@@ -5,10 +5,11 @@ import type { NavItem } from '@/types'
 
 export const product = {
   // اسم المنتج (يمكن أيضًا ضبطه عبر VITE_APP_NAME في .env)
-  name: import.meta.env.VITE_APP_NAME ?? 'Gym OS',
-  tagline: 'نظامك الكامل للياقة والتغذية',
+  name: import.meta.env.VITE_APP_NAME ?? 'قِمّة',
+  nameLatin: 'Qimmah',
+  tagline: 'نظام تشغيل اللياقة العربي',
   description:
-    'منصة واحدة فاخرة لمتابعة تمارينك، مكملاتك، أدويتك، تغذيتك، قياساتك، وروتينك — مصممة للسوق السعودي والخليجي.',
+    'قِمّة — منصة واحدة فاخرة تجمع تمارينك، مكملاتك، أدويتك، تغذيتك، وقياساتك في مكان واحد. عربية بالكامل، ومصممة للسوق السعودي والخليجي.',
   locale: 'ar',
   direction: 'rtl' as const,
 
@@ -26,11 +27,10 @@ export const product = {
 // روابط التنقّل في الهيدر والفوتر
 export const nav: NavItem[] = [
   { label: 'الرئيسية', href: '#hero' },
-  { label: 'اللوحة', href: '#dashboard' },
-  { label: 'التمارين', href: '#workout' },
-  { label: 'المكملات', href: '#supplements' },
-  { label: 'التغذية', href: '#meals' },
-  { label: 'القياسات', href: '#metrics' },
-  { label: 'الروتين', href: '#routine' },
+  { label: 'المشكلة', href: '#problem' },
+  { label: 'الحل', href: '#solution' },
+  { label: 'المزايا', href: '#benefits' },
+  { label: 'لمن قِمّة؟', href: '#audience' },
   { label: 'الأسعار', href: '#pricing' },
+  { label: 'الأسئلة', href: '#faq' },
 ]

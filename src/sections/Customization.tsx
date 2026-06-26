@@ -3,8 +3,12 @@ import { Icon } from '@/components/Icon'
 import { accentOptions } from '@/config/theme'
 import { sectionCopy, customizationPoints, customizationSwatchLabel } from '@/config/content'
 
-/** قسم التخصيص — يعرض قابلية تغيير الهوية بصريًا (عرض ثابت في القالب). */
-export function Customization() {
+interface CustomizationProps {
+  onOpenCenter?: () => void
+}
+
+/** قسم التخصيص — يعرض قابلية تغيير الهوية بصريًا ويفتح «مركز التخصيص». */
+export function Customization({ onOpenCenter }: CustomizationProps) {
   return (
     <section id="customization" className="section">
       <div className="container-page">
@@ -35,6 +39,13 @@ export function Customization() {
                 </li>
               ))}
             </ul>
+
+            {onOpenCenter && (
+              <button type="button" onClick={onOpenCenter} className="btn-primary mt-6 w-full">
+                <Icon name="Palette" className="h-4 w-4" />
+                افتح مركز التخصيص
+              </button>
+            )}
           </div>
         </div>
       </div>

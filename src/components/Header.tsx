@@ -27,7 +27,10 @@ export function Header() {
           <span className="grid h-9 w-9 place-items-center rounded-xl bg-brand-500 text-ink-950 shadow-glow">
             <Icon name="Dumbbell" className="h-5 w-5" strokeWidth={2.5} />
           </span>
-          <span className="text-lg font-extrabold text-white">{product.name}</span>
+          <span className="flex items-baseline gap-1.5">
+            <span className="text-lg font-extrabold text-white">{product.name}</span>
+            <span className="text-xs font-bold tracking-wide text-slate-500">{product.nameLatin}</span>
+          </span>
         </a>
 
         <nav className="hidden items-center gap-1 lg:flex">

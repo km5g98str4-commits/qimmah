@@ -100,6 +100,33 @@ export interface CustomizationOption {
   description: string
 }
 
+/** نقطة ألم في قسم المشكلة */
+export interface PainPoint {
+  icon: IconName
+  title: string
+  description: string
+}
+
+/** ركيزة قيمة في قسم الحل */
+export interface ValuePillar {
+  icon: IconName
+  title: string
+  description: string
+}
+
+/** عنصر جمهور (لمن هذا / لمن ليس) */
+export interface AudienceItem {
+  icon: IconName
+  title: string
+  description: string
+}
+
+/** سؤال شائع */
+export interface FaqItem {
+  question: string
+  answer: string
+}
+
 /** خطة تسعير */
 export interface PricingPlan {
   id: string
