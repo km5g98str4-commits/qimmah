@@ -1,18 +1,14 @@
 import { SectionHeading } from '@/components/SectionHeading'
 import { Icon } from '@/components/Icon'
 import { supplements } from '@/data/supplements'
+import { sectionCopy, labels } from '@/config/content'
 
 /** قسم المكملات والأدوية — جرعات وتوقيت وحالة الأخذ. */
 export function Supplements() {
   return (
     <section id="supplements" className="section">
       <div className="container-page">
-        <SectionHeading
-          eyebrow="المكملات والأدوية"
-          icon="Pill"
-          title="جرعاتك في وقتها الصحيح"
-          description="افصل بين المكملات والأدوية، وتابع التوقيت والجرعة، ولا تنسَ أي موعد مهم."
-        />
+        <SectionHeading {...sectionCopy.supplements} />
 
         <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {supplements.map((s) => (
@@ -26,7 +22,9 @@ export function Supplements() {
                   }`}
                 >
                   <Icon name="Pill" className="h-3 w-3" />
-                  {s.type === 'medication' ? 'دواء' : 'مكمل'}
+                  {s.type === 'medication'
+                    ? labels.supplements.medicationBadge
+                    : labels.supplements.supplementBadge}
                 </span>
                 <span
                   className={`grid h-7 w-7 place-items-center rounded-lg ${
@@ -40,11 +38,11 @@ export function Supplements() {
               <h3 className="mt-4 text-base font-bold text-white">{s.name}</h3>
               <div className="mt-3 space-y-1.5 text-xs text-slate-400">
                 <p className="flex items-center justify-between">
-                  <span>الجرعة</span>
+                  <span>{labels.supplements.dose}</span>
                   <span className="font-bold text-slate-200">{s.dose}</span>
                 </p>
                 <p className="flex items-center justify-between">
-                  <span>التوقيت</span>
+                  <span>{labels.supplements.timing}</span>
                   <span className="font-bold text-slate-200">{s.timing}</span>
                 </p>
               </div>

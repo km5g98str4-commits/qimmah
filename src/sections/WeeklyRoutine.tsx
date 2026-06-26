@@ -1,6 +1,7 @@
 import { SectionHeading } from '@/components/SectionHeading'
 import { Icon } from '@/components/Icon'
 import { weeklyRoutine, routineTypeColors, routineTypeLabels } from '@/data/routine'
+import { sectionCopy, labels } from '@/config/content'
 
 /** قسم الروتين الأسبوعي — أيام الأسبوع مع نوع التدريب وحالة الإنجاز. */
 export function WeeklyRoutine() {
@@ -9,18 +10,14 @@ export function WeeklyRoutine() {
   return (
     <section id="routine" className="section bg-ink-900/30">
       <div className="container-page">
-        <SectionHeading
-          eyebrow="الروتين الأسبوعي"
-          icon="CalendarDays"
-          title="خطّط أسبوعك بذكاء"
-          description="وزّع أيامك بين الدفع والسحب والأرجل والكارديو والراحة، وتابع التزامك خلال الأسبوع."
-        />
+        <SectionHeading {...sectionCopy.routine} />
 
         <div className="mt-12">
           <div className="mb-4 flex items-center justify-between">
             <p className="text-sm text-slate-400">
-              أنجزت <span className="font-bold text-brand-300">{doneCount}</span> من{' '}
-              {weeklyRoutine.length} أيام
+              {labels.routine.progressPrefix}{' '}
+              <span className="font-bold text-brand-300">{doneCount}</span>{' '}
+              {labels.routine.progressMid} {weeklyRoutine.length} {labels.routine.progressSuffix}
             </p>
           </div>
 

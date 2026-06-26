@@ -12,7 +12,7 @@
 - بدون مكتبات رسم خارجية (رسم SVG محلي)
 
 ## مبادئ أساسية (التزم بها)
-1. **Data-driven**: أي نص أو رقم قابل للتخصيص يجب أن يكون في `src/config` أو `src/data` — ممنوع hardcoding داخل المكونات.
+1. **Data-driven**: أي نص أو رقم قابل للتخصيص يجب أن يكون في `src/config` (`product.ts`, `theme.ts`, `content.ts`) أو `src/data` — ممنوع hardcoding داخل المكونات.
 2. **RTL أولاً**: التصميم عربي (`dir="rtl"`). استخدم خصائص منطقية (`ms-`, `me-`, `text-start`, `text-end`) لا `left/right`.
 3. **Mobile-first**: ابدأ من الجوال ثم وسّع بـ `sm: md: lg:`.
 4. **هوية موحّدة**: استخدم أصناف `.btn-primary`, `.card`, `.heading`, `.eyebrow`, `.container-page` من `styles/index.css`.

@@ -3,6 +3,7 @@ import { Icon } from '@/components/Icon'
 import { LineChart } from '@/components/LineChart'
 import { dashboardCards, weightProgress } from '@/data/dashboard'
 import { features } from '@/data/features'
+import { sectionCopy, labels } from '@/config/content'
 
 /** معاينة اللوحة — بطاقات سريعة + رسم تقدّم + شبكة الميزات. */
 export function Dashboard() {
@@ -13,12 +14,7 @@ export function Dashboard() {
   return (
     <section id="dashboard" className="section">
       <div className="container-page">
-        <SectionHeading
-          eyebrow="لوحة التحكم"
-          icon="BarChart3"
-          title="نظرة واحدة تكشف يومك كاملاً"
-          description="مؤشراتك الأساسية، تقدّمك، وكل أقسامك — مرتّبة بأناقة وسهلة القراءة على الجوال."
-        />
+        <SectionHeading {...sectionCopy.dashboard} />
 
         <div className="mt-12 grid gap-6 lg:grid-cols-3">
           {/* البطاقات السريعة */}
@@ -38,13 +34,13 @@ export function Dashboard() {
           {/* رسم التقدّم */}
           <div className="card flex flex-col p-6">
             <div className="flex items-center justify-between">
-              <p className="text-sm font-bold text-white">تقدّم الوزن</p>
+              <p className="text-sm font-bold text-white">{labels.dashboard.weightProgress}</p>
               <span className="flex items-center gap-1 text-xs font-bold text-brand-300">
                 <Icon name="TrendingDown" className="h-4 w-4" />
                 {diff} كجم
               </span>
             </div>
-            <p className="mt-1 text-xs text-slate-500">آخر 8 أسابيع</p>
+            <p className="mt-1 text-xs text-slate-500">{labels.dashboard.last8Weeks}</p>
             <div className="mt-6 flex-1">
               <LineChart data={weightProgress} />
             </div>

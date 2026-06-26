@@ -1,18 +1,14 @@
 import { SectionHeading } from '@/components/SectionHeading'
 import { Icon } from '@/components/Icon'
 import { bodyMetrics } from '@/data/metrics'
+import { sectionCopy } from '@/config/content'
 
 /** قسم قياسات الجسم — بطاقات مع نسبة التغيّر واتجاهه. */
 export function BodyMetrics() {
   return (
     <section id="metrics" className="section">
       <div className="container-page">
-        <SectionHeading
-          eyebrow="قياسات الجسم"
-          icon="Ruler"
-          title="تابع تغيّر جسمك بالأرقام"
-          description="الوزن، نسبة الدهون، الكتلة العضلية، والمحيطات — كلها موثّقة بتغيّرها عبر الزمن."
-        />
+        <SectionHeading {...sectionCopy.metrics} />
 
         <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {bodyMetrics.map((m) => {
@@ -34,7 +30,7 @@ export function BodyMetrics() {
                 <p className="mt-5 text-sm text-slate-400">{m.label}</p>
                 <p className="mt-1">
                   <span className="text-3xl font-black text-white">{m.value}</span>
-                  <span className="mr-1.5 text-sm text-slate-400">{m.unit}</span>
+                  <span className="ms-1.5 text-sm text-slate-400">{m.unit}</span>
                 </p>
               </div>
             )

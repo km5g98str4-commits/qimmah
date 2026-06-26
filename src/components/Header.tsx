@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { nav, site } from '@/config/site'
+import { nav, product } from '@/config/product'
 import { cn } from '@/lib/cn'
 import { Icon } from './Icon'
 
@@ -27,7 +27,7 @@ export function Header() {
           <span className="grid h-9 w-9 place-items-center rounded-xl bg-brand-500 text-ink-950 shadow-glow">
             <Icon name="Dumbbell" className="h-5 w-5" strokeWidth={2.5} />
           </span>
-          <span className="text-lg font-extrabold text-white">{site.name}</span>
+          <span className="text-lg font-extrabold text-white">{product.name}</span>
         </a>
 
         <nav className="hidden items-center gap-1 lg:flex">
@@ -44,7 +44,7 @@ export function Header() {
 
         <div className="hidden items-center gap-3 lg:flex">
           <a href="#pricing" className="btn-primary">
-            ابدأ الآن
+            {product.ctaLabel}
           </a>
         </div>
 
@@ -72,7 +72,7 @@ export function Header() {
               </a>
             ))}
             <a href="#pricing" onClick={() => setOpen(false)} className="btn-primary mt-2">
-              ابدأ الآن
+              {product.ctaLabel}
             </a>
           </nav>
         </div>

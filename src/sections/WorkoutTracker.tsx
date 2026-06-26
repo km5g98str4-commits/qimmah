@@ -1,6 +1,7 @@
 import { SectionHeading } from '@/components/SectionHeading'
 import { Icon } from '@/components/Icon'
-import { todayWorkout } from '@/data/workout'
+import { todayWorkout } from '@/data/workouts'
+import { sectionCopy, labels } from '@/config/content'
 
 /** قسم متتبّع التمارين — قائمة تمارين اليوم مع حالة الإنجاز. */
 export function WorkoutTracker() {
@@ -11,12 +12,7 @@ export function WorkoutTracker() {
     <section id="workout" className="section bg-ink-900/30">
       <div className="container-page">
         <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
-          <SectionHeading
-            eyebrow="متابعة التمارين"
-            icon="Dumbbell"
-            title="سجّل كل مجموعة وتكرار ووزن"
-            description="تابع تقدّمك في كل تمرين، وعلّم ما أنجزته، واعرف بالضبط أين وصلت في برنامجك اليومي."
-          />
+          <SectionHeading {...sectionCopy.workout} />
 
           <div className="card overflow-hidden">
             <div className="flex items-center justify-between border-b border-white/[0.06] p-5">
@@ -25,7 +21,7 @@ export function WorkoutTracker() {
                 <p className="mt-1 text-xs text-slate-400">{todayWorkout.focus}</p>
               </div>
               <span className="rounded-full bg-brand-500/15 px-3 py-1 text-xs font-bold text-brand-300">
-                {done} / {total} مكتمل
+                {done} / {total} {labels.workout.completed}
               </span>
             </div>
 
