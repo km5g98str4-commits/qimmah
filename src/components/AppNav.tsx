@@ -9,11 +9,10 @@ interface AppNavProps {
   current: AppView
   lang: Lang
   onNavigate: (view: AppView) => void
-  onChangeLang: (lang: Lang) => void
 }
 
-/** شريط تنقّل التطبيق — تبديل بين الرئيسية/الإعداد/النموذج + اللغة. */
-export function AppNav({ current, lang, onNavigate, onChangeLang }: AppNavProps) {
+/** شريط تنقّل التطبيق — تبديل بين الرئيسية/الإعداد/النموذج. */
+export function AppNav({ current, lang, onNavigate }: AppNavProps) {
   const t = getStrings(lang)
   const tabs: { id: AppView; label: string; icon: string }[] = [
     { id: 'dashboard', label: t.nav.home, icon: 'Flame' },
@@ -54,14 +53,8 @@ export function AppNav({ current, lang, onNavigate, onChangeLang }: AppNavProps)
           ))}
         </nav>
 
-        <button
-          type="button"
-          onClick={() => onChangeLang(lang === 'ar' ? 'en' : 'ar')}
-          className="rounded-lg border border-line bg-surface px-3 py-2 text-xs font-bold text-ink-700 transition-colors hover:bg-beige"
-          aria-label={t.lang.label}
-        >
-          {lang === 'ar' ? 'EN' : 'ع'}
-        </button>
+        {/* مساحة موازنة (مبدّل اللغة مخفي حتى اكتمال الإنجليزية) */}
+        <span className="w-9" aria-hidden="true" />
       </div>
     </header>
   )

@@ -5,6 +5,7 @@ import { useCustomization } from '@/lib/customizationContext'
 import { getMeasurementType } from '@/data/measurementTypes'
 import { addLog, deleteLog, loadLogs, trendFor, type Trend } from '@/lib/measurementLog'
 import { getDayStamp } from '@/lib/today'
+import { useIsDemo } from '@/lib/demoMode'
 import type { MeasurementLog } from '@/types/progress'
 import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
@@ -16,7 +17,8 @@ export function ProgressSection({ lang }: { lang: Lang }) {
   const { customization } = useCustomization()
   const mp = customization.measurementPlan
   const t = getStrings(lang).progress
-  const [logs, setLogs] = useState<MeasurementLog[]>(() => loadLogs())
+  const demo = useIsDemo()
+  const [logs, setLogs] = useState<MeasurementLog[]>(() => (demo ? [] : loadLogs()))
   const [form, setForm] = useState<Record<string, string>>({})
   const [notes, setNotes] = useState('')
 
@@ -48,12 +50,12 @@ export function ProgressSection({ lang }: { lang: Lang }) {
     })
     if (Object.keys(values).length === 0) return
     const log: MeasurementLog = { id: `log-${Date.now()}`, date: getDayStamp(), values, notes: notes || undefined }
-    setLogs(addLog(log))
+    setLogs(demo ? [log, ...logs] : addLog(log))
     setForm({})
     setNotes('')
   }
 
-  const remove = (id: string) => setLogs(deleteLog(id))
+  const remove = (id: string) => setLogs(demo ? logs.filter((l) => l.id !== id) : deleteLog(id))
 
   const trendIcon = (tr: Trend) => (tr === 'up' ? 'TrendingUp' : tr === 'down' ? 'TrendingDown' : 'Minus')
   const trendLabel = (tr: Trend) => (tr === 'up' ? t.up : tr === 'down' ? t.down : t.same)

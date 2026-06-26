@@ -27,7 +27,6 @@ import type { Lang } from '@/lib/appPreferences'
 interface DashboardViewProps {
   lang: Lang
   onNavigate: (view: AppView) => void
-  onChangeLang: (lang: Lang) => void
   onOpenSetup: () => void
   showSuccess: boolean
   onDismissSuccess: () => void
@@ -37,7 +36,6 @@ interface DashboardViewProps {
 export function DashboardView({
   lang,
   onNavigate,
-  onChangeLang,
   onOpenSetup,
   showSuccess,
   onDismissSuccess,
@@ -66,7 +64,7 @@ export function DashboardView({
 
   return (
     <div className="min-h-screen bg-page">
-      <AppNav current="dashboard" lang={lang} onNavigate={onNavigate} onChangeLang={onChangeLang} />
+      <AppNav current="dashboard" lang={lang} onNavigate={onNavigate} />
 
       <main>
         {/* أساسية دائمًا: مقدمة + اليوم + الحسابات + الهدف + البيانات */}

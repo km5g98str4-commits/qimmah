@@ -7,29 +7,52 @@ import type { AppView } from '@/components/AppNav'
 import { useCustomization } from '@/lib/customizationContext'
 import { type Customization, getDefaultCustomization } from '@/lib/customization'
 import { loadOnboarding, markCompleted } from '@/lib/onboarding'
-import { type Lang, applyLanguage, getLanguage, setLanguage } from '@/lib/appPreferences'
+import { applyLanguage } from '@/lib/appPreferences'
+import { type AppRoute, routeFromHash, setHashRoute } from '@/lib/appRoutes'
 
-type View = 'start' | 'setup' | 'dashboard' | 'demo'
+// اللغة مثبّتة على العربية حاليًا (الإنجليزية مخفية حتى اكتمال الترجمة).
+const LANG = 'ar' as const
 
-/** قشرة تطبيق قِمّة v2 — موجّه بسيط بين الشاشات (بلا توجيه/مكتبات خارجية). */
+/** يطبّق حراسة الإعداد: #/dashboard لإعداد غير مكتمل → الإعداد إن بدأ، وإلا البداية. */
+function guardRoute(route: AppRoute): AppRoute {
+  const ob = loadOnboarding()
+  if (route === 'dashboard' && !ob.completed) return (ob.lastStep ?? 0) > 0 ? 'setup' : 'start'
+  return route
+}
+
+function initialRoute(): AppRoute {
+  const r = routeFromHash()
+  if (r) return guardRoute(r)
+  return loadOnboarding().completed ? 'dashboard' : 'start'
+}
+
+/** قشرة تطبيق قِمّة v2 — توجيه بسيط عبر hash (بلا مكتبات خارجية). */
 export default function App() {
   const { applyCustomization } = useCustomization()
 
-  // اللغة
-  const [lang, setLang] = useState<Lang>(() => getLanguage())
   useEffect(() => {
-    applyLanguage(lang)
-  }, [lang])
-  const changeLang = useCallback((l: Lang) => {
-    setLanguage(l)
-    setLang(l)
+    applyLanguage(LANG)
   }, [])
 
-  // الشاشة الحالية: إعداد مكتمل → الرئيسية، وإلا شاشة البداية أولًا
-  const [view, setView] = useState<View>(() => (loadOnboarding().completed ? 'dashboard' : 'start'))
+  const [view, setView] = useState<AppRoute>(() => initialRoute())
   const [startStep, setStartStep] = useState<number>(() => loadOnboarding().lastStep ?? 0)
   const [showSuccess, setShowSuccess] = useState(false)
   const dismissSuccess = useCallback(() => setShowSuccess(false), [])
+
+  // view → hash
+  useEffect(() => {
+    setHashRoute(view)
+  }, [view])
+
+  // hash → view (تنقّل المتصفح / تحديث الصفحة) مع الحراسة
+  useEffect(() => {
+    const onHash = () => {
+      const r = routeFromHash()
+      if (r) setView(guardRoute(r))
+    }
+    window.addEventListener('hashchange', onHash)
+    return () => window.removeEventListener('hashchange', onHash)
+  }, [])
 
   const openSetup = () => {
     const ob = loadOnboarding()
@@ -58,6 +81,7 @@ export default function App() {
           sections: { ...base.sections, ...(p.sections ?? {}) },
           profile: { ...base.profile, ...(p.profile ?? {}) },
           targets: { ...base.targets, ...(p.targets ?? {}) },
+          targetsMeta: { ...base.targetsMeta, ...(p.targetsMeta ?? {}) },
           workoutPlan: p.workoutPlan ?? base.workoutPlan,
           nutritionPlan: p.nutritionPlan ? { ...base.nutritionPlan, ...p.nutritionPlan } : base.nutritionPlan,
           wellnessPlan: p.wellnessPlan ? { ...base.wellnessPlan, ...p.wellnessPlan } : base.wellnessPlan,
@@ -88,12 +112,11 @@ export default function App() {
     const ob = loadOnboarding()
     return (
       <StartView
-        lang={lang}
+        lang={LANG}
         hasStartedSetup={!ob.completed && (ob.lastStep ?? 0) > 0}
         onStartSetup={openSetup}
         onSeeDemo={() => setView('demo')}
         onImportFile={importFromFile}
-        onChangeLang={changeLang}
       />
     )
   }
@@ -103,14 +126,13 @@ export default function App() {
   }
 
   if (view === 'demo') {
-    return <DemoView lang={lang} onNavigate={navigate} onChangeLang={changeLang} onBack={closeDemo} />
+    return <DemoView lang={LANG} onNavigate={navigate} onBack={closeDemo} />
   }
 
   return (
     <DashboardView
-      lang={lang}
+      lang={LANG}
       onNavigate={navigate}
-      onChangeLang={changeLang}
       onOpenSetup={openSetup}
       showSuccess={showSuccess}
       onDismissSuccess={dismissSuccess}

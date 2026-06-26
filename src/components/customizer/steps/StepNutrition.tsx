@@ -34,16 +34,21 @@ export function StepNutrition({ ctx }: { ctx: WizardCtx }) {
     return { ...m, calories: Math.round(x.calories), protein: Math.round(x.protein), carbs: Math.round(x.carbs), fat: Math.round(x.fat) }
   }
 
-  const useSmart = () => {
-    const t = ctx.data.targets
-    setNp({
-      targetCalories: targetCaloriesFor(ctx.data.profile.goal, t),
-      targetProtein: t.proteinGrams,
-      targetCarbs: t.carbsGrams,
-      targetFat: t.fatGrams,
-      targetWaterLiters: t.waterLiters,
-    })
+  const smartTargets = {
+    targetCalories: targetCaloriesFor(ctx.data.profile.goal, ctx.data.targets),
+    targetProtein: ctx.data.targets.proteinGrams,
+    targetCarbs: ctx.data.targets.carbsGrams,
+    targetFat: ctx.data.targets.fatGrams,
+    targetWaterLiters: ctx.data.targets.waterLiters,
   }
+  const useSmart = () => setNp(smartTargets)
+  // هل تختلف أهداف الأكل عن الحسابات الذكية؟
+  const differsFromSmart =
+    np.targetCalories !== smartTargets.targetCalories ||
+    np.targetProtein !== smartTargets.targetProtein ||
+    np.targetCarbs !== smartTargets.targetCarbs ||
+    np.targetFat !== smartTargets.targetFat ||
+    np.targetWaterLiters !== smartTargets.targetWaterLiters
 
   const addTemplate = (templateId: string) =>
     setNp({ meals: reindex([...np.meals, createPlanMealFromTemplate(templateId, np.meals.length)]) })
@@ -111,6 +116,20 @@ export function StepNutrition({ ctx }: { ctx: WizardCtx }) {
           <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-surface shadow ${np.enabled ? 'start-0.5' : 'end-0.5'}`} />
         </span>
       </button>
+
+      {/* إشعار اختلاف الأهداف عن الحسابات الذكية */}
+      {np.enabled && differsFromSmart && (
+        <div className="mb-4 flex flex-col gap-3 rounded-2xl border border-gold-400/40 bg-gold-200/40 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="flex items-start gap-2 text-sm text-ink-700">
+            <Icon name="AlertTriangle" className="mt-0.5 h-4 w-4 shrink-0 text-gold-600" />
+            توجد اختلافات بين حساباتك وخطة الأكل.
+          </p>
+          <button type="button" onClick={useSmart} className="btn-primary px-4 py-2 text-sm">
+            <Icon name="BarChart3" className="h-4 w-4" />
+            تحديث خطة الأكل من حساباتي
+          </button>
+        </div>
+      )}
 
       {/* الأهداف */}
       <div className="card p-5">

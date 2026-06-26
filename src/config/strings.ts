@@ -154,7 +154,7 @@ export interface ShellStrings {
 
 const ar: ShellStrings = {
   brand: 'قِمّة',
-  tagline: 'كل رحلتك الرياضية في صفحة واحدة',
+  tagline: 'تطبيقك الشخصي للتمرين والتغذية والمتابعة',
   nav: { home: 'الرئيسية', setup: 'الإعداد', demo: 'النموذج' },
   lang: { ar: 'العربية', en: 'English', label: 'اللغة' },
   start: {

@@ -15,7 +15,7 @@ export function StepWelcome({ ctx }: { ctx: WizardCtx }) {
       <StepHeader
         icon="Sparkles"
         title={`أهلاً ${ctx.data.identity.userName} 👋`}
-        description="بنجهّز صفحتك الشخصية خطوة بخطوة. بس جاوب على أسئلة بسيطة، وتقدر ترجع تعدّل أي شي وقت ما تبي."
+        description="بنجهّز تطبيقك الشخصي خطوة بخطوة. بس جاوب على أسئلة بسيطة، وتقدر ترجع تعدّل أي شي وقت ما تبي."
       />
 
       <p className="mb-5 rounded-xl border border-primary-soft bg-primary-soft p-4 text-sm font-bold text-ink-900">

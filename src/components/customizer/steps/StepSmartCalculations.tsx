@@ -3,13 +3,21 @@ import { StepHeader } from '../StepHeader'
 import { Icon } from '@/components/Icon'
 import type { WizardCtx } from '../stepProps'
 import type { Targets } from '@/types/profile'
-import { computeTargets } from '@/lib/calculators'
+import { computeTargets, profileHash } from '@/lib/calculators'
 
 /** خطوة الحسابات الذكية — أرقام مقدّرة قابلة للتعديل اليدوي. */
 export function StepSmartCalculations({ ctx }: { ctx: WizardCtx }) {
   const t = ctx.data.targets
-  const setT = (partial: Partial<Targets>) => ctx.update({ targets: { ...t, ...partial } })
-  const recalc = () => ctx.update({ targets: computeTargets(ctx.data.profile) })
+  const manual = ctx.data.targetsMeta.manuallyEdited
+  // أي تعديل يدوي على رقم → يضع علامة «معدّل يدويًا»
+  const setT = (partial: Partial<Targets>) =>
+    ctx.update({ targets: { ...t, ...partial }, targetsMeta: { ...ctx.data.targetsMeta, manuallyEdited: true } })
+  // إعادة الحساب من الملف → يلغي التعديل اليدوي
+  const recalc = () =>
+    ctx.update({
+      targets: computeTargets(ctx.data.profile),
+      targetsMeta: { manuallyEdited: false, lastCalculatedFromProfileHash: profileHash(ctx.data.profile) },
+    })
 
   return (
     <div>
@@ -27,10 +35,23 @@ export function StepSmartCalculations({ ctx }: { ctx: WizardCtx }) {
         </p>
       </div>
 
-      <button type="button" onClick={recalc} className="btn-ghost mb-6 w-full py-3 sm:w-auto">
-        <Icon name="RotateCcw" className="h-4 w-4" />
-        إعادة الحساب من بياناتي
-      </button>
+      {/* إشعار التعديل اليدوي */}
+      {manual ? (
+        <div className="mb-5 flex flex-col gap-3 rounded-2xl border border-primary-soft bg-primary-soft p-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm font-bold text-ink-900">
+            لديك تعديلات يدوية على الحسابات. تقدر إعادة الحساب من بياناتك في أي وقت.
+          </p>
+          <button type="button" onClick={recalc} className="btn-primary px-4 py-2 text-sm">
+            <Icon name="RotateCcw" className="h-4 w-4" />
+            إعادة الحساب الآن
+          </button>
+        </div>
+      ) : (
+        <button type="button" onClick={recalc} className="btn-ghost mb-6 w-full py-3 sm:w-auto">
+          <Icon name="RotateCcw" className="h-4 w-4" />
+          إعادة الحساب من بياناتي
+        </button>
+      )}
 
       <div className="grid gap-5 lg:grid-cols-2">
         {/* السعرات */}

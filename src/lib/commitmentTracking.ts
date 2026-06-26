@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { getDayStamp } from './today'
+import { useIsDemo } from './demoMode'
 
 // تتبّع الالتزامات اليومي — يُصفّر مع تغيّر اليوم.
 
@@ -38,7 +39,11 @@ export function saveCommitmentsToday(state: CommitmentsTodayState): void {
 }
 
 export function useCommitmentsToday() {
-  const [state, setState] = useState<CommitmentsTodayState>(() => loadCommitmentsToday())
+  const demo = useIsDemo()
+  const [state, setState] = useState<CommitmentsTodayState>(() => (demo ? fresh() : loadCommitmentsToday()))
+  const persist = (s: CommitmentsTodayState) => {
+    if (!demo) saveCommitmentsToday(s)
+  }
 
   useEffect(() => {
     const check = () => {
@@ -46,7 +51,7 @@ export function useCommitmentsToday() {
       setState((prev) => {
         if (prev.date === today) return prev
         const f = fresh()
-        saveCommitmentsToday(f)
+        persist(f)
         return f
       })
     }
@@ -56,22 +61,25 @@ export function useCommitmentsToday() {
       window.removeEventListener('focus', check)
       document.removeEventListener('visibilitychange', check)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const toggle = useCallback((id: string) => {
     setState((prev) => {
       const next = { ...prev, done: { ...prev.done, [id]: !prev.done[id] } }
-      saveCommitmentsToday(next)
+      persist(next)
       return next
     })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const setNotes = useCallback((notes: string) => {
     setState((prev) => {
       const next = { ...prev, notes }
-      saveCommitmentsToday(next)
+      persist(next)
       return next
     })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const isDone = useCallback((id: string) => !!state.done[id], [state])

@@ -9,7 +9,7 @@ import { bodyMetrics } from '@/data/metrics'
 import { weeklyRoutine } from '@/data/routine'
 import type { RoutineDay, SupplementItem } from '@/types'
 import type { Profile, Targets } from '@/types/profile'
-import { computeTargets, defaultProfile } from './calculators'
+import { computeTargets, defaultProfile, profileHash } from './calculators'
 import type { WorkoutPlan } from '@/types/workout'
 import { generatePlanFromTemplate } from './workoutPlan'
 import type { NutritionPlan } from '@/types/nutrition'
@@ -103,6 +103,12 @@ export interface Customization {
   sections: SectionVisibility
   profile: Profile
   targets: Targets
+  /** حالة الحسابات: هل عُدّلت يدويًا + بصمة الملف الذي حُسبت منه. */
+  targetsMeta: {
+    manuallyEdited: boolean
+    lastCalculatedFromProfileHash?: string
+    updatedAt?: string
+  }
   workoutPlan: WorkoutPlan
   nutritionPlan: NutritionPlan
   wellnessPlan: WellnessPlan
@@ -132,6 +138,7 @@ export function getDefaultCustomization(): Customization {
     sections: { ...defaultSections },
     profile: { ...defaultProfile },
     targets: computeTargets(defaultProfile),
+    targetsMeta: { manuallyEdited: false, lastCalculatedFromProfileHash: profileHash(defaultProfile) },
     workoutPlan: generatePlanFromTemplate('full-body-3'),
     nutritionPlan: defaultNutritionPlan(computeTargets(defaultProfile), defaultProfile.goal),
     wellnessPlan: defaultWellnessPlan(),
@@ -185,6 +192,7 @@ export function loadCustomization(): Customization {
       sections: { ...base.sections, ...saved.sections },
       profile: { ...base.profile, ...saved.profile },
       targets: { ...base.targets, ...saved.targets },
+      targetsMeta: { ...base.targetsMeta, ...saved.targetsMeta },
       workoutPlan: saved.workoutPlan ?? base.workoutPlan,
       nutritionPlan: saved.nutritionPlan
         ? { ...base.nutritionPlan, ...saved.nutritionPlan }

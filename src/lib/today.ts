@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { useIsDemo } from './demoMode'
 
 // حالة «اليوم» — علامات الإنجاز اليومية، تُحفظ محليًا وتُصفّر تلقائيًا عند تغيّر اليوم.
 // نموذج بسيط: تاريخ اليوم + خريطة مفاتيح منجزة (key = "group:index").
@@ -47,7 +48,11 @@ export function saveToday(state: TodayState): void {
 
 /** هوك حالة اليوم: تبديل العلامات + تصفير يومي تلقائي. */
 export function useToday() {
-  const [state, setState] = useState<TodayState>(() => loadToday())
+  const demo = useIsDemo()
+  const [state, setState] = useState<TodayState>(() => (demo ? freshState() : loadToday()))
+  const persist = (s: TodayState) => {
+    if (!demo) saveToday(s)
+  }
 
   // تحقّق من تغيّر اليوم عند العودة للصفحة (لو بقيت مفتوحة بعد منتصف الليل)
   useEffect(() => {
@@ -56,7 +61,7 @@ export function useToday() {
       setState((prev) => {
         if (prev.date === today) return prev
         const fresh = freshState()
-        saveToday(fresh)
+        persist(fresh)
         return fresh
       })
     }
@@ -66,20 +71,23 @@ export function useToday() {
       window.removeEventListener('focus', check)
       document.removeEventListener('visibilitychange', check)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const toggle = useCallback((key: string) => {
     setState((prev) => {
       const next: TodayState = { ...prev, done: { ...prev.done, [key]: !prev.done[key] } }
-      saveToday(next)
+      persist(next)
       return next
     })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const resetDay = useCallback(() => {
     const fresh = freshState()
-    saveToday(fresh)
+    persist(fresh)
     setState(fresh)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const isDone = useCallback((key: string) => !!state.done[key], [state])

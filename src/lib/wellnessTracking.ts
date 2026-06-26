@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { getDayStamp } from './today'
+import { useIsDemo } from './demoMode'
 
 // تتبّع المكملات والأدوية اليومي — يُصفّر مع تغيّر اليوم.
 
@@ -38,7 +39,11 @@ export function saveWellnessToday(state: WellnessTodayState): void {
 }
 
 export function useWellnessToday() {
-  const [state, setState] = useState<WellnessTodayState>(() => loadWellnessToday())
+  const demo = useIsDemo()
+  const [state, setState] = useState<WellnessTodayState>(() => (demo ? fresh() : loadWellnessToday()))
+  const persist = (s: WellnessTodayState) => {
+    if (!demo) saveWellnessToday(s)
+  }
 
   useEffect(() => {
     const check = () => {
@@ -46,7 +51,7 @@ export function useWellnessToday() {
       setState((prev) => {
         if (prev.date === today) return prev
         const f = fresh()
-        saveWellnessToday(f)
+        persist(f)
         return f
       })
     }
@@ -56,22 +61,25 @@ export function useWellnessToday() {
       window.removeEventListener('focus', check)
       document.removeEventListener('visibilitychange', check)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const toggleSupplement = useCallback((id: string) => {
     setState((prev) => {
       const next = { ...prev, doneSupplements: { ...prev.doneSupplements, [id]: !prev.doneSupplements[id] } }
-      saveWellnessToday(next)
+      persist(next)
       return next
     })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const toggleMedication = useCallback((id: string) => {
     setState((prev) => {
       const next = { ...prev, doneMedications: { ...prev.doneMedications, [id]: !prev.doneMedications[id] } }
-      saveWellnessToday(next)
+      persist(next)
       return next
     })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const isSupplementDone = useCallback((id: string) => !!state.doneSupplements[id], [state])

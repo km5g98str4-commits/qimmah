@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { getDayStamp } from './today'
+import { useIsDemo } from './demoMode'
 
 // تتبّع التغذية اليومي — وجبات منجزة + كمية الماء، يُصفّر مع تغيّر اليوم.
 
@@ -39,7 +40,11 @@ export function saveNutritionToday(state: NutritionTodayState): void {
 
 /** هوك تتبّع التغذية اليومي مع تصفير عند تغيّر اليوم. */
 export function useNutritionToday() {
-  const [state, setState] = useState<NutritionTodayState>(() => loadNutritionToday())
+  const demo = useIsDemo()
+  const [state, setState] = useState<NutritionTodayState>(() => (demo ? fresh() : loadNutritionToday()))
+  const persist = (s: NutritionTodayState) => {
+    if (!demo) saveNutritionToday(s)
+  }
 
   useEffect(() => {
     const check = () => {
@@ -47,7 +52,7 @@ export function useNutritionToday() {
       setState((prev) => {
         if (prev.date === today) return prev
         const f = fresh()
-        saveNutritionToday(f)
+        persist(f)
         return f
       })
     }
@@ -57,28 +62,31 @@ export function useNutritionToday() {
       window.removeEventListener('focus', check)
       document.removeEventListener('visibilitychange', check)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const toggleMeal = useCallback((mealId: string) => {
     setState((prev) => {
       const next = { ...prev, doneMeals: { ...prev.doneMeals, [mealId]: !prev.doneMeals[mealId] } }
-      saveNutritionToday(next)
+      persist(next)
       return next
     })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const addWater = useCallback((ml: number) => {
     setState((prev) => {
       const next = { ...prev, waterMl: Math.max(0, prev.waterMl + ml) }
-      saveNutritionToday(next)
+      persist(next)
       return next
     })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const resetWater = useCallback(() => {
     setState((prev) => {
       const next = { ...prev, waterMl: 0 }
-      saveNutritionToday(next)
+      persist(next)
       return next
     })
   }, [])

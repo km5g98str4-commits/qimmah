@@ -190,3 +190,19 @@ export function targetCaloriesFor(goal: CalorieGoal, t: Targets): number {
   if (goal === 'bulk') return t.bulkingCalories
   return t.maintenanceCalories
 }
+
+/** بصمة الحقول المؤثّرة على الحسابات — لكشف تغيّر الملف الشخصي. */
+export function profileHash(p: Profile): string {
+  return [
+    p.gender,
+    p.age,
+    p.heightCm,
+    p.weightKg,
+    p.targetWeightKg,
+    p.activityLevel,
+    p.goal,
+    p.trainingDays,
+    p.trainingLevel,
+    p.workoutEnvironment,
+  ].join('|')
+}

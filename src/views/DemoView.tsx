@@ -14,24 +14,25 @@ import { ProgressSection } from '@/sections/ProgressSection'
 import { CommitmentsSection } from '@/sections/CommitmentsSection'
 import { HealthNotice } from '@/sections/HealthNotice'
 import { DemoCustomizationProvider } from '@/lib/customizationContext'
+import { DemoModeProvider } from '@/lib/demoMode'
 import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
 
 interface DemoViewProps {
   lang: Lang
   onNavigate: (view: AppView) => void
-  onChangeLang: (lang: Lang) => void
   onBack: () => void
 }
 
-/** عرض النموذج — لوحة تجريبية ببيانات افتراضية، بلا تأثير على بيانات المستخدم. */
-export function DemoView({ lang, onNavigate, onChangeLang, onBack }: DemoViewProps) {
+/** عرض النموذج — لوحة تجريبية ببيانات افتراضية، بلا أي كتابة في تخزين المستخدم. */
+export function DemoView({ lang, onNavigate, onBack }: DemoViewProps) {
   const t = getStrings(lang)
 
   return (
     <DemoCustomizationProvider>
+      <DemoModeProvider>
       <div className="min-h-screen bg-page">
-        <AppNav current="demo" lang={lang} onNavigate={onNavigate} onChangeLang={onChangeLang} />
+        <AppNav current="demo" lang={lang} onNavigate={onNavigate} />
 
         {/* شريط تنويه النموذج */}
         <div className="border-b border-line bg-beige">
@@ -67,6 +68,7 @@ export function DemoView({ lang, onNavigate, onChangeLang, onBack }: DemoViewPro
 
         <Footer />
       </div>
+      </DemoModeProvider>
     </DemoCustomizationProvider>
   )
 }

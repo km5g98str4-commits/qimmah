@@ -1,8 +1,8 @@
 import { useRef } from 'react'
 import { Icon } from '@/components/Icon'
-import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
+import { resetQimmah } from '@/lib/resetQimmah'
 
 interface StartViewProps {
   lang: Lang
@@ -10,7 +10,6 @@ interface StartViewProps {
   onStartSetup: () => void
   onSeeDemo: () => void
   onImportFile: (file: File) => void
-  onChangeLang: (lang: Lang) => void
 }
 
 /** شاشة البداية — أول ما يفتح المستخدم التطبيق (إعداد غير مكتمل). */
@@ -20,10 +19,19 @@ export function StartView({
   onStartSetup,
   onSeeDemo,
   onImportFile,
-  onChangeLang,
 }: StartViewProps) {
   const t = getStrings(lang)
   const fileRef = useRef<HTMLInputElement>(null)
+
+  const handleReset = () => {
+    if (
+      window.confirm(
+        'سيتم حذف كل بيانات قِمّة من هذا المتصفح نهائيًا (الإعداد، الخطة، المتابعات، السجلّات). لا يمكن التراجع. هل أنت متأكد؟',
+      )
+    ) {
+      resetQimmah()
+    }
+  }
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-page px-5 py-12">
@@ -31,25 +39,6 @@ export function StartView({
       <div className="pointer-events-none absolute inset-0 bg-grid-faint [background-size:44px_44px] opacity-60" />
 
       <div className="relative w-full max-w-md">
-        {/* اللغة */}
-        <div className="mb-8 flex justify-center gap-2">
-          {(['ar', 'en'] as Lang[]).map((l) => (
-            <button
-              key={l}
-              type="button"
-              onClick={() => onChangeLang(l)}
-              className={cn(
-                'rounded-full border px-4 py-1.5 text-xs font-bold transition-colors',
-                lang === l
-                  ? 'border-primary-soft bg-primary text-white'
-                  : 'border-line bg-surface text-ink-700 hover:bg-beige',
-              )}
-            >
-              {l === 'ar' ? t.lang.ar : t.lang.en}
-            </button>
-          ))}
-        </div>
-
         {/* الهوية */}
         <div className="text-center">
           <span className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-primary text-white shadow-glow">
@@ -95,6 +84,18 @@ export function StartView({
           <Icon name="ShieldCheck" className="h-3.5 w-3.5" />
           {t.start.note}
         </p>
+
+        {/* إعادة ضبط كاملة */}
+        <div className="mt-6 border-t border-line pt-5 text-center">
+          <button
+            type="button"
+            onClick={handleReset}
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-ink-400 transition-colors hover:text-danger"
+          >
+            <Icon name="RotateCcw" className="h-3.5 w-3.5" />
+            إعادة ضبط قِمّة بالكامل
+          </button>
+        </div>
       </div>
     </div>
   )

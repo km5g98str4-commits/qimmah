@@ -3,6 +3,7 @@ import { Icon } from '@/components/Icon'
 import { StepHeader } from '../StepHeader'
 import type { WizardCtx } from '../stepProps'
 import { userTypeOptions } from '@/lib/customization'
+import { resetQimmah } from '@/lib/resetQimmah'
 
 /** خطوة المراجعة والحفظ — ملخّص + منطقة متقدمة (نسخة احتياطية/استعادة/افتراضي). */
 export function StepReview({ ctx }: { ctx: WizardCtx }) {
@@ -112,6 +113,27 @@ export function StepReview({ ctx }: { ctx: WizardCtx }) {
             <p className="text-[11px] text-ink-400">
               «إعادة تشغيل الإعداد الأولي» يفتح لك الإعداد من جديد أول زيارة، بدون مسح بياناتك.
             </p>
+
+            {/* إعادة ضبط كاملة (خطر) */}
+            <div className="mt-3 rounded-xl border border-danger/30 bg-danger/5 p-3">
+              <button
+                type="button"
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      'سيتم حذف كل بيانات قِمّة من هذا المتصفح نهائيًا (الإعداد، الخطة، المتابعات، السجلّات). لا يمكن التراجع. هل أنت متأكد؟',
+                    )
+                  ) {
+                    resetQimmah()
+                  }
+                }}
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-danger"
+              >
+                <Icon name="RotateCcw" className="h-3.5 w-3.5" />
+                إعادة ضبط قِمّة بالكامل
+              </button>
+              <p className="mt-1 text-[11px] text-ink-400">يحذف بيانات قِمّة فقط من هذا المتصفح، ثم يبدأ من جديد.</p>
+            </div>
           </div>
         )}
       </div>
