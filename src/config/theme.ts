@@ -1,37 +1,37 @@
-// خيارات التخصيص المعروضة في قسم Customization.
-// هذه بيانات عرض فقط في القالب — يمكن ربطها بحالة فعلية عند التطوير.
+// خيارات ألوان الصفحة المعروضة في قسم التخصيص.
+// لوحة دافئة فاتحة تناسب هوية الخطة الشخصية.
 
 import type { CustomizationOption } from '@/types'
 
 export const accentOptions: CustomizationOption[] = [
   {
-    id: 'emerald',
-    label: 'زمردي',
-    swatch: '#10b981',
-    description: 'الافتراضي — طاقة وانتعاش',
+    id: 'orange',
+    label: 'برتقالي',
+    swatch: '#F26A21',
+    description: 'الافتراضي — دافئ ونشِط',
   },
   {
-    id: 'gold',
-    label: 'ذهبي',
-    swatch: '#d4af37',
-    description: 'فخامة وهيبة',
+    id: 'amber',
+    label: 'كهرماني',
+    swatch: '#E0941F',
+    description: 'دفء وهدوء',
   },
   {
-    id: 'azure',
-    label: 'أزرق',
-    swatch: '#3b82f6',
-    description: 'هدوء واحترافية',
+    id: 'terracotta',
+    label: 'طيني',
+    swatch: '#C2562E',
+    description: 'ترابي وأنيق',
   },
   {
-    id: 'crimson',
-    label: 'قرمزي',
-    swatch: '#ef4444',
-    description: 'قوة وحماس',
+    id: 'olive',
+    label: 'زيتوني',
+    swatch: '#7C7A3A',
+    description: 'طبيعي ومريح',
   },
   {
-    id: 'violet',
-    label: 'بنفسجي',
-    swatch: '#8b5cf6',
-    description: 'إبداع وتميّز',
+    id: 'clay',
+    label: 'قرميدي',
+    swatch: '#B14A3B',
+    description: 'جريء ودافئ',
   },
 ]

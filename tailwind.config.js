@@ -1,7 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
-  darkMode: 'class',
   theme: {
     extend: {
       fontFamily: {
@@ -9,43 +8,61 @@ export default {
         display: ['Tajawal', 'system-ui', 'sans-serif'],
       },
       colors: {
-        // لوحة ألوان فاخرة — أسود فحمي + ذهبي/أخضر نيون
+        // ألوان ديناميكية تُقاد من مركز التخصيص عبر CSS variables
+        primary: 'var(--c-primary)',
+        accent: 'var(--c-accent)',
+
+        // أسطح الثيم الدافئ الفاتح
+        page: '#FBF5EC',
+        surface: '#FFFFFF',
+        beige: '#F4E9D9',
+        line: '#EADDC8',
+
+        // مقياس النص (دافئ غامق → فاتح)
         ink: {
-          950: '#06070a',
-          900: '#0a0c11',
-          800: '#11141c',
-          700: '#181c27',
-          600: '#222736',
-          500: '#2e3445',
+          900: '#2B2520', // النص الأساسي
+          700: '#5C5249',
+          500: '#8C8073', // النص الثانوي
+          400: '#B4A795', // نص خافت
         },
+
+        // العلامة — برتقالي دافئ (يُقاد افتراضيًا من --c-primary أيضًا)
         brand: {
-          50: '#ecfdf5',
-          100: '#d1fae5',
-          200: '#a7f3d0',
-          300: '#6ee7b7',
-          400: '#34d399',
-          500: '#10b981',
-          600: '#059669',
-          700: '#047857',
-          800: '#065f46',
-          900: '#064e3b',
+          50: '#FEF3EB',
+          100: '#FDE7D8',
+          200: '#FBCBA9',
+          300: '#F8A06A',
+          400: '#F58145',
+          500: '#F26A21',
+          600: '#D4540F',
+          700: '#B0440B',
+          800: '#8A360A',
+          900: '#6B2A08',
         },
+        // لون التمييز — كهرماني دافئ
         gold: {
-          300: '#f5d98b',
-          400: '#eecb6a',
-          500: '#d4af37',
-          600: '#b8932a',
+          200: '#F6DCA8',
+          300: '#EFC066',
+          400: '#E0941F',
+          500: '#C97E12',
+          600: '#A9670D',
         },
+
+        // ألوان الحالة
+        success: '#3E9E6B',
+        warning: '#E0941F',
+        danger: '#D6553A',
       },
       boxShadow: {
-        glow: '0 0 0 1px rgba(16,185,129,0.15), 0 18px 60px -15px rgba(16,185,129,0.35)',
-        card: '0 1px 0 0 rgba(255,255,255,0.04) inset, 0 20px 50px -20px rgba(0,0,0,0.8)',
+        glow: '0 0 0 1px rgba(242,106,33,0.18), 0 14px 40px -12px rgba(242,106,33,0.30)',
+        card: '0 1px 2px 0 rgba(43,37,32,0.04), 0 12px 32px -16px rgba(43,37,32,0.18)',
+        soft: '0 1px 2px 0 rgba(43,37,32,0.05), 0 8px 24px -14px rgba(43,37,32,0.15)',
       },
       backgroundImage: {
         'grid-faint':
-          'linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px)',
+          'linear-gradient(to right, rgba(43,37,32,0.035) 1px, transparent 1px), linear-gradient(to bottom, rgba(43,37,32,0.035) 1px, transparent 1px)',
         'radial-brand':
-          'radial-gradient(60% 50% at 50% 0%, rgba(16,185,129,0.18) 0%, rgba(6,7,10,0) 70%)',
+          'radial-gradient(60% 50% at 50% 0%, rgba(242,106,33,0.12) 0%, rgba(251,245,236,0) 70%)',
       },
       keyframes: {
         'fade-up': {

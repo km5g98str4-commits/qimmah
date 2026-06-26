@@ -6,21 +6,21 @@ import { sectionCopy, labels } from '@/config/content'
 /** قسم الوجبات والماكروز — قائمة الوجبات + تقدّم الأهداف الغذائية. */
 export function Meals() {
   return (
-    <section id="meals" className="section bg-ink-900/30">
+    <section id="meals" className="section bg-beige">
       <div className="container-page">
         <SectionHeading {...sectionCopy.meals} />
 
         <div className="mt-12 grid gap-6 lg:grid-cols-5">
           {/* أهداف الماكروز */}
           <div className="card p-6 lg:col-span-2">
-            <p className="text-sm font-bold text-white">{labels.meals.todayTargets}</p>
+            <p className="text-sm font-bold text-ink-900">{labels.meals.todayTargets}</p>
             <div className="mt-6 space-y-5">
               {macroTargets.map((m) => (
                 <div key={m.label}>
                   <div className="flex items-center justify-between text-xs">
-                    <span className="font-bold text-slate-300">{m.label}</span>
-                    <span className="text-slate-400">
-                      <span className="font-bold text-white">{m.current}</span> / {m.target} {m.unit}
+                    <span className="font-bold text-ink-700">{m.label}</span>
+                    <span className="text-ink-500">
+                      <span className="font-bold text-ink-900">{m.current}</span> / {m.target} {m.unit}
                     </span>
                   </div>
                   <ProgressBar current={m.current} target={m.target} color={m.color} className="mt-2" />
@@ -31,17 +31,17 @@ export function Meals() {
 
           {/* قائمة الوجبات */}
           <div className="card overflow-hidden lg:col-span-3">
-            <div className="border-b border-white/[0.06] p-5">
-              <p className="text-sm font-bold text-white">{labels.meals.todayMeals}</p>
+            <div className="border-b border-line p-5">
+              <p className="text-sm font-bold text-ink-900">{labels.meals.todayMeals}</p>
             </div>
-            <ul className="divide-y divide-white/[0.04]">
+            <ul className="divide-y divide-line">
               {meals.map((meal) => (
                 <li key={meal.name} className="flex items-center gap-4 p-4">
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-bold text-white">{meal.name}</p>
-                    <p className="text-xs text-slate-400">{meal.time}</p>
+                    <p className="truncate text-sm font-bold text-ink-900">{meal.name}</p>
+                    <p className="text-xs text-ink-500">{meal.time}</p>
                   </div>
-                  <div className="hidden shrink-0 gap-3 text-center text-[11px] text-slate-400 sm:flex">
+                  <div className="hidden shrink-0 gap-3 text-center text-[11px] text-ink-500 sm:flex">
                     <span>
                       <span className="block font-bold text-brand-300">{meal.protein}</span>
                       {labels.meals.protein}

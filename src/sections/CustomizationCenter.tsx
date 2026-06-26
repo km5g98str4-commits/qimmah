@@ -1,378 +1,250 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Icon } from '@/components/Icon'
-import { Field, inputClass } from '@/components/customizer/Field'
-import { EditableTable, type ColumnDef } from '@/components/customizer/EditableTable'
-import { routineTypeLabels } from '@/data/routine'
-import {
-  type Customization,
-  type MealRow,
-  type MetricRow,
-  type RoutineRow,
-  type SupplementRow,
-  type WorkoutRow,
-  getDefaultCustomization,
-  loadCustomization,
-  saveCustomization,
-  clearCustomization,
-  userTypeOptions,
-} from '@/lib/customization'
+import { cn } from '@/lib/cn'
+import { type Customization, getDefaultCustomization } from '@/lib/customization'
+import { useCustomization } from '@/lib/customizationContext'
+import { markCompleted, restartOnboarding, setLastStep } from '@/lib/onboarding'
+import type { WizardCtx } from '@/components/customizer/stepProps'
+import { PreviewSummary } from '@/components/customizer/PreviewSummary'
+import { StepWelcome } from '@/components/customizer/steps/StepWelcome'
+import { StepBasics } from '@/components/customizer/steps/StepBasics'
+import { StepBody } from '@/components/customizer/steps/StepBody'
+import { StepSmartCalculations } from '@/components/customizer/steps/StepSmartCalculations'
+import { StepGoal } from '@/components/customizer/steps/StepGoal'
+import { StepSchedule } from '@/components/customizer/steps/StepSchedule'
+import { StepWorkoutTemplate } from '@/components/customizer/steps/StepWorkoutTemplate'
+import { StepNutrition } from '@/components/customizer/steps/StepNutrition'
+import { StepWellness } from '@/components/customizer/steps/StepWellness'
+import { StepCommitments } from '@/components/customizer/steps/StepCommitments'
+import { StepMeasurements } from '@/components/customizer/steps/StepMeasurements'
+import { StepLook } from '@/components/customizer/steps/StepLook'
+import { StepSections } from '@/components/customizer/steps/StepSections'
+import { StepReview } from '@/components/customizer/steps/StepReview'
 
 interface CustomizationCenterProps {
-  onBack: () => void
+  /** يُستدعى عند الإغلاق؛ completed=true عند «حفظ وإغلاق» لعرض تأكيد النجاح. */
+  onBack: (completed?: boolean) => void
+  /** الخطوة التي يبدأ منها المعالج (لاستئناف الإعداد غير المكتمل). */
+  initialStep?: number
 }
 
-const supplementTypeOptions = [
-  { value: 'supplement', label: 'مكمل' },
-  { value: 'medication', label: 'دواء' },
+const steps: { title: string; Component: (p: { ctx: WizardCtx }) => JSX.Element }[] = [
+  { title: 'الترحيب', Component: StepWelcome },
+  { title: 'بياناتي الأساسية', Component: StepBasics },
+  { title: 'بيانات الجسم', Component: StepBody },
+  { title: 'الحسابات الذكية', Component: StepSmartCalculations },
+  { title: 'هدفي الحالي', Component: StepGoal },
+  { title: 'جدولي الأسبوعي', Component: StepSchedule },
+  { title: 'اختيار جدول التمرين', Component: StepWorkoutTemplate },
+  { title: 'خطة الأكل', Component: StepNutrition },
+  { title: 'المكملات والأدوية', Component: StepWellness },
+  { title: 'الالتزامات', Component: StepCommitments },
+  { title: 'القياسات والمتابعة', Component: StepMeasurements },
+  { title: 'شكل الصفحة', Component: StepLook },
+  { title: 'الأقسام', Component: StepSections },
+  { title: 'المراجعة والحفظ', Component: StepReview },
 ]
 
-const routineTypeOptions = (Object.keys(routineTypeLabels) as RoutineRow['type'][]).map((t) => ({
-  value: t,
-  label: routineTypeLabels[t],
-}))
-
-const workoutColumns: ColumnDef<WorkoutRow>[] = [
-  { key: 'name', label: 'التمرين', span: 'sm:col-span-3' },
-  { key: 'muscle', label: 'العضلة', span: 'sm:col-span-2' },
-  { key: 'sets', label: 'مجموعات', type: 'number', span: 'sm:col-span-2' },
-  { key: 'reps', label: 'تكرارات', span: 'sm:col-span-2' },
-  { key: 'weight', label: 'الوزن', span: 'sm:col-span-2' },
-]
-
-const supplementColumns: ColumnDef<SupplementRow>[] = [
-  { key: 'name', label: 'الاسم', span: 'sm:col-span-3' },
-  { key: 'dose', label: 'الجرعة', span: 'sm:col-span-3' },
-  { key: 'timing', label: 'التوقيت', span: 'sm:col-span-3' },
-  { key: 'type', label: 'النوع', options: supplementTypeOptions, span: 'sm:col-span-2' },
-]
-
-const mealColumns: ColumnDef<MealRow>[] = [
-  { key: 'name', label: 'الوجبة', span: 'sm:col-span-3' },
-  { key: 'time', label: 'الوقت', span: 'sm:col-span-2' },
-  { key: 'calories', label: 'سعرات', type: 'number', span: 'sm:col-span-2' },
-  { key: 'protein', label: 'بروتين', type: 'number', span: 'sm:col-span-2' },
-  { key: 'carbs', label: 'كارب', type: 'number', span: 'sm:col-span-1' },
-  { key: 'fats', label: 'دهون', type: 'number', span: 'sm:col-span-1' },
-]
-
-const metricColumns: ColumnDef<MetricRow>[] = [
-  { key: 'label', label: 'القياس', span: 'sm:col-span-5' },
-  { key: 'value', label: 'القيمة', span: 'sm:col-span-3' },
-  { key: 'unit', label: 'الوحدة', span: 'sm:col-span-3' },
-]
-
-const routineColumns: ColumnDef<RoutineRow>[] = [
-  { key: 'day', label: 'اليوم', span: 'sm:col-span-3' },
-  { key: 'title', label: 'الوصف', span: 'sm:col-span-5' },
-  { key: 'type', label: 'النوع', options: routineTypeOptions, span: 'sm:col-span-3' },
-]
-
-/** مركز التخصيص — صفحة كاملة لتعديل بيانات القالب وحفظها محليًا (بلا backend). */
-export function CustomizationCenter({ onBack }: CustomizationCenterProps) {
-  const [data, setData] = useState<Customization>(() => loadCustomization())
+/** مركز التخصيص — معالج إعداد شخصي خطوة بخطوة (بلا backend، يُحفظ على الجهاز). */
+export function CustomizationCenter({ onBack, initialStep = 0 }: CustomizationCenterProps) {
+  const { customization, applyCustomization, resetCustomization } = useCustomization()
+  const [data, setData] = useState<Customization>(() => customization)
+  const [step, setStep] = useState(() =>
+    Math.min(Math.max(0, initialStep), steps.length - 1),
+  )
   const [saved, setSaved] = useState(false)
 
-  const patch = (partial: Partial<Customization>) => {
+  // تذكّر آخر خطوة (يسمح باستئناف الإعداد لاحقًا) دون المساس بحالة الإكمال
+  useEffect(() => {
+    setLastStep(step)
+  }, [step])
+
+  const isFirst = step === 0
+  const isLast = step === steps.length - 1
+  const progress = Math.round(((step + 1) / steps.length) * 100)
+
+  const update = (partial: Partial<Customization>) => {
     setData((prev) => ({ ...prev, ...partial }))
     setSaved(false)
   }
-  const patchIdentity = (partial: Partial<Customization['identity']>) =>
-    patch({ identity: { ...data.identity, ...partial } })
-  const patchColors = (partial: Partial<Customization['colors']>) =>
-    patch({ colors: { ...data.colors, ...partial } })
+  const updateIdentity = (partial: Partial<Customization['identity']>) =>
+    update({ identity: { ...data.identity, ...partial } })
+  const updateColors = (partial: Partial<Customization['colors']>) =>
+    update({ colors: { ...data.colors, ...partial } })
 
-  const handleSave = () => {
-    saveCustomization(data)
-    setSaved(true)
+  // تنزيل نسخة احتياطية على جهاز المستخدم
+  const onExport = () => {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'qimmah-plan.json'
+    a.click()
+    URL.revokeObjectURL(url)
   }
-  const handleReset = () => {
-    clearCustomization()
+  // استعادة من ملف نسخة
+  const onImportFile = (file: File) => {
+    const reader = new FileReader()
+    reader.onload = () => {
+      try {
+        const p = JSON.parse(String(reader.result)) as Partial<Customization>
+        setData((prev) => ({
+          ...prev,
+          ...p,
+          identity: { ...prev.identity, ...(p.identity ?? {}) },
+          colors: { ...prev.colors, ...(p.colors ?? {}) },
+        }))
+        setSaved(false)
+      } catch {
+        /* ملف غير صالح — تجاهل */
+      }
+    }
+    reader.readAsText(file)
+  }
+  const onReset = () => {
+    resetCustomization()
     setData(getDefaultCustomization())
+    setStep(0)
+    setSaved(false)
+  }
+  // إعادة تشغيل الإعداد الأولي — لا يمسح بيانات التخصيص
+  const onRestartOnboarding = () => {
+    restartOnboarding()
+    setStep(0)
     setSaved(false)
   }
 
-  const userTypeLabel =
-    userTypeOptions.find((o) => o.value === data.identity.userType)?.label ?? ''
+  const ctx: WizardCtx = {
+    data,
+    update,
+    updateIdentity,
+    updateColors,
+    onExport,
+    onImportFile,
+    onReset,
+    onRestartOnboarding,
+  }
+
+  const saveDraft = () => {
+    applyCustomization(data)
+    setLastStep(step)
+    setSaved(true)
+  }
+  const saveAndClose = () => {
+    applyCustomization(data)
+    markCompleted(step)
+    onBack(true)
+  }
+  const next = () => setStep((s) => Math.min(steps.length - 1, s + 1))
+  const prev = () => setStep((s) => Math.max(0, s - 1))
+
+  const Current = steps[step].Component
 
   return (
-    <div className="min-h-screen bg-ink-950">
-      {/* شريط علوي ثابت مع الإجراءات */}
-      <header className="sticky top-0 z-40 glass border-b border-white/[0.06]">
+    <div className="flex min-h-screen flex-col bg-page">
+      {/* شريط علوي */}
+      <header className="sticky top-0 z-40 glass border-b border-line">
         <div className="container-page flex h-16 items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
-            <span className="grid h-9 w-9 place-items-center rounded-xl bg-brand-500 text-ink-950">
+            <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-white">
               <Icon name="Palette" className="h-5 w-5" strokeWidth={2.5} />
             </span>
-            <span className="text-base font-extrabold text-white sm:text-lg">مركز التخصيص</span>
+            <span className="text-base font-extrabold text-ink-900 sm:text-lg">إعداد صفحتي</span>
           </div>
           <div className="flex items-center gap-2">
-            <button type="button" onClick={handleReset} className="btn-ghost px-3 py-2 text-xs sm:text-sm">
-              <Icon name="TrendingDown" className="h-4 w-4" />
-              <span className="hidden sm:inline">استعادة الافتراضي</span>
-              <span className="sm:hidden">افتراضي</span>
-            </button>
-            <button type="button" onClick={handleSave} className="btn-primary px-3 py-2 text-xs sm:text-sm">
+            <button type="button" onClick={saveDraft} className="btn-ghost px-3 py-2 text-xs sm:text-sm">
               <Icon name={saved ? 'CheckCircle2' : 'Check'} className="h-4 w-4" />
-              {saved ? 'تم الحفظ' : 'حفظ التخصيص'}
+              {saved ? 'تم الحفظ' : 'حفظ مؤقت'}
             </button>
+            <button type="button" onClick={() => onBack()} className="btn-ghost px-3 py-2 text-xs sm:text-sm">
+              <Icon name="Globe" className="h-4 w-4" />
+              <span className="hidden sm:inline">معاينة في الموقع</span>
+              <span className="sm:hidden">معاينة</span>
+            </button>
+          </div>
+        </div>
+
+        {/* مؤشر التقدّم */}
+        <div className="container-page pb-3">
+          <div className="flex items-center justify-between text-xs">
+            <span className="font-bold text-ink-700">
+              الخطوة {step + 1} من {steps.length}: {steps[step].title}
+            </span>
+            <span className="font-bold text-primary-c">{progress}%</span>
+          </div>
+          <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-line">
+            <div
+              className="h-full rounded-full bg-primary transition-all duration-300"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+          {/* خطوات قابلة للنقر (تمرير أفقي على الجوال) */}
+          <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+            {steps.map((s, i) => (
+              <button
+                key={s.title}
+                type="button"
+                onClick={() => setStep(i)}
+                className={cn(
+                  'whitespace-nowrap rounded-full border px-3 py-1 text-[11px] font-bold transition-colors',
+                  i === step
+                    ? 'border-primary-soft bg-primary-soft text-primary-c'
+                    : i < step
+                      ? 'border-line bg-surface text-ink-500'
+                      : 'border-line bg-surface text-ink-400',
+                )}
+              >
+                {i + 1}. {s.title}
+              </button>
+            ))}
           </div>
         </div>
       </header>
 
-      <main className="container-page space-y-8 py-8">
-        <button
-          type="button"
-          onClick={onBack}
-          className="flex items-center gap-1.5 text-sm text-slate-400 transition-colors hover:text-brand-300"
-        >
-          <Icon name="ChevronLeft" className="h-4 w-4 rotate-180" />
-          العودة للموقع
-        </button>
-
-        {/* ملاحظة النسخة الأولية */}
-        <div className="flex items-start gap-3 rounded-2xl border border-gold-500/25 bg-gold-500/10 p-4">
-          <Icon name="AlertTriangle" className="mt-0.5 h-5 w-5 shrink-0 text-gold-400" />
-          <p className="text-sm leading-relaxed text-gold-200">
-            <span className="font-bold">نسخة أولية:</span> هذا مركز تخصيص مبدئي بلا تسجيل دخول وبلا
-            خادم. تُحفظ تعديلاتك في متصفحك فقط (localStorage) على هذا الجهاز، ولن تنتقل لأجهزة أخرى.
-            للتخصيص الدائم في الإنتاج، عدّل ملفات <code className="rounded bg-ink-900/60 px-1">config</code> و
-            <code className="rounded bg-ink-900/60 px-1">data</code> مباشرة (انظر README).
-          </p>
-        </div>
-
+      {/* المحتوى */}
+      <main className="container-page flex-1 py-8">
         <div className="grid gap-8 lg:grid-cols-3">
-          {/* عمود التحرير */}
-          <div className="space-y-8 lg:col-span-2">
-            {/* الهوية */}
-            <CenterSection icon="Sparkles" title="الهوية والعلامة">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="اسم المستخدم / المدرب">
-                  <input
-                    className={inputClass}
-                    value={data.identity.userName}
-                    onChange={(e) => patchIdentity({ userName: e.target.value })}
-                  />
-                </Field>
-                <Field label="الشعار النصي (اسم العلامة)">
-                  <input
-                    className={inputClass}
-                    value={data.identity.brandName}
-                    onChange={(e) => patchIdentity({ brandName: e.target.value })}
-                  />
-                </Field>
-                <Field label="الشعار / الوصف القصير">
-                  <input
-                    className={inputClass}
-                    value={data.identity.tagline}
-                    onChange={(e) => patchIdentity({ tagline: e.target.value })}
-                  />
-                </Field>
-                <Field label="نوع المستخدم">
-                  <select
-                    className={inputClass}
-                    value={data.identity.userType}
-                    onChange={(e) =>
-                      patchIdentity({ userType: e.target.value as Customization['identity']['userType'] })
-                    }
-                  >
-                    {userTypeOptions.map((o) => (
-                      <option key={o.value} value={o.value}>
-                        {o.label}
-                      </option>
-                    ))}
-                  </select>
-                </Field>
-                <div className="sm:col-span-2">
-                  <Field label="الهدف الرئيسي">
-                    <textarea
-                      className={`${inputClass} min-h-[72px] resize-y`}
-                      value={data.identity.mainGoal}
-                      onChange={(e) => patchIdentity({ mainGoal: e.target.value })}
-                    />
-                  </Field>
-                </div>
-              </div>
-            </CenterSection>
-
-            {/* الألوان */}
-            <CenterSection icon="Palette" title="الألوان">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <ColorField
-                  label="اللون الأساسي"
-                  value={data.colors.primary}
-                  onChange={(v) => patchColors({ primary: v })}
-                />
-                <ColorField
-                  label="لون التمييز"
-                  value={data.colors.accent}
-                  onChange={(v) => patchColors({ accent: v })}
-                />
-              </div>
-            </CenterSection>
-
-            {/* جدول التمارين */}
-            <CenterSection icon="Dumbbell" title="جدول التمارين">
-              <EditableTable<WorkoutRow>
-                items={data.workouts}
-                columns={workoutColumns}
-                onChange={(workouts) => patch({ workouts })}
-                makeEmpty={() => ({ name: '', muscle: '', sets: 3, reps: '10', weight: '' })}
-                addLabel="إضافة تمرين"
-              />
-            </CenterSection>
-
-            {/* المكملات */}
-            <CenterSection icon="Pill" title="المكملات والأدوية">
-              <EditableTable<SupplementRow>
-                items={data.supplements}
-                columns={supplementColumns}
-                onChange={(supplements) => patch({ supplements })}
-                makeEmpty={() => ({ name: '', dose: '', timing: '', type: 'supplement' })}
-                addLabel="إضافة مكمل / دواء"
-              />
-            </CenterSection>
-
-            {/* الوجبات */}
-            <CenterSection icon="Salad" title="الوجبات والماكروز">
-              <EditableTable<MealRow>
-                items={data.meals}
-                columns={mealColumns}
-                onChange={(meals) => patch({ meals })}
-                makeEmpty={() => ({ name: '', time: '', calories: 0, protein: 0, carbs: 0, fats: 0 })}
-                addLabel="إضافة وجبة"
-              />
-            </CenterSection>
-
-            {/* القياسات */}
-            <CenterSection icon="Ruler" title="قياسات الجسم">
-              <EditableTable<MetricRow>
-                items={data.metrics}
-                columns={metricColumns}
-                onChange={(metrics) => patch({ metrics })}
-                makeEmpty={() => ({ label: '', value: '', unit: '' })}
-                addLabel="إضافة قياس"
-              />
-            </CenterSection>
-
-            {/* الروتين */}
-            <CenterSection icon="CalendarDays" title="الروتين الأسبوعي">
-              <EditableTable<RoutineRow>
-                items={data.routine}
-                columns={routineColumns}
-                onChange={(routine) => patch({ routine })}
-                makeEmpty={() => ({ day: '', title: '', type: 'rest' })}
-                addLabel="إضافة يوم"
-              />
-            </CenterSection>
+          <div className="lg:col-span-2">
+            <div className="card p-6 sm:p-8">
+              <Current ctx={ctx} />
+            </div>
           </div>
 
-          {/* عمود المعاينة الحية */}
           <aside className="lg:col-span-1">
-            <div className="sticky top-24 space-y-4">
-              <p className="text-xs font-bold uppercase tracking-wide text-slate-500">معاينة حية</p>
-              <div
-                className="card overflow-hidden p-6"
-                style={{ boxShadow: `0 20px 60px -20px ${data.colors.primary}55` }}
-              >
-                <span
-                  className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold"
-                  style={{ backgroundColor: `${data.colors.primary}22`, color: data.colors.primary }}
-                >
-                  <Icon name="Users" className="h-3 w-3" />
-                  {userTypeLabel}
-                </span>
-                <h3 className="mt-4 text-2xl font-black text-white">{data.identity.brandName}</h3>
-                <p className="mt-1 text-sm text-slate-400">{data.identity.tagline}</p>
-
-                <div className="mt-5 rounded-xl border border-white/[0.06] bg-ink-900/60 p-3">
-                  <p className="text-[11px] text-slate-500">الهدف الرئيسي</p>
-                  <p className="mt-1 text-sm leading-relaxed text-slate-200">{data.identity.mainGoal}</p>
-                </div>
-
-                <p className="mt-5 text-[11px] text-slate-500">صاحب الحساب</p>
-                <p className="text-sm font-bold text-white">{data.identity.userName}</p>
-
-                <div className="mt-5 flex gap-2">
-                  <span
-                    className="h-8 flex-1 rounded-lg"
-                    style={{ backgroundColor: data.colors.primary }}
-                  />
-                  <span
-                    className="h-8 flex-1 rounded-lg"
-                    style={{ backgroundColor: data.colors.accent }}
-                  />
-                </div>
-
-                <div className="mt-5 grid grid-cols-3 gap-2 text-center">
-                  <PreviewStat label="تمارين" value={data.workouts.length} />
-                  <PreviewStat label="مكملات" value={data.supplements.length} />
-                  <PreviewStat label="وجبات" value={data.meals.length} />
-                </div>
-              </div>
+            <div className="sticky top-40 space-y-3">
+              <p className="text-xs font-bold uppercase tracking-wide text-ink-400">معاينة حية</p>
+              <PreviewSummary data={data} />
             </div>
           </aside>
         </div>
       </main>
-    </div>
-  )
-}
 
-function CenterSection({
-  icon,
-  title,
-  children,
-}: {
-  icon: string
-  title: string
-  children: React.ReactNode
-}) {
-  return (
-    <section className="card p-5 sm:p-6">
-      <div className="mb-5 flex items-center gap-2.5">
-        <span className="grid h-9 w-9 place-items-center rounded-lg bg-brand-500/15 text-brand-300">
-          <Icon name={icon} className="h-5 w-5" />
-        </span>
-        <h2 className="text-base font-bold text-white">{title}</h2>
+      {/* شريط التنقّل السفلي */}
+      <div className="sticky bottom-0 z-30 border-t border-line bg-page/90 backdrop-blur">
+        <div className="container-page flex items-center justify-between gap-3 py-3">
+          <button
+            type="button"
+            onClick={prev}
+            disabled={isFirst}
+            className="btn-ghost px-5 py-3 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <Icon name="ChevronLeft" className="h-4 w-4 rotate-180" />
+            السابق
+          </button>
+
+          {isLast ? (
+            <button type="button" onClick={saveAndClose} className="btn-primary px-6 py-3">
+              <Icon name="Check" className="h-4 w-4" />
+              حفظ وإغلاق
+            </button>
+          ) : (
+            <button type="button" onClick={next} className="btn-primary px-6 py-3">
+              التالي
+              <Icon name="ChevronLeft" className="h-4 w-4" />
+            </button>
+          )}
+        </div>
       </div>
-      {children}
-    </section>
-  )
-}
-
-function ColorField({
-  label,
-  value,
-  onChange,
-}: {
-  label: string
-  value: string
-  onChange: (v: string) => void
-}) {
-  return (
-    <Field label={label} hint={value.toUpperCase()}>
-      <div className="flex items-center gap-2">
-        <input
-          type="color"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          aria-label={label}
-          className="h-10 w-14 shrink-0 cursor-pointer rounded-lg border border-white/10 bg-transparent"
-        />
-        <input
-          className={inputClass}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-        />
-      </div>
-    </Field>
-  )
-}
-
-function PreviewStat({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="rounded-lg border border-white/[0.06] bg-ink-900/60 py-2">
-      <p className="text-lg font-black text-white">{value}</p>
-      <p className="text-[10px] text-slate-500">{label}</p>
     </div>
   )
 }

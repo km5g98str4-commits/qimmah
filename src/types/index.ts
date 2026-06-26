@@ -100,6 +100,31 @@ export interface CustomizationOption {
   description: string
 }
 
+/** حقل في البيانات الأساسية (البروفايل) */
+export interface ProfileField {
+  icon: IconName
+  label: string
+  value: string
+  unit?: string
+}
+
+/** معلومات الهدف الحالي */
+export interface GoalInfo {
+  currentLabel: string
+  currentValue: string
+  targetLabel: string
+  targetValue: string
+  deadline: string
+  progress: number // 0..100
+}
+
+/** مفتاح التزام (عادة/مبدأ) */
+export interface CommitmentKey {
+  icon: IconName
+  title: string
+  description: string
+}
+
 /** نقطة ألم في قسم المشكلة */
 export interface PainPoint {
   icon: IconName

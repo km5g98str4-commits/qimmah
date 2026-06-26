@@ -26,18 +26,18 @@ export function Faq() {
                   aria-expanded={isOpen}
                   className="flex w-full items-center justify-between gap-4 p-5 text-start"
                 >
-                  <span className="text-sm font-bold text-white sm:text-base">{item.question}</span>
+                  <span className="text-sm font-bold text-ink-900 sm:text-base">{item.question}</span>
                   <span
                     className={[
-                      'grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-white/10 text-brand-300 transition-colors',
-                      isOpen ? 'bg-brand-500/15' : 'bg-white/[0.03]',
+                      'grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-line text-brand-300 transition-colors',
+                      isOpen ? 'bg-brand-500/15' : 'bg-beige',
                     ].join(' ')}
                   >
                     <Icon name={isOpen ? 'Minus' : 'Plus'} className="h-4 w-4" />
                   </span>
                 </button>
                 {isOpen && (
-                  <p className="px-5 pb-5 text-sm leading-relaxed text-slate-400">{item.answer}</p>
+                  <p className="px-5 pb-5 text-sm leading-relaxed text-ink-500">{item.answer}</p>
                 )}
               </div>
             )

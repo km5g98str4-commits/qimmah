@@ -28,26 +28,26 @@ export function Supplements() {
                 </span>
                 <span
                   className={`grid h-7 w-7 place-items-center rounded-lg ${
-                    s.taken ? 'bg-brand-500/15 text-brand-300' : 'bg-white/[0.03] text-slate-500'
+                    s.taken ? 'bg-brand-500/15 text-brand-300' : 'bg-beige text-ink-400'
                   }`}
                 >
                   <Icon name={s.taken ? 'Check' : 'Circle'} className="h-4 w-4" />
                 </span>
               </div>
 
-              <h3 className="mt-4 text-base font-bold text-white">{s.name}</h3>
-              <div className="mt-3 space-y-1.5 text-xs text-slate-400">
+              <h3 className="mt-4 text-base font-bold text-ink-900">{s.name}</h3>
+              <div className="mt-3 space-y-1.5 text-xs text-ink-500">
                 <p className="flex items-center justify-between">
                   <span>{labels.supplements.dose}</span>
-                  <span className="font-bold text-slate-200">{s.dose}</span>
+                  <span className="font-bold text-ink-900">{s.dose}</span>
                 </p>
                 <p className="flex items-center justify-between">
                   <span>{labels.supplements.timing}</span>
-                  <span className="font-bold text-slate-200">{s.timing}</span>
+                  <span className="font-bold text-ink-900">{s.timing}</span>
                 </p>
               </div>
               {s.note && (
-                <p className="mt-3 rounded-lg bg-white/[0.03] p-2.5 text-[11px] leading-relaxed text-slate-400">
+                <p className="mt-3 rounded-lg bg-beige p-2.5 text-[11px] leading-relaxed text-ink-500">
                   {s.note}
                 </p>
               )}

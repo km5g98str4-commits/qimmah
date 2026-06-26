@@ -20,8 +20,8 @@ export function Problem() {
                 <Icon name={p.icon} className="h-5 w-5" />
               </span>
               <div>
-                <h3 className="text-base font-bold text-white">{p.title}</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-slate-400">{p.description}</p>
+                <h3 className="text-base font-bold text-ink-900">{p.title}</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-ink-500">{p.description}</p>
               </div>
             </div>
           ))}

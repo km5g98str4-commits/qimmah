@@ -18,7 +18,7 @@ export function BodyMetrics() {
             return (
               <div key={m.label} className="card p-6">
                 <div className="flex items-center justify-between">
-                  <span className="grid h-11 w-11 place-items-center rounded-xl bg-white/[0.04] text-slate-300">
+                  <span className="grid h-11 w-11 place-items-center rounded-xl bg-beige text-ink-700">
                     <Icon name={m.icon} className="h-5 w-5" />
                   </span>
                   <span className={`flex items-center gap-1 text-xs font-bold ${trendColor}`}>
@@ -27,10 +27,10 @@ export function BodyMetrics() {
                     {m.change}
                   </span>
                 </div>
-                <p className="mt-5 text-sm text-slate-400">{m.label}</p>
+                <p className="mt-5 text-sm text-ink-500">{m.label}</p>
                 <p className="mt-1">
-                  <span className="text-3xl font-black text-white">{m.value}</span>
-                  <span className="ms-1.5 text-sm text-slate-400">{m.unit}</span>
+                  <span className="text-3xl font-black text-ink-900">{m.value}</span>
+                  <span className="ms-1.5 text-sm text-ink-500">{m.unit}</span>
                 </p>
               </div>
             )

@@ -4,7 +4,10 @@
 
 @layer base {
   :root {
-    color-scheme: dark;
+    color-scheme: light;
+    /* ألوان الهوية — تُحدَّث وقت التشغيل من مركز التخصيص (localStorage) */
+    --c-primary: #f26a21;
+    --c-accent: #e0941f;
   }
 
   html {
@@ -12,28 +15,29 @@
   }
 
   body {
-    @apply bg-ink-950 text-slate-200 font-sans antialiased;
+    @apply bg-page text-ink-900 font-sans antialiased;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
 
   ::selection {
-    @apply bg-brand-500/30 text-white;
+    background-color: color-mix(in srgb, var(--c-primary) 22%, transparent);
+    @apply text-ink-900;
   }
 
-  /* Scrollbar فاخر */
+  /* Scrollbar دافئ */
   ::-webkit-scrollbar {
     width: 10px;
     height: 10px;
   }
   ::-webkit-scrollbar-track {
-    @apply bg-ink-900;
+    @apply bg-page;
   }
   ::-webkit-scrollbar-thumb {
-    @apply bg-ink-600 rounded-full border-2 border-ink-900;
+    @apply bg-line rounded-full border-2 border-page;
   }
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-brand-700;
+    @apply bg-ink-400;
   }
 }
 
@@ -43,23 +47,30 @@
   }
 
   .glass {
-    @apply bg-ink-800/60 backdrop-blur-xl border border-white/[0.06];
+    @apply bg-surface/85 backdrop-blur-xl border border-line;
   }
 
   .card {
-    @apply glass rounded-2xl shadow-card;
+    @apply bg-surface border border-line rounded-2xl shadow-card;
   }
 
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-ink-950;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-page;
   }
 
   .btn-primary {
-    @apply btn bg-brand-500 text-ink-950 hover:bg-brand-400 hover:shadow-glow active:scale-[0.98];
+    @apply btn text-white active:scale-[0.98];
+    background-color: var(--c-primary);
+  }
+  .btn-primary:hover {
+    filter: brightness(0.94);
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--c-primary) 22%, transparent),
+      0 14px 40px -12px color-mix(in srgb, var(--c-primary) 40%, transparent);
   }
 
   .btn-ghost {
-    @apply btn border border-white/10 bg-white/[0.03] text-slate-100 hover:bg-white/[0.07];
+    @apply btn border border-line bg-surface text-ink-900 hover:bg-beige;
   }
 
   .section {
@@ -67,14 +78,40 @@
   }
 
   .eyebrow {
-    @apply inline-flex items-center gap-2 rounded-full border border-brand-500/30 bg-brand-500/10 px-3 py-1 text-xs font-bold text-brand-300;
+    @apply inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-bold;
+    color: var(--c-primary);
+    background-color: color-mix(in srgb, var(--c-primary) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--c-primary) 30%, transparent);
   }
 
   .heading {
-    @apply text-3xl font-extrabold leading-tight text-white sm:text-4xl lg:text-5xl;
+    @apply text-3xl font-extrabold leading-tight text-ink-900 sm:text-4xl lg:text-5xl;
   }
 
   .subheading {
-    @apply mt-4 max-w-2xl text-base leading-relaxed text-slate-400 sm:text-lg;
+    @apply mt-4 max-w-2xl text-base leading-relaxed text-ink-500 sm:text-lg;
+  }
+
+  /* أدوات لون ديناميكية تعتمد على متغيرات التخصيص */
+  .text-primary-c {
+    color: var(--c-primary);
+  }
+  .text-accent-c {
+    color: var(--c-accent);
+  }
+  .bg-primary-soft {
+    background-color: color-mix(in srgb, var(--c-primary) 12%, transparent);
+  }
+  .bg-accent-soft {
+    background-color: color-mix(in srgb, var(--c-accent) 14%, transparent);
+  }
+  .border-primary-soft {
+    border-color: color-mix(in srgb, var(--c-primary) 35%, transparent);
+  }
+  .border-accent-soft {
+    border-color: color-mix(in srgb, var(--c-accent) 40%, transparent);
+  }
+  .ring-primary-c {
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--c-primary) 55%, transparent);
   }
 }

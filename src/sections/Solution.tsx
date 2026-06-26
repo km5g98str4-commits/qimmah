@@ -31,7 +31,7 @@ export function Solution() {
             ))}
           </div>
 
-          <p className="mt-8 max-w-xl text-sm text-slate-500">
+          <p className="mt-8 max-w-xl text-sm text-ink-400">
             بالأسفل معاينة حيّة لما يقدّمه {product.name} — تصفّح اللوحة وكل قسم كما سيراه المستخدم.
           </p>
           <a href="#dashboard" className="btn-primary mt-6 text-base">

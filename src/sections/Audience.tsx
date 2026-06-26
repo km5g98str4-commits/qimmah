@@ -16,7 +16,7 @@ function Column({ title, tone, items }: ColumnProps) {
     <div
       className={[
         'card p-6 sm:p-8',
-        positive ? 'border-brand-500/25' : 'border-white/[0.06]',
+        positive ? 'border-brand-500/25' : 'border-line',
       ].join(' ')}
     >
       <div className="flex items-center gap-3">
@@ -28,7 +28,7 @@ function Column({ title, tone, items }: ColumnProps) {
         >
           <Icon name={positive ? 'CheckCircle2' : 'X'} className="h-5 w-5" />
         </span>
-        <h3 className="text-lg font-bold text-white">{title}</h3>
+        <h3 className="text-lg font-bold text-ink-900">{title}</h3>
       </div>
 
       <ul className="mt-6 space-y-5">
@@ -37,14 +37,14 @@ function Column({ title, tone, items }: ColumnProps) {
             <span
               className={[
                 'mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-lg',
-                positive ? 'bg-white/[0.04] text-brand-300' : 'bg-white/[0.03] text-slate-500',
+                positive ? 'bg-beige text-brand-300' : 'bg-beige text-ink-400',
               ].join(' ')}
             >
               <Icon name={item.icon} className="h-4 w-4" />
             </span>
             <div>
-              <p className="text-sm font-bold text-white">{item.title}</p>
-              <p className="mt-1 text-sm leading-relaxed text-slate-400">{item.description}</p>
+              <p className="text-sm font-bold text-ink-900">{item.title}</p>
+              <p className="mt-1 text-sm leading-relaxed text-ink-500">{item.description}</p>
             </div>
           </li>
         ))}

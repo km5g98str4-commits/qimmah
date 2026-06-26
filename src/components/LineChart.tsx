@@ -29,14 +29,14 @@ export function LineChart({ data, height = 120 }: LineChartProps) {
     <svg viewBox={`0 0 ${width} ${height}`} className="h-auto w-full" preserveAspectRatio="none" role="img" aria-label="رسم تقدّم الوزن">
       <defs>
         <linearGradient id={`grad-${id}`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#10b981" stopOpacity="0.35" />
-          <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
+          <stop offset="0%" stopColor="var(--c-primary)" stopOpacity="0.28" />
+          <stop offset="100%" stopColor="var(--c-primary)" stopOpacity="0" />
         </linearGradient>
       </defs>
       <path d={area} fill={`url(#grad-${id})`} />
-      <path d={line} fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d={line} fill="none" stroke="var(--c-primary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
       {points.map((p, i) => (
-        <circle key={i} cx={p.x} cy={p.y} r="3" fill="#06070a" stroke="#10b981" strokeWidth="2" />
+        <circle key={i} cx={p.x} cy={p.y} r="3" fill="#ffffff" stroke="var(--c-primary)" strokeWidth="2" />
       ))}
     </svg>
   )

@@ -8,6 +8,16 @@ import { meals as defaultMeals } from '@/data/meals'
 import { bodyMetrics } from '@/data/metrics'
 import { weeklyRoutine } from '@/data/routine'
 import type { RoutineDay, SupplementItem } from '@/types'
+import type { Profile, Targets } from '@/types/profile'
+import { computeTargets, defaultProfile } from './calculators'
+import type { WorkoutPlan } from '@/types/workout'
+import { generatePlanFromTemplate } from './workoutPlan'
+import type { NutritionPlan } from '@/types/nutrition'
+import { defaultNutritionPlan } from './nutritionPlan'
+import type { WellnessPlan } from '@/types/wellness'
+import { defaultWellnessPlan } from './wellnessPlan'
+import type { CommitmentPlan, MeasurementPlan } from '@/types/progress'
+import { defaultCommitmentPlan } from './commitmentPlan'
 
 export const STORAGE_KEY = 'qimmah:customization:v1'
 
@@ -55,6 +65,29 @@ export interface RoutineRow {
   type: RoutineDay['type']
 }
 
+/** أقسام الصفحة القابلة للإظهار/الإخفاء (بنية v2 — تُوسّع لاحقًا). */
+export interface SectionVisibility {
+  today: boolean
+  workouts: boolean
+  meals: boolean
+  supplements: boolean
+  medications: boolean
+  measurements: boolean
+  commitments: boolean
+  notes: boolean
+}
+
+export const defaultSections: SectionVisibility = {
+  today: true,
+  workouts: true,
+  meals: true,
+  supplements: true,
+  medications: true,
+  measurements: true,
+  commitments: true,
+  notes: true,
+}
+
 export interface Customization {
   identity: {
     userName: string
@@ -67,6 +100,14 @@ export interface Customization {
     primary: string
     accent: string
   }
+  sections: SectionVisibility
+  profile: Profile
+  targets: Targets
+  workoutPlan: WorkoutPlan
+  nutritionPlan: NutritionPlan
+  wellnessPlan: WellnessPlan
+  commitmentPlan: CommitmentPlan
+  measurementPlan: MeasurementPlan
   workouts: WorkoutRow[]
   supplements: SupplementRow[]
   meals: MealRow[]
@@ -85,9 +126,17 @@ export function getDefaultCustomization(): Customization {
       userType: 'individual',
     },
     colors: {
-      primary: '#10b981',
-      accent: '#d4af37',
+      primary: '#F26A21',
+      accent: '#E0941F',
     },
+    sections: { ...defaultSections },
+    profile: { ...defaultProfile },
+    targets: computeTargets(defaultProfile),
+    workoutPlan: generatePlanFromTemplate('full-body-3'),
+    nutritionPlan: defaultNutritionPlan(computeTargets(defaultProfile), defaultProfile.goal),
+    wellnessPlan: defaultWellnessPlan(),
+    commitmentPlan: defaultCommitmentPlan(),
+    measurementPlan: { enabled: true, selectedTypeIds: ['weightKg', 'waistCm', 'bodyFatPercent', 'sleepHours'] },
     workouts: todayWorkout.exercises.map((e) => ({
       name: e.name,
       muscle: e.muscle,
@@ -133,6 +182,22 @@ export function loadCustomization(): Customization {
     return {
       identity: { ...base.identity, ...saved.identity },
       colors: { ...base.colors, ...saved.colors },
+      sections: { ...base.sections, ...saved.sections },
+      profile: { ...base.profile, ...saved.profile },
+      targets: { ...base.targets, ...saved.targets },
+      workoutPlan: saved.workoutPlan ?? base.workoutPlan,
+      nutritionPlan: saved.nutritionPlan
+        ? { ...base.nutritionPlan, ...saved.nutritionPlan }
+        : base.nutritionPlan,
+      wellnessPlan: saved.wellnessPlan
+        ? { ...base.wellnessPlan, ...saved.wellnessPlan }
+        : base.wellnessPlan,
+      commitmentPlan: saved.commitmentPlan
+        ? { ...base.commitmentPlan, ...saved.commitmentPlan }
+        : base.commitmentPlan,
+      measurementPlan: saved.measurementPlan
+        ? { ...base.measurementPlan, ...saved.measurementPlan }
+        : base.measurementPlan,
       workouts: saved.workouts ?? base.workouts,
       supplements: saved.supplements ?? base.supplements,
       meals: saved.meals ?? base.meals,

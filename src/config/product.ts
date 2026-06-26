@@ -4,33 +4,34 @@
 import type { NavItem } from '@/types'
 
 export const product = {
-  // اسم المنتج (يمكن أيضًا ضبطه عبر VITE_APP_NAME في .env)
+  // اسم الصفحة الشخصية (يمكن أيضًا ضبطه عبر VITE_APP_NAME في .env)
   name: import.meta.env.VITE_APP_NAME ?? 'قِمّة',
   nameLatin: 'Qimmah',
-  tagline: 'نظام تشغيل اللياقة العربي',
+  tagline: 'خطتك الشخصية للنادي',
   description:
-    'قِمّة — منصة واحدة فاخرة تجمع تمارينك، مكملاتك، أدويتك، تغذيتك، وقياساتك في مكان واحد. عربية بالكامل، ومصممة للسوق السعودي والخليجي.',
+    'صفحتك الشخصية للنادي — تجمع هدفك، جدولك الأسبوعي، تمارينك، أكلك، ومكملاتك في مكان واحد. مبنية على حالتك، عربية بالكامل، وتفتحها من جوالك كل يوم.',
   locale: 'ar',
   direction: 'rtl' as const,
 
-  // روابط الدعوة للفعل (يمكن ضبطها عبر .env)
-  contactUrl: import.meta.env.VITE_CONTACT_URL ?? '#pricing',
-  checkoutUrl: import.meta.env.VITE_CHECKOUT_URL ?? '#pricing',
+  // روابط داخلية (يمكن ضبطها عبر .env)
+  contactUrl: import.meta.env.VITE_CONTACT_URL ?? '#goal',
+  checkoutUrl: import.meta.env.VITE_CHECKOUT_URL ?? '#goal',
 
   // تسميات عامة
-  ctaLabel: 'ابدأ الآن',
-  footerNote: 'صُمّم بعناية للسوق السعودي والخليجي',
-  rightsNote: 'جميع الحقوق محفوظة.',
+  ctaLabel: 'افتح خطتي',
+  footerNote: 'صفحة شخصية مبنية على حالتك',
+  rightsNote: 'صفحة شخصية.',
   year: 2026,
 }
 
-// روابط التنقّل في الهيدر والفوتر
+// روابط التنقّل في الهيدر والفوتر — أقسام الخطة الشخصية
 export const nav: NavItem[] = [
-  { label: 'الرئيسية', href: '#hero' },
-  { label: 'المشكلة', href: '#problem' },
-  { label: 'الحل', href: '#solution' },
-  { label: 'المزايا', href: '#benefits' },
-  { label: 'لمن قِمّة؟', href: '#audience' },
-  { label: 'الأسعار', href: '#pricing' },
-  { label: 'الأسئلة', href: '#faq' },
+  { label: 'يومي', href: '#today' },
+  { label: 'هدفي', href: '#goal' },
+  { label: 'بياناتي', href: '#profile' },
+  { label: 'جدولي', href: '#routine' },
+  { label: 'تماريني', href: '#workout' },
+  { label: 'أكلي', href: '#meals' },
+  { label: 'مكملاتي', href: '#supplements' },
+  { label: 'التزامي', href: '#commitment' },
 ]

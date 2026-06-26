@@ -14,10 +14,10 @@ export function FinalCta() {
               <Icon name="Sparkles" className="h-3.5 w-3.5" />
               {finalCta.eyebrow}
             </span>
-            <h2 className="mx-auto mt-5 max-w-2xl text-2xl font-black text-white sm:text-4xl">
+            <h2 className="mx-auto mt-5 max-w-2xl text-2xl font-black text-ink-900 sm:text-4xl">
               {finalCta.title}
             </h2>
-            <p className="mx-auto mt-4 max-w-xl text-slate-400">{finalCta.description}</p>
+            <p className="mx-auto mt-4 max-w-xl text-ink-500">{finalCta.description}</p>
 
             <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
               <a href={product.checkoutUrl} className="btn-primary text-base">

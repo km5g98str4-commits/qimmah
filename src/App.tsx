@@ -1,66 +1,119 @@
-import { useState } from 'react'
-import { Header } from '@/components/Header'
-import { Footer } from '@/components/Footer'
-import { Hero } from '@/sections/Hero'
-import { Problem } from '@/sections/Problem'
-import { Solution } from '@/sections/Solution'
-import { Dashboard } from '@/sections/Dashboard'
-import { WorkoutTracker } from '@/sections/WorkoutTracker'
-import { Supplements } from '@/sections/Supplements'
-import { Meals } from '@/sections/Meals'
-import { BodyMetrics } from '@/sections/BodyMetrics'
-import { WeeklyRoutine } from '@/sections/WeeklyRoutine'
-import { Benefits } from '@/sections/Benefits'
-import { Audience } from '@/sections/Audience'
-import { Customization } from '@/sections/Customization'
-import { Pricing } from '@/sections/Pricing'
-import { Faq } from '@/sections/Faq'
-import { FinalCta } from '@/sections/FinalCta'
-import { CustomizationCenter } from '@/sections/CustomizationCenter'
-import { Icon } from '@/components/Icon'
+import { useCallback, useEffect, useState } from 'react'
+import { StartView } from '@/views/StartView'
+import { SetupView } from '@/views/SetupView'
+import { DashboardView } from '@/views/DashboardView'
+import { DemoView } from '@/views/DemoView'
+import type { AppView } from '@/components/AppNav'
+import { useCustomization } from '@/lib/customizationContext'
+import { type Customization, getDefaultCustomization } from '@/lib/customization'
+import { loadOnboarding, markCompleted } from '@/lib/onboarding'
+import { type Lang, applyLanguage, getLanguage, setLanguage } from '@/lib/appPreferences'
 
-type View = 'landing' | 'customize'
+type View = 'start' | 'setup' | 'dashboard' | 'demo'
 
-/** الصفحة الرئيسية — تركّب الأقسام بترتيب تجاري، مع تبديل لمركز التخصيص. */
+/** قشرة تطبيق قِمّة v2 — موجّه بسيط بين الشاشات (بلا توجيه/مكتبات خارجية). */
 export default function App() {
-  const [view, setView] = useState<View>('landing')
+  const { applyCustomization } = useCustomization()
 
-  if (view === 'customize') {
-    return <CustomizationCenter onBack={() => setView('landing')} />
+  // اللغة
+  const [lang, setLang] = useState<Lang>(() => getLanguage())
+  useEffect(() => {
+    applyLanguage(lang)
+  }, [lang])
+  const changeLang = useCallback((l: Lang) => {
+    setLanguage(l)
+    setLang(l)
+  }, [])
+
+  // الشاشة الحالية: إعداد مكتمل → الرئيسية، وإلا شاشة البداية أولًا
+  const [view, setView] = useState<View>(() => (loadOnboarding().completed ? 'dashboard' : 'start'))
+  const [startStep, setStartStep] = useState<number>(() => loadOnboarding().lastStep ?? 0)
+  const [showSuccess, setShowSuccess] = useState(false)
+  const dismissSuccess = useCallback(() => setShowSuccess(false), [])
+
+  const openSetup = () => {
+    const ob = loadOnboarding()
+    setStartStep(ob.completed ? 1 : (ob.lastStep ?? 0))
+    setView('setup')
+  }
+
+  const closeSetup = (completed?: boolean) => {
+    const done = completed || loadOnboarding().completed
+    setView(done ? 'dashboard' : 'start')
+    if (completed) setShowSuccess(true)
+  }
+
+  const closeDemo = () => setView(loadOnboarding().completed ? 'dashboard' : 'start')
+
+  // استيراد نسخة سابقة من ملف على الجهاز
+  const importFromFile = (file: File) => {
+    const reader = new FileReader()
+    reader.onload = () => {
+      try {
+        const p = JSON.parse(String(reader.result)) as Partial<Customization>
+        const base = getDefaultCustomization()
+        applyCustomization({
+          identity: { ...base.identity, ...(p.identity ?? {}) },
+          colors: { ...base.colors, ...(p.colors ?? {}) },
+          sections: { ...base.sections, ...(p.sections ?? {}) },
+          profile: { ...base.profile, ...(p.profile ?? {}) },
+          targets: { ...base.targets, ...(p.targets ?? {}) },
+          workoutPlan: p.workoutPlan ?? base.workoutPlan,
+          nutritionPlan: p.nutritionPlan ? { ...base.nutritionPlan, ...p.nutritionPlan } : base.nutritionPlan,
+          wellnessPlan: p.wellnessPlan ? { ...base.wellnessPlan, ...p.wellnessPlan } : base.wellnessPlan,
+          commitmentPlan: p.commitmentPlan ? { ...base.commitmentPlan, ...p.commitmentPlan } : base.commitmentPlan,
+          measurementPlan: p.measurementPlan ? { ...base.measurementPlan, ...p.measurementPlan } : base.measurementPlan,
+          workouts: p.workouts ?? base.workouts,
+          supplements: p.supplements ?? base.supplements,
+          meals: p.meals ?? base.meals,
+          metrics: p.metrics ?? base.metrics,
+          routine: p.routine ?? base.routine,
+        })
+        markCompleted()
+        setView('dashboard')
+      } catch {
+        /* ملف غير صالح — تجاهل */
+      }
+    }
+    reader.readAsText(file)
+  }
+
+  // تنقّل شريط التطبيق
+  const navigate = (v: AppView) => {
+    if (v === 'setup') openSetup()
+    else setView(v)
+  }
+
+  if (view === 'start') {
+    const ob = loadOnboarding()
+    return (
+      <StartView
+        lang={lang}
+        hasStartedSetup={!ob.completed && (ob.lastStep ?? 0) > 0}
+        onStartSetup={openSetup}
+        onSeeDemo={() => setView('demo')}
+        onImportFile={importFromFile}
+        onChangeLang={changeLang}
+      />
+    )
+  }
+
+  if (view === 'setup') {
+    return <SetupView onClose={closeSetup} initialStep={startStep} />
+  }
+
+  if (view === 'demo') {
+    return <DemoView lang={lang} onNavigate={navigate} onChangeLang={changeLang} onBack={closeDemo} />
   }
 
   return (
-    <div className="min-h-screen bg-ink-950">
-      <Header />
-      <main>
-        <Hero />
-        <Problem />
-        <Solution />
-        <Dashboard />
-        <WorkoutTracker />
-        <Supplements />
-        <Meals />
-        <BodyMetrics />
-        <WeeklyRoutine />
-        <Benefits />
-        <Audience />
-        <Customization onOpenCenter={() => setView('customize')} />
-        <Pricing />
-        <Faq />
-        <FinalCta />
-      </main>
-      <Footer />
-
-      {/* زر عائم لفتح مركز التخصيص */}
-      <button
-        type="button"
-        onClick={() => setView('customize')}
-        className="btn-primary fixed bottom-5 start-5 z-40 shadow-glow"
-        aria-label="افتح مركز التخصيص"
-      >
-        <Icon name="Palette" className="h-4 w-4" />
-        <span className="hidden sm:inline">مركز التخصيص</span>
-      </button>
-    </div>
+    <DashboardView
+      lang={lang}
+      onNavigate={navigate}
+      onChangeLang={changeLang}
+      onOpenSetup={openSetup}
+      showSuccess={showSuccess}
+      onDismissSuccess={dismissSuccess}
+    />
   )
 }

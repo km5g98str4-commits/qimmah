@@ -10,12 +10,12 @@ interface FieldProps {
 export function Field({ label, hint, children }: FieldProps) {
   return (
     <label className="flex flex-col gap-1.5">
-      <span className="text-xs font-bold text-slate-300">{label}</span>
+      <span className="text-xs font-bold text-ink-700">{label}</span>
       {children}
-      {hint && <span className="text-[11px] text-slate-500">{hint}</span>}
+      {hint && <span className="text-[11px] text-ink-400">{hint}</span>}
     </label>
   )
 }
 
 export const inputClass =
-  'w-full rounded-lg border border-white/10 bg-ink-900/70 px-3 py-2 text-sm text-white placeholder:text-slate-500 transition-colors focus:border-brand-500/50 focus:outline-none focus:ring-2 focus:ring-brand-500/30'
+  'w-full rounded-lg border border-line bg-beige px-3 py-2 text-sm text-ink-900 placeholder:text-ink-400 transition-colors focus:border-brand-500/50 focus:outline-none focus:ring-2 focus:ring-brand-500/30'

@@ -24,6 +24,6 @@ export const routineTypeColors: Record<RoutineDay['type'], string> = {
   pull: 'bg-sky-500/15 text-sky-300 border-sky-500/30',
   legs: 'bg-violet-500/15 text-violet-300 border-violet-500/30',
   cardio: 'bg-orange-500/15 text-orange-300 border-orange-500/30',
-  rest: 'bg-ink-500/30 text-slate-400 border-white/10',
+  rest: 'bg-beige text-ink-500 border-line',
   full: 'bg-gold-500/15 text-gold-300 border-gold-500/30',
 }

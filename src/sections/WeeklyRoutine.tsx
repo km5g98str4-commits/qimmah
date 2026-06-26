@@ -8,13 +8,13 @@ export function WeeklyRoutine() {
   const doneCount = weeklyRoutine.filter((d) => d.done).length
 
   return (
-    <section id="routine" className="section bg-ink-900/30">
+    <section id="routine" className="section bg-beige">
       <div className="container-page">
         <SectionHeading {...sectionCopy.routine} />
 
         <div className="mt-12">
           <div className="mb-4 flex items-center justify-between">
-            <p className="text-sm text-slate-400">
+            <p className="text-sm text-ink-500">
               {labels.routine.progressPrefix}{' '}
               <span className="font-bold text-brand-300">{doneCount}</span>{' '}
               {labels.routine.progressMid} {weeklyRoutine.length} {labels.routine.progressSuffix}
@@ -28,7 +28,7 @@ export function WeeklyRoutine() {
                 className={`card flex flex-col p-4 ${d.done ? 'ring-1 ring-brand-500/30' : ''}`}
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-300">{d.day}</span>
+                  <span className="text-xs font-bold text-ink-700">{d.day}</span>
                   {d.done && <Icon name="CheckCircle2" className="h-4 w-4 text-brand-400" />}
                 </div>
                 <span
@@ -36,7 +36,7 @@ export function WeeklyRoutine() {
                 >
                   {routineTypeLabels[d.type]}
                 </span>
-                <p className="mt-3 text-xs leading-relaxed text-slate-400">{d.title}</p>
+                <p className="mt-3 text-xs leading-relaxed text-ink-500">{d.title}</p>
               </div>
             ))}
           </div>
