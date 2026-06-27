@@ -217,6 +217,14 @@ export const defaultProfile: Profile = {
   mealsPerDay: 4,
   nutritionStyle: 'high_protein',
   dislikedFoods: '',
+  muscleFocus: 'balanced',
+  consistency: 'regular',
+  experienceBand: '1to2y',
+  gymAccess: 'full',
+  equipment: [],
+  schedulingStyle: 'flexible',
+  preferredDays: [],
+  remindersOptIn: false,
 }
 
 /** السعرات المستهدفة حسب هدف الملف الشخصي. */
