@@ -36,11 +36,24 @@ function lowerReps(reps: string): string {
   return m ? m[0] : reps
 }
 
-/** تعديل قيمة رقمية نصية بمقدار، مع حد أدنى صفر ودعم الكسور. */
-function adjust(value: string, delta: number): string {
+/** حدود إدخال منطقية لوضع التمرين. */
+const WEIGHT_MAX = 500
+const REPS_MAX = 100
+
+/** يقصر قيمة نصية رقمية ضمن [0, max] (يحفظ الفراغ كما هو للسماح بالمسح). */
+function clampNum(value: string, max: number): string {
+  if (value.trim() === '') return ''
+  const m = String(value).match(/-?[\d.]+/)
+  if (!m) return ''
+  const n = Math.min(max, Math.max(0, Number(m[0])))
+  return `${Math.round(n * 100) / 100}`
+}
+
+/** تعديل قيمة رقمية نصية بمقدار، ضمن [0, max] ودعم الكسور. */
+function adjust(value: string, delta: number, max: number): string {
   const m = String(value).match(/-?[\d.]+/)
   const n = m ? Number(m[0]) : 0
-  const next = Math.max(0, Math.round((n + delta) * 100) / 100)
+  const next = Math.min(max, Math.max(0, Math.round((n + delta) * 100) / 100))
   return `${next}`
 }
 
@@ -327,8 +340,8 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
                 <Stepper
                   label={t.weightKg}
                   value={st.weightKg}
-                  onChange={(v) => setSet(i, { weightKg: v })}
-                  onStep={(d) => setSet(i, { weightKg: adjust(st.weightKg, d) })}
+                  onChange={(v) => setSet(i, { weightKg: clampNum(v, WEIGHT_MAX) })}
+                  onStep={(d) => setSet(i, { weightKg: adjust(st.weightKg, d, WEIGHT_MAX) })}
                   step={2.5}
                   mode="decimal"
                 />
@@ -336,8 +349,8 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
                   label={t.repsDone}
                   value={st.actualReps}
                   placeholder={lowerReps(pe.reps)}
-                  onChange={(v) => setSet(i, { actualReps: v })}
-                  onStep={(d) => setSet(i, { actualReps: adjust(st.actualReps, d) })}
+                  onChange={(v) => setSet(i, { actualReps: clampNum(v, REPS_MAX) })}
+                  onStep={(d) => setSet(i, { actualReps: adjust(st.actualReps, d, REPS_MAX) })}
                   step={1}
                   mode="numeric"
                 />

@@ -1,4 +1,4 @@
-import { AppNav, type AppView } from '@/components/AppNav'
+import { AppNav } from '@/components/AppNav'
 import { Footer } from '@/components/Footer'
 import { Icon } from '@/components/Icon'
 import { DailySummary } from '@/sections/DailySummary'
@@ -21,50 +21,49 @@ import { getStrings } from '@/config/strings'
 
 interface DemoViewProps {
   lang: Lang
-  onNavigate: (view: AppView) => void
-  onBack: () => void
+  onExit: () => void
 }
 
 /** عرض النموذج — لوحة تجريبية ببيانات افتراضية، بلا أي كتابة في تخزين المستخدم. */
-export function DemoView({ lang, onNavigate, onBack }: DemoViewProps) {
+export function DemoView({ lang, onExit }: DemoViewProps) {
   const t = getStrings(lang)
 
   return (
     <DemoCustomizationProvider>
       <DemoModeProvider>
       <div className="min-h-screen bg-page">
-        <AppNav current="demo" lang={lang} onNavigate={onNavigate} />
+        <AppNav lang={lang} current="demo" onHome={onExit} badge={{ kind: 'demo' }} />
 
-        {/* شريط تنويه النموذج */}
-        <div className="border-b border-line bg-beige">
+        {/* شريط تنويه النموذج — ظاهر دائمًا */}
+        <div className="sticky top-14 z-30 border-b border-primary-soft bg-primary-soft">
           <div className="container-page flex flex-wrap items-center justify-between gap-3 py-3">
             <div className="flex items-center gap-2.5">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1 text-[11px] font-black text-white">
                 <Icon name="Sparkles" className="h-3 w-3" />
                 {t.demo.badge}
               </span>
-              <p className="text-sm text-ink-700">{t.demo.body}</p>
+              <p className="text-sm font-bold text-ink-700">{t.demo.body}</p>
             </div>
-            <button type="button" onClick={onBack} className="btn-ghost px-4 py-2 text-xs">
+            <button type="button" onClick={onExit} className="btn-primary px-4 py-2 text-xs">
               <Icon name="ChevronLeft" className="h-4 w-4 rtl:rotate-180" />
-              {t.demo.back}
+              الخروج من النموذج
             </button>
           </div>
         </div>
 
         <main>
-          <DailySummary />
           <Today lang={lang} />
-          <CurrentGoal />
-          <ProfileData />
-          <MyTargets />
-          <WeeklyRoutine />
+          <DailySummary />
+          <NutritionPlanSection lang={lang} />
           <MuscleCoverageSection lang={lang} />
           <WorkoutPlanSection lang={lang} />
-          <NutritionPlanSection lang={lang} />
+          <WeeklyRoutine />
           <WellnessSection lang={lang} />
           <CommitmentsSection lang={lang} />
           <ProgressSection lang={lang} />
+          <CurrentGoal />
+          <ProfileData />
+          <MyTargets />
           <HealthNotice />
         </main>
 

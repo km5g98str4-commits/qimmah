@@ -84,7 +84,7 @@ export function Today({ lang, onStartWorkout }: TodayProps) {
               يومك
             </span>
             <h2 className="mt-3 text-2xl font-black text-ink-900 sm:text-3xl">
-              يومك، {userName} 👋
+              {userName ? `يومك، ${userName} 👋` : 'يومك 👋'}
             </h2>
             <p className="mt-1 text-sm text-ink-500">
               علّم كل شي تخلّصه — وتابع التزامك خطوة بخطوة.

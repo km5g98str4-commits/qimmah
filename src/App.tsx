@@ -1,13 +1,16 @@
 import { useCallback, useEffect, useState } from 'react'
 import { StartView } from '@/views/StartView'
+import { LoginView } from '@/views/LoginView'
 import { SetupView } from '@/views/SetupView'
 import { DashboardView } from '@/views/DashboardView'
 import { DemoView } from '@/views/DemoView'
 import { PrivacyView } from '@/views/PrivacyView'
 import { TermsView } from '@/views/TermsView'
 import { SettingsView } from '@/views/SettingsView'
-import type { AppView } from '@/components/AppNav'
+import { Icon } from '@/components/Icon'
 import { useCustomization } from '@/lib/customizationContext'
+import { useAuth } from '@/lib/authContext'
+import { disableGuest, enableGuest, isGuest } from '@/lib/appMode'
 import { type Customization, getDefaultCustomization } from '@/lib/customization'
 import { loadOnboarding, markCompleted } from '@/lib/onboarding'
 import { applyLanguage } from '@/lib/appPreferences'
@@ -16,28 +19,30 @@ import { type AppRoute, routeFromHash, setHashRoute } from '@/lib/appRoutes'
 // اللغة مثبّتة على العربية حاليًا (الإنجليزية مخفية حتى اكتمال الترجمة).
 const LANG = 'ar' as const
 
-/** يطبّق حراسة الإعداد: #/dashboard لإعداد غير مكتمل → الإعداد إن بدأ، وإلا البداية. */
-function guardRoute(route: AppRoute): AppRoute {
-  const ob = loadOnboarding()
-  if (route === 'dashboard' && !ob.completed) return (ob.lastStep ?? 0) > 0 ? 'setup' : 'start'
-  return route
+const PROTECTED_ROUTES: AppRoute[] = ['setup', 'dashboard', 'settings']
+
+/** شاشة تحميل بسيطة أثناء التحقق من جلسة المصادقة. */
+function Splash() {
+  return (
+    <div className="grid min-h-screen place-items-center bg-ink-900">
+      <span className="grid h-14 w-14 animate-float place-items-center rounded-2xl bg-primary text-white shadow-glow">
+        <Icon name="Dumbbell" className="h-7 w-7" strokeWidth={2.5} />
+      </span>
+    </div>
+  )
 }
 
-function initialRoute(): AppRoute {
-  const r = routeFromHash()
-  if (r) return guardRoute(r)
-  return loadOnboarding().completed ? 'dashboard' : 'start'
-}
-
-/** قشرة تطبيق قِمّة v2 — توجيه بسيط عبر hash (بلا مكتبات خارجية). */
+/** قشرة تطبيق قِمّة — توجيه عبر hash مع حراسة حساب (سحابي/ضيف) وعزل النموذج. */
 export default function App() {
+  const auth = useAuth()
   const { applyCustomization } = useCustomization()
 
   useEffect(() => {
     applyLanguage(LANG)
   }, [])
 
-  const [view, setView] = useState<AppRoute>(() => initialRoute())
+  // null = لم يُحسم بعد (ننتظر انتهاء تحميل المصادقة لاختيار وجهة افتراضية).
+  const [route, setRouteState] = useState<AppRoute | null>(() => routeFromHash())
   const [startStep, setStartStep] = useState<number>(() => loadOnboarding().lastStep ?? 0)
   const [setupMode, setSetupMode] = useState<'onboarding' | 'advanced'>(() =>
     loadOnboarding().completed ? 'advanced' : 'onboarding',
@@ -45,37 +50,90 @@ export default function App() {
   const [showSuccess, setShowSuccess] = useState(false)
   const dismissSuccess = useCallback(() => setShowSuccess(false), [])
 
-  // view → hash
-  useEffect(() => {
-    setHashRoute(view)
-  }, [view])
+  const hasAccount = !!auth.user || isGuest()
 
-  // hash → view (تنقّل المتصفح / تحديث الصفحة) مع الحراسة
+  // الحراسة: المسارات المحمية تتطلّب حسابًا (سحابيًا أو ضيفًا)، وإلا → البداية.
+  const guard = useCallback(
+    (r: AppRoute): AppRoute => {
+      if (PROTECTED_ROUTES.includes(r) && !hasAccount) return 'start'
+      return r
+    },
+    [hasAccount],
+  )
+
+  /** تنقّل صريح داخل التطبيق (يتجاوز حراسة الحساب لأنّ الانتقال مقصود). */
+  const setRoute = useCallback((r: AppRoute) => {
+    setRouteState(r)
+    setHashRoute(r)
+  }, [])
+
+  // مزامنة route → hash
+  useEffect(() => {
+    if (route) setHashRoute(route)
+  }, [route])
+
+  // hash → route (تنقّل المتصفح) مع الحراسة
   useEffect(() => {
     const onHash = () => {
       const r = routeFromHash()
-      if (r) setView(guardRoute(r))
+      if (r) setRouteState(guard(r))
     }
     window.addEventListener('hashchange', onHash)
     return () => window.removeEventListener('hashchange', onHash)
-  }, [])
+  }, [guard])
 
-  const openSetup = () => {
+  // بعد انتهاء تحميل المصادقة: احسم الوجهة الافتراضية أو أعد تطبيق الحراسة.
+  useEffect(() => {
+    if (auth.loading) return
+    setRouteState((prev) => {
+      if (prev === null) {
+        const completed = loadOnboarding().completed
+        if (hasAccount && completed) return 'dashboard'
+        if (hasAccount) return 'setup'
+        return 'start'
+      }
+      return guard(prev)
+    })
+  }, [auth.loading, hasAccount, guard])
+
+  const openSetup = useCallback(() => {
     const ob = loadOnboarding()
     setSetupMode(ob.completed ? 'advanced' : 'onboarding')
     setStartStep(ob.completed ? 0 : (ob.lastStep ?? 0))
-    setView('setup')
-  }
+    setRoute('setup')
+  }, [setRoute])
 
   const closeSetup = (completed?: boolean) => {
     const done = completed || loadOnboarding().completed
-    setView(done ? 'dashboard' : 'start')
+    setRoute(done ? 'dashboard' : 'start')
     if (completed) setShowSuccess(true)
   }
 
-  const closeDemo = () => setView(loadOnboarding().completed ? 'dashboard' : 'start')
+  const goHome = useCallback(() => {
+    setRoute(loadOnboarding().completed ? 'dashboard' : 'setup')
+  }, [setRoute])
 
-  // استيراد نسخة سابقة من ملف على الجهاز
+  // اختيار «المتابعة كضيف» — يفعّل وضع الضيف ثم يدخل الإعداد أو الرئيسية.
+  const continueAsGuest = useCallback(() => {
+    enableGuest()
+    setRoute(loadOnboarding().completed ? 'dashboard' : 'setup')
+  }, [setRoute])
+
+  // نجاح المصادقة السحابية.
+  const onAuthed = useCallback(() => {
+    setRoute(loadOnboarding().completed ? 'dashboard' : 'setup')
+  }, [setRoute])
+
+  // تسجيل الخروج (من الإعدادات) — يرجع للبداية بلا تسريب.
+  const logout = useCallback(async () => {
+    await auth.signOut()
+    disableGuest()
+    setRoute('start')
+  }, [auth, setRoute])
+
+  const closeDemo = () => setRoute(hasAccount && loadOnboarding().completed ? 'dashboard' : 'start')
+
+  // استيراد نسخة سابقة من ملف على الجهاز (يدخل المستخدم كضيف ويفتح الرئيسية).
   const importFromFile = (file: File) => {
     const reader = new FileReader()
     reader.onload = () => {
@@ -101,7 +159,8 @@ export default function App() {
           routine: p.routine ?? base.routine,
         })
         markCompleted()
-        setView('dashboard')
+        enableGuest()
+        setRoute('dashboard')
       } catch {
         /* ملف غير صالح — تجاهل */
       }
@@ -109,50 +168,60 @@ export default function App() {
     reader.readAsText(file)
   }
 
-  // تنقّل شريط التطبيق
-  const navigate = (v: AppView) => {
-    if (v === 'setup') openSetup()
-    else setView(v)
-  }
+  // أثناء تحميل المصادقة أو قبل حسم الوجهة → شاشة تحميل.
+  if (auth.loading || route === null) return <Splash />
 
-  if (view === 'start') {
-    const ob = loadOnboarding()
+  if (route === 'start') {
     return (
       <StartView
         lang={LANG}
-        hasStartedSetup={!ob.completed && (ob.lastStep ?? 0) > 0}
-        onStartSetup={openSetup}
-        onSeeDemo={() => setView('demo')}
+        onLogin={() => setRoute('login')}
+        onGuest={continueAsGuest}
+        onSeeDemo={() => setRoute('demo')}
         onImportFile={importFromFile}
       />
     )
   }
 
-  if (view === 'setup') {
+  if (route === 'login') {
+    return (
+      <LoginView
+        lang={LANG}
+        onAuthed={onAuthed}
+        onGuest={continueAsGuest}
+        onBack={() => setRoute('start')}
+      />
+    )
+  }
+
+  if (route === 'setup') {
     return <SetupView onClose={closeSetup} initialStep={startStep} mode={setupMode} />
   }
 
-  if (view === 'demo') {
-    return <DemoView lang={LANG} onNavigate={navigate} onBack={closeDemo} />
+  if (route === 'demo') {
+    return <DemoView lang={LANG} onExit={closeDemo} />
   }
 
-  const backToDashboard = () => setView(loadOnboarding().completed ? 'dashboard' : 'start')
+  const backToHome = () => setRoute(loadOnboarding().completed ? 'dashboard' : 'start')
 
-  if (view === 'privacy') {
-    return <PrivacyView onBack={backToDashboard} />
+  if (route === 'privacy') {
+    return <PrivacyView onBack={backToHome} />
   }
 
-  if (view === 'terms') {
-    return <TermsView onBack={backToDashboard} />
+  if (route === 'terms') {
+    return <TermsView onBack={backToHome} />
   }
 
-  if (view === 'settings') {
+  if (route === 'settings') {
     return (
       <SettingsView
-        onBack={backToDashboard}
+        lang={LANG}
+        onBack={() => setRoute('dashboard')}
         onOpenSetup={openSetup}
-        onOpenPrivacy={() => setView('privacy')}
-        onOpenTerms={() => setView('terms')}
+        onOpenPrivacy={() => setRoute('privacy')}
+        onOpenTerms={() => setRoute('terms')}
+        onLogin={() => setRoute('login')}
+        onLogout={logout}
       />
     )
   }
@@ -160,9 +229,9 @@ export default function App() {
   return (
     <DashboardView
       lang={LANG}
-      onNavigate={navigate}
+      onHome={goHome}
       onOpenSetup={openSetup}
-      onOpenSettings={() => setView('settings')}
+      onOpenSettings={() => setRoute('settings')}
       showSuccess={showSuccess}
       onDismissSuccess={dismissSuccess}
     />

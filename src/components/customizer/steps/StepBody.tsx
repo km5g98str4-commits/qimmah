@@ -72,16 +72,16 @@ export function StepBody({ ctx }: { ctx: WizardCtx }) {
           </select>
         </Field>
         <Field label="العمر" hint={errFor('age') ?? 'سنة (12–90)'}>
-          <input type="number" min={LIMITS.age.min} max={LIMITS.age.max} className={cn(inputClass, errFor('age') && 'border-danger')} value={p.age} onChange={(e) => set({ age: num(e.target.value) })} />
+          <input type="number" inputMode="numeric" min={LIMITS.age.min} max={LIMITS.age.max} className={cn(inputClass, errFor('age') && 'border-danger')} value={p.age} onChange={(e) => set({ age: num(e.target.value) })} />
         </Field>
         <Field label="الطول" hint={errFor('heightCm') ?? 'سم (100–230)'}>
-          <input type="number" min={LIMITS.heightCm.min} max={LIMITS.heightCm.max} className={cn(inputClass, errFor('heightCm') && 'border-danger')} value={p.heightCm} onChange={(e) => set({ heightCm: num(e.target.value) })} />
+          <input type="number" inputMode="numeric" min={LIMITS.heightCm.min} max={LIMITS.heightCm.max} className={cn(inputClass, errFor('heightCm') && 'border-danger')} value={p.heightCm} onChange={(e) => set({ heightCm: num(e.target.value) })} />
         </Field>
         <Field label="الوزن الحالي" hint={errFor('weightKg') ?? 'كجم (15–250)'}>
-          <input type="number" min={LIMITS.weightKg.min} max={LIMITS.weightKg.max} className={cn(inputClass, errFor('weightKg') && 'border-danger')} value={p.weightKg} onChange={(e) => set({ weightKg: num(e.target.value) })} />
+          <input type="number" inputMode="numeric" min={LIMITS.weightKg.min} max={LIMITS.weightKg.max} className={cn(inputClass, errFor('weightKg') && 'border-danger')} value={p.weightKg} onChange={(e) => set({ weightKg: num(e.target.value) })} />
         </Field>
         <Field label="الوزن الهدف" hint={errFor('targetWeightKg') ?? 'كجم (15–250)'}>
-          <input type="number" min={LIMITS.targetWeightKg.min} max={LIMITS.targetWeightKg.max} className={cn(inputClass, errFor('targetWeightKg') && 'border-danger')} value={p.targetWeightKg} onChange={(e) => set({ targetWeightKg: num(e.target.value) })} />
+          <input type="number" inputMode="numeric" min={LIMITS.targetWeightKg.min} max={LIMITS.targetWeightKg.max} className={cn(inputClass, errFor('targetWeightKg') && 'border-danger')} value={p.targetWeightKg} onChange={(e) => set({ targetWeightKg: num(e.target.value) })} />
         </Field>
         <Field label="مستوى النشاط">
           <select className={inputClass} value={p.activityLevel} onChange={(e) => set({ activityLevel: e.target.value as Profile['activityLevel'] })}>
@@ -94,10 +94,10 @@ export function StepBody({ ctx }: { ctx: WizardCtx }) {
           </select>
         </Field>
         <Field label="أيام التمرين بالأسبوع" hint={errFor('trainingDays') ?? '1–7'}>
-          <input type="number" min={LIMITS.trainingDays.min} max={LIMITS.trainingDays.max} className={cn(inputClass, errFor('trainingDays') && 'border-danger')} value={p.trainingDays} onChange={(e) => set({ trainingDays: num(e.target.value) })} />
+          <input type="number" inputMode="numeric" min={LIMITS.trainingDays.min} max={LIMITS.trainingDays.max} className={cn(inputClass, errFor('trainingDays') && 'border-danger')} value={p.trainingDays} onChange={(e) => set({ trainingDays: num(e.target.value) })} />
         </Field>
         <Field label="مدة التمرين" hint={errFor('workoutDuration') ?? 'دقيقة (20–150)'}>
-          <input type="number" min={LIMITS.workoutDuration.min} max={LIMITS.workoutDuration.max} className={cn(inputClass, errFor('workoutDuration') && 'border-danger')} value={p.workoutDuration} onChange={(e) => set({ workoutDuration: num(e.target.value) })} />
+          <input type="number" inputMode="numeric" min={LIMITS.workoutDuration.min} max={LIMITS.workoutDuration.max} className={cn(inputClass, errFor('workoutDuration') && 'border-danger')} value={p.workoutDuration} onChange={(e) => set({ workoutDuration: num(e.target.value) })} />
         </Field>
         <Field label="مكان التمرين">
           <select className={inputClass} value={p.workoutEnvironment} onChange={(e) => set({ workoutEnvironment: e.target.value as Profile['workoutEnvironment'] })}>

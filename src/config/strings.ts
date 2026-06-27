@@ -6,17 +6,40 @@ import type { Lang } from '@/lib/appPreferences'
 export interface ShellStrings {
   brand: string
   tagline: string
-  nav: { home: string; setup: string; demo: string }
+  nav: { home: string; setup: string; demo: string; settings: string }
   lang: { ar: string; en: string; label: string }
   start: {
     welcome: string
     intro: string
+    positioning: string
+    login: string
+    guest: string
     startSetup: string
     continueSetup: string
     seeDemo: string
     importPrevious: string
     chooseLang: string
     note: string
+  }
+  account: {
+    badgeDemo: string
+    badgeGuest: string
+    badgeCloud: string
+    account: string
+    loginTitle: string
+    loginSubtitle: string
+    email: string
+    password: string
+    login: string
+    createAccount: string
+    logout: string
+    guest: string
+    guestLimit: string
+    cloudDisabled: string
+    cloudOn: string
+    signedInAs: string
+    confirmEmail: string
+    back: string
   }
   demo: { badge: string; title: string; body: string; back: string }
   workout: {
@@ -230,17 +253,40 @@ export interface ShellStrings {
 const ar: ShellStrings = {
   brand: 'قِمّة',
   tagline: 'تطبيقك الشخصي للتمرين والتغذية والمتابعة',
-  nav: { home: 'الرئيسية', setup: 'الإعداد', demo: 'النموذج' },
+  nav: { home: 'الصفحة الرئيسية', setup: 'الإعداد', demo: 'النموذج', settings: 'الإعدادات' },
   lang: { ar: 'العربية', en: 'English', label: 'اللغة' },
   start: {
-    welcome: 'أهلاً بك في قِمّة',
-    intro: 'تمارينك، أكلك، مكملاتك، أدويتك، قياساتك، والتزامك اليومي — كلها في مكان واحد.',
+    welcome: 'قِمّة — نظام كمال الأجسام',
+    intro: 'تمارينك، أوزانك، تغذيتك، وقياساتك — في نظام واحد مبني للاعب كمال الأجسام.',
+    positioning: 'صمّم تقسيمتك، تتبّع كل تمرين ووزن، واحسب سعراتك وبروتينك. نظام شخصي يكبر معك.',
+    login: 'تسجيل الدخول',
+    guest: 'المتابعة كضيف',
     startSetup: 'ابدأ إعداد صفحتي',
     continueSetup: 'أكمل إعداد صفحتي',
-    seeDemo: 'شاهد نموذج جاهز',
+    seeDemo: 'شاهد نموذجًا',
     importPrevious: 'استورد نسخة سابقة',
     chooseLang: 'اختر اللغة',
     note: 'كل شيء محفوظ على جهازك. تقدر تعدل كل شيء لاحقًا.',
+  },
+  account: {
+    badgeDemo: 'نموذج تجريبي',
+    badgeGuest: 'ضيف',
+    badgeCloud: 'حساب سحابي',
+    account: 'حسابي',
+    loginTitle: 'تسجيل الدخول',
+    loginSubtitle: 'سجّل الدخول لمزامنة خطتك عبر أجهزتك، أو تابع كضيف على هذا الجهاز.',
+    email: 'البريد الإلكتروني',
+    password: 'كلمة المرور',
+    login: 'تسجيل الدخول',
+    createAccount: 'إنشاء حساب جديد',
+    logout: 'تسجيل الخروج',
+    guest: 'المتابعة كضيف على هذا الجهاز',
+    guestLimit: 'بيانات الضيف محفوظة على هذا الجهاز فقط.',
+    cloudDisabled: 'تسجيل الدخول السحابي غير مفعّل حاليًا. تقدر تستخدم وضع الضيف على هذا الجهاز.',
+    cloudOn: 'المزامنة السحابية مفعّلة في هذه النسخة.',
+    signedInAs: 'مسجّل الدخول بـ',
+    confirmEmail: 'أرسلنا رابط تأكيد إلى بريدك. فعّل حسابك ثم سجّل الدخول.',
+    back: 'رجوع',
   },
   demo: {
     badge: 'نموذج تجريبي',
@@ -458,17 +504,40 @@ const ar: ShellStrings = {
 const en: ShellStrings = {
   brand: 'Qimmah',
   tagline: 'Your personal fitness journey in one page',
-  nav: { home: 'My Page', setup: 'Setup', demo: 'Demo' },
+  nav: { home: 'Home', setup: 'Setup', demo: 'Demo', settings: 'Settings' },
   lang: { ar: 'العربية', en: 'English', label: 'Language' },
   start: {
-    welcome: 'Welcome to Qimmah',
-    intro: 'Your workouts, food, supplements, medications, measurements, and daily commitments — all in one place.',
+    welcome: 'Qimmah — Bodybuilding OS',
+    intro: 'Your workouts, weights, nutrition, and measurements — in one system built for the bodybuilder.',
+    positioning: 'Design your split, track every set and weight, and dial in calories and protein. A personal system that grows with you.',
+    login: 'Log in',
+    guest: 'Continue as guest',
     startSetup: 'Set up my page',
     continueSetup: 'Continue my setup',
-    seeDemo: 'See a ready sample',
+    seeDemo: 'See a sample',
     importPrevious: 'Import a previous copy',
     chooseLang: 'Choose language',
     note: 'Everything is saved on your device. You can edit anything later.',
+  },
+  account: {
+    badgeDemo: 'Demo',
+    badgeGuest: 'Guest',
+    badgeCloud: 'Cloud',
+    account: 'My account',
+    loginTitle: 'Log in',
+    loginSubtitle: 'Log in to sync your plan across devices, or continue as a guest on this device.',
+    email: 'Email',
+    password: 'Password',
+    login: 'Log in',
+    createAccount: 'Create account',
+    logout: 'Log out',
+    guest: 'Continue as guest on this device',
+    guestLimit: 'Guest data is stored on this device only.',
+    cloudDisabled: 'Cloud login is not enabled. You can use guest mode on this device.',
+    cloudOn: 'Cloud sync is enabled in this build.',
+    signedInAs: 'Signed in as',
+    confirmEmail: 'We sent a confirmation link to your email. Activate your account, then log in.',
+    back: 'Back',
   },
   demo: {
     badge: 'Demo',

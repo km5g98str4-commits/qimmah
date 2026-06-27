@@ -104,6 +104,7 @@ export function DemoCustomizationProvider({ children }: { children: ReactNode })
   return <CustomizationContext.Provider value={value}>{children}</CustomizationContext.Provider>
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useCustomization(): CustomizationContextValue {
   const ctx = useContext(CustomizationContext)
   if (!ctx) throw new Error('useCustomization يجب استخدامه داخل CustomizationProvider')
