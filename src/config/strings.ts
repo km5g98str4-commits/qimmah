@@ -7,6 +7,7 @@ export interface ShellStrings {
   brand: string
   tagline: string
   nav: { home: string; setup: string; demo: string; settings: string }
+  tabs: { home: string; workout: string; nutrition: string; progress: string; profile: string }
   lang: { ar: string; en: string; label: string }
   badge: { guest: string; account: string; demo: string }
   start: {
@@ -19,6 +20,8 @@ export interface ShellStrings {
     chooseLang: string
     note: string
     positioning: string
+    headline: string
+    buildPlan: string
     login: string
     continueGuest: string
     guestNote: string
@@ -203,6 +206,7 @@ const ar: ShellStrings = {
   brand: 'قِمّة',
   tagline: 'تطبيقك الشخصي لكمال الأجسام والتمرين',
   nav: { home: 'الصفحة الرئيسية', setup: 'الإعداد', demo: 'النموذج', settings: 'الإعدادات' },
+  tabs: { home: 'الرئيسية', workout: 'تمرين', nutrition: 'تغذية', progress: 'تقدم', profile: 'حسابي' },
   lang: { ar: 'العربية', en: 'English', label: 'اللغة' },
   badge: { guest: 'ضيف', account: 'حساب', demo: 'نموذج تجريبي' },
   start: {
@@ -215,6 +219,8 @@ const ar: ShellStrings = {
     chooseLang: 'اختر اللغة',
     note: 'بياناتك محفوظة على جهازك. تقدر تعدّل كل شيء لاحقًا.',
     positioning: 'نظام كمال أجسام للرياضي الفرد: تابع أوزانك وتكراراتك وتضخّمك التدريجي يومًا بيوم.',
+    headline: 'خطتك الرياضية الذكية تبدأ من هنا',
+    buildPlan: 'ابدأ بناء خطتي',
     login: 'تسجيل الدخول',
     continueGuest: 'المتابعة كضيف',
     guestNote: 'بيانات الضيف محفوظة على هذا الجهاز فقط.',
@@ -418,6 +424,7 @@ const en: ShellStrings = {
   brand: 'Qimmah',
   tagline: 'Your personal bodybuilding & training app',
   nav: { home: 'Home', setup: 'Setup', demo: 'Demo', settings: 'Settings' },
+  tabs: { home: 'Home', workout: 'Workout', nutrition: 'Nutrition', progress: 'Progress', profile: 'Profile' },
   lang: { ar: 'العربية', en: 'English', label: 'Language' },
   badge: { guest: 'Guest', account: 'Account', demo: 'Demo' },
   start: {
@@ -430,6 +437,8 @@ const en: ShellStrings = {
     chooseLang: 'Choose language',
     note: 'Your data is saved on your device. You can edit anything later.',
     positioning: 'A bodybuilding OS for the individual athlete: track your weights, reps, and progressive overload day by day.',
+    headline: 'Your smart training plan starts here',
+    buildPlan: 'Build my plan',
     login: 'Log in',
     continueGuest: 'Continue as guest',
     guestNote: 'Guest data is stored on this device only.',

@@ -231,7 +231,7 @@ function SettingsGroup({ icon, title, children }: { icon: string; title: string;
     <section className="card p-6">
       <div className="mb-4 flex items-center gap-2.5">
         <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary-soft text-primary-c">
-          <Icon name={icon} className="h-4.5 w-4.5" />
+          <Icon name={icon} className="h-5 w-5" />
         </span>
         <h2 className="text-base font-black text-ink-900">{title}</h2>
       </div>

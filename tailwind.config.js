@@ -12,18 +12,18 @@ export default {
         primary: 'var(--c-primary)',
         accent: 'var(--c-accent)',
 
-        // أسطح الثيم الدافئ الفاتح
-        page: '#FBF5EC',
-        surface: '#FFFFFF',
-        beige: '#F4E9D9',
-        line: '#EADDC8',
+        // أسطح الثيم — قنوات RGB عبر CSS variables لدعم مُعدِّل الشفافية (/opacity)
+        page: 'rgb(var(--c-page) / <alpha-value>)',
+        surface: 'rgb(var(--c-surface) / <alpha-value>)',
+        beige: 'rgb(var(--c-beige) / <alpha-value>)',
+        line: 'rgb(var(--c-line) / <alpha-value>)',
 
-        // مقياس النص (دافئ غامق → فاتح)
+        // مقياس النص — أبيض قوي → رمادي خافت
         ink: {
-          900: '#2B2520', // النص الأساسي
-          700: '#5C5249',
-          500: '#8C8073', // النص الثانوي
-          400: '#B4A795', // نص خافت
+          900: 'rgb(var(--c-ink-900) / <alpha-value>)',
+          700: 'rgb(var(--c-ink-700) / <alpha-value>)',
+          500: 'rgb(var(--c-ink-500) / <alpha-value>)',
+          400: 'rgb(var(--c-ink-400) / <alpha-value>)',
         },
 
         // العلامة — برتقالي دافئ (يُقاد افتراضيًا من --c-primary أيضًا)
@@ -60,9 +60,11 @@ export default {
       },
       backgroundImage: {
         'grid-faint':
-          'linear-gradient(to right, rgba(43,37,32,0.035) 1px, transparent 1px), linear-gradient(to bottom, rgba(43,37,32,0.035) 1px, transparent 1px)',
+          'linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px)',
         'radial-brand':
-          'radial-gradient(60% 50% at 50% 0%, rgba(242,106,33,0.12) 0%, rgba(251,245,236,0) 70%)',
+          'radial-gradient(60% 50% at 50% 0%, rgba(242,106,33,0.22) 0%, rgba(242,106,33,0) 70%)',
+        'app-hero':
+          'radial-gradient(80% 60% at 50% 0%, rgba(242,106,33,0.28) 0%, rgba(242,106,33,0) 60%), radial-gradient(70% 50% at 80% 100%, rgba(224,148,31,0.18) 0%, rgba(224,148,31,0) 60%)',
       },
       keyframes: {
         'fade-up': {

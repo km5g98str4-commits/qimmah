@@ -2,9 +2,37 @@ import { useEffect, useState } from 'react'
 
 // توجيه بسيط عبر hash بدون أي مكتبة خارجية.
 
-export type AppRoute = 'start' | 'login' | 'setup' | 'dashboard' | 'demo' | 'settings' | 'privacy' | 'terms'
+export type AppRoute =
+  | 'start'
+  | 'login'
+  | 'setup'
+  | 'dashboard'
+  | 'workout'
+  | 'nutrition'
+  | 'progress'
+  | 'profile'
+  | 'demo'
+  | 'settings'
+  | 'privacy'
+  | 'terms'
 
-const ROUTES: AppRoute[] = ['start', 'login', 'setup', 'dashboard', 'demo', 'settings', 'privacy', 'terms']
+const ROUTES: AppRoute[] = [
+  'start',
+  'login',
+  'setup',
+  'dashboard',
+  'workout',
+  'nutrition',
+  'progress',
+  'profile',
+  'demo',
+  'settings',
+  'privacy',
+  'terms',
+]
+
+/** التبويبات الرئيسية الخمسة في الشريط السفلي (كلها تتطلّب إعدادًا مكتملًا). */
+export const MAIN_TABS: AppRoute[] = ['dashboard', 'workout', 'nutrition', 'progress', 'profile']
 
 export function routeFromHash(): AppRoute | null {
   if (typeof window === 'undefined') return null
