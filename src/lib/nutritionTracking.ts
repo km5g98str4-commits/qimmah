@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { getDayStamp } from './today'
 import { useIsDemo } from './demoMode'
+import { saveNutritionLog, saveWaterLog } from './historyStore'
 
 // تتبّع التغذية اليومي — وجبات منجزة + كمية الماء، يُصفّر مع تغيّر اليوم.
 
@@ -43,7 +44,11 @@ export function useNutritionToday() {
   const demo = useIsDemo()
   const [state, setState] = useState<NutritionTodayState>(() => (demo ? fresh() : loadNutritionToday()))
   const persist = (s: NutritionTodayState) => {
-    if (!demo) saveNutritionToday(s)
+    if (demo) return
+    saveNutritionToday(s)
+    // عكس الحالة في المتجر التاريخي الدائم (لا يُصفّر مع تغيّر اليوم).
+    saveNutritionLog(s.date, { doneMeals: s.doneMeals, waterMl: s.waterMl })
+    saveWaterLog(s.date, s.waterMl)
   }
 
   useEffect(() => {

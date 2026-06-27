@@ -1,6 +1,8 @@
+import { useMemo } from 'react'
 import { Icon } from '@/components/Icon'
 import { useCustomization } from '@/lib/customizationContext'
 import { goalTypeLabel, targetCaloriesFor } from '@/lib/calculators'
+import { currentWeekSummary } from '@/lib/streaks'
 
 /** ملخّص يومي/ترحيب أعلى الرئيسية. */
 export function DailySummary() {
@@ -9,6 +11,9 @@ export function DailySummary() {
   const t = customization.targets
   const name = customization.identity.userName
   const calories = targetCaloriesFor(p.goal, t)
+
+  // سلسلة وملخّص الأسبوع من السجلّ الدائم (لا من حالة اليوم المؤقتة).
+  const week = useMemo(() => currentWeekSummary(), [])
 
   const cards = [
     { icon: 'Target', label: 'الهدف', value: goalTypeLabel(p.goalType) },
@@ -38,6 +43,22 @@ export function DailySummary() {
                 <p className="text-lg font-black text-ink-900">{c.value}</p>
               </div>
             ))}
+          </div>
+
+          {/* سلسلة وملخّص الأسبوع — من السجلّ الدائم */}
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-page px-3 py-1.5 text-xs font-bold text-ink-700">
+              <Icon name="Flame" className="h-3.5 w-3.5 text-primary-c" />
+              سلسلة التمرين: {week.currentStreak} يوم
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-page px-3 py-1.5 text-xs font-bold text-ink-700">
+              <Icon name="CheckCircle2" className="h-3.5 w-3.5 text-primary-c" />
+              هذا الأسبوع: {week.workoutDays}/7 تمارين
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-page px-3 py-1.5 text-xs font-bold text-ink-700">
+              <Icon name="Salad" className="h-3.5 w-3.5 text-primary-c" />
+              التزام التغذية: {week.nutritionDays}/7
+            </span>
           </div>
         </div>
       </div>
