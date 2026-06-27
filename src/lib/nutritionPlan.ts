@@ -2,7 +2,7 @@ import type { MealIngredient, MealType, NutritionPlan, PlanMeal } from '@/types/
 import type { Targets, CalorieGoal } from '@/types/profile'
 import type { Lang } from '@/lib/appPreferences'
 import { getIngredient } from '@/data/mealIngredients'
-import { getMealTemplate } from '@/data/mealTemplates'
+import { getMealTemplate, mealTemplates } from '@/data/mealTemplates'
 import { targetCaloriesFor } from '@/lib/calculators'
 
 const round = (n: number) => Math.round(n)
@@ -98,6 +98,33 @@ export function planTotals(meals: PlanMeal[]): Macros {
     }),
     { calories: 0, protein: 0, carbs: 0, fat: 0 },
   )
+}
+
+/**
+ * بدائل وجبة بسعرات/بروتين متقاربة — فلتر بسيط من قوالب الوجبات.
+ * النطاق التقريبي: ±25% للسعرات و±30غ للبروتين، مع تفضيل نفس نوع الوجبة.
+ */
+export function mealAlternatives(meal: PlanMeal): PlanMeal[] {
+  const candidates = mealTemplates
+    .map((tpl) => createPlanMealFromTemplate(tpl.id, meal.order))
+    .filter((alt) => alt.nameAr !== meal.nameAr) // استبعد نفس الوجبة بالاسم
+  const calLow = meal.calories * 0.75
+  const calHigh = meal.calories * 1.25
+  const within = candidates.filter(
+    (alt) =>
+      alt.calories >= calLow &&
+      alt.calories <= calHigh &&
+      Math.abs(alt.protein - meal.protein) <= 30,
+  )
+  // رتّب: نفس نوع الوجبة أولًا، ثم الأقرب بالسعرات
+  return within
+    .sort((a, b) => {
+      const at = a.mealType === meal.mealType ? 0 : 1
+      const bt = b.mealType === meal.mealType ? 0 : 1
+      if (at !== bt) return at - bt
+      return Math.abs(a.calories - meal.calories) - Math.abs(b.calories - meal.calories)
+    })
+    .slice(0, 4)
 }
 
 export function ingredientDisplayName(nameAr: string, nameEn: string, lang: Lang): string {

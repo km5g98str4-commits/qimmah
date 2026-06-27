@@ -29,6 +29,7 @@ interface DashboardViewProps {
   lang: Lang
   onNavigate: (view: AppView) => void
   onOpenSetup: () => void
+  onOpenSettings: () => void
   showSuccess: boolean
   onDismissSuccess: () => void
 }
@@ -38,6 +39,7 @@ export function DashboardView({
   lang,
   onNavigate,
   onOpenSetup,
+  onOpenSettings,
   showSuccess,
   onDismissSuccess,
 }: DashboardViewProps) {
@@ -95,16 +97,27 @@ export function DashboardView({
 
       <Footer />
 
-      {/* زر عائم — تعديل خطتي */}
-      <button
-        type="button"
-        onClick={onOpenSetup}
-        className="btn-primary fixed bottom-5 start-5 z-40 shadow-glow"
-        aria-label="تعديل خطتي"
-      >
-        <Icon name="Palette" className="h-4 w-4" />
-        <span className="hidden sm:inline">تعديل خطتي</span>
-      </button>
+      {/* أزرار عائمة — تعديل خطتي + الإعدادات */}
+      <div className="fixed bottom-5 start-5 z-40 flex gap-2">
+        <button
+          type="button"
+          onClick={onOpenSetup}
+          className="btn-primary shadow-glow"
+          aria-label="تعديل خطتي"
+        >
+          <Icon name="Palette" className="h-4 w-4" />
+          <span className="hidden sm:inline">تعديل خطتي</span>
+        </button>
+        <button
+          type="button"
+          onClick={onOpenSettings}
+          className="btn-ghost bg-surface shadow-glow"
+          aria-label="الإعدادات"
+        >
+          <Icon name="Settings" className="h-4 w-4" />
+          <span className="hidden sm:inline">الإعدادات</span>
+        </button>
+      </div>
 
       {/* وضع التمرين */}
       {workoutOpen && planDay && (

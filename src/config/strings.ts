@@ -79,8 +79,30 @@ export interface ShellStrings {
     addWater250: string
     addWater500: string
     resetWater: string
+    customWater: string
+    customWaterAdd: string
+    customWaterPlaceholder: string
     search: string
     allTypes: string
+    logMeal: string
+    quickAdd: string
+    eaten: string
+    remaining: string
+    remainingCalories: string
+    remainingProtein: string
+    addToLog: string
+    customQuickAdd: string
+    note: string
+    optional: string
+    searchFood: string
+    servingsCount: string
+    todayLog: string
+    emptyLog: string
+    removeEntry: string
+    swapMeal: string
+    swapMealTitle: string
+    noAlternatives: string
+    close: string
   }
   wellness: {
     title: string
@@ -107,6 +129,7 @@ export interface ShellStrings {
     caution: string
     purpose: string
     medSafety: string
+    suppSafety: string
     empty: string
     search: string
     allCategories: string
@@ -233,8 +256,30 @@ const ar: ShellStrings = {
     addWater250: '+250 مل',
     addWater500: '+500 مل',
     resetWater: 'تصفير الماء',
+    customWater: 'أضف كمية',
+    customWaterAdd: 'أضف',
+    customWaterPlaceholder: 'كمية بالمل (مثال: 350)',
     search: 'ابحث…',
     allTypes: 'كل الأنواع',
+    logMeal: '+ سجّل وجبة',
+    quickAdd: 'أضف سعرات وبروتين سريعًا',
+    eaten: 'مأكول',
+    remaining: 'المتبقّي',
+    remainingCalories: 'سعرات متبقّية',
+    remainingProtein: 'بروتين متبقّي',
+    addToLog: 'أضف للسجل',
+    customQuickAdd: 'إضافة سريعة مخصّصة',
+    note: 'ملاحظة',
+    optional: 'اختياري',
+    searchFood: 'ابحث عن طعام…',
+    servingsCount: 'عدد الحصص',
+    todayLog: 'سجل اليوم',
+    emptyLog: 'لا يوجد شيء مسجّل اليوم بعد.',
+    removeEntry: 'حذف',
+    swapMeal: 'بدّل الوجبة',
+    swapMealTitle: 'بدائل بسعرات وبروتين متقارب',
+    noAlternatives: 'لا توجد بدائل متقاربة حاليًا.',
+    close: 'إغلاق',
   },
   wellness: {
     title: 'المكملات والأدوية',
@@ -262,6 +307,7 @@ const ar: ShellStrings = {
     purpose: 'الغرض من المتابعة',
     medSafety:
       'قِمّة يساعدك على تنظيم ومتابعة أدويتك فقط. لا تبدأ أو توقف أو تغيّر جرعة أي دواء بدون استشارة الطبيب أو الصيدلي.',
+    suppSafety: 'قِمّة يساعدك على تتبّع المكملات فقط، ولا يوصي بجرعات علاجية.',
     empty: 'فعّل المكملات والأدوية من الإعداد إذا تبغى تتابعها.',
     search: 'ابحث…',
     allCategories: 'كل الفئات',
@@ -388,8 +434,30 @@ const en: ShellStrings = {
     addWater250: '+250 ml',
     addWater500: '+500 ml',
     resetWater: 'Reset water',
+    customWater: 'Add amount',
+    customWaterAdd: 'Add',
+    customWaterPlaceholder: 'Amount in ml (e.g. 350)',
     search: 'Search…',
     allTypes: 'All types',
+    logMeal: '+ Log meal',
+    quickAdd: 'Quickly add calories & protein',
+    eaten: 'Eaten',
+    remaining: 'Remaining',
+    remainingCalories: 'Calories left',
+    remainingProtein: 'Protein left',
+    addToLog: 'Add to log',
+    customQuickAdd: 'Custom quick add',
+    note: 'Note',
+    optional: 'optional',
+    searchFood: 'Search food…',
+    servingsCount: 'Servings',
+    todayLog: "Today's log",
+    emptyLog: 'Nothing logged today yet.',
+    removeEntry: 'Remove',
+    swapMeal: 'Swap meal',
+    swapMealTitle: 'Alternatives with similar calories & protein',
+    noAlternatives: 'No close alternatives right now.',
+    close: 'Close',
   },
   wellness: {
     title: 'Supplements & Medications',
@@ -417,6 +485,7 @@ const en: ShellStrings = {
     purpose: 'Tracking purpose',
     medSafety:
       'Qimmah helps you organize and track medications only. Do not start, stop, or change any medication dose without consulting a doctor or pharmacist.',
+    suppSafety: 'Qimmah helps you track supplements only and does not recommend therapeutic doses.',
     empty: 'Enable supplements & medications in Setup to track them.',
     search: 'Search…',
     allCategories: 'All categories',
