@@ -6,8 +6,9 @@ import type { Lang } from '@/lib/appPreferences'
 export interface ShellStrings {
   brand: string
   tagline: string
-  nav: { home: string; setup: string; demo: string }
+  nav: { home: string; setup: string; demo: string; settings: string }
   lang: { ar: string; en: string; label: string }
+  badge: { guest: string; account: string; demo: string }
   start: {
     welcome: string
     intro: string
@@ -17,6 +18,52 @@ export interface ShellStrings {
     importPrevious: string
     chooseLang: string
     note: string
+    positioning: string
+    login: string
+    continueGuest: string
+    guestNote: string
+  }
+  auth: {
+    title: string
+    subtitle: string
+    email: string
+    password: string
+    login: string
+    createAccount: string
+    logout: string
+    continueGuest: string
+    disabledTitle: string
+    disabledBody: string
+    guestBadge: string
+    guestNote: string
+    accountNote: string
+    cloudNote: string
+    back: string
+  }
+  settings: {
+    title: string
+    groupAccount: string
+    groupData: string
+    groupPlan: string
+    groupPrivacy: string
+    export: string
+    import: string
+    reset: string
+    resetConfirm: string
+    editPlan: string
+    regenerate: string
+    regenerateConfirm: string
+    privacyLink: string
+    termsLink: string
+    healthDisclaimer: string
+    importConfirm: string
+  }
+  legal: {
+    privacyTitle: string
+    termsTitle: string
+    back: string
+    privacyBody: string[]
+    termsBody: string[]
   }
   demo: { badge: string; title: string; body: string; back: string }
   workout: {
@@ -154,18 +201,78 @@ export interface ShellStrings {
 
 const ar: ShellStrings = {
   brand: 'قِمّة',
-  tagline: 'تطبيقك الشخصي للتمرين والتغذية والمتابعة',
-  nav: { home: 'الرئيسية', setup: 'الإعداد', demo: 'النموذج' },
+  tagline: 'تطبيقك الشخصي لكمال الأجسام والتمرين',
+  nav: { home: 'الصفحة الرئيسية', setup: 'الإعداد', demo: 'النموذج', settings: 'الإعدادات' },
   lang: { ar: 'العربية', en: 'English', label: 'اللغة' },
+  badge: { guest: 'ضيف', account: 'حساب', demo: 'نموذج تجريبي' },
   start: {
     welcome: 'أهلاً بك في قِمّة',
-    intro: 'تمارينك، أكلك، مكملاتك، أدويتك، قياساتك، والتزامك اليومي — كلها في مكان واحد.',
+    intro: 'تمارينك، أوزانك، التضخيم التدريجي، تغذيتك، وقياساتك — كلها في مكان واحد.',
     startSetup: 'ابدأ إعداد صفحتي',
     continueSetup: 'أكمل إعداد صفحتي',
-    seeDemo: 'شاهد نموذج جاهز',
+    seeDemo: 'شاهد نموذجًا',
     importPrevious: 'استورد نسخة سابقة',
     chooseLang: 'اختر اللغة',
-    note: 'كل شيء محفوظ على جهازك. تقدر تعدل كل شيء لاحقًا.',
+    note: 'بياناتك محفوظة على جهازك. تقدر تعدّل كل شيء لاحقًا.',
+    positioning: 'نظام كمال أجسام للرياضي الفرد: تابع أوزانك وتكراراتك وتضخّمك التدريجي يومًا بيوم.',
+    login: 'تسجيل الدخول',
+    continueGuest: 'المتابعة كضيف',
+    guestNote: 'بيانات الضيف محفوظة على هذا الجهاز فقط.',
+  },
+  auth: {
+    title: 'تسجيل الدخول',
+    subtitle: 'سجّل الدخول لحفظ بياناتك على حسابك السحابي والوصول إليها من أي جهاز.',
+    email: 'البريد الإلكتروني',
+    password: 'كلمة المرور',
+    login: 'تسجيل الدخول',
+    createAccount: 'إنشاء حساب جديد',
+    logout: 'تسجيل الخروج',
+    continueGuest: 'المتابعة كضيف',
+    disabledTitle: 'تسجيل الدخول السحابي غير مفعّل حاليًا',
+    disabledBody: 'تقدر تستخدم وضع الضيف على هذا الجهاز.',
+    guestBadge: 'ضيف',
+    guestNote: 'بيانات الضيف محفوظة على هذا الجهاز فقط.',
+    accountNote: 'أنت مسجّل الدخول. بياناتك تُزامَن مع حسابك السحابي.',
+    cloudNote: 'بياناتك محفوظة على هذا الجهاز وعلى حسابك السحابي.',
+    back: 'رجوع',
+  },
+  settings: {
+    title: 'الإعدادات',
+    groupAccount: 'الحساب',
+    groupData: 'البيانات',
+    groupPlan: 'خطتي',
+    groupPrivacy: 'الخصوصية والثقة',
+    export: 'تصدير نسخة احتياطية',
+    import: 'استيراد نسخة',
+    reset: 'إعادة ضبط البيانات',
+    resetConfirm:
+      'سيتم حذف كل بيانات قِمّة من هذا المتصفح نهائيًا (الإعداد، الخطة، المتابعات، السجلّات). لا يمكن التراجع. هل أنت متأكد؟',
+    editPlan: 'تعديل خطتي',
+    regenerate: 'إعادة توليد الخطة',
+    regenerateConfirm:
+      'سيُعاد توليد خطة التمرين والتغذية من بياناتك الحالية، وستُستبدل خطتك الحالية. هل تريد المتابعة؟',
+    privacyLink: 'سياسة الخصوصية',
+    termsLink: 'شروط الاستخدام',
+    healthDisclaimer:
+      'قِمّة أداة تنظيم ومتابعة شخصية، وليست بديلًا عن الاستشارة الطبية. لا تبدأ أو توقف أي دواء أو نظام بدون مختص.',
+    importConfirm: 'سيستبدل الاستيراد خطّتك وسجلّك الحالي بمحتوى الملف. هل تريد المتابعة؟',
+  },
+  legal: {
+    privacyTitle: 'سياسة الخصوصية',
+    termsTitle: 'شروط الاستخدام',
+    back: 'رجوع',
+    privacyBody: [
+      'قِمّة تطبيق شخصي يعمل على جهازك أولًا (local-first). في وضع الضيف تُحفظ كل بياناتك في متصفّح هذا الجهاز فقط ولا تغادره.',
+      'عند تسجيل الدخول بحساب سحابي (Supabase) تُرفع بياناتك إلى حسابك الخاص لتتمكّن من الوصول إليها من أجهزة أخرى. لا يصل إلى صفوفك إلا أنت (Row Level Security).',
+      'لا نبيع بياناتك ولا نشاركها مع معلنين. صور التقدّم والقياسات الصحية تبقى ملكك ويمكنك حذفها في أي وقت عبر «إعادة ضبط البيانات».',
+      'يمكنك تصدير نسخة كاملة من بياناتك في أي وقت من «الإعدادات → البيانات».',
+    ],
+    termsBody: [
+      'قِمّة أداة لتنظيم ومتابعة التمرين والتغذية والمكملات والقياسات للرياضي الفرد. الاستخدام على مسؤوليتك الشخصية.',
+      'المحتوى داخل التطبيق (حسابات السعرات، اقتراحات الأوزان، الجرعات) تقديري وتعليمي فقط، وليس نصيحة طبية أو غذائية أو دوائية.',
+      'استشر طبيبًا أو مختصًا مؤهّلًا قبل تغيير نظامك الغذائي أو الدوائي أو برنامج تمرينك، خصوصًا عند وجود حالة صحية.',
+      'أنت مسؤول عن صحة البيانات التي تُدخلها وعن الاحتفاظ بنسخة احتياطية عبر خاصية التصدير.',
+    ],
   },
   demo: {
     badge: 'نموذج تجريبي',
@@ -309,18 +416,78 @@ const ar: ShellStrings = {
 
 const en: ShellStrings = {
   brand: 'Qimmah',
-  tagline: 'Your personal fitness journey in one page',
-  nav: { home: 'My Page', setup: 'Setup', demo: 'Demo' },
+  tagline: 'Your personal bodybuilding & training app',
+  nav: { home: 'Home', setup: 'Setup', demo: 'Demo', settings: 'Settings' },
   lang: { ar: 'العربية', en: 'English', label: 'Language' },
+  badge: { guest: 'Guest', account: 'Account', demo: 'Demo' },
   start: {
     welcome: 'Welcome to Qimmah',
-    intro: 'Your workouts, food, supplements, medications, measurements, and daily commitments — all in one place.',
+    intro: 'Your workouts, weights, progressive overload, nutrition, and measurements — all in one place.',
     startSetup: 'Set up my page',
     continueSetup: 'Continue my setup',
-    seeDemo: 'See a ready sample',
+    seeDemo: 'See a sample',
     importPrevious: 'Import a previous copy',
     chooseLang: 'Choose language',
-    note: 'Everything is saved on your device. You can edit anything later.',
+    note: 'Your data is saved on your device. You can edit anything later.',
+    positioning: 'A bodybuilding OS for the individual athlete: track your weights, reps, and progressive overload day by day.',
+    login: 'Log in',
+    continueGuest: 'Continue as guest',
+    guestNote: 'Guest data is stored on this device only.',
+  },
+  auth: {
+    title: 'Log in',
+    subtitle: 'Log in to back up your data to the cloud and access it from any device.',
+    email: 'Email',
+    password: 'Password',
+    login: 'Log in',
+    createAccount: 'Create account',
+    logout: 'Log out',
+    continueGuest: 'Continue as guest',
+    disabledTitle: 'Cloud login is not enabled right now',
+    disabledBody: 'You can use guest mode on this device.',
+    guestBadge: 'Guest',
+    guestNote: 'Guest data is stored on this device only.',
+    accountNote: 'You are logged in. Your data syncs to your cloud account.',
+    cloudNote: 'Your data is stored on this device and on your cloud account.',
+    back: 'Back',
+  },
+  settings: {
+    title: 'Settings',
+    groupAccount: 'Account',
+    groupData: 'Data',
+    groupPlan: 'My Plan',
+    groupPrivacy: 'Privacy & Trust',
+    export: 'Export backup',
+    import: 'Import backup',
+    reset: 'Reset data',
+    resetConfirm:
+      'This will permanently delete all Qimmah data from this browser (setup, plan, tracking, logs). This cannot be undone. Are you sure?',
+    editPlan: 'Edit my plan',
+    regenerate: 'Regenerate plan',
+    regenerateConfirm:
+      'Your workout and nutrition plan will be regenerated from your current data, replacing the current plan. Continue?',
+    privacyLink: 'Privacy policy',
+    termsLink: 'Terms of use',
+    healthDisclaimer:
+      'Qimmah is a personal organization and tracking tool, not a substitute for medical advice. Do not start or stop any medication or program without a professional.',
+    importConfirm: 'Importing will replace your current plan and logs with the file contents. Continue?',
+  },
+  legal: {
+    privacyTitle: 'Privacy Policy',
+    termsTitle: 'Terms of Use',
+    back: 'Back',
+    privacyBody: [
+      'Qimmah is a local-first personal app. In guest mode, all your data stays in this device’s browser and never leaves it.',
+      'When you log in with a cloud account (Supabase), your data is uploaded to your own account so you can access it from other devices. Only you can read your rows (Row Level Security).',
+      'We do not sell or share your data with advertisers. Progress photos and health measurements remain yours and can be deleted anytime via “Reset data”.',
+      'You can export a full copy of your data anytime from Settings → Data.',
+    ],
+    termsBody: [
+      'Qimmah is a tool to organize and track training, nutrition, supplements, and measurements for the individual athlete. Use is at your own responsibility.',
+      'In-app content (calorie calculations, weight suggestions, doses) is estimated and educational only, not medical, nutritional, or pharmaceutical advice.',
+      'Consult a qualified professional before changing your diet, medication, or training program, especially with a health condition.',
+      'You are responsible for the accuracy of the data you enter and for keeping a backup via the export feature.',
+    ],
   },
   demo: {
     badge: 'Demo',

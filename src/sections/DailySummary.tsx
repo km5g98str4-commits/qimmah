@@ -33,7 +33,9 @@ export function DailySummary() {
             <Icon name="Flame" className="h-3.5 w-3.5" />
             خطتك اليوم
           </span>
-          <h1 className="mt-3 text-2xl font-black text-ink-900 sm:text-3xl">أهلًا {name}، هذه خطتك اليوم 👋</h1>
+          <h1 className="mt-3 text-2xl font-black text-ink-900 sm:text-3xl">
+            {name?.trim() ? `أهلًا ${name}، هذه خطتك اليوم 👋` : 'هذه خطتك اليوم 👋'}
+          </h1>
 
           <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
             {cards.map((c) => (

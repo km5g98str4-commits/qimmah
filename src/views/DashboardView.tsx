@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { AppNav, type AppView } from '@/components/AppNav'
 import { Footer } from '@/components/Footer'
-import { Icon } from '@/components/Icon'
 import { SuccessToast } from '@/components/SuccessToast'
 import { WorkoutMode } from '@/components/WorkoutMode'
 import { DailySummary } from '@/sections/DailySummary'
@@ -17,8 +16,8 @@ import { WellnessSection } from '@/sections/WellnessSection'
 import { ProgressSection } from '@/sections/ProgressSection'
 import { CommitmentsSection } from '@/sections/CommitmentsSection'
 import { HealthNotice } from '@/sections/HealthNotice'
-import { StorageCard } from '@/sections/StorageCard'
 import { useCustomization } from '@/lib/customizationContext'
+import { useAuth } from '@/lib/authContext'
 import { todayPlanDay } from '@/lib/workoutPlan'
 import { addSession, type WorkoutSession } from '@/lib/workoutSessions'
 import { loadHistory, recordExercise, saveHistory } from '@/lib/exerciseHistory'
@@ -29,22 +28,17 @@ import type { Lang } from '@/lib/appPreferences'
 interface DashboardViewProps {
   lang: Lang
   onNavigate: (view: AppView) => void
-  onOpenSetup: () => void
   showSuccess: boolean
   onDismissSuccess: () => void
 }
 
 /** عرض الصفحة الرئيسية — الخطة الشخصية + وضع التمرين. */
-export function DashboardView({
-  lang,
-  onNavigate,
-  onOpenSetup,
-  showSuccess,
-  onDismissSuccess,
-}: DashboardViewProps) {
+export function DashboardView({ lang, onNavigate, showSuccess, onDismissSuccess }: DashboardViewProps) {
   const { customization } = useCustomization()
+  const auth = useAuth()
   const s = customization.sections
   const tw = getStrings(lang).workout
+  const badge: 'guest' | 'account' = auth.user ? 'account' : 'guest'
 
   const [workoutOpen, setWorkoutOpen] = useState(false)
   const [savedWorkout, setSavedWorkout] = useState(false)
@@ -68,7 +62,7 @@ export function DashboardView({
 
   return (
     <div className="min-h-screen bg-page">
-      <AppNav current="dashboard" lang={lang} onNavigate={onNavigate} />
+      <AppNav current="dashboard" lang={lang} badge={badge} onNavigate={onNavigate} />
 
       <main>
         {/* 1) ملخّص يومي/ترحيب */}
@@ -92,23 +86,10 @@ export function DashboardView({
         <CurrentGoal />
         <ProfileData />
         <MyTargets />
-        {/* التخزين/التصدير */}
-        <StorageCard />
         {s.notes && <HealthNotice />}
       </main>
 
       <Footer />
-
-      {/* زر عائم — تعديل خطتي */}
-      <button
-        type="button"
-        onClick={onOpenSetup}
-        className="btn-primary fixed bottom-5 start-5 z-40 shadow-glow"
-        aria-label="تعديل خطتي"
-      >
-        <Icon name="Palette" className="h-4 w-4" />
-        <span className="hidden sm:inline">تعديل خطتي</span>
-      </button>
 
       {/* وضع التمرين */}
       {workoutOpen && planDay && (
