@@ -3,6 +3,8 @@ import { StartView } from '@/views/StartView'
 import { SetupView } from '@/views/SetupView'
 import { DashboardView } from '@/views/DashboardView'
 import { DemoView } from '@/views/DemoView'
+import { WorkoutView } from '@/views/WorkoutView'
+import { ExerciseLibraryView } from '@/views/ExerciseLibraryView'
 import type { AppView } from '@/components/AppNav'
 import { useCustomization } from '@/lib/customizationContext'
 import { type Customization, getDefaultCustomization } from '@/lib/customization'
@@ -16,7 +18,9 @@ const LANG = 'ar' as const
 /** يطبّق حراسة الإعداد: #/dashboard لإعداد غير مكتمل → الإعداد إن بدأ، وإلا البداية. */
 function guardRoute(route: AppRoute): AppRoute {
   const ob = loadOnboarding()
-  if (route === 'dashboard' && !ob.completed) return (ob.lastStep ?? 0) > 0 ? 'setup' : 'start'
+  // التمرين والمكتبة جزء من التطبيق الفعلي — تتطلب اكتمال الإعداد كالرئيسية.
+  const guarded = route === 'dashboard' || route === 'workout' || route === 'exercises'
+  if (guarded && !ob.completed) return (ob.lastStep ?? 0) > 0 ? 'setup' : 'start'
   return route
 }
 
@@ -131,6 +135,14 @@ export default function App() {
 
   if (view === 'demo') {
     return <DemoView lang={LANG} onNavigate={navigate} onBack={closeDemo} />
+  }
+
+  if (view === 'workout') {
+    return <WorkoutView lang={LANG} onNavigate={navigate} />
+  }
+
+  if (view === 'exercises') {
+    return <ExerciseLibraryView lang={LANG} onNavigate={navigate} />
   }
 
   return (

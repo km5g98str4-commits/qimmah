@@ -138,6 +138,18 @@ export const workoutTemplates: WorkoutTemplate[] = [
     ],
   },
   {
+    id: 'strength-5x5',
+    nameAr: 'قوة ٥×٥',
+    nameEn: 'Strength 5x5',
+    descriptionAr: 'برنامج قوة كلاسيكي بأوزان مركّبة ثقيلة و٥ مجموعات ×٥ تكرارات (يومان متبادلان).',
+    descriptionEn: 'Classic strength program built on heavy compounds, 5 sets × 5 reps (two alternating days).',
+    recommendedFor: 'متوسط–متقدّم',
+    days: [
+      { id: 'strength-5x5-d1', nameAr: 'يوم أ', nameEn: 'Workout A', exerciseIds: ['barbell-back-squat', 'barbell-bench-press', 'barbell-row'] },
+      { id: 'strength-5x5-d2', nameAr: 'يوم ب', nameEn: 'Workout B', exerciseIds: ['barbell-back-squat', 'overhead-press', 'deadlift'] },
+    ],
+  },
+  {
     id: 'custom',
     nameAr: 'مخصّص',
     nameEn: 'Custom',

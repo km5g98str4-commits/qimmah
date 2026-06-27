@@ -21,8 +21,8 @@ import { HealthNotice } from '@/sections/HealthNotice'
 import { StorageCard } from '@/sections/StorageCard'
 import { useCustomization } from '@/lib/customizationContext'
 import { todayPlanDay } from '@/lib/workoutPlan'
-import { addSession, type WorkoutSession } from '@/lib/workoutSessions'
-import { loadHistory, recordExercise, saveHistory } from '@/lib/exerciseHistory'
+import type { WorkoutSession } from '@/lib/workoutSessions'
+import { persistFinishedSession } from '@/lib/finishWorkout'
 import { getStrings } from '@/config/strings'
 import type { Lang } from '@/lib/appPreferences'
 
@@ -52,13 +52,7 @@ export function DashboardView({
 
   const finishWorkout = (session: WorkoutSession) => {
     // حفظ الجلسة + تحديث سجل الأداء (آخر/أفضل وزن وتكرارات + 1RM + سلسلة التقدّم)
-    addSession(session)
-    let history = loadHistory()
-    const when = session.finishedAt ?? session.startedAt
-    session.exercises.forEach((e) => {
-      history = recordExercise(history, e, when)
-    })
-    saveHistory(history)
+    persistFinishedSession(session)
     setWorkoutOpen(false)
     setSavedWorkout(true)
   }
