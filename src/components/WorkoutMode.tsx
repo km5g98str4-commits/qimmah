@@ -8,6 +8,7 @@ import { exerciseDisplayName, planExerciseName, planExerciseVideo } from '@/lib/
 import { getAlternatives, getExercise } from '@/data/exercises'
 import { getRecord, progressionHint } from '@/lib/exerciseHistory'
 import { getDayStamp } from '@/lib/today'
+import { NUM_LIMITS, sanitizeNumericInput } from '@/lib/validation'
 import type { Difficulty, SetLog, WorkoutSession } from '@/lib/workoutSessions'
 
 interface WorkoutModeProps {
@@ -180,8 +181,8 @@ export function WorkoutMode({ lang, day, onClose, onFinish }: WorkoutModeProps) 
                 {s.sets.map((st, i) => (
                   <div key={i} className="grid grid-cols-[2rem_1fr_1fr_2.5rem] items-center gap-2 border-t border-line px-2 py-1.5">
                     <span className="text-center text-xs font-bold text-ink-400">{st.setNumber}</span>
-                    <input className={numInput} inputMode="decimal" value={st.weightKg} onChange={(e) => setSet(pe.id, i, { weightKg: e.target.value })} />
-                    <input className={numInput} inputMode="numeric" value={st.actualReps} placeholder={pe.reps} onChange={(e) => setSet(pe.id, i, { actualReps: e.target.value })} />
+                    <input className={numInput} type="number" inputMode="decimal" min={NUM_LIMITS.workoutWeight.min} max={NUM_LIMITS.workoutWeight.max} value={st.weightKg} onChange={(e) => setSet(pe.id, i, { weightKg: sanitizeNumericInput(e.target.value, { max: NUM_LIMITS.workoutWeight.max, decimal: true }) })} />
+                    <input className={numInput} type="number" inputMode="numeric" min={NUM_LIMITS.reps.min} max={NUM_LIMITS.reps.max} value={st.actualReps} placeholder={pe.reps} onChange={(e) => setSet(pe.id, i, { actualReps: sanitizeNumericInput(e.target.value, { max: NUM_LIMITS.reps.max }) })} />
                     <button type="button" onClick={() => setSet(pe.id, i, { completed: !st.completed })} aria-pressed={st.completed} className={cn('mx-auto grid h-8 w-8 place-items-center rounded-full border-2', st.completed ? 'border-transparent bg-primary text-white' : 'border-line text-transparent')}>
                       <Icon name="Check" className="h-4 w-4" strokeWidth={3} />
                     </button>

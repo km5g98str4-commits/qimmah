@@ -92,6 +92,8 @@ export interface ShellStrings {
     remainingProtein: string
     addToLog: string
     customQuickAdd: string
+    foodName: string
+    quickAddHint: string
     note: string
     optional: string
     searchFood: string
@@ -269,6 +271,8 @@ const ar: ShellStrings = {
     remainingProtein: 'بروتين متبقّي',
     addToLog: 'أضف للسجل',
     customQuickAdd: 'إضافة سريعة مخصّصة',
+    foodName: 'اسم الطعام/الوجبة',
+    quickAddHint: 'أدخل سعرات أو بروتين على الأقل للإضافة.',
     note: 'ملاحظة',
     optional: 'اختياري',
     searchFood: 'ابحث عن طعام…',
@@ -447,6 +451,8 @@ const en: ShellStrings = {
     remainingProtein: 'Protein left',
     addToLog: 'Add to log',
     customQuickAdd: 'Custom quick add',
+    foodName: 'Food/meal name',
+    quickAddHint: 'Enter at least calories or protein to add.',
     note: 'Note',
     optional: 'optional',
     searchFood: 'Search food…',

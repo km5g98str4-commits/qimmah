@@ -4,6 +4,7 @@ import { Icon } from '@/components/Icon'
 import type { WizardCtx } from '../stepProps'
 import type { Targets } from '@/types/profile'
 import { computeTargets, profileHash } from '@/lib/calculators'
+import { NUM_LIMITS, parseSafeNumber } from '@/lib/validation'
 
 /** خطوة الحسابات الذكية — أرقام مقدّرة قابلة للتعديل اليدوي. */
 export function StepSmartCalculations({ ctx }: { ctx: WizardCtx }) {
@@ -57,10 +58,10 @@ export function StepSmartCalculations({ ctx }: { ctx: WizardCtx }) {
         {/* السعرات */}
         <Card icon="Flame" title="السعرات">
           <NumField label="الأساس (BMR)" value={t.bmr} unit="سعرة" onChange={(v) => setT({ bmr: v })} />
-          <NumField label="إجمالي الحركة (TDEE)" value={t.tdee} unit="سعرة" onChange={(v) => setT({ tdee: v })} />
-          <NumField label="المحافظة" value={t.maintenanceCalories} unit="سعرة" onChange={(v) => setT({ maintenanceCalories: v })} />
-          <NumField label="التنشيف" value={t.cuttingCalories} unit="سعرة" onChange={(v) => setT({ cuttingCalories: v })} />
-          <NumField label="التضخيم" value={t.bulkingCalories} unit="سعرة" onChange={(v) => setT({ bulkingCalories: v })} />
+          <NumField label="إجمالي الحركة (TDEE)" value={t.tdee} unit="سعرة" max={NUM_LIMITS.dailyCalories.max} onChange={(v) => setT({ tdee: v })} />
+          <NumField label="المحافظة" value={t.maintenanceCalories} unit="سعرة" max={NUM_LIMITS.dailyCalories.max} onChange={(v) => setT({ maintenanceCalories: v })} />
+          <NumField label="التنشيف" value={t.cuttingCalories} unit="سعرة" max={NUM_LIMITS.dailyCalories.max} onChange={(v) => setT({ cuttingCalories: v })} />
+          <NumField label="التضخيم" value={t.bulkingCalories} unit="سعرة" max={NUM_LIMITS.dailyCalories.max} onChange={(v) => setT({ bulkingCalories: v })} />
         </Card>
 
         {/* الماكروز */}
@@ -125,12 +126,14 @@ function NumField({
   value,
   unit,
   step,
+  max,
   onChange,
 }: {
   label: string
   value: number
   unit?: string
   step?: string
+  max?: number
   onChange: (v: number) => void
 }) {
   return (
@@ -139,9 +142,12 @@ function NumField({
       <div className="flex items-center gap-1.5">
         <input
           type="number"
+          inputMode="decimal"
+          min={0}
+          max={max}
           step={step ?? '1'}
           value={value}
-          onChange={(e) => onChange(Number(e.target.value) || 0)}
+          onChange={(e) => onChange(parseSafeNumber(e.target.value, { min: 0, max: max ?? Number.MAX_SAFE_INTEGER }))}
           className={fieldInput}
         />
         {unit && <span className="w-10 text-xs text-ink-400">{unit}</span>}

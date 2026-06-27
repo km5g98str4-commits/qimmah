@@ -14,6 +14,7 @@ import { mealDisplayName } from '@/lib/nutritionPlan'
 import { useNutritionToday } from '@/lib/nutritionTracking'
 import { medicationName, supplementName } from '@/lib/wellnessPlan'
 import { useWellnessToday } from '@/lib/wellnessTracking'
+import { inRange, NUM_LIMITS, NUM_MESSAGES, sanitizeNumericInput } from '@/lib/validation'
 
 interface TodayRow {
   key: string
@@ -364,15 +365,18 @@ function MiniTarget({ icon, label, value }: { icon: string; label: string; value
   )
 }
 
-/** إدخال كمية ماء مخصّصة بالمل تُضاف لإجمالي اليوم. */
+/** إدخال كمية ماء مخصّصة بالمل (50–3000) تُضاف لإجمالي اليوم. */
 function CustomWater({ lang, onAdd }: { lang: Lang; onAdd: (ml: number) => void }) {
   const tn = getStrings(lang).nutrition
   const [open, setOpen] = useState(false)
   const [ml, setMl] = useState('')
+  const { min, max } = NUM_LIMITS.waterMl
+  const amount = Number(ml)
+  const valid = inRange(amount, min, max)
 
   const submit = () => {
-    const amount = Math.round(Number(ml) || 0)
-    if (amount > 0) onAdd(amount)
+    if (!valid) return
+    onAdd(Math.round(amount))
     setMl('')
     setOpen(false)
   }
@@ -387,21 +391,28 @@ function CustomWater({ lang, onAdd }: { lang: Lang; onAdd: (ml: number) => void 
   }
 
   return (
-    <div className="mt-2 flex items-center gap-2">
-      <input
-        type="number"
-        min="1"
-        autoFocus
-        value={ml}
-        onChange={(e) => setMl(e.target.value)}
-        onKeyDown={(e) => { if (e.key === 'Enter') submit() }}
-        placeholder={tn.customWaterPlaceholder}
-        className="w-40 rounded-lg border border-line bg-page px-3 py-2 text-xs text-ink-900 outline-none focus:border-primary-c"
-      />
-      <button type="button" onClick={submit} className="btn-primary px-3 py-2 text-xs">{tn.customWaterAdd}</button>
-      <button type="button" onClick={() => { setOpen(false); setMl('') }} aria-label={tn.close} className="btn-ghost px-2 py-2 text-xs">
-        <Icon name="X" className="h-3.5 w-3.5" />
-      </button>
+    <div className="mt-2">
+      <div className="flex items-center gap-2">
+        <input
+          type="number"
+          inputMode="numeric"
+          min={min}
+          max={max}
+          autoFocus
+          value={ml}
+          onChange={(e) => setMl(sanitizeNumericInput(e.target.value, { max }))}
+          onKeyDown={(e) => { if (e.key === 'Enter') submit() }}
+          placeholder={tn.customWaterPlaceholder}
+          className="w-40 rounded-lg border border-line bg-page px-3 py-2 text-xs text-ink-900 outline-none focus:border-primary-c"
+        />
+        <button type="button" onClick={submit} disabled={!valid} className="btn-primary px-3 py-2 text-xs disabled:cursor-not-allowed disabled:opacity-40">{tn.customWaterAdd}</button>
+        <button type="button" onClick={() => { setOpen(false); setMl('') }} aria-label={tn.close} className="btn-ghost px-2 py-2 text-xs">
+          <Icon name="X" className="h-3.5 w-3.5" />
+        </button>
+      </div>
+      {ml !== '' && !valid && (
+        <p className="mt-1.5 text-[11px] font-bold text-danger">{NUM_MESSAGES.waterMl}</p>
+      )}
     </div>
   )
 }

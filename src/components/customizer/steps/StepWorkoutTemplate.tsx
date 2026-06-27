@@ -7,6 +7,7 @@ import type { WizardCtx } from '../stepProps'
 import type { PlanDay, PlanExercise, WorkoutPlan } from '@/types/workout'
 import { workoutTemplates } from '@/data/workoutTemplates'
 import { createPlanExercise, generatePlanFromTemplate, planExerciseName, planExerciseVideo } from '@/lib/workoutPlan'
+import { parseSafeNumber } from '@/lib/validation'
 
 const smallInput =
   'w-full rounded-lg border border-line bg-beige px-2.5 py-1.5 text-sm text-ink-900 focus:border-brand-500/50 focus:outline-none focus:ring-2 focus:ring-brand-500/30'
@@ -154,9 +155,9 @@ export function StepWorkoutTemplate({ ctx }: { ctx: WizardCtx }) {
                     </div>
                   </div>
                   <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                    <Labeled label="مجموعات"><input type="number" className={smallInput} value={pe.sets} onChange={(e) => updateExercise(day.id, pe.id, { sets: Number(e.target.value) || 0 })} /></Labeled>
+                    <Labeled label="مجموعات"><input type="number" inputMode="numeric" min={0} max={20} className={smallInput} value={pe.sets} onChange={(e) => updateExercise(day.id, pe.id, { sets: parseSafeNumber(e.target.value, { min: 0, max: 20 }) })} /></Labeled>
                     <Labeled label="تكرارات"><input className={smallInput} value={pe.reps} onChange={(e) => updateExercise(day.id, pe.id, { reps: e.target.value })} /></Labeled>
-                    <Labeled label="راحة (ث)"><input type="number" className={smallInput} value={pe.restSec} onChange={(e) => updateExercise(day.id, pe.id, { restSec: Number(e.target.value) || 0 })} /></Labeled>
+                    <Labeled label="راحة (ث)"><input type="number" inputMode="numeric" min={0} max={600} className={smallInput} value={pe.restSec} onChange={(e) => updateExercise(day.id, pe.id, { restSec: parseSafeNumber(e.target.value, { min: 0, max: 600 }) })} /></Labeled>
                     <Labeled label="وزن البداية"><input className={smallInput} value={pe.startingWeight ?? ''} onChange={(e) => updateExercise(day.id, pe.id, { startingWeight: e.target.value })} /></Labeled>
                     <div className="col-span-2 sm:col-span-4"><Labeled label="ملاحظات"><input className={smallInput} value={pe.notes ?? ''} onChange={(e) => updateExercise(day.id, pe.id, { notes: e.target.value })} /></Labeled></div>
                     <div className="col-span-2 sm:col-span-4"><Labeled label="رابط شرح (اختياري)"><input className={smallInput} value={pe.videoUrl ?? ''} onChange={(e) => updateExercise(day.id, pe.id, { videoUrl: e.target.value })} placeholder="اتركه فارغًا لاستخدام شرح المكتبة" /></Labeled></div>
