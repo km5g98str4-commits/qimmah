@@ -3,6 +3,7 @@ import { Icon } from '@/components/Icon'
 import { ProgressBar } from '@/components/ProgressBar'
 import { FOOD_ESTIMATE_NOTE, searchFood, type FoodItem } from '@/data/foodItems'
 import { useNutritionToday } from '@/lib/nutritionTracking'
+import { NUM_LIMITS, parseSafeNumber, sanitizeNumericInput } from '@/lib/validation'
 import { getStrings } from '@/config/strings'
 import type { Lang } from '@/lib/appPreferences'
 
@@ -29,12 +30,12 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein }: QuickMe
   const [selected, setSelected] = useState<FoodItem | null>(null)
   const [servings, setServings] = useState('1')
 
-  // إضافة سريعة مخصّصة
+  // إضافة سريعة / طعام مخصّص
+  const [cName, setCName] = useState('')
   const [cCal, setCCal] = useState('')
   const [cProt, setCProt] = useState('')
   const [cCarb, setCCarb] = useState('')
   const [cFat, setCFat] = useState('')
-  const [cNote, setCNote] = useState('')
 
   const results = useMemo(() => searchFood(query).slice(0, 10), [query])
 
@@ -45,7 +46,7 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein }: QuickMe
 
   const addSelected = () => {
     if (!selected) return
-    const q = Math.max(0.25, Number(servings) || 1)
+    const q = parseSafeNumber(servings, { min: 0.25, max: 50, fallback: 1 })
     const name = lang === 'en' ? selected.nameEn : selected.nameAr
     addLog({
       label: `${name} ×${q}`,
@@ -60,24 +61,27 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein }: QuickMe
     setServings('1')
   }
 
+  // سعرات/بروتين الإضافة الحالية (محصورة ضمن الحدود — لا قيم سالبة أو مستحيلة)
+  const cal = parseSafeNumber(cCal, { min: 0, max: NUM_LIMITS.quickCalories.max })
+  const prot = parseSafeNumber(cProt, { min: 0, max: NUM_LIMITS.quickProtein.max })
+  const canAddCustom = cal > 0 || prot > 0
+
   const addCustom = () => {
-    const cal = Number(cCal) || 0
-    const prot = Number(cProt) || 0
-    if (cal <= 0 && prot <= 0) return
+    if (!canAddCustom) return
     addLog({
-      label: cNote.trim() || (lang === 'en' ? 'Quick add' : 'إضافة سريعة'),
+      label: cName.trim() || (lang === 'en' ? 'Quick add' : 'إضافة سريعة'),
       servings: 1,
       calories: round(cal),
       protein: round(prot),
-      carbs: round(Number(cCarb) || 0),
-      fat: round(Number(cFat) || 0),
-      note: cNote.trim() || undefined,
+      carbs: round(parseSafeNumber(cCarb, { min: 0, max: NUM_LIMITS.quickMacro.max })),
+      fat: round(parseSafeNumber(cFat, { min: 0, max: NUM_LIMITS.quickMacro.max })),
+      note: cName.trim() || undefined,
     })
+    setCName('')
     setCCal('')
     setCProt('')
     setCCarb('')
     setCFat('')
-    setCNote('')
   }
 
   return (
@@ -178,10 +182,12 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein }: QuickMe
                     <label className="text-xs text-ink-500">{t.servingsCount}</label>
                     <input
                       type="number"
+                      inputMode="decimal"
                       min="0.25"
+                      max="50"
                       step="0.25"
                       value={servings}
-                      onChange={(e) => setServings(e.target.value)}
+                      onChange={(e) => setServings(sanitizeNumericInput(e.target.value, { max: 50, decimal: true }))}
                       className="w-20 rounded-lg border border-line bg-page px-2 py-1.5 text-sm text-ink-900 outline-none focus:border-primary-c"
                     />
                   </div>
@@ -200,23 +206,27 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein }: QuickMe
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-3">
-              <Field label={`${t.calories}`} value={cCal} onChange={setCCal} placeholder="0" />
-              <Field label={`${t.protein} (غ)`} value={cProt} onChange={setCProt} placeholder="0" />
-              <Field label={`${t.carbs} (غ) — ${t.optional}`} value={cCarb} onChange={setCCarb} placeholder="0" />
-              <Field label={`${t.fat} (غ) — ${t.optional}`} value={cFat} onChange={setCFat} placeholder="0" />
               <div className="col-span-2">
-                <label className="text-xs text-ink-500">{t.note} — {t.optional}</label>
+                <label className="text-xs text-ink-500">{t.foodName} — {t.optional}</label>
                 <input
                   type="text"
-                  value={cNote}
-                  onChange={(e) => setCNote(e.target.value)}
+                  value={cName}
+                  onChange={(e) => setCName(e.target.value)}
+                  placeholder={lang === 'en' ? 'e.g. Home kabsa plate' : 'مثال: صحن كبسة بيت'}
                   className="mt-1 w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink-900 outline-none focus:border-primary-c"
                 />
               </div>
-              <button type="button" onClick={addCustom} className="btn-primary col-span-2 justify-center py-2 text-xs">
+              <Field label={`${t.calories} (0–${NUM_LIMITS.quickCalories.max})`} value={cCal} onChange={setCCal} max={NUM_LIMITS.quickCalories.max} placeholder="0" />
+              <Field label={`${t.protein} (غ)`} value={cProt} onChange={setCProt} max={NUM_LIMITS.quickProtein.max} placeholder="0" />
+              <Field label={`${t.carbs} (غ) — ${t.optional}`} value={cCarb} onChange={setCCarb} max={NUM_LIMITS.quickMacro.max} placeholder="0" />
+              <Field label={`${t.fat} (غ) — ${t.optional}`} value={cFat} onChange={setCFat} max={NUM_LIMITS.quickMacro.max} placeholder="0" />
+              <button type="button" onClick={addCustom} disabled={!canAddCustom} className="btn-primary col-span-2 justify-center py-2 text-xs disabled:cursor-not-allowed disabled:opacity-40">
                 <Icon name="Plus" className="h-4 w-4" />
                 {t.addToLog}
               </button>
+              {!canAddCustom && (
+                <p className="col-span-2 text-[11px] text-ink-400">{t.quickAddHint}</p>
+              )}
             </div>
           )}
         </div>
@@ -271,15 +281,17 @@ function TabBtn({ active, onClick, label }: { active: boolean; onClick: () => vo
   )
 }
 
-function Field({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string }) {
+function Field({ label, value, onChange, placeholder, max }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; max?: number }) {
   return (
     <div>
       <label className="text-xs text-ink-500">{label}</label>
       <input
         type="number"
+        inputMode="numeric"
         min="0"
+        max={max}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => onChange(sanitizeNumericInput(e.target.value, { max }))}
         placeholder={placeholder}
         className="mt-1 w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink-900 outline-none focus:border-primary-c"
       />

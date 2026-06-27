@@ -125,11 +125,11 @@ export interface Customization {
 export function getDefaultCustomization(): Customization {
   return {
     identity: {
-      // فارغ افتراضيًا — الإعداد الحقيقي يطلب الاسم؛ والنموذج التجريبي فقط يضع اسمًا توضيحيًا.
+      // لا اسم افتراضي — يُدخله المستخدم في الإعداد (لا أسماء وهمية في اللوحة الحقيقية).
       userName: '',
       brandName: product.name,
       tagline: product.tagline,
-      mainGoal: 'الوصول إلى 78 كجم وتحسين شكل الجسم',
+      mainGoal: '',
       userType: 'individual',
     },
     colors: {

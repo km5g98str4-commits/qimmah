@@ -15,14 +15,20 @@ export function NutritionPlanSection({ lang }: { lang: Lang }) {
   const t = getStrings(lang).nutrition
   const [swapFor, setSwapFor] = useState<string | null>(null)
 
+  // أهداف التسجيل — من خطة الأكل إن وُجدت، وإلا من الحسابات الذكية (حتى يعمل المسجّل دائمًا)
+  const logCalories = np.targetCalories || customization.targets.maintenanceCalories || 2000
+  const logProtein = np.targetProtein || customization.targets.proteinGrams || 120
+
+  // المسجّل السريع يظهر دائمًا في الرئيسية — حتى لو لم تُفعَّل خطة وجبات.
   if (!np.enabled || np.meals.length === 0) {
     return (
       <section id="nutrition" className="section bg-beige">
         <div className="container-page">
           <SectionHeading eyebrow={t.title} icon="Salad" title={t.title} description={t.desc} />
-          <div className="mt-10 rounded-2xl border border-line bg-surface p-10 text-center">
-            <p className="text-sm text-ink-500">{t.empty}</p>
+          <div className="mt-10">
+            <QuickMealLogger lang={lang} targetCalories={logCalories} targetProtein={logProtein} />
           </div>
+          <p className="mt-4 text-center text-xs text-ink-400">{t.empty}</p>
         </div>
       </section>
     )

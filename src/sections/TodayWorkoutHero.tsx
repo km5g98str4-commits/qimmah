@@ -40,15 +40,17 @@ export function TodayWorkoutHero({
   const duration = useMemo(() => estimateDurationMin(day), [day])
   const exCount = day?.exercises.length ?? 0
 
-  const last = useMemo(() => {
-    const s = lastSession()
-    if (!s) return null
-    const sets = s.exercises.reduce((n, e) => n + (e.sets?.filter((x) => x.completed).length ?? 0), 0)
-    return { name: s.workoutDayName, sets }
-  }, [])
+  // تُقرأ من السجل في كل تصيير (بعد حفظ تمرين يُعاد تصيير اللوحة) — لا أرقام ثابتة.
+  const lastS = lastSession()
+  const last = lastS
+    ? {
+        name: lastS.workoutDayName,
+        sets: lastS.exercises.reduce((n, e) => n + (e.sets?.filter((x) => x.completed).length ?? 0), 0),
+      }
+    : null
 
-  const streak = useMemo(() => workoutStreak(), [])
-  const week = useMemo(() => weeklyCompleted(), [])
+  const streak = workoutStreak()
+  const week = weeklyCompleted()
 
   if (!day) return null
 

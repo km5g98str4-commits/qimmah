@@ -30,18 +30,41 @@ interface ExState {
   notes: string
 }
 
+// حدود التحقّق
+const MAX_WEIGHT = 500
+const MAX_REPS = 100
+
 /** أول رقم في نطاق التكرارات (مثال: «8–12» → «8»). */
 function lowerReps(reps: string): string {
   const m = String(reps).match(/\d+/)
   return m ? m[0] : reps
 }
 
-/** تعديل قيمة رقمية نصية بمقدار، مع حد أدنى صفر ودعم الكسور. */
-function adjust(value: string, delta: number): string {
+/** تعديل قيمة رقمية نصية بمقدار، مع قصّها بين صفر والحد الأقصى. */
+function adjust(value: string, delta: number, max: number): string {
   const m = String(value).match(/-?[\d.]+/)
   const n = m ? Number(m[0]) : 0
-  const next = Math.max(0, Math.round((n + delta) * 100) / 100)
+  const next = Math.min(max, Math.max(0, Math.round((n + delta) * 100) / 100))
   return `${next}`
+}
+
+const parseVal = (v: string): number => {
+  const m = String(v ?? '').match(/-?[\d.]+/)
+  return m ? Number(m[0]) : NaN
+}
+
+/** التحقّق من قيمة الوزن (٠–٥٠٠ كجم). فارغ = مسموح (لم يُدخل بعد). */
+function weightInvalid(v: string): boolean {
+  if (!String(v).trim()) return false
+  const n = parseVal(v)
+  return Number.isNaN(n) || n < 0 || n > MAX_WEIGHT
+}
+
+/** التحقّق من التكرارات (٠–١٠٠). فارغ = مسموح. */
+function repsInvalid(v: string): boolean {
+  if (!String(v).trim()) return false
+  const n = parseVal(v)
+  return Number.isNaN(n) || n < 0 || n > MAX_REPS
 }
 
 /** وضع التمرين النشط — شاشة كاملة، تمرين واحد في كل خطوة، تسجيل سريع. */
@@ -54,6 +77,7 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
   const [openDetails, setOpenDetails] = useState(false)
   const [swap, setSwap] = useState<Record<string, string>>({})
   const [savedFlash, setSavedFlash] = useState(false)
+  const [confirmOpen, setConfirmOpen] = useState(false)
   const flashTimer = useRef<number | null>(null)
 
   const effExId = (peId: string, exerciseId: string) => swap[peId] ?? exerciseId
@@ -129,6 +153,8 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
 
   const markDone = (idx: number) => {
     const set = s.sets[idx]
+    // امنع اعتماد جولة بقيم خارج النطاق
+    if (!set.completed && (weightInvalid(set.weightKg) || repsInvalid(set.actualReps))) return
     const willComplete = !set.completed
     setSet(idx, { completed: willComplete })
     if (willComplete) {
@@ -168,7 +194,7 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
 
   const isLast = current >= total - 1
   const goNext = () => {
-    if (isLast) return finish()
+    if (isLast) return setConfirmOpen(true)
     setCurrent((c) => Math.min(total - 1, c + 1))
     setTimer({ left: 0, running: false })
   }
@@ -177,8 +203,8 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
     setTimer({ left: 0, running: false })
   }
 
-  const finish = () => {
-    if (doneCount < total && !window.confirm(t.confirmUnfinished)) return
+  const doFinish = () => {
+    setConfirmOpen(false)
     const session: WorkoutSession = {
       id: `session-${startedAt}`,
       date: getDayStamp(),
@@ -310,53 +336,68 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
 
         {/* جولات التمرين الحالي */}
         <div className="space-y-3">
-          {s.sets.map((st, i) => (
-            <div
-              key={i}
-              className={cn(
-                'rounded-2xl border p-4 transition-colors',
-                st.completed ? 'border-primary-soft bg-primary-soft/60' : 'border-line bg-surface',
-              )}
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-black text-ink-900">{t.setsDone} {st.setNumber}</span>
-                <span className="text-xs font-bold text-ink-500">{t.target}: {st.targetReps}</span>
-              </div>
-
-              <div className="mt-3 grid grid-cols-2 gap-3">
-                <Stepper
-                  label={t.weightKg}
-                  value={st.weightKg}
-                  onChange={(v) => setSet(i, { weightKg: v })}
-                  onStep={(d) => setSet(i, { weightKg: adjust(st.weightKg, d) })}
-                  step={2.5}
-                  mode="decimal"
-                />
-                <Stepper
-                  label={t.repsDone}
-                  value={st.actualReps}
-                  placeholder={lowerReps(pe.reps)}
-                  onChange={(v) => setSet(i, { actualReps: v })}
-                  onStep={(d) => setSet(i, { actualReps: adjust(st.actualReps, d) })}
-                  step={1}
-                  mode="numeric"
-                />
-              </div>
-
-              <button
-                type="button"
-                onClick={() => markDone(i)}
-                aria-pressed={st.completed}
+          {s.sets.map((st, i) => {
+            const wErr = weightInvalid(st.weightKg)
+            const rErr = repsInvalid(st.actualReps)
+            const invalid = wErr || rErr
+            return (
+              <div
+                key={i}
                 className={cn(
-                  'mt-3 flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold transition-colors',
-                  st.completed ? 'bg-primary text-white' : 'border border-line bg-beige text-ink-700 active:scale-[0.99]',
+                  'rounded-2xl border p-4 transition-colors',
+                  st.completed ? 'border-primary-soft bg-primary-soft/60' : 'border-line bg-surface',
                 )}
               >
-                <Icon name={st.completed ? 'CheckCircle2' : 'Check'} className="h-5 w-5" strokeWidth={st.completed ? 2 : 3} />
-                {st.completed ? t.setSaved : 'تم'}
-              </button>
-            </div>
-          ))}
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-black text-ink-900">{t.setsDone} {st.setNumber}</span>
+                  <span className="text-xs font-bold text-ink-500">{t.target}: {st.targetReps}</span>
+                </div>
+
+                <div className="mt-3 grid grid-cols-2 gap-3">
+                  <Stepper
+                    label={t.weightKg}
+                    value={st.weightKg}
+                    onChange={(v) => setSet(i, { weightKg: v })}
+                    onStep={(d) => setSet(i, { weightKg: adjust(st.weightKg, d, MAX_WEIGHT) })}
+                    step={2.5}
+                    mode="decimal"
+                    invalid={wErr}
+                  />
+                  <Stepper
+                    label={t.repsDone}
+                    value={st.actualReps}
+                    placeholder={lowerReps(pe.reps)}
+                    onChange={(v) => setSet(i, { actualReps: v })}
+                    onStep={(d) => setSet(i, { actualReps: adjust(st.actualReps, d, MAX_REPS) })}
+                    step={1}
+                    mode="numeric"
+                    invalid={rErr}
+                  />
+                </div>
+
+                {invalid && (
+                  <p className="mt-2 flex items-center gap-1.5 text-xs font-bold text-danger">
+                    <Icon name="AlertTriangle" className="h-3.5 w-3.5 shrink-0" />
+                    {wErr ? t.errWeight : t.errReps}
+                  </p>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => markDone(i)}
+                  aria-pressed={st.completed}
+                  disabled={!st.completed && invalid}
+                  className={cn(
+                    'mt-3 flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold transition-colors',
+                    st.completed ? 'bg-primary text-white' : 'border border-line bg-beige text-ink-700 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40',
+                  )}
+                >
+                  <Icon name={st.completed ? 'CheckCircle2' : 'Check'} className="h-5 w-5" strokeWidth={st.completed ? 2 : 3} />
+                  {st.completed ? t.setSaved : 'تم'}
+                </button>
+              </div>
+            )
+          })}
         </div>
 
         {/* شرح سريع */}
@@ -502,7 +543,7 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
             <Icon name="ChevronRight" className="h-5 w-5" />
           </button>
           {isLast ? (
-            <button type="button" onClick={finish} className="btn-primary flex-1 py-3.5 text-base">
+            <button type="button" onClick={() => setConfirmOpen(true)} className="btn-primary flex-1 py-3.5 text-base">
               <Icon name="CheckCircle2" className="h-5 w-5" />{t.finish}
             </button>
           ) : (
@@ -512,6 +553,28 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
           )}
         </div>
       </div>
+
+      {/* تأكيد إنهاء التمرين (داخل التطبيق — لا confirm متصفح) */}
+      {confirmOpen && (
+        <div className="fixed inset-0 z-40 flex items-end justify-center bg-ink-900/40 p-4 sm:items-center" role="dialog" aria-modal="true">
+          <div className="w-full max-w-sm rounded-2xl border border-line bg-surface p-6 shadow-card">
+            <span className="grid h-12 w-12 place-items-center rounded-full bg-primary-soft text-primary-c">
+              <Icon name="CheckCircle2" className="h-6 w-6" />
+            </span>
+            <h3 className="mt-4 text-lg font-black text-ink-900">{t.finishTitle}</h3>
+            <p className="mt-1 text-sm text-ink-500">{doneCount < total ? t.finishBodyUnfinished : t.finishBodyDone}</p>
+            <p className="mt-3 text-xs font-bold text-ink-700">{t.progress}: {doneCount}/{total}</p>
+            <div className="mt-5 flex flex-col gap-2">
+              <button type="button" onClick={doFinish} className="btn-primary w-full py-3 text-base">
+                <Icon name="CheckCircle2" className="h-5 w-5" />{t.confirmFinish}
+              </button>
+              <button type="button" onClick={() => setConfirmOpen(false)} className="btn-ghost w-full py-2.5 text-sm">
+                {t.keepGoing}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -534,11 +597,12 @@ interface StepperProps {
   placeholder?: string
   step: number
   mode: 'decimal' | 'numeric'
+  invalid?: boolean
   onChange: (v: string) => void
   onStep: (delta: number) => void
 }
 
-function Stepper({ label, value, placeholder, step, mode, onChange, onStep }: StepperProps) {
+function Stepper({ label, value, placeholder, step, mode, invalid, onChange, onStep }: StepperProps) {
   return (
     <div>
       <p className="mb-1 text-center text-[11px] font-bold text-ink-500">{label}</p>
@@ -547,8 +611,12 @@ function Stepper({ label, value, placeholder, step, mode, onChange, onStep }: St
           <Icon name="Minus" className="h-4 w-4" />
         </button>
         <input
-          className="w-full min-w-0 rounded-lg border border-line bg-beige px-1 text-center text-base font-black text-ink-900 focus:border-brand-500/50 focus:outline-none"
+          className={cn(
+            'w-full min-w-0 rounded-lg border bg-beige px-1 text-center text-base font-black text-ink-900 focus:outline-none',
+            invalid ? 'border-danger focus:border-danger' : 'border-line focus:border-brand-500/50',
+          )}
           inputMode={mode}
+          aria-invalid={invalid}
           value={value}
           placeholder={placeholder}
           onChange={(e) => onChange(e.target.value)}
