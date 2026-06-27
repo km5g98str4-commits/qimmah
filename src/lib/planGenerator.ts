@@ -1,14 +1,23 @@
 // مولّد الخطة بقواعد ثابتة (بلا أي AI/خادم).
 // يأخذ الملف الشخصي + الهدف ويولّد: أهداف، جدول تمرين، خطة أكل، التزامات، قياسات.
 
-import type { Profile, Targets, GoalType } from '@/types/profile'
+import type {
+  ActivityLevel,
+  ExperienceBand,
+  GoalType,
+  MuscleFocus,
+  Profile,
+  Targets,
+  TrainingLevel,
+} from '@/types/profile'
 import type { CommitmentPlan } from '@/types/progress'
 import type { MeasurementPlan } from '@/types/progress'
 import type { NutritionPlan, PlanMeal } from '@/types/nutrition'
-import type { WorkoutPlan } from '@/types/workout'
+import type { Muscle, WorkoutPlan } from '@/types/workout'
 import type { RoutineRow } from '@/lib/customization'
 import { computeTargets, calorieGoalFromGoalType, goalTypeLabel } from '@/lib/calculators'
 import { generatePlanFromTemplate } from '@/lib/workoutPlan'
+import { getExercise } from '@/data/exercises'
 import { getTemplate } from '@/data/workoutTemplates'
 import { createPlanMealFromTemplate, planTotals } from '@/lib/nutritionPlan'
 import { createPlanCommitment } from '@/lib/commitmentPlan'
@@ -22,15 +31,52 @@ export interface GeneratedPlan {
   commitmentPlan: CommitmentPlan
   measurementPlan: MeasurementPlan
   explanationAr: string
+  planLabelAr: string
   warningsAr: string[]
 }
 
-/** يختار قالب التمرين حسب القواعد. */
+const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n))
+
+/** مستوى التدريب من مدّة الخبرة. */
+export function levelFromExperience(band?: ExperienceBand): TrainingLevel {
+  if (band === 'lt1m' || band === '1to6m') return 'beginner'
+  if (band === '6to12m' || band === '1to2y') return 'intermediate'
+  if (band === 'gt2y') return 'advanced'
+  return 'intermediate'
+}
+
+/** مستوى النشاط مشتقّ من عدد أيام التمرين. */
+export function deriveActivityLevel(days: number): ActivityLevel {
+  if (days <= 2) return 'light'
+  if (days <= 4) return 'moderate'
+  if (days <= 6) return 'active'
+  return 'very_active'
+}
+
+/** وزن هدف منطقي مشتقّ من الوزن والهدف (حين لا يُسأل عنه صراحةً). */
+export function deriveTargetWeight(weightKg: number, gt: GoalType): number {
+  if (gt === 'cutting') return Math.round(weightKg * 0.92)
+  if (gt === 'bulking' || gt === 'strength') return Math.round(weightKg * 1.05)
+  return weightKg // recomposition / health / maintenance / returning
+}
+
+/** يختار قالب التمرين حسب القواعد (يراعي إمكانية الوصول والأدوات إن توفّرت). */
 export function recommendTemplateId(p: Profile): string {
-  if (p.workoutEnvironment === 'home') return 'home-workout'
-  const days = Math.max(1, Math.min(7, p.trainingDays))
+  const access = p.gymAccess ?? (p.workoutEnvironment === 'home' ? 'home' : 'full')
+  const equip = p.equipment ?? []
+  const days = clamp(p.trainingDays, 1, 7)
   const lvl = p.trainingLevel
   const gt = p.goalType
+
+  // بيئات محدودة الأدوات → تمارين مناسبة فقط
+  if (access === 'bodyweight' || access === 'home') return 'home-workout'
+  if (access === 'small') {
+    const hasBarbell = equip.includes('barbell')
+    const hasMachine = equip.includes('machine') || equip.includes('cable')
+    if (!hasBarbell && hasMachine) return 'machine-only'
+    if (!hasBarbell && !hasMachine) return 'home-workout'
+    // عنده بار → نكمل بمنطق النادي الكامل
+  }
 
   if (gt === 'returning') return days >= 4 ? 'beginner-gym' : 'full-body-3'
 
@@ -72,10 +118,27 @@ function dayType(nameEn: string): RoutineRow['type'] {
 }
 
 /** يبني جدولًا أسبوعيًا متّسقًا مع أيام القالب (تدوير الأيام عبر الأسبوع). */
-export function buildWeeklySchedule(templateId: string, trainingDays: number): RoutineRow[] {
+export function buildWeeklySchedule(
+  templateId: string,
+  trainingDays: number,
+  preferredDays?: number[],
+): RoutineRow[] {
   const tpl = getTemplate(templateId)
   const days = Math.max(1, Math.min(7, trainingDays))
-  const trainIdx = TRAIN_PATTERN[days] ?? TRAIN_PATTERN[3]
+  let trainIdx: number[]
+  if (preferredDays && preferredDays.length) {
+    trainIdx = [...new Set(preferredDays)].filter((i) => i >= 0 && i < 7).sort((a, b) => a - b).slice(0, days)
+    // أكمل من النمط الافتراضي إن اختار المستخدم أيامًا أقل من المطلوب
+    if (trainIdx.length < days) {
+      for (const i of TRAIN_PATTERN[days] ?? []) {
+        if (trainIdx.length >= days) break
+        if (!trainIdx.includes(i)) trainIdx.push(i)
+      }
+      trainIdx.sort((a, b) => a - b)
+    }
+  } else {
+    trainIdx = TRAIN_PATTERN[days] ?? TRAIN_PATTERN[3]
+  }
   const rows: RoutineRow[] = []
   let c = 0
   WEEKDAYS.forEach((d, i) => {
@@ -164,17 +227,91 @@ export function defaultMeasurementPlan(): MeasurementPlan {
   return { enabled: true, selectedTypeIds: ['weightKg', 'waistCm', 'bodyFatPercent', 'progressPhotoNote'] }
 }
 
+// عضلات كل تركيز — لزيادة حجم العمل عليها.
+const FOCUS_MUSCLES: Record<MuscleFocus, Muscle[]> = {
+  balanced: [],
+  upper: ['chest', 'back', 'shoulders', 'biceps', 'triceps'],
+  lower: ['quads', 'hamstrings', 'glutes', 'calves'],
+  core: ['core'],
+  chest: ['chest'],
+  back: ['back'],
+  shoulders: ['shoulders'],
+  arms: ['biceps', 'triceps'],
+}
+
+const COMPOUND_PATTERNS = new Set(['squat', 'hinge', 'push', 'pull', 'lunge'])
+
+/** يزيد مجموعة واحدة على تمارين العضلات المستهدفة (توزيع حجم العمل). */
+function applyMuscleFocus(plan: WorkoutPlan, focus: MuscleFocus): WorkoutPlan {
+  const muscles = FOCUS_MUSCLES[focus] ?? []
+  if (!muscles.length) return plan
+  const set = new Set(muscles)
+  return {
+    ...plan,
+    days: plan.days.map((d) => ({
+      ...d,
+      exercises: d.exercises.map((pe) => {
+        const ex = getExercise(pe.exerciseId)
+        if (ex && set.has(ex.primaryMuscle) && pe.sets < 5) return { ...pe, sets: pe.sets + 1 }
+        return pe
+      }),
+    })),
+  }
+}
+
+/** هدف القوة: تكرارات أقل وراحة أطول على المركّبات. */
+function applyStrengthScheme(plan: WorkoutPlan): WorkoutPlan {
+  return {
+    ...plan,
+    days: plan.days.map((d) => ({
+      ...d,
+      exercises: d.exercises.map((pe) => {
+        const ex = getExercise(pe.exerciseId)
+        if (ex && COMPOUND_PATTERNS.has(ex.movementPattern)) {
+          return { ...pe, reps: '4–6', restSec: Math.max(pe.restSec, 150) }
+        }
+        return pe
+      }),
+    })),
+  }
+}
+
+/** رجوع بعد انقطاع: تخفيف حجم الأسبوع الأول (مجموعة أقل، حد أدنى مجموعتان). */
+function applyDeload(plan: WorkoutPlan): WorkoutPlan {
+  return {
+    ...plan,
+    days: plan.days.map((d) => ({
+      ...d,
+      exercises: d.exercises.map((pe) => ({ ...pe, sets: Math.max(2, pe.sets - 1) })),
+    })),
+  }
+}
+
+/** اسم/وسم الخطة المختصر. */
+export function planLabel(p: Profile, templateId: string): string {
+  const tpl = getTemplate(templateId)
+  const days = clamp(p.trainingDays, 1, 7)
+  return `خطة ${goalTypeLabel(p.goalType)} · ${days} أيام${tpl ? ` · ${tpl.nameAr}` : ''}`
+}
+
 /** المولّد الكامل. */
 export function generatePlan(profile: Profile): GeneratedPlan {
   const p: Profile = { ...profile, goal: calorieGoalFromGoalType(profile.goalType) }
   const targets = computeTargets(p)
   const templateId = recommendTemplateId(p)
   const tpl = getTemplate(templateId)
-  const workoutPlan = generatePlanFromTemplate(templateId)
-  const weeklySchedule = buildWeeklySchedule(templateId, p.trainingDays)
+  const isReturning = p.goalType === 'returning' || p.consistency === 'returning'
+
+  let workoutPlan = generatePlanFromTemplate(templateId)
+  if (p.goalType === 'strength') workoutPlan = applyStrengthScheme(workoutPlan)
+  workoutPlan = applyMuscleFocus(workoutPlan, p.muscleFocus ?? 'balanced')
+  if (isReturning) workoutPlan = applyDeload(workoutPlan)
+
+  const weeklySchedule = buildWeeklySchedule(templateId, p.trainingDays, p.preferredDays)
   const { plan: nutritionPlan, warning: nutritionWarning } = generateNutrition(p, targets)
 
   const warnings: string[] = []
+  if (isReturning) warnings.push('خفّفنا حجم أسبوعك الأول للرجوع بأمان — زِد تدريجيًا بعدها.')
   if (p.trainingLevel === 'beginner' && p.trainingDays >= 5) {
     warnings.push('للمبتدئ ننصح بـ3–4 أيام في البداية لبناء الالتزام والاستشفاء.')
   }
@@ -198,6 +335,7 @@ export function generatePlan(profile: Profile): GeneratedPlan {
     commitmentPlan: generateCommitments(p.goalType),
     measurementPlan: defaultMeasurementPlan(),
     explanationAr,
+    planLabelAr: planLabel(p, templateId),
     warningsAr: warnings,
   }
 }

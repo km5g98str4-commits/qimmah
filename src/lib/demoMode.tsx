@@ -9,6 +9,7 @@ export function DemoModeProvider({ children }: { children: ReactNode }) {
   return <DemoModeContext.Provider value={true}>{children}</DemoModeContext.Provider>
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useIsDemo(): boolean {
   return useContext(DemoModeContext)
 }

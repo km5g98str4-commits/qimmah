@@ -3,25 +3,34 @@ import { StartView } from '@/views/StartView'
 import { LoginView } from '@/views/LoginView'
 import { SetupView } from '@/views/SetupView'
 import { DashboardView } from '@/views/DashboardView'
+import { WorkoutView } from '@/views/WorkoutView'
+import { ExerciseLibraryView } from '@/views/ExerciseLibraryView'
+import { NutritionView } from '@/views/NutritionView'
+import { ProgressView } from '@/views/ProgressView'
+import { ProfileView } from '@/views/ProfileView'
 import { DemoView } from '@/views/DemoView'
 import { SettingsView } from '@/views/SettingsView'
 import { PrivacyView } from '@/views/PrivacyView'
 import { TermsView } from '@/views/TermsView'
-import type { AppView } from '@/components/AppNav'
+import { MobileShell, type MainTab } from '@/components/MobileShell'
+import type { AppBadge } from '@/components/AppNav'
+import { useAuth } from '@/lib/authContext'
 import { loadOnboarding } from '@/lib/onboarding'
 import { applyLanguage } from '@/lib/appPreferences'
-import { type AppRoute, routeFromHash, setHashRoute } from '@/lib/appRoutes'
+import { type AppRoute, MAIN_TABS, routeFromHash, setHashRoute } from '@/lib/appRoutes'
+import { SuccessToast } from '@/components/SuccessToast'
 import { BUILD_LABEL } from '@/lib/buildInfo'
 
 // اللغة مثبّتة على العربية حاليًا (الإنجليزية مخفية حتى اكتمال الترجمة).
 const LANG = 'ar' as const
 
 /**
- * حراسة المسار: #/dashboard لا يُفتح أبدًا قبل إكمال إعداد حقيقي
+ * حراسة المسار: التبويبات الرئيسية لا تُفتح أبدًا قبل إكمال إعداد حقيقي
  * (وبالتالي لا تظهر بيانات افتراضية/نموذجية في اللوحة الحقيقية).
  */
 function guardRoute(route: AppRoute): AppRoute {
-  if (route === 'dashboard') {
+  // التبويبات الرئيسية + مكتبة التمارين كلها تتطلّب إعدادًا مكتملًا.
+  if (MAIN_TABS.includes(route) || route === 'exercises') {
     const ob = loadOnboarding()
     if (!ob.completed) return (ob.lastStep ?? 0) > 0 ? 'setup' : 'start'
   }
@@ -36,9 +45,12 @@ function initialRoute(): AppRoute {
 
 /** قشرة تطبيق قِمّة — توجيه بسيط عبر hash (بلا مكتبات خارجية). */
 export default function App() {
+  const auth = useAuth()
+  const badge: AppBadge = auth.user ? 'account' : 'guest'
+
   useEffect(() => {
     applyLanguage(LANG)
-    // معرّف البناء في الـ console — للتحقق من نشر النسخة الصحيحة (Netlify).
+    // معرّف البناء في الـ console — للتحقق من نشر النسخة الصحيحة.
     console.info(`%cقِمّة ${BUILD_LABEL}`, 'color:#F26A21;font-weight:bold')
   }, [])
 
@@ -63,7 +75,7 @@ export default function App() {
         setView(guardRoute(r))
       } else if (window.location.hash && window.location.hash !== '#/') {
         // مسار غير معروف (مثل #/xyz) → وجهة آمنة + تصحيح العنوان صراحةً.
-        // المسارات الصالحة (ومنها #/login) تُعالَج في الفرع أعلاه ولا تصل هنا.
+        // المسارات الصالحة كلها مُعرّفة في appRoutes ولا تصل هنا.
         const target = loadOnboarding().completed ? 'dashboard' : 'start'
         setView(target)
         setHashRoute(target)
@@ -94,10 +106,10 @@ export default function App() {
 
   const closeDemo = () => setView(loadOnboarding().completed ? 'dashboard' : 'start')
 
-  // تنقّل شريط التطبيق — يمرّ عبر الحراسة حتى لا تُفتح لوحة بلا إعداد.
-  const navigate = (v: AppView) => {
+  // تنقّل عام — يمرّ عبر الحراسة حتى لا تُفتح لوحة بلا إعداد.
+  const navigate = (v: AppRoute) => {
     if (v === 'setup') openSetup()
-    else setView(guardRoute(v as AppRoute))
+    else setView(guardRoute(v))
   }
 
   // ——— الشاشات العامة (قبل الدخول) ———
@@ -107,10 +119,10 @@ export default function App() {
       <StartView
         lang={LANG}
         hasStartedSetup={!ob.completed && (ob.lastStep ?? 0) > 0}
+        onBuildPlan={openSetup}
         onLogin={() => setView('login')}
         onContinueGuest={enterApp}
         onSeeDemo={() => setView('demo')}
-        onContinueSetup={openSetup}
       />
     )
   }
@@ -127,7 +139,6 @@ export default function App() {
     return <TermsView lang={LANG} onBack={() => window.history.back()} />
   }
 
-  // ——— شاشات داخل التطبيق ———
   if (view === 'setup') {
     return <SetupView onClose={closeSetup} initialStep={startStep} mode={setupMode} />
   }
@@ -149,12 +160,25 @@ export default function App() {
     )
   }
 
+  // ——— التبويبات الرئيسية داخل قشرة الجوال ———
   return (
-    <DashboardView
-      lang={LANG}
-      onNavigate={navigate}
-      showSuccess={showSuccess}
-      onDismissSuccess={dismissSuccess}
-    />
+    <>
+      <MobileShell
+        lang={LANG}
+        tab={(view === 'exercises' ? 'workout' : view) as MainTab}
+        badge={badge}
+        onNavigate={navigate}
+        onOpenSettings={() => setView('settings')}
+      >
+        {view === 'dashboard' && <DashboardView lang={LANG} onNavigate={navigate} />}
+        {view === 'workout' && <WorkoutView lang={LANG} onNavigate={navigate} />}
+        {view === 'exercises' && <ExerciseLibraryView lang={LANG} />}
+        {view === 'nutrition' && <NutritionView lang={LANG} />}
+        {view === 'progress' && <ProgressView lang={LANG} />}
+        {view === 'profile' && <ProfileView lang={LANG} onNavigate={navigate} />}
+      </MobileShell>
+
+      {showSuccess && <SuccessToast onClose={dismissSuccess} />}
+    </>
   )
 }
