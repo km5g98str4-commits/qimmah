@@ -62,7 +62,12 @@ function buildDemoCustomization(): Customization {
   const g = generatePlan(demoProfile)
   return {
     ...base,
-    identity: { ...base.identity, userName: 'أحمد محمد' },
+    // هوية عيّنة للنموذج فقط (واضح أنها تجريبية) — لا تُكتب في تخزين المستخدم.
+    identity: {
+      ...base.identity,
+      userName: 'أحمد (نموذج)',
+      mainGoal: 'الوصول إلى 78 كجم وتحسين شكل الجسم',
+    },
     profile: demoProfile,
     targets: g.targets,
     workoutPlan: g.workoutPlan,

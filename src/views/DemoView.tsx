@@ -33,10 +33,10 @@ export function DemoView({ lang, onNavigate, onBack }: DemoViewProps) {
     <DemoCustomizationProvider>
       <DemoModeProvider>
       <div className="min-h-screen bg-page">
-        <AppNav current="demo" lang={lang} onNavigate={onNavigate} />
+        <AppNav current="demo" lang={lang} badge="demo" onNavigate={onNavigate} />
 
-        {/* شريط تنويه النموذج */}
-        <div className="border-b border-line bg-beige">
+        {/* شريط تنويه النموذج — ثابت أعلى الصفحة طوال وضع النموذج */}
+        <div className="sticky top-16 z-30 border-b border-line bg-beige">
           <div className="container-page flex flex-wrap items-center justify-between gap-3 py-3">
             <div className="flex items-center gap-2.5">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1 text-[11px] font-black text-white">

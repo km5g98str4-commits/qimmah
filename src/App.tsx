@@ -1,25 +1,29 @@
 import { useCallback, useEffect, useState } from 'react'
 import { StartView } from '@/views/StartView'
+import { LoginView } from '@/views/LoginView'
 import { SetupView } from '@/views/SetupView'
 import { DashboardView } from '@/views/DashboardView'
 import { DemoView } from '@/views/DemoView'
+import { SettingsView } from '@/views/SettingsView'
 import { PrivacyView } from '@/views/PrivacyView'
 import { TermsView } from '@/views/TermsView'
-import { SettingsView } from '@/views/SettingsView'
 import type { AppView } from '@/components/AppNav'
-import { useCustomization } from '@/lib/customizationContext'
-import { type Customization, getDefaultCustomization } from '@/lib/customization'
-import { loadOnboarding, markCompleted } from '@/lib/onboarding'
+import { loadOnboarding } from '@/lib/onboarding'
 import { applyLanguage } from '@/lib/appPreferences'
 import { type AppRoute, routeFromHash, setHashRoute } from '@/lib/appRoutes'
 
 // اللغة مثبّتة على العربية حاليًا (الإنجليزية مخفية حتى اكتمال الترجمة).
 const LANG = 'ar' as const
 
-/** يطبّق حراسة الإعداد: #/dashboard لإعداد غير مكتمل → الإعداد إن بدأ، وإلا البداية. */
+/**
+ * حراسة المسار: #/dashboard لا يُفتح أبدًا قبل إكمال إعداد حقيقي
+ * (وبالتالي لا تظهر بيانات افتراضية/نموذجية في اللوحة الحقيقية).
+ */
 function guardRoute(route: AppRoute): AppRoute {
-  const ob = loadOnboarding()
-  if (route === 'dashboard' && !ob.completed) return (ob.lastStep ?? 0) > 0 ? 'setup' : 'start'
+  if (route === 'dashboard') {
+    const ob = loadOnboarding()
+    if (!ob.completed) return (ob.lastStep ?? 0) > 0 ? 'setup' : 'start'
+  }
   return route
 }
 
@@ -29,10 +33,8 @@ function initialRoute(): AppRoute {
   return loadOnboarding().completed ? 'dashboard' : 'start'
 }
 
-/** قشرة تطبيق قِمّة v2 — توجيه بسيط عبر hash (بلا مكتبات خارجية). */
+/** قشرة تطبيق قِمّة — توجيه بسيط عبر hash (بلا مكتبات خارجية). */
 export default function App() {
-  const { applyCustomization } = useCustomization()
-
   useEffect(() => {
     applyLanguage(LANG)
   }, [])
@@ -60,12 +62,18 @@ export default function App() {
     return () => window.removeEventListener('hashchange', onHash)
   }, [])
 
-  const openSetup = () => {
+  const openSetup = useCallback(() => {
     const ob = loadOnboarding()
     setSetupMode(ob.completed ? 'advanced' : 'onboarding')
     setStartStep(ob.completed ? 0 : (ob.lastStep ?? 0))
     setView('setup')
-  }
+  }, [])
+
+  /** دخول التطبيق بعد تسجيل الدخول أو المتابعة كضيف. */
+  const enterApp = useCallback(() => {
+    if (loadOnboarding().completed) setView('dashboard')
+    else openSetup()
+  }, [openSetup])
 
   const closeSetup = (completed?: boolean) => {
     const done = completed || loadOnboarding().completed
@@ -75,59 +83,40 @@ export default function App() {
 
   const closeDemo = () => setView(loadOnboarding().completed ? 'dashboard' : 'start')
 
-  // استيراد نسخة سابقة من ملف على الجهاز
-  const importFromFile = (file: File) => {
-    const reader = new FileReader()
-    reader.onload = () => {
-      try {
-        const p = JSON.parse(String(reader.result)) as Partial<Customization>
-        const base = getDefaultCustomization()
-        applyCustomization({
-          identity: { ...base.identity, ...(p.identity ?? {}) },
-          colors: { ...base.colors, ...(p.colors ?? {}) },
-          sections: { ...base.sections, ...(p.sections ?? {}) },
-          profile: { ...base.profile, ...(p.profile ?? {}) },
-          targets: { ...base.targets, ...(p.targets ?? {}) },
-          targetsMeta: { ...base.targetsMeta, ...(p.targetsMeta ?? {}) },
-          workoutPlan: p.workoutPlan ?? base.workoutPlan,
-          nutritionPlan: p.nutritionPlan ? { ...base.nutritionPlan, ...p.nutritionPlan } : base.nutritionPlan,
-          wellnessPlan: p.wellnessPlan ? { ...base.wellnessPlan, ...p.wellnessPlan } : base.wellnessPlan,
-          commitmentPlan: p.commitmentPlan ? { ...base.commitmentPlan, ...p.commitmentPlan } : base.commitmentPlan,
-          measurementPlan: p.measurementPlan ? { ...base.measurementPlan, ...p.measurementPlan } : base.measurementPlan,
-          workouts: p.workouts ?? base.workouts,
-          supplements: p.supplements ?? base.supplements,
-          meals: p.meals ?? base.meals,
-          metrics: p.metrics ?? base.metrics,
-          routine: p.routine ?? base.routine,
-        })
-        markCompleted()
-        setView('dashboard')
-      } catch {
-        /* ملف غير صالح — تجاهل */
-      }
-    }
-    reader.readAsText(file)
-  }
-
-  // تنقّل شريط التطبيق
+  // تنقّل شريط التطبيق — يمرّ عبر الحراسة حتى لا تُفتح لوحة بلا إعداد.
   const navigate = (v: AppView) => {
     if (v === 'setup') openSetup()
-    else setView(v)
+    else setView(guardRoute(v as AppRoute))
   }
 
+  // ——— الشاشات العامة (قبل الدخول) ———
   if (view === 'start') {
     const ob = loadOnboarding()
     return (
       <StartView
         lang={LANG}
         hasStartedSetup={!ob.completed && (ob.lastStep ?? 0) > 0}
-        onStartSetup={openSetup}
+        onLogin={() => setView('login')}
+        onContinueGuest={enterApp}
         onSeeDemo={() => setView('demo')}
-        onImportFile={importFromFile}
+        onContinueSetup={openSetup}
       />
     )
   }
 
+  if (view === 'login') {
+    return <LoginView lang={LANG} onSuccess={enterApp} onGuest={enterApp} onBack={() => setView('start')} />
+  }
+
+  if (view === 'privacy') {
+    return <PrivacyView lang={LANG} onBack={() => window.history.back()} />
+  }
+
+  if (view === 'terms') {
+    return <TermsView lang={LANG} onBack={() => window.history.back()} />
+  }
+
+  // ——— شاشات داخل التطبيق ———
   if (view === 'setup') {
     return <SetupView onClose={closeSetup} initialStep={startStep} mode={setupMode} />
   }
@@ -136,21 +125,13 @@ export default function App() {
     return <DemoView lang={LANG} onNavigate={navigate} onBack={closeDemo} />
   }
 
-  const backToDashboard = () => setView(loadOnboarding().completed ? 'dashboard' : 'start')
-
-  if (view === 'privacy') {
-    return <PrivacyView onBack={backToDashboard} />
-  }
-
-  if (view === 'terms') {
-    return <TermsView onBack={backToDashboard} />
-  }
-
   if (view === 'settings') {
     return (
       <SettingsView
-        onBack={backToDashboard}
-        onOpenSetup={openSetup}
+        lang={LANG}
+        onNavigate={navigate}
+        onEditPlan={openSetup}
+        onLogin={() => setView('login')}
         onOpenPrivacy={() => setView('privacy')}
         onOpenTerms={() => setView('terms')}
       />
@@ -161,8 +142,6 @@ export default function App() {
     <DashboardView
       lang={LANG}
       onNavigate={navigate}
-      onOpenSetup={openSetup}
-      onOpenSettings={() => setView('settings')}
       showSuccess={showSuccess}
       onDismissSuccess={dismissSuccess}
     />

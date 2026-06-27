@@ -22,10 +22,10 @@ export function CurrentGoal() {
             <div className="relative">
               <span className="chip inline-flex items-center gap-1.5 rounded-full bg-primary-soft px-3 py-1 text-xs font-bold text-primary-c">
                 <Icon name="Target" className="h-3.5 w-3.5" />
-                هدف {userName}
+                {userName?.trim() ? `هدف ${userName}` : 'هدفي'}
               </span>
               <p className="mt-5 text-2xl font-black leading-snug text-ink-900 sm:text-3xl">
-                {mainGoal}
+                {mainGoal?.trim() ? mainGoal : 'حدّد هدفك من «الإعدادات → تعديل خطتي».'}
               </p>
 
               <div className="mt-7">
