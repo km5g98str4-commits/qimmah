@@ -12,7 +12,7 @@ import type { MuscleId, MuscleStatus, MuscleCoverage, WeeklyCoverageResult } fro
 import type { WorkoutPlan } from '@/types/workout'
 import type { TrainingLevel } from '@/types/profile'
 import type { WorkoutSession } from './workoutSessions'
-import { muscleGroups, muscleLabelAr } from '@/data/muscleGroups'
+import { muscleGroups, muscleMap, muscleLabelAr } from '@/data/muscleGroups'
 import { getExercise } from '@/data/exercises'
 
 const HOUR = 3600_000
@@ -31,6 +31,13 @@ function levelTarget(min: number, max: number, level: TrainingLevel): number {
   if (level === 'beginner') return min
   if (level === 'advanced') return max
   return Math.round((min + max) / 2)
+}
+
+/** الهدف الأسبوعي المعدَّل (بالمجموعات) لعضلة واحدة حسب المستوى — للاستخدام في الواجهة. */
+export function weeklyTargetFor(muscleId: MuscleId, level: TrainingLevel = 'intermediate'): number {
+  const mg = muscleMap[muscleId]
+  if (!mg) return 0
+  return levelTarget(mg.weeklyTarget.min, mg.weeklyTarget.max, level)
 }
 
 /** ساعات منذ آخر تمرين. */
