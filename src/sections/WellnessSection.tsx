@@ -78,8 +78,14 @@ export function WellnessSection({ lang }: { lang: Lang }) {
           </div>
         </div>
 
-        {/* تنويه طبي */}
-        <p className="mt-6 flex items-start gap-2 rounded-2xl border border-gold-400/40 bg-gold-200/40 p-4 text-xs leading-relaxed text-ink-700">
+        {/* تنويه المكملات */}
+        <p className="mt-6 flex items-start gap-2 rounded-2xl border border-line bg-surface p-4 text-xs leading-relaxed text-ink-600">
+          <Icon name="Info" className="mt-0.5 h-4 w-4 shrink-0 text-primary-c" />
+          {t.suppSafety}
+        </p>
+
+        {/* تنويه طبي للأدوية */}
+        <p className="mt-3 flex items-start gap-2 rounded-2xl border border-gold-400/40 bg-gold-200/40 p-4 text-xs leading-relaxed text-ink-700">
           <Icon name="AlertTriangle" className="mt-0.5 h-4 w-4 shrink-0 text-gold-600" />
           {t.medSafety}
         </p>

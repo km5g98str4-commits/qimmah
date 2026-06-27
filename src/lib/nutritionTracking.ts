@@ -1,29 +1,52 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useSyncExternalStore } from 'react'
 import { getDayStamp } from './today'
 import { useIsDemo } from './demoMode'
+import { saveNutritionLog, saveWaterLog } from './historyStore'
 
-// تتبّع التغذية اليومي — وجبات منجزة + كمية الماء، يُصفّر مع تغيّر اليوم.
+// تتبّع التغذية اليومي — وجبات الخطة المنجزة + وجبات مسجّلة (سعرات/بروتين) + كمية الماء.
+// يُصفّر تلقائيًا مع تغيّر اليوم. يستخدم مخزنًا مشتركًا (store) حتى تبقى كل المكوّنات متزامنة
+// (مثل قسم «اليوم» ومسجّل الوجبات على نفس الصفحة) بلا تعارض في الكتابة.
 
 export const NUTRITION_TODAY_KEY = 'qimmah:nutritionToday:v1'
+
+/** عنصر مسجّل في سجل اليوم — من قاعدة الأطعمة أو إضافة سريعة مخصّصة. */
+export interface LoggedFood {
+  id: string
+  label: string
+  servings: number
+  calories: number
+  protein: number
+  carbs: number
+  fat: number
+  note?: string
+}
 
 export interface NutritionTodayState {
   date: string
   doneMeals: Record<string, boolean>
   waterMl: number
+  log: LoggedFood[]
 }
 
 function fresh(): NutritionTodayState {
-  return { date: getDayStamp(), doneMeals: {}, waterMl: 0 }
+  return { date: getDayStamp(), doneMeals: {}, waterMl: 0, log: [] }
 }
 
-export function loadNutritionToday(): NutritionTodayState {
+function readStorage(): NutritionTodayState {
   if (typeof window === 'undefined') return fresh()
   const today = getDayStamp()
   try {
     const raw = window.localStorage.getItem(NUTRITION_TODAY_KEY)
     if (raw) {
-      const p = JSON.parse(raw) as NutritionTodayState
-      if (p && p.date === today && p.doneMeals) return { date: today, doneMeals: p.doneMeals, waterMl: p.waterMl || 0 }
+      const p = JSON.parse(raw) as Partial<NutritionTodayState>
+      if (p && p.date === today && p.doneMeals) {
+        return {
+          date: today,
+          doneMeals: p.doneMeals,
+          waterMl: p.waterMl || 0,
+          log: Array.isArray(p.log) ? p.log : [],
+        }
+      }
     }
   } catch {
     /* تجاهل */
@@ -33,65 +56,146 @@ export function loadNutritionToday(): NutritionTodayState {
   return f
 }
 
+export function loadNutritionToday(): NutritionTodayState {
+  return readStorage()
+}
+
 export function saveNutritionToday(state: NutritionTodayState): void {
   if (typeof window === 'undefined') return
   window.localStorage.setItem(NUTRITION_TODAY_KEY, JSON.stringify(state))
 }
 
-/** هوك تتبّع التغذية اليومي مع تصفير عند تغيّر اليوم. */
+/** مجاميع السعرات والماكروز من سجل اليوم. */
+export function logTotals(log: LoggedFood[]) {
+  return log.reduce(
+    (acc, e) => ({
+      calories: acc.calories + e.calories,
+      protein: acc.protein + e.protein,
+      carbs: acc.carbs + e.carbs,
+      fat: acc.fat + e.fat,
+    }),
+    { calories: 0, protein: 0, carbs: 0, fat: 0 },
+  )
+}
+
+// ===== مخزن مشترك (module-level) =====
+// مرجع واحد لكل وضع (حقيقي/تجريبي) يضمن تزامن كل النسخ بلا تعارض كتابة.
+
+const listeners = new Set<() => void>()
+let realCache: NutritionTodayState | null = null
+let demoCache: NutritionTodayState | null = null
+
+function snapshot(demo: boolean): NutritionTodayState {
+  if (demo) {
+    if (!demoCache) demoCache = fresh()
+    return demoCache
+  }
+  if (!realCache) realCache = readStorage()
+  return realCache
+}
+
+function notify() {
+  listeners.forEach((l) => l())
+}
+
+function setState(demo: boolean, mutate: (prev: NutritionTodayState) => NutritionTodayState): void {
+  const prev = snapshot(demo)
+  const next = mutate(prev)
+  if (demo) {
+    demoCache = next
+  } else {
+    realCache = next
+    saveNutritionToday(next)
+    // عكس الحالة في المتجر التاريخي الدائم (لا يُصفّر مع تغيّر اليوم).
+    saveNutritionLog(next.date, { doneMeals: next.doneMeals, waterMl: next.waterMl })
+    saveWaterLog(next.date, next.waterMl)
+  }
+  notify()
+}
+
+function rolloverIfNeeded(demo: boolean): void {
+  const today = getDayStamp()
+  const cur = snapshot(demo)
+  if (cur.date !== today) setState(demo, () => fresh())
+}
+
+// معرّف بسيط لعناصر السجل بلا اعتماد على Date.now (يكفي للتمييز محليًا).
+let logSeq = 0
+function nextLogId(): string {
+  logSeq += 1
+  return `log-${logSeq}-${Math.round(performance.now())}`
+}
+
+/** هوك تتبّع التغذية اليومي مع تصفير عند تغيّر اليوم — مزامَن عبر مخزن مشترك. */
 export function useNutritionToday() {
   const demo = useIsDemo()
-  const [state, setState] = useState<NutritionTodayState>(() => (demo ? fresh() : loadNutritionToday()))
-  const persist = (s: NutritionTodayState) => {
-    if (!demo) saveNutritionToday(s)
-  }
+  const subscribe = useCallback((cb: () => void) => {
+    listeners.add(cb)
+    return () => {
+      listeners.delete(cb)
+    }
+  }, [])
+  const state = useSyncExternalStore(
+    subscribe,
+    () => snapshot(demo),
+    () => snapshot(demo),
+  )
 
   useEffect(() => {
-    const check = () => {
-      const today = getDayStamp()
-      setState((prev) => {
-        if (prev.date === today) return prev
-        const f = fresh()
-        persist(f)
-        return f
-      })
+    const check = () => rolloverIfNeeded(demo)
+    const onStorage = (e: StorageEvent) => {
+      // مزامنة بين التبويبات (الوضع الحقيقي فقط)
+      if (!demo && e.key === NUTRITION_TODAY_KEY) {
+        realCache = readStorage()
+        notify()
+      }
     }
     window.addEventListener('focus', check)
     document.addEventListener('visibilitychange', check)
+    window.addEventListener('storage', onStorage)
     return () => {
       window.removeEventListener('focus', check)
       document.removeEventListener('visibilitychange', check)
+      window.removeEventListener('storage', onStorage)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [demo])
 
-  const toggleMeal = useCallback((mealId: string) => {
-    setState((prev) => {
-      const next = { ...prev, doneMeals: { ...prev.doneMeals, [mealId]: !prev.doneMeals[mealId] } }
-      persist(next)
-      return next
-    })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  const toggleMeal = useCallback(
+    (mealId: string) => {
+      setState(demo, (prev) => ({ ...prev, doneMeals: { ...prev.doneMeals, [mealId]: !prev.doneMeals[mealId] } }))
+    },
+    [demo],
+  )
 
-  const addWater = useCallback((ml: number) => {
-    setState((prev) => {
-      const next = { ...prev, waterMl: Math.max(0, prev.waterMl + ml) }
-      persist(next)
-      return next
-    })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  const addWater = useCallback(
+    (ml: number) => {
+      setState(demo, (prev) => ({ ...prev, waterMl: Math.max(0, prev.waterMl + ml) }))
+    },
+    [demo],
+  )
 
   const resetWater = useCallback(() => {
-    setState((prev) => {
-      const next = { ...prev, waterMl: 0 }
-      persist(next)
-      return next
-    })
-  }, [])
+    setState(demo, (prev) => ({ ...prev, waterMl: 0 }))
+  }, [demo])
+
+  /** إضافة عنصر للسجل (سعرات/ماكروز). يُولَّد المعرّف تلقائيًا إن لم يُمرَّر. */
+  const addLog = useCallback(
+    (entry: Omit<LoggedFood, 'id'> & { id?: string }) => {
+      const item: LoggedFood = { ...entry, id: entry.id ?? nextLogId() }
+      setState(demo, (prev) => ({ ...prev, log: [...prev.log, item] }))
+    },
+    [demo],
+  )
+
+  const removeLog = useCallback(
+    (id: string) => {
+      setState(demo, (prev) => ({ ...prev, log: prev.log.filter((e) => e.id !== id) }))
+    },
+    [demo],
+  )
 
   const isMealDone = useCallback((mealId: string) => !!state.doneMeals[mealId], [state])
+  const totals = logTotals(state.log)
 
-  return { state, toggleMeal, addWater, resetWater, isMealDone }
+  return { state, totals, toggleMeal, addWater, resetWater, addLog, removeLog, isMealDone }
 }

@@ -1,9 +1,11 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { Icon } from '@/components/Icon'
 import { ProgressBar } from '@/components/ProgressBar'
 import { cn } from '@/lib/cn'
 import { useCustomization } from '@/lib/customizationContext'
-import { useToday } from '@/lib/today'
+import { useToday, weekdayName } from '@/lib/today'
+import { TodayWorkoutHero } from '@/sections/TodayWorkoutHero'
+import { getTemplate } from '@/data/workoutTemplates'
 import { commitmentName } from '@/lib/commitmentPlan'
 import { useCommitmentsToday } from '@/lib/commitmentTracking'
 import type { Lang } from '@/lib/appPreferences'
@@ -34,12 +36,15 @@ export function Today({ lang, onStartWorkout }: TodayProps) {
   const wellnessToday = useWellnessToday()
   const commitmentsToday = useCommitmentsToday()
   const { userName } = customization.identity
-  const tw = getStrings(lang).workout
   const tn = getStrings(lang).nutrition
   const twell = getStrings(lang).wellness
   const tc = getStrings(lang).commit
   const planDay = todayPlanDay(customization.workoutPlan)
   const finishedToday = todaysFinishedSession()
+  const splitName = (() => {
+    const tpl = getTemplate(customization.workoutPlan.templateId)
+    return tpl ? (lang === 'en' ? tpl.nameEn : tpl.nameAr) : undefined
+  })()
   const np = customization.nutritionPlan
   const wp = customization.wellnessPlan
   const cp = customization.commitmentPlan
@@ -49,7 +54,9 @@ export function Today({ lang, onStartWorkout }: TodayProps) {
     () => [
       {
         id: 'w',
-        title: planDay ? (lang === 'en' ? planDay.nameEn : planDay.nameAr) : 'تمرين اليوم',
+        title: planDay
+          ? `${weekdayName(lang === 'en' ? 'en' : 'ar')} — ${lang === 'en' ? planDay.nameEn : planDay.nameAr}`
+          : 'تمرين اليوم',
         icon: 'Dumbbell',
         rows: (planDay?.exercises ?? []).map<TodayRow>((pe, i) => ({
           key: `w:${i}`,
@@ -82,23 +89,6 @@ export function Today({ lang, onStartWorkout }: TodayProps) {
             <p className="mt-1 text-sm text-ink-500">
               علّم كل شي تخلّصه — وتابع التزامك خطوة بخطوة.
             </p>
-
-            {/* ابدأ تمريني / حالة الإنجاز */}
-            {onStartWorkout && planDay && (
-              <div className="mt-4">
-                {finishedToday ? (
-                  <span className="inline-flex items-center gap-1.5 rounded-xl bg-primary-soft px-3 py-2 text-sm font-bold text-primary-c">
-                    <Icon name="CheckCircle2" className="h-4 w-4" />
-                    {tw.completedToday}
-                  </span>
-                ) : (
-                  <button type="button" onClick={onStartWorkout} className="btn-primary px-5 py-3 text-base">
-                    <Icon name="Dumbbell" className="h-5 w-5" />
-                    {tw.start}
-                  </button>
-                )}
-              </div>
-            )}
           </div>
 
           <div className="w-full sm:w-72">
@@ -119,6 +109,21 @@ export function Today({ lang, onStartWorkout }: TodayProps) {
             </button>
           </div>
         </div>
+
+        {/* بطاقة تمرين اليوم النشطة */}
+        {planDay && (
+          <div className="mt-6">
+            <TodayWorkoutHero
+              lang={lang}
+              day={planDay}
+              splitName={splitName}
+              finished={!!finishedToday}
+              onStart={onStartWorkout}
+              waterLiters={np.enabled ? np.targetWaterLiters : undefined}
+              proteinG={np.enabled ? np.targetProtein : undefined}
+            />
+          </div>
+        )}
 
         {/* بطاقات المجموعات */}
         <div className="mt-6 grid gap-5 lg:grid-cols-2">
@@ -259,6 +264,7 @@ export function Today({ lang, onStartWorkout }: TodayProps) {
                   {tn.resetWater}
                 </button>
               </div>
+              <CustomWater lang={lang} onAdd={nutritionToday.addWater} />
             </div>
           </div>
         )}
@@ -359,6 +365,48 @@ function MiniTarget({ icon, label, value }: { icon: string; label: string; value
       <Icon name={icon} className="mx-auto h-4 w-4 text-primary-c" />
       <p className="mt-1 text-sm font-black text-ink-900">{value}</p>
       <p className="text-[10px] text-ink-400">{label}</p>
+    </div>
+  )
+}
+
+/** إدخال كمية ماء مخصّصة بالمل تُضاف لإجمالي اليوم. */
+function CustomWater({ lang, onAdd }: { lang: Lang; onAdd: (ml: number) => void }) {
+  const tn = getStrings(lang).nutrition
+  const [open, setOpen] = useState(false)
+  const [ml, setMl] = useState('')
+
+  const submit = () => {
+    const amount = Math.round(Number(ml) || 0)
+    if (amount > 0) onAdd(amount)
+    setMl('')
+    setOpen(false)
+  }
+
+  if (!open) {
+    return (
+      <button type="button" onClick={() => setOpen(true)} className="btn-ghost mt-2 px-3 py-2 text-xs">
+        <Icon name="Plus" className="h-3.5 w-3.5" />
+        {tn.customWater}
+      </button>
+    )
+  }
+
+  return (
+    <div className="mt-2 flex items-center gap-2">
+      <input
+        type="number"
+        min="1"
+        autoFocus
+        value={ml}
+        onChange={(e) => setMl(e.target.value)}
+        onKeyDown={(e) => { if (e.key === 'Enter') submit() }}
+        placeholder={tn.customWaterPlaceholder}
+        className="w-40 rounded-lg border border-line bg-page px-3 py-2 text-xs text-ink-900 outline-none focus:border-primary-c"
+      />
+      <button type="button" onClick={submit} className="btn-primary px-3 py-2 text-xs">{tn.customWaterAdd}</button>
+      <button type="button" onClick={() => { setOpen(false); setMl('') }} aria-label={tn.close} className="btn-ghost px-2 py-2 text-xs">
+        <Icon name="X" className="h-3.5 w-3.5" />
+      </button>
     </div>
   )
 }

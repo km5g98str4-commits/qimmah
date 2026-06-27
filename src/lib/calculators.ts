@@ -86,12 +86,15 @@ function bmrFor(gender: Gender, weight: number, height: number, age: number): nu
   return baseline - 78 // متوسط تقريبي بين الذكر والأنثى
 }
 
+// تنبيه: مؤشر BMI لا يفرّق بين العضلات والدهون — نستخدم صياغة محايدة لا تحكم على الجسم.
+export const BMI_NOTE = 'مؤشر BMI لا يفرّق بين العضلات والدهون، لذلك يُستخدم كمؤشر عام فقط.'
+
 function bmiLabelFor(bmi: number): string {
   if (bmi <= 0) return ''
-  if (bmi < 18.5) return 'نقص وزن'
-  if (bmi < 25) return 'وزن طبيعي'
-  if (bmi < 30) return 'زيادة وزن'
-  return 'سمنة'
+  if (bmi < 18.5) return 'حسب BMI: أقل من الطبيعي'
+  if (bmi < 25) return 'حسب BMI: ضمن النطاق الطبيعي'
+  if (bmi < 30) return 'حسب BMI: أعلى من الطبيعي'
+  return 'حسب BMI: أعلى من الطبيعي بوضوح'
 }
 
 function calorieFloor(gender: Gender): number {
@@ -196,9 +199,9 @@ export function computeTargets(p: Profile): Targets {
   }
 }
 
-/** ملف شخصي افتراضي للعرض/الانطلاق. */
+/** ملف شخصي افتراضي للانطلاق — بلا اسم حقيقي (يُدخله المستخدم في الإعداد). */
 export const defaultProfile: Profile = {
-  name: 'أحمد محمد',
+  name: '',
   gender: 'male',
   age: 24,
   heightCm: 178,

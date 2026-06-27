@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useIsDemo } from './demoMode'
+import { saveDailyLog } from './historyStore'
 
 // حالة «اليوم» — علامات الإنجاز اليومية، تُحفظ محليًا وتُصفّر تلقائيًا عند تغيّر اليوم.
 // نموذج بسيط: تاريخ اليوم + خريطة مفاتيح منجزة (key = "group:index").
@@ -21,6 +22,17 @@ export function getDayStamp(d = new Date()): string {
 
 function freshState(): TodayState {
   return { date: getDayStamp(), done: {} }
+}
+
+/** اسم يوم الأسبوع بالعربية/الإنجليزية (مثال: «الأحد» / «Sunday»). */
+export function weekdayName(lang: 'ar' | 'en', d = new Date()): string {
+  try {
+    return new Intl.DateTimeFormat(lang === 'en' ? 'en-US' : 'ar', { weekday: 'long' }).format(d)
+  } catch {
+    const ar = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت']
+    const en = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+    return (lang === 'en' ? en : ar)[d.getDay()]
+  }
 }
 
 /** يقرأ حالة اليوم؛ وإن كان المحفوظ ليوم سابق يبدأ صفحة جديدة (تصفير). */
@@ -51,7 +63,10 @@ export function useToday() {
   const demo = useIsDemo()
   const [state, setState] = useState<TodayState>(() => (demo ? freshState() : loadToday()))
   const persist = (s: TodayState) => {
-    if (!demo) saveToday(s)
+    if (demo) return
+    saveToday(s)
+    // عكس علامات اليوم في المتجر التاريخي الدائم.
+    saveDailyLog(s.date, { done: s.done })
   }
 
   // تحقّق من تغيّر اليوم عند العودة للصفحة (لو بقيت مفتوحة بعد منتصف الليل)

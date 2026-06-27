@@ -7,6 +7,7 @@ import type { WizardCtx } from '../stepProps'
 import type { PlanDay, PlanExercise, WorkoutPlan } from '@/types/workout'
 import { workoutTemplates } from '@/data/workoutTemplates'
 import { createPlanExercise, generatePlanFromTemplate, planExerciseName, planExerciseVideo } from '@/lib/workoutPlan'
+import { analyzeWorkoutBalance } from '@/lib/workoutValidation'
 
 const smallInput =
   'w-full rounded-lg border border-line bg-beige px-2.5 py-1.5 text-sm text-ink-900 focus:border-brand-500/50 focus:outline-none focus:ring-2 focus:ring-brand-500/30'
@@ -19,6 +20,7 @@ export function StepWorkoutTemplate({ ctx }: { ctx: WizardCtx }) {
   const [pickerDayId, setPickerDayId] = useState<string | null>(null)
 
   const hasContent = plan.days.some((d) => d.exercises.length > 0)
+  const balanceWarnings = analyzeWorkoutBalance(plan)
 
   const chooseTemplate = (id: string) => {
     if (id === plan.templateId) return
@@ -123,6 +125,18 @@ export function StepWorkoutTemplate({ ctx }: { ctx: WizardCtx }) {
           )
         })}
       </div>
+
+      {/* تنبيهات توازن الخطة (غير معطِّلة) */}
+      {hasContent && balanceWarnings.length > 0 && (
+        <div className="mt-6 space-y-2">
+          {balanceWarnings.map((w, i) => (
+            <div key={i} className="flex items-start gap-2 rounded-xl border border-gold-400/40 bg-gold-200/40 p-3 text-sm text-ink-700">
+              <Icon name="AlertTriangle" className="mt-0.5 h-4 w-4 shrink-0 text-gold-600" />
+              <span>{w.message}</span>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* أيام الخطة القابلة للتعديل */}
       <div className="mt-8 space-y-5">

@@ -1,5 +1,7 @@
 // أنواع مكتبة التمارين وقوالب الجداول وخطة التمرين (Qimmah v2).
 
+import type { MuscleId } from './muscles'
+
 export type Muscle =
   | 'chest'
   | 'back'
@@ -25,8 +27,10 @@ export type MovementPattern =
   | 'carry'
   | 'core'
   | 'cardio'
+  | 'mobility'
 export type ExEnvironment = 'gym' | 'home' | 'both'
-export type VideoSource = 'official' | 'trusted' | 'custom'
+// مصدر الفيديو: بحث يوتيوب موثوق، أو فيديو موثوق محدّد، أو مخصّص من المستخدم.
+export type VideoSource = 'official' | 'trusted' | 'custom' | 'youtube_search' | 'trusted_video'
 
 export interface Exercise {
   id: string
@@ -34,6 +38,10 @@ export interface Exercise {
   nameEn: string
   primaryMuscle: Muscle
   secondaryMuscles: string[]
+  /** العضلات الأساسية التفصيلية (هوية كمال الأجسام) — للخريطة وحساب التغطية. */
+  primaryMusclesDetailed: MuscleId[]
+  /** العضلات الثانوية التفصيلية. */
+  secondaryMusclesDetailed: MuscleId[]
   equipment: string[]
   level: ExLevel
   movementPattern: MovementPattern
@@ -46,6 +54,9 @@ export interface Exercise {
   alternatives: string[]
   notesAr: string
   notesEn: string
+  techniqueTipsAr: string[]
+  commonMistakesAr: string[]
+  safetyNotesAr: string[]
 }
 
 export interface TemplateDay {

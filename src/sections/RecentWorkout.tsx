@@ -1,13 +1,46 @@
+import { useMemo } from 'react'
 import { Icon } from '@/components/Icon'
 import { SectionHeading } from '@/components/SectionHeading'
+import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
-import { lastSession } from '@/lib/workoutSessions'
+import { lastSession, loadSessions } from '@/lib/workoutSessions'
+import { loadHistory } from '@/lib/exerciseHistory'
+import { computeWeeklyCoverage } from '@/lib/muscleCoverage'
+import { generateInsights, type InsightTone } from '@/lib/trainingInsights'
+import { useCustomization } from '@/lib/customizationContext'
 
-/** قسم «آخر تمرين» — ملخّص مختصر لآخر جلسة محفوظة. */
+const TONE_CLS: Record<InsightTone, string> = {
+  success: 'border-success/30 bg-success/10 text-success',
+  warning: 'border-gold-400/40 bg-gold-200/40 text-gold-600',
+  danger: 'border-danger/30 bg-danger/10 text-danger',
+  info: 'border-line bg-beige text-ink-700',
+}
+
+const TONE_ICON: Record<InsightTone, string> = {
+  success: 'TrendingUp',
+  warning: 'Minus',
+  danger: 'AlertTriangle',
+  info: 'Activity',
+}
+
+/** قسم «آخر تمرين» — ملخّص مختصر لآخر جلسة + ملاحظات الذكاء التدريبي. */
 export function RecentWorkout({ lang }: { lang: Lang }) {
   const t = getStrings(lang).workout
+  const { customization } = useCustomization()
   const session = lastSession()
+
+  const insights = useMemo(() => {
+    const sessions = loadSessions()
+    if (!sessions.length) return []
+    const coverage = computeWeeklyCoverage({
+      sessions,
+      plan: customization.workoutPlan,
+      level: customization.profile.trainingLevel,
+    })
+    return generateInsights({ sessions, history: loadHistory(), coverage })
+  }, [customization.workoutPlan, customization.profile.trainingLevel])
+
   if (!session) return null
 
   const completed = session.exercises.filter((e) => e.completed).length
@@ -25,6 +58,27 @@ export function RecentWorkout({ lang }: { lang: Lang }) {
           <Stat icon="CheckCircle2" label="تمارين مكتملة" value={`${completed}/${total}`} />
           <Stat icon="Flame" label="تمارين صعبة" value={`${hard}`} />
         </div>
+
+        {/* ملاحظات الذكاء التدريبي */}
+        {insights.length > 0 && (
+          <div className="mt-6">
+            <h3 className="mb-3 flex items-center gap-2 text-sm font-bold text-ink-900">
+              <Icon name="Sparkles" className="h-4 w-4 text-primary-c" />
+              ملاحظات الذكاء التدريبي
+            </h3>
+            <ul className="grid gap-2.5 sm:grid-cols-2">
+              {insights.slice(0, 6).map((it) => (
+                <li
+                  key={it.id}
+                  className={cn('flex items-start gap-2 rounded-xl border p-3 text-sm leading-relaxed', TONE_CLS[it.tone])}
+                >
+                  <Icon name={TONE_ICON[it.tone]} className="mt-0.5 h-4 w-4 shrink-0" />
+                  <span>{it.text}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
     </section>
   )

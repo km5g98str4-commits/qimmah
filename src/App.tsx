@@ -3,6 +3,9 @@ import { StartView } from '@/views/StartView'
 import { SetupView } from '@/views/SetupView'
 import { DashboardView } from '@/views/DashboardView'
 import { DemoView } from '@/views/DemoView'
+import { PrivacyView } from '@/views/PrivacyView'
+import { TermsView } from '@/views/TermsView'
+import { SettingsView } from '@/views/SettingsView'
 import type { AppView } from '@/components/AppNav'
 import { useCustomization } from '@/lib/customizationContext'
 import { type Customization, getDefaultCustomization } from '@/lib/customization'
@@ -133,11 +136,33 @@ export default function App() {
     return <DemoView lang={LANG} onNavigate={navigate} onBack={closeDemo} />
   }
 
+  const backToDashboard = () => setView(loadOnboarding().completed ? 'dashboard' : 'start')
+
+  if (view === 'privacy') {
+    return <PrivacyView onBack={backToDashboard} />
+  }
+
+  if (view === 'terms') {
+    return <TermsView onBack={backToDashboard} />
+  }
+
+  if (view === 'settings') {
+    return (
+      <SettingsView
+        onBack={backToDashboard}
+        onOpenSetup={openSetup}
+        onOpenPrivacy={() => setView('privacy')}
+        onOpenTerms={() => setView('terms')}
+      />
+    )
+  }
+
   return (
     <DashboardView
       lang={LANG}
       onNavigate={navigate}
       onOpenSetup={openSetup}
+      onOpenSettings={() => setView('settings')}
       showSuccess={showSuccess}
       onDismissSuccess={dismissSuccess}
     />

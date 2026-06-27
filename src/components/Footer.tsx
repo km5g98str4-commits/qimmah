@@ -37,10 +37,14 @@ export function Footer() {
           <p>
             © {product.year} {brandName}. {product.rightsNote}
           </p>
-          <p className="flex items-center gap-1.5">
-            {product.footerNote}
-            <Icon name="Sparkles" className="h-3.5 w-3.5 text-gold-400" />
-          </p>
+          <div className="flex items-center gap-4">
+            <a href="#/privacy" className="text-ink-500 transition-colors hover:text-brand-300">الخصوصية</a>
+            <a href="#/terms" className="text-ink-500 transition-colors hover:text-brand-300">الشروط</a>
+            <p className="flex items-center gap-1.5">
+              {product.footerNote}
+              <Icon name="Sparkles" className="h-3.5 w-3.5 text-gold-400" />
+            </p>
+          </div>
         </div>
       </div>
     </footer>

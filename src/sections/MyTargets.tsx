@@ -1,7 +1,7 @@
 import { SectionHeading } from '@/components/SectionHeading'
 import { Icon } from '@/components/Icon'
 import { useCustomization } from '@/lib/customizationContext'
-import { targetCaloriesFor } from '@/lib/calculators'
+import { BMI_NOTE, targetCaloriesFor } from '@/lib/calculators'
 
 /** قسم «حساباتي» — ملخّص الأهداف المقدّرة في الصفحة الرئيسية. */
 export function MyTargets() {
@@ -41,6 +41,12 @@ export function MyTargets() {
             </div>
           ))}
         </div>
+
+        {/* تنبيه مؤشر BMI */}
+        <p className="mt-4 flex items-start gap-2 text-xs text-ink-400">
+          <Icon name="Info" className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+          {BMI_NOTE}
+        </p>
 
         {/* اقتراح التمرين */}
         <div className="mt-4 flex items-center gap-3 rounded-2xl border border-line bg-surface p-5">

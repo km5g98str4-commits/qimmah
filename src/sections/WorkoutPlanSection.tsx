@@ -1,8 +1,11 @@
 import { SectionHeading } from '@/components/SectionHeading'
 import { Icon } from '@/components/Icon'
+import { MuscleChips } from '@/components/MuscleChips'
 import { useCustomization } from '@/lib/customizationContext'
 import { planExerciseName, planExerciseVideo } from '@/lib/workoutPlan'
+import { getExercise } from '@/data/exercises'
 import { getRecord } from '@/lib/exerciseHistory'
+import { getCommonMistakes, getSafetyNotes, getTechniqueTips, getVideoLabel } from '@/lib/exerciseGuidance'
 import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
 
@@ -32,6 +35,7 @@ export function WorkoutPlanSection({ lang }: { lang: Lang }) {
                 <ul className="divide-y divide-line">
                   {day.exercises.map((pe) => {
                     const rec = getRecord(pe.exerciseId)
+                    const ex = getExercise(pe.exerciseId)
                     return (
                       <li key={pe.id} className="p-4">
                         <div className="flex items-start justify-between gap-3">
@@ -41,6 +45,13 @@ export function WorkoutPlanSection({ lang }: { lang: Lang }) {
                               {pe.sets}×{pe.reps} · {t.rest} {pe.restSec}ث
                               {pe.startingWeight ? ` · ${pe.startingWeight}` : ''}
                             </p>
+                            {ex && (
+                              <MuscleChips
+                                primary={ex.primaryMusclesDetailed}
+                                secondary={ex.secondaryMusclesDetailed}
+                                className="mt-2"
+                              />
+                            )}
                             {(rec?.lastWeight || rec?.bestWeight) && (
                               <p className="mt-1 text-[11px] text-primary-c">
                                 {rec?.lastWeight ? `${t.prevWeight}: ${rec.lastWeight}` : ''}
@@ -55,9 +66,23 @@ export function WorkoutPlanSection({ lang }: { lang: Lang }) {
                             className="btn-ghost shrink-0 px-3 py-2 text-xs"
                           >
                             <Icon name="Globe" className="h-4 w-4" />
-                            {t.watch}
+                            {ex ? getVideoLabel(ex) : t.watch}
                           </a>
                         </div>
+
+                        {ex && (
+                          <details className="group mt-3">
+                            <summary className="flex cursor-pointer list-none items-center gap-1.5 text-xs font-bold text-ink-500 transition-colors hover:text-primary-c">
+                              <Icon name="ChevronDown" className="h-3.5 w-3.5 transition-transform group-open:rotate-180" />
+                              نقاط التكنيك · أخطاء شائعة · تنبيه أمان
+                            </summary>
+                            <div className="mt-3 space-y-3">
+                              <GuidanceList icon="CheckCircle2" title="نقاط التكنيك" items={getTechniqueTips(ex)} tone="text-success" />
+                              <GuidanceList icon="X" title="أخطاء شائعة" items={getCommonMistakes(ex)} tone="text-danger" />
+                              <GuidanceList icon="AlertTriangle" title="تنبيه أمان" items={getSafetyNotes(ex)} tone="text-gold-600" />
+                            </div>
+                          </details>
+                        )}
                       </li>
                     )
                   })}
@@ -68,5 +93,24 @@ export function WorkoutPlanSection({ lang }: { lang: Lang }) {
         )}
       </div>
     </section>
+  )
+}
+
+function GuidanceList({ icon, title, items, tone }: { icon: string; title: string; items: string[]; tone: string }) {
+  return (
+    <div className="rounded-lg border border-line bg-page p-3">
+      <p className={`mb-1.5 flex items-center gap-1.5 text-[11px] font-black ${tone}`}>
+        <Icon name={icon} className="h-3.5 w-3.5" />
+        {title}
+      </p>
+      <ul className="space-y-1 ps-1">
+        {items.map((it, i) => (
+          <li key={i} className="flex gap-1.5 text-[11px] leading-relaxed text-ink-600">
+            <span className="text-ink-300">•</span>
+            <span>{it}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
   )
 }

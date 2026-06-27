@@ -1,4 +1,5 @@
 import type { MeasurementLog } from '@/types/progress'
+import { saveMeasurementLog as saveMeasurementLogHistory, setMeasurementLogs } from './historyStore'
 
 // سجلّات القياسات (محلي فقط).
 
@@ -23,12 +24,16 @@ export function saveLogs(logs: MeasurementLog[]): void {
 export function addLog(log: MeasurementLog): MeasurementLog[] {
   const next = [log, ...loadLogs()].slice(0, 200)
   saveLogs(next)
+  // عكس في المتجر التاريخي الدائم.
+  saveMeasurementLogHistory(log)
   return next
 }
 
 export function deleteLog(id: string): MeasurementLog[] {
   const next = loadLogs().filter((l) => l.id !== id)
   saveLogs(next)
+  // أبقِ المتجر التاريخي متوافقًا.
+  setMeasurementLogs(next)
   return next
 }
 

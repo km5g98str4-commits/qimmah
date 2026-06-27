@@ -125,7 +125,8 @@ export interface Customization {
 export function getDefaultCustomization(): Customization {
   return {
     identity: {
-      userName: 'أحمد محمد',
+      // فارغ افتراضيًا — الإعداد الحقيقي يطلب الاسم؛ والنموذج التجريبي فقط يضع اسمًا توضيحيًا.
+      userName: '',
       brandName: product.name,
       tagline: product.tagline,
       mainGoal: 'الوصول إلى 78 كجم وتحسين شكل الجسم',
