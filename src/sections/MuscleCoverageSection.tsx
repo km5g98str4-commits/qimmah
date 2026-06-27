@@ -1,20 +1,18 @@
 import { useMemo } from 'react'
-import { SectionHeading } from '@/components/SectionHeading'
 import { Icon } from '@/components/Icon'
-import { MuscleMap } from '@/components/MuscleMap'
-import { cn } from '@/lib/cn'
+import { MuscleCoverageGrid } from '@/components/MuscleMap'
 import { useCustomization } from '@/lib/customizationContext'
 import { useIsDemo } from '@/lib/demoMode'
-import { computeWeeklyCoverage, summarizeCoverage } from '@/lib/muscleCoverage'
+import { computeWeeklyCoverage } from '@/lib/muscleCoverage'
+import { summarizeMuscleGroups } from '@/lib/muscleGroupCoverage'
 import { loadSessions, type WorkoutSession } from '@/lib/workoutSessions'
-import { muscleLabelAr } from '@/data/muscleGroups'
 import { getDayStamp } from '@/lib/today'
 import type { Lang } from '@/lib/appPreferences'
 import type { WorkoutPlan } from '@/types/workout'
 
 /**
- * قسم «عضلاتك هذا الأسبوع» — خريطة العضلات + ملخّص التغطية + توصيات.
- * يظهر قرب الأعلى (بعد «اليوم» والجدول الأسبوعي).
+ * قسم «عضلاتك هذا الأسبوع» — بطاقات تغطية المجموعات العضلية + ملخّص + توصيات.
+ * تصميم كمال أجسام: مدمج، عالي التباين، بلا رسوم طفولية.
  */
 export function MuscleCoverageSection({ lang }: { lang: Lang }) {
   const { customization } = useCustomization()
@@ -22,100 +20,103 @@ export function MuscleCoverageSection({ lang }: { lang: Lang }) {
   const plan = customization.workoutPlan
   const level = customization.profile.trainingLevel
 
-  const result = useMemo(() => {
+  const { result, hasData } = useMemo(() => {
     const sessions = isDemo ? demoSessions(plan) : loadSessions()
-    return computeWeeklyCoverage({ sessions, plan, level })
+    const res = computeWeeklyCoverage({ sessions, plan, level })
+    const any = Object.values(res.weeklyCoverage).some((c) => c.sets > 0)
+    return { result: res, hasData: any }
   }, [isDemo, plan, level])
 
-  const summary = summarizeCoverage(result)
+  const summary = summarizeMuscleGroups(result.weeklyCoverage, level)
+  const topRecs = result.recommendationsAr.slice(0, 2)
 
   return (
     <section id="muscle-coverage" className="section">
       <div className="container-page">
-        <SectionHeading
-          eyebrow="عضلاتك هذا الأسبوع"
-          icon="Activity"
-          title="عضلاتك هذا الأسبوع"
-          description="شف وش تمرّنت، وش تعافى، ووش ناقصك هالأسبوع — بنظرة وحدة."
-        />
-
-        <div className="mt-10 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
-          {/* خريطة العضلات */}
-          <div className="card p-6">
-            <MuscleMap coverage={result.weeklyCoverage} />
+        {/* ترويسة القسم — نبرة كمال أجسام */}
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <span className="eyebrow">
+              <Icon name="Activity" className="h-3.5 w-3.5" />
+              تغطية العضلات
+            </span>
+            <h2 className="mt-3 text-2xl font-black text-ink-900 sm:text-3xl">عضلاتك هذا الأسبوع</h2>
+            <p className="mt-1 text-sm text-ink-500">وش تمرّنت، وش تعافى، ووش ناقصك — توزيع أسبوعي واضح.</p>
           </div>
 
-          {/* الملخّص + التوصيات */}
-          <div className="flex flex-col gap-4">
-            <div className="grid grid-cols-3 gap-3">
-              <SummaryCard icon="CheckCircle2" label="العضلات المكتملة" value={summary.completeCount} tone="success" />
-              <SummaryCard icon="AlertTriangle" label="العضلات الناقصة" value={summary.undertrainedCount} tone="danger" />
-              <SummaryCard icon="Moon" label="تحتاج راحة" value={summary.needRecoveryCount} tone="gold" />
+          {hasData && (
+            <div className="flex gap-2">
+              <SummaryPill icon="CheckCircle2" value={summary.complete} label="مكتملة" tone="#1F9D57" />
+              <SummaryPill icon="AlertTriangle" value={summary.undertrained} label="ناقصة" tone="#D6553A" />
+              <SummaryPill icon="Moon" value={summary.needRest} label="راحة" tone="#E0941F" />
             </div>
+          )}
+        </div>
 
-            {/* التوصيات */}
-            <div className="card flex-1 p-5">
-              <div className="mb-3 flex items-center gap-2">
-                <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary-soft text-primary-c">
-                  <Icon name="Sparkles" className="h-4 w-4" />
+        {hasData ? (
+          <>
+            {/* شريط التوصيات — بارز وحيوي */}
+            {topRecs.length > 0 && (
+              <div className="mt-6 flex flex-col gap-2 rounded-2xl border border-primary-soft bg-primary-soft p-4 sm:flex-row sm:items-center sm:gap-4">
+                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary text-white">
+                  <Icon name="Sparkles" className="h-5 w-5" />
                 </span>
-                <h3 className="text-sm font-bold text-ink-900">توصيات هذا الأسبوع</h3>
-              </div>
-              {result.recommendationsAr.length ? (
-                <ul className="space-y-2.5">
-                  {result.recommendationsAr.map((r, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm leading-relaxed text-ink-700">
-                      <Icon name="ChevronLeft" className="mt-0.5 h-4 w-4 shrink-0 rotate-180 text-primary-c" />
-                      {r}
-                    </li>
+                <ul className="flex-1 space-y-1">
+                  {topRecs.map((r, i) => (
+                    <li key={i} className="text-sm font-bold leading-relaxed text-ink-900">{r}</li>
                   ))}
                 </ul>
-              ) : (
-                <p className="text-sm text-ink-500">ابدأ تمرينك وسجّل مجموعاتك لتظهر لك توصيات مخصّصة.</p>
-              )}
+              </div>
+            )}
 
-              {/* النواقص كرقائق سريعة */}
-              {result.missingMuscles.length > 0 && (
-                <div className="mt-4 border-t border-line pt-4">
-                  <p className="mb-2 text-xs font-bold text-ink-500">ناقصة هذا الأسبوع</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {result.missingMuscles.map((m) => (
-                      <span key={m} className="rounded-full bg-danger/10 px-2.5 py-1 text-[11px] font-bold text-danger">
-                        {muscleLabelAr(m)}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-        {lang === 'en' && (
-          <p className="mt-3 text-xs text-ink-400">Muscle coverage is shown in Arabic in this preview.</p>
+            {/* بطاقات المجموعات العضلية */}
+            <MuscleCoverageGrid coverage={result.weeklyCoverage} level={level} className="mt-5" />
+          </>
+        ) : (
+          <EmptyState />
         )}
+
+        {lang === 'en' && <p className="mt-3 text-xs text-ink-400">Muscle coverage is shown in Arabic in this preview.</p>}
       </div>
     </section>
   )
 }
 
-function SummaryCard({ icon, label, value, tone }: { icon: string; label: string; value: number; tone: 'success' | 'danger' | 'gold' }) {
-  const toneCls =
-    tone === 'success' ? 'text-success' : tone === 'danger' ? 'text-danger' : 'text-gold-500'
+function SummaryPill({ icon, value, label, tone }: { icon: string; value: number; label: string; tone: string }) {
   return (
-    <div className="card p-4 text-center">
-      <Icon name={icon} className={cn('mx-auto h-5 w-5', toneCls)} />
-      <p className="mt-2 text-2xl font-black text-ink-900">{value}</p>
-      <p className="text-[11px] leading-tight text-ink-400">{label}</p>
+    <div className="flex items-center gap-2 rounded-xl border border-line bg-surface px-3 py-2 shadow-card">
+      <span className="grid h-7 w-7 place-items-center rounded-lg" style={{ backgroundColor: `${tone}1A`, color: tone }}>
+        <Icon name={icon} className="h-4 w-4" />
+      </span>
+      <div className="leading-none">
+        <p className="text-lg font-black text-ink-900">{value}</p>
+        <p className="mt-0.5 text-[10px] text-ink-400">{label}</p>
+      </div>
     </div>
   )
 }
 
-/** جلسات تجريبية للنموذج — تُضيء الخريطة ببيانات واقعية (بلا كتابة في التخزين). */
+function EmptyState() {
+  return (
+    <div className="mt-6 overflow-hidden rounded-2xl border border-line bg-surface shadow-card">
+      <div className="flex flex-col items-center gap-3 px-6 py-12 text-center">
+        <span className="grid h-14 w-14 place-items-center rounded-2xl bg-primary-soft text-primary-c">
+          <Icon name="Dumbbell" className="h-7 w-7" />
+        </span>
+        <p className="max-w-md text-base font-bold leading-relaxed text-ink-900">
+          ابدأ أول تمرينك، وبعدها بنعرض لك توزيع عضلاتك خلال الأسبوع.
+        </p>
+        <p className="text-sm text-ink-500">كل مجموعة تسجّلها تنعكس مباشرة على تغطية عضلاتك.</p>
+      </div>
+    </div>
+  )
+}
+
+/** جلسات تجريبية للنموذج — تُغذّي البطاقات ببيانات واقعية (بلا كتابة في التخزين). */
 function demoSessions(plan: WorkoutPlan): WorkoutSession[] {
   if (!plan.days.length) return []
   const now = Date.now()
   const dayMs = 24 * 3600_000
-  // يومان من الخطة: الأول قبل يوم، الثاني قبل ثلاثة أيام
   const picks = plan.days.slice(0, 2)
   return picks.map((day, di) => {
     const when = new Date(now - (di === 0 ? 1 : 3) * dayMs).toISOString()

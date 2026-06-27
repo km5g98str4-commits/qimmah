@@ -1,184 +1,116 @@
-import { useState } from 'react'
+import { Icon } from './Icon'
 import { cn } from '@/lib/cn'
 import { muscleLabelAr } from '@/data/muscleGroups'
-import type { MuscleCoverage, MuscleId, MuscleStatus, MuscleView } from '@/types/muscles'
+import { computeGroups, type GroupResult } from '@/lib/muscleGroupCoverage'
+import type { MuscleCoverage, MuscleStatus } from '@/types/muscles'
+import type { TrainingLevel } from '@/types/profile'
 
-// خريطة العضلات — رسم SVG محلي (بلا اعتماد على صور خارجية).
-// جسم منمّق بمناطق عضلية مسمّاة، تُلوّن حسب الحالة والشدّة.
+// شبكة تغطية العضلات — بطاقات مجموعات عضلية مدمجة (بديل خريطة الجسم الطفولية).
+// تعرض الحالة الأسبوعية لكل مجموعة: شارة + شريط تقدّم + رقائق العضلات + التوصية.
 
-interface MuscleMapProps {
+interface StatusMeta {
+  label: string
+  color: string
+  fill: 'solid' | 'soft'
+}
+
+const STATUS_META: Record<MuscleStatus, StatusMeta> = {
+  trained: { label: 'مكتملة', color: '#1F9D57', fill: 'solid' },
+  ready: { label: 'جاهزة', color: '#3E9E6B', fill: 'soft' },
+  recovering: { label: 'تحتاج راحة', color: '#E0941F', fill: 'soft' },
+  fresh: { label: 'تمرنت حديثًا', color: '#F26A21', fill: 'soft' },
+  undertrained: { label: 'ناقصة', color: '#D6553A', fill: 'soft' },
+}
+
+const EMPTY_DOT = '#C9B89B'
+
+interface MuscleCoverageGridProps {
   coverage: Record<string, MuscleCoverage>
-  /** عند النقر على عضلة. */
-  onSelect?: (id: MuscleId) => void
+  level?: TrainingLevel
   className?: string
 }
 
-/** ألوان الحالات (متوافقة مع لوحة الثيم). */
-const STATUS_COLOR: Record<MuscleStatus, string> = {
-  fresh: '#F26A21', // برتقالي — تُمرّنت للتو
-  trained: '#3E9E6B', // أخضر — كافية
-  recovering: '#E0941F', // كهرماني — تتعافى
-  ready: '#3E9E6B', // أخضر — جاهزة
-  undertrained: '#D6553A', // أحمر — ناقصة
+/** شبكة بطاقات المجموعات العضلية. */
+export function MuscleCoverageGrid({ coverage, level = 'intermediate', className }: MuscleCoverageGridProps) {
+  const groups = computeGroups(coverage, level)
+  return (
+    <div className={cn('grid gap-3 sm:grid-cols-2 xl:grid-cols-3', className)}>
+      {groups.map((g) => (
+        <GroupCard key={g.def.name} group={g} coverage={coverage} />
+      ))}
+    </div>
+  )
 }
 
-const EMPTY_FILL = '#EADDC8' // لون الخطوط — لم تُمرّن
-
-const STATUS_LABEL: Record<MuscleStatus, string> = {
-  fresh: 'تُمرّنت حديثًا',
-  trained: 'مكتملة',
-  recovering: 'تحتاج راحة',
-  ready: 'جاهزة',
-  undertrained: 'ناقصة',
-}
-
-/** يحسب لون العضلة وشفافيتها من تغطيتها. */
-function fillFor(coverage: Record<string, MuscleCoverage>, id: MuscleId): { fill: string; opacity: number } {
-  const c = coverage[id]
-  if (!c || c.sets <= 0) return { fill: EMPTY_FILL, opacity: 1 }
-  const base = STATUS_COLOR[c.status]
-  // الشدّة تتحكّم بالعتامة (0.4 → 1) لتبدو العضلات الأكثر تمرينًا أوضح
-  const opacity = 0.45 + Math.min(0.55, c.intensity * 0.55)
-  return { fill: base, opacity }
-}
-
-export function MuscleMap({ coverage, onSelect, className }: MuscleMapProps) {
-  const [view, setView] = useState<MuscleView>('front')
-
-  // عنصر منطقة عضلية قابل لإعادة الاستخدام
-  const Region = ({ id, d, cx, cy, rx, ry }: { id: MuscleId; d?: string; cx?: number | string; cy?: number | string; rx?: number | string; ry?: number | string }) => {
-    const { fill, opacity } = fillFor(coverage, id)
-    const c = coverage[id]
-    const sets = c ? c.sets : 0
-    const status = c?.status ?? 'undertrained'
-    const title = `${muscleLabelAr(id)} — ${STATUS_LABEL[status]} (${sets} مجموعة)`
-    const common = {
-      fill,
-      fillOpacity: opacity,
-      stroke: '#2B2520',
-      strokeOpacity: 0.12,
-      strokeWidth: 1,
-      className: cn('cursor-pointer transition-[fill-opacity] duration-300', onSelect && 'hover:stroke-[#2B2520]'),
-      onClick: () => onSelect?.(id),
-      role: 'button' as const,
-      'aria-label': title,
-    }
-    return d ? (
-      <path d={d} {...common}>
-        <title>{title}</title>
-      </path>
-    ) : (
-      <ellipse cx={cx} cy={cy} rx={rx} ry={ry} {...common}>
-        <title>{title}</title>
-      </ellipse>
-    )
-  }
+function GroupCard({ group, coverage }: { group: GroupResult; coverage: Record<string, MuscleCoverage> }) {
+  const meta = STATUS_META[group.status]
+  const pct = group.target > 0 ? Math.min(100, Math.round((group.sets / group.target) * 100)) : 0
 
   return (
-    <div className={cn('flex flex-col items-center', className)}>
-      {/* مبدّل الأمام/الخلف */}
-      <div className="mb-4 inline-flex rounded-full border border-line bg-surface p-1">
-        {(['front', 'back'] as MuscleView[]).map((v) => (
-          <button
-            key={v}
-            type="button"
-            onClick={() => setView(v)}
-            aria-pressed={view === v}
-            className={cn(
-              'rounded-full px-4 py-1.5 text-xs font-bold transition-colors',
-              view === v ? 'bg-primary text-white' : 'text-ink-500 hover:text-ink-900',
-            )}
-          >
-            {v === 'front' ? 'أمامي' : 'خلفي'}
-          </button>
-        ))}
+    <div className="relative overflow-hidden rounded-2xl border border-line bg-surface shadow-card transition-shadow hover:shadow-soft">
+      {/* شريط لوني جانبي حسب الحالة */}
+      <span className="absolute inset-y-0 end-0 w-1.5" style={{ backgroundColor: meta.color }} aria-hidden />
+
+      <div className="p-4 pe-5">
+        {/* الترويسة: اسم المجموعة + الشارة */}
+        <div className="flex items-center justify-between gap-2">
+          <h3 className="text-base font-black text-ink-900">{group.def.name}</h3>
+          <StatusBadge meta={meta} />
+        </div>
+
+        {/* التقدّم: مجموعات منجزة مقابل الهدف */}
+        <div className="mt-3 flex items-baseline justify-between text-xs">
+          <span className="font-bold text-ink-700">
+            <span className="text-lg font-black text-ink-900">{group.sets}</span>
+            <span className="text-ink-400"> / {group.target} مجموعة</span>
+          </span>
+          <span className="font-black tabular-nums" style={{ color: meta.color }}>{pct}%</span>
+        </div>
+        <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-beige">
+          <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, backgroundColor: meta.color }} />
+        </div>
+
+        {/* رقائق العضلات */}
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {group.def.muscles.map((m) => {
+            const c = coverage[m]
+            const st = c?.status ?? 'undertrained'
+            const dot = (c?.sets ?? 0) > 0 ? STATUS_META[st].color : EMPTY_DOT
+            return (
+              <span key={m} className="inline-flex items-center gap-1 rounded-full border border-line bg-page px-2 py-0.5 text-[10px] font-bold text-ink-700">
+                <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: dot }} aria-hidden />
+                {muscleLabelAr(m)}
+              </span>
+            )
+          })}
+        </div>
+
+        {/* التوصية */}
+        <p className="mt-3 flex items-start gap-1.5 border-t border-line pt-2.5 text-[11px] leading-relaxed text-ink-500">
+          <span className="mt-0.5 shrink-0" style={{ color: meta.color }}>
+            <Icon name="ChevronLeft" className="h-3.5 w-3.5 rotate-180" />
+          </span>
+          {group.recommendation}
+        </p>
       </div>
-
-      <svg viewBox="0 0 240 440" className="h-auto w-full max-w-[260px]" role="img" aria-label={`خريطة العضلات — العرض ${view === 'front' ? 'الأمامي' : 'الخلفي'}`}>
-        {/* الرأس (محايد) */}
-        <ellipse cx="120" cy="34" rx="20" ry="24" fill={EMPTY_FILL} stroke="#2B2520" strokeOpacity="0.12" />
-        <rect x="112" y="56" width="16" height="14" rx="6" fill={EMPTY_FILL} stroke="#2B2520" strokeOpacity="0.12" />
-
-        {view === 'front' ? (
-          <g>
-            {/* الأكتاف الأمامية + الجانبية */}
-            <Region id="side_delts" cx="66" cy="88" rx="18" ry="16" />
-            <Region id="side_delts" cx="174" cy="88" rx="18" ry="16" />
-            <Region id="front_delts" cx="84" cy="84" rx="13" ry="13" />
-            <Region id="front_delts" cx="156" cy="84" rx="13" ry="13" />
-
-            {/* الصدر: علوي / أوسط / سفلي */}
-            <Region id="chest_upper" d="M92 80 H148 a8 8 0 0 1 8 8 v6 H84 v-6 a8 8 0 0 1 8 -8 Z" />
-            <Region id="chest_mid" d="M84 96 H156 v18 a18 18 0 0 1 -18 14 H102 a18 18 0 0 1 -18 -14 Z" />
-            <Region id="chest_lower" d="M96 130 H144 v8 a14 14 0 0 1 -14 12 h-20 a14 14 0 0 1 -14 -12 Z" />
-
-            {/* الذراع الأمامي: بايسبس + ساعد */}
-            <Region id="biceps" cx="60" cy="128" rx="13" ry="26" />
-            <Region id="biceps" cx="180" cy="128" rx="13" ry="26" />
-            <Region id="forearms" cx="52" cy="180" rx="11" ry="28" />
-            <Region id="forearms" cx="188" cy="180" rx="11" ry="28" />
-
-            {/* البطن + الجوانب */}
-            <Region id="abs" d="M104 134 H136 v60 a16 16 0 0 1 -16 14 a16 16 0 0 1 -16 -14 Z" />
-            <Region id="obliques" cx="96" cy="172" rx="9" ry="30" />
-            <Region id="obliques" cx="144" cy="172" rx="9" ry="30" />
-
-            {/* الأرجل: كوادز + سمانة */}
-            <Region id="quads" cx="102" cy="276" rx="20" ry="52" />
-            <Region id="quads" cx="138" cy="276" rx="20" ry="52" />
-            <Region id="calves" cx="102" cy="372" rx="14" ry="42" />
-            <Region id="calves" cx="138" cy="372" rx="14" ry="42" />
-          </g>
-        ) : (
-          <g>
-            {/* الترابيس + الكتف الخلفي */}
-            <Region id="traps" d="M96 74 H144 l-10 22 H106 Z" />
-            <Region id="rear_delts" cx="68" cy="90" rx="17" ry="15" />
-            <Region id="rear_delts" cx="172" cy="90" rx="17" ry="15" />
-
-            {/* الظهر العلوي + اللاتس */}
-            <Region id="upper_back" d="M92 96 H148 v20 H92 Z" />
-            <Region id="lats" d="M88 118 H120 v44 l-20 -6 a16 16 0 0 1 -12 -16 Z" />
-            <Region id="lats" d="M152 118 H120 v44 l20 -6 a16 16 0 0 0 12 -16 Z" />
-
-            {/* أسفل الظهر */}
-            <Region id="lower_back" d="M104 164 H136 v26 a16 16 0 0 1 -16 8 a16 16 0 0 1 -16 -8 Z" />
-
-            {/* الترايسبس + الساعد (خلفي) */}
-            <Region id="triceps" cx="60" cy="128" rx="13" ry="26" />
-            <Region id="triceps" cx="180" cy="128" rx="13" ry="26" />
-            <Region id="forearms" cx="52" cy="180" rx="11" ry="28" />
-            <Region id="forearms" cx="188" cy="180" rx="11" ry="28" />
-
-            {/* المؤخرة + خلفية الفخذ + السمانة */}
-            <Region id="glutes" cx="104" cy="212" rx="20" ry="20" />
-            <Region id="glutes" cx="136" cy="212" rx="20" ry="20" />
-            <Region id="hamstrings" cx="102" cy="276" rx="19" ry="48" />
-            <Region id="hamstrings" cx="138" cy="276" rx="19" ry="48" />
-            <Region id="calves" cx="102" cy="372" rx="14" ry="42" />
-            <Region id="calves" cx="138" cy="372" rx="14" ry="42" />
-          </g>
-        )}
-      </svg>
-
-      {/* وسيلة الإيضاح */}
-      <ul className="mt-5 flex flex-wrap justify-center gap-x-4 gap-y-2 text-[11px]">
-        {([
-          { status: 'fresh', label: STATUS_LABEL.fresh },
-          { status: 'recovering', label: STATUS_LABEL.recovering },
-          { status: 'ready', label: STATUS_LABEL.ready },
-          { status: 'undertrained', label: STATUS_LABEL.undertrained },
-        ] as { status: MuscleStatus; label: string }[]).map((it) => (
-          <li key={it.status} className="flex items-center gap-1.5 text-ink-500">
-            <span className="inline-block h-3 w-3 rounded-full" style={{ backgroundColor: STATUS_COLOR[it.status] }} />
-            {it.label}
-          </li>
-        ))}
-        <li className="flex items-center gap-1.5 text-ink-500">
-          <span className="inline-block h-3 w-3 rounded-full border border-line" style={{ backgroundColor: EMPTY_FILL }} />
-          لم تُمرّن
-        </li>
-      </ul>
     </div>
+  )
+}
+
+function StatusBadge({ meta }: { meta: StatusMeta }) {
+  if (meta.fill === 'solid') {
+    return (
+      <span className="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-black text-white" style={{ backgroundColor: meta.color }}>
+        {meta.label}
+      </span>
+    )
+  }
+  return (
+    <span
+      className="shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-black"
+      style={{ color: meta.color, backgroundColor: `${meta.color}1A`, borderColor: `${meta.color}40` }}
+    >
+      {meta.label}
+    </span>
   )
 }
