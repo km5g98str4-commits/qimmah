@@ -46,6 +46,13 @@ export interface ShellStrings {
     safety: string
     finish: string
     confirmUnfinished: string
+    finishTitle: string
+    finishBodyUnfinished: string
+    finishBodyDone: string
+    confirmFinish: string
+    keepGoing: string
+    errWeight: string
+    errReps: string
     progress: string
     savedTitle: string
     savedBody: string
@@ -252,6 +259,13 @@ const ar: ShellStrings = {
     safety: 'إذا شعرت بألم غير طبيعي، أوقف التمرين واستشر مختصًا.',
     finish: 'إنهاء التمرين',
     confirmUnfinished: 'لسا فيه تمارين ما خلّصتها. تبي تنهي التمرين؟',
+    finishTitle: 'تنهي التمرين؟',
+    finishBodyUnfinished: 'لسا فيه تمارين ما خلّصتها — بنحفظ اللي سجّلته ونعرض الملخّص.',
+    finishBodyDone: 'بنحفظ تمرينك ونعرض الملخّص.',
+    confirmFinish: 'نعم، أنهِ واحفظ',
+    keepGoing: 'أكمل التمرين',
+    errWeight: 'الوزن لازم بين ٠ و٥٠٠ كجم',
+    errReps: 'التكرارات لازم بين ٠ و١٠٠',
     progress: 'الإنجاز',
     savedTitle: 'تم حفظ تمرينك',
     savedBody: 'تم تحديث أوزانك وسجل التمرين.',
@@ -457,6 +471,13 @@ const en: ShellStrings = {
     safety: 'If you feel unusual pain, stop and consult a professional.',
     finish: 'Finish workout',
     confirmUnfinished: 'Some exercises are not done yet. Finish the workout anyway?',
+    finishTitle: 'Finish workout?',
+    finishBodyUnfinished: 'Some exercises aren’t done — we’ll save what you logged and show the summary.',
+    finishBodyDone: 'We’ll save your workout and show the summary.',
+    confirmFinish: 'Yes, finish & save',
+    keepGoing: 'Keep going',
+    errWeight: 'Weight must be between 0 and 500 kg',
+    errReps: 'Reps must be between 0 and 100',
     progress: 'Progress',
     savedTitle: 'Workout saved',
     savedBody: 'Your weights and workout log were updated.',
