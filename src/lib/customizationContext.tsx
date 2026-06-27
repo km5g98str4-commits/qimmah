@@ -57,9 +57,13 @@ export function CustomizationProvider({ children }: { children: ReactNode }) {
 /** يبني نسخة عرض غنية للنموذج (دون حفظ) — خطة مولّدة ومتّسقة. */
 function buildDemoCustomization(): Customization {
   const base = getDefaultCustomization()
-  const g = generatePlan(base.profile)
+  // النموذج التجريبي فقط يستخدم اسمًا توضيحيًا «أحمد محمد» (لا يظهر في إعداد المستخدم الحقيقي).
+  const demoProfile = { ...base.profile, name: 'أحمد محمد' }
+  const g = generatePlan(demoProfile)
   return {
     ...base,
+    identity: { ...base.identity, userName: 'أحمد محمد' },
+    profile: demoProfile,
     targets: g.targets,
     workoutPlan: g.workoutPlan,
     routine: g.weeklySchedule,

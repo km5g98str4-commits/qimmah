@@ -1,5 +1,6 @@
 import { Icon } from '@/components/Icon'
 import { StepHeader } from '../StepHeader'
+import { Field, inputClass } from '../Field'
 import type { WizardCtx } from '../stepProps'
 
 const points = [
@@ -8,15 +9,35 @@ const points = [
   { icon: 'ShieldCheck', text: 'كل شيء محفوظ على جهازك' },
 ]
 
-/** خطوة الترحيب — تمهيد ودّي قبل البدء. */
+/** خطوة الترحيب — تمهيد ودّي + إدخال الاسم (مطلوب للبدء). */
 export function StepWelcome({ ctx }: { ctx: WizardCtx }) {
+  const { data, updateIdentity } = ctx
+  const name = data.identity.userName.trim()
   return (
     <div>
       <StepHeader
         icon="Sparkles"
-        title={`أهلاً ${ctx.data.identity.userName} 👋`}
+        title={name ? `أهلاً ${name} 👋` : 'أهلاً بك في قِمّة 👋'}
         description="بنجهّز تطبيقك الشخصي خطوة بخطوة. بس جاوب على أسئلة بسيطة، وتقدر ترجع تعدّل أي شي وقت ما تبي."
       />
+
+      <div className="mb-5">
+        <Field label="اسمك" hint="يظهر في صفحتك وفي ترحيب «اليوم» — مطلوب للبدء">
+          <input
+            className={inputClass}
+            value={data.identity.userName}
+            placeholder="مثال: زياد"
+            autoFocus
+            onChange={(e) => updateIdentity({ userName: e.target.value })}
+          />
+        </Field>
+        {!name && (
+          <p className="mt-2 flex items-center gap-1.5 text-xs font-bold text-danger">
+            <Icon name="AlertTriangle" className="h-3.5 w-3.5" />
+            اكتب اسمك للمتابعة.
+          </p>
+        )}
+      </div>
 
       <p className="mb-5 rounded-xl border border-primary-soft bg-primary-soft p-4 text-sm font-bold text-ink-900">
         سنجهّز صفحتك لأول مرة. تقدر تعدل كل شيء لاحقًا.

@@ -35,7 +35,7 @@ type StepDef = {
 }
 
 const onboardingSteps: StepDef[] = [
-  { title: 'الترحيب', Component: StepWelcome },
+  { title: 'الترحيب', Component: StepWelcome, validate: (d) => d.identity.userName.trim().length > 0 },
   { title: 'بياناتك', Component: StepBody, validate: (d) => isProfileValid(d.profile) },
   { title: 'خطتك', Component: StepGeneratePlan },
   { title: 'المكملات والأدوية', Component: StepWellness },
