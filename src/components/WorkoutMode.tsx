@@ -1,12 +1,14 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Icon } from './Icon'
 import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
 import type { PlanDay } from '@/types/workout'
-import { exerciseDisplayName, planExerciseName, planExerciseVideo } from '@/lib/workoutPlan'
+import { exerciseDisplayName, planExerciseVideo } from '@/lib/workoutPlan'
 import { getAlternatives, getExercise } from '@/data/exercises'
 import { getRecord, progressionHint } from '@/lib/exerciseHistory'
+import { exerciseGuidance } from '@/lib/exerciseGuidance'
+import { muscleLabel } from '@/lib/muscles'
 import { getDayStamp } from '@/lib/today'
 import type { Difficulty, SetLog, WorkoutSession } from '@/lib/workoutSessions'
 
@@ -15,32 +17,58 @@ interface WorkoutModeProps {
   day: PlanDay
   onClose: () => void
   onFinish: (session: WorkoutSession) => void
+  /** حفظ بديل في الخطة بشكل دائم (اختياري). */
+  onSwapExercise?: (dayId: string, planExerciseId: string, newExerciseId: string) => void
 }
 
 interface ExState {
   sets: SetLog[]
   difficulty?: Difficulty
+  rpe?: number
   painNote: string
   notes: string
 }
 
-/** وضع التمرين — تسجيل أداء كل مجموعة (وزن/تكرارات) داخل النادي. */
-export function WorkoutMode({ lang, day, onClose, onFinish }: WorkoutModeProps) {
+/** أول رقم في نطاق التكرارات (مثال: «8–12» → «8»). */
+function lowerReps(reps: string): string {
+  const m = String(reps).match(/\d+/)
+  return m ? m[0] : reps
+}
+
+/** تعديل قيمة رقمية نصية بمقدار، مع حد أدنى صفر ودعم الكسور. */
+function adjust(value: string, delta: number): string {
+  const m = String(value).match(/-?[\d.]+/)
+  const n = m ? Number(m[0]) : 0
+  const next = Math.max(0, Math.round((n + delta) * 100) / 100)
+  return `${next}`
+}
+
+/** وضع التمرين النشط — شاشة كاملة، تمرين واحد في كل خطوة، تسجيل سريع. */
+export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: WorkoutModeProps) {
   const t = getStrings(lang).workout
   const [startedAt] = useState(() => new Date().toISOString())
-  const [openAlt, setOpenAlt] = useState<string | null>(null)
+  const [current, setCurrent] = useState(0)
+  const [openGuide, setOpenGuide] = useState(false)
+  const [openAlt, setOpenAlt] = useState(false)
+  const [openDetails, setOpenDetails] = useState(false)
+  const [swap, setSwap] = useState<Record<string, string>>({})
+  const [savedFlash, setSavedFlash] = useState(false)
+  const flashTimer = useRef<number | null>(null)
+
+  const effExId = (peId: string, exerciseId: string) => swap[peId] ?? exerciseId
 
   const [state, setState] = useState<Record<string, ExState>>(() => {
     const init: Record<string, ExState> = {}
     day.exercises.forEach((pe) => {
       const rec = getRecord(pe.exerciseId)
       const w = rec?.lastWeight ?? pe.startingWeight ?? ''
+      const r = rec?.lastReps ?? lowerReps(pe.reps)
       const count = Math.max(1, pe.sets)
       init[pe.id] = {
         sets: Array.from({ length: count }, (_, i) => ({
           setNumber: i + 1,
           targetReps: pe.reps,
-          actualReps: '',
+          actualReps: r,
           weightKg: w,
           completed: false,
         })),
@@ -52,11 +80,7 @@ export function WorkoutMode({ lang, day, onClose, onFinish }: WorkoutModeProps) 
   })
 
   // مؤقّت الراحة
-  const [timer, setTimer] = useState<{ exId: string | null; left: number; running: boolean }>({
-    exId: null,
-    left: 0,
-    running: false,
-  })
+  const [timer, setTimer] = useState<{ left: number; running: boolean }>({ left: 0, running: false })
   useEffect(() => {
     if (!timer.running) return
     if (timer.left <= 0) {
@@ -67,186 +91,463 @@ export function WorkoutMode({ lang, day, onClose, onFinish }: WorkoutModeProps) 
     return () => window.clearTimeout(id)
   }, [timer.running, timer.left])
 
-  const setMeta = (id: string, partial: Partial<ExState>) =>
-    setState((prev) => ({ ...prev, [id]: { ...prev[id], ...partial } }))
-  const setSet = (id: string, idx: number, partial: Partial<SetLog>) =>
-    setState((prev) => ({
-      ...prev,
-      [id]: { ...prev[id], sets: prev[id].sets.map((s, i) => (i === idx ? { ...s, ...partial } : s)) },
-    }))
+  useEffect(() => () => {
+    if (flashTimer.current) window.clearTimeout(flashTimer.current)
+  }, [])
 
-  const exDone = (id: string) => state[id]?.sets.length > 0 && state[id].sets.every((s) => s.completed)
-  const done = day.exercises.filter((pe) => exDone(pe.id)).length
+  // أعد ضبط اللوحات عند الانتقال بين التمارين
+  useEffect(() => {
+    setOpenGuide(false)
+    setOpenAlt(false)
+    setOpenDetails(false)
+  }, [current])
+
+  const pe = day.exercises[current]
+  const exId = effExId(pe.id, pe.exerciseId)
+  const ex = getExercise(exId)
+  const s = state[pe.id]
+  const rec = getRecord(exId)
+  const hint = progressionHint(rec)
   const total = day.exercises.length
 
-  const startRest = (exId: string, sec: number) => setTimer({ exId, left: sec > 0 ? sec : 60, running: true })
-  const dayName = lang === 'en' ? day.nameEn : day.nameAr
+  const setMeta = (partial: Partial<ExState>) =>
+    setState((prev) => ({ ...prev, [pe.id]: { ...prev[pe.id], ...partial } }))
+  const setSet = (idx: number, partial: Partial<SetLog>) =>
+    setState((prev) => ({
+      ...prev,
+      [pe.id]: { ...prev[pe.id], sets: prev[pe.id].sets.map((x, i) => (i === idx ? { ...x, ...partial } : x)) },
+    }))
+
+  const flash = () => {
+    setSavedFlash(true)
+    if (flashTimer.current) window.clearTimeout(flashTimer.current)
+    flashTimer.current = window.setTimeout(() => setSavedFlash(false), 1600)
+  }
+
+  const startRest = (sec: number) => setTimer({ left: sec > 0 ? sec : 60, running: true })
+
+  const markDone = (idx: number) => {
+    const set = s.sets[idx]
+    const willComplete = !set.completed
+    setSet(idx, { completed: willComplete })
+    if (willComplete) {
+      flash()
+      startRest(pe.restSec)
+    }
+  }
+
+  const repeatLast = () => {
+    if (!rec?.lastWeight && !rec?.lastReps) return
+    setState((prev) => ({
+      ...prev,
+      [pe.id]: {
+        ...prev[pe.id],
+        sets: prev[pe.id].sets.map((x) => ({
+          ...x,
+          weightKg: rec?.lastWeight ?? x.weightKg,
+          actualReps: rec?.lastReps ?? x.actualReps,
+        })),
+      },
+    }))
+    flash()
+  }
+
+  const doSwap = (newId: string, persist: boolean) => {
+    setSwap((prev) => ({ ...prev, [pe.id]: newId }))
+    setOpenAlt(false)
+    if (persist && onSwapExercise) onSwapExercise(day.id, pe.id, newId)
+    flash()
+  }
+
+  const exDone = (peId: string) => {
+    const st = state[peId]
+    return st?.sets.length > 0 && st.sets.every((x) => x.completed)
+  }
+  const doneCount = day.exercises.filter((p) => exDone(p.id)).length
+
+  const isLast = current >= total - 1
+  const goNext = () => {
+    if (isLast) return finish()
+    setCurrent((c) => Math.min(total - 1, c + 1))
+    setTimer({ left: 0, running: false })
+  }
+  const goPrev = () => {
+    setCurrent((c) => Math.max(0, c - 1))
+    setTimer({ left: 0, running: false })
+  }
 
   const finish = () => {
-    if (done < total && !window.confirm(t.confirmUnfinished)) return
+    if (doneCount < total && !window.confirm(t.confirmUnfinished)) return
     const session: WorkoutSession = {
       id: `session-${startedAt}`,
       date: getDayStamp(),
       startedAt,
       finishedAt: new Date().toISOString(),
       workoutDayId: day.id,
-      workoutDayName: dayName,
-      exercises: day.exercises.map((pe) => {
-        const s = state[pe.id]
-        const ex = getExercise(pe.exerciseId)
+      workoutDayName: lang === 'en' ? day.nameEn : day.nameAr,
+      exercises: day.exercises.map((p) => {
+        const st = state[p.id]
+        const eId = effExId(p.id, p.exerciseId)
+        const e = getExercise(eId)
         return {
-          exerciseId: pe.exerciseId,
-          exerciseNameAr: ex?.nameAr,
-          exerciseNameEn: ex?.nameEn,
-          targetSets: pe.sets,
-          targetReps: pe.reps,
-          targetRestSec: pe.restSec,
-          completed: exDone(pe.id),
-          sets: s.sets,
-          difficulty: s.difficulty,
-          painNote: s.painNote,
-          notes: s.notes,
+          exerciseId: eId,
+          exerciseNameAr: e?.nameAr,
+          exerciseNameEn: e?.nameEn,
+          targetSets: p.sets,
+          targetReps: p.reps,
+          targetRestSec: p.restSec,
+          completed: exDone(p.id),
+          sets: st.sets.map((x) => (st.rpe ? { ...x, rpe: st.rpe } : x)),
+          difficulty: st.difficulty,
+          painNote: st.painNote,
+          notes: st.notes,
         }
       }),
     }
     onFinish(session)
   }
 
-  const difficulties: { value: Difficulty; label: string }[] = useMemo(
-    () => [
-      { value: 'easy', label: t.easy },
-      { value: 'medium', label: t.medium },
-      { value: 'hard', label: t.hard },
-    ],
-    [t],
-  )
+  // معلومات العرض
+  const nameAr = swap[pe.id] ? ex?.nameAr ?? '' : pe.customNameAr || ex?.nameAr || ''
+  const nameEn = swap[pe.id] ? ex?.nameEn ?? '' : pe.customNameEn || ex?.nameEn || ''
+  const muscles = ex ? muscleLabel(ex.primaryMuscle, lang) : ''
+  const guide = exerciseGuidance(exId, lang)
+  const videoUrl = swap[pe.id] ? ex?.videoUrl ?? '' : planExerciseVideo(pe)
+  const alts = getAlternatives(exId).slice(0, 5)
+  const difficulties: { value: Difficulty; label: string }[] = [
+    { value: 'easy', label: t.easy },
+    { value: 'medium', label: t.medium },
+    { value: 'hard', label: t.hard },
+  ]
 
-  const numInput = 'w-full rounded-lg border border-line bg-beige px-2 py-1.5 text-center text-sm font-bold text-ink-900 focus:border-brand-500/50 focus:outline-none'
+  // التالي في مؤقّت الراحة: جولة لم تكتمل، وإلا التمرين التالي
+  const nextSetNum = s.sets.find((x) => !x.completed)?.setNumber
+  const nextEx = day.exercises[current + 1]
+  const restNext = nextSetNum
+    ? `${t.sets} ${nextSetNum}`
+    : nextEx
+      ? exerciseDisplayName(getExercise(effExId(nextEx.id, nextEx.exerciseId))?.nameAr ?? '', getExercise(effExId(nextEx.id, nextEx.exerciseId))?.nameEn ?? '', lang)
+      : t.finish
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-page">
+      {/* الترويسة + شريط التقدّم */}
       <header className="sticky top-0 z-10 glass border-b border-line">
         <div className="container-page flex h-16 items-center justify-between gap-3">
-          <button type="button" onClick={onClose} aria-label="إغلاق" className="grid h-10 w-10 place-items-center rounded-lg border border-line bg-surface text-ink-700">
+          <button type="button" onClick={onClose} aria-label="إغلاق" className="grid h-11 w-11 place-items-center rounded-xl border border-line bg-surface text-ink-700">
             <Icon name="X" className="h-5 w-5" />
           </button>
           <div className="min-w-0 text-center">
-            <p className="truncate text-sm font-black text-ink-900">{dayName}</p>
-            <p className="text-xs text-ink-500">{t.progress}: {done}/{total}</p>
+            <p className="truncate text-sm font-black text-ink-900">{lang === 'en' ? day.nameEn : day.nameAr}</p>
+            <p className="text-xs text-ink-500">{current + 1} {t.of} {total}</p>
           </div>
-          <div className="h-10 w-10" />
+          <div className="h-11 w-11" />
         </div>
         <div className="container-page pb-3">
           <div className="h-2 w-full overflow-hidden rounded-full bg-line">
-            <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${total ? (done / total) * 100 : 0}%` }} />
+            <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${total ? (doneCount / total) * 100 : 0}%` }} />
           </div>
         </div>
       </header>
 
-      <main className="container-page flex-1 space-y-4 overflow-y-auto py-6">
-        {day.exercises.map((pe) => {
-          const s = state[pe.id]
-          const rec = getRecord(pe.exerciseId)
-          const alts = getAlternatives(pe.exerciseId)
-          const timing = timer.exId === pe.id
-          const hint = progressionHint(rec)
-          return (
-            <div key={pe.id} className={cn('card p-5', exDone(pe.id) && 'ring-1 ring-primary-soft')}>
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="text-base font-bold text-ink-900">{planExerciseName(pe, lang)}</p>
-                  <p className="mt-0.5 text-xs text-ink-500">{pe.sets} {t.sets} × {pe.reps} {t.reps} · {t.rest} {pe.restSec}ث</p>
-                  {(rec?.lastWeight || rec?.bestWeight) && (
-                    <p className="mt-1 text-[11px] text-primary-c">
-                      {rec?.lastWeight ? `${t.prevWeight}: ${rec.lastWeight}${rec.lastReps ? `×${rec.lastReps}` : ''}` : ''}
-                      {rec?.bestWeight ? `  ·  ${t.bestWeight}: ${rec.bestWeight}` : ''}
-                    </p>
-                  )}
-                  {hint && <p className="mt-1 text-[11px] font-bold text-success">↑ {hint}</p>}
-                </div>
-                <a href={planExerciseVideo(pe)} target="_blank" rel="noopener noreferrer" className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-line text-ink-500 hover:bg-beige" aria-label={t.watch}>
-                  <Icon name="Globe" className="h-4 w-4" />
-                </a>
+      <main className="container-page flex-1 space-y-4 overflow-y-auto py-5 pb-40">
+        {/* رأس التمرين */}
+        <div className="card p-5">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-lg font-black leading-tight text-ink-900">{nameAr || nameEn}</p>
+              {nameAr && nameEn && lang !== 'en' && <p className="mt-0.5 text-xs font-bold text-ink-400">{nameEn}</p>}
+              {muscles && (
+                <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-beige px-2.5 py-1 text-xs font-bold text-ink-700">
+                  <Icon name="Target" className="h-3.5 w-3.5 text-primary-c" />
+                  {muscles}
+                </span>
+              )}
+            </div>
+            <span className="shrink-0 rounded-full bg-primary-soft px-3 py-1.5 text-xs font-black text-primary-c">
+              {current + 1} {t.of} {total}
+            </span>
+          </div>
+
+          {/* الأداء السابق + الأفضل */}
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            <PerfCard
+              label={t.prevPerf}
+              value={rec?.lastWeight ? `${rec.lastWeight} ${t.volumeUnit}${rec.lastReps ? ` × ${rec.lastReps}` : ''}` : t.noHistory}
+              icon="RotateCcw"
+            />
+            <PerfCard
+              label={t.bestPerf}
+              value={rec?.bestWeight ? `${rec.bestWeight} ${t.volumeUnit}` : t.noHistory}
+              icon="Trophy"
+              gold
+            />
+          </div>
+          {hint && <p className="mt-2 flex items-center gap-1.5 text-xs font-bold text-primary-c"><Icon name="TrendingUp" className="h-3.5 w-3.5" />{hint}</p>}
+
+          {/* الهدف */}
+          <p className="mt-3 flex items-center gap-2 rounded-xl border border-line bg-page px-3 py-2.5 text-sm font-bold text-ink-700">
+            <Icon name="Target" className="h-4 w-4 text-primary-c" />
+            {t.target}: {pe.sets} {t.setsDone} × {pe.reps}
+          </p>
+
+          {/* كرّر آخر مرة */}
+          {(rec?.lastWeight || rec?.lastReps) && (
+            <button type="button" onClick={repeatLast} className="btn-ghost mt-3 w-full py-2.5 text-sm">
+              <Icon name="Repeat" className="h-4 w-4" />
+              {t.repeatLast}
+            </button>
+          )}
+        </div>
+
+        {/* جولات التمرين الحالي */}
+        <div className="space-y-3">
+          {s.sets.map((st, i) => (
+            <div
+              key={i}
+              className={cn(
+                'rounded-2xl border p-4 transition-colors',
+                st.completed ? 'border-primary-soft bg-primary-soft/60' : 'border-line bg-surface',
+              )}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-black text-ink-900">{t.setsDone} {st.setNumber}</span>
+                <span className="text-xs font-bold text-ink-500">{t.target}: {st.targetReps}</span>
               </div>
 
-              {/* جدول المجموعات */}
-              <div className="mt-3 overflow-hidden rounded-xl border border-line">
-                <div className="grid grid-cols-[2rem_1fr_1fr_2.5rem] items-center gap-2 bg-beige px-2 py-1.5 text-[10px] font-bold text-ink-500">
-                  <span className="text-center">#</span>
-                  <span className="text-center">الوزن (كجم)</span>
-                  <span className="text-center">{t.repsDone} ({pe.reps})</span>
-                  <span className="text-center">تم</span>
-                </div>
-                {s.sets.map((st, i) => (
-                  <div key={i} className="grid grid-cols-[2rem_1fr_1fr_2.5rem] items-center gap-2 border-t border-line px-2 py-1.5">
-                    <span className="text-center text-xs font-bold text-ink-400">{st.setNumber}</span>
-                    <input className={numInput} inputMode="decimal" value={st.weightKg} onChange={(e) => setSet(pe.id, i, { weightKg: e.target.value })} />
-                    <input className={numInput} inputMode="numeric" value={st.actualReps} placeholder={pe.reps} onChange={(e) => setSet(pe.id, i, { actualReps: e.target.value })} />
-                    <button type="button" onClick={() => setSet(pe.id, i, { completed: !st.completed })} aria-pressed={st.completed} className={cn('mx-auto grid h-8 w-8 place-items-center rounded-full border-2', st.completed ? 'border-transparent bg-primary text-white' : 'border-line text-transparent')}>
-                      <Icon name="Check" className="h-4 w-4" strokeWidth={3} />
-                    </button>
-                  </div>
+              <div className="mt-3 grid grid-cols-2 gap-3">
+                <Stepper
+                  label={t.weightKg}
+                  value={st.weightKg}
+                  onChange={(v) => setSet(i, { weightKg: v })}
+                  onStep={(d) => setSet(i, { weightKg: adjust(st.weightKg, d) })}
+                  step={2.5}
+                  mode="decimal"
+                />
+                <Stepper
+                  label={t.repsDone}
+                  value={st.actualReps}
+                  placeholder={lowerReps(pe.reps)}
+                  onChange={(v) => setSet(i, { actualReps: v })}
+                  onStep={(d) => setSet(i, { actualReps: adjust(st.actualReps, d) })}
+                  step={1}
+                  mode="numeric"
+                />
+              </div>
+
+              <button
+                type="button"
+                onClick={() => markDone(i)}
+                aria-pressed={st.completed}
+                className={cn(
+                  'mt-3 flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold transition-colors',
+                  st.completed ? 'bg-primary text-white' : 'border border-line bg-beige text-ink-700 active:scale-[0.99]',
+                )}
+              >
+                <Icon name={st.completed ? 'CheckCircle2' : 'Check'} className="h-5 w-5" strokeWidth={st.completed ? 2 : 3} />
+                {st.completed ? t.setSaved : 'تم'}
+              </button>
+            </div>
+          ))}
+        </div>
+
+        {/* شرح سريع */}
+        <div className="card overflow-hidden">
+          <button type="button" onClick={() => setOpenGuide((o) => !o)} className="flex w-full items-center justify-between px-4 py-3.5 text-sm font-bold text-ink-900">
+            <span className="flex items-center gap-2"><Icon name="Lightbulb" className="h-4 w-4 text-primary-c" />{t.quickGuide}</span>
+            <Icon name={openGuide ? 'Minus' : 'Plus'} className="h-4 w-4 text-ink-400" />
+          </button>
+          {openGuide && (
+            <div className="border-t border-line px-4 py-4">
+              <p className="mb-2 text-xs font-black text-ink-700">{t.techniquePoints}</p>
+              <ul className="space-y-1.5">
+                {guide.tips.slice(0, 3).map((tip, i) => (
+                  <li key={i} className="flex items-start gap-2 text-xs text-ink-700">
+                    <Icon name="Check" className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary-c" strokeWidth={3} />
+                    {tip}
+                  </li>
                 ))}
-              </div>
-
-              {/* أزرار */}
-              <div className="mt-3 flex flex-wrap gap-2">
-                {!timing ? (
-                  <button type="button" onClick={() => startRest(pe.id, pe.restSec)} className="btn-ghost px-3 py-2 text-xs">
-                    <Icon name="RotateCcw" className="h-4 w-4" />{t.startRest}
-                  </button>
-                ) : (
-                  <div className="flex items-center gap-2 rounded-xl border border-primary-soft bg-primary-soft px-3 py-2 text-xs font-bold text-primary-c">
-                    <span>{t.rest}: {timer.left}ث</span>
-                    <button type="button" onClick={() => setTimer((p) => ({ ...p, running: !p.running }))} aria-label={timer.running ? t.pause : t.resume}><Icon name={timer.running ? 'Minus' : 'Check'} className="h-4 w-4" /></button>
-                    <button type="button" onClick={() => setTimer({ exId: null, left: 0, running: false })} aria-label={t.reset}><Icon name="X" className="h-4 w-4" /></button>
-                  </div>
-                )}
-                {alts.length > 0 && (
-                  <button type="button" onClick={() => setOpenAlt(openAlt === pe.id ? null : pe.id)} className="btn-ghost px-3 py-2 text-xs"><Icon name="Layers" className="h-4 w-4" />{t.alternatives}</button>
-                )}
-              </div>
-
-              {openAlt === pe.id && alts.length > 0 && (
-                <div className="mt-3 rounded-xl border border-line bg-page p-3">
-                  <p className="mb-2 text-xs font-bold text-ink-700">{t.altPrompt}</p>
+              </ul>
+              {guide.mistakes.length > 0 && (
+                <>
+                  <p className="mb-2 mt-3 text-xs font-black text-ink-700">{t.commonMistakes}</p>
                   <ul className="space-y-1.5">
-                    {alts.map((a) => (
-                      <li key={a.id} className="flex items-center justify-between gap-2">
-                        <span className="truncate text-xs text-ink-900">{exerciseDisplayName(a.nameAr, a.nameEn, lang)}</span>
-                        <a href={a.videoUrl} target="_blank" rel="noopener noreferrer" className="grid h-7 w-7 shrink-0 place-items-center rounded-lg border border-line text-ink-500 hover:bg-beige" aria-label={t.watch}><Icon name="Globe" className="h-3.5 w-3.5" /></a>
+                    {guide.mistakes.map((mk, i) => (
+                      <li key={i} className="flex items-start gap-2 text-xs text-ink-500">
+                        <Icon name="AlertTriangle" className="mt-0.5 h-3.5 w-3.5 shrink-0 text-gold-600" />
+                        {mk}
                       </li>
                     ))}
                   </ul>
-                </div>
+                </>
               )}
+              {videoUrl && (
+                <a href={videoUrl} target="_blank" rel="noopener noreferrer" className="btn-ghost mt-3 w-full py-2.5 text-sm">
+                  <Icon name="Video" className="h-4 w-4 text-primary-c" />
+                  {t.videoLabel}
+                </a>
+              )}
+            </div>
+          )}
+        </div>
 
-              <div className="mt-3 flex items-center gap-2">
+        {/* بدائل — الجهاز مشغول؟ */}
+        {alts.length > 0 && (
+          <div className="card overflow-hidden">
+            <button type="button" onClick={() => setOpenAlt((o) => !o)} className="flex w-full items-center justify-between px-4 py-3.5 text-sm font-bold text-ink-900">
+              <span className="flex items-center gap-2"><Icon name="Layers" className="h-4 w-4 text-primary-c" />{t.altPrompt}</span>
+              <Icon name={openAlt ? 'Minus' : 'Plus'} className="h-4 w-4 text-ink-400" />
+            </button>
+            {openAlt && (
+              <ul className="space-y-2 border-t border-line px-4 py-4">
+                {alts.map((a) => (
+                  <li key={a.id} className="rounded-xl border border-line bg-page p-3">
+                    <p className="text-sm font-bold text-ink-900">{exerciseDisplayName(a.nameAr, a.nameEn, lang)}</p>
+                    <p className="mt-0.5 text-xs text-ink-500">
+                      {muscleLabel(a.primaryMuscle, lang)} · {a.equipment.join('، ')}
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      <button type="button" onClick={() => doSwap(a.id, false)} className="btn-primary px-3 py-2 text-xs">
+                        <Icon name="Repeat" className="h-3.5 w-3.5" />{t.swapForToday}
+                      </button>
+                      {onSwapExercise && (
+                        <button type="button" onClick={() => doSwap(a.id, true)} className="btn-ghost px-3 py-2 text-xs">
+                          <Icon name="Check" className="h-3.5 w-3.5" />{t.saveToPlan}
+                        </button>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+
+        {/* تفاصيل إضافية (اختيارية) */}
+        <div className="card overflow-hidden">
+          <button type="button" onClick={() => setOpenDetails((o) => !o)} className="flex w-full items-center justify-between px-4 py-3.5 text-sm font-bold text-ink-900">
+            <span className="flex items-center gap-2"><Icon name="Sparkles" className="h-4 w-4 text-ink-400" />{t.moreDetails}</span>
+            <Icon name={openDetails ? 'Minus' : 'Plus'} className="h-4 w-4 text-ink-400" />
+          </button>
+          {openDetails && (
+            <div className="space-y-3 border-t border-line px-4 py-4">
+              <div className="flex flex-wrap items-center gap-2">
                 <span className="text-xs text-ink-500">{t.difficulty}:</span>
                 {difficulties.map((d) => (
-                  <button key={d.value} type="button" onClick={() => setMeta(pe.id, { difficulty: d.value })} className={cn('rounded-full border px-3 py-1 text-xs font-bold', s.difficulty === d.value ? 'border-primary-soft bg-primary text-white' : 'border-line bg-surface text-ink-700')}>{d.label}</button>
+                  <button key={d.value} type="button" onClick={() => setMeta({ difficulty: d.value })} className={cn('rounded-full border px-3 py-1 text-xs font-bold', s.difficulty === d.value ? 'border-primary-soft bg-primary text-white' : 'border-line bg-surface text-ink-700')}>{d.label}</button>
                 ))}
               </div>
-
-              <div className="mt-3 grid gap-2">
-                <input className="w-full rounded-lg border border-line bg-beige px-3 py-2.5 text-sm text-ink-900 focus:outline-none" value={s.notes} onChange={(e) => setMeta(pe.id, { notes: e.target.value })} placeholder={t.notes} />
-                <input className="w-full rounded-lg border border-line bg-beige px-3 py-2.5 text-sm text-ink-900 focus:outline-none" value={s.painNote} onChange={(e) => setMeta(pe.id, { painNote: e.target.value })} placeholder={t.painLabel} />
+              <div>
+                <span className="text-xs text-ink-500">{t.rpe}:</span>
+                <div className="mt-1.5 flex flex-wrap gap-1.5">
+                  {[6, 7, 8, 9, 10].map((v) => (
+                    <button key={v} type="button" onClick={() => setMeta({ rpe: s.rpe === v ? undefined : v })} className={cn('h-9 w-9 rounded-lg border text-xs font-bold', s.rpe === v ? 'border-primary-soft bg-primary text-white' : 'border-line bg-surface text-ink-700')}>{v}</button>
+                  ))}
+                </div>
               </div>
+              <input className="w-full rounded-lg border border-line bg-beige px-3 py-2.5 text-sm text-ink-900 focus:outline-none" value={s.painNote} onChange={(e) => setMeta({ painNote: e.target.value })} placeholder={t.painLabel} />
+              <input className="w-full rounded-lg border border-line bg-beige px-3 py-2.5 text-sm text-ink-900 focus:outline-none" value={s.notes} onChange={(e) => setMeta({ notes: e.target.value })} placeholder={t.notes} />
             </div>
-          )
-        })}
+          )}
+        </div>
 
         <p className="flex items-start gap-2 rounded-xl border border-gold-400/40 bg-gold-200/40 p-3 text-xs leading-relaxed text-ink-700">
           <Icon name="AlertTriangle" className="mt-0.5 h-4 w-4 shrink-0 text-gold-600" />{t.safety}
         </p>
       </main>
 
-      <div className="sticky bottom-0 border-t border-line bg-page/90 backdrop-blur">
-        <div className="container-page py-3">
-          <button type="button" onClick={finish} className="btn-primary w-full py-4 text-base">
-            <Icon name="CheckCircle2" className="h-5 w-5" />{t.finish}
-          </button>
+      {/* إشعار حفظ الجولة */}
+      {savedFlash && (
+        <div className="pointer-events-none fixed inset-x-0 bottom-44 z-30 flex justify-center">
+          <span className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-bold text-white shadow-glow">
+            <Icon name="CheckCircle2" className="h-4 w-4" />{t.setSaved}
+          </span>
         </div>
+      )}
+
+      {/* مؤقّت الراحة النشط */}
+      {timer.running && (
+        <div className="fixed inset-x-0 bottom-[4.75rem] z-20 border-t border-primary-soft bg-primary-soft/95 backdrop-blur">
+          <div className="container-page flex items-center justify-between gap-3 py-3">
+            <div className="flex items-center gap-3">
+              <span className="relative grid h-12 w-12 shrink-0 place-items-center">
+                <span className="absolute inset-0 animate-ping rounded-full bg-primary/30" />
+                <span className="relative grid h-12 w-12 place-items-center rounded-full bg-primary text-base font-black text-white">{timer.left}</span>
+              </span>
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-primary-c">{t.rest}</p>
+                <p className="truncate text-xs text-ink-500">{t.nextUp}: {restNext}</p>
+              </div>
+            </div>
+            <div className="flex shrink-0 items-center gap-1.5">
+              <button type="button" onClick={() => setTimer((p) => ({ ...p, left: p.left + 30 }))} className="rounded-lg border border-line bg-surface px-2.5 py-2 text-xs font-bold text-ink-700">{t.restAdd30}</button>
+              <button type="button" onClick={() => setTimer({ left: 0, running: false })} className="rounded-lg border border-line bg-surface px-2.5 py-2 text-xs font-bold text-ink-700">{t.skipRest}</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* شريط الإجراءات السفلي */}
+      <div className="sticky bottom-0 z-10 border-t border-line bg-page/95 backdrop-blur">
+        <div className="container-page flex items-center gap-2 py-3">
+          <button type="button" onClick={goPrev} disabled={current === 0} className="btn-ghost h-12 w-12 shrink-0 p-0 disabled:opacity-40" aria-label={t.prevExercise}>
+            <Icon name="ChevronRight" className="h-5 w-5" />
+          </button>
+          {isLast ? (
+            <button type="button" onClick={finish} className="btn-primary flex-1 py-3.5 text-base">
+              <Icon name="CheckCircle2" className="h-5 w-5" />{t.finish}
+            </button>
+          ) : (
+            <button type="button" onClick={goNext} className="btn-primary flex-1 py-3.5 text-base">
+              {t.nextExercise}<Icon name="ChevronLeft" className="h-5 w-5" />
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function PerfCard({ label, value, icon, gold }: { label: string; value: string; icon: string; gold?: boolean }) {
+  return (
+    <div className={cn('rounded-xl border p-2.5', gold ? 'border-gold-400/40 bg-gold-200/30' : 'border-line bg-page')}>
+      <p className="flex items-center gap-1 text-[11px] font-bold text-ink-500">
+        <Icon name={icon} className={cn('h-3.5 w-3.5', gold ? 'text-gold-600' : 'text-primary-c')} />
+        {label}
+      </p>
+      <p className="mt-0.5 truncate text-sm font-black text-ink-900">{value}</p>
+    </div>
+  )
+}
+
+interface StepperProps {
+  label: string
+  value: string
+  placeholder?: string
+  step: number
+  mode: 'decimal' | 'numeric'
+  onChange: (v: string) => void
+  onStep: (delta: number) => void
+}
+
+function Stepper({ label, value, placeholder, step, mode, onChange, onStep }: StepperProps) {
+  return (
+    <div>
+      <p className="mb-1 text-center text-[11px] font-bold text-ink-500">{label}</p>
+      <div className="flex items-stretch gap-1.5">
+        <button type="button" onClick={() => onStep(-step)} aria-label="-" className="grid h-11 w-9 shrink-0 place-items-center rounded-lg border border-line bg-surface text-ink-700 active:scale-95">
+          <Icon name="Minus" className="h-4 w-4" />
+        </button>
+        <input
+          className="w-full min-w-0 rounded-lg border border-line bg-beige px-1 text-center text-base font-black text-ink-900 focus:border-brand-500/50 focus:outline-none"
+          inputMode={mode}
+          value={value}
+          placeholder={placeholder}
+          onChange={(e) => onChange(e.target.value)}
+        />
+        <button type="button" onClick={() => onStep(step)} aria-label="+" className="grid h-11 w-9 shrink-0 place-items-center rounded-lg border border-line bg-surface text-ink-700 active:scale-95">
+          <Icon name="Plus" className="h-4 w-4" />
+        </button>
       </div>
     </div>
   )

@@ -4,6 +4,7 @@ import { Footer } from '@/components/Footer'
 import { Icon } from '@/components/Icon'
 import { SuccessToast } from '@/components/SuccessToast'
 import { WorkoutMode } from '@/components/WorkoutMode'
+import { WorkoutSummary } from '@/components/WorkoutSummary'
 import { DailySummary } from '@/sections/DailySummary'
 import { Today } from '@/sections/Today'
 import { CurrentGoal } from '@/sections/CurrentGoal'
@@ -19,11 +20,25 @@ import { CommitmentsSection } from '@/sections/CommitmentsSection'
 import { HealthNotice } from '@/sections/HealthNotice'
 import { StorageCard } from '@/sections/StorageCard'
 import { useCustomization } from '@/lib/customizationContext'
-import { todayPlanDay } from '@/lib/workoutPlan'
+import { exerciseDisplayName, todayPlanDay } from '@/lib/workoutPlan'
+import { getExercise } from '@/data/exercises'
 import { addSession, type WorkoutSession } from '@/lib/workoutSessions'
 import { loadHistory, recordExercise, saveHistory } from '@/lib/exerciseHistory'
-import { getStrings } from '@/config/strings'
+import { workoutStreak } from '@/lib/workoutStats'
+import { weekdayName } from '@/lib/today'
 import type { Lang } from '@/lib/appPreferences'
+
+const parseNum = (v?: string): number => {
+  const m = String(v ?? '').match(/[\d.]+/)
+  return m ? Number(m[0]) : NaN
+}
+
+interface SummaryData {
+  session: WorkoutSession
+  prs: string[]
+  nextDayLabel?: string
+  streak: number
+}
 
 interface DashboardViewProps {
   lang: Lang
@@ -41,25 +56,75 @@ export function DashboardView({
   showSuccess,
   onDismissSuccess,
 }: DashboardViewProps) {
-  const { customization } = useCustomization()
+  const { customization, applyCustomization } = useCustomization()
   const s = customization.sections
-  const tw = getStrings(lang).workout
 
   const [workoutOpen, setWorkoutOpen] = useState(false)
-  const [savedWorkout, setSavedWorkout] = useState(false)
+  const [summary, setSummary] = useState<SummaryData | null>(null)
   const planDay = todayPlanDay(customization.workoutPlan)
 
+  /** استبدال بديل في الخطة بشكل دائم (من وضع التمرين). */
+  const swapPlanExercise = (dayId: string, planExerciseId: string, newExerciseId: string) => {
+    const next = {
+      ...customization,
+      workoutPlan: {
+        ...customization.workoutPlan,
+        days: customization.workoutPlan.days.map((d) =>
+          d.id !== dayId
+            ? d
+            : {
+                ...d,
+                exercises: d.exercises.map((pe) =>
+                  pe.id !== planExerciseId ? pe : { ...pe, exerciseId: newExerciseId, customNameAr: undefined, customNameEn: undefined, videoUrl: undefined },
+                ),
+              },
+        ),
+      },
+    }
+    applyCustomization(next)
+  }
+
   const finishWorkout = (session: WorkoutSession) => {
+    // أرقام قياسية: قارن أثقل مجموعة منجزة بأفضل وزن سابق (قبل الحفظ)
+    const before = loadHistory()
+    const prs: string[] = []
+    session.exercises.forEach((e) => {
+      const tops = (e.sets ?? []).filter((s) => s.completed).map((s) => parseNum(s.weightKg)).filter((n) => !Number.isNaN(n))
+      const top = tops.length ? Math.max(...tops) : 0
+      if (top <= 0) return
+      const prevBest = parseNum(before[e.exerciseId]?.bestWeight)
+      if (Number.isNaN(prevBest) || top > prevBest) {
+        const ex = getExercise(e.exerciseId)
+        prs.push(exerciseDisplayName(e.exerciseNameAr ?? ex?.nameAr ?? '', e.exerciseNameEn ?? ex?.nameEn ?? '', lang))
+      }
+    })
+
     // حفظ الجلسة + تحديث سجل الأداء (آخر/أفضل وزن وتكرارات + 1RM + سلسلة التقدّم)
     addSession(session)
-    let history = loadHistory()
+    let history = before
     const when = session.finishedAt ?? session.startedAt
     session.exercises.forEach((e) => {
       history = recordExercise(history, e, when)
     })
     saveHistory(history)
+
+    // تمرين الغد
+    const days = customization.workoutPlan.days
+    let nextDayLabel: string | undefined
+    if (days.length) {
+      const tomorrow = new Date()
+      tomorrow.setDate(tomorrow.getDate() + 1)
+      const nd = days[tomorrow.getDay() % days.length]
+      if (nd) nextDayLabel = `${weekdayName(lang === 'en' ? 'en' : 'ar', tomorrow)} — ${lang === 'en' ? nd.nameEn : nd.nameAr}`
+    }
+
     setWorkoutOpen(false)
-    setSavedWorkout(true)
+    setSummary({ session, prs, nextDayLabel, streak: workoutStreak() })
+  }
+
+  const scrollTo = (id: string) => {
+    setSummary(null)
+    requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }))
   }
 
   return (
@@ -108,22 +173,30 @@ export function DashboardView({
 
       {/* وضع التمرين */}
       {workoutOpen && planDay && (
-        <WorkoutMode lang={lang} day={planDay} onClose={() => setWorkoutOpen(false)} onFinish={finishWorkout} />
+        <WorkoutMode
+          lang={lang}
+          day={planDay}
+          onClose={() => setWorkoutOpen(false)}
+          onFinish={finishWorkout}
+          onSwapExercise={swapPlanExercise}
+        />
+      )}
+
+      {/* ملخّص نهاية التمرين */}
+      {summary && (
+        <WorkoutSummary
+          lang={lang}
+          session={summary.session}
+          prs={summary.prs}
+          nextDayLabel={summary.nextDayLabel}
+          streak={summary.streak}
+          onBackToToday={() => scrollTo('today')}
+          onViewProgress={() => scrollTo('recent-workout')}
+        />
       )}
 
       {/* تأكيد إكمال الإعداد */}
       {showSuccess && <SuccessToast onClose={onDismissSuccess} />}
-
-      {/* تأكيد حفظ التمرين */}
-      {savedWorkout && (
-        <SuccessToast
-          onClose={() => setSavedWorkout(false)}
-          title={tw.savedTitle}
-          body={tw.savedBody}
-          actionLabel={tw.recentTitle}
-          scrollTo="recent-workout"
-        />
-      )}
     </div>
   )
 }

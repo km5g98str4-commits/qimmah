@@ -54,6 +54,58 @@ export interface ShellStrings {
     emptyPlan: string
     workoutsTitle: string
     workoutsDesc: string
+    // — وضع التمرين النشط —
+    heroReady: string
+    startToday: string
+    targetMuscles: string
+    estDuration: string
+    exercisesCount: string
+    minShort: string
+    lastWorkout: string
+    noLastWorkout: string
+    streak: string
+    streakDays: string
+    weekDone: string
+    of: string
+    target: string
+    prevPerf: string
+    bestPerf: string
+    noHistory: string
+    repeatLast: string
+    nextExercise: string
+    prevExercise: string
+    setSaved: string
+    weightKg: string
+    moreDetails: string
+    rpe: string
+    restAdd30: string
+    skipRest: string
+    stopRest: string
+    nextUp: string
+    restDone: string
+    quickGuide: string
+    videoLabel: string
+    techniquePoints: string
+    commonMistakes: string
+    swapForToday: string
+    saveToPlan: string
+    swapped: string
+    equipment: string
+    // — ملخّص التمرين —
+    summaryTitle: string
+    summarySub: string
+    duration: string
+    exercisesDone: string
+    setsDone: string
+    totalVolume: string
+    volumeUnit: string
+    prsLabel: string
+    noPrs: string
+    musclesTrained: string
+    nextWorkout: string
+    backToToday: string
+    viewProgress: string
+    newPr: string
   }
   nutrition: {
     title: string
@@ -208,6 +260,56 @@ const ar: ShellStrings = {
     emptyPlan: 'اختر جدولك من الإعداد لتبدأ.',
     workoutsTitle: 'تماريني',
     workoutsDesc: 'جدولك الحالي بكل أيامه وتمارينه — مع شرح كل تمرين.',
+    heroReady: 'تمرينك اليوم جاهز',
+    startToday: 'ابدأ تمرين اليوم',
+    targetMuscles: 'العضلات المستهدفة',
+    estDuration: 'المدة التقريبية',
+    exercisesCount: 'تمارين',
+    minShort: 'دقيقة',
+    lastWorkout: 'آخر تمرين',
+    noLastWorkout: 'أول تمرين لك — يلا نبدأ!',
+    streak: 'سلسلة',
+    streakDays: 'يوم متتالي',
+    weekDone: 'هذا الأسبوع',
+    of: 'من',
+    target: 'الهدف',
+    prevPerf: 'آخر مرة',
+    bestPerf: 'أفضل أداء',
+    noHistory: 'لا يوجد سجل سابق',
+    repeatLast: 'كرّر آخر مرة',
+    nextExercise: 'التمرين التالي',
+    prevExercise: 'السابق',
+    setSaved: 'تم حفظ الجولة',
+    weightKg: 'الوزن (كجم)',
+    moreDetails: 'تفاصيل إضافية',
+    rpe: 'مجهود (RPE)',
+    restAdd30: '+30 ث',
+    skipRest: 'تخطي الراحة',
+    stopRest: 'إيقاف',
+    nextUp: 'التالي',
+    restDone: 'خلصت الراحة — جاهز للجولة الجاية',
+    quickGuide: 'شرح سريع',
+    videoLabel: 'فيديو',
+    techniquePoints: 'نقاط التكنيك',
+    commonMistakes: 'أخطاء شائعة',
+    swapForToday: 'استبدل لهذا اليوم',
+    saveToPlan: 'احفظ في خطتي',
+    swapped: 'تم الاستبدال لهذا اليوم',
+    equipment: 'المعدّات',
+    summaryTitle: 'تمرينك انحفظ 🎉',
+    summarySub: 'شغل ممتاز — استمر على هذا الإيقاع.',
+    duration: 'المدة',
+    exercisesDone: 'تمارين',
+    setsDone: 'جولات',
+    totalVolume: 'الحجم الكلي',
+    volumeUnit: 'كجم',
+    prsLabel: 'أرقام قياسية',
+    noPrs: 'ما فيه رقم قياسي هالمرة — بس كل جولة تقربك.',
+    musclesTrained: 'عضلات مرّنتها',
+    nextWorkout: 'تمرينك القادم',
+    backToToday: 'العودة لليوم',
+    viewProgress: 'عرض تقدمي',
+    newPr: 'رقم قياسي جديد',
   },
   nutrition: {
     title: 'خطة الأكل',
@@ -363,6 +465,56 @@ const en: ShellStrings = {
     emptyPlan: 'Choose your plan in Setup to get started.',
     workoutsTitle: 'My workouts',
     workoutsDesc: 'Your current plan with all days and exercises — each with a guide.',
+    heroReady: "Today's workout is ready",
+    startToday: "Start today's workout",
+    targetMuscles: 'Target muscles',
+    estDuration: 'Est. duration',
+    exercisesCount: 'exercises',
+    minShort: 'min',
+    lastWorkout: 'Last workout',
+    noLastWorkout: 'Your first workout — let’s go!',
+    streak: 'Streak',
+    streakDays: 'day streak',
+    weekDone: 'This week',
+    of: 'of',
+    target: 'Target',
+    prevPerf: 'Last time',
+    bestPerf: 'Best',
+    noHistory: 'No previous record',
+    repeatLast: 'Repeat last',
+    nextExercise: 'Next exercise',
+    prevExercise: 'Previous',
+    setSaved: 'Set saved',
+    weightKg: 'Weight (kg)',
+    moreDetails: 'More details',
+    rpe: 'Effort (RPE)',
+    restAdd30: '+30s',
+    skipRest: 'Skip rest',
+    stopRest: 'Stop',
+    nextUp: 'Next up',
+    restDone: 'Rest done — ready for the next set',
+    quickGuide: 'Quick guide',
+    videoLabel: 'Video',
+    techniquePoints: 'Technique tips',
+    commonMistakes: 'Common mistakes',
+    swapForToday: 'Swap for today',
+    saveToPlan: 'Save to my plan',
+    swapped: 'Swapped for today',
+    equipment: 'Equipment',
+    summaryTitle: 'Workout saved 🎉',
+    summarySub: 'Great work — keep the rhythm going.',
+    duration: 'Duration',
+    exercisesDone: 'Exercises',
+    setsDone: 'Sets',
+    totalVolume: 'Total volume',
+    volumeUnit: 'kg',
+    prsLabel: 'Personal records',
+    noPrs: 'No PR this time — every set still counts.',
+    musclesTrained: 'Muscles trained',
+    nextWorkout: 'Next workout',
+    backToToday: 'Back to Today',
+    viewProgress: 'View progress',
+    newPr: 'New PR',
   },
   nutrition: {
     title: 'Meal plan',

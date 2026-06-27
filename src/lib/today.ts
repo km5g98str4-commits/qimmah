@@ -23,6 +23,17 @@ function freshState(): TodayState {
   return { date: getDayStamp(), done: {} }
 }
 
+/** اسم يوم الأسبوع بالعربية/الإنجليزية (مثال: «الأحد» / «Sunday»). */
+export function weekdayName(lang: 'ar' | 'en', d = new Date()): string {
+  try {
+    return new Intl.DateTimeFormat(lang === 'en' ? 'en-US' : 'ar', { weekday: 'long' }).format(d)
+  } catch {
+    const ar = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت']
+    const en = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+    return (lang === 'en' ? en : ar)[d.getDay()]
+  }
+}
+
 /** يقرأ حالة اليوم؛ وإن كان المحفوظ ليوم سابق يبدأ صفحة جديدة (تصفير). */
 export function loadToday(): TodayState {
   if (typeof window === 'undefined') return freshState()
