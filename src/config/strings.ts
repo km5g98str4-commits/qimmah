@@ -105,6 +105,16 @@ export interface ShellStrings {
     swapMealTitle: string
     noAlternatives: string
     close: string
+    tabTitle: string
+    needCals: string
+    foodCals: string
+    exerciseCals: string
+    equationNote: string
+    addShort: string
+    copy: string
+    favorite: string
+    soon: string
+    back: string
   }
   wellness: {
     title: string
@@ -174,6 +184,26 @@ export interface ShellStrings {
     empty: string
     notes: string
     delete: string
+    tabTitle: string
+    back: string
+    cardWeight: string
+    cardPhotos: string
+    photosPlaceholder: string
+    cardVolume: string
+    cardPRs: string
+    cardMuscles: string
+    cardStreak: string
+    streakDays: string
+    noWorkouts: string
+    noWeight: string
+    noPRs: string
+    healthSyncTitle: string
+    healthSyncSoon: string
+    healthSyncBody: string
+    remindersTitle: string
+    reminderTrainingTime: string
+    reminderEnabled: string
+    reminderNote: string
   }
 }
 
@@ -284,6 +314,16 @@ const ar: ShellStrings = {
     swapMealTitle: 'بدائل بسعرات وبروتين متقارب',
     noAlternatives: 'لا توجد بدائل متقاربة حاليًا.',
     close: 'إغلاق',
+    tabTitle: 'التغذية',
+    needCals: 'احتياجك',
+    foodCals: 'الطعام',
+    exerciseCals: 'التمرين',
+    equationNote: 'احتياجك − الطعام + التمرين = المتبقّي',
+    addShort: 'أضف',
+    copy: 'نسخ',
+    favorite: 'مفضّلة',
+    soon: 'قريبًا',
+    back: 'رجوع',
   },
   wellness: {
     title: 'المكملات والأدوية',
@@ -354,6 +394,26 @@ const ar: ShellStrings = {
     empty: 'فعّل القياسات من الإعداد إذا تبغى تتابع تقدّمك.',
     notes: 'ملاحظات',
     delete: 'حذف',
+    tabTitle: 'التقدم',
+    back: 'رجوع',
+    cardWeight: 'الوزن',
+    cardPhotos: 'صور التقدّم',
+    photosPlaceholder: 'قريبًا: حفظ صور التقدّم على جهازك بخصوصية تامة.',
+    cardVolume: 'حجم التمرين',
+    cardPRs: 'أفضل الأوزان (PRs)',
+    cardMuscles: 'العضلات هذا الأسبوع',
+    cardStreak: 'سلسلة التمرين',
+    streakDays: 'يوم متتالٍ',
+    noWorkouts: 'لا توجد تمارين مسجّلة بعد. ابدأ تمرينك ليظهر تقدّمك هنا.',
+    noWeight: 'سجّل وزنك من قسم القياسات ليظهر هنا.',
+    noPRs: 'أكمل تمرينًا بأوزان لتظهر أرقامك القياسية.',
+    healthSyncTitle: 'مزامنة الصحة',
+    healthSyncSoon: 'قريبًا: Apple Health و Google Fit',
+    healthSyncBody: 'حاليًا تقدر تتابع تمرينك وتغذيتك داخل قِمّة.',
+    remindersTitle: 'التذكيرات',
+    reminderTrainingTime: 'وقت تذكير التمرين',
+    reminderEnabled: 'تفعيل التذكير',
+    reminderNote: 'التذكيرات داخل المتصفح محدودة. دعم التنبيهات الكامل لاحقًا في تطبيق الجوال.',
   },
 }
 
@@ -464,6 +524,16 @@ const en: ShellStrings = {
     swapMealTitle: 'Alternatives with similar calories & protein',
     noAlternatives: 'No close alternatives right now.',
     close: 'Close',
+    tabTitle: 'Nutrition',
+    needCals: 'Needs',
+    foodCals: 'Food',
+    exerciseCals: 'Exercise',
+    equationNote: 'Needs − Food + Exercise = Remaining',
+    addShort: 'Add',
+    copy: 'Copy',
+    favorite: 'Favorite',
+    soon: 'Soon',
+    back: 'Back',
   },
   wellness: {
     title: 'Supplements & Medications',
@@ -534,6 +604,26 @@ const en: ShellStrings = {
     empty: 'Enable measurements in Setup to track your progress.',
     notes: 'Notes',
     delete: 'Delete',
+    tabTitle: 'Progress',
+    back: 'Back',
+    cardWeight: 'Weight',
+    cardPhotos: 'Progress photos',
+    photosPlaceholder: 'Soon: store progress photos privately on your device.',
+    cardVolume: 'Training volume',
+    cardPRs: 'Best lifts (PRs)',
+    cardMuscles: 'Muscles this week',
+    cardStreak: 'Workout streak',
+    streakDays: 'days in a row',
+    noWorkouts: 'No workouts logged yet. Start a workout to see progress here.',
+    noWeight: 'Log your weight in Measurements to see it here.',
+    noPRs: 'Complete a weighted workout to see your PRs.',
+    healthSyncTitle: 'Health sync',
+    healthSyncSoon: 'Soon: Apple Health & Google Fit',
+    healthSyncBody: 'For now, track your workouts and nutrition inside Qimmah.',
+    remindersTitle: 'Reminders',
+    reminderTrainingTime: 'Training reminder time',
+    reminderEnabled: 'Enable reminder',
+    reminderNote: 'In-browser reminders are limited. Full notifications later in the mobile app.',
   },
 }
 

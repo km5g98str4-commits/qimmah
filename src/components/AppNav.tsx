@@ -3,7 +3,7 @@ import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
 
-export type AppView = 'dashboard' | 'setup' | 'demo'
+export type AppView = 'dashboard' | 'setup' | 'demo' | 'nutrition' | 'progress'
 
 interface AppNavProps {
   current: AppView
@@ -11,11 +11,13 @@ interface AppNavProps {
   onNavigate: (view: AppView) => void
 }
 
-/** شريط تنقّل التطبيق — تبديل بين الرئيسية/الإعداد/النموذج. */
+/** شريط تنقّل التطبيق — الرئيسية/التغذية/التقدّم/الإعداد/النموذج. */
 export function AppNav({ current, lang, onNavigate }: AppNavProps) {
   const t = getStrings(lang)
   const tabs: { id: AppView; label: string; icon: string }[] = [
     { id: 'dashboard', label: t.nav.home, icon: 'Flame' },
+    { id: 'nutrition', label: t.nutrition.tabTitle, icon: 'Salad' },
+    { id: 'progress', label: t.progress.tabTitle, icon: 'BarChart3' },
     { id: 'setup', label: t.nav.setup, icon: 'Palette' },
     { id: 'demo', label: t.nav.demo, icon: 'Sparkles' },
   ]

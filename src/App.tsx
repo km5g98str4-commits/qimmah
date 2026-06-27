@@ -6,6 +6,8 @@ import { DemoView } from '@/views/DemoView'
 import { PrivacyView } from '@/views/PrivacyView'
 import { TermsView } from '@/views/TermsView'
 import { SettingsView } from '@/views/SettingsView'
+import { NutritionView } from '@/views/NutritionView'
+import { ProgressView } from '@/views/ProgressView'
 import type { AppView } from '@/components/AppNav'
 import { useCustomization } from '@/lib/customizationContext'
 import { type Customization, getDefaultCustomization } from '@/lib/customization'
@@ -155,6 +157,14 @@ export default function App() {
         onOpenTerms={() => setView('terms')}
       />
     )
+  }
+
+  if (view === 'nutrition') {
+    return <NutritionView lang={LANG} onBack={backToDashboard} />
+  }
+
+  if (view === 'progress') {
+    return <ProgressView lang={LANG} onBack={backToDashboard} />
   }
 
   return (

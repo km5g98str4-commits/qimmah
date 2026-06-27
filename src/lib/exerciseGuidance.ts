@@ -83,7 +83,7 @@ const SAFETY_BY_PATTERN: Record<MovementPattern, string[]> = {
   mobility: ['لا تجبر المفصل على مدى مؤلم.', 'توقّف فورًا عند أي ألم حاد أو وخز.'],
 }
 
-const MUSCLE_AR: Record<Muscle, string> = {
+export const MUSCLE_AR: Record<Muscle, string> = {
   chest: 'الصدر',
   back: 'الظهر',
   shoulders: 'الأكتاف',
