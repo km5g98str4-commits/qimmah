@@ -12,6 +12,7 @@ import { type Customization, getDefaultCustomization } from '@/lib/customization
 import { loadOnboarding, markCompleted } from '@/lib/onboarding'
 import { applyLanguage } from '@/lib/appPreferences'
 import { type AppRoute, routeFromHash, setHashRoute } from '@/lib/appRoutes'
+import { BUILD_LABEL } from '@/lib/buildInfo'
 
 // اللغة مثبّتة على العربية حاليًا (الإنجليزية مخفية حتى اكتمال الترجمة).
 const LANG = 'ar' as const
@@ -35,6 +36,8 @@ export default function App() {
 
   useEffect(() => {
     applyLanguage(LANG)
+    // معرّف البناء في الـ console — للتحقق من نشر النسخة الصحيحة (Netlify).
+    console.info(`%cقِمّة ${BUILD_LABEL}`, 'color:#F26A21;font-weight:bold')
   }, [])
 
   const [view, setView] = useState<AppRoute>(() => initialRoute())
@@ -54,7 +57,15 @@ export default function App() {
   useEffect(() => {
     const onHash = () => {
       const r = routeFromHash()
-      if (r) setView(guardRoute(r))
+      if (r) {
+        setView(guardRoute(r))
+      } else if (window.location.hash && window.location.hash !== '#/') {
+        // مسار غير معروف (مثل #/login) → وجهة آمنة + تصحيح العنوان صراحةً
+        // (حتى لو لم تتغيّر الـ view، نضمن أن لا يبقى hash غير صالح).
+        const target = loadOnboarding().completed ? 'dashboard' : 'start'
+        setView(target)
+        setHashRoute(target)
+      }
     }
     window.addEventListener('hashchange', onHash)
     return () => window.removeEventListener('hashchange', onHash)
