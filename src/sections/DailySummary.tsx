@@ -9,7 +9,9 @@ export function DailySummary() {
   const { customization } = useCustomization()
   const p = customization.profile
   const t = customization.targets
-  const name = customization.identity.userName
+  // تحية ودودة حتى لو كان الاسم فارغًا (نسخة مستوردة ناقصة مثلًا) — بلا فاصلة مكرّرة.
+  const name = customization.identity.userName.trim()
+  const greeting = name ? `أهلًا ${name}،` : 'أهلًا بك،'
   const calories = targetCaloriesFor(p.goal, t)
 
   // سلسلة وملخّص الأسبوع من السجلّ الدائم (لا من حالة اليوم المؤقتة).
@@ -33,7 +35,7 @@ export function DailySummary() {
             <Icon name="Flame" className="h-3.5 w-3.5" />
             خطتك اليوم
           </span>
-          <h1 className="mt-3 text-2xl font-black text-ink-900 sm:text-3xl">أهلًا {name}، هذه خطتك اليوم 👋</h1>
+          <h1 className="mt-3 text-2xl font-black text-ink-900 sm:text-3xl">{greeting} هذه خطتك اليوم 👋</h1>
 
           <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
             {cards.map((c) => (

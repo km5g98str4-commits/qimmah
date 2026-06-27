@@ -1,5 +1,6 @@
 import { nav, product } from '@/config/product'
 import { useCustomization } from '@/lib/customizationContext'
+import { BUILD_LABEL } from '@/lib/buildInfo'
 import { Icon } from './Icon'
 
 /** الفوتر — هوية، روابط، حقوق. */
@@ -36,6 +37,7 @@ export function Footer() {
         <div className="mt-12 flex flex-col gap-3 border-t border-line pt-6 text-xs text-ink-400 sm:flex-row sm:items-center sm:justify-between">
           <p>
             © {product.year} {brandName}. {product.rightsNote}
+            <span className="ms-2 text-ink-300" title="معرّف البناء">{BUILD_LABEL}</span>
           </p>
           <div className="flex items-center gap-4">
             <a href="#/privacy" className="text-ink-500 transition-colors hover:text-brand-300">الخصوصية</a>

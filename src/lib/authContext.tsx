@@ -111,6 +111,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 }
 
 /** هوك الوصول لحالة المصادقة. آمن: يعيد وضع ضيف إن لم يُلفّ بالمزوّد. */
+// eslint-disable-next-line react-refresh/only-export-components -- ملف سياق: مزوّد + هوك معًا (نمط مقصود)
 export function useAuth(): AuthContextValue {
   const ctx = useContext(AuthContext)
   if (ctx) return ctx

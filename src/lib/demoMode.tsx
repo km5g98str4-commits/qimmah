@@ -9,6 +9,7 @@ export function DemoModeProvider({ children }: { children: ReactNode }) {
   return <DemoModeContext.Provider value={true}>{children}</DemoModeContext.Provider>
 }
 
+// eslint-disable-next-line react-refresh/only-export-components -- ملف سياق: مزوّد + هوك معًا (نمط مقصود)
 export function useIsDemo(): boolean {
   return useContext(DemoModeContext)
 }

@@ -35,7 +35,8 @@ export function Today({ lang, onStartWorkout }: TodayProps) {
   const nutritionToday = useNutritionToday()
   const wellnessToday = useWellnessToday()
   const commitmentsToday = useCommitmentsToday()
-  const { userName } = customization.identity
+  const userName = customization.identity.userName.trim()
+  const dayGreeting = userName ? `يومك، ${userName} 👋` : 'يومك 👋'
   const tn = getStrings(lang).nutrition
   const twell = getStrings(lang).wellness
   const tc = getStrings(lang).commit
@@ -84,7 +85,7 @@ export function Today({ lang, onStartWorkout }: TodayProps) {
               يومك
             </span>
             <h2 className="mt-3 text-2xl font-black text-ink-900 sm:text-3xl">
-              يومك، {userName} 👋
+              {dayGreeting}
             </h2>
             <p className="mt-1 text-sm text-ink-500">
               علّم كل شي تخلّصه — وتابع التزامك خطوة بخطوة.
