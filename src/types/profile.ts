@@ -6,6 +6,18 @@ export type TrainingLevel = 'beginner' | 'intermediate' | 'advanced'
 export type CalorieGoal = 'cut' | 'maintain' | 'bulk'
 export type WorkoutEnvironment = 'gym' | 'home'
 
+/** الهدف المنظَّم (يقود السعرات والتمرين والتغذية والالتزامات). */
+export type GoalType =
+  | 'cutting'
+  | 'bulking'
+  | 'maintenance'
+  | 'returning'
+  | 'health'
+  | 'strength'
+  | 'recomposition'
+
+export type NutritionStyle = 'simple' | 'high_protein' | 'saudi' | 'economical' | 'flexible'
+
 /** بيانات الجسم/الملف الشخصي التي تُبنى عليها الحسابات. */
 export interface Profile {
   name: string
@@ -17,10 +29,16 @@ export interface Profile {
   activityLevel: ActivityLevel
   trainingLevel: TrainingLevel
   goal: CalorieGoal
+  goalType: GoalType
   trainingDays: number
+  workoutDuration: number
   workoutEnvironment: WorkoutEnvironment
   injuries: string
   healthNotes: string
+  trackNutrition: boolean
+  mealsPerDay: number
+  nutritionStyle: NutritionStyle
+  dislikedFoods: string
 }
 
 /** أهداف مقدّرة قابلة للتعديل اليدوي. */

@@ -4,6 +4,8 @@ import type {
   ActivityLevel,
   CalorieGoal,
   Gender,
+  GoalType,
+  NutritionStyle,
   Profile,
   Targets,
   TrainingLevel,
@@ -45,6 +47,33 @@ export const environmentOptions: { value: WorkoutEnvironment; label: string }[] 
   { value: 'gym', label: 'نادي' },
   { value: 'home', label: 'منزل' },
 ]
+export const goalTypeOptions: { value: GoalType; label: string }[] = [
+  { value: 'cutting', label: 'تنشيف' },
+  { value: 'bulking', label: 'تضخيم' },
+  { value: 'maintenance', label: 'ثبات' },
+  { value: 'returning', label: 'رجوع بعد انقطاع' },
+  { value: 'health', label: 'صحة عامة' },
+  { value: 'strength', label: 'زيادة قوة' },
+  { value: 'recomposition', label: 'تحسين شكل الجسم' },
+]
+export const nutritionStyleOptions: { value: NutritionStyle; label: string }[] = [
+  { value: 'simple', label: 'بسيط' },
+  { value: 'high_protein', label: 'عالي البروتين' },
+  { value: 'saudi', label: 'سعودي/خليجي' },
+  { value: 'economical', label: 'اقتصادي' },
+  { value: 'flexible', label: 'مرن بالسعرات' },
+]
+
+/** يربط الهدف المنظَّم بهدف السعرات (للحاسبة). */
+export function calorieGoalFromGoalType(g: GoalType): CalorieGoal {
+  if (g === 'cutting') return 'cut'
+  if (g === 'bulking' || g === 'strength') return 'bulk'
+  return 'maintain' // maintenance / returning / health / recomposition
+}
+
+export function goalTypeLabel(g: GoalType): string {
+  return goalTypeOptions.find((o) => o.value === g)?.label ?? ''
+}
 
 const round = (n: number) => Math.round(n)
 const round1 = (n: number) => Math.round(n * 10) / 10
@@ -169,7 +198,7 @@ export function computeTargets(p: Profile): Targets {
 
 /** ملف شخصي افتراضي للعرض/الانطلاق. */
 export const defaultProfile: Profile = {
-  name: 'زياد العبدالله',
+  name: 'أحمد محمد',
   gender: 'male',
   age: 24,
   heightCm: 178,
@@ -178,10 +207,16 @@ export const defaultProfile: Profile = {
   activityLevel: 'moderate',
   trainingLevel: 'intermediate',
   goal: 'cut',
+  goalType: 'cutting',
   trainingDays: 4,
+  workoutDuration: 60,
   workoutEnvironment: 'gym',
   injuries: '',
   healthNotes: '',
+  trackNutrition: true,
+  mealsPerDay: 4,
+  nutritionStyle: 'high_protein',
+  dislikedFoods: '',
 }
 
 /** السعرات المستهدفة حسب هدف الملف الشخصي. */

@@ -6,6 +6,17 @@ export const WORKOUT_SESSIONS_KEY = 'qimmah:workoutSessions:v1'
 
 export type Difficulty = 'easy' | 'medium' | 'hard'
 
+/** سجلّ مجموعة واحدة (set) داخل التمرين. */
+export interface SetLog {
+  setNumber: number
+  targetReps: string
+  actualReps: string
+  weightKg: string
+  completed: boolean
+  rpe?: number
+  notes?: string
+}
+
 export interface SessionExercise {
   exerciseId: string
   exerciseNameAr?: string
@@ -14,6 +25,8 @@ export interface SessionExercise {
   targetReps: string
   targetRestSec: number
   completed: boolean
+  sets?: SetLog[]
+  // حقول قديمة للتوافق
   weight?: string
   repsDone?: string
   difficulty?: Difficulty

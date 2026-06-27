@@ -125,10 +125,10 @@ export interface Customization {
 export function getDefaultCustomization(): Customization {
   return {
     identity: {
-      userName: 'زياد العبدالله',
+      userName: 'أحمد محمد',
       brandName: product.name,
       tagline: product.tagline,
-      mainGoal: 'الوصول إلى 78 كجم وزيادة الكتلة العضلية خلال 12 أسبوعًا',
+      mainGoal: 'الوصول إلى 78 كجم وتحسين شكل الجسم',
       userType: 'individual',
     },
     colors: {
@@ -143,7 +143,7 @@ export function getDefaultCustomization(): Customization {
     nutritionPlan: defaultNutritionPlan(computeTargets(defaultProfile), defaultProfile.goal),
     wellnessPlan: defaultWellnessPlan(),
     commitmentPlan: defaultCommitmentPlan(),
-    measurementPlan: { enabled: true, selectedTypeIds: ['weightKg', 'waistCm', 'bodyFatPercent', 'sleepHours'] },
+    measurementPlan: { enabled: true, selectedTypeIds: ['weightKg', 'waistCm', 'bodyFatPercent', 'progressPhotoNote'] },
     workouts: todayWorkout.exercises.map((e) => ({
       name: e.name,
       muscle: e.muscle,

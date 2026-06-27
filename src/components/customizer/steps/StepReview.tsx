@@ -2,27 +2,26 @@ import { useRef, useState } from 'react'
 import { Icon } from '@/components/Icon'
 import { StepHeader } from '../StepHeader'
 import type { WizardCtx } from '../stepProps'
-import { userTypeOptions } from '@/lib/customization'
 import { resetQimmah } from '@/lib/resetQimmah'
+import { goalTypeLabel, targetCaloriesFor } from '@/lib/calculators'
+import { getTemplate } from '@/data/workoutTemplates'
 
-/** خطوة المراجعة والحفظ — ملخّص + منطقة متقدمة (نسخة احتياطية/استعادة/افتراضي). */
+/** خطوة المراجعة والحفظ — ملخّص الخطة + منطقة متقدمة. */
 export function StepReview({ ctx }: { ctx: WizardCtx }) {
   const { data } = ctx
   const [advanced, setAdvanced] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
 
-  const userTypeLabel =
-    userTypeOptions.find((o) => o.value === data.identity.userType)?.label ?? ''
-
   const summary: { label: string; value: string }[] = [
     { label: 'اسمك', value: data.identity.userName },
-    { label: 'اسم صفحتك', value: data.identity.brandName },
-    { label: 'النوع', value: userTypeLabel },
-    { label: 'تمارين', value: `${data.workouts.length}` },
-    { label: 'وجبات', value: `${data.meals.length}` },
-    { label: 'مكملات وأدوية', value: `${data.supplements.length}` },
-    { label: 'قياسات', value: `${data.metrics.length}` },
-    { label: 'أيام الجدول', value: `${data.routine.length}` },
+    { label: 'الهدف', value: goalTypeLabel(data.profile.goalType) },
+    { label: 'الوزن', value: `${data.profile.weightKg} → ${data.profile.targetWeightKg} كجم` },
+    { label: 'سعرات الهدف', value: `${targetCaloriesFor(data.profile.goal, data.targets)}` },
+    { label: 'بروتين', value: `${data.targets.proteinGrams}غ` },
+    { label: 'جدول التمرين', value: getTemplate(data.workoutPlan.templateId)?.nameAr ?? '—' },
+    { label: 'وجبات', value: `${data.nutritionPlan.meals.length}` },
+    { label: 'مكملات/أدوية', value: `${data.wellnessPlan.supplements.length + data.wellnessPlan.medications.length}` },
+    { label: 'قياسات', value: `${data.measurementPlan.selectedTypeIds.length}` },
   ]
 
   return (

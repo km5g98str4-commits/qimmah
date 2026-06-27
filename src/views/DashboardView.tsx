@@ -4,7 +4,7 @@ import { Footer } from '@/components/Footer'
 import { Icon } from '@/components/Icon'
 import { SuccessToast } from '@/components/SuccessToast'
 import { WorkoutMode } from '@/components/WorkoutMode'
-import { Hero } from '@/sections/Hero'
+import { DailySummary } from '@/sections/DailySummary'
 import { Today } from '@/sections/Today'
 import { CurrentGoal } from '@/sections/CurrentGoal'
 import { ProfileData } from '@/sections/ProfileData'
@@ -17,10 +17,11 @@ import { WellnessSection } from '@/sections/WellnessSection'
 import { ProgressSection } from '@/sections/ProgressSection'
 import { CommitmentsSection } from '@/sections/CommitmentsSection'
 import { HealthNotice } from '@/sections/HealthNotice'
+import { StorageCard } from '@/sections/StorageCard'
 import { useCustomization } from '@/lib/customizationContext'
 import { todayPlanDay } from '@/lib/workoutPlan'
 import { addSession, type WorkoutSession } from '@/lib/workoutSessions'
-import { loadHistory, recordWeight, saveHistory } from '@/lib/exerciseHistory'
+import { loadHistory, recordExercise, saveHistory } from '@/lib/exerciseHistory'
 import { getStrings } from '@/config/strings'
 import type { Lang } from '@/lib/appPreferences'
 
@@ -49,13 +50,12 @@ export function DashboardView({
   const planDay = todayPlanDay(customization.workoutPlan)
 
   const finishWorkout = (session: WorkoutSession) => {
-    // حفظ الجلسة + تحديث الأوزان (آخر/أفضل)
+    // حفظ الجلسة + تحديث سجل الأداء (آخر/أفضل وزن وتكرارات + 1RM + سلسلة التقدّم)
     addSession(session)
     let history = loadHistory()
+    const when = session.finishedAt ?? session.startedAt
     session.exercises.forEach((e) => {
-      if (e.completed && e.weight) {
-        history = recordWeight(history, e.exerciseId, e.weight, session.finishedAt ?? session.startedAt)
-      }
+      history = recordExercise(history, e, when)
     })
     saveHistory(history)
     setWorkoutOpen(false)
@@ -67,35 +67,43 @@ export function DashboardView({
       <AppNav current="dashboard" lang={lang} onNavigate={onNavigate} />
 
       <main>
-        {/* أساسية دائمًا: مقدمة + اليوم + الحسابات + الهدف + البيانات */}
-        <Hero />
+        {/* 1) ملخّص يومي/ترحيب */}
+        <DailySummary />
+        {/* 2) اليوم */}
         {s.today && <Today lang={lang} onStartWorkout={planDay ? () => setWorkoutOpen(true) : undefined} />}
-        <MyTargets />
-        <CurrentGoal />
-        <ProfileData />
+        {/* 3) الجدول الأسبوعي */}
         <WeeklyRoutine />
-
-        {/* أقسام اختيارية حسب إعداد المستخدم */}
+        {/* 4) خطة التمرين والأوزان */}
         {s.workouts && <WorkoutPlanSection lang={lang} />}
         {s.workouts && <RecentWorkout lang={lang} />}
+        {/* 5) التغذية */}
         {s.meals && <NutritionPlanSection lang={lang} />}
+        {/* 6) المكملات والأدوية */}
         {(s.supplements || s.medications) && <WellnessSection lang={lang} />}
+        {/* 7) الالتزامات */}
         {s.commitments && <CommitmentsSection lang={lang} />}
+        {/* 8) القياسات والتقدّم */}
         {s.measurements && <ProgressSection lang={lang} />}
+        {/* الهدف + البيانات + الأهداف المحسوبة */}
+        <CurrentGoal />
+        <ProfileData />
+        <MyTargets />
+        {/* التخزين/التصدير */}
+        <StorageCard />
         {s.notes && <HealthNotice />}
       </main>
 
       <Footer />
 
-      {/* زر عائم — تعديل الصفحة */}
+      {/* زر عائم — تعديل خطتي */}
       <button
         type="button"
         onClick={onOpenSetup}
         className="btn-primary fixed bottom-5 start-5 z-40 shadow-glow"
-        aria-label="تعديل صفحتي"
+        aria-label="تعديل خطتي"
       >
         <Icon name="Palette" className="h-4 w-4" />
-        <span className="hidden sm:inline">تعديل صفحتي</span>
+        <span className="hidden sm:inline">تعديل خطتي</span>
       </button>
 
       {/* وضع التمرين */}

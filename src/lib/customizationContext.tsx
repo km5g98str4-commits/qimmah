@@ -7,6 +7,7 @@ import {
   saveCustomization,
   clearCustomization,
 } from './customization'
+import { generatePlan } from './planGenerator'
 
 interface CustomizationContextValue {
   customization: Customization
@@ -53,11 +54,18 @@ export function CustomizationProvider({ children }: { children: ReactNode }) {
   return <CustomizationContext.Provider value={value}>{children}</CustomizationContext.Provider>
 }
 
-/** يبني نسخة عرض غنية للنموذج (دون حفظ). */
+/** يبني نسخة عرض غنية للنموذج (دون حفظ) — خطة مولّدة ومتّسقة. */
 function buildDemoCustomization(): Customization {
   const base = getDefaultCustomization()
+  const g = generatePlan(base.profile)
   return {
     ...base,
+    targets: g.targets,
+    workoutPlan: g.workoutPlan,
+    routine: g.weeklySchedule,
+    nutritionPlan: g.nutritionPlan,
+    commitmentPlan: g.commitmentPlan,
+    measurementPlan: g.measurementPlan,
     wellnessPlan: {
       ...base.wellnessPlan,
       // عيّنة دواء للمتابعة (الجرعة مُدخلة كمثال فقط — ليست توصية)

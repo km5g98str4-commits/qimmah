@@ -136,6 +136,10 @@ export function ProgressSection({ lang }: { lang: Lang }) {
         )}
 
         <p className="mt-6 flex items-start gap-2 text-xs text-ink-400">
+          <Icon name="ShieldCheck" className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+          صور التقدم محفوظة على جهازك فقط ولا يتم رفعها أو إرسالها لأي خادم. (تسجيل ملاحظة الصورة متاح، ورفع الصور الفعلي قيد التطوير.)
+        </p>
+        <p className="mt-2 flex items-start gap-2 text-xs text-ink-400">
           <Icon name="AlertTriangle" className="mt-0.5 h-3.5 w-3.5 shrink-0" />
           {t.advancedNote}
         </p>

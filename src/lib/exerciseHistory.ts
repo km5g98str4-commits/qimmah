@@ -1,11 +1,18 @@
-// سجل أوزان التمارين — آخر وزن وأفضل وزن لكل تمرين (محلي فقط).
+// سجل أداء التمارين — آخر/أفضل وزن وتكرارات + عدد الجلسات (محلي فقط).
+
+import type { SessionExercise } from './workoutSessions'
 
 export const EXERCISE_HISTORY_KEY = 'qimmah:exerciseHistory:v1'
 
 export interface ExerciseRecord {
   lastWeight?: string
   bestWeight?: string
+  lastReps?: string
+  bestEstimatedOneRepMax?: number
   lastCompletedAt?: string
+  totalSessions?: number
+  /** عدد الجلسات المتتالية التي أُكملت فيها كل التكرارات على نفس الوزن. */
+  streakFullReps?: number
 }
 
 export type ExerciseHistory = Record<string, ExerciseRecord>
@@ -35,7 +42,73 @@ const numOf = (w?: string): number => {
   return m ? Number(m[0]) : NaN
 }
 
-/** يحدّث آخر/أفضل وزن لتمرين عند إدخال وزن جديد. */
+/** Epley 1RM = w * (1 + reps/30). */
+function oneRepMax(weight: number, reps: number): number {
+  if (Number.isNaN(weight) || Number.isNaN(reps) || reps <= 0) return NaN
+  return Math.round(weight * (1 + reps / 30))
+}
+
+/** يحدّث سجل تمرين من نتيجة جلسة (يستخدم أثقل مجموعة منجزة). */
+export function recordExercise(
+  history: ExerciseHistory,
+  se: SessionExercise,
+  completedAt: string,
+): ExerciseHistory {
+  const sets = (se.sets ?? []).filter((s) => s.completed && numOf(s.weightKg) > 0)
+  let topWeight = NaN
+  let topReps = NaN
+  sets.forEach((s) => {
+    const w = numOf(s.weightKg)
+    if (Number.isNaN(topWeight) || w > topWeight) {
+      topWeight = w
+      topReps = numOf(s.actualReps) || numOf(s.targetReps)
+    }
+  })
+  if (Number.isNaN(topWeight) && se.weight) {
+    topWeight = numOf(se.weight)
+    topReps = numOf(se.repsDone) || numOf(se.targetReps)
+  }
+
+  const prev = history[se.exerciseId] ?? {}
+  if (Number.isNaN(topWeight)) {
+    return {
+      ...history,
+      [se.exerciseId]: { ...prev, lastCompletedAt: completedAt, totalSessions: (prev.totalSessions ?? 0) + 1 },
+    }
+  }
+
+  const prevBest = numOf(prev.bestWeight)
+  const best = Number.isNaN(prevBest) || topWeight > prevBest ? `${topWeight}` : prev.bestWeight
+  const orm = oneRepMax(topWeight, topReps)
+  const prevOrm = prev.bestEstimatedOneRepMax ?? 0
+  const allFull =
+    (se.sets?.length ?? 0) > 0 &&
+    se.sets!.every((s) => s.completed && (!numOf(s.targetReps) || numOf(s.actualReps) >= numOf(s.targetReps)))
+  const sameWeightAsLast = prev.lastWeight ? numOf(prev.lastWeight) === topWeight : false
+  const streak = allFull ? (sameWeightAsLast ? (prev.streakFullReps ?? 0) + 1 : 1) : 0
+
+  return {
+    ...history,
+    [se.exerciseId]: {
+      lastWeight: `${topWeight}`,
+      bestWeight: best,
+      lastReps: Number.isNaN(topReps) ? prev.lastReps : `${topReps}`,
+      bestEstimatedOneRepMax: Number.isNaN(orm) ? prevOrm : Math.max(prevOrm, orm),
+      lastCompletedAt: completedAt,
+      totalSessions: (prev.totalSessions ?? 0) + 1,
+      streakFullReps: streak,
+    },
+  }
+}
+
+/** اقتراح تقدّم بسيط بناءً على السجل. */
+export function progressionHint(rec?: ExerciseRecord): string | null {
+  if (!rec) return null
+  if ((rec.streakFullReps ?? 0) >= 2) return 'جرّب زيادة الوزن 2.5–5 كجم في المرة القادمة.'
+  return null
+}
+
+// — توافق قديم —
 export function recordWeight(
   history: ExerciseHistory,
   exerciseId: string,
@@ -47,8 +120,5 @@ export function recordWeight(
   const newNum = numOf(weight)
   const bestNum = numOf(prev.bestWeight)
   const best = !Number.isNaN(newNum) && (Number.isNaN(bestNum) || newNum > bestNum) ? weight : prev.bestWeight
-  return {
-    ...history,
-    [exerciseId]: { lastWeight: weight, bestWeight: best, lastCompletedAt: completedAt },
-  }
+  return { ...history, [exerciseId]: { ...prev, lastWeight: weight, bestWeight: best, lastCompletedAt: completedAt } }
 }

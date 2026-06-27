@@ -36,6 +36,9 @@ export default function App() {
 
   const [view, setView] = useState<AppRoute>(() => initialRoute())
   const [startStep, setStartStep] = useState<number>(() => loadOnboarding().lastStep ?? 0)
+  const [setupMode, setSetupMode] = useState<'onboarding' | 'advanced'>(() =>
+    loadOnboarding().completed ? 'advanced' : 'onboarding',
+  )
   const [showSuccess, setShowSuccess] = useState(false)
   const dismissSuccess = useCallback(() => setShowSuccess(false), [])
 
@@ -56,7 +59,8 @@ export default function App() {
 
   const openSetup = () => {
     const ob = loadOnboarding()
-    setStartStep(ob.completed ? 1 : (ob.lastStep ?? 0))
+    setSetupMode(ob.completed ? 'advanced' : 'onboarding')
+    setStartStep(ob.completed ? 0 : (ob.lastStep ?? 0))
     setView('setup')
   }
 
@@ -122,7 +126,7 @@ export default function App() {
   }
 
   if (view === 'setup') {
-    return <SetupView onClose={closeSetup} initialStep={startStep} />
+    return <SetupView onClose={closeSetup} initialStep={startStep} mode={setupMode} />
   }
 
   if (view === 'demo') {

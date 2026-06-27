@@ -1,7 +1,7 @@
 import { AppNav, type AppView } from '@/components/AppNav'
 import { Footer } from '@/components/Footer'
 import { Icon } from '@/components/Icon'
-import { Hero } from '@/sections/Hero'
+import { DailySummary } from '@/sections/DailySummary'
 import { Today } from '@/sections/Today'
 import { CurrentGoal } from '@/sections/CurrentGoal'
 import { ProfileData } from '@/sections/ProfileData'
@@ -52,7 +52,7 @@ export function DemoView({ lang, onNavigate, onBack }: DemoViewProps) {
         </div>
 
         <main>
-          <Hero />
+          <DailySummary />
           <Today lang={lang} />
           <CurrentGoal />
           <ProfileData />
