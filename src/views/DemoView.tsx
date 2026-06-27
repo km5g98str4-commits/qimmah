@@ -7,6 +7,7 @@ import { CurrentGoal } from '@/sections/CurrentGoal'
 import { ProfileData } from '@/sections/ProfileData'
 import { MyTargets } from '@/sections/MyTargets'
 import { WeeklyRoutine } from '@/sections/WeeklyRoutine'
+import { MuscleCoverageSection } from '@/sections/MuscleCoverageSection'
 import { WorkoutPlanSection } from '@/sections/WorkoutPlanSection'
 import { NutritionPlanSection } from '@/sections/NutritionPlanSection'
 import { WellnessSection } from '@/sections/WellnessSection'
@@ -58,6 +59,7 @@ export function DemoView({ lang, onNavigate, onBack }: DemoViewProps) {
           <ProfileData />
           <MyTargets />
           <WeeklyRoutine />
+          <MuscleCoverageSection lang={lang} />
           <WorkoutPlanSection lang={lang} />
           <NutritionPlanSection lang={lang} />
           <WellnessSection lang={lang} />

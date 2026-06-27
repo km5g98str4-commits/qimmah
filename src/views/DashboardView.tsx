@@ -10,6 +10,7 @@ import { CurrentGoal } from '@/sections/CurrentGoal'
 import { ProfileData } from '@/sections/ProfileData'
 import { MyTargets } from '@/sections/MyTargets'
 import { WeeklyRoutine } from '@/sections/WeeklyRoutine'
+import { MuscleCoverageSection } from '@/sections/MuscleCoverageSection'
 import { WorkoutPlanSection } from '@/sections/WorkoutPlanSection'
 import { RecentWorkout } from '@/sections/RecentWorkout'
 import { NutritionPlanSection } from '@/sections/NutritionPlanSection'
@@ -73,6 +74,8 @@ export function DashboardView({
         {s.today && <Today lang={lang} onStartWorkout={planDay ? () => setWorkoutOpen(true) : undefined} />}
         {/* 3) الجدول الأسبوعي */}
         <WeeklyRoutine />
+        {/* 3.5) عضلاتك هذا الأسبوع — خريطة العضلات والتغطية */}
+        {s.workouts && <MuscleCoverageSection lang={lang} />}
         {/* 4) خطة التمرين والأوزان */}
         {s.workouts && <WorkoutPlanSection lang={lang} />}
         {s.workouts && <RecentWorkout lang={lang} />}

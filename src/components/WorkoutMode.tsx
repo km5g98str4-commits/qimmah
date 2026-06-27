@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Icon } from './Icon'
+import { MuscleChips } from './MuscleChips'
 import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
@@ -163,6 +164,13 @@ export function WorkoutMode({ lang, day, onClose, onFinish }: WorkoutModeProps) 
                     </p>
                   )}
                   {hint && <p className="mt-1 text-[11px] font-bold text-success">↑ {hint}</p>}
+                  {getExercise(pe.exerciseId) && (
+                    <MuscleChips
+                      primary={getExercise(pe.exerciseId)!.primaryMusclesDetailed}
+                      secondary={getExercise(pe.exerciseId)!.secondaryMusclesDetailed}
+                      className="mt-2"
+                    />
+                  )}
                 </div>
                 <a href={planExerciseVideo(pe)} target="_blank" rel="noopener noreferrer" className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-line text-ink-500 hover:bg-beige" aria-label={t.watch}>
                   <Icon name="Globe" className="h-4 w-4" />
