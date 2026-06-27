@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Icon } from './Icon'
+import { MuscleChips } from './MuscleChips'
 import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
@@ -263,6 +264,13 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
                   {muscles}
                 </span>
               )}
+              {ex?.primaryMusclesDetailed?.length ? (
+                <MuscleChips
+                  primary={ex.primaryMusclesDetailed}
+                  secondary={ex.secondaryMusclesDetailed}
+                  className="mt-2"
+                />
+              ) : null}
             </div>
             <span className="shrink-0 rounded-full bg-primary-soft px-3 py-1.5 text-xs font-black text-primary-c">
               {current + 1} {t.of} {total}

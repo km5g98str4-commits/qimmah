@@ -1,10 +1,139 @@
 import type { Exercise, ExEnvironment, ExLevel, Muscle, MovementPattern } from '@/types/workout'
+import type { MuscleId } from '@/types/muscles'
 
 // مكتبة التمارين — ~80 تمرينًا. كل تمرين له رابط شرح موثوق (غير فارغ).
 // ملاحظة: بعض الروابط عبارة عن بحث يوتيوب موثوق وليست بالضرورة رسمية.
 
 function video(nameEn: string): string {
   return `https://www.youtube.com/results?search_query=${encodeURIComponent(nameEn + ' exercise form')}`
+}
+
+// خريطة العضلات التفصيلية لكل تمرين (هوية كمال الأجسام).
+// primary = العضلات المحرّكة الأساسية، secondary = المساعِدة.
+interface MuscleDetail {
+  primary: MuscleId[]
+  secondary?: MuscleId[]
+}
+
+const muscleDetailById: Record<string, MuscleDetail> = {
+  // ===== الصدر =====
+  'barbell-bench-press': { primary: ['chest_mid', 'triceps', 'front_delts'], secondary: ['chest_upper'] },
+  'incline-barbell-press': { primary: ['chest_upper', 'front_delts', 'triceps'], secondary: ['chest_mid'] },
+  'dumbbell-bench-press': { primary: ['chest_mid', 'triceps', 'front_delts'], secondary: ['chest_upper'] },
+  'incline-dumbbell-press': { primary: ['chest_upper', 'front_delts', 'triceps'], secondary: ['chest_mid'] },
+  'chest-press-machine': { primary: ['chest_mid', 'triceps'], secondary: ['front_delts'] },
+  'incline-machine-press': { primary: ['chest_upper', 'front_delts'], secondary: ['triceps'] },
+  'pec-deck': { primary: ['chest_mid'], secondary: ['front_delts'] },
+  'cable-crossover': { primary: ['chest_mid', 'chest_lower'], secondary: ['front_delts'] },
+  'dumbbell-fly': { primary: ['chest_mid'], secondary: ['front_delts'] },
+  'push-up': { primary: ['chest_mid', 'triceps'], secondary: ['front_delts', 'abs'] },
+  'incline-push-up': { primary: ['chest_mid'], secondary: ['triceps', 'front_delts'] },
+
+  // ===== الظهر =====
+  deadlift: { primary: ['lower_back', 'glutes', 'hamstrings'], secondary: ['traps', 'lats', 'upper_back', 'quads', 'forearms'] },
+  'barbell-row': { primary: ['lats', 'upper_back'], secondary: ['biceps', 'rear_delts', 'lower_back', 'forearms'] },
+  'dumbbell-row': { primary: ['lats', 'upper_back'], secondary: ['biceps', 'rear_delts'] },
+  'lat-pulldown': { primary: ['lats'], secondary: ['biceps', 'upper_back'] },
+  'seated-cable-row': { primary: ['upper_back', 'lats'], secondary: ['biceps', 'rear_delts'] },
+  'machine-row': { primary: ['upper_back', 'lats'], secondary: ['biceps'] },
+  't-bar-row': { primary: ['upper_back', 'lats'], secondary: ['biceps', 'rear_delts'] },
+  'pull-up': { primary: ['lats'], secondary: ['biceps', 'upper_back', 'forearms'] },
+  'chin-up': { primary: ['lats', 'biceps'], secondary: ['upper_back'] },
+  'straight-arm-pulldown': { primary: ['lats'], secondary: ['triceps'] },
+  'dumbbell-shrug': { primary: ['traps'], secondary: ['forearms'] },
+
+  // ===== الأكتاف =====
+  'overhead-press': { primary: ['front_delts', 'side_delts', 'triceps'], secondary: ['traps', 'upper_back'] },
+  'dumbbell-shoulder-press': { primary: ['front_delts', 'side_delts', 'triceps'], secondary: ['traps'] },
+  'shoulder-press-machine': { primary: ['front_delts', 'side_delts'], secondary: ['triceps'] },
+  'lateral-raise': { primary: ['side_delts'], secondary: ['traps'] },
+  'cable-lateral-raise': { primary: ['side_delts'], secondary: ['traps'] },
+  'rear-delt-fly': { primary: ['rear_delts'], secondary: ['upper_back'] },
+  'reverse-pec-deck': { primary: ['rear_delts'], secondary: ['upper_back'] },
+  'front-raise': { primary: ['front_delts'], secondary: ['side_delts'] },
+  'face-pull': { primary: ['rear_delts'], secondary: ['traps', 'upper_back'] },
+
+  // ===== البايسبس =====
+  'barbell-curl': { primary: ['biceps'], secondary: ['forearms'] },
+  'dumbbell-curl': { primary: ['biceps'], secondary: ['forearms'] },
+  'hammer-curl': { primary: ['biceps', 'forearms'] },
+  'preacher-curl': { primary: ['biceps'], secondary: ['forearms'] },
+  'cable-curl': { primary: ['biceps'], secondary: ['forearms'] },
+  'concentration-curl': { primary: ['biceps'] },
+
+  // ===== الترايسبس =====
+  'triceps-pushdown': { primary: ['triceps'] },
+  'rope-pushdown': { primary: ['triceps'] },
+  'overhead-triceps-extension': { primary: ['triceps'] },
+  'skull-crusher': { primary: ['triceps'] },
+  'close-grip-bench-press': { primary: ['triceps', 'chest_mid'], secondary: ['front_delts'] },
+  'bench-dip': { primary: ['triceps'], secondary: ['chest_lower', 'front_delts'] },
+
+  // ===== الأرجل / الكوادز =====
+  'barbell-back-squat': { primary: ['quads', 'glutes'], secondary: ['hamstrings', 'lower_back', 'abs'] },
+  'front-squat': { primary: ['quads'], secondary: ['glutes', 'abs', 'lower_back'] },
+  'leg-press': { primary: ['quads', 'glutes'], secondary: ['hamstrings'] },
+  'hack-squat': { primary: ['quads'], secondary: ['glutes'] },
+  'leg-extension': { primary: ['quads'] },
+  'goblet-squat': { primary: ['quads', 'glutes'], secondary: ['abs'] },
+  'bulgarian-split-squat': { primary: ['quads', 'glutes'], secondary: ['hamstrings'] },
+  'walking-lunge': { primary: ['quads', 'glutes'], secondary: ['hamstrings'] },
+  'smith-machine-squat': { primary: ['quads', 'glutes'], secondary: ['hamstrings'] },
+  'bodyweight-squat': { primary: ['quads', 'glutes'], secondary: ['hamstrings'] },
+  'step-up': { primary: ['quads', 'glutes'], secondary: ['hamstrings'] },
+
+  // ===== الهامسترنج =====
+  'romanian-deadlift': { primary: ['hamstrings', 'glutes'], secondary: ['lower_back'] },
+  'dumbbell-rdl': { primary: ['hamstrings', 'glutes'], secondary: ['lower_back'] },
+  'lying-leg-curl': { primary: ['hamstrings'], secondary: ['calves'] },
+  'seated-leg-curl': { primary: ['hamstrings'], secondary: ['calves'] },
+  'good-morning': { primary: ['hamstrings', 'lower_back'], secondary: ['glutes'] },
+
+  // ===== الجلوتس =====
+  'hip-thrust': { primary: ['glutes'], secondary: ['hamstrings'] },
+  'glute-bridge': { primary: ['glutes'], secondary: ['hamstrings'] },
+  'cable-kickback': { primary: ['glutes'], secondary: ['hamstrings'] },
+  'sumo-deadlift': { primary: ['glutes', 'quads'], secondary: ['hamstrings', 'lower_back', 'traps'] },
+  'cable-pull-through': { primary: ['glutes', 'hamstrings'], secondary: ['lower_back'] },
+  'kettlebell-swing': { primary: ['glutes', 'hamstrings'], secondary: ['lower_back', 'quads', 'abs'] },
+
+  // ===== السمانة =====
+  'standing-calf-raise': { primary: ['calves'] },
+  'seated-calf-raise': { primary: ['calves'] },
+  'bodyweight-calf-raise': { primary: ['calves'] },
+
+  // ===== الكور =====
+  plank: { primary: ['abs'], secondary: ['obliques', 'lower_back'] },
+  'side-plank': { primary: ['obliques'], secondary: ['abs'] },
+  'hanging-leg-raise': { primary: ['abs'], secondary: ['obliques'] },
+  'cable-crunch': { primary: ['abs'], secondary: ['obliques'] },
+  crunch: { primary: ['abs'] },
+  'russian-twist': { primary: ['obliques'], secondary: ['abs'] },
+  'ab-wheel-rollout': { primary: ['abs'], secondary: ['obliques', 'lower_back'] },
+  'mountain-climber': { primary: ['abs'], secondary: ['obliques'] },
+
+  // ===== كارديو (بلا عضلة هدف تفصيلية) =====
+  'treadmill-run': { primary: [] },
+  'stationary-bike': { primary: [] },
+  'rowing-machine': { primary: [] },
+  elliptical: { primary: [] },
+  'jump-rope': { primary: [] },
+}
+
+// خريطة احتياطية من العضلة العامة إلى العضلات التفصيلية (للتمارين المخصّصة دون تفصيل صريح).
+const coarseToDetailed: Record<Muscle, MuscleId[]> = {
+  chest: ['chest_mid'],
+  back: ['lats', 'upper_back'],
+  shoulders: ['side_delts', 'front_delts'],
+  biceps: ['biceps'],
+  triceps: ['triceps'],
+  legs: ['quads', 'glutes'],
+  glutes: ['glutes'],
+  hamstrings: ['hamstrings'],
+  quads: ['quads'],
+  calves: ['calves'],
+  core: ['abs'],
+  cardio: [],
 }
 
 interface ExInput {
@@ -25,12 +154,17 @@ interface ExInput {
 }
 
 function ex(p: ExInput): Exercise {
+  const detail = muscleDetailById[p.id]
+  const primaryDetailed = detail?.primary ?? coarseToDetailed[p.primaryMuscle] ?? []
+  const secondaryDetailed = detail?.secondary ?? []
   return {
     id: p.id,
     nameAr: p.nameAr,
     nameEn: p.nameEn,
     primaryMuscle: p.primaryMuscle,
     secondaryMuscles: p.secondaryMuscles ?? [],
+    primaryMusclesDetailed: primaryDetailed,
+    secondaryMusclesDetailed: secondaryDetailed,
     equipment: p.equipment,
     level: p.level,
     movementPattern: p.movementPattern,

@@ -1,5 +1,7 @@
 // أنواع مكتبة التمارين وقوالب الجداول وخطة التمرين (Qimmah v2).
 
+import type { MuscleId } from './muscles'
+
 export type Muscle =
   | 'chest'
   | 'back'
@@ -34,6 +36,10 @@ export interface Exercise {
   nameEn: string
   primaryMuscle: Muscle
   secondaryMuscles: string[]
+  /** العضلات الأساسية التفصيلية (هوية كمال الأجسام) — للخريطة وحساب التغطية. */
+  primaryMusclesDetailed: MuscleId[]
+  /** العضلات الثانوية التفصيلية. */
+  secondaryMusclesDetailed: MuscleId[]
   equipment: string[]
   level: ExLevel
   movementPattern: MovementPattern

@@ -1,7 +1,9 @@
 import { SectionHeading } from '@/components/SectionHeading'
 import { Icon } from '@/components/Icon'
+import { MuscleChips } from '@/components/MuscleChips'
 import { useCustomization } from '@/lib/customizationContext'
 import { planExerciseName, planExerciseVideo } from '@/lib/workoutPlan'
+import { getExercise } from '@/data/exercises'
 import { getRecord } from '@/lib/exerciseHistory'
 import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
@@ -32,6 +34,7 @@ export function WorkoutPlanSection({ lang }: { lang: Lang }) {
                 <ul className="divide-y divide-line">
                   {day.exercises.map((pe) => {
                     const rec = getRecord(pe.exerciseId)
+                    const lib = getExercise(pe.exerciseId)
                     return (
                       <li key={pe.id} className="p-4">
                         <div className="flex items-start justify-between gap-3">
@@ -41,6 +44,13 @@ export function WorkoutPlanSection({ lang }: { lang: Lang }) {
                               {pe.sets}×{pe.reps} · {t.rest} {pe.restSec}ث
                               {pe.startingWeight ? ` · ${pe.startingWeight}` : ''}
                             </p>
+                            {lib && (
+                              <MuscleChips
+                                primary={lib.primaryMusclesDetailed}
+                                secondary={lib.secondaryMusclesDetailed}
+                                className="mt-2"
+                              />
+                            )}
                             {(rec?.lastWeight || rec?.bestWeight) && (
                               <p className="mt-1 text-[11px] text-primary-c">
                                 {rec?.lastWeight ? `${t.prevWeight}: ${rec.lastWeight}` : ''}
