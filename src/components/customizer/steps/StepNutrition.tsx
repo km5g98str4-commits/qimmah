@@ -14,6 +14,7 @@ import {
   mealTypeLabels,
 } from '@/lib/nutritionPlan'
 import { targetCaloriesFor } from '@/lib/calculators'
+import { NUM_LIMITS, parseSafeNumber } from '@/lib/validation'
 
 const inputCls = 'w-full rounded-lg border border-line bg-beige px-2.5 py-1.5 text-sm text-ink-900 focus:border-brand-500/50 focus:outline-none focus:ring-2 focus:ring-brand-500/30'
 
@@ -141,11 +142,11 @@ export function StepNutrition({ ctx }: { ctx: WizardCtx }) {
           </button>
         </div>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
-          <Target label="سعرات" value={np.targetCalories} onChange={(v) => setNp({ targetCalories: v })} />
-          <Target label="بروتين (غ)" value={np.targetProtein} onChange={(v) => setNp({ targetProtein: v })} />
-          <Target label="كارب (غ)" value={np.targetCarbs} onChange={(v) => setNp({ targetCarbs: v })} />
-          <Target label="دهون (غ)" value={np.targetFat} onChange={(v) => setNp({ targetFat: v })} />
-          <Target label="ماء (لتر)" value={np.targetWaterLiters} step="0.1" onChange={(v) => setNp({ targetWaterLiters: v })} />
+          <Target label="سعرات" value={np.targetCalories} max={NUM_LIMITS.dailyCalories.max} onChange={(v) => setNp({ targetCalories: v })} />
+          <Target label="بروتين (غ)" value={np.targetProtein} max={1000} onChange={(v) => setNp({ targetProtein: v })} />
+          <Target label="كارب (غ)" value={np.targetCarbs} max={2000} onChange={(v) => setNp({ targetCarbs: v })} />
+          <Target label="دهون (غ)" value={np.targetFat} max={1000} onChange={(v) => setNp({ targetFat: v })} />
+          <Target label="ماء (لتر)" value={np.targetWaterLiters} step="0.1" max={15} onChange={(v) => setNp({ targetWaterLiters: v })} />
         </div>
       </div>
 
@@ -197,7 +198,7 @@ export function StepNutrition({ ctx }: { ctx: WizardCtx }) {
                 return (
                   <li key={`${ig.ingredientId}-${k}`} className="flex items-center gap-2 rounded-lg border border-line bg-page p-2">
                     <span className="min-w-0 flex-1 truncate text-xs text-ink-900">{data ? ingredientDisplayName(data.nameAr, data.nameEn, 'ar') : ig.ingredientId}</span>
-                    <input type="number" step="0.5" className="w-16 rounded-lg border border-line bg-beige px-2 py-1 text-xs text-ink-900 focus:outline-none" value={ig.servings} onChange={(e) => setServings(meal.id, k, Number(e.target.value) || 0)} />
+                    <input type="number" inputMode="decimal" min={0} max={50} step="0.5" className="w-16 rounded-lg border border-line bg-beige px-2 py-1 text-xs text-ink-900 focus:outline-none" value={ig.servings} onChange={(e) => setServings(meal.id, k, parseSafeNumber(e.target.value, { min: 0, max: 50 }))} />
                     <span className="text-[10px] text-ink-400">حصة</span>
                     <button type="button" onClick={() => removeIngredient(meal.id, k)} className="grid h-6 w-6 place-items-center rounded text-rose-500 hover:bg-rose-500/10" aria-label="حذف"><Icon name="X" className="h-3.5 w-3.5" /></button>
                   </li>
@@ -244,11 +245,11 @@ export function StepNutrition({ ctx }: { ctx: WizardCtx }) {
   )
 }
 
-function Target({ label, value, step, onChange }: { label: string; value: number; step?: string; onChange: (v: number) => void }) {
+function Target({ label, value, step, max, onChange }: { label: string; value: number; step?: string; max?: number; onChange: (v: number) => void }) {
   return (
     <label className="flex flex-col gap-1">
       <span className="text-[10px] font-medium text-ink-400">{label}</span>
-      <input type="number" step={step ?? '1'} className={inputCls} value={value} onChange={(e) => onChange(Number(e.target.value) || 0)} />
+      <input type="number" inputMode="decimal" min={0} max={max} step={step ?? '1'} className={inputCls} value={value} onChange={(e) => onChange(parseSafeNumber(e.target.value, { min: 0, max: max ?? Number.MAX_SAFE_INTEGER }))} />
     </label>
   )
 }
