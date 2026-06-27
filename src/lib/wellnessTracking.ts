@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { getDayStamp } from './today'
 import { useIsDemo } from './demoMode'
+import { saveMedicationLog, saveSupplementLog } from './historyStore'
 
 // تتبّع المكملات والأدوية اليومي — يُصفّر مع تغيّر اليوم.
 
@@ -42,7 +43,11 @@ export function useWellnessToday() {
   const demo = useIsDemo()
   const [state, setState] = useState<WellnessTodayState>(() => (demo ? fresh() : loadWellnessToday()))
   const persist = (s: WellnessTodayState) => {
-    if (!demo) saveWellnessToday(s)
+    if (demo) return
+    saveWellnessToday(s)
+    // عكس في المتجر التاريخي الدائم.
+    saveSupplementLog(s.date, s.doneSupplements)
+    saveMedicationLog(s.date, s.doneMedications)
   }
 
   useEffect(() => {

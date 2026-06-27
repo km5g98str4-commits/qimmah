@@ -22,6 +22,7 @@ import { useCustomization } from '@/lib/customizationContext'
 import { todayPlanDay } from '@/lib/workoutPlan'
 import { addSession, type WorkoutSession } from '@/lib/workoutSessions'
 import { loadHistory, recordExercise, saveHistory } from '@/lib/exerciseHistory'
+import { saveExerciseHistory, saveWorkoutSession } from '@/lib/historyStore'
 import { getStrings } from '@/config/strings'
 import type { Lang } from '@/lib/appPreferences'
 
@@ -58,6 +59,9 @@ export function DashboardView({
       history = recordExercise(history, e, when)
     })
     saveHistory(history)
+    // عكس في المتجر التاريخي الدائم (المصدر الذي يُزامَن سحابيًا لاحقًا).
+    saveWorkoutSession(session)
+    saveExerciseHistory(history)
     setWorkoutOpen(false)
     setSavedWorkout(true)
   }

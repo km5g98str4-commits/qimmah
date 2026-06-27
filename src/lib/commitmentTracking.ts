@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { getDayStamp } from './today'
 import { useIsDemo } from './demoMode'
+import { saveDailyLog } from './historyStore'
 
 // تتبّع الالتزامات اليومي — يُصفّر مع تغيّر اليوم.
 
@@ -42,7 +43,10 @@ export function useCommitmentsToday() {
   const demo = useIsDemo()
   const [state, setState] = useState<CommitmentsTodayState>(() => (demo ? fresh() : loadCommitmentsToday()))
   const persist = (s: CommitmentsTodayState) => {
-    if (!demo) saveCommitmentsToday(s)
+    if (demo) return
+    saveCommitmentsToday(s)
+    // عكس في المتجر التاريخي الدائم كجزء من اللقطة اليومية.
+    saveDailyLog(s.date, { commitments: { done: s.done, notes: s.notes } })
   }
 
   useEffect(() => {
