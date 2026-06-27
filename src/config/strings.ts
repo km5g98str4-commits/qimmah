@@ -7,12 +7,15 @@ export interface ShellStrings {
   brand: string
   tagline: string
   nav: { home: string; setup: string; demo: string; settings: string }
+  tabs: { home: string; workout: string; nutrition: string; progress: string; profile: string }
   lang: { ar: string; en: string; label: string }
   badge: { guest: string; account: string; demo: string }
   start: {
     welcome: string
+    headline: string
     intro: string
     startSetup: string
+    buildPlan: string
     continueSetup: string
     seeDemo: string
     importPrevious: string
@@ -162,6 +165,15 @@ export interface ShellStrings {
     newPr: string
   }
   nutrition: {
+    tabTitle: string
+    needCals: string
+    foodCals: string
+    exerciseCals: string
+    equationNote: string
+    addShort: string
+    copy: string
+    favorite: string
+    soon: string
     title: string
     desc: string
     enable: string
@@ -262,6 +274,25 @@ export interface ShellStrings {
     allCategories: string
   }
   progress: {
+    tabTitle: string
+    cardWeight: string
+    noWeight: string
+    cardStreak: string
+    streakDays: string
+    cardVolume: string
+    noWorkouts: string
+    cardPRs: string
+    noPRs: string
+    cardMuscles: string
+    cardPhotos: string
+    photosPlaceholder: string
+    healthSyncTitle: string
+    healthSyncSoon: string
+    healthSyncBody: string
+    remindersTitle: string
+    reminderEnabled: string
+    reminderTrainingTime: string
+    reminderNote: string
     title: string
     desc: string
     enable: string
@@ -286,13 +317,16 @@ export interface ShellStrings {
 const ar: ShellStrings = {
   brand: 'قِمّة',
   tagline: 'تطبيقك الشخصي لكمال الأجسام والتمرين',
-  nav: { home: 'الصفحة الرئيسية', setup: 'الإعداد', demo: 'النموذج', settings: 'الإعدادات' },
+  nav: { home: 'الرئيسية', setup: 'الإعداد', demo: 'النموذج', settings: 'الإعدادات' },
+  tabs: { home: 'الرئيسية', workout: 'تمرين', nutrition: 'تغذية', progress: 'تقدّم', profile: 'حسابي' },
   lang: { ar: 'العربية', en: 'English', label: 'اللغة' },
   badge: { guest: 'ضيف', account: 'حساب', demo: 'نموذج تجريبي' },
   start: {
     welcome: 'أهلاً بك في قِمّة',
+    headline: 'كل رحلتك في كمال الأجسام في نظام واحد',
     intro: 'تمارينك، أوزانك، التضخيم التدريجي، تغذيتك، وقياساتك — كلها في مكان واحد.',
     startSetup: 'ابدأ إعداد صفحتي',
+    buildPlan: 'ابنِ خطتي الآن',
     continueSetup: 'أكمل إعداد صفحتي',
     seeDemo: 'شاهد نموذجًا',
     importPrevious: 'استورد نسخة سابقة',
@@ -458,6 +492,15 @@ const ar: ShellStrings = {
     newPr: 'رقم قياسي جديد',
   },
   nutrition: {
+    tabTitle: 'التغذية',
+    needCals: 'احتياجك',
+    foodCals: 'الطعام',
+    exerciseCals: 'التمرين',
+    equationNote: 'احتياجك − الطعام + التمرين = المتبقّي',
+    addShort: 'أضف',
+    copy: 'نسخ',
+    favorite: 'مفضّلة',
+    soon: 'قريبًا',
     title: 'خطة الأكل',
     desc: 'وجباتك وأهدافك الغذائية — مبنية على حساباتك الذكية وقابلة للتعديل.',
     enable: 'أريد متابعة الأكل',
@@ -559,6 +602,25 @@ const ar: ShellStrings = {
     allCategories: 'كل الفئات',
   },
   progress: {
+    tabTitle: 'التقدّم',
+    cardWeight: 'الوزن',
+    noWeight: 'سجّل وزنك من قسم القياسات ليظهر هنا.',
+    cardStreak: 'سلسلة التمرين',
+    streakDays: 'يوم متتالٍ',
+    cardVolume: 'حجم التمرين',
+    noWorkouts: 'لا توجد تمارين مسجّلة بعد. ابدأ تمرينك ليظهر تقدّمك هنا.',
+    cardPRs: 'أفضل الأوزان (PRs)',
+    noPRs: 'أكمل تمرينًا بأوزان لتظهر أرقامك القياسية.',
+    cardMuscles: 'العضلات هذا الأسبوع',
+    cardPhotos: 'صور التقدّم',
+    photosPlaceholder: 'قريبًا: حفظ صور التقدّم على جهازك بخصوصية تامة.',
+    healthSyncTitle: 'مزامنة الصحة',
+    healthSyncSoon: 'قريبًا: Apple Health و Google Fit',
+    healthSyncBody: 'حاليًا تقدر تتابع تمرينك وتغذيتك داخل قِمّة.',
+    remindersTitle: 'التذكيرات',
+    reminderEnabled: 'تفعيل التذكير',
+    reminderTrainingTime: 'وقت تذكير التمرين',
+    reminderNote: 'التذكيرات داخل المتصفح محدودة. دعم التنبيهات الكامل لاحقًا في تطبيق الجوال.',
     title: 'القياسات والتقدّم',
     desc: 'سجّل قياساتك وتابع تقدّمك بمرور الوقت.',
     enable: 'أريد متابعة القياسات والتقدّم',
@@ -584,12 +646,15 @@ const en: ShellStrings = {
   brand: 'Qimmah',
   tagline: 'Your personal bodybuilding & training app',
   nav: { home: 'Home', setup: 'Setup', demo: 'Demo', settings: 'Settings' },
+  tabs: { home: 'Home', workout: 'Workout', nutrition: 'Nutrition', progress: 'Progress', profile: 'Profile' },
   lang: { ar: 'العربية', en: 'English', label: 'Language' },
   badge: { guest: 'Guest', account: 'Account', demo: 'Demo' },
   start: {
     welcome: 'Welcome to Qimmah',
+    headline: 'Your entire bodybuilding journey in one system',
     intro: 'Your workouts, weights, progressive overload, nutrition, and measurements — all in one place.',
     startSetup: 'Set up my page',
+    buildPlan: 'Build my plan now',
     continueSetup: 'Continue my setup',
     seeDemo: 'See a sample',
     importPrevious: 'Import a previous copy',
@@ -755,6 +820,15 @@ const en: ShellStrings = {
     newPr: 'New PR',
   },
   nutrition: {
+    tabTitle: 'Nutrition',
+    needCals: 'Needs',
+    foodCals: 'Food',
+    exerciseCals: 'Exercise',
+    equationNote: 'Needs − Food + Exercise = Remaining',
+    addShort: 'Add',
+    copy: 'Copy',
+    favorite: 'Favorite',
+    soon: 'Soon',
     title: 'Meal plan',
     desc: 'Your meals and nutrition targets — based on your smart calculations and editable.',
     enable: 'Track my food',
@@ -856,6 +930,25 @@ const en: ShellStrings = {
     allCategories: 'All categories',
   },
   progress: {
+    tabTitle: 'Progress',
+    cardWeight: 'Weight',
+    noWeight: 'Log your weight in Measurements to see it here.',
+    cardStreak: 'Workout streak',
+    streakDays: 'days in a row',
+    cardVolume: 'Training volume',
+    noWorkouts: 'No workouts logged yet. Start a workout to see progress here.',
+    cardPRs: 'Best lifts (PRs)',
+    noPRs: 'Complete a weighted workout to see your PRs.',
+    cardMuscles: 'Muscles this week',
+    cardPhotos: 'Progress photos',
+    photosPlaceholder: 'Soon: store progress photos privately on your device.',
+    healthSyncTitle: 'Health sync',
+    healthSyncSoon: 'Soon: Apple Health & Google Fit',
+    healthSyncBody: 'For now, track your workouts and nutrition inside Qimmah.',
+    remindersTitle: 'Reminders',
+    reminderEnabled: 'Enable reminder',
+    reminderTrainingTime: 'Training reminder time',
+    reminderNote: 'In-browser reminders are limited. Full notifications later in the mobile app.',
     title: 'Measurements & progress',
     desc: 'Log your measurements and track progress over time.',
     enable: 'Track measurements & progress',

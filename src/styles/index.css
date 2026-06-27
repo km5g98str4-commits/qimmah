@@ -4,10 +4,25 @@
 
 @layer base {
   :root {
-    color-scheme: light;
+    color-scheme: dark;
     /* ألوان الهوية — تُحدَّث وقت التشغيل من مركز التخصيص (localStorage) */
     --c-primary: #f26a21;
-    --c-accent: #e0941f;
+    --c-accent: #f5a623;
+
+    /* أسطح داكنة — قنوات RGB (R G B) لدعم مُعدِّل الشفافية في Tailwind */
+    --c-page: 16 18 22; /* #101216 خلفية التطبيق */
+    --c-surface: 24 27 33; /* #181b21 بطاقات */
+    --c-beige: 33 37 46; /* #21252e سطح ثانوي / مدخلات */
+    --c-line: 44 49 59; /* #2c313b حدود */
+
+    /* نص — أبيض قوي → رمادي خافت */
+    --c-ink-900: 246 247 249; /* #f6f7f9 */
+    --c-ink-700: 196 202 212; /* #c4cad4 */
+    --c-ink-500: 144 153 166; /* #9099a6 */
+    --c-ink-400: 105 112 124; /* #69707c */
+
+    /* مسافة أمان أسفل الشاشة (للشريط السفلي على الجوال) */
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
   }
 
   html {
@@ -73,8 +88,14 @@
     @apply btn border border-line bg-surface text-ink-900 hover:bg-beige;
   }
 
+  /* أقسام مدمجة بمظهر تطبيق (بدل المسافات التسويقية الكبيرة) */
   .section {
-    @apply py-14 sm:py-20;
+    @apply py-6 sm:py-8;
+  }
+
+  /* حاوية التطبيق — عرض جوال مركزي على سطح المكتب */
+  .app-container {
+    @apply mx-auto w-full max-w-md;
   }
 
   .eyebrow {
@@ -85,11 +106,11 @@
   }
 
   .heading {
-    @apply text-3xl font-extrabold leading-tight text-ink-900 sm:text-4xl lg:text-5xl;
+    @apply text-xl font-extrabold leading-tight text-ink-900 sm:text-2xl;
   }
 
   .subheading {
-    @apply mt-4 max-w-2xl text-base leading-relaxed text-ink-500 sm:text-lg;
+    @apply mt-2 max-w-2xl text-sm leading-relaxed text-ink-500;
   }
 
   /* أدوات لون ديناميكية تعتمد على متغيرات التخصيص */

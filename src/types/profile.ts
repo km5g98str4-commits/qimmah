@@ -18,6 +18,23 @@ export type GoalType =
 
 export type NutritionStyle = 'simple' | 'high_protein' | 'saudi' | 'economical' | 'flexible'
 
+// — حقول «باني الخطة» (Plan Builder) — كلها اختيارية للحفاظ على شكل البيانات المحفوظة —
+export type MuscleFocus =
+  | 'balanced'
+  | 'upper'
+  | 'lower'
+  | 'core'
+  | 'chest'
+  | 'back'
+  | 'shoulders'
+  | 'arms'
+export type Consistency = 'never' | 'onoff' | 'regular' | 'returning'
+export type ExperienceBand = 'lt1m' | '1to6m' | '6to12m' | '1to2y' | 'gt2y'
+export type GymAccess = 'full' | 'small' | 'home' | 'bodyweight'
+export type SchedulingStyle = 'fixed' | 'flexible'
+/** أدوات متاحة في البيت/النادي الصغير. */
+export type Equipment = 'dumbbell' | 'barbell' | 'bench' | 'machine' | 'cable' | 'bands'
+
 /** بيانات الجسم/الملف الشخصي التي تُبنى عليها الحسابات. */
 export interface Profile {
   name: string
@@ -39,6 +56,17 @@ export interface Profile {
   mealsPerDay: number
   nutritionStyle: NutritionStyle
   dislikedFoods: string
+  // — حقول «باني الخطة» الاختيارية (تُملأ عند استخدام Plan Builder) —
+  muscleFocus?: MuscleFocus
+  consistency?: Consistency
+  experienceBand?: ExperienceBand
+  gymAccess?: GymAccess
+  equipment?: Equipment[]
+  schedulingStyle?: SchedulingStyle
+  /** أيام التمرين المفضّلة كفهارس أسبوع (0=السبت … 6=الجمعة). */
+  preferredDays?: number[]
+  /** تفضيل تذكيرات محلي (لا إشعارات نظام فعلية بعد). */
+  remindersOptIn?: boolean
 }
 
 /** أهداف مقدّرة قابلة للتعديل اليدوي. */

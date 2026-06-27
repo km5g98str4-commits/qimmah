@@ -9,6 +9,17 @@ import { saveNutritionLog, saveWaterLog } from './historyStore'
 
 export const NUTRITION_TODAY_KEY = 'qimmah:nutritionToday:v1'
 
+/** خانة الوجبة لتصنيف العنصر المسجّل. */
+export type MealSlot = 'breakfast' | 'lunch' | 'dinner' | 'snack'
+
+/** خانات الوجبات لعرض التغذية اليومي. */
+export const MEAL_SLOTS: { id: MealSlot; ar: string; en: string; icon: string }[] = [
+  { id: 'breakfast', ar: 'الفطور', en: 'Breakfast', icon: 'Sparkles' },
+  { id: 'lunch', ar: 'الغداء', en: 'Lunch', icon: 'Flame' },
+  { id: 'dinner', ar: 'العشاء', en: 'Dinner', icon: 'Moon' },
+  { id: 'snack', ar: 'سناك', en: 'Snack', icon: 'Salad' },
+]
+
 /** عنصر مسجّل في سجل اليوم — من قاعدة الأطعمة أو إضافة سريعة مخصّصة. */
 export interface LoggedFood {
   id: string
@@ -18,6 +29,7 @@ export interface LoggedFood {
   protein: number
   carbs: number
   fat: number
+  meal?: MealSlot
   note?: string
 }
 
