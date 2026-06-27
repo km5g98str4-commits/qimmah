@@ -1,184 +1,190 @@
-import { useState } from 'react'
 import { cn } from '@/lib/cn'
-import { muscleLabelAr } from '@/data/muscleGroups'
-import type { MuscleCoverage, MuscleId, MuscleStatus, MuscleView } from '@/types/muscles'
+import { Icon } from '@/components/Icon'
+import { muscleLabelAr, getMuscle } from '@/data/muscleGroups'
+import type { MuscleCoverage, MuscleId, MuscleStatus } from '@/types/muscles'
 
-// خريطة العضلات — رسم SVG محلي (بلا اعتماد على صور خارجية).
-// جسم منمّق بمناطق عضلية مسمّاة، تُلوّن حسب الحالة والشدّة.
+// تغطية العضلات — بطاقات مجموعات احترافية (بديل خريطة الجسم القديمة).
+// كل بطاقة تمثّل مجموعة عضلية: الحالة، الحجم مقابل الهدف، رقائق العضلات، والإجراء المقترح.
 
 interface MuscleMapProps {
   coverage: Record<string, MuscleCoverage>
-  /** عند النقر على عضلة. */
-  onSelect?: (id: MuscleId) => void
   className?: string
 }
 
-/** ألوان الحالات (متوافقة مع لوحة الثيم). */
-const STATUS_COLOR: Record<MuscleStatus, string> = {
-  fresh: '#F26A21', // برتقالي — تُمرّنت للتو
-  trained: '#3E9E6B', // أخضر — كافية
-  recovering: '#E0941F', // كهرماني — تتعافى
-  ready: '#3E9E6B', // أخضر — جاهزة
-  undertrained: '#D6553A', // أحمر — ناقصة
+interface GroupDef {
+  key: string
+  nameAr: string
+  icon: string
+  muscles: MuscleId[]
 }
 
-const EMPTY_FILL = '#EADDC8' // لون الخطوط — لم تُمرّن
+/** المجموعات العضلية وعضلاتها — مصدر تجميع البطاقات. */
+const GROUPS: GroupDef[] = [
+  { key: 'chest', nameAr: 'الصدر', icon: 'Flame', muscles: ['chest_upper', 'chest_mid', 'chest_lower'] },
+  { key: 'back', nameAr: 'الظهر', icon: 'Layers', muscles: ['lats', 'upper_back', 'traps', 'lower_back'] },
+  { key: 'shoulders', nameAr: 'الأكتاف', icon: 'Activity', muscles: ['front_delts', 'side_delts', 'rear_delts'] },
+  { key: 'arms', nameAr: 'الذراع', icon: 'Dumbbell', muscles: ['biceps', 'triceps', 'forearms'] },
+  { key: 'legs', nameAr: 'الأرجل', icon: 'TrendingUp', muscles: ['quads', 'hamstrings', 'glutes', 'calves'] },
+  { key: 'core', nameAr: 'الكور', icon: 'Target', muscles: ['abs', 'obliques'] },
+]
 
-const STATUS_LABEL: Record<MuscleStatus, string> = {
-  fresh: 'تُمرّنت حديثًا',
-  trained: 'مكتملة',
-  recovering: 'تحتاج راحة',
-  ready: 'جاهزة',
-  undertrained: 'ناقصة',
+/** نمط كل حالة: التسمية، ألوان الشارة، الشريط، النقطة، والإجراء المقترح. */
+const STATUS_STYLE: Record<MuscleStatus, { label: string; badge: string; bar: string; dot: string; action: string }> = {
+  trained: {
+    label: 'مكتملة',
+    badge: 'bg-success/12 text-success',
+    bar: 'bg-success',
+    dot: 'bg-success',
+    action: 'تغطية ممتازة — حافظ على نفس المستوى.',
+  },
+  fresh: {
+    label: 'تمرنت حديثًا',
+    badge: 'bg-brand-500/12 text-brand-600',
+    bar: 'bg-brand-500',
+    dot: 'bg-brand-500',
+    action: 'تمرنت للتو — خلها ترتاح اليوم.',
+  },
+  recovering: {
+    label: 'تحتاج راحة',
+    badge: 'bg-gold-400/15 text-gold-600',
+    bar: 'bg-gold-400',
+    dot: 'bg-gold-400',
+    action: 'في طور التعافي — تجنّب إجهادها اليوم.',
+  },
+  ready: {
+    label: 'جاهزة',
+    badge: 'bg-success/10 text-success',
+    bar: 'bg-success/70',
+    dot: 'bg-success/70',
+    action: 'تعافت وجاهزة — تقدر تضيف لها مجموعات اليوم.',
+  },
+  undertrained: {
+    label: 'ناقصة',
+    badge: 'bg-ink-400/12 text-ink-500',
+    bar: 'bg-ink-400/60',
+    dot: 'bg-line',
+    action: 'أضف لها تمرينًا لتكمل تغطيتها هذا الأسبوع.',
+  },
 }
 
-/** يحسب لون العضلة وشفافيتها من تغطيتها. */
-function fillFor(coverage: Record<string, MuscleCoverage>, id: MuscleId): { fill: string; opacity: number } {
-  const c = coverage[id]
-  if (!c || c.sets <= 0) return { fill: EMPTY_FILL, opacity: 1 }
-  const base = STATUS_COLOR[c.status]
-  // الشدّة تتحكّم بالعتامة (0.4 → 1) لتبدو العضلات الأكثر تمرينًا أوضح
-  const opacity = 0.45 + Math.min(0.55, c.intensity * 0.55)
-  return { fill: base, opacity }
+interface GroupView {
+  def: GroupDef
+  totalSets: number
+  targetMin: number
+  targetMax: number
+  status: MuscleStatus
+  members: { id: MuscleId; status: MuscleStatus; sets: number }[]
 }
 
-export function MuscleMap({ coverage, onSelect, className }: MuscleMapProps) {
-  const [view, setView] = useState<MuscleView>('front')
+/** يحسب حالة المجموعة من حجمها مقابل الهدف وحالة عضلاتها. */
+function groupStatus(totalSets: number, targetMin: number, members: GroupView['members']): MuscleStatus {
+  if (totalSets <= 0) return 'undertrained'
+  const anyFresh = members.some((m) => m.status === 'fresh')
+  const anyRecovering = members.some((m) => m.status === 'recovering')
+  if (anyFresh) return 'fresh'
+  if (anyRecovering) return 'recovering'
+  if (totalSets >= targetMin) return 'trained'
+  return 'ready'
+}
 
-  // عنصر منطقة عضلية قابل لإعادة الاستخدام
-  const Region = ({ id, d, cx, cy, rx, ry }: { id: MuscleId; d?: string; cx?: number | string; cy?: number | string; rx?: number | string; ry?: number | string }) => {
-    const { fill, opacity } = fillFor(coverage, id)
-    const c = coverage[id]
-    const sets = c ? c.sets : 0
-    const status = c?.status ?? 'undertrained'
-    const title = `${muscleLabelAr(id)} — ${STATUS_LABEL[status]} (${sets} مجموعة)`
-    const common = {
-      fill,
-      fillOpacity: opacity,
-      stroke: '#2B2520',
-      strokeOpacity: 0.12,
-      strokeWidth: 1,
-      className: cn('cursor-pointer transition-[fill-opacity] duration-300', onSelect && 'hover:stroke-[#2B2520]'),
-      onClick: () => onSelect?.(id),
-      role: 'button' as const,
-      'aria-label': title,
-    }
-    return d ? (
-      <path d={d} {...common}>
-        <title>{title}</title>
-      </path>
-    ) : (
-      <ellipse cx={cx} cy={cy} rx={rx} ry={ry} {...common}>
-        <title>{title}</title>
-      </ellipse>
+/** يبني بيانات عرض كل مجموعة من التغطية. */
+function buildGroups(coverage: Record<string, MuscleCoverage>): GroupView[] {
+  return GROUPS.map((def) => {
+    const members = def.muscles.map((id) => {
+      const c = coverage[id]
+      return { id, status: c?.status ?? 'undertrained', sets: c?.sets ?? 0 }
+    })
+    const totalSets = Math.round(members.reduce((s, m) => s + m.sets, 0) * 10) / 10
+    const targetMin = def.muscles.reduce((s, id) => s + (getMuscle(id)?.weeklyTarget.min ?? 0), 0)
+    const targetMax = def.muscles.reduce((s, id) => s + (getMuscle(id)?.weeklyTarget.max ?? 0), 0)
+    return { def, totalSets, targetMin, targetMax, status: groupStatus(totalSets, targetMin, members), members }
+  })
+}
+
+export function MuscleMap({ coverage, className }: MuscleMapProps) {
+  const groups = buildGroups(coverage)
+  const hasData = groups.some((g) => g.totalSets > 0)
+
+  // حالة البداية: لا توجد بيانات بعد — لا نُظهر ٦ بطاقات «ناقصة» مخيفة.
+  if (!hasData) {
+    return (
+      <div className={cn('card flex flex-col items-center justify-center gap-3 p-8 text-center', className)}>
+        <span className="grid h-12 w-12 place-items-center rounded-2xl bg-primary-soft text-primary-c">
+          <Icon name="Dumbbell" className="h-6 w-6" />
+        </span>
+        <p className="max-w-sm text-sm font-bold leading-relaxed text-ink-900">
+          ابدأ أول تمرينك، وبعدها بنعرض لك توزيع عضلاتك خلال الأسبوع.
+        </p>
+        <p className="text-xs text-ink-400">مجموعاتك وتغطيتك تظهر هنا تلقائيًا بعد كل جلسة.</p>
+      </div>
     )
   }
 
   return (
-    <div className={cn('flex flex-col items-center', className)}>
-      {/* مبدّل الأمام/الخلف */}
-      <div className="mb-4 inline-flex rounded-full border border-line bg-surface p-1">
-        {(['front', 'back'] as MuscleView[]).map((v) => (
-          <button
-            key={v}
-            type="button"
-            onClick={() => setView(v)}
-            aria-pressed={view === v}
-            className={cn(
-              'rounded-full px-4 py-1.5 text-xs font-bold transition-colors',
-              view === v ? 'bg-primary text-white' : 'text-ink-500 hover:text-ink-900',
-            )}
+    <div className={cn('grid gap-3 sm:grid-cols-2', className)}>
+      {groups.map((g) => (
+        <GroupCard key={g.def.key} group={g} />
+      ))}
+    </div>
+  )
+}
+
+function GroupCard({ group }: { group: GroupView }) {
+  const style = STATUS_STYLE[group.status]
+  const pct = group.targetMax > 0 ? Math.min(100, Math.round((group.totalSets / group.targetMax) * 100)) : 0
+  // موضع علامة الحد الأدنى للهدف على الشريط
+  const minMark = group.targetMax > 0 ? Math.min(100, Math.round((group.targetMin / group.targetMax) * 100)) : 0
+  const setsLabel = Number.isInteger(group.totalSets) ? `${group.totalSets}` : group.totalSets.toFixed(1)
+
+  return (
+    <div className="card flex flex-col gap-3 p-4">
+      {/* الترويسة: الاسم + الشارة */}
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <span className="grid h-8 w-8 place-items-center rounded-xl bg-primary-soft text-primary-c">
+            <Icon name={group.def.icon} className="h-4 w-4" />
+          </span>
+          <h4 className="text-sm font-extrabold text-ink-900">{group.def.nameAr}</h4>
+        </div>
+        <span className={cn('rounded-full px-2.5 py-1 text-[11px] font-bold', style.badge)}>{style.label}</span>
+      </div>
+
+      {/* شريط التقدّم + علامة الهدف الأدنى */}
+      <div className="relative h-2 w-full overflow-hidden rounded-full bg-beige">
+        <div className={cn('h-full rounded-full transition-[width] duration-500', style.bar)} style={{ width: `${pct}%` }} />
+        {minMark > 0 && minMark < 100 && (
+          <span
+            className="absolute top-1/2 h-3 w-px -translate-y-1/2 bg-ink-400/40"
+            style={{ insetInlineStart: `${minMark}%` }}
+            aria-hidden
+          />
+        )}
+      </div>
+
+      {/* المجموعات مقابل الهدف */}
+      <p className="text-xs text-ink-500">
+        <span className="font-extrabold text-ink-900">{setsLabel}</span> مجموعة · الهدف {group.targetMin}–{group.targetMax}
+      </p>
+
+      {/* رقائق العضلات داخل المجموعة */}
+      <div className="flex flex-wrap gap-1.5">
+        {group.members.map((m) => (
+          <span
+            key={m.id}
+            className="inline-flex items-center gap-1 rounded-full border border-line bg-surface px-2 py-0.5 text-[10px] font-medium text-ink-700"
+            title={`${muscleLabelAr(m.id)} — ${STATUS_STYLE[m.status].label} (${m.sets} مجموعة)`}
           >
-            {v === 'front' ? 'أمامي' : 'خلفي'}
-          </button>
+            <span className={cn('inline-block h-1.5 w-1.5 rounded-full', STATUS_STYLE[m.status].dot)} aria-hidden />
+            {muscleLabelAr(m.id)}
+          </span>
         ))}
       </div>
 
-      <svg viewBox="0 0 240 440" className="h-auto w-full max-w-[260px]" role="img" aria-label={`خريطة العضلات — العرض ${view === 'front' ? 'الأمامي' : 'الخلفي'}`}>
-        {/* الرأس (محايد) */}
-        <ellipse cx="120" cy="34" rx="20" ry="24" fill={EMPTY_FILL} stroke="#2B2520" strokeOpacity="0.12" />
-        <rect x="112" y="56" width="16" height="14" rx="6" fill={EMPTY_FILL} stroke="#2B2520" strokeOpacity="0.12" />
-
-        {view === 'front' ? (
-          <g>
-            {/* الأكتاف الأمامية + الجانبية */}
-            <Region id="side_delts" cx="66" cy="88" rx="18" ry="16" />
-            <Region id="side_delts" cx="174" cy="88" rx="18" ry="16" />
-            <Region id="front_delts" cx="84" cy="84" rx="13" ry="13" />
-            <Region id="front_delts" cx="156" cy="84" rx="13" ry="13" />
-
-            {/* الصدر: علوي / أوسط / سفلي */}
-            <Region id="chest_upper" d="M92 80 H148 a8 8 0 0 1 8 8 v6 H84 v-6 a8 8 0 0 1 8 -8 Z" />
-            <Region id="chest_mid" d="M84 96 H156 v18 a18 18 0 0 1 -18 14 H102 a18 18 0 0 1 -18 -14 Z" />
-            <Region id="chest_lower" d="M96 130 H144 v8 a14 14 0 0 1 -14 12 h-20 a14 14 0 0 1 -14 -12 Z" />
-
-            {/* الذراع الأمامي: بايسبس + ساعد */}
-            <Region id="biceps" cx="60" cy="128" rx="13" ry="26" />
-            <Region id="biceps" cx="180" cy="128" rx="13" ry="26" />
-            <Region id="forearms" cx="52" cy="180" rx="11" ry="28" />
-            <Region id="forearms" cx="188" cy="180" rx="11" ry="28" />
-
-            {/* البطن + الجوانب */}
-            <Region id="abs" d="M104 134 H136 v60 a16 16 0 0 1 -16 14 a16 16 0 0 1 -16 -14 Z" />
-            <Region id="obliques" cx="96" cy="172" rx="9" ry="30" />
-            <Region id="obliques" cx="144" cy="172" rx="9" ry="30" />
-
-            {/* الأرجل: كوادز + سمانة */}
-            <Region id="quads" cx="102" cy="276" rx="20" ry="52" />
-            <Region id="quads" cx="138" cy="276" rx="20" ry="52" />
-            <Region id="calves" cx="102" cy="372" rx="14" ry="42" />
-            <Region id="calves" cx="138" cy="372" rx="14" ry="42" />
-          </g>
-        ) : (
-          <g>
-            {/* الترابيس + الكتف الخلفي */}
-            <Region id="traps" d="M96 74 H144 l-10 22 H106 Z" />
-            <Region id="rear_delts" cx="68" cy="90" rx="17" ry="15" />
-            <Region id="rear_delts" cx="172" cy="90" rx="17" ry="15" />
-
-            {/* الظهر العلوي + اللاتس */}
-            <Region id="upper_back" d="M92 96 H148 v20 H92 Z" />
-            <Region id="lats" d="M88 118 H120 v44 l-20 -6 a16 16 0 0 1 -12 -16 Z" />
-            <Region id="lats" d="M152 118 H120 v44 l20 -6 a16 16 0 0 0 12 -16 Z" />
-
-            {/* أسفل الظهر */}
-            <Region id="lower_back" d="M104 164 H136 v26 a16 16 0 0 1 -16 8 a16 16 0 0 1 -16 -8 Z" />
-
-            {/* الترايسبس + الساعد (خلفي) */}
-            <Region id="triceps" cx="60" cy="128" rx="13" ry="26" />
-            <Region id="triceps" cx="180" cy="128" rx="13" ry="26" />
-            <Region id="forearms" cx="52" cy="180" rx="11" ry="28" />
-            <Region id="forearms" cx="188" cy="180" rx="11" ry="28" />
-
-            {/* المؤخرة + خلفية الفخذ + السمانة */}
-            <Region id="glutes" cx="104" cy="212" rx="20" ry="20" />
-            <Region id="glutes" cx="136" cy="212" rx="20" ry="20" />
-            <Region id="hamstrings" cx="102" cy="276" rx="19" ry="48" />
-            <Region id="hamstrings" cx="138" cy="276" rx="19" ry="48" />
-            <Region id="calves" cx="102" cy="372" rx="14" ry="42" />
-            <Region id="calves" cx="138" cy="372" rx="14" ry="42" />
-          </g>
-        )}
-      </svg>
-
-      {/* وسيلة الإيضاح */}
-      <ul className="mt-5 flex flex-wrap justify-center gap-x-4 gap-y-2 text-[11px]">
-        {([
-          { status: 'fresh', label: STATUS_LABEL.fresh },
-          { status: 'recovering', label: STATUS_LABEL.recovering },
-          { status: 'ready', label: STATUS_LABEL.ready },
-          { status: 'undertrained', label: STATUS_LABEL.undertrained },
-        ] as { status: MuscleStatus; label: string }[]).map((it) => (
-          <li key={it.status} className="flex items-center gap-1.5 text-ink-500">
-            <span className="inline-block h-3 w-3 rounded-full" style={{ backgroundColor: STATUS_COLOR[it.status] }} />
-            {it.label}
-          </li>
-        ))}
-        <li className="flex items-center gap-1.5 text-ink-500">
-          <span className="inline-block h-3 w-3 rounded-full border border-line" style={{ backgroundColor: EMPTY_FILL }} />
-          لم تُمرّن
-        </li>
-      </ul>
+      {/* الإجراء المقترح */}
+      <p className="mt-auto flex items-start gap-1.5 border-t border-line pt-2.5 text-[11px] leading-relaxed text-ink-500">
+        <Icon name="ChevronLeft" className="mt-0.5 h-3.5 w-3.5 shrink-0 rotate-180 text-primary-c" />
+        {style.action}
+      </p>
     </div>
   )
 }

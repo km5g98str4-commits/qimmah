@@ -28,6 +28,10 @@ export function MuscleCoverageSection({ lang }: { lang: Lang }) {
   }, [isDemo, plan, level])
 
   const summary = summarizeCoverage(result)
+  const hasData = useMemo(
+    () => Object.values(result.weeklyCoverage).some((c) => c.sets > 0),
+    [result],
+  )
 
   return (
     <section id="muscle-coverage" className="section">
@@ -39,56 +43,55 @@ export function MuscleCoverageSection({ lang }: { lang: Lang }) {
           description="شف وش تمرّنت، وش تعافى، ووش ناقصك هالأسبوع — بنظرة وحدة."
         />
 
-        <div className="mt-10 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
-          {/* خريطة العضلات */}
-          <div className="card p-6">
-            <MuscleMap coverage={result.weeklyCoverage} />
-          </div>
+        {/* ملخّص سريع */}
+        <div className="mt-10 grid grid-cols-3 gap-3 sm:max-w-2xl">
+          <SummaryCard icon="CheckCircle2" label="عضلات مكتملة" value={summary.completeCount} tone="success" />
+          <SummaryCard icon="Target" label="تحتاج تمرين" value={summary.undertrainedCount} tone="gold" />
+          <SummaryCard icon="Moon" label="تحتاج راحة" value={summary.needRecoveryCount} tone="brand" />
+        </div>
 
-          {/* الملخّص + التوصيات */}
-          <div className="flex flex-col gap-4">
-            <div className="grid grid-cols-3 gap-3">
-              <SummaryCard icon="CheckCircle2" label="العضلات المكتملة" value={summary.completeCount} tone="success" />
-              <SummaryCard icon="AlertTriangle" label="العضلات الناقصة" value={summary.undertrainedCount} tone="danger" />
-              <SummaryCard icon="Moon" label="تحتاج راحة" value={summary.needRecoveryCount} tone="gold" />
+        <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+          {/* بطاقات تغطية العضلات */}
+          <MuscleMap coverage={result.weeklyCoverage} />
+
+          {/* التوصيات + النواقص */}
+          <aside className="card flex h-fit flex-col p-5">
+            <div className="mb-3 flex items-center gap-2">
+              <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary-soft text-primary-c">
+                <Icon name="Sparkles" className="h-4 w-4" />
+              </span>
+              <h3 className="text-sm font-bold text-ink-900">توصيات هذا الأسبوع</h3>
             </div>
+            {result.recommendationsAr.length ? (
+              <ul className="space-y-2.5">
+                {result.recommendationsAr.map((r, i) => (
+                  <li key={i} className="flex items-start gap-2 text-sm leading-relaxed text-ink-700">
+                    <Icon name="ChevronLeft" className="mt-0.5 h-4 w-4 shrink-0 rotate-180 text-primary-c" />
+                    {r}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-ink-500">ابدأ تمرينك وسجّل مجموعاتك لتظهر لك توصيات مخصّصة.</p>
+            )}
 
-            {/* التوصيات */}
-            <div className="card flex-1 p-5">
-              <div className="mb-3 flex items-center gap-2">
-                <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary-soft text-primary-c">
-                  <Icon name="Sparkles" className="h-4 w-4" />
-                </span>
-                <h3 className="text-sm font-bold text-ink-900">توصيات هذا الأسبوع</h3>
-              </div>
-              {result.recommendationsAr.length ? (
-                <ul className="space-y-2.5">
-                  {result.recommendationsAr.map((r, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm leading-relaxed text-ink-700">
-                      <Icon name="ChevronLeft" className="mt-0.5 h-4 w-4 shrink-0 rotate-180 text-primary-c" />
-                      {r}
-                    </li>
+            {/* النواقص — مطويّة وبنبرة محفّزة بدل قائمة حمراء مخيفة */}
+            {hasData && result.missingMuscles.length > 0 && (
+              <details className="group mt-4 border-t border-line pt-4" open={result.missingMuscles.length <= 6}>
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-2 text-xs font-bold text-ink-500">
+                  <span>تحتاج تمرين هذا الأسبوع ({result.missingMuscles.length})</span>
+                  <Icon name="ChevronDown" className="h-4 w-4 transition-transform group-open:rotate-180" />
+                </summary>
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  {result.missingMuscles.map((m) => (
+                    <span key={m} className="rounded-full bg-gold-400/12 px-2.5 py-1 text-[11px] font-bold text-gold-600">
+                      {muscleLabelAr(m)}
+                    </span>
                   ))}
-                </ul>
-              ) : (
-                <p className="text-sm text-ink-500">ابدأ تمرينك وسجّل مجموعاتك لتظهر لك توصيات مخصّصة.</p>
-              )}
-
-              {/* النواقص كرقائق سريعة */}
-              {result.missingMuscles.length > 0 && (
-                <div className="mt-4 border-t border-line pt-4">
-                  <p className="mb-2 text-xs font-bold text-ink-500">ناقصة هذا الأسبوع</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {result.missingMuscles.map((m) => (
-                      <span key={m} className="rounded-full bg-danger/10 px-2.5 py-1 text-[11px] font-bold text-danger">
-                        {muscleLabelAr(m)}
-                      </span>
-                    ))}
-                  </div>
                 </div>
-              )}
-            </div>
-          </div>
+              </details>
+            )}
+          </aside>
         </div>
         {lang === 'en' && (
           <p className="mt-3 text-xs text-ink-400">Muscle coverage is shown in Arabic in this preview.</p>
@@ -98,9 +101,9 @@ export function MuscleCoverageSection({ lang }: { lang: Lang }) {
   )
 }
 
-function SummaryCard({ icon, label, value, tone }: { icon: string; label: string; value: number; tone: 'success' | 'danger' | 'gold' }) {
+function SummaryCard({ icon, label, value, tone }: { icon: string; label: string; value: number; tone: 'success' | 'brand' | 'gold' }) {
   const toneCls =
-    tone === 'success' ? 'text-success' : tone === 'danger' ? 'text-danger' : 'text-gold-500'
+    tone === 'success' ? 'text-success' : tone === 'brand' ? 'text-brand-600' : 'text-gold-500'
   return (
     <div className="card p-4 text-center">
       <Icon name={icon} className={cn('mx-auto h-5 w-5', toneCls)} />
