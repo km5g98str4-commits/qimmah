@@ -30,7 +30,11 @@ export type MuscleFocus =
   | 'arms'
 export type Consistency = 'never' | 'onoff' | 'regular' | 'returning'
 export type ExperienceBand = 'lt1m' | '1to6m' | '6to12m' | '1to2y' | 'gt2y'
+/** مستوى الخبرة الدلالي (إعداد v2) — يحلّ تناقض «سنوات خبرة» مع «ما بدأت». */
+export type ExperienceLevel = 'beginner' | 'novice' | 'intermediate' | 'advanced'
 export type GymAccess = 'full' | 'small' | 'home' | 'bodyweight'
+/** نوع مكان التمرين الدلالي (إعداد v2). */
+export type GymType = 'commercial' | 'small' | 'home' | 'bodyweight'
 export type SchedulingStyle = 'fixed' | 'flexible'
 /** أدوات متاحة في البيت/النادي الصغير. */
 export type Equipment = 'dumbbell' | 'barbell' | 'bench' | 'machine' | 'cable' | 'bands'
@@ -60,7 +64,11 @@ export interface Profile {
   muscleFocus?: MuscleFocus
   consistency?: Consistency
   experienceBand?: ExperienceBand
+  /** مستوى الخبرة الدلالي (إعداد v2) — مصدر الحقيقة للإجابة. */
+  experienceLevel?: ExperienceLevel
   gymAccess?: GymAccess
+  /** نوع مكان التمرين الدلالي (إعداد v2). */
+  gymType?: GymType
   equipment?: Equipment[]
   schedulingStyle?: SchedulingStyle
   /** أيام التمرين المفضّلة كفهارس أسبوع (0=السبت … 6=الجمعة). */
@@ -78,6 +86,8 @@ export interface Targets {
   maintenanceCalories: number
   cuttingCalories: number
   bulkingCalories: number
+  /** السعرات المستهدفة الفعلية حسب الهدف المنظَّم (goalType) — مصدر الحقيقة للمتابعة. */
+  targetCalories: number
   proteinGrams: number
   fatGrams: number
   carbsGrams: number

@@ -53,7 +53,7 @@ export function DemoView({ lang, onNavigate, onBack }: DemoViewProps) {
         </div>
 
         <main>
-          <DailySummary />
+          <DailySummary lang={lang} />
           <Today lang={lang} />
           <CurrentGoal />
           <ProfileData />

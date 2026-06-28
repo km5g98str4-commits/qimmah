@@ -22,7 +22,7 @@ export function NutritionView({ lang }: NutritionViewProps) {
   const { state, totals, addWater, removeLog } = useNutritionToday()
   const np = customization.nutritionPlan
 
-  const targetCalories = np.targetCalories || customization.targets.maintenanceCalories || 2000
+  const targetCalories = np.targetCalories || customization.targets.targetCalories || customization.targets.maintenanceCalories || 2000
   const targetProtein = np.targetProtein || customization.targets.proteinGrams || 120
   const targetCarbs = np.targetCarbs || customization.targets.carbsGrams || 200
   const targetFat = np.targetFat || customization.targets.fatGrams || 70

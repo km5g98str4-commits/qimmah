@@ -6,11 +6,11 @@ import { cn } from '@/lib/cn'
 import type { WizardCtx } from '../stepProps'
 import type { Profile } from '@/types/profile'
 import { nutritionStyleOptions, targetCaloriesFor } from '@/lib/calculators'
-import { generatePlan, generateNutrition, buildWeeklySchedule } from '@/lib/planGenerator'
+import { generatePlan, generateNutrition, buildWeeklySchedule, planTitle } from '@/lib/planGenerator'
 import { generatePlanFromTemplate, planExerciseName } from '@/lib/workoutPlan'
 import { mealDisplayName } from '@/lib/nutritionPlan'
 import { commitmentName } from '@/lib/commitmentPlan'
-import { workoutTemplates, getTemplate } from '@/data/workoutTemplates'
+import { workoutTemplates } from '@/data/workoutTemplates'
 import { routineTypeColors, routineTypeLabels } from '@/data/routine'
 
 /** خطوة توليد الخطة — قِمّة تجهّز خطة جاهزة من بياناتك (الأهداف للعرض فقط). */
@@ -40,7 +40,7 @@ export function StepGeneratePlan({ ctx }: { ctx: WizardCtx }) {
   const warnings = useMemo(() => generatePlan(p).warningsAr, [p])
   const explanation = useMemo(() => generatePlan(p).explanationAr, [p])
 
-  const tpl = getTemplate(ctx.data.workoutPlan.templateId)
+  const planName = planTitle(ctx.data.workoutPlan.templateId, 'ar')
   const firstDay = ctx.data.workoutPlan.days[0]
   const calories = targetCaloriesFor(p.goal, ctx.data.targets)
   const np = ctx.data.nutritionPlan
@@ -82,7 +82,7 @@ export function StepGeneratePlan({ ctx }: { ctx: WizardCtx }) {
 
       {/* جدول التمرين المقترح */}
       <Card icon="Dumbbell" title="جدول التمرين المقترح">
-        <p className="text-sm font-bold text-ink-900">{tpl?.nameAr}</p>
+        <p className="text-sm font-bold text-ink-900">{planName}</p>
         <p className="mt-1 text-xs leading-relaxed text-ink-500">{explanation}</p>
 
         <div className="mt-3 flex flex-wrap gap-1.5">

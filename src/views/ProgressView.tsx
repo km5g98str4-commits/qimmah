@@ -2,7 +2,9 @@ import { useMemo, useState } from 'react'
 import { Icon } from '@/components/Icon'
 import { MUSCLE_AR } from '@/lib/exerciseGuidance'
 import { loadLogs, latestLog, trendFor } from '@/lib/measurementLog'
-import { musclesThisWeek, recentVolumes, topPRs, workoutCounts, workoutStreak } from '@/lib/progressStats'
+import { musclesThisWeek, recentVolumes, topPRs, workoutCounts } from '@/lib/progressStats'
+import { weeklyAdherenceStreak } from '@/lib/streaks'
+import { useCustomization } from '@/lib/customizationContext'
 import { loadReminderPrefs, saveReminderPrefs, type ReminderPrefs } from '@/lib/reminderPrefs'
 import { getStrings } from '@/config/strings'
 import type { Lang } from '@/lib/appPreferences'
@@ -14,6 +16,9 @@ interface ProgressViewProps {
 /** تبويب التقدّم — بطاقات الوزن والحجم والـPRs والعضلات والسلسلة + مزامنة صحة وتذكير (موبايل أولًا). */
 export function ProgressView({ lang }: ProgressViewProps) {
   const t = getStrings(lang).progress
+  const tw = getStrings(lang).workout
+  const { customization } = useCustomization()
+  const daysPerWeek = customization.workoutPlan.days.length || 3
 
   const stats = useMemo(() => {
     const logs = loadLogs()
@@ -25,10 +30,10 @@ export function ProgressView({ lang }: ProgressViewProps) {
       volumes: recentVolumes(8),
       prs: topPRs(5),
       muscles: musclesThisWeek(),
-      streak: workoutStreak(),
+      weekly: weeklyAdherenceStreak(daysPerWeek),
       counts: workoutCounts(),
     }
-  }, [])
+  }, [daysPerWeek])
 
   const hasWorkouts = stats.counts.total > 0
   const maxVol = Math.max(1, ...stats.volumes.map((v) => v.volume))
@@ -61,10 +66,13 @@ export function ProgressView({ lang }: ProgressViewProps) {
             )}
           </Card>
 
-          {/* سلسلة التمرين */}
-          <Card icon="Flame" title={t.cardStreak}>
+          {/* سلسلة الالتزام الأسبوعي */}
+          <Card icon="Flame" title={tw.weeklyStreakTitle}>
             <p className="text-2xl font-black text-ink-900">
-              {stats.streak}<span className="text-xs font-bold text-ink-400"> {t.streakDays}</span>
+              {stats.weekly.streakWeeks}<span className="text-xs font-bold text-ink-400"> {tw.weeksUnit}</span>
+            </p>
+            <p className="mt-0.5 text-[11px] text-ink-400">
+              {tw.weeklyDonePrefix} {stats.weekly.thisWeekCount} {tw.of} {stats.weekly.daysPerWeek} {tw.weeklyWorkoutsWord}
             </p>
           </Card>
         </div>
@@ -116,14 +124,6 @@ export function ProgressView({ lang }: ProgressViewProps) {
           ) : (
             <Empty text={t.noWorkouts} />
           )}
-        </Card>
-
-        {/* صور التقدّم — نائب */}
-        <Card icon="Maximize" title={t.cardPhotos} className="mt-3">
-          <div className="mt-1 flex items-center gap-3 rounded-xl border border-dashed border-line bg-page p-4">
-            <Icon name="Maximize" className="h-6 w-6 text-ink-300" />
-            <p className="text-xs leading-relaxed text-ink-500">{t.photosPlaceholder}</p>
-          </div>
         </Card>
 
         {/* مزامنة الصحة — نائب صادق */}

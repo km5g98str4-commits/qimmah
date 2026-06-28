@@ -77,6 +77,8 @@ export function goalTypeLabel(g: GoalType): string {
 
 const round = (n: number) => Math.round(n)
 const round1 = (n: number) => Math.round(n * 10) / 10
+/** تقريب لأقرب نصف لتر (0.5). */
+const roundHalf = (n: number) => Math.round(n * 2) / 2
 
 /** BMR — Mifflin-St Jeor؛ «غير محدّد» = متوسط تقريبي. */
 function bmrFor(gender: Gender, weight: number, height: number, age: number): number {
@@ -103,6 +105,27 @@ function calorieFloor(gender: Gender): number {
   return 1350
 }
 
+/**
+ * السعرات المستهدفة حسب الهدف المنظَّم (goalType) فوق صيانة الوزن (TDEE):
+ * تنشيف −400، تضخيم +300، قوة +150، إعادة تكوين/ثبات = TDEE.
+ */
+function targetCaloriesForGoalType(goalType: GoalType, tdee: number, gender: Gender): number {
+  switch (goalType) {
+    case 'cutting':
+      return Math.max(round(tdee - 400), calorieFloor(gender))
+    case 'bulking':
+      return round(tdee + 300)
+    case 'strength':
+      return round(tdee + 150)
+    case 'recomposition':
+    case 'maintenance':
+    case 'returning':
+    case 'health':
+    default:
+      return round(tdee)
+  }
+}
+
 /** اقتراح تقسيمة التمرين (قابل للتعديل من المستخدم). */
 function suggestedSplit(
   days: number,
@@ -127,6 +150,7 @@ export function emptyTargets(): Targets {
     maintenanceCalories: 0,
     cuttingCalories: 0,
     bulkingCalories: 0,
+    targetCalories: 0,
     proteinGrams: 0,
     fatGrams: 0,
     carbsGrams: 0,
@@ -149,23 +173,18 @@ export function computeTargets(p: Profile): Targets {
   const tdee = round(bmr * (ACTIVITY_MULTIPLIER[p.activityLevel] ?? 1.2))
   const maintenance = tdee
   const cutting = Math.max(round(tdee - 400), calorieFloor(p.gender))
-  const bulking = round(tdee + 250)
+  const bulking = round(tdee + 300)
 
-  // السعرات والبروتين حسب الهدف
-  let calories = maintenance
-  let proteinPerKg = 1.6
-  if (p.goal === 'cut') {
-    calories = cutting
-    proteinPerKg = 2.0
-  } else if (p.goal === 'bulk') {
-    calories = bulking
-    proteinPerKg = 1.8
-  }
+  // السعرات المستهدفة الفعلية حسب الهدف المنظَّم (cut/bulk/recomp/strength…)
+  const calories = targetCaloriesForGoalType(p.goalType, tdee, p.gender)
 
-  const protein = round(proteinPerKg * w)
-  const fat = round(0.8 * w)
+  // الماكروز محسوبة على السعرات المستهدفة الفعلية:
+  // بروتين 2.0غ/كجم، دهون 0.9غ/كجم، والباقي كارب.
+  const protein = round(2.0 * w)
+  const fat = round(0.9 * w)
   const carbs = Math.max(0, round((calories - protein * 4 - fat * 9) / 4))
-  const water = round1((35 * w) / 1000)
+  // الماء: وزن×0.035 لأقرب نصف لتر، بحدّ أدنى 2.5 لتر.
+  const water = Math.max(2.5, roundHalf(w * 0.035))
   const bmi = round1(w / Math.pow(h / 100, 2))
 
   // الوزن والمدة المقدّرة
@@ -188,6 +207,7 @@ export function computeTargets(p: Profile): Targets {
     maintenanceCalories: maintenance,
     cuttingCalories: cutting,
     bulkingCalories: bulking,
+    targetCalories: calories,
     proteinGrams: protein,
     fatGrams: fat,
     carbsGrams: carbs,
@@ -239,6 +259,7 @@ export function profileHash(p: Profile): string {
     p.targetWeightKg,
     p.activityLevel,
     p.goal,
+    p.goalType,
     p.trainingDays,
     p.trainingLevel,
     p.workoutEnvironment,

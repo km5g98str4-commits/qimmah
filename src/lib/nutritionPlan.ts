@@ -78,7 +78,7 @@ export function defaultNutritionPlan(targets: Targets, goal: CalorieGoal): Nutri
   const seed = ['high-protein-breakfast', 'chicken-rice', 'greek-yogurt-snack', 'light-dinner']
   return {
     enabled: true,
-    targetCalories: targetCaloriesFor(goal, targets),
+    targetCalories: targets.targetCalories || targetCaloriesFor(goal, targets),
     targetProtein: targets.proteinGrams,
     targetCarbs: targets.carbsGrams,
     targetFat: targets.fatGrams,

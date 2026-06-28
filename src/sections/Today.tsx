@@ -5,7 +5,7 @@ import { cn } from '@/lib/cn'
 import { useCustomization } from '@/lib/customizationContext'
 import { useToday, weekdayName } from '@/lib/today'
 import { TodayWorkoutHero } from '@/sections/TodayWorkoutHero'
-import { getTemplate } from '@/data/workoutTemplates'
+import { planTitle } from '@/lib/planGenerator'
 import { commitmentName } from '@/lib/commitmentPlan'
 import { useCommitmentsToday } from '@/lib/commitmentTracking'
 import type { Lang } from '@/lib/appPreferences'
@@ -27,10 +27,12 @@ interface TodayRow {
 interface TodayProps {
   lang: Lang
   onStartWorkout?: () => void
+  /** فتح الإعداد لإضافة/تعديل العناصر (مكملات/أدوية…). */
+  onEditPlan?: () => void
 }
 
 /** قسم «اليوم» — لوحة يومية عملية: تمارين، أكل، مكملات، والتزام — مع تتبّع إنجاز محلي. */
-export function Today({ lang, onStartWorkout }: TodayProps) {
+export function Today({ lang, onStartWorkout, onEditPlan }: TodayProps) {
   const { customization } = useCustomization()
   const { toggle, isDone, resetDay } = useToday()
   const nutritionToday = useNutritionToday()
@@ -42,10 +44,9 @@ export function Today({ lang, onStartWorkout }: TodayProps) {
   const tc = getStrings(lang).commit
   const planDay = todayPlanDay(customization.workoutPlan)
   const finishedToday = todaysFinishedSession()
-  const splitName = (() => {
-    const tpl = getTemplate(customization.workoutPlan.templateId)
-    return tpl ? (lang === 'en' ? tpl.nameEn : tpl.nameAr) : undefined
-  })()
+  const splitName = customization.workoutPlan.days.length
+    ? planTitle(customization.workoutPlan.templateId, lang)
+    : undefined
   const np = customization.nutritionPlan
   const wp = customization.wellnessPlan
   const cp = customization.commitmentPlan
@@ -122,6 +123,7 @@ export function Today({ lang, onStartWorkout }: TodayProps) {
               onStart={onStartWorkout}
               waterLiters={np.enabled ? np.targetWaterLiters : undefined}
               proteinG={np.enabled ? np.targetProtein : undefined}
+              daysPerWeek={customization.workoutPlan.days.length || 3}
             />
           </div>
         )}
@@ -271,7 +273,7 @@ export function Today({ lang, onStartWorkout }: TodayProps) {
         )}
 
         {/* بطاقة المكملات والأدوية */}
-        {wp.enabled && (wp.supplements.length > 0 || wp.medications.length > 0) && (
+        {wp.enabled && (
           <div className="mt-6 card p-5 sm:p-6">
             <div className="mb-4 flex items-center gap-2.5">
               <span className="grid h-10 w-10 place-items-center rounded-xl bg-primary-soft text-primary-c">
@@ -280,25 +282,41 @@ export function Today({ lang, onStartWorkout }: TodayProps) {
               <h3 className="text-base font-bold text-ink-900">{twell.title}</h3>
             </div>
 
-            <ul className="space-y-2.5">
-              {wp.supplements.map((s) => {
-                const sdone = wellnessToday.isSupplementDone(s.id)
-                return (
-                  <WellnessRow key={s.id} done={sdone} onToggle={() => wellnessToday.toggleSupplement(s.id)} title={supplementName(s, lang)} meta={[s.amount, s.timing].filter(Boolean).join(' · ')} badge={twell.supplementsTab} />
-                )
-              })}
-              {wp.medications.map((m) => {
-                const mdone = wellnessToday.isMedicationDone(m.id)
-                return (
-                  <WellnessRow key={m.id} done={mdone} onToggle={() => wellnessToday.toggleMedication(m.id)} title={medicationName(m, lang)} meta={[m.dose, m.timing].filter(Boolean).join(' · ')} badge={twell.medicationsTab} medical />
-                )
-              })}
-            </ul>
+            {wp.supplements.length > 0 || wp.medications.length > 0 ? (
+              <>
+                <ul className="space-y-2.5">
+                  {wp.supplements.map((s) => {
+                    const sdone = wellnessToday.isSupplementDone(s.id)
+                    return (
+                      <WellnessRow key={s.id} done={sdone} onToggle={() => wellnessToday.toggleSupplement(s.id)} title={supplementName(s, lang)} meta={[s.amount, s.timing].filter(Boolean).join(' · ')} badge={twell.supplementsTab} />
+                    )
+                  })}
+                  {wp.medications.map((m) => {
+                    const mdone = wellnessToday.isMedicationDone(m.id)
+                    return (
+                      <WellnessRow key={m.id} done={mdone} onToggle={() => wellnessToday.toggleMedication(m.id)} title={medicationName(m, lang)} meta={[m.dose, m.timing].filter(Boolean).join(' · ')} badge={twell.medicationsTab} medical />
+                    )
+                  })}
+                </ul>
 
-            <p className="mt-4 flex items-start gap-2 text-[11px] leading-relaxed text-ink-400">
-              <Icon name="AlertTriangle" className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-              {twell.medSafety}
-            </p>
+                <p className="mt-4 flex items-start gap-2 text-[11px] leading-relaxed text-ink-400">
+                  <Icon name="AlertTriangle" className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                  {twell.medSafety}
+                </p>
+              </>
+            ) : (
+              /* حالة فارغة ودّية — لا بيانات افتراضية، المستخدم يضيف ما يستخدمه فقط */
+              <div className="rounded-xl border border-dashed border-line bg-page p-4">
+                <p className="text-sm leading-relaxed text-ink-700">{twell.emptySupp}</p>
+                <p className="mt-1 text-xs leading-relaxed text-ink-500">{twell.emptyMed}</p>
+                {onEditPlan && (
+                  <button type="button" onClick={onEditPlan} className="btn-ghost mt-3 px-4 py-2 text-xs">
+                    <Icon name="Plus" className="h-4 w-4" />
+                    {twell.addSupplement}
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         )}
 
