@@ -208,6 +208,7 @@ export interface ShellStrings {
     remaining: string
     remainingCalories: string
     remainingProtein: string
+    remainingWater: string
     addToLog: string
     customQuickAdd: string
     foodName: string
@@ -535,6 +536,7 @@ const ar: ShellStrings = {
     remaining: 'المتبقّي',
     remainingCalories: 'سعرات متبقّية',
     remainingProtein: 'بروتين متبقّي',
+    remainingWater: 'ماء متبقّي',
     addToLog: 'أضف للسجل',
     customQuickAdd: 'إضافة سريعة مخصّصة',
     foodName: 'اسم الطعام/الوجبة',
@@ -863,6 +865,7 @@ const en: ShellStrings = {
     remaining: 'Remaining',
     remainingCalories: 'Calories left',
     remainingProtein: 'Protein left',
+    remainingWater: 'Water left',
     addToLog: 'Add to log',
     customQuickAdd: 'Custom quick add',
     foodName: 'Food/meal name',

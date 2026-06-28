@@ -78,6 +78,8 @@ export interface Targets {
   maintenanceCalories: number
   cuttingCalories: number
   bulkingCalories: number
+  /** السعرات المستهدفة الفعلية حسب الهدف المنظَّم (goalType) — مصدر الحقيقة للمتابعة. */
+  targetCalories: number
   proteinGrams: number
   fatGrams: number
   carbsGrams: number

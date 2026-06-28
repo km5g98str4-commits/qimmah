@@ -164,7 +164,9 @@ const STYLE_TEMPLATES: Record<Profile['nutritionStyle'], { breakfast: string; lu
 /** يولّد خطة أكل تقريبية من الأهداف والتفضيلات (يحاول الاقتراب من السعرات/البروتين). */
 export function generateNutrition(p: Profile, targets: Targets): { plan: NutritionPlan; warning?: string } {
   const goal = calorieGoalFromGoalType(p.goalType)
-  const targetCalories = goal === 'cut' ? targets.cuttingCalories : goal === 'bulk' ? targets.bulkingCalories : targets.maintenanceCalories
+  const targetCalories =
+    targets.targetCalories ||
+    (goal === 'cut' ? targets.cuttingCalories : goal === 'bulk' ? targets.bulkingCalories : targets.maintenanceCalories)
   const mealsCount = Math.max(3, Math.min(5, p.mealsPerDay))
   const s = STYLE_TEMPLATES[p.nutritionStyle] ?? STYLE_TEMPLATES.high_protein
 

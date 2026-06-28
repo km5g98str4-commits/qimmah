@@ -52,11 +52,15 @@ function readStorage(): NutritionTodayState {
     if (raw) {
       const p = JSON.parse(raw) as Partial<NutritionTodayState>
       if (p && p.date === today && p.doneMeals) {
+        // ترحيل: أي عنصر مسجّل قديم بلا خانة وجبة → سناك.
+        const log = Array.isArray(p.log)
+          ? p.log.map((e) => (e.meal ? e : { ...e, meal: 'snack' as MealSlot }))
+          : []
         return {
           date: today,
           doneMeals: p.doneMeals,
           waterMl: p.waterMl || 0,
-          log: Array.isArray(p.log) ? p.log : [],
+          log,
         }
       }
     }

@@ -187,7 +187,7 @@ export function loadCustomization(): Customization {
     const raw = window.localStorage.getItem(STORAGE_KEY)
     if (!raw) return base
     const saved = JSON.parse(raw) as Partial<Customization>
-    return {
+    const merged: Customization = {
       identity: { ...base.identity, ...saved.identity },
       colors: { ...base.colors, ...saved.colors },
       sections: { ...base.sections, ...saved.sections },
@@ -213,8 +213,34 @@ export function loadCustomization(): Customization {
       metrics: saved.metrics ?? base.metrics,
       routine: saved.routine ?? base.routine,
     }
+    return withFreshTargets(merged)
   } catch {
     return base
+  }
+}
+
+/**
+ * يعيد حساب الأهداف من الملف الشخصي عند تغيّره (أو تحديث صيغة الحساب) ما لم تُعدَّل يدويًا،
+ * ثم يزامن أهداف خطة التغذية (سعرات/ماكروز/ماء) مع الأهداف الجديدة مع إبقاء الوجبات.
+ * هذا يضمن أن المتابعة واللوحة تعكسان حسابات صحيحة دائمًا.
+ */
+function withFreshTargets(c: Customization): Customization {
+  if (c.targetsMeta.manuallyEdited) return c
+  const hash = profileHash(c.profile)
+  if (c.targetsMeta.lastCalculatedFromProfileHash === hash) return c
+  const targets = computeTargets(c.profile)
+  return {
+    ...c,
+    targets,
+    targetsMeta: { ...c.targetsMeta, lastCalculatedFromProfileHash: hash },
+    nutritionPlan: {
+      ...c.nutritionPlan,
+      targetCalories: targets.targetCalories,
+      targetProtein: targets.proteinGrams,
+      targetCarbs: targets.carbsGrams,
+      targetFat: targets.fatGrams,
+      targetWaterLiters: targets.waterLiters,
+    },
   }
 }
 

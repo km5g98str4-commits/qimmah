@@ -51,8 +51,8 @@ export function DashboardView({ lang, onNavigate }: DashboardViewProps) {
         </div>
       </button>
 
-      {/* ملخّص يومي (سعرات/بروتين/ماء + سلسلة) */}
-      <DailySummary />
+      {/* ملخّص يومي حيّ (هدف/مأكول/متبقّي + ماكروز + ماء + سلسلة) */}
+      <DailySummary lang={lang} />
 
       {/* قائمة اليوم — الإجراء اليومي */}
       {s.today && <Today lang={lang} onStartWorkout={planDay ? () => onNavigate('workout') : undefined} />}
