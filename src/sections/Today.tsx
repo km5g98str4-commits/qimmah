@@ -5,7 +5,7 @@ import { cn } from '@/lib/cn'
 import { useCustomization } from '@/lib/customizationContext'
 import { useToday, weekdayName } from '@/lib/today'
 import { TodayWorkoutHero } from '@/sections/TodayWorkoutHero'
-import { getTemplate } from '@/data/workoutTemplates'
+import { planTitle } from '@/lib/planGenerator'
 import { commitmentName } from '@/lib/commitmentPlan'
 import { useCommitmentsToday } from '@/lib/commitmentTracking'
 import type { Lang } from '@/lib/appPreferences'
@@ -42,10 +42,9 @@ export function Today({ lang, onStartWorkout }: TodayProps) {
   const tc = getStrings(lang).commit
   const planDay = todayPlanDay(customization.workoutPlan)
   const finishedToday = todaysFinishedSession()
-  const splitName = (() => {
-    const tpl = getTemplate(customization.workoutPlan.templateId)
-    return tpl ? (lang === 'en' ? tpl.nameEn : tpl.nameAr) : undefined
-  })()
+  const splitName = customization.workoutPlan.days.length
+    ? planTitle(customization.workoutPlan.templateId, lang)
+    : undefined
   const np = customization.nutritionPlan
   const wp = customization.wellnessPlan
   const cp = customization.commitmentPlan

@@ -5,8 +5,7 @@ import { LineChart } from './LineChart'
 import { MuscleChips } from './MuscleChips'
 import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
-import { getExercise } from '@/data/exercises'
-import { exerciseDisplayName } from '@/lib/workoutPlan'
+import { getExercise, targetMuscleAr } from '@/data/exercises'
 import { guidanceFor } from '@/lib/exerciseGuidance'
 import { exerciseStats } from '@/lib/exerciseStats'
 import { getRecord } from '@/lib/exerciseHistory'
@@ -37,7 +36,6 @@ export function ExerciseDetail({ lang, exerciseId, onClose, onAddToPlan }: Exerc
   const rec = useMemo(() => getRecord(exerciseId), [exerciseId])
 
   if (!ex) return null
-  const name = exerciseDisplayName(ex.nameAr, ex.nameEn, lang)
 
   return (
     <div className="fixed inset-0 z-[60] flex items-end justify-center bg-ink-900/50 p-0 sm:items-center sm:p-6">
@@ -54,9 +52,12 @@ export function ExerciseDetail({ lang, exerciseId, onClose, onAddToPlan }: Exerc
             <Icon name="X" className="h-5 w-5" />
           </button>
           <div className="absolute inset-x-0 bottom-0 p-4">
-            <h2 className="text-xl font-black text-white drop-shadow">{name}</h2>
-            <p className="mt-0.5 text-xs font-bold text-white/80">
-              {ex.equipment.join(' · ')} · {levelAr(ex.level)}
+            {/* الاسم الإنجليزي أولًا، العربي تحته، ثم العضلة الهدف بالعربية */}
+            <h2 className="text-xl font-black text-white drop-shadow">{ex.nameEn}</h2>
+            <p className="mt-0.5 text-sm font-bold text-white/90 drop-shadow">{ex.nameAr}</p>
+            <p className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px] font-bold text-white/80">
+              <span className="rounded-full bg-white/15 px-2 py-0.5 backdrop-blur">{targetMuscleAr(ex)}</span>
+              <span>{ex.equipment.join(' · ')} · {levelAr(ex.level)}</span>
             </p>
           </div>
         </div>
@@ -81,7 +82,7 @@ export function ExerciseDetail({ lang, exerciseId, onClose, onAddToPlan }: Exerc
 
         {/* المحتوى */}
         <div className="flex-1 overflow-y-auto p-4">
-          {tab === 'about' && <AboutTab ex={ex} onAddToPlan={onAddToPlan} />}
+          {tab === 'about' && <AboutTab ex={ex} lang={lang} onAddToPlan={onAddToPlan} />}
           {tab === 'history' && <HistoryTab stats={stats} lastWeight={rec?.lastWeight} bestWeight={rec?.bestWeight} lastReps={rec?.lastReps} />}
           {tab === 'charts' && <ChartsTab stats={stats} />}
           {tab === 'records' && <RecordsTab stats={stats} />}
@@ -112,7 +113,7 @@ function ExerciseHero({ ex }: { ex: NonNullable<ReturnType<typeof getExercise>> 
   )
 }
 
-function AboutTab({ ex, onAddToPlan }: { ex: NonNullable<ReturnType<typeof getExercise>>; onAddToPlan?: (id: string) => void }) {
+function AboutTab({ ex, lang, onAddToPlan }: { ex: NonNullable<ReturnType<typeof getExercise>>; lang: Lang; onAddToPlan?: (id: string) => void }) {
   const g = guidanceFor(ex)
   return (
     <div className="space-y-5">
@@ -156,18 +157,18 @@ function AboutTab({ ex, onAddToPlan }: { ex: NonNullable<ReturnType<typeof getEx
         {g.safety}
       </p>
 
-      {/* أزرار */}
+      {/* أزرار — زر يوتيوب فقط عند توفّر رابط (لا فيديو مُضمّن ولا صور خارجية) */}
       <div className="flex flex-wrap gap-2">
         {ex.videoUrl && (
           <a href={ex.videoUrl} target="_blank" rel="noopener noreferrer" className="btn-ghost px-4 py-2.5 text-sm">
-            <Icon name="Globe" className="h-4 w-4" />
-            شاهد الشرح
+            <Icon name="Play" className="h-4 w-4" />
+            {lang === 'en' ? 'Watch on YouTube' : 'شاهد على يوتيوب'}
           </a>
         )}
         {onAddToPlan && (
           <button type="button" onClick={() => onAddToPlan(ex.id)} className="btn-primary px-4 py-2.5 text-sm">
             <Icon name="Plus" className="h-4 w-4" />
-            أضف لخطتي
+            {lang === 'en' ? 'Add to my plan' : 'أضف لخطتي'}
           </button>
         )}
       </div>
