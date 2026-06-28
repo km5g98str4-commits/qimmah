@@ -16,6 +16,7 @@ import { MobileShell, type MainTab } from '@/components/MobileShell'
 import type { AppBadge } from '@/components/AppNav'
 import { useAuth } from '@/lib/authContext'
 import { loadOnboarding } from '@/lib/onboarding'
+import { ensureOnboardingProfile } from '@/lib/onboardingProfile'
 import { applyLanguage } from '@/lib/appPreferences'
 import { type AppRoute, MAIN_TABS, routeFromHash, setHashRoute } from '@/lib/appRoutes'
 import { SuccessToast } from '@/components/SuccessToast'
@@ -50,6 +51,8 @@ export default function App() {
 
   useEffect(() => {
     applyLanguage(LANG)
+    // هجرة لمرّة واحدة لمصدر الحقيقة (تحفظ المستخدمين الحاليين؛ آمنة للجدد).
+    ensureOnboardingProfile()
     // معرّف البناء في الـ console — للتحقق من نشر النسخة الصحيحة.
     console.info(`%cقِمّة ${BUILD_LABEL}`, 'color:#F26A21;font-weight:bold')
   }, [])
