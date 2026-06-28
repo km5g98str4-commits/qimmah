@@ -4,9 +4,7 @@ import { Icon } from '@/components/Icon'
 import { ExerciseDetail } from '@/components/ExerciseDetail'
 import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
-import { exercises } from '@/data/exercises'
-import { exerciseDisplayName } from '@/lib/workoutPlan'
-import { muscleLabelAr } from '@/data/muscleGroups'
+import { exercises, targetMuscleAr } from '@/data/exercises'
 import type { Muscle } from '@/types/workout'
 
 interface ExerciseLibraryViewProps {
@@ -146,9 +144,12 @@ export function ExerciseLibraryView({ lang }: ExerciseLibraryViewProps) {
                 >
                   <ExerciseThumb />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-bold text-ink-900">{exerciseDisplayName(e.nameAr, e.nameEn, lang)}</p>
-                    <p className="truncate text-[11px] text-ink-400">
-                      {muscleLabelAr(e.primaryMusclesDetailed[0] ?? 'abs')} · {e.equipment.map(equipAr).join(' · ')}
+                    {/* الاسم الإنجليزي أولًا، العربي تحته، ثم العضلة الهدف بالعربية */}
+                    <p className="truncate text-sm font-bold text-ink-900">{e.nameEn}</p>
+                    <p className="truncate text-[11px] text-ink-500">{e.nameAr}</p>
+                    <p className="mt-0.5 flex items-center gap-1.5 text-[11px] text-ink-400">
+                      <span className="rounded-full bg-primary-soft px-1.5 py-0.5 font-bold text-primary-c">{targetMuscleAr(e)}</span>
+                      <span className="truncate">{e.equipment.map(equipAr).join(' · ')}</span>
                     </p>
                   </div>
                   <Icon name="ChevronLeft" className="h-4 w-4 shrink-0 text-ink-400" />

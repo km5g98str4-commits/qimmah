@@ -1,5 +1,7 @@
 // مولّد الخطة بقواعد ثابتة (بلا أي AI/خادم).
 // يأخذ الملف الشخصي + الهدف ويولّد: أهداف، جدول تمرين، خطة أكل، التزامات، قياسات.
+// محرّك التمرين (v2): يبني التقسيمة من إجابات الإعداد مباشرة — اختيار التقسيمة تلقائي،
+// تصفية التمارين حسب الأدوات/نوع النادي، والمجموعات/التكرارات/الراحة حسب الهدف والخبرة.
 
 import type {
   ActivityLevel,
@@ -13,11 +15,12 @@ import type {
 import type { CommitmentPlan } from '@/types/progress'
 import type { MeasurementPlan } from '@/types/progress'
 import type { NutritionPlan, PlanMeal } from '@/types/nutrition'
-import type { Muscle, WorkoutPlan } from '@/types/workout'
+import type { Exercise, Muscle, MovementPattern, PlanDay, PlanExercise, WorkoutPlan } from '@/types/workout'
+import type { RoutineDay } from '@/types'
 import type { RoutineRow } from '@/lib/customization'
+import type { Lang } from '@/lib/appPreferences'
 import { computeTargets, calorieGoalFromGoalType, goalTypeLabel } from '@/lib/calculators'
-import { generatePlanFromTemplate } from '@/lib/workoutPlan'
-import { getExercise } from '@/data/exercises'
+import { exercises, getExercise } from '@/data/exercises'
 import { getTemplate } from '@/data/workoutTemplates'
 import { createPlanMealFromTemplate, planTotals } from '@/lib/nutritionPlan'
 import { createPlanCommitment } from '@/lib/commitmentPlan'
@@ -60,40 +63,403 @@ export function deriveTargetWeight(weightKg: number, gt: GoalType): number {
   return weightKg // recomposition / health / maintenance / returning
 }
 
-/** يختار قالب التمرين حسب القواعد (يراعي إمكانية الوصول والأدوات إن توفّرت). */
-export function recommendTemplateId(p: Profile): string {
+// ============================================================================
+// محرّك التقسيمة (Split Engine)
+// ============================================================================
+
+/** درجة الخبرة الفعلية (أربع درجات): تُشتقّ من مدّة الخبرة أو مستوى التدريب. */
+type ExpTier = 'beginner' | 'novice' | 'intermediate' | 'advanced'
+
+function expTier(p: Profile): ExpTier {
+  switch (p.experienceBand) {
+    case 'lt1m':
+    case '1to6m':
+      return 'beginner'
+    case '6to12m':
+      return 'novice'
+    case '1to2y':
+      return 'intermediate'
+    case 'gt2y':
+      return 'advanced'
+    default:
+      if (p.trainingLevel === 'beginner') return 'beginner'
+      if (p.trainingLevel === 'advanced') return 'advanced'
+      return 'intermediate'
+  }
+}
+
+/** عدد التمارين في الجلسة حسب الخبرة. */
+function exercisesPerSession(tier: ExpTier): number {
+  switch (tier) {
+    case 'beginner':
+      return 5 // 4–5
+    case 'novice':
+      return 5
+    case 'intermediate':
+      return 6 // 5–6
+    case 'advanced':
+      return 6
+  }
+}
+
+const COMPOUND_PATTERNS = new Set<MovementPattern>(['squat', 'hinge', 'push', 'pull', 'lunge'])
+
+type ExRole = 'compound' | 'isolation'
+function exerciseRole(ex: Exercise): ExRole {
+  return COMPOUND_PATTERNS.has(ex.movementPattern) ? 'compound' : 'isolation'
+}
+
+/** عدد المجموعات حسب الخبرة ونوع التمرين. */
+function setsFor(tier: ExpTier, role: ExRole): number {
+  switch (tier) {
+    case 'beginner':
+    case 'novice':
+      return 3
+    case 'intermediate':
+      return role === 'compound' ? 4 : 3
+    case 'advanced':
+      return 4
+  }
+}
+
+/** نظام التكرارات والراحة حسب الهدف ونوع التمرين. */
+interface RepScheme {
+  compoundReps: string
+  isoReps: string
+  compoundRest: number
+  isoRest: number
+}
+const SCHEMES: Record<GoalType, RepScheme> = {
+  strength: { compoundReps: '4–6', isoReps: '6–8', compoundRest: 180, isoRest: 90 },
+  bulking: { compoundReps: '6–10', isoReps: '10–12', compoundRest: 120, isoRest: 75 },
+  cutting: { compoundReps: '8–12', isoReps: '12–15', compoundRest: 90, isoRest: 60 },
+  recomposition: { compoundReps: '6–10', isoReps: '10–12', compoundRest: 120, isoRest: 75 },
+  maintenance: { compoundReps: '8–12', isoReps: '12–15', compoundRest: 90, isoRest: 75 },
+  health: { compoundReps: '8–12', isoReps: '12–15', compoundRest: 90, isoRest: 75 },
+  returning: { compoundReps: '10–12', isoReps: '12–15', compoundRest: 90, isoRest: 75 },
+}
+
+/** فلتر الأدوات حسب نوع النادي (gymType). لا نولّد تمارين مستحيلة للبيئة المختارة. */
+function makeEquipFilter(p: Profile): (ex: Exercise) => boolean {
   const access = p.gymAccess ?? (p.workoutEnvironment === 'home' ? 'home' : 'full')
-  const equip = p.equipment ?? []
-  const days = clamp(p.trainingDays, 1, 7)
-  const lvl = p.trainingLevel
-  const gt = p.goalType
-
-  // بيئات محدودة الأدوات → تمارين مناسبة فقط
-  if (access === 'bodyweight' || access === 'home') return 'home-workout'
+  if (access === 'full') return () => true
   if (access === 'small') {
-    const hasBarbell = equip.includes('barbell')
-    const hasMachine = equip.includes('machine') || equip.includes('cable')
-    if (!hasBarbell && hasMachine) return 'machine-only'
-    if (!hasBarbell && !hasMachine) return 'home-workout'
-    // عنده بار → نكمل بمنطق النادي الكامل
+    // وزن حر + أجهزة أساسية فقط — نتجنّب الكيبل (وما يتبعه).
+    const banned = new Set(['cable', 'rope'])
+    return (ex) => ex.equipment.every((e) => !banned.has(e))
   }
+  if (access === 'home') {
+    // دمبل/بار/وزن جسم/مطاط (+ مقعد شائع منزليًا).
+    const allowed = new Set(['dumbbell', 'barbell', 'bodyweight', 'band', 'bench'])
+    return (ex) => ex.equipment.every((e) => allowed.has(e))
+  }
+  // bodyweight: وزن الجسم فقط.
+  const allowed = new Set(['bodyweight'])
+  return (ex) => ex.equipment.every((e) => allowed.has(e))
+}
 
-  if (gt === 'returning') return days >= 4 ? 'beginner-gym' : 'full-body-3'
+/** هل التمرين مناسب لمستوى الخبرة؟ المبتدئ/المستجد لا نعطيه تمارين متقدّمة. */
+function levelOk(ex: Exercise, tier: ExpTier): boolean {
+  if (tier === 'beginner' || tier === 'novice') return ex.level !== 'advanced'
+  return true
+}
 
-  if (lvl === 'beginner') {
-    if (days <= 3) return 'full-body-3'
-    return 'beginner-gym' // 4+ أيام للمبتدئ: برنامج بسيط
+// — فتحات اليوم (Slots): قائمة مرتّبة بالأولوية تُملأ بأفضل تمرين متاح —
+interface Slot {
+  muscles: Muscle[]
+  role: ExRole | 'any'
+  patterns?: MovementPattern[]
+}
+
+type DayType = 'full' | 'upper' | 'lower' | 'push' | 'pull' | 'arms' | 'core'
+
+const SLOTS: Record<DayType, Slot[]> = {
+  full: [
+    { muscles: ['quads'], role: 'compound', patterns: ['squat', 'lunge'] },
+    { muscles: ['chest'], role: 'compound', patterns: ['push'] },
+    { muscles: ['back'], role: 'compound', patterns: ['pull'] },
+    { muscles: ['hamstrings', 'glutes'], role: 'compound', patterns: ['hinge'] },
+    { muscles: ['shoulders'], role: 'compound', patterns: ['push'] },
+    { muscles: ['core'], role: 'any' },
+    { muscles: ['biceps'], role: 'isolation' },
+    { muscles: ['triceps'], role: 'isolation' },
+    { muscles: ['calves'], role: 'isolation' },
+  ],
+  upper: [
+    { muscles: ['chest'], role: 'compound', patterns: ['push'] },
+    { muscles: ['back'], role: 'compound', patterns: ['pull'] },
+    { muscles: ['shoulders'], role: 'compound', patterns: ['push'] },
+    { muscles: ['back'], role: 'compound', patterns: ['pull'] },
+    { muscles: ['chest'], role: 'any' },
+    { muscles: ['shoulders'], role: 'isolation' },
+    { muscles: ['biceps'], role: 'isolation' },
+    { muscles: ['triceps'], role: 'isolation' },
+  ],
+  lower: [
+    { muscles: ['quads'], role: 'compound', patterns: ['squat'] },
+    { muscles: ['hamstrings'], role: 'compound', patterns: ['hinge'] },
+    { muscles: ['quads'], role: 'any' },
+    { muscles: ['glutes'], role: 'any' },
+    { muscles: ['hamstrings'], role: 'isolation' },
+    { muscles: ['calves'], role: 'isolation' },
+    { muscles: ['core'], role: 'any' },
+  ],
+  push: [
+    { muscles: ['chest'], role: 'compound', patterns: ['push'] },
+    { muscles: ['shoulders'], role: 'compound', patterns: ['push'] },
+    { muscles: ['chest'], role: 'any' },
+    { muscles: ['shoulders'], role: 'isolation' },
+    { muscles: ['triceps'], role: 'isolation' },
+    { muscles: ['triceps'], role: 'isolation' },
+    { muscles: ['core'], role: 'any' },
+  ],
+  pull: [
+    { muscles: ['back'], role: 'compound', patterns: ['pull'] },
+    { muscles: ['back'], role: 'compound', patterns: ['pull'] },
+    { muscles: ['back'], role: 'any' },
+    { muscles: ['shoulders'], role: 'isolation' },
+    { muscles: ['biceps'], role: 'isolation' },
+    { muscles: ['biceps'], role: 'isolation' },
+    { muscles: ['core'], role: 'any' },
+  ],
+  arms: [
+    { muscles: ['shoulders'], role: 'compound', patterns: ['push'] },
+    { muscles: ['shoulders'], role: 'isolation' },
+    { muscles: ['biceps'], role: 'isolation' },
+    { muscles: ['triceps'], role: 'isolation' },
+    { muscles: ['biceps'], role: 'isolation' },
+    { muscles: ['triceps'], role: 'isolation' },
+    { muscles: ['shoulders'], role: 'isolation' },
+  ],
+  core: [
+    { muscles: ['core'], role: 'any' },
+    { muscles: ['core'], role: 'any' },
+    { muscles: ['core'], role: 'any' },
+    { muscles: ['core'], role: 'any' },
+    { muscles: ['core'], role: 'any' },
+    { muscles: ['core'], role: 'any' },
+  ],
+}
+
+const TYPE_MUSCLES: Record<DayType, Muscle[]> = {
+  full: ['quads', 'chest', 'back', 'shoulders', 'hamstrings', 'glutes', 'biceps', 'triceps', 'calves', 'core'],
+  upper: ['chest', 'back', 'shoulders', 'biceps', 'triceps'],
+  lower: ['quads', 'hamstrings', 'glutes', 'calves', 'core'],
+  push: ['chest', 'shoulders', 'triceps'],
+  pull: ['back', 'biceps', 'shoulders'],
+  arms: ['biceps', 'triceps', 'shoulders'],
+  core: ['core'],
+}
+
+/** يختار تمرينًا لفتحة معيّنة من المجمع المتاح (مع تنويع عبر variation وتجنّب التكرار). */
+function pickForSlot(slot: Slot, pool: Exercise[], used: Set<string>, variation: number): string | undefined {
+  let cands = pool.filter(
+    (ex) =>
+      slot.muscles.includes(ex.primaryMuscle) &&
+      (slot.role === 'any' || exerciseRole(ex) === slot.role) &&
+      !used.has(ex.id),
+  )
+  if (slot.patterns) {
+    const byPattern = cands.filter((ex) => slot.patterns!.includes(ex.movementPattern))
+    if (byPattern.length) cands = byPattern
   }
-  if (lvl === 'intermediate') {
-    if (days <= 3) return gt === 'bulking' || gt === 'strength' ? 'push-pull-legs' : 'full-body-3'
-    if (days === 4) return gt === 'bulking' || gt === 'strength' ? 'muscle-gain' : 'upper-lower-4'
-    if (days === 5) return 'muscle-gain'
-    return 'push-pull-legs' // 6
+  if (!cands.length) return undefined
+  cands = cands.slice().sort((a, b) => a.id.localeCompare(b.id))
+  return cands[variation % cands.length].id
+}
+
+/** يبني قائمة معرّفات تمارين ليوم واحد. */
+function buildDayExercises(type: DayType, variation: number, pool: Exercise[], target: number): string[] {
+  const used = new Set<string>()
+  const ids: string[] = []
+  for (const slot of SLOTS[type]) {
+    if (ids.length >= target) break
+    const id = pickForSlot(slot, pool, used, variation)
+    if (id) {
+      ids.push(id)
+      used.add(id)
+    }
   }
-  // advanced
-  if (days <= 4) return gt === 'bulking' || gt === 'strength' ? 'muscle-gain' : 'upper-lower-4'
-  if (days === 5) return 'muscle-gain'
-  return 'push-pull-legs'
+  // إكمال النقص من عضلات اليوم الأساسية إن قلّت الفتحات المتاحة (بيئات محدودة الأدوات).
+  if (ids.length < target) {
+    const extra = pool
+      .filter((ex) => !used.has(ex.id) && TYPE_MUSCLES[type].includes(ex.primaryMuscle))
+      .sort((a, b) => a.id.localeCompare(b.id))
+    for (const ex of extra) {
+      if (ids.length >= target) break
+      ids.push(ex.id)
+      used.add(ex.id)
+    }
+  }
+  return ids
+}
+
+// — مواصفات أيام التقسيمة (الأسماء العربية/الإنجليزية + نوع الجدول) —
+interface DaySpec {
+  type: DayType
+  nameAr: string
+  nameEn: string
+  routineType: RoutineDay['type']
+}
+
+const AR_ALPHA = ['أ', 'ب', 'ج', 'د', 'هـ', 'و', 'ز']
+const AR_NUM = ['', '١', '٢', '٣', '٤', '٥', '٦', '٧']
+
+function fullDay(i: number): DaySpec {
+  return { type: 'full', nameAr: `جسم كامل ${AR_ALPHA[i]}`, nameEn: `Full Body ${String.fromCharCode(65 + i)}`, routineType: 'full' }
+}
+function ulDay(kind: 'upper' | 'lower', n: number): DaySpec {
+  return kind === 'upper'
+    ? { type: 'upper', nameAr: `علوي ${AR_NUM[n]}`, nameEn: `Upper ${n}`, routineType: 'full' }
+    : { type: 'lower', nameAr: `سفلي ${AR_NUM[n]}`, nameEn: `Lower ${n}`, routineType: 'legs' }
+}
+function pplDay(kind: 'push' | 'pull' | 'legs', n: number): DaySpec {
+  if (kind === 'push') return { type: 'push', nameAr: `دفع ${AR_NUM[n]}`, nameEn: `Push ${n}`, routineType: 'push' }
+  if (kind === 'pull') return { type: 'pull', nameAr: `سحب ${AR_NUM[n]}`, nameEn: `Pull ${n}`, routineType: 'pull' }
+  return { type: 'lower', nameAr: `أرجل ${AR_NUM[n]}`, nameEn: `Legs ${n}`, routineType: 'legs' }
+}
+function focusDay(focus?: MuscleFocus): DaySpec {
+  switch (focus) {
+    case 'lower':
+      return { type: 'lower', nameAr: 'أرجل (مركّز)', nameEn: 'Legs (Focus)', routineType: 'legs' }
+    case 'upper':
+    case 'chest':
+    case 'back':
+    case 'shoulders':
+      return { type: 'upper', nameAr: 'علوي (مركّز)', nameEn: 'Upper (Focus)', routineType: 'full' }
+    case 'core':
+      return { type: 'core', nameAr: 'بطن وكور', nameEn: 'Core', routineType: 'cardio' }
+    case 'arms':
+    default:
+      return { type: 'arms', nameAr: 'ذراعين وأكتاف', nameEn: 'Arms & Shoulders', routineType: 'push' }
+  }
+}
+
+/** يختار التقسيمة تلقائيًا حسب عدد أيام التمرين (والتركيز عند 5 أيام). */
+function splitDays(days: number, focus?: MuscleFocus): DaySpec[] {
+  const d = clamp(days, 1, 7)
+  if (d <= 2) return Array.from({ length: d }, (_, i) => fullDay(i))
+  if (d === 3) return [fullDay(0), fullDay(1), fullDay(2)]
+  if (d === 4) return [ulDay('upper', 1), ulDay('lower', 1), ulDay('upper', 2), ulDay('lower', 2)]
+  if (d === 5) return [ulDay('upper', 1), ulDay('lower', 1), ulDay('upper', 2), ulDay('lower', 2), focusDay(focus)]
+  if (d === 6)
+    return [pplDay('push', 1), pplDay('pull', 1), pplDay('legs', 1), pplDay('push', 2), pplDay('pull', 2), pplDay('legs', 2)]
+  // 7 أيام: PPL ×2 + يوم جسم كامل إضافي.
+  return [
+    pplDay('push', 1),
+    pplDay('pull', 1),
+    pplDay('legs', 1),
+    pplDay('push', 2),
+    pplDay('pull', 2),
+    pplDay('legs', 2),
+    { type: 'full', nameAr: 'جسم كامل', nameEn: 'Full Body', routineType: 'full' },
+  ]
+}
+
+function splitId(days: number): string {
+  const d = clamp(days, 1, 7)
+  if (d <= 3) return 'gen-fullbody'
+  if (d === 4) return 'gen-upper-lower-4'
+  if (d === 5) return 'gen-upper-lower-5'
+  if (d === 6) return 'gen-ppl-6'
+  return 'gen-ppl-7'
+}
+
+const SPLIT_TITLES: Record<string, { ar: string; en: string }> = {
+  'gen-fullbody': { ar: 'جسم كامل', en: 'Full Body' },
+  'gen-upper-lower-4': { ar: 'علوي / سفلي', en: 'Upper / Lower' },
+  'gen-upper-lower-5': { ar: 'علوي / سفلي + يوم مركّز', en: 'Upper / Lower + Focus' },
+  'gen-ppl-6': { ar: 'دفع / سحب / أرجل ×٢', en: 'Push / Pull / Legs ×2' },
+  'gen-ppl-7': { ar: 'دفع / سحب / أرجل ×٢ + إضافي', en: 'Push / Pull / Legs ×2 + Extra' },
+}
+
+/** اسم الخطة للعرض — يدعم تقسيمات المحرّك الجديدة والقوالب القديمة. */
+export function planTitle(templateId: string, lang: Lang = 'ar'): string {
+  const m = SPLIT_TITLES[templateId]
+  if (m) return lang === 'en' ? m.en : m.ar
+  const tpl = getTemplate(templateId)
+  if (tpl) return lang === 'en' ? tpl.nameEn : tpl.nameAr
+  return lang === 'en' ? 'Custom plan' : 'جدول مخصّص'
+}
+
+/** يبني عنصر خطة بمجموعات/تكرارات/راحة حسب الهدف والخبرة. */
+function createGenExercise(exerciseId: string, dayId: string, order: number, tier: ExpTier, gt: GoalType): PlanExercise {
+  const ex = getExercise(exerciseId)
+  const role: ExRole = ex ? exerciseRole(ex) : 'isolation'
+  const scheme = SCHEMES[gt] ?? SCHEMES.maintenance
+  const isCardio = ex?.movementPattern === 'cardio'
+  // التمارين المؤقّتة (ثوانٍ/دقائق) والكور نُبقي تكراراتها الافتراضية الطبيعية.
+  const keepDefaultReps =
+    isCardio || ex?.movementPattern === 'core' || ex?.primaryMuscle === 'core' || /[ثد]/.test(ex?.defaultReps ?? '')
+  return {
+    id: `${dayId}-${exerciseId}-${order}`,
+    exerciseId,
+    sets: isCardio ? 1 : setsFor(tier, role),
+    reps: keepDefaultReps ? ex?.defaultReps ?? '8–12' : role === 'compound' ? scheme.compoundReps : scheme.isoReps,
+    restSec: isCardio ? 0 : role === 'compound' ? scheme.compoundRest : scheme.isoRest,
+    startingWeight: '',
+    notes: '',
+    order,
+  }
+}
+
+/** يضيف عنصر كارديو ليومين أسبوعيًا (هدف التنشيف). */
+function addCutCardio(planDays: PlanDay[], equipOk: (ex: Exercise) => boolean): void {
+  const cardio = exercises
+    .filter((ex) => ex.primaryMuscle === 'cardio' && equipOk(ex))
+    .sort((a, b) => a.id.localeCompare(b.id))
+  if (!cardio.length || !planDays.length) return
+  const idxs = planDays.length >= 2 ? [0, Math.min(planDays.length - 1, Math.floor(planDays.length / 2))] : [0]
+  const unique = [...new Set(idxs)]
+  unique.forEach((dayIdx, k) => {
+    const day = planDays[dayIdx]
+    const ex = cardio[k % cardio.length]
+    if (day.exercises.some((pe) => pe.exerciseId === ex.id)) return
+    day.exercises.push({
+      id: `${day.id}-${ex.id}-cardio`,
+      exerciseId: ex.id,
+      sets: 1,
+      reps: ex.defaultReps,
+      restSec: 0,
+      startingWeight: '',
+      notes: 'كارديو لزيادة الحرق (هدف التنشيف).',
+      order: day.exercises.length,
+    })
+  })
+}
+
+/** يبني خطة التمرين كاملة من بيانات الملف الشخصي (تقسيمة + تمارين). */
+function generateWorkoutPlan(p: Profile): { plan: WorkoutPlan; specs: DaySpec[] } {
+  const days = clamp(p.trainingDays, 1, 7)
+  const specs = splitDays(days, p.muscleFocus)
+  const tier = expTier(p)
+  const target = exercisesPerSession(tier)
+  const equipOk = makeEquipFilter(p)
+  const pool = exercises.filter(
+    (ex) =>
+      equipOk(ex) &&
+      ex.movementPattern !== 'mobility' &&
+      ex.primaryMuscle !== 'cardio' &&
+      levelOk(ex, tier),
+  )
+
+  const counts: Record<string, number> = {}
+  const planDays: PlanDay[] = specs.map((spec, di) => {
+    const variation = counts[spec.type] ?? 0
+    counts[spec.type] = variation + 1
+    const dayId = `gen-${di + 1}-${spec.type}`
+    const ids = buildDayExercises(spec.type, variation, pool, target)
+    return {
+      id: dayId,
+      nameAr: spec.nameAr,
+      nameEn: spec.nameEn,
+      exercises: ids.map((id, i) => createGenExercise(id, dayId, i, tier, p.goalType)),
+    }
+  })
+
+  if (p.goalType === 'cutting') addCutCardio(planDays, equipOk)
+
+  return { plan: { templateId: splitId(days), days: planDays }, specs }
 }
 
 const WEEKDAYS = ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة']
@@ -108,6 +474,25 @@ const TRAIN_PATTERN: Record<number, number[]> = {
   7: [0, 1, 2, 3, 4, 5, 6],
 }
 
+/** يحسب فهارس أيام التمرين خلال الأسبوع (من تفضيل المستخدم أو النمط الافتراضي). */
+function trainingIndexes(days: number, preferredDays?: number[]): number[] {
+  if (preferredDays && preferredDays.length) {
+    const idx = [...new Set(preferredDays)]
+      .filter((i) => i >= 0 && i < 7)
+      .sort((a, b) => a - b)
+      .slice(0, days)
+    if (idx.length < days) {
+      for (const i of TRAIN_PATTERN[days] ?? []) {
+        if (idx.length >= days) break
+        if (!idx.includes(i)) idx.push(i)
+      }
+      idx.sort((a, b) => a - b)
+    }
+    return idx
+  }
+  return TRAIN_PATTERN[days] ?? TRAIN_PATTERN[3]
+}
+
 function dayType(nameEn: string): RoutineRow['type'] {
   const n = nameEn.toLowerCase()
   if (n.includes('push')) return 'push'
@@ -117,28 +502,29 @@ function dayType(nameEn: string): RoutineRow['type'] {
   return 'full'
 }
 
-/** يبني جدولًا أسبوعيًا متّسقًا مع أيام القالب (تدوير الأيام عبر الأسبوع). */
-export function buildWeeklySchedule(
-  templateId: string,
-  trainingDays: number,
-  preferredDays?: number[],
-): RoutineRow[] {
-  const tpl = getTemplate(templateId)
-  const days = Math.max(1, Math.min(7, trainingDays))
-  let trainIdx: number[]
-  if (preferredDays && preferredDays.length) {
-    trainIdx = [...new Set(preferredDays)].filter((i) => i >= 0 && i < 7).sort((a, b) => a - b).slice(0, days)
-    // أكمل من النمط الافتراضي إن اختار المستخدم أيامًا أقل من المطلوب
-    if (trainIdx.length < days) {
-      for (const i of TRAIN_PATTERN[days] ?? []) {
-        if (trainIdx.length >= days) break
-        if (!trainIdx.includes(i)) trainIdx.push(i)
-      }
-      trainIdx.sort((a, b) => a - b)
+/** يبني جدولًا أسبوعيًا من مواصفات التقسيمة المولّدة. */
+function buildScheduleFromSpecs(specs: DaySpec[], trainingDays: number, preferredDays?: number[]): RoutineRow[] {
+  const days = clamp(trainingDays, 1, 7)
+  const trainIdx = trainingIndexes(days, preferredDays)
+  const rows: RoutineRow[] = []
+  let c = 0
+  WEEKDAYS.forEach((d, i) => {
+    if (specs.length && trainIdx.includes(i)) {
+      const spec = specs[c % specs.length]
+      rows.push({ day: d, title: spec.nameAr, type: spec.routineType })
+      c++
+    } else {
+      rows.push({ day: d, title: 'راحة واستشفاء', type: 'rest' })
     }
-  } else {
-    trainIdx = TRAIN_PATTERN[days] ?? TRAIN_PATTERN[3]
-  }
+  })
+  return rows
+}
+
+/** (إرث) يبني جدولًا أسبوعيًا من قالب جاهز — يُستخدم في مسار «اختيار جدول آخر». */
+export function buildWeeklySchedule(templateId: string, trainingDays: number, preferredDays?: number[]): RoutineRow[] {
+  const tpl = getTemplate(templateId)
+  const days = clamp(trainingDays, 1, 7)
+  const trainIdx = trainingIndexes(days, preferredDays)
   const rows: RoutineRow[] = []
   let c = 0
   WEEKDAYS.forEach((d, i) => {
@@ -152,6 +538,10 @@ export function buildWeeklySchedule(
   })
   return rows
 }
+
+// ============================================================================
+// التغذية والالتزامات والقياسات (بلا تغيير منطقي)
+// ============================================================================
 
 const STYLE_TEMPLATES: Record<Profile['nutritionStyle'], { breakfast: string; lunch: string; dinner: string; snack: string }> = {
   simple: { breakfast: 'eggs-and-bread', lunch: 'chicken-rice', dinner: 'light-dinner', snack: 'greek-yogurt-snack' },
@@ -239,8 +629,6 @@ const FOCUS_MUSCLES: Record<MuscleFocus, Muscle[]> = {
   arms: ['biceps', 'triceps'],
 }
 
-const COMPOUND_PATTERNS = new Set(['squat', 'hinge', 'push', 'pull', 'lunge'])
-
 /** يزيد مجموعة واحدة على تمارين العضلات المستهدفة (توزيع حجم العمل). */
 function applyMuscleFocus(plan: WorkoutPlan, focus: MuscleFocus): WorkoutPlan {
   const muscles = FOCUS_MUSCLES[focus] ?? []
@@ -253,23 +641,6 @@ function applyMuscleFocus(plan: WorkoutPlan, focus: MuscleFocus): WorkoutPlan {
       exercises: d.exercises.map((pe) => {
         const ex = getExercise(pe.exerciseId)
         if (ex && set.has(ex.primaryMuscle) && pe.sets < 5) return { ...pe, sets: pe.sets + 1 }
-        return pe
-      }),
-    })),
-  }
-}
-
-/** هدف القوة: تكرارات أقل وراحة أطول على المركّبات. */
-function applyStrengthScheme(plan: WorkoutPlan): WorkoutPlan {
-  return {
-    ...plan,
-    days: plan.days.map((d) => ({
-      ...d,
-      exercises: d.exercises.map((pe) => {
-        const ex = getExercise(pe.exerciseId)
-        if (ex && COMPOUND_PATTERNS.has(ex.movementPattern)) {
-          return { ...pe, reps: '4–6', restSec: Math.max(pe.restSec, 150) }
-        }
         return pe
       }),
     })),
@@ -289,25 +660,22 @@ function applyDeload(plan: WorkoutPlan): WorkoutPlan {
 
 /** اسم/وسم الخطة المختصر. */
 export function planLabel(p: Profile, templateId: string): string {
-  const tpl = getTemplate(templateId)
   const days = clamp(p.trainingDays, 1, 7)
-  return `خطة ${goalTypeLabel(p.goalType)} · ${days} أيام${tpl ? ` · ${tpl.nameAr}` : ''}`
+  return `خطة ${goalTypeLabel(p.goalType)} · ${days} أيام · ${planTitle(templateId, 'ar')}`
 }
 
 /** المولّد الكامل. */
 export function generatePlan(profile: Profile): GeneratedPlan {
   const p: Profile = { ...profile, goal: calorieGoalFromGoalType(profile.goalType) }
   const targets = computeTargets(p)
-  const templateId = recommendTemplateId(p)
-  const tpl = getTemplate(templateId)
   const isReturning = p.goalType === 'returning' || p.consistency === 'returning'
 
-  let workoutPlan = generatePlanFromTemplate(templateId)
-  if (p.goalType === 'strength') workoutPlan = applyStrengthScheme(workoutPlan)
+  const { plan, specs } = generateWorkoutPlan(p)
+  let workoutPlan = plan
   workoutPlan = applyMuscleFocus(workoutPlan, p.muscleFocus ?? 'balanced')
   if (isReturning) workoutPlan = applyDeload(workoutPlan)
 
-  const weeklySchedule = buildWeeklySchedule(templateId, p.trainingDays, p.preferredDays)
+  const weeklySchedule = buildScheduleFromSpecs(specs, p.trainingDays, p.preferredDays)
   const { plan: nutritionPlan, warning: nutritionWarning } = generateNutrition(p, targets)
 
   const warnings: string[] = []
@@ -322,20 +690,20 @@ export function generatePlan(profile: Profile): GeneratedPlan {
   }
   if (nutritionWarning) warnings.push(nutritionWarning)
 
-  const explanationAr = tpl
-    ? `اخترنا «${tpl.nameAr}» لأنك ${goalTypeLabel(p.goalType)} بمستوى ${p.trainingLevel === 'beginner' ? 'مبتدئ' : p.trainingLevel === 'intermediate' ? 'متوسط' : 'متقدّم'} و${p.trainingDays} أيام تمرين${p.workoutEnvironment === 'home' ? ' في المنزل' : ''}.`
-    : 'تم توليد جدول مناسب لبياناتك.'
+  const levelAr = p.trainingLevel === 'beginner' ? 'مبتدئ' : p.trainingLevel === 'intermediate' ? 'متوسط' : 'متقدّم'
+  const envAr = p.workoutEnvironment === 'home' ? ' في المنزل' : ''
+  const explanationAr = `اخترنا تقسيمة «${planTitle(workoutPlan.templateId, 'ar')}» تلقائيًا لأنك ${goalTypeLabel(p.goalType)} بمستوى ${levelAr} و${clamp(p.trainingDays, 1, 7)} أيام تمرين${envAr}.`
 
   return {
     targets,
-    suggestedWorkoutTemplateId: templateId,
+    suggestedWorkoutTemplateId: workoutPlan.templateId,
     weeklySchedule,
     workoutPlan,
     nutritionPlan,
     commitmentPlan: generateCommitments(p.goalType),
     measurementPlan: defaultMeasurementPlan(),
     explanationAr,
-    planLabelAr: planLabel(p, templateId),
+    planLabelAr: planLabel(p, workoutPlan.templateId),
     warningsAr: warnings,
   }
 }

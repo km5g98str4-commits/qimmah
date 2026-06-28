@@ -411,6 +411,27 @@ export const exercises: Exercise[] = [
   ex({ id: 'child-pose', nameAr: 'وضعية الطفل (استرخاء)', nameEn: 'Child’s Pose', primaryMuscle: 'back', equipment: ['bodyweight'], level: 'beginner', movementPattern: 'mobility', environment: 'home', defaultSets: 2, defaultReps: '30–45 ث', defaultRestSec: 15 }),
 ]
 
+/** الاسم العربي للعضلة الهدف (المجموعة العامة) — يُعرض كسطر/رقاقة في بطاقة التمرين. */
+export const MUSCLE_LABEL_AR: Record<Muscle, string> = {
+  chest: 'الصدر',
+  back: 'الظهر',
+  shoulders: 'الأكتاف',
+  biceps: 'البايسبس',
+  triceps: 'الترايسبس',
+  legs: 'الأرجل',
+  glutes: 'المؤخرة',
+  hamstrings: 'خلفية الفخذ',
+  quads: 'أمامية الفخذ',
+  calves: 'السمانة',
+  core: 'البطن',
+  cardio: 'كارديو',
+}
+
+/** العضلة الهدف للتمرين بالعربية (target_muscle_ar). */
+export function targetMuscleAr(ex: Exercise): string {
+  return MUSCLE_LABEL_AR[ex.primaryMuscle] ?? ex.primaryMuscle
+}
+
 /** خريطة سريعة للوصول لتمرين بالمعرّف. */
 export const exerciseMap: Record<string, Exercise> = Object.fromEntries(
   exercises.map((e) => [e.id, e]),
