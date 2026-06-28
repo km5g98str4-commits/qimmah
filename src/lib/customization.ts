@@ -144,7 +144,7 @@ export function getDefaultCustomization(): Customization {
     nutritionPlan: defaultNutritionPlan(computeTargets(defaultProfile), defaultProfile.goal),
     wellnessPlan: defaultWellnessPlan(),
     commitmentPlan: defaultCommitmentPlan(),
-    measurementPlan: { enabled: true, selectedTypeIds: ['weightKg', 'waistCm', 'bodyFatPercent', 'progressPhotoNote'] },
+    measurementPlan: { enabled: true, selectedTypeIds: ['weightKg', 'waistCm', 'bodyFatPercent'] },
     workouts: todayWorkout.exercises.map((e) => ({
       name: e.name,
       muscle: e.muscle,

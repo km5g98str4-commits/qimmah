@@ -16,7 +16,6 @@ export const measurementTypes: MeasurementType[] = [
   { id: 'sleepHours', nameAr: 'ساعات النوم', nameEn: 'Sleep', unit: 'ساعة', category: 'lifestyle' },
   { id: 'energyLevel', nameAr: 'مستوى الطاقة', nameEn: 'Energy level', unit: '/10', category: 'lifestyle' },
   { id: 'mood', nameAr: 'المزاج', nameEn: 'Mood', unit: '', category: 'lifestyle' },
-  { id: 'progressPhotoNote', nameAr: 'ملاحظة صورة التقدّم', nameEn: 'Progress photo note', unit: '', category: 'photo' },
   { id: 'bloodPressure', nameAr: 'ضغط الدم', nameEn: 'Blood pressure', unit: 'mmHg', category: 'advanced', isAdvanced: true, noteAr: 'للتسجيل فقط، وليس للتشخيص.', noteEn: 'For recording only, not diagnosis.' },
   { id: 'bloodSugar', nameAr: 'سكر الدم', nameEn: 'Blood sugar', unit: 'mg/dL', category: 'advanced', isAdvanced: true, noteAr: 'للتسجيل فقط، وليس للتشخيص.', noteEn: 'For recording only, not diagnosis.' },
 ]

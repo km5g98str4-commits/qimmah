@@ -56,12 +56,14 @@ export function medicationName(pm: PlanMedication, lang: Lang): string {
   return ar && en ? `${ar} — ${en}` : ar || en
 }
 
-/** الخطة الافتراضية — مكملات شائعة مُختارة، وقائمة أدوية فارغة (لأسباب طبية). */
+/**
+ * الخطة الافتراضية — قوائم فارغة تمامًا.
+ * المكملات والأدوية يضيفها المستخدم بنفسه فقط (لا بيانات افتراضية وهمية، ولا توصيات).
+ */
 export function defaultWellnessPlan(): WellnessPlan {
-  const seed = ['whey-protein', 'creatine', 'omega-3', 'vitamin-d']
   return {
     enabled: true,
-    supplements: seed.map((id, i) => createPlanSupplement(id, i)),
+    supplements: [],
     medications: [],
   }
 }

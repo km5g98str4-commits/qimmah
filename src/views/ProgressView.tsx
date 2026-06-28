@@ -126,14 +126,6 @@ export function ProgressView({ lang }: ProgressViewProps) {
           )}
         </Card>
 
-        {/* صور التقدّم — نائب */}
-        <Card icon="Maximize" title={t.cardPhotos} className="mt-3">
-          <div className="mt-1 flex items-center gap-3 rounded-xl border border-dashed border-line bg-page p-4">
-            <Icon name="Maximize" className="h-6 w-6 text-ink-300" />
-            <p className="text-xs leading-relaxed text-ink-500">{t.photosPlaceholder}</p>
-          </div>
-        </Card>
-
         {/* مزامنة الصحة — نائب صادق */}
         <div className="mt-3 card border-primary-soft p-5">
           <div className="flex items-center gap-2.5">

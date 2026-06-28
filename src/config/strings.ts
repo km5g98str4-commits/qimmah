@@ -49,6 +49,9 @@ export interface ShellStrings {
     groupData: string
     groupPlan: string
     groupPrivacy: string
+    groupLanguage: string
+    languageActive: string
+    languageSoon: string
     export: string
     import: string
     reset: string
@@ -258,6 +261,8 @@ export interface ShellStrings {
     medSafety: string
     suppSafety: string
     empty: string
+    emptySupp: string
+    emptyMed: string
     search: string
     allCategories: string
   }
@@ -291,8 +296,6 @@ export interface ShellStrings {
     cardPRs: string
     noPRs: string
     cardMuscles: string
-    cardPhotos: string
-    photosPlaceholder: string
     healthSyncTitle: string
     healthSyncSoon: string
     healthSyncBody: string
@@ -367,6 +370,9 @@ const ar: ShellStrings = {
     groupData: 'البيانات',
     groupPlan: 'خطتي',
     groupPrivacy: 'الخصوصية والثقة',
+    groupLanguage: 'اللغة',
+    languageActive: 'العربية — مفعّلة',
+    languageSoon: 'الإنجليزية قريبًا (English coming soon)',
     export: 'تصدير نسخة احتياطية',
     import: 'استيراد نسخة',
     reset: 'إعادة ضبط البيانات',
@@ -389,7 +395,7 @@ const ar: ShellStrings = {
     privacyBody: [
       'قِمّة تطبيق شخصي يعمل على جهازك أولًا (local-first). في وضع الضيف تُحفظ كل بياناتك في متصفّح هذا الجهاز فقط ولا تغادره.',
       'عند تسجيل الدخول بحساب سحابي (Supabase) تُرفع بياناتك إلى حسابك الخاص لتتمكّن من الوصول إليها من أجهزة أخرى. لا يصل إلى صفوفك إلا أنت (Row Level Security).',
-      'لا نبيع بياناتك ولا نشاركها مع معلنين. صور التقدّم والقياسات الصحية تبقى ملكك ويمكنك حذفها في أي وقت عبر «إعادة ضبط البيانات».',
+      'لا نبيع بياناتك ولا نشاركها مع معلنين. قياساتك وسجلّاتك الصحية تبقى ملكك ويمكنك حذفها في أي وقت عبر «إعادة ضبط البيانات».',
       'يمكنك تصدير نسخة كاملة من بياناتك في أي وقت من «الإعدادات → البيانات».',
     ],
     termsBody: [
@@ -592,6 +598,8 @@ const ar: ShellStrings = {
       'قِمّة يساعدك على تنظيم ومتابعة أدويتك فقط. لا تبدأ أو توقف أو تغيّر جرعة أي دواء بدون استشارة الطبيب أو الصيدلي.',
     suppSafety: 'قِمّة يساعدك على تتبّع المكملات فقط، ولا يوصي بجرعات علاجية.',
     empty: 'فعّل المكملات والأدوية من الإعداد إذا تبغى تتابعها.',
+    emptySupp: 'أضف مكمّلاتك إذا كنت تستخدمها.',
+    emptyMed: 'أضف ما تريد متابعته فقط.',
     search: 'ابحث…',
     allCategories: 'كل الفئات',
   },
@@ -625,8 +633,6 @@ const ar: ShellStrings = {
     cardPRs: 'أفضل الأوزان (PRs)',
     noPRs: 'أكمل تمرينًا بأوزان لتظهر أرقامك القياسية.',
     cardMuscles: 'العضلات هذا الأسبوع',
-    cardPhotos: 'صور التقدّم',
-    photosPlaceholder: 'قريبًا: حفظ صور التقدّم على جهازك بخصوصية تامة.',
     healthSyncTitle: 'مزامنة الصحة',
     healthSyncSoon: 'قريبًا: Apple Health و Google Fit',
     healthSyncBody: 'حاليًا تقدر تتابع تمرينك وتغذيتك داخل قِمّة.',
@@ -701,6 +707,9 @@ const en: ShellStrings = {
     groupData: 'Data',
     groupPlan: 'My Plan',
     groupPrivacy: 'Privacy & Trust',
+    groupLanguage: 'Language',
+    languageActive: 'Arabic — active',
+    languageSoon: 'English coming soon',
     export: 'Export backup',
     import: 'Import backup',
     reset: 'Reset data',
@@ -926,6 +935,8 @@ const en: ShellStrings = {
       'Qimmah helps you organize and track medications only. Do not start, stop, or change any medication dose without consulting a doctor or pharmacist.',
     suppSafety: 'Qimmah helps you track supplements only and does not recommend therapeutic doses.',
     empty: 'Enable supplements & medications in Setup to track them.',
+    emptySupp: 'Add your supplements if you use any.',
+    emptyMed: 'Add only what you want to track.',
     search: 'Search…',
     allCategories: 'All categories',
   },
@@ -959,8 +970,6 @@ const en: ShellStrings = {
     cardPRs: 'Best lifts (PRs)',
     noPRs: 'Complete a weighted workout to see your PRs.',
     cardMuscles: 'Muscles this week',
-    cardPhotos: 'Progress photos',
-    photosPlaceholder: 'Soon: store progress photos privately on your device.',
     healthSyncTitle: 'Health sync',
     healthSyncSoon: 'Soon: Apple Health & Google Fit',
     healthSyncBody: 'For now, track your workouts and nutrition inside Qimmah.',
