@@ -7,6 +7,8 @@ export interface OnboardingState {
   completed: boolean
   completedAt?: string
   lastStep?: number
+  /** مسودة إجابات الإعداد — تُحفظ بعد كل خطوة لاستئناف الإعداد لاحقًا. */
+  draft?: unknown
 }
 
 const DEFAULT: OnboardingState = { completed: false }
@@ -17,10 +19,26 @@ export function loadOnboarding(): OnboardingState {
     const raw = window.localStorage.getItem(ONBOARDING_KEY)
     if (!raw) return { ...DEFAULT }
     const parsed = JSON.parse(raw) as Partial<OnboardingState>
-    return { completed: !!parsed.completed, completedAt: parsed.completedAt, lastStep: parsed.lastStep }
+    return {
+      completed: !!parsed.completed,
+      completedAt: parsed.completedAt,
+      lastStep: parsed.lastStep,
+      draft: parsed.draft,
+    }
   } catch {
     return { ...DEFAULT }
   }
+}
+
+/** يحفظ مسودة الإجابات دون المساس بحالة الإكمال (مصدر الحقيقة المؤقت للإعداد). */
+export function saveDraft(draft: unknown): void {
+  const prev = loadOnboarding()
+  saveOnboarding({ ...prev, draft })
+}
+
+/** يقرأ مسودة الإجابات المحفوظة (إن وُجدت). */
+export function loadDraft<T>(): T | undefined {
+  return loadOnboarding().draft as T | undefined
 }
 
 export function saveOnboarding(state: OnboardingState): void {

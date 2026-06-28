@@ -4,9 +4,11 @@ import type {
   Consistency,
   Equipment,
   ExperienceBand,
+  ExperienceLevel,
   Gender,
   GoalType,
   GymAccess,
+  GymType,
   MuscleFocus,
 } from '@/types/profile'
 
@@ -22,9 +24,11 @@ export const genderChoices: Choice<Gender>[] = [
   { value: 'female', label: 'أنثى', icon: 'Users' },
 ]
 
-/** أهداف «باني الخطة» السبعة (تُربط داخليًا بـ GoalType للحسابات). */
+/** أهداف الإعداد الأربعة (مسارات منطقية لا تتداخل) — تُربط داخليًا بـ GoalType للحسابات. */
+export type GoalValue = 'bulk' | 'cut' | 'recomp' | 'strength'
+
 export interface GoalChoice {
-  value: string
+  value: GoalValue
   label: string
   desc: string
   icon: string
@@ -32,13 +36,10 @@ export interface GoalChoice {
 }
 
 export const goalChoices: GoalChoice[] = [
-  { value: 'build_muscle', label: 'بناء عضل', desc: 'تضخيم نظيف وزيادة الكتلة العضلية', icon: 'Dumbbell', goalType: 'bulking' },
-  { value: 'strength', label: 'زيادة قوة', desc: 'أوزان أثقل وتكرارات أقل', icon: 'Zap', goalType: 'strength' },
-  { value: 'cut', label: 'تنشيف', desc: 'إنقاص الدهون مع الحفاظ على العضل', icon: 'Flame', goalType: 'cutting' },
-  { value: 'bulk', label: 'تضخيم', desc: 'زيادة وزن وحجم بأقصى سرعة معقولة', icon: 'TrendingUp', goalType: 'bulking' },
-  { value: 'recomp', label: 'إعادة تركيب الجسم', desc: 'تنزل دهون وتبني عضل بنفس الوقت', icon: 'Layers', goalType: 'recomposition' },
-  { value: 'fitness', label: 'لياقة عامة', desc: 'صحة وطاقة وثبات على الروتين', icon: 'Heart', goalType: 'health' },
-  { value: 'weight_loss', label: 'نزول وزن', desc: 'خسارة وزن بشكل آمن ومستمر', icon: 'TrendingDown', goalType: 'cutting' },
+  { value: 'bulk', label: 'تضخيم', desc: 'زيادة العضل والوزن', icon: 'TrendingUp', goalType: 'bulking' },
+  { value: 'cut', label: 'تنشيف', desc: 'خسارة دهون مع الحفاظ على العضل', icon: 'Flame', goalType: 'cutting' },
+  { value: 'recomp', label: 'تركيب الجسم', desc: 'تنشيف وبناء عضل معًا', icon: 'Layers', goalType: 'recomposition' },
+  { value: 'strength', label: 'زيادة القوة', desc: 'أقوى بأقل تكرارات', icon: 'Zap', goalType: 'strength' },
 ]
 
 export const muscleFocusChoices: Choice<MuscleFocus>[] = [
@@ -52,27 +53,53 @@ export const muscleFocusChoices: Choice<MuscleFocus>[] = [
   { value: 'arms', label: 'ذراع', desc: 'بايسبس وترايسبس', icon: 'Dumbbell' },
 ]
 
-export const experienceChoices: Choice<ExperienceBand>[] = [
-  { value: 'lt1m', label: 'أقل من شهر', icon: 'Sparkles' },
-  { value: '1to6m', label: '1–6 أشهر', icon: 'CalendarDays' },
-  { value: '6to12m', label: '6–12 شهر', icon: 'CalendarDays' },
-  { value: '1to2y', label: '1–2 سنة', icon: 'CalendarDays' },
-  { value: 'gt2y', label: 'أكثر من سنتين', icon: 'Trophy' },
+/** خبرة الإعداد الأربعة — كل مستوى يحمل نطاق المولّد (band) لاتساق الحسابات. */
+export interface ExperienceChoice {
+  value: ExperienceLevel
+  label: string
+  desc: string
+  icon: string
+  band: ExperienceBand
+}
+
+export const experienceChoices: ExperienceChoice[] = [
+  { value: 'beginner', label: 'مبتدئ', desc: 'أقل من ٣ شهور أو ما بدأت', icon: 'Sparkles', band: 'lt1m' },
+  { value: 'novice', label: 'مستجد', desc: '٣ شهور – سنة', icon: 'CalendarDays', band: '1to6m' },
+  { value: 'intermediate', label: 'متوسط', desc: '١ – ٣ سنوات', icon: 'CalendarDays', band: '1to2y' },
+  { value: 'advanced', label: 'متقدّم', desc: 'أكثر من ٣ سنوات', icon: 'Trophy', band: 'gt2y' },
 ]
 
+/** الانتظام — يظهر فقط لغير المبتدئ (المبتدئ يُخزَّن انتظامه «new» تلقائيًا). */
 export const consistencyChoices: Choice<Consistency>[] = [
-  { value: 'never', label: 'ما قد تمرنت حديد', desc: 'أول تجربة لك مع الأوزان', icon: 'Sparkles' },
-  { value: 'onoff', label: 'أتمرن فترة وأوقف', desc: 'التزام متقطّع', icon: 'Activity' },
+  { value: 'onoff', label: 'أتمرن وأوقف', desc: 'التزام متقطّع', icon: 'Activity' },
   { value: 'regular', label: 'أتمرن بانتظام', desc: 'روتين ثابت حاليًا', icon: 'CheckCircle2' },
   { value: 'returning', label: 'راجع بعد انقطاع', desc: 'كنت تتمرن وتوقفت فترة', icon: 'RotateCcw' },
 ]
 
-export const gymAccessChoices: Choice<GymAccess>[] = [
-  { value: 'full', label: 'نادي كامل', desc: 'أجهزة وأوزان حرة كاملة', icon: 'Building2' },
-  { value: 'small', label: 'نادي صغير', desc: 'تجهيزات محدودة', icon: 'Building2' },
-  { value: 'home', label: 'نادي منزلي', desc: 'أدوات بسيطة في البيت', icon: 'Home' },
+/** نوع مكان التمرين الأربعة — تُربط بـ GymAccess للمولّد عبر gymTypeToAccess. */
+export interface GymTypeChoice {
+  value: GymType
+  label: string
+  desc: string
+  icon: string
+}
+
+export const gymTypeChoices: GymTypeChoice[] = [
+  { value: 'commercial', label: 'صالة كاملة', desc: 'أجهزة وأوزان حرة كاملة', icon: 'Building2' },
+  { value: 'small', label: 'صالة صغيرة', desc: 'تجهيزات محدودة', icon: 'Dumbbell' },
+  { value: 'home', label: 'جيم منزلي', desc: 'أدوات بسيطة في البيت', icon: 'Home' },
   { value: 'bodyweight', label: 'وزن الجسم', desc: 'بدون أي أدوات', icon: 'Activity' },
 ]
+
+/** يربط نوع المكان الدلالي بقيمة GymAccess التي يفهمها المولّد. */
+export function gymTypeToAccess(t: GymType): GymAccess {
+  return t === 'commercial' ? 'full' : t
+}
+
+/** يحوّل مستوى الخبرة الدلالي إلى نطاق المولّد. */
+export function experienceToBand(level: ExperienceLevel): ExperienceBand {
+  return experienceChoices.find((c) => c.value === level)?.band ?? '1to2y'
+}
 
 export const equipmentChoices: Choice<Equipment>[] = [
   { value: 'dumbbell', label: 'دمبلز', icon: 'Dumbbell' },
@@ -99,11 +126,11 @@ export const durationBands: DurationBand[] = [
 /** أيام الأسبوع (تطابق ترتيب WEEKDAYS في مولّد الخطة: 0=السبت). */
 export const weekdayNames = ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة']
 
-/** توصية أيام التمرين حسب مستوى الخبرة. */
-export function recommendedDaysFor(band: ExperienceBand): { days: number; note: string } {
-  if (band === 'lt1m' || band === '1to6m') return { days: 3, note: 'ننصح بـ3 أيام للبداية وبناء الالتزام.' }
-  if (band === '6to12m' || band === '1to2y') return { days: 4, note: 'ننصح بـ4 أيام لتقدّم متوازن.' }
-  return { days: 5, note: 'تقدر تتمرن 5–6 أيام مع خبرتك.' }
+/** توصية أيام التمرين حسب مستوى الخبرة (نبرة محايدة). */
+export function recommendedDaysFor(level: ExperienceLevel): { days: number; note: string } {
+  if (level === 'beginner' || level === 'novice') return { days: 3, note: 'الموصى به لمستواك: ٣ أيام.' }
+  if (level === 'intermediate') return { days: 4, note: 'الموصى به لمستواك: ٤ أيام.' }
+  return { days: 5, note: 'الموصى به لمستواك: ٥ أيام.' }
 }
 
 /** نص تحفيزي عام (بلا إحصاءات وهمية). */
