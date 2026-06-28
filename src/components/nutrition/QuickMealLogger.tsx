@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react'
 import { Icon } from '@/components/Icon'
 import { ProgressBar } from '@/components/ProgressBar'
-import { FOOD_ESTIMATE_NOTE, searchFood, type FoodItem } from '@/data/foodItems'
+import { FOOD_ESTIMATE_NOTE, type FoodItem } from '@/data/foodItems'
+import { searchAllFoods } from '@/lib/foodSearch'
 import { useNutritionToday, type MealSlot } from '@/lib/nutritionTracking'
 import { NUM_LIMITS, parseSafeNumber, sanitizeNumericInput } from '@/lib/validation'
 import { getStrings } from '@/config/strings'
@@ -43,7 +44,8 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
   const [cCarb, setCCarb] = useState('')
   const [cFat, setCFat] = useState('')
 
-  const results = useMemo(() => searchFood(query).slice(0, 10), [query])
+  // بحث موحّد: قاعدة v2 المنسوخة + foodItems القديمة (بشكل FoodItem متوافق).
+  const results = useMemo(() => searchAllFoods(query, 12), [query])
 
   const eatenCal = round(totals.calories)
   const eatenProt = round(totals.protein)
