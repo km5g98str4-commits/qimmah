@@ -224,7 +224,7 @@ export function generateCommitments(gt: GoalType): CommitmentPlan {
 
 /** الخطة الافتراضية للقياسات (بدون «المزاج»). */
 export function defaultMeasurementPlan(): MeasurementPlan {
-  return { enabled: true, selectedTypeIds: ['weightKg', 'waistCm', 'bodyFatPercent', 'progressPhotoNote'] }
+  return { enabled: true, selectedTypeIds: ['weightKg', 'waistCm', 'bodyFatPercent'] }
 }
 
 // عضلات كل تركيز — لزيادة حجم العمل عليها.

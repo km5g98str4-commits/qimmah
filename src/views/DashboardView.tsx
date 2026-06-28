@@ -55,7 +55,13 @@ export function DashboardView({ lang, onNavigate }: DashboardViewProps) {
       <DailySummary />
 
       {/* قائمة اليوم — الإجراء اليومي */}
-      {s.today && <Today lang={lang} onStartWorkout={planDay ? () => onNavigate('workout') : undefined} />}
+      {s.today && (
+        <Today
+          lang={lang}
+          onStartWorkout={planDay ? () => onNavigate('workout') : undefined}
+          onEditPlan={() => onNavigate('setup')}
+        />
+      )}
 
       {/* آخر تمرين */}
       {s.workouts && <RecentWorkout lang={lang} />}

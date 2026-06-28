@@ -218,6 +218,17 @@ export function SettingsView({ lang, onNavigate, onEditPlan, onLogin, onOpenPriv
             {t.settings.healthDisclaimer}
           </p>
         </SettingsGroup>
+
+        {/* 5) اللغة — العربية مفعّلة، والإنجليزية قيد التطوير (لا تبديل نصف مترجم) */}
+        <SettingsGroup icon="Globe" title={t.settings.groupLanguage}>
+          <div className="flex flex-col gap-2">
+            <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-primary-soft px-3 py-1.5 text-[11px] font-black text-primary-c">
+              <Icon name="CheckCircle2" className="h-3.5 w-3.5" />
+              {t.settings.languageActive}
+            </span>
+            <p className="text-xs leading-relaxed text-ink-500">{t.settings.languageSoon}</p>
+          </div>
+        </SettingsGroup>
       </main>
 
       <Footer />
