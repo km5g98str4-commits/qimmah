@@ -11,6 +11,17 @@ import type {
   GymType,
   MuscleFocus,
 } from '@/types/profile'
+import type {
+  AdvancedSplit,
+  DietPattern,
+  Environment,
+  NeatLevel,
+  NutritionStyle as OnbNutritionStyle,
+  OnbConsistency,
+  Sex,
+  SplitMode,
+  WellnessTrackingMode,
+} from '@/types/onboarding'
 
 export interface Choice<T> {
   value: T
@@ -20,6 +31,12 @@ export interface Choice<T> {
 }
 
 export const genderChoices: Choice<Gender>[] = [
+  { value: 'male', label: 'ذكر', icon: 'Users' },
+  { value: 'female', label: 'أنثى', icon: 'Users' },
+]
+
+/** الجنس (إعداد Phase 1) — قيمتان فقط (male/female). */
+export const sexChoices: Choice<Sex>[] = [
   { value: 'male', label: 'ذكر', icon: 'Users' },
   { value: 'female', label: 'أنثى', icon: 'Users' },
 ]
@@ -76,6 +93,13 @@ export const consistencyChoices: Choice<Consistency>[] = [
   { value: 'returning', label: 'راجع بعد انقطاع', desc: 'كنت تتمرن وتوقفت فترة', icon: 'RotateCcw' },
 ]
 
+/** الانتظام (إعداد Phase 1 — قيم مصدر الحقيقة) — يظهر فقط لغير المبتدئ. */
+export const consistencyChoicesV2: Choice<OnbConsistency>[] = [
+  { value: 'on_and_off', label: 'أتمرن وأوقف', desc: 'التزام متقطّع', icon: 'Activity' },
+  { value: 'consistent', label: 'أتمرن بانتظام', desc: 'روتين ثابت حاليًا', icon: 'CheckCircle2' },
+  { value: 'returning', label: 'راجع بعد انقطاع', desc: 'كنت تتمرن وتوقفت فترة', icon: 'RotateCcw' },
+]
+
 /** نوع مكان التمرين الأربعة — تُربط بـ GymAccess للمولّد عبر gymTypeToAccess. */
 export interface GymTypeChoice {
   value: GymType
@@ -89,6 +113,91 @@ export const gymTypeChoices: GymTypeChoice[] = [
   { value: 'small', label: 'صالة صغيرة', desc: 'تجهيزات محدودة', icon: 'Dumbbell' },
   { value: 'home', label: 'جيم منزلي', desc: 'أدوات بسيطة في البيت', icon: 'Home' },
   { value: 'bodyweight', label: 'وزن الجسم', desc: 'بدون أي أدوات', icon: 'Activity' },
+]
+
+// ===== خيارات إعداد Phase 1 (مصدر الحقيقة الموسّع) =====
+
+/** بيئة التمرين (إعداد) — تُخزَّن صراحةً والمنزل/وزن الجسم واضحان. */
+export const environmentChoices: Choice<Environment>[] = [
+  { value: 'commercial_gym', label: 'صالة كاملة', desc: 'أجهزة وأوزان حرة كاملة', icon: 'Building2' },
+  { value: 'small_gym', label: 'صالة صغيرة', desc: 'تجهيزات محدودة', icon: 'Dumbbell' },
+  { value: 'home_gym', label: 'جيم منزلي', desc: 'أدوات بسيطة في البيت', icon: 'Home' },
+  { value: 'bodyweight', label: 'وزن الجسم', desc: 'بدون أي أدوات', icon: 'Activity' },
+]
+
+/** نمط اختيار التقسيمة. */
+export const splitModeChoices: Choice<SplitMode>[] = [
+  { value: 'auto', label: 'اختر لي تلقائيًا', desc: 'نختار أنسب تقسيمة لمستواك وأيامك', icon: 'Sparkles' },
+  { value: 'advanced', label: 'أختار بنفسي', desc: 'تحكّم متقدّم في نوع التقسيمة', icon: 'SlidersHorizontal' },
+]
+
+/** خيارات التقسيمة المتقدّمة — تظهر فقط عند splitMode=advanced. */
+export const advancedSplitChoices: Choice<AdvancedSplit>[] = [
+  { value: 'full_body', label: 'جسم كامل', desc: 'كل الجسم كل جلسة', icon: 'Layers' },
+  { value: 'upper_lower', label: 'علوي/سفلي', desc: 'تقسيم علوي وسفلي', icon: 'TrendingUp' },
+  { value: 'push_pull_legs', label: 'دفع/سحب/أرجل', desc: 'PPL كلاسيكي', icon: 'Dumbbell' },
+  { value: 'arnold', label: 'أرنولد', desc: 'صدر-ظهر / كتف-ذراع / أرجل', icon: 'Trophy' },
+  { value: 'bro_split', label: 'عضلة باليوم', desc: 'تركيز عضلة لكل جلسة', icon: 'Target' },
+]
+
+/** النشاط اليومي (NEAT) خارج التمرين. */
+export const neatChoices: Choice<NeatLevel>[] = [
+  { value: 'sedentary', label: 'قليل الحركة', desc: 'مكتبي/جالس أغلب اليوم', icon: 'Armchair' },
+  { value: 'light', label: 'حركة خفيفة', desc: 'مشي بسيط خلال اليوم', icon: 'Footprints' },
+  { value: 'moderate', label: 'حركة متوسطة', desc: 'واقف/متحرّك بانتظام', icon: 'Activity' },
+  { value: 'high', label: 'حركة عالية', desc: 'عمل بدني أو مشي كثير', icon: 'Flame' },
+]
+
+/** أسلوب التغذية — طريقة العرض (لا أسلوب الطبخ). */
+export const nutritionStyleChoices: Choice<OnbNutritionStyle>[] = [
+  { value: 'meal_suggestions', label: 'اقتراح وجبات', desc: 'وجبات جاهزة مقترحة حسب هدفك', icon: 'Salad' },
+  { value: 'macros_only', label: 'ماكروز فقط', desc: 'أهداف سعرات وبروتين بدون وجبات', icon: 'Target' },
+  { value: 'simple_guidance', label: 'إرشاد مبسّط', desc: 'توجيه عام بدون تفاصيل دقيقة', icon: 'Compass' },
+]
+
+/** نمط الأكل (اختياري). */
+export const dietPatternChoices: Choice<DietPattern>[] = [
+  { value: 'none', label: 'بدون قيود', icon: 'Check' },
+  { value: 'vegetarian', label: 'نباتي (مع ألبان/بيض)', icon: 'Leaf' },
+  { value: 'vegan', label: 'نباتي صرف', icon: 'Leaf' },
+  { value: 'pescatarian', label: 'سمك بدون لحوم', icon: 'Fish' },
+  { value: 'low_carb', label: 'قليل الكارب', icon: 'TrendingDown' },
+  { value: 'keto', label: 'كيتو', icon: 'Flame' },
+]
+
+/** حساسيات غذائية شائعة (اختياري — قيم مفتاحية ثابتة للتخزين). */
+export const allergyChoices: Choice<string>[] = [
+  { value: 'lactose', label: 'لاكتوز/ألبان', icon: 'Milk' },
+  { value: 'gluten', label: 'جلوتين', icon: 'Wheat' },
+  { value: 'nuts', label: 'مكسّرات', icon: 'Nut' },
+  { value: 'eggs', label: 'بيض', icon: 'Egg' },
+  { value: 'seafood', label: 'مأكولات بحرية', icon: 'Fish' },
+]
+
+/** مناطق/مفاصل الإصابة الشائعة (اختياري — بلا نصائح طبية). */
+export const injuryChoices: Choice<string>[] = [
+  { value: 'knee', label: 'الركبة', icon: 'Activity' },
+  { value: 'shoulder', label: 'الكتف', icon: 'Activity' },
+  { value: 'lower_back', label: 'أسفل الظهر', icon: 'Activity' },
+  { value: 'wrist', label: 'الرسغ', icon: 'Activity' },
+  { value: 'elbow', label: 'المرفق', icon: 'Activity' },
+  { value: 'ankle', label: 'الكاحل', icon: 'Activity' },
+]
+
+/** وضع تتبّع المكملات/الأدوية — الافتراضي «none». */
+export const wellnessModeChoices: Choice<WellnessTrackingMode>[] = [
+  { value: 'none', label: 'لا أريد التتبّع الآن', desc: 'تقدر تفعّله لاحقًا', icon: 'CircleSlash' },
+  { value: 'basic', label: 'تتبّع بسيط', desc: 'تذكير بأخذ المكملات/الأدوية', icon: 'Pill' },
+  { value: 'detailed', label: 'تتبّع مفصّل', desc: 'جرعات وأوقات وملاحظات', icon: 'ListChecks' },
+]
+
+/** نطاق مدّة الجلسة (دقائق) — يُخزَّن sessionDurationMin. */
+export const sessionDurationChoices: Choice<number>[] = [
+  { value: 30, label: '30 دقيقة', desc: 'سريع ومركّز' },
+  { value: 45, label: '45 دقيقة', desc: 'متوازن' },
+  { value: 60, label: '60 دقيقة', desc: 'كامل' },
+  { value: 75, label: '75 دقيقة', desc: 'مطوّل' },
+  { value: 90, label: '90 دقيقة', desc: 'مكثّف' },
 ]
 
 /** يربط نوع المكان الدلالي بقيمة GymAccess التي يفهمها المولّد. */
