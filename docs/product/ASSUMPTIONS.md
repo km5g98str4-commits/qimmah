@@ -1,0 +1,1 @@
+# Qimmah Assumptions Log
