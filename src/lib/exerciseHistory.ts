@@ -1,7 +1,12 @@
-// سجل أداء التمارين — آخر/أفضل وزن وتكرارات + عدد الجلسات (محلي فقط).
+// سجل أداء التمارين — آخر/أفضل وزن وتكرارات + عدد الجلسات.
+//
+// القراءة/الكتابة تمرّان عبر المتجر التاريخي الدائم (historyStore) حتى لا يبقى
+// السجل فارغًا بعد التمرين ولا يتشتّت بين مفتاحين.
 
 import type { SessionExercise } from './workoutSessions'
+import { getExerciseHistory, saveExerciseHistory } from './historyStore'
 
+// — مفتاح قديم (للتوافق فقط؛ الكتابة الفعلية في historyStore) —
 export const EXERCISE_HISTORY_KEY = 'qimmah:exerciseHistory:v1'
 
 export interface ExerciseRecord {
@@ -18,18 +23,11 @@ export interface ExerciseRecord {
 export type ExerciseHistory = Record<string, ExerciseRecord>
 
 export function loadHistory(): ExerciseHistory {
-  if (typeof window === 'undefined') return {}
-  try {
-    const raw = window.localStorage.getItem(EXERCISE_HISTORY_KEY)
-    return raw ? (JSON.parse(raw) as ExerciseHistory) : {}
-  } catch {
-    return {}
-  }
+  return getExerciseHistory()
 }
 
 export function saveHistory(history: ExerciseHistory): void {
-  if (typeof window === 'undefined') return
-  window.localStorage.setItem(EXERCISE_HISTORY_KEY, JSON.stringify(history))
+  saveExerciseHistory(history)
 }
 
 export function getRecord(exerciseId: string): ExerciseRecord | undefined {
@@ -40,6 +38,29 @@ const numOf = (w?: string): number => {
   if (!w) return NaN
   const m = String(w).match(/[\d.]+/)
   return m ? Number(m[0]) : NaN
+}
+
+/** أثقل وزن في مجموعة مكتملة لهذا التمرين (مع fallback للحقول القديمة). NaN إن لا يوجد. */
+export function topCompletedWeight(se: SessionExercise): number {
+  let top = NaN
+  ;(se.sets ?? []).forEach((s) => {
+    if (!s.completed) return
+    const w = numOf(s.weightKg)
+    if (w > 0 && (Number.isNaN(top) || w > top)) top = w
+  })
+  if (Number.isNaN(top) && se.weight) {
+    const w = numOf(se.weight)
+    if (w > 0) top = w
+  }
+  return top
+}
+
+/** أسماء/أوزان التمارين التي حقّقت رقمًا قياسيًا في هذه الجلسة (مقارنةً بالسجل قبل التحديث). */
+export function detectSessionPRs(prevHistory: ExerciseHistory, se: SessionExercise): boolean {
+  const top = topCompletedWeight(se)
+  if (Number.isNaN(top) || top <= 0) return false
+  const prevBest = numOf(prevHistory[se.exerciseId]?.bestWeight)
+  return Number.isNaN(prevBest) || top > prevBest
 }
 
 /** Epley 1RM = w * (1 + reps/30). */

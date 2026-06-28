@@ -121,6 +121,7 @@ export function Today({ lang, onStartWorkout }: TodayProps) {
               onStart={onStartWorkout}
               waterLiters={np.enabled ? np.targetWaterLiters : undefined}
               proteinG={np.enabled ? np.targetProtein : undefined}
+              daysPerWeek={customization.workoutPlan.days.length || 3}
             />
           </div>
         )}

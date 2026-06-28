@@ -139,6 +139,12 @@ export function saveWorkoutSession(session: WorkoutSession): WorkoutSession[] {
   return next
 }
 
+/** يستبدل كامل قائمة الجلسات (لمزامنة/استيراد أو حفظ مجمّع). */
+export function setWorkoutSessions(sessions: WorkoutSession[]): void {
+  ensureMigrated()
+  writeJSON(HISTORY_KEYS.workoutSessions, sessions.slice(0, 500))
+}
+
 export function getWorkoutSessionsByDate(date: string): WorkoutSession[] {
   return getWorkoutSessions().filter((s) => s.date === date)
 }

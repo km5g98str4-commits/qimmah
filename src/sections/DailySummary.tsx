@@ -37,8 +37,10 @@ export function DailySummary({ lang }: DailySummaryProps) {
   const waterMl = state.waterMl
   const remainingWaterMl = Math.max(0, targetWaterMl - waterMl)
 
+  // عدد أيام التمرين/الأسبوع من الخطة (للالتزام الأسبوعي).
+  const daysPerWeek = customization.workoutPlan.days.length || 3
   // سلسلة وملخّص الأسبوع من السجلّ الدائم (لا من حالة اليوم المؤقتة).
-  const week = useMemo(() => currentWeekSummary(), [])
+  const week = useMemo(() => currentWeekSummary(daysPerWeek), [daysPerWeek])
 
   return (
     <section id="summary">
@@ -90,10 +92,10 @@ export function DailySummary({ lang }: DailySummaryProps) {
           <Chip icon="TrendingDown" text={`${p.targetWeightKg} كجم`} />
         </div>
 
-        {/* سلسلة وملخّص الأسبوع — من السجلّ الدائم */}
+        {/* الالتزام الأسبوعي — X/Y تمارين هذا الأسبوع + سلسلة الأسابيع الناجحة */}
         <div className="mt-3 flex flex-wrap items-center gap-2">
-          <Chip icon="Flame" text={`سلسلة التمرين: ${week.currentStreak} يوم`} />
-          <Chip icon="CheckCircle2" text={`هذا الأسبوع: ${week.workoutDays}/7 تمارين`} />
+          <Chip icon="CheckCircle2" text={`هذا الأسبوع: ${week.weekly.thisWeekCount}/${week.weekly.daysPerWeek} تمارين`} />
+          <Chip icon="Flame" text={`سلسلة أسبوعية: ${week.weekly.streakWeeks} أسبوع`} />
           <Chip icon="Salad" text={`التزام التغذية: ${week.nutritionDays}/7`} />
         </div>
       </div>

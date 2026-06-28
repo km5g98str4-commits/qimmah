@@ -18,6 +18,16 @@ function addDays(d: Date, n: number): Date {
   return x
 }
 
+// بداية الأسبوع = السبت (الأسبوع الخليجي). 6 = السبت في getDay().
+const WEEK_START_DAY = 6
+
+/** تاريخ بداية الأسبوع (السبت) الذي يقع فيه التاريخ المعطى — منتصف الليل المحلي. */
+function startOfWeek(d: Date): Date {
+  const base = new Date(d.getFullYear(), d.getMonth(), d.getDate())
+  const diff = (base.getDay() - WEEK_START_DAY + 7) % 7
+  return addDays(base, -diff)
+}
+
 /** مجموعة تواريخ الأيام التي أُكملت فيها جلسة تمرين. */
 function workoutDays(): Set<string> {
   const set = new Set<string>()
@@ -80,6 +90,57 @@ export function weeklyNutritionAdherence(today = new Date()): number {
   return count
 }
 
+/** نتيجة سلسلة الالتزام الأسبوعي (تعتمد على عدد أيام التمرين/الأسبوع لا على أيام متتالية). */
+export interface WeeklyAdherence {
+  /** الهدف: عدد أيام التمرين في الأسبوع (من الخطة). */
+  daysPerWeek: number
+  /** أيام التمرين المنجزة في الأسبوع الحالي. */
+  thisWeekCount: number
+  /** هل اكتمل الأسبوع الحالي (count ≥ daysPerWeek)؟ */
+  currentWeekMet: boolean
+  /** عدد الأسابيع الناجحة المتتالية (لا تنكسر بسبب أسبوع حالي غير مكتمل بعد). */
+  streakWeeks: number
+}
+
+/**
+ * سلسلة الالتزام الأسبوعي:
+ * - الأسبوع «ناجح» إذا بلغ عدد أيام التمرين فيه daysPerWeek.
+ * - تُحسب الأسابيع الناجحة المتتالية رجوعًا.
+ * - لا تنكسر السلسلة بسبب الأسبوع الحالي إن لم يكتمل بعد (نبدأ العدّ من الأسبوع السابق).
+ * تعمل لأي عدد أيام (3/4/5/6).
+ */
+export function weeklyAdherenceStreak(daysPerWeek: number, today = new Date()): WeeklyAdherence {
+  const target = Math.max(1, Math.floor(daysPerWeek) || 1)
+  const days = workoutDays()
+
+  const countInWeek = (weekStart: Date): number => {
+    let c = 0
+    for (let i = 0; i < 7; i++) {
+      if (days.has(dayStamp(addDays(weekStart, i)))) c++
+    }
+    return c
+  }
+
+  const curStart = startOfWeek(today)
+  const thisWeekCount = countInWeek(curStart)
+  const currentWeekMet = thisWeekCount >= target
+
+  // إن اكتمل الأسبوع الحالي احسبه ضمن السلسلة، وإلا ابدأ من الأسبوع السابق (دون كسر مبكر).
+  let cursor = currentWeekMet ? curStart : addDays(curStart, -7)
+  let streakWeeks = 0
+  // حدّ أمان: 520 أسبوعًا (~10 سنوات).
+  for (let i = 0; i < 520; i++) {
+    if (countInWeek(cursor) >= target) {
+      streakWeeks++
+      cursor = addDays(cursor, -7)
+    } else {
+      break
+    }
+  }
+
+  return { daysPerWeek: target, thisWeekCount, currentWeekMet, streakWeeks }
+}
+
 export interface WeekSummary {
   /** عدد أيام التمرين هذا الأسبوع (آخر 7 أيام). */
   workoutDays: number
@@ -91,6 +152,8 @@ export interface WeekSummary {
   workedOutToday: boolean
   /** أطول سلسلة تمرين مسجّلة. */
   bestStreak: number
+  /** سلسلة الالتزام الأسبوعي (المعتمدة في الواجهة). */
+  weekly: WeeklyAdherence
 }
 
 /** أطول سلسلة تمرين عبر كامل التاريخ. */
@@ -113,13 +176,14 @@ export function bestWorkoutStreak(): number {
   return best
 }
 
-/** ملخّص الأسبوع الحالي — للوحة المعلومات. */
-export function currentWeekSummary(today = new Date()): WeekSummary {
+/** ملخّص الأسبوع الحالي — للوحة المعلومات. يأخذ عدد أيام التمرين/الأسبوع من الخطة. */
+export function currentWeekSummary(daysPerWeek = 3, today = new Date()): WeekSummary {
   return {
     workoutDays: weeklyWorkoutCount(today),
     currentStreak: workoutStreak(today),
     nutritionDays: weeklyNutritionAdherence(today),
     workedOutToday: workoutDays().has(dayStamp(today)),
     bestStreak: bestWorkoutStreak(),
+    weekly: weeklyAdherenceStreak(daysPerWeek, today),
   }
 }
