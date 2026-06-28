@@ -13,7 +13,8 @@ interface WorkoutSummaryProps {
   prs: string[]
   /** تسمية تمرين الغد/القادم (يوم — اسم). */
   nextDayLabel?: string
-  streak: number
+  /** عدد أسابيع الالتزام المتتالية. */
+  streakWeeks: number
   onBackToToday: () => void
   onViewProgress: () => void
 }
@@ -24,7 +25,7 @@ const num = (v?: string): number => {
 }
 
 /** ملخّص نهاية التمرين — احتفاء سريع بالإنجاز ودفعة للاستمرار. */
-export function WorkoutSummary({ lang, session, prs, nextDayLabel, streak, onBackToToday, onViewProgress }: WorkoutSummaryProps) {
+export function WorkoutSummary({ lang, session, prs, nextDayLabel, streakWeeks, onBackToToday, onViewProgress }: WorkoutSummaryProps) {
   const t = getStrings(lang).workout
 
   const stats = useMemo(() => {
@@ -71,12 +72,12 @@ export function WorkoutSummary({ lang, session, prs, nextDayLabel, streak, onBac
             <StatCard icon="TrendingUp" value={`${stats.volume}`} label={`${t.totalVolume} (${t.volumeUnit})`} />
           </div>
 
-          {/* السلسلة */}
+          {/* سلسلة الالتزام الأسبوعي */}
           <div className="mt-3 flex items-center justify-between rounded-2xl border border-line bg-surface p-4">
             <span className="flex items-center gap-2 text-sm font-bold text-ink-700">
-              <Icon name="Flame" className="h-5 w-5 text-primary-c" />{t.streak}
+              <Icon name="Flame" className="h-5 w-5 text-primary-c" />{t.weeklyStreakTitle}
             </span>
-            <span className="text-lg font-black text-primary-c">{streak} {t.streakDays}</span>
+            <span className="text-lg font-black text-primary-c">{streakWeeks} {t.weeksUnit}</span>
           </div>
 
           {/* الأرقام القياسية */}

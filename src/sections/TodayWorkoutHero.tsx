@@ -6,7 +6,8 @@ import { getStrings } from '@/config/strings'
 import type { PlanDay } from '@/types/workout'
 import { weekdayName } from '@/lib/today'
 import { dayTargetMuscles } from '@/lib/muscles'
-import { estimateDurationMin, weeklyCompleted, workoutStreak } from '@/lib/workoutStats'
+import { estimateDurationMin } from '@/lib/workoutStats'
+import { weeklyAdherenceStreak } from '@/lib/streaks'
 import { lastSession } from '@/lib/workoutSessions'
 
 interface TodayWorkoutHeroProps {
@@ -21,6 +22,8 @@ interface TodayWorkoutHeroProps {
   waterLiters?: number
   /** هدف البروتين (غ) لعرض شريحة صغيرة. */
   proteinG?: number
+  /** عدد أيام التمرين/الأسبوع (للالتزام الأسبوعي). */
+  daysPerWeek?: number
 }
 
 /** بطاقة «تمرينك اليوم» — أول بطاقة مهيمنة بعد الترحيب، بنبرة نشطة وزر واحد واضح. */
@@ -32,6 +35,7 @@ export function TodayWorkoutHero({
   onStart,
   waterLiters,
   proteinG,
+  daysPerWeek = 3,
 }: TodayWorkoutHeroProps) {
   const t = getStrings(lang).workout
   const weekday = weekdayName(lang === 'en' ? 'en' : 'ar')
@@ -49,8 +53,7 @@ export function TodayWorkoutHero({
       }
     : null
 
-  const streak = workoutStreak()
-  const week = weeklyCompleted()
+  const weekly = weeklyAdherenceStreak(daysPerWeek)
 
   if (!day) return null
 
@@ -115,8 +118,8 @@ export function TodayWorkoutHero({
 
         {/* معلومات ثانوية: سلسلة + الأسبوع + شرائح ماء/بروتين */}
         <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-line pt-4">
-          <Chip icon="Flame" text={`${streak} ${t.streakDays}`} highlight={streak > 0} />
-          <Chip icon="CalendarDays" text={`${t.weekDone}: ${week}`} />
+          <Chip icon="Flame" text={`${weekly.streakWeeks} ${t.weeksUnit}`} highlight={weekly.streakWeeks > 0} />
+          <Chip icon="CalendarDays" text={`${weekly.thisWeekCount} ${t.of} ${weekly.daysPerWeek}`} />
           {typeof proteinG === 'number' && <Chip icon="Salad" text={`${proteinG}غ`} />}
           {typeof waterLiters === 'number' && <Chip icon="Droplets" text={`${waterLiters} ${lang === 'en' ? 'L' : 'لتر'}`} />}
         </div>

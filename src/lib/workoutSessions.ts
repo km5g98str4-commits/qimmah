@@ -1,7 +1,12 @@
-// سجلّات جلسات التمرين (محلي فقط).
+// سجلّات جلسات التمرين — واجهة رفيعة فوق المتجر التاريخي الدائم (historyStore).
+//
+// كل القراءة/الكتابة تمرّ عبر historyStore حتى تبقى لوحة المعلومات والسلاسل
+// والتقدّم على مصدر حقيقة واحد (يحلّ مشكلة «العدّادات الثابتة» وسجل التمرين الفارغ).
 
 import { getDayStamp } from './today'
+import { getWorkoutSessions, saveWorkoutSession, setWorkoutSessions } from './historyStore'
 
+// — مفتاح قديم (للتوافق فقط؛ الكتابة الفعلية في historyStore) —
 export const WORKOUT_SESSIONS_KEY = 'qimmah:workoutSessions:v1'
 
 export type Difficulty = 'easy' | 'medium' | 'hard'
@@ -45,32 +50,24 @@ export interface WorkoutSession {
 }
 
 export function loadSessions(): WorkoutSession[] {
-  if (typeof window === 'undefined') return []
-  try {
-    const raw = window.localStorage.getItem(WORKOUT_SESSIONS_KEY)
-    return raw ? (JSON.parse(raw) as WorkoutSession[]) : []
-  } catch {
-    return []
-  }
+  return getWorkoutSessions()
 }
 
 export function saveSessions(sessions: WorkoutSession[]): void {
-  if (typeof window === 'undefined') return
-  window.localStorage.setItem(WORKOUT_SESSIONS_KEY, JSON.stringify(sessions))
+  setWorkoutSessions(sessions)
 }
 
-/** يضيف جلسة جديدة (الأحدث أولًا، نحتفظ بآخر 50). */
+/** يضيف/يحدّث جلسة (الأحدث أولًا، idempotent بالمعرّف). */
 export function addSession(session: WorkoutSession): void {
-  const all = [session, ...loadSessions()].slice(0, 50)
-  saveSessions(all)
+  saveWorkoutSession(session)
 }
 
 export function lastSession(): WorkoutSession | undefined {
-  return loadSessions()[0]
+  return getWorkoutSessions()[0]
 }
 
 /** هل توجد جلسة مكتملة اليوم؟ */
 export function todaysFinishedSession(): WorkoutSession | undefined {
   const today = getDayStamp()
-  return loadSessions().find((s) => s.date === today && s.finishedAt)
+  return getWorkoutSessions().find((s) => s.date === today && s.finishedAt)
 }

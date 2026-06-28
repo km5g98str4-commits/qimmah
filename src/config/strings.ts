@@ -163,6 +163,12 @@ export interface ShellStrings {
     backToToday: string
     viewProgress: string
     newPr: string
+    // — سلسلة الالتزام الأسبوعي —
+    weeklyStreakTitle: string
+    weeklyDonePrefix: string
+    weeklyWorkoutsWord: string
+    weeksUnit: string
+    weeklyStreakEmpty: string
   }
   nutrition: {
     tabTitle: string
@@ -490,6 +496,11 @@ const ar: ShellStrings = {
     backToToday: 'العودة لليوم',
     viewProgress: 'عرض تقدمي',
     newPr: 'رقم قياسي جديد',
+    weeklyStreakTitle: 'سلسلة الالتزام الأسبوعي',
+    weeklyDonePrefix: 'أنجزت',
+    weeklyWorkoutsWord: 'تمارين هذا الأسبوع',
+    weeksUnit: 'أسبوع',
+    weeklyStreakEmpty: 'ابدأ أسبوعك — كل تمرين يقربك لهدفك.',
   },
   nutrition: {
     tabTitle: 'التغذية',
@@ -818,6 +829,11 @@ const en: ShellStrings = {
     backToToday: 'Back to Today',
     viewProgress: 'View progress',
     newPr: 'New PR',
+    weeklyStreakTitle: 'Weekly commitment streak',
+    weeklyDonePrefix: 'You completed',
+    weeklyWorkoutsWord: 'workouts this week',
+    weeksUnit: 'weeks',
+    weeklyStreakEmpty: 'Start your week — every workout counts.',
   },
   nutrition: {
     tabTitle: 'Nutrition',

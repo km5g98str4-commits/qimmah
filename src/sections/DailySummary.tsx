@@ -3,6 +3,7 @@ import { Icon } from '@/components/Icon'
 import { useCustomization } from '@/lib/customizationContext'
 import { goalTypeLabel, targetCaloriesFor } from '@/lib/calculators'
 import { currentWeekSummary } from '@/lib/streaks'
+import { getStrings } from '@/config/strings'
 
 /** ملخّص يومي/ترحيب أعلى الرئيسية. */
 export function DailySummary() {
@@ -11,9 +12,12 @@ export function DailySummary() {
   const t = customization.targets
   const name = customization.identity.userName
   const calories = targetCaloriesFor(p.goal, t)
+  const tw = getStrings('ar').workout
 
+  // عدد أيام التمرين/الأسبوع من الخطة (للالتزام الأسبوعي).
+  const daysPerWeek = customization.workoutPlan.days.length || 3
   // سلسلة وملخّص الأسبوع من السجلّ الدائم (لا من حالة اليوم المؤقتة).
-  const week = useMemo(() => currentWeekSummary(), [])
+  const week = useMemo(() => currentWeekSummary(daysPerWeek), [daysPerWeek])
 
   const cards = [
     { icon: 'Target', label: 'الهدف', value: goalTypeLabel(p.goalType) },
@@ -47,15 +51,15 @@ export function DailySummary() {
             ))}
           </div>
 
-          {/* سلسلة وملخّص الأسبوع — من السجلّ الدائم */}
+          {/* سلسلة الالتزام الأسبوعي + التقدّم — من السجلّ الدائم */}
           <div className="mt-4 flex flex-wrap items-center gap-2">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-page px-3 py-1.5 text-xs font-bold text-ink-700">
               <Icon name="Flame" className="h-3.5 w-3.5 text-primary-c" />
-              سلسلة التمرين: {week.currentStreak} يوم
+              {tw.weeklyStreakTitle}: {week.weekly.streakWeeks} {tw.weeksUnit}
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-page px-3 py-1.5 text-xs font-bold text-ink-700">
               <Icon name="CheckCircle2" className="h-3.5 w-3.5 text-primary-c" />
-              هذا الأسبوع: {week.workoutDays}/7 تمارين
+              {tw.weeklyDonePrefix} {week.weekly.thisWeekCount} {tw.of} {week.weekly.daysPerWeek} {tw.weeklyWorkoutsWord}
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-page px-3 py-1.5 text-xs font-bold text-ink-700">
               <Icon name="Salad" className="h-3.5 w-3.5 text-primary-c" />

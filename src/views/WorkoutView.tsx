@@ -2,15 +2,25 @@ import { useState } from 'react'
 import { Icon } from '@/components/Icon'
 import { SuccessToast } from '@/components/SuccessToast'
 import { WorkoutMode } from '@/components/WorkoutMode'
+import { WorkoutSummary } from '@/components/WorkoutSummary'
 import type { Lang } from '@/lib/appPreferences'
 import type { AppRoute } from '@/lib/appRoutes'
 import { useCustomization } from '@/lib/customizationContext'
+import { getStrings } from '@/config/strings'
 import { generatePlanFromTemplate, todayPlanDay, planExerciseName } from '@/lib/workoutPlan'
 import { persistFinishedSession } from '@/lib/finishWorkout'
+import { weeklyAdherenceStreak } from '@/lib/streaks'
 import { getExercise } from '@/data/exercises'
 import { getTemplate, templateMap } from '@/data/workoutTemplates'
 import type { WorkoutSession } from '@/lib/workoutSessions'
 import type { PlanDay, WorkoutTemplate } from '@/types/workout'
+
+interface FinishSummary {
+  session: WorkoutSession
+  prs: string[]
+  streakWeeks: number
+  nextDayLabel?: string
+}
 
 interface WorkoutViewProps {
   lang: Lang
@@ -27,8 +37,9 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
   const planDay = todayPlanDay(plan)
 
   const [activeDay, setActiveDay] = useState<PlanDay | null>(null)
-  const [saved, setSaved] = useState(false)
+  const [summary, setSummary] = useState<FinishSummary | null>(null)
   const [adopted, setAdopted] = useState<string | null>(null)
+  const tw = getStrings(lang).workout
 
   const startDay = (day: PlanDay) => setActiveDay(day)
 
@@ -47,9 +58,22 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
   }
 
   const finish = (session: WorkoutSession) => {
-    persistFinishedSession(session)
+    const prs = persistFinishedSession(session)
+    const daysPerWeek = plan.days.length || 3
+    const weekly = weeklyAdherenceStreak(daysPerWeek)
+    const prLabels = prs.map((pr) => {
+      const name = lang === 'en' ? pr.nameEn || pr.nameAr : pr.nameAr || pr.nameEn
+      return `${name || pr.exerciseId} · ${pr.weight} ${tw.volumeUnit}`
+    })
+    // تسمية تمرين الغد (اليوم التالي في الخطة) — لمسة تحفيزية.
+    const nextDayLabel = plan.days.length
+      ? (() => {
+          const next = plan.days[(new Date().getDay() + 1) % plan.days.length]
+          return next ? (lang === 'en' ? next.nameEn : next.nameAr) : undefined
+        })()
+      : undefined
     setActiveDay(null)
-    setSaved(true)
+    setSummary({ session, prs: prLabels, streakWeeks: weekly.streakWeeks, nextDayLabel })
   }
 
   return (
@@ -199,15 +223,22 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
         </div>
       )}
 
-      {/* تأكيد الحفظ */}
-      {saved && (
-        <SuccessToast
-          onClose={() => setSaved(false)}
-          title="تم حفظ تمرينك"
-          body="تم تحديث أوزانك وسجل التمرين."
-          actionLabel="خطتي"
-          scrollTo="workout-myplan"
-        />
+      {/* ملخّص نهاية التمرين — المدة وعدد التمارين والحجم والأرقام القياسية */}
+      {summary && (
+        <div className="fixed inset-0 z-[70]">
+          <WorkoutSummary
+            lang={lang}
+            session={summary.session}
+            prs={summary.prs}
+            streakWeeks={summary.streakWeeks}
+            nextDayLabel={summary.nextDayLabel}
+            onBackToToday={() => setSummary(null)}
+            onViewProgress={() => {
+              setSummary(null)
+              onNavigate('progress')
+            }}
+          />
+        </div>
       )}
 
       {/* تأكيد اعتماد قالب */}
