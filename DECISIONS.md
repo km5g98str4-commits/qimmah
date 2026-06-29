@@ -1,10 +1,11 @@
 # DECISIONS — Phase 2, Agent 5 (Muscle Map + Step Counter)
 
-## RESUME — P2 A5 — 2026-06-29: setup done, building components
-- Repo cloned at `~/qimmah-p2-a5`; branches `integration/phase2` + `feature/phase2-muscle-steps` created off origin.
-- Baseline `npm install && build && lint && typecheck` all PASS.
-- Plan locked (see Decisions). Building: stepCounter.ts → StepCounterCard → WeeklyMuscleMap → wire into ProgressView → QA → merge.
-- If interrupted: re-`cd ~/qimmah-p2-a5`, `git status`, continue from first unbuilt file in the list above.
+## RESUME — P2 A5 — 2026-06-29: built + QA PASSED, merging
+- Repo cloned at `~/qimmah-p2-a5`; branches `integration/phase2` + `feature/phase2-muscle-steps` off origin.
+- All components built; build/lint/typecheck PASS (0 warnings). Committed `18f2d5e`.
+- Browser QA PASSED: front+back muscle highlight from logged session; untrained neutral; manual steps save + ring + persist after reload (`qimmah:steps:v1`); editable goal → green "reached" state; no fake health-sync.
+- Remaining: push `feature/phase2-muscle-steps`, merge into `integration/phase2`, push, re-verify build.
+- If interrupted: `cd ~/qimmah-p2-a5`, `git status`, finish the push+merge sequence.
 
 ## Mission
 Two additive, low-risk, isolated features:
