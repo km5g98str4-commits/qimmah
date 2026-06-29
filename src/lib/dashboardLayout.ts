@@ -1,7 +1,7 @@
 // منطق ترتيب أولوية بطاقات اللوحة — يُشتق من مصدر الحقيقة (الإعداد) لا من افتراضات.
 //
 // المبدأ: اللوحة تعكس «نظامًا بُني لك». ترتيب البطاقات يتبع الهدف والخبرة:
-//  - cut/recomp  → التغذية أعلى (العجز/التحكم بالسعرات هو المحرّك).
+//  - cut  → التغذية أعلى (العجز/التحكم بالسعرات هو المحرّك).
 //  - bulk/strength → التمرين أعلى (الحِمل والتقدّم هو المحرّك).
 //  - مبتدئ/مستجد → «الخطوة التالية» بارزة (إرشاد عملي).
 //  - متقدّم → «التقدّم/السجل» بارز (يتابع الأرقام).
@@ -20,7 +20,7 @@ export interface DashboardSignals {
   /** الهدف مُطبّع لأربعة مسارات الإعداد (إن أمكن اشتقاقه). */
   goal: OnbGoalType | undefined
   experience: ExperienceLevel | undefined
-  /** هل التغذية هي المحرّك (cut/recomp)؟ */
+  /** هل التغذية هي المحرّك (cut)؟ */
   nutritionFirst: boolean
   /** هل المستخدم في بداية الطريق (إرشاد أبرز)؟ */
   beginnerFocus: boolean
@@ -36,7 +36,8 @@ function goalFromProfile(p: Profile): OnbGoalType | undefined {
     case 'bulking':
       return 'bulk'
     case 'recomposition':
-      return 'recomp'
+      // الهدف الملغى «إعادة التكوين» يُطبّع إلى «تنشيف» (نفس مسار التغذية أولًا).
+      return 'cut'
     case 'strength':
       return 'strength'
     default:
@@ -72,7 +73,7 @@ export function resolveDashboardSignals(
 ): DashboardSignals {
   const goal = op?.goal.type ?? goalFromProfile(profile)
   const experience = op?.trainingPreferences.experience ?? experienceFromProfile(profile)
-  const nutritionFirst = goal === 'cut' || goal === 'recomp'
+  const nutritionFirst = goal === 'cut'
   const beginnerFocus = experience === 'beginner' || experience === 'novice'
   return {
     goal,

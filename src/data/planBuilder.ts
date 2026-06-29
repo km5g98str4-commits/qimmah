@@ -41,8 +41,8 @@ export const sexChoices: Choice<Sex>[] = [
   { value: 'female', label: 'أنثى', icon: 'Users' },
 ]
 
-/** أهداف الإعداد الأربعة (مسارات منطقية لا تتداخل) — تُربط داخليًا بـ GoalType للحسابات. */
-export type GoalValue = 'bulk' | 'cut' | 'recomp' | 'strength'
+/** أهداف الإعداد الثلاثة (مسارات منطقية لا تتداخل) — تُربط داخليًا بـ GoalType للحسابات. */
+export type GoalValue = 'bulk' | 'cut' | 'strength'
 
 export interface GoalChoice {
   value: GoalValue
@@ -55,7 +55,6 @@ export interface GoalChoice {
 export const goalChoices: GoalChoice[] = [
   { value: 'bulk', label: 'تضخيم', desc: 'زيادة العضل والوزن', icon: 'TrendingUp', goalType: 'bulking' },
   { value: 'cut', label: 'تنشيف', desc: 'خسارة دهون مع الحفاظ على العضل', icon: 'Flame', goalType: 'cutting' },
-  { value: 'recomp', label: 'تركيب الجسم', desc: 'تنشيف وبناء عضل معًا', icon: 'Layers', goalType: 'recomposition' },
   { value: 'strength', label: 'زيادة القوة', desc: 'أقوى بأقل تكرارات', icon: 'Zap', goalType: 'strength' },
 ]
 
