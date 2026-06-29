@@ -181,6 +181,31 @@ function levelOk(ex: Exercise, tier: ExpTier): boolean {
   return true
 }
 
+// — تفضيل الأجهزة للمبتدئ + استبعاد الكيبل (Phase 2) —
+// المبتدئ نادٍ-جديد: الأجهزة الموجّهة أأمن وأسهل ضبطًا. الكيبل (المحطّات الحرّة) دقيق ومربك له،
+// فنستبعده ونبقيه للمتقدّم فقط. ملاحظة: أجهزة السحب التي تستخدم بكرة لكنها موجّهة (لات بُل داون،
+// تجديف جهاز) مصنّفة machine أيضًا فلا تُعدّ «كيبلًا حرًّا» ولا تُستبعد.
+
+/** جهاز موجّه (يحوي 'machine' ضمن أدواته). */
+function isMachineExercise(ex: Exercise): boolean {
+  return ex.equipment.includes('machine')
+}
+
+/** كيبل حرّ بحت: يتطلّب كيبلًا بلا بديل جهاز موجّه (مثل تفتيح كيبل، دفع ترايسبس كيبل). */
+function isFreeCableExercise(ex: Exercise): boolean {
+  return ex.equipment.includes('cable') && !ex.equipment.includes('machine')
+}
+
+/** هل يُسمح بهذا التمرين من ناحية الكيبل؟ الكيبل الحرّ للمتقدّم فقط. */
+function cableOk(ex: Exercise, tier: ExpTier): boolean {
+  return tier === 'advanced' || !isFreeCableExercise(ex)
+}
+
+/** نفضّل الأجهزة في اختيار التمارين للمبتدئ/المستجد. */
+function prefersMachines(tier: ExpTier): boolean {
+  return tier === 'beginner' || tier === 'novice'
+}
+
 // — تصفية الإصابات: نستبعد التمارين عالية الخطورة ونُبقي بدائل أأمن (بلا نصائح طبية) —
 type InjuryArea = 'knee' | 'shoulder' | 'back'
 
@@ -307,8 +332,20 @@ const TYPE_MUSCLES: Record<DayType, Muscle[]> = {
   core: ['core'],
 }
 
+/** ترتيب المرشّحين: الأجهزة أولًا عند تفضيلها (للمبتدئ)، ثم أبجديًا (ثبات الاختيار). */
+function sortCandidates(cands: Exercise[], preferMachines: boolean): Exercise[] {
+  return cands.slice().sort((a, b) => {
+    if (preferMachines) {
+      const rank = (ex: Exercise) => (isMachineExercise(ex) ? 0 : 1)
+      const d = rank(a) - rank(b)
+      if (d !== 0) return d
+    }
+    return a.id.localeCompare(b.id)
+  })
+}
+
 /** يختار تمرينًا لفتحة معيّنة من المجمع المتاح (مع تنويع عبر variation وتجنّب التكرار). */
-function pickForSlot(slot: Slot, pool: Exercise[], used: Set<string>, variation: number): string | undefined {
+function pickForSlot(slot: Slot, pool: Exercise[], used: Set<string>, variation: number, preferMachines: boolean): string | undefined {
   let cands = pool.filter(
     (ex) =>
       slot.muscles.includes(ex.primaryMuscle) &&
@@ -320,17 +357,17 @@ function pickForSlot(slot: Slot, pool: Exercise[], used: Set<string>, variation:
     if (byPattern.length) cands = byPattern
   }
   if (!cands.length) return undefined
-  cands = cands.slice().sort((a, b) => a.id.localeCompare(b.id))
+  cands = sortCandidates(cands, preferMachines)
   return cands[variation % cands.length].id
 }
 
 /** يبني قائمة معرّفات تمارين ليوم واحد. */
-function buildDayExercises(type: DayType, variation: number, pool: Exercise[], target: number): string[] {
+function buildDayExercises(type: DayType, variation: number, pool: Exercise[], target: number, preferMachines: boolean): string[] {
   const used = new Set<string>()
   const ids: string[] = []
   for (const slot of SLOTS[type]) {
     if (ids.length >= target) break
-    const id = pickForSlot(slot, pool, used, variation)
+    const id = pickForSlot(slot, pool, used, variation, preferMachines)
     if (id) {
       ids.push(id)
       used.add(id)
@@ -338,9 +375,10 @@ function buildDayExercises(type: DayType, variation: number, pool: Exercise[], t
   }
   // إكمال النقص من عضلات اليوم الأساسية إن قلّت الفتحات المتاحة (بيئات محدودة الأدوات).
   if (ids.length < target) {
-    const extra = pool
-      .filter((ex) => !used.has(ex.id) && TYPE_MUSCLES[type].includes(ex.primaryMuscle))
-      .sort((a, b) => a.id.localeCompare(b.id))
+    const extra = sortCandidates(
+      pool.filter((ex) => !used.has(ex.id) && TYPE_MUSCLES[type].includes(ex.primaryMuscle)),
+      preferMachines,
+    )
     for (const ex of extra) {
       if (ids.length >= target) break
       ids.push(ex.id)
@@ -552,10 +590,12 @@ function generateWorkoutPlan(p: Profile): { plan: WorkoutPlan; specs: DaySpec[] 
   const target = targetExerciseCount(tier, p.workoutDuration)
   const equipOk = makeEquipFilter(p)
   const injuryOk = makeInjuryFilter(detectInjuries(p.injuries))
+  const preferMachines = prefersMachines(tier)
   const pool = exercises.filter(
     (ex) =>
       equipOk(ex) &&
       injuryOk(ex) &&
+      cableOk(ex, tier) && // الكيبل الحرّ للمتقدّم فقط — نستبعده للمبتدئ
       ex.movementPattern !== 'mobility' &&
       ex.primaryMuscle !== 'cardio' &&
       levelOk(ex, tier),
@@ -566,7 +606,7 @@ function generateWorkoutPlan(p: Profile): { plan: WorkoutPlan; specs: DaySpec[] 
     const variation = counts[spec.type] ?? 0
     counts[spec.type] = variation + 1
     const dayId = `gen-${di + 1}-${spec.type}`
-    const ids = buildDayExercises(spec.type, variation, pool, target)
+    const ids = buildDayExercises(spec.type, variation, pool, target, preferMachines)
     return {
       id: dayId,
       nameAr: spec.nameAr,
