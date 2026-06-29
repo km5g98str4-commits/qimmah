@@ -65,6 +65,15 @@ function mergeSection<T extends object>(base: T, saved: unknown): T {
   return { ...base, ...(saved as Partial<T>) }
 }
 
+/**
+ * هجرة الهدف الملغى «recomp» (إعادة تركيب الجسم) → «cut» عند القراءة.
+ * أي ملف محفوظ قديمًا بهدف recomp يُحمَّل بأمان ويُعاد حساب أهدافه بصيغة التنشيف (لا تعطّل).
+ */
+function migrateLegacyOnbGoal(goal: OnboardingProfile['goal']): OnboardingProfile['goal'] {
+  if ((goal.type as string) === 'recomp') return { ...goal, type: 'cut' }
+  return goal
+}
+
 // ===== التخزين =====
 
 /** يقرأ مصدر الحقيقة المحفوظ مدموجًا فوق الافتراضي (آمن ضد بيانات تالفة/قديمة). */
@@ -80,10 +89,11 @@ export function loadOnboardingProfile(): OnboardingProfile | null {
   try {
     const saved = JSON.parse(raw) as Partial<OnboardingProfile>
     const base = defaultOnboardingProfile()
+    const goal = migrateLegacyOnbGoal(mergeSection(base.goal, saved.goal))
     return {
       profile: mergeSection(base.profile, saved.profile),
       bodyMetrics: mergeSection(base.bodyMetrics, saved.bodyMetrics),
-      goal: mergeSection(base.goal, saved.goal),
+      goal,
       trainingPreferences: mergeSection(base.trainingPreferences, saved.trainingPreferences),
       activityProfile: mergeSection(base.activityProfile, saved.activityProfile),
       nutritionPreferences: mergeSection(base.nutritionPreferences, saved.nutritionPreferences),
@@ -121,7 +131,6 @@ export function clearOnboardingProfile(): void {
 const GOAL_TO_GOALTYPE: Record<OnbGoalType, GoalType> = {
   bulk: 'bulking',
   cut: 'cutting',
-  recomp: 'recomposition',
   strength: 'strength',
 }
 
@@ -162,9 +171,10 @@ export function toLegacyProfile(op: OnboardingProfile, base: Profile = defaultPr
   const consistency: Consistency = tp.consistency
     ? CONSISTENCY_TO_LEGACY[tp.consistency]
     : base.consistency ?? 'regular'
+  // وزن الهدف يُسأل مرّة واحدة لـ cut/bulk فقط؛ القوة لا هدف وزن لها (لا مدة/تغيّر مضلّل).
   const targetWeightKg = showsTargetWeight(op.goal.type)
     ? op.bodyMetrics.targetWeightKg || deriveTargetWeight(weightKg, goalType)
-    : deriveTargetWeight(weightKg, goalType)
+    : weightKg
   const activityLevel: ActivityLevel = op.activityProfile.neat
     ? NEAT_TO_ACTIVITY[op.activityProfile.neat]
     : deriveActivityLevel(trainingDays)
@@ -261,7 +271,8 @@ export function buildCustomizationFromOnboarding(op: OnboardingProfile, current:
 const GOALTYPE_TO_ONB: Partial<Record<GoalType, OnbGoalType>> = {
   bulking: 'bulk',
   cutting: 'cut',
-  recomposition: 'recomp',
+  // الهدف الملغى «إعادة التكوين» يُهاجَر إلى «تنشيف» (نفس مسار العجز).
+  recomposition: 'cut',
   strength: 'strength',
 }
 
@@ -308,7 +319,7 @@ function experienceFromLegacy(p: Profile): ExperienceLevel | undefined {
 export function migrateFromCustomization(c: Customization): OnboardingProfile {
   const p = c.profile
   const base = defaultOnboardingProfile()
-  const goalOnb = GOALTYPE_TO_ONB[p.goalType] ?? 'recomp'
+  const goalOnb = GOALTYPE_TO_ONB[p.goalType] ?? 'cut'
   const dislikes = (p.dislikedFoods ?? '').split(/[،,]/).map((s) => s.trim()).filter(Boolean)
   const injuries = (p.injuries ?? '').split(/[،,]/).map((s) => s.trim()).filter(Boolean)
   const wp = c.wellnessPlan

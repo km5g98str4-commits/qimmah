@@ -11,8 +11,8 @@ export const ONBOARDING_SCHEMA_VERSION = 1
 
 export type Sex = 'male' | 'female'
 
-/** الهدف — أربعة مسارات منطقية لا تتداخل (يطابق GoalValue في باني الخطة). */
-export type OnbGoalType = 'bulk' | 'cut' | 'recomp' | 'strength'
+/** الهدف — ثلاثة مسارات منطقية لا تتداخل (يطابق GoalValue في باني الخطة). */
+export type OnbGoalType = 'bulk' | 'cut' | 'strength'
 
 /** الانتظام (إعداد) — «new» تُخزَّن تلقائيًا للمبتدئ ولا يُسأل عنها. */
 export type OnbConsistency = 'new' | 'on_and_off' | 'consistent' | 'returning'

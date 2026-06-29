@@ -1,5 +1,54 @@
 # Qimmah Decisions Log
 
+## P2 Agent 1 — Goals reduced to 3 + target weight actually used — 2026-06-29
+
+### What changed
+- **Goals = exactly 3**: `bulk` (تضخيم), `cut` (تنشيف), `strength` (زيادة قوة).
+  Removed `recomp` (تركيب الجسم) from the goal-selection UI (`goalChoices`), the
+  onboarding enums (`OnbGoalType`, `GoalValue`), and the broad goal selector
+  (`goalTypeOptions` no longer lists `recomposition`).
+- **recomp migration (no crash, recomputes with cut formula)**:
+  - Stored onboarding profile with `goal.type === 'recomp'` → mapped to `cut` on load
+    (`migrateLegacyOnbGoal` in `loadOnboardingProfile`).
+  - Stored customization profile with `goalType === 'recomposition'` → mapped to
+    `cutting`/`cut` on load (`migrateLegacyGoal` in `loadCustomization`). Because
+    `goalType` changes, the profile hash differs and `withFreshTargets` recomputes
+    targets with the cut formula (TDEE−400).
+  - Legacy `recomposition` profiles in `dashboardLayout.goalFromProfile` normalize to
+    `cut` (same nutrition-first path).
+- **Goal calories** (unchanged engine, single source `rawCaloriesForGoalType`):
+  cut = TDEE−400 (with floor), bulk = TDEE+300, strength = TDEE+150. Removed the
+  `recomposition` (=TDEE) branch.
+- **Target weight captured once, actually used**: onboarding asks target weight once,
+  only for cut/bulk (`showsTargetWeight`). cut/bulk derive `weeklyWeightChangeKg` +
+  `estimatedWeeksToGoal` from (current − target) in `computeTargets`. For `strength`,
+  target weight is hidden and `toLegacyProfile` sets it to the current weight → no
+  misleading weekly-change/ETA. Plan summary (`MyTargets`) already surfaces target
+  weight + estimated weeks; left intact.
+
+### Decision: `recomposition` retained ONLY as an internal `GoalType` engine value
+- The user-facing/onboarding goal is fully reduced to 3 and `recomp` is gone from every
+  selector and onboarding enum. The broad `GoalType` union (`profile.ts`) still contains
+  `'recomposition'` because it is a key in `Record<GoalType, …>` tables inside
+  `planGenerator.ts` (SCHEMES, COMMITMENTS_BY_GOAL — **workout runtime, out of scope**)
+  and a `case` in `dashboardLayout.ts` (**dashboard layout, out of scope**). Removing it
+  from the union would force edits to those owned-by-other-agents files. It is now
+  **unreachable** from any UI and all onboarding/migration paths map it to `cut`.
+- Forced minimal edits in `dashboardLayout.ts` (return `'cut'` instead of the removed
+  `'recomp'` literal; drop the `=== 'recomp'` comparison) were unavoidable type-consistency
+  fixes from dropping `'recomp'` from `OnbGoalType`; they are behavior-preserving
+  (recomposition still routes to the nutrition-first/cut path).
+
+### Confirmed (no regressions)
+- No "what training type do you want" question exists or was added; the split stays
+  auto/advanced (training preference, not a goal). BMI label remains descriptive/neutral.
+  NEAT activity question + the NEAT-vs-training no-double-count calorie split untouched.
+- Verified at runtime (vite-node): recomp profile loads→migrates→recomputes (cut, weeks=16);
+  cut/bulk/strength deltas = −400/+300/+150; strength target weight = current, ETA = 0.
+- build + lint + typecheck all green.
+
+---
+
 ## RESUME — Agent 1 Training — 2026-06-29
 - done: implemented all training-engine requirements (advanced split override, session-duration
   exercise count, experience volume, onoff/returning conservative start, equipment filter incl.
