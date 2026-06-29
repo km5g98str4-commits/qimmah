@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { StartView } from '@/views/StartView'
 import { LoginView } from '@/views/LoginView'
 import { SetupView } from '@/views/SetupView'
@@ -64,6 +64,13 @@ export default function App() {
   )
   const [showSuccess, setShowSuccess] = useState(false)
   const dismissSuccess = useCallback(() => setShowSuccess(false), [])
+
+  // آخر مسار غير قانوني (للرجوع الآمن من الخصوصية/الشروط دون الاعتماد على history.back
+  // الذي قد يقذف المستخدم خارج التطبيق عند فتح الصفحة مباشرةً/التحديث).
+  const beforeLegalRef = useRef<AppRoute>('start')
+  useEffect(() => {
+    if (view !== 'privacy' && view !== 'terms') beforeLegalRef.current = view
+  }, [view])
 
   // view → hash
   useEffect(() => {
@@ -135,11 +142,11 @@ export default function App() {
   }
 
   if (view === 'privacy') {
-    return <PrivacyView lang={LANG} onBack={() => window.history.back()} />
+    return <PrivacyView lang={LANG} onBack={() => navigate(beforeLegalRef.current)} />
   }
 
   if (view === 'terms') {
-    return <TermsView lang={LANG} onBack={() => window.history.back()} />
+    return <TermsView lang={LANG} onBack={() => navigate(beforeLegalRef.current)} />
   }
 
   if (view === 'setup') {

@@ -19,7 +19,7 @@ export function StepBasics({ ctx }: { ctx: WizardCtx }) {
           <input
             className={inputClass}
             value={data.identity.userName}
-            placeholder="مثال: زياد"
+            placeholder="مثال: محمد"
             onChange={(e) => updateIdentity({ userName: e.target.value })}
           />
         </Field>

@@ -732,7 +732,7 @@ const en: ShellStrings = {
     privacyBody: [
       'Qimmah is a local-first personal app. In guest mode, all your data stays in this device’s browser and never leaves it.',
       'When you log in with a cloud account (Supabase), your data is uploaded to your own account so you can access it from other devices. Only you can read your rows (Row Level Security).',
-      'We do not sell or share your data with advertisers. Progress photos and health measurements remain yours and can be deleted anytime via “Reset data”.',
+      'We do not sell or share your data with advertisers. Your measurements remain yours and can be deleted anytime via “Reset data”.',
       'You can export a full copy of your data anytime from Settings → Data.',
     ],
     termsBody: [

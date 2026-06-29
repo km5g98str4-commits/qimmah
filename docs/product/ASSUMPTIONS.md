@@ -92,3 +92,21 @@
   one plan day per training day, so adherence targets read directly from the plan.
 - **Intermediate is the implicit default** when experience is unknown — no extra lead
   card, goal pair only.
+
+---
+
+## Agent 5 — Trust / Cleanup / Regression QA (Phase 1)
+
+- **`CustomizationCenter` لا يُستدعى في وضع onboarding**: `SetupView` يوجّه أول إعداد
+  إلى `PlanBuilder` دائمًا، ويستخدم `CustomizationCenter` بوضع `advanced` فقط.
+  لذلك فرع `onboardingSteps` فيه (ومعه `StepWelcome`) غير مُفعّل حاليًا. أُصلحت
+  ثغرة الشِّيپس فيه على أي حال لأنها صحيحة لكلا الوضعين وتلبّي بند QA رقم 13 حرفيًّا.
+- **مسح `qimmah:supabase-auth:v1` عند إعادة الضبط آمن**: لأن `resetQimmah` يُعيد
+  تحميل الصفحة بعد المسح، فلا تبقى حالة عميل Supabase في الذاكرة. القالب لا يضبط
+  Supabase افتراضيًا (لا أسرار)، فالمفتاح غالبًا غير موجود.
+- **«إعادة الضبط» تشمل تسجيل الخروج المحلّي**: افتُرض أن المستخدم يقصد محو كل أثر
+  محلّي (بما فيه الجلسة) عند «إعادة ضبط كامل». لا يؤثّر على بيانات سحابية (إن وُجدت)
+  بخلاف قطع الجلسة على هذا الجهاز.
+- **بذور `getDefaultCustomization` للعرض فقط**: المكملات/الوجبات الافتراضية بجرعات
+  موجودة في التخصيص الافتراضي، لكن التدفّق الحقيقي (`buildCustomizationFromOnboarding`)
+  يفرّغها؛ تظهر فعليًا في وضع النموذج فقط.
