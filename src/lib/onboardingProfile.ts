@@ -185,6 +185,8 @@ export function toLegacyProfile(op: OnboardingProfile, base: Profile = defaultPr
     goalType,
     trainingDays,
     workoutDuration: tp.sessionDurationMin || base.workoutDuration,
+    splitMode: tp.splitMode ?? 'auto',
+    splitChoice: tp.splitMode === 'advanced' ? tp.advancedSplit : undefined,
     workoutEnvironment: gymAccess === 'home' || gymAccess === 'bodyweight' ? 'home' : 'gym',
     injuries: op.limitations.injuries.join('، '),
     healthNotes: op.limitations.notes ?? '',
