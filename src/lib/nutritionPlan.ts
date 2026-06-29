@@ -84,6 +84,8 @@ export function defaultNutritionPlan(targets: Targets, goal: CalorieGoal): Nutri
     targetFat: targets.fatGrams,
     targetWaterLiters: targets.waterLiters,
     meals: seed.map((id, i) => createPlanMealFromTemplate(id, i)),
+    style: 'meal_suggestions',
+    mealsPerDay: seed.length,
   }
 }
 

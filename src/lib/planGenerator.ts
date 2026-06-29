@@ -557,9 +557,29 @@ export function generateNutrition(p: Profile, targets: Targets): { plan: Nutriti
   const targetCalories =
     targets.targetCalories ||
     (goal === 'cut' ? targets.cuttingCalories : goal === 'bulk' ? targets.bulkingCalories : targets.maintenanceCalories)
+  // أسلوب العرض من الإعداد — افتراضيًا اقتراح وجبات للحفاظ على سلوك المستخدمين الحاليين.
+  const displayStyle = p.nutritionDisplayStyle ?? 'meal_suggestions'
   const mealsCount = Math.max(3, Math.min(5, p.mealsPerDay))
+
+  // ماكروز فقط / إرشاد مبسّط: لا نفرض اقتراح وجبات — نكتفي بالأهداف + التسجيل (لا بيانات وهمية).
+  if (displayStyle !== 'meal_suggestions') {
+    const plan: NutritionPlan = {
+      enabled: p.trackNutrition,
+      targetCalories,
+      targetProtein: targets.proteinGrams,
+      targetCarbs: targets.carbsGrams,
+      targetFat: targets.fatGrams,
+      targetWaterLiters: targets.waterLiters,
+      meals: [],
+      style: displayStyle,
+      mealsPerDay: p.mealsPerDay,
+    }
+    return { plan }
+  }
+
   const s = STYLE_TEMPLATES[p.nutritionStyle] ?? STYLE_TEMPLATES.high_protein
 
+  // اقتراح الوجبات يُبنى حسب عدد الوجبات من الإعداد (meals_per_day).
   const slots: string[] = [s.breakfast, s.lunch, s.dinner]
   if (mealsCount >= 4) slots.push(s.snack)
   if (mealsCount >= 5) slots.push('protein-shake')
@@ -595,6 +615,8 @@ export function generateNutrition(p: Profile, targets: Targets): { plan: Nutriti
     targetFat: targets.fatGrams,
     targetWaterLiters: targets.waterLiters,
     meals,
+    style: displayStyle,
+    mealsPerDay: p.mealsPerDay,
   }
   return { plan, warning: within ? undefined : 'هذه أمثلة وجبات مبدئية وليست خطة كاملة مطابقة للأهداف.' }
 }

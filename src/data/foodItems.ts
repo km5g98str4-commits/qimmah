@@ -9,6 +9,7 @@ export type FoodCategory =
   | 'مشروبات'
   | 'فواكه'
   | 'خضار'
+  | 'حلويات'
   | 'مكملات غذائية'
 
 export interface FoodItem {
@@ -469,6 +470,20 @@ export const foodItems: FoodItem[] = [
     carbs: 54,
     fat: 6,
     fiber: 1,
+  },
+  {
+    id: 'bukhari-rice',
+    nameAr: 'رز بخاري',
+    nameEn: 'Bukhari rice',
+    category: 'كارب',
+    servingLabelAr: 'كوب (200غ)',
+    servingGrams: 200,
+    calories: 330,
+    protein: 6,
+    carbs: 52,
+    fat: 11,
+    fiber: 2,
+    notesAr: 'رز مطبوخ بالبهارات والجزر والزيت',
   },
 
   // ===== دهون صحية =====
@@ -1960,6 +1975,46 @@ export const foodItems: FoodItem[] = [
     carbs: 22,
     fat: 11,
     fiber: 5,
+  },
+
+  // ===== حلويات =====
+  {
+    id: 'kunafa',
+    nameAr: 'كنافة',
+    nameEn: 'Kunafa',
+    category: 'حلويات',
+    servingLabelAr: 'قطعة (100غ)',
+    servingGrams: 100,
+    calories: 350,
+    protein: 6,
+    carbs: 40,
+    fat: 18,
+    fiber: 1,
+    notesAr: 'تقديري — يختلف حسب القطر والجبن',
+  },
+  {
+    id: 'basbousa',
+    nameAr: 'بسبوسة',
+    nameEn: 'Basbousa',
+    category: 'حلويات',
+    servingLabelAr: 'قطعة (80غ)',
+    servingGrams: 80,
+    calories: 280,
+    protein: 4,
+    carbs: 42,
+    fat: 11,
+  },
+  {
+    id: 'luqaimat',
+    nameAr: 'لقيمات',
+    nameEn: 'Luqaimat',
+    category: 'حلويات',
+    servingLabelAr: '5 حبات (90غ)',
+    servingGrams: 90,
+    calories: 320,
+    protein: 4,
+    carbs: 48,
+    fat: 13,
   },
 
   // ===== مكملات غذائية =====
