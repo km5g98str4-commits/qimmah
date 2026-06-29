@@ -83,6 +83,14 @@ machines already existed (`belt-squat`, `glute-ham-raise`, `machine-hip-thrust`,
   "27 جهازًا", group "Chest · الصدر", items English-first + Arabic subtitle + Arabic target
   muscle incl. the new Decline Chest Press Machine); tapping a machine opens the existing
   ExerciseDetail demo; **no horizontal overflow (596=596), no console errors**.
+- **End-to-end plan flow** (real onboarding → generated plan → workout UI, beginner + full
+  gym + bulk, 3 days): app generated `gen-fullbody` with **13/15 machines, 0 cable exercises**
+  across the 3 days — Day أ all 5 machines (belt-squat, chest-press-machine, lat-pulldown,
+  machine-hip-thrust, shoulder-press-machine); Day ب pulled the 3 NEW machines
+  (decline-machine-press, low-row-machine, machine-rdl) + dumbbell fallback; Day ج machines +
+  dumbbell-rdl/db-shoulder-press where machines were exhausted. WorkoutMode renders exercise
+  1/5 as "دفع الأرجل جهاز / Leg Press". No console errors. Confirms machine-first + cable-free
+  for beginners flows all the way to the actual workout screen.
 
 ---
 
