@@ -232,8 +232,9 @@ export function buildCustomizationFromOnboarding(op: OnboardingProfile, current:
     commitmentPlan: g.commitmentPlan,
     measurementPlan: g.measurementPlan,
     routine: g.weeklySchedule,
-    // المكملات/الأدوية تبدأ فارغة (تتبّع none افتراضيًا) — لا بيانات وهمية.
-    wellnessPlan: { enabled: true, supplements: [], medications: [] },
+    // تتبّع المكملات/الأدوية يتبع اختيار الإعداد: «none» → معطّل (لا بطاقة وهمية)،
+    // basic/detailed → مُفعّل بقوائم فارغة (قشرة تتبّع فقط، يملؤها المستخدم).
+    wellnessPlan: { enabled: op.wellnessTracking.mode !== 'none', supplements: [], medications: [] },
     workouts: [],
     supplements: [],
     meals: [],
