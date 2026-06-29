@@ -37,14 +37,14 @@ export function emptyPlan(): WorkoutPlan {
   return { templateId: 'custom', days: [] }
 }
 
-/** اسم التمرين حسب اللغة: العربية = «عربي — إنجليزي»، الإنجليزية = إنجليزي فقط. */
+/** اسم التمرين حسب اللغة: العربية = «إنجليزي — عربي» (الاسم الإنجليزي أولًا)، الإنجليزية = إنجليزي فقط. */
 export function exerciseDisplayName(
   nameAr: string,
   nameEn: string,
   lang: Lang,
 ): string {
   if (lang === 'en') return nameEn
-  return nameAr && nameEn ? `${nameAr} — ${nameEn}` : nameAr || nameEn
+  return nameEn && nameAr ? `${nameEn} — ${nameAr}` : nameEn || nameAr
 }
 
 /** اسم عنصر الخطة (يراعي الأسماء المخصّصة). */

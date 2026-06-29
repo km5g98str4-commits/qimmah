@@ -29,6 +29,10 @@ export type MuscleFocus =
   | 'shoulders'
   | 'arms'
 export type Consistency = 'never' | 'onoff' | 'regular' | 'returning'
+/** نمط اختيار التقسيمة (تلقائي يختاره المحرّك / متقدّم يختاره المستخدم). */
+export type SplitMode = 'auto' | 'advanced'
+/** خيار التقسيمة المتقدّمة — يطابق AdvancedSplit في مصدر حقيقة الإعداد. */
+export type PlannedSplit = 'full_body' | 'upper_lower' | 'push_pull_legs' | 'arnold' | 'bro_split'
 export type ExperienceBand = 'lt1m' | '1to6m' | '6to12m' | '1to2y' | 'gt2y'
 /** مستوى الخبرة الدلالي (إعداد v2) — يحلّ تناقض «سنوات خبرة» مع «ما بدأت». */
 export type ExperienceLevel = 'beginner' | 'novice' | 'intermediate' | 'advanced'
@@ -63,6 +67,10 @@ export interface Profile {
   // — حقول «باني الخطة» الاختيارية (تُملأ عند استخدام Plan Builder) —
   muscleFocus?: MuscleFocus
   consistency?: Consistency
+  /** نمط اختيار التقسيمة — تلقائي افتراضًا؛ متقدّم يفعّل splitChoice. */
+  splitMode?: SplitMode
+  /** التقسيمة التي اختارها المستخدم صراحةً (تتجاوز التلقائي عند splitMode=advanced). */
+  splitChoice?: PlannedSplit
   experienceBand?: ExperienceBand
   /** مستوى الخبرة الدلالي (إعداد v2) — مصدر الحقيقة للإجابة. */
   experienceLevel?: ExperienceLevel
