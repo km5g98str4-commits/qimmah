@@ -11,13 +11,23 @@ export function MyTargets() {
   // السعرات المستهدفة الموحّدة (مصدر الحقيقة) — تتفق مع الرئيسية وتبويب التغذية.
   const calories = t.targetCalories || targetCaloriesFor(p.goal, t)
 
+  // وزن الهدف يُسأل ويُعرض فقط لهدفَي التنشيف/التضخيم؛ القوة لا وزن هدف لها
+  // (وزن الهدف = الوزن الحالي والمدة = 0، فإظهارها مضلّل). نخفيها للقوة.
+  const isWeightGoal = p.goalType === 'cutting' || p.goalType === 'bulking'
+  const weekly = t.weeklyWeightChangeKg
+  const etaSub = weekly !== 0 ? `أسبوع · ${Math.abs(weekly)} كجم/أسبوع` : 'أسبوع'
+
   const cards: { icon: string; label: string; value: string; sub?: string }[] = [
     { icon: 'Scale', label: 'مؤشر الكتلة BMI', value: `${t.bmi}`, sub: t.bmiLabel },
     { icon: 'Flame', label: 'سعرات الهدف', value: `${calories}`, sub: 'سعرة / يوم' },
     { icon: 'Salad', label: 'البروتين', value: `${t.proteinGrams}`, sub: 'غرام / يوم' },
     { icon: 'Droplets', label: 'الماء', value: `${t.waterLiters}`, sub: 'لتر / يوم' },
-    { icon: 'Target', label: 'الوزن الهدف', value: `${p.targetWeightKg}`, sub: 'كجم' },
-    { icon: 'CalendarDays', label: 'مدة تقديرية', value: `${t.estimatedWeeksToGoal}`, sub: 'أسبوع' },
+    ...(isWeightGoal
+      ? [
+          { icon: 'Target', label: 'الوزن الهدف', value: `${p.targetWeightKg}`, sub: 'كجم' },
+          { icon: 'CalendarDays', label: 'مدة تقديرية', value: `${t.estimatedWeeksToGoal}`, sub: etaSub },
+        ]
+      : []),
   ]
 
   return (
