@@ -16,6 +16,9 @@ export type AppRoute =
   | 'settings'
   | 'privacy'
   | 'terms'
+  | 'contact'
+  // مسار احتياطي داخلي فقط — لا يُسجَّل في ROUTES ولا يُكتب في hash مباشرة.
+  | 'notfound'
 
 const ROUTES: AppRoute[] = [
   'start',
@@ -31,6 +34,7 @@ const ROUTES: AppRoute[] = [
   'settings',
   'privacy',
   'terms',
+  'contact',
 ]
 
 /** التبويبات الرئيسية الخمسة في الشريط السفلي (كلها تتطلّب إعدادًا مكتملًا). */
