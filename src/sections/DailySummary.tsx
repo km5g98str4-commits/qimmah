@@ -21,7 +21,6 @@ export function DailySummary({ lang }: DailySummaryProps) {
   const t = customization.targets
   const np = customization.nutritionPlan
   const tn = getStrings(lang).nutrition
-  const name = customization.identity.userName
   const { state, totals } = useNutritionToday()
 
   // الأهداف: من خطة التغذية ثم الحسابات (مصدر واحد للحقيقة).
@@ -49,9 +48,7 @@ export function DailySummary({ lang }: DailySummaryProps) {
           <Icon name="Flame" className="h-3.5 w-3.5" />
           خطتك اليوم
         </span>
-        <h1 className="mt-2 text-xl font-black text-ink-900 sm:text-2xl">
-          {name?.trim() ? `أهلًا ${name} 👋` : 'هذه خطتك اليوم 👋'}
-        </h1>
+        <h1 className="mt-2 text-xl font-black text-ink-900 sm:text-2xl">ملخّص اليوم</h1>
 
         {/* السعرات: الهدف / المأكول / المتبقّي — حيّ */}
         <div className="mt-4 grid grid-cols-3 gap-2">
