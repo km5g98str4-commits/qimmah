@@ -243,6 +243,9 @@ export interface ShellStrings {
     optional: string
     searchFood: string
     servingsCount: string
+    gramsAmount: string
+    gramsUnit: string
+    perServingNote: string
     todayLog: string
     emptyLog: string
     removeEntry: string
@@ -596,6 +599,9 @@ const ar: ShellStrings = {
     optional: 'اختياري',
     searchFood: 'ابحث عن طعام…',
     servingsCount: 'عدد الحصص',
+    gramsAmount: 'الكمية (غرام)',
+    gramsUnit: 'غ',
+    perServingNote: 'القيم لكل',
     todayLog: 'سجل اليوم',
     emptyLog: 'لا يوجد شيء مسجّل اليوم بعد.',
     removeEntry: 'حذف',
@@ -950,6 +956,9 @@ const en: ShellStrings = {
     optional: 'optional',
     searchFood: 'Search food…',
     servingsCount: 'Servings',
+    gramsAmount: 'Amount (grams)',
+    gramsUnit: 'g',
+    perServingNote: 'Values per',
     todayLog: "Today's log",
     emptyLog: 'Nothing logged today yet.',
     removeEntry: 'Remove',
