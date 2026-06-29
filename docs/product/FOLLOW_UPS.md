@@ -1,5 +1,26 @@
 # Qimmah Follow-ups
 
+## P2 Agent 2 — Exercise library / machines (deferred, out of this scope)
+
+- A2-F1. **Real demos (GIF / trusted video).** All 170 exercises (incl. the 27 machine-catalog
+  entries) still use `videoUrl` = YouTube *search* links (`videoSource: 'youtube_search'`), not
+  specific embeds. Upgrade catalog machines first to curated `trusted_video` links or short
+  looping GIFs. NOTE: must use only legal/owned/embeddable media (no scraping, no broken links) —
+  that's why this run added no media. The data model already supports it (`videoSource:
+  'trusted_video'`, per-exercise `videoUrl`).
+- A2-F2. **Catalog integrity test.** `machineCatalog.catalogMissingIds()` is QA-checked manually
+  (bundled via esbuild). When a test runner is added (none configured today), wire a unit test:
+  `expect(catalogMissingIds()).toEqual([])` so a renamed/removed exercise id fails CI.
+- A2-F3. **Beginner cable policy is "advanced-only".** `cableOk()` excludes free-cable for
+  beginner+novice+intermediate (only `advanced` keeps them). If product wants intermediates to
+  use cables (e.g. face-pull for shoulder health), relax to `tier !== 'beginner' && tier !==
+  'novice'` — single-line change in `planGenerator.ts`.
+- A2-F4. **Machine catalog breadth.** Catalog covers the founder's named machines (27). Could add
+  more common machines later (e.g. assisted pull-up/dip machine, converging row, pendulum/V-squat
+  variants, smith-machine guided lifts) — each needs a real `exercises.ts` entry first.
+- A2-F5. **Adductors muscle id.** `adduction-machine` maps to `glutes` (no `adductors` MuscleId in
+  the taxonomy). If the muscle map grows an adductor id, retarget it for precise coverage stats.
+
 ## Agent 1 — Training Engine (deferred, out of this scope)
 
 - F1. Wrist / elbow / ankle injuries are captured in onboarding but have no exercise
