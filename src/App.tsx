@@ -12,6 +12,8 @@ import { DemoView } from '@/views/DemoView'
 import { SettingsView } from '@/views/SettingsView'
 import { PrivacyView } from '@/views/PrivacyView'
 import { TermsView } from '@/views/TermsView'
+import { ContactView } from '@/views/ContactView'
+import { NotFoundView } from '@/views/NotFoundView'
 import { MobileShell, type MainTab } from '@/components/MobileShell'
 import type { AppBadge } from '@/components/AppNav'
 import { useAuth } from '@/lib/authContext'
@@ -41,6 +43,10 @@ function guardRoute(route: AppRoute): AppRoute {
 function initialRoute(): AppRoute {
   const r = routeFromHash()
   if (r) return guardRoute(r)
+  // hash موجود لكنه غير معروف (مثل #/asdf) → صفحة 404 بدل التحويل الصامت.
+  if (typeof window !== 'undefined' && window.location.hash && window.location.hash !== '#/') {
+    return 'notfound'
+  }
   return loadOnboarding().completed ? 'dashboard' : 'start'
 }
 
@@ -65,9 +71,9 @@ export default function App() {
   const [showSuccess, setShowSuccess] = useState(false)
   const dismissSuccess = useCallback(() => setShowSuccess(false), [])
 
-  // view → hash
+  // view → hash (نُبقي مسار 404 على hash الخاطئ كما هو حتى لا نطمس الرابط الأصلي).
   useEffect(() => {
-    setHashRoute(view)
+    if (view !== 'notfound') setHashRoute(view)
   }, [view])
 
   // hash → view (تنقّل المتصفح / تحديث الصفحة) مع الحراسة
@@ -77,11 +83,8 @@ export default function App() {
       if (r) {
         setView(guardRoute(r))
       } else if (window.location.hash && window.location.hash !== '#/') {
-        // مسار غير معروف (مثل #/xyz) → وجهة آمنة + تصحيح العنوان صراحةً.
-        // المسارات الصالحة كلها مُعرّفة في appRoutes ولا تصل هنا.
-        const target = loadOnboarding().completed ? 'dashboard' : 'start'
-        setView(target)
-        setHashRoute(target)
+        // مسار غير معروف (مثل #/xyz) → صفحة 404 المخصّصة (نُبقي الرابط ظاهرًا).
+        setView('notfound')
       }
     }
     window.addEventListener('hashchange', onHash)
@@ -140,6 +143,18 @@ export default function App() {
 
   if (view === 'terms') {
     return <TermsView lang={LANG} onBack={() => window.history.back()} />
+  }
+
+  if (view === 'contact') {
+    return <ContactView lang={LANG} onBack={() => window.history.back()} />
+  }
+
+  if (view === 'notfound') {
+    const goHome = () => {
+      const target = loadOnboarding().completed ? 'dashboard' : 'start'
+      setView(guardRoute(target))
+    }
+    return <NotFoundView lang={LANG} onHome={goHome} onBack={() => window.history.back()} />
   }
 
   if (view === 'setup') {
