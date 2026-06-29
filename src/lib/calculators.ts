@@ -12,12 +12,31 @@ import type {
   WorkoutEnvironment,
 } from '@/types/profile'
 
-const ACTIVITY_MULTIPLIER: Record<ActivityLevel, number> = {
+// — معامل النشاط: نفصل حركة الحياة (NEAT) عن التمرين عمدًا حتى لا نحتسب التمرين مرّتين —
+// المعاملات القياسية 1.2–1.9 تتضمّن التمرين أصلًا؛ لذلك نأخذ NEAT أصغر ثم نضيف
+// إضافة بسيطة لكل جلسة (أيام×0.025) بدل القفزة الكبيرة في الجداول التقليدية.
+// NEAT: خامل/خفيف = 1.20، متوسط = 1.35، نشِط/عالٍ = 1.45.
+const NEAT_MULTIPLIER: Record<ActivityLevel, number> = {
   sedentary: 1.2,
-  light: 1.375,
-  moderate: 1.55,
-  active: 1.725,
-  very_active: 1.9,
+  light: 1.2,
+  moderate: 1.35,
+  active: 1.45,
+  very_active: 1.45,
+}
+
+/** إضافة التمرين لكل يوم/أسبوع — صغيرة عمدًا لتفادي مضاعفة احتساب التمرين. */
+const TRAINING_ADD_PER_DAY = 0.025
+/** سقف إجمالي معامل النشاط (NEAT + تمرين). */
+const ACTIVITY_MULTIPLIER_CAP = 1.9
+
+/**
+ * معامل النشاط الكلّي = NEAT + (أيام التمرين × 0.025)، بسقف 1.9.
+ * يفصل حركة الحياة عن التمرين لتفادي تضخيم السعرات.
+ */
+export function totalActivityMultiplier(activityLevel: ActivityLevel, trainingDays: number): number {
+  const neat = NEAT_MULTIPLIER[activityLevel] ?? NEAT_MULTIPLIER.sedentary
+  const days = Math.max(0, Math.min(7, Math.round(trainingDays || 0)))
+  return Math.min(ACTIVITY_MULTIPLIER_CAP, neat + days * TRAINING_ADD_PER_DAY)
 }
 
 // خيارات للقوائم المنسدلة (عربية)
@@ -106,13 +125,13 @@ function calorieFloor(gender: Gender): number {
 }
 
 /**
- * السعرات المستهدفة حسب الهدف المنظَّم (goalType) فوق صيانة الوزن (TDEE):
- * تنشيف −400، تضخيم +300، قوة +150، إعادة تكوين/ثبات = TDEE.
+ * السعرات المستهدفة الخام حسب الهدف المنظَّم (goalType) فوق صيانة الوزن (TDEE)
+ * قبل تطبيق الحد الأدنى: تنشيف −400، تضخيم +300، قوة +150، إعادة تكوين/ثبات = TDEE.
  */
-function targetCaloriesForGoalType(goalType: GoalType, tdee: number, gender: Gender): number {
+function rawCaloriesForGoalType(goalType: GoalType, tdee: number): number {
   switch (goalType) {
     case 'cutting':
-      return Math.max(round(tdee - 400), calorieFloor(gender))
+      return round(tdee - 400)
     case 'bulking':
       return round(tdee + 300)
     case 'strength':
@@ -125,6 +144,24 @@ function targetCaloriesForGoalType(goalType: GoalType, tdee: number, gender: Gen
       return round(tdee)
   }
 }
+
+/** السعرات المستهدفة النهائية مع حدّ أدنى آمن (لا حظر — مجرّد أرضية). */
+function targetCaloriesForGoalType(goalType: GoalType, tdee: number, gender: Gender): number {
+  const raw = rawCaloriesForGoalType(goalType, tdee)
+  return goalType === 'cutting' ? Math.max(raw, calorieFloor(gender)) : raw
+}
+
+/**
+ * عتبة التنبيه على انخفاض السعرات (نصّ تنبيه فقط — ليست نصيحة طبية ولا حظرًا):
+ * أقل من BMR للإناث / أقل من 1500 للذكور (وللجنس غير المحدّد نستخدم 1500).
+ */
+function lowCalorieThreshold(gender: Gender, bmr: number): number {
+  return gender === 'female' ? bmr : 1500
+}
+
+/** نصّ تنبيه السعرات المنخفضة — إعلامي ومحايد، بلا تشخيص أو وصفة. */
+export const LOW_CALORIE_NOTE =
+  'السعرات المستهدفة منخفضة نسبيًا؛ تأكد من تغطية احتياجك من البروتين والطاقة، وارفعها إذا شعرت بإرهاق.'
 
 /** اقتراح تقسيمة التمرين (قابل للتعديل من المستخدم). */
 function suggestedSplit(
@@ -170,13 +207,17 @@ export function computeTargets(p: Profile): Targets {
   if (w <= 0 || h <= 0) return emptyTargets()
 
   const bmr = round(bmrFor(p.gender, w, h, age))
-  const tdee = round(bmr * (ACTIVITY_MULTIPLIER[p.activityLevel] ?? 1.2))
+  // معامل النشاط الكلّي = NEAT (حركة الحياة) + إضافة التمرين (أيام×0.025)، بسقف 1.9.
+  const tdee = round(bmr * totalActivityMultiplier(p.activityLevel, p.trainingDays))
   const maintenance = tdee
   const cutting = Math.max(round(tdee - 400), calorieFloor(p.gender))
   const bulking = round(tdee + 300)
 
   // السعرات المستهدفة الفعلية حسب الهدف المنظَّم (cut/bulk/recomp/strength…)
   const calories = targetCaloriesForGoalType(p.goalType, tdee, p.gender)
+  // تنبيه السعرات المنخفضة (نصّ فقط) — نقارن الخام قبل الأرضية بعتبة الأمان.
+  const rawCalories = rawCaloriesForGoalType(p.goalType, tdee)
+  const isLowCalorie = rawCalories < lowCalorieThreshold(p.gender, bmr)
 
   // الماكروز محسوبة على السعرات المستهدفة الفعلية:
   // بروتين 2.0غ/كجم، دهون 0.9غ/كجم، والباقي كارب.
@@ -215,7 +256,12 @@ export function computeTargets(p: Profile): Targets {
     weeklyWeightChangeKg: weeklyChange,
     estimatedWeeksToGoal: weeks,
     suggestedTrainingSplit: suggestedSplit(p.trainingDays, p.trainingLevel, p.workoutEnvironment),
-    notes: p.gender === 'unspecified' ? 'تقدير تقريبي (لم يُحدَّد الجنس).' : '',
+    notes: [
+      p.gender === 'unspecified' ? 'تقدير تقريبي (لم يُحدَّد الجنس).' : '',
+      isLowCalorie ? LOW_CALORIE_NOTE : '',
+    ]
+      .filter(Boolean)
+      .join(' '),
   }
 }
 

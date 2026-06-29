@@ -16,3 +16,25 @@
 - F5. The legacy `CustomizationCenter` template marketplace (`StepWorkoutTemplate`) is the
   advanced editor; only the `StepGeneratePlan` "choose another template" entry is gated for
   beginners. Revisit whether the whole advanced template step should be hidden for beginners.
+
+---
+
+## Agent 2 — Nutrition (deferred)
+
+## F1 — تفعيل foodPreferences في البحث/الاقتراحات
+- الحالة: مؤجّل (غير عملي الآن).
+- السبب: الإعداد الجديد لا يجمع «أطعمة مكروهة» (تُحفظ فارغة)، ويجمع `dietPattern`
+  و`allergies` فقط. قاعدة الأطعمة لا تحمل وسوم حساسية/نمط غذائي، وقوالب الوجبات
+  محدودة، فالتصفية الدقيقة غير عملية بثقة الآن.
+- المقترح لاحقًا:
+  1. إضافة حقل «أطعمة مكروهة» لخطوة تفضيلات الأكل في `PlanBuilder`.
+  2. وسم عناصر `foodItems` بمسبّبات الحساسية الشائعة ونمط الأكل (نباتي/كيتو…).
+  3. تمرير المكروهات/الحساسيات إلى `searchFood`/مولّد الاقتراحات لخفض ترتيبها أو إخفائها.
+
+## F2 — توزيع السعرات على أقسام الوجبات
+- عند `meal_suggestions` نبني عدد الأقسام من `mealsPerDay`، لكن لا نوزّع حصص السعرات
+  المقترحة لكل قسم في تبويب التغذية (التسجيل يدوي). يمكن لاحقًا اقتراح حصّة لكل وجبة.
+
+## F3 — خانات وجبات أكثر من أربع
+- نموذج التخزين الحالي لخانات الوجبة أربع (فطور/غداء/عشاء/سناك). عند `mealsPerDay` = 5–6
+  نطوي الزائد ضمن «سناك». لاحقًا يمكن دعم خانات سناك متعددة دون كسر السجلات القديمة.

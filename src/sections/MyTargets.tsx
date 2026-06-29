@@ -8,7 +8,8 @@ export function MyTargets() {
   const { customization } = useCustomization()
   const t = customization.targets
   const p = customization.profile
-  const calories = targetCaloriesFor(p.goal, t)
+  // السعرات المستهدفة الموحّدة (مصدر الحقيقة) — تتفق مع الرئيسية وتبويب التغذية.
+  const calories = t.targetCalories || targetCaloriesFor(p.goal, t)
 
   const cards: { icon: string; label: string; value: string; sub?: string }[] = [
     { icon: 'Scale', label: 'مؤشر الكتلة BMI', value: `${t.bmi}`, sub: t.bmiLabel },

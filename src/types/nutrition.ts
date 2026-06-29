@@ -57,6 +57,9 @@ export interface PlanMeal {
   order: number
 }
 
+/** أسلوب عرض التغذية المشتقّ من الإعداد (مصدر الحقيقة) — يقود واجهة التبويب. */
+export type NutritionDisplayStyle = 'meal_suggestions' | 'macros_only' | 'simple_guidance'
+
 export interface NutritionPlan {
   enabled: boolean
   targetCalories: number
@@ -65,4 +68,8 @@ export interface NutritionPlan {
   targetFat: number
   targetWaterLiters: number
   meals: PlanMeal[]
+  /** أسلوب العرض من الإعداد — يحدّد إظهار اقتراح الوجبات أو الماكروز فقط. */
+  style?: NutritionDisplayStyle
+  /** عدد الوجبات من الإعداد — يبني عدد أقسام الوجبات عند اقتراح الوجبات. */
+  mealsPerDay?: number
 }

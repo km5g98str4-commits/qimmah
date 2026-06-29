@@ -63,6 +63,8 @@ export interface Profile {
   trackNutrition: boolean
   mealsPerDay: number
   nutritionStyle: NutritionStyle
+  /** أسلوب عرض التغذية الدلالي من الإعداد (اقتراح وجبات / ماكروز فقط / إرشاد مبسّط). */
+  nutritionDisplayStyle?: 'meal_suggestions' | 'macros_only' | 'simple_guidance'
   dislikedFoods: string
   // — حقول «باني الخطة» الاختيارية (تُملأ عند استخدام Plan Builder) —
   muscleFocus?: MuscleFocus

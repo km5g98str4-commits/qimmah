@@ -23,6 +23,7 @@ import type {
 import type { ExperienceLevel } from '@/types/profile'
 import {
   calorieGoalFromGoalType,
+  computeTargets,
   defaultProfile,
   profileHash,
 } from '@/lib/calculators'
@@ -193,6 +194,8 @@ export function toLegacyProfile(op: OnboardingProfile, base: Profile = defaultPr
     trackNutrition: true,
     mealsPerDay,
     nutritionStyle,
+    // أسلوب العرض الدلالي من الإعداد — يقود واجهة التغذية (اقتراح وجبات / ماكروز فقط).
+    nutritionDisplayStyle: op.nutritionPreferences.style ?? base.nutritionDisplayStyle,
     dislikedFoods: op.foodPreferences.dislikedFoods.join('، '),
     muscleFocus: 'balanced',
     consistency,
@@ -205,6 +208,15 @@ export function toLegacyProfile(op: OnboardingProfile, base: Profile = defaultPr
     preferredDays: [],
     remindersOptIn: op.appPreferences.reminders,
   }
+}
+
+/**
+ * المصدر الأساسي الوحيد لأهداف التغذية المشتقّة من الإعداد.
+ * الإعداد والرئيسية وتبويب التغذية كلها تتفق لأنها تمرّ عبر هذه الدالة (toLegacyProfile + computeTargets).
+ * BMR/TDEE/السعرات/الماكروز/الماء كلها محسوبة في computeTargets (NEAT منفصل عن التمرين، بلا مضاعفة).
+ */
+export function nutritionTargetsFromOnboarding(op: OnboardingProfile, base: Profile = defaultProfile) {
+  return computeTargets(toLegacyProfile(op, base))
 }
 
 /**
