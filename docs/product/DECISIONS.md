@@ -78,6 +78,11 @@ machines already existed (`belt-squat`, `glute-ham-raise`, `machine-hip-thrust`,
 - Generation smoke (bundled over the real engine): **beginner gym 4-day = 19/22 machines, 0
   free-cables, 0 empty days**; **advanced = cables present, free-weight-heavy**; **catalog
   integrity = 0 missing ids**.
+- **Browser smoke** (dev server, `#/exercises`): library renders (count = 170); default
+  «كل التمارين» view unchanged; «الأجهزة (للمبتدئين)» view shows grouped catalog (banner
+  "27 جهازًا", group "Chest · الصدر", items English-first + Arabic subtitle + Arabic target
+  muscle incl. the new Decline Chest Press Machine); tapping a machine opens the existing
+  ExerciseDetail demo; **no horizontal overflow (596=596), no console errors**.
 
 ---
 
