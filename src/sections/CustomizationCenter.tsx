@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Icon } from '@/components/Icon'
 import { cn } from '@/lib/cn'
 import { type Customization, getDefaultCustomization } from '@/lib/customization'
@@ -43,22 +43,36 @@ const onboardingSteps: StepDef[] = [
   { title: 'المراجعة', Component: StepReview },
 ]
 
-const advancedSteps: StepDef[] = [
+// تعديل الخطة (متقدّم) — يُقسَّم لتقليل الزحام:
+//  - الأساسيات: ما يحتاجه المبتدئ فعلًا (بياناته + التمرين + الأكل).
+//  - الإضافات: ضبط نادر الاستخدام يُكشف خلف زرّ «خيارات متقدّمة».
+const advancedEssentialSteps: StepDef[] = [
   { title: 'بياناتك', Component: StepBody, validate: (d) => isProfileValid(d.profile) },
-  { title: 'الحسابات الذكية', Component: StepSmartCalculations },
   { title: 'جدول التمرين', Component: StepWorkoutTemplate },
   { title: 'خطة الأكل', Component: StepNutrition },
+]
+
+const advancedExtraSteps: StepDef[] = [
+  { title: 'الحسابات الذكية', Component: StepSmartCalculations },
   { title: 'المكملات والأدوية', Component: StepWellness },
   { title: 'القياسات والمتابعة', Component: StepMeasurements },
   { title: 'الأقسام', Component: StepCommitments },
   { title: 'إظهار الأقسام', Component: StepSections },
-  { title: 'المراجعة', Component: StepReview },
 ]
+
+const advancedReviewStep: StepDef = { title: 'المراجعة', Component: StepReview }
 
 /** مركز التخصيص — معالج إعداد شخصي خطوة بخطوة (بلا backend، يُحفظ على الجهاز). */
 export function CustomizationCenter({ onBack, initialStep = 0, mode = 'onboarding' }: CustomizationCenterProps) {
   const { customization, applyCustomization, resetCustomization } = useCustomization()
-  const steps = mode === 'advanced' ? advancedSteps : onboardingSteps
+  // الخيارات المتقدّمة في «تعديل خطتي» مطويّة بالافتراض (تقليل التعقيد).
+  const [showAdvanced, setShowAdvanced] = useState(false)
+  const steps = useMemo<StepDef[]>(() => {
+    if (mode !== 'advanced') return onboardingSteps
+    return showAdvanced
+      ? [...advancedEssentialSteps, ...advancedExtraSteps, advancedReviewStep]
+      : [...advancedEssentialSteps, advancedReviewStep]
+  }, [mode, showAdvanced])
   const [data, setData] = useState<Customization>(() => customization)
   const [step, setStep] = useState(() =>
     Math.min(Math.max(0, initialStep), steps.length - 1),
@@ -163,6 +177,15 @@ export function CustomizationCenter({ onBack, initialStep = 0, mode = 'onboardin
   }
   const prev = () => setStep((s) => Math.max(0, s - 1))
 
+  // كشف/طيّ الخطوات المتقدّمة مع تثبيت الموضع ضمن الحدود الجديدة.
+  const toggleAdvanced = () => {
+    const next = !showAdvanced
+    const nextLen =
+      (next ? advancedEssentialSteps.length + advancedExtraSteps.length : advancedEssentialSteps.length) + 1
+    setShowAdvanced(next)
+    setStep((st) => Math.min(st, nextLen - 1))
+  }
+
   const Current = steps[step].Component
 
   return (
@@ -230,6 +253,19 @@ export function CustomizationCenter({ onBack, initialStep = 0, mode = 'onboardin
               )
             })}
           </div>
+
+          {/* كشف الخيارات المتقدّمة — مطويّة بالافتراض لتبسيط «تعديل خطتي» */}
+          {mode === 'advanced' && (
+            <button
+              type="button"
+              onClick={toggleAdvanced}
+              aria-expanded={showAdvanced}
+              className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-bold text-ink-500 transition-colors hover:text-primary-c"
+            >
+              <Icon name={showAdvanced ? 'ChevronDown' : 'SlidersHorizontal'} className="h-3.5 w-3.5" />
+              {showAdvanced ? 'إخفاء الخيارات المتقدّمة' : 'خيارات متقدّمة'}
+            </button>
+          )}
         </div>
       </header>
 
