@@ -39,6 +39,9 @@ export type SchedulingStyle = 'fixed' | 'flexible'
 /** أدوات متاحة في البيت/النادي الصغير. */
 export type Equipment = 'dumbbell' | 'barbell' | 'bench' | 'machine' | 'cable' | 'bands'
 
+/** خيارات التقسيمة المتقدّمة (Phase 1 — من إعداد المستخدم). */
+export type AdvancedSplit = 'full_body' | 'upper_lower' | 'push_pull_legs' | 'arnold' | 'bro_split'
+
 /** بيانات الجسم/الملف الشخصي التي تُبنى عليها الحسابات. */
 export interface Profile {
   name: string
@@ -75,6 +78,21 @@ export interface Profile {
   preferredDays?: number[]
   /** تفضيل تذكيرات محلي (لا إشعارات نظام فعلية بعد). */
   remindersOptIn?: boolean
+  /**
+   * نمط التقسيمة — «auto» يختار المنتج، «advanced» يحترم advancedSplit.
+   * (Phase 1 — من إعداد المستخدم)
+   */
+  splitMode?: 'auto' | 'advanced'
+  /**
+   * اختيار التقسيمة المتقدّمة — يُستخدم فقط عند splitMode=advanced.
+   * (Phase 1 — من إعداد المستخدم)
+   */
+  advancedSplit?: AdvancedSplit
+  /**
+   * أسلوب عرض التغذية من الإعداد — يختلف عن nutritionStyle (طريقة الطبخ).
+   * (Phase 1 — من إعداد المستخدم)
+   */
+  nutritionDisplayStyle?: 'meal_suggestions' | 'macros_only' | 'simple_guidance'
 }
 
 /** أهداف مقدّرة قابلة للتعديل اليدوي. */
@@ -96,4 +114,9 @@ export interface Targets {
   estimatedWeeksToGoal: number
   suggestedTrainingSplit: string
   notes: string
+  /**
+   * تنبيه عند انخفاض السعرات غير الاعتيادي (ليس نصيحة طبية).
+   * (Phase 1 — Agent C)
+   */
+  lowCalorieWarning?: string
 }
