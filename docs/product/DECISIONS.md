@@ -389,3 +389,7 @@ Agent: Splash + 404 + Contact pages (isolated). Branch: `claude/splash-404-conta
 
 ### QA
 - build / lint / typecheck all pass on a clean base and after changes.
+
+## CHECKPOINT — P2 Agent 1 merged into integration/phase2 — 2026-06-29
+- feature/phase2-goals-onboarding (a7013f0) merged via --no-ff into integration/phase2.
+- build + lint + typecheck green post-merge. Goals reduced to 3; recomp migrates to cut; target weight drives ETA.
