@@ -494,3 +494,18 @@ Agent: Splash + 404 + Contact pages (isolated). Branch: `claude/splash-404-conta
 ## CHECKPOINT — P2 Agent 1 merged into integration/phase2 — 2026-06-29
 - feature/phase2-goals-onboarding (a7013f0) merged via --no-ff into integration/phase2.
 - build + lint + typecheck green post-merge. Goals reduced to 3; recomp migrates to cut; target weight drives ETA.
+
+## Phase 2 — Integration QA (Agent 6) — 2026-06-29
+- **Scope honored:** verification + QA only. No code changes to the integration branch
+  (no P0 regressions). Findings in `PHASE2_QA_REPORT.md` + `FOLLOW_UPS.md`.
+- **Concurrent development:** `integration/phase2` advanced multiple times during QA as
+  several agents pushed. QA was re-verified at each step; final results reflect HEAD
+  `1088464`, by which point ALL Phase-2 feature branches were merged.
+- **Verified live/by code at final HEAD:** 3 goals + recomp→cut + target weight; gram-based
+  nutrition + Saudi foods + live/persisted logging; workout persistence; greeting "أهلًا يا
+  {name}" + rotating phrase; 1-tap entry; machine catalog UI; manual step counter; muscle
+  map from logged data; all red lines (no medical/dosage advice, BMI neutral, no fake stats,
+  no demo leak, no Ziyad placeholder). Build/lint/typecheck green.
+- **3rd goal = strength (not maintain):** product decision to confirm with founder.
+- **Readiness:** ✅ ready for founder smoke test; ⚠️ land FU-P2-1 (rAF completion) + FU-P2-3
+  (full-body day names) before promoting to `main`. Rest non-blocking.

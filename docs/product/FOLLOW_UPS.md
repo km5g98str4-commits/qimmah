@@ -95,3 +95,42 @@
    code-splitting / manualChunks.
 5. **النوع `MeasurementCategory='photo'`** في `types/progress.ts` باقٍ دون مدخل
    صورة فعلي — تنظيف نوعي عند حسم نطاق الصور.
+
+---
+
+## Phase 2 — Integration QA (Agent 6) — 2026-06-29
+
+> QA of `integration/phase2` at HEAD `1088464` — ALL Phase-2 branches merged
+> (goals, exercises, nutrition, simplify, muscle-steps, A2 machine-first, A4 simple/
+> greeting/quick-entry). No P0 regressions found. Resolved during Phase 2 (verified):
+> greeting "أهلًا يا {name}" + daily rotating phrase + 1-tap entry (A4); beginner cable
+> exclusion + machine catalog UI (A2); manual step counter `stepCounter.ts` (A5). Items
+> below are the remaining quality/completeness gaps (documented, not fixed — QA scope).
+> NOTE: branch was pushed to concurrently by multiple agents during QA.
+
+- **FU-P2-1 (HIGH, robustness):** Onboarding "building" screen (`PlanBuilder.tsx`) completes
+  via `requestAnimationFrame`, which browsers pause in a backgrounded tab → stalls at 0%
+  until refocus (self-heals). Add a `setTimeout(finishRef.current, 2600)` fallback (cleared
+  on unmount) or finish on `visibilitychange`. Only stall observed in QA.
+- **FU-P2-3 (MED, content):** Full-body generated days still "جسم كامل أ/ب/ج"
+  (`planGenerator.ts:403`); legacy `full-body-3`/`beginner-gym`/`fat-loss` templates also
+  أ/ب/ج. Push/Pull/Legs already numbered. Give full-body days professional names (beginners
+  on 3 days currently see أ/ب/ج).
+- **FU-P2-2 (LOW, consistency):** Generator excludes free-cables for beginners, but the
+  static `beginner-gym` template still lists `lat-pulldown`/`seated-cable-row`. Align it
+  (low impact: default path is the generated plan, not the template).
+- **FU-P2-4 (MED, UX):** Onboarding (`PlanBuilder`) shortened via optional/advanced gating
+  but still multi-step; consider trimming the default beginner path further.
+- **FU-P2-7 (LOW, content):** Saudi food DB lacks "البيك / Al Baik" (has kabsa/mandi/
+  shawarma/broast). Add if wanted.
+- **FU-P2-8 (LOW, perf):** Main JS chunk ~0.9 MB (~0.24 MB gzip) — non-blocking; consider
+  code-splitting / manualChunks.
+- **PRODUCT-Q (confirm):** 3rd onboarding goal is "زيادة القوة" (strength), not "maintain"
+  (target/ETA correctly hidden for strength). Confirm intended.
+
+### Resolved during Phase 2 (were earlier follow-ups)
+- ✅ Greeting "أهلًا يا {name}" + daily rotating phrase (`data/dailyPhrases.ts`).
+- ✅ 1-tap quick-start-workout + quick-add-food cards on home.
+- ✅ Beginner machine-first / free-cable exclusion in the plan generator.
+- ✅ Machine catalog browsable in `ExerciseLibraryView` (equipment view toggle).
+- ✅ Manual daily step counter (`lib/stepCounter.ts` + `StepCounterCard.tsx`).
