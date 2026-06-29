@@ -34,7 +34,8 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
   const [tab, setTab] = useState<Tab>('search')
   const [query, setQuery] = useState('')
   const [selected, setSelected] = useState<FoodItem | null>(null)
-  const [servings, setServings] = useState('1')
+  /** الكمية بالغرام (الإدخال الأساسي) — تبدأ من غرامات الحصة المرجعية للعنصر. */
+  const [grams, setGrams] = useState('')
 
   // إضافة سريعة / طعام مخصّص
   const [cName, setCName] = useState('')
@@ -50,22 +51,28 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
   const remCal = Math.max(0, targetCalories - eatenCal)
   const remProt = Math.max(0, targetProtein - eatenProt)
 
+  // غرامات الحصة المرجعية للعنصر المختار (أساس التحويل لكل غرام).
+  const baseGrams = (selected?.servingGrams && selected.servingGrams > 0) ? selected.servingGrams : 100
+  // الكمية الحالية بالغرام والعامل النسبي مقابل الحصة المرجعية.
+  const gramsNum = parseSafeNumber(grams, { min: 1, max: 3000, fallback: baseGrams })
+  const factor = gramsNum / baseGrams
+
   const addSelected = () => {
     if (!selected) return
-    const q = parseSafeNumber(servings, { min: 0.25, max: 50, fallback: 1 })
     const name = lang === 'en' ? selected.nameEn : selected.nameAr
     addLog({
-      label: `${name} ×${q}`,
-      servings: q,
-      calories: round(selected.calories * q),
-      protein: round(selected.protein * q),
-      carbs: round(selected.carbs * q),
-      fat: round(selected.fat * q),
+      label: `${name} · ${gramsNum}${t.gramsUnit}`,
+      servings: factor,
+      grams: gramsNum,
+      calories: round(selected.calories * factor),
+      protein: round(selected.protein * factor),
+      carbs: round(selected.carbs * factor),
+      fat: round(selected.fat * factor),
       meal: defaultMeal,
     })
     setSelected(null)
     setQuery('')
-    setServings('1')
+    setGrams('')
     onLogged?.()
   }
 
@@ -174,7 +181,7 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
                     <li key={f.id}>
                       <button
                         type="button"
-                        onClick={() => { setSelected(f); setServings('1') }}
+                        onClick={() => { setSelected(f); setGrams(String((f.servingGrams && f.servingGrams > 0) ? f.servingGrams : 100)) }}
                         className="flex w-full items-center justify-between gap-3 p-3 text-start hover:bg-beige"
                       >
                         <span className="min-w-0">
@@ -191,25 +198,26 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
               {selected && (
                 <div className="mt-3 rounded-lg border border-line bg-surface p-3">
                   <p className="text-sm font-bold text-ink-900">{lang === 'en' ? selected.nameEn : selected.nameAr}</p>
-                  <p className="text-[11px] text-ink-400">{selected.servingLabelAr}</p>
+                  <p className="text-[11px] text-ink-400">{t.perServingNote} {baseGrams}{t.gramsUnit}: {selected.calories} {t.calories} · {selected.protein}{t.gramsUnit} {t.protein}</p>
                   <div className="mt-3 flex items-center gap-2">
-                    <label className="text-xs text-ink-500">{t.servingsCount}</label>
+                    <label className="text-xs text-ink-500">{t.gramsAmount}</label>
                     <input
                       type="number"
-                      inputMode="decimal"
-                      min="0.25"
-                      max="50"
-                      step="0.25"
-                      value={servings}
-                      onChange={(e) => setServings(sanitizeNumericInput(e.target.value, { max: 50, decimal: true }))}
-                      className="w-20 rounded-lg border border-line bg-page px-2 py-1.5 text-sm text-ink-900 outline-none focus:border-primary-c"
+                      inputMode="numeric"
+                      min="1"
+                      max="3000"
+                      step="10"
+                      value={grams}
+                      onChange={(e) => setGrams(sanitizeNumericInput(e.target.value, { max: 3000 }))}
+                      className="w-24 rounded-lg border border-line bg-page px-2 py-1.5 text-sm text-ink-900 outline-none focus:border-primary-c"
                     />
+                    <span className="text-xs text-ink-400">{t.gramsUnit}</span>
                   </div>
                   <div className="mt-3 flex flex-wrap gap-3 text-xs text-ink-500">
-                    <Stat label={t.calories} value={round(selected.calories * (Number(servings) || 1))} />
-                    <Stat label={t.protein} value={`${round(selected.protein * (Number(servings) || 1))}غ`} />
-                    <Stat label={t.carbs} value={`${round(selected.carbs * (Number(servings) || 1))}غ`} />
-                    <Stat label={t.fat} value={`${round(selected.fat * (Number(servings) || 1))}غ`} />
+                    <Stat label={t.calories} value={round(selected.calories * factor)} />
+                    <Stat label={t.protein} value={`${round(selected.protein * factor)}${t.gramsUnit}`} />
+                    <Stat label={t.carbs} value={`${round(selected.carbs * factor)}${t.gramsUnit}`} />
+                    <Stat label={t.fat} value={`${round(selected.fat * factor)}${t.gramsUnit}`} />
                   </div>
                   <button type="button" onClick={addSelected} className="btn-primary mt-3 w-full justify-center py-2 text-xs">
                     <Icon name="Plus" className="h-4 w-4" />
