@@ -26,7 +26,7 @@ export function StepWelcome({ ctx }: { ctx: WizardCtx }) {
           <input
             className={inputClass}
             value={data.identity.userName}
-            placeholder="مثال: زياد"
+            placeholder="مثال: محمد"
             autoFocus
             onChange={(e) => updateIdentity({ userName: e.target.value })}
           />
