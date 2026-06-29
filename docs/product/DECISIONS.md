@@ -1,5 +1,25 @@
 # Qimmah Decisions Log
 
+## P2 Agent 1 — verify pass + strength summary fix — 2026-06-29 (second run)
+
+A prior P2 A1 run already landed the core mission on `integration/phase2`
+(commits `a7013f0` → `9d745de` → `302267e`): 3 goals, recomp→cut migration,
+cut/bulk/strength calories, target-weight-once. This run **verified** all of it
+end-to-end (build/lint/typecheck green; recomp migration recomputes via
+`withFreshTargets`; calories cut=TDEE−400 / bulk=TDEE+300 / strength=TDEE+150)
+and **closed the one gap the prior run left**:
+
+- **`MyTargets` (live plan summary, rendered in `ProfileView`) now hides the
+  "الوزن الهدف" + "مدة تقديرية" cards for `strength`** — for strength,
+  `toLegacyProfile` sets target = current weight and ETA = 0, so showing them was
+  misleading. They now render only for `cutting`/`bulking` (the weight goals), and
+  the ETA card surfaces the derived weekly rate (e.g. "أسبوع · 0.5 كجم/أسبوع"),
+  making the captured target weight visibly *used*. The prior run had explicitly
+  left `MyTargets` "intact".
+- No other files touched. `recomposition` stays an internal-only `GoalType` engine
+  value (see decision below) — unreachable from any UI, migrated to `cut` on every
+  load path. Did **not** edit `planGenerator.ts`/`dashboardLayout.ts` (other agents).
+
 ## P2 Agent 1 — Goals reduced to 3 + target weight actually used — 2026-06-29
 
 ### What changed
