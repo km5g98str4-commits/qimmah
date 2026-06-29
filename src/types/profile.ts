@@ -120,3 +120,5 @@ export interface Targets {
    */
   lowCalorieWarning?: string
 }
+
+// __PROBE__
