@@ -55,14 +55,23 @@ machines already existed (`belt-squat`, `glute-ham-raise`, `machine-hip-thrust`,
 - **No empty days / coverage preserved:** the existing fallback fill guarantees slots fill from
   the (still ample) non-cable pool. Verified by generation smoke test.
 
+### 3) Library UI — additive "Machines (for beginners)" view — `src/views/ExerciseLibraryView.tsx`
+- Added a **view toggle**: «كل التمارين» (default — existing search/filters/list, byte-identical
+  behavior) and «الأجهزة (للمبتدئين)» which renders the `machineCatalog` grouped by muscle group
+  with English-first name + Arabic subtitle + Arabic target muscle + sub-group label.
+- **Additive & low-risk:** default view is unchanged; the machines view is a separate branch that
+  reuses the existing `ExerciseDetail` modal for demos (each catalog item → real `exerciseId`,
+  guarded by `getExercise`). No existing filter/search/layout code was altered.
+- **Decision:** surfaced the catalog here (rather than deferring) because the mission goal was
+  "make the exercise library … machine-first, with demos" — and the library view is not
+  nutrition/dashboard/onboarding, so it's within the allowed area.
+
 ### Things intentionally NOT changed (hard rules / out of scope)
 - Nutrition, dashboard layout, onboarding goal logic, workout/streak — untouched.
-- **No UI changes.** The catalog is data-ready for a future "Machines" tab in
-  `ExerciseLibraryView`; wiring it was not specified and risks breakage, so deferred
-  (see FOLLOW_UPS).
 - **GIFs/demos:** library has no GIF infra; all demos are YouTube-search links via existing
-  `exercise.videoUrl`. Catalog items reuse that (each → real exerciseId). No new media added
-  (no scraping/secrets). Deferred as a content task.
+  `exercise.videoUrl` (shown through the existing `ExerciseDetail` modal). Catalog items reuse
+  that (each → real exerciseId). No new media added (no scraping/secrets). True GIF infra is a
+  separate content task (see FOLLOW_UPS).
 
 ### QA (this agent)
 - `npm run build` ✓ · `npm run lint` ✓ (0 warnings) · `tsc -b --noEmit` ✓.
