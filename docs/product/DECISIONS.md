@@ -10,9 +10,9 @@
   - `MyTargets` now uses canonical `targets.targetCalories`.
   - build + lint + typecheck all green; sample-user calc verified.
 - in_progress: none (work unit complete).
-- next: commit + push feature work.
-- branch_state: working branch `claude/nutrition-onboarding-integration-rfo9j5`
-  (rebased onto `origin/integration/phase1-smart-foundation`); dirty → about to commit.
+- next: integration agent to merge branch into `integration/phase1-smart-foundation`.
+- branch_state: `claude/nutrition-onboarding-integration-rfo9j5`
+  (rebased onto `origin/integration/phase1-smart-foundation`); clean; PUSHED at commit 876858e.
 
 > ملاحظة فرع: مهمّة Agent 2 طلبت فرع `feature/phase1-nutrition-activity-engine`
 > أساسه `integration/phase1-smart-foundation`. قواعد الـ harness تُلزم الدفع إلى
