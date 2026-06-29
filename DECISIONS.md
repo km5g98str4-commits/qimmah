@@ -2,10 +2,10 @@
 
 ## RESUME — P2 A3 — 2026-06-29
 - Branch: `feature/phase2-nutrition` off `integration/phase2` (base 302267e).
-- DONE (committed): (1) gram-based food logging; (2) hid non-functional `نسخ`/`مفضّلة · قريبًا` meal buttons behind a disabled flag.
-- BLOCKED / AWAITING USER: mission point 3 was truncated mid-sentence in the brief
-  ("Add SAUDI/GULF …") and any subsequent points are unknown. Do NOT invent the
-  food list/scope — confirm with user before implementing point 3+.
+- DONE (committed): (1) gram-based food logging; (2) hid non-functional `نسخ`/`مفضّلة · قريبًا`
+  meal buttons behind a disabled flag; (3) expanded Saudi/Gulf home dishes + restaurant/fast-food
+  (DB 165 → 187 items, all with `servingGrams`).
+- User confirmed: point 3 = BOTH restaurants + home dishes; point 3 is the LAST point. Mission complete.
 - NOT pushed yet (push feature branch only when instructed; never main).
 - Verify after each change: `npm run build && npm run lint && (npm run typecheck || npx tsc -b --noEmit)`.
 
@@ -29,10 +29,15 @@
   `SHOW_PLACEHOLDER_MEAL_ACTIONS = false` so they do NOT render now but the code +
   strings remain for when the feature ships. The functional `أضف` button stays.
 
-### 3. Saudi/Gulf + restaurants (point 3) — PENDING (brief truncated)
-- Current DB already has substantial `أكلات سعودية/خليجية` (kabsa, mandi, jareesh,
-  qursan, marqooq, mathlootha, saleeg, …) and `مطاعم/وجبات سريعة تقديرية` sections.
-- Awaiting the full instruction before adding/expanding to avoid wrong scope.
+### 3. Saudi/Gulf + restaurants (point 3) — DONE
+- User confirmed scope: expand BOTH home dishes and restaurants.
+- +10 `أكلات سعودية/خليجية` home dishes: haneeth-lamb, zurbian-chicken, majboos-chicken,
+  majboos-lamb, machboos-shrimp, kabsa-shrimp, mofatteh-lamb, madghoot-chicken, thareed, saloona-lamb.
+- +12 `مطاعم/وجبات سريعة تقديرية`: tawook-wrap, fajita-chicken, sfiha-meat, mutabbaq-meat,
+  onion-rings, loaded-fries, mozzarella-sticks, double-cheeseburger, hotdog, lamb-chops-plate,
+  broast-meal, fish-fillet-sandwich.
+- All carry `servingGrams` (gram logging works), realistic estimated macros, unique ids
+  (verified no dupes), and `notesAr` where the estimate is variable. DB 165 → 187 items.
 
 ## Hard rules honored
 - Working only on `integration/phase2` + `feature/phase2-nutrition`. No push to main, no deploy, no secrets.
