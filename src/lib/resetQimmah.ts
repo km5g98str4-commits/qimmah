@@ -3,6 +3,8 @@
 export const QIMMAH_KEYS = [
   'qimmah:customization:v1',
   'qimmah:onboarding:v1',
+  // مصدر الحقيقة للإعداد (Phase 1) — لازم يُمسح وإلا بقيت بيانات إعداد قديمة بعد الضبط.
+  'qimmah:onboarding:profile:v1',
   'qimmah:today:v1',
   'qimmah:nutritionToday:v1',
   'qimmah:wellnessToday:v1',
@@ -11,6 +13,10 @@ export const QIMMAH_KEYS = [
   'qimmah:workoutSessions:v1',
   'qimmah:exerciseHistory:v1',
   'qimmah:prefs:v1',
+  // تفضيلات التذكير + بيانات المزامنة (إن وُجدت)
+  'qimmah:reminders:v1',
+  'qimmah:sync:meta:v1',
+  'qimmah:supabase-auth:v1',
   // المتجر التاريخي الدائم (v1)
   'qimmah:history:workoutSessions:v1',
   'qimmah:history:exerciseHistory:v1',

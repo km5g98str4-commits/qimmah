@@ -71,6 +71,23 @@ export interface ShellStrings {
     privacyBody: string[]
     termsBody: string[]
   }
+  notFound: {
+    code: string
+    title: string
+    body: string
+    home: string
+    back: string
+  }
+  contact: {
+    title: string
+    intro: string
+    emailLabel: string
+    emailValue: string
+    emailCta: string
+    reportCta: string
+    reportSubject: string
+    back: string
+  }
   demo: { badge: string; title: string; body: string; back: string }
   workout: {
     start: string
@@ -405,6 +422,23 @@ const ar: ShellStrings = {
       'أنت مسؤول عن صحة البيانات التي تُدخلها وعن الاحتفاظ بنسخة احتياطية عبر خاصية التصدير.',
     ],
   },
+  notFound: {
+    code: '٤٠٤',
+    title: 'الصفحة غير موجودة',
+    body: 'الرابط اللي فتحته مو موجود أو اتغيّر.',
+    home: 'ارجع للرئيسية',
+    back: 'الشاشة السابقة',
+  },
+  contact: {
+    title: 'تواصل معنا',
+    intro: 'عندك ملاحظة أو سؤال أو واجهت مشكلة؟ يسعدنا نسمع منك ونرد عليك بأقرب وقت.',
+    emailLabel: 'البريد للدعم',
+    emailValue: 'support@qimmah.app',
+    emailCta: 'راسلنا عبر البريد',
+    reportCta: 'أبلغ عن مشكلة',
+    reportSubject: 'الإبلاغ عن مشكلة في قِمّة',
+    back: 'رجوع',
+  },
   demo: {
     badge: 'نموذج تجريبي',
     title: 'هذا نموذج تجريبي',
@@ -732,7 +766,7 @@ const en: ShellStrings = {
     privacyBody: [
       'Qimmah is a local-first personal app. In guest mode, all your data stays in this device’s browser and never leaves it.',
       'When you log in with a cloud account (Supabase), your data is uploaded to your own account so you can access it from other devices. Only you can read your rows (Row Level Security).',
-      'We do not sell or share your data with advertisers. Progress photos and health measurements remain yours and can be deleted anytime via “Reset data”.',
+      'We do not sell or share your data with advertisers. Your measurements remain yours and can be deleted anytime via “Reset data”.',
       'You can export a full copy of your data anytime from Settings → Data.',
     ],
     termsBody: [
@@ -741,6 +775,23 @@ const en: ShellStrings = {
       'Consult a qualified professional before changing your diet, medication, or training program, especially with a health condition.',
       'You are responsible for the accuracy of the data you enter and for keeping a backup via the export feature.',
     ],
+  },
+  notFound: {
+    code: '404',
+    title: 'Page not found',
+    body: 'The link you opened doesn’t exist or has changed.',
+    home: 'Back to home',
+    back: 'Previous screen',
+  },
+  contact: {
+    title: 'Contact us',
+    intro: 'Have feedback, a question, or hit a problem? We’d love to hear from you and will reply as soon as we can.',
+    emailLabel: 'Support email',
+    emailValue: 'support@qimmah.app',
+    emailCta: 'Email us',
+    reportCta: 'Report a problem',
+    reportSubject: 'Reporting a problem in Qimmah',
+    back: 'Back',
   },
   demo: {
     badge: 'Demo',

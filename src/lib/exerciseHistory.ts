@@ -75,6 +75,11 @@ export function recordExercise(
   se: SessionExercise,
   completedAt: string,
 ): ExerciseHistory {
+  // تمرين تخطّاه المستخدم (لا مجموعة منجزة ولا علامة إكمال) لا يُحدّث السجل —
+  // حتى يبقى «آخر إنجاز» وعدّاد الجلسات دقيقًا ولا تتلوّث الأرقام القياسية.
+  const anyCompleted = !!se.completed || (se.sets ?? []).some((s) => s.completed)
+  if (!anyCompleted) return history
+
   const sets = (se.sets ?? []).filter((s) => s.completed && numOf(s.weightKg) > 0)
   let topWeight = NaN
   let topReps = NaN

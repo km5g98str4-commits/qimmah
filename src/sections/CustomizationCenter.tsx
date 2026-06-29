@@ -65,6 +65,11 @@ export function CustomizationCenter({ onBack, initialStep = 0, mode = 'onboardin
   )
   const [saved, setSaved] = useState(false)
   const stepValid = !steps[step].validate || steps[step].validate!(data)
+  // أول خطوة مطلوبة غير مكتملة (-1 إذا كل الخطوات صالحة).
+  const firstInvalidIndex = steps.findIndex((s) => s.validate && !s.validate(data))
+  const allValid = firstInvalidIndex === -1
+  // يُسمح بالقفز عبر الشِّيپس للخلف بحرّية، وللأمام فقط حتى أول خطوة ناقصة (لا تجاوزها).
+  const canReachStep = (i: number) => allValid || i <= firstInvalidIndex
 
   // تذكّر آخر خطوة (يسمح باستئناف الإعداد لاحقًا) دون المساس بحالة الإكمال
   useEffect(() => {
@@ -143,6 +148,11 @@ export function CustomizationCenter({ onBack, initialStep = 0, mode = 'onboardin
     setSaved(true)
   }
   const saveAndClose = () => {
+    // لا يكتمل الإعداد والحقول المطلوبة ناقصة — انتقل لأول خطوة ناقصة لإصلاحها.
+    if (!allValid) {
+      setStep(firstInvalidIndex)
+      return
+    }
     applyCustomization(data)
     markCompleted(step)
     onBack(true)
@@ -195,23 +205,30 @@ export function CustomizationCenter({ onBack, initialStep = 0, mode = 'onboardin
           </div>
           {/* خطوات قابلة للنقر (تمرير أفقي على الجوال) */}
           <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
-            {steps.map((s, i) => (
-              <button
-                key={s.title}
-                type="button"
-                onClick={() => setStep(i)}
-                className={cn(
-                  'whitespace-nowrap rounded-full border px-3 py-1 text-[11px] font-bold transition-colors',
-                  i === step
-                    ? 'border-primary-soft bg-primary-soft text-primary-c'
-                    : i < step
-                      ? 'border-line bg-surface text-ink-500'
-                      : 'border-line bg-surface text-ink-400',
-                )}
-              >
-                {i + 1}. {s.title}
-              </button>
-            ))}
+            {steps.map((s, i) => {
+              const reachable = canReachStep(i)
+              return (
+                <button
+                  key={s.title}
+                  type="button"
+                  onClick={() => reachable && setStep(i)}
+                  disabled={!reachable}
+                  aria-disabled={!reachable}
+                  title={reachable ? undefined : 'أكمل الخطوات المطلوبة أولًا'}
+                  className={cn(
+                    'whitespace-nowrap rounded-full border px-3 py-1 text-[11px] font-bold transition-colors',
+                    !reachable && 'cursor-not-allowed opacity-40',
+                    i === step
+                      ? 'border-primary-soft bg-primary-soft text-primary-c'
+                      : i < step
+                        ? 'border-line bg-surface text-ink-500'
+                        : 'border-line bg-surface text-ink-400',
+                  )}
+                >
+                  {i + 1}. {s.title}
+                </button>
+              )
+            })}
           </div>
         </div>
       </header>
@@ -248,7 +265,7 @@ export function CustomizationCenter({ onBack, initialStep = 0, mode = 'onboardin
           </button>
 
           {isLast ? (
-            <button type="button" onClick={saveAndClose} className="btn-primary px-6 py-3">
+            <button type="button" onClick={saveAndClose} disabled={!allValid} className="btn-primary px-6 py-3 disabled:cursor-not-allowed disabled:opacity-40">
               <Icon name="Check" className="h-4 w-4" />
               {mode === 'advanced' ? 'حفظ وإغلاق' : 'اعتمد خطتي وابدأ'}
             </button>

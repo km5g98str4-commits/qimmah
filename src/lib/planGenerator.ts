@@ -8,6 +8,7 @@ import type {
   ExperienceBand,
   GoalType,
   MuscleFocus,
+  PlannedSplit,
   Profile,
   Targets,
   TrainingLevel,
@@ -88,7 +89,7 @@ function expTier(p: Profile): ExpTier {
   }
 }
 
-/** عدد التمارين في الجلسة حسب الخبرة. */
+/** العدد الأساسي للتمارين حسب الخبرة (قبل تعديل مدّة الجلسة). */
 function exercisesPerSession(tier: ExpTier): number {
   switch (tier) {
     case 'beginner':
@@ -100,6 +101,22 @@ function exercisesPerSession(tier: ExpTier): number {
     case 'advanced':
       return 6
   }
+}
+
+/**
+ * عدد تمارين الجلسة: الأساس من الخبرة، ثم تعديل بحجم العمل حسب مدّة الجلسة.
+ * 30=أقل، 45=متوسط، 60=قياسي، 75=أكثر، 90+=أعلى حجم. (يضمن 30 < 75+).
+ */
+function targetExerciseCount(tier: ExpTier, sessionMinutes: number): number {
+  const base = exercisesPerSession(tier)
+  const m = sessionMinutes > 0 ? sessionMinutes : 60
+  let delta: number
+  if (m <= 30) delta = -2
+  else if (m <= 45) delta = -1
+  else if (m <= 60) delta = 0
+  else if (m <= 75) delta = 1
+  else delta = 2
+  return clamp(base + delta, 3, 9)
 }
 
 const COMPOUND_PATTERNS = new Set<MovementPattern>(['squat', 'hinge', 'push', 'pull', 'lunge'])
@@ -144,8 +161,8 @@ function makeEquipFilter(p: Profile): (ex: Exercise) => boolean {
   const access = p.gymAccess ?? (p.workoutEnvironment === 'home' ? 'home' : 'full')
   if (access === 'full') return () => true
   if (access === 'small') {
-    // وزن حر + أجهزة أساسية فقط — نتجنّب الكيبل (وما يتبعه).
-    const banned = new Set(['cable', 'rope'])
+    // نادٍ صغير: وزن حر + أجهزة أساسية + كيبل أساسي — نستبعد المتخصّص فقط (سميث/حبل).
+    const banned = new Set(['smith', 'rope'])
     return (ex) => ex.equipment.every((e) => !banned.has(e))
   }
   if (access === 'home') {
@@ -162,6 +179,45 @@ function makeEquipFilter(p: Profile): (ex: Exercise) => boolean {
 function levelOk(ex: Exercise, tier: ExpTier): boolean {
   if (tier === 'beginner' || tier === 'novice') return ex.level !== 'advanced'
   return true
+}
+
+// — تصفية الإصابات: نستبعد التمارين عالية الخطورة ونُبقي بدائل أأمن (بلا نصائح طبية) —
+type InjuryArea = 'knee' | 'shoulder' | 'back'
+
+/** يكتشف مناطق الإصابة من نص القيود (معرّفات الإعداد القياسية + التسميات العربية). */
+function detectInjuries(injuries?: string): Set<InjuryArea> {
+  const out = new Set<InjuryArea>()
+  if (!injuries) return out
+  const t = injuries.toLowerCase()
+  if (/knee|ركبة|ركب/.test(t)) out.add('knee')
+  if (/shoulder|كتف|أكتاف|اكتاف/.test(t)) out.add('shoulder')
+  if (/back|lower_back|ظهر|عمود/.test(t)) out.add('back')
+  return out
+}
+
+// تمارين نستبعدها افتراضيًا لكل إصابة — مع إبقاء بدائل أأمن لنفس المجموعة العضلية.
+const INJURY_RISKY_IDS: Record<InjuryArea, ReadonlySet<string>> = {
+  // الركبة: نتجنّب القرفصاء الثقيل والاندفاع العميق ومدّ الرجل؛ نُبقي ليج برس/قرفصاء خفيف والهيپ.
+  knee: new Set([
+    'barbell-back-squat', 'front-squat', 'hack-squat', 'smith-machine-squat', 'sissy-squat',
+    'pendulum-squat', 'belt-squat', 'leg-press-narrow', 'bulgarian-split-squat', 'walking-lunge',
+    'reverse-lunge', 'step-up', 'leg-extension', 'wall-sit',
+  ]),
+  // الكتف: نتجنّب الضغط العلوي بالبار والتجديف العمودي؛ نُبقي ضغط الدمبل/الجهاز والرفرفات.
+  shoulder: new Set(['overhead-press', 'push-press', 'upright-row', 'arnold-press']),
+  // الظهر: نتجنّب الهينج الثقيل المحمّل على العمود؛ نُبقي التجديف المدعوم/الجهاز والهيپ ثرَست.
+  back: new Set([
+    'deadlift', 'sumo-deadlift', 'stiff-leg-deadlift', 'good-morning', 'barbell-row', 't-bar-row',
+    'romanian-deadlift', 'dumbbell-rdl', 'single-leg-rdl',
+  ]),
+}
+
+/** يبني فلتر إصابات يستبعد التمارين عالية الخطورة للإصابات المحددة. */
+function makeInjuryFilter(areas: Set<InjuryArea>): (ex: Exercise) => boolean {
+  if (!areas.size) return () => true
+  const banned = new Set<string>()
+  for (const area of areas) for (const id of INJURY_RISKY_IDS[area]) banned.add(id)
+  return (ex) => !banned.has(ex.id)
 }
 
 // — فتحات اليوم (Slots): قائمة مرتّبة بالأولوية تُملأ بأفضل تمرين متاح —
@@ -365,12 +421,68 @@ function splitId(days: number): string {
   return 'gen-ppl-7'
 }
 
+// — التقسيمة المتقدّمة (اختيار المستخدم يتجاوز التلقائي عند الجدولة الصالحة) —
+// دورة أنواع الأيام لكل تقسيمة؛ تتكرّر لملء عدد الأيام المختار.
+const ADVANCED_CYCLES: Record<PlannedSplit, DayType[]> = {
+  full_body: ['full'],
+  upper_lower: ['upper', 'lower'],
+  push_pull_legs: ['push', 'pull', 'lower'],
+  arnold: ['upper', 'arms', 'lower'], // صدر-ظهر / كتف-ذراع / أرجل (تقريب على محرّك الفتحات)
+  bro_split: ['push', 'pull', 'arms', 'lower'], // صدر / ظهر / كتف-ذراع / أرجل (تقريب)
+}
+
+const ADVANCED_SPLIT_ID: Record<PlannedSplit, string> = {
+  full_body: 'gen-adv-fullbody',
+  upper_lower: 'gen-adv-upper-lower',
+  push_pull_legs: 'gen-adv-ppl',
+  arnold: 'gen-adv-arnold',
+  bro_split: 'gen-adv-bro',
+}
+
+function advancedDaySpec(split: PlannedSplit, type: DayType, n: number): DaySpec {
+  switch (type) {
+    case 'full':
+      return fullDay((n - 1) % AR_ALPHA.length)
+    case 'upper':
+      return ulDay('upper', n)
+    case 'push':
+      return pplDay('push', n)
+    case 'pull':
+      return pplDay('pull', n)
+    case 'arms':
+      return { type: 'arms', nameAr: `ذراعين وأكتاف ${AR_NUM[n] ?? ''}`.trim(), nameEn: `Arms & Shoulders ${n}`, routineType: 'push' }
+    case 'core':
+      return focusDay('core')
+    case 'lower':
+      // «سفلي» في تقسيمة علوي/سفلي، و«أرجل» في PPL/أرنولد/برو.
+      return split === 'upper_lower' ? ulDay('lower', n) : pplDay('legs', n)
+  }
+}
+
+/** يبني مواصفات أيام تقسيمة متقدّمة، أو null إن لم تكن قابلة للجدولة لعدد الأيام. */
+function advancedSplitDays(days: number, split: PlannedSplit): DaySpec[] | null {
+  const cycle = ADVANCED_CYCLES[split]
+  const d = clamp(days, 1, 7)
+  if (!cycle || d < cycle.length) return null // أقل من دورة كاملة → غير صالح، نرجع للتلقائي
+  const counts: Record<string, number> = {}
+  return Array.from({ length: d }, (_, i) => {
+    const type = cycle[i % cycle.length]
+    counts[type] = (counts[type] ?? 0) + 1
+    return advancedDaySpec(split, type, counts[type])
+  })
+}
+
 const SPLIT_TITLES: Record<string, { ar: string; en: string }> = {
   'gen-fullbody': { ar: 'جسم كامل', en: 'Full Body' },
   'gen-upper-lower-4': { ar: 'علوي / سفلي', en: 'Upper / Lower' },
   'gen-upper-lower-5': { ar: 'علوي / سفلي + يوم مركّز', en: 'Upper / Lower + Focus' },
   'gen-ppl-6': { ar: 'دفع / سحب / أرجل ×٢', en: 'Push / Pull / Legs ×2' },
   'gen-ppl-7': { ar: 'دفع / سحب / أرجل ×٢ + إضافي', en: 'Push / Pull / Legs ×2 + Extra' },
+  'gen-adv-fullbody': { ar: 'جسم كامل (اختيارك)', en: 'Full Body (your choice)' },
+  'gen-adv-upper-lower': { ar: 'علوي / سفلي (اختيارك)', en: 'Upper / Lower (your choice)' },
+  'gen-adv-ppl': { ar: 'دفع / سحب / أرجل (اختيارك)', en: 'Push / Pull / Legs (your choice)' },
+  'gen-adv-arnold': { ar: 'تقسيمة أرنولد (اختيارك)', en: 'Arnold Split (your choice)' },
+  'gen-adv-bro': { ar: 'عضلة باليوم (اختيارك)', en: 'Bro Split (your choice)' },
 }
 
 /** اسم الخطة للعرض — يدعم تقسيمات المحرّك الجديدة والقوالب القديمة. */
@@ -431,13 +543,19 @@ function addCutCardio(planDays: PlanDay[], equipOk: (ex: Exercise) => boolean): 
 /** يبني خطة التمرين كاملة من بيانات الملف الشخصي (تقسيمة + تمارين). */
 function generateWorkoutPlan(p: Profile): { plan: WorkoutPlan; specs: DaySpec[] } {
   const days = clamp(p.trainingDays, 1, 7)
-  const specs = splitDays(days, p.muscleFocus)
+  // التقسيمة المتقدّمة (اختيار المستخدم) تتجاوز التلقائي متى كانت قابلة للجدولة.
+  const advanced =
+    p.splitMode === 'advanced' && p.splitChoice ? advancedSplitDays(days, p.splitChoice) : null
+  const specs = advanced ?? splitDays(days, p.muscleFocus)
+  const templateId = advanced && p.splitChoice ? ADVANCED_SPLIT_ID[p.splitChoice] : splitId(days)
   const tier = expTier(p)
-  const target = exercisesPerSession(tier)
+  const target = targetExerciseCount(tier, p.workoutDuration)
   const equipOk = makeEquipFilter(p)
+  const injuryOk = makeInjuryFilter(detectInjuries(p.injuries))
   const pool = exercises.filter(
     (ex) =>
       equipOk(ex) &&
+      injuryOk(ex) &&
       ex.movementPattern !== 'mobility' &&
       ex.primaryMuscle !== 'cardio' &&
       levelOk(ex, tier),
@@ -459,7 +577,7 @@ function generateWorkoutPlan(p: Profile): { plan: WorkoutPlan; specs: DaySpec[] 
 
   if (p.goalType === 'cutting') addCutCardio(planDays, equipOk)
 
-  return { plan: { templateId: splitId(days), days: planDays }, specs }
+  return { plan: { templateId, days: planDays }, specs }
 }
 
 const WEEKDAYS = ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة']
@@ -557,9 +675,29 @@ export function generateNutrition(p: Profile, targets: Targets): { plan: Nutriti
   const targetCalories =
     targets.targetCalories ||
     (goal === 'cut' ? targets.cuttingCalories : goal === 'bulk' ? targets.bulkingCalories : targets.maintenanceCalories)
+  // أسلوب العرض من الإعداد — افتراضيًا اقتراح وجبات للحفاظ على سلوك المستخدمين الحاليين.
+  const displayStyle = p.nutritionDisplayStyle ?? 'meal_suggestions'
   const mealsCount = Math.max(3, Math.min(5, p.mealsPerDay))
+
+  // ماكروز فقط / إرشاد مبسّط: لا نفرض اقتراح وجبات — نكتفي بالأهداف + التسجيل (لا بيانات وهمية).
+  if (displayStyle !== 'meal_suggestions') {
+    const plan: NutritionPlan = {
+      enabled: p.trackNutrition,
+      targetCalories,
+      targetProtein: targets.proteinGrams,
+      targetCarbs: targets.carbsGrams,
+      targetFat: targets.fatGrams,
+      targetWaterLiters: targets.waterLiters,
+      meals: [],
+      style: displayStyle,
+      mealsPerDay: p.mealsPerDay,
+    }
+    return { plan }
+  }
+
   const s = STYLE_TEMPLATES[p.nutritionStyle] ?? STYLE_TEMPLATES.high_protein
 
+  // اقتراح الوجبات يُبنى حسب عدد الوجبات من الإعداد (meals_per_day).
   const slots: string[] = [s.breakfast, s.lunch, s.dinner]
   if (mealsCount >= 4) slots.push(s.snack)
   if (mealsCount >= 5) slots.push('protein-shake')
@@ -595,6 +733,8 @@ export function generateNutrition(p: Profile, targets: Targets): { plan: Nutriti
     targetFat: targets.fatGrams,
     targetWaterLiters: targets.waterLiters,
     meals,
+    style: displayStyle,
+    mealsPerDay: p.mealsPerDay,
   }
   return { plan, warning: within ? undefined : 'هذه أمثلة وجبات مبدئية وليست خطة كاملة مطابقة للأهداف.' }
 }
@@ -670,25 +810,34 @@ export function planLabel(p: Profile, templateId: string): string {
 export function generatePlan(profile: Profile): GeneratedPlan {
   const p: Profile = { ...profile, goal: calorieGoalFromGoalType(profile.goalType) }
   const targets = computeTargets(p)
-  const isReturning = p.goalType === 'returning' || p.consistency === 'returning'
+  // بداية متحفّظة: الرجوع بعد انقطاع أو الانتظام المتقطّع → حجم أسبوع أوّل أخفّ.
+  const isConservativeStart =
+    p.goalType === 'returning' || p.consistency === 'returning' || p.consistency === 'onoff'
 
   const { plan, specs } = generateWorkoutPlan(p)
   let workoutPlan = plan
   workoutPlan = applyMuscleFocus(workoutPlan, p.muscleFocus ?? 'balanced')
-  if (isReturning) workoutPlan = applyDeload(workoutPlan)
+  if (isConservativeStart) workoutPlan = applyDeload(workoutPlan)
 
   const weeklySchedule = buildScheduleFromSpecs(specs, p.trainingDays, p.preferredDays)
   const { plan: nutritionPlan, warning: nutritionWarning } = generateNutrition(p, targets)
 
   const warnings: string[] = []
-  if (isReturning) warnings.push('خفّفنا حجم أسبوعك الأول للرجوع بأمان — زِد تدريجيًا بعدها.')
+  if (isConservativeStart) warnings.push('بدأنا بحجم أخفّ هذا الأسبوع لبداية آمنة — زِد تدريجيًا بعدها.')
   if (p.trainingLevel === 'beginner' && p.trainingDays >= 5) {
     warnings.push('للمبتدئ ننصح بـ3–4 أيام في البداية لبناء الالتزام والاستشفاء.')
   }
-  // فحص تكرار الأرجل لخطط التضخيم متعددة الأيام
-  if ((p.goalType === 'bulking' || p.goalType === 'recomposition') && p.trainingDays >= 4) {
-    const legDays = weeklySchedule.filter((d) => d.type === 'legs' || d.type === 'full').length
-    if (legDays < 2) warnings.push('تأكد من تدريب الأرجل مرتين أسبوعيًا على الأقل في خطط التضخيم.')
+  // تنبيه عند تصفية الإصابات: استبعدنا تمارين عالية الخطورة واخترنا بدائل أأمن.
+  const injuryAreas = detectInjuries(p.injuries)
+  if (injuryAreas.size) {
+    warnings.push('راعينا الإصابات المحددة باستبعاد تمارين عالية الخطورة واختيار بدائل أأمن لنفس العضلات.')
+  }
+  // فحص تكرار الأرجل: القاعدة مضمونة في التلقائي؛ هنا ننبّه إذا اختار المستخدم تقسيمة متقدّمة تدرّب الأرجل أقل من مرّتين.
+  const legDays = weeklySchedule.filter((d) => d.type === 'legs' || d.type === 'full').length
+  if (p.splitMode === 'advanced' && p.splitChoice && legDays < 2) {
+    warnings.push('تقسيمتك المختارة تدرّب الأرجل أقل من مرّتين أسبوعيًا — فكّر بزيادة الأيام أو تقسيمة أخرى.')
+  } else if ((p.goalType === 'bulking' || p.goalType === 'recomposition') && p.trainingDays >= 4 && legDays < 2) {
+    warnings.push('تأكد من تدريب الأرجل مرتين أسبوعيًا على الأقل في خطط التضخيم.')
   }
   if (nutritionWarning) warnings.push(nutritionWarning)
 

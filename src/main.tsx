@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App'
+import { SplashScreen } from './components/SplashScreen'
 import { CustomizationProvider } from './lib/customizationContext'
 import { AuthProvider } from './lib/authContext'
 import './styles/index.css'
@@ -13,6 +14,7 @@ createRoot(root).render(
     <AuthProvider>
       <CustomizationProvider>
         <App />
+        <SplashScreen />
       </CustomizationProvider>
     </AuthProvider>
   </StrictMode>,

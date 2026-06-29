@@ -127,6 +127,33 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
     setOpenDetails(false)
   }, [current])
 
+  // حارس: يوم بلا تمارين (مثل «تمرين فارغ») — لا نلمس مرجعًا غير موجود؛ نعرض حالة آمنة.
+  if (day.exercises.length === 0) {
+    return (
+      <div className="fixed inset-0 z-50 flex flex-col bg-page">
+        <header className="sticky top-0 z-10 glass border-b border-line">
+          <div className="container-page flex h-16 items-center justify-between gap-3">
+            <button type="button" onClick={onClose} aria-label="إغلاق" className="grid h-11 w-11 place-items-center rounded-xl border border-line bg-surface text-ink-700">
+              <Icon name="X" className="h-5 w-5" />
+            </button>
+            <p className="truncate text-sm font-black text-ink-900">{lang === 'en' ? day.nameEn : day.nameAr}</p>
+            <div className="h-11 w-11" />
+          </div>
+        </header>
+        <main className="container-page flex flex-1 flex-col items-center justify-center gap-4 py-10 text-center">
+          <span className="grid h-14 w-14 place-items-center rounded-2xl bg-primary-soft text-primary-c">
+            <Icon name="Dumbbell" className="h-7 w-7" />
+          </span>
+          <p className="text-base font-bold text-ink-900">{t.emptyPlan}</p>
+          <button type="button" onClick={onClose} className="btn-primary px-6 py-3 text-sm">
+            <Icon name="ChevronRight" className="h-4 w-4" />
+            {t.backToToday}
+          </button>
+        </main>
+      </div>
+    )
+  }
+
   const pe = day.exercises[current]
   const exId = effExId(pe.id, pe.exerciseId)
   const ex = getExercise(exId)

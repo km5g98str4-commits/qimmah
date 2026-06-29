@@ -15,6 +15,26 @@ interface NutritionViewProps {
 
 const round = (n: number) => Math.round(n)
 
+/** أقسام الوجبات المعروضة حسب عدد الوجبات من الإعداد (meals_per_day). */
+function mealSlotsForCount(count?: number) {
+  const ids: MealSlot[] =
+    count == null
+      ? ['breakfast', 'lunch', 'dinner', 'snack']
+      : count <= 2
+        ? ['breakfast', 'dinner']
+        : count === 3
+          ? ['breakfast', 'lunch', 'dinner']
+          : ['breakfast', 'lunch', 'dinner', 'snack']
+  return MEAL_SLOTS.filter((s) => ids.includes(s.id))
+}
+
+/** يضمن ظهور أي عنصر مسجّل حتى لو كانت خانته غير معروضة (تُطوى لآخر قسم متاح). */
+function slotForEntry(meal: MealSlot | undefined, visible: { id: MealSlot }[]): MealSlot {
+  const m = meal ?? 'snack'
+  if (visible.some((s) => s.id === m)) return m
+  return visible[visible.length - 1].id
+}
+
 /** تبويب التغذية — متتبّع يومي للوجبات والماكروز والماء (موبايل أولًا). */
 export function NutritionView({ lang }: NutritionViewProps) {
   const { customization } = useCustomization()
@@ -27,6 +47,11 @@ export function NutritionView({ lang }: NutritionViewProps) {
   const targetCarbs = np.targetCarbs || customization.targets.carbsGrams || 200
   const targetFat = np.targetFat || customization.targets.fatGrams || 70
   const targetWaterMl = Math.round((np.targetWaterLiters || customization.targets.waterLiters || 3) * 1000)
+
+  // أسلوب العرض من الإعداد (مصدر الحقيقة). افتراضيًا «اقتراح وجبات» للمستخدمين الحاليين.
+  const style = np.style ?? 'meal_suggestions'
+  // أقسام الوجبات تُبنى حسب عدد الوجبات من الإعداد (meals_per_day) عند اقتراح الوجبات.
+  const mealSlots = mealSlotsForCount(np.mealsPerDay)
 
   const eaten = round(totals.calories)
   const exerciseCals = 0 // لا نتتبّع السعرات المحروقة بعد — نعرضها 0 بصدق
@@ -65,20 +90,26 @@ export function NutritionView({ lang }: NutritionViewProps) {
           <MacroCard label={t.water} eaten={state.waterMl} target={targetWaterMl} unit="مل" color="bg-primary" />
         </div>
 
-        {/* الوجبات */}
-        <div className="mt-6 space-y-4">
-          {MEAL_SLOTS.map((slot) => (
-            <MealCard
-              key={slot.id}
-              lang={lang}
-              slot={slot}
-              items={state.log.filter((e) => (e.meal ?? 'snack') === slot.id)}
-              targetCalories={targetCalories}
-              targetProtein={targetProtein}
-              onRemove={removeLog}
-            />
-          ))}
-        </div>
+        {/* التسجيل: اقتراح وجبات → أقسام وجبات حسب عدد الوجبات؛ ماكروز فقط → مسجّل موحّد */}
+        {style === 'meal_suggestions' ? (
+          <div className="mt-6 space-y-4">
+            {mealSlots.map((slot) => (
+              <MealCard
+                key={slot.id}
+                lang={lang}
+                slot={slot}
+                items={state.log.filter((e) => slotForEntry(e.meal, mealSlots) === slot.id)}
+                targetCalories={targetCalories}
+                targetProtein={targetProtein}
+                onRemove={removeLog}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="mt-6">
+            <QuickMealLogger lang={lang} targetCalories={targetCalories} targetProtein={targetProtein} />
+          </div>
+        )}
 
         {/* الماء */}
         <WaterPanel lang={lang} waterMl={state.waterMl} targetMl={targetWaterMl} onAdd={addWater} />

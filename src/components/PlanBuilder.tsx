@@ -1,66 +1,94 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { Icon } from './Icon'
 import { cn } from '@/lib/cn'
-import { type Customization } from '@/lib/customization'
 import { useCustomization } from '@/lib/customizationContext'
 import { markCompleted, saveDraft, loadDraft, setLastStep } from '@/lib/onboarding'
-import { calorieGoalFromGoalType, profileHash } from '@/lib/calculators'
 import {
-  deriveActivityLevel,
-  deriveTargetWeight,
-  generatePlan,
-  levelFromExperience,
-} from '@/lib/planGenerator'
+  buildCustomizationFromOnboarding,
+  saveOnboardingProfile,
+} from '@/lib/onboardingProfile'
 import type {
-  Consistency,
+  AdvancedSplit,
+  DietPattern,
+  Environment,
   ExperienceLevel,
-  Gender,
-  GymType,
-  Profile,
-} from '@/types/profile'
+  NeatLevel,
+  NutritionStyle as OnbNutritionStyle,
+  OnbConsistency,
+  OnboardingProfile,
+  Sex,
+  SplitMode,
+  WellnessTrackingMode,
+} from '@/types/onboarding'
+import { ONBOARDING_SCHEMA_VERSION } from '@/types/onboarding'
 import {
-  consistencyChoices,
+  advancedSplitChoices,
+  allergyChoices,
+  consistencyChoicesV2,
+  dietPatternChoices,
+  environmentChoices,
   experienceChoices,
-  experienceToBand,
-  genderChoices,
-  gymTypeChoices,
-  gymTypeToAccess,
   goalChoices,
+  injuryChoices,
+  neatChoices,
+  nutritionStyleChoices,
   recommendedDaysFor,
+  sessionDurationChoices,
+  sexChoices,
+  splitModeChoices,
+  wellnessModeChoices,
 } from '@/data/planBuilder'
 import type { GoalValue } from '@/data/planBuilder'
 
 interface PlanBuilderProps {
-  /** يُستدعى بعد حفظ الخطة وتعليم الإكمال (دخول اللوحة). */
+  /** يُستدعى بعد حفظ مصدر الحقيقة والخطة وتعليم الإكمال (دخول اللوحة). */
   onComplete: () => void
   /** يُستدعى عند الخروج من أول خطوة (رجوع للبداية). */
   onExit: () => void
 }
 
-// حدود الإعداد (إدخال مرئي بمنزلقات — لا نص حر).
+// حدود الإعداد (إدخال مرئي بمنزلقات/عدّادات — لا نص حر).
 const BOUNDS = {
   age: { min: 14, max: 80 },
   height: { min: 120, max: 220 },
   weight: { min: 30, max: 250 },
   days: { min: 3, max: 6 },
+  meals: { min: 2, max: 6 },
+  steps: { min: 2000, max: 20000 },
 }
 
 interface Answers {
+  // profile + bodyMetrics
   goalValue?: GoalValue
-  gender?: Gender
+  sex?: Sex
   age: number
   heightCm: number
   weightKg: number
   targetWeightKg: number
-  /** هل لمس المستخدم منزلق وزن الهدف (لمنع إعادة التهيئة فوق اختياره). */
   targetTouched: boolean
+  // trainingPreferences
   experienceLevel?: ExperienceLevel
-  consistency?: Consistency
-  gymType?: GymType
+  consistency?: OnbConsistency
+  environment?: Environment
   trainingDays: number
-  /** هل لمس المستخدم عدّاد الأيام (لمنع إعادة التهيئة فوق اختياره). */
   daysTouched: boolean
+  sessionDurationMin: number
+  splitMode: SplitMode
+  advancedSplit?: AdvancedSplit
+  // activityProfile
+  neat: NeatLevel
+  includeSteps: boolean
+  stepEstimate: number
+  // nutritionPreferences
+  nutritionStyle: OnbNutritionStyle
+  mealsPerDay: number
+  // foodPreferences (optional)
+  dietPattern: DietPattern
+  allergies: string[]
+  // limitations + wellness (optional)
+  injuries: string[]
+  wellnessMode: WellnessTrackingMode
 }
 
 const defaultAnswers: Answers = {
@@ -71,6 +99,17 @@ const defaultAnswers: Answers = {
   targetTouched: false,
   trainingDays: 3,
   daysTouched: false,
+  sessionDurationMin: 60,
+  splitMode: 'auto',
+  neat: 'moderate',
+  includeSteps: false,
+  stepEstimate: 8000,
+  nutritionStyle: 'meal_suggestions',
+  mealsPerDay: 4,
+  dietPattern: 'none',
+  allergies: [],
+  injuries: [],
+  wellnessMode: 'none',
 }
 
 const clampN = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n))
@@ -82,9 +121,10 @@ function bmiOf(weightKg: number, heightCm: number): number | null {
 }
 
 const isBeginnerLevel = (l?: ExperienceLevel) => l === 'beginner'
+const showsTargetWeight = (g?: GoalValue) => g === 'cut' || g === 'bulk'
 
-/** خطأ خطوة الوزن: الهدف يتبع منطق الهدف (تنشيف أقل / تضخيم أعلى). */
-function weightStepError(a: Answers): string | undefined {
+/** خطأ وزن الهدف: تنشيف أقل من الحالي / تضخيم أعلى منه. */
+function targetWeightError(a: Answers): string | undefined {
   if (a.goalValue === 'cut' && !(a.targetWeightKg < a.weightKg))
     return 'وزن الهدف للتنشيف لازم يكون أقل من وزنك الحالي.'
   if (a.goalValue === 'bulk' && !(a.targetWeightKg > a.weightKg))
@@ -92,91 +132,48 @@ function weightStepError(a: Answers): string | undefined {
   return undefined
 }
 
-const showsTargetWeight = (g?: GoalValue) => g === 'cut' || g === 'bulk'
-
-/** يبني ملفًا شخصيًا من إجابات الإعداد (مصدر الحقيقة الوحيد). */
-function buildProfile(a: Answers, base: Profile): Profile {
-  const goal = goalChoices.find((g) => g.value === a.goalValue)
-  const goalType = goal?.goalType ?? 'recomposition'
-  const band = a.experienceLevel ? experienceToBand(a.experienceLevel) : undefined
-  const trainingLevel = levelFromExperience(band)
-  const weightKg = a.weightKg || base.weightKg
-  const gymType = a.gymType ?? 'commercial'
-  const gymAccess = gymTypeToAccess(gymType)
-  // المبتدئ: انتظامه يُخزَّن «new» (never) تلقائيًا ولا يُسأل عنه.
-  const consistency: Consistency = isBeginnerLevel(a.experienceLevel)
-    ? 'never'
-    : a.consistency ?? 'regular'
-  const targetWeightKg = showsTargetWeight(a.goalValue)
-    ? a.targetWeightKg
-    : deriveTargetWeight(weightKg, goalType)
+/** يبني كائن مصدر الحقيقة من الإجابات — لا اسم وهمي، قوائم تتبّع فارغة. */
+function buildOnboardingProfile(a: Answers): OnboardingProfile {
+  const beginner = isBeginnerLevel(a.experienceLevel)
   return {
-    ...base,
-    name: '', // لا اسم في الإعداد — لا أسماء وهمية، واللوحة تعمل بدونه.
-    gender: a.gender ?? 'unspecified',
-    age: a.age || base.age,
-    heightCm: a.heightCm || base.heightCm,
-    weightKg,
-    targetWeightKg,
-    activityLevel: deriveActivityLevel(a.trainingDays),
-    trainingLevel,
-    goalType,
-    goal: 'maintain', // يُضبط حسب goalType عند الحفظ/التوليد
-    trainingDays: a.trainingDays,
-    workoutDuration: 60,
-    workoutEnvironment: gymAccess === 'home' || gymAccess === 'bodyweight' ? 'home' : 'gym',
-    muscleFocus: 'balanced',
-    consistency,
-    experienceBand: band,
-    experienceLevel: a.experienceLevel,
-    gymAccess,
-    gymType,
-    equipment: [],
-    schedulingStyle: 'flexible',
-    preferredDays: [],
-    remindersOptIn: false,
+    profile: { sex: a.sex, age: a.age }, // لا اسم — اختياري ولا قيمة وهمية
+    bodyMetrics: {
+      heightCm: a.heightCm,
+      currentWeightKg: a.weightKg,
+      targetWeightKg: showsTargetWeight(a.goalValue) ? a.targetWeightKg : undefined,
+    },
+    goal: { type: a.goalValue },
+    trainingPreferences: {
+      experience: a.experienceLevel,
+      consistency: beginner ? 'new' : a.consistency,
+      environment: a.environment,
+      daysPerWeek: a.trainingDays,
+      sessionDurationMin: a.sessionDurationMin,
+      splitMode: a.splitMode,
+      advancedSplit: a.splitMode === 'advanced' ? a.advancedSplit : undefined,
+    },
+    activityProfile: {
+      neat: a.neat,
+      stepEstimate: a.includeSteps ? a.stepEstimate : undefined,
+    },
+    nutritionPreferences: {
+      style: a.nutritionStyle,
+      mealsPerDay: a.nutritionStyle === 'meal_suggestions' ? a.mealsPerDay : undefined,
+    },
+    foodPreferences: { dietPattern: a.dietPattern, dislikedFoods: [], allergies: a.allergies },
+    limitations: { injuries: a.injuries },
+    wellnessTracking: { mode: a.wellnessMode, supplements: [], medications: [] },
+    appPreferences: { language: 'ar', reminders: false },
+    _meta: {
+      schemaVersion: ONBOARDING_SCHEMA_VERSION,
+      completed: true,
+      completedAt: new Date().toISOString(),
+      source: 'onboarding',
+    },
   }
 }
 
-// goal المتوافق مع الحاسبة.
-function calorieGoalForStore(p: Profile) {
-  return calorieGoalFromGoalType(p.goalType)
-}
-
-/** يبني نسخة التخصيص الكاملة الجاهزة للحفظ — بلا بيانات وهمية مزروعة. */
-function buildCustomization(a: Answers, current: Customization): Customization {
-  const profile = buildProfile(a, current.profile)
-  const g = generatePlan(profile)
-  const goal = goalChoices.find((x) => x.value === a.goalValue)
-  return {
-    ...current,
-    identity: {
-      ...current.identity,
-      userName: profile.name, // '' — لا اسم وهمي
-      mainGoal: goal?.label ?? current.identity.mainGoal,
-    },
-    profile: { ...profile, goal: calorieGoalForStore(profile) },
-    targets: g.targets,
-    targetsMeta: {
-      manuallyEdited: false,
-      lastCalculatedFromProfileHash: profileHash(profile),
-      updatedAt: new Date().toISOString(),
-    },
-    workoutPlan: g.workoutPlan,
-    nutritionPlan: g.nutritionPlan,
-    commitmentPlan: g.commitmentPlan,
-    measurementPlan: g.measurementPlan,
-    routine: g.weeklySchedule,
-    // مصدر الحقيقة = إجابات الإعداد فقط — صفّر أي بيانات مزروعة (مكملات/أدوية/وجبات/تمارين).
-    wellnessPlan: { enabled: true, supplements: [], medications: [] },
-    workouts: [],
-    supplements: [],
-    meals: [],
-    metrics: [],
-  }
-}
-
-/** الإعداد الذكي — تسع خطوات، شاشة واحدة لكل خطوة (جوال داكن، RTL). */
+/** الإعداد الذكي (Phase 1) — مصدر الحقيقة: شاشة واحدة لكل خطوة (جوال داكن، RTL). */
 export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
   const { customization, applyCustomization } = useCustomization()
   const [a, setA] = useState<Answers>(() => {
@@ -184,8 +181,11 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
     return { ...defaultAnswers, ...(d ?? {}) }
   })
   const set = (partial: Partial<Answers>) => setA((prev) => ({ ...prev, ...partial }))
-
-  const built = useMemo(() => buildCustomization(a, customization), [a, customization])
+  const toggleIn = (key: 'allergies' | 'injuries', value: string) =>
+    setA((prev) => {
+      const list = prev[key]
+      return { ...prev, [key]: list.includes(value) ? list.filter((x) => x !== value) : [...list, value] }
+    })
 
   // تهيئة وزن الهدف افتراضيًا حسب الهدف (ما لم يلمسه المستخدم).
   useEffect(() => {
@@ -206,11 +206,12 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
   const bmi = bmiOf(a.weightKg, a.heightCm)
   const isBeginner = isBeginnerLevel(a.experienceLevel)
 
-  // — تعريف الخطوات التسع (شرطية المحتوى داخل الخطوة لا كخطوة منفصلة) —
+  // — تعريف الخطوات (شرطية بالكامل) —
   interface Step {
     key: string
     label: string
     valid?: boolean
+    optional?: boolean
     error?: string
     content: ReactNode
   }
@@ -224,18 +225,11 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
     valid: !!a.goalValue,
     content: (
       <Question title="وش هدفك؟" hint="نبني الخطة كلها حوله.">
-        <div className="space-y-2.5">
+        <List>
           {goalChoices.map((c) => (
-            <OptionRow
-              key={c.value}
-              icon={c.icon}
-              label={c.label}
-              desc={c.desc}
-              selected={a.goalValue === c.value}
-              onClick={() => set({ goalValue: c.value, targetTouched: false })}
-            />
+            <OptionRow key={c.value} icon={c.icon} label={c.label} desc={c.desc} selected={a.goalValue === c.value} onClick={() => set({ goalValue: c.value, targetTouched: false })} />
           ))}
-        </div>
+        </List>
       </Question>
     ),
   })
@@ -244,12 +238,12 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
   steps.push({
     key: 'sex',
     label: 'الجنس',
-    valid: !!a.gender,
+    valid: !!a.sex,
     content: (
       <Question title="جنسك؟" hint="نستخدمه لحساب السعرات بدقة.">
         <div className="grid grid-cols-2 gap-3">
-          {genderChoices.map((c) => (
-            <OptionCard key={c.value} icon={c.icon} label={c.label} selected={a.gender === c.value} onClick={() => set({ gender: c.value })} />
+          {sexChoices.map((c) => (
+            <OptionCard key={c.value} icon={c.icon} label={c.label} selected={a.sex === c.value} onClick={() => set({ sex: c.value })} />
           ))}
         </div>
       </Question>
@@ -280,88 +274,87 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
     ),
   })
 
-  // 5) الوزن الحالي + وزن الهدف الشرطي
+  // 5) الوزن الحالي (+ BMI رقمي)
   steps.push({
     key: 'weight',
     label: 'الوزن',
-    valid: !weightStepError(a),
-    error: weightStepError(a),
+    valid: true,
     content: (
       <Question title="كم وزنك الحالي؟">
         <Slider value={a.weightKg} min={BOUNDS.weight.min} max={BOUNDS.weight.max} unit="كجم" onChange={(v) => set({ weightKg: v })} ariaLabel="الوزن الحالي بالكيلوجرام" />
         {bmi !== null && (
-          <p className="mt-4 rounded-xl border border-night-700 bg-night-900 px-4 py-3 text-center text-sm font-bold text-night-100">
-            BMI: {bmi}
-          </p>
-        )}
-        {showsTargetWeight(a.goalValue) && (
-          <div className="mt-6 border-t border-night-800 pt-6">
-            <p className="mb-1 text-base font-bold text-night-100">وش وزنك الهدف؟</p>
-            <p className="mb-4 text-sm text-night-300">{a.goalValue === 'cut' ? 'أقل من وزنك الحالي.' : 'أعلى من وزنك الحالي.'}</p>
-            <Slider
-              value={a.targetWeightKg}
-              min={BOUNDS.weight.min}
-              max={BOUNDS.weight.max}
-              unit="كجم"
-              onChange={(v) => set({ targetWeightKg: v, targetTouched: true })}
-              ariaLabel="الوزن الهدف بالكيلوجرام"
-            />
-          </div>
+          <p className="mt-4 rounded-xl border border-night-700 bg-night-900 px-4 py-3 text-center text-sm font-bold text-night-100">BMI: {bmi}</p>
         )}
       </Question>
     ),
   })
 
-  // 6) الخبرة + الانتظام الشرطي (يظهر لغير المبتدئ)
+  // 6) وزن الهدف — فقط لـ bulk/cut
+  if (showsTargetWeight(a.goalValue)) {
+    steps.push({
+      key: 'targetWeight',
+      label: 'وزن الهدف',
+      valid: !targetWeightError(a),
+      error: targetWeightError(a),
+      content: (
+        <Question title="وش وزنك الهدف؟" hint={a.goalValue === 'cut' ? 'أقل من وزنك الحالي.' : 'أعلى من وزنك الحالي.'}>
+          <Slider value={a.targetWeightKg} min={BOUNDS.weight.min} max={BOUNDS.weight.max} unit="كجم" onChange={(v) => set({ targetWeightKg: v, targetTouched: true })} ariaLabel="الوزن الهدف بالكيلوجرام" />
+        </Question>
+      ),
+    })
+  }
+
+  // 7) الخبرة
   steps.push({
     key: 'experience',
     label: 'خبرتك',
-    valid: !!a.experienceLevel && (isBeginner || !!a.consistency),
+    valid: !!a.experienceLevel,
     content: (
       <Question title="من متى وأنت تتمرن حديد؟" hint="نضبط صعوبة الخطة على مستواك.">
-        <div className="space-y-2.5">
+        <List>
           {experienceChoices.map((c) => (
-            <OptionRow
-              key={c.value}
-              icon={c.icon}
-              label={c.label}
-              desc={c.desc}
-              selected={a.experienceLevel === c.value}
-              onClick={() => set({ experienceLevel: c.value, consistency: c.value === 'beginner' ? undefined : a.consistency, daysTouched: false })}
-            />
+            <OptionRow key={c.value} icon={c.icon} label={c.label} desc={c.desc} selected={a.experienceLevel === c.value} onClick={() => set({ experienceLevel: c.value, consistency: c.value === 'beginner' ? undefined : a.consistency, daysTouched: false })} />
           ))}
-        </div>
-        {a.experienceLevel && !isBeginner && (
-          <div className="mt-6 border-t border-night-800 pt-6">
-            <p className="mb-4 text-base font-bold text-night-100">كيف انتظامك حاليًا؟</p>
-            <div className="space-y-2.5">
-              {consistencyChoices.map((c) => (
-                <OptionRow key={c.value} icon={c.icon} label={c.label} desc={c.desc} selected={a.consistency === c.value} onClick={() => set({ consistency: c.value })} />
-              ))}
-            </div>
-          </div>
-        )}
+        </List>
       </Question>
     ),
   })
 
-  // 7) نوع مكان التمرين
+  // 8) الانتظام — فقط لغير المبتدئ
+  if (a.experienceLevel && !isBeginner) {
+    steps.push({
+      key: 'consistency',
+      label: 'انتظامك',
+      valid: !!a.consistency,
+      content: (
+        <Question title="كيف انتظامك حاليًا؟" hint="نبدأ من نقطة تناسب وضعك.">
+          <List>
+            {consistencyChoicesV2.map((c) => (
+              <OptionRow key={c.value} icon={c.icon} label={c.label} desc={c.desc} selected={a.consistency === c.value} onClick={() => set({ consistency: c.value })} />
+            ))}
+          </List>
+        </Question>
+      ),
+    })
+  }
+
+  // 9) بيئة التمرين
   steps.push({
-    key: 'gym',
+    key: 'environment',
     label: 'مكان التمرين',
-    valid: !!a.gymType,
+    valid: !!a.environment,
     content: (
       <Question title="وين بتتمرن؟" hint="نختار تمارين مناسبة لمكانك.">
-        <div className="space-y-2.5">
-          {gymTypeChoices.map((c) => (
-            <OptionRow key={c.value} icon={c.icon} label={c.label} desc={c.desc} selected={a.gymType === c.value} onClick={() => set({ gymType: c.value })} />
+        <List>
+          {environmentChoices.map((c) => (
+            <OptionRow key={c.value} icon={c.icon} label={c.label} desc={c.desc} selected={a.environment === c.value} onClick={() => set({ environment: c.value })} />
           ))}
-        </div>
+        </List>
       </Question>
     ),
   })
 
-  // 8) أيام التمرين بالأسبوع
+  // 10) أيام التمرين بالأسبوع
   steps.push({
     key: 'days',
     label: 'الأيام',
@@ -379,7 +372,168 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
     ),
   })
 
-  // 9) شاشة بناء الخطة
+  // 11) مدّة الجلسة
+  steps.push({
+    key: 'duration',
+    label: 'مدّة الجلسة',
+    valid: !!a.sessionDurationMin,
+    content: (
+      <Question title="كم تحب تطول الجلسة؟" hint="نضبط عدد التمارين على وقتك.">
+        <List>
+          {sessionDurationChoices.map((c) => (
+            <OptionRow key={c.value} icon="Clock" label={c.label} desc={c.desc} selected={a.sessionDurationMin === c.value} onClick={() => set({ sessionDurationMin: c.value })} />
+          ))}
+        </List>
+      </Question>
+    ),
+  })
+
+  // 12) نمط التقسيمة (تلقائي/متقدّم)
+  steps.push({
+    key: 'splitMode',
+    label: 'التقسيمة',
+    valid: !!a.splitMode,
+    content: (
+      <Question title="كيف تبي نحدد التقسيمة؟" hint="التلقائي يكفي معظم الناس.">
+        <List>
+          {splitModeChoices.map((c) => (
+            <OptionRow key={c.value} icon={c.icon} label={c.label} desc={c.desc} selected={a.splitMode === c.value} onClick={() => set({ splitMode: c.value })} />
+          ))}
+        </List>
+      </Question>
+    ),
+  })
+
+  // 13) اختيار التقسيمة المتقدّمة — فقط عند advanced
+  if (a.splitMode === 'advanced') {
+    steps.push({
+      key: 'advancedSplit',
+      label: 'نوع التقسيمة',
+      valid: !!a.advancedSplit,
+      content: (
+        <Question title="أي تقسيمة تفضّل؟" hint="اختر الأنسب لأسلوبك.">
+          <List>
+            {advancedSplitChoices.map((c) => (
+              <OptionRow key={c.value} icon={c.icon} label={c.label} desc={c.desc} selected={a.advancedSplit === c.value} onClick={() => set({ advancedSplit: c.value })} />
+            ))}
+          </List>
+        </Question>
+      ),
+    })
+  }
+
+  // 14) النشاط اليومي (NEAT) + تقدير خطوات اختياري
+  steps.push({
+    key: 'activity',
+    label: 'نشاطك اليومي',
+    valid: !!a.neat,
+    content: (
+      <Question title="كيف حركتك اليومية خارج التمرين؟" hint="تساعدنا نضبط سعراتك بدقة.">
+        <List>
+          {neatChoices.map((c) => (
+            <OptionRow key={c.value} icon={c.icon} label={c.label} desc={c.desc} selected={a.neat === c.value} onClick={() => set({ neat: c.value })} />
+          ))}
+        </List>
+        <div className="mt-6 border-t border-night-800 pt-5">
+          <Toggle
+            checked={a.includeSteps}
+            onChange={(v) => set({ includeSteps: v })}
+            title="أعرف عدد خطواتي اليومية"
+            subtitle="اختياري — يحسّن دقّة التقدير"
+          />
+          {a.includeSteps && (
+            <div className="mt-4">
+              <Slider value={a.stepEstimate} min={BOUNDS.steps.min} max={BOUNDS.steps.max} step={500} unit="خطوة" onChange={(v) => set({ stepEstimate: v })} ariaLabel="تقدير الخطوات اليومية" />
+            </div>
+          )}
+        </div>
+      </Question>
+    ),
+  })
+
+  // 15) أسلوب التغذية
+  steps.push({
+    key: 'nutritionStyle',
+    label: 'التغذية',
+    valid: !!a.nutritionStyle,
+    content: (
+      <Question title="كيف تبي تتعامل مع التغذية؟" hint="نقدر نعدّلها لاحقًا.">
+        <List>
+          {nutritionStyleChoices.map((c) => (
+            <OptionRow key={c.value} icon={c.icon} label={c.label} desc={c.desc} selected={a.nutritionStyle === c.value} onClick={() => set({ nutritionStyle: c.value })} />
+          ))}
+        </List>
+      </Question>
+    ),
+  })
+
+  // 16) عدد الوجبات — فقط عند meal_suggestions
+  if (a.nutritionStyle === 'meal_suggestions') {
+    steps.push({
+      key: 'meals',
+      label: 'الوجبات',
+      valid: a.mealsPerDay >= BOUNDS.meals.min && a.mealsPerDay <= BOUNDS.meals.max,
+      content: (
+        <Question title="كم وجبة باليوم تناسبك؟" hint="نوزّع سعراتك عليها.">
+          <Stepper value={a.mealsPerDay} min={BOUNDS.meals.min} max={BOUNDS.meals.max} onChange={(v) => set({ mealsPerDay: v })} unit="وجبات" />
+        </Question>
+      ),
+    })
+  }
+
+  // 17) تفضيلات الأكل — اختياري (لا يحجب توليد الخطة)
+  steps.push({
+    key: 'food',
+    label: 'تفضيلات الأكل',
+    optional: true,
+    valid: true,
+    content: (
+      <Question title="تفضيلات أكلك" hint="اختياري — تقدر تتخطّاها.">
+        <p className="mb-3 text-sm font-bold text-night-300">نمط الأكل</p>
+        <List>
+          {dietPatternChoices.map((c) => (
+            <OptionRow key={c.value} icon={c.icon} label={c.label} selected={a.dietPattern === c.value} onClick={() => set({ dietPattern: c.value })} />
+          ))}
+        </List>
+        <div className="mt-6 border-t border-night-800 pt-5">
+          <p className="mb-3 text-sm font-bold text-night-300">حساسيات غذائية (اختر ما ينطبق)</p>
+          <div className="grid grid-cols-2 gap-3">
+            {allergyChoices.map((c) => (
+              <OptionCard key={c.value} icon={c.icon} label={c.label} selected={a.allergies.includes(c.value)} onClick={() => toggleIn('allergies', c.value)} />
+            ))}
+          </div>
+        </div>
+      </Question>
+    ),
+  })
+
+  // 18) القيود + المكملات/الأدوية — اختياري (شاشة واحدة، مفصولة داخليًا)
+  steps.push({
+    key: 'limitations',
+    label: 'قيود ومتابعة',
+    optional: true,
+    valid: true,
+    content: (
+      <Question title="قيود ومتابعة" hint="اختياري — تقدر تتخطّاها.">
+        <p className="mb-3 text-sm font-bold text-night-300">إصابات أو مناطق حساسة؟</p>
+        <div className="grid grid-cols-2 gap-3">
+          {injuryChoices.map((c) => (
+            <OptionCard key={c.value} icon={c.icon} label={c.label} selected={a.injuries.includes(c.value)} onClick={() => toggleIn('injuries', c.value)} />
+          ))}
+        </div>
+        <div className="mt-6 border-t border-night-800 pt-5">
+          <p className="mb-3 text-sm font-bold text-night-300">تتبّع المكملات والأدوية؟</p>
+          <List>
+            {wellnessModeChoices.map((c) => (
+              <OptionRow key={c.value} icon={c.icon} label={c.label} desc={c.desc} selected={a.wellnessMode === c.value} onClick={() => set({ wellnessMode: c.value })} />
+            ))}
+          </List>
+        </div>
+      </Question>
+    ),
+  })
+
+  // شاشة البناء (لا تُحتسب خطوة نموذج)
   steps.push({ key: 'building', label: 'نبني خطتك', content: <span /> })
 
   // — حالة الخطوة والتنقّل —
@@ -389,6 +543,7 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
   const total = steps.length
   const isFirst = idx === 0
   const isBuilding = step.key === 'building'
+  const isLastForm = idx === total - 2
 
   // حفظ المسودة وآخر خطوة بعد كل تغيير (qimmah:onboarding:v1).
   useEffect(() => {
@@ -396,9 +551,12 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
     setLastStep(idx)
   }, [a, idx])
 
-  // الإنهاء عبر ref حتى لا تتطلب useEffect الإدراج في deps.
+  // الإنهاء: يبني مصدر الحقيقة ويحفظه، ثم يولّد التخصيص للوحة.
   const finishRef = useRef<() => void>(() => {})
   finishRef.current = () => {
+    const op = buildOnboardingProfile(a)
+    saveOnboardingProfile(op)
+    const built = buildCustomizationFromOnboarding(op, customization)
     applyCustomization(built)
     markCompleted()
     onComplete()
@@ -484,15 +642,22 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
               <Icon name="AlertTriangle" className="h-4 w-4 shrink-0" />{step.error}
             </p>
           )}
-          <button
-            type="button"
-            onClick={goNext}
-            disabled={step.valid === false}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-4 text-lg font-black text-white disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            {idx === total - 2 ? 'ابنِ خطتي' : 'التالي'}
-            <Icon name="ChevronLeft" className="h-5 w-5" />
-          </button>
+          <div className="flex items-center gap-3">
+            {step.optional && (
+              <button type="button" onClick={goNext} className="rounded-2xl border border-night-700 bg-night-900 px-5 py-4 text-base font-bold text-night-300">
+                تخطّي
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={goNext}
+              disabled={step.valid === false}
+              className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-primary py-4 text-lg font-black text-white disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {isLastForm ? 'ابنِ خطتي' : 'التالي'}
+              <Icon name="ChevronLeft" className="h-5 w-5" />
+            </button>
+          </div>
         </div>
       </footer>
     </div>
@@ -500,6 +665,10 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
 }
 
 // — مكوّنات العرض —
+
+function List({ children }: { children: ReactNode }) {
+  return <div className="space-y-2.5">{children}</div>
+}
 
 function Question({ title, hint, children }: { title: string; hint?: string; children: ReactNode }) {
   return (
@@ -523,7 +692,7 @@ function OptionCard({ icon, label, selected, onClick }: { icon?: string; label: 
       )}
     >
       {icon && <Icon name={icon} className={cn('h-6 w-6', selected ? 'text-primary' : 'text-night-300')} />}
-      <span className="text-base font-bold">{label}</span>
+      <span className="text-sm font-bold">{label}</span>
     </button>
   )
 }
@@ -572,20 +741,39 @@ function Stepper({ value, min, max, unit, onChange }: { value: number; min: numb
   )
 }
 
+function Toggle({ checked, onChange, title, subtitle }: { checked: boolean; onChange: (v: boolean) => void; title: string; subtitle?: string }) {
+  return (
+    <button
+      type="button"
+      onClick={() => onChange(!checked)}
+      aria-pressed={checked}
+      className={cn('flex w-full items-center justify-between rounded-2xl border px-4 py-4', checked ? 'border-primary bg-primary/10' : 'border-night-700 bg-night-900')}
+    >
+      <span className="text-start">
+        <span className="block text-base font-bold text-night-100">{title}</span>
+        {subtitle && <span className="block text-xs text-night-300">{subtitle}</span>}
+      </span>
+      <span className={cn('relative h-7 w-12 shrink-0 rounded-full transition-colors', checked ? 'bg-primary' : 'bg-night-700')}>
+        <span className={cn('absolute top-1 h-5 w-5 rounded-full bg-white transition-all', checked ? 'start-1' : 'end-1')} />
+      </span>
+    </button>
+  )
+}
+
 /** منزلق رقمي بمسطرة — إدخال مرئي للجوال (لا نص حر)، ومتاح بلوحة المفاتيح. */
-function Slider({ value, min, max, unit, onChange, ariaLabel }: { value: number; min: number; max: number; unit: string; onChange: (v: number) => void; ariaLabel: string }) {
-  const clamp = (n: number) => clampN(Math.round(n), min, max)
+function Slider({ value, min, max, unit, onChange, ariaLabel, step = 1 }: { value: number; min: number; max: number; unit: string; onChange: (v: number) => void; ariaLabel: string; step?: number }) {
+  const clamp = (n: number) => clampN(Math.round(n / step) * step, min, max)
   return (
     <div className="rounded-2xl border border-night-700 bg-night-900 p-5">
       <div className="flex items-end justify-center gap-2">
-        <span className="text-6xl font-black leading-none text-night-100">{value}</span>
+        <span className="text-6xl font-black leading-none text-night-100">{value.toLocaleString('en-US')}</span>
         <span className="pb-1.5 text-lg font-bold text-night-300">{unit}</span>
       </div>
       <input
         type="range"
         min={min}
         max={max}
-        step={1}
+        step={step}
         value={value}
         onChange={(e) => onChange(clamp(Number(e.target.value)))}
         aria-label={ariaLabel}
@@ -594,8 +782,8 @@ function Slider({ value, min, max, unit, onChange, ariaLabel }: { value: number;
         className="mt-6 h-2 w-full cursor-pointer appearance-none rounded-full bg-night-700 accent-primary"
       />
       <div dir="ltr" className="mt-2 flex justify-between text-xs font-bold text-night-400">
-        <span>{min}</span>
-        <span>{max}</span>
+        <span>{min.toLocaleString('en-US')}</span>
+        <span>{max.toLocaleString('en-US')}</span>
       </div>
     </div>
   )

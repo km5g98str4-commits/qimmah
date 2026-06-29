@@ -17,6 +17,8 @@ import { routineTypeColors, routineTypeLabels } from '@/data/routine'
 export function StepGeneratePlan({ ctx }: { ctx: WizardCtx }) {
   const p = ctx.data.profile
   const [showTemplates, setShowTemplates] = useState(false)
+  // لا «سوق قوالب» للمبتدئ — نُبقي الخطة المولّدة تلقائيًا بلا تشتيت.
+  const isBeginner = p.experienceLevel === 'beginner' || p.trainingLevel === 'beginner'
   const applied = useRef(false)
 
   // ولّد الخطة وطبّقها مرة عند الدخول
@@ -104,11 +106,13 @@ export function StepGeneratePlan({ ctx }: { ctx: WizardCtx }) {
           </div>
         )}
 
-        <button type="button" onClick={() => setShowTemplates((v) => !v)} className="btn-ghost mt-3 px-3 py-2 text-xs">
-          <Icon name="Layers" className="h-4 w-4" />
-          اختيار جدول آخر
-        </button>
-        {showTemplates && (
+        {!isBeginner && (
+          <button type="button" onClick={() => setShowTemplates((v) => !v)} className="btn-ghost mt-3 px-3 py-2 text-xs">
+            <Icon name="Layers" className="h-4 w-4" />
+            اختيار جدول آخر
+          </button>
+        )}
+        {!isBeginner && showTemplates && (
           <div className="mt-3 grid gap-2 sm:grid-cols-2">
             {workoutTemplates.filter((t) => t.id !== 'custom').map((t) => (
               <button key={t.id} type="button" onClick={() => chooseTemplate(t.id)} className={cn('rounded-xl border p-3 text-start text-sm', t.id === ctx.data.workoutPlan.templateId ? 'border-primary-soft bg-primary-soft' : 'border-line bg-surface hover:bg-beige')}>

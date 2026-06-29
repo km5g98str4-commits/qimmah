@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { StartView } from '@/views/StartView'
 import { LoginView } from '@/views/LoginView'
 import { SetupView } from '@/views/SetupView'
@@ -12,10 +12,13 @@ import { DemoView } from '@/views/DemoView'
 import { SettingsView } from '@/views/SettingsView'
 import { PrivacyView } from '@/views/PrivacyView'
 import { TermsView } from '@/views/TermsView'
+import { ContactView } from '@/views/ContactView'
+import { NotFoundView } from '@/views/NotFoundView'
 import { MobileShell, type MainTab } from '@/components/MobileShell'
 import type { AppBadge } from '@/components/AppNav'
 import { useAuth } from '@/lib/authContext'
 import { loadOnboarding } from '@/lib/onboarding'
+import { ensureOnboardingProfile } from '@/lib/onboardingProfile'
 import { applyLanguage } from '@/lib/appPreferences'
 import { type AppRoute, MAIN_TABS, routeFromHash, setHashRoute } from '@/lib/appRoutes'
 import { SuccessToast } from '@/components/SuccessToast'
@@ -40,6 +43,10 @@ function guardRoute(route: AppRoute): AppRoute {
 function initialRoute(): AppRoute {
   const r = routeFromHash()
   if (r) return guardRoute(r)
+  // hash موجود لكنه غير معروف (مثل #/asdf) → صفحة 404 بدل التحويل الصامت.
+  if (typeof window !== 'undefined' && window.location.hash && window.location.hash !== '#/') {
+    return 'notfound'
+  }
   return loadOnboarding().completed ? 'dashboard' : 'start'
 }
 
@@ -50,6 +57,8 @@ export default function App() {
 
   useEffect(() => {
     applyLanguage(LANG)
+    // هجرة لمرّة واحدة لمصدر الحقيقة (تحفظ المستخدمين الحاليين؛ آمنة للجدد).
+    ensureOnboardingProfile()
     // معرّف البناء في الـ console — للتحقق من نشر النسخة الصحيحة.
     console.info(`%cقِمّة ${BUILD_LABEL}`, 'color:#F26A21;font-weight:bold')
   }, [])
@@ -62,9 +71,16 @@ export default function App() {
   const [showSuccess, setShowSuccess] = useState(false)
   const dismissSuccess = useCallback(() => setShowSuccess(false), [])
 
-  // view → hash
+  // آخر مسار غير قانوني (للرجوع الآمن من الخصوصية/الشروط دون الاعتماد على history.back
+  // الذي قد يقذف المستخدم خارج التطبيق عند فتح الصفحة مباشرةً/التحديث).
+  const beforeLegalRef = useRef<AppRoute>('start')
   useEffect(() => {
-    setHashRoute(view)
+    if (view !== 'privacy' && view !== 'terms') beforeLegalRef.current = view
+  }, [view])
+
+  // view → hash (نُبقي مسار 404 على hash الخاطئ كما هو حتى لا نطمس الرابط الأصلي).
+  useEffect(() => {
+    if (view !== 'notfound') setHashRoute(view)
   }, [view])
 
   // hash → view (تنقّل المتصفح / تحديث الصفحة) مع الحراسة
@@ -74,11 +90,8 @@ export default function App() {
       if (r) {
         setView(guardRoute(r))
       } else if (window.location.hash && window.location.hash !== '#/') {
-        // مسار غير معروف (مثل #/xyz) → وجهة آمنة + تصحيح العنوان صراحةً.
-        // المسارات الصالحة كلها مُعرّفة في appRoutes ولا تصل هنا.
-        const target = loadOnboarding().completed ? 'dashboard' : 'start'
-        setView(target)
-        setHashRoute(target)
+        // مسار غير معروف (مثل #/xyz) → صفحة 404 المخصّصة (نُبقي الرابط ظاهرًا).
+        setView('notfound')
       }
     }
     window.addEventListener('hashchange', onHash)
@@ -132,11 +145,23 @@ export default function App() {
   }
 
   if (view === 'privacy') {
-    return <PrivacyView lang={LANG} onBack={() => window.history.back()} />
+    return <PrivacyView lang={LANG} onBack={() => navigate(beforeLegalRef.current)} />
   }
 
   if (view === 'terms') {
-    return <TermsView lang={LANG} onBack={() => window.history.back()} />
+    return <TermsView lang={LANG} onBack={() => navigate(beforeLegalRef.current)} />
+  }
+
+  if (view === 'contact') {
+    return <ContactView lang={LANG} onBack={() => window.history.back()} />
+  }
+
+  if (view === 'notfound') {
+    const goHome = () => {
+      const target = loadOnboarding().completed ? 'dashboard' : 'start'
+      setView(guardRoute(target))
+    }
+    return <NotFoundView lang={LANG} onHome={goHome} onBack={() => window.history.back()} />
   }
 
   if (view === 'setup') {
