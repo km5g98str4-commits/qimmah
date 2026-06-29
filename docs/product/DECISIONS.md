@@ -1,5 +1,77 @@
 # Qimmah Decisions Log
 
+## P2 Agent 2 — Exercise library: machine catalog + beginner machine-first — 2026-06-29
+
+### Scope note
+The mission brief arrived **truncated mid-sentence** (ended at "…Keep free-weight basics
+(squat/bench/RDL) where appropriate but lean"). Per the "decide small things, document"
+rule, I implemented the two fully-stated deliverables (1 machine catalog, 2 beginner
+machine-first + cable exclusion) plus the minimal data needed to make them complete and
+internally consistent. UI surfacing of the catalog and GIF/demo work were **not** clearly
+specified, so they are deferred (see below) to avoid breaking NutritionView/Dashboard/
+onboarding (forbidden by the hard rules).
+
+### 1) Machine catalog — `src/data/machineCatalog.ts` (NEW)
+- Structured, grouped catalog (`MachineGroup` → `MachineItem[]`) for the 6 requested groups:
+  Chest / Back / Legs / Shoulders / Biceps / Triceps.
+- **English-first** machine name + **Arabic subtitle** + **Arabic target muscle**, exactly as
+  requested. Legs split into sub-groups quads / hamstrings / glutes / calves with the founder's
+  names (صدر مستوي/علوي/سفلي، ظهر علوي/لاتس الوسط/لاتس سفلي، Leg Press/Hack/Belt Squat،
+  Lying/Seated Leg Curl/RDL machine/GHR، Hip Thrust/Glute Kickback/Abduction/Adduction،
+  Standing/Seated Calf Raise).
+- **27 machines across 6 groups.** Each item references a real `exerciseId` in `exercises.ts`
+  so the existing demo/video + plan engine work unchanged. Integrity is enforced by
+  `catalogMissingIds()` (QA-checked → empty).
+- **Decision: catalog is a thin organizing layer over `exercises.ts`** (not a parallel data
+  store) — avoids duplicating nutrition/guidance fields and keeps one source of truth.
+
+### Added 5 machines to `src/data/exercises.ts` (the founder names that didn't exist yet)
+`decline-machine-press` (صدر سفلي), `low-row-machine` (لاتس سفلي), `machine-rdl` (RDL machine),
+`glute-kickback-machine` (Glute Kickback), `adduction-machine` (Hip Adduction). All `machine`,
+mostly `beginner`, with detailed-muscle mappings added to `muscleDetailById`. The other founder
+machines already existed (`belt-squat`, `glute-ham-raise`, `machine-hip-thrust`,
+`abduction-machine`, `hack-squat`, `leg-press`, `leg-extension`, `lying/seated-leg-curl`,
+`standing/seated-calf-raise`, etc.). Library count 165 → **170**.
+- **Decision:** Hip Adduction has no dedicated `MuscleId` (no adductors id) → mapped to `glutes`
+  as the closest existing target. "RDL machine" is uncommon hardware → modeled as a guided
+  `hinge` machine and kept alongside the free-weight `dumbbell-rdl` (which stays in the pool).
+
+### 2) Beginner = machine-first, no cables — `src/lib/planGenerator.ts`
+- **Cable exclusion:** new `cableOk(ex, tier)` excludes **free-cable** exercises for everyone
+  except `advanced` (honors "cables available for advanced only").
+  - **Key nuance (decision):** "free-cable" = `equipment.includes('cable') && !includes('machine')`.
+    Guided cable-stack *machines* (Lat Pulldown, Wide-Grip Pulldown are tagged `['machine','cable']`)
+    are **kept** — they are machine-guided and beginner-friendly. Only standalone cable-station
+    moves (cable crossover, triceps pushdown, cable curl, face-pull, cable lateral raise) are cut.
+    A naïve `includes('cable')` would have wrongly removed the Lat Pulldown, the #1 beginner back
+    machine — so the nuance is deliberate.
+- **Machine preference:** `sortCandidates(..., preferMachines)` ranks `machine` exercises first
+  for `beginner`/`novice` tiers, then alphabetical (stable). Applied in both slot selection and
+  the fallback fill. Free-weight basics (squat/bench/RDL) remain eligible and are auto-chosen
+  where no machine exists for that slot/pattern (e.g. hinge → `machine-rdl` now leads, else
+  `dumbbell-rdl`).
+- **Tier mapping:** `beginner`+`novice` → machine-first + no cables; `intermediate` → no free
+  cables (per "advanced only") but no machine boost; `advanced` → everything.
+- **No empty days / coverage preserved:** the existing fallback fill guarantees slots fill from
+  the (still ample) non-cable pool. Verified by generation smoke test.
+
+### Things intentionally NOT changed (hard rules / out of scope)
+- Nutrition, dashboard layout, onboarding goal logic, workout/streak — untouched.
+- **No UI changes.** The catalog is data-ready for a future "Machines" tab in
+  `ExerciseLibraryView`; wiring it was not specified and risks breakage, so deferred
+  (see FOLLOW_UPS).
+- **GIFs/demos:** library has no GIF infra; all demos are YouTube-search links via existing
+  `exercise.videoUrl`. Catalog items reuse that (each → real exerciseId). No new media added
+  (no scraping/secrets). Deferred as a content task.
+
+### QA (this agent)
+- `npm run build` ✓ · `npm run lint` ✓ (0 warnings) · `tsc -b --noEmit` ✓.
+- Generation smoke (bundled over the real engine): **beginner gym 4-day = 19/22 machines, 0
+  free-cables, 0 empty days**; **advanced = cables present, free-weight-heavy**; **catalog
+  integrity = 0 missing ids**.
+
+---
+
 ## P2 Agent 1 — Goals reduced to 3 + target weight actually used — 2026-06-29
 
 ### What changed

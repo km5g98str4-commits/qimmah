@@ -2,7 +2,7 @@ import type { Exercise, ExEnvironment, ExLevel, Muscle, MovementPattern } from '
 import type { MuscleId } from '@/types/muscles'
 import { getCommonMistakes, getSafetyNotes, getTechniqueTips } from '@/lib/exerciseGuidance'
 
-// مكتبة التمارين — ~155 تمرينًا تغطي كل المجموعات العضلية + كارديو + إحماء/مرونة.
+// مكتبة التمارين — ١٧٠ تمرينًا تغطي كل المجموعات العضلية + كارديو + إحماء/مرونة.
 // كل تمرين له رابط شرح غير فارغ. الروابط غالبًا «بحث يوتيوب موثوق» وليست بالضرورة رسمية —
 // لذلك نوضّح المصدر عبر videoSource ('youtube_search' أو 'trusted_video').
 
@@ -113,6 +113,13 @@ const muscleDetailById: Record<string, MuscleDetail> = {
   'russian-twist': { primary: ['obliques'], secondary: ['abs'] },
   'ab-wheel-rollout': { primary: ['abs'], secondary: ['obliques', 'lower_back'] },
   'mountain-climber': { primary: ['abs'], secondary: ['obliques'] },
+
+  // ===== أجهزة مُضافة (Phase 2 — استكمال كتالوج الأجهزة) =====
+  'decline-machine-press': { primary: ['chest_lower', 'triceps'], secondary: ['front_delts'] },
+  'low-row-machine': { primary: ['lats', 'upper_back'], secondary: ['biceps'] },
+  'machine-rdl': { primary: ['hamstrings', 'glutes'], secondary: ['lower_back'] },
+  'glute-kickback-machine': { primary: ['glutes'], secondary: ['hamstrings'] },
+  'adduction-machine': { primary: ['glutes'] },
 
   // ===== كارديو (بلا عضلة هدف تفصيلية) =====
   'treadmill-run': { primary: [] },
@@ -409,6 +416,14 @@ export const exercises: Exercise[] = [
   ex({ id: 'ankle-mobility', nameAr: 'مرونة الكاحل', nameEn: 'Ankle Mobility Drill', primaryMuscle: 'calves', equipment: ['bodyweight'], level: 'beginner', movementPattern: 'mobility', environment: 'both', defaultSets: 2, defaultReps: '10–12 لكل جهة', defaultRestSec: 15 }),
   ex({ id: 'hamstring-stretch', nameAr: 'تمدّد الهامسترنج', nameEn: 'Standing Hamstring Stretch', primaryMuscle: 'hamstrings', equipment: ['bodyweight'], level: 'beginner', movementPattern: 'mobility', environment: 'both', defaultSets: 2, defaultReps: '30 ث', defaultRestSec: 15 }),
   ex({ id: 'child-pose', nameAr: 'وضعية الطفل (استرخاء)', nameEn: 'Child’s Pose', primaryMuscle: 'back', equipment: ['bodyweight'], level: 'beginner', movementPattern: 'mobility', environment: 'home', defaultSets: 2, defaultReps: '30–45 ث', defaultRestSec: 15 }),
+
+  // ===== أجهزة إضافية (Phase 2 — استكمال كتالوج الأجهزة للمبتدئين) =====
+  // أجهزة موجّهة آمنة للمبتدئ تكمّل الأسماء المطلوبة في كتالوج الأجهزة (machineCatalog.ts).
+  ex({ id: 'decline-machine-press', nameAr: 'ضغط صدر سفلي جهاز', nameEn: 'Decline Chest Press Machine', primaryMuscle: 'chest', secondaryMuscles: ['triceps'], equipment: ['machine'], level: 'beginner', movementPattern: 'push', environment: 'gym', defaultReps: '10–12', defaultRestSec: 75, alternatives: ['chest-press-machine', 'pec-deck'] }),
+  ex({ id: 'low-row-machine', nameAr: 'تجديف منخفض جهاز (لاتس سفلي)', nameEn: 'Low Row Machine', primaryMuscle: 'back', secondaryMuscles: ['biceps'], equipment: ['machine'], level: 'beginner', movementPattern: 'pull', environment: 'gym', defaultReps: '10–12', defaultRestSec: 75, alternatives: ['machine-row', 'lat-pulldown'] }),
+  ex({ id: 'machine-rdl', nameAr: 'الرفعة الرومانية بالجهاز', nameEn: 'RDL Machine', primaryMuscle: 'hamstrings', secondaryMuscles: ['glutes'], equipment: ['machine'], level: 'beginner', movementPattern: 'hinge', environment: 'gym', defaultReps: '10–12', defaultRestSec: 90, alternatives: ['lying-leg-curl', 'dumbbell-rdl'] }),
+  ex({ id: 'glute-kickback-machine', nameAr: 'ركلة المؤخرة بالجهاز', nameEn: 'Glute Kickback Machine', primaryMuscle: 'glutes', secondaryMuscles: ['hamstrings'], equipment: ['machine'], level: 'beginner', movementPattern: 'isolation', environment: 'gym', defaultReps: '12–15', defaultRestSec: 60, alternatives: ['machine-hip-thrust', 'cable-kickback'] }),
+  ex({ id: 'adduction-machine', nameAr: 'تقريب الأرجل جهاز', nameEn: 'Hip Adduction Machine', primaryMuscle: 'glutes', equipment: ['machine'], level: 'beginner', movementPattern: 'isolation', environment: 'gym', defaultReps: '15–20', defaultRestSec: 45, alternatives: ['abduction-machine'] }),
 ]
 
 /** الاسم العربي للعضلة الهدف (المجموعة العامة) — يُعرض كسطر/رقاقة في بطاقة التمرين. */
