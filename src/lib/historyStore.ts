@@ -6,7 +6,7 @@
 // يحافظ على التوافق مع المفاتيح القديمة: عند أول تشغيل ينقل بياناتها بأمان
 // (idempotent) إلى المفاتيح الجديدة دون حذف القديمة.
 
-import type { WorkoutSession } from './workoutSessions'
+import type { SessionExercise, SetLog, WorkoutSession } from './workoutSessions'
 import type { ExerciseHistory } from './exerciseHistory'
 import type { MeasurementLog } from '@/types/progress'
 
@@ -121,9 +121,62 @@ function nowISO(): string {
 // جلسات التمرين
 // ————————————————————————————————————————————————————————————————
 
+// — تطبيع الجلسات عند القراءة —
+// المتجر قد يحوي جلسات قديمة أو تالفة (مفاتيح سابقة، استيراد، نسخة أقدم).
+// نضمن أن كل جلسة تُعاد بشكل آمن: مصفوفة exercises دائمًا موجودة وكل تمرين
+// بحقول صالحة، حتى لا تنهار أي واجهة تقرأ السجلّ (لوحة، تقدّم، سلاسل، ذكاء تدريبي).
+
+function normalizeSet(raw: unknown): SetLog | null {
+  if (!raw || typeof raw !== 'object') return null
+  const s = raw as Record<string, unknown>
+  return {
+    setNumber: typeof s.setNumber === 'number' ? s.setNumber : 0,
+    targetReps: typeof s.targetReps === 'string' ? s.targetReps : '',
+    actualReps: typeof s.actualReps === 'string' ? s.actualReps : '',
+    weightKg: typeof s.weightKg === 'string' ? s.weightKg : '',
+    completed: !!s.completed,
+    rpe: typeof s.rpe === 'number' ? s.rpe : undefined,
+    notes: typeof s.notes === 'string' ? s.notes : undefined,
+  }
+}
+
+function normalizeExercise(raw: unknown): SessionExercise {
+  const e = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>
+  return {
+    // نُبقي الحقول القديمة (weight/repsDone/difficulty/painNote/notes) عبر النشر،
+    // ثم نضبط الحقول المعروفة بأنواعها الآمنة.
+    ...(e as object),
+    exerciseId: typeof e.exerciseId === 'string' ? e.exerciseId : '',
+    targetSets: typeof e.targetSets === 'number' ? e.targetSets : 0,
+    targetReps: typeof e.targetReps === 'string' ? e.targetReps : '',
+    targetRestSec: typeof e.targetRestSec === 'number' ? e.targetRestSec : 0,
+    completed: !!e.completed,
+    sets: Array.isArray(e.sets)
+      ? (e.sets.map(normalizeSet).filter(Boolean) as SetLog[])
+      : undefined,
+  } as SessionExercise
+}
+
+function normalizeSession(raw: unknown): WorkoutSession | null {
+  if (!raw || typeof raw !== 'object') return null
+  const s = raw as Record<string, unknown>
+  if (typeof s.id !== 'string' || !s.id) return null
+  return {
+    id: s.id,
+    date: typeof s.date === 'string' ? s.date : '',
+    startedAt: typeof s.startedAt === 'string' ? s.startedAt : '',
+    finishedAt: typeof s.finishedAt === 'string' ? s.finishedAt : undefined,
+    workoutDayId: typeof s.workoutDayId === 'string' ? s.workoutDayId : '',
+    workoutDayName: typeof s.workoutDayName === 'string' ? s.workoutDayName : '',
+    exercises: Array.isArray(s.exercises) ? s.exercises.map(normalizeExercise) : [],
+  }
+}
+
 export function getWorkoutSessions(): WorkoutSession[] {
   ensureMigrated()
-  return readJSON<WorkoutSession[]>(HISTORY_KEYS.workoutSessions, [])
+  const raw = readJSON<unknown[]>(HISTORY_KEYS.workoutSessions, [])
+  if (!Array.isArray(raw)) return []
+  return raw.map(normalizeSession).filter(Boolean) as WorkoutSession[]
 }
 
 /** يحفظ جلسة (الأحدث أولًا)، ويستبدل أي جلسة بنفس المعرّف (idempotent). */
