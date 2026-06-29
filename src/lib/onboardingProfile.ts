@@ -202,6 +202,9 @@ export function toLegacyProfile(op: OnboardingProfile, base: Profile = defaultPr
     schedulingStyle: 'flexible',
     preferredDays: [],
     remindersOptIn: op.appPreferences.reminders,
+    // نمط التقسيمة من الإعداد — يحترمه المولّد عند advanced (مصدر الحقيقة).
+    splitMode: tp.splitMode ?? base.splitMode ?? 'auto',
+    advancedSplit: tp.splitMode === 'advanced' ? tp.advancedSplit : undefined,
   }
 }
 

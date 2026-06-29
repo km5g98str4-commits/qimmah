@@ -5,6 +5,7 @@
 
 import type {
   ActivityLevel,
+  AdvancedSplit,
   ExperienceBand,
   GoalType,
   MuscleFocus,
@@ -71,6 +72,10 @@ export function deriveTargetWeight(weightKg: number, gt: GoalType): number {
 type ExpTier = 'beginner' | 'novice' | 'intermediate' | 'advanced'
 
 function expTier(p: Profile): ExpTier {
+  // مصدر الحقيقة: مستوى الخبرة الدلالي من الإعداد (أربع درجات مستقلة).
+  // ملاحظة: لا نشتقّ من experienceBand لأن خريطته تدمج «المستجد» مع «المبتدئ».
+  if (p.experienceLevel) return p.experienceLevel
+  // رجوع للقديم (هجرة/ملفات بلا مستوى دلالي).
   switch (p.experienceBand) {
     case 'lt1m':
     case '1to6m':
@@ -88,18 +93,26 @@ function expTier(p: Profile): ExpTier {
   }
 }
 
-/** عدد التمارين في الجلسة حسب الخبرة. */
-function exercisesPerSession(tier: ExpTier): number {
-  switch (tier) {
-    case 'beginner':
-      return 5 // 4–5
-    case 'novice':
-      return 5
-    case 'intermediate':
-      return 6 // 5–6
-    case 'advanced':
-      return 6
-  }
+/**
+ * عدد التمارين في الجلسة = أساس حسب الخبرة + تعديل حسب مدّة الجلسة.
+ * الخبرة ترفع الحجم (مبتدئ أبسط/أقل … متقدّم أعلى)، والمدّة تضبط العدد:
+ * 30د أقل، 45د معتدل، 60د قياسي، 75/90د أكثر حجمًا.
+ */
+function exercisesPerSession(tier: ExpTier, durationMin?: number): number {
+  const base: Record<ExpTier, number> = { beginner: 4, novice: 5, intermediate: 6, advanced: 7 }
+  const delta =
+    !durationMin || durationMin >= 90
+      ? tier === 'beginner'
+        ? 1
+        : 2 // 90د: أكثر حجم (المبتدئ بزيادة محدودة)
+      : durationMin <= 30
+      ? -2
+      : durationMin <= 45
+      ? -1
+      : durationMin >= 75
+      ? 1
+      : 0 // 60د قياسي
+  return clamp(base[tier] + delta, 3, 9)
 }
 
 const COMPOUND_PATTERNS = new Set<MovementPattern>(['squat', 'hinge', 'push', 'pull', 'lunge'])
@@ -144,9 +157,9 @@ function makeEquipFilter(p: Profile): (ex: Exercise) => boolean {
   const access = p.gymAccess ?? (p.workoutEnvironment === 'home' ? 'home' : 'full')
   if (access === 'full') return () => true
   if (access === 'small') {
-    // وزن حر + أجهزة أساسية فقط — نتجنّب الكيبل (وما يتبعه).
-    const banned = new Set(['cable', 'rope'])
-    return (ex) => ex.equipment.every((e) => !banned.has(e))
+    // صالة صغيرة: وزن حر + أجهزة أساسية + كيبل أساسي. نستبعد التخصصي (سميث/أوزان حرة نادرة).
+    const allowed = new Set(['dumbbell', 'barbell', 'bench', 'machine', 'cable', 'bodyweight', 'band'])
+    return (ex) => ex.equipment.every((e) => allowed.has(e))
   }
   if (access === 'home') {
     // دمبل/بار/وزن جسم/مطاط (+ مقعد شائع منزليًا).
@@ -162,6 +175,42 @@ function makeEquipFilter(p: Profile): (ex: Exercise) => boolean {
 function levelOk(ex: Exercise, tier: ExpTier): boolean {
   if (tier === 'beginner' || tier === 'novice') return ex.level !== 'advanced'
   return true
+}
+
+/** القيود/الإصابات المكتشفة من إجابات الإعداد (كلمات مفتاحية عربية/إنجليزية). */
+interface InjuryFlags {
+  knee: boolean
+  shoulder: boolean
+  back: boolean
+}
+function detectInjuries(p: Profile): InjuryFlags {
+  const s = (p.injuries ?? '').toLowerCase()
+  return {
+    knee: s.includes('knee') || s.includes('ركب'),
+    shoulder: s.includes('shoulder') || s.includes('كتف'),
+    back: s.includes('lower_back') || s.includes('back') || s.includes('ظهر'),
+  }
+}
+
+/**
+ * فلتر سلامة حسب القيود — يستبعد الافتراضيات الخطرة فقط ويُبقي بدائل أكثر أمانًا:
+ * - الركبة: نتجنّب السكوات/الطعنات بالأوزان الحرّة (نُبقي الأجهزة كبديل أأمن).
+ * - الكتف: نتجنّب الضغط فوق الرأس الخطر (نُبقي ضغط الجهاز والرفعات الجانبية).
+ * - الظهر: نتجنّب الـ hinge الثقيل بالبار (نُبقي الأجهزة/الكيبل والصفوف).
+ * ليست نصيحة طبية — مجرّد اختيار افتراضي أكثر تحفّظًا.
+ */
+function makeInjuryFilter(flags: InjuryFlags): (ex: Exercise) => boolean {
+  if (!flags.knee && !flags.shoulder && !flags.back) return () => true
+  return (ex) => {
+    const free = ex.equipment.some((e) => e === 'barbell' || e === 'dumbbell' || e === 'smith')
+    if (flags.knee && (ex.movementPattern === 'squat' || ex.movementPattern === 'lunge') && free) return false
+    if (flags.back && ex.movementPattern === 'hinge' && free) return false
+    if (flags.shoulder) {
+      if (/overhead|behind-neck|military|arnold-press|upright-row/.test(ex.id)) return false
+      if (ex.primaryMuscle === 'shoulders' && ex.movementPattern === 'push' && ex.equipment.includes('barbell')) return false
+    }
+    return true
+  }
 }
 
 // — فتحات اليوم (Slots): قائمة مرتّبة بالأولوية تُملأ بأفضل تمرين متاح —
@@ -365,12 +414,87 @@ function splitId(days: number): string {
   return 'gen-ppl-7'
 }
 
+// — أيام التقسيمة المتقدّمة (يحترم اختيار المستخدم عند splitMode=advanced) —
+function broDay(kind: 'chest' | 'back' | 'shoulders' | 'arms' | 'legs', n: number): DaySpec {
+  const nn = n > 1 ? ` ${AR_NUM[n]}` : ''
+  switch (kind) {
+    case 'chest':
+      return { type: 'push', nameAr: `صدر${nn}`, nameEn: `Chest${n > 1 ? ` ${n}` : ''}`, routineType: 'push' }
+    case 'back':
+      return { type: 'pull', nameAr: `ظهر${nn}`, nameEn: `Back${n > 1 ? ` ${n}` : ''}`, routineType: 'pull' }
+    case 'shoulders':
+      return { type: 'arms', nameAr: `أكتاف${nn}`, nameEn: `Shoulders${n > 1 ? ` ${n}` : ''}`, routineType: 'push' }
+    case 'arms':
+      return { type: 'arms', nameAr: `ذراعين${nn}`, nameEn: `Arms${n > 1 ? ` ${n}` : ''}`, routineType: 'push' }
+    case 'legs':
+      return { type: 'lower', nameAr: `أرجل${nn}`, nameEn: `Legs${n > 1 ? ` ${n}` : ''}`, routineType: 'legs' }
+  }
+}
+function arnoldDay(kind: 'chestback' | 'shoulderarms' | 'legs', n: number): DaySpec {
+  const nn = n > 1 ? ` ${AR_NUM[n]}` : ''
+  if (kind === 'chestback')
+    return { type: 'upper', nameAr: `صدر وظهر${nn}`, nameEn: `Chest & Back${n > 1 ? ` ${n}` : ''}`, routineType: 'full' }
+  if (kind === 'shoulderarms')
+    return { type: 'arms', nameAr: `كتف وذراع${nn}`, nameEn: `Shoulders & Arms${n > 1 ? ` ${n}` : ''}`, routineType: 'push' }
+  return { type: 'lower', nameAr: `أرجل${nn}`, nameEn: `Legs${n > 1 ? ` ${n}` : ''}`, routineType: 'legs' }
+}
+
+const ADV_SPLIT_IDS: Record<AdvancedSplit, string> = {
+  full_body: 'adv-full-body',
+  upper_lower: 'adv-upper-lower',
+  push_pull_legs: 'adv-ppl',
+  arnold: 'adv-arnold',
+  bro_split: 'adv-bro',
+}
+
+/**
+ * يبني أيام التقسيمة المتقدّمة المختارة، موزّعة على عدد أيام المستخدم.
+ * التقسيمات الدورية (PPL/أرنولد/عضلة-باليوم) تُكرَّر لملء الأيام مع ترقيم تلقائي.
+ */
+function advancedSplitDays(split: AdvancedSplit, days: number): DaySpec[] {
+  const d = clamp(days, 1, 7)
+  const cycle = (build: (i: number) => DaySpec) => Array.from({ length: d }, (_, i) => build(i))
+  switch (split) {
+    case 'full_body':
+      return cycle((i) => fullDay(i))
+    case 'upper_lower':
+      return cycle((i) => ulDay(i % 2 === 0 ? 'upper' : 'lower', Math.floor(i / 2) + 1))
+    case 'push_pull_legs': {
+      const order: Array<'push' | 'pull' | 'legs'> = ['push', 'pull', 'legs']
+      return cycle((i) => pplDay(order[i % 3], Math.floor(i / 3) + 1))
+    }
+    case 'arnold': {
+      const order: Array<'chestback' | 'shoulderarms' | 'legs'> = ['chestback', 'shoulderarms', 'legs']
+      return cycle((i) => arnoldDay(order[i % 3], Math.floor(i / 3) + 1))
+    }
+    case 'bro_split': {
+      const order: Array<'chest' | 'back' | 'shoulders' | 'arms' | 'legs'> = ['chest', 'back', 'shoulders', 'arms', 'legs']
+      return cycle((i) => broDay(order[i % 5], Math.floor(i / 5) + 1))
+    }
+  }
+}
+
+/** يحلّ التقسيمة النهائية: متقدّمة (اختيار المستخدم) أو تلقائية حسب الأيام. */
+function resolveSplit(p: Profile): { specs: DaySpec[]; templateId: string } {
+  const days = clamp(p.trainingDays, 1, 7)
+  if (p.splitMode === 'advanced' && p.advancedSplit) {
+    return { specs: advancedSplitDays(p.advancedSplit, days), templateId: ADV_SPLIT_IDS[p.advancedSplit] }
+  }
+  return { specs: splitDays(days, p.muscleFocus), templateId: splitId(days) }
+}
+
 const SPLIT_TITLES: Record<string, { ar: string; en: string }> = {
   'gen-fullbody': { ar: 'جسم كامل', en: 'Full Body' },
   'gen-upper-lower-4': { ar: 'علوي / سفلي', en: 'Upper / Lower' },
   'gen-upper-lower-5': { ar: 'علوي / سفلي + يوم مركّز', en: 'Upper / Lower + Focus' },
   'gen-ppl-6': { ar: 'دفع / سحب / أرجل ×٢', en: 'Push / Pull / Legs ×2' },
   'gen-ppl-7': { ar: 'دفع / سحب / أرجل ×٢ + إضافي', en: 'Push / Pull / Legs ×2 + Extra' },
+  // تقسيمات متقدّمة (اختيار المستخدم).
+  'adv-full-body': { ar: 'جسم كامل', en: 'Full Body' },
+  'adv-upper-lower': { ar: 'علوي / سفلي', en: 'Upper / Lower' },
+  'adv-ppl': { ar: 'دفع / سحب / أرجل', en: 'Push / Pull / Legs' },
+  'adv-arnold': { ar: 'تقسيمة أرنولد', en: 'Arnold Split' },
+  'adv-bro': { ar: 'عضلة باليوم', en: 'Bro Split' },
 }
 
 /** اسم الخطة للعرض — يدعم تقسيمات المحرّك الجديدة والقوالب القديمة. */
@@ -430,14 +554,15 @@ function addCutCardio(planDays: PlanDay[], equipOk: (ex: Exercise) => boolean): 
 
 /** يبني خطة التمرين كاملة من بيانات الملف الشخصي (تقسيمة + تمارين). */
 function generateWorkoutPlan(p: Profile): { plan: WorkoutPlan; specs: DaySpec[] } {
-  const days = clamp(p.trainingDays, 1, 7)
-  const specs = splitDays(days, p.muscleFocus)
+  const { specs, templateId } = resolveSplit(p)
   const tier = expTier(p)
-  const target = exercisesPerSession(tier)
+  const target = exercisesPerSession(tier, p.workoutDuration)
   const equipOk = makeEquipFilter(p)
+  const injuryOk = makeInjuryFilter(detectInjuries(p))
   const pool = exercises.filter(
     (ex) =>
       equipOk(ex) &&
+      injuryOk(ex) &&
       ex.movementPattern !== 'mobility' &&
       ex.primaryMuscle !== 'cardio' &&
       levelOk(ex, tier),
@@ -459,7 +584,7 @@ function generateWorkoutPlan(p: Profile): { plan: WorkoutPlan; specs: DaySpec[] 
 
   if (p.goalType === 'cutting') addCutCardio(planDays, equipOk)
 
-  return { plan: { templateId: splitId(days), days: planDays }, specs }
+  return { plan: { templateId, days: planDays }, specs }
 }
 
 const WEEKDAYS = ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة']
@@ -660,6 +785,17 @@ function applyDeload(plan: WorkoutPlan): WorkoutPlan {
   }
 }
 
+/** التزام متقطّع (on/off): بداية متحفّظة قليلًا — نخفّف المجموعات العالية فقط (≥4 → 3). */
+function applyMildConservative(plan: WorkoutPlan): WorkoutPlan {
+  return {
+    ...plan,
+    days: plan.days.map((d) => ({
+      ...d,
+      exercises: d.exercises.map((pe) => (pe.sets >= 4 ? { ...pe, sets: pe.sets - 1 } : pe)),
+    })),
+  }
+}
+
 /** اسم/وسم الخطة المختصر. */
 export function planLabel(p: Profile, templateId: string): string {
   const days = clamp(p.trainingDays, 1, 7)
@@ -672,16 +808,25 @@ export function generatePlan(profile: Profile): GeneratedPlan {
   const targets = computeTargets(p)
   const isReturning = p.goalType === 'returning' || p.consistency === 'returning'
 
+  const isOnOff = !isReturning && p.consistency === 'onoff'
+
   const { plan, specs } = generateWorkoutPlan(p)
   let workoutPlan = plan
   workoutPlan = applyMuscleFocus(workoutPlan, p.muscleFocus ?? 'balanced')
   if (isReturning) workoutPlan = applyDeload(workoutPlan)
+  else if (isOnOff) workoutPlan = applyMildConservative(workoutPlan)
 
   const weeklySchedule = buildScheduleFromSpecs(specs, p.trainingDays, p.preferredDays)
   const { plan: nutritionPlan, warning: nutritionWarning } = generateNutrition(p, targets)
 
   const warnings: string[] = []
   if (isReturning) warnings.push('خفّفنا حجم أسبوعك الأول للرجوع بأمان — زِد تدريجيًا بعدها.')
+  else if (isOnOff) warnings.push('بدأنا بحجم متحفّظ قليلًا يناسب الالتزام المتقطّع — زِد تدريجيًا مع الانتظام.')
+  // تنبيهات سلامة حسب القيود (ليست نصيحة طبية — مجرّد اختيار افتراضي أكثر تحفّظًا).
+  const inj = detectInjuries(p)
+  if (inj.knee) warnings.push('راعينا حساسية الركبة: قلّلنا تمارين السكوات الثقيلة بالأوزان الحرّة وفضّلنا بدائل أأمن.')
+  if (inj.shoulder) warnings.push('راعينا حساسية الكتف: تجنّبنا الضغط فوق الرأس الخطر وفضّلنا ضغط الجهاز والرفعات الجانبية.')
+  if (inj.back) warnings.push('راعينا حساسية أسفل الظهر: تجنّبنا الـ hinge الثقيل بالبار وفضّلنا الأجهزة/الكيبل.')
   if (p.trainingLevel === 'beginner' && p.trainingDays >= 5) {
     warnings.push('للمبتدئ ننصح بـ3–4 أيام في البداية لبناء الالتزام والاستشفاء.')
   }
