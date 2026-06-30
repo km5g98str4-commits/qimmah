@@ -61,7 +61,7 @@ export function deriveActivityLevel(days: number): ActivityLevel {
 /** وزن هدف منطقي مشتقّ من الوزن والهدف (حين لا يُسأل عنه صراحةً). */
 export function deriveTargetWeight(weightKg: number, gt: GoalType): number {
   if (gt === 'cutting') return Math.round(weightKg * 0.92)
-  if (gt === 'bulking' || gt === 'strength') return Math.round(weightKg * 1.05)
+  if (gt === 'bulking') return Math.round(weightKg * 1.05)
   return weightKg // recomposition / health / maintenance / returning
 }
 
@@ -148,7 +148,6 @@ interface RepScheme {
   isoRest: number
 }
 const SCHEMES: Record<GoalType, RepScheme> = {
-  strength: { compoundReps: '4–6', isoReps: '6–8', compoundRest: 180, isoRest: 90 },
   bulking: { compoundReps: '6–10', isoReps: '10–12', compoundRest: 120, isoRest: 75 },
   cutting: { compoundReps: '8–12', isoReps: '12–15', compoundRest: 90, isoRest: 60 },
   recomposition: { compoundReps: '6–10', isoReps: '10–12', compoundRest: 120, isoRest: 75 },
@@ -710,6 +709,50 @@ const STYLE_TEMPLATES: Record<Profile['nutritionStyle'], { breakfast: string; lu
   flexible: { breakfast: 'oats-and-whey', lunch: 'chicken-sweet-potato', dinner: 'light-dinner', snack: 'cottage-fruit' },
 }
 
+// — توزيع حجم الوجبات (P2.5): أوزان نسبية لكل فتحة حسب تفضيل المستخدم —
+// ترتيب الفتحات: فطور، غداء، عشاء، سناك، شيك بروتين (يطابق ترتيب slots أدناه).
+const SLOT_BASE_WEIGHT = [1, 1, 1, 0.55, 0.45]
+type Timing = NonNullable<Profile['appetiteTiming']>
+type Distribution = NonNullable<Profile['mealDistribution']>
+// وقت الجوع: الصباح يثقّل الوجبات الباكرة، المساء يثقّل العشاء.
+const TIMING_WEIGHT: Record<Timing, number[]> = {
+  balanced: [1, 1, 1, 1, 1],
+  morning: [1.3, 1.1, 0.75, 1.05, 0.9],
+  evening: [0.75, 0.95, 1.35, 1.05, 1.15],
+}
+// توزيع الحجم: «أكبر وأقل» يركّز في الرئيسية ويصغّر السناك؛ «أصغر وأكثر» يكبّر السناك.
+const DISTRIBUTION_WEIGHT: Record<Distribution, number[]> = {
+  balanced: [1, 1, 1, 1, 1],
+  fewer_larger: [1.15, 1.15, 1.15, 0.5, 0.45],
+  more_smaller: [0.95, 0.95, 0.95, 1.35, 1.3],
+}
+
+/**
+ * يعيد توزيع السعرات على الوجبات حسب تفضيل الحجم/الوقت (P2.5) مع تثبيت الإجمالي على
+ * السعرات المستهدفة (لا مضاعفة احتساب — المجموع يبقى = targetCalories تقريبًا).
+ */
+function redistributeMeals(meals: PlanMeal[], targetCalories: number, timing: Timing, dist: Distribution): PlanMeal[] {
+  if (!meals.length || targetCalories <= 0) return meals
+  const weights = meals.map((_, i) => {
+    const idx = Math.min(i, SLOT_BASE_WEIGHT.length - 1)
+    return SLOT_BASE_WEIGHT[idx] * TIMING_WEIGHT[timing][idx] * DISTRIBUTION_WEIGHT[dist][idx]
+  })
+  const sum = weights.reduce((a, b) => a + b, 0)
+  if (sum <= 0) return meals
+  return meals.map((m, i) => {
+    const perMeal = targetCalories * (weights[i] / sum)
+    const base = m.calories > 0 ? m.calories : 1
+    const factor = Math.max(0.4, Math.min(2.4, perMeal / base))
+    return {
+      ...m,
+      calories: Math.round(m.calories * factor),
+      protein: Math.round(m.protein * factor),
+      carbs: Math.round(m.carbs * factor),
+      fat: Math.round(m.fat * factor),
+    }
+  })
+}
+
 /** يولّد خطة أكل تقريبية من الأهداف والتفضيلات (يحاول الاقتراب من السعرات/البروتين). */
 export function generateNutrition(p: Profile, targets: Targets): { plan: NutritionPlan; warning?: string } {
   const goal = calorieGoalFromGoalType(p.goalType)
@@ -745,19 +788,27 @@ export function generateNutrition(p: Profile, targets: Targets): { plan: Nutriti
 
   let meals: PlanMeal[] = slots.map((id, i) => createPlanMealFromTemplate(id, i))
 
-  // محاولة تقريب السعرات ضمن ±10% عبر معامل قياس بسيط على الماكروز المعروضة
-  const totals0 = planTotals(meals)
-  if (totals0.calories > 0) {
-    const factor = targetCalories / totals0.calories
-    const clamped = Math.max(0.6, Math.min(1.6, factor)) // لا نبالغ في التحجيم
-    if (Math.abs(factor - 1) > 0.1) {
-      meals = meals.map((m) => ({
-        ...m,
-        calories: Math.round(m.calories * clamped),
-        protein: Math.round(m.protein * clamped),
-        carbs: Math.round(m.carbs * clamped),
-        fat: Math.round(m.fat * clamped),
-      }))
+  // توزيع حجم الوجبات حسب تفضيل المستخدم (P2.5): عند اختيار توزيع/وقت جوع غير «متوازن»
+  // نعيد توزيع السعرات على الوجبات (مع تثبيت الإجمالي)؛ غير ذلك نُبقي السلوك الموحّد القديم.
+  const timing: Timing = p.appetiteTiming ?? 'balanced'
+  const dist: Distribution = p.mealDistribution ?? 'balanced'
+  if (timing !== 'balanced' || dist !== 'balanced') {
+    meals = redistributeMeals(meals, targetCalories, timing, dist)
+  } else {
+    // المسار القديم: محاولة تقريب السعرات ضمن ±10% عبر معامل قياس موحّد على الماكروز.
+    const totals0 = planTotals(meals)
+    if (totals0.calories > 0) {
+      const factor = targetCalories / totals0.calories
+      const clamped = Math.max(0.6, Math.min(1.6, factor)) // لا نبالغ في التحجيم
+      if (Math.abs(factor - 1) > 0.1) {
+        meals = meals.map((m) => ({
+          ...m,
+          calories: Math.round(m.calories * clamped),
+          protein: Math.round(m.protein * clamped),
+          carbs: Math.round(m.carbs * clamped),
+          fat: Math.round(m.fat * clamped),
+        }))
+      }
     }
   }
 
@@ -783,7 +834,6 @@ export function generateNutrition(p: Profile, targets: Targets): { plan: Nutriti
 const COMMITMENTS_BY_GOAL: Record<GoalType, string[]> = {
   cutting: ['today-workout', 'steps-10k', 'water-target', 'sleep-7h', 'protein-target'],
   bulking: ['today-workout', 'protein-target', 'calories-target', 'sleep-7h', 'post-workout-meal'],
-  strength: ['today-workout', 'warm-up', 'protein-target', 'sleep-7h', 'water-target'],
   returning: ['today-workout', 'stretching', 'light-walk', 'water-target', 'sleep-7h'],
   health: ['today-workout', 'steps-10k', 'water-target', 'sleep-7h', 'vegetables'],
   maintenance: ['today-workout', 'protein-target', 'water-target', 'sleep-7h', 'steps-10k'],

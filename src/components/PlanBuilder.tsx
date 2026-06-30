@@ -10,9 +10,11 @@ import {
 } from '@/lib/onboardingProfile'
 import type {
   AdvancedSplit,
+  AppetiteTiming,
   DietPattern,
   Environment,
   ExperienceLevel,
+  MealDistribution,
   NeatLevel,
   NutritionStyle as OnbNutritionStyle,
   OnbConsistency,
@@ -25,12 +27,14 @@ import { ONBOARDING_SCHEMA_VERSION } from '@/types/onboarding'
 import {
   advancedSplitChoices,
   allergyChoices,
+  appetiteTimingChoices,
   consistencyChoicesV2,
   dietPatternChoices,
   environmentChoices,
   experienceChoices,
   goalChoices,
   injuryChoices,
+  mealDistributionChoices,
   neatChoices,
   nutritionStyleChoices,
   recommendedDaysFor,
@@ -83,6 +87,8 @@ interface Answers {
   // nutritionPreferences
   nutritionStyle: OnbNutritionStyle
   mealsPerDay: number
+  mealDistribution: MealDistribution
+  appetiteTiming: AppetiteTiming
   // foodPreferences (optional)
   dietPattern: DietPattern
   allergies: string[]
@@ -106,6 +112,8 @@ const defaultAnswers: Answers = {
   stepEstimate: 8000,
   nutritionStyle: 'meal_suggestions',
   mealsPerDay: 4,
+  mealDistribution: 'balanced',
+  appetiteTiming: 'balanced',
   dietPattern: 'none',
   allergies: [],
   injuries: [],
@@ -159,6 +167,9 @@ function buildOnboardingProfile(a: Answers): OnboardingProfile {
     nutritionPreferences: {
       style: a.nutritionStyle,
       mealsPerDay: a.nutritionStyle === 'meal_suggestions' ? a.mealsPerDay : undefined,
+      // توزيع الحجم/وقت الجوع يُطلبان ويُحفظان فقط عند اقتراح الوجبات (P2.5).
+      mealDistribution: a.nutritionStyle === 'meal_suggestions' ? a.mealDistribution : undefined,
+      appetiteTiming: a.nutritionStyle === 'meal_suggestions' ? a.appetiteTiming : undefined,
     },
     foodPreferences: { dietPattern: a.dietPattern, dislikedFoods: [], allergies: a.allergies },
     limitations: { injuries: a.injuries },
@@ -476,6 +487,38 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
       content: (
         <Question title="كم وجبة باليوم تناسبك؟" hint="نوزّع سعراتك عليها.">
           <Stepper value={a.mealsPerDay} min={BOUNDS.meals.min} max={BOUNDS.meals.max} onChange={(v) => set({ mealsPerDay: v })} unit="وجبات" />
+        </Question>
+      ),
+    })
+
+    // 16ب) توزيع حجم الوجبات (P2.5) — يغيّر تركيز السعرات بين الوجبات.
+    steps.push({
+      key: 'mealDistribution',
+      label: 'توزيع الوجبات',
+      valid: !!a.mealDistribution,
+      content: (
+        <Question title="تفضّل وجباتك أكبر وأقل، ولا أصغر وأكثر؟" hint="يحدّد أين نركّز سعراتك.">
+          <List>
+            {mealDistributionChoices.map((c) => (
+              <OptionRow key={c.value} icon={c.icon} label={c.label} desc={c.desc} selected={a.mealDistribution === c.value} onClick={() => set({ mealDistribution: c.value })} />
+            ))}
+          </List>
+        </Question>
+      ),
+    })
+
+    // 16ج) وقت الجوع الأكثر (P2.5) — يميل توزيع السعرات للصباح أو المساء.
+    steps.push({
+      key: 'appetiteTiming',
+      label: 'وقت الجوع',
+      valid: !!a.appetiteTiming,
+      content: (
+        <Question title="متى تكون أكثر جوعًا؟" hint="نوزّع سعراتك على وقتك المناسب.">
+          <List>
+            {appetiteTimingChoices.map((c) => (
+              <OptionRow key={c.value} icon={c.icon} label={c.label} desc={c.desc} selected={a.appetiteTiming === c.value} onClick={() => set({ appetiteTiming: c.value })} />
+            ))}
+          </List>
         </Question>
       ),
     })
