@@ -12,9 +12,9 @@ export const workoutTemplates: WorkoutTemplate[] = [
     descriptionEn: 'Whole-body training three times a week — great for beginners and busy weeks.',
     recommendedFor: 'مبتدئ–متوسط',
     days: [
-      { id: 'full-body-3-d1', nameAr: 'اليوم أ', nameEn: 'Day A', exerciseIds: ['barbell-back-squat', 'barbell-bench-press', 'barbell-row', 'overhead-press', 'plank'] },
-      { id: 'full-body-3-d2', nameAr: 'اليوم ب', nameEn: 'Day B', exerciseIds: ['deadlift', 'incline-dumbbell-press', 'lat-pulldown', 'dumbbell-shoulder-press', 'hanging-leg-raise'] },
-      { id: 'full-body-3-d3', nameAr: 'اليوم ج', nameEn: 'Day C', exerciseIds: ['leg-press', 'dumbbell-bench-press', 'seated-cable-row', 'lateral-raise', 'cable-crunch'] },
+      { id: 'full-body-3-d1', nameAr: 'جسم كامل', nameEn: 'Full Body', exerciseIds: ['barbell-back-squat', 'barbell-bench-press', 'barbell-row', 'overhead-press', 'plank'] },
+      { id: 'full-body-3-d2', nameAr: 'جسم كامل', nameEn: 'Full Body', exerciseIds: ['deadlift', 'incline-dumbbell-press', 'lat-pulldown', 'dumbbell-shoulder-press', 'hanging-leg-raise'] },
+      { id: 'full-body-3-d3', nameAr: 'جسم كامل', nameEn: 'Full Body', exerciseIds: ['leg-press', 'dumbbell-bench-press', 'seated-cable-row', 'lateral-raise', 'cable-crunch'] },
     ],
   },
   {
@@ -105,9 +105,9 @@ export const workoutTemplates: WorkoutTemplate[] = [
     descriptionEn: 'A simple starter program — three light full-body days.',
     recommendedFor: 'مبتدئ',
     days: [
-      { id: 'beginner-gym-d1', nameAr: 'اليوم أ', nameEn: 'Day A', exerciseIds: ['chest-press-machine', 'lat-pulldown', 'leg-press', 'plank'] },
-      { id: 'beginner-gym-d2', nameAr: 'اليوم ب', nameEn: 'Day B', exerciseIds: ['shoulder-press-machine', 'seated-cable-row', 'leg-extension', 'lying-leg-curl'] },
-      { id: 'beginner-gym-d3', nameAr: 'اليوم ج', nameEn: 'Day C', exerciseIds: ['incline-machine-press', 'machine-row', 'goblet-squat', 'standing-calf-raise'] },
+      { id: 'beginner-gym-d1', nameAr: 'جسم كامل', nameEn: 'Full Body', exerciseIds: ['chest-press-machine', 'lat-pulldown', 'leg-press', 'plank'] },
+      { id: 'beginner-gym-d2', nameAr: 'جسم كامل', nameEn: 'Full Body', exerciseIds: ['shoulder-press-machine', 'seated-cable-row', 'leg-extension', 'lying-leg-curl'] },
+      { id: 'beginner-gym-d3', nameAr: 'جسم كامل', nameEn: 'Full Body', exerciseIds: ['incline-machine-press', 'machine-row', 'goblet-squat', 'standing-calf-raise'] },
     ],
   },
   {
@@ -118,9 +118,9 @@ export const workoutTemplates: WorkoutTemplate[] = [
     descriptionEn: 'Full-body sessions finished with cardio — more movement, more burn.',
     recommendedFor: 'مبتدئ–متوسط',
     days: [
-      { id: 'fat-loss-d1', nameAr: 'اليوم أ', nameEn: 'Day A', exerciseIds: ['goblet-squat', 'push-up', 'dumbbell-row', 'plank', 'treadmill-run'] },
-      { id: 'fat-loss-d2', nameAr: 'اليوم ب', nameEn: 'Day B', exerciseIds: ['leg-press', 'dumbbell-shoulder-press', 'lat-pulldown', 'mountain-climber', 'stationary-bike'] },
-      { id: 'fat-loss-d3', nameAr: 'اليوم ج', nameEn: 'Day C', exerciseIds: ['walking-lunge', 'dumbbell-bench-press', 'seated-cable-row', 'russian-twist', 'rowing-machine'] },
+      { id: 'fat-loss-d1', nameAr: 'جسم كامل', nameEn: 'Full Body', exerciseIds: ['goblet-squat', 'push-up', 'dumbbell-row', 'plank', 'treadmill-run'] },
+      { id: 'fat-loss-d2', nameAr: 'جسم كامل', nameEn: 'Full Body', exerciseIds: ['leg-press', 'dumbbell-shoulder-press', 'lat-pulldown', 'mountain-climber', 'stationary-bike'] },
+      { id: 'fat-loss-d3', nameAr: 'جسم كامل', nameEn: 'Full Body', exerciseIds: ['walking-lunge', 'dumbbell-bench-press', 'seated-cable-row', 'russian-twist', 'rowing-machine'] },
     ],
   },
   {
@@ -144,7 +144,7 @@ export const workoutTemplates: WorkoutTemplate[] = [
     descriptionAr: 'ابدأ من يوم فارغ وأضف تمارينك من المكتبة بنفسك.',
     descriptionEn: 'Start from an empty day and add exercises from the library yourself.',
     recommendedFor: 'الكل',
-    days: [{ id: 'custom-d1', nameAr: 'يوم ١', nameEn: 'Day 1', exerciseIds: [] }],
+    days: [{ id: 'custom-d1', nameAr: 'تمرين', nameEn: 'Workout', exerciseIds: [] }],
   },
 ]
 

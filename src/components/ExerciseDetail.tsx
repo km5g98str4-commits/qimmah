@@ -9,7 +9,7 @@ import { getExercise, targetMuscleAr } from '@/data/exercises'
 import { guidanceFor } from '@/lib/exerciseGuidance'
 import { exerciseStats } from '@/lib/exerciseStats'
 import { getRecord } from '@/lib/exerciseHistory'
-import { muscleLabelAr } from '@/data/muscleGroups'
+import { ExerciseMedia } from './ExerciseMedia'
 
 type DetailTab = 'about' | 'history' | 'charts' | 'records'
 
@@ -92,25 +92,9 @@ export function ExerciseDetail({ lang, exerciseId, onClose, onAddToPlan }: Exerc
   )
 }
 
-/** صورة بديلة فاخرة (لا صور خارجية) — تدرّج داكن + أيقونة + رقائق العضلات. */
+/** رأس بطاقة التمرين — صورة حقيقية (مع تلاشٍ متبادل) عند توفّر مطابقة، وإلا بديل فاخر. */
 function ExerciseHero({ ex }: { ex: NonNullable<ReturnType<typeof getExercise>> }) {
-  return (
-    <div className="relative h-40 w-full bg-gradient-to-br from-ink-900 via-ink-700 to-ink-900">
-      <div className="absolute inset-0 opacity-20 bg-grid-faint" />
-      <div className="absolute inset-0 flex items-center justify-center">
-        <span className="grid h-16 w-16 place-items-center rounded-2xl bg-primary/90 text-white shadow-glow">
-          <Icon name="Dumbbell" className="h-8 w-8" strokeWidth={2.5} />
-        </span>
-      </div>
-      <div className="absolute start-3 top-3 flex flex-wrap gap-1.5">
-        {ex.primaryMusclesDetailed.slice(0, 3).map((m) => (
-          <span key={m} className="rounded-full bg-white/15 px-2 py-0.5 text-[10px] font-bold text-white backdrop-blur">
-            {muscleLabelAr(m)}
-          </span>
-        ))}
-      </div>
-    </div>
-  )
+  return <ExerciseMedia exerciseId={ex.id} muscles={ex.primaryMusclesDetailed} heightClass="h-40" />
 }
 
 function AboutTab({ ex, lang, onAddToPlan }: { ex: NonNullable<ReturnType<typeof getExercise>>; lang: Lang; onAddToPlan?: (id: string) => void }) {

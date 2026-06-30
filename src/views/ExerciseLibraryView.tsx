@@ -5,6 +5,7 @@ import { ExerciseDetail } from '@/components/ExerciseDetail'
 import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
 import { exercises, getExercise, targetMuscleAr } from '@/data/exercises'
+import { getExerciseMedia } from '@/data/exerciseMedia'
 import { machineCatalog } from '@/data/machineCatalog'
 import type { Muscle } from '@/types/workout'
 
@@ -166,7 +167,7 @@ export function ExerciseLibraryView({ lang }: ExerciseLibraryViewProps) {
                   onClick={() => setOpenId(e.id)}
                   className="flex w-full items-center gap-3 rounded-2xl border border-line bg-surface p-3 text-start shadow-card transition-shadow hover:shadow-soft"
                 >
-                  <ExerciseThumb />
+                  <ExerciseThumb exerciseId={e.id} />
                   <div className="min-w-0 flex-1">
                     {/* الاسم الإنجليزي أولًا، العربي تحته، ثم العضلة الهدف بالعربية */}
                     <p className="truncate text-sm font-bold text-ink-900">{e.nameEn}</p>
@@ -223,7 +224,7 @@ function MachineCatalogBrowser({ onOpen }: { onOpen: (id: string) => void }) {
                       onClick={() => onOpen(item.exerciseId)}
                       className="flex w-full items-center gap-3 rounded-2xl border border-line bg-surface p-3 text-start shadow-card transition-shadow hover:shadow-soft"
                     >
-                      <ExerciseThumb />
+                      <ExerciseThumb exerciseId={item.exerciseId} />
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-bold text-ink-900">{item.nameEn}</p>
                         <p className="truncate text-[11px] text-ink-500">{item.nameAr}</p>
@@ -245,8 +246,24 @@ function MachineCatalogBrowser({ onOpen }: { onOpen: (id: string) => void }) {
   )
 }
 
-/** صورة بديلة مصغّرة فاخرة (لا صور خارجية). */
-function ExerciseThumb() {
+/** صورة مصغّرة — صورة حقيقية (إطار البداية) عند توفّر مطابقة، وإلا بديل فاخر بالأيقونة. */
+function ExerciseThumb({ exerciseId }: { exerciseId: string }) {
+  const media = getExerciseMedia(exerciseId)
+  const [failed, setFailed] = useState(false)
+  if (media && !failed) {
+    return (
+      <span className="relative grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-xl bg-gradient-to-br from-ink-900 to-ink-700">
+        <img
+          src={media.gifUrl || media.img0}
+          alt=""
+          aria-hidden="true"
+          loading="lazy"
+          onError={() => setFailed(true)}
+          className="h-full w-full object-cover"
+        />
+      </span>
+    )
+  }
   return (
     <span className="relative grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-xl bg-gradient-to-br from-ink-900 to-ink-700 text-white">
       <Icon name="Dumbbell" className="h-5 w-5" />
