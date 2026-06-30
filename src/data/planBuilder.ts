@@ -13,8 +13,10 @@ import type {
 } from '@/types/profile'
 import type {
   AdvancedSplit,
+  AppetiteTiming,
   DietPattern,
   Environment,
+  MealDistribution,
   NeatLevel,
   NutritionStyle as OnbNutritionStyle,
   OnbConsistency,
@@ -41,8 +43,9 @@ export const sexChoices: Choice<Sex>[] = [
   { value: 'female', label: 'أنثى', icon: 'Users' },
 ]
 
-/** أهداف الإعداد الثلاثة (مسارات منطقية لا تتداخل) — تُربط داخليًا بـ GoalType للحسابات. */
-export type GoalValue = 'bulk' | 'cut' | 'strength'
+/** هدفا الإعداد (مساران منطقيان لا يتداخلان) — يُربطان داخليًا بـ GoalType للحسابات. */
+// P2.5: حُصِر الهدف في تنشيف/تضخيم فقط؛ أُلغي مسار «القوة».
+export type GoalValue = 'bulk' | 'cut'
 
 export interface GoalChoice {
   value: GoalValue
@@ -55,7 +58,6 @@ export interface GoalChoice {
 export const goalChoices: GoalChoice[] = [
   { value: 'bulk', label: 'تضخيم', desc: 'زيادة العضل والوزن', icon: 'TrendingUp', goalType: 'bulking' },
   { value: 'cut', label: 'تنشيف', desc: 'خسارة دهون مع الحفاظ على العضل', icon: 'Flame', goalType: 'cutting' },
-  { value: 'strength', label: 'زيادة القوة', desc: 'أقوى بأقل تكرارات', icon: 'Zap', goalType: 'strength' },
 ]
 
 export const muscleFocusChoices: Choice<MuscleFocus>[] = [
@@ -152,6 +154,20 @@ export const nutritionStyleChoices: Choice<OnbNutritionStyle>[] = [
   { value: 'meal_suggestions', label: 'اقتراح وجبات', desc: 'وجبات جاهزة مقترحة حسب هدفك', icon: 'Salad' },
   { value: 'macros_only', label: 'ماكروز فقط', desc: 'أهداف سعرات وبروتين بدون وجبات', icon: 'Target' },
   { value: 'simple_guidance', label: 'إرشاد مبسّط', desc: 'توجيه عام بدون تفاصيل دقيقة', icon: 'Compass' },
+]
+
+/** توزيع حجم الوجبات (P2.5) — يحدّد أين تتركّز السعرات بين الوجبات. */
+export const mealDistributionChoices: Choice<MealDistribution>[] = [
+  { value: 'balanced', label: 'متوازنة', desc: 'وجبات رئيسية ووجبات خفيفة بحجم طبيعي', icon: 'Scale' },
+  { value: 'fewer_larger', label: 'أكبر وأقل', desc: 'سعرات مركّزة في الوجبات الرئيسية', icon: 'UtensilsCrossed' },
+  { value: 'more_smaller', label: 'أصغر وأكثر', desc: 'سعرات موزّعة بالتساوي على الوجبات', icon: 'LayoutGrid' },
+]
+
+/** وقت الجوع الأكثر (P2.5) — يميل توزيع السعرات للصباح أو المساء. */
+export const appetiteTimingChoices: Choice<AppetiteTiming>[] = [
+  { value: 'balanced', label: 'متوازن', desc: 'جوعي موزّع على اليوم', icon: 'Clock' },
+  { value: 'morning', label: 'الصباح', desc: 'أجوع أكثر بداية اليوم', icon: 'Sunrise' },
+  { value: 'evening', label: 'المساء', desc: 'أجوع أكثر آخر اليوم', icon: 'Sunset' },
 ]
 
 /** نمط الأكل (اختياري). */

@@ -66,11 +66,13 @@ function mergeSection<T extends object>(base: T, saved: unknown): T {
 }
 
 /**
- * هجرة الهدف الملغى «recomp» (إعادة تركيب الجسم) → «cut» عند القراءة.
- * أي ملف محفوظ قديمًا بهدف recomp يُحمَّل بأمان ويُعاد حساب أهدافه بصيغة التنشيف (لا تعطّل).
+ * هجرة الأهداف الملغاة عند القراءة (لا تعطّل، ويُعاد الحساب تلقائيًا):
+ * - «recomp» (إعادة تركيب الجسم) → «cut».
+ * - «strength» (زيادة القوة، أُلغي في P2.5) → «bulk» (أقرب مسار: فائض سعرات + تمرين أولًا).
  */
 function migrateLegacyOnbGoal(goal: OnboardingProfile['goal']): OnboardingProfile['goal'] {
   if ((goal.type as string) === 'recomp') return { ...goal, type: 'cut' }
+  if ((goal.type as string) === 'strength') return { ...goal, type: 'bulk' }
   return goal
 }
 
@@ -131,7 +133,6 @@ export function clearOnboardingProfile(): void {
 const GOAL_TO_GOALTYPE: Record<OnbGoalType, GoalType> = {
   bulk: 'bulking',
   cut: 'cutting',
-  strength: 'strength',
 }
 
 const CONSISTENCY_TO_LEGACY: Record<OnbConsistency, Consistency> = {
@@ -206,6 +207,9 @@ export function toLegacyProfile(op: OnboardingProfile, base: Profile = defaultPr
     nutritionStyle,
     // أسلوب العرض الدلالي من الإعداد — يقود واجهة التغذية (اقتراح وجبات / ماكروز فقط).
     nutritionDisplayStyle: op.nutritionPreferences.style ?? base.nutritionDisplayStyle,
+    // توزيع حجم الوجبات ووقت الجوع (P2.5) — يؤثّران على توزيع السعرات في اقتراح الوجبات.
+    mealDistribution: op.nutritionPreferences.mealDistribution ?? base.mealDistribution,
+    appetiteTiming: op.nutritionPreferences.appetiteTiming ?? base.appetiteTiming,
     dislikedFoods: op.foodPreferences.dislikedFoods.join('، '),
     muscleFocus: 'balanced',
     consistency,
@@ -273,7 +277,6 @@ const GOALTYPE_TO_ONB: Partial<Record<GoalType, OnbGoalType>> = {
   cutting: 'cut',
   // الهدف الملغى «إعادة التكوين» يُهاجَر إلى «تنشيف» (نفس مسار العجز).
   recomposition: 'cut',
-  strength: 'strength',
 }
 
 const LEGACY_CONSISTENCY_TO_ONB: Record<Consistency, OnbConsistency> = {

@@ -180,11 +180,13 @@ export function getDefaultCustomization(): Customization {
 }
 
 /**
- * هجرة الهدف الملغى: أي ملف محفوظ بهدف «إعادة التكوين» (recomposition) يُحوَّل إلى «تنشيف».
- * بتغيّر goalType تختلف بصمة الملف فتُعاد الأهداف حسابها بصيغة التنشيف (TDEE−400) في withFreshTargets.
+ * هجرة الأهداف الملغاة في الملف المحفوظ (تتغيّر بصمة الملف فتُعاد الأهداف حسابها في withFreshTargets):
+ * - «إعادة التكوين» (recomposition) → «تنشيف» (cutting، TDEE−400).
+ * - «القوة» (strength، أُلغي في P2.5) → «تضخيم» (bulking، TDEE+300).
  */
 function migrateLegacyGoal(p: Profile): Profile {
   if (p.goalType === 'recomposition') return { ...p, goalType: 'cutting', goal: 'cut' }
+  if ((p.goalType as string) === 'strength') return { ...p, goalType: 'bulking', goal: 'bulk' }
   return p
 }
 
