@@ -388,65 +388,79 @@ function buildDayExercises(type: DayType, variation: number, pool: Exercise[], t
   return ids
 }
 
-// — مواصفات أيام التقسيمة (الأسماء العربية/الإنجليزية + نوع الجدول) —
+// — مواصفات أيام التقسيمة —
+// نحمل «الاسم الأساسي» للتقسيمة فقط (بلا ترقيم)، ويُركّب الاسم المعروض
+// «اليوم N · <التقسيمة>» عند الاستهلاك حيث يتوفّر ترتيب اليوم داخل الخطة.
 interface DaySpec {
   type: DayType
-  nameAr: string
-  nameEn: string
+  baseAr: string
+  baseEn: string
   routineType: RoutineDay['type']
 }
 
-const AR_ALPHA = ['أ', 'ب', 'ج', 'د', 'هـ', 'و', 'ز']
 const AR_NUM = ['', '١', '٢', '٣', '٤', '٥', '٦', '٧']
 
-function fullDay(i: number): DaySpec {
-  return { type: 'full', nameAr: `جسم كامل ${AR_ALPHA[i]}`, nameEn: `Full Body ${String.fromCharCode(65 + i)}`, routineType: 'full' }
+/** الرقم العربي-الهندي لليوم (مع تجاوز آمن للأرقام الكبيرة). */
+function arDayNum(n: number): string {
+  return AR_NUM[n] ?? String(n)
 }
-function ulDay(kind: 'upper' | 'lower', n: number): DaySpec {
+
+/** اسم اليوم المعروض: «اليوم N · <التقسيمة>» / «Day N · <split>». */
+function dayLabel(spec: DaySpec, dayNumber: number): { nameAr: string; nameEn: string } {
+  return {
+    nameAr: `اليوم ${arDayNum(dayNumber)} · ${spec.baseAr}`,
+    nameEn: `Day ${dayNumber} · ${spec.baseEn}`,
+  }
+}
+
+function fullDay(): DaySpec {
+  return { type: 'full', baseAr: 'جسم كامل', baseEn: 'Full Body', routineType: 'full' }
+}
+function ulDay(kind: 'upper' | 'lower'): DaySpec {
   return kind === 'upper'
-    ? { type: 'upper', nameAr: `علوي ${AR_NUM[n]}`, nameEn: `Upper ${n}`, routineType: 'full' }
-    : { type: 'lower', nameAr: `سفلي ${AR_NUM[n]}`, nameEn: `Lower ${n}`, routineType: 'legs' }
+    ? { type: 'upper', baseAr: 'علوي', baseEn: 'Upper', routineType: 'full' }
+    : { type: 'lower', baseAr: 'سفلي', baseEn: 'Lower', routineType: 'legs' }
 }
-function pplDay(kind: 'push' | 'pull' | 'legs', n: number): DaySpec {
-  if (kind === 'push') return { type: 'push', nameAr: `دفع ${AR_NUM[n]}`, nameEn: `Push ${n}`, routineType: 'push' }
-  if (kind === 'pull') return { type: 'pull', nameAr: `سحب ${AR_NUM[n]}`, nameEn: `Pull ${n}`, routineType: 'pull' }
-  return { type: 'lower', nameAr: `أرجل ${AR_NUM[n]}`, nameEn: `Legs ${n}`, routineType: 'legs' }
+function pplDay(kind: 'push' | 'pull' | 'legs'): DaySpec {
+  if (kind === 'push') return { type: 'push', baseAr: 'دفع', baseEn: 'Push', routineType: 'push' }
+  if (kind === 'pull') return { type: 'pull', baseAr: 'سحب', baseEn: 'Pull', routineType: 'pull' }
+  return { type: 'lower', baseAr: 'أرجل', baseEn: 'Legs', routineType: 'legs' }
 }
 function focusDay(focus?: MuscleFocus): DaySpec {
   switch (focus) {
     case 'lower':
-      return { type: 'lower', nameAr: 'أرجل (مركّز)', nameEn: 'Legs (Focus)', routineType: 'legs' }
+      return { type: 'lower', baseAr: 'أرجل (مركّز)', baseEn: 'Legs (Focus)', routineType: 'legs' }
     case 'upper':
     case 'chest':
     case 'back':
     case 'shoulders':
-      return { type: 'upper', nameAr: 'علوي (مركّز)', nameEn: 'Upper (Focus)', routineType: 'full' }
+      return { type: 'upper', baseAr: 'علوي (مركّز)', baseEn: 'Upper (Focus)', routineType: 'full' }
     case 'core':
-      return { type: 'core', nameAr: 'بطن وكور', nameEn: 'Core', routineType: 'cardio' }
+      return { type: 'core', baseAr: 'بطن وكور', baseEn: 'Core', routineType: 'cardio' }
     case 'arms':
     default:
-      return { type: 'arms', nameAr: 'ذراعين وأكتاف', nameEn: 'Arms & Shoulders', routineType: 'push' }
+      return { type: 'arms', baseAr: 'ذراعين وأكتاف', baseEn: 'Arms & Shoulders', routineType: 'push' }
   }
 }
 
 /** يختار التقسيمة تلقائيًا حسب عدد أيام التمرين (والتركيز عند 5 أيام). */
 function splitDays(days: number, focus?: MuscleFocus): DaySpec[] {
   const d = clamp(days, 1, 7)
-  if (d <= 2) return Array.from({ length: d }, (_, i) => fullDay(i))
-  if (d === 3) return [fullDay(0), fullDay(1), fullDay(2)]
-  if (d === 4) return [ulDay('upper', 1), ulDay('lower', 1), ulDay('upper', 2), ulDay('lower', 2)]
-  if (d === 5) return [ulDay('upper', 1), ulDay('lower', 1), ulDay('upper', 2), ulDay('lower', 2), focusDay(focus)]
+  if (d <= 2) return Array.from({ length: d }, () => fullDay())
+  if (d === 3) return [fullDay(), fullDay(), fullDay()]
+  if (d === 4) return [ulDay('upper'), ulDay('lower'), ulDay('upper'), ulDay('lower')]
+  if (d === 5) return [ulDay('upper'), ulDay('lower'), ulDay('upper'), ulDay('lower'), focusDay(focus)]
   if (d === 6)
-    return [pplDay('push', 1), pplDay('pull', 1), pplDay('legs', 1), pplDay('push', 2), pplDay('pull', 2), pplDay('legs', 2)]
+    return [pplDay('push'), pplDay('pull'), pplDay('legs'), pplDay('push'), pplDay('pull'), pplDay('legs')]
   // 7 أيام: PPL ×2 + يوم جسم كامل إضافي.
   return [
-    pplDay('push', 1),
-    pplDay('pull', 1),
-    pplDay('legs', 1),
-    pplDay('push', 2),
-    pplDay('pull', 2),
-    pplDay('legs', 2),
-    { type: 'full', nameAr: 'جسم كامل', nameEn: 'Full Body', routineType: 'full' },
+    pplDay('push'),
+    pplDay('pull'),
+    pplDay('legs'),
+    pplDay('push'),
+    pplDay('pull'),
+    pplDay('legs'),
+    fullDay(),
   ]
 }
 
@@ -477,23 +491,23 @@ const ADVANCED_SPLIT_ID: Record<PlannedSplit, string> = {
   bro_split: 'gen-adv-bro',
 }
 
-function advancedDaySpec(split: PlannedSplit, type: DayType, n: number): DaySpec {
+function advancedDaySpec(split: PlannedSplit, type: DayType): DaySpec {
   switch (type) {
     case 'full':
-      return fullDay((n - 1) % AR_ALPHA.length)
+      return fullDay()
     case 'upper':
-      return ulDay('upper', n)
+      return ulDay('upper')
     case 'push':
-      return pplDay('push', n)
+      return pplDay('push')
     case 'pull':
-      return pplDay('pull', n)
+      return pplDay('pull')
     case 'arms':
-      return { type: 'arms', nameAr: `ذراعين وأكتاف ${AR_NUM[n] ?? ''}`.trim(), nameEn: `Arms & Shoulders ${n}`, routineType: 'push' }
+      return { type: 'arms', baseAr: 'ذراعين وأكتاف', baseEn: 'Arms & Shoulders', routineType: 'push' }
     case 'core':
       return focusDay('core')
     case 'lower':
       // «سفلي» في تقسيمة علوي/سفلي، و«أرجل» في PPL/أرنولد/برو.
-      return split === 'upper_lower' ? ulDay('lower', n) : pplDay('legs', n)
+      return split === 'upper_lower' ? ulDay('lower') : pplDay('legs')
   }
 }
 
@@ -502,12 +516,7 @@ function advancedSplitDays(days: number, split: PlannedSplit): DaySpec[] | null 
   const cycle = ADVANCED_CYCLES[split]
   const d = clamp(days, 1, 7)
   if (!cycle || d < cycle.length) return null // أقل من دورة كاملة → غير صالح، نرجع للتلقائي
-  const counts: Record<string, number> = {}
-  return Array.from({ length: d }, (_, i) => {
-    const type = cycle[i % cycle.length]
-    counts[type] = (counts[type] ?? 0) + 1
-    return advancedDaySpec(split, type, counts[type])
-  })
+  return Array.from({ length: d }, (_, i) => advancedDaySpec(split, cycle[i % cycle.length]))
 }
 
 const SPLIT_TITLES: Record<string, { ar: string; en: string }> = {
@@ -607,10 +616,11 @@ function generateWorkoutPlan(p: Profile): { plan: WorkoutPlan; specs: DaySpec[] 
     counts[spec.type] = variation + 1
     const dayId = `gen-${di + 1}-${spec.type}`
     const ids = buildDayExercises(spec.type, variation, pool, target, preferMachines)
+    const { nameAr, nameEn } = dayLabel(spec, di + 1)
     return {
       id: dayId,
-      nameAr: spec.nameAr,
-      nameEn: spec.nameEn,
+      nameAr,
+      nameEn,
       exercises: ids.map((id, i) => createGenExercise(id, dayId, i, tier, p.goalType)),
     }
   })
@@ -668,8 +678,9 @@ function buildScheduleFromSpecs(specs: DaySpec[], trainingDays: number, preferre
   let c = 0
   WEEKDAYS.forEach((d, i) => {
     if (specs.length && trainIdx.includes(i)) {
-      const spec = specs[c % specs.length]
-      rows.push({ day: d, title: spec.nameAr, type: spec.routineType })
+      const idx = c % specs.length
+      const spec = specs[idx]
+      rows.push({ day: d, title: dayLabel(spec, idx + 1).nameAr, type: spec.routineType })
       c++
     } else {
       rows.push({ day: d, title: 'راحة واستشفاء', type: 'rest' })

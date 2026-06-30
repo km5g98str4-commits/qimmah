@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import { Icon } from './Icon'
+import { ExerciseDemo } from './ExerciseDemo'
 import { LineChart } from './LineChart'
 import { MuscleChips } from './MuscleChips'
 import { cn } from '@/lib/cn'
@@ -9,7 +10,6 @@ import { getExercise, targetMuscleAr } from '@/data/exercises'
 import { guidanceFor } from '@/lib/exerciseGuidance'
 import { exerciseStats } from '@/lib/exerciseStats'
 import { getRecord } from '@/lib/exerciseHistory'
-import { muscleLabelAr } from '@/data/muscleGroups'
 
 type DetailTab = 'about' | 'history' | 'charts' | 'records'
 
@@ -40,18 +40,26 @@ export function ExerciseDetail({ lang, exerciseId, onClose, onAddToPlan }: Exerc
   return (
     <div className="fixed inset-0 z-[60] flex items-end justify-center bg-ink-900/50 p-0 sm:items-center sm:p-6">
       <div className="flex max-h-[92vh] w-full max-w-xl flex-col rounded-t-3xl bg-page shadow-card sm:rounded-3xl">
-        {/* رأس بطاقة مع صورة بديلة داكنة فاخرة */}
+        {/* رأس البطاقة — عرض متحرك للتمرين أو إطار بديل أنيق */}
         <div className="relative shrink-0 overflow-hidden rounded-t-3xl">
-          <ExerciseHero ex={ex} />
+          <ExerciseDemo
+            exerciseId={ex.id}
+            nameEn={ex.nameEn}
+            lang={lang}
+            videoUrl={ex.videoUrl}
+            primaryMuscles={ex.primaryMusclesDetailed}
+          />
+          {/* تدرّج سفلي داكن ثابت لوضوح الاسم فوق العرض (قد تكون الصورة فاتحة الخلفية) */}
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/90 via-black/55 to-transparent" />
           <button
             type="button"
             onClick={onClose}
             aria-label="إغلاق"
-            className="absolute end-3 top-3 grid h-9 w-9 place-items-center rounded-full bg-ink-900/40 text-white backdrop-blur hover:bg-ink-900/60"
+            className="absolute end-3 top-3 grid h-9 w-9 place-items-center rounded-full bg-black/45 text-white backdrop-blur hover:bg-black/65"
           >
             <Icon name="X" className="h-5 w-5" />
           </button>
-          <div className="absolute inset-x-0 bottom-0 p-4">
+          <div className="absolute inset-x-0 bottom-0 p-4 pe-28">
             {/* الاسم الإنجليزي أولًا، العربي تحته، ثم العضلة الهدف بالعربية */}
             <h2 className="text-xl font-black text-white drop-shadow">{ex.nameEn}</h2>
             <p className="mt-0.5 text-sm font-bold text-white/90 drop-shadow">{ex.nameAr}</p>
@@ -87,27 +95,6 @@ export function ExerciseDetail({ lang, exerciseId, onClose, onAddToPlan }: Exerc
           {tab === 'charts' && <ChartsTab stats={stats} />}
           {tab === 'records' && <RecordsTab stats={stats} />}
         </div>
-      </div>
-    </div>
-  )
-}
-
-/** صورة بديلة فاخرة (لا صور خارجية) — تدرّج داكن + أيقونة + رقائق العضلات. */
-function ExerciseHero({ ex }: { ex: NonNullable<ReturnType<typeof getExercise>> }) {
-  return (
-    <div className="relative h-40 w-full bg-gradient-to-br from-ink-900 via-ink-700 to-ink-900">
-      <div className="absolute inset-0 opacity-20 bg-grid-faint" />
-      <div className="absolute inset-0 flex items-center justify-center">
-        <span className="grid h-16 w-16 place-items-center rounded-2xl bg-primary/90 text-white shadow-glow">
-          <Icon name="Dumbbell" className="h-8 w-8" strokeWidth={2.5} />
-        </span>
-      </div>
-      <div className="absolute start-3 top-3 flex flex-wrap gap-1.5">
-        {ex.primaryMusclesDetailed.slice(0, 3).map((m) => (
-          <span key={m} className="rounded-full bg-white/15 px-2 py-0.5 text-[10px] font-bold text-white backdrop-blur">
-            {muscleLabelAr(m)}
-          </span>
-        ))}
       </div>
     </div>
   )
