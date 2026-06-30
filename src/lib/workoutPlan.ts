@@ -2,6 +2,7 @@ import type { PlanDay, PlanExercise, WorkoutPlan } from '@/types/workout'
 import type { Lang } from '@/lib/appPreferences'
 import { getExercise } from '@/data/exercises'
 import { getTemplate } from '@/data/workoutTemplates'
+import { workoutDayNameAr, workoutDayNameEn } from '@/lib/workoutDayLabel'
 
 /** يبني عنصر خطة من تمرين في المكتبة بقيمه الافتراضية. */
 export function createPlanExercise(exerciseId: string, dayId: string, order: number): PlanExercise {
@@ -24,10 +25,10 @@ export function generatePlanFromTemplate(templateId: string): WorkoutPlan {
   if (!tpl) return { templateId: 'custom', days: [] }
   return {
     templateId: tpl.id,
-    days: tpl.days.map<PlanDay>((d) => ({
+    days: tpl.days.map<PlanDay>((d, di) => ({
       id: d.id,
-      nameAr: d.nameAr,
-      nameEn: d.nameEn,
+      nameAr: workoutDayNameAr(d.nameAr, di),
+      nameEn: workoutDayNameEn(d.nameEn, di),
       exercises: d.exerciseIds.map((exId, i) => createPlanExercise(exId, d.id, i)),
     })),
   }
