@@ -1,5 +1,48 @@
 # Qimmah Follow-ups
 
+## P2.5 — Real exercise media (images now, animated GIFs optional)
+
+**What shipped.** Exercise cards/thumbnails now show **real photos** instead of the empty
+gradient placeholder. At build time `scripts/build-exercise-media.mjs` matches Qimmah's 170
+exercises to the open public-domain dataset [`yuhonas/free-exercise-db`](https://github.com/yuhonas/free-exercise-db)
+(Unlicense / public domain) and writes a static map `src/data/exerciseMedia.ts`
+(`exerciseId → { img0, img1, gifUrl? }`). The UI cross-fades the start frame (`0.jpg`) and
+end frame (`1.jpg`) every ~1.1s to fake the motion. **Coverage: 136/170 (80%).** The 34
+unmatched are cardio (treadmill/bike/rowing/jump-rope…) and mobility (leg-swings/ankle-mobility…)
+that legitimately have no lift frames; they keep the clean gradient placeholder **plus** the
+existing working YouTube-search link. No broken `<img>` ever — every image has an `onError`
+fallback to the placeholder.
+
+**Re-generate the map** (e.g. after adding exercises): `npm run build:media`. It re-fetches the
+dataset, re-matches, and rewrites `src/data/exerciseMedia.ts`. Commit the result.
+
+### Unlock animated GIFs with muscle highlighting (optional — for the founder)
+
+The map already has a `gifUrl` slot that the UI **prefers over the static images** when present.
+To fill it from [WorkoutX](https://workoutxapp.com) (animated GIFs + muscle highlighting):
+
+1. Sign up free at **workoutxapp.com** → get an API key. Free tier is **500 requests/month, no
+   credit card**.
+2. Re-generate the map **with the key set** (the key is read from the environment, never
+   committed):
+   ```bash
+   WORKOUTX_API_KEY=your_key_here npm run build:media
+   ```
+   The script fetches `https://api.workoutxapp.com/exercises` (header `X-WorkoutX-Key`), matches
+   by name, and writes `gifUrl` into the map for every exercise it can match. Commit the result.
+3. If `WORKOUTX_API_KEY` is **absent**, the script silently skips WorkoutX and keeps the static
+   free-exercise-db images — no setup required for the default build.
+
+**Security note:** the key is only ever read at build time from the shell environment. It is
+**not** a `VITE_*` var and is **never** written into the bundle, the committed map, or the repo.
+Do not hardcode it.
+
+### Day naming
+The bare `أ/ب/ج` day labels are gone. Every workout day the user sees is now `اليوم N · <split>`
+(e.g. `اليوم 1 · دفع`, `اليوم 2 · جسم كامل`) via `src/lib/workoutDayLabel.ts`, applied at plan
+construction (`generatePlanFromTemplate`, `generateWorkoutPlan`) and the weekly-schedule builders.
+The label index follows the day's position in the plan.
+
 ## P2 Agent 2 — Exercise library / machines (deferred, out of this scope)
 
 - A2-F1. **Real demos (GIF / trusted video).** All 170 exercises (incl. the 27 machine-catalog

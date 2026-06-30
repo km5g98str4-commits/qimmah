@@ -23,6 +23,7 @@ import type { Lang } from '@/lib/appPreferences'
 import { computeTargets, calorieGoalFromGoalType, goalTypeLabel } from '@/lib/calculators'
 import { exercises, getExercise } from '@/data/exercises'
 import { getTemplate } from '@/data/workoutTemplates'
+import { workoutDayNameAr, workoutDayNameEn } from '@/lib/workoutDayLabel'
 import { createPlanMealFromTemplate, planTotals } from '@/lib/nutritionPlan'
 import { createPlanCommitment } from '@/lib/commitmentPlan'
 
@@ -396,11 +397,11 @@ interface DaySpec {
   routineType: RoutineDay['type']
 }
 
-const AR_ALPHA = ['أ', 'ب', 'ج', 'د', 'هـ', 'و', 'ز']
 const AR_NUM = ['', '١', '٢', '٣', '٤', '٥', '٦', '٧']
 
-function fullDay(i: number): DaySpec {
-  return { type: 'full', nameAr: `جسم كامل ${AR_ALPHA[i]}`, nameEn: `Full Body ${String.fromCharCode(65 + i)}`, routineType: 'full' }
+// اسم التقسيمة الأساسي فقط — رقم اليوم يُضاف لاحقًا عبر workoutDayName* («اليوم N · جسم كامل»).
+function fullDay(): DaySpec {
+  return { type: 'full', nameAr: 'جسم كامل', nameEn: 'Full Body', routineType: 'full' }
 }
 function ulDay(kind: 'upper' | 'lower', n: number): DaySpec {
   return kind === 'upper'
@@ -432,8 +433,8 @@ function focusDay(focus?: MuscleFocus): DaySpec {
 /** يختار التقسيمة تلقائيًا حسب عدد أيام التمرين (والتركيز عند 5 أيام). */
 function splitDays(days: number, focus?: MuscleFocus): DaySpec[] {
   const d = clamp(days, 1, 7)
-  if (d <= 2) return Array.from({ length: d }, (_, i) => fullDay(i))
-  if (d === 3) return [fullDay(0), fullDay(1), fullDay(2)]
+  if (d <= 2) return Array.from({ length: d }, () => fullDay())
+  if (d === 3) return [fullDay(), fullDay(), fullDay()]
   if (d === 4) return [ulDay('upper', 1), ulDay('lower', 1), ulDay('upper', 2), ulDay('lower', 2)]
   if (d === 5) return [ulDay('upper', 1), ulDay('lower', 1), ulDay('upper', 2), ulDay('lower', 2), focusDay(focus)]
   if (d === 6)
@@ -480,7 +481,7 @@ const ADVANCED_SPLIT_ID: Record<PlannedSplit, string> = {
 function advancedDaySpec(split: PlannedSplit, type: DayType, n: number): DaySpec {
   switch (type) {
     case 'full':
-      return fullDay((n - 1) % AR_ALPHA.length)
+      return fullDay()
     case 'upper':
       return ulDay('upper', n)
     case 'push':
@@ -609,8 +610,8 @@ function generateWorkoutPlan(p: Profile): { plan: WorkoutPlan; specs: DaySpec[] 
     const ids = buildDayExercises(spec.type, variation, pool, target, preferMachines)
     return {
       id: dayId,
-      nameAr: spec.nameAr,
-      nameEn: spec.nameEn,
+      nameAr: workoutDayNameAr(spec.nameAr, di),
+      nameEn: workoutDayNameEn(spec.nameEn, di),
       exercises: ids.map((id, i) => createGenExercise(id, dayId, i, tier, p.goalType)),
     }
   })
@@ -669,7 +670,7 @@ function buildScheduleFromSpecs(specs: DaySpec[], trainingDays: number, preferre
   WEEKDAYS.forEach((d, i) => {
     if (specs.length && trainIdx.includes(i)) {
       const spec = specs[c % specs.length]
-      rows.push({ day: d, title: spec.nameAr, type: spec.routineType })
+      rows.push({ day: d, title: workoutDayNameAr(spec.nameAr, c % specs.length), type: spec.routineType })
       c++
     } else {
       rows.push({ day: d, title: 'راحة واستشفاء', type: 'rest' })
@@ -688,7 +689,7 @@ export function buildWeeklySchedule(templateId: string, trainingDays: number, pr
   WEEKDAYS.forEach((d, i) => {
     if (tpl && trainIdx.includes(i)) {
       const td = tpl.days[c % tpl.days.length]
-      rows.push({ day: d, title: td.nameAr, type: dayType(td.nameEn) })
+      rows.push({ day: d, title: workoutDayNameAr(td.nameAr, c % tpl.days.length), type: dayType(td.nameEn) })
       c++
     } else {
       rows.push({ day: d, title: 'راحة واستشفاء', type: 'rest' })
