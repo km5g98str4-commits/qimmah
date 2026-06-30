@@ -149,7 +149,7 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
                       <p className="text-[11px] font-bold text-primary-c">تمرين اليوم</p>
                       <p className="truncate text-sm font-bold text-ink-900">{lang === 'en' ? planDay.nameEn : planDay.nameAr}</p>
                       <p className="mt-0.5 truncate text-[11px] text-ink-400">
-                        {planDay.exercises.slice(0, 4).map((pe) => planExerciseName(pe, lang).split(' — ')[0]).join(' · ') || 'لا تمارين'}
+                        {planDay.exercises.slice(0, 4).map((pe) => planExerciseName(pe, lang)).join(' · ') || 'لا تمارين'}
                       </p>
                     </div>
                     {planDay.exercises.length > 0 && (

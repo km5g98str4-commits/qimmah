@@ -159,7 +159,17 @@ const SCHEMES: Record<GoalType, RepScheme> = {
 
 /** فلتر الأدوات حسب نوع النادي (gymType). لا نولّد تمارين مستحيلة للبيئة المختارة. */
 function makeEquipFilter(p: Profile): (ex: Exercise) => boolean {
-  const access = p.gymAccess ?? (p.workoutEnvironment === 'home' ? 'home' : 'full')
+  // الأولوية لـ gymAccess، ثم نشتق احتياطيًا من gymType أو workoutEnvironment للملفّات القديمة
+  // كي لا يحصل مستخدم «جيم منزلي» على أجهزة لمجرد غياب حقل واحد.
+  const fallback: Profile['gymAccess'] =
+    p.gymType === 'home' || p.workoutEnvironment === 'home'
+      ? 'home'
+      : p.gymType === 'bodyweight'
+        ? 'bodyweight'
+        : p.gymType === 'small'
+          ? 'small'
+          : 'full'
+  const access = p.gymAccess ?? fallback
   if (access === 'full') return () => true
   if (access === 'small') {
     // نادٍ صغير: وزن حر + أجهزة أساسية + كيبل أساسي — نستبعد المتخصّص فقط (سميث/حبل).

@@ -1,5 +1,23 @@
 # Qimmah Follow-ups
 
+## P2.7 — Image render confirmed + animated GIFs still optional
+
+**Images render.** Verified in P2.7 that the matched exercises load real `<img>` elements.
+The map `src/data/exerciseMedia.ts` holds **136/170** entries pointing at stable raw URLs on
+[`yuhonas/free-exercise-db`](https://github.com/yuhonas/free-exercise-db) (Unlicense / public
+domain), e.g. `https://raw.githubusercontent.com/.../exercises/<Name>/0.jpg`. Spot-checked
+several URLs → **HTTP 200**. `ExerciseMedia` and `ExerciseThumb` render real `<img>` with an
+`onError` handler that falls back to the gradient placeholder, so a missing match or a failed
+load never shows a broken image. NOTE: these images are **referenced by remote URL, not copied
+into the repo** (`public/` holds only `favicon.svg` + `_redirects`). They require outbound
+network at view time; the placeholder covers the offline case.
+
+**Animated muscle-highlight GIFs are still the optional upgrade.** The `gifUrl` slot in the map
+is preferred by the UI when present and is filled only when the build runs with a free
+**`WORKOUTX_API_KEY`** (workoutxapp.com — free tier, 500 req/month, no card). The integration
+seam is already in place — see the P2.5 section just below for the exact steps. No code change
+is needed to turn it on; just re-run `WORKOUTX_API_KEY=… npm run build:media` and commit.
+
 ## P2.5 — Real exercise media (images now, animated GIFs optional)
 
 **What shipped.** Exercise cards/thumbnails now show **real photos** instead of the empty
