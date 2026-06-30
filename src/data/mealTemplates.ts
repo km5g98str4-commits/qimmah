@@ -23,6 +23,9 @@ export const mealTemplates: MealTemplate[] = [
   { id: 'protein-shake', nameAr: 'شيك بروتين', nameEn: 'Protein Shake', mealType: 'post_workout', ingredientIds: ['whey-protein', 'milk', 'banana'], defaultServings: { 'whey-protein': 1, milk: 1, banana: 1 } },
   { id: 'light-dinner', nameAr: 'عشاء خفيف', nameEn: 'Light Dinner', mealType: 'dinner', ingredientIds: ['salmon', 'mixed-salad', 'sweet-potato'], defaultServings: { salmon: 1, 'mixed-salad': 1, 'sweet-potato': 1 } },
   { id: 'salmon-quinoa', nameAr: 'سلمون وكينوا', nameEn: 'Salmon & Quinoa', mealType: 'dinner', ingredientIds: ['salmon', 'quinoa', 'spinach'], defaultServings: { salmon: 1, quinoa: 1, spinach: 1 } },
+  // وجبات نباتية (P2.6) — بدائل بلا لحم/سمك تُستخدم عند اختيار نمط أكل نباتي/نباتي صرف.
+  { id: 'lentil-rice-bowl', nameAr: 'عدس وأرز', nameEn: 'Lentils & Rice', mealType: 'lunch', ingredientIds: ['lentils', 'white-rice', 'mixed-vegetables', 'olive-oil'], defaultServings: { lentils: 2, 'white-rice': 1, 'mixed-vegetables': 1, 'olive-oil': 1 } },
+  { id: 'chickpea-quinoa-bowl', nameAr: 'حمّص وكينوا', nameEn: 'Chickpea & Quinoa', mealType: 'dinner', ingredientIds: ['chickpeas', 'quinoa', 'spinach', 'olive-oil'], defaultServings: { chickpeas: 1, quinoa: 1, spinach: 1, 'olive-oil': 1 } },
 ]
 
 export const mealTemplateMap: Record<string, MealTemplate> = Object.fromEntries(

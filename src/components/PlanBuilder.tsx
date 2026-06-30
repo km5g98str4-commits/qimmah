@@ -8,22 +8,13 @@ import {
   buildCustomizationFromOnboarding,
   saveOnboardingProfile,
 } from '@/lib/onboardingProfile'
-import type {
-  AdvancedSplit,
-  AppetiteTiming,
-  DietPattern,
-  Environment,
-  ExperienceLevel,
-  MealDistribution,
-  NeatLevel,
-  NutritionStyle as OnbNutritionStyle,
-  OnbConsistency,
-  OnboardingProfile,
-  Sex,
-  SplitMode,
-  WellnessTrackingMode,
-} from '@/types/onboarding'
-import { ONBOARDING_SCHEMA_VERSION } from '@/types/onboarding'
+import type { Answers } from '@/lib/planBuilderAnswers'
+import {
+  buildOnboardingProfile,
+  defaultAnswers,
+  isBeginnerLevel,
+  showsTargetWeight,
+} from '@/lib/planBuilderAnswers'
 import {
   advancedSplitChoices,
   allergyChoices,
@@ -43,7 +34,6 @@ import {
   splitModeChoices,
   wellnessModeChoices,
 } from '@/data/planBuilder'
-import type { GoalValue } from '@/data/planBuilder'
 
 interface PlanBuilderProps {
   /** يُستدعى بعد حفظ مصدر الحقيقة والخطة وتعليم الإكمال (دخول اللوحة). */
@@ -62,64 +52,6 @@ const BOUNDS = {
   steps: { min: 2000, max: 20000 },
 }
 
-interface Answers {
-  // profile + bodyMetrics
-  goalValue?: GoalValue
-  sex?: Sex
-  age: number
-  heightCm: number
-  weightKg: number
-  targetWeightKg: number
-  targetTouched: boolean
-  // trainingPreferences
-  experienceLevel?: ExperienceLevel
-  consistency?: OnbConsistency
-  environment?: Environment
-  trainingDays: number
-  daysTouched: boolean
-  sessionDurationMin: number
-  splitMode: SplitMode
-  advancedSplit?: AdvancedSplit
-  // activityProfile
-  neat: NeatLevel
-  includeSteps: boolean
-  stepEstimate: number
-  // nutritionPreferences
-  nutritionStyle: OnbNutritionStyle
-  mealsPerDay: number
-  mealDistribution: MealDistribution
-  appetiteTiming: AppetiteTiming
-  // foodPreferences (optional)
-  dietPattern: DietPattern
-  allergies: string[]
-  // limitations + wellness (optional)
-  injuries: string[]
-  wellnessMode: WellnessTrackingMode
-}
-
-const defaultAnswers: Answers = {
-  age: 25,
-  heightCm: 170,
-  weightKg: 75,
-  targetWeightKg: 70,
-  targetTouched: false,
-  trainingDays: 3,
-  daysTouched: false,
-  sessionDurationMin: 60,
-  splitMode: 'auto',
-  neat: 'moderate',
-  includeSteps: false,
-  stepEstimate: 8000,
-  nutritionStyle: 'meal_suggestions',
-  mealsPerDay: 4,
-  mealDistribution: 'balanced',
-  appetiteTiming: 'balanced',
-  dietPattern: 'none',
-  allergies: [],
-  injuries: [],
-  wellnessMode: 'none',
-}
-
 const clampN = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n))
 
 /** BMI رقمي فقط — بلا أي حكم قيمي أو تشخيص طبي. */
@@ -128,9 +60,6 @@ function bmiOf(weightKg: number, heightCm: number): number | null {
   return Math.round((weightKg / Math.pow(heightCm / 100, 2)) * 10) / 10
 }
 
-const isBeginnerLevel = (l?: ExperienceLevel) => l === 'beginner'
-const showsTargetWeight = (g?: GoalValue) => g === 'cut' || g === 'bulk'
-
 /** خطأ وزن الهدف: تنشيف أقل من الحالي / تضخيم أعلى منه. */
 function targetWeightError(a: Answers): string | undefined {
   if (a.goalValue === 'cut' && !(a.targetWeightKg < a.weightKg))
@@ -138,50 +67,6 @@ function targetWeightError(a: Answers): string | undefined {
   if (a.goalValue === 'bulk' && !(a.targetWeightKg > a.weightKg))
     return 'وزن الهدف للتضخيم لازم يكون أعلى من وزنك الحالي.'
   return undefined
-}
-
-/** يبني كائن مصدر الحقيقة من الإجابات — لا اسم وهمي، قوائم تتبّع فارغة. */
-function buildOnboardingProfile(a: Answers): OnboardingProfile {
-  const beginner = isBeginnerLevel(a.experienceLevel)
-  return {
-    profile: { sex: a.sex, age: a.age }, // لا اسم — اختياري ولا قيمة وهمية
-    bodyMetrics: {
-      heightCm: a.heightCm,
-      currentWeightKg: a.weightKg,
-      targetWeightKg: showsTargetWeight(a.goalValue) ? a.targetWeightKg : undefined,
-    },
-    goal: { type: a.goalValue },
-    trainingPreferences: {
-      experience: a.experienceLevel,
-      consistency: beginner ? 'new' : a.consistency,
-      environment: a.environment,
-      daysPerWeek: a.trainingDays,
-      sessionDurationMin: a.sessionDurationMin,
-      splitMode: a.splitMode,
-      advancedSplit: a.splitMode === 'advanced' ? a.advancedSplit : undefined,
-    },
-    activityProfile: {
-      neat: a.neat,
-      stepEstimate: a.includeSteps ? a.stepEstimate : undefined,
-    },
-    nutritionPreferences: {
-      style: a.nutritionStyle,
-      mealsPerDay: a.nutritionStyle === 'meal_suggestions' ? a.mealsPerDay : undefined,
-      // توزيع الحجم/وقت الجوع يُطلبان ويُحفظان فقط عند اقتراح الوجبات (P2.5).
-      mealDistribution: a.nutritionStyle === 'meal_suggestions' ? a.mealDistribution : undefined,
-      appetiteTiming: a.nutritionStyle === 'meal_suggestions' ? a.appetiteTiming : undefined,
-    },
-    foodPreferences: { dietPattern: a.dietPattern, dislikedFoods: [], allergies: a.allergies },
-    limitations: { injuries: a.injuries },
-    wellnessTracking: { mode: a.wellnessMode, supplements: [], medications: [] },
-    appPreferences: { language: 'ar', reminders: false },
-    _meta: {
-      schemaVersion: ONBOARDING_SCHEMA_VERSION,
-      completed: true,
-      completedAt: new Date().toISOString(),
-      source: 'onboarding',
-    },
-  }
 }
 
 /** الإعداد الذكي (Phase 1) — مصدر الحقيقة: شاشة واحدة لكل خطوة (جوال داكن، RTL). */
@@ -324,7 +209,7 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
       <Question title="من متى وأنت تتمرن حديد؟" hint="نضبط صعوبة الخطة على مستواك.">
         <List>
           {experienceChoices.map((c) => (
-            <OptionRow key={c.value} icon={c.icon} label={c.label} desc={c.desc} selected={a.experienceLevel === c.value} onClick={() => set({ experienceLevel: c.value, consistency: c.value === 'beginner' ? undefined : a.consistency, daysTouched: false })} />
+            <OptionRow key={c.value} icon={c.icon} label={c.label} desc={c.desc} selected={a.experienceLevel === c.value} onClick={() => set({ experienceLevel: c.value, consistency: c.value === 'beginner' ? undefined : a.consistency, splitMode: c.value === 'beginner' ? 'auto' : a.splitMode, advancedSplit: c.value === 'beginner' ? undefined : a.advancedSplit, daysTouched: false })} />
           ))}
         </List>
       </Question>
@@ -399,24 +284,26 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
     ),
   })
 
-  // 12) نمط التقسيمة (تلقائي/متقدّم)
-  steps.push({
-    key: 'splitMode',
-    label: 'التقسيمة',
-    valid: !!a.splitMode,
-    content: (
-      <Question title="كيف تبي نحدد التقسيمة؟" hint="التلقائي يكفي معظم الناس.">
-        <List>
-          {splitModeChoices.map((c) => (
-            <OptionRow key={c.value} icon={c.icon} label={c.label} desc={c.desc} selected={a.splitMode === c.value} onClick={() => set({ splitMode: c.value })} />
-          ))}
-        </List>
-      </Question>
-    ),
-  })
+  // 12) نمط التقسيمة (تلقائي/متقدّم) — يظهر لغير المبتدئ فقط؛ المبتدئ تقسيمته «تلقائي» دائمًا.
+  if (a.experienceLevel && !isBeginner) {
+    steps.push({
+      key: 'splitMode',
+      label: 'التقسيمة',
+      valid: !!a.splitMode,
+      content: (
+        <Question title="كيف تبي نحدد التقسيمة؟" hint="التلقائي يكفي معظم الناس.">
+          <List>
+            {splitModeChoices.map((c) => (
+              <OptionRow key={c.value} icon={c.icon} label={c.label} desc={c.desc} selected={a.splitMode === c.value} onClick={() => set({ splitMode: c.value })} />
+            ))}
+          </List>
+        </Question>
+      ),
+    })
+  }
 
-  // 13) اختيار التقسيمة المتقدّمة — فقط عند advanced
-  if (a.splitMode === 'advanced') {
+  // 13) اختيار التقسيمة المتقدّمة — فقط لغير المبتدئ وعند advanced
+  if (!isBeginner && a.splitMode === 'advanced') {
     steps.push({
       key: 'advancedSplit',
       label: 'نوع التقسيمة',
