@@ -2,7 +2,7 @@ import { SectionHeading } from '@/components/SectionHeading'
 import { Icon } from '@/components/Icon'
 import { MuscleChips } from '@/components/MuscleChips'
 import { useCustomization } from '@/lib/customizationContext'
-import { planExerciseName, planExerciseVideo } from '@/lib/workoutPlan'
+import { planExerciseNameParts, planExerciseVideo } from '@/lib/workoutPlan'
 import { getExercise } from '@/data/exercises'
 import { getRecord } from '@/lib/exerciseHistory'
 import { getCommonMistakes, getSafetyNotes, getTechniqueTips, getVideoLabel } from '@/lib/exerciseGuidance'
@@ -40,7 +40,15 @@ export function WorkoutPlanSection({ lang }: { lang: Lang }) {
                       <li key={pe.id} className="p-4">
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
-                            <p className="text-sm font-bold text-ink-900">{planExerciseName(pe, lang)}</p>
+                            {(() => {
+                              const nm = planExerciseNameParts(pe, lang)
+                              return (
+                                <>
+                                  <p className="text-sm font-bold text-ink-900">{nm.primary}</p>
+                                  {nm.secondary && <p className="text-[11px] font-medium text-ink-400">{nm.secondary}</p>}
+                                </>
+                              )
+                            })()}
                             <p className="mt-0.5 text-xs text-ink-500">
                               {pe.sets}×{pe.reps} · {t.rest} {pe.restSec}ث
                               {pe.startingWeight ? ` · ${pe.startingWeight}` : ''}

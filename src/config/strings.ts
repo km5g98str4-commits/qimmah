@@ -316,9 +316,6 @@ export interface ShellStrings {
     cardPRs: string
     noPRs: string
     cardMuscles: string
-    healthSyncTitle: string
-    healthSyncSoon: string
-    healthSyncBody: string
     remindersTitle: string
     reminderEnabled: string
     reminderTrainingTime: string
@@ -673,9 +670,6 @@ const ar: ShellStrings = {
     cardPRs: 'أفضل الأوزان (PRs)',
     noPRs: 'أكمل تمرينًا بأوزان لتظهر أرقامك القياسية.',
     cardMuscles: 'العضلات هذا الأسبوع',
-    healthSyncTitle: 'مزامنة الصحة',
-    healthSyncSoon: 'يحتاج تطبيق آيفون — قريبًا',
-    healthSyncBody: 'الربط التلقائي مع صحّتي (Apple Health) يحتاج تطبيق آيفون — قريبًا. حاليًا أضف خطواتك يدويًا.',
     remindersTitle: 'التذكيرات',
     reminderEnabled: 'تفعيل التذكير',
     reminderTrainingTime: 'وقت تذكير التمرين',
@@ -1030,9 +1024,6 @@ const en: ShellStrings = {
     cardPRs: 'Best lifts (PRs)',
     noPRs: 'Complete a weighted workout to see your PRs.',
     cardMuscles: 'Muscles this week',
-    healthSyncTitle: 'Health sync',
-    healthSyncSoon: 'Needs an iPhone app — soon',
-    healthSyncBody: 'Automatic sync with Apple Health needs an iPhone app — coming soon. For now, add your steps manually.',
     remindersTitle: 'Reminders',
     reminderEnabled: 'Enable reminder',
     reminderTrainingTime: 'Training reminder time',

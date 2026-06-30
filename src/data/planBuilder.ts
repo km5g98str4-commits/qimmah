@@ -132,13 +132,16 @@ export const splitModeChoices: Choice<SplitMode>[] = [
   { value: 'advanced', label: 'أختار بنفسي', desc: 'تحكّم متقدّم في نوع التقسيمة', icon: 'SlidersHorizontal' },
 ]
 
-/** خيارات التقسيمة المتقدّمة — تظهر فقط عند splitMode=advanced. */
+/**
+ * خيارات التقسيمة المتقدّمة — تظهر فقط عند splitMode=advanced.
+ * مجموعة نظيفة متمايزة بلا تكرار (P2.7): جسم كامل / علوي-سفلي / دفع-سحب-أرجل.
+ * (أُزيلت «أرنولد» و«عضلة باليوم» من القائمة لتجنّب التداخل؛ المولّد يبقى يدعمها
+ *  للملفّات القديمة المحفوظة فلا تنكسر — راجع ADVANCED_CYCLES في planGenerator.)
+ */
 export const advancedSplitChoices: Choice<AdvancedSplit>[] = [
   { value: 'full_body', label: 'جسم كامل', desc: 'كل الجسم كل جلسة', icon: 'Layers' },
-  { value: 'upper_lower', label: 'علوي/سفلي', desc: 'تقسيم علوي وسفلي', icon: 'TrendingUp' },
+  { value: 'upper_lower', label: 'علوي/سفلي', desc: 'علوي وسفلي بالتناوب', icon: 'TrendingUp' },
   { value: 'push_pull_legs', label: 'دفع/سحب/أرجل', desc: 'PPL كلاسيكي', icon: 'Dumbbell' },
-  { value: 'arnold', label: 'أرنولد', desc: 'صدر-ظهر / كتف-ذراع / أرجل', icon: 'Trophy' },
-  { value: 'bro_split', label: 'عضلة باليوم', desc: 'تركيز عضلة لكل جلسة', icon: 'Target' },
 ]
 
 /** النشاط اليومي (NEAT) خارج التمرين. */
