@@ -1,3 +1,56 @@
+# DECISIONS — Phase 2.5, Agent 1 (Onboarding: 2 goals + split choice + nutrition Qs)
+
+## RESUME — P2.5 A1 — 2026-06-30: built + verified (23/23) + ready to merge
+- Repo `~/qimmah-p25-a1`; branches `integration/phase2.5` (off origin/main, pushed) + `feature/p25-onboarding`.
+- Build ✅ · lint ✅ (0 warnings) · typecheck ✅. Verification harness: 23/23 PASS.
+- If interrupted: `cd ~/qimmah-p25-a1`, `git status`; remaining step is commit → push feature → self-merge into integration/phase2.5.
+- Untracked `.claude/launch.json` is a local dev helper — do NOT commit it.
+
+## Mission (P2.5 A1) — what was done
+1. **Goals = exactly 2 (cut/تنشيف, bulk/تضخيم).** Removed «strength/زيادة القوة» from UI + enums + all branch logic.
+   - `OnbGoalType` & `GoalValue` → `'bulk' | 'cut'`. Removed strength `goalChoice`.
+   - `GoalType` (profile) dropped `'strength'`; cleaned `SCHEMES`, `COMMITMENTS_BY_GOAL`, `rawCaloriesForGoalType`,
+     `calorieGoalFromGoalType`, `deriveTargetWeight`, `goalTypeOptions`, dashboardLayout goal map.
+   - **Migration (load, recompute, no crash):**
+     - `onboardingProfile.migrateLegacyOnbGoal`: stored `goal.type:'strength'` → `'bulk'`.
+     - `customization.migrateLegacyGoal`: stored `goalType:'strength'` → `'bulking'` (→ withFreshTargets recomputes).
+   - Decision: kept the broad `GoalType` superset minus strength (recomposition/maintenance/health/returning still
+     exist as internal/migration targets, never user-selectable) — least-risk, all paths have safe fallbacks.
+2. **Bulk calories — ALREADY CORRECT in this codebase (no bug to fix).** cut & bulk both derive from the SAME
+   `TDEE = BMR × (NEAT + days×0.025)`; only the offset differs (cut −400 / bulk +300). Verified the required sample:
+   male/25/180cm/75kg/moderate-NEAT/3days → BMR 1755 × 1.425 = TDEE **2501** → bulk **2801** (not 2713). Added a
+   code comment locking the invariant so future edits don't give bulk a different multiplier.
+3. **Preferred split — ALREADY EXISTED and is honored by the generator** (`advancedSplitDays` overrides auto when
+   `splitMode==='advanced' && splitChoice`). Verified honoring for all 5 advanced splits (Full Body, Upper/Lower,
+   PPL, Arnold, Bro split) and that auto still works. Decision: kept the existing named-split set (more meaningful
+   than raw «4-day/5-day», which are the days-per-week question already present); the 3 mission-named splits
+   (Full Body, Upper/Lower, PPL) are all included and honored. No regression, no fake option.
+4. **Nutrition: +2 NEW onboarding questions that really change the plan** (gated on `style==='meal_suggestions'`,
+   kept inside onboarding):
+   - «تفضّل وجباتك أكبر وأقل، ولا أصغر وأكثر؟» → `mealDistribution: balanced | fewer_larger | more_smaller`.
+   - «متى تكون أكثر جوعًا؟» → `appetiteTiming: balanced | morning | evening`.
+   - Effect: new `redistributeMeals()` in `planGenerator` reweights per-meal calories (slot base × timing × dist),
+     **total stays anchored to targetCalories (no double-count)**. Defaults `balanced/balanced` ⇒ old uniform path
+     (existing users unchanged). Verified: morning→breakfast>dinner, evening→dinner>breakfast, fewer_larger shrinks
+     snack, totals within 0% drift.
+
+## Files changed (11)
+- types: `onboarding.ts`, `profile.ts` · data: `planBuilder.ts` · lib: `calculators.ts`, `planGenerator.ts`,
+  `onboardingProfile.ts`, `customization.ts`, `dashboardLayout.ts`, `icons.ts` (added 4 lucide icons) ·
+  components: `PlanBuilder.tsx` · views: `DashboardView.tsx` (comment only).
+
+## QA results
+- Only 2 goals (UI confirmed via served module: 0 strength) · strength→bulk migration (onboarding + customization)
+  recomputes, no crash · bulk sample **2801** not 2713, same multiplier as cut · advanced split (PPL/4-day/etc)
+  honored by generator (5/5) · new nutrition Qs change meal distribution · build/lint/typecheck PASS.
+
+## Forbidden (respected)
+No exercise GIFs · no muscle map · no food DB · no health/steps · no medical advice · BMI stays descriptive ·
+no double-count calories · no push to main · no deploy · no secrets. Worked only on `integration/phase2.5` +
+`feature/p25-onboarding`.
+
+---
+
 # DECISIONS — Phase 2, Agent 5 (Muscle Map + Step Counter)
 
 ## RESUME — P2 A5 — 2026-06-29: built + QA PASSED, merged

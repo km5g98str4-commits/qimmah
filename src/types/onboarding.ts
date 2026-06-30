@@ -11,8 +11,9 @@ export const ONBOARDING_SCHEMA_VERSION = 1
 
 export type Sex = 'male' | 'female'
 
-/** الهدف — ثلاثة مسارات منطقية لا تتداخل (يطابق GoalValue في باني الخطة). */
-export type OnbGoalType = 'bulk' | 'cut' | 'strength'
+/** الهدف — مساران منطقيان لا يتداخلان (يطابق GoalValue في باني الخطة). */
+// ملاحظة (P2.5): أُلغي مسار «القوة»؛ أي بيانات قديمة بقيمة 'strength' تُهاجَر إلى 'bulk' عند التحميل.
+export type OnbGoalType = 'bulk' | 'cut'
 
 /** الانتظام (إعداد) — «new» تُخزَّن تلقائيًا للمبتدئ ولا يُسأل عنها. */
 export type OnbConsistency = 'new' | 'on_and_off' | 'consistent' | 'returning'
@@ -31,6 +32,12 @@ export type NeatLevel = 'sedentary' | 'light' | 'moderate' | 'high'
 
 /** أسلوب التغذية — كيف تُقدَّم: اقتراح وجبات / ماكروز فقط / إرشاد مبسّط. */
 export type NutritionStyle = 'meal_suggestions' | 'macros_only' | 'simple_guidance'
+
+/** توزيع حجم الوجبات — يبيّن أين تتركّز السعرات (P2.5، يؤثّر على اقتراح الوجبات فقط). */
+export type MealDistribution = 'balanced' | 'fewer_larger' | 'more_smaller'
+
+/** وقت الجوع الأكثر — يميل توزيع السعرات للصباح أو المساء (P2.5، اقتراح الوجبات فقط). */
+export type AppetiteTiming = 'balanced' | 'morning' | 'evening'
 
 /** نمط الأكل (اختياري — لا يحجب توليد الخطة). */
 export type DietPattern = 'none' | 'vegetarian' | 'vegan' | 'pescatarian' | 'low_carb' | 'keto'
@@ -85,6 +92,10 @@ export interface OnbNutritionPreferences {
   style?: NutritionStyle
   /** عدد الوجبات — يُطلب فقط عند style=meal_suggestions. */
   mealsPerDay?: number
+  /** توزيع حجم الوجبات — يُطلب فقط عند style=meal_suggestions (P2.5). */
+  mealDistribution?: MealDistribution
+  /** وقت الجوع الأكثر — يُطلب فقط عند style=meal_suggestions (P2.5). */
+  appetiteTiming?: AppetiteTiming
 }
 
 /** تفضيلات الأكل — اختيارية، لا تحجب توليد الخطة. */

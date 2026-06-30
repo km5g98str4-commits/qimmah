@@ -72,7 +72,6 @@ export const goalTypeOptions: { value: GoalType; label: string }[] = [
   { value: 'maintenance', label: 'ثبات' },
   { value: 'returning', label: 'رجوع بعد انقطاع' },
   { value: 'health', label: 'صحة عامة' },
-  { value: 'strength', label: 'زيادة قوة' },
 ]
 export const nutritionStyleOptions: { value: NutritionStyle; label: string }[] = [
   { value: 'simple', label: 'بسيط' },
@@ -85,7 +84,7 @@ export const nutritionStyleOptions: { value: NutritionStyle; label: string }[] =
 /** يربط الهدف المنظَّم بهدف السعرات (للحاسبة). */
 export function calorieGoalFromGoalType(g: GoalType): CalorieGoal {
   if (g === 'cutting') return 'cut'
-  if (g === 'bulking' || g === 'strength') return 'bulk'
+  if (g === 'bulking') return 'bulk'
   return 'maintain' // maintenance / returning / health / recomposition
 }
 
@@ -125,7 +124,9 @@ function calorieFloor(gender: Gender): number {
 
 /**
  * السعرات المستهدفة الخام حسب الهدف المنظَّم (goalType) فوق صيانة الوزن (TDEE)
- * قبل تطبيق الحد الأدنى: تنشيف −400، تضخيم +300، قوة +150، وغيرها (ثبات/صحة/رجوع) = TDEE.
+ * قبل تطبيق الحد الأدنى: تنشيف −400، تضخيم +300، وغيرها (ثبات/صحة/رجوع) = TDEE.
+ * مهم (P2.5): التنشيف والتضخيم يبنيان على نفس الـ TDEE (نفس معامل النشاط NEAT + أيام×0.025)؛
+ * الفرق فقط في الإزاحة (−400 / +300)، فلا يستخدم التضخيم معاملًا مختلفًا عن التنشيف.
  */
 function rawCaloriesForGoalType(goalType: GoalType, tdee: number): number {
   switch (goalType) {
@@ -133,8 +134,6 @@ function rawCaloriesForGoalType(goalType: GoalType, tdee: number): number {
       return round(tdee - 400)
     case 'bulking':
       return round(tdee + 300)
-    case 'strength':
-      return round(tdee + 150)
     case 'maintenance':
     case 'returning':
     case 'health':
@@ -211,7 +210,7 @@ export function computeTargets(p: Profile): Targets {
   const cutting = Math.max(round(tdee - 400), calorieFloor(p.gender))
   const bulking = round(tdee + 300)
 
-  // السعرات المستهدفة الفعلية حسب الهدف المنظَّم (cut/bulk/strength…)
+  // السعرات المستهدفة الفعلية حسب الهدف المنظَّم (cut/bulk/maintain…)
   const calories = targetCaloriesForGoalType(p.goalType, tdee, p.gender)
   // تنبيه السعرات المنخفضة (نصّ فقط) — نقارن الخام قبل الأرضية بعتبة الأمان.
   const rawCalories = rawCaloriesForGoalType(p.goalType, tdee)

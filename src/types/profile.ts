@@ -7,13 +7,13 @@ export type CalorieGoal = 'cut' | 'maintain' | 'bulk'
 export type WorkoutEnvironment = 'gym' | 'home'
 
 /** الهدف المنظَّم (يقود السعرات والتمرين والتغذية والالتزامات). */
+// ملاحظة (P2.5): أُلغي «strength»؛ البيانات القديمة تُهاجَر إلى «bulking» عند التحميل.
 export type GoalType =
   | 'cutting'
   | 'bulking'
   | 'maintenance'
   | 'returning'
   | 'health'
-  | 'strength'
   | 'recomposition'
 
 export type NutritionStyle = 'simple' | 'high_protein' | 'saudi' | 'economical' | 'flexible'
@@ -65,6 +65,10 @@ export interface Profile {
   nutritionStyle: NutritionStyle
   /** أسلوب عرض التغذية الدلالي من الإعداد (اقتراح وجبات / ماكروز فقط / إرشاد مبسّط). */
   nutritionDisplayStyle?: 'meal_suggestions' | 'macros_only' | 'simple_guidance'
+  /** توزيع حجم الوجبات من الإعداد (P2.5) — يميل تركيز السعرات بين الوجبات. */
+  mealDistribution?: 'balanced' | 'fewer_larger' | 'more_smaller'
+  /** وقت الجوع الأكثر من الإعداد (P2.5) — يميل توزيع السعرات للصباح/المساء. */
+  appetiteTiming?: 'balanced' | 'morning' | 'evening'
   dislikedFoods: string
   // — حقول «باني الخطة» الاختيارية (تُملأ عند استخدام Plan Builder) —
   muscleFocus?: MuscleFocus

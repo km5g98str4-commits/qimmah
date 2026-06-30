@@ -224,7 +224,7 @@ function SystemIdentity({ onNavigate }: { onNavigate: (route: AppRoute) => void 
   )
 }
 
-/** بطاقة تمرين اليوم — تقود مَن هدفه bulk/strength، أو ثانوية لغيرهم. */
+/** بطاقة تمرين اليوم — تقود مَن هدفه bulk، أو ثانوية لغيرهم. */
 function WorkoutLead({ lang, onNavigate }: { lang: Lang; onNavigate: (route: AppRoute) => void }) {
   const { customization } = useCustomization()
   const tw = getStrings(lang).workout
