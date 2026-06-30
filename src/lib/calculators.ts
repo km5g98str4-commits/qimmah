@@ -73,7 +73,6 @@ export const goalTypeOptions: { value: GoalType; label: string }[] = [
   { value: 'returning', label: 'رجوع بعد انقطاع' },
   { value: 'health', label: 'صحة عامة' },
   { value: 'strength', label: 'زيادة قوة' },
-  { value: 'recomposition', label: 'تحسين شكل الجسم' },
 ]
 export const nutritionStyleOptions: { value: NutritionStyle; label: string }[] = [
   { value: 'simple', label: 'بسيط' },
@@ -126,7 +125,7 @@ function calorieFloor(gender: Gender): number {
 
 /**
  * السعرات المستهدفة الخام حسب الهدف المنظَّم (goalType) فوق صيانة الوزن (TDEE)
- * قبل تطبيق الحد الأدنى: تنشيف −400، تضخيم +300، قوة +150، إعادة تكوين/ثبات = TDEE.
+ * قبل تطبيق الحد الأدنى: تنشيف −400، تضخيم +300، قوة +150، وغيرها (ثبات/صحة/رجوع) = TDEE.
  */
 function rawCaloriesForGoalType(goalType: GoalType, tdee: number): number {
   switch (goalType) {
@@ -136,7 +135,6 @@ function rawCaloriesForGoalType(goalType: GoalType, tdee: number): number {
       return round(tdee + 300)
     case 'strength':
       return round(tdee + 150)
-    case 'recomposition':
     case 'maintenance':
     case 'returning':
     case 'health':
@@ -213,7 +211,7 @@ export function computeTargets(p: Profile): Targets {
   const cutting = Math.max(round(tdee - 400), calorieFloor(p.gender))
   const bulking = round(tdee + 300)
 
-  // السعرات المستهدفة الفعلية حسب الهدف المنظَّم (cut/bulk/recomp/strength…)
+  // السعرات المستهدفة الفعلية حسب الهدف المنظَّم (cut/bulk/strength…)
   const calories = targetCaloriesForGoalType(p.goalType, tdee, p.gender)
   // تنبيه السعرات المنخفضة (نصّ فقط) — نقارن الخام قبل الأرضية بعتبة الأمان.
   const rawCalories = rawCaloriesForGoalType(p.goalType, tdee)

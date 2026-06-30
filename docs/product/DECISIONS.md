@@ -1,5 +1,168 @@
 # Qimmah Decisions Log
 
+## P2 Agent 2 — Exercise library: machine catalog + beginner machine-first — 2026-06-29
+
+### Scope note
+The mission brief arrived **truncated mid-sentence** (ended at "…Keep free-weight basics
+(squat/bench/RDL) where appropriate but lean"). Per the "decide small things, document"
+rule, I implemented the two fully-stated deliverables (1 machine catalog, 2 beginner
+machine-first + cable exclusion) plus the minimal data needed to make them complete and
+internally consistent. UI surfacing of the catalog and GIF/demo work were **not** clearly
+specified, so they are deferred (see below) to avoid breaking NutritionView/Dashboard/
+onboarding (forbidden by the hard rules).
+
+### 1) Machine catalog — `src/data/machineCatalog.ts` (NEW)
+- Structured, grouped catalog (`MachineGroup` → `MachineItem[]`) for the 6 requested groups:
+  Chest / Back / Legs / Shoulders / Biceps / Triceps.
+- **English-first** machine name + **Arabic subtitle** + **Arabic target muscle**, exactly as
+  requested. Legs split into sub-groups quads / hamstrings / glutes / calves with the founder's
+  names (صدر مستوي/علوي/سفلي، ظهر علوي/لاتس الوسط/لاتس سفلي، Leg Press/Hack/Belt Squat،
+  Lying/Seated Leg Curl/RDL machine/GHR، Hip Thrust/Glute Kickback/Abduction/Adduction،
+  Standing/Seated Calf Raise).
+- **27 machines across 6 groups.** Each item references a real `exerciseId` in `exercises.ts`
+  so the existing demo/video + plan engine work unchanged. Integrity is enforced by
+  `catalogMissingIds()` (QA-checked → empty).
+- **Decision: catalog is a thin organizing layer over `exercises.ts`** (not a parallel data
+  store) — avoids duplicating nutrition/guidance fields and keeps one source of truth.
+
+### Added 5 machines to `src/data/exercises.ts` (the founder names that didn't exist yet)
+`decline-machine-press` (صدر سفلي), `low-row-machine` (لاتس سفلي), `machine-rdl` (RDL machine),
+`glute-kickback-machine` (Glute Kickback), `adduction-machine` (Hip Adduction). All `machine`,
+mostly `beginner`, with detailed-muscle mappings added to `muscleDetailById`. The other founder
+machines already existed (`belt-squat`, `glute-ham-raise`, `machine-hip-thrust`,
+`abduction-machine`, `hack-squat`, `leg-press`, `leg-extension`, `lying/seated-leg-curl`,
+`standing/seated-calf-raise`, etc.). Library count 165 → **170**.
+- **Decision:** Hip Adduction has no dedicated `MuscleId` (no adductors id) → mapped to `glutes`
+  as the closest existing target. "RDL machine" is uncommon hardware → modeled as a guided
+  `hinge` machine and kept alongside the free-weight `dumbbell-rdl` (which stays in the pool).
+
+### 2) Beginner = machine-first, no cables — `src/lib/planGenerator.ts`
+- **Cable exclusion:** new `cableOk(ex, tier)` excludes **free-cable** exercises for everyone
+  except `advanced` (honors "cables available for advanced only").
+  - **Key nuance (decision):** "free-cable" = `equipment.includes('cable') && !includes('machine')`.
+    Guided cable-stack *machines* (Lat Pulldown, Wide-Grip Pulldown are tagged `['machine','cable']`)
+    are **kept** — they are machine-guided and beginner-friendly. Only standalone cable-station
+    moves (cable crossover, triceps pushdown, cable curl, face-pull, cable lateral raise) are cut.
+    A naïve `includes('cable')` would have wrongly removed the Lat Pulldown, the #1 beginner back
+    machine — so the nuance is deliberate.
+- **Machine preference:** `sortCandidates(..., preferMachines)` ranks `machine` exercises first
+  for `beginner`/`novice` tiers, then alphabetical (stable). Applied in both slot selection and
+  the fallback fill. Free-weight basics (squat/bench/RDL) remain eligible and are auto-chosen
+  where no machine exists for that slot/pattern (e.g. hinge → `machine-rdl` now leads, else
+  `dumbbell-rdl`).
+- **Tier mapping:** `beginner`+`novice` → machine-first + no cables; `intermediate` → no free
+  cables (per "advanced only") but no machine boost; `advanced` → everything.
+- **No empty days / coverage preserved:** the existing fallback fill guarantees slots fill from
+  the (still ample) non-cable pool. Verified by generation smoke test.
+
+### 3) Library UI — additive "Machines (for beginners)" view — `src/views/ExerciseLibraryView.tsx`
+- Added a **view toggle**: «كل التمارين» (default — existing search/filters/list, byte-identical
+  behavior) and «الأجهزة (للمبتدئين)» which renders the `machineCatalog` grouped by muscle group
+  with English-first name + Arabic subtitle + Arabic target muscle + sub-group label.
+- **Additive & low-risk:** default view is unchanged; the machines view is a separate branch that
+  reuses the existing `ExerciseDetail` modal for demos (each catalog item → real `exerciseId`,
+  guarded by `getExercise`). No existing filter/search/layout code was altered.
+- **Decision:** surfaced the catalog here (rather than deferring) because the mission goal was
+  "make the exercise library … machine-first, with demos" — and the library view is not
+  nutrition/dashboard/onboarding, so it's within the allowed area.
+
+### Things intentionally NOT changed (hard rules / out of scope)
+- Nutrition, dashboard layout, onboarding goal logic, workout/streak — untouched.
+- **GIFs/demos:** library has no GIF infra; all demos are YouTube-search links via existing
+  `exercise.videoUrl` (shown through the existing `ExerciseDetail` modal). Catalog items reuse
+  that (each → real exerciseId). No new media added (no scraping/secrets). True GIF infra is a
+  separate content task (see FOLLOW_UPS).
+
+### QA (this agent)
+- `npm run build` ✓ · `npm run lint` ✓ (0 warnings) · `tsc -b --noEmit` ✓.
+- Generation smoke (bundled over the real engine): **beginner gym 4-day = 19/22 machines, 0
+  free-cables, 0 empty days**; **advanced = cables present, free-weight-heavy**; **catalog
+  integrity = 0 missing ids**.
+- **Browser smoke** (dev server, `#/exercises`): library renders (count = 170); default
+  «كل التمارين» view unchanged; «الأجهزة (للمبتدئين)» view shows grouped catalog (banner
+  "27 جهازًا", group "Chest · الصدر", items English-first + Arabic subtitle + Arabic target
+  muscle incl. the new Decline Chest Press Machine); tapping a machine opens the existing
+  ExerciseDetail demo; **no horizontal overflow (596=596), no console errors**.
+- **End-to-end plan flow** (real onboarding → generated plan → workout UI, beginner + full
+  gym + bulk, 3 days): app generated `gen-fullbody` with **13/15 machines, 0 cable exercises**
+  across the 3 days — Day أ all 5 machines (belt-squat, chest-press-machine, lat-pulldown,
+  machine-hip-thrust, shoulder-press-machine); Day ب pulled the 3 NEW machines
+  (decline-machine-press, low-row-machine, machine-rdl) + dumbbell fallback; Day ج machines +
+  dumbbell-rdl/db-shoulder-press where machines were exhausted. WorkoutMode renders exercise
+  1/5 as "دفع الأرجل جهاز / Leg Press". No console errors. Confirms machine-first + cable-free
+  for beginners flows all the way to the actual workout screen.
+
+---
+
+## P2 Agent 1 — verify pass + strength summary fix — 2026-06-29 (second run)
+
+A prior P2 A1 run already landed the core mission on `integration/phase2`
+(commits `a7013f0` → `9d745de` → `302267e`): 3 goals, recomp→cut migration,
+cut/bulk/strength calories, target-weight-once. This run **verified** all of it
+end-to-end (build/lint/typecheck green; recomp migration recomputes via
+`withFreshTargets`; calories cut=TDEE−400 / bulk=TDEE+300 / strength=TDEE+150)
+and **closed the one gap the prior run left**:
+
+- **`MyTargets` (live plan summary, rendered in `ProfileView`) now hides the
+  "الوزن الهدف" + "مدة تقديرية" cards for `strength`** — for strength,
+  `toLegacyProfile` sets target = current weight and ETA = 0, so showing them was
+  misleading. They now render only for `cutting`/`bulking` (the weight goals), and
+  the ETA card surfaces the derived weekly rate (e.g. "أسبوع · 0.5 كجم/أسبوع"),
+  making the captured target weight visibly *used*. The prior run had explicitly
+  left `MyTargets` "intact".
+- No other files touched. `recomposition` stays an internal-only `GoalType` engine
+  value (see decision below) — unreachable from any UI, migrated to `cut` on every
+  load path. Did **not** edit `planGenerator.ts`/`dashboardLayout.ts` (other agents).
+
+## P2 Agent 1 — Goals reduced to 3 + target weight actually used — 2026-06-29
+
+### What changed
+- **Goals = exactly 3**: `bulk` (تضخيم), `cut` (تنشيف), `strength` (زيادة قوة).
+  Removed `recomp` (تركيب الجسم) from the goal-selection UI (`goalChoices`), the
+  onboarding enums (`OnbGoalType`, `GoalValue`), and the broad goal selector
+  (`goalTypeOptions` no longer lists `recomposition`).
+- **recomp migration (no crash, recomputes with cut formula)**:
+  - Stored onboarding profile with `goal.type === 'recomp'` → mapped to `cut` on load
+    (`migrateLegacyOnbGoal` in `loadOnboardingProfile`).
+  - Stored customization profile with `goalType === 'recomposition'` → mapped to
+    `cutting`/`cut` on load (`migrateLegacyGoal` in `loadCustomization`). Because
+    `goalType` changes, the profile hash differs and `withFreshTargets` recomputes
+    targets with the cut formula (TDEE−400).
+  - Legacy `recomposition` profiles in `dashboardLayout.goalFromProfile` normalize to
+    `cut` (same nutrition-first path).
+- **Goal calories** (unchanged engine, single source `rawCaloriesForGoalType`):
+  cut = TDEE−400 (with floor), bulk = TDEE+300, strength = TDEE+150. Removed the
+  `recomposition` (=TDEE) branch.
+- **Target weight captured once, actually used**: onboarding asks target weight once,
+  only for cut/bulk (`showsTargetWeight`). cut/bulk derive `weeklyWeightChangeKg` +
+  `estimatedWeeksToGoal` from (current − target) in `computeTargets`. For `strength`,
+  target weight is hidden and `toLegacyProfile` sets it to the current weight → no
+  misleading weekly-change/ETA. Plan summary (`MyTargets`) already surfaces target
+  weight + estimated weeks; left intact.
+
+### Decision: `recomposition` retained ONLY as an internal `GoalType` engine value
+- The user-facing/onboarding goal is fully reduced to 3 and `recomp` is gone from every
+  selector and onboarding enum. The broad `GoalType` union (`profile.ts`) still contains
+  `'recomposition'` because it is a key in `Record<GoalType, …>` tables inside
+  `planGenerator.ts` (SCHEMES, COMMITMENTS_BY_GOAL — **workout runtime, out of scope**)
+  and a `case` in `dashboardLayout.ts` (**dashboard layout, out of scope**). Removing it
+  from the union would force edits to those owned-by-other-agents files. It is now
+  **unreachable** from any UI and all onboarding/migration paths map it to `cut`.
+- Forced minimal edits in `dashboardLayout.ts` (return `'cut'` instead of the removed
+  `'recomp'` literal; drop the `=== 'recomp'` comparison) were unavoidable type-consistency
+  fixes from dropping `'recomp'` from `OnbGoalType`; they are behavior-preserving
+  (recomposition still routes to the nutrition-first/cut path).
+
+### Confirmed (no regressions)
+- No "what training type do you want" question exists or was added; the split stays
+  auto/advanced (training preference, not a goal). BMI label remains descriptive/neutral.
+  NEAT activity question + the NEAT-vs-training no-double-count calorie split untouched.
+- Verified at runtime (vite-node): recomp profile loads→migrates→recomputes (cut, weeks=16);
+  cut/bulk/strength deltas = −400/+300/+150; strength target weight = current, ETA = 0.
+- build + lint + typecheck all green.
+
+---
+
 ## RESUME — Agent 1 Training — 2026-06-29
 - done: implemented all training-engine requirements (advanced split override, session-duration
   exercise count, experience volume, onoff/returning conservative start, equipment filter incl.
@@ -340,3 +503,22 @@ Agent: Splash + 404 + Contact pages (isolated). Branch: `claude/splash-404-conta
 
 ### QA
 - build / lint / typecheck all pass on a clean base and after changes.
+
+## CHECKPOINT — P2 Agent 1 merged into integration/phase2 — 2026-06-29
+- feature/phase2-goals-onboarding (a7013f0) merged via --no-ff into integration/phase2.
+- build + lint + typecheck green post-merge. Goals reduced to 3; recomp migrates to cut; target weight drives ETA.
+
+## Phase 2 — Integration QA (Agent 6) — 2026-06-29
+- **Scope honored:** verification + QA only. No code changes to the integration branch
+  (no P0 regressions). Findings in `PHASE2_QA_REPORT.md` + `FOLLOW_UPS.md`.
+- **Concurrent development:** `integration/phase2` advanced multiple times during QA as
+  several agents pushed. QA was re-verified at each step; final results reflect HEAD
+  `1088464`, by which point ALL Phase-2 feature branches were merged.
+- **Verified live/by code at final HEAD:** 3 goals + recomp→cut + target weight; gram-based
+  nutrition + Saudi foods + live/persisted logging; workout persistence; greeting "أهلًا يا
+  {name}" + rotating phrase; 1-tap entry; machine catalog UI; manual step counter; muscle
+  map from logged data; all red lines (no medical/dosage advice, BMI neutral, no fake stats,
+  no demo leak, no Ziyad placeholder). Build/lint/typecheck green.
+- **3rd goal = strength (not maintain):** product decision to confirm with founder.
+- **Readiness:** ✅ ready for founder smoke test; ⚠️ land FU-P2-1 (rAF completion) + FU-P2-3
+  (full-body day names) before promoting to `main`. Rest non-blocking.

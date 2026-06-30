@@ -4,7 +4,8 @@ import { Icon } from '@/components/Icon'
 import { ExerciseDetail } from '@/components/ExerciseDetail'
 import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
-import { exercises, targetMuscleAr } from '@/data/exercises'
+import { exercises, getExercise, targetMuscleAr } from '@/data/exercises'
+import { machineCatalog } from '@/data/machineCatalog'
 import type { Muscle } from '@/types/workout'
 
 interface ExerciseLibraryViewProps {
@@ -48,6 +49,8 @@ export function ExerciseLibraryView({ lang }: ExerciseLibraryViewProps) {
   const [muscle, setMuscle] = useState<Muscle | 'all'>('all')
   const [equip, setEquip] = useState<string>('all')
   const [openId, setOpenId] = useState<string | null>(null)
+  // وضع العرض: كل التمارين (الافتراضي — السلوك القديم) أو كتالوج الأجهزة للمبتدئين.
+  const [view, setView] = useState<'all' | 'machines'>('all')
 
   // قائمة المعدّات الفريدة من البيانات
   const equipList = useMemo(() => {
@@ -92,6 +95,27 @@ export function ExerciseLibraryView({ lang }: ExerciseLibraryViewProps) {
           </button>
         </div>
 
+        {/* مبدّل العرض: كل التمارين (افتراضي) / الأجهزة للمبتدئين */}
+        <div className="mt-5 inline-flex rounded-xl border border-line bg-surface p-1">
+          <button
+            type="button"
+            onClick={() => setView('all')}
+            className={cn('rounded-lg px-3 py-2 text-xs font-bold transition-colors', view === 'all' ? 'bg-primary text-white' : 'text-ink-700 hover:bg-beige')}
+          >
+            كل التمارين
+          </button>
+          <button
+            type="button"
+            onClick={() => setView('machines')}
+            className={cn('flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-bold transition-colors', view === 'machines' ? 'bg-primary text-white' : 'text-ink-700 hover:bg-beige')}
+          >
+            <Icon name="Boxes" className="h-3.5 w-3.5" />
+            الأجهزة (للمبتدئين)
+          </button>
+        </div>
+
+      {view === 'all' && (
+        <>
         {/* بحث */}
         <div className="mt-5 flex items-center gap-2 rounded-xl border border-line bg-surface px-3">
           <Icon name="Search" className="h-4 w-4 text-ink-400" />
@@ -158,9 +182,65 @@ export function ExerciseLibraryView({ lang }: ExerciseLibraryViewProps) {
             ))}
           </ul>
         )}
+        </>
+      )}
+
+      {view === 'machines' && <MachineCatalogBrowser onOpen={setOpenId} />}
       </div>
 
       {openId && <ExerciseDetail lang={lang} exerciseId={openId} onClose={() => setOpenId(null)} />}
+    </div>
+  )
+}
+
+/** كتالوج الأجهزة — مرتّب حسب المجموعة العضلية، صديق للمبتدئ. النقر يفتح تفاصيل/شرح التمرين. */
+function MachineCatalogBrowser({ onOpen }: { onOpen: (id: string) => void }) {
+  const total = machineCatalog.reduce((n, g) => n + g.items.length, 0)
+  return (
+    <div className="mt-5">
+      <p className="mb-3 flex items-start gap-2 rounded-xl border border-primary-soft bg-primary-soft/40 p-3 text-[11px] leading-relaxed text-ink-700">
+        <Icon name="Info" className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary-c" />
+        الأجهزة الموجّهة أسهل وأأمن للبداية — اختر جهازًا لتشاهد الشرح والعضلة المستهدفة. {total} جهازًا.
+      </p>
+      <div className="space-y-6">
+        {machineCatalog.map((group) => (
+          <section key={group.key}>
+            <h2 className="mb-2.5 flex items-center gap-2 text-sm font-black text-ink-900">
+              <span className="grid h-7 w-7 place-items-center rounded-lg bg-primary-soft text-primary-c">
+                <Icon name="Dumbbell" className="h-4 w-4" />
+              </span>
+              {group.titleEn}
+              <span className="text-xs font-bold text-ink-400">· {group.titleAr}</span>
+            </h2>
+            <ul className="grid gap-2.5 sm:grid-cols-2">
+              {group.items.map((item) => {
+                const ex = getExercise(item.exerciseId)
+                if (!ex) return null
+                return (
+                  <li key={item.exerciseId}>
+                    <button
+                      type="button"
+                      onClick={() => onOpen(item.exerciseId)}
+                      className="flex w-full items-center gap-3 rounded-2xl border border-line bg-surface p-3 text-start shadow-card transition-shadow hover:shadow-soft"
+                    >
+                      <ExerciseThumb />
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-bold text-ink-900">{item.nameEn}</p>
+                        <p className="truncate text-[11px] text-ink-500">{item.nameAr}</p>
+                        <p className="mt-0.5 flex items-center gap-1.5 text-[11px] text-ink-400">
+                          <span className="rounded-full bg-primary-soft px-1.5 py-0.5 font-bold text-primary-c">{item.targetMuscleAr}</span>
+                          {item.subGroupAr && <span className="truncate">{item.subGroupAr}</span>}
+                        </p>
+                      </div>
+                      <Icon name="ChevronLeft" className="h-4 w-4 shrink-0 text-ink-400" />
+                    </button>
+                  </li>
+                )
+              })}
+            </ul>
+          </section>
+        ))}
+      </div>
     </div>
   )
 }

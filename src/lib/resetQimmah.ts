@@ -13,6 +13,8 @@ export const QIMMAH_KEYS = [
   'qimmah:workoutSessions:v1',
   'qimmah:exerciseHistory:v1',
   'qimmah:prefs:v1',
+  // تفضيل وضع الواجهة (بسيط/متقدّم)
+  'qimmah:uiMode:v1',
   // تفضيلات التذكير + بيانات المزامنة (إن وُجدت)
   'qimmah:reminders:v1',
   'qimmah:sync:meta:v1',

@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Icon } from '@/components/Icon'
+import { WeeklyMuscleMap } from '@/components/WeeklyMuscleMap'
+import { StepCounterCard } from '@/components/StepCounterCard'
 import { MUSCLE_AR } from '@/lib/exerciseGuidance'
 import { loadLogs, latestLog, trendFor } from '@/lib/measurementLog'
 import { musclesThisWeek, recentVolumes, topPRs, workoutCounts } from '@/lib/progressStats'
@@ -125,6 +127,12 @@ export function ProgressView({ lang }: ProgressViewProps) {
             <Empty text={t.noWorkouts} />
           )}
         </Card>
+
+        {/* خريطة العضلات الأسبوعية — تُضيء ما درّبته هذا الأسبوع */}
+        <WeeklyMuscleMap className="mt-3" />
+
+        {/* عدّاد الخطوات اليدوي + الهدف اليومي */}
+        <StepCounterCard className="mt-3" />
 
         {/* مزامنة الصحة — نائب صادق */}
         <div className="mt-3 card border-primary-soft p-5">

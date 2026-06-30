@@ -24,7 +24,10 @@ export const MEAL_SLOTS: { id: MealSlot; ar: string; en: string; icon: string }[
 export interface LoggedFood {
   id: string
   label: string
+  /** نسبة الكمية المُسجّلة إلى الحصة المرجعية (grams / servingGrams) — للتوافق التاريخي. */
   servings: number
+  /** الكمية المُسجّلة بالغرام (الإدخال الأساسي لعناصر قاعدة الأطعمة). */
+  grams?: number
   calories: number
   protein: number
   carbs: number
