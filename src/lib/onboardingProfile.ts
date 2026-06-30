@@ -210,6 +210,8 @@ export function toLegacyProfile(op: OnboardingProfile, base: Profile = defaultPr
     // توزيع حجم الوجبات ووقت الجوع (P2.5) — يؤثّران على توزيع السعرات في اقتراح الوجبات.
     mealDistribution: op.nutritionPreferences.mealDistribution ?? base.mealDistribution,
     appetiteTiming: op.nutritionPreferences.appetiteTiming ?? base.appetiteTiming,
+    // نمط الأكل (P2.6) — يصفّي الوجبات المقترحة في المولّد (نباتي/سمك بدون لحوم…).
+    dietPattern: op.foodPreferences.dietPattern ?? base.dietPattern,
     dislikedFoods: op.foodPreferences.dislikedFoods.join('، '),
     muscleFocus: 'balanced',
     consistency,
@@ -355,7 +357,7 @@ export function migrateFromCustomization(c: Customization): OnboardingProfile {
       style: p.trackNutrition ? 'meal_suggestions' : 'macros_only',
       mealsPerDay: p.mealsPerDay,
     },
-    foodPreferences: { dietPattern: 'none', dislikedFoods: dislikes, allergies: [] },
+    foodPreferences: { dietPattern: p.dietPattern ?? 'none', dislikedFoods: dislikes, allergies: [] },
     limitations: { injuries, notes: p.healthNotes || undefined },
     wellnessTracking: {
       mode: suppIds.length || medIds.length ? 'basic' : 'none',

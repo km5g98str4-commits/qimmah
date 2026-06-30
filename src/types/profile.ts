@@ -69,6 +69,8 @@ export interface Profile {
   mealDistribution?: 'balanced' | 'fewer_larger' | 'more_smaller'
   /** وقت الجوع الأكثر من الإعداد (P2.5) — يميل توزيع السعرات للصباح/المساء. */
   appetiteTiming?: 'balanced' | 'morning' | 'evening'
+  /** نمط الأكل من الإعداد (P2.6) — يصفّي الوجبات المقترحة (نباتي/سمك بدون لحوم…). */
+  dietPattern?: 'none' | 'vegetarian' | 'vegan' | 'pescatarian' | 'low_carb' | 'keto'
   dislikedFoods: string
   // — حقول «باني الخطة» الاختيارية (تُملأ عند استخدام Plan Builder) —
   muscleFocus?: MuscleFocus

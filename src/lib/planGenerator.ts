@@ -23,6 +23,7 @@ import type { Lang } from '@/lib/appPreferences'
 import { computeTargets, calorieGoalFromGoalType, goalTypeLabel } from '@/lib/calculators'
 import { exercises, getExercise } from '@/data/exercises'
 import { getTemplate } from '@/data/workoutTemplates'
+import { mealTemplates, getMealTemplate } from '@/data/mealTemplates'
 import { workoutDayNameAr, workoutDayNameEn } from '@/lib/workoutDayLabel'
 import { createPlanMealFromTemplate, planTotals } from '@/lib/nutritionPlan'
 import { createPlanCommitment } from '@/lib/commitmentPlan'
@@ -753,6 +754,56 @@ function redistributeMeals(meals: PlanMeal[], targetCalories: number, timing: Ti
   })
 }
 
+// — تصفية الوجبات حسب نمط الأكل (P2.6): نستبعد المكوّنات الحيوانية الممنوعة ونستبدل
+//   القالب بأقرب بديل متوافق من نفس نوع الوجبة. (تصفية فقط — بلا ادعاءات تغذوية/صحية.)
+type Diet = NonNullable<Profile['dietPattern']>
+// لحوم برّية (تُستبعد للنباتي/النباتي الصرف/سمك-بدون-لحوم).
+const LAND_MEAT_IDS = new Set(['chicken-breast', 'lean-beef', 'ground-beef-lean', 'turkey-breast'])
+// أسماك/بحريات (تُستبعد للنباتي والنباتي الصرف، وتُسمح لسمك-بدون-لحوم).
+const SEAFOOD_IDS = new Set(['tuna', 'salmon', 'shrimp'])
+// بيض ومشتقّات حيوانية (تُستبعد للنباتي الصرف فقط).
+const EGG_IDS = new Set(['eggs', 'egg-whites'])
+const DAIRY_IDS = new Set(['milk', 'greek-yogurt', 'laban', 'labneh', 'feta-cheese', 'cottage-cheese', 'butter', 'whey-protein'])
+const ANIMAL_BYPRODUCT_IDS = new Set(['honey'])
+
+/** هل يمنع نمط الأكل هذا المكوّن؟ (low_carb/keto/none: لا تصفية لحوم — أنماط ماكروز.) */
+function dietForbidsIngredient(diet: Diet, id: string): boolean {
+  switch (diet) {
+    case 'vegetarian':
+      return LAND_MEAT_IDS.has(id) || SEAFOOD_IDS.has(id)
+    case 'vegan':
+      return (
+        LAND_MEAT_IDS.has(id) || SEAFOOD_IDS.has(id) ||
+        EGG_IDS.has(id) || DAIRY_IDS.has(id) || ANIMAL_BYPRODUCT_IDS.has(id)
+      )
+    case 'pescatarian':
+      return LAND_MEAT_IDS.has(id)
+    default:
+      return false
+  }
+}
+
+/** هل يتوافق قالب الوجبة مع نمط الأكل؟ (كل مكوّناته مسموحة.) */
+function mealCompliesWithDiet(templateId: string, diet: Diet): boolean {
+  const t = getMealTemplate(templateId)
+  if (!t) return true
+  return !t.ingredientIds.some((id) => dietForbidsIngredient(diet, id))
+}
+
+/**
+ * يعيد قالبًا متوافقًا مع نمط الأكل: الأصل إن توافق، وإلا أقرب بديل من نفس نوع الوجبة،
+ * وإلا أي بديل متوافق (الموقف المحافظ: لا نقدّم أبدًا مكوّنًا ممنوعًا).
+ */
+function dietCompliantMeal(templateId: string, diet: Diet): string {
+  if (diet === 'none' || diet === 'low_carb' || diet === 'keto') return templateId
+  if (mealCompliesWithDiet(templateId, diet)) return templateId
+  const mealType = getMealTemplate(templateId)?.mealType
+  const sameType = mealTemplates.find((x) => x.mealType === mealType && mealCompliesWithDiet(x.id, diet))
+  if (sameType) return sameType.id
+  const anyOk = mealTemplates.find((x) => mealCompliesWithDiet(x.id, diet))
+  return anyOk ? anyOk.id : templateId
+}
+
 /** يولّد خطة أكل تقريبية من الأهداف والتفضيلات (يحاول الاقتراب من السعرات/البروتين). */
 export function generateNutrition(p: Profile, targets: Targets): { plan: NutritionPlan; warning?: string } {
   const goal = calorieGoalFromGoalType(p.goalType)
@@ -786,7 +837,12 @@ export function generateNutrition(p: Profile, targets: Targets): { plan: Nutriti
   if (mealsCount >= 4) slots.push(s.snack)
   if (mealsCount >= 5) slots.push('protein-shake')
 
-  let meals: PlanMeal[] = slots.map((id, i) => createPlanMealFromTemplate(id, i))
+  // تصفية نمط الأكل (P2.6): نستبدل أي قالب غير متوافق ببديل من نفس نوع الوجبة
+  // (نباتي/نباتي صرف/سمك بدون لحوم) — مع الحفاظ على ترتيب الفتحات لأوزان التوزيع.
+  const diet: Diet = p.dietPattern ?? 'none'
+  const dietSlots = slots.map((id) => dietCompliantMeal(id, diet))
+
+  let meals: PlanMeal[] = dietSlots.map((id, i) => createPlanMealFromTemplate(id, i))
 
   // توزيع حجم الوجبات حسب تفضيل المستخدم (P2.5): عند اختيار توزيع/وقت جوع غير «متوازن»
   // نعيد توزيع السعرات على الوجبات (مع تثبيت الإجمالي)؛ غير ذلك نُبقي السلوك الموحّد القديم.
