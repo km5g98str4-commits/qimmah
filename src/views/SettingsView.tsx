@@ -138,7 +138,7 @@ export function SettingsView({ lang, onNavigate, onEditPlan, onLogin, onOpenPriv
                 {auth.user ? t.badge.account : t.badge.guest}
               </span>
               <div>
-                {auth.user && <p className="text-sm font-bold text-ink-900">{auth.user.email}</p>}
+                {auth.displayName && <p className="text-sm font-bold text-ink-900">{auth.displayName}</p>}
                 <p className="text-xs leading-relaxed text-ink-500">{accountStatus}</p>
               </div>
             </div>
