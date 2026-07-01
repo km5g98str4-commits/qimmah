@@ -19,6 +19,9 @@ const PrivacyView = lazy(() => import('@/views/PrivacyView').then((m) => ({ defa
 const TermsView = lazy(() => import('@/views/TermsView').then((m) => ({ default: m.TermsView })))
 const ContactView = lazy(() => import('@/views/ContactView').then((m) => ({ default: m.ContactView })))
 const NotFoundView = lazy(() => import('@/views/NotFoundView').then((m) => ({ default: m.NotFoundView })))
+const ReviewPanelView = lazy(() =>
+  import('@/features/products/reviewPanel/ReviewPanelView').then((m) => ({ default: m.ReviewPanelView })),
+)
 import { MobileShell, type MainTab } from '@/components/MobileShell'
 import type { AppBadge } from '@/components/AppNav'
 import { useAuth } from '@/lib/authContext'
@@ -172,8 +175,11 @@ export default function App() {
         onLogin={() => setView('login')}
         onOpenPrivacy={() => setView('privacy')}
         onOpenTerms={() => setView('terms')}
+        onOpenProductReview={() => setView('productReview')}
       />
     )
+  } else if (view === 'productReview') {
+    content = <ReviewPanelView lang={LANG} onBack={() => setView('settings')} />
   } else {
     // ——— التبويبات الرئيسية داخل قشرة الجوال ———
     content = (

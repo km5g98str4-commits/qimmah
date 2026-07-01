@@ -62,7 +62,11 @@ export function ScanFoodPanel({ lang, onResolved, onManualFallback, onClose }: S
         <div className="flex-1 overflow-y-auto p-4">
           {status === 'scanning' && (
             <>
-              <BarcodeCamera onDetected={handleDetected} onError={() => setStatus('permission-denied')} />
+              <BarcodeCamera
+                onDetected={handleDetected}
+                onError={() => setStatus('permission-denied')}
+                torchLabel={d.scanTorch}
+              />
               <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-xs text-ink-500">
                 <Icon name="ScanLine" className="h-4 w-4 text-ink-400" />
                 {d.scanHint}

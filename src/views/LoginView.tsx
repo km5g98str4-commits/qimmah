@@ -12,36 +12,56 @@ interface LoginViewProps {
   onBack: () => void
 }
 
-/** شاشة الحساب — تسجيل دخول/إنشاء حساب (Supabase) أو متابعة كضيف. */
+type Mode = 'login' | 'signup'
+
+/** شاشة الحساب — تبديل بين تسجيل الدخول وإنشاء حساب (Supabase) أو المتابعة كضيف. */
 export function LoginView({ lang, onSuccess, onGuest, onBack }: LoginViewProps) {
   const t = getStrings(lang)
   const d = miscStrings[lang]
   const auth = useAuth()
+  const [mode, setMode] = useState<Mode>('login')
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)
   const [msg, setMsg] = useState<string | null>(null)
+  const [notice, setNotice] = useState<string | null>(null)
+
+  const isSignup = mode === 'signup'
+  const canSubmit = Boolean(email && password && (!isSignup || name.trim()))
 
   const input =
     'w-full rounded-lg border border-line bg-beige px-3 py-3 text-sm text-ink-900 focus:border-brand-500/50 focus:outline-none'
 
-  const onLogin = async () => {
-    setBusy(true)
+  const switchMode = (next: Mode) => {
+    setMode(next)
     setMsg(null)
-    const r = await auth.signIn(email, password)
-    setBusy(false)
-    if (r.ok) onSuccess()
-    else setMsg(r.error ?? d.loginFailed)
+    setNotice(null)
   }
 
-  const onCreate = async () => {
+  const submit = async () => {
+    if (!canSubmit) return
     setBusy(true)
     setMsg(null)
-    const r = await auth.signUp(email, password)
-    setBusy(false)
-    if (!r.ok) setMsg(r.error ?? d.createFailed)
-    else if (r.needsConfirmation) setMsg(d.accountCreatedConfirm)
-    else onSuccess()
+    setNotice(null)
+    if (isSignup) {
+      const r = await auth.signUp(email, password, name)
+      setBusy(false)
+      if (!r.ok) {
+        setMsg(r.error ?? d.createFailed)
+      } else if (r.needsConfirmation) {
+        // تأكيد البريد مطلوب — نعرض تنبيهًا واضحًا ونعيد المستخدم لوضع الدخول.
+        setNotice(d.accountCreatedConfirm)
+        setMode('login')
+      } else {
+        onSuccess()
+      }
+    } else {
+      const r = await auth.signIn(email, password)
+      setBusy(false)
+      if (r.ok) onSuccess()
+      else setMsg(r.error ?? d.loginFailed)
+    }
   }
 
   return (
@@ -61,15 +81,48 @@ export function LoginView({ lang, onSuccess, onGuest, onBack }: LoginViewProps) 
 
         <div className="text-center">
           <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-primary text-white shadow-glow">
-            <Icon name="LogIn" className="h-7 w-7" strokeWidth={2.5} />
+            <Icon name={isSignup ? 'UserPlus' : 'LogIn'} className="h-7 w-7" strokeWidth={2.5} />
           </span>
-          <h1 className="mt-4 text-2xl font-black text-ink-900">{t.auth.title}</h1>
+          <h1 className="mt-4 text-2xl font-black text-ink-900">
+            {isSignup ? t.auth.signupTitle : t.auth.title}
+          </h1>
         </div>
 
         {auth.configured ? (
           <>
-            <p className="mt-2 text-center text-sm leading-relaxed text-ink-500">{t.auth.subtitle}</p>
-            <div className="mt-6 space-y-3">
+            <p className="mt-2 text-center text-sm leading-relaxed text-ink-500">
+              {isSignup ? t.auth.signupSubtitle : t.auth.subtitle}
+            </p>
+
+            {notice && (
+              <p className="mt-4 flex items-start gap-2 rounded-xl border border-line bg-surface p-3 text-xs leading-relaxed text-ink-700">
+                <Icon name="Mail" className="mt-0.5 h-4 w-4 shrink-0 text-primary-c" />
+                {notice}
+              </p>
+            )}
+
+            <form
+              className="mt-6 space-y-3"
+              onSubmit={(e) => {
+                e.preventDefault()
+                void submit()
+              }}
+            >
+              {isSignup && (
+                <div className="relative">
+                  <span className="pointer-events-none absolute inset-y-0 end-3 grid place-items-center text-ink-400">
+                    <Icon name="User" className="h-4 w-4" />
+                  </span>
+                  <input
+                    className={input}
+                    type="text"
+                    autoComplete="name"
+                    placeholder={t.auth.name}
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  />
+                </div>
+              )}
               <div className="relative">
                 <span className="pointer-events-none absolute inset-y-0 end-3 grid place-items-center text-ink-400">
                   <Icon name="Mail" className="h-4 w-4" />
@@ -91,7 +144,7 @@ export function LoginView({ lang, onSuccess, onGuest, onBack }: LoginViewProps) 
                 <input
                   className={input}
                   type="password"
-                  autoComplete="current-password"
+                  autoComplete={isSignup ? 'new-password' : 'current-password'}
                   placeholder={t.auth.password}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -101,22 +154,25 @@ export function LoginView({ lang, onSuccess, onGuest, onBack }: LoginViewProps) 
               {msg && <p className="text-xs leading-relaxed text-gold-600">{msg}</p>}
 
               <button
-                type="button"
-                onClick={onLogin}
-                disabled={busy || !email || !password}
+                type="submit"
+                disabled={busy || !canSubmit}
                 className="btn-primary w-full py-3.5 text-base disabled:opacity-50"
               >
-                {t.auth.login}
+                {isSignup ? t.auth.createAccount : t.auth.login}
               </button>
+            </form>
+
+            {/* تبديل بين الدخول وإنشاء حساب */}
+            <p className="mt-4 text-center text-xs text-ink-500">
+              {isSignup ? t.auth.haveAccount : t.auth.noAccount}{' '}
               <button
                 type="button"
-                onClick={onCreate}
-                disabled={busy || !email || !password}
-                className="btn-ghost w-full py-3.5 text-base disabled:opacity-50"
+                onClick={() => switchMode(isSignup ? 'login' : 'signup')}
+                className="font-black text-primary-c transition-colors hover:underline"
               >
-                {t.auth.createAccount}
+                {isSignup ? t.auth.switchToLogin : t.auth.switchToSignup}
               </button>
-            </div>
+            </p>
           </>
         ) : (
           // — Supabase غير مضبوط —

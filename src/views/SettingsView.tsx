@@ -32,10 +32,19 @@ interface SettingsViewProps {
   onLogin: () => void
   onOpenPrivacy: () => void
   onOpenTerms: () => void
+  onOpenProductReview: () => void
 }
 
 /** صفحة الإعدادات — مجموعات: الحساب / البيانات / خطتي / الخصوصية والثقة. (ليست تعديل الخطة) */
-export function SettingsView({ lang, onNavigate, onEditPlan, onLogin, onOpenPrivacy, onOpenTerms }: SettingsViewProps) {
+export function SettingsView({
+  lang,
+  onNavigate,
+  onEditPlan,
+  onLogin,
+  onOpenPrivacy,
+  onOpenTerms,
+  onOpenProductReview,
+}: SettingsViewProps) {
   const t = getStrings(lang)
   const auth = useAuth()
   const { customization, applyCustomization } = useCustomization()
@@ -138,7 +147,7 @@ export function SettingsView({ lang, onNavigate, onEditPlan, onLogin, onOpenPriv
                 {auth.user ? t.badge.account : t.badge.guest}
               </span>
               <div>
-                {auth.user && <p className="text-sm font-bold text-ink-900">{auth.user.email}</p>}
+                {auth.displayName && <p className="text-sm font-bold text-ink-900">{auth.displayName}</p>}
                 <p className="text-xs leading-relaxed text-ink-500">{accountStatus}</p>
               </div>
             </div>
@@ -224,7 +233,22 @@ export function SettingsView({ lang, onNavigate, onEditPlan, onLogin, onOpenPriv
         {/* 5) التطبيق والتنبيهات — تثبيت PWA + إذن التنبيهات (نسخة صادقة، حدود آيفون واضحة) */}
         <DeviceSettings lang={lang} />
 
-        {/* 6) اللغة — تبديل حيّ عربي/English (يبدّل النص والاتجاه فورًا). */}
+        {/* 6) أدوات داخلية — مراجعة المنتجات (ليست جزءًا من رحلة المستخدم العادية). */}
+        <SettingsGroup icon="Wrench" title={t.settings.groupDev}>
+          <div className="flex flex-col gap-2">
+            <button
+              type="button"
+              onClick={onOpenProductReview}
+              className="btn-ghost justify-start px-4 py-2.5 text-sm"
+            >
+              <Icon name="ClipboardList" className="h-4 w-4" />
+              {t.settings.devReviewProducts}
+            </button>
+            <p className="text-xs leading-relaxed text-ink-500">{t.settings.devReviewHint}</p>
+          </div>
+        </SettingsGroup>
+
+        {/* 7) اللغة — تبديل حيّ عربي/English (يبدّل النص والاتجاه فورًا). */}
         <SettingsGroup icon="Globe" title={t.settings.groupLanguage}>
           <div className="flex flex-col gap-3">
             <LanguageToggle />

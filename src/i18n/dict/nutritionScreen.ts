@@ -45,6 +45,7 @@ export interface NutritionScreenStrings {
   scanFoundHint: string
   scanAttribution: string
   scanUnsupported: string
+  scanTorch: string
 }
 
 const ar: NutritionScreenStrings = {
@@ -86,6 +87,7 @@ const ar: NutritionScreenStrings = {
   scanFoundHint: 'لقينا المنتج — راجع القيم وسجّله.',
   scanAttribution: 'بيانات المنتج من Open Food Facts (رخصة ODbL)',
   scanUnsupported: 'المتصفح ما يدعم مسح الباركود — استخدم الإضافة اليدوية.',
+  scanTorch: 'الفلاش',
 }
 
 const en: NutritionScreenStrings = {
@@ -127,6 +129,7 @@ const en: NutritionScreenStrings = {
   scanFoundHint: 'Found it — review the values and log it.',
   scanAttribution: 'Product data from Open Food Facts (ODbL license)',
   scanUnsupported: "This browser doesn't support barcode scanning — use manual entry instead.",
+  scanTorch: 'Flashlight',
 }
 
 export const nutritionScreenStrings: Record<Lang, NutritionScreenStrings> = { ar, en }
