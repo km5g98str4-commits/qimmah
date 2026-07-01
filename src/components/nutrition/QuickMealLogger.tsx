@@ -198,7 +198,11 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
               {selected && (
                 <div className="mt-3 rounded-lg border border-line bg-surface p-3">
                   <p className="text-sm font-bold text-ink-900">{lang === 'en' ? selected.nameEn : selected.nameAr}</p>
-                  <p className="text-[11px] text-ink-400">{t.perServingNote} {baseGrams}{t.gramsUnit}: {selected.calories} {t.calories} · {selected.protein}{t.gramsUnit} {t.protein}</p>
+                  {/* عرض واضح: لكل حصة + لكل 100غ */}
+                  <div className="mt-1 flex flex-wrap gap-x-4 gap-y-0.5 text-[11px] text-ink-400">
+                    <span>{t.perPortion} ({selected.servingLabelAr}): <span className="font-bold text-ink-600">{selected.calories} {t.calories} · {selected.protein}{t.gramsUnit} {t.protein}</span></span>
+                    <span>{t.per100g}: <span className="font-bold text-ink-600">{round(selected.calories * 100 / baseGrams)} {t.calories} · {round(selected.protein * 100 / baseGrams)}{t.gramsUnit} {t.protein}</span></span>
+                  </div>
                   <div className="mt-3 flex items-center gap-2">
                     <label className="text-xs text-ink-500">{t.gramsAmount}</label>
                     <input

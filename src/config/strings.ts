@@ -253,6 +253,10 @@ export interface ShellStrings {
     swapMealTitle: string
     noAlternatives: string
     close: string
+    per100g: string
+    perPortion: string
+    emptyStateTitle: string
+    emptyStateHint: string
   }
   wellness: {
     title: string
@@ -606,6 +610,10 @@ const ar: ShellStrings = {
     swapMealTitle: 'بدائل بسعرات وبروتين متقارب',
     noAlternatives: 'لا توجد بدائل متقاربة حاليًا.',
     close: 'إغلاق',
+    per100g: 'لكل 100غ',
+    perPortion: 'لكل حصة',
+    emptyStateTitle: 'ابدأ — سجّل أول وجبة',
+    emptyStateHint: 'اضغط «أضف» عند أي وجبة، ابحث عن أكلتك، وحدّد الكمية بالغرام.',
   },
   wellness: {
     title: 'المكملات والأدوية',
@@ -960,6 +968,10 @@ const en: ShellStrings = {
     swapMealTitle: 'Alternatives with similar calories & protein',
     noAlternatives: 'No close alternatives right now.',
     close: 'Close',
+    per100g: 'Per 100g',
+    perPortion: 'Per portion',
+    emptyStateTitle: 'Start — log your first meal',
+    emptyStateHint: 'Tap “Add” on any meal, search for your food, and set the amount in grams.',
   },
   wellness: {
     title: 'Supplements & Medications',

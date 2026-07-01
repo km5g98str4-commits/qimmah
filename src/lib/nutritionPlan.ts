@@ -1,9 +1,11 @@
 import type { MealIngredient, MealType, NutritionPlan, PlanMeal } from '@/types/nutrition'
 import type { Targets, CalorieGoal } from '@/types/profile'
+import type { DietPattern } from '@/types/onboarding'
 import type { Lang } from '@/lib/appPreferences'
 import { getIngredient } from '@/data/mealIngredients'
 import { getMealTemplate, mealTemplates } from '@/data/mealTemplates'
 import { targetCaloriesFor } from '@/lib/calculators'
+import { templateAllowedForDiet } from '@/lib/dietFilter'
 
 const round = (n: number) => Math.round(n)
 
@@ -105,9 +107,11 @@ export function planTotals(meals: PlanMeal[]): Macros {
 /**
  * بدائل وجبة بسعرات/بروتين متقاربة — فلتر بسيط من قوالب الوجبات.
  * النطاق التقريبي: ±25% للسعرات و±30غ للبروتين، مع تفضيل نفس نوع الوجبة.
+ * يحترم النمط الغذائي (نباتي/صرف/بيسكتاريان) فيستبعد البدائل غير المتوافقة.
  */
-export function mealAlternatives(meal: PlanMeal): PlanMeal[] {
+export function mealAlternatives(meal: PlanMeal, dietPattern?: DietPattern): PlanMeal[] {
   const candidates = mealTemplates
+    .filter((tpl) => templateAllowedForDiet(tpl, dietPattern))
     .map((tpl) => createPlanMealFromTemplate(tpl.id, meal.order))
     .filter((alt) => alt.nameAr !== meal.nameAr) // استبعد نفس الوجبة بالاسم
   const calLow = meal.calories * 0.75

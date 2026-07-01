@@ -210,7 +210,7 @@ export function toLegacyProfile(op: OnboardingProfile, base: Profile = defaultPr
     // توزيع حجم الوجبات ووقت الجوع (P2.5) — يؤثّران على توزيع السعرات في اقتراح الوجبات.
     mealDistribution: op.nutritionPreferences.mealDistribution ?? base.mealDistribution,
     appetiteTiming: op.nutritionPreferences.appetiteTiming ?? base.appetiteTiming,
-    // نمط الأكل (P2.6) — يصفّي الوجبات المقترحة في المولّد (نباتي/سمك بدون لحوم…).
+    // نمط الأكل (P3) — يصفّي اقتراح الوجبات/البدائل حسب النباتي/الصرف/البيسكتاريان.
     dietPattern: op.foodPreferences.dietPattern ?? base.dietPattern,
     dislikedFoods: op.foodPreferences.dislikedFoods.join('، '),
     muscleFocus: 'balanced',

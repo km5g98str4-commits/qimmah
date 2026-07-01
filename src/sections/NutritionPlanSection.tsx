@@ -85,7 +85,7 @@ export function NutritionPlanSection({ lang }: { lang: Lang }) {
         {/* قائمة الوجبات + تبديل الوجبة */}
         <div className="mt-6 grid gap-4 lg:grid-cols-2">
           {np.meals.map((meal) => {
-            const alts = swapFor === meal.id ? mealAlternatives(meal) : []
+            const alts = swapFor === meal.id ? mealAlternatives(meal, customization.profile.dietPattern) : []
             return (
               <div key={meal.id} className="card p-5">
                 <div className="flex items-center justify-between">
