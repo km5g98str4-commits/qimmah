@@ -35,6 +35,28 @@
     text-rendering: optimizeLegibility;
   }
 
+  /* احترام تفضيل تقليل الحركة — يوقف كل الانتقالات/الرسوم للمستخدمين الحسّاسين. */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* أهداف لمس مريحة على الجوال — أي زر/رابط تفاعلي ≥ 44px. */
+  button,
+  a[role='button'],
+  [role='button'] {
+    touch-action: manipulation;
+  }
+
   ::selection {
     background-color: color-mix(in srgb, var(--c-primary) 22%, transparent);
     @apply text-ink-900;
@@ -69,8 +91,19 @@
     @apply bg-surface border border-line rounded-2xl shadow-card;
   }
 
+  /* بطاقة تفاعلية (قابلة للنقر): ارتفاع خفيف عند المرور وضغطة لطيفة عند اللمس. */
+  .card-interactive {
+    @apply card transition-[transform,box-shadow,border-color] duration-200 ease-out;
+  }
+  .card-interactive:hover {
+    @apply -translate-y-0.5 border-primary-soft shadow-elevated;
+  }
+  .card-interactive:active {
+    @apply translate-y-0 scale-[0.99];
+  }
+
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-page;
+    @apply inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-page;
   }
 
   .btn-primary {
@@ -134,5 +167,37 @@
   }
   .ring-primary-c {
     box-shadow: 0 0 0 2px color-mix(in srgb, var(--c-primary) 55%, transparent);
+  }
+
+  /* هدف لمس مريح: لا يقل أي عنصر تفاعلي عن 44×44px. */
+  .tap-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+
+  /* ضغطة لطيفة عند اللمس لأي عنصر تفاعلي. */
+  .press {
+    @apply transition-transform duration-150 ease-out active:scale-[0.97];
+  }
+
+  /* هيكل التحميل (skeleton) — نبض هادئ + لمعان يمرّ فوقه. */
+  .skeleton {
+    @apply relative overflow-hidden rounded-lg bg-beige;
+  }
+  .skeleton::after {
+    content: '';
+    @apply absolute inset-0;
+    transform: translateX(100%);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgb(var(--c-ink-500) / 0.14),
+      transparent
+    );
+    animation: shimmer 1.6s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .skeleton::after {
+      display: none;
+    }
   }
 }

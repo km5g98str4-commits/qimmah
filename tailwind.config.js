@@ -54,9 +54,11 @@ export default {
         danger: '#D6553A',
       },
       boxShadow: {
-        glow: '0 0 0 1px rgba(242,106,33,0.18), 0 14px 40px -12px rgba(242,106,33,0.30)',
-        card: '0 1px 2px 0 rgba(43,37,32,0.04), 0 12px 32px -16px rgba(43,37,32,0.18)',
-        soft: '0 1px 2px 0 rgba(43,37,32,0.05), 0 8px 24px -14px rgba(43,37,32,0.15)',
+        glow: '0 0 0 1px rgba(242,106,33,0.20), 0 14px 40px -12px rgba(242,106,33,0.34)',
+        // ظلال مُعايَرة للثيم الداكن (أساس أسود لعمق حقيقي على خلفية #101216)
+        card: '0 1px 2px 0 rgba(0,0,0,0.30), 0 14px 34px -18px rgba(0,0,0,0.55)',
+        soft: '0 1px 2px 0 rgba(0,0,0,0.25), 0 8px 24px -14px rgba(0,0,0,0.45)',
+        elevated: '0 2px 4px 0 rgba(0,0,0,0.35), 0 24px 56px -20px rgba(0,0,0,0.70)',
       },
       backgroundImage: {
         'grid-faint':
@@ -71,14 +73,29 @@ export default {
           '0%': { opacity: '0', transform: 'translateY(16px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
         },
+        'fade-in': {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        'pop-in': {
+          '0%': { opacity: '0', transform: 'scale(0.96)' },
+          '100%': { opacity: '1', transform: 'scale(1)' },
+        },
         float: {
           '0%, 100%': { transform: 'translateY(0)' },
           '50%': { transform: 'translateY(-8px)' },
         },
+        // لمعان هيكل التحميل (skeleton) — يمرّ من اليمين لليسار مناسبًا للـ RTL
+        shimmer: {
+          '100%': { transform: 'translateX(-100%)' },
+        },
       },
       animation: {
         'fade-up': 'fade-up 0.6s ease-out both',
+        'fade-in': 'fade-in 0.4s ease-out both',
+        'pop-in': 'pop-in 0.28s cubic-bezier(0.22,1,0.36,1) both',
         float: 'float 6s ease-in-out infinite',
+        shimmer: 'shimmer 1.6s ease-in-out infinite',
       },
     },
   },
