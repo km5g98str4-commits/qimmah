@@ -8,6 +8,8 @@ import {
   buildCustomizationFromOnboarding,
   saveOnboardingProfile,
 } from '@/lib/onboardingProfile'
+import { persistOnboardingToProfile } from '@/lib/onboardingSync'
+import { useAuth } from '@/lib/authContext'
 import type { Answers } from '@/lib/planBuilderAnswers'
 import {
   buildOnboardingProfile,
@@ -76,8 +78,11 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
   const lang = useLang()
   const d = onboardingStrings[lang]
   const { customization, applyCustomization } = useCustomization()
+  const auth = useAuth()
+  // المالك الحالي — المسودة والإكمال يُنسبان له (حساب جديد لا يرث مسودة حساب آخر).
+  const userId = auth.user?.id ?? null
   const [a, setA] = useState<Answers>(() => {
-    const d = loadDraft<Partial<Answers>>()
+    const d = loadDraft<Partial<Answers>>(userId)
     return { ...defaultAnswers, ...(d ?? {}) }
   })
   const set = (partial: Partial<Answers>) => setA((prev) => ({ ...prev, ...partial }))
@@ -500,11 +505,11 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
   const isBuilding = step.key === 'building'
   const isLastForm = idx === total - 2
 
-  // حفظ المسودة وآخر خطوة بعد كل تغيير (qimmah:onboarding:v1).
+  // حفظ المسودة وآخر خطوة بعد كل تغيير (qimmah:onboarding:v1) منسوبةً للمالك الحالي.
   useEffect(() => {
-    saveDraft(a)
+    saveDraft(a, userId)
     setLastStep(idx)
-  }, [a, idx])
+  }, [a, idx, userId])
 
   // الإنهاء: يبني مصدر الحقيقة ويحفظه، ثم يولّد التخصيص للوحة.
   const finishRef = useRef<() => void>(() => {})
@@ -513,7 +518,9 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
     saveOnboardingProfile(op)
     const built = buildCustomizationFromOnboarding(op, customization)
     applyCustomization(built)
-    markCompleted()
+    // إكمال لكل حساب + حفظ إشارة الإعداد في الملف السحابي (best-effort، لا يعطّل الدخول).
+    markCompleted(userId)
+    if (userId) void persistOnboardingToProfile(userId, op)
     onComplete()
   }
 

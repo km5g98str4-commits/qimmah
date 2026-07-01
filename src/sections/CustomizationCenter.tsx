@@ -4,6 +4,7 @@ import { cn } from '@/lib/cn'
 import { type Customization, getDefaultCustomization } from '@/lib/customization'
 import { useCustomization } from '@/lib/customizationContext'
 import { markCompleted, restartOnboarding, setLastStep } from '@/lib/onboarding'
+import { useAuth } from '@/lib/authContext'
 import type { WizardCtx } from '@/components/customizer/stepProps'
 import { PreviewSummary } from '@/components/customizer/PreviewSummary'
 import { StepWelcome } from '@/components/customizer/steps/StepWelcome'
@@ -69,6 +70,9 @@ export function CustomizationCenter({ onBack, initialStep = 0, mode = 'onboardin
   const lang = useLang()
   const d = onboardingStrings[lang]
   const { customization, applyCustomization, resetCustomization } = useCustomization()
+  const auth = useAuth()
+  // المالك الحالي — الإكمال/إعادة التشغيل يُنسبان للحساب لا للجهاز.
+  const userId = auth.user?.id ?? null
   // الخيارات المتقدّمة في «تعديل خطتي» مطويّة بالافتراض (تقليل التعقيد).
   const [showAdvanced, setShowAdvanced] = useState(false)
   const steps = useMemo<StepDef[]>(() => {
@@ -144,7 +148,7 @@ export function CustomizationCenter({ onBack, initialStep = 0, mode = 'onboardin
   }
   // إعادة تشغيل الإعداد الأولي — لا يمسح بيانات التخصيص
   const onRestartOnboarding = () => {
-    restartOnboarding()
+    restartOnboarding(userId)
     setStep(0)
     setSaved(false)
   }
@@ -173,7 +177,7 @@ export function CustomizationCenter({ onBack, initialStep = 0, mode = 'onboardin
       return
     }
     applyCustomization(data)
-    markCompleted(step)
+    markCompleted(userId, step)
     onBack(true)
   }
   const next = () => {

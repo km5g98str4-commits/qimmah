@@ -25,8 +25,9 @@ const ReviewPanelView = lazy(() =>
 import { MobileShell, type MainTab } from '@/components/MobileShell'
 import type { AppBadge } from '@/components/AppNav'
 import { useAuth } from '@/lib/authContext'
-import { loadOnboarding } from '@/lib/onboarding'
+import { isAccountOnboarded, isOnboardingComplete, loadOnboarding } from '@/lib/onboarding'
 import { ensureOnboardingProfile } from '@/lib/onboardingProfile'
+import { currentUserId, hydrateOnboardingFromProfile } from '@/lib/onboardingSync'
 import { useLanguage } from '@/i18n'
 import { type AppRoute, MAIN_TABS, routeFromHash, setHashRoute } from '@/lib/appRoutes'
 import { SuccessToast } from '@/components/SuccessToast'
@@ -34,26 +35,30 @@ import { AchievementToaster } from '@/features/achievements/AchievementToaster'
 import { BUILD_LABEL } from '@/lib/buildInfo'
 
 /**
- * حراسة المسار: التبويبات الرئيسية لا تُفتح أبدًا قبل إكمال إعداد حقيقي
- * (وبالتالي لا تظهر بيانات افتراضية/نموذجية في اللوحة الحقيقية).
+ * حراسة المسار: التبويبات الرئيسية لا تُفتح أبدًا قبل إكمال إعداد حقيقي **لهذا الحساب**
+ * (وبالتالي حساب جديد يُطالَب بالإعداد ولو أُكمل على الجهاز بحساب آخر).
  */
-function guardRoute(route: AppRoute): AppRoute {
+function guardRoute(route: AppRoute, userId: string | null): AppRoute {
   // التبويبات الرئيسية + مكتبة التمارين كلها تتطلّب إعدادًا مكتملًا.
   if (MAIN_TABS.includes(route) || route === 'exercises') {
-    const ob = loadOnboarding()
-    if (!ob.completed) return (ob.lastStep ?? 0) > 0 ? 'setup' : 'start'
+    if (!isOnboardingComplete(userId)) {
+      // مسجّل دخول لم يُكمل → مباشرةً لمعالج الإعداد؛ ضيف بمسودة بدأها → استئناف الإعداد؛
+      // وإلا شاشة البداية.
+      if (userId) return 'setup'
+      return (loadOnboarding().lastStep ?? 0) > 0 ? 'setup' : 'start'
+    }
   }
   return route
 }
 
-function initialRoute(): AppRoute {
+function initialRoute(userId: string | null): AppRoute {
   const r = routeFromHash()
-  if (r) return guardRoute(r)
+  if (r) return guardRoute(r, userId)
   // hash موجود لكنه غير معروف (مثل #/asdf) → صفحة 404 بدل التحويل الصامت.
   if (typeof window !== 'undefined' && window.location.hash && window.location.hash !== '#/') {
     return 'notfound'
   }
-  return loadOnboarding().completed ? 'dashboard' : 'start'
+  return isOnboardingComplete(userId) ? 'dashboard' : 'start'
 }
 
 /** قشرة تطبيق قِمّة — توجيه بسيط عبر hash (بلا مكتبات خارجية). */
@@ -62,6 +67,8 @@ export default function App() {
   // اللغة الحية من سياق i18n — التبديل يعيد رسم كل الشاشات فورًا (بلا إعادة تحميل).
   const { lang: LANG } = useLanguage()
   const badge: AppBadge = auth.user ? 'account' : 'guest'
+  // المالك الحالي لقرار البوابة: معرّف الحساب المسجّل، أو null لوضع الضيف.
+  const uid = auth.user?.id ?? null
 
   useEffect(() => {
     // تطبيق اللغة/الاتجاه يتكفّل به LanguageProvider. هنا هجرات لمرّة واحدة فقط.
@@ -70,11 +77,7 @@ export default function App() {
     console.info(`%cقِمّة ${BUILD_LABEL}`, 'color:#F26A21;font-weight:bold')
   }, [])
 
-  const [view, setView] = useState<AppRoute>(() => initialRoute())
-  const [startStep, setStartStep] = useState<number>(() => loadOnboarding().lastStep ?? 0)
-  const [setupMode, setSetupMode] = useState<'onboarding' | 'advanced'>(() =>
-    loadOnboarding().completed ? 'advanced' : 'onboarding',
-  )
+  const [view, setView] = useState<AppRoute>(() => initialRoute(auth.user?.id ?? null))
   const [showSuccess, setShowSuccess] = useState(false)
   const dismissSuccess = useCallback(() => setShowSuccess(false), [])
 
@@ -90,12 +93,12 @@ export default function App() {
     if (view !== 'notfound') setHashRoute(view)
   }, [view])
 
-  // hash → view (تنقّل المتصفح / تحديث الصفحة) مع الحراسة
+  // hash → view (تنقّل المتصفح / تحديث الصفحة) مع الحراسة لكل حساب.
   useEffect(() => {
     const onHash = () => {
       const r = routeFromHash()
       if (r) {
-        setView(guardRoute(r))
+        setView(guardRoute(r, uid))
       } else if (window.location.hash && window.location.hash !== '#/') {
         // مسار غير معروف (مثل #/xyz) → صفحة 404 المخصّصة (نُبقي الرابط ظاهرًا).
         setView('notfound')
@@ -103,33 +106,58 @@ export default function App() {
     }
     window.addEventListener('hashchange', onHash)
     return () => window.removeEventListener('hashchange', onHash)
-  }, [])
+  }, [uid])
 
+  // مصالحة حالة الحساب بعد جهوزية المصادقة (تحديث الصفحة / تسجيل الدخول):
+  // نزامن علامة الإكمال من الملف السحابي ثم نُعيد حراسة الشاشة الحالية بحالة الحساب
+  // الصحيحة — فحساب جديد لم يُكمل الإعداد لا يبقى على اللوحة بعد التحديث.
+  useEffect(() => {
+    if (auth.loading) return
+    let cancelled = false
+    void (async () => {
+      if (uid && !isAccountOnboarded(uid)) await hydrateOnboardingFromProfile(uid)
+      if (cancelled) return
+      setView((v) => guardRoute(v, uid))
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [auth.loading, uid])
+
+  // فتح شاشة الإعداد — النمط (معالج أولي مقابل محرّرات متقدّمة) يُشتقّ من حالة الحساب
+  // وقت العرض، فلا حاجة لحالة نمط مخزّنة قد تتقادم.
   const openSetup = useCallback(() => {
-    const ob = loadOnboarding()
-    setSetupMode(ob.completed ? 'advanced' : 'onboarding')
-    setStartStep(ob.completed ? 0 : (ob.lastStep ?? 0))
     setView('setup')
   }, [])
 
-  /** دخول التطبيق بعد تسجيل الدخول أو المتابعة كضيف. */
-  const enterApp = useCallback(() => {
-    if (loadOnboarding().completed) setView('dashboard')
+  /** دخول التطبيق بعد تسجيل الدخول أو المتابعة كضيف — بوابة لكل حساب. */
+  const enterApp = useCallback(async () => {
+    const signedInId = await currentUserId()
+    if (!signedInId) {
+      // ضيف — علم الجهاز كما كان.
+      if (loadOnboarding().completed) setView('dashboard')
+      else openSetup()
+      return
+    }
+    // مسجّل دخول — القرار لكل حساب: السجلّ المحلي، وإلا الملف السحابي.
+    let onboarded = isAccountOnboarded(signedInId)
+    if (!onboarded) onboarded = await hydrateOnboardingFromProfile(signedInId)
+    if (onboarded) setView('dashboard')
     else openSetup()
   }, [openSetup])
 
   const closeSetup = (completed?: boolean) => {
-    const done = completed || loadOnboarding().completed
+    const done = completed || isOnboardingComplete(uid)
     setView(done ? 'dashboard' : 'start')
     if (completed) setShowSuccess(true)
   }
 
-  const closeDemo = () => setView(loadOnboarding().completed ? 'dashboard' : 'start')
+  const closeDemo = () => setView(isOnboardingComplete(uid) ? 'dashboard' : 'start')
 
   // تنقّل عام — يمرّ عبر الحراسة حتى لا تُفتح لوحة بلا إعداد.
   const navigate = (v: AppRoute) => {
     if (v === 'setup') openSetup()
-    else setView(guardRoute(v))
+    else setView(guardRoute(v, uid))
   }
 
   // ——— بناء عنصر الشاشة الحالية ثم لفّه بحدّ Suspense (أسفل المزوّدات حتى تبقى حالتها
@@ -141,7 +169,7 @@ export default function App() {
     content = (
       <StartView
         lang={LANG}
-        hasStartedSetup={!ob.completed && (ob.lastStep ?? 0) > 0}
+        hasStartedSetup={!isOnboardingComplete(uid) && (ob.lastStep ?? 0) > 0}
         onBuildPlan={openSetup}
         onLogin={() => setView('login')}
         onContinueGuest={enterApp}
@@ -158,12 +186,15 @@ export default function App() {
     content = <ContactView lang={LANG} onBack={() => window.history.back()} />
   } else if (view === 'notfound') {
     const goHome = () => {
-      const target = loadOnboarding().completed ? 'dashboard' : 'start'
-      setView(guardRoute(target))
+      const target = isOnboardingComplete(uid) ? 'dashboard' : 'start'
+      setView(guardRoute(target, uid))
     }
     content = <NotFoundView lang={LANG} onHome={goHome} onBack={() => window.history.back()} />
   } else if (view === 'setup') {
-    content = <SetupView onClose={closeSetup} initialStep={startStep} mode={setupMode} />
+    // النمط يُشتقّ من حالة الحساب وقت العرض: مكتمل → محرّرات متقدّمة (تعديل الخطة)؛
+    // غير مكتمل → معالج الإعداد الأولي (وزنه/هدفه هو).
+    const onboarded = isOnboardingComplete(uid)
+    content = <SetupView onClose={closeSetup} initialStep={0} mode={onboarded ? 'advanced' : 'onboarding'} />
   } else if (view === 'demo') {
     content = <DemoView lang={LANG} onNavigate={navigate} onBack={closeDemo} />
   } else if (view === 'settings') {
