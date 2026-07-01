@@ -1,7 +1,7 @@
 // نصوص لوحة مراجعة المنتجات — شاشة داخلية (ليست جزءًا من رحلة المستخدم العادية).
 
 import type { Lang } from '@/lib/appPreferences'
-import type { ProductReviewStatus } from '@/types'
+import type { ProductStatus } from '@/features/products'
 
 export interface ReviewPanelStrings {
   title: string
@@ -9,7 +9,7 @@ export interface ReviewPanelStrings {
   back: string
   empty: string
   emptyHint: string
-  statusLabels: Record<Exclude<ProductReviewStatus, 'verified' | 'rejected'>, string>
+  statusLabels: Record<Extract<ProductStatus, 'pending_review' | 'user_submitted' | 'needs_fix'>, string>
   productPhoto: string
   nutritionPhoto: string
   noPhoto: string
@@ -21,12 +21,11 @@ export interface ReviewPanelStrings {
   carbsLabel: string
   fatLabel: string
   per100g: string
+  perServing: string
   approve: string
   edit: string
   save: string
   cancel: string
-  approvedToast: string
-  savedToast: string
   nameFieldLabel: string
 }
 
@@ -52,12 +51,11 @@ const ar: ReviewPanelStrings = {
   carbsLabel: 'كربوهيدرات',
   fatLabel: 'دهون',
   per100g: 'لكل 100غ',
+  perServing: 'لكل حصة',
   approve: 'اعتماد',
   edit: 'تعديل',
   save: 'حفظ',
   cancel: 'إلغاء',
-  approvedToast: 'تم اعتماد المنتج',
-  savedToast: 'تم حفظ التعديلات',
   nameFieldLabel: 'اسم المنتج',
 }
 
@@ -83,12 +81,11 @@ const en: ReviewPanelStrings = {
   carbsLabel: 'Carbs',
   fatLabel: 'Fat',
   per100g: 'per 100g',
+  perServing: 'per serving',
   approve: 'Approve',
   edit: 'Edit',
   save: 'Save',
   cancel: 'Cancel',
-  approvedToast: 'Product approved',
-  savedToast: 'Changes saved',
   nameFieldLabel: 'Product name',
 }
 

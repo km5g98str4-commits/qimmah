@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { Icon } from '@/components/Icon'
 import { Footer } from '@/components/Footer'
 import type { Lang } from '@/lib/appPreferences'
-import type { ProductRecord } from '@/types'
-import { appendAudit, listByStatus, upsert } from './productDb'
+import { editProduct, listByStatus, setProductStatus, type ProductStatus, type StoredProduct } from '@/features/products'
+import { ensureReviewPanelSeed } from './seed'
 import { reviewPanelStrings } from './strings'
 
 interface ReviewPanelViewProps {
@@ -11,83 +11,89 @@ interface ReviewPanelViewProps {
   onBack: () => void
 }
 
-const REVIEW_STATUSES: ProductRecord['status'][] = ['pending_review', 'user_submitted', 'needs_fix']
+const REVIEW_STATUSES: ProductStatus[] = ['pending_review', 'user_submitted', 'needs_fix']
+
+// مُنفّذ العمليات في سجلّ التدقيق — هذه الشاشة داخلية فقط، لا حساب مستخدم مرتبط بها بعد.
+const REVIEWER = 'internal_review_panel'
+
+function loadReviewProducts(): StoredProduct[] {
+  return REVIEW_STATUSES.flatMap((status) => listByStatus(status)).sort((a, b) =>
+    b.updatedAt.localeCompare(a.updatedAt),
+  )
+}
 
 interface EditForm {
   name: string
   brand: string
   servingSize: string
-  caloriesPer100g: string
-  proteinPer100g: string
-  carbsPer100g: string
-  fatPer100g: string
+  kcal: string
+  protein: string
+  carbs: string
+  fat: string
 }
 
-function toForm(p: ProductRecord): EditForm {
+function toForm(p: StoredProduct): EditForm {
   return {
     name: p.name,
     brand: p.brand ?? '',
     servingSize: p.servingSize ?? '',
-    caloriesPer100g: String(p.nutrition.caloriesPer100g),
-    proteinPer100g: String(p.nutrition.proteinPer100g),
-    carbsPer100g: String(p.nutrition.carbsPer100g),
-    fatPer100g: String(p.nutrition.fatPer100g),
-  }
-}
-
-function fromForm(p: ProductRecord, form: EditForm): ProductRecord {
-  return {
-    ...p,
-    name: form.name.trim() || p.name,
-    brand: form.brand.trim() || undefined,
-    servingSize: form.servingSize.trim() || undefined,
-    nutrition: {
-      caloriesPer100g: Number(form.caloriesPer100g) || 0,
-      proteinPer100g: Number(form.proteinPer100g) || 0,
-      carbsPer100g: Number(form.carbsPer100g) || 0,
-      fatPer100g: Number(form.fatPer100g) || 0,
-    },
+    kcal: String(p.kcal),
+    protein: String(p.protein),
+    carbs: String(p.carbs),
+    fat: String(p.fat),
   }
 }
 
 /**
  * شاشة داخلية لمراجعة المنتجات (باركود/OCR/يدوي) قبل اعتمادها في قاعدة البيانات.
+ * تستهلك قاعدة بيانات المنتجات الفعلية (`@/features/products`) — لا تخزين موازٍ خاص بها.
  * ليست جزءًا من تنقّل المستخدم العادي — تُفتح من مدخل مطوّر في الإعدادات.
  */
 export function ReviewPanelView({ lang, onBack }: ReviewPanelViewProps) {
   const t = reviewPanelStrings[lang]
-  const [products, setProducts] = useState<ProductRecord[]>(() => listByStatus(REVIEW_STATUSES))
-  const [editingId, setEditingId] = useState<string | null>(null)
+  const [products, setProducts] = useState<StoredProduct[]>(() => {
+    ensureReviewPanelSeed()
+    return loadReviewProducts()
+  })
+  const [editingBarcode, setEditingBarcode] = useState<string | null>(null)
   const [form, setForm] = useState<EditForm | null>(null)
 
-  const refresh = () => setProducts(listByStatus(REVIEW_STATUSES))
+  const refresh = () => setProducts(loadReviewProducts())
 
-  const startEdit = (p: ProductRecord) => {
-    setEditingId(p.id)
+  const startEdit = (p: StoredProduct) => {
+    setEditingBarcode(p.barcode)
     setForm(toForm(p))
   }
 
   const cancelEdit = () => {
-    setEditingId(null)
+    setEditingBarcode(null)
     setForm(null)
   }
 
-  const approve = (p: ProductRecord) => {
-    const before = p
-    const after = { ...p, status: 'verified' as const }
-    upsert(after)
-    appendAudit({ productId: p.id, action: 'approved', before, after })
+  const approve = (p: StoredProduct) => {
+    setProductStatus(p.barcode, 'verified', REVIEWER, 'اعتماد من لوحة المراجعة الداخلية')
     refresh()
   }
 
-  const saveEdit = (p: ProductRecord) => {
+  const saveEdit = (p: StoredProduct) => {
     if (!form) return
-    const before = p
     // منتج كان "يحتاج تصحيح" وتمّ تعديله يعود لقائمة الانتظار العادية ليُراجَع من جديد.
-    const nextStatus = p.status === 'needs_fix' ? 'pending_review' : p.status
-    const after = { ...fromForm(p, form), status: nextStatus }
-    upsert(after)
-    appendAudit({ productId: p.id, action: 'edited', before, after })
+    const nextStatus: ProductStatus = p.status === 'needs_fix' ? 'pending_review' : p.status
+    editProduct(
+      p.barcode,
+      {
+        name: form.name.trim() || p.name,
+        brand: form.brand.trim() || undefined,
+        servingSize: form.servingSize.trim() || undefined,
+        kcal: Number(form.kcal) || 0,
+        protein: Number(form.protein) || 0,
+        carbs: Number(form.carbs) || 0,
+        fat: Number(form.fat) || 0,
+        status: nextStatus,
+      },
+      REVIEWER,
+      'تعديل قيم من لوحة المراجعة الداخلية',
+    )
     cancelEdit()
     refresh()
   }
@@ -128,11 +134,11 @@ export function ReviewPanelView({ lang, onBack }: ReviewPanelViewProps) {
           <div className="grid gap-4 sm:grid-cols-2">
             {products.map((p) => (
               <ProductReviewCard
-                key={p.id}
+                key={p.barcode}
                 product={p}
                 t={t}
-                isEditing={editingId === p.id}
-                form={editingId === p.id ? form : null}
+                isEditing={editingBarcode === p.barcode}
+                form={editingBarcode === p.barcode ? form : null}
                 onStartEdit={() => startEdit(p)}
                 onCancelEdit={cancelEdit}
                 onChangeForm={setForm}
@@ -150,7 +156,7 @@ export function ReviewPanelView({ lang, onBack }: ReviewPanelViewProps) {
 }
 
 interface ProductReviewCardProps {
-  product: ProductRecord
+  product: StoredProduct
   t: (typeof reviewPanelStrings)['ar']
   isEditing: boolean
   form: EditForm | null
@@ -172,6 +178,8 @@ function ProductReviewCard({
   onSaveEdit,
   onApprove,
 }: ProductReviewCardProps) {
+  const perLabel = product.per === 'serving' ? t.perServing : t.per100g
+
   return (
     <div className="card flex flex-col gap-4 p-5">
       <div className="flex items-start justify-between gap-2">
@@ -179,12 +187,14 @@ function ProductReviewCard({
           <Icon name="AlertTriangle" className="h-3.5 w-3.5" />
           {t.statusLabels[product.status as keyof typeof t.statusLabels] ?? product.status}
         </span>
-        {product.barcode && <span className="text-[11px] text-ink-400">{t.barcodeLabel}: {product.barcode}</span>}
+        <span className="text-[11px] text-ink-400">
+          {t.barcodeLabel}: {product.barcode}
+        </span>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <PhotoBox label={t.productPhoto} noPhoto={t.noPhoto} url={product.productPhotoUrl} />
-        <PhotoBox label={t.nutritionPhoto} noPhoto={t.noPhoto} url={product.nutritionPhotoUrl} />
+        <PhotoBox label={t.productPhoto} noPhoto={t.noPhoto} url={product.imageUrl} />
+        <PhotoBox label={t.nutritionPhoto} noPhoto={t.noPhoto} url={product.nutritionImageUrl} />
       </div>
 
       {isEditing && form ? (
@@ -198,27 +208,27 @@ function ProductReviewCard({
           />
           <div className="grid grid-cols-2 gap-2">
             <Field
-              label={`${t.caloriesLabel} (${t.per100g})`}
-              value={form.caloriesPer100g}
-              onChange={(v) => onChangeForm({ ...form, caloriesPer100g: v })}
+              label={`${t.caloriesLabel} (${perLabel})`}
+              value={form.kcal}
+              onChange={(v) => onChangeForm({ ...form, kcal: v })}
               numeric
             />
             <Field
-              label={`${t.proteinLabel} (${t.per100g})`}
-              value={form.proteinPer100g}
-              onChange={(v) => onChangeForm({ ...form, proteinPer100g: v })}
+              label={`${t.proteinLabel} (${perLabel})`}
+              value={form.protein}
+              onChange={(v) => onChangeForm({ ...form, protein: v })}
               numeric
             />
             <Field
-              label={`${t.carbsLabel} (${t.per100g})`}
-              value={form.carbsPer100g}
-              onChange={(v) => onChangeForm({ ...form, carbsPer100g: v })}
+              label={`${t.carbsLabel} (${perLabel})`}
+              value={form.carbs}
+              onChange={(v) => onChangeForm({ ...form, carbs: v })}
               numeric
             />
             <Field
-              label={`${t.fatLabel} (${t.per100g})`}
-              value={form.fatPer100g}
-              onChange={(v) => onChangeForm({ ...form, fatPer100g: v })}
+              label={`${t.fatLabel} (${perLabel})`}
+              value={form.fat}
+              onChange={(v) => onChangeForm({ ...form, fat: v })}
               numeric
             />
           </div>
@@ -244,10 +254,10 @@ function ProductReviewCard({
             )}
           </div>
           <div className="grid grid-cols-4 gap-2 rounded-xl border border-line bg-beige/50 p-3 text-center">
-            <Macro label={t.caloriesLabel} value={product.nutrition.caloriesPer100g} />
-            <Macro label={t.proteinLabel} value={product.nutrition.proteinPer100g} />
-            <Macro label={t.carbsLabel} value={product.nutrition.carbsPer100g} />
-            <Macro label={t.fatLabel} value={product.nutrition.fatPer100g} />
+            <Macro label={t.caloriesLabel} value={product.kcal} />
+            <Macro label={t.proteinLabel} value={product.protein} />
+            <Macro label={t.carbsLabel} value={product.carbs} />
+            <Macro label={t.fatLabel} value={product.fat} />
           </div>
           <div className="flex gap-2">
             <button type="button" onClick={onApprove} className="btn-primary flex-1 justify-center py-2 text-xs">
