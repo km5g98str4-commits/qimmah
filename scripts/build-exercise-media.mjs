@@ -14,7 +14,7 @@
 //           WORKOUTX_API_KEY=xxxx node scripts/build-exercise-media.mjs   (لفتح GIF المتحرّك)
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { readFileSync, writeFileSync } from 'node:fs'
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, resolve } from 'node:path'
 
@@ -23,6 +23,13 @@ const ROOT = resolve(__dirname, '..')
 
 const DB_JSON_URL = 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json'
 const DB_IMG_BASE = 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/'
+
+// مجلد الصور المحلّية (يُخدَم من الجذر: /exercise-images/…). نُنزّل الصور المطابَقة هنا ونُلزمها في المستودع
+// كي لا يعتمد العرض على شبكة raw.githubusercontent وقت التشغيل. الرخصة Unlicense (ملكية عامة) — الالتزام مسموح.
+const LOCAL_DIR = resolve(ROOT, 'public/exercise-images')
+const LOCAL_BASE = '/exercise-images/' // مسار الويب (Vite يخدم public/ من الجذر)
+// إعادة التنزيل عند ضبط FORCE_REDOWNLOAD=1؛ افتراضيًا نتخطّى الملفات الموجودة (idempotent + سريع).
+const FORCE_REDOWNLOAD = process.env.FORCE_REDOWNLOAD === '1'
 
 const WORKOUTX_KEY = process.env.WORKOUTX_API_KEY || ''
 const WORKOUTX_URL = 'https://api.workoutxapp.com/exercises'
@@ -87,6 +94,8 @@ const MANUAL_OVERRIDE = {
   'lat-pulldown': 'Wide-Grip_Lat_Pulldown',
   'overhead-press': 'Standing_Military_Press',
   'pull-up': 'Pullups',
+  // رفرفة خلفية بالدمبل (تمرين منزلي) — نتفادى مطابقة صورة الكيبل ونثبّت صورة الدمبل.
+  'rear-delt-fly': 'Reverse_Flyes',
 }
 
 const STOP = new Set(['the', 'a', 'with', 'and', 'of', 'to', 'for', 'on', 'machine'])
@@ -200,6 +209,30 @@ function matchGif(q, gifList) {
   return best && best.coverage >= 0.66 ? best.url : null
 }
 
+// — تنزيل صورة واحدة إلى مسار محلّي (idempotent: يتخطّى الموجود ما لم يُطلب FORCE) —
+// يُرجع true عند توفّر الملف محليًا (منزَّل أو موجود مسبقًا)، false عند فشل التنزيل.
+async function downloadImage(url, absPath) {
+  if (existsSync(absPath) && !FORCE_REDOWNLOAD) return true
+  try {
+    const res = await fetch(url)
+    if (!res.ok) {
+      console.warn(`  ⚠ فشل تنزيل ${url} (${res.status})`)
+      return false
+    }
+    const buf = Buffer.from(await res.arrayBuffer())
+    if (buf.length === 0) {
+      console.warn(`  ⚠ ملف فارغ ${url}`)
+      return false
+    }
+    mkdirSync(dirname(absPath), { recursive: true })
+    writeFileSync(absPath, buf)
+    return true
+  } catch (e) {
+    console.warn(`  ⚠ خطأ تنزيل ${url} (${e.message})`)
+    return false
+  }
+}
+
 async function main() {
   console.log('▶ تحميل free-exercise-db …')
   const db = await fetchDb()
@@ -211,8 +244,11 @@ async function main() {
   const mapping = {}
   let matched = 0
   let gifs = 0
+  let localFrames = 0
+  let remoteFallbacks = 0
   const unmatched = []
 
+  console.log(`▶ تنزيل الصور محليًا إلى public/exercise-images/ …`)
   for (const q of qimmah) {
     if (q.muscle === 'cardio') {
       unmatched.push(q.id)
@@ -224,8 +260,25 @@ async function main() {
       unmatched.push(q.id)
       continue
     }
-    const imgs = hit.dbEx.images.map((p) => DB_IMG_BASE + p)
-    const entry = { img0: imgs[0], img1: imgs[1] || imgs[0] }
+    // الروابط البعيدة (raw.githubusercontent) — تبقى كـ fallback عند onError.
+    const remote0 = DB_IMG_BASE + hit.dbEx.images[0]
+    const remote1 = hit.dbEx.images[1] ? DB_IMG_BASE + hit.dbEx.images[1] : remote0
+    const single = remote1 === remote0
+
+    // تنزيل الإطارين إلى public/exercise-images/<id>/0.jpg (و1.jpg إن اختلف).
+    const rel0 = `${q.id}/0.jpg`
+    const rel1 = single ? rel0 : `${q.id}/1.jpg`
+    const ok0 = await downloadImage(remote0, resolve(LOCAL_DIR, rel0))
+    const ok1 = single ? ok0 : await downloadImage(remote1, resolve(LOCAL_DIR, rel1))
+
+    // المسار المحلّي إن نجح التنزيل، وإلا نُبقي البعيد كمصدر أساسي (لا نُشير لملف غير موجود).
+    const img0 = ok0 ? LOCAL_BASE + rel0 : remote0
+    const img1 = ok1 ? LOCAL_BASE + rel1 : remote1
+    if (ok0) localFrames++
+    else remoteFallbacks++
+
+    // fallback بعيد دائمًا (عند تعذّر تحميل الملف المحلّي في المتصفح).
+    const entry = { img0, img1, img0Remote: remote0, img1Remote: remote1 }
     const gif = matchGif(q, gifList)
     if (gif) {
       entry.gifUrl = gif
@@ -234,6 +287,7 @@ async function main() {
     mapping[q.id] = entry
     matched++
   }
+  console.log(`▶ إطارات محلّية: ${localFrames} تمرينًا • fallback بعيد: ${remoteFallbacks}`)
 
   // ترتيب المفاتيح لثبات الـ diff
   const ordered = {}
@@ -245,15 +299,20 @@ async function main() {
 // لفتح GIF المتحرّك (اختياري):  WORKOUTX_API_KEY=xxxx node scripts/build-exercise-media.mjs
 //
 // التغطية: ${matched}/${qimmah.length} تمرينًا له صورة حقيقية${gifs ? ` • ${gifs} منها GIF متحرّك` : ''}.
+// الصور مُنزَّلة محليًا في public/exercise-images/ (لا اعتماد على شبكة وقت التشغيل)؛ الروابط البعيدة تبقى كـ fallback.
 `
 
   const body = `
 /** وسائط تمرين واحد: إطار بداية + إطار نهاية (واختياريًا GIF متحرّك يُفضّل عند توفّره). */
 export interface ExerciseMedia {
-  /** إطار بداية الحركة (0.jpg). */
+  /** إطار بداية الحركة (0.jpg) — مسار محلّي مُلتزَم في المستودع. */
   img0: string
-  /** إطار نهاية الحركة (1.jpg) — للتلاشي المتبادل ومحاكاة الحركة. */
+  /** إطار نهاية الحركة (1.jpg) — للتلاشي المتبادل ومحاكاة الحركة (مسار محلّي). */
   img1: string
+  /** مصدر بعيد بديل لإطار البداية (raw.githubusercontent) — يُستخدم فقط عند تعذّر تحميل الملف المحلّي. */
+  img0Remote?: string
+  /** مصدر بعيد بديل لإطار النهاية — يُستخدم فقط عند تعذّر تحميل الملف المحلّي. */
+  img1Remote?: string
   /** GIF متحرّك (WorkoutX) — يُفضّل على الصور الثابتة عند توفّره. */
   gifUrl?: string
 }
