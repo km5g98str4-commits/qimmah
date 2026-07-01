@@ -8,6 +8,7 @@ import type { Lang } from '@/lib/appPreferences'
 import { libraryStrings, type LibraryStrings } from '@/i18n/dict/library'
 import { exercises, getExercise, targetMuscleAr } from '@/data/exercises'
 import { getExerciseMedia } from '@/data/exerciseMedia'
+import { getExerciseGif } from '@/data/exerciseGifs'
 import { machineCatalog } from '@/data/machineCatalog'
 import type { Muscle } from '@/types/workout'
 
@@ -258,12 +259,13 @@ function MachineCatalogBrowser({ onOpen, d }: { onOpen: (id: string) => void; d:
 /** صورة مصغّرة — صورة حقيقية (إطار البداية) عند توفّر مطابقة، وإلا بديل فاخر بالأيقونة. */
 function ExerciseThumb({ exerciseId }: { exerciseId: string }) {
   const media = getExerciseMedia(exerciseId)
+  const src = getExerciseGif(exerciseId) || media?.gifUrl || media?.img0
   const [failed, setFailed] = useState(false)
-  if (media && !failed) {
+  if (src && !failed) {
     return (
       <span className="relative grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-xl bg-gradient-to-br from-ink-900 to-ink-700">
         <img
-          src={media.gifUrl || media.img0}
+          src={src}
           alt=""
           aria-hidden="true"
           loading="lazy"
