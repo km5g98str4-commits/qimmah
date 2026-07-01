@@ -9,6 +9,7 @@
 import {
   ACHIEVEMENTS,
   getAchievement,
+  type AchievementCategory,
   type AchievementDef,
   type AchievementMetric,
 } from '@/data/achievements'
@@ -46,8 +47,8 @@ export interface EvaluateInput {
 
 /** احتفال معلّق يعرضه الـ toaster (وسام جديد أو رقم قياسي). */
 export type Celebration =
-  | { key: string; kind: 'medal'; title: string; description: string; emoji: string }
-  | { key: string; kind: 'pr'; title: string; body: string; emoji: string }
+  | { key: string; kind: 'medal'; title: string; description: string; category: AchievementCategory; icon: string }
+  | { key: string; kind: 'pr'; title: string; body: string; icon: string }
 
 // ————————————————————————————————————————————————————————————————
 // حفظ/قراءة الحالة
@@ -237,7 +238,8 @@ export function evaluateAchievements(input: EvaluateInput = {}): AchievementDef[
         kind: 'medal',
         title: def.title,
         description: def.description,
-        emoji: def.emoji,
+        category: def.category,
+        icon: def.icon,
       })
       changed = true
     }
@@ -273,9 +275,9 @@ export function registerWorkoutPRs(prs: PRCelebration[]): void {
     enqueueCelebration({
       key: nextKey('pr'),
       kind: 'pr',
-      title: 'رقم قياسي جديد! 💪',
+      title: 'رقم قياسي جديد!',
       body: `${name} · ${pr.weight} كجم — رقم جديد ما وصلته قبل.`,
-      emoji: '🎉',
+      icon: 'PartyPopper',
     })
   })
   notifyCelebrations()

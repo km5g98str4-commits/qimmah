@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { Icon } from '@/components/Icon'
+import { MedalBadge } from '@/components/MedalBadge'
 import { useCelebrations } from './useAchievements'
 import type { Celebration } from './engine'
 
@@ -23,7 +24,7 @@ function CelebrationCard({ celebration, onClose }: { celebration: Celebration; o
 
   const isMedal = celebration.kind === 'medal'
   const eyebrow = isMedal ? 'فتحت وسام جديد' : 'إنجاز'
-  const title = isMedal ? `🏅 ${celebration.title}` : celebration.title
+  const title = celebration.title
   const body = isMedal ? celebration.description : celebration.body
 
   return (
@@ -33,9 +34,13 @@ function CelebrationCard({ celebration, onClose }: { celebration: Celebration; o
         aria-live="polite"
         className="card pointer-events-auto flex w-full max-w-md items-start gap-3 border-gold-500/40 bg-gradient-to-br from-surface to-gold-500/10 p-4 shadow-glow animate-pop-in"
       >
-        <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gold-500/15 text-2xl">
-          <span aria-hidden="true">{celebration.emoji}</span>
-        </span>
+        {isMedal ? (
+          <MedalBadge category={celebration.category} icon={celebration.icon} unlocked size={48} className="shrink-0" />
+        ) : (
+          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gold-500/15 text-gold-500">
+            <Icon name={celebration.icon} className="h-6 w-6" />
+          </span>
+        )}
         <div className="min-w-0 flex-1">
           <span className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wide text-gold-500">
             <Icon name="PartyPopper" className="h-3.5 w-3.5" />

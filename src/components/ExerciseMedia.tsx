@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Icon } from './Icon'
 import { cn } from '@/lib/cn'
 import { getExerciseMedia } from '@/data/exerciseMedia'
+import { getExerciseGif } from '@/data/exerciseGifs'
 import { muscleLabelAr } from '@/data/muscleGroups'
 import type { MuscleId } from '@/types/muscles'
 
@@ -63,7 +64,9 @@ export function ExerciseMedia({ exerciseId, muscles = [], heightClass = 'h-40', 
   const [secondFailed, setSecondFailed] = useState(false) // نفاد مصادر الإطار الثاني → إيقاف التبديل
   const [gifFailed, setGifFailed] = useState(false) // فشل الـ GIF → الرجوع للصور الثابتة
 
-  const useGif = !!media?.gifUrl && !gifFailed
+  // يُفضّل GIF المتحرّك المُنزَّل محليًا (public/exercise-gifs) ثم الرابط البعيد إن وُجد، ثم الصور الثابتة.
+  const gifSrcs = chain(getExerciseGif(exerciseId), media?.gifUrl)
+  const useGif = gifSrcs.length > 0 && !gifFailed
   const src0 = chain(media?.img0, media?.img0Remote)
   const src1 = chain(media?.img1, media?.img1Remote)
   const twoFrame = !useGif && src1.length > 0 && src1.join('|') !== src0.join('|') && !secondFailed
@@ -81,8 +84,9 @@ export function ExerciseMedia({ exerciseId, muscles = [], heightClass = 'h-40', 
     return () => clearInterval(t)
   }, [twoFrame])
 
-  // بديل أنيق: عند غياب المطابقة أو نفاد مصادر الإطار الأساسي (لا صورة مكسورة).
-  if (!media || baseFailed) {
+  // بديل أنيق: عند غياب أي وسيط (لا gif ولا صورة) أو نفاد مصادر الإطار الأساسي (لا صورة مكسورة).
+  // نُبقي الـ gif ظاهرًا حتى لو لم توجد صورة ثابتة مطابِقة لهذا التمرين.
+  if (!useGif && (!media || baseFailed)) {
     return <ExercisePlaceholder muscles={muscles} heightClass={heightClass} hideChips={hideChips} />
   }
 
@@ -91,7 +95,7 @@ export function ExerciseMedia({ exerciseId, muscles = [], heightClass = 'h-40', 
     <div className={cn('relative w-full overflow-hidden bg-gradient-to-br from-ink-900 via-ink-700 to-ink-900', heightClass)}>
       {useGif ? (
         <FallbackImg
-          srcs={[media.gifUrl as string]}
+          srcs={gifSrcs}
           onExhausted={() => setGifFailed(true)}
           className="absolute inset-0 h-full w-full object-cover"
         />
