@@ -25,21 +25,37 @@ export interface AuthContextValue {
   session: Session | null
   /** ما زالت حالة المصادقة قيد التحميل (أول إقلاع). */
   loading: boolean
-  signUp: (email: string, password: string) => Promise<AuthResult>
+  /** الاسم المعروض للمستخدم (من user_metadata) أو البريد كبديل، أو null كضيف. */
+  displayName: string | null
+  signUp: (email: string, password: string, displayName?: string) => Promise<AuthResult>
   signIn: (email: string, password: string) => Promise<AuthResult>
   signOut: () => Promise<void>
+}
+
+/** يستخرج الاسم المعروض من بيانات المستخدم (metadata) مع البريد كبديل. */
+function userDisplayName(user: User | null): string | null {
+  if (!user) return null
+  const meta = user.user_metadata as { display_name?: unknown } | undefined
+  const name = typeof meta?.display_name === 'string' ? meta.display_name.trim() : ''
+  return name || user.email || null
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
 
 function arabicAuthError(message: string | undefined): string {
   const m = (message ?? '').toLowerCase()
-  if (m.includes('invalid login')) return 'البريد أو كلمة المرور غير صحيحة.'
-  if (m.includes('already registered') || m.includes('already been registered'))
+  if (m.includes('invalid login') || m.includes('invalid credentials'))
+    return 'البريد أو كلمة المرور غير صحيحة.'
+  if (m.includes('already registered') || m.includes('already been registered') || m.includes('user already'))
     return 'هذا البريد مسجّل مسبقًا. سجّل الدخول بدلًا من ذلك.'
-  if (m.includes('password') && m.includes('6')) return 'كلمة المرور يجب أن تكون 6 أحرف على الأقل.'
+  if (m.includes('email not confirmed'))
+    return 'راجع بريدك وأكّد الحساب أولًا ثم سجّل الدخول.'
+  if (m.includes('password') && (m.includes('6') || m.includes('short') || m.includes('weak') || m.includes('least')))
+    return 'كلمة المرور ضعيفة — استخدم 6 أحرف على الأقل.'
   if (m.includes('email') && m.includes('valid')) return 'البريد الإلكتروني غير صالح.'
-  if (m.includes('network') || m.includes('failed to fetch')) return 'تعذّر الاتصال بالخادم. تحقّق من الإنترنت.'
+  if (m.includes('rate limit') || m.includes('too many')) return 'محاولات كثيرة. انتظر قليلًا ثم أعد المحاولة.'
+  if (m.includes('network') || m.includes('failed to fetch') || m.includes('fetch'))
+    return 'تعذّر الاتصال بالخادم. تحقّق من الإنترنت وحاول مجددًا.'
   return message || 'حدث خطأ غير متوقع. حاول مجددًا.'
 }
 
@@ -84,9 +100,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user,
       session,
       loading,
-      async signUp(email, password) {
+      displayName: userDisplayName(user),
+      async signUp(email, password, displayName) {
         if (!supabase) return { ok: false, error: 'المزامنة السحابية غير مفعّلة في هذه النسخة.' }
-        const { data, error } = await supabase.auth.signUp({ email: email.trim(), password })
+        const name = displayName?.trim()
+        const { data, error } = await supabase.auth.signUp({
+          email: email.trim(),
+          password,
+          // الاسم يُخزَّن في user_metadata؛ trigger المنصّة يقرأ display_name لإنشاء صف profile.
+          options: name ? { data: { display_name: name } } : undefined,
+        })
         if (error) return { ok: false, error: arabicAuthError(error.message) }
         // إن لم تُرجع جلسة فالأرجح أنّ تأكيد البريد مطلوب.
         return { ok: true, needsConfirmation: !data.session }
@@ -120,6 +143,7 @@ export function useAuth(): AuthContextValue {
     user: null,
     session: null,
     loading: false,
+    displayName: null,
     async signUp() {
       return { ok: false, error: 'المزامنة السحابية غير مفعّلة في هذه النسخة.' }
     },
