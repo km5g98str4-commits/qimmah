@@ -49,6 +49,7 @@ export interface DashboardStrings {
   todaySubtitle: string
   todayProgressLabel: string
   resetDay: string
+  autoResetHint: string
   todayWorkoutTitle: string
   noItemsToday: string
   waterUnit: string // "لتر"
@@ -120,6 +121,7 @@ const ar: DashboardStrings = {
   todaySubtitle: 'علّم كل شي تخلّصه — وتابع التزامك خطوة بخطوة.',
   todayProgressLabel: 'إنجاز اليوم',
   resetDay: 'إعادة ضبط اليوم',
+  autoResetHint: 'يتصفّر تلقائيًا كل يوم عند منتصف الليل',
   todayWorkoutTitle: 'تمرين اليوم',
   noItemsToday: 'لا عناصر لهذا اليوم.',
   waterUnit: 'لتر',
@@ -188,6 +190,7 @@ const en: DashboardStrings = {
   todaySubtitle: 'Check off everything you finish — and track your consistency step by step.',
   todayProgressLabel: "Today's progress",
   resetDay: 'Reset day',
+  autoResetHint: 'Resets automatically each day at midnight',
   todayWorkoutTitle: "Today's workout",
   noItemsToday: 'Nothing scheduled for today.',
   waterUnit: 'L',

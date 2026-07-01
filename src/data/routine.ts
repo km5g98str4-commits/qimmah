@@ -1,12 +1,14 @@
 import type { RoutineDay } from '@/types'
 
+// أسبوع تجريبي نظيف: كل يوم تدريب = تمرين واحد واضح بلا تكرار (لا يومَي «دفع» متشابهَين).
+// خمسة أيام تدريب بأنواع متمايزة (دفع/سحب/أرجل/علوي/كارديو) + راحة.
 export const weeklyRoutine: RoutineDay[] = [
   { day: 'السبت', short: 'سبت', title: 'دفع — صدر وكتف وترايسبس', type: 'push', done: true },
   { day: 'الأحد', short: 'أحد', title: 'سحب — ظهر وبايسبس', type: 'pull', done: true },
-  { day: 'الإثنين', short: 'إثن', title: 'أرجل كاملة', type: 'legs', done: true },
-  { day: 'الثلاثاء', short: 'ثلا', title: 'كارديو وبطن', type: 'cardio', done: true },
-  { day: 'الأربعاء', short: 'أرب', title: 'دفع — صدر وكتف', type: 'push', done: false },
-  { day: 'الخميس', short: 'خمي', title: 'سحب — ظهر وبايسبس', type: 'pull', done: false },
+  { day: 'الإثنين', short: 'إثن', title: 'أرجل كاملة — كواد وخلفي وسمانة', type: 'legs', done: true },
+  { day: 'الثلاثاء', short: 'ثلا', title: 'علوي — صدر وظهر وأكتاف', type: 'full', done: true },
+  { day: 'الأربعاء', short: 'أرب', title: 'كارديو وبطن', type: 'cardio', done: false },
+  { day: 'الخميس', short: 'خمي', title: 'راحة نشِطة — مشي وإطالة', type: 'rest', done: false },
   { day: 'الجمعة', short: 'جمع', title: 'راحة واستشفاء', type: 'rest', done: false },
 ]
 
