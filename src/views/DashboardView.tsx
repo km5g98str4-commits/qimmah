@@ -3,6 +3,7 @@ import { Icon } from '@/components/Icon'
 import { DailySummary } from '@/sections/DailySummary'
 import { Today } from '@/sections/Today'
 import { RecentWorkout } from '@/sections/RecentWorkout'
+import { AchievementsCard } from '@/features/achievements/AchievementsCard'
 import { useCustomization } from '@/lib/customizationContext'
 import { todayPlanDay } from '@/lib/workoutPlan'
 import { planTitle } from '@/lib/planGenerator'
@@ -54,6 +55,9 @@ export function DashboardView({ lang, onNavigate }: DashboardViewProps) {
       {leads.map((card) => (
         <LeadBlock key={card} card={card} lang={lang} onNavigate={onNavigate} />
       ))}
+
+      {/* أوسمتك — ظاهرة دائمًا (تحفيز المبتدئ)، والشبكة الكاملة على بُعد نقرة */}
+      <AchievementsCard />
 
       {/* الوضع المتقدّم — تفاصيل أكثر لمن يريدها */}
       {!isSimple && (

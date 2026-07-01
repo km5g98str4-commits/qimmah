@@ -9,6 +9,7 @@ import { todayPlanDay, planExerciseName } from '@/lib/workoutPlan'
 import { planTitle } from '@/lib/planGenerator'
 import { getStrings } from '@/config/strings'
 import { persistFinishedSession } from '@/lib/finishWorkout'
+import { evaluateAchievements, registerWorkoutPRs } from '@/features/achievements/engine'
 import { weeklyAdherenceStreak } from '@/lib/streaks'
 import { getExercise } from '@/data/exercises'
 import type { WorkoutSession } from '@/lib/workoutSessions'
@@ -44,6 +45,9 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
   const finish = (session: WorkoutSession) => {
     const prs = persistFinishedSession(session)
     const daysPerWeek = plan.days.length || 3
+    // احتفل بالأرقام القياسية وافتح أوسمة التمرين/السلسلة/الأرقام القياسية فورًا.
+    registerWorkoutPRs(prs)
+    evaluateAchievements({ daysPerWeek })
     const weekly = weeklyAdherenceStreak(daysPerWeek)
     const prLabels = prs.map((pr) => {
       const name = lang === 'en' ? pr.nameEn || pr.nameAr : pr.nameAr || pr.nameEn

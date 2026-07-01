@@ -29,6 +29,8 @@ export const QIMMAH_KEYS = [
   'qimmah:history:supplementLogs:v1',
   'qimmah:history:medicationLogs:v1',
   'qimmah:history:migrated:v1',
+  // الأوسمة والإنجازات
+  'qimmah:achievements:v1',
 ]
 
 /** يحذف مفاتيح قِمّة فقط، ثم يعيد التحميل إلى شاشة البداية. */
