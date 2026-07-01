@@ -5,8 +5,8 @@ import { NUM_LIMITS, parseSafeNumber, sanitizeNumericInput } from '@/lib/validat
 import { addProductStrings } from './strings'
 import { PhotoCapture } from './PhotoCapture'
 import { extractNutritionFromImage } from './ocr'
-import { upsertProduct } from './productStore'
-import type { ProductPer, StoredProduct } from './types'
+import { upsertProduct } from '@/features/products'
+import type { ProductPer, StoredProduct } from '@/features/products'
 
 interface AddProductScreenProps {
   lang: Lang
@@ -82,9 +82,12 @@ export function AddProductScreen({ lang, barcode, onSaved, onClose }: AddProduct
     const hasNutrition = kcal > 0 || protein > 0 || carbs > 0 || fat > 0
     // اسم افتراضي صادق بدل حجب الحفظ — لا يُفقَد أي إدخال حتى لو تُرك حقل الاسم فارغًا.
     const finalName = name.trim() || (barcode ? `${t.titleNew} · ${barcode}` : t.titleNew)
+    // منتج بلا باركود (إضافة يدوية بحتة بلا مسح سابق) يحتاج مفتاحًا محليًا فريدًا —
+    // قاعدة المنتجات مفتاحها الباركود دائمًا.
+    const effectiveBarcode = barcode || `local:${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`
 
     const saved = upsertProduct({
-      barcode: barcode || undefined,
+      barcode: effectiveBarcode,
       name: finalName,
       brand: brand.trim() || undefined,
       per,
@@ -95,8 +98,9 @@ export function AddProductScreen({ lang, barcode, onSaved, onClose }: AddProduct
       fat,
       imageUrl: productPhoto,
       nutritionImageUrl: nutritionPhoto,
-      sourceName: 'user',
       status: hasNutrition ? 'user_submitted' : 'pending_review',
+      source: { sourceName: 'user', importedAt: new Date().toISOString() },
+      note: ocrPrefilled ? 'أُدخل بمساعدة القراءة التلقائية (OCR) وراجعه المستخدم قبل الحفظ' : undefined,
     })
     onSaved(saved)
   }
