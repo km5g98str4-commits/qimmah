@@ -21,6 +21,8 @@ import type { GoalValue } from '@/data/planBuilder'
 
 export interface Answers {
   // profile + bodyMetrics
+  /** الاسم — اختياري تمامًا وقابل للتخطّي (لا اسم وهمي افتراضي). */
+  name: string
   goalValue?: GoalValue
   sex?: Sex
   age: number
@@ -55,6 +57,7 @@ export interface Answers {
 }
 
 export const defaultAnswers: Answers = {
+  name: '',
   age: 25,
   heightCm: 170,
   weightKg: 75,
@@ -83,8 +86,10 @@ export const showsTargetWeight = (g?: GoalValue) => g === 'cut' || g === 'bulk'
 /** يبني كائن مصدر الحقيقة من الإجابات — لا اسم وهمي، قوائم تتبّع فارغة. */
 export function buildOnboardingProfile(a: Answers): OnboardingProfile {
   const beginner = isBeginnerLevel(a.experienceLevel)
+  const trimmedName = a.name.trim()
   return {
-    profile: { sex: a.sex, age: a.age }, // لا اسم — اختياري ولا قيمة وهمية
+    // الاسم اختياري: يُحفظ فقط لو كتبه المستخدم (لا اسم وهمي عند التخطّي).
+    profile: { name: trimmedName || undefined, sex: a.sex, age: a.age },
     bodyMetrics: {
       heightCm: a.heightCm,
       currentWeightKg: a.weightKg,

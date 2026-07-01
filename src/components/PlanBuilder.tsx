@@ -114,6 +114,25 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
 
   const steps: Step[] = []
 
+  // 0) الاسم — اختياري تمامًا وقابل للتخطّي (نرحّب فيك باسمك في الرئيسية).
+  steps.push({
+    key: 'name',
+    label: 'اسمك',
+    optional: true,
+    valid: true,
+    content: (
+      <Question title="وش نناديك؟" hint="اختياري — نستخدمه نرحّب فيك بالرئيسية. تقدر تتخطّاها.">
+        <TextField
+          value={a.name}
+          placeholder="اسمك (اختياري)"
+          maxLength={24}
+          onChange={(v) => set({ name: v })}
+          ariaLabel="الاسم (اختياري)"
+        />
+      </Question>
+    ),
+  })
+
   // 1) الهدف
   steps.push({
     key: 'goal',
@@ -471,6 +490,8 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
   const idx = Math.min(stepIndex, steps.length - 1)
   const step = steps[idx]
   const total = steps.length
+  // شاشة البناء ليست خطوة نموذج — نستبعدها من العدّاد وشريط التقدّم ليكونا دقيقين.
+  const formTotal = total - 1
   const isFirst = idx === 0
   const isBuilding = step.key === 'building'
   const isLastForm = idx === total - 2
@@ -519,7 +540,7 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
     setStepIndex((s) => Math.max(0, s - 1))
   }
 
-  const progress = Math.round(((idx + 1) / total) * 100)
+  const progress = Math.round(((idx + 1) / formTotal) * 100)
 
   if (isBuilding) {
     return (
@@ -550,7 +571,7 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
           </button>
           <div className="flex items-center gap-2 text-sm">
             <span className="font-bold text-night-100">{step.label}</span>
-            <span className="font-bold text-night-300">{idx + 1}/{total}</span>
+            <span className="font-bold text-night-300">{idx + 1}/{formTotal}</span>
           </div>
           <div className="h-10 w-10" />
         </div>
@@ -651,6 +672,22 @@ function OptionRow({ icon, label, desc, selected, onClick }: { icon?: string; la
         <Icon name="Check" className="h-3.5 w-3.5" strokeWidth={3} />
       </span>
     </button>
+  )
+}
+
+/** حقل نصّي بسيط — للاسم الاختياري فقط (إدخال قصير، بلا نص حرّ طويل). */
+function TextField({ value, placeholder, maxLength, onChange, ariaLabel }: { value: string; placeholder?: string; maxLength?: number; onChange: (v: string) => void; ariaLabel: string }) {
+  return (
+    <input
+      type="text"
+      value={value}
+      placeholder={placeholder}
+      maxLength={maxLength}
+      onChange={(e) => onChange(e.target.value)}
+      aria-label={ariaLabel}
+      autoComplete="off"
+      className="w-full rounded-2xl border border-night-700 bg-night-900 px-5 py-4 text-lg font-bold text-night-100 placeholder:font-normal placeholder:text-night-400 focus:border-primary focus:outline-none"
+    />
   )
 }
 
