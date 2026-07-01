@@ -174,4 +174,47 @@ export interface DashboardCard {
   accent: string
 }
 
+/** حالة مراجعة منتج ممسوح/مُضاف — دورة الحياة من الالتقاط حتى التحقق. */
+export type ProductReviewStatus = 'pending_review' | 'user_submitted' | 'needs_fix' | 'verified' | 'rejected'
+
+/** مصدر التقاط بيانات المنتج (لأغراض التتبّع فقط). */
+export type ProductSource = 'ocr' | 'manual' | 'off' | 'seed'
+
+/** القيم الغذائية لكل 100غ — الأساس الموحّد لأي منتج ممسوح. */
+export interface ProductNutrition {
+  caloriesPer100g: number
+  proteinPer100g: number
+  carbsPer100g: number
+  fatPer100g: number
+}
+
+/** سجل منتج بانتظار المراجعة الداخلية (باركود/تصوير/OCR). */
+export interface ProductRecord {
+  id: string
+  barcode?: string
+  name: string
+  brand?: string
+  servingSize?: string
+  nutrition: ProductNutrition
+  /** صورة المنتج المحفوظة (Data URL أو رابط) — قد لا تتوفر بعد. */
+  productPhotoUrl?: string
+  /** صورة جدول القيم الغذائية المصوَّرة (OCR) — قد لا تتوفر بعد. */
+  nutritionPhotoUrl?: string
+  status: ProductReviewStatus
+  source: ProductSource
+  createdAt: string
+  updatedAt: string
+}
+
+/** إدخال سجلّ تدقيق واحد على منتج — من أنشأه/عدّله وماذا تغيّر. */
+export interface ProductAuditEntry {
+  id: string
+  productId: string
+  action: 'created' | 'edited' | 'approved' | 'rejected'
+  before?: Partial<ProductRecord>
+  after?: Partial<ProductRecord>
+  note?: string
+  at: string
+}
+
 export type IconComponent = LucideIcon

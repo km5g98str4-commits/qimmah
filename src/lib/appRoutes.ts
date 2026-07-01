@@ -17,6 +17,8 @@ export type AppRoute =
   | 'privacy'
   | 'terms'
   | 'contact'
+  // شاشة داخلية لمراجعة المنتجات (باركود/OCR) — مدخلها من الإعدادات، ليست تبويبًا رئيسيًا.
+  | 'productReview'
   // مسار احتياطي داخلي فقط — لا يُسجَّل في ROUTES ولا يُكتب في hash مباشرة.
   | 'notfound'
 
@@ -35,6 +37,7 @@ const ROUTES: AppRoute[] = [
   'privacy',
   'terms',
   'contact',
+  'productReview',
 ]
 
 /** التبويبات الرئيسية الخمسة في الشريط السفلي (كلها تتطلّب إعدادًا مكتملًا). */
