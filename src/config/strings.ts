@@ -78,6 +78,11 @@ export interface ShellStrings {
     home: string
     back: string
   }
+  errorBoundary: {
+    title: string
+    body: string
+    reload: string
+  }
   contact: {
     title: string
     intro: string
@@ -432,6 +437,11 @@ const ar: ShellStrings = {
     body: 'الرابط اللي فتحته مو موجود أو اتغيّر.',
     home: 'ارجع للرئيسية',
     back: 'الشاشة السابقة',
+  },
+  errorBoundary: {
+    title: 'صار خلل بسيط',
+    body: 'واجهنا مشكلة غير متوقعة في هذي الشاشة. جرّب تحدّث الصفحة وبيرجع كل شي مكانه — بياناتك محفوظة على جهازك.',
+    reload: 'حدّث الصفحة',
   },
   contact: {
     title: 'تواصل معنا',
@@ -790,6 +800,11 @@ const en: ShellStrings = {
     body: 'The link you opened doesn’t exist or has changed.',
     home: 'Back to home',
     back: 'Previous screen',
+  },
+  errorBoundary: {
+    title: 'Something went wrong',
+    body: 'We hit an unexpected problem on this screen. Try reloading the page and it should be back to normal — your data is saved on your device.',
+    reload: 'Reload page',
   },
   contact: {
     title: 'Contact us',

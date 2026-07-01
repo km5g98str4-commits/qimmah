@@ -1,19 +1,24 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
+// شاشة البداية (الهبوط) تبقى مُحمّلة مباشرةً لأول رسم سريع.
 import { StartView } from '@/views/StartView'
-import { LoginView } from '@/views/LoginView'
-import { SetupView } from '@/views/SetupView'
-import { DashboardView } from '@/views/DashboardView'
-import { WorkoutView } from '@/views/WorkoutView'
-import { ExerciseLibraryView } from '@/views/ExerciseLibraryView'
-import { NutritionView } from '@/views/NutritionView'
-import { ProgressView } from '@/views/ProgressView'
-import { ProfileView } from '@/views/ProfileView'
-import { DemoView } from '@/views/DemoView'
-import { SettingsView } from '@/views/SettingsView'
-import { PrivacyView } from '@/views/PrivacyView'
-import { TermsView } from '@/views/TermsView'
-import { ContactView } from '@/views/ContactView'
-import { NotFoundView } from '@/views/NotFoundView'
+import { AppLoading } from '@/components/AppLoading'
+// باقي الشاشات مُقسّمة إلى حِزم عند الطلب (code-splitting) لتقليل حزمة الدخول الأولى.
+const LoginView = lazy(() => import('@/views/LoginView').then((m) => ({ default: m.LoginView })))
+const SetupView = lazy(() => import('@/views/SetupView').then((m) => ({ default: m.SetupView })))
+const DashboardView = lazy(() => import('@/views/DashboardView').then((m) => ({ default: m.DashboardView })))
+const WorkoutView = lazy(() => import('@/views/WorkoutView').then((m) => ({ default: m.WorkoutView })))
+const ExerciseLibraryView = lazy(() =>
+  import('@/views/ExerciseLibraryView').then((m) => ({ default: m.ExerciseLibraryView })),
+)
+const NutritionView = lazy(() => import('@/views/NutritionView').then((m) => ({ default: m.NutritionView })))
+const ProgressView = lazy(() => import('@/views/ProgressView').then((m) => ({ default: m.ProgressView })))
+const ProfileView = lazy(() => import('@/views/ProfileView').then((m) => ({ default: m.ProfileView })))
+const DemoView = lazy(() => import('@/views/DemoView').then((m) => ({ default: m.DemoView })))
+const SettingsView = lazy(() => import('@/views/SettingsView').then((m) => ({ default: m.SettingsView })))
+const PrivacyView = lazy(() => import('@/views/PrivacyView').then((m) => ({ default: m.PrivacyView })))
+const TermsView = lazy(() => import('@/views/TermsView').then((m) => ({ default: m.TermsView })))
+const ContactView = lazy(() => import('@/views/ContactView').then((m) => ({ default: m.ContactView })))
+const NotFoundView = lazy(() => import('@/views/NotFoundView').then((m) => ({ default: m.NotFoundView })))
 import { MobileShell, type MainTab } from '@/components/MobileShell'
 import type { AppBadge } from '@/components/AppNav'
 import { useAuth } from '@/lib/authContext'
@@ -125,10 +130,13 @@ export default function App() {
     else setView(guardRoute(v))
   }
 
-  // ——— الشاشات العامة (قبل الدخول) ———
+  // ——— بناء عنصر الشاشة الحالية ثم لفّه بحدّ Suspense (أسفل المزوّدات حتى تبقى حالتها
+  //     محفوظة أثناء تحميل الحِزم عند الطلب) ———
+  let content: ReactNode
+
   if (view === 'start') {
     const ob = loadOnboarding()
-    return (
+    content = (
       <StartView
         lang={LANG}
         hasStartedSetup={!ob.completed && (ob.lastStep ?? 0) > 0}
@@ -138,42 +146,26 @@ export default function App() {
         onSeeDemo={() => setView('demo')}
       />
     )
-  }
-
-  if (view === 'login') {
-    return <LoginView lang={LANG} onSuccess={enterApp} onGuest={enterApp} onBack={() => setView('start')} />
-  }
-
-  if (view === 'privacy') {
-    return <PrivacyView lang={LANG} onBack={() => navigate(beforeLegalRef.current)} />
-  }
-
-  if (view === 'terms') {
-    return <TermsView lang={LANG} onBack={() => navigate(beforeLegalRef.current)} />
-  }
-
-  if (view === 'contact') {
-    return <ContactView lang={LANG} onBack={() => window.history.back()} />
-  }
-
-  if (view === 'notfound') {
+  } else if (view === 'login') {
+    content = <LoginView lang={LANG} onSuccess={enterApp} onGuest={enterApp} onBack={() => setView('start')} />
+  } else if (view === 'privacy') {
+    content = <PrivacyView lang={LANG} onBack={() => navigate(beforeLegalRef.current)} />
+  } else if (view === 'terms') {
+    content = <TermsView lang={LANG} onBack={() => navigate(beforeLegalRef.current)} />
+  } else if (view === 'contact') {
+    content = <ContactView lang={LANG} onBack={() => window.history.back()} />
+  } else if (view === 'notfound') {
     const goHome = () => {
       const target = loadOnboarding().completed ? 'dashboard' : 'start'
       setView(guardRoute(target))
     }
-    return <NotFoundView lang={LANG} onHome={goHome} onBack={() => window.history.back()} />
-  }
-
-  if (view === 'setup') {
-    return <SetupView onClose={closeSetup} initialStep={startStep} mode={setupMode} />
-  }
-
-  if (view === 'demo') {
-    return <DemoView lang={LANG} onNavigate={navigate} onBack={closeDemo} />
-  }
-
-  if (view === 'settings') {
-    return (
+    content = <NotFoundView lang={LANG} onHome={goHome} onBack={() => window.history.back()} />
+  } else if (view === 'setup') {
+    content = <SetupView onClose={closeSetup} initialStep={startStep} mode={setupMode} />
+  } else if (view === 'demo') {
+    content = <DemoView lang={LANG} onNavigate={navigate} onBack={closeDemo} />
+  } else if (view === 'settings') {
+    content = (
       <SettingsView
         lang={LANG}
         onNavigate={navigate}
@@ -183,27 +175,29 @@ export default function App() {
         onOpenTerms={() => setView('terms')}
       />
     )
+  } else {
+    // ——— التبويبات الرئيسية داخل قشرة الجوال ———
+    content = (
+      <>
+        <MobileShell
+          lang={LANG}
+          tab={(view === 'exercises' ? 'workout' : view) as MainTab}
+          badge={badge}
+          onNavigate={navigate}
+          onOpenSettings={() => setView('settings')}
+        >
+          {view === 'dashboard' && <DashboardView lang={LANG} onNavigate={navigate} />}
+          {view === 'workout' && <WorkoutView lang={LANG} onNavigate={navigate} />}
+          {view === 'exercises' && <ExerciseLibraryView lang={LANG} />}
+          {view === 'nutrition' && <NutritionView lang={LANG} />}
+          {view === 'progress' && <ProgressView lang={LANG} />}
+          {view === 'profile' && <ProfileView lang={LANG} onNavigate={navigate} />}
+        </MobileShell>
+
+        {showSuccess && <SuccessToast onClose={dismissSuccess} />}
+      </>
+    )
   }
 
-  // ——— التبويبات الرئيسية داخل قشرة الجوال ———
-  return (
-    <>
-      <MobileShell
-        lang={LANG}
-        tab={(view === 'exercises' ? 'workout' : view) as MainTab}
-        badge={badge}
-        onNavigate={navigate}
-        onOpenSettings={() => setView('settings')}
-      >
-        {view === 'dashboard' && <DashboardView lang={LANG} onNavigate={navigate} />}
-        {view === 'workout' && <WorkoutView lang={LANG} onNavigate={navigate} />}
-        {view === 'exercises' && <ExerciseLibraryView lang={LANG} />}
-        {view === 'nutrition' && <NutritionView lang={LANG} />}
-        {view === 'progress' && <ProgressView lang={LANG} />}
-        {view === 'profile' && <ProfileView lang={LANG} onNavigate={navigate} />}
-      </MobileShell>
-
-      {showSuccess && <SuccessToast onClose={dismissSuccess} />}
-    </>
-  )
+  return <Suspense fallback={<AppLoading />}>{content}</Suspense>
 }
