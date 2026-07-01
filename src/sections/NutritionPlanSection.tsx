@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { SectionHeading } from '@/components/SectionHeading'
 import { Icon } from '@/components/Icon'
 import { QuickMealLogger } from '@/components/nutrition/QuickMealLogger'
+import { CalorieExplainer } from '@/components/nutrition/CalorieExplainer'
 import { useCustomization } from '@/lib/customizationContext'
 import { mealAlternatives, mealDisplayName, mealTypeLabels, planTotals } from '@/lib/nutritionPlan'
 import type { PlanMeal } from '@/types/nutrition'
@@ -27,6 +28,9 @@ export function NutritionPlanSection({ lang }: { lang: Lang }) {
           <SectionHeading eyebrow={t.title} icon="Salad" title={t.title} description={t.desc} />
           <div className="mt-10">
             <QuickMealLogger lang={lang} targetCalories={logCalories} targetProtein={logProtein} />
+          </div>
+          <div className="mt-6">
+            <CalorieExplainer />
           </div>
           <p className="mt-4 text-center text-xs text-ink-400">{t.empty}</p>
         </div>
@@ -61,6 +65,11 @@ export function NutritionPlanSection({ lang }: { lang: Lang }) {
         {/* تسجيل الوجبات السريع + التقدّم اليومي (مأكول/الهدف/المتبقّي) */}
         <div className="mt-10">
           <QuickMealLogger lang={lang} targetCalories={np.targetCalories} targetProtein={np.targetProtein} />
+        </div>
+
+        {/* شفافية الحساب: كيف نحسب سعراتك؟ (بناء الثقة بالأرقام) */}
+        <div className="mt-6">
+          <CalorieExplainer />
         </div>
 
         {/* الأهداف مقابل المخطّط */}

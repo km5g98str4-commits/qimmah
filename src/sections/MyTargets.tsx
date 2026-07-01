@@ -1,5 +1,6 @@
 import { SectionHeading } from '@/components/SectionHeading'
 import { Icon } from '@/components/Icon'
+import { CalorieExplainer } from '@/components/nutrition/CalorieExplainer'
 import { useCustomization } from '@/lib/customizationContext'
 import { BMI_NOTE, targetCaloriesFor } from '@/lib/calculators'
 
@@ -58,6 +59,11 @@ export function MyTargets() {
           <Icon name="Info" className="mt-0.5 h-3.5 w-3.5 shrink-0" />
           {BMI_NOTE}
         </p>
+
+        {/* شفافية الحساب: كيف نحسب سعراتك؟ (بناء الثقة بالأرقام) */}
+        <div className="mt-4">
+          <CalorieExplainer />
+        </div>
 
         {/* اقتراح التمرين */}
         <div className="mt-4 flex items-center gap-3 rounded-2xl border border-line bg-surface p-5">
