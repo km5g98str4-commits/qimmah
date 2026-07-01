@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { Icon } from './Icon'
+import { InstallBanner } from './InstallBanner'
 import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
@@ -79,6 +80,9 @@ export function MobileShell({ lang, tab, badge, onNavigate, onOpenSettings, chil
             </div>
           </div>
         </header>
+
+        {/* شريط تثبيت التطبيق — قابل للإغلاق، يظهر فقط عند الحاجة */}
+        <InstallBanner lang={lang} onOpenSettings={onOpenSettings} />
 
         {/* المحتوى */}
         <main className="flex-1 pb-24">{children}</main>

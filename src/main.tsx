@@ -6,6 +6,8 @@ import { ErrorBoundary } from './components/ErrorBoundary'
 import { CustomizationProvider } from './lib/customizationContext'
 import { AuthProvider } from './lib/authContext'
 import { registerStepBridge } from './lib/stepCounter'
+// وحدة PWA: تلتقط حدث beforeinstallprompt مبكرًا (يُطلق مرّة واحدة فقط) لعرض زر التثبيت لاحقًا.
+import './lib/pwa'
 import './styles/index.css'
 
 // سيم الخطوات: يُتيح لغلاف أصلي مستقبلي (تطبيق آيفون يقرأ Apple Health) دفع الخطوات.
