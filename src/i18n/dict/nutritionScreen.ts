@@ -31,6 +31,20 @@ export interface NutritionScreenStrings {
   catDairy: string
   catDrink: string
   catOther: string
+  // barcode scanner
+  scanBarcode: string
+  scanTitle: string
+  scanHint: string
+  scanCancel: string
+  scanPermissionDenied: string
+  scanLookingUp: string
+  scanNotFoundTitle: string
+  scanNotFoundHint: string
+  scanAddManually: string
+  scanTryAgain: string
+  scanFoundHint: string
+  scanAttribution: string
+  scanUnsupported: string
 }
 
 const ar: NutritionScreenStrings = {
@@ -59,6 +73,19 @@ const ar: NutritionScreenStrings = {
   catDairy: 'ألبان',
   catDrink: 'مشروبات',
   catOther: 'أخرى',
+  scanBarcode: 'امسح الباركود 📷',
+  scanTitle: 'مسح الباركود',
+  scanHint: 'وجّه الكاميرا نحو الباركود',
+  scanCancel: 'إلغاء',
+  scanPermissionDenied: 'ما قدرنا نوصل للكاميرا. تأكد من منح صلاحية الكاميرا من إعدادات المتصفح.',
+  scanLookingUp: 'جارٍ البحث عن المنتج…',
+  scanNotFoundTitle: 'ما لقينا المنتج',
+  scanNotFoundHint: 'تغطية قاعدة البيانات ما تشمل كل المنتجات المحلية بعد — تقدر تضيفه يدويًا.',
+  scanAddManually: 'إضافة يدوية',
+  scanTryAgain: 'أعد المسح',
+  scanFoundHint: 'لقينا المنتج — راجع القيم وسجّله.',
+  scanAttribution: 'بيانات المنتج من Open Food Facts (رخصة ODbL)',
+  scanUnsupported: 'المتصفح ما يدعم مسح الباركود — استخدم الإضافة اليدوية.',
 }
 
 const en: NutritionScreenStrings = {
@@ -87,6 +114,19 @@ const en: NutritionScreenStrings = {
   catDairy: 'Dairy',
   catDrink: 'Drinks',
   catOther: 'Other',
+  scanBarcode: 'Scan barcode 📷',
+  scanTitle: 'Scan barcode',
+  scanHint: 'Point the camera at the barcode',
+  scanCancel: 'Cancel',
+  scanPermissionDenied: "Couldn't access the camera. Check camera permission in your browser settings.",
+  scanLookingUp: 'Looking up product…',
+  scanNotFoundTitle: 'Product not found',
+  scanNotFoundHint: "Database coverage doesn't include every local product yet — you can add it manually.",
+  scanAddManually: 'Add manually',
+  scanTryAgain: 'Scan again',
+  scanFoundHint: 'Found it — review the values and log it.',
+  scanAttribution: 'Product data from Open Food Facts (ODbL license)',
+  scanUnsupported: "This browser doesn't support barcode scanning — use manual entry instead.",
 }
 
 export const nutritionScreenStrings: Record<Lang, NutritionScreenStrings> = { ar, en }

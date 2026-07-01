@@ -12,7 +12,7 @@ import { currentWeekSummary } from '@/lib/streaks'
 import { experienceChoices } from '@/data/planBuilder'
 import { useDashboardSignals, type LeadCard } from '@/lib/dashboardLayout'
 import { useUiMode } from '@/lib/uiMode'
-import { phraseForDay } from '@/data/dailyPhrases'
+import { getRandomPhrase } from '@/data/motivationalPhrases'
 import { getStrings } from '@/config/strings'
 import { dashboardStrings } from '@/i18n/dict/dashboard'
 import type { Lang } from '@/lib/appPreferences'
@@ -88,13 +88,13 @@ export function DashboardView({ lang, onNavigate }: DashboardViewProps) {
   )
 }
 
-/** بطاقة ترحيب — «أهلًا يا {الاسم}» + عبارة تحفيزية تتغيّر يوميًا (حتمية بالتاريخ). */
+/** بطاقة ترحيب — «أهلًا يا {الاسم}» + عبارة تحفيزية عشوائية تدور كل زيارة. */
 function GreetingCard({ lang, onNavigate }: { lang: Lang; onNavigate: (route: AppRoute) => void }) {
   const { customization } = useCustomization()
   const d = dashboardStrings[lang]
   const name = customization.identity.userName?.trim()
-  // عبارة اليوم ثابتة طوال اليوم (تُحسب مرة عند العرض).
-  const phrase = useMemo(() => phraseForDay(), [])
+  // عبارة عشوائية تُحسب مرة عند دخول/تركيب الرئيسية (تدور مع كل جلسة جديدة).
+  const phrase = useMemo(() => getRandomPhrase(), [])
 
   return (
     <section className="card relative overflow-hidden p-5">
@@ -107,7 +107,7 @@ function GreetingCard({ lang, onNavigate }: { lang: Lang; onNavigate: (route: Ap
         <h1 className="mt-2 text-2xl font-black text-ink-900">
           {name ? `${d.greetNamedPrefix}${name}${d.greetNamedSuffix}` : d.greetGuest}
         </h1>
-        <p className="mt-1.5 text-sm leading-relaxed text-ink-600">{phrase}</p>
+        <p className="mt-1.5 text-sm leading-relaxed text-ink-600">{lang === 'en' ? phrase.en : phrase.ar}</p>
 
         <button
           type="button"
