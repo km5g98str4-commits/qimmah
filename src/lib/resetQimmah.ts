@@ -3,6 +3,8 @@
 export const QIMMAH_KEYS = [
   'qimmah:customization:v1',
   'qimmah:onboarding:v1',
+  // سجلّ الحسابات التي أكملت الإعداد (بوابة الإعداد لكل حساب).
+  'qimmah:onboarding:accounts:v1',
   // مصدر الحقيقة للإعداد (Phase 1) — لازم يُمسح وإلا بقيت بيانات إعداد قديمة بعد الضبط.
   'qimmah:onboarding:profile:v1',
   'qimmah:today:v1',
