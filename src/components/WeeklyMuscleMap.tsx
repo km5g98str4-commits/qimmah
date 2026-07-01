@@ -20,12 +20,12 @@ import type { MuscleCoverage, MuscleId, MuscleView } from '@/types/muscles'
 // غير المُدرّبة تبقى محايدة (تشجيع بلا أحكام). الأشكال من data/bodyAnatomy.
 
 const SKIN_FILL = '#E9D9C4'
-const SKIN_STROKE = 'rgba(43,37,32,0.16)'
-const MUSCLE_FILL = '#DBC7AC'
-const MUSCLE_STROKE = 'rgba(43,37,32,0.14)'
+const SKIN_STROKE = 'rgba(43,37,32,0.18)'
+const MUSCLE_FILL = '#D8C3A4'
+const MUSCLE_STROKE = 'rgba(43,37,32,0.16)'
 const HEAT = '#F26A21'
-const GARMENT_FILL = '#3E6B8C'
-const GARMENT_STROKE = 'rgba(31,54,70,0.55)'
+const GARMENT_FILL = '#3B4A63'
+const GARMENT_STROKE = 'rgba(20,28,44,0.7)'
 
 /** شدّة الإضاءة (0.30 → 0.92) أو لا شيء إن لم تُدرّب. */
 function heatOpacity(c?: MuscleCoverage): number | null {
@@ -65,7 +65,16 @@ function Region({
       ))}
       {/* طبقة الإضاءة البرتقالية حسب الشدّة */}
       {heat !== null &&
-        def.d.map((d, i) => <path key={`h${i}`} d={d} fill={HEAT} fillOpacity={heat} stroke="none" />)}
+        def.d.map((d, i) => (
+          <path
+            key={`h${i}`}
+            d={d}
+            fill={HEAT}
+            fillOpacity={heat}
+            stroke="none"
+            className="transition-[fill-opacity] duration-500 ease-out motion-reduce:transition-none"
+          />
+        ))}
       {/* تحديد العضلة المختارة */}
       {selected &&
         def.d.map((d, i) => (
@@ -124,7 +133,7 @@ export function WeeklyMuscleMap({ className }: { className?: string }) {
             <p className="text-[11px] font-bold text-ink-400">هذا الأسبوع · {genderLabel}</p>
           </div>
         </div>
-        <div className="inline-flex rounded-full border border-line bg-page p-1">
+        <div className="inline-flex rounded-full border border-line bg-page p-1" role="group" aria-label="جهة عرض الجسم">
           {(['front', 'back'] as MuscleView[]).map((v) => (
             <button
               key={v}
@@ -135,8 +144,8 @@ export function WeeklyMuscleMap({ className }: { className?: string }) {
               }}
               aria-pressed={view === v}
               className={cn(
-                'rounded-full px-3 py-1 text-[11px] font-bold transition-colors',
-                view === v ? 'bg-primary text-white' : 'text-ink-500 hover:text-ink-900',
+                'rounded-full px-4 py-1.5 text-xs font-bold transition-all duration-200 active:scale-95 motion-reduce:transition-none',
+                view === v ? 'bg-primary text-white shadow-soft' : 'text-ink-500 hover:text-ink-900',
               )}
             >
               {v === 'front' ? 'أمامي' : 'خلفي'}
@@ -153,6 +162,14 @@ export function WeeklyMuscleMap({ className }: { className?: string }) {
           role="img"
           aria-label={`خريطة العضلات — جسم ${genderLabel}، العرض ${view === 'front' ? 'الأمامي' : 'الخلفي'}، فعّلت ${trainedCount} عضلة هذا الأسبوع`}
         >
+          <defs>
+            {/* توهّج خلفيّ دافئ خلف الجسم لعمق بصري */}
+            <radialGradient id="mm-glow" cx="50%" cy="32%" r="62%">
+              <stop offset="0%" stopColor={HEAT} stopOpacity={0.12} />
+              <stop offset="70%" stopColor={HEAT} stopOpacity={0} />
+            </radialGradient>
+          </defs>
+          <rect x="0" y="0" width="220" height="470" fill="url(#mm-glow)" aria-hidden />
           {/* الهيكل الجلدي المحايد (حدود الجسم) */}
           {silhouette.map((d, i) => (
             <path key={`sk${i}`} d={d} fill={SKIN_FILL} stroke={SKIN_STROKE} strokeWidth={1.2} strokeLinejoin="round" />

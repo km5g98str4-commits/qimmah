@@ -53,12 +53,13 @@ export function Dashboard() {
 
         {/* شبكة الميزات */}
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {features.map((f) => (
+          {features.map((f, i) => (
             <div
               key={f.title}
-              className="group card p-6 transition-all duration-300 hover:-translate-y-1 hover:border-brand-500/30"
+              className="group card-interactive animate-fade-up p-6 motion-reduce:animate-none"
+              style={{ animationDelay: `${Math.min(i * 60, 360)}ms` }}
             >
-              <span className="grid h-11 w-11 place-items-center rounded-xl bg-brand-500/15 text-brand-300 transition-colors group-hover:bg-brand-500 group-hover:text-white">
+              <span className="grid h-11 w-11 place-items-center rounded-xl bg-brand-500/15 text-brand-300 transition-colors duration-200 group-hover:bg-brand-500 group-hover:text-white">
                 <Icon name={f.icon} className="h-5 w-5" />
               </span>
               <h3 className="mt-4 text-base font-bold text-ink-900">{f.title}</h3>
