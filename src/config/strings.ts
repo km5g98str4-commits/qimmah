@@ -78,6 +78,11 @@ export interface ShellStrings {
     home: string
     back: string
   }
+  errorBoundary: {
+    title: string
+    body: string
+    reload: string
+  }
   contact: {
     title: string
     intro: string
@@ -417,7 +422,7 @@ const ar: ShellStrings = {
       'قِمّة تطبيق شخصي يعمل على جهازك أولًا (local-first). في وضع الضيف تُحفظ كل بياناتك في متصفّح هذا الجهاز فقط ولا تغادره.',
       'عند تسجيل الدخول بحساب سحابي (Supabase) تُرفع بياناتك إلى حسابك الخاص لتتمكّن من الوصول إليها من أجهزة أخرى. لا يصل إلى صفوفك إلا أنت (Row Level Security).',
       'لا نبيع بياناتك ولا نشاركها مع معلنين. قياساتك وسجلّاتك الصحية تبقى ملكك ويمكنك حذفها في أي وقت عبر «إعادة ضبط البيانات».',
-      'يمكنك تصدير نسخة كاملة من بياناتك في أي وقت من «الإعدادات → البيانات».',
+      'تقدر تصدّر نسخة كاملة من بياناتك في أي وقت من «الإعدادات → البيانات».',
     ],
     termsBody: [
       'قِمّة أداة لتنظيم ومتابعة التمرين والتغذية والمكملات والقياسات للرياضي الفرد. الاستخدام على مسؤوليتك الشخصية.',
@@ -432,6 +437,11 @@ const ar: ShellStrings = {
     body: 'الرابط اللي فتحته مو موجود أو اتغيّر.',
     home: 'ارجع للرئيسية',
     back: 'الشاشة السابقة',
+  },
+  errorBoundary: {
+    title: 'صار خلل بسيط',
+    body: 'واجهنا مشكلة غير متوقعة في هذي الشاشة. جرّب تحدّث الصفحة وبيرجع كل شي مكانه — بياناتك محفوظة على جهازك.',
+    reload: 'حدّث الصفحة',
   },
   contact: {
     title: 'تواصل معنا',
@@ -652,7 +662,7 @@ const ar: ShellStrings = {
     title: 'التزاماتي',
     desc: 'الأشياء اللي تبي تلتزم فيها يوميًا أو أسبوعيًا.',
     enable: 'أريد متابعة الالتزامات اليومية',
-    intro: 'اختر الأشياء التي تبي تلتزم فيها يوميًا أو أسبوعيًا. تقدر تعدلها لاحقًا.',
+    intro: 'اختر الأشياء اللي تبي تلتزم فيها يوميًا أو أسبوعيًا. تقدر تعدّلها لاحقًا.',
     add: 'أضف من المكتبة',
     addCustom: 'أضف التزامًا مخصّصًا',
     name: 'الاسم',
@@ -685,7 +695,7 @@ const ar: ShellStrings = {
     title: 'القياسات والتقدّم',
     desc: 'سجّل قياساتك وتابع تقدّمك بمرور الوقت.',
     enable: 'أريد متابعة القياسات والتقدّم',
-    selectTypes: 'اختر القياسات التي تبي تتابعها',
+    selectTypes: 'اختر القياسات اللي تبي تتابعها',
     advanced: 'قياسات صحية متقدمة',
     advancedNote: 'القياسات الصحية المتقدمة للتسجيل فقط، وليست للتشخيص.',
     quickLog: 'تسجيل سريع',
@@ -790,6 +800,11 @@ const en: ShellStrings = {
     body: 'The link you opened doesn’t exist or has changed.',
     home: 'Back to home',
     back: 'Previous screen',
+  },
+  errorBoundary: {
+    title: 'Something went wrong',
+    body: 'We hit an unexpected problem on this screen. Try reloading the page and it should be back to normal — your data is saved on your device.',
+    reload: 'Reload page',
   },
   contact: {
     title: 'Contact us',
