@@ -1,8 +1,11 @@
 // أوسمة قِمّة — تعريف تصريحي (data-driven) لكل الأوسمة القابلة للفتح.
 //
-// كل وسام يوصف ببياناته فقط: معرّف، عنوان (لهجة خليجية)، وصف، إيموجي، فئة،
+// كل وسام يوصف ببياناته فقط: معرّف، عنوان (لهجة خليجية)، وصف، أيقونة (lucide)، فئة،
 // والمقياس + العتبة اللازمة لفتحه. منطق التقييم كله في محرّك الأوسمة
 // (features/achievements/engine.ts) — هذا الملف بيانات صرفة لا منطق فيه.
+//
+// البصريات: كل وسام يُرسم كقرص SVG معدني (components/MedalBadge) بلون فئته
+// (سلاسل=برتقالي، بروتين=أخضر، خطوات=أزرق، قوّة=ذهبي، بدايات=بنفسجي) مع أيقونة مركزية.
 
 /** المقاييس التي تُقاس عليها الأوسمة (يحسبها المحرّك من السجلّ المحلي). */
 export type AchievementMetric =
@@ -25,8 +28,8 @@ export interface AchievementDef {
   title: string
   /** وصف قصير يشرح كيف يُفتح. */
   description: string
-  /** إيموجي الوسام (بديل خفيف عن الأيقونة، data-driven بالكامل). */
-  emoji: string
+  /** اسم أيقونة الوسام المركزية (من خريطة lucide في src/lib/icons.ts). */
+  icon: string
   /** فئة الوسام. */
   category: AchievementCategory
   /** المقياس الذي يُقارَن. */
@@ -54,7 +57,7 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     id: 'first-workout',
     title: 'أول تمرين',
     description: 'خلّصت أول تمرين لك — البداية أصعب خطوة.',
-    emoji: '🏋️',
+    icon: 'Dumbbell',
     category: 'firsts',
     metric: 'finishedWorkouts',
     threshold: 1,
@@ -63,7 +66,7 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     id: 'first-meal',
     title: 'أول وجبة',
     description: 'سجّلت أول وجبة — بديت تمسك أكلك.',
-    emoji: '🍽️',
+    icon: 'Utensils',
     category: 'firsts',
     metric: 'mealDaysTotal',
     threshold: 1,
@@ -72,7 +75,7 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     id: 'first-week',
     title: 'أول أسبوع كامل',
     description: 'كمّلت التزام أسبوع كامل حسب خطتك.',
-    emoji: '📅',
+    icon: 'CalendarDays',
     category: 'firsts',
     metric: 'weeklyStreakBest',
     threshold: 1,
@@ -81,7 +84,7 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     id: 'first-pr',
     title: 'أول رقم قياسي',
     description: 'رفعت وزن جديد بأي تمرين لأول مرة.',
-    emoji: '💪',
+    icon: 'TrendingUp',
     category: 'firsts',
     metric: 'prCountTotal',
     threshold: 1,
@@ -92,7 +95,7 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     id: 'streak-3',
     title: '٣ أيام متتالية',
     description: 'تمرّنت ٣ أيام ورا بعض بدون ما توقف.',
-    emoji: '⚡',
+    icon: 'Flame',
     category: 'streak',
     metric: 'workoutStreakBest',
     threshold: 3,
@@ -101,7 +104,7 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     id: 'streak-7',
     title: 'أسبوع بلا توقّف',
     description: '٧ أيام تمرين متتالية — التزام نظيف.',
-    emoji: '🔥',
+    icon: 'Flame',
     category: 'streak',
     metric: 'workoutStreakBest',
     threshold: 7,
@@ -110,7 +113,7 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     id: 'streak-14',
     title: 'أسبوعين حديد',
     description: '١٤ يوم متتالية — صرت ماكينة.',
-    emoji: '💥',
+    icon: 'Zap',
     category: 'streak',
     metric: 'workoutStreakBest',
     threshold: 14,
@@ -119,7 +122,7 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     id: 'streak-30',
     title: '٣٠ يوم أسطورة',
     description: 'شهر كامل بدون ما تكسر السلسلة.',
-    emoji: '👑',
+    icon: 'Trophy',
     category: 'streak',
     metric: 'workoutStreakBest',
     threshold: 30,
@@ -130,7 +133,7 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     id: 'protein-1',
     title: 'قفلت البروتين',
     description: 'وصلت هدف البروتين أول مرة.',
-    emoji: '🥩',
+    icon: 'Egg',
     category: 'protein',
     metric: 'proteinDaysTotal',
     threshold: 1,
@@ -139,7 +142,7 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     id: 'protein-3',
     title: 'بروتينك ٣ أيام',
     description: 'قفلت هدف البروتين ٣ أيام.',
-    emoji: '✅',
+    icon: 'Egg',
     category: 'protein',
     metric: 'proteinDaysTotal',
     threshold: 3,
@@ -148,7 +151,7 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     id: 'protein-10',
     title: 'بروتينك ١٠ أيام',
     description: 'قفلت هدف البروتين ١٠ أيام — عضلاتك تشكرك.',
-    emoji: '🍗',
+    icon: 'Fish',
     category: 'protein',
     metric: 'proteinDaysTotal',
     threshold: 10,
@@ -157,7 +160,7 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     id: 'protein-30',
     title: 'بروتين شهر كامل',
     description: 'قفلت هدف البروتين ٣٠ يوم — احتراف.',
-    emoji: '🏆',
+    icon: 'Trophy',
     category: 'protein',
     metric: 'proteinDaysTotal',
     threshold: 30,
@@ -168,7 +171,7 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     id: 'steps-1',
     title: 'قفلت خطواتك',
     description: 'وصلت هدف الخطوات أول مرة.',
-    emoji: '👟',
+    icon: 'Footprints',
     category: 'steps',
     metric: 'stepDaysTotal',
     threshold: 1,
@@ -177,7 +180,7 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     id: 'steps-7',
     title: 'خطواتك ٧ أيام',
     description: 'قفلت هدف الخطوات ٧ أيام متتالية.',
-    emoji: '🚶',
+    icon: 'Footprints',
     category: 'steps',
     metric: 'stepStreakBest',
     threshold: 7,
@@ -186,7 +189,7 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     id: 'steps-30',
     title: 'خطواتك ٣٠ يوم',
     description: 'قفلت هدف الخطوات ٣٠ يوم متتالية.',
-    emoji: '🥾',
+    icon: 'Trophy',
     category: 'steps',
     metric: 'stepStreakBest',
     threshold: 30,
@@ -197,7 +200,7 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     id: 'pr-3',
     title: '٣ أرقام قياسية',
     description: 'حطّمت ٣ أرقام قياسية بتمارينك.',
-    emoji: '🏅',
+    icon: 'TrendingUp',
     category: 'strength',
     metric: 'prCountTotal',
     threshold: 3,
@@ -206,7 +209,7 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     id: 'pr-10',
     title: '١٠ أرقام قياسية',
     description: 'حطّمت ١٠ أرقام قياسية — تتقدّم بثبات.',
-    emoji: '🚀',
+    icon: 'Sparkles',
     category: 'strength',
     metric: 'prCountTotal',
     threshold: 10,
@@ -215,7 +218,7 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     id: 'workouts-10',
     title: '١٠ تمارين مكتملة',
     description: 'خلّصت ١٠ تمارين — العادة تترسّخ.',
-    emoji: '🎯',
+    icon: 'Target',
     category: 'strength',
     metric: 'finishedWorkouts',
     threshold: 10,
@@ -224,7 +227,7 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     id: 'workouts-25',
     title: '٢٥ تمرين إنجاز',
     description: 'خلّصت ٢٥ تمرين — رحلة حقيقية.',
-    emoji: '🌟',
+    icon: 'Trophy',
     category: 'strength',
     metric: 'finishedWorkouts',
     threshold: 25,

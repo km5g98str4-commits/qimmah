@@ -35,7 +35,7 @@ interface TodayProps {
 /** قسم «اليوم» — لوحة يومية عملية: تمارين، أكل، مكملات، والتزام — مع تتبّع إنجاز محلي. */
 export function Today({ lang, onStartWorkout, onEditPlan }: TodayProps) {
   const { customization } = useCustomization()
-  const { toggle, isDone, resetDay } = useToday()
+  const { toggle, isDone } = useToday()
   const nutritionToday = useNutritionToday()
   const wellnessToday = useWellnessToday()
   const commitmentsToday = useCommitmentsToday()
@@ -103,14 +103,11 @@ export function Today({ lang, onStartWorkout, onEditPlan }: TodayProps) {
               </span>
             </div>
             <ProgressBar current={doneCount} target={total || 1} color="bg-primary" className="mt-2 h-2.5" />
-            <button
-              type="button"
-              onClick={resetDay}
-              className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-ink-500 transition-colors hover:text-primary-c"
-            >
-              <Icon name="RotateCcw" className="h-3.5 w-3.5" />
-              {d.resetDay}
-            </button>
+            {/* لا زر «إعادة ضبط اليوم» — التصفير تلقائي عند منتصف الليل المحلّي (انظر lib/today.ts). */}
+            <p className="mt-2.5 flex items-center gap-1.5 text-[11px] font-medium text-ink-400">
+              <Icon name="RefreshCw" className="h-3 w-3" />
+              {d.autoResetHint}
+            </p>
           </div>
         </div>
 
