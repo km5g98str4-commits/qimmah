@@ -12,6 +12,8 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "typecheck": "tsc -b --noEmit",
     "build:media": "node scripts/build-exercise-media.mjs",
+    "media:gifs": "node scripts/fetch-workoutx-media.mjs",
+    "media:gifs:probe": "node scripts/fetch-workoutx-media.mjs --probe",
     "proof:media": "node scripts/run-p3-media-proof.mjs",
     "proof:achievements": "node scripts/run-achievements-proof.mjs",
     "proof:p4a3": "node scripts/run-p4a3-proof.mjs && node scripts/run-p4a3-ssr-proof.mjs"
