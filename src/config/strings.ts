@@ -29,12 +29,20 @@ export interface ShellStrings {
   auth: {
     title: string
     subtitle: string
+    signupTitle: string
+    signupSubtitle: string
+    name: string
     email: string
     password: string
     login: string
     createAccount: string
     logout: string
     continueGuest: string
+    noAccount: string
+    haveAccount: string
+    switchToSignup: string
+    switchToLogin: string
+    savePrompt: string
     disabledTitle: string
     disabledBody: string
     guestBadge: string
@@ -400,12 +408,20 @@ const ar: ShellStrings = {
   auth: {
     title: 'تسجيل الدخول',
     subtitle: 'سجّل الدخول لحفظ بياناتك على حسابك السحابي والوصول إليها من أي جهاز.',
+    signupTitle: 'حساب جديد',
+    signupSubtitle: 'أنشئ حسابك مرّة واحدة لحفظ تقدّمك والوصول إليه من أي جهاز.',
+    name: 'الاسم',
     email: 'البريد الإلكتروني',
     password: 'كلمة المرور',
     login: 'تسجيل الدخول',
     createAccount: 'إنشاء حساب جديد',
     logout: 'تسجيل الخروج',
     continueGuest: 'المتابعة كضيف',
+    noAccount: 'ما عندك حساب؟',
+    haveAccount: 'عندك حساب؟',
+    switchToSignup: 'أنشئ حسابًا',
+    switchToLogin: 'سجّل الدخول',
+    savePrompt: 'سجّل لحفظ تقدّمك',
     disabledTitle: 'تسجيل الدخول السحابي غير مفعّل حاليًا',
     disabledBody: 'تقدر تستخدم وضع الضيف على هذا الجهاز.',
     guestBadge: 'ضيف',
@@ -789,12 +805,20 @@ const en: ShellStrings = {
   auth: {
     title: 'Log in',
     subtitle: 'Log in to back up your data to the cloud and access it from any device.',
+    signupTitle: 'Create account',
+    signupSubtitle: 'Create your account once to save your progress and reach it from any device.',
+    name: 'Name',
     email: 'Email',
     password: 'Password',
     login: 'Log in',
     createAccount: 'Create account',
     logout: 'Log out',
     continueGuest: 'Continue as guest',
+    noAccount: 'No account?',
+    haveAccount: 'Have an account?',
+    switchToSignup: 'Create one',
+    switchToLogin: 'Log in',
+    savePrompt: 'Sign up to save your progress',
     disabledTitle: 'Cloud login is not enabled right now',
     disabledBody: 'You can use guest mode on this device.',
     guestBadge: 'Guest',

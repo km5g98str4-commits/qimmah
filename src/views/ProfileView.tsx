@@ -33,7 +33,7 @@ export function ProfileView({ lang, onNavigate }: ProfileViewProps) {
           </span>
           <div className="min-w-0">
             <p className="truncate text-sm font-black text-ink-900">
-              {auth.user ? auth.user.email : t.badge.guest}
+              {auth.displayName ?? t.badge.guest}
             </p>
             <p className="text-xs leading-relaxed text-ink-500">{statusText}</p>
           </div>
