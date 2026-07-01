@@ -16,7 +16,10 @@
     "media:gifs:probe": "node scripts/fetch-workoutx-media.mjs --probe",
     "proof:media": "node scripts/run-p3-media-proof.mjs",
     "proof:achievements": "node scripts/run-achievements-proof.mjs",
-    "proof:p4a3": "node scripts/run-p4a3-proof.mjs && node scripts/run-p4a3-ssr-proof.mjs"
+    "proof:p4a3": "node scripts/run-p4a3-proof.mjs && node scripts/run-p4a3-ssr-proof.mjs",
+    "proof:p5reset": "node scripts/run-p5-reset-proof.mjs",
+    "proof:p5plan": "node scripts/run-p5-plan-proof.mjs",
+    "proof:p5medals": "node scripts/run-p5-medals-shot.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.108.2",
