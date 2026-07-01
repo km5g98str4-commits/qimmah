@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Icon } from './Icon'
 import { MuscleChips } from './MuscleChips'
+import { ExerciseMedia } from './ExerciseMedia'
 import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
@@ -308,7 +309,9 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
 
       <main className="container-page flex-1 space-y-4 overflow-y-auto py-5 pb-40">
         {/* رأس التمرين */}
-        <div className="card p-5">
+        <div className="card overflow-hidden">
+          <ExerciseMedia exerciseId={exId} heightClass="h-48" hideChips />
+          <div className="p-5">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <p className="text-lg font-black leading-tight text-ink-900">{nameAr || nameEn}</p>
@@ -361,6 +364,7 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
               {t.repeatLast}
             </button>
           )}
+          </div>
         </div>
 
         {/* جولات التمرين الحالي */}
