@@ -27,6 +27,7 @@ import { ensureOnboardingProfile } from '@/lib/onboardingProfile'
 import { applyLanguage } from '@/lib/appPreferences'
 import { type AppRoute, MAIN_TABS, routeFromHash, setHashRoute } from '@/lib/appRoutes'
 import { SuccessToast } from '@/components/SuccessToast'
+import { AchievementToaster } from '@/features/achievements/AchievementToaster'
 import { BUILD_LABEL } from '@/lib/buildInfo'
 
 // اللغة مثبّتة على العربية حاليًا (الإنجليزية مخفية حتى اكتمال الترجمة).
@@ -195,6 +196,9 @@ export default function App() {
         </MobileShell>
 
         {showSuccess && <SuccessToast onClose={dismissSuccess} />}
+
+        {/* احتفالات الأوسمة والأرقام القياسية — فوق كل الشاشات الرئيسية */}
+        <AchievementToaster />
       </>
     )
   }
