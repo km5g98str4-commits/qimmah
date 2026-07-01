@@ -13,7 +13,8 @@
     "typecheck": "tsc -b --noEmit",
     "build:media": "node scripts/build-exercise-media.mjs",
     "proof:media": "node scripts/run-p3-media-proof.mjs",
-    "proof:achievements": "node scripts/run-achievements-proof.mjs"
+    "proof:achievements": "node scripts/run-achievements-proof.mjs",
+    "proof:p4a3": "node scripts/run-p4a3-proof.mjs && node scripts/run-p4a3-ssr-proof.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.108.2",
