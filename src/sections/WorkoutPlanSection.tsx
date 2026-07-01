@@ -8,12 +8,14 @@ import { getRecord } from '@/lib/exerciseHistory'
 import { getCommonMistakes, getSafetyNotes, getTechniqueTips, getVideoLabel } from '@/lib/exerciseGuidance'
 import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
+import { workoutScreenStrings } from '@/i18n/dict/workoutScreen'
 
 /** قسم «تماريني» — يعرض خطة التمرين الحالية مع شرح كل تمرين وآخر/أفضل وزن. */
 export function WorkoutPlanSection({ lang }: { lang: Lang }) {
   const { customization } = useCustomization()
   const plan = customization.workoutPlan
   const t = getStrings(lang).workout
+  const d = workoutScreenStrings[lang]
 
   return (
     <section id="workouts" className="section">
@@ -30,7 +32,7 @@ export function WorkoutPlanSection({ lang }: { lang: Lang }) {
               <div key={day.id} className="card overflow-hidden">
                 <div className="border-b border-line p-5">
                   <p className="text-sm font-bold text-ink-900">{lang === 'en' ? day.nameEn : day.nameAr}</p>
-                  <p className="text-xs text-ink-400">{day.exercises.length} تمارين</p>
+                  <p className="text-xs text-ink-400">{day.exercises.length} {d.exercisesUnit}</p>
                 </div>
                 <ul className="divide-y divide-line">
                   {day.exercises.map((pe) => {
@@ -50,7 +52,7 @@ export function WorkoutPlanSection({ lang }: { lang: Lang }) {
                               )
                             })()}
                             <p className="mt-0.5 text-xs text-ink-500">
-                              {pe.sets}×{pe.reps} · {t.rest} {pe.restSec}ث
+                              {pe.sets}×{pe.reps} · {t.rest} {pe.restSec}{d.secShort}
                               {pe.startingWeight ? ` · ${pe.startingWeight}` : ''}
                             </p>
                             {ex && (
@@ -82,12 +84,12 @@ export function WorkoutPlanSection({ lang }: { lang: Lang }) {
                           <details className="group mt-3">
                             <summary className="flex cursor-pointer list-none items-center gap-1.5 text-xs font-bold text-ink-500 transition-colors hover:text-primary-c">
                               <Icon name="ChevronDown" className="h-3.5 w-3.5 transition-transform group-open:rotate-180" />
-                              نقاط التكنيك · أخطاء شائعة · تنبيه أمان
+                              {d.guidanceSummary}
                             </summary>
                             <div className="mt-3 space-y-3">
-                              <GuidanceList icon="CheckCircle2" title="نقاط التكنيك" items={getTechniqueTips(ex)} tone="text-success" />
-                              <GuidanceList icon="X" title="أخطاء شائعة" items={getCommonMistakes(ex)} tone="text-danger" />
-                              <GuidanceList icon="AlertTriangle" title="تنبيه أمان" items={getSafetyNotes(ex)} tone="text-gold-600" />
+                              <GuidanceList icon="CheckCircle2" title={d.techniquePoints} items={getTechniqueTips(ex)} tone="text-success" />
+                              <GuidanceList icon="X" title={d.commonMistakes} items={getCommonMistakes(ex)} tone="text-danger" />
+                              <GuidanceList icon="AlertTriangle" title={d.safetyNote} items={getSafetyNotes(ex)} tone="text-gold-600" />
                             </div>
                           </details>
                         )}

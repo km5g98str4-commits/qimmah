@@ -24,14 +24,11 @@ import type { AppBadge } from '@/components/AppNav'
 import { useAuth } from '@/lib/authContext'
 import { loadOnboarding } from '@/lib/onboarding'
 import { ensureOnboardingProfile } from '@/lib/onboardingProfile'
-import { applyLanguage } from '@/lib/appPreferences'
+import { useLanguage } from '@/i18n'
 import { type AppRoute, MAIN_TABS, routeFromHash, setHashRoute } from '@/lib/appRoutes'
 import { SuccessToast } from '@/components/SuccessToast'
 import { AchievementToaster } from '@/features/achievements/AchievementToaster'
 import { BUILD_LABEL } from '@/lib/buildInfo'
-
-// اللغة مثبّتة على العربية حاليًا (الإنجليزية مخفية حتى اكتمال الترجمة).
-const LANG = 'ar' as const
 
 /**
  * حراسة المسار: التبويبات الرئيسية لا تُفتح أبدًا قبل إكمال إعداد حقيقي
@@ -59,11 +56,12 @@ function initialRoute(): AppRoute {
 /** قشرة تطبيق قِمّة — توجيه بسيط عبر hash (بلا مكتبات خارجية). */
 export default function App() {
   const auth = useAuth()
+  // اللغة الحية من سياق i18n — التبديل يعيد رسم كل الشاشات فورًا (بلا إعادة تحميل).
+  const { lang: LANG } = useLanguage()
   const badge: AppBadge = auth.user ? 'account' : 'guest'
 
   useEffect(() => {
-    applyLanguage(LANG)
-    // هجرة لمرّة واحدة لمصدر الحقيقة (تحفظ المستخدمين الحاليين؛ آمنة للجدد).
+    // تطبيق اللغة/الاتجاه يتكفّل به LanguageProvider. هنا هجرات لمرّة واحدة فقط.
     ensureOnboardingProfile()
     // معرّف البناء في الـ console — للتحقق من نشر النسخة الصحيحة.
     console.info(`%cقِمّة ${BUILD_LABEL}`, 'color:#F26A21;font-weight:bold')

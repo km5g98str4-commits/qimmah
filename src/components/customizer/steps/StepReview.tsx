@@ -5,31 +5,33 @@ import type { WizardCtx } from '../stepProps'
 import { resetQimmah } from '@/lib/resetQimmah'
 import { goalTypeLabel, targetCaloriesFor } from '@/lib/calculators'
 import { planTitle } from '@/lib/planGenerator'
+import { onboardingStrings } from '@/i18n/dict/onboarding'
 
 /** خطوة المراجعة والحفظ — ملخّص الخطة + منطقة متقدمة. */
 export function StepReview({ ctx }: { ctx: WizardCtx }) {
+  const d = onboardingStrings[ctx.lang]
   const { data } = ctx
   const [advanced, setAdvanced] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
 
   const summary: { label: string; value: string }[] = [
-    { label: 'اسمك', value: data.identity.userName },
-    { label: 'الهدف', value: goalTypeLabel(data.profile.goalType) },
-    { label: 'الوزن', value: `${data.profile.weightKg} → ${data.profile.targetWeightKg} كجم` },
-    { label: 'سعرات الهدف', value: `${targetCaloriesFor(data.profile.goal, data.targets)}` },
-    { label: 'بروتين', value: `${data.targets.proteinGrams}غ` },
-    { label: 'جدول التمرين', value: planTitle(data.workoutPlan.templateId, 'ar') },
-    { label: 'وجبات', value: `${data.nutritionPlan.meals.length}` },
-    { label: 'مكملات/أدوية', value: `${data.wellnessPlan.supplements.length + data.wellnessPlan.medications.length}` },
-    { label: 'قياسات', value: `${data.measurementPlan.selectedTypeIds.length}` },
+    { label: d.reviewName, value: data.identity.userName },
+    { label: d.reviewGoal, value: goalTypeLabel(data.profile.goalType) },
+    { label: d.reviewWeight, value: `${data.profile.weightKg} → ${data.profile.targetWeightKg} ${d.unitKg}` },
+    { label: d.reviewTargetCalories, value: `${targetCaloriesFor(data.profile.goal, data.targets)}` },
+    { label: d.reviewProtein, value: `${data.targets.proteinGrams}${d.gGram}` },
+    { label: d.reviewSchedule, value: planTitle(data.workoutPlan.templateId, ctx.lang) },
+    { label: d.reviewMeals, value: `${data.nutritionPlan.meals.length}` },
+    { label: d.reviewSuppMed, value: `${data.wellnessPlan.supplements.length + data.wellnessPlan.medications.length}` },
+    { label: d.reviewMeasurements, value: `${data.measurementPlan.selectedTypeIds.length}` },
   ]
 
   return (
     <div>
       <StepHeader
         icon="CheckCircle2"
-        title="المراجعة والحفظ"
-        description="راجع صفحتك بسرعة، وإذا كل شي تمام احفظ وأقفل. كل شيء محفوظ على جهازك."
+        title={d.reviewTitle}
+        description={d.reviewDescription}
       />
 
       <div className="rounded-2xl border border-line bg-page p-5">
@@ -46,7 +48,7 @@ export function StepReview({ ctx }: { ctx: WizardCtx }) {
 
       <p className="mt-5 flex items-center gap-2 text-sm text-ink-500">
         <Icon name="ShieldCheck" className="h-4 w-4 text-primary-c" />
-        تقدر ترجع تعدّل أي شي لاحقًا — ما يحتاج معرفة تقنية.
+        {d.reviewEditLater}
       </p>
 
       {/* منطقة متقدمة */}
@@ -58,7 +60,7 @@ export function StepReview({ ctx }: { ctx: WizardCtx }) {
         >
           <span className="flex items-center gap-2">
             <Icon name="Layers" className="h-4 w-4 text-ink-500" />
-            خيارات متقدمة
+            {d.reviewAdvancedOptions}
           </span>
           <Icon
             name="ChevronLeft"
@@ -69,13 +71,12 @@ export function StepReview({ ctx }: { ctx: WizardCtx }) {
         {advanced && (
           <div className="space-y-3 border-t border-line p-4">
             <p className="text-xs leading-relaxed text-ink-500">
-              تقدر تحفظ نسخة احتياطية من صفحتك على جهازك، أو تستعيدها لاحقًا، أو ترجع للإعداد
-              الأساسي.
+              {d.reviewAdvancedIntro}
             </p>
             <div className="flex flex-wrap gap-2">
               <button type="button" onClick={ctx.onExport} className="btn-ghost px-3 py-2 text-xs">
                 <Icon name="TrendingDown" className="h-4 w-4" />
-                حفظ نسخة احتياطية
+                {d.reviewBackup}
               </button>
               <button
                 type="button"
@@ -83,11 +84,11 @@ export function StepReview({ ctx }: { ctx: WizardCtx }) {
                 className="btn-ghost px-3 py-2 text-xs"
               >
                 <Icon name="TrendingUp" className="h-4 w-4" />
-                استعادة من نسخة
+                {d.reviewRestore}
               </button>
               <button type="button" onClick={ctx.onReset} className="btn-ghost px-3 py-2 text-xs">
                 <Icon name="RotateCcw" className="h-4 w-4" />
-                رجوع للإعداد الأساسي
+                {d.reviewResetBasic}
               </button>
               <button
                 type="button"
@@ -95,7 +96,7 @@ export function StepReview({ ctx }: { ctx: WizardCtx }) {
                 className="btn-ghost px-3 py-2 text-xs"
               >
                 <Icon name="Sparkles" className="h-4 w-4" />
-                إعادة تشغيل الإعداد الأولي
+                {d.reviewRestartOnboarding}
               </button>
               <input
                 ref={fileRef}
@@ -110,7 +111,7 @@ export function StepReview({ ctx }: { ctx: WizardCtx }) {
               />
             </div>
             <p className="text-[11px] text-ink-400">
-              «إعادة تشغيل الإعداد الأولي» يفتح لك الإعداد من جديد أول زيارة، بدون مسح بياناتك.
+              {d.reviewRestartOnboardingNote}
             </p>
 
             {/* إعادة ضبط كاملة (خطر) */}
@@ -118,20 +119,16 @@ export function StepReview({ ctx }: { ctx: WizardCtx }) {
               <button
                 type="button"
                 onClick={() => {
-                  if (
-                    window.confirm(
-                      'سيتم حذف كل بيانات قِمّة من هذا المتصفح نهائيًا (الإعداد، الخطة، المتابعات، السجلّات). لا يمكن التراجع. هل أنت متأكد؟',
-                    )
-                  ) {
+                  if (window.confirm(d.reviewFullResetConfirm)) {
                     resetQimmah()
                   }
                 }}
                 className="inline-flex items-center gap-1.5 text-xs font-bold text-danger"
               >
                 <Icon name="RotateCcw" className="h-3.5 w-3.5" />
-                إعادة ضبط قِمّة بالكامل
+                {d.reviewFullReset}
               </button>
-              <p className="mt-1 text-[11px] text-ink-400">يحذف بيانات قِمّة فقط من هذا المتصفح، ثم يبدأ من جديد.</p>
+              <p className="mt-1 text-[11px] text-ink-400">{d.reviewFullResetNote}</p>
             </div>
           </div>
         )}

@@ -34,6 +34,8 @@ import {
   splitModeChoices,
   wellnessModeChoices,
 } from '@/data/planBuilder'
+import { useLang } from '@/i18n'
+import { onboardingStrings, type OnboardingStrings } from '@/i18n/dict/onboarding'
 
 interface PlanBuilderProps {
   /** يُستدعى بعد حفظ مصدر الحقيقة والخطة وتعليم الإكمال (دخول اللوحة). */
@@ -61,16 +63,18 @@ function bmiOf(weightKg: number, heightCm: number): number | null {
 }
 
 /** خطأ وزن الهدف: تنشيف أقل من الحالي / تضخيم أعلى منه. */
-function targetWeightError(a: Answers): string | undefined {
+function targetWeightError(a: Answers, d: OnboardingStrings): string | undefined {
   if (a.goalValue === 'cut' && !(a.targetWeightKg < a.weightKg))
-    return 'وزن الهدف للتنشيف لازم يكون أقل من وزنك الحالي.'
+    return d.targetWeightErrorCut
   if (a.goalValue === 'bulk' && !(a.targetWeightKg > a.weightKg))
-    return 'وزن الهدف للتضخيم لازم يكون أعلى من وزنك الحالي.'
+    return d.targetWeightErrorBulk
   return undefined
 }
 
 /** الإعداد الذكي (Phase 1) — مصدر الحقيقة: شاشة واحدة لكل خطوة (جوال داكن، RTL). */
 export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
+  const lang = useLang()
+  const d = onboardingStrings[lang]
   const { customization, applyCustomization } = useCustomization()
   const [a, setA] = useState<Answers>(() => {
     const d = loadDraft<Partial<Answers>>()
@@ -117,17 +121,17 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
   // 0) الاسم — اختياري تمامًا وقابل للتخطّي (نرحّب فيك باسمك في الرئيسية).
   steps.push({
     key: 'name',
-    label: 'اسمك',
+    label: d.labelName,
     optional: true,
     valid: true,
     content: (
-      <Question title="وش نناديك؟" hint="اختياري — نستخدمه نرحّب فيك بالرئيسية. تقدر تتخطّاها.">
+      <Question title={d.nameTitle} hint={d.nameHint}>
         <TextField
           value={a.name}
-          placeholder="اسمك (اختياري)"
+          placeholder={d.namePlaceholder}
           maxLength={24}
           onChange={(v) => set({ name: v })}
-          ariaLabel="الاسم (اختياري)"
+          ariaLabel={d.nameAria}
         />
       </Question>
     ),
@@ -136,10 +140,10 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
   // 1) الهدف
   steps.push({
     key: 'goal',
-    label: 'الهدف',
+    label: d.labelGoal,
     valid: !!a.goalValue,
     content: (
-      <Question title="وش هدفك؟" hint="نبني الخطة كلها حوله.">
+      <Question title={d.goalTitle} hint={d.goalHint}>
         <List>
           {goalChoices.map((c) => (
             <OptionRow key={c.value} icon={c.icon} label={c.label} desc={c.desc} selected={a.goalValue === c.value} onClick={() => set({ goalValue: c.value, targetTouched: false })} />
@@ -152,10 +156,10 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
   // 2) الجنس
   steps.push({
     key: 'sex',
-    label: 'الجنس',
+    label: d.labelSex,
     valid: !!a.sex,
     content: (
-      <Question title="جنسك؟" hint="نستخدمه لحساب السعرات بدقة.">
+      <Question title={d.sexTitle} hint={d.sexHint}>
         <div className="grid grid-cols-2 gap-3">
           {sexChoices.map((c) => (
             <OptionCard key={c.value} icon={c.icon} label={c.label} selected={a.sex === c.value} onClick={() => set({ sex: c.value })} />
@@ -168,11 +172,11 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
   // 3) العمر
   steps.push({
     key: 'age',
-    label: 'العمر',
+    label: d.labelAge,
     valid: true,
     content: (
-      <Question title="كم عمرك؟">
-        <Slider value={a.age} min={BOUNDS.age.min} max={BOUNDS.age.max} unit="سنة" onChange={(v) => set({ age: v })} ariaLabel="العمر بالسنوات" />
+      <Question title={d.ageTitle}>
+        <Slider value={a.age} min={BOUNDS.age.min} max={BOUNDS.age.max} unit={d.ageUnit} onChange={(v) => set({ age: v })} ariaLabel={d.ageAria} />
       </Question>
     ),
   })
@@ -180,11 +184,11 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
   // 4) الطول
   steps.push({
     key: 'height',
-    label: 'الطول',
+    label: d.labelHeight,
     valid: true,
     content: (
-      <Question title="كم طولك؟">
-        <Slider value={a.heightCm} min={BOUNDS.height.min} max={BOUNDS.height.max} unit="سم" onChange={(v) => set({ heightCm: v })} ariaLabel="الطول بالسنتيمتر" />
+      <Question title={d.heightTitle}>
+        <Slider value={a.heightCm} min={BOUNDS.height.min} max={BOUNDS.height.max} unit={d.heightUnit} onChange={(v) => set({ heightCm: v })} ariaLabel={d.heightAria} />
       </Question>
     ),
   })
@@ -192,11 +196,11 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
   // 5) الوزن الحالي (+ BMI رقمي)
   steps.push({
     key: 'weight',
-    label: 'الوزن',
+    label: d.labelWeight,
     valid: true,
     content: (
-      <Question title="كم وزنك الحالي؟">
-        <Slider value={a.weightKg} min={BOUNDS.weight.min} max={BOUNDS.weight.max} unit="كجم" onChange={(v) => set({ weightKg: v })} ariaLabel="الوزن الحالي بالكيلوجرام" />
+      <Question title={d.weightTitle}>
+        <Slider value={a.weightKg} min={BOUNDS.weight.min} max={BOUNDS.weight.max} unit={d.weightUnit} onChange={(v) => set({ weightKg: v })} ariaLabel={d.weightAria} />
         {bmi !== null && (
           <p className="mt-4 rounded-xl border border-night-700 bg-night-900 px-4 py-3 text-center text-sm font-bold text-night-100">BMI: {bmi}</p>
         )}
@@ -208,12 +212,12 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
   if (showsTargetWeight(a.goalValue)) {
     steps.push({
       key: 'targetWeight',
-      label: 'وزن الهدف',
-      valid: !targetWeightError(a),
-      error: targetWeightError(a),
+      label: d.labelTargetWeight,
+      valid: !targetWeightError(a, d),
+      error: targetWeightError(a, d),
       content: (
-        <Question title="وش وزنك الهدف؟" hint={a.goalValue === 'cut' ? 'أقل من وزنك الحالي.' : 'أعلى من وزنك الحالي.'}>
-          <Slider value={a.targetWeightKg} min={BOUNDS.weight.min} max={BOUNDS.weight.max} unit="كجم" onChange={(v) => set({ targetWeightKg: v, targetTouched: true })} ariaLabel="الوزن الهدف بالكيلوجرام" />
+        <Question title={d.targetWeightTitle} hint={a.goalValue === 'cut' ? d.targetWeightHintCut : d.targetWeightHintBulk}>
+          <Slider value={a.targetWeightKg} min={BOUNDS.weight.min} max={BOUNDS.weight.max} unit={d.weightUnit} onChange={(v) => set({ targetWeightKg: v, targetTouched: true })} ariaLabel={d.targetWeightAria} />
         </Question>
       ),
     })
@@ -222,10 +226,10 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
   // 7) الخبرة
   steps.push({
     key: 'experience',
-    label: 'خبرتك',
+    label: d.labelExperience,
     valid: !!a.experienceLevel,
     content: (
-      <Question title="من متى وأنت تتمرن حديد؟" hint="نضبط صعوبة الخطة على مستواك.">
+      <Question title={d.experienceTitle} hint={d.experienceHint}>
         <List>
           {experienceChoices.map((c) => (
             <OptionRow key={c.value} icon={c.icon} label={c.label} desc={c.desc} selected={a.experienceLevel === c.value} onClick={() => set({ experienceLevel: c.value, consistency: c.value === 'beginner' ? undefined : a.consistency, splitMode: c.value === 'beginner' ? 'auto' : a.splitMode, advancedSplit: c.value === 'beginner' ? undefined : a.advancedSplit, daysTouched: false })} />
@@ -239,10 +243,10 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
   if (a.experienceLevel && !isBeginner) {
     steps.push({
       key: 'consistency',
-      label: 'انتظامك',
+      label: d.labelConsistency,
       valid: !!a.consistency,
       content: (
-        <Question title="كيف انتظامك حاليًا؟" hint="نبدأ من نقطة تناسب وضعك.">
+        <Question title={d.consistencyTitle} hint={d.consistencyHint}>
           <List>
             {consistencyChoicesV2.map((c) => (
               <OptionRow key={c.value} icon={c.icon} label={c.label} desc={c.desc} selected={a.consistency === c.value} onClick={() => set({ consistency: c.value })} />
@@ -256,10 +260,10 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
   // 9) بيئة التمرين
   steps.push({
     key: 'environment',
-    label: 'مكان التمرين',
+    label: d.labelEnvironment,
     valid: !!a.environment,
     content: (
-      <Question title="وين بتتمرن؟" hint="نختار تمارين مناسبة لمكانك.">
+      <Question title={d.environmentTitle} hint={d.environmentHint}>
         <List>
           {environmentChoices.map((c) => (
             <OptionRow key={c.value} icon={c.icon} label={c.label} desc={c.desc} selected={a.environment === c.value} onClick={() => set({ environment: c.value })} />
@@ -272,15 +276,15 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
   // 10) أيام التمرين بالأسبوع
   steps.push({
     key: 'days',
-    label: 'الأيام',
+    label: d.labelDays,
     valid: a.trainingDays >= BOUNDS.days.min && a.trainingDays <= BOUNDS.days.max,
     content: (
-      <Question title="كم يوم تقدر تتمرن بالأسبوع؟" hint={dayRec?.note}>
-        <Stepper value={a.trainingDays} min={BOUNDS.days.min} max={BOUNDS.days.max} onChange={(v) => set({ trainingDays: v, daysTouched: true })} unit="أيام" />
+      <Question title={d.daysTitle} hint={dayRec?.note}>
+        <Stepper value={a.trainingDays} min={BOUNDS.days.min} max={BOUNDS.days.max} onChange={(v) => set({ trainingDays: v, daysTouched: true })} unit={d.daysUnit} d={d} />
         {dayRec && (
           <button type="button" onClick={() => set({ trainingDays: dayRec.days, daysTouched: true })} className="mt-4 w-full rounded-xl border border-primary/40 bg-primary/10 px-4 py-2.5 text-sm font-bold text-primary">
             <Icon name="Sparkles" className="me-1 inline h-4 w-4" />
-            الموصى به: {dayRec.days} أيام
+            {d.recommended} {dayRec.days} {d.daysUnit}
           </button>
         )}
       </Question>
@@ -290,10 +294,10 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
   // 11) مدّة الجلسة
   steps.push({
     key: 'duration',
-    label: 'مدّة الجلسة',
+    label: d.labelDuration,
     valid: !!a.sessionDurationMin,
     content: (
-      <Question title="كم تحب تطول الجلسة؟" hint="نضبط عدد التمارين على وقتك.">
+      <Question title={d.durationTitle} hint={d.durationHint}>
         <List>
           {sessionDurationChoices.map((c) => (
             <OptionRow key={c.value} icon="Clock" label={c.label} desc={c.desc} selected={a.sessionDurationMin === c.value} onClick={() => set({ sessionDurationMin: c.value })} />
@@ -307,10 +311,10 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
   if (a.experienceLevel && !isBeginner) {
     steps.push({
       key: 'splitMode',
-      label: 'التقسيمة',
+      label: d.labelSplitMode,
       valid: !!a.splitMode,
       content: (
-        <Question title="كيف تبي نحدد التقسيمة؟" hint="التلقائي يكفي معظم الناس.">
+        <Question title={d.splitModeTitle} hint={d.splitModeHint}>
           <List>
             {splitModeChoices.map((c) => (
               <OptionRow key={c.value} icon={c.icon} label={c.label} desc={c.desc} selected={a.splitMode === c.value} onClick={() => set({ splitMode: c.value })} />
@@ -325,10 +329,10 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
   if (!isBeginner && a.splitMode === 'advanced') {
     steps.push({
       key: 'advancedSplit',
-      label: 'نوع التقسيمة',
+      label: d.labelAdvancedSplit,
       valid: !!a.advancedSplit,
       content: (
-        <Question title="أي تقسيمة تفضّل؟" hint="اختر الأنسب لأسلوبك.">
+        <Question title={d.advancedSplitTitle} hint={d.advancedSplitHint}>
           <List>
             {advancedSplitChoices.map((c) => (
               <OptionRow key={c.value} icon={c.icon} label={c.label} desc={c.desc} selected={a.advancedSplit === c.value} onClick={() => set({ advancedSplit: c.value })} />
@@ -342,10 +346,10 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
   // 14) النشاط اليومي (NEAT) + تقدير خطوات اختياري
   steps.push({
     key: 'activity',
-    label: 'نشاطك اليومي',
+    label: d.labelActivity,
     valid: !!a.neat,
     content: (
-      <Question title="كيف حركتك اليومية خارج التمرين؟" hint="تساعدنا نضبط سعراتك بدقة.">
+      <Question title={d.activityTitle} hint={d.activityHint}>
         <List>
           {neatChoices.map((c) => (
             <OptionRow key={c.value} icon={c.icon} label={c.label} desc={c.desc} selected={a.neat === c.value} onClick={() => set({ neat: c.value })} />
@@ -355,12 +359,12 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
           <Toggle
             checked={a.includeSteps}
             onChange={(v) => set({ includeSteps: v })}
-            title="أعرف عدد خطواتي اليومية"
-            subtitle="اختياري — يحسّن دقّة التقدير"
+            title={d.activityStepsToggleTitle}
+            subtitle={d.activityStepsToggleSubtitle}
           />
           {a.includeSteps && (
             <div className="mt-4">
-              <Slider value={a.stepEstimate} min={BOUNDS.steps.min} max={BOUNDS.steps.max} step={500} unit="خطوة" onChange={(v) => set({ stepEstimate: v })} ariaLabel="تقدير الخطوات اليومية" />
+              <Slider value={a.stepEstimate} min={BOUNDS.steps.min} max={BOUNDS.steps.max} step={500} unit={d.stepsUnit} onChange={(v) => set({ stepEstimate: v })} ariaLabel={d.stepsAria} />
             </div>
           )}
         </div>
@@ -371,10 +375,10 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
   // 15) أسلوب التغذية
   steps.push({
     key: 'nutritionStyle',
-    label: 'التغذية',
+    label: d.labelNutritionStyle,
     valid: !!a.nutritionStyle,
     content: (
-      <Question title="كيف تبي تتعامل مع التغذية؟" hint="نقدر نعدّلها لاحقًا.">
+      <Question title={d.nutritionStyleTitle} hint={d.nutritionStyleHint}>
         <List>
           {nutritionStyleChoices.map((c) => (
             <OptionRow key={c.value} icon={c.icon} label={c.label} desc={c.desc} selected={a.nutritionStyle === c.value} onClick={() => set({ nutritionStyle: c.value })} />
@@ -388,11 +392,11 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
   if (a.nutritionStyle === 'meal_suggestions') {
     steps.push({
       key: 'meals',
-      label: 'الوجبات',
+      label: d.labelMeals,
       valid: a.mealsPerDay >= BOUNDS.meals.min && a.mealsPerDay <= BOUNDS.meals.max,
       content: (
-        <Question title="كم وجبة باليوم تناسبك؟" hint="نوزّع سعراتك عليها.">
-          <Stepper value={a.mealsPerDay} min={BOUNDS.meals.min} max={BOUNDS.meals.max} onChange={(v) => set({ mealsPerDay: v })} unit="وجبات" />
+        <Question title={d.mealsTitle} hint={d.mealsHint}>
+          <Stepper value={a.mealsPerDay} min={BOUNDS.meals.min} max={BOUNDS.meals.max} onChange={(v) => set({ mealsPerDay: v })} unit={d.mealsUnit} d={d} />
         </Question>
       ),
     })
@@ -400,10 +404,10 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
     // 16ب) توزيع حجم الوجبات (P2.5) — يغيّر تركيز السعرات بين الوجبات.
     steps.push({
       key: 'mealDistribution',
-      label: 'توزيع الوجبات',
+      label: d.labelMealDistribution,
       valid: !!a.mealDistribution,
       content: (
-        <Question title="تفضّل وجباتك أكبر وأقل، ولا أصغر وأكثر؟" hint="يحدّد أين نركّز سعراتك.">
+        <Question title={d.mealDistributionTitle} hint={d.mealDistributionHint}>
           <List>
             {mealDistributionChoices.map((c) => (
               <OptionRow key={c.value} icon={c.icon} label={c.label} desc={c.desc} selected={a.mealDistribution === c.value} onClick={() => set({ mealDistribution: c.value })} />
@@ -416,10 +420,10 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
     // 16ج) وقت الجوع الأكثر (P2.5) — يميل توزيع السعرات للصباح أو المساء.
     steps.push({
       key: 'appetiteTiming',
-      label: 'وقت الجوع',
+      label: d.labelAppetiteTiming,
       valid: !!a.appetiteTiming,
       content: (
-        <Question title="متى تكون أكثر جوعًا؟" hint="نوزّع سعراتك على وقتك المناسب.">
+        <Question title={d.appetiteTimingTitle} hint={d.appetiteTimingHint}>
           <List>
             {appetiteTimingChoices.map((c) => (
               <OptionRow key={c.value} icon={c.icon} label={c.label} desc={c.desc} selected={a.appetiteTiming === c.value} onClick={() => set({ appetiteTiming: c.value })} />
@@ -433,19 +437,19 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
   // 17) تفضيلات الأكل — اختياري (لا يحجب توليد الخطة)
   steps.push({
     key: 'food',
-    label: 'تفضيلات الأكل',
+    label: d.labelFood,
     optional: true,
     valid: true,
     content: (
-      <Question title="تفضيلات أكلك" hint="اختياري — تقدر تتخطّاها.">
-        <p className="mb-3 text-sm font-bold text-night-300">نمط الأكل</p>
+      <Question title={d.foodTitle} hint={d.foodHint}>
+        <p className="mb-3 text-sm font-bold text-night-300">{d.foodPatternLabel}</p>
         <List>
           {dietPatternChoices.map((c) => (
             <OptionRow key={c.value} icon={c.icon} label={c.label} selected={a.dietPattern === c.value} onClick={() => set({ dietPattern: c.value })} />
           ))}
         </List>
         <div className="mt-6 border-t border-night-800 pt-5">
-          <p className="mb-3 text-sm font-bold text-night-300">حساسيات غذائية (اختر ما ينطبق)</p>
+          <p className="mb-3 text-sm font-bold text-night-300">{d.foodAllergiesLabel}</p>
           <div className="grid grid-cols-2 gap-3">
             {allergyChoices.map((c) => (
               <OptionCard key={c.value} icon={c.icon} label={c.label} selected={a.allergies.includes(c.value)} onClick={() => toggleIn('allergies', c.value)} />
@@ -459,19 +463,19 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
   // 18) القيود + المكملات/الأدوية — اختياري (شاشة واحدة، مفصولة داخليًا)
   steps.push({
     key: 'limitations',
-    label: 'قيود ومتابعة',
+    label: d.labelLimitations,
     optional: true,
     valid: true,
     content: (
-      <Question title="قيود ومتابعة" hint="اختياري — تقدر تتخطّاها.">
-        <p className="mb-3 text-sm font-bold text-night-300">إصابات أو مناطق حساسة؟</p>
+      <Question title={d.limitationsTitle} hint={d.limitationsHint}>
+        <p className="mb-3 text-sm font-bold text-night-300">{d.limitationsInjuriesLabel}</p>
         <div className="grid grid-cols-2 gap-3">
           {injuryChoices.map((c) => (
             <OptionCard key={c.value} icon={c.icon} label={c.label} selected={a.injuries.includes(c.value)} onClick={() => toggleIn('injuries', c.value)} />
           ))}
         </div>
         <div className="mt-6 border-t border-night-800 pt-5">
-          <p className="mb-3 text-sm font-bold text-night-300">تتبّع المكملات والأدوية؟</p>
+          <p className="mb-3 text-sm font-bold text-night-300">{d.limitationsWellnessLabel}</p>
           <List>
             {wellnessModeChoices.map((c) => (
               <OptionRow key={c.value} icon={c.icon} label={c.label} desc={c.desc} selected={a.wellnessMode === c.value} onClick={() => set({ wellnessMode: c.value })} />
@@ -483,7 +487,7 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
   })
 
   // شاشة البناء (لا تُحتسب خطوة نموذج)
-  steps.push({ key: 'building', label: 'نبني خطتك', content: <span /> })
+  steps.push({ key: 'building', label: d.labelBuilding, content: <span /> })
 
   // — حالة الخطوة والتنقّل —
   const [stepIndex, setStepIndex] = useState(0)
@@ -551,8 +555,8 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
             <Icon name="Dumbbell" className="h-11 w-11" />
           </span>
         </span>
-        <h1 className="mt-8 text-2xl font-black text-night-100">نبني خطتك المثالية…</h1>
-        <p className="mt-2 text-sm text-night-300">نختار التقسيمة، نوزّع الأيام، ونحسب أهدافك.</p>
+        <h1 className="mt-8 text-2xl font-black text-night-100">{d.buildingTitle}</h1>
+        <p className="mt-2 text-sm text-night-300">{d.buildingSubtitle}</p>
         <div className="mt-8 h-2 w-full max-w-xs overflow-hidden rounded-full bg-night-800">
           <div className="h-full rounded-full bg-primary transition-all duration-150" style={{ width: `${buildPct}%` }} />
         </div>
@@ -566,7 +570,7 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
       {/* رأس: رجوع + المسمّى + العدّاد + شريط التقدّم */}
       <header className="shrink-0 px-5 pt-4">
         <div className="mx-auto flex w-full max-w-md items-center justify-between gap-3">
-          <button type="button" onClick={goBack} aria-label="رجوع" className="grid h-10 w-10 place-items-center rounded-xl border border-night-700 bg-night-900 text-night-100">
+          <button type="button" onClick={goBack} aria-label={d.back} className="grid h-10 w-10 place-items-center rounded-xl border border-night-700 bg-night-900 text-night-100">
             <Icon name="ChevronRight" className="h-5 w-5" />
           </button>
           <div className="flex items-center gap-2 text-sm">
@@ -596,7 +600,7 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
           <div className="flex items-center gap-3">
             {step.optional && (
               <button type="button" onClick={goNext} className="rounded-2xl border border-night-700 bg-night-900 px-5 py-4 text-base font-bold text-night-300">
-                تخطّي
+                {d.skip}
               </button>
             )}
             <button
@@ -605,7 +609,7 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
               disabled={step.valid === false}
               className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-primary py-4 text-lg font-black text-white disabled:cursor-not-allowed disabled:opacity-40"
             >
-              {isLastForm ? 'ابنِ خطتي' : 'التالي'}
+              {isLastForm ? d.buildMyPlan : d.next}
               <Icon name="ChevronLeft" className="h-5 w-5" />
             </button>
           </div>
@@ -691,17 +695,17 @@ function TextField({ value, placeholder, maxLength, onChange, ariaLabel }: { val
   )
 }
 
-function Stepper({ value, min, max, unit, onChange }: { value: number; min: number; max: number; unit: string; onChange: (v: number) => void }) {
+function Stepper({ value, min, max, unit, onChange, d }: { value: number; min: number; max: number; unit: string; onChange: (v: number) => void; d: OnboardingStrings }) {
   return (
     <div className="flex items-center justify-between rounded-2xl border border-night-700 bg-night-900 p-3">
-      <button type="button" onClick={() => onChange(Math.max(min, value - 1))} disabled={value <= min} aria-label="ناقص" className="grid h-14 w-14 place-items-center rounded-xl bg-night-800 text-night-100 disabled:opacity-30">
+      <button type="button" onClick={() => onChange(Math.max(min, value - 1))} disabled={value <= min} aria-label={d.decrease} className="grid h-14 w-14 place-items-center rounded-xl bg-night-800 text-night-100 disabled:opacity-30">
         <Icon name="Minus" className="h-6 w-6" />
       </button>
       <div className="text-center">
         <p className="text-4xl font-black text-night-100">{value}</p>
         <p className="text-xs text-night-300">{unit}</p>
       </div>
-      <button type="button" onClick={() => onChange(Math.min(max, value + 1))} disabled={value >= max} aria-label="زائد" className="grid h-14 w-14 place-items-center rounded-xl bg-primary text-white disabled:opacity-30">
+      <button type="button" onClick={() => onChange(Math.min(max, value + 1))} disabled={value >= max} aria-label={d.increase} className="grid h-14 w-14 place-items-center rounded-xl bg-primary text-white disabled:opacity-30">
         <Icon name="Plus" className="h-6 w-6" />
       </button>
     </div>

@@ -55,9 +55,9 @@ export function DemoView({ lang, onNavigate, onBack }: DemoViewProps) {
         <main>
           <DailySummary lang={lang} />
           <Today lang={lang} />
-          <CurrentGoal />
-          <ProfileData />
-          <MyTargets />
+          <CurrentGoal lang={lang} />
+          <ProfileData lang={lang} />
+          <MyTargets lang={lang} />
           <WeeklyRoutine />
           <MuscleCoverageSection lang={lang} />
           <WorkoutPlanSection lang={lang} />

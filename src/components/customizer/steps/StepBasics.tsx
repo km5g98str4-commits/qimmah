@@ -2,44 +2,46 @@ import { Field, inputClass } from '../Field'
 import { StepHeader } from '../StepHeader'
 import type { WizardCtx } from '../stepProps'
 import { userTypeOptions, type Customization } from '@/lib/customization'
+import { onboardingStrings } from '@/i18n/dict/onboarding'
 
 /** خطوة البيانات الأساسية — الاسم، اسم الصفحة، الوصف، والنوع. */
 export function StepBasics({ ctx }: { ctx: WizardCtx }) {
+  const d = onboardingStrings[ctx.lang]
   const { data, updateIdentity } = ctx
   return (
     <div>
       <StepHeader
         icon="Users"
-        title="بياناتي الأساسية"
-        description="نبدأ بأسمك وشكل التعريف بصفحتك. كل هذا تقدر تغيّره لاحقًا."
+        title={d.basicsTitle}
+        description={d.basicsDescription}
       />
 
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="اسمك" hint="يظهر في صفحتك وفي ترحيب «اليوم»">
+        <Field label={d.basicsNameLabel} hint={d.basicsNameHint}>
           <input
             className={inputClass}
             value={data.identity.userName}
-            placeholder="مثال: محمد"
+            placeholder={d.basicsNamePlaceholder}
             onChange={(e) => updateIdentity({ userName: e.target.value })}
           />
         </Field>
-        <Field label="اسم صفحتك" hint="العنوان اللي يظهر فوق">
+        <Field label={d.basicsBrandLabel} hint={d.basicsBrandHint}>
           <input
             className={inputClass}
             value={data.identity.brandName}
-            placeholder="مثال: قِمّة"
+            placeholder={d.basicsBrandPlaceholder}
             onChange={(e) => updateIdentity({ brandName: e.target.value })}
           />
         </Field>
-        <Field label="وصف قصير" hint="جملة تعرّف بصفحتك">
+        <Field label={d.basicsTaglineLabel} hint={d.basicsTaglineHint}>
           <input
             className={inputClass}
             value={data.identity.tagline}
-            placeholder="مثال: خطتي الشخصية للنادي"
+            placeholder={d.basicsTaglinePlaceholder}
             onChange={(e) => updateIdentity({ tagline: e.target.value })}
           />
         </Field>
-        <Field label="نوعك">
+        <Field label={d.basicsUserType}>
           <select
             className={inputClass}
             value={data.identity.userType}

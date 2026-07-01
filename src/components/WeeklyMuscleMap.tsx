@@ -2,6 +2,8 @@ import { useMemo, useState } from 'react'
 import Model, { type IMuscleStats, type Muscle } from 'react-body-highlighter'
 import { Icon } from './Icon'
 import { cn } from '@/lib/cn'
+import { progressScreenStrings } from '@/i18n/dict/progressScreen'
+import type { Lang } from '@/lib/appPreferences'
 import { muscleGroups } from '@/data/muscleGroups'
 import { computeWeeklyCoverage } from '@/lib/muscleCoverage'
 import { loadSessions } from '@/lib/workoutSessions'
@@ -16,7 +18,8 @@ import type { MuscleView } from '@/types/muscles'
 /** يحوّل جهة العرض المحلية إلى نوع نموذج المكتبة. */
 const MODEL_TYPE = { front: 'anterior', back: 'posterior' } as const
 
-export function WeeklyMuscleMap({ className }: { className?: string }) {
+export function WeeklyMuscleMap({ className, lang }: { className?: string; lang: Lang }) {
+  const d = progressScreenStrings[lang]
   const { customization } = useCustomization()
   const [view, setView] = useState<MuscleView>('front')
   const [selected, setSelected] = useState<Muscle | null>(null)
@@ -40,10 +43,10 @@ export function WeeklyMuscleMap({ className }: { className?: string }) {
   const caption = selLabel
     ? `${selLabel} — اضغط عضلة ثانية للتفاصيل`
     : trainedCount > 0
-      ? `فعّلت ${trainedCount} من ${muscleGroups.length} عضلة هذا الأسبوع 💪`
-      : 'ابدأ تمرينك وبتشوف عضلاتك تتلوّن هنا.'
+      ? `${d.activatedPrefix} ${trainedCount} ${d.activatedMiddle} ${muscleGroups.length} ${d.activatedSuffix}`
+      : d.emptyCaption
 
-  const genderLabel = gender === 'female' ? 'أنثى' : gender === 'male' ? 'ذكر' : 'محايد'
+  const genderLabel = gender === 'female' ? d.mapGenderFemale : gender === 'male' ? d.mapGenderMale : d.mapGenderNeutral
 
   const handleClick = (stats: IMuscleStats) => {
     const m = stats?.muscle
@@ -60,11 +63,11 @@ export function WeeklyMuscleMap({ className }: { className?: string }) {
             <Icon name="Dumbbell" className="h-5 w-5" />
           </span>
           <div>
-            <p className="text-sm font-black text-ink-900">خريطة عضلاتك</p>
-            <p className="text-[11px] font-bold text-ink-400">هذا الأسبوع · {genderLabel}</p>
+            <p className="text-sm font-black text-ink-900">{d.mapTitle}</p>
+            <p className="text-[11px] font-bold text-ink-400">{d.thisWeekWord} · {genderLabel}</p>
           </div>
         </div>
-        <div className="inline-flex rounded-full border border-line bg-page p-1" role="group" aria-label="جهة عرض الجسم">
+        <div className="inline-flex rounded-full border border-line bg-page p-1" role="group" aria-label={d.bodyViewGroupAria}>
           {(['front', 'back'] as MuscleView[]).map((v) => (
             <button
               key={v}
@@ -79,7 +82,7 @@ export function WeeklyMuscleMap({ className }: { className?: string }) {
                 view === v ? 'bg-primary text-white shadow-soft' : 'text-ink-500 hover:text-ink-900',
               )}
             >
-              {v === 'front' ? 'أمامي' : 'خلفي'}
+              {v === 'front' ? d.viewFront : d.viewBack}
             </button>
           ))}
         </div>
@@ -89,7 +92,7 @@ export function WeeklyMuscleMap({ className }: { className?: string }) {
       <div
         className="flex justify-center"
         role="img"
-        aria-label={`خريطة العضلات — العرض ${view === 'front' ? 'الأمامي' : 'الخلفي'}، فعّلت ${trainedCount} عضلة هذا الأسبوع`}
+        aria-label={`${d.mapImgAriaPrefix} ${genderLabel}, ${d.mapImgAriaView} ${view === 'front' ? d.mapImgAriaFront : d.mapImgAriaBack}, ${d.activatedPrefix} ${trainedCount} ${d.mapImgAriaSuffix}`}
       >
         <Model
           type={MODEL_TYPE[view]}
@@ -111,14 +114,14 @@ export function WeeklyMuscleMap({ className }: { className?: string }) {
             className="inline-block h-3 w-6 rounded-full"
             style={{ background: `linear-gradient(90deg, ${HEAT_SCALE[0]}, ${HEAT_SCALE[2]})` }}
           />
-          درّبتها (الأغمق أكثر)
+          {d.legendTrained}
         </span>
         <span className="flex items-center gap-1.5">
           <span
             className="inline-block h-3 w-3 rounded-full"
             style={{ backgroundColor: BODY_NEUTRAL, border: '1px solid rgba(43,37,32,0.18)' }}
           />
-          لم تُدرّب
+          {d.legendUntrained}
         </span>
       </div>
     </div>

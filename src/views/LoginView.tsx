@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Icon } from '@/components/Icon'
 import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
+import { miscStrings } from '@/i18n/dict/misc'
 import { useAuth } from '@/lib/authContext'
 
 interface LoginViewProps {
@@ -14,6 +15,7 @@ interface LoginViewProps {
 /** شاشة الحساب — تسجيل دخول/إنشاء حساب (Supabase) أو متابعة كضيف. */
 export function LoginView({ lang, onSuccess, onGuest, onBack }: LoginViewProps) {
   const t = getStrings(lang)
+  const d = miscStrings[lang]
   const auth = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -29,7 +31,7 @@ export function LoginView({ lang, onSuccess, onGuest, onBack }: LoginViewProps) 
     const r = await auth.signIn(email, password)
     setBusy(false)
     if (r.ok) onSuccess()
-    else setMsg(r.error ?? 'تعذّر تسجيل الدخول.')
+    else setMsg(r.error ?? d.loginFailed)
   }
 
   const onCreate = async () => {
@@ -37,8 +39,8 @@ export function LoginView({ lang, onSuccess, onGuest, onBack }: LoginViewProps) 
     setMsg(null)
     const r = await auth.signUp(email, password)
     setBusy(false)
-    if (!r.ok) setMsg(r.error ?? 'تعذّر إنشاء الحساب.')
-    else if (r.needsConfirmation) setMsg('أنشئنا حسابك. تحقّق من بريدك لتأكيد الحساب ثم سجّل الدخول.')
+    if (!r.ok) setMsg(r.error ?? d.createFailed)
+    else if (r.needsConfirmation) setMsg(d.accountCreatedConfirm)
     else onSuccess()
   }
 

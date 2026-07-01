@@ -8,6 +8,7 @@ import { cn } from '@/lib/cn'
 import type { WizardCtx } from '../stepProps'
 import type { FoodTiming, PlanMedication, PlanSupplement, WellnessPlan } from '@/types/wellness'
 import { getStrings } from '@/config/strings'
+import { onboardingStrings } from '@/i18n/dict/onboarding'
 import {
   createCustomMedication,
   createCustomSupplement,
@@ -21,7 +22,8 @@ const inputCls = 'w-full rounded-lg border border-line bg-beige px-2.5 py-1.5 te
 
 /** خطوة المكملات والأدوية — مكتبتان + محرّر + إضافة مخصّصة + تنويه طبي. */
 export function StepWellness({ ctx }: { ctx: WizardCtx }) {
-  const t = getStrings('ar').wellness
+  const d = onboardingStrings[ctx.lang]
+  const t = getStrings(ctx.lang).wellness
   const wp = ctx.data.wellnessPlan
   const setWp = (partial: Partial<WellnessPlan>) => ctx.update({ wellnessPlan: { ...wp, ...partial } })
   const [tab, setTab] = useState<'supp' | 'med'>('supp')
@@ -45,7 +47,7 @@ export function StepWellness({ ctx }: { ctx: WizardCtx }) {
 
   return (
     <div>
-      <StepHeader icon="Pill" title="المكملات والأدوية" description="نظّم مكملاتك وأدويتك للمتابعة فقط. الأدوية للمتابعة وليست نصيحة طبية." />
+      <StepHeader icon="Pill" title={d.wellTitle} description={d.wellDescription} />
 
       {/* تفعيل */}
       <button
@@ -79,17 +81,17 @@ export function StepWellness({ ctx }: { ctx: WizardCtx }) {
             {wp.supplements.map((s) => (
               <div key={s.id} className="card p-4">
                 <div className="mb-3 flex items-center justify-between">
-                  <p className="text-sm font-bold text-ink-900">{supplementName(s, 'ar')}</p>
-                  <button type="button" onClick={() => setWp({ supplements: reindexS(wp.supplements.filter((x) => x.id !== s.id)) })} className="grid h-8 w-8 place-items-center rounded-lg border border-rose-500/20 bg-rose-500/10 text-rose-500" aria-label="حذف"><Icon name="X" className="h-4 w-4" /></button>
+                  <p className="text-sm font-bold text-ink-900">{supplementName(s, ctx.lang)}</p>
+                  <button type="button" onClick={() => setWp({ supplements: reindexS(wp.supplements.filter((x) => x.id !== s.id)) })} className="grid h-8 w-8 place-items-center rounded-lg border border-rose-500/20 bg-rose-500/10 text-rose-500" aria-label={d.wellDelete}><Icon name="X" className="h-4 w-4" /></button>
                 </div>
                 {!s.supplementId && (
                   <div className="mb-2 grid gap-2 sm:grid-cols-2">
-                    <input className={inputCls} value={s.customNameAr ?? ''} onChange={(e) => updateSupp(s.id, { customNameAr: e.target.value })} placeholder="الاسم (عربي)" />
-                    <input className={inputCls} value={s.customNameEn ?? ''} onChange={(e) => updateSupp(s.id, { customNameEn: e.target.value })} placeholder="Name (English)" />
+                    <input className={inputCls} value={s.customNameAr ?? ''} onChange={(e) => updateSupp(s.id, { customNameAr: e.target.value })} placeholder={d.wellSuppNameArPlaceholder} />
+                    <input className={inputCls} value={s.customNameEn ?? ''} onChange={(e) => updateSupp(s.id, { customNameEn: e.target.value })} placeholder={d.wellSuppNameEnPlaceholder} />
                   </div>
                 )}
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                  <Field label={t.amount}><input className={inputCls} value={s.amount ?? ''} onChange={(e) => updateSupp(s.id, { amount: e.target.value })} placeholder="مثال: مكيال" /></Field>
+                  <Field label={t.amount}><input className={inputCls} value={s.amount ?? ''} onChange={(e) => updateSupp(s.id, { amount: e.target.value })} placeholder={d.wellSuppAmountPlaceholder} /></Field>
                   <Field label={t.timing}><input className={inputCls} value={s.timing ?? ''} onChange={(e) => updateSupp(s.id, { timing: e.target.value })} /></Field>
                   <Field label={t.frequency}><input className={inputCls} value={s.frequency ?? ''} onChange={(e) => updateSupp(s.id, { frequency: e.target.value })} /></Field>
                   <Field label={t.notes}><input className={inputCls} value={s.notes ?? ''} onChange={(e) => updateSupp(s.id, { notes: e.target.value })} /></Field>
@@ -115,13 +117,13 @@ export function StepWellness({ ctx }: { ctx: WizardCtx }) {
             {wp.medications.map((m) => (
               <div key={m.id} className="card p-4">
                 <div className="mb-3 flex items-center justify-between">
-                  <p className="text-sm font-bold text-ink-900">{medicationName(m, 'ar')}</p>
-                  <button type="button" onClick={() => setWp({ medications: reindexM(wp.medications.filter((x) => x.id !== m.id)) })} className="grid h-8 w-8 place-items-center rounded-lg border border-rose-500/20 bg-rose-500/10 text-rose-500" aria-label="حذف"><Icon name="X" className="h-4 w-4" /></button>
+                  <p className="text-sm font-bold text-ink-900">{medicationName(m, ctx.lang)}</p>
+                  <button type="button" onClick={() => setWp({ medications: reindexM(wp.medications.filter((x) => x.id !== m.id)) })} className="grid h-8 w-8 place-items-center rounded-lg border border-rose-500/20 bg-rose-500/10 text-rose-500" aria-label={d.wellDelete}><Icon name="X" className="h-4 w-4" /></button>
                 </div>
                 {!m.medicationId && (
                   <div className="mb-2 grid gap-2 sm:grid-cols-2">
-                    <input className={inputCls} value={m.customNameAr ?? ''} onChange={(e) => updateMed(m.id, { customNameAr: e.target.value })} placeholder="الاسم (عربي)" />
-                    <input className={inputCls} value={m.customNameEn ?? ''} onChange={(e) => updateMed(m.id, { customNameEn: e.target.value })} placeholder="Name (English)" />
+                    <input className={inputCls} value={m.customNameAr ?? ''} onChange={(e) => updateMed(m.id, { customNameAr: e.target.value })} placeholder={d.wellMedNameArPlaceholder} />
+                    <input className={inputCls} value={m.customNameEn ?? ''} onChange={(e) => updateMed(m.id, { customNameEn: e.target.value })} placeholder={d.wellMedNameEnPlaceholder} />
                   </div>
                 )}
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -143,8 +145,8 @@ export function StepWellness({ ctx }: { ctx: WizardCtx }) {
         </div>
       )}
 
-      {suppPicker && <SupplementLibraryPicker lang="ar" onClose={() => setSuppPicker(false)} onAdd={(id) => { setWp({ supplements: reindexS([...wp.supplements, createPlanSupplement(id, wp.supplements.length)]) }); setSuppPicker(false) }} />}
-      {medPicker && <MedicationLibraryPicker lang="ar" onClose={() => setMedPicker(false)} onAdd={(id) => { setWp({ medications: reindexM([...wp.medications, createPlanMedication(id, wp.medications.length)]) }); setMedPicker(false) }} />}
+      {suppPicker && <SupplementLibraryPicker lang={ctx.lang} onClose={() => setSuppPicker(false)} onAdd={(id) => { setWp({ supplements: reindexS([...wp.supplements, createPlanSupplement(id, wp.supplements.length)]) }); setSuppPicker(false) }} />}
+      {medPicker && <MedicationLibraryPicker lang={ctx.lang} onClose={() => setMedPicker(false)} onAdd={(id) => { setWp({ medications: reindexM([...wp.medications, createPlanMedication(id, wp.medications.length)]) }); setMedPicker(false) }} />}
     </div>
   )
 }

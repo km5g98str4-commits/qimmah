@@ -5,6 +5,7 @@ import { FOOD_ESTIMATE_NOTE, searchFood, type FoodItem, type FoodSize } from '@/
 import { useNutritionToday, type MealSlot } from '@/lib/nutritionTracking'
 import { NUM_LIMITS, parseSafeNumber, sanitizeNumericInput } from '@/lib/validation'
 import { getStrings } from '@/config/strings'
+import { nutritionScreenStrings } from '@/i18n/dict/nutritionScreen'
 import type { Lang } from '@/lib/appPreferences'
 
 interface QuickMealLoggerProps {
@@ -28,6 +29,7 @@ function round(n: number): number {
 /** مسجّل وجبات سريع — بحث في قاعدة الأطعمة أو إضافة سعرات/بروتين مخصّصة، مع تقدّم يومي. */
 export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMeal, embedded = false, onLogged }: QuickMealLoggerProps) {
   const t = getStrings(lang).nutrition
+  const d = nutritionScreenStrings[lang]
   const { state, totals, addLog, removeLog } = useNutritionToday()
 
   const [open, setOpen] = useState(embedded)
@@ -112,7 +114,7 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
   const addCustom = () => {
     if (!canAddCustom) return
     addLog({
-      label: cName.trim() || (lang === 'en' ? 'Quick add' : 'إضافة سريعة'),
+      label: cName.trim() || d.quickAddLabel,
       servings: 1,
       calories: round(cal),
       protein: round(prot),
@@ -149,11 +151,11 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
               <div className="flex items-center justify-between text-xs">
                 <span className="font-bold text-ink-700">{t.protein}</span>
                 <span className="text-ink-500">
-                  <span className="font-bold text-ink-900">{eatenProt}</span> / {targetProtein}غ
+                  <span className="font-bold text-ink-900">{eatenProt}</span> / {targetProtein}{t.gramsUnit}
                 </span>
               </div>
               <ProgressBar current={eatenProt} target={targetProtein || 1} color="bg-brand-500" className="mt-2" />
-              <p className="mt-1 text-[11px] text-ink-400">{t.remainingProtein}: <span className="font-bold text-ink-700">{remProt}غ</span></p>
+              <p className="mt-1 text-[11px] text-ink-400">{t.remainingProtein}: <span className="font-bold text-ink-700">{remProt}{t.gramsUnit}</span></p>
             </div>
           </div>
 
@@ -203,7 +205,7 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
               {!selected && query.trim() && (
                 <ul className="mt-2 max-h-56 divide-y divide-line overflow-y-auto rounded-lg border border-line">
                   {results.length === 0 && (
-                    <li className="p-3 text-xs text-ink-400">{lang === 'en' ? 'No results' : 'لا نتائج'}</li>
+                    <li className="p-3 text-xs text-ink-400">{d.noResults}</li>
                   )}
                   {results.map((f) => (
                     <li key={f.id}>
@@ -223,7 +225,7 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
                           </span>
                           <span className="block text-[11px] text-ink-400">{f.servingLabelAr} · {f.category}</span>
                         </span>
-                        <span className="shrink-0 text-[11px] font-bold text-orange-300">{f.calories} · {f.protein}غ</span>
+                        <span className="shrink-0 text-[11px] font-bold text-orange-300">{f.calories} · {f.protein}{t.gramsUnit}</span>
                       </button>
                     </li>
                   ))}
@@ -296,14 +298,14 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
                   type="text"
                   value={cName}
                   onChange={(e) => setCName(e.target.value)}
-                  placeholder={lang === 'en' ? 'e.g. Home kabsa plate' : 'مثال: صحن كبسة بيت'}
+                  placeholder={d.foodNameExample}
                   className="mt-1 w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink-900 outline-none focus:border-primary-c"
                 />
               </div>
               <Field label={`${t.calories} (0–${NUM_LIMITS.quickCalories.max})`} value={cCal} onChange={setCCal} max={NUM_LIMITS.quickCalories.max} placeholder="0" />
-              <Field label={`${t.protein} (غ)`} value={cProt} onChange={setCProt} max={NUM_LIMITS.quickProtein.max} placeholder="0" />
-              <Field label={`${t.carbs} (غ) — ${t.optional}`} value={cCarb} onChange={setCCarb} max={NUM_LIMITS.quickMacro.max} placeholder="0" />
-              <Field label={`${t.fat} (غ) — ${t.optional}`} value={cFat} onChange={setCFat} max={NUM_LIMITS.quickMacro.max} placeholder="0" />
+              <Field label={`${t.protein} (${t.gramsUnit})`} value={cProt} onChange={setCProt} max={NUM_LIMITS.quickProtein.max} placeholder="0" />
+              <Field label={`${t.carbs} (${t.gramsUnit}) — ${t.optional}`} value={cCarb} onChange={setCCarb} max={NUM_LIMITS.quickMacro.max} placeholder="0" />
+              <Field label={`${t.fat} (${t.gramsUnit}) — ${t.optional}`} value={cFat} onChange={setCFat} max={NUM_LIMITS.quickMacro.max} placeholder="0" />
               <button type="button" onClick={addCustom} disabled={!canAddCustom} className="btn-primary col-span-2 justify-center py-2 text-xs disabled:cursor-not-allowed disabled:opacity-40">
                 <Icon name="Plus" className="h-4 w-4" />
                 {t.addToLog}
@@ -329,7 +331,7 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
                   <li key={e.id} className="flex items-center gap-3 py-2">
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-sm text-ink-900">{e.label}</span>
-                      <span className="block text-[11px] text-ink-400">{e.calories} سعرة · {e.protein}غ بروتين</span>
+                      <span className="block text-[11px] text-ink-400">{e.calories} {d.caloriesUnit} · {e.protein}{t.gramsUnit} {d.caloriesDotProteinG}</span>
                     </span>
                     <button
                       type="button"

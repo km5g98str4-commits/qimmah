@@ -5,6 +5,7 @@ import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
 import type { AppRoute } from '@/lib/appRoutes'
 import type { AppBadge } from './AppNav'
+import { LanguageToggle } from '@/i18n'
 
 export type MainTab = 'dashboard' | 'workout' | 'nutrition' | 'progress' | 'profile'
 
@@ -68,6 +69,7 @@ export function MobileShell({ lang, tab, badge, onNavigate, onOpenSettings, chil
                 <Icon name={badgeIcon} className="h-3 w-3" />
                 {badgeLabel}
               </span>
+              <LanguageToggle variant="compact" />
               <button
                 type="button"
                 onClick={onOpenSettings}

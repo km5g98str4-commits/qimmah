@@ -7,6 +7,7 @@ import { computeWeeklyCoverage } from '@/lib/muscleCoverage'
 import { summarizeMuscleGroups } from '@/lib/muscleGroupCoverage'
 import { loadSessions, type WorkoutSession } from '@/lib/workoutSessions'
 import { getDayStamp } from '@/lib/today'
+import { progressScreenStrings } from '@/i18n/dict/progressScreen'
 import type { Lang } from '@/lib/appPreferences'
 import type { WorkoutPlan } from '@/types/workout'
 
@@ -15,6 +16,7 @@ import type { WorkoutPlan } from '@/types/workout'
  * تصميم كمال أجسام: مدمج، عالي التباين، بلا رسوم طفولية.
  */
 export function MuscleCoverageSection({ lang }: { lang: Lang }) {
+  const d = progressScreenStrings[lang]
   const { customization } = useCustomization()
   const isDemo = useIsDemo()
   const plan = customization.workoutPlan
@@ -38,17 +40,17 @@ export function MuscleCoverageSection({ lang }: { lang: Lang }) {
           <div>
             <span className="eyebrow">
               <Icon name="Activity" className="h-3.5 w-3.5" />
-              تغطية العضلات
+              {d.coverageEyebrow}
             </span>
-            <h2 className="mt-3 text-2xl font-black text-ink-900 sm:text-3xl">عضلاتك هذا الأسبوع</h2>
-            <p className="mt-1 text-sm text-ink-500">وش تمرّنت، وش تعافى، ووش ناقصك — توزيع أسبوعي واضح.</p>
+            <h2 className="mt-3 text-2xl font-black text-ink-900 sm:text-3xl">{d.coverageTitle}</h2>
+            <p className="mt-1 text-sm text-ink-500">{d.coverageDesc}</p>
           </div>
 
           {hasData && (
             <div className="flex gap-2">
-              <SummaryPill icon="CheckCircle2" value={summary.complete} label="مكتملة" tone="#1F9D57" />
-              <SummaryPill icon="AlertTriangle" value={summary.undertrained} label="ناقصة" tone="#D6553A" />
-              <SummaryPill icon="Moon" value={summary.needRest} label="راحة" tone="#E0941F" />
+              <SummaryPill icon="CheckCircle2" value={summary.complete} label={d.pillComplete} tone="#1F9D57" />
+              <SummaryPill icon="AlertTriangle" value={summary.undertrained} label={d.pillUndertrained} tone="#D6553A" />
+              <SummaryPill icon="Moon" value={summary.needRest} label={d.pillRest} tone="#E0941F" />
             </div>
           )}
         </div>
@@ -70,13 +72,13 @@ export function MuscleCoverageSection({ lang }: { lang: Lang }) {
             )}
 
             {/* بطاقات المجموعات العضلية */}
-            <MuscleCoverageGrid coverage={result.weeklyCoverage} level={level} className="mt-5" />
+            <MuscleCoverageGrid coverage={result.weeklyCoverage} level={level} className="mt-5" lang={lang} />
           </>
         ) : (
-          <EmptyState />
+          <EmptyState lang={lang} />
         )}
 
-        {lang === 'en' && <p className="mt-3 text-xs text-ink-400">Muscle coverage is shown in Arabic in this preview.</p>}
+        {lang === 'en' && <p className="mt-3 text-xs text-ink-400">Muscle recommendations are shown in Arabic in this preview.</p>}
       </div>
     </section>
   )
@@ -96,7 +98,8 @@ function SummaryPill({ icon, value, label, tone }: { icon: string; value: number
   )
 }
 
-function EmptyState() {
+function EmptyState({ lang }: { lang: Lang }) {
+  const d = progressScreenStrings[lang]
   return (
     <div className="mt-6 overflow-hidden rounded-2xl border border-line bg-surface shadow-card">
       <div className="flex flex-col items-center gap-3 px-6 py-12 text-center">
@@ -104,9 +107,9 @@ function EmptyState() {
           <Icon name="Dumbbell" className="h-7 w-7" />
         </span>
         <p className="max-w-md text-base font-bold leading-relaxed text-ink-900">
-          ابدأ أول تمرينك، وبعدها بنعرض لك توزيع عضلاتك خلال الأسبوع.
+          {d.sectionEmptyTitle}
         </p>
-        <p className="text-sm text-ink-500">كل مجموعة تسجّلها تنعكس مباشرة على تغطية عضلاتك.</p>
+        <p className="text-sm text-ink-500">{d.sectionEmptyBody}</p>
       </div>
     </div>
   )

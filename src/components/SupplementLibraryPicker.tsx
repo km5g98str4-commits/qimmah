@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Icon } from './Icon'
 import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
+import { wellnessScreenStrings } from '@/i18n/dict/wellnessScreen'
 import { supplementLibrary } from '@/data/supplementLibrary'
 import type { SupplementCategory } from '@/types/wellness'
 
@@ -11,21 +12,22 @@ interface Props {
   onClose: () => void
 }
 
-const catOptions: { value: SupplementCategory | 'all'; label: string }[] = [
-  { value: 'all', label: 'كل الفئات' },
-  { value: 'protein', label: 'بروتين' },
-  { value: 'performance', label: 'أداء' },
-  { value: 'recovery', label: 'استشفاء' },
-  { value: 'vitamins', label: 'فيتامينات' },
-  { value: 'minerals', label: 'معادن' },
-  { value: 'hydration', label: 'ترطيب' },
-  { value: 'digestive', label: 'هضمي' },
-  { value: 'general_health', label: 'صحة عامة' },
-  { value: 'other', label: 'أخرى' },
+const catOptions = (d: (typeof wellnessScreenStrings)['ar']): { value: SupplementCategory | 'all'; label: string }[] => [
+  { value: 'all', label: d.allCategories },
+  { value: 'protein', label: d.supCatProtein },
+  { value: 'performance', label: d.supCatPerformance },
+  { value: 'recovery', label: d.supCatRecovery },
+  { value: 'vitamins', label: d.supCatVitamins },
+  { value: 'minerals', label: d.supCatMinerals },
+  { value: 'hydration', label: d.supCatHydration },
+  { value: 'digestive', label: d.supCatDigestive },
+  { value: 'general_health', label: d.supCatGeneralHealth },
+  { value: 'other', label: d.supCatOther },
 ]
 
 export function SupplementLibraryPicker({ lang, onAdd, onClose }: Props) {
   const t = getStrings(lang).wellness
+  const d = wellnessScreenStrings[lang]
   const [q, setQ] = useState('')
   const [cat, setCat] = useState<SupplementCategory | 'all'>('all')
 
@@ -42,8 +44,8 @@ export function SupplementLibraryPicker({ lang, onAdd, onClose }: Props) {
     <div className="fixed inset-0 z-[60] flex items-end justify-center bg-ink-900/40 p-0 sm:items-center sm:p-6">
       <div className="flex max-h-[90vh] w-full max-w-lg flex-col rounded-t-3xl bg-surface shadow-card sm:rounded-3xl">
         <div className="flex items-center justify-between border-b border-line p-4">
-          <h3 className="text-base font-bold text-ink-900">مكتبة المكملات</h3>
-          <button type="button" onClick={onClose} aria-label="إغلاق" className="grid h-8 w-8 place-items-center rounded-lg text-ink-500 hover:bg-beige"><Icon name="X" className="h-5 w-5" /></button>
+          <h3 className="text-base font-bold text-ink-900">{d.supplementLibraryTitle}</h3>
+          <button type="button" onClick={onClose} aria-label={d.close} className="grid h-8 w-8 place-items-center rounded-lg text-ink-500 hover:bg-beige"><Icon name="X" className="h-5 w-5" /></button>
         </div>
         <div className="space-y-2 border-b border-line p-4">
           <div className="flex items-center gap-2 rounded-xl border border-line bg-page px-3">
@@ -51,12 +53,12 @@ export function SupplementLibraryPicker({ lang, onAdd, onClose }: Props) {
             <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t.search} className="w-full bg-transparent py-2.5 text-sm text-ink-900 focus:outline-none" />
           </div>
           <select className="rounded-lg border border-line bg-surface px-2.5 py-2 text-xs font-bold text-ink-700" value={cat} onChange={(e) => setCat(e.target.value as SupplementCategory | 'all')}>
-            {catOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+            {catOptions(d).map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
         </div>
         <div className="flex-1 overflow-y-auto p-3">
           {filtered.length === 0 ? (
-            <p className="py-10 text-center text-sm text-ink-400">ما فيه نتائج.</p>
+            <p className="py-10 text-center text-sm text-ink-400">{d.noResults}</p>
           ) : (
             <ul className="space-y-2">
               {filtered.map((s) => (
@@ -70,7 +72,7 @@ export function SupplementLibraryPicker({ lang, onAdd, onClose }: Props) {
                         <p className="mt-0.5 text-[11px] font-bold text-danger">{t.caution}: {lang === 'en' ? s.cautionEn : s.cautionAr}</p>
                       )}
                     </div>
-                    <button type="button" onClick={() => onAdd(s.id)} className="btn-primary shrink-0 px-3 py-2 text-xs"><Icon name="Plus" className="h-4 w-4" />أضف</button>
+                    <button type="button" onClick={() => onAdd(s.id)} className="btn-primary shrink-0 px-3 py-2 text-xs"><Icon name="Plus" className="h-4 w-4" />{d.add}</button>
                   </div>
                 </li>
               ))}

@@ -9,6 +9,7 @@ import { weeklyAdherenceStreak } from '@/lib/streaks'
 import { useCustomization } from '@/lib/customizationContext'
 import { loadReminderPrefs, saveReminderPrefs, type ReminderPrefs } from '@/lib/reminderPrefs'
 import { getStrings } from '@/config/strings'
+import { progressScreenStrings } from '@/i18n/dict/progressScreen'
 import type { Lang } from '@/lib/appPreferences'
 
 interface ProgressViewProps {
@@ -19,6 +20,7 @@ interface ProgressViewProps {
 export function ProgressView({ lang }: ProgressViewProps) {
   const t = getStrings(lang).progress
   const tw = getStrings(lang).workout
+  const d = progressScreenStrings[lang]
   const { customization } = useCustomization()
   const daysPerWeek = customization.workoutPlan.days.length || 3
 
@@ -55,7 +57,7 @@ export function ProgressView({ lang }: ProgressViewProps) {
           <Card icon="Scale" title={t.cardWeight}>
             {stats.weight ? (
               <p className="text-2xl font-black text-ink-900">
-                {stats.weight}<span className="text-xs font-bold text-ink-400"> كجم</span>
+                {stats.weight}<span className="text-xs font-bold text-ink-400"> {d.weightUnit}</span>
                 {stats.weightTrend && (
                   <Icon
                     name={stats.weightTrend === 'up' ? 'TrendingUp' : stats.weightTrend === 'down' ? 'TrendingDown' : 'Minus'}
@@ -93,7 +95,7 @@ export function ProgressView({ lang }: ProgressViewProps) {
             <Empty text={t.noWorkouts} />
           )}
           {hasWorkouts && (
-            <p className="mt-2 text-[11px] text-ink-400">{stats.counts.thisWeek} هذا الأسبوع · {stats.counts.total} إجمالًا</p>
+            <p className="mt-2 text-[11px] text-ink-400">{stats.counts.thisWeek} {d.thisWeekWord} · {stats.counts.total} {d.totalWord}</p>
           )}
         </Card>
 
@@ -104,7 +106,7 @@ export function ProgressView({ lang }: ProgressViewProps) {
               {stats.prs.map((pr) => (
                 <li key={pr.exerciseId} className="flex items-center justify-between gap-2">
                   <span className="min-w-0 truncate text-sm text-ink-900">{pr.nameAr}</span>
-                  <span className="shrink-0 rounded-lg bg-primary-soft px-2 py-0.5 text-xs font-black text-primary-c">{pr.weight} كجم</span>
+                  <span className="shrink-0 rounded-lg bg-primary-soft px-2 py-0.5 text-xs font-black text-primary-c">{pr.weight} {d.prWeightUnit}</span>
                 </li>
               ))}
             </ul>
@@ -129,10 +131,10 @@ export function ProgressView({ lang }: ProgressViewProps) {
         </Card>
 
         {/* خريطة العضلات الأسبوعية — تُضيء ما درّبته هذا الأسبوع */}
-        <WeeklyMuscleMap className="mt-3" />
+        <WeeklyMuscleMap className="mt-3" lang={lang} />
 
         {/* عدّاد الخطوات اليدوي + الهدف اليومي (إدخال يدوي فقط — لا مزامنة صحّية) */}
-        <StepCounterCard className="mt-3" />
+        <StepCounterCard className="mt-3" lang={lang} />
 
         {/* التذكيرات */}
         <ReminderCard lang={lang} />

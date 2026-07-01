@@ -3,21 +3,24 @@ import { Icon } from '@/components/Icon'
 import { sectionCopy } from '@/config/content'
 import { useCustomization } from '@/lib/customizationContext'
 import { activityOptions, targetCaloriesFor } from '@/lib/calculators'
+import { profileScreenStrings } from '@/i18n/dict/profileScreen'
+import type { Lang } from '@/lib/appPreferences'
 
 /** قسم البيانات الأساسية — بطاقات العمر/الطول/الوزن/الهدف من بيانات المستخدم الحيّة. */
-export function ProfileData() {
+export function ProfileData({ lang = 'ar' }: { lang?: Lang }) {
+  const d = profileScreenStrings[lang]
   const { customization } = useCustomization()
   const p = customization.profile
-  const activityLabel = activityOptions.find((a) => a.value === p.activityLevel)?.label ?? 'متوسط'
+  const activityLabel = activityOptions.find((a) => a.value === p.activityLevel)?.label ?? d.activityMedium
   const calories = targetCaloriesFor(p.goal, customization.targets)
 
   const fields: { icon: string; label: string; value: string; unit?: string }[] = [
-    { icon: 'Users', label: 'العمر', value: `${p.age}`, unit: 'سنة' },
-    { icon: 'Maximize', label: 'الطول', value: `${p.heightCm}`, unit: 'سم' },
-    { icon: 'Scale', label: 'الوزن الحالي', value: `${p.weightKg}`, unit: 'كجم' },
-    { icon: 'Target', label: 'الوزن الهدف', value: `${p.targetWeightKg}`, unit: 'كجم' },
-    { icon: 'Activity', label: 'مستوى النشاط', value: activityLabel },
-    { icon: 'Flame', label: 'سعرات اليوم', value: calories.toLocaleString('en-US'), unit: 'سعرة' },
+    { icon: 'Users', label: d.age, value: `${p.age}`, unit: d.ageUnit },
+    { icon: 'Maximize', label: d.height, value: `${p.heightCm}`, unit: d.heightUnit },
+    { icon: 'Scale', label: d.currentWeight, value: `${p.weightKg}`, unit: d.weightUnit },
+    { icon: 'Target', label: d.targetWeight, value: `${p.targetWeightKg}`, unit: d.weightUnit },
+    { icon: 'Activity', label: d.activityLevel, value: activityLabel },
+    { icon: 'Flame', label: d.todayCalories, value: calories.toLocaleString('en-US'), unit: d.caloriesUnit },
   ]
 
   return (

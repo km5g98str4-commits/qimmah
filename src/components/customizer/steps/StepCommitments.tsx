@@ -6,13 +6,15 @@ import { CommitmentLibraryPicker } from '@/components/CommitmentLibraryPicker'
 import type { WizardCtx } from '../stepProps'
 import type { CommitmentPlan, Frequency, PlanCommitment } from '@/types/progress'
 import { getStrings } from '@/config/strings'
+import { onboardingStrings } from '@/i18n/dict/onboarding'
 import { commitmentName, createCustomCommitment, createPlanCommitment } from '@/lib/commitmentPlan'
 
 const inputCls = 'w-full rounded-lg border border-line bg-beige px-2.5 py-1.5 text-sm text-ink-900 focus:border-brand-500/50 focus:outline-none focus:ring-2 focus:ring-brand-500/30'
 
 /** خطوة الالتزامات — مكتبة + محرّر + إضافة مخصّصة. */
 export function StepCommitments({ ctx }: { ctx: WizardCtx }) {
-  const t = getStrings('ar').commit
+  const d = onboardingStrings[ctx.lang]
+  const t = getStrings(ctx.lang).commit
   const cp = ctx.data.commitmentPlan
   const setCp = (partial: Partial<CommitmentPlan>) => ctx.update({ commitmentPlan: { ...cp, ...partial } })
   const [picker, setPicker] = useState(false)
@@ -36,7 +38,7 @@ export function StepCommitments({ ctx }: { ctx: WizardCtx }) {
 
   return (
     <div>
-      <StepHeader icon="CheckCircle2" title="الالتزامات" description={t.intro} />
+      <StepHeader icon="CheckCircle2" title={d.commitTitle} description={t.intro} />
 
       <button
         type="button"
@@ -58,17 +60,17 @@ export function StepCommitments({ ctx }: { ctx: WizardCtx }) {
         {cp.items.map((it, i) => (
           <div key={it.id} className="card p-4">
             <div className="mb-3 flex items-center justify-between">
-              <p className="text-sm font-bold text-ink-900">{commitmentName(it, 'ar')}</p>
+              <p className="text-sm font-bold text-ink-900">{commitmentName(it, ctx.lang)}</p>
               <div className="flex items-center gap-1">
-                <button type="button" onClick={() => move(i, -1)} className="grid h-8 w-8 place-items-center rounded-lg border border-line text-ink-500 hover:bg-beige" aria-label="أعلى"><Icon name="ChevronLeft" className="h-4 w-4 rotate-90" /></button>
-                <button type="button" onClick={() => move(i, 1)} className="grid h-8 w-8 place-items-center rounded-lg border border-line text-ink-500 hover:bg-beige" aria-label="أسفل"><Icon name="ChevronLeft" className="h-4 w-4 -rotate-90" /></button>
-                <button type="button" onClick={() => setCp({ items: reindex(cp.items.filter((x) => x.id !== it.id)) })} className="grid h-8 w-8 place-items-center rounded-lg border border-rose-500/20 bg-rose-500/10 text-rose-500" aria-label="حذف"><Icon name="X" className="h-4 w-4" /></button>
+                <button type="button" onClick={() => move(i, -1)} className="grid h-8 w-8 place-items-center rounded-lg border border-line text-ink-500 hover:bg-beige" aria-label={d.commitMoveUp}><Icon name="ChevronLeft" className="h-4 w-4 rotate-90" /></button>
+                <button type="button" onClick={() => move(i, 1)} className="grid h-8 w-8 place-items-center rounded-lg border border-line text-ink-500 hover:bg-beige" aria-label={d.commitMoveDown}><Icon name="ChevronLeft" className="h-4 w-4 -rotate-90" /></button>
+                <button type="button" onClick={() => setCp({ items: reindex(cp.items.filter((x) => x.id !== it.id)) })} className="grid h-8 w-8 place-items-center rounded-lg border border-rose-500/20 bg-rose-500/10 text-rose-500" aria-label={d.commitDelete}><Icon name="X" className="h-4 w-4" /></button>
               </div>
             </div>
             {!it.commitmentId && (
               <div className="mb-2 grid gap-2 sm:grid-cols-2">
-                <input className={inputCls} value={it.customNameAr ?? ''} onChange={(e) => update(it.id, { customNameAr: e.target.value })} placeholder="الاسم (عربي)" />
-                <input className={inputCls} value={it.customNameEn ?? ''} onChange={(e) => update(it.id, { customNameEn: e.target.value })} placeholder="Name (English)" />
+                <input className={inputCls} value={it.customNameAr ?? ''} onChange={(e) => update(it.id, { customNameAr: e.target.value })} placeholder={d.commitNameArPlaceholder} />
+                <input className={inputCls} value={it.customNameEn ?? ''} onChange={(e) => update(it.id, { customNameEn: e.target.value })} placeholder={d.commitNameEnPlaceholder} />
               </div>
             )}
             <div className="grid grid-cols-2 gap-2">
@@ -85,7 +87,7 @@ export function StepCommitments({ ctx }: { ctx: WizardCtx }) {
 
       <button type="button" onClick={() => setCp({ items: reindex([...cp.items, createCustomCommitment(cp.items.length, `cmt-custom-${Date.now()}`)]) })} className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-line bg-beige py-3 text-sm font-bold text-ink-700 hover:border-primary-soft hover:text-primary-c"><Icon name="Plus" className="h-4 w-4" />{t.addCustom}</button>
 
-      {picker && <CommitmentLibraryPicker lang="ar" onClose={() => setPicker(false)} onAdd={(id) => { setCp({ items: reindex([...cp.items, createPlanCommitment(id, cp.items.length)]) }); setPicker(false) }} />}
+      {picker && <CommitmentLibraryPicker lang={ctx.lang} onClose={() => setPicker(false)} onAdd={(id) => { setCp({ items: reindex([...cp.items, createPlanCommitment(id, cp.items.length)]) }); setPicker(false) }} />}
     </div>
   )
 }

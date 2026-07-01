@@ -2,6 +2,8 @@ import { Icon } from './Icon'
 import { Skeleton } from './Skeleton'
 import { EmptyState } from './EmptyState'
 import { cn } from '@/lib/cn'
+import { progressScreenStrings, type ProgressScreenStrings } from '@/i18n/dict/progressScreen'
+import type { Lang } from '@/lib/appPreferences'
 import { muscleLabelAr } from '@/data/muscleGroups'
 import { computeGroups, type GroupResult } from '@/lib/muscleGroupCoverage'
 import type { MuscleCoverage, MuscleStatus } from '@/types/muscles'
@@ -10,18 +12,21 @@ import type { TrainingLevel } from '@/types/profile'
 // شبكة تغطية العضلات — بطاقات مجموعات عضلية مدمجة (بديل خريطة الجسم الطفولية).
 // تعرض الحالة الأسبوعية لكل مجموعة: شارة + شريط تقدّم + رقائق العضلات + التوصية.
 
+// مفاتيح النصوص ذات القيمة النصية فقط (نستثني مفاتيح المصفوفات مثل weekdayShort).
+type StringKey = { [K in keyof ProgressScreenStrings]: ProgressScreenStrings[K] extends string ? K : never }[keyof ProgressScreenStrings]
+
 interface StatusMeta {
-  label: string
+  labelKey: StringKey
   color: string
   fill: 'solid' | 'soft'
 }
 
 const STATUS_META: Record<MuscleStatus, StatusMeta> = {
-  trained: { label: 'مكتملة', color: '#1F9D57', fill: 'solid' },
-  ready: { label: 'جاهزة', color: '#3E9E6B', fill: 'soft' },
-  recovering: { label: 'تحتاج راحة', color: '#E0941F', fill: 'soft' },
-  fresh: { label: 'تمرنت حديثًا', color: '#F26A21', fill: 'soft' },
-  undertrained: { label: 'ناقصة', color: '#D6553A', fill: 'soft' },
+  trained: { labelKey: 'statusTrained', color: '#1F9D57', fill: 'solid' },
+  ready: { labelKey: 'statusReady', color: '#3E9E6B', fill: 'soft' },
+  recovering: { labelKey: 'statusRecovering', color: '#E0941F', fill: 'soft' },
+  fresh: { labelKey: 'statusFresh', color: '#F26A21', fill: 'soft' },
+  undertrained: { labelKey: 'statusUndertrained', color: '#D6553A', fill: 'soft' },
 }
 
 const EMPTY_DOT = '#C9B89B'
@@ -30,10 +35,12 @@ interface MuscleCoverageGridProps {
   coverage: Record<string, MuscleCoverage>
   level?: TrainingLevel
   className?: string
+  lang: Lang
 }
 
 /** شبكة بطاقات المجموعات العضلية. */
-export function MuscleCoverageGrid({ coverage, level = 'intermediate', className }: MuscleCoverageGridProps) {
+export function MuscleCoverageGrid({ coverage, level = 'intermediate', className, lang }: MuscleCoverageGridProps) {
+  const d = progressScreenStrings[lang]
   const groups = computeGroups(coverage, level)
   const hasAny = groups.some((g) => g.sets > 0)
 
@@ -43,8 +50,8 @@ export function MuscleCoverageGrid({ coverage, level = 'intermediate', className
       <EmptyState
         className={className}
         icon="Dumbbell"
-        title="ما فيه تغطية بعد — يوم تبدأ تمرينك بتتلوّن عضلاتك هنا."
-        body="كل مجموعة تسجّلها تنعكس على توزيع عضلاتك خلال الأسبوع."
+        title={d.gridEmptyTitle}
+        body={d.gridEmptyBody}
       />
     )
   }
@@ -53,7 +60,7 @@ export function MuscleCoverageGrid({ coverage, level = 'intermediate', className
     <div className={cn('grid gap-3 sm:grid-cols-2 xl:grid-cols-3', className)}>
       {groups.map((g, i) => (
         <div key={g.def.name} className="animate-fade-in motion-reduce:animate-none" style={{ animationDelay: `${Math.min(i * 50, 300)}ms` }}>
-          <GroupCard group={g} coverage={coverage} />
+          <GroupCard group={g} coverage={coverage} lang={lang} />
         </div>
       ))}
     </div>
@@ -82,7 +89,8 @@ export function MuscleCoverageGridSkeleton({ className }: { className?: string }
   )
 }
 
-function GroupCard({ group, coverage }: { group: GroupResult; coverage: Record<string, MuscleCoverage> }) {
+function GroupCard({ group, coverage, lang }: { group: GroupResult; coverage: Record<string, MuscleCoverage>; lang: Lang }) {
+  const d = progressScreenStrings[lang]
   const meta = STATUS_META[group.status]
   const pct = group.target > 0 ? Math.min(100, Math.round((group.sets / group.target) * 100)) : 0
 
@@ -95,14 +103,14 @@ function GroupCard({ group, coverage }: { group: GroupResult; coverage: Record<s
         {/* الترويسة: اسم المجموعة + الشارة */}
         <div className="flex items-center justify-between gap-2">
           <h3 className="text-base font-black text-ink-900">{group.def.name}</h3>
-          <StatusBadge meta={meta} />
+          <StatusBadge meta={meta} label={d[meta.labelKey]} />
         </div>
 
         {/* التقدّم: مجموعات منجزة مقابل الهدف */}
         <div className="mt-3 flex items-baseline justify-between text-xs">
           <span className="font-bold text-ink-700">
             <span className="text-lg font-black text-ink-900">{group.sets}</span>
-            <span className="text-ink-400"> / {group.target} مجموعة</span>
+            <span className="text-ink-400"> / {group.target} {d.setsWord}</span>
           </span>
           <span className="font-black tabular-nums" style={{ color: meta.color }}>{pct}%</span>
         </div>
@@ -137,11 +145,11 @@ function GroupCard({ group, coverage }: { group: GroupResult; coverage: Record<s
   )
 }
 
-function StatusBadge({ meta }: { meta: StatusMeta }) {
+function StatusBadge({ meta, label }: { meta: StatusMeta; label: string }) {
   if (meta.fill === 'solid') {
     return (
       <span className="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-black text-white" style={{ backgroundColor: meta.color }}>
-        {meta.label}
+        {label}
       </span>
     )
   }
@@ -150,7 +158,7 @@ function StatusBadge({ meta }: { meta: StatusMeta }) {
       className="shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-black"
       style={{ color: meta.color, backgroundColor: `${meta.color}1A`, borderColor: `${meta.color}40` }}
     >
-      {meta.label}
+      {label}
     </span>
   )
 }

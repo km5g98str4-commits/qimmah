@@ -5,10 +5,12 @@ import type { WizardCtx } from '../stepProps'
 import type { MeasurementPlan } from '@/types/progress'
 import { measurementTypes } from '@/data/measurementTypes'
 import { getStrings } from '@/config/strings'
+import { onboardingStrings } from '@/i18n/dict/onboarding'
 
 /** خطوة القياسات والمتابعة — اختيار أنواع القياسات + مجموعة متقدمة. */
 export function StepMeasurements({ ctx }: { ctx: WizardCtx }) {
-  const t = getStrings('ar').progress
+  const d = onboardingStrings[ctx.lang]
+  const t = getStrings(ctx.lang).progress
   const mp = ctx.data.measurementPlan
   const setMp = (partial: Partial<MeasurementPlan>) => ctx.update({ measurementPlan: { ...mp, ...partial } })
   const [advOpen, setAdvOpen] = useState(false)
@@ -40,7 +42,7 @@ export function StepMeasurements({ ctx }: { ctx: WizardCtx }) {
 
   return (
     <div>
-      <StepHeader icon="Ruler" title="القياسات والمتابعة" description={t.selectTypes} />
+      <StepHeader icon="Ruler" title={d.measTitle} description={t.selectTypes} />
 
       <button
         type="button"

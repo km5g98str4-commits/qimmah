@@ -1,4 +1,6 @@
 import { useEffect } from 'react'
+import { getLanguage } from '@/lib/appPreferences'
+import { miscStrings } from '@/i18n/dict/misc'
 import { Icon } from './Icon'
 
 interface SuccessToastProps {
@@ -16,11 +18,15 @@ interface SuccessToastProps {
 export function SuccessToast({
   onClose,
   duration = 6000,
-  title = 'تم تجهيز صفحتك',
-  body = 'ابدأ من قسم اليوم وتابع تمرينك، أكلك، ومكملاتك من مكان واحد.',
-  actionLabel = 'افتح يومي',
+  title,
+  body,
+  actionLabel,
   scrollTo = 'today',
 }: SuccessToastProps) {
+  const d = miscStrings[getLanguage()]
+  const titleText = title ?? d.toastTitle
+  const bodyText = body ?? d.toastBody
+  const actionText = actionLabel ?? d.toastAction
   useEffect(() => {
     const t = setTimeout(onClose, duration)
     return () => clearTimeout(t)
@@ -43,17 +49,17 @@ export function SuccessToast({
           <Icon name="CheckCircle2" className="h-5 w-5" />
         </span>
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-bold text-ink-900">{title}</p>
-          <p className="mt-0.5 text-sm leading-relaxed text-ink-500">{body}</p>
+          <p className="text-sm font-bold text-ink-900">{titleText}</p>
+          <p className="mt-0.5 text-sm leading-relaxed text-ink-500">{bodyText}</p>
           <button type="button" onClick={openTarget} className="btn-primary mt-3 px-4 py-2 text-xs">
-            {actionLabel}
+            {actionText}
             <Icon name="ArrowLeft" className="h-4 w-4" />
           </button>
         </div>
         <button
           type="button"
           onClick={onClose}
-          aria-label="إغلاق"
+          aria-label={d.close}
           className="grid h-7 w-7 shrink-0 place-items-center rounded-lg text-ink-400 transition-colors hover:bg-beige hover:text-ink-700"
         >
           <Icon name="X" className="h-4 w-4" />

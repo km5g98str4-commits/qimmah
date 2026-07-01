@@ -4,11 +4,14 @@ import { Icon } from '@/components/Icon'
 import { sectionCopy, labels } from '@/config/content'
 import { goalInfo } from '@/data/goal'
 import { useCustomization } from '@/lib/customizationContext'
+import type { Lang } from '@/lib/appPreferences'
+import { dashboardStrings } from '@/i18n/dict/dashboard'
 
 /** قسم الهدف الحالي — يعرض هدف الشخص (حيّ من مركز التخصيص) مع تقدّمه. */
-export function CurrentGoal() {
+export function CurrentGoal({ lang = 'ar' }: { lang?: Lang }) {
   const { customization } = useCustomization()
   const { mainGoal, userName } = customization.identity
+  const d = dashboardStrings[lang]
 
   return (
     <section id="goal" className="section">
@@ -22,10 +25,10 @@ export function CurrentGoal() {
             <div className="relative">
               <span className="chip inline-flex items-center gap-1.5 rounded-full bg-primary-soft px-3 py-1 text-xs font-bold text-primary-c">
                 <Icon name="Target" className="h-3.5 w-3.5" />
-                {userName?.trim() ? `هدف ${userName}` : 'هدفي'}
+                {userName?.trim() ? `${d.goalNamedPrefix}${userName}${d.goalNamedSuffix}` : d.goalMine}
               </span>
               <p className="mt-5 text-2xl font-black leading-snug text-ink-900 sm:text-3xl">
-                {mainGoal?.trim() ? mainGoal : 'حدّد هدفك من «الإعدادات → تعديل خطتي».'}
+                {mainGoal?.trim() ? mainGoal : d.goalUnset}
               </p>
 
               <div className="mt-7">
