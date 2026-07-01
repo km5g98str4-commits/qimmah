@@ -33,3 +33,6 @@ pnpm-debug.log*
 
 # TS incremental build info (regenerated)
 tsconfig.app.tsbuildinfo
+
+# P3 proof harness build artifact
+scripts/.p3proof.bundle.mjs

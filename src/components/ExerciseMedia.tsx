@@ -16,61 +16,103 @@ interface ExerciseMediaProps {
 }
 
 /**
- * إطار وسائط التمرين — يعرض صورة حقيقية من قاعدة بيانات عامة (free-exercise-db)
+ * صورة بسلسلة مصادر بديلة: تجرّب المصدر الأول، وعند فشله تنتقل للتالي، وعند نفاد الكل تُبلّغ onExhausted.
+ * تُستخدم لتفضيل الملف المحلّي (المُلتزَم في المستودع) ثم الرجوع للرابط البعيد عند تعذّره.
+ */
+function FallbackImg({
+  srcs,
+  className,
+  onExhausted,
+}: {
+  srcs: string[]
+  className: string
+  onExhausted: () => void
+}) {
+  const key = srcs.join('|')
+  const [idx, setIdx] = useState(0)
+  useEffect(() => {
+    setIdx(0)
+  }, [key])
+  const src = srcs[idx]
+  if (!src) return null
+  return (
+    <img
+      src={src}
+      alt=""
+      aria-hidden="true"
+      className={className}
+      onError={() => (idx + 1 < srcs.length ? setIdx(idx + 1) : onExhausted())}
+    />
+  )
+}
+
+/** يبني سلسلة مصادر (محلّي ثم بعيد) بلا تكرار ولا قيم فارغة. */
+function chain(...srcs: (string | undefined)[]): string[] {
+  return srcs.filter((s): s is string => !!s).filter((s, i, a) => a.indexOf(s) === i)
+}
+
+/**
+ * إطار وسائط التمرين — يعرض صورة حقيقية من قاعدة بيانات عامة (free-exercise-db) مُنزَّلة محليًا،
  * مع تلاشٍ متبادل بين إطار البداية والنهاية لمحاكاة الحركة، أو GIF متحرّك عند توفّره.
- * التمارين غير المطابِقة (كارديو/مرونة/نادرة) تعرض بديلًا أنيقًا — لا صورة مكسورة أبدًا.
+ * سلسلة الرجوع: ملف محلّي → رابط بعيد → بديل أنيق. لا صورة مكسورة أبدًا.
  */
 export function ExerciseMedia({ exerciseId, muscles = [], heightClass = 'h-40', hideChips = false }: ExerciseMediaProps) {
   const media = getExerciseMedia(exerciseId)
   const [frame, setFrame] = useState(0)
-  const [failed, setFailed] = useState(false)
+  const [baseFailed, setBaseFailed] = useState(false) // نفاد مصادر الإطار الأساسي → بديل أنيق
+  const [secondFailed, setSecondFailed] = useState(false) // نفاد مصادر الإطار الثاني → إيقاف التبديل
+  const [gifFailed, setGifFailed] = useState(false) // فشل الـ GIF → الرجوع للصور الثابتة
 
-  const animated = !!media?.gifUrl
-  const twoFrame = !!media && !animated && media.img1 !== media.img0
+  const useGif = !!media?.gifUrl && !gifFailed
+  const src0 = chain(media?.img0, media?.img0Remote)
+  const src1 = chain(media?.img1, media?.img1Remote)
+  const twoFrame = !useGif && src1.length > 0 && src1.join('|') !== src0.join('|') && !secondFailed
 
   useEffect(() => {
     setFrame(0)
-    setFailed(false)
+    setBaseFailed(false)
+    setSecondFailed(false)
+    setGifFailed(false)
   }, [exerciseId])
 
   useEffect(() => {
-    if (!twoFrame || failed) return
+    if (!twoFrame) return
     const t = setInterval(() => setFrame((f) => (f === 0 ? 1 : 0)), 1100)
     return () => clearInterval(t)
-  }, [twoFrame, failed])
+  }, [twoFrame])
 
-  // بديل أنيق: عند غياب المطابقة أو فشل تحميل الصورة (لا صورة مكسورة).
-  if (!media || failed) {
+  // بديل أنيق: عند غياب المطابقة أو نفاد مصادر الإطار الأساسي (لا صورة مكسورة).
+  if (!media || baseFailed) {
     return <ExercisePlaceholder muscles={muscles} heightClass={heightClass} hideChips={hideChips} />
   }
 
   return (
     // خلفية داكنة بالهوية تحت الصورة — تبقى أنيقة أثناء التحميل وتحافظ على وضوح النص فوقها.
     <div className={cn('relative w-full overflow-hidden bg-gradient-to-br from-ink-900 via-ink-700 to-ink-900', heightClass)}>
-      {animated ? (
-        <img
-          src={media.gifUrl}
-          alt=""
-          aria-hidden="true"
-          onError={() => setFailed(true)}
+      {useGif ? (
+        <FallbackImg
+          srcs={[media.gifUrl as string]}
+          onExhausted={() => setGifFailed(true)}
           className="absolute inset-0 h-full w-full object-cover"
         />
       ) : (
         <>
-          <img
-            src={media.img0}
-            alt=""
-            aria-hidden="true"
-            onError={() => setFailed(true)}
-            className={cn('absolute inset-0 h-full w-full object-cover transition-opacity duration-700', frame === 0 ? 'opacity-100' : 'opacity-0')}
+          <FallbackImg
+            srcs={src0}
+            onExhausted={() => setBaseFailed(true)}
+            className={cn(
+              'absolute inset-0 h-full w-full object-cover transition-opacity duration-700',
+              frame === 0 ? 'opacity-100' : 'opacity-0',
+            )}
           />
           {twoFrame && (
-            <img
-              src={media.img1}
-              alt=""
-              aria-hidden="true"
-              onError={() => setFailed(true)}
-              className={cn('absolute inset-0 h-full w-full object-cover transition-opacity duration-700', frame === 1 ? 'opacity-100' : 'opacity-0')}
+            <FallbackImg
+              srcs={src1}
+              onExhausted={() => setSecondFailed(true)}
+              className={cn(
+                'absolute inset-0 h-full w-full object-cover transition-opacity duration-700',
+                frame === 1 ? 'opacity-100' : 'opacity-0',
+              )}
             />
           )}
         </>

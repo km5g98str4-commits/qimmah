@@ -78,6 +78,11 @@ export interface ShellStrings {
     home: string
     back: string
   }
+  errorBoundary: {
+    title: string
+    body: string
+    reload: string
+  }
   contact: {
     title: string
     intro: string
@@ -253,6 +258,10 @@ export interface ShellStrings {
     swapMealTitle: string
     noAlternatives: string
     close: string
+    per100g: string
+    perPortion: string
+    emptyStateTitle: string
+    emptyStateHint: string
   }
   wellness: {
     title: string
@@ -316,9 +325,6 @@ export interface ShellStrings {
     cardPRs: string
     noPRs: string
     cardMuscles: string
-    healthSyncTitle: string
-    healthSyncSoon: string
-    healthSyncBody: string
     remindersTitle: string
     reminderEnabled: string
     reminderTrainingTime: string
@@ -352,7 +358,7 @@ const ar: ShellStrings = {
   lang: { ar: 'العربية', en: 'English', label: 'اللغة' },
   badge: { guest: 'ضيف', account: 'حساب', demo: 'نموذج تجريبي' },
   start: {
-    welcome: 'أهلاً بك في قِمّة',
+    welcome: 'هلا فيك في قِمّة',
     headline: 'كل رحلتك في كمال الأجسام في نظام واحد',
     intro: 'تمارينك، أوزانك، التضخيم التدريجي، تغذيتك، وقياساتك — كلها في مكان واحد.',
     startSetup: 'ابدأ إعداد صفحتي',
@@ -416,7 +422,7 @@ const ar: ShellStrings = {
       'قِمّة تطبيق شخصي يعمل على جهازك أولًا (local-first). في وضع الضيف تُحفظ كل بياناتك في متصفّح هذا الجهاز فقط ولا تغادره.',
       'عند تسجيل الدخول بحساب سحابي (Supabase) تُرفع بياناتك إلى حسابك الخاص لتتمكّن من الوصول إليها من أجهزة أخرى. لا يصل إلى صفوفك إلا أنت (Row Level Security).',
       'لا نبيع بياناتك ولا نشاركها مع معلنين. قياساتك وسجلّاتك الصحية تبقى ملكك ويمكنك حذفها في أي وقت عبر «إعادة ضبط البيانات».',
-      'يمكنك تصدير نسخة كاملة من بياناتك في أي وقت من «الإعدادات → البيانات».',
+      'تقدر تصدّر نسخة كاملة من بياناتك في أي وقت من «الإعدادات → البيانات».',
     ],
     termsBody: [
       'قِمّة أداة لتنظيم ومتابعة التمرين والتغذية والمكملات والقياسات للرياضي الفرد. الاستخدام على مسؤوليتك الشخصية.',
@@ -431,6 +437,11 @@ const ar: ShellStrings = {
     body: 'الرابط اللي فتحته مو موجود أو اتغيّر.',
     home: 'ارجع للرئيسية',
     back: 'الشاشة السابقة',
+  },
+  errorBoundary: {
+    title: 'صار خلل بسيط',
+    body: 'واجهنا مشكلة غير متوقعة في هذي الشاشة. جرّب تحدّث الصفحة وبيرجع كل شي مكانه — بياناتك محفوظة على جهازك.',
+    reload: 'حدّث الصفحة',
   },
   contact: {
     title: 'تواصل معنا',
@@ -483,8 +494,8 @@ const ar: ShellStrings = {
     errWeight: 'الوزن لازم بين ٠ و٥٠٠ كجم',
     errReps: 'التكرارات لازم بين ٠ و١٠٠',
     progress: 'الإنجاز',
-    savedTitle: 'تم حفظ تمرينك',
-    savedBody: 'تم تحديث أوزانك وسجل التمرين.',
+    savedTitle: 'يعطيك العافية! حفظنا تمرينك',
+    savedBody: 'حدّثنا أوزانك وسجل تمرينك.',
     recentTitle: 'آخر تمرين',
     completedToday: 'تمرين اليوم مكتمل',
     emptyPlan: 'اختر جدولك من الإعداد لتبدأ.',
@@ -609,6 +620,10 @@ const ar: ShellStrings = {
     swapMealTitle: 'بدائل بسعرات وبروتين متقارب',
     noAlternatives: 'لا توجد بدائل متقاربة حاليًا.',
     close: 'إغلاق',
+    per100g: 'لكل 100غ',
+    perPortion: 'لكل حصة',
+    emptyStateTitle: 'ابدأ — سجّل أول وجبة',
+    emptyStateHint: 'اضغط «أضف» عند أي وجبة، ابحث عن أكلتك، وحدّد الكمية بالغرام.',
   },
   wellness: {
     title: 'المكملات والأدوية',
@@ -647,7 +662,7 @@ const ar: ShellStrings = {
     title: 'التزاماتي',
     desc: 'الأشياء اللي تبي تلتزم فيها يوميًا أو أسبوعيًا.',
     enable: 'أريد متابعة الالتزامات اليومية',
-    intro: 'اختر الأشياء التي تبي تلتزم فيها يوميًا أو أسبوعيًا. تقدر تعدلها لاحقًا.',
+    intro: 'اختر الأشياء اللي تبي تلتزم فيها يوميًا أو أسبوعيًا. تقدر تعدّلها لاحقًا.',
     add: 'أضف من المكتبة',
     addCustom: 'أضف التزامًا مخصّصًا',
     name: 'الاسم',
@@ -673,9 +688,6 @@ const ar: ShellStrings = {
     cardPRs: 'أفضل الأوزان (PRs)',
     noPRs: 'أكمل تمرينًا بأوزان لتظهر أرقامك القياسية.',
     cardMuscles: 'العضلات هذا الأسبوع',
-    healthSyncTitle: 'مزامنة الصحة',
-    healthSyncSoon: 'يحتاج تطبيق آيفون — قريبًا',
-    healthSyncBody: 'الربط التلقائي مع صحّتي (Apple Health) يحتاج تطبيق آيفون — قريبًا. حاليًا أضف خطواتك يدويًا.',
     remindersTitle: 'التذكيرات',
     reminderEnabled: 'تفعيل التذكير',
     reminderTrainingTime: 'وقت تذكير التمرين',
@@ -683,7 +695,7 @@ const ar: ShellStrings = {
     title: 'القياسات والتقدّم',
     desc: 'سجّل قياساتك وتابع تقدّمك بمرور الوقت.',
     enable: 'أريد متابعة القياسات والتقدّم',
-    selectTypes: 'اختر القياسات التي تبي تتابعها',
+    selectTypes: 'اختر القياسات اللي تبي تتابعها',
     advanced: 'قياسات صحية متقدمة',
     advancedNote: 'القياسات الصحية المتقدمة للتسجيل فقط، وليست للتشخيص.',
     quickLog: 'تسجيل سريع',
@@ -788,6 +800,11 @@ const en: ShellStrings = {
     body: 'The link you opened doesn’t exist or has changed.',
     home: 'Back to home',
     back: 'Previous screen',
+  },
+  errorBoundary: {
+    title: 'Something went wrong',
+    body: 'We hit an unexpected problem on this screen. Try reloading the page and it should be back to normal — your data is saved on your device.',
+    reload: 'Reload page',
   },
   contact: {
     title: 'Contact us',
@@ -966,6 +983,10 @@ const en: ShellStrings = {
     swapMealTitle: 'Alternatives with similar calories & protein',
     noAlternatives: 'No close alternatives right now.',
     close: 'Close',
+    per100g: 'Per 100g',
+    perPortion: 'Per portion',
+    emptyStateTitle: 'Start — log your first meal',
+    emptyStateHint: 'Tap “Add” on any meal, search for your food, and set the amount in grams.',
   },
   wellness: {
     title: 'Supplements & Medications',
@@ -1030,9 +1051,6 @@ const en: ShellStrings = {
     cardPRs: 'Best lifts (PRs)',
     noPRs: 'Complete a weighted workout to see your PRs.',
     cardMuscles: 'Muscles this week',
-    healthSyncTitle: 'Health sync',
-    healthSyncSoon: 'Needs an iPhone app — soon',
-    healthSyncBody: 'Automatic sync with Apple Health needs an iPhone app — coming soon. For now, add your steps manually.',
     remindersTitle: 'Reminders',
     reminderEnabled: 'Enable reminder',
     reminderTrainingTime: 'Training reminder time',

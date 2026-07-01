@@ -8,22 +8,13 @@ import {
   buildCustomizationFromOnboarding,
   saveOnboardingProfile,
 } from '@/lib/onboardingProfile'
-import type {
-  AdvancedSplit,
-  AppetiteTiming,
-  DietPattern,
-  Environment,
-  ExperienceLevel,
-  MealDistribution,
-  NeatLevel,
-  NutritionStyle as OnbNutritionStyle,
-  OnbConsistency,
-  OnboardingProfile,
-  Sex,
-  SplitMode,
-  WellnessTrackingMode,
-} from '@/types/onboarding'
-import { ONBOARDING_SCHEMA_VERSION } from '@/types/onboarding'
+import type { Answers } from '@/lib/planBuilderAnswers'
+import {
+  buildOnboardingProfile,
+  defaultAnswers,
+  isBeginnerLevel,
+  showsTargetWeight,
+} from '@/lib/planBuilderAnswers'
 import {
   advancedSplitChoices,
   allergyChoices,
@@ -43,7 +34,6 @@ import {
   splitModeChoices,
   wellnessModeChoices,
 } from '@/data/planBuilder'
-import type { GoalValue } from '@/data/planBuilder'
 
 interface PlanBuilderProps {
   /** يُستدعى بعد حفظ مصدر الحقيقة والخطة وتعليم الإكمال (دخول اللوحة). */
@@ -62,64 +52,6 @@ const BOUNDS = {
   steps: { min: 2000, max: 20000 },
 }
 
-interface Answers {
-  // profile + bodyMetrics
-  goalValue?: GoalValue
-  sex?: Sex
-  age: number
-  heightCm: number
-  weightKg: number
-  targetWeightKg: number
-  targetTouched: boolean
-  // trainingPreferences
-  experienceLevel?: ExperienceLevel
-  consistency?: OnbConsistency
-  environment?: Environment
-  trainingDays: number
-  daysTouched: boolean
-  sessionDurationMin: number
-  splitMode: SplitMode
-  advancedSplit?: AdvancedSplit
-  // activityProfile
-  neat: NeatLevel
-  includeSteps: boolean
-  stepEstimate: number
-  // nutritionPreferences
-  nutritionStyle: OnbNutritionStyle
-  mealsPerDay: number
-  mealDistribution: MealDistribution
-  appetiteTiming: AppetiteTiming
-  // foodPreferences (optional)
-  dietPattern: DietPattern
-  allergies: string[]
-  // limitations + wellness (optional)
-  injuries: string[]
-  wellnessMode: WellnessTrackingMode
-}
-
-const defaultAnswers: Answers = {
-  age: 25,
-  heightCm: 170,
-  weightKg: 75,
-  targetWeightKg: 70,
-  targetTouched: false,
-  trainingDays: 3,
-  daysTouched: false,
-  sessionDurationMin: 60,
-  splitMode: 'auto',
-  neat: 'moderate',
-  includeSteps: false,
-  stepEstimate: 8000,
-  nutritionStyle: 'meal_suggestions',
-  mealsPerDay: 4,
-  mealDistribution: 'balanced',
-  appetiteTiming: 'balanced',
-  dietPattern: 'none',
-  allergies: [],
-  injuries: [],
-  wellnessMode: 'none',
-}
-
 const clampN = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n))
 
 /** BMI رقمي فقط — بلا أي حكم قيمي أو تشخيص طبي. */
@@ -128,9 +60,6 @@ function bmiOf(weightKg: number, heightCm: number): number | null {
   return Math.round((weightKg / Math.pow(heightCm / 100, 2)) * 10) / 10
 }
 
-const isBeginnerLevel = (l?: ExperienceLevel) => l === 'beginner'
-const showsTargetWeight = (g?: GoalValue) => g === 'cut' || g === 'bulk'
-
 /** خطأ وزن الهدف: تنشيف أقل من الحالي / تضخيم أعلى منه. */
 function targetWeightError(a: Answers): string | undefined {
   if (a.goalValue === 'cut' && !(a.targetWeightKg < a.weightKg))
@@ -138,50 +67,6 @@ function targetWeightError(a: Answers): string | undefined {
   if (a.goalValue === 'bulk' && !(a.targetWeightKg > a.weightKg))
     return 'وزن الهدف للتضخيم لازم يكون أعلى من وزنك الحالي.'
   return undefined
-}
-
-/** يبني كائن مصدر الحقيقة من الإجابات — لا اسم وهمي، قوائم تتبّع فارغة. */
-function buildOnboardingProfile(a: Answers): OnboardingProfile {
-  const beginner = isBeginnerLevel(a.experienceLevel)
-  return {
-    profile: { sex: a.sex, age: a.age }, // لا اسم — اختياري ولا قيمة وهمية
-    bodyMetrics: {
-      heightCm: a.heightCm,
-      currentWeightKg: a.weightKg,
-      targetWeightKg: showsTargetWeight(a.goalValue) ? a.targetWeightKg : undefined,
-    },
-    goal: { type: a.goalValue },
-    trainingPreferences: {
-      experience: a.experienceLevel,
-      consistency: beginner ? 'new' : a.consistency,
-      environment: a.environment,
-      daysPerWeek: a.trainingDays,
-      sessionDurationMin: a.sessionDurationMin,
-      splitMode: a.splitMode,
-      advancedSplit: a.splitMode === 'advanced' ? a.advancedSplit : undefined,
-    },
-    activityProfile: {
-      neat: a.neat,
-      stepEstimate: a.includeSteps ? a.stepEstimate : undefined,
-    },
-    nutritionPreferences: {
-      style: a.nutritionStyle,
-      mealsPerDay: a.nutritionStyle === 'meal_suggestions' ? a.mealsPerDay : undefined,
-      // توزيع الحجم/وقت الجوع يُطلبان ويُحفظان فقط عند اقتراح الوجبات (P2.5).
-      mealDistribution: a.nutritionStyle === 'meal_suggestions' ? a.mealDistribution : undefined,
-      appetiteTiming: a.nutritionStyle === 'meal_suggestions' ? a.appetiteTiming : undefined,
-    },
-    foodPreferences: { dietPattern: a.dietPattern, dislikedFoods: [], allergies: a.allergies },
-    limitations: { injuries: a.injuries },
-    wellnessTracking: { mode: a.wellnessMode, supplements: [], medications: [] },
-    appPreferences: { language: 'ar', reminders: false },
-    _meta: {
-      schemaVersion: ONBOARDING_SCHEMA_VERSION,
-      completed: true,
-      completedAt: new Date().toISOString(),
-      source: 'onboarding',
-    },
-  }
 }
 
 /** الإعداد الذكي (Phase 1) — مصدر الحقيقة: شاشة واحدة لكل خطوة (جوال داكن، RTL). */
@@ -228,6 +113,25 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
   }
 
   const steps: Step[] = []
+
+  // 0) الاسم — اختياري تمامًا وقابل للتخطّي (نرحّب فيك باسمك في الرئيسية).
+  steps.push({
+    key: 'name',
+    label: 'اسمك',
+    optional: true,
+    valid: true,
+    content: (
+      <Question title="وش نناديك؟" hint="اختياري — نستخدمه نرحّب فيك بالرئيسية. تقدر تتخطّاها.">
+        <TextField
+          value={a.name}
+          placeholder="اسمك (اختياري)"
+          maxLength={24}
+          onChange={(v) => set({ name: v })}
+          ariaLabel="الاسم (اختياري)"
+        />
+      </Question>
+    ),
+  })
 
   // 1) الهدف
   steps.push({
@@ -324,7 +228,7 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
       <Question title="من متى وأنت تتمرن حديد؟" hint="نضبط صعوبة الخطة على مستواك.">
         <List>
           {experienceChoices.map((c) => (
-            <OptionRow key={c.value} icon={c.icon} label={c.label} desc={c.desc} selected={a.experienceLevel === c.value} onClick={() => set({ experienceLevel: c.value, consistency: c.value === 'beginner' ? undefined : a.consistency, daysTouched: false })} />
+            <OptionRow key={c.value} icon={c.icon} label={c.label} desc={c.desc} selected={a.experienceLevel === c.value} onClick={() => set({ experienceLevel: c.value, consistency: c.value === 'beginner' ? undefined : a.consistency, splitMode: c.value === 'beginner' ? 'auto' : a.splitMode, advancedSplit: c.value === 'beginner' ? undefined : a.advancedSplit, daysTouched: false })} />
           ))}
         </List>
       </Question>
@@ -399,24 +303,26 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
     ),
   })
 
-  // 12) نمط التقسيمة (تلقائي/متقدّم)
-  steps.push({
-    key: 'splitMode',
-    label: 'التقسيمة',
-    valid: !!a.splitMode,
-    content: (
-      <Question title="كيف تبي نحدد التقسيمة؟" hint="التلقائي يكفي معظم الناس.">
-        <List>
-          {splitModeChoices.map((c) => (
-            <OptionRow key={c.value} icon={c.icon} label={c.label} desc={c.desc} selected={a.splitMode === c.value} onClick={() => set({ splitMode: c.value })} />
-          ))}
-        </List>
-      </Question>
-    ),
-  })
+  // 12) نمط التقسيمة (تلقائي/متقدّم) — يظهر لغير المبتدئ فقط؛ المبتدئ تقسيمته «تلقائي» دائمًا.
+  if (a.experienceLevel && !isBeginner) {
+    steps.push({
+      key: 'splitMode',
+      label: 'التقسيمة',
+      valid: !!a.splitMode,
+      content: (
+        <Question title="كيف تبي نحدد التقسيمة؟" hint="التلقائي يكفي معظم الناس.">
+          <List>
+            {splitModeChoices.map((c) => (
+              <OptionRow key={c.value} icon={c.icon} label={c.label} desc={c.desc} selected={a.splitMode === c.value} onClick={() => set({ splitMode: c.value })} />
+            ))}
+          </List>
+        </Question>
+      ),
+    })
+  }
 
-  // 13) اختيار التقسيمة المتقدّمة — فقط عند advanced
-  if (a.splitMode === 'advanced') {
+  // 13) اختيار التقسيمة المتقدّمة — فقط لغير المبتدئ وعند advanced
+  if (!isBeginner && a.splitMode === 'advanced') {
     steps.push({
       key: 'advancedSplit',
       label: 'نوع التقسيمة',
@@ -584,6 +490,8 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
   const idx = Math.min(stepIndex, steps.length - 1)
   const step = steps[idx]
   const total = steps.length
+  // شاشة البناء ليست خطوة نموذج — نستبعدها من العدّاد وشريط التقدّم ليكونا دقيقين.
+  const formTotal = total - 1
   const isFirst = idx === 0
   const isBuilding = step.key === 'building'
   const isLastForm = idx === total - 2
@@ -632,7 +540,7 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
     setStepIndex((s) => Math.max(0, s - 1))
   }
 
-  const progress = Math.round(((idx + 1) / total) * 100)
+  const progress = Math.round(((idx + 1) / formTotal) * 100)
 
   if (isBuilding) {
     return (
@@ -663,7 +571,7 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
           </button>
           <div className="flex items-center gap-2 text-sm">
             <span className="font-bold text-night-100">{step.label}</span>
-            <span className="font-bold text-night-300">{idx + 1}/{total}</span>
+            <span className="font-bold text-night-300">{idx + 1}/{formTotal}</span>
           </div>
           <div className="h-10 w-10" />
         </div>
@@ -764,6 +672,22 @@ function OptionRow({ icon, label, desc, selected, onClick }: { icon?: string; la
         <Icon name="Check" className="h-3.5 w-3.5" strokeWidth={3} />
       </span>
     </button>
+  )
+}
+
+/** حقل نصّي بسيط — للاسم الاختياري فقط (إدخال قصير، بلا نص حرّ طويل). */
+function TextField({ value, placeholder, maxLength, onChange, ariaLabel }: { value: string; placeholder?: string; maxLength?: number; onChange: (v: string) => void; ariaLabel: string }) {
+  return (
+    <input
+      type="text"
+      value={value}
+      placeholder={placeholder}
+      maxLength={maxLength}
+      onChange={(e) => onChange(e.target.value)}
+      aria-label={ariaLabel}
+      autoComplete="off"
+      className="w-full rounded-2xl border border-night-700 bg-night-900 px-5 py-4 text-lg font-bold text-night-100 placeholder:font-normal placeholder:text-night-400 focus:border-primary focus:outline-none"
+    />
   )
 }
 

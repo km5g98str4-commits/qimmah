@@ -85,13 +85,24 @@ export function NutritionView({ lang }: NutritionViewProps) {
           <ProgressBar current={eaten} target={targetCalories || 1} color="bg-orange-500" className="mt-4" />
         </div>
 
-        {/* ملخّص الماكروز + الماء */}
+        {/* ملخّص الماكروز + الماء — حلقات واضحة */}
         <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <MacroCard label={t.protein} eaten={round(totals.protein)} target={targetProtein} unit="غ" color="bg-brand-500" />
-          <MacroCard label={t.carbs} eaten={round(totals.carbs)} target={targetCarbs} unit="غ" color="bg-sky-500" />
-          <MacroCard label={t.fat} eaten={round(totals.fat)} target={targetFat} unit="غ" color="bg-gold-500" />
-          <MacroCard label={t.water} eaten={state.waterMl} target={targetWaterMl} unit="مل" color="bg-primary" />
+          <MacroCard label={t.protein} eaten={round(totals.protein)} target={targetProtein} unit="غ" color="#22c55e" />
+          <MacroCard label={t.carbs} eaten={round(totals.carbs)} target={targetCarbs} unit="غ" color="#0ea5e9" />
+          <MacroCard label={t.fat} eaten={round(totals.fat)} target={targetFat} unit="غ" color="#e0941f" />
+          <MacroCard label={t.water} eaten={state.waterMl} target={targetWaterMl} unit="مل" color="#F26A21" />
         </div>
+
+        {/* حالة فارغة — تحفيز لتسجيل أول وجبة */}
+        {state.log.length === 0 && (
+          <div className="mt-4 card flex flex-col items-center gap-2 p-6 text-center">
+            <span className="grid h-11 w-11 place-items-center rounded-2xl bg-primary-soft text-primary-c">
+              <Icon name="Utensils" className="h-5 w-5" />
+            </span>
+            <p className="text-sm font-black text-ink-900">{t.emptyStateTitle}</p>
+            <p className="max-w-xs text-xs text-ink-400">{t.emptyStateHint}</p>
+          </div>
+        )}
 
         {/* التسجيل: اقتراح وجبات → أقسام وجبات حسب عدد الوجبات؛ ماكروز فقط → مسجّل موحّد */}
         {style === 'meal_suggestions' ? (
@@ -140,14 +151,39 @@ function EqCell({ label, value, highlight }: { label: string; value: number; hig
 }
 
 function MacroCard({ label, eaten, target, unit, color }: { label: string; eaten: number; target: number; unit: string; color: string }) {
+  const pct = target > 0 ? Math.min(1, eaten / target) : 0
   return (
-    <div className="card p-4">
-      <p className="text-xs text-ink-500">{label}</p>
-      <p className="mt-1 text-sm font-black text-ink-900">
-        {eaten}<span className="text-[11px] font-bold text-ink-400"> / {target}{unit}</span>
-      </p>
-      <ProgressBar current={eaten} target={target || 1} color={color} className="mt-2 h-1.5" />
+    <div className="card flex items-center gap-3 p-4">
+      <Ring pct={pct} color={color} />
+      <div className="min-w-0">
+        <p className="truncate text-xs text-ink-500">{label}</p>
+        <p className="mt-0.5 text-sm font-black text-ink-900">
+          {eaten}<span className="text-[11px] font-bold text-ink-400"> / {target}{unit}</span>
+        </p>
+      </div>
     </div>
+  )
+}
+
+/** حلقة تقدّم SVG محلية (بلا مكتبات) — نسبة المأكول إلى الهدف. */
+function Ring({ pct, color }: { pct: number; color: string }) {
+  const r = 15
+  const c = 2 * Math.PI * r
+  const dash = Math.max(0, Math.min(1, pct)) * c
+  return (
+    <svg viewBox="0 0 40 40" className="h-10 w-10 shrink-0 -rotate-90" role="img" aria-hidden="true">
+      <circle cx="20" cy="20" r={r} fill="none" stroke="currentColor" strokeWidth="4" className="text-line" />
+      <circle
+        cx="20"
+        cy="20"
+        r={r}
+        fill="none"
+        stroke={color}
+        strokeWidth="4"
+        strokeLinecap="round"
+        strokeDasharray={`${dash} ${c - dash}`}
+      />
+    </svg>
   )
 }
 

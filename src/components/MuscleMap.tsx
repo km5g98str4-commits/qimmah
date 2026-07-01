@@ -1,4 +1,6 @@
 import { Icon } from './Icon'
+import { Skeleton } from './Skeleton'
+import { EmptyState } from './EmptyState'
 import { cn } from '@/lib/cn'
 import { muscleLabelAr } from '@/data/muscleGroups'
 import { computeGroups, type GroupResult } from '@/lib/muscleGroupCoverage'
@@ -33,10 +35,48 @@ interface MuscleCoverageGridProps {
 /** شبكة بطاقات المجموعات العضلية. */
 export function MuscleCoverageGrid({ coverage, level = 'intermediate', className }: MuscleCoverageGridProps) {
   const groups = computeGroups(coverage, level)
+  const hasAny = groups.some((g) => g.sets > 0)
+
+  // حالة فارغة ودودة (شبكة أمان — القسم يمرّر عادةً بيانات موجودة).
+  if (!hasAny) {
+    return (
+      <EmptyState
+        className={className}
+        icon="Dumbbell"
+        title="ما فيه تغطية بعد — يوم تبدأ تمرينك بتتلوّن عضلاتك هنا."
+        body="كل مجموعة تسجّلها تنعكس على توزيع عضلاتك خلال الأسبوع."
+      />
+    )
+  }
+
   return (
     <div className={cn('grid gap-3 sm:grid-cols-2 xl:grid-cols-3', className)}>
-      {groups.map((g) => (
-        <GroupCard key={g.def.name} group={g} coverage={coverage} />
+      {groups.map((g, i) => (
+        <div key={g.def.name} className="animate-fade-in motion-reduce:animate-none" style={{ animationDelay: `${Math.min(i * 50, 300)}ms` }}>
+          <GroupCard group={g} coverage={coverage} />
+        </div>
+      ))}
+    </div>
+  )
+}
+
+/** هيكل تحميل لشبكة تغطية العضلات — يُعرض أثناء تجهيز البيانات. */
+export function MuscleCoverageGridSkeleton({ className }: { className?: string }) {
+  return (
+    <div className={cn('grid gap-3 sm:grid-cols-2 xl:grid-cols-3', className)} aria-hidden>
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} className="rounded-2xl border border-line bg-surface p-4 shadow-card">
+          <div className="flex items-center justify-between">
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-5 w-14 rounded-full" />
+          </div>
+          <Skeleton className="mt-3 h-2 w-full rounded-full" />
+          <div className="mt-3 flex gap-1.5">
+            <Skeleton className="h-4 w-14 rounded-full" />
+            <Skeleton className="h-4 w-12 rounded-full" />
+            <Skeleton className="h-4 w-16 rounded-full" />
+          </div>
+        </div>
       ))}
     </div>
   )

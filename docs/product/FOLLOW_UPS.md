@@ -1,5 +1,41 @@
 # Qimmah Follow-ups
 
+## P3 — Exercise images vendored locally (resilience fix) ✅ supersedes the P2.7 note below
+
+Exercise images are **no longer hotlinked** to `raw.githubusercontent`. `scripts/build-exercise-media.mjs`
+now **downloads** the 136 matched images into `public/exercise-images/<exerciseId>/{0,1}.jpg` and commits
+them (Unlicense / public domain — committing is fine). `src/data/exerciseMedia.ts` points `img0`/`img1`
+at the **local** paths (`/exercise-images/…`) and keeps the raw URL as `img0Remote`/`img1Remote` **fallback**.
+`ExerciseMedia` walks the chain **local → remote → clean placeholder**, so the app renders exercise images
+**without any outbound network at view time**. Proof: `npm run proof:media` (272 local files verified on
+disk + referenced; `dist/` ships them).
+
+- Re-generate after adding exercises: `npm run build:media` (downloads only missing files — idempotent).
+- If you change a `MANUAL_OVERRIDE` mapping, force a refresh so stale files are replaced:
+  `FORCE_REDOWNLOAD=1 npm run build:media` (or delete that exercise's folder under `public/exercise-images/`).
+- The **animated-GIF seam is unchanged** — still the optional `WORKOUTX_API_KEY` upgrade documented below.
+
+## P2.7 — Image render confirmed + animated GIFs still optional
+
+> **Note (P3):** the "referenced by remote URL, not copied into the repo" statement below is **superseded**
+> — images are now vendored locally (see the P3 section above). The remote URLs remain only as fallback.
+
+**Images render.** Verified in P2.7 that the matched exercises load real `<img>` elements.
+The map `src/data/exerciseMedia.ts` holds **136/170** entries pointing at stable raw URLs on
+[`yuhonas/free-exercise-db`](https://github.com/yuhonas/free-exercise-db) (Unlicense / public
+domain), e.g. `https://raw.githubusercontent.com/.../exercises/<Name>/0.jpg`. Spot-checked
+several URLs → **HTTP 200**. `ExerciseMedia` and `ExerciseThumb` render real `<img>` with an
+`onError` handler that falls back to the gradient placeholder, so a missing match or a failed
+load never shows a broken image. NOTE: these images are **referenced by remote URL, not copied
+into the repo** (`public/` holds only `favicon.svg` + `_redirects`). They require outbound
+network at view time; the placeholder covers the offline case.
+
+**Animated muscle-highlight GIFs are still the optional upgrade.** The `gifUrl` slot in the map
+is preferred by the UI when present and is filled only when the build runs with a free
+**`WORKOUTX_API_KEY`** (workoutxapp.com — free tier, 500 req/month, no card). The integration
+seam is already in place — see the P2.5 section just below for the exact steps. No code change
+is needed to turn it on; just re-run `WORKOUTX_API_KEY=… npm run build:media` and commit.
+
 ## P2.5 — Real exercise media (images now, animated GIFs optional)
 
 **What shipped.** Exercise cards/thumbnails now show **real photos** instead of the empty

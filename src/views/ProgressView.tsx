@@ -15,7 +15,7 @@ interface ProgressViewProps {
   lang: Lang
 }
 
-/** تبويب التقدّم — بطاقات الوزن والحجم والـPRs والعضلات والسلسلة + مزامنة صحة وتذكير (موبايل أولًا). */
+/** تبويب التقدّم — بطاقات الوزن والحجم والـPRs والعضلات والسلسلة + خطوات يدوية وتذكير (موبايل أولًا). */
 export function ProgressView({ lang }: ProgressViewProps) {
   const t = getStrings(lang).progress
   const tw = getStrings(lang).workout
@@ -131,22 +131,8 @@ export function ProgressView({ lang }: ProgressViewProps) {
         {/* خريطة العضلات الأسبوعية — تُضيء ما درّبته هذا الأسبوع */}
         <WeeklyMuscleMap className="mt-3" />
 
-        {/* عدّاد الخطوات اليدوي + الهدف اليومي */}
+        {/* عدّاد الخطوات اليدوي + الهدف اليومي (إدخال يدوي فقط — لا مزامنة صحّية) */}
         <StepCounterCard className="mt-3" />
-
-        {/* مزامنة الصحة — نائب صادق */}
-        <div className="mt-3 card border-primary-soft p-5">
-          <div className="flex items-center gap-2.5">
-            <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary-soft text-primary-c">
-              <Icon name="Activity" className="h-5 w-5" />
-            </span>
-            <div>
-              <p className="text-sm font-black text-ink-900">{t.healthSyncTitle}</p>
-              <p className="text-[11px] font-bold text-primary-c">{t.healthSyncSoon}</p>
-            </div>
-          </div>
-          <p className="mt-3 text-xs leading-relaxed text-ink-500">{t.healthSyncBody}</p>
-        </div>
 
         {/* التذكيرات */}
         <ReminderCard lang={lang} />

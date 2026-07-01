@@ -4,7 +4,7 @@ import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
 import { exercises } from '@/data/exercises'
-import { exerciseDisplayName } from '@/lib/workoutPlan'
+import { ExerciseName } from './ExerciseName'
 import type { ExEnvironment, ExLevel, Muscle } from '@/types/workout'
 
 interface ExerciseLibraryPickerProps {
@@ -106,9 +106,13 @@ export function ExerciseLibraryPicker({ lang, onAdd, onClose }: ExerciseLibraryP
               {filtered.map((e) => (
                 <li key={e.id} className="flex items-center gap-2 rounded-xl border border-line bg-page p-3">
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-bold text-ink-900">
-                      {exerciseDisplayName(e.nameAr, e.nameEn, lang)}
-                    </p>
+                    <ExerciseName
+                      nameAr={e.nameAr}
+                      nameEn={e.nameEn}
+                      lang={lang}
+                      className="truncate text-sm font-bold text-ink-900"
+                      secondaryClassName="truncate text-[11px] text-ink-500"
+                    />
                     <p className="truncate text-[11px] text-ink-400">
                       {e.equipment.join(' · ')} · {e.defaultSets}×{e.defaultReps}
                     </p>

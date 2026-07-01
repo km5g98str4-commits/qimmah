@@ -38,22 +38,47 @@ export function emptyPlan(): WorkoutPlan {
   return { templateId: 'custom', days: [] }
 }
 
-/** اسم التمرين حسب اللغة: العربية = «إنجليزي — عربي» (الاسم الإنجليزي أولًا)، الإنجليزية = إنجليزي فقط. */
+/**
+ * اسم التمرين الأساسي (سطر واحد): العربية أساسية في الوضع العربي، الإنجليزية في الوضع الإنجليزي.
+ * (P2.7) أُلغي اللصق «إنجليزي — عربي» المزدوج؛ الاسم الثانوي يُعرض كسطر منفصل عبر exerciseNameParts.
+ */
 export function exerciseDisplayName(
   nameAr: string,
   nameEn: string,
   lang: Lang,
 ): string {
-  if (lang === 'en') return nameEn
-  return nameEn && nameAr ? `${nameEn} — ${nameAr}` : nameEn || nameAr
+  if (lang === 'en') return nameEn || nameAr
+  return nameAr || nameEn
 }
 
-/** اسم عنصر الخطة (يراعي الأسماء المخصّصة). */
+/** جزأا اسم التمرين الموحّدان: أساسي (عربي) + ثانوي (إنجليزي أصغر) في الوضع العربي. */
+export interface ExerciseNameParts {
+  primary: string
+  secondary: string
+}
+
+/** يُرجّع الاسم الأساسي + الثانوي بشكل متّسق (عربي أساسي، إنجليزي ثانوي). */
+export function exerciseNameParts(nameAr: string, nameEn: string, lang: Lang): ExerciseNameParts {
+  if (lang === 'en') return { primary: nameEn || nameAr, secondary: '' }
+  const primary = nameAr || nameEn
+  const secondary = nameEn && nameAr && nameEn !== nameAr ? nameEn : ''
+  return { primary, secondary }
+}
+
+/** اسم عنصر الخطة (سطر واحد، يراعي الأسماء المخصّصة). */
 export function planExerciseName(pe: PlanExercise, lang: Lang): string {
   const ex = getExercise(pe.exerciseId)
   const ar = pe.customNameAr || ex?.nameAr || ''
   const en = pe.customNameEn || ex?.nameEn || ''
   return exerciseDisplayName(ar, en, lang)
+}
+
+/** جزأا اسم عنصر الخطة (أساسي/ثانوي) يراعي الأسماء المخصّصة. */
+export function planExerciseNameParts(pe: PlanExercise, lang: Lang): ExerciseNameParts {
+  const ex = getExercise(pe.exerciseId)
+  const ar = pe.customNameAr || ex?.nameAr || ''
+  const en = pe.customNameEn || ex?.nameEn || ''
+  return exerciseNameParts(ar, en, lang)
 }
 
 /** رابط الفيديو لعنصر الخطة (تخصيص ثم مكتبة). */

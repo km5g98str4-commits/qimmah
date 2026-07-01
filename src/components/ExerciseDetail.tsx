@@ -52,9 +52,13 @@ export function ExerciseDetail({ lang, exerciseId, onClose, onAddToPlan }: Exerc
             <Icon name="X" className="h-5 w-5" />
           </button>
           <div className="absolute inset-x-0 bottom-0 p-4">
-            {/* الاسم الإنجليزي أولًا، العربي تحته، ثم العضلة الهدف بالعربية */}
-            <h2 className="text-xl font-black text-white drop-shadow">{ex.nameEn}</h2>
-            <p className="mt-0.5 text-sm font-bold text-white/90 drop-shadow">{ex.nameAr}</p>
+            {/* الاسم العربي أساسي، الإنجليزي سطر ثانوي أصغر (موحّد عبر الواجهة) */}
+            <h2 className="text-xl font-black text-white drop-shadow">
+              {lang === 'en' ? ex.nameEn || ex.nameAr : ex.nameAr || ex.nameEn}
+            </h2>
+            {lang !== 'en' && ex.nameEn && ex.nameEn !== ex.nameAr && (
+              <p className="mt-0.5 text-sm font-bold text-white/80 drop-shadow">{ex.nameEn}</p>
+            )}
             <p className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px] font-bold text-white/80">
               <span className="rounded-full bg-white/15 px-2 py-0.5 backdrop-blur">{targetMuscleAr(ex)}</span>
               <span>{ex.equipment.join(' · ')} · {levelAr(ex.level)}</span>

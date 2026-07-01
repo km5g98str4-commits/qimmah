@@ -11,7 +11,8 @@
     "preview": "vite preview",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "typecheck": "tsc -b --noEmit",
-    "build:media": "node scripts/build-exercise-media.mjs"
+    "build:media": "node scripts/build-exercise-media.mjs",
+    "proof:media": "node scripts/run-p3-media-proof.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.108.2",

@@ -23,9 +23,12 @@ import type { Lang } from '@/lib/appPreferences'
 import { computeTargets, calorieGoalFromGoalType, goalTypeLabel } from '@/lib/calculators'
 import { exercises, getExercise } from '@/data/exercises'
 import { getTemplate } from '@/data/workoutTemplates'
+import { mealTemplates, getMealTemplate } from '@/data/mealTemplates'
 import { workoutDayNameAr, workoutDayNameEn } from '@/lib/workoutDayLabel'
 import { createPlanMealFromTemplate, planTotals } from '@/lib/nutritionPlan'
 import { createPlanCommitment } from '@/lib/commitmentPlan'
+import { templateAllowedForDiet, dietRestrictsSources } from '@/lib/dietFilter'
+import type { DietPattern } from '@/types/onboarding'
 
 export interface GeneratedPlan {
   targets: Targets
@@ -158,7 +161,17 @@ const SCHEMES: Record<GoalType, RepScheme> = {
 
 /** فلتر الأدوات حسب نوع النادي (gymType). لا نولّد تمارين مستحيلة للبيئة المختارة. */
 function makeEquipFilter(p: Profile): (ex: Exercise) => boolean {
-  const access = p.gymAccess ?? (p.workoutEnvironment === 'home' ? 'home' : 'full')
+  // الأولوية لـ gymAccess، ثم نشتق احتياطيًا من gymType أو workoutEnvironment للملفّات القديمة
+  // كي لا يحصل مستخدم «جيم منزلي» على أجهزة لمجرد غياب حقل واحد.
+  const fallback: Profile['gymAccess'] =
+    p.gymType === 'home' || p.workoutEnvironment === 'home'
+      ? 'home'
+      : p.gymType === 'bodyweight'
+        ? 'bodyweight'
+        : p.gymType === 'small'
+          ? 'small'
+          : 'full'
+  const access = p.gymAccess ?? fallback
   if (access === 'full') return () => true
   if (access === 'small') {
     // نادٍ صغير: وزن حر + أجهزة أساسية + كيبل أساسي — نستبعد المتخصّص فقط (سميث/حبل).
@@ -207,7 +220,7 @@ function prefersMachines(tier: ExpTier): boolean {
 }
 
 // — تصفية الإصابات: نستبعد التمارين عالية الخطورة ونُبقي بدائل أأمن (بلا نصائح طبية) —
-type InjuryArea = 'knee' | 'shoulder' | 'back'
+type InjuryArea = 'knee' | 'shoulder' | 'back' | 'wrist' | 'elbow' | 'ankle'
 
 /** يكتشف مناطق الإصابة من نص القيود (معرّفات الإعداد القياسية + التسميات العربية). */
 function detectInjuries(injuries?: string): Set<InjuryArea> {
@@ -217,10 +230,14 @@ function detectInjuries(injuries?: string): Set<InjuryArea> {
   if (/knee|ركبة|ركب/.test(t)) out.add('knee')
   if (/shoulder|كتف|أكتاف|اكتاف/.test(t)) out.add('shoulder')
   if (/back|lower_back|ظهر|عمود/.test(t)) out.add('back')
+  if (/wrist|رسغ|معصم/.test(t)) out.add('wrist')
+  if (/elbow|مرفق|كوع/.test(t)) out.add('elbow')
+  if (/ankle|كاحل|كعب/.test(t)) out.add('ankle')
   return out
 }
 
 // تمارين نستبعدها افتراضيًا لكل إصابة — مع إبقاء بدائل أأمن لنفس المجموعة العضلية.
+// المبدأ: عند الشك نستبعد (محافظ)، مع ضمان بقاء بدائل تملأ الخطة (أجهزة/كيبل/دمبل).
 const INJURY_RISKY_IDS: Record<InjuryArea, ReadonlySet<string>> = {
   // الركبة: نتجنّب القرفصاء الثقيل والاندفاع العميق ومدّ الرجل؛ نُبقي ليج برس/قرفصاء خفيف والهيپ.
   knee: new Set([
@@ -234,6 +251,34 @@ const INJURY_RISKY_IDS: Record<InjuryArea, ReadonlySet<string>> = {
   back: new Set([
     'deadlift', 'sumo-deadlift', 'stiff-leg-deadlift', 'good-morning', 'barbell-row', 't-bar-row',
     'romanian-deadlift', 'dumbbell-rdl', 'single-leg-rdl',
+  ]),
+  // الرسغ: نتجنّب القبضة الثقيلة (رفعات/عقلة/تجديف بار)، وحمل وزن الجسم على الكفّ (ضغط/غطس)،
+  // وتمرير البار المستقيم والضغط الضيّق (إجهاد الرسغ). نُبقي أجهزة/كيبل/دمبل بقبضة محايدة.
+  wrist: new Set([
+    'deadlift', 'sumo-deadlift', 'rack-pull', 'barbell-row', 'pendlay-row', 't-bar-row',
+    'meadows-row', 'pull-up', 'chin-up', 'inverted-row', 'dumbbell-shrug', 'barbell-shrug',
+    'kettlebell-swing', 'hanging-leg-raise', 'toes-to-bar', 'front-squat',
+    'barbell-curl', 'ez-bar-curl', 'cable-curl', 'reverse-curl', 'preacher-curl', 'spider-curl',
+    'skull-crusher', 'close-grip-bench-press', 'jm-press',
+    'push-up', 'incline-push-up', 'knee-push-up', 'diamond-push-up', 'chest-dip', 'bench-dip',
+    'ab-wheel-rollout', 'mountain-climber', 'burpees',
+  ]),
+  // المرفق: نتجنّب تمارين ثني/مدّ المرفق تحت حِمل مباشر (التمريرات، مدّ الترايسبس الثقيل، الغطس).
+  // نُبقي دفع الترايسبس بالكيبل (بوش داون) والضغط بالجهاز/الدمبل لملء اليوم.
+  elbow: new Set([
+    'barbell-curl', 'dumbbell-curl', 'hammer-curl', 'preacher-curl', 'cable-curl',
+    'concentration-curl', 'incline-dumbbell-curl', 'ez-bar-curl', 'spider-curl', 'cable-hammer-curl',
+    'reverse-curl', 'machine-curl',
+    'skull-crusher', 'overhead-triceps-extension', 'cable-overhead-extension', 'dumbbell-kickback',
+    'close-grip-bench-press', 'jm-press', 'bench-dip', 'chest-dip', 'triceps-dip-machine',
+    'diamond-push-up',
+  ]),
+  // الكاحل: نتجنّب القفز/الارتطام، ورفع السمانة واقفًا (توازن على الكاحل)، والاندفاع.
+  // نُبقي سمانة جالس/ليج برس والقرفصاء المدعوم والكارديو منخفض الارتطام.
+  ankle: new Set([
+    'bulgarian-split-squat', 'walking-lunge', 'reverse-lunge', 'step-up',
+    'standing-calf-raise', 'bodyweight-calf-raise', 'donkey-calf-raise', 'single-leg-calf-raise',
+    'jump-rope', 'burpees', 'high-knees', 'mountain-climber',
   ]),
 }
 
@@ -553,10 +598,14 @@ function createGenExercise(exerciseId: string, dayId: string, order: number, tie
   }
 }
 
-/** يضيف عنصر كارديو ليومين أسبوعيًا (هدف التنشيف). */
-function addCutCardio(planDays: PlanDay[], equipOk: (ex: Exercise) => boolean): void {
+/** يضيف عنصر كارديو ليومين أسبوعيًا (هدف التنشيف) — يحترم فلتر الإصابات (يستبعد الكارديو عالي الارتطام). */
+function addCutCardio(
+  planDays: PlanDay[],
+  equipOk: (ex: Exercise) => boolean,
+  injuryOk: (ex: Exercise) => boolean,
+): void {
   const cardio = exercises
-    .filter((ex) => ex.primaryMuscle === 'cardio' && equipOk(ex))
+    .filter((ex) => ex.primaryMuscle === 'cardio' && equipOk(ex) && injuryOk(ex))
     .sort((a, b) => a.id.localeCompare(b.id))
   if (!cardio.length || !planDays.length) return
   const idxs = planDays.length >= 2 ? [0, Math.min(planDays.length - 1, Math.floor(planDays.length / 2))] : [0]
@@ -589,7 +638,8 @@ function generateWorkoutPlan(p: Profile): { plan: WorkoutPlan; specs: DaySpec[] 
   const tier = expTier(p)
   const target = targetExerciseCount(tier, p.workoutDuration)
   const equipOk = makeEquipFilter(p)
-  const injuryOk = makeInjuryFilter(detectInjuries(p.injuries))
+  const injuryAreas = detectInjuries(p.injuries)
+  const injuryOk = makeInjuryFilter(injuryAreas)
   const preferMachines = prefersMachines(tier)
   const pool = exercises.filter(
     (ex) =>
@@ -615,7 +665,7 @@ function generateWorkoutPlan(p: Profile): { plan: WorkoutPlan; specs: DaySpec[] 
     }
   })
 
-  if (p.goalType === 'cutting') addCutCardio(planDays, equipOk)
+  if (p.goalType === 'cutting') addCutCardio(planDays, equipOk, injuryOk)
 
   return { plan: { templateId, days: planDays }, specs }
 }
@@ -753,6 +803,25 @@ function redistributeMeals(meals: PlanMeal[], targetCalories: number, timing: Ti
   })
 }
 
+/**
+ * يختار قالب وجبة متوافقًا مع النمط الغذائي. إن كان القالب المفضّل مخالفًا (مثل دجاج لنباتي)
+ * نستبدله بأفضل بديل متوافق من نفس نوع الوجبة (الأعلى بروتينًا)؛ وإلا نُبقي المفضّل.
+ */
+function pickTemplateForDiet(preferredId: string, dietPattern: DietPattern | undefined): string {
+  const preferred = getMealTemplate(preferredId)
+  if (!preferred || !dietRestrictsSources(dietPattern)) return preferredId
+  if (templateAllowedForDiet(preferred, dietPattern)) return preferredId
+  const byProtein = (a: { protein: number }, b: { protein: number }) => b.protein - a.protein
+  const compliant = mealTemplates
+    .filter((t) => templateAllowedForDiet(t, dietPattern))
+    .map((t) => ({ id: t.id, mealType: t.mealType, protein: createPlanMealFromTemplate(t.id, 0).protein }))
+  // فضّل نفس نوع الوجبة؛ وإن لم يوجد بديل متوافق من النوع نفسه، اختر أعلى بديل متوافق من أي نوع.
+  const sameType = compliant.filter((t) => t.mealType === preferred.mealType).sort(byProtein)
+  if (sameType.length) return sameType[0].id
+  const any = [...compliant].sort(byProtein)
+  return any.length ? any[0].id : preferredId
+}
+
 /** يولّد خطة أكل تقريبية من الأهداف والتفضيلات (يحاول الاقتراب من السعرات/البروتين). */
 export function generateNutrition(p: Profile, targets: Targets): { plan: NutritionPlan; warning?: string } {
   const goal = calorieGoalFromGoalType(p.goalType)
@@ -786,7 +855,11 @@ export function generateNutrition(p: Profile, targets: Targets): { plan: Nutriti
   if (mealsCount >= 4) slots.push(s.snack)
   if (mealsCount >= 5) slots.push('protein-shake')
 
-  let meals: PlanMeal[] = slots.map((id, i) => createPlanMealFromTemplate(id, i))
+  // احترام النمط الغذائي: استبدل أي قالب مخالف (لحم/سمك) ببديل متوافق من نفس النوع.
+  const dietPattern = p.dietPattern
+  let meals: PlanMeal[] = slots
+    .map((id) => pickTemplateForDiet(id, dietPattern))
+    .map((id, i) => createPlanMealFromTemplate(id, i))
 
   // توزيع حجم الوجبات حسب تفضيل المستخدم (P2.5): عند اختيار توزيع/وقت جوع غير «متوازن»
   // نعيد توزيع السعرات على الوجبات (مع تثبيت الإجمالي)؛ غير ذلك نُبقي السلوك الموحّد القديم.

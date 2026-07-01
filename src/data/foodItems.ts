@@ -179,6 +179,7 @@ export const foodItems: FoodItem[] = [
     protein: 24,
     carbs: 0,
     fat: 0,
+    keywords: ['جمبري', 'قمبري', 'shrimp', 'prawn'],
   },
   {
     id: 'sardine',
@@ -3917,13 +3918,55 @@ export function getFood(id: string): FoodItem | undefined {
   return foodMap[id]
 }
 
+/**
+ * تطبيع نص عربي/لاتيني للبحث: يزيل التشكيل والتطويل، ويوحّد الألف والهمزات والتاء المربوطة
+ * والألف المقصورة، ويحوّل للأحرف الصغيرة. يجعل «كبسه» و«كبسة» و«كبسـة» تتطابق.
+ */
+export function normalizeSearch(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[ً-ْٰ]/g, '') // التشكيل (فتحة/ضمة/كسرة/شدة/سكون/تنوين + ألف خنجرية)
+    .replace(/ـ/g, '') // التطويل (ـ)
+    .replace(/[أإآٱ]/g, 'ا') // توحيد الألف بأنواعها
+    .replace(/ة/g, 'ه') // التاء المربوطة → هاء (كبسة/كبسه)
+    .replace(/ى/g, 'ي') // الألف المقصورة → ياء
+    .replace(/[ؤ]/g, 'و')
+    .replace(/[ئ]/g, 'ي')
+    .replace(/ء/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+/**
+ * بحث في قاعدة الأطعمة — عربي أولًا، يتحمّل الأخطاء الإملائية الشائعة والمرادفات
+ * (عبر التطبيع + الكلمات المفتاحية اللاتينية). النتائج مرتّبة: تطابق تام → بادئة → تضمين،
+ * مع أولوية الاسم العربي ثم الإنجليزي ثم الكلمات المفتاحية.
+ */
 export function searchFood(query: string): FoodItem[] {
-  const q = query.trim().toLowerCase()
+  const q = normalizeSearch(query)
   if (!q) return foodItems
-  return foodItems.filter(
-    (f) =>
-      f.nameAr.toLowerCase().includes(q) ||
-      f.nameEn.toLowerCase().includes(q) ||
-      f.keywords?.some((k) => k.toLowerCase().includes(q)),
-  )
+
+  const scored: { item: FoodItem; score: number }[] = []
+  for (const f of foodItems) {
+    const ar = normalizeSearch(f.nameAr)
+    const en = normalizeSearch(f.nameEn)
+    const kws = (f.keywords ?? []).map(normalizeSearch)
+
+    let score = Infinity
+    if (ar === q) score = 0
+    else if (ar.startsWith(q)) score = 1
+    else if (ar.includes(q)) score = 2
+    else if (en.startsWith(q)) score = 3
+    else if (en.includes(q)) score = 4
+    else if (kws.some((k) => k === q || k.startsWith(q))) score = 5
+    else if (kws.some((k) => k.includes(q))) score = 6
+
+    if (score !== Infinity) scored.push({ item: f, score })
+  }
+
+  // ترتيب ثابت: الأدنى نتيجةً أولًا، مع الحفاظ على الترتيب الأصلي عند التساوي.
+  return scored
+    .map((s, i) => ({ ...s, i }))
+    .sort((a, b) => (a.score - b.score) || (a.i - b.i))
+    .map((s) => s.item)
 }

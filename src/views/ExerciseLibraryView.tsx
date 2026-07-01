@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import { Icon } from '@/components/Icon'
 import { ExerciseDetail } from '@/components/ExerciseDetail'
+import { ExerciseName } from '@/components/ExerciseName'
 import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
 import { exercises, getExercise, targetMuscleAr } from '@/data/exercises'
@@ -169,9 +170,14 @@ export function ExerciseLibraryView({ lang }: ExerciseLibraryViewProps) {
                 >
                   <ExerciseThumb exerciseId={e.id} />
                   <div className="min-w-0 flex-1">
-                    {/* الاسم الإنجليزي أولًا، العربي تحته، ثم العضلة الهدف بالعربية */}
-                    <p className="truncate text-sm font-bold text-ink-900">{e.nameEn}</p>
-                    <p className="truncate text-[11px] text-ink-500">{e.nameAr}</p>
+                    {/* الاسم العربي أساسي، الإنجليزي سطر ثانوي أصغر (موحّد) */}
+                    <ExerciseName
+                      nameAr={e.nameAr}
+                      nameEn={e.nameEn}
+                      lang={lang}
+                      className="truncate text-sm font-bold text-ink-900"
+                      secondaryClassName="truncate text-[11px] text-ink-500"
+                    />
                     <p className="mt-0.5 flex items-center gap-1.5 text-[11px] text-ink-400">
                       <span className="rounded-full bg-primary-soft px-1.5 py-0.5 font-bold text-primary-c">{targetMuscleAr(e)}</span>
                       <span className="truncate">{e.equipment.map(equipAr).join(' · ')}</span>
