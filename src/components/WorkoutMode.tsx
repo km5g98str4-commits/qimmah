@@ -4,6 +4,7 @@ import { MuscleChips } from './MuscleChips'
 import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
+import { workoutScreenStrings } from '@/i18n/dict/workoutScreen'
 import type { PlanDay } from '@/types/workout'
 import { exerciseDisplayName, planExerciseVideo } from '@/lib/workoutPlan'
 import { getAlternatives, getExercise } from '@/data/exercises'
@@ -70,6 +71,7 @@ function repsInvalid(v: string): boolean {
 /** وضع التمرين النشط — شاشة كاملة، تمرين واحد في كل خطوة، تسجيل سريع. */
 export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: WorkoutModeProps) {
   const t = getStrings(lang).workout
+  const d = workoutScreenStrings[lang]
   const [startedAt] = useState(() => new Date().toISOString())
   const [current, setCurrent] = useState(0)
   const [openGuide, setOpenGuide] = useState(false)
@@ -133,7 +135,7 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
       <div className="fixed inset-0 z-50 flex flex-col bg-page">
         <header className="sticky top-0 z-10 glass border-b border-line">
           <div className="container-page flex h-16 items-center justify-between gap-3">
-            <button type="button" onClick={onClose} aria-label="إغلاق" className="grid h-11 w-11 place-items-center rounded-xl border border-line bg-surface text-ink-700">
+            <button type="button" onClick={onClose} aria-label={d.close} className="grid h-11 w-11 place-items-center rounded-xl border border-line bg-surface text-ink-700">
               <Icon name="X" className="h-5 w-5" />
             </button>
             <p className="truncate text-sm font-black text-ink-900">{lang === 'en' ? day.nameEn : day.nameAr}</p>
@@ -288,7 +290,7 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
       {/* الترويسة + شريط التقدّم */}
       <header className="sticky top-0 z-10 glass border-b border-line">
         <div className="container-page flex h-16 items-center justify-between gap-3">
-          <button type="button" onClick={onClose} aria-label="إغلاق" className="grid h-11 w-11 place-items-center rounded-xl border border-line bg-surface text-ink-700">
+          <button type="button" onClick={onClose} aria-label={d.close} className="grid h-11 w-11 place-items-center rounded-xl border border-line bg-surface text-ink-700">
             <Icon name="X" className="h-5 w-5" />
           </button>
           <div className="min-w-0 text-center">
@@ -420,7 +422,7 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
                   )}
                 >
                   <Icon name={st.completed ? 'CheckCircle2' : 'Check'} className="h-5 w-5" strokeWidth={st.completed ? 2 : 3} />
-                  {st.completed ? t.setSaved : 'تم'}
+                  {st.completed ? t.setSaved : d.done}
                 </button>
               </div>
             )

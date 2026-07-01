@@ -4,7 +4,7 @@
  *  - أصول نفس الأصل (JS/CSS/صور/خطوط): stale-while-revalidate.
  * غيّر رقم الإصدار عند كل نشر لإبطال الكاش القديم.
  */
-const VERSION = 'qimmah-v1'
+const VERSION = 'qimmah-v2'
 const APP_SHELL = `${VERSION}-shell`
 const RUNTIME = `${VERSION}-runtime`
 

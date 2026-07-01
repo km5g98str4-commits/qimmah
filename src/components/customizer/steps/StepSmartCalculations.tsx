@@ -5,9 +5,11 @@ import type { WizardCtx } from '../stepProps'
 import type { Targets } from '@/types/profile'
 import { computeTargets, profileHash } from '@/lib/calculators'
 import { NUM_LIMITS, parseSafeNumber } from '@/lib/validation'
+import { onboardingStrings } from '@/i18n/dict/onboarding'
 
 /** خطوة الحسابات الذكية — أرقام مقدّرة قابلة للتعديل اليدوي. */
 export function StepSmartCalculations({ ctx }: { ctx: WizardCtx }) {
+  const d = onboardingStrings[ctx.lang]
   const t = ctx.data.targets
   const manual = ctx.data.targetsMeta.manuallyEdited
   // أي تعديل يدوي على رقم → يضع علامة «معدّل يدويًا»
@@ -24,15 +26,15 @@ export function StepSmartCalculations({ ctx }: { ctx: WizardCtx }) {
     <div>
       <StepHeader
         icon="BarChart3"
-        title="الحسابات الذكية"
-        description="قِمّة قدّرت لك الأرقام من بياناتك. عدّل أي رقم يدويًا إذا تبي."
+        title={d.smartTitle}
+        description={d.smartDescription}
       />
 
       {/* تنويه */}
       <div className="mb-5 flex items-start gap-3 rounded-2xl border border-gold-400/40 bg-gold-200/40 p-4">
         <Icon name="AlertTriangle" className="mt-0.5 h-5 w-5 shrink-0 text-gold-600" />
         <p className="text-sm leading-relaxed text-ink-700">
-          هذه الحسابات تقديرية للتنظيم والمتابعة فقط، وليست بديلًا عن مختص.
+          {d.smartDisclaimer}
         </p>
       </div>
 
@@ -40,54 +42,54 @@ export function StepSmartCalculations({ ctx }: { ctx: WizardCtx }) {
       {manual ? (
         <div className="mb-5 flex flex-col gap-3 rounded-2xl border border-primary-soft bg-primary-soft p-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm font-bold text-ink-900">
-            لديك تعديلات يدوية على الحسابات. تقدر إعادة الحساب من بياناتك في أي وقت.
+            {d.smartManualNotice}
           </p>
           <button type="button" onClick={recalc} className="btn-primary px-4 py-2 text-sm">
             <Icon name="RotateCcw" className="h-4 w-4" />
-            إعادة الحساب الآن
+            {d.smartRecalcNow}
           </button>
         </div>
       ) : (
         <button type="button" onClick={recalc} className="btn-ghost mb-6 w-full py-3 sm:w-auto">
           <Icon name="RotateCcw" className="h-4 w-4" />
-          إعادة الحساب من بياناتي
+          {d.smartRecalcFromData}
         </button>
       )}
 
       <div className="grid gap-5 lg:grid-cols-2">
         {/* السعرات */}
-        <Card icon="Flame" title="السعرات">
-          <NumField label="الأساس (BMR)" value={t.bmr} unit="سعرة" onChange={(v) => setT({ bmr: v })} />
-          <NumField label="إجمالي الحركة (TDEE)" value={t.tdee} unit="سعرة" max={NUM_LIMITS.dailyCalories.max} onChange={(v) => setT({ tdee: v })} />
-          <NumField label="المحافظة" value={t.maintenanceCalories} unit="سعرة" max={NUM_LIMITS.dailyCalories.max} onChange={(v) => setT({ maintenanceCalories: v })} />
-          <NumField label="التنشيف" value={t.cuttingCalories} unit="سعرة" max={NUM_LIMITS.dailyCalories.max} onChange={(v) => setT({ cuttingCalories: v })} />
-          <NumField label="التضخيم" value={t.bulkingCalories} unit="سعرة" max={NUM_LIMITS.dailyCalories.max} onChange={(v) => setT({ bulkingCalories: v })} />
+        <Card icon="Flame" title={d.smartCaloriesCard}>
+          <NumField label={d.smartBmr} value={t.bmr} unit={d.unitCalories} onChange={(v) => setT({ bmr: v })} />
+          <NumField label={d.smartTdee} value={t.tdee} unit={d.unitCalories} max={NUM_LIMITS.dailyCalories.max} onChange={(v) => setT({ tdee: v })} />
+          <NumField label={d.smartMaintenance} value={t.maintenanceCalories} unit={d.unitCalories} max={NUM_LIMITS.dailyCalories.max} onChange={(v) => setT({ maintenanceCalories: v })} />
+          <NumField label={d.smartCutting} value={t.cuttingCalories} unit={d.unitCalories} max={NUM_LIMITS.dailyCalories.max} onChange={(v) => setT({ cuttingCalories: v })} />
+          <NumField label={d.smartBulking} value={t.bulkingCalories} unit={d.unitCalories} max={NUM_LIMITS.dailyCalories.max} onChange={(v) => setT({ bulkingCalories: v })} />
         </Card>
 
         {/* الماكروز */}
-        <Card icon="Salad" title="الماكروز">
-          <NumField label="البروتين" value={t.proteinGrams} unit="غ" onChange={(v) => setT({ proteinGrams: v })} />
-          <NumField label="الدهون" value={t.fatGrams} unit="غ" onChange={(v) => setT({ fatGrams: v })} />
-          <NumField label="الكربوهيدرات" value={t.carbsGrams} unit="غ" onChange={(v) => setT({ carbsGrams: v })} />
+        <Card icon="Salad" title={d.smartMacros}>
+          <NumField label={d.smartProtein} value={t.proteinGrams} unit={d.unitG} onChange={(v) => setT({ proteinGrams: v })} />
+          <NumField label={d.smartFat} value={t.fatGrams} unit={d.unitG} onChange={(v) => setT({ fatGrams: v })} />
+          <NumField label={d.smartCarbs} value={t.carbsGrams} unit={d.unitG} onChange={(v) => setT({ carbsGrams: v })} />
         </Card>
 
         {/* الماء */}
-        <Card icon="Droplets" title="الماء">
-          <NumField label="الماء اليومي" value={t.waterLiters} unit="لتر" step="0.1" onChange={(v) => setT({ waterLiters: v })} />
+        <Card icon="Droplets" title={d.smartWaterCard}>
+          <NumField label={d.smartDailyWater} value={t.waterLiters} unit={d.unitLiter} step="0.1" onChange={(v) => setT({ waterLiters: v })} />
         </Card>
 
         {/* الوزن والهدف */}
-        <Card icon="Scale" title="الوزن والهدف">
-          <NumField label="مؤشر الكتلة (BMI)" value={t.bmi} step="0.1" onChange={(v) => setT({ bmi: v })} />
-          <TextField label="تصنيف المؤشر" value={t.bmiLabel} onChange={(v) => setT({ bmiLabel: v })} />
-          <NumField label="تغيّر أسبوعي متوقّع" value={t.weeklyWeightChangeKg} unit="كجم" step="0.05" onChange={(v) => setT({ weeklyWeightChangeKg: v })} />
-          <NumField label="أسابيع تقديرية للهدف" value={t.estimatedWeeksToGoal} unit="أسبوع" onChange={(v) => setT({ estimatedWeeksToGoal: v })} />
+        <Card icon="Scale" title={d.smartWeightGoalCard}>
+          <NumField label={d.smartBmi} value={t.bmi} step="0.1" onChange={(v) => setT({ bmi: v })} />
+          <TextField label={d.smartBmiLabel} value={t.bmiLabel} onChange={(v) => setT({ bmiLabel: v })} />
+          <NumField label={d.smartWeeklyChange} value={t.weeklyWeightChangeKg} unit={d.unitKg} step="0.05" onChange={(v) => setT({ weeklyWeightChangeKg: v })} />
+          <NumField label={d.smartWeeksToGoal} value={t.estimatedWeeksToGoal} unit={d.unitWeeks} onChange={(v) => setT({ estimatedWeeksToGoal: v })} />
         </Card>
 
         {/* اقتراح التمرين */}
-        <Card icon="Dumbbell" title="اقتراح التمرين" full>
-          <TextField label="التقسيمة المقترحة" value={t.suggestedTrainingSplit} onChange={(v) => setT({ suggestedTrainingSplit: v })} />
-          <TextField label="ملاحظات" value={t.notes} onChange={(v) => setT({ notes: v })} />
+        <Card icon="Dumbbell" title={d.smartTrainingCard} full>
+          <TextField label={d.smartSuggestedSplit} value={t.suggestedTrainingSplit} onChange={(v) => setT({ suggestedTrainingSplit: v })} />
+          <TextField label={d.smartNotes} value={t.notes} onChange={(v) => setT({ notes: v })} />
         </Card>
       </div>
     </div>

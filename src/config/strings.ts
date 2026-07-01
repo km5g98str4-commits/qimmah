@@ -52,6 +52,7 @@ export interface ShellStrings {
     groupLanguage: string
     languageActive: string
     languageSoon: string
+    languageHint: string
     export: string
     import: string
     reset: string
@@ -63,6 +64,26 @@ export interface ShellStrings {
     termsLink: string
     healthDisclaimer: string
     importConfirm: string
+  }
+  pwa: {
+    group: string
+    installTitle: string
+    installBody: string
+    installBtn: string
+    installIosTitle: string
+    installIosBody: string
+    installedTitle: string
+    installedBody: string
+    notifTitle: string
+    notifBody: string
+    notifEnable: string
+    notifGranted: string
+    notifDenied: string
+    notifUnsupported: string
+    notifConfirm: string
+    bannerText: string
+    bannerInstall: string
+    bannerDismiss: string
   }
   legal: {
     privacyTitle: string
@@ -399,6 +420,7 @@ const ar: ShellStrings = {
     groupLanguage: 'اللغة',
     languageActive: 'العربية — مفعّلة',
     languageSoon: 'الإنجليزية قريبًا (English coming soon)',
+    languageHint: 'يتغيّر النص واتجاه الصفحة فورًا، ويُحفظ اختيارك على هذا الجهاز.',
     export: 'تصدير نسخة احتياطية',
     import: 'استيراد نسخة',
     reset: 'إعادة ضبط البيانات',
@@ -413,6 +435,28 @@ const ar: ShellStrings = {
     healthDisclaimer:
       'قِمّة أداة تنظيم ومتابعة شخصية، وليست بديلًا عن الاستشارة الطبية. لا تبدأ أو توقف أي دواء أو نظام بدون مختص.',
     importConfirm: 'سيستبدل الاستيراد خطّتك وسجلّك الحالي بمحتوى الملف. هل تريد المتابعة؟',
+  },
+  pwa: {
+    group: 'التطبيق والتنبيهات',
+    installTitle: 'ثبّت قِمّة على جهازك',
+    installBody: 'أضف قِمّة كتطبيق ليفتح بلمسة واحدة ويعمل حتى دون اتصال.',
+    installBtn: 'تثبيت التطبيق',
+    installIosTitle: 'أضف قِمّة للشاشة الرئيسية',
+    installIosBody:
+      'في متصفح آيفون: اضغط زر المشاركة ثم «أضف إلى الشاشة الرئيسية». التنبيهات محدودة في متصفح الآيفون — للتجربة الكاملة أضف قِمّة للشاشة الرئيسية.',
+    installedTitle: 'قِمّة مثبّتة ✓',
+    installedBody: 'أنت تستخدم قِمّة كتطبيق مثبّت. استمتع بالتجربة الكاملة.',
+    notifTitle: 'تنبيهات التذكير',
+    notifBody:
+      'فعّل التنبيهات لتذكيرات لطيفة بتمرينك ووجباتك. التذكيرات محلية داخل هذا المتصفح، وقد لا تصل في الخلفية على بعض الأجهزة — بلا وعود مضمونة.',
+    notifEnable: 'تفعيل التنبيهات',
+    notifGranted: 'التنبيهات مفعّلة ✓',
+    notifDenied: 'التنبيهات محظورة من إعدادات المتصفح. فعّلها يدويًا من إعدادات الموقع.',
+    notifUnsupported: 'متصفحك لا يدعم التنبيهات هنا. أضف قِمّة للشاشة الرئيسية لتجربة أفضل.',
+    notifConfirm: 'رائع! سنُذكّرك بمواعيد تمرينك ووجباتك.',
+    bannerText: 'أضف قِمّة لشاشتك الرئيسية — أسرع وتعمل دون اتصال.',
+    bannerInstall: 'تثبيت',
+    bannerDismiss: 'لاحقًا',
   },
   legal: {
     privacyTitle: 'سياسة الخصوصية',
@@ -762,6 +806,7 @@ const en: ShellStrings = {
     groupLanguage: 'Language',
     languageActive: 'Arabic — active',
     languageSoon: 'English coming soon',
+    languageHint: 'Text and page direction switch instantly, and your choice is saved on this device.',
     export: 'Export backup',
     import: 'Import backup',
     reset: 'Reset data',
@@ -776,6 +821,28 @@ const en: ShellStrings = {
     healthDisclaimer:
       'Qimmah is a personal organization and tracking tool, not a substitute for medical advice. Do not start or stop any medication or program without a professional.',
     importConfirm: 'Importing will replace your current plan and logs with the file contents. Continue?',
+  },
+  pwa: {
+    group: 'App & Notifications',
+    installTitle: 'Install Qimmah on your device',
+    installBody: 'Add Qimmah as an app so it opens in one tap and works offline.',
+    installBtn: 'Install app',
+    installIosTitle: 'Add Qimmah to your Home Screen',
+    installIosBody:
+      'On iPhone Safari: tap the Share button, then “Add to Home Screen”. Notifications are limited in the iPhone browser — for the full experience add Qimmah to your Home Screen.',
+    installedTitle: 'Qimmah installed ✓',
+    installedBody: 'You’re using Qimmah as an installed app. Enjoy the full experience.',
+    notifTitle: 'Reminder notifications',
+    notifBody:
+      'Enable notifications for gentle nudges about your workouts and meals. Reminders are local to this browser and may not arrive in the background on some devices — no guarantees.',
+    notifEnable: 'Enable notifications',
+    notifGranted: 'Notifications enabled ✓',
+    notifDenied: 'Notifications are blocked in your browser settings. Enable them manually from site settings.',
+    notifUnsupported: 'Your browser does not support notifications here. Add Qimmah to your Home Screen for a better experience.',
+    notifConfirm: 'Great! We’ll remind you about your workouts and meals.',
+    bannerText: 'Add Qimmah to your Home Screen — faster and works offline.',
+    bannerInstall: 'Install',
+    bannerDismiss: 'Later',
   },
   legal: {
     privacyTitle: 'Privacy Policy',

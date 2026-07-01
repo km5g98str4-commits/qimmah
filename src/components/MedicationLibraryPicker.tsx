@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Icon } from './Icon'
 import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
+import { wellnessScreenStrings } from '@/i18n/dict/wellnessScreen'
 import { medications } from '@/data/medications'
 import type { MedicationCategory } from '@/types/wellness'
 
@@ -11,25 +12,26 @@ interface Props {
   onClose: () => void
 }
 
-const catOptions: { value: MedicationCategory | 'all'; label: string }[] = [
-  { value: 'all', label: 'كل الفئات' },
-  { value: 'thyroid', label: 'الغدة الدرقية' },
-  { value: 'diabetes', label: 'السكري' },
-  { value: 'blood_pressure', label: 'الضغط' },
-  { value: 'cholesterol', label: 'الكوليسترول' },
-  { value: 'allergy', label: 'الحساسية' },
-  { value: 'asthma', label: 'الربو' },
-  { value: 'stomach', label: 'المعدة' },
-  { value: 'pain_relief', label: 'المسكّنات' },
-  { value: 'antibiotic', label: 'مضاد حيوي' },
-  { value: 'vitamin_prescription', label: 'فيتامينات بوصفة' },
-  { value: 'iron', label: 'الحديد' },
-  { value: 'mental_health', label: 'الصحة النفسية' },
-  { value: 'other', label: 'أخرى' },
+const catOptions = (d: (typeof wellnessScreenStrings)['ar']): { value: MedicationCategory | 'all'; label: string }[] => [
+  { value: 'all', label: d.allCategories },
+  { value: 'thyroid', label: d.medCatThyroid },
+  { value: 'diabetes', label: d.medCatDiabetes },
+  { value: 'blood_pressure', label: d.medCatBloodPressure },
+  { value: 'cholesterol', label: d.medCatCholesterol },
+  { value: 'allergy', label: d.medCatAllergy },
+  { value: 'asthma', label: d.medCatAsthma },
+  { value: 'stomach', label: d.medCatStomach },
+  { value: 'pain_relief', label: d.medCatPainRelief },
+  { value: 'antibiotic', label: d.medCatAntibiotic },
+  { value: 'vitamin_prescription', label: d.medCatVitaminPrescription },
+  { value: 'iron', label: d.medCatIron },
+  { value: 'mental_health', label: d.medCatMentalHealth },
+  { value: 'other', label: d.medCatOther },
 ]
 
 export function MedicationLibraryPicker({ lang, onAdd, onClose }: Props) {
   const t = getStrings(lang).wellness
+  const d = wellnessScreenStrings[lang]
   const [q, setQ] = useState('')
   const [cat, setCat] = useState<MedicationCategory | 'all'>('all')
 
@@ -46,8 +48,8 @@ export function MedicationLibraryPicker({ lang, onAdd, onClose }: Props) {
     <div className="fixed inset-0 z-[60] flex items-end justify-center bg-ink-900/40 p-0 sm:items-center sm:p-6">
       <div className="flex max-h-[90vh] w-full max-w-lg flex-col rounded-t-3xl bg-surface shadow-card sm:rounded-3xl">
         <div className="flex items-center justify-between border-b border-line p-4">
-          <h3 className="text-base font-bold text-ink-900">مكتبة الأدوية</h3>
-          <button type="button" onClick={onClose} aria-label="إغلاق" className="grid h-8 w-8 place-items-center rounded-lg text-ink-500 hover:bg-beige"><Icon name="X" className="h-5 w-5" /></button>
+          <h3 className="text-base font-bold text-ink-900">{d.medicationLibraryTitle}</h3>
+          <button type="button" onClick={onClose} aria-label={d.close} className="grid h-8 w-8 place-items-center rounded-lg text-ink-500 hover:bg-beige"><Icon name="X" className="h-5 w-5" /></button>
         </div>
 
         {/* تنويه طبي */}
@@ -64,13 +66,13 @@ export function MedicationLibraryPicker({ lang, onAdd, onClose }: Props) {
             <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t.search} className="w-full bg-transparent py-2.5 text-sm text-ink-900 focus:outline-none" />
           </div>
           <select className="rounded-lg border border-line bg-surface px-2.5 py-2 text-xs font-bold text-ink-700" value={cat} onChange={(e) => setCat(e.target.value as MedicationCategory | 'all')}>
-            {catOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+            {catOptions(d).map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
         </div>
 
         <div className="flex-1 overflow-y-auto p-3">
           {filtered.length === 0 ? (
-            <p className="py-10 text-center text-sm text-ink-400">ما فيه نتائج.</p>
+            <p className="py-10 text-center text-sm text-ink-400">{d.noResults}</p>
           ) : (
             <ul className="space-y-2">
               {filtered.map((m) => (
@@ -81,7 +83,7 @@ export function MedicationLibraryPicker({ lang, onAdd, onClose }: Props) {
                       <p className="text-[11px] text-ink-500">{lang === 'en' ? m.trackingPurposeEn : m.trackingPurposeAr}</p>
                       <p className="mt-0.5 text-[11px] text-ink-400">{lang === 'en' ? m.timingHintEn : m.timingHintAr}</p>
                     </div>
-                    <button type="button" onClick={() => onAdd(m.id)} className="btn-primary shrink-0 px-3 py-2 text-xs"><Icon name="Plus" className="h-4 w-4" />أضف</button>
+                    <button type="button" onClick={() => onAdd(m.id)} className="btn-primary shrink-0 px-3 py-2 text-xs"><Icon name="Plus" className="h-4 w-4" />{d.add}</button>
                   </div>
                 </li>
               ))}

@@ -12,12 +12,15 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "typecheck": "tsc -b --noEmit",
     "build:media": "node scripts/build-exercise-media.mjs",
-    "proof:media": "node scripts/run-p3-media-proof.mjs"
+    "proof:media": "node scripts/run-p3-media-proof.mjs",
+    "proof:achievements": "node scripts/run-achievements-proof.mjs",
+    "proof:p4a3": "node scripts/run-p4a3-proof.mjs && node scripts/run-p4a3-ssr-proof.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.108.2",
     "lucide-react": "^0.456.0",
     "react": "^18.3.1",
+    "react-body-highlighter": "^2.0.5",
     "react-dom": "^18.3.1"
   },
   "devDependencies": {

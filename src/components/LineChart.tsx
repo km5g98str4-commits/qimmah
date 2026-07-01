@@ -1,5 +1,7 @@
 import { useId } from 'react'
 import type { ProgressPoint } from '@/types'
+import { getLanguage } from '@/lib/appPreferences'
+import { miscStrings } from '@/i18n/dict/misc'
 
 interface LineChartProps {
   data: ProgressPoint[]
@@ -26,7 +28,7 @@ export function LineChart({ data, height = 120 }: LineChartProps) {
   const area = `${line} L ${points[points.length - 1].x.toFixed(1)} ${height} L ${points[0].x.toFixed(1)} ${height} Z`
 
   return (
-    <svg viewBox={`0 0 ${width} ${height}`} className="h-auto w-full" preserveAspectRatio="none" role="img" aria-label="رسم تقدّم الوزن">
+    <svg viewBox={`0 0 ${width} ${height}`} className="h-auto w-full" preserveAspectRatio="none" role="img" aria-label={miscStrings[getLanguage()].weightChartLabel}>
       <defs>
         <linearGradient id={`grad-${id}`} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="var(--c-primary)" stopOpacity="0.28" />

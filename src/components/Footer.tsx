@@ -1,11 +1,14 @@
 import { nav, product } from '@/config/product'
 import { useCustomization } from '@/lib/customizationContext'
 import { BUILD_LABEL } from '@/lib/buildInfo'
+import { getLanguage } from '@/lib/appPreferences'
+import { miscStrings } from '@/i18n/dict/misc'
 import { Icon } from './Icon'
 
 /** الفوتر — هوية، روابط، حقوق. */
 export function Footer() {
   const { customization } = useCustomization()
+  const d = miscStrings[getLanguage()]
   const brandName = customization.identity.brandName || product.name
   return (
     <footer className="border-t border-line bg-beige">
@@ -37,12 +40,12 @@ export function Footer() {
         <div className="mt-12 flex flex-col gap-3 border-t border-line pt-6 text-xs text-ink-400 sm:flex-row sm:items-center sm:justify-between">
           <p>
             © {product.year} {brandName}. {product.rightsNote}
-            <span className="ms-2 text-ink-300" title="معرّف البناء">{BUILD_LABEL}</span>
+            <span className="ms-2 text-ink-300" title={d.buildIdTitle}>{BUILD_LABEL}</span>
           </p>
           <div className="flex items-center gap-4">
-            <a href="#/privacy" className="text-ink-500 transition-colors hover:text-brand-300">الخصوصية</a>
-            <a href="#/terms" className="text-ink-500 transition-colors hover:text-brand-300">الشروط</a>
-            <a href="#/contact" className="text-ink-500 transition-colors hover:text-brand-300">تواصل معنا</a>
+            <a href="#/privacy" className="text-ink-500 transition-colors hover:text-brand-300">{d.privacy}</a>
+            <a href="#/terms" className="text-ink-500 transition-colors hover:text-brand-300">{d.terms}</a>
+            <a href="#/contact" className="text-ink-500 transition-colors hover:text-brand-300">{d.contact}</a>
             <p className="flex items-center gap-1.5">
               {product.footerNote}
               <Icon name="Sparkles" className="h-3.5 w-3.5 text-gold-400" />

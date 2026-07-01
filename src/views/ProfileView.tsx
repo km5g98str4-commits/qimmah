@@ -58,8 +58,8 @@ export function ProfileView({ lang, onNavigate }: ProfileViewProps) {
       </div>
 
       {/* بيانات الجسم + الأهداف */}
-      <ProfileData />
-      <MyTargets />
+      <ProfileData lang={lang} />
+      <MyTargets lang={lang} />
 
       {/* روابط الثقة */}
       <div className="card p-5">

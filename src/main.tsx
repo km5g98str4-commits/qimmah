@@ -5,7 +5,10 @@ import { SplashScreen } from './components/SplashScreen'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { CustomizationProvider } from './lib/customizationContext'
 import { AuthProvider } from './lib/authContext'
+import { LanguageProvider } from './i18n'
 import { registerStepBridge } from './lib/stepCounter'
+// وحدة PWA: تلتقط حدث beforeinstallprompt مبكرًا (يُطلق مرّة واحدة فقط) لعرض زر التثبيت لاحقًا.
+import './lib/pwa'
 import './styles/index.css'
 
 // سيم الخطوات: يُتيح لغلاف أصلي مستقبلي (تطبيق آيفون يقرأ Apple Health) دفع الخطوات.
@@ -26,12 +29,14 @@ if (!root) throw new Error('عنصر root غير موجود في index.html')
 createRoot(root).render(
   <StrictMode>
     <ErrorBoundary>
-      <AuthProvider>
-        <CustomizationProvider>
-          <App />
-          <SplashScreen />
-        </CustomizationProvider>
-      </AuthProvider>
+      <LanguageProvider>
+        <AuthProvider>
+          <CustomizationProvider>
+            <App />
+            <SplashScreen />
+          </CustomizationProvider>
+        </AuthProvider>
+      </LanguageProvider>
     </ErrorBoundary>
   </StrictMode>,
 )

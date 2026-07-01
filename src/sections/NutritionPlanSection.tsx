@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { SectionHeading } from '@/components/SectionHeading'
 import { Icon } from '@/components/Icon'
 import { QuickMealLogger } from '@/components/nutrition/QuickMealLogger'
+import { CalorieExplainer } from '@/components/nutrition/CalorieExplainer'
 import { useCustomization } from '@/lib/customizationContext'
 import { mealAlternatives, mealDisplayName, mealTypeLabels, planTotals } from '@/lib/nutritionPlan'
 import type { PlanMeal } from '@/types/nutrition'
@@ -28,6 +29,9 @@ export function NutritionPlanSection({ lang }: { lang: Lang }) {
           <div className="mt-10">
             <QuickMealLogger lang={lang} targetCalories={logCalories} targetProtein={logProtein} />
           </div>
+          <div className="mt-6">
+            <CalorieExplainer />
+          </div>
           <p className="mt-4 text-center text-xs text-ink-400">{t.empty}</p>
         </div>
       </section>
@@ -48,9 +52,9 @@ export function NutritionPlanSection({ lang }: { lang: Lang }) {
 
   const targets = [
     { label: t.calories, planned: Math.round(totals.calories), target: np.targetCalories, unit: '' },
-    { label: t.protein, planned: Math.round(totals.protein), target: np.targetProtein, unit: 'غ' },
-    { label: t.carbs, planned: Math.round(totals.carbs), target: np.targetCarbs, unit: 'غ' },
-    { label: t.fat, planned: Math.round(totals.fat), target: np.targetFat, unit: 'غ' },
+    { label: t.protein, planned: Math.round(totals.protein), target: np.targetProtein, unit: t.gramsUnit },
+    { label: t.carbs, planned: Math.round(totals.carbs), target: np.targetCarbs, unit: t.gramsUnit },
+    { label: t.fat, planned: Math.round(totals.fat), target: np.targetFat, unit: t.gramsUnit },
   ]
 
   return (
@@ -61,6 +65,11 @@ export function NutritionPlanSection({ lang }: { lang: Lang }) {
         {/* تسجيل الوجبات السريع + التقدّم اليومي (مأكول/الهدف/المتبقّي) */}
         <div className="mt-10">
           <QuickMealLogger lang={lang} targetCalories={np.targetCalories} targetProtein={np.targetProtein} />
+        </div>
+
+        {/* شفافية الحساب: كيف نحسب سعراتك؟ (بناء الثقة بالأرقام) */}
+        <div className="mt-6">
+          <CalorieExplainer />
         </div>
 
         {/* الأهداف مقابل المخطّط */}
@@ -96,9 +105,9 @@ export function NutritionPlanSection({ lang }: { lang: Lang }) {
                 </div>
                 <div className="mt-3 flex flex-wrap gap-3 text-xs text-ink-500">
                   <Macro icon="Flame" value={`${meal.calories}`} label={t.calories} />
-                  <Macro icon="Salad" value={`${meal.protein}غ`} label={t.protein} />
-                  <Macro icon="CalendarDays" value={`${meal.carbs}غ`} label={t.carbs} />
-                  <Macro icon="Droplets" value={`${meal.fat}غ`} label={t.fat} />
+                  <Macro icon="Salad" value={`${meal.protein}${t.gramsUnit}`} label={t.protein} />
+                  <Macro icon="CalendarDays" value={`${meal.carbs}${t.gramsUnit}`} label={t.carbs} />
+                  <Macro icon="Droplets" value={`${meal.fat}${t.gramsUnit}`} label={t.fat} />
                 </div>
 
                 <button
@@ -125,7 +134,7 @@ export function NutritionPlanSection({ lang }: { lang: Lang }) {
                               className="flex w-full items-center justify-between gap-3 rounded-lg border border-line bg-surface p-2.5 text-start hover:border-primary-c"
                             >
                               <span className="min-w-0 truncate text-sm text-ink-900">{mealDisplayName(alt, lang)}</span>
-                              <span className="shrink-0 text-[11px] font-bold text-orange-300">{alt.calories} · {alt.protein}غ</span>
+                              <span className="shrink-0 text-[11px] font-bold text-orange-300">{alt.calories} · {alt.protein}{t.gramsUnit}</span>
                             </button>
                           </li>
                         ))}

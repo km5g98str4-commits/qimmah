@@ -1,5 +1,7 @@
 import { Icon } from '@/components/Icon'
 import { inputClass } from './Field'
+import type { Lang } from '@/lib/appPreferences'
+import { onboardingStrings } from '@/i18n/dict/onboarding'
 
 export interface ColumnDef<T> {
   key: keyof T
@@ -15,6 +17,7 @@ interface EditableTableProps<T> {
   onChange: (items: T[]) => void
   makeEmpty: () => T
   addLabel: string
+  lang: Lang
 }
 
 /** جدول قابل للتعديل: صفوف بحقول + إضافة/حذف. عام لكل أقسام البيانات. */
@@ -24,7 +27,9 @@ export function EditableTable<T extends object>({
   onChange,
   makeEmpty,
   addLabel,
+  lang,
 }: EditableTableProps<T>) {
+  const d = onboardingStrings[lang]
   const update = (index: number, key: keyof T, raw: string, type?: string) => {
     const next = items.slice()
     const value = type === 'number' ? Number(raw) || 0 : raw
@@ -71,7 +76,7 @@ export function EditableTable<T extends object>({
             <button
               type="button"
               onClick={() => remove(i)}
-              aria-label="حذف الصف"
+              aria-label={d.deleteRow}
               className="grid h-9 w-9 place-items-center rounded-lg border border-rose-500/20 bg-rose-500/10 text-rose-300 transition-colors hover:bg-rose-500/20"
             >
               <Icon name="X" className="h-4 w-4" />

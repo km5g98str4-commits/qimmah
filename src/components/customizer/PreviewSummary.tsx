@@ -1,8 +1,11 @@
 import { Icon } from '@/components/Icon'
 import { userTypeOptions, type Customization } from '@/lib/customization'
+import type { Lang } from '@/lib/appPreferences'
+import { onboardingStrings } from '@/i18n/dict/onboarding'
 
 /** معاينة مختصرة حيّة لصفحة المستخدم — تتحدّث مع كل تعديل. */
-export function PreviewSummary({ data }: { data: Customization }) {
+export function PreviewSummary({ data, lang }: { data: Customization; lang: Lang }) {
+  const d = onboardingStrings[lang]
   const userTypeLabel =
     userTypeOptions.find((o) => o.value === data.identity.userType)?.label ?? ''
 
@@ -16,23 +19,23 @@ export function PreviewSummary({ data }: { data: Customization }) {
         style={{ backgroundColor: `${data.colors.primary}1f`, color: data.colors.primary }}
       >
         <Icon name="Sparkles" className="h-3 w-3" />
-        معاينة صفحتك
+        {d.previewYourPage}
       </span>
 
       <h3 className="mt-4 text-2xl font-black text-ink-900">{data.identity.brandName}</h3>
       <p className="mt-1 text-sm text-ink-500">{data.identity.tagline}</p>
 
       <div className="mt-5 rounded-xl border border-line bg-page p-3">
-        <p className="text-[11px] text-ink-400">هدفك</p>
+        <p className="text-[11px] text-ink-400">{d.previewYourGoal}</p>
         <p className="mt-1 text-sm leading-relaxed text-ink-900">{data.identity.mainGoal}</p>
       </div>
 
       <div className="mt-4 flex items-center justify-between text-sm">
-        <span className="text-ink-500">صاحب الصفحة</span>
+        <span className="text-ink-500">{d.previewPageOwner}</span>
         <span className="font-bold text-ink-900">{data.identity.userName}</span>
       </div>
       <div className="mt-1.5 flex items-center justify-between text-sm">
-        <span className="text-ink-500">النوع</span>
+        <span className="text-ink-500">{d.previewType}</span>
         <span className="font-bold text-ink-900">{userTypeLabel}</span>
       </div>
 
@@ -42,10 +45,10 @@ export function PreviewSummary({ data }: { data: Customization }) {
       </div>
 
       <div className="mt-5 grid grid-cols-4 gap-2 text-center">
-        <PreviewStat label="تمارين" value={data.workouts.length} />
-        <PreviewStat label="وجبات" value={data.meals.length} />
-        <PreviewStat label="مكملات" value={data.supplements.length} />
-        <PreviewStat label="قياسات" value={data.metrics.length} />
+        <PreviewStat label={d.previewWorkouts} value={data.workouts.length} />
+        <PreviewStat label={d.previewMeals} value={data.meals.length} />
+        <PreviewStat label={d.previewSupplements} value={data.supplements.length} />
+        <PreviewStat label={d.previewMetrics} value={data.metrics.length} />
       </div>
     </div>
   )

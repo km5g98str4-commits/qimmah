@@ -15,11 +15,13 @@ import {
 } from '@/lib/nutritionPlan'
 import { targetCaloriesFor } from '@/lib/calculators'
 import { NUM_LIMITS, parseSafeNumber } from '@/lib/validation'
+import { onboardingStrings } from '@/i18n/dict/onboarding'
 
 const inputCls = 'w-full rounded-lg border border-line bg-beige px-2.5 py-1.5 text-sm text-ink-900 focus:border-brand-500/50 focus:outline-none focus:ring-2 focus:ring-brand-500/30'
 
 /** خطوة خطة الأكل — أهداف + قوالب وجبات + باني وجبات من المكونات. */
 export function StepNutrition({ ctx }: { ctx: WizardCtx }) {
+  const d = onboardingStrings[ctx.lang]
   const np = ctx.data.nutritionPlan
   const setNp = (partial: Partial<NutritionPlan>) => ctx.update({ nutritionPlan: { ...np, ...partial } })
   const [pickerMealId, setPickerMealId] = useState<string | null>(null)
@@ -99,7 +101,7 @@ export function StepNutrition({ ctx }: { ctx: WizardCtx }) {
 
   return (
     <div>
-      <StepHeader icon="Salad" title="خطة الأكل" description="حدّد أهدافك واختر وجباتك الجاهزة أو ابنِها من المكونات." />
+      <StepHeader icon="Salad" title={d.nutTitle} description={d.nutDescription} />
 
       {/* تفعيل المتابعة */}
       <button
@@ -111,7 +113,7 @@ export function StepNutrition({ ctx }: { ctx: WizardCtx }) {
           <span className={`grid h-9 w-9 place-items-center rounded-xl ${np.enabled ? 'bg-primary text-white' : 'bg-beige text-ink-400'}`}>
             <Icon name="Salad" className="h-5 w-5" />
           </span>
-          <span className="text-sm font-bold text-ink-900">أريد متابعة الأكل</span>
+          <span className="text-sm font-bold text-ink-900">{d.nutTrackNutrition}</span>
         </span>
         <span className={`relative h-6 w-11 rounded-full ${np.enabled ? 'bg-primary' : 'bg-line'}`}>
           <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-surface shadow ${np.enabled ? 'start-0.5' : 'end-0.5'}`} />
@@ -123,11 +125,11 @@ export function StepNutrition({ ctx }: { ctx: WizardCtx }) {
         <div className="mb-4 flex flex-col gap-3 rounded-2xl border border-gold-400/40 bg-gold-200/40 p-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="flex items-start gap-2 text-sm text-ink-700">
             <Icon name="AlertTriangle" className="mt-0.5 h-4 w-4 shrink-0 text-gold-600" />
-            توجد اختلافات بين حساباتك وخطة الأكل.
+            {d.nutDiffersNotice}
           </p>
           <button type="button" onClick={useSmart} className="btn-primary px-4 py-2 text-sm">
             <Icon name="BarChart3" className="h-4 w-4" />
-            تحديث خطة الأكل من حساباتي
+            {d.nutUpdateFromCalc}
           </button>
         </div>
       )}
@@ -135,18 +137,18 @@ export function StepNutrition({ ctx }: { ctx: WizardCtx }) {
       {/* الأهداف */}
       <div className="card p-5">
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-base font-bold text-ink-900">الأهداف الغذائية</h3>
+          <h3 className="text-base font-bold text-ink-900">{d.nutGoalsTitle}</h3>
           <button type="button" onClick={useSmart} className="btn-ghost px-3 py-2 text-xs">
             <Icon name="BarChart3" className="h-4 w-4" />
-            استخدم حساباتي الذكية
+            {d.nutUseSmartCalc}
           </button>
         </div>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
-          <Target label="سعرات" value={np.targetCalories} max={NUM_LIMITS.dailyCalories.max} onChange={(v) => setNp({ targetCalories: v })} />
-          <Target label="بروتين (غ)" value={np.targetProtein} max={1000} onChange={(v) => setNp({ targetProtein: v })} />
-          <Target label="كارب (غ)" value={np.targetCarbs} max={2000} onChange={(v) => setNp({ targetCarbs: v })} />
-          <Target label="دهون (غ)" value={np.targetFat} max={1000} onChange={(v) => setNp({ targetFat: v })} />
-          <Target label="ماء (لتر)" value={np.targetWaterLiters} step="0.1" max={15} onChange={(v) => setNp({ targetWaterLiters: v })} />
+          <Target label={d.nutCalories} value={np.targetCalories} max={NUM_LIMITS.dailyCalories.max} onChange={(v) => setNp({ targetCalories: v })} />
+          <Target label={d.nutProtein} value={np.targetProtein} max={1000} onChange={(v) => setNp({ targetProtein: v })} />
+          <Target label={d.nutCarbs} value={np.targetCarbs} max={2000} onChange={(v) => setNp({ targetCarbs: v })} />
+          <Target label={d.nutFat} value={np.targetFat} max={1000} onChange={(v) => setNp({ targetFat: v })} />
+          <Target label={d.nutWater} value={np.targetWaterLiters} step="0.1" max={15} onChange={(v) => setNp({ targetWaterLiters: v })} />
         </div>
       </div>
 
@@ -154,14 +156,14 @@ export function StepNutrition({ ctx }: { ctx: WizardCtx }) {
       <div className="mt-5">
         <button type="button" onClick={() => setTplOpen((v) => !v)} className="btn-ghost w-full py-3">
           <Icon name="Plus" className="h-4 w-4" />
-          أضف وجبة جاهزة
+          {d.nutAddTemplate}
         </button>
         {tplOpen && (
           <div className="mt-3 rounded-2xl border border-line bg-surface p-3">
             <div className="mb-2 flex flex-wrap gap-2">
-              <input className={inputCls + ' max-w-[12rem]'} value={tplQ} onChange={(e) => setTplQ(e.target.value)} placeholder="ابحث…" />
+              <input className={inputCls + ' max-w-[12rem]'} value={tplQ} onChange={(e) => setTplQ(e.target.value)} placeholder={d.nutSearchPlaceholder} />
               <select className="rounded-lg border border-line bg-surface px-2.5 py-2 text-xs font-bold text-ink-700" value={tplType} onChange={(e) => setTplType(e.target.value as MealType | 'all')}>
-                <option value="all">كل الأنواع</option>
+                <option value="all">{d.nutAllTypes}</option>
                 {(Object.keys(mealTypeLabels) as MealType[]).map((mt) => (
                   <option key={mt} value={mt}>{mealTypeLabels[mt].ar}</option>
                 ))}
@@ -174,7 +176,7 @@ export function StepNutrition({ ctx }: { ctx: WizardCtx }) {
                     <span className="block truncate text-sm font-bold text-ink-900">{t.nameAr} — {t.nameEn}</span>
                     <span className="text-[11px] text-ink-400">{mealTypeLabels[t.mealType].ar}</span>
                   </span>
-                  <button type="button" onClick={() => addTemplate(t.id)} className="btn-primary px-3 py-1.5 text-xs">أضف</button>
+                  <button type="button" onClick={() => addTemplate(t.id)} className="btn-primary px-3 py-1.5 text-xs">{d.nutAdd}</button>
                 </li>
               ))}
             </ul>
@@ -187,8 +189,8 @@ export function StepNutrition({ ctx }: { ctx: WizardCtx }) {
         {np.meals.map((meal, mi) => (
           <div key={meal.id} className="card p-4">
             <div className="mb-3 grid gap-2 sm:grid-cols-2">
-              <input className={inputCls} value={meal.nameAr} onChange={(e) => updateMeal(meal.id, { nameAr: e.target.value })} placeholder="اسم الوجبة (عربي)" />
-              <input className={inputCls} value={meal.nameEn} onChange={(e) => updateMeal(meal.id, { nameEn: e.target.value })} placeholder="Meal name (English)" />
+              <input className={inputCls} value={meal.nameAr} onChange={(e) => updateMeal(meal.id, { nameAr: e.target.value })} placeholder={d.nutMealNameArPlaceholder} />
+              <input className={inputCls} value={meal.nameEn} onChange={(e) => updateMeal(meal.id, { nameEn: e.target.value })} placeholder={d.nutMealNameEnPlaceholder} />
             </div>
 
             {/* المكونات */}
@@ -197,32 +199,32 @@ export function StepNutrition({ ctx }: { ctx: WizardCtx }) {
                 const data = getIngredient(ig.ingredientId)
                 return (
                   <li key={`${ig.ingredientId}-${k}`} className="flex items-center gap-2 rounded-lg border border-line bg-page p-2">
-                    <span className="min-w-0 flex-1 truncate text-xs text-ink-900">{data ? ingredientDisplayName(data.nameAr, data.nameEn, 'ar') : ig.ingredientId}</span>
+                    <span className="min-w-0 flex-1 truncate text-xs text-ink-900">{data ? ingredientDisplayName(data.nameAr, data.nameEn, ctx.lang) : ig.ingredientId}</span>
                     <input type="number" inputMode="decimal" min={0} max={50} step="0.5" className="w-16 rounded-lg border border-line bg-beige px-2 py-1 text-xs text-ink-900 focus:outline-none" value={ig.servings} onChange={(e) => setServings(meal.id, k, parseSafeNumber(e.target.value, { min: 0, max: 50 }))} />
-                    <span className="text-[10px] text-ink-400">حصة</span>
-                    <button type="button" onClick={() => removeIngredient(meal.id, k)} className="grid h-6 w-6 place-items-center rounded text-rose-500 hover:bg-rose-500/10" aria-label="حذف"><Icon name="X" className="h-3.5 w-3.5" /></button>
+                    <span className="text-[10px] text-ink-400">{d.nutServing}</span>
+                    <button type="button" onClick={() => removeIngredient(meal.id, k)} className="grid h-6 w-6 place-items-center rounded text-rose-500 hover:bg-rose-500/10" aria-label={d.nutDelete}><Icon name="X" className="h-3.5 w-3.5" /></button>
                   </li>
                 )
               })}
             </ul>
 
             <div className="mt-2 flex flex-wrap gap-2">
-              <button type="button" onClick={() => setPickerMealId(meal.id)} className="btn-ghost px-3 py-1.5 text-xs"><Icon name="Plus" className="h-3.5 w-3.5" />أضف مكوّن</button>
-              <button type="button" onClick={() => recalc(meal.id)} className="btn-ghost px-3 py-1.5 text-xs"><Icon name="RotateCcw" className="h-3.5 w-3.5" />احسب من المكونات</button>
+              <button type="button" onClick={() => setPickerMealId(meal.id)} className="btn-ghost px-3 py-1.5 text-xs"><Icon name="Plus" className="h-3.5 w-3.5" />{d.nutAddIngredient}</button>
+              <button type="button" onClick={() => recalc(meal.id)} className="btn-ghost px-3 py-1.5 text-xs"><Icon name="RotateCcw" className="h-3.5 w-3.5" />{d.nutRecalcFromIngredients}</button>
             </div>
 
             {/* الماكروز (قابلة للتعديل اليدوي) */}
             <div className="mt-3 grid grid-cols-4 gap-2">
-              <Target label="سعرات" value={meal.calories} onChange={(v) => updateMeal(meal.id, { calories: v })} />
-              <Target label="بروتين" value={meal.protein} onChange={(v) => updateMeal(meal.id, { protein: v })} />
-              <Target label="كارب" value={meal.carbs} onChange={(v) => updateMeal(meal.id, { carbs: v })} />
-              <Target label="دهون" value={meal.fat} onChange={(v) => updateMeal(meal.id, { fat: v })} />
+              <Target label={d.nutMealCalories} value={meal.calories} onChange={(v) => updateMeal(meal.id, { calories: v })} />
+              <Target label={d.nutMealProtein} value={meal.protein} onChange={(v) => updateMeal(meal.id, { protein: v })} />
+              <Target label={d.nutMealCarbs} value={meal.carbs} onChange={(v) => updateMeal(meal.id, { carbs: v })} />
+              <Target label={d.nutMealFat} value={meal.fat} onChange={(v) => updateMeal(meal.id, { fat: v })} />
             </div>
 
             <div className="mt-3 flex items-center justify-end gap-1">
-              <button type="button" onClick={() => moveMeal(mi, -1)} className="grid h-8 w-8 place-items-center rounded-lg border border-line text-ink-500 hover:bg-beige" aria-label="أعلى"><Icon name="ChevronLeft" className="h-4 w-4 rotate-90" /></button>
-              <button type="button" onClick={() => moveMeal(mi, 1)} className="grid h-8 w-8 place-items-center rounded-lg border border-line text-ink-500 hover:bg-beige" aria-label="أسفل"><Icon name="ChevronLeft" className="h-4 w-4 -rotate-90" /></button>
-              <button type="button" onClick={() => removeMeal(meal.id)} className="grid h-8 w-8 place-items-center rounded-lg border border-rose-500/20 bg-rose-500/10 text-rose-500 hover:bg-rose-500/20" aria-label="حذف"><Icon name="X" className="h-4 w-4" /></button>
+              <button type="button" onClick={() => moveMeal(mi, -1)} className="grid h-8 w-8 place-items-center rounded-lg border border-line text-ink-500 hover:bg-beige" aria-label={d.nutMoveUp}><Icon name="ChevronLeft" className="h-4 w-4 rotate-90" /></button>
+              <button type="button" onClick={() => moveMeal(mi, 1)} className="grid h-8 w-8 place-items-center rounded-lg border border-line text-ink-500 hover:bg-beige" aria-label={d.nutMoveDown}><Icon name="ChevronLeft" className="h-4 w-4 -rotate-90" /></button>
+              <button type="button" onClick={() => removeMeal(meal.id)} className="grid h-8 w-8 place-items-center rounded-lg border border-rose-500/20 bg-rose-500/10 text-rose-500 hover:bg-rose-500/20" aria-label={d.nutDelete}><Icon name="X" className="h-4 w-4" /></button>
             </div>
           </div>
         ))}
@@ -230,16 +232,16 @@ export function StepNutrition({ ctx }: { ctx: WizardCtx }) {
 
       <button type="button" onClick={addCustomMeal} className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-line bg-beige py-3 text-sm font-bold text-ink-700 hover:border-primary-soft hover:text-primary-c">
         <Icon name="Plus" className="h-4 w-4" />
-        أضف وجبة مخصّصة
+        {d.nutAddCustomMeal}
       </button>
 
       <p className="mt-5 flex items-start gap-2 rounded-xl border border-gold-400/40 bg-gold-200/40 p-3 text-xs leading-relaxed text-ink-700">
         <Icon name="AlertTriangle" className="mt-0.5 h-4 w-4 shrink-0 text-gold-600" />
-        القيم الغذائية تقديرية وقد تختلف حسب المنتج وطريقة التحضير.
+        {d.nutDisclaimer}
       </p>
 
       {pickerMealId && (
-        <IngredientPicker lang="ar" onAdd={(id) => addIngredient(pickerMealId, id)} onClose={() => setPickerMealId(null)} />
+        <IngredientPicker lang={ctx.lang} onAdd={(id) => addIngredient(pickerMealId, id)} onClose={() => setPickerMealId(null)} />
       )}
     </div>
   )

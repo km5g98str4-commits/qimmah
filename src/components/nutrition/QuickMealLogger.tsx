@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react'
 import { Icon } from '@/components/Icon'
 import { ProgressBar } from '@/components/ProgressBar'
-import { FOOD_ESTIMATE_NOTE, searchFood, type FoodItem } from '@/data/foodItems'
+import { FOOD_ESTIMATE_NOTE, searchFood, type FoodItem, type FoodSize } from '@/data/foodItems'
 import { useNutritionToday, type MealSlot } from '@/lib/nutritionTracking'
 import { NUM_LIMITS, parseSafeNumber, sanitizeNumericInput } from '@/lib/validation'
 import { getStrings } from '@/config/strings'
+import { nutritionScreenStrings } from '@/i18n/dict/nutritionScreen'
 import type { Lang } from '@/lib/appPreferences'
 
 interface QuickMealLoggerProps {
@@ -28,12 +29,15 @@ function round(n: number): number {
 /** مسجّل وجبات سريع — بحث في قاعدة الأطعمة أو إضافة سعرات/بروتين مخصّصة، مع تقدّم يومي. */
 export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMeal, embedded = false, onLogged }: QuickMealLoggerProps) {
   const t = getStrings(lang).nutrition
+  const d = nutritionScreenStrings[lang]
   const { state, totals, addLog, removeLog } = useNutritionToday()
 
   const [open, setOpen] = useState(embedded)
   const [tab, setTab] = useState<Tab>('search')
   const [query, setQuery] = useState('')
   const [selected, setSelected] = useState<FoodItem | null>(null)
+  /** الحجم المختار (صغير/وسط/كبير) عندما يملك العنصر أحجامًا — يقود الماكروز الأساسية. */
+  const [sizeId, setSizeId] = useState<string | null>(null)
   /** الكمية بالغرام (الإدخال الأساسي) — تبدأ من غرامات الحصة المرجعية للعنصر. */
   const [grams, setGrams] = useState('')
 
@@ -51,26 +55,52 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
   const remCal = Math.max(0, targetCalories - eatenCal)
   const remProt = Math.max(0, targetProtein - eatenProt)
 
-  // غرامات الحصة المرجعية للعنصر المختار (أساس التحويل لكل غرام).
-  const baseGrams = (selected?.servingGrams && selected.servingGrams > 0) ? selected.servingGrams : 100
+  // الحجم المختار (إن وُجد) والقيم الأساسية الفعّالة: من الحجم المختار وإلا من العنصر نفسه.
+  const activeSize = selected?.sizes?.find((s) => s.id === sizeId) ?? null
+  const baseCal = activeSize?.calories ?? selected?.calories ?? 0
+  const baseProt = activeSize?.protein ?? selected?.protein ?? 0
+  const baseCarb = activeSize?.carbs ?? selected?.carbs ?? 0
+  const baseFat = activeSize?.fat ?? selected?.fat ?? 0
+  const baseServingLabel = activeSize?.servingLabelAr ?? selected?.servingLabelAr ?? ''
+  // غرامات الحصة المرجعية للقيم الفعّالة (أساس التحويل لكل غرام).
+  const baseGrams = activeSize
+    ? activeSize.servingGrams
+    : (selected?.servingGrams && selected.servingGrams > 0 ? selected.servingGrams : 100)
   // الكمية الحالية بالغرام والعامل النسبي مقابل الحصة المرجعية.
   const gramsNum = parseSafeNumber(grams, { min: 1, max: 3000, fallback: baseGrams })
   const factor = gramsNum / baseGrams
 
+  // اختيار عنصر من النتائج: يضبط الحجم الافتراضي (وسط إن وُجد) والغرامات المطابقة له.
+  const selectItem = (f: FoodItem) => {
+    setSelected(f)
+    const defSize = f.sizes ? (f.sizes.find((s) => s.labelAr === 'وسط') ?? f.sizes[0]) : null
+    setSizeId(defSize?.id ?? null)
+    const g = defSize ? defSize.servingGrams : (f.servingGrams && f.servingGrams > 0 ? f.servingGrams : 100)
+    setGrams(String(g))
+  }
+
+  // اختيار حجم: يحدّث القيم الأساسية والغرامات المرجعية لذلك الحجم.
+  const pickSize = (s: FoodSize) => {
+    setSizeId(s.id)
+    setGrams(String(s.servingGrams))
+  }
+
   const addSelected = () => {
     if (!selected) return
     const name = lang === 'en' ? selected.nameEn : selected.nameAr
+    const sizeLabel = activeSize ? ` (${lang === 'en' ? activeSize.labelEn : activeSize.labelAr})` : ''
     addLog({
-      label: `${name} · ${gramsNum}${t.gramsUnit}`,
+      label: `${name}${sizeLabel} · ${gramsNum}${t.gramsUnit}`,
       servings: factor,
       grams: gramsNum,
-      calories: round(selected.calories * factor),
-      protein: round(selected.protein * factor),
-      carbs: round(selected.carbs * factor),
-      fat: round(selected.fat * factor),
+      calories: round(baseCal * factor),
+      protein: round(baseProt * factor),
+      carbs: round(baseCarb * factor),
+      fat: round(baseFat * factor),
       meal: defaultMeal,
     })
     setSelected(null)
+    setSizeId(null)
     setQuery('')
     setGrams('')
     onLogged?.()
@@ -84,7 +114,7 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
   const addCustom = () => {
     if (!canAddCustom) return
     addLog({
-      label: cName.trim() || (lang === 'en' ? 'Quick add' : 'إضافة سريعة'),
+      label: cName.trim() || d.quickAddLabel,
       servings: 1,
       calories: round(cal),
       protein: round(prot),
@@ -121,11 +151,11 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
               <div className="flex items-center justify-between text-xs">
                 <span className="font-bold text-ink-700">{t.protein}</span>
                 <span className="text-ink-500">
-                  <span className="font-bold text-ink-900">{eatenProt}</span> / {targetProtein}غ
+                  <span className="font-bold text-ink-900">{eatenProt}</span> / {targetProtein}{t.gramsUnit}
                 </span>
               </div>
               <ProgressBar current={eatenProt} target={targetProtein || 1} color="bg-brand-500" className="mt-2" />
-              <p className="mt-1 text-[11px] text-ink-400">{t.remainingProtein}: <span className="font-bold text-ink-700">{remProt}غ</span></p>
+              <p className="mt-1 text-[11px] text-ink-400">{t.remainingProtein}: <span className="font-bold text-ink-700">{remProt}{t.gramsUnit}</span></p>
             </div>
           </div>
 
@@ -166,7 +196,7 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
                 <input
                   type="text"
                   value={query}
-                  onChange={(e) => { setQuery(e.target.value); setSelected(null) }}
+                  onChange={(e) => { setQuery(e.target.value); setSelected(null); setSizeId(null) }}
                   placeholder={t.searchFood}
                   className="w-full rounded-lg border border-line bg-surface py-2 ps-9 pe-3 text-sm text-ink-900 outline-none focus:border-primary-c"
                 />
@@ -175,20 +205,27 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
               {!selected && query.trim() && (
                 <ul className="mt-2 max-h-56 divide-y divide-line overflow-y-auto rounded-lg border border-line">
                   {results.length === 0 && (
-                    <li className="p-3 text-xs text-ink-400">{lang === 'en' ? 'No results' : 'لا نتائج'}</li>
+                    <li className="p-3 text-xs text-ink-400">{d.noResults}</li>
                   )}
                   {results.map((f) => (
                     <li key={f.id}>
                       <button
                         type="button"
-                        onClick={() => { setSelected(f); setGrams(String((f.servingGrams && f.servingGrams > 0) ? f.servingGrams : 100)) }}
+                        onClick={() => selectItem(f)}
                         className="flex w-full items-center justify-between gap-3 p-3 text-start hover:bg-beige"
                       >
                         <span className="min-w-0">
-                          <span className="block truncate text-sm font-bold text-ink-900">{lang === 'en' ? f.nameEn : f.nameAr}</span>
+                          <span className="flex items-center gap-1.5">
+                            <span className="truncate text-sm font-bold text-ink-900">{lang === 'en' ? f.nameEn : f.nameAr}</span>
+                            {f.sizes && (
+                              <span className="shrink-0 rounded-full bg-primary-soft px-1.5 py-0.5 text-[9px] font-bold text-primary-c">
+                                {lang === 'en' ? `${f.sizes.length} sizes` : `${f.sizes.length} أحجام`}
+                              </span>
+                            )}
+                          </span>
                           <span className="block text-[11px] text-ink-400">{f.servingLabelAr} · {f.category}</span>
                         </span>
-                        <span className="shrink-0 text-[11px] font-bold text-orange-300">{f.calories} · {f.protein}غ</span>
+                        <span className="shrink-0 text-[11px] font-bold text-orange-300">{f.calories} · {f.protein}{t.gramsUnit}</span>
                       </button>
                     </li>
                   ))}
@@ -198,10 +235,33 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
               {selected && (
                 <div className="mt-3 rounded-lg border border-line bg-surface p-3">
                   <p className="text-sm font-bold text-ink-900">{lang === 'en' ? selected.nameEn : selected.nameAr}</p>
+
+                  {/* اختيار الحجم (صغير/وسط/كبير) — كل حجم بسعراته الخاصة */}
+                  {selected.sizes && (
+                    <div className="mt-2">
+                      <p className="mb-1.5 text-[11px] font-bold text-ink-500">{lang === 'en' ? 'Size' : 'الحجم'}</p>
+                      <div className="flex flex-wrap gap-2">
+                        {selected.sizes.map((s) => (
+                          <button
+                            key={s.id}
+                            type="button"
+                            onClick={() => pickSize(s)}
+                            className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-colors ${
+                              sizeId === s.id ? 'bg-primary text-white' : 'bg-beige text-ink-600 hover:text-ink-900'
+                            }`}
+                          >
+                            {lang === 'en' ? s.labelEn : s.labelAr}
+                            <span className={`ms-1 text-[10px] font-normal ${sizeId === s.id ? 'text-white/80' : 'text-ink-400'}`}>{s.calories}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {/* عرض واضح: لكل حصة + لكل 100غ */}
-                  <div className="mt-1 flex flex-wrap gap-x-4 gap-y-0.5 text-[11px] text-ink-400">
-                    <span>{t.perPortion} ({selected.servingLabelAr}): <span className="font-bold text-ink-600">{selected.calories} {t.calories} · {selected.protein}{t.gramsUnit} {t.protein}</span></span>
-                    <span>{t.per100g}: <span className="font-bold text-ink-600">{round(selected.calories * 100 / baseGrams)} {t.calories} · {round(selected.protein * 100 / baseGrams)}{t.gramsUnit} {t.protein}</span></span>
+                  <div className="mt-2 flex flex-wrap gap-x-4 gap-y-0.5 text-[11px] text-ink-400">
+                    <span>{t.perPortion} ({baseServingLabel}): <span className="font-bold text-ink-600">{baseCal} {t.calories} · {baseProt}{t.gramsUnit} {t.protein}</span></span>
+                    <span>{t.per100g}: <span className="font-bold text-ink-600">{round(baseCal * 100 / baseGrams)} {t.calories} · {round(baseProt * 100 / baseGrams)}{t.gramsUnit} {t.protein}</span></span>
                   </div>
                   <div className="mt-3 flex items-center gap-2">
                     <label className="text-xs text-ink-500">{t.gramsAmount}</label>
@@ -218,10 +278,10 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
                     <span className="text-xs text-ink-400">{t.gramsUnit}</span>
                   </div>
                   <div className="mt-3 flex flex-wrap gap-3 text-xs text-ink-500">
-                    <Stat label={t.calories} value={round(selected.calories * factor)} />
-                    <Stat label={t.protein} value={`${round(selected.protein * factor)}${t.gramsUnit}`} />
-                    <Stat label={t.carbs} value={`${round(selected.carbs * factor)}${t.gramsUnit}`} />
-                    <Stat label={t.fat} value={`${round(selected.fat * factor)}${t.gramsUnit}`} />
+                    <Stat label={t.calories} value={round(baseCal * factor)} />
+                    <Stat label={t.protein} value={`${round(baseProt * factor)}${t.gramsUnit}`} />
+                    <Stat label={t.carbs} value={`${round(baseCarb * factor)}${t.gramsUnit}`} />
+                    <Stat label={t.fat} value={`${round(baseFat * factor)}${t.gramsUnit}`} />
                   </div>
                   <button type="button" onClick={addSelected} className="btn-primary mt-3 w-full justify-center py-2 text-xs">
                     <Icon name="Plus" className="h-4 w-4" />
@@ -238,14 +298,14 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
                   type="text"
                   value={cName}
                   onChange={(e) => setCName(e.target.value)}
-                  placeholder={lang === 'en' ? 'e.g. Home kabsa plate' : 'مثال: صحن كبسة بيت'}
+                  placeholder={d.foodNameExample}
                   className="mt-1 w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink-900 outline-none focus:border-primary-c"
                 />
               </div>
               <Field label={`${t.calories} (0–${NUM_LIMITS.quickCalories.max})`} value={cCal} onChange={setCCal} max={NUM_LIMITS.quickCalories.max} placeholder="0" />
-              <Field label={`${t.protein} (غ)`} value={cProt} onChange={setCProt} max={NUM_LIMITS.quickProtein.max} placeholder="0" />
-              <Field label={`${t.carbs} (غ) — ${t.optional}`} value={cCarb} onChange={setCCarb} max={NUM_LIMITS.quickMacro.max} placeholder="0" />
-              <Field label={`${t.fat} (غ) — ${t.optional}`} value={cFat} onChange={setCFat} max={NUM_LIMITS.quickMacro.max} placeholder="0" />
+              <Field label={`${t.protein} (${t.gramsUnit})`} value={cProt} onChange={setCProt} max={NUM_LIMITS.quickProtein.max} placeholder="0" />
+              <Field label={`${t.carbs} (${t.gramsUnit}) — ${t.optional}`} value={cCarb} onChange={setCCarb} max={NUM_LIMITS.quickMacro.max} placeholder="0" />
+              <Field label={`${t.fat} (${t.gramsUnit}) — ${t.optional}`} value={cFat} onChange={setCFat} max={NUM_LIMITS.quickMacro.max} placeholder="0" />
               <button type="button" onClick={addCustom} disabled={!canAddCustom} className="btn-primary col-span-2 justify-center py-2 text-xs disabled:cursor-not-allowed disabled:opacity-40">
                 <Icon name="Plus" className="h-4 w-4" />
                 {t.addToLog}
@@ -271,7 +331,7 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
                   <li key={e.id} className="flex items-center gap-3 py-2">
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-sm text-ink-900">{e.label}</span>
-                      <span className="block text-[11px] text-ink-400">{e.calories} سعرة · {e.protein}غ بروتين</span>
+                      <span className="block text-[11px] text-ink-400">{e.calories} {d.caloriesUnit} · {e.protein}{t.gramsUnit} {d.caloriesDotProteinG}</span>
                     </span>
                     <button
                       type="button"

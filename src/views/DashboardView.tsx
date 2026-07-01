@@ -3,6 +3,7 @@ import { Icon } from '@/components/Icon'
 import { DailySummary } from '@/sections/DailySummary'
 import { Today } from '@/sections/Today'
 import { RecentWorkout } from '@/sections/RecentWorkout'
+import { AchievementsCard } from '@/features/achievements/AchievementsCard'
 import { useCustomization } from '@/lib/customizationContext'
 import { todayPlanDay } from '@/lib/workoutPlan'
 import { planTitle } from '@/lib/planGenerator'
@@ -13,6 +14,7 @@ import { useDashboardSignals, type LeadCard } from '@/lib/dashboardLayout'
 import { useUiMode } from '@/lib/uiMode'
 import { phraseForDay } from '@/data/dailyPhrases'
 import { getStrings } from '@/config/strings'
+import { dashboardStrings } from '@/i18n/dict/dashboard'
 import type { Lang } from '@/lib/appPreferences'
 import type { AppRoute } from '@/lib/appRoutes'
 
@@ -45,7 +47,7 @@ export function DashboardView({ lang, onNavigate }: DashboardViewProps) {
   return (
     <div className="space-y-4 px-4 py-4">
       {/* ترحيب شخصي + عبارة اليوم */}
-      <GreetingCard onNavigate={onNavigate} />
+      <GreetingCard lang={lang} onNavigate={onNavigate} />
 
       {/* تسجيل سريع — أبرز إجراءين على بُعد نقرة واحدة */}
       <QuickEntry lang={lang} onNavigate={onNavigate} />
@@ -55,10 +57,13 @@ export function DashboardView({ lang, onNavigate }: DashboardViewProps) {
         <LeadBlock key={card} card={card} lang={lang} onNavigate={onNavigate} />
       ))}
 
+      {/* أوسمتك — ظاهرة دائمًا (تحفيز المبتدئ)، والشبكة الكاملة على بُعد نقرة */}
+      <AchievementsCard />
+
       {/* الوضع المتقدّم — تفاصيل أكثر لمن يريدها */}
       {!isSimple && (
         <>
-          <SystemIdentity onNavigate={onNavigate} />
+          <SystemIdentity lang={lang} onNavigate={onNavigate} />
 
           {s.today && (
             <Today
@@ -78,14 +83,15 @@ export function DashboardView({ lang, onNavigate }: DashboardViewProps) {
       )}
 
       {/* مبدّل الوضع البسيط/المتقدّم */}
-      <ModeToggle isSimple={isSimple} onToggle={toggle} />
+      <ModeToggle lang={lang} isSimple={isSimple} onToggle={toggle} />
     </div>
   )
 }
 
 /** بطاقة ترحيب — «أهلًا يا {الاسم}» + عبارة تحفيزية تتغيّر يوميًا (حتمية بالتاريخ). */
-function GreetingCard({ onNavigate }: { onNavigate: (route: AppRoute) => void }) {
+function GreetingCard({ lang, onNavigate }: { lang: Lang; onNavigate: (route: AppRoute) => void }) {
   const { customization } = useCustomization()
+  const d = dashboardStrings[lang]
   const name = customization.identity.userName?.trim()
   // عبارة اليوم ثابتة طوال اليوم (تُحسب مرة عند العرض).
   const phrase = useMemo(() => phraseForDay(), [])
@@ -96,10 +102,10 @@ function GreetingCard({ onNavigate }: { onNavigate: (route: AppRoute) => void })
       <div className="relative">
         <span className="eyebrow">
           <Icon name="Sparkles" className="h-3.5 w-3.5" />
-          قِمّة
+          {d.brand}
         </span>
         <h1 className="mt-2 text-2xl font-black text-ink-900">
-          {name ? `أهلًا يا ${name} 👋` : 'أهلًا بك 👋'}
+          {name ? `${d.greetNamedPrefix}${name}${d.greetNamedSuffix}` : d.greetGuest}
         </h1>
         <p className="mt-1.5 text-sm leading-relaxed text-ink-600">{phrase}</p>
 
@@ -109,7 +115,7 @@ function GreetingCard({ onNavigate }: { onNavigate: (route: AppRoute) => void })
           className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-ink-500 transition-colors hover:text-primary-c"
         >
           <Icon name="SlidersHorizontal" className="h-3.5 w-3.5" />
-          تعديل خطتي
+          {d.editPlan}
         </button>
       </div>
     </section>
@@ -118,6 +124,7 @@ function GreetingCard({ onNavigate }: { onNavigate: (route: AppRoute) => void })
 
 /** تسجيل سريع — سجّل أكل / ابدأ تمرين، كلاهما على بُعد نقرة من الرئيسية. */
 function QuickEntry({ lang, onNavigate }: { lang: Lang; onNavigate: (route: AppRoute) => void }) {
+  const d = dashboardStrings[lang]
   const tw = getStrings(lang).workout
   const tn = getStrings(lang).nutrition
   return (
@@ -126,33 +133,34 @@ function QuickEntry({ lang, onNavigate }: { lang: Lang; onNavigate: (route: AppR
         type="button"
         onClick={() => onNavigate('nutrition')}
         className="card flex flex-col items-start gap-2 p-4 text-start active:scale-[0.99]"
-        aria-label="سجّل وجبة بسرعة"
+        aria-label={d.logMealAria}
       >
         <span className="grid h-11 w-11 place-items-center rounded-2xl bg-primary text-white shadow-glow">
           <Icon name="Plus" className="h-6 w-6" />
         </span>
-        <span className="text-sm font-black text-ink-900">سجّل أكل</span>
-        <span className="text-[11px] text-ink-500">{tn.tabTitle} — أضف وجبتك الآن</span>
+        <span className="text-sm font-black text-ink-900">{d.logFood}</span>
+        <span className="text-[11px] text-ink-500">{tn.tabTitle} — {d.logFoodHint}</span>
       </button>
 
       <button
         type="button"
         onClick={() => onNavigate('workout')}
         className="card flex flex-col items-start gap-2 p-4 text-start active:scale-[0.99]"
-        aria-label="ابدأ تمرين اليوم"
+        aria-label={d.startTodayWorkoutAria}
       >
         <span className="grid h-11 w-11 place-items-center rounded-2xl bg-primary text-white shadow-glow">
           <Icon name="Dumbbell" className="h-6 w-6" />
         </span>
-        <span className="text-sm font-black text-ink-900">ابدأ تمرين</span>
-        <span className="text-[11px] text-ink-500">{tw.start} — افتح تمرين اليوم</span>
+        <span className="text-sm font-black text-ink-900">{d.startWorkout}</span>
+        <span className="text-[11px] text-ink-500">{tw.start} — {d.startWorkoutHint}</span>
       </button>
     </div>
   )
 }
 
 /** زرّ كشف/إخفاء الخيارات الإضافية. */
-function ModeToggle({ isSimple, onToggle }: { isSimple: boolean; onToggle: () => void }) {
+function ModeToggle({ lang, isSimple, onToggle }: { lang: Lang; isSimple: boolean; onToggle: () => void }) {
+  const d = dashboardStrings[lang]
   return (
     <button
       type="button"
@@ -161,7 +169,7 @@ function ModeToggle({ isSimple, onToggle }: { isSimple: boolean; onToggle: () =>
       aria-expanded={!isSimple}
     >
       <Icon name={isSimple ? 'ChevronDown' : 'SlidersHorizontal'} className="h-4 w-4" />
-      {isSimple ? 'خيارات أكثر · وضع متقدّم' : 'عرض أبسط'}
+      {isSimple ? d.moreOptions : d.simplerView}
     </button>
   )
 }
@@ -184,18 +192,19 @@ function LeadBlock({
     case 'nextAction':
       return <NextActionCard lang={lang} onNavigate={onNavigate} />
     case 'progress':
-      return <ProgressSnapshot onNavigate={onNavigate} />
+      return <ProgressSnapshot lang={lang} onNavigate={onNavigate} />
     default:
       return null
   }
 }
 
 /** بطاقة هوية النظام (متقدّم فقط) — الهدف، الأيام، التقسيمة، السعرات. */
-function SystemIdentity({ onNavigate }: { onNavigate: (route: AppRoute) => void }) {
+function SystemIdentity({ lang, onNavigate }: { lang: Lang; onNavigate: (route: AppRoute) => void }) {
   const { customization } = useCustomization()
+  const d = dashboardStrings[lang]
   const p = customization.profile
   const days = customization.workoutPlan.days.length
-  const split = days ? planTitle(customization.workoutPlan.templateId, 'ar') : undefined
+  const split = days ? planTitle(customization.workoutPlan.templateId, lang) : undefined
   const calories = customization.nutritionPlan.targetCalories || customization.targets.targetCalories || 0
   const expLabel = experienceChoices.find((e) => e.value === p.experienceLevel)?.label
 
@@ -203,13 +212,13 @@ function SystemIdentity({ onNavigate }: { onNavigate: (route: AppRoute) => void 
     <section className="card p-5">
       <span className="eyebrow">
         <Icon name="Sparkles" className="h-3.5 w-3.5" />
-        نظامك مبنيّ من إعدادك
+        {d.systemBuiltFromSetup}
       </span>
       <div className="mt-3 flex flex-wrap gap-2">
         <Chip icon="Target" text={goalTypeLabel(p.goalType)} />
-        {days > 0 && <Chip icon="CalendarDays" text={`${days} أيام/أسبوع`} />}
+        {days > 0 && <Chip icon="CalendarDays" text={`${days} ${d.daysPerWeek}`} />}
         {split && <Chip icon="Dumbbell" text={split} />}
-        {calories > 0 && <Chip icon="Flame" text={`${calories} سعرة/يوم`} />}
+        {calories > 0 && <Chip icon="Flame" text={`${calories} ${d.caloriesPerDay}`} />}
         {expLabel && <Chip icon="TrendingUp" text={expLabel} />}
       </div>
       <button
@@ -218,7 +227,7 @@ function SystemIdentity({ onNavigate }: { onNavigate: (route: AppRoute) => void 
         className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-ink-500 transition-colors hover:text-primary-c"
       >
         <Icon name="SlidersHorizontal" className="h-3.5 w-3.5" />
-        تعديل خطتي
+        {d.editPlan}
       </button>
     </section>
   )
@@ -264,23 +273,22 @@ function WorkoutLead({ lang, onNavigate }: { lang: Lang; onNavigate: (route: App
 /** بطاقة «خطوتك التالية» — إرشاد عملي للمبتدئ (بارزة في ترتيبه). */
 function NextActionCard({ lang, onNavigate }: { lang: Lang; onNavigate: (route: AppRoute) => void }) {
   const { customization } = useCustomization()
+  const d = dashboardStrings[lang]
   const planDay = todayPlanDay(customization.workoutPlan)
   const dayName = planDay ? (lang === 'en' ? planDay.nameEn : planDay.nameAr) : ''
 
   // خطوة عملية واحدة واضحة: تمرين اليوم إن وُجد، وإلا مراجعة الخطة/التغذية.
   const hasWorkoutToday = !!planDay
-  const title = hasWorkoutToday ? `ابدأ بتمرين اليوم: ${dayName}` : 'اليوم راحة — جهّز تغذيتك'
-  const hint = hasWorkoutToday
-    ? 'خطوة وحدة تكفي اليوم. افتح التمرين وعلّم كل مجموعة وأنت تخلّصها.'
-    : 'لا تمرين اليوم. راجع وجباتك واشرب ماءك — الالتزام في يوم الراحة جزء من الخطة.'
-  const cta = hasWorkoutToday ? 'افتح تمرين اليوم' : 'افتح خطة الأكل'
+  const title = hasWorkoutToday ? `${d.startTodayPrefix}${dayName}` : d.restDayTitle
+  const hint = hasWorkoutToday ? d.workoutTodayHint : d.restDayHint
+  const cta = hasWorkoutToday ? d.openTodayWorkout : d.openMealPlan
   const target: AppRoute = hasWorkoutToday ? 'workout' : 'nutrition'
 
   return (
     <section className="card p-5">
       <span className="eyebrow">
         <Icon name="Compass" className="h-3.5 w-3.5" />
-        خطوتك التالية
+        {d.nextStep}
       </span>
       <p className="mt-2 text-base font-black text-ink-900">{title}</p>
       <p className="mt-1 text-xs leading-relaxed text-ink-500">{hint}</p>
@@ -293,8 +301,9 @@ function NextActionCard({ lang, onNavigate }: { lang: Lang; onNavigate: (route: 
 }
 
 /** لقطة تقدّم مختصرة — بارزة للمتقدّم (سلسلة/التزام الأسبوع/تمرين اليوم). */
-function ProgressSnapshot({ onNavigate }: { onNavigate: (route: AppRoute) => void }) {
+function ProgressSnapshot({ lang, onNavigate }: { lang: Lang; onNavigate: (route: AppRoute) => void }) {
   const { customization } = useCustomization()
+  const d = dashboardStrings[lang]
   const daysPerWeek = customization.workoutPlan.days.length || 3
   const week = useMemo(() => currentWeekSummary(daysPerWeek), [daysPerWeek])
   const hasHistory = week.weekly.thisWeekCount > 0 || week.weekly.streakWeeks > 0 || week.bestStreak > 0
@@ -308,20 +317,20 @@ function ProgressSnapshot({ onNavigate }: { onNavigate: (route: AppRoute) => voi
       <div className="flex items-center justify-between">
         <span className="eyebrow">
           <Icon name="BarChart3" className="h-3.5 w-3.5" />
-          تقدّمك
+          {d.yourProgress}
         </span>
         <Icon name="ChevronLeft" className="h-4 w-4 text-ink-400 rtl:rotate-180" />
       </div>
 
       {hasHistory ? (
         <div className="mt-3 grid grid-cols-3 gap-2">
-          <Stat value={`${week.weekly.thisWeekCount}/${week.weekly.daysPerWeek}`} label="هذا الأسبوع" />
-          <Stat value={`${week.weekly.streakWeeks}`} label="أسابيع متتالية" />
-          <Stat value={`${week.bestStreak}`} label="أطول سلسلة" />
+          <Stat value={`${week.weekly.thisWeekCount}/${week.weekly.daysPerWeek}`} label={d.thisWeek} />
+          <Stat value={`${week.weekly.streakWeeks}`} label={d.streakWeeks} />
+          <Stat value={`${week.bestStreak}`} label={d.longestStreak} />
         </div>
       ) : (
         <p className="mt-3 text-xs leading-relaxed text-ink-500">
-          سجّل أول تمرين وتبدأ أرقامك تظهر هنا — الحجم، الأرقام القياسية، والسلسلة الأسبوعية.
+          {d.progressEmpty}
         </p>
       )}
     </button>
