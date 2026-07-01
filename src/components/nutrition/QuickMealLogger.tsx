@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { lazy, Suspense, useMemo, useState } from 'react'
 import { Icon } from '@/components/Icon'
 import { ProgressBar } from '@/components/ProgressBar'
 import { FOOD_ESTIMATE_NOTE, searchFood, type FoodItem, type FoodSize } from '@/data/foodItems'
@@ -7,6 +7,9 @@ import { NUM_LIMITS, parseSafeNumber, sanitizeNumericInput } from '@/lib/validat
 import { getStrings } from '@/config/strings'
 import { nutritionScreenStrings } from '@/i18n/dict/nutritionScreen'
 import type { Lang } from '@/lib/appPreferences'
+
+// يُحمَّل عند الحاجة فقط — مكتبة مسح الباركود ثقيلة ولا يلزم تحميلها إلا عند فتح الماسح.
+const ScanFoodPanel = lazy(() => import('@/features/barcode/ScanFoodPanel').then((m) => ({ default: m.ScanFoodPanel })))
 
 interface QuickMealLoggerProps {
   lang: Lang
@@ -34,6 +37,7 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
 
   const [open, setOpen] = useState(embedded)
   const [tab, setTab] = useState<Tab>('search')
+  const [scanOpen, setScanOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [selected, setSelected] = useState<FoodItem | null>(null)
   /** الحجم المختار (صغير/وسط/كبير) عندما يملك العنصر أحجامًا — يقود الماكروز الأساسية. */
@@ -191,15 +195,25 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
 
           {tab === 'search' ? (
             <div>
-              <div className="relative">
-                <Icon name="Search" className="pointer-events-none absolute top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400 ms-3" />
-                <input
-                  type="text"
-                  value={query}
-                  onChange={(e) => { setQuery(e.target.value); setSelected(null); setSizeId(null) }}
-                  placeholder={t.searchFood}
-                  className="w-full rounded-lg border border-line bg-surface py-2 ps-9 pe-3 text-sm text-ink-900 outline-none focus:border-primary-c"
-                />
+              <div className="flex items-center gap-2">
+                <div className="relative flex-1">
+                  <Icon name="Search" className="pointer-events-none absolute top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400 ms-3" />
+                  <input
+                    type="text"
+                    value={query}
+                    onChange={(e) => { setQuery(e.target.value); setSelected(null); setSizeId(null) }}
+                    placeholder={t.searchFood}
+                    className="w-full rounded-lg border border-line bg-surface py-2 ps-9 pe-3 text-sm text-ink-900 outline-none focus:border-primary-c"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setScanOpen(true)}
+                  className="btn-ghost shrink-0 px-3 py-2 text-xs"
+                >
+                  <Icon name="Camera" className="h-4 w-4" />
+                  {d.scanBarcode}
+                </button>
               </div>
 
               {!selected && query.trim() && (
@@ -352,6 +366,24 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
             {FOOD_ESTIMATE_NOTE}
           </p>
         </>
+      )}
+
+      {scanOpen && (
+        <Suspense fallback={null}>
+          <ScanFoodPanel
+            lang={lang}
+            onClose={() => setScanOpen(false)}
+            onResolved={(item) => {
+              setScanOpen(false)
+              setTab('search')
+              selectItem(item)
+            }}
+            onManualFallback={() => {
+              setScanOpen(false)
+              setTab('custom')
+            }}
+          />
+        </Suspense>
       )}
     </div>
   )
