@@ -10,6 +10,7 @@ import { commitmentName } from '@/lib/commitmentPlan'
 import { useCommitmentsToday } from '@/lib/commitmentTracking'
 import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
+import { dashboardStrings } from '@/i18n/dict/dashboard'
 import { planExerciseName, todayPlanDay } from '@/lib/workoutPlan'
 import { todaysFinishedSession } from '@/lib/workoutSessions'
 import { mealDisplayName } from '@/lib/nutritionPlan'
@@ -39,6 +40,7 @@ export function Today({ lang, onStartWorkout, onEditPlan }: TodayProps) {
   const wellnessToday = useWellnessToday()
   const commitmentsToday = useCommitmentsToday()
   const { userName } = customization.identity
+  const d = dashboardStrings[lang]
   const tn = getStrings(lang).nutrition
   const twell = getStrings(lang).wellness
   const tc = getStrings(lang).commit
@@ -58,7 +60,7 @@ export function Today({ lang, onStartWorkout, onEditPlan }: TodayProps) {
         id: 'w',
         title: planDay
           ? `${weekdayName(lang === 'en' ? 'en' : 'ar')} — ${lang === 'en' ? planDay.nameEn : planDay.nameAr}`
-          : 'تمرين اليوم',
+          : d.todayWorkoutTitle,
         icon: 'Dumbbell',
         rows: (planDay?.exercises ?? []).map<TodayRow>((pe, i) => ({
           key: `w:${i}`,
@@ -67,7 +69,7 @@ export function Today({ lang, onStartWorkout, onEditPlan }: TodayProps) {
         })),
       },
     ],
-    [planDay, lang],
+    [planDay, lang, d.todayWorkoutTitle],
   )
 
   const allRows = useMemo(() => groups.flatMap((g) => g.rows), [groups])
@@ -83,19 +85,19 @@ export function Today({ lang, onStartWorkout, onEditPlan }: TodayProps) {
           <div>
             <span className="eyebrow">
               <Icon name="Flame" className="h-3.5 w-3.5" />
-              يومك
+              {d.yourDay}
             </span>
             <h2 className="mt-3 text-2xl font-black text-ink-900 sm:text-3xl">
-              {userName?.trim() ? `يومك، ${userName} 👋` : 'يومك 👋'}
+              {userName?.trim() ? `${d.yourDayNamedPrefix}${userName}${d.yourDayNamedSuffix}` : d.yourDayGuest}
             </h2>
             <p className="mt-1 text-sm text-ink-500">
-              علّم كل شي تخلّصه — وتابع التزامك خطوة بخطوة.
+              {d.todaySubtitle}
             </p>
           </div>
 
           <div className="w-full sm:w-72">
             <div className="flex items-center justify-between text-sm">
-              <span className="font-bold text-ink-700">إنجاز اليوم</span>
+              <span className="font-bold text-ink-700">{d.todayProgressLabel}</span>
               <span className="font-black text-primary-c">
                 {doneCount}/{total} · {pct}%
               </span>
@@ -107,7 +109,7 @@ export function Today({ lang, onStartWorkout, onEditPlan }: TodayProps) {
               className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-ink-500 transition-colors hover:text-primary-c"
             >
               <Icon name="RotateCcw" className="h-3.5 w-3.5" />
-              إعادة ضبط اليوم
+              {d.resetDay}
             </button>
           </div>
         </div>
@@ -147,7 +149,7 @@ export function Today({ lang, onStartWorkout, onEditPlan }: TodayProps) {
                 </div>
 
                 {g.rows.length === 0 ? (
-                  <p className="py-6 text-center text-sm text-ink-400">لا عناصر لهذا اليوم.</p>
+                  <p className="py-6 text-center text-sm text-ink-400">{d.noItemsToday}</p>
                 ) : (
                   <ul className="space-y-2.5">
                     {g.rows.map((row) => {
@@ -212,8 +214,8 @@ export function Today({ lang, onStartWorkout, onEditPlan }: TodayProps) {
             {/* أهداف مختصرة */}
             <div className="grid grid-cols-3 gap-3">
               <MiniTarget icon="Flame" label={tn.calories} value={`${np.targetCalories}`} />
-              <MiniTarget icon="Salad" label={tn.protein} value={`${np.targetProtein}غ`} />
-              <MiniTarget icon="Droplets" label={tn.water} value={`${np.targetWaterLiters} لتر`} />
+              <MiniTarget icon="Salad" label={tn.protein} value={`${np.targetProtein}${d.proteinUnit}`} />
+              <MiniTarget icon="Droplets" label={tn.water} value={`${np.targetWaterLiters} ${d.waterUnit}`} />
             </div>
 
             {/* الوجبات */}
@@ -239,7 +241,7 @@ export function Today({ lang, onStartWorkout, onEditPlan }: TodayProps) {
                           <span className={cn('block truncate text-sm font-bold', mdone ? 'text-ink-500 line-through' : 'text-ink-900')}>
                             {mealDisplayName(meal, lang)}
                           </span>
-                          <span className="block truncate text-xs text-ink-400">{meal.calories} {tn.calories} · {meal.protein}غ {tn.protein}</span>
+                          <span className="block truncate text-xs text-ink-400">{meal.calories} {tn.calories} · {meal.protein}{d.proteinUnit} {tn.protein}</span>
                         </span>
                       </button>
                     </li>
@@ -256,7 +258,7 @@ export function Today({ lang, onStartWorkout, onEditPlan }: TodayProps) {
                   {tn.water}
                 </span>
                 <span className="text-sm font-black text-primary-c">
-                  {(nutritionToday.state.waterMl / 1000).toFixed(2)} / {np.targetWaterLiters} لتر
+                  {(nutritionToday.state.waterMl / 1000).toFixed(2)} / {np.targetWaterLiters} {d.waterUnit}
                 </span>
               </div>
               <div className="mt-3 flex flex-wrap gap-2">

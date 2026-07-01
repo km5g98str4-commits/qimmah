@@ -15,9 +15,11 @@ import {
   trainingLevelOptions,
 } from '@/lib/calculators'
 import { LIMITS, validateProfile } from '@/lib/validation'
+import { onboardingStrings } from '@/i18n/dict/onboarding'
 
 /** خطوة بياناتك — جسم + هدف + تمرين، مع تحقّق من القيم. */
 export function StepBody({ ctx }: { ctx: WizardCtx }) {
+  const d = onboardingStrings[ctx.lang]
   const p = ctx.data.profile
   const manual = ctx.data.targetsMeta.manuallyEdited
   const errors = validateProfile(p)
@@ -43,12 +45,12 @@ export function StepBody({ ctx }: { ctx: WizardCtx }) {
     <div>
       <StepHeader
         icon="Ruler"
-        title="بياناتك"
-        description="جاوب على بياناتك وهدفك، وقِمّة بتجهّز خطتك تلقائيًا. تقدر تعدّل أي شي لاحقًا."
+        title={d.bodyTitle}
+        description={d.bodyDescription}
       />
 
       {/* الهدف — اختيارات */}
-      <p className="mb-2 text-sm font-bold text-ink-900">هدفك</p>
+      <p className="mb-2 text-sm font-bold text-ink-900">{d.bodyGoalLabel}</p>
       <div className="mb-6 grid grid-cols-2 gap-2 sm:grid-cols-4">
         {goalTypeOptions.map((o) => (
           <button
@@ -66,47 +68,47 @@ export function StepBody({ ctx }: { ctx: WizardCtx }) {
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="الجنس">
+        <Field label={d.bodyGender}>
           <select className={inputClass} value={p.gender} onChange={(e) => set({ gender: e.target.value as Profile['gender'] })}>
             {genderOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
         </Field>
-        <Field label="العمر" hint={errFor('age') ?? 'سنة (12–90)'}>
+        <Field label={d.bodyAge} hint={errFor('age') ?? d.bodyAgeHint}>
           <input type="number" min={LIMITS.age.min} max={LIMITS.age.max} className={cn(inputClass, errFor('age') && 'border-danger')} value={p.age} onChange={(e) => set({ age: num(e.target.value) })} />
         </Field>
-        <Field label="الطول" hint={errFor('heightCm') ?? 'سم (100–230)'}>
+        <Field label={d.bodyHeight} hint={errFor('heightCm') ?? d.bodyHeightHint}>
           <input type="number" min={LIMITS.heightCm.min} max={LIMITS.heightCm.max} className={cn(inputClass, errFor('heightCm') && 'border-danger')} value={p.heightCm} onChange={(e) => set({ heightCm: num(e.target.value) })} />
         </Field>
-        <Field label="الوزن الحالي" hint={errFor('weightKg') ?? 'كجم (15–250)'}>
+        <Field label={d.bodyWeight} hint={errFor('weightKg') ?? d.bodyWeightHint}>
           <input type="number" min={LIMITS.weightKg.min} max={LIMITS.weightKg.max} className={cn(inputClass, errFor('weightKg') && 'border-danger')} value={p.weightKg} onChange={(e) => set({ weightKg: num(e.target.value) })} />
         </Field>
-        <Field label="الوزن الهدف" hint={errFor('targetWeightKg') ?? 'كجم (15–250)'}>
+        <Field label={d.bodyTargetWeight} hint={errFor('targetWeightKg') ?? d.bodyTargetWeightHint}>
           <input type="number" min={LIMITS.targetWeightKg.min} max={LIMITS.targetWeightKg.max} className={cn(inputClass, errFor('targetWeightKg') && 'border-danger')} value={p.targetWeightKg} onChange={(e) => set({ targetWeightKg: num(e.target.value) })} />
         </Field>
-        <Field label="مستوى النشاط">
+        <Field label={d.bodyActivityLevel}>
           <select className={inputClass} value={p.activityLevel} onChange={(e) => set({ activityLevel: e.target.value as Profile['activityLevel'] })}>
             {activityOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
         </Field>
-        <Field label="مستوى التمرين">
+        <Field label={d.bodyTrainingLevel}>
           <select className={inputClass} value={p.trainingLevel} onChange={(e) => set({ trainingLevel: e.target.value as Profile['trainingLevel'] })}>
             {trainingLevelOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
         </Field>
-        <Field label="أيام التمرين بالأسبوع" hint={errFor('trainingDays') ?? '1–7'}>
+        <Field label={d.bodyTrainingDays} hint={errFor('trainingDays') ?? d.bodyTrainingDaysHint}>
           <input type="number" min={LIMITS.trainingDays.min} max={LIMITS.trainingDays.max} className={cn(inputClass, errFor('trainingDays') && 'border-danger')} value={p.trainingDays} onChange={(e) => set({ trainingDays: num(e.target.value) })} />
         </Field>
-        <Field label="مدة التمرين" hint={errFor('workoutDuration') ?? 'دقيقة (20–150)'}>
+        <Field label={d.bodyWorkoutDuration} hint={errFor('workoutDuration') ?? d.bodyWorkoutDurationHint}>
           <input type="number" min={LIMITS.workoutDuration.min} max={LIMITS.workoutDuration.max} className={cn(inputClass, errFor('workoutDuration') && 'border-danger')} value={p.workoutDuration} onChange={(e) => set({ workoutDuration: num(e.target.value) })} />
         </Field>
-        <Field label="مكان التمرين">
+        <Field label={d.bodyWorkoutEnvironment}>
           <select className={inputClass} value={p.workoutEnvironment} onChange={(e) => set({ workoutEnvironment: e.target.value as Profile['workoutEnvironment'] })}>
             {environmentOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
         </Field>
         <div className="sm:col-span-2">
-          <Field label="إصابات (اختياري)" hint="أي إصابة تحب تنتبه لها">
-            <input className={inputClass} value={p.injuries} placeholder="مثال: ألم أسفل الظهر" onChange={(e) => set({ injuries: e.target.value })} />
+          <Field label={d.bodyInjuries} hint={d.bodyInjuriesHint}>
+            <input className={inputClass} value={p.injuries} placeholder={d.bodyInjuriesPlaceholder} onChange={(e) => set({ injuries: e.target.value })} />
           </Field>
         </div>
       </div>
@@ -114,7 +116,7 @@ export function StepBody({ ctx }: { ctx: WizardCtx }) {
       {errors.length > 0 && (
         <p className="mt-4 flex items-start gap-2 rounded-xl border border-danger/30 bg-danger/5 p-3 text-xs font-bold text-danger">
           <Icon name="AlertTriangle" className="mt-0.5 h-4 w-4 shrink-0" />
-          صحّح القيم المظلّلة بالأحمر للمتابعة.
+          {d.bodyErrorHint}
         </p>
       )}
 
@@ -122,12 +124,12 @@ export function StepBody({ ctx }: { ctx: WizardCtx }) {
       <div className="mt-6 rounded-2xl border border-primary-soft bg-primary-soft p-4">
         <div className="flex items-center gap-2 text-sm font-bold text-ink-900">
           <Icon name="BarChart3" className="h-4 w-4 text-primary-c" />
-          قِمّة بتحسب أهدافك من هذه البيانات:
+          {d.bodyCalcIntro}
         </div>
         <div className="mt-3 grid grid-cols-3 gap-3 text-center">
-          <LivePreview label="سعرات الهدف" value={`${ctx.data.targets.maintenanceCalories}`} unit="سعرة" />
-          <LivePreview label="البروتين" value={`${ctx.data.targets.proteinGrams}`} unit="غ" />
-          <LivePreview label="الماء" value={`${ctx.data.targets.waterLiters}`} unit="لتر" />
+          <LivePreview label={d.bodyTargetCalories} value={`${ctx.data.targets.maintenanceCalories}`} unit={d.unitCalories} />
+          <LivePreview label={d.bodyProtein} value={`${ctx.data.targets.proteinGrams}`} unit={d.unitG} />
+          <LivePreview label={d.bodyWater} value={`${ctx.data.targets.waterLiters}`} unit={d.unitLiter} />
         </div>
       </div>
     </div>

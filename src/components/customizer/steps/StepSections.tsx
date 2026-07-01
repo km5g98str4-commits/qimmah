@@ -2,20 +2,22 @@ import { StepHeader } from '../StepHeader'
 import { Icon } from '@/components/Icon'
 import type { WizardCtx } from '../stepProps'
 import type { SectionVisibility } from '@/lib/customization'
+import { onboardingStrings, type OnboardingStrings } from '@/i18n/dict/onboarding'
 
-const items: { key: keyof SectionVisibility; label: string; hint: string; icon: string }[] = [
-  { key: 'today', label: 'اليوم', hint: 'متابعة يومك خطوة بخطوة', icon: 'Flame' },
-  { key: 'workouts', label: 'تمارين القوة', hint: 'تمارينك ومجموعاتك', icon: 'Dumbbell' },
-  { key: 'meals', label: 'خطة الأكل', hint: 'وجباتك وسعراتك', icon: 'Salad' },
-  { key: 'supplements', label: 'المكملات', hint: 'مكملاتك الغذائية', icon: 'Pill' },
-  { key: 'medications', label: 'الأدوية', hint: 'أدويتك وجرعاتها', icon: 'Pill' },
-  { key: 'measurements', label: 'القياسات', hint: 'وزنك ومحيطاتك', icon: 'Ruler' },
-  { key: 'commitments', label: 'مفاتيح الالتزام', hint: 'عاداتك اليومية', icon: 'CheckCircle2' },
-  { key: 'notes', label: 'التنبيه الصحي', hint: 'ملاحظة صحية بسيطة', icon: 'ShieldCheck' },
+const items: { key: keyof SectionVisibility; labelKey: keyof OnboardingStrings; hintKey: keyof OnboardingStrings; icon: string }[] = [
+  { key: 'today', labelKey: 'secToday', hintKey: 'secTodayHint', icon: 'Flame' },
+  { key: 'workouts', labelKey: 'secWorkouts', hintKey: 'secWorkoutsHint', icon: 'Dumbbell' },
+  { key: 'meals', labelKey: 'secMeals', hintKey: 'secMealsHint', icon: 'Salad' },
+  { key: 'supplements', labelKey: 'secSupplements', hintKey: 'secSupplementsHint', icon: 'Pill' },
+  { key: 'medications', labelKey: 'secMedications', hintKey: 'secMedicationsHint', icon: 'Pill' },
+  { key: 'measurements', labelKey: 'secMeasurements', hintKey: 'secMeasurementsHint', icon: 'Ruler' },
+  { key: 'commitments', labelKey: 'secCommitments', hintKey: 'secCommitmentsHint', icon: 'CheckCircle2' },
+  { key: 'notes', labelKey: 'secNotes', hintKey: 'secNotesHint', icon: 'ShieldCheck' },
 ]
 
 /** خطوة اختيار الأقسام التي تظهر في الصفحة. */
 export function StepSections({ ctx }: { ctx: WizardCtx }) {
+  const d = onboardingStrings[ctx.lang]
   const { data, update } = ctx
   const sections = data.sections
 
@@ -26,8 +28,8 @@ export function StepSections({ ctx }: { ctx: WizardCtx }) {
     <div>
       <StepHeader
         icon="Layers"
-        title="الأقسام التي تريدها في صفحتك"
-        description="اختر الأقسام اللي تبي تشوفها. تقدر تشغّل أو تطفّي أي قسم لاحقًا."
+        title={d.secTitle}
+        description={d.secDescription}
       />
 
       <div className="grid gap-3 sm:grid-cols-2">
@@ -51,8 +53,8 @@ export function StepSections({ ctx }: { ctx: WizardCtx }) {
                 <Icon name={it.icon} className="h-5 w-5" />
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block text-sm font-bold text-ink-900">{it.label}</span>
-                <span className="block truncate text-xs text-ink-500">{it.hint}</span>
+                <span className="block text-sm font-bold text-ink-900">{d[it.labelKey]}</span>
+                <span className="block truncate text-xs text-ink-500">{d[it.hintKey]}</span>
               </span>
               {/* مفتاح تشغيل/إيقاف */}
               <span
@@ -71,7 +73,7 @@ export function StepSections({ ctx }: { ctx: WizardCtx }) {
         })}
       </div>
 
-      <p className="mt-5 text-xs text-ink-400">الملف الشخصي والهدف يظلّون ظاهرين دائمًا.</p>
+      <p className="mt-5 text-xs text-ink-400">{d.secAlwaysVisible}</p>
     </div>
   )
 }

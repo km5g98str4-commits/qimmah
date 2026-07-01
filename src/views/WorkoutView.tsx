@@ -8,6 +8,7 @@ import { useCustomization } from '@/lib/customizationContext'
 import { todayPlanDay, planExerciseName } from '@/lib/workoutPlan'
 import { planTitle } from '@/lib/planGenerator'
 import { getStrings } from '@/config/strings'
+import { workoutScreenStrings } from '@/i18n/dict/workoutScreen'
 import { persistFinishedSession } from '@/lib/finishWorkout'
 import { weeklyAdherenceStreak } from '@/lib/streaks'
 import { getExercise } from '@/data/exercises'
@@ -35,11 +36,12 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
   const [activeDay, setActiveDay] = useState<PlanDay | null>(null)
   const [summary, setSummary] = useState<FinishSummary | null>(null)
   const tw = getStrings(lang).workout
+  const d = workoutScreenStrings[lang]
 
   const startDay = (day: PlanDay) => setActiveDay(day)
 
   const startEmpty = () =>
-    setActiveDay({ id: `empty-${Date.now()}`, nameAr: 'تمرين فارغ', nameEn: 'Empty Workout', exercises: [] })
+    setActiveDay({ id: `empty-${Date.now()}`, nameAr: d.emptyWorkoutNameAr, nameEn: d.emptyWorkoutNameEn, exercises: [] })
 
   const finish = (session: WorkoutSession) => {
     const prs = persistFinishedSession(session)
@@ -68,14 +70,14 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
           <div>
             <span className="eyebrow">
               <Icon name="Dumbbell" className="h-3.5 w-3.5" />
-              تمرين
+              {d.workoutEyebrow}
             </span>
-            <h1 className="mt-3 text-2xl font-black text-ink-900 sm:text-3xl">تمرين</h1>
+            <h1 className="mt-3 text-2xl font-black text-ink-900 sm:text-3xl">{d.workoutHeading}</h1>
           </div>
           <button
             type="button"
             onClick={() => onNavigate('exercises')}
-            aria-label="بحث في المكتبة"
+            aria-label={d.searchLibrary}
             className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-line bg-surface text-ink-700 shadow-card hover:bg-beige"
           >
             <Icon name="Search" className="h-5 w-5" />
@@ -84,7 +86,7 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
 
         {/* بدء سريع */}
         <section>
-          <H2 icon="Zap">بدء سريع</H2>
+          <H2 icon="Zap">{d.quickStart}</H2>
           <div className="grid gap-3 sm:grid-cols-2">
             {planDay && planDay.exercises.length > 0 && (
               <button
@@ -96,8 +98,8 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
                   <Icon name="Flame" className="h-5 w-5" />
                 </span>
                 <span className="min-w-0">
-                  <span className="block text-sm font-black">ابدأ تمرين اليوم</span>
-                  <span className="block truncate text-xs text-white/85">{lang === 'en' ? planDay.nameEn : planDay.nameAr} · {planDay.exercises.length} تمارين</span>
+                  <span className="block text-sm font-black">{d.startTodayWorkout}</span>
+                  <span className="block truncate text-xs text-white/85">{lang === 'en' ? planDay.nameEn : planDay.nameAr} · {planDay.exercises.length} {d.exercisesUnit}</span>
                 </span>
               </button>
             )}
@@ -110,8 +112,8 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
                 <Icon name="Plus" className="h-5 w-5" />
               </span>
               <span className="min-w-0">
-                <span className="block text-sm font-black text-ink-900">ابدأ تمرين فارغ</span>
-                <span className="block text-xs text-ink-400">سجّل مجموعاتك بدون جدول مسبق</span>
+                <span className="block text-sm font-black text-ink-900">{d.startEmptyWorkout}</span>
+                <span className="block text-xs text-ink-400">{d.startEmptyDesc}</span>
               </span>
             </button>
           </div>
@@ -119,13 +121,13 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
 
         {/* خطتي */}
         <section id="workout-myplan">
-          <H2 icon="CalendarDays">خطتي</H2>
+          <H2 icon="CalendarDays">{d.myPlan}</H2>
           {plan.days.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-line bg-surface px-6 py-8 text-center">
-              <p className="text-sm text-ink-500">ما عندك جدول حالي — قِمّة تولّد لك خطة من بياناتك وهدفك.</p>
+              <p className="text-sm text-ink-500">{d.noPlanYet}</p>
               <button type="button" onClick={() => onNavigate('setup')} className="btn-primary mx-auto mt-4 px-4 py-2.5 text-xs">
                 <Icon name="Sparkles" className="h-4 w-4" />
-                أنشئ خطتي
+                {d.createMyPlan}
               </button>
             </div>
           ) : (
@@ -133,11 +135,11 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <p className="text-sm font-black text-ink-900">{planTitle(plan.templateId, lang)}</p>
-                  <p className="text-xs text-ink-400">{plan.days.length} أيام/أسبوع</p>
+                  <p className="text-xs text-ink-400">{plan.days.length} {d.daysPerWeek}</p>
                 </div>
                 <button type="button" onClick={() => onNavigate('setup')} className="btn-ghost shrink-0 px-3 py-2 text-xs">
                   <Icon name="Palette" className="h-4 w-4" />
-                  تعديل
+                  {d.edit}
                 </button>
               </div>
 
@@ -146,16 +148,16 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
                 <div className="mt-4 rounded-xl border border-line bg-page p-4">
                   <div className="flex items-center justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="text-[11px] font-bold text-primary-c">تمرين اليوم</p>
+                      <p className="text-[11px] font-bold text-primary-c">{d.todayWorkout}</p>
                       <p className="truncate text-sm font-bold text-ink-900">{lang === 'en' ? planDay.nameEn : planDay.nameAr}</p>
                       <p className="mt-0.5 truncate text-[11px] text-ink-400">
-                        {planDay.exercises.slice(0, 4).map((pe) => planExerciseName(pe, lang)).join(' · ') || 'لا تمارين'}
+                        {planDay.exercises.slice(0, 4).map((pe) => planExerciseName(pe, lang)).join(' · ') || d.noExercises}
                       </p>
                     </div>
                     {planDay.exercises.length > 0 && (
                       <button type="button" onClick={() => startDay(planDay)} className="btn-primary shrink-0 px-4 py-2.5 text-xs">
                         <Icon name="Flame" className="h-4 w-4" />
-                        ابدأ
+                        {d.start}
                       </button>
                     )}
                   </div>
@@ -164,16 +166,16 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
 
               {/* بقية الأيام */}
               <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                {plan.days.map((d) => (
+                {plan.days.map((pd) => (
                   <button
-                    key={d.id}
+                    key={pd.id}
                     type="button"
-                    onClick={() => startDay(d)}
+                    onClick={() => startDay(pd)}
                     className="flex items-center justify-between gap-2 rounded-xl border border-line bg-surface p-3 text-start hover:bg-beige"
                   >
                     <span className="min-w-0">
-                      <span className="block truncate text-sm font-bold text-ink-900">{lang === 'en' ? d.nameEn : d.nameAr}</span>
-                      <span className="block text-[11px] text-ink-400">{d.exercises.length} تمارين · ~{estDayMinutes(d)} د</span>
+                      <span className="block truncate text-sm font-bold text-ink-900">{lang === 'en' ? pd.nameEn : pd.nameAr}</span>
+                      <span className="block text-[11px] text-ink-400">{pd.exercises.length} {d.exercisesUnit} · ~{estDayMinutes(pd)} {d.minShort}</span>
                     </span>
                     <Icon name="ChevronLeft" className="h-4 w-4 shrink-0 text-ink-400" />
                   </button>
@@ -185,8 +187,8 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
 
         {/* قوالبي */}
         <section>
-          <H2 icon="Layers">قوالبي</H2>
-          <EmptyCard text="خطتك تُولَّد تلقائيًا من بياناتك. عدّل بياناتك من الإعداد لإعادة توليد جدول يناسبك." />
+          <H2 icon="Layers">{d.myTemplates}</H2>
+          <EmptyCard text={d.templatesAutoGenerated} />
         </section>
       </div>
 

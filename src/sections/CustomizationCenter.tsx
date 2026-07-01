@@ -18,6 +18,8 @@ import { StepMeasurements } from '@/components/customizer/steps/StepMeasurements
 import { StepSections } from '@/components/customizer/steps/StepSections'
 import { StepReview } from '@/components/customizer/steps/StepReview'
 import { isProfileValid } from '@/lib/validation'
+import { useLang } from '@/i18n'
+import { onboardingStrings, type OnboardingStrings } from '@/i18n/dict/onboarding'
 
 interface CustomizationCenterProps {
   /** يُستدعى عند الإغلاق؛ completed=true عند «حفظ وإغلاق» لعرض تأكيد النجاح. */
@@ -29,41 +31,43 @@ interface CustomizationCenterProps {
 }
 
 type StepDef = {
-  title: string
+  titleKey: keyof OnboardingStrings
   Component: (p: { ctx: WizardCtx }) => JSX.Element
   validate?: (d: Customization) => boolean
 }
 
 const onboardingSteps: StepDef[] = [
-  { title: 'الترحيب', Component: StepWelcome, validate: (d) => d.identity.userName.trim().length > 0 },
-  { title: 'بياناتك', Component: StepBody, validate: (d) => isProfileValid(d.profile) },
-  { title: 'خطتك', Component: StepGeneratePlan },
-  { title: 'المكملات والأدوية', Component: StepWellness },
-  { title: 'القياسات والمتابعة', Component: StepMeasurements },
-  { title: 'المراجعة', Component: StepReview },
+  { titleKey: 'ccWelcome', Component: StepWelcome, validate: (d) => d.identity.userName.trim().length > 0 },
+  { titleKey: 'ccBody', Component: StepBody, validate: (d) => isProfileValid(d.profile) },
+  { titleKey: 'ccPlan', Component: StepGeneratePlan },
+  { titleKey: 'ccWellness', Component: StepWellness },
+  { titleKey: 'ccMeasurements', Component: StepMeasurements },
+  { titleKey: 'ccReview', Component: StepReview },
 ]
 
 // تعديل الخطة (متقدّم) — يُقسَّم لتقليل الزحام:
 //  - الأساسيات: ما يحتاجه المبتدئ فعلًا (بياناته + التمرين + الأكل).
 //  - الإضافات: ضبط نادر الاستخدام يُكشف خلف زرّ «خيارات متقدّمة».
 const advancedEssentialSteps: StepDef[] = [
-  { title: 'بياناتك', Component: StepBody, validate: (d) => isProfileValid(d.profile) },
-  { title: 'جدول التمرين', Component: StepWorkoutTemplate },
-  { title: 'خطة الأكل', Component: StepNutrition },
+  { titleKey: 'ccBody', Component: StepBody, validate: (d) => isProfileValid(d.profile) },
+  { titleKey: 'ccWorkoutTemplate', Component: StepWorkoutTemplate },
+  { titleKey: 'ccNutrition', Component: StepNutrition },
 ]
 
 const advancedExtraSteps: StepDef[] = [
-  { title: 'الحسابات الذكية', Component: StepSmartCalculations },
-  { title: 'المكملات والأدوية', Component: StepWellness },
-  { title: 'القياسات والمتابعة', Component: StepMeasurements },
-  { title: 'الأقسام', Component: StepCommitments },
-  { title: 'إظهار الأقسام', Component: StepSections },
+  { titleKey: 'ccSmartCalc', Component: StepSmartCalculations },
+  { titleKey: 'ccWellness', Component: StepWellness },
+  { titleKey: 'ccMeasurements', Component: StepMeasurements },
+  { titleKey: 'ccCommitments', Component: StepCommitments },
+  { titleKey: 'ccSections', Component: StepSections },
 ]
 
-const advancedReviewStep: StepDef = { title: 'المراجعة', Component: StepReview }
+const advancedReviewStep: StepDef = { titleKey: 'ccReview', Component: StepReview }
 
 /** مركز التخصيص — معالج إعداد شخصي خطوة بخطوة (بلا backend، يُحفظ على الجهاز). */
 export function CustomizationCenter({ onBack, initialStep = 0, mode = 'onboarding' }: CustomizationCenterProps) {
+  const lang = useLang()
+  const d = onboardingStrings[lang]
   const { customization, applyCustomization, resetCustomization } = useCustomization()
   // الخيارات المتقدّمة في «تعديل خطتي» مطويّة بالافتراض (تقليل التعقيد).
   const [showAdvanced, setShowAdvanced] = useState(false)
@@ -146,6 +150,7 @@ export function CustomizationCenter({ onBack, initialStep = 0, mode = 'onboardin
   }
 
   const ctx: WizardCtx = {
+    lang,
     data,
     update,
     updateIdentity,
@@ -197,17 +202,17 @@ export function CustomizationCenter({ onBack, initialStep = 0, mode = 'onboardin
             <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-white">
               <Icon name="Palette" className="h-5 w-5" strokeWidth={2.5} />
             </span>
-            <span className="text-base font-extrabold text-ink-900 sm:text-lg">{mode === 'advanced' ? 'تعديل خطتي' : 'إعداد خطتي'}</span>
+            <span className="text-base font-extrabold text-ink-900 sm:text-lg">{mode === 'advanced' ? d.editPlanTitle : d.setupPlanTitle}</span>
           </div>
           <div className="flex items-center gap-2">
             <button type="button" onClick={saveDraft} className="btn-ghost px-3 py-2 text-xs sm:text-sm">
               <Icon name={saved ? 'CheckCircle2' : 'Check'} className="h-4 w-4" />
-              {saved ? 'تم الحفظ' : 'حفظ مؤقت'}
+              {saved ? d.saved : d.saveDraft}
             </button>
             <button type="button" onClick={() => onBack()} className="btn-ghost px-3 py-2 text-xs sm:text-sm">
               <Icon name="Globe" className="h-4 w-4" />
-              <span className="hidden sm:inline">معاينة في الموقع</span>
-              <span className="sm:hidden">معاينة</span>
+              <span className="hidden sm:inline">{d.previewOnSite}</span>
+              <span className="sm:hidden">{d.preview}</span>
             </button>
           </div>
         </div>
@@ -216,7 +221,7 @@ export function CustomizationCenter({ onBack, initialStep = 0, mode = 'onboardin
         <div className="container-page pb-3">
           <div className="flex items-center justify-between text-xs">
             <span className="font-bold text-ink-700">
-              الخطوة {step + 1} من {steps.length}: {steps[step].title}
+              {d.stepPrefix} {step + 1} {d.stepOf} {steps.length}: {d[steps[step].titleKey]}
             </span>
             <span className="font-bold text-primary-c">{progress}%</span>
           </div>
@@ -232,12 +237,12 @@ export function CustomizationCenter({ onBack, initialStep = 0, mode = 'onboardin
               const reachable = canReachStep(i)
               return (
                 <button
-                  key={s.title}
+                  key={s.titleKey}
                   type="button"
                   onClick={() => reachable && setStep(i)}
                   disabled={!reachable}
                   aria-disabled={!reachable}
-                  title={reachable ? undefined : 'أكمل الخطوات المطلوبة أولًا'}
+                  title={reachable ? undefined : d.completeRequiredFirst}
                   className={cn(
                     'whitespace-nowrap rounded-full border px-3 py-1 text-[11px] font-bold transition-colors',
                     !reachable && 'cursor-not-allowed opacity-40',
@@ -248,7 +253,7 @@ export function CustomizationCenter({ onBack, initialStep = 0, mode = 'onboardin
                         : 'border-line bg-surface text-ink-400',
                   )}
                 >
-                  {i + 1}. {s.title}
+                  {i + 1}. {d[s.titleKey]}
                 </button>
               )
             })}
@@ -263,7 +268,7 @@ export function CustomizationCenter({ onBack, initialStep = 0, mode = 'onboardin
               className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-bold text-ink-500 transition-colors hover:text-primary-c"
             >
               <Icon name={showAdvanced ? 'ChevronDown' : 'SlidersHorizontal'} className="h-3.5 w-3.5" />
-              {showAdvanced ? 'إخفاء الخيارات المتقدّمة' : 'خيارات متقدّمة'}
+              {showAdvanced ? d.hideAdvanced : d.advancedOptions}
             </button>
           )}
         </div>
@@ -280,8 +285,8 @@ export function CustomizationCenter({ onBack, initialStep = 0, mode = 'onboardin
 
           <aside className="lg:col-span-1">
             <div className="sticky top-40 space-y-3">
-              <p className="text-xs font-bold uppercase tracking-wide text-ink-400">معاينة حية</p>
-              <PreviewSummary data={data} />
+              <p className="text-xs font-bold uppercase tracking-wide text-ink-400">{d.livePreview}</p>
+              <PreviewSummary data={data} lang={lang} />
             </div>
           </aside>
         </div>
@@ -297,17 +302,17 @@ export function CustomizationCenter({ onBack, initialStep = 0, mode = 'onboardin
             className="btn-ghost px-5 py-3 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <Icon name="ChevronLeft" className="h-4 w-4 rotate-180" />
-            السابق
+            {d.prev}
           </button>
 
           {isLast ? (
             <button type="button" onClick={saveAndClose} disabled={!allValid} className="btn-primary px-6 py-3 disabled:cursor-not-allowed disabled:opacity-40">
               <Icon name="Check" className="h-4 w-4" />
-              {mode === 'advanced' ? 'حفظ وإغلاق' : 'اعتمد خطتي وابدأ'}
+              {mode === 'advanced' ? d.saveAndClose : d.approveAndStart}
             </button>
           ) : (
             <button type="button" onClick={next} disabled={!stepValid} className="btn-primary px-6 py-3 disabled:cursor-not-allowed disabled:opacity-40">
-              التالي
+              {d.next}
               <Icon name="ChevronLeft" className="h-4 w-4" />
             </button>
           )}

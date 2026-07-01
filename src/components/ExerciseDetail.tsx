@@ -5,6 +5,7 @@ import { LineChart } from './LineChart'
 import { MuscleChips } from './MuscleChips'
 import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
+import { libraryStrings, type LibraryStrings } from '@/i18n/dict/library'
 import { getExercise, targetMuscleAr } from '@/data/exercises'
 import { guidanceFor } from '@/lib/exerciseGuidance'
 import { exerciseStats } from '@/lib/exerciseStats'
@@ -21,15 +22,16 @@ interface ExerciseDetailProps {
   onAddToPlan?: (exerciseId: string) => void
 }
 
-const TABS: { id: DetailTab; label: string; icon: string }[] = [
-  { id: 'about', label: 'عن التمرين', icon: 'HelpCircle' },
-  { id: 'history', label: 'التاريخ', icon: 'CalendarDays' },
-  { id: 'charts', label: 'الرسوم', icon: 'BarChart3' },
-  { id: 'records', label: 'الأرقام', icon: 'Trophy' },
+const TABS: { id: DetailTab; labelKey: keyof LibraryStrings; icon: string }[] = [
+  { id: 'about', labelKey: 'tabAbout', icon: 'HelpCircle' },
+  { id: 'history', labelKey: 'tabHistory', icon: 'CalendarDays' },
+  { id: 'charts', labelKey: 'tabCharts', icon: 'BarChart3' },
+  { id: 'records', labelKey: 'tabRecords', icon: 'Trophy' },
 ]
 
 /** بطاقة تفاصيل تمرين — Sheet/Modal بأربعة تبويبات (عن/التاريخ/الرسوم/الأرقام). */
 export function ExerciseDetail({ lang, exerciseId, onClose, onAddToPlan }: ExerciseDetailProps) {
+  const d = libraryStrings[lang]
   const ex = getExercise(exerciseId)
   const [tab, setTab] = useState<DetailTab>('about')
   const stats = useMemo(() => exerciseStats(exerciseId), [exerciseId])
@@ -46,7 +48,7 @@ export function ExerciseDetail({ lang, exerciseId, onClose, onAddToPlan }: Exerc
           <button
             type="button"
             onClick={onClose}
-            aria-label="إغلاق"
+            aria-label={d.close}
             className="absolute end-3 top-3 grid h-9 w-9 place-items-center rounded-full bg-ink-900/40 text-white backdrop-blur hover:bg-ink-900/60"
           >
             <Icon name="X" className="h-5 w-5" />
@@ -61,7 +63,7 @@ export function ExerciseDetail({ lang, exerciseId, onClose, onAddToPlan }: Exerc
             )}
             <p className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px] font-bold text-white/80">
               <span className="rounded-full bg-white/15 px-2 py-0.5 backdrop-blur">{targetMuscleAr(ex)}</span>
-              <span>{ex.equipment.join(' · ')} · {levelAr(ex.level)}</span>
+              <span>{ex.equipment.join(' · ')} · {levelLabel(ex.level, d)}</span>
             </p>
           </div>
         </div>
@@ -79,17 +81,17 @@ export function ExerciseDetail({ lang, exerciseId, onClose, onAddToPlan }: Exerc
               )}
             >
               <Icon name={tb.icon} className="h-4 w-4 shrink-0" />
-              <span className="truncate">{tb.label}</span>
+              <span className="truncate">{d[tb.labelKey]}</span>
             </button>
           ))}
         </div>
 
         {/* المحتوى */}
         <div className="flex-1 overflow-y-auto p-4">
-          {tab === 'about' && <AboutTab ex={ex} lang={lang} onAddToPlan={onAddToPlan} />}
-          {tab === 'history' && <HistoryTab stats={stats} lastWeight={rec?.lastWeight} bestWeight={rec?.bestWeight} lastReps={rec?.lastReps} />}
-          {tab === 'charts' && <ChartsTab stats={stats} />}
-          {tab === 'records' && <RecordsTab stats={stats} />}
+          {tab === 'about' && <AboutTab ex={ex} d={d} onAddToPlan={onAddToPlan} />}
+          {tab === 'history' && <HistoryTab stats={stats} d={d} lastWeight={rec?.lastWeight} bestWeight={rec?.bestWeight} lastReps={rec?.lastReps} />}
+          {tab === 'charts' && <ChartsTab stats={stats} d={d} />}
+          {tab === 'records' && <RecordsTab stats={stats} d={d} />}
         </div>
       </div>
     </div>
@@ -101,24 +103,24 @@ function ExerciseHero({ ex }: { ex: NonNullable<ReturnType<typeof getExercise>> 
   return <ExerciseMedia exerciseId={ex.id} muscles={ex.primaryMusclesDetailed} heightClass="h-40" />
 }
 
-function AboutTab({ ex, lang, onAddToPlan }: { ex: NonNullable<ReturnType<typeof getExercise>>; lang: Lang; onAddToPlan?: (id: string) => void }) {
+function AboutTab({ ex, d, onAddToPlan }: { ex: NonNullable<ReturnType<typeof getExercise>>; d: LibraryStrings; onAddToPlan?: (id: string) => void }) {
   const g = guidanceFor(ex)
   return (
     <div className="space-y-5">
       {/* العضلات المستهدفة */}
-      <Block title="العضلات المستهدفة" icon="Target">
-        <p className="mb-2 text-[11px] font-bold text-ink-500">أساسية</p>
+      <Block title={d.targetMuscles} icon="Target">
+        <p className="mb-2 text-[11px] font-bold text-ink-500">{d.primary}</p>
         <MuscleChips primary={ex.primaryMusclesDetailed} />
         {ex.secondaryMusclesDetailed.length > 0 && (
           <>
-            <p className="mb-2 mt-3 text-[11px] font-bold text-ink-500">ثانوية</p>
+            <p className="mb-2 mt-3 text-[11px] font-bold text-ink-500">{d.secondary}</p>
             <MuscleChips primary={[]} secondary={ex.secondaryMusclesDetailed} />
           </>
         )}
       </Block>
 
       {/* خطوات الأداء */}
-      <Block title="طريقة الأداء" icon="CheckCircle2">
+      <Block title={d.howToPerform} icon="CheckCircle2">
         <ol className="space-y-1.5">
           {g.howTo.map((h, i) => (
             <li key={i} className="flex gap-2 text-sm leading-relaxed text-ink-700">
@@ -130,12 +132,12 @@ function AboutTab({ ex, lang, onAddToPlan }: { ex: NonNullable<ReturnType<typeof
       </Block>
 
       {/* نصائح تقنية */}
-      <Block title="نصائح تقنية" icon="Sparkles">
+      <Block title={d.techniqueTips} icon="Sparkles">
         <BulletList items={g.tips} dot="#3E9E6B" />
       </Block>
 
       {/* أخطاء شائعة */}
-      <Block title="أخطاء شائعة" icon="AlertTriangle">
+      <Block title={d.commonMistakes} icon="AlertTriangle">
         <BulletList items={g.mistakes} dot="#D6553A" />
       </Block>
 
@@ -150,13 +152,13 @@ function AboutTab({ ex, lang, onAddToPlan }: { ex: NonNullable<ReturnType<typeof
         {ex.videoUrl && (
           <a href={ex.videoUrl} target="_blank" rel="noopener noreferrer" className="btn-ghost px-4 py-2.5 text-sm">
             <Icon name="Play" className="h-4 w-4" />
-            {lang === 'en' ? 'Watch on YouTube' : 'شاهد على يوتيوب'}
+            {d.watchOnYouTube}
           </a>
         )}
         {onAddToPlan && (
           <button type="button" onClick={() => onAddToPlan(ex.id)} className="btn-primary px-4 py-2.5 text-sm">
             <Icon name="Plus" className="h-4 w-4" />
-            {lang === 'en' ? 'Add to my plan' : 'أضف لخطتي'}
+            {d.addToMyPlan}
           </button>
         )}
       </div>
@@ -166,35 +168,37 @@ function AboutTab({ ex, lang, onAddToPlan }: { ex: NonNullable<ReturnType<typeof
 
 function HistoryTab({
   stats,
+  d,
   lastWeight,
   bestWeight,
   lastReps,
 }: {
   stats: ReturnType<typeof exerciseStats>
+  d: LibraryStrings
   lastWeight?: string
   bestWeight?: string
   lastReps?: string
 }) {
   if (stats.totalSessions === 0) {
-    return <EmptyHint text="ما فيه سجلّ لهذا التمرين بعد. سجّل تمرينك وبيظهر هنا." />
+    return <EmptyHint text={d.historyEmpty} />
   }
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-3 gap-2">
-        <MiniStat label="آخر وزن" value={lastWeight ? `${lastWeight}` : '—'} />
-        <MiniStat label="أفضل وزن" value={bestWeight ? `${bestWeight}` : '—'} />
-        <MiniStat label="آخر تكرارات" value={lastReps ? `${lastReps}` : '—'} />
+        <MiniStat label={d.lastWeight} value={lastWeight ? `${lastWeight}` : '—'} />
+        <MiniStat label={d.bestWeight} value={bestWeight ? `${bestWeight}` : '—'} />
+        <MiniStat label={d.lastReps} value={lastReps ? `${lastReps}` : '—'} />
       </div>
       <ul className="space-y-2">
         {stats.history.map((r, i) => (
           <li key={i} className="flex items-center justify-between gap-3 rounded-xl border border-line bg-surface p-3">
             <div className="min-w-0">
-              <p className="truncate text-sm font-bold text-ink-900">{r.dayName || 'تمرين'}</p>
+              <p className="truncate text-sm font-bold text-ink-900">{r.dayName || d.workout}</p>
               <p className="text-[11px] text-ink-400">{r.date}</p>
             </div>
             <div className="shrink-0 text-end">
-              <p className="text-sm font-black text-ink-900">{r.topWeight || '—'} كجم × {r.topReps || '—'}</p>
-              <p className="text-[11px] text-ink-400">{r.sets} مجموعة · حجم {r.volume}</p>
+              <p className="text-sm font-black text-ink-900">{r.topWeight || '—'} {d.kg} × {r.topReps || '—'}</p>
+              <p className="text-[11px] text-ink-400">{r.sets} {d.setUnit} · {d.volumeLabel} {r.volume}</p>
             </div>
           </li>
         ))}
@@ -203,23 +207,23 @@ function HistoryTab({
   )
 }
 
-function ChartsTab({ stats }: { stats: ReturnType<typeof exerciseStats> }) {
+function ChartsTab({ stats, d }: { stats: ReturnType<typeof exerciseStats>; d: LibraryStrings }) {
   if (stats.totalSessions === 0) {
-    return <EmptyHint text="بعد ما تسجّل تمارين، بتشوف هنا تطوّر الوزن والحجم وتقدير الـ 1RM." />
+    return <EmptyHint text={d.chartsEmpty} />
   }
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-3 gap-2">
-        <MiniStat label="أعلى 1RM تقديري" value={stats.records.bestOneRepMax ? `${stats.records.bestOneRepMax}` : '—'} />
-        <MiniStat label="أفضل حجم" value={stats.records.bestVolume ? `${stats.records.bestVolume}` : '—'} />
-        <MiniStat label="عدد الجلسات" value={`${stats.totalSessions}`} />
+        <MiniStat label={d.bestOneRepMax} value={stats.records.bestOneRepMax ? `${stats.records.bestOneRepMax}` : '—'} />
+        <MiniStat label={d.bestVolume} value={stats.records.bestVolume ? `${stats.records.bestVolume}` : '—'} />
+        <MiniStat label={d.sessionsCount} value={`${stats.totalSessions}`} />
       </div>
 
       {stats.weightTrend.length >= 2 ? (
         <div className="card p-4">
           <p className="mb-3 flex items-center gap-1.5 text-sm font-bold text-ink-900">
             <Icon name="TrendingUp" className="h-4 w-4 text-primary-c" />
-            تطوّر وزن أعلى مجموعة
+            {d.topSetWeightTrend}
           </p>
           <LineChart data={stats.weightTrend} />
           <div className="mt-2 flex justify-between text-[11px] text-ink-400">
@@ -228,22 +232,22 @@ function ChartsTab({ stats }: { stats: ReturnType<typeof exerciseStats> }) {
           </div>
         </div>
       ) : (
-        <EmptyHint text="تحتاج جلستين على الأقل لعرض رسم التطوّر." />
+        <EmptyHint text={d.needTwoSessions} />
       )}
     </div>
   )
 }
 
-function RecordsTab({ stats }: { stats: ReturnType<typeof exerciseStats> }) {
+function RecordsTab({ stats, d }: { stats: ReturnType<typeof exerciseStats>; d: LibraryStrings }) {
   const r = stats.records
   const empty = !r.bestWeight && !r.bestReps && !r.bestVolume && !r.bestOneRepMax
-  if (empty) return <EmptyHint text="لا أرقام قياسية بعد — كل جلسة تقربك من رقم جديد." />
+  if (empty) return <EmptyHint text={d.recordsEmpty} />
   return (
     <div className="grid grid-cols-2 gap-3">
-      <RecordCard icon="Scale" label="أفضل وزن" value={r.bestWeight ? `${r.bestWeight} كجم` : '—'} />
-      <RecordCard icon="RotateCcw" label="أعلى تكرارات" value={r.bestReps ? `${r.bestReps}` : '—'} />
-      <RecordCard icon="BarChart3" label="أفضل حجم (وزن×تكرار)" value={r.bestVolume ? `${r.bestVolume}` : '—'} />
-      <RecordCard icon="Trophy" label="أعلى 1RM تقديري" value={r.bestOneRepMax ? `${r.bestOneRepMax} كجم` : '—'} />
+      <RecordCard icon="Scale" label={d.recBestWeight} value={r.bestWeight ? `${r.bestWeight} ${d.kg}` : '—'} />
+      <RecordCard icon="RotateCcw" label={d.recBestReps} value={r.bestReps ? `${r.bestReps}` : '—'} />
+      <RecordCard icon="BarChart3" label={d.recBestVolume} value={r.bestVolume ? `${r.bestVolume}` : '—'} />
+      <RecordCard icon="Trophy" label={d.recBestOneRepMax} value={r.bestOneRepMax ? `${r.bestOneRepMax} ${d.kg}` : '—'} />
     </div>
   )
 }
@@ -307,6 +311,6 @@ function EmptyHint({ text }: { text: string }) {
   )
 }
 
-function levelAr(level: string): string {
-  return level === 'beginner' ? 'مبتدئ' : level === 'advanced' ? 'متقدّم' : 'متوسط'
+function levelLabel(level: string, d: LibraryStrings): string {
+  return level === 'beginner' ? d.levelBeginner : level === 'advanced' ? d.levelAdvanced : d.levelIntermediate
 }

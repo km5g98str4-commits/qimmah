@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react'
 import { Icon } from './Icon'
 import { cn } from '@/lib/cn'
+import { progressScreenStrings } from '@/i18n/dict/progressScreen'
+import type { Lang } from '@/lib/appPreferences'
 import { muscleGroups, muscleLabelAr } from '@/data/muscleGroups'
 import { computeWeeklyCoverage } from '@/lib/muscleCoverage'
 import { loadSessions } from '@/lib/workoutSessions'
@@ -38,17 +40,20 @@ function Region({
   coverage,
   selected,
   onSelect,
+  lang,
 }: {
   def: BodyRegion
   coverage: Record<string, MuscleCoverage>
   selected: boolean
   onSelect: (m: MuscleId) => void
+  lang: Lang
 }) {
+  const d = progressScreenStrings[lang]
   const c = coverage[def.m]
   const heat = heatOpacity(c)
   const label = muscleLabelAr(def.m)
   const sets = c?.sets ?? 0
-  const title = heat !== null ? `${label} — ${sets} مجموعة هذا الأسبوع` : `${label} — لم تُسجّل بعد`
+  const title = heat !== null ? `${label} — ${sets} ${d.setsThisWeekSuffix}` : `${label} — ${d.notLoggedYet}`
   return (
     <g
       role="button"
@@ -84,7 +89,8 @@ function Region({
   )
 }
 
-export function WeeklyMuscleMap({ className }: { className?: string }) {
+export function WeeklyMuscleMap({ className, lang }: { className?: string; lang: Lang }) {
+  const d = progressScreenStrings[lang]
   const { customization } = useCustomization()
   const [view, setView] = useState<MuscleView>('front')
   const [selected, setSelected] = useState<MuscleId | null>(null)
@@ -112,13 +118,13 @@ export function WeeklyMuscleMap({ className }: { className?: string }) {
   const sel = selected ? coverage[selected] : undefined
   const caption = selected
     ? sel && sel.sets > 0
-      ? `${muscleLabelAr(selected)} · ${sel.sets} مجموعة هذا الأسبوع`
-      : `${muscleLabelAr(selected)} · لم تُسجّل بعد — جرّب تضيفها`
+      ? `${muscleLabelAr(selected)} · ${sel.sets} ${d.setsThisWeekSuffix}`
+      : `${muscleLabelAr(selected)} · ${d.selectedNotLoggedSuffix}`
     : trainedCount > 0
-      ? `فعّلت ${trainedCount} من ${muscleGroups.length} عضلة هذا الأسبوع 💪`
-      : 'ابدأ تمرينك وبتشوف عضلاتك تتلوّن هنا.'
+      ? `${d.activatedPrefix} ${trainedCount} ${d.activatedMiddle} ${muscleGroups.length} ${d.activatedSuffix}`
+      : d.emptyCaption
 
-  const genderLabel = gender === 'female' ? 'أنثى' : gender === 'male' ? 'ذكر' : 'محايد'
+  const genderLabel = gender === 'female' ? d.mapGenderFemale : gender === 'male' ? d.mapGenderMale : d.mapGenderNeutral
 
   return (
     <div className={cn('card p-5', className)}>
@@ -129,11 +135,11 @@ export function WeeklyMuscleMap({ className }: { className?: string }) {
             <Icon name="Dumbbell" className="h-5 w-5" />
           </span>
           <div>
-            <p className="text-sm font-black text-ink-900">خريطة عضلاتك</p>
-            <p className="text-[11px] font-bold text-ink-400">هذا الأسبوع · {genderLabel}</p>
+            <p className="text-sm font-black text-ink-900">{d.mapTitle}</p>
+            <p className="text-[11px] font-bold text-ink-400">{d.thisWeekWord} · {genderLabel}</p>
           </div>
         </div>
-        <div className="inline-flex rounded-full border border-line bg-page p-1" role="group" aria-label="جهة عرض الجسم">
+        <div className="inline-flex rounded-full border border-line bg-page p-1" role="group" aria-label={d.bodyViewGroupAria}>
           {(['front', 'back'] as MuscleView[]).map((v) => (
             <button
               key={v}
@@ -148,7 +154,7 @@ export function WeeklyMuscleMap({ className }: { className?: string }) {
                 view === v ? 'bg-primary text-white shadow-soft' : 'text-ink-500 hover:text-ink-900',
               )}
             >
-              {v === 'front' ? 'أمامي' : 'خلفي'}
+              {v === 'front' ? d.viewFront : d.viewBack}
             </button>
           ))}
         </div>
@@ -160,7 +166,7 @@ export function WeeklyMuscleMap({ className }: { className?: string }) {
           viewBox="0 0 220 470"
           className="h-auto w-full max-w-[240px]"
           role="img"
-          aria-label={`خريطة العضلات — جسم ${genderLabel}، العرض ${view === 'front' ? 'الأمامي' : 'الخلفي'}، فعّلت ${trainedCount} عضلة هذا الأسبوع`}
+          aria-label={`${d.mapImgAriaPrefix} ${genderLabel}, ${d.mapImgAriaView} ${view === 'front' ? d.mapImgAriaFront : d.mapImgAriaBack}, ${d.activatedPrefix} ${trainedCount} ${d.mapImgAriaSuffix}`}
         >
           <defs>
             {/* توهّج خلفيّ دافئ خلف الجسم لعمق بصري */}
@@ -182,6 +188,7 @@ export function WeeklyMuscleMap({ className }: { className?: string }) {
               coverage={coverage}
               selected={selected === def.m}
               onSelect={(m) => setSelected((cur) => (cur === m ? null : m))}
+              lang={lang}
             />
           ))}
           {/* طبقة اللباس الرياضي المحتشم (فوق العضلات، شفّافة جزئيًا) */}
@@ -206,11 +213,11 @@ export function WeeklyMuscleMap({ className }: { className?: string }) {
       <div className="mt-4 flex items-center justify-center gap-4 border-t border-line pt-3 text-[11px] text-ink-500">
         <span className="flex items-center gap-1.5">
           <span className="inline-block h-3 w-6 rounded-full" style={{ background: `linear-gradient(90deg, ${HEAT}55, ${HEAT})` }} />
-          درّبتها (الأغمق أكثر)
+          {d.legendTrained}
         </span>
         <span className="flex items-center gap-1.5">
           <span className="inline-block h-3 w-3 rounded-full" style={{ backgroundColor: MUSCLE_FILL, border: '1px solid rgba(43,37,32,0.18)' }} />
-          لم تُدرّب
+          {d.legendUntrained}
         </span>
       </div>
     </div>

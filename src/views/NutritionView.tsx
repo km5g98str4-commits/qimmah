@@ -7,6 +7,7 @@ import { MEAL_SLOTS, useNutritionToday, type LoggedFood, type MealSlot } from '@
 import { inRange, NUM_LIMITS, NUM_MESSAGES, sanitizeNumericInput } from '@/lib/validation'
 import { FOOD_ESTIMATE_NOTE } from '@/data/foodItems'
 import { getStrings } from '@/config/strings'
+import { nutritionScreenStrings } from '@/i18n/dict/nutritionScreen'
 import type { Lang } from '@/lib/appPreferences'
 
 interface NutritionViewProps {
@@ -42,6 +43,7 @@ function slotForEntry(meal: MealSlot | undefined, visible: { id: MealSlot }[]): 
 export function NutritionView({ lang }: NutritionViewProps) {
   const { customization } = useCustomization()
   const t = getStrings(lang).nutrition
+  const d = nutritionScreenStrings[lang]
   const { state, totals, addWater, removeLog } = useNutritionToday()
   const np = customization.nutritionPlan
 
@@ -75,11 +77,11 @@ export function NutritionView({ lang }: NutritionViewProps) {
           <p className="text-xs font-bold text-ink-500">{t.equationNote}</p>
           <div className="mt-3 flex items-end justify-between gap-2">
             <EqCell label={t.needCals} value={targetCalories} />
-            <Op symbol="−" />
+            <Op symbol={d.opMinus} />
             <EqCell label={t.foodCals} value={eaten} />
-            <Op symbol="+" />
+            <Op symbol={d.opPlus} />
             <EqCell label={t.exerciseCals} value={exerciseCals} />
-            <Op symbol="=" />
+            <Op symbol={d.opEquals} />
             <EqCell label={t.remaining} value={remaining} highlight />
           </div>
           <ProgressBar current={eaten} target={targetCalories || 1} color="bg-orange-500" className="mt-4" />
@@ -87,10 +89,10 @@ export function NutritionView({ lang }: NutritionViewProps) {
 
         {/* ملخّص الماكروز + الماء — حلقات واضحة */}
         <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <MacroCard label={t.protein} eaten={round(totals.protein)} target={targetProtein} unit="غ" color="#22c55e" />
-          <MacroCard label={t.carbs} eaten={round(totals.carbs)} target={targetCarbs} unit="غ" color="#0ea5e9" />
-          <MacroCard label={t.fat} eaten={round(totals.fat)} target={targetFat} unit="غ" color="#e0941f" />
-          <MacroCard label={t.water} eaten={state.waterMl} target={targetWaterMl} unit="مل" color="#F26A21" />
+          <MacroCard label={t.protein} eaten={round(totals.protein)} target={targetProtein} unit={d.gramsUnit} color="#22c55e" />
+          <MacroCard label={t.carbs} eaten={round(totals.carbs)} target={targetCarbs} unit={d.gramsUnit} color="#0ea5e9" />
+          <MacroCard label={t.fat} eaten={round(totals.fat)} target={targetFat} unit={d.gramsUnit} color="#e0941f" />
+          <MacroCard label={t.water} eaten={state.waterMl} target={targetWaterMl} unit={d.mlUnit} color="#F26A21" />
         </div>
 
         {/* حالة فارغة — تحفيز لتسجيل أول وجبة */}
@@ -203,6 +205,7 @@ function MealCard({
   onRemove: (id: string) => void
 }) {
   const t = getStrings(lang).nutrition
+  const d = nutritionScreenStrings[lang]
   const [adding, setAdding] = useState(false)
   const cals = items.reduce((a, e) => a + e.calories, 0)
   const prot = items.reduce((a, e) => a + e.protein, 0)
@@ -216,7 +219,7 @@ function MealCard({
           </span>
           <div>
             <p className="text-sm font-bold text-ink-900">{lang === 'en' ? slot.en : slot.ar}</p>
-            <p className="text-[11px] text-ink-400">{cals} سعرة · {prot}غ بروتين</p>
+            <p className="text-[11px] text-ink-400">{cals} {d.caloriesUnit} · {prot}{d.gramsUnit} {d.caloriesDotProteinG}</p>
           </div>
         </div>
         <div className="flex items-center gap-1">
@@ -240,7 +243,7 @@ function MealCard({
             <li key={e.id} className="flex items-center gap-3 px-4 py-2.5">
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-sm text-ink-900">{e.label}</span>
-                <span className="block text-[11px] text-ink-400">{e.calories} سعرة · {e.protein}غ</span>
+                <span className="block text-[11px] text-ink-400">{e.calories} {d.caloriesUnit} · {e.protein}{d.gramsUnit}</span>
               </span>
               <button type="button" onClick={() => onRemove(e.id)} aria-label={t.removeEntry} className="shrink-0 rounded-lg p-1.5 text-ink-400 hover:bg-beige hover:text-danger">
                 <Icon name="Trash2" className="h-4 w-4" />
@@ -283,6 +286,7 @@ function PlaceholderBtn({ icon, title }: { icon: string; title: string }) {
 /** لوحة الماء — +250/+500 + إدخال كمية مخصّصة (50–3000 مل). */
 function WaterPanel({ lang, waterMl, targetMl, onAdd }: { lang: Lang; waterMl: number; targetMl: number; onAdd: (ml: number) => void }) {
   const t = getStrings(lang).nutrition
+  const d = nutritionScreenStrings[lang]
   const [ml, setMl] = useState('')
   const { min, max } = NUM_LIMITS.waterMl
   const amount = Number(ml)
@@ -300,7 +304,7 @@ function WaterPanel({ lang, waterMl, targetMl, onAdd }: { lang: Lang; waterMl: n
           <Icon name="Droplets" className="h-4 w-4 text-primary-c" />
           {t.water}
         </span>
-        <span className="text-sm font-black text-primary-c">{(waterMl / 1000).toFixed(2)} / {(targetMl / 1000).toFixed(1)} لتر</span>
+        <span className="text-sm font-black text-primary-c">{(waterMl / 1000).toFixed(2)} / {(targetMl / 1000).toFixed(1)} {d.litersUnit}</span>
       </div>
       <ProgressBar current={waterMl} target={targetMl || 1} color="bg-primary" className="mt-3 h-1.5" />
       <div className="mt-3 flex flex-wrap gap-2">

@@ -6,6 +6,7 @@ import { goalTypeLabel } from '@/lib/calculators'
 import { currentWeekSummary } from '@/lib/streaks'
 import { useNutritionToday } from '@/lib/nutritionTracking'
 import { getStrings } from '@/config/strings'
+import { dashboardStrings } from '@/i18n/dict/dashboard'
 import type { Lang } from '@/lib/appPreferences'
 
 const round = (n: number) => Math.round(n)
@@ -20,6 +21,7 @@ export function DailySummary({ lang }: DailySummaryProps) {
   const p = customization.profile
   const t = customization.targets
   const np = customization.nutritionPlan
+  const d = dashboardStrings[lang]
   const tn = getStrings(lang).nutrition
   const { state, totals } = useNutritionToday()
 
@@ -46,9 +48,9 @@ export function DailySummary({ lang }: DailySummaryProps) {
       <div className="card overflow-hidden p-5 sm:p-6">
         <span className="eyebrow">
           <Icon name="Flame" className="h-3.5 w-3.5" />
-          خطتك اليوم
+          {d.yourPlanToday}
         </span>
-        <h1 className="mt-2 text-xl font-black text-ink-900 sm:text-2xl">ملخّص اليوم</h1>
+        <h1 className="mt-2 text-xl font-black text-ink-900 sm:text-2xl">{d.todaySummary}</h1>
 
         {/* السعرات: الهدف / المأكول / المتبقّي — حيّ */}
         <div className="mt-4 grid grid-cols-3 gap-2">
@@ -85,15 +87,15 @@ export function DailySummary({ lang }: DailySummaryProps) {
         {/* سياق الهدف والوزن */}
         <div className="mt-3 flex flex-wrap gap-2">
           <Chip icon="Target" text={goalTypeLabel(p.goalType)} />
-          <Chip icon="Scale" text={`${p.weightKg} كجم`} />
-          <Chip icon="TrendingDown" text={`${p.targetWeightKg} كجم`} />
+          <Chip icon="Scale" text={`${p.weightKg} ${d.weightUnit}`} />
+          <Chip icon="TrendingDown" text={`${p.targetWeightKg} ${d.weightUnit}`} />
         </div>
 
         {/* الالتزام الأسبوعي — X/Y تمارين هذا الأسبوع + سلسلة الأسابيع الناجحة */}
         <div className="mt-3 flex flex-wrap items-center gap-2">
-          <Chip icon="CheckCircle2" text={`هذا الأسبوع: ${week.weekly.thisWeekCount}/${week.weekly.daysPerWeek} تمارين`} />
-          <Chip icon="Flame" text={`سلسلة أسبوعية: ${week.weekly.streakWeeks} أسبوع`} />
-          <Chip icon="Salad" text={`التزام التغذية: ${week.nutritionDays}/7`} />
+          <Chip icon="CheckCircle2" text={`${d.thisWeekWorkoutsPrefix}${week.weekly.thisWeekCount}/${week.weekly.daysPerWeek} ${d.thisWeekWorkoutsSuffix}`} />
+          <Chip icon="Flame" text={`${d.weeklyStreakPrefix}${week.weekly.streakWeeks} ${d.weeklyStreakSuffix}`} />
+          <Chip icon="Salad" text={`${d.nutritionAdherencePrefix}${week.nutritionDays}/7`} />
         </div>
       </div>
     </section>

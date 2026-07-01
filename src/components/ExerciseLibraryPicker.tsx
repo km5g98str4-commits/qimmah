@@ -3,6 +3,7 @@ import { Icon } from './Icon'
 import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
+import { libraryStrings, type LibraryStrings } from '@/i18n/dict/library'
 import { exercises } from '@/data/exercises'
 import { ExerciseName } from './ExerciseName'
 import type { ExEnvironment, ExLevel, Muscle } from '@/types/workout'
@@ -13,31 +14,31 @@ interface ExerciseLibraryPickerProps {
   onClose: () => void
 }
 
-const muscleOptions: { value: Muscle | 'all'; label: string }[] = [
-  { value: 'all', label: 'كل العضلات' },
-  { value: 'chest', label: 'صدر' },
-  { value: 'back', label: 'ظهر' },
-  { value: 'shoulders', label: 'أكتاف' },
-  { value: 'biceps', label: 'بايسبس' },
-  { value: 'triceps', label: 'ترايسبس' },
-  { value: 'quads', label: 'أرجل (أمامي)' },
-  { value: 'hamstrings', label: 'خلفي الفخذ' },
-  { value: 'glutes', label: 'جلوتس' },
-  { value: 'calves', label: 'سمانة' },
-  { value: 'core', label: 'كور' },
-  { value: 'cardio', label: 'كارديو' },
+const muscleOptions: { value: Muscle | 'all'; key: keyof LibraryStrings }[] = [
+  { value: 'all', key: 'muscleAllOptions' },
+  { value: 'chest', key: 'muscleChest' },
+  { value: 'back', key: 'muscleBack' },
+  { value: 'shoulders', key: 'muscleShoulders' },
+  { value: 'biceps', key: 'muscleBiceps' },
+  { value: 'triceps', key: 'muscleTriceps' },
+  { value: 'quads', key: 'muscleQuadsFront' },
+  { value: 'hamstrings', key: 'muscleHamstrings' },
+  { value: 'glutes', key: 'muscleGlutes' },
+  { value: 'calves', key: 'muscleCalves' },
+  { value: 'core', key: 'muscleCore' },
+  { value: 'cardio', key: 'muscleCardio' },
 ]
-const envOptions: { value: ExEnvironment | 'all'; label: string }[] = [
-  { value: 'all', label: 'أي مكان' },
-  { value: 'gym', label: 'نادي' },
-  { value: 'home', label: 'منزل' },
-  { value: 'both', label: 'الاثنين' },
+const envOptions: { value: ExEnvironment | 'all'; key: keyof LibraryStrings }[] = [
+  { value: 'all', key: 'envAll' },
+  { value: 'gym', key: 'envGym' },
+  { value: 'home', key: 'envHome' },
+  { value: 'both', key: 'envBoth' },
 ]
-const levelOptions: { value: ExLevel | 'all'; label: string }[] = [
-  { value: 'all', label: 'أي مستوى' },
-  { value: 'beginner', label: 'مبتدئ' },
-  { value: 'intermediate', label: 'متوسط' },
-  { value: 'advanced', label: 'متقدّم' },
+const levelOptions: { value: ExLevel | 'all'; key: keyof LibraryStrings }[] = [
+  { value: 'all', key: 'levelAll' },
+  { value: 'beginner', key: 'levelBeginner' },
+  { value: 'intermediate', key: 'levelIntermediate' },
+  { value: 'advanced', key: 'levelAdvanced' },
 ]
 
 const selectClass =
@@ -46,6 +47,7 @@ const selectClass =
 /** منتقي تمارين من المكتبة — بحث وفلاتر وزر إضافة وشرح. */
 export function ExerciseLibraryPicker({ lang, onAdd, onClose }: ExerciseLibraryPickerProps) {
   const t = getStrings(lang).workout
+  const d = libraryStrings[lang]
   const [q, setQ] = useState('')
   const [muscle, setMuscle] = useState<Muscle | 'all'>('all')
   const [env, setEnv] = useState<ExEnvironment | 'all'>('all')
@@ -67,8 +69,8 @@ export function ExerciseLibraryPicker({ lang, onAdd, onClose }: ExerciseLibraryP
       <div className="flex max-h-[90vh] w-full max-w-lg flex-col rounded-t-3xl bg-surface shadow-card sm:rounded-3xl">
         {/* رأس */}
         <div className="flex items-center justify-between border-b border-line p-4">
-          <h3 className="text-base font-bold text-ink-900">مكتبة التمارين</h3>
-          <button type="button" onClick={onClose} aria-label="إغلاق" className="grid h-8 w-8 place-items-center rounded-lg text-ink-500 hover:bg-beige">
+          <h3 className="text-base font-bold text-ink-900">{d.pickerTitle}</h3>
+          <button type="button" onClick={onClose} aria-label={d.close} className="grid h-8 w-8 place-items-center rounded-lg text-ink-500 hover:bg-beige">
             <Icon name="X" className="h-5 w-5" />
           </button>
         </div>
@@ -80,19 +82,19 @@ export function ExerciseLibraryPicker({ lang, onAdd, onClose }: ExerciseLibraryP
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="ابحث عن تمرين…"
+              placeholder={d.pickerSearchPlaceholder}
               className="w-full bg-transparent py-2.5 text-sm text-ink-900 focus:outline-none"
             />
           </div>
           <div className="flex flex-wrap gap-2">
             <select className={selectClass} value={muscle} onChange={(e) => setMuscle(e.target.value as Muscle | 'all')}>
-              {muscleOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+              {muscleOptions.map((o) => <option key={o.value} value={o.value}>{d[o.key]}</option>)}
             </select>
             <select className={selectClass} value={env} onChange={(e) => setEnv(e.target.value as ExEnvironment | 'all')}>
-              {envOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+              {envOptions.map((o) => <option key={o.value} value={o.value}>{d[o.key]}</option>)}
             </select>
             <select className={selectClass} value={level} onChange={(e) => setLevel(e.target.value as ExLevel | 'all')}>
-              {levelOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+              {levelOptions.map((o) => <option key={o.value} value={o.value}>{d[o.key]}</option>)}
             </select>
           </div>
         </div>
@@ -100,7 +102,7 @@ export function ExerciseLibraryPicker({ lang, onAdd, onClose }: ExerciseLibraryP
         {/* القائمة */}
         <div className="flex-1 overflow-y-auto p-3">
           {filtered.length === 0 ? (
-            <p className="py-10 text-center text-sm text-ink-400">ما فيه نتائج مطابقة.</p>
+            <p className="py-10 text-center text-sm text-ink-400">{d.pickerNoResults}</p>
           ) : (
             <ul className="space-y-2">
               {filtered.map((e) => (
@@ -132,7 +134,7 @@ export function ExerciseLibraryPicker({ lang, onAdd, onClose }: ExerciseLibraryP
                     className={cn('btn-primary px-3 py-2 text-xs')}
                   >
                     <Icon name="Plus" className="h-4 w-4" />
-                    أضف
+                    {d.add}
                   </button>
                 </li>
               ))}

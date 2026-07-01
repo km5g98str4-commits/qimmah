@@ -2,20 +2,22 @@ import { Field, inputClass } from '../Field'
 import { StepHeader } from '../StepHeader'
 import type { WizardCtx } from '../stepProps'
 import { accentOptions } from '@/config/theme'
+import { onboardingStrings } from '@/i18n/dict/onboarding'
 
 /** خطوة شكل الصفحة — الألوان. */
 export function StepLook({ ctx }: { ctx: WizardCtx }) {
+  const d = onboardingStrings[ctx.lang]
   const { data, updateColors } = ctx
   return (
     <div>
       <StepHeader
         icon="Palette"
-        title="شكل الصفحة"
-        description="اختر ألوان صفحتك. تنعكس مباشرة على أزرارك ومؤشراتك في كل مكان."
+        title={d.lookTitle}
+        description={d.lookDescription}
       />
 
       {/* ألوان جاهزة */}
-      <p className="text-xs font-bold text-ink-500">ألوان جاهزة:</p>
+      <p className="text-xs font-bold text-ink-500">{d.lookPresetColors}</p>
       <div className="mt-3 flex flex-wrap gap-3">
         {accentOptions.map((opt) => {
           const active = data.colors.primary.toLowerCase() === opt.swatch.toLowerCase()
@@ -42,12 +44,12 @@ export function StepLook({ ctx }: { ctx: WizardCtx }) {
       {/* لون مخصّص */}
       <div className="mt-7 grid gap-5 sm:grid-cols-2">
         <ColorField
-          label="اللون الأساسي"
+          label={d.lookPrimaryColor}
           value={data.colors.primary}
           onChange={(v) => updateColors({ primary: v })}
         />
         <ColorField
-          label="لون التمييز"
+          label={d.lookAccentColor}
           value={data.colors.accent}
           onChange={(v) => updateColors({ accent: v })}
         />

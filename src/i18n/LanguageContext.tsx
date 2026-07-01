@@ -63,6 +63,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 }
 
 /** يعيد سياق اللغة كاملًا (lang, dir, t, setLang, toggle). */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useLanguage(): LanguageContextValue {
   const ctx = useContext(LanguageContext)
   if (!ctx) throw new Error('useLanguage must be used within a LanguageProvider')
@@ -70,11 +71,13 @@ export function useLanguage(): LanguageContextValue {
 }
 
 /** اختصار للحصول على نصوص القشرة للغة الحالية. */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useStrings(): ShellStrings {
   return useLanguage().t
 }
 
 /** اختصار للحصول على اللغة الحالية فقط. */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useLang(): Lang {
   return useLanguage().lang
 }

@@ -4,6 +4,7 @@ import { SectionHeading } from '@/components/SectionHeading'
 import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
+import { dashboardStrings } from '@/i18n/dict/dashboard'
 import { lastSession, loadSessions } from '@/lib/workoutSessions'
 import { loadHistory } from '@/lib/exerciseHistory'
 import { computeWeeklyCoverage } from '@/lib/muscleCoverage'
@@ -27,6 +28,7 @@ const TONE_ICON: Record<InsightTone, string> = {
 /** قسم «آخر تمرين» — ملخّص مختصر لآخر جلسة + ملاحظات الذكاء التدريبي. */
 export function RecentWorkout({ lang }: { lang: Lang }) {
   const t = getStrings(lang).workout
+  const d = dashboardStrings[lang]
   const { customization } = useCustomization()
   const session = lastSession()
 
@@ -53,10 +55,10 @@ export function RecentWorkout({ lang }: { lang: Lang }) {
         <SectionHeading eyebrow={t.recentTitle} icon="CheckCircle2" title={t.recentTitle} />
 
         <div className="mt-10 grid gap-4 sm:grid-cols-4">
-          <Stat icon="CalendarDays" label="التاريخ" value={session.date} />
-          <Stat icon="Dumbbell" label="اليوم" value={session.workoutDayName} />
-          <Stat icon="CheckCircle2" label="تمارين مكتملة" value={`${completed}/${total}`} />
-          <Stat icon="Flame" label="تمارين صعبة" value={`${hard}`} />
+          <Stat icon="CalendarDays" label={d.date} value={session.date} />
+          <Stat icon="Dumbbell" label={d.day} value={session.workoutDayName} />
+          <Stat icon="CheckCircle2" label={d.completedExercises} value={`${completed}/${total}`} />
+          <Stat icon="Flame" label={d.hardExercises} value={`${hard}`} />
         </div>
 
         {/* ملاحظات الذكاء التدريبي */}
@@ -64,7 +66,7 @@ export function RecentWorkout({ lang }: { lang: Lang }) {
           <div className="mt-6">
             <h3 className="mb-3 flex items-center gap-2 text-sm font-bold text-ink-900">
               <Icon name="Sparkles" className="h-4 w-4 text-primary-c" />
-              ملاحظات الذكاء التدريبي
+              {d.trainingInsights}
             </h3>
             <ul className="grid gap-2.5 sm:grid-cols-2">
               {insights.slice(0, 6).map((it) => (

@@ -9,6 +9,7 @@ import { useIsDemo } from '@/lib/demoMode'
 import type { MeasurementLog } from '@/types/progress'
 import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
+import { progressScreenStrings } from '@/i18n/dict/progressScreen'
 
 const inputCls = 'w-full rounded-lg border border-line bg-beige px-2.5 py-2 text-sm text-ink-900 focus:border-brand-500/50 focus:outline-none focus:ring-2 focus:ring-brand-500/30'
 
@@ -17,6 +18,7 @@ export function ProgressSection({ lang }: { lang: Lang }) {
   const { customization } = useCustomization()
   const mp = customization.measurementPlan
   const t = getStrings(lang).progress
+  const d = progressScreenStrings[lang]
   const demo = useIsDemo()
   const [logs, setLogs] = useState<MeasurementLog[]>(() => (demo ? [] : loadLogs()))
   const [form, setForm] = useState<Record<string, string>>({})
@@ -137,7 +139,7 @@ export function ProgressSection({ lang }: { lang: Lang }) {
 
         <p className="mt-6 flex items-start gap-2 text-xs text-ink-400">
           <Icon name="ShieldCheck" className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-          قياساتك وملاحظاتك محفوظة على جهازك فقط ولا يتم رفعها أو إرسالها لأي خادم.
+          {d.privacyNote}
         </p>
         <p className="mt-2 flex items-start gap-2 text-xs text-ink-400">
           <Icon name="AlertTriangle" className="mt-0.5 h-3.5 w-3.5 shrink-0" />

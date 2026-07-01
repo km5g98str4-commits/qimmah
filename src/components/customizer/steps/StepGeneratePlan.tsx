@@ -12,9 +12,11 @@ import { mealDisplayName } from '@/lib/nutritionPlan'
 import { commitmentName } from '@/lib/commitmentPlan'
 import { workoutTemplates } from '@/data/workoutTemplates'
 import { routineTypeColors, routineTypeLabels } from '@/data/routine'
+import { onboardingStrings } from '@/i18n/dict/onboarding'
 
 /** خطوة توليد الخطة — قِمّة تجهّز خطة جاهزة من بياناتك (الأهداف للعرض فقط). */
 export function StepGeneratePlan({ ctx }: { ctx: WizardCtx }) {
+  const d = onboardingStrings[ctx.lang]
   const p = ctx.data.profile
   const [showTemplates, setShowTemplates] = useState(false)
   // لا «سوق قوالب» للمبتدئ — نُبقي الخطة المولّدة تلقائيًا بلا تشتيت.
@@ -42,7 +44,7 @@ export function StepGeneratePlan({ ctx }: { ctx: WizardCtx }) {
   const warnings = useMemo(() => generatePlan(p).warningsAr, [p])
   const explanation = useMemo(() => generatePlan(p).explanationAr, [p])
 
-  const planName = planTitle(ctx.data.workoutPlan.templateId, 'ar')
+  const planName = planTitle(ctx.data.workoutPlan.templateId, ctx.lang)
   const firstDay = ctx.data.workoutPlan.days[0]
   const calories = targetCaloriesFor(p.goal, ctx.data.targets)
   const np = ctx.data.nutritionPlan
@@ -64,26 +66,26 @@ export function StepGeneratePlan({ ctx }: { ctx: WizardCtx }) {
 
   return (
     <div>
-      <StepHeader icon="Sparkles" title="خطتك جاهزة" description="قِمّة جهّزت لك خطة مبدئية من بياناتك وهدفك." />
+      <StepHeader icon="Sparkles" title={d.genTitle} description={d.genDescription} />
 
       <p className="mb-5 rounded-xl border border-primary-soft bg-primary-soft p-4 text-sm font-bold text-ink-900">
-        قِمّة حسبت هذه الأهداف بناءً على بياناتك وهدفك. تقدر تعديلها لاحقًا من الإعدادات المتقدمة.
+        {d.genIntro}
       </p>
 
       {/* الأهداف (عرض فقط) */}
-      <Card icon="BarChart3" title="أهدافك اليومية">
+      <Card icon="BarChart3" title={d.genDailyTargets}>
         <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
-          <Stat label="سعرات" value={`${calories}`} />
-          <Stat label="بروتين" value={`${ctx.data.targets.proteinGrams}غ`} />
-          <Stat label="كارب" value={`${ctx.data.targets.carbsGrams}غ`} />
-          <Stat label="دهون" value={`${ctx.data.targets.fatGrams}غ`} />
-          <Stat label="ماء" value={`${ctx.data.targets.waterLiters}ل`} />
+          <Stat label={d.genCalories} value={`${calories}`} />
+          <Stat label={d.genProtein} value={`${ctx.data.targets.proteinGrams}${d.gGram}`} />
+          <Stat label={d.genCarbs} value={`${ctx.data.targets.carbsGrams}${d.gGram}`} />
+          <Stat label={d.genFat} value={`${ctx.data.targets.fatGrams}${d.gGram}`} />
+          <Stat label={d.genWater} value={`${ctx.data.targets.waterLiters}${d.lLiter}`} />
           <Stat label="BMI" value={`${ctx.data.targets.bmi}`} />
         </div>
       </Card>
 
       {/* جدول التمرين المقترح */}
-      <Card icon="Dumbbell" title="جدول التمرين المقترح">
+      <Card icon="Dumbbell" title={d.genSuggestedSchedule}>
         <p className="text-sm font-bold text-ink-900">{planName}</p>
         <p className="mt-1 text-xs leading-relaxed text-ink-500">{explanation}</p>
 
@@ -100,7 +102,7 @@ export function StepGeneratePlan({ ctx }: { ctx: WizardCtx }) {
             <p className="text-xs font-bold text-ink-700">{firstDay.nameAr}</p>
             <ul className="mt-1.5 space-y-0.5">
               {firstDay.exercises.slice(0, 5).map((pe) => (
-                <li key={pe.id} className="truncate text-xs text-ink-500">• {planExerciseName(pe, 'ar')} — {pe.sets}×{pe.reps}</li>
+                <li key={pe.id} className="truncate text-xs text-ink-500">• {planExerciseName(pe, ctx.lang)} — {pe.sets}×{pe.reps}</li>
               ))}
             </ul>
           </div>
@@ -109,7 +111,7 @@ export function StepGeneratePlan({ ctx }: { ctx: WizardCtx }) {
         {!isBeginner && (
           <button type="button" onClick={() => setShowTemplates((v) => !v)} className="btn-ghost mt-3 px-3 py-2 text-xs">
             <Icon name="Layers" className="h-4 w-4" />
-            اختيار جدول آخر
+            {d.genChooseAnother}
           </button>
         )}
         {!isBeginner && showTemplates && (
@@ -117,7 +119,7 @@ export function StepGeneratePlan({ ctx }: { ctx: WizardCtx }) {
             {workoutTemplates.filter((t) => t.id !== 'custom').map((t) => (
               <button key={t.id} type="button" onClick={() => chooseTemplate(t.id)} className={cn('rounded-xl border p-3 text-start text-sm', t.id === ctx.data.workoutPlan.templateId ? 'border-primary-soft bg-primary-soft' : 'border-line bg-surface hover:bg-beige')}>
                 <span className="font-bold text-ink-900">{t.nameAr}</span>
-                <span className="block text-[11px] text-ink-400">{t.days.length} أيام · {t.recommendedFor}</span>
+                <span className="block text-[11px] text-ink-400">{t.days.length} {d.daysWord} · {t.recommendedFor}</span>
               </button>
             ))}
           </div>
@@ -125,9 +127,9 @@ export function StepGeneratePlan({ ctx }: { ctx: WizardCtx }) {
       </Card>
 
       {/* التغذية */}
-      <Card icon="Salad" title="خطة الأكل">
+      <Card icon="Salad" title={d.genNutritionPlan}>
         <button type="button" onClick={() => setNutPref({ trackNutrition: !p.trackNutrition })} className={cn('flex w-full items-center justify-between rounded-xl border p-3', p.trackNutrition ? 'border-primary-soft bg-primary-soft' : 'border-line bg-surface')}>
-          <span className="text-sm font-bold text-ink-900">أريد متابعة الأكل</span>
+          <span className="text-sm font-bold text-ink-900">{d.genTrackNutrition}</span>
           <span className={cn('relative h-6 w-11 rounded-full', p.trackNutrition ? 'bg-primary' : 'bg-line')}>
             <span className={cn('absolute top-0.5 h-5 w-5 rounded-full bg-surface shadow', p.trackNutrition ? 'start-0.5' : 'end-0.5')} />
           </span>
@@ -137,7 +139,7 @@ export function StepGeneratePlan({ ctx }: { ctx: WizardCtx }) {
           <>
             <div className="mt-3 grid gap-3 sm:grid-cols-2">
               <label className="flex flex-col gap-1">
-                <span className="text-[11px] font-bold text-ink-500">عدد الوجبات</span>
+                <span className="text-[11px] font-bold text-ink-500">{d.genMealsCount}</span>
                 <div className="flex gap-2">
                   {[3, 4, 5].map((n) => (
                     <button key={n} type="button" onClick={() => setNutPref({ mealsPerDay: n })} className={cn('flex-1 rounded-lg border py-2 text-sm font-bold', p.mealsPerDay === n ? 'border-primary-soft bg-primary text-white' : 'border-line bg-surface text-ink-700')}>{n}</button>
@@ -145,17 +147,17 @@ export function StepGeneratePlan({ ctx }: { ctx: WizardCtx }) {
                 </div>
               </label>
               <label className="flex flex-col gap-1">
-                <span className="text-[11px] font-bold text-ink-500">أسلوب الأكل</span>
+                <span className="text-[11px] font-bold text-ink-500">{d.genNutritionStyle}</span>
                 <select className="w-full rounded-lg border border-line bg-beige px-2.5 py-2 text-sm text-ink-900 focus:outline-none" value={p.nutritionStyle} onChange={(e) => setNutPref({ nutritionStyle: e.target.value as Profile['nutritionStyle'] })}>
                   {nutritionStyleOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
                 </select>
               </label>
             </div>
             <div className="mt-3 rounded-xl border border-line bg-page p-3">
-              <p className="text-xs font-bold text-primary-c">المخطّط: {Math.round(np.meals.reduce((a, m) => a + m.calories, 0))} سعرة · {Math.round(np.meals.reduce((a, m) => a + m.protein, 0))}غ بروتين (الهدف: {np.targetCalories} سعرة · {np.targetProtein}غ)</p>
+              <p className="text-xs font-bold text-primary-c">{d.genPlanned} {Math.round(np.meals.reduce((a, m) => a + m.calories, 0))} {d.calWord} · {Math.round(np.meals.reduce((a, m) => a + m.protein, 0))}{d.gGram} {d.genPlannedProteinSuffix} ({d.genPlannedTargetPrefix} {np.targetCalories} {d.calWord} · {np.targetProtein}{d.gGram})</p>
               <ul className="mt-1.5 space-y-0.5">
                 {np.meals.map((m) => (
-                  <li key={m.id} className="truncate text-xs text-ink-500">• {mealDisplayName(m, 'ar')} — {m.calories} سعرة</li>
+                  <li key={m.id} className="truncate text-xs text-ink-500">• {mealDisplayName(m, ctx.lang)} — {m.calories} {d.calWord}</li>
                 ))}
               </ul>
             </div>
@@ -164,10 +166,10 @@ export function StepGeneratePlan({ ctx }: { ctx: WizardCtx }) {
       </Card>
 
       {/* الالتزامات المقترحة */}
-      <Card icon="CheckCircle2" title="التزامات مقترحة">
+      <Card icon="CheckCircle2" title={d.genSuggestedCommitments}>
         <div className="flex flex-wrap gap-1.5">
           {ctx.data.commitmentPlan.items.map((it) => (
-            <span key={it.id} className="rounded-full bg-beige px-2.5 py-1 text-[11px] font-bold text-ink-700">{commitmentName(it, 'ar')}</span>
+            <span key={it.id} className="rounded-full bg-beige px-2.5 py-1 text-[11px] font-bold text-ink-700">{commitmentName(it, ctx.lang)}</span>
           ))}
         </div>
       </Card>
