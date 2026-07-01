@@ -2,10 +2,8 @@
 // الافتراضي يُبنى من ملفات config/data، والتعديلات تُحفظ في localStorage فقط (بلا backend).
 
 import { product } from '@/config/product'
-import { todayWorkout } from '@/data/workouts'
 import { supplements as defaultSupplements } from '@/data/supplements'
 import { meals as defaultMeals } from '@/data/meals'
-import { bodyMetrics } from '@/data/metrics'
 import { weeklyRoutine } from '@/data/routine'
 import type { RoutineDay, SupplementItem } from '@/types'
 import type { Profile, Targets } from '@/types/profile'
@@ -145,13 +143,9 @@ export function getDefaultCustomization(): Customization {
     wellnessPlan: defaultWellnessPlan(),
     commitmentPlan: defaultCommitmentPlan(),
     measurementPlan: { enabled: true, selectedTypeIds: ['weightKg', 'waistCm', 'bodyFatPercent'] },
-    workouts: todayWorkout.exercises.map((e) => ({
-      name: e.name,
-      muscle: e.muscle,
-      sets: e.sets,
-      reps: e.reps,
-      weight: e.weight,
-    })),
+    // بيانات المستخدم الشخصية تبدأ فارغة دائمًا — لا تمارين مُسجّلة ولا قياسات جسم مزروعة.
+    // (المستخدم الحقيقي يملؤها بنفسه؛ العيّنة الغنية تظهر في وضع النموذج فقط عبر DemoCustomizationProvider.)
+    workouts: [],
     supplements: defaultSupplements.map((s) => ({
       name: s.name,
       dose: s.dose,
@@ -166,11 +160,7 @@ export function getDefaultCustomization(): Customization {
       carbs: m.carbs,
       fats: m.fats,
     })),
-    metrics: bodyMetrics.map((m) => ({
-      label: m.label,
-      value: m.value,
-      unit: m.unit,
-    })),
+    metrics: [],
     routine: weeklyRoutine.map((r) => ({
       day: r.day,
       title: r.title,
