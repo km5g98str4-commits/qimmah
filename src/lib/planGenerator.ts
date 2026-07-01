@@ -26,6 +26,9 @@ import { getTemplate } from '@/data/workoutTemplates'
 import { workoutDayNameAr, workoutDayNameEn } from '@/lib/workoutDayLabel'
 import { createPlanMealFromTemplate, planTotals } from '@/lib/nutritionPlan'
 import { createPlanCommitment } from '@/lib/commitmentPlan'
+import { templateAllowedForDiet, dietRestrictsSources } from '@/lib/dietFilter'
+import { getMealTemplate, mealTemplates } from '@/data/mealTemplates'
+import type { DietPattern } from '@/types/onboarding'
 
 export interface GeneratedPlan {
   targets: Targets
@@ -753,6 +756,25 @@ function redistributeMeals(meals: PlanMeal[], targetCalories: number, timing: Ti
   })
 }
 
+/**
+ * يختار قالب وجبة متوافقًا مع النمط الغذائي. إن كان القالب المفضّل مخالفًا (مثل دجاج لنباتي)
+ * نستبدله بأفضل بديل متوافق من نفس نوع الوجبة (الأعلى بروتينًا)؛ وإلا نُبقي المفضّل.
+ */
+function pickTemplateForDiet(preferredId: string, dietPattern: DietPattern | undefined): string {
+  const preferred = getMealTemplate(preferredId)
+  if (!preferred || !dietRestrictsSources(dietPattern)) return preferredId
+  if (templateAllowedForDiet(preferred, dietPattern)) return preferredId
+  const byProtein = (a: { protein: number }, b: { protein: number }) => b.protein - a.protein
+  const compliant = mealTemplates
+    .filter((t) => templateAllowedForDiet(t, dietPattern))
+    .map((t) => ({ id: t.id, mealType: t.mealType, protein: createPlanMealFromTemplate(t.id, 0).protein }))
+  // فضّل نفس نوع الوجبة؛ وإن لم يوجد بديل متوافق من النوع نفسه، اختر أعلى بديل متوافق من أي نوع.
+  const sameType = compliant.filter((t) => t.mealType === preferred.mealType).sort(byProtein)
+  if (sameType.length) return sameType[0].id
+  const any = [...compliant].sort(byProtein)
+  return any.length ? any[0].id : preferredId
+}
+
 /** يولّد خطة أكل تقريبية من الأهداف والتفضيلات (يحاول الاقتراب من السعرات/البروتين). */
 export function generateNutrition(p: Profile, targets: Targets): { plan: NutritionPlan; warning?: string } {
   const goal = calorieGoalFromGoalType(p.goalType)
@@ -786,7 +808,11 @@ export function generateNutrition(p: Profile, targets: Targets): { plan: Nutriti
   if (mealsCount >= 4) slots.push(s.snack)
   if (mealsCount >= 5) slots.push('protein-shake')
 
-  let meals: PlanMeal[] = slots.map((id, i) => createPlanMealFromTemplate(id, i))
+  // احترام النمط الغذائي: استبدل أي قالب مخالف (لحم/سمك) ببديل متوافق من نفس النوع.
+  const dietPattern = p.dietPattern
+  let meals: PlanMeal[] = slots
+    .map((id) => pickTemplateForDiet(id, dietPattern))
+    .map((id, i) => createPlanMealFromTemplate(id, i))
 
   // توزيع حجم الوجبات حسب تفضيل المستخدم (P2.5): عند اختيار توزيع/وقت جوع غير «متوازن»
   // نعيد توزيع السعرات على الوجبات (مع تثبيت الإجمالي)؛ غير ذلك نُبقي السلوك الموحّد القديم.

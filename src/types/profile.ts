@@ -18,6 +18,9 @@ export type GoalType =
 
 export type NutritionStyle = 'simple' | 'high_protein' | 'saudi' | 'economical' | 'flexible'
 
+/** نمط الأكل (يطابق DietPattern في الإعداد) — يقود تصفية اقتراح الوجبات والبدائل. */
+export type DietPattern = 'none' | 'vegetarian' | 'vegan' | 'pescatarian' | 'low_carb' | 'keto'
+
 // — حقول «باني الخطة» (Plan Builder) — كلها اختيارية للحفاظ على شكل البيانات المحفوظة —
 export type MuscleFocus =
   | 'balanced'
@@ -69,6 +72,8 @@ export interface Profile {
   mealDistribution?: 'balanced' | 'fewer_larger' | 'more_smaller'
   /** وقت الجوع الأكثر من الإعداد (P2.5) — يميل توزيع السعرات للصباح/المساء. */
   appetiteTiming?: 'balanced' | 'morning' | 'evening'
+  /** نمط الأكل من الإعداد (P3) — يصفّي اقتراح الوجبات/البدائل (نباتي/صرف/بيسكتاريان). */
+  dietPattern?: DietPattern
   dislikedFoods: string
   // — حقول «باني الخطة» الاختيارية (تُملأ عند استخدام Plan Builder) —
   muscleFocus?: MuscleFocus

@@ -211,6 +211,8 @@ export function toLegacyProfile(op: OnboardingProfile, base: Profile = defaultPr
     mealDistribution: op.nutritionPreferences.mealDistribution ?? base.mealDistribution,
     appetiteTiming: op.nutritionPreferences.appetiteTiming ?? base.appetiteTiming,
     dislikedFoods: op.foodPreferences.dislikedFoods.join('، '),
+    // نمط الأكل (P3) — يصفّي اقتراح الوجبات/البدائل حسب النباتي/الصرف/البيسكتاريان.
+    dietPattern: op.foodPreferences.dietPattern ?? base.dietPattern,
     muscleFocus: 'balanced',
     consistency,
     experienceBand: band,

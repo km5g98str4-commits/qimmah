@@ -46,6 +46,7 @@ export const mealIngredients: Ingredient[] = [
   ing({ id: 'lentils', nameAr: 'عدس', nameEn: 'Lentils', category: 'protein', servingAr: 'كوب مطبوخ', servingEn: '1 cup', cal: 230, p: 18, c: 40, f: 1 }),
   ing({ id: 'chickpeas', nameAr: 'حمّص حب', nameEn: 'Chickpeas', category: 'protein', servingAr: 'كوب', servingEn: '1 cup', cal: 269, p: 15, c: 45, f: 4 }),
   ing({ id: 'fava-beans', nameAr: 'فول', nameEn: 'Fava Beans', category: 'protein', servingAr: 'كوب', servingEn: '1 cup', cal: 187, p: 13, c: 33, f: 1 }),
+  ing({ id: 'tofu', nameAr: 'توفو', nameEn: 'Tofu', category: 'protein', servingAr: '100غ', servingEn: '100g', cal: 120, p: 13, c: 3, f: 7 }),
 
   // ===== كربوهيدرات =====
   ing({ id: 'white-rice', nameAr: 'أرز أبيض', nameEn: 'White Rice', category: 'carb', servingAr: 'كوب مطبوخ', servingEn: '1 cup', cal: 205, p: 4, c: 45, f: 0 }),
