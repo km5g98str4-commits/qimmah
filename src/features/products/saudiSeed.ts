@@ -1,18 +1,20 @@
 // Seed منتجات السوق السعودي — يجلب دفعة من Open Food Facts (facet: السعودية) مرّة واحدة
-// ويخزّنها محليًا (عبر upsert) كي تُحسم عمليات المسح الشائعة فورًا دون انتظار الشبكة لاحقًا.
+// ويخزّنها محليًا عبر `upsertProduct` (Agent 1) كي تُحسم عمليات المسح الشائعة فورًا دون
+// انتظار الشبكة لاحقًا. منطق الدمج/كشف التعارض بين مصادر من مسؤولية store.ts — هذه الوحدة
+// فقط تغذّيه بدفعات.
 //
 // السقف: صفحة بحجم 100 × 3 صفحات كحدّ أقصى = 300 منتج كحد أعلى للدفعة الواحدة (يتوقف مبكرًا
-// إن رجعت صفحة فارغة). هذا يبقي حجم بيانات localStorage معقولًا لهاتف متوسط.
+// إن رجعت صفحة فارغة أو أقل من الحجم المطلوب). هذا يبقي حجم بيانات localStorage معقولًا.
 
+import { upsertProduct, type ProductSource } from './index'
 import { fetchSaudiOffPage } from './offSource'
-import { upsert } from './productDb'
 
 const SEED_DONE_KEY = 'qimmah:products:saudi-seed-done:v1'
 const PAGE_SIZE = 100
 const MAX_PAGES = 3
 
 export interface SeedResult {
-  /** true إذا نُفِّذت هذه المرة فعليًا (لم تُنفَّذ من قبل على هذا الجهاز). */
+  /** true إذا نُفِّذت هذه المرة فعليًا (لم تُنفَّذ من قبل على هذا الجهاز، أو force). */
   ran: boolean
   imported: number
   pagesFetched: number
@@ -55,7 +57,25 @@ export async function seedSaudiProducts(options: { force?: boolean } = {}): Prom
       pagesFetched++
       if (items.length === 0) break
       for (const item of items) {
-        upsert(item)
+        const source: ProductSource = {
+          sourceName: 'open_food_facts',
+          sourceUrl: item.result.sourceUrl,
+          importedAt: new Date().toISOString(),
+        }
+        upsertProduct({
+          barcode: item.barcode,
+          name: item.result.name,
+          brand: item.result.brand,
+          imageUrl: item.result.imageUrl,
+          per: item.result.per,
+          servingSize: item.result.servingSize,
+          kcal: item.result.kcal,
+          protein: item.result.protein,
+          carbs: item.result.carbs,
+          fat: item.result.fat,
+          source,
+          by: 'saudi_seed',
+        })
         imported++
       }
       if (items.length < PAGE_SIZE) break // آخر صفحة متاحة

@@ -1,18 +1,24 @@
 // جالب Open Food Facts لقاعدة بيانات المنتجات (P8 A2) — مجاني بلا مفتاح، ترخيص ODbL
-// (استخدام تجاري مسموح مع نسب المصدر). يغطي حالتين: منتج مفرد بالباركود، ودفعة بحث
-// السوق السعودي (facet) لتغذية seed محلي يعمل بلا اتصال لاحقًا.
+// (استخدام تجاري مسموح مع نسب المصدر). يستهلك واجهة Agent 1 (`./index`) فقط عبر خطاف
+// التسجيل `registerOpenFoodFactsFetcher` دون تعديل store.ts/resolve.ts/types.ts.
+// يغطي حالتين: منتج مفرد بالباركود (يُسجَّل كجالب في resolveBarcode)، ودفعة بحث السوق
+// السعودي (facet) تُستهلك من saudiSeed.ts لتغذية قاعدة محلية تعمل بلا اتصال لاحقًا.
 
-import { registerBarcodeFetcher, upsert, type StoredProduct } from './productDb'
+import { registerOpenFoodFactsFetcher, type ProductPer, type RemoteFetcher, type RemoteProductResult } from './index'
 
 const PRODUCT_BASE = 'https://world.openfoodfacts.org/api/v2/product'
 const SEARCH_BASE = 'https://world.openfoodfacts.org/api/v2/search'
 const FIELDS = 'product_name,brands,image_url,nutriments,serving_size'
 const USER_AGENT = 'Qimmah/1.0'
 
-/** نسب المصدر — نفس نص `nutritionScreenStrings.scanAttribution` المستخدم في لوحة المسح. */
+/** نسب المصدر — نفس نص `nutritionScreenStrings.scanAttribution` المستخدم في لوحة المسح الحالية. */
 export const OFF_ATTRIBUTION_AR = 'بيانات المنتج من Open Food Facts (ODbL)'
 export const OFF_ATTRIBUTION_EN = 'Product data from Open Food Facts (ODbL)'
 export const OFF_HOME_URL = 'https://world.openfoodfacts.org'
+
+export function offProductUrl(barcode: string): string {
+  return `${OFF_HOME_URL}/product/${barcode}`
+}
 
 function num(v: unknown): number {
   return typeof v === 'number' && Number.isFinite(v) ? v : 0
@@ -22,46 +28,66 @@ function str(v: unknown): string | undefined {
   return typeof v === 'string' && v.trim() ? v.trim() : undefined
 }
 
+interface Macros {
+  per: ProductPer
+  servingSize?: string
+  kcal: number
+  protein: number
+  carbs: number
+  fat: number
+}
+
 /**
- * يبني منتجًا داخليًا من سجل OFF خام (نفس الشكل سواء من /product أو /search).
- * يفضّل قيم لكل 100غ؛ وإن غابت يستخدم قيم الحصة (_serving) كبديل موثَّق.
+ * يفضّل قيم لكل 100غ (`per: '100g'`)؛ وإن غابت (صفر) يستخدم قيم الحصة (`_serving`) بديلًا
+ * موسومًا `per: 'serving'` — لا يخلط الأساسين أبدًا في نفس النتيجة. null إن غاب كلاهما.
  */
-export function mapOffRecordToProduct(
-  code: string,
-  record: Record<string, unknown>,
-  fetchedAt: number,
-): StoredProduct | null {
+function parseMacros(nutriments: Record<string, unknown>, servingSize?: string): Macros | null {
+  const kcal100 = num(nutriments['energy-kcal_100g'])
+  if (kcal100 > 0) {
+    return {
+      per: '100g',
+      servingSize,
+      kcal: kcal100,
+      protein: num(nutriments['proteins_100g']),
+      carbs: num(nutriments['carbohydrates_100g']),
+      fat: num(nutriments['fat_100g']),
+    }
+  }
+  const kcalServing = num(nutriments['energy-kcal_serving'])
+  if (kcalServing > 0) {
+    return {
+      per: 'serving',
+      servingSize,
+      kcal: kcalServing,
+      protein: num(nutriments['proteins_serving']),
+      carbs: num(nutriments['carbohydrates_serving']),
+      fat: num(nutriments['fat_serving']),
+    }
+  }
+  return null
+}
+
+/** يبني نتيجة بعيدة (بلا باركود/مصدر — يضيفهما المستدعي) من سجل OFF خام. null إن كانت البيانات غير قابلة للاستخدام. */
+export function mapOffRecordToRemoteResult(record: Record<string, unknown>): RemoteProductResult | null {
   const name = str(record.product_name)
-  if (!name || !code) return null
-
-  const nutriments = (record.nutriments ?? {}) as Record<string, unknown>
-  const caloriesPer100g = num(nutriments['energy-kcal_100g']) || num(nutriments['energy-kcal_serving'])
-  const proteinPer100g = num(nutriments['proteins_100g']) || num(nutriments['proteins_serving'])
-  const carbsPer100g = num(nutriments['carbohydrates_100g']) || num(nutriments['carbohydrates_serving'])
-  const fatPer100g = num(nutriments['fat_100g']) || num(nutriments['fat_serving'])
-
-  // منتج بلا سعرات لا يفيد حساب التغذية — نعامله كغير قابل للاستيراد.
-  if (caloriesPer100g <= 0) return null
-
+  if (!name) return null
+  const macros = parseMacros((record.nutriments ?? {}) as Record<string, unknown>, str(record.serving_size))
+  if (!macros) return null
   return {
-    barcode: code,
     name,
-    brands: str(record.brands),
+    brand: str(record.brands),
     imageUrl: str(record.image_url),
-    servingSize: str(record.serving_size),
-    caloriesPer100g,
-    proteinPer100g,
-    carbsPer100g,
-    fatPer100g,
-    sourceName: 'open_food_facts',
-    sourceUrl: `${OFF_HOME_URL}/product/${code}`,
-    status: 'imported',
-    updatedAt: fetchedAt,
+    per: macros.per,
+    servingSize: macros.servingSize,
+    kcal: macros.kcal,
+    protein: macros.protein,
+    carbs: macros.carbs,
+    fat: macros.fat,
   }
 }
 
-/** يجلب منتجًا واحدًا من OFF بالباركود. يرجّع null عند status:0 أو فشل الشبكة أو بيانات ناقصة. */
-export async function fetchFromOFF(barcode: string, fetchedAt = Date.now()): Promise<StoredProduct | null> {
+/** جالب OFF لمنتج مفرد — يطابق توقيع `RemoteFetcher` في resolve.ts. */
+export const fetchFromOFF: RemoteFetcher = async (barcode: string): Promise<RemoteProductResult | null> => {
   try {
     const res = await fetch(`${PRODUCT_BASE}/${encodeURIComponent(barcode)}.json?fields=${FIELDS}`, {
       headers: { 'User-Agent': USER_AGENT },
@@ -69,43 +95,47 @@ export async function fetchFromOFF(barcode: string, fetchedAt = Date.now()): Pro
     if (!res.ok) return null
     const data = (await res.json()) as { status?: number; product?: Record<string, unknown> }
     if (data.status !== 1 || !data.product) return null
-    return mapOffRecordToProduct(barcode, data.product, fetchedAt)
+    const mapped = mapOffRecordToRemoteResult(data.product)
+    return mapped ? { ...mapped, sourceUrl: offProductUrl(barcode) } : null
   } catch {
     return null
   }
 }
 
+/** يسجّل OFF كجالب باركود لدى resolveBarcode (Agent 1) — يُستدعى مرّة واحدة عند تحميل الوحدة. */
+export function registerOffFetcher() {
+  registerOpenFoodFactsFetcher(fetchFromOFF)
+}
+
+registerOffFetcher()
+
+export interface SaudiSeedItem {
+  barcode: string
+  result: RemoteProductResult
+}
+
 interface OffSearchResponse {
   products?: Array<Record<string, unknown> & { code?: string }>
-  count?: number
 }
 
 /**
  * يجلب صفحة من منتجات السوق السعودي (facet: countries_tags_en=saudi-arabia) لتغذية
  * seed محلي. يرجّع مصفوفة فارغة فقط عند نهاية النتائج الحقيقية (استجابة ناجحة بلا منتجات)؛
- * فشل الشبكة أو HTTP يُرمى كاستثناء عمدًا كي يميّز seedSaudiProducts بين «انتهت الصفحات»
+ * فشل الشبكة أو HTTP يُرمى كاستثناء عمدًا كي يميّز saudiSeed.ts بين «انتهت الصفحات»
  * و«تعذّر الاتصال» فلا يُعلَّم seed كمكتمل خطأً عند انقطاع الشبكة.
  */
-export async function fetchSaudiOffPage(page: number, pageSize = 100, fetchedAt = Date.now()): Promise<StoredProduct[]> {
+export async function fetchSaudiOffPage(page: number, pageSize = 100): Promise<SaudiSeedItem[]> {
   const url = `${SEARCH_BASE}?countries_tags_en=saudi-arabia&fields=code,${FIELDS}&page_size=${pageSize}&page=${page}`
   const res = await fetch(url, { headers: { 'User-Agent': USER_AGENT } })
   if (!res.ok) throw new Error(`OFF search HTTP ${res.status}`)
   const data = (await res.json()) as OffSearchResponse
   const products = Array.isArray(data.products) ? data.products : []
-  return products
-    .map((p) => (p.code ? mapOffRecordToProduct(p.code, p, fetchedAt) : null))
-    .filter((p): p is StoredProduct => p !== null)
-}
-
-/** يسجّل OFF كجالب باركود لدى resolveBarcode — يُستدعى مرة واحدة عند تحميل الوحدة. */
-export function registerOffFetcher() {
-  registerBarcodeFetcher('open_food_facts', (barcode) => fetchFromOFF(barcode))
-}
-
-registerOffFetcher()
-
-/** يستورد منتجًا مفردًا مباشرة إلى القاعدة المحلية (بدل الاعتماد على resolveBarcode). */
-export async function importFromOFF(barcode: string): Promise<StoredProduct | null> {
-  const product = await fetchFromOFF(barcode)
-  return product ? upsert(product) : null
+  const items: SaudiSeedItem[] = []
+  for (const p of products) {
+    if (!p.code) continue
+    const mapped = mapOffRecordToRemoteResult(p)
+    if (!mapped) continue
+    items.push({ barcode: p.code, result: { ...mapped, sourceUrl: offProductUrl(p.code) } })
+  }
+  return items
 }
