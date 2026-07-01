@@ -15,7 +15,7 @@ interface ProgressViewProps {
   lang: Lang
 }
 
-/** تبويب التقدّم — بطاقات الوزن والحجم والـPRs والعضلات والسلسلة + مزامنة صحة وتذكير (موبايل أولًا). */
+/** تبويب التقدّم — بطاقات الوزن والحجم والـPRs والعضلات والسلسلة + خطوات يدوية وتذكير (موبايل أولًا). */
 export function ProgressView({ lang }: ProgressViewProps) {
   const t = getStrings(lang).progress
   const tw = getStrings(lang).workout
