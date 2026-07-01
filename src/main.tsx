@@ -5,6 +5,7 @@ import { SplashScreen } from './components/SplashScreen'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { CustomizationProvider } from './lib/customizationContext'
 import { AuthProvider } from './lib/authContext'
+import { LanguageProvider } from './i18n'
 import { registerStepBridge } from './lib/stepCounter'
 import './styles/index.css'
 
@@ -26,12 +27,14 @@ if (!root) throw new Error('عنصر root غير موجود في index.html')
 createRoot(root).render(
   <StrictMode>
     <ErrorBoundary>
-      <AuthProvider>
-        <CustomizationProvider>
-          <App />
-          <SplashScreen />
-        </CustomizationProvider>
-      </AuthProvider>
+      <LanguageProvider>
+        <AuthProvider>
+          <CustomizationProvider>
+            <App />
+            <SplashScreen />
+          </CustomizationProvider>
+        </AuthProvider>
+      </LanguageProvider>
     </ErrorBoundary>
   </StrictMode>,
 )

@@ -52,6 +52,7 @@ export interface ShellStrings {
     groupLanguage: string
     languageActive: string
     languageSoon: string
+    languageHint: string
     export: string
     import: string
     reset: string
@@ -399,6 +400,7 @@ const ar: ShellStrings = {
     groupLanguage: 'اللغة',
     languageActive: 'العربية — مفعّلة',
     languageSoon: 'الإنجليزية قريبًا (English coming soon)',
+    languageHint: 'يتغيّر النص واتجاه الصفحة فورًا، ويُحفظ اختيارك على هذا الجهاز.',
     export: 'تصدير نسخة احتياطية',
     import: 'استيراد نسخة',
     reset: 'إعادة ضبط البيانات',
@@ -762,6 +764,7 @@ const en: ShellStrings = {
     groupLanguage: 'Language',
     languageActive: 'Arabic — active',
     languageSoon: 'English coming soon',
+    languageHint: 'Text and page direction switch instantly, and your choice is saved on this device.',
     export: 'Export backup',
     import: 'Import backup',
     reset: 'Reset data',

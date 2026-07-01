@@ -1,6 +1,7 @@
 import { Icon } from '@/components/Icon'
 import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
+import { LanguageToggle } from '@/i18n'
 
 interface StartViewProps {
   lang: Lang
@@ -30,6 +31,11 @@ export function StartView({
       <div className="pointer-events-none absolute -top-24 start-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-primary-soft blur-3xl" />
 
       <div className="app-container relative flex flex-1 flex-col">
+        {/* مبدّل اللغة — أعلى الشاشة */}
+        <div className="flex justify-end">
+          <LanguageToggle variant="compact" />
+        </div>
+
         {/* الهوية — أعلى */}
         <div className="flex flex-1 flex-col items-center justify-center text-center">
           <span className="grid h-20 w-20 place-items-center rounded-3xl bg-primary text-white shadow-glow">
