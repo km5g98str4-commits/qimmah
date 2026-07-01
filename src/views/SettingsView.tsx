@@ -2,6 +2,7 @@ import { useRef, type ReactNode } from 'react'
 import { AppNav, type AppView } from '@/components/AppNav'
 import { Footer } from '@/components/Footer'
 import { Icon } from '@/components/Icon'
+import { DeviceSettings } from '@/components/DeviceSettings'
 import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
 import { LanguageToggle } from '@/i18n'
@@ -220,7 +221,10 @@ export function SettingsView({ lang, onNavigate, onEditPlan, onLogin, onOpenPriv
           </p>
         </SettingsGroup>
 
-        {/* 5) اللغة — تبديل حيّ عربي/English (يبدّل النص والاتجاه فورًا). */}
+        {/* 5) التطبيق والتنبيهات — تثبيت PWA + إذن التنبيهات (نسخة صادقة، حدود آيفون واضحة) */}
+        <DeviceSettings lang={lang} />
+
+        {/* 6) اللغة — تبديل حيّ عربي/English (يبدّل النص والاتجاه فورًا). */}
         <SettingsGroup icon="Globe" title={t.settings.groupLanguage}>
           <div className="flex flex-col gap-3">
             <LanguageToggle />
