@@ -8,6 +8,7 @@ import { useCustomization } from '@/lib/customizationContext'
 import { todayPlanDay } from '@/lib/workoutPlan'
 import { planTitle } from '@/lib/planGenerator'
 import { goalTypeLabel } from '@/lib/calculators'
+import { goalTypeLabelI18n } from '@/lib/i18nLabels'
 import { currentWeekSummary } from '@/lib/streaks'
 import { experienceChoices } from '@/data/planBuilder'
 import { useDashboardSignals, type LeadCard } from '@/lib/dashboardLayout'
@@ -215,7 +216,7 @@ function SystemIdentity({ lang, onNavigate }: { lang: Lang; onNavigate: (route: 
         {d.systemBuiltFromSetup}
       </span>
       <div className="mt-3 flex flex-wrap gap-2">
-        <Chip icon="Target" text={goalTypeLabel(p.goalType)} />
+        <Chip icon="Target" text={goalTypeLabelI18n(p.goalType, goalTypeLabel(p.goalType), lang)} />
         {days > 0 && <Chip icon="CalendarDays" text={`${days} ${d.daysPerWeek}`} />}
         {split && <Chip icon="Dumbbell" text={split} />}
         {calories > 0 && <Chip icon="Flame" text={`${calories} ${d.caloriesPerDay}`} />}

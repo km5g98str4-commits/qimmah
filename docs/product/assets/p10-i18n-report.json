@@ -1,0 +1,124 @@
+{
+  "generatedAt": "2026-07-02T04:02:22.515Z",
+  "langs": {
+    "en": {
+      "login": {
+        "dir": "ltr",
+        "htmlLang": "en",
+        "lineCount": 8,
+        "strayArabicInEn": [],
+        "arabicLines": 0
+      },
+      "dashboard": {
+        "dir": "ltr",
+        "htmlLang": "en",
+        "lineCount": 113,
+        "strayArabicInEn": [],
+        "arabicLines": 1
+      },
+      "workout": {
+        "dir": "ltr",
+        "htmlLang": "en",
+        "lineCount": 31,
+        "strayArabicInEn": [],
+        "arabicLines": 1
+      },
+      "nutrition": {
+        "dir": "ltr",
+        "htmlLang": "en",
+        "lineCount": 41,
+        "strayArabicInEn": [],
+        "arabicLines": 1
+      },
+      "progress": {
+        "dir": "ltr",
+        "htmlLang": "en",
+        "lineCount": 50,
+        "strayArabicInEn": [],
+        "arabicLines": 1
+      },
+      "profile": {
+        "dir": "ltr",
+        "htmlLang": "en",
+        "lineCount": 59,
+        "strayArabicInEn": [],
+        "arabicLines": 4
+      },
+      "settings": {
+        "dir": "ltr",
+        "htmlLang": "en",
+        "lineCount": 47,
+        "strayArabicInEn": [],
+        "arabicLines": 3
+      }
+    },
+    "ar": {
+      "login": {
+        "dir": "rtl",
+        "htmlLang": "ar",
+        "lineCount": 8,
+        "strayArabicInEn": [],
+        "arabicLines": 8,
+        "latinLines": []
+      },
+      "dashboard": {
+        "dir": "rtl",
+        "htmlLang": "ar",
+        "lineCount": 114,
+        "strayArabicInEn": [],
+        "arabicLines": 101,
+        "latinLines": [
+          "تمرين اليوم — Today workout",
+          "شرب الماء — Water target",
+          "البروتين — Protein target",
+          "نوم 7 ساعات — 7h sleep",
+          "المكملات — Supplements"
+        ]
+      },
+      "workout": {
+        "dir": "rtl",
+        "htmlLang": "ar",
+        "lineCount": 31,
+        "strayArabicInEn": [],
+        "arabicLines": 30,
+        "latinLines": []
+      },
+      "nutrition": {
+        "dir": "rtl",
+        "htmlLang": "ar",
+        "lineCount": 42,
+        "strayArabicInEn": [],
+        "arabicLines": 36,
+        "latinLines": []
+      },
+      "progress": {
+        "dir": "rtl",
+        "htmlLang": "ar",
+        "lineCount": 51,
+        "strayArabicInEn": [],
+        "arabicLines": 45,
+        "latinLines": []
+      },
+      "profile": {
+        "dir": "rtl",
+        "htmlLang": "ar",
+        "lineCount": 59,
+        "strayArabicInEn": [],
+        "arabicLines": 52,
+        "latinLines": [
+          "علوي/سفلي (Upper/Lower)"
+        ]
+      },
+      "settings": {
+        "dir": "rtl",
+        "htmlLang": "ar",
+        "lineCount": 46,
+        "strayArabicInEn": [],
+        "arabicLines": 45,
+        "latinLines": [
+          "English"
+        ]
+      }
+    }
+  }
+}

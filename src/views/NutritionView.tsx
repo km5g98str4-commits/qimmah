@@ -5,7 +5,6 @@ import { QuickMealLogger } from '@/components/nutrition/QuickMealLogger'
 import { useCustomization } from '@/lib/customizationContext'
 import { MEAL_SLOTS, useNutritionToday, type LoggedFood, type MealSlot } from '@/lib/nutritionTracking'
 import { inRange, NUM_LIMITS, NUM_MESSAGES, sanitizeNumericInput } from '@/lib/validation'
-import { FOOD_ESTIMATE_NOTE } from '@/data/foodItems'
 import { getStrings } from '@/config/strings'
 import { nutritionScreenStrings } from '@/i18n/dict/nutritionScreen'
 import type { Lang } from '@/lib/appPreferences'
@@ -132,7 +131,7 @@ export function NutritionView({ lang }: NutritionViewProps) {
 
         <p className="mt-6 flex items-start gap-2 text-[11px] text-ink-400">
           <Icon name="Info" className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-          {FOOD_ESTIMATE_NOTE}
+          {t.estimateNote}
         </p>
       </div>
     </div>

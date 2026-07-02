@@ -3,6 +3,7 @@ import { Icon } from '@/components/Icon'
 import { ProgressBar } from '@/components/ProgressBar'
 import { useCustomization } from '@/lib/customizationContext'
 import { goalTypeLabel } from '@/lib/calculators'
+import { goalTypeLabelI18n } from '@/lib/i18nLabels'
 import { currentWeekSummary } from '@/lib/streaks'
 import { useNutritionToday } from '@/lib/nutritionTracking'
 import { getStrings } from '@/config/strings'
@@ -62,9 +63,9 @@ export function DailySummary({ lang }: DailySummaryProps) {
 
         {/* الماكروز: مأكول / هدف — حيّ */}
         <div className="mt-4 grid grid-cols-3 gap-2.5">
-          <MacroMini label={tn.protein} eaten={round(totals.protein)} target={targetProtein} color="bg-brand-500" />
-          <MacroMini label={tn.carbs} eaten={round(totals.carbs)} target={targetCarbs} color="bg-sky-500" />
-          <MacroMini label={tn.fat} eaten={round(totals.fat)} target={targetFat} color="bg-gold-500" />
+          <MacroMini label={tn.protein} eaten={round(totals.protein)} target={targetProtein} unit={d.proteinUnit} color="bg-brand-500" />
+          <MacroMini label={tn.carbs} eaten={round(totals.carbs)} target={targetCarbs} unit={d.proteinUnit} color="bg-sky-500" />
+          <MacroMini label={tn.fat} eaten={round(totals.fat)} target={targetFat} unit={d.proteinUnit} color="bg-gold-500" />
         </div>
 
         {/* الماء: مستهلك / هدف + المتبقّي — حيّ */}
@@ -86,7 +87,7 @@ export function DailySummary({ lang }: DailySummaryProps) {
 
         {/* سياق الهدف والوزن */}
         <div className="mt-3 flex flex-wrap gap-2">
-          <Chip icon="Target" text={goalTypeLabel(p.goalType)} />
+          <Chip icon="Target" text={goalTypeLabelI18n(p.goalType, goalTypeLabel(p.goalType), lang)} />
           <Chip icon="Scale" text={`${p.weightKg} ${d.weightUnit}`} />
           <Chip icon="TrendingDown" text={`${p.targetWeightKg} ${d.weightUnit}`} />
         </div>
@@ -111,12 +112,24 @@ function CalCell({ label, value, highlight }: { label: string; value: number; hi
   )
 }
 
-function MacroMini({ label, eaten, target, color }: { label: string; eaten: number; target: number; color: string }) {
+function MacroMini({
+  label,
+  eaten,
+  target,
+  unit,
+  color,
+}: {
+  label: string
+  eaten: number
+  target: number
+  unit: string
+  color: string
+}) {
   return (
     <div className="rounded-xl border border-line bg-page p-3">
       <p className="text-[11px] text-ink-500">{label}</p>
       <p className="mt-0.5 text-sm font-black text-ink-900">
-        {eaten}<span className="text-[10px] font-bold text-ink-400"> / {target}غ</span>
+        {eaten}<span className="text-[10px] font-bold text-ink-400"> / {target}{unit}</span>
       </p>
       <ProgressBar current={eaten} target={target || 1} color={color} className="mt-1.5 h-1.5" />
     </div>

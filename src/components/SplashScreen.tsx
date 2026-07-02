@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { product } from '@/config/product'
+import { getLanguage } from '@/lib/appPreferences'
+import { getStrings } from '@/config/strings'
 import { Icon } from './Icon'
 
 const VISIBLE_MS = 1700
@@ -38,10 +39,12 @@ export function SplashScreen() {
 
   if (gone) return null
 
+  // الاسم والوصف باللغة الحالية (تُقرأ عند العرض — الشاشة لحظية فلا حاجة لاشتراك حيّ).
+  const s = getStrings(getLanguage())
   return (
     <div
       role="status"
-      aria-label={product.name}
+      aria-label={s.brand}
       className={[
         'fixed inset-0 z-[100] grid place-items-center bg-page',
         reduceMotion ? '' : 'transition-opacity ease-out',
@@ -53,8 +56,8 @@ export function SplashScreen() {
         <span className="mx-auto grid h-20 w-20 place-items-center rounded-3xl bg-primary text-white shadow-glow">
           <Icon name="Dumbbell" className="h-10 w-10" strokeWidth={2.5} />
         </span>
-        <p className="mt-5 text-2xl font-black tracking-tight text-ink-900">{product.name}</p>
-        <p className="mt-1 text-sm font-medium text-ink-500">{product.tagline}</p>
+        <p className="mt-5 text-2xl font-black tracking-tight text-ink-900">{s.brand}</p>
+        <p className="mt-1 text-sm font-medium text-ink-500">{s.tagline}</p>
       </div>
     </div>
   )

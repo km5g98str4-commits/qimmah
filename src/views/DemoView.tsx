@@ -65,7 +65,7 @@ export function DemoView({ lang, onNavigate, onBack }: DemoViewProps) {
           <WellnessSection lang={lang} />
           <CommitmentsSection lang={lang} />
           <ProgressSection lang={lang} />
-          <HealthNotice />
+          <HealthNotice lang={lang} />
         </main>
 
         <Footer />

@@ -1,5 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react'
 import { getStrings } from '@/config/strings'
+import { getLanguage } from '@/lib/appPreferences'
 
 interface ErrorBoundaryProps {
   children: ReactNode
@@ -39,17 +40,20 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   render(): ReactNode {
     if (!this.state.hasError) return this.props.children
 
-    // نحاول جلب النصوص من الإعداد؛ وإن فشل، نستخدم النص الاحتياطي المطبوع.
+    // نحاول جلب النصوص من الإعداد باللغة الحالية؛ وإن فشل، نستخدم النص الاحتياطي المطبوع.
     let t = FALLBACK
+    let dir: 'rtl' | 'ltr' = 'rtl'
     try {
-      const s = getStrings('ar').errorBoundary
+      const lang = getLanguage()
+      dir = lang === 'en' ? 'ltr' : 'rtl'
+      const s = getStrings(lang).errorBoundary
       if (s) t = s
     } catch {
       t = FALLBACK
     }
 
     return (
-      <div dir="rtl" className="flex min-h-screen flex-col items-center justify-center bg-page px-6 py-16 text-center">
+      <div dir={dir} className="flex min-h-screen flex-col items-center justify-center bg-page px-6 py-16 text-center">
         <div className="mx-auto w-full max-w-md">
           <span className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-primary-soft text-primary-c">
             <svg

@@ -72,6 +72,9 @@ export interface ShellStrings {
     termsLink: string
     healthDisclaimer: string
     importConfirm: string
+    importSuccess: string
+    importError: string
+    regenerateSuccess: string
     groupDev: string
     devReviewProducts: string
     devReviewHint: string
@@ -454,6 +457,9 @@ const ar: ShellStrings = {
     healthDisclaimer:
       'قِمّة أداة تنظيم ومتابعة شخصية، وليست بديلًا عن الاستشارة الطبية. لا تبدأ أو توقف أي دواء أو نظام بدون مختص.',
     importConfirm: 'سيستبدل الاستيراد خطّتك وسجلّك الحالي بمحتوى الملف. هل تريد المتابعة؟',
+    importSuccess: 'تم استيراد نسختك بنجاح.',
+    importError: 'تعذّرت قراءة الملف. تأكّد أنّه نسخة قِمّة صحيحة.',
+    regenerateSuccess: 'تم إعادة توليد خطتك من بياناتك الحالية.',
     groupDev: 'أدوات داخلية',
     devReviewProducts: 'مراجعة المنتجات',
     devReviewHint: 'مراجعة منتجات ممسوحة/مُضافة بانتظار الاعتماد قبل ظهورها للمستخدمين.',
@@ -851,6 +857,9 @@ const en: ShellStrings = {
     healthDisclaimer:
       'Qimmah is a personal organization and tracking tool, not a substitute for medical advice. Do not start or stop any medication or program without a professional.',
     importConfirm: 'Importing will replace your current plan and logs with the file contents. Continue?',
+    importSuccess: 'Your backup was imported successfully.',
+    importError: "Couldn't read the file. Make sure it's a valid Qimmah backup.",
+    regenerateSuccess: 'Your plan was regenerated from your current data.',
     groupDev: 'Internal tools',
     devReviewProducts: 'Product review',
     devReviewHint: 'Review scanned or submitted products awaiting approval before they reach users.',
