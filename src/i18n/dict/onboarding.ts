@@ -7,6 +7,7 @@ export interface OnboardingStrings {
   next: string
   buildMyPlan: string
   recommended: string // "الموصى به: {n} أيام" → prefix, composed with count + unit
+  recommendedForLevel: string // "الموصى به لمستواك: {n} أيام." — {n} يُستبدل بعدد الأيام
   daysUnit: string // "أيام"
   buildingTitle: string
   buildingSubtitle: string
@@ -448,6 +449,7 @@ const ar: OnboardingStrings = {
   next: 'التالي',
   buildMyPlan: 'ابنِ خطتي',
   recommended: 'الموصى به:',
+  recommendedForLevel: 'الموصى به لمستواك: {n} أيام.',
   daysUnit: 'أيام',
   buildingTitle: 'نبني خطتك المثالية…',
   buildingSubtitle: 'نختار التقسيمة، نوزّع الأيام، ونحسب أهدافك.',
@@ -874,6 +876,7 @@ const en: OnboardingStrings = {
   next: 'Next',
   buildMyPlan: 'Build my plan',
   recommended: 'Recommended:',
+  recommendedForLevel: 'Recommended for your level: {n} days.',
   daysUnit: 'days',
   buildingTitle: 'Building your perfect plan…',
   buildingSubtitle: 'Picking your split, spreading your days, and crunching your targets.',
