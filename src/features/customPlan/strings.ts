@@ -1,0 +1,237 @@
+// نصوص ميزة «الجدول المخصّص» (باني الخطة اليدوي) — عربي خليجي + إنجليزي.
+// مُستقلة عن قواميس الشاشات العامة لتبقى الميزة قائمة بذاتها (P10 A1).
+
+import type { Lang } from '@/lib/appPreferences'
+import type { Muscle } from '@/types/workout'
+
+export type MuscleFilter = Muscle | 'all'
+
+export interface CustomPlanStrings {
+  // — شاشة الاختيار في الإعداد —
+  choiceEyebrow: string
+  choiceTitle: string
+  choiceHint: string
+  autoTitle: string
+  autoDesc: string
+  customTitle: string
+  customDesc: string
+  recommendedBadge: string
+
+  // — رأس الباني —
+  createTitle: string
+  editTitle: string
+  stepDays: string
+  stepBuild: string
+  stepReview: string
+
+  // — خطوة الأيام —
+  daysTitle: string
+  daysHint: string
+  daysUnit: string
+
+  // — خطوة البناء —
+  buildTitle: string
+  buildHint: string
+  dayNameLabel: string
+  dayNamePlaceholder: string
+  addExercise: string
+  emptyDayTitle: string
+  emptyDayHint: string
+  setsLabel: string
+  repsLabel: string
+  moveUp: string
+  moveDown: string
+  removeExercise: string
+  dayTab: string
+
+  // — خطوة المراجعة —
+  reviewTitle: string
+  reviewHint: string
+  reviewEmptyWarning: string
+  totalExercises: string
+
+  // — أزرار التنقّل —
+  next: string
+  back: string
+  save: string
+  cancel: string
+  exercisesUnit: string
+
+  // — منتقي التمارين —
+  pickerTitle: string
+  searchPlaceholder: string
+  noResults: string
+  add: string
+  added: string
+  close: string
+  muscleLabels: Record<MuscleFilter, string>
+
+  // — نقاط الدخول في تبويب التمرين —
+  customPlanBadge: string
+  autoPlanBadge: string
+  editMyPlan: string
+  createCustom: string
+  createCustomDesc: string
+  useCustom: string
+  useAuto: string
+  planSourceTitle: string
+  planSavedToast: string
+}
+
+const ar: CustomPlanStrings = {
+  choiceEyebrow: 'جدول التمرين',
+  choiceTitle: 'كيف تبي جدول تمرينك؟',
+  choiceHint: 'اختر الطريقة اللي تناسبك — تقدر تغيّرها في أي وقت لاحقًا.',
+  autoTitle: 'جدول جاهز حسب هدفك',
+  autoDesc: 'نولّد لك خطة متكاملة من بياناتك وهدفك — جاهزة على طول.',
+  customTitle: 'أصمّم جدولي بنفسي',
+  customDesc: 'اختر أيامك وتمارينك ورتّبها كما تحب — تحكّم كامل.',
+  recommendedBadge: 'موصى به',
+
+  createTitle: 'إنشاء جدول مخصّص',
+  editTitle: 'تعديل جدولي',
+  stepDays: 'الأيام',
+  stepBuild: 'التمارين',
+  stepReview: 'مراجعة',
+
+  daysTitle: 'كم يوم تمرين بالأسبوع؟',
+  daysHint: 'اختر عدد الأيام ونجهّز لك بطاقة لكل يوم باسم مقترح.',
+  daysUnit: 'أيام',
+
+  buildTitle: 'ابنِ أيامك',
+  buildHint: 'سمِّ كل يوم، أضف تمارينه، ورتّبها بالترتيب اللي تبيه.',
+  dayNameLabel: 'اسم اليوم',
+  dayNamePlaceholder: 'مثال: صدر + ترايسبس',
+  addExercise: 'أضف تمرين',
+  emptyDayTitle: 'ما أضفت تمارين لهذا اليوم بعد',
+  emptyDayHint: 'اضغط «أضف تمرين» لاختيار تمارينك من المكتبة.',
+  setsLabel: 'مجموعات',
+  repsLabel: 'تكرار',
+  moveUp: 'تحريك لأعلى',
+  moveDown: 'تحريك لأسفل',
+  removeExercise: 'حذف التمرين',
+  dayTab: 'اليوم',
+
+  reviewTitle: 'راجع جدولك',
+  reviewHint: 'تأكد من كل يوم وتمارينه قبل الحفظ.',
+  reviewEmptyWarning: 'أضف تمرينًا واحدًا على الأقل في يوم واحد قبل الحفظ.',
+  totalExercises: 'إجمالي التمارين',
+
+  next: 'التالي',
+  back: 'رجوع',
+  save: 'حفظ الجدول',
+  cancel: 'إلغاء',
+  exercisesUnit: 'تمارين',
+
+  pickerTitle: 'اختر تمرينًا',
+  searchPlaceholder: 'ابحث عن تمرين…',
+  noResults: 'ما فيه نتائج مطابقة.',
+  add: 'إضافة',
+  added: 'أُضيف',
+  close: 'إغلاق',
+  muscleLabels: {
+    all: 'كل العضلات',
+    chest: 'صدر',
+    back: 'ظهر',
+    shoulders: 'أكتاف',
+    biceps: 'بايسبس',
+    triceps: 'ترايسبس',
+    legs: 'أرجل',
+    quads: 'أمامية الفخذ',
+    hamstrings: 'خلفية الفخذ',
+    glutes: 'المؤخرة',
+    calves: 'سمانة',
+    core: 'بطن',
+    cardio: 'كارديو',
+  },
+
+  customPlanBadge: 'جدول مخصّص',
+  autoPlanBadge: 'جدول تلقائي',
+  editMyPlan: 'تعديل جدولي',
+  createCustom: 'أنشئ جدولًا مخصّصًا',
+  createCustomDesc: 'اختر أيامك وتمارينك بنفسك',
+  useCustom: 'جدولي المخصّص',
+  useAuto: 'الجدول التلقائي',
+  planSourceTitle: 'الجدول المعتمد',
+  planSavedToast: 'تم حفظ جدولك المخصّص',
+}
+
+const en: CustomPlanStrings = {
+  choiceEyebrow: 'Workout plan',
+  choiceTitle: 'How do you want your plan?',
+  choiceHint: 'Pick what suits you — you can change it anytime later.',
+  autoTitle: 'Ready plan for your goal',
+  autoDesc: 'We build a complete plan from your data and goal — ready instantly.',
+  customTitle: 'Build my own plan',
+  customDesc: 'Choose your days and exercises and order them however you like — full control.',
+  recommendedBadge: 'Recommended',
+
+  createTitle: 'Create custom plan',
+  editTitle: 'Edit my plan',
+  stepDays: 'Days',
+  stepBuild: 'Exercises',
+  stepReview: 'Review',
+
+  daysTitle: 'How many training days per week?',
+  daysHint: 'Pick the number of days and we prepare a card for each with a suggested name.',
+  daysUnit: 'days',
+
+  buildTitle: 'Build your days',
+  buildHint: 'Name each day, add its exercises, and order them the way you want.',
+  dayNameLabel: 'Day name',
+  dayNamePlaceholder: 'e.g. Chest + Triceps',
+  addExercise: 'Add exercise',
+  emptyDayTitle: "You haven't added exercises to this day yet",
+  emptyDayHint: 'Tap “Add exercise” to pick from the library.',
+  setsLabel: 'Sets',
+  repsLabel: 'Reps',
+  moveUp: 'Move up',
+  moveDown: 'Move down',
+  removeExercise: 'Remove exercise',
+  dayTab: 'Day',
+
+  reviewTitle: 'Review your plan',
+  reviewHint: 'Check each day and its exercises before saving.',
+  reviewEmptyWarning: 'Add at least one exercise to one day before saving.',
+  totalExercises: 'Total exercises',
+
+  next: 'Next',
+  back: 'Back',
+  save: 'Save plan',
+  cancel: 'Cancel',
+  exercisesUnit: 'exercises',
+
+  pickerTitle: 'Pick an exercise',
+  searchPlaceholder: 'Search for an exercise…',
+  noResults: 'No matching results.',
+  add: 'Add',
+  added: 'Added',
+  close: 'Close',
+  muscleLabels: {
+    all: 'All muscles',
+    chest: 'Chest',
+    back: 'Back',
+    shoulders: 'Shoulders',
+    biceps: 'Biceps',
+    triceps: 'Triceps',
+    legs: 'Legs',
+    quads: 'Quads',
+    hamstrings: 'Hamstrings',
+    glutes: 'Glutes',
+    calves: 'Calves',
+    core: 'Core',
+    cardio: 'Cardio',
+  },
+
+  customPlanBadge: 'Custom plan',
+  autoPlanBadge: 'Auto plan',
+  editMyPlan: 'Edit my plan',
+  createCustom: 'Create a custom plan',
+  createCustomDesc: 'Choose your days and exercises yourself',
+  useCustom: 'My custom plan',
+  useAuto: 'Auto plan',
+  planSourceTitle: 'Active plan',
+  planSavedToast: 'Your custom plan was saved',
+}
+
+export const customPlanStrings: Record<Lang, CustomPlanStrings> = { ar, en }

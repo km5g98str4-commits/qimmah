@@ -1,12 +1,22 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Icon } from '@/components/Icon'
 import { WorkoutMode } from '@/components/WorkoutMode'
 import { WorkoutSummary } from '@/components/WorkoutSummary'
 import type { Lang } from '@/lib/appPreferences'
 import type { AppRoute } from '@/lib/appRoutes'
+import { useAuth } from '@/lib/authContext'
 import { useCustomization } from '@/lib/customizationContext'
 import { todayPlanDay, planExerciseName } from '@/lib/workoutPlan'
 import { planTitle } from '@/lib/planGenerator'
+import { cn } from '@/lib/cn'
+import {
+  CustomPlanBuilder,
+  customPlanStrings,
+  loadCustomPlanRecord,
+  saveCustomPlan,
+  setPlanSource,
+  type PlanSource,
+} from '@/features/customPlan'
 import { getStrings } from '@/config/strings'
 import { workoutScreenStrings } from '@/i18n/dict/workoutScreen'
 import { persistFinishedSession } from '@/lib/finishWorkout'
@@ -31,8 +41,29 @@ interface WorkoutViewProps {
 /** تبويب التمرين — بدء سريع، خطتي المولّدة، وقوالبي. لا «قوالب جاهزة» — الخطة تُولَّد من بياناتك. */
 export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
   const { customization } = useCustomization()
-  const plan = customization.workoutPlan
+  const auth = useAuth()
+  const userId = auth.user?.id ?? null
+  const autoPlan = customization.workoutPlan
+
+  // مصدر الجدول لكل حساب: مخصّص (إن وُجد واعتُمد) أو التلقائي المولّد.
+  const [customRec, setCustomRec] = useState(() => loadCustomPlanRecord(userId))
+  useEffect(() => {
+    setCustomRec(loadCustomPlanRecord(userId))
+  }, [userId])
+  const source: PlanSource = customRec?.source ?? 'auto'
+  const hasCustom = !!customRec && customRec.plan.days.length > 0
+  const plan = source === 'custom' && hasCustom ? customRec.plan : autoPlan
   const planDay = todayPlanDay(plan)
+
+  const cp = customPlanStrings[lang]
+  const [builderOpen, setBuilderOpen] = useState<null | 'create' | 'edit'>(null)
+  const [savedToast, setSavedToast] = useState(false)
+
+  const refreshCustom = () => setCustomRec(loadCustomPlanRecord(userId))
+  const switchSource = (s: PlanSource) => {
+    setPlanSource(userId, s)
+    refreshCustom()
+  }
 
   const [activeDay, setActiveDay] = useState<PlanDay | null>(null)
   const [summary, setSummary] = useState<FinishSummary | null>(null)
@@ -126,23 +157,75 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
         {/* خطتي */}
         <section id="workout-myplan">
           <H2 icon="CalendarDays">{d.myPlan}</H2>
+
+          {/* مصدر الجدول (تلقائي/مخصّص) + إدارة الجدول المخصّص */}
+          <div className="mb-3 flex flex-wrap items-center gap-2">
+            {hasCustom && (
+              <div className="inline-flex rounded-xl border border-line bg-surface p-1" role="tablist" aria-label={cp.planSourceTitle}>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={source === 'auto'}
+                  onClick={() => switchSource('auto')}
+                  className={cn('rounded-lg px-3 py-1.5 text-xs font-bold transition-colors', source === 'auto' ? 'bg-primary text-white' : 'text-ink-500 hover:text-ink-900')}
+                >
+                  {cp.useAuto}
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={source === 'custom'}
+                  onClick={() => switchSource('custom')}
+                  className={cn('rounded-lg px-3 py-1.5 text-xs font-bold transition-colors', source === 'custom' ? 'bg-primary text-white' : 'text-ink-500 hover:text-ink-900')}
+                >
+                  {cp.useCustom}
+                </button>
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={() => setBuilderOpen(hasCustom ? 'edit' : 'create')}
+              className="btn-ghost px-3 py-2 text-xs"
+            >
+              <Icon name={hasCustom ? 'SlidersHorizontal' : 'Plus'} className="h-4 w-4" />
+              {hasCustom ? cp.editMyPlan : cp.createCustom}
+            </button>
+          </div>
+
           {plan.days.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-line bg-surface px-6 py-8 text-center">
               <p className="text-sm text-ink-500">{d.noPlanYet}</p>
-              <button type="button" onClick={() => onNavigate('setup')} className="btn-primary mx-auto mt-4 px-4 py-2.5 text-xs">
-                <Icon name="Sparkles" className="h-4 w-4" />
-                {d.createMyPlan}
-              </button>
+              <div className="mt-4 flex flex-wrap justify-center gap-2">
+                <button type="button" onClick={() => onNavigate('setup')} className="btn-primary px-4 py-2.5 text-xs">
+                  <Icon name="Sparkles" className="h-4 w-4" />
+                  {d.createMyPlan}
+                </button>
+                <button type="button" onClick={() => setBuilderOpen('create')} className="btn-ghost px-4 py-2.5 text-xs">
+                  <Icon name="SlidersHorizontal" className="h-4 w-4" />
+                  {cp.createCustom}
+                </button>
+              </div>
             </div>
           ) : (
             <div className="card p-5">
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-sm font-black text-ink-900">{planTitle(plan.templateId, lang)}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-black text-ink-900">
+                      {source === 'custom' ? cp.customPlanBadge : planTitle(plan.templateId, lang)}
+                    </p>
+                    <span className="rounded-full bg-primary-soft px-2 py-0.5 text-[10px] font-black text-primary-c">
+                      {source === 'custom' ? cp.customPlanBadge : cp.autoPlanBadge}
+                    </span>
+                  </div>
                   <p className="text-xs text-ink-400">{plan.days.length} {d.daysPerWeek}</p>
                 </div>
-                <button type="button" onClick={() => onNavigate('setup')} className="btn-ghost shrink-0 px-3 py-2 text-xs">
-                  <Icon name="Palette" className="h-4 w-4" />
+                <button
+                  type="button"
+                  onClick={() => (source === 'custom' ? setBuilderOpen('edit') : onNavigate('setup'))}
+                  className="btn-ghost shrink-0 px-3 py-2 text-xs"
+                >
+                  <Icon name={source === 'custom' ? 'SlidersHorizontal' : 'Palette'} className="h-4 w-4" />
                   {d.edit}
                 </button>
               </div>
@@ -195,6 +278,34 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
           <EmptyCard text={d.templatesAutoGenerated} />
         </section>
       </div>
+
+      {/* باني الجدول المخصّص — إنشاء/تعديل، يعتمد الجدول لهذا الحساب عند الحفظ */}
+      {builderOpen && (
+        <div className="fixed inset-0 z-[65]">
+          <CustomPlanBuilder
+            lang={lang}
+            initialPlan={builderOpen === 'edit' ? customRec?.plan : undefined}
+            onSave={(p) => {
+              saveCustomPlan(userId, p)
+              refreshCustom()
+              setBuilderOpen(null)
+              setSavedToast(true)
+              window.setTimeout(() => setSavedToast(false), 2200)
+            }}
+            onCancel={() => setBuilderOpen(null)}
+          />
+        </div>
+      )}
+
+      {/* إشعار حفظ الجدول المخصّص */}
+      {savedToast && (
+        <div className="fixed inset-x-0 bottom-24 z-[75] flex justify-center px-4">
+          <div className="flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-bold text-white shadow-glow">
+            <Icon name="CheckCircle2" className="h-4 w-4" />
+            {cp.planSavedToast}
+          </div>
+        </div>
+      )}
 
       {/* وضع التمرين — فوق الشريط السفلي */}
       {activeDay && (
