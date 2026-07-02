@@ -1,4 +1,5 @@
-// الذكاء التدريبي — يولّد ملاحظات عربية بسيطة من سجلّ الأداء وجلسات التمرين والتغطية العضلية.
+// الذكاء التدريبي — يولّد ملاحظات بسيطة من سجلّ الأداء وجلسات التمرين والتغطية العضلية،
+// بلغة الواجهة الحالية (عربي/إنجليزي) عبر قاموس i18n/dict/insights (P10.1).
 //
 // أمثلة:
 // - ثبات الأداء على الهدف لجلستين → اقترح زيادة الوزن 2.5 كجم.
@@ -9,8 +10,10 @@
 import type { ExerciseHistory } from './exerciseHistory'
 import type { WorkoutSession, SessionExercise } from './workoutSessions'
 import type { WeeklyCoverageResult } from '@/types/muscles'
+import type { Lang } from '@/lib/appPreferences'
 import { getExercise } from '@/data/exercises'
-import { muscleLabelAr } from '@/data/muscleGroups'
+import { muscleGroupLabel } from '@/data/muscleGroups'
+import { insightsStrings, type InsightsStrings } from '@/i18n/dict/insights'
 
 export type InsightKind = 'progress' | 'hold' | 'pain' | 'undertrained'
 export type InsightTone = 'success' | 'warning' | 'danger' | 'info'
@@ -27,6 +30,8 @@ interface InsightInput {
   sessions: WorkoutSession[]
   history: ExerciseHistory
   coverage?: WeeklyCoverageResult
+  /** لغة نصوص الملاحظات — الافتراضي العربية (توافقًا مع الاستدعاءات القديمة). */
+  lang?: Lang
 }
 
 const numOf = (w?: string): number => {
@@ -46,13 +51,22 @@ function metTarget(se: SessionExercise): boolean {
   return sets.every((s) => s.completed && (!numOf(s.targetReps) || numOf(s.actualReps) >= numOf(s.targetReps)))
 }
 
-function exName(exerciseId: string): string {
-  return getExercise(exerciseId)?.nameAr ?? exerciseId
+/** اسم التمرين بلغة الواجهة (الإنجليزي عند lang=en مع العربي احتياطًا). */
+function exName(exerciseId: string, lang: Lang): string {
+  const ex = getExercise(exerciseId)
+  if (!ex) return exerciseId
+  return lang === 'en' ? ex.nameEn || ex.nameAr : ex.nameAr || ex.nameEn
 }
 
-/** يولّد قائمة ملاحظات تدريبية مرتّبة (الأهم أولًا). */
-export function generateInsights({ sessions, history, coverage }: InsightInput): TrainingInsight[] {
+/** يعبّئ قالب ملاحظة بوسائطه ({exercise}/{muscle}). */
+function fmt(template: string, params: Record<string, string>): string {
+  return template.replace(/\{(\w+)\}/g, (_, key: string) => params[key] ?? '')
+}
+
+/** يولّد قائمة ملاحظات تدريبية مرتّبة (الأهم أولًا) بلغة الواجهة. */
+export function generateInsights({ sessions, history, coverage, lang = 'ar' }: InsightInput): TrainingInsight[] {
   const insights: TrainingInsight[] = []
+  const d: InsightsStrings = insightsStrings[lang]
 
   const sorted = [...sessions].sort((a, b) => (sessionTime(a) < sessionTime(b) ? 1 : -1))
 
@@ -68,6 +82,7 @@ export function generateInsights({ sessions, history, coverage }: InsightInput):
   Object.entries(occurrences).forEach(([exId, occ]) => {
     const recent = occ.slice(0, 2)
     const rec = history[exId]
+    const name = exName(exId, lang)
 
     // 1) ألم في آخر ظهور
     const painful = recent.find((se) => (se.painNote ?? '').trim().length > 0)
@@ -77,7 +92,7 @@ export function generateInsights({ sessions, history, coverage }: InsightInput):
         kind: 'pain',
         tone: 'danger',
         exerciseId: exId,
-        text: `سجّلت ألمًا في «${exName(exId)}». جرّب بديلًا أو خفّف الحمل.`,
+        text: fmt(d.pain, { exercise: name }),
       })
       return // لا نعطي توصية تقدّم/تثبيت مع وجود ألم
     }
@@ -89,7 +104,7 @@ export function generateInsights({ sessions, history, coverage }: InsightInput):
         kind: 'progress',
         tone: 'success',
         exerciseId: exId,
-        text: `أداؤك ثابت في «${exName(exId)}». جرّب زيادة الوزن 2.5 كجم في التمرين القادم.`,
+        text: fmt(d.progress, { exercise: name }),
       })
       return
     }
@@ -101,7 +116,7 @@ export function generateInsights({ sessions, history, coverage }: InsightInput):
         kind: 'hold',
         tone: 'warning',
         exerciseId: exId,
-        text: `ثبّت الوزن في «${exName(exId)}» حتى تكمل التكرارات المستهدفة.`,
+        text: fmt(d.hold, { exercise: name }),
       })
     }
   })
@@ -113,7 +128,7 @@ export function generateInsights({ sessions, history, coverage }: InsightInput):
         id: `undertrained-${m}`,
         kind: 'undertrained',
         tone: 'info',
-        text: `عضلة ${muscleLabelAr(m)} ناقصة هذا الأسبوع.`,
+        text: fmt(d.undertrained, { muscle: muscleGroupLabel(m, lang) }),
       })
     })
   }

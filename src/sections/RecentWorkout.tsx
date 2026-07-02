@@ -40,8 +40,9 @@ export function RecentWorkout({ lang }: { lang: Lang }) {
       plan: customization.workoutPlan,
       level: customization.profile.trainingLevel,
     })
-    return generateInsights({ sessions, history: loadHistory(), coverage })
-  }, [customization.workoutPlan, customization.profile.trainingLevel])
+    // الملاحظات تُولَّد بلغة الواجهة الحالية (P10.1).
+    return generateInsights({ sessions, history: loadHistory(), coverage, lang })
+  }, [customization.workoutPlan, customization.profile.trainingLevel, lang])
 
   if (!session) return null
 
@@ -75,7 +76,8 @@ export function RecentWorkout({ lang }: { lang: Lang }) {
                   className={cn('flex items-start gap-2 rounded-xl border p-3 text-sm leading-relaxed', TONE_CLS[it.tone])}
                 >
                   <Icon name={TONE_ICON[it.tone]} className="mt-0.5 h-4 w-4 shrink-0" />
-                  <span>{it.text}</span>
+                  {/* عزل اتجاه النص (bdi): نص عربي احتياطي داخل واجهة إنجليزية لا يكسر علامات الترقيم */}
+                  <bdi className="min-w-0">{it.text}</bdi>
                 </li>
               ))}
             </ul>
@@ -93,7 +95,8 @@ function Stat({ icon, label, value }: { icon: string; label: string; value: stri
         <Icon name={icon} className="h-5 w-5" />
       </span>
       <p className="mt-4 text-xs text-ink-500">{label}</p>
-      <p className="mt-1 truncate text-lg font-black text-ink-900">{value}</p>
+      {/* dir=auto: قيمة قد تكون اسم يوم عربيًا محفوظًا في جلسة قديمة داخل واجهة إنجليزية */}
+      <p dir="auto" className="mt-1 truncate text-lg font-black text-ink-900">{value}</p>
     </div>
   )
 }

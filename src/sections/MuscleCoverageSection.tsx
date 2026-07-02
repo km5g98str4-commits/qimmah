@@ -23,11 +23,11 @@ export function MuscleCoverageSection({ lang }: { lang: Lang }) {
   const level = customization.profile.trainingLevel
 
   const { result, hasData } = useMemo(() => {
-    const sessions = isDemo ? demoSessions(plan) : loadSessions()
+    const sessions = isDemo ? demoSessions(plan, lang) : loadSessions()
     const res = computeWeeklyCoverage({ sessions, plan, level })
     const any = Object.values(res.weeklyCoverage).some((c) => c.sets > 0)
     return { result: res, hasData: any }
-  }, [isDemo, plan, level])
+  }, [isDemo, plan, level, lang])
 
   const summary = summarizeMuscleGroups(result.weeklyCoverage, level)
   const topRecs = result.recommendationsAr.slice(0, 2)
@@ -65,7 +65,8 @@ export function MuscleCoverageSection({ lang }: { lang: Lang }) {
                 </span>
                 <ul className="flex-1 space-y-1">
                   {topRecs.map((r, i) => (
-                    <li key={i} className="text-sm font-bold leading-relaxed text-ink-900">{r}</li>
+                    // dir=auto: التوصيات عربية المصدر وقد تُعرض داخل واجهة إنجليزية — عزل الاتجاه يحفظ الترقيم
+                    <li key={i} dir="auto" className="text-sm font-bold leading-relaxed text-ink-900">{r}</li>
                   ))}
                 </ul>
               </div>
@@ -116,7 +117,7 @@ function EmptyState({ lang }: { lang: Lang }) {
 }
 
 /** جلسات تجريبية للنموذج — تُغذّي البطاقات ببيانات واقعية (بلا كتابة في التخزين). */
-function demoSessions(plan: WorkoutPlan): WorkoutSession[] {
+function demoSessions(plan: WorkoutPlan, lang: Lang): WorkoutSession[] {
   if (!plan.days.length) return []
   const now = Date.now()
   const dayMs = 24 * 3600_000
@@ -129,7 +130,8 @@ function demoSessions(plan: WorkoutPlan): WorkoutSession[] {
       startedAt: when,
       finishedAt: when,
       workoutDayId: day.id,
-      workoutDayName: day.nameAr,
+      // اسم اليوم بلغة الواجهة (P10.1) — جلسة عرض فقط، لا تُكتب في التخزين.
+      workoutDayName: lang === 'en' ? day.nameEn || day.nameAr : day.nameAr,
       exercises: day.exercises.map((pe) => ({
         exerciseId: pe.exerciseId,
         targetSets: pe.sets,
