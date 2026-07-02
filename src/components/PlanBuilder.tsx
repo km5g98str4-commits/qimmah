@@ -60,6 +60,9 @@ const BOUNDS = {
 
 const clampN = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n))
 
+/** تحويل رقم لاتيني إلى أرقام هندية (للنص العربي فقط). */
+const toArDigits = (n: number) => String(n).replace(/\d/g, (x) => '٠١٢٣٤٥٦٧٨٩'[Number(x)])
+
 /** BMI رقمي فقط — بلا أي حكم قيمي أو تشخيص طبي. */
 function bmiOf(weightKg: number, heightCm: number): number | null {
   if (!(weightKg > 0) || !(heightCm > 0)) return null
@@ -116,6 +119,14 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
   const bmi = bmiOf(a.weightKg, a.heightCm)
   const isBeginner = isBeginnerLevel(a.experienceLevel)
 
+  // P10.1: حلّ تسمية/وصف بطاقات الخيارات حسب اللغة الحالية مع رجوع للعربية (المصدر الأساسي).
+  const cLabel = (c: { label: string; labelEn?: string }) => (lang === 'en' ? c.labelEn ?? c.label : c.label)
+  const cDesc = (c: { desc?: string; descEn?: string }) => (lang === 'en' ? c.descEn ?? c.desc : c.desc)
+  // تلميح الأيام الموصى بها — من قاموس i18n (أرقام هندية للعربية، لاتينية للإنجليزية).
+  const dayRecNote = dayRec
+    ? d.recommendedForLevel.replace('{n}', lang === 'en' ? String(dayRec.days) : toArDigits(dayRec.days))
+    : undefined
+
   // — تعريف الخطوات (شرطية بالكامل) —
   interface Step {
     key: string
@@ -156,7 +167,7 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
       <Question title={d.goalTitle} hint={d.goalHint}>
         <List>
           {goalChoices.map((c) => (
-            <OptionRow key={c.value} icon={c.icon} label={c.label} desc={c.desc} selected={a.goalValue === c.value} onClick={() => set({ goalValue: c.value, targetTouched: false })} />
+            <OptionRow key={c.value} icon={c.icon} label={cLabel(c)} desc={cDesc(c)} selected={a.goalValue === c.value} onClick={() => set({ goalValue: c.value, targetTouched: false })} />
           ))}
         </List>
       </Question>
@@ -172,7 +183,7 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
       <Question title={d.sexTitle} hint={d.sexHint}>
         <div className="grid grid-cols-2 gap-3">
           {sexChoices.map((c) => (
-            <OptionCard key={c.value} icon={c.icon} label={c.label} selected={a.sex === c.value} onClick={() => set({ sex: c.value })} />
+            <OptionCard key={c.value} icon={c.icon} label={cLabel(c)} selected={a.sex === c.value} onClick={() => set({ sex: c.value })} />
           ))}
         </div>
       </Question>
@@ -250,7 +261,7 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
       <Question title={d.experienceTitle} hint={d.experienceHint}>
         <List>
           {experienceChoices.map((c) => (
-            <OptionRow key={c.value} icon={c.icon} label={c.label} desc={c.desc} selected={a.experienceLevel === c.value} onClick={() => set({ experienceLevel: c.value, consistency: c.value === 'beginner' ? undefined : a.consistency, splitMode: c.value === 'beginner' ? 'auto' : a.splitMode, advancedSplit: c.value === 'beginner' ? undefined : a.advancedSplit, daysTouched: false })} />
+            <OptionRow key={c.value} icon={c.icon} label={cLabel(c)} desc={cDesc(c)} selected={a.experienceLevel === c.value} onClick={() => set({ experienceLevel: c.value, consistency: c.value === 'beginner' ? undefined : a.consistency, splitMode: c.value === 'beginner' ? 'auto' : a.splitMode, advancedSplit: c.value === 'beginner' ? undefined : a.advancedSplit, daysTouched: false })} />
           ))}
         </List>
       </Question>
@@ -267,7 +278,7 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
         <Question title={d.consistencyTitle} hint={d.consistencyHint}>
           <List>
             {consistencyChoicesV2.map((c) => (
-              <OptionRow key={c.value} icon={c.icon} label={c.label} desc={c.desc} selected={a.consistency === c.value} onClick={() => set({ consistency: c.value })} />
+              <OptionRow key={c.value} icon={c.icon} label={cLabel(c)} desc={cDesc(c)} selected={a.consistency === c.value} onClick={() => set({ consistency: c.value })} />
             ))}
           </List>
         </Question>
@@ -284,7 +295,7 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
       <Question title={d.environmentTitle} hint={d.environmentHint}>
         <List>
           {environmentChoices.map((c) => (
-            <OptionRow key={c.value} icon={c.icon} label={c.label} desc={c.desc} selected={a.environment === c.value} onClick={() => set({ environment: c.value })} />
+            <OptionRow key={c.value} icon={c.icon} label={cLabel(c)} desc={cDesc(c)} selected={a.environment === c.value} onClick={() => set({ environment: c.value })} />
           ))}
         </List>
       </Question>
@@ -297,7 +308,7 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
     label: d.labelDays,
     valid: a.trainingDays >= BOUNDS.days.min && a.trainingDays <= BOUNDS.days.max,
     content: (
-      <Question title={d.daysTitle} hint={dayRec?.note}>
+      <Question title={d.daysTitle} hint={dayRecNote}>
         <Stepper value={a.trainingDays} min={BOUNDS.days.min} max={BOUNDS.days.max} onChange={(v) => set({ trainingDays: v, daysTouched: true })} unit={d.daysUnit} d={d} />
         {dayRec && (
           <button type="button" onClick={() => set({ trainingDays: dayRec.days, daysTouched: true })} className="mt-4 w-full rounded-xl border border-primary/40 bg-primary/10 px-4 py-2.5 text-sm font-bold text-primary">
@@ -318,7 +329,7 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
       <Question title={d.durationTitle} hint={d.durationHint}>
         <List>
           {sessionDurationChoices.map((c) => (
-            <OptionRow key={c.value} icon="Clock" label={c.label} desc={c.desc} selected={a.sessionDurationMin === c.value} onClick={() => set({ sessionDurationMin: c.value })} />
+            <OptionRow key={c.value} icon="Clock" label={cLabel(c)} desc={cDesc(c)} selected={a.sessionDurationMin === c.value} onClick={() => set({ sessionDurationMin: c.value })} />
           ))}
         </List>
       </Question>
@@ -335,7 +346,7 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
         <Question title={d.splitModeTitle} hint={d.splitModeHint}>
           <List>
             {splitModeChoices.map((c) => (
-              <OptionRow key={c.value} icon={c.icon} label={c.label} desc={c.desc} selected={a.splitMode === c.value} onClick={() => set({ splitMode: c.value })} />
+              <OptionRow key={c.value} icon={c.icon} label={cLabel(c)} desc={cDesc(c)} selected={a.splitMode === c.value} onClick={() => set({ splitMode: c.value })} />
             ))}
           </List>
         </Question>
@@ -353,7 +364,7 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
         <Question title={d.advancedSplitTitle} hint={d.advancedSplitHint}>
           <List>
             {advancedSplitChoices.map((c) => (
-              <OptionRow key={c.value} icon={c.icon} label={c.label} desc={c.desc} selected={a.advancedSplit === c.value} onClick={() => set({ advancedSplit: c.value })} />
+              <OptionRow key={c.value} icon={c.icon} label={cLabel(c)} desc={cDesc(c)} selected={a.advancedSplit === c.value} onClick={() => set({ advancedSplit: c.value })} />
             ))}
           </List>
         </Question>
@@ -370,7 +381,7 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
       <Question title={d.activityTitle} hint={d.activityHint}>
         <List>
           {neatChoices.map((c) => (
-            <OptionRow key={c.value} icon={c.icon} label={c.label} desc={c.desc} selected={a.neat === c.value} onClick={() => set({ neat: c.value })} />
+            <OptionRow key={c.value} icon={c.icon} label={cLabel(c)} desc={cDesc(c)} selected={a.neat === c.value} onClick={() => set({ neat: c.value })} />
           ))}
         </List>
         <div className="mt-6 border-t border-night-800 pt-5">
@@ -399,7 +410,7 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
       <Question title={d.nutritionStyleTitle} hint={d.nutritionStyleHint}>
         <List>
           {nutritionStyleChoices.map((c) => (
-            <OptionRow key={c.value} icon={c.icon} label={c.label} desc={c.desc} selected={a.nutritionStyle === c.value} onClick={() => set({ nutritionStyle: c.value })} />
+            <OptionRow key={c.value} icon={c.icon} label={cLabel(c)} desc={cDesc(c)} selected={a.nutritionStyle === c.value} onClick={() => set({ nutritionStyle: c.value })} />
           ))}
         </List>
       </Question>
@@ -428,7 +439,7 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
         <Question title={d.mealDistributionTitle} hint={d.mealDistributionHint}>
           <List>
             {mealDistributionChoices.map((c) => (
-              <OptionRow key={c.value} icon={c.icon} label={c.label} desc={c.desc} selected={a.mealDistribution === c.value} onClick={() => set({ mealDistribution: c.value })} />
+              <OptionRow key={c.value} icon={c.icon} label={cLabel(c)} desc={cDesc(c)} selected={a.mealDistribution === c.value} onClick={() => set({ mealDistribution: c.value })} />
             ))}
           </List>
         </Question>
@@ -444,7 +455,7 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
         <Question title={d.appetiteTimingTitle} hint={d.appetiteTimingHint}>
           <List>
             {appetiteTimingChoices.map((c) => (
-              <OptionRow key={c.value} icon={c.icon} label={c.label} desc={c.desc} selected={a.appetiteTiming === c.value} onClick={() => set({ appetiteTiming: c.value })} />
+              <OptionRow key={c.value} icon={c.icon} label={cLabel(c)} desc={cDesc(c)} selected={a.appetiteTiming === c.value} onClick={() => set({ appetiteTiming: c.value })} />
             ))}
           </List>
         </Question>
@@ -463,14 +474,14 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
         <p className="mb-3 text-sm font-bold text-night-300">{d.foodPatternLabel}</p>
         <List>
           {dietPatternChoices.map((c) => (
-            <OptionRow key={c.value} icon={c.icon} label={c.label} selected={a.dietPattern === c.value} onClick={() => set({ dietPattern: c.value })} />
+            <OptionRow key={c.value} icon={c.icon} label={cLabel(c)} selected={a.dietPattern === c.value} onClick={() => set({ dietPattern: c.value })} />
           ))}
         </List>
         <div className="mt-6 border-t border-night-800 pt-5">
           <p className="mb-3 text-sm font-bold text-night-300">{d.foodAllergiesLabel}</p>
           <div className="grid grid-cols-2 gap-3">
             {allergyChoices.map((c) => (
-              <OptionCard key={c.value} icon={c.icon} label={c.label} selected={a.allergies.includes(c.value)} onClick={() => toggleIn('allergies', c.value)} />
+              <OptionCard key={c.value} icon={c.icon} label={cLabel(c)} selected={a.allergies.includes(c.value)} onClick={() => toggleIn('allergies', c.value)} />
             ))}
           </div>
         </div>
@@ -489,14 +500,14 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
         <p className="mb-3 text-sm font-bold text-night-300">{d.limitationsInjuriesLabel}</p>
         <div className="grid grid-cols-2 gap-3">
           {injuryChoices.map((c) => (
-            <OptionCard key={c.value} icon={c.icon} label={c.label} selected={a.injuries.includes(c.value)} onClick={() => toggleIn('injuries', c.value)} />
+            <OptionCard key={c.value} icon={c.icon} label={cLabel(c)} selected={a.injuries.includes(c.value)} onClick={() => toggleIn('injuries', c.value)} />
           ))}
         </div>
         <div className="mt-6 border-t border-night-800 pt-5">
           <p className="mb-3 text-sm font-bold text-night-300">{d.limitationsWellnessLabel}</p>
           <List>
             {wellnessModeChoices.map((c) => (
-              <OptionRow key={c.value} icon={c.icon} label={c.label} desc={c.desc} selected={a.wellnessMode === c.value} onClick={() => set({ wellnessMode: c.value })} />
+              <OptionRow key={c.value} icon={c.icon} label={cLabel(c)} desc={cDesc(c)} selected={a.wellnessMode === c.value} onClick={() => set({ wellnessMode: c.value })} />
             ))}
           </List>
         </div>

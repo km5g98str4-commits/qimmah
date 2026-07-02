@@ -211,7 +211,9 @@ function SystemIdentity({ lang, onNavigate }: { lang: Lang; onNavigate: (route: 
   const days = customization.workoutPlan.days.length
   const split = days ? planTitle(customization.workoutPlan.templateId, lang) : undefined
   const calories = customization.nutritionPlan.targetCalories || customization.targets.targetCalories || 0
-  const expLabel = experienceChoices.find((e) => e.value === p.experienceLevel)?.label
+  // P10.1: تسمية الخبرة حسب اللغة الحالية مع رجوع للعربية (المصدر الأساسي).
+  const expChoice = experienceChoices.find((e) => e.value === p.experienceLevel)
+  const expLabel = expChoice ? (lang === 'en' ? expChoice.labelEn ?? expChoice.label : expChoice.label) : undefined
 
   return (
     <section className="card p-5">
