@@ -21,7 +21,8 @@
     "proof:p5plan": "node scripts/run-p5-plan-proof.mjs",
     "proof:p5medals": "node scripts/run-p5-medals-shot.mjs",
     "proof:p8a2off": "node scripts/run-p8a2-off-proof.mjs",
-    "proof:p8a3": "node scripts/run-p8a3-proof.mjs"
+    "proof:p8a3": "node scripts/run-p8a3-proof.mjs",
+    "proof:p10a5": "node scripts/run-p10-a5-proof.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.108.2",

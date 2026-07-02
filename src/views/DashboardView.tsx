@@ -4,6 +4,7 @@ import { DailySummary } from '@/sections/DailySummary'
 import { Today } from '@/sections/Today'
 import { RecentWorkout } from '@/sections/RecentWorkout'
 import { AchievementsCard } from '@/features/achievements/AchievementsCard'
+import { TodoWidget } from '@/features/todo/TodoWidget'
 import { useCustomization } from '@/lib/customizationContext'
 import { todayPlanDay } from '@/lib/workoutPlan'
 import { planTitle } from '@/lib/planGenerator'
@@ -60,6 +61,9 @@ export function DashboardView({ lang, onNavigate }: DashboardViewProps) {
 
       {/* أوسمتك — ظاهرة دائمًا (تحفيز المبتدئ)، والشبكة الكاملة على بُعد نقرة */}
       <AchievementsCard />
+
+      {/* مهام اليوم — قائمة سريعة خفيفة قرب أسفل الرئيسية (وصول بالإبهام). */}
+      <TodoWidget lang={lang} />
 
       {/* الوضع المتقدّم — تفاصيل أكثر لمن يريدها */}
       {!isSimple && (
