@@ -1,7 +1,16 @@
 import { useState } from 'react'
 import { Icon } from '@/components/Icon'
 import { useCustomization } from '@/lib/customizationContext'
-import { activityOptions, goalTypeLabel, totalActivityMultiplier } from '@/lib/calculators'
+import {
+  activityOptions,
+  BULK_SURPLUS,
+  CUT_DEFICIT,
+  goalTypeLabel,
+  totalActivityMultiplier,
+} from '@/lib/calculators'
+import { useLang } from '@/i18n'
+import { calorieExplainerStrings } from '@/i18n/dict/calorieExplainer'
+import { activityLabelI18n, goalTypeLabelI18n } from '@/lib/i18nLabels'
 
 /**
  * «كيف نحسب سعراتك؟» — يفكّك منطق الحساب بأرقامك الفعلية (BMR ← TDEE ← تعديل الهدف ← البروتين)
@@ -11,12 +20,16 @@ export function CalorieExplainer() {
   const { customization } = useCustomization()
   const p = customization.profile
   const t = customization.targets
+  const lang = useLang()
+  const d = calorieExplainerStrings[lang]
   const [open, setOpen] = useState(false)
 
   // القيم الفعلية من ملفك — لا أرقام ثابتة.
   const multiplier = totalActivityMultiplier(p.activityLevel, p.trainingDays)
-  const activityLabel = activityOptions.find((o) => o.value === p.activityLevel)?.label ?? ''
-  const goalAdj = p.goalType === 'cutting' ? -400 : p.goalType === 'bulking' ? 300 : 0
+  const activityLabelAr = activityOptions.find((o) => o.value === p.activityLevel)?.label ?? ''
+  const activityLabel = activityLabelI18n(p.activityLevel, activityLabelAr, lang)
+  const goalAdj = p.goalType === 'cutting' ? -CUT_DEFICIT : p.goalType === 'bulking' ? BULK_SURPLUS : 0
+  const goalLabel = goalTypeLabelI18n(p.goalType, goalTypeLabel(p.goalType), lang)
   const proteinPerKg = p.weightKg > 0 ? Math.round((t.proteinGrams / p.weightKg) * 10) / 10 : 0
 
   // بدون بيانات جسم كافية لا توجد أرقام نشرحها.
@@ -34,8 +47,8 @@ export function CalorieExplainer() {
           <Icon name="Calculator" className="h-5 w-5" />
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block text-sm font-bold text-ink-900">كيف نحسب سعراتك؟</span>
-          <span className="block text-[11px] text-ink-400">اعرف من وين جت أرقامك خطوة بخطوة</span>
+          <span className="block text-sm font-bold text-ink-900">{d.toggleTitle}</span>
+          <span className="block text-[11px] text-ink-400">{d.toggleHint}</span>
         </span>
         <Icon name={open ? 'ChevronUp' : 'ChevronDown'} className="h-5 w-5 shrink-0 text-ink-400" />
       </button>
@@ -43,55 +56,41 @@ export function CalorieExplainer() {
       {open && (
         <div className="border-t border-line p-5">
           {!hasData ? (
-            <p className="text-sm text-ink-500">
-              أكمل بيانات جسمك (الوزن والطول والعمر) في الإعداد حتى نعرض لك طريقة الحساب بأرقامك.
-            </p>
+            <p className="text-sm text-ink-500">{d.needData}</p>
           ) : (
             <>
               <ol className="space-y-4">
-                <Step
-                  n={1}
-                  title="سعرات جسمك وأنت مرتاح (BMR)"
-                  desc="كم يحرق جسمك لو ما تحركت طول اليوم — نحسبها بمعادلة Mifflin-St Jeor من وزنك وطولك وعمرك."
-                  value={`${t.bmr}`}
-                  unit="سعرة"
-                />
+                <Step n={1} title={d.bmrTitle} desc={d.bmrDesc} value={`${t.bmr}`} unit={d.calorieUnit} />
                 <Step
                   n={2}
-                  title="سعرات يومك كامل (TDEE)"
-                  desc={`نضرب BMR في معامل حركتك (${activityLabel} + ${p.trainingDays} أيام تمرين) = ×${multiplier.toFixed(2)}.`}
+                  title={d.tdeeTitle}
+                  desc={`${d.tdeeDescPrefix} (${activityLabel} + ${p.trainingDays} ${d.daysWord}) = ×${multiplier.toFixed(2)}.`}
                   value={`${t.tdee}`}
-                  unit="سعرة"
+                  unit={d.calorieUnit}
                   formula={`${t.bmr} × ${multiplier.toFixed(2)}`}
                 />
                 <Step
                   n={3}
-                  title={`تعديل حسب هدفك (${goalTypeLabel(p.goalType)})`}
-                  desc={
-                    goalAdj < 0
-                      ? 'للتنشيف ننقص ٤٠٠ سعرة عن سعرات يومك لخسارة الدهون بثبات.'
-                      : goalAdj > 0
-                        ? 'للتضخيم نزيد ٣٠٠ سعرة فوق سعرات يومك لبناء العضل تدريجيًا.'
-                        : 'لهدف الثبات نبقى على سعرات يومك بدون زيادة أو نقص.'
-                  }
+                  title={`${d.goalTitlePrefix} (${goalLabel})`}
+                  desc={goalAdj < 0 ? d.descCut : goalAdj > 0 ? d.descBulk : d.descMaintain}
                   value={`${t.targetCalories}`}
-                  unit="سعرة / يوم"
+                  unit={d.targetDayUnit}
                   formula={goalAdj !== 0 ? `${t.tdee} ${goalAdj < 0 ? '−' : '+'} ${Math.abs(goalAdj)}` : `${t.tdee}`}
                   highlight
                 />
                 <Step
                   n={4}
-                  title="بروتينك اليومي"
-                  desc={`نحسب ${proteinPerKg}غ لكل كيلو من وزنك — ضمن النطاق الموصى به للرياضيين ١٫٦–٢٫٢غ/كجم للحفاظ على العضل.`}
+                  title={d.proteinTitle}
+                  desc={`${d.proteinDescA}${proteinPerKg}${d.proteinDescB}`}
                   value={`${t.proteinGrams}`}
-                  unit="غرام / يوم"
-                  formula={`${proteinPerKg} × ${p.weightKg} كجم`}
+                  unit={d.proteinDayUnit}
+                  formula={`${proteinPerKg} × ${p.weightKg} ${d.kg}`}
                 />
               </ol>
 
               <p className="mt-4 flex items-start gap-2 text-[11px] text-ink-400">
                 <Icon name="Info" className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                هذه تقديرات لتنظيم أكلك ومتابعة تقدّمك فقط، وليست نصيحة طبية. عدّلها حسب إحساسك ونتائجك على أرض الواقع.
+                {d.disclaimer}
               </p>
             </>
           )}

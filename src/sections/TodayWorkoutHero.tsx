@@ -120,7 +120,7 @@ export function TodayWorkoutHero({
         <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-line pt-4">
           <Chip icon="Flame" text={`${weekly.streakWeeks} ${t.weeksUnit}`} highlight={weekly.streakWeeks > 0} />
           <Chip icon="CalendarDays" text={`${weekly.thisWeekCount} ${t.of} ${weekly.daysPerWeek}`} />
-          {typeof proteinG === 'number' && <Chip icon="Salad" text={`${proteinG}غ`} />}
+          {typeof proteinG === 'number' && <Chip icon="Salad" text={`${proteinG}${lang === 'en' ? 'g' : 'غ'}`} />}
           {typeof waterLiters === 'number' && <Chip icon="Droplets" text={`${waterLiters} ${lang === 'en' ? 'L' : 'لتر'}`} />}
         </div>
       </div>

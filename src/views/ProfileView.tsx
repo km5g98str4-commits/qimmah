@@ -4,6 +4,7 @@ import { MyTargets } from '@/sections/MyTargets'
 import { HealthNotice } from '@/sections/HealthNotice'
 import { useAuth } from '@/lib/authContext'
 import { getStrings } from '@/config/strings'
+import { calcScreenStrings } from '@/i18n/dict/calcScreen'
 import type { Lang } from '@/lib/appPreferences'
 import type { AppRoute } from '@/lib/appRoutes'
 
@@ -15,6 +16,7 @@ interface ProfileViewProps {
 /** تبويب حسابي — الحساب + بيانات الجسم + الأهداف + روابط الإعدادات والقانون. */
 export function ProfileView({ lang, onNavigate }: ProfileViewProps) {
   const t = getStrings(lang)
+  const calc = calcScreenStrings[lang]
   const auth = useAuth()
 
   const statusText = !auth.configured
@@ -61,6 +63,22 @@ export function ProfileView({ lang, onNavigate }: ProfileViewProps) {
       <ProfileData lang={lang} />
       <MyTargets lang={lang} />
 
+      {/* مدخل صفحة «كيف نحسب أرقامك؟» — شفافية الحسابات */}
+      <button
+        type="button"
+        onClick={() => onNavigate('calc')}
+        className="card flex w-full items-center gap-3 p-5 text-start transition-colors hover:border-primary-soft"
+      >
+        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary-c">
+          <Icon name="Calculator" className="h-5 w-5" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-black text-ink-900">{calc.pageTitle}</span>
+          <span className="block text-xs leading-relaxed text-ink-500">{calc.pageSubtitle}</span>
+        </span>
+        <Icon name="ChevronLeft" className="h-4 w-4 shrink-0 text-ink-400 rtl:rotate-180" />
+      </button>
+
       {/* روابط الثقة */}
       <div className="card p-5">
         <h2 className="text-base font-black text-ink-900">{t.settings.groupPrivacy}</h2>
@@ -70,7 +88,7 @@ export function ProfileView({ lang, onNavigate }: ProfileViewProps) {
         </div>
       </div>
 
-      <HealthNotice />
+      <HealthNotice lang={lang} />
     </div>
   )
 }

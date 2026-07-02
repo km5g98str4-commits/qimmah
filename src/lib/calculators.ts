@@ -29,6 +29,21 @@ const TRAINING_ADD_PER_DAY = 0.025
 /** سقف إجمالي معامل النشاط (NEAT + تمرين). */
 const ACTIVITY_MULTIPLIER_CAP = 1.9
 
+// — ثوابت الماكروز والسعرات (مصدر حقيقة واحد، تستهلكها صفحة «كيف نحسب أرقامك») —
+/** البروتين لكل كيلو من وزن الجسم — 1.8غ/كجم لكل الأهداف (ضمن نطاق 1.6–2.2 الموصى به رياضيًا). */
+export const PROTEIN_PER_KG = 1.8
+/** نسبة سعرات الدهون من إجمالي السعرات المستهدفة (~25–30% — نستخدم 27%). */
+export const FAT_CALORIE_RATIO = 0.27
+/** عجز التنشيف بالسعرات تحت TDEE. */
+export const CUT_DEFICIT = 400
+/** فائض التضخيم بالسعرات فوق TDEE. */
+export const BULK_SURPLUS = 300
+/**
+ * إصدار صيغة الحساب — يُضمَّن في بصمة الملف الشخصي حتى تُعاد الحسابات تلقائيًا
+ * للمستخدمين الحاليين عند تغيّر المعادلات (بروتين 1.8، دهون نسبة سعرات).
+ */
+export const CALC_FORMULA_VERSION = 'p10-protein1.8-fat27'
+
 /**
  * معامل النشاط الكلّي = NEAT + (أيام التمرين × 0.025)، بسقف 1.9.
  * يفصل حركة الحياة عن التمرين لتفادي تضخيم السعرات.
@@ -59,7 +74,7 @@ export const trainingLevelOptions: { value: TrainingLevel; label: string }[] = [
 ]
 export const goalOptions: { value: CalorieGoal; label: string }[] = [
   { value: 'cut', label: 'تنشيف (إنقاص دهون)' },
-  { value: 'maintain', label: 'محافظة على الوزن' },
+  { value: 'maintain', label: 'محافظة على العضل' },
   { value: 'bulk', label: 'تضخيم (زيادة كتلة)' },
 ]
 export const environmentOptions: { value: WorkoutEnvironment; label: string }[] = [
@@ -69,7 +84,7 @@ export const environmentOptions: { value: WorkoutEnvironment; label: string }[] 
 export const goalTypeOptions: { value: GoalType; label: string }[] = [
   { value: 'cutting', label: 'تنشيف' },
   { value: 'bulking', label: 'تضخيم' },
-  { value: 'maintenance', label: 'ثبات' },
+  { value: 'maintenance', label: 'محافظة على العضل' },
   { value: 'returning', label: 'رجوع بعد انقطاع' },
   { value: 'health', label: 'صحة عامة' },
 ]
@@ -97,12 +112,16 @@ const round1 = (n: number) => Math.round(n * 10) / 10
 /** تقريب لأقرب نصف لتر (0.5). */
 const roundHalf = (n: number) => Math.round(n * 2) / 2
 
+/** ثابت الجنس في معادلة ميفلين–سانت جيور: +5 ذكر، −161 أنثى، −78 غير محدّد (متوسط تقريبي). */
+export function mifflinSexConstant(gender: Gender): number {
+  if (gender === 'male') return 5
+  if (gender === 'female') return -161
+  return -78
+}
+
 /** BMR — Mifflin-St Jeor؛ «غير محدّد» = متوسط تقريبي. */
 function bmrFor(gender: Gender, weight: number, height: number, age: number): number {
-  const baseline = 10 * weight + 6.25 * height - 5 * age
-  if (gender === 'male') return baseline + 5
-  if (gender === 'female') return baseline - 161
-  return baseline - 78 // متوسط تقريبي بين الذكر والأنثى
+  return 10 * weight + 6.25 * height - 5 * age + mifflinSexConstant(gender)
 }
 
 // تنبيه: مؤشر BMI لا يفرّق بين العضلات والدهون — نستخدم صياغة محايدة لا تحكم على الجسم.
@@ -131,9 +150,9 @@ function calorieFloor(gender: Gender): number {
 function rawCaloriesForGoalType(goalType: GoalType, tdee: number): number {
   switch (goalType) {
     case 'cutting':
-      return round(tdee - 400)
+      return round(tdee - CUT_DEFICIT)
     case 'bulking':
-      return round(tdee + 300)
+      return round(tdee + BULK_SURPLUS)
     case 'maintenance':
     case 'returning':
     case 'health':
@@ -217,9 +236,9 @@ export function computeTargets(p: Profile): Targets {
   const isLowCalorie = rawCalories < lowCalorieThreshold(p.gender, bmr)
 
   // الماكروز محسوبة على السعرات المستهدفة الفعلية:
-  // بروتين 2.0غ/كجم، دهون 0.9غ/كجم، والباقي كارب.
-  const protein = round(2.0 * w)
-  const fat = round(0.9 * w)
+  // بروتين 1.8غ/كجم لكل الأهداف، دهون ~27% من السعرات، والباقي كارب.
+  const protein = round(PROTEIN_PER_KG * w)
+  const fat = round((calories * FAT_CALORIE_RATIO) / 9)
   const carbs = Math.max(0, round((calories - protein * 4 - fat * 9) / 4))
   // الماء: وزن×0.035 لأقرب نصف لتر، بحدّ أدنى 2.5 لتر.
   const water = Math.max(2.5, roundHalf(w * 0.035))
@@ -295,6 +314,7 @@ export function targetCaloriesFor(goal: CalorieGoal, t: Targets): number {
 /** بصمة الحقول المؤثّرة على الحسابات — لكشف تغيّر الملف الشخصي. */
 export function profileHash(p: Profile): string {
   return [
+    CALC_FORMULA_VERSION,
     p.gender,
     p.age,
     p.heightCm,

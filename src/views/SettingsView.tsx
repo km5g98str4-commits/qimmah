@@ -89,9 +89,9 @@ export function SettingsView({
         if (parsed.history) importHistory(parsed.history)
         if (parsed.preferences) savePreferences({ ...loadPreferences(), ...parsed.preferences })
         markPendingSync()
-        window.alert('تم استيراد نسختك بنجاح.')
+        window.alert(t.settings.importSuccess)
       } catch {
-        window.alert('تعذّرت قراءة الملف. تأكّد أنّه نسخة قِمّة صحيحة.')
+        window.alert(t.settings.importError)
       }
     }
     reader.readAsText(file)
@@ -116,7 +116,7 @@ export function SettingsView({
       measurementPlan: g.measurementPlan,
     })
     markPendingSync()
-    window.alert('تم إعادة توليد خطتك من بياناتك الحالية.')
+    window.alert(t.settings.regenerateSuccess)
   }
 
   // — الحساب: حالة + خروج —

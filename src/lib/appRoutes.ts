@@ -12,6 +12,8 @@ export type AppRoute =
   | 'nutrition'
   | 'progress'
   | 'profile'
+  // صفحة «كيف نحسب أرقامك؟» — مدخلها من تبويب حسابي، ليست تبويبًا رئيسيًا.
+  | 'calc'
   | 'demo'
   | 'settings'
   | 'privacy'
@@ -32,6 +34,7 @@ const ROUTES: AppRoute[] = [
   'nutrition',
   'progress',
   'profile',
+  'calc',
   'demo',
   'settings',
   'privacy',

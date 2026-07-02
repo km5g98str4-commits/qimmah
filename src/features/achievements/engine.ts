@@ -8,11 +8,15 @@
 
 import {
   ACHIEVEMENTS,
+  achievementDescription,
+  achievementTitle,
   getAchievement,
   type AchievementCategory,
   type AchievementDef,
   type AchievementMetric,
 } from '@/data/achievements'
+import { getLanguage } from '@/lib/appPreferences'
+import { achievementsStrings } from '@/i18n/dict/achievements'
 import { getNutritionLogs, getWorkoutSessions } from '@/lib/historyStore'
 import { bestWorkoutStreak, weeklyAdherenceStreak } from '@/lib/streaks'
 import { loadStepGoal, loadStepLog } from '@/lib/stepCounter'
@@ -233,11 +237,12 @@ export function evaluateAchievements(input: EvaluateInput = {}): AchievementDef[
     if (stats[def.metric] >= def.threshold) {
       state.unlocked[def.id] = today
       newlyUnlocked.push(def)
+      const lang = getLanguage()
       enqueueCelebration({
         key: nextKey('medal'),
         kind: 'medal',
-        title: def.title,
-        description: def.description,
+        title: achievementTitle(def, lang),
+        description: achievementDescription(def, lang),
         category: def.category,
         icon: def.icon,
       })
@@ -270,13 +275,15 @@ export function registerWorkoutPRs(prs: PRCelebration[]): void {
   state.prCount += prs.length
   saveState(state)
 
+  const lang = getLanguage()
+  const s = achievementsStrings[lang]
   prs.forEach((pr) => {
-    const name = pr.nameAr || pr.nameEn || 'تمرينك'
+    const name = (lang === 'en' ? pr.nameEn || pr.nameAr : pr.nameAr || pr.nameEn) || s.prFallbackName
     enqueueCelebration({
       key: nextKey('pr'),
       kind: 'pr',
-      title: 'رقم قياسي جديد!',
-      body: `${name} · ${pr.weight} كجم — رقم جديد ما وصلته قبل.`,
+      title: s.prTitle,
+      body: `${name} · ${pr.weight} ${s.prKg} — ${s.prTail}`,
       icon: 'PartyPopper',
     })
   })

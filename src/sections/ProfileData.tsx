@@ -1,8 +1,8 @@
 import { SectionHeading } from '@/components/SectionHeading'
 import { Icon } from '@/components/Icon'
-import { sectionCopy } from '@/config/content'
 import { useCustomization } from '@/lib/customizationContext'
 import { activityOptions, targetCaloriesFor } from '@/lib/calculators'
+import { activityLabelI18n } from '@/lib/i18nLabels'
 import { profileScreenStrings } from '@/i18n/dict/profileScreen'
 import type { Lang } from '@/lib/appPreferences'
 
@@ -11,7 +11,8 @@ export function ProfileData({ lang = 'ar' }: { lang?: Lang }) {
   const d = profileScreenStrings[lang]
   const { customization } = useCustomization()
   const p = customization.profile
-  const activityLabel = activityOptions.find((a) => a.value === p.activityLevel)?.label ?? d.activityMedium
+  const activityLabelAr = activityOptions.find((a) => a.value === p.activityLevel)?.label ?? d.activityMedium
+  const activityLabel = activityLabelI18n(p.activityLevel, activityLabelAr, lang)
   const calories = targetCaloriesFor(p.goal, customization.targets)
 
   const fields: { icon: string; label: string; value: string; unit?: string }[] = [
@@ -26,7 +27,12 @@ export function ProfileData({ lang = 'ar' }: { lang?: Lang }) {
   return (
     <section id="profile" className="section bg-beige">
       <div className="container-page">
-        <SectionHeading {...sectionCopy.profile} />
+        <SectionHeading
+          eyebrow={d.sectionEyebrow}
+          icon="Ruler"
+          title={d.sectionTitle}
+          description={d.sectionDescription}
+        />
 
         <div className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
           {fields.map((f) => (

@@ -36,6 +36,7 @@ export interface ProgressScreenStrings {
   activatedMiddle: string
   activatedSuffix: string
   emptyCaption: string
+  mapSelectHint: string
   mapImgAriaPrefix: string
   mapImgAriaView: string
   mapImgAriaFront: string
@@ -100,6 +101,7 @@ const ar: ProgressScreenStrings = {
   activatedMiddle: 'من',
   activatedSuffix: 'عضلة هذا الأسبوع 💪',
   emptyCaption: 'ابدأ تمرينك وبتشوف عضلاتك تتلوّن هنا.',
+  mapSelectHint: 'اضغط عضلة ثانية للتفاصيل',
   mapImgAriaPrefix: 'خريطة العضلات — جسم',
   mapImgAriaView: 'العرض',
   mapImgAriaFront: 'الأمامي',
@@ -164,6 +166,7 @@ const en: ProgressScreenStrings = {
   activatedMiddle: 'of',
   activatedSuffix: 'muscles this week 💪',
   emptyCaption: 'Start your workout and watch your muscles light up here.',
+  mapSelectHint: 'Tap another muscle for details',
   mapImgAriaPrefix: 'Muscle map — a',
   mapImgAriaView: 'body,',
   mapImgAriaFront: 'front',
