@@ -2,11 +2,12 @@ import { useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import { Icon } from './Icon'
 import { LineChart } from './LineChart'
-import { MuscleChips } from './MuscleChips'
 import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
 import { libraryStrings, type LibraryStrings } from '@/i18n/dict/library'
-import { getExercise, targetMuscleAr } from '@/data/exercises'
+import { detailedMuscleLabel, exerciseName, getExercise } from '@/data/exercises'
+import { muscleLabel } from '@/lib/muscles'
+import type { MuscleId } from '@/types/muscles'
 import { guidanceFor } from '@/lib/exerciseGuidance'
 import { exerciseStats } from '@/lib/exerciseStats'
 import { getRecord } from '@/lib/exerciseHistory'
@@ -56,13 +57,13 @@ export function ExerciseDetail({ lang, exerciseId, onClose, onAddToPlan }: Exerc
           <div className="absolute inset-x-0 bottom-0 p-4">
             {/* الاسم العربي أساسي، الإنجليزي سطر ثانوي أصغر (موحّد عبر الواجهة) */}
             <h2 className="text-xl font-black text-white drop-shadow">
-              {lang === 'en' ? ex.nameEn || ex.nameAr : ex.nameAr || ex.nameEn}
+              {exerciseName(ex, lang)}
             </h2>
             {lang !== 'en' && ex.nameEn && ex.nameEn !== ex.nameAr && (
               <p className="mt-0.5 text-sm font-bold text-white/80 drop-shadow">{ex.nameEn}</p>
             )}
             <p className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px] font-bold text-white/80">
-              <span className="rounded-full bg-white/15 px-2 py-0.5 backdrop-blur">{targetMuscleAr(ex)}</span>
+              <span className="rounded-full bg-white/15 px-2 py-0.5 backdrop-blur">{muscleLabel(ex.primaryMuscle, lang)}</span>
               <span>{ex.equipment.join(' · ')} · {levelLabel(ex.level, d)}</span>
             </p>
           </div>
@@ -88,7 +89,7 @@ export function ExerciseDetail({ lang, exerciseId, onClose, onAddToPlan }: Exerc
 
         {/* المحتوى */}
         <div className="flex-1 overflow-y-auto p-4">
-          {tab === 'about' && <AboutTab ex={ex} d={d} onAddToPlan={onAddToPlan} />}
+          {tab === 'about' && <AboutTab ex={ex} d={d} lang={lang} onAddToPlan={onAddToPlan} />}
           {tab === 'history' && <HistoryTab stats={stats} d={d} lastWeight={rec?.lastWeight} bestWeight={rec?.bestWeight} lastReps={rec?.lastReps} />}
           {tab === 'charts' && <ChartsTab stats={stats} d={d} />}
           {tab === 'records' && <RecordsTab stats={stats} d={d} />}
@@ -103,18 +104,18 @@ function ExerciseHero({ ex }: { ex: NonNullable<ReturnType<typeof getExercise>> 
   return <ExerciseMedia exerciseId={ex.id} muscles={ex.primaryMusclesDetailed} heightClass="h-40" />
 }
 
-function AboutTab({ ex, d, onAddToPlan }: { ex: NonNullable<ReturnType<typeof getExercise>>; d: LibraryStrings; onAddToPlan?: (id: string) => void }) {
+function AboutTab({ ex, d, lang, onAddToPlan }: { ex: NonNullable<ReturnType<typeof getExercise>>; d: LibraryStrings; lang: Lang; onAddToPlan?: (id: string) => void }) {
   const g = guidanceFor(ex)
   return (
     <div className="space-y-5">
-      {/* العضلات المستهدفة */}
+      {/* العضلات المستهدفة — رقائق بلغة الواجهة الحالية (قاموس العضلات المشترك) */}
       <Block title={d.targetMuscles} icon="Target">
         <p className="mb-2 text-[11px] font-bold text-ink-500">{d.primary}</p>
-        <MuscleChips primary={ex.primaryMusclesDetailed} />
+        <LocalizedChips ids={ex.primaryMusclesDetailed} lang={lang} kind="primary" />
         {ex.secondaryMusclesDetailed.length > 0 && (
           <>
             <p className="mb-2 mt-3 text-[11px] font-bold text-ink-500">{d.secondary}</p>
-            <MuscleChips primary={[]} secondary={ex.secondaryMusclesDetailed} />
+            <LocalizedChips ids={ex.secondaryMusclesDetailed} lang={lang} kind="secondary" />
           </>
         )}
       </Block>
@@ -253,6 +254,28 @@ function RecordsTab({ stats, d }: { stats: ReturnType<typeof exerciseStats>; d: 
 }
 
 // — عناصر مساعدة —
+
+/** رقائق عضلات بلغة الواجهة — نفس مظهر MuscleChips لكن بأسماء محلولة حسب اللغة. */
+function LocalizedChips({ ids, lang, kind }: { ids: MuscleId[]; lang: Lang; kind: 'primary' | 'secondary' }) {
+  if (!ids.length) return null
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {ids.map((m) => (
+        <span
+          key={m}
+          className={cn(
+            'rounded-full px-2 py-0.5 text-[10px]',
+            kind === 'primary'
+              ? 'bg-primary-soft font-bold text-primary-c'
+              : 'border border-line bg-surface font-medium text-ink-500',
+          )}
+        >
+          {detailedMuscleLabel(m, lang)}
+        </span>
+      ))}
+    </div>
+  )
+}
 
 function Block({ title, icon, children }: { title: string; icon: string; children: ReactNode }) {
   return (
