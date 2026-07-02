@@ -18,10 +18,12 @@ interface ExerciseNameProps {
  */
 export function ExerciseName({ nameAr, nameEn, lang, className, secondaryClassName }: ExerciseNameProps) {
   const { primary, secondary } = exerciseNameParts(nameAr, nameEn, lang)
+  // (P10.1) عزل اتجاه المحتوى بـ <bdi>: الاسم قد يكون عربيًا داخل واجهة إنجليزية (LTR)
+  // عند غياب الاسم الإنجليزي، والعكس للسطر الثانوي — يمنع قفز علامات الترقيم لبداية السطر.
   return (
     <>
-      <p className={className}>{primary}</p>
-      {secondary ? <p className={secondaryClassName}>{secondary}</p> : null}
+      <p className={className}><bdi>{primary}</bdi></p>
+      {secondary ? <p className={secondaryClassName}><bdi>{secondary}</bdi></p> : null}
     </>
   )
 }

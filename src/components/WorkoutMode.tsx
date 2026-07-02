@@ -72,6 +72,9 @@ function repsInvalid(v: string): boolean {
 export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: WorkoutModeProps) {
   const t = getStrings(lang).workout
   const d = workoutScreenStrings[lang]
+  // (P10.1) أسهم التنقّل تتبع اتجاه اللغة: «التالي» مع اتجاه القراءة و«السابق/الرجوع» عكسه.
+  const nextChevron = lang === 'en' ? 'ChevronRight' : 'ChevronLeft'
+  const prevChevron = lang === 'en' ? 'ChevronLeft' : 'ChevronRight'
   const [startedAt] = useState(() => new Date().toISOString())
   const [current, setCurrent] = useState(0)
   const [openGuide, setOpenGuide] = useState(false)
@@ -148,7 +151,7 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
           </span>
           <p className="text-base font-bold text-ink-900">{t.emptyPlan}</p>
           <button type="button" onClick={onClose} className="btn-primary px-6 py-3 text-sm">
-            <Icon name="ChevronRight" className="h-4 w-4" />
+            <Icon name={prevChevron} className="h-4 w-4" />
             {t.backToToday}
           </button>
         </main>
@@ -280,7 +283,7 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
   const nextSetNum = s.sets.find((x) => !x.completed)?.setNumber
   const nextEx = day.exercises[current + 1]
   const restNext = nextSetNum
-    ? `${t.sets} ${nextSetNum}`
+    ? `${d.setSingular} ${nextSetNum}`
     : nextEx
       ? exerciseDisplayName(getExercise(effExId(nextEx.id, nextEx.exerciseId))?.nameAr ?? '', getExercise(effExId(nextEx.id, nextEx.exerciseId))?.nameEn ?? '', lang)
       : t.finish
@@ -389,7 +392,7 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
                 )}
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-black text-ink-900">{t.setsDone} {st.setNumber}</span>
+                  <span className="text-sm font-black text-ink-900">{d.setSingular} {st.setNumber}</span>
                   <span className="text-xs font-bold text-ink-500">{t.target}: {st.targetReps}</span>
                 </div>
 
@@ -565,7 +568,8 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
               </span>
               <div className="min-w-0">
                 <p className="text-xs font-bold text-primary-c">{t.rest}</p>
-                <p className="truncate text-xs text-ink-500">{t.nextUp}: {restNext}</p>
+                {/* عزل اتجاه المحتوى: اسم التمرين قد يكون عربيًا داخل واجهة إنجليزية (LTR) والعكس. */}
+                <p className="truncate text-xs text-ink-500">{t.nextUp}: <bdi>{restNext}</bdi></p>
               </div>
             </div>
             <div className="flex shrink-0 items-center gap-1.5">
@@ -580,7 +584,7 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
       <div className="sticky bottom-0 z-10 border-t border-line bg-page/95 backdrop-blur">
         <div className="container-page flex items-center gap-2 py-3">
           <button type="button" onClick={goPrev} disabled={current === 0} className="btn-ghost h-12 w-12 shrink-0 p-0 disabled:opacity-40" aria-label={t.prevExercise}>
-            <Icon name="ChevronRight" className="h-5 w-5" />
+            <Icon name={prevChevron} className="h-5 w-5" />
           </button>
           {isLast ? (
             <button type="button" onClick={() => setConfirmOpen(true)} className="btn-primary flex-1 py-3.5 text-base">
@@ -588,7 +592,7 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
             </button>
           ) : (
             <button type="button" onClick={goNext} className="btn-primary flex-1 py-3.5 text-base">
-              {t.nextExercise}<Icon name="ChevronLeft" className="h-5 w-5" />
+              {t.nextExercise}<Icon name={nextChevron} className="h-5 w-5" />
             </button>
           )}
         </div>
