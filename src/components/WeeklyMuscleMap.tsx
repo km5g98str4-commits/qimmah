@@ -41,7 +41,7 @@ export function WeeklyMuscleMap({ className, lang }: { className?: string; lang:
 
   const selLabel = selected ? SLUG_LABEL_AR[selected] ?? selected : null
   const caption = selLabel
-    ? `${selLabel} — اضغط عضلة ثانية للتفاصيل`
+    ? `${selLabel} — ${d.mapSelectHint}`
     : trainedCount > 0
       ? `${d.activatedPrefix} ${trainedCount} ${d.activatedMiddle} ${muscleGroups.length} ${d.activatedSuffix}`
       : d.emptyCaption

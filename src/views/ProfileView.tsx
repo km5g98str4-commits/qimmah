@@ -70,7 +70,7 @@ export function ProfileView({ lang, onNavigate }: ProfileViewProps) {
         </div>
       </div>
 
-      <HealthNotice />
+      <HealthNotice lang={lang} />
     </div>
   )
 }

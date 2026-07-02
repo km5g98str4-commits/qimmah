@@ -7,10 +7,12 @@ import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
 import { getSupabase, isSupabaseConfigured } from './supabaseClient'
+import { getLanguage } from './appPreferences'
+import { miscStrings } from '@/i18n/dict/misc'
 
 export interface AuthResult {
   ok: boolean
-  /** رسالة خطأ جاهزة للعرض بالعربية، إن وُجدت. */
+  /** رسالة خطأ جاهزة للعرض باللغة الحالية (عربي/إنجليزي)، إن وُجدت. */
   error?: string
   /** هل يحتاج المستخدم لتأكيد بريده (sign up)؟ */
   needsConfirmation?: boolean
@@ -42,21 +44,28 @@ function userDisplayName(user: User | null): string | null {
 
 const AuthContext = createContext<AuthContextValue | null>(null)
 
-function arabicAuthError(message: string | undefined): string {
+/** رسالة الخطأ المحلية غير المفعّلة (المزامنة السحابية) — حسب اللغة الحالية. */
+function cloudDisabledError(): string {
+  return miscStrings[getLanguage()].authCloudDisabled
+}
+
+/**
+ * يحوّل رسالة خطأ Supabase (بالإنجليزية) إلى رسالة واضحة باللغة الحالية للمستخدم.
+ * منطق المطابقة ثابت؛ فقط النص المُرجَع صار ثنائي اللغة.
+ */
+function localizedAuthError(message: string | undefined): string {
+  const t = miscStrings[getLanguage()]
   const m = (message ?? '').toLowerCase()
-  if (m.includes('invalid login') || m.includes('invalid credentials'))
-    return 'البريد أو كلمة المرور غير صحيحة.'
+  if (m.includes('invalid login') || m.includes('invalid credentials')) return t.authInvalidCredentials
   if (m.includes('already registered') || m.includes('already been registered') || m.includes('user already'))
-    return 'هذا البريد مسجّل مسبقًا. سجّل الدخول بدلًا من ذلك.'
-  if (m.includes('email not confirmed'))
-    return 'راجع بريدك وأكّد الحساب أولًا ثم سجّل الدخول.'
+    return t.authAlreadyRegistered
+  if (m.includes('email not confirmed')) return t.authEmailNotConfirmed
   if (m.includes('password') && (m.includes('6') || m.includes('short') || m.includes('weak') || m.includes('least')))
-    return 'كلمة المرور ضعيفة — استخدم 6 أحرف على الأقل.'
-  if (m.includes('email') && m.includes('valid')) return 'البريد الإلكتروني غير صالح.'
-  if (m.includes('rate limit') || m.includes('too many')) return 'محاولات كثيرة. انتظر قليلًا ثم أعد المحاولة.'
-  if (m.includes('network') || m.includes('failed to fetch') || m.includes('fetch'))
-    return 'تعذّر الاتصال بالخادم. تحقّق من الإنترنت وحاول مجددًا.'
-  return message || 'حدث خطأ غير متوقع. حاول مجددًا.'
+    return t.authWeakPassword
+  if (m.includes('email') && m.includes('valid')) return t.authInvalidEmail
+  if (m.includes('rate limit') || m.includes('too many')) return t.authRateLimit
+  if (m.includes('network') || m.includes('failed to fetch') || m.includes('fetch')) return t.authNetwork
+  return message || t.authGeneric
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -102,7 +111,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loading,
       displayName: userDisplayName(user),
       async signUp(email, password, displayName) {
-        if (!supabase) return { ok: false, error: 'المزامنة السحابية غير مفعّلة في هذه النسخة.' }
+        if (!supabase) return { ok: false, error: cloudDisabledError() }
         const name = displayName?.trim()
         const { data, error } = await supabase.auth.signUp({
           email: email.trim(),
@@ -110,14 +119,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // الاسم يُخزَّن في user_metadata؛ trigger المنصّة يقرأ display_name لإنشاء صف profile.
           options: name ? { data: { display_name: name } } : undefined,
         })
-        if (error) return { ok: false, error: arabicAuthError(error.message) }
+        if (error) return { ok: false, error: localizedAuthError(error.message) }
         // إن لم تُرجع جلسة فالأرجح أنّ تأكيد البريد مطلوب.
         return { ok: true, needsConfirmation: !data.session }
       },
       async signIn(email, password) {
-        if (!supabase) return { ok: false, error: 'المزامنة السحابية غير مفعّلة في هذه النسخة.' }
+        if (!supabase) return { ok: false, error: cloudDisabledError() }
         const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
-        if (error) return { ok: false, error: arabicAuthError(error.message) }
+        if (error) return { ok: false, error: localizedAuthError(error.message) }
         return { ok: true }
       },
       async signOut() {
@@ -145,10 +154,10 @@ export function useAuth(): AuthContextValue {
     loading: false,
     displayName: null,
     async signUp() {
-      return { ok: false, error: 'المزامنة السحابية غير مفعّلة في هذه النسخة.' }
+      return { ok: false, error: cloudDisabledError() }
     },
     async signIn() {
-      return { ok: false, error: 'المزامنة السحابية غير مفعّلة في هذه النسخة.' }
+      return { ok: false, error: cloudDisabledError() }
     },
     async signOut() {},
   }

@@ -4,6 +4,10 @@
 import type { Lang } from '@/lib/appPreferences'
 
 export interface ProfileScreenStrings {
+  // ProfileData — ترويسة القسم
+  sectionEyebrow: string
+  sectionTitle: string
+  sectionDescription: string
   // ProfileData — بطاقات بيانات الجسم
   age: string
   ageUnit: string
@@ -36,6 +40,9 @@ export interface ProfileScreenStrings {
 }
 
 const ar: ProfileScreenStrings = {
+  sectionEyebrow: 'بياناتك الأساسية',
+  sectionTitle: 'حالتك الحالية بالأرقام',
+  sectionDescription: 'العمر، الطول، الوزن، والوزن الهدف — الأساس اللي تُبنى عليه خطتك.',
   age: 'العمر',
   ageUnit: 'سنة',
   height: 'الطول',
@@ -66,6 +73,9 @@ const ar: ProfileScreenStrings = {
 }
 
 const en: ProfileScreenStrings = {
+  sectionEyebrow: 'Your core data',
+  sectionTitle: 'Your current stats in numbers',
+  sectionDescription: 'Age, height, weight, and target weight — the foundation your plan is built on.',
   age: 'Age',
   ageUnit: 'yrs',
   height: 'Height',

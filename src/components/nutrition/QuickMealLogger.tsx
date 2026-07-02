@@ -1,7 +1,7 @@
 import { lazy, Suspense, useMemo, useState } from 'react'
 import { Icon } from '@/components/Icon'
 import { ProgressBar } from '@/components/ProgressBar'
-import { FOOD_ESTIMATE_NOTE, searchFood, type FoodItem, type FoodSize } from '@/data/foodItems'
+import { searchFood, type FoodItem, type FoodSize } from '@/data/foodItems'
 import { useNutritionToday, type MealSlot } from '@/lib/nutritionTracking'
 import { NUM_LIMITS, parseSafeNumber, sanitizeNumericInput } from '@/lib/validation'
 import { getStrings } from '@/config/strings'
@@ -363,7 +363,7 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
 
           <p className="mt-4 flex items-start gap-2 text-[11px] text-ink-400">
             <Icon name="Info" className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-            {FOOD_ESTIMATE_NOTE}
+            {t.estimateNote}
           </p>
         </>
       )}

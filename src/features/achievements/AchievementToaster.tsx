@@ -1,6 +1,8 @@
 import { useEffect } from 'react'
 import { Icon } from '@/components/Icon'
 import { MedalBadge } from '@/components/MedalBadge'
+import { useLang } from '@/i18n'
+import { achievementsStrings } from '@/i18n/dict/achievements'
 import { useCelebrations } from './useAchievements'
 import type { Celebration } from './engine'
 
@@ -22,8 +24,9 @@ function CelebrationCard({ celebration, onClose }: { celebration: Celebration; o
     return () => clearTimeout(t)
   }, [onClose, celebration.kind])
 
+  const s = achievementsStrings[useLang()]
   const isMedal = celebration.kind === 'medal'
-  const eyebrow = isMedal ? 'فتحت وسام جديد' : 'إنجاز'
+  const eyebrow = isMedal ? s.newMedalEyebrow : s.achievementEyebrow
   const title = celebration.title
   const body = isMedal ? celebration.description : celebration.body
 
@@ -52,7 +55,7 @@ function CelebrationCard({ celebration, onClose }: { celebration: Celebration; o
         <button
           type="button"
           onClick={onClose}
-          aria-label="إغلاق"
+          aria-label={s.close}
           className="grid h-7 w-7 shrink-0 place-items-center rounded-lg text-ink-400 transition-colors hover:bg-beige hover:text-ink-700"
         >
           <Icon name="X" className="h-4 w-4" />

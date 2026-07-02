@@ -2,14 +2,21 @@ import { nav, product } from '@/config/product'
 import { useCustomization } from '@/lib/customizationContext'
 import { BUILD_LABEL } from '@/lib/buildInfo'
 import { getLanguage } from '@/lib/appPreferences'
-import { miscStrings } from '@/i18n/dict/misc'
+import { getStrings } from '@/config/strings'
+import { miscStrings, type MiscStrings } from '@/i18n/dict/misc'
 import { Icon } from './Icon'
 
 /** الفوتر — هوية، روابط، حقوق. */
 export function Footer() {
   const { customization } = useCustomization()
-  const d = miscStrings[getLanguage()]
-  const brandName = customization.identity.brandName || product.name
+  const lang = getLanguage()
+  const d = miscStrings[lang]
+  const brandName = customization.identity.brandName || getStrings(lang).brand
+  // تسمية رابط التنقّل حسب اللغة (المفتاح مشتقّ من href مثل '#today').
+  const navLabel = (href: string, fallback: string): string => {
+    const key = href.replace('#', '') as keyof MiscStrings['footerNav']
+    return d.footerNav[key] ?? fallback
+  }
   return (
     <footer className="border-t border-line bg-beige">
       <div className="container-page py-14">
@@ -21,7 +28,7 @@ export function Footer() {
               </span>
               <span className="text-lg font-extrabold text-ink-900">{brandName}</span>
             </a>
-            <p className="mt-4 text-sm leading-relaxed text-ink-500">{product.description}</p>
+            <p className="mt-4 text-sm leading-relaxed text-ink-500">{d.footerBlurb}</p>
           </div>
 
           <nav className="grid grid-cols-2 gap-x-12 gap-y-2 sm:grid-cols-2">
@@ -31,7 +38,7 @@ export function Footer() {
                 href={item.href}
                 className="text-sm text-ink-500 transition-colors hover:text-brand-300"
               >
-                {item.label}
+                {navLabel(item.href, item.label)}
               </a>
             ))}
           </nav>
@@ -39,7 +46,7 @@ export function Footer() {
 
         <div className="mt-12 flex flex-col gap-3 border-t border-line pt-6 text-xs text-ink-400 sm:flex-row sm:items-center sm:justify-between">
           <p>
-            © {product.year} {brandName}. {product.rightsNote}
+            © {product.year} {brandName}. {d.footerRights}
             <span className="ms-2 text-ink-300" title={d.buildIdTitle}>{BUILD_LABEL}</span>
           </p>
           <div className="flex items-center gap-4">
@@ -47,7 +54,7 @@ export function Footer() {
             <a href="#/terms" className="text-ink-500 transition-colors hover:text-brand-300">{d.terms}</a>
             <a href="#/contact" className="text-ink-500 transition-colors hover:text-brand-300">{d.contact}</a>
             <p className="flex items-center gap-1.5">
-              {product.footerNote}
+              {d.footerNote}
               <Icon name="Sparkles" className="h-3.5 w-3.5 text-gold-400" />
             </p>
           </div>

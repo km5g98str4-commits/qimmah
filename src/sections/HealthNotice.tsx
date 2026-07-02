@@ -1,8 +1,10 @@
 import { Icon } from '@/components/Icon'
-import { healthNotice } from '@/config/content'
+import { miscStrings } from '@/i18n/dict/misc'
+import type { Lang } from '@/lib/appPreferences'
 
 /** قسم تنبيه صحي بسيط — تذكير بمراجعة المختص. */
-export function HealthNotice() {
+export function HealthNotice({ lang = 'ar' }: { lang?: Lang }) {
+  const d = miscStrings[lang]
   return (
     <section id="health" className="pb-8">
       <div className="container-page">
@@ -11,8 +13,8 @@ export function HealthNotice() {
             <Icon name="AlertTriangle" className="h-5 w-5" />
           </span>
           <div>
-            <h3 className="text-sm font-bold text-ink-900">{healthNotice.title}</h3>
-            <p className="mt-1 text-sm leading-relaxed text-ink-700">{healthNotice.body}</p>
+            <h3 className="text-sm font-bold text-ink-900">{d.healthNoticeTitle}</h3>
+            <p className="mt-1 text-sm leading-relaxed text-ink-700">{d.healthNoticeBody}</p>
           </div>
         </div>
       </div>

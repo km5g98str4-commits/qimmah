@@ -1,4 +1,6 @@
 import { cn } from '@/lib/cn'
+import { getLanguage } from '@/lib/appPreferences'
+import { miscStrings } from '@/i18n/dict/misc'
 
 // عناصر هيكل التحميل (skeleton) — بدائل بصرية أثناء تجهيز البيانات.
 // تعتمد صنف `.skeleton` من styles/index.css (نبض + لمعان يحترم تقليل الحركة).
@@ -27,18 +29,20 @@ export function LoadingBoundary({
   loading,
   skeleton,
   children,
-  label = 'جارٍ التحميل…',
+  label,
 }: {
   loading: boolean
   skeleton: React.ReactNode
   children: React.ReactNode
   label?: string
 }) {
+  // النص الافتراضي يتبع اللغة الحالية (قارئ الشاشة فقط) إن لم يُمرَّر نص صريح.
+  const resolvedLabel = label ?? `${miscStrings[getLanguage()].loadingLabel}…`
   return (
     <div aria-busy={loading} aria-live="polite">
       {loading ? (
         <>
-          <span className="sr-only">{label}</span>
+          <span className="sr-only">{resolvedLabel}</span>
           {skeleton}
         </>
       ) : (
