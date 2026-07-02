@@ -8,6 +8,8 @@ import { muscleGroups } from '@/data/muscleGroups'
 import { computeWeeklyCoverage } from '@/lib/muscleCoverage'
 import { loadSessions } from '@/lib/workoutSessions'
 import { useCustomization } from '@/lib/customizationContext'
+import { useAuth } from '@/lib/authContext'
+import { accountGender } from '@/lib/onboardingProfile'
 import { BODY_NEUTRAL, HEAT_SCALE, SLUG_LABEL_AR, buildBodyData } from '@/lib/muscleMapLib'
 import type { MuscleView } from '@/types/muscles'
 
@@ -21,10 +23,14 @@ const MODEL_TYPE = { front: 'anterior', back: 'posterior' } as const
 export function WeeklyMuscleMap({ className, lang }: { className?: string; lang: Lang }) {
   const d = progressScreenStrings[lang]
   const { customization } = useCustomization()
+  const { user } = useAuth()
   const [view, setView] = useState<MuscleView>('front')
   const [selected, setSelected] = useState<Muscle | null>(null)
 
-  const gender = customization.profile.gender
+  // (P10.1) الجنس من ملف الحساب المسجّل (لكل حساب) لا من تخزين الجهاز العام مباشرة؛
+  // غير المحدَّد/الموروث من حساب آخر → تسمية محايدة. النموذج التشريحي نفسه محايد
+  // (المكتبة توفّر نموذجًا واحدًا) — الجنس يقود التسمية ووصف الوصول فقط.
+  const gender = accountGender(user?.id ?? null, customization.profile.gender)
 
   const coverage = useMemo(() => {
     const result = computeWeeklyCoverage({

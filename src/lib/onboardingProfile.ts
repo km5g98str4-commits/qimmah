@@ -15,6 +15,7 @@ import { ONBOARDING_SCHEMA_VERSION } from '@/types/onboarding'
 import type {
   ActivityLevel,
   Consistency,
+  Gender,
   GoalType,
   GymType,
   NutritionStyle,
@@ -126,6 +127,27 @@ export function clearOnboardingProfile(): void {
   } catch {
     /* تجاهل */
   }
+}
+
+// ===== قراءة الجنس لكل حساب (إصلاح P10.1) =====
+
+/**
+ * جنس العرض للمالك الحالي — لكل **حساب** لا لكل جهاز.
+ *
+ * السبب الجذري: التخصيص (qimmah:customization:v1) مفتاح عام على مستوى الجهاز
+ * يكتبه آخر من أكمل الإعداد، بينما حالة الإعداد (qimmah:onboarding:v1) تحمل
+ * «مالك» تلك الكتابة (معرّف الحساب أو undefined للضيف). لذلك نثق بجنس التخصيص
+ * فقط إذا لم يكن التخزين العام مملوكًا لحساب آخر معروف:
+ *   • المالك هو الحساب الحالي نفسه → جنس التخصيص (بياناته هو).
+ *   • لا مالك مسجّل (بيانات ضيف/قديمة) → جنس التخصيص (يغطّي مسار «ضيف ثم أنشأ حسابًا»).
+ *   • المالك حساب مختلف → 'unspecified' — الافتراضي الموثّق: تسمية محايدة،
+ *     فلا تظهر «أنثى/ذكر» موروثة من حساب آخر على الجهاز نفسه.
+ */
+export function accountGender(userId: string | null | undefined, deviceGender: Gender): Gender {
+  const owner = loadOnboarding().owner
+  const current = userId ?? undefined
+  if (!owner || owner === current) return deviceGender
+  return 'unspecified'
 }
 
 // ===== خرائط مصدر-الحقيقة → الشكل القديم (للمولّد) =====
