@@ -13,6 +13,9 @@ const ExerciseLibraryView = lazy(() =>
 const NutritionView = lazy(() => import('@/views/NutritionView').then((m) => ({ default: m.NutritionView })))
 const ProgressView = lazy(() => import('@/views/ProgressView').then((m) => ({ default: m.ProgressView })))
 const ProfileView = lazy(() => import('@/views/ProfileView').then((m) => ({ default: m.ProfileView })))
+const CalcExplainerView = lazy(() =>
+  import('@/views/CalcExplainerView').then((m) => ({ default: m.CalcExplainerView })),
+)
 const DemoView = lazy(() => import('@/views/DemoView').then((m) => ({ default: m.DemoView })))
 const SettingsView = lazy(() => import('@/views/SettingsView').then((m) => ({ default: m.SettingsView })))
 const PrivacyView = lazy(() => import('@/views/PrivacyView').then((m) => ({ default: m.PrivacyView })))
@@ -211,6 +214,8 @@ export default function App() {
     )
   } else if (view === 'productReview') {
     content = <ReviewPanelView lang={LANG} onBack={() => setView('settings')} />
+  } else if (view === 'calc') {
+    content = <CalcExplainerView lang={LANG} onBack={() => navigate('profile')} />
   } else {
     // ——— التبويبات الرئيسية داخل قشرة الجوال ———
     content = (

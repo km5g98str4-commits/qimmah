@@ -1,7 +1,13 @@
 import { useState } from 'react'
 import { Icon } from '@/components/Icon'
 import { useCustomization } from '@/lib/customizationContext'
-import { activityOptions, goalTypeLabel, totalActivityMultiplier } from '@/lib/calculators'
+import {
+  activityOptions,
+  BULK_SURPLUS,
+  CUT_DEFICIT,
+  goalTypeLabel,
+  totalActivityMultiplier,
+} from '@/lib/calculators'
 
 /**
  * «كيف نحسب سعراتك؟» — يفكّك منطق الحساب بأرقامك الفعلية (BMR ← TDEE ← تعديل الهدف ← البروتين)
@@ -16,7 +22,7 @@ export function CalorieExplainer() {
   // القيم الفعلية من ملفك — لا أرقام ثابتة.
   const multiplier = totalActivityMultiplier(p.activityLevel, p.trainingDays)
   const activityLabel = activityOptions.find((o) => o.value === p.activityLevel)?.label ?? ''
-  const goalAdj = p.goalType === 'cutting' ? -400 : p.goalType === 'bulking' ? 300 : 0
+  const goalAdj = p.goalType === 'cutting' ? -CUT_DEFICIT : p.goalType === 'bulking' ? BULK_SURPLUS : 0
   const proteinPerKg = p.weightKg > 0 ? Math.round((t.proteinGrams / p.weightKg) * 10) / 10 : 0
 
   // بدون بيانات جسم كافية لا توجد أرقام نشرحها.

@@ -11,9 +11,10 @@ export const ONBOARDING_SCHEMA_VERSION = 1
 
 export type Sex = 'male' | 'female'
 
-/** الهدف — مساران منطقيان لا يتداخلان (يطابق GoalValue في باني الخطة). */
+/** الهدف — ثلاثة مسارات منطقية (يطابق GoalValue في باني الخطة). */
 // ملاحظة (P2.5): أُلغي مسار «القوة»؛ أي بيانات قديمة بقيمة 'strength' تُهاجَر إلى 'bulk' عند التحميل.
-export type OnbGoalType = 'bulk' | 'cut'
+// P10: أُضيف مسار «المحافظة على العضل» (maintain) = سعرات صيانة (TDEE) بلا عجز/فائض.
+export type OnbGoalType = 'bulk' | 'cut' | 'maintain'
 
 /** الانتظام (إعداد) — «new» تُخزَّن تلقائيًا للمبتدئ ولا يُسأل عنها. */
 export type OnbConsistency = 'new' | 'on_and_off' | 'consistent' | 'returning'
