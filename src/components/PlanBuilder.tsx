@@ -38,6 +38,8 @@ import {
 } from '@/data/planBuilder'
 import { useLang } from '@/i18n'
 import { onboardingStrings, type OnboardingStrings } from '@/i18n/dict/onboarding'
+import { PlanChoiceScreen, CustomPlanBuilder, customPlanStrings, saveCustomPlan } from '@/features/customPlan'
+import type { PlanSource } from '@/features/customPlan'
 
 interface PlanBuilderProps {
   /** يُستدعى بعد حفظ مصدر الحقيقة والخطة وتعليم الإكمال (دخول اللوحة). */
@@ -86,6 +88,9 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
     return { ...defaultAnswers, ...(d ?? {}) }
   })
   const set = (partial: Partial<Answers>) => setA((prev) => ({ ...prev, ...partial }))
+  // اختيار طريقة الجدول (تلقائي مقابل مخصّص) + عرض الباني المخصّص بعد التوليد.
+  const [planMode, setPlanMode] = useState<PlanSource | undefined>(undefined)
+  const [showCustomBuilder, setShowCustomBuilder] = useState(false)
   const toggleIn = (key: 'allergies' | 'injuries', value: string) =>
     setA((prev) => {
       const list = prev[key]
@@ -211,6 +216,14 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
         )}
       </Question>
     ),
+  })
+
+  // 5ب) طريقة الجدول — بعد الأساسيات مباشرةً: جدول تلقائي أو تصميم يدوي.
+  steps.push({
+    key: 'planMode',
+    label: customPlanStrings[lang].choiceEyebrow,
+    valid: !!planMode,
+    content: <PlanChoiceScreen lang={lang} value={planMode} onChange={setPlanMode} />,
   })
 
   // 6) وزن الهدف — فقط لـ bulk/cut
@@ -521,6 +534,12 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
     // إكمال لكل حساب + حفظ إشارة الإعداد في الملف السحابي (best-effort، لا يعطّل الدخول).
     markCompleted(userId)
     if (userId) void persistOnboardingToProfile(userId, op)
+    // مسار «أصمّم جدولي بنفسي»: نفتح الباني المخصّص بعد التوليد بدل الدخول مباشرةً للوحة.
+    // الجدول التلقائي محفوظ أصلًا كأساس/بديل، فيبقى الدخول سليمًا حتى لو ألغى المستخدم.
+    if (planMode === 'custom') {
+      setShowCustomBuilder(true)
+      return
+    }
     onComplete()
   }
 
@@ -552,6 +571,21 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
   }
 
   const progress = Math.round(((idx + 1) / formTotal) * 100)
+
+  // مسار الجدول المخصّص: بعد التوليد، نفتح الباني ليصمّم المستخدم جدوله من الصفر.
+  // الحفظ يعتمد الجدول المخصّص لهذا الحساب؛ الإلغاء يُبقي الجدول التلقائي المُولّد.
+  if (showCustomBuilder) {
+    return (
+      <CustomPlanBuilder
+        lang={lang}
+        onSave={(plan) => {
+          saveCustomPlan(userId, plan)
+          onComplete()
+        }}
+        onCancel={onComplete}
+      />
+    )
+  }
 
   if (isBuilding) {
     return (
