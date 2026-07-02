@@ -1,7 +1,13 @@
 import { useState } from 'react'
 import { Icon } from '@/components/Icon'
 import { useCustomization } from '@/lib/customizationContext'
-import { activityOptions, goalTypeLabel, totalActivityMultiplier } from '@/lib/calculators'
+import {
+  activityOptions,
+  BULK_SURPLUS,
+  CUT_DEFICIT,
+  goalTypeLabel,
+  totalActivityMultiplier,
+} from '@/lib/calculators'
 import { useLang } from '@/i18n'
 import { calorieExplainerStrings } from '@/i18n/dict/calorieExplainer'
 import { activityLabelI18n, goalTypeLabelI18n } from '@/lib/i18nLabels'
@@ -22,7 +28,7 @@ export function CalorieExplainer() {
   const multiplier = totalActivityMultiplier(p.activityLevel, p.trainingDays)
   const activityLabelAr = activityOptions.find((o) => o.value === p.activityLevel)?.label ?? ''
   const activityLabel = activityLabelI18n(p.activityLevel, activityLabelAr, lang)
-  const goalAdj = p.goalType === 'cutting' ? -400 : p.goalType === 'bulking' ? 300 : 0
+  const goalAdj = p.goalType === 'cutting' ? -CUT_DEFICIT : p.goalType === 'bulking' ? BULK_SURPLUS : 0
   const goalLabel = goalTypeLabelI18n(p.goalType, goalTypeLabel(p.goalType), lang)
   const proteinPerKg = p.weightKg > 0 ? Math.round((t.proteinGrams / p.weightKg) * 10) / 10 : 0
 

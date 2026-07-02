@@ -43,9 +43,9 @@ export const sexChoices: Choice<Sex>[] = [
   { value: 'female', label: 'أنثى', icon: 'Users' },
 ]
 
-/** هدفا الإعداد (مساران منطقيان لا يتداخلان) — يُربطان داخليًا بـ GoalType للحسابات. */
-// P2.5: حُصِر الهدف في تنشيف/تضخيم فقط؛ أُلغي مسار «القوة».
-export type GoalValue = 'bulk' | 'cut'
+/** أهداف الإعداد الثلاثة — يُربطان داخليًا بـ GoalType للحسابات. */
+// P2.5: أُلغي مسار «القوة». P10: أُضيف «المحافظة على العضل» (سعرات صيانة بلا عجز/فائض).
+export type GoalValue = 'bulk' | 'cut' | 'maintain'
 
 export interface GoalChoice {
   value: GoalValue
@@ -58,6 +58,7 @@ export interface GoalChoice {
 export const goalChoices: GoalChoice[] = [
   { value: 'bulk', label: 'تضخيم', desc: 'زيادة العضل والوزن', icon: 'TrendingUp', goalType: 'bulking' },
   { value: 'cut', label: 'تنشيف', desc: 'خسارة دهون مع الحفاظ على العضل', icon: 'Flame', goalType: 'cutting' },
+  { value: 'maintain', label: 'محافظة على العضل', desc: 'ثبات على وزنك مع الحفاظ على عضلك', icon: 'ShieldCheck', goalType: 'maintenance' },
 ]
 
 export const muscleFocusChoices: Choice<MuscleFocus>[] = [

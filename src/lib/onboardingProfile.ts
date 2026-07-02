@@ -133,6 +133,7 @@ export function clearOnboardingProfile(): void {
 const GOAL_TO_GOALTYPE: Record<OnbGoalType, GoalType> = {
   bulk: 'bulking',
   cut: 'cutting',
+  maintain: 'maintenance',
 }
 
 const CONSISTENCY_TO_LEGACY: Record<OnbConsistency, Consistency> = {
@@ -277,6 +278,10 @@ export function buildCustomizationFromOnboarding(op: OnboardingProfile, current:
 const GOALTYPE_TO_ONB: Partial<Record<GoalType, OnbGoalType>> = {
   bulking: 'bulk',
   cutting: 'cut',
+  // المحافظة/الثبات/الرجوع/الصحة كلها سعرات صيانة → مسار «المحافظة على العضل».
+  maintenance: 'maintain',
+  returning: 'maintain',
+  health: 'maintain',
   // الهدف الملغى «إعادة التكوين» يُهاجَر إلى «تنشيف» (نفس مسار العجز).
   recomposition: 'cut',
 }
