@@ -1,4 +1,5 @@
 import type { MuscleGroup, MuscleId } from '@/types/muscles'
+import type { Lang } from '@/lib/appPreferences'
 
 // تصنيف العضلات التفصيلي — مصدر الحقيقة لأسماء العضلات والأهداف الأسبوعية.
 // الأهداف الأسبوعية: العضلات الكبيرة 8–16 مجموعة، الصغيرة 6–12 (تُعدَّل حسب المستوى في muscleCoverage).
@@ -51,6 +52,13 @@ export function getMuscle(id: MuscleId): MuscleGroup | undefined {
 /** الاسم العربي لعضلة (أو المعرّف إن لم تُعرَّف). */
 export function muscleLabelAr(id: MuscleId): string {
   return muscleMap[id]?.labelAr ?? id
+}
+
+/** اسم العضلة حسب اللغة الحالية (P10.1) — المعرّف احتياطًا إن لم تُعرَّف. */
+export function muscleGroupLabel(id: MuscleId, lang: Lang): string {
+  const m = muscleMap[id]
+  if (!m) return id
+  return lang === 'en' ? m.labelEn : m.labelAr
 }
 
 export const ALL_MUSCLE_IDS: MuscleId[] = muscleGroups.map((m) => m.id)

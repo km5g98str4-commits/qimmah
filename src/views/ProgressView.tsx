@@ -2,7 +2,8 @@ import { useMemo, useState } from 'react'
 import { Icon } from '@/components/Icon'
 import { WeeklyMuscleMap } from '@/components/WeeklyMuscleMap'
 import { StepCounterCard } from '@/components/StepCounterCard'
-import { MUSCLE_AR } from '@/lib/exerciseGuidance'
+import { muscleLabel } from '@/lib/muscles'
+import { getExercise } from '@/data/exercises'
 import { loadLogs, latestLog, trendFor } from '@/lib/measurementLog'
 import { musclesThisWeek, recentVolumes, topPRs, workoutCounts } from '@/lib/progressStats'
 import { weeklyAdherenceStreak } from '@/lib/streaks'
@@ -105,7 +106,10 @@ export function ProgressView({ lang }: ProgressViewProps) {
             <ul className="mt-1 space-y-2">
               {stats.prs.map((pr) => (
                 <li key={pr.exerciseId} className="flex items-center justify-between gap-2">
-                  <span className="min-w-0 truncate text-sm text-ink-900">{pr.nameAr}</span>
+                  {/* اسم التمرين بلغة الواجهة (P10.1) — الإنجليزي من المكتبة والعربي احتياطًا */}
+                  <span className="min-w-0 truncate text-sm text-ink-900">
+                    {lang === 'en' ? getExercise(pr.exerciseId)?.nameEn || pr.nameAr : pr.nameAr}
+                  </span>
                   <span className="shrink-0 rounded-lg bg-primary-soft px-2 py-0.5 text-xs font-black text-primary-c">{pr.weight} {d.prWeightUnit}</span>
                 </li>
               ))}
@@ -121,7 +125,8 @@ export function ProgressView({ lang }: ProgressViewProps) {
             <div className="mt-1 flex flex-wrap gap-2">
               {stats.muscles.map((m) => (
                 <span key={m.muscle} className="rounded-full bg-beige px-3 py-1 text-xs font-bold text-ink-700">
-                  {MUSCLE_AR[m.muscle]} · {m.count}
+                  {/* اسم العضلة من القاموس المشترك حسب اللغة الحالية (P10.1) */}
+                  {muscleLabel(m.muscle, lang)} · {m.count}
                 </span>
               ))}
             </div>

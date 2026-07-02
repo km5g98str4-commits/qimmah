@@ -10,6 +10,7 @@ import type { Profile, Targets } from '@/types/profile'
 import { computeTargets, defaultProfile, profileHash } from './calculators'
 import type { WorkoutPlan } from '@/types/workout'
 import { generatePlanFromTemplate } from './workoutPlan'
+import { normalizePlanDayNames } from './planDayNames'
 import type { NutritionPlan } from '@/types/nutrition'
 import { defaultNutritionPlan } from './nutritionPlan'
 import type { WellnessPlan } from '@/types/wellness'
@@ -195,7 +196,8 @@ export function loadCustomization(): Customization {
       profile: migrateLegacyGoal({ ...base.profile, ...saved.profile }),
       targets: { ...base.targets, ...saved.targets },
       targetsMeta: { ...base.targetsMeta, ...saved.targetsMeta },
-      workoutPlan: saved.workoutPlan ?? base.workoutPlan,
+      // تطبيع أسماء الأيام وقت القراءة (P10.1): خطط قديمة بلا nameEn تُكمَّل تلقائيًا.
+      workoutPlan: normalizePlanDayNames(saved.workoutPlan ?? base.workoutPlan),
       nutritionPlan: saved.nutritionPlan
         ? { ...base.nutritionPlan, ...saved.nutritionPlan }
         : base.nutritionPlan,
