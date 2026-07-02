@@ -78,6 +78,9 @@ export default function App() {
   }, [])
 
   const [view, setView] = useState<AppRoute>(() => initialRoute(auth.user?.id ?? null))
+  // هل حُسم مسار الإقلاع الأول *بعد* جهوزية المصادقة؟ يمنع تثبيت شاشة البداية/الدخول
+  // بينما الجلسة ما زالت تُستعاد بشكل غير متزامن (سبب مطالبة المستخدم بالدخول كل مرة).
+  const didInitialAuthRoute = useRef(false)
   const [showSuccess, setShowSuccess] = useState(false)
   const dismissSuccess = useCallback(() => setShowSuccess(false), [])
 
@@ -89,9 +92,13 @@ export default function App() {
   }, [view])
 
   // view → hash (نُبقي مسار 404 على hash الخاطئ كما هو حتى لا نطمس الرابط الأصلي).
+  // مهم: لا نكتب الـ hash قبل حسم مسار الإقلاع الأول بعد استعادة الجلسة، وإلّا طمسنا
+  // الرابط الأصلي (مثل #/dashboard) بقيمة العرض المؤقتة أثناء التحميل فيُطالَب المستخدم
+  // بالدخول رغم وجود جلسة صالحة.
   useEffect(() => {
+    if (auth.loading || !didInitialAuthRoute.current) return
     if (view !== 'notfound') setHashRoute(view)
-  }, [view])
+  }, [view, auth.loading])
 
   // hash → view (تنقّل المتصفح / تحديث الصفحة) مع الحراسة لكل حساب.
   useEffect(() => {
@@ -117,7 +124,19 @@ export default function App() {
     void (async () => {
       if (uid && !isAccountOnboarded(uid)) await hydrateOnboardingFromProfile(uid)
       if (cancelled) return
-      setView((v) => guardRoute(v, uid))
+      if (!didInitialAuthRoute.current) {
+        // أول حسم للمسار بعد استعادة الجلسة: نحسب مسار الإقلاع بمعرّف الحساب الحقيقي
+        // (مع احترام الـ hash) فيهبط المستخدم المسجَّل حيث كان — لا على شاشة الدخول.
+        // بدون هذا يبقى العرض عالقًا على 'start' لأنّ guardRoute لا يرفع مسارًا غير رئيسي.
+        didInitialAuthRoute.current = true
+        const landing = initialRoute(uid)
+        setView(landing)
+        // اكتب الـ hash صراحةً: عند تساوي القيمة مع الحالة الأولية يتخطّى تأثير المزامنة
+        // التحديث، فنضمن بقاء سلوك الضيف/الروابط العميقة كما كان تمامًا.
+        if (landing !== 'notfound') setHashRoute(landing)
+      } else {
+        setView((v) => guardRoute(v, uid))
+      }
     })()
     return () => {
       cancelled = true
@@ -158,6 +177,12 @@ export default function App() {
   const navigate = (v: AppRoute) => {
     if (v === 'setup') openSetup()
     else setView(guardRoute(v, uid))
+  }
+
+  // ——— بوابة الإقلاع: أثناء استعادة جلسة المصادقة نعرض حالة تحميل قصيرة (لا شاشة دخول)
+  //     حتى لا يُطالَب مستخدم لديه جلسة صالحة بتسجيل الدخول من جديد. ———
+  if (auth.loading) {
+    return <AppLoading />
   }
 
   // ——— بناء عنصر الشاشة الحالية ثم لفّه بحدّ Suspense (أسفل المزوّدات حتى تبقى حالتها
