@@ -35,10 +35,21 @@ export const QIMMAH_KEYS = [
   'qimmah:achievements:v1',
 ]
 
+// مفاتيح ذات لاحقة ديناميكية (منعزلة لكل حساب) تُمسح بالبادئة لا بالمطابقة التامة.
+// مثال: مهام اليوم `qimmah:todo:v1:<userId>` / `qimmah:todo:v1:guest`.
+const QIMMAH_KEY_PREFIXES = ['qimmah:todo:v1:']
+
 /** يحذف مفاتيح قِمّة فقط، ثم يعيد التحميل إلى شاشة البداية. */
 export function resetQimmah(): void {
   if (typeof window === 'undefined') return
   QIMMAH_KEYS.forEach((k) => window.localStorage.removeItem(k))
+  // اكنس المفاتيح ذات البادئة (لكل الحسابات على هذا الجهاز).
+  for (let i = window.localStorage.length - 1; i >= 0; i -= 1) {
+    const key = window.localStorage.key(i)
+    if (key && QIMMAH_KEY_PREFIXES.some((p) => key.startsWith(p))) {
+      window.localStorage.removeItem(key)
+    }
+  }
   window.location.hash = '/start'
   window.location.reload()
 }
