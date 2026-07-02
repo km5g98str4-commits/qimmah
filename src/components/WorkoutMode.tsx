@@ -141,7 +141,7 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
             <button type="button" onClick={onClose} aria-label={d.close} className="grid h-11 w-11 place-items-center rounded-xl border border-line bg-surface text-ink-700">
               <Icon name="X" className="h-5 w-5" />
             </button>
-            <p className="truncate text-sm font-black text-ink-900">{lang === 'en' ? day.nameEn || day.nameAr : day.nameAr || day.nameEn}</p>
+            <p dir="auto" className="truncate text-sm font-black text-ink-900">{lang === 'en' ? day.nameEn || day.nameAr : day.nameAr || day.nameEn}</p>
             <div className="h-11 w-11" />
           </div>
         </header>
@@ -297,7 +297,7 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
             <Icon name="X" className="h-5 w-5" />
           </button>
           <div className="min-w-0 text-center">
-            <p className="truncate text-sm font-black text-ink-900">{lang === 'en' ? day.nameEn || day.nameAr : day.nameAr || day.nameEn}</p>
+            <p dir="auto" className="truncate text-sm font-black text-ink-900">{lang === 'en' ? day.nameEn || day.nameAr : day.nameAr || day.nameEn}</p>
             <p className="text-xs text-ink-500">{current + 1} {t.of} {total}</p>
           </div>
           <div className="h-11 w-11" />

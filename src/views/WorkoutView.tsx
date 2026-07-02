@@ -134,7 +134,7 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
                 </span>
                 <span className="min-w-0">
                   <span className="block text-sm font-black">{d.startTodayWorkout}</span>
-                  <span className="block truncate text-xs text-white/85">{lang === 'en' ? planDay.nameEn : planDay.nameAr} · {planDay.exercises.length} {d.exercisesUnit}</span>
+                  <span dir="auto" className="block truncate text-xs text-white/85">{lang === 'en' ? planDay.nameEn : planDay.nameAr} · {planDay.exercises.length} {d.exercisesUnit}</span>
                 </span>
               </button>
             )}
@@ -236,7 +236,7 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
                   <div className="flex items-center justify-between gap-3">
                     <div className="min-w-0">
                       <p className="text-[11px] font-bold text-primary-c">{d.todayWorkout}</p>
-                      <p className="truncate text-sm font-bold text-ink-900">{lang === 'en' ? planDay.nameEn : planDay.nameAr}</p>
+                      <p dir="auto" className="truncate text-sm font-bold text-ink-900">{lang === 'en' ? planDay.nameEn : planDay.nameAr}</p>
                       <p className="mt-0.5 truncate text-[11px] text-ink-400">
                         {planDay.exercises.slice(0, 4).map((pe) => planExerciseName(pe, lang)).join(' · ') || d.noExercises}
                       </p>
@@ -261,7 +261,7 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
                     className="flex items-center justify-between gap-2 rounded-xl border border-line bg-surface p-3 text-start hover:bg-beige"
                   >
                     <span className="min-w-0">
-                      <span className="block truncate text-sm font-bold text-ink-900">{lang === 'en' ? pd.nameEn : pd.nameAr}</span>
+                      <span dir="auto" className="block truncate text-sm font-bold text-ink-900">{lang === 'en' ? pd.nameEn : pd.nameAr}</span>
                       <span className="block text-[11px] text-ink-400">{pd.exercises.length} {d.exercisesUnit} · ~{estDayMinutes(pd)} {d.minShort}</span>
                     </span>
                     <Icon name="ChevronLeft" className="h-4 w-4 shrink-0 text-ink-400" />
