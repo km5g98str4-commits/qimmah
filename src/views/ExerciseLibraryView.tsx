@@ -6,7 +6,8 @@ import { ExerciseName } from '@/components/ExerciseName'
 import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
 import { libraryStrings, type LibraryStrings } from '@/i18n/dict/library'
-import { exercises, getExercise, targetMuscleAr } from '@/data/exercises'
+import { detailedMuscleLabel, exercises, getExercise } from '@/data/exercises'
+import { muscleLabel } from '@/lib/muscles'
 import { getExerciseMedia } from '@/data/exerciseMedia'
 import { getExerciseGif } from '@/data/exerciseGifs'
 import { machineCatalog } from '@/data/machineCatalog'
@@ -74,8 +75,9 @@ export function ExerciseLibraryView({ lang }: ExerciseLibraryViewProps) {
         if (query && !`${e.nameAr} ${e.nameEn}`.toLowerCase().includes(query)) return false
         return true
       })
-      .sort((a, b) => a.nameAr.localeCompare(b.nameAr, 'ar'))
-  }, [q, muscle, equip])
+      // ترتيب أبجدي بحسب لغة الواجهة (الاسم المعروض فعليًا)
+      .sort((a, b) => (lang === 'en' ? a.nameEn.localeCompare(b.nameEn, 'en') : a.nameAr.localeCompare(b.nameAr, 'ar')))
+  }, [q, muscle, equip, lang])
 
   return (
     <div className="px-4 py-4">
@@ -183,7 +185,7 @@ export function ExerciseLibraryView({ lang }: ExerciseLibraryViewProps) {
                       secondaryClassName="truncate text-[11px] text-ink-500"
                     />
                     <p className="mt-0.5 flex items-center gap-1.5 text-[11px] text-ink-400">
-                      <span className="rounded-full bg-primary-soft px-1.5 py-0.5 font-bold text-primary-c">{targetMuscleAr(e)}</span>
+                      <span className="rounded-full bg-primary-soft px-1.5 py-0.5 font-bold text-primary-c">{muscleLabel(e.primaryMuscle, lang)}</span>
                       <span className="truncate">{e.equipment.map((eq) => equipLabel(eq, d)).join(' · ')}</span>
                     </p>
                   </div>
@@ -196,7 +198,7 @@ export function ExerciseLibraryView({ lang }: ExerciseLibraryViewProps) {
         </>
       )}
 
-      {view === 'machines' && <MachineCatalogBrowser onOpen={setOpenId} d={d} />}
+      {view === 'machines' && <MachineCatalogBrowser onOpen={setOpenId} d={d} lang={lang} />}
       </div>
 
       {openId && <ExerciseDetail lang={lang} exerciseId={openId} onClose={() => setOpenId(null)} />}
@@ -205,7 +207,7 @@ export function ExerciseLibraryView({ lang }: ExerciseLibraryViewProps) {
 }
 
 /** كتالوج الأجهزة — مرتّب حسب المجموعة العضلية، صديق للمبتدئ. النقر يفتح تفاصيل/شرح التمرين. */
-function MachineCatalogBrowser({ onOpen, d }: { onOpen: (id: string) => void; d: LibraryStrings }) {
+function MachineCatalogBrowser({ onOpen, d, lang }: { onOpen: (id: string) => void; d: LibraryStrings; lang: Lang }) {
   const total = machineCatalog.reduce((n, g) => n + g.items.length, 0)
   return (
     <div className="mt-5">
@@ -239,8 +241,15 @@ function MachineCatalogBrowser({ onOpen, d }: { onOpen: (id: string) => void; d:
                         <p className="truncate text-sm font-bold text-ink-900">{item.nameEn}</p>
                         <p className="truncate text-[11px] text-ink-500">{item.nameAr}</p>
                         <p className="mt-0.5 flex items-center gap-1.5 text-[11px] text-ink-400">
-                          <span className="rounded-full bg-primary-soft px-1.5 py-0.5 font-bold text-primary-c">{item.targetMuscleAr}</span>
-                          {item.subGroupAr && <span className="truncate">{item.subGroupAr}</span>}
+                          {/* العضلة الهدف بلغة الواجهة — بالإنجليزية تُحلّ من قاموس العضلات التفصيلي */}
+                          <span className="rounded-full bg-primary-soft px-1.5 py-0.5 font-bold text-primary-c">
+                            {lang === 'en'
+                              ? ex.primaryMusclesDetailed[0]
+                                ? detailedMuscleLabel(ex.primaryMusclesDetailed[0], lang)
+                                : muscleLabel(ex.primaryMuscle, lang)
+                              : item.targetMuscleAr}
+                          </span>
+                          {lang !== 'en' && item.subGroupAr && <span className="truncate">{item.subGroupAr}</span>}
                         </p>
                       </div>
                       <Icon name="ChevronLeft" className="h-4 w-4 shrink-0 text-ink-400" />

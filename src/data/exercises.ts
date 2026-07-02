@@ -1,5 +1,7 @@
 import type { Exercise, ExEnvironment, ExLevel, Muscle, MovementPattern } from '@/types/workout'
 import type { MuscleId } from '@/types/muscles'
+import type { Lang } from '@/lib/appPreferences'
+import { getMuscle } from '@/data/muscleGroups'
 import { getCommonMistakes, getSafetyNotes, getTechniqueTips } from '@/lib/exerciseGuidance'
 
 // مكتبة التمارين — ١٧٠ تمرينًا تغطي كل المجموعات العضلية + كارديو + إحماء/مرونة.
@@ -445,6 +447,17 @@ export const MUSCLE_LABEL_AR: Record<Muscle, string> = {
 /** العضلة الهدف للتمرين بالعربية (target_muscle_ar). */
 export function targetMuscleAr(ex: Exercise): string {
   return MUSCLE_LABEL_AR[ex.primaryMuscle] ?? ex.primaryMuscle
+}
+
+/** اسم التمرين بحسب اللغة الحالية — إنجليزي في وضع 'en' مع رجوع آمن للعربي عند غيابه، والعكس. */
+export function exerciseName(ex: Exercise, lang: Lang): string {
+  return lang === 'en' ? ex.nameEn || ex.nameAr : ex.nameAr || ex.nameEn
+}
+
+/** اسم العضلة التفصيلية بحسب اللغة — يستهلك قاموس العضلات المشترك (muscleGroups). */
+export function detailedMuscleLabel(id: MuscleId, lang: Lang): string {
+  const m = getMuscle(id)
+  return m ? (lang === 'en' ? m.labelEn : m.labelAr) : id
 }
 
 /** خريطة سريعة للوصول لتمرين بالمعرّف. */

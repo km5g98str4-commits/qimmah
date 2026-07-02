@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import { Icon } from './Icon'
-import { MuscleChips } from './MuscleChips'
 import { ExerciseMedia } from './ExerciseMedia'
 import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
@@ -8,7 +7,7 @@ import { getStrings } from '@/config/strings'
 import { workoutScreenStrings } from '@/i18n/dict/workoutScreen'
 import type { PlanDay } from '@/types/workout'
 import { exerciseDisplayName, planExerciseVideo } from '@/lib/workoutPlan'
-import { getAlternatives, getExercise } from '@/data/exercises'
+import { detailedMuscleLabel, getAlternatives, getExercise } from '@/data/exercises'
 import { getRecord, progressionHint } from '@/lib/exerciseHistory'
 import { exerciseGuidance } from '@/lib/exerciseGuidance'
 import { muscleLabel } from '@/lib/muscles'
@@ -139,7 +138,7 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
             <button type="button" onClick={onClose} aria-label={d.close} className="grid h-11 w-11 place-items-center rounded-xl border border-line bg-surface text-ink-700">
               <Icon name="X" className="h-5 w-5" />
             </button>
-            <p className="truncate text-sm font-black text-ink-900">{lang === 'en' ? day.nameEn : day.nameAr}</p>
+            <p className="truncate text-sm font-black text-ink-900">{lang === 'en' ? day.nameEn || day.nameAr : day.nameAr || day.nameEn}</p>
             <div className="h-11 w-11" />
           </div>
         </header>
@@ -295,7 +294,7 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
             <Icon name="X" className="h-5 w-5" />
           </button>
           <div className="min-w-0 text-center">
-            <p className="truncate text-sm font-black text-ink-900">{lang === 'en' ? day.nameEn : day.nameAr}</p>
+            <p className="truncate text-sm font-black text-ink-900">{lang === 'en' ? day.nameEn || day.nameAr : day.nameAr || day.nameEn}</p>
             <p className="text-xs text-ink-500">{current + 1} {t.of} {total}</p>
           </div>
           <div className="h-11 w-11" />
@@ -314,7 +313,7 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
           <div className="p-5">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <p className="text-lg font-black leading-tight text-ink-900">{nameAr || nameEn}</p>
+              <p className="text-lg font-black leading-tight text-ink-900">{exerciseDisplayName(nameAr, nameEn, lang)}</p>
               {nameAr && nameEn && lang !== 'en' && <p className="mt-0.5 text-xs font-bold text-ink-400">{nameEn}</p>}
               {muscles && (
                 <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-beige px-2.5 py-1 text-xs font-bold text-ink-700">
@@ -323,11 +322,19 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
                 </span>
               )}
               {ex?.primaryMusclesDetailed?.length ? (
-                <MuscleChips
-                  primary={ex.primaryMusclesDetailed}
-                  secondary={ex.secondaryMusclesDetailed}
-                  className="mt-2"
-                />
+                // رقائق العضلات بلغة الواجهة الحالية (تُحلّ عبر قاموس العضلات المشترك)
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {ex.primaryMusclesDetailed.map((m) => (
+                    <span key={`p-${m}`} className="rounded-full bg-primary-soft px-2 py-0.5 text-[10px] font-bold text-primary-c">
+                      {detailedMuscleLabel(m, lang)}
+                    </span>
+                  ))}
+                  {ex.secondaryMusclesDetailed.map((m) => (
+                    <span key={`s-${m}`} className="rounded-full border border-line bg-surface px-2 py-0.5 text-[10px] font-medium text-ink-500">
+                      {detailedMuscleLabel(m, lang)}
+                    </span>
+                  ))}
+                </div>
               ) : null}
             </div>
             <span className="shrink-0 rounded-full bg-primary-soft px-3 py-1.5 text-xs font-black text-primary-c">
@@ -486,7 +493,7 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
                   <li key={a.id} className="rounded-xl border border-line bg-page p-3">
                     <p className="text-sm font-bold text-ink-900">{exerciseDisplayName(a.nameAr, a.nameEn, lang)}</p>
                     <p className="mt-0.5 text-xs text-ink-500">
-                      {muscleLabel(a.primaryMuscle, lang)} · {a.equipment.join('، ')}
+                      {muscleLabel(a.primaryMuscle, lang)} · {a.equipment.join(lang === 'en' ? ', ' : '، ')}
                     </p>
                     <div className="mt-2 flex flex-wrap gap-2">
                       <button type="button" onClick={() => doSwap(a.id, false)} className="btn-primary px-3 py-2 text-xs">
