@@ -23,6 +23,13 @@
 - أيقونة جديدة → استوردها في `src/lib/icons.ts` وأضفها للخريطة.
 - نوع بيانات جديد → `src/types/index.ts`.
 
+## النشر (Hosting)
+- **الاستضافة انتقلت نهائيًا من Netlify إلى Cloudflare Pages** (2026-07). لا تفحص Netlify ولا تعتمد عليه.
+- مشروع Cloudflare Pages: `qimmah` — ينشر تلقائيًا من `main`.
+- رابط الإنتاج: https://qimmah-8qp.pages.dev
+- فروع المعاينة تُنشر على نطاقات فرعية مثل `https://integration-p10-1.qimmah-8qp.pages.dev`.
+- للتحقق من النسخة المنشورة: `BUILD_LABEL` (الفوتر/console) يعرض هاش الـ commit.
+
 ## قبل التسليم
 ```bash
 npm run typecheck && npm run build
