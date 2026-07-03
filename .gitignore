@@ -34,3 +34,6 @@ pnpm-debug.log*
 # TS incremental build info (regenerated)
 tsconfig.app.tsbuildinfo
 # cf-pages-trigger
+
+# agent worktrees (transient)
+.claude/worktrees/
