@@ -1,6 +1,7 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react'
 import { getStrings } from '@/config/strings'
 import { getLanguage } from '@/lib/appPreferences'
+import { Icon } from './Icon'
 
 interface ErrorBoundaryProps {
   children: ReactNode
@@ -94,6 +95,81 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
               {t.reload}
             </button>
           </div>
+        </div>
+      </div>
+    )
+  }
+}
+
+interface RouteErrorBoundaryProps {
+  children: ReactNode
+  /** يُستدعى مع «أعد المحاولة» — يعيد إنشاء حِزم الشاشات الكسولة كي يُعاد استيراد الحزمة الفاشلة. */
+  onRetry?: () => void
+}
+
+/**
+ * حدّ أخطاء الشاشات (المسارات الكسولة) — يلتقط فشل تحميل حزمة عند الطلب أو انهيار
+ * عرض شاشة، ويعرض بطاقة ودّية بلغة الواجهة مع زرّ «أعد المحاولة» يعيد التركيب
+ * ويعيد الاستيراد فعليًا (بلا تحديث كامل للصفحة) — لا شاشة بيضاء أبدًا.
+ */
+export class RouteErrorBoundary extends Component<RouteErrorBoundaryProps, ErrorBoundaryState> {
+  state: ErrorBoundaryState = { hasError: false }
+
+  /** وقت آخر نقرة «أعد المحاولة» — لكشف فشل إعادة الاستيراد الفوري بعدها. */
+  private retryAt = 0
+
+  static getDerivedStateFromError(): ErrorBoundaryState {
+    return { hasError: true }
+  }
+
+  componentDidCatch(error: Error, info: ErrorInfo): void {
+    // console فقط (بلا إرسال خارجي) — يساعد على تشخيص فشل تحميل الحِزم.
+    console.error('RouteErrorBoundary caught an error:', error, info.componentStack)
+    // بعض المتصفحات (Chromium) تخزّن فشل استيراد الوحدة في خريطة الوحدات، فتفشل
+    // إعادة الاستيراد داخل الصفحة فورًا حتى بعد عودة الاتصال. إن فشل تحميل حزمة
+    // مباشرةً بعد «أعد المحاولة» نعيد تحميل الصفحة مرة واحدة — تحميل كامل يجدّد
+    // خريطة الوحدات فيُجلب الملف فعليًا (بياناتك محلية فلا يضيع شيء).
+    const isChunkError = /dynamically imported module|Importing a module script|Failed to fetch|Loading chunk/i.test(
+      String(error?.message ?? error),
+    )
+    if (isChunkError && Date.now() - this.retryAt < 6000) {
+      this.retryAt = 0
+      window.location.reload()
+    }
+  }
+
+  private handleRetry = (): void => {
+    // أعِد إنشاء الشاشات الكسولة أولًا ثم أزل حالة الخطأ — فيُعاد الاستيراد من جديد.
+    this.retryAt = Date.now()
+    this.props.onRetry?.()
+    this.setState({ hasError: false })
+  }
+
+  render(): ReactNode {
+    if (!this.state.hasError) return this.props.children
+
+    const lang = getLanguage()
+    const t = getStrings(lang).errorBoundary
+    return (
+      <div
+        dir={lang === 'en' ? 'ltr' : 'rtl'}
+        className="flex min-h-screen items-center justify-center bg-page px-6 py-16"
+      >
+        <div className="card w-full max-w-md p-8 text-center" data-testid="route-error-card">
+          <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-primary-soft text-primary-c">
+            <Icon name="AlertTriangle" className="h-7 w-7" />
+          </span>
+          <h1 className="mt-4 text-xl font-black text-ink-900">{t.routeTitle}</h1>
+          <p className="mt-2 text-sm leading-relaxed text-ink-500">{t.routeBody}</p>
+          <button
+            type="button"
+            onClick={this.handleRetry}
+            className="btn-primary mt-6"
+            data-testid="route-error-retry"
+          >
+            <Icon name="RotateCcw" className="h-4 w-4" />
+            {t.retry}
+          </button>
         </div>
       </div>
     )

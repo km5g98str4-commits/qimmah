@@ -244,7 +244,7 @@ function MealCard({
                 <span className="block truncate text-sm text-ink-900">{e.label}</span>
                 <span className="block text-[11px] text-ink-400">{e.calories} {d.caloriesUnit} · {e.protein}{d.gramsUnit}</span>
               </span>
-              <button type="button" onClick={() => onRemove(e.id)} aria-label={t.removeEntry} className="shrink-0 rounded-lg p-1.5 text-ink-400 hover:bg-beige hover:text-danger">
+              <button type="button" onClick={() => onRemove(e.id)} aria-label={t.removeEntry} className="grid h-11 w-11 shrink-0 place-items-center rounded-lg text-ink-400 hover:bg-beige hover:text-danger">
                 <Icon name="Trash2" className="h-4 w-4" />
               </button>
             </li>

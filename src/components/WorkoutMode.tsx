@@ -613,7 +613,7 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
                 <span className="text-xs text-ink-500">{t.rpe}:</span>
                 <div className="mt-1.5 flex flex-wrap gap-1.5">
                   {[6, 7, 8, 9, 10].map((v) => (
-                    <button key={v} type="button" onClick={() => setMeta({ rpe: s.rpe === v ? undefined : v })} className={cn('h-9 w-9 rounded-lg border text-xs font-bold', s.rpe === v ? 'border-primary-soft bg-primary text-white' : 'border-line bg-surface text-ink-700')}>{v}</button>
+                    <button key={v} type="button" onClick={() => setMeta({ rpe: s.rpe === v ? undefined : v })} className={cn('h-11 w-11 rounded-lg border text-xs font-bold', s.rpe === v ? 'border-primary-soft bg-primary text-white' : 'border-line bg-surface text-ink-700')}>{v}</button>
                   ))}
                 </div>
               </div>
@@ -653,8 +653,8 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
               </div>
             </div>
             <div className="flex shrink-0 items-center gap-1.5">
-              <button type="button" onClick={() => setTimer((p) => ({ ...p, left: p.left + 30 }))} className="rounded-lg border border-line bg-surface px-2.5 py-2 text-xs font-bold text-ink-700">{t.restAdd30}</button>
-              <button type="button" onClick={() => setTimer({ left: 0, running: false })} className="rounded-lg border border-line bg-surface px-2.5 py-2 text-xs font-bold text-ink-700">{t.skipRest}</button>
+              <button type="button" onClick={() => setTimer((p) => ({ ...p, left: p.left + 30 }))} className="min-h-[44px] rounded-lg border border-line bg-surface px-2.5 py-2 text-xs font-bold text-ink-700">{t.restAdd30}</button>
+              <button type="button" onClick={() => setTimer({ left: 0, running: false })} className="min-h-[44px] rounded-lg border border-line bg-surface px-2.5 py-2 text-xs font-bold text-ink-700">{t.skipRest}</button>
             </div>
           </div>
         </div>
@@ -731,7 +731,7 @@ function Stepper({ label, value, placeholder, step, mode, invalid, onChange, onS
     <div>
       <p className="mb-1 text-center text-[11px] font-bold text-ink-500">{label}</p>
       <div className="flex items-stretch gap-1.5">
-        <button type="button" onClick={() => onStep(-step)} aria-label="-" className="grid h-11 w-9 shrink-0 place-items-center rounded-lg border border-line bg-surface text-ink-700 active:scale-95">
+        <button type="button" onClick={() => onStep(-step)} aria-label="-" className="grid h-11 w-11 shrink-0 place-items-center rounded-lg border border-line bg-surface text-ink-700 active:scale-95">
           <Icon name="Minus" className="h-4 w-4" />
         </button>
         <input
@@ -745,7 +745,7 @@ function Stepper({ label, value, placeholder, step, mode, invalid, onChange, onS
           placeholder={placeholder}
           onChange={(e) => onChange(e.target.value)}
         />
-        <button type="button" onClick={() => onStep(step)} aria-label="+" className="grid h-11 w-9 shrink-0 place-items-center rounded-lg border border-line bg-surface text-ink-700 active:scale-95">
+        <button type="button" onClick={() => onStep(step)} aria-label="+" className="grid h-11 w-11 shrink-0 place-items-center rounded-lg border border-line bg-surface text-ink-700 active:scale-95">
           <Icon name="Plus" className="h-4 w-4" />
         </button>
       </div>
