@@ -42,17 +42,30 @@
 cd ~/path/to/gym-os-template            # جذر المشروع (فرع claude/p12-a4-asset-pipeline)
 export WORKOUTX_API_KEY=xxxx            # المفتاح من البيئة فقط — لا يُكتب في أي ملف
 
-bash scripts/p12-fetch-gifs.sh --dry-run   # بلا شبكة: راجع الخطة (46 عنصرًا، طلب قائمة واحد)
+bash scripts/p12-fetch-gifs.sh --dry-run   # بلا شبكة: راجع الخطة (طلب قائمة واحد + ترقيم)
 bash scripts/p12-fetch-gifs.sh --probe     # طلب واحد فقط: حالة+جسم خام + تحقق مطابقة Hack Squat — لا تكمل إن فشل
 # راجع المخرجات — ثم نفّذ الجلب الفعلي:
-bash scripts/p12-fetch-gifs.sh             # idempotent: يتخطّى أي ملف موجود
+bash scripts/p12-fetch-gifs.sh             # idempotent: يتخطّى الموجود؛ لا تنزيل تلقائي دون تغطية 0.85
+
+# قرار زياد 2b — الأساسيات بلا صورة تحت العتبة تُدرَج كمرشّحات للموافقة اليدوية:
+node scripts/p12-fetch-gifs.mjs --candidates   # يكتب top-3 لكل أساسي بلا GIF بين علامتَي P12_GIF_CANDIDATES أدناه
+# راجع الجدول أدناه، اعتمد يدويًا، وحمّل المعتمد يدويًا أو أعد التشغيل بعتبة أدنى لعنصر بعينه:
+#   WORKOUTX_COVERAGE_MIN=0.6 bash scripts/p12-fetch-gifs.sh   # (يخفض العتبة للتشغيل كله — استخدمه بحذر)
 
 node scripts/p12-sync-gifs.mjs             # يعيد توليد src/data/exerciseGifs.ts من الملفات
 npm run build                              # يجب أن يمرّ بلا أخطاء
 
-git add public/exercise-gifs src/data/exerciseGifs.ts
-git commit -m "P12: جلب GIF الأجهزة الناقصة من WorkoutX + مزامنة الخريطة"
+git add public/exercise-gifs src/data/exerciseGifs.ts docs/product/P12_ASSETS.md
+git commit -m "P12: جلب GIF الأجهزة الناقصة من WorkoutX + مزامنة الخريطة + مرشّحات الأساسيات"
 ```
+
+> **عتبة التنزيل التلقائي = 0.85** (قرار زياد P12). أي مطابقة أساسية دون هذه التغطية **لا تُنزَّل تلقائيًا**؛
+> يطبع السكربت لها top-3 مرشّحات ويكتبها في القسم أدناه لموافقتك اليدوية. البدائل (غير الأساسية)
+> تخضع للعتبة نفسها. عدّل العتبة عبر `WORKOUTX_COVERAGE_MIN` عند الحاجة.
+
+<!--P12_GIF_CANDIDATES:START-->
+_(يُملأ آليًا بـ `node scripts/p12-fetch-gifs.mjs --candidates` على جهاز فيه كاش الزحف — البيئة هنا بلا إنترنت.)_
+<!--P12_GIF_CANDIDATES:END-->
 
 - إن ظهر «Pillow غير مثبّت»: `pip3 install pillow` ثم أعد التشغيل.
 - إعادة تشغيل `p12-fetch-gifs.sh` آمنة دائمًا (skip-if-exists) — تجلب فقط ما تبقّى.

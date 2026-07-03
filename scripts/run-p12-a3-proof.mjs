@@ -35,14 +35,31 @@ const check = (name, expected, actual, pass) => {
 
 // ————— static source extraction (regex on source files — robust for these data files) —————
 const catalogSrc = readFileSync('src/data/machineCatalog.ts', 'utf8')
-const catalogIds = new Set([...catalogSrc.matchAll(/exerciseId: '([^']+)'/g)].map((m) => m[1]))
+// «الأساسيات» = قائمة زياد الـ٣٢ (PRIMARY_MACHINE_IDS) — لا الكتالوج القابل للتصفّح (٣٨).
+// المولّد والقوالب لا يجوز أن تختار أساسيًا خارج هذه القائمة.
+const primaryBlock = catalogSrc.slice(
+  catalogSrc.indexOf('PRIMARY_MACHINE_IDS'),
+  catalogSrc.indexOf('primaryMachineIdSet'),
+)
+const catalogIds = new Set([...primaryBlock.matchAll(/'([^']+)'/g)].map((m) => m[1]))
+// الأجهزة المستبعَدة من الأساسيات (ذراعان/بطن/كيبل) — يجب ألا تظهر أساسيًا في أي قالب/خطة.
+const NON_PRIMARY_MACHINES = [
+  'preacher-curl-machine', 'cable-biceps-curl', 'triceps-extension-machine',
+  'cable-triceps-pushdown', 'ab-crunch-machine', 'cable-crunch',
+]
 
 const exercisesSrc = readFileSync('src/data/exercises.ts', 'utf8')
 const legacyBlock = exercisesSrc.match(/LEGACY_EXERCISE_ID_MAP[\s\S]*?\n\}/)?.[0] ?? ''
 const legacyIds = new Set([...legacyBlock.matchAll(/'([^']+)':\s*'[^']+'/g)].map((m) => m[1]))
 
 function staticChecks() {
-  check('catalog id extraction', '38 ids', `${catalogIds.size} ids`, catalogIds.size === 38)
+  check('primary set extraction', '32 primaries', `${catalogIds.size} primaries`, catalogIds.size === 32)
+  check(
+    'no arm/abs/cable machine is a primary',
+    'none',
+    NON_PRIMARY_MACHINES.filter((id) => catalogIds.has(id)).join(',') || 'none',
+    NON_PRIMARY_MACHINES.every((id) => !catalogIds.has(id)),
+  )
 
   // — قوالب: كل قالب (عدا home-workout) أجهزة كتالوج فقط (+كارديو مسموح) —
   const tplSrc = readFileSync('src/data/workoutTemplates.ts', 'utf8')

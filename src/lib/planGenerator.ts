@@ -19,7 +19,7 @@ import type { RoutineRow } from '@/lib/customization'
 import type { Lang } from '@/lib/appPreferences'
 import { computeTargets, calorieGoalFromGoalType, goalTypeLabel } from '@/lib/calculators'
 import { canonicalExerciseId, exercises, getExercise } from '@/data/exercises'
-import { machineCatalogIdSet } from '@/data/machineCatalog'
+import { primaryMachineIdSet } from '@/data/machineCatalog'
 import { getTemplate } from '@/data/workoutTemplates'
 import { mealTemplates, getMealTemplate } from '@/data/mealTemplates'
 import { workoutDayNameAr, workoutDayNameEn } from '@/lib/workoutDayLabel'
@@ -654,7 +654,11 @@ function generateWorkoutPlan(p: Profile): { plan: WorkoutPlan; specs: DaySpec[] 
   const access = resolveGymAccess(p)
   const machinesOnly = access === 'full' || access === 'small'
   const pool = machinesOnly
-    ? exercises.filter((ex) => machineCatalogIdSet.has(ex.id) && injuryOk(ex) && levelOk(ex, tier))
+    ? // أجهزة فقط: الحوض حصريًا من قائمة الأساسيات الـ٣٢ (قرار زياد النهائي). لا أجهزة
+      // ذراعين/بطن ولا كيبل هنا — الذراعان والبطن يُدرَّبان تبعيًا عبر المركّبات (ضغط الصدر
+      // للترايسبس، السحب/التجديف للبايسبس). فتحات البايسبس/الترايسبس/الكور لا يملؤها شيء
+      // من الحوض فيُكمل buildDayExercises العدد المستهدف من بقية أجهزة القائمة.
+      exercises.filter((ex) => primaryMachineIdSet.has(ex.id) && injuryOk(ex) && levelOk(ex, tier))
     : exercises.filter(
         (ex) =>
           equipOk(ex) &&

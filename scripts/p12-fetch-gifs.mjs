@@ -41,6 +41,7 @@ const HARD_CAP = 200
 
 const DRY_RUN = process.argv.includes('--dry-run')
 const PROBE = process.argv.includes('--probe')
+const CANDIDATES = process.argv.includes('--candidates')
 
 // ── القائمة الناقصة: slug | اسم البحث EN | عضلة تقريبية (لمكافأة المطابقة) ──
 const MISSING = [
@@ -213,6 +214,62 @@ function bestGif(nameEn, muscle, catalog) {
   return best && best.coverage >= 0.66 ? best : null
 }
 
+// أفضل n مرشّحات (اسم + تغطية + رابط) لمراجعة زياد اليدوية — بلا حد أدنى.
+function topGifs(nameEn, muscle, catalog, n = 3) {
+  const qTok = tokens(nameEn)
+  const want = MUSCLE_MAP[muscle] || []
+  const scored = []
+  for (const c of catalog) {
+    if (!c.url) continue
+    const cSet = new Set(tokens(c.name))
+    const hit = qTok.filter((t) => cSet.has(t)).length
+    const coverage = qTok.length ? hit / qTok.length : 0
+    const muscleTok = new Set(tokens((c.muscles || []).join(' ')))
+    const muscleBonus = want.some((w) => muscleTok.has(w)) ? 0.1 : 0
+    scored.push({ name: c.name, url: c.url, coverage, score: coverage + muscleBonus })
+  }
+  scored.sort((a, b) => b.score - a.score)
+  return scored.slice(0, n)
+}
+
+// عتبة التنزيل التلقائي (قرار زياد P12): لا تنزيل تلقائي دون هذه التغطية — تُدرَج مرشّحاتها
+// للموافقة اليدوية بدل تنزيلها. عدّلها عبر WORKOUTX_COVERAGE_MIN عند الحاجة.
+const COVERAGE_MIN = Number(process.env.WORKOUTX_COVERAGE_MIN || 0.85)
+
+// قائمة الأساسيات الـ٣٢ (قرار زياد) — تُقرأ من machineCatalog.ts كي لا تنجرف عن المصدر.
+const PRIMARY_IDS = (() => {
+  try {
+    const src = readFileSync(resolve(ROOT, 'src/data/machineCatalog.ts'), 'utf8')
+    const block = src.slice(src.indexOf('PRIMARY_MACHINE_IDS'), src.indexOf('primaryMachineIdSet'))
+    return new Set([...block.matchAll(/'([^']+)'/g)].map((m) => m[1]))
+  } catch { return new Set() }
+})()
+
+// يكتب/يحدّث قسم مرشّحات GIF للأساسيات داخل P12_ASSETS.md بين علامتين ثابتتين.
+function writeCandidatesDoc(rows) {
+  const docPath = resolve(ROOT, 'docs/product/P12_ASSETS.md')
+  const START = '<!--P12_GIF_CANDIDATES:START-->'
+  const END = '<!--P12_GIF_CANDIDATES:END-->'
+  let doc
+  try { doc = readFileSync(docPath, 'utf8') } catch { return }
+  const lines = ['', '### مرشّحات GIF للأساسيات بلا صورة (top-3، للموافقة اليدوية)', '',
+    '> مولّد آليًا بـ `node scripts/p12-fetch-gifs.mjs --candidates` على جهاز فيه كاش الزحف. راجع كل صف واعتمد الأنسب يدويًا.', '',
+    '| الأساسي (placeholder) | مرشّح ١ (تغطية) | مرشّح ٢ | مرشّح ٣ |', '|---|---|---|---|']
+  for (const r of rows) {
+    const c = r.candidates
+    const cell = (x) => (x ? `«${x.name}» (${x.coverage.toFixed(2)})` : '—')
+    lines.push(`| \`${r.slug}\` | ${cell(c[0])} | ${cell(c[1])} | ${cell(c[2])} |`)
+  }
+  const section = `${START}\n${lines.join('\n')}\n${END}`
+  if (doc.includes(START) && doc.includes(END)) {
+    doc = doc.replace(new RegExp(`${START}[\\s\\S]*?${END}`), section)
+  } else {
+    doc += `\n\n${section}\n`
+  }
+  writeFileSync(docPath, doc)
+  console.log(`▶ كُتبت ${rows.length} مرشّحًا في docs/product/P12_ASSETS.md (بين علامتَي P12_GIF_CANDIDATES).`)
+}
+
 async function downloadGif(url, absPath) {
   if (existsSync(absPath)) return 'exists'
   try {
@@ -352,6 +409,7 @@ async function main() {
           console.log(`▶ كاش الزحف مكتمل (${c.entries.length}/${c.total}) — مطابقة وتنزيل مباشرةً، صفر طلبات قائمة.`)
           const catalog = toCatalog(c.entries)
           console.log(`▶ كتالوج WorkoutX من الكاش: ${catalog.length} مدخلًا يحمل gif.`)
+          if (CANDIDATES) { runCandidates(catalog); return }
           await matchAndDownload(catalog)
           return
         }
@@ -386,6 +444,7 @@ async function main() {
 
   const catalog = await fetchCatalog(det)
 
+  if (CANDIDATES) { runCandidates(catalog); return }
   await matchAndDownload(catalog)
 }
 
@@ -393,12 +452,20 @@ async function main() {
 // المطابقة + التنزيل + جدول مراجعة المطابقات (تغطية < 1.00 تُطبع لمراجعة زياد اليدوية).
 async function matchAndDownload(catalog) {
   let downloaded = 0, skipped = 0, notfound = []
-  const review = []
+  const review = []       // تغطية بين العتبة و١.٠٠ — نُزّلت لكن راجعها بصريًا
+  const belowThreshold = [] // تحت العتبة — لم تُنزَّل، مرشّحاتها للموافقة اليدوية
   for (const [i, [slug, name, muscle]] of MISSING.entries()) {
     const out = resolve(LOCAL_DIR, `${slug}.gif`)
     if (existsSync(out)) { console.log(`[${i + 1}/${MISSING.length}] ⏭ ${slug} — موجود.`); skipped++; continue }
     const hit = bestGif(name, muscle, catalog)
     if (!hit) { console.log(`[${i + 1}/${MISSING.length}] ✗ ${slug} — لا مطابقة في WorkoutX (تخطٍّ، لا فشل).`); notfound.push(slug); continue }
+    // بوابة العتبة (قرار زياد): لا تنزيل تلقائي دون COVERAGE_MIN — نجمع المرشّحات للموافقة.
+    if (hit.coverage < COVERAGE_MIN) {
+      const cands = topGifs(name, muscle, catalog, 3)
+      belowThreshold.push({ slug, isPrimary: PRIMARY_IDS.has(slug), candidates: cands })
+      console.log(`[${i + 1}/${MISSING.length}] ⏸ ${slug} — أفضل تغطية ${hit.coverage.toFixed(2)} < عتبة ${COVERAGE_MIN} → لا تنزيل تلقائي (مرشّحات للموافقة).`)
+      continue
+    }
     if (hit.coverage < 1) review.push({ slug, matched: hit.name, coverage: hit.coverage })
     console.log(`[${i + 1}/${MISSING.length}] ⬇ ${slug} ← «${hit.name}» (تغطية ${hit.coverage.toFixed(2)})`)
     const ok = await downloadGif(hit.url, out)
@@ -408,14 +475,39 @@ async function matchAndDownload(catalog) {
   }
 
   console.log(`\n══════════ الخلاصة ══════════`)
-  console.log(`نزّلنا: ${downloaded} • تخطّينا (موجود): ${skipped} • غير موجود/فشل: ${notfound.length}`)
+  console.log(`نزّلنا: ${downloaded} • تخطّينا (موجود): ${skipped} • غير موجود/فشل: ${notfound.length} • تحت العتبة (بلا تنزيل): ${belowThreshold.length}`)
   if (notfound.length) console.log(`غير الموجود: ${notfound.join(', ')}`)
   if (review.length) {
-    console.log(`\n⚠ مراجعة المطابقات (تغطية < 1.00) — راجعها يدويًا وأضفها إلى MATCH_REVIEW في P12_ASSETS.md:`)
+    console.log(`\n⚠ مراجعة المطابقات (عتبة ≤ تغطية < 1.00) — نُزّلت، راجعها بصريًا (MATCH_REVIEW في P12_ASSETS.md):`)
     for (const r of review) console.log(`  • ${r.slug} ← «${r.matched}» (${r.coverage.toFixed(2)})`)
   }
+  // مرشّحات الأساسيات تحت العتبة → تُكتب في P12_ASSETS.md للموافقة اليدوية (قرار زياد 2b).
+  const primPending = belowThreshold.filter((b) => b.isPrimary)
+  if (primPending.length) {
+    console.log(`\n⚠ ${primPending.length} أساسيًا دون عتبة التنزيل — مرشّحاتها (top-3) للموافقة اليدوية:`)
+    for (const b of primPending) {
+      const c = b.candidates.map((x) => `«${x.name}» ${x.coverage.toFixed(2)}`).join(' | ')
+      console.log(`  • ${b.slug}: ${c || '(لا مرشّح)'}`)
+    }
+    writeCandidatesDoc(primPending)
+  }
   console.log(`طلبات API المستهلكة هذه الجولة: ${reqCount} (تشمل تنزيلات gif — كلها موقَّعة بالمفتاح).`)
-  console.log(`التالي: node scripts/p12-sync-gifs.mjs && npm run build`)
+  console.log(`التالي: راجع المرشّحات في P12_ASSETS.md ثم node scripts/p12-sync-gifs.mjs && npm run build`)
+}
+
+// وضع --candidates: لكل أساسي بلا GIF محلي، اطبع top-3 مرشّحات واكتبها في P12_ASSETS.md. بلا تنزيل.
+function runCandidates(catalog) {
+  const rows = []
+  for (const [slug, name, muscle] of MISSING) {
+    if (!PRIMARY_IDS.has(slug)) continue // أساسيات فقط
+    if (existsSync(resolve(LOCAL_DIR, `${slug}.gif`))) continue // له صورة أصلًا
+    rows.push({ slug, candidates: topGifs(name, muscle, catalog, 3) })
+  }
+  console.log(`\n── مرشّحات ${rows.length} أساسيًا بلا GIF (top-3 لكل واحد) ──`)
+  for (const r of rows) {
+    console.log(`  • ${r.slug}: ${r.candidates.map((x) => `«${x.name}» ${x.coverage.toFixed(2)}`).join(' | ') || '(لا مرشّح)'}`)
+  }
+  writeCandidatesDoc(rows)
 }
 
 main().catch((e) => { console.error('✗', e.message); process.exit(1) })

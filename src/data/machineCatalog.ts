@@ -182,15 +182,43 @@ export const machineCatalogExerciseIds: string[] = Array.from(
   new Set(machineCatalog.flatMap((g) => g.items.map((i) => i.exerciseId))),
 )
 
-/** مجموعة بحث سريعة: هل هذا التمرين ضمن كتالوج الأجهزة المعتمد؟ */
+/** مجموعة بحث سريعة: هل هذا التمرين ضمن كتالوج الأجهزة القابل للتصفّح (يشمل الذراعين/البطن)؟
+ *  للعرض/التصفّح فقط (مكتبة الأجهزة + مصنّف الباني). ليست مجموعة «الأساسيات». */
 export const machineCatalogIdSet: ReadonlySet<string> = new Set(machineCatalogExerciseIds)
 
 /**
- * هل هذا المعرّف تمرينًا أساسيًا (جهاز من الكتالوج)؟
+ * قائمة الأساسيات المعتمدة (قرار زياد النهائي، P12) — المصدر الوحيد لما يختاره
+ * مولّد الخطط والقوالب كتمرين «أساسي». **لا شيء خارج هذه القائمة يكون أساسيًا.**
+ * أجهزة الذراعين/البطن والكيبل تبقى في المكتبة وكبدائل، لكنها لا تظهر أساسيات خطة أبدًا.
+ * الترتيب مطابق لقائمة زياد (صدر ← ظهر ← أكتاف ← أرجل) ليكون تدقيقه بصريًا سهلًا.
+ */
+export const PRIMARY_MACHINE_IDS: readonly string[] = [
+  // الصدر (٦)
+  'chest-press-machine', 'iso-lateral-chest-press', 'incline-chest-press-machine',
+  'iso-lateral-incline-press', 'decline-chest-press-machine', 'assisted-dip-machine',
+  // الظهر (١٠)
+  'lat-pulldown-machine', 'single-arm-lat-pulldown', 'iso-lateral-pulldown',
+  'iso-lateral-high-row', 'wide-grip-lat-pulldown', 'wide-grip-iso-lateral-pulldown',
+  'seated-row-machine', 'chest-supported-row-machine', 't-bar-row-machine', 'rear-delt-row-machine',
+  // الأكتاف (٣)
+  'shoulder-press-machine', 'lateral-raise-machine', 'reverse-pec-deck',
+  // الأرجل (١٣)
+  'leg-extension-machine', 'hack-squat-machine', 'pendulum-squat-machine', 'leg-press-machine',
+  'seated-leg-curl', 'lying-leg-curl', 'standing-leg-curl', 'hip-adductor-machine',
+  'glute-drive-machine', 'glute-kickback-machine', 'standing-hip-extension-machine',
+  'seated-calf-raise-machine', 'standing-calf-raise-machine',
+]
+
+/** مجموعة الأساسيات المعتمدة — يستخدمها المولّد والقوالب وQA. */
+export const primaryMachineIdSet: ReadonlySet<string> = new Set(PRIMARY_MACHINE_IDS)
+
+/**
+ * هل هذا المعرّف تمرينًا **أساسيًا** (ضمن قائمة زياد الـ٣٢)؟
  * يقبل المعرّفات القديمة أيضًا (يحوّلها للقانوني قبل الفحص).
+ * ملاحظة: أجهزة الذراعين/البطن ضمن الكتالوج القابل للتصفّح لكنها ليست أساسيات → تُعيد false.
  */
 export function isMachinePrimary(id: string): boolean {
-  return machineCatalogIdSet.has(canonicalExerciseId(id))
+  return primaryMachineIdSet.has(canonicalExerciseId(id))
 }
 
 /** يعيد مجموعة كتالوج بمفتاحها. */
