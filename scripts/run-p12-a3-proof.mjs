@@ -61,24 +61,33 @@ function staticChecks() {
     NON_PRIMARY_MACHINES.every((id) => !catalogIds.has(id)),
   )
 
-  // — قوالب: كل قالب (عدا home-workout) أجهزة كتالوج فقط (+كارديو مسموح) —
+  // — قوالب: كل قالب (عدا home-workout) = أساسيات الـ٣٢ + إضافة واحدة/يوم (+كارديو مسموح) —
   const tplSrc = readFileSync('src/data/workoutTemplates.ts', 'utf8')
   const tplRe = /\n  \{\n    id: '([^']+)',([\s\S]*?)\n  \},/g
+  const tplAccSet = new Set(NON_PRIMARY_MACHINES)
   let m
   let tplCount = 0
   while ((m = tplRe.exec(tplSrc))) {
     const [, tplId, body] = m
     tplCount++
-    const ids = [...body.matchAll(/exerciseIds: \[([^\]]*)\]/g)].flatMap((mm) =>
+    const dayArrays = [...body.matchAll(/exerciseIds: \[([^\]]*)\]/g)].map((mm) =>
       [...mm[1].matchAll(/'([^']+)'/g)].map((x) => x[1]),
     )
     if (tplId === 'home-workout') {
-      const nonCatalog = ids.filter((id) => !catalogIds.has(id))
+      const nonCatalog = dayArrays.flat().filter((id) => !catalogIds.has(id))
       check(`template ${tplId} keeps home exercises (exempt)`, '>0 non-catalog', `${nonCatalog.length} non-catalog`, nonCatalog.length > 0)
       continue
     }
-    const bad = ids.filter((id) => !catalogIds.has(id) && !CARDIO_ALLOWED.has(id))
-    check(`template ${tplId}: only catalog machines (+cardio)`, 'no offenders', bad.length ? bad.join(',') : 'no offenders', bad.length === 0)
+    // كل يوم: أساسيات الـ٣٢ + إضافة واحدة اختيارية (من الستة) تُلحَق آخر تمرين مقاومة.
+    const bad = dayArrays.flat().filter((id) => !catalogIds.has(id) && !tplAccSet.has(id) && !CARDIO_ALLOWED.has(id))
+    check(`template ${tplId}: only 32 primaries + accessory pool (+cardio)`, 'no offenders', bad.length ? bad.join(',') : 'no offenders', bad.length === 0)
+    const accCheck = dayArrays.every((day) => {
+      const nonCardio = day.filter((id) => !CARDIO_ALLOWED.has(id))
+      const acc = nonCardio.filter((id) => tplAccSet.has(id))
+      const lastOk = acc.length === 0 || tplAccSet.has(nonCardio[nonCardio.length - 1])
+      return acc.length <= 1 && lastOk
+    })
+    check(`template ${tplId}: ≤1 accessory/day, always last`, 'yes', accCheck ? 'yes' : 'no', accCheck)
   }
   check('templates parsed', '11 templates', `${tplCount} templates`, tplCount === 11)
 

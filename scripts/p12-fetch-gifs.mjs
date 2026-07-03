@@ -236,13 +236,20 @@ function topGifs(nameEn, muscle, catalog, n = 3) {
 // للموافقة اليدوية بدل تنزيلها. عدّلها عبر WORKOUTX_COVERAGE_MIN عند الحاجة.
 const COVERAGE_MIN = Number(process.env.WORKOUTX_COVERAGE_MIN || 0.85)
 
-// قائمة الأساسيات الـ٣٢ (قرار زياد) — تُقرأ من machineCatalog.ts كي لا تنجرف عن المصدر.
+// أجهزة الموافقة اليدوية = الأساسيات الـ٣٢ + الأجهزة الست للإضافات (قرار زياد: الإضافات
+// تظهر في كل خطة الآن فتُعامَل مثل الأساسيات في جدول الموافقة اليدوية للصور).
+// الأساسيات تُقرأ من machineCatalog.ts كي لا تنجرف؛ الإضافات ثابتة (الأجهزة الست).
+const ACCESSORY_MACHINE_IDS = [
+  'preacher-curl-machine', 'cable-biceps-curl', 'triceps-extension-machine',
+  'cable-triceps-pushdown', 'ab-crunch-machine', 'cable-crunch',
+]
 const PRIMARY_IDS = (() => {
   try {
     const src = readFileSync(resolve(ROOT, 'src/data/machineCatalog.ts'), 'utf8')
     const block = src.slice(src.indexOf('PRIMARY_MACHINE_IDS'), src.indexOf('primaryMachineIdSet'))
-    return new Set([...block.matchAll(/'([^']+)'/g)].map((m) => m[1]))
-  } catch { return new Set() }
+    const ids = [...block.matchAll(/'([^']+)'/g)].map((m) => m[1])
+    return new Set([...ids, ...ACCESSORY_MACHINE_IDS])
+  } catch { return new Set(ACCESSORY_MACHINE_IDS) }
 })()
 
 // يكتب/يحدّث قسم مرشّحات GIF للأساسيات داخل P12_ASSETS.md بين علامتين ثابتتين.
@@ -252,9 +259,9 @@ function writeCandidatesDoc(rows) {
   const END = '<!--P12_GIF_CANDIDATES:END-->'
   let doc
   try { doc = readFileSync(docPath, 'utf8') } catch { return }
-  const lines = ['', '### مرشّحات GIF للأساسيات بلا صورة (top-3، للموافقة اليدوية)', '',
+  const lines = ['', '### مرشّحات GIF للأجهزة بلا صورة — أساسيات + إضافات (top-3، للموافقة اليدوية)', '',
     '> مولّد آليًا بـ `node scripts/p12-fetch-gifs.mjs --candidates` على جهاز فيه كاش الزحف. راجع كل صف واعتمد الأنسب يدويًا.', '',
-    '| الأساسي (placeholder) | مرشّح ١ (تغطية) | مرشّح ٢ | مرشّح ٣ |', '|---|---|---|---|']
+    '| الجهاز (placeholder) | مرشّح ١ (تغطية) | مرشّح ٢ | مرشّح ٣ |', '|---|---|---|---|']
   for (const r of rows) {
     const c = r.candidates
     const cell = (x) => (x ? `«${x.name}» (${x.coverage.toFixed(2)})` : '—')
@@ -481,10 +488,10 @@ async function matchAndDownload(catalog) {
     console.log(`\n⚠ مراجعة المطابقات (عتبة ≤ تغطية < 1.00) — نُزّلت، راجعها بصريًا (MATCH_REVIEW في P12_ASSETS.md):`)
     for (const r of review) console.log(`  • ${r.slug} ← «${r.matched}» (${r.coverage.toFixed(2)})`)
   }
-  // مرشّحات الأساسيات تحت العتبة → تُكتب في P12_ASSETS.md للموافقة اليدوية (قرار زياد 2b).
+  // مرشّحات الأجهزة (أساسيات + إضافات) تحت العتبة → للموافقة اليدوية (قرار زياد 2b/rec3).
   const primPending = belowThreshold.filter((b) => b.isPrimary)
   if (primPending.length) {
-    console.log(`\n⚠ ${primPending.length} أساسيًا دون عتبة التنزيل — مرشّحاتها (top-3) للموافقة اليدوية:`)
+    console.log(`\n⚠ ${primPending.length} جهازًا (أساسي/إضافة) دون عتبة التنزيل — مرشّحاتها (top-3) للموافقة اليدوية:`)
     for (const b of primPending) {
       const c = b.candidates.map((x) => `«${x.name}» ${x.coverage.toFixed(2)}`).join(' | ')
       console.log(`  • ${b.slug}: ${c || '(لا مرشّح)'}`)
@@ -495,15 +502,15 @@ async function matchAndDownload(catalog) {
   console.log(`التالي: راجع المرشّحات في P12_ASSETS.md ثم node scripts/p12-sync-gifs.mjs && npm run build`)
 }
 
-// وضع --candidates: لكل أساسي بلا GIF محلي، اطبع top-3 مرشّحات واكتبها في P12_ASSETS.md. بلا تنزيل.
+// وضع --candidates: لكل جهاز (أساسي أو إضافة) بلا GIF محلي، اطبع top-3 واكتبها في P12_ASSETS.md. بلا تنزيل.
 function runCandidates(catalog) {
   const rows = []
   for (const [slug, name, muscle] of MISSING) {
-    if (!PRIMARY_IDS.has(slug)) continue // أساسيات فقط
+    if (!PRIMARY_IDS.has(slug)) continue // أجهزة الموافقة اليدوية (أساسيات + إضافات) فقط
     if (existsSync(resolve(LOCAL_DIR, `${slug}.gif`))) continue // له صورة أصلًا
     rows.push({ slug, candidates: topGifs(name, muscle, catalog, 3) })
   }
-  console.log(`\n── مرشّحات ${rows.length} أساسيًا بلا GIF (top-3 لكل واحد) ──`)
+  console.log(`\n── مرشّحات ${rows.length} جهازًا (أساسيات + إضافات) بلا GIF (top-3 لكل واحد) ──`)
   for (const r of rows) {
     console.log(`  • ${r.slug}: ${r.candidates.map((x) => `«${x.name}» ${x.coverage.toFixed(2)}`).join(' | ') || '(لا مرشّح)'}`)
   }
