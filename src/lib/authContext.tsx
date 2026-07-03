@@ -81,7 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     let active = true
     let unsubscribe: (() => void) | null = null
-    // getSupabase() كسول (P12): المكتبة تُحمَّل هنا بعد الرسم الأول، لا في حزمة الإقلاع.
+    // getSupabase() كسول (P11.5): المكتبة تُحمَّل هنا بعد الرسم الأول، لا في حزمة الإقلاع.
     getSupabase().then((supabase) => {
       if (!active || !supabase) {
         if (active) setLoading(false)

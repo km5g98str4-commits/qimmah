@@ -28,7 +28,7 @@ import {
   defaultProfile,
   profileHash,
 } from '@/lib/calculators'
-// P12: الاشتقاقات الخفيفة من planDerive — planGenerator (ومعه قاعدة التمارين)
+// P11.5: الاشتقاقات الخفيفة من planDerive — planGenerator (ومعه قاعدة التمارين)
 // يُحمَّل كسولًا داخل buildCustomizationFromOnboarding فقط، خارج حزمة الإقلاع.
 import { deriveActivityLevel, deriveTargetWeight, levelFromExperience } from '@/lib/planDerive'
 import { experienceToBand, goalChoices, gymTypeToAccess } from '@/data/planBuilder'

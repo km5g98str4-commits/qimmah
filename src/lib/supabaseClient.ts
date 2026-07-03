@@ -9,7 +9,7 @@
 // إن لم تتوفّر قيم صالحة إطلاقًا يبقى التطبيق يعمل محليًا (Guest Mode) دون أن ينهار؛
 // أي استدعاء سحابي يجب أن يتحقّق أولًا عبر isSupabaseConfigured() أو getSupabase().
 
-// ملاحظة أداء (P12): مكتبة supabase-js تُحمَّل كسولًا (dynamic import) كي لا تدخل
+// ملاحظة أداء (P11.5): مكتبة supabase-js تُحمَّل كسولًا (dynamic import) كي لا تدخل
 // حزمة الإقلاع (~55KB gzip) — الرسم الأول لا يحتاجها، وgetSupabase() صارت async.
 import type { SupabaseClient } from '@supabase/supabase-js'
 

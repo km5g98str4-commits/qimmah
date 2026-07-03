@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// بوابة ميزانية الأداء (P12) — تفشل إن تجاوزت أحجام gzip حدودها.
+// بوابة ميزانية الأداء (P11.5) — تفشل إن تجاوزت أحجام gzip حدودها.
 //
 // تُشغَّل بعد `npm run build`:  npm run perf:budget
 // الحدود مقصودة كسقف تراجع (regression ceiling) لا كهدف — عدّلها بوعي فقط
@@ -14,7 +14,7 @@ const ASSETS = join(DIST, 'assets')
 
 // —— الميزانيات (bytes، بعد gzip) ——
 const BUDGETS = [
-  // حزمة الدخول (entry): كانت 137KB قبل P12؛ الحدّ يمنع العودة للوراء.
+  // حزمة الدخول (entry): كانت 137KB قبل P11.5؛ الحدّ يمنع العودة للوراء.
   { label: 'entry (index-*.js المُشار إليه من index.html)', kind: 'entry', maxGzip: 80_000 },
   // إجمالي JS المُحمَّل عند الإقلاع: entry + vendor-react + vendor-icons (modulepreload).
   { label: 'boot JS (entry + modulepreload)', kind: 'boot', maxGzip: 140_000 },

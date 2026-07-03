@@ -1,10 +1,10 @@
-// P12 QA — أداء الجوال + PWA (متصفّح بلا رأس، بعد npm run build):
+// P11.5 QA — أداء الجوال + PWA (متصفّح بلا رأس، بعد npm run build):
 //  • عامل الخدمة يسجَّل ويُفعَّل، وأسماء الكاش تحمل إصدار البناء المحقون (هاش الـ commit).
 //  • فتح التطبيق دون اتصال (offline) بعد أول زيارة → القشرة تُرسم من الكاش.
 //  • حزمة Supabase كسولة: لا تُحمَّل قبل اكتمال DOMContentLoaded (خارج مسار الإقلاع).
 //  • الإقلاع يظلّ سليمًا: شاشة البداية تُرسم بلا أخطاء صفحة غير معالَجة.
 //
-// التشغيل: npm run qa:p12  (يبني أولًا عبر prequa إن رُبط، وإلا: npm run build && node scripts/run-p12-qa.mjs)
+// التشغيل: npm run qa:p11.5  (يبني أولًا عبر prequa إن رُبط، وإلا: npm run build && node scripts/run-p11.5-qa.mjs)
 
 import { chromium } from 'playwright'
 import { spawn } from 'node:child_process'
@@ -105,7 +105,7 @@ async function main() {
   }
 
   const failed = results.filter((r) => !r.pass)
-  console.log(`\n${failed.length === 0 ? '🎉 P12 QA — ALL GREEN' : '💥 ' + failed.length + ' CHECK(S) FAILED'}`)
+  console.log(`\n${failed.length === 0 ? '🎉 P11.5 QA — ALL GREEN' : '💥 ' + failed.length + ' CHECK(S) FAILED'}`)
   process.exit(failed.length === 0 ? 0 : 1)
 }
 

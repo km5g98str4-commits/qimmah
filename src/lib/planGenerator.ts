@@ -42,7 +42,7 @@ export interface GeneratedPlan {
 
 const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n))
 
-// الاشتقاقات الخفيفة انتقلت إلى planDerive (P12) لإخراجها من حزمة الإقلاع؛
+// الاشتقاقات الخفيفة انتقلت إلى planDerive (P11.5) لإخراجها من حزمة الإقلاع؛
 // يُعاد تصديرها هنا للتوافق مع المستوردين الحاليين.
 export { levelFromExperience, deriveActivityLevel, deriveTargetWeight } from '@/lib/planDerive'
 

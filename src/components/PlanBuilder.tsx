@@ -536,7 +536,7 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
   }, [a, idx, userId])
 
   // الإنهاء: يبني مصدر الحقيقة ويحفظه، ثم يولّد التخصيص للوحة.
-  // async (P12): مولّد الخطط يُحمَّل كسولًا — شاشة «البناء» (~2.5ث) تغطي التحميل بمرّات.
+  // async (P11.5): مولّد الخطط يُحمَّل كسولًا — شاشة «البناء» (~2.5ث) تغطي التحميل بمرّات.
   const finishRef = useRef<() => void>(() => {})
   finishRef.current = () => {
     void (async () => {

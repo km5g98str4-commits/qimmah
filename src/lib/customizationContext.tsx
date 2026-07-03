@@ -56,7 +56,7 @@ export function CustomizationProvider({ children }: { children: ReactNode }) {
 /**
  * مزوّد قيمة ثابتة للعرض فقط — بلا حفظ وبلا تغيير ألوان عامة.
  * يستخدمه وضع النموذج (demoCustomization) — انتقل بناء بيانات النموذج إلى ملفه
- * الخاص (P12) كي لا يسحب مولّد الخطط إلى حزمة الإقلاع عبر هذا المزوّد المشترك.
+ * الخاص (P11.5) كي لا يسحب مولّد الخطط إلى حزمة الإقلاع عبر هذا المزوّد المشترك.
  */
 export function StaticCustomizationProvider({
   customization,

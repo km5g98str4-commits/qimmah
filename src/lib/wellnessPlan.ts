@@ -56,5 +56,5 @@ export function medicationName(pm: PlanMedication, lang: Lang): string {
   return ar && en ? `${ar} — ${en}` : ar || en
 }
 
-// defaultWellnessPlan انتقلت إلى customization.ts (P12) — كي لا تسحب حزمة
+// defaultWellnessPlan انتقلت إلى customization.ts (P11.5) — كي لا تسحب حزمة
 // الإقلاع مكتبتَي المكملات والأدوية المستوردتين أعلى هذا الملف.
