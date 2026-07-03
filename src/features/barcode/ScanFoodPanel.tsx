@@ -1,10 +1,10 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Icon } from '@/components/Icon'
 import type { Lang } from '@/lib/appPreferences'
-import { nutritionScreenStrings } from '@/i18n/dict/nutritionScreen'
+import { nutritionScreenStrings, type NutritionScreenStrings } from '@/i18n/dict/nutritionScreen'
 import type { FoodItem } from '@/data/foodItems'
 import { lookupBarcode } from './openFoodFacts'
-import { BarcodeCamera } from './BarcodeCamera'
+import { BarcodeCamera, type CameraFailure } from './BarcodeCamera'
 
 interface ScanFoodPanelProps {
   lang: Lang
@@ -15,7 +15,42 @@ interface ScanFoodPanelProps {
   onClose: () => void
 }
 
-type Status = 'scanning' | 'looking-up' | 'not-found' | 'permission-denied' | 'unsupported'
+type Status =
+  | 'scanning'
+  | 'looking-up'
+  | 'not-found'
+  | 'network-error'
+  | 'permission-denied'
+  | 'no-camera'
+  | 'unsupported'
+  | 'error'
+
+/** حالات التعذّر التي تُعرض بلوحة موحّدة (رسالة + إعادة محاولة اختيارية + مسار يدوي دائم). */
+type FailureStatus = Exclude<Status, 'scanning' | 'looking-up' | 'not-found'>
+
+interface FailureView {
+  icon: string
+  title?: string
+  message: string
+  /** rescan = العودة للكاميرا، lookup = إعادة البحث بآخر باركود مقروء. */
+  retry?: 'rescan' | 'lookup'
+}
+
+/** خصائص عرض كل حالة تعذّر — الرسائل من القاموس ثنائي اللغة. */
+function failureView(status: FailureStatus, d: NutritionScreenStrings): FailureView {
+  switch (status) {
+    case 'permission-denied':
+      return { icon: 'AlertTriangle', message: d.scanPermissionDenied, retry: 'rescan' }
+    case 'no-camera':
+      return { icon: 'Camera', message: d.scanNoCamera }
+    case 'unsupported':
+      return { icon: 'CircleSlash', message: d.scanUnsupported }
+    case 'network-error':
+      return { icon: 'CircleSlash', title: d.scanNetworkErrorTitle, message: d.scanNetworkErrorHint, retry: 'lookup' }
+    case 'error':
+      return { icon: 'AlertTriangle', message: d.scanErrorGeneric, retry: 'rescan' }
+  }
+}
 
 function supportsCamera(): boolean {
   return typeof navigator !== 'undefined' && !!navigator.mediaDevices?.getUserMedia
@@ -25,29 +60,51 @@ function supportsCamera(): boolean {
 export function ScanFoodPanel({ lang, onResolved, onManualFallback, onClose }: ScanFoodPanelProps) {
   const d = nutritionScreenStrings[lang]
   const [status, setStatus] = useState<Status>(() => (supportsCamera() ? 'scanning' : 'unsupported'))
+  /** آخر باركود مقروء — لإعادة البحث عند فشل الاتصال دون إعادة المسح. */
+  const lastBarcodeRef = useRef('')
+
+  const handleCameraError = (failure: CameraFailure) => {
+    setStatus(failure === 'start-failed' ? 'error' : failure)
+  }
 
   const handleDetected = async (barcode: string) => {
+    lastBarcodeRef.current = barcode
     setStatus('looking-up')
-    const product = await lookupBarcode(barcode)
-    if (!product) {
-      setStatus('not-found')
-      return
+    try {
+      const result = await lookupBarcode(barcode)
+      if (result.status !== 'found') {
+        setStatus(result.status === 'network-error' ? 'network-error' : 'not-found')
+        return
+      }
+      const { product } = result
+      const item: FoodItem = {
+        id: `off:${barcode}`,
+        nameAr: product.name,
+        nameEn: product.name,
+        category: 'منتج ممسوح بالباركود',
+        servingLabelAr: product.servingSize ? `100غ (${product.servingSize})` : '100غ',
+        servingGrams: 100,
+        calories: Math.round(product.caloriesPer100g),
+        protein: Math.round(product.proteinPer100g),
+        carbs: Math.round(product.carbsPer100g),
+        fat: Math.round(product.fatPer100g),
+        notesAr: product.brands,
+      }
+      onResolved(item)
+    } catch {
+      // أي استثناء غير متوقّع أثناء البحث/التحويل → حالة خطأ معروضة، لا شاشة بيضاء.
+      setStatus('error')
     }
-    const item: FoodItem = {
-      id: `off:${barcode}`,
-      nameAr: product.name,
-      nameEn: product.name,
-      category: 'منتج ممسوح بالباركود',
-      servingLabelAr: product.servingSize ? `100غ (${product.servingSize})` : '100غ',
-      servingGrams: 100,
-      calories: Math.round(product.caloriesPer100g),
-      protein: Math.round(product.proteinPer100g),
-      carbs: Math.round(product.carbsPer100g),
-      fat: Math.round(product.fatPer100g),
-      notesAr: product.brands,
-    }
-    onResolved(item)
   }
+
+  const retryActions: Record<'rescan' | 'lookup', () => void> = {
+    rescan: () => setStatus('scanning'),
+    // إعادة البحث بآخر باركود إن وُجد؛ وإلا نعود للكاميرا.
+    lookup: () => (lastBarcodeRef.current ? void handleDetected(lastBarcodeRef.current) : setStatus('scanning')),
+  }
+
+  const failure =
+    status !== 'scanning' && status !== 'looking-up' && status !== 'not-found' ? failureView(status, d) : null
 
   return (
     <div className="fixed inset-0 z-[70] flex items-end justify-center bg-ink-900/40 p-0 sm:items-center sm:p-6">
@@ -64,7 +121,7 @@ export function ScanFoodPanel({ lang, onResolved, onManualFallback, onClose }: S
             <>
               <BarcodeCamera
                 onDetected={handleDetected}
-                onError={() => setStatus('permission-denied')}
+                onError={handleCameraError}
                 torchLabel={d.scanTorch}
               />
               <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-xs text-ink-500">
@@ -99,16 +156,23 @@ export function ScanFoodPanel({ lang, onResolved, onManualFallback, onClose }: S
             </div>
           )}
 
-          {(status === 'permission-denied' || status === 'unsupported') && (
+          {failure && (
             <div className="flex flex-col items-center gap-2 py-8 text-center">
-              <Icon name="AlertTriangle" className="h-8 w-8 text-ink-400" />
-              <p className="max-w-xs text-xs text-ink-500">
-                {status === 'permission-denied' ? d.scanPermissionDenied : d.scanUnsupported}
-              </p>
-              <button type="button" onClick={onManualFallback} className="btn-primary mt-3 justify-center py-2 text-xs">
-                <Icon name="Plus" className="h-4 w-4" />
-                {d.scanAddManually}
-              </button>
+              <Icon name={failure.icon} className="h-8 w-8 text-ink-400" />
+              {failure.title && <p className="text-sm font-bold text-ink-900">{failure.title}</p>}
+              <p className="max-w-xs text-xs text-ink-500">{failure.message}</p>
+              <div className="mt-3 flex w-full flex-col gap-2">
+                {failure.retry && (
+                  <button type="button" onClick={retryActions[failure.retry]} className="btn-ghost justify-center py-2 text-xs">
+                    <Icon name="RefreshCw" className="h-4 w-4" />
+                    {d.scanRetry}
+                  </button>
+                )}
+                <button type="button" onClick={onManualFallback} className="btn-primary justify-center py-2 text-xs">
+                  <Icon name="Plus" className="h-4 w-4" />
+                  {d.scanAddManually}
+                </button>
+              </div>
             </div>
           )}
         </div>

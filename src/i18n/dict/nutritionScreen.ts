@@ -46,6 +46,11 @@ export interface NutritionScreenStrings {
   scanAttribution: string
   scanUnsupported: string
   scanTorch: string
+  scanNoCamera: string
+  scanErrorGeneric: string
+  scanNetworkErrorTitle: string
+  scanNetworkErrorHint: string
+  scanRetry: string
 }
 
 const ar: NutritionScreenStrings = {
@@ -88,6 +93,11 @@ const ar: NutritionScreenStrings = {
   scanAttribution: 'بيانات المنتج من Open Food Facts (رخصة ODbL)',
   scanUnsupported: 'المتصفح ما يدعم مسح الباركود — استخدم الإضافة اليدوية.',
   scanTorch: 'الفلاش',
+  scanNoCamera: 'ما لقينا كاميرا في هذا الجهاز — أضف المنتج يدويًا.',
+  scanErrorGeneric: 'صار خطأ غير متوقّع أثناء المسح. حاول مرة ثانية أو أضف المنتج يدويًا.',
+  scanNetworkErrorTitle: 'ما فيه اتصال',
+  scanNetworkErrorHint: 'قرينا الباركود لكن تعذّر الوصول لقاعدة بيانات المنتجات. تحقّق من اتصالك وحاول مرة ثانية، أو أضف المنتج يدويًا.',
+  scanRetry: 'حاول مرة ثانية',
 }
 
 const en: NutritionScreenStrings = {
@@ -130,6 +140,11 @@ const en: NutritionScreenStrings = {
   scanAttribution: 'Product data from Open Food Facts (ODbL license)',
   scanUnsupported: "This browser doesn't support barcode scanning — use manual entry instead.",
   scanTorch: 'Flashlight',
+  scanNoCamera: 'No camera found on this device — add the product manually.',
+  scanErrorGeneric: 'Something went wrong while scanning. Try again or add the product manually.',
+  scanNetworkErrorTitle: 'No connection',
+  scanNetworkErrorHint: "We read the barcode but couldn't reach the product database. Check your connection and try again, or add the product manually.",
+  scanRetry: 'Try again',
 }
 
 export const nutritionScreenStrings: Record<Lang, NutritionScreenStrings> = { ar, en }
