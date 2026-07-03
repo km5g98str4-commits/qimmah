@@ -11,6 +11,8 @@
     "preview": "vite preview",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "typecheck": "tsc -b --noEmit",
+    "perf:budget": "node scripts/check-perf-budget.mjs",
+    "qa:p11.5": "node scripts/run-p11.5-qa.mjs",
     "build:media": "node scripts/build-exercise-media.mjs",
     "media:gifs": "node scripts/fetch-workoutx-media.mjs",
     "media:gifs:probe": "node scripts/fetch-workoutx-media.mjs --probe",

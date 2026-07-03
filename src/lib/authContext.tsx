@@ -70,38 +70,47 @@ function localizedAuthError(message: string | undefined): string {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const configured = isSupabaseConfigured()
-  const supabase = getSupabase()
   const [session, setSession] = useState<Session | null>(null)
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState<boolean>(configured)
 
   useEffect(() => {
-    if (!supabase) {
+    if (!configured) {
       setLoading(false)
       return
     }
     let active = true
-    supabase.auth
-      .getSession()
-      .then(({ data }) => {
-        if (!active) return
-        setSession(data.session)
-        setUser(data.session?.user ?? null)
-        setLoading(false)
-      })
-      .catch(() => {
+    let unsubscribe: (() => void) | null = null
+    // getSupabase() كسول (P11.5): المكتبة تُحمَّل هنا بعد الرسم الأول، لا في حزمة الإقلاع.
+    getSupabase().then((supabase) => {
+      if (!active || !supabase) {
         if (active) setLoading(false)
-      })
+        return
+      }
+      supabase.auth
+        .getSession()
+        .then(({ data }) => {
+          if (!active) return
+          setSession(data.session)
+          setUser(data.session?.user ?? null)
+          setLoading(false)
+        })
+        .catch(() => {
+          if (active) setLoading(false)
+        })
 
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, newSession) => {
-      setSession(newSession)
-      setUser(newSession?.user ?? null)
+      const { data: sub } = supabase.auth.onAuthStateChange((_event, newSession) => {
+        if (!active) return
+        setSession(newSession)
+        setUser(newSession?.user ?? null)
+      })
+      unsubscribe = () => sub.subscription.unsubscribe()
     })
     return () => {
       active = false
-      sub.subscription.unsubscribe()
+      unsubscribe?.()
     }
-  }, [supabase])
+  }, [configured])
 
   const value = useMemo<AuthContextValue>(
     () => ({
@@ -111,6 +120,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loading,
       displayName: userDisplayName(user),
       async signUp(email, password, displayName) {
+        const supabase = await getSupabase()
         if (!supabase) return { ok: false, error: cloudDisabledError() }
         const name = displayName?.trim()
         const { data, error } = await supabase.auth.signUp({
@@ -124,19 +134,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { ok: true, needsConfirmation: !data.session }
       },
       async signIn(email, password) {
+        const supabase = await getSupabase()
         if (!supabase) return { ok: false, error: cloudDisabledError() }
         const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
         if (error) return { ok: false, error: localizedAuthError(error.message) }
         return { ok: true }
       },
       async signOut() {
+        const supabase = await getSupabase()
         if (!supabase) return
         await supabase.auth.signOut()
         setSession(null)
         setUser(null)
       },
     }),
-    [configured, user, session, loading, supabase],
+    [configured, user, session, loading],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

@@ -14,11 +14,23 @@ import { normalizePlanDayNames } from './planDayNames'
 import type { NutritionPlan } from '@/types/nutrition'
 import { defaultNutritionPlan } from './nutritionPlan'
 import type { WellnessPlan } from '@/types/wellness'
-import { defaultWellnessPlan } from './wellnessPlan'
 import type { CommitmentPlan, MeasurementPlan } from '@/types/progress'
 import { defaultCommitmentPlan } from './commitmentPlan'
 
 export const STORAGE_KEY = 'qimmah:customization:v1'
+
+/**
+ * الخطة الافتراضية للمكملات/الأدوية — قوائم فارغة تمامًا؛ يضيفها المستخدم بنفسه فقط.
+ * انتقلت من wellnessPlan (P11.5): ذلك الملف يسحب مكتبتَي المكملات والأدوية (~48KB)
+ * غير اللازمتين في حزمة الإقلاع، بينما هذا الافتراضي لا يحتاجهما إطلاقًا.
+ */
+export function defaultWellnessPlan(): WellnessPlan {
+  return {
+    enabled: true,
+    supplements: [],
+    medications: [],
+  }
+}
 
 export type UserType = 'individual' | 'coach' | 'creator'
 

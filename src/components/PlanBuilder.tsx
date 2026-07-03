@@ -536,22 +536,25 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
   }, [a, idx, userId])
 
   // الإنهاء: يبني مصدر الحقيقة ويحفظه، ثم يولّد التخصيص للوحة.
+  // async (P11.5): مولّد الخطط يُحمَّل كسولًا — شاشة «البناء» (~2.5ث) تغطي التحميل بمرّات.
   const finishRef = useRef<() => void>(() => {})
   finishRef.current = () => {
-    const op = buildOnboardingProfile(a)
-    saveOnboardingProfile(op)
-    const built = buildCustomizationFromOnboarding(op, customization)
-    applyCustomization(built)
-    // إكمال لكل حساب + حفظ إشارة الإعداد في الملف السحابي (best-effort، لا يعطّل الدخول).
-    markCompleted(userId)
-    if (userId) void persistOnboardingToProfile(userId, op)
-    // مسار «أصمّم جدولي بنفسي»: نفتح الباني المخصّص بعد التوليد بدل الدخول مباشرةً للوحة.
-    // الجدول التلقائي محفوظ أصلًا كأساس/بديل، فيبقى الدخول سليمًا حتى لو ألغى المستخدم.
-    if (planMode === 'custom') {
-      setShowCustomBuilder(true)
-      return
-    }
-    onComplete()
+    void (async () => {
+      const op = buildOnboardingProfile(a)
+      saveOnboardingProfile(op)
+      const built = await buildCustomizationFromOnboarding(op, customization)
+      applyCustomization(built)
+      // إكمال لكل حساب + حفظ إشارة الإعداد في الملف السحابي (best-effort، لا يعطّل الدخول).
+      markCompleted(userId)
+      if (userId) void persistOnboardingToProfile(userId, op)
+      // مسار «أصمّم جدولي بنفسي»: نفتح الباني المخصّص بعد التوليد بدل الدخول مباشرةً للوحة.
+      // الجدول التلقائي محفوظ أصلًا كأساس/بديل، فيبقى الدخول سليمًا حتى لو ألغى المستخدم.
+      if (planMode === 'custom') {
+        setShowCustomBuilder(true)
+        return
+      }
+      onComplete()
+    })()
   }
 
   // شاشة البناء: تقدّم 0→100% خلال ~2.5ث ثم حفظ والانتقال للوحة.

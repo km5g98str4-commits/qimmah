@@ -28,12 +28,9 @@ import {
   defaultProfile,
   profileHash,
 } from '@/lib/calculators'
-import {
-  deriveActivityLevel,
-  deriveTargetWeight,
-  generatePlan,
-  levelFromExperience,
-} from '@/lib/planGenerator'
+// P11.5: الاشتقاقات الخفيفة من planDerive — planGenerator (ومعه قاعدة التمارين)
+// يُحمَّل كسولًا داخل buildCustomizationFromOnboarding فقط، خارج حزمة الإقلاع.
+import { deriveActivityLevel, deriveTargetWeight, levelFromExperience } from '@/lib/planDerive'
 import { experienceToBand, goalChoices, gymTypeToAccess } from '@/data/planBuilder'
 import type { Customization } from '@/lib/customization'
 import { hasSavedCustomization, loadCustomization } from '@/lib/customization'
@@ -262,8 +259,12 @@ export function nutritionTargetsFromOnboarding(op: OnboardingProfile, base: Prof
  * يبني التخصيص الكامل من مصدر الحقيقة — يشغّل المولّد الحالي.
  * لا تمارين/وجبات مكتوبة يدويًا، ولا بيانات وهمية مزروعة.
  */
-export function buildCustomizationFromOnboarding(op: OnboardingProfile, current: Customization): Customization {
+export async function buildCustomizationFromOnboarding(
+  op: OnboardingProfile,
+  current: Customization,
+): Promise<Customization> {
   const profile = toLegacyProfile(op, current.profile)
+  const { generatePlan } = await import('@/lib/planGenerator')
   const g = generatePlan(profile)
   const goalLabel = goalChoices.find((x) => x.value === op.goal.type)?.label
   return {
