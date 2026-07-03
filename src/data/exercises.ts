@@ -61,6 +61,7 @@ const muscleDetailById: Record<string, MuscleDetail> = {
   'overhead-press': { primary: ['front_delts', 'side_delts', 'triceps'], secondary: ['traps', 'upper_back'] },
   'dumbbell-shoulder-press': { primary: ['front_delts', 'side_delts', 'triceps'], secondary: ['traps'] },
   'shoulder-press-machine': { primary: ['front_delts', 'side_delts'], secondary: ['triceps'] },
+  'cable-shoulder-press': { primary: ['front_delts', 'side_delts'], secondary: ['triceps'] },
   'lateral-raise-machine': { primary: ['side_delts'], secondary: ['traps'] },
   'lateral-raise': { primary: ['side_delts'], secondary: ['traps'] },
   'cable-lateral-raise': { primary: ['side_delts'], secondary: ['traps'] },
@@ -99,6 +100,7 @@ const muscleDetailById: Record<string, MuscleDetail> = {
   'walking-lunge': { primary: ['quads', 'glutes'], secondary: ['hamstrings'] },
   'smith-machine-squat': { primary: ['quads', 'glutes'], secondary: ['hamstrings'] },
   'bodyweight-squat': { primary: ['quads', 'glutes'], secondary: ['hamstrings'] },
+  'sissy-squat': { primary: ['quads'], secondary: [] },
   'step-up': { primary: ['quads', 'glutes'], secondary: ['hamstrings'] },
 
   // ===== الهامسترنج =====
@@ -264,7 +266,9 @@ export const exercises: Exercise[] = [
   // ===== الأكتاف =====
   ex({ id: 'overhead-press', nameAr: 'ضغط كتف بار واقف', nameEn: 'Overhead Press', primaryMuscle: 'shoulders', equipment: ['barbell'], level: 'intermediate', movementPattern: 'push', environment: 'gym', defaultReps: '6–10', defaultRestSec: 120 }),
   ex({ id: 'dumbbell-shoulder-press', nameAr: 'ضغط كتف دمبل', nameEn: 'Dumbbell Shoulder Press', primaryMuscle: 'shoulders', equipment: ['dumbbell'], level: 'beginner', movementPattern: 'push', environment: 'gym', defaultReps: '8–12' }),
-  ex({ id: 'shoulder-press-machine', nameAr: 'جهاز ضغط كتف', nameEn: 'Shoulder Press Machine', primaryMuscle: 'shoulders', equipment: ['machine'], level: 'beginner', movementPattern: 'push', environment: 'gym', defaultReps: '10–12', alternatives: ['seated-dumbbell-press', 'cable-lateral-raise'] }),
+  ex({ id: 'shoulder-press-machine', nameAr: 'جهاز ضغط كتف', nameEn: 'Shoulder Press Machine', primaryMuscle: 'shoulders', equipment: ['machine'], level: 'beginner', movementPattern: 'push', environment: 'gym', defaultReps: '10–12', alternatives: ['seated-dumbbell-press', 'cable-shoulder-press'] }),
+  // بديل الكيبل لجهاز ضغط الكتف (مراجعة زياد): ضغط رأسي مركّب من بكرات منخفضة — لا رفرفة عزل.
+  ex({ id: 'cable-shoulder-press', nameAr: 'ضغط كتف كيبل', nameEn: 'Cable Shoulder Press', primaryMuscle: 'shoulders', equipment: ['cable'], level: 'intermediate', movementPattern: 'push', environment: 'gym', defaultReps: '8–12', defaultRestSec: 90, notesAr: 'من بكرات منخفضة، جالسًا أو واقفًا — ادفع للأعلى بمسار ثابت.', alternatives: ['seated-dumbbell-press', 'shoulder-press-machine'] }),
   ex({ id: 'lateral-raise', nameAr: 'رفرفة جانبي دمبل', nameEn: 'Lateral Raise', primaryMuscle: 'shoulders', equipment: ['dumbbell'], level: 'beginner', movementPattern: 'isolation', environment: 'both', defaultReps: '12–15', defaultRestSec: 45 }),
   ex({ id: 'cable-lateral-raise', nameAr: 'رفرفة جانبي كيبل', nameEn: 'Cable Lateral Raise', primaryMuscle: 'shoulders', equipment: ['cable'], level: 'intermediate', movementPattern: 'isolation', environment: 'gym', defaultReps: '12–15', defaultRestSec: 45 }),
   ex({ id: 'rear-delt-fly', nameAr: 'رفرفة خلفي دمبل', nameEn: 'Rear Delt Fly', primaryMuscle: 'shoulders', equipment: ['dumbbell'], level: 'beginner', movementPattern: 'isolation', environment: 'both', defaultReps: '12–15', defaultRestSec: 45 }),
@@ -292,7 +296,9 @@ export const exercises: Exercise[] = [
   // ===== الأرجل / الكوادز =====
   ex({ id: 'barbell-back-squat', nameAr: 'سكوات خلفي بار', nameEn: 'Barbell Back Squat', primaryMuscle: 'quads', equipment: ['barbell'], level: 'advanced', movementPattern: 'squat', environment: 'gym', defaultReps: '5–8', defaultRestSec: 150 }),
   ex({ id: 'front-squat', nameAr: 'سكوات أمامي', nameEn: 'Front Squat', primaryMuscle: 'quads', equipment: ['barbell'], level: 'advanced', movementPattern: 'squat', environment: 'gym', defaultReps: '6–8', defaultRestSec: 120 }),
-  ex({ id: 'leg-press-machine', nameAr: 'جهاز دفع الأرجل', nameEn: 'Leg Press Machine', primaryMuscle: 'quads', equipment: ['machine'], level: 'beginner', movementPattern: 'squat', environment: 'gym', defaultReps: '10–12', defaultRestSec: 120, alternatives: ['goblet-squat', 'bodyweight-squat'] }),
+  ex({ id: 'leg-press-machine', nameAr: 'جهاز دفع الأرجل', nameEn: 'Leg Press Machine', primaryMuscle: 'quads', equipment: ['machine'], level: 'beginner', movementPattern: 'squat', environment: 'gym', defaultReps: '10–12', defaultRestSec: 120, alternatives: ['sissy-squat', 'bodyweight-squat'] }),
+  // بديل عزل الكوادز لجهاز مد الأرجل (مراجعة زياد): عزل ركبة بوزن الجسم — أدق ميكانيكيًا من الجوبليت المركّب.
+  ex({ id: 'sissy-squat', nameAr: 'سيسي سكوات', nameEn: 'Sissy Squat', primaryMuscle: 'quads', equipment: ['bodyweight'], level: 'intermediate', movementPattern: 'isolation', environment: 'both', defaultReps: '8–12', defaultRestSec: 60, notesAr: 'بوزن الجسم مع مسك دعامة للتوازن — انزل بميل الركبتين للأمام وحافظ على استقامة الورك.', alternatives: ['leg-extension-machine', 'bodyweight-squat'] }),
   ex({ id: 'hack-squat-machine', nameAr: 'هاك سكوات جهاز', nameEn: 'Hack Squat Machine', primaryMuscle: 'quads', equipment: ['machine'], level: 'beginner', movementPattern: 'squat', environment: 'gym', defaultReps: '8–12', defaultRestSec: 120, alternatives: ['goblet-squat', 'bodyweight-squat'] }),
   ex({ id: 'leg-extension-machine', nameAr: 'جهاز مد الأرجل', nameEn: 'Leg Extension Machine', primaryMuscle: 'quads', equipment: ['machine'], level: 'beginner', movementPattern: 'isolation', environment: 'gym', defaultReps: '12–15', defaultRestSec: 60, alternatives: ['goblet-squat', 'bodyweight-squat'] }),
   ex({ id: 'goblet-squat', nameAr: 'سكوات جوبليت دمبل', nameEn: 'Goblet Squat', primaryMuscle: 'quads', equipment: ['dumbbell'], level: 'beginner', movementPattern: 'squat', environment: 'both', defaultReps: '10–12', defaultRestSec: 90 }),

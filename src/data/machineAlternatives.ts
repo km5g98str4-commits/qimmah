@@ -16,6 +16,8 @@ export interface MachineAlternatives {
   cable: string
   /** true = لا يوجد كيبل منطقي؛ حقل cable يشير لبديل دمبل/وزن جسم — اعرضه بصدق. */
   cableIsFallback?: boolean
+  /** true = حقل dumbbell يشير لبديل حر بوزن الجسم (مثل سيسي سكوات) — اعرضه بصدق. */
+  dumbbellIsFallback?: boolean
 }
 
 /** بدائل كل جهاز في الكتالوج — المفاتيح هي المعرّفات القانونية. */
@@ -41,13 +43,15 @@ export const machineAlternatives: Record<string, MachineAlternatives> = {
   'rear-delt-row-machine': { dumbbell: 'rear-delt-fly', cable: 'face-pull' },
 
   // ===== الأكتاف =====
-  'shoulder-press-machine': { dumbbell: 'seated-dumbbell-press', cable: 'cable-lateral-raise' },
+  // مراجعة زياد: البديل ضغط رأسي مركّب مثل الجهاز — لا رفرفة عزل جانبية.
+  'shoulder-press-machine': { dumbbell: 'seated-dumbbell-press', cable: 'cable-shoulder-press' },
   'lateral-raise-machine': { dumbbell: 'lateral-raise', cable: 'cable-lateral-raise' },
   // إلزامي: بديل الكيبل لبيك دك العكسي هو سحب الوجه (Face Pull).
   'reverse-pec-deck': { dumbbell: 'rear-delt-fly', cable: 'face-pull' },
 
   // ===== الأرجل — فخذ أمامي =====
-  'leg-extension-machine': { dumbbell: 'goblet-squat', cable: 'bodyweight-squat', cableIsFallback: true },
+  // مراجعة زياد: مد الأرجل عزل كوادز خالص — سيسي سكوات (حر) أدق ميكانيكيًا من الجوبليت المركّب.
+  'leg-extension-machine': { dumbbell: 'sissy-squat', dumbbellIsFallback: true, cable: 'bodyweight-squat', cableIsFallback: true },
   'hack-squat-machine': { dumbbell: 'goblet-squat', cable: 'bodyweight-squat', cableIsFallback: true },
   'pendulum-squat-machine': { dumbbell: 'goblet-squat', cable: 'bodyweight-squat', cableIsFallback: true },
   'leg-press-machine': { dumbbell: 'goblet-squat', cable: 'bodyweight-squat', cableIsFallback: true },

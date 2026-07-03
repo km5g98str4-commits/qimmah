@@ -49,6 +49,7 @@ export interface WorkoutScreenStrings {
   altBlockNote: string
   /** (P12) تسميات محتوى بطاقتي البديل. */
   altDumbbellLabel: string
+  altDumbbellFallbackLabel: string
   altCableLabel: string
   altCableFallbackLabel: string
   altMachineLabel: string
@@ -91,6 +92,7 @@ const ar: WorkoutScreenStrings = {
   altBlockTitle: 'البديل إذا الجهاز غير متوفر',
   altBlockNote: 'التبديل لهذه الجلسة فقط — خطتك تبقى كما هي.',
   altDumbbellLabel: 'بديل دمبل',
+  altDumbbellFallbackLabel: 'بديل حر (وزن الجسم)',
   altCableLabel: 'بديل كيبل',
   altCableFallbackLabel: 'بديل بوزن الجسم/دمبل',
   altMachineLabel: 'الجهاز الأساسي',
@@ -132,6 +134,7 @@ const en: WorkoutScreenStrings = {
   altBlockTitle: "If the machine isn't available",
   altBlockNote: 'Swap applies to this session only — your plan stays unchanged.',
   altDumbbellLabel: 'Dumbbell alternative',
+  altDumbbellFallbackLabel: 'Free alternative (bodyweight)',
   altCableLabel: 'Cable alternative',
   altCableFallbackLabel: 'Bodyweight/dumbbell fallback',
   altMachineLabel: 'Primary machine',

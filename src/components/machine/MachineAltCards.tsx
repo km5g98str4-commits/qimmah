@@ -30,7 +30,8 @@ export function MachineAltCards({ lang, machineId, alt, slots, onSwitch }: Machi
   const labelFor = (exerciseId: string): string => {
     const id = canonicalExerciseId(exerciseId)
     if (id === canonicalExerciseId(machineId)) return d.altMachineLabel
-    if (id === canonicalExerciseId(alt.dumbbell)) return d.altDumbbellLabel
+    if (id === canonicalExerciseId(alt.dumbbell))
+      return alt.dumbbellIsFallback ? d.altDumbbellFallbackLabel : d.altDumbbellLabel
     return alt.cableIsFallback ? d.altCableFallbackLabel : d.altCableLabel
   }
 

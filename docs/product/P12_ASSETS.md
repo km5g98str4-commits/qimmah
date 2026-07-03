@@ -9,7 +9,7 @@
 | --- | --- |
 | المطلوب الكلي (38 جهاز كتالوج + 35 بديلًا فريدًا) | **73** |
 | مغطّى (ملف GIF موجود فعلًا) | **29** |
-| ناقص (يُجلب من WorkoutX) | **44** |
+| ناقص (يُجلب من WorkoutX) | **46** |
 
 - المفاتيح في `src/data/exerciseGifs.ts` **قانونية** (canonical): 8 ملفات بقيت بأسمائها القديمة
   (مثل `hack-squat.gif`) ويشير إليها المعرّف القانوني (`hack-squat-machine`) — صفر إعادة تسمية،
@@ -20,9 +20,9 @@
 ## حساب ميزانية الطلبات
 
 - الافتراض المحافظ: **2 طلب لكل GIF** (بحث بالاسم + تنزيل الملف).
-- المخطّط بالضبط: **44 × 2 = 88 طلبًا ≤ السقف الصارم 150** ✅
+- المخطّط بالضبط: **46 × 2 = 92 طلبًا ≤ السقف الصارم 150** ✅
 - ملاحظة من تجربة P5 (`scripts/fetch-workoutx-media.mjs`): تنزيل ملف الـ gif يتم من CDN بلا
-  مفتاح ولا يُحتسب غالبًا على الحصّة — أي أن الاستهلاك الفعلي المرجّح **≈ 44 طلبًا فقط**.
+  مفتاح ولا يُحتسب غالبًا على الحصّة — أي أن الاستهلاك الفعلي المرجّح **≈ 46 طلبًا فقط**.
 - المفتاح لديه ~367 طلبًا متبقيًا مدى الحياة؛ سكربت الجلب يحمل عدّادًا جاريًا يتوقّف صلبًا عند 150.
 - `pendulum-squat-machine` قد لا يوجد في WorkoutX أصلًا — السكربت يتخطّاه ويسجّله بلا فشل.
 
@@ -32,7 +32,7 @@
 cd ~/path/to/gym-os-template            # جذر المشروع (فرع claude/p12-a4-asset-pipeline)
 export WORKOUTX_API_KEY=xxxx            # المفتاح من البيئة فقط — لا يُكتب في أي ملف
 
-bash scripts/p12-fetch-gifs.sh --dry-run   # بلا شبكة: راجع الخطة (44 عنصرًا، 88 طلبًا)
+bash scripts/p12-fetch-gifs.sh --dry-run   # بلا شبكة: راجع الخطة (46 عنصرًا، 92 طلبًا)
 # راجع المخرجات — ثم نفّذ الجلب الفعلي:
 bash scripts/p12-fetch-gifs.sh             # idempotent: يتخطّى أي ملف موجود
 
@@ -48,7 +48,9 @@ git commit -m "P12: جلب GIF الأجهزة الناقصة من WorkoutX + م�
 - العناصر «غير موجود» في الخلاصة النهائية متوقّعة لبعض الأجهزة النادرة — تُترك للـ fallback
   الأنيق في الواجهة (صورة ثابتة/أيقونة).
 
-## القائمة الناقصة (44)
+## القائمة الناقصة (46)
+
+> تحديث مراجعة زياد: أُضيف `cable-shoulder-press` (بديل كيبل لجهاز ضغط الكتف) و`sissy-squat` (بديل عزل الكوادز لجهاز مد الأرجل).
 
 مرتّبة أبجديًا — نفسها المثبّتة داخل `scripts/p12-fetch-gifs.sh`:
 
@@ -57,6 +59,7 @@ git commit -m "P12: جلب GIF الأجهزة الناقصة من WorkoutX + م�
 - `cable-hammer-curl` — Cable Hammer Curl
 - `cable-hip-adduction` — Cable Hip Adduction
 - `cable-overhead-extension` — Cable Overhead Extension
+- `cable-shoulder-press` — Cable Shoulder Press
 - `cable-woodchop` — Cable Woodchop
 - `chest-supported-row` — Chest-Supported Row
 - `chest-supported-row-machine` — Chest-Supported Row Machine
@@ -88,6 +91,7 @@ git commit -m "P12: جلب GIF الأجهزة الناقصة من WorkoutX + م�
 - `reverse-pec-deck` — Reverse Pec Deck
 - `seated-dumbbell-press` — Seated Dumbbell Press
 - `seated-row-machine` — Seated Row Machine
+- `sissy-squat` — Sissy Squat
 - `single-arm-cable-row` — Single-Arm Cable Row
 - `single-arm-lat-pulldown` — Single-Arm Lat Pulldown
 - `single-leg-calf-raise` — Single-Leg Calf Raise

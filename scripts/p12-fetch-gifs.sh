@@ -43,6 +43,7 @@ assisted-dip-machine|Assisted Dip Machine
 cable-hammer-curl|Cable Hammer Curl
 cable-hip-adduction|Cable Hip Adduction
 cable-overhead-extension|Cable Overhead Extension
+cable-shoulder-press|Cable Shoulder Press
 cable-woodchop|Cable Woodchop
 chest-supported-row|Chest-Supported Row
 chest-supported-row-machine|Chest-Supported Row Machine
@@ -74,6 +75,7 @@ rear-delt-row-machine|Rear Delt Row Machine
 reverse-pec-deck|Reverse Pec Deck
 seated-dumbbell-press|Seated Dumbbell Press
 seated-row-machine|Seated Row Machine
+sissy-squat|Sissy Squat
 single-arm-cable-row|Single-Arm Cable Row
 single-arm-lat-pulldown|Single-Arm Lat Pulldown
 single-leg-calf-raise|Single-Leg Calf Raise
