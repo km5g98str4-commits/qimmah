@@ -285,8 +285,9 @@ async function main() {
     await clickSettingsAction(page, 'التحويل لنسخة الأجهزة')
     const planB = await readPlan(page)
     const bIds = planB.days.flatMap((d) => splitCardio(d).resistance.map((pe) => pe.exerciseId))
-    const bBad = bIds.filter((id) => !catalogIds.has(id))
-    check('(b) switch → plan 100% catalog machines', 'no offenders', bBad.length ? bBad.join(',') : 'no offenders', bBad.length === 0)
+    const bAccSet = new Set(NON_PRIMARY_MACHINES)
+    const bBad = bIds.filter((id) => !catalogIds.has(id) && !bAccSet.has(id))
+    check('(b) switch → plan = 32 primaries + accessory pool only', 'no offenders', bBad.length ? bBad.join(',') : 'no offenders', bBad.length === 0)
     check('(b) switch → day count preserved', '3 days', `${planB.days.length} days`, planB.days.length === 3)
     const histAfter = await historySnapshot(page, HISTORY_PREFIX)
     check('(b) history byte-identical across switch', 'identical', sameSnapshot(histBefore, histAfter) ? 'identical' : 'MUTATED', sameSnapshot(histBefore, histAfter))
@@ -302,14 +303,24 @@ async function main() {
       await clickSettingsAction(page, 'إعادة توليد الخطة')
       const plan = await readPlan(page)
       const days = plan?.days ?? []
-      const flat = days.flatMap((d) => splitCardio(d).resistance.map((pe) => pe.exerciseId))
-      const bad = [...new Set(flat.filter((id) => !catalogIds.has(id)))]
+      // كل يوم: أساسيات من الـ٣٢ + إضافة واحدة اختيارية (من الستة) تُلحَق أخيرًا.
+      const accSet = new Set(NON_PRIMARY_MACHINES)
+      const resistancePerDay = days.map((d) => splitCardio(d).resistance.map((pe) => pe.exerciseId))
+      const flat = resistancePerDay.flat()
+      const bad = [...new Set(flat.filter((id) => !catalogIds.has(id) && !accSet.has(id)))]
       const target = expectedCount(profile.experienceBand, profile.workoutDuration)
-      const counts = days.map((d) => splitCardio(d).resistance.length)
-      const countsOk = counts.every((c) => c === target)
-      check(`(c) ${p.tag}: machines-only`, 'no offenders', bad.length ? bad.join(',') : 'no offenders', bad.length === 0)
+      const perDay = resistancePerDay.map((day) => {
+        const acc = day.filter((id) => accSet.has(id))
+        const prim = day.filter((id) => !accSet.has(id))
+        const accLast = acc.length === 0 || accSet.has(day[day.length - 1])
+        return { prim: prim.length, acc: acc.length, accLast }
+      })
+      const primOk = perDay.every((x) => x.prim === target)
+      const accOk = perDay.every((x) => x.acc <= 1 && x.accLast)
+      check(`(c) ${p.tag}: machines-only (32 primaries + accessory pool)`, 'no offenders', bad.length ? bad.join(',') : 'no offenders', bad.length === 0)
       check(`(c) ${p.tag}: days match`, `${profile.trainingDays} days`, `${days.length} days`, days.length === profile.trainingDays)
-      check(`(c) ${p.tag}: per-day count = target`, `${target}/day`, counts.join(','), countsOk)
+      check(`(c) ${p.tag}: per-day primaries = target`, `${target}/day`, perDay.map((x) => x.prim).join(','), primOk)
+      check(`(c) ${p.tag}: ≤1 accessory, always last`, 'yes', perDay.map((x) => `${x.acc}${x.accLast ? '✓' : '✗'}`).join(','), accOk)
       if (profile.goalType === 'cutting' || profile.goalType === 'recomposition') {
         const cardioCount = days.reduce((n, d) => n + splitCardio(d).cardio.length, 0)
         check(`(c) ${p.tag}: cut cardio appended (addCutCardio stays)`, '>=1 cardio finisher', `${cardioCount}`, cardioCount >= 1)

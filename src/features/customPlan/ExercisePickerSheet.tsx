@@ -57,7 +57,7 @@ interface MachineSub {
   rows: MachineRow[]
 }
 interface MachineSection {
-  key: MachineGroupKey
+  key: MachineGroupKey | 'accessories'
   title: string
   subs: MachineSub[]
 }
@@ -80,7 +80,10 @@ export function ExercisePickerSheet({ lang, onAdd, onClose }: ExercisePickerShee
   const machineSections = useMemo<MachineSection[]>(() => {
     const allowedGroup = muscle === 'all' ? null : GROUP_FOR_MUSCLE[muscle as Muscle]
     if (muscle !== 'all' && !allowedGroup) return [] // كارديو ونحوه: لا أجهزة كتالوج
-    const sections: MachineSection[] = []
+    // أجهزة الذراعين/البطن ليست أساسية (قرار زياد P12) — تُجمَّع تحت عنوان «إضافات» أسفل الأساسيات.
+    const ACCESSORY_GROUPS = new Set<MachineGroupKey>(['biceps', 'triceps', 'abs'])
+    const primarySections: MachineSection[] = []
+    const accessorySubs: MachineSub[] = []
     for (const group of machineCatalog) {
       if (allowedGroup && group.key !== allowedGroup) continue
       const subs: MachineSub[] = []
@@ -98,9 +101,13 @@ export function ExercisePickerSheet({ lang, onAdd, onClose }: ExercisePickerShee
         if (last && last.title === subTitle) last.rows.push(row)
         else subs.push({ title: subTitle, rows: [row] })
       }
-      if (subs.length) {
-        sections.push({ key: group.key, title: lang === 'en' ? group.titleEn : group.titleAr, subs })
-      }
+      if (!subs.length) continue
+      if (ACCESSORY_GROUPS.has(group.key)) accessorySubs.push(...subs)
+      else primarySections.push({ key: group.key, title: lang === 'en' ? group.titleEn : group.titleAr, subs })
+    }
+    const sections = [...primarySections]
+    if (accessorySubs.length) {
+      sections.push({ key: 'accessories', title: customPlanStrings[lang].accessoriesSection, subs: accessorySubs })
     }
     return sections
   }, [lang, muscle, query])

@@ -365,6 +365,42 @@ const TYPE_MUSCLES: Record<DayType, Muscle[]> = {
   core: ['core'],
 }
 
+// ————— الإضافات (Accessories) — قرار زياد النهائي P12 —————
+// لا أيام ذراعين/بطن مستقلّة إطلاقًا. الذراعان والبطن تدخل الخطة **إضافة واحدة تُلحَق بنهاية
+// اليوم فقط**، من أجهزة الذراعين/البطن الستة (تبقى غير أساسية — قائمة الـ٣٢ تظل الحوض الوحيد).
+// الأجهزة موجودة في الكتالوج + لها بدائل + how-to → تظهر في التمرين كبطاقة عادية (بلا UI خاص).
+const ACCESSORY_POOL: Record<'triceps' | 'biceps' | 'abs', string[]> = {
+  // assisted-dip-machine أساسي (ضمن الـ٣٢) فلا يُلحَق كإضافة — نستخدم غير الأساسيين للترايسبس.
+  triceps: ['triceps-extension-machine', 'cable-triceps-pushdown'],
+  biceps: ['preacher-curl-machine', 'cable-biceps-curl'],
+  abs: ['ab-crunch-machine', 'cable-crunch'],
+}
+
+/** فئة إضافة اليوم حسب نوعه: دفع←ترايسبس، سحب←بايسبس، أرجل/كامل←بطن،
+ *  علوي/ذراعين←ترايسبس أو بايسبس بالتناوب عبر الأسبوع (حسب تكرار اليوم). */
+function accessoryCategory(type: DayType, variation: number): 'triceps' | 'biceps' | 'abs' | null {
+  switch (type) {
+    case 'push': return 'triceps'
+    case 'pull': return 'biceps'
+    case 'full':
+    case 'lower': return 'abs'
+    case 'upper':
+    case 'arms': return variation % 2 === 0 ? 'triceps' : 'biceps'
+    case 'core': return 'abs'
+    default: return null
+  }
+}
+
+/** يختار جهاز إضافة واحدًا من فئته (يتناوب حسب فهرس اليوم، ويتجنّب المكرّر داخل اليوم). */
+function pickAccessory(cat: 'triceps' | 'biceps' | 'abs', dayIndex: number, used: Set<string>): string | null {
+  const pool = ACCESSORY_POOL[cat]
+  for (let k = 0; k < pool.length; k++) {
+    const cand = pool[(dayIndex + k) % pool.length]
+    if (!used.has(cand)) return cand
+  }
+  return pool[dayIndex % pool.length] ?? null
+}
+
 /** ترتيب المرشّحين: الأجهزة أولًا عند تفضيلها (للمبتدئ)، ثم أبجديًا (ثبات الاختيار). */
 function sortCandidates(cands: Exercise[], preferMachines: boolean): Exercise[] {
   return cands.slice().sort((a, b) => {
@@ -675,6 +711,12 @@ function generateWorkoutPlan(p: Profile): { plan: WorkoutPlan; specs: DaySpec[] 
     counts[spec.type] = variation + 1
     const dayId = `gen-${di + 1}-${spec.type}`
     const ids = buildDayExercises(spec.type, variation, pool, target, preferMachines, machinesOnly)
+    // إضافة واحدة تُلحَق بنهاية اليوم (أجهزة فقط) — ذراعان/بطن حسب نوع اليوم، غير أساسية.
+    if (machinesOnly) {
+      const cat = accessoryCategory(spec.type, variation)
+      const acc = cat ? pickAccessory(cat, di, new Set(ids)) : null
+      if (acc) ids.push(acc)
+    }
     return {
       id: dayId,
       nameAr: workoutDayNameAr(spec.nameAr, di),
