@@ -1,13 +1,18 @@
 import { useEffect, useRef, useState } from 'react'
 import { Icon } from './Icon'
 import { ExerciseMedia } from './ExerciseMedia'
+import { ExerciseName } from './ExerciseName'
+import { MachineAltCards } from './machine/MachineAltCards'
+import { MachineHowTo } from './machine/MachineHowTo'
+import { findMachineInfo } from './machine/machineInfo'
 import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
 import { workoutScreenStrings } from '@/i18n/dict/workoutScreen'
 import type { PlanDay } from '@/types/workout'
-import { exerciseDisplayName, planExerciseVideo } from '@/lib/workoutPlan'
-import { detailedMuscleLabel, getAlternatives, getExercise } from '@/data/exercises'
+import { exerciseDisplayName, exerciseVideoSearchUrl, planExerciseVideo } from '@/lib/workoutPlan'
+import { canonicalExerciseId, detailedMuscleLabel, getAlternatives, getExercise } from '@/data/exercises'
+import { getMachineAlternatives } from '@/data/machineAlternatives'
 import { getRecord, progressionHint } from '@/lib/exerciseHistory'
 import { exerciseGuidance } from '@/lib/exerciseGuidance'
 import { muscleLabel } from '@/lib/muscles'
@@ -81,6 +86,8 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
   const [openAlt, setOpenAlt] = useState(false)
   const [openDetails, setOpenDetails] = useState(false)
   const [swap, setSwap] = useState<Record<string, string>>({})
+  // (P12) محتوى بطاقتي البديل الصغيرتين لكل عنصر خطة (يتبدّل مع البطاقة الكبيرة في هذه الجلسة فقط).
+  const [altSlots, setAltSlots] = useState<Record<string, [string, string]>>({})
   const [savedFlash, setSavedFlash] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const flashTimer = useRef<number | null>(null)
@@ -218,6 +225,31 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
     flash()
   }
 
+  // (P12) الأجهزة الأساسية: بديلا دمبل/كيبل من الكتالوج — تبديل بضغطة واحدة لهذه الجلسة فقط.
+  const machineAlt = getMachineAlternatives(pe.exerciseId)
+  const machineSlots: [string, string] | null = machineAlt
+    ? altSlots[pe.id] ?? [machineAlt.dumbbell, machineAlt.cable]
+    : null
+
+  /** يرقّي بديلًا للبطاقة الكبيرة وينزل المعروض حاليًا لمكانه — يمتد effExId فيسجّل تحت المؤدَّى فعلًا. */
+  const switchMachineAlt = (slotIdx: 0 | 1, newId: string) => {
+    if (!machineSlots) return
+    const demotedId = effExId(pe.id, pe.exerciseId)
+    setAltSlots((prev) => {
+      const next: [string, string] = [...machineSlots]
+      next[slotIdx] = demotedId
+      return { ...prev, [pe.id]: next }
+    })
+    setSwap((prev) => {
+      const next = { ...prev }
+      // العودة للجهاز الأساسي = إزالة التبديل (تعود الأسماء/الفيديو المخصّصة في الخطة).
+      if (canonicalExerciseId(newId) === canonicalExerciseId(pe.exerciseId)) delete next[pe.id]
+      else next[pe.id] = newId
+      return next
+    })
+    flash()
+  }
+
   const exDone = (peId: string) => {
     const st = state[peId]
     return st?.sets.length > 0 && st.sets.every((x) => x.completed)
@@ -271,7 +303,12 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
   const nameEn = swap[pe.id] ? ex?.nameEn ?? '' : pe.customNameEn || ex?.nameEn || ''
   const muscles = ex ? muscleLabel(ex.primaryMuscle, lang) : ''
   const guide = exerciseGuidance(exId, lang)
-  const videoUrl = swap[pe.id] ? ex?.videoUrl ?? '' : planExerciseVideo(pe)
+  // (P12) زر «شاهد الطريقة»: videoUrl إن وُجد، وإلا بحث يوتيوب عن أداء التمرين بالاسم الإنجليزي.
+  const videoUrl =
+    (swap[pe.id] ? ex?.videoUrl ?? '' : planExerciseVideo(pe)) ||
+    (ex?.nameEn ? exerciseVideoSearchUrl(ex.nameEn) : '')
+  // (P12) وسوم الجهاز (التصنيف الفرعي ثنائي اللغة) للتمرين المعروض إن كان جهاز كتالوج.
+  const machineInfo = findMachineInfo(exId)
   const alts = getAlternatives(exId).slice(0, 5)
   const difficulties: { value: Difficulty; label: string }[] = [
     { value: 'easy', label: t.easy },
@@ -316,29 +353,49 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
           <div className="p-5">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <p className="text-lg font-black leading-tight text-ink-900">{exerciseDisplayName(nameAr, nameEn, lang)}</p>
-              {nameAr && nameEn && lang !== 'en' && <p className="mt-0.5 text-xs font-bold text-ink-400">{nameEn}</p>}
-              {muscles && (
-                <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-beige px-2.5 py-1 text-xs font-bold text-ink-700">
-                  <Icon name="Target" className="h-3.5 w-3.5 text-primary-c" />
-                  {muscles}
-                </span>
-              )}
-              {ex?.primaryMusclesDetailed?.length ? (
-                // رقائق العضلات بلغة الواجهة الحالية (تُحلّ عبر قاموس العضلات المشترك)
+              {/* (P10.1) اسم موحّد بعزل <bdi>: عربي أساسي + إنجليزي ثانوي. */}
+              <ExerciseName
+                nameAr={nameAr}
+                nameEn={nameEn}
+                lang={lang}
+                className="text-lg font-black leading-tight text-ink-900"
+                secondaryClassName="mt-0.5 text-xs font-bold text-ink-400"
+              />
+              {machineInfo ? (
+                // (P12) وسوم الجهاز: التصنيف الفرعي + المجموعة (ثنائية اللغة من الكتالوج).
                 <div className="mt-2 flex flex-wrap gap-1.5">
-                  {ex.primaryMusclesDetailed.map((m) => (
-                    <span key={`p-${m}`} className="rounded-full bg-primary-soft px-2 py-0.5 text-[10px] font-bold text-primary-c">
-                      {detailedMuscleLabel(m, lang)}
-                    </span>
-                  ))}
-                  {ex.secondaryMusclesDetailed.map((m) => (
-                    <span key={`s-${m}`} className="rounded-full border border-line bg-surface px-2 py-0.5 text-[10px] font-medium text-ink-500">
-                      {detailedMuscleLabel(m, lang)}
-                    </span>
-                  ))}
+                  <span className="rounded-full bg-primary-soft px-2.5 py-1 text-xs font-bold text-primary-c">
+                    {lang === 'en' ? machineInfo.item.subGroup.en : machineInfo.item.subGroup.ar}
+                  </span>
+                  <span className="rounded-full bg-beige px-2.5 py-1 text-xs font-bold text-ink-700">
+                    {lang === 'en' ? machineInfo.group.titleEn : machineInfo.group.titleAr}
+                  </span>
                 </div>
-              ) : null}
+              ) : (
+                <>
+                  {muscles && (
+                    <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-beige px-2.5 py-1 text-xs font-bold text-ink-700">
+                      <Icon name="Target" className="h-3.5 w-3.5 text-primary-c" />
+                      {muscles}
+                    </span>
+                  )}
+                  {ex?.primaryMusclesDetailed?.length ? (
+                    // رقائق العضلات بلغة الواجهة الحالية (تُحلّ عبر قاموس العضلات المشترك)
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {ex.primaryMusclesDetailed.map((m) => (
+                        <span key={`p-${m}`} className="rounded-full bg-primary-soft px-2 py-0.5 text-[10px] font-bold text-primary-c">
+                          {detailedMuscleLabel(m, lang)}
+                        </span>
+                      ))}
+                      {ex.secondaryMusclesDetailed.map((m) => (
+                        <span key={`s-${m}`} className="rounded-full border border-line bg-surface px-2 py-0.5 text-[10px] font-medium text-ink-500">
+                          {detailedMuscleLabel(m, lang)}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
+                </>
+              )}
             </div>
             <span className="shrink-0 rounded-full bg-primary-soft px-3 py-1.5 text-xs font-black text-primary-c">
               {current + 1} {t.of} {total}
@@ -367,6 +424,18 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
             {t.target}: {pe.sets} {t.setsDone} × {pe.reps}
           </p>
 
+          {/* (P12) طريقة استخدام الجهاز — قابلة للطي (مطوية افتراضيًا)، تظهر فقط عند توفّر
+              خطوات للتمرين المعروض؛ key يعيد الطي عند تبديل التمرين. */}
+          <MachineHowTo key={exId} exerciseId={exId} lang={lang} />
+
+          {/* (P12) شاهد الطريقة — رابط خارجي: videoUrl إن وُجد وإلا بحث يوتيوب بالاسم الإنجليزي. */}
+          {videoUrl && (
+            <a href={videoUrl} target="_blank" rel="noopener noreferrer" className="btn-ghost mt-3 w-full py-2.5 text-sm">
+              <Icon name="Video" className="h-4 w-4 text-primary-c" />
+              {d.watchVideo}
+            </a>
+          )}
+
           {/* كرّر آخر مرة */}
           {(rec?.lastWeight || rec?.lastReps) && (
             <button type="button" onClick={repeatLast} className="btn-ghost mt-3 w-full py-2.5 text-sm">
@@ -376,6 +445,17 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
           )}
           </div>
         </div>
+
+        {/* (P12) بطاقتا البديل (دمبل/كيبل) لأجهزة الكتالوج — تبديل بضغطة لهذه الجلسة فقط. */}
+        {machineAlt && machineSlots && (
+          <MachineAltCards
+            lang={lang}
+            machineId={pe.exerciseId}
+            alt={machineAlt}
+            slots={machineSlots}
+            onSwitch={switchMachineAlt}
+          />
+        )}
 
         {/* جولات التمرين الحالي */}
         <div className="space-y-3">
@@ -483,8 +563,8 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
           )}
         </div>
 
-        {/* بدائل — الجهاز مشغول؟ */}
-        {alts.length > 0 && (
+        {/* بدائل — الجهاز مشغول؟ (لغير أجهزة الكتالوج فقط؛ الأجهزة لها بطاقتا البديل أعلاه) */}
+        {!machineAlt && alts.length > 0 && (
           <div className="card overflow-hidden">
             <button type="button" onClick={() => setOpenAlt((o) => !o)} className="flex w-full items-center justify-between px-4 py-3.5 text-sm font-bold text-ink-900">
               <span className="flex items-center gap-2"><Icon name="Layers" className="h-4 w-4 text-primary-c" />{t.altPrompt}</span>

@@ -3,8 +3,32 @@ import { Icon } from './Icon'
 import { cn } from '@/lib/cn'
 import { getExerciseMedia } from '@/data/exerciseMedia'
 import { getExerciseGif } from '@/data/exerciseGifs'
+import { LEGACY_EXERCISE_ID_MAP, canonicalExerciseId } from '@/data/exercises'
 import { muscleLabelAr } from '@/data/muscleGroups'
 import type { MuscleId } from '@/types/muscles'
+
+// (P12) خرائط الوسائط (exerciseGifs/exerciseMedia) قد تكون بمفاتيح قديمة أو قانونية أثناء
+// التوحيد — نحلّ الوسائط بتجربة: المعرّف كما ورد ← القانوني ← كل الأسماء القديمة المقابلة له.
+const CANONICAL_TO_LEGACY: Record<string, string[]> = {}
+for (const [legacy, canonical] of Object.entries(LEGACY_EXERCISE_ID_MAP)) {
+  CANONICAL_TO_LEGACY[canonical] = [...(CANONICAL_TO_LEGACY[canonical] ?? []), legacy]
+}
+
+/** مرشّحو المعرّف بالترتيب: كما ورد ← القانوني ← الأسماء القديمة (بلا تكرار). */
+function idCandidates(exerciseId: string): string[] {
+  const canonical = canonicalExerciseId(exerciseId)
+  const all = [exerciseId, canonical, ...(CANONICAL_TO_LEGACY[canonical] ?? [])]
+  return all.filter((id, i) => all.indexOf(id) === i)
+}
+
+/** يحلّ وسيطًا بأول مرشّح مطابق (يعمل مع أي من المفاتيح القديمة/القانونية). */
+function resolveByCandidates<T>(exerciseId: string, get: (id: string) => T | undefined): T | undefined {
+  for (const id of idCandidates(exerciseId)) {
+    const found = get(id)
+    if (found) return found
+  }
+  return undefined
+}
 
 interface ExerciseMediaProps {
   exerciseId: string
@@ -58,14 +82,14 @@ function chain(...srcs: (string | undefined)[]): string[] {
  * سلسلة الرجوع: ملف محلّي → رابط بعيد → بديل أنيق. لا صورة مكسورة أبدًا.
  */
 export function ExerciseMedia({ exerciseId, muscles = [], heightClass = 'h-40', hideChips = false }: ExerciseMediaProps) {
-  const media = getExerciseMedia(exerciseId)
+  const media = resolveByCandidates(exerciseId, getExerciseMedia)
   const [frame, setFrame] = useState(0)
   const [baseFailed, setBaseFailed] = useState(false) // نفاد مصادر الإطار الأساسي → بديل أنيق
   const [secondFailed, setSecondFailed] = useState(false) // نفاد مصادر الإطار الثاني → إيقاف التبديل
   const [gifFailed, setGifFailed] = useState(false) // فشل الـ GIF → الرجوع للصور الثابتة
 
   // يُفضّل GIF المتحرّك المُنزَّل محليًا (public/exercise-gifs) ثم الرابط البعيد إن وُجد، ثم الصور الثابتة.
-  const gifSrcs = chain(getExerciseGif(exerciseId), media?.gifUrl)
+  const gifSrcs = chain(resolveByCandidates(exerciseId, getExerciseGif), media?.gifUrl)
   const useGif = gifSrcs.length > 0 && !gifFailed
   const src0 = chain(media?.img0, media?.img0Remote)
   const src1 = chain(media?.img1, media?.img1Remote)

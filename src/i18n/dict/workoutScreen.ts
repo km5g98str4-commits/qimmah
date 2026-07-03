@@ -40,6 +40,20 @@ export interface WorkoutScreenStrings {
   techniquePoints: string
   commonMistakes: string
   safetyNote: string
+  /** (P12) طريقة استخدام الجهاز — قسم قابل للطي في بطاقة التمرين. */
+  howToTitle: string
+  /** (P12) زر مشاهدة فيديو الشرح (يفتح خارجيًا). */
+  watchVideo: string
+  /** (P12) بطاقتا البديل — العنوان والتوضيح. */
+  altBlockTitle: string
+  altBlockNote: string
+  /** (P12) تسميات محتوى بطاقتي البديل. */
+  altDumbbellLabel: string
+  altCableLabel: string
+  altCableFallbackLabel: string
+  altMachineLabel: string
+  /** (P12) زر التبديل داخل البطاقة الصغيرة. */
+  switchHere: string
 }
 
 const ar: WorkoutScreenStrings = {
@@ -72,6 +86,15 @@ const ar: WorkoutScreenStrings = {
   techniquePoints: 'نقاط التكنيك',
   commonMistakes: 'أخطاء شائعة',
   safetyNote: 'تنبيه أمان',
+  howToTitle: 'طريقة استخدام الجهاز',
+  watchVideo: 'شاهد الطريقة',
+  altBlockTitle: 'البديل إذا الجهاز غير متوفر',
+  altBlockNote: 'التبديل لهذه الجلسة فقط — خطتك تبقى كما هي.',
+  altDumbbellLabel: 'بديل دمبل',
+  altCableLabel: 'بديل كيبل',
+  altCableFallbackLabel: 'بديل بوزن الجسم/دمبل',
+  altMachineLabel: 'الجهاز الأساسي',
+  switchHere: 'بدّل إليه',
 }
 
 const en: WorkoutScreenStrings = {
@@ -104,6 +127,15 @@ const en: WorkoutScreenStrings = {
   techniquePoints: 'Technique cues',
   commonMistakes: 'Common mistakes',
   safetyNote: 'Safety note',
+  howToTitle: 'How to use this machine',
+  watchVideo: 'Watch video',
+  altBlockTitle: "If the machine isn't available",
+  altBlockNote: 'Swap applies to this session only — your plan stays unchanged.',
+  altDumbbellLabel: 'Dumbbell alternative',
+  altCableLabel: 'Cable alternative',
+  altCableFallbackLabel: 'Bodyweight/dumbbell fallback',
+  altMachineLabel: 'Primary machine',
+  switchHere: 'Switch to this',
 }
 
 export const workoutScreenStrings: Record<Lang, WorkoutScreenStrings> = { ar, en }
