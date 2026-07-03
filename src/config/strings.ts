@@ -68,6 +68,9 @@ export interface ShellStrings {
     editPlan: string
     regenerate: string
     regenerateConfirm: string
+    switchMachines: string
+    switchMachinesConfirm: string
+    switchMachinesSuccess: string
     privacyLink: string
     termsLink: string
     healthDisclaimer: string
@@ -452,6 +455,10 @@ const ar: ShellStrings = {
     regenerate: 'إعادة توليد الخطة',
     regenerateConfirm:
       'سيُعاد توليد خطة التمرين والتغذية من بياناتك الحالية، وستُستبدل خطتك الحالية. هل تريد المتابعة؟',
+    switchMachines: 'التحويل لنسخة الأجهزة',
+    switchMachinesConfirm:
+      'سيُعاد توليد خطتك التلقائية بتمارين أجهزة الكتالوج فقط، وتُستبدل الخطة التلقائية الحالية. جدولك المخصّص وسجلّ تمارينك لن يتغيّرا. هل تريد المتابعة؟',
+    switchMachinesSuccess: 'تم التحويل — خطتك التلقائية الآن بنسخة الأجهزة.',
     privacyLink: 'سياسة الخصوصية',
     termsLink: 'شروط الاستخدام',
     healthDisclaimer:
@@ -852,6 +859,10 @@ const en: ShellStrings = {
     regenerate: 'Regenerate plan',
     regenerateConfirm:
       'Your workout and nutrition plan will be regenerated from your current data, replacing the current plan. Continue?',
+    switchMachines: 'Switch to machines version',
+    switchMachinesConfirm:
+      'Your auto plan will be regenerated with catalog machine exercises only, replacing the current auto plan. Your custom plan and workout history stay untouched. Continue?',
+    switchMachinesSuccess: 'Done — your auto plan is now the machines version.',
     privacyLink: 'Privacy policy',
     termsLink: 'Terms of use',
     healthDisclaimer:
