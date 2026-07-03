@@ -37,3 +37,6 @@ tsconfig.app.tsbuildinfo
 
 # agent worktrees (transient)
 .claude/worktrees/
+
+# كاش زحف WorkoutX المؤقت (استئناف p12-fetch-gifs) — لا يُلتزَم
+scripts/.p12-catalog-cache.json

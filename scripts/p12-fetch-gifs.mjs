@@ -15,7 +15,7 @@
 //
 // idempotent: يتخطّى أي ملف موجود في public/exercise-gifs/. غير الموجود في WorkoutX → تخطٍّ وتسجيل.
 
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, resolve } from 'node:path'
 
@@ -99,30 +99,55 @@ function redact(s) {
   return String(s).split(KEY).join('«REDACTED-KEY»')
 }
 
-function readQuota(headers) {
-  const keys = ['x-quota-remaining', 'x-ratelimit-remaining', 'x-requests-remaining']
-  const out = {}
-  for (const [k, v] of headers) {
-    if (keys.includes(k.toLowerCase()) || /quota|remaining|ratelimit|limit/i.test(k)) out[k] = v
-  }
-  return out
+// ── حصّة وحدود ──
+// x-quota-remaining  = الحصّة الدائمة (مدى الحياة) — إشارة التوقف الوحيدة للميزانية.
+// x-ratelimit-remaining = حد الدقيقة (30/د، يتصفّر كل دقيقة) — ليس نفاد حصّة! ننتظر ونكمل.
+// (حادثة 2026-07-03 الثالثة: الخلط بينهما أوقف الزحف عند صفحة 30/133 والحصّة 468.)
+const RATE_WAIT_MS = Number(process.env.WORKOUTX_RATE_WAIT_MS || 65_000)
+const MIN_SPACING_MS = Number(process.env.WORKOUTX_SPACING_MS || 2_400) // ~25 طلبًا/دقيقة استباقيًا
+let lastReqAt = 0
+let rateRemaining = Infinity
+
+const hdrNum = (res, name) => {
+  const v = res.headers.get(name)
+  const n = Number(v)
+  return v == null || Number.isNaN(n) ? null : n
 }
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
 async function apiFetch(path) {
-  if (quotaExhausted) throw new Error('توقّف: إشارة نفاد الحصّة استُلمت سابقًا.')
-  if (reqCount >= HARD_CAP) throw new Error(`توقّف: بلغنا سقف الميزانية الصارم (${HARD_CAP} طلب).`)
-  reqCount++
-  const url = BASE + path
-  console.log(`  → [req ${reqCount}/${HARD_CAP}] GET ${url}`)
-  const res = await fetch(url, { headers: { [AUTH_HEADER]: AUTH_PREFIX + KEY, Accept: 'application/json' } })
-  const quota = readQuota(res.headers)
-  if (Object.keys(quota).length) console.log(`    حصّة:`, JSON.stringify(quota))
-  const remainingVals = Object.values(quota).map(Number).filter((n) => !Number.isNaN(n))
-  if (res.status === 429 || remainingVals.some((n) => n <= 0)) {
-    quotaExhausted = true
-    console.warn('    ⚠ إشارة نفاد الحصّة — إيقاف كل طلبات WorkoutX.')
+  if (quotaExhausted) throw new Error('توقّف: الحصّة الدائمة (x-quota-remaining) نفدت.')
+  for (;;) {
+    if (reqCount >= HARD_CAP) throw new Error(`توقّف: بلغنا سقف الميزانية الصارم (${HARD_CAP} طلب).`)
+    // تهدئة استباقية (~25/د) + انتظار حد الدقيقة إن تصفّر
+    const spacing = lastReqAt + MIN_SPACING_MS - Date.now()
+    if (spacing > 0) await sleep(spacing)
+    if (rateRemaining <= 0) {
+      console.log(`    ⏸ حد الدقيقة (x-ratelimit) وصل صفرًا — انتظار ${Math.round(RATE_WAIT_MS / 1000)} ثانية ثم متابعة…`)
+      await sleep(RATE_WAIT_MS)
+      rateRemaining = Infinity
+    }
+    reqCount++
+    lastReqAt = Date.now()
+    const url = BASE + path
+    const res = await fetch(url, { headers: { [AUTH_HEADER]: AUTH_PREFIX + KEY, Accept: 'application/json' } })
+    const quota = hdrNum(res, 'x-quota-remaining')
+    const rate = hdrNum(res, 'x-ratelimit-remaining')
+    if (rate != null) rateRemaining = rate
+    console.log(`  → [req ${reqCount}/${HARD_CAP}] GET ${url}${quota != null ? ` • حصّة دائمة: ${quota}` : ''}${rate != null ? ` • حد الدقيقة: ${rate}` : ''}`)
+    if (quota != null && quota <= 0) {
+      quotaExhausted = true
+      console.warn('    ⛔ الحصّة الدائمة نفدت (x-quota-remaining ≤ 0) — إيقاف كل طلبات WorkoutX.')
+      return { res }
+    }
+    if (res.status === 429) {
+      console.log(`    ⏸ HTTP 429 — إيقاف مؤقت ${Math.round(RATE_WAIT_MS / 1000)} ثانية ثم إعادة المحاولة (rate limit pause, resuming…)`)
+      await sleep(RATE_WAIT_MS)
+      rateRemaining = Infinity
+      continue
+    }
+    return { res }
   }
-  return { res, quota }
 }
 
 function extractList(data) {
@@ -265,13 +290,30 @@ async function fetchCatalog(det) {
   if (totalPages > MAX_COMFORT_REQUESTS && !ALLOW_MANY_PAGES)
     throw new Error(`حجم الصفحة ${det.pageSize} يتطلب ${totalPages} طلبًا (> ${MAX_COMFORT_REQUESTS}). ` +
       `أكّد الميزانية ثم أعد التشغيل مع WORKOUTX_ALLOW_PAGES=1.`)
-  const all = det.pages.flat()
-  for (let i = det.pages.length; i < totalPages; i++) {
+  // استئناف فعّال: كاش محلي (غير مُلتزَم) للصفحات المجموعة — إعادة التشغيل لا تعيد الزحف.
+  const CACHE = resolve(__dirname, '.p12-catalog-cache.json')
+  let all = det.pages.flat()
+  let startPage = det.pages.length
+  if (existsSync(CACHE)) {
+    try {
+      const c = JSON.parse(readFileSync(CACHE, 'utf8'))
+      if (c.total === det.total && c.pageSize === det.pageSize && c.mode === det.mode && Array.isArray(c.entries) && c.fetchedPages > startPage) {
+        all = c.entries
+        startPage = c.fetchedPages
+        console.log(`▶ استئناف من الكاش: ${startPage}/${totalPages} صفحة (${all.length} مدخلًا) — لا إعادة زحف.`)
+      }
+    } catch { /* كاش تالف → تجاهل */ }
+  }
+  const etaMin = (left) => Math.ceil((left * MIN_SPACING_MS) / 60000)
+  if (startPage < totalPages)
+    console.log(`▶ زحف القائمة: ${totalPages - startPage} صفحة متبقية ≈ ${etaMin(totalPages - startPage)} دقيقة (تهدئة ~25 طلبًا/د).`)
+  for (let i = startPage; i < totalPages; i++) {
     const q = det.mode === 'page' ? `?limit=${det.pageSize}&page=${i + 1}` : `?limit=${det.pageSize}&offset=${i * det.pageSize}`
     const pg = await fetchJsonPage(q)
     if (!pg.count) break
     all.push(...pg.entries)
-    await new Promise((r) => setTimeout(r, 250))
+    writeFileSync(CACHE, JSON.stringify({ total: det.total, pageSize: det.pageSize, mode: det.mode, fetchedPages: i + 1, entries: all }))
+    console.log(`  📄 صفحة ${i + 1}/${totalPages} (${all.length}/${det.total} مدخلًا) — متبقٍ ≈ ${etaMin(totalPages - i - 1)} د`)
   }
   const catalog = toCatalog(all)
   console.log(`▶ كتالوج WorkoutX كامل: ${all.length}/${det.total} مدخلًا (${catalog.length} يحمل gif) عبر ${reqCount} طلبًا.`)
