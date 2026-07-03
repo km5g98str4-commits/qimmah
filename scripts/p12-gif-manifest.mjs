@@ -10,10 +10,10 @@
 // يطبع: قائمة المغطّى، قائمة الناقص (slug قانوني + الاسم EN + الاسم AR)،
 // وعدد طلبات WorkoutX المخطّط لها بالضبط.
 //
-// افتراض عدد الطلبات (محافظ): 2 طلب لكل GIF ناقص = بحث + تنزيل.
+// شكل الطلب المُثبت (P5): طلب قائمة واحد + مطابقة محلية + تنزيل CDN بلا مفتاح.
+// (حادثة 2026-07-03: افتراض ?search= لكل تمرين كان خاطئًا — 46×404. المتبقي ~229.)
 // ملاحظة من P5 (scripts/fetch-workoutx-media.mjs): تنزيل ملفات gif يتم من CDN
 // بلا مفتاح ولا يُحتسب غالبًا على الحصّة — أي أن الاستهلاك الفعلي المرجّح
-// ≈ 1 طلب/GIF. نخطّط بالمحافظ (2) ونفرح إن كان أقل.
 //
 // قاعدة الميزانية الصارمة: إن تجاوز المخطّط 150 طلبًا → تحذير STOP أحمر.
 //
@@ -35,7 +35,6 @@ const GREEN = '\x1b[32m'
 const YELLOW = '\x1b[33m'
 const RESET = '\x1b[0m'
 const HARD_BUDGET = 150
-const REQUESTS_PER_GIF = 2 // بحث + تنزيل (افتراض محافظ — انظر الترويسة)
 
 // ── 1) أجهزة الكتالوج (+ أسماؤها الثنائية) من machineCatalog.ts ──
 function extractCatalog(src) {
@@ -127,16 +126,16 @@ function main() {
   }
   console.log()
 
-  const planned = missing.length * REQUESTS_PER_GIF
+  const planned = 4 // أسوأ حالة: مرشّحات مسار القائمة الأربعة
   console.log('═'.repeat(72))
-  console.log(`عدد طلبات WorkoutX المخطّط بالضبط: ${missing.length} GIF × ${REQUESTS_PER_GIF} (بحث + تنزيل) = ${planned} طلبًا`)
+  console.log(`طلبات API المخطّطة: 1 (قائمة واحدة، أسوأ حالة 4 مع المسارات الاحتياطية) — ${missing.length} GIF تُنزَّل من CDN بلا مفتاح`)
   console.log('(افتراض محافظ؛ تجربة P5 تشير إلى أن تنزيل CDN لا يحمل المفتاح — الاستهلاك الفعلي المرجّح ≈ ' + missing.length + ')')
   if (planned > HARD_BUDGET) {
     console.log(`${RED}⛔ STOP: المخطّط (${planned}) يتجاوز سقف الميزانية الصارم (${HARD_BUDGET} طلبًا).`)
     console.log(`   لا تُشغّل الجلب — قلّص القائمة أو قسّمها على دفعات معتمدة.${RESET}`)
     process.exitCode = 1
   } else {
-    console.log(`${GREEN}✅ ضمن الميزانية: ${planned} ≤ ${HARD_BUDGET} (المفتاح لديه ~367 طلبًا متبقيًا مدى الحياة).${RESET}`)
+    console.log(`${GREEN}✅ ضمن الميزانية: ${planned} ≤ ${HARD_BUDGET} (المتبقي مدى الحياة ~229 بعد حادثة الـ404).${RESET}`)
   }
 }
 
