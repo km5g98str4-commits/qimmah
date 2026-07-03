@@ -424,6 +424,18 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
             {t.target}: {pe.sets} {t.setsDone} × {pe.reps}
           </p>
 
+          {/* (P12) طريقة استخدام الجهاز — قابلة للطي (مطوية افتراضيًا)، تظهر فقط عند توفّر
+              خطوات للتمرين المعروض؛ key يعيد الطي عند تبديل التمرين. */}
+          <MachineHowTo key={exId} exerciseId={exId} lang={lang} />
+
+          {/* (P12) شاهد الطريقة — رابط خارجي: videoUrl إن وُجد وإلا بحث يوتيوب بالاسم الإنجليزي. */}
+          {videoUrl && (
+            <a href={videoUrl} target="_blank" rel="noopener noreferrer" className="btn-ghost mt-3 w-full py-2.5 text-sm">
+              <Icon name="Video" className="h-4 w-4 text-primary-c" />
+              {d.watchVideo}
+            </a>
+          )}
+
           {/* كرّر آخر مرة */}
           {(rec?.lastWeight || rec?.lastReps) && (
             <button type="button" onClick={repeatLast} className="btn-ghost mt-3 w-full py-2.5 text-sm">
@@ -433,6 +445,17 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
           )}
           </div>
         </div>
+
+        {/* (P12) بطاقتا البديل (دمبل/كيبل) لأجهزة الكتالوج — تبديل بضغطة لهذه الجلسة فقط. */}
+        {machineAlt && machineSlots && (
+          <MachineAltCards
+            lang={lang}
+            machineId={pe.exerciseId}
+            alt={machineAlt}
+            slots={machineSlots}
+            onSwitch={switchMachineAlt}
+          />
+        )}
 
         {/* جولات التمرين الحالي */}
         <div className="space-y-3">
@@ -540,8 +563,8 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
           )}
         </div>
 
-        {/* بدائل — الجهاز مشغول؟ */}
-        {alts.length > 0 && (
+        {/* بدائل — الجهاز مشغول؟ (لغير أجهزة الكتالوج فقط؛ الأجهزة لها بطاقتا البديل أعلاه) */}
+        {!machineAlt && alts.length > 0 && (
           <div className="card overflow-hidden">
             <button type="button" onClick={() => setOpenAlt((o) => !o)} className="flex w-full items-center justify-between px-4 py-3.5 text-sm font-bold text-ink-900">
               <span className="flex items-center gap-2"><Icon name="Layers" className="h-4 w-4 text-primary-c" />{t.altPrompt}</span>
