@@ -25,6 +25,7 @@ const NotFoundView = lazy(() => import('@/views/NotFoundView').then((m) => ({ de
 const ReviewPanelView = lazy(() =>
   import('@/features/products/reviewPanel/ReviewPanelView').then((m) => ({ default: m.ReviewPanelView })),
 )
+const MyStatsView = lazy(() => import('@/views/MyStatsView').then((m) => ({ default: m.MyStatsView })))
 import { MobileShell, type MainTab } from '@/components/MobileShell'
 import type { AppBadge } from '@/components/AppNav'
 import { useAuth } from '@/lib/authContext'
@@ -42,8 +43,8 @@ import { BUILD_LABEL } from '@/lib/buildInfo'
  * (وبالتالي حساب جديد يُطالَب بالإعداد ولو أُكمل على الجهاز بحساب آخر).
  */
 function guardRoute(route: AppRoute, userId: string | null): AppRoute {
-  // التبويبات الرئيسية + مكتبة التمارين كلها تتطلّب إعدادًا مكتملًا.
-  if (MAIN_TABS.includes(route) || route === 'exercises') {
+  // التبويبات الرئيسية + مكتبة التمارين + «لوحتي» كلها تتطلّب إعدادًا مكتملًا.
+  if (MAIN_TABS.includes(route) || route === 'exercises' || route === 'stats') {
     if (!isOnboardingComplete(userId)) {
       // مسجّل دخول لم يُكمل → مباشرةً لمعالج الإعداد؛ ضيف بمسودة بدأها → استئناف الإعداد؛
       // وإلا شاشة البداية.
@@ -247,7 +248,7 @@ export default function App() {
       <>
         <MobileShell
           lang={LANG}
-          tab={(view === 'exercises' ? 'workout' : view) as MainTab}
+          tab={(view === 'exercises' ? 'workout' : view === 'stats' ? 'dashboard' : view) as MainTab}
           badge={badge}
           onNavigate={navigate}
           onOpenSettings={() => setView('settings')}
@@ -258,6 +259,7 @@ export default function App() {
           {view === 'nutrition' && <NutritionView lang={LANG} />}
           {view === 'progress' && <ProgressView lang={LANG} />}
           {view === 'profile' && <ProfileView lang={LANG} onNavigate={navigate} />}
+          {view === 'stats' && <MyStatsView lang={LANG} />}
         </MobileShell>
 
         {showSuccess && <SuccessToast onClose={dismissSuccess} />}
