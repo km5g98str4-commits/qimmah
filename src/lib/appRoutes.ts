@@ -55,6 +55,17 @@ export function routeFromHash(): AppRoute | null {
   return (ROUTES as string[]).includes(h) ? (h as AppRoute) : null
 }
 
+/**
+ * هل الـ hash الحالي مسار route غير معروف (مثل #/asdf) يستحق صفحة 404؟
+ * المرساة النصية العادية (مثل #today بلا شرطة) ليست مسارًا — تُعامَل كمرساة تمرير
+ * لا كمسار، فلا تُقذف إلى صفحة 404 (كانت روابط الفوتر التسويقية تسقط هنا سابقًا).
+ */
+export function isUnknownRouteHash(): boolean {
+  if (typeof window === 'undefined') return false
+  const h = window.location.hash
+  return h.startsWith('#/') && h !== '#/' && routeFromHash() === null
+}
+
 /** يضبط hash المسار (يُطلق hashchange). */
 export function setHashRoute(route: AppRoute): void {
   if (typeof window === 'undefined') return

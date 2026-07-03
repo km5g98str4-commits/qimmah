@@ -4,6 +4,7 @@ import { StartView } from '@/views/StartView'
 import { AppLoading } from '@/components/AppLoading'
 import { RouteErrorBoundary } from '@/components/ErrorBoundary'
 import { DashboardSkeleton, ProgressSkeleton } from '@/components/ViewSkeletons'
+import { InstallPrompt } from '@/components/InstallPrompt'
 
 // باقي الشاشات مُقسّمة إلى حِزم عند الطلب (code-splitting) لتقليل حزمة الدخول الأولى.
 // تُبنى عبر مصنع لأنّ React.lazy يخزّن فشل الاستيراد نهائيًا — زرّ «أعد المحاولة» في
@@ -42,7 +43,7 @@ import { isAccountOnboarded, isOnboardingComplete, loadOnboarding } from '@/lib/
 import { ensureOnboardingProfile } from '@/lib/onboardingProfile'
 import { currentUserId, hydrateOnboardingFromProfile } from '@/lib/onboardingSync'
 import { useLanguage } from '@/i18n'
-import { type AppRoute, MAIN_TABS, routeFromHash, setHashRoute } from '@/lib/appRoutes'
+import { type AppRoute, MAIN_TABS, isUnknownRouteHash, routeFromHash, setHashRoute } from '@/lib/appRoutes'
 import { SuccessToast } from '@/components/SuccessToast'
 import { AchievementToaster } from '@/features/achievements/AchievementToaster'
 import { BUILD_LABEL } from '@/lib/buildInfo'
@@ -67,8 +68,9 @@ function guardRoute(route: AppRoute, userId: string | null): AppRoute {
 function initialRoute(userId: string | null): AppRoute {
   const r = routeFromHash()
   if (r) return guardRoute(r, userId)
-  // hash موجود لكنه غير معروف (مثل #/asdf) → صفحة 404 بدل التحويل الصامت.
-  if (typeof window !== 'undefined' && window.location.hash && window.location.hash !== '#/') {
+  // مسار route غير معروف (مثل #/asdf) → صفحة 404 بدل التحويل الصامت.
+  // المرساة النصية (مثل #today من روابط الفوتر) ليست مسارًا فلا تُقذف إلى 404.
+  if (isUnknownRouteHash()) {
     return 'notfound'
   }
   return isOnboardingComplete(userId) ? 'dashboard' : 'start'
@@ -122,8 +124,9 @@ export default function App() {
       const r = routeFromHash()
       if (r) {
         setView(guardRoute(r, uid))
-      } else if (window.location.hash && window.location.hash !== '#/') {
-        // مسار غير معروف (مثل #/xyz) → صفحة 404 المخصّصة (نُبقي الرابط ظاهرًا).
+      } else if (isUnknownRouteHash()) {
+        // مسار route غير معروف (مثل #/xyz) → صفحة 404 المخصّصة (نُبقي الرابط ظاهرًا).
+        // مرساة تمرير عادية (#today) تُتجاهَل ولا تُعدّ 404.
         setView('notfound')
       }
     }
@@ -298,6 +301,8 @@ export default function App() {
   return (
     <RouteErrorBoundary onRetry={retryLazyViews}>
       <Suspense fallback={<AppLoading />}>{content}</Suspense>
+      {/* دعوة تثبيت التطبيق (P12) — شريط سفلي قابل للإغلاق، لا يظهر مثبّتًا أو بعد الإغلاق. */}
+      <InstallPrompt lang={LANG} />
     </RouteErrorBoundary>
   )
 }
