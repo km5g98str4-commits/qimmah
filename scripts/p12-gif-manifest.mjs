@@ -135,7 +135,7 @@ function main() {
     console.log(`   لا تُشغّل الجلب — قلّص القائمة أو قسّمها على دفعات معتمدة.${RESET}`)
     process.exitCode = 1
   } else {
-    console.log(`${GREEN}✅ ضمن الميزانية: ${planned} ≤ ${HARD_BUDGET} (المتبقي مدى الحياة ~229 بعد حادثة الـ404).${RESET}`)
+    console.log(`${GREEN}✅ ضمن الميزانية: ${planned} ≤ ${HARD_BUDGET} (المتبقي مدى الحياة ~225).${RESET}`)
   }
 }
 

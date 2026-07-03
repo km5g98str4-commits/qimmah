@@ -25,10 +25,16 @@ const LOCAL_DIR = resolve(ROOT, 'public/exercise-gifs')
 
 const KEY = process.env.WORKOUTX_API_KEY || ''
 const BASE = 'https://api.workoutxapp.com'
-const HEADER = 'X-WorkoutX-Key'
-// نفس مرشّحات P5 — الأول هو الذي نجح تاريخيًا؛ البقية احتياط إن تغيّرت الواجهة.
-const CANDIDATE_PATHS = ['/exercises', '/v1/exercises', '/api/exercises', '/exercise']
-// سقف صارم لطلبات API المُوقَّعة بالمفتاح (المتبقي مدى الحياة ~229 بعد حادثة الـ404).
+// probe زياد 2026-07-03: ‎/v1/exercises هو المسار الحقيقي (401 = موجود لكن المصادقة مرفوضة)،
+// وبقية المسارات 404 «Route not found» — لذلك v1 أولًا ولا نجرّب 404ات معروفة افتراضيًا.
+const CANDIDATE_PATHS = ['/v1/exercises']
+// آلية المصادقة الأصلية (P5): المفتاح خامًا في X-WorkoutX-Key. فشلت اليوم بـ401
+// «Invalid API key format» → يبدو أن WorkoutX غيّرت المخطط. بعد التحقق من لوحة/وثائق
+// WorkoutX اضبط الشكل الصحيح عبر البيئة دون تعديل كود:
+//   WORKOUTX_AUTH_HEADER=Authorization WORKOUTX_AUTH_PREFIX='Bearer ' bash scripts/p12-fetch-gifs.sh --probe
+const AUTH_HEADER = process.env.WORKOUTX_AUTH_HEADER || 'X-WorkoutX-Key'
+const AUTH_PREFIX = process.env.WORKOUTX_AUTH_PREFIX || ''
+// سقف صارم لطلبات API المُوقَّعة بالمفتاح (المتبقي ~225 بعد حادثتي 2026-07-03).
 const HARD_CAP = 150
 
 const DRY_RUN = process.argv.includes('--dry-run')
@@ -108,7 +114,7 @@ async function apiFetch(path) {
   reqCount++
   const url = BASE + path
   console.log(`  → [req ${reqCount}/${HARD_CAP}] GET ${url}`)
-  const res = await fetch(url, { headers: { [HEADER]: KEY, Accept: 'application/json' } })
+  const res = await fetch(url, { headers: { [AUTH_HEADER]: AUTH_PREFIX + KEY, Accept: 'application/json' } })
   const quota = readQuota(res.headers)
   if (Object.keys(quota).length) console.log(`    حصّة:`, JSON.stringify(quota))
   const remainingVals = Object.values(quota).map(Number).filter((n) => !Number.isNaN(n))
@@ -238,6 +244,13 @@ async function main() {
   }
 
   if (!KEY) { console.error('KEY MISSING — اضبط WORKOUTX_API_KEY في البيئة.'); process.exit(1) }
+
+  // تشخيص سلامة المفتاح (بلا كشفه): الطول + بصمة + كشف مسافات/أسطر تسلّلت من الصدفة.
+  const { createHash } = await import('node:crypto')
+  const fp = createHash('sha256').update(KEY).digest('hex').slice(0, 8)
+  console.log(`Auth: ${AUTH_HEADER}: ${AUTH_PREFIX}«REDACTED len=${KEY.length} sha256:${fp}…»`)
+  if (/^\s|\s$/.test(KEY)) console.warn('⚠ المفتاح يبدأ/ينتهي بمسافة أو سطر جديد — نظّفه (السبب الشائع لـ«Invalid API key format»).')
+  if (/[\r\n]/.test(KEY)) console.warn('⚠ المفتاح يحوي سطرًا جديدًا داخليًا — انسخه من المصدر مباشرة.')
 
   const catalog = await fetchCatalog()
 
