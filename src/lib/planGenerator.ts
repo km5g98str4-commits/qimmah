@@ -4,14 +4,11 @@
 // تصفية التمارين حسب الأدوات/نوع النادي، والمجموعات/التكرارات/الراحة حسب الهدف والخبرة.
 
 import type {
-  ActivityLevel,
-  ExperienceBand,
   GoalType,
   MuscleFocus,
   PlannedSplit,
   Profile,
   Targets,
-  TrainingLevel,
 } from '@/types/profile'
 import type { CommitmentPlan } from '@/types/progress'
 import type { MeasurementPlan } from '@/types/progress'
@@ -45,28 +42,9 @@ export interface GeneratedPlan {
 
 const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n))
 
-/** مستوى التدريب من مدّة الخبرة. */
-export function levelFromExperience(band?: ExperienceBand): TrainingLevel {
-  if (band === 'lt1m' || band === '1to6m') return 'beginner'
-  if (band === '6to12m' || band === '1to2y') return 'intermediate'
-  if (band === 'gt2y') return 'advanced'
-  return 'intermediate'
-}
-
-/** مستوى النشاط مشتقّ من عدد أيام التمرين. */
-export function deriveActivityLevel(days: number): ActivityLevel {
-  if (days <= 2) return 'light'
-  if (days <= 4) return 'moderate'
-  if (days <= 6) return 'active'
-  return 'very_active'
-}
-
-/** وزن هدف منطقي مشتقّ من الوزن والهدف (حين لا يُسأل عنه صراحةً). */
-export function deriveTargetWeight(weightKg: number, gt: GoalType): number {
-  if (gt === 'cutting') return Math.round(weightKg * 0.92)
-  if (gt === 'bulking') return Math.round(weightKg * 1.05)
-  return weightKg // recomposition / health / maintenance / returning
-}
+// الاشتقاقات الخفيفة انتقلت إلى planDerive (P12) لإخراجها من حزمة الإقلاع؛
+// يُعاد تصديرها هنا للتوافق مع المستوردين الحاليين.
+export { levelFromExperience, deriveActivityLevel, deriveTargetWeight } from '@/lib/planDerive'
 
 // ============================================================================
 // محرّك التقسيمة (Split Engine)

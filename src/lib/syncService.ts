@@ -100,7 +100,7 @@ export function getSyncStatus(signedIn: boolean): SyncStatus {
 
 /** يجلب معرّف المستخدم الحالي أو null. */
 async function currentUserId(): Promise<string | null> {
-  const supabase = getSupabase()
+  const supabase = await getSupabase()
   if (!supabase) return null
   try {
     const { data } = await supabase.auth.getUser()
@@ -114,7 +114,7 @@ async function currentUserId(): Promise<string | null> {
  * يرفع البيانات المحلية إلى السحابة (upsert). آمن عند غياب الضبط/المستخدم.
  */
 export async function syncLocalToCloud(): Promise<SyncStatus> {
-  const supabase = getSupabase()
+  const supabase = await getSupabase()
   if (!supabase) return buildStatus('disabled', 'المزامنة السحابية غير مفعّلة في هذه النسخة.')
   const userId = await currentUserId()
   if (!userId) return buildStatus('guest', 'سجّل الدخول لمزامنة بياناتك سحابيًا.')
@@ -192,7 +192,7 @@ export async function syncLocalToCloud(): Promise<SyncStatus> {
  * يسحب البيانات السحابية ويدمجها محليًا. local-first: يفوز المحلي عند التساوي.
  */
 export async function pullCloudToLocal(): Promise<SyncStatus> {
-  const supabase = getSupabase()
+  const supabase = await getSupabase()
   if (!supabase) return buildStatus('disabled', 'المزامنة السحابية غير مفعّلة في هذه النسخة.')
   const userId = await currentUserId()
   if (!userId) return buildStatus('guest', 'سجّل الدخول لسحب بياناتك السحابية.')

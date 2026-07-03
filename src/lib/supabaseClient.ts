@@ -9,7 +9,9 @@
 // إن لم تتوفّر قيم صالحة إطلاقًا يبقى التطبيق يعمل محليًا (Guest Mode) دون أن ينهار؛
 // أي استدعاء سحابي يجب أن يتحقّق أولًا عبر isSupabaseConfigured() أو getSupabase().
 
-import { createClient, type SupabaseClient } from '@supabase/supabase-js'
+// ملاحظة أداء (P12): مكتبة supabase-js تُحمَّل كسولًا (dynamic import) كي لا تدخل
+// حزمة الإقلاع (~55KB gzip) — الرسم الأول لا يحتاجها، وgetSupabase() صارت async.
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 // — القيم العامة المدمجة (fallback). عامّة وآمنة، محميّة بـ RLS. —
 const DEFAULT_SUPABASE_URL = 'https://ledlypcyrtnzvjvhykwz.supabase.co'
@@ -62,28 +64,33 @@ export interface Database {
 
 export type TypedSupabaseClient = SupabaseClient
 
-let client: TypedSupabaseClient | null = null
+let clientPromise: Promise<TypedSupabaseClient | null> | null = null
 
-if (isSupabaseConfigured()) {
-  try {
-    client = createClient(url, anonKey, {
-      auth: {
-        persistSession: true,
-        autoRefreshToken: true,
-        detectSessionInUrl: true,
-        // تبقى الجلسة محفوظة في localStorage — «سجّل مرّة، يتعرّف عليك الجهاز» عبر التحديثات.
-        storageKey: 'qimmah:supabase-auth:v1',
-      },
-    })
-  } catch {
-    // لا نُسقط التطبيق إن فشل الإنشاء — نبقى في الوضع المحلي.
-    client = null
+/**
+ * يعيد عميل Supabase أو null إن لم يُضبط. لا يرمي استثناء أبدًا.
+ * async: المكتبة تُحمَّل عند أول استدعاء فقط (خارج مسار الإقلاع الحرج).
+ */
+export function getSupabase(): Promise<TypedSupabaseClient | null> {
+  if (!isSupabaseConfigured()) return Promise.resolve(null)
+  if (!clientPromise) {
+    clientPromise = import('@supabase/supabase-js')
+      .then(({ createClient }) =>
+        createClient(url, anonKey, {
+          auth: {
+            persistSession: true,
+            autoRefreshToken: true,
+            detectSessionInUrl: true,
+            // تبقى الجلسة محفوظة في localStorage — «سجّل مرّة، يتعرّف عليك الجهاز» عبر التحديثات.
+            storageKey: 'qimmah:supabase-auth:v1',
+          },
+        }),
+      )
+      .catch(() => {
+        // لا نُسقط التطبيق إن فشل التحميل/الإنشاء — نبقى في الوضع المحلي.
+        return null
+      })
   }
-}
-
-/** يعيد عميل Supabase أو null إن لم يُضبط. لا يرمي استثناء أبدًا. */
-export function getSupabase(): TypedSupabaseClient | null {
-  return client
+  return clientPromise
 }
 
 /** وصف حالة الضبط لعرضها في الواجهة. */

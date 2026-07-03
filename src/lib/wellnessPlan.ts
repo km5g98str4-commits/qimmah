@@ -1,4 +1,4 @@
-import type { PlanMedication, PlanSupplement, WellnessPlan } from '@/types/wellness'
+import type { PlanMedication, PlanSupplement } from '@/types/wellness'
 import type { Lang } from '@/lib/appPreferences'
 import { getSupplement } from '@/data/supplementLibrary'
 import { getMedication } from '@/data/medications'
@@ -56,14 +56,5 @@ export function medicationName(pm: PlanMedication, lang: Lang): string {
   return ar && en ? `${ar} — ${en}` : ar || en
 }
 
-/**
- * الخطة الافتراضية — قوائم فارغة تمامًا.
- * المكملات والأدوية يضيفها المستخدم بنفسه فقط (لا بيانات افتراضية وهمية، ولا توصيات).
- */
-export function defaultWellnessPlan(): WellnessPlan {
-  return {
-    enabled: true,
-    supplements: [],
-    medications: [],
-  }
-}
+// defaultWellnessPlan انتقلت إلى customization.ts (P12) — كي لا تسحب حزمة
+// الإقلاع مكتبتَي المكملات والأدوية المستوردتين أعلى هذا الملف.

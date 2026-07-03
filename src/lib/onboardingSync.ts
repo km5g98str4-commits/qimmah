@@ -40,7 +40,7 @@ function snapshotLooksOnboarded(ob: OnboardingSnapshot | undefined): boolean {
 
 /** يجلب معرّف المستخدم الحالي مباشرةً من Supabase (لا يعتمد على حالة React). */
 export async function currentUserId(): Promise<string | null> {
-  const supabase = getSupabase()
+  const supabase = await getSupabase()
   if (!supabase) return null
   try {
     const { data } = await supabase.auth.getUser()
@@ -55,7 +55,7 @@ export async function currentUserId(): Promise<string | null> {
  * يدمج فوق البيانات الموجودة حتى لا يمحو مفاتيح أخرى. لا يرمي أبدًا.
  */
 export async function persistOnboardingToProfile(userId: string, op: OnboardingProfile): Promise<void> {
-  const supabase = getSupabase()
+  const supabase = await getSupabase()
   if (!supabase || !userId) return
   try {
     const { data: existing } = await supabase
@@ -78,7 +78,7 @@ export async function persistOnboardingToProfile(userId: string, op: OnboardingP
  * غير مكتمل → تظهر له بوابة الإعداد. يعيد true إن كان الحساب مكتملًا سحابيًا. لا يرمي.
  */
 export async function hydrateOnboardingFromProfile(userId: string): Promise<boolean> {
-  const supabase = getSupabase()
+  const supabase = await getSupabase()
   if (!supabase || !userId) return false
   try {
     const { data } = await supabase.from('profiles').select('data').eq('user_id', userId).maybeSingle()

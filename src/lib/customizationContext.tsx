@@ -7,7 +7,6 @@ import {
   saveCustomization,
   clearCustomization,
 } from './customization'
-import { generatePlan } from './planGenerator'
 
 interface CustomizationContextValue {
   customization: Customization
@@ -54,50 +53,18 @@ export function CustomizationProvider({ children }: { children: ReactNode }) {
   return <CustomizationContext.Provider value={value}>{children}</CustomizationContext.Provider>
 }
 
-/** يبني نسخة عرض غنية للنموذج (دون حفظ) — خطة مولّدة ومتّسقة. */
-function buildDemoCustomization(): Customization {
-  const base = getDefaultCustomization()
-  // النموذج التجريبي فقط يستخدم اسمًا توضيحيًا «أحمد محمد» (لا يظهر في إعداد المستخدم الحقيقي).
-  const demoProfile = { ...base.profile, name: 'أحمد محمد' }
-  const g = generatePlan(demoProfile)
-  return {
-    ...base,
-    // هوية عيّنة للنموذج فقط (واضح أنها تجريبية) — لا تُكتب في تخزين المستخدم.
-    identity: {
-      ...base.identity,
-      userName: 'أحمد (نموذج)',
-      mainGoal: 'الوصول إلى 78 كجم وتحسين شكل الجسم',
-    },
-    profile: demoProfile,
-    targets: g.targets,
-    workoutPlan: g.workoutPlan,
-    routine: g.weeklySchedule,
-    nutritionPlan: g.nutritionPlan,
-    commitmentPlan: g.commitmentPlan,
-    measurementPlan: g.measurementPlan,
-    wellnessPlan: {
-      ...base.wellnessPlan,
-      // عيّنة دواء للمتابعة (الجرعة مُدخلة كمثال فقط — ليست توصية)
-      medications: [
-        {
-          id: 'demo-med-1',
-          medicationId: 'vitamin-d-rx',
-          dose: 'حبة',
-          timing: 'مع الإفطار',
-          frequency: 'أسبوعيًا',
-          beforeAfterFood: 'with',
-          notes: '',
-          doctorNote: 'حسب وصف الطبيب',
-          order: 0,
-        },
-      ],
-    },
-  }
-}
-
-/** مزوّد للعرض فقط (النموذج) — بيانات تجريبية غنية، بلا حفظ وبلا تغيير ألوان عامة. */
-export function DemoCustomizationProvider({ children }: { children: ReactNode }) {
-  const [customization] = useState<Customization>(() => buildDemoCustomization())
+/**
+ * مزوّد قيمة ثابتة للعرض فقط — بلا حفظ وبلا تغيير ألوان عامة.
+ * يستخدمه وضع النموذج (demoCustomization) — انتقل بناء بيانات النموذج إلى ملفه
+ * الخاص (P12) كي لا يسحب مولّد الخطط إلى حزمة الإقلاع عبر هذا المزوّد المشترك.
+ */
+export function StaticCustomizationProvider({
+  customization,
+  children,
+}: {
+  customization: Customization
+  children: ReactNode
+}) {
   const value = useMemo<CustomizationContextValue>(
     () => ({
       customization,
