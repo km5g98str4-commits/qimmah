@@ -81,6 +81,9 @@ export interface ShellStrings {
     groupDev: string
     devReviewProducts: string
     devReviewHint: string
+    groupAbout: string
+    versionLabel: string
+    calcLink: string
   }
   pwa: {
     group: string
@@ -120,6 +123,10 @@ export interface ShellStrings {
     title: string
     body: string
     reload: string
+    // بطاقة خطأ الشاشات (حدّ أخطاء المسارات) — إعادة محاولة بلا تحديث كامل للصفحة.
+    routeTitle: string
+    routeBody: string
+    retry: string
   }
   contact: {
     title: string
@@ -470,6 +477,9 @@ const ar: ShellStrings = {
     groupDev: 'أدوات داخلية',
     devReviewProducts: 'مراجعة المنتجات',
     devReviewHint: 'مراجعة منتجات ممسوحة/مُضافة بانتظار الاعتماد قبل ظهورها للمستخدمين.',
+    groupAbout: 'عن التطبيق',
+    versionLabel: 'إصدار التطبيق',
+    calcLink: 'كيف نحسب أرقامك؟',
   },
   pwa: {
     group: 'التطبيق والتنبيهات',
@@ -521,6 +531,9 @@ const ar: ShellStrings = {
     title: 'صار خلل بسيط',
     body: 'واجهنا مشكلة غير متوقعة في هذي الشاشة. جرّب تحدّث الصفحة وبيرجع كل شي مكانه — بياناتك محفوظة على جهازك.',
     reload: 'حدّث الصفحة',
+    routeTitle: 'حدث خطأ غير متوقّع',
+    routeBody: 'تعذّر تحميل هذه الشاشة — قد يكون الاتصال ضعيفًا. بياناتك محفوظة على جهازك.',
+    retry: 'أعد المحاولة',
   },
   contact: {
     title: 'تواصل معنا',
@@ -874,6 +887,9 @@ const en: ShellStrings = {
     groupDev: 'Internal tools',
     devReviewProducts: 'Product review',
     devReviewHint: 'Review scanned or submitted products awaiting approval before they reach users.',
+    groupAbout: 'About',
+    versionLabel: 'App version',
+    calcLink: 'How we calculate your numbers',
   },
   pwa: {
     group: 'App & Notifications',
@@ -925,6 +941,9 @@ const en: ShellStrings = {
     title: 'Something went wrong',
     body: 'We hit an unexpected problem on this screen. Try reloading the page and it should be back to normal — your data is saved on your device.',
     reload: 'Reload page',
+    routeTitle: 'Something went wrong',
+    routeBody: 'This screen failed to load — your connection may be weak. Your data is saved on your device.',
+    retry: 'Try again',
   },
   contact: {
     title: 'Contact us',

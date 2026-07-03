@@ -10,6 +10,7 @@ interface PhotoCaptureProps {
   choosePhotoLabel: string
   retakeLabel: string
   removeLabel: string
+  cancelLabel: string
   deniedHint: string
 }
 
@@ -29,6 +30,7 @@ export function PhotoCapture({
   choosePhotoLabel,
   retakeLabel,
   removeLabel,
+  cancelLabel,
   deniedHint,
 }: PhotoCaptureProps) {
   const [mode, setMode] = useState<Mode>('idle')
@@ -119,7 +121,7 @@ export function PhotoCapture({
               <Icon name="Camera" className="h-4 w-4" />
               {takePhotoLabel}
             </button>
-            <button type="button" onClick={cancelCamera} className="btn-ghost px-4 py-2 text-xs">
+            <button type="button" onClick={cancelCamera} aria-label={cancelLabel} className="btn-ghost px-4 py-2 text-xs">
               <Icon name="X" className="h-4 w-4" />
             </button>
           </div>

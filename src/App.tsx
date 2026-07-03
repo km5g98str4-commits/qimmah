@@ -2,30 +2,39 @@ import { lazy, Suspense, useCallback, useEffect, useRef, useState, type ReactNod
 // شاشة البداية (الهبوط) تبقى مُحمّلة مباشرةً لأول رسم سريع.
 import { StartView } from '@/views/StartView'
 import { AppLoading } from '@/components/AppLoading'
+import { RouteErrorBoundary } from '@/components/ErrorBoundary'
+import { DashboardSkeleton, ProgressSkeleton } from '@/components/ViewSkeletons'
+
 // باقي الشاشات مُقسّمة إلى حِزم عند الطلب (code-splitting) لتقليل حزمة الدخول الأولى.
-const LoginView = lazy(() => import('@/views/LoginView').then((m) => ({ default: m.LoginView })))
-const SetupView = lazy(() => import('@/views/SetupView').then((m) => ({ default: m.SetupView })))
-const DashboardView = lazy(() => import('@/views/DashboardView').then((m) => ({ default: m.DashboardView })))
-const WorkoutView = lazy(() => import('@/views/WorkoutView').then((m) => ({ default: m.WorkoutView })))
-const ExerciseLibraryView = lazy(() =>
-  import('@/views/ExerciseLibraryView').then((m) => ({ default: m.ExerciseLibraryView })),
-)
-const NutritionView = lazy(() => import('@/views/NutritionView').then((m) => ({ default: m.NutritionView })))
-const ProgressView = lazy(() => import('@/views/ProgressView').then((m) => ({ default: m.ProgressView })))
-const ProfileView = lazy(() => import('@/views/ProfileView').then((m) => ({ default: m.ProfileView })))
-const CalcExplainerView = lazy(() =>
-  import('@/views/CalcExplainerView').then((m) => ({ default: m.CalcExplainerView })),
-)
-const DemoView = lazy(() => import('@/views/DemoView').then((m) => ({ default: m.DemoView })))
-const SettingsView = lazy(() => import('@/views/SettingsView').then((m) => ({ default: m.SettingsView })))
-const PrivacyView = lazy(() => import('@/views/PrivacyView').then((m) => ({ default: m.PrivacyView })))
-const TermsView = lazy(() => import('@/views/TermsView').then((m) => ({ default: m.TermsView })))
-const ContactView = lazy(() => import('@/views/ContactView').then((m) => ({ default: m.ContactView })))
-const NotFoundView = lazy(() => import('@/views/NotFoundView').then((m) => ({ default: m.NotFoundView })))
-const ReviewPanelView = lazy(() =>
-  import('@/features/products/reviewPanel/ReviewPanelView').then((m) => ({ default: m.ReviewPanelView })),
-)
-const MyStatsView = lazy(() => import('@/views/MyStatsView').then((m) => ({ default: m.MyStatsView })))
+// تُبنى عبر مصنع لأنّ React.lazy يخزّن فشل الاستيراد نهائيًا — زرّ «أعد المحاولة» في
+// حدّ الأخطاء يستدعي المصنع من جديد فيُعاد استيراد الحزمة الفاشلة فعليًا.
+function createLazyViews() {
+  return {
+    LoginView: lazy(() => import('@/views/LoginView').then((m) => ({ default: m.LoginView }))),
+    SetupView: lazy(() => import('@/views/SetupView').then((m) => ({ default: m.SetupView }))),
+    DashboardView: lazy(() => import('@/views/DashboardView').then((m) => ({ default: m.DashboardView }))),
+    WorkoutView: lazy(() => import('@/views/WorkoutView').then((m) => ({ default: m.WorkoutView }))),
+    ExerciseLibraryView: lazy(() =>
+      import('@/views/ExerciseLibraryView').then((m) => ({ default: m.ExerciseLibraryView })),
+    ),
+    NutritionView: lazy(() => import('@/views/NutritionView').then((m) => ({ default: m.NutritionView }))),
+    ProgressView: lazy(() => import('@/views/ProgressView').then((m) => ({ default: m.ProgressView }))),
+    ProfileView: lazy(() => import('@/views/ProfileView').then((m) => ({ default: m.ProfileView }))),
+    CalcExplainerView: lazy(() =>
+      import('@/views/CalcExplainerView').then((m) => ({ default: m.CalcExplainerView })),
+    ),
+    DemoView: lazy(() => import('@/views/DemoView').then((m) => ({ default: m.DemoView }))),
+    SettingsView: lazy(() => import('@/views/SettingsView').then((m) => ({ default: m.SettingsView }))),
+    PrivacyView: lazy(() => import('@/views/PrivacyView').then((m) => ({ default: m.PrivacyView }))),
+    TermsView: lazy(() => import('@/views/TermsView').then((m) => ({ default: m.TermsView }))),
+    ContactView: lazy(() => import('@/views/ContactView').then((m) => ({ default: m.ContactView }))),
+    NotFoundView: lazy(() => import('@/views/NotFoundView').then((m) => ({ default: m.NotFoundView }))),
+    ReviewPanelView: lazy(() =>
+      import('@/features/products/reviewPanel/ReviewPanelView').then((m) => ({ default: m.ReviewPanelView })),
+    ),
+    MyStatsView: lazy(() => import('@/views/MyStatsView').then((m) => ({ default: m.MyStatsView }))),
+  }
+}
 import { MobileShell, type MainTab } from '@/components/MobileShell'
 import type { AppBadge } from '@/components/AppNav'
 import { useAuth } from '@/lib/authContext'
@@ -82,6 +91,9 @@ export default function App() {
   }, [])
 
   const [view, setView] = useState<AppRoute>(() => initialRoute(auth.user?.id ?? null))
+  // حِزم الشاشات الكسولة — تُستبدل بنسخة جديدة عند «أعد المحاولة» بعد فشل تحميل حزمة.
+  const [V, setV] = useState(createLazyViews)
+  const retryLazyViews = useCallback(() => setV(createLazyViews()), [])
   // هل حُسم مسار الإقلاع الأول *بعد* جهوزية المصادقة؟ يمنع تثبيت شاشة البداية/الدخول
   // بينما الجلسة ما زالت تُستعاد بشكل غير متزامن (سبب مطالبة المستخدم بالدخول كل مرة).
   const didInitialAuthRoute = useRef(false)
@@ -206,29 +218,29 @@ export default function App() {
       />
     )
   } else if (view === 'login') {
-    content = <LoginView lang={LANG} onSuccess={enterApp} onGuest={enterApp} onBack={() => setView('start')} />
+    content = <V.LoginView lang={LANG} onSuccess={enterApp} onGuest={enterApp} onBack={() => setView('start')} />
   } else if (view === 'privacy') {
-    content = <PrivacyView lang={LANG} onBack={() => navigate(beforeLegalRef.current)} />
+    content = <V.PrivacyView lang={LANG} onBack={() => navigate(beforeLegalRef.current)} />
   } else if (view === 'terms') {
-    content = <TermsView lang={LANG} onBack={() => navigate(beforeLegalRef.current)} />
+    content = <V.TermsView lang={LANG} onBack={() => navigate(beforeLegalRef.current)} />
   } else if (view === 'contact') {
-    content = <ContactView lang={LANG} onBack={() => window.history.back()} />
+    content = <V.ContactView lang={LANG} onBack={() => window.history.back()} />
   } else if (view === 'notfound') {
     const goHome = () => {
       const target = isOnboardingComplete(uid) ? 'dashboard' : 'start'
       setView(guardRoute(target, uid))
     }
-    content = <NotFoundView lang={LANG} onHome={goHome} onBack={() => window.history.back()} />
+    content = <V.NotFoundView lang={LANG} onHome={goHome} onBack={() => window.history.back()} />
   } else if (view === 'setup') {
     // النمط يُشتقّ من حالة الحساب وقت العرض: مكتمل → محرّرات متقدّمة (تعديل الخطة)؛
     // غير مكتمل → معالج الإعداد الأولي (وزنه/هدفه هو).
     const onboarded = isOnboardingComplete(uid)
-    content = <SetupView onClose={closeSetup} initialStep={0} mode={onboarded ? 'advanced' : 'onboarding'} />
+    content = <V.SetupView onClose={closeSetup} initialStep={0} mode={onboarded ? 'advanced' : 'onboarding'} />
   } else if (view === 'demo') {
-    content = <DemoView lang={LANG} onNavigate={navigate} onBack={closeDemo} />
+    content = <V.DemoView lang={LANG} onNavigate={navigate} onBack={closeDemo} />
   } else if (view === 'settings') {
     content = (
-      <SettingsView
+      <V.SettingsView
         lang={LANG}
         onNavigate={navigate}
         onEditPlan={openSetup}
@@ -236,12 +248,13 @@ export default function App() {
         onOpenPrivacy={() => setView('privacy')}
         onOpenTerms={() => setView('terms')}
         onOpenProductReview={() => setView('productReview')}
+        onOpenCalc={() => setView('calc')}
       />
     )
   } else if (view === 'productReview') {
-    content = <ReviewPanelView lang={LANG} onBack={() => setView('settings')} />
+    content = <V.ReviewPanelView lang={LANG} onBack={() => setView('settings')} />
   } else if (view === 'calc') {
-    content = <CalcExplainerView lang={LANG} onBack={() => navigate('profile')} />
+    content = <V.CalcExplainerView lang={LANG} onBack={() => navigate('profile')} />
   } else {
     // ——— التبويبات الرئيسية داخل قشرة الجوال ———
     content = (
@@ -253,13 +266,23 @@ export default function App() {
           onNavigate={navigate}
           onOpenSettings={() => setView('settings')}
         >
-          {view === 'dashboard' && <DashboardView lang={LANG} onNavigate={navigate} />}
-          {view === 'workout' && <WorkoutView lang={LANG} onNavigate={navigate} />}
-          {view === 'exercises' && <ExerciseLibraryView lang={LANG} />}
-          {view === 'nutrition' && <NutritionView lang={LANG} />}
-          {view === 'progress' && <ProgressView lang={LANG} />}
-          {view === 'profile' && <ProfileView lang={LANG} onNavigate={navigate} />}
-          {view === 'stats' && <MyStatsView lang={LANG} />}
+          {/* الرئيسية والتقدّم: fallback هيكلي لكل مسار (بدل AppLoading العام) — البيانات
+              محلية متزامنة فلا يظهر الهيكل إلا أثناء تحميل حزمة الشاشة عند الطلب. */}
+          {view === 'dashboard' && (
+            <Suspense fallback={<DashboardSkeleton />}>
+              <V.DashboardView lang={LANG} onNavigate={navigate} />
+            </Suspense>
+          )}
+          {view === 'workout' && <V.WorkoutView lang={LANG} onNavigate={navigate} />}
+          {view === 'exercises' && <V.ExerciseLibraryView lang={LANG} />}
+          {view === 'nutrition' && <V.NutritionView lang={LANG} />}
+          {view === 'progress' && (
+            <Suspense fallback={<ProgressSkeleton />}>
+              <V.ProgressView lang={LANG} />
+            </Suspense>
+          )}
+          {view === 'profile' && <V.ProfileView lang={LANG} onNavigate={navigate} />}
+          {view === 'stats' && <V.MyStatsView lang={LANG} />}
         </MobileShell>
 
         {showSuccess && <SuccessToast onClose={dismissSuccess} />}
@@ -270,5 +293,11 @@ export default function App() {
     )
   }
 
-  return <Suspense fallback={<AppLoading />}>{content}</Suspense>
+  // حدّ أخطاء المسارات فوق Suspense: فشل تحميل حزمة أو انهيار شاشة يعرض بطاقة
+  // «أعد المحاولة» (تعيد إنشاء الحِزم الكسولة وتعيد الاستيراد) — لا شاشة بيضاء.
+  return (
+    <RouteErrorBoundary onRetry={retryLazyViews}>
+      <Suspense fallback={<AppLoading />}>{content}</Suspense>
+    </RouteErrorBoundary>
+  )
 }

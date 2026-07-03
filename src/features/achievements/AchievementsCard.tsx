@@ -130,7 +130,7 @@ function AchievementsSheet({
           type="button"
           onClick={onClose}
           aria-label={s.close}
-          className="grid h-10 w-10 place-items-center rounded-xl border border-line bg-surface text-ink-700 hover:bg-beige"
+          className="grid h-11 w-11 place-items-center rounded-xl border border-line bg-surface text-ink-700 hover:bg-beige"
         >
           <Icon name="X" className="h-5 w-5" />
         </button>

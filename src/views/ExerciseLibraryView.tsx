@@ -135,7 +135,7 @@ export function ExerciseLibraryView({ lang }: ExerciseLibraryViewProps) {
             aria-label={d.searchAria}
           />
           {q && (
-            <button type="button" onClick={() => setQ('')} aria-label={d.clearSearchAria} className="text-ink-400 hover:text-ink-900">
+            <button type="button" onClick={() => setQ('')} aria-label={d.clearSearchAria} className="-me-2 grid h-11 w-11 shrink-0 place-items-center text-ink-400 hover:text-ink-900">
               <Icon name="X" className="h-4 w-4" />
             </button>
           )}

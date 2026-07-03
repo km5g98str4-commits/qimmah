@@ -14,6 +14,7 @@ import { loadPreferences, savePreferences, type AppPreferences } from '@/lib/app
 import { resetQimmah } from '@/lib/resetQimmah'
 import { generatePlan } from '@/lib/planGenerator'
 import { markPendingSync } from '@/lib/syncService'
+import { BUILD_LABEL } from '@/lib/buildInfo'
 
 const EXPORT_VERSION = 2
 
@@ -33,6 +34,7 @@ interface SettingsViewProps {
   onOpenPrivacy: () => void
   onOpenTerms: () => void
   onOpenProductReview: () => void
+  onOpenCalc: () => void
 }
 
 /** صفحة الإعدادات — مجموعات: الحساب / البيانات / خطتي / الخصوصية والثقة. (ليست تعديل الخطة) */
@@ -44,6 +46,7 @@ export function SettingsView({
   onOpenPrivacy,
   onOpenTerms,
   onOpenProductReview,
+  onOpenCalc,
 }: SettingsViewProps) {
   const t = getStrings(lang)
   const auth = useAuth()
@@ -269,6 +272,23 @@ export function SettingsView({
           <div className="flex flex-col gap-3">
             <LanguageToggle />
             <p className="text-xs leading-relaxed text-ink-500">{t.settings.languageHint}</p>
+          </div>
+        </SettingsGroup>
+
+        {/* 8) عن التطبيق — إصدار البناء (BUILD_LABEL) + رابط «كيف نحسب أرقامك؟» */}
+        <SettingsGroup icon="Info" title={t.settings.groupAbout}>
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-sm text-ink-700">{t.settings.versionLabel}</span>
+              {/* معرّف البناء دائمًا LTR (لاتيني) حتى داخل الواجهة العربية */}
+              <span dir="ltr" data-testid="settings-build-label" className="rounded-lg bg-beige px-2.5 py-1 font-mono text-xs font-bold text-ink-500">
+                {BUILD_LABEL}
+              </span>
+            </div>
+            <button type="button" onClick={onOpenCalc} data-testid="settings-calc-link" className="btn-ghost justify-start px-4 py-2.5 text-sm">
+              <Icon name="Calculator" className="h-4 w-4" />
+              {t.settings.calcLink}
+            </button>
           </div>
         </SettingsGroup>
       </main>

@@ -65,7 +65,7 @@ export function TodoWidget({ lang }: { lang: Lang }) {
             <button
               type="button"
               onClick={() => setExpanded((v) => !v)}
-              className="grid h-8 w-8 place-items-center rounded-lg text-ink-500 transition-colors hover:text-primary-c"
+              className="grid h-11 w-11 place-items-center rounded-lg text-ink-500 transition-colors hover:text-primary-c"
               aria-expanded={expanded}
               aria-label={expanded ? s.collapse : s.expand}
             >
@@ -196,7 +196,7 @@ function TodoRow({
         type="button"
         onClick={onDelete}
         aria-label={s.deleteAria}
-        className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-ink-400 opacity-60 transition-all hover:text-danger hover:opacity-100"
+        className="grid h-11 w-11 shrink-0 place-items-center rounded-lg text-ink-400 opacity-60 transition-all hover:text-danger hover:opacity-100"
       >
         <Icon name="Trash2" className="h-4 w-4" />
       </button>

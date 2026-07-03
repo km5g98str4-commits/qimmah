@@ -75,7 +75,7 @@ export function MobileShell({ lang, tab, badge, onNavigate, onOpenSettings, chil
                 type="button"
                 onClick={onOpenSettings}
                 aria-label={t.nav.settings}
-                className="grid h-9 w-9 place-items-center rounded-lg border border-line bg-surface text-ink-500 transition-colors hover:text-ink-900"
+                className="grid h-11 w-11 place-items-center rounded-lg border border-line bg-surface text-ink-500 transition-colors hover:text-ink-900"
               >
                 <Icon name="Settings" className="h-5 w-5" />
               </button>
