@@ -191,13 +191,13 @@ while IFS='|' read -r slug name; do
 
   if [ "$DRY_RUN" -eq 1 ]; then
     req_count=$((req_count + REQS_PER_GIF))
-    echo "[$i/$TOTAL] (dry) $slug ← بحث: «$name» + تنزيل → $REQS_PER_GIF طلب (تراكمي: $req_count)"
+    echo "[$i/$TOTAL] (dry) $slug ← بحث: «${name}» + تنزيل → $REQS_PER_GIF طلب (تراكمي: $req_count)"
     continue
   fi
 
   [ "$stopped" -eq 1 ] && break
 
-  echo "[$i/$TOTAL] 🔎 $slug — بحث WorkoutX: «$name»"
+  echo "[$i/$TOTAL] 🔎 $slug — بحث WorkoutX: «${name}»"
   q="$(urlencode "$name")"
   tick "GET $BASE$SEARCH_PATH$q"
   resp="$TMP_DIR/resp.json"
