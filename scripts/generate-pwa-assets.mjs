@@ -1,7 +1,14 @@
-// أداة تطوير: تولّد أيقونات PWA (192/512 maskable + apple-touch) وصورة OG من SVG عبر
-// متصفح headless. تُشغّل يدويًا عند الحاجة: node scripts/generate-pwa-assets.mjs
+// أداة تطوير: تولّد أيقونات PWA من SVG عبر متصفح headless (Playwright chromium المحلي).
+// تُشغّل يدويًا عند الحاجة: node scripts/generate-pwa-assets.mjs
 // ليست جزءًا من حزمة الإنتاج — المخرجات تُحفظ في public/ وتُدفع مع المستودع.
-import { mkdirSync, writeFileSync } from 'node:fs'
+//
+// المخرجات:
+//   favicon.svg                    — العلامة (SVG) لتبويب المتصفح
+//   icon-192.png / icon-512.png    — purpose "any" (هامش صغير، لا يلامس الحواف)
+//   icon-maskable-192.png / -512   — purpose "maskable" (المنطقة الآمنة: دائرة نصف قطرها 40% من المركز)
+//   apple-touch-icon.png 180×180   — خلفية معتمة (iOS يضيف تدويره بنفسه)
+//   og-image.png (اختياري: --og)   — يتطلّب خط عربي مثبّت على الجهاز وإلا ظهر النص مربعات
+import { writeFileSync, existsSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright'
@@ -9,45 +16,65 @@ import { chromium } from 'playwright'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const root = resolve(__dirname, '..')
 const outDir = resolve(root, 'public')
-mkdirSync(outDir, { recursive: true })
 
 const BRAND = '#F26A21'
 const BRAND_DARK = '#D4540F'
 const CREAM = '#FBF5EC'
+const WHITE = '#FFFFFF'
 
-// شعار «قِمّة» — قمّة جبل (رمز الاسم) فوق دمبل، بلون كريمي على تدرّج برتقالي.
-// مصمّم maskable: المحتوى داخل المنطقة الآمنة (المركز ~72%) مع خلفية ممتدة.
-function iconSvg(size, { maskable = true } = {}) {
-  const pad = maskable ? size * 0.14 : size * 0.06 // منطقة آمنة للأيقونة القابلة للقصّ
-  const inner = size - pad * 2
-  const cx = size / 2
-  // إحداثيات نسبية داخل المربّع الداخلي
-  const peakTop = pad + inner * 0.22
-  const peakBase = pad + inner * 0.5
-  const barY = pad + inner * 0.7
-  const barHalf = inner * 0.3
-  const plateH = inner * 0.16
+// ————————————————————————————————————————————————————————————————
+// العلامة: قمّة جبل (▲) فوق بار حديد — هوية «قِمّة».
+// مرسومة في فضاء محلي مركزه (0,0) لتسهل معايرتها رياضيًا:
+//   - الجبل: مثلث ممتلئ حاد، رأسه (0,-71) وقاعدته (±48, 5) — أضيق من البار ليقرأ «قمّة فوق بار».
+//   - البار: خط أفقي y=47 بطول ±60 + قرصان رأسيان عند ±60 (y: 31..63).
+//   - كل الخطوط بسماكة موحّدة 16 مع أطراف دائرية (نصف قطر الطرف 8).
+// أبعد نقطة عن المركز: أسفل القرص (±60, 63) + طرف دائري 8 → √(60²+63²)+8 ≈ 95.1
+// أنصاف الامتدادات المحيطة: أفقيًا 68 (60+8)، رأسيًا 71 (الرأس أعلى / أسفل القرص 63+8).
+const GLYPH = { maxR: 95.1, halfW: 68, halfH: 71 }
+const STROKE = 16
+
+function glyphGroup(color) {
+  return `<path d="M0 -71 L48 5 L-48 5 Z" fill="${color}"/>
+    <g stroke="${color}" stroke-width="${STROKE}" stroke-linecap="round" fill="none">
+      <line x1="-60" y1="47" x2="60" y2="47"/>
+      <line x1="-60" y1="31" x2="-60" y2="63"/>
+      <line x1="60" y1="31" x2="60" y2="63"/>
+    </g>`
+}
+
+// مقياس العلامة داخل أيقونة بحجم size:
+//  - maskable: أبعد نقطة ≤ 38% من الحجم (هامش أمان تحت حدّ الـ 40% القياسي).
+//  - any: صندوق العلامة ≈ 84% من الارتفاع (هامش ≥ 8% من كل جهة — لا يلامس الحواف).
+function glyphScale(size, variant) {
+  return variant === 'maskable' ? (0.38 * size) / GLYPH.maxR : (0.42 * size) / GLYPH.halfH
+}
+
+// أيقونة مربّعة كاملة التغطية: خلفية برتقالية معتمة + علامة بيضاء موسّطة بصريًا.
+function iconSvg(size, variant) {
+  const k = glyphScale(size, variant)
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="${BRAND}"/>
-      <stop offset="1" stop-color="${BRAND_DARK}"/>
-    </linearGradient>
-  </defs>
-  <rect width="${size}" height="${size}" fill="url(#bg)"/>
-  <!-- قمّة جبل -->
-  <path d="M${cx} ${peakTop} L${cx + inner * 0.28} ${peakBase} L${cx + inner * 0.14} ${peakBase} L${cx} ${peakBase - inner * 0.12} L${cx - inner * 0.14} ${peakBase} L${cx - inner * 0.28} ${peakBase} Z"
-        fill="${CREAM}"/>
-  <!-- دمبل -->
-  <g stroke="${CREAM}" stroke-width="${inner * 0.08}" stroke-linecap="round" fill="none">
-    <line x1="${cx - barHalf}" y1="${barY}" x2="${cx + barHalf}" y2="${barY}"/>
-    <line x1="${cx - barHalf}" y1="${barY - plateH}" x2="${cx - barHalf}" y2="${barY + plateH}"/>
-    <line x1="${cx + barHalf}" y1="${barY - plateH}" x2="${cx + barHalf}" y2="${barY + plateH}"/>
+  <rect width="${size}" height="${size}" fill="${BRAND}"/>
+  <g transform="translate(${size / 2} ${size / 2}) scale(${k.toFixed(5)})">
+    ${glyphGroup(WHITE)}
   </g>
 </svg>`
 }
 
-// صورة OpenGraph 1200×630 — عنوان عربي + شعار على خلفية العلامة.
+// favicon.svg — نفس العلامة بزوايا مدوّرة خفيفة لتبويب المتصفح.
+function faviconSvg() {
+  const size = 64
+  const k = glyphScale(size, 'any')
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}">
+  <rect width="${size}" height="${size}" rx="14" fill="${BRAND}"/>
+  <g transform="translate(${size / 2} ${size / 2}) scale(${k.toFixed(5)})">
+    ${glyphGroup(WHITE)}
+  </g>
+</svg>
+`
+}
+
+// صورة OpenGraph 1200×630 — عنوان عربي + العلامة على خلفية كريمية.
+// تُولَّد فقط بـ --og لأنها تتطلّب خطًا عربيًا مثبّتًا على جهاز التوليد.
 function ogSvg() {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" dir="rtl">
   <defs>
@@ -65,14 +92,8 @@ function ogSvg() {
     <text x="1110" y="390" font-size="42" font-weight="500" fill="#5A514A">تمارين • تغذية • مكملات • قياسات • التزام يومي</text>
     <text x="1110" y="560" font-size="34" font-weight="700" fill="${BRAND_DARK}">عربي بالكامل — يعمل على جوالك</text>
   </g>
-  <!-- شعار القمّة -->
-  <g transform="translate(150,315)">
-    <path d="M0 -120 L90 40 L45 40 L0 0 L-45 40 L-90 40 Z" fill="${BRAND}"/>
-    <g stroke="${BRAND}" stroke-width="22" stroke-linecap="round" fill="none">
-      <line x1="-80" y1="110" x2="80" y2="110"/>
-      <line x1="-80" y1="80" x2="-80" y2="140"/>
-      <line x1="80" y1="80" x2="80" y2="140"/>
-    </g>
+  <g transform="translate(150,315) scale(1.6)">
+    ${glyphGroup(BRAND)}
   </g>
 </svg>`
 }
@@ -90,10 +111,22 @@ async function render(browser, svg, w, h, outPath) {
   console.log('✓', outPath.replace(root + '/', ''), `${w}×${h}`)
 }
 
-const browser = await chromium.launch()
-await render(browser, iconSvg(192), 192, 192, resolve(outDir, 'icon-192.png'))
-await render(browser, iconSvg(512), 512, 512, resolve(outDir, 'icon-512.png'))
-await render(browser, iconSvg(180, { maskable: false }), 180, 180, resolve(outDir, 'apple-touch-icon.png'))
-await render(browser, ogSvg(), 1200, 630, resolve(outDir, 'og-image.png'))
+// متصفح Playwright المثبّت مسبقًا محليًا (بيئة بلا إنترنت).
+const localChromium = '/opt/pw-browsers/chromium'
+const browser = await chromium.launch(
+  existsSync(localChromium) ? { executablePath: localChromium } : {},
+)
+
+writeFileSync(resolve(outDir, 'favicon.svg'), faviconSvg())
+console.log('✓ public/favicon.svg')
+
+await render(browser, iconSvg(192, 'any'), 192, 192, resolve(outDir, 'icon-192.png'))
+await render(browser, iconSvg(512, 'any'), 512, 512, resolve(outDir, 'icon-512.png'))
+await render(browser, iconSvg(192, 'maskable'), 192, 192, resolve(outDir, 'icon-maskable-192.png'))
+await render(browser, iconSvg(512, 'maskable'), 512, 512, resolve(outDir, 'icon-maskable-512.png'))
+await render(browser, iconSvg(180, 'any'), 180, 180, resolve(outDir, 'apple-touch-icon.png'))
+if (process.argv.includes('--og')) {
+  await render(browser, ogSvg(), 1200, 630, resolve(outDir, 'og-image.png'))
+}
 await browser.close()
 console.log('PWA assets generated.')
