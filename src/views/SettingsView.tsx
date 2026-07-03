@@ -103,8 +103,7 @@ export function SettingsView({
   }
 
   // — خطتي: إعادة توليد —
-  const onRegenerate = () => {
-    if (!window.confirm(t.settings.regenerateConfirm)) return
+  const regenerateFromProfile = () => {
     const g = generatePlan(customization.profile)
     applyCustomization({
       ...customization,
@@ -116,7 +115,20 @@ export function SettingsView({
       measurementPlan: g.measurementPlan,
     })
     markPendingSync()
+  }
+
+  const onRegenerate = () => {
+    if (!window.confirm(t.settings.regenerateConfirm)) return
+    regenerateFromProfile()
     window.alert(t.settings.regenerateSuccess)
+  }
+
+  // — خطتي: التحويل لنسخة الأجهزة (P12) — اختياري: يعيد توليد الخطة التلقائية عبر المولّد
+  // (أجهزة الكتالوج فقط في النادي). لا يمسّ الجدول المخصّص المحفوظ ولا سجلّ التمارين.
+  const onSwitchToMachines = () => {
+    if (!window.confirm(t.settings.switchMachinesConfirm)) return
+    regenerateFromProfile()
+    window.alert(t.settings.switchMachinesSuccess)
   }
 
   // — الحساب: حالة + خروج —
@@ -208,6 +220,10 @@ export function SettingsView({
             <button type="button" onClick={onRegenerate} className="btn-ghost px-4 py-2.5 text-sm">
               <Icon name="RotateCcw" className="h-4 w-4" />
               {t.settings.regenerate}
+            </button>
+            <button type="button" onClick={onSwitchToMachines} className="btn-ghost px-4 py-2.5 text-sm">
+              <Icon name="Dumbbell" className="h-4 w-4" />
+              {t.settings.switchMachines}
             </button>
           </div>
         </SettingsGroup>
