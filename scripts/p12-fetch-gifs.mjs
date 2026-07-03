@@ -3,7 +3,7 @@
 // الشكل المؤكّد (probe زياد 2026-07-03، HTTP 200):
 //   • GET https://api.workoutxapp.com/v1/exercises — ترويسة X-WorkoutX-Key بالمفتاح خامًا
 //   • الاستجابة مُقسَّمة صفحات: {total: 1327, count: N, data: [...]} — يجب جمع كل الصفحات
-//   • المطابقة محليًا على القائمة الكاملة، والتنزيل من gifUrl (CDN) داخل المدخلات
+//   • المطابقة محليًا على القائمة الكاملة، والتنزيل من gifUrl — التنزيل يتطلب المفتاح أيضًا (يُحتسب)
 //
 // درسا P12: (1) لا endpoint بحث — 46×404. (2) لا افتراض «قائمة واحدة» — v1 مُقسَّم.
 // القاعدة: ‎--probe أولًا دائمًا؛ يكشف حجم الصفحة ويطبع العدد الكلي المخطّط ثم يتوقف.
@@ -34,8 +34,10 @@ const CANDIDATE_PATHS = ['/v1/exercises']
 //   WORKOUTX_AUTH_HEADER=Authorization WORKOUTX_AUTH_PREFIX='Bearer ' bash scripts/p12-fetch-gifs.sh --probe
 const AUTH_HEADER = process.env.WORKOUTX_AUTH_HEADER || 'X-WorkoutX-Key'
 const AUTH_PREFIX = process.env.WORKOUTX_AUTH_PREFIX || ''
-// سقف صارم لطلبات API المُوقَّعة بالمفتاح (المتبقي ~225 بعد حادثتي 2026-07-03).
-const HARD_CAP = 150
+// سقف صارم لكل الطلبات الموقَّعة بالمفتاح — قائمة + تنزيلات gif (v1 يتطلب المفتاح عليها ويُحتسبان).
+// تشغيل كامل بلا كاش = 133 صفحة + ~46 تنزيلًا ≈ 179؛ السقف 200 يسمح به ويمنع أي جموح أبعد.
+// (الحصّة الدائمة عند آخر قراءة: 335.)
+const HARD_CAP = 200
 
 const DRY_RUN = process.argv.includes('--dry-run')
 const PROBE = process.argv.includes('--probe')
@@ -129,7 +131,7 @@ async function apiFetch(path) {
     }
     reqCount++
     lastReqAt = Date.now()
-    const url = BASE + path
+    const url = path.startsWith('http') ? path : BASE + path
     const res = await fetch(url, { headers: { [AUTH_HEADER]: AUTH_PREFIX + KEY, Accept: 'application/json' } })
     const quota = hdrNum(res, 'x-quota-remaining')
     const rate = hdrNum(res, 'x-ratelimit-remaining')
@@ -214,7 +216,9 @@ function bestGif(nameEn, muscle, catalog) {
 async function downloadGif(url, absPath) {
   if (existsSync(absPath)) return 'exists'
   try {
-    const res = await fetch(url) // CDN بلا مفتاح — لا يُحتسب على حصّة API وفق تجربة P5.
+    // v1 يتطلب المفتاح على تنزيلات gif أيضًا (401 بدونه — حادثة 2026-07-03 الرابعة)،
+    // لذلك نمرّرها عبر apiFetch: نفس الترويسة + العدّاد + التهدئة + طباعة الحصّة لكل تنزيل.
+    const { res } = await apiFetch(url)
     if (!res.ok) { console.warn(`    ⚠ فشل تنزيل gif ${redact(url)} (${res.status})`); return false }
     const buf = Buffer.from(await res.arrayBuffer())
     if (buf.length === 0) { console.warn(`    ⚠ gif فارغ ${redact(url)}`); return false }
@@ -321,7 +325,7 @@ async function fetchCatalog(det) {
 }
 
 async function main() {
-  console.log(`P12 fetch-gifs (v3 — v1 مُرقَّم الصفحات: كشف حجم الصفحة ثم جمع كامل + مطابقة محلية + تنزيل CDN)`)
+  console.log(`P12 fetch-gifs (v4.1 — v1 مُرقَّم: كاش زحف قابل للاستئناف + تنزيلات موقَّعة بالمفتاح ومحسوبة)`)
   console.log(`ناقص: ${MISSING.length} GIF • v1 مُقسَّم صفحات (total≈1327) — probe يكشف حجم الصفحة ويطبع العدد المخطّط • سقف صارم: ${HARD_CAP}`)
 
   if (DRY_RUN) {
@@ -337,6 +341,23 @@ async function main() {
   }
 
   if (!KEY) { console.error('KEY MISSING — اضبط WORKOUTX_API_KEY في البيئة.'); process.exit(1) }
+
+  // كاش زحف مكتمل؟ → مطابقة وتنزيل مباشرةً، صفر طلبات قائمة (حتى الكشف لا يلزم).
+  if (!PROBE) {
+    const CACHE = resolve(__dirname, '.p12-catalog-cache.json')
+    if (existsSync(CACHE)) {
+      try {
+        const c = JSON.parse(readFileSync(CACHE, 'utf8'))
+        if (Array.isArray(c.entries) && c.total && c.entries.length >= c.total) {
+          console.log(`▶ كاش الزحف مكتمل (${c.entries.length}/${c.total}) — مطابقة وتنزيل مباشرةً، صفر طلبات قائمة.`)
+          const catalog = toCatalog(c.entries)
+          console.log(`▶ كتالوج WorkoutX من الكاش: ${catalog.length} مدخلًا يحمل gif.`)
+          await matchAndDownload(catalog)
+          return
+        }
+      } catch { /* كاش تالف → مسار الكشف الطبيعي */ }
+    }
+  }
 
   // تشخيص سلامة المفتاح (بلا كشفه): الطول + بصمة + كشف مسافات/أسطر تسلّلت من الصدفة.
   const { createHash } = await import('node:crypto')
@@ -365,24 +386,35 @@ async function main() {
 
   const catalog = await fetchCatalog(det)
 
+  await matchAndDownload(catalog)
+}
+
+
+// المطابقة + التنزيل + جدول مراجعة المطابقات (تغطية < 1.00 تُطبع لمراجعة زياد اليدوية).
+async function matchAndDownload(catalog) {
   let downloaded = 0, skipped = 0, notfound = []
+  const review = []
   for (const [i, [slug, name, muscle]] of MISSING.entries()) {
     const out = resolve(LOCAL_DIR, `${slug}.gif`)
     if (existsSync(out)) { console.log(`[${i + 1}/${MISSING.length}] ⏭ ${slug} — موجود.`); skipped++; continue }
     const hit = bestGif(name, muscle, catalog)
     if (!hit) { console.log(`[${i + 1}/${MISSING.length}] ✗ ${slug} — لا مطابقة في WorkoutX (تخطٍّ، لا فشل).`); notfound.push(slug); continue }
+    if (hit.coverage < 1) review.push({ slug, matched: hit.name, coverage: hit.coverage })
     console.log(`[${i + 1}/${MISSING.length}] ⬇ ${slug} ← «${hit.name}» (تغطية ${hit.coverage.toFixed(2)})`)
     const ok = await downloadGif(hit.url, out)
     if (ok === true) downloaded++
     else if (ok === 'exists') skipped++
     else notfound.push(slug)
-    await new Promise((r) => setTimeout(r, 400)) // لطف مع الـCDN
   }
 
   console.log(`\n══════════ الخلاصة ══════════`)
   console.log(`نزّلنا: ${downloaded} • تخطّينا (موجود): ${skipped} • غير موجود/فشل: ${notfound.length}`)
   if (notfound.length) console.log(`غير الموجود: ${notfound.join(', ')}`)
-  console.log(`طلبات API المستهلكة هذه الجولة: ${reqCount} (التنزيلات CDN لا تحمل المفتاح).`)
+  if (review.length) {
+    console.log(`\n⚠ مراجعة المطابقات (تغطية < 1.00) — راجعها يدويًا وأضفها إلى MATCH_REVIEW في P12_ASSETS.md:`)
+    for (const r of review) console.log(`  • ${r.slug} ← «${r.matched}» (${r.coverage.toFixed(2)})`)
+  }
+  console.log(`طلبات API المستهلكة هذه الجولة: ${reqCount} (تشمل تنزيلات gif — كلها موقَّعة بالمفتاح).`)
   console.log(`التالي: node scripts/p12-sync-gifs.mjs && npm run build`)
 }
 
