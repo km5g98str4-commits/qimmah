@@ -237,7 +237,8 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
                               </span>
                             )}
                           </span>
-                          <span className="block text-[11px] text-ink-400">{f.servingLabelAr} · {f.category}</span>
+                          {/* عزل اتجاه: تسمية الحصة عربية دائمًا وقد تُعرض داخل واجهة إنجليزية (LTR). */}
+                        <span className="block text-[11px] text-ink-400"><bdi>{f.servingLabelAr}</bdi> · {f.category}</span>
                         </span>
                         <span className="shrink-0 text-[11px] font-bold text-orange-300">{f.calories} · {f.protein}{t.gramsUnit}</span>
                       </button>
@@ -248,7 +249,8 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
 
               {selected && (
                 <div className="mt-3 rounded-lg border border-line bg-surface p-3">
-                  <p className="text-sm font-bold text-ink-900">{lang === 'en' ? selected.nameEn : selected.nameAr}</p>
+                  {/* عزل اتجاه: منتجات الباركود قد تحمل اسمًا عربيًا حتى في الوضع الإنجليزي. */}
+                  <p className="text-sm font-bold text-ink-900"><bdi>{lang === 'en' ? selected.nameEn : selected.nameAr}</bdi></p>
 
                   {/* اختيار الحجم (صغير/وسط/كبير) — كل حجم بسعراته الخاصة */}
                   {selected.sizes && (
@@ -274,7 +276,7 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
 
                   {/* عرض واضح: لكل حصة + لكل 100غ */}
                   <div className="mt-2 flex flex-wrap gap-x-4 gap-y-0.5 text-[11px] text-ink-400">
-                    <span>{t.perPortion} ({baseServingLabel}): <span className="font-bold text-ink-600">{baseCal} {t.calories} · {baseProt}{t.gramsUnit} {t.protein}</span></span>
+                    <span>{t.perPortion} (<bdi>{baseServingLabel}</bdi>): <span className="font-bold text-ink-600">{baseCal} {t.calories} · {baseProt}{t.gramsUnit} {t.protein}</span></span>
                     <span>{t.per100g}: <span className="font-bold text-ink-600">{round(baseCal * 100 / baseGrams)} {t.calories} · {round(baseProt * 100 / baseGrams)}{t.gramsUnit} {t.protein}</span></span>
                   </div>
                   <div className="mt-3 flex items-center gap-2">
@@ -344,7 +346,8 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
                 {state.log.map((e) => (
                   <li key={e.id} className="flex items-center gap-3 py-2">
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-sm text-ink-900">{e.label}</span>
+                      {/* عزل اتجاه: تسمية السجل تحمل اسم الطعام (عربي/مدخل من المستخدم) وقد تُعرض في الاتجاه المعاكس. */}
+                      <span className="block truncate text-sm text-ink-900"><bdi>{e.label}</bdi></span>
                       <span className="block text-[11px] text-ink-400">{e.calories} {d.caloriesUnit} · {e.protein}{t.gramsUnit} {d.caloriesDotProteinG}</span>
                     </span>
                     <button

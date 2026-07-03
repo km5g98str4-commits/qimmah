@@ -33,9 +33,4 @@ pnpm-debug.log*
 
 # TS incremental build info (regenerated)
 tsconfig.app.tsbuildinfo
-
-# P3 proof harness build artifact
-scripts/.p3proof.bundle.mjs
-
-# P8 A2 proof harness build artifact
-scripts/.p8a2-off-proof.bundle.mjs
+# cf-pages-trigger

@@ -5,6 +5,7 @@
 // الجدول نفسه من نوع WorkoutPlan الحالي، فيعمل مباشرةً في تبويب التمرين ووضع التمرين.
 
 import type { WorkoutPlan } from '@/types/workout'
+import { normalizePlanDayNames } from '@/lib/planDayNames'
 
 /** مفتاح سجلّ الجداول المخصّصة (لكل حساب، لا لكل جهاز). */
 export const CUSTOM_PLAN_KEY = 'qimmah:customPlan:v1'
@@ -50,7 +51,8 @@ function saveRegistry(reg: Registry): void {
 export function loadCustomPlanRecord(userId: string | null | undefined): CustomPlanRecord | undefined {
   const rec = loadRegistry()[ownerKey(userId)]
   if (!rec || !rec.plan || !Array.isArray(rec.plan.days)) return undefined
-  return rec
+  // تطبيع أسماء الأيام وقت القراءة (P10.1): جداول مخصّصة قديمة بلا nameEn تُكمَّل تلقائيًا.
+  return { ...rec, plan: normalizePlanDayNames(rec.plan) }
 }
 
 /** هل يملك هذا الحساب جدولًا مخصّصًا محفوظًا فيه يوم واحد على الأقل؟ */
