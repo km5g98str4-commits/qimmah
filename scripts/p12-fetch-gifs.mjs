@@ -1,12 +1,12 @@
-// P12 — جلب GIFs الناقصة (46) بشكل الطلب المُثبت من P5 (fetch-workoutx-media.mjs).
+// P12 — جلب GIFs الناقصة (46) من WorkoutX v1 (مُصادَق عليه بمفتاح wx_ الجديد).
 //
-// الشكل المُثبت (الذي نجح في دفعة الـ60 الأصلية):
-//   • طلب قائمة واحد: GET https://api.workoutxapp.com/exercises (ترويسة X-WorkoutX-Key)
-//   • المطابقة محليًا على القائمة المعادة (لا يوجد endpoint بحث لكل تمرين!)
-//   • التنزيل من روابط CDN داخل القائمة (بلا مفتاح — لا يُحتسب على الحصّة وفق تجربة P5)
+// الشكل المؤكّد (probe زياد 2026-07-03، HTTP 200):
+//   • GET https://api.workoutxapp.com/v1/exercises — ترويسة X-WorkoutX-Key بالمفتاح خامًا
+//   • الاستجابة مُقسَّمة صفحات: {total: 1327, count: N, data: [...]} — يجب جمع كل الصفحات
+//   • المطابقة محليًا على القائمة الكاملة، والتنزيل من gifUrl (CDN) داخل المدخلات
 //
-// درس P12: سكربت سابق افترض ‎?search=‎ لكل تمرين → 46×404 حرقت 46 طلبًا. لا تخمين بعد اليوم:
-// شغّل ‎--probe أولًا (طلب واحد) وتأكد من الشكل قبل أي تشغيل كامل.
+// درسا P12: (1) لا endpoint بحث — 46×404. (2) لا افتراض «قائمة واحدة» — v1 مُقسَّم.
+// القاعدة: ‎--probe أولًا دائمًا؛ يكشف حجم الصفحة ويطبع العدد الكلي المخطّط ثم يتوقف.
 //
 // الأوضاع:
 //   node scripts/p12-fetch-gifs.mjs --dry-run   ← بلا شبكة: يطبع الخطة والعدّاد
@@ -201,35 +201,86 @@ async function downloadGif(url, absPath) {
   }
 }
 
-// يجلب كتالوج WorkoutX بمسار القائمة المُثبت (مع احتياطات) — طلب واحد عادةً.
-async function fetchCatalog() {
-  for (const path of CANDIDATE_PATHS) {
-    const { res } = await apiFetch(path)
-    const raw = await res.text()
-    if (PROBE) {
-      console.log(`\n── PROBE — الحالة والجسم الخام (مقتطع 800 حرفًا، المفتاح محجوب) ──`)
-      console.log(`HTTP ${res.status} ${res.statusText} — ${BASE}${path}`)
-      console.log(redact(raw).slice(0, 800))
-    }
-    if (res.status !== 200) { console.warn(`  ⚠ ${path} → ${res.status}؛ أجرّب المرشّح التالي.`); continue }
-    let data
-    try { data = JSON.parse(raw) } catch { console.warn(`  ⚠ ${path}: ليس JSON.`); continue }
-    const list = extractList(data)
-    if (!list.length) { console.warn(`  ⚠ ${path}: قائمة فارغة/شكل غير معروف.`); continue }
-    const catalog = list.map((e) => ({
-      name: extractName(e),
-      url: extractGifUrl(e),
-      muscles: [e.muscle, e.primaryMuscle, e.target, ...(Array.isArray(e.muscles) ? e.muscles : [])].filter(Boolean),
-    })).filter((c) => c.name && c.url)
-    console.log(`▶ كتالوج WorkoutX عبر ${path}: ${catalog.length} مدخلًا يحمل gif.`)
-    return catalog
+// ── ترقيم الصفحات (v1) ──
+const PATH = '/v1/exercises'
+const TARGET_DETECT_LIMIT = 1000 // نطلب سقفًا كبيرًا؛ الواجهة تعيد count الفعلي (كشف الحد الأقصى بطلب واحد).
+const MAX_COMFORT_REQUESTS = 15 // هدف زياد: القائمة كاملة في ≤ 15 طلبًا وإلا توقف وتأكيد.
+const ALLOW_MANY_PAGES = process.env.WORKOUTX_ALLOW_PAGES === '1' // تجاوز صريح بعد تأكيد الميزانية.
+
+function toCatalog(list) {
+  return list.map((e) => ({
+    name: extractName(e),
+    url: extractGifUrl(e),
+    muscles: [e.muscle, e.primaryMuscle, e.target, ...(Array.isArray(e.muscles) ? e.muscles : [])].filter(Boolean),
+  })).filter((c) => c.name && c.url)
+}
+
+async function fetchJsonPage(query) {
+  const { res } = await apiFetch(`${PATH}${query}`)
+  const raw = await res.text()
+  if (res.status !== 200) throw new Error(`${PATH}${query} → HTTP ${res.status}: ${redact(raw).slice(0, 200)}`)
+  let data
+  try { data = JSON.parse(raw) } catch { throw new Error(`${PATH}${query}: الاستجابة ليست JSON`) }
+  const entries = extractList(data)
+  const total = Number(data.total ?? data.totalCount ?? data.total_count ?? NaN)
+  const cursorKeys = ['next', 'nextCursor', 'next_cursor', 'cursor', 'nextPage', 'links'].filter((k) => data[k] != null)
+  return { entries, total: Number.isNaN(total) ? null : total, count: entries.length, cursorKeys, raw }
+}
+
+/**
+ * يكشف الترقيم بأقل الطلبات:
+ *  ط1: ?limit=1000 → count المعاد = حجم الصفحة الفعلي (وربما القائمة كلها).
+ *  ط2 (عند الحاجة): ?limit=<eff>&offset=<eff> — إن اختلف أول مدخل → offset يعمل؛
+ *  وإلا ط3: ?limit=<eff>&page=2. يعيد {pageSize, total, mode, firstPages}.
+ */
+async function detectPagination() {
+  const p1 = await fetchJsonPage(`?limit=${TARGET_DETECT_LIMIT}`)
+  const pageSize = p1.count
+  const total = p1.total ?? p1.count
+  if (p1.cursorKeys.length) console.log(`  ℹ حقول ترقيم في الجسم: ${p1.cursorKeys.join(', ')}`)
+  if (pageSize >= total) return { pageSize, total, mode: 'single', pages: [p1.entries] }
+
+  const firstName = extractName(p1.entries[0] ?? {})
+  const p2 = await fetchJsonPage(`?limit=${pageSize}&offset=${pageSize}`)
+  if (p2.count && extractName(p2.entries[0] ?? {}) !== firstName)
+    return { pageSize, total, mode: 'offset', pages: [p1.entries, p2.entries] }
+
+  const p3 = await fetchJsonPage(`?limit=${pageSize}&page=2`)
+  if (p3.count && extractName(p3.entries[0] ?? {}) !== firstName)
+    return { pageSize, total, mode: 'page', pages: [p1.entries, p3.entries] }
+
+  throw new Error('تعذّر كشف معامل الترقيم (لا offset ولا page غيّرا الصفحة) — توقف وراجع وثائق WorkoutX.')
+}
+
+function plannedTotalRequests(det) {
+  const totalPages = Math.ceil(det.total / det.pageSize)
+  const already = det.pages.length
+  return { totalPages, planned: reqCount + Math.max(0, totalPages - already) }
+}
+
+// يجمع القائمة كاملة وفق الترقيم المكتشف (مع بوابة الميزانية).
+async function fetchCatalog(det) {
+  const { totalPages, planned } = plannedTotalRequests(det)
+  if (planned > HARD_CAP) throw new Error(`المخطّط ${planned} طلبًا > السقف الصارم ${HARD_CAP} — توقف.`)
+  if (totalPages > MAX_COMFORT_REQUESTS && !ALLOW_MANY_PAGES)
+    throw new Error(`حجم الصفحة ${det.pageSize} يتطلب ${totalPages} طلبًا (> ${MAX_COMFORT_REQUESTS}). ` +
+      `أكّد الميزانية ثم أعد التشغيل مع WORKOUTX_ALLOW_PAGES=1.`)
+  const all = det.pages.flat()
+  for (let i = det.pages.length; i < totalPages; i++) {
+    const q = det.mode === 'page' ? `?limit=${det.pageSize}&page=${i + 1}` : `?limit=${det.pageSize}&offset=${i * det.pageSize}`
+    const pg = await fetchJsonPage(q)
+    if (!pg.count) break
+    all.push(...pg.entries)
+    await new Promise((r) => setTimeout(r, 250))
   }
-  throw new Error('كل مرشّحات مسار القائمة فشلت — لا تكمل، راجع المخرجات أعلاه.')
+  const catalog = toCatalog(all)
+  console.log(`▶ كتالوج WorkoutX كامل: ${all.length}/${det.total} مدخلًا (${catalog.length} يحمل gif) عبر ${reqCount} طلبًا.`)
+  return catalog
 }
 
 async function main() {
-  console.log(`P12 fetch-gifs (v2 — شكل P5 المُثبت: قائمة واحدة + مطابقة محلية + تنزيل CDN)`)
-  console.log(`ناقص: ${MISSING.length} GIF • طلبات API المخطّطة: 1 (قائمة) — التنزيلات عبر CDN بلا مفتاح • سقف صارم: ${HARD_CAP}`)
+  console.log(`P12 fetch-gifs (v3 — v1 مُرقَّم الصفحات: كشف حجم الصفحة ثم جمع كامل + مطابقة محلية + تنزيل CDN)`)
+  console.log(`ناقص: ${MISSING.length} GIF • v1 مُقسَّم صفحات (total≈1327) — probe يكشف حجم الصفحة ويطبع العدد المخطّط • سقف صارم: ${HARD_CAP}`)
 
   if (DRY_RUN) {
     console.log(`── DRY RUN (بلا شبكة، بلا مفتاح) ──`)
@@ -238,8 +289,8 @@ async function main() {
       console.log(`[${i + 1}/${MISSING.length}] (dry) ${slug} ← مطابقة محلية: «${name}»${exists ? ' — موجود، سيُتخطّى' : ''}`)
     })
     console.log(`\n══════════ الخلاصة ══════════`)
-    console.log(`DRY RUN: ${MISSING.length} عنصرًا • طلب API واحد مخطّط (قائمة) + تنزيلات CDN • لا شبكة استُخدمت.`)
-    console.log(`✅ ضمن الميزانية (1 ≤ ${HARD_CAP}).`)
+    console.log(`DRY RUN: ${MISSING.length} عنصرًا • الطلبات: كشف الترقيم 1–3 + ceil(1327/حجم الصفحة) صفحات (الهدف ≤ 15) + تنزيلات CDN • لا شبكة استُخدمت.`)
+    console.log(`✅ الحسم النهائي للعدد في --probe (إلزامي قبل التشغيل الكامل).`)
     return
   }
 
@@ -252,15 +303,25 @@ async function main() {
   if (/^\s|\s$/.test(KEY)) console.warn('⚠ المفتاح يبدأ/ينتهي بمسافة أو سطر جديد — نظّفه (السبب الشائع لـ«Invalid API key format»).')
   if (/[\r\n]/.test(KEY)) console.warn('⚠ المفتاح يحوي سطرًا جديدًا داخليًا — انسخه من المصدر مباشرة.')
 
-  const catalog = await fetchCatalog()
+  const det = await detectPagination()
+  const { totalPages, planned } = plannedTotalRequests(det)
+  console.log(`▶ الترقيم: total=${det.total} • حجم الصفحة الفعلي=${det.pageSize} • النمط=${det.mode} • الصفحات=${totalPages}`)
+  console.log(`▶ إجمالي طلبات API المخطّط للتشغيل الكامل: ${planned} (المستهلك في الكشف: ${reqCount})`)
 
   if (PROBE) {
-    const probeHit = bestGif('Hack Squat', 'quads', catalog)
-    console.log(`\n── PROBE — تحقق مطابقة على تمرين معروف (Hack Squat، موجود لدينا أصلًا) ──`)
-    console.log(probeHit ? `✅ وجدنا «${probeHit.name}» بتغطية ${probeHit.coverage.toFixed(2)} — الشكل يعمل.` : '⚠ لم تنجح المطابقة — راجع شكل القائمة أعلاه قبل التشغيل الكامل.')
-    console.log(`ℹ --probe: توقّف بعد الاختبار. طلبات API المستهلكة: ${reqCount}.`)
+    const sampled = toCatalog(det.pages.flat())
+    const probeHit = bestGif('Hack Squat', 'quads', sampled)
+    console.log(`\n── PROBE — مطابقة Hack Squat على الصفحات المُحمَّلة (${sampled.length} مدخلًا) ──`)
+    console.log(probeHit
+      ? `✅ وجدنا «${probeHit.name}» بتغطية ${probeHit.coverage.toFixed(2)}.`
+      : `ℹ غير موجود في العيّنة المُحمَّلة (${det.pages.length} صفحة من ${totalPages}) — طبيعي مع الترقيم؛ التشغيل الكامل يبحث في الكل.`)
+    if (totalPages > MAX_COMFORT_REQUESTS)
+      console.log(`⚠ الصفحات (${totalPages}) تتجاوز هدف ≤ ${MAX_COMFORT_REQUESTS} — التشغيل الكامل سيتوقف ما لم تضبط WORKOUTX_ALLOW_PAGES=1 بعد تأكيد الميزانية.`)
+    console.log(`ℹ --probe: توقّف. طلبات API المستهلكة: ${reqCount}.`)
     return
   }
+
+  const catalog = await fetchCatalog(det)
 
   let downloaded = 0, skipped = 0, notfound = []
   for (const [i, [slug, name, muscle]] of MISSING.entries()) {
