@@ -88,6 +88,8 @@ export interface PlanExercise {
   videoUrl?: string
   notes?: string
   order: number
+  /** إضافة نهاية اليوم (ذراعان/بطن) — اختيارية؛ تُعرَض بوسم «(اختياري)». */
+  optional?: boolean
 }
 
 export interface PlanDay {

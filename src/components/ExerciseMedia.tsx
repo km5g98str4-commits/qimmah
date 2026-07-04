@@ -3,6 +3,7 @@ import { Icon } from './Icon'
 import { cn } from '@/lib/cn'
 import { getExerciseMedia } from '@/data/exerciseMedia'
 import { getExerciseGif } from '@/data/exerciseGifs'
+import { getMachineImage } from '@/data/machineImages'
 import { LEGACY_EXERCISE_ID_MAP, canonicalExerciseId, isPlaceholderOnlyMedia } from '@/data/exercises'
 import { muscleLabelAr } from '@/data/muscleGroups'
 import type { MuscleId } from '@/types/muscles'
@@ -82,16 +83,21 @@ function chain(...srcs: (string | undefined)[]): string[] {
  * سلسلة الرجوع: ملف محلّي → رابط بعيد → بديل أنيق. لا صورة مكسورة أبدًا.
  */
 export function ExerciseMedia({ exerciseId, muscles = [], heightClass = 'h-40', hideChips = false }: ExerciseMediaProps) {
-  // بطاقات الأجهزة بلا لقطة جهاز أصيلة → البديل الأنيق دومًا (تتجاوز أي gif/صورة منزَّلة خاطئة).
+  // بطاقات أجهزة بلا لقطة جهاز من قنوات المقاومة → لا نعرض وسيط وزن حرّ إطلاقًا. بدلًا من ذلك:
+  // صورة الجهاز الحقيقية إن جُلبت (machineImages)، وإلا البديل الأنيق — لا شيء آخر.
   const placeholderOnly = isPlaceholderOnlyMedia(exerciseId)
+  const machineImg = placeholderOnly ? getMachineImage(canonicalExerciseId(exerciseId)) : undefined
   const media = placeholderOnly ? undefined : resolveByCandidates(exerciseId, getExerciseMedia)
   const [frame, setFrame] = useState(0)
   const [baseFailed, setBaseFailed] = useState(false) // نفاد مصادر الإطار الأساسي → بديل أنيق
   const [secondFailed, setSecondFailed] = useState(false) // نفاد مصادر الإطار الثاني → إيقاف التبديل
   const [gifFailed, setGifFailed] = useState(false) // فشل الـ GIF → الرجوع للصور الثابتة
 
-  // يُفضّل GIF المتحرّك المُنزَّل محليًا (public/exercise-gifs) ثم الرابط البعيد إن وُجد، ثم الصور الثابتة.
-  const gifSrcs = placeholderOnly ? [] : chain(resolveByCandidates(exerciseId, getExerciseGif), media?.gifUrl)
+  // بطاقة placeholderOnly: تعرض صورة الجهاز المخصّصة فقط (jpg/gif) عبر نفس مسار العرض، وعند غيابها
+  // أو فشل تحميلها → البديل الأنيق. غير ذلك: GIF محلي ثم رابط بعيد ثم الصور الثابتة.
+  const gifSrcs = placeholderOnly
+    ? (machineImg ? [machineImg] : [])
+    : chain(resolveByCandidates(exerciseId, getExerciseGif), media?.gifUrl)
   const useGif = gifSrcs.length > 0 && !gifFailed
   const src0 = chain(media?.img0, media?.img0Remote)
   const src1 = chain(media?.img1, media?.img1Remote)

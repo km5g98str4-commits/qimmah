@@ -536,11 +536,12 @@ export function canonicalExerciseId(id: string): string {
 }
 
 /**
- * بطاقات أجهزة لا نملك لها لقطة *جهاز* أصيلة — لا GIF ولا صورة ثابتة. قاعدة زياد الميدانية:
- * بطاقة الجهاز تعرض لقطة جهاز أو البديل الأنيق (placeholder)، لا شيء آخر (بار/دمبل/حبل/وزن جسم).
- * قاعدة بيانات الصور العامة (free-exercise-db) تطابق هذه المعرّفات دومًا بلقطة وزن حرّ خاطئة،
- * لذا نمنع أي وسيط منزَّل عنها ونفرض البديل الأنيق. المفاتيح **قانونية** (يُحلّ القديم عبر
- * canonicalExerciseId قبل الفحص). مصدر واحد للحقيقة يستهلكه ExerciseMedia وسكربتات الوسائط.
+ * بطاقات أجهزة لا نملك لها لقطة *جهاز* من قنوات المقاومة (WorkoutX/free-exercise-db تعطي وزنًا حرًّا).
+ * قاعدة زياد: بطاقة الجهاز تعرض **صورة الجهاز نفسه** أو البديل الأنيق — لا شيء آخر (بار/دمبل/حبل/وزن جسم).
+ * لذا نمنع عنها أي gif/صورة من تلك القنوات، وتُعرَض لها بدلًا من ذلك صورة جهاز مخصّصة إن توفّرت
+ * (public/exercise-machine-images/{slug}.jpg|gif عبر machineImages.ts — يجلبها سكربت p12-fetch-machine-images
+ * من مصادر مفتوحة الترخيص)، وإلا البديل الأنيق. المفاتيح **قانونية** (يُحلّ القديم عبر canonicalExerciseId).
+ * مصدر واحد للحقيقة يستهلكه ExerciseMedia وسكربتات الوسائط.
  */
 export const PLACEHOLDER_ONLY_EXERCISE_IDS: readonly string[] = [
   'decline-chest-press-machine',
@@ -556,6 +557,12 @@ export const PLACEHOLDER_ONLY_EXERCISE_IDS: readonly string[] = [
   'glute-drive-machine',
   'glute-kickback-machine',
   'cable-crunch',
+  // بلا أي وسيط أصلًا (كانت placeholder نظيفة) — تُدرَج كي تُجلب لها صورة جهاز حقيقية أيضًا.
+  'iso-lateral-incline-press',
+  'single-arm-lat-pulldown',
+  'chest-supported-row-machine',
+  'pendulum-squat-machine',
+  'hip-adductor-machine',
 ]
 
 const placeholderOnlySet = new Set(PLACEHOLDER_ONLY_EXERCISE_IDS)

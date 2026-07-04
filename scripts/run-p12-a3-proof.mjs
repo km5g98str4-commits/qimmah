@@ -211,7 +211,24 @@ const PROFILES = [
   { tag: 'adv-maint-4d-full-bro-90min', experienceBand: 'gt2y', trainingLevel: 'advanced', goalType: 'maintenance', goal: 'maintain', trainingDays: 4, gymAccess: 'full', splitMode: 'advanced', splitChoice: 'bro_split', workoutDuration: 90 },
   { tag: 'adv-recomp-5d-full-75min', experienceBand: 'gt2y', trainingLevel: 'advanced', goalType: 'recomposition', goal: 'cut', trainingDays: 5, gymAccess: 'full', workoutDuration: 75 },
   { tag: 'adv-bulk-7d-full', experienceBand: 'gt2y', trainingLevel: 'advanced', goalType: 'bulking', goal: 'bulk', trainingDays: 7, gymAccess: 'full' },
+  // (جولة 3) جلسة قصيرة ٣٠د جسم كامل: يجب أن تُرفَع لـ FULL_BODY_MIN=5 وتلمس كل مجموعة كبرى.
+  { tag: 'beg-cut-3d-full-30min', experienceBand: '1to6m', trainingLevel: 'beginner', goalType: 'cutting', goal: 'cut', trainingDays: 3, gymAccess: 'full', workoutDuration: 30 },
 ]
+
+// (جولة 3) حدّ أدنى ليوم الجسم الكامل — أرجل+صدر+ظهر+أكتاف+أرجل خلفية.
+const FULL_BODY_MIN = 5
+// مجموعة كبرى لكل عضلة (للتحقّق من تغطية يوم الجسم الكامل).
+const MAJOR_OF = { quads: 'legs', hamstrings: 'legs', glutes: 'legs', calves: 'legs', chest: 'chest', back: 'back', shoulders: 'shoulders' }
+const NEED_MAJORS = ['legs', 'chest', 'back', 'shoulders']
+// خريطة معرّف تمرين → العضلة الأساسية (من exercises.ts نصّيًا) — للتغطية.
+const idToMuscle = Object.fromEntries(
+  [...exercisesSrc.matchAll(/ex\(\{ id: '([^']+)',[^\n]*?primaryMuscle: '([^']+)'/g)].map((m) => [m[1], m[2]]),
+)
+const canonicalOf = (id) => {
+  // نفس منطق canonicalExerciseId المبسّط: القديم→القانوني إن وُجد.
+  const legM = legacyBlock.match(new RegExp("'" + id + "':\\s*'([^']+)'"))
+  return idToMuscle[id] ? id : (legM ? legM[1] : id)
+}
 
 // ————— browser helpers —————
 async function seedAndLoad(page, { cus, extra = {} }, hash = '') {
@@ -329,22 +346,42 @@ async function main() {
       const flat = resistancePerDay.flat()
       const bad = [...new Set(flat.filter((id) => !catalogIds.has(id) && !accSet.has(id)))]
       const target = expectedCount(profile.experienceBand, profile.workoutDuration)
-      const perDay = resistancePerDay.map((day) => {
+      // (جولة 3) يوم الجسم الكامل: العدد المتوقّع = max(target, FULL_BODY_MIN).
+      const isFull = (d) => String(d.id).includes('-full')
+      const perDay = days.map((d) => {
+        const day = splitCardio(d).resistance.map((pe) => pe.exerciseId)
         const acc = day.filter((id) => accSet.has(id))
         const prim = day.filter((id) => !accSet.has(id))
         const accLast = acc.length === 0 || accSet.has(day[day.length - 1])
-        return { prim: prim.length, acc: acc.length, accLast }
+        const exp = isFull(d) ? Math.max(target, FULL_BODY_MIN) : target
+        return { prim: prim.length, acc: acc.length, accLast, exp }
       })
-      const primOk = perDay.every((x) => x.prim === target)
+      const primOk = perDay.every((x) => x.prim === x.exp)
       const accOk = perDay.every((x) => x.acc <= 1 && x.accLast)
+      // (جولة 3) كل يوم جسم كامل يلمس المجموعات الكبرى الأربع (أرجل، صدر، ظهر، أكتاف).
+      const fullDays = days.filter(isFull)
+      const fullMissing = fullDays
+        .map((d) => {
+          const majors = new Set(
+            splitCardio(d).resistance
+              .map((pe) => MAJOR_OF[idToMuscle[canonicalOf(pe.exerciseId)]])
+              .filter(Boolean),
+          )
+          const miss = NEED_MAJORS.filter((m) => !majors.has(m))
+          return miss.length ? `${d.id}:${miss.join('+')}` : ''
+        })
+        .filter(Boolean)
       // كل سلوت في اليوم يجب أن يكون: أساسي(٣٢) أو إضافة(٦) — لا كارديو ولا أي شيء آخر (جولة 2).
       const allSlots = days.flatMap((d) => d.exercises.map((pe) => pe.exerciseId))
       const slotBad = [...new Set(allSlots.filter((id) => !catalogIds.has(id) && !accSet.has(id)))]
       check(`(c) ${p.tag}: EVERY slot (incl. finisher) ∈ 32 primaries + accessories`, 'no offenders', slotBad.length ? slotBad.join(',') : 'no offenders', slotBad.length === 0)
       check(`(c) ${p.tag}: machines-only (32 primaries + accessory pool)`, 'no offenders', bad.length ? bad.join(',') : 'no offenders', bad.length === 0)
       check(`(c) ${p.tag}: days match`, `${profile.trainingDays} days`, `${days.length} days`, days.length === profile.trainingDays)
-      check(`(c) ${p.tag}: per-day primaries = target`, `${target}/day`, perDay.map((x) => x.prim).join(','), primOk)
+      check(`(c) ${p.tag}: per-day primaries = expected (full≥${FULL_BODY_MIN})`, perDay.map((x) => x.exp).join(','), perDay.map((x) => x.prim).join(','), primOk)
       check(`(c) ${p.tag}: ≤1 accessory, always last`, 'yes', perDay.map((x) => `${x.acc}${x.accLast ? '✓' : '✗'}`).join(','), accOk)
+      if (fullDays.length) {
+        check(`(c) ${p.tag}: full-body hits every major (legs/chest/back/shoulders)`, 'all covered', fullMissing.length ? fullMissing.join(' ') : 'all covered', fullMissing.length === 0)
+      }
       // (جولة 2) صفر كارديو في أي خطة مولّدة — لا خاتمة كارديو إطلاقًا.
       const cardioSlots = [...new Set(allSlots.filter((id) => CARDIO_IDS.has(id) || String(id).endsWith('-cardio')))]
       check(`(c) ${p.tag}: no cardio finisher (addCutCardio removed)`, 'none', cardioSlots.length ? cardioSlots.join(',') : 'none', cardioSlots.length === 0)

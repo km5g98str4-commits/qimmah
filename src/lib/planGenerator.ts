@@ -102,6 +102,10 @@ function targetExerciseCount(tier: ExpTier, sessionMinutes: number): number {
   return clamp(base + delta, 3, 9)
 }
 
+// (جولة 3) الحدّ الأدنى لأساسيات يوم الجسم الكامل: أرجل + صدر + ظهر + أكتاف + أرجل خلفية = ٥،
+// كي يلمس كل مجموعة كبرى مهما قصُرت الجلسة (إضافة الذراعين/البطن الاختيارية تُلحَق فوقها).
+const FULL_BODY_MIN = 5
+
 const COMPOUND_PATTERNS = new Set<MovementPattern>(['squat', 'hinge', 'push', 'pull', 'lunge'])
 
 type ExRole = 'compound' | 'isolation'
@@ -286,16 +290,18 @@ interface Slot {
 type DayType = 'full' | 'upper' | 'lower' | 'push' | 'pull' | 'arms' | 'core'
 
 const SLOTS: Record<DayType, Slot[]> = {
+  // (جولة 3) المجموعات الكبرى الأربع أولًا (أرجل، صدر، ظهر، أكتاف) كي يضمن أي يوم جسم كامل
+  // — مهما قصُرت الجلسة — لمس كل مجموعة. ثم الأرجل الخلفية (hinge) والسمانة والكور والذراعان.
   full: [
     { muscles: ['quads'], role: 'compound', patterns: ['squat', 'lunge'] },
     { muscles: ['chest'], role: 'compound', patterns: ['push'] },
     { muscles: ['back'], role: 'compound', patterns: ['pull'] },
-    { muscles: ['hamstrings', 'glutes'], role: 'compound', patterns: ['hinge'] },
     { muscles: ['shoulders'], role: 'compound', patterns: ['push'] },
+    { muscles: ['hamstrings', 'glutes'], role: 'compound', patterns: ['hinge'] },
+    { muscles: ['calves'], role: 'isolation' },
     { muscles: ['core'], role: 'any' },
     { muscles: ['biceps'], role: 'isolation' },
     { muscles: ['triceps'], role: 'isolation' },
-    { muscles: ['calves'], role: 'isolation' },
   ],
   upper: [
     { muscles: ['chest'], role: 'compound', patterns: ['push'] },
@@ -671,7 +677,7 @@ export function planTitle(templateId: string, lang: Lang = 'ar'): string {
 }
 
 /** يبني عنصر خطة بمجموعات/تكرارات/راحة حسب الهدف والخبرة. */
-function createGenExercise(exerciseId: string, dayId: string, order: number, tier: ExpTier, gt: GoalType): PlanExercise {
+function createGenExercise(exerciseId: string, dayId: string, order: number, tier: ExpTier, gt: GoalType, optional = false): PlanExercise {
   const ex = getExercise(exerciseId)
   const role: ExRole = ex ? exerciseRole(ex) : 'isolation'
   const scheme = SCHEMES[gt] ?? SCHEMES.maintenance
@@ -688,6 +694,7 @@ function createGenExercise(exerciseId: string, dayId: string, order: number, tie
     startingWeight: '',
     notes: '',
     order,
+    ...(optional ? { optional: true } : {}),
   }
 }
 
@@ -739,20 +746,27 @@ function generateWorkoutPlan(p: Profile): { plan: WorkoutPlan; specs: DaySpec[] 
     counts[spec.type] = variation + 1
     const nVar = typeTotal[spec.type] ?? 1
     const dayId = `gen-${di + 1}-${spec.type}`
-    const ids = buildDayExercises(spec.type, variation, nVar, pool, target, preferMachines, rank, machinesOnly)
+    // (جولة 3) يوم الجسم الكامل لا يقل عن ٥ أساسيات (أرجل+صدر+ظهر+أكتاف+أرجل خلفية) مهما قصُرت
+    // الجلسة — كي يلمس كل مجموعة كبرى؛ بقية الأنواع تتبع عدد الجلسة المعتاد.
+    const dayTarget = spec.type === 'full' ? Math.max(target, FULL_BODY_MIN) : target
+    const ids = buildDayExercises(spec.type, variation, nVar, pool, dayTarget, preferMachines, rank, machinesOnly)
     // إضافة واحدة تُلحَق بنهاية اليوم (أجهزة فقط) — ذراعان/بطن حسب نوع اليوم، غير أساسية.
     // (جولة 2) نُدوّر الإضافة بفهرس النسخة (variation) لا فهرس اليوم المطلق — كي يأخذ يومَا نفس
     // النوع (سفلي أ/ب) إضافتين مختلفتين بدل تكرار نفسها (كان سبب تداخل ٤٥٪ في يوم السفلي).
+    let accId: string | null = null
     if (machinesOnly) {
       const cat = accessoryCategory(spec.type, variation)
       const acc = cat ? pickAccessory(cat, variation, new Set(ids)) : null
-      if (acc) ids.push(acc)
+      if (acc) { ids.push(acc); accId = acc }
     }
     return {
       id: dayId,
       nameAr: workoutDayNameAr(spec.nameAr, di),
       nameEn: workoutDayNameEn(spec.nameEn, di),
-      exercises: ids.map((id, i) => createGenExercise(id, dayId, i, tier, p.goalType)),
+      // آخر عنصر إن كان الإضافة (accId) → optional=true فيُعرَض بوسم «(اختياري)».
+      exercises: ids.map((id, i) =>
+        createGenExercise(id, dayId, i, tier, p.goalType, i === ids.length - 1 && id === accId),
+      ),
     }
   })
 

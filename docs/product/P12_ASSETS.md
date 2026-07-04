@@ -1,5 +1,38 @@
 # P12 — خط أصول GIF للأجهزة (Asset Pipeline)
 
+## 🖼️ صور الأجهزة الحقيقية للبطاقات على البديل الأنيق (جولة 3 — 2026-07-04)
+
+**القاعدة:** بطاقة الجهاز تعرض **الجهاز نفسه** أو البديل الأنيق — لا بار/دمبل/حبل/وزن جسم إطلاقًا.
+١٨ بطاقة جهاز لا تملك لقطة جهاز من قنوات المقاومة (WorkoutX/free-exercise-db تعيد وزنًا حرًّا) مُدرَجة
+في `PLACEHOLDER_ONLY_EXERCISE_IDS` (`src/data/exercises.ts`)، وتُعرَض لها — إن جُلبت — صورة جهاز حقيقية
+من `public/exercise-machine-images/{slug}.jpg|gif` عبر `src/data/machineImages.ts`، وإلا البديل الأنيق.
+
+**الأجهزة الثمانية عشر:** decline-chest-press-machine · hack-squat-machine · preacher-curl-machine ·
+rear-delt-row-machine · seated-calf-raise-machine · standing-calf-raise-machine · seated-leg-curl ·
+lateral-raise-machine · shoulder-press-machine · standing-leg-curl · glute-drive-machine ·
+glute-kickback-machine · cable-crunch · iso-lateral-incline-press · single-arm-lat-pulldown ·
+chest-supported-row-machine · pendulum-squat-machine · hip-adductor-machine.
+(`reverse-pec-deck` يعرض صورة «Reverse Machine Flyes» الحقيقية أصلًا — يبقى كما هو، ليس ضمن القائمة.)
+
+**الجلب (على ماك زياد — بيئة الوكيل بلا إنترنت):**
+
+```bash
+# يجرّب WorkoutX (لقطة جهاز) أولًا، ثم صورًا مفتوحة الترخيص (Wikimedia Commons ثم Openverse)؛
+# المقبول فقط: Public Domain / CC0 / CC-BY / CC-BY-SA — لا صور محفوظة الحقوق (سطح قانوني للتطبيق التجاري).
+WORKOUTX_API_KEY=wx_xxx node scripts/p12-fetch-machine-images.mjs
+#   اختياريًا مصدران إضافيان (ترخيصهما تجاري): UNSPLASH_ACCESS_KEY=... PEXELS_API_KEY=...
+#   ثم زامن الخريطة وابنِ:
+node scripts/p12-sync-machine-images.mjs && npm run typecheck && npm run build && git add -A && git commit -m "P12: machine images"
+```
+
+السكربت يوحّد كل صورة (sips → 1024×576 JPEG أفقي)، يحفظها `{slug}.jpg`، ويطبع + يُلحق **المصدر والترخيص
+والإسناد** لكل جهاز في سجلّ أسفل هذا الملف (يصنّف كلًّا: `workoutx-gif` / `web-image` / `placeholder`).
+بطاقة لا تجد صورة جهاز مقبولة في أي مصدر تبقى على البديل الأنيق (لا لقطة وزن حرّ أبدًا).
+
+> بيئة الوكيل بلا إنترنت، فالصور تُجلب محليًا. حتى الجلب تظهر البطاقات الثمانية عشر على البديل الأنيق.
+
+---
+
 ## ✅ الحالة: مكتمل (2026-07)
 
 جلب صور الأجهزة اكتمل ودُفِع إلى `main`.

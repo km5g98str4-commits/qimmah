@@ -4,6 +4,8 @@ export interface WorkoutScreenStrings {
   /** اسم تمرين فارغ (بلا تمارين). */
   emptyWorkoutNameAr: string
   emptyWorkoutNameEn: string
+  /** وسم الإضافة الاختيارية (ذراعان/بطن نهاية اليوم): «(اختياري)» / "(optional)". */
+  optionalTag: string
   /** ترويسة الشاشة. */
   workoutEyebrow: string
   workoutHeading: string
@@ -60,6 +62,7 @@ export interface WorkoutScreenStrings {
 const ar: WorkoutScreenStrings = {
   emptyWorkoutNameAr: 'تمرين فارغ',
   emptyWorkoutNameEn: 'Empty Workout',
+  optionalTag: '(اختياري)',
   workoutEyebrow: 'تمرين',
   workoutHeading: 'تمرين',
   searchLibrary: 'بحث في المكتبة',
@@ -102,6 +105,7 @@ const ar: WorkoutScreenStrings = {
 const en: WorkoutScreenStrings = {
   emptyWorkoutNameAr: 'تمرين فارغ',
   emptyWorkoutNameEn: 'Empty Workout',
+  optionalTag: '(optional)',
   workoutEyebrow: 'Workout',
   workoutHeading: 'Workout',
   searchLibrary: 'Search the library',

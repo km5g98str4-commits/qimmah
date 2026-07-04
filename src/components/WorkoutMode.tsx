@@ -354,13 +354,21 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               {/* (P10.1) اسم موحّد بعزل <bdi>: عربي أساسي + إنجليزي ثانوي. */}
-              <ExerciseName
-                nameAr={nameAr}
-                nameEn={nameEn}
-                lang={lang}
-                className="text-lg font-black leading-tight text-ink-900"
-                secondaryClassName="mt-0.5 text-xs font-bold text-ink-400"
-              />
+              <div className="flex flex-wrap items-center gap-x-2">
+                <ExerciseName
+                  nameAr={nameAr}
+                  nameEn={nameEn}
+                  lang={lang}
+                  className="text-lg font-black leading-tight text-ink-900"
+                  secondaryClassName="mt-0.5 text-xs font-bold text-ink-400"
+                />
+                {/* (جولة 3) إضافة نهاية اليوم (ذراعان/بطن) اختيارية — وسم واضح بجانب الاسم. */}
+                {pe.optional && (
+                  <span className="shrink-0 rounded-full bg-beige px-2 py-0.5 text-[11px] font-bold text-ink-500">
+                    {d.optionalTag}
+                  </span>
+                )}
+              </div>
               {machineInfo ? (
                 // (P12) وسوم الجهاز: التصنيف الفرعي + المجموعة (ثنائية اللغة من الكتالوج).
                 <div className="mt-2 flex flex-wrap gap-1.5">
