@@ -5,7 +5,7 @@
 // (مثل cable-curl.gif) تبقى بأسمائها — صفر إعادة تسمية/تنزيل — ويشير إليها
 // المعرّف القانوني (cable-biceps-curl → /exercise-gifs/cable-curl.gif) وفق
 // LEGACY_EXERCISE_ID_MAP في exercises.ts. لجلب الناقص: scripts/p12-fetch-gifs.sh.
-// التغطية الحالية: 82 معرّفًا (3 منها عبر ملف باسم قديم).
+// التغطية الحالية: 81 معرّفًا (3 منها عبر ملف باسم قديم).
 
 /** خريطة ثابتة: مُعرّف تمرين قانوني → مسار GIF متحرّك محلّي. */
 export const exerciseGifs: Record<string, string> = {
@@ -22,7 +22,6 @@ export const exerciseGifs: Record<string, string> = {
   'bulgarian-split-squat': '/exercise-gifs/bulgarian-split-squat.gif',
   'cable-biceps-curl': '/exercise-gifs/cable-curl.gif',
   'cable-crossover': '/exercise-gifs/cable-crossover.gif',
-  'cable-crunch': '/exercise-gifs/cable-crunch.gif',
   'cable-hammer-curl': '/exercise-gifs/cable-hammer-curl.gif',
   'cable-hip-adduction': '/exercise-gifs/cable-hip-adduction.gif',
   'cable-kickback': '/exercise-gifs/cable-kickback.gif',

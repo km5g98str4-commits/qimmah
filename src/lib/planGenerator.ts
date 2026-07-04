@@ -413,8 +413,23 @@ function sortCandidates(cands: Exercise[], preferMachines: boolean): Exercise[] 
   })
 }
 
-/** يختار تمرينًا لفتحة معيّنة من المجمع المتاح (مع تنويع عبر variation وتجنّب التكرار). */
-function pickForSlot(slot: Slot, pool: Exercise[], used: Set<string>, variation: number, preferMachines: boolean): string | undefined {
+/**
+ * (جولة 2 — تنويع A/B/C) يقسّم قائمة مرتّبة على «تنويعات» اليوم المتكرّر: تمارين النسخة الحالية
+ * أولًا (الفهرس % nVar === variation) ثم الباقي كاحتياط. هكذا «علوي أ» و«علوي ب» يأخذان
+ * أجهزة مختلفة لنفس العضلة (chest-press على أ، iso-lateral على ب) بدل نسخة متطابقة.
+ * subgroup بجهاز واحد قد يتكرّر (احتياط) — مقبول؛ لكن اليوم ككل لا يكون نسخة.
+ */
+function partitionOrder<T>(sorted: T[], variation: number, nVar: number): T[] {
+  if (nVar <= 1 || sorted.length <= 1) return sorted
+  const v = ((variation % nVar) + nVar) % nVar
+  const mine: T[] = []
+  const rest: T[] = []
+  sorted.forEach((item, i) => (i % nVar === v ? mine : rest).push(item))
+  return [...mine, ...rest]
+}
+
+/** يختار تمرينًا لفتحة معيّنة من المجمع المتاح (تقسيم النسخة أولًا لتنويع A/B، وتجنّب التكرار). */
+function pickForSlot(slot: Slot, pool: Exercise[], used: Set<string>, variation: number, nVar: number, preferMachines: boolean): string | undefined {
   let cands = pool.filter(
     (ex) =>
       slot.muscles.includes(ex.primaryMuscle) &&
@@ -426,14 +441,16 @@ function pickForSlot(slot: Slot, pool: Exercise[], used: Set<string>, variation:
     if (byPattern.length) cands = byPattern
   }
   if (!cands.length) return undefined
-  cands = sortCandidates(cands, preferMachines)
-  return cands[variation % cands.length].id
+  // مرتّبًا (أجهزة أولًا للمبتدئ ثم أبجديًا)، ثم نقدّم حصّة هذه النسخة (A/B/C) أولًا.
+  const ordered = partitionOrder(sortCandidates(cands, preferMachines), variation, nVar)
+  return ordered[0].id
 }
 
 /** يبني قائمة معرّفات تمارين ليوم واحد. */
 function buildDayExercises(
   type: DayType,
   variation: number,
+  nVar: number,
   pool: Exercise[],
   target: number,
   preferMachines: boolean,
@@ -443,17 +460,22 @@ function buildDayExercises(
   const ids: string[] = []
   for (const slot of SLOTS[type]) {
     if (ids.length >= target) break
-    const id = pickForSlot(slot, pool, used, variation, preferMachines)
+    const id = pickForSlot(slot, pool, used, variation, nVar, preferMachines)
     if (id) {
       ids.push(id)
       used.add(id)
     }
   }
   // إكمال النقص من عضلات اليوم الأساسية إن قلّت الفتحات المتاحة (بيئات محدودة الأدوات).
+  // (جولة 2) نقسّم الاحتياط على النسخة (A/B/C) كي لا يأخذ يومان متكرّران نفس الأجهزة الأبجدية.
   if (ids.length < target) {
-    const extra = sortCandidates(
-      pool.filter((ex) => !used.has(ex.id) && TYPE_MUSCLES[type].includes(ex.primaryMuscle)),
-      preferMachines,
+    const extra = partitionOrder(
+      sortCandidates(
+        pool.filter((ex) => !used.has(ex.id) && TYPE_MUSCLES[type].includes(ex.primaryMuscle)),
+        preferMachines,
+      ),
+      variation,
+      nVar,
     )
     for (const ex of extra) {
       if (ids.length >= target) break
@@ -463,9 +485,13 @@ function buildDayExercises(
   }
   // P12 (أجهزة فقط): بعض الأيام تستنفد أجهزة عضلاتها قبل بلوغ العدد المستهدف
   // (مثل يوم «بطن وكور» — جهازا بطن فقط، أو يوم الذراعين للمتقدّم بجلسة طويلة).
-  // نكمل من بقية أجهزة الكتالوج بترتيب ثابت كي يصل كل يوم لعدده المستهدف.
+  // نكمل من بقية أجهزة الكتالوج، مقسومًا على النسخة (تنويع A/B) بترتيب ثابت داخل كل نسخة.
   if (fillFromWholePool && ids.length < target) {
-    const extra = sortCandidates(pool.filter((ex) => !used.has(ex.id)), preferMachines)
+    const extra = partitionOrder(
+      sortCandidates(pool.filter((ex) => !used.has(ex.id)), preferMachines),
+      variation,
+      nVar,
+    )
     for (const ex of extra) {
       if (ids.length >= target) break
       ids.push(ex.id)
@@ -640,45 +666,6 @@ function createGenExercise(exerciseId: string, dayId: string, order: number, tie
   }
 }
 
-/** يضيف عنصر كارديو ليومين أسبوعيًا (هدف التنشيف) — يحترم فلتر الإصابات (يستبعد الكارديو عالي الارتطام). */
-function addCutCardio(
-  planDays: PlanDay[],
-  equipOk: (ex: Exercise) => boolean,
-  injuryOk: (ex: Exercise) => boolean,
-  machinesOnly: boolean,
-): void {
-  // خاتمة الكارديو تمرّ ضمن سلوت الخطة فتُعرض كتمرين عادي — لذا في سياق «أجهزة فقط» يجب أن
-  // تكون **جهاز كارديو حصريًا** (تريدميل/دراجة/تجديف/إليبتيكال/درج/أسولت)، لا حبال قتال أو
-  // وزن جسم. (تسريب battle-ropes: equipOk للنادي الكامل يسمح بكل شيء، فبلا هذا القيد يتسلّل.)
-  const cardio = exercises
-    .filter(
-      (ex) =>
-        ex.primaryMuscle === 'cardio' &&
-        equipOk(ex) &&
-        injuryOk(ex) &&
-        (!machinesOnly || ex.equipment.includes('machine')),
-    )
-    .sort((a, b) => a.id.localeCompare(b.id))
-  if (!cardio.length || !planDays.length) return
-  const idxs = planDays.length >= 2 ? [0, Math.min(planDays.length - 1, Math.floor(planDays.length / 2))] : [0]
-  const unique = [...new Set(idxs)]
-  unique.forEach((dayIdx, k) => {
-    const day = planDays[dayIdx]
-    const ex = cardio[k % cardio.length]
-    if (day.exercises.some((pe) => pe.exerciseId === ex.id)) return
-    day.exercises.push({
-      id: `${day.id}-${ex.id}-cardio`,
-      exerciseId: ex.id,
-      sets: 1,
-      reps: ex.defaultReps,
-      restSec: 0,
-      startingWeight: '',
-      notes: 'كارديو لزيادة الحرق (هدف التنشيف).',
-      order: day.exercises.length,
-    })
-  })
-}
-
 /** يبني خطة التمرين كاملة من بيانات الملف الشخصي (تقسيمة + تمارين). */
 function generateWorkoutPlan(p: Profile): { plan: WorkoutPlan; specs: DaySpec[] } {
   const days = clamp(p.trainingDays, 1, 7)
@@ -695,7 +682,7 @@ function generateWorkoutPlan(p: Profile): { plan: WorkoutPlan; specs: DaySpec[] 
   const preferMachines = prefersMachines(tier)
   // P12 «أجهزة فقط»: في النادي (كامل/صغير) التمارين الأساسية هي أجهزة الكتالوج المعتمد حصريًا —
   // لا بار/دمبل أساسي إطلاقًا. كيبل الكتالوج (بايسبس/ترايسبس/كرنش) معتمد لكل المستويات لأنه
-  // ضمن اختيار المؤسس، فلا يمرّ على cableOk. الكارديو يُضاف لاحقًا في addCutCardio كما هو.
+  // ضمن اختيار المؤسس، فلا يمرّ على cableOk. (جولة 2) لا كارديو يُضاف إطلاقًا — أُزيل addCutCardio.
   // في المنزل/وزن الجسم لا توجد أجهزة — نُبقي السلوك السابق المناسب للأدوات المتاحة.
   const access = resolveGymAccess(p)
   const machinesOnly = access === 'full' || access === 'small'
@@ -715,12 +702,17 @@ function generateWorkoutPlan(p: Profile): { plan: WorkoutPlan; specs: DaySpec[] 
           levelOk(ex, tier),
       )
 
+  // عدد نسخ كل نوع يوم في التقسيمة (Upper ×2، Full ×3 …) — لتقسيم اختيار التمارين على A/B/C.
+  const typeTotal: Record<string, number> = {}
+  for (const spec of specs) typeTotal[spec.type] = (typeTotal[spec.type] ?? 0) + 1
+
   const counts: Record<string, number> = {}
   const planDays: PlanDay[] = specs.map((spec, di) => {
     const variation = counts[spec.type] ?? 0
     counts[spec.type] = variation + 1
+    const nVar = typeTotal[spec.type] ?? 1
     const dayId = `gen-${di + 1}-${spec.type}`
-    const ids = buildDayExercises(spec.type, variation, pool, target, preferMachines, machinesOnly)
+    const ids = buildDayExercises(spec.type, variation, nVar, pool, target, preferMachines, machinesOnly)
     // إضافة واحدة تُلحَق بنهاية اليوم (أجهزة فقط) — ذراعان/بطن حسب نوع اليوم، غير أساسية.
     if (machinesOnly) {
       const cat = accessoryCategory(spec.type, variation)
@@ -735,7 +727,8 @@ function generateWorkoutPlan(p: Profile): { plan: WorkoutPlan; specs: DaySpec[] 
     }
   })
 
-  if (p.goalType === 'cutting') addCutCardio(planDays, equipOk, injuryOk, machinesOnly)
+  // (جولة 2 — قرار زياد) لا خاتمة كارديو مُلحَقة بأي خطة مولّدة: كل يوم ينتهي بالإضافة
+  // (ترايسبس/بايسبس/بطن) فقط. أُزيل addCutCardio نهائيًا؛ الحوض = ٣٢ أساسيًا + الإضافات لا غير.
 
   return { plan: { templateId, days: planDays }, specs }
 }

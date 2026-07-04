@@ -84,7 +84,10 @@ const APPROVED = {
 //   glute-drive-machine          ← مرفوض سابقًا، لا ملف (يُبقى مُدرجًا كي لا يُنزَّل)
 //   shoulder-press-machine       ← لقطة حبل مقاومة لا جهاز (قرار زياد 2026-07-04)
 //   standing-leg-curl            ← لقطة وزن جسم لا جهاز (قرار زياد 2026-07-04)
+//   glute-kickback-machine       ← لقطة ركل أرضي بوزن الجسم (جولة 2 — 2026-07-04)
+//   cable-crunch                 ← لقطة كرنش دمبل لا كيبل (جولة 2 — 2026-07-04)
 // القاعدة: بطاقة الجهاز تعرض لقطة جهاز أو البديل الأنيق — لا شيء آخر (بار/دمبل/حبل/وزن جسم).
+// المصدر القانوني الموحّد: PLACEHOLDER_ONLY_EXERCISE_IDS في src/data/exercises.ts (يستهلكه ExerciseMedia أيضًا).
 const REJECTED = new Set([
   'decline-chest-press-machine',
   'hack-squat-machine',
@@ -95,8 +98,10 @@ const REJECTED = new Set([
   'seated-leg-curl',
   'lateral-raise-machine',
   'glute-drive-machine',
+  'glute-kickback-machine',
   'shoulder-press-machine',
   'standing-leg-curl',
+  'cable-crunch',
 ])
 
 // ── القائمة الناقصة: slug | اسم البحث EN | عضلة تقريبية (لمكافأة المطابقة) ──

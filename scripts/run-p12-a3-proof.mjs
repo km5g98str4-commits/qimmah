@@ -2,14 +2,15 @@
 // Pattern follows scripts/run-p10-integration-qa.mjs (build → vite preview → chromium).
 //
 // Checks:
-//  (s) static: templates (except home-workout) use only machine-catalog ids (+cardio machines
-//      in fat-loss finishers); injury ban lists contain no stale legacy ids.
+//  (s) static: templates (except home-workout) use only 32 primaries + accessory pool, NO cardio
+//      finisher (round 2); injury ban lists contain no stale legacy ids.
 //  (a) legacy fixture: old customization whose plan holds free-weight ids + history records
 //      survive reload — plan intact (names still render), history byte-identical (SACRED).
 //  (b) switch action («التحويل لنسخة الأجهزة») via UI → regenerated auto plan is 100% catalog
 //      machines; history AND saved custom plan byte-identical before/after.
 //  (c) fresh profiles matrix (tiers × goals × days × gym access × advanced splits) through the
-//      real regenerate flow → every non-cardio exercise ∈ catalog, day counts match target.
+//      real regenerate flow → EVERY slot ∈ 32 primaries + accessories (zero cardio), day counts
+//      match target, and same-type days (Upper A/B, Full A/B/C) differ (overlap ≤ 40%).
 import { chromium } from 'playwright'
 import { spawn, execSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
@@ -23,14 +24,17 @@ const CUS_KEY = 'qimmah:customization:v1'
 const CUSTOM_PLAN_KEY = 'qimmah:customPlan:v1'
 const HISTORY_PREFIX = 'qimmah:history:'
 
-// أجهزة كارديو خارج كتالوج المقاومة — مسموحة كخواتيم كارديو فقط (fat-loss/addCutCardio).
-// كارديو القوالب الثابتة (fat-loss).
-const CARDIO_ALLOWED = new Set(['treadmill-run', 'stationary-bike', 'rowing-machine'])
-// أجهزة الكارديو المسموح بها كخاتمة في الخطط المولّدة (أجهزة فقط) — لا حبال قتال/وزن جسم.
-const MACHINE_CARDIO = new Set([
+// (جولة 2 — قرار زياد) لا خاتمة كارديو في أي خطة مولّدة ولا في القوالب الثابتة: كل يوم ينتهي
+// بالإضافة (ترايسبس/بايسبس/بطن). الحوض المسموح = ٣٢ أساسيًا + الإضافات الستة لا غير — صفر كارديو.
+const CARDIO_IDS = new Set([
   'treadmill-run', 'incline-treadmill-walk', 'stationary-bike', 'rowing-machine',
-  'elliptical', 'stairmaster', 'assault-bike',
+  'elliptical', 'stairmaster', 'assault-bike', 'jump-rope', 'burpees', 'high-knees',
+  'battle-ropes', 'outdoor-walk',
 ])
+// حدّ تشابه يومَي نفس النوع (A/B/C): تداخل التمارين (Jaccard = التقاطع/الاتحاد) ≤ ٤٠٪ (قرار زياد جولة 2).
+// Jaccard هو المقياس القياسي لتشابه مجموعتين: نسخة متطابقة = ١٠٠٪، اشتراك ٥ من ٦ = ٧١٪،
+// اشتراك المركّبات أحادية الجهاز فقط (كتف/ورك في الجسم الكامل) ≈ ٣٣٪ — يمرّ، وهو تدريب صحيح لا نسخة.
+const AB_OVERLAP_MAX = 0.4
 
 // ————— matrix output —————
 const rows = []
@@ -84,13 +88,14 @@ function staticChecks() {
       check(`template ${tplId} keeps home exercises (exempt)`, '>0 non-catalog', `${nonCatalog.length} non-catalog`, nonCatalog.length > 0)
       continue
     }
-    // كل يوم: أساسيات الـ٣٢ + إضافة واحدة اختيارية (من الستة) تُلحَق آخر تمرين مقاومة.
-    const bad = dayArrays.flat().filter((id) => !catalogIds.has(id) && !tplAccSet.has(id) && !CARDIO_ALLOWED.has(id))
-    check(`template ${tplId}: only 32 primaries + accessory pool (+cardio)`, 'no offenders', bad.length ? bad.join(',') : 'no offenders', bad.length === 0)
+    // كل يوم: أساسيات الـ٣٢ + إضافة واحدة اختيارية (من الستة) تُلحَق أخيرًا — صفر كارديو.
+    const bad = dayArrays.flat().filter((id) => !catalogIds.has(id) && !tplAccSet.has(id))
+    check(`template ${tplId}: only 32 primaries + accessory pool (no cardio)`, 'no offenders', bad.length ? bad.join(',') : 'no offenders', bad.length === 0)
+    const noCardio = dayArrays.flat().filter((id) => CARDIO_IDS.has(id))
+    check(`template ${tplId}: no cardio finisher`, 'none', noCardio.length ? noCardio.join(',') : 'none', noCardio.length === 0)
     const accCheck = dayArrays.every((day) => {
-      const nonCardio = day.filter((id) => !CARDIO_ALLOWED.has(id))
-      const acc = nonCardio.filter((id) => tplAccSet.has(id))
-      const lastOk = acc.length === 0 || tplAccSet.has(nonCardio[nonCardio.length - 1])
+      const acc = day.filter((id) => tplAccSet.has(id))
+      const lastOk = acc.length === 0 || tplAccSet.has(day[day.length - 1])
       return acc.length <= 1 && lastOk
     })
     check(`template ${tplId}: ≤1 accessory/day, always last`, 'yes', accCheck ? 'yes' : 'no', accCheck)
@@ -332,19 +337,49 @@ async function main() {
       })
       const primOk = perDay.every((x) => x.prim === target)
       const accOk = perDay.every((x) => x.acc <= 1 && x.accLast)
-      // كل سلوت في اليوم (بما فيه الخاتمة) يجب أن يكون: أساسي(٣٢) أو إضافة(٦) أو جهاز كارديو.
-      // يمسك تسريب battle-ropes أو أي كارديو غير جهازي في الخطة المولّدة.
+      // كل سلوت في اليوم يجب أن يكون: أساسي(٣٢) أو إضافة(٦) — لا كارديو ولا أي شيء آخر (جولة 2).
       const allSlots = days.flatMap((d) => d.exercises.map((pe) => pe.exerciseId))
-      const slotBad = [...new Set(allSlots.filter((id) => !catalogIds.has(id) && !accSet.has(id) && !MACHINE_CARDIO.has(id)))]
-      check(`(c) ${p.tag}: EVERY slot (incl. finisher) ∈ 32+accessory+machine-cardio`, 'no offenders', slotBad.length ? slotBad.join(',') : 'no offenders', slotBad.length === 0)
+      const slotBad = [...new Set(allSlots.filter((id) => !catalogIds.has(id) && !accSet.has(id)))]
+      check(`(c) ${p.tag}: EVERY slot (incl. finisher) ∈ 32 primaries + accessories`, 'no offenders', slotBad.length ? slotBad.join(',') : 'no offenders', slotBad.length === 0)
       check(`(c) ${p.tag}: machines-only (32 primaries + accessory pool)`, 'no offenders', bad.length ? bad.join(',') : 'no offenders', bad.length === 0)
       check(`(c) ${p.tag}: days match`, `${profile.trainingDays} days`, `${days.length} days`, days.length === profile.trainingDays)
       check(`(c) ${p.tag}: per-day primaries = target`, `${target}/day`, perDay.map((x) => x.prim).join(','), primOk)
       check(`(c) ${p.tag}: ≤1 accessory, always last`, 'yes', perDay.map((x) => `${x.acc}${x.accLast ? '✓' : '✗'}`).join(','), accOk)
-      if (profile.goalType === 'cutting' || profile.goalType === 'recomposition') {
-        const cardioCount = days.reduce((n, d) => n + splitCardio(d).cardio.length, 0)
-        check(`(c) ${p.tag}: cut cardio appended (addCutCardio stays)`, '>=1 cardio finisher', `${cardioCount}`, cardioCount >= 1)
+      // (جولة 2) صفر كارديو في أي خطة مولّدة — لا خاتمة كارديو إطلاقًا.
+      const cardioSlots = [...new Set(allSlots.filter((id) => CARDIO_IDS.has(id) || String(id).endsWith('-cardio')))]
+      check(`(c) ${p.tag}: no cardio finisher (addCutCardio removed)`, 'none', cardioSlots.length ? cardioSlots.join(',') : 'none', cardioSlots.length === 0)
+      // (جولة 2) تنويع A/B/C: أيام نفس النوع (Upper1/Upper2 …) يجب ألا تكون نسخة — تداخل ≤ ٤٠٪.
+      const byType = {}
+      for (const d of days) {
+        const t = String(d.id).match(/gen-\d+-(\w+)/)?.[1] ?? d.id
+        ;(byType[t] ??= []).push(d.exercises.map((pe) => pe.exerciseId))
       }
+      let maxOverlap = 0
+      let worstPair = 'n/a'
+      let pairsCompared = 0
+      for (const [t, list] of Object.entries(byType)) {
+        for (let i = 0; i < list.length; i++) {
+          for (let j = i + 1; j < list.length; j++) {
+            pairsCompared++
+            const a = new Set(list[i])
+            const b = new Set(list[j])
+            const inter = [...a].filter((x) => b.has(x)).length
+            const union = a.size + b.size - inter
+            const ov = union === 0 ? 0 : inter / union // Jaccard: التقاطع/الاتحاد
+            if (ov > maxOverlap) {
+              maxOverlap = ov
+              worstPair = `${t}#${i + 1}/#${j + 1}=${(ov * 100).toFixed(0)}%`
+            }
+          }
+        }
+      }
+      const abOk = pairsCompared === 0 || maxOverlap <= AB_OVERLAP_MAX
+      check(
+        `(c) ${p.tag}: A/B/C variety (same-type day Jaccard overlap ≤ ${AB_OVERLAP_MAX * 100}%)`,
+        pairsCompared === 0 ? 'n/a (no repeated type)' : `≤ ${AB_OVERLAP_MAX * 100}%`,
+        pairsCompared === 0 ? 'n/a' : worstPair,
+        abOk,
+      )
     }
 
     check('no uncaught page errors', 'none', pageErrors.length ? pageErrors.slice(0, 2).join(' | ') : 'none', pageErrors.length === 0)

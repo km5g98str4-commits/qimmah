@@ -117,13 +117,13 @@ export const workoutTemplates: WorkoutTemplate[] = [
     id: 'fat-loss',
     nameAr: 'خسارة دهون',
     nameEn: 'Fat Loss',
-    descriptionAr: 'جسم كامل مع كارديو في النهاية — حركة أكثر وحرق أعلى.',
-    descriptionEn: 'Full-body sessions finished with cardio — more movement, more burn.',
+    descriptionAr: 'جسم كامل عالي الكثافة — أجهزة موجّهة وحجم عمل يرفع الحرق.',
+    descriptionEn: 'High-density full-body machine sessions — more volume, more burn.',
     recommendedFor: 'مبتدئ–متوسط',
     days: [
-      { id: 'fat-loss-d1', nameAr: 'جسم كامل', nameEn: 'Full Body', exerciseIds: ['hack-squat-machine', 'chest-press-machine', 'seated-row-machine', 'shoulder-press-machine', 'ab-crunch-machine', 'treadmill-run'] },
-      { id: 'fat-loss-d2', nameAr: 'جسم كامل', nameEn: 'Full Body', exerciseIds: ['leg-press-machine', 'shoulder-press-machine', 'lat-pulldown-machine', 'chest-press-machine', 'cable-crunch', 'stationary-bike'] },
-      { id: 'fat-loss-d3', nameAr: 'جسم كامل', nameEn: 'Full Body', exerciseIds: ['pendulum-squat-machine', 'iso-lateral-chest-press', 'chest-supported-row-machine', 'shoulder-press-machine', 'ab-crunch-machine', 'rowing-machine'] },
+      { id: 'fat-loss-d1', nameAr: 'جسم كامل', nameEn: 'Full Body', exerciseIds: ['hack-squat-machine', 'chest-press-machine', 'seated-row-machine', 'shoulder-press-machine', 'ab-crunch-machine'] },
+      { id: 'fat-loss-d2', nameAr: 'جسم كامل', nameEn: 'Full Body', exerciseIds: ['leg-press-machine', 'shoulder-press-machine', 'lat-pulldown-machine', 'chest-press-machine', 'cable-crunch'] },
+      { id: 'fat-loss-d3', nameAr: 'جسم كامل', nameEn: 'Full Body', exerciseIds: ['pendulum-squat-machine', 'iso-lateral-chest-press', 'chest-supported-row-machine', 'shoulder-press-machine', 'ab-crunch-machine'] },
     ],
   },
   {

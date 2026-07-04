@@ -535,6 +535,36 @@ export function canonicalExerciseId(id: string): string {
   return exerciseMap[id] ? id : (LEGACY_EXERCISE_ID_MAP[id] ?? id)
 }
 
+/**
+ * بطاقات أجهزة لا نملك لها لقطة *جهاز* أصيلة — لا GIF ولا صورة ثابتة. قاعدة زياد الميدانية:
+ * بطاقة الجهاز تعرض لقطة جهاز أو البديل الأنيق (placeholder)، لا شيء آخر (بار/دمبل/حبل/وزن جسم).
+ * قاعدة بيانات الصور العامة (free-exercise-db) تطابق هذه المعرّفات دومًا بلقطة وزن حرّ خاطئة،
+ * لذا نمنع أي وسيط منزَّل عنها ونفرض البديل الأنيق. المفاتيح **قانونية** (يُحلّ القديم عبر
+ * canonicalExerciseId قبل الفحص). مصدر واحد للحقيقة يستهلكه ExerciseMedia وسكربتات الوسائط.
+ */
+export const PLACEHOLDER_ONLY_EXERCISE_IDS: readonly string[] = [
+  'decline-chest-press-machine',
+  'hack-squat-machine',
+  'preacher-curl-machine',
+  'rear-delt-row-machine',
+  'seated-calf-raise-machine',
+  'standing-calf-raise-machine',
+  'seated-leg-curl',
+  'lateral-raise-machine',
+  'shoulder-press-machine',
+  'standing-leg-curl',
+  'glute-drive-machine',
+  'glute-kickback-machine',
+  'cable-crunch',
+]
+
+const placeholderOnlySet = new Set(PLACEHOLDER_ONLY_EXERCISE_IDS)
+
+/** هل يجب أن تبقى بطاقة هذا التمرين على البديل الأنيق (تمنع أي gif/صورة منزَّلة)؟ */
+export function isPlaceholderOnlyMedia(id: string): boolean {
+  return placeholderOnlySet.has(canonicalExerciseId(id))
+}
+
 export function getExercise(id: string): Exercise | undefined {
   return exerciseMap[id] ?? exerciseMap[LEGACY_EXERCISE_ID_MAP[id] ?? '']
 }

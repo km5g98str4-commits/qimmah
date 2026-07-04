@@ -128,6 +128,17 @@ function loadQimmahExercises() {
   return rows
 }
 
+// بطاقات أجهزة يجب أن تبقى على البديل الأنيق — لا تُطابَق بصور free-exercise-db (وزن حرّ دومًا).
+// المصدر الموحّد: PLACEHOLDER_ONLY_EXERCISE_IDS في src/data/exercises.ts (يستخرجه نصّيًا كي لا ينحرف).
+function loadPlaceholderOnlyIds() {
+  const src = readFileSync(resolve(ROOT, 'src/data/exercises.ts'), 'utf8')
+  const start = src.indexOf('PLACEHOLDER_ONLY_EXERCISE_IDS: readonly string[] = [')
+  if (start === -1) return new Set()
+  const open = src.indexOf('[', start)
+  const close = src.indexOf(']', open)
+  return new Set([...src.slice(open + 1, close).matchAll(/'([^']+)'/g)].map((m) => m[1]))
+}
+
 async function fetchDb() {
   const res = await fetch(DB_JSON_URL)
   if (!res.ok) throw new Error(`free-exercise-db fetch failed: ${res.status}`)
@@ -238,6 +249,7 @@ async function main() {
   const db = await fetchDb()
   const dbById = Object.fromEntries(db.map((x) => [x.id, x]))
   const qimmah = loadQimmahExercises()
+  const placeholderOnly = loadPlaceholderOnlyIds()
   const gifList = await fetchWorkoutXGifs()
   if (WORKOUTX_KEY) console.log(gifList ? `▶ WorkoutX: ${gifList.length} تمرين متحرّك` : '▶ WorkoutX: لا بيانات')
 
@@ -251,6 +263,11 @@ async function main() {
   console.log(`▶ تنزيل الصور محليًا إلى public/exercise-images/ …`)
   for (const q of qimmah) {
     if (q.muscle === 'cardio') {
+      unmatched.push(q.id)
+      continue
+    }
+    // بطاقات أجهزة بلا لقطة جهاز أصيلة → البديل الأنيق (لا نطابقها بصورة وزن حرّ خاطئة).
+    if (placeholderOnly.has(q.id)) {
       unmatched.push(q.id)
       continue
     }

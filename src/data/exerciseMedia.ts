@@ -3,7 +3,8 @@
 // لإعادة التوليد:  node scripts/build-exercise-media.mjs
 // لفتح GIF المتحرّك (اختياري):  WORKOUTX_API_KEY=xxxx node scripts/build-exercise-media.mjs
 //
-// التغطية: 136/170 تمرينًا له صورة حقيقية.
+// التغطية: 125/170 تمرينًا له صورة حقيقية.
+// (استُبعِدت بطاقات الأجهزة في PLACEHOLDER_ONLY_EXERCISE_IDS — لا تُطابَق بصور وزن حرّ خاطئة.)
 // الصور مُنزَّلة محليًا في public/exercise-images/ (لا اعتماد على شبكة وقت التشغيل)؛ الروابط البعيدة تبقى كـ fallback.
 
 /** وسائط تمرين واحد: إطار بداية + إطار نهاية (واختياريًا GIF متحرّك يُفضّل عند توفّره). */
@@ -105,12 +106,6 @@ export const exerciseMedia: Record<string, ExerciseMedia> = {
     "img1": "/exercise-images/cable-crossover/1.jpg",
     "img0Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Crossover/0.jpg",
     "img1Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Crossover/1.jpg"
-  },
-  "cable-crunch": {
-    "img0": "/exercise-images/cable-crunch/0.jpg",
-    "img1": "/exercise-images/cable-crunch/1.jpg",
-    "img0Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Crunch/0.jpg",
-    "img1Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Crunch/1.jpg"
   },
   "cable-curl": {
     "img0": "/exercise-images/cable-curl/0.jpg",
@@ -232,12 +227,6 @@ export const exerciseMedia: Record<string, ExerciseMedia> = {
     "img0Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Decline_Dumbbell_Bench_Press/0.jpg",
     "img1Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Decline_Dumbbell_Bench_Press/1.jpg"
   },
-  "decline-machine-press": {
-    "img0": "/exercise-images/decline-machine-press/0.jpg",
-    "img1": "/exercise-images/decline-machine-press/1.jpg",
-    "img0Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Leverage_Decline_Chest_Press/0.jpg",
-    "img1Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Leverage_Decline_Chest_Press/1.jpg"
-  },
   "diamond-push-up": {
     "img0": "/exercise-images/diamond-push-up/0.jpg",
     "img1": "/exercise-images/diamond-push-up/1.jpg",
@@ -340,12 +329,6 @@ export const exerciseMedia: Record<string, ExerciseMedia> = {
     "img0Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Glute_Ham_Raise/0.jpg",
     "img1Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Glute_Ham_Raise/1.jpg"
   },
-  "glute-kickback-machine": {
-    "img0": "/exercise-images/glute-kickback-machine/0.jpg",
-    "img1": "/exercise-images/glute-kickback-machine/1.jpg",
-    "img0Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Glute_Kickback/0.jpg",
-    "img1Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Glute_Kickback/1.jpg"
-  },
   "goblet-squat": {
     "img0": "/exercise-images/goblet-squat/0.jpg",
     "img1": "/exercise-images/goblet-squat/1.jpg",
@@ -357,12 +340,6 @@ export const exerciseMedia: Record<string, ExerciseMedia> = {
     "img1": "/exercise-images/good-morning/1.jpg",
     "img0Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Good_Morning/0.jpg",
     "img1Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Good_Morning/1.jpg"
-  },
-  "hack-squat": {
-    "img0": "/exercise-images/hack-squat/0.jpg",
-    "img1": "/exercise-images/hack-squat/1.jpg",
-    "img0Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Hack_Squat/0.jpg",
-    "img1Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Hack_Squat/1.jpg"
   },
   "hammer-curl": {
     "img0": "/exercise-images/hammer-curl/0.jpg",
@@ -532,18 +509,6 @@ export const exerciseMedia: Record<string, ExerciseMedia> = {
     "img0Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Flat_Bench_Cable_Flyes/0.jpg",
     "img1Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Flat_Bench_Cable_Flyes/1.jpg"
   },
-  "machine-hip-thrust": {
-    "img0": "/exercise-images/machine-hip-thrust/0.jpg",
-    "img1": "/exercise-images/machine-hip-thrust/1.jpg",
-    "img0Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Hip_Thrust/0.jpg",
-    "img1Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Hip_Thrust/1.jpg"
-  },
-  "machine-lateral-raise": {
-    "img0": "/exercise-images/machine-lateral-raise/0.jpg",
-    "img1": "/exercise-images/machine-lateral-raise/1.jpg",
-    "img0Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Seated_Lateral_Raise/0.jpg",
-    "img1Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Seated_Lateral_Raise/1.jpg"
-  },
   "machine-rdl": {
     "img0": "/exercise-images/machine-rdl/0.jpg",
     "img1": "/exercise-images/machine-rdl/1.jpg",
@@ -597,12 +562,6 @@ export const exerciseMedia: Record<string, ExerciseMedia> = {
     "img1": "/exercise-images/plank/1.jpg",
     "img0Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Plank/0.jpg",
     "img1Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Plank/1.jpg"
-  },
-  "preacher-curl": {
-    "img0": "/exercise-images/preacher-curl/0.jpg",
-    "img1": "/exercise-images/preacher-curl/1.jpg",
-    "img0Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Preacher_Curl/0.jpg",
-    "img1Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Preacher_Curl/1.jpg"
   },
   "pull-up": {
     "img0": "/exercise-images/pull-up/0.jpg",
@@ -676,12 +635,6 @@ export const exerciseMedia: Record<string, ExerciseMedia> = {
     "img0Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Seated_Cable_Rows/0.jpg",
     "img1Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Seated_Cable_Rows/1.jpg"
   },
-  "seated-calf-raise": {
-    "img0": "/exercise-images/seated-calf-raise/0.jpg",
-    "img1": "/exercise-images/seated-calf-raise/1.jpg",
-    "img0Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Seated_Calf_Raise/0.jpg",
-    "img1Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Seated_Calf_Raise/1.jpg"
-  },
   "seated-dumbbell-press": {
     "img0": "/exercise-images/seated-dumbbell-press/0.jpg",
     "img1": "/exercise-images/seated-dumbbell-press/1.jpg",
@@ -693,18 +646,6 @@ export const exerciseMedia: Record<string, ExerciseMedia> = {
     "img1": "/exercise-images/seated-lateral-raise/1.jpg",
     "img0Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Seated_Side_Lateral_Raise/0.jpg",
     "img1Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Seated_Side_Lateral_Raise/1.jpg"
-  },
-  "seated-leg-curl": {
-    "img0": "/exercise-images/seated-leg-curl/0.jpg",
-    "img1": "/exercise-images/seated-leg-curl/1.jpg",
-    "img0Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Seated_Leg_Curl/0.jpg",
-    "img1Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Seated_Leg_Curl/1.jpg"
-  },
-  "shoulder-press-machine": {
-    "img0": "/exercise-images/shoulder-press-machine/0.jpg",
-    "img1": "/exercise-images/shoulder-press-machine/1.jpg",
-    "img0Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Shoulder_Press/0.jpg",
-    "img1Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Shoulder_Press/1.jpg"
   },
   "side-plank": {
     "img0": "/exercise-images/side-plank/0.jpg",
@@ -759,12 +700,6 @@ export const exerciseMedia: Record<string, ExerciseMedia> = {
     "img1": "/exercise-images/spider-curl/1.jpg",
     "img0Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Spider_Curl/0.jpg",
     "img1Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Spider_Curl/1.jpg"
-  },
-  "standing-calf-raise": {
-    "img0": "/exercise-images/standing-calf-raise/0.jpg",
-    "img1": "/exercise-images/standing-calf-raise/1.jpg",
-    "img0Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Standing_Calf_Raises/0.jpg",
-    "img1Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Standing_Calf_Raises/1.jpg"
   },
   "step-up": {
     "img0": "/exercise-images/step-up/0.jpg",
