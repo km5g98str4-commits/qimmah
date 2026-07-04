@@ -251,9 +251,9 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
                 </div>
               )}
 
-              {/* بقية الأيام */}
+              {/* بقية الأيام — نستثني «يوم اليوم» المعروض في البطاقة أعلاه (كان يظهر مكرّرًا). */}
               <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                {plan.days.map((pd) => (
+                {plan.days.filter((pd) => pd.id !== planDay?.id).map((pd) => (
                   <button
                     key={pd.id}
                     type="button"

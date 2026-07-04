@@ -537,11 +537,10 @@ export function canonicalExerciseId(id: string): string {
 
 /**
  * بطاقات أجهزة لا نملك لها لقطة *جهاز* من قنوات المقاومة (WorkoutX/free-exercise-db تعطي وزنًا حرًّا).
- * قاعدة زياد: بطاقة الجهاز تعرض **صورة الجهاز نفسه** أو البديل الأنيق — لا شيء آخر (بار/دمبل/حبل/وزن جسم).
- * لذا نمنع عنها أي gif/صورة من تلك القنوات، وتُعرَض لها بدلًا من ذلك صورة جهاز مخصّصة إن توفّرت
- * (public/exercise-machine-images/{slug}.jpg|gif عبر machineImages.ts — يجلبها سكربت p12-fetch-machine-images
- * من مصادر مفتوحة الترخيص)، وإلا البديل الأنيق. المفاتيح **قانونية** (يُحلّ القديم عبر canonicalExerciseId).
- * مصدر واحد للحقيقة يستهلكه ExerciseMedia وسكربتات الوسائط.
+ * قاعدة زياد: بطاقة الجهاز تعرض **لقطة WorkoutX للجهاز إن وُجدت** أو البديل الأنيق — لا شيء آخر
+ * (بار/دمبل/حبل/وزن جسم، ولا صور ويب). المعرّفات هنا لا لقطة جهاز لها في WorkoutX، فنمنع عنها أي
+ * gif/صورة من تلك القنوات (كي لا يتسرّب وزن حرّ) وتبقى على البديل الأنيق. المفاتيح **قانونية**
+ * (يُحلّ القديم عبر canonicalExerciseId). مصدر واحد للحقيقة يستهلكه ExerciseMedia وسكربت الوسائط.
  */
 export const PLACEHOLDER_ONLY_EXERCISE_IDS: readonly string[] = [
   'decline-chest-press-machine',

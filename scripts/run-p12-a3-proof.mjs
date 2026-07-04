@@ -108,6 +108,14 @@ function staticChecks() {
   const injuryIds = [...injuryBlock.matchAll(/'([a-z0-9-]+)'/g)].map((x) => x[1])
   const staleLegacy = [...new Set(injuryIds.filter((id) => legacyIds.has(id)))]
   check('INJURY_RISKY_IDS: no stale legacy ids', 'none', staleLegacy.length ? staleLegacy.join(',') : 'none', staleLegacy.length === 0)
+
+  // (إصلاح الانحدار) ضبط الاختبار السلبي: عيّنة الأوزان الحرّة موجودة فعلًا في الكتالوج (فيمكن
+  // للمولّد اختيارها لولا الحارس) — كي يكون «غيابها من الخطط» دليلًا على الحارس لا على غيابها أصلًا.
+  const missingSample = FREE_WEIGHT_SAMPLE.filter((id) => !new RegExp("ex\\(\\{ id: '" + id + "'").test(exercisesSrc))
+  check('free-weight sample exists in catalog (negative-test control)', 'all present', missingSample.length ? 'MISSING:' + missingSample.join(',') : 'all present', missingSample.length === 0)
+  // والأهم: لا يجوز أن يكون أيٌّ منها ضمن الأساسيات الـ٣٢ (وإلا لن يمسكه الحارس).
+  const sampleInPrimaries = FREE_WEIGHT_SAMPLE.filter((id) => catalogIds.has(id))
+  check('free-weight sample is NOT a primary', 'none', sampleInPrimaries.length ? sampleInPrimaries.join(',') : 'none', sampleInPrimaries.length === 0)
 }
 
 // ————— fixtures —————
@@ -213,6 +221,19 @@ const PROFILES = [
   { tag: 'adv-bulk-7d-full', experienceBand: 'gt2y', trainingLevel: 'advanced', goalType: 'bulking', goal: 'bulk', trainingDays: 7, gymAccess: 'full' },
   // (جولة 3) جلسة قصيرة ٣٠د جسم كامل: يجب أن تُرفَع لـ FULL_BODY_MIN=5 وتلمس كل مجموعة كبرى.
   { tag: 'beg-cut-3d-full-30min', experienceBand: '1to6m', trainingLevel: 'beginner', goalType: 'cutting', goal: 'cut', trainingDays: 3, gymAccess: 'full', workoutDuration: 30 },
+  // (إصلاح الانحدار) هذه الملفّات كانت **تسرّب وزنًا حرًّا** قبل الإصلاح (المنزل/وزن الجسم كان لهما
+  // مسار وزن حرّ). الآن يجب أن تكون أجهزة فقط كالبقية — تُثبت أن الحارس يرفض الوزن الحرّ لكل بيئة.
+  { tag: 'REG-home-6d-full', experienceBand: '1to2y', trainingLevel: 'intermediate', goalType: 'maintenance', goal: 'maintain', trainingDays: 6, gymAccess: 'home' },
+  { tag: 'REG-bodyweight-4d', experienceBand: '1to6m', trainingLevel: 'beginner', goalType: 'cutting', goal: 'cut', trainingDays: 4, gymAccess: 'bodyweight' },
+  { tag: 'REG-homeEnv-3d-full', experienceBand: '1to6m', trainingLevel: 'beginner', goalType: 'bulking', goal: 'bulk', trainingDays: 3, workoutEnvironment: 'home', gymType: 'home' },
+]
+
+// (إصلاح الانحدار) عيّنة أوزان حرّة **موجودة في الكتالوج** — يجب ألا يظهر أيٌّ منها أساسيًا في أي
+// يوم مولّد لأي ملف/بيئة. اختبار سلبي صريح: نثبت أنها موجودة (فيمكن اختيارها) ثم أنها مرفوضة.
+const FREE_WEIGHT_SAMPLE = [
+  'barbell-bench-press', 'barbell-back-squat', 'deadlift', 'barbell-row', 'overhead-press',
+  'bodyweight-squat', 'push-up', 'pull-up', 'chin-up', 'dumbbell-row', 'dumbbell-shoulder-press',
+  'arnold-press', 'walking-lunge', 'bulgarian-split-squat', 'chest-dip',
 ]
 
 // (جولة 3) حدّ أدنى ليوم الجسم الكامل — أرجل+صدر+ظهر+أكتاف+أرجل خلفية.
@@ -376,6 +397,9 @@ async function main() {
       const slotBad = [...new Set(allSlots.filter((id) => !catalogIds.has(id) && !accSet.has(id)))]
       check(`(c) ${p.tag}: EVERY slot (incl. finisher) ∈ 32 primaries + accessories`, 'no offenders', slotBad.length ? slotBad.join(',') : 'no offenders', slotBad.length === 0)
       check(`(c) ${p.tag}: machines-only (32 primaries + accessory pool)`, 'no offenders', bad.length ? bad.join(',') : 'no offenders', bad.length === 0)
+      // (إصلاح الانحدار) اختبار سلبي صريح: صفر وزن حرّ من العيّنة في أي سلوت (يمسك تسريب المنزل/وزن الجسم).
+      const freeLeak = [...new Set(allSlots.filter((id) => FREE_WEIGHT_SAMPLE.includes(id)))]
+      check(`(c) ${p.tag}: ZERO free weights (guard blocks barbell/dumbbell/bodyweight)`, 'none', freeLeak.length ? freeLeak.join(',') : 'none', freeLeak.length === 0)
       check(`(c) ${p.tag}: days match`, `${profile.trainingDays} days`, `${days.length} days`, days.length === profile.trainingDays)
       check(`(c) ${p.tag}: per-day primaries = expected (full≥${FULL_BODY_MIN})`, perDay.map((x) => x.exp).join(','), perDay.map((x) => x.prim).join(','), primOk)
       check(`(c) ${p.tag}: ≤1 accessory, always last`, 'yes', perDay.map((x) => `${x.acc}${x.accLast ? '✓' : '✗'}`).join(','), accOk)

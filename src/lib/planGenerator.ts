@@ -142,64 +142,18 @@ const SCHEMES: Record<GoalType, RepScheme> = {
   returning: { compoundReps: '10–12', isoReps: '12–15', compoundRest: 90, isoRest: 75 },
 }
 
-/** يحسم بيئة التمرين الفعلية من الملف — الأولوية لـ gymAccess الصريح، ثم الاشتقاق الاحتياطي. */
-function resolveGymAccess(p: Profile): NonNullable<Profile['gymAccess']> {
-  // نشتق احتياطيًا من gymType أو workoutEnvironment للملفّات القديمة
-  // كي لا يحصل مستخدم «جيم منزلي» على أجهزة لمجرد غياب حقل واحد.
-  const fallback: NonNullable<Profile['gymAccess']> =
-    p.gymType === 'home' || p.workoutEnvironment === 'home'
-      ? 'home'
-      : p.gymType === 'bodyweight'
-        ? 'bodyweight'
-        : p.gymType === 'small'
-          ? 'small'
-          : 'full'
-  return p.gymAccess ?? fallback
-}
-
-/** فلتر الأدوات حسب نوع النادي (gymType). لا نولّد تمارين مستحيلة للبيئة المختارة. */
-function makeEquipFilter(p: Profile): (ex: Exercise) => boolean {
-  const access = resolveGymAccess(p)
-  if (access === 'full') return () => true
-  if (access === 'small') {
-    // نادٍ صغير: وزن حر + أجهزة أساسية + كيبل أساسي — نستبعد المتخصّص فقط (سميث/حبل).
-    const banned = new Set(['smith', 'rope'])
-    return (ex) => ex.equipment.every((e) => !banned.has(e))
-  }
-  if (access === 'home') {
-    // دمبل/بار/وزن جسم/مطاط (+ مقعد شائع منزليًا).
-    const allowed = new Set(['dumbbell', 'barbell', 'bodyweight', 'band', 'bench'])
-    return (ex) => ex.equipment.every((e) => allowed.has(e))
-  }
-  // bodyweight: وزن الجسم فقط.
-  const allowed = new Set(['bodyweight'])
-  return (ex) => ex.equipment.every((e) => allowed.has(e))
-}
-
 /** هل التمرين مناسب لمستوى الخبرة؟ المبتدئ/المستجد لا نعطيه تمارين متقدّمة. */
 function levelOk(ex: Exercise, tier: ExpTier): boolean {
   if (tier === 'beginner' || tier === 'novice') return ex.level !== 'advanced'
   return true
 }
 
-// — تفضيل الأجهزة للمبتدئ + استبعاد الكيبل (Phase 2) —
-// المبتدئ نادٍ-جديد: الأجهزة الموجّهة أأمن وأسهل ضبطًا. الكيبل (المحطّات الحرّة) دقيق ومربك له،
-// فنستبعده ونبقيه للمتقدّم فقط. ملاحظة: أجهزة السحب التي تستخدم بكرة لكنها موجّهة (لات بُل داون،
-// تجديف جهاز) مصنّفة machine أيضًا فلا تُعدّ «كيبلًا حرًّا» ولا تُستبعد.
+// المبتدئ نادٍ-جديد: الأجهزة الموجّهة أأمن وأسهل ضبطًا. (إصلاح انحدار) التوليد أجهزة فقط دومًا،
+// فلم تعد هناك مسارات وزن حرّ/كيبل حرّ للتصفية — الحوض كله من قائمة الأساسيات الـ٣٢.
 
-/** جهاز موجّه (يحوي 'machine' ضمن أدواته). */
+/** جهاز موجّه (يحوي 'machine' ضمن أدواته) — لترتيب التفضيل. */
 function isMachineExercise(ex: Exercise): boolean {
   return ex.equipment.includes('machine')
-}
-
-/** كيبل حرّ بحت: يتطلّب كيبلًا بلا بديل جهاز موجّه (مثل تفتيح كيبل، دفع ترايسبس كيبل). */
-function isFreeCableExercise(ex: Exercise): boolean {
-  return ex.equipment.includes('cable') && !ex.equipment.includes('machine')
-}
-
-/** هل يُسمح بهذا التمرين من ناحية الكيبل؟ الكيبل الحرّ للمتقدّم فقط. */
-function cableOk(ex: Exercise, tier: ExpTier): boolean {
-  return tier === 'advanced' || !isFreeCableExercise(ex)
 }
 
 /** نفضّل الأجهزة في اختيار التمارين للمبتدئ/المستجد. */
@@ -708,31 +662,15 @@ function generateWorkoutPlan(p: Profile): { plan: WorkoutPlan; specs: DaySpec[] 
   const templateId = advanced && p.splitChoice ? ADVANCED_SPLIT_ID[p.splitChoice] : splitId(days)
   const tier = expTier(p)
   const target = targetExerciseCount(tier, p.workoutDuration)
-  const equipOk = makeEquipFilter(p)
   const injuryAreas = detectInjuries(p.injuries)
   const injuryOk = makeInjuryFilter(injuryAreas)
   const preferMachines = prefersMachines(tier)
-  // P12 «أجهزة فقط»: في النادي (كامل/صغير) التمارين الأساسية هي أجهزة الكتالوج المعتمد حصريًا —
-  // لا بار/دمبل أساسي إطلاقًا. كيبل الكتالوج (بايسبس/ترايسبس/كرنش) معتمد لكل المستويات لأنه
-  // ضمن اختيار المؤسس، فلا يمرّ على cableOk. (جولة 2) لا كارديو يُضاف إطلاقًا — أُزيل addCutCardio.
-  // في المنزل/وزن الجسم لا توجد أجهزة — نُبقي السلوك السابق المناسب للأدوات المتاحة.
-  const access = resolveGymAccess(p)
-  const machinesOnly = access === 'full' || access === 'small'
-  const pool = machinesOnly
-    ? // أجهزة فقط: الحوض حصريًا من قائمة الأساسيات الـ٣٢ (قرار زياد النهائي). لا أجهزة
-      // ذراعين/بطن ولا كيبل هنا — الذراعان والبطن يُدرَّبان تبعيًا عبر المركّبات (ضغط الصدر
-      // للترايسبس، السحب/التجديف للبايسبس). فتحات البايسبس/الترايسبس/الكور لا يملؤها شيء
-      // من الحوض فيُكمل buildDayExercises العدد المستهدف من بقية أجهزة القائمة.
-      exercises.filter((ex) => primaryMachineIdSet.has(ex.id) && injuryOk(ex) && levelOk(ex, tier))
-    : exercises.filter(
-        (ex) =>
-          equipOk(ex) &&
-          injuryOk(ex) &&
-          cableOk(ex, tier) && // الكيبل الحرّ للمتقدّم فقط — نستبعده للمبتدئ
-          ex.movementPattern !== 'mobility' &&
-          ex.primaryMuscle !== 'cardio' &&
-          levelOk(ex, tier),
-      )
+  // (إصلاح انحدار — قرار زياد) **كل** خطة مولّدة أجهزة فقط، لأي بيئة (نادٍ/منزل/وزن جسم) وأي هدف.
+  // القاعدة الأساسية للتطبيق: صفر وزن حرّ أساسي إطلاقًا. الحوض حصريًا قائمة الأساسيات الـ٣٢ (قرار
+  // زياد)؛ الذراعان/البطن يدخلان كإضافة نهاية يوم فقط. لا مسار وزن حرّ في التوليد بعد اليوم
+  // (كان النادي فقط أجهزة، والمنزل/وزن الجسم يسرّبان بار/دمبل — هذا مصدر الانحدار، أُزيل).
+  const machinesOnly = true
+  const pool = exercises.filter((ex) => primaryMachineIdSet.has(ex.id) && injuryOk(ex) && levelOk(ex, tier))
 
   // عدد نسخ كل نوع يوم في التقسيمة (Upper ×2، Full ×3 …) — لتقسيم اختيار التمارين على A/B/C.
   const typeTotal: Record<string, number> = {}
