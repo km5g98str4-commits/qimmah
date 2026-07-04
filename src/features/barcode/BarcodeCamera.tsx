@@ -3,12 +3,32 @@ import { BarcodeFormat, DecodeHintType } from '@zxing/library'
 import { BrowserMultiFormatReader } from '@zxing/browser'
 import { Icon } from '@/components/Icon'
 
+/** سبب فشل تشغيل الكاميرا — يميّز رفض الصلاحية عن غياب الكاميرا عن أي عطل آخر. */
+export type CameraFailure = 'permission-denied' | 'no-camera' | 'start-failed'
+
 interface BarcodeCameraProps {
   onDetected: (barcode: string) => void
-  /** يُستدعى عند رفض صلاحية الكاميرا أو عدم توفّرها. */
-  onError: () => void
+  /** يُستدعى عند تعذّر بدء المسح، مع سبب مصنَّف كي يعرض الأب رسالة دقيقة لكل حالة. */
+  onError: (failure: CameraFailure) => void
   /** تسمية زر الفلاش (aria-label) — تأتي من قاموس الأب لدعم العربية/الإنجليزية. */
   torchLabel: string
+}
+
+/** يصنّف خطأ getUserMedia/zxing إلى سبب واجهة — حسب اسم DOMException القياسي. */
+function classifyCameraError(err: unknown): CameraFailure {
+  const name =
+    err instanceof DOMException
+      ? err.name
+      : err && typeof err === 'object' && 'name' in err
+        ? String((err as { name: unknown }).name)
+        : ''
+  if (name === 'NotAllowedError' || name === 'PermissionDeniedError' || name === 'SecurityError') {
+    return 'permission-denied'
+  }
+  if (name === 'NotFoundError' || name === 'DevicesNotFoundError' || name === 'OverconstrainedError') {
+    return 'no-camera'
+  }
+  return 'start-failed'
 }
 
 // صيغ باركود منتجات التجزئة الشائعة فقط — تسريع القراءة وتقليل الأخطاء بدل مسح كل الصيغ (QR/PDF417...).
@@ -48,38 +68,45 @@ export function BarcodeCamera({ onDetected, onError, torchLabel }: BarcodeCamera
   const [torchOn, setTorchOn] = useState(false)
 
   useEffect(() => {
-    const reader = new BrowserMultiFormatReader(buildHints())
     let stopped = false
     let controls: { stop: () => void } | undefined
 
-    const constraints: MediaStreamConstraints = {
-      video: {
-        facingMode: 'environment',
-        width: { ideal: 1280 },
-        height: { ideal: 720 },
-      },
-    }
+    // كل مسار البدء داخل try — أي استثناء متزامن (تهيئة القارئ/القيود) يتحوّل لحالة خطأ
+    // معروضة في الواجهة بدل شاشة بيضاء.
+    try {
+      const reader = new BrowserMultiFormatReader(buildHints())
 
-    reader
-      .decodeFromConstraints(constraints, videoRef.current ?? undefined, (result, _err, ctrl) => {
-        controls = ctrl
-        if (stopped) return
-        if (!ready) {
-          setReady(true)
-          const stream = videoRef.current?.srcObject
-          const track = stream instanceof MediaStream ? stream.getVideoTracks()[0] : undefined
-          trackRef.current = track ?? null
-          setTorchSupported(track ? trackSupportsTorch(track) : false)
-        }
-        if (result) {
-          stopped = true
-          ctrl.stop()
-          onDetected(result.getText())
-        }
-      })
-      .catch(() => {
-        if (!stopped) onError()
-      })
+      const constraints: MediaStreamConstraints = {
+        video: {
+          facingMode: 'environment',
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+        },
+      }
+
+      reader
+        .decodeFromConstraints(constraints, videoRef.current ?? undefined, (result, _err, ctrl) => {
+          controls = ctrl
+          if (stopped) return
+          if (!ready) {
+            setReady(true)
+            const stream = videoRef.current?.srcObject
+            const track = stream instanceof MediaStream ? stream.getVideoTracks()[0] : undefined
+            trackRef.current = track ?? null
+            setTorchSupported(track ? trackSupportsTorch(track) : false)
+          }
+          if (result) {
+            stopped = true
+            ctrl.stop()
+            onDetected(result.getText())
+          }
+        })
+        .catch((err: unknown) => {
+          if (!stopped) onError(classifyCameraError(err))
+        })
+    } catch (err) {
+      if (!stopped) onError(classifyCameraError(err))
+    }
 
     return () => {
       stopped = true

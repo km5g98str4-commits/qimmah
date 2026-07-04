@@ -17,6 +17,7 @@ import { useUiMode } from '@/lib/uiMode'
 import { getRandomPhrase } from '@/data/motivationalPhrases'
 import { getStrings } from '@/config/strings'
 import { dashboardStrings } from '@/i18n/dict/dashboard'
+import { statsScreenStrings } from '@/i18n/dict/statsScreen'
 import type { Lang } from '@/lib/appPreferences'
 import type { AppRoute } from '@/lib/appRoutes'
 
@@ -53,6 +54,9 @@ export function DashboardView({ lang, onNavigate }: DashboardViewProps) {
 
       {/* تسجيل سريع — أبرز إجراءين على بُعد نقرة واحدة */}
       <QuickEntry lang={lang} onNavigate={onNavigate} />
+
+      {/* «لوحتي» (P12-C) — مدخل ملخّص أرقام الأسبوع (تمرين/تغذية/وزن) */}
+      <MyStatsEntry lang={lang} onNavigate={onNavigate} />
 
       {/* الأساسيات: تمرين اليوم + سعرات/ماء اليوم */}
       {leads.map((card) => (
@@ -160,6 +164,29 @@ function QuickEntry({ lang, onNavigate }: { lang: Lang; onNavigate: (route: AppR
         <span className="text-[11px] text-ink-500">{tw.start} — {d.startWorkoutHint}</span>
       </button>
     </div>
+  )
+}
+
+/** بطاقة دخول «لوحتي» — تفتح شاشة ملخّص أرقام المستخدم الأسبوعية (P12-C). */
+function MyStatsEntry({ lang, onNavigate }: { lang: Lang; onNavigate: (route: AppRoute) => void }) {
+  const s = statsScreenStrings[lang]
+  return (
+    <button
+      type="button"
+      onClick={() => onNavigate('stats')}
+      className="card flex w-full items-center gap-3 p-4 text-start active:scale-[0.99]"
+      aria-label={s.entryAria}
+      data-testid="stats-entry"
+    >
+      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary-c">
+        <Icon name="Activity" className="h-5 w-5" />
+      </span>
+      <span className="min-w-0">
+        <span className="block text-sm font-black text-ink-900">{s.entryTitle}</span>
+        <span className="mt-0.5 block truncate text-[11px] text-ink-500">{s.entryHint}</span>
+      </span>
+      <Icon name="ChevronLeft" className="ms-auto h-4 w-4 shrink-0 text-ink-400 rtl:rotate-180" />
+    </button>
   )
 }
 

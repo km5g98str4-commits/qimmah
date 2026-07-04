@@ -198,6 +198,7 @@ export function AddProductScreen({ lang, barcode, onSaved, onClose }: AddProduct
                 choosePhotoLabel={t.choosePhoto}
                 retakeLabel={t.retake}
                 removeLabel={t.remove}
+                cancelLabel={t.cancel}
                 deniedHint={t.cameraDenied}
               />
               <PhotoCapture
@@ -218,6 +219,7 @@ export function AddProductScreen({ lang, barcode, onSaved, onClose }: AddProduct
                 choosePhotoLabel={t.choosePhoto}
                 retakeLabel={t.retake}
                 removeLabel={t.remove}
+                cancelLabel={t.cancel}
                 deniedHint={t.cameraDenied}
               />
             </div>

@@ -18,7 +18,8 @@ import type { RoutineDay } from '@/types'
 import type { RoutineRow } from '@/lib/customization'
 import type { Lang } from '@/lib/appPreferences'
 import { computeTargets, calorieGoalFromGoalType, goalTypeLabel } from '@/lib/calculators'
-import { exercises, getExercise } from '@/data/exercises'
+import { canonicalExerciseId, exercises, getExercise } from '@/data/exercises'
+import { primaryMachineIdSet } from '@/data/machineCatalog'
 import { getTemplate } from '@/data/workoutTemplates'
 import { mealTemplates, getMealTemplate } from '@/data/mealTemplates'
 import { workoutDayNameAr, workoutDayNameEn } from '@/lib/workoutDayLabel'
@@ -137,11 +138,11 @@ const SCHEMES: Record<GoalType, RepScheme> = {
   returning: { compoundReps: '10–12', isoReps: '12–15', compoundRest: 90, isoRest: 75 },
 }
 
-/** فلتر الأدوات حسب نوع النادي (gymType). لا نولّد تمارين مستحيلة للبيئة المختارة. */
-function makeEquipFilter(p: Profile): (ex: Exercise) => boolean {
-  // الأولوية لـ gymAccess، ثم نشتق احتياطيًا من gymType أو workoutEnvironment للملفّات القديمة
+/** يحسم بيئة التمرين الفعلية من الملف — الأولوية لـ gymAccess الصريح، ثم الاشتقاق الاحتياطي. */
+function resolveGymAccess(p: Profile): NonNullable<Profile['gymAccess']> {
+  // نشتق احتياطيًا من gymType أو workoutEnvironment للملفّات القديمة
   // كي لا يحصل مستخدم «جيم منزلي» على أجهزة لمجرد غياب حقل واحد.
-  const fallback: Profile['gymAccess'] =
+  const fallback: NonNullable<Profile['gymAccess']> =
     p.gymType === 'home' || p.workoutEnvironment === 'home'
       ? 'home'
       : p.gymType === 'bodyweight'
@@ -149,7 +150,12 @@ function makeEquipFilter(p: Profile): (ex: Exercise) => boolean {
         : p.gymType === 'small'
           ? 'small'
           : 'full'
-  const access = p.gymAccess ?? fallback
+  return p.gymAccess ?? fallback
+}
+
+/** فلتر الأدوات حسب نوع النادي (gymType). لا نولّد تمارين مستحيلة للبيئة المختارة. */
+function makeEquipFilter(p: Profile): (ex: Exercise) => boolean {
+  const access = resolveGymAccess(p)
   if (access === 'full') return () => true
   if (access === 'small') {
     // نادٍ صغير: وزن حر + أجهزة أساسية + كيبل أساسي — نستبعد المتخصّص فقط (سميث/حبل).
@@ -216,27 +222,28 @@ function detectInjuries(injuries?: string): Set<InjuryArea> {
 
 // تمارين نستبعدها افتراضيًا لكل إصابة — مع إبقاء بدائل أأمن لنفس المجموعة العضلية.
 // المبدأ: عند الشك نستبعد (محافظ)، مع ضمان بقاء بدائل تملأ الخطة (أجهزة/كيبل/دمبل).
+// المعرّفات هنا قانونية (P12): كائنات التمارين تحمل المعرّف القانوني وفحص العضوية يتم عليه.
 const INJURY_RISKY_IDS: Record<InjuryArea, ReadonlySet<string>> = {
   // الركبة: نتجنّب القرفصاء الثقيل والاندفاع العميق ومدّ الرجل؛ نُبقي ليج برس/قرفصاء خفيف والهيپ.
   knee: new Set([
-    'barbell-back-squat', 'front-squat', 'hack-squat', 'smith-machine-squat', 'sissy-squat',
-    'pendulum-squat', 'belt-squat', 'leg-press-narrow', 'bulgarian-split-squat', 'walking-lunge',
-    'reverse-lunge', 'step-up', 'leg-extension', 'wall-sit',
+    'barbell-back-squat', 'front-squat', 'hack-squat-machine', 'smith-machine-squat', 'sissy-squat',
+    'pendulum-squat-machine', 'belt-squat', 'leg-press-narrow', 'bulgarian-split-squat', 'walking-lunge',
+    'reverse-lunge', 'step-up', 'leg-extension-machine', 'wall-sit',
   ]),
   // الكتف: نتجنّب الضغط العلوي بالبار والتجديف العمودي؛ نُبقي ضغط الدمبل/الجهاز والرفرفات.
   shoulder: new Set(['overhead-press', 'push-press', 'upright-row', 'arnold-press']),
   // الظهر: نتجنّب الهينج الثقيل المحمّل على العمود؛ نُبقي التجديف المدعوم/الجهاز والهيپ ثرَست.
   back: new Set([
-    'deadlift', 'sumo-deadlift', 'stiff-leg-deadlift', 'good-morning', 'barbell-row', 't-bar-row',
+    'deadlift', 'sumo-deadlift', 'stiff-leg-deadlift', 'good-morning', 'barbell-row', 't-bar-row-machine',
     'romanian-deadlift', 'dumbbell-rdl', 'single-leg-rdl',
   ]),
   // الرسغ: نتجنّب القبضة الثقيلة (رفعات/عقلة/تجديف بار)، وحمل وزن الجسم على الكفّ (ضغط/غطس)،
   // وتمرير البار المستقيم والضغط الضيّق (إجهاد الرسغ). نُبقي أجهزة/كيبل/دمبل بقبضة محايدة.
   wrist: new Set([
-    'deadlift', 'sumo-deadlift', 'rack-pull', 'barbell-row', 'pendlay-row', 't-bar-row',
+    'deadlift', 'sumo-deadlift', 'rack-pull', 'barbell-row', 'pendlay-row', 't-bar-row-machine',
     'meadows-row', 'pull-up', 'chin-up', 'inverted-row', 'dumbbell-shrug', 'barbell-shrug',
     'kettlebell-swing', 'hanging-leg-raise', 'toes-to-bar', 'front-squat',
-    'barbell-curl', 'ez-bar-curl', 'cable-curl', 'reverse-curl', 'preacher-curl', 'spider-curl',
+    'barbell-curl', 'ez-bar-curl', 'cable-biceps-curl', 'reverse-curl', 'preacher-curl-machine', 'spider-curl',
     'skull-crusher', 'close-grip-bench-press', 'jm-press',
     'push-up', 'incline-push-up', 'knee-push-up', 'diamond-push-up', 'chest-dip', 'bench-dip',
     'ab-wheel-rollout', 'mountain-climber', 'burpees',
@@ -244,18 +251,18 @@ const INJURY_RISKY_IDS: Record<InjuryArea, ReadonlySet<string>> = {
   // المرفق: نتجنّب تمارين ثني/مدّ المرفق تحت حِمل مباشر (التمريرات، مدّ الترايسبس الثقيل، الغطس).
   // نُبقي دفع الترايسبس بالكيبل (بوش داون) والضغط بالجهاز/الدمبل لملء اليوم.
   elbow: new Set([
-    'barbell-curl', 'dumbbell-curl', 'hammer-curl', 'preacher-curl', 'cable-curl',
+    'barbell-curl', 'dumbbell-curl', 'hammer-curl', 'preacher-curl-machine', 'cable-biceps-curl',
     'concentration-curl', 'incline-dumbbell-curl', 'ez-bar-curl', 'spider-curl', 'cable-hammer-curl',
     'reverse-curl', 'machine-curl',
     'skull-crusher', 'overhead-triceps-extension', 'cable-overhead-extension', 'dumbbell-kickback',
-    'close-grip-bench-press', 'jm-press', 'bench-dip', 'chest-dip', 'triceps-dip-machine',
+    'close-grip-bench-press', 'jm-press', 'bench-dip', 'chest-dip', 'assisted-dip-machine',
     'diamond-push-up',
   ]),
   // الكاحل: نتجنّب القفز/الارتطام، ورفع السمانة واقفًا (توازن على الكاحل)، والاندفاع.
   // نُبقي سمانة جالس/ليج برس والقرفصاء المدعوم والكارديو منخفض الارتطام.
   ankle: new Set([
     'bulgarian-split-squat', 'walking-lunge', 'reverse-lunge', 'step-up',
-    'standing-calf-raise', 'bodyweight-calf-raise', 'donkey-calf-raise', 'single-leg-calf-raise',
+    'standing-calf-raise-machine', 'bodyweight-calf-raise', 'donkey-calf-raise', 'single-leg-calf-raise',
     'jump-rope', 'burpees', 'high-knees', 'mountain-climber',
   ]),
 }
@@ -264,7 +271,8 @@ const INJURY_RISKY_IDS: Record<InjuryArea, ReadonlySet<string>> = {
 function makeInjuryFilter(areas: Set<InjuryArea>): (ex: Exercise) => boolean {
   if (!areas.size) return () => true
   const banned = new Set<string>()
-  for (const area of areas) for (const id of INJURY_RISKY_IDS[area]) banned.add(id)
+  // canonicalExerciseId تحصين إضافي: لو تسلّل معرّف قديم للقوائم يبقى الاستبعاد صحيحًا.
+  for (const area of areas) for (const id of INJURY_RISKY_IDS[area]) banned.add(canonicalExerciseId(id))
   return (ex) => !banned.has(ex.id)
 }
 
@@ -301,7 +309,9 @@ const SLOTS: Record<DayType, Slot[]> = {
   ],
   lower: [
     { muscles: ['quads'], role: 'compound', patterns: ['squat'] },
-    { muscles: ['hamstrings'], role: 'compound', patterns: ['hinge'] },
+    // P12: الهينج المركّب في نسخة الأجهزة هو جهاز دفع الألوية (glutes) — نوسّع الفتحة
+    // لتشمل الألوية كي تمتلئ من الكتالوج؛ في المنزل تبقى RDL دمبل (hamstrings) أول المرشّحين.
+    { muscles: ['hamstrings', 'glutes'], role: 'compound', patterns: ['hinge'] },
     { muscles: ['quads'], role: 'any' },
     { muscles: ['glutes'], role: 'any' },
     { muscles: ['hamstrings'], role: 'isolation' },
@@ -355,6 +365,42 @@ const TYPE_MUSCLES: Record<DayType, Muscle[]> = {
   core: ['core'],
 }
 
+// ————— الإضافات (Accessories) — قرار زياد النهائي P12 —————
+// لا أيام ذراعين/بطن مستقلّة إطلاقًا. الذراعان والبطن تدخل الخطة **إضافة واحدة تُلحَق بنهاية
+// اليوم فقط**، من أجهزة الذراعين/البطن الستة (تبقى غير أساسية — قائمة الـ٣٢ تظل الحوض الوحيد).
+// الأجهزة موجودة في الكتالوج + لها بدائل + how-to → تظهر في التمرين كبطاقة عادية (بلا UI خاص).
+const ACCESSORY_POOL: Record<'triceps' | 'biceps' | 'abs', string[]> = {
+  // assisted-dip-machine أساسي (ضمن الـ٣٢) فلا يُلحَق كإضافة — نستخدم غير الأساسيين للترايسبس.
+  triceps: ['triceps-extension-machine', 'cable-triceps-pushdown'],
+  biceps: ['preacher-curl-machine', 'cable-biceps-curl'],
+  abs: ['ab-crunch-machine', 'cable-crunch'],
+}
+
+/** فئة إضافة اليوم حسب نوعه: دفع←ترايسبس، سحب←بايسبس، أرجل/كامل←بطن،
+ *  علوي/ذراعين←ترايسبس أو بايسبس بالتناوب عبر الأسبوع (حسب تكرار اليوم). */
+function accessoryCategory(type: DayType, variation: number): 'triceps' | 'biceps' | 'abs' | null {
+  switch (type) {
+    case 'push': return 'triceps'
+    case 'pull': return 'biceps'
+    case 'full':
+    case 'lower': return 'abs'
+    case 'upper':
+    case 'arms': return variation % 2 === 0 ? 'triceps' : 'biceps'
+    case 'core': return 'abs'
+    default: return null
+  }
+}
+
+/** يختار جهاز إضافة واحدًا من فئته (يتناوب حسب فهرس اليوم، ويتجنّب المكرّر داخل اليوم). */
+function pickAccessory(cat: 'triceps' | 'biceps' | 'abs', dayIndex: number, used: Set<string>): string | null {
+  const pool = ACCESSORY_POOL[cat]
+  for (let k = 0; k < pool.length; k++) {
+    const cand = pool[(dayIndex + k) % pool.length]
+    if (!used.has(cand)) return cand
+  }
+  return pool[dayIndex % pool.length] ?? null
+}
+
 /** ترتيب المرشّحين: الأجهزة أولًا عند تفضيلها (للمبتدئ)، ثم أبجديًا (ثبات الاختيار). */
 function sortCandidates(cands: Exercise[], preferMachines: boolean): Exercise[] {
   return cands.slice().sort((a, b) => {
@@ -385,7 +431,14 @@ function pickForSlot(slot: Slot, pool: Exercise[], used: Set<string>, variation:
 }
 
 /** يبني قائمة معرّفات تمارين ليوم واحد. */
-function buildDayExercises(type: DayType, variation: number, pool: Exercise[], target: number, preferMachines: boolean): string[] {
+function buildDayExercises(
+  type: DayType,
+  variation: number,
+  pool: Exercise[],
+  target: number,
+  preferMachines: boolean,
+  fillFromWholePool = false,
+): string[] {
   const used = new Set<string>()
   const ids: string[] = []
   for (const slot of SLOTS[type]) {
@@ -402,6 +455,17 @@ function buildDayExercises(type: DayType, variation: number, pool: Exercise[], t
       pool.filter((ex) => !used.has(ex.id) && TYPE_MUSCLES[type].includes(ex.primaryMuscle)),
       preferMachines,
     )
+    for (const ex of extra) {
+      if (ids.length >= target) break
+      ids.push(ex.id)
+      used.add(ex.id)
+    }
+  }
+  // P12 (أجهزة فقط): بعض الأيام تستنفد أجهزة عضلاتها قبل بلوغ العدد المستهدف
+  // (مثل يوم «بطن وكور» — جهازا بطن فقط، أو يوم الذراعين للمتقدّم بجلسة طويلة).
+  // نكمل من بقية أجهزة الكتالوج بترتيب ثابت كي يصل كل يوم لعدده المستهدف.
+  if (fillFromWholePool && ids.length < target) {
+    const extra = sortCandidates(pool.filter((ex) => !used.has(ex.id)), preferMachines)
     for (const ex of extra) {
       if (ids.length >= target) break
       ids.push(ex.id)
@@ -619,22 +683,40 @@ function generateWorkoutPlan(p: Profile): { plan: WorkoutPlan; specs: DaySpec[] 
   const injuryAreas = detectInjuries(p.injuries)
   const injuryOk = makeInjuryFilter(injuryAreas)
   const preferMachines = prefersMachines(tier)
-  const pool = exercises.filter(
-    (ex) =>
-      equipOk(ex) &&
-      injuryOk(ex) &&
-      cableOk(ex, tier) && // الكيبل الحرّ للمتقدّم فقط — نستبعده للمبتدئ
-      ex.movementPattern !== 'mobility' &&
-      ex.primaryMuscle !== 'cardio' &&
-      levelOk(ex, tier),
-  )
+  // P12 «أجهزة فقط»: في النادي (كامل/صغير) التمارين الأساسية هي أجهزة الكتالوج المعتمد حصريًا —
+  // لا بار/دمبل أساسي إطلاقًا. كيبل الكتالوج (بايسبس/ترايسبس/كرنش) معتمد لكل المستويات لأنه
+  // ضمن اختيار المؤسس، فلا يمرّ على cableOk. الكارديو يُضاف لاحقًا في addCutCardio كما هو.
+  // في المنزل/وزن الجسم لا توجد أجهزة — نُبقي السلوك السابق المناسب للأدوات المتاحة.
+  const access = resolveGymAccess(p)
+  const machinesOnly = access === 'full' || access === 'small'
+  const pool = machinesOnly
+    ? // أجهزة فقط: الحوض حصريًا من قائمة الأساسيات الـ٣٢ (قرار زياد النهائي). لا أجهزة
+      // ذراعين/بطن ولا كيبل هنا — الذراعان والبطن يُدرَّبان تبعيًا عبر المركّبات (ضغط الصدر
+      // للترايسبس، السحب/التجديف للبايسبس). فتحات البايسبس/الترايسبس/الكور لا يملؤها شيء
+      // من الحوض فيُكمل buildDayExercises العدد المستهدف من بقية أجهزة القائمة.
+      exercises.filter((ex) => primaryMachineIdSet.has(ex.id) && injuryOk(ex) && levelOk(ex, tier))
+    : exercises.filter(
+        (ex) =>
+          equipOk(ex) &&
+          injuryOk(ex) &&
+          cableOk(ex, tier) && // الكيبل الحرّ للمتقدّم فقط — نستبعده للمبتدئ
+          ex.movementPattern !== 'mobility' &&
+          ex.primaryMuscle !== 'cardio' &&
+          levelOk(ex, tier),
+      )
 
   const counts: Record<string, number> = {}
   const planDays: PlanDay[] = specs.map((spec, di) => {
     const variation = counts[spec.type] ?? 0
     counts[spec.type] = variation + 1
     const dayId = `gen-${di + 1}-${spec.type}`
-    const ids = buildDayExercises(spec.type, variation, pool, target, preferMachines)
+    const ids = buildDayExercises(spec.type, variation, pool, target, preferMachines, machinesOnly)
+    // إضافة واحدة تُلحَق بنهاية اليوم (أجهزة فقط) — ذراعان/بطن حسب نوع اليوم، غير أساسية.
+    if (machinesOnly) {
+      const cat = accessoryCategory(spec.type, variation)
+      const acc = cat ? pickAccessory(cat, di, new Set(ids)) : null
+      if (acc) ids.push(acc)
+    }
     return {
       id: dayId,
       nameAr: workoutDayNameAr(spec.nameAr, di),

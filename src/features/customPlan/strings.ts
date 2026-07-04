@@ -64,6 +64,10 @@ export interface CustomPlanStrings {
   add: string
   added: string
   close: string
+  /** عنوان قسم التمارين الحرة أسفل أجهزة الكتالوج (P12). */
+  freeWeightsSection: string
+  /** عنوان قسم أجهزة الإضافات (ذراعان/بطن) — غير أساسية، تُلحَق بالأيام (P12). */
+  accessoriesSection: string
   muscleLabels: Record<MuscleFilter, string>
 
   // — نقاط الدخول في تبويب التمرين —
@@ -129,6 +133,8 @@ const ar: CustomPlanStrings = {
   add: 'إضافة',
   added: 'أُضيف',
   close: 'إغلاق',
+  freeWeightsSection: 'تمارين حرة (متقدّم)',
+  accessoriesSection: 'إضافات (ذراعان وبطن)',
   muscleLabels: {
     all: 'كل العضلات',
     chest: 'صدر',
@@ -207,6 +213,8 @@ const en: CustomPlanStrings = {
   add: 'Add',
   added: 'Added',
   close: 'Close',
+  freeWeightsSection: 'Free weights (advanced)',
+  accessoriesSection: 'Accessories (arms & abs)',
   muscleLabels: {
     all: 'All muscles',
     chest: 'Chest',

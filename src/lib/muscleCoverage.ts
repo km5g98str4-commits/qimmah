@@ -11,9 +11,22 @@
 import type { MuscleId, MuscleStatus, MuscleCoverage, WeeklyCoverageResult } from '@/types/muscles'
 import type { WorkoutPlan } from '@/types/workout'
 import type { TrainingLevel } from '@/types/profile'
+import type { Lang } from '@/lib/appPreferences'
 import type { WorkoutSession } from './workoutSessions'
-import { muscleGroups, muscleMap, muscleLabelAr } from '@/data/muscleGroups'
+import { muscleGroups, muscleMap, muscleGroupLabel } from '@/data/muscleGroups'
 import { getExercise } from '@/data/exercises'
+import { muscleCoverageStrings } from '@/i18n/dict/muscleCoverage'
+
+/** التوصيات ثنائية اللغة (P12) — بالعربية والإنجليزية معًا. */
+export interface LocalizedRecommendations {
+  ar: string[]
+  en: string[]
+}
+
+/** نتيجة التغطية مع توصيات ثنائية اللغة — recommendationsAr تبقى للتوافق مع المستهلكين الحاليين. */
+export interface WeeklyCoverageResultLocalized extends WeeklyCoverageResult {
+  recommendations: LocalizedRecommendations
+}
 
 const HOUR = 3600_000
 const WEEK_MS = 7 * 24 * HOUR
@@ -62,7 +75,7 @@ function completedSetCount(ex: WorkoutSession['exercises'][number]): number {
 }
 
 /** يحسب التغطية الأسبوعية الكاملة لكل العضلات. */
-export function computeWeeklyCoverage(input: CoverageInput): WeeklyCoverageResult {
+export function computeWeeklyCoverage(input: CoverageInput): WeeklyCoverageResultLocalized {
   const now = (input.now ?? new Date()).getTime()
   const level = input.level ?? 'intermediate'
   const windowStart = now - WEEK_MS
@@ -131,9 +144,16 @@ export function computeWeeklyCoverage(input: CoverageInput): WeeklyCoverageResul
     if (a.sets > mg.weeklyTarget.max * 1.25) overtrainedMuscles.push(mg.id)
   })
 
-  const recommendationsAr = buildRecommendations(weeklyCoverage, missingMuscles, overtrainedMuscles, now)
+  const recommendations = buildRecommendations(weeklyCoverage, missingMuscles, overtrainedMuscles, now)
 
-  return { weeklyCoverage, missingMuscles, overtrainedMuscles, recommendationsAr }
+  return {
+    weeklyCoverage,
+    missingMuscles,
+    overtrainedMuscles,
+    recommendations,
+    // توافق: المستهلكون الحاليون يقرأون recommendationsAr — مشتقة من البنية الجديدة.
+    recommendationsAr: recommendations.ar,
+  }
 }
 
 /** يستخرج العضلات التي تلمسها الخطة (أساسية + ثانوية). */
@@ -160,19 +180,30 @@ function deriveStatus(sets: number, hrs: number, target: number): MuscleStatus {
   return sets < target * 0.5 ? 'undertrained' : 'ready'
 }
 
-/** يبني توصيات عربية موجزة بناءً على التغطية. */
+/** يملأ قالب توصية بأسماء العضلات بلغة محددة. */
+function fillTemplate(template: string, params: Record<string, string>): string {
+  return template.replace(/\{(\w+)\}/g, (_, key: string) => params[key] ?? '')
+}
+
+/** يبني توصيات موجزة ثنائية اللغة (P12) بناءً على التغطية — القوالب من i18n/dict/muscleCoverage. */
 function buildRecommendations(
   coverage: Record<string, MuscleCoverage>,
   missing: MuscleId[],
   overtrained: MuscleId[],
   now: number,
-): string[] {
-  const recs: string[] = []
+): LocalizedRecommendations {
+  const recs: LocalizedRecommendations = { ar: [], en: [] }
+  const langs: Lang[] = ['ar', 'en']
+  const push = (build: (lang: Lang) => string) => {
+    langs.forEach((lang) => recs[lang].push(build(lang)))
+  }
+  const joinNames = (ids: MuscleId[], lang: Lang) =>
+    ids.map((id) => muscleGroupLabel(id, lang)).join(muscleCoverageStrings[lang].listSeparator)
 
   // 1) أبرز عضلة ناقصة
   if (missing.length) {
-    const names = missing.slice(0, 3).map(muscleLabelAr).join('، ')
-    recs.push(`${names} ${missing.length > 1 ? 'تمرّنت' : 'تمرّن'} أقل من باقي العضلات هذا الأسبوع — أضف لها تمرينًا.`)
+    const key = missing.length > 1 ? 'missingMultiple' : 'missingSingle'
+    push((lang) => fillTemplate(muscleCoverageStrings[lang][key], { muscles: joinNames(missing.slice(0, 3), lang) }))
   }
 
   // 2) عضلة تحتاج راحة اليوم (تُمرّنت خلال أقل من 48 ساعة)
@@ -181,21 +212,22 @@ function buildRecommendations(
     .filter((c) => c && (c.status === 'fresh' || c.status === 'recovering'))
     .sort((a, b) => hoursSince(a.lastTrainedAt, now) - hoursSince(b.lastTrainedAt, now))[0]
   if (needRest) {
-    recs.push(`${muscleLabelAr(needRest.muscleId)} يحتاج راحة اليوم — تعافيه لم يكتمل بعد.`)
+    push((lang) => fillTemplate(muscleCoverageStrings[lang].needsRest, { muscle: muscleGroupLabel(needRest.muscleId, lang) }))
   }
 
   // 3) إفراط
   if (overtrained.length) {
-    const names = overtrained.slice(0, 2).map(muscleLabelAr).join('، ')
-    recs.push(`${names} تجاوز الحد الموصى به من المجموعات — خفّف الحجم قليلًا.`)
+    push((lang) => fillTemplate(muscleCoverageStrings[lang].overtrained, { muscles: joinNames(overtrained.slice(0, 2), lang) }))
   }
 
   // 4) عضلة جاهزة للتمرين (تعافت)
-  if (!recs.length || recs.length < 2) {
+  if (recs.ar.length < 2) {
     const ready = muscleGroups
       .map((m) => coverage[m.id])
       .find((c) => c && c.status === 'ready' && c.sets > 0)
-    if (ready) recs.push(`${muscleLabelAr(ready.muscleId)} تعافى وجاهز للتمرين اليوم.`)
+    if (ready) {
+      push((lang) => fillTemplate(muscleCoverageStrings[lang].readyToTrain, { muscle: muscleGroupLabel(ready.muscleId, lang) }))
+    }
   }
 
   return recs

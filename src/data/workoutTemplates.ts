@@ -1,7 +1,10 @@
 import type { WorkoutTemplate } from '@/types/workout'
 
-// قوالب جداول التمرين — تستخدم معرّفات تمارين من exercises.ts.
-// عملية وآمنة: المبتدئ غير محمّل، Machine Only أجهزة، Home Workout وزن جسم/دمبل.
+// قوالب جداول التمرين — تستخدم معرّفات تمارين قانونية من exercises.ts.
+// P12 «أجهزة فقط»: كل التمارين الأساسية في قوالب النادي من كتالوج الأجهزة المعتمد
+// (machineCatalog.ts) حصريًا — لا بار/دمبل/وزن جسم أساسي. الاستثناءان:
+//  • home-workout: قالب منزلي بلا أجهزة — يبقى بتمارين المنزل (وزن جسم/دمبل).
+//  • كارديو fat-loss: أجهزة كارديو (سير/دراجة/تجديف) خارج الكتالوج لأنها ليست تمارين مقاومة.
 
 export const workoutTemplates: WorkoutTemplate[] = [
   {
@@ -12,9 +15,9 @@ export const workoutTemplates: WorkoutTemplate[] = [
     descriptionEn: 'Whole-body training three times a week — great for beginners and busy weeks.',
     recommendedFor: 'مبتدئ–متوسط',
     days: [
-      { id: 'full-body-3-d1', nameAr: 'جسم كامل', nameEn: 'Full Body', exerciseIds: ['barbell-back-squat', 'barbell-bench-press', 'barbell-row', 'overhead-press', 'plank'] },
-      { id: 'full-body-3-d2', nameAr: 'جسم كامل', nameEn: 'Full Body', exerciseIds: ['deadlift', 'incline-dumbbell-press', 'lat-pulldown', 'dumbbell-shoulder-press', 'hanging-leg-raise'] },
-      { id: 'full-body-3-d3', nameAr: 'جسم كامل', nameEn: 'Full Body', exerciseIds: ['leg-press', 'dumbbell-bench-press', 'seated-cable-row', 'lateral-raise', 'cable-crunch'] },
+      { id: 'full-body-3-d1', nameAr: 'جسم كامل', nameEn: 'Full Body', exerciseIds: ['hack-squat-machine', 'chest-press-machine', 'seated-row-machine', 'shoulder-press-machine', 'lying-leg-curl', 'ab-crunch-machine'] },
+      { id: 'full-body-3-d2', nameAr: 'جسم كامل', nameEn: 'Full Body', exerciseIds: ['glute-drive-machine', 'incline-chest-press-machine', 'lat-pulldown-machine', 'shoulder-press-machine', 'leg-extension-machine', 'cable-crunch'] },
+      { id: 'full-body-3-d3', nameAr: 'جسم كامل', nameEn: 'Full Body', exerciseIds: ['leg-press-machine', 'iso-lateral-chest-press', 'chest-supported-row-machine', 'lateral-raise-machine', 'seated-leg-curl', 'ab-crunch-machine'] },
     ],
   },
   {
@@ -25,22 +28,22 @@ export const workoutTemplates: WorkoutTemplate[] = [
     descriptionEn: 'Classic split: a push day, a pull day, and a legs day.',
     recommendedFor: 'متوسط',
     days: [
-      { id: 'push-pull-legs-d1', nameAr: 'دفع', nameEn: 'Push', exerciseIds: ['barbell-bench-press', 'overhead-press', 'incline-dumbbell-press', 'lateral-raise', 'triceps-pushdown'] },
-      { id: 'push-pull-legs-d2', nameAr: 'سحب', nameEn: 'Pull', exerciseIds: ['deadlift', 'lat-pulldown', 'barbell-row', 'face-pull', 'barbell-curl'] },
-      { id: 'push-pull-legs-d3', nameAr: 'أرجل', nameEn: 'Legs', exerciseIds: ['barbell-back-squat', 'romanian-deadlift', 'leg-press', 'leg-extension', 'standing-calf-raise'] },
+      { id: 'push-pull-legs-d1', nameAr: 'دفع', nameEn: 'Push', exerciseIds: ['chest-press-machine', 'shoulder-press-machine', 'incline-chest-press-machine', 'lateral-raise-machine', 'assisted-dip-machine', 'triceps-extension-machine'] },
+      { id: 'push-pull-legs-d2', nameAr: 'سحب', nameEn: 'Pull', exerciseIds: ['iso-lateral-high-row', 'lat-pulldown-machine', 'seated-row-machine', 'reverse-pec-deck', 'single-arm-lat-pulldown', 'preacher-curl-machine'] },
+      { id: 'push-pull-legs-d3', nameAr: 'أرجل', nameEn: 'Legs', exerciseIds: ['hack-squat-machine', 'seated-leg-curl', 'leg-press-machine', 'leg-extension-machine', 'standing-calf-raise-machine', 'ab-crunch-machine'] },
     ],
   },
   {
     id: 'ppl-3',
     nameAr: 'PPL ٣ أيام',
     nameEn: 'PPL 3 Days',
-    descriptionAr: 'دفع/سحب/أرجل بنسخة أجهزة ودمبل أسهل على المفاصل.',
-    descriptionEn: 'Push/Pull/Legs in a machine & dumbbell-friendly variation.',
+    descriptionAr: 'دفع/سحب/أرجل بنسخة أجهزة أسهل على المفاصل.',
+    descriptionEn: 'Push/Pull/Legs in a machine-friendly variation.',
     recommendedFor: 'مبتدئ–متوسط',
     days: [
-      { id: 'ppl-3-d1', nameAr: 'دفع', nameEn: 'Push', exerciseIds: ['chest-press-machine', 'shoulder-press-machine', 'incline-dumbbell-press', 'cable-lateral-raise', 'rope-pushdown'] },
-      { id: 'ppl-3-d2', nameAr: 'سحب', nameEn: 'Pull', exerciseIds: ['lat-pulldown', 'seated-cable-row', 'machine-row', 'face-pull', 'cable-curl'] },
-      { id: 'ppl-3-d3', nameAr: 'أرجل', nameEn: 'Legs', exerciseIds: ['hack-squat', 'leg-press', 'lying-leg-curl', 'leg-extension', 'seated-calf-raise'] },
+      { id: 'ppl-3-d1', nameAr: 'دفع', nameEn: 'Push', exerciseIds: ['chest-press-machine', 'shoulder-press-machine', 'incline-chest-press-machine', 'lateral-raise-machine', 'assisted-dip-machine', 'triceps-extension-machine'] },
+      { id: 'ppl-3-d2', nameAr: 'سحب', nameEn: 'Pull', exerciseIds: ['lat-pulldown-machine', 'seated-row-machine', 'chest-supported-row-machine', 'reverse-pec-deck', 'wide-grip-lat-pulldown', 'preacher-curl-machine'] },
+      { id: 'ppl-3-d3', nameAr: 'أرجل', nameEn: 'Legs', exerciseIds: ['hack-squat-machine', 'leg-press-machine', 'lying-leg-curl', 'leg-extension-machine', 'seated-calf-raise-machine', 'ab-crunch-machine'] },
     ],
   },
   {
@@ -51,10 +54,10 @@ export const workoutTemplates: WorkoutTemplate[] = [
     descriptionEn: 'Two upper and two lower days — a solid balance of frequency and recovery.',
     recommendedFor: 'متوسط',
     days: [
-      { id: 'upper-lower-4-d1', nameAr: 'علوي أ', nameEn: 'Upper A', exerciseIds: ['barbell-bench-press', 'barbell-row', 'overhead-press', 'lat-pulldown', 'barbell-curl', 'triceps-pushdown'] },
-      { id: 'upper-lower-4-d2', nameAr: 'سفلي أ', nameEn: 'Lower A', exerciseIds: ['barbell-back-squat', 'romanian-deadlift', 'leg-press', 'lying-leg-curl', 'standing-calf-raise'] },
-      { id: 'upper-lower-4-d3', nameAr: 'علوي ب', nameEn: 'Upper B', exerciseIds: ['incline-dumbbell-press', 'seated-cable-row', 'dumbbell-shoulder-press', 'pull-up', 'hammer-curl', 'skull-crusher'] },
-      { id: 'upper-lower-4-d4', nameAr: 'سفلي ب', nameEn: 'Lower B', exerciseIds: ['deadlift', 'hack-squat', 'walking-lunge', 'seated-leg-curl', 'seated-calf-raise'] },
+      { id: 'upper-lower-4-d1', nameAr: 'علوي أ', nameEn: 'Upper A', exerciseIds: ['chest-press-machine', 'seated-row-machine', 'shoulder-press-machine', 'lat-pulldown-machine', 'rear-delt-row-machine', 'assisted-dip-machine', 'triceps-extension-machine'] },
+      { id: 'upper-lower-4-d2', nameAr: 'سفلي أ', nameEn: 'Lower A', exerciseIds: ['hack-squat-machine', 'glute-drive-machine', 'leg-press-machine', 'lying-leg-curl', 'standing-calf-raise-machine', 'ab-crunch-machine'] },
+      { id: 'upper-lower-4-d3', nameAr: 'علوي ب', nameEn: 'Upper B', exerciseIds: ['incline-chest-press-machine', 'chest-supported-row-machine', 'shoulder-press-machine', 'wide-grip-lat-pulldown', 't-bar-row-machine', 'assisted-dip-machine', 'preacher-curl-machine'] },
+      { id: 'upper-lower-4-d4', nameAr: 'سفلي ب', nameEn: 'Lower B', exerciseIds: ['leg-press-machine', 'hack-squat-machine', 'leg-extension-machine', 'seated-leg-curl', 'seated-calf-raise-machine', 'cable-crunch'] },
     ],
   },
   {
@@ -65,10 +68,10 @@ export const workoutTemplates: WorkoutTemplate[] = [
     descriptionEn: 'Body-part split: chest/triceps, back/biceps, shoulders/core, legs.',
     recommendedFor: 'متوسط–متقدّم',
     days: [
-      { id: 'four-day-split-d1', nameAr: 'صدر وترايسبس', nameEn: 'Chest & Triceps', exerciseIds: ['barbell-bench-press', 'incline-dumbbell-press', 'cable-crossover', 'close-grip-bench-press', 'rope-pushdown'] },
-      { id: 'four-day-split-d2', nameAr: 'ظهر وبايسبس', nameEn: 'Back & Biceps', exerciseIds: ['deadlift', 'barbell-row', 'lat-pulldown', 'seated-cable-row', 'barbell-curl', 'hammer-curl'] },
-      { id: 'four-day-split-d3', nameAr: 'أكتاف وكور', nameEn: 'Shoulders & Core', exerciseIds: ['overhead-press', 'lateral-raise', 'rear-delt-fly', 'face-pull', 'hanging-leg-raise', 'plank'] },
-      { id: 'four-day-split-d4', nameAr: 'أرجل', nameEn: 'Legs', exerciseIds: ['barbell-back-squat', 'leg-press', 'romanian-deadlift', 'leg-extension', 'standing-calf-raise'] },
+      { id: 'four-day-split-d1', nameAr: 'صدر وترايسبس', nameEn: 'Chest & Triceps', exerciseIds: ['chest-press-machine', 'incline-chest-press-machine', 'iso-lateral-chest-press', 'assisted-dip-machine', 'decline-chest-press-machine', 'triceps-extension-machine'] },
+      { id: 'four-day-split-d2', nameAr: 'ظهر وبايسبس', nameEn: 'Back & Biceps', exerciseIds: ['iso-lateral-high-row', 'seated-row-machine', 'lat-pulldown-machine', 'chest-supported-row-machine', 'single-arm-lat-pulldown', 'wide-grip-iso-lateral-pulldown', 'preacher-curl-machine'] },
+      { id: 'four-day-split-d3', nameAr: 'أكتاف', nameEn: 'Shoulders', exerciseIds: ['shoulder-press-machine', 'lateral-raise-machine', 'reverse-pec-deck', 'rear-delt-row-machine', 'ab-crunch-machine'] },
+      { id: 'four-day-split-d4', nameAr: 'أرجل', nameEn: 'Legs', exerciseIds: ['hack-squat-machine', 'leg-press-machine', 'seated-leg-curl', 'leg-extension-machine', 'standing-calf-raise-machine', 'cable-crunch'] },
     ],
   },
   {
@@ -79,9 +82,9 @@ export const workoutTemplates: WorkoutTemplate[] = [
     descriptionEn: 'All machine and cable based — comfortable and safe for beginners.',
     recommendedFor: 'مبتدئ',
     days: [
-      { id: 'machine-only-d1', nameAr: 'دفع', nameEn: 'Push', exerciseIds: ['chest-press-machine', 'shoulder-press-machine', 'pec-deck', 'triceps-pushdown'] },
-      { id: 'machine-only-d2', nameAr: 'سحب', nameEn: 'Pull', exerciseIds: ['lat-pulldown', 'machine-row', 'seated-cable-row', 'reverse-pec-deck', 'cable-curl'] },
-      { id: 'machine-only-d3', nameAr: 'أرجل', nameEn: 'Legs', exerciseIds: ['leg-press', 'hack-squat', 'leg-extension', 'lying-leg-curl', 'seated-calf-raise'] },
+      { id: 'machine-only-d1', nameAr: 'دفع', nameEn: 'Push', exerciseIds: ['chest-press-machine', 'shoulder-press-machine', 'incline-chest-press-machine', 'assisted-dip-machine', 'triceps-extension-machine'] },
+      { id: 'machine-only-d2', nameAr: 'سحب', nameEn: 'Pull', exerciseIds: ['lat-pulldown-machine', 'seated-row-machine', 'chest-supported-row-machine', 'reverse-pec-deck', 'wide-grip-lat-pulldown', 'preacher-curl-machine'] },
+      { id: 'machine-only-d3', nameAr: 'أرجل', nameEn: 'Legs', exerciseIds: ['leg-press-machine', 'hack-squat-machine', 'leg-extension-machine', 'lying-leg-curl', 'seated-calf-raise-machine', 'ab-crunch-machine'] },
     ],
   },
   {
@@ -105,9 +108,9 @@ export const workoutTemplates: WorkoutTemplate[] = [
     descriptionEn: 'A simple starter program — three light full-body days.',
     recommendedFor: 'مبتدئ',
     days: [
-      { id: 'beginner-gym-d1', nameAr: 'جسم كامل', nameEn: 'Full Body', exerciseIds: ['chest-press-machine', 'lat-pulldown', 'leg-press', 'plank'] },
-      { id: 'beginner-gym-d2', nameAr: 'جسم كامل', nameEn: 'Full Body', exerciseIds: ['shoulder-press-machine', 'seated-cable-row', 'leg-extension', 'lying-leg-curl'] },
-      { id: 'beginner-gym-d3', nameAr: 'جسم كامل', nameEn: 'Full Body', exerciseIds: ['incline-machine-press', 'machine-row', 'goblet-squat', 'standing-calf-raise'] },
+      { id: 'beginner-gym-d1', nameAr: 'جسم كامل', nameEn: 'Full Body', exerciseIds: ['chest-press-machine', 'lat-pulldown-machine', 'leg-press-machine', 'shoulder-press-machine', 'ab-crunch-machine'] },
+      { id: 'beginner-gym-d2', nameAr: 'جسم كامل', nameEn: 'Full Body', exerciseIds: ['shoulder-press-machine', 'seated-row-machine', 'leg-extension-machine', 'lying-leg-curl', 'cable-crunch'] },
+      { id: 'beginner-gym-d3', nameAr: 'جسم كامل', nameEn: 'Full Body', exerciseIds: ['incline-chest-press-machine', 'chest-supported-row-machine', 'hack-squat-machine', 'standing-calf-raise-machine', 'ab-crunch-machine'] },
     ],
   },
   {
@@ -118,9 +121,9 @@ export const workoutTemplates: WorkoutTemplate[] = [
     descriptionEn: 'Full-body sessions finished with cardio — more movement, more burn.',
     recommendedFor: 'مبتدئ–متوسط',
     days: [
-      { id: 'fat-loss-d1', nameAr: 'جسم كامل', nameEn: 'Full Body', exerciseIds: ['goblet-squat', 'push-up', 'dumbbell-row', 'plank', 'treadmill-run'] },
-      { id: 'fat-loss-d2', nameAr: 'جسم كامل', nameEn: 'Full Body', exerciseIds: ['leg-press', 'dumbbell-shoulder-press', 'lat-pulldown', 'mountain-climber', 'stationary-bike'] },
-      { id: 'fat-loss-d3', nameAr: 'جسم كامل', nameEn: 'Full Body', exerciseIds: ['walking-lunge', 'dumbbell-bench-press', 'seated-cable-row', 'russian-twist', 'rowing-machine'] },
+      { id: 'fat-loss-d1', nameAr: 'جسم كامل', nameEn: 'Full Body', exerciseIds: ['hack-squat-machine', 'chest-press-machine', 'seated-row-machine', 'shoulder-press-machine', 'ab-crunch-machine', 'treadmill-run'] },
+      { id: 'fat-loss-d2', nameAr: 'جسم كامل', nameEn: 'Full Body', exerciseIds: ['leg-press-machine', 'shoulder-press-machine', 'lat-pulldown-machine', 'chest-press-machine', 'cable-crunch', 'stationary-bike'] },
+      { id: 'fat-loss-d3', nameAr: 'جسم كامل', nameEn: 'Full Body', exerciseIds: ['pendulum-squat-machine', 'iso-lateral-chest-press', 'chest-supported-row-machine', 'shoulder-press-machine', 'ab-crunch-machine', 'rowing-machine'] },
     ],
   },
   {
@@ -131,10 +134,10 @@ export const workoutTemplates: WorkoutTemplate[] = [
     descriptionEn: 'Four hypertrophy days (upper/lower ×2) with higher volume.',
     recommendedFor: 'متوسط–متقدّم',
     days: [
-      { id: 'muscle-gain-d1', nameAr: 'علوي أ', nameEn: 'Upper A', exerciseIds: ['barbell-bench-press', 'barbell-row', 'dumbbell-shoulder-press', 'lat-pulldown', 'barbell-curl', 'triceps-pushdown'] },
-      { id: 'muscle-gain-d2', nameAr: 'سفلي أ', nameEn: 'Lower A', exerciseIds: ['barbell-back-squat', 'romanian-deadlift', 'leg-press', 'leg-extension', 'standing-calf-raise'] },
-      { id: 'muscle-gain-d3', nameAr: 'علوي ب', nameEn: 'Upper B', exerciseIds: ['incline-barbell-press', 'seated-cable-row', 'lateral-raise', 'pull-up', 'hammer-curl', 'skull-crusher'] },
-      { id: 'muscle-gain-d4', nameAr: 'سفلي ب', nameEn: 'Lower B', exerciseIds: ['hack-squat', 'hip-thrust', 'lying-leg-curl', 'walking-lunge', 'seated-calf-raise'] },
+      { id: 'muscle-gain-d1', nameAr: 'علوي أ', nameEn: 'Upper A', exerciseIds: ['chest-press-machine', 'seated-row-machine', 'shoulder-press-machine', 'lat-pulldown-machine', 'rear-delt-row-machine', 'assisted-dip-machine', 'triceps-extension-machine'] },
+      { id: 'muscle-gain-d2', nameAr: 'سفلي أ', nameEn: 'Lower A', exerciseIds: ['hack-squat-machine', 'seated-leg-curl', 'leg-press-machine', 'leg-extension-machine', 'standing-calf-raise-machine', 'ab-crunch-machine'] },
+      { id: 'muscle-gain-d3', nameAr: 'علوي ب', nameEn: 'Upper B', exerciseIds: ['incline-chest-press-machine', 'chest-supported-row-machine', 'lateral-raise-machine', 'wide-grip-lat-pulldown', 't-bar-row-machine', 'assisted-dip-machine', 'preacher-curl-machine'] },
+      { id: 'muscle-gain-d4', nameAr: 'سفلي ب', nameEn: 'Lower B', exerciseIds: ['pendulum-squat-machine', 'glute-drive-machine', 'lying-leg-curl', 'leg-extension-machine', 'seated-calf-raise-machine', 'cable-crunch'] },
     ],
   },
   {

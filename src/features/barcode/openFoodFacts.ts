@@ -24,6 +24,15 @@ interface CacheEntry {
 
 type Cache = Record<string, CacheEntry>
 
+/**
+ * نتيجة البحث المميَّزة — تفصل «المنتج غير موجود في القاعدة» عن «تعذّر الاتصال بالقاعدة»
+ * كي تعرض الواجهة رسالة صادقة لكل حالة بدل خلطهما.
+ */
+export type LookupResult =
+  | { status: 'found'; product: OffProduct }
+  | { status: 'not-found' }
+  | { status: 'network-error' }
+
 function readCache(): Cache {
   if (typeof window === 'undefined') return {}
   try {
@@ -68,12 +77,12 @@ function parseProduct(barcode: string, data: Record<string, unknown>): OffProduc
 
 /**
  * يبحث عن منتج بالباركود عبر Open Food Facts، مع تخزين مؤقت محلي.
- * يرجّع null إن لم يُعثر على المنتج أو كانت بياناته الغذائية ناقصة (بدون سعرات).
+ * «غير موجود» يشمل المنتج بلا بيانات غذائية قابلة للاستخدام (بدون سعرات).
  */
-export async function lookupBarcode(barcode: string): Promise<OffProduct | null> {
+export async function lookupBarcode(barcode: string): Promise<LookupResult> {
   const cache = readCache()
   const cached = cache[barcode]
-  if (cached) return cached.product
+  if (cached) return cached.product ? { status: 'found', product: cached.product } : { status: 'not-found' }
 
   try {
     const res = await fetch(`${API_BASE}/${encodeURIComponent(barcode)}.json?fields=${FIELDS}`, {
@@ -87,9 +96,9 @@ export async function lookupBarcode(barcode: string): Promise<OffProduct | null>
     const usable = product && product.caloriesPer100g > 0 ? product : null
     cache[barcode] = { fetchedAt: Date.now(), product: usable }
     writeCache(cache)
-    return usable
+    return usable ? { status: 'found', product: usable } : { status: 'not-found' }
   } catch {
-    // فشل الشبكة لا يُخزَّن — قد ينجح لاحقًا.
-    return null
+    // فشل الشبكة لا يُخزَّن (قد ينجح لاحقًا) ويُميَّز عن «غير موجود» لعرض حالة اتصال صادقة.
+    return { status: 'network-error' }
   }
 }

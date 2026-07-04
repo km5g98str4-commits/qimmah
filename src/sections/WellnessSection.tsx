@@ -37,7 +37,12 @@ export function WellnessSection({ lang }: { lang: Lang }) {
               <p className="text-sm font-bold text-ink-900">{t.supplementsTab}</p>
             </div>
             {wp.supplements.length === 0 ? (
-              <p className="p-6 text-center text-sm text-ink-400">—</p>
+              <div className="flex flex-col items-center gap-2 p-6 text-center">
+                <span className="grid h-10 w-10 place-items-center rounded-xl bg-primary-soft text-primary-c">
+                  <Icon name="Pill" className="h-5 w-5" />
+                </span>
+                <p className="text-sm leading-relaxed text-ink-500">{t.emptySupp}</p>
+              </div>
             ) : (
               <ul className="divide-y divide-line">
                 {wp.supplements.map((s) => (
@@ -61,7 +66,12 @@ export function WellnessSection({ lang }: { lang: Lang }) {
               <p className="text-sm font-bold text-ink-900">{t.medicationsTab}</p>
             </div>
             {wp.medications.length === 0 ? (
-              <p className="p-6 text-center text-sm text-ink-400">—</p>
+              <div className="flex flex-col items-center gap-2 p-6 text-center">
+                <span className="grid h-10 w-10 place-items-center rounded-xl bg-primary-soft text-primary-c">
+                  <Icon name="ClipboardList" className="h-5 w-5" />
+                </span>
+                <p className="text-sm leading-relaxed text-ink-500">{t.emptyMed}</p>
+              </div>
             ) : (
               <ul className="divide-y divide-line">
                 {wp.medications.map((m) => (

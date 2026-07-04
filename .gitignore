@@ -34,3 +34,9 @@ pnpm-debug.log*
 # TS incremental build info (regenerated)
 tsconfig.app.tsbuildinfo
 # cf-pages-trigger
+
+# agent worktrees (transient)
+.claude/worktrees/
+
+# كاش زحف WorkoutX المؤقت (استئناف p12-fetch-gifs) — لا يُلتزَم
+scripts/.p12-catalog-cache.json

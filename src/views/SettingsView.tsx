@@ -5,6 +5,8 @@ import { Icon } from '@/components/Icon'
 import { DeviceSettings } from '@/components/DeviceSettings'
 import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
+import { installGuideStrings } from '@/i18n/dict/installGuide'
+import { isIOSSafari } from '@/lib/installState'
 import { LanguageToggle } from '@/i18n'
 import { useAuth } from '@/lib/authContext'
 import { useCustomization } from '@/lib/customizationContext'
@@ -14,6 +16,7 @@ import { loadPreferences, savePreferences, type AppPreferences } from '@/lib/app
 import { resetQimmah } from '@/lib/resetQimmah'
 import { generatePlan } from '@/lib/planGenerator'
 import { markPendingSync } from '@/lib/syncService'
+import { BUILD_LABEL } from '@/lib/buildInfo'
 
 const EXPORT_VERSION = 2
 
@@ -33,6 +36,7 @@ interface SettingsViewProps {
   onOpenPrivacy: () => void
   onOpenTerms: () => void
   onOpenProductReview: () => void
+  onOpenCalc: () => void
 }
 
 /** صفحة الإعدادات — مجموعات: الحساب / البيانات / خطتي / الخصوصية والثقة. (ليست تعديل الخطة) */
@@ -44,6 +48,7 @@ export function SettingsView({
   onOpenPrivacy,
   onOpenTerms,
   onOpenProductReview,
+  onOpenCalc,
 }: SettingsViewProps) {
   const t = getStrings(lang)
   const auth = useAuth()
@@ -103,8 +108,7 @@ export function SettingsView({
   }
 
   // — خطتي: إعادة توليد —
-  const onRegenerate = () => {
-    if (!window.confirm(t.settings.regenerateConfirm)) return
+  const regenerateFromProfile = () => {
     const g = generatePlan(customization.profile)
     applyCustomization({
       ...customization,
@@ -116,7 +120,20 @@ export function SettingsView({
       measurementPlan: g.measurementPlan,
     })
     markPendingSync()
+  }
+
+  const onRegenerate = () => {
+    if (!window.confirm(t.settings.regenerateConfirm)) return
+    regenerateFromProfile()
     window.alert(t.settings.regenerateSuccess)
+  }
+
+  // — خطتي: التحويل لنسخة الأجهزة (P12) — اختياري: يعيد توليد الخطة التلقائية عبر المولّد
+  // (أجهزة الكتالوج فقط في النادي). لا يمسّ الجدول المخصّص المحفوظ ولا سجلّ التمارين.
+  const onSwitchToMachines = () => {
+    if (!window.confirm(t.settings.switchMachinesConfirm)) return
+    regenerateFromProfile()
+    window.alert(t.settings.switchMachinesSuccess)
   }
 
   // — الحساب: حالة + خروج —
@@ -209,6 +226,10 @@ export function SettingsView({
               <Icon name="RotateCcw" className="h-4 w-4" />
               {t.settings.regenerate}
             </button>
+            <button type="button" onClick={onSwitchToMachines} className="btn-ghost px-4 py-2.5 text-sm">
+              <Icon name="Dumbbell" className="h-4 w-4" />
+              {t.settings.switchMachines}
+            </button>
           </div>
         </SettingsGroup>
 
@@ -233,6 +254,9 @@ export function SettingsView({
         {/* 5) التطبيق والتنبيهات — تثبيت PWA + إذن التنبيهات (نسخة صادقة، حدود آيفون واضحة) */}
         <DeviceSettings lang={lang} />
 
+        {/* 5.1) دليل «ثبّت التطبيق» — خطوات مكتوبة لكل منصّة (المكتشفة أولًا)، بلا صور خارجية. */}
+        <InstallGuideSection lang={lang} />
+
         {/* 6) أدوات داخلية — مراجعة المنتجات (ليست جزءًا من رحلة المستخدم العادية). */}
         <SettingsGroup icon="Wrench" title={t.settings.groupDev}>
           <div className="flex flex-col gap-2">
@@ -255,6 +279,23 @@ export function SettingsView({
             <p className="text-xs leading-relaxed text-ink-500">{t.settings.languageHint}</p>
           </div>
         </SettingsGroup>
+
+        {/* 8) عن التطبيق — إصدار البناء (BUILD_LABEL) + رابط «كيف نحسب أرقامك؟» */}
+        <SettingsGroup icon="Info" title={t.settings.groupAbout}>
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-sm text-ink-700">{t.settings.versionLabel}</span>
+              {/* معرّف البناء دائمًا LTR (لاتيني) حتى داخل الواجهة العربية */}
+              <span dir="ltr" data-testid="settings-build-label" className="rounded-lg bg-beige px-2.5 py-1 font-mono text-xs font-bold text-ink-500">
+                {BUILD_LABEL}
+              </span>
+            </div>
+            <button type="button" onClick={onOpenCalc} data-testid="settings-calc-link" className="btn-ghost justify-start px-4 py-2.5 text-sm">
+              <Icon name="Calculator" className="h-4 w-4" />
+              {t.settings.calcLink}
+            </button>
+          </div>
+        </SettingsGroup>
       </main>
 
       <Footer />
@@ -263,9 +304,19 @@ export function SettingsView({
 }
 
 /** بطاقة مجموعة إعدادات. */
-function SettingsGroup({ icon, title, children }: { icon: string; title: string; children: ReactNode }) {
+function SettingsGroup({
+  icon,
+  title,
+  testId,
+  children,
+}: {
+  icon: string
+  title: string
+  testId?: string
+  children: ReactNode
+}) {
   return (
-    <section className="card p-6">
+    <section className="card p-6" data-testid={testId}>
       <div className="mb-4 flex items-center gap-2.5">
         <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary-soft text-primary-c">
           <Icon name={icon} className="h-4.5 w-4.5" />
@@ -274,5 +325,90 @@ function SettingsGroup({ icon, title, children }: { icon: string; title: string;
       </div>
       {children}
     </section>
+  )
+}
+
+/**
+ * قسم «ثبّت التطبيق» — خطوات مصوّرة بالكلمات لآيفون (Safari) وأندرويد (Chrome/Edge).
+ * تُعرض منصّة الجهاز المكتشفة أولًا، والأخرى بعدها (كلاهما متاح دائمًا). RTL-آمن وثنائي اللغة.
+ */
+function InstallGuideSection({ lang }: { lang: Lang }) {
+  const g = installGuideStrings[lang]
+  const iosFirst = isIOSSafari()
+
+  const ios = (
+    <PlatformSteps
+      icon="Share2"
+      title={g.iosTitle}
+      steps={g.iosSteps}
+      badge={iosFirst ? g.currentDeviceBadge : undefined}
+    />
+  )
+  const android = (
+    <PlatformSteps
+      icon="Smartphone"
+      title={g.androidTitle}
+      steps={g.androidSteps}
+      badge={!iosFirst ? g.currentDeviceBadge : undefined}
+    />
+  )
+
+  return (
+    <SettingsGroup icon="Download" title={g.sectionTitle} testId="install-guide-section">
+      <p className="mb-4 text-xs leading-relaxed text-ink-500">{g.sectionIntro}</p>
+      <div className="space-y-3">
+        {iosFirst ? (
+          <>
+            {ios}
+            {android}
+          </>
+        ) : (
+          <>
+            {android}
+            {ios}
+          </>
+        )}
+      </div>
+    </SettingsGroup>
+  )
+}
+
+/** بطاقة خطوات منصّة واحدة (قائمة مرقّمة). */
+function PlatformSteps({
+  icon,
+  title,
+  steps,
+  badge,
+}: {
+  icon: string
+  title: string
+  steps: string[]
+  badge?: string
+}) {
+  return (
+    <div className="rounded-xl border border-line bg-surface p-4">
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-beige text-primary-c">
+          <Icon name={icon} className="h-4 w-4" />
+        </span>
+        <h3 className="min-w-0 flex-1 break-words text-sm font-black text-ink-900">{title}</h3>
+        {badge && (
+          <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-primary-soft px-2.5 py-1 text-[10px] font-black text-primary-c">
+            <Icon name="CheckCircle2" className="h-3 w-3" />
+            {badge}
+          </span>
+        )}
+      </div>
+      <ol className="space-y-2">
+        {steps.map((step, i) => (
+          <li key={i} className="flex items-start gap-2.5 text-xs leading-relaxed text-ink-700">
+            <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-primary text-[10px] font-black text-white">
+              {i + 1}
+            </span>
+            <span className="min-w-0 break-words text-start">{step}</span>
+          </li>
+        ))}
+      </ol>
+    </div>
   )
 }
