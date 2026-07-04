@@ -16,7 +16,7 @@
 //
 // idempotent: يتخطّى أي ملف موجود في public/exercise-gifs/. غير الموجود في WorkoutX → تخطٍّ وتسجيل.
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, resolve } from 'node:path'
 
@@ -550,25 +550,31 @@ function runCandidates(catalog) {
 // التنزيلات موقَّعة بالمفتاح ومحسوبة (apiFetch)، idempotent (يتخطّى الموجود)، لا مطابقة ضبابية.
 const normName = (s) => String(s).toLowerCase().replace(/\s+/g, ' ').trim()
 async function runApproved(catalog) {
-  const byName = new Map(catalog.map((c) => [normName(c.name), c]))
+  // خريطة اسم→مدخل من الكتالوج. الموافقة الدقيقة **نهائية**: لا عتبة تغطية، لا مرشّحات،
+  // ولا تخطٍّ للموجود — المطابقة الاسمية الدقيقة هي التفويض فتُنزَّل قسريًا (تستبدل أي ملف سابق).
+  const byName = new Map()
+  for (const c of catalog) {
+    const nm = normName(c.name)
+    if (nm && !byName.has(nm)) byName.set(nm, c) // أول تطابق يفوز (ثبات)
+  }
   const entries = Object.entries(APPROVED)
-  console.log(`\n── --approved: ${entries.length} موافقة يدوية (مطابقة اسم دقيقة) ──`)
-  let downloaded = 0, skipped = 0
+  console.log(`\n── --approved: ${entries.length} موافقة يدوية — مطابقة اسم دقيقة نهائية (بلا عتبة)، تنزيل قسري ──`)
+  let downloaded = 0
   const notfound = []
   for (const [slug, name] of entries) {
     const out = resolve(LOCAL_DIR, `${slug}.gif`)
-    if (existsSync(out)) { console.log(`  ⏭ ${slug} — موجود، تخطٍّ.`); skipped++; continue }
     const hit = byName.get(normName(name))
-    if (!hit || !hit.url) { console.log(`  ✗ ${slug} ← «${name}» — لا مطابقة اسم دقيقة في الكتالوج.`); notfound.push(slug); continue }
-    console.log(`  ⬇ ${slug} ← «${hit.name}»`)
+    if (!hit || !hit.url) { console.log(`  ✗ ${slug} ← «${name}» — لا مطابقة اسم دقيقة في الكتالوج (تحقّق من التهجئة).`); notfound.push(slug); continue }
+    // تنزيل قسري: نحذف أي ملف سابق (قد يكون مطابقة خاطئة) ثم ننزّل المُعتمَد بعينه.
+    try { rmSync(out, { force: true }) } catch { /* لا ملف — طبيعي */ }
+    console.log(`  ⬇ ${slug} ← «${hit.name}» (قسري)`)
     const ok = await downloadGif(hit.url, out)
     if (ok === true) downloaded++
-    else if (ok === 'exists') skipped++
     else notfound.push(slug)
   }
   console.log(`\n══════════ الخلاصة (--approved) ══════════`)
-  console.log(`نزّلنا: ${downloaded} • تخطّينا (موجود): ${skipped} • غير موجود/فشل: ${notfound.length}`)
-  if (notfound.length) console.log(`لم يُنزَّل: ${notfound.join(', ')} — راجع اسم الكتالوج بالضبط.`)
+  console.log(`نزّلنا (قسري): ${downloaded} • لم يُنزَّل: ${notfound.length}`)
+  if (notfound.length) console.log(`لم يُنزَّل: ${notfound.join(', ')} — أرسل اسم الكتالوج الدقيق لأصحّح الخريطة.`)
   console.log(`طلبات API المستهلكة هذه الجولة: ${reqCount} (تنزيلات موقَّعة بالمفتاح).`)
   console.log(`التالي: node scripts/p12-sync-gifs.mjs && npm run build`)
 }
