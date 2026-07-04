@@ -24,7 +24,13 @@ const CUSTOM_PLAN_KEY = 'qimmah:customPlan:v1'
 const HISTORY_PREFIX = 'qimmah:history:'
 
 // أجهزة كارديو خارج كتالوج المقاومة — مسموحة كخواتيم كارديو فقط (fat-loss/addCutCardio).
+// كارديو القوالب الثابتة (fat-loss).
 const CARDIO_ALLOWED = new Set(['treadmill-run', 'stationary-bike', 'rowing-machine'])
+// أجهزة الكارديو المسموح بها كخاتمة في الخطط المولّدة (أجهزة فقط) — لا حبال قتال/وزن جسم.
+const MACHINE_CARDIO = new Set([
+  'treadmill-run', 'incline-treadmill-walk', 'stationary-bike', 'rowing-machine',
+  'elliptical', 'stairmaster', 'assault-bike',
+])
 
 // ————— matrix output —————
 const rows = []
@@ -326,6 +332,11 @@ async function main() {
       })
       const primOk = perDay.every((x) => x.prim === target)
       const accOk = perDay.every((x) => x.acc <= 1 && x.accLast)
+      // كل سلوت في اليوم (بما فيه الخاتمة) يجب أن يكون: أساسي(٣٢) أو إضافة(٦) أو جهاز كارديو.
+      // يمسك تسريب battle-ropes أو أي كارديو غير جهازي في الخطة المولّدة.
+      const allSlots = days.flatMap((d) => d.exercises.map((pe) => pe.exerciseId))
+      const slotBad = [...new Set(allSlots.filter((id) => !catalogIds.has(id) && !accSet.has(id) && !MACHINE_CARDIO.has(id)))]
+      check(`(c) ${p.tag}: EVERY slot (incl. finisher) ∈ 32+accessory+machine-cardio`, 'no offenders', slotBad.length ? slotBad.join(',') : 'no offenders', slotBad.length === 0)
       check(`(c) ${p.tag}: machines-only (32 primaries + accessory pool)`, 'no offenders', bad.length ? bad.join(',') : 'no offenders', bad.length === 0)
       check(`(c) ${p.tag}: days match`, `${profile.trainingDays} days`, `${days.length} days`, days.length === profile.trainingDays)
       check(`(c) ${p.tag}: per-day primaries = target`, `${target}/day`, perDay.map((x) => x.prim).join(','), primOk)

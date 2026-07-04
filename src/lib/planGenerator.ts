@@ -645,9 +645,19 @@ function addCutCardio(
   planDays: PlanDay[],
   equipOk: (ex: Exercise) => boolean,
   injuryOk: (ex: Exercise) => boolean,
+  machinesOnly: boolean,
 ): void {
+  // خاتمة الكارديو تمرّ ضمن سلوت الخطة فتُعرض كتمرين عادي — لذا في سياق «أجهزة فقط» يجب أن
+  // تكون **جهاز كارديو حصريًا** (تريدميل/دراجة/تجديف/إليبتيكال/درج/أسولت)، لا حبال قتال أو
+  // وزن جسم. (تسريب battle-ropes: equipOk للنادي الكامل يسمح بكل شيء، فبلا هذا القيد يتسلّل.)
   const cardio = exercises
-    .filter((ex) => ex.primaryMuscle === 'cardio' && equipOk(ex) && injuryOk(ex))
+    .filter(
+      (ex) =>
+        ex.primaryMuscle === 'cardio' &&
+        equipOk(ex) &&
+        injuryOk(ex) &&
+        (!machinesOnly || ex.equipment.includes('machine')),
+    )
     .sort((a, b) => a.id.localeCompare(b.id))
   if (!cardio.length || !planDays.length) return
   const idxs = planDays.length >= 2 ? [0, Math.min(planDays.length - 1, Math.floor(planDays.length / 2))] : [0]
@@ -725,7 +735,7 @@ function generateWorkoutPlan(p: Profile): { plan: WorkoutPlan; specs: DaySpec[] 
     }
   })
 
-  if (p.goalType === 'cutting') addCutCardio(planDays, equipOk, injuryOk)
+  if (p.goalType === 'cutting') addCutCardio(planDays, equipOk, injuryOk, machinesOnly)
 
   return { plan: { templateId, days: planDays }, specs }
 }

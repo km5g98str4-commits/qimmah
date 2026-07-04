@@ -60,7 +60,7 @@ const APPROVED = {
   'leg-extension-machine': 'Lever Leg Extension',
   'leg-press-machine': 'Sled 45° Leg Press',
   'lying-leg-curl': 'Lever Lying Leg Curl',
-  'rear-delt-row-machine': 'Barbell Rear Delt Row',
+  // rear-delt-row-machine أُزيل (2026-07-04): «Barbell Rear Delt Row» لقطة بار حرّة على بطاقة جهاز → مرفوض (انظر REJECTED).
   'seated-row-machine': 'Cable Seated High Row v-bar',
   'standing-hip-extension-machine': 'Cable Standing Hip Extension',
   'standing-leg-curl': 'Standing Single Leg Curl',
@@ -69,6 +69,30 @@ const APPROVED = {
   'wide-grip-lat-pulldown': 'Twin Handle Parallel Grip Lat Pulldown',
   'ab-crunch-machine': 'Cable Kneeling Crunch',
 }
+
+// مرفوضة نهائيًا (مراجعة زياد الميدانية 2026-07-04): بطاقات أجهزة كانت تعرض لقطة بار/بنش حرّ
+// (أو لقطة خاطئة). تبقى على البديل الأنيق (placeholder) — **ممنوع** تنزيلها في أي وضع
+// (--approved / --candidates / المطابقة التلقائية). حُذفت ملفاتها من public/exercise-gifs/.
+//   decline-chest-press-machine  ← بنش صدر سفلي بار
+//   hack-squat-machine           ← هاك سكوات بار
+//   preacher-curl-machine        ← مرجحة بار منبطحة
+//   rear-delt-row-machine        ← تجديف بار للدلتويد الخلفي
+//   seated-calf-raise-machine    ← رفع سمانة جالس بالبار
+//   standing-calf-raise-machine  ← رفع سمانة واقف بالبار
+//   seated-leg-curl              ← لقطة خاطئة (مرجحة معصم بالبار)
+//   lateral-raise-machine        ← لقطة خاطئة (كانت أصلًا ضمن المرفوضة، تسرّب ملفها)
+//   glute-drive-machine          ← مرفوض سابقًا، لا ملف (يُبقى مُدرجًا كي لا يُنزَّل)
+const REJECTED = new Set([
+  'decline-chest-press-machine',
+  'hack-squat-machine',
+  'preacher-curl-machine',
+  'rear-delt-row-machine',
+  'seated-calf-raise-machine',
+  'standing-calf-raise-machine',
+  'seated-leg-curl',
+  'lateral-raise-machine',
+  'glute-drive-machine',
+])
 
 // ── القائمة الناقصة: slug | اسم البحث EN | عضلة تقريبية (لمكافأة المطابقة) ──
 const MISSING = [
@@ -492,6 +516,7 @@ async function matchAndDownload(catalog) {
   const belowThreshold = [] // تحت العتبة — لم تُنزَّل، مرشّحاتها للموافقة اليدوية
   for (const [i, [slug, name, muscle]] of MISSING.entries()) {
     const out = resolve(LOCAL_DIR, `${slug}.gif`)
+    if (REJECTED.has(slug)) { console.log(`[${i + 1}/${MISSING.length}] ⛔ ${slug} — مرفوض نهائيًا (يبقى placeholder).`); continue }
     if (existsSync(out)) { console.log(`[${i + 1}/${MISSING.length}] ⏭ ${slug} — موجود.`); skipped++; continue }
     const hit = bestGif(name, muscle, catalog)
     if (!hit) { console.log(`[${i + 1}/${MISSING.length}] ✗ ${slug} — لا مطابقة في WorkoutX (تخطٍّ، لا فشل).`); notfound.push(slug); continue }
@@ -536,6 +561,7 @@ function runCandidates(catalog) {
   const rows = []
   for (const [slug, name, muscle] of MISSING) {
     if (!PRIMARY_IDS.has(slug)) continue // أجهزة الموافقة اليدوية (أساسيات + إضافات) فقط
+    if (REJECTED.has(slug)) continue // مرفوض نهائيًا — لا نقترح مرشّحات
     if (existsSync(resolve(LOCAL_DIR, `${slug}.gif`))) continue // له صورة أصلًا
     rows.push({ slug, candidates: topGifs(name, muscle, catalog, 3) })
   }
@@ -562,6 +588,7 @@ async function runApproved(catalog) {
   let downloaded = 0
   const notfound = []
   for (const [slug, name] of entries) {
+    if (REJECTED.has(slug)) { console.log(`  ⛔ ${slug} — مرفوض نهائيًا، تخطٍّ.`); continue }
     const out = resolve(LOCAL_DIR, `${slug}.gif`)
     const hit = byName.get(normName(name))
     if (!hit || !hit.url) { console.log(`  ✗ ${slug} ← «${name}» — لا مطابقة اسم دقيقة في الكتالوج (تحقّق من التهجئة).`); notfound.push(slug); continue }

@@ -5,7 +5,7 @@
 // (مثل cable-curl.gif) تبقى بأسمائها — صفر إعادة تسمية/تنزيل — ويشير إليها
 // المعرّف القانوني (cable-biceps-curl → /exercise-gifs/cable-curl.gif) وفق
 // LEGACY_EXERCISE_ID_MAP في exercises.ts. لجلب الناقص: scripts/p12-fetch-gifs.sh.
-// التغطية الحالية: 92 معرّفًا (8 منها عبر ملف باسم قديم).
+// التغطية الحالية: 84 معرّفًا (3 منها عبر ملف باسم قديم).
 
 /** خريطة ثابتة: مُعرّف تمرين قانوني → مسار GIF متحرّك محلّي. */
 export const exerciseGifs: Record<string, string> = {
@@ -38,7 +38,6 @@ export const exerciseGifs: Record<string, string> = {
   'concentration-curl': '/exercise-gifs/concentration-curl.gif',
   'crunch': '/exercise-gifs/crunch.gif',
   'deadlift': '/exercise-gifs/deadlift.gif',
-  'decline-chest-press-machine': '/exercise-gifs/decline-machine-press.gif',
   'decline-dumbbell-press': '/exercise-gifs/decline-dumbbell-press.gif',
   'dumbbell-bench-press': '/exercise-gifs/dumbbell-bench-press.gif',
   'dumbbell-curl': '/exercise-gifs/dumbbell-curl.gif',
@@ -52,7 +51,6 @@ export const exerciseGifs: Record<string, string> = {
   'glute-bridge': '/exercise-gifs/glute-bridge.gif',
   'goblet-squat': '/exercise-gifs/goblet-squat.gif',
   'good-morning': '/exercise-gifs/good-morning.gif',
-  'hack-squat-machine': '/exercise-gifs/hack-squat.gif',
   'hammer-curl': '/exercise-gifs/hammer-curl.gif',
   'hanging-leg-raise': '/exercise-gifs/hanging-leg-raise.gif',
   'incline-barbell-press': '/exercise-gifs/incline-barbell-press.gif',
@@ -64,24 +62,19 @@ export const exerciseGifs: Record<string, string> = {
   'iso-lateral-pulldown': '/exercise-gifs/iso-lateral-pulldown.gif',
   'lat-pulldown-machine': '/exercise-gifs/lat-pulldown-machine.gif',
   'lateral-raise': '/exercise-gifs/lateral-raise.gif',
-  'lateral-raise-machine': '/exercise-gifs/lateral-raise-machine.gif',
   'leg-extension-machine': '/exercise-gifs/leg-extension-machine.gif',
   'leg-press-machine': '/exercise-gifs/leg-press-machine.gif',
   'lying-leg-curl': '/exercise-gifs/lying-leg-curl.gif',
   'overhead-triceps-extension': '/exercise-gifs/overhead-triceps-extension.gif',
   'plank': '/exercise-gifs/plank.gif',
-  'preacher-curl-machine': '/exercise-gifs/preacher-curl.gif',
   'pull-up': '/exercise-gifs/pull-up.gif',
   'push-up': '/exercise-gifs/push-up.gif',
   'rear-delt-fly': '/exercise-gifs/rear-delt-fly.gif',
-  'rear-delt-row-machine': '/exercise-gifs/rear-delt-row-machine.gif',
   'romanian-deadlift': '/exercise-gifs/romanian-deadlift.gif',
   'rope-pushdown': '/exercise-gifs/rope-pushdown.gif',
   'russian-twist': '/exercise-gifs/russian-twist.gif',
   'seated-cable-row': '/exercise-gifs/seated-cable-row.gif',
-  'seated-calf-raise-machine': '/exercise-gifs/seated-calf-raise.gif',
   'seated-dumbbell-press': '/exercise-gifs/seated-dumbbell-press.gif',
-  'seated-leg-curl': '/exercise-gifs/seated-leg-curl.gif',
   'seated-row-machine': '/exercise-gifs/seated-row-machine.gif',
   'shoulder-press-machine': '/exercise-gifs/shoulder-press-machine.gif',
   'side-plank': '/exercise-gifs/side-plank.gif',
@@ -89,7 +82,6 @@ export const exerciseGifs: Record<string, string> = {
   'sissy-squat': '/exercise-gifs/sissy-squat.gif',
   'skull-crusher': '/exercise-gifs/skull-crusher.gif',
   'smith-machine-squat': '/exercise-gifs/smith-machine-squat.gif',
-  'standing-calf-raise-machine': '/exercise-gifs/standing-calf-raise.gif',
   'standing-hip-extension-machine': '/exercise-gifs/standing-hip-extension-machine.gif',
   'standing-leg-curl': '/exercise-gifs/standing-leg-curl.gif',
   'stationary-bike': '/exercise-gifs/stationary-bike.gif',
