@@ -336,6 +336,8 @@ const SLOTS: Record<DayType, Slot[]> = {
     { muscles: ['biceps'], role: 'isolation' },
     { muscles: ['core'], role: 'any' },
   ],
+  // (جولة 2) كتفان اثنان لا ثلاثة: يوم «ذراعين وأكتاف» أكثر توازنًا (٢ كتف/٢ بايسبس/٢ ترايسبس)،
+  // ويمنع في «أجهزة فقط» إجبار يومَي الذراعين على استنفاد أجهزة الكتف الثلاثة (كان يرفع تداخل A/B إلى ٤٠٪).
   arms: [
     { muscles: ['shoulders'], role: 'compound', patterns: ['push'] },
     { muscles: ['shoulders'], role: 'isolation' },
@@ -343,7 +345,6 @@ const SLOTS: Record<DayType, Slot[]> = {
     { muscles: ['triceps'], role: 'isolation' },
     { muscles: ['biceps'], role: 'isolation' },
     { muscles: ['triceps'], role: 'isolation' },
-    { muscles: ['shoulders'], role: 'isolation' },
   ],
   core: [
     { muscles: ['core'], role: 'any' },
@@ -361,7 +362,9 @@ const TYPE_MUSCLES: Record<DayType, Muscle[]> = {
   lower: ['quads', 'hamstrings', 'glutes', 'calves', 'core'],
   push: ['chest', 'shoulders', 'triceps'],
   pull: ['back', 'biceps', 'shoulders'],
-  arms: ['biceps', 'triceps', 'shoulders'],
+  // (جولة 2) بلا shoulders في احتياط الذراعين: الكتفان يُملآن من فتحتيهما فقط، فلا يعيد الاحتياط
+  // إضافة جهاز الكتف الثالث ليومَي الذراعين (كان يجبرهما على تطابق أجهزة الكتف → تداخل ٤٠٪).
+  arms: ['biceps', 'triceps'],
   core: ['core'],
 }
 
@@ -413,31 +416,42 @@ function sortCandidates(cands: Exercise[], preferMachines: boolean): Exercise[] 
   })
 }
 
-/** تجزئة ثابتة لمعرّف التمرين — نفس المعرّف يقع دومًا في نفس السلّة مهما تغيّر ترتيب القائمة. */
-function idHash(id: string): number {
-  let h = 0
-  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0
-  return h
+/**
+ * (جولة 2) **رتبة داخل العضلة** (round-robin): لكل عضلة نرتّب أجهزتها ثم نعطي كلًّا رقمًا 0,1,2…
+ * فتُقسَّم بالتساوي على «نسخ» اليوم عبر rank % nVar. هذا هو الجذر الصحيح لتوزيع السلال: يضمن أن
+ * أجهزة كل عضلة تتوزّع بالتساوي بين النسخ (لا تتكتّل صدفةً في سلّة واحدة كما يحدث مع التجزئة الشاملة —
+ * سبب بقاء تداخل السحب مرتفعًا). المفتاح ثابت لكل جهاز فلا ينحرف حين تُقصي فتحات سابقة أجهزةً مختلفة.
+ */
+function buildMuscleRankMap(pool: Exercise[]): Map<string, number> {
+  const rank = new Map<string, number>()
+  const byMuscle = new Map<Muscle, Exercise[]>()
+  for (const ex of pool) {
+    const list = byMuscle.get(ex.primaryMuscle) ?? []
+    list.push(ex)
+    byMuscle.set(ex.primaryMuscle, list)
+  }
+  for (const list of byMuscle.values()) {
+    list.sort((a, b) => a.id.localeCompare(b.id)).forEach((ex, i) => rank.set(ex.id, i))
+  }
+  return rank
 }
 
 /**
- * (جولة 2 — تنويع A/B/C) يقسّم مجمّع كل عضلة على «نسخ» اليوم المتكرّر بسلّة **ثابتة لكل جهاز**
- * (idHash % nVar): «علوي أ» يفضّل سلّته و«علوي ب» سلّته، فيأخذان أجهزة مختلفة لنفس العضلة
- * (chest-press على أ، iso-lateral على ب) — لا نسخة متطابقة. السلّة مرتبطة بالجهاز لا بموضعه في
- * القائمة، فلا تنحرف حين تُقصي فتحاتٌ سابقة أجهزةً مختلفة بين اليومين (سبب تداخل السحب ٥٦٪ سابقًا).
- * subgroup بجهاز واحد أو عضلة كل أجهزتها في سلّة واحدة قد يتكرّر (احتياط) — مقبول، لكن اليوم لا يكون نسخة.
+ * يقدّم أجهزة «حصّة» النسخة الحالية (rank % nVar === variation) أولًا ثم الباقي كاحتياط —
+ * فيأخذ «علوي أ» و«علوي ب» أجهزة مختلفة لنفس العضلة (chest-press على أ، iso-lateral على ب).
+ * subgroup بجهاز واحد قد يتكرّر (احتياط) — مقبول، لكن اليوم ككل لا يكون نسخة.
  */
-function partitionOrder(sorted: Exercise[], variation: number, nVar: number): Exercise[] {
+function partitionOrder(sorted: Exercise[], variation: number, nVar: number, rank: Map<string, number>): Exercise[] {
   if (nVar <= 1 || sorted.length <= 1) return sorted
   const v = ((variation % nVar) + nVar) % nVar
   const mine: Exercise[] = []
   const rest: Exercise[] = []
-  for (const ex of sorted) (idHash(ex.id) % nVar === v ? mine : rest).push(ex)
+  for (const ex of sorted) ((rank.get(ex.id) ?? 0) % nVar === v ? mine : rest).push(ex)
   return [...mine, ...rest]
 }
 
 /** يختار تمرينًا لفتحة معيّنة من المجمع المتاح (تقسيم النسخة أولًا لتنويع A/B، وتجنّب التكرار). */
-function pickForSlot(slot: Slot, pool: Exercise[], used: Set<string>, variation: number, nVar: number, preferMachines: boolean): string | undefined {
+function pickForSlot(slot: Slot, pool: Exercise[], used: Set<string>, variation: number, nVar: number, preferMachines: boolean, rank: Map<string, number>): string | undefined {
   let cands = pool.filter(
     (ex) =>
       slot.muscles.includes(ex.primaryMuscle) &&
@@ -450,7 +464,7 @@ function pickForSlot(slot: Slot, pool: Exercise[], used: Set<string>, variation:
   }
   if (!cands.length) return undefined
   // مرتّبًا (أجهزة أولًا للمبتدئ ثم أبجديًا)، ثم نقدّم حصّة هذه النسخة (A/B/C) أولًا.
-  const ordered = partitionOrder(sortCandidates(cands, preferMachines), variation, nVar)
+  const ordered = partitionOrder(sortCandidates(cands, preferMachines), variation, nVar, rank)
   return ordered[0].id
 }
 
@@ -462,13 +476,14 @@ function buildDayExercises(
   pool: Exercise[],
   target: number,
   preferMachines: boolean,
+  rank: Map<string, number>,
   fillFromWholePool = false,
 ): string[] {
   const used = new Set<string>()
   const ids: string[] = []
   for (const slot of SLOTS[type]) {
     if (ids.length >= target) break
-    const id = pickForSlot(slot, pool, used, variation, nVar, preferMachines)
+    const id = pickForSlot(slot, pool, used, variation, nVar, preferMachines, rank)
     if (id) {
       ids.push(id)
       used.add(id)
@@ -484,6 +499,7 @@ function buildDayExercises(
       ),
       variation,
       nVar,
+      rank,
     )
     for (const ex of extra) {
       if (ids.length >= target) break
@@ -499,6 +515,7 @@ function buildDayExercises(
       sortCandidates(pool.filter((ex) => !used.has(ex.id)), preferMachines),
       variation,
       nVar,
+      rank,
     )
     for (const ex of extra) {
       if (ids.length >= target) break
@@ -713,6 +730,8 @@ function generateWorkoutPlan(p: Profile): { plan: WorkoutPlan; specs: DaySpec[] 
   // عدد نسخ كل نوع يوم في التقسيمة (Upper ×2، Full ×3 …) — لتقسيم اختيار التمارين على A/B/C.
   const typeTotal: Record<string, number> = {}
   for (const spec of specs) typeTotal[spec.type] = (typeTotal[spec.type] ?? 0) + 1
+  // رتبة كل جهاز داخل عضلته (round-robin) — أساس توزيع سلال A/B/C بالتساوي (يُحسب مرّة للحوض كله).
+  const rank = buildMuscleRankMap(pool)
 
   const counts: Record<string, number> = {}
   const planDays: PlanDay[] = specs.map((spec, di) => {
@@ -720,7 +739,7 @@ function generateWorkoutPlan(p: Profile): { plan: WorkoutPlan; specs: DaySpec[] 
     counts[spec.type] = variation + 1
     const nVar = typeTotal[spec.type] ?? 1
     const dayId = `gen-${di + 1}-${spec.type}`
-    const ids = buildDayExercises(spec.type, variation, nVar, pool, target, preferMachines, machinesOnly)
+    const ids = buildDayExercises(spec.type, variation, nVar, pool, target, preferMachines, rank, machinesOnly)
     // إضافة واحدة تُلحَق بنهاية اليوم (أجهزة فقط) — ذراعان/بطن حسب نوع اليوم، غير أساسية.
     // (جولة 2) نُدوّر الإضافة بفهرس النسخة (variation) لا فهرس اليوم المطلق — كي يأخذ يومَا نفس
     // النوع (سفلي أ/ب) إضافتين مختلفتين بدل تكرار نفسها (كان سبب تداخل ٤٥٪ في يوم السفلي).
