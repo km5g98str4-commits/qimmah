@@ -64,7 +64,16 @@ git commit -m "P12: جلب GIF الأجهزة الناقصة من WorkoutX + م�
 > تخضع للعتبة نفسها. عدّل العتبة عبر `WORKOUTX_COVERAGE_MIN` عند الحاجة.
 
 <!--P12_GIF_CANDIDATES:START-->
-_(يُملأ آليًا بـ `node scripts/p12-fetch-gifs.mjs --candidates` على جهاز فيه كاش الزحف — البيئة هنا بلا إنترنت.)_
+
+### مرشّحات GIF للأجهزة بلا صورة — أساسيات + إضافات (top-3، للموافقة اليدوية)
+
+> مولّد آليًا بـ `node scripts/p12-fetch-gifs.mjs --candidates` على جهاز فيه كاش الزحف. راجع كل صف واعتمد الأنسب يدويًا.
+
+| الجهاز (placeholder) | مرشّح ١ (تغطية) | مرشّح ٢ | مرشّح ٣ |
+|---|---|---|---|
+| `iso-lateral-high-row` | «Lever One Arm Lateral High Row» (0.75) | «Cable Seated High Row (v-bar)» (0.50) | «Cable High Row (kneeling)» (0.50) |
+| `iso-lateral-pulldown` | «Alternate Lateral Pulldown» (0.67) | «Cable Bar Lateral Pulldown» (0.67) | «Cable Cross-over Lateral Pulldown» (0.67) |
+| `wide-grip-lat-pulldown` | «Reverse Grip Machine Lat Pulldown» (0.75) | «Twin Handle Parallel Grip Lat Pulldown» (0.75) | «Cable Wide Grip Rear Pulldown Behind Neck» (0.75) |
 <!--P12_GIF_CANDIDATES:END-->
 
 - إن ظهر «Pillow غير مثبّت»: `pip3 install pillow` ثم أعد التشغيل.
