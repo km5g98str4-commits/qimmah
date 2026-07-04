@@ -413,18 +413,26 @@ function sortCandidates(cands: Exercise[], preferMachines: boolean): Exercise[] 
   })
 }
 
+/** تجزئة ثابتة لمعرّف التمرين — نفس المعرّف يقع دومًا في نفس السلّة مهما تغيّر ترتيب القائمة. */
+function idHash(id: string): number {
+  let h = 0
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0
+  return h
+}
+
 /**
- * (جولة 2 — تنويع A/B/C) يقسّم قائمة مرتّبة على «تنويعات» اليوم المتكرّر: تمارين النسخة الحالية
- * أولًا (الفهرس % nVar === variation) ثم الباقي كاحتياط. هكذا «علوي أ» و«علوي ب» يأخذان
- * أجهزة مختلفة لنفس العضلة (chest-press على أ، iso-lateral على ب) بدل نسخة متطابقة.
- * subgroup بجهاز واحد قد يتكرّر (احتياط) — مقبول؛ لكن اليوم ككل لا يكون نسخة.
+ * (جولة 2 — تنويع A/B/C) يقسّم مجمّع كل عضلة على «نسخ» اليوم المتكرّر بسلّة **ثابتة لكل جهاز**
+ * (idHash % nVar): «علوي أ» يفضّل سلّته و«علوي ب» سلّته، فيأخذان أجهزة مختلفة لنفس العضلة
+ * (chest-press على أ، iso-lateral على ب) — لا نسخة متطابقة. السلّة مرتبطة بالجهاز لا بموضعه في
+ * القائمة، فلا تنحرف حين تُقصي فتحاتٌ سابقة أجهزةً مختلفة بين اليومين (سبب تداخل السحب ٥٦٪ سابقًا).
+ * subgroup بجهاز واحد أو عضلة كل أجهزتها في سلّة واحدة قد يتكرّر (احتياط) — مقبول، لكن اليوم لا يكون نسخة.
  */
-function partitionOrder<T>(sorted: T[], variation: number, nVar: number): T[] {
+function partitionOrder(sorted: Exercise[], variation: number, nVar: number): Exercise[] {
   if (nVar <= 1 || sorted.length <= 1) return sorted
   const v = ((variation % nVar) + nVar) % nVar
-  const mine: T[] = []
-  const rest: T[] = []
-  sorted.forEach((item, i) => (i % nVar === v ? mine : rest).push(item))
+  const mine: Exercise[] = []
+  const rest: Exercise[] = []
+  for (const ex of sorted) (idHash(ex.id) % nVar === v ? mine : rest).push(ex)
   return [...mine, ...rest]
 }
 
@@ -714,9 +722,11 @@ function generateWorkoutPlan(p: Profile): { plan: WorkoutPlan; specs: DaySpec[] 
     const dayId = `gen-${di + 1}-${spec.type}`
     const ids = buildDayExercises(spec.type, variation, nVar, pool, target, preferMachines, machinesOnly)
     // إضافة واحدة تُلحَق بنهاية اليوم (أجهزة فقط) — ذراعان/بطن حسب نوع اليوم، غير أساسية.
+    // (جولة 2) نُدوّر الإضافة بفهرس النسخة (variation) لا فهرس اليوم المطلق — كي يأخذ يومَا نفس
+    // النوع (سفلي أ/ب) إضافتين مختلفتين بدل تكرار نفسها (كان سبب تداخل ٤٥٪ في يوم السفلي).
     if (machinesOnly) {
       const cat = accessoryCategory(spec.type, variation)
-      const acc = cat ? pickAccessory(cat, di, new Set(ids)) : null
+      const acc = cat ? pickAccessory(cat, variation, new Set(ids)) : null
       if (acc) ids.push(acc)
     }
     return {
