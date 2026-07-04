@@ -63,7 +63,7 @@ const APPROVED = {
   // rear-delt-row-machine أُزيل (2026-07-04): «Barbell Rear Delt Row» لقطة بار حرّة على بطاقة جهاز → مرفوض (انظر REJECTED).
   'seated-row-machine': 'Cable Seated High Row v-bar',
   'standing-hip-extension-machine': 'Cable Standing Hip Extension',
-  'standing-leg-curl': 'Standing Single Leg Curl',
+  // standing-leg-curl أُزيل (2026-07-04): «Standing Single Leg Curl» لقطة وزن جسم لا جهاز → مرفوض (انظر REJECTED).
   'triceps-extension-machine': 'Assisted Standing Triceps Extension with Towel',
   'wide-grip-iso-lateral-pulldown': 'Lever One Arm Lateral Wide Pulldown',
   'wide-grip-lat-pulldown': 'Twin Handle Parallel Grip Lat Pulldown',
@@ -82,6 +82,9 @@ const APPROVED = {
 //   seated-leg-curl              ← لقطة خاطئة (مرجحة معصم بالبار)
 //   lateral-raise-machine        ← لقطة خاطئة (كانت أصلًا ضمن المرفوضة، تسرّب ملفها)
 //   glute-drive-machine          ← مرفوض سابقًا، لا ملف (يُبقى مُدرجًا كي لا يُنزَّل)
+//   shoulder-press-machine       ← لقطة حبل مقاومة لا جهاز (قرار زياد 2026-07-04)
+//   standing-leg-curl            ← لقطة وزن جسم لا جهاز (قرار زياد 2026-07-04)
+// القاعدة: بطاقة الجهاز تعرض لقطة جهاز أو البديل الأنيق — لا شيء آخر (بار/دمبل/حبل/وزن جسم).
 const REJECTED = new Set([
   'decline-chest-press-machine',
   'hack-squat-machine',
@@ -92,6 +95,8 @@ const REJECTED = new Set([
   'seated-leg-curl',
   'lateral-raise-machine',
   'glute-drive-machine',
+  'shoulder-press-machine',
+  'standing-leg-curl',
 ])
 
 // ── القائمة الناقصة: slug | اسم البحث EN | عضلة تقريبية (لمكافأة المطابقة) ──

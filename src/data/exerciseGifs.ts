@@ -5,7 +5,7 @@
 // (مثل cable-curl.gif) تبقى بأسمائها — صفر إعادة تسمية/تنزيل — ويشير إليها
 // المعرّف القانوني (cable-biceps-curl → /exercise-gifs/cable-curl.gif) وفق
 // LEGACY_EXERCISE_ID_MAP في exercises.ts. لجلب الناقص: scripts/p12-fetch-gifs.sh.
-// التغطية الحالية: 84 معرّفًا (3 منها عبر ملف باسم قديم).
+// التغطية الحالية: 82 معرّفًا (3 منها عبر ملف باسم قديم).
 
 /** خريطة ثابتة: مُعرّف تمرين قانوني → مسار GIF متحرّك محلّي. */
 export const exerciseGifs: Record<string, string> = {
@@ -76,14 +76,12 @@ export const exerciseGifs: Record<string, string> = {
   'seated-cable-row': '/exercise-gifs/seated-cable-row.gif',
   'seated-dumbbell-press': '/exercise-gifs/seated-dumbbell-press.gif',
   'seated-row-machine': '/exercise-gifs/seated-row-machine.gif',
-  'shoulder-press-machine': '/exercise-gifs/shoulder-press-machine.gif',
   'side-plank': '/exercise-gifs/side-plank.gif',
   'single-leg-calf-raise': '/exercise-gifs/single-leg-calf-raise.gif',
   'sissy-squat': '/exercise-gifs/sissy-squat.gif',
   'skull-crusher': '/exercise-gifs/skull-crusher.gif',
   'smith-machine-squat': '/exercise-gifs/smith-machine-squat.gif',
   'standing-hip-extension-machine': '/exercise-gifs/standing-hip-extension-machine.gif',
-  'standing-leg-curl': '/exercise-gifs/standing-leg-curl.gif',
   'stationary-bike': '/exercise-gifs/stationary-bike.gif',
   'step-up': '/exercise-gifs/step-up.gif',
   'straight-arm-pulldown': '/exercise-gifs/straight-arm-pulldown.gif',
