@@ -47,16 +47,19 @@ bash scripts/p12-fetch-gifs.sh --probe     # طلب واحد فقط: حالة+ج
 # راجع المخرجات — ثم نفّذ الجلب الفعلي:
 bash scripts/p12-fetch-gifs.sh             # idempotent: يتخطّى الموجود؛ لا تنزيل تلقائي دون تغطية 0.85
 
-# قرار زياد 2b — الأساسيات بلا صورة تحت العتبة تُدرَج كمرشّحات للموافقة اليدوية:
+# قرار زياد 2b — الأساسيات/الإضافات بلا صورة تحت العتبة تُدرَج كمرشّحات للموافقة اليدوية:
 node scripts/p12-fetch-gifs.mjs --candidates   # يكتب top-3 لكل جهاز (أساسي أو إضافة) بلا GIF بين علامتَي P12_GIF_CANDIDATES
-# راجع الجدول أدناه، اعتمد يدويًا، وحمّل المعتمد يدويًا أو أعد التشغيل بعتبة أدنى لعنصر بعينه:
-#   WORKOUTX_COVERAGE_MIN=0.6 bash scripts/p12-fetch-gifs.sh   # (يخفض العتبة للتشغيل كله — استخدمه بحذر)
+
+# ★ موافقات زياد اليدوية (2026-07): ينزّل الـ١٧ المعتمدة فقط بمطابقة اسم دقيقة (~١٧ طلبًا موقَّعًا، الحصّة ~302):
+node scripts/p12-fetch-gifs.mjs --approved
+# (المرفوضة تبقى placeholder ولا تُنزَّل — الخريطة المعتمدة مثبّتة داخل السكربت.)
 
 node scripts/p12-sync-gifs.mjs             # يعيد توليد src/data/exerciseGifs.ts من الملفات
 npm run build                              # يجب أن يمرّ بلا أخطاء
 
-git add public/exercise-gifs src/data/exerciseGifs.ts docs/product/P12_ASSETS.md
-git commit -m "P12: جلب GIF الأجهزة الناقصة من WorkoutX + مزامنة الخريطة + مرشّحات الأساسيات"
+git add public/exercise-gifs src/data/exerciseGifs.ts
+git commit -m "P12: 17 approved machine GIFs + sync map"
+git push origin main
 ```
 
 > **عتبة التنزيل التلقائي = 0.85** (قرار زياد P12). أي مطابقة **لجهاز أساسي أو إضافة** دون هذه التغطية **لا تُنزَّل تلقائيًا**؛
