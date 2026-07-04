@@ -11,7 +11,8 @@
 // الأوضاع:
 //   node scripts/p12-fetch-gifs.mjs --dry-run   ← بلا شبكة: يطبع الخطة والعدّاد
 //   WORKOUTX_API_KEY=x node scripts/p12-fetch-gifs.mjs --probe   ← طلب واحد: حالة+جسم خام، ثم يتوقف
-//   WORKOUTX_API_KEY=x node scripts/p12-fetch-gifs.mjs           ← التشغيل الكامل
+//   WORKOUTX_API_KEY=x node scripts/p12-fetch-gifs.mjs           ← التشغيل الكامل (عتبة 0.85)
+//   WORKOUTX_API_KEY=x node scripts/p12-fetch-gifs.mjs --approved ← ينزّل الـ١٧ المعتمدة يدويًا فقط
 //
 // idempotent: يتخطّى أي ملف موجود في public/exercise-gifs/. غير الموجود في WorkoutX → تخطٍّ وتسجيل.
 
@@ -42,6 +43,32 @@ const HARD_CAP = 200
 const DRY_RUN = process.argv.includes('--dry-run')
 const PROBE = process.argv.includes('--probe')
 const CANDIDATES = process.argv.includes('--candidates')
+const APPROVED_MODE = process.argv.includes('--approved')
+
+// موافقات زياد اليدوية من جدول المرشّحات (2026-07): slug → اسم مدخل الكتالوج **بالضبط**.
+// --approved ينزّل هذه الـ١٧ فقط بمطابقة اسم دقيقة (لا مطابقة ضبابية) — كل واحد اعتمده زياد بعينه.
+// المرفوضة (تبقى placeholder، لا تُنزَّل): lateral-raise-machine, reverse-pec-deck,
+// glute-drive-machine, glute-kickback-machine, hip-adductor-machine, pendulum-squat-machine,
+// single-arm-lat-pulldown, chest-supported-row-machine, iso-lateral-incline-press.
+const APPROVED = {
+  'assisted-dip-machine': 'Assisted Triceps Dip kneeling',
+  'incline-chest-press-machine': 'Lever Incline Chest Press',
+  'iso-lateral-chest-press': 'Lever Chest Press',
+  'iso-lateral-high-row': 'Lever One Arm Lateral High Row',
+  'iso-lateral-pulldown': 'Cable Bar Lateral Pulldown',
+  'lat-pulldown-machine': 'Cable Pulldown pro Lat Bar',
+  'leg-extension-machine': 'Lever Leg Extension',
+  'leg-press-machine': 'Sled 45° Leg Press',
+  'lying-leg-curl': 'Lever Lying Leg Curl',
+  'rear-delt-row-machine': 'Barbell Rear Delt Row',
+  'seated-row-machine': 'Cable Seated High Row v-bar',
+  'standing-hip-extension-machine': 'Cable Standing Hip Extension',
+  'standing-leg-curl': 'Standing Single Leg Curl',
+  'triceps-extension-machine': 'Assisted Standing Triceps Extension with Towel',
+  'wide-grip-iso-lateral-pulldown': 'Lever One Arm Lateral Wide Pulldown',
+  'wide-grip-lat-pulldown': 'Twin Handle Parallel Grip Lat Pulldown',
+  'ab-crunch-machine': 'Cable Kneeling Crunch',
+}
 
 // ── القائمة الناقصة: slug | اسم البحث EN | عضلة تقريبية (لمكافأة المطابقة) ──
 const MISSING = [
@@ -416,6 +443,7 @@ async function main() {
           console.log(`▶ كاش الزحف مكتمل (${c.entries.length}/${c.total}) — مطابقة وتنزيل مباشرةً، صفر طلبات قائمة.`)
           const catalog = toCatalog(c.entries)
           console.log(`▶ كتالوج WorkoutX من الكاش: ${catalog.length} مدخلًا يحمل gif.`)
+          if (APPROVED_MODE) { await runApproved(catalog); return }
           if (CANDIDATES) { runCandidates(catalog); return }
           await matchAndDownload(catalog)
           return
@@ -451,6 +479,7 @@ async function main() {
 
   const catalog = await fetchCatalog(det)
 
+  if (APPROVED_MODE) { await runApproved(catalog); return }
   if (CANDIDATES) { runCandidates(catalog); return }
   await matchAndDownload(catalog)
 }
@@ -515,6 +544,33 @@ function runCandidates(catalog) {
     console.log(`  • ${r.slug}: ${r.candidates.map((x) => `«${x.name}» ${x.coverage.toFixed(2)}`).join(' | ') || '(لا مرشّح)'}`)
   }
   writeCandidatesDoc(rows)
+}
+
+// وضع --approved: ينزّل الـ١٧ المعتمدة يدويًا بمطابقة اسم دقيقة من الكتالوج المُخزَّن.
+// التنزيلات موقَّعة بالمفتاح ومحسوبة (apiFetch)، idempotent (يتخطّى الموجود)، لا مطابقة ضبابية.
+const normName = (s) => String(s).toLowerCase().replace(/\s+/g, ' ').trim()
+async function runApproved(catalog) {
+  const byName = new Map(catalog.map((c) => [normName(c.name), c]))
+  const entries = Object.entries(APPROVED)
+  console.log(`\n── --approved: ${entries.length} موافقة يدوية (مطابقة اسم دقيقة) ──`)
+  let downloaded = 0, skipped = 0
+  const notfound = []
+  for (const [slug, name] of entries) {
+    const out = resolve(LOCAL_DIR, `${slug}.gif`)
+    if (existsSync(out)) { console.log(`  ⏭ ${slug} — موجود، تخطٍّ.`); skipped++; continue }
+    const hit = byName.get(normName(name))
+    if (!hit || !hit.url) { console.log(`  ✗ ${slug} ← «${name}» — لا مطابقة اسم دقيقة في الكتالوج.`); notfound.push(slug); continue }
+    console.log(`  ⬇ ${slug} ← «${hit.name}»`)
+    const ok = await downloadGif(hit.url, out)
+    if (ok === true) downloaded++
+    else if (ok === 'exists') skipped++
+    else notfound.push(slug)
+  }
+  console.log(`\n══════════ الخلاصة (--approved) ══════════`)
+  console.log(`نزّلنا: ${downloaded} • تخطّينا (موجود): ${skipped} • غير موجود/فشل: ${notfound.length}`)
+  if (notfound.length) console.log(`لم يُنزَّل: ${notfound.join(', ')} — راجع اسم الكتالوج بالضبط.`)
+  console.log(`طلبات API المستهلكة هذه الجولة: ${reqCount} (تنزيلات موقَّعة بالمفتاح).`)
+  console.log(`التالي: node scripts/p12-sync-gifs.mjs && npm run build`)
 }
 
 main().catch((e) => { console.error('✗', e.message); process.exit(1) })
