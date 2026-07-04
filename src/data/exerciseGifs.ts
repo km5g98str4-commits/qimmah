@@ -5,10 +5,11 @@
 // (مثل cable-curl.gif) تبقى بأسمائها — صفر إعادة تسمية/تنزيل — ويشير إليها
 // المعرّف القانوني (cable-biceps-curl → /exercise-gifs/cable-curl.gif) وفق
 // LEGACY_EXERCISE_ID_MAP في exercises.ts. لجلب الناقص: scripts/p12-fetch-gifs.sh.
-// التغطية الحالية: 86 معرّفًا (8 منها عبر ملف باسم قديم).
+// التغطية الحالية: 92 معرّفًا (8 منها عبر ملف باسم قديم).
 
 /** خريطة ثابتة: مُعرّف تمرين قانوني → مسار GIF متحرّك محلّي. */
 export const exerciseGifs: Record<string, string> = {
+  'ab-crunch-machine': '/exercise-gifs/ab-crunch-machine.gif',
   'ab-wheel-rollout': '/exercise-gifs/ab-wheel-rollout.gif',
   'assisted-dip-machine': '/exercise-gifs/assisted-dip-machine.gif',
   'barbell-back-squat': '/exercise-gifs/barbell-back-squat.gif',
@@ -58,6 +59,9 @@ export const exerciseGifs: Record<string, string> = {
   'incline-cable-fly': '/exercise-gifs/incline-cable-fly.gif',
   'incline-chest-press-machine': '/exercise-gifs/incline-chest-press-machine.gif',
   'incline-dumbbell-press': '/exercise-gifs/incline-dumbbell-press.gif',
+  'iso-lateral-chest-press': '/exercise-gifs/iso-lateral-chest-press.gif',
+  'iso-lateral-high-row': '/exercise-gifs/iso-lateral-high-row.gif',
+  'iso-lateral-pulldown': '/exercise-gifs/iso-lateral-pulldown.gif',
   'lat-pulldown-machine': '/exercise-gifs/lat-pulldown-machine.gif',
   'lateral-raise': '/exercise-gifs/lateral-raise.gif',
   'lateral-raise-machine': '/exercise-gifs/lateral-raise-machine.gif',
@@ -95,6 +99,8 @@ export const exerciseGifs: Record<string, string> = {
   't-bar-row-machine': '/exercise-gifs/t-bar-row.gif',
   'triceps-extension-machine': '/exercise-gifs/triceps-extension-machine.gif',
   'walking-lunge': '/exercise-gifs/walking-lunge.gif',
+  'wide-grip-iso-lateral-pulldown': '/exercise-gifs/wide-grip-iso-lateral-pulldown.gif',
+  'wide-grip-lat-pulldown': '/exercise-gifs/wide-grip-lat-pulldown.gif',
 }
 
 /** يُرجع مسار الـ GIF المحلّي إن توفّر، وإلا undefined (فيرجع المكوّن للصورة الثابتة ثم البديل الأنيق). */
