@@ -257,20 +257,23 @@ export function SettingsView({
         {/* 5.1) دليل «ثبّت التطبيق» — خطوات مكتوبة لكل منصّة (المكتشفة أولًا)، بلا صور خارجية. */}
         <InstallGuideSection lang={lang} />
 
-        {/* 6) أدوات داخلية — مراجعة المنتجات (ليست جزءًا من رحلة المستخدم العادية). */}
-        <SettingsGroup icon="Wrench" title={t.settings.groupDev}>
-          <div className="flex flex-col gap-2">
-            <button
-              type="button"
-              onClick={onOpenProductReview}
-              className="btn-ghost justify-start px-4 py-2.5 text-sm"
-            >
-              <Icon name="ClipboardList" className="h-4 w-4" />
-              {t.settings.devReviewProducts}
-            </button>
-            <p className="text-xs leading-relaxed text-ink-500">{t.settings.devReviewHint}</p>
-          </div>
-        </SettingsGroup>
+        {/* 6) أدوات داخلية — مراجعة المنتجات. أداة طاقم داخلية فقط: مُقصاة تمامًا من حزمة
+            الإنتاج الاستهلاكية (import.meta.env.DEV=false في البناء) فلا تظهر لأي مستخدم. */}
+        {import.meta.env.DEV && (
+          <SettingsGroup icon="Wrench" title={t.settings.groupDev}>
+            <div className="flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={onOpenProductReview}
+                className="btn-ghost justify-start px-4 py-2.5 text-sm"
+              >
+                <Icon name="ClipboardList" className="h-4 w-4" />
+                {t.settings.devReviewProducts}
+              </button>
+              <p className="text-xs leading-relaxed text-ink-500">{t.settings.devReviewHint}</p>
+            </div>
+          </SettingsGroup>
+        )}
 
         {/* 7) اللغة — تبديل حيّ عربي/English (يبدّل النص والاتجاه فورًا). */}
         <SettingsGroup icon="Globe" title={t.settings.groupLanguage}>

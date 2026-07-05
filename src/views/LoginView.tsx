@@ -4,6 +4,7 @@ import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
 import { miscStrings } from '@/i18n/dict/misc'
 import { useAuth } from '@/lib/authContext'
+import { evaluatePassword, PASSWORD_MIN_LENGTH } from '@/lib/passwordPolicy'
 
 interface LoginViewProps {
   lang: Lang
@@ -28,7 +29,9 @@ export function LoginView({ lang, onSuccess, onGuest, onBack }: LoginViewProps) 
   const [notice, setNotice] = useState<string | null>(null)
 
   const isSignup = mode === 'signup'
-  const canSubmit = Boolean(email && password && (!isSignup || name.trim()))
+  // سياسة كلمة المرور (P0): عند التسجيل يجب أن تجتاز الحدّ الأدنى ٨ + حرف + رقم قبل الإرسال.
+  const pw = evaluatePassword(password)
+  const canSubmit = Boolean(email && password && (!isSignup || (name.trim() && pw.valid)))
 
   const input =
     'w-full rounded-lg border border-line bg-beige px-3 py-3 text-sm text-ink-900 focus:border-brand-500/50 focus:outline-none'
@@ -148,8 +151,44 @@ export function LoginView({ lang, onSuccess, onGuest, onBack }: LoginViewProps) 
                   placeholder={t.auth.password}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  minLength={isSignup ? PASSWORD_MIN_LENGTH : undefined}
+                  aria-describedby={isSignup ? 'pw-requirements' : undefined}
                 />
               </div>
+
+              {/* سياسة كلمة المرور (P0) — مؤشّر قوة + متطلّبات واضحة قبل الإرسال (عند التسجيل فقط). */}
+              {isSignup && (
+                <div id="pw-requirements" className="-mt-1 space-y-1.5">
+                  <div className="flex gap-1" aria-hidden="true">
+                    {[0, 1, 2, 3].map((i) => (
+                      <span
+                        key={i}
+                        className={`h-1.5 flex-1 rounded-full ${
+                          password.length === 0 || i >= pw.score
+                            ? 'bg-line'
+                            : pw.score <= 1
+                              ? 'bg-danger'
+                              : pw.score === 2
+                                ? 'bg-gold-500'
+                                : 'bg-emerald-500'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <ul className="flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] font-medium">
+                    {[
+                      { ok: pw.lengthOk, ar: `${PASSWORD_MIN_LENGTH}+ أحرف`, en: `${PASSWORD_MIN_LENGTH}+ characters` },
+                      { ok: pw.hasLetter, ar: 'حرف', en: 'a letter' },
+                      { ok: pw.hasNumber, ar: 'رقم', en: 'a number' },
+                    ].map((r, i) => (
+                      <li key={i} className={`flex items-center gap-1 ${r.ok ? 'text-emerald-600' : 'text-ink-400'}`}>
+                        <Icon name={r.ok ? 'Check' : 'Circle'} className="h-3 w-3 shrink-0" />
+                        {lang === 'en' ? r.en : r.ar}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
               {msg && <p className="text-xs leading-relaxed text-gold-600">{msg}</p>}
 

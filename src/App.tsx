@@ -2,6 +2,7 @@ import { lazy, Suspense, useCallback, useEffect, useRef, useState, type ReactNod
 // شاشة البداية (الهبوط) تبقى مُحمّلة مباشرةً لأول رسم سريع.
 import { StartView } from '@/views/StartView'
 import { AppLoading } from '@/components/AppLoading'
+import { VerifyEmailView } from '@/views/VerifyEmailView'
 import { RouteErrorBoundary } from '@/components/ErrorBoundary'
 import { DashboardSkeleton, ProgressSkeleton } from '@/components/ViewSkeletons'
 import { InstallPrompt } from '@/components/InstallPrompt'
@@ -39,7 +40,7 @@ function createLazyViews() {
 import { MobileShell, type MainTab } from '@/components/MobileShell'
 import type { AppBadge } from '@/components/AppNav'
 import { useAuth } from '@/lib/authContext'
-import { isAccountOnboarded, isOnboardingComplete, loadOnboarding } from '@/lib/onboarding'
+import { isAccountOnboarded, isOnboardingComplete, loadOnboarding, markCompleted } from '@/lib/onboarding'
 import { ensureOnboardingProfile } from '@/lib/onboardingProfile'
 import { currentUserId, hydrateOnboardingFromProfile } from '@/lib/onboardingSync'
 import { useLanguage } from '@/i18n'
@@ -190,6 +191,14 @@ export default function App() {
     if (completed) setShowSuccess(true)
   }
 
+  // مخرج طوارئ للإعداد: يُعلّم الحساب/الجهاز مكتمل الإعداد ويدخل اللوحة فورًا. يستخدمه زرّ
+  // «تخطّي» الدائم في المعالج وحاجز الأخطاء — فلا يُحبَس مستخدم أبدًا حتى لو تعطّلت خطوة.
+  const skipOnboarding = useCallback(() => {
+    markCompleted(uid)
+    setView('dashboard')
+    setShowSuccess(true)
+  }, [uid])
+
   const closeDemo = () => setView(isOnboardingComplete(uid) ? 'dashboard' : 'start')
 
   // تنقّل عام — يمرّ عبر الحراسة حتى لا تُفتح لوحة بلا إعداد.
@@ -202,6 +211,12 @@ export default function App() {
   //     حتى لا يُطالَب مستخدم لديه جلسة صالحة بتسجيل الدخول من جديد. ———
   if (auth.loading) {
     return <AppLoading />
+  }
+
+  // ——— بوّابة تأكيد البريد (P0، دفاع عميق): حساب مسجّل ببريد لم يُؤكَّد بعد لا يُمنح وصولًا
+  //     كاملًا — يُحوَّل لشاشة التأكيد. الضيف/غير المسجّل بالبريد يمرّ (emailVerified=true). ———
+  if (!auth.emailVerified) {
+    return <VerifyEmailView lang={LANG} onSignedOut={() => setView('login')} />
   }
 
   // ——— بناء عنصر الشاشة الحالية ثم لفّه بحدّ Suspense (أسفل المزوّدات حتى تبقى حالتها
@@ -238,7 +253,7 @@ export default function App() {
     // النمط يُشتقّ من حالة الحساب وقت العرض: مكتمل → محرّرات متقدّمة (تعديل الخطة)؛
     // غير مكتمل → معالج الإعداد الأولي (وزنه/هدفه هو).
     const onboarded = isOnboardingComplete(uid)
-    content = <V.SetupView onClose={closeSetup} initialStep={0} mode={onboarded ? 'advanced' : 'onboarding'} />
+    content = <V.SetupView onClose={closeSetup} onForceComplete={skipOnboarding} initialStep={0} mode={onboarded ? 'advanced' : 'onboarding'} />
   } else if (view === 'demo') {
     content = <V.DemoView lang={LANG} onNavigate={navigate} onBack={closeDemo} />
   } else if (view === 'settings') {
@@ -255,7 +270,13 @@ export default function App() {
       />
     )
   } else if (view === 'productReview') {
-    content = <V.ReviewPanelView lang={LANG} onBack={() => setView('settings')} />
+    // أداة طاقم داخلية فقط — تُعرَض في التطوير فقط؛ في الإنتاج الوصول إليها (حتى عبر
+    // #/productReview مباشرةً) مُقصى ويُعاد المستخدم لشاشة «غير موجود».
+    content = import.meta.env.DEV ? (
+      <V.ReviewPanelView lang={LANG} onBack={() => setView('settings')} />
+    ) : (
+      <V.NotFoundView lang={LANG} onHome={() => setView('dashboard')} onBack={() => setView('dashboard')} />
+    )
   } else if (view === 'calc') {
     content = <V.CalcExplainerView lang={LANG} onBack={() => navigate('profile')} />
   } else {

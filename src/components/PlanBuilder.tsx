@@ -46,6 +46,8 @@ interface PlanBuilderProps {
   onComplete: () => void
   /** يُستدعى عند الخروج من أول خطوة (رجوع للبداية). */
   onExit: () => void
+  /** مخرج طوارئ: يُعلّم الإعداد مكتملًا ويدخل اللوحة فورًا مهما كانت حالة الخطوات (لا حبس أبدًا). */
+  onForceComplete?: () => void
 }
 
 // حدود الإعداد (إدخال مرئي بمنزلقات/عدّادات — لا نص حر).
@@ -79,7 +81,7 @@ function targetWeightError(a: Answers, d: OnboardingStrings): string | undefined
 }
 
 /** الإعداد الذكي (Phase 1) — مصدر الحقيقة: شاشة واحدة لكل خطوة (جوال داكن، RTL). */
-export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
+export function PlanBuilder({ onComplete, onExit, onForceComplete }: PlanBuilderProps) {
   const lang = useLang()
   const d = onboardingStrings[lang]
   const { customization, applyCustomization } = useCustomization()
@@ -583,6 +585,17 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
     if (isFirst) return onExit()
     setStepIndex((s) => Math.max(0, s - 1))
   }
+  // مخرج الطوارئ الدائم: يضمن ألّا يُحبَس المستخدم أبدًا في المعالج مهما تعطّلت خطوة.
+  // يُعلّم الإعداد مكتملًا (الجدول الافتراضي محفوظ أصلًا كأساس) ويدخل اللوحة فورًا.
+  const skipToDashboard = () => {
+    try {
+      markCompleted(userId)
+    } catch {
+      /* لا شيء يمنع الدخول */
+    }
+    if (onForceComplete) onForceComplete()
+    else onComplete()
+  }
 
   const progress = Math.round(((idx + 1) / formTotal) * 100)
 
@@ -632,7 +645,15 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
             <span className="font-bold text-night-100">{step.label}</span>
             <span className="font-bold text-night-300">{idx + 1}/{formTotal}</span>
           </div>
-          <div className="h-10 w-10" />
+          {/* مخرج طوارئ دائم — «تخطّي الإعداد» يدخل اللوحة فورًا (ضمانة ضد أي حبس في المعالج). */}
+          <button
+            type="button"
+            onClick={skipToDashboard}
+            aria-label={lang === 'en' ? 'Skip setup and go to dashboard' : 'تخطّي الإعداد والدخول للوحة'}
+            className="whitespace-nowrap rounded-xl px-2.5 py-2 text-xs font-bold text-night-300 hover:text-night-100"
+          >
+            {lang === 'en' ? 'Skip' : 'تخطّي'}
+          </button>
         </div>
         <div className="mx-auto mt-3 h-1.5 w-full max-w-md overflow-hidden rounded-full bg-night-800">
           <div className="h-full rounded-full bg-primary transition-all duration-300" style={{ width: `${progress}%` }} />
