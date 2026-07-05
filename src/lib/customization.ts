@@ -151,7 +151,7 @@ export function getDefaultCustomization(): Customization {
     profile: { ...defaultProfile },
     targets: computeTargets(defaultProfile),
     targetsMeta: { manuallyEdited: false, lastCalculatedFromProfileHash: profileHash(defaultProfile) },
-    workoutPlan: generatePlanFromTemplate('full-body-3'),
+    workoutPlan: generatePlanFromTemplate('full-body'),
     nutritionPlan: defaultNutritionPlan(computeTargets(defaultProfile), defaultProfile.goal),
     wellnessPlan: defaultWellnessPlan(),
     commitmentPlan: defaultCommitmentPlan(),

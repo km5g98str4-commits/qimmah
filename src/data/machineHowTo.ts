@@ -404,7 +404,7 @@ export const machineHowTo: Record<string, HowToSteps> = {
   },
 
   // ===== الأرجل — الألوية =====
-  'glute-drive-machine': {
+  'glute-machine': {
     ar: [
       'اجلس وثبّت الحزام فوق وركيك وظهرك على المسند وقدماك على المنصة.',
       'ادفع بوركيك للأعلى مع الزفير حتى يستقيم الجذع مع الفخذين.',

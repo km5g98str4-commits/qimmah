@@ -90,6 +90,7 @@ export const machineCatalog: MachineGroup[] = [
       item({ exerciseId: 'iso-lateral-incline-press', nameEn: 'Iso-Lateral Incline Press', nameAr: 'ضغط علوي أيزو-لاترال', targetMuscleAr: 'الصدر العلوي', subGroup: SUB.chestIncline, aliasesEn: ['Hammer Strength Incline Press'] }),
       item({ exerciseId: 'decline-chest-press-machine', nameEn: 'Decline Chest Press Machine', nameAr: 'جهاز ضغط صدر سفلي', targetMuscleAr: 'الصدر السفلي', subGroup: SUB.chestDecline }),
       item({ exerciseId: 'assisted-dip-machine', nameEn: 'Assisted Dip Machine', nameAr: 'جهاز غطس مساعد', targetMuscleAr: 'الصدر السفلي والترايسبس', subGroup: SUB.chestDecline, sharedGroups: ['triceps'] }),
+      item({ exerciseId: 'pec-deck-machine', nameEn: 'Pec Deck Machine', nameAr: 'جهاز فلاي صدر', targetMuscleAr: 'وسط الصدر', subGroup: SUB.chestFlat }),
     ],
   },
   {
@@ -138,8 +139,9 @@ export const machineCatalog: MachineGroup[] = [
       item({ exerciseId: 'standing-leg-curl', nameEn: 'Standing Leg Curl', nameAr: 'ثني أرجل واقف', targetMuscleAr: 'خلفية الفخذ', subGroup: SUB.hamstrings }),
       // — الفخذ الداخلي (Adductors) —
       item({ exerciseId: 'hip-adductor-machine', nameEn: 'Hip Adductor Machine', nameAr: 'جهاز ضم الفخذ', targetMuscleAr: 'الفخذ الداخلي', subGroup: SUB.adductors }),
+      item({ exerciseId: 'hip-abduction-machine', nameEn: 'Hip Abduction Machine', nameAr: 'جهاز مباعدة الأرجل', targetMuscleAr: 'الفخذ الخارجي والألوية', subGroup: SUB.glutes }),
       // — الألوية (Glutes) —
-      item({ exerciseId: 'glute-drive-machine', nameEn: 'Glute Drive Machine', nameAr: 'جهاز دفع الألوية', targetMuscleAr: 'الألوية', subGroup: SUB.glutes }),
+      item({ exerciseId: 'glute-machine', nameEn: 'Glute Machine', nameAr: 'جهاز الألوية', targetMuscleAr: 'الألوية', subGroup: SUB.glutes }),
       item({ exerciseId: 'glute-kickback-machine', nameEn: 'Glute Kickback Machine', nameAr: 'جهاز ركل خلفي', targetMuscleAr: 'الألوية', subGroup: SUB.glutes }),
       item({ exerciseId: 'standing-hip-extension-machine', nameEn: 'Standing Hip Extension Machine', nameAr: 'مد ورك واقف', targetMuscleAr: 'الألوية', subGroup: SUB.glutes }),
       // — البطات (Calves) —
@@ -205,7 +207,7 @@ export const PRIMARY_MACHINE_IDS: readonly string[] = [
   // الأرجل (١٣)
   'leg-extension-machine', 'hack-squat-machine', 'pendulum-squat-machine', 'leg-press-machine',
   'seated-leg-curl', 'lying-leg-curl', 'standing-leg-curl', 'hip-adductor-machine',
-  'glute-drive-machine', 'glute-kickback-machine', 'standing-hip-extension-machine',
+  'glute-machine', 'glute-kickback-machine', 'standing-hip-extension-machine',
   'seated-calf-raise-machine', 'standing-calf-raise-machine',
 ]
 

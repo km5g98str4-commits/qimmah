@@ -31,7 +31,7 @@ const muscleDetailById: Record<string, MuscleDetail> = {
   'incline-chest-press-machine': { primary: ['chest_upper', 'front_delts'], secondary: ['triceps'] },
   'iso-lateral-incline-press': { primary: ['chest_upper', 'front_delts'], secondary: ['triceps'] },
   'assisted-dip-machine': { primary: ['chest_lower', 'triceps'], secondary: ['front_delts'] },
-  'pec-deck': { primary: ['chest_mid'], secondary: ['front_delts'] },
+  'pec-deck-machine': { primary: ['chest_mid'], secondary: ['front_delts'] },
   'cable-crossover': { primary: ['chest_mid', 'chest_lower'], secondary: ['front_delts'] },
   'dumbbell-fly': { primary: ['chest_mid'], secondary: ['front_delts'] },
   'push-up': { primary: ['chest_mid', 'triceps'], secondary: ['front_delts', 'abs'] },
@@ -137,7 +137,7 @@ const muscleDetailById: Record<string, MuscleDetail> = {
   // ===== أجهزة مُضافة (P12 — كتالوج الأجهزة المعتمد) =====
   'decline-chest-press-machine': { primary: ['chest_lower', 'triceps'], secondary: ['front_delts'] },
   'machine-rdl': { primary: ['hamstrings', 'glutes'], secondary: ['lower_back'] },
-  'glute-drive-machine': { primary: ['glutes'], secondary: ['hamstrings'] },
+  'glute-machine': { primary: ['glutes'], secondary: ['hamstrings'] },
   'glute-kickback-machine': { primary: ['glutes'], secondary: ['hamstrings'] },
   'standing-hip-extension-machine': { primary: ['glutes'], secondary: ['hamstrings'] },
   'hip-adductor-machine': { primary: ['glutes'] },
@@ -238,7 +238,7 @@ export const exercises: Exercise[] = [
   ex({ id: 'iso-lateral-chest-press', nameAr: 'ضغط صدر أيزو-لاترال', nameEn: 'Iso-Lateral Chest Press', primaryMuscle: 'chest', equipment: ['machine'], level: 'beginner', movementPattern: 'push', environment: 'gym', alternatives: ['dumbbell-bench-press', 'cable-crossover'] }),
   ex({ id: 'incline-chest-press-machine', nameAr: 'جهاز ضغط صدر علوي', nameEn: 'Incline Chest Press Machine', primaryMuscle: 'chest', equipment: ['machine'], level: 'beginner', movementPattern: 'push', environment: 'gym', alternatives: ['incline-dumbbell-press', 'incline-cable-fly'] }),
   ex({ id: 'iso-lateral-incline-press', nameAr: 'ضغط علوي أيزو-لاترال', nameEn: 'Iso-Lateral Incline Press', primaryMuscle: 'chest', equipment: ['machine'], level: 'beginner', movementPattern: 'push', environment: 'gym', alternatives: ['incline-dumbbell-press', 'incline-cable-fly'] }),
-  ex({ id: 'pec-deck', nameAr: 'تفتيح جهاز (بيك دك)', nameEn: 'Pec Deck Machine', primaryMuscle: 'chest', equipment: ['machine'], level: 'beginner', movementPattern: 'isolation', environment: 'gym', defaultReps: '12–15', defaultRestSec: 60 }),
+  ex({ id: 'pec-deck-machine', nameAr: 'جهاز فلاي صدر', nameEn: 'Pec Deck Machine', primaryMuscle: 'chest', equipment: ['machine'], level: 'beginner', movementPattern: 'isolation', environment: 'gym', defaultReps: '12–15', defaultRestSec: 60 }),
   ex({ id: 'cable-crossover', nameAr: 'تفتيح كيبل', nameEn: 'Cable Crossover', primaryMuscle: 'chest', equipment: ['cable'], level: 'intermediate', movementPattern: 'isolation', environment: 'gym', defaultReps: '12–15', defaultRestSec: 60 }),
   ex({ id: 'dumbbell-fly', nameAr: 'تفتيح دمبل', nameEn: 'Dumbbell Fly', primaryMuscle: 'chest', equipment: ['dumbbell', 'bench'], level: 'beginner', movementPattern: 'isolation', environment: 'gym', defaultReps: '12–15', defaultRestSec: 60 }),
   ex({ id: 'push-up', nameAr: 'ضغط (تمرين الجسم)', nameEn: 'Push-Up', primaryMuscle: 'chest', equipment: ['bodyweight'], level: 'beginner', movementPattern: 'push', environment: 'both', defaultReps: '10–20', defaultRestSec: 60 }),
@@ -354,7 +354,7 @@ export const exercises: Exercise[] = [
   ex({ id: 'incline-cable-fly', nameAr: 'تفتيح كيبل مائل', nameEn: 'Incline Cable Fly', primaryMuscle: 'chest', equipment: ['cable'], level: 'intermediate', movementPattern: 'isolation', environment: 'gym', defaultReps: '12–15', defaultRestSec: 60 }),
   ex({ id: 'chest-dip', nameAr: 'غطس الصدر (متوازي)', nameEn: 'Chest Dip', primaryMuscle: 'chest', secondaryMuscles: ['triceps', 'shoulders'], equipment: ['bodyweight'], level: 'intermediate', movementPattern: 'push', environment: 'both', defaultReps: '8–12', defaultRestSec: 90, alternatives: ['push-up', 'chest-press-machine'] }),
   ex({ id: 'svend-press', nameAr: 'سفيند بريس', nameEn: 'Svend Press', primaryMuscle: 'chest', equipment: ['plate'], level: 'beginner', movementPattern: 'isolation', environment: 'gym', defaultReps: '15–20', defaultRestSec: 45 }),
-  ex({ id: 'machine-fly', nameAr: 'تفتيح جهاز', nameEn: 'Machine Fly', primaryMuscle: 'chest', equipment: ['machine'], level: 'beginner', movementPattern: 'isolation', environment: 'gym', defaultReps: '12–15', defaultRestSec: 60, alternatives: ['pec-deck', 'dumbbell-fly'] }),
+  ex({ id: 'machine-fly', nameAr: 'تفتيح جهاز', nameEn: 'Machine Fly', primaryMuscle: 'chest', equipment: ['machine'], level: 'beginner', movementPattern: 'isolation', environment: 'gym', defaultReps: '12–15', defaultRestSec: 60, alternatives: ['pec-deck-machine', 'dumbbell-fly'] }),
   ex({ id: 'knee-push-up', nameAr: 'ضغط على الركبتين', nameEn: 'Knee Push-Up', primaryMuscle: 'chest', secondaryMuscles: ['triceps'], equipment: ['bodyweight'], level: 'beginner', movementPattern: 'push', environment: 'home', defaultReps: '10–15', defaultRestSec: 45, notesAr: 'بديل مبتدئ للضغط العادي.', alternatives: ['incline-push-up', 'push-up'] }),
 
   // ===== الظهر (إضافات) =====
@@ -411,9 +411,9 @@ export const exercises: Exercise[] = [
   ex({ id: 'glute-ham-raise', nameAr: 'رفع الجلوت-هام (GHR)', nameEn: 'Glute-Ham Raise', primaryMuscle: 'hamstrings', secondaryMuscles: ['glutes'], equipment: ['machine'], level: 'advanced', movementPattern: 'isolation', environment: 'gym', defaultReps: '8–12', defaultRestSec: 75 }),
 
   // ===== الجلوتس (إضافات) =====
-  ex({ id: 'glute-drive-machine', nameAr: 'جهاز دفع الألوية', nameEn: 'Glute Drive Machine', primaryMuscle: 'glutes', secondaryMuscles: ['hamstrings'], equipment: ['machine'], level: 'beginner', movementPattern: 'hinge', environment: 'gym', defaultReps: '10–15', defaultRestSec: 75, alternatives: ['glute-bridge', 'cable-pull-through'] }),
+  ex({ id: 'glute-machine', nameAr: 'جهاز الألوية', nameEn: 'Glute Machine', primaryMuscle: 'glutes', secondaryMuscles: ['hamstrings'], equipment: ['machine'], level: 'beginner', movementPattern: 'hinge', environment: 'gym', defaultReps: '10–15', defaultRestSec: 75, alternatives: ['glute-bridge', 'cable-pull-through'] }),
   ex({ id: 'single-leg-hip-thrust', nameAr: 'دفع الورك برجل واحدة', nameEn: 'Single-Leg Hip Thrust', primaryMuscle: 'glutes', equipment: ['bodyweight'], level: 'intermediate', movementPattern: 'hinge', environment: 'home', defaultReps: '10–15', defaultRestSec: 60 }),
-  ex({ id: 'abduction-machine', nameAr: 'مباعدة الأرجل جهاز', nameEn: 'Hip Abduction Machine', primaryMuscle: 'glutes', equipment: ['machine'], level: 'beginner', movementPattern: 'isolation', environment: 'gym', defaultReps: '15–20', defaultRestSec: 45 }),
+  ex({ id: 'hip-abduction-machine', nameAr: 'جهاز مباعدة الأرجل', nameEn: 'Hip Abduction Machine', primaryMuscle: 'glutes', equipment: ['machine'], level: 'beginner', movementPattern: 'isolation', environment: 'gym', defaultReps: '15–20', defaultRestSec: 45 }),
   ex({ id: 'banded-lateral-walk', nameAr: 'مشي جانبي بالمطاط', nameEn: 'Banded Lateral Walk', primaryMuscle: 'glutes', equipment: ['band'], level: 'beginner', movementPattern: 'isolation', environment: 'both', defaultReps: '12–15 لكل جهة', defaultRestSec: 45 }),
   ex({ id: 'frog-pump', nameAr: 'ضخّ الضفدع للجلوت', nameEn: 'Frog Pump', primaryMuscle: 'glutes', equipment: ['bodyweight'], level: 'beginner', movementPattern: 'hinge', environment: 'home', defaultReps: '15–25', defaultRestSec: 45 }),
 
@@ -521,7 +521,11 @@ export const LEGACY_EXERCISE_ID_MAP: Record<string, string> = {
   'pendulum-squat': 'pendulum-squat-machine',
   'leg-press': 'leg-press-machine',
   'adduction-machine': 'hip-adductor-machine',
-  'machine-hip-thrust': 'glute-drive-machine',
+  'abduction-machine': 'hip-abduction-machine',
+  'pec-deck': 'pec-deck-machine',
+  // (تحديث نهائي) أُزيل glute-drive-machine؛ جهاز الألوية الرسمي الوحيد هو glute-machine.
+  'glute-drive-machine': 'glute-machine',
+  'machine-hip-thrust': 'glute-machine',
   'seated-calf-raise': 'seated-calf-raise-machine',
   'standing-calf-raise': 'standing-calf-raise-machine',
   'preacher-curl': 'preacher-curl-machine',
@@ -554,7 +558,7 @@ export const PLACEHOLDER_ONLY_EXERCISE_IDS: readonly string[] = [
   'lateral-raise-machine',
   'shoulder-press-machine',
   'standing-leg-curl',
-  'glute-drive-machine',
+  'glute-machine',
   'glute-kickback-machine',
   'cable-crunch',
   // بلا أي وسيط أصلًا (كانت placeholder نظيفة) — تُدرَج كي تُجلب لها صورة جهاز حقيقية أيضًا.
@@ -563,6 +567,7 @@ export const PLACEHOLDER_ONLY_EXERCISE_IDS: readonly string[] = [
   'chest-supported-row-machine',
   'pendulum-squat-machine',
   'hip-adductor-machine',
+  'hip-abduction-machine',
 ]
 
 const placeholderOnlySet = new Set(PLACEHOLDER_ONLY_EXERCISE_IDS)

@@ -551,7 +551,7 @@ export const exerciseMedia: Record<string, ExerciseMedia> = {
     "img0Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Pallof_Press/0.jpg",
     "img1Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Pallof_Press/1.jpg"
   },
-  "pec-deck": {
+  "pec-deck-machine": {
     "img0": "/exercise-images/pec-deck/0.jpg",
     "img1": "/exercise-images/pec-deck/1.jpg",
     "img0Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Butterfly/0.jpg",

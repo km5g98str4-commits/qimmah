@@ -65,7 +65,7 @@ export const machineAlternatives: Record<string, MachineAlternatives> = {
   'hip-adductor-machine': { dumbbell: 'dumbbell-sumo-squat', cable: 'cable-hip-adduction' },
 
   // ===== الأرجل — الألوية =====
-  'glute-drive-machine': { dumbbell: 'glute-bridge', cable: 'cable-pull-through' },
+  'glute-machine': { dumbbell: 'glute-bridge', cable: 'cable-pull-through' },
   'glute-kickback-machine': { dumbbell: 'glute-bridge', cable: 'cable-kickback' },
   'standing-hip-extension-machine': { dumbbell: 'glute-bridge', cable: 'cable-kickback' },
 
