@@ -86,7 +86,13 @@ export function ExerciseMedia({ exerciseId, muscles = [], heightClass = 'h-40', 
   // بطاقات أجهزة بلا لقطة جهاز من قنوات المقاومة → لا نعرض وسيط وزن حرّ إطلاقًا. بدلًا من ذلك:
   // صورة الجهاز الحقيقية إن جُلبت (machineImages)، وإلا البديل الأنيق — لا شيء آخر.
   const placeholderOnly = isPlaceholderOnlyMedia(exerciseId)
-  const machineImg = placeholderOnly ? getMachineImage(canonicalExerciseId(exerciseId)) : undefined
+  // بطاقة الجهاز الكبيرة كانت تعتمد فقط على خريطة machineImages (المولّدة) وهي فارغة، فتظهر
+  // على البديل رغم وجود الملف المرفوع. الإصلاح: نقرأ الصورة بالاصطلاح مباشرةً من
+  // public/exercise-machine-images/{slug}.jpg (نفس مصدر البطاقات الصغيرة)، مع إبقاء الخريطة
+  // أولويةً للتوافق. ملف مفقود → onError في FallbackImg يتدهور بأمان إلى البديل الأنيق.
+  const machineImg = placeholderOnly
+    ? getMachineImage(canonicalExerciseId(exerciseId)) ?? `/exercise-machine-images/${canonicalExerciseId(exerciseId)}.jpg`
+    : undefined
   const media = placeholderOnly ? undefined : resolveByCandidates(exerciseId, getExerciseMedia)
   const [frame, setFrame] = useState(0)
   const [baseFailed, setBaseFailed] = useState(false) // نفاد مصادر الإطار الأساسي → بديل أنيق
