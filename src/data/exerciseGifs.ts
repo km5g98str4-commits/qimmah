@@ -1,96 +1,11 @@
-// ⚙️ ملف مُولّد آليًا — لا تُحرّره يدويًا. لإعادة التوليد:  node scripts/p12-sync-gifs.mjs
-// خريطة ثابتة: مُعرّف تمرين قانوني → مسار GIF متحرّك محلّي في public/exercise-gifs/.
-//
-// المفاتيح قانونية (canonical-first، P12): ملفات وُرِّدت قديمًا باسم معرّف قديم
-// (مثل cable-curl.gif) تبقى بأسمائها — صفر إعادة تسمية/تنزيل — ويشير إليها
-// المعرّف القانوني (cable-biceps-curl → /exercise-gifs/cable-curl.gif) وفق
-// LEGACY_EXERCISE_ID_MAP في exercises.ts. لجلب الناقص: scripts/p12-fetch-gifs.sh.
-// التغطية الحالية: 81 معرّفًا (3 منها عبر ملف باسم قديم).
+// ⚠️ طبقة GIF مُعطّلة عمدًا (P0 — إزالة العلامة المائية).
+// كانت هذه الخريطة تشير إلى ملفات GIF من WorkoutX (api.workoutxapp.com) تحمل علامة مائية
+// قطرية «…Y API». المصدر مملوك ومُعلَّم، فأُزيلت الملفات من public/exercise-gifs/ وفُرِّغت الخريطة.
+// النتيجة: يرجع ExerciseMedia تلقائيًا إلى الإطارات الثابتة النظيفة من free-exercise-db
+// (ملكية عامة، عبر exerciseMedia.ts) حيثما توفّرت، وإلا البديل الأنيق — لا علامة مائية إطلاقًا.
 
-/** خريطة ثابتة: مُعرّف تمرين قانوني → مسار GIF متحرّك محلّي. */
-export const exerciseGifs: Record<string, string> = {
-  'ab-crunch-machine': '/exercise-gifs/ab-crunch-machine.gif',
-  'ab-wheel-rollout': '/exercise-gifs/ab-wheel-rollout.gif',
-  'assisted-dip-machine': '/exercise-gifs/assisted-dip-machine.gif',
-  'barbell-back-squat': '/exercise-gifs/barbell-back-squat.gif',
-  'barbell-bench-press': '/exercise-gifs/barbell-bench-press.gif',
-  'barbell-curl': '/exercise-gifs/barbell-curl.gif',
-  'barbell-row': '/exercise-gifs/barbell-row.gif',
-  'bench-dip': '/exercise-gifs/bench-dip.gif',
-  'bodyweight-calf-raise': '/exercise-gifs/bodyweight-calf-raise.gif',
-  'bodyweight-squat': '/exercise-gifs/bodyweight-squat.gif',
-  'bulgarian-split-squat': '/exercise-gifs/bulgarian-split-squat.gif',
-  'cable-biceps-curl': '/exercise-gifs/cable-curl.gif',
-  'cable-crossover': '/exercise-gifs/cable-crossover.gif',
-  'cable-hammer-curl': '/exercise-gifs/cable-hammer-curl.gif',
-  'cable-hip-adduction': '/exercise-gifs/cable-hip-adduction.gif',
-  'cable-kickback': '/exercise-gifs/cable-kickback.gif',
-  'cable-lateral-raise': '/exercise-gifs/cable-lateral-raise.gif',
-  'cable-overhead-extension': '/exercise-gifs/cable-overhead-extension.gif',
-  'cable-pull-through': '/exercise-gifs/cable-pull-through.gif',
-  'cable-shoulder-press': '/exercise-gifs/cable-shoulder-press.gif',
-  'cable-triceps-pushdown': '/exercise-gifs/triceps-pushdown.gif',
-  'chest-press-machine': '/exercise-gifs/chest-press-machine.gif',
-  'chin-up': '/exercise-gifs/chin-up.gif',
-  'close-grip-bench-press': '/exercise-gifs/close-grip-bench-press.gif',
-  'close-grip-pulldown': '/exercise-gifs/close-grip-pulldown.gif',
-  'concentration-curl': '/exercise-gifs/concentration-curl.gif',
-  'crunch': '/exercise-gifs/crunch.gif',
-  'deadlift': '/exercise-gifs/deadlift.gif',
-  'decline-dumbbell-press': '/exercise-gifs/decline-dumbbell-press.gif',
-  'dumbbell-bench-press': '/exercise-gifs/dumbbell-bench-press.gif',
-  'dumbbell-curl': '/exercise-gifs/dumbbell-curl.gif',
-  'dumbbell-fly': '/exercise-gifs/dumbbell-fly.gif',
-  'dumbbell-rdl': '/exercise-gifs/dumbbell-rdl.gif',
-  'dumbbell-row': '/exercise-gifs/dumbbell-row.gif',
-  'dumbbell-shoulder-press': '/exercise-gifs/dumbbell-shoulder-press.gif',
-  'dumbbell-shrug': '/exercise-gifs/dumbbell-shrug.gif',
-  'front-raise': '/exercise-gifs/front-raise.gif',
-  'front-squat': '/exercise-gifs/front-squat.gif',
-  'glute-bridge': '/exercise-gifs/glute-bridge.gif',
-  'goblet-squat': '/exercise-gifs/goblet-squat.gif',
-  'good-morning': '/exercise-gifs/good-morning.gif',
-  'hammer-curl': '/exercise-gifs/hammer-curl.gif',
-  'hanging-leg-raise': '/exercise-gifs/hanging-leg-raise.gif',
-  'incline-barbell-press': '/exercise-gifs/incline-barbell-press.gif',
-  'incline-cable-fly': '/exercise-gifs/incline-cable-fly.gif',
-  'incline-chest-press-machine': '/exercise-gifs/incline-chest-press-machine.gif',
-  'incline-dumbbell-press': '/exercise-gifs/incline-dumbbell-press.gif',
-  'iso-lateral-chest-press': '/exercise-gifs/iso-lateral-chest-press.gif',
-  'iso-lateral-high-row': '/exercise-gifs/iso-lateral-high-row.gif',
-  'iso-lateral-pulldown': '/exercise-gifs/iso-lateral-pulldown.gif',
-  'lat-pulldown-machine': '/exercise-gifs/lat-pulldown-machine.gif',
-  'lateral-raise': '/exercise-gifs/lateral-raise.gif',
-  'leg-extension-machine': '/exercise-gifs/leg-extension-machine.gif',
-  'leg-press-machine': '/exercise-gifs/leg-press-machine.gif',
-  'lying-leg-curl': '/exercise-gifs/lying-leg-curl.gif',
-  'overhead-triceps-extension': '/exercise-gifs/overhead-triceps-extension.gif',
-  'plank': '/exercise-gifs/plank.gif',
-  'pull-up': '/exercise-gifs/pull-up.gif',
-  'push-up': '/exercise-gifs/push-up.gif',
-  'rear-delt-fly': '/exercise-gifs/rear-delt-fly.gif',
-  'romanian-deadlift': '/exercise-gifs/romanian-deadlift.gif',
-  'rope-pushdown': '/exercise-gifs/rope-pushdown.gif',
-  'russian-twist': '/exercise-gifs/russian-twist.gif',
-  'seated-cable-row': '/exercise-gifs/seated-cable-row.gif',
-  'seated-dumbbell-press': '/exercise-gifs/seated-dumbbell-press.gif',
-  'seated-row-machine': '/exercise-gifs/seated-row-machine.gif',
-  'side-plank': '/exercise-gifs/side-plank.gif',
-  'single-leg-calf-raise': '/exercise-gifs/single-leg-calf-raise.gif',
-  'sissy-squat': '/exercise-gifs/sissy-squat.gif',
-  'skull-crusher': '/exercise-gifs/skull-crusher.gif',
-  'smith-machine-squat': '/exercise-gifs/smith-machine-squat.gif',
-  'standing-hip-extension-machine': '/exercise-gifs/standing-hip-extension-machine.gif',
-  'stationary-bike': '/exercise-gifs/stationary-bike.gif',
-  'step-up': '/exercise-gifs/step-up.gif',
-  'straight-arm-pulldown': '/exercise-gifs/straight-arm-pulldown.gif',
-  'sumo-deadlift': '/exercise-gifs/sumo-deadlift.gif',
-  't-bar-row-machine': '/exercise-gifs/t-bar-row.gif',
-  'triceps-extension-machine': '/exercise-gifs/triceps-extension-machine.gif',
-  'walking-lunge': '/exercise-gifs/walking-lunge.gif',
-  'wide-grip-iso-lateral-pulldown': '/exercise-gifs/wide-grip-iso-lateral-pulldown.gif',
-  'wide-grip-lat-pulldown': '/exercise-gifs/wide-grip-lat-pulldown.gif',
-}
+/** خريطة الـ GIF — فارغة عمدًا بعد إزالة أصول WorkoutX المُعلَّمة (لا مصدر GIF نظيف حاليًا). */
+export const exerciseGifs: Record<string, string> = {}
 
 /** يُرجع مسار الـ GIF المحلّي إن توفّر، وإلا undefined (فيرجع المكوّن للصورة الثابتة ثم البديل الأنيق). */
 export function getExerciseGif(exerciseId: string): string | undefined {

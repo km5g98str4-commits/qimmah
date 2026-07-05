@@ -29,9 +29,24 @@ export interface AuthContextValue {
   loading: boolean
   /** الاسم المعروض للمستخدم (من user_metadata) أو البريد كبديل، أو null كضيف. */
   displayName: string | null
+  /**
+   * هل بريد الحساب مؤكَّد؟ (دفاع عميق ضد الوصول الكامل بحساب غير مؤكَّد.)
+   * true للضيف/غير المسجّل بالبريد. false فقط لحساب ببريد لم يُؤكَّد بعد (email_confirmed_at غائب).
+   */
+  emailVerified: boolean
   signUp: (email: string, password: string, displayName?: string) => Promise<AuthResult>
   signIn: (email: string, password: string) => Promise<AuthResult>
   signOut: () => Promise<void>
+  /** يعيد إرسال رسالة تأكيد البريد. */
+  resendConfirmation: (email: string) => Promise<AuthResult>
+  /** يعيد جلب المستخدم من الخادم لالتقاط تأكيد البريد بعد الضغط على الرابط. */
+  refreshUser: () => Promise<void>
+}
+
+/** هل بريد هذا المستخدم مؤكَّد؟ ضيف/بلا بريد = مؤكَّد ضمنيًا (لا يُحبَس). */
+function isEmailVerified(user: User | null): boolean {
+  if (!user || !user.email) return true
+  return Boolean(user.email_confirmed_at || user.confirmed_at)
 }
 
 /** يستخرج الاسم المعروض من بيانات المستخدم (metadata) مع البريد كبديل. */
@@ -81,6 +96,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     let active = true
     let unsubscribe: (() => void) | null = null
+    // فشل آمن: مهما تعذّر وصول الشبكة (جلسة مُعلَّقة لا تُحسم)، لا نُبقي بوّابة الإقلاع
+    // عالقة أبدًا — نرفع التحميل بعد مهلة قصيرة فيدخل المستخدم بدل شاشة تحميل دائمة.
+    const failsafe = window.setTimeout(() => {
+      if (active) setLoading(false)
+    }, 8000)
     // getSupabase() كسول (P11.5): المكتبة تُحمَّل هنا بعد الرسم الأول، لا في حزمة الإقلاع.
     getSupabase().then((supabase) => {
       if (!active || !supabase) {
@@ -108,6 +128,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     })
     return () => {
       active = false
+      window.clearTimeout(failsafe)
       unsubscribe?.()
     }
   }, [configured])
@@ -119,6 +140,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       session,
       loading,
       displayName: userDisplayName(user),
+      emailVerified: isEmailVerified(user),
       async signUp(email, password, displayName) {
         const supabase = await getSupabase()
         if (!supabase) return { ok: false, error: cloudDisabledError() }
@@ -147,6 +169,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession(null)
         setUser(null)
       },
+      async resendConfirmation(email) {
+        const supabase = await getSupabase()
+        if (!supabase) return { ok: false, error: cloudDisabledError() }
+        const { error } = await supabase.auth.resend({ type: 'signup', email: email.trim() })
+        if (error) return { ok: false, error: localizedAuthError(error.message) }
+        return { ok: true }
+      },
+      async refreshUser() {
+        const supabase = await getSupabase()
+        if (!supabase) return
+        const { data } = await supabase.auth.getUser()
+        if (data.user) setUser(data.user)
+      },
     }),
     [configured, user, session, loading],
   )
@@ -165,6 +200,7 @@ export function useAuth(): AuthContextValue {
     session: null,
     loading: false,
     displayName: null,
+    emailVerified: true,
     async signUp() {
       return { ok: false, error: cloudDisabledError() }
     },
@@ -172,5 +208,9 @@ export function useAuth(): AuthContextValue {
       return { ok: false, error: cloudDisabledError() }
     },
     async signOut() {},
+    async resendConfirmation() {
+      return { ok: false, error: cloudDisabledError() }
+    },
+    async refreshUser() {},
   }
 }
