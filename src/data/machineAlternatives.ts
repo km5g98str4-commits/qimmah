@@ -53,7 +53,6 @@ export const machineAlternatives: Record<string, MachineAlternatives> = {
   // مراجعة زياد: مد الأرجل عزل كوادز خالص — سيسي سكوات (حر) أدق ميكانيكيًا من الجوبليت المركّب.
   'leg-extension-machine': { dumbbell: 'sissy-squat', dumbbellIsFallback: true, cable: 'bodyweight-squat', cableIsFallback: true },
   'hack-squat-machine': { dumbbell: 'goblet-squat', cable: 'bodyweight-squat', cableIsFallback: true },
-  'pendulum-squat-machine': { dumbbell: 'goblet-squat', cable: 'bodyweight-squat', cableIsFallback: true },
   'leg-press-machine': { dumbbell: 'goblet-squat', cable: 'bodyweight-squat', cableIsFallback: true },
 
   // ===== الأرجل — فخذ خلفي =====
@@ -82,8 +81,7 @@ export const machineAlternatives: Record<string, MachineAlternatives> = {
   'cable-triceps-pushdown': { dumbbell: 'dumbbell-kickback', cable: 'rope-pushdown' },
 
   // ===== البطن =====
-  'ab-crunch-machine': { dumbbell: 'crunch', cable: 'cable-crunch' },
-  'cable-crunch': { dumbbell: 'crunch', cable: 'cable-woodchop' },
+  'ab-crunch-machine': { dumbbell: 'crunch', cable: 'crunch', cableIsFallback: true },
 }
 
 /** يعيد بديلي الجهاز (دمبل/كيبل) — يقبل المعرّفات القديمة، أو null إن لم يكن جهاز كتالوج. */

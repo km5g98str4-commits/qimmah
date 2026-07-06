@@ -314,20 +314,6 @@ export const machineHowTo: Record<string, HowToSteps> = {
       'Drive up through the whole foot while exhaling, without locking the knees.',
     ],
   },
-  'pendulum-squat-machine': {
-    ar: [
-      'ثبّت كتفيك تحت الوسادتين وظهرك على المسند، وقدماك بمنتصف المنصة.',
-      'حرّر الأمان وانزل ببطء مع الشهيق بعمق مريح.',
-      'حافظ على كامل القدم ملتصقة بالمنصة.',
-      'ادفع للأعلى مع الزفير حتى تمتد الرجلان دون قفل الركبتين.',
-    ],
-    en: [
-      'Set your shoulders under the pads, back on the pad, feet mid-platform.',
-      'Release the safety and lower slowly while inhaling to a comfortable depth.',
-      'Keep the whole foot flat on the platform.',
-      'Drive up while exhaling until the legs extend without locking the knees.',
-    ],
-  },
   'leg-press-machine': {
     ar: [
       'اجلس وثبّت ظهرك ووركيك على المسند، وضع قدميك بعرض الكتفين منتصف المنصة.',
@@ -550,20 +536,6 @@ export const machineHowTo: Record<string, HowToSteps> = {
       'Curl your ribs toward your pelvis, rounding the torso forward while exhaling.',
       'Pause briefly at peak ab contraction.',
       'Return slowly while inhaling without letting the weight drop.',
-    ],
-  },
-  'cable-crunch': {
-    ar: [
-      'ثبّت الحبل بأعلى العمود واركع تحته ممسكًا الطرفين بجانب رأسك.',
-      'قوّس جذعك للأسفل بتقريب الأضلاع نحو الحوض مع الزفير.',
-      'أبقِ الوركين ثابتين — الحركة من البطن لا من الذراعين.',
-      'ارجع ببطء مع الشهيق حتى يستقيم الجذع.',
-    ],
-    en: [
-      'Set the rope at the top pulley and kneel below it, holding the ends beside your head.',
-      'Crunch your torso down, bringing the ribs toward the pelvis while exhaling.',
-      'Keep the hips still — the movement comes from the abs, not the arms.',
-      'Return slowly while inhaling until the torso is upright.',
     ],
   },
 }

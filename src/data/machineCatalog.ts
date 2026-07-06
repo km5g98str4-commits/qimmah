@@ -131,7 +131,6 @@ export const machineCatalog: MachineGroup[] = [
       // — فخذ أمامي (Quads) —
       item({ exerciseId: 'leg-extension-machine', nameEn: 'Leg Extension Machine', nameAr: 'جهاز مد الأرجل', targetMuscleAr: 'أمامية الفخذ', subGroup: SUB.quads }),
       item({ exerciseId: 'hack-squat-machine', nameEn: 'Hack Squat Machine', nameAr: 'هاك سكوات جهاز', targetMuscleAr: 'أمامية الفخذ', subGroup: SUB.quads }),
-      item({ exerciseId: 'pendulum-squat-machine', nameEn: 'Pendulum Squat Machine', nameAr: 'سكوات البندول', targetMuscleAr: 'أمامية الفخذ', subGroup: SUB.quads }),
       item({ exerciseId: 'leg-press-machine', nameEn: 'Leg Press Machine', nameAr: 'جهاز دفع الأرجل', targetMuscleAr: 'أمامية الفخذ', subGroup: SUB.quads }),
       // — فخذ خلفي (Hamstrings) —
       item({ exerciseId: 'seated-leg-curl', nameEn: 'Seated Leg Curl', nameAr: 'ثني أرجل جالس', targetMuscleAr: 'خلفية الفخذ', subGroup: SUB.hamstrings }),
@@ -174,7 +173,6 @@ export const machineCatalog: MachineGroup[] = [
     titleAr: 'البطن',
     items: [
       item({ exerciseId: 'ab-crunch-machine', nameEn: 'Ab Crunch Machine', nameAr: 'جهاز طحن البطن', targetMuscleAr: 'البطن', subGroup: SUB.abs }),
-      item({ exerciseId: 'cable-crunch', nameEn: 'Cable Crunch', nameAr: 'طحن بالكيبل', targetMuscleAr: 'البطن', subGroup: SUB.abs }),
     ],
   },
 ]
@@ -204,8 +202,8 @@ export const PRIMARY_MACHINE_IDS: readonly string[] = [
   'seated-row-machine', 'chest-supported-row-machine', 't-bar-row-machine', 'rear-delt-row-machine',
   // الأكتاف (٣)
   'shoulder-press-machine', 'lateral-raise-machine', 'reverse-pec-deck',
-  // الأرجل (١٣)
-  'leg-extension-machine', 'hack-squat-machine', 'pendulum-squat-machine', 'leg-press-machine',
+  // الأرجل (١٢)
+  'leg-extension-machine', 'hack-squat-machine', 'leg-press-machine',
   'seated-leg-curl', 'lying-leg-curl', 'standing-leg-curl', 'hip-adductor-machine',
   'glute-machine', 'glute-kickback-machine', 'standing-hip-extension-machine',
   'seated-calf-raise-machine', 'standing-calf-raise-machine',

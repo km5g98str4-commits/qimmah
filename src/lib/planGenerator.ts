@@ -231,7 +231,7 @@ const INJURY_RISKY_IDS: Record<InjuryArea, ReadonlySet<string>> = {
   // الركبة: نتجنّب القرفصاء الثقيل والاندفاع العميق ومدّ الرجل؛ نُبقي ليج برس/قرفصاء خفيف والهيپ.
   knee: new Set([
     'barbell-back-squat', 'front-squat', 'hack-squat-machine', 'smith-machine-squat', 'sissy-squat',
-    'pendulum-squat-machine', 'belt-squat', 'leg-press-narrow', 'bulgarian-split-squat', 'walking-lunge',
+    'belt-squat', 'leg-press-narrow', 'bulgarian-split-squat', 'walking-lunge',
     'reverse-lunge', 'step-up', 'leg-extension-machine', 'wall-sit',
   ]),
   // الكتف: نتجنّب الضغط العلوي بالبار والتجديف العمودي؛ نُبقي ضغط الدمبل/الجهاز والرفرفات.
@@ -382,7 +382,7 @@ const ACCESSORY_POOL: Record<'triceps' | 'biceps' | 'abs', string[]> = {
   // assisted-dip-machine أساسي (ضمن الـ٣٢) فلا يُلحَق كإضافة — نستخدم غير الأساسيين للترايسبس.
   triceps: ['triceps-extension-machine', 'cable-triceps-pushdown'],
   biceps: ['preacher-curl-machine', 'cable-biceps-curl'],
-  abs: ['ab-crunch-machine', 'cable-crunch'],
+  abs: ['ab-crunch-machine'],
 }
 
 /** فئة إضافة اليوم حسب نوعه: دفع←ترايسبس، سحب←بايسبس، أرجل/كامل←بطن،
