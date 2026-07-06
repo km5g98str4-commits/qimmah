@@ -564,6 +564,8 @@ export const PLACEHOLDER_ONLY_EXERCISE_IDS: readonly string[] = [
   'iso-lateral-pulldown',
   'wide-grip-iso-lateral-pulldown',
   'iso-lateral-high-row',
+  'triceps-extension-machine',
+  'standing-hip-extension-machine',
   'single-arm-lat-pulldown',
   'chest-supported-row-machine',
   'hip-adductor-machine',
