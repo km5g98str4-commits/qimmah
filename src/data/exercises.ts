@@ -560,6 +560,10 @@ export const PLACEHOLDER_ONLY_EXERCISE_IDS: readonly string[] = [
   'glute-kickback-machine',
   // بلا أي وسيط أصلًا (كانت placeholder نظيفة) — تُدرَج كي تُجلب لها صورة جهاز حقيقية أيضًا.
   'iso-lateral-incline-press',
+  'iso-lateral-chest-press',
+  'iso-lateral-pulldown',
+  'wide-grip-iso-lateral-pulldown',
+  'iso-lateral-high-row',
   'single-arm-lat-pulldown',
   'chest-supported-row-machine',
   'hip-adductor-machine',
