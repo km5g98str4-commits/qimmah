@@ -381,7 +381,9 @@ function ExerciseRow({
   onReps: (reps: string) => void
 }) {
   const ex = getExercise(pe.exerciseId)
-  const repOptions = REP_OPTIONS.includes(pe.reps) ? REP_OPTIONS : [pe.reps, ...REP_OPTIONS]
+  // توحيد القيمة القديمة «30 ث» إلى الرمز المحايد كي لا يظهر خياران متطابقان في العربية.
+  const reps = pe.reps === '30 ث' ? REP_SECONDS_VALUE : pe.reps
+  const repOptions = REP_OPTIONS.includes(reps) ? REP_OPTIONS : [reps, ...REP_OPTIONS]
   return (
     <li className="rounded-2xl border border-line bg-surface p-3">
       <div className="flex items-center gap-3">
@@ -457,7 +459,7 @@ function ExerciseRow({
         <div className="flex flex-1 items-center justify-between gap-2 rounded-xl border border-line bg-beige px-2 py-1.5">
           <span className="ps-1 text-[11px] font-bold text-ink-500">{d.repsLabel}</span>
           <select
-            value={pe.reps}
+            value={reps}
             onChange={(e) => onReps(e.target.value)}
             aria-label={d.repsLabel}
             className="rounded-lg border border-line bg-surface px-2 py-1.5 text-sm font-black text-ink-900 focus:outline-none"
