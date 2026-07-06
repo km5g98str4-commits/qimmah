@@ -1,3 +1,5 @@
+import { saudiTraditionalFoods } from './saudiFoods'
+
 export type FoodCategory =
   | 'بروتين'
   | 'كارب'
@@ -6,6 +8,7 @@ export type FoodCategory =
   | 'فطور'
   | 'أكلات سعودية/خليجية'
   | 'أطباق سعودية / شعبية'
+  | 'أطباق سعودية تقليدية'
   | 'مطاعم/وجبات سريعة تقديرية'
   | 'مطاعم'
   | 'مشروبات'
@@ -5609,6 +5612,8 @@ export const foodItems: FoodItem[] = [
     fat: 36,
     keywords: ['qishda', 'قشطة عربية'],
   },
+  // ===== أطباق سعودية تقليدية (إقليمية) — جداول تركيب الأغذية السعودية، القيم لكل 100غ =====
+  ...saudiTraditionalFoods,
 ]
 
 export const foodMap: Record<string, FoodItem> = Object.fromEntries(
