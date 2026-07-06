@@ -51,6 +51,9 @@ export interface NutritionLog {
   date: string
   doneMeals: Record<string, boolean>
   waterMl?: number
+  /** مجاميع الأطعمة المُسجّلة يدويًا في هذا اليوم (سعرات/ماكروز) — تبقى بعد تصفير اليوم
+   *  فتظهر في الملخّص الأسبوعي/التقدّم. تُكتب من مسجّل الوجبات. */
+  loggedFood?: { calories: number; protein: number; carbs: number; fat: number }
   updatedAt: string
 }
 

@@ -125,8 +125,9 @@ function setState(demo: boolean, mutate: (prev: NutritionTodayState) => Nutritio
   } else {
     realCache = next
     saveNutritionToday(next)
-    // عكس الحالة في المتجر التاريخي الدائم (لا يُصفّر مع تغيّر اليوم).
-    saveNutritionLog(next.date, { doneMeals: next.doneMeals, waterMl: next.waterMl })
+    // عكس الحالة في المتجر التاريخي الدائم (لا يُصفّر مع تغيّر اليوم). نحفظ أيضًا مجاميع
+    // الأطعمة المُسجّلة يدويًا حتى تبقى بعد تصفير اليوم وتظهر في الملخّص الأسبوعي والتقدّم.
+    saveNutritionLog(next.date, { doneMeals: next.doneMeals, waterMl: next.waterMl, loggedFood: logTotals(next.log) })
     saveWaterLog(next.date, next.waterMl)
   }
   notify()
