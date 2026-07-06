@@ -122,6 +122,7 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login' }: Lo
                     type="text"
                     autoComplete="name"
                     placeholder={t.auth.name}
+                    aria-label={t.auth.name}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                   />
@@ -137,6 +138,7 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login' }: Lo
                   inputMode="email"
                   autoComplete="email"
                   placeholder={t.auth.email}
+                  aria-label={t.auth.email}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
@@ -150,6 +152,7 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login' }: Lo
                   type="password"
                   autoComplete={isSignup ? 'new-password' : 'current-password'}
                   placeholder={t.auth.password}
+                  aria-label={t.auth.password}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   minLength={isSignup ? PASSWORD_MIN_LENGTH : undefined}

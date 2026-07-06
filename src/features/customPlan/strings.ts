@@ -41,6 +41,9 @@ export interface CustomPlanStrings {
   repsLabel: string
   moveUp: string
   moveDown: string
+  decrease: string
+  increase: string
+  repsSecondsOption: string
   removeExercise: string
   dayTab: string
 
@@ -113,6 +116,9 @@ const ar: CustomPlanStrings = {
   repsLabel: 'تكرار',
   moveUp: 'تحريك لأعلى',
   moveDown: 'تحريك لأسفل',
+  decrease: 'إنقاص',
+  increase: 'زيادة',
+  repsSecondsOption: '30 ث',
   removeExercise: 'حذف التمرين',
   dayTab: 'اليوم',
 
@@ -193,6 +199,9 @@ const en: CustomPlanStrings = {
   repsLabel: 'Reps',
   moveUp: 'Move up',
   moveDown: 'Move down',
+  decrease: 'Decrease',
+  increase: 'Increase',
+  repsSecondsOption: '30 s',
   removeExercise: 'Remove exercise',
   dayTab: 'Day',
 

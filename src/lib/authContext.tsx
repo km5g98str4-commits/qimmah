@@ -1,7 +1,7 @@
-// طبقة المصادقة — Supabase email/password مع بقاء Guest Mode ممكنًا دائمًا.
+// طبقة المصادقة — Supabase email/password. الحساب مطلوب للدخول (لا وضع ضيف داخل التطبيق).
 //
-// إن لم يُضبط Supabase تبقى الحالة «ضيف» (user = null, configured = false)
-// ولا تنهار الواجهة. كل الدوال آمنة عند غياب العميل.
+// إن لم يُضبط Supabase تبقى الحالة user = null, configured = false ولا تنهار الواجهة،
+// وتَعرض شاشة الحساب أنّ المزامنة غير مفعّلة. كل الدوال آمنة عند غياب العميل.
 
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'

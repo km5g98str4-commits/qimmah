@@ -1,7 +1,7 @@
-import { lazy, Suspense, useMemo, useState } from 'react'
+import { lazy, Suspense, useId, useMemo, useState } from 'react'
 import { Icon } from '@/components/Icon'
 import { ProgressBar } from '@/components/ProgressBar'
-import { searchFood, type FoodItem, type FoodSize } from '@/data/foodItems'
+import { searchFood, foodCategoryEn, type FoodItem, type FoodSize } from '@/data/foodItems'
 import { useNutritionToday, type MealSlot } from '@/lib/nutritionTracking'
 import { NUM_LIMITS, parseSafeNumber, sanitizeNumericInput } from '@/lib/validation'
 import { getStrings } from '@/config/strings'
@@ -71,7 +71,10 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
     ? activeSize.servingGrams
     : (selected?.servingGrams && selected.servingGrams > 0 ? selected.servingGrams : 100)
   // الكمية الحالية بالغرام والعامل النسبي مقابل الحصة المرجعية.
-  const gramsNum = parseSafeNumber(grams, { min: 1, max: 3000, fallback: baseGrams })
+  // حقل فارغ (مسحه المستخدم ليعيد الكتابة) = الحصة المرجعية، لا 1غ (Number('')===0 يتخطّى
+  // fallback فيُقصّ إلى الحدّ الأدنى 1). نعالج الفراغ صراحةً قبل التحويل.
+  const gramsBlank = grams.trim() === ''
+  const gramsNum = gramsBlank ? baseGrams : parseSafeNumber(grams, { min: 1, max: 3000, fallback: baseGrams })
   const factor = gramsNum / baseGrams
 
   // اختيار عنصر من النتائج: يضبط الحجم الافتراضي (وسط إن وُجد) والغرامات المطابقة له.
@@ -203,6 +206,7 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
                     value={query}
                     onChange={(e) => { setQuery(e.target.value); setSelected(null); setSizeId(null) }}
                     placeholder={t.searchFood}
+                    aria-label={t.searchFood}
                     className="w-full rounded-lg border border-line bg-surface py-2 ps-9 pe-3 text-sm text-ink-900 outline-none focus:border-primary-c"
                   />
                 </div>
@@ -238,7 +242,7 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
                             )}
                           </span>
                           {/* عزل اتجاه: تسمية الحصة عربية دائمًا وقد تُعرض داخل واجهة إنجليزية (LTR). */}
-                        <span className="block text-[11px] text-ink-400"><bdi>{f.servingLabelAr}</bdi> · {f.category}</span>
+                        <span className="block text-[11px] text-ink-400"><bdi>{f.servingLabelAr}</bdi> · {lang === 'en' ? foodCategoryEn[f.category] : f.category}</span>
                         </span>
                         <span className="shrink-0 text-[11px] font-bold text-orange-300">{f.calories} · {f.protein}{t.gramsUnit}</span>
                       </button>
@@ -280,8 +284,9 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
                     <span>{t.per100g}: <span className="font-bold text-ink-600">{round(baseCal * 100 / baseGrams)} {t.calories} · {round(baseProt * 100 / baseGrams)}{t.gramsUnit} {t.protein}</span></span>
                   </div>
                   <div className="mt-3 flex items-center gap-2">
-                    <label className="text-xs text-ink-500">{t.gramsAmount}</label>
+                    <label htmlFor="qml-grams" className="text-xs text-ink-500">{t.gramsAmount}</label>
                     <input
+                      id="qml-grams"
                       type="number"
                       inputMode="numeric"
                       min="1"
@@ -299,7 +304,7 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
                     <Stat label={t.carbs} value={`${round(baseCarb * factor)}${t.gramsUnit}`} />
                     <Stat label={t.fat} value={`${round(baseFat * factor)}${t.gramsUnit}`} />
                   </div>
-                  <button type="button" onClick={addSelected} className="btn-primary mt-3 w-full justify-center py-2 text-xs">
+                  <button type="button" onClick={addSelected} disabled={gramsBlank} className="btn-primary mt-3 w-full justify-center py-2 text-xs disabled:cursor-not-allowed disabled:opacity-40">
                     <Icon name="Plus" className="h-4 w-4" />
                     {t.addToLog}
                   </button>
@@ -309,8 +314,9 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
           ) : (
             <div className="grid grid-cols-2 gap-3">
               <div className="col-span-2">
-                <label className="text-xs text-ink-500">{t.foodName} — {t.optional}</label>
+                <label htmlFor="qml-custom-name" className="text-xs text-ink-500">{t.foodName} — {t.optional}</label>
                 <input
+                  id="qml-custom-name"
                   type="text"
                   value={cName}
                   onChange={(e) => setCName(e.target.value)}
@@ -407,10 +413,12 @@ function TabBtn({ active, onClick, label }: { active: boolean; onClick: () => vo
 }
 
 function Field({ label, value, onChange, placeholder, max }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; max?: number }) {
+  const id = useId()
   return (
     <div>
-      <label className="text-xs text-ink-500">{label}</label>
+      <label htmlFor={id} className="text-xs text-ink-500">{label}</label>
       <input
+        id={id}
         type="number"
         inputMode="numeric"
         min="0"

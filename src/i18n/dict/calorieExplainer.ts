@@ -22,6 +22,8 @@ export interface CalorieExplainerStrings {
   proteinDayUnit: string
   kg: string
   disclaimer: string
+  /** يظهر بدل معادلة (TDEE−٤٠٠) حين تُطبَّق أرضية السعرات الآمنة فتصبح المعادلة غير مطابقة للناتج. */
+  floorLabel: string
 }
 
 const ar: CalorieExplainerStrings = {
@@ -46,6 +48,7 @@ const ar: CalorieExplainerStrings = {
   kg: 'كجم',
   disclaimer:
     'هذه تقديرات لتنظيم أكلك ومتابعة تقدّمك فقط، وليست نصيحة طبية. عدّلها حسب إحساسك ونتائجك على أرض الواقع.',
+  floorLabel: 'الحد الأدنى الآمن',
 }
 
 const en: CalorieExplainerStrings = {
@@ -72,6 +75,7 @@ const en: CalorieExplainerStrings = {
   kg: 'kg',
   disclaimer:
     'These are estimates to organize your eating and track your progress only, not medical advice. Adjust them to how you feel and your real-world results.',
+  floorLabel: 'Safe minimum',
 }
 
 export const calorieExplainerStrings: Record<Lang, CalorieExplainerStrings> = { ar, en }

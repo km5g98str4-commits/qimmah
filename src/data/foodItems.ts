@@ -59,6 +59,26 @@ export interface FoodItem {
 export const FOOD_ESTIMATE_NOTE =
   'القيم الغذائية تقديرية وقد تختلف حسب طريقة الطبخ والكمية.'
 
+/** تسمية إنجليزية لكل تصنيف طعام — لعرض التصنيف في الواجهة الإنجليزية بدل النص العربي. */
+export const foodCategoryEn: Record<FoodCategory, string> = {
+  'بروتين': 'Protein',
+  'كارب': 'Carbs',
+  'دهون صحية': 'Healthy fats',
+  'ألبان': 'Dairy',
+  'فطور': 'Breakfast',
+  'أكلات سعودية/خليجية': 'Saudi / Gulf dishes',
+  'أطباق سعودية / شعبية': 'Saudi / popular dishes',
+  'أطباق سعودية تقليدية': 'Traditional Saudi dishes',
+  'مطاعم/وجبات سريعة تقديرية': 'Restaurants / fast food (est.)',
+  'مطاعم': 'Restaurants',
+  'مشروبات': 'Drinks',
+  'فواكه': 'Fruits',
+  'خضار': 'Vegetables',
+  'حلويات': 'Desserts',
+  'مكملات غذائية': 'Supplements',
+  'منتج ممسوح بالباركود': 'Scanned product',
+}
+
 export const foodItems: FoodItem[] = [
   // ===== بروتين =====
   {

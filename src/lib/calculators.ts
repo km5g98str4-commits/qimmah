@@ -38,6 +38,8 @@ export const FAT_CALORIE_RATIO = 0.27
 export const CUT_DEFICIT = 400
 /** فائض التضخيم بالسعرات فوق TDEE. */
 export const BULK_SURPLUS = 300
+/** طاقة الكيلوغرام من نسيج الجسم (تقريبي) — لاشتقاق معدّل تغيّر الوزن الأسبوعي من العجز/الفائض. */
+export const KCAL_PER_KG = 7700
 /**
  * إصدار صيغة الحساب — يُضمَّن في بصمة الملف الشخصي حتى تُعاد الحسابات تلقائيًا
  * للمستخدمين الحاليين عند تغيّر المعادلات (بروتين 1.8، دهون نسبة سعرات).
@@ -244,16 +246,20 @@ export function computeTargets(p: Profile): Targets {
   const water = Math.max(2.5, roundHalf(w * 0.035))
   const bmi = round1(w / Math.pow(h / 100, 2))
 
-  // الوزن والمدة المقدّرة
+  // الوزن والمدة المقدّرة — يُشتقّ معدّل التغيّر الأسبوعي من نفس العجز/الفائض الذي تفرضه
+  // الخطة (عجز 400 → ≈0.36 كجم/أسبوع، فائض 300 → ≈0.27 كجم/أسبوع) عبر 7700 سعرة/كجم،
+  // فلا يتناقض الرقم المعروض مع السعرات المستهدفة. المدة تُحسب بالمعدّل الدقيق قبل التقريب.
   const diff = p.targetWeightKg - w
   let weeklyChange = 0
   let weeks = 0
   if (diff < -0.05) {
-    weeklyChange = -0.5
-    weeks = Math.ceil(Math.abs(diff) / 0.5)
+    const rate = (CUT_DEFICIT * 7) / KCAL_PER_KG
+    weeklyChange = -round1(rate)
+    weeks = Math.ceil(Math.abs(diff) / rate)
   } else if (diff > 0.05) {
-    weeklyChange = 0.25
-    weeks = Math.ceil(diff / 0.25)
+    const rate = (BULK_SURPLUS * 7) / KCAL_PER_KG
+    weeklyChange = round1(rate)
+    weeks = Math.ceil(diff / rate)
   }
 
   return {

@@ -6,7 +6,7 @@ import type { FoodItem } from './foodItems'
 export const saudiTraditionalFoods: FoodItem[] = [
   {
     id: 'sfct-1',
-    nameAr: 'قرصان',
+    nameAr: 'قرصان (الرياض)',
     nameEn: 'Qursan',
     category: 'أطباق سعودية تقليدية',
     servingLabelAr: 'لكل 100غ',
@@ -36,7 +36,7 @@ export const saudiTraditionalFoods: FoodItem[] = [
   },
   {
     id: 'sfct-3',
-    nameAr: 'مرقوق',
+    nameAr: 'مرقوق (الرياض)',
     nameEn: 'Margaouq',
     category: 'أطباق سعودية تقليدية',
     servingLabelAr: 'لكل 100غ',
@@ -66,7 +66,7 @@ export const saudiTraditionalFoods: FoodItem[] = [
   },
   {
     id: 'sfct-5',
-    nameAr: 'قشد',
+    nameAr: 'قشد (الرياض)',
     nameEn: 'Qishd',
     category: 'أطباق سعودية تقليدية',
     servingLabelAr: 'لكل 100غ',
@@ -435,7 +435,7 @@ export const saudiTraditionalFoods: FoodItem[] = [
   },
   {
     id: 'sfct-30',
-    nameAr: 'معصوب',
+    nameAr: 'معصوب (مكة)',
     nameEn: 'Ma’soub',
     category: 'أطباق سعودية تقليدية',
     servingLabelAr: 'لكل 100غ',
@@ -620,7 +620,7 @@ export const saudiTraditionalFoods: FoodItem[] = [
     servingGrams: 100,
     calories: 359,
     protein: 3,
-    carbs: 21,
+    carbs: 46,
     fat: 17.9,
     fiber: 2.7,
     notesAr: 'طبق المدينة المنورة التقليدي · القيم لكل 100غ (جداول تركيب الأغذية السعودية).',
@@ -821,7 +821,7 @@ export const saudiTraditionalFoods: FoodItem[] = [
   },
   {
     id: 'sfct-56',
-    nameAr: 'مراصيع',
+    nameAr: 'مراصيع (القصيم)',
     nameEn: 'Marasee’',
     category: 'أطباق سعودية تقليدية',
     servingLabelAr: 'لكل 100غ',
@@ -836,7 +836,7 @@ export const saudiTraditionalFoods: FoodItem[] = [
   },
   {
     id: 'sfct-57',
-    nameAr: 'مصابيب',
+    nameAr: 'مصابيب (القصيم)',
     nameEn: 'Masabeeb',
     category: 'أطباق سعودية تقليدية',
     servingLabelAr: 'لكل 100غ',
@@ -881,7 +881,7 @@ export const saudiTraditionalFoods: FoodItem[] = [
   },
   {
     id: 'sfct-60',
-    nameAr: 'مطازيز',
+    nameAr: 'مطازيز (القصيم)',
     nameEn: 'Matazeez',
     category: 'أطباق سعودية تقليدية',
     servingLabelAr: 'لكل 100غ',
@@ -976,7 +976,7 @@ export const saudiTraditionalFoods: FoodItem[] = [
     category: 'أطباق سعودية تقليدية',
     servingLabelAr: 'لكل 100غ',
     servingGrams: 100,
-    calories: 477,
+    calories: 118,
     protein: 5.5,
     carbs: 16,
     fat: 3.5,
@@ -1207,7 +1207,7 @@ export const saudiTraditionalFoods: FoodItem[] = [
   },
   {
     id: 'sfct-82',
-    nameAr: 'رغفان',
+    nameAr: 'رغفان (تبوك)',
     nameEn: 'Raghfan',
     category: 'أطباق سعودية تقليدية',
     servingLabelAr: 'لكل 100غ',
@@ -1417,7 +1417,7 @@ export const saudiTraditionalFoods: FoodItem[] = [
   },
   {
     id: 'sfct-96',
-    nameAr: 'كبسة دجاج',
+    nameAr: 'كبسة دجاج (الباحة)',
     nameEn: 'Chicken Kabsa',
     category: 'أطباق سعودية تقليدية',
     servingLabelAr: 'لكل 100غ',

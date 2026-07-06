@@ -394,7 +394,6 @@ export const exercises: Exercise[] = [
   ex({ id: 'jm-press', nameAr: 'جي إم بريس', nameEn: 'JM Press', primaryMuscle: 'triceps', equipment: ['barbell', 'bench'], level: 'advanced', movementPattern: 'push', environment: 'gym', defaultReps: '8–10', defaultRestSec: 75 }),
 
   // ===== الكوادز (إضافات) =====
-  ex({ id: 'sissy-squat', nameAr: 'سيسي سكوات', nameEn: 'Sissy Squat', primaryMuscle: 'quads', equipment: ['bodyweight'], level: 'advanced', movementPattern: 'squat', environment: 'both', defaultReps: '10–15', defaultRestSec: 60 }),
   ex({ id: 'reverse-lunge', nameAr: 'طعنة خلفية', nameEn: 'Reverse Lunge', primaryMuscle: 'quads', secondaryMuscles: ['glutes'], equipment: ['dumbbell'], level: 'beginner', movementPattern: 'lunge', environment: 'both', defaultReps: '10–12', defaultRestSec: 60, alternatives: ['walking-lunge', 'step-up'] }),
   ex({ id: 'leg-press-narrow', nameAr: 'دفع أرجل قبضة ضيقة', nameEn: 'Narrow-Stance Leg Press', primaryMuscle: 'quads', equipment: ['machine'], level: 'beginner', movementPattern: 'squat', environment: 'gym', defaultReps: '10–12', defaultRestSec: 120 }),
   ex({ id: 'belt-squat', nameAr: 'سكوات بالحزام', nameEn: 'Belt Squat', primaryMuscle: 'quads', secondaryMuscles: ['glutes'], equipment: ['machine'], level: 'intermediate', movementPattern: 'squat', environment: 'gym', defaultReps: '10–15', defaultRestSec: 90 }),

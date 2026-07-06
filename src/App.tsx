@@ -4,7 +4,7 @@ import { StartView } from '@/views/StartView'
 import { AppLoading } from '@/components/AppLoading'
 import { VerifyEmailView } from '@/views/VerifyEmailView'
 import { RouteErrorBoundary } from '@/components/ErrorBoundary'
-import { DashboardSkeleton, ProgressSkeleton } from '@/components/ViewSkeletons'
+import { DashboardSkeleton, ProgressSkeleton, TabSkeleton } from '@/components/ViewSkeletons'
 import { InstallPrompt } from '@/components/InstallPrompt'
 
 // باقي الشاشات مُقسّمة إلى حِزم عند الطلب (code-splitting) لتقليل حزمة الدخول الأولى.
@@ -54,9 +54,16 @@ import { BUILD_LABEL } from '@/lib/buildInfo'
  * (وبالتالي حساب جديد يُطالَب بالإعداد ولو أُكمل على الجهاز بحساب آخر).
  */
 function guardRoute(route: AppRoute, userId: string | null): AppRoute {
-  // لا حساب = لا وصول: الإعداد (الأسئلة) والتبويبات ومكتبة التمارين و«لوحتي» كلها تتطلّب
-  // تسجيل دخول/إنشاء حساب أولًا. الأسئلة تبدأ فقط بعد الحساب — لا وضع ضيف.
-  const needsAccount = MAIN_TABS.includes(route) || route === 'exercises' || route === 'stats' || route === 'setup'
+  // لا حساب = لا وصول: الإعداد (الأسئلة) والتبويبات ومكتبة التمارين و«لوحتي» والإعدادات
+  // وصفحة الحساب والحاسبة والعرض التوضيحي كلها تتطلّب حسابًا أولًا. لا وضع ضيف ولا تصفّح بلا حساب.
+  const needsAccount =
+    MAIN_TABS.includes(route) ||
+    route === 'exercises' ||
+    route === 'stats' ||
+    route === 'setup' ||
+    route === 'settings' ||
+    route === 'calc' ||
+    route === 'demo'
   if (needsAccount && !userId) return 'start'
   // بعد الحساب: التبويبات تتطلّب إعدادًا مكتملًا وإلا معالج الإعداد (الأسئلة).
   if (MAIN_TABS.includes(route) || route === 'exercises' || route === 'stats') {
@@ -83,7 +90,8 @@ export default function App() {
   const auth = useAuth()
   // اللغة الحية من سياق i18n — التبديل يعيد رسم كل الشاشات فورًا (بلا إعادة تحميل).
   const { lang: LANG } = useLanguage()
-  const badge: AppBadge = auth.user ? 'account' : 'guest'
+  // داخل التطبيق لا يوجد ضيف بعد الآن (كل التبويبات خلف حساب)، فالشارة دائمًا «حساب».
+  const badge: AppBadge = 'account'
   // المالك الحالي لقرار البوابة: معرّف الحساب المسجّل، أو null لوضع الضيف.
   const uid = auth.user?.id ?? null
 
@@ -169,8 +177,13 @@ export default function App() {
   // فتح شاشة الإعداد — النمط (معالج أولي مقابل محرّرات متقدّمة) يُشتقّ من حالة الحساب
   // وقت العرض، فلا حاجة لحالة نمط مخزّنة قد تتقادم.
   const openSetup = useCallback(() => {
+    // الأسئلة/الإعداد لا تُفتح أبدًا بلا حساب — مرور عبر البوابة صراحةً.
+    if (!uid) {
+      setView('start')
+      return
+    }
     setView('setup')
-  }, [])
+  }, [uid])
 
   /** دخول التطبيق بعد تسجيل الدخول/إنشاء الحساب — بوابة لكل حساب (لا وضع ضيف). */
   const enterApp = useCallback(async () => {
@@ -190,7 +203,9 @@ export default function App() {
 
   const closeSetup = (completed?: boolean) => {
     const done = completed || isOnboardingComplete(uid)
-    setView(done ? 'dashboard' : 'start')
+    // كل وجهة تمرّ عبر البوابة. مستخدم مسجّل لم يُكمل الأسئلة يبقى في الإعداد (لا يُقذف
+    // لشاشة الحساب)، وغير المسجّل فقط يعود لشاشة تسجيل الدخول/إنشاء الحساب.
+    setView(guardRoute(done ? 'dashboard' : uid ? 'setup' : 'start', uid))
     if (completed) setShowSuccess(true)
   }
 
@@ -198,11 +213,11 @@ export default function App() {
   // «تخطّي» الدائم في المعالج وحاجز الأخطاء — فلا يُحبَس مستخدم أبدًا حتى لو تعطّلت خطوة.
   const skipOnboarding = useCallback(() => {
     markCompleted(uid)
-    setView('dashboard')
+    setView(guardRoute('dashboard', uid))
     setShowSuccess(true)
   }, [uid])
 
-  const closeDemo = () => setView(isOnboardingComplete(uid) ? 'dashboard' : 'start')
+  const closeDemo = () => setView(guardRoute(isOnboardingComplete(uid) ? 'dashboard' : uid ? 'setup' : 'start', uid))
 
   // تنقّل عام — يمرّ عبر الحراسة حتى لا تُفتح لوحة بلا إعداد.
   const navigate = (v: AppRoute) => {
@@ -296,16 +311,36 @@ export default function App() {
               <V.DashboardView lang={LANG} onNavigate={navigate} />
             </Suspense>
           )}
-          {view === 'workout' && <V.WorkoutView lang={LANG} onNavigate={navigate} />}
-          {view === 'exercises' && <V.ExerciseLibraryView lang={LANG} />}
-          {view === 'nutrition' && <V.NutritionView lang={LANG} />}
+          {view === 'workout' && (
+            <Suspense fallback={<TabSkeleton />}>
+              <V.WorkoutView lang={LANG} onNavigate={navigate} />
+            </Suspense>
+          )}
+          {view === 'exercises' && (
+            <Suspense fallback={<TabSkeleton />}>
+              <V.ExerciseLibraryView lang={LANG} />
+            </Suspense>
+          )}
+          {view === 'nutrition' && (
+            <Suspense fallback={<TabSkeleton />}>
+              <V.NutritionView lang={LANG} />
+            </Suspense>
+          )}
           {view === 'progress' && (
             <Suspense fallback={<ProgressSkeleton />}>
               <V.ProgressView lang={LANG} />
             </Suspense>
           )}
-          {view === 'profile' && <V.ProfileView lang={LANG} onNavigate={navigate} />}
-          {view === 'stats' && <V.MyStatsView lang={LANG} />}
+          {view === 'profile' && (
+            <Suspense fallback={<TabSkeleton />}>
+              <V.ProfileView lang={LANG} onNavigate={navigate} />
+            </Suspense>
+          )}
+          {view === 'stats' && (
+            <Suspense fallback={<TabSkeleton />}>
+              <V.MyStatsView lang={LANG} />
+            </Suspense>
+          )}
         </MobileShell>
 
         {showSuccess && <SuccessToast onClose={dismissSuccess} />}
