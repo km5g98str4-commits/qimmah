@@ -5,22 +5,12 @@ import { LanguageToggle } from '@/i18n'
 
 interface StartViewProps {
   lang: Lang
-  hasStartedSetup: boolean
-  onBuildPlan: () => void
   onLogin: () => void
-  onContinueGuest: () => void
-  onSeeDemo: () => void
+  onSignup: () => void
 }
 
-/** شاشة البداية — مدخل فاخر بمظهر رياضي داكن. */
-export function StartView({
-  lang,
-  hasStartedSetup,
-  onBuildPlan,
-  onLogin,
-  onContinueGuest,
-  onSeeDemo,
-}: StartViewProps) {
+/** شاشة البداية — مدخل فاخر بمظهر رياضي داكن. خياران فقط: إنشاء حساب أو تسجيل دخول. */
+export function StartView({ lang, onLogin, onSignup }: StartViewProps) {
   const t = getStrings(lang)
 
   return (
@@ -46,37 +36,16 @@ export function StartView({
           <p className="mt-3 max-w-xs text-sm leading-relaxed text-ink-500">{t.start.positioning}</p>
         </div>
 
-        {/* الأزرار — أسفل */}
+        {/* الأزرار — أسفل: خياران فقط (إنشاء حساب / تسجيل دخول) */}
         <div className="space-y-3 pb-2">
-          <button type="button" onClick={onBuildPlan} className="btn-primary w-full py-4 text-base">
-            <Icon name="Sparkles" className="h-5 w-5" />
-            {hasStartedSetup ? t.start.continueSetup : t.start.buildPlan}
+          <button type="button" onClick={onSignup} className="btn-primary w-full py-4 text-base">
+            <Icon name="UserPlus" className="h-5 w-5" />
+            {t.auth.createAccount}
           </button>
           <button type="button" onClick={onLogin} className="btn-ghost w-full py-4 text-base">
             <Icon name="LogIn" className="h-5 w-5" />
             {t.start.login}
           </button>
-          <div className="flex items-center justify-center gap-5 pt-1">
-            <button
-              type="button"
-              onClick={onContinueGuest}
-              className="text-sm font-bold text-ink-500 transition-colors hover:text-ink-900"
-            >
-              {t.start.continueGuest}
-            </button>
-            <span className="h-3 w-px bg-line" />
-            <button
-              type="button"
-              onClick={onSeeDemo}
-              className="text-sm font-bold text-ink-500 transition-colors hover:text-ink-900"
-            >
-              {t.start.seeDemo}
-            </button>
-          </div>
-          <p className="flex items-center justify-center gap-1.5 pt-2 text-center text-xs text-ink-400">
-            <Icon name="ShieldCheck" className="h-3.5 w-3.5" />
-            {t.start.guestNote}
-          </p>
         </div>
       </div>
     </div>

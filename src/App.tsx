@@ -40,7 +40,7 @@ function createLazyViews() {
 import { MobileShell, type MainTab } from '@/components/MobileShell'
 import type { AppBadge } from '@/components/AppNav'
 import { useAuth } from '@/lib/authContext'
-import { isAccountOnboarded, isOnboardingComplete, loadOnboarding, markCompleted } from '@/lib/onboarding'
+import { isAccountOnboarded, isOnboardingComplete, markCompleted } from '@/lib/onboarding'
 import { ensureOnboardingProfile } from '@/lib/onboardingProfile'
 import { currentUserId, hydrateOnboardingFromProfile } from '@/lib/onboardingSync'
 import { useLanguage } from '@/i18n'
@@ -54,14 +54,13 @@ import { BUILD_LABEL } from '@/lib/buildInfo'
  * (وبالتالي حساب جديد يُطالَب بالإعداد ولو أُكمل على الجهاز بحساب آخر).
  */
 function guardRoute(route: AppRoute, userId: string | null): AppRoute {
-  // التبويبات الرئيسية + مكتبة التمارين + «لوحتي» كلها تتطلّب إعدادًا مكتملًا.
+  // لا حساب = لا وصول: الإعداد (الأسئلة) والتبويبات ومكتبة التمارين و«لوحتي» كلها تتطلّب
+  // تسجيل دخول/إنشاء حساب أولًا. الأسئلة تبدأ فقط بعد الحساب — لا وضع ضيف.
+  const needsAccount = MAIN_TABS.includes(route) || route === 'exercises' || route === 'stats' || route === 'setup'
+  if (needsAccount && !userId) return 'start'
+  // بعد الحساب: التبويبات تتطلّب إعدادًا مكتملًا وإلا معالج الإعداد (الأسئلة).
   if (MAIN_TABS.includes(route) || route === 'exercises' || route === 'stats') {
-    if (!isOnboardingComplete(userId)) {
-      // مسجّل دخول لم يُكمل → مباشرةً لمعالج الإعداد؛ ضيف بمسودة بدأها → استئناف الإعداد؛
-      // وإلا شاشة البداية.
-      if (userId) return 'setup'
-      return (loadOnboarding().lastStep ?? 0) > 0 ? 'setup' : 'start'
-    }
+    if (!isOnboardingComplete(userId)) return 'setup'
   }
   return route
 }
@@ -74,7 +73,9 @@ function initialRoute(userId: string | null): AppRoute {
   if (isUnknownRouteHash()) {
     return 'notfound'
   }
-  return isOnboardingComplete(userId) ? 'dashboard' : 'start'
+  // بلا حساب → شاشة الحساب (تسجيل دخول/إنشاء حساب). بحساب → اللوحة أو الأسئلة.
+  if (!userId) return 'start'
+  return isOnboardingComplete(userId) ? 'dashboard' : 'setup'
 }
 
 /** قشرة تطبيق قِمّة — توجيه بسيط عبر hash (بلا مكتبات خارجية). */
@@ -102,6 +103,8 @@ export default function App() {
   const didInitialAuthRoute = useRef(false)
   const [showSuccess, setShowSuccess] = useState(false)
   const dismissSuccess = useCallback(() => setShowSuccess(false), [])
+  // وضع شاشة الحساب (تسجيل دخول/إنشاء حساب) — يُحدَّد من زرّ شاشة البداية.
+  const [loginMode, setLoginMode] = useState<'login' | 'signup'>('login')
 
   // آخر مسار غير قانوني (للرجوع الآمن من الخصوصية/الشروط دون الاعتماد على history.back
   // الذي قد يقذف المستخدم خارج التطبيق عند فتح الصفحة مباشرةً/التحديث).
@@ -169,16 +172,16 @@ export default function App() {
     setView('setup')
   }, [])
 
-  /** دخول التطبيق بعد تسجيل الدخول أو المتابعة كضيف — بوابة لكل حساب. */
+  /** دخول التطبيق بعد تسجيل الدخول/إنشاء الحساب — بوابة لكل حساب (لا وضع ضيف). */
   const enterApp = useCallback(async () => {
     const signedInId = await currentUserId()
     if (!signedInId) {
-      // ضيف — علم الجهاز كما كان.
-      if (loadOnboarding().completed) setView('dashboard')
-      else openSetup()
+      // لا حساب → يعود لشاشة الحساب (لا دخول بلا تسجيل).
+      setView('login')
       return
     }
     // مسجّل دخول — القرار لكل حساب: السجلّ المحلي، وإلا الملف السحابي.
+    // الأسئلة (الإعداد) تبدأ الآن فقط بعد الحساب.
     let onboarded = isAccountOnboarded(signedInId)
     if (!onboarded) onboarded = await hydrateOnboardingFromProfile(signedInId)
     if (onboarded) setView('dashboard')
@@ -224,19 +227,15 @@ export default function App() {
   let content: ReactNode
 
   if (view === 'start') {
-    const ob = loadOnboarding()
     content = (
       <StartView
         lang={LANG}
-        hasStartedSetup={!isOnboardingComplete(uid) && (ob.lastStep ?? 0) > 0}
-        onBuildPlan={openSetup}
-        onLogin={() => setView('login')}
-        onContinueGuest={enterApp}
-        onSeeDemo={() => setView('demo')}
+        onLogin={() => { setLoginMode('login'); setView('login') }}
+        onSignup={() => { setLoginMode('signup'); setView('login') }}
       />
     )
   } else if (view === 'login') {
-    content = <V.LoginView lang={LANG} onSuccess={enterApp} onGuest={enterApp} onBack={() => setView('start')} />
+    content = <V.LoginView lang={LANG} initialMode={loginMode} onSuccess={enterApp} onBack={() => setView('start')} />
   } else if (view === 'privacy') {
     content = <V.PrivacyView lang={LANG} onBack={() => navigate(beforeLegalRef.current)} />
   } else if (view === 'terms') {

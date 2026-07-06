@@ -9,18 +9,19 @@ import { evaluatePassword, PASSWORD_MIN_LENGTH } from '@/lib/passwordPolicy'
 interface LoginViewProps {
   lang: Lang
   onSuccess: () => void
-  onGuest: () => void
   onBack: () => void
+  /** الوضع الابتدائي عند الفتح — تسجيل دخول أو إنشاء حساب. */
+  initialMode?: Mode
 }
 
 type Mode = 'login' | 'signup'
 
-/** شاشة الحساب — تبديل بين تسجيل الدخول وإنشاء حساب (Supabase) أو المتابعة كضيف. */
-export function LoginView({ lang, onSuccess, onGuest, onBack }: LoginViewProps) {
+/** شاشة الحساب — تبديل بين تسجيل الدخول وإنشاء حساب (Supabase). لا وضع ضيف. */
+export function LoginView({ lang, onSuccess, onBack, initialMode = 'login' }: LoginViewProps) {
   const t = getStrings(lang)
   const d = miscStrings[lang]
   const auth = useAuth()
-  const [mode, setMode] = useState<Mode>('login')
+  const [mode, setMode] = useState<Mode>(initialMode)
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -220,18 +221,6 @@ export function LoginView({ lang, onSuccess, onGuest, onBack }: LoginViewProps) 
             <p className="mt-1 text-xs leading-relaxed text-ink-500">{t.auth.disabledBody}</p>
           </div>
         )}
-
-        {/* المتابعة كضيف — متاحة دائمًا */}
-        <div className="mt-5 border-t border-line pt-5">
-          <button type="button" onClick={onGuest} className="btn-ghost w-full py-3.5 text-base">
-            <Icon name="User" className="h-5 w-5" />
-            {t.auth.continueGuest}
-          </button>
-          <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-xs text-ink-400">
-            <Icon name="ShieldCheck" className="h-3.5 w-3.5" />
-            {t.auth.guestNote}
-          </p>
-        </div>
       </div>
     </div>
   )
