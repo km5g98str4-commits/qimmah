@@ -15,9 +15,6 @@ interface NutritionViewProps {
 
 const round = (n: number) => Math.round(n)
 
-// أزرار «نسخ»/«مفضّلة» غير مفعّلة بعد — مخفيّة حتى تُبنى الميزة فعليًا (لا تُربك المستخدم).
-const SHOW_PLACEHOLDER_MEAL_ACTIONS = false
-
 /** أقسام الوجبات المعروضة حسب عدد الوجبات من الإعداد (meals_per_day). */
 function mealSlotsForCount(count?: number) {
   const ids: MealSlot[] =
@@ -222,13 +219,6 @@ function MealCard({
           </div>
         </div>
         <div className="flex items-center gap-1">
-          {/* أزرار نائبة: نسخ/مفضّلة — مخفيّة خلف علم حتى تعمل الميزة */}
-          {SHOW_PLACEHOLDER_MEAL_ACTIONS && (
-            <>
-              <PlaceholderBtn icon="Layers" title={`${t.copy} · ${t.soon}`} />
-              <PlaceholderBtn icon="Sparkles" title={`${t.favorite} · ${t.soon}`} />
-            </>
-          )}
           <button type="button" onClick={() => setAdding((v) => !v)} className="btn-primary px-3 py-1.5 text-xs">
             <Icon name="Plus" className="h-3.5 w-3.5" />
             {t.addShort}
@@ -265,20 +255,6 @@ function MealCard({
         </div>
       )}
     </div>
-  )
-}
-
-function PlaceholderBtn({ icon, title }: { icon: string; title: string }) {
-  return (
-    <button
-      type="button"
-      title={title}
-      aria-label={title}
-      className="grid h-8 w-8 place-items-center rounded-lg border border-line text-ink-300"
-      onClick={(e) => e.preventDefault()}
-    >
-      <Icon name={icon} className="h-3.5 w-3.5" />
-    </button>
   )
 }
 

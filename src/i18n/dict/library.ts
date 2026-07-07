@@ -5,8 +5,6 @@ export interface LibraryStrings {
   eyebrow: string
   title: string
   countSuffix: string // "{n} تمرين بشرح ومجموعات مستهدفة."
-  soon: string
-  newExercise: string
   // view switch
   allExercises: string
   machinesForBeginners: string
@@ -108,8 +106,6 @@ const ar: LibraryStrings = {
   eyebrow: 'المكتبة',
   title: 'مكتبة التمارين',
   countSuffix: 'تمرين بشرح ومجموعات مستهدفة.',
-  soon: 'قريبًا',
-  newExercise: 'تمرين جديد',
   allExercises: 'كل التمارين',
   machinesForBeginners: 'الأجهزة (للمبتدئين)',
   searchPlaceholder: 'ابحث باسم التمرين بالعربي أو الإنجليزي…',
@@ -195,8 +191,6 @@ const en: LibraryStrings = {
   eyebrow: 'Library',
   title: 'Exercise library',
   countSuffix: 'exercises with guidance and target sets.',
-  soon: 'Soon',
-  newExercise: 'New exercise',
   allExercises: 'All exercises',
   machinesForBeginners: 'Machines (for beginners)',
   searchPlaceholder: 'Search by exercise name in Arabic or English…',

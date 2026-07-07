@@ -83,24 +83,13 @@ export function ExerciseLibraryView({ lang }: ExerciseLibraryViewProps) {
     <div className="px-4 py-4">
       <div>
         {/* ترويسة */}
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <span className="eyebrow">
-              <Icon name="Boxes" className="h-3.5 w-3.5" />
-              {d.eyebrow}
-            </span>
-            <h1 className="mt-3 text-2xl font-black text-ink-900 sm:text-3xl">{d.title}</h1>
-            <p className="mt-1 text-sm text-ink-500">{exercises.length} {d.countSuffix}</p>
-          </div>
-          <button
-            type="button"
-            disabled
-            title={d.soon}
-            className="btn-ghost shrink-0 cursor-not-allowed px-3 py-2.5 text-xs opacity-60"
-          >
-            <Icon name="Plus" className="h-4 w-4" />
-            <span className="hidden sm:inline">{d.newExercise}</span>
-          </button>
+        <div>
+          <span className="eyebrow">
+            <Icon name="Boxes" className="h-3.5 w-3.5" />
+            {d.eyebrow}
+          </span>
+          <h1 className="mt-3 text-2xl font-black text-ink-900 sm:text-3xl">{d.title}</h1>
+          <p className="mt-1 text-sm text-ink-500">{exercises.length} {d.countSuffix}</p>
         </div>
 
         {/* مبدّل العرض: كل التمارين (افتراضي) / الأجهزة للمبتدئين */}

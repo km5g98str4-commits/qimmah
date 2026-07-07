@@ -25,7 +25,6 @@ function createLazyViews() {
     CalcExplainerView: lazy(() =>
       import('@/views/CalcExplainerView').then((m) => ({ default: m.CalcExplainerView })),
     ),
-    DemoView: lazy(() => import('@/views/DemoView').then((m) => ({ default: m.DemoView }))),
     SettingsView: lazy(() => import('@/views/SettingsView').then((m) => ({ default: m.SettingsView }))),
     PrivacyView: lazy(() => import('@/views/PrivacyView').then((m) => ({ default: m.PrivacyView }))),
     TermsView: lazy(() => import('@/views/TermsView').then((m) => ({ default: m.TermsView }))),
@@ -62,8 +61,7 @@ function guardRoute(route: AppRoute, userId: string | null): AppRoute {
     route === 'stats' ||
     route === 'setup' ||
     route === 'settings' ||
-    route === 'calc' ||
-    route === 'demo'
+    route === 'calc'
   if (needsAccount && !userId) return 'start'
   // بعد الحساب: التبويبات تتطلّب إعدادًا مكتملًا وإلا معالج الإعداد (الأسئلة).
   if (MAIN_TABS.includes(route) || route === 'exercises' || route === 'stats') {
@@ -217,8 +215,6 @@ export default function App() {
     setShowSuccess(true)
   }, [uid])
 
-  const closeDemo = () => setView(guardRoute(isOnboardingComplete(uid) ? 'dashboard' : uid ? 'setup' : 'start', uid))
-
   // تنقّل عام — يمرّ عبر الحراسة حتى لا تُفتح لوحة بلا إعداد.
   const navigate = (v: AppRoute) => {
     if (v === 'setup') openSetup()
@@ -268,8 +264,6 @@ export default function App() {
     // غير مكتمل → معالج الإعداد الأولي (وزنه/هدفه هو).
     const onboarded = isOnboardingComplete(uid)
     content = <V.SetupView onClose={closeSetup} onForceComplete={skipOnboarding} initialStep={0} mode={onboarded ? 'advanced' : 'onboarding'} />
-  } else if (view === 'demo') {
-    content = <V.DemoView lang={LANG} onNavigate={navigate} onBack={closeDemo} />
   } else if (view === 'settings') {
     content = (
       <V.SettingsView

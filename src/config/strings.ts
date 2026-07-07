@@ -6,10 +6,10 @@ import type { Lang } from '@/lib/appPreferences'
 export interface ShellStrings {
   brand: string
   tagline: string
-  nav: { home: string; setup: string; demo: string; settings: string }
+  nav: { home: string; setup: string; settings: string }
   tabs: { home: string; workout: string; nutrition: string; progress: string; profile: string }
   lang: { ar: string; en: string; label: string }
-  badge: { guest: string; account: string; demo: string }
+  badge: { guest: string; account: string }
   start: {
     welcome: string
     headline: string
@@ -68,7 +68,6 @@ export interface ShellStrings {
     groupPrivacy: string
     groupLanguage: string
     languageActive: string
-    languageSoon: string
     languageHint: string
     export: string
     import: string
@@ -147,7 +146,6 @@ export interface ShellStrings {
     reportSubject: string
     back: string
   }
-  demo: { badge: string; title: string; body: string; back: string }
   workout: {
     start: string
     watch: string
@@ -256,9 +254,6 @@ export interface ShellStrings {
     exerciseCals: string
     equationNote: string
     addShort: string
-    copy: string
-    favorite: string
-    soon: string
     title: string
     desc: string
     enable: string
@@ -407,10 +402,10 @@ export interface ShellStrings {
 const ar: ShellStrings = {
   brand: 'قِمّة',
   tagline: 'تطبيقك الشخصي لكمال الأجسام والتمرين',
-  nav: { home: 'الرئيسية', setup: 'الإعداد', demo: 'النموذج', settings: 'الإعدادات' },
+  nav: { home: 'الرئيسية', setup: 'الإعداد', settings: 'الإعدادات' },
   tabs: { home: 'الرئيسية', workout: 'تمرين', nutrition: 'تغذية', progress: 'تقدّم', profile: 'حسابي' },
   lang: { ar: 'العربية', en: 'English', label: 'اللغة' },
-  badge: { guest: 'ضيف', account: 'حساب', demo: 'نموذج تجريبي' },
+  badge: { guest: 'ضيف', account: 'حساب' },
   start: {
     welcome: 'هلا فيك في قِمّة',
     headline: 'كل رحلتك في كمال الأجسام في نظام واحد',
@@ -470,7 +465,6 @@ const ar: ShellStrings = {
     groupPrivacy: 'الخصوصية والثقة',
     groupLanguage: 'اللغة',
     languageActive: 'العربية — مفعّلة',
-    languageSoon: 'الإنجليزية قريبًا (English coming soon)',
     languageHint: 'يتغيّر النص واتجاه الصفحة فورًا، ويُحفظ اختيارك على هذا الجهاز.',
     export: 'تصدير نسخة احتياطية',
     import: 'استيراد نسخة',
@@ -562,12 +556,6 @@ const ar: ShellStrings = {
     emailCta: 'راسلنا عبر البريد',
     reportCta: 'أبلغ عن مشكلة',
     reportSubject: 'الإبلاغ عن مشكلة في قِمّة',
-    back: 'رجوع',
-  },
-  demo: {
-    badge: 'نموذج تجريبي',
-    title: 'هذا نموذج تجريبي',
-    body: 'هذا نموذج تجريبي ولا يغيّر بياناتك.',
     back: 'رجوع',
   },
   workout: {
@@ -675,9 +663,6 @@ const ar: ShellStrings = {
     exerciseCals: 'التمرين',
     equationNote: 'احتياجك − الطعام + التمرين = المتبقّي',
     addShort: 'أضف',
-    copy: 'نسخ',
-    favorite: 'مفضّلة',
-    soon: 'قريبًا',
     title: 'خطة الأكل',
     desc: 'وجباتك وأهدافك الغذائية — مبنية على حساباتك الذكية وقابلة للتعديل.',
     enable: 'أريد متابعة الأكل',
@@ -827,10 +812,10 @@ const ar: ShellStrings = {
 const en: ShellStrings = {
   brand: 'Qimmah',
   tagline: 'Your personal bodybuilding & training app',
-  nav: { home: 'Home', setup: 'Setup', demo: 'Demo', settings: 'Settings' },
+  nav: { home: 'Home', setup: 'Setup', settings: 'Settings' },
   tabs: { home: 'Home', workout: 'Workout', nutrition: 'Nutrition', progress: 'Progress', profile: 'Profile' },
   lang: { ar: 'العربية', en: 'English', label: 'Language' },
-  badge: { guest: 'Guest', account: 'Account', demo: 'Demo' },
+  badge: { guest: 'Guest', account: 'Account' },
   start: {
     welcome: 'Welcome to Qimmah',
     headline: 'Your entire bodybuilding journey in one system',
@@ -890,7 +875,6 @@ const en: ShellStrings = {
     groupPrivacy: 'Privacy & Trust',
     groupLanguage: 'Language',
     languageActive: 'Arabic — active',
-    languageSoon: 'English coming soon',
     languageHint: 'Text and page direction switch instantly, and your choice is saved on this device.',
     export: 'Export backup',
     import: 'Import backup',
@@ -982,12 +966,6 @@ const en: ShellStrings = {
     emailCta: 'Email us',
     reportCta: 'Report a problem',
     reportSubject: 'Reporting a problem in Qimmah',
-    back: 'Back',
-  },
-  demo: {
-    badge: 'Demo',
-    title: 'This is a demo',
-    body: 'This is a demo and does not change your data.',
     back: 'Back',
   },
   workout: {
@@ -1095,9 +1073,6 @@ const en: ShellStrings = {
     exerciseCals: 'Exercise',
     equationNote: 'Needs − Food + Exercise = Remaining',
     addShort: 'Add',
-    copy: 'Copy',
-    favorite: 'Favorite',
-    soon: 'Soon',
     title: 'Meal plan',
     desc: 'Your meals and nutrition targets — based on your smart calculations and editable.',
     enable: 'Track my food',

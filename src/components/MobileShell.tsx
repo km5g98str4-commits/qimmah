@@ -38,14 +38,12 @@ export function MobileShell({ lang, tab, badge, onNavigate, onOpenSettings, chil
     { id: 'profile', route: 'profile', label: t.tabs.profile, icon: 'User' },
   ]
 
-  const badgeLabel = badge === 'demo' ? t.badge.demo : badge === 'account' ? t.badge.account : t.badge.guest
-  const badgeIcon = badge === 'demo' ? 'Sparkles' : badge === 'account' ? 'CheckCircle2' : 'User'
+  const badgeLabel = badge === 'account' ? t.badge.account : t.badge.guest
+  const badgeIcon = badge === 'account' ? 'CheckCircle2' : 'User'
   const badgeClass =
-    badge === 'demo'
-      ? 'bg-primary text-white'
-      : badge === 'account'
-        ? 'bg-primary-soft text-primary-c'
-        : 'border border-line bg-beige text-ink-500'
+    badge === 'account'
+      ? 'bg-primary-soft text-primary-c'
+      : 'border border-line bg-beige text-ink-500'
 
   return (
     <div className="min-h-screen bg-page">
