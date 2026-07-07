@@ -4,9 +4,12 @@ import { pricingPlans } from '@/data/pricing'
 import { product } from '@/config/product'
 import { sectionCopy } from '@/config/content'
 import { cn } from '@/lib/cn'
+import { showExternalPurchase } from '@/lib/platform'
 
 /** قسم قديم محفوظ للقالب — غير معروض في الصفحة الشخصية (التصدير فارغ). */
 export function Pricing() {
+  // داخل iOS/Capacitor لا نعرض أي مسار شراء خارجي (App Store 3.1.1). على الويب كما هو.
+  if (!showExternalPurchase()) return null
   return (
     <section id="pricing" className="section">
       <div className="container-page">

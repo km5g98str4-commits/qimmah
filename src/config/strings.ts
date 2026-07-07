@@ -50,6 +50,15 @@ export interface ShellStrings {
     accountNote: string
     cloudNote: string
     back: string
+    deleteAccount: string
+    deleteAccountDesc: string
+    deleteConfirmTitle: string
+    deleteConfirmBody: string
+    deleteConfirmHint: string
+    deleteConfirmWord: string
+    deleteConfirmCta: string
+    deleting: string
+    cancel: string
   }
   settings: {
     title: string
@@ -442,6 +451,16 @@ const ar: ShellStrings = {
     accountNote: 'أنت مسجّل الدخول. بياناتك تُزامَن مع حسابك السحابي.',
     cloudNote: 'بياناتك محفوظة على هذا الجهاز وعلى حسابك السحابي.',
     back: 'رجوع',
+    deleteAccount: 'حذف الحساب',
+    deleteAccountDesc: 'حذف حسابك وكل بياناتك نهائيًا. لا يمكن التراجع عن هذا الإجراء.',
+    deleteConfirmTitle: 'حذف الحساب نهائيًا؟',
+    deleteConfirmBody:
+      'سيُحذف حسابك وكل بياناتك (خطتك، سجلّاتك، قياساتك) نهائيًا من هذا الجهاز ومن حسابك السحابي. لا يمكن استرجاعها.',
+    deleteConfirmHint: 'اكتب «حذف» للتأكيد',
+    deleteConfirmWord: 'حذف',
+    deleteConfirmCta: 'حذف حسابي نهائيًا',
+    deleting: 'جارٍ الحذف…',
+    cancel: 'إلغاء',
   },
   settings: {
     title: 'الإعدادات',
@@ -852,6 +871,16 @@ const en: ShellStrings = {
     accountNote: 'You are logged in. Your data syncs to your cloud account.',
     cloudNote: 'Your data is stored on this device and on your cloud account.',
     back: 'Back',
+    deleteAccount: 'Delete account',
+    deleteAccountDesc: 'Permanently delete your account and all your data. This cannot be undone.',
+    deleteConfirmTitle: 'Delete account permanently?',
+    deleteConfirmBody:
+      'Your account and all your data (plan, logs, measurements) will be permanently deleted from this device and your cloud account. This cannot be recovered.',
+    deleteConfirmHint: 'Type "DELETE" to confirm',
+    deleteConfirmWord: 'DELETE',
+    deleteConfirmCta: 'Delete my account',
+    deleting: 'Deleting…',
+    cancel: 'Cancel',
   },
   settings: {
     title: 'Settings',

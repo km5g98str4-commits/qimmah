@@ -22,6 +22,8 @@
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>NSCameraUsageDescription</key>
+	<string>يستخدم قِمّة الكاميرا لمسح باركود المنتجات الغذائية وإضافتها لسجلّك الغذائي. Qimmah uses the camera to scan food product barcodes and add them to your nutrition log.</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>

@@ -1,9 +1,12 @@
 import { Icon } from '@/components/Icon'
 import { finalCta } from '@/config/content'
 import { product } from '@/config/product'
+import { showExternalPurchase } from '@/lib/platform'
 
 /** الدعوة النهائية للفعل — قسم مستقل قبل الفوتر. */
 export function FinalCta() {
+  // مسار الشراء الخارجي محجوب داخل iOS/Capacitor (App Store 3.1.1). على الويب كما هو.
+  if (!showExternalPurchase()) return null
   return (
     <section id="cta" className="section pt-0">
       <div className="container-page">

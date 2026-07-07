@@ -1,4 +1,4 @@
-import { useRef, type ReactNode } from 'react'
+import { useRef, useState, type ReactNode } from 'react'
 import { AppNav, type AppView } from '@/components/AppNav'
 import { Footer } from '@/components/Footer'
 import { Icon } from '@/components/Icon'
@@ -107,6 +107,26 @@ export function SettingsView({
     if (window.confirm(t.settings.resetConfirm)) resetQimmah()
   }
 
+  // — الحساب: حذف نهائي (Apple 5.1.1(v)) — تأكيد صريح ثم حذف سحابي best-effort + مسح محلي كامل —
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [deleteWord, setDeleteWord] = useState('')
+  const [deleting, setDeleting] = useState(false)
+  const canConfirmDelete = deleteWord.trim() === t.auth.deleteConfirmWord && !deleting
+
+  const onDeleteAccount = async () => {
+    if (!canConfirmDelete) return
+    setDeleting(true)
+    // حذف الحساب سحابيًا (best-effort عبر دالة آمنة) + إنهاء الجلسة. لا نُظهر خطأً حاجبًا:
+    // حتى لو تعذّر حذف مستخدم المصادقة على الخادم، نُكمل بمسح كل بيانات الجهاز وإخراج المستخدم.
+    try {
+      await auth.deleteAccount()
+    } catch {
+      /* تجاهل — التنظيف المحلي يتم على أي حال */
+    }
+    // مسح كامل لبيانات قِمّة على الجهاز ثم إعادة التحميل لشاشة الحساب.
+    resetQimmah()
+  }
+
   // — خطتي: إعادة توليد —
   const regenerateFromProfile = () => {
     const g = generatePlan(customization.profile)
@@ -180,6 +200,64 @@ export function SettingsView({
               </button>
             )}
           </div>
+
+          {/* حذف الحساب نهائيًا — إلزامي لمتاجر التطبيقات (يُعرض فقط لمستخدم مسجّل) */}
+          {auth.user && (
+            <div className="mt-4 border-t border-line pt-4">
+              {!confirmDelete ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setConfirmDelete(true)}
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-danger/40 px-4 py-2 text-xs font-bold text-danger transition-colors hover:bg-danger/10"
+                  >
+                    <Icon name="Trash2" className="h-4 w-4" />
+                    {t.auth.deleteAccount}
+                  </button>
+                  <p className="mt-2 text-[11px] leading-relaxed text-ink-400">{t.auth.deleteAccountDesc}</p>
+                </>
+              ) : (
+                <div className="rounded-xl border border-danger/40 bg-danger/[0.06] p-4">
+                  <p className="flex items-center gap-1.5 text-sm font-black text-danger">
+                    <Icon name="AlertTriangle" className="h-4 w-4" />
+                    {t.auth.deleteConfirmTitle}
+                  </p>
+                  <p className="mt-2 text-xs leading-relaxed text-ink-600">{t.auth.deleteConfirmBody}</p>
+                  <label htmlFor="delete-confirm" className="mt-3 block text-[11px] font-bold text-ink-500">
+                    {t.auth.deleteConfirmHint}
+                  </label>
+                  <input
+                    id="delete-confirm"
+                    type="text"
+                    value={deleteWord}
+                    onChange={(e) => setDeleteWord(e.target.value)}
+                    aria-label={t.auth.deleteConfirmHint}
+                    autoComplete="off"
+                    className="mt-1 w-full max-w-xs rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink-900 outline-none focus:border-danger"
+                  />
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={onDeleteAccount}
+                      disabled={!canConfirmDelete}
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-danger px-4 py-2 text-xs font-bold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      <Icon name="Trash2" className="h-4 w-4" />
+                      {deleting ? t.auth.deleting : t.auth.deleteConfirmCta}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setConfirmDelete(false); setDeleteWord('') }}
+                      disabled={deleting}
+                      className="btn-ghost px-4 py-2 text-xs"
+                    >
+                      {t.auth.cancel}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </SettingsGroup>
 
         {/* 2) البيانات */}

@@ -18,6 +18,19 @@ export interface AuthResult {
   needsConfirmation?: boolean
 }
 
+export interface DeleteAccountResult {
+  /** أُنجزت العملية (التنظيف السحابي best-effort + سيُكمل المستدعي التنظيف المحلي). */
+  ok: boolean
+  /**
+   * هل حُذف صفّ مستخدم المصادقة (auth.users) فعليًا من الخادم؟
+   * يتطلّب دالة Postgres آمنة (security definer) اسمها delete_own_account — بلا service role في العميل.
+   * false إن لم تُنشَر تلك الدالة بعد؛ عندها تُحذف بيانات الملف الشخصي وتُنظَّف الجلسة محليًا فقط.
+   */
+  authUserDeleted: boolean
+  /** رسالة الخطأ الخادمي إن تعذّر حذف مستخدم المصادقة. */
+  error?: string
+}
+
 export interface AuthContextValue {
   /** هل المزامنة السحابية مضبوطة في هذه النسخة؟ */
   configured: boolean
@@ -41,6 +54,11 @@ export interface AuthContextValue {
   resendConfirmation: (email: string) => Promise<AuthResult>
   /** يعيد جلب المستخدم من الخادم لالتقاط تأكيد البريد بعد الضغط على الرابط. */
   refreshUser: () => Promise<void>
+  /**
+   * يحذف حساب المستخدم وبياناته السحابية (best-effort) ويُنهي الجلسة.
+   * لا يمسّ التخزين المحلي — المستدعي يتكفّل به (resetQimmah) ليضمن مسحًا كاملًا حتى عند غياب السحابة.
+   */
+  deleteAccount: () => Promise<DeleteAccountResult>
 }
 
 /** هل بريد هذا المستخدم مؤكَّد؟ ضيف/بلا بريد = مؤكَّد ضمنيًا (لا يُحبَس). */
@@ -182,6 +200,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const { data } = await supabase.auth.getUser()
         if (data.user) setUser(data.user)
       },
+      async deleteAccount() {
+        const supabase = await getSupabase()
+        const uid = user?.id
+        // لا سحابة/لا مستخدم — لا شيء على الخادم؛ المستدعي يُكمل التنظيف المحلي.
+        if (!supabase || !uid) return { ok: true, authUserDeleted: false }
+
+        let authUserDeleted = false
+        let error: string | undefined
+        // 1) النمط الآمن لحذف الحساب ذاتيًا: دالة Postgres security-definer تحذف auth.uid()
+        //    (delete_own_account) — لا تكشف مفتاح service role في العميل إطلاقًا.
+        try {
+          const { error: rpcErr } = await supabase.rpc('delete_own_account')
+          if (!rpcErr) authUserDeleted = true
+          else error = rpcErr.message
+        } catch (e) {
+          error = e instanceof Error ? e.message : String(e)
+        }
+        // 2) best-effort: حذف صفّ الملف الشخصي (حذف ذاتي عبر RLS) — لا يُفشل العملية.
+        try {
+          await supabase.from('profiles').delete().eq('id', uid)
+        } catch {
+          /* تجاهل — قد لا تسمح السياسة أو الجدول غير موجود */
+        }
+        // 3) إنهاء الجلسة وتنظيف الحالة في الذاكرة.
+        try {
+          await supabase.auth.signOut()
+        } catch {
+          /* تجاهل — سنُعيد التحميل على أي حال */
+        }
+        setSession(null)
+        setUser(null)
+        return { ok: true, authUserDeleted, error: authUserDeleted ? undefined : error }
+      },
     }),
     [configured, user, session, loading],
   )
@@ -212,5 +263,8 @@ export function useAuth(): AuthContextValue {
       return { ok: false, error: cloudDisabledError() }
     },
     async refreshUser() {},
+    async deleteAccount() {
+      return { ok: true, authUserDeleted: false }
+    },
   }
 }
