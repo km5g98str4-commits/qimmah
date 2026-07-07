@@ -1,5 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import { Capacitor } from '@capacitor/core'
 import App from './App'
 import { SplashScreen } from './components/SplashScreen'
 import { ErrorBoundary } from './components/ErrorBoundary'
@@ -14,8 +15,11 @@ import './styles/index.css'
 // سيم الخطوات: يُتيح لغلاف أصلي مستقبلي (تطبيق آيفون يقرأ Apple Health) دفع الخطوات.
 registerStepBridge()
 
-// تسجيل عامل الخدمة (PWA) — في الإنتاج فقط حتى لا يتعارض مع خادم التطوير (HMR).
-if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+// تسجيل عامل الخدمة (PWA) — للويب فقط في الإنتاج.
+// داخل Capacitor (iOS/Android) الأصول تُخدَّم محليًا من الحزمة الأصلية، وتشغيل Service
+// Worker داخل الـ WebView قد يتعارض مع كاش القشرة ودورة تحديث الأصول، فنُبقيه للويب
+// ونُعطّله على المنصّات الأصلية.
+if (import.meta.env.PROD && !Capacitor.isNativePlatform() && 'serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').catch(() => {
       // فشل التسجيل لا يجب أن يكسر التطبيق — يبقى يعمل أونلاين طبيعيًا.
