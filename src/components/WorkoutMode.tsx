@@ -143,7 +143,7 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
   if (day.exercises.length === 0) {
     return (
       <div className="fixed inset-0 z-50 flex flex-col bg-page">
-        <header className="sticky top-0 z-10 glass border-b border-line">
+        <header className="sticky top-0 z-10 glass border-b border-line" style={{ paddingTop: 'var(--safe-top)' }}>
           <div className="container-page flex h-16 items-center justify-between gap-3">
             <button type="button" onClick={onClose} aria-label={d.close} className="grid h-11 w-11 place-items-center rounded-xl border border-line bg-surface text-ink-700">
               <Icon name="X" className="h-5 w-5" />
@@ -328,7 +328,7 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-page">
       {/* الترويسة + شريط التقدّم */}
-      <header className="sticky top-0 z-10 glass border-b border-line">
+      <header className="sticky top-0 z-10 glass border-b border-line" style={{ paddingTop: 'var(--safe-top)' }}>
         <div className="container-page flex h-16 items-center justify-between gap-3">
           <button type="button" onClick={onClose} aria-label={d.close} className="grid h-11 w-11 place-items-center rounded-xl border border-line bg-surface text-ink-700">
             <Icon name="X" className="h-5 w-5" />
@@ -669,7 +669,7 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
       )}
 
       {/* شريط الإجراءات السفلي */}
-      <div className="sticky bottom-0 z-10 border-t border-line bg-page/95 backdrop-blur">
+      <div className="sticky bottom-0 z-10 border-t border-line bg-page/95 backdrop-blur" style={{ paddingBottom: 'var(--safe-bottom)' }}>
         <div className="container-page flex items-center gap-2 py-3">
           <button type="button" onClick={goPrev} disabled={current === 0} className="btn-ghost h-12 w-12 shrink-0 p-0 disabled:opacity-40" aria-label={t.prevExercise}>
             <Icon name={prevChevron} className="h-5 w-5" />

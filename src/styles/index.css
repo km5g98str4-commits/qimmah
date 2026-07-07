@@ -23,6 +23,8 @@
 
     /* مسافة أمان أسفل الشاشة (للشريط السفلي على الجوال) */
     --safe-bottom: env(safe-area-inset-bottom, 0px);
+    /* مسافة أمان أعلى الشاشة (نتوء/شريط الحالة على iPhone تحت viewport-fit=cover) — 0 على الويب */
+    --safe-top: env(safe-area-inset-top, 0px);
   }
 
   html {

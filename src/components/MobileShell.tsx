@@ -49,7 +49,7 @@ export function MobileShell({ lang, tab, badge, onNavigate, onOpenSettings, chil
     <div className="min-h-screen bg-page">
       <div className="app-container flex min-h-screen flex-col border-x border-line/60">
         {/* هيدر مدمج */}
-        <header className="sticky top-0 z-40 glass">
+        <header className="sticky top-0 z-40 glass" style={{ paddingTop: 'var(--safe-top)' }}>
           <div className="flex h-14 items-center justify-between gap-3 px-4">
             <button type="button" onClick={() => onNavigate('dashboard')} className="flex items-center gap-2">
               <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-white shadow-glow">
