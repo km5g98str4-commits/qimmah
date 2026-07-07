@@ -217,11 +217,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } catch (e) {
           error = e instanceof Error ? e.message : String(e)
         }
-        // 2) best-effort: حذف صفّ الملف الشخصي (حذف ذاتي عبر RLS) — لا يُفشل العملية.
-        try {
-          await supabase.from('profiles').delete().eq('id', uid)
-        } catch {
-          /* تجاهل — قد لا تسمح السياسة أو الجدول غير موجود */
+        // 2) best-effort: حذف كل صفوف بيانات المستخدم من الجداول السحابية (حذف ذاتي عبر RLS).
+        //    كلها مفهرسة بعمود user_id (لا id). يعمل حتى لو لم تُنشَر دالة الحذف بعد أو
+        //    لم تُضبط سلسلة الحذف المتتالي (cascade) على الخادم. لا يُفشل العملية.
+        const USER_OWNED_TABLES = [
+          'profiles',
+          'workout_sessions',
+          'exercise_history',
+          'measurement_logs',
+          'daily_logs',
+        ] as const
+        for (const table of USER_OWNED_TABLES) {
+          try {
+            await supabase.from(table).delete().eq('user_id', uid)
+          } catch {
+            /* تجاهل — قد لا تسمح السياسة أو الجدول غير موجود */
+          }
         }
         // 3) إنهاء الجلسة وتنظيف الحالة في الذاكرة.
         try {
