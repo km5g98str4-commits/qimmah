@@ -1,5 +1,7 @@
 // إعادة ضبط قِمّة بالكامل — يحذف مفاتيح قِمّة فقط دون المساس بأي مفاتيح أخرى.
 
+import { resetAnalytics } from './analytics'
+
 export const QIMMAH_KEYS = [
   'qimmah:customization:v1',
   'qimmah:onboarding:v1',
@@ -46,6 +48,9 @@ const QIMMAH_KEY_PREFIXES = ['qimmah:todo:v1:']
 /** يحذف مفاتيح قِمّة فقط، ثم يعيد التحميل إلى شاشة البداية. */
 export function resetQimmah(): void {
   if (typeof window === 'undefined') return
+  // أسقط حالة التحليلات في الذاكرة أولًا (طابور/دفعة معلّقة + الموافقة والمعرّف المجهول
+  // المخزَّنان في cache) — لا يكفي مسح localStorage وحده لأن المعرّف القديم يبقى في الذاكرة.
+  resetAnalytics()
   QIMMAH_KEYS.forEach((k) => window.localStorage.removeItem(k))
   // اكنس المفاتيح ذات البادئة (لكل الحسابات على هذا الجهاز).
   for (let i = window.localStorage.length - 1; i >= 0; i -= 1) {

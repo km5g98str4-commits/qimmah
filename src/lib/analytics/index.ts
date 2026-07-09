@@ -10,23 +10,34 @@
 import type { AnalyticsEventName, EventProps } from './events'
 import type { AnalyticsProvider, CapturedEvent } from './provider'
 import { getProvider, setProvider } from './provider'
-import { getAnonId, getConsent } from './consent'
+import type { ConsentState } from './consent'
+import { clearConsentCache, getAnonId, getConsent, setConsent as persistConsent } from './consent'
 import { noopProvider } from './providers/noop'
 import { consoleProvider } from './providers/console'
 import { createHttpProvider } from './providers/http'
 
 export type { AnalyticsEventName, EventProps } from './events'
 export type { ConsentState } from './consent'
-export { getConsent, setConsent, getAnonId } from './consent'
+export { getConsent, getAnonId } from './consent'
 export { firstOnce } from './milestones'
 
 let initialized = false
 const buffer: CapturedEvent[] = []
 const MAX_BUFFER = 50
 
+/** يقبل فقط رابط HTTPS صالحًا كوجهة تحليلات — أي شيء آخر يعني «لا إرسال». */
+function isValidHttpsEndpoint(url: string): boolean {
+  try {
+    return new URL(url).protocol === 'https:'
+  } catch {
+    return false
+  }
+}
+
 /**
  * يختار المزوّد ويهيّئ الطبقة. يُستدعى مرّة واحدة عند الإقلاع (main.tsx).
- * الأولوية: endpoint مضبوط → HTTP، وإلا DEV → console، وإلا no-op.
+ * الأولوية: endpoint صالح (HTTPS فقط) → HTTP. غير ذلك (فارغ/غير صالح/غير HTTPS)
+ * → console في DEV فقط (طباعة محلية بلا شبكة)، وإلا no-op — لا إرسال إطلاقًا.
  */
 export function initAnalytics(): void {
   if (initialized) return
@@ -34,13 +45,50 @@ export function initAnalytics(): void {
   let provider: AnalyticsProvider = noopProvider
   try {
     const endpoint = import.meta.env.VITE_ANALYTICS_ENDPOINT?.trim()
-    if (endpoint) provider = createHttpProvider(endpoint)
-    else if (import.meta.env.DEV) provider = consoleProvider
+    if (endpoint && isValidHttpsEndpoint(endpoint)) {
+      provider = createHttpProvider(endpoint)
+    } else {
+      if (endpoint && import.meta.env.DEV) {
+        console.warn('[analytics] VITE_ANALYTICS_ENDPOINT is not a valid HTTPS URL — no events will be sent.')
+      }
+      provider = import.meta.env.DEV ? consoleProvider : noopProvider
+    }
   } catch {
     provider = noopProvider
   }
   setProvider(provider)
   flushBuffer()
+}
+
+/**
+ * يضبط الموافقة، ويوقف الجمع فورًا عند «denied»: يُفرَّغ الطابور المؤقّت في الذاكرة
+ * وتُلغى أي دفعة/مؤقّت معلّق في المزوّد — فلا يُرسَل أي حدث سابق بعد سحب الموافقة.
+ */
+export function setConsent(consent: ConsentState): void {
+  persistConsent(consent)
+  if (consent === 'denied') {
+    buffer.length = 0
+    try {
+      getProvider().reset?.()
+    } catch {
+      /* تجاهل */
+    }
+  }
+}
+
+/**
+ * إعادة ضبط كاملة للتحليلات (يُستدعى من resetQimmah عند حذف الحساب/إعادة الضبط):
+ * يُسقط الطابور المؤقّت والدفعة المعلّقة والحالة في الذاكرة (الموافقة + المعرّف المجهول)
+ * — لا يبقى معرّف قديم في الذاكرة، ولا تُرسَل أحداث سابقة.
+ */
+export function resetAnalytics(): void {
+  buffer.length = 0
+  try {
+    getProvider().reset?.()
+  } catch {
+    /* تجاهل */
+  }
+  clearConsentCache()
 }
 
 function flushBuffer(): void {

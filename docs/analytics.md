@@ -24,7 +24,9 @@ call site ──▶ track(event, props) ──▶ [consent gate] ──▶ [pre-
 - **`src/lib/analytics/index.ts`** — public facade: `initAnalytics()`, `track()`, `getConsent()`,
   `setConsent()`, `firstOnce()`. Buffers events fired before init, flushes after.
 - **`src/lib/analytics/providers/`** — `noop` (default), `console` (DEV), `http` (activated only
-  when `VITE_ANALYTICS_ENDPOINT` is set; batched `sendBeacon`/`fetch keepalive`).
+  when `VITE_ANALYTICS_ENDPOINT` is set **and is a valid HTTPS URL**; batched
+  `sendBeacon`/`fetch keepalive`). Empty, non-HTTPS, or malformed endpoint ⇒ **no network
+  provider** (console in DEV, no-op in prod).
 
 ## Events (exactly 15 — scope is closed)
 
@@ -48,20 +50,52 @@ call site ──▶ track(event, props) ──▶ [consent gate] ──▶ [pre-
 
 ## Privacy guarantees
 
+- **Default opt-out model.** Analytics defaults to `granted` (anonymous, non-PII usage stats
+  on a legitimate-interest basis) with a **clear off switch** in Settings → Privacy. Turning it
+  off sets consent `denied` and stops all collection immediately — see *Consent* below. The
+  consent model is opt-out by design; nothing in these fixes changes that.
 - **Anonymous only.** The id is a random `crypto.randomUUID()` stored locally. It is **never**
   the Supabase `user.id`, email, or display name. No event carries the auth identity.
 - **No PII in any payload.** Props are enums/counts/route names only — never a dish name,
   the scanned barcode value, an error message/stack, weight/measurement values, or free text.
-  `unhandled_error` sends the error *name* (e.g. `TypeError`), not the message.
-- **Consent-gated (opt-out).** Default `granted`; a Settings toggle sets `denied`, after which
-  `track()` collects nothing. `getConsent()`/`setConsent()` are the only controls.
-- **Wiped on account deletion.** `qimmah:analytics:v1` + `qimmah:analytics:milestones:v1` are in
-  `QIMMAH_KEYS`, so `resetQimmah()` clears the id, consent, and milestones; a new anonymous id
-  is minted afterward (the old analytics identity is severed).
-- **No network by default.** Production builds with no `VITE_ANALYTICS_ENDPOINT` send nothing
-  (no-op provider). The HTTP provider is opt-in via env and batches over `sendBeacon`.
+  `unhandled_error` sends the error *name* (e.g. `TypeError`), not the message. The strict
+  per-event types in `events.ts` make it impossible to attach an out-of-contract field.
+- **Consent-gated, stops instantly.** `setConsent('denied')` (a) blocks every future `track()`,
+  (b) **clears the in-memory pre-init buffer**, and (c) calls the provider's `reset()` to
+  **drop the queued batch and cancel the pending flush timer** — so a queued event can no longer
+  be flushed by `pagehide`/`visibilitychange` after opt-out. `getConsent()`/`setConsent()` are
+  the only controls.
+- **HTTPS-only endpoint.** The HTTP provider is created **only** for a syntactically valid
+  `https:` URL. An empty, non-HTTPS (e.g. `http://`), or malformed `VITE_ANALYTICS_ENDPOINT`
+  yields no network provider (console in DEV, no-op in prod) — the app never sends analytics
+  over plain HTTP or to an invalid destination.
+- **Wiped on account deletion.** `resetQimmah()` first calls `resetAnalytics()` — which clears
+  the provider queue/timer **and the in-memory consent+anonId cache** — then removes
+  `qimmah:analytics:v1` + `qimmah:analytics:milestones:v1` from `localStorage`. So neither the
+  stored nor the cached identity survives; a fresh anonymous id is minted afterward.
+- **No network by default.** Production builds with no valid `VITE_ANALYTICS_ENDPOINT` send
+  nothing (no-op provider). The HTTP provider is opt-in via env and batches over `sendBeacon`.
 - **Fail-safe.** Every `track()` is wrapped in try/catch and no-ops outside the browser; the
   layer can never throw into the render path.
+
+## App Store privacy label implications
+
+If this app is submitted with analytics **enabled** (i.e. a real HTTPS endpoint configured),
+declare the following in App Store Connect → App Privacy:
+
+- **Usage Data → Product Interaction / Other Usage Data:** collected. Purpose: **Analytics** and
+  **App Functionality** only.
+- **Linked to identity: NO.** The anonymous id is a random local UUID with no link to the user's
+  Supabase account, email, or name; it is not merged with identity anywhere.
+- **Used for Tracking: NO.** No cross-app/website tracking, no advertising identifiers, no data
+  sharing with third-party ad networks or data brokers. No advertising SDK is present.
+- **Diagnostics → Crash/Other Diagnostic Data:** the `unhandled_error` event carries only an
+  error *name* (no message/stack), so if enabled, declare Diagnostics too (Analytics purpose).
+
+If the app ships with **no endpoint** (the default), nothing is transmitted off-device and the
+usage-data declaration can reflect "not collected" for the transmitted-data sense — but confirm
+the shipped configuration before filling the labels. Keep this section in sync with
+`docs/ios/milestone-4a-backend-privacy.md`.
 
 ## Verify events in the dev console
 
@@ -78,8 +112,9 @@ call site ──▶ track(event, props) ──▶ [consent gate] ──▶ [pre-
    - Toggle the training reminder on → `reminder_enabled`.
 4. Toggle **Settings → Privacy → Anonymous analytics** off → the console goes silent (consent
    `denied`); toggle on → events resume.
-5. To test the real network path in dev, set `VITE_ANALYTICS_ENDPOINT` in `.env` and watch the
-   **Network** tab for batched POSTs to that URL instead of console logs.
+5. To test the real network path in dev, set `VITE_ANALYTICS_ENDPOINT` to a valid **HTTPS** URL
+   in `.env` and watch the **Network** tab for batched POSTs to that URL instead of console logs.
+   (An `http://`, malformed, or empty value logs a dev warning and sends nothing.)
 
 ## Swapping the provider later
 

@@ -36,11 +36,15 @@ export function createHttpProvider(endpoint: string): AnalyticsProvider {
     }
   }
 
-  function flush(): void {
+  function cancelTimer(): void {
     if (timer) {
       clearTimeout(timer)
       timer = null
     }
+  }
+
+  function flush(): void {
+    cancelTimer()
     if (!queue.length) return
     send(queue.splice(0, queue.length))
   }
@@ -53,8 +57,18 @@ export function createHttpProvider(endpoint: string): AnalyticsProvider {
     }, FLUSH_MS)
   }
 
+  /**
+   * سحب الموافقة/إعادة الضبط: أفرغ الطابور فورًا وألغِ المؤقّت **دون إرسال** —
+   * فلا يستطيع pagehide/visibilitychange إرسال أحداث سابقة بعد ذلك.
+   */
+  function reset(): void {
+    cancelTimer()
+    queue.length = 0
+  }
+
   if (typeof window !== 'undefined') {
     // أفرغ ما تبقّى عند إخفاء الصفحة/الخروج حتى لا تضيع أحداث آخر جلسة.
+    // بعد reset يكون الطابور فارغًا، فلا تُرسَل أحداث سابقة بعد سحب الموافقة.
     window.addEventListener('pagehide', flush)
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'hidden') flush()
@@ -68,5 +82,6 @@ export function createHttpProvider(endpoint: string): AnalyticsProvider {
       else schedule()
     },
     flush,
+    reset,
   }
 }

@@ -78,3 +78,12 @@ export function setConsent(consent: ConsentState): void {
 export function getAnonId(): string {
   return read().anonId
 }
+
+/**
+ * يُسقط الحالة في الذاكرة (الموافقة + المعرّف المجهول المخزَّنان في cache) — يُستدعى من
+ * إعادة الضبط/حذف الحساب بعد مسح localStorage، فلا يبقى معرّف قديم في الذاكرة، ويُولَّد
+ * معرّف جديد عند أول قراءة لاحقة.
+ */
+export function clearConsentCache(): void {
+  cache = null
+}
