@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Icon } from '@/components/Icon'
 import { WeeklyMuscleMap } from '@/components/WeeklyMuscleMap'
 import { StepCounterCard } from '@/components/StepCounterCard'
@@ -9,7 +9,7 @@ import { musclesThisWeek, recentVolumes, topPRs, workoutCounts } from '@/lib/pro
 import { weeklyAdherenceStreak } from '@/lib/streaks'
 import { useCustomization } from '@/lib/customizationContext'
 import { loadReminderPrefs, saveReminderPrefs, type ReminderPrefs } from '@/lib/reminderPrefs'
-import { remindersSupported, requestReminderPermission, syncWorkoutReminder } from '@/lib/reminders'
+import { remindersSupported, requestReminderPermission, reminderPermissionStatus, syncWorkoutReminder, type ReminderPermission } from '@/lib/reminders'
 import { track } from '@/lib/analytics'
 import { getStrings } from '@/config/strings'
 import { progressScreenStrings } from '@/i18n/dict/progressScreen'
@@ -170,14 +170,40 @@ function Empty({ text }: { text: string }) {
  * بطاقة تذكير التمرين — على iOS فقط تجدول تنبيهًا محليًا يوميًا في الوقت المختار.
  * على الويب/Android المفتاح **معطّل** ويظهر نص صادق (يعمل في تطبيق iOS) — لا يُفعَّل
  * تفضيل ولا يُطلق حدث لأنّه لا يستطيع الإشعار فعليًا. الإذن يُطلب فقط عند التفعيل
- * الصريح؛ الرفض يُبقي المفتاح مطفأ مع تلميح واضح. مقفول ضدّ النقر المزدوج أثناء الطلب.
+ * الصريح؛ الرفض يُبقي المفتاح مطفأ مع تلميح واضح.
+ *
+ * صدق حالة التفعيل: «مفعّل» مُشتق من التفضيل **وإذن iOS الحالي معًا** — فإن عطّل المستخدم
+ * الإشعارات من إعدادات iOS بعد التفعيل يظهر المفتاح مطفأً (لا ادّعاء تذكير فعّال) مع
+ * تلميح لإعادة التفعيل. قفل صلب (ref) يمنع النقر المزدوج قبل تحديث حالة React.
  */
 function ReminderCard({ lang }: { lang: Lang }) {
   const t = getStrings(lang).progress
   const [prefs, setPrefs] = useState<ReminderPrefs>(() => loadReminderPrefs())
   const [denied, setDenied] = useState(false)
   const [busy, setBusy] = useState(false)
+  // إذن iOS الحالي (null = لم يُفحَص). يُفحَص بلا مربّع (checkPermissions) عند الظهور/العودة.
+  const [permission, setPermission] = useState<ReminderPermission | null>(null)
+  // قفل تزامن صلب (ref) — يمنع دخول مسار الجدولة غير المتزامن مرّتين قبل تحديث حالة React.
+  const lockRef = useRef(false)
   const supported = remindersSupported() // iOS فقط — الويب/Android لا يدعمان الجدولة
+
+  // افحص الإذن عند الظهور وعند كل عودة — يلتقط تعطيل المستخدم للإشعارات من إعدادات iOS.
+  useEffect(() => {
+    if (!supported) return
+    let alive = true
+    const check = () => void reminderPermissionStatus().then((p) => { if (alive) setPermission(p) })
+    check()
+    const onVisible = () => { if (document.visibilityState === 'visible') check() }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => { alive = false; document.removeEventListener('visibilitychange', onVisible) }
+  }, [supported])
+
+  // «مفعّل فعليًا» = التفضيل محفوظ **و** الإذن ممنوح. قبل معرفة الإذن نتبع التفضيل (بلا وميض)،
+  // وبعده نعكس الحقيقة — فإن أُلغي الإذن يظهر المفتاح مطفأً بصدق.
+  const permKnown = permission !== null
+  const active = supported && prefs.trainingEnabled && (permKnown ? permission === 'granted' : true)
+  // إذن أُلغي بعد تفعيل سابق — تلميح صادق لإعادة التفعيل من الإعدادات.
+  const revoked = supported && prefs.trainingEnabled && permKnown && permission !== 'granted'
 
   const persist = (next: ReminderPrefs) => {
     setPrefs(next)
@@ -186,32 +212,37 @@ function ReminderCard({ lang }: { lang: Lang }) {
   }
 
   const onToggle = async () => {
-    // الويب/Android: التذكير غير مدعوم — لا تفعيل ولا حدث. + قفل ضدّ النقر المزدوج.
-    if (!supported || busy) return
+    // الويب/Android غير مدعوم؛ والقفل الصلب يمنع النقر المزدوج قبل تحديث حالة busy.
+    if (!supported || lockRef.current) return
+    lockRef.current = true
     setBusy(true)
     try {
-      if (prefs.trainingEnabled) {
+      if (active) {
+        // إيقاف تذكير مفعّل فعليًا.
         setDenied(false)
-        persist({ ...prefs, trainingEnabled: false }) // يُلغي الجدولة
+        persist({ ...prefs, trainingEnabled: false })
         return
       }
-      // تفعيل: نطلب الإذن أولًا (فقط الآن، لا عند الإقلاع).
+      // تفعيل (أو إعادة تفعيل بعد إلغاء الإذن): نطلب الإذن الآن فقط.
+      const wasEnabled = prefs.trainingEnabled
       const perm = await requestReminderPermission()
+      setPermission(perm)
       if (perm !== 'granted') {
-        setDenied(true) // نُبقي المفتاح مطفأ ونعرض تلميحًا صادقًا — لا وعد كاذب، ولا حدث
+        setDenied(true) // نُبقيه مطفأً ونعرض تلميحًا صادقًا — لا وعد كاذب
         return
       }
       setDenied(false)
-      // إشارة صحّة ميزة (حدث Phase 2 القائم) — عند تفعيل تذكير أصلي فعلي فقط.
-      track('reminder_enabled', { kind: 'training' })
+      // حدث Phase 2 القائم — عند تفعيل جديد فقط (لا يتكرّر عند إعادة منح إذن لتفضيل مفعّل سابقًا).
+      if (!wasEnabled) track('reminder_enabled', { kind: 'training' })
       persist({ ...prefs, trainingEnabled: true })
     } finally {
+      lockRef.current = false
       setBusy(false)
     }
   }
 
-  // النص الصادق: الويب يوضّح أنه لا إشعار خلفي؛ الأصلي عند الرفض يرشد لإعدادات آيفون.
-  const note = !supported ? t.reminderWebHint : denied ? t.reminderDeniedHint : null
+  // النص الصادق: الويب يعمل في تطبيق iOS؛ iOS عند الرفض/إلغاء الإذن يرشد للإعدادات.
+  const note = !supported ? t.reminderWebHint : denied || revoked ? t.reminderDeniedHint : null
 
   return (
     <div className="mt-3 card p-5">
@@ -228,12 +259,12 @@ function ReminderCard({ lang }: { lang: Lang }) {
           id="reminder-enabled"
           type="button"
           role="switch"
-          aria-checked={supported && prefs.trainingEnabled}
+          aria-checked={active}
           disabled={!supported || busy}
           onClick={() => void onToggle()}
-          className={`relative h-6 w-11 rounded-full transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${supported && prefs.trainingEnabled ? 'bg-primary' : 'bg-line'}`}
+          className={`relative h-6 w-11 rounded-full transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${active ? 'bg-primary' : 'bg-line'}`}
         >
-          <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-all ${supported && prefs.trainingEnabled ? 'start-0.5' : 'end-0.5'}`} />
+          <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-all ${active ? 'start-0.5' : 'end-0.5'}`} />
         </button>
       </div>
 
@@ -243,7 +274,7 @@ function ReminderCard({ lang }: { lang: Lang }) {
           id="reminder-time"
           type="time"
           value={prefs.trainingTime}
-          disabled={!supported || !prefs.trainingEnabled || busy}
+          disabled={!active || busy}
           onChange={(e) => persist({ ...prefs, trainingTime: e.target.value })}
           className="rounded-lg border border-line bg-page px-3 py-2 text-sm text-ink-900 outline-none focus:border-primary-c disabled:opacity-40"
         />

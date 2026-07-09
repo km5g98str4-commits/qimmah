@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Icon } from './Icon'
 import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
@@ -6,7 +6,7 @@ import type { WorkoutSession } from '@/lib/workoutSessions'
 import { getExercise } from '@/data/exercises'
 import { muscleLabel } from '@/lib/muscles'
 import { loadReminderPrefs, saveReminderPrefs } from '@/lib/reminderPrefs'
-import { remindersSupported, requestReminderPermission, syncWorkoutReminder } from '@/lib/reminders'
+import { remindersSupported, requestReminderPermission, reminderPermissionStatus, syncWorkoutReminder } from '@/lib/reminders'
 import { track } from '@/lib/analytics'
 
 interface WorkoutSummaryProps {
@@ -147,13 +147,27 @@ export function WorkoutSummary({ lang, session, prs, nextDayLabel, streakWeeks, 
  */
 function ReminderCta({ lang }: { lang: Lang }) {
   const t = getStrings(lang).workout
-  const [state, setState] = useState<'idle' | 'enabled' | 'denied'>(() =>
-    loadReminderPrefs().trainingEnabled ? 'enabled' : 'idle',
-  )
+  // «مفعّل» يُشتق من التفضيل **وإذن iOS معًا** — لا ادّعاء «مفعّل» إن أُلغي الإذن.
+  // 'checking' حتى نعرف الإذن (بلا مربّع)، فلا نعرض حالة كاذبة قبل التحقّق.
+  const [state, setState] = useState<'checking' | 'idle' | 'enabled' | 'denied'>('checking')
   const [busy, setBusy] = useState(false)
+  // قفل تزامن صلب (ref) — يمنع دخول مسار الجدولة مرّتين قبل تحديث حالة busy.
+  const lockRef = useRef(false)
+
+  useEffect(() => {
+    if (!remindersSupported()) return
+    let alive = true
+    void reminderPermissionStatus().then((perm) => {
+      if (!alive) return
+      const active = loadReminderPrefs().trainingEnabled && perm === 'granted'
+      setState(active ? 'enabled' : 'idle')
+    })
+    return () => { alive = false }
+  }, [])
 
   // iOS فقط — الويب/Android لا يدعمان التذكير المجدوَل فلا نعرض الدعوة أصلًا (صدق الواجهة).
   if (!remindersSupported()) return null
+  if (state === 'checking') return null // لا نعرض شيئًا حتى نعرف حقيقة الإذن
 
   if (state === 'enabled') {
     return (
@@ -165,19 +179,23 @@ function ReminderCta({ lang }: { lang: Lang }) {
   }
 
   const enable = async () => {
-    if (busy) return // قفل ضدّ النقر المزدوج أثناء طلب الإذن/الجدولة
+    if (lockRef.current) return // قفل صلب ضدّ النقر المزدوج قبل تحديث busy
+    lockRef.current = true
     setBusy(true)
     try {
+      const wasEnabled = loadReminderPrefs().trainingEnabled
       const perm = await requestReminderPermission()
       if (perm !== 'granted') {
         setState('denied')
         return
       }
       saveReminderPrefs({ ...loadReminderPrefs(), trainingEnabled: true })
-      track('reminder_enabled', { kind: 'training' })
+      // حدث Phase 2 القائم — عند تفعيل جديد فقط (لا يتكرّر عند إعادة منح إذن لتفضيل مفعّل).
+      if (!wasEnabled) track('reminder_enabled', { kind: 'training' })
       await syncWorkoutReminder()
       setState('enabled')
     } finally {
+      lockRef.current = false
       setBusy(false)
     }
   }
