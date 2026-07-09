@@ -53,7 +53,7 @@ export function StartView({ lang, onLogin, onSignup }: StartViewProps) {
           </button>
 
           {/* لماذا أثق؟ — سطر صدق هادئ (بلا دليل اجتماعي، بلا مبالغة) */}
-          <p className="pt-1 text-center text-xs font-medium text-ink-400">{t.start.trust}</p>
+          <p className="pt-1 text-center text-xs font-medium text-ink-500">{t.start.trust}</p>
         </div>
       </div>
     </div>

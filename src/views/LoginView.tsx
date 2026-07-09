@@ -206,7 +206,7 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login' }: Lo
                       { ok: pw.hasLetter, ar: 'حرف', en: 'a letter' },
                       { ok: pw.hasNumber, ar: 'رقم', en: 'a number' },
                     ].map((r, i) => (
-                      <li key={i} className={`flex items-center gap-1 ${r.ok ? 'text-success' : 'text-ink-400'}`}>
+                      <li key={i} className={`flex items-center gap-1 ${r.ok ? 'text-success' : 'text-ink-500'}`}>
                         <Icon name={r.ok ? 'Check' : 'Circle'} className="h-3 w-3 shrink-0" />
                         {lang === 'en' ? r.en : r.ar}
                       </li>

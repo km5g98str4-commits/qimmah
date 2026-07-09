@@ -423,7 +423,7 @@ export interface ShellStrings {
 
 const ar: ShellStrings = {
   brand: 'قِمّة',
-  tagline: 'تطبيقك الشخصي لكمال الأجسام والتمرين',
+  tagline: 'مرشدك الهادئ نحو صحة أفضل',
   nav: { home: 'الرئيسية', setup: 'الإعداد', settings: 'الإعدادات' },
   tabs: { home: 'الرئيسية', workout: 'تمرين', nutrition: 'تغذية', progress: 'تقدّم', profile: 'حسابي' },
   lang: { ar: 'العربية', en: 'English', label: 'اللغة' },
@@ -852,7 +852,7 @@ const ar: ShellStrings = {
 
 const en: ShellStrings = {
   brand: 'Qimmah',
-  tagline: 'Your personal bodybuilding & training app',
+  tagline: 'Your calm guide to better health',
   nav: { home: 'Home', setup: 'Setup', settings: 'Settings' },
   tabs: { home: 'Home', workout: 'Workout', nutrition: 'Nutrition', progress: 'Progress', profile: 'Profile' },
   lang: { ar: 'العربية', en: 'English', label: 'Language' },
