@@ -1,10 +1,13 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { Icon } from './Icon'
 import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
 import type { WorkoutSession } from '@/lib/workoutSessions'
 import { getExercise } from '@/data/exercises'
 import { muscleLabel } from '@/lib/muscles'
+import { loadReminderPrefs, saveReminderPrefs } from '@/lib/reminderPrefs'
+import { remindersSupported, requestReminderPermission, syncWorkoutReminder } from '@/lib/reminders'
+import { track } from '@/lib/analytics'
 
 interface WorkoutSummaryProps {
   lang: Lang
@@ -119,6 +122,9 @@ export function WorkoutSummary({ lang, session, prs, nextDayLabel, streakWeeks, 
             </p>
           )}
 
+          {/* دعوة خفيفة لتفعيل تذكير التمرين — في ذروة الحماس، iOS الأصلي فقط (لا وعد على الويب). */}
+          <ReminderCta lang={lang} />
+
           {/* الأزرار */}
           <div className="mt-6 flex flex-col gap-2">
             <button type="button" onClick={onBackToToday} className="btn-primary w-full py-3.5 text-base">
@@ -130,6 +136,61 @@ export function WorkoutSummary({ lang, session, prs, nextDayLabel, streakWeeks, 
           </div>
         </div>
       </div>
+    </div>
+  )
+}
+
+/**
+ * دعوة تفعيل تذكير التمرين بعد الجلسة — تحويل ذروة الحماس إلى تذكير محلي مجدوَل.
+ * iOS الأصلي فقط: على الويب لا تظهر إطلاقًا (لا وعد بما لا يُدعم). تعيد استخدام
+ * reminderPrefs + المجدوِل القائم وحدث reminder_enabled من Phase 2 (بلا حدث جديد).
+ */
+function ReminderCta({ lang }: { lang: Lang }) {
+  const t = getStrings(lang).workout
+  const [state, setState] = useState<'idle' | 'enabled' | 'denied'>(() =>
+    loadReminderPrefs().trainingEnabled ? 'enabled' : 'idle',
+  )
+
+  // الويب لا يدعم التذكير المجدوَل في الخلفية — لا نعرض الدعوة أصلًا (صدق الواجهة).
+  if (!remindersSupported()) return null
+
+  if (state === 'enabled') {
+    return (
+      <p className="mt-3 flex items-center gap-2 rounded-2xl border border-primary-soft bg-primary-soft/40 p-4 text-sm text-ink-700">
+        <Icon name="Bell" className="h-4 w-4 text-primary-c" />
+        {t.reminderCtaEnabled}
+      </p>
+    )
+  }
+
+  const enable = async () => {
+    const perm = await requestReminderPermission()
+    if (perm !== 'granted') {
+      setState('denied')
+      return
+    }
+    saveReminderPrefs({ ...loadReminderPrefs(), trainingEnabled: true })
+    track('reminder_enabled', { kind: 'training' })
+    await syncWorkoutReminder()
+    setState('enabled')
+  }
+
+  return (
+    <div className="mt-3 rounded-2xl border border-line bg-page p-4">
+      <p className="flex items-center gap-2 text-sm text-ink-700">
+        <Icon name="Bell" className="h-4 w-4 text-primary-c" />
+        {t.reminderCtaText}
+      </p>
+      <button type="button" onClick={() => void enable()} className="btn-ghost mt-3 w-full justify-center py-2.5 text-sm">
+        <Icon name="Bell" className="h-4 w-4" />
+        {t.reminderCtaButton}
+      </button>
+      {state === 'denied' && (
+        <p className="mt-2 flex items-start gap-2 text-[11px] leading-relaxed text-ink-400">
+          <Icon name="Info" className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+          {t.reminderCtaDenied}
+        </p>
+      )}
     </div>
   )
 }

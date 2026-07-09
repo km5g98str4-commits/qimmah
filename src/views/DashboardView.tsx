@@ -97,7 +97,7 @@ export function DashboardView({ lang, onNavigate }: DashboardViewProps) {
   )
 }
 
-/** بطاقة ترحيب — «أهلًا يا {الاسم}» + عبارة تحفيزية عشوائية تدور كل زيارة. */
+/** بطاقة ترحيب — «أهلًا يا {الاسم}» + عبارة تحفيزية عشوائية + إشارة زخم هادئة. */
 function GreetingCard({ lang, onNavigate }: { lang: Lang; onNavigate: (route: AppRoute) => void }) {
   const { customization } = useCustomization()
   const d = dashboardStrings[lang]
@@ -118,6 +118,9 @@ function GreetingCard({ lang, onNavigate }: { lang: Lang; onNavigate: (route: Ap
         </h1>
         <p className="mt-1.5 text-sm leading-relaxed text-ink-600">{lang === 'en' ? phrase.en : phrase.ar}</p>
 
+        {/* إشارة الزخم — هادئة وبارزة، لكل المستخدمين (تعيد استخدام حساب السلسلة القائم). */}
+        <MomentumSignal lang={lang} />
+
         <button
           type="button"
           onClick={() => onNavigate('setup')}
@@ -128,6 +131,50 @@ function GreetingCard({ lang, onNavigate }: { lang: Lang; onNavigate: (route: Ap
         </button>
       </div>
     </section>
+  )
+}
+
+/**
+ * إشارة الزخم — صف واحد هادئ على الرئيسية لكل المستخدمين (بسيط ومتقدّم):
+ * سلسلة الأيام المتتالية (إن وُجدت) + التزام الأسبوع {x/y}، أو سطر بدء لطيف بلا سجل.
+ * تعيد استخدام currentWeekSummary/streaks القائم — لا حساب جديد ولا نظام تحفيز جديد.
+ */
+function MomentumSignal({ lang }: { lang: Lang }) {
+  const { customization } = useCustomization()
+  const d = dashboardStrings[lang]
+  const daysPerWeek = customization.workoutPlan.days.length || 3
+  const week = useMemo(() => currentWeekSummary(daysPerWeek), [daysPerWeek])
+  const streak = week.currentStreak
+  const hasHistory = week.weekly.thisWeekCount > 0 || streak > 0 || week.bestStreak > 0
+
+  if (!hasHistory) {
+    return (
+      <p className="mt-2.5 flex items-center gap-1.5 text-xs text-ink-500">
+        <Icon name="Sparkles" className="h-3.5 w-3.5 text-primary-c" />
+        {d.momentumStart}
+      </p>
+    )
+  }
+
+  return (
+    <div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs">
+      {streak > 0 && (
+        <span className="inline-flex items-center gap-1 font-bold text-primary-c">
+          <Icon name="Flame" className="h-3.5 w-3.5" />
+          {streak} {d.momentumDayStreak}
+        </span>
+      )}
+      <span className="inline-flex items-center gap-1 text-ink-600">
+        <Icon name="CalendarDays" className="h-3.5 w-3.5 text-ink-400" />
+        {week.weekly.thisWeekCount}/{week.weekly.daysPerWeek} {d.thisWeek}
+      </span>
+      {week.workedOutToday && (
+        <span className="inline-flex items-center gap-1 font-bold text-success">
+          <Icon name="Check" className="h-3.5 w-3.5" />
+          {d.momentumTodayDone}
+        </span>
+      )}
+    </div>
   )
 }
 

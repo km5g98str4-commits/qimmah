@@ -244,6 +244,11 @@ export interface ShellStrings {
     backToToday: string
     viewProgress: string
     newPr: string
+    // — دعوة تفعيل تذكير التمرين بعد الجلسة (iOS الأصلي فقط) —
+    reminderCtaText: string
+    reminderCtaButton: string
+    reminderCtaEnabled: string
+    reminderCtaDenied: string
     // — سلسلة الالتزام الأسبوعي —
     weeklyStreakTitle: string
     weeklyDonePrefix: string
@@ -382,6 +387,11 @@ export interface ShellStrings {
     reminderEnabled: string
     reminderTrainingTime: string
     reminderNote: string
+    // نص إشعار التمرين + تلميحات الإذن/الويب
+    reminderNotifTitle: string
+    reminderNotifBody: string
+    reminderDeniedHint: string
+    reminderWebHint: string
     title: string
     desc: string
     enable: string
@@ -657,6 +667,10 @@ const ar: ShellStrings = {
     nextWorkout: 'تمرينك القادم',
     backToToday: 'العودة لليوم',
     viewProgress: 'عرض تقدمي',
+    reminderCtaText: 'تبي نذكّرك بموعد تمرينك القادم؟',
+    reminderCtaButton: 'ذكّرني بموعد تمريني',
+    reminderCtaEnabled: 'تذكير التمرين مفعّل — بنذكّرك في وقتك.',
+    reminderCtaDenied: 'الإشعارات موقوفة. فعّلها من إعدادات آيفون ← الإشعارات ← قِمّة.',
     newPr: 'رقم قياسي جديد',
     weeklyStreakTitle: 'سلسلة الالتزام الأسبوعي',
     weeklyDonePrefix: 'أنجزت',
@@ -796,6 +810,10 @@ const ar: ShellStrings = {
     reminderEnabled: 'تفعيل التذكير',
     reminderTrainingTime: 'وقت تذكير التمرين',
     reminderNote: 'التذكيرات داخل المتصفح محدودة. دعم التنبيهات الكامل لاحقًا في تطبيق الجوال.',
+    reminderNotifTitle: 'وقت تمرينك 💪',
+    reminderNotifBody: 'تمرينك في انتظارك — حافظ على استمراريتك.',
+    reminderDeniedHint: 'الإشعارات موقوفة لقِمّة. فعّلها من إعدادات آيفون ← الإشعارات ← قِمّة، ثم أعد المحاولة.',
+    reminderWebHint: 'التذكيرات المجدوَلة تعمل في تطبيق آيفون. داخل المتصفح لن يصلك إشعار في الخلفية.',
     title: 'القياسات والتقدّم',
     desc: 'سجّل قياساتك وتابع تقدّمك بمرور الوقت.',
     enable: 'أريد متابعة القياسات والتقدّم',
@@ -1071,6 +1089,10 @@ const en: ShellStrings = {
     nextWorkout: 'Next workout',
     backToToday: 'Back to Today',
     viewProgress: 'View progress',
+    reminderCtaText: 'Want a reminder for your next workout?',
+    reminderCtaButton: 'Remind me at my workout time',
+    reminderCtaEnabled: 'Workout reminder on — we’ll nudge you at your time.',
+    reminderCtaDenied: 'Notifications are off. Enable them in iOS Settings → Notifications → Qimmah.',
     newPr: 'New PR',
     weeklyStreakTitle: 'Weekly commitment streak',
     weeklyDonePrefix: 'You completed',
@@ -1210,6 +1232,10 @@ const en: ShellStrings = {
     reminderEnabled: 'Enable reminder',
     reminderTrainingTime: 'Training reminder time',
     reminderNote: 'In-browser reminders are limited. Full notifications later in the mobile app.',
+    reminderNotifTitle: 'Time to train 💪',
+    reminderNotifBody: 'Your workout is waiting — keep your momentum going.',
+    reminderDeniedHint: 'Notifications are off for Qimmah. Enable them in iOS Settings → Notifications → Qimmah, then try again.',
+    reminderWebHint: 'Scheduled reminders work in the iOS app. In the browser you won’t get a background notification.',
     title: 'Measurements & progress',
     desc: 'Log your measurements and track progress over time.',
     enable: 'Track measurements & progress',

@@ -41,6 +41,11 @@ export interface DashboardStrings {
   longestStreak: string
   progressEmpty: string
 
+  // إشارة الزخم (الرئيسية — لكل المستخدمين)
+  momentumDayStreak: string
+  momentumTodayDone: string
+  momentumStart: string
+
   // Today section
   yourDay: string
   yourDayNamedPrefix: string // "يومك، " + name
@@ -113,6 +118,9 @@ const ar: DashboardStrings = {
   streakWeeks: 'أسابيع متتالية',
   longestStreak: 'أطول سلسلة',
   progressEmpty: 'سجّل أول تمرين وتبدأ أرقامك تظهر هنا — الحجم، الأرقام القياسية، والسلسلة الأسبوعية.',
+  momentumDayStreak: 'يوم متتالي',
+  momentumTodayDone: 'تمرّنت اليوم',
+  momentumStart: 'أول تمرين هذا الأسبوع يبدأ سلسلتك.',
 
   yourDay: 'يومك',
   yourDayNamedPrefix: 'يومك، ',
@@ -182,6 +190,9 @@ const en: DashboardStrings = {
   streakWeeks: 'Weeks in a row',
   longestStreak: 'Longest streak',
   progressEmpty: 'Log your first workout and your numbers start showing up here — volume, PRs, and your weekly streak.',
+  momentumDayStreak: 'day streak',
+  momentumTodayDone: 'Trained today',
+  momentumStart: 'Your first workout this week starts your streak.',
 
   yourDay: 'Your day',
   yourDayNamedPrefix: 'Your day, ',

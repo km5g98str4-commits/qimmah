@@ -1,6 +1,7 @@
 // إعادة ضبط قِمّة بالكامل — يحذف مفاتيح قِمّة فقط دون المساس بأي مفاتيح أخرى.
 
 import { resetAnalytics } from './analytics'
+import { cancelAllReminders } from './reminders'
 
 export const QIMMAH_KEYS = [
   'qimmah:customization:v1',
@@ -46,11 +47,14 @@ export const QIMMAH_KEYS = [
 const QIMMAH_KEY_PREFIXES = ['qimmah:todo:v1:']
 
 /** يحذف مفاتيح قِمّة فقط، ثم يعيد التحميل إلى شاشة البداية. */
-export function resetQimmah(): void {
+export async function resetQimmah(): Promise<void> {
   if (typeof window === 'undefined') return
   // أسقط حالة التحليلات في الذاكرة أولًا (طابور/دفعة معلّقة + الموافقة والمعرّف المجهول
   // المخزَّنان في cache) — لا يكفي مسح localStorage وحده لأن المعرّف القديم يبقى في الذاكرة.
   resetAnalytics()
+  // ألغِ تذكيرات الجهاز المجدوَلة (iOS الأصلي) قبل مسح البيانات وإعادة التحميل — لا يكفي
+  // مسح localStorage: الإشعار مجدوَل في نظام التشغيل ويجب إلغاؤه صراحةً. (لا شيء على الويب.)
+  await cancelAllReminders()
   QIMMAH_KEYS.forEach((k) => window.localStorage.removeItem(k))
   // اكنس المفاتيح ذات البادئة (لكل الحسابات على هذا الجهاز).
   for (let i = window.localStorage.length - 1; i >= 0; i -= 1) {

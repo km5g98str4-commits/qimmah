@@ -9,6 +9,7 @@ import { musclesThisWeek, recentVolumes, topPRs, workoutCounts } from '@/lib/pro
 import { weeklyAdherenceStreak } from '@/lib/streaks'
 import { useCustomization } from '@/lib/customizationContext'
 import { loadReminderPrefs, saveReminderPrefs, type ReminderPrefs } from '@/lib/reminderPrefs'
+import { remindersSupported, requestReminderPermission, syncWorkoutReminder } from '@/lib/reminders'
 import { track } from '@/lib/analytics'
 import { getStrings } from '@/config/strings'
 import { progressScreenStrings } from '@/i18n/dict/progressScreen'
@@ -165,18 +166,46 @@ function Empty({ text }: { text: string }) {
   return <p className="mt-1 text-xs leading-relaxed text-ink-400">{text}</p>
 }
 
-/** بطاقة تفضيل التذكير — وقت + تفعيل، يُحفظ محليًا. لا تنبيهات نظام. */
+/**
+ * بطاقة تذكير التمرين — على iOS الأصلي تجدول تنبيهًا محليًا يوميًا في الوقت المختار؛
+ * على الويب تُحفظ نيّة التذكير فقط (لا إشعار خلفي — نص صادق يوضّح ذلك).
+ * الإذن يُطلب فقط عند التفعيل الصريح؛ الرفض يُبقي المفتاح مطفأ مع تلميح واضح.
+ */
 function ReminderCard({ lang }: { lang: Lang }) {
   const t = getStrings(lang).progress
   const [prefs, setPrefs] = useState<ReminderPrefs>(() => loadReminderPrefs())
+  const [denied, setDenied] = useState(false)
+  const supported = remindersSupported()
 
-  const update = (partial: Partial<ReminderPrefs>) => {
-    const next = { ...prefs, ...partial }
-    // تفعيل التذكير — إشارة صحّة ميزة، تُطلق فقط عند الانتقال من مطفأ إلى مفعّل.
-    if (!prefs.trainingEnabled && next.trainingEnabled) track('reminder_enabled', { kind: 'training' })
+  const persist = (next: ReminderPrefs) => {
     setPrefs(next)
     saveReminderPrefs(next)
+    // على الأصلي فقط: أعد المزامنة (إلغاء + إعادة جدولة حسب التفضيل الجديد).
+    if (supported) void syncWorkoutReminder()
   }
+
+  const onToggle = async () => {
+    if (prefs.trainingEnabled) {
+      setDenied(false)
+      persist({ ...prefs, trainingEnabled: false }) // يلغي الجدولة على الأصلي
+      return
+    }
+    // تفعيل: على الأصلي نطلب الإذن أولًا (فقط الآن، لا عند الإقلاع).
+    if (supported) {
+      const perm = await requestReminderPermission()
+      if (perm !== 'granted') {
+        setDenied(true) // نُبقي المفتاح مطفأ ونعرض تلميحًا صادقًا — لا وعد كاذب
+        return
+      }
+      setDenied(false)
+    }
+    // إشارة صحّة ميزة (حدث Phase 2 القائم) — عند التفعيل الفعلي فقط.
+    track('reminder_enabled', { kind: 'training' })
+    persist({ ...prefs, trainingEnabled: true })
+  }
+
+  // النص الصادق: الويب يوضّح أنه لا إشعار خلفي؛ الأصلي عند الرفض يرشد لإعدادات آيفون.
+  const note = !supported ? t.reminderWebHint : denied ? t.reminderDeniedHint : null
 
   return (
     <div className="mt-3 card p-5">
@@ -194,7 +223,7 @@ function ReminderCard({ lang }: { lang: Lang }) {
           type="button"
           role="switch"
           aria-checked={prefs.trainingEnabled}
-          onClick={() => update({ trainingEnabled: !prefs.trainingEnabled })}
+          onClick={() => void onToggle()}
           className={`relative h-6 w-11 rounded-full transition-colors ${prefs.trainingEnabled ? 'bg-primary' : 'bg-line'}`}
         >
           <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-all ${prefs.trainingEnabled ? 'start-0.5' : 'end-0.5'}`} />
@@ -208,15 +237,17 @@ function ReminderCard({ lang }: { lang: Lang }) {
           type="time"
           value={prefs.trainingTime}
           disabled={!prefs.trainingEnabled}
-          onChange={(e) => update({ trainingTime: e.target.value })}
+          onChange={(e) => persist({ ...prefs, trainingTime: e.target.value })}
           className="rounded-lg border border-line bg-page px-3 py-2 text-sm text-ink-900 outline-none focus:border-primary-c disabled:opacity-40"
         />
       </div>
 
-      <p className="mt-3 flex items-start gap-2 text-[11px] text-ink-400">
-        <Icon name="Info" className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-        {t.reminderNote}
-      </p>
+      {note && (
+        <p className="mt-3 flex items-start gap-2 text-[11px] text-ink-400">
+          <Icon name="Info" className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+          {note}
+        </p>
+      )}
     </div>
   )
 }
