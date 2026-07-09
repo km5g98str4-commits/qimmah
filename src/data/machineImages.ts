@@ -4,10 +4,12 @@
 // هذه بطاقات أجهزة لا تملك لقطة جهاز من قنوات المقاومة (WorkoutX/free-exercise-db تعيد وزنًا حرًّا)،
 // فنعرض لها صورة الجهاز الحقيقية المجلوبة من مصادر مفتوحة الترخيص عبر scripts/p12-fetch-machine-images.mjs.
 // حتى تُجلب الصور تبقى الخريطة فارغة وتظهر البطاقات على البديل الأنيق (لا لقطة وزن حرّ أبدًا).
-// التغطية الحالية: 0 جهازًا.
+// التغطية الحالية: 2 جهازًا.
 
 /** خريطة ثابتة: مُعرّف جهاز قانوني → مسار صورة الجهاز المحلّية. */
 export const machineImages: Record<string, string> = {
+  'hack-squat-machine': '/exercise-machine-images/hack-squat-machine.jpg',
+  'shoulder-press-machine': '/exercise-machine-images/shoulder-press-machine.jpg',
 }
 
 /** يُرجع مسار صورة الجهاز إن توفّرت، وإلا undefined (فيرجع المكوّن للبديل الأنيق). */

@@ -311,3 +311,27 @@ git push origin main
 - `machine-row` و`low-row-machine` كلاهما غائب عن خريطة gif القديمة — لا تعارض مفاتيح عند
   إعادة التقنين على `seated-row-machine` (مؤكَّد).
 - `lying-leg-curl`, `face-pull`, وكل عناصر `iso-lateral-*` الجديدة: ناقصة (مؤكَّد).
+
+
+### 🖼️ سجلّ صور الأجهزة (p12-fetch-machine-images) — run-date
+
+| الجهاز | النتيجة | المصدر | الرابط | الترخيص | الإسناد |
+| --- | --- | --- | --- | --- | --- |
+| `decline-chest-press-machine` | placeholder | — | — | — | — |
+| `hack-squat-machine` | web-image | Wikimedia Commons | [link](https://commons.wikimedia.org/wiki/File:David_Jobson_%26_Ziggy_Chima;_machine_hack_squat.jpg) | CC BY 2.0 | brett jordan |
+| `preacher-curl-machine` | placeholder | — | — | — | — |
+| `rear-delt-row-machine` | placeholder | — | — | — | — |
+| `seated-calf-raise-machine` | placeholder | — | — | — | — |
+| `standing-calf-raise-machine` | placeholder | — | — | — | — |
+| `seated-leg-curl` | placeholder | — | — | — | — |
+| `lateral-raise-machine` | placeholder | — | — | — | — |
+| `shoulder-press-machine` | web-image | Wikimedia Commons | [link](https://commons.wikimedia.org/wiki/File:%27Dragon%27_Battalion_soldiers_take_fitness_to_the_next_level_in_gym_honoring_fallen_comrade_DVIDS451818.jpg) | Public domain | U.S. Army photo by Staff Sgt. Justin Phemister |
+| `standing-leg-curl` | placeholder | — | — | — | — |
+| `glute-drive-machine` | placeholder | — | — | — | — |
+| `glute-kickback-machine` | placeholder | — | — | — | — |
+| `cable-crunch` | placeholder | — | — | — | — |
+| `iso-lateral-incline-press` | placeholder | — | — | — | — |
+| `single-arm-lat-pulldown` | placeholder | — | — | — | — |
+| `chest-supported-row-machine` | placeholder | — | — | — | — |
+| `pendulum-squat-machine` | placeholder | — | — | — | — |
+| `hip-adductor-machine` | placeholder | — | — | — | — |
