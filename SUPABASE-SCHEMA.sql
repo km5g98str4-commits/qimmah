@@ -3,8 +3,12 @@
 -- ============================================================================
 -- شغّل هذا الملف يدويًا في Supabase SQL Editor عند تفعيل المزامنة السحابية.
 -- التطبيق لا يشغّل أي migration تلقائيًا — هذا الملف توثيقي/إعدادي فقط.
--- الملف idempotent (create ... if not exists / or replace / drop policy if exists)،
--- فآمن لإعادة التشغيل، وآمن فوق تنصيب سابق.
+-- الملف idempotent بالكامل وآمن لإعادة التشغيل فوق أي تنصيب سابق:
+--   * الجداول/الفهارس: create ... if not exists
+--   * الدوال: create or replace
+--   * التريغرات: drop trigger if exists ثم create
+--   * السياسات (RLS): تُحذف *كل* سياسات الجدول القائمة (أيًا كان اسمها) ثم تُعاد الأربع
+--     القياسية — فلا يتعارض مع سياسات سابقة أُنشئت يدويًا/عبر اللوحة (مثل "own profile").
 --
 -- المبادئ:
 --   * كل جدول مربوط بـ auth.users(id) عبر user_id مع ON DELETE CASCADE.
@@ -152,6 +156,7 @@ $$;
 do $$
 declare
   t text;
+  pol text;
 begin
   foreach t in array array[
     'profiles','workout_sessions','exercise_history','measurement_logs','daily_logs'
@@ -159,22 +164,25 @@ begin
   loop
     execute format('alter table public.%I enable row level security;', t);
 
-    execute format('drop policy if exists "%1$s_select_own" on public.%1$s;', t);
+    -- idempotency صلبة: احذف *كل* سياسة قائمة على الجدول أيًا كان اسمها (بما فيها
+    -- سياسات أُنشئت سابقًا يدويًا/عبر لوحة Supabase مثل "own profile")، ثم أعد إنشاء
+    -- الأربع القياسية. هذا يجعل الملف قابلًا لإعادة التشغيل فوق أي حالة سابقة.
+    for pol in
+      select policyname from pg_policies
+      where schemaname = 'public' and tablename = t
+    loop
+      execute format('drop policy if exists %I on public.%I;', pol, t);
+    end loop;
+
     execute format(
       'create policy "%1$s_select_own" on public.%1$s
          for select using (auth.uid() = user_id);', t);
-
-    execute format('drop policy if exists "%1$s_insert_own" on public.%1$s;', t);
     execute format(
       'create policy "%1$s_insert_own" on public.%1$s
          for insert with check (auth.uid() = user_id);', t);
-
-    execute format('drop policy if exists "%1$s_update_own" on public.%1$s;', t);
     execute format(
       'create policy "%1$s_update_own" on public.%1$s
          for update using (auth.uid() = user_id) with check (auth.uid() = user_id);', t);
-
-    execute format('drop policy if exists "%1$s_delete_own" on public.%1$s;', t);
     execute format(
       'create policy "%1$s_delete_own" on public.%1$s
          for delete using (auth.uid() = user_id);', t);
