@@ -46,15 +46,20 @@ export const QIMMAH_KEYS = [
 // مثال: مهام اليوم `qimmah:todo:v1:<userId>` / `qimmah:todo:v1:guest`.
 const QIMMAH_KEY_PREFIXES = ['qimmah:todo:v1:']
 
-/** يحذف مفاتيح قِمّة فقط، ثم يعيد التحميل إلى شاشة البداية. */
+/**
+ * يحذف مفاتيح قِمّة فقط، ثم يعيد التحميل إلى شاشة البداية.
+ *
+ * async لأنّ إلغاء تذكيرات iOS المجدوَلة يمرّ عبر جسر أصلي. آمن للاستدعاء fire-and-forget
+ * (المستدعون لا ينتظرونه): الدالة مكتفية ذاتيًا وتعيد التحميل بنفسها في النهاية. المسح
+ * المحلي الحرج يتمّ **أولًا** ولا يعتمد على أي نظام خارجي، وإلغاء الإشعار best-effort
+ * محتوى الخطأ (try/catch) فلا يمنع خطأ الإلغاء المسح أو إعادة التحميل.
+ */
 export async function resetQimmah(): Promise<void> {
   if (typeof window === 'undefined') return
   // أسقط حالة التحليلات في الذاكرة أولًا (طابور/دفعة معلّقة + الموافقة والمعرّف المجهول
   // المخزَّنان في cache) — لا يكفي مسح localStorage وحده لأن المعرّف القديم يبقى في الذاكرة.
   resetAnalytics()
-  // ألغِ تذكيرات الجهاز المجدوَلة (iOS الأصلي) قبل مسح البيانات وإعادة التحميل — لا يكفي
-  // مسح localStorage: الإشعار مجدوَل في نظام التشغيل ويجب إلغاؤه صراحةً. (لا شيء على الويب.)
-  await cancelAllReminders()
+  // المسح المحلي الحرج أولًا (لا يعتمد على أي جسر أصلي) — يُضمن حتى لو تعثّر إلغاء الإشعار.
   QIMMAH_KEYS.forEach((k) => window.localStorage.removeItem(k))
   // اكنس المفاتيح ذات البادئة (لكل الحسابات على هذا الجهاز).
   for (let i = window.localStorage.length - 1; i >= 0; i -= 1) {
@@ -62,6 +67,13 @@ export async function resetQimmah(): Promise<void> {
     if (key && QIMMAH_KEY_PREFIXES.some((p) => key.startsWith(p))) {
       window.localStorage.removeItem(key)
     }
+  }
+  // ألغِ تذكيرات iOS المجدوَلة (best-effort، محتوى الخطأ) — لا يحجب المسح/إعادة التحميل.
+  // (cancelAllReminders لا يرمي أصلًا؛ الـ try هنا حزام أمان إضافي.)
+  try {
+    await cancelAllReminders()
+  } catch {
+    /* لا يمنع الإكمال */
   }
   window.location.hash = '/start'
   window.location.reload()

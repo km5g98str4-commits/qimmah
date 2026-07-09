@@ -150,8 +150,9 @@ function ReminderCta({ lang }: { lang: Lang }) {
   const [state, setState] = useState<'idle' | 'enabled' | 'denied'>(() =>
     loadReminderPrefs().trainingEnabled ? 'enabled' : 'idle',
   )
+  const [busy, setBusy] = useState(false)
 
-  // الويب لا يدعم التذكير المجدوَل في الخلفية — لا نعرض الدعوة أصلًا (صدق الواجهة).
+  // iOS فقط — الويب/Android لا يدعمان التذكير المجدوَل فلا نعرض الدعوة أصلًا (صدق الواجهة).
   if (!remindersSupported()) return null
 
   if (state === 'enabled') {
@@ -164,15 +165,21 @@ function ReminderCta({ lang }: { lang: Lang }) {
   }
 
   const enable = async () => {
-    const perm = await requestReminderPermission()
-    if (perm !== 'granted') {
-      setState('denied')
-      return
+    if (busy) return // قفل ضدّ النقر المزدوج أثناء طلب الإذن/الجدولة
+    setBusy(true)
+    try {
+      const perm = await requestReminderPermission()
+      if (perm !== 'granted') {
+        setState('denied')
+        return
+      }
+      saveReminderPrefs({ ...loadReminderPrefs(), trainingEnabled: true })
+      track('reminder_enabled', { kind: 'training' })
+      await syncWorkoutReminder()
+      setState('enabled')
+    } finally {
+      setBusy(false)
     }
-    saveReminderPrefs({ ...loadReminderPrefs(), trainingEnabled: true })
-    track('reminder_enabled', { kind: 'training' })
-    await syncWorkoutReminder()
-    setState('enabled')
   }
 
   return (
@@ -181,7 +188,12 @@ function ReminderCta({ lang }: { lang: Lang }) {
         <Icon name="Bell" className="h-4 w-4 text-primary-c" />
         {t.reminderCtaText}
       </p>
-      <button type="button" onClick={() => void enable()} className="btn-ghost mt-3 w-full justify-center py-2.5 text-sm">
+      <button
+        type="button"
+        onClick={() => void enable()}
+        disabled={busy}
+        className="btn-ghost mt-3 w-full justify-center py-2.5 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+      >
         <Icon name="Bell" className="h-4 w-4" />
         {t.reminderCtaButton}
       </button>

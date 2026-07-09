@@ -1,9 +1,9 @@
 // تذكير التمرين — تنبيهات محلية على الجهاز فقط (iOS الأصلي عبر @capacitor/local-notifications).
 //
 // المبادئ:
-//   • على الويب: لا جدولة في الخلفية إطلاقًا (المتصفّح لا يدعمها بلا خادم Push) —
-//     remindersSupported() تُعيد false فتُبقي الواجهة صادقة بلا وعود زائفة.
-//   • على iOS الأصلي: تذكير يومي متكرّر واحد في وقت التمرين المختار (أصغر تنفيذ يخدم
+//   • مدعوم على iOS **فقط** (المرحلة 3). الويب و Android → remindersSupported()=false
+//     فتبقى الواجهة صادقة بلا وعود زائفة (Android يُراجَع ويُفعَّل لاحقًا).
+//   • على iOS: تذكير يومي متكرّر واحد في وقت التمرين المختار (أصغر تنفيذ يخدم
 //     seam reminderPrefs الحالي: { trainingEnabled, trainingTime }). بلا خادم، بلا Push.
 //   • الإذن يُطلب فقط عند تفعيل المستخدم الصريح للتذكير (لا عند الإقلاع).
 //   • آمن الفشل: كل استدعاء ملفوف بـ try/catch ولا يرمي في مسار التطبيق.
@@ -20,13 +20,14 @@ const WORKOUT_REMINDER_ID = 1001
 
 export type ReminderPermission = 'granted' | 'denied' | 'unsupported'
 
-function isNative(): boolean {
-  return Capacitor.isNativePlatform()
+// المرحلة 3 لـ iOS فقط. لا نعامل كل منصّة أصلية كمدعومة — Android يُراجَع ويُفعَّل لاحقًا.
+function isIOS(): boolean {
+  return Capacitor.getPlatform() === 'ios'
 }
 
-/** هل تدعم هذه المنصّة تذكيرات محلية مجدوَلة تعمل والتطبيق مغلق؟ (iOS الأصلي فقط) */
+/** هل تدعم هذه المنصّة تذكيرات محلية مجدوَلة تعمل والتطبيق مغلق؟ (iOS فقط حاليًا) */
 export function remindersSupported(): boolean {
-  return isNative()
+  return isIOS()
 }
 
 async function getPlugin() {
@@ -45,7 +46,7 @@ function notifContent(): { title: string; body: string } {
  * يُعيد 'unsupported' على الويب دون إظهار أي مربّع.
  */
 export async function requestReminderPermission(): Promise<ReminderPermission> {
-  if (!isNative()) return 'unsupported'
+  if (!isIOS()) return 'unsupported'
   try {
     const LN = await getPlugin()
     const res = await LN.requestPermissions()
@@ -57,7 +58,7 @@ export async function requestReminderPermission(): Promise<ReminderPermission> {
 
 /** الحالة الحالية للإذن دون طلبه (granted فقط تسمح بالجدولة). */
 export async function reminderPermissionStatus(): Promise<ReminderPermission> {
-  if (!isNative()) return 'unsupported'
+  if (!isIOS()) return 'unsupported'
   try {
     const LN = await getPlugin()
     const res = await LN.checkPermissions()
@@ -68,28 +69,42 @@ export async function reminderPermissionStatus(): Promise<ReminderPermission> {
 }
 
 /**
- * مصدر الحقيقة للجدولة: يُلغي التذكير القائم ثم يُعيد جدولته من reminderPrefs.
- * لا يجدول إلا إذا: المنصّة أصلية + التذكير مفعّل + الإذن ممنوح. غير ذلك يبقى ملغى.
+ * مصدر الحقيقة للجدولة (iOS فقط). **يتحقّق أولًا** من التفعيل وصحّة الوقت والإذن،
+ * ثم يقرّر: إمّا يجدول تذكيرًا يوميًا متكرّرًا (يستبدل القائم بنفس المعرّف)، وإمّا
+ * يُلغي القائم فقط عندما يجب ألّا يوجد تذكير — فلا نُلغي إشعارًا صالحًا قبل التحقّق.
  * يُستدعى عند: الإقلاع/الاستئناف، تغيير التفضيل، تفعيل التذكير.
  */
 export async function syncWorkoutReminder(): Promise<void> {
-  if (!isNative()) return
+  if (!isIOS()) return
   try {
     const LN = await getPlugin()
-    // ألغِ دائمًا أولًا (idempotent) حتى لا يتراكم أكثر من إشعار.
-    await LN.cancel({ notifications: [{ id: WORKOUT_REMINDER_ID }] })
-
     const prefs = loadReminderPrefs()
-    if (!prefs.trainingEnabled) return
 
-    const perm = await LN.checkPermissions()
-    if (perm.display !== 'granted') return
-
+    // 1) تحقّق من صحّة الوقت والتفعيل قبل لمس أي إشعار قائم.
     const [hourStr, minStr] = prefs.trainingTime.split(':')
     const hour = Number(hourStr)
     const minute = Number(minStr)
-    if (!Number.isFinite(hour) || !Number.isFinite(minute)) return
+    const timeValid =
+      Number.isInteger(hour) && hour >= 0 && hour <= 23 &&
+      Number.isInteger(minute) && minute >= 0 && minute <= 59
 
+    const cancel = () => LN.cancel({ notifications: [{ id: WORKOUT_REMINDER_ID }] })
+
+    // يجب ألّا يوجد تذكير (مطفأ أو وقت غير صالح) → عندها فقط نُلغي القائم.
+    if (!prefs.trainingEnabled || !timeValid) {
+      await cancel()
+      return
+    }
+
+    // 2) تحقّق من الإذن قبل الجدولة. بلا إذن → لا تُبقِ تذكيرًا مجدوَلًا.
+    const perm = await LN.checkPermissions()
+    if (perm.display !== 'granted') {
+      await cancel()
+      return
+    }
+
+    // 3) جدولة يومية متكرّرة **صريحة** (repeats:true) بنفس المعرّف — يستبدل أي إشعار
+    //    قائم دون إلغاء مسبق، فلا فجوة ولا تراكم. on:{hour,minute} = وقت ثابت يوميًا.
     const { title, body } = notifContent()
     await LN.schedule({
       notifications: [
@@ -97,8 +112,7 @@ export async function syncWorkoutReminder(): Promise<void> {
           id: WORKOUT_REMINDER_ID,
           title,
           body,
-          // on:{hour,minute} = تذكير يومي متكرّر (يُحتسب مرّة واحدة ضمن حدّ iOS، بلا تراكم).
-          schedule: { on: { hour, minute }, allowWhileIdle: true },
+          schedule: { on: { hour, minute }, repeats: true, allowWhileIdle: true },
         },
       ],
     })
@@ -109,7 +123,7 @@ export async function syncWorkoutReminder(): Promise<void> {
 
 /** يُلغي كل تذكيرات قِمّة — يُستدعى من إعادة الضبط/حذف الحساب قبل مسح البيانات. */
 export async function cancelAllReminders(): Promise<void> {
-  if (!isNative()) return
+  if (!isIOS()) return
   try {
     const LN = await getPlugin()
     await LN.cancel({ notifications: [{ id: WORKOUT_REMINDER_ID }] })

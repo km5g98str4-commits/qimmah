@@ -167,41 +167,47 @@ function Empty({ text }: { text: string }) {
 }
 
 /**
- * بطاقة تذكير التمرين — على iOS الأصلي تجدول تنبيهًا محليًا يوميًا في الوقت المختار؛
- * على الويب تُحفظ نيّة التذكير فقط (لا إشعار خلفي — نص صادق يوضّح ذلك).
- * الإذن يُطلب فقط عند التفعيل الصريح؛ الرفض يُبقي المفتاح مطفأ مع تلميح واضح.
+ * بطاقة تذكير التمرين — على iOS فقط تجدول تنبيهًا محليًا يوميًا في الوقت المختار.
+ * على الويب/Android المفتاح **معطّل** ويظهر نص صادق (يعمل في تطبيق iOS) — لا يُفعَّل
+ * تفضيل ولا يُطلق حدث لأنّه لا يستطيع الإشعار فعليًا. الإذن يُطلب فقط عند التفعيل
+ * الصريح؛ الرفض يُبقي المفتاح مطفأ مع تلميح واضح. مقفول ضدّ النقر المزدوج أثناء الطلب.
  */
 function ReminderCard({ lang }: { lang: Lang }) {
   const t = getStrings(lang).progress
   const [prefs, setPrefs] = useState<ReminderPrefs>(() => loadReminderPrefs())
   const [denied, setDenied] = useState(false)
-  const supported = remindersSupported()
+  const [busy, setBusy] = useState(false)
+  const supported = remindersSupported() // iOS فقط — الويب/Android لا يدعمان الجدولة
 
   const persist = (next: ReminderPrefs) => {
     setPrefs(next)
     saveReminderPrefs(next)
-    // على الأصلي فقط: أعد المزامنة (إلغاء + إعادة جدولة حسب التفضيل الجديد).
-    if (supported) void syncWorkoutReminder()
+    void syncWorkoutReminder() // iOS-محروس داخليًا (إلغاء/إعادة جدولة)؛ لا شيء على الويب
   }
 
   const onToggle = async () => {
-    if (prefs.trainingEnabled) {
-      setDenied(false)
-      persist({ ...prefs, trainingEnabled: false }) // يلغي الجدولة على الأصلي
-      return
-    }
-    // تفعيل: على الأصلي نطلب الإذن أولًا (فقط الآن، لا عند الإقلاع).
-    if (supported) {
+    // الويب/Android: التذكير غير مدعوم — لا تفعيل ولا حدث. + قفل ضدّ النقر المزدوج.
+    if (!supported || busy) return
+    setBusy(true)
+    try {
+      if (prefs.trainingEnabled) {
+        setDenied(false)
+        persist({ ...prefs, trainingEnabled: false }) // يُلغي الجدولة
+        return
+      }
+      // تفعيل: نطلب الإذن أولًا (فقط الآن، لا عند الإقلاع).
       const perm = await requestReminderPermission()
       if (perm !== 'granted') {
-        setDenied(true) // نُبقي المفتاح مطفأ ونعرض تلميحًا صادقًا — لا وعد كاذب
+        setDenied(true) // نُبقي المفتاح مطفأ ونعرض تلميحًا صادقًا — لا وعد كاذب، ولا حدث
         return
       }
       setDenied(false)
+      // إشارة صحّة ميزة (حدث Phase 2 القائم) — عند تفعيل تذكير أصلي فعلي فقط.
+      track('reminder_enabled', { kind: 'training' })
+      persist({ ...prefs, trainingEnabled: true })
+    } finally {
+      setBusy(false)
     }
-    // إشارة صحّة ميزة (حدث Phase 2 القائم) — عند التفعيل الفعلي فقط.
-    track('reminder_enabled', { kind: 'training' })
-    persist({ ...prefs, trainingEnabled: true })
   }
 
   // النص الصادق: الويب يوضّح أنه لا إشعار خلفي؛ الأصلي عند الرفض يرشد لإعدادات آيفون.
@@ -222,11 +228,12 @@ function ReminderCard({ lang }: { lang: Lang }) {
           id="reminder-enabled"
           type="button"
           role="switch"
-          aria-checked={prefs.trainingEnabled}
+          aria-checked={supported && prefs.trainingEnabled}
+          disabled={!supported || busy}
           onClick={() => void onToggle()}
-          className={`relative h-6 w-11 rounded-full transition-colors ${prefs.trainingEnabled ? 'bg-primary' : 'bg-line'}`}
+          className={`relative h-6 w-11 rounded-full transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${supported && prefs.trainingEnabled ? 'bg-primary' : 'bg-line'}`}
         >
-          <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-all ${prefs.trainingEnabled ? 'start-0.5' : 'end-0.5'}`} />
+          <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-all ${supported && prefs.trainingEnabled ? 'start-0.5' : 'end-0.5'}`} />
         </button>
       </div>
 
@@ -236,7 +243,7 @@ function ReminderCard({ lang }: { lang: Lang }) {
           id="reminder-time"
           type="time"
           value={prefs.trainingTime}
-          disabled={!prefs.trainingEnabled}
+          disabled={!supported || !prefs.trainingEnabled || busy}
           onChange={(e) => persist({ ...prefs, trainingTime: e.target.value })}
           className="rounded-lg border border-line bg-page px-3 py-2 text-sm text-ink-900 outline-none focus:border-primary-c disabled:opacity-40"
         />
