@@ -40,6 +40,7 @@ import { useLang } from '@/i18n'
 import { onboardingStrings, type OnboardingStrings } from '@/i18n/dict/onboarding'
 import { PlanChoiceScreen, CustomPlanBuilder, customPlanStrings, saveCustomPlan } from '@/features/customPlan'
 import type { PlanSource } from '@/features/customPlan'
+import { track } from '@/lib/analytics'
 
 interface PlanBuilderProps {
   /** يُستدعى بعد حفظ مصدر الحقيقة والخطة وتعليم الإكمال (دخول اللوحة). */
@@ -537,6 +538,16 @@ export function PlanBuilder({ onComplete, onExit, onForceComplete }: PlanBuilder
     setLastStep(idx)
   }, [a, idx, userId])
 
+  // عرض خطوة الأسئلة — إشارة قمع (رقم الخطوة + مفتاحها الثابت فقط، بلا أي إجابة).
+  const stepKey = step.key
+  const lastStepKeyRef = useRef<string | null>(null)
+  useEffect(() => {
+    if (stepKey === 'building') return
+    if (lastStepKeyRef.current === stepKey) return
+    lastStepKeyRef.current = stepKey
+    track('onboarding_step_viewed', { step: idx, key: stepKey })
+  }, [stepKey, idx])
+
   // الإنهاء: يبني مصدر الحقيقة ويحفظه، ثم يولّد التخصيص للوحة.
   // async (P11.5): مولّد الخطط يُحمَّل كسولًا — شاشة «البناء» (~2.5ث) تغطي التحميل بمرّات.
   const finishRef = useRef<() => void>(() => {})
@@ -546,8 +557,11 @@ export function PlanBuilder({ onComplete, onExit, onForceComplete }: PlanBuilder
       saveOnboardingProfile(op)
       const built = await buildCustomizationFromOnboarding(op, customization)
       applyCustomization(built)
+      // توليد الخطة التلقائية من الأسئلة — إشارة صحّة ميزة.
+      track('plan_generated', { source: 'onboarding' })
       // إكمال لكل حساب + حفظ إشارة الإعداد في الملف السحابي (best-effort، لا يعطّل الدخول).
       markCompleted(userId)
+      track('onboarding_completed', { planMode: planMode === 'custom' ? 'custom' : 'auto' })
       if (userId) void persistOnboardingToProfile(userId, op)
       // مسار «أصمّم جدولي بنفسي»: نفتح الباني المخصّص بعد التوليد بدل الدخول مباشرةً للوحة.
       // الجدول التلقائي محفوظ أصلًا كأساس/بديل، فيبقى الدخول سليمًا حتى لو ألغى المستخدم.
@@ -582,7 +596,11 @@ export function PlanBuilder({ onComplete, onExit, onForceComplete }: PlanBuilder
     setStepIndex((s) => Math.min(steps.length - 1, s + 1))
   }
   const goBack = () => {
-    if (isFirst) return onExit()
+    if (isFirst) {
+      // خروج من أول خطوة دون إكمال — إشارة قمع «مغادرة الإعداد».
+      track('onboarding_abandoned', { step: idx })
+      return onExit()
+    }
     setStepIndex((s) => Math.max(0, s - 1))
   }
   // مخرج الطوارئ الدائم: يضمن ألّا يُحبَس المستخدم أبدًا في المعالج مهما تعطّلت خطوة.
@@ -607,6 +625,8 @@ export function PlanBuilder({ onComplete, onExit, onForceComplete }: PlanBuilder
         lang={lang}
         onSave={(plan) => {
           saveCustomPlan(userId, plan)
+          // حفظ جدول مصمَّم يدويًا أثناء الإعداد — إشارة صحّة ميزة.
+          track('plan_generated', { source: 'custom' })
           onComplete()
         }}
         onCancel={onComplete}

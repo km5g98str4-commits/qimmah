@@ -47,6 +47,7 @@ import { type AppRoute, MAIN_TABS, isUnknownRouteHash, routeFromHash, setHashRou
 import { SuccessToast } from '@/components/SuccessToast'
 import { AchievementToaster } from '@/features/achievements/AchievementToaster'
 import { BUILD_LABEL } from '@/lib/buildInfo'
+import { track } from '@/lib/analytics'
 
 /**
  * حراسة المسار: التبويبات الرئيسية لا تُفتح أبدًا قبل إكمال إعداد حقيقي **لهذا الحساب**
@@ -98,6 +99,8 @@ export default function App() {
     ensureOnboardingProfile()
     // معرّف البناء في الـ console — للتحقق من نشر النسخة الصحيحة.
     console.info(`%cقِمّة ${BUILD_LABEL}`, 'color:#F26A21;font-weight:bold')
+    // فتح التطبيق — يُطلق مرّة واحدة لكل تحميل.
+    track('app_opened', {})
   }, [])
 
   const [view, setView] = useState<AppRoute>(() => initialRoute(auth.user?.id ?? null))
@@ -118,6 +121,17 @@ export default function App() {
   useEffect(() => {
     if (view !== 'privacy' && view !== 'terms') beforeLegalRef.current = view
   }, [view])
+
+  // تغيّر المسار — إشارة تنقّل (اسم المسار فقط، بلا أي بيانات مستخدم).
+  const prevViewRef = useRef<AppRoute | null>(null)
+  useEffect(() => {
+    if (auth.loading) return
+    const from = prevViewRef.current
+    if (from !== view) {
+      track('route_changed', { route: view, from: from ?? undefined })
+      prevViewRef.current = view
+    }
+  }, [view, auth.loading])
 
   // view → hash (نُبقي مسار 404 على hash الخاطئ كما هو حتى لا نطمس الرابط الأصلي).
   // مهم: لا نكتب الـ hash قبل حسم مسار الإقلاع الأول بعد استعادة الجلسة، وإلّا طمسنا

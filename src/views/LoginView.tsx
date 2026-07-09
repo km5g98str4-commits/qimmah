@@ -5,6 +5,7 @@ import { getStrings } from '@/config/strings'
 import { miscStrings } from '@/i18n/dict/misc'
 import { useAuth } from '@/lib/authContext'
 import { evaluatePassword, PASSWORD_MIN_LENGTH } from '@/lib/passwordPolicy'
+import { track } from '@/lib/analytics'
 
 interface LoginViewProps {
   lang: Lang
@@ -49,15 +50,18 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login' }: Lo
     setMsg(null)
     setNotice(null)
     if (isSignup) {
+      track('signup_started', {})
       const r = await auth.signUp(email, password, name)
       setBusy(false)
       if (!r.ok) {
         setMsg(r.error ?? d.createFailed)
       } else if (r.needsConfirmation) {
         // تأكيد البريد مطلوب — نعرض تنبيهًا واضحًا ونعيد المستخدم لوضع الدخول.
+        track('signup_succeeded', { needsConfirmation: true })
         setNotice(d.accountCreatedConfirm)
         setMode('login')
       } else {
+        track('signup_succeeded', { needsConfirmation: false })
         onSuccess()
       }
     } else {

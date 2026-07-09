@@ -8,12 +8,26 @@ import { CustomizationProvider } from './lib/customizationContext'
 import { AuthProvider } from './lib/authContext'
 import { LanguageProvider } from './i18n'
 import { registerStepBridge } from './lib/stepCounter'
+import { initAnalytics, track } from './lib/analytics'
 // وحدة PWA: تلتقط حدث beforeinstallprompt مبكرًا (يُطلق مرّة واحدة فقط) لعرض زر التثبيت لاحقًا.
 import './lib/pwa'
 import './styles/index.css'
 
 // سيم الخطوات: يُتيح لغلاف أصلي مستقبلي (تطبيق آيفون يقرأ Apple Health) دفع الخطوات.
 registerStepBridge()
+
+// تهيئة التحليلات (مضبوطة بالموافقة، مجهولة، بلا SDK خارجي) قبل الرسم الأول.
+initAnalytics()
+// أخطاء عامّة غير ملتقَطة — إشارة استقرار فقط (اسم الخطأ، بلا رسالة/بيانات).
+if (typeof window !== 'undefined') {
+  window.addEventListener('error', (e) => {
+    track('unhandled_error', { source: 'window', name: e.error instanceof Error ? e.error.name : undefined })
+  })
+  window.addEventListener('unhandledrejection', (e) => {
+    const r = (e as PromiseRejectionEvent).reason
+    track('unhandled_error', { source: 'promise', name: r instanceof Error ? r.name : undefined })
+  })
+}
 
 // تسجيل عامل الخدمة (PWA) — للويب فقط في الإنتاج.
 // داخل Capacitor (iOS/Android) الأصول تُخدَّم محليًا من الحزمة الأصلية، وتشغيل Service

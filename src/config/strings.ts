@@ -92,6 +92,10 @@ export interface ShellStrings {
     groupAbout: string
     versionLabel: string
     calcLink: string
+    // تحليلات مجهولة اختيارية (opt-out)
+    analyticsTitle: string
+    analyticsDesc: string
+    analyticsToggle: string
   }
   pwa: {
     group: string
@@ -493,6 +497,10 @@ const ar: ShellStrings = {
     groupAbout: 'عن التطبيق',
     versionLabel: 'إصدار التطبيق',
     calcLink: 'كيف نحسب أرقامك؟',
+    analyticsTitle: 'تحليلات مجهولة',
+    analyticsDesc:
+      'إحصاءات استخدام مجهولة تمامًا (بلا اسم أو بريد أو أي بيانات شخصية) تساعدنا على تحسين التطبيق. تقدر توقفها في أي وقت.',
+    analyticsToggle: 'المشاركة في التحليلات المجهولة',
   },
   pwa: {
     group: 'التطبيق والتنبيهات',
@@ -903,6 +911,10 @@ const en: ShellStrings = {
     groupAbout: 'About',
     versionLabel: 'App version',
     calcLink: 'How we calculate your numbers',
+    analyticsTitle: 'Anonymous analytics',
+    analyticsDesc:
+      'Fully anonymous usage stats (no name, email, or personal data) that help us improve the app. You can turn this off any time.',
+    analyticsToggle: 'Share anonymous analytics',
   },
   pwa: {
     group: 'App & Notifications',

@@ -4,6 +4,7 @@
 
 import { addSession, type WorkoutSession } from './workoutSessions'
 import { detectSessionPRs, loadHistory, recordExercise, saveHistory, topCompletedWeight } from './exerciseHistory'
+import { track, firstOnce } from './analytics'
 
 /** رقم قياسي محقّق في الجلسة. */
 export interface SessionPR {
@@ -42,6 +43,10 @@ export function persistFinishedSession(session: WorkoutSession): SessionPR[] {
     history = recordExercise(history, e, when)
   })
   saveHistory(history)
+
+  // إشارات التمرين — تعدادات فقط (عدد التمارين والأرقام القياسية)، بلا أي تفاصيل.
+  track('workout_logged', { exercises: session.exercises.length, prs: prs.length })
+  if (firstOnce('firstWorkout')) track('first_workout_logged', {})
 
   return prs
 }

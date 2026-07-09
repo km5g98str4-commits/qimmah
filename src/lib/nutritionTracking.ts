@@ -2,6 +2,7 @@ import { useCallback, useEffect, useSyncExternalStore } from 'react'
 import { getDayStamp } from './today'
 import { useIsDemo } from './demoMode'
 import { saveNutritionLog, saveWaterLog } from './historyStore'
+import { track, firstOnce } from './analytics'
 
 // تتبّع التغذية اليومي — وجبات الخطة المنجزة + وجبات مسجّلة (سعرات/بروتين) + كمية الماء.
 // يُصفّر تلقائيًا مع تغيّر اليوم. يستخدم مخزنًا مشتركًا (store) حتى تبقى كل المكوّنات متزامنة
@@ -203,6 +204,11 @@ export function useNutritionToday() {
     (entry: Omit<LoggedFood, 'id'> & { id?: string }) => {
       const item: LoggedFood = { ...entry, id: entry.id ?? nextLogId() }
       setState(demo, (prev) => ({ ...prev, log: [...prev.log, item] }))
+      // إشارة وجبة — خانة الوجبة فقط (تعداد)، بلا اسم الطبق أو الكمية. وضع النموذج لا يُرسل شيئًا.
+      if (!demo) {
+        track('meal_logged', { mealSlot: item.meal })
+        if (firstOnce('firstMeal')) track('first_meal_logged', {})
+      }
     },
     [demo],
   )

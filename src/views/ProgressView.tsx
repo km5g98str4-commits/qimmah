@@ -9,6 +9,7 @@ import { musclesThisWeek, recentVolumes, topPRs, workoutCounts } from '@/lib/pro
 import { weeklyAdherenceStreak } from '@/lib/streaks'
 import { useCustomization } from '@/lib/customizationContext'
 import { loadReminderPrefs, saveReminderPrefs, type ReminderPrefs } from '@/lib/reminderPrefs'
+import { track } from '@/lib/analytics'
 import { getStrings } from '@/config/strings'
 import { progressScreenStrings } from '@/i18n/dict/progressScreen'
 import type { Lang } from '@/lib/appPreferences'
@@ -171,6 +172,8 @@ function ReminderCard({ lang }: { lang: Lang }) {
 
   const update = (partial: Partial<ReminderPrefs>) => {
     const next = { ...prefs, ...partial }
+    // تفعيل التذكير — إشارة صحّة ميزة، تُطلق فقط عند الانتقال من مطفأ إلى مفعّل.
+    if (!prefs.trainingEnabled && next.trainingEnabled) track('reminder_enabled', { kind: 'training' })
     setPrefs(next)
     saveReminderPrefs(next)
   }

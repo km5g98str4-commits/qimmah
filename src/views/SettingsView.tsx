@@ -14,6 +14,7 @@ import { type Customization, getDefaultCustomization } from '@/lib/customization
 import { exportHistory, importHistory, type HistorySnapshot } from '@/lib/historyStore'
 import { loadPreferences, savePreferences, type AppPreferences } from '@/lib/appPreferences'
 import { resetQimmah } from '@/lib/resetQimmah'
+import { getConsent, setConsent } from '@/lib/analytics'
 import { generatePlan } from '@/lib/planGenerator'
 import { markPendingSync } from '@/lib/syncService'
 import { BUILD_LABEL } from '@/lib/buildInfo'
@@ -154,6 +155,14 @@ export function SettingsView({
     if (!window.confirm(t.settings.switchMachinesConfirm)) return
     regenerateFromProfile()
     window.alert(t.settings.switchMachinesSuccess)
+  }
+
+  // — الخصوصية: موافقة التحليلات المجهولة (opt-out، تُحفظ محليًا فورًا) —
+  const [analyticsOn, setAnalyticsOn] = useState(() => getConsent() === 'granted')
+  const toggleAnalytics = () => {
+    const next = !analyticsOn
+    setAnalyticsOn(next)
+    setConsent(next ? 'granted' : 'denied')
   }
 
   // — الحساب: حالة + خروج —
@@ -321,6 +330,23 @@ export function SettingsView({
             <button type="button" onClick={onOpenTerms} className="btn-ghost px-4 py-2.5 text-sm">
               <Icon name="FileText" className="h-4 w-4" />
               {t.settings.termsLink}
+            </button>
+          </div>
+          {/* تحليلات مجهولة اختيارية (opt-out) — بلا أي بيانات شخصية، تُحفظ محليًا. */}
+          <div className="mt-4 flex items-start justify-between gap-3 border-t border-line pt-4">
+            <div className="min-w-0">
+              <p className="text-sm font-bold text-ink-900">{t.settings.analyticsTitle}</p>
+              <p className="mt-1 text-xs leading-relaxed text-ink-500">{t.settings.analyticsDesc}</p>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={analyticsOn}
+              aria-label={t.settings.analyticsToggle}
+              onClick={toggleAnalytics}
+              className={`relative mt-0.5 h-6 w-11 shrink-0 rounded-full transition-colors ${analyticsOn ? 'bg-primary' : 'bg-line'}`}
+            >
+              <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-all ${analyticsOn ? 'start-0.5' : 'end-0.5'}`} />
             </button>
           </div>
           <p className="mt-3 flex items-start gap-2 rounded-xl border border-gold-400/40 bg-gold-200/40 p-3 text-xs leading-relaxed text-ink-700">
