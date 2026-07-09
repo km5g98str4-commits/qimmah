@@ -15,9 +15,13 @@ interface LoginViewProps {
   initialMode?: Mode
 }
 
-type Mode = 'login' | 'signup'
+type Mode = 'login' | 'signup' | 'forgot'
 
-/** شاشة الحساب — تبديل بين تسجيل الدخول وإنشاء حساب (Supabase). لا وضع ضيف. */
+/**
+ * شاشة الحساب (Sprint UI 1) — دخول / إنشاء حساب / استعادة كلمة المرور (Supabase). لا وضع ضيف.
+ * تجيب: أين أنا؟ (العنوان) · ماذا أفعل؟ (النموذج + إجراء أساسي واحد) · لماذا أثق؟ (نبرة هادئة صادقة).
+ * منطق المصادقة والأحداث لم يتغيّر؛ التعديل بصري + إضافة وضع الاستعادة فقط.
+ */
 export function LoginView({ lang, onSuccess, onBack, initialMode = 'login' }: LoginViewProps) {
   const t = getStrings(lang)
   const d = miscStrings[lang]
@@ -31,12 +35,12 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login' }: Lo
   const [notice, setNotice] = useState<string | null>(null)
 
   const isSignup = mode === 'signup'
+  const isForgot = mode === 'forgot'
   // سياسة كلمة المرور (P0): عند التسجيل يجب أن تجتاز الحدّ الأدنى ٨ + حرف + رقم قبل الإرسال.
   const pw = evaluatePassword(password)
-  const canSubmit = Boolean(email && password && (!isSignup || (name.trim() && pw.valid)))
-
-  const input =
-    'w-full rounded-lg border border-line bg-beige px-3 py-3 text-sm text-ink-900 focus:border-brand-500/50 focus:outline-none'
+  const canSubmit = isForgot
+    ? Boolean(email)
+    : Boolean(email && password && (!isSignup || (name.trim() && pw.valid)))
 
   const switchMode = (next: Mode) => {
     setMode(next)
@@ -49,6 +53,14 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login' }: Lo
     setBusy(true)
     setMsg(null)
     setNotice(null)
+    if (isForgot) {
+      // استعادة كلمة المرور — رسالة عامة دائمًا (لا تكشف وجود الحساب). لا حدث تحليلات جديد.
+      const r = await auth.resetPassword(email)
+      setBusy(false)
+      if (r.ok) setNotice(t.auth.forgotSent)
+      else setMsg(r.error ?? t.auth.forgotFailed)
+      return
+    }
     if (isSignup) {
       track('signup_started', {})
       const r = await auth.signUp(email, password, name)
@@ -72,35 +84,37 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login' }: Lo
     }
   }
 
+  const headerIcon = isForgot ? 'KeyRound' : isSignup ? 'UserPlus' : 'LogIn'
+  const title = isForgot ? t.auth.forgotTitle : isSignup ? t.auth.signupTitle : t.auth.title
+  const subtitle = isForgot ? t.auth.forgotSubtitle : isSignup ? t.auth.signupSubtitle : t.auth.subtitle
+  const primaryLabel = isForgot ? t.auth.sendReset : isSignup ? t.auth.createAccount : t.auth.login
+
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-page px-5 py-12">
-      <div className="pointer-events-none absolute inset-0 bg-radial-brand" />
-      <div className="pointer-events-none absolute inset-0 bg-grid-faint [background-size:44px_44px] opacity-60" />
+      <div className="pointer-events-none absolute inset-0 bg-radial-brand opacity-70" />
+      <div className="pointer-events-none absolute inset-0 bg-grid-faint [background-size:44px_44px] opacity-25" />
 
       <div className="relative w-full max-w-md">
         <button
           type="button"
-          onClick={onBack}
-          className="mb-4 inline-flex items-center gap-1.5 text-xs font-bold text-ink-500 transition-colors hover:text-ink-900"
+          onClick={isForgot ? () => switchMode('login') : onBack}
+          className="mb-4 inline-flex min-h-[44px] items-center gap-1.5 text-xs font-bold text-ink-500 transition-colors hover:text-ink-900"
         >
           <Icon name="ChevronLeft" className="h-4 w-4 rtl:rotate-180" />
           {t.auth.back}
         </button>
 
+        {/* أين أنا؟ */}
         <div className="text-center">
           <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-primary text-white shadow-glow">
-            <Icon name={isSignup ? 'UserPlus' : 'LogIn'} className="h-7 w-7" strokeWidth={2.5} />
+            <Icon name={headerIcon} className="h-7 w-7" strokeWidth={2.25} />
           </span>
-          <h1 className="mt-4 text-2xl font-black text-ink-900">
-            {isSignup ? t.auth.signupTitle : t.auth.title}
-          </h1>
+          <h1 className="heading mt-4 text-2xl">{title}</h1>
         </div>
 
         {auth.configured ? (
           <>
-            <p className="mt-2 text-center text-sm leading-relaxed text-ink-500">
-              {isSignup ? t.auth.signupSubtitle : t.auth.subtitle}
-            </p>
+            <p className="mt-2 text-center text-sm leading-relaxed text-ink-500">{subtitle}</p>
 
             {notice && (
               <p className="mt-4 flex items-start gap-2 rounded-xl border border-line bg-surface p-3 text-xs leading-relaxed text-ink-700">
@@ -109,6 +123,7 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login' }: Lo
               </p>
             )}
 
+            {/* ماذا أفعل؟ */}
             <form
               className="mt-6 space-y-3"
               onSubmit={(e) => {
@@ -122,7 +137,7 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login' }: Lo
                     <Icon name="User" className="h-4 w-4" />
                   </span>
                   <input
-                    className={input}
+                    className="input pe-10"
                     type="text"
                     autoComplete="name"
                     placeholder={t.auth.name}
@@ -137,7 +152,7 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login' }: Lo
                   <Icon name="Mail" className="h-4 w-4" />
                 </span>
                 <input
-                  className={input}
+                  className="input pe-10"
                   type="email"
                   inputMode="email"
                   autoComplete="email"
@@ -147,22 +162,24 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login' }: Lo
                   onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
-              <div className="relative">
-                <span className="pointer-events-none absolute inset-y-0 end-3 grid place-items-center text-ink-400">
-                  <Icon name="Lock" className="h-4 w-4" />
-                </span>
-                <input
-                  className={input}
-                  type="password"
-                  autoComplete={isSignup ? 'new-password' : 'current-password'}
-                  placeholder={t.auth.password}
-                  aria-label={t.auth.password}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  minLength={isSignup ? PASSWORD_MIN_LENGTH : undefined}
-                  aria-describedby={isSignup ? 'pw-requirements' : undefined}
-                />
-              </div>
+              {!isForgot && (
+                <div className="relative">
+                  <span className="pointer-events-none absolute inset-y-0 end-3 grid place-items-center text-ink-400">
+                    <Icon name="Lock" className="h-4 w-4" />
+                  </span>
+                  <input
+                    className="input pe-10"
+                    type="password"
+                    autoComplete={isSignup ? 'new-password' : 'current-password'}
+                    placeholder={t.auth.password}
+                    aria-label={t.auth.password}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    minLength={isSignup ? PASSWORD_MIN_LENGTH : undefined}
+                    aria-describedby={isSignup ? 'pw-requirements' : undefined}
+                  />
+                </div>
+              )}
 
               {/* سياسة كلمة المرور (P0) — مؤشّر قوة + متطلّبات واضحة قبل الإرسال (عند التسجيل فقط). */}
               {isSignup && (
@@ -178,7 +195,7 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login' }: Lo
                               ? 'bg-danger'
                               : pw.score === 2
                                 ? 'bg-gold-500'
-                                : 'bg-emerald-500'
+                                : 'bg-success'
                         }`}
                       />
                     ))}
@@ -189,12 +206,25 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login' }: Lo
                       { ok: pw.hasLetter, ar: 'حرف', en: 'a letter' },
                       { ok: pw.hasNumber, ar: 'رقم', en: 'a number' },
                     ].map((r, i) => (
-                      <li key={i} className={`flex items-center gap-1 ${r.ok ? 'text-emerald-600' : 'text-ink-400'}`}>
+                      <li key={i} className={`flex items-center gap-1 ${r.ok ? 'text-success' : 'text-ink-400'}`}>
                         <Icon name={r.ok ? 'Check' : 'Circle'} className="h-3 w-3 shrink-0" />
                         {lang === 'en' ? r.en : r.ar}
                       </li>
                     ))}
                   </ul>
+                </div>
+              )}
+
+              {/* رابط استعادة كلمة المرور — وضع الدخول فقط */}
+              {mode === 'login' && (
+                <div className="text-end">
+                  <button
+                    type="button"
+                    onClick={() => switchMode('forgot')}
+                    className="text-xs font-bold text-ink-500 transition-colors hover:text-primary-c"
+                  >
+                    {t.auth.forgotLink}
+                  </button>
                 </div>
               )}
 
@@ -205,21 +235,23 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login' }: Lo
                 disabled={busy || !canSubmit}
                 className="btn-primary w-full py-3.5 text-base disabled:opacity-50"
               >
-                {isSignup ? t.auth.createAccount : t.auth.login}
+                {primaryLabel}
               </button>
             </form>
 
-            {/* تبديل بين الدخول وإنشاء حساب */}
-            <p className="mt-4 text-center text-xs text-ink-500">
-              {isSignup ? t.auth.haveAccount : t.auth.noAccount}{' '}
-              <button
-                type="button"
-                onClick={() => switchMode(isSignup ? 'login' : 'signup')}
-                className="font-black text-primary-c transition-colors hover:underline"
-              >
-                {isSignup ? t.auth.switchToLogin : t.auth.switchToSignup}
-              </button>
-            </p>
+            {/* تبديل بين الدخول وإنشاء حساب — يُخفى في وضع الاستعادة (الرجوع بالسهم أعلاه) */}
+            {!isForgot && (
+              <p className="mt-4 text-center text-xs text-ink-500">
+                {isSignup ? t.auth.haveAccount : t.auth.noAccount}{' '}
+                <button
+                  type="button"
+                  onClick={() => switchMode(isSignup ? 'login' : 'signup')}
+                  className="font-black text-primary-c transition-colors hover:underline"
+                >
+                  {isSignup ? t.auth.switchToLogin : t.auth.switchToSignup}
+                </button>
+              </p>
+            )}
           </>
         ) : (
           // — Supabase غير مضبوط —

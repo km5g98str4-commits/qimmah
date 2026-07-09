@@ -52,6 +52,8 @@ export interface AuthContextValue {
   signOut: () => Promise<void>
   /** يعيد إرسال رسالة تأكيد البريد. */
   resendConfirmation: (email: string) => Promise<AuthResult>
+  /** يرسل رابط استعادة كلمة المرور للبريد (Sprint UI 1 — إضافة فقط، لا تغيّر تدفّقات المصادقة القائمة). */
+  resetPassword: (email: string) => Promise<AuthResult>
   /** يعيد جلب المستخدم من الخادم لالتقاط تأكيد البريد بعد الضغط على الرابط. */
   refreshUser: () => Promise<void>
   /**
@@ -194,6 +196,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (error) return { ok: false, error: localizedAuthError(error.message) }
         return { ok: true }
       },
+      async resetPassword(email) {
+        const supabase = await getSupabase()
+        if (!supabase) return { ok: false, error: cloudDisabledError() }
+        // رابط استعادة عبر البريد — دالة Supabase قياسية، لا تكشف وجود الحساب من عدمه.
+        const { error } = await supabase.auth.resetPasswordForEmail(email.trim())
+        if (error) return { ok: false, error: localizedAuthError(error.message) }
+        return { ok: true }
+      },
       async refreshUser() {
         const supabase = await getSupabase()
         if (!supabase) return
@@ -271,6 +281,9 @@ export function useAuth(): AuthContextValue {
     },
     async signOut() {},
     async resendConfirmation() {
+      return { ok: false, error: cloudDisabledError() }
+    },
+    async resetPassword() {
       return { ok: false, error: cloudDisabledError() }
     },
     async refreshUser() {},

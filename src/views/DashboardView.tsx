@@ -113,7 +113,7 @@ function GreetingCard({ lang, onNavigate }: { lang: Lang; onNavigate: (route: Ap
           <Icon name="Sparkles" className="h-3.5 w-3.5" />
           {d.brand}
         </span>
-        <h1 className="mt-2 text-2xl font-black text-ink-900">
+        <h1 className="heading mt-2 text-2xl">
           {name ? `${d.greetNamedPrefix}${name}${d.greetNamedSuffix}` : d.greetGuest}
         </h1>
         <p className="mt-1.5 text-sm leading-relaxed text-ink-600">{lang === 'en' ? phrase.en : phrase.ar}</p>

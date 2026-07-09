@@ -22,6 +22,7 @@ export interface ShellStrings {
     chooseLang: string
     note: string
     positioning: string
+    trust: string
     login: string
     continueGuest: string
     guestNote: string
@@ -37,6 +38,13 @@ export interface ShellStrings {
     login: string
     createAccount: string
     logout: string
+    // استعادة كلمة المرور (Sprint UI 1)
+    forgotLink: string
+    forgotTitle: string
+    forgotSubtitle: string
+    sendReset: string
+    forgotSent: string
+    forgotFailed: string
     continueGuest: string
     noAccount: string
     haveAccount: string
@@ -422,7 +430,7 @@ const ar: ShellStrings = {
   badge: { guest: 'ضيف', account: 'حساب' },
   start: {
     welcome: 'هلا فيك في قِمّة',
-    headline: 'كل رحلتك في كمال الأجسام في نظام واحد',
+    headline: 'كل قمة تبدأ بخطوة.',
     intro: 'تمارينك، أوزانك، التضخيم التدريجي، تغذيتك، وقياساتك — كلها في مكان واحد.',
     startSetup: 'ابدأ إعداد صفحتي',
     buildPlan: 'ابنِ خطتي الآن',
@@ -431,7 +439,8 @@ const ar: ShellStrings = {
     importPrevious: 'استورد نسخة سابقة',
     chooseLang: 'اختر اللغة',
     note: 'بياناتك محفوظة على جهازك. تقدر تعدّل كل شيء لاحقًا.',
-    positioning: 'نظام كمال أجسام للرياضي الفرد: تابع أوزانك وتكراراتك وتضخّمك التدريجي يومًا بيوم.',
+    positioning: 'مرشدك الهادئ نحو صحة أفضل.',
+    trust: 'بلا إعلانات، وبلا مبالغات.',
     login: 'تسجيل الدخول',
     continueGuest: 'المتابعة كضيف',
     guestNote: 'بيانات الضيف محفوظة على هذا الجهاز فقط.',
@@ -447,6 +456,12 @@ const ar: ShellStrings = {
     login: 'تسجيل الدخول',
     createAccount: 'إنشاء حساب جديد',
     logout: 'تسجيل الخروج',
+    forgotLink: 'نسيت كلمة المرور؟',
+    forgotTitle: 'استعادة كلمة المرور',
+    forgotSubtitle: 'أدخل بريدك، ونرسل لك رابطًا لإعادة تعيين كلمة المرور.',
+    sendReset: 'إرسال رابط الاستعادة',
+    forgotSent: 'إن كان البريد مسجّلًا لدينا، وصلك رابط الاستعادة. تحقّق من بريدك.',
+    forgotFailed: 'تعذّر إرسال الرابط الآن. جرّب لاحقًا.',
     continueGuest: 'المتابعة كضيف',
     noAccount: 'ما عندك حساب؟',
     haveAccount: 'عندك حساب؟',
@@ -844,7 +859,7 @@ const en: ShellStrings = {
   badge: { guest: 'Guest', account: 'Account' },
   start: {
     welcome: 'Welcome to Qimmah',
-    headline: 'Your entire bodybuilding journey in one system',
+    headline: 'Every summit begins with a step.',
     intro: 'Your workouts, weights, progressive overload, nutrition, and measurements — all in one place.',
     startSetup: 'Set up my page',
     buildPlan: 'Build my plan now',
@@ -853,7 +868,8 @@ const en: ShellStrings = {
     importPrevious: 'Import a previous copy',
     chooseLang: 'Choose language',
     note: 'Your data is saved on your device. You can edit anything later.',
-    positioning: 'A bodybuilding OS for the individual athlete: track your weights, reps, and progressive overload day by day.',
+    positioning: 'Your calm guide to better health.',
+    trust: 'No ads. No hype.',
     login: 'Log in',
     continueGuest: 'Continue as guest',
     guestNote: 'Guest data is stored on this device only.',
@@ -869,6 +885,12 @@ const en: ShellStrings = {
     login: 'Log in',
     createAccount: 'Create account',
     logout: 'Log out',
+    forgotLink: 'Forgot your password?',
+    forgotTitle: 'Reset your password',
+    forgotSubtitle: "Enter your email and we'll send you a link to reset your password.",
+    sendReset: 'Send reset link',
+    forgotSent: "If that email is registered, a reset link is on its way. Check your inbox.",
+    forgotFailed: "Couldn't send the link right now. Try again later.",
     continueGuest: 'Continue as guest',
     noAccount: 'No account?',
     haveAccount: 'Have an account?',

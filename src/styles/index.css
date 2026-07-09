@@ -130,6 +130,20 @@
     @apply btn border border-line bg-surface text-ink-900 hover:bg-beige;
   }
 
+  /* حقل إدخال قياسي (Sprint UI 1) — يوحّد المدخلات المتناثرة سابقًا في عدة ملفات.
+     44px حدّ أدنى للمس، سطح beige، حدّ line، وتركيز هادئ بلون العلامة. */
+  .input {
+    @apply w-full min-h-[44px] rounded-xl border border-line bg-beige px-4 py-3 text-sm text-ink-900 placeholder:text-ink-400 transition-colors focus:outline-none;
+  }
+  .input:focus {
+    border-color: color-mix(in srgb, var(--c-primary) 45%, transparent);
+  }
+  /* حالة الخطأ — حدّ خطر واضح دون صراخ. */
+  .input-invalid,
+  .input-invalid:focus {
+    @apply border-danger;
+  }
+
   /* أقسام مدمجة بمظهر تطبيق (بدل المسافات التسويقية الكبيرة) */
   .section {
     @apply py-6 sm:py-8;
