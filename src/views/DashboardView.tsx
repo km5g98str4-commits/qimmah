@@ -44,15 +44,19 @@ export function DashboardView({ lang, onNavigate }: DashboardViewProps) {
 
   // الأساسيات (تمرين اليوم + سعرات/ماء) دائمًا ظاهرة، مرتّبة حسب المحرّك.
   const essentialLeads = signals.leadOrder.filter((c) => c === 'workout' || c === 'nutrition')
-  // الوضع المتقدّم يضيف بطاقات الإشارات الكاملة (الخطوة التالية/التقدّم).
-  const leads = isSimple ? essentialLeads : signals.leadOrder
+  // «الخطوة التالية» رُفِعت لأعلى الشاشة كبطاقة رئيسية دائمة (لكل المستخدمين)، فتُستبعد من
+  // قائمة الصدارة هنا حتى لا تتكرّر. الوضع المتقدّم يبقي بطاقة التقدّم.
+  const leads = (isSimple ? essentialLeads : signals.leadOrder).filter((c) => c !== 'nextAction')
 
   return (
     <div className="space-y-4 px-4 py-4">
-      {/* ترحيب شخصي + عبارة اليوم */}
+      {/* الترويسة — «اليوم» + ترحيب هادئ + إشارة زخم (أين أنا؟ / لماذا أثق؟) */}
       <GreetingCard lang={lang} onNavigate={onNavigate} />
 
-      {/* تسجيل سريع — أبرز إجراءين على بُعد نقرة واحدة */}
+      {/* الخطوة التالية — أبرز بطاقة: الإجراء الصحي التالي بوضوح، بإجراء أساسي واحد (ماذا أفعل الآن؟) */}
+      <NextActionCard lang={lang} onNavigate={onNavigate} />
+
+      {/* تسجيل سريع — إجراءات ثانوية هادئة على بُعد نقرة (إمالة أخفض من الخطوة التالية). */}
       <QuickEntry lang={lang} onNavigate={onNavigate} />
 
       {/* «لوحتي» (P12-C) — مدخل ملخّص أرقام الأسبوع (تمرين/تغذية/وزن) */}
@@ -101,6 +105,7 @@ export function DashboardView({ lang, onNavigate }: DashboardViewProps) {
 function GreetingCard({ lang, onNavigate }: { lang: Lang; onNavigate: (route: AppRoute) => void }) {
   const { customization } = useCustomization()
   const d = dashboardStrings[lang]
+  const t = getStrings(lang)
   const name = customization.identity.userName?.trim()
   // عبارة عشوائية تُحسب مرة عند دخول/تركيب الرئيسية (تدور مع كل جلسة جديدة).
   const phrase = useMemo(() => getRandomPhrase(), [])
@@ -109,14 +114,15 @@ function GreetingCard({ lang, onNavigate }: { lang: Lang; onNavigate: (route: Ap
     <section className="card relative overflow-hidden p-5">
       <div className="pointer-events-none absolute inset-0 bg-radial-brand opacity-60" />
       <div className="relative">
+        {/* هوية الشاشة: «اليوم» — النموذج الذهني ليس «لوحة تحكّم» بل يومك الحالي. */}
         <span className="eyebrow">
-          <Icon name="Sparkles" className="h-3.5 w-3.5" />
-          {d.brand}
+          <Icon name="CalendarDays" className="h-3.5 w-3.5" />
+          {t.tabs.today}
         </span>
         <h1 className="heading mt-2 text-2xl">
           {name ? `${d.greetNamedPrefix}${name}${d.greetNamedSuffix}` : d.greetGuest}
         </h1>
-        <p className="mt-1.5 text-sm leading-relaxed text-ink-600">{lang === 'en' ? phrase.en : phrase.ar}</p>
+        <p className="mt-1.5 text-sm leading-relaxed text-ink-700">{lang === 'en' ? phrase.en : phrase.ar}</p>
 
         {/* إشارة الزخم — هادئة وبارزة، لكل المستخدمين (تعيد استخدام حساب السلسلة القائم). */}
         <MomentumSignal lang={lang} />
@@ -164,7 +170,7 @@ function MomentumSignal({ lang }: { lang: Lang }) {
           {streak} {d.momentumDayStreak}
         </span>
       )}
-      <span className="inline-flex items-center gap-1 text-ink-600">
+      <span className="inline-flex items-center gap-1 text-ink-700">
         <Icon name="CalendarDays" className="h-3.5 w-3.5 text-ink-400" />
         {week.weekly.thisWeekCount}/{week.weekly.daysPerWeek} {d.thisWeek}
       </span>
@@ -191,7 +197,7 @@ function QuickEntry({ lang, onNavigate }: { lang: Lang; onNavigate: (route: AppR
         className="card flex flex-col items-start gap-2 p-4 text-start active:scale-[0.99]"
         aria-label={d.logMealAria}
       >
-        <span className="grid h-11 w-11 place-items-center rounded-2xl bg-primary text-white shadow-glow">
+        <span className="grid h-11 w-11 place-items-center rounded-2xl bg-primary-soft text-primary-c">
           <Icon name="Plus" className="h-6 w-6" />
         </span>
         <span className="text-sm font-black text-ink-900">{d.logFood}</span>
@@ -204,7 +210,7 @@ function QuickEntry({ lang, onNavigate }: { lang: Lang; onNavigate: (route: AppR
         className="card flex flex-col items-start gap-2 p-4 text-start active:scale-[0.99]"
         aria-label={d.startTodayWorkoutAria}
       >
-        <span className="grid h-11 w-11 place-items-center rounded-2xl bg-primary text-white shadow-glow">
+        <span className="grid h-11 w-11 place-items-center rounded-2xl bg-primary-soft text-primary-c">
           <Icon name="Dumbbell" className="h-6 w-6" />
         </span>
         <span className="text-sm font-black text-ink-900">{d.startWorkout}</span>
@@ -244,7 +250,7 @@ function ModeToggle({ lang, isSimple, onToggle }: { lang: Lang; isSimple: boolea
     <button
       type="button"
       onClick={onToggle}
-      className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-line bg-page py-3 text-sm font-bold text-ink-600 transition-colors hover:border-primary-soft hover:text-primary-c"
+      className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-line bg-page py-3 text-sm font-bold text-ink-700 transition-colors hover:border-primary-soft hover:text-primary-c"
       aria-expanded={!isSimple}
     >
       <Icon name={isSimple ? 'ChevronDown' : 'SlidersHorizontal'} className="h-4 w-4" />
@@ -343,7 +349,7 @@ function WorkoutLead({ lang, onNavigate }: { lang: Lang; onNavigate: (route: App
             </p>
           )}
         </div>
-        <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-primary text-white shadow-glow">
+        <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-primary-soft text-primary-c">
           <Icon name="Flame" className="h-6 w-6" />
         </span>
       </div>
@@ -366,17 +372,22 @@ function NextActionCard({ lang, onNavigate }: { lang: Lang; onNavigate: (route: 
   const target: AppRoute = hasWorkoutToday ? 'workout' : 'nutrition'
 
   return (
-    <section className="card p-5">
-      <span className="eyebrow">
-        <Icon name="Compass" className="h-3.5 w-3.5" />
-        {d.nextStep}
-      </span>
-      <p className="mt-2 text-base font-black text-ink-900">{title}</p>
-      <p className="mt-1 text-xs leading-relaxed text-ink-500">{hint}</p>
-      <button type="button" onClick={() => onNavigate(target)} className="btn-primary mt-3 w-full justify-center py-3 text-sm">
-        <Icon name={hasWorkoutToday ? 'Dumbbell' : 'Salad'} className="h-4 w-4" />
-        {cta}
-      </button>
+    <section className="card relative overflow-hidden p-5">
+      {/* أجواء بؤرية هادئة تجعلها البطاقة الرئيسية دون ضجيج. */}
+      <div className="pointer-events-none absolute inset-0 bg-radial-brand opacity-40" />
+      <div className="relative">
+        <span className="eyebrow">
+          <Icon name="Compass" className="h-3.5 w-3.5" />
+          {d.nextStep}
+        </span>
+        <p className="mt-2 text-lg font-black text-ink-900">{title}</p>
+        <p className="mt-1 text-xs leading-relaxed text-ink-500">{hint}</p>
+        {/* الإجراء الأساسي الوحيد بلون العلامة على هذه الشاشة. */}
+        <button type="button" onClick={() => onNavigate(target)} className="btn-primary mt-3 w-full justify-center py-3 text-sm">
+          <Icon name={hasWorkoutToday ? 'Dumbbell' : 'Salad'} className="h-4 w-4" />
+          {cta}
+        </button>
+      </div>
     </section>
   )
 }

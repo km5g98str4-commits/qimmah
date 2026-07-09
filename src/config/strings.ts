@@ -7,7 +7,7 @@ export interface ShellStrings {
   brand: string
   tagline: string
   nav: { home: string; setup: string; settings: string }
-  tabs: { home: string; workout: string; nutrition: string; progress: string; profile: string }
+  tabs: { home: string; today: string; workout: string; nutrition: string; progress: string; profile: string }
   lang: { ar: string; en: string; label: string }
   badge: { guest: string; account: string }
   start: {
@@ -425,7 +425,7 @@ const ar: ShellStrings = {
   brand: 'قِمّة',
   tagline: 'مرشدك الهادئ نحو صحة أفضل',
   nav: { home: 'الرئيسية', setup: 'الإعداد', settings: 'الإعدادات' },
-  tabs: { home: 'الرئيسية', workout: 'تمرين', nutrition: 'تغذية', progress: 'تقدّم', profile: 'حسابي' },
+  tabs: { home: 'الرئيسية', today: 'اليوم', workout: 'تمرين', nutrition: 'تغذية', progress: 'تقدّم', profile: 'حسابي' },
   lang: { ar: 'العربية', en: 'English', label: 'اللغة' },
   badge: { guest: 'ضيف', account: 'حساب' },
   start: {
@@ -854,7 +854,7 @@ const en: ShellStrings = {
   brand: 'Qimmah',
   tagline: 'Your calm guide to better health',
   nav: { home: 'Home', setup: 'Setup', settings: 'Settings' },
-  tabs: { home: 'Home', workout: 'Workout', nutrition: 'Nutrition', progress: 'Progress', profile: 'Profile' },
+  tabs: { home: 'Home', today: 'Today', workout: 'Workout', nutrition: 'Nutrition', progress: 'Progress', profile: 'Profile' },
   lang: { ar: 'العربية', en: 'English', label: 'Language' },
   badge: { guest: 'Guest', account: 'Account' },
   start: {
