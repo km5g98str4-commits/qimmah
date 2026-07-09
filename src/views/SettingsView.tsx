@@ -186,7 +186,7 @@ export function SettingsView({
               <span
                 className={
                   'inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-black ' +
-                  (auth.user ? 'bg-primary-soft text-primary-c' : 'border border-line bg-surface text-ink-600')
+                  (auth.user ? 'bg-primary-soft text-primary-c' : 'border border-line bg-surface text-ink-700')
                 }
               >
                 <Icon name={auth.user ? 'CheckCircle2' : 'User'} className="h-3.5 w-3.5" />
@@ -231,7 +231,7 @@ export function SettingsView({
                     <Icon name="AlertTriangle" className="h-4 w-4" />
                     {t.auth.deleteConfirmTitle}
                   </p>
-                  <p className="mt-2 text-xs leading-relaxed text-ink-600">{t.auth.deleteConfirmBody}</p>
+                  <p className="mt-2 text-xs leading-relaxed text-ink-700">{t.auth.deleteConfirmBody}</p>
                   <label htmlFor="delete-confirm" className="mt-3 block text-[11px] font-bold text-ink-500">
                     {t.auth.deleteConfirmHint}
                   </label>

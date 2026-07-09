@@ -117,7 +117,7 @@ export function StepCounterCard({ className, lang }: { className?: string; lang:
               type="button"
               onClick={commitGoal}
               aria-label={dict.saveGoalAria}
-              className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-white"
+              className="grid h-11 w-11 place-items-center rounded-lg bg-primary text-white"
             >
               <Icon name="Check" className="h-4 w-4" />
             </button>

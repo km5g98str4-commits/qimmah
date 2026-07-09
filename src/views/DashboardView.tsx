@@ -95,9 +95,36 @@ export function DashboardView({ lang, onNavigate }: DashboardViewProps) {
         </>
       )}
 
+      {/* «تطبيق قِمّة قريبًا» — بطاقة إعلامية هادئة أسفل كل مهام اليوم (ويب فقط):
+          لا تنافس «الخطوة التالية»، بلا CTA ولا استعجال زائف (لا وجهة انتظار حقيقية بعد). */}
+      <AppComingSoonCard lang={lang} />
+
       {/* مبدّل الوضع البسيط/المتقدّم */}
       <ModeToggle lang={lang} isSimple={isSimple} onToggle={toggle} />
     </div>
+  )
+}
+
+/**
+ * بطاقة «تطبيق قِمّة قريبًا» — إعلام هادئ بقدوم تطبيق آيفون. إعلامية بحتة:
+ * بلا زرّ (لا قائمة انتظار حقيقية بعد)، بلا عدّاد، بلا أرقام مزيّفة، وبأدنى إمالة بصرية
+ * كي لا تنافس الإجراء الأساسي الوحيد في الشاشة (بطاقة الخطوة التالية).
+ */
+function AppComingSoonCard({ lang }: { lang: Lang }) {
+  const d = dashboardStrings[lang]
+  return (
+    <section className="rounded-2xl border border-line bg-surface/60 p-4">
+      <div className="flex items-start gap-3">
+        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-line bg-page text-ink-500">
+          <Icon name="Smartphone" className="h-5 w-5" />
+        </span>
+        <div className="min-w-0">
+          <p className="text-sm font-bold text-ink-900">{d.appSoonTitle}</p>
+          <p className="mt-1 text-xs leading-relaxed text-ink-500">{d.appSoonBody}</p>
+          <p className="mt-1.5 text-[11px] font-medium text-ink-500">{d.appSoonTrust}</p>
+        </div>
+      </div>
+    </section>
   )
 }
 

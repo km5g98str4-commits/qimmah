@@ -59,7 +59,7 @@ export function DailySummary({ lang }: DailySummaryProps) {
           <CalCell label={tn.eaten} value={eatenCal} />
           <CalCell label={tn.remaining} value={remainingCal} highlight />
         </div>
-        <ProgressBar current={eatenCal} target={targetCalories || 1} color="bg-orange-500" className="mt-3 h-2" />
+        <ProgressBar current={eatenCal} target={targetCalories || 1} color="bg-primary" className="mt-3 h-2" />
 
         {/* الماكروز: مأكول / هدف — حيّ */}
         <div className="mt-4 grid grid-cols-3 gap-2.5">

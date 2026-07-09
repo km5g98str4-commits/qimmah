@@ -80,15 +80,15 @@ export function NutritionView({ lang }: NutritionViewProps) {
             <Op symbol={d.opEquals} />
             <EqCell label={t.remaining} value={remaining} highlight />
           </div>
-          <ProgressBar current={eaten} target={targetCalories || 1} color="bg-orange-500" className="mt-4" />
+          <ProgressBar current={eaten} target={targetCalories || 1} color="bg-primary" className="mt-4" />
         </div>
 
         {/* ملخّص الماكروز + الماء — حلقات واضحة */}
         <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <MacroCard label={t.protein} eaten={round(totals.protein)} target={targetProtein} unit={d.gramsUnit} color="#22c55e" />
+          <MacroCard label={t.protein} eaten={round(totals.protein)} target={targetProtein} unit={d.gramsUnit} color="#3E9E6B" />
           <MacroCard label={t.carbs} eaten={round(totals.carbs)} target={targetCarbs} unit={d.gramsUnit} color="#0ea5e9" />
           <MacroCard label={t.fat} eaten={round(totals.fat)} target={targetFat} unit={d.gramsUnit} color="#e0941f" />
-          <MacroCard label={t.water} eaten={state.waterMl} target={targetWaterMl} unit={d.mlUnit} color="#F26A21" />
+          <MacroCard label={t.water} eaten={state.waterMl} target={targetWaterMl} unit={d.mlUnit} color="var(--c-primary)" />
         </div>
 
         {/* حالة فارغة — تحفيز لتسجيل أول وجبة */}
@@ -136,7 +136,7 @@ export function NutritionView({ lang }: NutritionViewProps) {
 }
 
 function Op({ symbol }: { symbol: string }) {
-  return <span className="pb-5 text-base font-black text-ink-300">{symbol}</span>
+  return <span className="pb-5 text-base font-black text-ink-400">{symbol}</span>
 }
 
 function EqCell({ label, value, highlight }: { label: string; value: number; highlight?: boolean }) {

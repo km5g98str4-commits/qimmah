@@ -2,6 +2,7 @@ import { lazy, Suspense, useId, useMemo, useState } from 'react'
 import { Icon } from '@/components/Icon'
 import { ProgressBar } from '@/components/ProgressBar'
 import { searchFood, foodCategoryEn, type FoodItem, type FoodSize } from '@/data/foodItems'
+import { loggedServingsText, quantityLine, servingSummary } from '@/lib/servingDisplay'
 import { useNutritionToday, type MealSlot } from '@/lib/nutritionTracking'
 import { NUM_LIMITS, parseSafeNumber, sanitizeNumericInput } from '@/lib/validation'
 import { getStrings } from '@/config/strings'
@@ -151,7 +152,7 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
                   <span className="font-bold text-ink-900">{eatenCal}</span> / {targetCalories}
                 </span>
               </div>
-              <ProgressBar current={eatenCal} target={targetCalories || 1} color="bg-orange-500" className="mt-2" />
+              <ProgressBar current={eatenCal} target={targetCalories || 1} color="bg-primary" className="mt-2" />
               <p className="mt-1 text-[11px] text-ink-400">{t.remainingCalories}: <span className="font-bold text-ink-700">{remCal}</span></p>
             </div>
             <div>
@@ -241,10 +242,11 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
                               </span>
                             )}
                           </span>
-                          {/* عزل اتجاه: تسمية الحصة عربية دائمًا وقد تُعرض داخل واجهة إنجليزية (LTR). */}
-                        <span className="block text-[11px] text-ink-400"><bdi>{f.servingLabelAr}</bdi> · {lang === 'en' ? foodCategoryEn[f.category] : f.category}</span>
+                          {/* عزل اتجاه: تسمية الحصة عربية دائمًا وقد تُعرض داخل واجهة إنجليزية (LTR).
+                              الكمية إنسانية: «100 جم · كوب» بدل تسمية تقنية — الجرام يبقى مصدر الحساب. */}
+                        <span className="block text-[11px] text-ink-400"><bdi>{servingSummary(f, lang, t.gramsUnit) ?? f.servingLabelAr}</bdi> · {lang === 'en' ? foodCategoryEn[f.category] : f.category}</span>
                         </span>
-                        <span className="shrink-0 text-[11px] font-bold text-orange-300">{f.calories} · {f.protein}{t.gramsUnit}</span>
+                        <span className="shrink-0 text-[11px] font-bold text-primary-c">{f.calories} · {f.protein}{t.gramsUnit}</span>
                       </button>
                     </li>
                   ))}
@@ -267,7 +269,7 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
                             type="button"
                             onClick={() => pickSize(s)}
                             className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-colors ${
-                              sizeId === s.id ? 'bg-primary text-white' : 'bg-beige text-ink-600 hover:text-ink-900'
+                              sizeId === s.id ? 'bg-primary text-white' : 'bg-beige text-ink-700 hover:text-ink-900'
                             }`}
                           >
                             {lang === 'en' ? s.labelEn : s.labelAr}
@@ -280,8 +282,8 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
 
                   {/* عرض واضح: لكل حصة + لكل 100غ */}
                   <div className="mt-2 flex flex-wrap gap-x-4 gap-y-0.5 text-[11px] text-ink-400">
-                    <span>{t.perPortion} (<bdi>{baseServingLabel}</bdi>): <span className="font-bold text-ink-600">{baseCal} {t.calories} · {baseProt}{t.gramsUnit} {t.protein}</span></span>
-                    <span>{t.per100g}: <span className="font-bold text-ink-600">{round(baseCal * 100 / baseGrams)} {t.calories} · {round(baseProt * 100 / baseGrams)}{t.gramsUnit} {t.protein}</span></span>
+                    <span>{t.perPortion} (<bdi>{baseServingLabel}</bdi>): <span className="font-bold text-ink-700">{baseCal} {t.calories} · {baseProt}{t.gramsUnit} {t.protein}</span></span>
+                    <span>{t.per100g}: <span className="font-bold text-ink-700">{round(baseCal * 100 / baseGrams)} {t.calories} · {round(baseProt * 100 / baseGrams)}{t.gramsUnit} {t.protein}</span></span>
                   </div>
                   <div className="mt-3 flex items-center gap-2">
                     <label htmlFor="qml-grams" className="text-xs text-ink-500">{t.gramsAmount}</label>
@@ -298,6 +300,10 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
                     />
                     <span className="text-xs text-ink-400">{t.gramsUnit}</span>
                   </div>
+                  {/* سطر الكمية الإنساني — «150 جم · 1.5 كوب»: عرض مساعد فقط، الحساب بالجرام. */}
+                  <p className="mt-1.5 text-[11px] text-ink-400">
+                    <bdi>{quantityLine(gramsNum, { servingLabelAr: baseServingLabel, servingGrams: baseGrams }, lang, t.gramsUnit)}</bdi>
+                  </p>
                   <div className="mt-3 flex flex-wrap gap-3 text-xs text-ink-500">
                     <Stat label={t.calories} value={round(baseCal * factor)} />
                     <Stat label={t.protein} value={`${round(baseProt * factor)}${t.gramsUnit}`} />
@@ -354,7 +360,11 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
                     <span className="min-w-0 flex-1">
                       {/* عزل اتجاه: تسمية السجل تحمل اسم الطعام (عربي/مدخل من المستخدم) وقد تُعرض في الاتجاه المعاكس. */}
                       <span className="block truncate text-sm text-ink-900"><bdi>{e.label}</bdi></span>
-                      <span className="block text-[11px] text-ink-400">{e.calories} {d.caloriesUnit} · {e.protein}{t.gramsUnit} {d.caloriesDotProteinG}</span>
+                      {/* عدّ الحصص المخزَّن مع الإدخال (عرض مساعد) — يظهر فقط عندما يختلف عن حصة واحدة. */}
+                      <span className="block text-[11px] text-ink-400">
+                        {e.calories} {d.caloriesUnit} · {e.protein}{t.gramsUnit} {d.caloriesDotProteinG}
+                        {loggedServingsText(e.servings, lang) ? <> · {loggedServingsText(e.servings, lang)}</> : null}
+                      </span>
                     </span>
                     <button
                       type="button"

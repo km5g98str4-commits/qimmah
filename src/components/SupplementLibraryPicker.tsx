@@ -45,7 +45,7 @@ export function SupplementLibraryPicker({ lang, onAdd, onClose }: Props) {
       <div className="flex max-h-[90vh] w-full max-w-lg flex-col rounded-t-3xl bg-surface shadow-card sm:rounded-3xl">
         <div className="flex items-center justify-between border-b border-line p-4">
           <h3 className="text-base font-bold text-ink-900">{d.supplementLibraryTitle}</h3>
-          <button type="button" onClick={onClose} aria-label={d.close} className="grid h-8 w-8 place-items-center rounded-lg text-ink-500 hover:bg-beige"><Icon name="X" className="h-5 w-5" /></button>
+          <button type="button" onClick={onClose} aria-label={d.close} className="grid h-11 w-11 place-items-center rounded-lg text-ink-500 hover:bg-beige"><Icon name="X" className="h-5 w-5" /></button>
         </div>
         <div className="space-y-2 border-b border-line p-4">
           <div className="flex items-center gap-2 rounded-xl border border-line bg-page px-3">

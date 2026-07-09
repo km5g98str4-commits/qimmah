@@ -77,7 +77,7 @@ export function CalcExplainerView({ lang, onBack }: CalcExplainerViewProps) {
             </div>
           </div>
 
-          <p className="mt-6 rounded-2xl border border-line bg-surface p-5 text-sm leading-relaxed text-ink-600">
+          <p className="mt-6 rounded-2xl border border-line bg-surface p-5 text-sm leading-relaxed text-ink-700">
             {d.intro}
           </p>
 
@@ -90,7 +90,7 @@ export function CalcExplainerView({ lang, onBack }: CalcExplainerViewProps) {
             <div className="mt-6 space-y-4">
               {/* 1) BMR */}
               <Card icon="Flame" title={d.bmrTitle} basis={d.bmrBasis}>
-                <p className="text-sm leading-relaxed text-ink-600">{d.bmrDesc}</p>
+                <p className="text-sm leading-relaxed text-ink-700">{d.bmrDesc}</p>
                 <Formula>{`BMR = 10×${w} + 6.25×${h} − 5×${age} ${sexSign} ${sexAbs}`}</Formula>
                 <p className="text-[11px] text-ink-400" dir="ltr">
                   {`(${sexSign}${sexAbs} = ${sexLabel})`}
@@ -100,7 +100,7 @@ export function CalcExplainerView({ lang, onBack }: CalcExplainerViewProps) {
 
               {/* 2) TDEE */}
               <Card icon="Activity" title={d.tdeeTitle}>
-                <p className="text-sm leading-relaxed text-ink-600">{d.tdeeDesc}</p>
+                <p className="text-sm leading-relaxed text-ink-700">{d.tdeeDesc}</p>
                 <div className="overflow-hidden rounded-xl border border-line">
                   <table className="w-full text-sm">
                     <thead className="bg-beige text-ink-500">
@@ -135,8 +135,8 @@ export function CalcExplainerView({ lang, onBack }: CalcExplainerViewProps) {
 
               {/* 3) السعرات المستهدفة حسب الهدف */}
               <Card icon="Target" title={d.caloriesTitle}>
-                <p className="text-sm leading-relaxed text-ink-600">{d.caloriesDesc}</p>
-                <ul className="space-y-1.5 text-sm text-ink-600">
+                <p className="text-sm leading-relaxed text-ink-700">{d.caloriesDesc}</p>
+                <ul className="space-y-1.5 text-sm text-ink-700">
                   <GoalLine active={p.goalType === 'cutting'} text={d.goalCut} />
                   <GoalLine active={p.goalType === 'maintenance'} text={d.goalMaintain} />
                   <GoalLine active={p.goalType === 'bulking'} text={d.goalBulk} />
@@ -151,7 +151,7 @@ export function CalcExplainerView({ lang, onBack }: CalcExplainerViewProps) {
 
               {/* 4) البروتين */}
               <Card icon="Salad" title={d.proteinTitle}>
-                <p className="text-sm leading-relaxed text-ink-600">{d.proteinDesc}</p>
+                <p className="text-sm leading-relaxed text-ink-700">{d.proteinDesc}</p>
                 <p className="text-sm leading-relaxed text-ink-500">{d.proteinRationale}</p>
                 <Formula>{`${proteinPerKg} × ${w} ${d.unitKg} = ${t.proteinGrams} ${d.unitGram}`}</Formula>
                 <Result label={d.proteinResult} value={`${t.proteinGrams}`} unit={d.unitGramPerDay} />
@@ -159,9 +159,9 @@ export function CalcExplainerView({ lang, onBack }: CalcExplainerViewProps) {
 
               {/* 5) الدهون والكربوهيدرات */}
               <Card icon="Percent" title={d.macrosTitle}>
-                <p className="text-sm leading-relaxed text-ink-600">{d.fatDesc}</p>
+                <p className="text-sm leading-relaxed text-ink-700">{d.fatDesc}</p>
                 <Formula>{`(${t.targetCalories} × ${fatPct}%) ÷ 9 = ${t.fatGrams} ${d.unitGram}`}</Formula>
-                <p className="text-sm leading-relaxed text-ink-600">{d.carbsDesc}</p>
+                <p className="text-sm leading-relaxed text-ink-700">{d.carbsDesc}</p>
                 <Formula>{`(${t.targetCalories} − ${t.proteinGrams}×4 − ${t.fatGrams}×9) ÷ 4 = ${t.carbsGrams} ${d.unitGram}`}</Formula>
                 <div className="grid grid-cols-2 gap-3">
                   <Result label={d.fatLabel} value={`${t.fatGrams}`} unit={d.unitGramPerDay} />
@@ -171,7 +171,7 @@ export function CalcExplainerView({ lang, onBack }: CalcExplainerViewProps) {
 
               {/* 6) BMI */}
               <Card icon="Scale" title={d.bmiTitle}>
-                <p className="text-sm leading-relaxed text-ink-600">{d.bmiDesc}</p>
+                <p className="text-sm leading-relaxed text-ink-700">{d.bmiDesc}</p>
                 <Formula>{`${w} ÷ (${(h / 100).toFixed(2)})² = ${t.bmi}`}</Formula>
                 <Result label={d.bmiResult} value={`${t.bmi}`} unit={t.bmiLabel} />
                 <p className="flex items-start gap-2 rounded-xl border border-line bg-beige p-3 text-xs leading-relaxed text-ink-500">
@@ -250,7 +250,7 @@ function Result({
         highlight ? 'bg-primary text-white' : 'border border-line bg-surface'
       }`}
     >
-      <span className={`text-sm font-bold ${highlight ? 'text-white/90' : 'text-ink-600'}`}>{label}</span>
+      <span className={`text-sm font-bold ${highlight ? 'text-white/90' : 'text-ink-700'}`}>{label}</span>
       <span className={`text-lg font-black ${highlight ? 'text-white' : 'text-ink-900'}`}>
         {value}
         {unit && (
@@ -266,7 +266,7 @@ function GoalLine({ active, text }: { active: boolean; text: string }) {
     <li className={`flex items-start gap-2 ${active ? 'font-bold text-ink-900' : ''}`}>
       <Icon
         name={active ? 'CheckCircle2' : 'Circle'}
-        className={`mt-0.5 h-4 w-4 shrink-0 ${active ? 'text-primary-c' : 'text-ink-300'}`}
+        className={`mt-0.5 h-4 w-4 shrink-0 ${active ? 'text-primary-c' : 'text-ink-400'}`}
       />
       <span>{text}</span>
     </li>

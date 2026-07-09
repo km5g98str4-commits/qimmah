@@ -24,7 +24,7 @@ export function AppNav({ current, lang, badge, onNavigate }: AppNavProps) {
   const badgeClass =
     badge === 'account'
       ? 'bg-primary-soft text-primary-c'
-      : 'border border-line bg-surface text-ink-600'
+      : 'border border-line bg-surface text-ink-700'
 
   const tabs: { id: AppView; label: string; icon: string }[] = [
     { id: 'dashboard', label: t.nav.home, icon: 'Flame' },

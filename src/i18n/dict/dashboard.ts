@@ -46,6 +46,11 @@ export interface DashboardStrings {
   momentumTodayDone: string
   momentumStart: string
 
+  // بطاقة «تطبيق قِمّة قريبًا» — إعلامية هادئة (ويب فقط، بلا CTA حتى تتوفّر وجهة حقيقية)
+  appSoonTitle: string
+  appSoonBody: string
+  appSoonTrust: string
+
   // Today section
   yourDay: string
   yourDayNamedPrefix: string // "يومك، " + name
@@ -121,6 +126,9 @@ const ar: DashboardStrings = {
   momentumDayStreak: 'يوم متتالي',
   momentumTodayDone: 'تمرّنت اليوم',
   momentumStart: 'أول تمرين هذا الأسبوع يبدأ سلسلتك.',
+  appSoonTitle: 'تطبيق قِمّة قريبًا',
+  appSoonBody: 'نعمل على تجربة آيفون أكثر هدوءًا وسلاسة، لتكون خطوتك الصحية معك دائمًا.',
+  appSoonTrust: 'نفس الوضوح. نفس الهدوء. أقرب إليك.',
 
   yourDay: 'يومك',
   yourDayNamedPrefix: 'يومك، ',
@@ -193,6 +201,9 @@ const en: DashboardStrings = {
   momentumDayStreak: 'day streak',
   momentumTodayDone: 'Trained today',
   momentumStart: 'Your first workout this week starts your streak.',
+  appSoonTitle: 'Qimmah app coming soon',
+  appSoonBody: 'We’re building a calmer, smoother iPhone experience so your next healthy step stays with you.',
+  appSoonTrust: 'Same clarity. Same calm. Closer to you.',
 
   yourDay: 'Your day',
   yourDayNamedPrefix: 'Your day, ',

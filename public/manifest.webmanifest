@@ -1,7 +1,7 @@
 {
-  "name": "قِمّة — تطبيقك الشخصي للتمرين والتغذية",
+  "name": "قِمّة — مرشدك الهادئ نحو صحة أفضل",
   "short_name": "قِمّة",
-  "description": "تطبيق شخصي عربي يجمع تمارينك، أكلك، مكملاتك، قياساتك، والتزامك اليومي في مكان واحد — يعمل على جوالك.",
+  "description": "رفيقك العربي للياقة والصحة — خطة تمارين واضحة، تسجيل وجبات بسيط، ومتابعة تقدّم صادقة.",
   "lang": "ar",
   "dir": "rtl",
   "start_url": "/",
@@ -9,9 +9,13 @@
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#F26A21",
-  "theme_color": "#F26A21",
-  "categories": ["health", "fitness", "lifestyle"],
+  "background_color": "#101216",
+  "theme_color": "#101216",
+  "categories": [
+    "health",
+    "fitness",
+    "lifestyle"
+  ],
   "icons": [
     {
       "src": "/icon-192.png",

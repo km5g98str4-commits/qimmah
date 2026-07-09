@@ -431,7 +431,7 @@ const ar: ShellStrings = {
   start: {
     welcome: 'هلا فيك في قِمّة',
     headline: 'كل قمة تبدأ بخطوة.',
-    intro: 'تمارينك، أوزانك، التضخيم التدريجي، تغذيتك، وقياساتك — كلها في مكان واحد.',
+    intro: 'تمارينك، تغذيتك، وتقدّمك — كلها في مكان واحد، بوضوح وهدوء.',
     startSetup: 'ابدأ إعداد صفحتي',
     buildPlan: 'ابنِ خطتي الآن',
     continueSetup: 'أكمل إعداد صفحتي',
@@ -860,7 +860,7 @@ const en: ShellStrings = {
   start: {
     welcome: 'Welcome to Qimmah',
     headline: 'Every summit begins with a step.',
-    intro: 'Your workouts, weights, progressive overload, nutrition, and measurements — all in one place.',
+    intro: 'Your workouts, nutrition, and progress — all in one place, with clarity and calm.',
     startSetup: 'Set up my page',
     buildPlan: 'Build my plan now',
     continueSetup: 'Continue my setup',
