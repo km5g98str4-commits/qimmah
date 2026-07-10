@@ -27,7 +27,9 @@
     "proof:p10a5": "node scripts/run-p10-a5-proof.mjs",
     "proof:p10qa": "node scripts/run-p10-integration-qa.mjs",
     "test:e2e:onboarding": "node scripts/e2e-onboarding.mjs",
-    "test:e2e": "npm run build && node scripts/e2e-onboarding.mjs"
+    "test:e2e": "npm run build && node scripts/e2e-onboarding.mjs",
+    "test:e2e:auth:preflight": "node scripts/e2e-auth/preflight.mjs",
+    "test:e2e:auth": "node scripts/e2e-auth/run.mjs"
   },
   "dependencies": {
     "@capacitor/core": "^8.4.1",

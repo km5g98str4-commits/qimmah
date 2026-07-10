@@ -1,0 +1,37 @@
+# إعداد Supabase محلي — لاختبار المصادقة فقط (test-only). لا علاقة له بالإنتاج إطلاقًا.
+# لا يُنفَّذ عليه `supabase link`؛ يُستخدم فقط مع `supabase start` محليًا. لا أسرار هنا:
+# المفاتيح المحلية تُولَّد وقت التشغيل وتبقى على 127.0.0.1.
+project_id = "qimmah-e2e-local"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public"]
+extra_search_path = ["public"]
+max_rows = 1000
+
+[db]
+port = 54322
+major_version = 15
+
+[inbucket]
+enabled = true
+port = 54324
+
+[auth]
+enabled = true
+# أصل التطبيق أثناء الاختبار (vite preview) — يُسمح به كوجهة إعادة توجيه الاستعادة.
+site_url = "http://localhost:4321"
+additional_redirect_urls = [
+  "http://localhost:4321",
+  "http://localhost:4321/",
+  "http://127.0.0.1:4321",
+  "http://127.0.0.1:4321/",
+]
+jwt_expiry = 3600
+enable_signup = true
+
+[auth.email]
+enable_signup = true
+# تأكيد تلقائي: حساب الاختبار جاهز فورًا، وتدفّق الاستعادة يعمل بلا خطوة تأكيد يدوية.
+enable_confirmations = false

@@ -40,3 +40,6 @@ tsconfig.app.tsbuildinfo
 
 # كاش زحف WorkoutX المؤقت (استئناف p12-fetch-gifs) — لا يُلتزَم
 scripts/.p12-catalog-cache.json
+
+# local auth-e2e runtime workdir (Supabase config copy)
+scripts/e2e-auth/.workdir/
