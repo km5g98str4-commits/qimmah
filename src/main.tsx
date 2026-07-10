@@ -9,8 +9,11 @@ import { AuthProvider } from './lib/authContext'
 import { LanguageProvider } from './i18n'
 import { registerStepBridge } from './lib/stepCounter'
 import { initAnalytics, track } from './lib/analytics'
+import { initNativeShell } from './lib/nativeShell'
 // وحدة PWA: تلتقط حدث beforeinstallprompt مبكرًا (يُطلق مرّة واحدة فقط) لعرض زر التثبيت لاحقًا.
 import './lib/pwa'
+// خطوط مُستضافة ذاتيًا (Tajawal) — بلا CDN وقت التشغيل، مهم للنسخة الأصلية/دون اتصال.
+import './design-system/fonts'
 import './styles/index.css'
 // طبقة الرموز الدلالية (seam) — إضافية وعكوسة، تُحيل للقيم الحالية المؤقتة فقط
 // (ليست هوية معتمدة). نقطة الإسقاط لرموز Cloud Design المعتمدة لاحقًا.
@@ -61,3 +64,6 @@ createRoot(root).render(
     </ErrorBoundary>
   </StrictMode>,
 )
+
+// قشرة النظام الأصلية (شريط الحالة + إخفاء شاشة الإقلاع) — بعد الرسم، أصلي فقط، no-op على الويب.
+void initNativeShell()
