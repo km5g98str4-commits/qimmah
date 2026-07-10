@@ -18,6 +18,8 @@ export type AppRoute =
   | 'privacy'
   | 'terms'
   | 'contact'
+  // شاشة تعيين كلمة مرور جديدة (Sprint A) — وجهة رابط استعادة كلمة المرور، عامّة بلا حساب.
+  | 'reset'
   // شاشة داخلية لمراجعة المنتجات (باركود/OCR) — مدخلها من الإعدادات، ليست تبويبًا رئيسيًا.
   | 'productReview'
   // «لوحتي» (P12-C) — ملخّص أرقام المستخدم الأسبوعية؛ مدخلها بطاقة على الرئيسية، ليست تبويبًا رئيسيًا.
@@ -40,6 +42,7 @@ const ROUTES: AppRoute[] = [
   'privacy',
   'terms',
   'contact',
+  'reset',
   'productReview',
   'stats',
 ]
@@ -49,7 +52,9 @@ export const MAIN_TABS: AppRoute[] = ['dashboard', 'workout', 'nutrition', 'prog
 
 export function routeFromHash(): AppRoute | null {
   if (typeof window === 'undefined') return null
-  const h = window.location.hash.replace(/^#\/?/, '')
+  // نتساهل مع لواحق رمز الاستعادة التي قد يُلحقها Supabase بالـ fragment في التدفّق الضمني
+  // (مثل «/reset&access_token=…»): نأخذ مقطع المسار الأول فقط قبل أي «&» أو «?».
+  const h = window.location.hash.replace(/^#\/?/, '').split(/[&?]/)[0]
   return (ROUTES as string[]).includes(h) ? (h as AppRoute) : null
 }
 

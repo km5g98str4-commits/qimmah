@@ -45,6 +45,19 @@ export interface ShellStrings {
     sendReset: string
     forgotSent: string
     forgotFailed: string
+    // تعيين كلمة مرور جديدة (Sprint A) — شاشة استكمال الاستعادة بعد فتح رابط البريد
+    resetTitle: string
+    resetSubtitle: string
+    resetNewPassword: string
+    resetConfirmPassword: string
+    resetSave: string
+    resetSuccess: string
+    resetSuccessHint: string
+    resetMismatch: string
+    resetWeak: string
+    resetExpiredTitle: string
+    resetExpired: string
+    resetChecking: string
     continueGuest: string
     noAccount: string
     haveAccount: string
@@ -462,6 +475,18 @@ const ar: ShellStrings = {
     sendReset: 'إرسال رابط الاستعادة',
     forgotSent: 'إن كان البريد مسجّلًا لدينا، وصلك رابط الاستعادة. تحقّق من بريدك.',
     forgotFailed: 'تعذّر إرسال الرابط الآن. جرّب لاحقًا.',
+    resetTitle: 'تعيين كلمة مرور جديدة',
+    resetSubtitle: 'اختر كلمة مرور جديدة لحسابك في قِمّة.',
+    resetNewPassword: 'كلمة المرور الجديدة',
+    resetConfirmPassword: 'تأكيد كلمة المرور',
+    resetSave: 'حفظ كلمة المرور',
+    resetSuccess: 'تم تحديث كلمة المرور بنجاح.',
+    resetSuccessHint: 'يمكنك الآن تسجيل الدخول بكلمة المرور الجديدة.',
+    resetMismatch: 'كلمتا المرور غير متطابقتين. تحقّق منهما بهدوء.',
+    resetWeak: 'كلمة المرور ضعيفة — ٨ أحرف على الأقل مع حرف ورقم.',
+    resetExpiredTitle: 'الرابط لم يعد صالحًا',
+    resetExpired: 'انتهت صلاحية الرابط أو لم يعد صالحًا. اطلب رابطًا جديدًا بهدوء.',
+    resetChecking: 'نتحقّق من الرابط…',
     continueGuest: 'المتابعة كضيف',
     noAccount: 'ما عندك حساب؟',
     haveAccount: 'عندك حساب؟',
@@ -891,6 +916,18 @@ const en: ShellStrings = {
     sendReset: 'Send reset link',
     forgotSent: "If that email is registered, a reset link is on its way. Check your inbox.",
     forgotFailed: "Couldn't send the link right now. Try again later.",
+    resetTitle: 'Set a new password',
+    resetSubtitle: 'Choose a new password for your Qimmah account.',
+    resetNewPassword: 'New password',
+    resetConfirmPassword: 'Confirm password',
+    resetSave: 'Save password',
+    resetSuccess: 'Your password has been updated.',
+    resetSuccessHint: 'You can now sign in with your new password.',
+    resetMismatch: "The two passwords don't match. Check them calmly.",
+    resetWeak: 'Password too weak — at least 8 characters with a letter and a number.',
+    resetExpiredTitle: 'This link is no longer valid',
+    resetExpired: 'The link has expired or is no longer valid. Request a new one calmly.',
+    resetChecking: 'Checking the link…',
     continueGuest: 'Continue as guest',
     noAccount: 'No account?',
     haveAccount: 'Have an account?',

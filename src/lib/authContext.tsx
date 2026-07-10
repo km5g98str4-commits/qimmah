@@ -54,6 +54,11 @@ export interface AuthContextValue {
   resendConfirmation: (email: string) => Promise<AuthResult>
   /** يرسل رابط استعادة كلمة المرور للبريد (Sprint UI 1 — إضافة فقط، لا تغيّر تدفّقات المصادقة القائمة). */
   resetPassword: (email: string) => Promise<AuthResult>
+  /**
+   * يضبط كلمة مرور جديدة للجلسة الحالية (Sprint A — استكمال الاستعادة بعد فتح رابط البريد).
+   * يعمل على جلسة الاستعادة التي أنشأها Supabase من رابط البريد، أو أي جلسة مسجّلة.
+   */
+  updatePassword: (password: string) => Promise<AuthResult>
   /** يعيد جلب المستخدم من الخادم لالتقاط تأكيد البريد بعد الضغط على الرابط. */
   refreshUser: () => Promise<void>
   /**
@@ -200,7 +205,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const supabase = await getSupabase()
         if (!supabase) return { ok: false, error: cloudDisabledError() }
         // رابط استعادة عبر البريد — دالة Supabase قياسية، لا تكشف وجود الحساب من عدمه.
-        const { error } = await supabase.auth.resetPasswordForEmail(email.trim())
+        // redirectTo يعيد المستخدم لشاشة تعيين كلمة مرور جديدة داخل التطبيق (#/reset) على
+        // نفس أصل النشر الحالي — لا رابط localhost مثبّت. تدفّق PKCE يضع الرمز في query
+        // فيبقى hash المسار (#/reset) سليمًا. يجب أن يسمح Supabase بهذا الأصل في Redirect URLs.
+        const redirectTo =
+          typeof window !== 'undefined'
+            ? `${window.location.origin}${window.location.pathname}#/reset`
+            : undefined
+        const { error } = await supabase.auth.resetPasswordForEmail(
+          email.trim(),
+          redirectTo ? { redirectTo } : undefined,
+        )
+        if (error) return { ok: false, error: localizedAuthError(error.message) }
+        return { ok: true }
+      },
+      async updatePassword(password) {
+        const supabase = await getSupabase()
+        if (!supabase) return { ok: false, error: cloudDisabledError() }
+        // يعمل على جلسة الاستعادة (أو أي جلسة نشطة). لا يكشف وجود الحساب — يتطلّب جلسة صالحة.
+        const { error } = await supabase.auth.updateUser({ password })
         if (error) return { ok: false, error: localizedAuthError(error.message) }
         return { ok: true }
       },
@@ -284,6 +307,9 @@ export function useAuth(): AuthContextValue {
       return { ok: false, error: cloudDisabledError() }
     },
     async resetPassword() {
+      return { ok: false, error: cloudDisabledError() }
+    },
+    async updatePassword() {
       return { ok: false, error: cloudDisabledError() }
     },
     async refreshUser() {},

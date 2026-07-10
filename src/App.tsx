@@ -13,6 +13,9 @@ import { InstallPrompt } from '@/components/InstallPrompt'
 function createLazyViews() {
   return {
     LoginView: lazy(() => import('@/views/LoginView').then((m) => ({ default: m.LoginView }))),
+    ResetPasswordView: lazy(() =>
+      import('@/views/ResetPasswordView').then((m) => ({ default: m.ResetPasswordView })),
+    ),
     SetupView: lazy(() => import('@/views/SetupView').then((m) => ({ default: m.SetupView }))),
     DashboardView: lazy(() => import('@/views/DashboardView').then((m) => ({ default: m.DashboardView }))),
     WorkoutView: lazy(() => import('@/views/WorkoutView').then((m) => ({ default: m.WorkoutView }))),
@@ -273,6 +276,9 @@ export default function App() {
     )
   } else if (view === 'login') {
     content = <V.LoginView lang={LANG} initialMode={loginMode} onSuccess={enterApp} onBack={() => setView('start')} />
+  } else if (view === 'reset') {
+    // شاشة تعيين كلمة مرور جديدة — وجهة رابط الاستعادة، عامّة (بلا بوابة حساب).
+    content = <V.ResetPasswordView lang={LANG} onDone={() => { setLoginMode('login'); setView('login') }} />
   } else if (view === 'privacy') {
     content = <V.PrivacyView lang={LANG} onBack={() => navigate(beforeLegalRef.current)} />
   } else if (view === 'terms') {
