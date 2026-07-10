@@ -1,7 +1,7 @@
 {
-  "name": "gym-os-template",
+  "name": "qimmah",
   "version": "1.0.0",
-  "description": "قالب ويب فاخر لمتابعة التمارين والمكملات والتغذية والقياسات والأهداف الشخصية — Premium fitness OS template",
+  "description": "قِمّة — مرشدك الهادئ نحو صحة أفضل: تمارين وتغذية وقياسات وأهداف بالعربية. Qimmah — a calm, Arabic-first health & fitness companion.",
   "private": true,
   "type": "module",
   "license": "Commercial",
