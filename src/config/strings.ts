@@ -589,7 +589,8 @@ const ar: ShellStrings = {
       'قِمّة تطبيق شخصي يعمل على جهازك أولًا (local-first). في وضع الضيف تُحفظ كل بياناتك في متصفّح هذا الجهاز فقط ولا تغادره.',
       'عند تسجيل الدخول بحساب سحابي (Supabase) تُرفع بياناتك إلى حسابك الخاص لتتمكّن من الوصول إليها من أجهزة أخرى. لا يصل إلى صفوفك إلا أنت (Row Level Security).',
       'لا نبيع بياناتك ولا نشاركها مع معلنين. قياساتك وسجلّاتك الصحية تبقى ملكك ويمكنك حذفها في أي وقت عبر «إعادة ضبط البيانات».',
-      'تقدر تصدّر نسخة كاملة من بياناتك في أي وقت من «الإعدادات → البيانات».',
+      'نستخدم إحصاءات استخدام مجهولة تمامًا (بلا اسم أو بريد أو أي بيانات شخصية) لتحسين قِمّة، دون بيعها أو تتبّعك خارج التطبيق. يمكنك إيقافها في أي وقت من «الإعدادات → الخصوصية».',
+      'تقدر تحذف حسابك وكل بياناته نهائيًا من «الإعدادات → الحساب → حذف الحساب»، أو تصدّر نسخة كاملة من بياناتك في أي وقت من «الإعدادات → البيانات».',
     ],
     termsBody: [
       'قِمّة أداة لتنظيم ومتابعة التمرين والتغذية والمكملات والقياسات للرياضي الفرد. الاستخدام على مسؤوليتك الشخصية.',
@@ -1033,7 +1034,8 @@ const en: ShellStrings = {
       'Qimmah is a local-first personal app. In guest mode, all your data stays in this device’s browser and never leaves it.',
       'When you log in with a cloud account (Supabase), your data is uploaded to your own account so you can access it from other devices. Only you can read your rows (Row Level Security).',
       'We do not sell or share your data with advertisers. Your measurements remain yours and can be deleted anytime via “Reset data”.',
-      'You can export a full copy of your data anytime from Settings → Data.',
+      'We use fully anonymous usage analytics (no name, email, or personal data) to improve Qimmah — never sold and never used to track you across apps. You can turn this off anytime in Settings → Privacy.',
+      'You can permanently delete your account and all its data from Settings → Account → Delete account, or export a full copy of your data anytime from Settings → Data.',
     ],
     termsBody: [
       'Qimmah is a tool to organize and track training, nutrition, supplements, and measurements for the individual athlete. Use is at your own responsibility.',
