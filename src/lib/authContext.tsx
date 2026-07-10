@@ -254,9 +254,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } catch (e) {
           error = e instanceof Error ? e.message : String(e)
         }
-        // 2) best-effort: حذف كل صفوف بيانات المستخدم من الجداول السحابية (حذف ذاتي عبر RLS).
-        //    كلها مفهرسة بعمود user_id (لا id). يعمل حتى لو لم تُنشَر دالة الحذف بعد أو
-        //    لم تُضبط سلسلة الحذف المتتالي (cascade) على الخادم. لا يُفشل العملية.
+        // فشل حذف مستخدم المصادقة (مثلًا لم تُنشَر دالة delete_own_account) → لا نحذف أي صفّ
+        // بيانات ولا نُنهي الجلسة، فيبقى الحساب سليمًا تمامًا لإعادة المحاولة/التواصل، ولا ندّعي
+        // نجاحًا كاذبًا. (يمنع حالة الحذف الجزئي: صفوف محذوفة ومستخدم مصادقة باقٍ.)
+        if (!authUserDeleted) {
+          return { ok: false, authUserDeleted: false, error }
+        }
+        // 2) بعد تأكيد حذف مستخدم المصادقة: best-effort تنظيف صفوف بيانات المستخدم من الجداول
+        //    السحابية (حذف ذاتي عبر RLS) في حال لم تُضبط سلسلة الحذف المتتالي (cascade) على الخادم.
+        //    كلها مفهرسة بعمود user_id (لا id). لا يُفشل العملية — الحذف الأساسي تمّ فعلًا.
         const USER_OWNED_TABLES = [
           'profiles',
           'workout_sessions',
@@ -271,20 +277,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             /* تجاهل — قد لا تسمح السياسة أو الجدول غير موجود */
           }
         }
-        // 3) إنهاء الجلسة وتنظيف الحالة — فقط عند تأكيد حذف مستخدم المصادقة على الخادم.
-        //    إن فشل حذف مستخدم المصادقة (مثلًا لم تُنشَر دالة delete_own_account) نُبقي الجلسة
-        //    قائمة كي يستطيع المستخدم إعادة المحاولة، ولا ندّعي نجاحًا كاذبًا للمستدعي.
-        if (authUserDeleted) {
-          try {
-            await supabase.auth.signOut()
-          } catch {
-            /* تجاهل — سنُعيد التحميل على أي حال */
-          }
-          setSession(null)
-          setUser(null)
+        // 3) إنهاء الجلسة وتنظيف الحالة في الذاكرة.
+        try {
+          await supabase.auth.signOut()
+        } catch {
+          /* تجاهل — سنُعيد التحميل على أي حال */
         }
-        // ok يعكس اكتمال الحذف فعليًا: صحيح فقط عند إزالة مستخدم المصادقة من الخادم.
-        return { ok: authUserDeleted, authUserDeleted, error: authUserDeleted ? undefined : error }
+        setSession(null)
+        setUser(null)
+        // ok يعكس اكتمال الحذف فعليًا: وصلنا هنا فقط بعد إزالة مستخدم المصادقة من الخادم.
+        return { ok: true, authUserDeleted: true }
       },
     }),
     [configured, user, session, loading],
