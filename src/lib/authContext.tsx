@@ -19,12 +19,16 @@ export interface AuthResult {
 }
 
 export interface DeleteAccountResult {
-  /** أُنجزت العملية (التنظيف السحابي best-effort + سيُكمل المستدعي التنظيف المحلي). */
+  /**
+   * هل اكتمل الحذف فعليًا؟ للحساب السحابي = تأكيد حذف مستخدم المصادقة (authUserDeleted).
+   * للوضع المحلي/الضيف (لا سحابة) = صحيح (لا شيء على الخادم). المستدعي يُكمل التنظيف المحلي
+   * ويعيد التحميل فقط عند ok=true — وإلا يعرض حالة فشل صادقة بلا ادّعاء نجاح.
+   */
   ok: boolean
   /**
    * هل حُذف صفّ مستخدم المصادقة (auth.users) فعليًا من الخادم؟
    * يتطلّب دالة Postgres آمنة (security definer) اسمها delete_own_account — بلا service role في العميل.
-   * false إن لم تُنشَر تلك الدالة بعد؛ عندها تُحذف بيانات الملف الشخصي وتُنظَّف الجلسة محليًا فقط.
+   * false إن لم تُنشَر تلك الدالة بعد؛ عندها تبقى الجلسة قائمة لإعادة المحاولة (لا نُنهيها كذبًا).
    */
   authUserDeleted: boolean
   /** رسالة الخطأ الخادمي إن تعذّر حذف مستخدم المصادقة. */
@@ -267,15 +271,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             /* تجاهل — قد لا تسمح السياسة أو الجدول غير موجود */
           }
         }
-        // 3) إنهاء الجلسة وتنظيف الحالة في الذاكرة.
-        try {
-          await supabase.auth.signOut()
-        } catch {
-          /* تجاهل — سنُعيد التحميل على أي حال */
+        // 3) إنهاء الجلسة وتنظيف الحالة — فقط عند تأكيد حذف مستخدم المصادقة على الخادم.
+        //    إن فشل حذف مستخدم المصادقة (مثلًا لم تُنشَر دالة delete_own_account) نُبقي الجلسة
+        //    قائمة كي يستطيع المستخدم إعادة المحاولة، ولا ندّعي نجاحًا كاذبًا للمستدعي.
+        if (authUserDeleted) {
+          try {
+            await supabase.auth.signOut()
+          } catch {
+            /* تجاهل — سنُعيد التحميل على أي حال */
+          }
+          setSession(null)
+          setUser(null)
         }
-        setSession(null)
-        setUser(null)
-        return { ok: true, authUserDeleted, error: authUserDeleted ? undefined : error }
+        // ok يعكس اكتمال الحذف فعليًا: صحيح فقط عند إزالة مستخدم المصادقة من الخادم.
+        return { ok: authUserDeleted, authUserDeleted, error: authUserDeleted ? undefined : error }
       },
     }),
     [configured, user, session, loading],

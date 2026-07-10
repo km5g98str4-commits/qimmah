@@ -112,20 +112,37 @@ export function SettingsView({
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleteWord, setDeleteWord] = useState('')
   const [deleting, setDeleting] = useState(false)
+  const [deleteFailed, setDeleteFailed] = useState(false)
   const canConfirmDelete = deleteWord.trim() === t.auth.deleteConfirmWord && !deleting
 
   const onDeleteAccount = async () => {
     if (!canConfirmDelete) return
     setDeleting(true)
-    // حذف الحساب سحابيًا (best-effort عبر دالة آمنة) + إنهاء الجلسة. لا نُظهر خطأً حاجبًا:
-    // حتى لو تعذّر حذف مستخدم المصادقة على الخادم، نُكمل بمسح كل بيانات الجهاز وإخراج المستخدم.
+    setDeleteFailed(false)
+    // الحذف يكتمل فقط عند تأكيد إزالة مستخدم المصادقة على الخادم (أو في الوضع المحلي/الضيف).
+    // res.ok يعكس ذلك بصدق: لا نمسح ونُعيد التحميل (ما يُقرأ كنجاح) إلا عند اكتمال الحذف فعلًا.
+    let ok = false
     try {
-      await auth.deleteAccount()
+      const res = await auth.deleteAccount()
+      ok = res.ok
     } catch {
-      /* تجاهل — التنظيف المحلي يتم على أي حال */
+      ok = false
     }
-    // مسح كامل لبيانات قِمّة على الجهاز ثم إعادة التحميل لشاشة الحساب.
-    resetQimmah()
+    if (ok) {
+      // حذف مؤكَّد → مسح كامل لبيانات قِمّة على الجهاز ثم إعادة التحميل لشاشة الحساب.
+      resetQimmah()
+      return
+    }
+    // لم يُؤكَّد حذف مستخدم المصادقة — لا ندّعي نجاحًا. نُبقي الجلسة ونعرض خطأً صادقًا مع خيار
+    // إعادة المحاولة أو التواصل (الجلسة ما زالت قائمة لأنّ authContext لم يُنهِها عند الفشل).
+    setDeleting(false)
+    setDeleteFailed(true)
+  }
+
+  const cancelDelete = () => {
+    setConfirmDelete(false)
+    setDeleteWord('')
+    setDeleteFailed(false)
   }
 
   // — خطتي: إعادة توليد —
@@ -244,6 +261,18 @@ export function SettingsView({
                     autoComplete="off"
                     className="mt-1 w-full max-w-xs rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink-900 outline-none focus:border-danger"
                   />
+                  {/* فشل حذف مستخدم المصادقة — رسالة صادقة (لا ادّعاء نجاح) + مسار تواصل. */}
+                  {deleteFailed && (
+                    <p role="alert" className="mt-3 flex items-start gap-2 rounded-lg border border-danger/40 bg-danger/[0.08] p-3 text-xs leading-relaxed text-ink-700">
+                      <Icon name="AlertTriangle" className="mt-0.5 h-4 w-4 shrink-0 text-danger" />
+                      <span>
+                        {t.auth.deleteFailed}{' '}
+                        <a href="#/contact" className="font-bold text-danger underline underline-offset-2">
+                          {t.auth.deleteContactCta}
+                        </a>
+                      </span>
+                    </p>
+                  )}
                   <div className="mt-3 flex flex-wrap gap-2">
                     <button
                       type="button"
@@ -252,11 +281,11 @@ export function SettingsView({
                       className="inline-flex items-center gap-1.5 rounded-xl bg-danger px-4 py-2 text-xs font-bold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       <Icon name="Trash2" className="h-4 w-4" />
-                      {deleting ? t.auth.deleting : t.auth.deleteConfirmCta}
+                      {deleting ? t.auth.deleting : deleteFailed ? t.auth.deleteRetry : t.auth.deleteConfirmCta}
                     </button>
                     <button
                       type="button"
-                      onClick={() => { setConfirmDelete(false); setDeleteWord('') }}
+                      onClick={cancelDelete}
                       disabled={deleting}
                       className="btn-ghost px-4 py-2 text-xs"
                     >

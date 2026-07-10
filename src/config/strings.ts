@@ -79,6 +79,10 @@ export interface ShellStrings {
     deleteConfirmWord: string
     deleteConfirmCta: string
     deleting: string
+    // فشل حذف مستخدم المصادقة على الخادم — رسالة صادقة بلا ادّعاء نجاح (Sprint B)
+    deleteFailed: string
+    deleteRetry: string
+    deleteContactCta: string
     cancel: string
   }
   settings: {
@@ -509,6 +513,9 @@ const ar: ShellStrings = {
     deleteConfirmWord: 'حذف',
     deleteConfirmCta: 'حذف حسابي نهائيًا',
     deleting: 'جارٍ الحذف…',
+    deleteFailed: 'لم نتمكن من حذف الحساب بالكامل. لم تكتمل العملية. حاول مرة أخرى أو',
+    deleteRetry: 'إعادة المحاولة',
+    deleteContactCta: 'تواصل معنا',
     cancel: 'إلغاء',
   },
   settings: {
@@ -549,7 +556,7 @@ const ar: ShellStrings = {
     calcLink: 'كيف نحسب أرقامك؟',
     analyticsTitle: 'تحليلات مجهولة',
     analyticsDesc:
-      'إحصاءات استخدام مجهولة تمامًا (بلا اسم أو بريد أو أي بيانات شخصية) تساعدنا على تحسين التطبيق. تقدر توقفها في أي وقت.',
+      'إحصاءات استخدام مجهولة تمامًا (بلا اسم أو بريد أو أي بيانات شخصية) تساعدنا على تحسين قِمّة. لا نبيع بياناتك ولا نتتبّعك خارج التطبيق. تقدر توقفها في أي وقت.',
     analyticsToggle: 'المشاركة في التحليلات المجهولة',
   },
   pwa: {
@@ -950,6 +957,9 @@ const en: ShellStrings = {
     deleteConfirmWord: 'DELETE',
     deleteConfirmCta: 'Delete my account',
     deleting: 'Deleting…',
+    deleteFailed: "We couldn't fully delete your account. The process didn't complete. Try again or",
+    deleteRetry: 'Try again',
+    deleteContactCta: 'contact us',
     cancel: 'Cancel',
   },
   settings: {
@@ -990,7 +1000,7 @@ const en: ShellStrings = {
     calcLink: 'How we calculate your numbers',
     analyticsTitle: 'Anonymous analytics',
     analyticsDesc:
-      'Fully anonymous usage stats (no name, email, or personal data) that help us improve the app. You can turn this off any time.',
+      "Fully anonymous usage stats (no name, email, or personal data) that help us improve Qimmah. We don't sell your data or track you across apps. You can turn this off any time.",
     analyticsToggle: 'Share anonymous analytics',
   },
   pwa: {
