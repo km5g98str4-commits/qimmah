@@ -52,9 +52,11 @@ export const MAIN_TABS: AppRoute[] = ['dashboard', 'workout', 'nutrition', 'prog
 
 export function routeFromHash(): AppRoute | null {
   if (typeof window === 'undefined') return null
-  // نتساهل مع لواحق رمز الاستعادة التي قد يُلحقها Supabase بالـ fragment في التدفّق الضمني
-  // (مثل «/reset&access_token=…»): نأخذ مقطع المسار الأول فقط قبل أي «&» أو «?».
-  const h = window.location.hash.replace(/^#\/?/, '').split(/[&?]/)[0]
+  // نتساهل مع لواحق رمز الاستعادة التي يُلحقها Supabase بالـ fragment:
+  //   • تدفّق PKCE:     «/reset?code=…»       (قبل «?»)
+  //   • تدفّق ضمني (implicit): «/reset#access_token=…»  (هاش ثانٍ)
+  // نأخذ مقطع المسار الأول فقط قبل أي «&» أو «?» أو «#».
+  const h = window.location.hash.replace(/^#\/?/, '').split(/[&?#]/)[0]
   return (ROUTES as string[]).includes(h) ? (h as AppRoute) : null
 }
 

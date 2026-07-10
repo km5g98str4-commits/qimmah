@@ -93,7 +93,10 @@ function startStack() {
   // نُبقي: db + auth(gotrue) + kong + inbucket(mailpit) + rest(postgrest للـ RPC والحذف)
   // + analytics(logflare) + vector (سلسلة السجلّات لصحّة الخدمات). نستثني ما لا يلزم أو يفشل:
   // edge-runtime (rlimit)، imgproxy/storage (غير لازمة)، studio/realtime/supavisor.
-  const EXCLUDE = 'edge-runtime,imgproxy,storage-api,studio,realtime,supavisor'
+  // نُبقي فقط ما يلزم للمصادقة/الاستعادة/الحذف: db + auth(gotrue) + kong + inbucket(mailpit)
+  // + rest(postgrest للـ RPC والحذف). نستثني بقية الخدمات — غير لازمة، وبعضها (logflare/vector/
+  // postgres-meta) يظهر غير سليم أحيانًا فيمنع إقلاع المكدّس. لا حاجة لها هنا.
+  const EXCLUDE = 'edge-runtime,imgproxy,storage-api,studio,realtime,supavisor,logflare,vector,postgres-meta'
   console.log('· supabase start (خدمات المصادقة فقط)…')
   sh(`npx --yes supabase start -x ${EXCLUDE}`, { cwd: WORKDIR })
   const env = localSupabaseEnv(WORKDIR) // يرمي إن لم يكن محليًا
@@ -167,9 +170,17 @@ async function testReset(browser) {
   const ctx = await browser.newContext({ locale: 'ar' })
   const page = await ctx.newPage()
   const consoleErrors = []
-  const redact = (s) => s.replace(/((?:access_token|code|token|refresh_token)=)[^&#\s"']+/g, '$1<redacted>')
+  const failedResponses = []
+  const redact = (s) => s.replace(/((?:access_token|code|token|refresh_token|apikey)=)[^&#\s"']+/g, '$1<redacted>')
   page.on('console', (m) => { if (m.type() === 'error') consoleErrors.push(redact(m.text()).slice(0, 200)) })
   page.on('pageerror', (e) => consoleErrors.push('PAGEERROR: ' + redact(e.message).slice(0, 200)))
+  page.on('response', (r) => {
+    if (r.status() >= 400) {
+      // مسار الطلب فقط (بلا استعلام يحمل رموزًا) + الحالة.
+      const path = r.url().split('?')[0].replace(/^https?:\/\/[^/]+/, '')
+      failedResponses.push(`${r.status()} ${r.request().method()} ${path}`)
+    }
+  })
   try {
     await register(page, email, pwOld)
     record('إنشاء حساب تجريبي', authUserCount(email) === 1, mask(email))
@@ -208,6 +219,11 @@ async function testReset(browser) {
     if (!dest) throw new Error(`verify لم يُعِد وجهة (status=${verifyStatus})`)
 
     const appUrl = dest.startsWith('http') ? dest : `${BASE}${dest}`
+
+    // إجبار تحميل مستند جديد كليًّا: زيارة رابط الاستعادة تغيّر الـ hash فقط على تطبيق
+    // صفحة-واحدة مُحمَّل مسبقًا (نفس الأصل)، فلا يُعاد تقييم حزمة JS ولا تُلتقط رموز الرابط.
+    // المستخدم الحقيقي يفتح الرابط في تحميل جديد؛ نحاكي ذلك عبر about:blank ثم الوجهة.
+    await page.goto('about:blank')
     await page.goto(appUrl, { waitUntil: 'load' })
     await page.waitForTimeout(3500)
     let sessionAppeared = false
@@ -220,6 +236,7 @@ async function testReset(browser) {
     }
     console.log(`    · session appeared in storage within ~8s: ${sessionAppeared}`)
     if (consoleErrors.length) console.log(`    · console errors: ${JSON.stringify(consoleErrors.slice(0, 4))}`)
+    if (failedResponses.length) console.log(`    · failed requests: ${JSON.stringify([...new Set(failedResponses)].slice(0, 6))}`)
     const onForm = (await page.locator('input[type="password"]').count()) >= 1
     record('فتح شاشة تعيين كلمة مرور جديدة (وليس expired)', onForm)
     if (!onForm) throw new Error(`الرابط فتح expired بدل النموذج (sessionAppeared=${sessionAppeared})`)

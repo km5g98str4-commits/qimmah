@@ -79,15 +79,36 @@ export interface AuthContextValue {
 }
 
 /**
+ * لقطة عنوان الصفحة وقت تحميل الوحدة (قبل أول رسم React). هذا حاسم لتدفّق الاستعادة:
+ * توجيه التطبيق يعيد كتابة الـ hash إلى «#/reset» بعد الإقلاع (يطمس الـ fragment الثاني
+ * «#access_token=…»)، فلو قرأنا الرموز من window.location لحظة الاستكمال لوجدناها مطموسة.
+ * الوحدة تُقيَّم عند الاستيراد الساكن (main.tsx) قبل أي effect، فالعنوان هنا سليم. لا نطبع أبدًا.
+ */
+const INITIAL_URL: string = typeof window !== 'undefined' ? `${window.location.hash}&${window.location.search}` : ''
+
+/**
  * يستخرج رمز استعادة PKCE من عنوان الصفحة أينما وقع (H1): من query (?code=)، أو من داخل
  * hash التوجيه (#/reset?code=…) حين لا يجده detectSessionInUrl. يعيد null إن لم يوجد رمز.
+ * يقرأ من لقطة الإقلاع لا من العنوان الحالي (الذي قد يكون طُمس بعد التوجيه).
  */
 function extractRecoveryCode(): string | null {
-  if (typeof window === 'undefined') return null
-  const fromQuery = new URLSearchParams(window.location.search).get('code')
-  if (fromQuery) return fromQuery
-  const m = window.location.hash.match(/[?&#]code=([^&]+)/)
+  if (!INITIAL_URL) return null
+  const m = INITIAL_URL.match(/[?&#]code=([^&#]+)/)
   return m ? decodeURIComponent(m[1]) : null
+}
+
+/**
+ * يستخرج رموز التدفّق الضمني (implicit) من العنوان أينما وقعت: access_token + refresh_token.
+ * GoTrue الافتراضي يعيدها في fragment ثانٍ (#/reset#access_token=…&refresh_token=…) الذي لا
+ * يلتقطه detectSessionInUrl مع توجيه hash. يعيد null إن نقص أحدهما. لا يطبع أي رمز إطلاقًا.
+ * يقرأ من لقطة الإقلاع لا من العنوان الحالي (الذي قد يكون طُمس بعد التوجيه).
+ */
+function extractImplicitTokens(): { access_token: string; refresh_token: string } | null {
+  if (!INITIAL_URL) return null
+  const at = INITIAL_URL.match(/[#?&]access_token=([^&#]+)/)
+  const rt = INITIAL_URL.match(/[#?&]refresh_token=([^&#]+)/)
+  if (!at || !rt) return null
+  return { access_token: decodeURIComponent(at[1]), refresh_token: decodeURIComponent(rt[1]) }
 }
 
 /** هل بريد هذا المستخدم مؤكَّد؟ ضيف/بلا بريد = مؤكَّد ضمنيًا (لا يُحبَس). */
@@ -252,21 +273,54 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       async completeRecovery() {
         const supabase = await getSupabase()
         if (!supabase) return false
-        // جلسة قائمة (نجح detectSessionInUrl، أو مستخدم مسجّل) → لا حاجة للتبادل.
+        // جلسة قائمة أصلًا (نجح detectSessionInUrl، أو مستخدم مسجّل) → لا حاجة للتبادل.
         const { data: cur } = await supabase.auth.getSession()
         if (cur.session) return true
-        // لا جلسة: نبحث عن رمز استعادة قد لم يلتقطه detectSessionInUrl (وقع داخل الـ hash مثلًا).
+
+        // مؤشّرات الاستعادة في الرابط: implicit (access_token+refresh_token) أو PKCE (code).
+        const implicit = extractImplicitTokens()
         const code = extractRecoveryCode()
-        if (!code) return false
-        try {
-          const { data, error } = await supabase.auth.exchangeCodeForSession(code)
-          if (error || !data.session) return false
-          setSession(data.session)
-          setUser(data.session.user)
-          return true
-        } catch {
-          return false
+        // لا مؤشّر إطلاقًا → رابط منتهٍ/زيارة مباشرة؛ نعود فورًا (بلا انتظار) لعرض حالة «منتهٍ».
+        if (!implicit && !code) return false
+
+        // Codex M1: مؤشّر موجود — نمنح detectSessionInUrl فرصة (حتى ~3s) لإنشاء الجلسة تلقائيًا
+        // قبل أي تبادل يدوي، تفاديًا للتسابق على رمز أحادي الاستخدام (فشل زائف = «منتهٍ»).
+        for (let i = 0; i < 12; i++) {
+          await new Promise((r) => setTimeout(r, 250))
+          const { data } = await supabase.auth.getSession()
+          if (data.session) return true
         }
+
+        // (أ) التدفّق الضمني: الرموز في الـ fragment مباشرة — نضبط الجلسة بها. لا نطبع أي رمز.
+        if (implicit) {
+          try {
+            const { data, error } = await supabase.auth.setSession(implicit)
+            if (!error && data.session) {
+              setSession(data.session)
+              setUser(data.session.user)
+              return true
+            }
+          } catch {
+            /* نتابع لمحاولة PKCE */
+          }
+        }
+
+        // (ب) تدفّق PKCE: نبادل الرمز بجلسة.
+        if (code) {
+          try {
+            const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+            if (!error && data.session) {
+              setSession(data.session)
+              setUser(data.session.user)
+              return true
+            }
+          } catch {
+            /* تجاهل */
+          }
+        }
+
+        // لا PKCE ولا implicit نجح → تُعرض حالة الرابط المنتهي الهادئة.
+        return false
       },
       async refreshUser() {
         const supabase = await getSupabase()
