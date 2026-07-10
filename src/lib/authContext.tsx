@@ -87,6 +87,19 @@ export interface AuthContextValue {
 const INITIAL_URL: string = typeof window !== 'undefined' ? `${window.location.hash}&${window.location.search}` : ''
 
 /**
+ * فكّ ترميز URI آمن: ترميز percent مشوّه (مثل «%zz» في رابط مُصطنع) يجعل decodeURIComponent
+ * يرمي URIError — فيعلق ResetPasswordView على «جارٍ التحقّق». نعيد null بدل الرمي؛
+ * المستدعي يعامل null كغياب المؤشّر فتظهر حالة «الرابط منتهٍ» الهادئة.
+ */
+function safeDecode(value: string): string | null {
+  try {
+    return decodeURIComponent(value)
+  } catch {
+    return null
+  }
+}
+
+/**
  * يستخرج رمز استعادة PKCE من عنوان الصفحة أينما وقع (H1): من query (?code=)، أو من داخل
  * hash التوجيه (#/reset?code=…) حين لا يجده detectSessionInUrl. يعيد null إن لم يوجد رمز.
  * يقرأ من لقطة الإقلاع لا من العنوان الحالي (الذي قد يكون طُمس بعد التوجيه).
@@ -94,7 +107,7 @@ const INITIAL_URL: string = typeof window !== 'undefined' ? `${window.location.h
 function extractRecoveryCode(): string | null {
   if (!INITIAL_URL) return null
   const m = INITIAL_URL.match(/[?&#]code=([^&#]+)/)
-  return m ? decodeURIComponent(m[1]) : null
+  return m ? safeDecode(m[1]) : null
 }
 
 /**
@@ -108,7 +121,10 @@ function extractImplicitTokens(): { access_token: string; refresh_token: string 
   const at = INITIAL_URL.match(/[#?&]access_token=([^&#]+)/)
   const rt = INITIAL_URL.match(/[#?&]refresh_token=([^&#]+)/)
   if (!at || !rt) return null
-  return { access_token: decodeURIComponent(at[1]), refresh_token: decodeURIComponent(rt[1]) }
+  const access_token = safeDecode(at[1])
+  const refresh_token = safeDecode(rt[1])
+  if (!access_token || !refresh_token) return null
+  return { access_token, refresh_token }
 }
 
 /** هل بريد هذا المستخدم مؤكَّد؟ ضيف/بلا بريد = مؤكَّد ضمنيًا (لا يُحبَس). */

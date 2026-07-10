@@ -182,6 +182,19 @@ async function testReset(browser) {
     }
   })
   try {
+    // MINOR-1: رابط استعادة مشوّه (ترميز percent فاسد «%zz») يجب ألّا يُعلّق الشاشة على
+    // «جارٍ التحقّق» — تظهر حالة «الرابط لم يعد صالحًا» الهادئة. تحميل مستند جديد كليًّا
+    // (كنقرة بريد حقيقية) ليُلتقط العنوان في snapshot الإقلاع.
+    await page.goto('about:blank')
+    await page.goto(`${BASE}/#/reset#access_token=%zz&refresh_token=x`, { waitUntil: 'load' })
+    const expiredShown = await page
+      .getByText('الرابط لم يعد صالحًا', { exact: false })
+      .first()
+      .waitFor({ state: 'visible', timeout: 10000 })
+      .then(() => true)
+      .catch(() => false)
+    record('رابط مشوّه لا يعلّق الشاشة (تظهر حالة «منتهٍ»)', expiredShown)
+
     await register(page, email, pwOld)
     record('إنشاء حساب تجريبي', authUserCount(email) === 1, mask(email))
 

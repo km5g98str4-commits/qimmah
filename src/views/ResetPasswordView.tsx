@@ -44,9 +44,16 @@ export function ResetPasswordView({ lang, onDone }: ResetPasswordViewProps) {
     if (triedRecovery.current) return
     triedRecovery.current = true
     let cancelled = false
-    void auth.completeRecovery().then((ok) => {
-      if (!cancelled) setPhase(ok ? 'ready' : 'expired')
-    })
+    void auth
+      .completeRecovery()
+      .then((ok) => {
+        if (!cancelled) setPhase(ok ? 'ready' : 'expired')
+      })
+      // رفض غير متوقّع (رابط مشوّه/خطأ داخلي) لا يجوز أن يُعلّق الشاشة على «جارٍ التحقّق» —
+      // نهبط لحالة «الرابط منتهٍ» الهادئة نفسها.
+      .catch(() => {
+        if (!cancelled) setPhase('expired')
+      })
     return () => {
       cancelled = true
     }
