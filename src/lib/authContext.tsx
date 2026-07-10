@@ -63,6 +63,12 @@ export interface AuthContextValue {
    * يعمل على جلسة الاستعادة التي أنشأها Supabase من رابط البريد، أو أي جلسة مسجّلة.
    */
   updatePassword: (password: string) => Promise<AuthResult>
+  /**
+   * يستكمل جلسة الاستعادة من رابط البريد (H1 fallback). إن لم يلتقط detectSessionInUrl الرمز
+   * تلقائيًا — مثلًا حين يقع code داخل hash التوجيه (#/reset?code=…) — نستخرجه يدويًا ونبادله
+   * بجلسة عبر exchangeCodeForSession. يعيد true إن توفّرت جلسة صالحة بعدها. آمن عند غياب رمز.
+   */
+  completeRecovery: () => Promise<boolean>
   /** يعيد جلب المستخدم من الخادم لالتقاط تأكيد البريد بعد الضغط على الرابط. */
   refreshUser: () => Promise<void>
   /**
@@ -70,6 +76,18 @@ export interface AuthContextValue {
    * لا يمسّ التخزين المحلي — المستدعي يتكفّل به (resetQimmah) ليضمن مسحًا كاملًا حتى عند غياب السحابة.
    */
   deleteAccount: () => Promise<DeleteAccountResult>
+}
+
+/**
+ * يستخرج رمز استعادة PKCE من عنوان الصفحة أينما وقع (H1): من query (?code=)، أو من داخل
+ * hash التوجيه (#/reset?code=…) حين لا يجده detectSessionInUrl. يعيد null إن لم يوجد رمز.
+ */
+function extractRecoveryCode(): string | null {
+  if (typeof window === 'undefined') return null
+  const fromQuery = new URLSearchParams(window.location.search).get('code')
+  if (fromQuery) return fromQuery
+  const m = window.location.hash.match(/[?&#]code=([^&]+)/)
+  return m ? decodeURIComponent(m[1]) : null
 }
 
 /** هل بريد هذا المستخدم مؤكَّد؟ ضيف/بلا بريد = مؤكَّد ضمنيًا (لا يُحبَس). */
@@ -231,6 +249,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (error) return { ok: false, error: localizedAuthError(error.message) }
         return { ok: true }
       },
+      async completeRecovery() {
+        const supabase = await getSupabase()
+        if (!supabase) return false
+        // جلسة قائمة (نجح detectSessionInUrl، أو مستخدم مسجّل) → لا حاجة للتبادل.
+        const { data: cur } = await supabase.auth.getSession()
+        if (cur.session) return true
+        // لا جلسة: نبحث عن رمز استعادة قد لم يلتقطه detectSessionInUrl (وقع داخل الـ hash مثلًا).
+        const code = extractRecoveryCode()
+        if (!code) return false
+        try {
+          const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+          if (error || !data.session) return false
+          setSession(data.session)
+          setUser(data.session.user)
+          return true
+        } catch {
+          return false
+        }
+      },
       async refreshUser() {
         const supabase = await getSupabase()
         if (!supabase) return
@@ -322,6 +359,9 @@ export function useAuth(): AuthContextValue {
     },
     async updatePassword() {
       return { ok: false, error: cloudDisabledError() }
+    },
+    async completeRecovery() {
+      return false
     },
     async refreshUser() {},
     async deleteAccount() {

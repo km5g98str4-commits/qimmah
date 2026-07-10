@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Icon } from '@/components/Icon'
 import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
@@ -29,8 +29,29 @@ export function ResetPasswordView({ lang, onDone }: ResetPasswordViewProps) {
   const [error, setError] = useState<string | null>(null)
   const [done, setDone] = useState(false)
 
-  // جلسة الاستعادة التي أنشأها Supabase من الرابط. غيابها = رابط منتهٍ/غير صالح.
-  const hasRecoverySession = Boolean(auth.session)
+  // مرحلة جلسة الاستعادة: checking حتى نتحقّق/نستكمل من الرابط، ثم ready (نموذج) أو expired.
+  // نبدأ ready فورًا إن كانت الجلسة حاضرة أصلًا (نجح detectSessionInUrl تلقائيًا).
+  const [phase, setPhase] = useState<'checking' | 'ready' | 'expired'>(() => (auth.session ? 'ready' : 'checking'))
+  const triedRecovery = useRef(false)
+
+  useEffect(() => {
+    // جلسة حاضرة (سياقيًا) → نموذج مباشرة.
+    if (auth.session) {
+      setPhase('ready')
+      return
+    }
+    // مرّة واحدة: نحاول استكمال الاستعادة (H1) — يبادل رمز الرابط بجلسة إن لم يلتقطه detectSessionInUrl.
+    if (triedRecovery.current) return
+    triedRecovery.current = true
+    let cancelled = false
+    void auth.completeRecovery().then((ok) => {
+      if (!cancelled) setPhase(ok ? 'ready' : 'expired')
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [auth])
+
   const pw = evaluatePassword(password)
   const canSubmit = pw.valid && confirm.length > 0 && !busy
 
@@ -67,10 +88,10 @@ export function ResetPasswordView({ lang, onDone }: ResetPasswordViewProps) {
         {/* أين أنا؟ */}
         <div className="text-center">
           <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-primary text-white shadow-glow">
-            <Icon name={done ? 'CheckCircle2' : hasRecoverySession ? 'KeyRound' : 'AlertTriangle'} className="h-7 w-7" strokeWidth={2.25} />
+            <Icon name={done ? 'CheckCircle2' : phase === 'expired' ? 'AlertTriangle' : 'KeyRound'} className="h-7 w-7" strokeWidth={2.25} />
           </span>
           <h1 className="heading mt-4 text-2xl">
-            {done ? t.auth.resetSuccess : hasRecoverySession ? t.auth.resetTitle : t.auth.resetExpiredTitle}
+            {done ? t.auth.resetSuccess : phase === 'expired' ? t.auth.resetExpiredTitle : t.auth.resetTitle}
           </h1>
         </div>
 
@@ -83,7 +104,13 @@ export function ResetPasswordView({ lang, onDone }: ResetPasswordViewProps) {
               {t.auth.back}
             </button>
           </>
-        ) : hasRecoverySession ? (
+        ) : phase === 'checking' ? (
+          /* نتحقّق من الرابط ونستكمل جلسة الاستعادة قبل الحكم بانتهاء الصلاحية. */
+          <p className="mt-6 flex items-center justify-center gap-2 text-center text-sm text-ink-500">
+            <Icon name="RefreshCw" className="h-4 w-4 animate-spin" />
+            {t.auth.resetChecking}
+          </p>
+        ) : phase === 'ready' ? (
           /* النموذج — حقلان + متطلّبات هادئة + إجراء أساسي واحد. */
           <>
             <p className="mt-2 text-center text-sm leading-relaxed text-ink-500">{t.auth.resetSubtitle}</p>
