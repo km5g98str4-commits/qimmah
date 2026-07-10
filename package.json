@@ -29,7 +29,8 @@
     "test:e2e:onboarding": "node scripts/e2e-onboarding.mjs",
     "test:e2e": "npm run build && node scripts/e2e-onboarding.mjs",
     "test:e2e:auth:preflight": "node scripts/e2e-auth/preflight.mjs",
-    "test:e2e:auth": "node scripts/e2e-auth/run.mjs"
+    "test:e2e:auth": "node scripts/e2e-auth/run.mjs",
+    "test:e2e:auth:preload": "node scripts/e2e-auth/preload-images.mjs"
   },
   "dependencies": {
     "@capacitor/core": "^8.4.1",

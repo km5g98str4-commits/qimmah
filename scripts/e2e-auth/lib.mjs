@@ -70,26 +70,51 @@ export function mailboxOf(email) {
   return email.split('@')[0]
 }
 
+/** يلتقط رابط الاستعادة من نصّ الرسالة (يُفضّل verify/recover/token/code). */
+export function pickRecoveryLink(body) {
+  const m = body.match(/https?:\/\/[^\s"'<>]+/g) || []
+  const raw = m.find((u) => /verify|recover|token|code=/.test(u)) || m[0] || null
+  if (!raw) return null
+  // فكّ ترميز HTML: روابط جسم HTML تحمل «&amp;» بدل «&»، فتصل معاملات verify مشوّهة لـ GoTrue
+  // (amp;type=…) ويردّ 400. نُعيدها سليمة قبل الاستخدام.
+  return raw
+    .replace(/&amp;/g, '&')
+    .replace(/&#0*38;/g, '&')
+    .replace(/&#x0*26;/gi, '&')
+}
+
 /**
- * يستخرج رابط الاستعادة من رسالة Inbucket. يقرأ آخر رسالة في صندوق البريد، ثم يلتقط
- * أول رابط verify/recovery. لا يطبع الرمز الكامل. يعيد الرابط أو null إن لم يصل بعد.
+ * يستخرج رابط الاستعادة من صندوق البريد المحلي. يدعم **Mailpit** (نسخ supabase الحديثة)
+ * و**Inbucket** (الأقدم) — كلاهما على المنفذ 54324. لا يطبع الرمز الكامل. يعيد الرابط أو null.
  */
-export async function fetchRecoveryLink(email, { attempts = 20, delayMs = 1000 } = {}) {
+export async function fetchRecoveryLink(email, { attempts = 30, delayMs = 1000 } = {}) {
   const box = mailboxOf(email)
   for (let i = 0; i < attempts; i++) {
+    // 1) Mailpit API
+    try {
+      const res = await fetch(`${LOCAL.inbucket}/api/v1/search?query=${encodeURIComponent('to:' + email)}`)
+      if (res.ok) {
+        const data = await res.json()
+        const msgs = data.messages || []
+        if (msgs.length) {
+          const full = await fetch(`${LOCAL.inbucket}/api/v1/message/${msgs[0].ID}`).then((r) => r.json())
+          const link = pickRecoveryLink(`${full.HTML ?? ''}\n${full.Text ?? ''}`)
+          if (link) return link
+        }
+      }
+    } catch {
+      /* ليس Mailpit أو ليس جاهزًا */
+    }
+    // 2) Inbucket API (احتياطي)
     try {
       const list = await fetch(`${LOCAL.inbucket}/api/v1/mailbox/${box}`).then((r) => r.json())
       if (Array.isArray(list) && list.length) {
-        const last = list[list.length - 1]
-        const msg = await fetch(`${LOCAL.inbucket}/api/v1/mailbox/${box}/${last.id}`).then((r) => r.json())
-        const body = `${msg.body?.html ?? ''}\n${msg.body?.text ?? ''}`
-        const m = body.match(/https?:\/\/[^\s"'<>]+/g) || []
-        // نفضّل رابط verify (تدفّق الاستعادة)، وإلا أول رابط.
-        const link = m.find((u) => /verify|recover|token|code=/.test(u)) || m[0]
+        const msg = await fetch(`${LOCAL.inbucket}/api/v1/mailbox/${box}/${list[list.length - 1].id}`).then((r) => r.json())
+        const link = pickRecoveryLink(`${msg.body?.html ?? ''}\n${msg.body?.text ?? ''}`)
         if (link) return link
       }
     } catch {
-      /* Inbucket قد لا يكون جاهزًا بعد */
+      /* ليس Inbucket أو ليس جاهزًا */
     }
     await sleep(delayMs)
   }
@@ -136,10 +161,10 @@ function shellQuote(s) {
 }
 
 /** يقرأ رابط/مفتاح Supabase المحلي من `supabase status -o env`. يرمي إن لم يكن محليًا. */
-export function localSupabaseEnv() {
+export function localSupabaseEnv(cwd = '.') {
   let out
   try {
-    out = execSync('npx --yes supabase status -o env', { encoding: 'utf8' })
+    out = execSync('npx --yes supabase status -o env', { encoding: 'utf8', cwd })
   } catch (e) {
     throw new Error('supabase CLI/stack غير متاح — شغّل `supabase start` أولًا. ' + (e.message || ''))
   }

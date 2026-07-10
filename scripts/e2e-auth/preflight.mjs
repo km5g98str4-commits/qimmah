@@ -12,6 +12,7 @@ import {
   randomTestEmail,
   randomPassword,
   mailboxOf,
+  pickRecoveryLink,
 } from './lib.mjs'
 
 let pass = 0
@@ -70,6 +71,8 @@ function pickLink(body) {
 const sampleHtml =
   '<p>مرحبًا</p><a href="http://127.0.0.1:54321/auth/v1/verify?token=REDACTED&type=recovery&redirect_to=http://127.0.0.1:4321/%23/reset">اضغط</a>'
 ok('يلتقط رابط verify من HTML', (pickLink(sampleHtml) || '').includes('/auth/v1/verify'))
+// فكّ ترميز HTML: يجب ألّا يبقى «&amp;» في الرابط الملتقَط (وإلا 400 من GoTrue).
+ok('يفكّ &amp; في رابط verify', !pickRecoveryLink('http://127.0.0.1:54321/auth/v1/verify?token=T&amp;type=recovery').includes('&amp;'))
 ok('يفضّل رابط الاستعادة على روابط أخرى', pickLink('http://a.b/x http://127.0.0.1/auth/v1/verify?token=t') === 'http://127.0.0.1/auth/v1/verify?token=t')
 ok('يعيد null بلا روابط', pickLink('لا روابط هنا') === null)
 

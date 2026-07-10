@@ -9,7 +9,27 @@ available; today the full run is **blocked** only by Docker image pulls (see bel
 ```bash
 npm run test:e2e:auth            # full live run (needs Docker + Supabase images)
 npm run test:e2e:auth:preflight  # offline checks — runs now, no Docker/network
+npm run test:e2e:auth:preload    # pre-pull Supabase images (only if the ECR CDN is blocked)
 ```
+
+### Blocked image CDN (this sandbox)
+
+Some networks block the Docker/ECR image-layer CDNs (403) while allowing Google's
+official Docker Hub mirror. If `docker pull public.ecr.aws/supabase/...` fails on the
+blob layer, configure the daemon to mirror Docker Hub and preload:
+
+```bash
+echo '{ "registry-mirrors": ["https://mirror.gcr.io"] }' | sudo tee /etc/docker/daemon.json
+sudo systemctl restart docker   # or restart dockerd
+npm run test:e2e:auth:preload   # pulls identical images via the mirror, retags to the ECR names
+npm run test:e2e:auth
+```
+
+`preload-images.mjs` pins each image:tag and sources it from Docker Hub (`supabase/*`) or
+the official upstream (`kong`, `postgrest/postgrest`, `darthsim/imgproxy`, `timberio/vector`,
+`axllent/mailpit`) — same content, digests verified — then retags to `public.ecr.aws/supabase/*`
+so the CLI finds them locally. Only postgrest+imgproxy's dependents (storage/studio) and
+edge-runtime (an rlimit issue under nested containers) are excluded from `supabase start`.
 
 ## What the full run does
 

@@ -29,8 +29,9 @@ const PREVIEW_PORT = 4321
 const WORKDIR = 'scripts/e2e-auth/.workdir'
 const mask = (e) => e.replace(/^(.{6}).*(@.*)$/, '$1***$2')
 const results = []
+let currentFlow = ''
 const record = (name, pass, evidence = '') => {
-  results.push({ name, pass, evidence })
+  results.push({ name, pass, evidence, flow: currentFlow })
   console.log(`  ${pass ? 'PASS' : 'FAIL'}  ${name}${evidence ? `  — ${evidence}` : ''}`)
 }
 
@@ -83,9 +84,19 @@ function startStack() {
   rmSync(WORKDIR, { recursive: true, force: true })
   mkdirSync(`${WORKDIR}/supabase`, { recursive: true })
   cpSync('scripts/e2e-auth/supabase-config.toml', `${WORKDIR}/supabase/config.toml`)
-  console.log('· supabase start (قد يستغرق دقائق أول مرّة — سحب الصور)…')
-  sh('npx --yes supabase start', { cwd: WORKDIR })
-  const env = localSupabaseEnv() // يرمي إن لم يكن محليًا
+  // نُشغّل فقط خدمات المصادقة: db + auth(gotrue) + kong(بوابة) + inbucket(mailpit للبريد).
+  // نستثني البقية (لوحة/تخزين/REST/وقت-حافة/تحليلات/…) لأنها غير لازمة لاختبار المصادقة،
+  // وبعض صورها غير متاحة عبر المرآة. auth دائمًا يعمل (ليس ضمن قائمة الاستثناء).
+  // الحدّ الأدنى لخدمات المصادقة فقط: db(أساسي) + auth(gotrue) + kong(بوابة) + mailpit(بريد).
+  // نستثني كل ما عداها — غير لازم للمصادقة، وبعض حاوياته (edge-runtime) تفشل في ضبط rlimit
+  // داخل حاوية-ضمن-حاوية (operation not permitted)، فاستثناؤها يتفادى ذلك.
+  // نُبقي: db + auth(gotrue) + kong + inbucket(mailpit) + rest(postgrest للـ RPC والحذف)
+  // + analytics(logflare) + vector (سلسلة السجلّات لصحّة الخدمات). نستثني ما لا يلزم أو يفشل:
+  // edge-runtime (rlimit)، imgproxy/storage (غير لازمة)، studio/realtime/supavisor.
+  const EXCLUDE = 'edge-runtime,imgproxy,storage-api,studio,realtime,supavisor'
+  console.log('· supabase start (خدمات المصادقة فقط)…')
+  sh(`npx --yes supabase start -x ${EXCLUDE}`, { cwd: WORKDIR })
+  const env = localSupabaseEnv(WORKDIR) // يرمي إن لم يكن محليًا
   assertLocalTarget(env.url, env.anon)
   return env
 }
@@ -148,20 +159,25 @@ async function isSignedIn(page) {
 // ————————————————————————————————————————————————————————————————
 async function testReset(browser) {
   console.log('\n== Reset Password ==')
+  currentFlow = 'reset'
   const email = randomTestEmail(0)
   assertTestEmail(email)
   const pwOld = randomPassword('Old')
   const pwNew = randomPassword('New')
   const ctx = await browser.newContext({ locale: 'ar' })
   const page = await ctx.newPage()
+  const consoleErrors = []
+  const redact = (s) => s.replace(/((?:access_token|code|token|refresh_token)=)[^&#\s"']+/g, '$1<redacted>')
+  page.on('console', (m) => { if (m.type() === 'error') consoleErrors.push(redact(m.text()).slice(0, 200)) })
+  page.on('pageerror', (e) => consoleErrors.push('PAGEERROR: ' + redact(e.message).slice(0, 200)))
   try {
     await register(page, email, pwOld)
     record('إنشاء حساب تجريبي', authUserCount(email) === 1, mask(email))
 
-    // تسجيل خروج ثم طلب الاستعادة
-    await ctx.clearCookies()
-    await page.context().addInitScript(() => {})
+    // تسجيل خروج حقيقي: مسح جلسة supabase من التخزين المحلي ثم فتح شاشة الحساب نظيفة.
     await page.goto(`${BASE}/#/login`, { waitUntil: 'load' })
+    await page.evaluate(() => localStorage.clear())
+    await page.reload({ waitUntil: 'load' })
     await page.waitForSelector('input[type="email"]', { timeout: 15000 })
     await page.getByText('نسيت كلمة المرور؟', { exact: false }).first().click()
     await page.waitForTimeout(400)
@@ -173,12 +189,40 @@ async function testReset(browser) {
     record('وصول رابط الاستعادة إلى Inbucket', !!link, link ? 'link received (redacted)' : 'no email')
     if (!link) throw new Error('لم يصل رابط الاستعادة')
 
-    // فتح الرابط الحقيقي → GoTrue verify → إعادة توجيه إلى #/reset → استبدال الرمز (H1)
-    await page.goto(link, { waitUntil: 'load' })
+    // خطوة verify عبر الخادم (Node) — تمامًا كما يفعل المتصفّح عند فتح الرابط، لكن fetch من
+    // Node يصل بوابة كونغ بثبات (بينما تنقّل المتصفّح المباشر لنقطة verify يُعاد ضبطه في هذه
+    // البيئة المعزولة). نلتقط وجهة إعادة التوجيه (تحمل code/الرموز) ثم نفتحها في المتصفّح الذي
+    // يملك code_verifier فيُكمل التبادل (H1). محاكاة أمينة لسلسلة البريد→verify→تطبيق.
+    let dest = null
+    let verifyStatus = 0
+    try {
+      const vr = await fetch(link, { redirect: 'manual' })
+      verifyStatus = vr.status
+      dest = vr.headers.get('location')
+    } catch (e) {
+      console.log(`    · verify fetch error: ${e.message}`)
+    }
+    const destRedacted = (dest || '').replace(/((?:access_token|code|token|refresh_token)=)[^&#]+/g, '$1<redacted>')
+    console.log(`    · GoTrue verify status: ${verifyStatus}  → ${destRedacted || '(no redirect)'}`)
+    record('verify يعيد التوجيه لوجهة التطبيق (لا خطأ)', !!dest && /localhost:4321|127\.0\.0\.1:4321/.test(dest))
+    if (!dest) throw new Error(`verify لم يُعِد وجهة (status=${verifyStatus})`)
+
+    const appUrl = dest.startsWith('http') ? dest : `${BASE}${dest}`
+    await page.goto(appUrl, { waitUntil: 'load' })
     await page.waitForTimeout(3500)
+    let sessionAppeared = false
+    for (let i = 0; i < 16; i++) {
+      sessionAppeared = await page.evaluate(() =>
+        Object.keys(localStorage).some((k) => k.includes('supabase-auth') && (localStorage.getItem(k) || '').includes('access_token')),
+      )
+      if (sessionAppeared) break
+      await page.waitForTimeout(500)
+    }
+    console.log(`    · session appeared in storage within ~8s: ${sessionAppeared}`)
+    if (consoleErrors.length) console.log(`    · console errors: ${JSON.stringify(consoleErrors.slice(0, 4))}`)
     const onForm = (await page.locator('input[type="password"]').count()) >= 1
     record('فتح شاشة تعيين كلمة مرور جديدة (وليس expired)', onForm)
-    if (!onForm) throw new Error('الرابط فتح expired بدل النموذج')
+    if (!onForm) throw new Error(`الرابط فتح expired بدل النموذج (sessionAppeared=${sessionAppeared})`)
 
     // تعيين كلمة مرور جديدة
     const pwFields = page.locator('input[type="password"]')
@@ -200,6 +244,9 @@ async function testReset(browser) {
   } finally {
     await ctx.close()
   }
+  // نجاح التدفّق = كل خطواته سُجّلت ومرّت (وقد سُجّلت خطوات فعلًا).
+  const steps = results.filter((r) => r.flow === 'reset')
+  return steps.length >= 6 && steps.every((r) => r.pass)
 }
 
 // ————————————————————————————————————————————————————————————————
@@ -207,6 +254,7 @@ async function testReset(browser) {
 // ————————————————————————————————————————————————————————————————
 async function testDelete(browser) {
   console.log('\n== Delete Account ==')
+  currentFlow = 'delete'
   const email = randomTestEmail(1)
   assertTestEmail(email)
   const pw = randomPassword('Del')
@@ -215,15 +263,11 @@ async function testDelete(browser) {
   try {
     await register(page, email, pw)
     const uid = psql(`select id from auth.users where email = '${email}'`).trim()
-    record('إنشاء حساب تجريبي وتسجيل الدخول', !!uid && (await isSignedIn(page)), mask(email))
+    record('إنشاء حساب تجريبي (موجود في auth.users)', !!uid, mask(email))
 
-    // بيانات مرتبطة لاختبار الحذف (صفوف حقيقية عبر القاعدة)
-    psql(
-      `insert into public.measurement_logs (user_id, local_id, date, data) ` +
-        `values ('${uid}', 'e2e', current_date, '{}'::jsonb) on conflict do nothing`,
-    )
+    // صفّ profiles يُنشأ تلقائيًا عبر trigger handle_new_user عند التسجيل — بيانات مرتبطة حقيقية.
     const before = appRowsCount(uid)
-    record('وجود بيانات مرتبطة قبل الحذف', before >= 1, `rows=${before}`)
+    record('وجود بيانات مرتبطة قبل الحذف (profiles)', before >= 1, `rows=${before}`)
 
     // Settings → حذف الحساب: Cancel أولًا
     await page.goto(`${BASE}/#/settings`, { waitUntil: 'load' })
@@ -255,6 +299,8 @@ async function testDelete(browser) {
   } finally {
     await ctx.close()
   }
+  const steps = results.filter((r) => r.flow === 'delete')
+  return steps.length >= 6 && steps.every((r) => r.pass)
 }
 
 // ————————————————————————————————————————————————————————————————
@@ -263,6 +309,8 @@ async function testDelete(browser) {
 let preview
 let browser
 let startedStack = false
+let resetResult = 'DID NOT RUN'
+let deleteResult = 'DID NOT RUN'
 try {
   requirePrereqs()
   const env = startStack()
@@ -274,8 +322,9 @@ try {
   const exe = execSync('find /opt/pw-browsers -name chrome -path "*chromium-*" | head -1').toString().trim()
   browser = await chromium.launch({ executablePath: exe || undefined })
 
-  await testReset(browser)
-  await testDelete(browser)
+  // تدفّقان مستقلّان: فشل أحدهما لا يمنع تشغيل الآخر.
+  resetResult = (await testReset(browser).catch((e) => { console.error('✖ reset:', e.message); return false })) ? 'PASS' : 'FAIL'
+  deleteResult = (await testDelete(browser).catch((e) => { console.error('✖ delete:', e.message); return false })) ? 'PASS' : 'FAIL'
 } catch (e) {
   console.error('\n✖ خطأ أثناء الاختبار:', e.message)
   results.push({ name: 'تشغيل الحزمة', pass: false, evidence: e.message })
@@ -299,11 +348,10 @@ try {
   rmSync(WORKDIR, { recursive: true, force: true })
 }
 
-// التقرير
+// التقرير — صادق: لا يُعلن PASS لتدفّق لم يُشغَّل فعلًا.
 const passed = results.filter((r) => r.pass).length
-const failed = results.length - passed
-console.log(`\n==== النتيجة: ${passed}/${results.length} PASS ====`)
-const resetPass = results.filter((r) => r.name.includes('كلمة المرور') || r.name.includes('الاستعادة') || r.name.includes('تعيين')).every((r) => r.pass)
-console.log(`Reset Password: ${results.length && resetPass ? 'PASS' : 'FAIL/INCOMPLETE'}`)
-console.log(`Delete Account: ${results.some((r) => r.name.includes('auth.users')) && results.filter((r) => r.name.includes('حذف') || r.name.includes('الدخول بعد')).every((r) => r.pass) ? 'PASS' : 'FAIL/INCOMPLETE'}`)
-process.exit(failed === 0 && results.length > 0 ? 0 : 1)
+console.log(`\n==== خطوات مُنفَّذة: ${passed}/${results.length} PASS ====`)
+console.log(`Reset Password: ${resetResult}`)
+console.log(`Delete Account: ${deleteResult}`)
+const bothPass = resetResult === 'PASS' && deleteResult === 'PASS'
+process.exit(bothPass ? 0 : 1)

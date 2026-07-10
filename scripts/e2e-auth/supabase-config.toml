@@ -22,11 +22,12 @@ port = 54324
 enabled = true
 # أصل التطبيق أثناء الاختبار (vite preview) — يُسمح به كوجهة إعادة توجيه الاستعادة.
 site_url = "http://localhost:4321"
+# أنماط glob — GoTrue يطابق redirect_to كاملًا (بما فيه المسار/الهاش) بأنماط، فنحتاج «**».
 additional_redirect_urls = [
+  "http://localhost:4321/**",
+  "http://127.0.0.1:4321/**",
   "http://localhost:4321",
-  "http://localhost:4321/",
   "http://127.0.0.1:4321",
-  "http://127.0.0.1:4321/",
 ]
 jwt_expiry = 3600
 enable_signup = true
