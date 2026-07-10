@@ -1,0 +1,149 @@
+/* ============================================================================
+ * Qimmah — Semantic Design Tokens (SEAM / drop-in point)
+ * ============================================================================
+ *
+ * ⚠️ TEMPORARY VALUES — NOT AN APPROVED VISUAL DIRECTION.
+ *
+ * This file is the single semantic seam that Cloud Design's *approved* tokens
+ * drop into later. Today it only ALIASES the values already shipping in
+ * `styles/index.css` (the current dark build). Those inherited values are the
+ * previous deep-night / warm-stone look, which the founder explicitly did NOT
+ * approve for the app — see docs/design/DESIGN-SOURCE-OF-TRUTH.md. Do NOT treat
+ * anything here as final branding, and do NOT let the old luxury palette be
+ * silently re-enshrined through this file.
+ *
+ * Rules:
+ *   • One source of truth: raw color values live in styles/index.css as
+ *     `--c-*`. This file maps them to *semantic* names only (no new raw hex for
+ *     colors). Non-color scales (spacing/radius/motion/type) are neutral
+ *     engineering scales, not brand decisions.
+ *   • Components should migrate to these semantic names over time so that a
+ *     future approved-token drop changes the whole app from one place.
+ *   • Additive & reversible: importing this file changes no rendered pixel
+ *     (aliases resolve to the current values).
+ *
+ * When Cloud Design ships approved tokens: replace the right-hand sides here
+ * (and/or the `--c-*` source in index.css) — components stay untouched.
+ * ============================================================================ */
+
+:root {
+  /* ---- Color · semantic (alias → current temporary source in index.css) ---- */
+  --color-bg-page: rgb(var(--c-page));
+  --color-surface: rgb(var(--c-surface));
+  --color-surface-raised: rgb(var(--c-beige));
+  --color-border: rgb(var(--c-line));
+
+  --color-text-primary: rgb(var(--c-ink-900));
+  --color-text-secondary: rgb(var(--c-ink-700));
+  --color-text-muted: rgb(var(--c-ink-500));
+  --color-text-disabled: rgb(var(--c-ink-400));
+
+  --color-action-primary: var(--c-primary);
+  --color-action-accent: var(--c-accent);
+  --color-focus-ring: var(--c-primary);
+
+  /* Status — meaning must never be color-only (pair with icon/text). */
+  --color-success: #3e9e6b;
+  --color-info: var(--c-accent);
+  --color-warning: #e0941f;
+  --color-danger: #d6553a;
+  --color-destructive: #d6553a;
+
+  /* Domain states — placeholders until Cloud Design defines them.
+     Intentionally alias to primary/accent so nothing looks broken. */
+  --color-state-workout: var(--c-primary);
+  --color-state-nutrition: var(--c-accent);
+  --color-state-progress: #3e9e6b;
+  --color-state-reminder: var(--c-accent);
+
+  /* Skeleton / loading */
+  --color-skeleton: rgb(var(--c-beige));
+
+  /* ---- Typography · semantic (family centralized; scale is neutral) ---- */
+  /* Family kept as the current safe font (Tajawal). Native self-hosting is a
+     documented follow-up — see docs/ios/IOS-FOUNDATION-STATUS.md. */
+  --font-family-base: 'Tajawal', system-ui, sans-serif;
+  --font-family-display: 'Tajawal', system-ui, sans-serif;
+  /* Tabular numerals for metrics/timers (weights, calories, countdowns). */
+  --font-numeric: 'Tajawal', system-ui, sans-serif;
+  --font-numeric-feature: 'tnum' 1, 'lnum' 1;
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+  --font-weight-black: 900;
+
+  /* Type scale (rem) — neutral, matches current usage; not a brand decision. */
+  --font-size-caption: 0.75rem;
+  --font-size-body-sm: 0.875rem;
+  --font-size-body: 1rem;
+  --font-size-title-sm: 1.125rem;
+  --font-size-title: 1.5rem;
+  --font-size-display: 2rem;
+  --font-size-metric: 2.25rem;
+
+  --line-height-tight: 1.2;
+  --line-height-snug: 1.4;
+  --line-height-normal: 1.6;
+
+  /* ---- Spacing · 4px base (neutral engineering scale) ---- */
+  --space-0: 0;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+
+  /* ---- Radius (matches current rounded-* usage) ---- */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+  --radius-2xl: 1.5rem;
+  --radius-pill: 9999px;
+
+  /* ---- Elevation (alias to current dark-tuned shadows; temporary) ---- */
+  --elevation-card: 0 1px 2px 0 rgba(0, 0, 0, 0.3), 0 14px 34px -18px rgba(0, 0, 0, 0.55);
+  --elevation-raised: 0 2px 4px 0 rgba(0, 0, 0, 0.35), 0 24px 56px -20px rgba(0, 0, 0, 0.7);
+
+  /* ---- Icon sizes ---- */
+  --icon-sm: 1rem;
+  --icon-md: 1.25rem;
+  --icon-lg: 1.5rem;
+
+  /* ---- Opacity ---- */
+  --opacity-disabled: 0.5;
+  --opacity-muted: 0.7;
+
+  /* ---- Motion · duration + easing (respects Reduced Motion globally) ---- */
+  --motion-duration-instant: 80ms;
+  --motion-duration-fast: 150ms;
+  --motion-duration-base: 250ms;
+  --motion-duration-slow: 400ms;
+  --motion-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --motion-ease-decelerate: cubic-bezier(0, 0, 0, 1);
+  --motion-ease-accelerate: cubic-bezier(0.3, 0, 1, 1);
+
+  /* ---- Layout · mobile shell ---- */
+  --layout-max-width: 30rem; /* content column cap on large screens */
+  --layout-tabbar-height: 3.5rem;
+  --layout-touch-min: 2.75rem; /* 44px — Apple HIG minimum target */
+  --safe-area-top: var(--safe-top);
+  --safe-area-bottom: var(--safe-bottom);
+}
+
+/* Reduced Motion: neutralize motion durations at the token layer too, so any
+   token-driven animation collapses (belt-and-suspenders with the global rule
+   in styles/index.css). */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-duration-instant: 0.001ms;
+    --motion-duration-fast: 0.001ms;
+    --motion-duration-base: 0.001ms;
+    --motion-duration-slow: 0.001ms;
+  }
+}

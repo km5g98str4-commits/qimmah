@@ -12,6 +12,9 @@ import { initAnalytics, track } from './lib/analytics'
 // وحدة PWA: تلتقط حدث beforeinstallprompt مبكرًا (يُطلق مرّة واحدة فقط) لعرض زر التثبيت لاحقًا.
 import './lib/pwa'
 import './styles/index.css'
+// طبقة الرموز الدلالية (seam) — إضافية وعكوسة، تُحيل للقيم الحالية المؤقتة فقط
+// (ليست هوية معتمدة). نقطة الإسقاط لرموز Cloud Design المعتمدة لاحقًا.
+import './design-system/tokens.css'
 
 // سيم الخطوات: يُتيح لغلاف أصلي مستقبلي (تطبيق آيفون يقرأ Apple Health) دفع الخطوات.
 registerStepBridge()
