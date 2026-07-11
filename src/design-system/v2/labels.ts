@@ -49,6 +49,8 @@ export interface V2WelcomeCopy {
   support: string
   primary: string
   secondary: string
+  /** Calm trust line above the CTA — honest, anti-hype (warm MSA). */
+  trust: string
 }
 
 /**
@@ -63,6 +65,7 @@ export const V2_WELCOME: Record<'ar' | 'en', V2WelcomeCopy> = {
     support: 'تمرينك وتغذيتك وتقدمك في مكان واحد — بالعربية، وبخطوات واضحة.',
     primary: 'ابدأ الآن',
     secondary: 'لديك حساب؟ تسجيل الدخول',
+    trust: 'بلا إعلانات، وبلا مبالغات.',
   },
   en: {
     brand: 'Qimmah',
@@ -70,5 +73,6 @@ export const V2_WELCOME: Record<'ar' | 'en', V2WelcomeCopy> = {
     support: 'Your training, nutrition, and progress in one place — Arabic-first, in clear steps.',
     primary: 'Start now',
     secondary: 'Have an account? Log in',
+    trust: 'No ads. No hype.',
   },
 } as const
