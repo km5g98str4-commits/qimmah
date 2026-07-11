@@ -27,6 +27,40 @@ const toAr = (n: number, lang: Lang) => (lang === 'en' ? String(n) : String(n).r
 const fmtTime = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
 
 /**
+ * Validate a persisted/candidate active session against the CURRENT plan.
+ * localStorage is treated as hostile input: the stored session may belong to an
+ * older generated workout (different/removed exercises), be malformed, or have
+ * out-of-range indices. Returns true only if the session is fully usable for the
+ * current plan — every current exercise has a non-empty rows array, and the
+ * exIndex/setIndex are in bounds. A type guard so callers get a real ActiveState.
+ */
+function isUsableSession(value: unknown, exercises: WorkoutV2Exercise[]): value is ActiveState {
+  if (!value || typeof value !== 'object') return false
+  const s = value as Partial<ActiveState>
+  if (exercises.length === 0) return false
+  if (!Number.isInteger(s.exIndex) || (s.exIndex as number) < 0 || (s.exIndex as number) >= exercises.length) return false
+  if (!Number.isInteger(s.setIndex) || (s.setIndex as number) < 0) return false
+  if (!Number.isInteger(s.startedAt)) return false
+  if (!s.rows || typeof s.rows !== 'object') return false
+  const rows = s.rows as Record<string, unknown>
+  // Every exercise in the CURRENT plan must have a non-empty set array (i.e. the
+  // session belongs to this plan — stale ids fail here on exercise 0).
+  for (const ex of exercises) {
+    const r = rows[ex.id]
+    if (!Array.isArray(r) || r.length === 0) return false
+    for (const item of r) {
+      if (!item || typeof item !== 'object') return false
+      const row = item as Partial<SetRow>
+      if (typeof row.weight !== 'number' || typeof row.reps !== 'number' || typeof row.done !== 'boolean') return false
+    }
+  }
+  // Current set index must be inside the current exercise's rows.
+  const curRows = rows[exercises[s.exIndex as number].id] as SetRow[]
+  if ((s.setIndex as number) >= curRows.length) return false
+  return true
+}
+
+/**
  * Workout v2 — Qimmah v2.1 (Slice 4). Preview-gated (WorkoutView branches here
  * under isDesignV2). Self-contained internal navigation: Plan → Exercise Detail
  * → Active Workout (set editor + rest timer) → Complete. Reads the real
@@ -46,21 +80,46 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   const [resting, setResting] = useState(false)
   const [rest, setRest] = useState(REST_DEFAULT)
 
-  // Restore an in-progress session on mount.
+  // Restore an in-progress session on mount — but NEVER trust localStorage.
+  // Only resume if the persisted session is fully usable for the current plan;
+  // otherwise discard just our own key and stay safely on the Plan screen.
   useEffect(() => {
+    let parsed: unknown = null
     try {
       const raw = localStorage.getItem(ACTIVE_KEY)
-      if (raw) {
-        const s = JSON.parse(raw) as ActiveState
-        if (s && typeof s.exIndex === 'number' && s.rows) {
-          setActive(s)
-          setScreen('active')
-        }
-      }
+      if (!raw) return
+      parsed = JSON.parse(raw)
     } catch {
-      /* ignore corrupt state */
+      parsed = null // malformed JSON
     }
+    if (isUsableSession(parsed, model.exercises)) {
+      setActive(parsed)
+      setScreen('active')
+    } else {
+      try {
+        localStorage.removeItem(ACTIVE_KEY)
+      } catch {
+        /* storage unavailable */
+      }
+    }
+    // Mount-only restore against the plan present at mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // Safety net: if we somehow end up on the active screen with an unusable
+  // session (e.g. the plan regenerated mid-session), discard it and fall back to
+  // Plan — from an EFFECT, so render stays pure and never dereferences undefined.
+  useEffect(() => {
+    if (screen === 'active' && !isUsableSession(active, model.exercises)) {
+      try {
+        localStorage.removeItem(ACTIVE_KEY)
+      } catch {
+        /* storage unavailable */
+      }
+      setActive(null)
+      setScreen('plan')
+    }
+  }, [screen, active, model.exercises])
 
   // Persist active session.
   useEffect(() => {
@@ -98,12 +157,15 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
     setActive(null)
   }
 
-  if (screen === 'plan') return <PlanScreen model={model} lang={lang} onExercise={(i) => { setDetailIdx(i); setScreen('detail') }} onStart={startSession} onBack={() => onNavigate('dashboard')} />
+  const planScreen = <PlanScreen model={model} lang={lang} onExercise={(i) => { setDetailIdx(i); setScreen('detail') }} onStart={startSession} onBack={() => onNavigate('dashboard')} />
+  if (screen === 'plan') return planScreen
   if (screen === 'detail') return <DetailScreen ex={model.exercises[detailIdx]} idx={detailIdx} total={model.exercises.length} lang={lang} onStart={startSession} onBack={() => setScreen('plan')} />
   if (screen === 'complete') return <CompleteScreen model={model} active={active} lang={lang} onDone={() => { clearActive(); onNavigate('dashboard') }} />
 
-  // ── Active workout ──
-  if (!active) { startSession(); return null }
+  // ── Active workout ── Render PURELY. If the session is not usable for the
+  // current plan, render the Plan screen (the safety-net effect above resets the
+  // screen state) — never call setState in render, never dereference undefined.
+  if (!isUsableSession(active, model.exercises)) return planScreen
   const ex = model.exercises[active.exIndex]
   const rows = active.rows[ex.id]
   const row = rows[active.setIndex]
