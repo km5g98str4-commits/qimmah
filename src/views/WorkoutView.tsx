@@ -23,6 +23,8 @@ import { persistFinishedSession } from '@/lib/finishWorkout'
 import { evaluateAchievements, registerWorkoutPRs } from '@/features/achievements/engine'
 import { weeklyAdherenceStreak } from '@/lib/streaks'
 import { getExercise } from '@/data/exercises'
+import { isDesignV2 } from '@/design-system/designPreview'
+import { WorkoutV2 } from '@/views/WorkoutV2'
 import type { WorkoutSession } from '@/lib/workoutSessions'
 import type { PlanDay } from '@/types/workout'
 
@@ -40,6 +42,14 @@ interface WorkoutViewProps {
 
 /** تبويب التمرين — بدء سريع، خطتي المولّدة، وقوالبي. لا «قوالب جاهزة» — الخطة تُولَّد من بياناتك. */
 export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
+  // v2.1 preview (dev-only): the v2 workout loop. Default/production keeps v1.
+  if (isDesignV2()) {
+    return <WorkoutV2 lang={lang} onNavigate={onNavigate} />
+  }
+  return <WorkoutViewV1 lang={lang} onNavigate={onNavigate} />
+}
+
+function WorkoutViewV1({ lang, onNavigate }: WorkoutViewProps) {
   const { customization } = useCustomization()
   const auth = useAuth()
   const userId = auth.user?.id ?? null
