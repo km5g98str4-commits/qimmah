@@ -49,7 +49,7 @@ export function TodayV2({ lang, onNavigate }: TodayV2Props) {
 
   return (
     <div dir={ar ? 'rtl' : 'ltr'} className="min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
-      <div className="mx-auto w-full max-w-md space-y-4">
+      <div className="mx-auto w-full max-w-md space-y-4 animate-fade-up">
         {/* Header — أين أنا؟ */}
         <header className="flex items-center justify-between pt-1">
           <div>
@@ -158,7 +158,7 @@ function Ring({ percent, muted, icon }: { percent: number; muted: boolean; icon:
       <svg className="absolute inset-0 -rotate-90" viewBox="0 0 44 44" aria-hidden="true">
         <circle cx="22" cy="22" r={r} fill="none" stroke="rgb(var(--c-line))" strokeWidth="4" />
         {!muted && percent > 0 && (
-          <circle cx="22" cy="22" r={r} fill="none" stroke="var(--c-primary)" strokeWidth="4" strokeLinecap="round" strokeDasharray={c} strokeDashoffset={off} />
+          <circle cx="22" cy="22" r={r} fill="none" stroke="var(--c-primary)" strokeWidth="4" strokeLinecap="round" strokeDasharray={c} strokeDashoffset={off} className="motion-safe:transition-[stroke-dashoffset] motion-safe:duration-700 motion-safe:ease-out" />
         )}
       </svg>
       <Icon name={icon} className={cn('h-4.5 w-4.5', muted ? 'text-ink-400' : 'text-ink-700')} />

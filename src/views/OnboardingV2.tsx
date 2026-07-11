@@ -378,7 +378,7 @@ function ReadyScreen({ lang, t, goalLabel, days, duration, split, placeLabel, fi
       </div>
       <div className="app-container relative z-10 flex flex-1 flex-col px-6" style={{ paddingTop: 'max(1rem, var(--safe-top))', paddingBottom: 'max(1.75rem, var(--safe-bottom))' }}>
         <div className="flex flex-1 flex-col items-center justify-center text-center">
-          <span className="grid h-16 w-16 place-items-center rounded-2xl bg-primary text-white shadow-glow">
+          <span className="grid h-16 w-16 animate-pop-in place-items-center rounded-2xl bg-primary text-white shadow-glow">
             <Icon name="Check" className="h-8 w-8" strokeWidth={3} />
           </span>
           <p className="mt-5 text-xs font-black uppercase tracking-widest text-primary">{t.ready.eyebrow}</p>

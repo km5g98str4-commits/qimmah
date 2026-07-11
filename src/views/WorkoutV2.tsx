@@ -284,7 +284,7 @@ function PlanScreen({ model, lang, onExercise, onStart, onBack }: { model: Retur
   })
   return (
     <div dir={ar ? 'rtl' : 'ltr'} className="min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
-      <div className="mx-auto w-full max-w-md">
+      <div className="mx-auto w-full max-w-md animate-fade-up">
         <button type="button" onClick={onBack} aria-label={ar ? 'رجوع' : 'Back'} className="grid h-10 w-10 place-items-center rounded-xl border border-line bg-surface"><Icon name="ChevronRight" className="h-5 w-5" /></button>
         <p className="mt-4 text-xs font-black uppercase tracking-wider text-primary">{ar ? model.program.titleAr : model.program.titleEn} · {ar ? model.program.contextAr : model.program.contextEn}</p>
         <h1 className="mt-1 text-3xl font-black tracking-tight">{model.session.title}</h1>
@@ -367,7 +367,7 @@ function CompleteScreen({ model, active, lang, onDone }: { model: ReturnType<typ
   const durationMin = active ? Math.max(1, Math.round((Date.now() - active.startedAt) / 60000)) : 0
   return (
     <div dir={ar ? 'rtl' : 'ltr'} className="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-page px-6 text-center text-ink-900">
-      <span className="grid h-16 w-16 place-items-center rounded-2xl bg-primary text-white shadow-glow"><Icon name="Check" className="h-8 w-8" strokeWidth={3} /></span>
+      <span className="grid h-16 w-16 animate-pop-in place-items-center rounded-2xl bg-primary text-white shadow-glow"><Icon name="Check" className="h-8 w-8" strokeWidth={3} /></span>
       <h1 className="mt-5 text-3xl font-black">{ar ? 'أنهيت الجلسة' : 'Session complete'}</h1>
       <p className="mt-1 text-sm text-ink-500">{model.session.title}</p>
       <div className="mt-6 grid w-full max-w-xs grid-cols-3 gap-3">
