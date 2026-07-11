@@ -175,7 +175,7 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
             type="button"
             onClick={next}
             disabled={!canNext}
-            className="btn-primary w-full py-4 text-base disabled:cursor-not-allowed disabled:opacity-40"
+            className="btn-primary w-full py-4 text-[1.1875rem] disabled:cursor-not-allowed disabled:opacity-40"
           >
             {step === 2 ? t.equipment.cta : t.next}
           </button>
@@ -395,7 +395,7 @@ function ReadyScreen({ lang, t, goalLabel, days, duration, split, placeLabel, fi
 
         <div className="space-y-3">
           <p className="text-center text-[0.7rem] font-medium text-ink-400">{t.ready.previewNote}</p>
-          <button type="button" onClick={onEnter} disabled={finalizing} className="btn-primary w-full py-4 text-base shadow-glow disabled:opacity-60">
+          <button type="button" onClick={onEnter} disabled={finalizing} className="btn-primary w-full py-4 text-[1.1875rem] shadow-glow disabled:opacity-60">
             {finalizing ? (
               <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-white/40 border-t-white" aria-label={t.ready.enter} />
             ) : (

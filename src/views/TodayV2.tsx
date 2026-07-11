@@ -49,7 +49,7 @@ export function TodayV2({ lang, onNavigate }: TodayV2Props) {
 
   return (
     <div dir={ar ? 'rtl' : 'ltr'} className="min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
-      <div className="mx-auto w-full max-w-md space-y-4 animate-fade-up">
+      <div className="mx-auto w-full max-w-md space-y-5 animate-fade-up">
         {/* Header — أين أنا؟ */}
         <header className="flex items-center justify-between pt-1">
           <div>
@@ -74,17 +74,19 @@ export function TodayV2({ lang, onNavigate }: TodayV2Props) {
             </p>
             <h2 className="mt-3 text-2xl font-black leading-tight">{model.nextAction.title}</h2>
             <p className="mt-2 text-sm leading-relaxed text-ink-500">{model.nextAction.subtitle}</p>
-            <button type="button" onClick={() => go(model.nextAction)} className="btn-primary mt-4 w-full py-3.5 text-base">
+            <button type="button" onClick={() => go(model.nextAction)} className="btn-primary mt-4 w-full py-3.5 text-[1.1875rem]">
               {model.nextAction.ctaLabel}
             </button>
           </div>
         </section>
 
+        {/* State band — momentum + its nudges read as one cluster (section.gap.tight 12). */}
+        <div className="space-y-3">
         {/* Momentum track — 4 pillars, glanceable in 3s. */}
         <section className="rounded-2xl border border-line bg-surface p-4">
           <div className="flex items-center justify-between">
             <span className="text-sm font-black">{ar ? 'زخم اليوم' : 'Today’s momentum'}</span>
-            <span className="text-xs font-bold text-ink-500">{model.dayProgress.completedCount}/{model.dayProgress.totalCount}</span>
+            <span className="text-xs font-bold tabular-nums text-ink-500">{model.dayProgress.completedCount}/{model.dayProgress.totalCount}</span>
           </div>
           <div className="mt-3 grid grid-cols-4 gap-2">
             {PILLARS.map((p) => {
@@ -129,6 +131,7 @@ export function TodayV2({ lang, onNavigate }: TodayV2Props) {
             ))}
           </section>
         )}
+        </div>
 
         {/* Quick log — secondary, calm. */}
         <section className="rounded-2xl border border-line bg-surface p-4">

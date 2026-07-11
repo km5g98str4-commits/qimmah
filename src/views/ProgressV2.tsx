@@ -29,7 +29,7 @@ export function ProgressV2({ lang, onNavigate }: ProgressV2Props) {
 
   return (
     <div dir={ar ? 'rtl' : 'ltr'} className="min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
-      <div className="mx-auto w-full max-w-md space-y-4 animate-fade-up">
+      <div className="mx-auto w-full max-w-md space-y-5 animate-fade-up">
         <header className="flex items-center justify-between pt-1">
           <h1 className="text-2xl font-black tracking-tight">{t('التقدم', 'Progress')}</h1>
           {model.goalLabel && <span className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-bold text-primary">{model.goalLabel}</span>}
@@ -48,7 +48,7 @@ export function ProgressV2({ lang, onNavigate }: ProgressV2Props) {
         <section className="rounded-2xl border border-line bg-surface p-4">
           <div className="flex items-center justify-between">
             <span className="text-sm font-black">{t('الزخم', 'Momentum')}</span>
-            <span className="text-xs font-bold text-ink-500">{model.momentum.overallScore}/100</span>
+            <span className="text-xs font-bold tabular-nums text-ink-500">{model.momentum.overallScore}/100</span>
           </div>
           <div className="mt-3 grid grid-cols-4 gap-2 text-center">
             <ScorePill label={t('تدريب', 'Train')} v={model.momentum.trainingScore} />
@@ -102,7 +102,7 @@ function ScorePill({ label, v }: { label: string; v: number }) {
   return (
     <div>
       <div className="mx-auto grid h-11 w-11 place-items-center rounded-full border-2 border-line">
-        <span className={cn('text-sm font-black', v > 0 ? 'text-primary' : 'text-ink-400')}>{v}</span>
+        <span className={cn('text-sm font-black tabular-nums', v > 0 ? 'text-primary' : 'text-ink-400')}>{v}</span>
       </div>
       <p className="mt-1 text-[0.65rem] font-bold text-ink-500">{label}</p>
     </div>
@@ -113,7 +113,7 @@ function Tile({ icon, title, main, sub, onClick }: { icon: string; title: string
   return (
     <button type="button" onClick={onClick} className="rounded-2xl border border-line bg-surface p-4 text-start transition-colors hover:border-primary/40">
       <span className="flex items-center gap-2 text-xs font-bold text-ink-500"><Icon name={icon} className="h-4 w-4" />{title}</span>
-      <p className="mt-2 text-lg font-black">{main}</p>
+      <p className="mt-2 text-lg font-black tabular-nums">{main}</p>
       <p className="text-xs text-ink-500">{sub}</p>
     </button>
   )

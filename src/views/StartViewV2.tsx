@@ -58,7 +58,7 @@ export function StartViewV2({ lang, onLogin, onSignup }: StartViewV2Props) {
 
           <span className="mt-8 block h-1 w-10 rounded-full bg-primary" />
 
-          <h1 className="mt-5 text-[2.35rem] font-black leading-[1.14] tracking-tight text-ink-900 sm:text-5xl">
+          <h1 className="mt-5 font-display text-[2.35rem] font-black leading-[1.14] tracking-tight text-ink-900 sm:text-5xl">
             <span className="block">{c.headline[0]}</span>
             <span className="block text-primary">{c.headline[1]}</span>
           </h1>
@@ -72,7 +72,7 @@ export function StartViewV2({ lang, onLogin, onSignup }: StartViewV2Props) {
         {/* Bottom — calm trust line, then one ember primary + calm secondary. */}
         <div className="space-y-3">
           <p className="text-center text-xs font-medium text-ink-500">{c.trust}</p>
-          <button type="button" onClick={onSignup} className="btn-primary w-full py-4 text-base shadow-glow">
+          <button type="button" onClick={onSignup} className="btn-primary w-full py-4 text-[1.1875rem] shadow-glow">
             {c.primary}
           </button>
           <button

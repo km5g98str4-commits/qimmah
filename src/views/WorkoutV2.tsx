@@ -224,7 +224,7 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
             {rows.map((r, i) => (
               <div key={i} className={cn('flex items-center justify-between rounded-xl border px-4 py-2.5 text-sm', i === active.setIndex ? 'border-primary bg-primary/10' : r.done ? 'border-line bg-surface text-ink-500' : 'border-line bg-surface')}>
                 <span className="font-bold">{t(`المجموعة ${toAr(i + 1, lang)}`, `Set ${i + 1}`)}</span>
-                <span className={cn('font-bold', r.done && 'text-success')}>{toAr(r.weight, lang)} {t('كجم', 'kg')} × {toAr(r.reps, lang)}{r.done ? ' ✓' : ''}</span>
+                <span className={cn('font-bold tabular-nums', r.done && 'text-success')}>{toAr(r.weight, lang)} {t('كجم', 'kg')} × {toAr(r.reps, lang)}{r.done ? ' ✓' : ''}</span>
               </div>
             ))}
           </div>
@@ -235,7 +235,7 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
             <Stepper label={t('التكرار', 'Reps')} value={row.reps} step={1} onChange={(v) => setRow({ reps: Math.max(0, v) })} lang={lang} />
           </div>
 
-          <button type="button" onClick={finishSet} className="btn-primary mt-6 w-full py-4 text-lg">{t('أنهِ المجموعة', 'Complete set')}</button>
+          <button type="button" onClick={finishSet} className="btn-primary mt-6 w-full py-4 text-[1.1875rem]">{t('أنهِ المجموعة', 'Complete set')}</button>
         </main>
       )}
     </div>
@@ -316,7 +316,7 @@ function PlanScreen({ model, lang, onExercise, onStart, onBack }: { model: Retur
 
         {/* In-flow primary CTA — sits within the scroll (above the app tab bar,
             which a fixed footer would collide with), so it's always tappable. */}
-        <button type="button" onClick={onStart} className="btn-primary mt-6 w-full py-4 text-lg shadow-glow">{ar ? 'ابدأ الجلسة' : 'Start session'}</button>
+        <button type="button" onClick={onStart} className="btn-primary mt-6 w-full py-4 text-[1.1875rem] shadow-glow">{ar ? 'ابدأ الجلسة' : 'Start session'}</button>
       </div>
     </div>
   )
@@ -351,7 +351,7 @@ function DetailScreen({ ex, idx, total, lang, onStart, onBack }: { ex: WorkoutV2
         </ul>
 
         <div className="mt-6 space-y-2.5">
-          <button type="button" onClick={onStart} className="btn-primary w-full py-4 text-base">{ar ? 'ابدأ التمرين' : 'Start exercise'}</button>
+          <button type="button" onClick={onStart} className="btn-primary w-full py-4 text-[1.1875rem]">{ar ? 'ابدأ التمرين' : 'Start exercise'}</button>
           <button type="button" disabled aria-disabled className="w-full rounded-2xl border border-line bg-surface py-3 text-sm font-bold text-ink-400" title={ar ? 'الاستبدال قادم لاحقًا' : 'Replace coming later'}>{ar ? 'استبدال · لاحقًا' : 'Replace · later'}</button>
         </div>
       </div>
@@ -375,7 +375,7 @@ function CompleteScreen({ model, active, lang, onDone }: { model: ReturnType<typ
         <Stat label={ar ? 'المجموعات' : 'Sets'} value={toAr(totalSets, lang)} />
         <Stat label={ar ? 'الحجم كجم' : 'Volume kg'} value={toAr(volume, lang)} />
       </div>
-      <button type="button" onClick={onDone} className="btn-primary mt-8 w-full max-w-xs py-4 text-base shadow-glow">{ar ? 'حفظ وإنهاء' : 'Save & finish'}</button>
+      <button type="button" onClick={onDone} className="btn-primary mt-8 w-full max-w-xs py-4 text-[1.1875rem] shadow-glow">{ar ? 'حفظ وإنهاء' : 'Save & finish'}</button>
       <p className="mt-3 text-[0.7rem] text-ink-400">{ar ? 'محفوظ على هذا الجهاز فقط.' : 'Saved on this device only.'}</p>
     </div>
   )
@@ -388,7 +388,7 @@ function MissingPlan({ lang, onNavigate }: { lang: Lang; onNavigate: (r: AppRout
       <Icon name="Dumbbell" className="h-12 w-12 text-ink-400" />
       <h1 className="mt-5 text-2xl font-black">{ar ? 'أكمل إعداد خطتك' : 'Finish setting up your plan'}</h1>
       <p className="mt-2 max-w-xs text-sm text-ink-500">{ar ? 'نحتاج هدفك وجدولك لنبني تمرينك.' : 'We need your goal and schedule to build your workout.'}</p>
-      <button type="button" onClick={() => onNavigate('setup')} className="btn-primary mt-6 w-full max-w-xs py-4">{ar ? 'ابدأ الإعداد' : 'Start setup'}</button>
+      <button type="button" onClick={() => onNavigate('setup')} className="btn-primary mt-6 w-full max-w-xs py-4 text-[1.1875rem]">{ar ? 'ابدأ الإعداد' : 'Start setup'}</button>
     </div>
   )
 }
@@ -397,5 +397,5 @@ function Chip({ icon, text }: { icon: string; text: string }) {
   return <span className="flex items-center gap-1 rounded-full border border-line bg-surface px-2.5 py-1"><Icon name={icon} className="h-3.5 w-3.5" />{text}</span>
 }
 function Stat({ label, value, muted }: { label: string; value: string; muted?: boolean }) {
-  return <div className="rounded-xl border border-line bg-surface px-2 py-3 text-center"><p className={cn('text-lg font-black', muted && 'text-ink-400')}>{value}</p><p className="mt-0.5 text-[0.65rem] font-bold text-ink-500">{label}</p></div>
+  return <div className="rounded-xl border border-line bg-surface px-2 py-3 text-center"><p className={cn('text-lg font-black tabular-nums', muted && 'text-ink-400')}>{value}</p><p className="mt-0.5 text-[0.65rem] font-bold text-ink-500">{label}</p></div>
 }

@@ -37,7 +37,7 @@ export function ProfileV2({ lang, onNavigate }: ProfileV2Props) {
 
   return (
     <div dir={ar ? 'rtl' : 'ltr'} className="min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
-      <div className="mx-auto w-full max-w-md space-y-4 animate-fade-up">
+      <div className="mx-auto w-full max-w-md space-y-5 animate-fade-up">
         <h1 className="pt-1 text-2xl font-black tracking-tight">{t('ملفك التدريبي', 'Your training profile')}</h1>
 
         {/* Identity card */}

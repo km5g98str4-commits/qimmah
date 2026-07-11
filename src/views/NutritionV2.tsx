@@ -44,7 +44,7 @@ export function NutritionV2({ lang }: NutritionV2Props) {
   const heroClr = model.hero.category === 'protein' ? 'text-primary' : model.hero.category === 'fuel' ? 'text-primary' : 'text-ink-900'
   return (
     <div dir={ar ? 'rtl' : 'ltr'} className="min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
-      <div className="mx-auto w-full max-w-md space-y-4 animate-fade-up">
+      <div className="mx-auto w-full max-w-md space-y-5 animate-fade-up">
         <header className="flex items-center justify-between pt-1">
           <h1 className="text-2xl font-black tracking-tight">{t('التغذية · اليوم', 'Nutrition · Today')}</h1>
           {model.goalLabel && <span className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-bold text-primary">{model.goalLabel}</span>}
@@ -55,7 +55,7 @@ export function NutritionV2({ lang }: NutritionV2Props) {
           <p className="text-xs font-black uppercase tracking-wider text-primary">{model.hero.priorityLabel}</p>
           <h2 className={cn('mt-2 text-2xl font-black leading-tight', heroClr)}>{model.hero.title}</h2>
           <p className="mt-2 text-sm text-ink-500">{model.hero.subtitle}</p>
-          <button type="button" onClick={() => openAdd(targetSlot)} className="btn-primary mt-4 w-full py-3.5">{model.hero.ctaLabel}</button>
+          <button type="button" onClick={() => openAdd(targetSlot)} className="btn-primary mt-4 w-full py-3.5 text-[1.1875rem]">{model.hero.ctaLabel}</button>
         </section>
 
         {/* Summary */}
