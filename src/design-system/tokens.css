@@ -197,6 +197,12 @@
   --font-family-display: var(--font-display-v2);
   --font-numeric: var(--font-ui-v2);
 
+  /* Tailwind-consumed font vars (font-sans / font-display utilities + body).
+     Defining them here — and NOWHERE in the default :root — is what makes v2
+     actually render IBM Plex Sans Arabic while the default stays Tajawal. */
+  --font-sans: var(--font-ui-v2);
+  --font-display: var(--font-display-v2);
+
   --color-action-primary: var(--v2-action-primary);
   --color-focus-ring: var(--v2-action-primary);
   --color-bg-page: var(--v2-surface-canvas);

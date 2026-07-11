@@ -41,3 +41,34 @@ export const V2_GOAL_MODEL: readonly V2GoalModelEntry[] = [
   { value: 'maintain', label: 'محافظة', description: 'تثبيت الوزن وتحسين الشكل والأداء' },
   { value: 'bulk', label: 'تضخيم', description: 'زيادة الكتلة العضلية بشكل محسوب' },
 ] as const
+
+export interface V2WelcomeCopy {
+  brand: string
+  /** Headline delivered as two short confident lines. */
+  headline: readonly [string, string]
+  support: string
+  primary: string
+  secondary: string
+}
+
+/**
+ * Approved v2.1 Welcome / Start copy (Founder Refinement Pass) — warm MSA.
+ * Arabic is the source of truth; English mirrors it for the bilingual toggle.
+ * Rendered by the v2 Welcome slice (StartViewV2), preview-gated.
+ */
+export const V2_WELCOME: Record<'ar' | 'en', V2WelcomeCopy> = {
+  ar: {
+    brand: 'قِمّة',
+    headline: ['درّب بوضوح.', 'تقدّم بثقة.'],
+    support: 'تمرينك وتغذيتك وتقدمك في مكان واحد — بالعربية، وبخطوات واضحة.',
+    primary: 'ابدأ الآن',
+    secondary: 'لديك حساب؟ تسجيل الدخول',
+  },
+  en: {
+    brand: 'Qimmah',
+    headline: ['Train with clarity.', 'Progress with confidence.'],
+    support: 'Your training, nutrition, and progress in one place — Arabic-first, in clear steps.',
+    primary: 'Start now',
+    secondary: 'Have an account? Log in',
+  },
+} as const

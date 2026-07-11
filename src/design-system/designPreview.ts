@@ -53,3 +53,14 @@ export function initDesignPreview(): void {
     delete document.documentElement.dataset.design
   }
 }
+
+/**
+ * Is the v2.1 preview currently active? Reads the attribute set by
+ * initDesignPreview(). Safe in production — the attribute is never set there,
+ * so this returns false and views render their v1 layout. Read once at render
+ * (the flag only changes on a full reload via `?design=`), so no reactivity
+ * is needed.
+ */
+export function isDesignV2(): boolean {
+  return typeof document !== 'undefined' && document.documentElement.dataset.design === 'v2'
+}

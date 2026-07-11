@@ -2,6 +2,8 @@ import { Icon } from '@/components/Icon'
 import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
 import { LanguageToggle } from '@/i18n'
+import { isDesignV2 } from '@/design-system/designPreview'
+import { StartViewV2 } from '@/views/StartViewV2'
 
 interface StartViewProps {
   lang: Lang
@@ -17,6 +19,12 @@ interface StartViewProps {
  */
 export function StartView({ lang, onLogin, onSignup }: StartViewProps) {
   const t = getStrings(lang)
+
+  // v2.1 preview (dev-only flag): render the approved Welcome slice. Default /
+  // production keeps the v1 screen below unchanged — same onLogin/onSignup routes.
+  if (isDesignV2()) {
+    return <StartViewV2 lang={lang} onLogin={onLogin} onSignup={onSignup} />
+  }
 
   return (
     <div className="relative flex min-h-screen flex-col overflow-hidden bg-page px-5 pb-8 pt-6" style={{ paddingTop: 'max(1.5rem, var(--safe-top))' }}>

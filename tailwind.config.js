@@ -4,8 +4,13 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Tajawal', 'system-ui', 'sans-serif'],
-        display: ['Tajawal', 'system-ui', 'sans-serif'],
+        // Font is token-driven so the v2.1 seam can switch it from one place.
+        // `--font-sans`/`--font-display` are UNDEFINED by default → the var()
+        // fallback (Tajawal) renders, so the default build is byte-identical.
+        // Under `[data-design="v2"]` (tokens.css) they resolve to IBM Plex Sans
+        // Arabic / Readex Pro. No mixed fonts: every `font-sans` user switches.
+        sans: ['var(--font-sans, "Tajawal", system-ui, sans-serif)'],
+        display: ['var(--font-display, "Tajawal", system-ui, sans-serif)'],
       },
       colors: {
         // ألوان ديناميكية تُقاد من مركز التخصيص عبر CSS variables
