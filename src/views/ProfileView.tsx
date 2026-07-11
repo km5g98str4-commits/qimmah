@@ -7,6 +7,8 @@ import { getStrings } from '@/config/strings'
 import { calcScreenStrings } from '@/i18n/dict/calcScreen'
 import type { Lang } from '@/lib/appPreferences'
 import type { AppRoute } from '@/lib/appRoutes'
+import { isDesignV2 } from '@/design-system/designPreview'
+import { ProfileV2 } from '@/views/ProfileV2'
 
 interface ProfileViewProps {
   lang: Lang
@@ -15,6 +17,14 @@ interface ProfileViewProps {
 
 /** تبويب حسابي — الحساب + بيانات الجسم + الأهداف + روابط الإعدادات والقانون. */
 export function ProfileView({ lang, onNavigate }: ProfileViewProps) {
+  // v2.1 preview (dev-only): the training-identity profile. Default keeps v1.
+  if (isDesignV2()) {
+    return <ProfileV2 lang={lang} onNavigate={onNavigate} />
+  }
+  return <ProfileViewV1 lang={lang} onNavigate={onNavigate} />
+}
+
+function ProfileViewV1({ lang, onNavigate }: ProfileViewProps) {
   const t = getStrings(lang)
   const calc = calcScreenStrings[lang]
   const auth = useAuth()
