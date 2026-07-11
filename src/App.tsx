@@ -354,7 +354,7 @@ export default function App() {
           )}
           {view === 'progress' && (
             <Suspense fallback={<ProgressSkeleton />}>
-              <V.ProgressView lang={LANG} />
+              <V.ProgressView lang={LANG} onNavigate={navigate} />
             </Suspense>
           )}
           {view === 'profile' && (

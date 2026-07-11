@@ -14,13 +14,26 @@ import { track } from '@/lib/analytics'
 import { getStrings } from '@/config/strings'
 import { progressScreenStrings } from '@/i18n/dict/progressScreen'
 import type { Lang } from '@/lib/appPreferences'
+import type { AppRoute } from '@/lib/appRoutes'
+import { isDesignV2 } from '@/design-system/designPreview'
+import { ProgressV2 } from '@/views/ProgressV2'
 
 interface ProgressViewProps {
   lang: Lang
+  /** Optional — used only by the v2 preview for cross-screen actions; v1 ignores it. */
+  onNavigate?: (route: AppRoute) => void
 }
 
 /** تبويب التقدّم — بطاقات الوزن والحجم والـPRs والعضلات والسلسلة + خطوات يدوية وتذكير (موبايل أولًا). */
-export function ProgressView({ lang }: ProgressViewProps) {
+export function ProgressView({ lang, onNavigate }: ProgressViewProps) {
+  // v2.1 preview (dev-only): the Progress Brief. Default/production keeps v1.
+  if (isDesignV2()) {
+    return <ProgressV2 lang={lang} onNavigate={onNavigate} />
+  }
+  return <ProgressViewV1 lang={lang} />
+}
+
+function ProgressViewV1({ lang }: ProgressViewProps) {
   const t = getStrings(lang).progress
   const tw = getStrings(lang).workout
   const d = progressScreenStrings[lang]
