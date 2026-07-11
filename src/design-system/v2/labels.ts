@@ -58,6 +58,123 @@ export interface V2WelcomeCopy {
  * Arabic is the source of truth; English mirrors it for the bilingual toggle.
  * Rendered by the v2 Welcome slice (StartViewV2), preview-gated.
  */
+export interface V2OnboardingCopy {
+  back: string
+  next: string
+  stepOf: (n: number) => string
+  goal: { title: string; note: string }
+  training: { title: string; subtitle: string; daysQ: string; durationQ: string; daysUnit: string; summaryTitle: string; perSession: string; suitsGoal: string }
+  equipment: { title: string; subtitle: string; placeQ: string; prefQ: string; injuryQ: string; injuryNote: string; cta: string }
+  places: readonly { value: string; label: string; icon: string }[]
+  prefs: readonly { value: string; label: string; icon: string }[]
+  injuries: readonly { value: string; label: string }[]
+  ready: { eyebrow: string; title: string; subtitle: string; enter: string; previewNote: string }
+}
+
+/** Approved v2.1 onboarding copy (warm MSA). Rendered by OnboardingV2 (preview-gated). */
+export const V2_ONBOARDING: Record<'ar' | 'en', V2OnboardingCopy> = {
+  ar: {
+    back: 'رجوع',
+    next: 'التالي',
+    stepOf: (n) => `الخطوة ${['١', '٢', '٣'][n - 1] ?? n} من ٣`,
+    goal: { title: 'ما هدفك الآن؟', note: 'يمكنك تغييره في أي وقت.' },
+    training: {
+      title: 'نُعد جدولك',
+      subtitle: 'أسئلة قصيرة لنقترح خطة تناسب وقتك وهدفك.',
+      daysQ: 'كم يوم تتمرن بالأسبوع؟',
+      durationQ: 'مدة التمرين المناسبة لك؟',
+      daysUnit: 'أيام',
+      summaryTitle: 'خطتك تتكوّن',
+      perSession: 'للجلسة',
+      suitsGoal: 'تناسب هدف',
+    },
+    equipment: {
+      title: 'أين تتمرن؟ وكيف؟',
+      subtitle: 'نختار التمارين المناسبة للمعدات المتاحة لك.',
+      placeQ: 'مكان التمرين',
+      prefQ: 'ماذا تفضّل؟',
+      injuryQ: 'عندك إصابة أو تمرين ممنوع؟',
+      injuryNote: 'نستبعد الحركات غير المناسبة تلقائيًا.',
+      cta: 'اعتمد خطتي',
+    },
+    places: [
+      { value: 'gym', label: 'نادي', icon: 'Building2' },
+      { value: 'home', label: 'منزل', icon: 'Home' },
+      { value: 'machines', label: 'أجهزة فقط', icon: 'Dumbbell' },
+    ],
+    prefs: [
+      { value: 'machines', label: 'أجهزة', icon: 'Dumbbell' },
+      { value: 'free', label: 'أوزان حرة', icon: 'Activity' },
+      { value: 'mixed', label: 'مزيج', icon: 'Zap' },
+    ],
+    injuries: [
+      { value: 'knee', label: 'الركبة' },
+      { value: 'shoulder', label: 'الكتف' },
+      { value: 'lower_back', label: 'أسفل الظهر' },
+      { value: 'wrist', label: 'الرسغ' },
+      { value: 'elbow', label: 'المرفق' },
+      { value: 'ankle', label: 'الكاحل' },
+    ],
+    ready: {
+      eyebrow: 'جاهز',
+      title: 'خطتك جاهزة',
+      subtitle: 'بنيناها على هدفك ووقتك ومعداتك.',
+      enter: 'الدخول للوحة',
+      previewNote: 'هذه معاينة تصميم — اختياراتك هنا لا تُحفظ بعد.',
+    },
+  },
+  en: {
+    back: 'Back',
+    next: 'Next',
+    stepOf: (n) => `Step ${n} of 3`,
+    goal: { title: 'What is your goal now?', note: 'You can change it anytime.' },
+    training: {
+      title: 'Setting up your schedule',
+      subtitle: 'A few quick questions to suggest a plan that fits your time and goal.',
+      daysQ: 'How many days per week?',
+      durationQ: 'Session length that suits you?',
+      daysUnit: 'days',
+      summaryTitle: 'Your plan is forming',
+      perSession: 'per session',
+      suitsGoal: 'suits',
+    },
+    equipment: {
+      title: 'Where do you train? And how?',
+      subtitle: 'We pick the right exercises for the equipment you have.',
+      placeQ: 'Training place',
+      prefQ: 'What do you prefer?',
+      injuryQ: 'Any injury or exercise to avoid?',
+      injuryNote: 'We automatically exclude unsuitable movements.',
+      cta: 'Confirm my plan',
+    },
+    places: [
+      { value: 'gym', label: 'Gym', icon: 'Building2' },
+      { value: 'home', label: 'Home', icon: 'Home' },
+      { value: 'machines', label: 'Machines only', icon: 'Dumbbell' },
+    ],
+    prefs: [
+      { value: 'machines', label: 'Machines', icon: 'Dumbbell' },
+      { value: 'free', label: 'Free weights', icon: 'Activity' },
+      { value: 'mixed', label: 'Mixed', icon: 'Zap' },
+    ],
+    injuries: [
+      { value: 'knee', label: 'Knee' },
+      { value: 'shoulder', label: 'Shoulder' },
+      { value: 'lower_back', label: 'Lower back' },
+      { value: 'wrist', label: 'Wrist' },
+      { value: 'elbow', label: 'Elbow' },
+      { value: 'ankle', label: 'Ankle' },
+    ],
+    ready: {
+      eyebrow: 'Ready',
+      title: 'Your plan is ready',
+      subtitle: 'Built on your goal, time, and equipment.',
+      enter: 'Enter dashboard',
+      previewNote: 'This is a design preview — your choices here are not saved yet.',
+    },
+  },
+} as const
+
 export const V2_WELCOME: Record<'ar' | 'en', V2WelcomeCopy> = {
   ar: {
     brand: 'قِمّة',
