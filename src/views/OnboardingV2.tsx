@@ -9,6 +9,7 @@ import { useAuth } from '@/lib/authContext'
 import { buildOnboardingProfile } from '@/lib/planBuilderAnswers'
 import { buildCustomizationFromOnboarding, saveOnboardingProfile } from '@/lib/onboardingProfile'
 import { markCompleted } from '@/lib/onboarding'
+import { persistOnboardingToProfile } from '@/lib/onboardingSync'
 import { track } from '@/lib/analytics'
 import { toAnswersFromV2, type V2Place, type V2Pref } from '@/lib/onboardingV2Adapter'
 
@@ -101,6 +102,12 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
         track('plan_generated', { source: 'onboarding' })
         markCompleted(userId)
         track('onboarding_completed', { planMode: 'auto' })
+        // Cloud parity — EXACTLY as v1 (PlanBuilder): best-effort, fire-and-forget,
+        // only when signed in. persistOnboardingToProfile never throws and merges
+        // into the user's own profile row (anon client, RLS; no schema change, no
+        // service_role). Local completion above is already the source of truth, so
+        // a cloud failure changes nothing for the user.
+        if (userId) void persistOnboardingToProfile(userId, op)
       } catch {
         // Generation should never trap the user in setup — fall through to enter.
       }
