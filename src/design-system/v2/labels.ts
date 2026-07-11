@@ -120,7 +120,7 @@ export const V2_ONBOARDING: Record<'ar' | 'en', V2OnboardingCopy> = {
       title: 'خطتك جاهزة',
       subtitle: 'بنيناها على هدفك ووقتك ومعداتك.',
       enter: 'الدخول للوحة',
-      previewNote: 'هذه معاينة تصميم — اختياراتك هنا لا تُحفظ بعد.',
+      previewNote: 'تُبنى خطتك وتُحفظ على هذا الجهاز. المزامنة السحابية تحتاج تسجيل الدخول.',
     },
   },
   en: {
@@ -170,7 +170,7 @@ export const V2_ONBOARDING: Record<'ar' | 'en', V2OnboardingCopy> = {
       title: 'Your plan is ready',
       subtitle: 'Built on your goal, time, and equipment.',
       enter: 'Enter dashboard',
-      previewNote: 'This is a design preview — your choices here are not saved yet.',
+      previewNote: 'Your plan is built and saved on this device. Cloud sync needs sign-in.',
     },
   },
 } as const

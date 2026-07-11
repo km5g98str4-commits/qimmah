@@ -4,6 +4,13 @@ import { Icon } from '@/components/Icon'
 import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
 import { V2_GOAL_MODEL, V2_ONBOARDING, type V2GoalValue } from '@/design-system/v2/labels'
+import { useCustomization } from '@/lib/customizationContext'
+import { useAuth } from '@/lib/authContext'
+import { buildOnboardingProfile } from '@/lib/planBuilderAnswers'
+import { buildCustomizationFromOnboarding, saveOnboardingProfile } from '@/lib/onboardingProfile'
+import { markCompleted } from '@/lib/onboarding'
+import { track } from '@/lib/analytics'
+import { toAnswersFromV2, type V2Place, type V2Pref } from '@/lib/onboardingV2Adapter'
 
 interface OnboardingV2Props {
   lang: Lang
@@ -46,14 +53,21 @@ const toAr = (n: number, lang: Lang) => (lang === 'en' ? String(n) : String(n).r
  * summary) → Equipment/constraints — ending on a "plan ready" screen. Momentum
  * direction (graphite/ember, IBM Plex under the v2 seam).
  *
- * State is LOCAL to this preview: choices are not persisted to the real
- * onboarding profile/Supabase. The final CTA uses the existing safe local
- * completion path (onComplete) to enter the app — no plan is generated from
- * partial data, no cloud write.
+ * Slice 2B — now FUNCTIONAL: the choices map to the existing `Answers` model
+ * (see onboardingV2Adapter) and run the SAME local plan generation + completion
+ * v1 uses (buildOnboardingProfile → saveOnboardingProfile →
+ * buildCustomizationFromOnboarding → applyCustomization → markCompleted). The
+ * only v1 step deliberately skipped is the Supabase profile write
+ * (persistOnboardingToProfile) — kept out of this slice for safety; it is a
+ * best-effort cloud sync that requires a real account/staging to verify.
  */
 export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
   const t = V2_ONBOARDING[lang] ?? V2_ONBOARDING.ar
+  const { customization, applyCustomization } = useCustomization()
+  const auth = useAuth()
+  const userId = auth.user?.id ?? null
   const [step, setStep] = useState(0) // 0 goal · 1 training · 2 equipment · 3 ready
+  const [finalizing, setFinalizing] = useState(false)
 
   const [goal, setGoal] = useState<V2GoalValue | null>(null)
   const [days, setDays] = useState(4)
@@ -71,6 +85,29 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
   const toggleInjury = (v: string) =>
     setInjuries((list) => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v]))
 
+  // Real completion: map v2 choices → Answers, then run v1's local generation
+  // pipeline. No Supabase write (skipped for safety). Never leaves the user
+  // stuck: on any failure we still enter the app via onComplete.
+  const finalize = () => {
+    if (finalizing) return
+    setFinalizing(true)
+    void (async () => {
+      try {
+        const answers = toAnswersFromV2({ goal, days, duration, place: place as V2Place | null, pref: pref as V2Pref | null, injuries: hasInjury ? injuries : [] })
+        const op = buildOnboardingProfile(answers)
+        saveOnboardingProfile(op)
+        const built = await buildCustomizationFromOnboarding(op, customization)
+        applyCustomization(built)
+        track('plan_generated', { source: 'onboarding' })
+        markCompleted(userId)
+        track('onboarding_completed', { planMode: 'auto' })
+      } catch {
+        // Generation should never trap the user in setup — fall through to enter.
+      }
+      onComplete()
+    })()
+  }
+
   // Ready screen — full-bleed confirmation.
   if (step === 3) {
     return (
@@ -82,7 +119,8 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
         duration={duration}
         split={splitFor(days, lang)}
         placeLabel={t.places.find((p) => p.value === place)?.label ?? ''}
-        onEnter={onComplete}
+        finalizing={finalizing}
+        onEnter={finalize}
       />
     )
   }
@@ -325,7 +363,7 @@ function EquipmentStep({ t, place, pref, hasInjury, injuries, onPlace, onPref, o
   )
 }
 
-function ReadyScreen({ lang, t, goalLabel, days, duration, split, placeLabel, onEnter }: { lang: Lang; t: T; goalLabel: string; days: number; duration: number; split: string; placeLabel: string; onEnter: () => void }) {
+function ReadyScreen({ lang, t, goalLabel, days, duration, split, placeLabel, finalizing, onEnter }: { lang: Lang; t: T; goalLabel: string; days: number; duration: number; split: string; placeLabel: string; finalizing: boolean; onEnter: () => void }) {
   return (
     <div dir={lang === 'en' ? 'ltr' : 'rtl'} className="fixed inset-0 z-50 flex flex-col overflow-hidden bg-page text-ink-900">
       <div className="pointer-events-none absolute inset-0" aria-hidden="true">
@@ -350,8 +388,12 @@ function ReadyScreen({ lang, t, goalLabel, days, duration, split, placeLabel, on
 
         <div className="space-y-3">
           <p className="text-center text-[0.7rem] font-medium text-ink-400">{t.ready.previewNote}</p>
-          <button type="button" onClick={onEnter} className="btn-primary w-full py-4 text-base shadow-glow">
-            {t.ready.enter}
+          <button type="button" onClick={onEnter} disabled={finalizing} className="btn-primary w-full py-4 text-base shadow-glow disabled:opacity-60">
+            {finalizing ? (
+              <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-white/40 border-t-white" aria-label={t.ready.enter} />
+            ) : (
+              t.ready.enter
+            )}
           </button>
         </div>
       </div>
