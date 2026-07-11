@@ -3,6 +3,43 @@
 Separates **technical decisions made** (reversible, no visual authority) from
 **subjective decisions deferred** to the founder / Cloud Design.
 
+## Approved design direction: Qimmah App Foundation v2.1 (Founder Refinement Pass)
+
+The founder has **approved v2.1 as the design direction** for future
+implementation. This supersedes the earlier "no approved direction" status for
+the areas it names. Implementation is **sliced** — v2.1 is adopted screen by
+screen behind the reversible seam, not in one redesign.
+
+**Approved v2.1 decisions (frozen):**
+
+| Area | Decision |
+|---|---|
+| UI typeface | **IBM Plex Sans Arabic** (self-hosted) |
+| Display / brand face | **Readex Pro** — brand/display only, never functional UI copy |
+| Arabic tone | **Warm Modern Standard Arabic** — confident, motivating; not heavy slang, not cold/clinical |
+| Tab labels (final) | اليوم · التمارين · تسجيل · التغذية · التقدم |
+| Goal model | تنشيف · محافظة · تضخيم |
+| Color family | **Momentum** — Ember / Graphite / Chalk / Blue |
+| Ember usage | Reserved for the **primary action** + momentum moments |
+| Error / destructive | **Separate** from Ember |
+| Approved as direction (NOT yet built) | Today command center · Active Workout · Progress Brief |
+
+**Slice 0 (this phase) — foundation only, near-zero visible change:**
+
+- Self-hosted IBM Plex Sans Arabic + Readex Pro (`src/design-system/fonts.ts`),
+  declared but rendered only under the v2 seam.
+- v2.1 token aliases + `[data-design="v2"]` activation seam in
+  `src/design-system/tokens.css` (color values **pending** the Momentum hex
+  drop — they currently alias the v1 source, so flipping v2 changes only the
+  typeface today).
+- Canonical v2.1 tab labels + goal model frozen in
+  `src/design-system/v2/labels.ts` (unwired; live UI unchanged).
+
+**Not in Slice 0 (explicitly deferred to later slices):** any screen redesign —
+Today command center, Onboarding, Active Workout, Progress Brief — and the
+new "تسجيل" (Log) tab / nav restructure. Concrete Momentum hex values are still
+pending; do not invent them.
+
 ## Technical decisions made this phase (reversible)
 
 | Decision | Why safe / reversible |
@@ -16,19 +53,22 @@ Separates **technical decisions made** (reversible, no visual authority) from
 
 ## Subjective decisions deferred (founder / Cloud Design authority)
 
-- Final **colour palette** and whether the app is light, dark, or both.
-- Final **logo** and **app icon**.
-- Final **font family** (Tajawal kept as the current safe font only).
+- Concrete **Momentum hex values** (Ember / Graphite / Chalk / Blue) — family
+  approved, exact values pending the Cloud Design token drop.
+- Final **logo** and **app icon** / splash assets.
 - **Motion personality** (durations/easings are neutral; the *feel* is pending).
-- **Navigation concept** for the native app (current: bottom tabs on mobile shell).
-- Whether/how the "dumbbell mark" motion exists.
-- The athletic/active visual language — **direction stated by founder, not yet specced**.
+- Per-screen **layout** for the approved v2.1 directions (Today command center,
+  Active Workout, Progress Brief) — approved as direction, not yet specced/built.
+
+Font family is now **decided** (IBM Plex Sans Arabic for UI, Readex Pro for
+display) per v2.1 — self-hosted in Slice 0, activated per screen in later slices.
 
 ## Explicitly NOT done (guardrails honored)
 
-- No full redesign; no unapproved logo/colours/fonts applied globally.
+- No full redesign; no unapproved colours applied globally; no screen rebuilt.
 - No production Supabase / schema / signing / App Store actions.
-- No new fonts downloaded or redistributed.
+- v2.1 fonts (IBM Plex Sans Arabic, Readex Pro) are self-hosted via `@fontsource`
+  (OFL) — bundled, not applied by default; no runtime CDN dependency.
 - The rejected luxury direction was **not** re-enshrined.
 - Protected `.patch` files untouched and untracked.
 

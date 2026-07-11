@@ -50,6 +50,21 @@ export const tokens = {
     safeTop: '--safe-area-top',
     safeBottom: '--safe-area-bottom',
   },
+  /* Qimmah Design v2.1 (SEAM ONLY) — names for the approved-direction aliases
+     defined in tokens.css. Active only under `[data-design="v2"]`; values are
+     PENDING the Momentum hex drop (currently alias the v1 source). Present so
+     future slices (e.g. charts reading data colors) reference one contract. */
+  v2: {
+    brandPrimary: '--v2-brand-primary',
+    actionPrimary: '--v2-action-primary',
+    surfaceCanvas: '--v2-surface-canvas',
+    surfaceNextStep: '--v2-surface-next-step',
+    feedbackError: '--v2-feedback-error',
+    data1: '--v2-data-1',
+    data2: '--v2-data-2',
+    data3: '--v2-data-3',
+    data4: '--v2-data-4',
+  },
 } as const
 
 /** `var(--token)` reference for inline styles: `style={{ color: cssVar(tokens.color.textPrimary) }}`. */

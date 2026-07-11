@@ -13,25 +13,33 @@ silently re-enshrines a rejected direction or invents an unapproved one.
 6. Earlier Qimmah design docs — **historical reference only**.
 7. Engineering judgment.
 
-## Current status (as of this foundation phase)
+## Current status
 
-- **No new Cloud Design "App Foundation" deliverable exists in the repository.**
-  A repo-wide search (all file types) found no design export, token file, brand
-  package, "north star", or "cloud design" artifact. See
-  [`CLOUD-DESIGN-INVENTORY.md`](./CLOUD-DESIGN-INVENTORY.md).
+- **APPROVED DIRECTION: Qimmah App Foundation v2.1 (Founder Refinement Pass).**
+  The founder has approved v2.1 as the design direction for future
+  implementation. The frozen decisions and the Slice-0 foundation are recorded
+  in [`DESIGN-DECISIONS.md`](./DESIGN-DECISIONS.md). Adoption is **sliced** —
+  screens migrate to v2.1 behind the `[data-design="v2"]` seam, not in one pass.
+- **Decided by v2.1:** UI typeface (IBM Plex Sans Arabic), display face (Readex
+  Pro, brand/display only), Arabic tone (warm MSA), final tab labels, goal model
+  (تنشيف / محافظة / تضخيم), and the **Momentum** color *family* (Ember /
+  Graphite / Chalk / Blue) with Ember reserved for the primary action and
+  error/destructive kept separate.
+- **Still PENDING under v2.1:** concrete **Momentum hex values** (family
+  approved, exact values await the Cloud Design token drop), final logo / app
+  icon / splash, and per-screen layouts (Today command center, Active Workout,
+  Progress Brief are approved as *direction*, not yet built).
 - Earlier specs (Design Specification v1.1, Visual North Star, Health OS
-  package) were delivered as **chat/artifacts in prior sessions, not committed
-  files**, and are **historical references, not approved**.
-- **No visual direction is currently approved.** Therefore the app's colors,
-  logo, icon, font choice, palette, and motion personality are all **PENDING**.
+  package) remain **historical references, not approved** — v2.1 supersedes them.
 
 ## What is temporary vs final
 
 | Area | State | Notes |
 |---|---|---|
-| Colors (deep-night + warm-stone) in `styles/index.css` | **TEMPORARY** | Inherited from the previous build. **Not approved.** |
-| Semantic tokens in `src/design-system/tokens.css` | **TEMPORARY architecture** | Names are the stable seam; values alias the temporary source. |
-| Font (Tajawal) | **Temporary-safe** | Kept as the current safe font; final family is a Cloud Design decision. |
+| Colors (deep-night + warm-stone) in `styles/index.css` | **TEMPORARY** | Inherited from the previous build. **Not approved.** v2.1 Momentum hex will replace these at the seam. |
+| Semantic tokens in `src/design-system/tokens.css` | **TEMPORARY values / stable architecture** | Names are the stable seam; v1 + v2.1 aliases both currently resolve to the temporary source. |
+| Font — v1 default (Tajawal) | **Temporary-safe** | Renders today; superseded by IBM Plex Sans Arabic as v2.1 activates per screen. |
+| Font — v2.1 (IBM Plex Sans Arabic UI, Readex Pro display) | **APPROVED, prepared** | Self-hosted in Slice 0; rendered only under `[data-design="v2"]` until screen slices adopt it. |
 | Icon / splash / logo | **PENDING** | No approved assets. Do not ship invented ones. |
 | Spacing / radius / motion-duration scales | **Neutral engineering scales** | Not brand decisions; safe to keep. |
 

@@ -147,3 +147,60 @@
     --motion-duration-slow: 0.001ms;
   }
 }
+
+/* ============================================================================
+ * Qimmah Design v2.1 — approved direction baseline (Founder Refinement Pass)
+ * ----------------------------------------------------------------------------
+ * SLICE 0 — SEAM ONLY. Everything below is *defined* but NOT active in the
+ * default (v1) build. It renders zero pixels differently until a screen slice
+ * opts in by setting `data-design="v2"` on <html>. Fully reversible: delete
+ * this block (and the v2 font imports in fonts.ts) to remove it entirely.
+ *
+ * v2.1 approved decisions captured here:
+ *   • UI typeface   → IBM Plex Sans Arabic (self-hosted, see fonts.ts)
+ *   • Display face  → Readex Pro (brand/display only; falls back to UI face)
+ *   • Momentum color family → Ember / Graphite / Chalk / Blue
+ *       - Ember is reserved for the primary action + momentum moments.
+ *       - Error/destructive stays SEPARATE from Ember.
+ *
+ * ⚠️ Momentum concrete hex values are still pending the Cloud Design token
+ * drop. So each color alias below RESOLVES to the current temporary value
+ * (same additive/invisible pattern as the v1 seam above). Slice 0 freezes the
+ * NAMES and the semantic assignments — not a new palette. Do NOT invent brand
+ * hex here; when the Momentum values land, replace the right-hand sides only.
+ * ============================================================================ */
+:root {
+  /* v2.1 typefaces (self-hosted; Tajawal remains the tail fallback). */
+  --font-ui-v2: 'IBM Plex Sans Arabic', 'Tajawal', system-ui, sans-serif;
+  --font-display-v2: 'Readex Pro', 'IBM Plex Sans Arabic', 'Tajawal', system-ui, sans-serif;
+
+  /* v2.1 Momentum semantic aliases — values PENDING; alias to current source. */
+  --v2-brand-primary: var(--c-primary); /* Ember */
+  --v2-action-primary: var(--c-primary); /* Ember — reserved for primary action */
+  --v2-surface-canvas: rgb(var(--c-page)); /* app canvas (Graphite/Chalk family) */
+  --v2-surface-next-step: rgb(var(--c-surface)); /* highlighted "next step" surface */
+  --v2-feedback-error: #d6553a; /* destructive — SEPARATE from Ember */
+  --v2-data-1: var(--c-primary); /* data series — Blue/Ember/… pending Momentum hex */
+  --v2-data-2: var(--c-accent);
+  --v2-data-3: #3e9e6b;
+  --v2-data-4: var(--c-accent);
+}
+
+/* Activation seam — OPT-IN ONLY. The default document has no `data-design`
+   attribute, so none of these overrides apply and v1 renders unchanged. A
+   future screen slice flips this (globally or on a subtree) to adopt v2.1.
+   Because the color aliases currently equal the v1 values, flipping v2 today
+   changes only the *typeface* (IBM Plex Sans Arabic) — colors stay identical
+   until the Momentum hex drop. */
+:root[data-design='v2'] {
+  --font-family-base: var(--font-ui-v2);
+  --font-family-display: var(--font-display-v2);
+  --font-numeric: var(--font-ui-v2);
+
+  --color-action-primary: var(--v2-action-primary);
+  --color-focus-ring: var(--v2-action-primary);
+  --color-bg-page: var(--v2-surface-canvas);
+  --color-surface: var(--v2-surface-next-step);
+  --color-danger: var(--v2-feedback-error);
+  --color-destructive: var(--v2-feedback-error);
+}

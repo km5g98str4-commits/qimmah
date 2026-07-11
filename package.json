@@ -38,6 +38,8 @@
     "@capacitor/local-notifications": "^8.2.0",
     "@capacitor/splash-screen": "^8.0.1",
     "@capacitor/status-bar": "^8.0.2",
+    "@fontsource/ibm-plex-sans-arabic": "^5.2.9",
+    "@fontsource/readex-pro": "^5.2.11",
     "@fontsource/tajawal": "^5.2.7",
     "@supabase/supabase-js": "^2.108.2",
     "@zxing/browser": "^0.2.0",
