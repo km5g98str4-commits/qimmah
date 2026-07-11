@@ -16,6 +16,8 @@ import { useDashboardSignals, type LeadCard } from '@/lib/dashboardLayout'
 import { useUiMode } from '@/lib/uiMode'
 import { getRandomPhrase } from '@/data/motivationalPhrases'
 import { getStrings } from '@/config/strings'
+import { isDesignV2 } from '@/design-system/designPreview'
+import { TodayV2 } from '@/views/TodayV2'
 import { dashboardStrings } from '@/i18n/dict/dashboard'
 import { statsScreenStrings } from '@/i18n/dict/statsScreen'
 import type { Lang } from '@/lib/appPreferences'
@@ -36,6 +38,15 @@ interface DashboardViewProps {
  * ترتيب التمرين/التغذية يتبع إشارات الإعداد (مصدر الحقيقة) لا ترتيبًا ثابتًا.
  */
 export function DashboardView({ lang, onNavigate }: DashboardViewProps) {
+  // v2.1 preview (dev-only): the Today Command Center. Default/production keeps
+  // the v1 dashboard below unchanged.
+  if (isDesignV2()) {
+    return <TodayV2 lang={lang} onNavigate={onNavigate} />
+  }
+  return <DashboardViewV1 lang={lang} onNavigate={onNavigate} />
+}
+
+function DashboardViewV1({ lang, onNavigate }: DashboardViewProps) {
   const { customization } = useCustomization()
   const s = customization.sections
   const signals = useDashboardSignals(customization.profile)
