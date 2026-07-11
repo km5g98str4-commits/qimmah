@@ -8,6 +8,8 @@ import { inRange, NUM_LIMITS, NUM_MESSAGES, sanitizeNumericInput } from '@/lib/v
 import { getStrings } from '@/config/strings'
 import { nutritionScreenStrings } from '@/i18n/dict/nutritionScreen'
 import type { Lang } from '@/lib/appPreferences'
+import { isDesignV2 } from '@/design-system/designPreview'
+import { NutritionV2 } from '@/views/NutritionV2'
 
 interface NutritionViewProps {
   lang: Lang
@@ -37,6 +39,14 @@ function slotForEntry(meal: MealSlot | undefined, visible: { id: MealSlot }[]): 
 
 /** تبويب التغذية — متتبّع يومي للوجبات والماكروز والماء (موبايل أولًا). */
 export function NutritionView({ lang }: NutritionViewProps) {
+  // v2.1 preview (dev-only): goal-driven Nutrition. Default/production keeps v1.
+  if (isDesignV2()) {
+    return <NutritionV2 lang={lang} />
+  }
+  return <NutritionViewV1 lang={lang} />
+}
+
+function NutritionViewV1({ lang }: NutritionViewProps) {
   const { customization } = useCustomization()
   const t = getStrings(lang).nutrition
   const d = nutritionScreenStrings[lang]
