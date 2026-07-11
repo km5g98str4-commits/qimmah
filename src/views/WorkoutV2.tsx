@@ -205,7 +205,7 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   }
 
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="fixed inset-0 z-50 flex flex-col bg-page text-ink-900" style={{ paddingTop: 'max(0.75rem, var(--safe-top))' }}>
+    <div dir={ar ? 'rtl' : 'ltr'} className="fixed inset-0 z-[60] flex flex-col bg-page text-ink-900" style={{ paddingTop: 'max(0.75rem, var(--safe-top))' }}>
       <header className="flex items-center justify-between px-5 py-2">
         <button type="button" onClick={() => { if (confirmLeave()) { clearActive(); onNavigate('dashboard') } }} aria-label={t('إغلاق', 'Close')} className="grid h-10 w-10 place-items-center rounded-xl border border-line bg-surface"><Icon name="ChevronRight" className="h-5 w-5" /></button>
         <span className="text-sm font-bold text-ink-500">{t(`التمرين ${toAr(active.exIndex + 1, lang)} من ${toAr(model.exercises.length, lang)}`, `Exercise ${active.exIndex + 1} of ${model.exercises.length}`)}</span>
@@ -313,9 +313,10 @@ function PlanScreen({ model, lang, onExercise, onStart, onBack }: { model: Retur
             </div>
           ))}
         </div>
-      </div>
-      <div className="fixed inset-x-0 bottom-0 border-t border-line bg-page/90 px-4 py-4 backdrop-blur" style={{ paddingBottom: 'max(1rem, var(--safe-bottom))' }}>
-        <div className="mx-auto w-full max-w-md"><button type="button" onClick={onStart} className="btn-primary w-full py-4 text-lg">{ar ? 'ابدأ الجلسة' : 'Start session'}</button></div>
+
+        {/* In-flow primary CTA — sits within the scroll (above the app tab bar,
+            which a fixed footer would collide with), so it's always tappable. */}
+        <button type="button" onClick={onStart} className="btn-primary mt-6 w-full py-4 text-lg shadow-glow">{ar ? 'ابدأ الجلسة' : 'Start session'}</button>
       </div>
     </div>
   )
@@ -324,7 +325,7 @@ function PlanScreen({ model, lang, onExercise, onStart, onBack }: { model: Retur
 function DetailScreen({ ex, idx, total, lang, onStart, onBack }: { ex: WorkoutV2Exercise; idx: number; total: number; lang: Lang; onStart: () => void; onBack: () => void }) {
   const ar = lang !== 'en'
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="min-h-screen bg-page px-4 pb-8 pt-3 text-ink-900">
+    <div dir={ar ? 'rtl' : 'ltr'} className="min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
       <div className="mx-auto w-full max-w-md">
         <button type="button" onClick={onBack} aria-label={ar ? 'رجوع' : 'Back'} className="grid h-10 w-10 place-items-center rounded-xl border border-line bg-surface"><Icon name="ChevronRight" className="h-5 w-5" /></button>
         {/* media placeholder (no demo media in the plan template) */}
@@ -365,7 +366,7 @@ function CompleteScreen({ model, active, lang, onDone }: { model: ReturnType<typ
   const volume = rows.reduce((v, r) => v + r.weight * r.reps, 0)
   const durationMin = active ? Math.max(1, Math.round((Date.now() - active.startedAt) / 60000)) : 0
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="flex min-h-screen flex-col items-center justify-center bg-page px-6 text-center text-ink-900">
+    <div dir={ar ? 'rtl' : 'ltr'} className="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-page px-6 text-center text-ink-900">
       <span className="grid h-16 w-16 place-items-center rounded-2xl bg-primary text-white shadow-glow"><Icon name="Check" className="h-8 w-8" strokeWidth={3} /></span>
       <h1 className="mt-5 text-3xl font-black">{ar ? 'أنهيت الجلسة' : 'Session complete'}</h1>
       <p className="mt-1 text-sm text-ink-500">{model.session.title}</p>

@@ -28,7 +28,7 @@ export function ProgressV2({ lang, onNavigate }: ProgressV2Props) {
   const go = (r?: string) => r && onNavigate?.(r as AppRoute)
 
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="min-h-screen bg-page px-4 pb-8 pt-3 text-ink-900">
+    <div dir={ar ? 'rtl' : 'ltr'} className="min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
       <div className="mx-auto w-full max-w-md space-y-4">
         <header className="flex items-center justify-between pt-1">
           <h1 className="text-2xl font-black tracking-tight">{t('التقدم', 'Progress')}</h1>

@@ -43,7 +43,7 @@ export function NutritionV2({ lang }: NutritionV2Props) {
 
   const heroClr = model.hero.category === 'protein' ? 'text-primary' : model.hero.category === 'fuel' ? 'text-primary' : 'text-ink-900'
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="min-h-screen bg-page px-4 pb-8 pt-3 text-ink-900">
+    <div dir={ar ? 'rtl' : 'ltr'} className="min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
       <div className="mx-auto w-full max-w-md space-y-4">
         <header className="flex items-center justify-between pt-1">
           <h1 className="text-2xl font-black tracking-tight">{t('التغذية · اليوم', 'Nutrition · Today')}</h1>
@@ -125,7 +125,7 @@ function AddMeal({ lang, slot, onAdd, onBack }: { lang: Lang; slot: MealSlot; on
   }, [q, highProtein])
 
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="min-h-screen bg-page px-4 pb-8 pt-3 text-ink-900">
+    <div dir={ar ? 'rtl' : 'ltr'} className="min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
       <div className="mx-auto w-full max-w-md">
         <div className="flex items-center gap-3">
           <button type="button" onClick={onBack} aria-label={ar ? 'رجوع' : 'Back'} className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-line bg-surface"><Icon name="ChevronRight" className="h-5 w-5" /></button>
