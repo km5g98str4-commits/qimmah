@@ -27,6 +27,7 @@
     "proof:p10a5": "node scripts/run-p10-a5-proof.mjs",
     "proof:p10qa": "node scripts/run-p10-integration-qa.mjs",
     "test:active-session": "node scripts/run-active-session-proof.mjs",
+    "test:isolation": "node scripts/run-isolation-proof.mjs",
     "test:e2e:onboarding": "node scripts/e2e-onboarding.mjs",
     "test:e2e": "npm run build && node scripts/e2e-onboarding.mjs",
     "test:e2e:auth:preflight": "node scripts/e2e-auth/preflight.mjs",
