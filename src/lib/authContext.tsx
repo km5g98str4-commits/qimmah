@@ -8,6 +8,7 @@ import type { ReactNode } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
 import { getSupabase, isSupabaseConfigured } from './supabaseClient'
 import { getLanguage } from './appPreferences'
+import { wipeUserData, setLastUser } from './accountScope'
 import { miscStrings } from '@/i18n/dict/misc'
 
 export interface AuthResult {
@@ -250,6 +251,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const supabase = await getSupabase()
         if (!supabase) return
         await supabase.auth.signOut()
+        // عزل الحساب: امسح كل بيانات المستخدم على الجهاز عند الخروج (لا تبقى بقايا
+        // يقرؤها المستخدم التالي)، وثبّت المالك على «ضيف» فلا يُعيد التوفيق المسح مجددًا.
+        wipeUserData()
+        setLastUser(null)
+        // امسح رمز الجلسة صراحةً: wipeUserData يُبقيه (كي لا يُطرد مستخدم أثناء تبديل)،
+        // لكن الخروج يجب أن يُنهي الجلسة حتى لو تعذّر نداء signOut الشبكي (فلا يُستعاد الحساب عند إعادة التحميل).
+        if (typeof window !== 'undefined') {
+          try {
+            window.localStorage.removeItem('qimmah:supabase-auth:v1')
+          } catch {
+            /* تجاهل */
+          }
+        }
         setSession(null)
         setUser(null)
       },

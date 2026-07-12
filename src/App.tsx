@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 // شاشة البداية (الهبوط) تبقى مُحمّلة مباشرةً لأول رسم سريع.
 import { StartView } from '@/views/StartView'
 import { AppLoading } from '@/components/AppLoading'
@@ -43,6 +43,7 @@ import { MobileShell, type MainTab } from '@/components/MobileShell'
 import type { AppBadge } from '@/components/AppNav'
 import { useAuth } from '@/lib/authContext'
 import { isAccountOnboarded, isOnboardingComplete, markCompleted } from '@/lib/onboarding'
+import { reconcileAccountScope } from '@/lib/accountScope'
 import { ensureOnboardingProfile } from '@/lib/onboardingProfile'
 import { currentUserId, hydrateOnboardingFromProfile } from '@/lib/onboardingSync'
 import { useLanguage } from '@/i18n'
@@ -97,6 +98,17 @@ export default function App() {
   const badge: AppBadge = 'account'
   // المالك الحالي لقرار البوابة: معرّف الحساب المسجّل، أو null لوضع الضيف.
   const uid = auth.user?.id ?? null
+
+  // عزل الحساب (شبكة أمان): بمجرّد جهوزية المصادقة، إن ظهر حساب مختلف عن آخر ما رأيناه
+  // (مثلًا استعادة جلسة لحساب آخر دون مرور بتسجيل خروج) → امسح بقايا السابق قبل الرسم،
+  // ثم أعِد التحميل نظيفًا فلا تبقى أي حالة في الذاكرة من الحساب السابق. تسجيل الخروج
+  // العادي يمسح مباشرةً في signOut، فهذه الحالة تلتقط المسارات غير المتوقّعة فقط.
+  // useLayoutEffect ليتمّ المسح قبل أن يرسم المتصفح واجهة الحساب الجديد.
+  useLayoutEffect(() => {
+    if (auth.loading) return
+    const { wiped } = reconcileAccountScope(uid)
+    if (wiped && typeof window !== 'undefined') window.location.reload()
+  }, [auth.loading, uid])
 
   useEffect(() => {
     // تطبيق اللغة/الاتجاه يتكفّل به LanguageProvider. هنا هجرات لمرّة واحدة فقط.
