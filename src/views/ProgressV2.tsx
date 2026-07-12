@@ -1,110 +1,129 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { Icon } from '@/components/Icon'
 import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
 import type { AppRoute } from '@/lib/appRoutes'
 import { useCustomization } from '@/lib/customizationContext'
-import { buildProgressV2Model, type BriefItem, type BriefStatus } from '@/lib/progressV2Model'
+import {
+  buildProgressV2Model,
+  type LiftLadder,
+  type ProgressScreen,
+  type RowTone,
+  type SummaryRow,
+  type WeightDetail,
+} from '@/lib/progressV2Model'
 
 interface ProgressV2Props {
   lang: Lang
   onNavigate?: (route: AppRoute) => void
 }
 
-const STATUS_ICON: Record<BriefStatus, string> = { improved: 'TrendingUp', stable: 'Minus', needsData: 'Circle', caution: 'AlertTriangle', unknown: 'Circle' }
-const STATUS_CLR: Record<BriefStatus, string> = { improved: 'text-success', stable: 'text-ink-500', needsData: 'text-ink-400', caution: 'text-warning', unknown: 'text-ink-400' }
+// Positive-signal green (matches the workout success moment) and a data-viz blue
+// for the weight line / steady lifts. Chart hues are viz decisions, not brand
+// tokens — kept explicit so both read correctly in the current preview theme.
+const SUCCESS = '#1F9D57'
+const BLUE = '#5C8DF0'
+
+const TONE_TEXT: Record<RowTone, string> = { good: '', neutral: 'text-ink-500', needsData: 'text-ink-400' }
 
 /**
- * Progress v2 — Qimmah v2.1 (Slice 6). Preview-gated (ProgressView branches
- * here under isDesignV2). A coach-style Brief of the last 14 days built from
- * real local state; honest needs-data prompts otherwise. No fake progress,
- * PRs, body-fat, or steps.
+ * Progress v2 — Qimmah v2.1 (Slice 6, PDF §05). Preview-gated (ProgressView
+ * branches here under isDesignV2). Three self-contained screens: the honest,
+ * hedged Brief (home) → Weight detail (goal band) → Strength detail (per-lift
+ * ladders). Every number comes from real local history; where there is none we
+ * say so. No fake weight loss / PRs / body-fat / steps.
  */
 export function ProgressV2({ lang, onNavigate }: ProgressV2Props) {
   const { customization } = useCustomization()
   const ar = lang !== 'en'
   const t = (a: string, e: string) => (ar ? a : e)
   const model = useMemo(() => buildProgressV2Model(customization, lang), [customization, lang])
-  const go = (r?: string) => r && onNavigate?.(r as AppRoute)
+  const [screen, setScreen] = useState<ProgressScreen>('home')
+  const go = (r: AppRoute) => onNavigate?.(r)
+
+  if (screen === 'weight') return <WeightDetailScreen model={model.weight} lang={lang} onBack={() => setScreen('home')} onLog={() => go('progress')} stale={model.stale.show ? model.stale.detailText : null} />
+  if (screen === 'strength') return <StrengthDetailScreen strength={model.strength} lang={lang} onBack={() => setScreen('home')} onTrain={() => go('workout')} />
 
   return (
     <div dir={ar ? 'rtl' : 'ltr'} className="min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
       <div className="mx-auto w-full max-w-md space-y-5 animate-fade-up">
-        <header className="flex items-center justify-between pt-1">
-          <h1 className="text-2xl font-black tracking-tight">{t('التقدم', 'Progress')}</h1>
-          {model.goalLabel && <span className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-bold text-primary">{model.goalLabel}</span>}
+        <header className="pt-1">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-black uppercase tracking-wider text-primary">{t('التقدّم', 'Progress')}</p>
+            {model.goalLabel && <span className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-bold text-primary">{model.goalLabel}</span>}
+          </div>
+          {/* Hedged header — always «يبدو…», never a verdict. */}
+          <h1 className="mt-2 text-2xl font-black leading-snug tracking-tight">{model.headline}</h1>
         </header>
 
-        {/* Brief hero */}
+        {/* Brief — last 14 days */}
         <section className="rounded-3xl border border-line bg-surface p-5 shadow-card">
-          <p className="text-xs font-black uppercase tracking-wider text-primary">{model.period.label}</p>
-          <h2 className="mt-2 text-xl font-black leading-snug">{model.brief.headline}</h2>
-          <div className="mt-4 space-y-2.5">
-            {model.brief.items.map((it, i) => <BriefRow key={i} it={it} onGo={go} />)}
+          <div className="flex items-center gap-2">
+            <span className="text-primary"><Icon name="Sparkles" className="h-4 w-4" /></span>
+            <p className="text-xs font-black uppercase tracking-wider text-primary">{model.period.label}</p>
           </div>
+          <div className="mt-4 space-y-3">
+            {model.summary.map((row) => <BriefRow key={row.key} row={row} />)}
+          </div>
+          {model.stale.show && (
+            <button type="button" onClick={() => setScreen('weight')} className="mt-4 flex w-full items-center justify-between gap-2 border-t border-line pt-3 text-start">
+              <span className="flex min-w-0 items-center gap-2 text-sm font-bold text-ink-500">
+                <Icon name="Clock" className="h-4 w-4 shrink-0" />
+                <span className="min-w-0">{model.stale.text}</span>
+              </span>
+              <span className="shrink-0 text-xs font-black text-primary">{model.stale.actionLabel} ›</span>
+            </button>
+          )}
         </section>
 
-        {/* Momentum score */}
+        {/* Training momentum — area chart of real session volumes */}
         <section className="rounded-2xl border border-line bg-surface p-4">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-black">{t('الزخم', 'Momentum')}</span>
-            <span className="text-xs font-bold tabular-nums text-ink-500">{model.momentum.overallScore}/100</span>
+            <span className="text-sm font-black">{model.momentum.label}</span>
+            <span className="text-xs font-bold text-ink-500">{model.momentum.hasData ? t(`آخر ${model.momentum.weeks} جلسات`, `Last ${model.momentum.weeks} sessions`) : t('لا بيانات بعد', 'No data yet')}</span>
           </div>
-          <div className="mt-3 grid grid-cols-4 gap-2 text-center">
-            <ScorePill label={t('تدريب', 'Train')} v={model.momentum.trainingScore} />
-            <ScorePill label={t('تغذية', 'Fuel')} v={model.momentum.nutritionScore} />
-            <ScorePill label={t('حركة', 'Move')} v={model.momentum.activityScore} />
-            <ScorePill label={t('تعافي', 'Recover')} v={model.momentum.recoveryScore} />
-          </div>
+          {model.momentum.hasData
+            ? <MomentumArea values={model.momentum.series.map((p) => p.value)} lang={lang} />
+            : <NeedsData text={t('أكمل تمارينك ليظهر زخمك هنا.', 'Complete workouts to see your momentum here.')} />}
         </section>
 
-        {/* Weight + strength tiles */}
+        {/* Weight + strength tiles → detail screens */}
         <section className="grid grid-cols-2 gap-3">
-          <Tile icon="TrendingUp" title={t('الوزن والجسم', 'Weight & body')} main={model.weight.currentKg ? `${model.weight.currentKg} ${t('كجم', 'kg')}` : t('غير مسجّل', 'Not logged')} sub={model.weight.targetKg ? t(`الهدف ${model.weight.targetKg} كجم`, `Target ${model.weight.targetKg} kg`) : t('سجّل وزنك', 'Log weight')} onClick={() => go('progress')} />
-          <Tile icon="Dumbbell" title={t('القوة', 'Strength')} main={model.strength.lastSessionTitle ? t('جلسة واحدة', '1 session') : t('لا بيانات', 'No data')} sub={model.strength.lastSessionTitle ? t('نحتاج تمرينين', 'Need two workouts') : t('أكمل تمرينين', 'Complete two')} onClick={() => go('workout')} />
+          <Tile
+            icon="TrendingDown"
+            title={t('الوزن والجسم', 'Weight & body')}
+            main={model.weight.currentKg ? `${model.weight.currentKg} ${t('كجم', 'kg')}` : t('غير مسجّل', 'Not logged')}
+            sub={model.weight.targetKg ? t(`الهدف ${model.weight.targetKg}`, `Target ${model.weight.targetKg}`) : t('سجّل وزنك', 'Log weight')}
+            onClick={() => setScreen('weight')}
+          />
+          <Tile
+            icon="Dumbbell"
+            title={t('القوة', 'Strength')}
+            main={model.strength.hasData ? t(`${model.strength.lifts.length} تمارين`, `${model.strength.lifts.length} lifts`) : t('لا بيانات', 'No data')}
+            sub={model.strength.improvedCount > 0 ? t(`تحسّن ${model.strength.improvedCount}`, `${model.strength.improvedCount} up`) : t('أكمل تمرينين', 'Do two workouts')}
+            onClick={() => setScreen('strength')}
+          />
         </section>
 
-        {/* Next actions */}
-        {model.nextActions.length > 0 && (
-          <section className="space-y-2">
-            <p className="text-sm font-black">{t('الخطوة التالية', 'Next steps')}</p>
-            {model.nextActions.map((a, i) => (
-              <button key={i} type="button" onClick={() => go(a.destination)} className="flex w-full items-center justify-between gap-2 rounded-2xl border border-line bg-surface px-4 py-3 text-start hover:border-primary/40">
-                <span className="min-w-0"><span className="block text-sm font-bold">{a.label}</span><span className="block text-xs text-ink-500">{a.reason}</span></span>
-                <span className="shrink-0 text-xs font-black text-primary">{a.actionLabel}</span>
-              </button>
-            ))}
-          </section>
-        )}
-
-        <p className="px-1 text-center text-[0.7rem] text-ink-400">{t('قراءة تقديرية — تتحسّن كلما سجّلت أكثر.', 'An estimated read — sharper the more you log.')}</p>
+        <p className="px-1 text-center text-[0.7rem] text-ink-400">{model.disclaimer}</p>
       </div>
     </div>
   )
 }
 
-function BriefRow({ it, onGo }: { it: BriefItem; onGo: (r?: string) => void }) {
+function BriefRow({ row }: { row: SummaryRow }) {
+  const good = row.tone === 'good'
   return (
     <div className="flex items-center gap-3">
-      <Icon name={STATUS_ICON[it.status]} className={cn('h-4.5 w-4.5 shrink-0', STATUS_CLR[it.status])} />
-      <span className="min-w-0 flex-1">
-        <span className="block text-sm font-bold">{it.label} · <span className="font-black text-ink-900">{it.value}</span></span>
-        <span className="block text-xs text-ink-500">{it.note}</span>
+      <span className="shrink-0" style={good ? { color: SUCCESS } : undefined}>
+        <Icon name={row.icon} className={cn('h-4.5 w-4.5', !good && TONE_TEXT[row.tone])} />
       </span>
-      {it.actionLabel && it.destination && (
-        <button type="button" onClick={() => onGo(it.destination)} className="shrink-0 text-xs font-black text-primary">{it.actionLabel}</button>
-      )}
-    </div>
-  )
-}
-
-function ScorePill({ label, v }: { label: string; v: number }) {
-  return (
-    <div>
-      <div className="mx-auto grid h-11 w-11 place-items-center rounded-full border-2 border-line">
-        <span className={cn('text-sm font-black tabular-nums', v > 0 ? 'text-primary' : 'text-ink-400')}>{v}</span>
-      </div>
-      <p className="mt-1 text-[0.65rem] font-bold text-ink-500">{label}</p>
+      <span className="min-w-0 flex-1 text-sm font-bold">
+        {row.text}{row.value && <> <b className="tabular-nums text-ink-900">{row.value}</b></>}
+      </span>
+      <span className="shrink-0 text-xs font-black" style={good ? { color: SUCCESS } : undefined}>
+        <span className={good ? '' : row.tone === 'needsData' ? 'text-ink-400' : 'text-ink-500'}>{row.tag}</span>
+      </span>
     </div>
   )
 }
@@ -116,5 +135,206 @@ function Tile({ icon, title, main, sub, onClick }: { icon: string; title: string
       <p className="mt-2 text-lg font-black tabular-nums">{main}</p>
       <p className="text-xs text-ink-500">{sub}</p>
     </button>
+  )
+}
+
+function NeedsData({ text }: { text: string }) {
+  return <p className="mt-3 rounded-xl border border-dashed border-line bg-page px-3 py-4 text-center text-xs text-ink-400">{text}</p>
+}
+
+// ── Weight detail ─────────────────────────────────────────────────────────────
+
+function WeightDetailScreen({ model, lang, onBack, onLog, stale }: { model: WeightDetail; lang: Lang; onBack: () => void; onLog: () => void; stale: string | null }) {
+  const ar = lang !== 'en'
+  const t = (a: string, e: string) => (ar ? a : e)
+  const down = model.changeKg !== null && model.changeKg < 0
+  const up = model.changeKg !== null && model.changeKg > 0
+  return (
+    <div dir={ar ? 'rtl' : 'ltr'} className="min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
+      <div className="mx-auto w-full max-w-md animate-fade-up">
+        <div className="flex items-center justify-between">
+          <button type="button" onClick={onBack} aria-label={t('رجوع', 'Back')} className="grid h-10 w-10 place-items-center rounded-xl border border-line bg-surface"><Icon name="ChevronRight" className="h-5 w-5 rtl:rotate-0 ltr:rotate-180" /></button>
+          <h1 className="text-lg font-black">{t('الوزن والجسم', 'Weight & body')}</h1>
+        </div>
+
+        {/* current + change */}
+        <div className="mt-5 flex items-end justify-between">
+          <p className="text-4xl font-black tabular-nums">{model.currentKg ?? '—'}<span className="ms-1 text-sm font-bold text-ink-400">{t('كجم', 'kg')}</span></p>
+          <div className="text-end text-sm font-bold">
+            {model.changeKg !== null && (
+              <span className="inline-flex items-center gap-1" style={{ color: down ? SUCCESS : up ? BLUE : undefined }}>
+                <Icon name={down ? 'TrendingDown' : up ? 'TrendingUp' : 'Minus'} className="h-4 w-4" />
+                <span className="tabular-nums">{Math.abs(model.changeKg)}</span>
+              </span>
+            )}
+            {model.targetKg && <span className="ms-2 text-ink-500">{t(`الهدف ${model.targetKg}`, `Target ${model.targetKg}`)}</span>}
+          </div>
+        </div>
+
+        {/* line chart with goal band */}
+        <div className="mt-4 rounded-2xl border border-line bg-surface p-4">
+          {model.series.length >= 2
+            ? <WeightLine series={model.series.map((p) => p.kg)} band={model.band} />
+            : <NeedsData text={t('سجّل وزنك مرتين على الأقل لرسم الاتجاه.', 'Log your weight at least twice to draw the trend.')} />}
+          <div className="mt-2 flex items-center justify-between text-[0.7rem] font-bold text-ink-400">
+            <span>{t('الآن', 'Now')}</span>
+            {model.band && <span style={{ color: SUCCESS }}>{t(`نطاق الهدف ${model.band[0]}–${model.band[1]}`, `Goal band ${model.band[0]}–${model.band[1]}`)}</span>}
+          </div>
+        </div>
+
+        {/* waist + body fat */}
+        <div className="mt-3 grid grid-cols-2 gap-3">
+          <div className="rounded-2xl border border-line bg-surface p-4">
+            <p className="text-xs font-bold text-ink-500">{t('الخصر', 'Waist')}</p>
+            <p className="mt-1 text-2xl font-black tabular-nums">{model.waistCm ?? '—'}<span className="ms-1 text-xs font-bold text-ink-400">{t('سم', 'cm')}</span></p>
+            {model.waistChangeCm !== null && (
+              <p className="mt-0.5 inline-flex items-center gap-1 text-xs font-bold" style={{ color: model.waistChangeCm < 0 ? SUCCESS : model.waistChangeCm > 0 ? BLUE : undefined }}>
+                <Icon name={model.waistChangeCm < 0 ? 'TrendingDown' : model.waistChangeCm > 0 ? 'TrendingUp' : 'Minus'} className="h-3.5 w-3.5" />
+                <span className="tabular-nums">{Math.abs(model.waistChangeCm)} {t('سم', 'cm')}</span>
+              </p>
+            )}
+          </div>
+          <div className="rounded-2xl border border-line bg-surface p-4">
+            <p className="text-xs font-bold text-ink-500">{t('نسبة الدهون', 'Body fat')}</p>
+            {model.bodyFatPct !== null ? (
+              <>
+                <p className="mt-1 text-2xl font-black tabular-nums">~{model.bodyFatPct}<span className="ms-0.5 text-xs font-bold text-ink-400">%</span></p>
+                <p className="mt-0.5 text-xs font-bold text-ink-400">{t('تقديري', 'Estimated')}</p>
+              </>
+            ) : (
+              <p className="mt-1 text-xs text-ink-400">{t('غير مسجّلة', 'Not logged')}</p>
+            )}
+          </div>
+        </div>
+
+        {/* stale waist callout */}
+        {stale && (
+          <button type="button" onClick={onLog} className="mt-3 flex w-full items-center justify-between gap-2 rounded-2xl border border-primary/30 bg-primary/10 px-4 py-3 text-start">
+            <span className="flex min-w-0 items-center gap-2 text-sm font-bold text-primary">
+              <Icon name="Clock" className="h-4 w-4 shrink-0" /><span className="min-w-0">{stale}</span>
+            </span>
+            <span className="shrink-0 text-xs font-black text-primary">{t('قِس', 'Measure')} ›</span>
+          </button>
+        )}
+
+        <button type="button" onClick={onLog} className="btn-primary mt-4 w-full py-4 text-[1.1875rem]">{t('تسجيل وزن اليوم', 'Log today’s weight')}</button>
+      </div>
+    </div>
+  )
+}
+
+// ── Strength detail ───────────────────────────────────────────────────────────
+
+function StrengthDetailScreen({ strength, lang, onBack, onTrain }: { strength: import('@/lib/progressV2Model').StrengthDetail; lang: Lang; onBack: () => void; onTrain: () => void }) {
+  const ar = lang !== 'en'
+  const t = (a: string, e: string) => (ar ? a : e)
+  return (
+    <div dir={ar ? 'rtl' : 'ltr'} className="min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
+      <div className="mx-auto w-full max-w-md animate-fade-up">
+        <div className="flex items-center justify-between">
+          <button type="button" onClick={onBack} aria-label={t('رجوع', 'Back')} className="grid h-10 w-10 place-items-center rounded-xl border border-line bg-surface"><Icon name="ChevronRight" className="h-5 w-5 rtl:rotate-0 ltr:rotate-180" /></button>
+          <h1 className="text-lg font-black">{t('تطوّر القوة', 'Strength progress')}</h1>
+        </div>
+
+        {/* hedged headline */}
+        <div className="mt-5 flex items-center gap-2 rounded-2xl border border-line bg-surface px-4 py-3">
+          <span style={strength.improvedCount > 0 ? { color: SUCCESS } : undefined}><Icon name="Diamond" className="h-4 w-4" /></span>
+          <p className="text-sm font-bold">{strength.headline}</p>
+        </div>
+
+        {strength.hasData ? (
+          <div className="mt-4 space-y-3">
+            {strength.lifts.map((lift) => <LiftRow key={lift.exerciseId} lift={lift} lang={lang} />)}
+          </div>
+        ) : (
+          <>
+            <NeedsData text={t('أكمل تمرينين على الأقل لنعرض تطوّر قوّتك لكل تمرين.', 'Complete at least two workouts to show per-lift progress.')} />
+            <button type="button" onClick={onTrain} className="btn-primary mt-4 w-full py-4 text-[1.1875rem]">{t('ابدأ تمرينًا', 'Start a workout')}</button>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function LiftRow({ lift, lang }: { lift: LiftLadder; lang: Lang }) {
+  const ar = lang !== 'en'
+  const t = (a: string, e: string) => (ar ? a : e)
+  const positive = lift.status === 'pr' || lift.status === 'up'
+  const statusColor = positive ? SUCCESS : BLUE
+  const statusLabel = lift.status === 'pr'
+    ? t('رقم قياسي', 'PR')
+    : lift.status === 'up'
+      ? `↑ ${lift.deltaKg ?? ''}`
+      : t('ثابت', 'Steady')
+  return (
+    <div className="rounded-2xl border border-line bg-surface p-4">
+      <div className="flex items-center justify-between">
+        <p className="text-sm font-black"><bdi>{lift.name}</bdi></p>
+        <p className="text-xs font-bold tabular-nums text-ink-500">
+          {lift.bestKg} {t('كجم', 'kg')} · <span style={{ color: statusColor }}>{statusLabel}</span>
+        </p>
+      </div>
+      {/* per-lift ladder — the leading rung is coloured by trend, the rest are
+          empty rungs (matches PDF §05: one bold block + outlined slots). */}
+      <div className="mt-3 flex gap-1.5" role="img" aria-label={`${lift.name} · ${lift.bestKg} ${t('كجم', 'kg')} · ${statusLabel}`}>
+        {Array.from({ length: 6 }, (_, i) => (
+          <span key={i} className="h-8 flex-1 rounded-md border" style={{ background: i === 0 ? statusColor : 'transparent', borderColor: i === 0 ? statusColor : 'rgb(var(--c-line))' }} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ── Local SVG charts (no external libs) ───────────────────────────────────────
+
+function MomentumArea({ values, lang }: { values: number[]; lang: Lang }) {
+  const ar = lang !== 'en'
+  const W = 320, H = 96, P = 4
+  const n = values.length
+  const min = Math.min(...values), max = Math.max(...values)
+  // Baseline below the minimum so a gentle upward trend is visible (values are
+  // often close together); the area still fills to the bottom edge.
+  const spread = max - min || max || 1
+  const lo = min - spread * 0.5, hi = max + spread * 0.1
+  const x = (i: number) => (n <= 1 ? W / 2 : P + (i * (W - 2 * P)) / (n - 1))
+  const y = (v: number) => H - P - ((v - lo) / (hi - lo)) * (H - 2 * P)
+  const line = values.map((v, i) => `${i === 0 ? 'M' : 'L'} ${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join(' ')
+  const area = `${line} L ${x(n - 1).toFixed(1)} ${H} L ${x(0).toFixed(1)} ${H} Z`
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} className="mt-3 h-24 w-full" preserveAspectRatio="none" role="img" aria-label={ar ? 'مخطّط زخم التدريب' : 'Training momentum chart'}>
+      <defs>
+        <linearGradient id="momentumFill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="rgb(var(--c-primary))" stopOpacity="0.35" />
+          <stop offset="100%" stopColor="rgb(var(--c-primary))" stopOpacity="0.02" />
+        </linearGradient>
+      </defs>
+      <path d={area} fill="url(#momentumFill)" />
+      <path d={line} fill="none" stroke="rgb(var(--c-primary))" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
+      {values.map((v, i) => <circle key={i} cx={x(i)} cy={y(v)} r={2.5} fill="rgb(var(--c-primary))" />)}
+    </svg>
+  )
+}
+
+function WeightLine({ series, band }: { series: number[]; band: [number, number] | null }) {
+  const W = 320, H = 120, P = 6
+  const all = band ? [...series, band[0], band[1]] : series
+  const min = Math.min(...all), max = Math.max(...all)
+  const span = max - min || 1
+  const n = series.length
+  const x = (i: number) => (n <= 1 ? W / 2 : P + (i * (W - 2 * P)) / (n - 1))
+  const y = (v: number) => P + (1 - (v - min) / span) * (H - 2 * P)
+  const line = series.map((v, i) => `${i === 0 ? 'M' : 'L'} ${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join(' ')
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} className="h-28 w-full" preserveAspectRatio="none" role="img" aria-label="Weight trend">
+      {band && (
+        <>
+          <rect x={0} y={y(band[1])} width={W} height={Math.max(2, y(band[0]) - y(band[1]))} fill={SUCCESS} opacity={0.12} />
+          <line x1={0} y1={y((band[0] + band[1]) / 2)} x2={W} y2={y((band[0] + band[1]) / 2)} stroke={SUCCESS} strokeWidth={1.5} strokeDasharray="5 4" opacity={0.7} />
+        </>
+      )}
+      <path d={line} fill="none" stroke={BLUE} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
+      {series.map((v, i) => <circle key={i} cx={x(i)} cy={y(v)} r={i === n - 1 ? 4 : 2.5} fill={BLUE} />)}
+    </svg>
   )
 }

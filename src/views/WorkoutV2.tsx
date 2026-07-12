@@ -4,6 +4,11 @@ import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
 import type { AppRoute } from '@/lib/appRoutes'
 import { useCustomization } from '@/lib/customizationContext'
+// Reuse the SACRED, just-shipped timestamp rest-timer helpers from the v1 active
+// session engine (read-only import — the logic is never rewritten here). Basing
+// the v2 rest timer on `endsAt`/`durationSec` (not a decrementing counter) keeps
+// it correct after the app returns from the background, exactly like WorkoutMode.
+import { restIsFinished, restRemainingSec, type RestSnapshot } from '@/lib/activeSession'
 import { buildWorkoutV2Model, CATEGORY_LABEL, type ExCategory, type WorkoutV2Exercise } from '@/lib/workoutV2Model'
 
 interface WorkoutV2Props {
@@ -14,10 +19,39 @@ interface WorkoutV2Props {
 const ACTIVE_KEY = 'qimmah:active-workout:v2'
 const SUMMARY_KEY = 'qimmah:workout-summary:v2'
 const REST_DEFAULT = 90
+const REST_ADD = 15
+
+/**
+ * Dedicated DARK "focus mode" palette for the active workout — the v2.1 crown
+ * jewel (PDF §07). Values are explicit and INDEPENDENT of the app theme tokens:
+ * the approved v2.1 app surface is light, but the active workout is a deliberate
+ * dark focus moment. (Today's tokens still alias the legacy dark build, so "dark"
+ * can't be derived from them yet either.) Ember = the single primary action per
+ * screen; green = success/completion moments.
+ */
+const FOCUS = {
+  bg: '#141110',
+  card: '#1F1B18',
+  cardActive: '#2A2420',
+  line: 'rgba(255,255,255,0.09)',
+  ink: '#F7F4F0',
+  inkMuted: '#A8A19A',
+  inkFaint: '#8B847C',
+  ember: '#F26A21',
+  emberInk: '#FFFFFF',
+  success: '#1F9D57',
+} as const
 
 type Screen = 'plan' | 'detail' | 'active' | 'complete'
 interface SetRow { weight: number; reps: number; done: boolean }
-interface ActiveState { startedAt: number; exIndex: number; setIndex: number; rows: Record<string, SetRow[]> }
+interface ActiveState {
+  startedAt: number
+  exIndex: number
+  setIndex: number
+  rows: Record<string, SetRow[]>
+  /** Rest timer as timestamps (survives refresh + background) — see activeSession.ts. */
+  rest?: RestSnapshot | null
+}
 
 const parseReps = (reps: string): number => {
   const m = reps.match(/\d+/)
@@ -54,6 +88,11 @@ function isUsableSession(value: unknown, exercises: WorkoutV2Exercise[]): value 
       if (typeof row.weight !== 'number' || typeof row.reps !== 'number' || typeof row.done !== 'boolean') return false
     }
   }
+  // Rest, when present, must be a well-formed timestamp snapshot (optional field).
+  if (s.rest != null) {
+    const r = s.rest as Partial<RestSnapshot>
+    if (typeof r.endsAt !== 'number' || typeof r.durationSec !== 'number') return false
+  }
   // Current set index must be inside the current exercise's rows.
   const curRows = rows[exercises[s.exIndex as number].id] as SetRow[]
   if ((s.setIndex as number) >= curRows.length) return false
@@ -61,12 +100,13 @@ function isUsableSession(value: unknown, exercises: WorkoutV2Exercise[]): value 
 }
 
 /**
- * Workout v2 — Qimmah v2.1 (Slice 4). Preview-gated (WorkoutView branches here
- * under isDesignV2). Self-contained internal navigation: Plan → Exercise Detail
- * → Active Workout (set editor + rest timer) → Complete. Reads the real
- * generated plan; no fake previous weights/PRs. Active session persists to
- * localStorage (qimmah:active-workout:v2) so a refresh resumes; a completed
- * summary is saved locally (qimmah:workout-summary:v2). No cloud write.
+ * Workout v2 — Qimmah v2.1 (Slice 4, "crown jewel"). Preview-gated (WorkoutView
+ * branches here under isDesignV2). Self-contained internal navigation: Plan →
+ * Exercise Detail → Active Workout (dark focus mode: set editor + rest timer) →
+ * Complete. Reads the real generated plan; no fake previous weights/PRs. The
+ * active session persists to localStorage (qimmah:active-workout:v2) so a refresh
+ * resumes — including the rest timer, stored as timestamps. A completed summary
+ * is saved locally (qimmah:workout-summary:v2). No cloud write.
  */
 export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   const { customization } = useCustomization()
@@ -77,8 +117,8 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   const [screen, setScreen] = useState<Screen>('plan')
   const [detailIdx, setDetailIdx] = useState(0)
   const [active, setActive] = useState<ActiveState | null>(null)
-  const [resting, setResting] = useState(false)
-  const [rest, setRest] = useState(REST_DEFAULT)
+  // Display clock for the timestamp-based rest timer (ticks only while resting).
+  const [now, setNow] = useState(() => Date.now())
 
   // Restore an in-progress session on mount — but NEVER trust localStorage.
   // Only resume if the persisted session is fully usable for the current plan;
@@ -94,6 +134,7 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
     }
     if (isUsableSession(parsed, model.exercises)) {
       setActive(parsed)
+      setNow(Date.now())
       setScreen('active')
     } else {
       try {
@@ -121,7 +162,7 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
     }
   }, [screen, active, model.exercises])
 
-  // Persist active session.
+  // Persist active session (rest timestamps included → refresh resumes the rest).
   useEffect(() => {
     try {
       if (active) localStorage.setItem(ACTIVE_KEY, JSON.stringify(active))
@@ -130,16 +171,32 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
     }
   }, [active])
 
-  // Rest countdown.
+  const resting = active?.rest != null
+  const restDone = active?.rest ? restIsFinished(active.rest, now) : false
+
+  // Display pulse (¼s) while a rest is running — auto-stops when the rest clears.
   useEffect(() => {
     if (!resting) return
-    if (rest <= 0) {
-      setResting(false)
-      return
+    const id = window.setInterval(() => setNow(Date.now()), 250)
+    return () => window.clearInterval(id)
+  }, [resting])
+  // Recompute the instant the app returns to the foreground — JS timers freeze in
+  // the background on iOS, so we never rely on the pulse alone (same fix as v1).
+  useEffect(() => {
+    const sync = () => setNow(Date.now())
+    document.addEventListener('visibilitychange', sync)
+    window.addEventListener('focus', sync)
+    return () => {
+      document.removeEventListener('visibilitychange', sync)
+      window.removeEventListener('focus', sync)
     }
-    const id = window.setTimeout(() => setRest((r) => r - 1), 1000)
+  }, [])
+  // Keep the "done" state visible a beat, then clear the rest bar.
+  useEffect(() => {
+    if (!restDone) return
+    const id = window.setTimeout(() => setActive((prev) => (prev ? { ...prev, rest: null } : prev)), 2500)
     return () => window.clearTimeout(id)
-  }, [resting, rest])
+  }, [restDone])
 
   if (!model.available) return <MissingPlan lang={lang} onNavigate={onNavigate} />
 
@@ -148,7 +205,7 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
     for (const ex of model.exercises) {
       rows[ex.id] = Array.from({ length: ex.sets }, () => ({ weight: ex.targetWeightKg ?? 20, reps: parseReps(ex.reps), done: false }))
     }
-    setActive({ startedAt: Date.now(), exIndex: 0, setIndex: 0, rows })
+    setActive({ startedAt: Date.now(), exIndex: 0, setIndex: 0, rows, rest: null })
     setScreen('active')
   }
 
@@ -169,6 +226,8 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   const ex = model.exercises[active.exIndex]
   const rows = active.rows[ex.id]
   const row = rows[active.setIndex]
+  const doneSets = Object.values(active.rows).flat().filter((r) => r.done).length
+  const totalPlannedSets = Object.values(active.rows).flat().length
 
   const setRow = (patch: Partial<SetRow>) => {
     setActive((prev) => {
@@ -182,94 +241,121 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   }
 
   const finishSet = () => {
-    setRow({ done: true })
     const lastSet = active.setIndex >= rows.length - 1
     const lastEx = active.exIndex >= model.exercises.length - 1
     if (lastSet && lastEx) {
       try {
-        const totalSets = Object.values(active.rows).flat().filter((r) => r.done).length + 1
+        const totalSets = doneSets + 1
         const volume = Object.values(active.rows).flat().reduce((v, r) => v + (r.done ? r.weight * r.reps : 0), 0) + row.weight * row.reps
         localStorage.setItem(SUMMARY_KEY, JSON.stringify({ date: new Date().toISOString().slice(0, 10), title: model.session.title, totalSets, volume, durationMin: Math.round((Date.now() - active.startedAt) / 60000) }))
       } catch { /* ignore */ }
+      setRow({ done: true })
       setScreen('complete')
       return
     }
-    // advance
-    setResting(true)
-    setRest(REST_DEFAULT)
+    // Mark done, advance, and start the rest — a single atomic update.
     setActive((prev) => {
       if (!prev) return prev
-      if (active.setIndex < rows.length - 1) return { ...prev, setIndex: prev.setIndex + 1 }
-      return { ...prev, exIndex: prev.exIndex + 1, setIndex: 0 }
+      const arr = [...prev.rows[ex.id]]
+      arr[prev.setIndex] = { ...arr[prev.setIndex], done: true }
+      const rowsNext = { ...prev.rows, [ex.id]: arr }
+      const advance = prev.setIndex < rows.length - 1
+        ? { setIndex: prev.setIndex + 1 }
+        : { exIndex: prev.exIndex + 1, setIndex: 0 }
+      return { ...prev, ...advance, rows: rowsNext, rest: { endsAt: Date.now() + REST_DEFAULT * 1000, durationSec: REST_DEFAULT } }
     })
+    setNow(Date.now())
   }
 
+  const restLeft = active.rest ? restRemainingSec(active.rest.endsAt, now) : 0
+  const addRest = () => setActive((prev) => (prev?.rest ? { ...prev, rest: { ...prev.rest, endsAt: prev.rest.endsAt + REST_ADD * 1000 } } : prev))
+  const skipRest = () => setActive((prev) => (prev ? { ...prev, rest: null } : prev))
+
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="fixed inset-0 z-[60] flex flex-col bg-page text-ink-900" style={{ paddingTop: 'max(0.75rem, var(--safe-top))' }}>
-      <header className="flex items-center justify-between px-5 py-2">
-        <button type="button" onClick={() => { if (confirmLeave()) { clearActive(); onNavigate('dashboard') } }} aria-label={t('إغلاق', 'Close')} className="grid h-10 w-10 place-items-center rounded-xl border border-line bg-surface"><Icon name="ChevronRight" className="h-5 w-5" /></button>
-        <span className="text-sm font-bold text-ink-500">{t(`التمرين ${toAr(active.exIndex + 1, lang)} من ${toAr(model.exercises.length, lang)}`, `Exercise ${active.exIndex + 1} of ${model.exercises.length}`)}</span>
-        <span className="h-10 w-10" />
+    <div dir={ar ? 'rtl' : 'ltr'} className="fixed inset-0 z-[60] flex flex-col" style={{ background: FOCUS.bg, color: FOCUS.ink, paddingTop: 'max(0.75rem, var(--safe-top))', paddingBottom: 'var(--safe-bottom)' }}>
+      <header className="flex items-center justify-between gap-3 px-5 py-2">
+        <button type="button" onClick={() => { clearActive(); onNavigate('dashboard') }} aria-label={t('إغلاق التمرين', 'Close workout')} className="grid h-10 w-10 place-items-center rounded-xl" style={{ background: FOCUS.card, border: `1px solid ${FOCUS.line}`, color: FOCUS.ink }}>
+          <Icon name="X" className="h-5 w-5" />
+        </button>
+        <span className="text-sm font-bold tabular-nums" style={{ color: FOCUS.inkMuted }}>{t(`التمرين ${toAr(active.exIndex + 1, lang)} من ${toAr(model.exercises.length, lang)}`, `Exercise ${active.exIndex + 1} of ${model.exercises.length}`)}</span>
+        <span className="grid h-10 w-10 place-items-center rounded-xl text-xs font-black tabular-nums" style={{ background: FOCUS.card, border: `1px solid ${FOCUS.line}`, color: FOCUS.inkMuted }} aria-label={t(`${toAr(doneSets, lang)} من ${toAr(totalPlannedSets, lang)} مجموعات مكتملة`, `${doneSets} of ${totalPlannedSets} sets done`)}>{toAr(doneSets, lang)}/{toAr(totalPlannedSets, lang)}</span>
       </header>
+      {/* session progress (completed sets) */}
+      <div className="mx-5 mb-1 h-1.5 overflow-hidden rounded-full" style={{ background: FOCUS.line }}>
+        <div className="h-full rounded-full transition-all" style={{ width: `${totalPlannedSets ? (doneSets / totalPlannedSets) * 100 : 0}%`, background: FOCUS.ember }} />
+      </div>
 
       {resting ? (
-        <RestPanel lang={lang} rest={rest} nextEx={model.exercises[active.exIndex]} setLabel={t(`المجموعة ${toAr(active.setIndex + 1, lang)}`, `Set ${active.setIndex + 1}`)} onAdd={() => setRest((r) => r + 15)} onSkip={() => setResting(false)} />
+        <RestPanel lang={lang} restLeft={restLeft} restDone={restDone} nextEx={model.exercises[active.exIndex]} setLabel={t(`المجموعة ${toAr(active.setIndex + 1, lang)}`, `Set ${active.setIndex + 1}`)} onAdd={addRest} onSkip={skipRest} />
       ) : (
         <main className="flex flex-1 flex-col overflow-y-auto px-5 pb-6">
-          <h1 className="text-2xl font-black">{ar ? ex.nameAr : ex.nameEn}</h1>
-          <p className="mt-1 text-sm text-ink-500">{CATEGORY_LABEL[ex.category][ar ? 'ar' : 'en']} · {ex.sets}×{ex.reps}</p>
+          <h1 className="mt-2 text-2xl font-black leading-tight">{ar ? ex.nameAr : ex.nameEn}</h1>
+          <p className="mt-1 text-sm font-bold" style={{ color: FOCUS.inkMuted }}>{CATEGORY_LABEL[ex.category][ar ? 'ar' : 'en']} · {ex.sets}×{ex.reps}</p>
 
-          {/* set list */}
+          {/* set list — big tabular weight × reps */}
           <div className="mt-5 space-y-2">
-            {rows.map((r, i) => (
-              <div key={i} className={cn('flex items-center justify-between rounded-xl border px-4 py-2.5 text-sm', i === active.setIndex ? 'border-primary bg-primary/10' : r.done ? 'border-line bg-surface text-ink-500' : 'border-line bg-surface')}>
-                <span className="font-bold">{t(`المجموعة ${toAr(i + 1, lang)}`, `Set ${i + 1}`)}</span>
-                <span className={cn('font-bold tabular-nums', r.done && 'text-success')}>{toAr(r.weight, lang)} {t('كجم', 'kg')} × {toAr(r.reps, lang)}{r.done ? ' ✓' : ''}</span>
-              </div>
-            ))}
+            {rows.map((r, i) => {
+              const isCurrent = i === active.setIndex
+              return (
+                <div key={i} className="flex items-center justify-between rounded-2xl px-4 py-3" style={{ background: isCurrent ? FOCUS.cardActive : FOCUS.card, border: `1px solid ${isCurrent ? FOCUS.ember : FOCUS.line}` }}>
+                  <span className="text-sm font-bold" style={{ color: isCurrent ? FOCUS.ink : FOCUS.inkMuted }}>{t(`المجموعة ${toAr(i + 1, lang)}`, `Set ${i + 1}`)}</span>
+                  <span className="flex items-center gap-2">
+                    <span className="text-lg font-black tabular-nums" style={{ color: r.done ? FOCUS.success : FOCUS.ink }}>{toAr(r.weight, lang)}<span className="text-xs font-bold" style={{ color: FOCUS.inkFaint }}> {t('كجم', 'kg')} </span>×<span className="text-xs font-bold" style={{ color: FOCUS.inkFaint }}> </span>{toAr(r.reps, lang)}</span>
+                    {r.done && <span style={{ color: FOCUS.success }}><Icon name="Check" className="h-4 w-4" strokeWidth={3} /></span>}
+                  </span>
+                </div>
+              )
+            })}
           </div>
 
-          {/* current set editor — large controls */}
+          {/* current set editor — big controls */}
           <div className="mt-6 grid grid-cols-2 gap-3">
             <Stepper label={t('الوزن · كجم', 'Weight · kg')} value={row.weight} step={2.5} onChange={(v) => setRow({ weight: Math.max(0, v) })} lang={lang} />
             <Stepper label={t('التكرار', 'Reps')} value={row.reps} step={1} onChange={(v) => setRow({ reps: Math.max(0, v) })} lang={lang} />
           </div>
 
-          <button type="button" onClick={finishSet} className="btn-primary mt-6 w-full py-4 text-[1.1875rem]">{t('أنهِ المجموعة', 'Complete set')}</button>
+          {/* single ember action */}
+          <button type="button" onClick={finishSet} className="mt-6 w-full rounded-2xl py-4 text-[1.1875rem] font-black" style={{ background: FOCUS.ember, color: FOCUS.emberInk }}>{t('أنهِ المجموعة', 'Complete set')}</button>
         </main>
       )}
     </div>
   )
 }
 
-function confirmLeave(): boolean {
-  return true
-}
-
 function Stepper({ label, value, step, onChange, lang }: { label: string; value: number; step: number; onChange: (v: number) => void; lang: Lang }) {
   return (
-    <div className="rounded-2xl border border-line bg-surface p-3">
-      <p className="text-center text-xs font-bold text-ink-500">{label}</p>
-      <div className="mt-2 flex items-center justify-between">
-        <button type="button" onClick={() => onChange(value - step)} aria-label="−" className="grid h-12 w-12 place-items-center rounded-xl bg-beige text-ink-900"><Icon name="Minus" className="h-6 w-6" /></button>
-        <span className="text-3xl font-black tabular-nums">{toAr(value, lang)}</span>
-        <button type="button" onClick={() => onChange(value + step)} aria-label="+" className="grid h-12 w-12 place-items-center rounded-xl bg-primary text-white"><Icon name="Plus" className="h-6 w-6" /></button>
+    <div className="rounded-2xl p-3" style={{ background: FOCUS.card, border: `1px solid ${FOCUS.line}` }}>
+      <p className="text-center text-xs font-bold" style={{ color: FOCUS.inkMuted }}>{label}</p>
+      <div className="mt-2 flex items-center justify-between gap-2">
+        <button type="button" onClick={() => onChange(value - step)} aria-label={label + ' −'} className="grid h-12 w-12 shrink-0 place-items-center rounded-xl" style={{ background: FOCUS.cardActive, border: `1px solid ${FOCUS.line}`, color: FOCUS.ink }}><Icon name="Minus" className="h-6 w-6" /></button>
+        <span className="text-3xl font-black tabular-nums" style={{ color: FOCUS.ink }}>{toAr(value, lang)}</span>
+        <button type="button" onClick={() => onChange(value + step)} aria-label={label + ' +'} className="grid h-12 w-12 shrink-0 place-items-center rounded-xl" style={{ background: FOCUS.ember, color: FOCUS.emberInk }}><Icon name="Plus" className="h-6 w-6" /></button>
       </div>
     </div>
   )
 }
 
-function RestPanel({ lang, rest, nextEx, setLabel, onAdd, onSkip }: { lang: Lang; rest: number; nextEx: WorkoutV2Exercise; setLabel: string; onAdd: () => void; onSkip: () => void }) {
+function RestPanel({ lang, restLeft, restDone, nextEx, setLabel, onAdd, onSkip }: { lang: Lang; restLeft: number; restDone: boolean; nextEx: WorkoutV2Exercise; setLabel: string; onAdd: () => void; onSkip: () => void }) {
   const ar = lang !== 'en'
   return (
     <main className="flex flex-1 flex-col items-center justify-center px-6 text-center">
-      <p className="text-sm font-bold text-ink-500">{ar ? 'راحة' : 'Rest'}</p>
-      <p className="mt-2 text-7xl font-black tabular-nums text-primary">{fmtTime(rest)}</p>
-      <p className="mt-4 text-sm text-ink-500">{ar ? 'التالي' : 'Next'}: {ar ? nextEx.nameAr : nextEx.nameEn} · {setLabel}</p>
-      <div className="mt-8 flex gap-3">
-        <button type="button" onClick={onAdd} className="rounded-2xl border border-line bg-surface px-6 py-3 font-bold text-ink-900">+15 {ar ? 'ث' : 's'}</button>
-        <button type="button" onClick={onSkip} className="btn-primary px-8 py-3">{ar ? 'تخطي' : 'Skip'}</button>
-      </div>
+      {restDone ? (
+        <>
+          <span className="grid h-20 w-20 place-items-center rounded-full" style={{ background: FOCUS.success, color: '#fff' }}><Icon name="Check" className="h-10 w-10" strokeWidth={3} /></span>
+          <p className="mt-5 text-xl font-black" style={{ color: FOCUS.success }}>{ar ? 'انتهت الراحة' : 'Rest done'}</p>
+          <p className="mt-1 text-sm" style={{ color: FOCUS.inkMuted }}>{ar ? 'التالي' : 'Next'}: <bdi>{ar ? nextEx.nameAr : nextEx.nameEn}</bdi> · {setLabel}</p>
+        </>
+      ) : (
+        <>
+          <p className="text-sm font-bold" style={{ color: FOCUS.inkMuted }}>{ar ? 'راحة' : 'Rest'}</p>
+          <p className="mt-2 text-7xl font-black tabular-nums" style={{ color: FOCUS.ember }}>{fmtTime(restLeft)}</p>
+          <p className="mt-4 text-sm" style={{ color: FOCUS.inkMuted }}>{ar ? 'التالي' : 'Next'}: <bdi>{ar ? nextEx.nameAr : nextEx.nameEn}</bdi> · {setLabel}</p>
+          <div className="mt-8 flex items-center gap-3">
+            <button type="button" onClick={onAdd} className="rounded-2xl px-6 py-3 font-bold" style={{ background: FOCUS.card, border: `1px solid ${FOCUS.line}`, color: FOCUS.ink }}>+{toAr(REST_ADD, lang)} {ar ? 'ث' : 's'}</button>
+            <button type="button" onClick={onSkip} className="rounded-2xl px-8 py-3 font-black" style={{ background: FOCUS.ember, color: FOCUS.emberInk }}>{ar ? 'تخطي' : 'Skip'}</button>
+          </div>
+        </>
+      )}
     </main>
   )
 }
@@ -285,7 +371,7 @@ function PlanScreen({ model, lang, onExercise, onStart, onBack }: { model: Retur
   return (
     <div dir={ar ? 'rtl' : 'ltr'} className="min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
       <div className="mx-auto w-full max-w-md animate-fade-up">
-        <button type="button" onClick={onBack} aria-label={ar ? 'رجوع' : 'Back'} className="grid h-10 w-10 place-items-center rounded-xl border border-line bg-surface"><Icon name="ChevronRight" className="h-5 w-5" /></button>
+        <button type="button" onClick={onBack} aria-label={ar ? 'رجوع' : 'Back'} className="grid h-10 w-10 place-items-center rounded-xl border border-line bg-surface"><Icon name="ChevronRight" className="h-5 w-5 rtl:rotate-0 ltr:rotate-180" /></button>
         <p className="mt-4 text-xs font-black uppercase tracking-wider text-primary">{ar ? model.program.titleAr : model.program.titleEn} · {ar ? model.program.contextAr : model.program.contextEn}</p>
         <h1 className="mt-1 text-3xl font-black tracking-tight">{model.session.title}</h1>
         <div className="mt-3 flex flex-wrap gap-2 text-xs font-bold text-ink-500">
@@ -327,7 +413,7 @@ function DetailScreen({ ex, idx, total, lang, onStart, onBack }: { ex: WorkoutV2
   return (
     <div dir={ar ? 'rtl' : 'ltr'} className="min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
       <div className="mx-auto w-full max-w-md">
-        <button type="button" onClick={onBack} aria-label={ar ? 'رجوع' : 'Back'} className="grid h-10 w-10 place-items-center rounded-xl border border-line bg-surface"><Icon name="ChevronRight" className="h-5 w-5" /></button>
+        <button type="button" onClick={onBack} aria-label={ar ? 'رجوع' : 'Back'} className="grid h-10 w-10 place-items-center rounded-xl border border-line bg-surface"><Icon name="ChevronRight" className="h-5 w-5 rtl:rotate-0 ltr:rotate-180" /></button>
         {/* media placeholder (no demo media in the plan template) */}
         <div className="mt-4 grid aspect-video place-items-center rounded-2xl border border-line bg-surface text-ink-400"><Icon name="Dumbbell" className="h-10 w-10" /></div>
         <p className="mt-4 text-xs font-black uppercase tracking-wider text-primary">{ar ? `التمرين ${toAr(idx + 1, lang)} من ${toAr(total, lang)}` : `Exercise ${idx + 1} of ${total}`}</p>
@@ -366,17 +452,18 @@ function CompleteScreen({ model, active, lang, onDone }: { model: ReturnType<typ
   const volume = rows.reduce((v, r) => v + r.weight * r.reps, 0)
   const durationMin = active ? Math.max(1, Math.round((Date.now() - active.startedAt) / 60000)) : 0
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-page px-6 text-center text-ink-900">
-      <span className="grid h-16 w-16 animate-pop-in place-items-center rounded-2xl bg-primary text-white shadow-glow"><Icon name="Check" className="h-8 w-8" strokeWidth={3} /></span>
+    <div dir={ar ? 'rtl' : 'ltr'} className="fixed inset-0 z-[60] flex flex-col items-center justify-center px-6 text-center" style={{ background: FOCUS.bg, color: FOCUS.ink }}>
+      {/* success moment — green */}
+      <span className="grid h-16 w-16 animate-pop-in place-items-center rounded-2xl" style={{ background: FOCUS.success, color: '#fff' }}><Icon name="Check" className="h-8 w-8" strokeWidth={3} /></span>
       <h1 className="mt-5 text-3xl font-black">{ar ? 'أنهيت الجلسة' : 'Session complete'}</h1>
-      <p className="mt-1 text-sm text-ink-500">{model.session.title}</p>
+      <p className="mt-1 text-sm" style={{ color: FOCUS.inkMuted }}>{model.session.title}</p>
       <div className="mt-6 grid w-full max-w-xs grid-cols-3 gap-3">
-        <Stat label={ar ? 'الدقائق' : 'Minutes'} value={toAr(durationMin, lang)} />
-        <Stat label={ar ? 'المجموعات' : 'Sets'} value={toAr(totalSets, lang)} />
-        <Stat label={ar ? 'الحجم كجم' : 'Volume kg'} value={toAr(volume, lang)} />
+        <FocusStat label={ar ? 'الدقائق' : 'Minutes'} value={toAr(durationMin, lang)} />
+        <FocusStat label={ar ? 'المجموعات' : 'Sets'} value={toAr(totalSets, lang)} />
+        <FocusStat label={ar ? 'الحجم كجم' : 'Volume kg'} value={toAr(volume, lang)} />
       </div>
-      <button type="button" onClick={onDone} className="btn-primary mt-8 w-full max-w-xs py-4 text-[1.1875rem] shadow-glow">{ar ? 'حفظ وإنهاء' : 'Save & finish'}</button>
-      <p className="mt-3 text-[0.7rem] text-ink-400">{ar ? 'محفوظ على هذا الجهاز فقط.' : 'Saved on this device only.'}</p>
+      <button type="button" onClick={onDone} className="mt-8 w-full max-w-xs rounded-2xl py-4 text-[1.1875rem] font-black" style={{ background: FOCUS.ember, color: FOCUS.emberInk }}>{ar ? 'حفظ وإنهاء' : 'Save & finish'}</button>
+      <p className="mt-3 text-[0.7rem]" style={{ color: FOCUS.inkFaint }}>{ar ? 'محفوظ على هذا الجهاز فقط.' : 'Saved on this device only.'}</p>
     </div>
   )
 }
@@ -398,4 +485,7 @@ function Chip({ icon, text }: { icon: string; text: string }) {
 }
 function Stat({ label, value, muted }: { label: string; value: string; muted?: boolean }) {
   return <div className="rounded-xl border border-line bg-surface px-2 py-3 text-center"><p className={cn('text-lg font-black tabular-nums', muted && 'text-ink-400')}>{value}</p><p className="mt-0.5 text-[0.65rem] font-bold text-ink-500">{label}</p></div>
+}
+function FocusStat({ label, value }: { label: string; value: string }) {
+  return <div className="rounded-xl px-2 py-3 text-center" style={{ background: FOCUS.card, border: `1px solid ${FOCUS.line}` }}><p className="text-lg font-black tabular-nums" style={{ color: FOCUS.ink }}>{value}</p><p className="mt-0.5 text-[0.65rem] font-bold" style={{ color: FOCUS.inkMuted }}>{label}</p></div>
 }
