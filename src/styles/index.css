@@ -130,6 +130,20 @@
     @apply btn border border-line bg-surface text-ink-900 hover:bg-beige;
   }
 
+  /* Recovery/after-workout CTA (v2.1 Today) — green, reserved for the
+     post-workout «سجّل وجبة» moment where ember would misread as «start».
+     Mirrors .btn-primary; uses the success token so the meaning stays green. */
+  .btn-success {
+    @apply btn text-white active:scale-[0.98];
+    background-color: var(--color-success);
+  }
+  .btn-success:hover {
+    filter: brightness(0.94);
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--color-success) 22%, transparent),
+      0 14px 40px -12px color-mix(in srgb, var(--color-success) 40%, transparent);
+  }
+
   /* حقل إدخال قياسي (Sprint UI 1) — يوحّد المدخلات المتناثرة سابقًا في عدة ملفات.
      44px حدّ أدنى للمس، سطح beige، حدّ line، وتركيز هادئ بلون العلامة. */
   .input {
