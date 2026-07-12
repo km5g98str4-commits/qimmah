@@ -184,6 +184,9 @@ export interface ShellStrings {
     startRest: string
     pause: string
     resume: string
+    resumeTitle: string
+    resumeBody: string
+    resumeDiscard: string
     reset: string
     rest: string
     sets: string
@@ -633,6 +636,9 @@ const ar: ShellStrings = {
     startRest: 'ابدأ الراحة',
     pause: 'إيقاف',
     resume: 'متابعة',
+    resumeTitle: 'لديك تمرين غير مكتمل',
+    resumeBody: 'تكمل من حيث وقفت؟',
+    resumeDiscard: 'تجاهل',
     reset: 'تصفير',
     rest: 'راحة',
     sets: 'مجموعات',
@@ -1078,6 +1084,9 @@ const en: ShellStrings = {
     startRest: 'Start rest',
     pause: 'Pause',
     resume: 'Resume',
+    resumeTitle: 'You have an unfinished workout',
+    resumeBody: 'Continue where you left off?',
+    resumeDiscard: 'Discard',
     reset: 'Reset',
     rest: 'Rest',
     sets: 'Sets',

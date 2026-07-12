@@ -20,6 +20,7 @@ import {
 import { getStrings } from '@/config/strings'
 import { workoutScreenStrings } from '@/i18n/dict/workoutScreen'
 import { persistFinishedSession } from '@/lib/finishWorkout'
+import { clearActiveSession, loadActiveSession, type ActiveSessionSnapshot } from '@/lib/activeSession'
 import { evaluateAchievements, registerWorkoutPRs } from '@/features/achievements/engine'
 import { weeklyAdherenceStreak } from '@/lib/streaks'
 import { getExercise } from '@/data/exercises'
@@ -77,13 +78,41 @@ function WorkoutViewV1({ lang, onNavigate }: WorkoutViewProps) {
 
   const [activeDay, setActiveDay] = useState<PlanDay | null>(null)
   const [summary, setSummary] = useState<FinishSummary | null>(null)
+  // لقطة جلسة نشطة غير مكتملة (< ١٢س) لهذا الحساب — تُعرض كبطاقة «استئناف».
+  const [pendingRestore, setPendingRestore] = useState<ActiveSessionSnapshot | null>(null)
+  // اللقطة المُمرَّرة فعلًا إلى WorkoutMode عند «متابعة» (null للبدء الجديد).
+  const [restoreSnapshot, setRestoreSnapshot] = useState<ActiveSessionSnapshot | null>(null)
   const tw = getStrings(lang).workout
   const d = workoutScreenStrings[lang]
 
-  const startDay = (day: PlanDay) => setActiveDay(day)
+  // عند الإقلاع/تبديل الحساب: افحص وجود لقطة قابلة للاستئناف (لا نعرضها أثناء تمرين قائم).
+  useEffect(() => {
+    setPendingRestore(loadActiveSession(userId))
+  }, [userId])
 
-  const startEmpty = () =>
+  const startDay = (day: PlanDay) => {
+    setRestoreSnapshot(null)
+    setPendingRestore(null)
+    setActiveDay(day)
+  }
+
+  const startEmpty = () => {
+    setRestoreSnapshot(null)
+    setPendingRestore(null)
     setActiveDay({ id: `empty-${Date.now()}`, nameAr: d.emptyWorkoutNameAr, nameEn: d.emptyWorkoutNameEn, exercises: [] })
+  }
+
+  const resumeWorkout = () => {
+    if (!pendingRestore) return
+    setRestoreSnapshot(pendingRestore)
+    setActiveDay(pendingRestore.day)
+    setPendingRestore(null)
+  }
+
+  const discardRestore = () => {
+    clearActiveSession(userId)
+    setPendingRestore(null)
+  }
 
   const finish = (session: WorkoutSession) => {
     const prs = persistFinishedSession(session)
@@ -104,6 +133,7 @@ function WorkoutViewV1({ lang, onNavigate }: WorkoutViewProps) {
         })()
       : undefined
     setActiveDay(null)
+    setRestoreSnapshot(null)
     setSummary({ session, prs: prLabels, streakWeeks: weekly.streakWeeks, nextDayLabel })
   }
 
@@ -128,6 +158,34 @@ function WorkoutViewV1({ lang, onNavigate }: WorkoutViewProps) {
             <Icon name="Search" className="h-5 w-5" />
           </button>
         </div>
+
+        {/* استئناف تمرين غير مكتمل — لقطة محفوظة (< ١٢س) لهذا الحساب */}
+        {pendingRestore && !activeDay && !summary && (
+          <section>
+            <div className="flex flex-col gap-3 rounded-2xl border border-primary-soft bg-primary-soft/40 p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-start gap-3">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary text-white">
+                  <Icon name="RotateCcw" className="h-5 w-5" />
+                </span>
+                <div className="min-w-0">
+                  <p className="text-sm font-black text-ink-900">{tw.resumeTitle}</p>
+                  <p dir="auto" className="truncate text-xs text-ink-500">
+                    {(lang === 'en' ? pendingRestore.day.nameEn : pendingRestore.day.nameAr) || tw.resumeBody}
+                  </p>
+                </div>
+              </div>
+              <div className="flex shrink-0 items-center gap-2">
+                <button type="button" onClick={resumeWorkout} className="btn-primary px-4 py-2.5 text-xs">
+                  <Icon name="Flame" className="h-4 w-4" />
+                  {tw.resume}
+                </button>
+                <button type="button" onClick={discardRestore} className="btn-ghost px-4 py-2.5 text-xs">
+                  {tw.resumeDiscard}
+                </button>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* بدء سريع */}
         <section>
@@ -320,7 +378,17 @@ function WorkoutViewV1({ lang, onNavigate }: WorkoutViewProps) {
       {/* وضع التمرين — فوق الشريط السفلي */}
       {activeDay && (
         <div className="fixed inset-0 z-[60]">
-          <WorkoutMode lang={lang} day={activeDay} onClose={() => setActiveDay(null)} onFinish={finish} />
+          <WorkoutMode
+            lang={lang}
+            day={activeDay}
+            ownerId={userId}
+            initialSnapshot={restoreSnapshot}
+            onClose={() => {
+              setActiveDay(null)
+              setRestoreSnapshot(null)
+            }}
+            onFinish={finish}
+          />
         </div>
       )}
 
