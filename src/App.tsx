@@ -157,6 +157,16 @@ export default function App() {
     if (view !== 'notfound') setHashRoute(view)
   }, [view, auth.loading])
 
+  // استعادة كلمة المرور مصدر حقيقته حدث PASSWORD_RECOVERY (لا الـ hash): متى نُشِّط، نُثبّت
+  // العرض على شاشة إعادة التعيين ونكتب الـ hash صراحةً — فحتى لو هبط الرابط على جذر التطبيق
+  // (بلا #/reset) يصل المستخدم لشاشة كلمة المرور الجديدة بدل قذفه لتسجيل الدخول.
+  useEffect(() => {
+    if (auth.recoveryActive && view !== 'reset') {
+      setView('reset')
+      setHashRoute('reset')
+    }
+  }, [auth.recoveryActive, view])
+
   // hash → view (تنقّل المتصفح / تحديث الصفحة) مع الحراسة لكل حساب.
   useEffect(() => {
     const onHash = () => {
@@ -178,6 +188,12 @@ export default function App() {
   // الصحيحة — فحساب جديد لم يُكمل الإعداد لا يبقى على اللوحة بعد التحديث.
   useEffect(() => {
     if (auth.loading) return
+    // أثناء استعادة كلمة المرور لا نحسب مسار إقلاع ولا نكتب hash — بوّابة الاستعادة تتكفّل
+    // بالعرض، وأي حساب جلسة استعادة (uid) يجب ألّا يُحوَّل للأسئلة/اللوحة.
+    if (auth.recoveryActive) {
+      didInitialAuthRoute.current = true
+      return
+    }
     let cancelled = false
     void (async () => {
       if (uid && !isAccountOnboarded(uid)) await hydrateOnboardingFromProfile(uid)
@@ -199,7 +215,7 @@ export default function App() {
     return () => {
       cancelled = true
     }
-  }, [auth.loading, uid])
+  }, [auth.loading, uid, auth.recoveryActive])
 
   // فتح شاشة الإعداد — النمط (معالج أولي مقابل محرّرات متقدّمة) يُشتقّ من حالة الحساب
   // وقت العرض، فلا حاجة لحالة نمط مخزّنة قد تتقادم.
@@ -256,6 +272,28 @@ export default function App() {
     return <AppLoading />
   }
 
+  // ——— بوّابة الاستعادة (فوق كل البوّابات): جلسة استعادة كلمة المرور يجب أن تهبط دائمًا على
+  //     شاشة «كلمة مرور جديدة» — لا تُقذف لتسجيل الدخول ولا لتأكيد البريد ولا للأسئلة، ولو
+  //     لم يكن hash هو #/reset (قالب Supabase الافتراضي أو Deep Link على iOS). مصدر الحقيقة:
+  //     حدث PASSWORD_RECOVERY أو مؤشّر استعادة في عنوان الإقلاع. ———
+  if (view === 'reset' || auth.recoveryActive) {
+    return (
+      <RouteErrorBoundary onRetry={retryLazyViews}>
+        <Suspense fallback={<AppLoading />}>
+          <V.ResetPasswordView
+            lang={LANG}
+            onDone={() => {
+              auth.endRecovery()
+              setLoginMode('login')
+              setView('login')
+            }}
+          />
+        </Suspense>
+        <InstallPrompt lang={LANG} />
+      </RouteErrorBoundary>
+    )
+  }
+
   // ——— بوّابة تأكيد البريد (P0، دفاع عميق): حساب مسجّل ببريد لم يُؤكَّد بعد لا يُمنح وصولًا
   //     كاملًا — يُحوَّل لشاشة التأكيد. الضيف/غير المسجّل بالبريد يمرّ (emailVerified=true). ———
   if (!auth.emailVerified) {
@@ -276,9 +314,7 @@ export default function App() {
     )
   } else if (view === 'login') {
     content = <V.LoginView lang={LANG} initialMode={loginMode} onSuccess={enterApp} onBack={() => setView('start')} />
-  } else if (view === 'reset') {
-    // شاشة تعيين كلمة مرور جديدة — وجهة رابط الاستعادة، عامّة (بلا بوابة حساب).
-    content = <V.ResetPasswordView lang={LANG} onDone={() => { setLoginMode('login'); setView('login') }} />
+    // ملاحظة: مسار 'reset' يُعالَج في بوّابة الاستعادة أعلى الدالة (فوق كل البوّابات).
   } else if (view === 'privacy') {
     content = <V.PrivacyView lang={LANG} onBack={() => navigate(beforeLegalRef.current)} />
   } else if (view === 'terms') {
