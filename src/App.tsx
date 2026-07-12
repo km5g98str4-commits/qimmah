@@ -234,7 +234,7 @@ export default function App() {
     // النمط يُشتقّ من حالة الحساب وقت العرض: مكتمل → محرّرات متقدّمة (تعديل الخطة)؛
     // غير مكتمل → معالج الإعداد الأولي (وزنه/هدفه هو).
     const onboarded = isOnboardingComplete(uid)
-    content = <SetupView onClose={closeSetup} initialStep={0} mode={onboarded ? 'advanced' : 'onboarding'} />
+    content = <SetupView designV2={designV2} onClose={closeSetup} initialStep={0} mode={onboarded ? 'advanced' : 'onboarding'} />
   } else if (view === 'demo') {
     content = <DemoView lang={LANG} onNavigate={navigate} onBack={closeDemo} />
   } else if (view === 'settings') {

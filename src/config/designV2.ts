@@ -44,6 +44,60 @@ export const designV2Copy = {
   tabs: ['اليوم', 'التمارين', 'تسجيل', 'التغذية', 'التقدّم'],
 } as const
 
+export const designV2Onboarding = {
+  progressLabel: 'إعداد خطتك',
+  back: 'رجوع',
+  next: 'تابع',
+  retry: 'أعد المحاولة',
+  goal: {
+    eyebrow: 'هدفك',
+    title: 'ما هدفك الآن؟',
+    hint: 'اختر المسار الأقرب لهدفك الحالي.',
+    error: 'اختر هدفًا للمتابعة.',
+    options: [
+      { value: 'cut', label: 'تنشيف', description: 'خفّض الدهون مع الحفاظ على العضل', icon: 'TrendingDown' },
+      { value: 'maintain', label: 'محافظة', description: 'ثبّت وزنك وحافظ على تقدّمك', icon: 'ShieldCheck' },
+      { value: 'bulk', label: 'تضخيم', description: 'ابنِ العضل بزيادة مدروسة', icon: 'TrendingUp' },
+    ],
+  },
+  reality: {
+    eyebrow: 'واقع تمرينك',
+    title: 'كم مرة تتمرّن؟',
+    hint: 'اختر عدد الأيام ومدة الجلسة المناسبة لجدولك.',
+    daysLabel: 'أيام التمرين في الأسبوع',
+    durationLabel: 'مدة الجلسة',
+    days: [3, 4, 5, 6],
+    durations: [30, 45, 60, 75],
+    dayUnit: 'أيام',
+    minuteUnit: 'دقيقة',
+    error: 'اختر الأيام ومدة الجلسة للمتابعة.',
+  },
+  equipment: {
+    eyebrow: 'مكان التمرين',
+    title: 'أين تتمرّن؟ وكيف تفضّل؟',
+    hint: 'اختر المكان والتجهيز الأقرب لواقعك.',
+    error: 'اختر مكان التمرين للمتابعة.',
+    options: [
+      { value: 'commercial_gym', label: 'صالة كاملة', description: 'أجهزة وأوزان حرة', icon: 'Building2' },
+      { value: 'small_gym', label: 'صالة صغيرة', description: 'تجهيزات أساسية', icon: 'Dumbbell' },
+      { value: 'home_gym', label: 'تمرين منزلي', description: 'أدوات بسيطة في المنزل', icon: 'Home' },
+      { value: 'bodyweight', label: 'وزن الجسم', description: 'بدون أدوات', icon: 'Activity' },
+    ],
+  },
+  assembly: {
+    eyebrow: 'خطتك',
+    loadingTitle: 'يتم إعداد خطتك',
+    loadingBody: 'نرتّب أيامك وتمارينك وفق اختياراتك.',
+    readyTitle: 'خطتك جاهزة',
+    readyBody: 'راجع الأساس، ثم ابدأ خطتك.',
+    goalLabel: 'الهدف',
+    scheduleLabel: 'الجدول',
+    placeLabel: 'المكان',
+    start: 'ابدأ خطتي',
+    error: 'تعذّر إعداد الخطة. أعد المحاولة.',
+  },
+} as const
+
 export function isDesignV2Preview(): boolean {
   if (typeof window === 'undefined') return false
   return new URLSearchParams(window.location.search).get(DESIGN_V2_QUERY_KEY) === DESIGN_V2_QUERY_VALUE
