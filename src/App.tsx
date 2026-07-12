@@ -36,6 +36,7 @@ import { type AppRoute, MAIN_TABS, routeFromHash, setHashRoute } from '@/lib/app
 import { SuccessToast } from '@/components/SuccessToast'
 import { AchievementToaster } from '@/features/achievements/AchievementToaster'
 import { BUILD_LABEL } from '@/lib/buildInfo'
+import { isDesignV2Preview, loadDesignV2Fonts } from '@/config/designV2'
 
 /**
  * حراسة المسار: التبويبات الرئيسية لا تُفتح أبدًا قبل إكمال إعداد حقيقي **لهذا الحساب**
@@ -66,6 +67,7 @@ function initialRoute(userId: string | null): AppRoute {
 
 /** قشرة تطبيق قِمّة — توجيه بسيط عبر hash (بلا مكتبات خارجية). */
 export default function App() {
+  const designV2 = isDesignV2Preview()
   const auth = useAuth()
   // اللغة الحية من سياق i18n — التبديل يعيد رسم كل الشاشات فورًا (بلا إعادة تحميل).
   const { lang: LANG } = useLanguage()
@@ -74,6 +76,7 @@ export default function App() {
   const uid = auth.user?.id ?? null
 
   useEffect(() => {
+    loadDesignV2Fonts()
     // تطبيق اللغة/الاتجاه يتكفّل به LanguageProvider. هنا هجرات لمرّة واحدة فقط.
     ensureOnboardingProfile()
     // معرّف البناء في الـ console — للتحقق من نشر النسخة الصحيحة.
@@ -197,6 +200,7 @@ export default function App() {
     content = (
       <StartView
         lang={LANG}
+        designV2={designV2}
         hasStartedSetup={!isOnboardingComplete(uid) && (ob.lastStep ?? 0) > 0}
         onBuildPlan={openSetup}
         onLogin={() => setView('login')}
@@ -205,7 +209,15 @@ export default function App() {
       />
     )
   } else if (view === 'login') {
-    content = <LoginView lang={LANG} onSuccess={enterApp} onGuest={enterApp} onBack={() => setView('start')} />
+    content = (
+      <LoginView
+        lang={LANG}
+        designV2={designV2}
+        onSuccess={enterApp}
+        onGuest={enterApp}
+        onBack={() => setView('start')}
+      />
+    )
   } else if (view === 'privacy') {
     content = <PrivacyView lang={LANG} onBack={() => navigate(beforeLegalRef.current)} />
   } else if (view === 'terms') {
@@ -268,5 +280,9 @@ export default function App() {
     )
   }
 
-  return <Suspense fallback={<AppLoading />}>{content}</Suspense>
+  return (
+    <div className={designV2 ? 'design-v2 min-h-screen' : undefined}>
+      <Suspense fallback={<AppLoading />}>{content}</Suspense>
+    </div>
+  )
 }

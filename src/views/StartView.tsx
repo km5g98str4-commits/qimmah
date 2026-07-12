@@ -2,9 +2,12 @@ import { Icon } from '@/components/Icon'
 import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
 import { LanguageToggle } from '@/i18n'
+import { AscentMark } from '@/components/AscentMark'
+import { designV2Copy } from '@/config/designV2'
 
 interface StartViewProps {
   lang: Lang
+  designV2?: boolean
   hasStartedSetup: boolean
   onBuildPlan: () => void
   onLogin: () => void
@@ -15,6 +18,7 @@ interface StartViewProps {
 /** شاشة البداية — مدخل فاخر بمظهر رياضي داكن. */
 export function StartView({
   lang,
+  designV2 = false,
   hasStartedSetup,
   onBuildPlan,
   onLogin,
@@ -22,6 +26,34 @@ export function StartView({
   onSeeDemo,
 }: StartViewProps) {
   const t = getStrings(lang)
+
+  if (designV2) {
+    return (
+      <main className="v2-welcome" dir="rtl">
+        <div className="v2-welcome__ascent" aria-hidden="true">
+          <AscentMark className="h-full w-full" decorative />
+        </div>
+        <div className="v2-welcome__content">
+          <p className="v2-welcome__latin" lang="en">{designV2Copy.brandLatin}</p>
+          <div className="v2-welcome__identity">
+            <span className="v2-welcome__icon"><AscentMark className="h-8 w-8" decorative /></span>
+            <p className="v2-welcome__brand">{designV2Copy.brandArabic}</p>
+          </div>
+          <h1 className="v2-welcome__headline">{designV2Copy.welcome.headline}</h1>
+          <p className="v2-welcome__subline">{designV2Copy.welcome.subline}</p>
+        </div>
+        <div className="v2-welcome__actions">
+          <button type="button" onClick={onBuildPlan} className="v2-btn-primary w-full">
+            {designV2Copy.welcome.primaryCta}
+          </button>
+          <p className="v2-welcome__login">
+            {designV2Copy.welcome.secondaryPrefix}{' '}
+            <button type="button" onClick={onLogin}>{designV2Copy.welcome.secondaryCta}</button>
+          </p>
+        </div>
+      </main>
+    )
+  }
 
   return (
     <div className="relative flex min-h-screen flex-col overflow-hidden bg-page px-5 py-10">

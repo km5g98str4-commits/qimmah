@@ -2,6 +2,156 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Foundation v2.1 — inert unless the ?design=v2 wrapper exists. */
+.design-v2 {
+  --v2-ember: #f0512a;
+  --v2-blue: #2a6ce0;
+  --v2-green: #1f9d57;
+  --v2-teal: #12a594;
+  --v2-error: #e11d2e;
+  --v2-surface-welcome: #11100f;
+  --v2-text-strong: #f7f3ed;
+  --v2-text-muted: #aaa49c;
+  --v2-text-subtle: #8e8982;
+  --v2-text-brand: #f47754;
+  --v2-text-error: #ff9da6;
+  --v2-space-xs: 0.5rem;
+  --v2-space-sm: 0.75rem;
+  --v2-space-md: 1rem;
+  --v2-space-lg: 1.5rem;
+  --v2-space-xl: 2rem;
+  --v2-space-screen: 1.25rem;
+  --v2-radius-control: 0.75rem;
+  --v2-radius-card: 1rem;
+  --v2-radius-hero: 1.5rem;
+  --v2-radius-pill: 9999px;
+  --v2-motion-press: 150ms;
+  --v2-motion-control: 200ms;
+  --v2-motion-entrance: 400ms;
+  --v2-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+
+.design-v2 :where([data-value], table, output, time) {
+  font-variant-numeric: tabular-nums;
+}
+
+.v2-welcome {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  min-height: 100svh;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--v2-surface-welcome);
+  color: var(--v2-text-strong);
+  padding: max(2rem, env(safe-area-inset-top)) var(--v2-space-screen) max(2rem, env(safe-area-inset-bottom));
+}
+
+.v2-welcome__ascent {
+  position: absolute;
+  z-index: -1;
+  inset-block-start: 5.25rem;
+  inset-inline-start: 50%;
+  width: min(78vw, 20rem);
+  transform: translateX(50%);
+  color: color-mix(in srgb, var(--v2-ember) 25%, transparent);
+}
+
+.v2-welcome__content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding-block-start: 5.5rem;
+}
+
+.v2-welcome__latin {
+  position: absolute;
+  inset-block-start: 2.5rem;
+  color: var(--v2-text-subtle);
+  font-size: 0.64rem;
+  font-weight: 500;
+  letter-spacing: 0.5em;
+}
+
+.v2-welcome__identity { display: grid; justify-items: center; }
+.v2-welcome__icon {
+  display: grid;
+  width: 3.75rem;
+  height: 3.75rem;
+  place-items: center;
+  border-radius: var(--v2-radius-control);
+  background: var(--v2-ember);
+  color: white;
+}
+.v2-welcome__brand {
+  margin-block-start: var(--v2-space-md);
+  font-family: 'Readex Pro', 'IBM Plex Sans Arabic', sans-serif;
+  font-size: clamp(3.25rem, 15vw, 4rem);
+  font-weight: 700;
+  line-height: 1;
+}
+.v2-welcome__headline {
+  max-width: 16rem;
+  margin-block-start: var(--v2-space-xl);
+  color: var(--v2-text-brand);
+  font-family: 'Readex Pro', 'IBM Plex Sans Arabic', sans-serif;
+  font-size: clamp(1.7rem, 8vw, 2.15rem);
+  font-weight: 700;
+  line-height: 1.45;
+}
+.v2-welcome__subline {
+  max-width: 19rem;
+  margin-block-start: var(--v2-space-md);
+  color: var(--v2-text-muted);
+  font-size: 0.94rem;
+  line-height: 1.9;
+}
+.v2-welcome__actions { width: 100%; max-width: 24rem; margin-inline: auto; }
+.v2-btn-primary {
+  min-height: 3.75rem;
+  border-radius: var(--v2-radius-control);
+  background: var(--v2-ember);
+  color: white;
+  font-size: 1.05rem;
+  font-weight: 700;
+  transition: transform var(--v2-motion-press) var(--v2-ease-out), filter var(--v2-motion-control) ease;
+}
+.v2-btn-primary:hover { filter: brightness(0.94); }
+.v2-btn-primary:active { transform: scale(0.98); }
+.v2-btn-primary:focus-visible,
+.v2-welcome__login button:focus-visible { outline: 2px solid white; outline-offset: 3px; }
+.v2-welcome__login { margin-block-start: var(--v2-space-md); color: var(--v2-text-muted); text-align: center; font-size: 0.9rem; }
+.v2-welcome__login button { color: var(--v2-text-brand); font-weight: 700; }
+
+.v2-auth { --c-primary: var(--v2-ember); background: var(--v2-surface-welcome); }
+.v2-auth::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--v2-ember) 16%, transparent), transparent 46%);
+  pointer-events: none;
+}
+.v2-auth__mark { border-radius: var(--v2-radius-control); background: var(--v2-ember); box-shadow: none; }
+.v2-auth__input { border-radius: var(--v2-radius-control); transition: border-color var(--v2-motion-control) ease; }
+.v2-auth__input:focus { border-color: var(--v2-ember); }
+.v2-auth__error {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--v2-space-xs);
+  border: 1px solid color-mix(in srgb, var(--v2-error) 45%, transparent);
+  border-radius: var(--v2-radius-control);
+  background: color-mix(in srgb, var(--v2-error) 10%, transparent);
+  padding: var(--v2-space-sm);
+  color: var(--v2-text-error);
+  font-size: 0.75rem;
+  line-height: 1.6;
+}
+
 @layer base {
   :root {
     color-scheme: dark;

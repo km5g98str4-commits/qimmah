@@ -7,6 +7,7 @@ import { useAuth } from '@/lib/authContext'
 
 interface LoginViewProps {
   lang: Lang
+  designV2?: boolean
   onSuccess: () => void
   onGuest: () => void
   onBack: () => void
@@ -15,7 +16,7 @@ interface LoginViewProps {
 type Mode = 'login' | 'signup'
 
 /** شاشة الحساب — تبديل بين تسجيل الدخول وإنشاء حساب (Supabase) أو المتابعة كضيف. */
-export function LoginView({ lang, onSuccess, onGuest, onBack }: LoginViewProps) {
+export function LoginView({ lang, designV2 = false, onSuccess, onGuest, onBack }: LoginViewProps) {
   const t = getStrings(lang)
   const d = miscStrings[lang]
   const auth = useAuth()
@@ -31,7 +32,7 @@ export function LoginView({ lang, onSuccess, onGuest, onBack }: LoginViewProps) 
   const canSubmit = Boolean(email && password && (!isSignup || name.trim()))
 
   const input =
-    'w-full rounded-lg border border-line bg-beige px-3 py-3 text-sm text-ink-900 focus:border-brand-500/50 focus:outline-none'
+    `w-full rounded-lg border border-line bg-beige px-3 py-3 text-sm text-ink-900 focus:border-brand-500/50 focus:outline-none ${designV2 ? 'v2-auth__input pe-10' : ''}`
 
   const switchMode = (next: Mode) => {
     setMode(next)
@@ -65,7 +66,7 @@ export function LoginView({ lang, onSuccess, onGuest, onBack }: LoginViewProps) 
   }
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-page px-5 py-12">
+    <div className={`relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-page px-5 py-12 ${designV2 ? 'v2-auth' : ''}`} dir={designV2 ? 'rtl' : undefined}>
       <div className="pointer-events-none absolute inset-0 bg-radial-brand" />
       <div className="pointer-events-none absolute inset-0 bg-grid-faint [background-size:44px_44px] opacity-60" />
 
@@ -80,7 +81,7 @@ export function LoginView({ lang, onSuccess, onGuest, onBack }: LoginViewProps) 
         </button>
 
         <div className="text-center">
-          <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-primary text-white shadow-glow">
+          <span className={`mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-primary text-white shadow-glow ${designV2 ? 'v2-auth__mark' : ''}`}>
             <Icon name={isSignup ? 'UserPlus' : 'LogIn'} className="h-7 w-7" strokeWidth={2.5} />
           </span>
           <h1 className="mt-4 text-2xl font-black text-ink-900">
@@ -151,7 +152,12 @@ export function LoginView({ lang, onSuccess, onGuest, onBack }: LoginViewProps) 
                 />
               </div>
 
-              {msg && <p className="text-xs leading-relaxed text-gold-600">{msg}</p>}
+              {msg && (
+                <p className={designV2 ? 'v2-auth__error' : 'text-xs leading-relaxed text-gold-600'}>
+                  {designV2 && <Icon name="AlertTriangle" className="h-4 w-4 shrink-0" />}
+                  {msg}
+                </p>
+              )}
 
               <button
                 type="submit"
