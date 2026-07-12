@@ -1,4 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
+import {
+  clearActiveSession,
+  restIsFinished,
+  restRemainingSec,
+  saveActiveSession,
+  type ActiveExerciseState,
+  type ActiveSessionSnapshot,
+  type RestSnapshot,
+} from '@/lib/activeSession'
 import { Icon } from './Icon'
 import { ExerciseMedia } from './ExerciseMedia'
 import { ExerciseName } from './ExerciseName'
@@ -22,19 +31,17 @@ import type { Difficulty, SetLog, WorkoutSession } from '@/lib/workoutSessions'
 interface WorkoutModeProps {
   lang: Lang
   day: PlanDay
+  /** الحساب المالك — يربط لقطة الجلسة النشطة بمفتاح خاص به. */
+  ownerId: string | null
+  /** لقطة سابقة لاستئنافها (عند «متابعة» تمرين غير مكتمل) — وإلا جلسة جديدة. */
+  initialSnapshot?: ActiveSessionSnapshot | null
   onClose: () => void
   onFinish: (session: WorkoutSession) => void
   /** حفظ بديل في الخطة بشكل دائم (اختياري). */
   onSwapExercise?: (dayId: string, planExerciseId: string, newExerciseId: string) => void
 }
 
-interface ExState {
-  sets: SetLog[]
-  difficulty?: Difficulty
-  rpe?: number
-  painNote: string
-  notes: string
-}
+type ExState = ActiveExerciseState
 
 // حدود التحقّق
 const MAX_WEIGHT = 500
@@ -74,27 +81,32 @@ function repsInvalid(v: string): boolean {
 }
 
 /** وضع التمرين النشط — شاشة كاملة، تمرين واحد في كل خطوة، تسجيل سريع. */
-export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: WorkoutModeProps) {
+export function WorkoutMode({ lang, day, ownerId, initialSnapshot, onClose, onFinish, onSwapExercise }: WorkoutModeProps) {
   const t = getStrings(lang).workout
   const d = workoutScreenStrings[lang]
   // (P10.1) أسهم التنقّل تتبع اتجاه اللغة: «التالي» مع اتجاه القراءة و«السابق/الرجوع» عكسه.
   const nextChevron = lang === 'en' ? 'ChevronRight' : 'ChevronLeft'
   const prevChevron = lang === 'en' ? 'ChevronLeft' : 'ChevronRight'
-  const [startedAt] = useState(() => new Date().toISOString())
-  const [current, setCurrent] = useState(0)
+  // بذر معرّف الجلسة من اللقطة عند الاستئناف يُبقي الجلسة idempotent (نفس id عند الحفظ).
+  const [startedAt] = useState(() => initialSnapshot?.startedAt ?? new Date().toISOString())
+  const [current, setCurrent] = useState(() => initialSnapshot?.current ?? 0)
   const [openGuide, setOpenGuide] = useState(false)
   const [openAlt, setOpenAlt] = useState(false)
   const [openDetails, setOpenDetails] = useState(false)
-  const [swap, setSwap] = useState<Record<string, string>>({})
+  const [swap, setSwap] = useState<Record<string, string>>(() => initialSnapshot?.swap ?? {})
   // (P12) محتوى بطاقتي البديل الصغيرتين لكل عنصر خطة (يتبدّل مع البطاقة الكبيرة في هذه الجلسة فقط).
-  const [altSlots, setAltSlots] = useState<Record<string, [string, string]>>({})
+  const [altSlots, setAltSlots] = useState<Record<string, [string, string]>>(() => initialSnapshot?.altSlots ?? {})
   const [savedFlash, setSavedFlash] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const flashTimer = useRef<number | null>(null)
+  // بمجرّد الإنهاء/الإغلاق نوقف الحفظ حتى لا يعيد تأثيرُ الحفظ إنشاء لقطة بعد مسحها.
+  const persistLive = useRef(true)
 
   const effExId = (peId: string, exerciseId: string) => swap[peId] ?? exerciseId
 
   const [state, setState] = useState<Record<string, ExState>>(() => {
+    // استئناف: استخدم حالة اللقطة كما هي (تحقّق منها الحارس مسبقًا في الأب).
+    if (initialSnapshot) return initialSnapshot.state
     const init: Record<string, ExState> = {}
     day.exercises.forEach((pe) => {
       const rec = getRecord(pe.exerciseId)
@@ -116,17 +128,34 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
     return init
   })
 
-  // مؤقّت الراحة
-  const [timer, setTimer] = useState<{ left: number; running: boolean }>({ left: 0, running: false })
+  // مؤقّت الراحة — طابعان زمنيان (endsAt/durationSec) لا عدّاد متناقص، فيبقى
+  // صحيحًا بعد رجوع التطبيق من الخلفية (تُجمَّد مؤقتات JS على iOS أثناء الخلفية).
+  const [rest, setRest] = useState<RestSnapshot | null>(() => initialSnapshot?.rest ?? null)
+  const [now, setNow] = useState(() => Date.now())
+  // نبضة عرض (كل ¼ ثانية) ما دامت راحة قائمة — تتوقّف تلقائيًا عند انتهائها/إزالتها.
   useEffect(() => {
-    if (!timer.running) return
-    if (timer.left <= 0) {
-      setTimer((p) => ({ ...p, running: false }))
-      return
+    if (!rest) return
+    const id = window.setInterval(() => setNow(Date.now()), 250)
+    return () => window.clearInterval(id)
+  }, [rest])
+  // إعادة الحساب فور عودة التطبيق للواجهة — لا نعتمد على نبضة قد تكون مُجمَّدة.
+  useEffect(() => {
+    const sync = () => setNow(Date.now())
+    document.addEventListener('visibilitychange', sync)
+    window.addEventListener('focus', sync)
+    return () => {
+      document.removeEventListener('visibilitychange', sync)
+      window.removeEventListener('focus', sync)
     }
-    const id = window.setTimeout(() => setTimer((p) => ({ ...p, left: p.left - 1 })), 1000)
+  }, [])
+  const restLeft = rest ? restRemainingSec(rest.endsAt, now) : 0
+  const restDone = restIsFinished(rest, now)
+  // بعد انتهاء الراحة نُبقي حالة «خلصت» لحظةً ثم نزيل الشريط.
+  useEffect(() => {
+    if (!restDone) return
+    const id = window.setTimeout(() => setRest(null), 2500)
     return () => window.clearTimeout(id)
-  }, [timer.running, timer.left])
+  }, [restDone])
 
   useEffect(() => () => {
     if (flashTimer.current) window.clearTimeout(flashTimer.current)
@@ -139,13 +168,39 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
     setOpenDetails(false)
   }, [current])
 
+  // حفظ لقطة الجلسة على كل تغيير ذي معنى — فيُستأنَف التمرين بعد قتل التطبيق.
+  // نتجاهل يوم بلا تمارين (تمرين فارغ) — لا حالة قابلة للاستئناف.
+  useEffect(() => {
+    if (!persistLive.current) return
+    if (day.exercises.length === 0) return
+    const snapshot: ActiveSessionSnapshot = {
+      version: 1,
+      savedAt: Date.now(),
+      startedAt,
+      day,
+      current,
+      state,
+      swap,
+      altSlots,
+      rest,
+    }
+    saveActiveSession(ownerId, snapshot)
+  }, [ownerId, day, current, state, swap, altSlots, rest, startedAt])
+
+  // إغلاق التمرين (زر ✕) = تخلٍّ مقصود → نمسح اللقطة فلا تُعرض كـ«استئناف» لاحقًا.
+  const handleClose = () => {
+    persistLive.current = false
+    clearActiveSession(ownerId)
+    onClose()
+  }
+
   // حارس: يوم بلا تمارين (مثل «تمرين فارغ») — لا نلمس مرجعًا غير موجود؛ نعرض حالة آمنة.
   if (day.exercises.length === 0) {
     return (
       <div className="fixed inset-0 z-50 flex flex-col bg-page">
         <header className="sticky top-0 z-10 glass border-b border-line" style={{ paddingTop: 'var(--safe-top)' }}>
           <div className="container-page flex h-16 items-center justify-between gap-3">
-            <button type="button" onClick={onClose} aria-label={d.close} className="grid h-11 w-11 place-items-center rounded-xl border border-line bg-surface text-ink-700">
+            <button type="button" onClick={handleClose} aria-label={d.close} className="grid h-11 w-11 place-items-center rounded-xl border border-line bg-surface text-ink-700">
               <Icon name="X" className="h-5 w-5" />
             </button>
             <p dir="auto" className="truncate text-sm font-black text-ink-900">{lang === 'en' ? day.nameEn || day.nameAr : day.nameAr || day.nameEn}</p>
@@ -157,7 +212,7 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
             <Icon name="Dumbbell" className="h-7 w-7" />
           </span>
           <p className="text-base font-bold text-ink-900">{t.emptyPlan}</p>
-          <button type="button" onClick={onClose} className="btn-primary px-6 py-3 text-sm">
+          <button type="button" onClick={handleClose} className="btn-primary px-6 py-3 text-sm">
             <Icon name={prevChevron} className="h-4 w-4" />
             {t.backToToday}
           </button>
@@ -188,7 +243,11 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
     flashTimer.current = window.setTimeout(() => setSavedFlash(false), 1600)
   }
 
-  const startRest = (sec: number) => setTimer({ left: sec > 0 ? sec : 60, running: true })
+  const startRest = (sec: number) => {
+    const dur = sec > 0 ? sec : 60
+    setNow(Date.now())
+    setRest({ endsAt: Date.now() + dur * 1000, durationSec: dur })
+  }
 
   const markDone = (idx: number) => {
     const set = s.sets[idx]
@@ -260,14 +319,17 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
   const goNext = () => {
     if (isLast) return setConfirmOpen(true)
     setCurrent((c) => Math.min(total - 1, c + 1))
-    setTimer({ left: 0, running: false })
+    setRest(null)
   }
   const goPrev = () => {
     setCurrent((c) => Math.max(0, c - 1))
-    setTimer({ left: 0, running: false })
+    setRest(null)
   }
 
   const doFinish = () => {
+    // الجلسة اكتملت → أوقف الحفظ وامسح اللقطة قبل التسليم للأب.
+    persistLive.current = false
+    clearActiveSession(ownerId)
     setConfirmOpen(false)
     const session: WorkoutSession = {
       id: `session-${startedAt}`,
@@ -330,7 +392,7 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
       {/* الترويسة + شريط التقدّم */}
       <header className="sticky top-0 z-10 glass border-b border-line" style={{ paddingTop: 'var(--safe-top)' }}>
         <div className="container-page flex h-16 items-center justify-between gap-3">
-          <button type="button" onClick={onClose} aria-label={d.close} className="grid h-11 w-11 place-items-center rounded-xl border border-line bg-surface text-ink-700">
+          <button type="button" onClick={handleClose} aria-label={d.close} className="grid h-11 w-11 place-items-center rounded-xl border border-line bg-surface text-ink-700">
             <Icon name="X" className="h-5 w-5" />
           </button>
           <div className="min-w-0 text-center">
@@ -645,25 +707,37 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
         </div>
       )}
 
-      {/* مؤقّت الراحة النشط */}
-      {timer.running && (
+      {/* مؤقّت الراحة النشط — العدّ يُحسب من الطابع الزمني، فيبقى صحيحًا بعد الخلفية. */}
+      {rest && (
         <div className="fixed inset-x-0 bottom-[4.75rem] z-20 border-t border-primary-soft bg-primary-soft/95 backdrop-blur">
           <div className="container-page flex items-center justify-between gap-3 py-3">
-            <div className="flex items-center gap-3">
-              <span className="relative grid h-12 w-12 shrink-0 place-items-center">
-                <span className="absolute inset-0 animate-ping rounded-full bg-primary/30" />
-                <span className="relative grid h-12 w-12 place-items-center rounded-full bg-primary text-base font-black text-white">{timer.left}</span>
-              </span>
-              <div className="min-w-0">
-                <p className="text-xs font-bold text-primary-c">{t.rest}</p>
-                {/* عزل اتجاه المحتوى: اسم التمرين قد يكون عربيًا داخل واجهة إنجليزية (LTR) والعكس. */}
-                <p className="truncate text-xs text-ink-500">{t.nextUp}: <bdi>{restNext}</bdi></p>
+            {restDone ? (
+              // انتهت الراحة (قد يكون التطبيق عاد من خلفية طويلة) — حالة «خلصت» واضحة.
+              <div className="flex items-center gap-3">
+                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-primary text-white">
+                  <Icon name="CheckCircle2" className="h-6 w-6" />
+                </span>
+                <p className="text-sm font-black text-primary-c">{t.restDone}</p>
               </div>
-            </div>
-            <div className="flex shrink-0 items-center gap-1.5">
-              <button type="button" onClick={() => setTimer((p) => ({ ...p, left: p.left + 30 }))} className="min-h-[44px] rounded-lg border border-line bg-surface px-2.5 py-2 text-xs font-bold text-ink-700">{t.restAdd30}</button>
-              <button type="button" onClick={() => setTimer({ left: 0, running: false })} className="min-h-[44px] rounded-lg border border-line bg-surface px-2.5 py-2 text-xs font-bold text-ink-700">{t.skipRest}</button>
-            </div>
+            ) : (
+              <>
+                <div className="flex items-center gap-3">
+                  <span className="relative grid h-12 w-12 shrink-0 place-items-center">
+                    <span className="absolute inset-0 animate-ping rounded-full bg-primary/30" />
+                    <span className="relative grid h-12 w-12 place-items-center rounded-full bg-primary text-base font-black text-white tabular-nums">{restLeft}</span>
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-primary-c">{t.rest}</p>
+                    {/* عزل اتجاه المحتوى: اسم التمرين قد يكون عربيًا داخل واجهة إنجليزية (LTR) والعكس. */}
+                    <p className="truncate text-xs text-ink-500">{t.nextUp}: <bdi>{restNext}</bdi></p>
+                  </div>
+                </div>
+                <div className="flex shrink-0 items-center gap-1.5">
+                  <button type="button" onClick={() => setRest((p) => (p ? { ...p, endsAt: p.endsAt + 30_000 } : p))} className="min-h-[44px] rounded-lg border border-line bg-surface px-2.5 py-2 text-xs font-bold text-ink-700">{t.restAdd30}</button>
+                  <button type="button" onClick={() => setRest(null)} className="min-h-[44px] rounded-lg border border-line bg-surface px-2.5 py-2 text-xs font-bold text-ink-700">{t.skipRest}</button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
