@@ -10,6 +10,7 @@ import { getSupabase, isSupabaseConfigured } from './supabaseClient'
 import { getLanguage } from './appPreferences'
 import { wipeUserData, setLastUser } from './accountScope'
 import { miscStrings } from '@/i18n/dict/misc'
+import { parseRecoveryParams, implicitTokens } from './recoveryState'
 
 export interface AuthResult {
   ok: boolean
@@ -45,6 +46,12 @@ export interface AuthContextValue {
   session: Session | null
   /** ما زالت حالة المصادقة قيد التحميل (أول إقلاع). */
   loading: boolean
+  /**
+   * هل نحن في تدفّق استعادة كلمة المرور؟ مصدر الحقيقة للتوجيه: يصبح true عند حدث
+   * PASSWORD_RECOVERY من Supabase، أو إن حمل عنوان الإقلاع مؤشّر استعادة. عند true
+   * يجب أن يهبط المستخدم على شاشة «كلمة مرور جديدة» ولا يُقذف أبدًا لتسجيل الدخول/الأسئلة.
+   */
+  recoveryActive: boolean
   /** الاسم المعروض للمستخدم (من user_metadata) أو البريد كبديل، أو null كضيف. */
   displayName: string | null
   /**
@@ -70,6 +77,8 @@ export interface AuthContextValue {
    * بجلسة عبر exchangeCodeForSession. يعيد true إن توفّرت جلسة صالحة بعدها. آمن عند غياب رمز.
    */
   completeRecovery: () => Promise<boolean>
+  /** يُنهي وضع الاستعادة صراحةً (عند مغادرة الشاشة بعد النجاح أو من حالة الرابط المنتهي). */
+  endRecovery: () => void
   /** يعيد جلب المستخدم من الخادم لالتقاط تأكيد البريد بعد الضغط على الرابط. */
   refreshUser: () => Promise<void>
   /**
@@ -87,45 +96,17 @@ export interface AuthContextValue {
  */
 const INITIAL_URL: string = typeof window !== 'undefined' ? `${window.location.hash}&${window.location.search}` : ''
 
-/**
- * فكّ ترميز URI آمن: ترميز percent مشوّه (مثل «%zz» في رابط مُصطنع) يجعل decodeURIComponent
- * يرمي URIError — فيعلق ResetPasswordView على «جارٍ التحقّق». نعيد null بدل الرمي؛
- * المستدعي يعامل null كغياب المؤشّر فتظهر حالة «الرابط منتهٍ» الهادئة.
- */
-function safeDecode(value: string): string | null {
-  try {
-    return decodeURIComponent(value)
-  } catch {
-    return null
-  }
-}
+/** مؤشّرات الاستعادة المُلتقطة من عنوان الإقلاع مرّة واحدة (قبل أن يطمس التوجيه الـ fragment). */
+const INITIAL_RECOVERY = parseRecoveryParams(INITIAL_URL)
 
-/**
- * يستخرج رمز استعادة PKCE من عنوان الصفحة أينما وقع (H1): من query (?code=)، أو من داخل
- * hash التوجيه (#/reset?code=…) حين لا يجده detectSessionInUrl. يعيد null إن لم يوجد رمز.
- * يقرأ من لقطة الإقلاع لا من العنوان الحالي (الذي قد يكون طُمس بعد التوجيه).
- */
+/** رمز استعادة PKCE من لقطة الإقلاع (يقرأ من اللقطة لا من العنوان الحالي المطموس بعد التوجيه). */
 function extractRecoveryCode(): string | null {
-  if (!INITIAL_URL) return null
-  const m = INITIAL_URL.match(/[?&#]code=([^&#]+)/)
-  return m ? safeDecode(m[1]) : null
+  return INITIAL_RECOVERY.code
 }
 
-/**
- * يستخرج رموز التدفّق الضمني (implicit) من العنوان أينما وقعت: access_token + refresh_token.
- * GoTrue الافتراضي يعيدها في fragment ثانٍ (#/reset#access_token=…&refresh_token=…) الذي لا
- * يلتقطه detectSessionInUrl مع توجيه hash. يعيد null إن نقص أحدهما. لا يطبع أي رمز إطلاقًا.
- * يقرأ من لقطة الإقلاع لا من العنوان الحالي (الذي قد يكون طُمس بعد التوجيه).
- */
+/** زوج رموز التدفّق الضمني من لقطة الإقلاع (access_token + refresh_token) أو null إن نقص أحدهما. */
 function extractImplicitTokens(): { access_token: string; refresh_token: string } | null {
-  if (!INITIAL_URL) return null
-  const at = INITIAL_URL.match(/[#?&]access_token=([^&#]+)/)
-  const rt = INITIAL_URL.match(/[#?&]refresh_token=([^&#]+)/)
-  if (!at || !rt) return null
-  const access_token = safeDecode(at[1])
-  const refresh_token = safeDecode(rt[1])
-  if (!access_token || !refresh_token) return null
-  return { access_token, refresh_token }
+  return implicitTokens(INITIAL_RECOVERY)
 }
 
 /** هل بريد هذا المستخدم مؤكَّد؟ ضيف/بلا بريد = مؤكَّد ضمنيًا (لا يُحبَس). */
@@ -173,6 +154,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState<boolean>(configured)
+  // يبدأ من مؤشّر عنوان الإقلاع (يلتقط الحالة قبل أن يحسم Supabase الحدث)، ثم يُرفع أيضًا
+  // عند حدث PASSWORD_RECOVERY. لا يُخفَض تلقائيًا — الشاشة نفسها تُنهيه بعد النجاح/العودة.
+  const [recoveryActive, setRecoveryActive] = useState<boolean>(() => INITIAL_RECOVERY.hasRecovery)
 
   useEffect(() => {
     if (!configured) {
@@ -204,10 +188,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (active) setLoading(false)
         })
 
-      const { data: sub } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      const { data: sub } = supabase.auth.onAuthStateChange((event, newSession) => {
         if (!active) return
         setSession(newSession)
         setUser(newSession?.user ?? null)
+        // مصدر الحقيقة للاستعادة: حين يكتشف Supabase رابط الاستعادة (ويب أو Deep Link) يُطلق
+        // PASSWORD_RECOVERY مع جلسة مؤقتة — نرفع العلم فيُثبَّت المستخدم على شاشة كلمة المرور
+        // الجديدة فوق كل البوّابات، ولا يُقذف لتسجيل الدخول ولو لم يكن hash هو #/reset.
+        if (event === 'PASSWORD_RECOVERY') setRecoveryActive(true)
       })
       unsubscribe = () => sub.subscription.unsubscribe()
     })
@@ -224,6 +212,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user,
       session,
       loading,
+      recoveryActive,
       displayName: userDisplayName(user),
       emailVerified: isEmailVerified(user),
       async signUp(email, password, displayName) {
@@ -266,6 +255,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
         setSession(null)
         setUser(null)
+        // انتهى أي تدفّق استعادة بمجرّد الخروج (نجاح إعادة التعيين يُنهي الجلسة أيضًا).
+        setRecoveryActive(false)
       },
       async resendConfirmation(email) {
         const supabase = await getSupabase()
@@ -278,13 +269,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const supabase = await getSupabase()
         if (!supabase) return { ok: false, error: cloudDisabledError() }
         // رابط استعادة عبر البريد — دالة Supabase قياسية، لا تكشف وجود الحساب من عدمه.
-        // redirectTo يعيد المستخدم لشاشة تعيين كلمة مرور جديدة داخل التطبيق (#/reset) على
-        // نفس أصل النشر الحالي — لا رابط localhost مثبّت. تدفّق PKCE يضع الرمز في query
-        // فيبقى hash المسار (#/reset) سليمًا. يجب أن يسمح Supabase بهذا الأصل في Redirect URLs.
+        // redirectTo يعيد المستخدم لشاشة تعيين كلمة مرور جديدة داخل التطبيق (#/reset).
+        //
+        // الويب: أصل النشر الحالي + #/reset (لا localhost مثبّت). تدفّق PKCE يضع الرمز في
+        // query فيبقى hash المسار سليمًا. يجب أن يسمح Supabase بهذا الأصل في Redirect URLs.
+        //
+        // iOS الأصلي: window.location.origin هو capacitor://localhost — غير صالح كوجهة بريد.
+        // يُضبط VITE_RESET_REDIRECT_URL لرابط عميق مُهيّأ (نطاق Universal Link مثل
+        // https://qimmah.app/#/reset، أو مخطّط مخصّص com.qimmah.mobile://reset) ويُضاف لقائمة
+        // Redirect URLs في Supabase. مستمع appUrlOpen (deepLinkRecovery) يلتقطه على الجهاز.
+        const configuredRedirect = import.meta.env.VITE_RESET_REDIRECT_URL?.trim()
         const redirectTo =
-          typeof window !== 'undefined'
+          configuredRedirect ||
+          (typeof window !== 'undefined'
             ? `${window.location.origin}${window.location.pathname}#/reset`
-            : undefined
+            : undefined)
         const { error } = await supabase.auth.resetPasswordForEmail(
           email.trim(),
           redirectTo ? { redirectTo } : undefined,
@@ -352,6 +351,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // لا PKCE ولا implicit نجح → تُعرض حالة الرابط المنتهي الهادئة.
         return false
       },
+      endRecovery() {
+        setRecoveryActive(false)
+      },
       async refreshUser() {
         const supabase = await getSupabase()
         if (!supabase) return
@@ -410,7 +412,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { ok: true, authUserDeleted: true }
       },
     }),
-    [configured, user, session, loading],
+    [configured, user, session, loading, recoveryActive],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
@@ -426,6 +428,7 @@ export function useAuth(): AuthContextValue {
     user: null,
     session: null,
     loading: false,
+    recoveryActive: false,
     displayName: null,
     emailVerified: true,
     async signUp() {
@@ -447,6 +450,7 @@ export function useAuth(): AuthContextValue {
     async completeRecovery() {
       return false
     },
+    endRecovery() {},
     async refreshUser() {},
     async deleteAccount() {
       return { ok: true, authUserDeleted: false }

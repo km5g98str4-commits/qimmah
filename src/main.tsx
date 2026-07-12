@@ -10,6 +10,7 @@ import { LanguageProvider } from './i18n'
 import { registerStepBridge } from './lib/stepCounter'
 import { initAnalytics, track } from './lib/analytics'
 import { initNativeShell } from './lib/nativeShell'
+import { initDeepLinkRecovery } from './lib/deepLinkRecovery'
 // وحدة PWA: تلتقط حدث beforeinstallprompt مبكرًا (يُطلق مرّة واحدة فقط) لعرض زر التثبيت لاحقًا.
 import './lib/pwa'
 // خطوط مُستضافة ذاتيًا (Tajawal) — بلا CDN وقت التشغيل، مهم للنسخة الأصلية/دون اتصال.
@@ -71,5 +72,9 @@ createRoot(root).render(
   </StrictMode>,
 )
 
-// قشرة النظام الأصلية (شريط الحالة + إخفاء شاشة الإقلاع) — بعد الرسم، أصلي فقط، no-op على الويب.
+// قشرة النظام الأصلية (شريط الحالة + إخفاء شاشة الإقلاع) — بعد الرسم، أصلي فقط, no-op على الويب.
 void initNativeShell()
+
+// سباكة الرابط العميق للاستعادة (appUrlOpen) — أصلي فقط، no-op على الويب. توصِل رابط استعادة
+// كلمة المرور القادم من البريد إلى داخل التطبيق فيهبط المستخدم على شاشة «كلمة مرور جديدة».
+void initDeepLinkRecovery()

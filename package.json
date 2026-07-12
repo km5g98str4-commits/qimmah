@@ -28,6 +28,7 @@
     "proof:p10qa": "node scripts/run-p10-integration-qa.mjs",
     "test:active-session": "node scripts/run-active-session-proof.mjs",
     "test:isolation": "node scripts/run-isolation-proof.mjs",
+    "test:reset-recovery": "node scripts/run-reset-recovery-proof.mjs",
     "test:e2e:onboarding": "node scripts/e2e-onboarding.mjs",
     "test:e2e": "npm run build && node scripts/e2e-onboarding.mjs",
     "test:e2e:auth:preflight": "node scripts/e2e-auth/preflight.mjs",
@@ -35,6 +36,7 @@
     "test:e2e:auth:preload": "node scripts/e2e-auth/preload-images.mjs"
   },
   "dependencies": {
+    "@capacitor/app": "^8.1.0",
     "@capacitor/core": "^8.4.1",
     "@capacitor/ios": "^8.4.1",
     "@capacitor/local-notifications": "^8.2.0",
