@@ -1,5 +1,18 @@
 -- ============================================================================
--- Qimmah — Supabase Schema (cloud persistence)
+-- ⚠ SUPERSEDED — do not apply this file to new projects.
+-- ============================================================================
+-- The source of truth is now supabase/migrations/ (timestamped, idempotent,
+-- Supabase-CLI `db push`), which covers the 5 tables below PLUS the previously
+-- sync-blind stores (nutrition/water/supplement/medication/steps/achievements/
+-- custom_plans/todos), hardened RLS (scoped `to authenticated`, cached
+-- `(select auth.uid())`), and a fail-safe delete_own_account() that wipes EVERY
+-- table with a user_id column (not a hardcoded list). Apply per scripts/db/apply-guide.md
+-- and verify with `npm run db:verify`. This file is kept for historical reference
+-- only; it remains idempotent and non-destructive if ever re-run.
+-- ============================================================================
+--
+-- ============================================================================
+-- Qimmah — Supabase Schema (cloud persistence)  [historical]
 -- ============================================================================
 -- شغّل هذا الملف يدويًا في Supabase SQL Editor عند تفعيل المزامنة السحابية.
 -- التطبيق لا يشغّل أي migration تلقائيًا — هذا الملف توثيقي/إعدادي فقط.
