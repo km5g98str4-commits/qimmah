@@ -8,6 +8,10 @@
   <meta name="theme-color" content="#101216" />
   <link rel="canonical" href="https://qimmah.app/" />
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png" />
+  <!-- Preload the two hero font weights (self-hosted) to cut FOUT on first paint. -->
+  <link rel="preload" href="fonts/ipsa-arabic-700.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="fonts/ipsa-arabic-400.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="stylesheet" href="assets/site.css" />
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
@@ -15,10 +19,15 @@
   <meta property="og:site_name" content="قِمّة — Qimmah" />
   <meta property="og:title" content="قِمّة — درّب بوضوح. تقدّم بثقة." />
   <meta property="og:description" content="تمرينك وتغذيتك وتقدّمك في مكان واحد — بالعربية، وبخطوات واضحة." />
-  <meta property="og:image" content="assets/favicon.svg" />
-  <meta name="twitter:card" content="summary" />
+  <meta property="og:url" content="https://qimmah.app/" />
+  <meta property="og:image" content="https://qimmah.app/assets/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="قِمّة — درّب بوضوح. تقدّم بثقة." />
+  <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="قِمّة — درّب بوضوح. تقدّم بثقة." />
   <meta name="twitter:description" content="تمرينك وتغذيتك وتقدّمك في مكان واحد — بالعربية، وبخطوات واضحة." />
+  <meta name="twitter:image" content="https://qimmah.app/assets/og-image.png" />
   <!-- Structured data — iOS fitness app (crawler metadata only; triggers no request). -->
   <script type="application/ld+json">
   {
