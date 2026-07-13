@@ -19,6 +19,20 @@
 | **P-1** | **Transparency / policy availability** | This Privacy Policy + Terms will be hosted (`public/legal/*.html`); in-app privacy screen exists. | **Compliant on publish** | Link both from the App Store listing and in-app once hosted. |
 | **D-1** | **Data minimisation** | Local-first; only needed fields synced; no ads/tracking SDKs; barcode sends only the number; fonts self-hosted. | **Compliant** | — |
 
+## Sources & verification status
+The PDPL points above were corroborated against authoritative secondary references during a research pass
+(**no claim was refuted**); the automated adversarial verification/synthesis step was cut short by a session
+limit, so treat these as **sourced but pending final legal confirmation** — consistent with the “owner + legal
+review” header. Owner’s counsel should confirm against the official SDAIA regulations before publishing.
+- **Breach notification 72h (B-1)** — controller notifies SDAIA within 72 hours of awareness; affected data
+  subjects informed without undue delay. Refs: SDAIA PDPL / Implementing Regulations; DLA Piper Data Protection
+  — Saudi Arabia (<https://www.dlapiperdataprotection.com/?c=SA>).
+- **Sensitive data incl. health (C-2)** — PDPL enumerates health as *sensitive* personal data. Ref: DLA Piper (above).
+- **Cross-border transfer (X-1)** — no official adequacy list published yet; use SDAIA-approved safeguards/SCCs for
+  non-adequate destinations. Refs: DLA Piper (above); CMS “one-year anniversary Saudi PDPL”.
+- **Data-subject rights (R-1…R-4)** — access, correction, deletion, objection/restriction (and data
+  access/portability) are PDPL rights. Ref: DLA Piper (above).
+
 ## Priority order for the owner
 1. **R-3 / R-1 confirm** — verify `delete_own_account` deployed; document/implement access-export. (Data-subject rights are the highest App-review + PDPL risk.)
 2. **X-1** — confirm Supabase region (drives the cross-border notice).

@@ -15,6 +15,20 @@ Justification: no ads, no data brokers, no third-party analytics/attribution SDK
 optional identifier (`anonId`) is app-generated, random, and explicitly **not** linked to the account or shared
 for cross-app/cross-site tracking (`analytics/provider.ts:9-12`). No ATT prompt is needed.
 
+> **Verified against Apple's published definitions (adversarially confirmed, 3-0):**
+> - Apple: *“Tracking refers to … linking user or device data collected from your app with … data collected
+>   from other companies' apps, websites, or offline properties for targeted advertising or advertising
+>   measurement … or sharing … with data brokers.”* → Qimmah does none of these ⇒ **Tracking = No.**
+>   Source: <https://developer.apple.com/app-store/user-privacy-and-data-use/> and
+>   <https://developer.apple.com/app-store/app-privacy-details/>
+> - Apple: *“Collect refers to transmitting data off the device and storing it … for longer than the time it
+>   takes to service the request.”* → the app’s device-only data (nutrition, water, steps, achievements) is
+>   never transmitted ⇒ **Not Collected** (§C). Source (app-privacy-details, above).
+> - Apple: data *“linked solely on the end-user's device and … not sent off the device in a way that can
+>   identify the end-user or device”* is **not** tracking ⇒ no ATT required.
+> **Common fitness-app mistake:** declaring Health/Fitness as *tracking* or showing an ATT prompt for
+> first-party, non-advertising analytics — not required here.
+
 ## B. Data types — enter each as Collected? / Linked to identity? / Used for tracking? + purpose
 
 | Apple data type | Collected? | Linked to user? | Tracking? | Purpose(s) to select | Justification (code) |
