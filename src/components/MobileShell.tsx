@@ -7,6 +7,8 @@ import { getStrings } from '@/config/strings'
 import type { AppRoute } from '@/lib/appRoutes'
 import type { AppBadge } from './AppNav'
 import { LanguageToggle } from '@/i18n'
+import { isDesignV2 } from '@/design-system/designPreview'
+import { V2_TAB_LABELS } from '@/design-system/v2/labels'
 
 export type MainTab = 'dashboard' | 'workout' | 'nutrition' | 'progress' | 'profile'
 
@@ -24,19 +26,34 @@ interface TabDef {
   route: AppRoute
   label: string
   icon: string
+  /** v2 center action «تسجيل» — a raised quick-log button, not a plain tab. */
+  action?: boolean
 }
 
 /** قشرة التطبيق على الجوال — هيدر مدمج أعلى + شريط تنقّل سفلي ثابت. */
 export function MobileShell({ lang, tab, badge, onNavigate, onOpenSettings, children }: MobileShellProps) {
   const t = getStrings(lang)
+  const ar = lang !== 'en'
+  const v2 = isDesignV2()
 
-  const tabs: TabDef[] = [
-    { id: 'dashboard', route: 'dashboard', label: t.tabs.home, icon: 'Flame' },
-    { id: 'workout', route: 'workout', label: t.tabs.workout, icon: 'Dumbbell' },
-    { id: 'nutrition', route: 'nutrition', label: t.tabs.nutrition, icon: 'Salad' },
-    { id: 'progress', route: 'progress', label: t.tabs.progress, icon: 'BarChart3' },
-    { id: 'profile', route: 'profile', label: t.tabs.profile, icon: 'User' },
-  ]
+  // v2.1 §03 — final tab labels + center «تسجيل» action, RTL order per the PDF
+  // mock (اليوم · التمارين · تسجيل · التغذية · التقدّم). v1 keeps its own set.
+  const tabs: TabDef[] = v2
+    ? [
+        { id: 'dashboard', route: 'dashboard', label: V2_TAB_LABELS.today, icon: 'Home' },
+        { id: 'workout', route: 'workout', label: V2_TAB_LABELS.workout, icon: 'Dumbbell' },
+        // Center action: quick-log → the nutrition logging surface (most-logged).
+        { id: 'nutrition', route: 'nutrition', label: V2_TAB_LABELS.log, icon: 'Plus', action: true },
+        { id: 'nutrition', route: 'nutrition', label: V2_TAB_LABELS.nutrition, icon: 'Salad' },
+        { id: 'progress', route: 'progress', label: V2_TAB_LABELS.progress, icon: 'BarChart3' },
+      ]
+    : [
+        { id: 'dashboard', route: 'dashboard', label: t.tabs.home, icon: 'Flame' },
+        { id: 'workout', route: 'workout', label: t.tabs.workout, icon: 'Dumbbell' },
+        { id: 'nutrition', route: 'nutrition', label: t.tabs.nutrition, icon: 'Salad' },
+        { id: 'progress', route: 'progress', label: t.tabs.progress, icon: 'BarChart3' },
+        { id: 'profile', route: 'profile', label: t.tabs.profile, icon: 'User' },
+      ]
 
   const badgeLabel = badge === 'account' ? t.badge.account : t.badge.guest
   const badgeIcon = badge === 'account' ? 'CheckCircle2' : 'User'
@@ -69,14 +86,31 @@ export function MobileShell({ lang, tab, badge, onNavigate, onOpenSettings, chil
                 {badgeLabel}
               </span>
               <LanguageToggle variant="compact" />
-              <button
-                type="button"
-                onClick={onOpenSettings}
-                aria-label={t.nav.settings}
-                className="grid h-11 w-11 place-items-center rounded-lg border border-line bg-surface text-ink-500 transition-colors hover:text-ink-900"
-              >
-                <Icon name="Settings" className="h-5 w-5" />
-              </button>
+              {v2 ? (
+                // v2 §06 — profile «ملفك التدريبي» rides in the header avatar (it
+                // is no longer a bottom tab). Settings live inside the profile.
+                <button
+                  type="button"
+                  onClick={() => onNavigate('profile')}
+                  aria-label={ar ? 'ملفك التدريبي' : 'Your training profile'}
+                  aria-current={tab === 'profile' ? 'page' : undefined}
+                  className={cn(
+                    'grid h-11 w-11 place-items-center rounded-full border transition-colors',
+                    tab === 'profile' ? 'border-primary bg-primary-soft text-primary-c' : 'border-line bg-surface text-ink-500 hover:text-ink-900',
+                  )}
+                >
+                  <Icon name="User" className="h-5 w-5" />
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={onOpenSettings}
+                  aria-label={t.nav.settings}
+                  className="grid h-11 w-11 place-items-center rounded-lg border border-line bg-surface text-ink-500 transition-colors hover:text-ink-900"
+                >
+                  <Icon name="Settings" className="h-5 w-5" />
+                </button>
+              )}
             </div>
           </div>
         </header>
@@ -92,9 +126,28 @@ export function MobileShell({ lang, tab, badge, onNavigate, onOpenSettings, chil
       <nav
         className="fixed inset-x-0 bottom-0 z-50 border-t border-line bg-surface/95 backdrop-blur-xl"
         style={{ paddingBottom: 'var(--safe-bottom)' }}
+        aria-label={ar ? 'التنقّل الرئيسي' : 'Primary navigation'}
       >
         <div className="app-container grid grid-cols-5">
           {tabs.map((tb) => {
+            if (tb.action) {
+              // Center «تسجيل» — a raised quick-log action, visually distinct.
+              return (
+                <div key="log-action" className="flex items-start justify-center">
+                  <button
+                    type="button"
+                    onClick={() => onNavigate(tb.route)}
+                    aria-label={tb.label}
+                    className="-mt-5 flex flex-col items-center gap-1 text-[10px] font-bold text-primary-c"
+                  >
+                    <span className="grid h-14 w-14 place-items-center rounded-full bg-primary text-white shadow-glow ring-4 ring-surface">
+                      <Icon name={tb.icon} className="h-6 w-6" strokeWidth={2.75} />
+                    </span>
+                    {tb.label}
+                  </button>
+                </div>
+              )
+            }
             const active = tb.id === tab
             return (
               <button
