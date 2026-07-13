@@ -37,7 +37,7 @@ export const sectionCopy: Record<string, SectionCopy> = {
   routine: {
     eyebrow: 'جدولك الأسبوعي',
     icon: 'CalendarDays',
-    title: 'تعرف وش ينتظرك كل يوم',
+    title: 'اعرف ما ينتظرك كل يوم',
     description: 'ترتيب أيامك بين تمرين وراحة، عشان تمشي على نظام واضح بدون حيرة.',
   },
   workout: {
@@ -51,12 +51,12 @@ export const sectionCopy: Record<string, SectionCopy> = {
     eyebrow: 'خطة الأكل',
     icon: 'Salad',
     title: 'أكلك ليومك مرتّب وواضح',
-    description: 'وجباتك وسعراتك وبروتينك — تعرف وش تاكل ومتى، بدون تعقيد.',
+    description: 'وجباتك وسعراتك وبروتينك — اعرف ماذا تأكل ومتى، بلا تعقيد.',
   },
   supplements: {
     eyebrow: 'المكملات والأدوية',
     icon: 'Pill',
-    title: 'وش تاخذ، كم، ومتى',
+    title: 'ما تتناوله، كميته، وموعده',
     description: 'مكملاتك وأدويتك بجرعاتها وأوقاتها — واضحة عشان ما تنسى شي مهم.',
   },
   commitment: {

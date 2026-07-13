@@ -21,8 +21,10 @@ interface ProgressV2Props {
 // Positive-signal green (matches the workout success moment) and a data-viz blue
 // for the weight line / steady lifts. Chart hues are viz decisions, not brand
 // tokens — kept explicit so both read correctly in the current preview theme.
-const SUCCESS = '#1F9D57'
-const BLUE = '#5C8DF0'
+const SUCCESS = 'var(--v2-green)'
+const SUCCESS_TEXT = 'var(--v2-green-text)'
+const BLUE = 'var(--v2-blue)'
+const BLUE_TEXT = 'var(--v2-blue-text)'
 
 const TONE_TEXT: Record<RowTone, string> = { good: '', neutral: 'text-ink-500', needsData: 'text-ink-400' }
 
@@ -45,12 +47,12 @@ export function ProgressV2({ lang, onNavigate }: ProgressV2Props) {
   if (screen === 'strength') return <StrengthDetailScreen strength={model.strength} lang={lang} onBack={() => setScreen('home')} onTrain={() => go('workout')} />
 
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
-      <div className="mx-auto w-full max-w-md space-y-5 animate-fade-up">
+    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
+      <div className="v2-screen-enter mx-auto w-full max-w-md space-y-5">
         <header className="pt-1">
           <div className="flex items-center justify-between">
-            <p className="text-xs font-black uppercase tracking-wider text-primary">{t('التقدّم', 'Progress')}</p>
-            {model.goalLabel && <span className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-bold text-primary">{model.goalLabel}</span>}
+            <p className="v2-text-blue text-xs font-black uppercase tracking-wider">{t('التقدّم', 'Progress')}</p>
+            {model.goalLabel && <span className="v2-bg-blue-soft v2-text-blue rounded-full border border-[color:var(--v2-blue)] px-3 py-1 text-xs font-bold">{model.goalLabel}</span>}
           </div>
           {/* Hedged header — always «يبدو…», never a verdict. */}
           <h1 className="mt-2 text-2xl font-black leading-snug tracking-tight">{model.headline}</h1>
@@ -59,8 +61,8 @@ export function ProgressV2({ lang, onNavigate }: ProgressV2Props) {
         {/* Brief — last 14 days */}
         <section className="rounded-3xl border border-line bg-surface p-5 shadow-card">
           <div className="flex items-center gap-2">
-            <span className="text-primary"><Icon name="Sparkles" className="h-4 w-4" /></span>
-            <p className="text-xs font-black uppercase tracking-wider text-primary">{model.period.label}</p>
+            <span className="v2-text-blue"><Icon name="Sparkles" className="h-4 w-4" /></span>
+            <p className="v2-text-blue text-xs font-black uppercase tracking-wider">{model.period.label}</p>
           </div>
           <div className="mt-4 space-y-3">
             {model.summary.map((row) => <BriefRow key={row.key} row={row} />)}
@@ -71,7 +73,7 @@ export function ProgressV2({ lang, onNavigate }: ProgressV2Props) {
                 <Icon name="Clock" className="h-4 w-4 shrink-0" />
                 <span className="min-w-0">{model.stale.text}</span>
               </span>
-              <span className="shrink-0 text-xs font-black text-primary">{model.stale.actionLabel} ›</span>
+              <span className="v2-text-blue shrink-0 text-xs font-black">{model.stale.actionLabel} ›</span>
             </button>
           )}
         </section>
@@ -115,13 +117,13 @@ function BriefRow({ row }: { row: SummaryRow }) {
   const good = row.tone === 'good'
   return (
     <div className="flex items-center gap-3">
-      <span className="shrink-0" style={good ? { color: SUCCESS } : undefined}>
+      <span className="shrink-0" style={good ? { color: SUCCESS_TEXT } : undefined}>
         <Icon name={row.icon} className={cn('h-4.5 w-4.5', !good && TONE_TEXT[row.tone])} />
       </span>
       <span className="min-w-0 flex-1 text-sm font-bold">
         {row.text}{row.value && <> <b className="tabular-nums text-ink-900">{row.value}</b></>}
       </span>
-      <span className="shrink-0 text-xs font-black" style={good ? { color: SUCCESS } : undefined}>
+      <span className="shrink-0 text-xs font-black" style={good ? { color: SUCCESS_TEXT } : undefined}>
         <span className={good ? '' : row.tone === 'needsData' ? 'text-ink-400' : 'text-ink-500'}>{row.tag}</span>
       </span>
     </div>
@@ -130,7 +132,7 @@ function BriefRow({ row }: { row: SummaryRow }) {
 
 function Tile({ icon, title, main, sub, onClick }: { icon: string; title: string; main: string; sub: string; onClick: () => void }) {
   return (
-    <button type="button" onClick={onClick} className="rounded-2xl border border-line bg-surface p-4 text-start transition-colors hover:border-primary/40">
+    <button type="button" onClick={onClick} className="v2-pressable rounded-2xl border border-line bg-surface p-4 text-start hover:border-[color:var(--v2-blue)]">
       <span className="flex items-center gap-2 text-xs font-bold text-ink-500"><Icon name={icon} className="h-4 w-4" />{title}</span>
       <p className="mt-2 text-lg font-black tabular-nums">{main}</p>
       <p className="text-xs text-ink-500">{sub}</p>
@@ -150,8 +152,8 @@ function WeightDetailScreen({ model, lang, onBack, onLog, stale }: { model: Weig
   const down = model.changeKg !== null && model.changeKg < 0
   const up = model.changeKg !== null && model.changeKg > 0
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
-      <div className="mx-auto w-full max-w-md animate-fade-up">
+    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
+      <div className="v2-screen-enter mx-auto w-full max-w-md">
         <div className="flex items-center justify-between">
           <button type="button" onClick={onBack} aria-label={t('رجوع', 'Back')} className="grid h-10 w-10 place-items-center rounded-xl border border-line bg-surface"><Icon name="ChevronRight" className="h-5 w-5 rtl:rotate-0 ltr:rotate-180" /></button>
           <h1 className="text-lg font-black">{t('الوزن والجسم', 'Weight & body')}</h1>
@@ -162,7 +164,7 @@ function WeightDetailScreen({ model, lang, onBack, onLog, stale }: { model: Weig
           <p className="text-4xl font-black tabular-nums">{model.currentKg ?? '—'}<span className="ms-1 text-sm font-bold text-ink-400">{t('كجم', 'kg')}</span></p>
           <div className="text-end text-sm font-bold">
             {model.changeKg !== null && (
-              <span className="inline-flex items-center gap-1" style={{ color: down ? SUCCESS : up ? BLUE : undefined }}>
+              <span className="inline-flex items-center gap-1" style={{ color: down ? SUCCESS_TEXT : up ? BLUE_TEXT : undefined }}>
                 <Icon name={down ? 'TrendingDown' : up ? 'TrendingUp' : 'Minus'} className="h-4 w-4" />
                 <span className="tabular-nums">{Math.abs(model.changeKg)}</span>
               </span>
@@ -178,7 +180,7 @@ function WeightDetailScreen({ model, lang, onBack, onLog, stale }: { model: Weig
             : <NeedsData text={t('سجّل وزنك مرتين على الأقل لرسم الاتجاه.', 'Log your weight at least twice to draw the trend.')} />}
           <div className="mt-2 flex items-center justify-between text-[0.7rem] font-bold text-ink-400">
             <span>{t('الآن', 'Now')}</span>
-            {model.band && <span style={{ color: SUCCESS }}>{t(`نطاق الهدف ${model.band[0]}–${model.band[1]}`, `Goal band ${model.band[0]}–${model.band[1]}`)}</span>}
+            {model.band && <span style={{ color: SUCCESS_TEXT }}>{t(`نطاق الهدف ${model.band[0]}–${model.band[1]}`, `Goal band ${model.band[0]}–${model.band[1]}`)}</span>}
           </div>
         </div>
 
@@ -188,7 +190,7 @@ function WeightDetailScreen({ model, lang, onBack, onLog, stale }: { model: Weig
             <p className="text-xs font-bold text-ink-500">{t('الخصر', 'Waist')}</p>
             <p className="mt-1 text-2xl font-black tabular-nums">{model.waistCm ?? '—'}<span className="ms-1 text-xs font-bold text-ink-400">{t('سم', 'cm')}</span></p>
             {model.waistChangeCm !== null && (
-              <p className="mt-0.5 inline-flex items-center gap-1 text-xs font-bold" style={{ color: model.waistChangeCm < 0 ? SUCCESS : model.waistChangeCm > 0 ? BLUE : undefined }}>
+              <p className="mt-0.5 inline-flex items-center gap-1 text-xs font-bold" style={{ color: model.waistChangeCm < 0 ? SUCCESS_TEXT : model.waistChangeCm > 0 ? BLUE_TEXT : undefined }}>
                 <Icon name={model.waistChangeCm < 0 ? 'TrendingDown' : model.waistChangeCm > 0 ? 'TrendingUp' : 'Minus'} className="h-3.5 w-3.5" />
                 <span className="tabular-nums">{Math.abs(model.waistChangeCm)} {t('سم', 'cm')}</span>
               </p>
@@ -209,11 +211,11 @@ function WeightDetailScreen({ model, lang, onBack, onLog, stale }: { model: Weig
 
         {/* stale waist callout */}
         {stale && (
-          <button type="button" onClick={onLog} className="mt-3 flex w-full items-center justify-between gap-2 rounded-2xl border border-primary/30 bg-primary/10 px-4 py-3 text-start">
-            <span className="flex min-w-0 items-center gap-2 text-sm font-bold text-primary">
+          <button type="button" onClick={onLog} className="v2-info-panel v2-pressable mt-3 flex w-full items-center justify-between gap-2 rounded-2xl border px-4 py-3 text-start">
+            <span className="v2-text-blue flex min-w-0 items-center gap-2 text-sm font-bold">
               <Icon name="Clock" className="h-4 w-4 shrink-0" /><span className="min-w-0">{stale}</span>
             </span>
-            <span className="shrink-0 text-xs font-black text-primary">{t('قِس', 'Measure')} ›</span>
+            <span className="v2-text-blue shrink-0 text-xs font-black">{t('قِس', 'Measure')} ›</span>
           </button>
         )}
 
@@ -229,8 +231,8 @@ function StrengthDetailScreen({ strength, lang, onBack, onTrain }: { strength: i
   const ar = lang !== 'en'
   const t = (a: string, e: string) => (ar ? a : e)
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
-      <div className="mx-auto w-full max-w-md animate-fade-up">
+    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
+      <div className="v2-screen-enter mx-auto w-full max-w-md">
         <div className="flex items-center justify-between">
           <button type="button" onClick={onBack} aria-label={t('رجوع', 'Back')} className="grid h-10 w-10 place-items-center rounded-xl border border-line bg-surface"><Icon name="ChevronRight" className="h-5 w-5 rtl:rotate-0 ltr:rotate-180" /></button>
           <h1 className="text-lg font-black">{t('تطوّر القوة', 'Strength progress')}</h1>
@@ -238,7 +240,7 @@ function StrengthDetailScreen({ strength, lang, onBack, onTrain }: { strength: i
 
         {/* hedged headline */}
         <div className="mt-5 flex items-center gap-2 rounded-2xl border border-line bg-surface px-4 py-3">
-          <span style={strength.improvedCount > 0 ? { color: SUCCESS } : undefined}><Icon name="Diamond" className="h-4 w-4" /></span>
+          <span style={strength.improvedCount > 0 ? { color: SUCCESS_TEXT } : undefined}><Icon name="Diamond" className="h-4 w-4" /></span>
           <p className="text-sm font-bold">{strength.headline}</p>
         </div>
 
@@ -261,14 +263,14 @@ function LiftRow({ lift, lang }: { lift: LiftLadder; lang: Lang }) {
   const ar = lang !== 'en'
   const t = (a: string, e: string) => (ar ? a : e)
   const positive = lift.status === 'pr' || lift.status === 'up'
-  const statusColor = positive ? SUCCESS : BLUE
+  const statusColor = positive ? SUCCESS_TEXT : BLUE
   const statusLabel = lift.status === 'pr'
     ? t('رقم قياسي', 'PR')
     : lift.status === 'up'
       ? `↑ ${lift.deltaKg ?? ''}`
       : t('ثابت', 'Steady')
   return (
-    <div className="rounded-2xl border border-line bg-surface p-4">
+    <div className={cn('rounded-2xl border border-line bg-surface p-4', lift.status === 'pr' && 'v2-earned-moment')}>
       <div className="flex items-center justify-between">
         <p className="text-sm font-black"><bdi>{lift.name}</bdi></p>
         <p className="text-xs font-bold tabular-nums text-ink-500">
@@ -305,13 +307,13 @@ function MomentumArea({ values, lang }: { values: number[]; lang: Lang }) {
     <svg viewBox={`0 0 ${W} ${H}`} className="mt-3 h-24 w-full" preserveAspectRatio="none" role="img" aria-label={ar ? 'مخطّط زخم التدريب' : 'Training momentum chart'}>
       <defs>
         <linearGradient id="momentumFill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="rgb(var(--c-primary))" stopOpacity="0.35" />
-          <stop offset="100%" stopColor="rgb(var(--c-primary))" stopOpacity="0.02" />
+          <stop offset="0%" stopColor={BLUE} stopOpacity="0.35" />
+          <stop offset="100%" stopColor={BLUE} stopOpacity="0.02" />
         </linearGradient>
       </defs>
       <path d={area} fill="url(#momentumFill)" />
-      <path d={line} fill="none" stroke="rgb(var(--c-primary))" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
-      {values.map((v, i) => <circle key={i} cx={x(i)} cy={y(v)} r={2.5} fill="rgb(var(--c-primary))" />)}
+      <path d={line} fill="none" stroke={BLUE} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="v2-fill" />
+      {values.map((v, i) => <circle key={i} cx={x(i)} cy={y(v)} r={2.5} fill={BLUE} />)}
     </svg>
   )
 }

@@ -159,49 +159,83 @@
  * v2.1 approved decisions captured here:
  *   • UI typeface   → IBM Plex Sans Arabic (self-hosted, see fonts.ts)
  *   • Display face  → Readex Pro (brand/display only; falls back to UI face)
- *   • Momentum color family → Ember / Graphite / Chalk / Blue
+ *   • Momentum color family → Ember / warm paper / ink / Blue / Green / Teal
  *       - Ember is reserved for the primary action + momentum moments.
  *       - Error/destructive stays SEPARATE from Ember.
  *
- * ⚠️ Momentum concrete hex values are still pending the Cloud Design token
- * drop. So each color alias below RESOLVES to the current temporary value
- * (same additive/invisible pattern as the v1 seam above). Slice 0 freezes the
- * NAMES and the semantic assignments — not a new palette. Do NOT invent brand
- * hex here; when the Momentum values land, replace the right-hand sides only.
+ * The concrete values below are sampled from the approved v2.1 PDF mocks.
+ * They remain inert until `[data-design="v2"]` is active.
  * ============================================================================ */
 :root {
   /* v2.1 typefaces (self-hosted; Tajawal remains the tail fallback). */
   --font-ui-v2: 'IBM Plex Sans Arabic', 'Tajawal', system-ui, sans-serif;
   --font-display-v2: 'Readex Pro', 'IBM Plex Sans Arabic', 'Tajawal', system-ui, sans-serif;
 
-  /* v2.1 Momentum semantic aliases — values PENDING; alias to current source. */
-  --v2-brand-primary: var(--c-primary); /* Ember */
-  --v2-action-primary: var(--c-primary); /* Ember — reserved for primary action */
-  --v2-surface-canvas: rgb(var(--c-page)); /* app canvas (Graphite/Chalk family) */
-  --v2-surface-next-step: rgb(var(--c-surface)); /* highlighted "next step" surface */
-  --v2-feedback-error: #d6553a; /* destructive — SEPARATE from Ember */
-  --v2-data-1: var(--c-primary); /* data series — Blue/Ember/… pending Momentum hex */
-  --v2-data-2: var(--c-accent);
-  --v2-data-3: #3e9e6b;
-  --v2-data-4: var(--c-accent);
+  /* Momentum roles. Ember is an action color, never a data series. */
+  --v2-ember: #f0512a;
+  --v2-blue: #2a6ce0;
+  --v2-green: #1f9d57;
+  --v2-teal: #12a594;
+  --v2-error: #e11d2e;
+
+  /* Accessible text variants retain the same hue while normal-size copy meets
+     WCAG AA on the warm paper/card surfaces. */
+  --v2-ember-text: color-mix(in srgb, var(--v2-ember) 74%, var(--v2-ink-strong));
+  --v2-green-text: #157f46;
+  --v2-teal-text: #0e8578;
+  --v2-blue-text: #245fc5;
+
+  /* Light system sampled from the PDF phone mocks (§04–§06). */
+  --v2-cream: #f1eee8;
+  --v2-paper: #ffffff;
+  --v2-paper-muted: #e9e5de;
+  --v2-border: #e0d9ce;
+  --v2-ink-strong: #0e0d0a;
+  --v2-ink: #2a251e;
+  --v2-ink-muted: #625f5a;
+  --v2-ink-faint: #726b62;
+
+  /* Dark focus system sampled from Welcome / Active Workout mocks. */
+  --v2-dark-canvas: #16140f;
+  --v2-dark-paper: #1e1c17;
+  --v2-dark-paper-active: #2c2823;
+  --v2-dark-border: #37332d;
+  --v2-dark-ink-strong: #f1eee8;
+  --v2-dark-ink: #ddd6cb;
+  --v2-dark-ink-muted: #c5bfb5;
+  --v2-dark-ink-faint: #a79f94;
+  --v2-on-color: #ffffff;
+
+  --v2-brand-primary: var(--v2-ember);
+  --v2-action-primary: var(--v2-ember);
+  --v2-surface-canvas: var(--v2-cream);
+  --v2-surface-next-step: var(--v2-paper);
+  --v2-feedback-error: var(--v2-error);
+  --v2-data-1: var(--v2-blue);
+  --v2-data-2: var(--v2-green);
+  --v2-data-3: var(--v2-teal);
+  --v2-data-4: var(--v2-blue);
 
   /* Today command center — the four «مسار اليوم» pillar colors (Slice 3).
      Meaning is never color-only: every pillar also carries an icon + text label.
      Centralised here (not inlined in the view) so the Momentum hex drop replaces
      the right-hand sides only. Movement Blue is the one genuinely new value —
      the palette had no blue yet. Additive: consumed only by TodayV2. */
-  --v2-pillar-train: var(--c-primary); /* تدريب — Ember (matches state-workout) */
-  --v2-pillar-nutrition: #3e9e6b; /* تغذية — Green (matches success) */
-  --v2-pillar-move: #3b82f6; /* حركة — Momentum Blue (new; pending final hex) */
-  --v2-pillar-recover: rgb(var(--c-ink-500)); /* تعافي — neutral until scheduled */
+  --v2-pillar-train: var(--v2-blue);
+  --v2-pillar-nutrition: var(--v2-green);
+  --v2-pillar-move: var(--v2-blue);
+  --v2-pillar-recover: var(--v2-teal);
+
+  /* Motion serves hierarchy: entrance, press, fill, earned moments. */
+  --v2-motion-screen: 280ms;
+  --v2-motion-press: 120ms;
+  --v2-motion-fill: 600ms;
+  --v2-motion-moment: 420ms;
+  --v2-motion-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 /* Activation seam — OPT-IN ONLY. The default document has no `data-design`
-   attribute, so none of these overrides apply and v1 renders unchanged. A
-   future screen slice flips this (globally or on a subtree) to adopt v2.1.
-   Because the color aliases currently equal the v1 values, flipping v2 today
-   changes only the *typeface* (IBM Plex Sans Arabic) — colors stay identical
-   until the Momentum hex drop. */
+   attribute, so none of these overrides apply and v1 renders unchanged. */
 :root[data-design='v2'] {
   --font-family-base: var(--font-ui-v2);
   --font-family-display: var(--font-display-v2);
@@ -219,4 +253,147 @@
   --color-surface: var(--v2-surface-next-step);
   --color-danger: var(--v2-feedback-error);
   --color-destructive: var(--v2-feedback-error);
+  --color-success: var(--v2-green);
+  --color-info: var(--v2-blue);
+}
+
+/* v2 is light by default. Put the legacy utility variables on body so they
+   override any inherited, user-customized root values without touching the
+   customization logic. v1 remains byte-for-byte inert. */
+:root[data-design='v2'] body,
+:root[data-design='v2'] .v2-surface-light {
+  color-scheme: light;
+  --c-primary: var(--v2-ember);
+  --c-accent: var(--v2-blue);
+  --c-page: 241 238 232;
+  --c-surface: 255 255 255;
+  --c-beige: 233 229 222;
+  --c-line: 224 217 206;
+  --c-ink-900: 14 13 10;
+  --c-ink-700: 42 37 30;
+  --c-ink-500: 98 95 90;
+  --c-ink-400: 114 107 98;
+  --elevation-card: 0 1px 2px rgba(14, 13, 10, 0.04), 0 12px 30px -22px rgba(14, 13, 10, 0.28);
+  --elevation-raised: 0 2px 4px rgba(14, 13, 10, 0.06), 0 22px 48px -28px rgba(14, 13, 10, 0.34);
+}
+
+/* Only Welcome, Onboarding and Active Workout opt into this focus surface. */
+:root[data-design='v2'] .v2-surface-dark {
+  color-scheme: dark;
+  --c-primary: var(--v2-ember);
+  --c-accent: var(--v2-teal);
+  --c-page: 22 20 15;
+  --c-surface: 30 28 23;
+  --c-beige: 44 40 35;
+  --c-line: 55 51 45;
+  --c-ink-900: 241 238 232;
+  --c-ink-700: 221 214 203;
+  --c-ink-500: 197 191 181;
+  --c-ink-400: 167 159 148;
+}
+
+:root[data-design='v2'] .v2-text-ember { color: var(--v2-ember-text); }
+:root[data-design='v2'] .v2-text-blue { color: var(--v2-blue-text); }
+:root[data-design='v2'] .v2-text-green { color: var(--v2-green-text); }
+:root[data-design='v2'] .v2-text-teal { color: var(--v2-teal-text); }
+:root[data-design='v2'] .v2-bg-blue { background-color: var(--v2-blue); }
+:root[data-design='v2'] .v2-bg-blue-soft { background-color: color-mix(in srgb, var(--v2-blue) 10%, transparent); }
+:root[data-design='v2'] .v2-bg-green { background-color: var(--v2-green); }
+:root[data-design='v2'] .v2-bg-teal { background-color: var(--v2-teal); }
+
+/* Textual Ember is darkened only on light surfaces so small labels meet AA;
+   dark focus surfaces can use the exact Ember swatch at 5.18:1. */
+:root[data-design='v2'] body .text-primary,
+:root[data-design='v2'] body .text-primary-c { color: var(--v2-ember-text); }
+:root[data-design='v2'] body .v2-surface-dark .text-primary,
+:root[data-design='v2'] body .v2-surface-dark .text-primary-c { color: var(--v2-ember); }
+
+:root[data-design='v2'] .btn-primary {
+  color: var(--v2-on-color);
+  font-size: max(1.1875rem, 1em);
+  font-weight: 700;
+}
+
+:root[data-design='v2'] .shadow-card { box-shadow: var(--elevation-card); }
+:root[data-design='v2'] .shadow-elevated { box-shadow: var(--elevation-raised); }
+:root[data-design='v2'] .shadow-glow {
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--v2-ember) 18%, transparent), 0 14px 32px -18px color-mix(in srgb, var(--v2-ember) 48%, transparent);
+}
+
+:root[data-design='v2'] .v2-error-panel {
+  border-color: color-mix(in srgb, var(--v2-error) 42%, transparent);
+  background-color: color-mix(in srgb, var(--v2-error) 9%, transparent);
+}
+:root[data-design='v2'] .v2-error-icon { color: var(--v2-error); }
+:root[data-design='v2'] .input-invalid,
+:root[data-design='v2'] .input-invalid:focus { border-color: var(--v2-error); }
+
+:root[data-design='v2'] .v2-choice-selected {
+  border-color: var(--v2-blue);
+  background-color: color-mix(in srgb, var(--v2-blue) 12%, transparent);
+}
+:root[data-design='v2'] .v2-choice-icon-selected {
+  background-color: var(--v2-blue);
+  color: var(--v2-on-color);
+}
+:root[data-design='v2'] .v2-choice-accent { background-color: var(--v2-blue); }
+:root[data-design='v2'] .v2-info-panel {
+  border-color: color-mix(in srgb, var(--v2-blue) 30%, transparent);
+  background-color: color-mix(in srgb, var(--v2-blue) 6%, transparent);
+}
+:root[data-design='v2'] .v2-heat-1 { background-color: color-mix(in srgb, var(--v2-green) 30%, var(--v2-paper-muted)); }
+:root[data-design='v2'] .v2-heat-2 { background-color: color-mix(in srgb, var(--v2-green) 60%, var(--v2-paper-muted)); }
+:root[data-design='v2'] .v2-heat-3 { background-color: var(--v2-green); }
+
+:root[data-design='v2'] .v2-glow-ember {
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--v2-ember) 30%, transparent), transparent 72%);
+}
+:root[data-design='v2'] .v2-glow-green {
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--v2-green) 22%, transparent), transparent 72%);
+}
+:root[data-design='v2'] .v2-bottom-fade {
+  background: linear-gradient(to top, var(--v2-dark-canvas) 22%, transparent);
+}
+
+@keyframes v2-screen-enter {
+  from { opacity: 0; transform: translateY(0.5rem); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes v2-earned-moment {
+  0% { opacity: 0; transform: scale(0.92); }
+  70% { opacity: 1; transform: scale(1.035); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+:root[data-design='v2'] .v2-screen-enter {
+  animation: v2-screen-enter var(--v2-motion-screen) var(--v2-motion-ease) both;
+}
+
+:root[data-design='v2'] .v2-pressable {
+  transition: transform var(--v2-motion-press) var(--v2-motion-ease), border-color var(--v2-motion-press) ease, box-shadow var(--v2-motion-press) ease;
+}
+
+:root[data-design='v2'] .v2-pressable:active { transform: scale(0.985); }
+
+:root[data-design='v2'] .v2-fill {
+  transition: width var(--v2-motion-fill) var(--v2-motion-ease), stroke-dashoffset var(--v2-motion-fill) var(--v2-motion-ease);
+}
+
+:root[data-design='v2'] .v2-earned-moment {
+  animation: v2-earned-moment var(--v2-motion-moment) var(--v2-motion-ease) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --v2-motion-screen: 0.001ms;
+    --v2-motion-press: 0.001ms;
+    --v2-motion-fill: 0.001ms;
+    --v2-motion-moment: 0.001ms;
+  }
+  :root[data-design='v2'] .v2-screen-enter,
+  :root[data-design='v2'] .v2-earned-moment {
+    opacity: 1;
+    transform: none;
+  }
 }

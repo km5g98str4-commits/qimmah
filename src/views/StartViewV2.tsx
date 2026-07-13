@@ -23,25 +23,19 @@ export function StartViewV2({ lang, onLogin, onSignup }: StartViewV2Props) {
   const c = V2_WELCOME[lang] ?? V2_WELCOME.ar
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-page">
+    <div className="v2-surface-dark relative min-h-screen overflow-hidden bg-page">
       {/* Background depth — ember glow behind the headline + faint grid + large
           Ascent motif anchored low. Purely decorative, non-interactive. */}
       <div className="pointer-events-none absolute inset-0" aria-hidden="true">
-        <div
-          className="absolute start-[-25%] top-[9%] h-[46%] w-[85%] rounded-full blur-[2px]"
-          style={{ background: 'radial-gradient(closest-side, rgba(242,106,33,0.30), rgba(242,106,33,0) 72%)' }}
-        />
+        <div className="v2-glow-ember absolute start-[-25%] top-[9%] h-[46%] w-[85%] rounded-full blur-[2px]" />
         <div className="absolute inset-0 bg-grid-faint [background-size:46px_46px] opacity-[0.10]" />
         <AscentMotif className="absolute bottom-[16%] end-0 h-[42%] w-[72%]" />
         {/* Ground the bottom so the CTA sits on solid graphite, not the motif. */}
-        <div
-          className="absolute inset-x-0 bottom-0 h-40"
-          style={{ background: 'linear-gradient(to top, rgb(var(--c-page)) 22%, rgba(16,18,22,0))' }}
-        />
+        <div className="v2-bottom-fade absolute inset-x-0 bottom-0 h-40" />
       </div>
 
       <div
-        className="app-container relative z-10 flex min-h-screen flex-col px-6"
+        className="app-container v2-screen-enter relative z-10 flex min-h-screen flex-col px-6"
         style={{ paddingTop: 'max(1rem, var(--safe-top))', paddingBottom: 'max(1.75rem, var(--safe-bottom))' }}
       >
         {/* Top row — language toggle only. */}

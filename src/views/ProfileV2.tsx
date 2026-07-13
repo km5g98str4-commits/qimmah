@@ -39,17 +39,17 @@ export function ProfileV2({ lang, onNavigate }: ProfileV2Props) {
   const numerals = (n: number) => (ar ? n.toLocaleString('ar-EG') : String(n))
 
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
-      <div className="mx-auto w-full max-w-md space-y-5 animate-fade-up">
+    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
+      <div className="v2-screen-enter mx-auto w-full max-w-md space-y-5">
         <h1 className="pt-1 text-2xl font-black tracking-tight">{t('ملفك التدريبي', 'Your training profile')}</h1>
 
         {/* Earned-identity header — avatar · name · goal badge */}
         <section className="flex items-center gap-4 rounded-3xl border border-line bg-surface p-5 shadow-card">
-          <span className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-primary text-2xl font-black text-white">{model.user.initials}</span>
+          <span className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-beige text-2xl font-black text-ink-700">{model.user.initials}</span>
           <div className="min-w-0">
             <p className="truncate text-lg font-black">{model.user.displayName}</p>
             {model.trainingIdentity.goalLabel && (
-              <span className="mt-1.5 inline-flex items-center gap-1.5 rounded-full bg-primary-soft px-2.5 py-1 text-xs font-black text-primary-c">
+              <span className="v2-bg-blue-soft v2-text-blue mt-1.5 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-black">
                 {t('الهدف', 'Goal')} · {model.trainingIdentity.goalLabel}
               </span>
             )}
@@ -84,7 +84,7 @@ export function ProfileV2({ lang, onNavigate }: ProfileV2Props) {
           <p className="px-1 pt-1 text-center text-xs leading-relaxed text-ink-500">
             {model.subscription.text}
             {' — '}
-            <button type="button" onClick={() => setScreen('settings')} className="font-bold text-ink-500 underline decoration-line underline-offset-2 transition-colors hover:text-primary-c">
+            <button type="button" onClick={() => setScreen('settings')} className="font-bold text-ink-500 underline decoration-line underline-offset-2 transition-colors hover:text-ink-900">
               {model.subscription.cta}
             </button>
           </p>
@@ -102,8 +102,8 @@ function ProgramCard({ model, t, numerals, onOpen }: { model: ProfileV2Model; t:
       ? t(`الأسبوع ${numerals(program.weekOf)} من ${numerals(program.totalWeeks)} · ${numerals(program.daysPerWeek)} أيام/أسبوع`, `Week ${program.weekOf} of ${program.totalWeeks} · ${program.daysPerWeek} days/week`)
       : t(`الأسبوع ${numerals(program.weekOf)} من ${numerals(program.totalWeeks)}`, `Week ${program.weekOf} of ${program.totalWeeks}`)
   return (
-    <button type="button" onClick={onOpen} className="flex w-full items-center gap-3 rounded-2xl border border-line bg-surface p-4 text-start transition-colors hover:border-primary/40">
-      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary-c"><Icon name="Dumbbell" className="h-5 w-5" /></span>
+    <button type="button" onClick={onOpen} className="v2-pressable flex w-full items-center gap-3 rounded-2xl border border-line bg-surface p-4 text-start hover:border-[color:var(--v2-blue)]">
+      <span className="v2-bg-blue-soft v2-text-blue grid h-10 w-10 shrink-0 place-items-center rounded-xl"><Icon name="Dumbbell" className="h-5 w-5" /></span>
       <span className="min-w-0 flex-1">
         <span className="block text-sm font-black">{program.title}</span>
         <span className="mt-0.5 block text-xs text-ink-500">{sub}</span>
@@ -139,9 +139,9 @@ function CommitmentHeatmap({ model, lang, t, numerals }: { model: ProfileV2Model
 // renders transparent. Use element `opacity-*` utilities for the intensity ramp.
 const HEAT: Record<CommitmentWeek['level'], string> = {
   0: 'bg-beige',
-  1: 'bg-primary opacity-30',
-  2: 'bg-primary opacity-60',
-  3: 'bg-primary',
+  1: 'v2-heat-1',
+  2: 'v2-heat-2',
+  3: 'v2-heat-3',
 }
 
 function Privacy({ lang, model, onBack, onDelete }: { lang: Lang; model: ProfileV2Model; onBack: () => void; onDelete: () => void }) {
@@ -157,9 +157,9 @@ function Privacy({ lang, model, onBack, onDelete }: { lang: Lang; model: Profile
         <InfoRow icon="BarChart3" title={t('تحليلات مجهولة', 'Anonymous analytics')} sub={t('لتحسين التطبيق فقط', 'To improve the app only')} state={model.privacy.analyticsAnonymousEnabled ? t('مفعّل', 'On') : t('مطفأ', 'Off')} />
         <InfoRow icon="Activity" title={t('مشاركة بيانات الصحة', 'Health sharing')} sub={t('غير مربوطة بعد', 'Not connected yet')} disabled />
         <InfoRow icon="Download" title={t('تنزيل نسخة من بياناتي', 'Export my data')} sub={t('قادم لاحقًا', 'Coming later')} disabled />
-        <button type="button" onClick={onDelete} className="flex w-full items-center gap-3 rounded-2xl border border-danger/40 bg-danger/5 px-4 py-3.5 text-start">
-          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-danger/15 text-danger"><Icon name="Trash2" className="h-4.5 w-4.5" /></span>
-          <span className="min-w-0 flex-1"><span className="block text-sm font-bold text-danger">{t('حذف الحساب نهائيًا', 'Delete account permanently')}</span><span className="block text-xs text-ink-500">{t('لا يمكن التراجع · يتطلب تأكيدًا', 'Irreversible · requires confirmation')}</span></span>
+        <button type="button" onClick={onDelete} className="v2-error-panel v2-pressable flex w-full items-center gap-3 rounded-2xl border px-4 py-3.5 text-start">
+          <span className="v2-error-icon grid h-9 w-9 shrink-0 place-items-center rounded-xl"><Icon name="Trash2" className="h-4.5 w-4.5" /></span>
+          <span className="min-w-0 flex-1"><span className="v2-error-icon block text-sm font-bold">{t('حذف الحساب نهائيًا', 'Delete account permanently')}</span><span className="block text-xs text-ink-500">{t('لا يمكن التراجع · يتطلب تأكيدًا', 'Irreversible · requires confirmation')}</span></span>
           <Icon name="ChevronLeft" className="h-4 w-4 shrink-0 text-ink-400 rtl:rotate-0 ltr:rotate-180" />
         </button>
       </section>
@@ -173,7 +173,7 @@ function Settings({ lang, model, onBack, onAccount, onPrivacy }: { lang: Lang; m
   return (
     <SubScreen title={t('الإعدادات والخصوصية', 'Settings & privacy')} onBack={onBack} lang={lang}>
       <Group title={t('المظهر', 'Appearance')}>
-        <InfoRow icon="Moon" title={t('السمة', 'Theme')} sub={model.settings.appearance} disabled subNote={t('داكن حاليًا', 'Dark for now')} />
+        <InfoRow icon="Sun" title={t('السمة', 'Theme')} sub={model.settings.appearance} disabled subNote={t('فاتح حاليًا', 'Light for now')} />
       </Group>
       <Group title={t('عام', 'General')}>
         <InfoRow icon="Globe" title={t('اللغة', 'Language')} sub={model.settings.language} state="" />
@@ -197,8 +197,8 @@ function Settings({ lang, model, onBack, onAccount, onPrivacy }: { lang: Lang; m
 function SubScreen({ title, onBack, lang, children }: { title: string; onBack: () => void; lang: Lang; children: ReactNode }) {
   const ar = lang !== 'en'
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
-      <div className="mx-auto w-full max-w-md">
+    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
+      <div className="v2-screen-enter mx-auto w-full max-w-md">
         <div className="flex items-center gap-3">
           <button type="button" onClick={onBack} aria-label={ar ? 'رجوع' : 'Back'} className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-line bg-surface"><Icon name="ChevronRight" className="h-5 w-5 rtl:rotate-0 ltr:rotate-180" /></button>
           <h1 className="text-xl font-black">{title}</h1>
@@ -223,7 +223,7 @@ function Stat({ value, label }: { value: string; label: string }) {
 }
 function Row({ icon, label, onClick }: { icon: string; label: string; onClick: () => void }) {
   return (
-    <button type="button" onClick={onClick} className="flex w-full items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3 text-start transition-colors hover:border-primary/40">
+    <button type="button" onClick={onClick} className="v2-pressable flex w-full items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3 text-start hover:border-[color:var(--v2-blue)]">
       <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-beige text-ink-500"><Icon name={icon} className="h-4.5 w-4.5" /></span>
       <span className="flex-1 text-sm font-bold">{label}</span>
       <Icon name="ChevronLeft" className="h-4 w-4 shrink-0 text-ink-400 rtl:rotate-0 ltr:rotate-180" />
@@ -233,7 +233,7 @@ function Row({ icon, label, onClick }: { icon: string; label: string; onClick: (
 function InfoRow({ icon, title, sub, state, disabled, subNote, onClick }: { icon: string; title: string; sub: string; state?: string; disabled?: boolean; subNote?: string; onClick?: () => void }) {
   const Comp = onClick ? 'button' : 'div'
   return (
-    <Comp type={onClick ? 'button' : undefined} onClick={onClick} className={cn('flex w-full items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3 text-start', disabled && 'opacity-70', onClick && 'hover:border-primary/40')}>
+    <Comp type={onClick ? 'button' : undefined} onClick={onClick} className={cn('flex w-full items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3 text-start', disabled && 'opacity-70', onClick && 'v2-pressable hover:border-[color:var(--v2-blue)]')}>
       <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-beige text-ink-500"><Icon name={icon} className="h-4.5 w-4.5" /></span>
       <span className="min-w-0 flex-1"><span className="block text-sm font-bold">{title}</span><span className="block text-xs text-ink-500">{subNote ?? sub}</span></span>
       {state != null && state !== '' && <span className="shrink-0 text-xs font-black text-ink-500">{state}</span>}
