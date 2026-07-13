@@ -1,10 +1,9 @@
-import { useMemo, useState } from 'react'
+import { lazy, Suspense, useMemo, useState } from 'react'
 import { Icon } from '@/components/Icon'
 import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
 import { useCustomization } from '@/lib/customizationContext'
 import { foodItems, type FoodItem } from '@/data/foodItems'
-import { ScanFoodPanel } from '@/features/barcode/ScanFoodPanel'
 import {
   addFoodToDay,
   addWaterToDay,
@@ -12,6 +11,10 @@ import {
   type MealSlot,
   type Nudge,
 } from '@/lib/nutritionV2Model'
+
+// الماسح (ScanFoodPanel → BarcodeCamera → @zxing) يُحمَّل كسولًا: محرّك الباركود
+// الثقيل (~443kB) لا يدخل حزمة شاشة التغذية، ويُجلب فقط عند فتح المستخدم للماسح.
+const ScanFoodPanel = lazy(() => import('@/features/barcode/ScanFoodPanel').then((m) => ({ default: m.ScanFoodPanel })))
 
 interface NutritionV2Props {
   lang: Lang
@@ -381,12 +384,14 @@ function AddMeal({ lang, slot, onAdd, onBack }: { lang: Lang; slot: MealSlot; on
       </div>
 
       {scanning && (
-        <ScanFoodPanel
-          lang={lang}
-          onResolved={(item) => { setScanning(false); logFood(item) }}
-          onManualFallback={() => setScanning(false)}
-          onClose={() => setScanning(false)}
-        />
+        <Suspense fallback={null}>
+          <ScanFoodPanel
+            lang={lang}
+            onResolved={(item) => { setScanning(false); logFood(item) }}
+            onManualFallback={() => setScanning(false)}
+            onClose={() => setScanning(false)}
+          />
+        </Suspense>
       )}
     </div>
   )
