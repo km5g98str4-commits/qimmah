@@ -17,7 +17,7 @@
 | **Supabase (cloud)** — account | email, password hash, display name | Supabase GoTrue; client `src/lib/supabaseClient.ts` (`DEFAULT_SUPABASE_URL = …ledlypcyrtnzvjvhykwz.supabase.co`) |
 | **Supabase (cloud)** — synced app data (13 tables, RLS own-row) | `profiles, workout_sessions, exercise_history, measurement_logs, daily_logs` (`…120002`), `nutrition_logs, water_logs, supplement_logs, medication_logs, step_logs, achievements, custom_plans, todos` (`…120003`) | `supabase/migrations/*.sql`; RLS `…120005_rls_enable_and_policies.sql` |
 | **Device (local-first)** | full history mirror in `localStorage` (`qimmah:*`) | `src/lib/historyStore.ts` (`HISTORY_KEYS`) |
-| **Analytics** | anonymous counts/enums only — **no** email/name/barcode, random device id | `src/lib/analytics.ts` (opt-in, HTTPS-only, no PII); policy on branch `legal/appstore-pack` `docs/legal/privacy-policy.md` §analytics |
+| **Analytics** | anonymous counts/enums only — **no** email/name/barcode, random device id | `src/lib/analytics/index.ts` (`isValidHttpsEndpoint` HTTPS-only, consent-gated `consent==='granted'`, `getAnonId`); policy on branch `legal/appstore-pack` `docs/legal/privacy-policy.md` §analytics |
 
 Health/fitness data is **local-first**; it reaches the cloud only for a signed-in
 user via the sync queue (`src/lib/syncQueue.ts` → `syncService.flushSyncQueue`).
