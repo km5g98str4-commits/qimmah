@@ -1,4 +1,5 @@
 import { saudiTraditionalFoods } from './saudiFoods'
+import { gccStaples } from './gccStaples'
 
 export type FoodCategory =
   | 'بروتين'
@@ -5634,6 +5635,8 @@ export const foodItems: FoodItem[] = [
   },
   // ===== أطباق سعودية تقليدية (إقليمية) — جداول تركيب الأغذية السعودية، القيم لكل 100غ =====
   ...saudiTraditionalFoods,
+  // ===== أطباق ومشروبات ومقبّلات خليجية شائعة (Cycle 4) — انظر gccStaples.ts =====
+  ...gccStaples,
 ]
 
 export const foodMap: Record<string, FoodItem> = Object.fromEntries(
