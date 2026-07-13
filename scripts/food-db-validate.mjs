@@ -41,6 +41,7 @@ try {
 }
 // الأطباق السعودية التقليدية تُدمج في foodItems عبر spread بمعرّفات «sfct-*».
 const saudiCount = foodItems.filter((f) => typeof f.id === 'string' && f.id.startsWith('sfct-')).length
+const gccCount = foodItems.filter((f) => typeof f.id === 'string' && f.id.startsWith('gcc-')).length
 
 // ————— إعدادات الفحص —————
 const KCAL_TOL = 0.15 // ±15% لقاعدة 4/4/9
@@ -117,6 +118,9 @@ for (const item of foodItems) {
   if (/برغر/.test(lbl)) add('WARN', 'UNIT_SPELL', item.id, item.nameAr, `«برغر» غير قياسي — استخدم «برجر»: «${lbl}»`)
   if (/^نص\s/.test(lbl)) add('WARN', 'UNIT_MSA', item.id, item.nameAr, `«نص» عامّية — استخدم «نصف»: «${lbl}»`)
   if (/^\d+\s*(غ|مل)$/.test(lbl)) add('WARN', 'UNIT_BARE', item.id, item.nameAr, `وحدة مجرّدة بلا وصف «${lbl}» — استخدم «لكل Nغ» أو «حصة (Nغ)»`)
+  // تناسق التسمية (Cycle 5): إملاء «برجر» القياسي بدل «برغر».
+  const nameBlob = `${item.nameAr || ''} ${Array.isArray(item.keywords) ? item.keywords.join(' ') : ''}`
+  if (/برغر/.test(nameBlob)) add('WARN', 'NAME_SPELL', item.id, item.nameAr, '«برغر» غير قياسي — استخدم «برجر»')
   if (Array.isArray(item.sizes)) {
     for (const sz of item.sizes) checkMacros({ ...sz, servingGrams: sz.servingGrams }, `حجم:${sz.id || sz.labelAr || '?'}`)
   }
@@ -160,12 +164,12 @@ const byCode = {}
 for (const f of findings) (byCode[f.code] ||= []).push(f)
 
 if (JSON_OUT) {
-  console.log(JSON.stringify({ total: foodItems.length, saudi: saudiCount, errors: errors.length, warnings: warns.length, byCode: Object.fromEntries(Object.entries(byCode).map(([k, v]) => [k, v.length])), findings }, null, 2))
+  console.log(JSON.stringify({ total: foodItems.length, saudi: saudiCount, gcc: gccCount, errors: errors.length, warnings: warns.length, byCode: Object.fromEntries(Object.entries(byCode).map(([k, v]) => [k, v.length])), findings }, null, 2))
 } else {
   console.log('════════ مُدقِّق قاعدة الأطعمة — قِمّة ════════')
   console.log(`الإجمالي: ${foodItems.length} صنفًا (منها ${saudiCount} طبقًا سعوديًا)`)
   console.log(`أخطاء (ERROR): ${errors.length} · تحذيرات (WARN): ${warns.length}\n`)
-  const order = ['MISSING_STR', 'MISSING_NUM', 'NEGATIVE', 'BAD_FIBER', 'RANGE_MACRO', 'RANGE_SUM', 'RANGE_KCAL', 'DUP_ID', 'DIVERGE_KCAL', 'UNIT_SPELL', 'UNIT_MSA', 'UNIT_BARE', 'KCAL_449', 'DUP_NAME_AR', 'DUP_NAME_EN']
+  const order = ['MISSING_STR', 'MISSING_NUM', 'NEGATIVE', 'BAD_FIBER', 'RANGE_MACRO', 'RANGE_SUM', 'RANGE_KCAL', 'DUP_ID', 'DIVERGE_KCAL', 'UNIT_SPELL', 'UNIT_MSA', 'UNIT_BARE', 'NAME_SPELL', 'KCAL_449', 'DUP_NAME_AR', 'DUP_NAME_EN']
   for (const code of order) {
     const rows = byCode[code]
     if (!rows || !rows.length) continue

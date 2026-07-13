@@ -82,3 +82,16 @@ node scripts/food-db-validate.mjs --strict    # يفشل أيضًا على ال�
   يطابق ماكروزه لنسخة قصيمية أخفّ مرقًا). ليست أخطاء بل تحضيرات/أوزان حصص مختلفة، فأُبقيت عمدًا ووثّقها المُدقِّق
   كتحذير دائم (لا يُفشل البوّابة). لم أستبدل أي قيمة مصدرية بتقديرٍ مني.
 النتيجة: 581 صنفًا، 0 أخطاء، 4 تحذيرات (DIVERGE مقبولة). typecheck + build ناجحان.
+
+## Cycle 6 — قفل الجودة دائمًا (proof gate)
+`scripts/run-food-db-proof.mjs` يشغّل المُدقِّق ويؤكّد 19 ثابتًا (0 أخطاء، 130 سعودي، 40 خليجي مضاف،
+لا UNIT_*/NAME_SPELL/DUP_NAME، وDIVERGE_KCAL ≤ 4 المقبولة). أي انحدار ⇒ خروج 1.
+```bash
+node scripts/run-food-db-proof.mjs   # ✅ 19 فحصًا
+```
+> لا يمكن تعديل `package.json` في هذا الفرع (قاعدة صارمة — دمج wave3 جارٍ). لربط البوّابة:
+> أضِف لاحقًا `"test:food-db": "node scripts/run-food-db-proof.mjs"` إلى `package.json`،
+> وسطرًا في `.github/workflows/ci.yml` ضمن جولة الإثباتات.
+
+### الحصيلة النهائية
+541 → **581 صنفًا** · **0 أخطاء** · 4 تحذيرات DIVERGE مقبولة وموثّقة · typecheck + build ناجحان في كل جولة.
