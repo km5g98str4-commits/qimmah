@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Icon } from './Icon'
 import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
-import { canPromptInstall, isIOS, isStandalone, onInstallStateChange, promptInstall } from '@/lib/pwa'
+import { canPromptInstall, isIOS, isNativePlatform, isStandalone, onInstallStateChange, promptInstall } from '@/lib/pwa'
 
 const DISMISS_KEY = 'qimmah:install-banner:dismissed'
 
@@ -29,7 +29,8 @@ export function InstallBanner({ lang, onOpenSettings }: { lang: Lang; onOpenSett
 
   useEffect(() => onInstallStateChange(() => setInstallable(canPromptInstall())), [])
 
-  if (standalone || dismissed || (!installable && !ios)) return null
+  // داخل الغلاف الأصلي (Capacitor) لا شريط تثبيت PWA إطلاقًا — التطبيق مثبّت أصلًا (خطر رفض App Store).
+  if (isNativePlatform() || standalone || dismissed || (!installable && !ios)) return null
 
   const dismiss = () => {
     setDismissed(true)
