@@ -69,6 +69,14 @@ export interface V2OnboardingCopy {
   prefs: readonly { value: string; label: string; icon: string }[]
   injuries: readonly { value: string; label: string }[]
   ready: { eyebrow: string; title: string; subtitle: string; enter: string; previewNote: string }
+  /** Full-screen plan-assembly loading state (shown while the plan is generated). */
+  building: { title: string; subtitle: string }
+  /** Visible plan-generation failure + retry (never a silent drop into the app). */
+  error: { title: string; message: string; retry: string }
+  /** Per-step inline validation messages shown when Next is tapped incomplete. */
+  validation: { goal: string; training: string; equipment: string }
+  /** sr-only fieldset legends for each choice group (a11y — not shown visually). */
+  legends: { goal: string; days: string; duration: string; place: string; pref: string; injuries: string }
 }
 
 /** Approved v2.1 onboarding copy (warm MSA). Rendered by OnboardingV2 (preview-gated). */
@@ -122,6 +130,28 @@ export const V2_ONBOARDING: Record<'ar' | 'en', V2OnboardingCopy> = {
       enter: 'الدخول للوحة',
       previewNote: 'تُبنى خطتك وتُحفظ على هذا الجهاز. المزامنة السحابية تحتاج تسجيل الدخول.',
     },
+    building: {
+      title: 'يتم إعداد خطتك',
+      subtitle: 'نرتّب أيامك وتمارينك…',
+    },
+    error: {
+      title: 'تعذّر إعداد الخطة',
+      message: 'واجهنا مشكلة أثناء تجهيز خطتك. تأكّد من اتصالك ثم حاول مرة أخرى.',
+      retry: 'أعد المحاولة',
+    },
+    validation: {
+      goal: 'اختر هدفك أولًا للمتابعة.',
+      training: 'اختر عدد الأيام ومدة التمرين للمتابعة.',
+      equipment: 'اختر مكان التمرين وما تفضّله للمتابعة.',
+    },
+    legends: {
+      goal: 'اختيار الهدف',
+      days: 'عدد أيام التمرين في الأسبوع',
+      duration: 'مدة التمرين',
+      place: 'مكان التمرين',
+      pref: 'تفضيل المعدات',
+      injuries: 'الإصابات أو التمارين الممنوعة',
+    },
   },
   en: {
     back: 'Back',
@@ -171,6 +201,28 @@ export const V2_ONBOARDING: Record<'ar' | 'en', V2OnboardingCopy> = {
       subtitle: 'Built on your goal, time, and equipment.',
       enter: 'Enter dashboard',
       previewNote: 'Your plan is built and saved on this device. Cloud sync needs sign-in.',
+    },
+    building: {
+      title: 'Setting up your plan',
+      subtitle: 'Arranging your days and workouts…',
+    },
+    error: {
+      title: 'Couldn’t build the plan',
+      message: 'Something went wrong while preparing your plan. Check your connection and try again.',
+      retry: 'Try again',
+    },
+    validation: {
+      goal: 'Pick your goal to continue.',
+      training: 'Pick your days and session length to continue.',
+      equipment: 'Pick where you train and what you prefer to continue.',
+    },
+    legends: {
+      goal: 'Choose your goal',
+      days: 'Training days per week',
+      duration: 'Session length',
+      place: 'Training place',
+      pref: 'Equipment preference',
+      injuries: 'Injuries or movements to avoid',
     },
   },
 } as const
