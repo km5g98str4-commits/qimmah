@@ -132,6 +132,22 @@ for (const it of foodItems) {
 for (const [k, ids] of byNameAr) if (ids.length > 1) add('WARN', 'DUP_NAME_AR', ids.join(','), k, `اسم عربي مكرّر (${ids.length})`)
 for (const [k, ids] of byNameEn) if (ids.length > 1) add('WARN', 'DUP_NAME_EN', ids.join(','), k, `اسم إنجليزي مكرّر (${ids.length})`)
 
+// تباعد الطاقة بين أصناف تحمل الاسم نفسه (بعد التطبيع لكل 100غ) — يكشف تعارض بيانات حقيقيًا
+// (طبق واحد بسعرات مختلفة جوهريًا في مدخلين). عتبة 1.30× (30%).
+const per100cal = (it) => (isNum(it.servingGrams) && it.servingGrams > 0 ? (it.calories / it.servingGrams) * 100 : null)
+const byId2 = new Map(foodItems.map((it) => [it.id, it]))
+// اسم أساسي: يُزيل لاحقة المنطقة بين قوسين وبدائل «/» لتجميع «مطازيز» مع «مطازيز (القصيم)».
+const baseName = (s) => norm(String(s || '').replace(/\([^)]*\)/g, '').split('/')[0])
+const groups = new Map()
+for (const it of foodItems) { const a = baseName(it.nameAr); if (a) (groups.get(a) || groups.set(a, []).get(a)).push(it.id) }
+for (const [, ids] of groups) {
+  if (ids.length < 2) continue
+  const vals = ids.map((id) => ({ id, v: per100cal(byId2.get(id)) })).filter((x) => x.v != null)
+  if (vals.length < 2) continue
+  const min = Math.min(...vals.map((x) => x.v)), max = Math.max(...vals.map((x) => x.v))
+  if (min > 0 && max / min > 1.30) add('WARN', 'DIVERGE_KCAL', vals.map((x) => x.id).join(','), byId2.get(ids[0]).nameAr, `سعرات/100غ متباعدة ${vals.map((x) => `${x.id}=${x.v.toFixed(0)}`).join(' vs ')} (نسبة ${(max / min).toFixed(1)}×)`)
+}
+
 // ————— التقرير —————
 const errors = findings.filter((f) => f.level === 'ERROR')
 const warns = findings.filter((f) => f.level === 'WARN')
@@ -144,7 +160,7 @@ if (JSON_OUT) {
   console.log('════════ مُدقِّق قاعدة الأطعمة — قِمّة ════════')
   console.log(`الإجمالي: ${foodItems.length} صنفًا (منها ${saudiCount} طبقًا سعوديًا)`)
   console.log(`أخطاء (ERROR): ${errors.length} · تحذيرات (WARN): ${warns.length}\n`)
-  const order = ['MISSING_STR', 'MISSING_NUM', 'NEGATIVE', 'BAD_FIBER', 'RANGE_MACRO', 'RANGE_SUM', 'RANGE_KCAL', 'DUP_ID', 'KCAL_449', 'DUP_NAME_AR', 'DUP_NAME_EN']
+  const order = ['MISSING_STR', 'MISSING_NUM', 'NEGATIVE', 'BAD_FIBER', 'RANGE_MACRO', 'RANGE_SUM', 'RANGE_KCAL', 'DUP_ID', 'DIVERGE_KCAL', 'KCAL_449', 'DUP_NAME_AR', 'DUP_NAME_EN']
   for (const code of order) {
     const rows = byCode[code]
     if (!rows || !rows.length) continue
