@@ -3,6 +3,7 @@
 
 import {
   Activity,
+  AlertCircle,
   AlertTriangle,
   ArrowLeft,
   Armchair,
@@ -108,6 +109,7 @@ import type { IconComponent } from '@/types'
 
 export const icons: Record<string, IconComponent> = {
   Activity,
+  AlertCircle,
   AlertTriangle,
   ArrowLeft,
   Armchair,

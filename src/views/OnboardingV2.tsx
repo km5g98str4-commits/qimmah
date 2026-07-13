@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { Icon } from '@/components/Icon'
 import { cn } from '@/lib/cn'
@@ -12,6 +12,19 @@ import { markCompleted } from '@/lib/onboarding'
 import { persistOnboardingToProfile } from '@/lib/onboardingSync'
 import { track } from '@/lib/analytics'
 import { toAnswersFromV2, type V2Place, type V2Pref } from '@/lib/onboardingV2Adapter'
+import {
+  DAYS,
+  DURATIONS,
+  canAdvance,
+  clearDraftV2,
+  finalizeReduce,
+  loadDraftV2,
+  saveDraftV2,
+  validateStep,
+  type FinalizeStatus,
+  type OnboardingV2Draft,
+  type StepValidation,
+} from '@/lib/onboardingV2Flow'
 
 interface OnboardingV2Props {
   lang: Lang
@@ -22,8 +35,9 @@ interface OnboardingV2Props {
 }
 
 const GOAL_ICON: Record<V2GoalValue, string> = { cut: 'Flame', maintain: 'ShieldCheck', bulk: 'TrendingUp' }
-const DAYS = [3, 4, 5, 6]
-const DURATIONS = [30, 45, 60, 75]
+
+// Stable ids linking each step's region to its heading (aria-labelledby).
+const TITLE_ID = ['onb-title-goal', 'onb-title-training', 'onb-title-equipment'] as const
 
 /**
  * Suggested split label from weekly days — a real split descriptor (NOT
@@ -51,16 +65,14 @@ const toAr = (n: number, lang: Lang) => (lang === 'en' ? String(n) : String(n).r
 /**
  * Onboarding — Qimmah Design v2.1 (Slice 2). Preview-gated (see SetupView): a
  * focused, coach-like three-step flow — Goal → Training setup (live plan
- * summary) → Equipment/constraints — ending on a "plan ready" screen. Momentum
- * direction (graphite/ember, IBM Plex under the v2 seam).
+ * summary) → Equipment/constraints — ending on a "plan ready" screen.
  *
- * Slice 2B — now FUNCTIONAL: the choices map to the existing `Answers` model
- * (see onboardingV2Adapter) and run the SAME local plan generation + completion
- * v1 uses (buildOnboardingProfile → saveOnboardingProfile →
- * buildCustomizationFromOnboarding → applyCustomization → markCompleted). The
- * only v1 step deliberately skipped is the Supabase profile write
- * (persistOnboardingToProfile) — kept out of this slice for safety; it is a
- * best-effort cloud sync that requires a real account/staging to verify.
+ * Async + a11y hardened: plan assembly shows a full-screen loading state; a
+ * failure surfaces a visible retry (never a silent drop into the app);
+ * per-step Next validation is announced; answers persist as an owner-scoped
+ * draft that survives reload and clears on finish; every choice group is a
+ * labelled fieldset. Choices map to the existing `Answers` model
+ * (onboardingV2Adapter) and run the SAME local generation pipeline v1 uses.
  */
 export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
   const t = V2_ONBOARDING[lang] ?? V2_ONBOARDING.ar
@@ -68,7 +80,7 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
   const auth = useAuth()
   const userId = auth.user?.id ?? null
   const [step, setStep] = useState(0) // 0 goal · 1 training · 2 equipment · 3 ready
-  const [finalizing, setFinalizing] = useState(false)
+  const [status, setStatus] = useState<FinalizeStatus>('idle')
 
   const [goal, setGoal] = useState<V2GoalValue | null>(null)
   const [days, setDays] = useState(4)
@@ -77,25 +89,84 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
   const [pref, setPref] = useState<string | null>(null)
   const [hasInjury, setHasInjury] = useState(false)
   const [injuries, setInjuries] = useState<string[]>([])
+  const [validation, setValidation] = useState<StepValidation>(null)
 
   const goalEntry = useMemo(() => V2_GOAL_MODEL.find((g) => g.value === goal) ?? null, [goal])
-  const canNext = step === 0 ? !!goal : step === 2 ? !!place && !!pref : true
+  const answers = { goal, days, duration, place: place as V2Place | null, pref: pref as V2Pref | null }
 
-  const next = () => setStep((s) => Math.min(3, s + 1))
-  const back = () => (step === 0 ? onExit() : setStep((s) => s - 1))
+  // Resume an in-progress draft ONCE on mount (owner-scoped; a foreign/older/
+  // malformed draft is ignored by loadDraftV2). Runs before the persist effect
+  // marks the flow live, so restoring does not immediately re-save the default.
+  const restored = useRef(false)
+  useEffect(() => {
+    if (restored.current) return
+    const d = loadDraftV2(userId)
+    if (d) {
+      setStep(d.step)
+      setGoal(d.goal)
+      setDays(d.days)
+      setDuration(d.duration)
+      setPlace(d.place)
+      setPref(d.pref)
+      setHasInjury(d.hasInjury)
+      setInjuries(d.injuries)
+    }
+    restored.current = true
+    // Mount-only restore against the account present at mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Persist the draft on every answer/step change — a reload resumes here.
+  // Never while the plan is being built or after a successful finish.
+  useEffect(() => {
+    if (!restored.current) return
+    if (status === 'building' || status === 'done') return
+    const draft: OnboardingV2Draft = { step, goal, days, duration, place: place as V2Place | null, pref: pref as V2Pref | null, hasInjury, injuries }
+    saveDraftV2(draft, userId)
+  }, [step, goal, days, duration, place, pref, hasInjury, injuries, status, userId])
+
+  // Auto-dismiss a shown validation message once the step becomes complete.
+  useEffect(() => {
+    if (validation && canAdvance(step, answers)) setValidation(null)
+    // answers is derived each render; the primitive fields are the real deps.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [validation, step, goal, days, duration, place, pref])
+
+  const next = () => {
+    const v = validateStep(step, answers)
+    if (v) {
+      setValidation(v)
+      return
+    }
+    setValidation(null)
+    setStep((s) => Math.min(3, s + 1))
+  }
+  const back = () => {
+    setValidation(null)
+    if (step === 0) return onExit()
+    setStep((s) => s - 1)
+  }
   const toggleInjury = (v: string) =>
     setInjuries((list) => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v]))
 
   // Real completion: map v2 choices → Answers, then run v1's local generation
-  // pipeline. No Supabase write (skipped for safety). Never leaves the user
-  // stuck: on any failure we still enter the app via onComplete.
+  // pipeline. Visible failure: on any throw we surface the error screen with a
+  // retry and DO NOT enter the app. On success we clear the draft and enter.
   const finalize = () => {
-    if (finalizing) return
-    setFinalizing(true)
+    if (status === 'building') return
+    setStatus((s) => finalizeReduce(s, 'start'))
     void (async () => {
       try {
-        const answers = toAnswersFromV2({ goal, days, duration, place: place as V2Place | null, pref: pref as V2Pref | null, injuries: hasInjury ? injuries : [] })
-        const op = buildOnboardingProfile(answers)
+        // DEV-only preview seam to exercise the async states without a real
+        // failure. `hang` holds the loading state (for observing it); `error`
+        // throws so the failure/retry UI shows. Zero effect in production.
+        if (import.meta.env.DEV) {
+          const mode = readForceFail()
+          if (mode === 'hang') await new Promise(() => {})
+          if (mode === 'error') throw new Error('forced onboarding failure (dev preview)')
+        }
+        const built0 = toAnswersFromV2({ goal, days, duration, place: place as V2Place | null, pref: pref as V2Pref | null, injuries: hasInjury ? injuries : [] })
+        const op = buildOnboardingProfile(built0)
         saveOnboardingProfile(op)
         const built = await buildCustomizationFromOnboarding(op, customization)
         applyCustomization(built)
@@ -103,35 +174,41 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
         markCompleted(userId)
         track('onboarding_completed', { planMode: 'auto' })
         // Cloud parity — EXACTLY as v1 (PlanBuilder): best-effort, fire-and-forget,
-        // only when signed in. persistOnboardingToProfile never throws and merges
-        // into the user's own profile row (anon client, RLS; no schema change, no
-        // service_role). Local completion above is already the source of truth, so
-        // a cloud failure changes nothing for the user.
+        // only when signed in. persistOnboardingToProfile never throws.
         if (userId) void persistOnboardingToProfile(userId, op)
+        clearDraftV2(userId) // discard the resumable draft — setup is complete
+        setStatus((s) => finalizeReduce(s, 'ok'))
+        onComplete()
       } catch {
-        // Generation should never trap the user in setup — fall through to enter.
+        // Visible failure — surface retry, keep the user in setup (draft intact).
+        setStatus((s) => finalizeReduce(s, 'fail'))
       }
-      onComplete()
     })()
   }
 
-  // Ready screen — full-bleed confirmation.
+  // Ready screen (+ async overlays). Building/error overlay ON TOP so the CTA
+  // stays mounted with aria-busy during async work.
   if (step === 3) {
     return (
-      <ReadyScreen
-        lang={lang}
-        t={t}
-        goalLabel={goalEntry?.label ?? ''}
-        days={days}
-        duration={duration}
-        split={splitFor(days, lang)}
-        placeLabel={t.places.find((p) => p.value === place)?.label ?? ''}
-        finalizing={finalizing}
-        onEnter={finalize}
-      />
+      <>
+        <ReadyScreen
+          lang={lang}
+          t={t}
+          goalLabel={goalEntry?.label ?? ''}
+          days={days}
+          duration={duration}
+          split={splitFor(days, lang)}
+          placeLabel={t.places.find((p) => p.value === place)?.label ?? ''}
+          busy={status === 'building'}
+          onEnter={finalize}
+        />
+        {status === 'building' && <BuildingScreen lang={lang} t={t} />}
+        {status === 'error' && <ErrorScreen lang={lang} t={t} onRetry={finalize} onDismiss={() => setStatus('idle')} />}
+      </>
     )
   }
 
+  const stepTitleId = TITLE_ID[step]
   return (
     <div dir={lang === 'en' ? 'ltr' : 'rtl'} className="fixed inset-0 z-50 flex flex-col bg-page text-ink-900">
       {/* Header — back + segmented progress + step label. */}
@@ -155,27 +232,35 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
         </div>
       </header>
 
-      {/* Content */}
+      {/* Content — each step is a region named by its heading. */}
       <main className="flex-1 overflow-y-auto px-5 py-6">
         <div className="mx-auto w-full max-w-md">
-          {step === 0 && <GoalStep t={t} goal={goal} onPick={setGoal} />}
+          {step === 0 && <GoalStep t={t} titleId={stepTitleId} goal={goal} onPick={(g) => { setGoal(g); setValidation(null) }} />}
           {step === 1 && (
-            <TrainingStep t={t} lang={lang} days={days} duration={duration} onDays={setDays} onDuration={setDuration} goalLabel={goalEntry?.label ?? ''} split={splitFor(days, lang)} />
+            <TrainingStep t={t} titleId={stepTitleId} lang={lang} days={days} duration={duration} onDays={setDays} onDuration={setDuration} goalLabel={goalEntry?.label ?? ''} split={splitFor(days, lang)} />
           )}
           {step === 2 && (
-            <EquipmentStep t={t} place={place} pref={pref} hasInjury={hasInjury} injuries={injuries} onPlace={setPlace} onPref={setPref} onToggleInjury={() => setHasInjury((v) => !v)} onInjury={toggleInjury} />
+            <EquipmentStep t={t} titleId={stepTitleId} place={place} pref={pref} hasInjury={hasInjury} injuries={injuries} onPlace={(v) => { setPlace(v); setValidation(null) }} onPref={(v) => { setPref(v); setValidation(null) }} onToggleInjury={() => setHasInjury((v) => !v)} onInjury={toggleInjury} />
           )}
         </div>
       </main>
 
-      {/* Footer CTA */}
+      {/* Footer CTA + inline validation (announced). */}
       <footer className="shrink-0 border-t border-line bg-page/90 px-5 py-4 backdrop-blur" style={{ paddingBottom: 'max(1rem, var(--safe-bottom))' }}>
         <div className="mx-auto w-full max-w-md">
+          {/* High-contrast text + danger icon/border (not colour-only) so the
+              message stays AA-legible on both the light and dark token themes. */}
+          {validation && (
+            <p role="alert" className="mb-3 flex items-center gap-2 rounded-xl border border-danger/40 bg-danger/10 px-3 py-2.5 text-sm font-bold text-ink-900">
+              <Icon name="AlertCircle" className="h-4 w-4 shrink-0 text-danger" />
+              <span>{t.validation[validation]}</span>
+            </p>
+          )}
           <button
             type="button"
             onClick={next}
-            disabled={!canNext}
-            className="btn-primary w-full py-4 text-[1.1875rem] disabled:cursor-not-allowed disabled:opacity-40"
+            aria-disabled={!canAdvance(step, answers)}
+            className="btn-primary w-full py-4 text-[1.1875rem]"
           >
             {step === 2 ? t.equipment.cta : t.next}
           </button>
@@ -185,22 +270,44 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
   )
 }
 
+// DEV-only preview switch (see finalize). Guarded by import.meta.env.DEV at the
+// call site. 'hang' → stay on the loading screen; 'error' → surface the failure.
+function readForceFail(): 'off' | 'hang' | 'error' {
+  try {
+    if (typeof localStorage === 'undefined') return 'off'
+    const v = localStorage.getItem('qimmah:onboarding:force-fail')
+    return v === 'hang' ? 'hang' : v === '1' ? 'error' : 'off'
+  } catch {
+    return 'off'
+  }
+}
+
 type T = (typeof V2_ONBOARDING)['ar']
 
-function StepTitle({ title, subtitle }: { title: string; subtitle?: string }) {
+/** A choice group wrapped as a labelled fieldset (legend is sr-only). */
+function Group({ legend, children, className }: { legend: string; children: ReactNode; className?: string }) {
+  return (
+    <fieldset className={cn('m-0 min-w-0 border-0 p-0', className)}>
+      <legend className="sr-only">{legend}</legend>
+      {children}
+    </fieldset>
+  )
+}
+
+function StepTitle({ id, title, subtitle }: { id: string; title: string; subtitle?: string }) {
   return (
     <div className="animate-fade-up">
-      <h1 className="text-[1.7rem] font-black leading-tight tracking-tight text-ink-900">{title}</h1>
+      <h1 id={id} className="text-[1.7rem] font-black leading-tight tracking-tight text-ink-900">{title}</h1>
       {subtitle && <p className="mt-2 text-sm leading-relaxed text-ink-500">{subtitle}</p>}
     </div>
   )
 }
 
-function GoalStep({ t, goal, onPick }: { t: T; goal: V2GoalValue | null; onPick: (g: V2GoalValue) => void }) {
+function GoalStep({ t, titleId, goal, onPick }: { t: T; titleId: string; goal: V2GoalValue | null; onPick: (g: V2GoalValue) => void }) {
   return (
-    <div>
-      <StepTitle title={t.goal.title} />
-      <div className="mt-6 space-y-3">
+    <section aria-labelledby={titleId}>
+      <StepTitle id={titleId} title={t.goal.title} />
+      <Group legend={t.legends.goal} className="mt-6 block space-y-3">
         {V2_GOAL_MODEL.map((g) => {
           const on = goal === g.value
           return (
@@ -229,13 +336,13 @@ function GoalStep({ t, goal, onPick }: { t: T; goal: V2GoalValue | null; onPick:
             </button>
           )
         })}
-      </div>
+      </Group>
       <p className="mt-5 text-center text-xs font-medium text-ink-500">{t.goal.note}</p>
-    </div>
+    </section>
   )
 }
 
-function Segmented({ options, value, onChange, render }: { options: number[]; value: number; onChange: (v: number) => void; render: (v: number) => ReactNode }) {
+function Segmented({ options, value, onChange, render }: { options: readonly number[]; value: number; onChange: (v: number) => void; render: (v: number) => ReactNode }) {
   return (
     <div className="grid grid-cols-4 gap-2">
       {options.map((o) => {
@@ -259,21 +366,25 @@ function Segmented({ options, value, onChange, render }: { options: number[]; va
   )
 }
 
-function TrainingStep({ t, lang, days, duration, onDays, onDuration, goalLabel, split }: { t: T; lang: Lang; days: number; duration: number; onDays: (v: number) => void; onDuration: (v: number) => void; goalLabel: string; split: string }) {
+function TrainingStep({ t, titleId, lang, days, duration, onDays, onDuration, goalLabel, split }: { t: T; titleId: string; lang: Lang; days: number; duration: number; onDays: (v: number) => void; onDuration: (v: number) => void; goalLabel: string; split: string }) {
   return (
-    <div>
-      <StepTitle title={t.training.title} subtitle={t.training.subtitle} />
+    <section aria-labelledby={titleId}>
+      <StepTitle id={titleId} title={t.training.title} subtitle={t.training.subtitle} />
 
-      <p className="mt-6 mb-3 text-sm font-bold text-ink-700">{t.training.daysQ}</p>
-      <Segmented options={DAYS} value={days} onChange={onDays} render={(v) => <span className="text-xl font-black">{toAr(v, lang)}</span>} />
+      <Group legend={t.legends.days}>
+        <p className="mt-6 mb-3 text-sm font-bold text-ink-700">{t.training.daysQ}</p>
+        <Segmented options={DAYS} value={days} onChange={onDays} render={(v) => <span className="text-xl font-black">{toAr(v, lang)}</span>} />
+      </Group>
 
-      <p className="mt-6 mb-3 text-sm font-bold text-ink-700">{t.training.durationQ}</p>
-      <Segmented options={DURATIONS} value={duration} onChange={onDuration} render={(v) => (
-        <>
-          <span className="text-lg font-black">{toAr(v, lang)}</span>
-          <span className="text-[0.65rem] font-bold text-ink-500">{lang === 'en' ? 'min' : 'د'}</span>
-        </>
-      )} />
+      <Group legend={t.legends.duration}>
+        <p className="mt-6 mb-3 text-sm font-bold text-ink-700">{t.training.durationQ}</p>
+        <Segmented options={DURATIONS} value={duration} onChange={onDuration} render={(v) => (
+          <>
+            <span className="text-lg font-black">{toAr(v, lang)}</span>
+            <span className="text-[0.65rem] font-bold text-ink-500">{lang === 'en' ? 'min' : 'د'}</span>
+          </>
+        )} />
+      </Group>
 
       {/* Live plan summary — updates as choices change. */}
       <div className="mt-7 overflow-hidden rounded-2xl border border-primary/30 bg-primary/[0.06] p-4">
@@ -287,7 +398,7 @@ function TrainingStep({ t, lang, days, duration, onDays, onDuration, goalLabel, 
           {goalLabel && <SummaryRow icon="Target" text={`${t.training.suitsGoal} ${goalLabel}`} />}
         </div>
       </div>
-    </div>
+    </section>
   )
 }
 
@@ -325,20 +436,24 @@ function TileGroup({ options, value, onChange }: { options: readonly { value: st
   )
 }
 
-function EquipmentStep({ t, place, pref, hasInjury, injuries, onPlace, onPref, onToggleInjury, onInjury }: { t: T; place: string | null; pref: string | null; hasInjury: boolean; injuries: string[]; onPlace: (v: string) => void; onPref: (v: string) => void; onToggleInjury: () => void; onInjury: (v: string) => void }) {
+function EquipmentStep({ t, titleId, place, pref, hasInjury, injuries, onPlace, onPref, onToggleInjury, onInjury }: { t: T; titleId: string; place: string | null; pref: string | null; hasInjury: boolean; injuries: string[]; onPlace: (v: string) => void; onPref: (v: string) => void; onToggleInjury: () => void; onInjury: (v: string) => void }) {
   return (
-    <div>
-      <StepTitle title={t.equipment.title} subtitle={t.equipment.subtitle} />
+    <section aria-labelledby={titleId}>
+      <StepTitle id={titleId} title={t.equipment.title} subtitle={t.equipment.subtitle} />
 
-      <p className="mt-6 mb-3 text-sm font-bold text-ink-700">{t.equipment.placeQ}</p>
-      <TileGroup options={t.places} value={place} onChange={onPlace} />
+      <Group legend={t.legends.place}>
+        <p className="mt-6 mb-3 text-sm font-bold text-ink-700">{t.equipment.placeQ}</p>
+        <TileGroup options={t.places} value={place} onChange={onPlace} />
+      </Group>
 
-      <p className="mt-6 mb-3 text-sm font-bold text-ink-700">{t.equipment.prefQ}</p>
-      <TileGroup options={t.prefs} value={pref} onChange={onPref} />
+      <Group legend={t.legends.pref}>
+        <p className="mt-6 mb-3 text-sm font-bold text-ink-700">{t.equipment.prefQ}</p>
+        <TileGroup options={t.prefs} value={pref} onChange={onPref} />
+      </Group>
 
       {/* Injury — calm, coach-like, not medical. */}
       <div className="mt-7 rounded-2xl border border-line bg-surface p-4">
-        <button type="button" onClick={onToggleInjury} aria-pressed={hasInjury} className="flex w-full items-center justify-between gap-3 text-start">
+        <button type="button" onClick={onToggleInjury} role="switch" aria-checked={hasInjury} className="flex w-full items-center justify-between gap-3 text-start">
           <span className="min-w-0">
             <span className="block text-sm font-bold text-ink-900">{t.equipment.injuryQ}</span>
             <span className="mt-0.5 block text-xs text-ink-500">{t.equipment.injuryNote}</span>
@@ -348,7 +463,7 @@ function EquipmentStep({ t, place, pref, hasInjury, injuries, onPlace, onPref, o
           </span>
         </button>
         {hasInjury && (
-          <div className="mt-4 flex flex-wrap gap-2 border-t border-line pt-4">
+          <Group legend={t.legends.injuries} className="mt-4 flex flex-wrap gap-2 border-t border-line pt-4">
             {t.injuries.map((inj) => {
               const on = injuries.includes(inj.value)
               return (
@@ -363,16 +478,59 @@ function EquipmentStep({ t, place, pref, hasInjury, injuries, onPlace, onPref, o
                 </button>
               )
             })}
-          </div>
+          </Group>
         )}
+      </div>
+    </section>
+  )
+}
+
+/** Full-screen plan-assembly loading state (a bare button spinner is forbidden). */
+function BuildingScreen({ lang, t }: { lang: Lang; t: T }) {
+  return (
+    <div
+      dir={lang === 'en' ? 'ltr' : 'rtl'}
+      role="status"
+      aria-live="polite"
+      aria-busy="true"
+      className="fixed inset-0 z-[60] flex flex-col items-center justify-center gap-5 bg-page px-6 text-center text-ink-900"
+    >
+      <span className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-primary/25 border-t-primary" aria-hidden="true" />
+      <div>
+        <h1 className="text-2xl font-black tracking-tight">{t.building.title}</h1>
+        <p className="mt-2 text-sm text-ink-500">{t.building.subtitle}</p>
       </div>
     </div>
   )
 }
 
-function ReadyScreen({ lang, t, goalLabel, days, duration, split, placeLabel, finalizing, onEnter }: { lang: Lang; t: T; goalLabel: string; days: number; duration: number; split: string; placeLabel: string; finalizing: boolean; onEnter: () => void }) {
+/** Visible plan-generation failure with retry — never a silent drop into the app. */
+function ErrorScreen({ lang, t, onRetry, onDismiss }: { lang: Lang; t: T; onRetry: () => void; onDismiss: () => void }) {
   return (
-    <div dir={lang === 'en' ? 'ltr' : 'rtl'} className="fixed inset-0 z-50 flex flex-col overflow-hidden bg-page text-ink-900">
+    <div dir={lang === 'en' ? 'ltr' : 'rtl'} className="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-page px-6 text-center text-ink-900">
+      <div role="alert" className="flex flex-col items-center">
+        <span className="grid h-16 w-16 place-items-center rounded-2xl bg-danger/12 text-danger">
+          <Icon name="AlertTriangle" className="h-8 w-8" strokeWidth={2.25} />
+        </span>
+        <h1 className="mt-5 text-2xl font-black tracking-tight">{t.error.title}</h1>
+        <p className="mt-2 max-w-xs text-sm text-ink-500">{t.error.message}</p>
+      </div>
+      <div className="mt-7 w-full max-w-xs space-y-2.5">
+        <button type="button" onClick={onRetry} className="btn-primary w-full py-4 text-[1.1875rem] shadow-glow">
+          <Icon name="RotateCcw" className="h-5 w-5" />
+          {t.error.retry}
+        </button>
+        <button type="button" onClick={onDismiss} className="w-full rounded-2xl border border-line bg-surface py-3 text-sm font-bold text-ink-700">
+          {t.back}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function ReadyScreen({ lang, t, goalLabel, days, duration, split, placeLabel, busy, onEnter }: { lang: Lang; t: T; goalLabel: string; days: number; duration: number; split: string; placeLabel: string; busy: boolean; onEnter: () => void }) {
+  return (
+    <div dir={lang === 'en' ? 'ltr' : 'rtl'} aria-busy={busy} className="fixed inset-0 z-50 flex flex-col overflow-hidden bg-page text-ink-900">
       <div className="pointer-events-none absolute inset-0" aria-hidden="true">
         <div className="absolute start-1/2 top-[10%] h-[40%] w-[80%] -translate-x-1/2 rounded-full blur-[2px]" style={{ background: 'radial-gradient(closest-side, rgba(242,106,33,0.26), rgba(242,106,33,0) 72%)' }} />
       </div>
@@ -395,12 +553,8 @@ function ReadyScreen({ lang, t, goalLabel, days, duration, split, placeLabel, fi
 
         <div className="space-y-3">
           <p className="text-center text-[0.7rem] font-medium text-ink-400">{t.ready.previewNote}</p>
-          <button type="button" onClick={onEnter} disabled={finalizing} className="btn-primary w-full py-4 text-[1.1875rem] shadow-glow disabled:opacity-60">
-            {finalizing ? (
-              <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-white/40 border-t-white" aria-label={t.ready.enter} />
-            ) : (
-              t.ready.enter
-            )}
+          <button type="button" onClick={onEnter} disabled={busy} aria-busy={busy} className="btn-primary w-full py-4 text-[1.1875rem] shadow-glow disabled:opacity-60">
+            {t.ready.enter}
           </button>
         </div>
       </div>
