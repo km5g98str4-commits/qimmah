@@ -10,6 +10,11 @@ import { useCustomization } from '@/lib/customizationContext'
 // it correct after the app returns from the background, exactly like WorkoutMode.
 import { restIsFinished, restRemainingSec, type RestSnapshot } from '@/lib/activeSession'
 import { buildWorkoutV2Model, CATEGORY_LABEL, type ExCategory, type WorkoutV2Exercise } from '@/lib/workoutV2Model'
+// Fix-forward A: finished v2 workouts persist through the canonical path so
+// Progress/Today/Profile react (and sync auto-enqueues) — not just a local summary.
+import { persistFinishedSession } from '@/lib/finishWorkout'
+import { getDayStamp } from '@/lib/today'
+import { buildV2WorkoutSession } from '@/lib/workoutV2Persist'
 
 interface WorkoutV2Props {
   lang: Lang
@@ -244,11 +249,21 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
     const lastSet = active.setIndex >= rows.length - 1
     const lastEx = active.exIndex >= model.exercises.length - 1
     if (lastSet && lastEx) {
+      // Final state with the last set marked done (setRow below is async).
+      const finalActive = {
+        ...active,
+        rows: { ...active.rows, [ex.id]: rows.map((r, i) => (i === active.setIndex ? { ...r, done: true } : r)) },
+      }
       try {
         const totalSets = doneSets + 1
         const volume = Object.values(active.rows).flat().reduce((v, r) => v + (r.done ? r.weight * r.reps : 0), 0) + row.weight * row.reps
         localStorage.setItem(SUMMARY_KEY, JSON.stringify({ date: new Date().toISOString().slice(0, 10), title: model.session.title, totalSets, volume, durationMin: Math.round((Date.now() - active.startedAt) / 60000) }))
       } catch { /* ignore */ }
+      // Canonical persist — feeds historyStore (auto-enqueues sync) + exercise
+      // history, so Progress / Today / Profile all react to this v2 workout.
+      try {
+        persistFinishedSession(buildV2WorkoutSession(finalActive, model, { date: getDayStamp(), finishedAtMs: Date.now() }))
+      } catch { /* local summary already saved; never trap the user on completion */ }
       setRow({ done: true })
       setScreen('complete')
       return

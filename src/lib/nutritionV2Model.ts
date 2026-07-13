@@ -10,6 +10,10 @@ import type { Customization } from '@/lib/customization'
 import type { Lang } from '@/lib/appPreferences'
 import type { CalorieGoal } from '@/types/profile'
 import { getDayStamp } from '@/lib/today'
+// Fix-forward B: the v2 day log mirrors its totals into the CANONICAL daily
+// nutrition store (historyStore), which is the same store Today's تغذية pillar
+// reads (loggedFood) and which auto-enqueues sync. One real store, both ways.
+import { saveNutritionLog, saveWaterLog } from '@/lib/historyStore'
 
 export const NUTRITION_V2_KEY = 'qimmah:nutrition:v2'
 export type MealSlot = 'breakfast' | 'lunch' | 'dinner' | 'snack'
@@ -25,6 +29,26 @@ export interface LoggedFood {
   meal: MealSlot
 }
 interface DayLog { date: string; foods: LoggedFood[]; waterMl: number }
+
+/** Day food totals in the canonical `loggedFood` shape Today's pillar reads. */
+export function nutritionDayTotals(foods: LoggedFood[]): { calories: number; protein: number; carbs: number; fat: number } {
+  return {
+    calories: Math.round(foods.reduce((s, f) => s + (f.calories || 0), 0)),
+    protein: Math.round(foods.reduce((s, f) => s + (f.protein || 0), 0)),
+    carbs: Math.round(foods.reduce((s, f) => s + (f.carbs ?? 0), 0)),
+    fat: Math.round(foods.reduce((s, f) => s + (f.fat ?? 0), 0)),
+  }
+}
+
+/** Mirror the v2 day into the canonical daily nutrition store (best-effort). */
+function mirrorToCanonical(day: DayLog): void {
+  try {
+    saveNutritionLog(day.date, { loggedFood: nutritionDayTotals(day.foods) })
+    saveWaterLog(day.date, day.waterMl)
+  } catch {
+    /* canonical mirror is best-effort — the v2 store already persisted */
+  }
+}
 
 export function loadNutritionDay(): DayLog {
   const empty: DayLog = { date: getDayStamp(), foods: [], waterMl: 0 }
@@ -47,6 +71,7 @@ function persist(day: DayLog): DayLog {
   } catch {
     /* storage unavailable */
   }
+  mirrorToCanonical(day)
   return day
 }
 
