@@ -136,7 +136,7 @@ export function ScanFoodPanel({ lang, onResolved, onManualFallback, onClose }: S
 
           {status === 'looking-up' && (
             <div className="flex flex-col items-center gap-3 py-10">
-              <Icon name="RefreshCw" className="h-6 w-6 animate-spin text-primary-c" />
+              <Icon name="RefreshCw" className="h-6 w-6 animate-spin" style={{ color: '#12A594' }} />
               <p className="text-sm text-ink-500">{d.scanLookingUp}</p>
             </div>
           )}

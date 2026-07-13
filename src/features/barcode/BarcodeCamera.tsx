@@ -132,7 +132,12 @@ export function BarcodeCamera({ onDetected, onError, torchLabel }: BarcodeCamera
   return (
     <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-black">
       <video ref={videoRef} className="h-full w-full object-cover" muted playsInline />
-      <div className="pointer-events-none absolute inset-6 rounded-xl border-2 border-white/70" />
+      {/* v2.1 reticle — dimmed surround + teal scan frame (visual only; decode untouched). */}
+      <div className="pointer-events-none absolute inset-0 shadow-[inset_0_0_0_9999px_rgba(0,0,0,0.28)]" />
+      <div
+        className="pointer-events-none absolute inset-8 rounded-2xl border-2"
+        style={{ borderColor: '#12A594', boxShadow: '0 0 0 3px rgba(18,165,148,0.18)' }}
+      />
       {torchSupported && (
         <button
           type="button"
