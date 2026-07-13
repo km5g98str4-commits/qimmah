@@ -54,10 +54,12 @@
 الدخول تُزامَن إلى حسابك الخاص فقط ومحميّة بصلاحيات على مستوى الصف (RLS) بحيث لا يصل إليها إلا أنت. **لا نبيعها
 ولا نشاركها لأغراض تسويقية.**
 
-### 6. المزامنة والاستضافة
-عند تسجيل الدخول تُزامَن البيانات المذكورة في §4 إلى Supabase عبر اتصال مشفّر (HTTPS). موقع استضافة مشروع
-Supabase: **[يُؤكَّد من المالك]** — إن كان خارج المملكة، يلزم بيان النقل عبر الحدود بموجب نظام حماية البيانات
-الشخصية (PDPL).
+### 6. المزامنة والاستضافة وموقع التخزين
+عند تسجيل الدخول تُزامَن البيانات المذكورة في §4 إلى Supabase عبر اتصال مشفّر (HTTPS). تُخزَّن بياناتك على
+بنية Supabase التحتية في **اليابان** (منطقة `ap-northeast-1` — طوكيو). هذا يعني نقل بياناتك عبر الحدود من
+المملكة العربية السعودية إلى اليابان. تُحكَم هذه المعالجة تعاقديًّا عبر مُلحق معالجة البيانات (DPA) الخاص بـ
+Supabase. لا ندّعي وجود «قرار كفاية» أو اعتماد رسمي لأي وجهة؛ ويبقى الاعتماد النهائي لآلية النقل عبر الحدود
+بموجب نظام حماية البيانات الشخصية (PDPL) بيد المالك والمستشار القانوني قبل الإطلاق العام.
 
 ### 7. مدة الاحتفاظ
 نحتفظ ببياناتك ما دام حسابك قائمًا. البيانات المحلية تبقى على جهازك حتى تحذفها أو تحذف التطبيق. عند حذف الحساب
@@ -131,9 +133,13 @@ unlinked to your account, with your consent.
 We treat your health & fitness data with care: it stays local, and when signed in it syncs only to your own
 account, protected by row-level security so only you can access it. **We never sell or share it for marketing.**
 
-### 6. Sync & hosting
-When signed in, the data in §4 syncs to Supabase over an encrypted (HTTPS) connection. Supabase project hosting
-region: **[OWNER-TO-CONFIRM]** — if outside Saudi Arabia, a cross-border transfer notice is required under PDPL.
+### 6. Sync, hosting & storage location
+When signed in, the data in §4 syncs to Supabase over an encrypted (HTTPS) connection. Your data is stored on
+Supabase infrastructure in **Japan** (region `ap-northeast-1`, Tokyo). This means your data is transferred across
+borders from Saudi Arabia to Japan. This processing is safeguarded contractually through Supabase's Data
+Processing Addendum (DPA). We claim no adequacy decision or formal approval for any destination; final sign-off on
+the cross-border transfer mechanism under the Saudi Personal Data Protection Law (PDPL) rests with the owner and
+legal counsel before public launch.
 
 ### 7. Retention
 We keep your data while your account exists. Local data stays on your device until you delete it or the app.

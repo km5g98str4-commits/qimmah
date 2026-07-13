@@ -12,7 +12,7 @@
 | **R-3** | **Right to deletion** | `delete_own_account` RPC wipes auth user + 5 tables + full local wipe; no partial delete/false success (`authContext.tsx:374-397`, `resetQimmah.ts`). | **Compliant** | Confirm the `delete_own_account` function **is deployed** on the production Supabase project (client handles its absence safely, but deletion won’t occur). **OWNER-TO-CONFIRM.** |
 | **R-4** | **Right to object / restrict** | No in-app objection/restriction mechanism beyond deletion. | **Gap (minor)** | State in the Privacy Policy that requests go to `support@qimmah.app`; handle manually. |
 | **B-1** | **Breach notification (72h to SDAIA + affected)** | No documented breach-response process in the repo. | **Gap** | Add a one-page breach runbook: detection (Supabase logs/alerts), assessment, notify SDAIA + affected users within 72h, owner contact. |
-| **X-1** | **Cross-border transfer** | Data syncs to Supabase (`ledlypcyrtnzvjvhykwz.supabase.co`); project **region not in repo**. | **Confirm** | Confirm the Supabase region. If outside KSA, add a transfer notice + ensure PDPL transfer conditions (adequacy/safeguards) are met. |
+| **X-1** | **Cross-border transfer** | Data syncs to Supabase, region **`ap-northeast-1` (Tokyo, Japan)** — owner-confirmed. | **Confirmed (KSA → Japan)** | Cross-border transfer **CONFIRMED (KSA → Japan)**. Disclosure added to Privacy Policy §6 (AR + EN) and DATA-INVENTORY. Contractual safeguards via Supabase DPA. **Final PDPL transfer-mechanism sign-off remains OWNER+LEGAL before public launch (beta OK with disclosure).** No adequacy status claimed. |
 | **M-1** | **Minors** | No eligibility age gate; age field accepts 12–90 for calorie math only (`validation.ts:6`). | **Gap** | Set an explicit eligibility age in Terms §3 and (if under the PDPL minor threshold) a parental-consent step; enforce in onboarding if required. |
 | **G-1** | **Controller identity / record of processing** | No named controller entity in the repo (support email `support@qimmah.app` exists). | **Gap** | Name **[OWNER-ENTITY]** (legal entity + address) in Privacy Policy & Terms; keep an internal record-of-processing for the categories in `DATA-INVENTORY.md`. |
 | **S-1** | **Security of processing** | HTTPS transport; server-side auth; RLS referenced by the self-delete path (rows keyed by `user_id`); no secrets in client (public anon key only). | **Compliant (verify)** | Confirm RLS policies are actually enabled on all 5 user tables server-side. **OWNER-TO-CONFIRM.** |
@@ -35,7 +35,7 @@ review” header. Owner’s counsel should confirm against the official SDAIA re
 
 ## Priority order for the owner
 1. **R-3 / R-1 confirm** — verify `delete_own_account` deployed; document/implement access-export. (Data-subject rights are the highest App-review + PDPL risk.)
-2. **X-1** — confirm Supabase region (drives the cross-border notice).
+2. **X-1** — region confirmed `ap-northeast-1` (Japan); disclosure shipped. Remaining: OWNER+LEGAL sign-off on the PDPL transfer mechanism (SCCs/safeguards) before public launch — beta OK with the disclosure.
 3. **C-2 / M-1 / G-1** — health-data consent, eligibility age, named controller.
 4. **B-1** — breach runbook.
 5. **C-1** — analytics opt-in (only if an endpoint is configured).
