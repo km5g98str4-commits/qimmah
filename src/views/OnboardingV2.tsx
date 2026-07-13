@@ -188,7 +188,7 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
 
   const stepTitleId = TITLE_ID[step]
   return (
-    <div dir={lang === 'en' ? 'ltr' : 'rtl'} className="fixed inset-0 z-50 flex flex-col bg-page text-ink-900">
+    <div dir={lang === 'en' ? 'ltr' : 'rtl'} className="v2-surface-dark fixed inset-0 z-50 flex flex-col bg-page text-ink-900">
       {/* Header — back + segmented progress + step label. */}
       <header className="shrink-0 px-5" style={{ paddingTop: 'max(1rem, var(--safe-top))' }}>
         <div className="mx-auto flex w-full max-w-md items-center justify-between gap-3">
@@ -205,14 +205,14 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
         </div>
         <div className="mx-auto mt-3 flex w-full max-w-md gap-1.5">
           {[0, 1, 2].map((i) => (
-            <span key={i} className={cn('h-1.5 flex-1 rounded-full transition-colors', i <= step ? 'bg-primary' : 'bg-line')} />
+            <span key={i} className={cn('h-1.5 flex-1 rounded-full transition-colors', i <= step ? 'v2-bg-blue' : 'bg-line')} />
           ))}
         </div>
       </header>
 
       {/* Content — each step is a region named by its heading. */}
       <main className="flex-1 overflow-y-auto px-5 py-6">
-        <div className="mx-auto w-full max-w-md">
+        <div className="v2-screen-enter mx-auto w-full max-w-md">
           {step === 0 && <GoalStep t={t} titleId={stepTitleId} goal={goal} onPick={(g) => { setGoal(g); setValidation(null) }} />}
           {step === 1 && (
             <TrainingStep t={t} titleId={stepTitleId} lang={lang} days={days} duration={duration} onDays={setDays} onDuration={setDuration} goalLabel={goalEntry?.label ?? ''} split={splitFor(days, lang)} />
@@ -229,8 +229,8 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
           {/* High-contrast text + danger icon/border (not colour-only) so the
               message stays AA-legible on both the light and dark token themes. */}
           {validation && (
-            <p role="alert" className="mb-3 flex items-center gap-2 rounded-xl border border-danger/40 bg-danger/10 px-3 py-2.5 text-sm font-bold text-ink-900">
-              <Icon name="AlertCircle" className="h-4 w-4 shrink-0 text-danger" />
+            <p role="alert" className="v2-error-panel mb-3 flex items-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-bold text-ink-900">
+              <Icon name="AlertCircle" className="v2-error-icon h-4 w-4 shrink-0" />
               <span>{t.validation[validation]}</span>
             </p>
           )}
@@ -295,20 +295,20 @@ function GoalStep({ t, titleId, goal, onPick }: { t: T; titleId: string; goal: V
               onClick={() => onPick(g.value)}
               aria-pressed={on}
               className={cn(
-                'relative flex w-full items-center gap-4 overflow-hidden rounded-2xl border p-4 text-start transition-all active:scale-[0.99]',
-                on ? 'border-primary bg-primary/10 shadow-glow' : 'border-line bg-surface hover:border-ink-400/40',
+                'v2-pressable relative flex w-full items-center gap-4 overflow-hidden rounded-2xl border p-4 text-start',
+                on ? 'v2-choice-selected' : 'border-line bg-surface hover:border-ink-400/40',
               )}
             >
               {/* Ember accent bar on selection. */}
-              <span className={cn('absolute inset-y-0 start-0 w-1 transition-colors', on ? 'bg-primary' : 'bg-transparent')} />
-              <span className={cn('grid h-12 w-12 shrink-0 place-items-center rounded-xl transition-colors', on ? 'bg-primary text-white' : 'bg-beige text-ink-500')}>
+              <span className={cn('absolute inset-y-0 start-0 w-1 transition-colors', on ? 'v2-choice-accent' : 'bg-transparent')} />
+              <span className={cn('grid h-12 w-12 shrink-0 place-items-center rounded-xl transition-colors', on ? 'v2-choice-icon-selected' : 'bg-beige text-ink-500')}>
                 <Icon name={GOAL_ICON[g.value]} className="h-6 w-6" strokeWidth={2.25} />
               </span>
               <span className="min-w-0 flex-1">
                 <span className="block text-lg font-black text-ink-900">{g.label}</span>
                 <span className="mt-0.5 block text-[0.8rem] leading-snug text-ink-500">{g.description}</span>
               </span>
-              <span className={cn('grid h-6 w-6 shrink-0 place-items-center rounded-full border-2 transition-colors', on ? 'border-primary bg-primary text-white' : 'border-line text-transparent')}>
+              <span className={cn('grid h-6 w-6 shrink-0 place-items-center rounded-full border-2 transition-colors', on ? 'v2-choice-icon-selected border-[color:var(--v2-blue)]' : 'border-line text-transparent')}>
                 <Icon name="Check" className="h-3.5 w-3.5" strokeWidth={3} />
               </span>
             </button>
@@ -332,8 +332,8 @@ function Segmented({ options, value, onChange, render }: { options: readonly num
             onClick={() => onChange(o)}
             aria-pressed={on}
             className={cn(
-              'flex flex-col items-center justify-center gap-0.5 rounded-xl border py-3 text-center transition-all active:scale-[0.97]',
-              on ? 'border-primary bg-primary/10 text-ink-900' : 'border-line bg-surface text-ink-700 hover:border-ink-400/40',
+              'v2-pressable flex flex-col items-center justify-center gap-0.5 rounded-xl border py-3 text-center',
+              on ? 'v2-choice-selected text-ink-900' : 'border-line bg-surface text-ink-700 hover:border-ink-400/40',
             )}
           >
             {render(o)}
@@ -365,10 +365,10 @@ function TrainingStep({ t, titleId, lang, days, duration, onDays, onDuration, go
       </Group>
 
       {/* Live plan summary — updates as choices change. */}
-      <div className="mt-7 overflow-hidden rounded-2xl border border-primary/30 bg-primary/[0.06] p-4">
+      <div className="v2-info-panel mt-7 overflow-hidden rounded-2xl border p-4">
         <div className="flex items-center gap-2">
-          <Icon name="Sparkles" className="h-4 w-4 text-primary" />
-          <span className="text-sm font-black text-primary">{t.training.summaryTitle}</span>
+          <Icon name="Sparkles" className="h-4 w-4 text-[color:var(--v2-blue)]" />
+          <span className="text-sm font-black text-ink-900">{t.training.summaryTitle}</span>
         </div>
         <div className="mt-3 space-y-2 text-sm">
           <SummaryRow icon="Dumbbell" text={`${lang === 'en' ? `${days}-day split` : `تقسيمة ${toAr(days, lang)} ${t.training.daysUnit}`} · ${split}`} />
@@ -401,11 +401,11 @@ function TileGroup({ options, value, onChange }: { options: readonly { value: st
             onClick={() => onChange(o.value)}
             aria-pressed={on}
             className={cn(
-              'flex min-h-[5rem] flex-col items-center justify-center gap-1.5 rounded-2xl border px-2 py-3 text-center transition-all active:scale-[0.97]',
-              on ? 'border-primary bg-primary/10' : 'border-line bg-surface hover:border-ink-400/40',
+              'v2-pressable flex min-h-[5rem] flex-col items-center justify-center gap-1.5 rounded-2xl border px-2 py-3 text-center',
+              on ? 'v2-choice-selected' : 'border-line bg-surface hover:border-ink-400/40',
             )}
           >
-            <Icon name={o.icon} className={cn('h-6 w-6', on ? 'text-primary' : 'text-ink-500')} strokeWidth={2.25} />
+            <Icon name={o.icon} className={cn('h-6 w-6', on ? 'text-[color:var(--v2-blue)]' : 'text-ink-500')} strokeWidth={2.25} />
             <span className={cn('text-xs font-bold', on ? 'text-ink-900' : 'text-ink-700')}>{o.label}</span>
           </button>
         )
@@ -436,7 +436,7 @@ function EquipmentStep({ t, titleId, place, pref, hasInjury, injuries, onPlace, 
             <span className="block text-sm font-bold text-ink-900">{t.equipment.injuryQ}</span>
             <span className="mt-0.5 block text-xs text-ink-500">{t.equipment.injuryNote}</span>
           </span>
-          <span className={cn('relative h-7 w-12 shrink-0 rounded-full transition-colors', hasInjury ? 'bg-primary' : 'bg-line')}>
+          <span className={cn('relative h-7 w-12 shrink-0 rounded-full transition-colors', hasInjury ? 'v2-bg-blue' : 'bg-line')}>
             <span className={cn('absolute top-1 h-5 w-5 rounded-full bg-white transition-all', hasInjury ? 'start-1' : 'end-1')} />
           </span>
         </button>
@@ -450,7 +450,7 @@ function EquipmentStep({ t, titleId, place, pref, hasInjury, injuries, onPlace, 
                   type="button"
                   onClick={() => onInjury(inj.value)}
                   aria-pressed={on}
-                  className={cn('rounded-full border px-3.5 py-2 text-sm font-semibold transition-colors', on ? 'border-primary bg-primary/15 text-ink-900' : 'border-line bg-beige text-ink-700')}
+                  className={cn('v2-pressable rounded-full border px-3.5 py-2 text-sm font-semibold', on ? 'v2-choice-selected text-ink-900' : 'border-line bg-beige text-ink-700')}
                 >
                   {inj.label}
                 </button>
@@ -471,7 +471,7 @@ function BuildingScreen({ lang, t }: { lang: Lang; t: T }) {
       role="status"
       aria-live="polite"
       aria-busy="true"
-      className="fixed inset-0 z-[60] flex flex-col items-center justify-center gap-5 bg-page px-6 text-center text-ink-900"
+      className="v2-surface-dark fixed inset-0 z-[60] flex flex-col items-center justify-center gap-5 bg-page px-6 text-center text-ink-900"
     >
       <span className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-primary/25 border-t-primary" aria-hidden="true" />
       <div>
@@ -485,9 +485,9 @@ function BuildingScreen({ lang, t }: { lang: Lang; t: T }) {
 /** Visible plan-generation failure with retry — never a silent drop into the app. */
 function ErrorScreen({ lang, t, onRetry, onDismiss }: { lang: Lang; t: T; onRetry: () => void; onDismiss: () => void }) {
   return (
-    <div dir={lang === 'en' ? 'ltr' : 'rtl'} className="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-page px-6 text-center text-ink-900">
+    <div dir={lang === 'en' ? 'ltr' : 'rtl'} className="v2-surface-dark fixed inset-0 z-[60] flex flex-col items-center justify-center bg-page px-6 text-center text-ink-900">
       <div role="alert" className="flex flex-col items-center">
-        <span className="grid h-16 w-16 place-items-center rounded-2xl bg-danger/12 text-danger">
+        <span className="v2-error-panel v2-error-icon grid h-16 w-16 place-items-center rounded-2xl border">
           <Icon name="AlertTriangle" className="h-8 w-8" strokeWidth={2.25} />
         </span>
         <h1 className="mt-5 text-2xl font-black tracking-tight">{t.error.title}</h1>
@@ -508,16 +508,16 @@ function ErrorScreen({ lang, t, onRetry, onDismiss }: { lang: Lang; t: T; onRetr
 
 function ReadyScreen({ lang, t, goalLabel, days, duration, split, placeLabel, busy, onEnter }: { lang: Lang; t: T; goalLabel: string; days: number; duration: number; split: string; placeLabel: string; busy: boolean; onEnter: () => void }) {
   return (
-    <div dir={lang === 'en' ? 'ltr' : 'rtl'} aria-busy={busy} className="fixed inset-0 z-50 flex flex-col overflow-hidden bg-page text-ink-900">
+    <div dir={lang === 'en' ? 'ltr' : 'rtl'} aria-busy={busy} className="v2-surface-light fixed inset-0 z-50 flex flex-col overflow-hidden bg-page text-ink-900">
       <div className="pointer-events-none absolute inset-0" aria-hidden="true">
-        <div className="absolute start-1/2 top-[10%] h-[40%] w-[80%] -translate-x-1/2 rounded-full blur-[2px]" style={{ background: 'radial-gradient(closest-side, rgba(242,106,33,0.26), rgba(242,106,33,0) 72%)' }} />
+        <div className="v2-glow-ember absolute start-1/2 top-[10%] h-[40%] w-[80%] -translate-x-1/2 rounded-full blur-[2px]" />
       </div>
-      <div className="app-container relative z-10 flex flex-1 flex-col px-6" style={{ paddingTop: 'max(1rem, var(--safe-top))', paddingBottom: 'max(1.75rem, var(--safe-bottom))' }}>
+      <div className="app-container v2-screen-enter relative z-10 flex flex-1 flex-col px-6" style={{ paddingTop: 'max(1rem, var(--safe-top))', paddingBottom: 'max(1.75rem, var(--safe-bottom))' }}>
         <div className="flex flex-1 flex-col items-center justify-center text-center">
-          <span className="grid h-16 w-16 animate-pop-in place-items-center rounded-2xl bg-primary text-white shadow-glow">
+          <span className="v2-earned-moment v2-bg-green grid h-16 w-16 place-items-center rounded-2xl text-white">
             <Icon name="Check" className="h-8 w-8" strokeWidth={3} />
           </span>
-          <p className="mt-5 text-xs font-black uppercase tracking-widest text-primary">{t.ready.eyebrow}</p>
+          <p className="v2-text-green mt-5 text-xs font-black uppercase tracking-widest">{t.ready.eyebrow}</p>
           <h1 className="mt-2 text-[2rem] font-black tracking-tight text-ink-900">{t.ready.title}</h1>
           <p className="mt-2 max-w-xs text-sm text-ink-500">{t.ready.subtitle}</p>
 

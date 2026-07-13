@@ -16,7 +16,7 @@ const TONE_VAR: Record<TodayCard['tone'], string> = {
   train: 'var(--v2-pillar-train)',
   nutrition: 'var(--v2-pillar-nutrition)',
   move: 'var(--v2-pillar-move)',
-  recover: 'var(--v2-pillar-nutrition)',
+  recover: 'var(--v2-pillar-recover)',
   progress: 'var(--v2-pillar-move)',
 }
 
@@ -34,28 +34,24 @@ export function TodayV2({ lang, onNavigate }: TodayV2Props) {
   const go = (dest: AppRoute | null) => dest && onNavigate(dest)
 
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
-      <div className="mx-auto w-full max-w-md space-y-5 animate-fade-up">
+    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
+      <div className="v2-screen-enter mx-auto w-full max-w-md space-y-5">
         {/* Header — من أنا وأين أنا (avatar + greeting rewritten by state/time). */}
         <header className="flex items-center justify-between gap-3 pt-1">
           <div className="min-w-0">
             <p className="text-xs font-medium text-ink-500">{model.dateLabel}</p>
             <h1 className="mt-0.5 truncate text-2xl font-black tracking-tight">{model.greeting}</h1>
           </div>
-          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-primary/12 text-lg font-black text-primary" aria-hidden="true">
+          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-beige text-lg font-black text-ink-700" aria-hidden="true">
             {model.avatarInitial ?? <Icon name="User" className="h-5 w-5" />}
           </span>
         </header>
 
         {/* Hero — الخطوة الواحدة (owns the top third). */}
         <section className="relative overflow-hidden rounded-3xl border border-line bg-surface p-5 shadow-card">
-          <div
-            className="pointer-events-none absolute -top-8 end-[-10%] h-32 w-40 rounded-full opacity-70"
-            style={{ background: `radial-gradient(closest-side, ${model.hero.ctaTone === 'green' ? 'rgba(62,158,107,0.22)' : 'rgba(242,106,33,0.22)'}, transparent)` }}
-            aria-hidden="true"
-          />
+          <div className={cn('pointer-events-none absolute -top-8 end-[-10%] h-32 w-40 rounded-full opacity-70', model.hero.ctaTone === 'green' ? 'v2-glow-green' : 'v2-glow-ember')} aria-hidden="true" />
           <div className="relative">
-            <p className={cn('flex items-center gap-1.5 text-xs font-black uppercase tracking-wider', model.hero.eyebrowDone ? 'text-[color:var(--color-success)]' : 'text-primary')}>
+            <p className={cn('flex items-center gap-1.5 text-xs font-black uppercase tracking-wider', model.hero.eyebrowDone ? 'v2-text-green' : 'text-primary')}>
               {model.hero.eyebrowDone ? (
                 <Icon name="Check" className="h-4 w-4" strokeWidth={3} />
               ) : (
@@ -99,7 +95,7 @@ export function TodayV2({ lang, onNavigate }: TodayV2Props) {
                 key={i}
                 type="button"
                 onClick={() => go(c.destination)}
-                className="flex w-full items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3 text-start transition-colors hover:border-primary/40"
+                className="v2-pressable flex w-full items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3 text-start hover:border-[color:var(--v2-blue)]"
               >
                 <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl" style={{ backgroundColor: `color-mix(in srgb, ${TONE_VAR[c.tone]} 14%, transparent)`, color: TONE_VAR[c.tone] }}>
                   <Icon name={c.icon} className="h-[1.15rem] w-[1.15rem]" />
@@ -132,7 +128,7 @@ export function TodayV2({ lang, onNavigate }: TodayV2Props) {
  */
 function PillarRing({ pillar, lang }: { pillar: TodayPillar; lang: Lang }) {
   const ar = lang !== 'en'
-  const color = `var(--v2-pillar-${pillar.key})`
+  const color = pillar.state === 'done' ? 'var(--v2-green)' : `var(--v2-pillar-${pillar.key})`
   const r = 19
   const c = 2 * Math.PI * r
   const off = c - (pillar.percent / 100) * c
@@ -164,7 +160,7 @@ function PillarRing({ pillar, lang }: { pillar: TodayPillar; lang: Lang }) {
             strokeLinecap="round"
             strokeDasharray={c}
             strokeDashoffset={off}
-            className="motion-safe:transition-[stroke-dashoffset] motion-safe:duration-700 motion-safe:ease-out"
+            className="v2-fill"
           />
         </svg>
         <span className="text-[0.72rem] font-black tabular-nums" style={{ color }}>

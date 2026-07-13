@@ -35,7 +35,7 @@ class SetupErrorBoundary extends Component<{ onEscape: () => void; children: Rea
         <p className="mt-3 max-w-sm text-sm text-night-300">
           {en
             ? "No problem — you can finish setup later from Settings. Let's get you into the app."
-            : 'ما فيه مشكلة — تقدر تكمل الإعداد لاحقًا من الإعدادات. نوصلك للتطبيق الحين.'}
+            : 'لا بأس — يمكنك إكمال الإعداد لاحقًا من الإعدادات. سننقلك إلى التطبيق الآن.'}
         </p>
         <button
           type="button"

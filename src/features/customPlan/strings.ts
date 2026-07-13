@@ -87,7 +87,7 @@ export interface CustomPlanStrings {
 
 const ar: CustomPlanStrings = {
   choiceEyebrow: 'جدول التمرين',
-  choiceTitle: 'كيف تبي جدول تمرينك؟',
+  choiceTitle: 'كيف تريد جدول تمرينك؟',
   choiceHint: 'اختر الطريقة اللي تناسبك — تقدر تغيّرها في أي وقت لاحقًا.',
   autoTitle: 'جدول جاهز حسب هدفك',
   autoDesc: 'نولّد لك خطة متكاملة من بياناتك وهدفك — جاهزة على طول.',
@@ -106,7 +106,7 @@ const ar: CustomPlanStrings = {
   daysUnit: 'أيام',
 
   buildTitle: 'ابنِ أيامك',
-  buildHint: 'سمِّ كل يوم، أضف تمارينه، ورتّبها بالترتيب اللي تبيه.',
+  buildHint: 'سمِّ كل يوم، وأضف تمارينه، ورتّبها كما تريد.',
   dayNameLabel: 'اسم اليوم',
   dayNamePlaceholder: 'مثال: صدر + ترايسبس',
   addExercise: 'أضف تمرين',

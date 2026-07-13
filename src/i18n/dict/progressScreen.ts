@@ -121,7 +121,7 @@ const ar: ProgressScreenStrings = {
 
   coverageEyebrow: 'تغطية العضلات',
   coverageTitle: 'عضلاتك هذا الأسبوع',
-  coverageDesc: 'وش تمرّنت، وش تعافى، ووش ناقصك — توزيع أسبوعي واضح.',
+  coverageDesc: 'ما تمرّنت عليه، وما تعافى، وما يحتاج عملًا — توزيع أسبوعي واضح.',
   pillComplete: 'مكتملة',
   pillUndertrained: 'ناقصة',
   pillRest: 'راحة',

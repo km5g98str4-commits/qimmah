@@ -5,9 +5,8 @@
 // that need a token in JS (e.g. a canvas chart color, an inline style) stay
 // decoupled from raw values and follow the approved-token drop-in seam.
 //
-// ⚠️ The current resolved values are TEMPORARY (inherited from the existing dark
-// build) and are NOT an approved visual direction — see
-// docs/design/DESIGN-SOURCE-OF-TRUTH.md.
+// v2 values are the approved Momentum roles sampled from the v2.1 PDF. v1
+// continues to resolve through its legacy aliases unless the v2 seam is active.
 
 /** Semantic token names available as CSS custom properties (`var(--…)`). */
 export const tokens = {
@@ -50,10 +49,7 @@ export const tokens = {
     safeTop: '--safe-area-top',
     safeBottom: '--safe-area-bottom',
   },
-  /* Qimmah Design v2.1 (SEAM ONLY) — names for the approved-direction aliases
-     defined in tokens.css. Active only under `[data-design="v2"]`; values are
-     PENDING the Momentum hex drop (currently alias the v1 source). Present so
-     future slices (e.g. charts reading data colors) reference one contract. */
+  /* Qimmah Design v2.1 — approved Momentum semantic roles. */
   v2: {
     brandPrimary: '--v2-brand-primary',
     actionPrimary: '--v2-action-primary',
@@ -64,6 +60,29 @@ export const tokens = {
     data2: '--v2-data-2',
     data3: '--v2-data-3',
     data4: '--v2-data-4',
+    ember: '--v2-ember',
+    emberText: '--v2-ember-text',
+    blue: '--v2-blue',
+    blueText: '--v2-blue-text',
+    green: '--v2-green',
+    greenText: '--v2-green-text',
+    teal: '--v2-teal',
+    tealText: '--v2-teal-text',
+    error: '--v2-error',
+    cream: '--v2-cream',
+    paper: '--v2-paper',
+    paperMuted: '--v2-paper-muted',
+    border: '--v2-border',
+    inkStrong: '--v2-ink-strong',
+    ink: '--v2-ink',
+    inkMuted: '--v2-ink-muted',
+    inkFaint: '--v2-ink-faint',
+    darkCanvas: '--v2-dark-canvas',
+    darkPaper: '--v2-dark-paper',
+    darkPaperActive: '--v2-dark-paper-active',
+    darkBorder: '--v2-dark-border',
+    darkInkStrong: '--v2-dark-ink-strong',
+    darkInkMuted: '--v2-dark-ink-muted',
   },
 } as const
 

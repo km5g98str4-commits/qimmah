@@ -27,24 +27,22 @@ const REST_DEFAULT = 90
 const REST_ADD = 15
 
 /**
- * Dedicated DARK "focus mode" palette for the active workout — the v2.1 crown
- * jewel (PDF §07). Values are explicit and INDEPENDENT of the app theme tokens:
- * the approved v2.1 app surface is light, but the active workout is a deliberate
- * dark focus moment. (Today's tokens still alias the legacy dark build, so "dark"
- * can't be derived from them yet either.) Ember = the single primary action per
- * screen; green = success/completion moments.
+ * Dedicated DARK focus roles for the active workout — the v2.1 crown jewel.
+ * Values resolve through tokens.css: Ember = one primary action, blue = progress,
+ * teal = recovery and green = completion.
  */
 const FOCUS = {
-  bg: '#141110',
-  card: '#1F1B18',
-  cardActive: '#2A2420',
-  line: 'rgba(255,255,255,0.09)',
-  ink: '#F7F4F0',
-  inkMuted: '#A8A19A',
-  inkFaint: '#8B847C',
-  ember: '#F26A21',
-  emberInk: '#FFFFFF',
-  success: '#1F9D57',
+  card: 'var(--v2-dark-paper)',
+  cardActive: 'var(--v2-dark-paper-active)',
+  line: 'var(--v2-dark-border)',
+  ink: 'var(--v2-dark-ink-strong)',
+  inkMuted: 'var(--v2-dark-ink-muted)',
+  inkFaint: 'var(--v2-dark-ink-faint)',
+  ember: 'var(--v2-ember)',
+  onColor: 'var(--v2-on-color)',
+  blue: 'var(--v2-blue)',
+  teal: 'var(--v2-teal)',
+  success: 'var(--v2-green)',
 } as const
 
 type Screen = 'plan' | 'detail' | 'active' | 'complete'
@@ -287,7 +285,7 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   const skipRest = () => setActive((prev) => (prev ? { ...prev, rest: null } : prev))
 
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="fixed inset-0 z-[60] flex flex-col" style={{ background: FOCUS.bg, color: FOCUS.ink, paddingTop: 'max(0.75rem, var(--safe-top))', paddingBottom: 'var(--safe-bottom)' }}>
+    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-dark v2-screen-enter fixed inset-0 z-[60] flex flex-col bg-page text-ink-900" style={{ paddingTop: 'max(0.75rem, var(--safe-top))', paddingBottom: 'var(--safe-bottom)' }}>
       <header className="flex items-center justify-between gap-3 px-5 py-2">
         <button type="button" onClick={() => { clearActive(); onNavigate('dashboard') }} aria-label={t('إغلاق التمرين', 'Close workout')} className="grid h-10 w-10 place-items-center rounded-xl" style={{ background: FOCUS.card, border: `1px solid ${FOCUS.line}`, color: FOCUS.ink }}>
           <Icon name="X" className="h-5 w-5" />
@@ -297,7 +295,7 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
       </header>
       {/* session progress (completed sets) */}
       <div className="mx-5 mb-1 h-1.5 overflow-hidden rounded-full" style={{ background: FOCUS.line }}>
-        <div className="h-full rounded-full transition-all" style={{ width: `${totalPlannedSets ? (doneSets / totalPlannedSets) * 100 : 0}%`, background: FOCUS.ember }} />
+        <div className="v2-fill h-full rounded-full" style={{ width: `${totalPlannedSets ? (doneSets / totalPlannedSets) * 100 : 0}%`, background: FOCUS.blue }} />
       </div>
 
       {resting ? (
@@ -312,7 +310,7 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
             {rows.map((r, i) => {
               const isCurrent = i === active.setIndex
               return (
-                <div key={i} className="flex items-center justify-between rounded-2xl px-4 py-3" style={{ background: isCurrent ? FOCUS.cardActive : FOCUS.card, border: `1px solid ${isCurrent ? FOCUS.ember : FOCUS.line}` }}>
+                <div key={i} className="flex items-center justify-between rounded-2xl px-4 py-3" style={{ background: isCurrent ? FOCUS.cardActive : FOCUS.card, border: `1px solid ${isCurrent ? FOCUS.blue : FOCUS.line}` }}>
                   <span className="text-sm font-bold" style={{ color: isCurrent ? FOCUS.ink : FOCUS.inkMuted }}>{t(`المجموعة ${toAr(i + 1, lang)}`, `Set ${i + 1}`)}</span>
                   <span className="flex items-center gap-2">
                     <span className="text-lg font-black tabular-nums" style={{ color: r.done ? FOCUS.success : FOCUS.ink }}>{toAr(r.weight, lang)}<span className="text-xs font-bold" style={{ color: FOCUS.inkFaint }}> {t('كجم', 'kg')} </span>×<span className="text-xs font-bold" style={{ color: FOCUS.inkFaint }}> </span>{toAr(r.reps, lang)}</span>
@@ -330,7 +328,7 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
           </div>
 
           {/* single ember action */}
-          <button type="button" onClick={finishSet} className="mt-6 w-full rounded-2xl py-4 text-[1.1875rem] font-black" style={{ background: FOCUS.ember, color: FOCUS.emberInk }}>{t('أنهِ المجموعة', 'Complete set')}</button>
+          <button type="button" onClick={finishSet} className="v2-pressable mt-6 w-full rounded-2xl py-4 text-[1.1875rem] font-black" style={{ background: FOCUS.ember, color: FOCUS.onColor }}>{t('أنهِ المجموعة', 'Complete set')}</button>
         </main>
       )}
     </div>
@@ -344,7 +342,7 @@ function Stepper({ label, value, step, onChange, lang }: { label: string; value:
       <div className="mt-2 flex items-center justify-between gap-2">
         <button type="button" onClick={() => onChange(value - step)} aria-label={label + ' −'} className="grid h-12 w-12 shrink-0 place-items-center rounded-xl" style={{ background: FOCUS.cardActive, border: `1px solid ${FOCUS.line}`, color: FOCUS.ink }}><Icon name="Minus" className="h-6 w-6" /></button>
         <span className="text-3xl font-black tabular-nums" style={{ color: FOCUS.ink }}>{toAr(value, lang)}</span>
-        <button type="button" onClick={() => onChange(value + step)} aria-label={label + ' +'} className="grid h-12 w-12 shrink-0 place-items-center rounded-xl" style={{ background: FOCUS.ember, color: FOCUS.emberInk }}><Icon name="Plus" className="h-6 w-6" /></button>
+        <button type="button" onClick={() => onChange(value + step)} aria-label={label + ' +'} className="v2-pressable grid h-12 w-12 shrink-0 place-items-center rounded-xl" style={{ background: FOCUS.cardActive, border: `1px solid ${FOCUS.line}`, color: FOCUS.ink }}><Icon name="Plus" className="h-6 w-6" /></button>
       </div>
     </div>
   )
@@ -356,18 +354,18 @@ function RestPanel({ lang, restLeft, restDone, nextEx, setLabel, onAdd, onSkip }
     <main className="flex flex-1 flex-col items-center justify-center px-6 text-center">
       {restDone ? (
         <>
-          <span className="grid h-20 w-20 place-items-center rounded-full" style={{ background: FOCUS.success, color: '#fff' }}><Icon name="Check" className="h-10 w-10" strokeWidth={3} /></span>
+          <span className="v2-earned-moment grid h-20 w-20 place-items-center rounded-full" style={{ background: FOCUS.success, color: FOCUS.onColor }}><Icon name="Check" className="h-10 w-10" strokeWidth={3} /></span>
           <p className="mt-5 text-xl font-black" style={{ color: FOCUS.success }}>{ar ? 'انتهت الراحة' : 'Rest done'}</p>
           <p className="mt-1 text-sm" style={{ color: FOCUS.inkMuted }}>{ar ? 'التالي' : 'Next'}: <bdi>{ar ? nextEx.nameAr : nextEx.nameEn}</bdi> · {setLabel}</p>
         </>
       ) : (
         <>
           <p className="text-sm font-bold" style={{ color: FOCUS.inkMuted }}>{ar ? 'راحة' : 'Rest'}</p>
-          <p className="mt-2 text-7xl font-black tabular-nums" style={{ color: FOCUS.ember }}>{fmtTime(restLeft)}</p>
+          <p className="mt-2 text-7xl font-black tabular-nums" style={{ color: FOCUS.teal }}>{fmtTime(restLeft)}</p>
           <p className="mt-4 text-sm" style={{ color: FOCUS.inkMuted }}>{ar ? 'التالي' : 'Next'}: <bdi>{ar ? nextEx.nameAr : nextEx.nameEn}</bdi> · {setLabel}</p>
           <div className="mt-8 flex items-center gap-3">
             <button type="button" onClick={onAdd} className="rounded-2xl px-6 py-3 font-bold" style={{ background: FOCUS.card, border: `1px solid ${FOCUS.line}`, color: FOCUS.ink }}>+{toAr(REST_ADD, lang)} {ar ? 'ث' : 's'}</button>
-            <button type="button" onClick={onSkip} className="rounded-2xl px-8 py-3 font-black" style={{ background: FOCUS.ember, color: FOCUS.emberInk }}>{ar ? 'تخطي' : 'Skip'}</button>
+            <button type="button" onClick={onSkip} className="v2-pressable rounded-2xl px-8 py-3 text-[1.1875rem] font-black" style={{ background: FOCUS.ember, color: FOCUS.onColor }}>{ar ? 'تخطي' : 'Skip'}</button>
           </div>
         </>
       )}
@@ -384,10 +382,10 @@ function PlanScreen({ model, lang, onExercise, onStart, onBack }: { model: Retur
     else groups.push({ cat: ex.category, items: [{ ex, i }] })
   })
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
-      <div className="mx-auto w-full max-w-md animate-fade-up">
+    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
+      <div className="v2-screen-enter mx-auto w-full max-w-md">
         <button type="button" onClick={onBack} aria-label={ar ? 'رجوع' : 'Back'} className="grid h-10 w-10 place-items-center rounded-xl border border-line bg-surface"><Icon name="ChevronRight" className="h-5 w-5 rtl:rotate-0 ltr:rotate-180" /></button>
-        <p className="mt-4 text-xs font-black uppercase tracking-wider text-primary">{ar ? model.program.titleAr : model.program.titleEn} · {ar ? model.program.contextAr : model.program.contextEn}</p>
+        <p className="v2-text-blue mt-4 text-xs font-black uppercase tracking-wider">{ar ? model.program.titleAr : model.program.titleEn} · {ar ? model.program.contextAr : model.program.contextEn}</p>
         <h1 className="mt-1 text-3xl font-black tracking-tight">{model.session.title}</h1>
         <div className="mt-3 flex flex-wrap gap-2 text-xs font-bold text-ink-500">
           <Chip icon="Dumbbell" text={`${model.session.exerciseCount} ${ar ? 'تمارين' : 'exercises'}`} />
@@ -401,7 +399,7 @@ function PlanScreen({ model, lang, onExercise, onStart, onBack }: { model: Retur
               <p className="mb-2 text-sm font-black text-ink-700">{CATEGORY_LABEL[g.cat][ar ? 'ar' : 'en']}</p>
               <div className="space-y-2">
                 {g.items.map(({ ex, i }) => (
-                  <button key={ex.id} type="button" onClick={() => onExercise(i)} className="flex w-full items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3 text-start transition-colors hover:border-primary/40">
+                  <button key={ex.id} type="button" onClick={() => onExercise(i)} className="v2-pressable flex w-full items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3 text-start hover:border-[color:var(--v2-blue)]">
                     <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-beige text-ink-500"><Icon name="Dumbbell" className="h-5 w-5" /></span>
                     <span className="min-w-0 flex-1">
                       <span className="block text-sm font-bold">{ar ? ex.nameAr : ex.nameEn}</span>
@@ -426,12 +424,12 @@ function PlanScreen({ model, lang, onExercise, onStart, onBack }: { model: Retur
 function DetailScreen({ ex, idx, total, lang, onStart, onBack }: { ex: WorkoutV2Exercise; idx: number; total: number; lang: Lang; onStart: () => void; onBack: () => void }) {
   const ar = lang !== 'en'
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
-      <div className="mx-auto w-full max-w-md">
+    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
+      <div className="v2-screen-enter mx-auto w-full max-w-md">
         <button type="button" onClick={onBack} aria-label={ar ? 'رجوع' : 'Back'} className="grid h-10 w-10 place-items-center rounded-xl border border-line bg-surface"><Icon name="ChevronRight" className="h-5 w-5 rtl:rotate-0 ltr:rotate-180" /></button>
         {/* media placeholder (no demo media in the plan template) */}
         <div className="mt-4 grid aspect-video place-items-center rounded-2xl border border-line bg-surface text-ink-400"><Icon name="Dumbbell" className="h-10 w-10" /></div>
-        <p className="mt-4 text-xs font-black uppercase tracking-wider text-primary">{ar ? `التمرين ${toAr(idx + 1, lang)} من ${toAr(total, lang)}` : `Exercise ${idx + 1} of ${total}`}</p>
+        <p className="v2-text-blue mt-4 text-xs font-black uppercase tracking-wider">{ar ? `التمرين ${toAr(idx + 1, lang)} من ${toAr(total, lang)}` : `Exercise ${idx + 1} of ${total}`}</p>
         <h1 className="mt-1 text-2xl font-black">{ar ? ex.nameAr : ex.nameEn}</h1>
         <div className="mt-3 flex flex-wrap gap-2 text-xs font-bold text-ink-500">
           {ex.muscles.map((m) => <Chip key={m} icon="Target" text={m} />)}
@@ -447,7 +445,7 @@ function DetailScreen({ ex, idx, total, lang, onStart, onBack }: { ex: WorkoutV2
         <p className="mt-6 mb-2 text-sm font-black text-ink-700">{ar ? 'إشارات سريعة' : 'Quick cues'}</p>
         <ul className="space-y-2">
           {ex.cues.map((c, i) => (
-            <li key={i} className="flex items-center gap-2 rounded-xl border border-line bg-surface px-3 py-2.5 text-sm"><Icon name="Check" className="h-4 w-4 shrink-0 text-primary" strokeWidth={3} />{c}</li>
+            <li key={i} className="flex items-center gap-2 rounded-xl border border-line bg-surface px-3 py-2.5 text-sm"><Icon name="Check" className="h-4 w-4 shrink-0 text-[color:var(--v2-green)]" strokeWidth={3} />{c}</li>
           ))}
         </ul>
 
@@ -467,9 +465,9 @@ function CompleteScreen({ model, active, lang, onDone }: { model: ReturnType<typ
   const volume = rows.reduce((v, r) => v + r.weight * r.reps, 0)
   const durationMin = active ? Math.max(1, Math.round((Date.now() - active.startedAt) / 60000)) : 0
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="fixed inset-0 z-[60] flex flex-col items-center justify-center px-6 text-center" style={{ background: FOCUS.bg, color: FOCUS.ink }}>
+    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-dark v2-screen-enter fixed inset-0 z-[60] flex flex-col items-center justify-center bg-page px-6 text-center text-ink-900">
       {/* success moment — green */}
-      <span className="grid h-16 w-16 animate-pop-in place-items-center rounded-2xl" style={{ background: FOCUS.success, color: '#fff' }}><Icon name="Check" className="h-8 w-8" strokeWidth={3} /></span>
+      <span className="v2-earned-moment grid h-16 w-16 place-items-center rounded-2xl" style={{ background: FOCUS.success, color: FOCUS.onColor }}><Icon name="Check" className="h-8 w-8" strokeWidth={3} /></span>
       <h1 className="mt-5 text-3xl font-black">{ar ? 'أنهيت الجلسة' : 'Session complete'}</h1>
       <p className="mt-1 text-sm" style={{ color: FOCUS.inkMuted }}>{model.session.title}</p>
       <div className="mt-6 grid w-full max-w-xs grid-cols-3 gap-3">
@@ -477,7 +475,7 @@ function CompleteScreen({ model, active, lang, onDone }: { model: ReturnType<typ
         <FocusStat label={ar ? 'المجموعات' : 'Sets'} value={toAr(totalSets, lang)} />
         <FocusStat label={ar ? 'الحجم كجم' : 'Volume kg'} value={toAr(volume, lang)} />
       </div>
-      <button type="button" onClick={onDone} className="mt-8 w-full max-w-xs rounded-2xl py-4 text-[1.1875rem] font-black" style={{ background: FOCUS.ember, color: FOCUS.emberInk }}>{ar ? 'حفظ وإنهاء' : 'Save & finish'}</button>
+      <button type="button" onClick={onDone} className="v2-pressable mt-8 w-full max-w-xs rounded-2xl py-4 text-[1.1875rem] font-black" style={{ background: FOCUS.ember, color: FOCUS.onColor }}>{ar ? 'حفظ وإنهاء' : 'Save & finish'}</button>
       <p className="mt-3 text-[0.7rem]" style={{ color: FOCUS.inkFaint }}>{ar ? 'محفوظ على هذا الجهاز فقط.' : 'Saved on this device only.'}</p>
     </div>
   )
@@ -486,7 +484,7 @@ function CompleteScreen({ model, active, lang, onDone }: { model: ReturnType<typ
 function MissingPlan({ lang, onNavigate }: { lang: Lang; onNavigate: (r: AppRoute) => void }) {
   const ar = lang !== 'en'
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="flex min-h-screen flex-col items-center justify-center bg-page px-6 text-center text-ink-900">
+    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light v2-screen-enter flex min-h-screen flex-col items-center justify-center bg-page px-6 text-center text-ink-900">
       <Icon name="Dumbbell" className="h-12 w-12 text-ink-400" />
       <h1 className="mt-5 text-2xl font-black">{ar ? 'أكمل إعداد خطتك' : 'Finish setting up your plan'}</h1>
       <p className="mt-2 max-w-xs text-sm text-ink-500">{ar ? 'نحتاج هدفك وجدولك لنبني تمرينك.' : 'We need your goal and schedule to build your workout.'}</p>
