@@ -112,6 +112,11 @@ for (const item of foodItems) {
     if (typeof item[f] !== 'string' || !item[f].trim()) add('ERROR', 'MISSING_STR', item.id || '(بلا معرّف)', item.nameAr || '', `الحقل النصّي «${f}» مفقود`)
   }
   checkMacros(item)
+  // وحدات الحصص: تطبيع عربي فصيح ومتّسق (Cycle 3).
+  const lbl = typeof item.servingLabelAr === 'string' ? item.servingLabelAr : ''
+  if (/برغر/.test(lbl)) add('WARN', 'UNIT_SPELL', item.id, item.nameAr, `«برغر» غير قياسي — استخدم «برجر»: «${lbl}»`)
+  if (/^نص\s/.test(lbl)) add('WARN', 'UNIT_MSA', item.id, item.nameAr, `«نص» عامّية — استخدم «نصف»: «${lbl}»`)
+  if (/^\d+\s*(غ|مل)$/.test(lbl)) add('WARN', 'UNIT_BARE', item.id, item.nameAr, `وحدة مجرّدة بلا وصف «${lbl}» — استخدم «لكل Nغ» أو «حصة (Nغ)»`)
   if (Array.isArray(item.sizes)) {
     for (const sz of item.sizes) checkMacros({ ...sz, servingGrams: sz.servingGrams }, `حجم:${sz.id || sz.labelAr || '?'}`)
   }
@@ -160,7 +165,7 @@ if (JSON_OUT) {
   console.log('════════ مُدقِّق قاعدة الأطعمة — قِمّة ════════')
   console.log(`الإجمالي: ${foodItems.length} صنفًا (منها ${saudiCount} طبقًا سعوديًا)`)
   console.log(`أخطاء (ERROR): ${errors.length} · تحذيرات (WARN): ${warns.length}\n`)
-  const order = ['MISSING_STR', 'MISSING_NUM', 'NEGATIVE', 'BAD_FIBER', 'RANGE_MACRO', 'RANGE_SUM', 'RANGE_KCAL', 'DUP_ID', 'DIVERGE_KCAL', 'KCAL_449', 'DUP_NAME_AR', 'DUP_NAME_EN']
+  const order = ['MISSING_STR', 'MISSING_NUM', 'NEGATIVE', 'BAD_FIBER', 'RANGE_MACRO', 'RANGE_SUM', 'RANGE_KCAL', 'DUP_ID', 'DIVERGE_KCAL', 'UNIT_SPELL', 'UNIT_MSA', 'UNIT_BARE', 'KCAL_449', 'DUP_NAME_AR', 'DUP_NAME_EN']
   for (const code of order) {
     const rows = byCode[code]
     if (!rows || !rows.length) continue
