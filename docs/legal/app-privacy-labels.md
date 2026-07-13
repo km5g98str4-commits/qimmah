@@ -1,0 +1,53 @@
+# App Store — App Privacy Labels (fill-in sheet)
+
+> **Draft for owner review — not legal advice.** Follow this verbatim in **App Store Connect → App Privacy**.
+> Grounded in `DATA-INVENTORY.md`. Apple’s rule: data is **“Collected”** only if it is **transmitted off the
+> device** or handled by a third-party SDK. So the app’s **device-only** data (nutrition, water, steps,
+> achievements) is **NOT “Collected”** for Apple’s purposes — it never leaves the device.
+>
+> **Two answers depend on the production build config — set them by the checkbox below:**
+> - [ ] The App Store build **does NOT** set `VITE_ANALYTICS_ENDPOINT` → **Diagnostics/Usage Data = Not Collected** (default; recommended).
+> - [ ] The App Store build **DOES** set `VITE_ANALYTICS_ENDPOINT` → complete the “Usage Data / Diagnostics” rows (still anonymous, still **not** Tracking).
+
+## A. Tracking — the top question
+**Does this app use data for tracking?** → **NO.**
+Justification: no ads, no data brokers, no third-party analytics/attribution SDK (see dependency list); the only
+optional identifier (`anonId`) is app-generated, random, and explicitly **not** linked to the account or shared
+for cross-app/cross-site tracking (`analytics/provider.ts:9-12`). No ATT prompt is needed.
+
+## B. Data types — enter each as Collected? / Linked to identity? / Used for tracking? + purpose
+
+| Apple data type | Collected? | Linked to user? | Tracking? | Purpose(s) to select | Justification (code) |
+|---|---|---|---|---|---|
+| **Contact Info → Email Address** | **Yes** | **Yes** | No | App Functionality | Account sign-in (`authContext.tsx:62`) |
+| **Contact Info → Name** | **Yes** | **Yes** | No | App Functionality | Optional display name (`authContext.tsx:62,121`) |
+| **Health & Fitness → Health** | **Yes** | **Yes** | No | App Functionality | Body measurements: weight, waist, body-fat % synced (`syncService.ts:166`); supplements/medications tracked in profile (`customization.ts:30-31`) |
+| **Health & Fitness → Fitness** | **Yes** | **Yes** | No | App Functionality | Workout sessions, exercises, sets, reps, PRs synced (`syncService.ts:141-153`) |
+| **Identifiers → User ID** | **Yes** | **Yes** | No | App Functionality | Supabase `user_id` keys all synced rows (`syncService.ts:141`) |
+| **User Content → Other User Content** | **Yes** | **Yes** | No | App Functionality | Free-text daily/commitment notes synced in `daily_logs` (`commitmentTracking.ts:49`) |
+| **Usage Data → Product Interaction** | **Only if analytics endpoint set** (else **No**) | **No** | No | Analytics | Anonymous event counts, random `anonId`, no PII (`analytics/events.ts:4-45`) |
+| **Diagnostics → Crash Data / Other** | **Only if analytics endpoint set** (else **No**) | **No** | No | Analytics | `unhandled_error` event (anonymous) (`analytics/events.ts:39`) |
+
+## C. Data types to mark **NOT Collected** (with the reason, in case Apple asks)
+
+| Apple data type | Why Not Collected |
+|---|---|
+| **Health & Fitness** — nutrition, water, **steps** | Device-only; never transmitted (not in `syncService.ts`); steps are manual, **no HealthKit** (`stepCounter.ts:2`) |
+| **Precise/Coarse Location** | No location API or permission (`Info.plist` has no `NSLocation*`) |
+| **Financial Info / Purchases** | No active subscription/IAP in this version (Terms §8) |
+| **Contacts** | No contacts access |
+| **Browsing / Search History** | Not collected |
+| **Identifiers → Device ID (IDFA/IDFV)** | Not accessed; no `AdSupport`/`AppTrackingTransparency` |
+| **Sensitive Info** | Medications/supplements are declared under Health & Fitness → Health (above), not sold/shared |
+| **Photos or Videos** | Camera frames are decoded on-device for barcodes and never stored/transmitted (`Info.plist NSCameraUsageDescription`) |
+
+## D. Third parties to note (context for the review team; not a separate label field)
+- **Supabase** — processor for auth + synced data (§B rows).
+- **Open Food Facts** — receives only the scanned barcode number, no user data (`openFoodFacts.ts:88`).
+- **GitHub/jsDelivr** — serves exercise demo images; receives an image request (device IP), no user data.
+- **YouTube** — external search link only (no in-app embed/SDK).
+
+## E. Reminder before submitting
+- Set the checkbox in the header to match the actual App Store build’s `VITE_ANALYTICS_ENDPOINT`.
+- Confirm the Supabase project has RLS enabled (data-isolation claim) — **OWNER-TO-CONFIRM**.
+- App age rating: align with the eligibility age you set in Terms §3.
