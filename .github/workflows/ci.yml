@@ -1,0 +1,88 @@
+name: CI
+
+# Runs the repo's TRUE quality gate on every push and PR to any branch.
+# Mirrors the local gate exactly: typecheck -> lint (0 warnings) -> production
+# build -> perf budget -> the deterministic pure-node proof runners.
+# Each proof is invoked via `node` directly (no npm-script indirection).
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: ['**']
+
+# One in-flight run per ref; new pushes cancel the previous run to keep it fast.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    name: Quality gate (typecheck · lint · build · proofs)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 22 (+ npm cache)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # ---- static checks (fail fast) ----
+      - name: Typecheck
+        run: npx tsc -b --noEmit
+
+      - name: Lint (--max-warnings 0)
+        run: npx eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0
+
+      # ---- production build (tsc -b && vite build) ----
+      - name: Production build
+        run: npx tsc -b && npx vite build
+
+      - name: Perf budget (boot-bundle size)
+        run: node scripts/check-perf-budget.mjs
+
+      # ---- deterministic proof runners (the real "N tests") ----
+      # Pure-node, no browser/docker/network. Verified green on integration/wave2.
+      # `set -e` + explicit loop → fails fast on the first failing proof, and the
+      # failing script name is printed just above the error.
+      - name: Proof runners
+        run: |
+          set -euo pipefail
+          proofs=(
+            scripts/run-active-session-proof.mjs      # active-session: 31 checks
+            scripts/run-isolation-proof.mjs           # account isolation: 28
+            scripts/run-reset-recovery-proof.mjs      # reset/recovery: 33
+            scripts/run-today-v2-model-proof.mjs      # Today v2.1 model: 32
+            scripts/run-achievements-proof.mjs        # achievements: 19 medals
+            scripts/run-logic-audit-proof.mjs         # cross-cutting logic audit
+            scripts/run-p4a3-proof.mjs                # p4a3: 57 checks
+            scripts/run-p5-plan-proof.mjs             # plan generation
+            scripts/run-p5-reset-proof.mjs            # reset flow
+            scripts/run-p8a2-off-proof.mjs            # analytics-off invariants
+            scripts/p3_a2_proof.mjs                   # p3-a2: 22 checks
+          )
+          for s in "${proofs[@]}"; do
+            echo "::group::node $s"
+            node "$s"
+            echo "::endgroup::"
+          done
+          echo "All ${#proofs[@]} proof runners passed."
+
+      - name: Upload dist artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ github.sha }}
+          path: dist
+          if-no-files-found: error
+          retention-days: 7

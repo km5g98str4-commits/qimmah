@@ -1,0 +1,131 @@
+name: Nightly
+
+# Scheduled full drift check on the long-lived integration branches. Re-runs the
+# same deterministic gate as ci.yml (so a dependency bump, a force-push, or an
+# environment change that breaks the build is caught even without a new push),
+# plus a NON-BLOCKING best-effort pass of the browser proofs for visibility.
+#
+# NOTE: GitHub only fires `schedule` from the workflow file on the repository's
+# DEFAULT branch (main). This file therefore starts running nightly once it lands
+# on main; until then, trigger it manually with "Run workflow" (workflow_dispatch).
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # 02:00 UTC daily
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Branch/ref to run the gate on (manual runs)'
+        required: false
+        default: 'integration/wave2'
+
+permissions:
+  contents: read
+
+jobs:
+  drift-gate:
+    name: Drift gate — ${{ matrix.ref }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        ref: [integration/wave1, integration/wave2]
+    steps:
+      - name: Checkout ${{ github.event.inputs.ref || matrix.ref }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.ref || matrix.ref }}
+
+      - name: Setup Node 22 (+ npm cache)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npx tsc -b --noEmit
+
+      - name: Lint (--max-warnings 0)
+        run: npx eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0
+
+      - name: Production build
+        run: npx tsc -b && npx vite build
+
+      - name: Perf budget
+        run: node scripts/check-perf-budget.mjs
+
+      # Same proof set as ci.yml, but each guarded by existence so an older
+      # integration branch that predates a proof is skipped (not failed).
+      - name: Proof runners (existence-guarded)
+        run: |
+          set -euo pipefail
+          proofs=(
+            scripts/run-active-session-proof.mjs
+            scripts/run-isolation-proof.mjs
+            scripts/run-reset-recovery-proof.mjs
+            scripts/run-today-v2-model-proof.mjs
+            scripts/run-achievements-proof.mjs
+            scripts/run-logic-audit-proof.mjs
+            scripts/run-p4a3-proof.mjs
+            scripts/run-p5-plan-proof.mjs
+            scripts/run-p5-reset-proof.mjs
+            scripts/run-p8a2-off-proof.mjs
+            scripts/p3_a2_proof.mjs
+          )
+          for s in "${proofs[@]}"; do
+            if [ -f "$s" ]; then
+              echo "::group::node $s"; node "$s"; echo "::endgroup::"
+            else
+              echo "skip (absent on this ref): $s"
+            fi
+          done
+
+  browser-proofs:
+    name: Browser proofs (best-effort, non-gating)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    continue-on-error: true # informational only — never blocks
+    steps:
+      - name: Checkout integration/wave2
+        uses: actions/checkout@v4
+        with:
+          ref: integration/wave2
+
+      - name: Setup Node 22 (+ npm cache)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Production build (needed by browser proofs)
+        run: npx tsc -b && npx vite build
+
+      # These need a real browser and may also need network/preview; they are NOT
+      # part of the merge gate. Guarded + continue-on-error so results are surfaced
+      # without ever gating. (Proofs needing Supabase/Docker are excluded — see
+      # docs/ci/README.md.)
+      - name: Browser proof runners (informational)
+        run: |
+          set +e
+          proofs=(
+            scripts/run-p10-i18n-proof.mjs
+            scripts/run-p5-medals-shot.mjs
+            scripts/run-p10-a5-proof.mjs
+          )
+          fail=0
+          for s in "${proofs[@]}"; do
+            [ -f "$s" ] || { echo "absent: $s"; continue; }
+            echo "::group::node $s"; node "$s"; rc=$?; echo "::endgroup::"
+            [ $rc -eq 0 ] && echo "PASS $s" || { echo "NON-ZERO ($rc) $s"; fail=1; }
+          done
+          echo "browser-proofs summary: fail=$fail (non-gating)"
