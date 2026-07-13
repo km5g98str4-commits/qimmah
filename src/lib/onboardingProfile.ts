@@ -35,6 +35,7 @@ import { experienceToBand, goalChoices, gymTypeToAccess } from '@/data/planBuild
 import type { Customization } from '@/lib/customization'
 import { hasSavedCustomization, loadCustomization } from '@/lib/customization'
 import { loadOnboarding } from '@/lib/onboarding'
+import { enqueueSyncOperation } from '@/lib/syncQueue'
 
 export const ONBOARDING_PROFILE_KEY = 'qimmah:onboarding:profile:v1'
 
@@ -112,6 +113,7 @@ export function saveOnboardingProfile(value: OnboardingProfile): void {
   if (typeof window === 'undefined') return
   try {
     window.localStorage.setItem(ONBOARDING_PROFILE_KEY, JSON.stringify(value))
+    enqueueSyncOperation('profiles', 'profile', { data: { onboarding: value } })
   } catch {
     /* تجاهل أخطاء التخزين (وضع التصفّح الخاص …) */
   }

@@ -9,6 +9,7 @@
 import type { SessionExercise, SetLog, WorkoutSession } from './workoutSessions'
 import type { ExerciseHistory } from './exerciseHistory'
 import type { MeasurementLog } from '@/types/progress'
+import { enqueueSyncDelete, enqueueSyncOperation } from './syncQueue'
 
 // ختم اليوم المحلي (YYYY-MM-DD) — مكرّر هنا لكسر الاعتماد الدائري مع today.ts.
 function dayStamp(d = new Date()): string {
@@ -188,6 +189,16 @@ export function saveWorkoutSession(session: WorkoutSession): WorkoutSession[] {
   const existing = getWorkoutSessions().filter((s) => s.id !== session.id)
   const next = [session, ...existing].slice(0, 500)
   writeJSON(HISTORY_KEYS.workoutSessions, next)
+  enqueueSyncOperation('workout_sessions', session.id, {
+    local_id: session.id,
+    date: session.date,
+    started_at: session.startedAt,
+    finished_at: session.finishedAt ?? null,
+    workout_day_id: session.workoutDayId,
+    workout_day_name: session.workoutDayName,
+    data: session,
+    updated_at: session.finishedAt ?? session.startedAt,
+  })
   // لقطة يومية: علّم أنّ اليوم فيه تمرين مكتمل.
   if (session.finishedAt) {
     saveDailyLog(session.date, { workoutCompleted: true })
@@ -198,6 +209,10 @@ export function saveWorkoutSession(session: WorkoutSession): WorkoutSession[] {
 /** يستبدل كامل قائمة الجلسات (لمزامنة/استيراد أو حفظ مجمّع). */
 export function setWorkoutSessions(sessions: WorkoutSession[]): void {
   ensureMigrated()
+  const retained = new Set(sessions.map((session) => session.id))
+  getWorkoutSessions().forEach((session) => {
+    if (!retained.has(session.id)) enqueueSyncDelete('workout_sessions', session.id)
+  })
   writeJSON(HISTORY_KEYS.workoutSessions, sessions.slice(0, 500))
 }
 
@@ -221,6 +236,13 @@ export function getExerciseHistory(): ExerciseHistory {
 export function saveExerciseHistory(history: ExerciseHistory): void {
   ensureMigrated()
   writeJSON(HISTORY_KEYS.exerciseHistory, history)
+  Object.entries(history).forEach(([exerciseId, record]) => {
+    enqueueSyncOperation('exercise_history', exerciseId, {
+      exercise_id: exerciseId,
+      data: record,
+      updated_at: record.lastCompletedAt ?? nowISO(),
+    })
+  })
 }
 
 // ————————————————————————————————————————————————————————————————
@@ -242,6 +264,7 @@ export function saveDailyLog(date: string, partial: Partial<Omit<DailyLog, 'date
   const prev = logs[date] ?? { date, updatedAt: nowISO() }
   logs[date] = { ...prev, ...partial, date, updatedAt: nowISO() }
   writeJSON(HISTORY_KEYS.dailyLogs, logs)
+  enqueueDailySync(date)
 }
 
 /** آخر 7 أيام من اللقطات اليومية (الأحدث أولًا). */
@@ -271,12 +294,22 @@ export function saveMeasurementLog(log: MeasurementLog): MeasurementLog[] {
   const existing = getMeasurementLogs().filter((l) => l.id !== log.id)
   const next = [log, ...existing].slice(0, 1000)
   writeJSON(HISTORY_KEYS.measurementLogs, next)
+  enqueueSyncOperation('measurement_logs', log.id, {
+    local_id: log.id,
+    date: log.date,
+    values: log.values,
+    notes: log.notes ?? null,
+  })
   return next
 }
 
 /** يستبدل كامل قائمة القياسات (لمزامنة/استيراد). */
 export function setMeasurementLogs(logs: MeasurementLog[]): void {
   ensureMigrated()
+  const retained = new Set(logs.map((log) => log.id))
+  getMeasurementLogs().forEach((log) => {
+    if (!retained.has(log.id)) enqueueSyncDelete('measurement_logs', log.id)
+  })
   writeJSON(HISTORY_KEYS.measurementLogs, logs)
 }
 
@@ -298,6 +331,7 @@ export function saveNutritionLog(date: string, partial: Partial<Omit<NutritionLo
   const prev = logs[date] ?? { date, doneMeals: {}, updatedAt: nowISO() }
   logs[date] = { ...prev, ...partial, date, updatedAt: nowISO() }
   writeJSON(HISTORY_KEYS.nutritionLogs, logs)
+  enqueueDailySync(date)
 }
 
 // ————————————————————————————————————————————————————————————————
@@ -313,6 +347,7 @@ export function saveWaterLog(date: string, waterMl: number): void {
   const logs = getWaterLogs()
   logs[date] = { date, waterMl: Math.max(0, waterMl), updatedAt: nowISO() }
   writeJSON(HISTORY_KEYS.waterLogs, logs)
+  enqueueDailySync(date)
 }
 
 // ————————————————————————————————————————————————————————————————
@@ -328,6 +363,7 @@ export function saveSupplementLog(date: string, done: Record<string, boolean>): 
   const logs = getSupplementLogs()
   logs[date] = { date, done, updatedAt: nowISO() }
   writeJSON(HISTORY_KEYS.supplementLogs, logs)
+  enqueueDailySync(date)
 }
 
 export function getMedicationLogs(): ByDate<MedicationLog> {
@@ -339,6 +375,24 @@ export function saveMedicationLog(date: string, done: Record<string, boolean>): 
   const logs = getMedicationLogs()
   logs[date] = { date, done, updatedAt: nowISO() }
   writeJSON(HISTORY_KEYS.medicationLogs, logs)
+  enqueueDailySync(date)
+}
+
+/** daily_logs is the approved aggregate cloud home for these daily local stores. */
+function enqueueDailySync(date: string): void {
+  const daily = getDailyLogs()[date]
+  const nutrition = getNutritionLogs()[date]
+  const water = getWaterLogs()[date]
+  const supplements = getSupplementLogs()[date]
+  const medications = getMedicationLogs()[date]
+  const timestamps = [daily?.updatedAt, nutrition?.updatedAt, water?.updatedAt, supplements?.updatedAt, medications?.updatedAt]
+    .filter((value): value is string => Boolean(value))
+    .sort()
+  enqueueSyncOperation('daily_logs', date, {
+    date,
+    data: { daily, nutrition, water, supplements, medications },
+    updated_at: timestamps.at(-1) ?? nowISO(),
+  })
 }
 
 // ————————————————————————————————————————————————————————————————

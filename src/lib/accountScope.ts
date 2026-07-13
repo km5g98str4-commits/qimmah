@@ -10,6 +10,8 @@
 // (قائمة تضمين ثابتة كانت تُغفل مفاتيح): أي مفتاح جديد يُمسح افتراضيًا، فلا تتسرّب
 // بيانات مستخدم عبر مفتاح نُسي.
 
+import { clearSyncArtifacts } from './syncQueue'
+
 const PREFIX = 'qimmah:'
 
 /** المفتاح الذي يتتبّع آخر حساب رأيناه (لكشف تبديل الحساب). عامّ آمن — يبقى. */
@@ -49,8 +51,9 @@ function isGlobalSafe(key: string): boolean {
  * كل مفتاح `qimmah:*` غير مذكور في قائمة السماح العامّة يُحذف (fail-safe). لا يمسّ
  * مفاتيح غير `qimmah:` إطلاقًا. آمن للاستدعاء المتكرّر ولا يرمي.
  */
-export function wipeUserData(): void {
+export function wipeUserData(userId?: string): void {
   if (typeof window === 'undefined') return
+  if (userId) clearSyncArtifacts(userId)
   const ls = window.localStorage
   const toRemove: string[] = []
   for (let i = 0; i < ls.length; i += 1) {
