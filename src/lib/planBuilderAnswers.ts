@@ -16,7 +16,7 @@ import type {
   SplitMode,
   WellnessTrackingMode,
 } from '@/types/onboarding'
-import { ONBOARDING_SCHEMA_VERSION } from '@/types/onboarding'
+import { HEALTH_CONSENT_POLICY_VERSION, ONBOARDING_SCHEMA_VERSION } from '@/types/onboarding'
 import type { GoalValue } from '@/data/planBuilder'
 
 export interface Answers {
@@ -54,6 +54,7 @@ export interface Answers {
   // limitations + wellness (optional)
   injuries: string[]
   wellnessMode: WellnessTrackingMode
+  healthDataConsent: boolean
 }
 
 export const defaultAnswers: Answers = {
@@ -78,6 +79,7 @@ export const defaultAnswers: Answers = {
   allergies: [],
   injuries: [],
   wellnessMode: 'none',
+  healthDataConsent: false,
 }
 
 export const isBeginnerLevel = (l?: ExperienceLevel) => l === 'beginner'
@@ -121,6 +123,13 @@ export function buildOnboardingProfile(a: Answers): OnboardingProfile {
     limitations: { injuries: a.injuries },
     wellnessTracking: { mode: a.wellnessMode, supplements: [], medications: [] },
     appPreferences: { language: 'ar', reminders: false },
+    consents: {
+      healthData: {
+        accepted: a.healthDataConsent,
+        acceptedAt: a.healthDataConsent ? new Date().toISOString() : undefined,
+        policyVersion: HEALTH_CONSENT_POLICY_VERSION,
+      },
+    },
     _meta: {
       schemaVersion: ONBOARDING_SCHEMA_VERSION,
       completed: true,

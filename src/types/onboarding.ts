@@ -7,7 +7,9 @@ import type { ExperienceLevel } from '@/types/profile'
 export type { ExperienceLevel }
 
 /** إصدار المخطّط — يُزاد عند تغيير كاسر لشكل التخزين. */
-export const ONBOARDING_SCHEMA_VERSION = 1
+export const ONBOARDING_SCHEMA_VERSION = 2
+
+export const HEALTH_CONSENT_POLICY_VERSION = '2026-07-13'
 
 export type Sex = 'male' | 'female'
 
@@ -128,6 +130,15 @@ export interface OnbAppPreferences {
   reminders: boolean
 }
 
+/** موافقات صريحة مرتبطة بالسياسة — لا تُستنتج من استخدام التطبيق. */
+export interface OnbConsents {
+  healthData: {
+    accepted: boolean
+    acceptedAt?: string
+    policyVersion: string
+  }
+}
+
 /** بيانات وصفية للحالة والمصدر. */
 export interface OnbMeta {
   schemaVersion: number
@@ -151,5 +162,6 @@ export interface OnboardingProfile {
   limitations: OnbLimitations
   wellnessTracking: OnbWellnessTracking
   appPreferences: OnbAppPreferences
+  consents: OnbConsents
   _meta: OnbMeta
 }

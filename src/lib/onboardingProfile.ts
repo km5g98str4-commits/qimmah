@@ -11,7 +11,7 @@ import type {
   OnbGoalType,
   OnboardingProfile,
 } from '@/types/onboarding'
-import { ONBOARDING_SCHEMA_VERSION } from '@/types/onboarding'
+import { HEALTH_CONSENT_POLICY_VERSION, ONBOARDING_SCHEMA_VERSION } from '@/types/onboarding'
 import type {
   ActivityLevel,
   Consistency,
@@ -54,6 +54,12 @@ export function defaultOnboardingProfile(): OnboardingProfile {
     limitations: { injuries: [] },
     wellnessTracking: { mode: 'none', supplements: [], medications: [] },
     appPreferences: { language: 'ar', reminders: false },
+    consents: {
+      healthData: {
+        accepted: false,
+        policyVersion: HEALTH_CONSENT_POLICY_VERSION,
+      },
+    },
     _meta: { schemaVersion: ONBOARDING_SCHEMA_VERSION, completed: false, source: 'onboarding' },
   }
 }
@@ -102,6 +108,11 @@ export function loadOnboardingProfile(): OnboardingProfile | null {
       limitations: mergeSection(base.limitations, saved.limitations),
       wellnessTracking: mergeSection(base.wellnessTracking, saved.wellnessTracking),
       appPreferences: { ...base.appPreferences, ...saved.appPreferences, language: 'ar' },
+      consents: {
+        ...base.consents,
+        ...saved.consents,
+        healthData: mergeSection(base.consents.healthData, saved.consents?.healthData),
+      },
       _meta: { ...base._meta, ...saved._meta, schemaVersion: ONBOARDING_SCHEMA_VERSION },
     }
   } catch {
@@ -395,6 +406,8 @@ export function migrateFromCustomization(c: Customization): OnboardingProfile {
       medications: medIds,
     },
     appPreferences: { language: 'ar', reminders: !!p.remindersOptIn },
+    // البيانات القديمة لا تُعد موافقة صريحة؛ يُطلب الإقرار في الإعداد بدل استنتاجه.
+    consents: base.consents,
     _meta: { ...base._meta, completed: true, source: 'migrated', completedAt: new Date().toISOString() },
   }
 }

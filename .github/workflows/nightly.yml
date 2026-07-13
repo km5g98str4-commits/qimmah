@@ -17,7 +17,7 @@ on:
       ref:
         description: 'Branch/ref to run the gate on (manual runs)'
         required: false
-        default: 'integration/wave2'
+        default: 'integration/wave4'
 
 permissions:
   contents: read
@@ -30,7 +30,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ref: [integration/wave1, integration/wave2]
+        ref: [integration/wave3, integration/wave4]
     steps:
       - name: Checkout ${{ github.event.inputs.ref || matrix.ref }}
         uses: actions/checkout@v4
@@ -59,31 +59,14 @@ jobs:
         continue-on-error: true
         run: node scripts/check-perf-budget.mjs
 
-      # Same proof set as ci.yml, but each guarded by existence so an older
-      # integration branch that predates a proof is skipped (not failed).
-      - name: Proof runners (existence-guarded)
-        run: |
-          set -euo pipefail
-          proofs=(
-            scripts/run-active-session-proof.mjs
-            scripts/run-isolation-proof.mjs
-            scripts/run-reset-recovery-proof.mjs
-            scripts/run-today-v2-model-proof.mjs
-            scripts/run-achievements-proof.mjs
-            scripts/run-logic-audit-proof.mjs
-            scripts/run-p4a3-proof.mjs
-            scripts/run-p5-plan-proof.mjs
-            scripts/run-p5-reset-proof.mjs
-            scripts/run-p8a2-off-proof.mjs
-            scripts/p3_a2_proof.mjs
-          )
-          for s in "${proofs[@]}"; do
-            if [ -f "$s" ]; then
-              echo "::group::node $s"; node "$s"; echo "::endgroup::"
-            else
-              echo "skip (absent on this ref): $s"
-            fi
-          done
+      - name: Full deterministic test gate
+        run: npm run test:gate
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Onboarding v2 browser E2E
+        run: npm run test:e2e:onboarding
 
   browser-proofs:
     name: Browser proofs (best-effort, non-gating)
@@ -91,10 +74,10 @@ jobs:
     timeout-minutes: 25
     continue-on-error: true # informational only — never blocks
     steps:
-      - name: Checkout integration/wave2
+      - name: Checkout integration/wave4
         uses: actions/checkout@v4
         with:
-          ref: integration/wave2
+          ref: integration/wave4
 
       - name: Setup Node 22 (+ npm cache)
         uses: actions/setup-node@v4

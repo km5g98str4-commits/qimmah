@@ -36,6 +36,7 @@ async function openSurface(page, surface) {
   }
   if (surface === 'summary') {
     await page.getByRole('button', { name: /تنشيف/ }).click()
+    await page.getByRole('checkbox', { name: /أوافق على معالجة بياناتي الصحية/ }).check()
     await page.getByRole('button', { name: 'التالي' }).click()
     await page.getByRole('button', { name: 'التالي' }).click()
     const choices = page.locator('fieldset button')
@@ -44,6 +45,17 @@ async function openSurface(page, surface) {
     await page.getByRole('button', { name: 'اعتمد خطتي' }).click()
     await page.getByRole('heading', { name: 'خطتك جاهزة' }).waitFor()
   }
+}
+
+async function answerOnboarding(page) {
+  await page.getByRole('button', { name: /تنشيف/ }).click()
+  await page.getByRole('checkbox', { name: /أوافق على معالجة بياناتي الصحية/ }).check()
+  await page.getByRole('button', { name: 'التالي' }).click()
+  await page.getByRole('button', { name: 'التالي' }).click()
+  await page.getByRole('button', { name: 'نادي', exact: true }).click()
+  await page.getByRole('button', { name: 'مزيج', exact: true }).click()
+  await page.getByRole('button', { name: 'اعتمد خطتي' }).click()
+  await page.getByRole('heading', { name: 'خطتك جاهزة' }).waitFor()
 }
 
 function ratio(lighter, darker) {
@@ -112,6 +124,29 @@ try {
   })
   if (tooSlow.length) failures.push(`reduced motion durations: ${JSON.stringify(tooSlow)}`)
   await reduced.close()
+
+  // Async smoke: exercise the observable building state, then a forced failure
+  // and successful retry. These switches exist only in the DEV proof seam.
+  const asyncContext = await browser.newContext({ viewport: { width: 320, height: 720 }, locale: 'ar-SA' })
+  const asyncPage = await asyncContext.newPage()
+  await asyncPage.goto(`${BASE}?surface=summary`, { waitUntil: 'networkidle' })
+  await answerOnboarding(asyncPage)
+  await asyncPage.evaluate(() => localStorage.setItem('qimmah:onboarding:force-fail', 'hang'))
+  await asyncPage.getByRole('button', { name: 'الدخول للوحة' }).click()
+  await asyncPage.getByRole('heading', { name: 'يتم إعداد خطتك' }).waitFor()
+  await asyncContext.close()
+
+  const retryContext = await browser.newContext({ viewport: { width: 320, height: 720 }, locale: 'ar-SA' })
+  const retryPage = await retryContext.newPage()
+  await retryPage.goto(`${BASE}?surface=summary`, { waitUntil: 'networkidle' })
+  await answerOnboarding(retryPage)
+  await retryPage.evaluate(() => localStorage.setItem('qimmah:onboarding:force-fail', '1'))
+  await retryPage.getByRole('button', { name: 'الدخول للوحة' }).click()
+  await retryPage.getByRole('heading', { name: 'تعذّر إعداد الخطة' }).waitFor()
+  await retryPage.evaluate(() => localStorage.removeItem('qimmah:onboarding:force-fail'))
+  await retryPage.getByRole('button', { name: 'أعد المحاولة' }).click()
+  await retryPage.getByRole('heading', { name: 'تعذّر إعداد الخطة' }).waitFor({ state: 'hidden' })
+  await retryContext.close()
 
   const contrastRows = pairs.map(([label, fg, bg, minimum]) => {
     const l1 = luminance(fg)

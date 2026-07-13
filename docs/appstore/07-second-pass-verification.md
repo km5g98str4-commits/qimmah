@@ -51,7 +51,7 @@ purchasable subscription/premium tier, background web push, "fully offline insta
 
 ## D. Consolidated TO-CONFIRM (owner / unverifiable-by-me)
 1. **Description char limit** — confirm ~4000 in the ASC field counter (Apple doesn't publish it).
-2. **Minimum eligibility age** (Terms §3) + whether a hard age gate is needed (PDPL) — no gate today.
+2. **Apple-computed content rating** after submitting the questionnaire; the product eligibility age is fixed at 12 and signup now has a blocking 12+ confirmation.
 3. **Exact age rating** Apple computes from the questionnaire answers.
 4. **Hosted Privacy Policy + Terms public URLs** (domain) — `public/legal/*.html` exist; hosting = owner.
 5. **`VITE_DESIGN_V2`** in the shipped build must match the screenshots (v2.1 vs v1).

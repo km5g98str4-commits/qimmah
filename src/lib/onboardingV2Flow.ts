@@ -21,7 +21,7 @@ export const DAYS = [3, 4, 5, 6] as const
 export const DURATIONS = [30, 45, 60, 75] as const
 
 /** Version stamp for the persisted v2 draft — a shape change bumps this and old drafts are ignored. */
-export const DRAFT_VERSION = 2
+export const DRAFT_VERSION = 3
 
 /** Full resumable state of the v2 onboarding flow. */
 export interface OnboardingV2Draft {
@@ -33,6 +33,7 @@ export interface OnboardingV2Draft {
   pref: V2Pref | null
   hasInjury: boolean
   injuries: string[]
+  healthDataConsent: boolean
 }
 
 /**
@@ -50,6 +51,7 @@ export function initialDraftV2(userId?: string | null): OnboardingV2Draft {
     pref: null,
     hasInjury: false,
     injuries: [],
+    healthDataConsent: false,
   }
 }
 
@@ -59,7 +61,7 @@ interface PersistedDraft extends OnboardingV2Draft {
 }
 
 /** Which step-specific validation message to surface, or null when the step is complete. */
-export type StepValidation = 'goal' | 'training' | 'equipment' | null
+export type StepValidation = 'goal' | 'healthConsent' | 'training' | 'equipment' | null
 
 /** Async plan-assembly status driving the loading / error / done screens. */
 export type FinalizeStatus = 'idle' | 'building' | 'error' | 'done'
@@ -84,7 +86,7 @@ export function finalizeReduce(status: FinalizeStatus, action: FinalizeAction): 
   }
 }
 
-type Validatable = Pick<OnboardingV2Draft, 'goal' | 'days' | 'duration' | 'place' | 'pref'>
+type Validatable = Pick<OnboardingV2Draft, 'goal' | 'days' | 'duration' | 'place' | 'pref' | 'healthDataConsent'>
 
 /**
  * Validate one step. Returns the step's message key when incomplete, else null.
@@ -92,7 +94,10 @@ type Validatable = Pick<OnboardingV2Draft, 'goal' | 'days' | 'duration' | 'place
  * incomplete if a control was somehow left off its allowed value set.
  */
 export function validateStep(step: number, d: Validatable): StepValidation {
-  if (step === 0) return d.goal ? null : 'goal'
+  if (step === 0) {
+    if (!d.goal) return 'goal'
+    return d.healthDataConsent ? null : 'healthConsent'
+  }
   if (step === 1) return DAYS.includes(d.days as (typeof DAYS)[number]) && DURATIONS.includes(d.duration as (typeof DURATIONS)[number]) ? null : 'training'
   if (step === 2) return d.place && d.pref ? null : 'equipment'
   return null
@@ -116,6 +121,7 @@ function isPersistedDraft(value: unknown): value is PersistedDraft {
   if (d.place !== null && typeof d.place !== 'string') return false
   if (d.pref !== null && typeof d.pref !== 'string') return false
   if (typeof d.hasInjury !== 'boolean') return false
+  if (typeof d.healthDataConsent !== 'boolean') return false
   if (!Array.isArray(d.injuries) || !d.injuries.every((x) => typeof x === 'string')) return false
   return true
 }

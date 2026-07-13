@@ -1,7 +1,7 @@
 # سياسة الخصوصية — قِمّة / Privacy Policy — Qimmah
 
 > **مسودة للمراجعة من المالك والمستشار القانوني — ليست استشارة قانونية.** كل بند مبني على سلوك التطبيق
-> الفعلي في الشيفرة (`integration/wave2`). المواضع المعلّمة **[OWNER-EMAIL]** أو **[يُؤكَّد من المالك]**
+> الفعلي في الشيفرة (`integration/wave4`). المواضع المعلّمة **[OWNER-EMAIL]** أو **[يُؤكَّد من المالك]**
 > تحتاج قرارًا تجاريًا/قانونيًا قبل النشر.
 >
 > **Draft for owner + legal review — not legal advice.** Every clause reflects the app’s actual behaviour
@@ -27,8 +27,8 @@
 **ج) بيانات الصحة واللياقة:** جلسات التمرين (التمارين والأوزان والتكرارات)، الأرقام القياسية، القياسات الجسدية
 (الوزن، الخصر، نسبة الدهون)، الأدوية والمكمّلات التي تتابعها، والإصابات التي تُدخلها — لتتبّع تقدّمك وتخصيص خطتك.
 
-**د) تسجيلات على الجهاز فقط (لا تُرفع للسحابة):** سجلّ التغذية والسعرات، الماء، الخطوات (تُدخَل يدويًا — **لا
-نقرأ Apple Health**)، والإنجازات. هذه تبقى على جهازك ولا تُرسل لخوادمنا.
+**د) تسجيلات يومية:** سجلّ التغذية والسعرات، الماء، الخطوات (تُدخَل يدويًا — **لا نقرأ Apple Health**)،
+والإنجازات، والخطط المخصّصة، والمهام. تبقى محلية أولًا، وقد تُزامَن إلى حسابك عند تفعيل المزامنة.
 
 **هـ) الكاميرا:** تُستخدم **فقط** لمسح باركود المنتجات الغذائية. تُعالَج الصورة على الجهاز لقراءة الرمز، ولا
 تُخزَّن ولا تُرسَل صور.
@@ -44,7 +44,7 @@
 ### 4. ما الذي يغادر جهازك ولمن
 | الوجهة | متى | ماذا يُرسَل |
 |---|---|---|
-| **Supabase** (خدمة الخادم) | عند تسجيل الدخول والمزامنة | بيانات الحساب والملف والتمارين والقياسات والسجلّات اليومية والأدوية/المكمّلات — مرتبطة بمعرّف حسابك |
+| **Supabase** (خدمة الخادم) | عند تسجيل الدخول وتفعيل المزامنة | بيانات الحساب والملف والتمارين والقياسات والتغذية والماء والخطوات والإنجازات والخطط والمهام والأدوية/المكمّلات — مرتبطة بمعرّف حسابك |
 | **Open Food Facts** | عند مسح/بحث باركود غذائي | رقم الباركود فقط (لمعرفة المنتج) — بلا أي بيانات عنك |
 | **GitHub / jsDelivr** | عند عرض صورة توضيحية لتمرين | طلب تحميل صورة (يظهر عنوان IP لجهازك للمزوّد) — بلا بيانات عنك |
 | **YouTube** | عند الضغط «شاهد الأداء» | يفتح رابط بحث خارجيًا في المتصفّح — لا تضمين ولا تتبّع داخل التطبيق |
@@ -68,8 +68,7 @@ Supabase. لا ندّعي وجود «قرار كفاية» أو اعتماد ر�
 ### 8. حذف بياناتك
 داخل التطبيق: «الإعدادات والخصوصية ← حذف الحساب نهائيًا». يؤدي ذلك إلى:
 1. حذف حساب المصادقة الخاص بك من الخادم.
-2. حذف صفوف بياناتك من جداول: `profiles`، `workout_sessions`، `exercise_history`، `measurement_logs`،
-   `daily_logs`.
+2. حذف صفوفك من جميع جداول بيانات المستخدم في قاعدة قِمّة قبل حذف حساب المصادقة.
 3. مسح كل بيانات قِمّة من جهازك (تبقى فقط تفضيلات غير شخصية كاللغة).
 إن تعذّر حذف الحساب من الخادم، لا يُحذف أي شيء ولا يُدّعى نجاح — تُعيد المحاولة أو تتواصل معنا.
 
@@ -78,9 +77,8 @@ Supabase. لا ندّعي وجود «قرار كفاية» أو اعتماد ر�
 التطبيق (تعديل الملف، حذف الحساب). لأي طلب إضافي راسلنا على **support@qimmah.app** وسنستجيب خلال المدة النظامية.
 
 ### 10. الأطفال والفئة العمرية
-التطبيق موجّه للبالغين والمراهقين المهتمين باللياقة. الحد الأدنى للعمر المؤهّل للاستخدام: **[يُؤكَّد من المالك —
-انظر ملاحظة الشروط §سنّ الأهلية]**. (ملاحظة فنية: حقل العمر في الإعداد يقبل حاليًا 12–90 سنة لأغراض حساب السعرات،
-وليس بوابة أهلية.)
+التطبيق موجّه للبالغين والمراهقين المهتمين باللياقة. الحد الأدنى للعمر المؤهّل للاستخدام: **12 سنة**، ويجب
+تأكيد ذلك صراحةً عند إنشاء الحساب. لا يوجد مسار موافقة وليّ أمر في هذه النسخة.
 
 ### 11. الأمان
 اتصالات مشفّرة (HTTPS)، ومصادقة وصلاحيات صف (RLS) على الخادم. لا نخزّن أي مفاتيح سرية داخل التطبيق (المفاتيح
@@ -109,8 +107,8 @@ by our auth provider (Supabase); we never see them.
 **c) Health & fitness:** workout sessions (exercises, weights, reps), personal records, body measurements
 (weight, waist, body-fat %), the supplements/medications you track, and injuries you enter — to track progress
 and tailor your plan.
-**d) On-device only (never uploaded):** nutrition/calorie logs, water, steps (entered manually — **we do not
-read Apple Health**), and achievements. These stay on your device.
+**d) Daily logs:** nutrition/calorie logs, water, steps (entered manually — **we do not read Apple Health**),
+achievements, custom plans, and tasks are local-first and may sync to your account when sync is enabled.
 **e) Camera:** used **only** to scan food barcodes. Frames are decoded on-device; no images are stored or sent.
 **f) Optional diagnostics:** the app collects **no** usage data by default. Only if enabled by the owner,
 anonymous events (counts/enums with **no** email, name, or barcode value) are sent under a random identifier
@@ -124,7 +122,7 @@ unlinked to your account, with your consent.
 ### 4. What leaves your device, to whom
 | Destination | When | What is sent |
 |---|---|---|
-| **Supabase** | Sign-in & sync | Account, profile, workouts, measurements, daily logs, meds/supplements — linked to your account id |
+| **Supabase** | Sign-in & enabled sync | Account, profile, workouts, measurements, nutrition, water, steps, achievements, plans, tasks, meds/supplements — linked to your account id |
 | **Open Food Facts** | You scan/search a food barcode | The barcode number only — nothing about you |
 | **GitHub / jsDelivr** | Viewing an exercise demo image | An image GET request (your IP is visible to the CDN) — nothing about you |
 | **YouTube** | You tap “watch form” | Opens an external search URL in your browser — no in-app embed or tracking |
@@ -147,7 +145,7 @@ Deleting your account erases your data from the server and device (see §8).
 
 ### 8. Deleting your data
 In-app: **Settings & privacy → Delete account permanently**, which: (1) deletes your auth account on the server;
-(2) deletes your rows from `profiles`, `workout_sessions`, `exercise_history`, `measurement_logs`, `daily_logs`;
+(2) deletes your rows from all Qimmah user-data tables before deleting the auth account;
 (3) wipes all Qimmah data from your device (only non-personal preferences like language remain). If server
 deletion fails, nothing is deleted and no success is claimed — retry or contact us.
 
@@ -156,8 +154,8 @@ You have the right to **access**, **correct**, **delete**, and **object to/restr
 exercised directly in-app (edit profile, delete account). For anything else, email **support@qimmah.app**.
 
 ### 10. Children & age
-Minimum eligible age: **[OWNER-TO-CONFIRM — see Terms “Eligibility age”]**. (Technical note: the setup age field
-currently accepts 12–90 for calorie math; it is not an eligibility gate.)
+Minimum eligible age: **12 years**. Account creation requires an explicit 12+ confirmation. This version does
+not provide a parental-consent flow.
 
 ### 11. Security
 Encrypted (HTTPS) connections; server-side auth and row-level security. No secret keys are embedded in the app

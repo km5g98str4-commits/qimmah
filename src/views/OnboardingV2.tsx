@@ -11,6 +11,7 @@ import { buildCustomizationFromOnboarding, saveOnboardingProfile } from '@/lib/o
 import { markCompleted } from '@/lib/onboarding'
 import { persistOnboardingToProfile } from '@/lib/onboardingSync'
 import { track } from '@/lib/analytics'
+import { POLICY_LINKS, policyCopy } from '@/data/policyCopy'
 import { toAnswersFromV2, type V2Place, type V2Pref } from '@/lib/onboardingV2Adapter'
 import {
   DAYS,
@@ -90,25 +91,26 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
   const [pref, setPref] = useState<string | null>(initialDraft.pref)
   const [hasInjury, setHasInjury] = useState(initialDraft.hasInjury)
   const [injuries, setInjuries] = useState<string[]>(initialDraft.injuries)
+  const [healthDataConsent, setHealthDataConsent] = useState(initialDraft.healthDataConsent)
   const [validation, setValidation] = useState<StepValidation>(null)
 
   const goalEntry = useMemo(() => V2_GOAL_MODEL.find((g) => g.value === goal) ?? null, [goal])
-  const answers = { goal, days, duration, place: place as V2Place | null, pref: pref as V2Pref | null }
+  const answers = { goal, days, duration, place: place as V2Place | null, pref: pref as V2Pref | null, healthDataConsent }
 
   // Persist the draft on every answer/step change — a reload resumes here.
   // Never while the plan is being built or after a successful finish.
   useEffect(() => {
     if (status === 'building' || status === 'done') return
-    const draft: OnboardingV2Draft = { step, goal, days, duration, place: place as V2Place | null, pref: pref as V2Pref | null, hasInjury, injuries }
+    const draft: OnboardingV2Draft = { step, goal, days, duration, place: place as V2Place | null, pref: pref as V2Pref | null, hasInjury, injuries, healthDataConsent }
     saveDraftV2(draft, userId)
-  }, [step, goal, days, duration, place, pref, hasInjury, injuries, status, userId])
+  }, [step, goal, days, duration, place, pref, hasInjury, injuries, healthDataConsent, status, userId])
 
   // Auto-dismiss a shown validation message once the step becomes complete.
   useEffect(() => {
     if (validation && canAdvance(step, answers)) setValidation(null)
     // answers is derived each render; the primitive fields are the real deps.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [validation, step, goal, days, duration, place, pref])
+  }, [validation, step, goal, days, duration, place, pref, healthDataConsent])
 
   const next = () => {
     const v = validateStep(step, answers)
@@ -143,7 +145,7 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
           if (mode === 'hang') await new Promise(() => {})
           if (mode === 'error') throw new Error('forced onboarding failure (dev preview)')
         }
-        const built0 = toAnswersFromV2({ goal, days, duration, place: place as V2Place | null, pref: pref as V2Pref | null, injuries: hasInjury ? injuries : [] })
+        const built0 = toAnswersFromV2({ goal, days, duration, place: place as V2Place | null, pref: pref as V2Pref | null, injuries: hasInjury ? injuries : [], healthDataConsent })
         const op = buildOnboardingProfile(built0)
         saveOnboardingProfile(op)
         const built = await buildCustomizationFromOnboarding(op, customization)
@@ -213,7 +215,7 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
       {/* Content — each step is a region named by its heading. */}
       <main className="flex-1 overflow-y-auto px-5 py-6">
         <div className="v2-screen-enter mx-auto w-full max-w-md">
-          {step === 0 && <GoalStep t={t} titleId={stepTitleId} goal={goal} onPick={(g) => { setGoal(g); setValidation(null) }} />}
+          {step === 0 && <GoalStep lang={lang} t={t} titleId={stepTitleId} goal={goal} healthDataConsent={healthDataConsent} onConsent={setHealthDataConsent} onPick={(g) => { setGoal(g); setValidation(null) }} />}
           {step === 1 && (
             <TrainingStep t={t} titleId={stepTitleId} lang={lang} days={days} duration={duration} onDays={setDays} onDuration={setDuration} goalLabel={goalEntry?.label ?? ''} split={splitFor(days, lang)} />
           )}
@@ -231,7 +233,7 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
           {validation && (
             <p role="alert" className="v2-error-panel mb-3 flex items-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-bold text-ink-900">
               <Icon name="AlertCircle" className="v2-error-icon h-4 w-4 shrink-0" />
-              <span>{t.validation[validation]}</span>
+              <span>{validation === 'healthConsent' ? policyCopy[lang].healthConsentRequired : t.validation[validation]}</span>
             </p>
           )}
           <button
@@ -281,7 +283,8 @@ function StepTitle({ id, title, subtitle }: { id: string; title: string; subtitl
   )
 }
 
-function GoalStep({ t, titleId, goal, onPick }: { t: T; titleId: string; goal: V2GoalValue | null; onPick: (g: V2GoalValue) => void }) {
+function GoalStep({ lang, t, titleId, goal, healthDataConsent, onConsent, onPick }: { lang: Lang; t: T; titleId: string; goal: V2GoalValue | null; healthDataConsent: boolean; onConsent: (checked: boolean) => void; onPick: (g: V2GoalValue) => void }) {
+  const policy = policyCopy[lang]
   return (
     <section aria-labelledby={titleId}>
       <StepTitle id={titleId} title={t.goal.title} />
@@ -315,6 +318,13 @@ function GoalStep({ t, titleId, goal, onPick }: { t: T; titleId: string; goal: V
           )
         })}
       </Group>
+      <div className="mt-5 rounded-2xl border border-line bg-surface p-4">
+        <p className="text-sm leading-relaxed text-ink-500">{policy.healthExplanation}</p>
+        <label className="mt-3 flex cursor-pointer items-start gap-3 text-start text-sm font-bold leading-relaxed text-ink-900">
+          <input type="checkbox" checked={healthDataConsent} onChange={(e) => onConsent(e.target.checked)} className="mt-0.5 h-5 w-5 shrink-0 accent-primary" />
+          <span>{policy.healthConsent} · <a href={POLICY_LINKS.privacy} target="_blank" rel="noopener noreferrer" className="text-[color:var(--v2-blue)] underline underline-offset-2">{policy.privacy}</a></span>
+        </label>
+      </div>
       <p className="mt-5 text-center text-xs font-medium text-ink-500">{t.goal.note}</p>
     </section>
   )

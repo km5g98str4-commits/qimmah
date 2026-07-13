@@ -19,7 +19,7 @@ export const V2_TAB_LABELS = {
   workout: 'التمارين',
   log: 'تسجيل',
   nutrition: 'التغذية',
-  progress: 'التقدم',
+  progress: 'التقدّم',
 } as const
 
 export type V2TabKey = keyof typeof V2_TAB_LABELS

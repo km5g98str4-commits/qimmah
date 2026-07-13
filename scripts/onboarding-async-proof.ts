@@ -27,24 +27,25 @@ function check(label: string, cond: boolean): void {
 }
 
 function draft(over: Partial<OnboardingV2Draft> = {}): OnboardingV2Draft {
-  return { step: 2, goal: 'cut', days: 4, duration: 45, place: 'gym', pref: 'mixed', hasInjury: true, injuries: ['knee'], ...over }
+  return { step: 2, goal: 'cut', days: 4, duration: 45, place: 'gym', pref: 'mixed', hasInjury: true, injuries: ['knee'], healthDataConsent: true, ...over }
 }
 
 console.log('\n① تحقّق الخطوات (رسالة خاصة بكل خطوة)')
 {
   check('صياغة المكان تطابق النص العربي المعتمد', V2_ONBOARDING.ar.equipment.title === 'أين وكيف تتمرّن؟')
   // Step 0 — goal required.
-  check('خطوة الهدف بلا هدف → «goal»', validateStep(0, { goal: null, days: 4, duration: 45, place: null, pref: null }) === 'goal')
-  check('خطوة الهدف مع هدف → صالحة', validateStep(0, { goal: 'bulk', days: 4, duration: 45, place: null, pref: null }) === null)
-  check('canAdvance(0) يتبع التحقّق', canAdvance(0, { goal: 'cut', days: 4, duration: 45, place: null, pref: null }) === true)
+  check('خطوة الهدف بلا هدف → «goal»', validateStep(0, { goal: null, days: 4, duration: 45, place: null, pref: null, healthDataConsent: false }) === 'goal')
+  check('خطوة الهدف بلا موافقة صحية → محجوبة', validateStep(0, { goal: 'bulk', days: 4, duration: 45, place: null, pref: null, healthDataConsent: false }) === 'healthConsent')
+  check('خطوة الهدف مع الموافقة → صالحة', validateStep(0, { goal: 'bulk', days: 4, duration: 45, place: null, pref: null, healthDataConsent: true }) === null)
+  check('canAdvance(0) يتبع الموافقة', canAdvance(0, { goal: 'cut', days: 4, duration: 45, place: null, pref: null, healthDataConsent: true }) === true)
   // Step 1 — training defaults are always valid; an off-set value is caught.
-  check('خطوة التدريب بالقيم الافتراضية → صالحة', validateStep(1, { goal: 'cut', days: 4, duration: 45, place: null, pref: null }) === null)
-  check('خطوة التدريب بقيمة أيام خارج المجموعة → «training»', validateStep(1, { goal: 'cut', days: 7, duration: 45, place: null, pref: null }) === 'training')
+  check('خطوة التدريب بالقيم الافتراضية → صالحة', validateStep(1, { goal: 'cut', days: 4, duration: 45, place: null, pref: null, healthDataConsent: true }) === null)
+  check('خطوة التدريب بقيمة أيام خارج المجموعة → «training»', validateStep(1, { goal: 'cut', days: 7, duration: 45, place: null, pref: null, healthDataConsent: true }) === 'training')
   // Step 2 — place + pref required.
-  check('خطوة المعدات بلا مكان → «equipment»', validateStep(2, { goal: 'cut', days: 4, duration: 45, place: null, pref: 'mixed' }) === 'equipment')
-  check('خطوة المعدات بلا تفضيل → «equipment»', validateStep(2, { goal: 'cut', days: 4, duration: 45, place: 'gym', pref: null }) === 'equipment')
-  check('خطوة المعدات بمكان وتفضيل → صالحة', validateStep(2, { goal: 'cut', days: 4, duration: 45, place: 'gym', pref: 'mixed' }) === null)
-  check('canAdvance(2) ناقص → false', canAdvance(2, { goal: 'cut', days: 4, duration: 45, place: 'gym', pref: null }) === false)
+  check('خطوة المعدات بلا مكان → «equipment»', validateStep(2, { goal: 'cut', days: 4, duration: 45, place: null, pref: 'mixed', healthDataConsent: true }) === 'equipment')
+  check('خطوة المعدات بلا تفضيل → «equipment»', validateStep(2, { goal: 'cut', days: 4, duration: 45, place: 'gym', pref: null, healthDataConsent: true }) === 'equipment')
+  check('خطوة المعدات بمكان وتفضيل → صالحة', validateStep(2, { goal: 'cut', days: 4, duration: 45, place: 'gym', pref: 'mixed', healthDataConsent: true }) === null)
+  check('canAdvance(2) ناقص → false', canAdvance(2, { goal: 'cut', days: 4, duration: 45, place: 'gym', pref: null, healthDataConsent: true }) === false)
 }
 
 console.log('\n② مسار إعادة المحاولة (آلة حالة الإنهاء)')
@@ -102,6 +103,7 @@ console.log('\n⑤ افتراضيات أول تشغيل')
     pref: null,
     hasInjury: false,
     injuries: [],
+    healthDataConsent: false,
   }))
 }
 

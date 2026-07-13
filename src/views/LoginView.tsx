@@ -6,6 +6,7 @@ import { miscStrings } from '@/i18n/dict/misc'
 import { useAuth } from '@/lib/authContext'
 import { evaluatePassword, PASSWORD_MIN_LENGTH } from '@/lib/passwordPolicy'
 import { track } from '@/lib/analytics'
+import { POLICY_LINKS, policyCopy } from '@/data/policyCopy'
 
 interface LoginViewProps {
   lang: Lang
@@ -33,23 +34,30 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login' }: Lo
   const [busy, setBusy] = useState(false)
   const [msg, setMsg] = useState<string | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
+  const [eligible12, setEligible12] = useState(false)
 
   const isSignup = mode === 'signup'
   const isForgot = mode === 'forgot'
   // سياسة كلمة المرور (P0): عند التسجيل يجب أن تجتاز الحدّ الأدنى ٨ + حرف + رقم قبل الإرسال.
   const pw = evaluatePassword(password)
+  const policy = policyCopy[lang]
   const canSubmit = isForgot
     ? Boolean(email)
-    : Boolean(email && password && (!isSignup || (name.trim() && pw.valid)))
+    : Boolean(email && password && (!isSignup || (name.trim() && pw.valid && eligible12)))
 
   const switchMode = (next: Mode) => {
     setMode(next)
     setMsg(null)
     setNotice(null)
+    if (next !== 'signup') setEligible12(false)
   }
 
   const submit = async () => {
     if (!canSubmit) return
+    if (isSignup && !eligible12) {
+      setMsg(policy.eligibilityRequired)
+      return
+    }
     setBusy(true)
     setMsg(null)
     setNotice(null)
@@ -213,6 +221,26 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login' }: Lo
                     ))}
                   </ul>
                 </div>
+              )}
+
+              {isSignup && (
+                <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-line bg-surface p-3 text-start text-xs leading-relaxed text-ink-700">
+                  <input
+                    type="checkbox"
+                    checked={eligible12}
+                    onChange={(e) => {
+                      setEligible12(e.target.checked)
+                      if (e.target.checked && msg === policy.eligibilityRequired) setMsg(null)
+                    }}
+                    className="mt-0.5 h-5 w-5 shrink-0 accent-primary"
+                  />
+                  <span>
+                    {policy.eligibilityPrefix}{' '}
+                    <a href={POLICY_LINKS.terms} target="_blank" rel="noopener noreferrer" className="font-black text-primary-c underline underline-offset-2">{policy.terms}</a>{' '}
+                    {policy.joiner}{' '}
+                    <a href={POLICY_LINKS.privacy} target="_blank" rel="noopener noreferrer" className="font-black text-primary-c underline underline-offset-2">{policy.privacy}</a>
+                  </span>
+                </label>
               )}
 
               {/* رابط استعادة كلمة المرور — وضع الدخول فقط */}

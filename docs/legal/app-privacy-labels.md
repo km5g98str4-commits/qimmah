@@ -2,8 +2,8 @@
 
 > **Draft for owner review — not legal advice.** Follow this verbatim in **App Store Connect → App Privacy**.
 > Grounded in `DATA-INVENTORY.md`. Apple’s rule: data is **“Collected”** only if it is **transmitted off the
-> device** or handled by a third-party SDK. So the app’s **device-only** data (nutrition, water, steps,
-> achievements) is **NOT “Collected”** for Apple’s purposes — it never leaves the device.
+> device** or handled by a third-party SDK. With optional sync enabled, nutrition, water, steps, achievements,
+> plans, and tasks can leave the device and therefore must be disclosed as collected.
 >
 > **Two answers depend on the production build config — set them by the checkbox below:**
 > - [ ] The App Store build **does NOT** set `VITE_ANALYTICS_ENDPOINT` → **Diagnostics/Usage Data = Not Collected** (default; recommended).
@@ -22,8 +22,7 @@ for cross-app/cross-site tracking (`analytics/provider.ts:9-12`). No ATT prompt 
 >   Source: <https://developer.apple.com/app-store/user-privacy-and-data-use/> and
 >   <https://developer.apple.com/app-store/app-privacy-details/>
 > - Apple: *“Collect refers to transmitting data off the device and storing it … for longer than the time it
->   takes to service the request.”* → the app’s device-only data (nutrition, water, steps, achievements) is
->   never transmitted ⇒ **Not Collected** (§C). Source (app-privacy-details, above).
+>   takes to service the request.”* → the app’s optional sync makes the synced health/fitness records Collected.
 > - Apple: data *“linked solely on the end-user's device and … not sent off the device in a way that can
 >   identify the end-user or device”* is **not** tracking ⇒ no ATT required.
 > **Common fitness-app mistake:** declaring Health/Fitness as *tracking* or showing an ATT prompt for
@@ -35,8 +34,8 @@ for cross-app/cross-site tracking (`analytics/provider.ts:9-12`). No ATT prompt 
 |---|---|---|---|---|---|
 | **Contact Info → Email Address** | **Yes** | **Yes** | No | App Functionality | Account sign-in (`authContext.tsx:62`) |
 | **Contact Info → Name** | **Yes** | **Yes** | No | App Functionality | Optional display name (`authContext.tsx:62,121`) |
-| **Health & Fitness → Health** | **Yes** | **Yes** | No | App Functionality | Body measurements: weight, waist, body-fat % synced (`syncService.ts:166`); supplements/medications tracked in profile (`customization.ts:30-31`) |
-| **Health & Fitness → Fitness** | **Yes** | **Yes** | No | App Functionality | Workout sessions, exercises, sets, reps, PRs synced (`syncService.ts:141-153`) |
+| **Health & Fitness → Health** | **Yes** | **Yes** | No | App Functionality | Body measurements, nutrition, water, and supplements/medications can sync (`syncService.ts`, `syncStores.ts`) |
+| **Health & Fitness → Fitness** | **Yes** | **Yes** | No | App Functionality | Workouts, sets, reps, PRs, manual steps, and achievements can sync (`syncService.ts`, `syncStores.ts`) |
 | **Identifiers → User ID** | **Yes** | **Yes** | No | App Functionality | Supabase `user_id` keys all synced rows (`syncService.ts:141`) |
 | **User Content → Other User Content** | **Yes** | **Yes** | No | App Functionality | Free-text daily/commitment notes synced in `daily_logs` (`commitmentTracking.ts:49`) |
 | **Usage Data → Product Interaction** | **Only if analytics endpoint set** (else **No**) | **No** | No | Analytics | Anonymous event counts, random `anonId`, no PII (`analytics/events.ts:4-45`) |
@@ -46,7 +45,6 @@ for cross-app/cross-site tracking (`analytics/provider.ts:9-12`). No ATT prompt 
 
 | Apple data type | Why Not Collected |
 |---|---|
-| **Health & Fitness** — nutrition, water, **steps** | Device-only; never transmitted (not in `syncService.ts`); steps are manual, **no HealthKit** (`stepCounter.ts:2`) |
 | **Precise/Coarse Location** | No location API or permission (`Info.plist` has no `NSLocation*`) |
 | **Financial Info / Purchases** | No active subscription/IAP in this version (Terms §8) |
 | **Contacts** | No contacts access |

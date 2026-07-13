@@ -41,6 +41,7 @@ import { onboardingStrings, type OnboardingStrings } from '@/i18n/dict/onboardin
 import { PlanChoiceScreen, CustomPlanBuilder, customPlanStrings, saveCustomPlan } from '@/features/customPlan'
 import type { PlanSource } from '@/features/customPlan'
 import { track } from '@/lib/analytics'
+import { POLICY_LINKS, policyCopy } from '@/data/policyCopy'
 
 interface PlanBuilderProps {
   /** يُستدعى بعد حفظ مصدر الحقيقة والخطة وتعليم الإكمال (دخول اللوحة). */
@@ -53,7 +54,7 @@ interface PlanBuilderProps {
 
 // حدود الإعداد (إدخال مرئي بمنزلقات/عدّادات — لا نص حر).
 const BOUNDS = {
-  age: { min: 14, max: 80 },
+  age: { min: 12, max: 80 },
   height: { min: 120, max: 220 },
   weight: { min: 30, max: 250 },
   days: { min: 3, max: 6 },
@@ -209,9 +210,11 @@ export function PlanBuilder({ onComplete, onExit, onForceComplete }: PlanBuilder
   steps.push({
     key: 'height',
     label: d.labelHeight,
-    valid: true,
+    valid: a.healthDataConsent,
+    error: a.healthDataConsent ? undefined : policyCopy[lang].healthConsentRequired,
     content: (
       <Question title={d.heightTitle}>
+        <HealthDataConsent lang={lang} checked={a.healthDataConsent} onChange={(checked) => set({ healthDataConsent: checked })} />
         <Slider value={a.heightCm} min={BOUNDS.height.min} max={BOUNDS.height.max} unit={d.heightUnit} onChange={(v) => set({ heightCm: v })} ariaLabel={d.heightAria} />
       </Question>
     ),
@@ -727,6 +730,19 @@ function Question({ title, hint, children }: { title: string; hint?: string; chi
       <h2 className="text-2xl font-black leading-tight text-night-100">{title}</h2>
       {hint && <p className="mt-2 text-sm text-night-300">{hint}</p>}
       <div className="mt-6">{children}</div>
+    </div>
+  )
+}
+
+function HealthDataConsent({ lang, checked, onChange }: { lang: 'ar' | 'en'; checked: boolean; onChange: (checked: boolean) => void }) {
+  const p = policyCopy[lang]
+  return (
+    <div className="mb-5 rounded-2xl border border-night-700 bg-night-900 p-4">
+      <p className="text-sm leading-relaxed text-night-300">{p.healthExplanation}</p>
+      <label className="mt-3 flex cursor-pointer items-start gap-3 text-sm font-bold leading-relaxed text-night-100">
+        <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="mt-0.5 h-5 w-5 shrink-0 accent-primary" />
+        <span>{p.healthConsent} · <a href={POLICY_LINKS.privacy} target="_blank" rel="noopener noreferrer" className="text-primary underline underline-offset-2">{p.privacy}</a></span>
+      </label>
     </div>
   )
 }

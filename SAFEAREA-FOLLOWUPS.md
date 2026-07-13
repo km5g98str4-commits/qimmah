@@ -142,3 +142,17 @@ storyboard background (kills the white flash) + added SplashScreen plugin config
 (`launchAutoHide:false`, dark `backgroundColor`, `fadeOutDuration`). The same Ascent
 splash asset also lands via `design/v21-nutrition-assets` — the two are identical in
 intent; on merge, keep one copy of `Splash.imageset`.
+
+---
+
+## Wave 4 execution status — 2026-07-14
+
+| Item | Verdict | Evidence |
+|---|---|---|
+| A — native PWA banner | **PASS** | `isNativePlatform()` guards both components; `docs/proof/wave4/ios-notched-welcome.png` shows the native welcome with no install prompt. |
+| B — recovery deep link | **PASS (custom scheme)** | `xcrun simctl openurl` produced the native “فتح في قِمّة؟” routing prompt: `docs/proof/wave4/ios-deep-link-prompt.png`; 33 recovery proofs pass. Universal Link remains blocked by missing production Associated Domain/AASA + Apple Team ID and is not fabricated. |
+| C — keyboard avoidance | **CONFIG + BUILD PASS; physical tap pending** | `Keyboard.resize='native'`, plugin registration, `cap sync ios`, and Xcode build pass. macOS Simulator tap automation was unavailable; the exact six-surface live checklist is retained in `docs/release/OWNER-BUILD.md`. |
+| D — notifications | **PRESENTATION PIPELINE PASS; in-app schedule pending** | `xcrun simctl push` returned “Notification sent to com.qimmah.mobile”. Permission + scheduled local fire needs the owner’s physical/simulator tap and is listed in `OWNER-BUILD.md`. |
+| E — external links | **STATIC PASS; live tap pending** | Source sweep confirms external anchors use `target="_blank" rel="noopener noreferrer"` and no allow-navigation override. Physical Safari handoff remains in the owner checklist. |
+
+Native safe-area proof used a booted iPhone 17 Pro simulator; the status bar/Dynamic Island and bottom home indicator stay outside Qimmah’s interactive content in `ios-notched-welcome.png`.

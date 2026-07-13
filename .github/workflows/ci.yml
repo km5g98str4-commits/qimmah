@@ -2,8 +2,7 @@ name: CI
 
 # Runs the repo's TRUE quality gate on every push and PR to any branch.
 # Mirrors the local gate exactly: typecheck -> lint (0 warnings) -> production
-# build -> perf budget -> the deterministic pure-node proof runners.
-# Each proof is invoked via `node` directly (no npm-script indirection).
+# build -> perf budget -> the repository's canonical deterministic test gate.
 
 on:
   push:
@@ -56,32 +55,14 @@ jobs:
         continue-on-error: true
         run: node scripts/check-perf-budget.mjs
 
-      # ---- deterministic proof runners (the real "N tests") ----
-      # Pure-node, no browser/docker/network. Verified green on integration/wave2.
-      # `set -e` + explicit loop → fails fast on the first failing proof, and the
-      # failing script name is printed just above the error.
-      - name: Proof runners
-        run: |
-          set -euo pipefail
-          proofs=(
-            scripts/run-active-session-proof.mjs      # active-session: 31 checks
-            scripts/run-isolation-proof.mjs           # account isolation: 28
-            scripts/run-reset-recovery-proof.mjs      # reset/recovery: 33
-            scripts/run-today-v2-model-proof.mjs      # Today v2.1 model: 32
-            scripts/run-achievements-proof.mjs        # achievements: 19 medals
-            scripts/run-logic-audit-proof.mjs         # cross-cutting logic audit
-            scripts/run-p4a3-proof.mjs                # p4a3: 57 checks
-            scripts/run-p5-plan-proof.mjs             # plan generation
-            scripts/run-p5-reset-proof.mjs            # reset flow
-            scripts/run-p8a2-off-proof.mjs            # analytics-off invariants
-            scripts/p3_a2_proof.mjs                   # p3-a2: 22 checks
-          )
-          for s in "${proofs[@]}"; do
-            echo "::group::node $s"
-            node "$s"
-            echo "::endgroup::"
-          done
-          echo "All ${#proofs[@]} proof runners passed."
+      - name: Full deterministic test gate
+        run: npm run test:gate
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Onboarding v2 browser E2E
+        run: npm run test:e2e:onboarding
 
       - name: Upload dist artifact
         if: success()

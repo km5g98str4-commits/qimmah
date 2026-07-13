@@ -60,19 +60,15 @@ tracking-only with disclaimers (`src/data/medications.ts`, copy "للمتابع�
 | Unrestricted Web Access | No | no in-app browser |
 | Medical/Treatment Information | **No (advice)** / wellness = Yes | see category 1 |
 
-## Interaction with the owner's pending **minimum-age** decision  ⚠ OWNER-DECISION
+## Interaction with the owner's **minimum-age** decision
 - **These are two different settings:**
   1. **Apple content Age Rating** — *computed* from the answers above (likely a 12+/13+-band due to
      the wellness/fitness axis; Apple decides).
-  2. **Eligibility / minimum age** you state in **Terms §3** — currently **[OWNER-TO-CONFIRM]**;
-     the app has **no age gate** today (setup age field accepts 12–90 for calorie math only,
-     `src/lib/validation.ts`; `docs/legal/terms-of-service.md` §3, `pdpl-gap-checklist.md`).
+  2. **Eligibility / minimum age** stated in **Terms §3** — **12 years**; signup is blocked until the user
+     explicitly confirms 12+ and accepts Terms + Privacy, and the setup age minimum is 12.
 - **They must be consistent.** If Apple computes, say, a 13+ band, your stated eligibility age must
   not be lower than that, and should also satisfy **PDPL minor provisions** for KSA.
-- **Recommendation to owner:** decide the eligibility age (e.g. **13+** or **16+**) *before*
-  submitting; if you require a hard gate, add an eligibility check (not just the calorie-math field).
-  Then answer the questionnaire truthfully and let Apple compute — **do not** manually lower the
-  rating below what the answers imply.
+- Answer the questionnaire truthfully and let Apple compute the content rating. If Apple computes a band above
+  the product's 12-year eligibility, reconcile the Terms and product gate before submission.
 
-**TO-CONFIRM:** (a) exact rating Apple computes after you submit the answers; (b) the eligibility age
-in Terms §3; (c) whether a hard in-app age gate is required for your chosen age + PDPL.
+**TO-CONFIRM:** the exact rating Apple computes and counsel’s final PDPL treatment for eligible users aged 12.

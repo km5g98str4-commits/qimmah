@@ -7,7 +7,7 @@ Automated quality gate for every change. Two workflows under `.github/workflows/
 | Workflow | Trigger | Purpose |
 |---|---|---|
 | **CI** (`ci.yml`) | every `push` and `pull_request` to **any** branch | The merge gate. Must be green before merging (see `BRANCH-PROTECTION.md`). |
-| **Nightly** (`nightly.yml`) | `schedule` (02:00 UTC daily) + manual `workflow_dispatch` | Re-runs the same gate on `integration/wave1` + `integration/wave2` to catch drift (dependency bumps, force-pushes, env changes), plus a **non-gating** best-effort browser-proof pass. |
+| **Nightly** (`nightly.yml`) | `schedule` (02:00 UTC daily) + manual `workflow_dispatch` | Re-runs the same gate on `integration/wave3` + `integration/wave4` to catch drift, plus a **non-gating** best-effort browser-proof pass. |
 
 > **Nightly scheduling caveat (GitHub rule):** `schedule` only fires from the workflow file on the repo's
 > **default branch** (`main`). Nightly starts running automatically once this file is on `main`; until then run
@@ -27,7 +27,10 @@ Runner: `ubuntu-latest`, **Node 22**, npm cache. Steps run in order and **fail f
    in `src/` (outside this branch's surface, and the CI branch must not touch code), so it is surfaced but not
    gated. **Tech-debt:** code-split `NutritionView` (e.g. lazy-load the barcode/`ScanFoodPanel` path) to bring
    the chunk under budget, then flip this step back to gating.
-6. **Proof runners** — each via `node` directly (no npm script):
+6. **Deterministic proofs** — `npm run test:gate` covers active session, Today v2, sync,
+   onboarding async, wave3 fix-forwards, isolation, recovery, demo seeds, catalog media, and policy gates.
+7. **Browser E2E** — CI installs Playwright Chromium and runs `npm run test:e2e:onboarding`, covering
+   RTL, consent blocking, all onboarding steps, summary, forced failure, and retry without credentials.
 
    | Proof runner | Checks |
    |---|---|
@@ -45,8 +48,8 @@ Runner: `ubuntu-latest`, **Node 22**, npm cache. Steps run in order and **fail f
 
 7. **Upload `dist/`** as an artifact (`dist-<sha>`, 7-day retention).
 
-These 11 runners are exactly the deterministic, pure-node proofs that are green on `integration/wave2` with only
-`npm ci` — no browser, Docker, Supabase, or network. That is the *true* gate; nothing here is invented.
+The deterministic gate needs no browser, Docker, Supabase, or network. The onboarding E2E uses the real component
+through the development proof harness and does not contact Supabase.
 
 ## Scripts deliberately NOT in the gate (and why)
 
@@ -56,8 +59,8 @@ Enumerated from `scripts/` and probed headless on the pristine base. Excluded ru
   `run-p10-i18n-proof.mjs`, `run-p5-medals-shot.mjs`, `run-p10-a5-proof.mjs`, `run-p10-integration-qa.mjs`,
   `run-p12-*-qa.mjs`, `p10-a1-proof.mjs`, `qa-smoke.mjs`.
 - **Needs a browser + Supabase/Docker** → local/manual only (needs a running Supabase + Docker daemon; not in CI):
-  `run-p10a3-session-proof.mjs`, `run-p11.5-qa.mjs`, `scripts/e2e-auth/*` (`test:e2e:auth*`), `e2e-onboarding.mjs`
-  (`test:e2e*`).
+  `run-p10a3-session-proof.mjs`, `run-p11.5-qa.mjs`, and `scripts/e2e-auth/*` (`test:e2e:auth*`).
+  `e2e-onboarding.mjs` is credential-free and gates CI.
 - **Stale on the current base (reference removed code) — tracked as tech-debt, gated nowhere:**
   `run-p4a3-ssr-proof.mjs` (imports removed `DemoCustomizationProvider`), `run-p8a3-proof.mjs`
   (imports missing `@/features/products/addProduct/ocr`), `p3proof.mjs` (uses `@/` alias with no resolver),

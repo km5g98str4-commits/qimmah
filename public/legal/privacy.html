@@ -46,7 +46,7 @@
     <h3>أ) بيانات الحساب</h3><p>البريد الإلكتروني وكلمة المرور واسم العرض (اختياري) — لتسجيل الدخول والمزامنة. تُدار كلمة المرور بأمان عبر مزوّد المصادقة (Supabase) ولا نطّلع عليها.</p>
     <h3>ب) ملفك وبياناتك الجسدية</h3><p>الاسم، العمر، الجنس، الطول، الوزن، الوزن المستهدف، مستوى الخبرة، والهدف (تنشيف/محافظة/تضخيم) — لبناء خطتك وحساب سعراتك.</p>
     <h3>ج) بيانات الصحة واللياقة</h3><p>جلسات التمرين (التمارين والأوزان والتكرارات)، الأرقام القياسية، القياسات (الوزن، الخصر، نسبة الدهون)، الأدوية والمكمّلات التي تتابعها، والإصابات — لتتبّع تقدّمك وتخصيص خطتك.</p>
-    <h3>د) تسجيلات على الجهاز فقط (لا تُرفع للسحابة)</h3><p>سجلّ التغذية والسعرات، الماء، الخطوات (تُدخَل يدويًا — <strong>لا نقرأ Apple Health</strong>)، والإنجازات. تبقى على جهازك.</p>
+    <h3>د) تسجيلات يومية</h3><p>سجلّ التغذية والسعرات، الماء، الخطوات (تُدخَل يدويًا — <strong>لا نقرأ Apple Health</strong>)، والإنجازات، والخطط المخصّصة، والمهام. تبقى محلية أولًا، وقد تُزامَن إلى حسابك عند تفعيل المزامنة.</p>
     <h3>هـ) الكاميرا</h3><p>تُستخدم <strong>فقط</strong> لمسح باركود المنتجات الغذائية. تُعالَج الصورة على الجهاز لقراءة الرمز؛ لا تُخزَّن ولا تُرسَل صور.</p>
     <h3>و) تشخيص اختياري</h3><p>التطبيق <strong>لا يجمع</strong> بيانات استخدام افتراضيًا. عند تفعيله من المالك فقط، تُرسل أحداث مجهولة (أعداد بلا بريد أو اسم أو رقم باركود) بمعرّف عشوائي غير مرتبط بحسابك وبموافقتك.</p>
 
@@ -59,7 +59,7 @@
 
     <h2>٤) ما الذي يغادر جهازك ولمن</h2>
     <table><thead><tr><th>الوجهة</th><th>متى</th><th>ماذا يُرسَل</th></tr></thead><tbody>
-      <tr><td>Supabase (الخادم)</td><td>تسجيل الدخول والمزامنة</td><td>بيانات الحساب والملف والتمارين والقياسات والسجلّات اليومية والأدوية/المكمّلات — مرتبطة بمعرّف حسابك</td></tr>
+      <tr><td>Supabase (الخادم)</td><td>تسجيل الدخول وتفعيل المزامنة</td><td>بيانات الحساب والملف والتمارين والقياسات والتغذية والماء والخطوات والإنجازات والخطط والمهام والأدوية/المكمّلات — مرتبطة بمعرّف حسابك</td></tr>
       <tr><td>Open Food Facts</td><td>مسح/بحث باركود غذائي</td><td>رقم الباركود فقط — بلا أي بيانات عنك</td></tr>
       <tr><td>GitHub / jsDelivr</td><td>عرض صورة توضيحية لتمرين</td><td>طلب تحميل صورة (يظهر IP جهازك) — بلا بيانات عنك</td></tr>
       <tr><td>YouTube</td><td>الضغط «شاهد الأداء»</td><td>يفتح رابط بحث خارجيًا — لا تضمين ولا تتبّع داخل التطبيق</td></tr>
@@ -75,13 +75,13 @@
     <p>نحتفظ ببياناتك ما دام حسابك قائمًا. البيانات المحلية تبقى على جهازك حتى تحذفها أو تحذف التطبيق. عند حذف الحساب تُمحى من الخادم والجهاز (§٨).</p>
 
     <h2>٨) حذف بياناتك</h2>
-    <p>داخل التطبيق: «الإعدادات والخصوصية ← حذف الحساب نهائيًا»، ويؤدي إلى: (١) حذف حساب المصادقة من الخادم؛ (٢) حذف صفوف بياناتك من <code>profiles</code>، <code>workout_sessions</code>، <code>exercise_history</code>، <code>measurement_logs</code>، <code>daily_logs</code>؛ (٣) مسح كل بيانات قِمّة من جهازك (تبقى تفضيلات غير شخصية كاللغة). إن تعذّر الحذف من الخادم لا يُحذف شيء ولا يُدّعى نجاح.</p>
+    <p>داخل التطبيق: «الإعدادات والخصوصية ← حذف الحساب نهائيًا»، ويؤدي إلى حذف صفوفك من جميع جداول بيانات المستخدم، ثم حساب المصادقة، ثم كل بيانات قِمّة من جهازك (تبقى تفضيلات غير شخصية كاللغة). إن تعذّر الحذف من الخادم لا يُحذف شيء ولا يُدّعى نجاح.</p>
 
     <h2>٩) حقوقك (نظام حماية البيانات الشخصية)</h2>
     <p>لك الحق في <strong>الوصول</strong> و<strong>التصحيح</strong> و<strong>الحذف</strong> و<strong>الاعتراض/التقييد</strong>. تمارس معظمها داخل التطبيق (تعديل الملف، حذف الحساب). لأي طلب إضافي راسلنا على <a href="mailto:support@qimmah.app">support@qimmah.app</a>.</p>
 
     <h2>١٠) الأطفال والفئة العمرية</h2>
-    <p>الحد الأدنى للعمر المؤهّل: <strong>[يُؤكَّد من المالك]</strong>. (ملاحظة فنية: حقل العمر في الإعداد يقبل حاليًا ١٢–٩٠ لأغراض حساب السعرات، وليس بوابة أهلية.)</p>
+    <p>الحد الأدنى للعمر المؤهّل: <strong>١٢ سنة</strong>، ويجب تأكيد ذلك صراحةً عند إنشاء الحساب. لا يوجد مسار موافقة وليّ أمر في هذه النسخة.</p>
 
     <h2>١١) الأمان</h2>
     <p>اتصالات مشفّرة (HTTPS)، ومصادقة وصلاحيات صف (RLS) على الخادم. لا نخزّن مفاتيح سرية داخل التطبيق (مفاتيح عامة فقط محميّة بـ RLS).</p>
@@ -100,14 +100,14 @@
     <p><strong>a) Account:</strong> email, password, optional display name — for sign-in and sync; passwords are managed securely by Supabase and we never see them.<br>
     <strong>b) Profile &amp; body metrics:</strong> name, age, gender, height, weight, target weight, experience, goal — to build your plan and calorie targets.<br>
     <strong>c) Health &amp; fitness:</strong> workouts (exercises, weights, reps), personal records, body measurements (weight, waist, body-fat %), tracked supplements/medications, and injuries — to track progress and tailor your plan.<br>
-    <strong>d) On-device only (never uploaded):</strong> nutrition/calorie logs, water, steps (manual — <strong>we do not read Apple Health</strong>), achievements.<br>
+    <strong>d) Daily logs:</strong> nutrition/calorie logs, water, steps (manual — <strong>we do not read Apple Health</strong>), achievements, custom plans, and tasks are local-first and may sync when sync is enabled.<br>
     <strong>e) Camera:</strong> used <strong>only</strong> to scan food barcodes; frames are decoded on-device, no images stored or sent.<br>
     <strong>f) Optional diagnostics:</strong> <strong>no</strong> usage data by default. Only if enabled by the owner, anonymous events (no email, name, or barcode) under a random identifier unlinked to your account, with consent.</p>
     <h2>3) What we don’t do</h2>
     <ul><li><strong>No ads, no cross-app/cross-site tracking, no selling your data.</strong></li><li><strong>No third-party tracking SDKs</strong> (no Google/Meta/etc.).</li><li><strong>We do not request your location, contacts, or photos.</strong></li></ul>
     <h2>4) What leaves your device, to whom</h2>
     <table><thead><tr><th>Destination</th><th>When</th><th>What is sent</th></tr></thead><tbody>
-      <tr><td>Supabase</td><td>Sign-in &amp; sync</td><td>Account, profile, workouts, measurements, daily logs, meds/supplements — linked to your account id</td></tr>
+      <tr><td>Supabase</td><td>Sign-in &amp; enabled sync</td><td>Account, profile, workouts, measurements, nutrition, water, steps, achievements, plans, tasks, meds/supplements — linked to your account id</td></tr>
       <tr><td>Open Food Facts</td><td>Scan/search a barcode</td><td>The barcode number only — nothing about you</td></tr>
       <tr><td>GitHub / jsDelivr</td><td>Viewing an exercise image</td><td>An image GET (your IP visible to the CDN) — nothing about you</td></tr>
       <tr><td>YouTube</td><td>Tap “watch form”</td><td>Opens an external search URL — no in-app embed or tracking</td></tr>
@@ -115,9 +115,9 @@
     <h2>5) Health data</h2><p>Your health data stays local and, when signed in, syncs only to your own account, protected by row-level security so only you can access it. We never sell or share it for marketing.</p>
     <h2>6) Sync, hosting &amp; storage location</h2><p>Data syncs to Supabase over HTTPS. Your data is stored on Supabase infrastructure in <strong>Japan</strong> (region <code>ap-northeast-1</code>, Tokyo) — a cross-border transfer from Saudi Arabia to Japan. This processing is safeguarded contractually through Supabase's Data Processing Addendum (DPA). We claim no adequacy decision or formal approval for any destination; final sign-off on the cross-border transfer mechanism under the Saudi PDPL rests with the owner and legal counsel before public launch.</p>
     <h2>7) Retention</h2><p>We keep your data while your account exists. Local data stays until you delete it or the app. Deleting your account erases data from server and device (§8).</p>
-    <h2>8) Deleting your data</h2><p>In-app: <strong>Settings &amp; privacy → Delete account permanently</strong> — deletes your auth account, your rows in <code>profiles/workout_sessions/exercise_history/measurement_logs/daily_logs</code>, and all Qimmah data on your device. If server deletion fails, nothing is deleted and no success is claimed.</p>
+    <h2>8) Deleting your data</h2><p>In-app: <strong>Settings &amp; privacy → Delete account permanently</strong> — deletes your rows from all Qimmah user-data tables, your auth account, and all Qimmah data on your device. If server deletion fails, nothing is deleted and no success is claimed.</p>
     <h2>9) Your rights (Saudi PDPL)</h2><p>Access, correction, deletion, objection/restriction — most exercised in-app; else email <a href="mailto:support@qimmah.app">support@qimmah.app</a>.</p>
-    <h2>10) Children &amp; age</h2><p>Minimum eligible age: <strong>[OWNER-TO-CONFIRM]</strong>. (Technical note: the setup age field accepts 12–90 for calorie math; it is not an eligibility gate.)</p>
+    <h2>10) Children &amp; age</h2><p>Minimum eligible age: <strong>12 years</strong>. Account creation requires an explicit 12+ confirmation. This version has no parental-consent flow.</p>
     <h2>11) Security</h2><p>Encrypted (HTTPS) connections; server-side auth and row-level security. No secret keys embedded in the app.</p>
     <h2>12) Changes</h2><p>We may update this policy; the date above is published and material changes are notified.</p>
     <h2>13) Contact</h2><p><strong>Qimmah App — represented by its owner</strong> — <a href="mailto:[OWNER-EMAIL]">[OWNER-EMAIL]</a></p>

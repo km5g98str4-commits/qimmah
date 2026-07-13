@@ -21,9 +21,8 @@
 
 ### 3. سنّ الأهلية
 الحد الأدنى للعمر لاستخدام قِمّة: **12 سنة**.
-> ملاحظة فنية صادقة (من الشيفرة): إدخال بيانات التطبيق يبدأ من 12 سنة، متوافقًا مع حقل العمر في الإعداد الذي يقبل
-> 12–90 سنة لحساب السعرات (`src/lib/validation.ts`). لا توجد بعد شاشة تأكيد أهلية صريحة عند التسجيل؛ إضافة تأكيد
-> أهلية «12+» عند التسجيل متابعة مُسجّلة (follow-up) على المالك. لا يُدّعى أي تحقّق عمري لم يُبنَ بعد.
+يتطلّب إنشاء الحساب تأكيدًا صريحًا بأن العمر 12 سنة أو أكثر، مع الموافقة على هذه الشروط وسياسة الخصوصية. لا
+ندّعي التحقق من وثيقة هوية أو وجود مسار موافقة وليّ أمر.
 
 ### 4. حسابك
 أنت مسؤول عن سرية بيانات دخولك وعن النشاط على حسابك. زوّدنا ببيانات صحيحة وحدّثها عند الحاجة.
@@ -79,10 +78,8 @@ emergency, contact emergency services.
 
 ### 3. Eligibility age
 Minimum age to use Qimmah: **12 years**.
-> Honest technical note (from code): app data input starts at 12, aligned with the setup age field which accepts
-> 12–90 for calorie math (`src/lib/validation.ts`). An explicit eligibility confirmation at signup is not yet
-> shipped; adding a “12+” confirmation at signup is a logged follow-up for the owner. No age verification is
-> claimed that isn’t built.
+Account creation requires an explicit confirmation that the user is 12 or older and accepts these Terms and the
+Privacy Policy. We do not claim identity-document verification or a parental-consent flow.
 
 ### 4. Your account
 You are responsible for your credentials and account activity. Provide accurate information and keep it updated.

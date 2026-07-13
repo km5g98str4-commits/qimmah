@@ -21,6 +21,7 @@ export interface V2OnboardingChoices {
   /** Equipment preference — NO existing `Answers` field; collected for UX only. */
   pref: V2Pref | null
   injuries: string[]
+  healthDataConsent: boolean
 }
 
 /** v2 training place → the closest existing `Environment`. */
@@ -55,6 +56,7 @@ export function toAnswersFromV2(choices: V2OnboardingChoices): Answers {
     sessionDurationMin: choices.duration,
     environment: choices.place ? PLACE_TO_ENV[choices.place] : undefined,
     injuries: [...choices.injuries],
+    healthDataConsent: choices.healthDataConsent,
     targetWeightKg,
     targetTouched: true,
   }
