@@ -11,6 +11,8 @@ import { getLanguage } from './appPreferences'
 import { wipeUserData, setLastUser } from './accountScope'
 import { miscStrings } from '@/i18n/dict/misc'
 import { parseRecoveryParams, implicitTokens } from './recoveryState'
+import { fullSync, startSyncLifecycle } from './syncService'
+import { isSyncEnabled, setSyncRuntime } from './syncQueue'
 
 export interface AuthResult {
   ok: boolean
@@ -195,7 +197,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // مصدر الحقيقة للاستعادة: حين يكتشف Supabase رابط الاستعادة (ويب أو Deep Link) يُطلق
         // PASSWORD_RECOVERY مع جلسة مؤقتة — نرفع العلم فيُثبَّت المستخدم على شاشة كلمة المرور
         // الجديدة فوق كل البوّابات، ولا يُقذف لتسجيل الدخول ولو لم يكن hash هو #/reset.
-        if (event === 'PASSWORD_RECOVERY') setRecoveryActive(true)
+        if (event === 'PASSWORD_RECOVERY') {
+          setSyncRuntime(newSession?.user.id ?? null, true)
+          setRecoveryActive(true)
+        }
       })
       unsubscribe = () => sub.subscription.unsubscribe()
     })
@@ -205,6 +210,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       unsubscribe?.()
     }
   }, [configured])
+
+  useEffect(() => {
+    const userId = user?.id ?? null
+    setSyncRuntime(userId, recoveryActive)
+    if (!isSyncEnabled() || !userId || recoveryActive || loading) return
+    // Login/session restoration hydrates once; lifecycle covers connectivity and foreground retries.
+    void fullSync()
+    return startSyncLifecycle()
+  }, [user?.id, recoveryActive, loading])
 
   const value = useMemo<AuthContextValue>(
     () => ({
@@ -239,10 +253,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       async signOut() {
         const supabase = await getSupabase()
         if (!supabase) return
-        await supabase.auth.signOut()
+        try {
+          await supabase.auth.signOut()
+        } catch {
+          /* Local owner isolation must complete even when the network is unavailable. */
+        }
         // عزل الحساب: امسح كل بيانات المستخدم على الجهاز عند الخروج (لا تبقى بقايا
         // يقرؤها المستخدم التالي)، وثبّت المالك على «ضيف» فلا يُعيد التوفيق المسح مجددًا.
-        wipeUserData()
+        wipeUserData(user?.id)
         setLastUser(null)
         // امسح رمز الجلسة صراحةً: wipeUserData يُبقيه (كي لا يُطرد مستخدم أثناء تبديل)،
         // لكن الخروج يجب أن يُنهي الجلسة حتى لو تعذّر نداء signOut الشبكي (فلا يُستعاد الحساب عند إعادة التحميل).
