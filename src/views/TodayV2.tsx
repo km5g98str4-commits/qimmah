@@ -4,176 +4,183 @@ import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
 import type { AppRoute } from '@/lib/appRoutes'
 import { useCustomization } from '@/lib/customizationContext'
-import { buildTodayV2Model, type TodayCategory, type TodayNextAction } from '@/lib/todayV2Model'
+import { buildTodayV2Model, type TodayCard, type TodayPillar } from '@/lib/todayV2Model'
 
 interface TodayV2Props {
   lang: Lang
   onNavigate: (route: AppRoute) => void
 }
 
-const CAT_ICON: Record<TodayCategory, string> = { train: 'Dumbbell', fuel: 'Flame', move: 'Activity', recover: 'ShieldCheck', setup: 'Sparkles' }
-
-const PILLARS: { key: 'train' | 'nutrition' | 'move' | 'recover'; ar: string; en: string; icon: string }[] = [
-  { key: 'train', ar: 'تدريب', en: 'Training', icon: 'Dumbbell' },
-  { key: 'nutrition', ar: 'تغذية', en: 'Nutrition', icon: 'Flame' },
-  { key: 'move', ar: 'حركة', en: 'Movement', icon: 'Activity' },
-  { key: 'recover', ar: 'تعافي', en: 'Recovery', icon: 'ShieldCheck' },
-]
+/** Card icon-tile colour by tone — reads the centralised «مسار اليوم» pillar vars. */
+const TONE_VAR: Record<TodayCard['tone'], string> = {
+  train: 'var(--v2-pillar-train)',
+  nutrition: 'var(--v2-pillar-nutrition)',
+  move: 'var(--v2-pillar-move)',
+  recover: 'var(--v2-pillar-nutrition)',
+  progress: 'var(--v2-pillar-move)',
+}
 
 /**
- * Today — Qimmah v2.1 Command Center (Slice 3). Preview-gated (rendered from
- * DashboardView under isDesignV2). Answers, top to bottom: أين أنا؟ (header +
- * goal) · ماذا أفعل الآن؟ (next-step hero + nudges) · لماذا أثق؟ (momentum track
- * + honest trust notes). All data comes from buildTodayV2Model — real where
- * available, honest fallback otherwise, never faked.
+ * Today — Qimmah v2.1 Command Center (Slice 3 · PDF §04). One hero decision owns
+ * the top third; a four-pillar «مسار اليوم» track reads in 3s; every card carries
+ * a verb + destination. Three states, all real-data-driven (buildTodayV2Model):
+ * normal · new-user (guides setup, no empty rings) · after-workout (recovery +
+ * fuel, green CTA). Preview-gated — rendered from DashboardView under isDesignV2.
  */
 export function TodayV2({ lang, onNavigate }: TodayV2Props) {
   const { customization } = useCustomization()
   const ar = lang !== 'en'
   const model = useMemo(() => buildTodayV2Model(customization, lang), [customization, lang])
-  const dateLabel = useMemo(() => {
-    try {
-      return new Intl.DateTimeFormat(ar ? 'ar-SA' : 'en-US', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date())
-    } catch {
-      return ''
-    }
-  }, [ar])
-
-  const go = (a: TodayNextAction | { destination: AppRoute | null; disabledReason: string | null }) => {
-    if (a.destination) onNavigate(a.destination as AppRoute)
-  }
-  const pillarPct = (k: string) =>
-    k === 'train' ? model.dayProgress.trainPercent : k === 'nutrition' ? model.dayProgress.nutritionPercent : k === 'move' ? model.dayProgress.movementPercent : model.dayProgress.recoveryPercent
-  const pillarOn = (k: string) =>
-    k === 'train' ? model.nextWorkout.available : k === 'nutrition' ? model.nutrition.available : k === 'move' ? model.movement.available : model.recovery.available
+  const go = (dest: AppRoute | null) => dest && onNavigate(dest)
 
   return (
     <div dir={ar ? 'rtl' : 'ltr'} className="min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
       <div className="mx-auto w-full max-w-md space-y-5 animate-fade-up">
-        {/* Header — أين أنا؟ */}
-        <header className="flex items-center justify-between pt-1">
-          <div>
-            <p className="text-xs font-medium text-ink-500">{dateLabel}</p>
-            <h1 className="mt-0.5 text-2xl font-black tracking-tight">{ar ? 'اليوم' : 'Today'}</h1>
+        {/* Header — من أنا وأين أنا (avatar + greeting rewritten by state/time). */}
+        <header className="flex items-center justify-between gap-3 pt-1">
+          <div className="min-w-0">
+            <p className="text-xs font-medium text-ink-500">{model.dateLabel}</p>
+            <h1 className="mt-0.5 truncate text-2xl font-black tracking-tight">{model.greeting}</h1>
           </div>
-          {model.goalLabel && (
-            <span className="flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs font-bold text-primary">
-              <Icon name="Target" className="h-3.5 w-3.5" />
-              {model.goalLabel}
-            </span>
-          )}
+          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-primary/12 text-lg font-black text-primary" aria-hidden="true">
+            {model.avatarInitial ?? <Icon name="User" className="h-5 w-5" />}
+          </span>
         </header>
 
-        {/* Hero — ماذا أفعل الآن؟ (خطوتك التالية) */}
+        {/* Hero — الخطوة الواحدة (owns the top third). */}
         <section className="relative overflow-hidden rounded-3xl border border-line bg-surface p-5 shadow-card">
-          <div className="pointer-events-none absolute -top-8 end-[-10%] h-32 w-40 rounded-full opacity-70" style={{ background: 'radial-gradient(closest-side, rgba(242,106,33,0.22), transparent)' }} aria-hidden="true" />
+          <div
+            className="pointer-events-none absolute -top-8 end-[-10%] h-32 w-40 rounded-full opacity-70"
+            style={{ background: `radial-gradient(closest-side, ${model.hero.ctaTone === 'green' ? 'rgba(62,158,107,0.22)' : 'rgba(242,106,33,0.22)'}, transparent)` }}
+            aria-hidden="true"
+          />
           <div className="relative">
-            <p className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-primary">
-              <Icon name={CAT_ICON[model.nextAction.category]} className="h-4 w-4" />
-              {ar ? 'خطوتك التالية' : 'Your next step'}
+            <p className={cn('flex items-center gap-1.5 text-xs font-black uppercase tracking-wider', model.hero.eyebrowDone ? 'text-[color:var(--color-success)]' : 'text-primary')}>
+              {model.hero.eyebrowDone ? (
+                <Icon name="Check" className="h-4 w-4" strokeWidth={3} />
+              ) : (
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary" aria-hidden="true" />
+              )}
+              {model.hero.eyebrow}
             </p>
-            <h2 className="mt-3 text-2xl font-black leading-tight">{model.nextAction.title}</h2>
-            <p className="mt-2 text-sm leading-relaxed text-ink-500">{model.nextAction.subtitle}</p>
-            <button type="button" onClick={() => go(model.nextAction)} className="btn-primary mt-4 w-full py-3.5 text-[1.1875rem]">
-              {model.nextAction.ctaLabel}
+            <h2 className="mt-3 text-2xl font-black leading-tight">{model.hero.title}</h2>
+            <p className="mt-2 text-sm leading-relaxed text-ink-500">{model.hero.subtitle}</p>
+            <button
+              type="button"
+              onClick={() => go(model.hero.destination)}
+              className={cn('mt-4 w-full py-3.5 text-[1.1875rem]', model.hero.ctaTone === 'green' ? 'btn-success' : 'btn-primary')}
+            >
+              {model.hero.ctaLabel}
             </button>
           </div>
         </section>
 
-        {/* State band — momentum + its nudges read as one cluster (section.gap.tight 12). */}
-        <div className="space-y-3">
-        {/* Momentum track — 4 pillars, glanceable in 3s. */}
-        <section className="rounded-2xl border border-line bg-surface p-4">
+        {/* مسار اليوم — four labelled pillars, concrete not abstract. */}
+        <section className="rounded-2xl border border-line bg-surface p-4" aria-label={ar ? 'مسار اليوم' : 'Today’s track'}>
           <div className="flex items-center justify-between">
-            <span className="text-sm font-black">{ar ? 'زخم اليوم' : 'Today’s momentum'}</span>
-            <span className="text-xs font-bold tabular-nums text-ink-500">{model.dayProgress.completedCount}/{model.dayProgress.totalCount}</span>
+            <span className="text-sm font-black">{ar ? 'مسار اليوم' : 'Today’s track'}</span>
+            <span className={cn('text-xs font-bold tabular-nums', model.completedCount > 0 ? 'text-[color:var(--color-success)]' : 'text-ink-500')}>{model.progressLabel}</span>
           </div>
-          <div className="mt-3 grid grid-cols-4 gap-2">
-            {PILLARS.map((p) => {
-              const on = pillarOn(p.key)
-              const percent = pillarPct(p.key)
-              return (
-                <div key={p.key} className="flex flex-col items-center gap-1.5">
-                  <Ring percent={on ? percent : 0} muted={!on} icon={p.icon} />
-                  <span className="text-[0.7rem] font-bold text-ink-700">{ar ? p.ar : p.en}</span>
-                  <span className={cn('text-[0.65rem] font-semibold', on ? 'text-ink-500' : 'text-ink-400')}>
-                    {on ? `${percent}%` : ar ? 'إعداد' : 'Setup'}
-                  </span>
-                </div>
-              )
-            })}
-          </div>
+          <ul className="mt-4 grid grid-cols-4 gap-2">
+            {model.pillars.map((p) => (
+              <li key={p.key} className="flex flex-col items-center gap-2">
+                <PillarRing pillar={p} lang={lang} />
+                <span className="text-[0.7rem] font-bold text-ink-700">{ar ? p.labelAr : p.labelEn}</span>
+              </li>
+            ))}
+          </ul>
         </section>
 
-        {/* Priority nudges — honest, actionable. */}
-        {model.nudges.length > 0 && (
-          <section className="space-y-2.5">
-            {model.nudges.map((n, i) => (
+        {/* Cards — setup guides (new user) or actionable nudges; each verb + destination. */}
+        {model.cards.length > 0 && (
+          <section className="space-y-2.5" aria-label={ar ? 'خطوات مقترحة' : 'Suggested steps'}>
+            {model.cards.map((c, i) => (
               <button
                 key={i}
                 type="button"
-                onClick={() => n.destination && onNavigate(n.destination as AppRoute)}
-                disabled={!n.destination}
-                className={cn(
-                  'flex w-full items-center gap-3 rounded-2xl border px-4 py-3 text-start transition-colors',
-                  n.destination ? 'border-line bg-surface hover:border-primary/40' : 'border-line bg-beige/50 opacity-80',
-                )}
+                onClick={() => go(c.destination)}
+                className="flex w-full items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3 text-start transition-colors hover:border-primary/40"
               >
-                <span className={cn('grid h-9 w-9 shrink-0 place-items-center rounded-xl', n.destination ? 'bg-primary/12 text-primary' : 'bg-beige text-ink-500')}>
-                  <Icon name={CAT_ICON[n.category]} className="h-4.5 w-4.5" />
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl" style={{ backgroundColor: `color-mix(in srgb, ${TONE_VAR[c.tone]} 14%, transparent)`, color: TONE_VAR[c.tone] }}>
+                  <Icon name={c.icon} className="h-[1.15rem] w-[1.15rem]" />
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-bold text-ink-900">{n.label}</span>
-                  {n.disabledReason && <span className="block text-xs text-ink-500">{n.disabledReason}</span>}
+                  <span className="block text-sm font-bold leading-snug text-ink-900">{c.label}</span>
+                  {c.hint && <span className="mt-0.5 block text-xs text-ink-500">{c.hint}</span>}
                 </span>
-                <span className={cn('shrink-0 text-xs font-black', n.destination ? 'text-primary' : 'text-ink-400')}>{n.actionLabel}</span>
+                <span className="flex shrink-0 items-center gap-0.5 text-xs font-black" style={{ color: TONE_VAR[c.tone] }}>
+                  {c.actionLabel}
+                  <Icon name={ar ? 'ChevronLeft' : 'ChevronRight'} className="h-4 w-4" />
+                </span>
               </button>
             ))}
           </section>
         )}
-        </div>
 
-        {/* Quick log — secondary, calm. */}
-        <section className="rounded-2xl border border-line bg-surface p-4">
-          <span className="text-sm font-black">{ar ? 'تسجيل سريع' : 'Quick log'}</span>
-          <div className="mt-3 grid grid-cols-3 gap-2">
-            <QuickBtn icon="Flame" label={ar ? 'وجبة' : 'Meal'} onClick={() => onNavigate('nutrition')} />
-            <QuickBtn icon="Dumbbell" label={ar ? 'تمرين' : 'Workout'} onClick={() => onNavigate('workout')} />
-            <QuickBtn icon="TrendingUp" label={ar ? 'وزن' : 'Weight'} onClick={() => onNavigate('progress')} />
-          </div>
-        </section>
-
-        {/* Trust notes — لماذا أثق؟ */}
-        {model.trustNotes.length > 0 && (
-          <p className="px-1 text-center text-[0.7rem] leading-relaxed text-ink-400">{model.trustNotes.join(' · ')}</p>
-        )}
+        {/* Trust note — honest about what we don't yet know (only when true). */}
+        {model.trustNote && <p className="px-1 text-center text-[0.7rem] leading-relaxed text-ink-400">{model.trustNote}</p>}
       </div>
     </div>
   )
 }
 
-function Ring({ percent, muted, icon }: { percent: number; muted: boolean; icon: string }) {
-  const r = 18
+/**
+ * A single «مسار اليوم» pillar. Four visual states, meaning never colour-only
+ * (icon/check/% always present): done = filled + ✓ · ready = filled + icon ·
+ * active = colour ring + % · locked = dashed placeholder + muted icon (no empty
+ * ring for new users).
+ */
+function PillarRing({ pillar, lang }: { pillar: TodayPillar; lang: Lang }) {
+  const ar = lang !== 'en'
+  const color = `var(--v2-pillar-${pillar.key})`
+  const r = 19
   const c = 2 * Math.PI * r
-  const off = c - (percent / 100) * c
-  return (
-    <span className="relative grid h-12 w-12 place-items-center">
-      <svg className="absolute inset-0 -rotate-90" viewBox="0 0 44 44" aria-hidden="true">
-        <circle cx="22" cy="22" r={r} fill="none" stroke="rgb(var(--c-line))" strokeWidth="4" />
-        {!muted && percent > 0 && (
-          <circle cx="22" cy="22" r={r} fill="none" stroke="var(--c-primary)" strokeWidth="4" strokeLinecap="round" strokeDasharray={c} strokeDashoffset={off} className="motion-safe:transition-[stroke-dashoffset] motion-safe:duration-700 motion-safe:ease-out" />
-        )}
-      </svg>
-      <Icon name={icon} className={cn('h-4.5 w-4.5', muted ? 'text-ink-400' : 'text-ink-700')} />
-    </span>
-  )
-}
+  const off = c - (pillar.percent / 100) * c
+  const name = ar ? pillar.labelAr : pillar.labelEn
+  const stateWord =
+    pillar.state === 'done' ? (ar ? 'مكتمل' : 'done') : pillar.state === 'active' ? `${pillar.percent}%` : pillar.state === 'ready' ? (ar ? 'جاهز' : 'ready') : ar ? 'لم يبدأ' : 'not started'
+  const label = `${name}: ${stateWord}`
 
-function QuickBtn({ icon, label, onClick }: { icon: string; label: string; onClick: () => void }) {
+  if (pillar.state === 'done' || pillar.state === 'ready') {
+    return (
+      <span className="grid h-14 w-14 place-items-center rounded-full" style={{ backgroundColor: color }} role="img" aria-label={label}>
+        <Icon name={pillar.state === 'done' ? 'Check' : pillar.icon} className="h-5 w-5 text-white" strokeWidth={pillar.state === 'done' ? 3 : 2} />
+      </span>
+    )
+  }
+
+  if (pillar.state === 'active') {
+    return (
+      <span className="relative grid h-14 w-14 place-items-center" role="img" aria-label={label}>
+        <svg className="absolute inset-0 -rotate-90" viewBox="0 0 44 44" aria-hidden="true">
+          <circle cx="22" cy="22" r={r} fill="none" stroke="rgb(var(--c-line))" strokeWidth="4" />
+          <circle
+            cx="22"
+            cy="22"
+            r={r}
+            fill="none"
+            stroke={color}
+            strokeWidth="4"
+            strokeLinecap="round"
+            strokeDasharray={c}
+            strokeDashoffset={off}
+            className="motion-safe:transition-[stroke-dashoffset] motion-safe:duration-700 motion-safe:ease-out"
+          />
+        </svg>
+        <span className="text-[0.72rem] font-black tabular-nums" style={{ color }}>
+          {pillar.percent}%
+        </span>
+      </span>
+    )
+  }
+
+  // locked — dashed placeholder, muted icon (never an empty 0% ring)
   return (
-    <button type="button" onClick={onClick} className="flex flex-col items-center gap-1.5 rounded-xl border border-line bg-beige/50 py-3 text-ink-700 transition-colors hover:border-primary/40 active:scale-[0.97]">
-      <Icon name={icon} className="h-5 w-5" />
-      <span className="text-xs font-bold">{label}</span>
-    </button>
+    <span className="relative grid h-14 w-14 place-items-center" role="img" aria-label={label}>
+      <svg className="absolute inset-0" viewBox="0 0 44 44" aria-hidden="true">
+        <circle cx="22" cy="22" r={r} fill="none" stroke="rgb(var(--c-line))" strokeWidth="2" strokeDasharray="3 4" strokeLinecap="round" />
+      </svg>
+      <Icon name={pillar.icon} className="h-5 w-5 text-ink-400" />
+    </span>
   )
 }

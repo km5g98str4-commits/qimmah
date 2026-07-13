@@ -1,199 +1,341 @@
-// Today v2 (Command Center) model — Qimmah Design v2.1 (Slice 3).
+// Today v2.1 (Command Center) model — Qimmah Design v2.1 (Slice 3, PDF §04).
 //
-// A small, HONEST view-model assembled from real local data (customization/
-// generated plan, step log, nutrition log, onboarding profile). Every field
-// degrades to a useful next-action fallback when data is missing — never a fake
-// value, never an empty ring. Pure/read-only: no writes, no network, no schema.
+// A small, HONEST view-model assembled from real local data (generated plan,
+// finished sessions, step log, nutrition log, wellness plan, onboarding). It
+// resolves ONE of three states the founder stress-tested — normal · new-user
+// (low data) · after-workout — and, for each, a single hero decision, a four
+// pillar «مسار اليوم» track, and verb+destination cards. Every value is real or
+// an honest fallback; never a fake number, never an empty ring. Pure/read-only.
 
 import type { Customization } from '@/lib/customization'
 import type { Lang } from '@/lib/appPreferences'
 import type { CalorieGoal } from '@/types/profile'
+import type { AppRoute } from '@/lib/appRoutes'
 import { todayPlanDay } from '@/lib/workoutPlan'
 import { getSteps, loadStepGoal } from '@/lib/stepCounter'
-import { getNutritionLog } from '@/lib/historyStore'
-import { getDayStamp } from '@/lib/today'
+import { getNutritionLog, getWorkoutSessions } from '@/lib/historyStore'
+import { todaysFinishedSession } from '@/lib/workoutSessions'
+import { getDayStamp, weekdayName } from '@/lib/today'
 import { loadOnboardingProfile } from '@/lib/onboardingProfile'
 
-export type TodayCategory = 'train' | 'fuel' | 'move' | 'recover' | 'setup'
+export type TodayState = 'normal' | 'newUser' | 'afterWorkout'
+export type PillarKey = 'train' | 'nutrition' | 'move' | 'recover'
+/** done = complete (✓) · active = in-progress ring (%) · ready = today's focus, filled + icon · locked = dashed placeholder (no empty ring). */
+export type PillarState = 'done' | 'active' | 'ready' | 'locked'
 
-export interface TodayNextAction {
-  category: TodayCategory
+export interface TodayPillar {
+  key: PillarKey
+  labelAr: string
+  labelEn: string
+  icon: string
+  state: PillarState
+  percent: number
+}
+
+export interface TodayHero {
+  eyebrow: string
+  /** after-workout eyebrow reads as a green completion line, not an ember prompt. */
+  eyebrowDone: boolean
   title: string
   subtitle: string
   ctaLabel: string
-  destination: 'setup' | 'workout' | 'nutrition' | 'progress' | null
-  disabledReason: string | null
+  ctaTone: 'ember' | 'green'
+  destination: AppRoute | null
 }
 
-export interface TodayNudge {
+export interface TodayCard {
   label: string
+  hint: string | null
+  /** short imperative verb («أضف»/«سجّل»/«عرض»/«فعّل») paired with the chevron; may be '' when the label itself opens with the verb. */
   actionLabel: string
-  category: TodayCategory
-  destination: 'setup' | 'workout' | 'nutrition' | 'progress' | null
-  disabledReason: string | null
+  icon: string
+  tone: PillarKey | 'progress'
+  destination: AppRoute | null
 }
 
 export interface TodayV2Model {
-  currentGoal: CalorieGoal | null
+  state: TodayState
+  greeting: string
+  dateLabel: string
+  avatarInitial: string | null
   goalLabel: string | null
-  nextAction: TodayNextAction
-  nextWorkout: { title: string; durationMin: number; exerciseCount: number; muscles: string[]; source: string; available: boolean }
-  nutrition: { caloriesRemaining: number | null; proteinRemainingGrams: number | null; priorityText: string; available: boolean }
-  movement: { stepsCurrent: number | null; stepsTarget: number | null; stepsRemaining: number | null; available: boolean }
-  recovery: { nextReminder: string | null; available: boolean }
-  dayProgress: { trainPercent: number; nutritionPercent: number; movementPercent: number; recoveryPercent: number; completedCount: number; totalCount: number }
-  nudges: TodayNudge[]
-  trustNotes: string[]
+  hero: TodayHero
+  pillars: TodayPillar[]
+  progressLabel: string
+  completedCount: number
+  totalCount: number
+  cards: TodayCard[]
+  trustNote: string | null
 }
 
 const GOAL_LABEL_AR: Record<CalorieGoal, string> = { cut: 'تنشيف', maintain: 'محافظة', bulk: 'تضخيم' }
 const GOAL_LABEL_EN: Record<CalorieGoal, string> = { cut: 'Cut', maintain: 'Maintain', bulk: 'Bulk' }
 const pct = (cur: number, target: number) => (target > 0 ? Math.max(0, Math.min(100, Math.round((cur / target) * 100))) : 0)
-
-/** Estimated session length from the exercise count (honest heuristic, ~9 min/exercise incl. rest). */
+/** Honest session-length heuristic (~9 min/exercise incl. rest), rounded to 5. */
 const estimateDurationMin = (exerciseCount: number) => (exerciseCount > 0 ? Math.max(20, Math.round((exerciseCount * 9) / 5) * 5) : 0)
+const num = (n: number) => n.toLocaleString('en-US')
+
+/** Part of day for the honest greeting/date line — from the real clock. */
+function partOfDay(ar: boolean, d = new Date()): string {
+  const h = d.getHours()
+  if (h < 12) return ar ? 'صباحًا' : 'Morning'
+  if (h < 17) return ar ? 'ظهرًا' : 'Afternoon'
+  return ar ? 'مساءً' : 'Evening'
+}
 
 export function buildTodayV2Model(customization: Customization, lang: Lang): TodayV2Model {
   const ar = lang !== 'en'
   const t = (a: string, e: string) => (ar ? a : e)
+  const now = new Date()
+
   const onboarded = loadOnboardingProfile() !== null
   const goal = customization.profile.goal ?? null
   const goalLabel = goal ? (ar ? GOAL_LABEL_AR[goal] : GOAL_LABEL_EN[goal]) : null
+  const name = (customization.profile.name ?? '').trim()
+  const firstName = name ? name.split(/\s+/)[0] : ''
+  const avatarInitial = name ? Array.from(name)[0] : null
 
-  // ── Workout (real: generated plan) ──
+  // ── Workout (real: generated plan + finished sessions) ──
   const day = todayPlanDay(customization.workoutPlan)
   const exerciseCount = day?.exercises.length ?? 0
+  const workoutName = day ? (ar ? day.nameAr : day.nameEn) : ''
   const workoutAvailable = onboarded && exerciseCount > 0
-  const workoutTitle = day ? (ar ? day.nameAr : day.nameEn) : ''
-  const nextWorkout = {
-    title: workoutTitle,
-    durationMin: estimateDurationMin(exerciseCount),
-    exerciseCount,
-    muscles: [] as string[],
-    source: t('من خطتك المولّدة', 'from your generated plan'),
-    available: workoutAvailable,
-  }
+  const durationMin = customization.profile.workoutDuration > 0 ? customization.profile.workoutDuration : estimateDurationMin(exerciseCount)
+  const finished = todaysFinishedSession()
+  const finishedName = finished ? finished.workoutDayName || workoutName : ''
 
-  // ── Nutrition (target real; consumed from today's log if any) ──
+  // ── Nutrition (target real; consumed from today's log — the manually logged
+  //    food totals live under `loggedFood`, not top-level fields) ──
   const log = getNutritionLog(getDayStamp())
-  const rec = log as unknown as { calories?: number; protein?: number } | undefined
-  const caloriesConsumed = typeof rec?.calories === 'number' ? rec.calories : 0
-  const proteinConsumed = typeof rec?.protein === 'number' ? rec.protein : 0
+  const food = log?.loggedFood
+  const caloriesConsumed = typeof food?.calories === 'number' ? food.calories : 0
+  const proteinConsumed = typeof food?.protein === 'number' ? food.protein : 0
   const calTarget = customization.nutritionPlan?.targetCalories ?? 0
   const proTarget = customization.nutritionPlan?.targetProtein ?? 0
+  const proteinRemaining = proTarget > 0 ? Math.max(0, proTarget - proteinConsumed) : null
+  const nutritionTarget = calTarget > 0
   const loggedMeal = caloriesConsumed > 0 || proteinConsumed > 0
-  const nutrition = {
-    caloriesRemaining: calTarget > 0 ? Math.max(0, calTarget - caloriesConsumed) : null,
-    proteinRemainingGrams: proTarget > 0 ? Math.max(0, proTarget - proteinConsumed) : null,
-    priorityText: loggedMeal
-      ? t(`بقي ${Math.max(0, proTarget - proteinConsumed)}g بروتين لهدف اليوم`, `${Math.max(0, proTarget - proteinConsumed)}g protein left today`)
-      : t('سجّل أول وجبة لنضبط البروتين', 'Log your first meal to hit protein'),
-    available: calTarget > 0,
-  }
+  const nutritionPercent = nutritionTarget ? pct(caloriesConsumed, calTarget) : 0
 
   // ── Movement (real: step log; honest missing if no source) ──
   const stepsCurrent = getSteps()
   const stepsTarget = loadStepGoal()
   const movementAvailable = stepsCurrent > 0
-  const movement = {
-    stepsCurrent: movementAvailable ? stepsCurrent : null,
-    stepsTarget,
-    stepsRemaining: movementAvailable ? Math.max(0, stepsTarget - stepsCurrent) : null,
-    available: movementAvailable,
-  }
+  const stepsRemaining = movementAvailable ? Math.max(0, stepsTarget - stepsCurrent) : null
+  const movementPercent = movementAvailable ? pct(stepsCurrent, stepsTarget) : 0
 
-  // ── Recovery (reminders/meds) — neutral when nothing scheduled ──
+  // ── Recovery (wellness reminders) — neutral until scheduled/done ──
   const supplements = customization.wellnessPlan?.supplements ?? []
   const medications = customization.wellnessPlan?.medications ?? []
-  const recoveryAvailable = supplements.length + medications.length > 0
-  const recovery = {
-    nextReminder: recoveryAvailable ? t('لديك تذكيرات اليوم', 'You have reminders today') : null,
-    available: recoveryAvailable,
-  }
+  const recoveryAvailable = customization.wellnessPlan?.enabled !== false && supplements.length + medications.length > 0
 
-  // ── Day progress (four pillars) ──
-  const trainPercent = 0 // completed-workout tracking lands with the workout loop; honest 0 until then
-  const nutritionPercent = nutrition.available ? pct(caloriesConsumed, calTarget) : 0
-  const movementPercent = movement.available ? pct(stepsCurrent, stepsTarget) : 0
-  const recoveryPercent = 0
-  const pillars = [
-    { on: onboarded, done: trainPercent >= 100 },
-    { on: nutrition.available, done: nutritionPercent >= 100 },
-    { on: movement.available, done: movementPercent >= 100 },
-    { on: recoveryAvailable, done: false },
-  ]
-  const dayProgress = {
-    trainPercent,
-    nutritionPercent,
-    movementPercent,
-    recoveryPercent,
-    completedCount: pillars.filter((p) => p.done).length,
-    totalCount: pillars.filter((p) => p.on).length || 4,
-  }
+  // ── State discriminator (from real data) ──
+  const hasHistory = getWorkoutSessions().length > 0 || loggedMeal || movementAvailable
+  const state: TodayState = finished ? 'afterWorkout' : !onboarded || !hasHistory ? 'newUser' : 'normal'
 
-  // ── Next action (single most important decision) — priority: setup > train > fuel > move ──
-  let nextAction: TodayNextAction
-  if (!onboarded) {
-    nextAction = {
-      category: 'setup',
-      title: t('أكمل إعداد خطتك', 'Finish setting up your plan'),
-      subtitle: t('دقيقتان لنبني تمرينك وتغذيتك.', 'Two minutes to build your training and nutrition.'),
-      ctaLabel: t('ابدأ الإعداد', 'Start setup'),
-      destination: 'setup',
-      disabledReason: null,
-    }
-  } else if (workoutAvailable) {
-    nextAction = {
-      category: 'train',
-      title: t(`ابدأ تمرين ${workoutTitle}`, `Start ${workoutTitle}`),
-      subtitle: t(`${exerciseCount} تمارين · ~${nextWorkout.durationMin} دقيقة`, `${exerciseCount} exercises · ~${nextWorkout.durationMin} min`),
-      ctaLabel: t('ابدأ التمرين', 'Start workout'),
-      destination: 'workout',
-      disabledReason: null,
-    }
-  } else if (nutrition.available && !loggedMeal) {
-    nextAction = {
-      category: 'fuel',
-      title: t('سجّل أول وجبة', 'Log your first meal'),
-      subtitle: nutrition.priorityText,
-      ctaLabel: t('سجّل وجبة', 'Log a meal'),
-      destination: 'nutrition',
-      disabledReason: null,
-    }
-  } else if (movement.available && (movement.stepsRemaining ?? 0) > 0) {
-    nextAction = {
-      category: 'move',
-      title: t(`امشِ ${movement.stepsRemaining?.toLocaleString('en-US')} خطوة`, `Walk ${movement.stepsRemaining?.toLocaleString('en-US')} steps`),
-      subtitle: t('لتكمل هدف حركتك اليوم.', 'to finish today’s movement goal.'),
-      ctaLabel: t('عرض التقدّم', 'View progress'),
-      destination: 'progress',
-      disabledReason: null,
-    }
+  // ── Header: greeting + date line, rewritten by state & time-of-day ──
+  const weekday = weekdayName(ar ? 'ar' : 'en', now)
+  let greeting: string
+  let dateLabel: string
+  if (state === 'afterWorkout') {
+    greeting = t('أحسنت اليوم', 'Well done today')
+    dateLabel = `${weekday} · ${partOfDay(ar, now)}`
   } else {
-    nextAction = {
-      category: 'recover',
-      title: t('أنت على المسار', 'You are on track'),
-      subtitle: t('راجع تقدّمك أو سجّل وجبتك القادمة.', 'Review progress or log your next meal.'),
+    const dayMonth = (() => {
+      try {
+        // `ar` (not `ar-SA`) keeps the Gregorian calendar to match the approved
+        // v2.1 mockups («١١ يوليو»), consistent with the Gregorian weekday above.
+        return new Intl.DateTimeFormat(ar ? 'ar' : 'en-US', { day: 'numeric', month: 'long' }).format(now)
+      } catch {
+        return ''
+      }
+    })()
+    dateLabel = dayMonth ? `${weekday} · ${dayMonth}` : weekday
+    greeting = state === 'newUser' ? (firstName ? t(`أهلاً ${firstName}`, `Hi ${firstName}`) : t('أهلاً بك', 'Welcome')) : t('يومك في قِمّة', 'Your day in Qimmah')
+  }
+
+  // ── Hero: the single top-third decision ──
+  const hero = buildHero({ t, state, workoutAvailable, workoutName, exerciseCount, durationMin, finishedName, proteinRemaining, nutritionTarget, loggedMeal })
+
+  // ── مسار اليوم: four pillars (real state each; all locked for new users) ──
+  const trainState: PillarState = finished ? 'done' : workoutAvailable ? 'ready' : 'locked'
+  const nutritionState: PillarState = !nutritionTarget ? 'locked' : nutritionPercent >= 100 ? 'done' : nutritionPercent > 0 ? 'active' : 'locked'
+  const moveState: PillarState = !movementAvailable ? 'locked' : movementPercent >= 100 ? 'done' : movementPercent > 0 ? 'active' : 'locked'
+  const recoverState: PillarState = 'locked' // recovery completes in the evening flow; honest neutral until then
+  const lockAll = state === 'newUser'
+  const pillars: TodayPillar[] = [
+    { key: 'train', labelAr: 'تدريب', labelEn: 'Training', icon: 'Dumbbell', state: lockAll ? 'locked' : trainState, percent: 0 },
+    { key: 'nutrition', labelAr: 'تغذية', labelEn: 'Nutrition', icon: 'Flame', state: lockAll ? 'locked' : nutritionState, percent: nutritionPercent },
+    { key: 'move', labelAr: 'حركة', labelEn: 'Movement', icon: 'Activity', state: lockAll ? 'locked' : moveState, percent: movementPercent },
+    { key: 'recover', labelAr: 'تعافي', labelEn: 'Recovery', icon: 'Moon', state: lockAll ? 'locked' : recoverState, percent: 0 },
+  ]
+  const completedCount = pillars.filter((p) => p.state === 'done').length
+  const totalCount = pillars.length
+  const progressLabel = state === 'newUser' ? t('لم يبدأ بعد', 'Not started yet') : t(`${completedCount} من ${totalCount} مكتمل`, `${completedCount} of ${totalCount} done`)
+
+  // ── Cards: setup guides (new user) or actionable nudges (normal/after) ──
+  const cards =
+    state === 'newUser'
+      ? buildSetupCards(t)
+      : state === 'afterWorkout'
+        ? buildAfterWorkoutNudges({ t, recoveryAvailable, proteinRemaining })
+        : buildNormalNudges({ t, proteinRemaining, loggedMeal, movementAvailable, stepsRemaining, nutritionTarget })
+
+  // ── Trust note (single, honest, only when something is genuinely unknown) ──
+  let trustNote: string | null = null
+  if (state !== 'newUser') {
+    if (!movementAvailable) trustNote = t('لا تُعرض خطوات وهمية — مصدر الحركة غير مربوط.', 'No fake steps — movement source not connected.')
+    else if (!loggedMeal && nutritionTarget) trustNote = t('لا وجبات مسجّلة اليوم بعد.', 'No meals logged yet today.')
+  }
+
+  return { state, greeting, dateLabel, avatarInitial, goalLabel, hero, pillars, progressLabel, completedCount, totalCount, cards, trustNote }
+}
+
+// ── Hero builders ────────────────────────────────────────────────────────────
+
+function buildHero(a: {
+  t: (ar: string, en: string) => string
+  state: TodayState
+  workoutAvailable: boolean
+  workoutName: string
+  exerciseCount: number
+  durationMin: number
+  finishedName: string
+  proteinRemaining: number | null
+  nutritionTarget: boolean
+  loggedMeal: boolean
+}): TodayHero {
+  const { t, state, workoutAvailable, workoutName, exerciseCount, durationMin, finishedName, proteinRemaining } = a
+  const withPrefix = (n: string) => (n.startsWith('تمرين') ? n : `تمرين ${n}`)
+
+  if (state === 'afterWorkout') {
+    const doneLine = finishedName ? t(`أنهيت ${withPrefix(finishedName)}`, `Finished ${finishedName}`) : t('أنهيت تمرين اليوم', 'Workout done')
+    if (proteinRemaining !== null && proteinRemaining > 0) {
+      return {
+        eyebrow: doneLine,
+        eyebrowDone: true,
+        title: t('سجّل وجبة ما بعد التمرين', 'Log your post-workout meal'),
+        subtitle: t(`بروتين الآن يسرّع التعافي · بقي ${proteinRemaining}g`, `Protein now speeds recovery · ${proteinRemaining}g left`),
+        ctaLabel: t('سجّل وجبة', 'Log a meal'),
+        ctaTone: 'green',
+        destination: 'nutrition',
+      }
+    }
+    // protein goal met (or no target) → recovery-first, still a real next action
+    return {
+      eyebrow: doneLine,
+      eyebrowDone: true,
+      title: proteinRemaining === 0 ? t('اكتمل بروتين اليوم', 'Protein goal met') : t('خذ قسط تعافٍ', 'Take your recovery'),
+      subtitle: t('راحة جيدة الليلة تُثبّت تقدّمك.', 'Good rest tonight locks in your progress.'),
       ctaLabel: t('عرض التقدّم', 'View progress'),
+      ctaTone: 'green',
       destination: 'progress',
-      disabledReason: null,
     }
   }
 
-  // ── Priority nudges (honest, actionable, 2–4) ──
-  const nudges: TodayNudge[] = []
-  if (workoutAvailable) nudges.push({ label: t('تمرينك القادم جاهز', 'Your next workout is ready'), actionLabel: t('ابدأ', 'Start'), category: 'train', destination: 'workout', disabledReason: null })
-  if (!onboarded) nudges.push({ label: t('لم تُكمل الإعداد بعد', 'Setup not finished'), actionLabel: t('أكمل', 'Finish'), category: 'setup', destination: 'setup', disabledReason: null })
-  if (nutrition.available && !loggedMeal) nudges.push({ label: t('سجّل أول وجبة', 'Log your first meal'), actionLabel: t('سجّل', 'Log'), category: 'fuel', destination: 'nutrition', disabledReason: null })
-  if (!movement.available) nudges.push({ label: t('بيانات الخطوات غير متاحة', 'Step data unavailable'), actionLabel: t('لاحقًا', 'Later'), category: 'move', destination: null, disabledReason: t('اربط مصدر الخطوات لاحقًا', 'Connect a step source later') })
-  else if ((movement.stepsRemaining ?? 0) > 0) nudges.push({ label: t(`بقي ${movement.stepsRemaining?.toLocaleString('en-US')} خطوة`, `${movement.stepsRemaining?.toLocaleString('en-US')} steps left`), actionLabel: t('عرض', 'View'), category: 'move', destination: 'progress', disabledReason: null })
-  if (nudges.length < 2) nudges.push({ label: t('سجّل وزنك الحالي', 'Log your current weight'), actionLabel: t('نقطة البداية', 'Baseline'), category: 'recover', destination: 'progress', disabledReason: null })
+  if (state === 'newUser') {
+    if (workoutAvailable) {
+      return {
+        eyebrow: t('أول خطوة معنا', 'Your first step with us'),
+        eyebrowDone: false,
+        title: t('ابدأ تمرينك الأول', 'Start your first workout'),
+        subtitle: t(`خطتك جاهزة · ${workoutName} · ${durationMin} دقيقة`, `Your plan is ready · ${workoutName} · ${durationMin} min`),
+        ctaLabel: t('ابدأ التمرين', 'Start workout'),
+        ctaTone: 'ember',
+        destination: 'workout',
+      }
+    }
+    return {
+      eyebrow: t('أول خطوة معنا', 'Your first step with us'),
+      eyebrowDone: false,
+      title: t('أكمل إعداد خطتك', 'Finish setting up your plan'),
+      subtitle: t('دقيقتان لنُعِدّ تمرينك وتغذيتك.', 'Two minutes to build your training and nutrition.'),
+      ctaLabel: t('ابدأ الإعداد', 'Start setup'),
+      ctaTone: 'ember',
+      destination: 'setup',
+    }
+  }
 
-  // ── Trust notes (data source honesty) ──
-  const trustNotes: string[] = []
-  trustNotes.push(onboarded ? t('خطتك مبنية على إعدادك.', 'Your plan is built from your setup.') : t('أكمل الإعداد لبناء خطتك.', 'Finish setup to build your plan.'))
-  if (!movement.available) trustNotes.push(t('لا تُعرض خطوات وهمية — المصدر غير مربوط.', 'No fake steps — no source connected.'))
-  if (!loggedMeal && nutrition.available) trustNotes.push(t('لا وجبات مسجّلة اليوم بعد.', 'No meals logged yet today.'))
+  // normal
+  if (workoutAvailable) {
+    return {
+      eyebrow: t('خطوتك التالية · الآن', 'Your next step · now'),
+      eyebrowDone: false,
+      title: t(withPrefix(workoutName), workoutName),
+      subtitle: t(`${exerciseCount} تمارين · ${durationMin} دقيقة · جاهز لك`, `${exerciseCount} exercises · ${durationMin} min · ready for you`),
+      ctaLabel: t('ابدأ التمرين', 'Start workout'),
+      ctaTone: 'ember',
+      destination: 'workout',
+    }
+  }
+  // rest day / no workout scheduled → next best real action
+  if (a.nutritionTarget && !a.loggedMeal) {
+    return {
+      eyebrow: t('خطوتك التالية · الآن', 'Your next step · now'),
+      eyebrowDone: false,
+      title: t('سجّل وجبتك القادمة', 'Log your next meal'),
+      subtitle: proteinRemaining !== null && proteinRemaining > 0 ? t(`بقي ${proteinRemaining}g بروتين لهدف اليوم`, `${proteinRemaining}g protein left today`) : t('يوم راحة — تغذيتك تصنع الفرق.', 'Rest day — nutrition makes the difference.'),
+      ctaLabel: t('سجّل وجبة', 'Log a meal'),
+      ctaTone: 'ember',
+      destination: 'nutrition',
+    }
+  }
+  return {
+    eyebrow: t('خطوتك التالية · الآن', 'Your next step · now'),
+    eyebrowDone: false,
+    title: t('راجع تقدّمك', 'Review your progress'),
+    subtitle: t('يوم راحة — حركة خفيفة تكفي اليوم.', 'Rest day — light movement is enough today.'),
+    ctaLabel: t('عرض التقدّم', 'View progress'),
+    ctaTone: 'ember',
+    destination: 'progress',
+  }
+}
 
-  return { currentGoal: goal, goalLabel, nextAction, nextWorkout, nutrition, movement, recovery, dayProgress, nudges: nudges.slice(0, 4), trustNotes }
+// ── Card builders ────────────────────────────────────────────────────────────
+
+/** New-user setup guides — always the three first-steps, never empty rings. */
+function buildSetupCards(t: (ar: string, en: string) => string): TodayCard[] {
+  return [
+    { label: t('سجّل أول وجبة لنضبط سعراتك', 'Log your first meal to set your calories'), hint: null, actionLabel: t('سجّل', 'Log'), icon: 'Utensils', tone: 'nutrition', destination: 'nutrition' },
+    { label: t('سجّل وزنك الحالي · نقطة البداية', 'Log your current weight · your baseline'), hint: null, actionLabel: t('سجّل', 'Log'), icon: 'TrendingUp', tone: 'progress', destination: 'progress' },
+    { label: t('فعّل التذكيرات · لا تفوّت تمرين', 'Turn on reminders · never miss a workout'), hint: null, actionLabel: t('فعّل', 'Enable'), icon: 'Bell', tone: 'recover', destination: 'settings' },
+  ]
+}
+
+/** Normal-day nudges — 2–3, each a verb + destination, never a dead stat. */
+function buildNormalNudges(a: {
+  t: (ar: string, en: string) => string
+  proteinRemaining: number | null
+  loggedMeal: boolean
+  movementAvailable: boolean
+  stepsRemaining: number | null
+  nutritionTarget: boolean
+}): TodayCard[] {
+  const { t, proteinRemaining, loggedMeal, movementAvailable, stepsRemaining, nutritionTarget } = a
+  const cards: TodayCard[] = []
+  if (proteinRemaining !== null && proteinRemaining > 0) {
+    cards.push({ label: t(`بقي ${proteinRemaining}g بروتين لهدف اليوم`, `${proteinRemaining}g protein left for today’s goal`), hint: null, actionLabel: t('أضف', 'Add'), icon: 'Flame', tone: 'nutrition', destination: 'nutrition' })
+  } else if (nutritionTarget && !loggedMeal) {
+    cards.push({ label: t('سجّل أول وجبة لنضبط سعراتك', 'Log your first meal to set your calories'), hint: null, actionLabel: t('سجّل', 'Log'), icon: 'Utensils', tone: 'nutrition', destination: 'nutrition' })
+  }
+  if (movementAvailable && (stepsRemaining ?? 0) > 0) {
+    cards.push({ label: t(`امشِ ${num(stepsRemaining as number)} خطوة تكمل هدفك`, `Walk ${num(stepsRemaining as number)} steps to finish your goal`), hint: null, actionLabel: '', icon: 'Activity', tone: 'move', destination: 'progress' })
+  } else if (!movementAvailable) {
+    cards.push({ label: t('فعّل عدّاد الخطوات لتتبّع حركتك', 'Turn on the step counter to track movement'), hint: null, actionLabel: t('فعّل', 'Enable'), icon: 'Activity', tone: 'move', destination: 'settings' })
+  }
+  if (cards.length < 2) {
+    cards.push({ label: t('سجّل وزنك الحالي · نقطة البداية', 'Log your current weight · your baseline'), hint: null, actionLabel: t('سجّل', 'Log'), icon: 'TrendingUp', tone: 'progress', destination: 'progress' })
+  }
+  return cards.slice(0, 3)
+}
+
+/** After-workout nudges — recovery + a real look-back, each with a destination. */
+function buildAfterWorkoutNudges(a: { t: (ar: string, en: string) => string; recoveryAvailable: boolean; proteinRemaining: number | null }): TodayCard[] {
+  const { t, recoveryAvailable } = a
+  const cards: TodayCard[] = []
+  if (recoveryAvailable) {
+    cards.push({ label: t('تذكيرات المساء · مكمّلاتك قبل النوم', 'Evening reminders · supplements before bed'), hint: null, actionLabel: t('عرض', 'View'), icon: 'Moon', tone: 'recover', destination: 'settings' })
+  }
+  cards.push({ label: t('عرض ملخّص تمرين اليوم', 'View today’s workout summary'), hint: null, actionLabel: t('عرض', 'View'), icon: 'Trophy', tone: 'progress', destination: 'progress' })
+  return cards.slice(0, 3)
 }

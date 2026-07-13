@@ -184,6 +184,16 @@
   --v2-data-2: var(--c-accent);
   --v2-data-3: #3e9e6b;
   --v2-data-4: var(--c-accent);
+
+  /* Today command center — the four «مسار اليوم» pillar colors (Slice 3).
+     Meaning is never color-only: every pillar also carries an icon + text label.
+     Centralised here (not inlined in the view) so the Momentum hex drop replaces
+     the right-hand sides only. Movement Blue is the one genuinely new value —
+     the palette had no blue yet. Additive: consumed only by TodayV2. */
+  --v2-pillar-train: var(--c-primary); /* تدريب — Ember (matches state-workout) */
+  --v2-pillar-nutrition: #3e9e6b; /* تغذية — Green (matches success) */
+  --v2-pillar-move: #3b82f6; /* حركة — Momentum Blue (new; pending final hex) */
+  --v2-pillar-recover: rgb(var(--c-ink-500)); /* تعافي — neutral until scheduled */
 }
 
 /* Activation seam — OPT-IN ONLY. The default document has no `data-design`
