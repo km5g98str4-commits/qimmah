@@ -50,7 +50,7 @@
 | **YouTube** (`youtube.com/results?...`) | User taps “watch form” | Opens external search URL in the browser | No |
 | **Analytics endpoint** | Only if `VITE_ANALYTICS_ENDPOINT` configured **and** consent granted | Batched anonymous event counts (`{events:[…]}`) with random `anonId` | No |
 
-Hosting region of the Supabase project is not encoded in the repo → **OWNER-TO-CONFIRM** (cross-border transfer, §PDPL).
+Hosting region of the Supabase project is not encoded in the repo. **Confirmed by owner: `ap-northeast-1` (Tokyo, Japan).** Signed-in users' health/fitness data (categories 1–8) is therefore stored on Supabase infrastructure in **Japan** — a cross-border transfer from KSA users. Contractual safeguards apply via Supabase's Data Processing Addendum (DPA). No adequacy decision is claimed; final PDPL transfer-mechanism sign-off remains with OWNER+LEGAL (see pdpl-gap-checklist §X-1).
 
 ## 3. Account deletion (verified end-to-end)
 
