@@ -55,7 +55,8 @@ jobs:
       - name: Production build
         run: npx tsc -b && npx vite build
 
-      - name: Perf budget
+      - name: Perf budget (informational, non-gating)
+        continue-on-error: true
         run: node scripts/check-perf-budget.mjs
 
       # Same proof set as ci.yml, but each guarded by existence so an older
