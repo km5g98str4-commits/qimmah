@@ -64,4 +64,8 @@ for cross-app/cross-site tracking (`analytics/provider.ts:9-12`). No ATT prompt 
 ## E. Reminder before submitting
 - Set the checkbox in the header to match the actual App Store build’s `VITE_ANALYTICS_ENDPOINT`.
 - Confirm the Supabase project has RLS enabled (data-isolation claim) — **OWNER-TO-CONFIRM**.
-- App age rating: align with the eligibility age you set in Terms §3.
+- App age rating: eligibility age is **12** (Terms §3). Answer Apple's 2025 age-rating questionnaire
+  truthfully for the app's fitness/wellness content and let Apple **compute** the band; ensure the stated
+  **12+** eligibility is not below Apple's computed band. Note 12 < 13: keep the app out of the Kids Category
+  and use no child-directed data practices (it already has **no ads and no tracking**). See the App Store
+  pack `docs/appstore/03-age-rating.md`.

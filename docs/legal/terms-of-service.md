@@ -1,10 +1,10 @@
 # شروط الاستخدام — قِمّة / Terms of Service — Qimmah
 
-> **مسودة للمراجعة من المالك والمستشار القانوني — ليست استشارة قانونية.** المواضع **[OWNER-ENTITY]** /
-> **[يُؤكَّد من المالك]** تحتاج قرارًا قبل النشر.
+> **مسودة للمراجعة من المالك والمستشار القانوني — ليست استشارة قانونية.** الموضع **[OWNER-EMAIL]**
+> والمواضع **[يُؤكَّد من المالك]** تحتاج قرارًا قبل النشر.
 > **Draft for owner + legal review — not legal advice.**
 
-آخر تحديث / Last updated: [DATE] · **[OWNER-ENTITY]** · **support@qimmah.app**
+آخر تحديث / Last updated: [DATE] · **تطبيق قِمّة — يمثله مالكه / Qimmah App — represented by its owner** · **[OWNER-EMAIL]**
 
 ---
 
@@ -20,10 +20,10 @@
 والمكمّلات **لأغراض التنظيم الشخصي فقط، وليست وصفة ولا توصية بجرعة**. في أي طارئ صحي، اتصل بالجهات الطبية.
 
 ### 3. سنّ الأهلية
-الحد الأدنى للعمر لاستخدام قِمّة: **[يُؤكَّد من المالك]**.
-> ملاحظة فنية صادقة (من الشيفرة): لا توجد حاليًا بوابة عمر للأهلية في التطبيق؛ حقل العمر في الإعداد يقبل 12–90 سنة
-> لحساب السعرات فقط (`src/lib/validation.ts`). يوصى بتحديد سنّ أهلية صريح (مثلًا 13+ أو 16+) بما يتوافق مع تصنيف
-> App Store وأحكام القاصرين في نظام حماية البيانات الشخصية، وإضافة تحقّق فعلي إن لزم.
+الحد الأدنى للعمر لاستخدام قِمّة: **12 سنة**.
+> ملاحظة فنية صادقة (من الشيفرة): إدخال بيانات التطبيق يبدأ من 12 سنة، متوافقًا مع حقل العمر في الإعداد الذي يقبل
+> 12–90 سنة لحساب السعرات (`src/lib/validation.ts`). لا توجد بعد شاشة تأكيد أهلية صريحة عند التسجيل؛ إضافة تأكيد
+> أهلية «12+» عند التسجيل متابعة مُسجّلة (follow-up) على المالك. لا يُدّعى أي تحقّق عمري لم يُبنَ بعد.
 
 ### 4. حسابك
 أنت مسؤول عن سرية بيانات دخولك وعن النشاط على حسابك. زوّدنا ببيانات صحيحة وحدّثها عند الحاجة.
@@ -60,7 +60,7 @@
 قد نحدّث هذه الشروط؛ يُنشر التاريخ أعلاه، والاستمرار في الاستخدام بعد التحديث يعني الموافقة.
 
 ### 13. التواصل
-**[OWNER-ENTITY]** — **support@qimmah.app**
+**تطبيق قِمّة — يمثله مالكه** — **[OWNER-EMAIL]**
 
 ---
 
@@ -78,10 +78,11 @@ feature is **for personal organisation only — it is not a prescription or dosi
 emergency, contact emergency services.
 
 ### 3. Eligibility age
-Minimum age to use Qimmah: **[OWNER-TO-CONFIRM]**.
-> Honest technical note (from code): the app currently has **no eligibility age gate**; the setup age field
-> accepts 12–90 for calorie math only (`src/lib/validation.ts`). We recommend setting an explicit eligibility age
-> (e.g. 13+ or 16+) consistent with the App Store age rating and PDPL minor provisions, and enforcing it if needed.
+Minimum age to use Qimmah: **12 years**.
+> Honest technical note (from code): app data input starts at 12, aligned with the setup age field which accepts
+> 12–90 for calorie math (`src/lib/validation.ts`). An explicit eligibility confirmation at signup is not yet
+> shipped; adding a “12+” confirmation at signup is a logged follow-up for the owner. No age verification is
+> claimed that isn’t built.
 
 ### 4. Your account
 You are responsible for your credentials and account activity. Provide accurate information and keep it updated.
@@ -119,4 +120,4 @@ These Terms are governed by the laws of the Kingdom of Saudi Arabia. **[OWNER-TO
 We may update these Terms; the date above is published, and continued use after an update means acceptance.
 
 ### 13. Contact
-**[OWNER-ENTITY]** — **support@qimmah.app**
+**Qimmah App — represented by its owner** — **[OWNER-EMAIL]**

@@ -1,13 +1,13 @@
 # سياسة الخصوصية — قِمّة / Privacy Policy — Qimmah
 
 > **مسودة للمراجعة من المالك والمستشار القانوني — ليست استشارة قانونية.** كل بند مبني على سلوك التطبيق
-> الفعلي في الشيفرة (`integration/wave2`). المواضع المعلّمة **[OWNER-ENTITY]** أو **[يُؤكَّد من المالك]**
+> الفعلي في الشيفرة (`integration/wave2`). المواضع المعلّمة **[OWNER-EMAIL]** أو **[يُؤكَّد من المالك]**
 > تحتاج قرارًا تجاريًا/قانونيًا قبل النشر.
 >
 > **Draft for owner + legal review — not legal advice.** Every clause reflects the app’s actual behaviour
-> in code. Fields marked **[OWNER-ENTITY]** / **[OWNER-TO-CONFIRM]** need a business/legal decision first.
+> in code. Fields marked **[OWNER-EMAIL]** / **[OWNER-TO-CONFIRM]** need a business/legal decision first.
 
-آخر تحديث / Last updated: [DATE] · المالك / Controller: **[OWNER-ENTITY]** · التواصل / Contact: **support@qimmah.app**
+آخر تحديث / Last updated: [DATE] · المالك / Controller: **تطبيق قِمّة — يمثله مالكه / Qimmah App — represented by its owner** · التواصل / Contact: **[OWNER-EMAIL]**
 
 ---
 
@@ -88,7 +88,7 @@ Supabase: **[يُؤكَّد من المالك]** — إن كان خارج الم
 قد نحدّث هذه السياسة؛ يُنشر التاريخ أعلاه، والتغييرات الجوهرية تُبلَّغ داخل التطبيق أو بالبريد.
 
 ### 13. التواصل
-**[OWNER-ENTITY]** — **support@qimmah.app**
+**تطبيق قِمّة — يمثله مالكه** — **[OWNER-EMAIL]**
 
 ---
 
@@ -161,4 +161,4 @@ Encrypted (HTTPS) connections; server-side auth and row-level security. No secre
 We may update this policy; the date above is published and material changes are notified in-app or by email.
 
 ### 13. Contact
-**[OWNER-ENTITY]** — **support@qimmah.app**
+**Qimmah App — represented by its owner** — **[OWNER-EMAIL]**
