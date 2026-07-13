@@ -35,6 +35,24 @@ export interface OnboardingV2Draft {
   injuries: string[]
 }
 
+/**
+ * Resolve the first render's state synchronously. This prevents the persistence
+ * effect from overwriting a saved draft with defaults before React applies an
+ * asynchronous mount-effect restore.
+ */
+export function initialDraftV2(userId?: string | null): OnboardingV2Draft {
+  return loadDraftV2(userId) ?? {
+    step: 0,
+    goal: null,
+    days: 4,
+    duration: 45,
+    place: null,
+    pref: null,
+    hasInjury: false,
+    injuries: [],
+  }
+}
+
 /** Persisted envelope (version + fields) — the shape actually written to storage. */
 interface PersistedDraft extends OnboardingV2Draft {
   v: number

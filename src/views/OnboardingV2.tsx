@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import { Icon } from '@/components/Icon'
 import { cn } from '@/lib/cn'
@@ -18,7 +18,7 @@ import {
   canAdvance,
   clearDraftV2,
   finalizeReduce,
-  loadDraftV2,
+  initialDraftV2,
   saveDraftV2,
   validateStep,
   type FinalizeStatus,
@@ -79,47 +79,25 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
   const { customization, applyCustomization } = useCustomization()
   const auth = useAuth()
   const userId = auth.user?.id ?? null
-  const [step, setStep] = useState(0) // 0 goal · 1 training · 2 equipment · 3 ready
+  const [initialDraft] = useState(() => initialDraftV2(userId))
+  const [step, setStep] = useState(initialDraft.step) // 0 goal · 1 training · 2 equipment · 3 ready
   const [status, setStatus] = useState<FinalizeStatus>('idle')
 
-  const [goal, setGoal] = useState<V2GoalValue | null>(null)
-  const [days, setDays] = useState(4)
-  const [duration, setDuration] = useState(45)
-  const [place, setPlace] = useState<string | null>(null)
-  const [pref, setPref] = useState<string | null>(null)
-  const [hasInjury, setHasInjury] = useState(false)
-  const [injuries, setInjuries] = useState<string[]>([])
+  const [goal, setGoal] = useState<V2GoalValue | null>(initialDraft.goal)
+  const [days, setDays] = useState(initialDraft.days)
+  const [duration, setDuration] = useState(initialDraft.duration)
+  const [place, setPlace] = useState<string | null>(initialDraft.place)
+  const [pref, setPref] = useState<string | null>(initialDraft.pref)
+  const [hasInjury, setHasInjury] = useState(initialDraft.hasInjury)
+  const [injuries, setInjuries] = useState<string[]>(initialDraft.injuries)
   const [validation, setValidation] = useState<StepValidation>(null)
 
   const goalEntry = useMemo(() => V2_GOAL_MODEL.find((g) => g.value === goal) ?? null, [goal])
   const answers = { goal, days, duration, place: place as V2Place | null, pref: pref as V2Pref | null }
 
-  // Resume an in-progress draft ONCE on mount (owner-scoped; a foreign/older/
-  // malformed draft is ignored by loadDraftV2). Runs before the persist effect
-  // marks the flow live, so restoring does not immediately re-save the default.
-  const restored = useRef(false)
-  useEffect(() => {
-    if (restored.current) return
-    const d = loadDraftV2(userId)
-    if (d) {
-      setStep(d.step)
-      setGoal(d.goal)
-      setDays(d.days)
-      setDuration(d.duration)
-      setPlace(d.place)
-      setPref(d.pref)
-      setHasInjury(d.hasInjury)
-      setInjuries(d.injuries)
-    }
-    restored.current = true
-    // Mount-only restore against the account present at mount.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
   // Persist the draft on every answer/step change — a reload resumes here.
   // Never while the plan is being built or after a successful finish.
   useEffect(() => {
-    if (!restored.current) return
     if (status === 'building' || status === 'done') return
     const draft: OnboardingV2Draft = { step, goal, days, duration, place: place as V2Place | null, pref: pref as V2Pref | null, hasInjury, injuries }
     saveDraftV2(draft, userId)

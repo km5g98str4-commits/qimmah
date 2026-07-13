@@ -6,11 +6,13 @@ import {
   canAdvance,
   clearDraftV2,
   finalizeReduce,
+  initialDraftV2,
   loadDraftV2,
   saveDraftV2,
   validateStep,
   type OnboardingV2Draft,
 } from '@/lib/onboardingV2Flow'
+import { V2_ONBOARDING } from '@/design-system/v2/labels'
 
 let pass = 0
 let fail = 0
@@ -30,6 +32,7 @@ function draft(over: Partial<OnboardingV2Draft> = {}): OnboardingV2Draft {
 
 console.log('\n① تحقّق الخطوات (رسالة خاصة بكل خطوة)')
 {
+  check('صياغة المكان تطابق النص العربي المعتمد', V2_ONBOARDING.ar.equipment.title === 'أين وكيف تتمرّن؟')
   // Step 0 — goal required.
   check('خطوة الهدف بلا هدف → «goal»', validateStep(0, { goal: null, days: 4, duration: 45, place: null, pref: null }) === 'goal')
   check('خطوة الهدف مع هدف → صالحة', validateStep(0, { goal: 'bulk', days: 4, duration: 45, place: null, pref: null }) === null)
@@ -61,6 +64,7 @@ console.log('\n③ جولة المسودة (مربوطة بالمالك، آمن
   const loaded = loadDraftV2('userA')
   check('التحميل يُعيد مسودة غير فارغة', loaded !== undefined)
   check('البيانات متطابقة (round-trip)', JSON.stringify(loaded) === JSON.stringify(d))
+  check('حالة أول render تُبنى من المسودة بلا افتراضيات وسيطة', JSON.stringify(initialDraftV2('userA')) === JSON.stringify(d))
   check('حساب آخر لا يرى مسودة A (لا تسريب)', loadDraftV2('userB') === undefined)
   check('الضيف لا يرى مسودة حساب مسجّل', loadDraftV2(null) === undefined)
 
@@ -84,6 +88,21 @@ console.log('\n④ تجاهل المسودة عند الإنهاء')
   check('المسودة موجودة قبل الإنهاء', loadDraftV2('userZ') !== undefined)
   clearDraftV2('userZ')
   check('المسودة مُسحت بعد الإنهاء (لا استئناف لإعداد مكتمل)', loadDraftV2('userZ') === undefined)
+}
+
+console.log('\n⑤ افتراضيات أول تشغيل')
+{
+  clearDraftV2('newUser')
+  check('بلا مسودة يبدأ من الهدف مع قيم التدريب الآمنة', JSON.stringify(initialDraftV2('newUser')) === JSON.stringify({
+    step: 0,
+    goal: null,
+    days: 4,
+    duration: 45,
+    place: null,
+    pref: null,
+    hasInjury: false,
+    injuries: [],
+  }))
 }
 
 console.log(`\n${'─'.repeat(44)}`)

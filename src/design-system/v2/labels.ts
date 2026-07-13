@@ -97,7 +97,7 @@ export const V2_ONBOARDING: Record<'ar' | 'en', V2OnboardingCopy> = {
       suitsGoal: 'تناسب هدف',
     },
     equipment: {
-      title: 'أين تتمرن؟ وكيف؟',
+      title: 'أين وكيف تتمرّن؟',
       subtitle: 'نختار التمارين المناسبة للمعدات المتاحة لك.',
       placeQ: 'مكان التمرين',
       prefQ: 'ماذا تفضّل؟',
