@@ -177,21 +177,23 @@ export function buildNutritionV2Model(customization: Customization, lang: Lang):
     nudges.push({
       id: 'protein',
       tone: 'protein',
-      icon: 'Star',
+      icon: 'Egg',
       text: t(`بقي ${proRemaining}g بروتين لهدف اليوم`, `${proRemaining}g protein left for today’s goal`),
       actionLabel: t('أضف', 'Add'),
       action: 'add',
     })
   }
   if (waterTarget > 0 && waterRemaining > 0) {
-    const glass = 500
+    // Pick the glass that fits the remaining gap so the label and the logged
+    // amount stay identical (a full 500 would overshoot when little is left).
+    const glass = waterRemaining >= 500 ? 500 : 250
     nudges.push({
       id: 'water',
       tone: 'water',
       icon: 'Droplets',
-      text: t(`اشرب ${Math.min(glass, waterRemaining)}ml ماء لتكمل هدفك`, `Drink ${Math.min(glass, waterRemaining)}ml water to hit your goal`),
+      text: t(`اشرب ${glass}ml ماء لتكمل هدفك`, `Drink ${glass}ml water to hit your goal`),
       actionLabel: t('سجّل', 'Log'),
-      action: 'water500',
+      action: glass === 500 ? 'water500' : 'water250',
     })
   }
   if (calTarget > 0 && goal === 'bulk' && calRemaining > 0) {

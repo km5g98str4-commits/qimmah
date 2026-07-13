@@ -27,8 +27,22 @@ function urlDesignParam(): 'v1' | 'v2' | null {
  * No-op in production. Never throws, never touches user data or analytics.
  */
 export function initDesignPreview(): void {
-  // Hard gate: production builds ignore every preview flag.
-  if (!import.meta.env.DEV || typeof document === 'undefined') return
+  if (typeof document === 'undefined') return
+
+  // Production opt-in (Slice: promotion switch). A build made with
+  // `VITE_DESIGN_V2=true npm run build` ships v2.1 turned on everywhere — this is
+  // how the owner runs v2 on his physical iPhone. The flag is a build-time
+  // constant Vite inlines: when it is NOT set, `import.meta.env.VITE_DESIGN_V2`
+  // is `undefined`, this whole block is dead-code-eliminated, and behaviour is
+  // byte-identical to today (the DEV-only preview below). Provably inert unless
+  // explicitly set at build time.
+  if (import.meta.env.VITE_DESIGN_V2 === 'true') {
+    document.documentElement.dataset.design = 'v2'
+    return
+  }
+
+  // Hard gate: normal production builds ignore every preview flag.
+  if (!import.meta.env.DEV) return
 
   let enabled = false
   try {
