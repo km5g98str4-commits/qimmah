@@ -1,128 +1,330 @@
-// Progress v2 model — Qimmah Design v2.1 (Slice 6). A coach-style "brief" over
-// the last 14 days, read-only, HONEST. Uses real local state where present
-// (profile weight, workout summary, nutrition v2 log, steps) and explicit
-// needs-data prompts otherwise. Never invents weight loss / PRs / body-fat /
-// steps. Uncertain language only (يبدو / تقديري / يحتاج بيانات أكثر).
+// Progress v2 model — Qimmah Design v2.1 (Slice 6, PDF §05). A coach-style
+// "Brief" over the last 14 days, read-only and HONEST. Wired to the REAL local
+// stores the app actually writes to:
+//   • weight / waist / body-fat  → measurementLog (loadLogs)
+//   • strength & momentum        → workout sessions (loadSessions) + exercise history
+//   • adherence                  → finished-session dates vs the plan's days/week
+// Data over two weeks is a SIGNAL, not a verdict — so every read is hedged:
+// «يبدو أنك…», «تقديري», «~», «يحتاج قياس جديد». We never invent weight loss,
+// PRs, body-fat, or steps; where there is no data we say so and offer the action.
 
 import type { Customization } from '@/lib/customization'
 import type { Lang } from '@/lib/appPreferences'
 import type { CalorieGoal } from '@/types/profile'
-import { getSteps } from '@/lib/stepCounter'
-import { NUTRITION_V2_KEY } from '@/lib/nutritionV2Model'
+import { loadLogs } from '@/lib/measurementLog'
+import { loadSessions } from '@/lib/workoutSessions'
+import { loadHistory } from '@/lib/exerciseHistory'
+import { recentVolumes } from '@/lib/progressStats'
+import { getExercise } from '@/data/exercises'
+import { getDayStamp } from '@/lib/today'
 
-const WORKOUT_SUMMARY_KEY = 'qimmah:workout-summary:v2'
+const DAY_MS = 86_400_000
+const WINDOW_DAYS = 14
+const WAIST_STALE_DAYS = 7
 
-export type BriefStatus = 'improved' | 'stable' | 'needsData' | 'caution' | 'unknown'
-export type BriefType = 'weight' | 'strength' | 'nutrition' | 'activity' | 'measurement'
+export type NavDest = 'progress' | 'nutrition' | 'workout' | 'setup'
+export type RowTone = 'good' | 'neutral' | 'needsData'
+export type LiftStatus = 'pr' | 'up' | 'stable'
+export type ProgressScreen = 'home' | 'weight' | 'strength'
 
-export interface BriefItem { type: BriefType; status: BriefStatus; label: string; value: string; note: string; actionLabel?: string; destination?: 'progress' | 'nutrition' | 'workout' | 'setup' }
+/** One row of the «ملخّص آخر ١٤ يوم» Brief. */
+export interface SummaryRow {
+  key: 'weight' | 'strength' | 'adherence'
+  icon: string
+  /** Lead text, e.g. «الوزن نزل». */
+  text: string
+  /** Emphasised value, e.g. «0.8 كجم» (empty when needs-data). */
+  value: string
+  /** Right-aligned status tag, e.g. «تقدّم جيد». */
+  tag: string
+  tone: RowTone
+}
+
+/** A "stale / missing measurement" nudge (waist). */
+export interface StaleNudge {
+  show: boolean
+  /** Short form for the Brief home. */
+  text: string
+  /** Long form (with days) for the weight detail. */
+  detailText: string
+  actionLabel: string
+  destination: NavDest
+}
+
+export interface WeightPoint { date: string; kg: number }
+export interface MomentumPoint { date: string; value: number }
+
+export interface WeightDetail {
+  currentKg: number | null
+  targetKg: number | null
+  /** Signed change over the window (negative = down). */
+  changeKg: number | null
+  /** Goal band [target − 1, target + 1] («نطاق الهدف»). */
+  band: [number, number] | null
+  /** Dated weight series (ascending) — real logged points only. */
+  series: WeightPoint[]
+  /** Body fat %, real only (logged bodyFatPercent) — always shown as «~ · تقديري». */
+  bodyFatPct: number | null
+  waistCm: number | null
+  waistChangeCm: number | null
+  source: 'real' | 'profileOnly' | 'missing'
+}
+
+export interface LiftLadder {
+  exerciseId: string
+  name: string
+  bestKg: number
+  status: LiftStatus
+  /** For 'up': kg gained vs the previous session. */
+  deltaKg: number | null
+  /** 0..6 filled blocks = logged sessions for this lift (capped). */
+  filledBlocks: number
+}
+
+export interface StrengthDetail {
+  improvedCount: number
+  /** «يبدو أن قوّتك تتحسّن باطّراد» when improving, hedged prompt otherwise. */
+  headline: string
+  lifts: LiftLadder[]
+  hasData: boolean
+}
 
 export interface ProgressV2Model {
   goal: CalorieGoal | null
   goalLabel: string | null
   period: { label: string }
-  brief: { headline: string; items: BriefItem[] }
-  weight: { currentKg: number | null; targetKg: number | null; changeKg: number | null; source: 'real' | 'fallback' | 'missing' }
-  strength: { lastSessionTitle: string | null; lastVolume: number | null; source: 'localSummary' | 'missing' }
-  nutrition: { loggedToday: boolean; source: 'local' | 'missing' }
-  activity: { stepsToday: number | null; source: 'real' | 'missing' }
-  momentum: { trainingScore: number; nutritionScore: number; activityScore: number; recoveryScore: number; overallScore: number }
-  nextActions: { label: string; actionLabel: string; reason: string; destination: 'progress' | 'nutrition' | 'workout' | 'setup' }[]
+  /** Hedged Brief header — never the unhedged «أنت في المسار الصحيح». */
+  headline: string
+  summary: SummaryRow[]
+  stale: StaleNudge
+  momentum: { series: MomentumPoint[]; weeks: number; hasData: boolean; label: string }
+  weight: WeightDetail
+  strength: StrengthDetail
+  disclaimer: string
 }
 
 const GOAL_AR: Record<CalorieGoal, string> = { cut: 'تنشيف', maintain: 'محافظة', bulk: 'تضخيم' }
 
-function readSummary(): { title: string; volume: number } | null {
-  if (typeof window === 'undefined') return null
-  try {
-    const raw = localStorage.getItem(WORKOUT_SUMMARY_KEY)
-    if (!raw) return null
-    const s = JSON.parse(raw) as { title?: string; volume?: number }
-    if (s && typeof s.title === 'string') return { title: s.title, volume: typeof s.volume === 'number' ? s.volume : 0 }
-  } catch {
-    /* ignore */
-  }
-  return null
+const numOf = (v: string | number | undefined): number => {
+  if (v === undefined) return NaN
+  const m = String(v).match(/-?[\d.]+/)
+  return m ? Number(m[0]) : NaN
 }
-function nutritionLoggedToday(): boolean {
-  if (typeof window === 'undefined') return false
-  try {
-    const raw = localStorage.getItem(NUTRITION_V2_KEY)
-    const p = raw ? (JSON.parse(raw) as { foods?: unknown[] }) : null
-    return !!p && Array.isArray(p.foods) && p.foods.length > 0
-  } catch {
-    return false
+const round1 = (n: number): number => Math.round(n * 10) / 10
+const stampMs = (stamp: string): number => new Date(`${stamp}T00:00:00`).getTime()
+const daysAgo = (stamp: string, now: number): number => Math.max(0, Math.floor((now - stampMs(stamp)) / DAY_MS))
+
+/** Dated values for a measurement type, ascending, real only. */
+function measurementSeries(typeId: string): { date: string; value: number }[] {
+  return loadLogs()
+    .filter((l) => l.values[typeId] !== undefined && l.values[typeId] !== '')
+    .map((l) => ({ date: l.date, value: numOf(l.values[typeId]) }))
+    .filter((p) => Number.isFinite(p.value))
+    .sort((a, b) => stampMs(a.date) - stampMs(b.date))
+}
+
+/** Top completed weight for one exercise inside one session (0 if none). */
+function topWeightInSession(exercises: { exerciseId: string; sets?: { weightKg?: string; completed?: boolean }[] }[], exId: string): number {
+  let top = 0
+  for (const ex of exercises) {
+    if (ex.exerciseId !== exId || !ex.sets) continue
+    for (const st of ex.sets) {
+      if (st.completed) top = Math.max(top, numOf(st.weightKg) || 0)
+    }
   }
+  return top
 }
 
 export function buildProgressV2Model(customization: Customization, lang: Lang): ProgressV2Model {
   const ar = lang !== 'en'
   const t = (a: string, e: string) => (ar ? a : e)
+  const now = stampMs(getDayStamp()) + DAY_MS - 1 // end of today (local)
+  const windowStart = now - WINDOW_DAYS * DAY_MS
   const goal = customization.profile.goal ?? null
 
-  const currentKg = customization.profile.weightKg || null
+  // ── Weight (real dated series + profile fallback) ───────────────────────────
+  const weightSeries = measurementSeries('weightKg')
+  const profileWeight = customization.profile.weightKg || null
   const targetKg = customization.profile.targetWeightKg || null
-  // We only have a single current weight (no dated history in preview) → no honest change.
-  const weight = { currentKg, targetKg, changeKg: null as number | null, source: (currentKg ? 'real' : 'missing') as 'real' | 'fallback' | 'missing' }
+  const loggedCurrent = weightSeries.length ? weightSeries[weightSeries.length - 1].value : null
+  const currentKg = loggedCurrent ?? profileWeight
+  const windowWeights = weightSeries.filter((p) => stampMs(p.date) >= windowStart)
+  const changeKg =
+    windowWeights.length >= 2 ? round1(windowWeights[windowWeights.length - 1].value - windowWeights[0].value) : null
 
-  const summary = readSummary()
-  const strength = { lastSessionTitle: summary?.title ?? null, lastVolume: summary?.volume ?? null, source: (summary ? 'localSummary' : 'missing') as 'localSummary' | 'missing' }
+  // ── Waist (stale detection) ─────────────────────────────────────────────────
+  const waistSeries = measurementSeries('waistCm')
+  const latestWaist = waistSeries.length ? waistSeries[waistSeries.length - 1] : null
+  const waistCm = latestWaist ? latestWaist.value : null
+  const waistChangeCm =
+    waistSeries.length >= 2 ? round1(waistSeries[waistSeries.length - 1].value - waistSeries[waistSeries.length - 2].value) : null
+  const waistAge = latestWaist ? daysAgo(latestWaist.date, now) : null
+  const waistStale = waistAge !== null && waistAge > WAIST_STALE_DAYS
+  const waistMissing = latestWaist === null
+  const stale: StaleNudge = {
+    show: waistStale || waistMissing,
+    text: waistMissing ? t('لا يوجد قياس خصر بعد', 'No waist measurement yet') : t('قياس الخصر قديم — يحتاج قياس جديد', 'Waist reading is old — needs a fresh one'),
+    detailText: waistMissing
+      ? t('سجّل قياس الخصر لقراءة أدق', 'Log a waist measurement for a sharper read')
+      : t(`آخر قياس للخصر قبل ${waistAge} ${ar ? 'أيام' : 'days'} — يحتاج قياس جديد`, `Last waist measurement ${waistAge} days ago — needs a fresh one`),
+    actionLabel: t('قِس', 'Measure'),
+    destination: 'progress',
+  }
 
-  const loggedToday = nutritionLoggedToday()
-  const nutrition = { loggedToday, source: (loggedToday ? 'local' : 'missing') as 'local' | 'missing' }
+  // ── Body fat (real only, always estimated) ──────────────────────────────────
+  const fatSeries = measurementSeries('bodyFatPercent')
+  const bodyFatPct = fatSeries.length ? fatSeries[fatSeries.length - 1].value : null
 
-  const stepsToday = getSteps()
-  const activity = { stepsToday: stepsToday > 0 ? stepsToday : null, source: (stepsToday > 0 ? 'real' : 'missing') as 'real' | 'missing' }
+  // ── Sessions → strength ladders + momentum + adherence ──────────────────────
+  const finished = loadSessions().filter((s) => s.finishedAt)
+  const history = loadHistory()
 
-  // Brief items — honest statuses.
-  const items: BriefItem[] = []
-  items.push(
-    currentKg
-      ? { type: 'weight', status: 'needsData', label: t('الوزن', 'Weight'), value: `${currentKg} ${t('كجم', 'kg')}`, note: t('سجّل وزنك بانتظام لنقرأ الاتجاه.', 'Log weight regularly to read the trend.'), actionLabel: t('سجّل', 'Log'), destination: 'progress' }
-      : { type: 'weight', status: 'needsData', label: t('الوزن', 'Weight'), value: t('غير مسجّل', 'Not logged'), note: t('سجّل وزنك الحالي.', 'Log your current weight.'), actionLabel: t('سجّل', 'Log'), destination: 'progress' },
-  )
-  items.push(
-    summary
-      ? { type: 'strength', status: 'needsData', label: t('القوة', 'Strength'), value: t('جلسة واحدة', '1 session'), note: t('أكمل تمرينين على الأقل لنعرض تطور القوة.', 'Complete at least two workouts to read strength trend.'), actionLabel: t('تمرّن', 'Train'), destination: 'workout' }
-      : { type: 'strength', status: 'needsData', label: t('القوة', 'Strength'), value: t('لا بيانات', 'No data'), note: t('أكمل تمرينين على الأقل لنقرأ تطور القوة.', 'Complete at least two workouts.'), actionLabel: t('تمرّن', 'Train'), destination: 'workout' },
-  )
-  items.push(
-    loggedToday
-      ? { type: 'nutrition', status: 'needsData', label: t('الالتزام', 'Consistency'), value: t('بدأت اليوم', 'Started today'), note: t('سجّل وجباتك لأسبوع لنقرأ الالتزام.', 'Log meals for a week to read consistency.'), actionLabel: t('سجّل', 'Log'), destination: 'nutrition' }
-      : { type: 'nutrition', status: 'needsData', label: t('الالتزام', 'Consistency'), value: t('لا تسجيل بعد', 'Not logged'), note: t('سجّل وجباتك لأسبوع لنقرأ الالتزام.', 'Log meals for a week.'), actionLabel: t('سجّل', 'Log'), destination: 'nutrition' },
-  )
-  items.push(
-    activity.source === 'real'
-      ? { type: 'activity', status: 'stable', label: t('الحركة', 'Activity'), value: `${activity.stepsToday?.toLocaleString('en-US')} ${t('خطوة', 'steps')}`, note: t('اليوم.', 'today.') }
-      : { type: 'activity', status: 'needsData', label: t('الحركة', 'Activity'), value: t('غير متاحة', 'Unavailable'), note: t('بيانات الخطوات غير متاحة — اربط المصدر لاحقًا.', 'Step data unavailable — connect a source later.') },
-  )
-  items.push({ type: 'measurement', status: 'needsData', label: t('القياسات', 'Measurements'), value: t('قديمة', 'Stale'), note: t('سجّل قياس الخصر لقراءة أدق.', 'Log a waist measurement for a sharper read.'), actionLabel: t('سجّل', 'Log'), destination: 'progress' })
+  // Per-lift ladders (top lifts by best weight).
+  const exIds = Array.from(new Set(finished.flatMap((s) => s.exercises.map((e) => e.exerciseId)))).filter(Boolean)
+  const ladders: LiftLadder[] = []
+  let improvedCount = 0
+  for (const exId of exIds) {
+    const tops = finished
+      .filter((s) => s.exercises.some((e) => e.exerciseId === exId))
+      .sort((a, b) => stampMs(a.date) - stampMs(b.date))
+      .map((s) => topWeightInSession(s.exercises, exId))
+      .filter((w) => w > 0)
+    if (tops.length === 0) continue
+    const latest = tops[tops.length - 1]
+    const prev = tops.length >= 2 ? tops[tops.length - 2] : null
+    const best = Math.max(numOf(history[exId]?.bestWeight) || 0, ...tops)
+    let status: LiftStatus = 'stable'
+    let deltaKg: number | null = null
+    if (prev !== null && latest > prev) {
+      status = 'up'
+      deltaKg = round1(latest - prev)
+      improvedCount++
+    } else if (latest >= best && (prev === null || latest > tops[0])) {
+      status = 'pr'
+      if (prev !== null) improvedCount++
+    }
+    const ex = getExercise(exId)
+    ladders.push({
+      exerciseId: exId,
+      name: ex ? (ar ? ex.nameAr : ex.nameEn) : exId,
+      bestKg: best,
+      status,
+      deltaKg,
+      filledBlocks: Math.min(6, tops.length),
+    })
+  }
+  ladders.sort((a, b) => b.bestKg - a.bestKg)
+  const topLadders = ladders.slice(0, 4)
+  const strength: StrengthDetail = {
+    improvedCount,
+    headline: improvedCount > 0
+      ? t('يبدو أن قوّتك تتحسّن باطّراد', 'Your strength looks like it’s trending up')
+      : ladders.length > 0
+        ? t('يبدو أن قوّتك ثابتة — واصل', 'Your strength looks steady — keep going')
+        : t('أكمل تمرينين لنقرأ تطوّر قوّتك', 'Complete two workouts to read your strength'),
+    lifts: topLadders,
+    hasData: ladders.length > 0,
+  }
 
-  const hasAny = !!currentKg || !!summary || loggedToday || activity.source === 'real'
-  const headline = hasAny ? t('يبدو أنك في بداية الطريق', 'Looks like you’re getting started') : t('نحتاج بيانات أكثر لنقرأ تقدمك', 'We need more data to read your progress')
+  // Momentum (real session volumes, oldest→newest).
+  const volumes = recentVolumes(8)
+  const momentum = {
+    series: volumes.map((v) => ({ date: v.date, value: v.volume })),
+    weeks: volumes.length,
+    hasData: volumes.some((v) => v.volume > 0),
+    label: t('زخم التدريب', 'Training momentum'),
+  }
 
-  // Momentum scores (honest, from what exists).
-  const trainingScore = summary ? 40 : 0
-  const nutritionScore = loggedToday ? 30 : 0
-  const activityScore = activity.source === 'real' ? Math.min(100, Math.round(((activity.stepsToday ?? 0) / 10000) * 100)) : 0
-  const recoveryScore = 0
-  const overallScore = Math.round((trainingScore + nutritionScore + activityScore + recoveryScore) / 4)
+  // Adherence over the window (distinct finished-workout days vs plan target).
+  const daysPerWeek = customization.workoutPlan.days.length || 3
+  const workoutDays = new Set(finished.filter((s) => stampMs(s.date) >= windowStart).map((s) => s.date))
+  const expectedDays = Math.max(1, daysPerWeek * 2)
+  const adherencePct = finished.length > 0 ? Math.min(100, Math.round((workoutDays.size / expectedDays) * 100)) : null
 
-  const nextActions: ProgressV2Model['nextActions'] = []
-  if (!summary) nextActions.push({ label: t('أكمل تمرينك الأول', 'Complete your first workout'), actionLabel: t('تمرّن', 'Train'), reason: t('لنبدأ قراءة القوة', 'to start reading strength'), destination: 'workout' })
-  if (!loggedToday) nextActions.push({ label: t('سجّل وجباتك اليوم', 'Log your meals today'), actionLabel: t('سجّل', 'Log'), reason: t('لقراءة الالتزام', 'to read consistency'), destination: 'nutrition' })
-  nextActions.push({ label: t('سجّل وزنك الحالي', 'Log your current weight'), actionLabel: t('سجّل', 'Log'), reason: t('نقطة البداية', 'a baseline'), destination: 'progress' })
+  // ── Brief summary rows ──────────────────────────────────────────────────────
+  const weightOnTrack =
+    changeKg !== null && goal
+      ? goal === 'cut'
+        ? changeKg <= -0.2
+        : goal === 'bulk'
+          ? changeKg >= 0.2
+          : Math.abs(changeKg) <= 0.5
+      : false
+
+  const summary: SummaryRow[] = []
+  // Weight
+  if (changeKg !== null) {
+    const dir = changeKg < 0 ? 'down' : changeKg > 0 ? 'up' : 'flat'
+    summary.push({
+      key: 'weight',
+      icon: dir === 'down' ? 'TrendingDown' : dir === 'up' ? 'TrendingUp' : 'Minus',
+      text: dir === 'flat' ? t('الوزن ثابت', 'Weight steady') : dir === 'down' ? t('الوزن نزل', 'Weight down') : t('الوزن زاد', 'Weight up'),
+      value: dir === 'flat' ? '' : `${fmt(Math.abs(changeKg))} ${t('كجم', 'kg')}`,
+      tag: weightOnTrack ? t('تقدّم جيد', 'Good progress') : t('تغيّر', 'Changed'),
+      tone: weightOnTrack ? 'good' : 'neutral',
+    })
+  } else {
+    summary.push({
+      key: 'weight',
+      icon: 'Scale',
+      text: currentKg ? t('الوزن', 'Weight') : t('سجّل وزنك', 'Log your weight'),
+      value: currentKg ? `${fmt(currentKg)} ${t('كجم', 'kg')}` : '',
+      tag: t('سجّل بانتظام', 'Log regularly'),
+      tone: 'needsData',
+    })
+  }
+  // Strength
+  if (improvedCount > 0) {
+    summary.push({ key: 'strength', icon: 'TrendingUp', text: t('القوة تحسّنت في', 'Strength improved in'), value: t(`${fmt(improvedCount)} تمارين`, `${improvedCount} lifts`), tag: t('تقدّم', 'Progress'), tone: 'good' })
+  } else if (strength.hasData) {
+    summary.push({ key: 'strength', icon: 'Minus', text: t('القوة ثابتة', 'Strength steady'), value: '', tag: t('واصل', 'Keep on'), tone: 'neutral' })
+  } else {
+    summary.push({ key: 'strength', icon: 'Dumbbell', text: t('أكمل تمرينين لقراءة القوة', 'Complete two workouts'), value: '', tag: t('لا بيانات', 'No data'), tone: 'needsData' })
+  }
+  // Adherence
+  if (adherencePct !== null) {
+    summary.push({ key: 'adherence', icon: 'CalendarCheck', text: t('الالتزام', 'Consistency'), value: `${fmt(adherencePct)}%`, tag: adherencePct >= 70 ? t('جيد', 'Good') : t('واصل', 'Keep on'), tone: adherencePct >= 70 ? 'good' : 'neutral' })
+  } else {
+    summary.push({ key: 'adherence', icon: 'CalendarCheck', text: t('لا تسجيل تمارين بعد', 'No workouts logged yet'), value: '', tag: t('ابدأ', 'Start'), tone: 'needsData' })
+  }
+
+  // ── Hedged headline ─────────────────────────────────────────────────────────
+  const adherentGood = adherencePct !== null && adherencePct >= 70
+  const onTrack = weightOnTrack || improvedCount > 0 || adherentGood
+  const hasAny = !!currentKg || finished.length > 0 || adherencePct !== null
+  const headline = onTrack
+    ? t('يبدو أنك في المسار الصحيح', 'Looks like you’re on the right track')
+    : hasAny
+      ? t('يبدو أنك في بداية الطريق', 'Looks like you’re getting started')
+      : t('نحتاج بيانات أكثر لنقرأ تقدمك', 'We need more data to read your progress')
+
+  const weightDetail: WeightDetail = {
+    currentKg: currentKg ? round1(currentKg) : null,
+    targetKg,
+    changeKg,
+    band: targetKg ? [round1(targetKg - 1), round1(targetKg + 1)] : null,
+    series: windowWeights.length >= 2 ? weightSeries.slice(-10).map((p) => ({ date: p.date, kg: p.value })) : weightSeries.slice(-10).map((p) => ({ date: p.date, kg: p.value })),
+    bodyFatPct,
+    waistCm,
+    waistChangeCm,
+    source: loggedCurrent ? 'real' : profileWeight ? 'profileOnly' : 'missing',
+  }
 
   return {
     goal,
     goalLabel: goal ? GOAL_AR[goal] : null,
-    period: { label: t('آخر ١٤ يوم', 'Last 14 days') },
-    brief: { headline, items },
-    weight,
+    period: { label: t('ملخّص آخر 14 يوم', 'Last 14 days') },
+    headline,
+    summary,
+    stale,
+    momentum,
+    weight: weightDetail,
     strength,
-    nutrition,
-    activity,
-    momentum: { trainingScore, nutritionScore, activityScore, recoveryScore, overallScore },
-    nextActions: nextActions.slice(0, 4),
+    disclaimer: t('قراءة تقديرية — تصبح أدق كلما سجّلت أكثر.', 'An estimated read — sharper the more you log.'),
   }
+}
+
+// Metrics use WESTERN digits to match the PDF §05 exactly (0.8 كجم · 78% · 14 يوم).
+function fmt(n: number): string {
+  return Number.isInteger(n) ? String(n) : String(round1(n))
 }
