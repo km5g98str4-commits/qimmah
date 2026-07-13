@@ -24,6 +24,7 @@ import {
   writeSyncBackup,
   type SyncTable,
 } from './syncQueue'
+import { enqueueAuxOperations, hydrateAuxFromCloud, readAuxBackup } from './syncStores'
 import type { WorkoutSession } from './workoutSessions'
 import type { ExerciseHistory } from './exerciseHistory'
 import type { MeasurementLog } from '@/types/progress'
@@ -129,16 +130,22 @@ async function productionTransport(): Promise<SyncTransport | null> {
       const { error } = await supabase.from(table).upsert(rows, {
         onConflict:
           table === 'exercise_history'
-              ? 'user_id,exercise_id'
-              : table === 'daily_logs'
-                ? 'user_id,date'
+            ? 'user_id,exercise_id'
+            : table === 'daily_logs' || table === 'step_logs'
+              ? 'user_id,date'
+              : table === 'achievements' || table === 'custom_plans' || table === 'todos'
+                ? 'user_id'
                 : 'user_id,local_id',
       })
       if (error) throw error
     },
     async delete(table, userId, entityKeys) {
       const entityColumn =
-        table === 'exercise_history' ? 'exercise_id' : table === 'daily_logs' ? 'date' : 'local_id'
+        table === 'exercise_history'
+          ? 'exercise_id'
+          : table === 'daily_logs' || table === 'step_logs'
+            ? 'date'
+            : 'local_id'
       const { error } = await supabase.from(table).delete().eq('user_id', userId).in(entityColumn, entityKeys)
       if (error) throw error
     },
@@ -191,6 +198,11 @@ async function flushImpl(now = Date.now()): Promise<SyncStatus> {
   if (!client) return buildStatus('disabled', null, 'المزامنة السحابية غير مضبوطة.')
   const userId = await guardedOwner(client)
   if (!userId) return buildStatus('guest', null, 'أُوقفت المزامنة: مالك الجلسة غير مطابق أو الاستعادة نشطة.')
+
+  // Capture the latest aux-store state (steps/achievements/custom_plans/todos)
+  // each cycle so live edits ship without a per-write hook in the feature stores.
+  // Bounded + idempotent (replace-on-enqueue); self-guards to this same owner.
+  enqueueAuxOperations(userId)
 
   const due = readSyncQueue(userId).filter((op) => op.userId === userId && op.nextAttemptAt <= now)
   if (!due.length) return buildStatus('idle', userId, 'لا توجد تغييرات جاهزة للرفع.')
@@ -397,13 +409,31 @@ async function hydrateImpl(): Promise<SyncStatus> {
 
   const localHistory = exportHistory()
   const localOnboarding = loadOnboardingProfile()
-  const backup = { createdAt: new Date().toISOString(), userId, history: localHistory, onboardingProfile: localOnboarding }
+  const backup = {
+    createdAt: new Date().toISOString(),
+    userId,
+    history: localHistory,
+    onboardingProfile: localOnboarding,
+    // Fold the four aux stores into the same owner-scoped backup key so a
+    // server-wins overlay below is always recoverable (wipeUserData clears it).
+    aux: readAuxBackup(userId),
+  }
   if (!writeSyncBackup(userId, backup)) {
     return buildStatus('error', userId, 'تعذّر حفظ النسخة المحلية؛ لم تُغيّر أي بيانات.')
   }
 
   try {
-    const tables: SyncTable[] = ['profiles', 'workout_sessions', 'exercise_history', 'measurement_logs', 'daily_logs']
+    const tables: SyncTable[] = [
+      'profiles',
+      'workout_sessions',
+      'exercise_history',
+      'measurement_logs',
+      'daily_logs',
+      'step_logs',
+      'achievements',
+      'custom_plans',
+      'todos',
+    ]
     const pulled = await Promise.all(tables.map(async (table) => [table, await client.select(table, userId)] as const))
     if ((await guardedOwner(client)) !== userId) return buildStatus('error', userId, 'أُوقف السحب بسبب تغيّر الحساب.')
     const rows = Object.fromEntries(pulled) as Record<SyncTable, Record<string, unknown>[]>
@@ -422,9 +452,23 @@ async function hydrateImpl(): Promise<SyncStatus> {
         if (localOnboarding) conflict('profiles', 'profile')
         saveOnboardingProfile(resolvedOnboarding)
       }
+      // Aux stores: server-wins overlay (backup already persisted above). Local-only
+      // entries are kept; every overwrite of existing local data is logged.
+      hydrateAuxFromCloud(
+        userId,
+        {
+          step_logs: rows.step_logs,
+          achievements: rows.achievements,
+          custom_plans: rows.custom_plans,
+          todos: rows.todos,
+        },
+        conflict,
+      )
     } finally {
       setSyncCapturePaused(false)
     }
+    // enqueueSnapshot uploads the merged history; the merged aux stores are
+    // enqueued by the flushSyncQueue() below (flush captures aux each cycle).
     enqueueSnapshot(merged, resolvedOnboarding)
     return flushSyncQueue()
   } catch {

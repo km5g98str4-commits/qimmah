@@ -15,6 +15,9 @@ import {
   setSyncTransportForTests,
   type SyncTransport,
 } from '@/lib/syncService'
+import { enqueueAuxOperations } from '@/lib/syncStores'
+import { getSteps } from '@/lib/stepCounter'
+import { getDayStamp } from '@/lib/today'
 
 let pass = 0
 let fail = 0
@@ -140,6 +143,85 @@ check('pre-hydration local snapshot exists', backup?.history?.workoutSessions?.l
 check('server wins the conflicting entity', exportHistory().workoutSessions[0]?.workoutDayId === 'server-day')
 check('merged snapshot is uploaded through queue', calls.some((call) => call.table === 'workout_sessions'))
 
+// Capture conflict logs (metadata only) to prove overwrites are logged, not dropped.
+const conflicts: { table: string; entityKey: string }[] = []
+const origInfo = console.info
+console.info = (...args: unknown[]) => {
+  if (args[0] === '[qimmah-sync-conflict]' && args[1] && typeof args[1] === 'object') {
+    conflicts.push(args[1] as { table: string; entityKey: string })
+  }
+  origInfo(...(args as []))
+}
+const today = getDayStamp()
+
+console.log('\n⑥ coverage extension: aux stores → dedicated tables')
+localStorage.clear()
+setSyncRuntime('A', false)
+owner = 'A'
+calls.length = 0
+localStorage.setItem('qimmah:steps:v1', JSON.stringify({ '2026-07-13': 8000, '2026-07-12': 6000 }))
+localStorage.setItem('qimmah:stepSource:v1', JSON.stringify({ '2026-07-13': 'manual', '2026-07-12': 'healthkit' }))
+localStorage.setItem('qimmah:achievements:v1', JSON.stringify({ unlocked: { first_workout: '2026-07-10' }, proteinDays: ['2026-07-11'], prCount: 3 }))
+localStorage.setItem('qimmah:customPlan:v1', JSON.stringify({ A: { plan: { days: [{ id: 'd1', name: 'Push', nameEn: 'Push', exercises: [] }] }, source: 'custom', updatedAt: '2026-07-10T00:00:00.000Z' } }))
+localStorage.setItem('qimmah:todo:v1:A', JSON.stringify({ date: today, items: [{ id: 't1', text: 'stretch', done: false }] }))
+await flushSyncQueue(20_000)
+const tbl = (t: string) => calls.filter((c) => c.table === t)
+const stepRows = tbl('step_logs')[0]?.rows ?? []
+check('step_logs uploaded per-day, owner-scoped', stepRows.length === 2 && stepRows.every((r) => r.user_id === 'A') && stepRows.some((r) => r.date === '2026-07-13' && r.steps === 8000 && r.source === 'manual'))
+check('achievements uploaded as single owner row', tbl('achievements')[0]?.rows[0]?.user_id === 'A' && (tbl('achievements')[0]?.rows[0]?.data as { prCount?: number })?.prCount === 3)
+check('custom_plans uploaded with source + plan data', tbl('custom_plans')[0]?.rows[0]?.user_id === 'A' && tbl('custom_plans')[0]?.rows[0]?.source === 'custom')
+check('todos uploaded as single owner row', tbl('todos')[0]?.rows[0]?.user_id === 'A' && Array.isArray((tbl('todos')[0]?.rows[0]?.data as { items?: unknown[] })?.items))
+check('re-capture de-duplicates (bounded queue, no growth)', (enqueueAuxOperations('A'), readSyncQueue('A').filter((op) => op.table === 'step_logs').length === 2))
+
+console.log('\n⑦ aux hydrate: backup-first + server-wins + conflict logged')
+localStorage.clear()
+setSyncRuntime('A', false)
+owner = 'A'
+localStorage.setItem('qimmah:steps:v1', JSON.stringify({ '2026-07-12': 100 }))
+localStorage.setItem('qimmah:stepSource:v1', JSON.stringify({ '2026-07-12': 'manual' }))
+cloudRows = {
+  step_logs: [
+    { local_id: 'x', date: '2026-07-12', steps: 9999, source: 'healthkit' },
+    { local_id: 'y', date: '2026-07-11', steps: 5000, source: 'manual' },
+  ],
+  achievements: [{ data: { unlocked: { server_medal: '2026-07-01' }, proteinDays: [], prCount: 7 } }],
+  custom_plans: [{ source: 'auto', data: { days: [{ id: 'server-day', name: 'S', nameEn: 'S', exercises: [] }] } }],
+  todos: [{ data: { date: today, items: [{ id: 's1', text: 'server-todo', done: false }] } }],
+}
+conflicts.length = 0
+calls.length = 0
+await hydrateFromCloud()
+const backup2 = JSON.parse(localStorage.getItem(backupKey('A')) ?? 'null') as { aux?: { steps?: { date: string; steps: number }[] } } | null
+check('backup captured aux BEFORE overlay', backup2?.aux?.steps?.some((s) => s.date === '2026-07-12' && s.steps === 100) === true)
+check('server wins the conflicting step-day', getSteps('2026-07-12') === 9999)
+check('server-only step-day is added', getSteps('2026-07-11') === 5000)
+check('aux conflict was logged, not dropped', conflicts.some((c) => c.table === 'step_logs' && c.entityKey === '2026-07-12'))
+check('achievements overlaid from server', (JSON.parse(localStorage.getItem('qimmah:achievements:v1') ?? '{}') as { prCount?: number }).prCount === 7)
+check('merged aux re-uploaded through queue', calls.some((c) => c.table === 'step_logs'))
+
+console.log('\n⑧ owner/recovery guard covers aux capture')
+localStorage.clear()
+setSyncRuntime('A', true) // recovery active
+owner = 'A'
+localStorage.setItem('qimmah:steps:v1', JSON.stringify({ '2026-07-13': 500 }))
+calls.length = 0
+await flushSyncQueue(25_000)
+check('recovery session performs NO aux upload', calls.length === 0)
+
+console.log('\n⑨ wipe clears aux queue ops + aux store keys')
+localStorage.clear()
+setSyncRuntime('A', false)
+owner = 'A'
+localStorage.setItem('qimmah:steps:v1', JSON.stringify({ '2026-07-13': 700 }))
+localStorage.setItem('qimmah:achievements:v1', JSON.stringify({ unlocked: { m: 'd' }, proteinDays: [], prCount: 1 }))
+enqueueAuxOperations('A')
+check('aux ops enqueued into the owner queue', readSyncQueue('A').some((op) => op.table === 'step_logs'))
+wipeUserData('A')
+check('wipe clears aux queue ops', readSyncQueue('A').length === 0)
+check('wipe clears steps store key', localStorage.getItem('qimmah:steps:v1') === null)
+check('wipe clears achievements store key', localStorage.getItem('qimmah:achievements:v1') === null)
+
+console.info = origInfo
 setSyncTransportForTests(undefined)
 setSyncFeatureEnabledForTests(undefined)
 console.log(`\n${'─'.repeat(46)}`)

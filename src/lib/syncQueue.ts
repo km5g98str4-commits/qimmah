@@ -15,6 +15,15 @@ export type SyncTable =
   | 'exercise_history'
   | 'measurement_logs'
   | 'daily_logs'
+  // Coverage extension (wave3): dedicated homes for stores that were sync-blind.
+  // Per-day: step_logs (unique user_id,date). Per-account singles: achievements,
+  // custom_plans, todos (unique user_id). Nutrition/water/supplement/medication
+  // deliberately STAY in the daily_logs aggregate — see docs/sync-coverage-map.md
+  // — so nothing double-syncs into their (also-present) dedicated tables.
+  | 'step_logs'
+  | 'achievements'
+  | 'custom_plans'
+  | 'todos'
 
 const SYNC_TABLES: ReadonlySet<string> = new Set<SyncTable>([
   'profiles',
@@ -22,6 +31,10 @@ const SYNC_TABLES: ReadonlySet<string> = new Set<SyncTable>([
   'exercise_history',
   'measurement_logs',
   'daily_logs',
+  'step_logs',
+  'achievements',
+  'custom_plans',
+  'todos',
 ])
 
 export interface SyncOperation {
