@@ -3716,7 +3716,7 @@ export const foodItems: FoodItem[] = [
   },
   {
     id: 'hardees-thickburger',
-    nameAr: 'هارديز - ثيك برغر أصلي',
+    nameAr: 'هارديز - ثيك برجر أصلي',
     nameEn: "Hardee's - Original Thickburger",
     category: 'مطاعم',
     servingLabelAr: 'برجر (270غ)',
@@ -3725,7 +3725,7 @@ export const foodItems: FoodItem[] = [
     protein: 40,
     carbs: 50,
     fat: 51,
-    keywords: ['hardees', "hardee's", 'هارديز', 'هارديس', 'thickburger', 'ثيك برغر'],
+    keywords: ['hardees', "hardee's", 'هارديز', 'هارديس', 'thickburger', 'ثيك برجر'],
   },
   {
     id: 'hardees-charbroiled-chicken',
@@ -3833,11 +3833,11 @@ export const foodItems: FoodItem[] = [
     protein: 24,
     carbs: 38,
     fat: 24,
-    keywords: ['burgerizzr', 'برجرايزر', 'برغرايزر', 'classic', 'كلاسيك'],
+    keywords: ['burgerizzr', 'برجرايزر', 'برجرايزر', 'classic', 'كلاسيك'],
   },
   {
     id: 'burgerizzr-double',
-    nameAr: 'برجرايزر - دبل برغر',
+    nameAr: 'برجرايزر - دبل برجر',
     nameEn: 'Burgerizzr - Double burger',
     category: 'مطاعم',
     servingLabelAr: 'برجر (260غ)',
@@ -3846,11 +3846,11 @@ export const foodItems: FoodItem[] = [
     protein: 40,
     carbs: 40,
     fat: 42,
-    keywords: ['burgerizzr', 'برجرايزر', 'برغرايزر', 'double', 'دبل'],
+    keywords: ['burgerizzr', 'برجرايزر', 'برجرايزر', 'double', 'دبل'],
   },
   {
     id: 'burgerizzr-crispy-chicken',
-    nameAr: 'برجرايزر - كرسبي تشيكن برغر',
+    nameAr: 'برجرايزر - كرسبي تشيكن برجر',
     nameEn: 'Burgerizzr - Crispy chicken burger',
     category: 'مطاعم',
     servingLabelAr: 'برجر (220غ)',
@@ -3859,7 +3859,7 @@ export const foodItems: FoodItem[] = [
     protein: 26,
     carbs: 45,
     fat: 28,
-    keywords: ['burgerizzr', 'برجرايزر', 'برغرايزر', 'crispy chicken', 'كرسبي'],
+    keywords: ['burgerizzr', 'برجرايزر', 'برجرايزر', 'crispy chicken', 'كرسبي'],
   },
   {
     id: 'burgerizzr-fries',
@@ -3872,7 +3872,7 @@ export const foodItems: FoodItem[] = [
     protein: 5,
     carbs: 45,
     fat: 18,
-    keywords: ['burgerizzr', 'برجرايزر', 'برغرايزر', 'fries', 'بطاطس'],
+    keywords: ['burgerizzr', 'برجرايزر', 'برجرايزر', 'fries', 'بطاطس'],
   },
 
   // --- كاريبو كوفي (Caribou Coffee) ---
