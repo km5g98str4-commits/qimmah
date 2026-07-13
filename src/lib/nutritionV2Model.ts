@@ -50,6 +50,53 @@ function mirrorToCanonical(day: DayLog): void {
   }
 }
 
+// ── Legacy compat (wave3 debt) ──────────────────────────────────────────────
+// The v1 nutrition day store lived under `qimmah:nutritionToday:v1`
+// (nutritionTracking.ts). v2 is now the default surface and reads
+// `qimmah:nutrition:v2` (the unified store). A user upgrading mid-day could have
+// today's meals only under the legacy key. So loadNutritionDay reads the unified
+// store first and, ONLY when it has no entry for today, falls back to a
+// READ-ONLY read of the legacy key (never writes it back here — the next v2
+// write persists to the unified store and the app converges).
+//
+// REMOVAL PLAN: delete LEGACY_NUTRITION_KEY + readLegacyNutritionDay + this
+// fallback branch ONE release after wave3 ships v2 as default (by then every
+// active install has written the unified key at least once). Tracking: the v1
+// key write path in nutritionTracking.ts is retired in the same removal.
+const LEGACY_NUTRITION_KEY = 'qimmah:nutritionToday:v1'
+
+interface LegacyLoggedFood {
+  id: string
+  label: string
+  calories: number
+  protein: number
+  carbs?: number
+  fat?: number
+  meal?: MealSlot
+}
+
+/** Read-only map of the legacy v1 day store for TODAY → v2 DayLog, or null. */
+function readLegacyNutritionDay(): DayLog | null {
+  try {
+    const raw = localStorage.getItem(LEGACY_NUTRITION_KEY)
+    if (!raw) return null
+    const p = JSON.parse(raw) as { date?: string; waterMl?: number; log?: LegacyLoggedFood[] }
+    if (!p || p.date !== getDayStamp() || !Array.isArray(p.log)) return null
+    const foods: LoggedFood[] = p.log.map((e) => ({
+      id: e.id,
+      nameAr: e.label,
+      calories: Number(e.calories) || 0,
+      protein: Number(e.protein) || 0,
+      carbs: typeof e.carbs === 'number' ? e.carbs : undefined,
+      fat: typeof e.fat === 'number' ? e.fat : undefined,
+      meal: e.meal ?? 'snack',
+    }))
+    return { date: p.date, foods, waterMl: Number(p.waterMl) || 0 }
+  } catch {
+    return null
+  }
+}
+
 export function loadNutritionDay(): DayLog {
   const empty: DayLog = { date: getDayStamp(), foods: [], waterMl: 0 }
   if (typeof window === 'undefined') return empty
@@ -62,7 +109,8 @@ export function loadNutritionDay(): DayLog {
   } catch {
     /* ignore */
   }
-  return empty
+  // Unified store has nothing for today → one-release read-only legacy fallback.
+  return readLegacyNutritionDay() ?? empty
 }
 
 function persist(day: DayLog): DayLog {
