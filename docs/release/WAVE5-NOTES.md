@@ -1,6 +1,6 @@
 # Wave 5 — Integration Notes
 
-Status: **partial trunk, blocked on three missing system branches and one missing proof branch.** Nothing below labels absent work green.
+Status: **partial trunk, blocked on two missing system branches and one missing proof branch.** Nothing below labels absent work green.
 
 ## Integration status
 
@@ -15,21 +15,20 @@ Status: **partial trunk, blocked on three missing system branches and one missin
 | `feat/arabic-coach-content @ 871d20c` | Integrated + gated | Arabic exercise cues, 40 lessons, and contextual rest tips. |
 | PDF §05 progress follow-up | Integrated + gated | Weight logging now persists through the sync-ready history path; hydrated measurements and real PR events feed Progress/Profile. |
 | Notifications (commander fix-forward) | Integrated + gated | Five opt-in native iOS reminder types, owner-scoped preferences, plan-aware workout/rest days, and quiet hours. Lock-screen copy is deliberately generic. |
-| `feat/insights-engine` | Blocked: no origin tip | No insights system claimed or exposed by this integration. |
+| `feat/insights-engine @ 52fc851` | Integrated after standards fix-forward | Today and Progress show up to three hedged, actionable weekly insights from canonical workout, nutrition, weight, and plan data. |
 | `feat/plates-and-prs` | Blocked: no origin tip | No plates/PR system claimed or exposed by this integration. |
 | Data-access export (commander fix-forward) | Integrated + gated | Profile privacy exports an owner-guarded JSON copy of on-device data; recovery sessions are blocked and auth/sync secrets are excluded. Import/restore remains out of scope. |
 | `test/proof-deepening` | Blocked: branch absent | Existing proofs remain green; no extra proof suite claimed. |
 
 ## Release blockers / tracked debt
 
-1. Push immutable, proof-bearing tips for the three missing systems, then run the standards/security court and full per-merge gate for each.
+1. Push immutable, proof-bearing tips for the two missing systems, then run the standards/security court and full per-merge gate for each.
 2. Validate notification timing and permission UX on the owner's physical iPhone before public release; browser and simulator gates cannot prove real delivery timing.
-3. Insights must remove raw-hex fallbacks from its v2 card before acceptance.
-4. Replace legal `[OWNER-EMAIL]`/jurisdiction placeholders and obtain legal sign-off before public release.
-5. Run credentialed auth E2E, production Supabase/RLS verification, universal-link, and physical-device checks with owner-held credentials/device.
-6. Catalog proof reports 20 extension/content-type mismatches; runtime display is healthy, but asset normalization remains cleanup debt.
-7. `npm audit --omit=dev` is clean. The development toolchain still reports the Vite/esbuild advisory; its automated fix upgrades to Vite 8, so handle it as a tested migration rather than using `--force` in this release branch.
-8. Data portability currently provides a safe access export only. A future import/restore system needs separate schema migration, validation, and conflict-policy design.
+3. Replace legal `[OWNER-EMAIL]`/jurisdiction placeholders and obtain legal sign-off before public release.
+4. Run credentialed auth E2E, production Supabase/RLS verification, universal-link, and physical-device checks with owner-held credentials/device.
+5. Catalog proof reports 20 extension/content-type mismatches; runtime display is healthy, but asset normalization remains cleanup debt.
+6. `npm audit --omit=dev` is clean. The development toolchain still reports the Vite/esbuild advisory; its automated fix upgrades to Vite 8, so handle it as a tested migration rather than using `--force` in this release branch.
+7. Data portability currently provides a safe access export only. A future import/restore system needs separate schema migration, validation, and conflict-policy design.
 
 ## PDF §05 evidence
 
@@ -52,3 +51,10 @@ Status: **partial trunk, blocked on three missing system branches and one missin
 - Every preference key carries the current owner id. Reconciliation rejects owner mismatch and password recovery, and cancels all known Qimmah schedules before sign-out/account change.
 - Five reminder families use deterministic ids and quiet-hours-aware scheduling; the workout/rest week comes from the saved plan rather than a second plan model.
 - `test:notifications` covers 30 deterministic scheduling, privacy, owner, recovery, race, migration, and cancellation cases; the shared browser proof covers 320/768/1280 RTL.
+
+## Weekly-insights evidence
+
+- The adapter reads canonical workout, measurement, nutrition, history, and saved-plan stores without creating a second persistence path.
+- Muscle coverage compares only the actual saved plan; insufficient or missing targets produce an explicit abstention instead of a guess.
+- Arabic and English exercise/muscle labels follow the active locale; all card copy lives in `src/data` and v2 UI uses semantic color tokens only.
+- `test:insights` covers 28 deterministic threshold, truth-label, ordering, plan, and owner-isolation cases; Today/Progress are included in the shared 3-breakpoint RTL proof.

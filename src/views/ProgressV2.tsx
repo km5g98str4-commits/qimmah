@@ -15,6 +15,9 @@ import {
   type SummaryRow,
   type WeightDetail,
 } from '@/lib/progressV2Model'
+import { buildWeeklyInsights } from '@/lib/insights'
+import { InsightCardsView } from '@/lib/insights/InsightCardsView'
+import { insightCopy } from '@/data/insightCopy'
 
 interface ProgressV2Props {
   lang: Lang
@@ -46,6 +49,8 @@ export function ProgressV2({ lang, onNavigate }: ProgressV2Props) {
   // The model reads the local-first stores; rebuilding on render makes a saved
   // measurement visible immediately without introducing a second UI cache.
   const model = buildProgressV2Model(customization, lang)
+  const insights = buildWeeklyInsights(ar ? 'ar' : 'en')
+  const insightsCopy = insightCopy(ar ? 'ar' : 'en')
   const [screen, setScreen] = useState<ProgressScreen>('home')
   const go = (r: AppRoute) => onNavigate?.(r)
 
@@ -85,6 +90,10 @@ export function ProgressV2({ lang, onNavigate }: ProgressV2Props) {
           </div>
           <div className="mt-4 space-y-3">
             {model.summary.map((row) => <BriefRow key={row.key} row={row} />)}
+          </div>
+          {/* رؤى الأسبوع — بطاقات المحرّك المُحوَّطة (فعل + وجهة، أو «نحتاج المزيد»). */}
+          <div className="mt-4 border-t border-line pt-4">
+            <InsightCardsView cards={insights.cards} lang={ar ? 'ar' : 'en'} onNavigate={go} title={insightsCopy.progressTitle} />
           </div>
           {model.stale.show && (
             <button type="button" onClick={() => setScreen('weight')} className="mt-4 flex w-full items-center justify-between gap-2 border-t border-line pt-3 text-start">

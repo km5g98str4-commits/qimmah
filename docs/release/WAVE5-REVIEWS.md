@@ -21,7 +21,7 @@ Security review result for the integrated set: **No high-confidence vulnerabilit
 | System branch | Tip | Verdict | Blocking findings / wiring |
 |---|---|---|---|
 | `feat/notifications-engine` | — | BRANCH ABSENT / TRUNK FIX-FORWARD ACCEPT | The branch never produced a reviewable tip. Commander implemented the bounded system on trunk with owner-scoped storage, recovery guard, pre-sign-out cancellation, generic lock-screen copy, 30 proofs, and 3-breakpoint RTL UI evidence. |
-| `feat/insights-engine` | — | BLOCKED — NOT PRESENT | A local uncommitted worktree exists, but no origin tip/proof exists. Preliminary standards finding: remove raw-hex fallbacks from the v2 insight card before acceptance. |
+| `feat/insights-engine` | `52fc851` | ACCEPT AFTER FIX | Removed raw-hex fallbacks, moved copy to `src/data`, made muscle coverage compare the saved plan rather than a fixed list, preserved immediate Progress refresh, and wired 28 checks into `test:gate`. |
 | `feat/plates-and-prs` | — | BLOCKED — NOT PRESENT | A local uncommitted worktree exists, but no origin tip/proof exists. |
 | `feat/data-portability` | — | BLOCKED — NOT PRESENT | The local worktree remains at the Wave 4 base with no system diff and no origin branch. |
 | `feat/arabic-coach-content` | `871d20c` | ACCEPT CODE / REJECT PACKAGE DIFF | 181 cues + 40 lessons + 25 rest tips; 25 proof checks and owner-scoped lesson key. Commander wired `test:coaching` into `test:gate`, hid Arabic-only rest copy in EN mode, and replaced raw component colors with semantic success/danger tokens. |
@@ -43,6 +43,7 @@ Every completed merge ran: `typecheck` → `lint --max-warnings 0` → productio
 | Progress canonical-data follow-up | PASS — cloud-style measurements feed Progress without the retired key; validated logging enqueues through `historyStore`; actual achievement PR count feeds Profile; 11 regression checks + shared RTL browser proof |
 | Data-access export fix-forward | PASS — 12 allowlist/owner/recovery checks + real JSON download, status/error semantics, and 3-breakpoint RTL proof |
 | Notifications fix-forward | PASS — 30 owner/recovery/privacy/scheduling checks + 320/768/1280 RTL settings proof; native delivery remains a physical-device release check |
+| Insights engine | PASS after standards fixes — 28 threshold/truth/plan/isolation checks; shared 320/768/1280 RTL proof covers Today and Progress |
 
 Security follow-up: the new measurement form accepts bounded numeric values only,
 creates a client id, and writes through the existing owner-guarded sync boundary.
@@ -75,4 +76,4 @@ This trunk fix-forward closes the access-export gap; it does not claim that the 
 
 ## Blocker record
 
-Five bounded fetch/review loops completed after the open-loop consolidation. The three remaining unmerged system branches and `test/proof-deepening` never appeared on `origin`; therefore no immutable diff, proof, or tip existed to review or merge. Per the hard-cap rule, these are release blockers rather than green systems. The absent notifications branch is recorded honestly above; the accepted trunk fix-forward is independently reviewed and proven.
+Five bounded fetch/review loops completed after the open-loop consolidation. `feat/insights-engine` appeared in the final refresh and was reviewed, corrected, and integrated. The two remaining unmerged system branches and `test/proof-deepening` never appeared on `origin`; therefore no immutable diff, proof, or tip existed to review or merge. Per the hard-cap rule, these remain release blockers rather than green systems. The absent notifications branch is recorded honestly above; the accepted trunk fix-forward is independently reviewed and proven.
