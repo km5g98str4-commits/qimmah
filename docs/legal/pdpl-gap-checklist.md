@@ -7,7 +7,7 @@
 |---|---|---|---|---|
 | **C-1** | **Lawful basis / consent — analytics** | Analytics consent **defaults to `granted`** (`consent.ts:18`), opt-out model. Inert today (provider is `noop` unless `VITE_ANALYTICS_ENDPOINT` set). | **Gap (conditional)** | If any analytics endpoint is ever configured: change default to `denied` and add an explicit in-app opt-in toggle. While noop, low risk — document the decision. |
 | **C-2** | **Explicit consent — health data (sensitive)** | Both onboarding flows block at the first metrics stage until the user accepts the health-data notice; acceptance, time, and policy version are stored in `OnboardingProfile.consents`. | **Implemented (legal review)** | Confirm final wording and lawful-basis treatment with Saudi counsel before public launch. |
-| **R-1** | **Right of access** | User can view profile in-app; **no data export** (`ProfileV2` privacy screen shows “تنزيل نسخة — قادم لاحقًا”, disabled). | **Gap** | Provide export: implement the disabled “export my data”, or honour access requests via `support@qimmah.app` within the statutory period (document the manual process now). |
+| **R-1** | **Right of access** | The v2 privacy screen exports an explicit, schema-labelled JSON copy of the current owner's on-device profile, history, nutrition, wellness, reminders, plan, tasks, achievements, and coaching state. Auth tokens, sync internals, caches, and other owners' records are excluded. Manual requests remain available through support. | **Implemented (legal review)** | Confirm the JSON scope and response workflow with Saudi counsel; this is access export, not an import/restore feature. |
 | **R-2** | **Right to correction** | Profile/body data editable in-app; edits recompute and re-sync. | **Compliant** | — |
 | **R-3** | **Right to deletion** | `delete_own_account` deletes rows from every public table carrying `user_id`, then the auth user; the client performs the full local wipe only after success. | **Compliant** | Confirm the latest function is deployed on production. **OWNER-TO-CONFIRM.** |
 | **R-4** | **Right to object / restrict** | No in-app objection/restriction mechanism beyond deletion. | **Gap (minor)** | State in the Privacy Policy that requests go to `support@qimmah.app`; handle manually. |
@@ -34,7 +34,7 @@ review” header. Owner’s counsel should confirm against the official SDAIA re
   access/portability) are PDPL rights. Ref: DLA Piper (above).
 
 ## Priority order for the owner
-1. **R-3 / R-1 confirm** — verify `delete_own_account` deployed; document/implement access-export. (Data-subject rights are the highest App-review + PDPL risk.)
+1. **R-3 / R-1 confirm** — verify `delete_own_account` deployed and obtain legal sign-off on the implemented access-export scope. (Data-subject rights are the highest App-review + PDPL risk.)
 2. **X-1** — region confirmed `ap-northeast-1` (Japan); disclosure shipped. Remaining: OWNER+LEGAL sign-off on the PDPL transfer mechanism (SCCs/safeguards) before public launch — beta OK with the disclosure.
 3. **C-2 / M-1 legal sign-off** — product gates now ship; counsel confirms wording and minor-treatment basis. **G-1** still needs the owner’s real **[OWNER-EMAIL]**.
 4. **B-1** — breach runbook.

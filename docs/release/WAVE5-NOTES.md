@@ -17,7 +17,7 @@ Status: **partial trunk, blocked on four missing system branches and one missing
 | `feat/notifications-engine` | Blocked: no origin tip | No notification system claimed or exposed by this integration. |
 | `feat/insights-engine` | Blocked: no origin tip | No insights system claimed or exposed by this integration. |
 | `feat/plates-and-prs` | Blocked: no origin tip | No plates/PR system claimed or exposed by this integration. |
-| `feat/data-portability` | Blocked: no origin tip | No export/import system claimed or exposed by this integration. |
+| Data-access export (commander fix-forward) | Integrated + gated | Profile privacy exports an owner-guarded JSON copy of on-device data; recovery sessions are blocked and auth/sync secrets are excluded. Import/restore remains out of scope. |
 | `test/proof-deepening` | Blocked: branch absent | Existing proofs remain green; no extra proof suite claimed. |
 
 ## Release blockers / tracked debt
@@ -29,6 +29,7 @@ Status: **partial trunk, blocked on four missing system branches and one missing
 5. Run credentialed auth E2E, production Supabase/RLS verification, universal-link, and physical-device checks with owner-held credentials/device.
 6. Catalog proof reports 20 extension/content-type mismatches; runtime display is healthy, but asset normalization remains cleanup debt.
 7. `npm audit --omit=dev` is clean. The development toolchain still reports the Vite/esbuild advisory; its automated fix upgrades to Vite 8, so handle it as a tested migration rather than using `--force` in this release branch.
+8. Data portability currently provides a safe access export only. A future import/restore system needs separate schema migration, validation, and conflict-policy design.
 
 ## PDF §05 evidence
 
@@ -36,5 +37,11 @@ Status: **partial trunk, blocked on four missing system branches and one missing
 - The weight CTA opens a real validated logger, writes through `historyStore`, redraws immediately, and exposes icon + text errors accessibly.
 - Profile counts earned PR events from the achievements engine instead of counting exercise baselines.
 - Today keeps the approved command-center hierarchy by collapsing the optional coaching lesson until requested.
-- Browser proof: 24 RTL screenshots at 320/768/1280, zero console errors/overflow, reduced-motion fallbacks, and AA token contrast.
+- Browser proof: 27 RTL screenshots at 320/768/1280, including the privacy/export surface, with zero console errors/overflow, reduced-motion fallbacks, and AA token contrast.
 - Native proof: `npx cap sync ios` and the generic iOS Simulator `xcodebuild` both succeed for `com.qimmah.mobile`.
+
+## Data-access export evidence
+
+- Export is built from an explicit allowlist; it omits auth tokens, sync queues/backups/meta, analytics identifiers, caches, and other owners' registries.
+- Account-scope mismatch and password-recovery sessions fail closed; the JSON payload is capped at 10 MB.
+- `test:data-portability` covers 12 deterministic security/schema cases; browser proof covers real download, icon + text errors, and RTL screenshots at 320/768/1280.

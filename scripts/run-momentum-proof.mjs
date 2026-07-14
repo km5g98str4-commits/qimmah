@@ -1,6 +1,6 @@
 import { chromium } from 'playwright'
 import { spawn } from 'node:child_process'
-import { mkdir, writeFile } from 'node:fs/promises'
+import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { setTimeout as sleep } from 'node:timers/promises'
 
 const PORT = 5198
@@ -58,6 +58,13 @@ async function answerOnboarding(page) {
   await page.getByRole('heading', { name: 'خطتك جاهزة' }).waitFor()
 }
 
+async function openProfilePrivacy(page) {
+  await openSurface(page, 'profile')
+  await page.getByRole('button', { name: 'الإعدادات والخصوصية', exact: true }).click()
+  await page.getByRole('button', { name: /^الخصوصية والبيانات/ }).click()
+  await page.getByRole('heading', { name: 'الخصوصية والبيانات' }).waitFor()
+}
+
 function ratio(lighter, darker) {
   return (lighter + 0.05) / (darker + 0.05)
 }
@@ -107,6 +114,55 @@ try {
       await context.close()
     }
   }
+
+  // PDPL access right: the privacy sub-screen is a real, accessible export
+  // surface at every approved breakpoint, not a disabled “coming later” row.
+  for (const width of widths) {
+    const context = await browser.newContext({ viewport: { width, height: heights[width] }, locale: 'ar-SA', acceptDownloads: true })
+    const page = await context.newPage()
+    const consoleErrors = []
+    page.on('console', (message) => message.type() === 'error' && consoleErrors.push(message.text()))
+    page.on('pageerror', (error) => consoleErrors.push(String(error)))
+    await openProfilePrivacy(page)
+    await page.waitForTimeout(700)
+    const audit = await page.evaluate(() => ({
+      dir: document.documentElement.dir,
+      overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    }))
+    if (audit.dir !== 'rtl') failures.push(`privacy-${width}: dir=${audit.dir}`)
+    if (audit.overflow > 1) failures.push(`privacy-${width}: horizontal overflow ${audit.overflow}px`)
+    if (consoleErrors.length) failures.push(`privacy-${width}: console ${consoleErrors.join(' | ')}`)
+    await page.screenshot({ path: `${OUT}/privacy-${width}.png`, fullPage: true })
+    await context.close()
+  }
+
+  // Owner mismatch must fail with icon + text; a matching guest scope then
+  // downloads a schema-labelled file without auth/sync material.
+  const exportContext = await browser.newContext({ viewport: { width: 320, height: 720 }, locale: 'ar-SA', acceptDownloads: true })
+  const exportPage = await exportContext.newPage()
+  await openProfilePrivacy(exportPage)
+  await exportPage.evaluate(() => {
+    localStorage.setItem('qimmah:lastUser:v1', 'someone-else')
+    localStorage.setItem('qimmah:supabase-auth:v1', 'BROWSER_AUTH_SECRET')
+    localStorage.setItem('qimmah:syncQueue:v1:guest', 'BROWSER_QUEUE_SECRET')
+  })
+  const exportButton = exportPage.getByRole('button', { name: /تنزيل نسخة من بياناتي/ })
+  await exportButton.click()
+  const exportAlert = exportPage.getByRole('alert')
+  await exportAlert.waitFor()
+  if (!(await exportAlert.locator('svg').count())) failures.push('privacy export error lacks icon + text')
+  await exportPage.evaluate(() => localStorage.setItem('qimmah:lastUser:v1', 'guest'))
+  const downloadPromise = exportPage.waitForEvent('download')
+  await exportButton.click()
+  const download = await downloadPromise
+  const downloadPath = await download.path()
+  const exportJson = downloadPath ? await readFile(downloadPath, 'utf8') : ''
+  const exportBundle = exportJson ? JSON.parse(exportJson) : null
+  if (download.suggestedFilename() !== `qimmah-data-${new Date().toISOString().slice(0, 10)}.json`) failures.push(`privacy export filename = ${download.suggestedFilename()}`)
+  if (exportBundle?.format !== 'qimmah-data-export' || exportBundle?.schemaVersion !== 1) failures.push('privacy export format/schema invalid')
+  if (exportJson.includes('BROWSER_AUTH_SECRET') || exportJson.includes('BROWSER_QUEUE_SECRET')) failures.push('privacy export leaked auth/sync material')
+  await exportPage.getByRole('status').waitFor()
+  await exportContext.close()
 
   // Today hierarchy: coaching supports the command center without displacing
   // its hero. The lesson is compact by default and expands accessibly.
@@ -203,6 +259,6 @@ if (failures.length) {
   console.error(failures.map((failure) => `FAIL ${failure}`).join('\n'))
   process.exitCode = 1
 } else {
-  console.log(`PASS ${surfaces.length * widths.length} RTL screenshots, zero console errors, no horizontal overflow`)
+  console.log(`PASS ${surfaces.length * widths.length + widths.length} RTL screenshots, zero console errors, no horizontal overflow`)
   console.log('PASS reduced-motion fallbacks and WCAG AA token contrast')
 }

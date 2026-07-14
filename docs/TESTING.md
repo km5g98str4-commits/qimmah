@@ -17,6 +17,7 @@ npm run test:gate
 | `active-session` | 31 | workout snapshot save/restore, owner isolation, 12h freshness, **timestamp rest timer** (background-safe) | `scripts/active-session-proof.ts` |
 | `today-v2` | 32 | Today v2 model: 3 states, pillars, hero, hedged copy | `scripts/*today-v2*`/`run-today-v2-model-proof.mjs` |
 | `progress-v2` | 11 | canonical hydrated measurements, immediate logging, honest trend copy, actual PR-event count | `scripts/progress-v2-proof.ts` |
+| `data-portability` | 12 | allowlisted export schema, owner isolation, recovery guard, secret exclusion, size cap | `scripts/data-portability-proof.ts` |
 | `sync` | 19 | sync queue: enqueue gating (`syncAllowedFor`), recovery guard, dedup, retry/backoff | `scripts/sync-proof.ts` |
 | `onboarding-async` | 28 | onboarding flow: step validation, finalize state machine, owner-scoped draft round-trip, discard-on-finish | `scripts/onboarding-async-proof.ts` |
 | `fixforward` | 17 | wave3 fixes: v2 workout → canonical session mapping; NutritionV2 → canonical `loggedFood` mirror | `scripts/fixforward-proof.ts` |

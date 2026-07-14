@@ -1,10 +1,12 @@
-import { useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Icon } from '@/components/Icon'
 import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
 import type { AppRoute } from '@/lib/appRoutes'
 import { useCustomization } from '@/lib/customizationContext'
 import { useAuth } from '@/lib/authContext'
+import { dataPortabilityCopy } from '@/data/dataPortabilityCopy'
+import { buildQimmahDataExport, deliverQimmahDataExport } from '@/lib/dataPortability'
 import { buildProfileV2Model, COMMITMENT_WEEKS, type CommitmentWeek, type ProfileV2Model } from '@/lib/profileV2Model'
 
 interface ProfileV2Props {
@@ -33,7 +35,25 @@ export function ProfileV2({ lang, onNavigate }: ProfileV2Props) {
     [customization, auth.displayName, auth.user, lang],
   )
 
-  if (screen === 'privacy') return <Privacy lang={lang} model={model} onBack={() => setScreen('home')} onDelete={() => onNavigate('settings')} />
+  useEffect(() => {
+    // Internal sub-screens replace the profile body in place. Reset retained
+    // page scroll so their heading and first action stay inside the viewport.
+    window.scrollTo({ top: 0, behavior: 'auto' })
+  }, [screen])
+
+  if (screen === 'privacy') {
+    return (
+      <Privacy
+        lang={lang}
+        model={model}
+        ownerId={auth.user?.id ?? null}
+        email={auth.user?.email ?? null}
+        recoveryActive={auth.recoveryActive}
+        onBack={() => setScreen('home')}
+        onDelete={() => onNavigate('settings')}
+      />
+    )
+  }
   if (screen === 'settings') return <Settings lang={lang} model={model} onBack={() => setScreen('home')} onAccount={() => onNavigate('settings')} onPrivacy={() => setScreen('privacy')} />
 
   const numerals = (n: number) => (ar ? n.toLocaleString('ar-EG') : String(n))
@@ -144,9 +164,26 @@ const HEAT: Record<CommitmentWeek['level'], string> = {
   3: 'v2-heat-3',
 }
 
-function Privacy({ lang, model, onBack, onDelete }: { lang: Lang; model: ProfileV2Model; onBack: () => void; onDelete: () => void }) {
+type ExportState = 'idle' | 'preparing' | 'success' | 'error'
+
+function Privacy({ lang, model, ownerId, email, recoveryActive, onBack, onDelete }: { lang: Lang; model: ProfileV2Model; ownerId: string | null; email: string | null; recoveryActive: boolean; onBack: () => void; onDelete: () => void }) {
   const ar = lang !== 'en'
   const t = (a: string, e: string) => (ar ? a : e)
+  const copy = dataPortabilityCopy(lang)
+  const [exportState, setExportState] = useState<ExportState>('idle')
+
+  const exportData = async () => {
+    if (exportState === 'preparing') return
+    setExportState('preparing')
+    try {
+      const bundle = buildQimmahDataExport({ ownerId, email, recoveryActive })
+      const result = await deliverQimmahDataExport(bundle)
+      setExportState(result === 'cancelled' ? 'idle' : 'success')
+    } catch {
+      setExportState('error')
+    }
+  }
+
   return (
     <SubScreen title={t('الخصوصية والبيانات', 'Privacy & data')} onBack={onBack} lang={lang}>
       <section className="rounded-3xl border border-line bg-surface p-5">
@@ -156,7 +193,30 @@ function Privacy({ lang, model, onBack, onDelete }: { lang: Lang; model: Profile
       <section className="mt-4 space-y-2.5">
         <InfoRow icon="BarChart3" title={t('تحليلات مجهولة', 'Anonymous analytics')} sub={t('لتحسين التطبيق فقط', 'To improve the app only')} state={model.privacy.analyticsAnonymousEnabled ? t('مفعّل', 'On') : t('مطفأ', 'Off')} />
         <InfoRow icon="Activity" title={t('مشاركة بيانات الصحة', 'Health sharing')} sub={t('غير مربوطة بعد', 'Not connected yet')} disabled />
-        <InfoRow icon="Download" title={t('تنزيل نسخة من بياناتي', 'Export my data')} sub={t('قادم لاحقًا', 'Coming later')} disabled />
+        <button
+          type="button"
+          onClick={() => void exportData()}
+          disabled={exportState === 'preparing'}
+          aria-busy={exportState === 'preparing'}
+          className="v2-pressable flex w-full items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3 text-start hover:border-[color:var(--v2-blue)] disabled:cursor-wait disabled:opacity-70"
+        >
+          <span className="v2-bg-blue-soft v2-text-blue grid h-9 w-9 shrink-0 place-items-center rounded-xl"><Icon name="Download" className="h-4.5 w-4.5" /></span>
+          <span className="min-w-0 flex-1"><span className="block text-sm font-bold">{copy.actionTitle}</span><span className="block text-xs text-ink-500">{exportState === 'preparing' ? copy.preparing : copy.actionDescription}</span></span>
+          <Icon name="ChevronLeft" className="h-4 w-4 shrink-0 text-ink-400 rtl:rotate-0 ltr:rotate-180" />
+        </button>
+        {exportState === 'success' && (
+          <p role="status" className="flex items-start gap-2 rounded-xl border border-[color:var(--v2-green)] bg-surface px-3 py-2.5 text-xs font-bold text-ink-900">
+            <Icon name="CheckCircle2" className="v2-text-green mt-0.5 h-4 w-4 shrink-0" />
+            <span>{copy.success}</span>
+          </p>
+        )}
+        {exportState === 'error' && (
+          <p role="alert" className="v2-error-panel flex items-start gap-2 rounded-xl border px-3 py-2.5 text-xs font-bold text-ink-900">
+            <Icon name="AlertCircle" className="v2-error-icon mt-0.5 h-4 w-4 shrink-0" />
+            <span>{copy.error}</span>
+          </p>
+        )}
+        <p className="px-2 text-xs leading-relaxed text-ink-500">{copy.safetyNote}</p>
         <button type="button" onClick={onDelete} className="v2-error-panel v2-pressable flex w-full items-center gap-3 rounded-2xl border px-4 py-3.5 text-start">
           <span className="v2-error-icon grid h-9 w-9 shrink-0 place-items-center rounded-xl"><Icon name="Trash2" className="h-4.5 w-4.5" /></span>
           <span className="min-w-0 flex-1"><span className="v2-error-icon block text-sm font-bold">{t('حذف الحساب نهائيًا', 'Delete account permanently')}</span><span className="block text-xs text-ink-500">{t('لا يمكن التراجع · يتطلب تأكيدًا', 'Irreversible · requires confirmation')}</span></span>

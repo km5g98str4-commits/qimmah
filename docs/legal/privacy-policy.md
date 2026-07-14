@@ -73,8 +73,9 @@ Supabase. لا ندّعي وجود «قرار كفاية» أو اعتماد ر�
 إن تعذّر حذف الحساب من الخادم، لا يُحذف أي شيء ولا يُدّعى نجاح — تُعيد المحاولة أو تتواصل معنا.
 
 ### 9. حقوقك (نظام حماية البيانات الشخصية — السعودية)
-لك الحق في: **الوصول** إلى بياناتك، **تصحيحها**، **حذفها**، و**الاعتراض/تقييد** المعالجة. تمارس معظمها مباشرة داخل
-التطبيق (تعديل الملف، حذف الحساب). لأي طلب إضافي راسلنا على **support@qimmah.app** وسنستجيب خلال المدة النظامية.
+لك الحق في: **الوصول** إلى بياناتك، **تصحيحها**، **حذفها**، و**الاعتراض/تقييد** المعالجة. يمكنك تنزيل نسخة JSON
+من البيانات المتاحة على جهازك عبر «الملف الشخصي ← الإعدادات والخصوصية ← الخصوصية والبيانات». ويمكنك تعديل ملفك
+أو حذف حسابك داخل التطبيق. لأي طلب إضافي راسلنا على **support@qimmah.app** وسنستجيب خلال المدة النظامية.
 
 ### 10. الأطفال والفئة العمرية
 التطبيق موجّه للبالغين والمراهقين المهتمين باللياقة. الحد الأدنى للعمر المؤهّل للاستخدام: **12 سنة**، ويجب
@@ -150,8 +151,9 @@ In-app: **Settings & privacy → Delete account permanently**, which: (1) delete
 deletion fails, nothing is deleted and no success is claimed — retry or contact us.
 
 ### 9. Your rights (Saudi PDPL)
-You have the right to **access**, **correct**, **delete**, and **object to/restrict** processing. Most are
-exercised directly in-app (edit profile, delete account). For anything else, email **support@qimmah.app**.
+You have the right to **access**, **correct**, **delete**, and **object to/restrict** processing. You can export
+a JSON copy of the data available on your device from **Profile → Settings & privacy → Privacy & data**. You can
+also edit your profile or delete your account in-app. For anything else, email **support@qimmah.app**.
 
 ### 10. Children & age
 Minimum eligible age: **12 years**. Account creation requires an explicit 12+ confirmation. This version does

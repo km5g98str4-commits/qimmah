@@ -37,15 +37,29 @@ Every completed merge ran: `typecheck` → `lint --max-warnings 0` → productio
 | marketing/support site | PASS |
 | bundle optimization | PASS |
 | App Store screenshot assets | PASS |
-| Wave 4 v2 promotion reconciliation | PASS — built HTML contains `data-design="v2"`; 24 RTL surface screenshots, zero console errors/overflow |
+| Wave 4 v2 promotion reconciliation | PASS — built HTML contains `data-design="v2"`; RTL surface screenshots, zero console errors/overflow |
 | Arabic coaching content | PASS after one fix loop — TypeScript narrowing corrected; 25 coaching checks + full gate green |
 | Coaching semantic-color follow-up | PASS — typecheck, lint 0, v2 build, every `test:gate` suite, onboarding E2E 11/11, Capacitor iOS sync |
-| Progress canonical-data follow-up | PASS — cloud-style measurements feed Progress without the retired key; validated logging enqueues through `historyStore`; actual achievement PR count feeds Profile; 11 regression checks + 24-view RTL browser proof |
+| Progress canonical-data follow-up | PASS — cloud-style measurements feed Progress without the retired key; validated logging enqueues through `historyStore`; actual achievement PR count feeds Profile; 11 regression checks + shared RTL browser proof |
+| Data-access export fix-forward | PASS — 12 allowlist/owner/recovery checks + real JSON download, status/error semantics, and 3-breakpoint RTL proof |
 
 Security follow-up: the new measurement form accepts bounded numeric values only,
 creates a client id, and writes through the existing owner-guarded sync boundary.
 No auth/recovery/wipe logic changed; queue execution still requires the matching
 runtime owner with `recoveryActive=false`, and database RLS remains owner-only.
+
+## Commander data-access export fix-forward
+
+| Review axis | Verdict | Evidence |
+|---|---|---|
+| Standards | ACCEPT | Copy is data-driven; v2 UI uses semantic tokens, RTL logical layout, reduced-motion-compatible press feedback, and error icon + text. |
+| Owner isolation | ACCEPT | Export requires `accountScope` owner equality; owner-scoped plan, tasks, session, and coaching readers receive that same owner id. |
+| Recovery safety | ACCEPT | `recoveryActive` fails closed before any data is read or delivered. |
+| Exfiltration surface | ACCEPT | Explicit allowlist excludes auth/session tokens, sync queue/backup/meta, analytics IDs, caches, and other-owner registries; 10 MB cap limits accidental oversized output. |
+| Proof | ACCEPT | 12 deterministic checks plus real-browser download/error/status proof and 320/768/1280 RTL screenshots. |
+
+This trunk fix-forward closes the access-export gap; it does not claim that the absent
+`feat/data-portability` branch landed, and it intentionally does not implement import/restore.
 
 ## Blocker record
 
