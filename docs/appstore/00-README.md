@@ -8,8 +8,8 @@ Nothing here is applied to App Store Connect — submission is the owner's step 
 |---|---|
 | `01-naming.md` | App name / subtitle / promotional text / keywords — 3 scored options each, one recommended; brand line placed as subtitle |
 | `02-description.md` | Full AR (primary) + EN description; hook → features → privacy → Qimmah+ one line; claim→code map |
-| `03-age-rating.md` | 2025 age-rating questionnaire answered per Qimmah's real content; flags the pending minimum-age decision |
-| `04-screenshots-plan.md` | Required device sizes (6.9″/1290×2796), 6-shot list mapped to v2.1 surfaces, AR captions (≤6 words, verb-first) |
+| `03-age-rating.md` | 2025 age-rating questionnaire answered per Qimmah's real content and the implemented 12+ eligibility gate |
+| `04-screenshots.md` | Required 6.9″/1260×2736 set, 6-shot list mapped to v2.1 surfaces, and committed raw captures |
 | `05-reviewer-notes.md` | App Review notes (Arabic-first, v2 access, barcode testing) + demo-account seeding plan |
 | `06-submission-runbook.md` | Owner-facing Arabic walkthrough: app record → privacy labels → legal URLs → Xcode upload → TestFlight → submit; OWNER-DECISION inline |
 | `07-second-pass-verification.md` | Every Apple limit cited+dated, feature→file trace, consolidated TO-CONFIRM |
