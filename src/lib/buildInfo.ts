@@ -1,5 +1,5 @@
 // معرّف البناء — يُحقن وقت البناء عبر vite define (انظر vite.config.ts).
-// يساعد على التحقق من أن Netlify نشر النسخة الصحيحة (في الـ console والفوتر).
+// يساعد على التحقق من أن Cloudflare Pages نشر النسخة الصحيحة (في الـ console والفوتر).
 
 declare const __APP_VERSION__: string
 declare const __BUILD_COMMIT__: string

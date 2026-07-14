@@ -13,9 +13,9 @@ const pkgVersion = (() => {
   }
 })()
 
-// على Netlify يتوفّر COMMIT_REF؛ محليًا نقرأ git؛ وإلا 'dev'.
+// على Cloudflare Pages يتوفّر CF_PAGES_COMMIT_SHA؛ محليًا نقرأ git؛ وإلا 'dev'.
 const buildCommit = (() => {
-  const ref = process.env.COMMIT_REF
+  const ref = process.env.CF_PAGES_COMMIT_SHA
   if (ref) return ref.slice(0, 7)
   try {
     return execSync('git rev-parse --short HEAD').toString().trim()

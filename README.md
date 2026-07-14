@@ -104,23 +104,13 @@ npm run build      # ⇠ ينتج dist/
 npm run preview    # معاينة الإنتاج على http://localhost:4173
 ```
 
-### Netlify
-- ملف `netlify.toml` جاهز: `command = npm run build` · `publish = dist` · Node 20.
-- **SPA fallback**: مُهيّأ عبر `netlify.toml` و`public/_redirects` (`/* → /index.html 200`).
-- النشر: اربط الريبو في Netlify (يلتقط الإعدادات تلقائيًا)، أو ارفع مجلد `dist` يدويًا، أو:
-  ```bash
-  npx netlify-cli deploy --prod --dir=dist
-  ```
-
-### Vercel
-- ملف `vercel.json` جاهز: `framework: vite` · `buildCommand: npm run build` · `outputDirectory: dist` + **rewrite** لكل المسارات إلى `index.html`.
-- النشر: استورد الريبو في Vercel (يتعرّف على Vite تلقائيًا)، أو:
-  ```bash
-  npx vercel --prod
-  ```
+### Cloudflare Pages
+- المضيف المعتمد هو مشروع `qimmah`، وينشر تلقائيًا من `main`.
+- أمر البناء `npm run build` ومجلد الإخراج `dist`، مع SPA fallback في `public/_redirects`.
+- فروع المعاينة تظهر على نطاقات فرعية لمشروع `qimmah-8qp.pages.dev`.
 
 ### ملاحظات
-- **SPA fallback** ضروري: التطبيق يدير حالاته في الذاكرة (بلا React Router)، فأي تحديث صفحة على أي حالة يجب أن يخدم `index.html` (مُهيّأ للمنصّتين).
+- **SPA fallback** ضروري: التطبيق يدير حالاته في الذاكرة (بلا React Router)، فأي تحديث صفحة على أي حالة يجب أن يخدم `index.html`.
 - `base` الافتراضي `/` — مناسب للنشر على جذر النطاق. لو نشرت تحت مسار فرعي، اضبط `base` في `vite.config.ts`.
 - لا متغيرات بيئة مطلوبة. كل البيانات في متصفح المستخدم.
 

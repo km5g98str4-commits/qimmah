@@ -65,13 +65,8 @@ Verify on a simulator: launch, safe-area/StatusBar correct, no white flash
 
 ## Step 5 — Web / marketing site
 
-Two deploy configs are present — **confirm the live target with the owner before relying on either:**
-- `netlify.toml` (`command = npm run build`, `publish = dist`) — Netlify.
-- `docs/MERGE-DEPLOY-PLAN.md` / `docs/release-checklist.md` reference **Cloudflare Pages** (project `qimmah`, auto-deploy from `main`).
-
-> ⚠️ **Discrepancy to resolve:** the repo ships a `netlify.toml` while the release
-> docs name Cloudflare Pages. Only one should be authoritative. Whichever is live
-> auto-deploys from `main` on merge — so the `main` PR merge is the web deploy trigger.
+**Cloudflare Pages هو المضيف الوحيد المعتمد** (المشروع `qimmah`). ينشر تلقائيًا من
+`main`، لذلك دمج PR في `main` هو مشغّل النشر. إعداد الاستضافة المتقاعد أزيل من المستودع.
 - **RP-5:** web host dashboards keep prior deploys; roll back by promoting the last-good deploy.
 
 ## Backend (Supabase) release

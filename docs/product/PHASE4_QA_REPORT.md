@@ -16,7 +16,7 @@
 | فحص | نتيجة |
 |---|---|
 | ملفات محلّية في `public/exercise-images/` | **272 ملف** (136 تمرينًا × `0.jpg` + `1.jpg`) |
-| متعقّبة في Git (`git ls-files`) | **272 ملف** — ستُنشر على Netlify |
+| متعقّبة في Git (`git ls-files`) | **272 ملف** — ستُنشر على Cloudflare Pages |
 | نُسخت إلى `dist/` بعد `npm run build` | **272 ملف** ✓ |
 | خدمة HTTP من الحزمة المبنيّة | `GET /exercise-images/barbell-bench-press/0.jpg` → **200**, `image/jpeg`, 72816 bytes ✓ |
 
@@ -112,7 +112,7 @@
 2. فرع `integration/phase4` المذكور في خطوات النشر غير موجود.
 
 **الخطوة التالية المقترحة:** مراجعة الفرع `claude/phase4-final-qa-deploy-87ofjx` وفتح PR إلى `main`، ثم النشر عبر
-Netlify (الإعداد الحالي في `netlify.toml`). بعد النشر، تأكيد أنّ `qimmah-v2` يُبطل الكاش لدى مستخدم عائد.
+Cloudflare Pages. بعد النشر، تأكيد أنّ `qimmah-v2` يُبطل الكاش لدى مستخدم عائد.
 
 ### متابعات (Follow-ups)
 - اختبار تسجيل جلسة تمرين كاملة e2e مع onboarding فعليّ (persist + achievements fire).

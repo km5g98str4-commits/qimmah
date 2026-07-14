@@ -1,2 +1,2 @@
-# Netlify SPA fallback — every path serves index.html (app handles state in-memory)
+# Cloudflare Pages SPA fallback — every path serves index.html (app handles state in-memory)
 /*    /index.html   200

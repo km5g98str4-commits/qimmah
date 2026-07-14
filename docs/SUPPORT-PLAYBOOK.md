@@ -21,7 +21,7 @@ reflects the **real app behaviour** on `integration/wave3`.
 | "Can't log in / forgot password" | needs reset | Send them the reset flow; deep link handled by `recoveryState.ts` → reset screen. Owner ref: `docs/QA-RESET-PASSWORD.md`. |
 | "Reset link doesn't open the app" | deep-link config | Confirm `VITE_RESET_REDIRECT_URL` + Supabase Redirect URLs + Info.plist `CFBundleURLTypes` (`com.qimmah.mobile`). |
 | "Stuck on verify-email" | email unconfirmed | App shows `VerifyEmailView` until `email_confirmed_at` set (`authContext`). Ask them to open the confirmation email; resend from the screen. |
-| "My data isn't on my other device" | sync not flushed / offline | Sync is signed-in + online only; queue persists locally (`syncQueue.ts`) and flushes on foreground (`startSyncLifecycle`). Ask them to sign in on both, open the app foreground, check connectivity. **No data is lost** — it's local-first. |
+| "My data isn't on my other device" | cloud sync disabled / not flushed / offline | Confirm cloud sync is enabled for the build, then sign in on both devices, foreground the app, and check connectivity. The owner-scoped queue persists locally (`syncQueue.ts`) and flushes on foreground (`startSyncLifecycle`). |
 | "I deleted my account but…" | partial delete | Deletion is honest: it only reports success when the auth user is actually deleted (`delete_own_account` RPC), else a calm failure «لم نتمكن من حذف الحساب بالكامل… تواصل معنا» with retry. If it failed, retry; if persistent, escalate. |
 | "Give me a copy of my data" (PDPL access) | R-1 access request | Follow `docs/DATA-EXPORT-DESIGN.md` Path 1 (owner-run export). Log the request + fulfilment date. |
 | "I think my account was accessed" | possible incident | Treat as suspected breach → `docs/BREACH-RUNBOOK.md` (72h SDAIA clock starts at your awareness). |
@@ -37,7 +37,7 @@ reflects the **real app behaviour** on `integration/wave3`.
 ## FAQ (publishable — AR + EN)
 
 ### هل بياناتي آمنة؟
-نعم. بياناتك تُخزَّن أولًا على جهازك، وتُزامَن سحابيًا فقط عند تسجيل الدخول وبحماية صفوف
+نعم. بياناتك تُخزَّن أولًا على جهازك، وعند تفعيل المزامنة تُزامَن سحابيًا فقط بعد تسجيل الدخول وبحماية صفوف
 لكل مستخدم (لا يرى أحد بيانات غيره). لا نطلب موقعك ولا جهات اتصالك ولا صورك، ولا نبيع بياناتك.
 
 ### كيف أستعيد كلمة المرور؟
@@ -51,8 +51,8 @@ reflects the **real app behaviour** on `integration/wave3`.
 راسِل `support@qimmah.app` بطلب «نسخة من بياناتي»، ونزوّدك بها خلال المدة النظامية.
 
 ### لماذا لا تظهر بياناتي على جهازي الآخر؟
-المزامنة تعمل عند تسجيل الدخول والاتصال بالإنترنت. سجّل الدخول على الجهازين وافتح التطبيق؛
-لا تُفقد بياناتك — فهي محفوظة محليًا وتُرفع عند توفّر الاتصال.
+عند تفعيل المزامنة، تعمل بعد تسجيل الدخول والاتصال بالإنترنت. سجّل الدخول على الجهازين
+وافتح التطبيق، ثم تحقّق من الاتصال.
 
 ### كيف أتواصل معكم؟
 عبر `support@qimmah.app` (زر «تواصل معنا» داخل التطبيق).
@@ -60,7 +60,7 @@ reflects the **real app behaviour** on `integration/wave3`.
 ---
 
 ### Is my data safe?
-Yes. Your data is stored on your device first and synced to the cloud only when you're
+Yes. Your data is stored on your device first and, when sync is enabled, synced to the cloud only when you're
 signed in, protected by per-user row-level security (no one sees another user's data).
 We don't request your location, contacts, or photos, and we don't sell your data.
 
@@ -78,8 +78,8 @@ Email `support@qimmah.app` requesting "a copy of my data"; we provide it within 
 statutory period.
 
 ### Why isn't my data on my other device?
-Sync runs when you're signed in and online. Sign in on both devices and open the app —
-nothing is lost; your data is stored locally and uploads when a connection is available.
+When sync is enabled, it runs while you're signed in and online. Sign in on both devices,
+open the app, and check connectivity.
 
 ### How do I contact you?
 `support@qimmah.app` (the in-app "Contact us" button).

@@ -2,7 +2,7 @@
 
 ## Preview URL
 
-no preview generated — enable Netlify branch deploys / run `npm run dev` locally
+no preview generated — verify the Cloudflare Pages branch preview / run `npm run dev` locally
 
 _(PR #3 opened: https://github.com/km5g98str4-commits/gym-os-template/pull/3)_
 
