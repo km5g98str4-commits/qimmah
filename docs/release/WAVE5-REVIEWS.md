@@ -24,7 +24,7 @@ Security review result for the integrated set: **No high-confidence vulnerabilit
 | `feat/insights-engine` | pending | WAITING | Not present on origin. |
 | `feat/plates-and-prs` | pending | WAITING | Not present on origin. |
 | `feat/data-portability` | pending | WAITING | Not present on origin. |
-| `content/arabic-coach-content` | pending | WAITING | Not present on origin. |
+| `feat/arabic-coach-content` | `871d20c` | ACCEPT CODE / REJECT PACKAGE DIFF | 181 cues + 40 lessons + 25 rest tips; 25 proof checks and owner-scoped lesson key. Commander wired `test:coaching` into `test:gate` and hid Arabic-only rest copy in EN mode. |
 
 ## Gate ledger
 
@@ -38,3 +38,4 @@ Every completed merge ran: `typecheck` → `lint --max-warnings 0` → productio
 | bundle optimization | PASS |
 | App Store screenshot assets | PASS |
 | Wave 4 v2 promotion reconciliation | PASS — built HTML contains `data-design="v2"`; 24 RTL surface screenshots, zero console errors/overflow |
+| Arabic coaching content | PASS after one fix loop — TypeScript narrowing corrected; 25 coaching checks + full gate green |

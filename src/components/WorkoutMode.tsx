@@ -758,12 +758,12 @@ export function WorkoutMode({ lang, day, ownerId, initialSnapshot, onClose, onFi
             )}
           </div>
           {/* نصيحة تدريب هادئة أثناء الراحة — قابلة للتجاهل، وتخفت الحركة مع reduce-motion. */}
-          {!restDone && restTip && !restTipDismissed && (
+          {lang !== 'en' && !restDone && restTip && !restTipDismissed && (
             <div className="container-page motion-safe:animate-fade-up pb-3">
               <div className="flex items-start gap-2 rounded-xl border border-line bg-surface/70 px-3 py-2">
                 <Icon name="Sparkles" className="mt-0.5 h-4 w-4 shrink-0 text-primary-c" />
                 <p className="min-w-0 flex-1 text-xs leading-relaxed text-ink-700">{restTip.textAr}</p>
-                <button type="button" onClick={() => setRestTipDismissed(true)} aria-label={lang !== 'en' ? 'تجاهل النصيحة' : 'Dismiss tip'} className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-ink-500 hover:bg-beige">
+                <button type="button" onClick={() => setRestTipDismissed(true)} aria-label="تجاهل النصيحة" className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-ink-500 hover:bg-beige">
                   <Icon name="X" className="h-3.5 w-3.5" />
                 </button>
               </div>
