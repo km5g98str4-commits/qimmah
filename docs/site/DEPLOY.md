@@ -6,15 +6,26 @@
 ## المحتويات (جذر النشر = `site/`)
 ```
 site/
-├── index.html          # الصفحة الرئيسية (Hero + المزايا + قِمّة+)
+├── index.html          # الصفحة الرئيسية (Hero + المزايا + قِمّة+) + JSON-LD
 ├── support.html        # الدعم (تواصل + أسئلة شائعة)
 ├── privacy.html        # سياسة الخصوصية (AR + EN)
 ├── terms.html          # شروط الاستخدام (AR + EN)
+├── 404.html            # صفحة «غير موجودة» (يخدمها Cloudflare تلقائيًا)
+├── robots.txt          # يسمح بالفهرسة + يشير إلى sitemap
+├── sitemap.xml         # خريطة الصفحات الأربع
+├── _headers            # ترويسات Cloudflare (CSP ذاتي فقط + أمان + كاش)
 ├── assets/
 │   ├── site.css        # نظام التصميم (Momentum) + @font-face
-│   └── favicon.svg     # علامة Ascent
+│   ├── favicon.svg     # علامة Ascent
+│   ├── apple-touch-icon.png  # أيقونة iOS (180×180)
+│   └── og-image.png    # بطاقة المشاركة (1200×630)
 └── fonts/              # IBM Plex Sans Arabic (woff2، ذاتي الاستضافة)
 ```
+
+> **ملاحظة النطاق:** الروابط المطلقة في `robots.txt`, `sitemap.xml`, `canonical`,
+> و`og:image` تفترض النطاق **`https://qimmah.app`**. إن اختلف النطاق النهائي، استبدله
+> في هذه الملفات (بحث/استبدال لـ `qimmah.app`). الملفات النسبية (CSS/الخطوط/الأيقونات)
+> لا تحتاج تعديلًا. ملف `_headers` يُطبّق CSP `default-src 'self'` — لا يتطلب النطاق.
 
 ## أ) النشر عبر Git (موصى به)
 1. ادفع الفرع (هذا المستودع) إلى GitHub/GitLab.
