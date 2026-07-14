@@ -24,6 +24,8 @@ import { canonicalExerciseId, detailedMuscleLabel, getAlternatives, getExercise 
 import { getMachineAlternatives } from '@/data/machineAlternatives'
 import { getRecord, progressionHint } from '@/lib/exerciseHistory'
 import { exerciseGuidance } from '@/lib/exerciseGuidance'
+import { pickRestTip } from '@/lib/coaching'
+import type { RestTip } from '@/lib/coaching'
 import { muscleLabel } from '@/lib/muscles'
 import { getDayStamp } from '@/lib/today'
 import type { Difficulty, SetLog, WorkoutSession } from '@/lib/workoutSessions'
@@ -132,6 +134,22 @@ export function WorkoutMode({ lang, day, ownerId, initialSnapshot, onClose, onFi
   // صحيحًا بعد رجوع التطبيق من الخلفية (تُجمَّد مؤقتات JS على iOS أثناء الخلفية).
   const [rest, setRest] = useState<RestSnapshot | null>(() => initialSnapshot?.rest ?? null)
   const [now, setNow] = useState(() => Date.now())
+  // نصيحة راحة سياقية على السطح الداكن — تُختار حسب عضلة التمرين الحالي، بلا تكرار
+  // خلال الجلسة، وقابلة للتجاهل. حتمية بالنسبة للبذرة (endsAt) فتبقى ثابتة خلال الراحة.
+  const [restTip, setRestTip] = useState<RestTip | null>(null)
+  const [restTipDismissed, setRestTipDismissed] = useState(false)
+  const shownRestTips = useRef<string[]>([])
+  useEffect(() => {
+    if (!rest) { setRestTip(null); return }
+    const pe = day.exercises[current]
+    const mus = pe ? getExercise(effExId(pe.id, pe.exerciseId))?.primaryMuscle : undefined
+    if (!mus) { setRestTip(null); return }
+    const picked = pickRestTip(mus, rest.endsAt, shownRestTips.current)
+    if (picked) shownRestTips.current = [...shownRestTips.current, picked.id]
+    setRestTip(picked)
+    setRestTipDismissed(false)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rest?.endsAt])
   // نبضة عرض (كل ¼ ثانية) ما دامت راحة قائمة — تتوقّف تلقائيًا عند انتهائها/إزالتها.
   useEffect(() => {
     if (!rest) return
@@ -739,6 +757,18 @@ export function WorkoutMode({ lang, day, ownerId, initialSnapshot, onClose, onFi
               </>
             )}
           </div>
+          {/* نصيحة تدريب هادئة أثناء الراحة — قابلة للتجاهل، وتخفت الحركة مع reduce-motion. */}
+          {!restDone && restTip && !restTipDismissed && (
+            <div className="container-page motion-safe:animate-fade-up pb-3">
+              <div className="flex items-start gap-2 rounded-xl border border-line bg-surface/70 px-3 py-2">
+                <Icon name="Sparkles" className="mt-0.5 h-4 w-4 shrink-0 text-primary-c" />
+                <p className="min-w-0 flex-1 text-xs leading-relaxed text-ink-700">{restTip.textAr}</p>
+                <button type="button" onClick={() => setRestTipDismissed(true)} aria-label={lang !== 'en' ? 'تجاهل النصيحة' : 'Dismiss tip'} className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-ink-500 hover:bg-beige">
+                  <Icon name="X" className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

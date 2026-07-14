@@ -9,6 +9,7 @@ import { detailedMuscleLabel, exerciseName, getExercise } from '@/data/exercises
 import { muscleLabel } from '@/lib/muscles'
 import type { MuscleId } from '@/types/muscles'
 import { guidanceFor } from '@/lib/exerciseGuidance'
+import { getCue } from '@/lib/coaching'
 import { exerciseStats } from '@/lib/exerciseStats'
 import { getRecord } from '@/lib/exerciseHistory'
 import { ExerciseMedia } from './ExerciseMedia'
@@ -106,6 +107,7 @@ function ExerciseHero({ ex }: { ex: NonNullable<ReturnType<typeof getExercise>> 
 
 function AboutTab({ ex, d, lang, onAddToPlan }: { ex: NonNullable<ReturnType<typeof getExercise>>; d: LibraryStrings; lang: Lang; onAddToPlan?: (id: string) => void }) {
   const g = guidanceFor(ex)
+  const cue = getCue(ex.id)
   return (
     <div className="space-y-5">
       {/* العضلات المستهدفة — رقائق بلغة الواجهة الحالية (قاموس العضلات المشترك) */}
@@ -120,10 +122,10 @@ function AboutTab({ ex, d, lang, onAddToPlan }: { ex: NonNullable<ReturnType<typ
         )}
       </Block>
 
-      {/* خطوات الأداء */}
-      <Block title={d.howToPerform} icon="CheckCircle2">
+      {/* كيف تؤديه — إرشاد قِمّة المكتوب لكل تمرين (عربي)؛ للإنجليزية يبقى الإرشاد العام. */}
+      <Block title={lang !== 'en' ? 'كيف تؤديه' : d.howToPerform} icon="CheckCircle2">
         <ol className="space-y-1.5">
-          {g.howTo.map((h, i) => (
+          {(lang !== 'en' ? cue.steps : g.howTo).map((h, i) => (
             <li key={i} className="flex gap-2 text-sm leading-relaxed text-ink-700">
               <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-primary-soft text-[11px] font-black text-primary-c">{i + 1}</span>
               {h}
@@ -132,20 +134,20 @@ function AboutTab({ ex, d, lang, onAddToPlan }: { ex: NonNullable<ReturnType<typ
         </ol>
       </Block>
 
-      {/* نصائح تقنية */}
+      {/* نصائح تقنية (عام، ثنائي اللغة) */}
       <Block title={d.techniqueTips} icon="Sparkles">
         <BulletList items={g.tips} dot="#3E9E6B" />
       </Block>
 
       {/* أخطاء شائعة */}
       <Block title={d.commonMistakes} icon="AlertTriangle">
-        <BulletList items={g.mistakes} dot="#D6553A" />
+        <BulletList items={lang !== 'en' ? cue.mistakes : g.mistakes} dot="#D6553A" />
       </Block>
 
-      {/* سلامة */}
+      {/* سلامة — تمارين تحميل العمود/الركبة توجّه صراحةً لاستشارة مختص. */}
       <p className="flex items-start gap-2 rounded-xl border border-gold-400/40 bg-gold-200/40 p-3 text-xs leading-relaxed text-ink-700">
         <Icon name="ShieldCheck" className="mt-0.5 h-4 w-4 shrink-0 text-gold-600" />
-        {g.safety}
+        {lang !== 'en' ? cue.safety : g.safety}
       </p>
 
       {/* أزرار — زر يوتيوب فقط عند توفّر رابط (لا فيديو مُضمّن ولا صور خارجية) */}

@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { Icon } from '@/components/Icon'
+import { TodayLearnCard } from '@/components/coaching/TodayLearnCard'
 import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
 import type { AppRoute } from '@/lib/appRoutes'
@@ -112,6 +113,9 @@ export function TodayV2({ lang, onNavigate }: TodayV2Props) {
             ))}
           </section>
         )}
+
+        {/* تعلّم — درس تدريبي دقيق يتدوّر بلا تكرار (عربي فقط). */}
+        <TodayLearnCard lang={lang} />
 
         {/* Trust note — honest about what we don't yet know (only when true). */}
         {model.trustNote && <p className="px-1 text-center text-[0.7rem] leading-relaxed text-ink-400">{model.trustNote}</p>}
