@@ -55,6 +55,9 @@ jobs:
         continue-on-error: true
         run: node scripts/check-perf-budget.mjs
 
+      - name: Food database quality proof
+        run: npm run test:food-db
+
       - name: Full deterministic test gate
         run: npm run test:gate
 
