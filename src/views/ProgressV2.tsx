@@ -1,9 +1,12 @@
-import { useMemo, useState } from 'react'
+import { useState, type FormEvent } from 'react'
 import { Icon } from '@/components/Icon'
 import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
 import type { AppRoute } from '@/lib/appRoutes'
 import { useCustomization } from '@/lib/customizationContext'
+import { addLog } from '@/lib/measurementLog'
+import { getDayStamp } from '@/lib/today'
+import { inRange, LIMITS, sanitizeNumericInput } from '@/lib/validation'
 import {
   buildProgressV2Model,
   type LiftLadder,
@@ -39,12 +42,28 @@ export function ProgressV2({ lang, onNavigate }: ProgressV2Props) {
   const { customization } = useCustomization()
   const ar = lang !== 'en'
   const t = (a: string, e: string) => (ar ? a : e)
-  const model = useMemo(() => buildProgressV2Model(customization, lang), [customization, lang])
+  const [, setRevision] = useState(0)
+  // The model reads the local-first stores; rebuilding on render makes a saved
+  // measurement visible immediately without introducing a second UI cache.
+  const model = buildProgressV2Model(customization, lang)
   const [screen, setScreen] = useState<ProgressScreen>('home')
   const go = (r: AppRoute) => onNavigate?.(r)
 
-  if (screen === 'weight') return <WeightDetailScreen model={model.weight} lang={lang} onBack={() => setScreen('home')} onLog={() => go('progress')} stale={model.stale.show ? model.stale.detailText : null} />
+  if (screen === 'weight') return <WeightDetailScreen model={model.weight} lang={lang} onBack={() => setScreen('home')} onLog={() => setScreen('log')} stale={model.stale.show ? model.stale.detailText : null} />
   if (screen === 'strength') return <StrengthDetailScreen strength={model.strength} lang={lang} onBack={() => setScreen('home')} onTrain={() => go('workout')} />
+  if (screen === 'log') {
+    return (
+      <WeightLogScreen
+        lang={lang}
+        current={model.weight}
+        onBack={() => setScreen('weight')}
+        onSaved={() => {
+          setRevision((value) => value + 1)
+          setScreen('weight')
+        }}
+      />
+    )
+  }
 
   return (
     <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
@@ -110,6 +129,99 @@ export function ProgressV2({ lang, onNavigate }: ProgressV2Props) {
         <p className="px-1 text-center text-[0.7rem] text-ink-400">{model.disclaimer}</p>
       </div>
     </div>
+  )
+}
+
+// ── Real measurement logging ─────────────────────────────────────────────────
+
+function WeightLogScreen({ lang, current, onBack, onSaved }: { lang: Lang; current: WeightDetail; onBack: () => void; onSaved: () => void }) {
+  const ar = lang !== 'en'
+  const t = (a: string, e: string) => (ar ? a : e)
+  const [weight, setWeight] = useState(current.currentKg ? String(current.currentKg) : '')
+  const [waist, setWaist] = useState(current.waistCm ? String(current.waistCm) : '')
+  const [bodyFat, setBodyFat] = useState(current.bodyFatPct ? String(current.bodyFatPct) : '')
+  const [error, setError] = useState<string | null>(null)
+
+  const submit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const weightKg = Number(weight)
+    const waistCm = waist === '' ? null : Number(waist)
+    const bodyFatPercent = bodyFat === '' ? null : Number(bodyFat)
+    if (!inRange(weightKg, LIMITS.weightKg.min, LIMITS.weightKg.max)) {
+      setError(t('أدخل وزنًا بين 15 و250 كجم.', 'Enter a weight between 15 and 250 kg.'))
+      return
+    }
+    if (waistCm !== null && !inRange(waistCm, 30, 250)) {
+      setError(t('أدخل محيط خصر بين 30 و250 سم.', 'Enter a waist measurement between 30 and 250 cm.'))
+      return
+    }
+    if (bodyFatPercent !== null && !inRange(bodyFatPercent, 2, 70)) {
+      setError(t('أدخل نسبة دهون بين 2% و70%.', 'Enter body fat between 2% and 70%.'))
+      return
+    }
+
+    const values: Record<string, string | number> = { weightKg }
+    if (waistCm !== null) values.waistCm = waistCm
+    if (bodyFatPercent !== null) values.bodyFatPercent = bodyFatPercent
+    const id = typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `measurement-${Date.now()}`
+    addLog({ id, date: getDayStamp(), values })
+    setError(null)
+    onSaved()
+  }
+
+  return (
+    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
+      <div className="v2-screen-enter mx-auto w-full max-w-md">
+        <div className="flex items-center justify-between">
+          <button type="button" onClick={onBack} aria-label={t('رجوع', 'Back')} className="grid h-10 w-10 place-items-center rounded-xl border border-line bg-surface">
+            <Icon name="ChevronRight" className="h-5 w-5 rtl:rotate-0 ltr:rotate-180" />
+          </button>
+          <h1 className="text-lg font-black">{t('تسجيل قياسات اليوم', 'Log today’s measurements')}</h1>
+        </div>
+
+        <form onSubmit={submit} className="mt-5 rounded-3xl border border-line bg-surface p-5 shadow-card" noValidate>
+          <p className="text-sm leading-relaxed text-ink-500">{t('سجّل وزنك، وأضف الخصر أو نسبة الدهون إن قستها اليوم.', 'Log your weight, and add waist or body fat if measured today.')}</p>
+          <div className="mt-5 space-y-4">
+            <MeasurementField id="v2-weight" label={t('الوزن', 'Weight')} unit={t('كجم', 'kg')} value={weight} required error={!!error && !inRange(Number(weight), LIMITS.weightKg.min, LIMITS.weightKg.max)} onChange={(value) => setWeight(sanitizeNumericInput(value, { max: LIMITS.weightKg.max, decimal: true }))} />
+            <MeasurementField id="v2-waist" label={t('محيط الخصر', 'Waist')} unit={t('سم', 'cm')} value={waist} onChange={(value) => setWaist(sanitizeNumericInput(value, { max: 250, decimal: true }))} />
+            <MeasurementField id="v2-body-fat" label={t('نسبة الدهون · تقديري', 'Body fat · estimated')} unit="%" value={bodyFat} onChange={(value) => setBodyFat(sanitizeNumericInput(value, { max: 70, decimal: true }))} />
+          </div>
+
+          {error && (
+            <p id="measurement-error" role="alert" className="v2-error-panel mt-4 flex items-start gap-2 rounded-xl border px-3 py-2.5 text-sm font-bold text-ink-900">
+              <Icon name="AlertCircle" className="v2-error-icon mt-0.5 h-4 w-4 shrink-0" />
+              <span>{error}</span>
+            </p>
+          )}
+
+          <button type="submit" className="btn-primary mt-5 w-full py-4 text-[1.1875rem]">{t('احفظ القياسات', 'Save measurements')}</button>
+        </form>
+        <p className="mt-3 px-2 text-center text-[0.7rem] leading-relaxed text-ink-400">{t('تُحفظ القياسات في حسابك عند تفعيل المزامنة.', 'Measurements sync to your account when cloud sync is enabled.')}</p>
+      </div>
+    </div>
+  )
+}
+
+function MeasurementField({ id, label, unit, value, required = false, error = false, onChange }: { id: string; label: string; unit: string; value: string; required?: boolean; error?: boolean; onChange: (value: string) => void }) {
+  return (
+    <label htmlFor={id} className="block">
+      <span className="mb-1.5 flex items-center justify-between text-sm font-bold">
+        <span>{label}</span>
+        <span className="text-xs text-ink-400">{unit}</span>
+      </span>
+      <input
+        id={id}
+        type="text"
+        inputMode="decimal"
+        autoComplete="off"
+        value={value}
+        required={required}
+        aria-invalid={error || undefined}
+        aria-describedby={error ? 'measurement-error' : undefined}
+        onChange={(event) => onChange(event.target.value)}
+        className={cn('input w-full text-start text-lg font-black tabular-nums', error && 'input-invalid')}
+      />
+    </label>
   )
 }
 

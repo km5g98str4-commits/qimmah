@@ -120,7 +120,7 @@ export function buildSeed(opts: SeedOptions): Record<string, string> {
   }
   if (cfg.weeks > 0) measurements.push({ id: 'demo-waist', date: stamp(nowMs, 7), values: { waistCm: 88 } })
   const measurementsNewestFirst = measurements.reverse()
-  out['qimmah:measurementLogs:v1'] = measurementsNewestFirst // legacy key (measurementLog.loadLogs)
+  out['qimmah:measurementLogs:v1'] = measurementsNewestFirst // legacy migration fixture
   out['qimmah:history:measurementLogs:v1'] = measurementsNewestFirst // permanent store
 
   // 4) التغذية: مجاميع loggedFood لأيام سابقة + سجلّ اليوم التفصيلي (أطعمة سعودية).

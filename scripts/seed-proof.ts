@@ -48,7 +48,7 @@ function validateProfile(p: SeedProfile, nowMs: number): void {
   // كل جلسة بشكل صالح (id/date/تمارين بمجموعات).
   const sessionsValid = sessions.every((s) => typeof s.id === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s.date) && Array.isArray(s.exercises) && s.exercises.every((e) => typeof e.exerciseId === 'string' && Array.isArray(e.sets)))
   check('الجلسات تُقرأ بشكل صالح (getWorkoutSessions)', sessionsValid)
-  check('قياسات الوزن تُقرأ (measurementLog.loadLogs, مفتاح قديم)', Array.isArray(meas) && meas.every((m) => typeof m.date === 'string' && !!m.values))
+  check('قياسات الوزن تُقرأ من المتجر القانوني', Array.isArray(meas) && meas.every((m) => typeof m.date === 'string' && !!m.values))
   check('قياسات المتجر الدائم متطابقة (historyStore)', measHist.length === meas.length)
   check('حالة الإنجازات بشكل صالح', ach && typeof ach.prCount === 'number' && ach.unlocked && typeof ach.unlocked === 'object')
   check('سجلّات الماء واللقطات اليومية كائنات', water && typeof water === 'object' && daily && typeof daily === 'object')

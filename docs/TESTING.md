@@ -3,27 +3,30 @@
 The suite is **browserless proof scripts**: each `scripts/*-proof.ts` runs its logic
 over a mocked `localStorage` (esbuild bundles it with `@/` aliases, a runner injects
 the shim, then imports it). No test framework, no DOM. Deterministic and fast.
-Verified on `integration/wave3`.
+Verified on `integration/wave5`.
 
 ## Gate suites (must be green to release)
 
-Run all:
+Run the release gate:
 ```bash
-for s in active-session today-v2 sync onboarding-async fixforward isolation reset-recovery; do npm run test:$s; done
+npm run test:gate
 ```
 
 | Suite (`npm run test:…`) | Checks | Covers | Source |
 |---|---|---|---|
 | `active-session` | 31 | workout snapshot save/restore, owner isolation, 12h freshness, **timestamp rest timer** (background-safe) | `scripts/active-session-proof.ts` |
 | `today-v2` | 32 | Today v2 model: 3 states, pillars, hero, hedged copy | `scripts/*today-v2*`/`run-today-v2-model-proof.mjs` |
+| `progress-v2` | 11 | canonical hydrated measurements, immediate logging, honest trend copy, actual PR-event count | `scripts/progress-v2-proof.ts` |
 | `sync` | 19 | sync queue: enqueue gating (`syncAllowedFor`), recovery guard, dedup, retry/backoff | `scripts/sync-proof.ts` |
 | `onboarding-async` | 28 | onboarding flow: step validation, finalize state machine, owner-scoped draft round-trip, discard-on-finish | `scripts/onboarding-async-proof.ts` |
 | `fixforward` | 17 | wave3 fixes: v2 workout → canonical session mapping; NutritionV2 → canonical `loggedFood` mirror | `scripts/fixforward-proof.ts` |
 | `isolation` | 28 | account-scope: prefix wipe, global-safe allowlist, no cross-account leak | `scripts/isolation-proof.ts` |
 | `reset-recovery` | 33 | `PASSWORD_RECOVERY` routing, `decideResetPhase`, no sync/wipe during recovery | `scripts/reset-recovery-proof.ts` |
 
-**Total: 188 checks.** The recovery + isolation + sync suites are the security-critical
-trio (they guard `authContext`/`accountScope`/`syncQueue`); keep them green.
+The recovery + isolation + sync suites are the security-critical trio (they guard
+`authContext`/`accountScope`/`syncQueue`); keep them green. `test:gate` also runs
+the seed, catalog, food-database, coaching, and policy suites; `package.json` is
+the authoritative list so new proof suites cannot be omitted from release checks.
 
 ## Runner pattern (how a proof works)
 
@@ -66,13 +69,15 @@ node scripts/db/run-verify-rls.mjs   # needs SUPABASE_* env (see scripts/db/appl
 ```
 Asserts RLS own-row on all 13 tables + `delete_own_account` behaviour.
 
-## Sibling-branch proofs (not on wave3)
+## Integrated content proofs
 
 | Branch | Command | Covers |
 |---|---|---|
-| `content/catalog-audit-seed` | `node scripts/run-catalog-media-proof.mjs` (+`CATALOG_MEDIA_REMOTE=1`) | 274 local assets + 250 remote media URLs |
-| `content/catalog-audit-seed` | `node scripts/run-seed-proof.mjs` | demo-seed shapes + idempotency (35) |
+| catalog | `npm run test:catalog` (+`CATALOG_MEDIA_REMOTE=1` for remote verification) | local assets + remote media URL policy |
+| demo data | `npm run test:seed` | demo-seed shapes + idempotency |
+| food database | `npm run test:food-db` | schema, quality, media, and Saudi/GCC catalog coverage |
+| Arabic coaching | `npm run test:coaching` | exercise cues, lessons, rest tips, and owner-scoped progress |
 
 ## What "green" means at release
-`npm run typecheck && npm run lint && npm run build`, then all **7 gate suites (188)**
-pass. See `docs/RELEASE-RUNBOOK.md` Step 1.
+`npm run typecheck && npm run lint -- --max-warnings 0 && npm run build`, then
+`npm run test:gate` passes. See `docs/RELEASE-RUNBOOK.md` Step 1.

@@ -108,6 +108,41 @@ try {
     }
   }
 
+  // Today hierarchy: coaching supports the command center without displacing
+  // its hero. The lesson is compact by default and expands accessibly.
+  const todayContext = await browser.newContext({ viewport: { width: 320, height: 720 }, locale: 'ar-SA' })
+  const todayPage = await todayContext.newPage()
+  await openSurface(todayPage, 'today')
+  const lessonToggle = todayPage.locator('section[aria-label="تعلّم"] button[aria-controls="today-learning-detail"]')
+  await lessonToggle.waitFor()
+  if ((await lessonToggle.getAttribute('aria-expanded')) !== 'false') failures.push('today lesson is not collapsed by default')
+  if (!(await todayPage.locator('#today-learning-detail').isHidden())) failures.push('today lesson body displaces the command center')
+  await lessonToggle.click()
+  if ((await lessonToggle.getAttribute('aria-expanded')) !== 'true') failures.push('today lesson aria-expanded did not update')
+  if (!(await todayPage.locator('#today-learning-detail').isVisible())) failures.push('today lesson did not expand')
+  await todayContext.close()
+
+  // PDF §05 action proof: the ember weight CTA must write through the canonical
+  // history path and immediately redraw the detail — never route to itself.
+  const progressContext = await browser.newContext({ viewport: { width: 320, height: 720 }, locale: 'ar-SA' })
+  const progressPage = await progressContext.newPage()
+  await openSurface(progressPage, 'progress')
+  await progressPage.getByRole('button', { name: /الوزن والجسم/ }).click()
+  await progressPage.getByRole('button', { name: 'تسجيل وزن اليوم' }).click()
+  await progressPage.getByLabel('الوزن').fill('')
+  await progressPage.getByRole('button', { name: 'احفظ القياسات' }).click()
+  await progressPage.getByRole('alert').waitFor()
+  await progressPage.getByLabel('الوزن').fill('80.7')
+  await progressPage.getByLabel('محيط الخصر').fill('86')
+  await progressPage.getByRole('button', { name: 'احفظ القياسات' }).click()
+  await progressPage.getByRole('heading', { name: 'الوزن والجسم' }).waitFor()
+  const savedMeasurement = await progressPage.evaluate(() => {
+    const rows = JSON.parse(localStorage.getItem('qimmah:history:measurementLogs:v1') || '[]')
+    return rows[0]?.values?.weightKg
+  })
+  if (savedMeasurement !== 80.7) failures.push(`progress canonical measurement write = ${savedMeasurement}`)
+  await progressContext.close()
+
   const reduced = await browser.newContext({ viewport: { width: 320, height: 720 }, reducedMotion: 'reduce', locale: 'ar-SA' })
   const reducedPage = await reduced.newPage()
   await openSurface(reducedPage, 'today')

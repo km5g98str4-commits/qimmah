@@ -45,7 +45,12 @@ customization.nutritionPlan.targetProtein = 160
 
 function seedReviewData() {
   localStorage.setItem('qimmah:history:migrated:v1', 'done')
-  localStorage.setItem('qimmah:onboarding:profile:v1', JSON.stringify({ goal: 'cut', days: 4, duration: 45 }))
+  localStorage.setItem('qimmah:onboarding:profile:v1', JSON.stringify({
+    goal: { type: 'cut' },
+    trainingPreferences: { daysPerWeek: 4, sessionDurationMin: 45, environment: 'commercial_gym' },
+    consents: { healthData: { accepted: true, policyVersion: '2026-07-13' } },
+    _meta: { schemaVersion: 2, completed: true, source: 'onboarding' },
+  }))
   localStorage.setItem('qimmah:steps:v1', JSON.stringify({ [stamp]: 8200 }))
   localStorage.setItem(
     'qimmah:nutrition:v2',
@@ -63,23 +68,33 @@ function seedReviewData() {
     JSON.stringify({ [stamp]: { date: stamp, loggedFood: { calories: 1300, protein: 90, carbs: 160, fat: 30 }, updatedAt: iso } }),
   )
   const set = (setNumber: number, weightKg: string) => ({ setNumber, targetReps: '8–10', actualReps: '10', weightKg, completed: true })
+  const day = (daysAgo: number) => new Date(now.getTime() - daysAgo * 86_400_000).toISOString().slice(0, 10)
+  const finished = (daysAgo: number) => new Date(now.getTime() - daysAgo * 86_400_000).toISOString()
+  const sessions = [12, 10, 8, 6, 3, 0].map((daysAgo, index) => {
+    const top = 50 + index * 2
+    return {
+      id: `review-session-${index + 1}`, date: day(daysAgo), startedAt: new Date(new Date(finished(daysAgo)).getTime() - 3_600_000).toISOString(), finishedAt: finished(daysAgo),
+      workoutDayId: 'full-body-a', workoutDayName: 'الجسم الكامل',
+      exercises: [{ exerciseId: 'barbell-bench-press', targetSets: 3, targetReps: '8–10', targetRestSec: 90, completed: true, sets: [set(1, String(top - 2)), set(2, String(top - 1)), set(3, String(top))] }],
+    }
+  }).reverse()
   localStorage.setItem(
     'qimmah:history:workoutSessions:v1',
-    JSON.stringify([
-      {
-        id: 'review-session-1', date: stamp, startedAt: new Date(now.getTime() - 3_600_000).toISOString(), finishedAt: iso,
-        workoutDayId: 'full-body-a', workoutDayName: 'الجسم الكامل',
-        exercises: [{ exerciseId: 'barbell-bench-press', targetSets: 3, targetReps: '8–10', targetRestSec: 90, completed: true, sets: [set(1, '55'), set(2, '57.5'), set(3, '60')] }],
-      },
-    ]),
+    JSON.stringify(sessions),
   )
+  localStorage.setItem('qimmah:history:exerciseHistory:v1', JSON.stringify({ 'barbell-bench-press': { lastWeight: '60', bestWeight: '60', lastReps: '10', lastCompletedAt: iso, totalSessions: 6 } }))
+  localStorage.setItem('qimmah:achievements:v1', JSON.stringify({ unlocked: { 'first-workout': stamp, 'first-pr': stamp }, proteinDays: [], prCount: 3 }))
+  const measurements = [
+    { id: 'review-weight-2', date: stamp, values: { weightKg: 81.2, waistCm: 87, bodyFatPercent: 18 } },
+    { id: 'review-weight-1', date: day(10), values: { weightKg: 82.1, waistCm: 88 } },
+  ]
   localStorage.setItem(
     'qimmah:history:measurementLogs:v1',
-    JSON.stringify([
-      { id: 'review-weight-2', date: stamp, values: { weightKg: 81.2, waistCm: 87 } },
-      { id: 'review-weight-1', date: new Date(now.getTime() - 10 * 86_400_000).toISOString().slice(0, 10), values: { weightKg: 82.1, waistCm: 88 } },
-    ]),
+    JSON.stringify(measurements),
   )
+  // The canonical path above is what sync hydrates. Keep the retired key absent
+  // so the visual proof catches any regression back to legacy-only reads.
+  localStorage.removeItem('qimmah:measurementLogs:v1')
 }
 
 seedReviewData()

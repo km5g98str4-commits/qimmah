@@ -13,6 +13,7 @@ Status: **partial trunk, blocked on four missing system branches and one missing
 | `assets/screenshots-site @ cd8ea7c` | Integrated + gated | Six 1260×2736 App Store captures and reproducible screenshot factory. |
 | `integration/wave4 @ d2b6bd5` | Reconciled + gated | v2 is baked into the production build when `VITE_DESIGN_V2=true`. |
 | `feat/arabic-coach-content @ 871d20c` | Integrated + gated | Arabic exercise cues, 40 lessons, and contextual rest tips. |
+| PDF §05 progress follow-up | Integrated + gated | Weight logging now persists through the sync-ready history path; hydrated measurements and real PR events feed Progress/Profile. |
 | `feat/notifications-engine` | Blocked: no origin tip | No notification system claimed or exposed by this integration. |
 | `feat/insights-engine` | Blocked: no origin tip | No insights system claimed or exposed by this integration. |
 | `feat/plates-and-prs` | Blocked: no origin tip | No plates/PR system claimed or exposed by this integration. |
@@ -27,3 +28,13 @@ Status: **partial trunk, blocked on four missing system branches and one missing
 4. Replace legal `[OWNER-EMAIL]`/jurisdiction placeholders and obtain legal sign-off before public release.
 5. Run credentialed auth E2E, production Supabase/RLS verification, universal-link, and physical-device checks with owner-held credentials/device.
 6. Catalog proof reports 20 extension/content-type mismatches; runtime display is healthy, but asset normalization remains cleanup debt.
+7. `npm audit --omit=dev` is clean. The development toolchain still reports the Vite/esbuild advisory; its automated fix upgrades to Vite 8, so handle it as a tested migration rather than using `--force` in this release branch.
+
+## PDF §05 evidence
+
+- Progress reads the canonical measurement store populated by cloud hydration; the retired local-only key is covered by a regression proof.
+- The weight CTA opens a real validated logger, writes through `historyStore`, redraws immediately, and exposes icon + text errors accessibly.
+- Profile counts earned PR events from the achievements engine instead of counting exercise baselines.
+- Today keeps the approved command-center hierarchy by collapsing the optional coaching lesson until requested.
+- Browser proof: 24 RTL screenshots at 320/768/1280, zero console errors/overflow, reduced-motion fallbacks, and AA token contrast.
+- Native proof: `npx cap sync ios` and the generic iOS Simulator `xcodebuild` both succeed for `com.qimmah.mobile`.

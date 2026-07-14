@@ -40,6 +40,12 @@ Every completed merge ran: `typecheck` → `lint --max-warnings 0` → productio
 | Wave 4 v2 promotion reconciliation | PASS — built HTML contains `data-design="v2"`; 24 RTL surface screenshots, zero console errors/overflow |
 | Arabic coaching content | PASS after one fix loop — TypeScript narrowing corrected; 25 coaching checks + full gate green |
 | Coaching semantic-color follow-up | PASS — typecheck, lint 0, v2 build, every `test:gate` suite, onboarding E2E 11/11, Capacitor iOS sync |
+| Progress canonical-data follow-up | PASS — cloud-style measurements feed Progress without the retired key; validated logging enqueues through `historyStore`; actual achievement PR count feeds Profile; 11 regression checks + 24-view RTL browser proof |
+
+Security follow-up: the new measurement form accepts bounded numeric values only,
+creates a client id, and writes through the existing owner-guarded sync boundary.
+No auth/recovery/wipe logic changed; queue execution still requires the matching
+runtime owner with `recoveryActive=false`, and database RLS remains owner-only.
 
 ## Blocker record
 
