@@ -193,14 +193,11 @@ function migrateLegacyGoal(p: Profile): Profile {
   return p
 }
 
-/** قراءة التخصيص المحفوظ مدموجًا فوق الافتراضي (آمن ضد بيانات تالفة). */
-export function loadCustomization(): Customization {
+/** تطبيع قيمة غير موثوقة فوق الافتراضي قبل الحفظ/الاستخدام. */
+export function normalizeCustomization(value: unknown): Customization {
   const base = getDefaultCustomization()
-  if (typeof window === 'undefined') return base
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY)
-    if (!raw) return base
-    const saved = JSON.parse(raw) as Partial<Customization>
+    const saved = value && typeof value === 'object' ? value as Partial<Customization> : {}
     const merged: Customization = {
       identity: { ...base.identity, ...saved.identity },
       colors: { ...base.colors, ...saved.colors },
@@ -231,6 +228,17 @@ export function loadCustomization(): Customization {
     return withFreshTargets(merged)
   } catch {
     return base
+  }
+}
+
+/** قراءة التخصيص المحفوظ مدموجًا فوق الافتراضي (آمن ضد بيانات تالفة). */
+export function loadCustomization(): Customization {
+  if (typeof window === 'undefined') return getDefaultCustomization()
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY)
+    return raw ? normalizeCustomization(JSON.parse(raw)) : getDefaultCustomization()
+  } catch {
+    return getDefaultCustomization()
   }
 }
 

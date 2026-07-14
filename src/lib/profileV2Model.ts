@@ -12,7 +12,7 @@ import { loadOnboardingProfile } from '@/lib/onboardingProfile'
 import { workoutCounts } from '@/lib/progressStats'
 import { workoutStreak } from '@/lib/streaks'
 import { loadSessions } from '@/lib/workoutSessions'
-import { loadAchievementState } from '@/features/achievements/engine'
+import { personalRecordCount } from '@/lib/personalRecords'
 
 const GOAL_AR: Record<CalorieGoal, string> = { cut: 'تنشيف', maintain: 'محافظة', bulk: 'تضخيم' }
 
@@ -125,9 +125,9 @@ export function buildProfileV2Model(customization: Customization, auth: AuthSumm
     .map((s) => s.date)
   const workoutCount = workoutCounts().total
   const streakDays = workoutStreak(now)
-  // A best weight is only a baseline; the achievements engine increments this
-  // counter only when a finished workout actually beats a previous result.
-  const prCount = loadAchievementState().prCount
+  // Derived from canonical finished sessions: a first load is a baseline and
+  // only a later improvement is a PR. This cannot drift from hydrated history.
+  const prCount = personalRecordCount()
   const hasData = workoutCount > 0
 
   const totalWeeks = goal ? PROGRAM_WEEKS[goal] : PROGRAM_WEEKS.maintain

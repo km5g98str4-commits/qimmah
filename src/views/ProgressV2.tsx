@@ -18,6 +18,9 @@ import {
 import { buildWeeklyInsights } from '@/lib/insights'
 import { InsightCardsView } from '@/lib/insights/InsightCardsView'
 import { insightCopy } from '@/data/insightCopy'
+import { personalRecordCopy } from '@/data/personalRecordCopy'
+import { plateCopy } from '@/data/plateCopy'
+import { PlateCalculatorPanel } from '@/features/plates/PlateCalculatorPanel'
 
 interface ProgressV2Props {
   lang: Lang
@@ -351,6 +354,10 @@ function WeightDetailScreen({ model, lang, onBack, onLog, stale }: { model: Weig
 function StrengthDetailScreen({ strength, lang, onBack, onTrain }: { strength: import('@/lib/progressV2Model').StrengthDetail; lang: Lang; onBack: () => void; onTrain: () => void }) {
   const ar = lang !== 'en'
   const t = (a: string, e: string) => (ar ? a : e)
+  const copy = personalRecordCopy(lang)
+  const plates = plateCopy(lang)
+  const [platesOpen, setPlatesOpen] = useState(false)
+  const plateTarget = strength.lifts[0]?.bestKg ?? 20
   return (
     <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
       <div className="v2-screen-enter mx-auto w-full max-w-md">
@@ -366,9 +373,39 @@ function StrengthDetailScreen({ strength, lang, onBack, onTrain }: { strength: i
         </div>
 
         {strength.hasData ? (
-          <div className="mt-4 space-y-3">
-            {strength.lifts.map((lift) => <LiftRow key={lift.exerciseId} lift={lift} lang={lang} />)}
-          </div>
+          <>
+            <div className="mt-4 space-y-3">
+              {strength.lifts.map((lift) => <LiftRow key={lift.exerciseId} lift={lift} lang={lang} />)}
+            </div>
+
+            <button type="button" onClick={() => setPlatesOpen(true)} className="v2-pressable v2-bg-blue-soft v2-text-blue mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border border-[color:var(--v2-blue)] py-3 text-sm font-black">
+              <Icon name="Calculator" className="h-4 w-4" />
+              {plates.open}
+            </button>
+
+            <section className="mt-6 rounded-2xl border border-line bg-surface p-4" aria-labelledby="personal-records-title">
+              <div className="flex items-center gap-2">
+                <span className="v2-text-green"><Icon name="Trophy" className="h-4 w-4" /></span>
+                <h2 id="personal-records-title" className="text-sm font-black">{copy.title}</h2>
+              </div>
+              {strength.prEvents.length > 0 ? (
+                <ol className="mt-3 space-y-2.5">
+                  {strength.prEvents.map((record) => (
+                    <li key={record.id} className="rounded-xl border border-line bg-page px-3 py-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="min-w-0 truncate text-sm font-black"><bdi>{ar ? record.nameAr : record.nameEn}</bdi></p>
+                        <p className="shrink-0 text-sm font-black tabular-nums">{record.weightKg} {t('كجم', 'kg')}</p>
+                      </div>
+                      <div className="mt-1 flex items-center justify-between gap-3 text-xs font-bold">
+                        <span className="v2-text-green">{copy.improvement(record.improvementKg)}</span>
+                        <time className="text-ink-400" dateTime={record.date}>{new Intl.DateTimeFormat(ar ? 'ar-SA' : 'en', { day: 'numeric', month: 'short' }).format(new Date(`${record.date}T12:00:00`))}</time>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              ) : <p className="mt-3 text-sm leading-relaxed text-ink-500">{copy.empty}</p>}
+            </section>
+          </>
         ) : (
           <>
             <NeedsData text={t('أكمل تمرينين على الأقل لنعرض تطوّر قوّتك لكل تمرين.', 'Complete at least two workouts to show per-lift progress.')} />
@@ -376,6 +413,7 @@ function StrengthDetailScreen({ strength, lang, onBack, onTrain }: { strength: i
           </>
         )}
       </div>
+      <PlateCalculatorPanel open={platesOpen} lang={lang} initialTargetKg={plateTarget} onClose={() => setPlatesOpen(false)} />
     </div>
   )
 }

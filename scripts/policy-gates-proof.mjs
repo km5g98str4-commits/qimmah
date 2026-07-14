@@ -21,6 +21,7 @@ const prompt = read('src/components/InstallPrompt.tsx')
 const shell = read('src/components/MobileShell.tsx')
 const labels = read('src/design-system/v2/labels.ts')
 const profileV2 = read('src/views/ProfileV2.tsx')
+const viteConfig = read('vite.config.ts')
 
 console.log('\n① بوابة أهلية 12+ على سطح الحساب المشترك بين v1 وv2')
 check('زر التسجيل محجوب بلا موافقة', /pw\.valid && eligible12/.test(login))
@@ -41,5 +42,6 @@ check('InstallPrompt لا يرندر أصليًا', prompt.includes('if (isNativ
 check('التبويبات تستخدم قاموس v2 المركزي', shell.includes('V2_TAB_LABELS.today') && shell.includes('V2_TAB_LABELS.progress'))
 check('تسميات §03 الخمس موجودة', ['اليوم', 'التمارين', 'تسجيل', 'التغذية', 'التقدّم'].every((s) => labels.includes(s)))
 check('قِمّة+ سطر هادئ واحد', (profileV2.match(/Qimmah\+ — ONE quiet line/g) ?? []).length === 1)
+check('بناء الإنتاج يفعّل v2 افتراضيًا مع رجوع false صريح', viteConfig.includes("mode === 'production' && env.VITE_DESIGN_V2 !== 'false'"))
 
 console.log(`\n✅ نجحت ${pass} فحوص سياسة/غلاف أصلي.`)

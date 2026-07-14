@@ -3,16 +3,18 @@
 ## خطوات البناء
 
 ```bash
-cd /Users/ziyad/qimmah-integration-w4
-git switch integration/wave4
-git pull --ff-only origin integration/wave4
+cd /Users/ziyad/qimmah-integration-w5
+git switch codex/v21-completion
+git pull --ff-only origin codex/v21-completion
 npm ci
-VITE_DESIGN_V2=true npm run build
+npm run build
 npx cap sync ios
 open ios/App/App.xcodeproj
 ```
 
 في Xcode: اختر مشروع **App** ثم Signing & Capabilities، حدّد فريق Apple Developer الصحيح، اختر جهاز **Ziyad iPhone** من شريط الوجهة، وافتح قفل الهاتف ووثّق الثقة إن طلب iOS ذلك، ثم اضغط **Run ▶︎**. معرّف الحزمة هو `com.qimmah.mobile`.
+
+تصميم v2.1 هو الافتراضي في أي بناء إنتاج. للرجوع الطارئ فقط: `VITE_DESIGN_V2=false npm run build`.
 
 ## قائمة اختبار يدوية — 15 بندًا
 

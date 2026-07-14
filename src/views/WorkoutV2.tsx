@@ -12,9 +12,13 @@ import { restIsFinished, restRemainingSec, type RestSnapshot } from '@/lib/activ
 import { buildWorkoutV2Model, CATEGORY_LABEL, type ExCategory, type WorkoutV2Exercise } from '@/lib/workoutV2Model'
 // Fix-forward A: finished v2 workouts persist through the canonical path so
 // Progress/Today/Profile react (and sync auto-enqueues) — not just a local summary.
-import { persistFinishedSession } from '@/lib/finishWorkout'
+import { persistFinishedSession, type SessionPR } from '@/lib/finishWorkout'
 import { getDayStamp } from '@/lib/today'
 import { buildV2WorkoutSession } from '@/lib/workoutV2Persist'
+import { evaluateAchievements, registerWorkoutPRs } from '@/features/achievements/engine'
+import { PlateCalculatorPanel } from '@/features/plates/PlateCalculatorPanel'
+import { plateCopy } from '@/data/plateCopy'
+import { personalRecordCopy } from '@/data/personalRecordCopy'
 
 interface WorkoutV2Props {
   lang: Lang
@@ -120,6 +124,8 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   const [screen, setScreen] = useState<Screen>('plan')
   const [detailIdx, setDetailIdx] = useState(0)
   const [active, setActive] = useState<ActiveState | null>(null)
+  const [platesOpen, setPlatesOpen] = useState(false)
+  const [sessionPRs, setSessionPRs] = useState<SessionPR[]>([])
   // Display clock for the timestamp-based rest timer (ticks only while resting).
   const [now, setNow] = useState(() => Date.now())
 
@@ -204,6 +210,7 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   if (!model.available) return <MissingPlan lang={lang} onNavigate={onNavigate} />
 
   const startSession = () => {
+    setSessionPRs([])
     const rows: Record<string, SetRow[]> = {}
     for (const ex of model.exercises) {
       rows[ex.id] = Array.from({ length: ex.sets }, () => ({ weight: ex.targetWeightKg ?? 20, reps: parseReps(ex.reps), done: false }))
@@ -220,7 +227,7 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   const planScreen = <PlanScreen model={model} lang={lang} onExercise={(i) => { setDetailIdx(i); setScreen('detail') }} onStart={startSession} onBack={() => onNavigate('dashboard')} />
   if (screen === 'plan') return planScreen
   if (screen === 'detail') return <DetailScreen ex={model.exercises[detailIdx]} idx={detailIdx} total={model.exercises.length} lang={lang} onStart={startSession} onBack={() => setScreen('plan')} />
-  if (screen === 'complete') return <CompleteScreen model={model} active={active} lang={lang} onDone={() => { clearActive(); onNavigate('dashboard') }} />
+  if (screen === 'complete') return <CompleteScreen model={model} active={active} prs={sessionPRs} lang={lang} onDone={() => { clearActive(); onNavigate('dashboard') }} />
 
   // ── Active workout ── Render PURELY. If the session is not usable for the
   // current plan, render the Plan screen (the safety-net effect above resets the
@@ -260,7 +267,10 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
       // Canonical persist — feeds historyStore (auto-enqueues sync) + exercise
       // history, so Progress / Today / Profile all react to this v2 workout.
       try {
-        persistFinishedSession(buildV2WorkoutSession(finalActive, model, { date: getDayStamp(), finishedAtMs: Date.now() }))
+        const prs = persistFinishedSession(buildV2WorkoutSession(finalActive, model, { date: getDayStamp(), finishedAtMs: Date.now() }))
+        setSessionPRs(prs)
+        registerWorkoutPRs(prs)
+        evaluateAchievements({ daysPerWeek: customization.workoutPlan.days.length || 3 })
       } catch { /* local summary already saved; never trap the user on completion */ }
       setRow({ done: true })
       setScreen('complete')
@@ -327,8 +337,14 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
             <Stepper label={t('التكرار', 'Reps')} value={row.reps} step={1} onChange={(v) => setRow({ reps: Math.max(0, v) })} lang={lang} />
           </div>
 
+          <button type="button" onClick={() => setPlatesOpen(true)} className="v2-pressable mt-3 flex w-full items-center justify-center gap-2 rounded-2xl border py-3 text-sm font-black" style={{ background: FOCUS.card, borderColor: FOCUS.blue, color: FOCUS.blue }}>
+            <Icon name="Calculator" className="h-4 w-4" />
+            {plateCopy(lang).open}
+          </button>
+
           {/* single ember action */}
           <button type="button" onClick={finishSet} className="v2-pressable mt-6 w-full rounded-2xl py-4 text-[1.1875rem] font-black" style={{ background: FOCUS.ember, color: FOCUS.onColor }}>{t('أنهِ المجموعة', 'Complete set')}</button>
+          <PlateCalculatorPanel open={platesOpen} lang={lang} initialTargetKg={row.weight} surface="dark" onClose={() => setPlatesOpen(false)} onApply={(weightKg) => setRow({ weight: weightKg })} />
         </main>
       )}
     </div>
@@ -458,8 +474,10 @@ function DetailScreen({ ex, idx, total, lang, onStart, onBack }: { ex: WorkoutV2
   )
 }
 
-function CompleteScreen({ model, active, lang, onDone }: { model: ReturnType<typeof buildWorkoutV2Model>; active: ActiveState | null; lang: Lang; onDone: () => void }) {
+function CompleteScreen({ model, active, prs, lang, onDone }: { model: ReturnType<typeof buildWorkoutV2Model>; active: ActiveState | null; prs: SessionPR[]; lang: Lang; onDone: () => void }) {
   const ar = lang !== 'en'
+  const copy = personalRecordCopy(lang)
+  const units = plateCopy(lang)
   const rows = active ? Object.values(active.rows).flat() : []
   const totalSets = rows.length
   const volume = rows.reduce((v, r) => v + r.weight * r.reps, 0)
@@ -475,6 +493,17 @@ function CompleteScreen({ model, active, lang, onDone }: { model: ReturnType<typ
         <FocusStat label={ar ? 'المجموعات' : 'Sets'} value={toAr(totalSets, lang)} />
         <FocusStat label={ar ? 'الحجم كجم' : 'Volume kg'} value={toAr(volume, lang)} />
       </div>
+      {prs.length > 0 && (
+        <section className="v2-earned-moment mt-5 w-full max-w-xs rounded-2xl border p-4 text-start" style={{ background: FOCUS.card, borderColor: FOCUS.success }} aria-labelledby="workout-pr-title">
+          <div className="flex items-center gap-2" style={{ color: FOCUS.success }}>
+            <Icon name="Trophy" className="h-4 w-4" />
+            <h2 id="workout-pr-title" className="text-sm font-black">{copy.title}</h2>
+          </div>
+          <ul className="mt-2 space-y-1.5">
+            {prs.map((pr) => <li key={pr.exerciseId} className="flex items-center justify-between gap-3 text-sm font-bold"><bdi>{(ar ? pr.nameAr : pr.nameEn) ?? pr.exerciseId}</bdi><span className="tabular-nums">{pr.weight} {units.kg}</span></li>)}
+          </ul>
+        </section>
+      )}
       <button type="button" onClick={onDone} className="v2-pressable mt-8 w-full max-w-xs rounded-2xl py-4 text-[1.1875rem] font-black" style={{ background: FOCUS.ember, color: FOCUS.onColor }}>{ar ? 'حفظ وإنهاء' : 'Save & finish'}</button>
       <p className="mt-3 text-[0.7rem]" style={{ color: FOCUS.inkFaint }}>{ar ? 'محفوظ على هذا الجهاز فقط.' : 'Saved on this device only.'}</p>
     </div>

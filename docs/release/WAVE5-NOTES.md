@@ -1,6 +1,6 @@
 # Wave 5 — Integration Notes
 
-Status: **partial trunk, blocked on two missing system branches and one missing proof branch.** Nothing below labels absent work green.
+Status: **completed on `codex/v21-completion` with proof-bearing trunk fix-forwards for the two branches that never appeared on origin.** External production credentials, legal sign-off, and physical-device checks remain owner release actions.
 
 ## Integration status
 
@@ -16,19 +16,17 @@ Status: **partial trunk, blocked on two missing system branches and one missing 
 | PDF §05 progress follow-up | Integrated + gated | Weight logging now persists through the sync-ready history path; hydrated measurements and real PR events feed Progress/Profile. |
 | Notifications (commander fix-forward) | Integrated + gated | Five opt-in native iOS reminder types, owner-scoped preferences, plan-aware workout/rest days, and quiet hours. Lock-screen copy is deliberately generic. |
 | `feat/insights-engine @ 52fc851` | Integrated after standards fix-forward | Today and Progress show up to three hedged, actionable weekly insights from canonical workout, nutrition, weight, and plan data. |
-| `feat/plates-and-prs` | Blocked: no origin tip | No plates/PR system claimed or exposed by this integration. |
-| Data-access export (commander fix-forward) | Integrated + gated | Profile privacy exports an owner-guarded JSON copy of on-device data; recovery sessions are blocked and auth/sync secrets are excluded. Import/restore remains out of scope. |
-| `test/proof-deepening` | Blocked: branch absent | Existing proofs remain green; no extra proof suite claimed. |
+| Plates + PRs (commander fix-forward) | Integrated + gated | Workout and Progress share an accessible bar-plate calculator; PRs derive from canonical finished sessions and never count a first baseline. |
+| Data portability (commander fix-forward) | Integrated + gated | v1/v2 export and restore an owner-scoped, schema-validated copy with preview, explicit confirmation, pre-write backup, rollback, and recovery-session guard. |
+| Proof deepening (commander fix-forward) | Integrated + gated | Added 26 plate/PR checks and expanded data-portability coverage from 12 to 33 checks, including injected write failure and UI wiring. |
 
 ## Release blockers / tracked debt
 
-1. Push immutable, proof-bearing tips for the two missing systems, then run the standards/security court and full per-merge gate for each.
-2. Validate notification timing and permission UX on the owner's physical iPhone before public release; browser and simulator gates cannot prove real delivery timing.
-3. Replace legal `[OWNER-EMAIL]`/jurisdiction placeholders and obtain legal sign-off before public release.
-4. Run credentialed auth E2E, production Supabase/RLS verification, universal-link, and physical-device checks with owner-held credentials/device.
-5. Catalog proof reports 20 extension/content-type mismatches; runtime display is healthy, but asset normalization remains cleanup debt.
-6. `npm audit --omit=dev` is clean. The development toolchain still reports the Vite/esbuild advisory; its automated fix upgrades to Vite 8, so handle it as a tested migration rather than using `--force` in this release branch.
-7. Data portability currently provides a safe access export only. A future import/restore system needs separate schema migration, validation, and conflict-policy design.
+1. Validate notification timing, permission UX, keyboard behavior, and camera/barcode flow on the owner's physical iPhone; browser/simulator gates cannot prove these hardware paths.
+2. Replace any remaining legal owner placeholders and obtain Saudi counsel sign-off before public release.
+3. Run credentialed auth E2E, production Supabase/RLS verification, and universal-link checks with owner-held credentials.
+4. Catalog proof reports 20 extension/content-type mismatches; runtime display is healthy, but asset normalization remains cleanup debt.
+5. `npm audit --omit=dev` is clean. The development toolchain advisory requires a tested Vite migration rather than `--force`.
 
 ## PDF §05 evidence
 
@@ -39,11 +37,19 @@ Status: **partial trunk, blocked on two missing system branches and one missing 
 - Browser proof: 30 RTL screenshots at 320/768/1280, including the privacy/export and notification surfaces, with zero console errors/overflow, reduced-motion fallbacks, and AA token contrast.
 - Native proof: `npx cap sync ios` and the generic iOS Simulator `xcodebuild` both succeed for `com.qimmah.mobile`.
 
-## Data-access export evidence
+## Data portability evidence
 
 - Export is built from an explicit allowlist; it omits auth tokens, sync queues/backups/meta, analytics identifiers, caches, and other owners' registries.
 - Account-scope mismatch and password-recovery sessions fail closed; the JSON payload is capped at 10 MB.
-- `test:data-portability` covers 12 deterministic security/schema cases; browser proof covers real download, icon + text errors, and RTL screenshots at 320/768/1280.
+- Restore accepts only the exact schema/allowlist, rejects prototype keys and embedded auth/sync fields, previews counts, and requires explicit confirmation.
+- A current-data backup is written before replacement. An injected storage failure proves rollback; `wipeUserData` removes the owner's restore backup.
+- `test:data-portability` covers 33 deterministic security/schema/rollback/UI cases; browser proof covers a real export→restore round trip plus RTL screenshots.
+
+## Plates and personal-record evidence
+
+- The calculator uses bounded dynamic programming, so non-greedy plate combinations still resolve exactly and an inexact result never exceeds the requested load.
+- PR events are rebuilt from canonical finished sessions; the first valid load is a baseline, equal/lower loads are ignored, and Profile/Progress share the same derived count.
+- `test:plates-prs` covers 22 logic/isolation checks plus four static UI-wiring checks; the browser proof opens the real modal and verifies its exact-load state.
 
 ## Notification evidence
 

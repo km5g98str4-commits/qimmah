@@ -28,7 +28,7 @@ export interface LoggedFood {
   fat?: number
   meal: MealSlot
 }
-interface DayLog { date: string; foods: LoggedFood[]; waterMl: number }
+export interface DayLog { date: string; foods: LoggedFood[]; waterMl: number }
 
 /** Day food totals in the canonical `loggedFood` shape Today's pillar reads. */
 export function nutritionDayTotals(foods: LoggedFood[]): { calories: number; protein: number; carbs: number; fat: number } {
@@ -121,6 +121,24 @@ function persist(day: DayLog): DayLog {
   }
   mirrorToCanonical(day)
   return day
+}
+
+export function restoreNutritionDay(value: unknown): DayLog {
+  const today = getDayStamp()
+  const input = value && typeof value === 'object' ? value as Partial<DayLog> : {}
+  const foods = Array.isArray(input.foods)
+    ? input.foods.filter((food): food is LoggedFood => Boolean(food) && typeof food.id === 'string' && typeof food.nameAr === 'string')
+      .slice(0, 500)
+      .map((food) => ({
+        ...food,
+        calories: Math.max(0, Math.min(10000, Number(food.calories) || 0)),
+        protein: Math.max(0, Math.min(1000, Number(food.protein) || 0)),
+        carbs: Math.max(0, Math.min(2000, Number(food.carbs) || 0)),
+        fat: Math.max(0, Math.min(1000, Number(food.fat) || 0)),
+        meal: ['breakfast', 'lunch', 'dinner', 'snack'].includes(food.meal) ? food.meal : 'snack',
+      }))
+    : []
+  return persist({ date: today, foods, waterMl: Math.max(0, Math.min(20000, Number(input.waterMl) || 0)) })
 }
 
 export function addFoodToDay(food: LoggedFood): DayLog {

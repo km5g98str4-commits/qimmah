@@ -1,11 +1,8 @@
-# Data Export — Design (PDPL Right of Access, R-1)
+# Data Export + Restore — Implemented (PDPL Right of Access, R-1)
 
-> **Design only — no code in this change.** Closes the *design* half of PDPL gap
-> **R-1** (`docs/legal/pdpl-gap-checklist.md`, branch `legal/appstore-pack`): the
-> app shows a disabled "تنزيل نسخة — قادم لاحقًا" and has no export yet. This spec
-> defines the export shape and two delivery paths so the owner can honour access
-> requests **now** (manual) and implement the in-app button **later** (wired to
-> code that already exists). Traces to `integration/wave3`.
+> Implemented in `src/lib/dataPortability.ts` and shared by the v1 Settings and
+> v2 Privacy surfaces. Export and restore are owner-scoped, blocked during
+> `PASSWORD_RECOVERY`, capped at 10 MB, and covered by `npm run test:data-portability`.
 
 ## What "your data" is (per store)
 
@@ -37,18 +34,20 @@ step_logs, achievements, custom_plans, todos` (`…120003`).
 > (`src/lib/analytics/index.ts` — random id, no PII), the exercise/food **catalog**
 > (`src/data/**`, static reference content), and media assets.
 
-## Export envelope (proposed JSON)
+## Export envelope (schema v1)
 
 ```jsonc
 {
-  "export": { "app": "Qimmah", "version": "1.0.0", "generatedAt": "<ISO>", "schema": 1 },
-  "account": { "email": "<from Supabase>", "displayName": "<optional>" },
-  "profile": { /* customization.profile + targets + plans */ },
-  "history": { /* HistorySnapshot verbatim (snapshotForExport) */ }
+  "format": "qimmah-data-export",
+  "schemaVersion": 1,
+  "exportedAt": "<ISO>",
+  "build": "<build label>",
+  "account": { "userId": "<owner-or-null>", "email": "<email-or-null>" },
+  "data": { /* explicit allowlist of profile, history, daily, plan and coaching stores */ }
 }
 ```
-- UTF-8, Arabic preserved. One file: `qimmah-export-<yyyy-mm-dd>.json`.
-- `schema` lets a future importer validate; `restoreSnapshot()` already consumes the `history` half.
+- UTF-8, Arabic preserved. One file: `qimmah-data-<yyyy-mm-dd>.json`.
+- Auth/session tokens, sync internals, analytics identifiers, catalogs, and other-owner records are excluded.
 
 ## Path 1 — Owner-run manual access (available now)
 
@@ -63,22 +62,18 @@ For a request to `support@qimmah.app` (statutory access period):
 > Do the SQL read-only and scoped to the one `user_id`. Never export another user's rows
 > (RLS protects the app; the dashboard bypasses RLS — be deliberate).
 
-## Path 2 — In-app "Export my data" (implementation design, future)
+## Path 2 — In-app export and restore (live)
 
-Wire the disabled ProfileV2 button (`docs/legal/pdpl-gap-checklist.md` R-1) to:
-1. `const snapshot = snapshotForExport()` (already exists) + read `customization` + the live
-   Supabase account email.
-2. Build the envelope; `JSON.stringify(…, null, 2)`.
-3. **Deliver:** web → `Blob` download; iOS (Capacitor) → write to app dir + share sheet
-   (`@capacitor/filesystem` + share) so it lands in Files/Mail.
-4. No new backend needed — everything is already on-device for a synced user.
-5. Round-trip safety: a future "Import" reuses `restoreSnapshot()` (validates via `importHistory`).
+1. Export builds the exact allowlisted envelope and uses the native share sheet when available, with a deterministic browser download fallback.
+2. Restore rejects wrong format/version/owner, unknown top-level data, dangerous prototype keys, oversized/deep payloads, and recovery sessions.
+3. The user sees counts and source date before an explicit confirmation checkbox becomes actionable.
+4. The app writes `qimmah:restoreBackup:v1:<owner>` before replacement, applies through canonical store writers, enqueues sync-ready rows, and rolls the whole Qimmah namespace back on failure.
+5. `wipeUserData` removes the owner's restore backup by default through the account-scope fail-safe allowlist policy.
 
-### Acceptance criteria (when built)
-- Produces the envelope above for `reviewer`/`veteran` seed profiles (see `DEMO-ACCOUNTS.md`).
-- Contains zero other-user data; excludes analytics + catalog.
-- Re-importable through `restoreSnapshot()` with no shape errors.
-- A `scripts/export-proof.ts` can assert the envelope matches `HistorySnapshot` + customization keys.
+### Proof
+
+- `npm run test:data-portability`: 33 deterministic export, owner, recovery, schema, malicious-input, backup, rollback, wipe, and UI-wiring checks.
+- `node scripts/run-momentum-proof.mjs`: real download→upload→preview→confirm→restore round trip, RTL screenshots, reduced motion, no overflow/console errors.
 
 ## Deletion (the mirror right, already shipped)
 Right of erasure (R-3) is live: `public.delete_own_account` (`…120007`, security-definer,

@@ -17,7 +17,8 @@ npm run test:gate
 | `active-session` | 31 | workout snapshot save/restore, owner isolation, 12h freshness, **timestamp rest timer** (background-safe) | `scripts/active-session-proof.ts` |
 | `today-v2` | 32 | Today v2 model: 3 states, pillars, hero, hedged copy | `scripts/*today-v2*`/`run-today-v2-model-proof.mjs` |
 | `progress-v2` | 11 | canonical hydrated measurements, immediate logging, honest trend copy, actual PR-event count | `scripts/progress-v2-proof.ts` |
-| `data-portability` | 12 | allowlisted export schema, owner isolation, recovery guard, secret exclusion, size cap | `scripts/data-portability-proof.ts` |
+| `plates-prs` | 26 | exact/nearest plate loading, baseline-vs-PR truth, canonical Progress/Profile derivation, owner isolation, shared UI wiring | `scripts/plates-prs-proof.ts` |
+| `data-portability` | 33 | allowlisted export/restore schema, owner isolation, recovery guard, secret exclusion, preview/confirmation, backup, injected-failure rollback, wipe, v1/v2 UI wiring | `scripts/data-portability-proof.ts` |
 | `notifications` | 30 | owner-scoped preferences, restart persistence, quiet hours, five reminder types, permission discipline, sign-out/account-switch cancellation, recovery guard, generic lock-screen copy | `scripts/notifications-proof.ts` |
 | `insights` | 28 | honest weekly metrics, abstention thresholds, plan-based muscle coverage, deterministic priority, store isolation | `scripts/insights-proof.ts` |
 | `sync` | 19 | sync queue: enqueue gating (`syncAllowedFor`), recovery guard, dedup, retry/backoff | `scripts/sync-proof.ts` |

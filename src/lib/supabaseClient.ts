@@ -27,10 +27,9 @@ export function isSupabaseConfigured(): boolean {
 }
 
 // ============================================================================
-// أنواع الجداول المساعِدة — profiles جاهز الآن؛ بقية الجداول تُضاف في جلسة
-// المزامنة اللاحقة (seam). تُصدَّر كأنواع توثيقية للاستخدام اليدوي؛ لا نمرّرها
-// إلى createClient<Database> بعد لأنّ طبقة المزامنة (syncService) ما زالت تستخدم
-// أسماء جداول لم تُنمذَج بعد — التنميط الكامل يتم مع بناء المزامنة.
+// أنواع الجداول المساعِدة — لا نمرّرها إلى createClient<Database> بعد لأنّ
+// syncService يتعامل مع جداول المزامنة عبر محوّل محكوم بقائمة سماح. المخطط
+// الكامل ومفاتيح الملكية وسياسات RLS موثقة في supabase/migrations.
 // ============================================================================
 export interface ProfileRow {
   id: string
@@ -53,8 +52,8 @@ export interface Database {
         }
         Update: Partial<ProfileRow>
       }
-      // TODO(sync): weight_logs / food_logs / workout_logs / custom_foods
-      // تُضاف أنواعها هنا عند بناء المزامنة السحابية (localStorage → cloud).
+      // بقية جداول المزامنة ممثلة في SyncTable؛ إبقاء هذا النوع جزئيًا يمنع
+      // ازدواج مخطط SQL يدوي قد ينجرف عن ملفات الترحيل.
     }
     Views: Record<string, never>
     Functions: Record<string, never>

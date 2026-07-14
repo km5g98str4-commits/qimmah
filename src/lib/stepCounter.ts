@@ -2,6 +2,7 @@
 // لا مزامنة مع Apple Health / Google Fit (مؤجَّلة). كل القيم تُحفظ في localStorage لكل يوم.
 
 import { getDayStamp } from './today'
+import { enqueueSyncDelete, enqueueSyncOperation } from './syncQueue'
 
 export const STEP_LOG_KEY = 'qimmah:steps:v1'
 export const STEP_SOURCE_KEY = 'qimmah:stepSource:v1'
@@ -138,6 +139,24 @@ export function setSteps(steps: number, date = getDayStamp(), source: StepSource
   persist(log)
   persistSources(sources)
   return value
+}
+
+/** Full confirmed restore: replace all day rows and emit owner-guarded sync ops. */
+export function replaceStepLog(days: readonly DaySteps[]): void {
+  const before = loadStepLog()
+  const log: Record<string, number> = {}
+  const sources: Record<string, StepSource> = {}
+  days.slice(0, 5000).forEach((day) => {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(day.date)) return
+    const steps = clampSteps(day.steps)
+    if (steps <= 0) return
+    log[day.date] = steps
+    sources[day.date] = normalizeSource(day.source)
+  })
+  persist(log)
+  persistSources(sources)
+  Object.keys(before).filter((date) => !(date in log)).forEach((date) => enqueueSyncDelete('step_logs', date))
+  Object.entries(log).forEach(([date, steps]) => enqueueSyncOperation('step_logs', date, { date, steps, source: sources[date] }))
 }
 
 /** يضيف (أو يطرح) خطوات ليوم محدّد ويُعيد المجموع الجديد (يبقى الإدخال يدويًا). */

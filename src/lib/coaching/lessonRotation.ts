@@ -67,3 +67,13 @@ export function markLessonUnderstood(userId: string | null | undefined, seed: nu
 export function shownLessonIds(userId: string | null | undefined): string[] {
   return readShown(userId)
 }
+
+/** استعادة قائمة الدروس المعروفة فقط، مع إزالة التكرار وربطها بالمالك. */
+export function restoreShownLessonIds(userId: string | null | undefined, value: unknown): string[] {
+  const known = new Set(LESSONS.map((lesson) => lesson.id))
+  const safe = Array.isArray(value)
+    ? [...new Set(value.filter((id): id is string => typeof id === 'string' && known.has(id)))].slice(0, LESSONS.length)
+    : []
+  writeShown(userId, safe)
+  return safe
+}

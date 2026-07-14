@@ -193,6 +193,18 @@ try {
   if (exportBundle?.format !== 'qimmah-data-export' || exportBundle?.schemaVersion !== 1) failures.push('privacy export format/schema invalid')
   if (exportJson.includes('BROWSER_AUTH_SECRET') || exportJson.includes('BROWSER_QUEUE_SECRET')) failures.push('privacy export leaked auth/sync material')
   await exportPage.getByRole('status').waitFor()
+  // Round-trip the just-exported owner-scoped file through the real restore UI.
+  // Preview + explicit confirmation are mandatory before any local write.
+  const restoreInput = exportPage.locator('input[type="file"]')
+  await restoreInput.setInputFiles(downloadPath)
+  await exportPage.getByRole('heading', { name: 'راجع النسخة' }).waitFor()
+  const restoreApply = exportPage.getByRole('button', { name: 'استعد البيانات' })
+  if (await restoreApply.isEnabled()) failures.push('privacy restore apply enabled before explicit confirmation')
+  await exportPage.getByRole('checkbox', { name: /أفهم أن الاستعادة/ }).check()
+  if (!(await restoreApply.isEnabled())) failures.push('privacy restore apply stayed disabled after confirmation')
+  await restoreApply.click()
+  await exportPage.getByText(/تمت الاستعادة/).waitFor()
+  await exportPage.screenshot({ path: `${OUT}/privacy-restore-320.png`, fullPage: true })
   await exportContext.close()
 
   // Today hierarchy: coaching supports the command center without displacing
@@ -231,6 +243,24 @@ try {
   })
   if (savedMeasurement !== 80.7) failures.push(`progress canonical measurement write = ${savedMeasurement}`)
   await progressContext.close()
+
+  // Plates/PR completion: the strength surface opens the shared accessible
+  // calculator and produces an exact, token-colored load without a second store.
+  const platesContext = await browser.newContext({ viewport: { width: 320, height: 720 }, locale: 'ar-SA' })
+  const platesPage = await platesContext.newPage()
+  await openSurface(platesPage, 'progress')
+  await platesPage.getByRole('button', { name: /^القوة/ }).click()
+  await platesPage.getByRole('button', { name: 'احسب أقراص البار' }).click()
+  const platesDialog = platesPage.getByRole('dialog', { name: 'تركيب الوزن' })
+  await platesDialog.waitFor()
+  await platesPage.getByLabel('الوزن الكلي · كجم').fill('100')
+  await platesPage.getByText('تركيب مطابق', { exact: true }).waitFor()
+  if ((await platesDialog.getAttribute('aria-modal')) !== 'true') failures.push('plate calculator is not modal to assistive technology')
+  await platesPage.waitForTimeout(450) // capture the settled state, not the entry fade
+  await platesPage.screenshot({ path: `${OUT}/plates-320.png`, fullPage: false })
+  await platesPage.getByRole('button', { name: 'إغلاق حاسبة الأقراص' }).click()
+  await platesDialog.waitFor({ state: 'hidden' })
+  await platesContext.close()
 
   const reduced = await browser.newContext({ viewport: { width: 320, height: 720 }, reducedMotion: 'reduce', locale: 'ar-SA' })
   const reducedPage = await reduced.newPage()

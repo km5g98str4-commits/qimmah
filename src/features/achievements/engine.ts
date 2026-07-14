@@ -62,20 +62,36 @@ function freshState(): AchievementState {
   return { unlocked: {}, proteinDays: [], prCount: 0 }
 }
 
+export function sanitizeAchievementState(value: unknown): AchievementState {
+  if (!value || typeof value !== 'object') return freshState()
+  const input = value as Partial<AchievementState>
+  const unlocked = input.unlocked && typeof input.unlocked === 'object'
+    ? Object.fromEntries(Object.entries(input.unlocked).filter(([id, date]) => typeof id === 'string' && typeof date === 'string').slice(0, 1000))
+    : {}
+  return {
+    unlocked,
+    proteinDays: Array.isArray(input.proteinDays) ? [...new Set(input.proteinDays.filter((date): date is string => typeof date === 'string'))].slice(0, 5000) : [],
+    prCount: typeof input.prCount === 'number' && Number.isInteger(input.prCount) && input.prCount >= 0 ? Math.min(input.prCount, 100000) : 0,
+  }
+}
+
 export function loadAchievementState(): AchievementState {
   if (typeof window === 'undefined') return freshState()
   try {
     const raw = window.localStorage.getItem(ACHIEVEMENTS_KEY)
     if (!raw) return freshState()
-    const p = JSON.parse(raw) as Partial<AchievementState>
-    return {
-      unlocked: p.unlocked && typeof p.unlocked === 'object' ? p.unlocked : {},
-      proteinDays: Array.isArray(p.proteinDays) ? p.proteinDays.filter((d) => typeof d === 'string') : [],
-      prCount: typeof p.prCount === 'number' && p.prCount >= 0 ? p.prCount : 0,
-    }
+    return sanitizeAchievementState(JSON.parse(raw))
   } catch {
     return freshState()
   }
+}
+
+/** استعادة مؤكدة فقط؛ المستدعي مسؤول عن حارس المالك/الاستعادة والنسخة الاحتياطية. */
+export function restoreAchievementState(value: unknown): AchievementState {
+  const state = sanitizeAchievementState(value)
+  saveState(state)
+  bumpVersion()
+  return state
 }
 
 function saveState(state: AchievementState): void {

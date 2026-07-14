@@ -60,7 +60,9 @@ export function detectSessionPRs(prevHistory: ExerciseHistory, se: SessionExerci
   const top = topCompletedWeight(se)
   if (Number.isNaN(top) || top <= 0) return false
   const prevBest = numOf(prevHistory[se.exerciseId]?.bestWeight)
-  return Number.isNaN(prevBest) || top > prevBest
+  // The first valid load is a baseline, not a record. Calling it a PR would
+  // inflate Profile/achievement counts and contradict the honest Progress copy.
+  return Number.isFinite(prevBest) && top > prevBest
 }
 
 /** Epley 1RM = w * (1 + reps/30). */

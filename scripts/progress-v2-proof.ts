@@ -60,9 +60,13 @@ globalThis.localStorage.setItem('qimmah:history:exerciseHistory:v1', JSON.string
   deadlift: { bestWeight: '120' },
   squat: { bestWeight: '100' },
 }))
-globalThis.localStorage.setItem('qimmah:achievements:v1', JSON.stringify({ unlocked: {}, proteinDays: [], prCount: 1 }))
+globalThis.localStorage.setItem('qimmah:history:workoutSessions:v1', JSON.stringify([
+  { id: 'improvement', date: day(0), startedAt: `${day(0)}T10:00:00.000Z`, finishedAt: `${day(0)}T11:00:00.000Z`, workoutDayId: 'push', workoutDayName: 'دفع', exercises: [{ exerciseId: 'bench-press', targetSets: 1, targetReps: '5', targetRestSec: 90, completed: true, sets: [{ setNumber: 1, targetReps: '5', actualReps: '5', weightKg: '85', completed: true }] }] },
+  { id: 'baseline', date: day(-7), startedAt: `${day(-7)}T10:00:00.000Z`, finishedAt: `${day(-7)}T11:00:00.000Z`, workoutDayId: 'push', workoutDayName: 'دفع', exercises: [{ exerciseId: 'bench-press', targetSets: 1, targetReps: '5', targetRestSec: 90, completed: true, sets: [{ setNumber: 1, targetReps: '5', actualReps: '5', weightKg: '80', completed: true }] }] },
+]))
+globalThis.localStorage.setItem('qimmah:achievements:v1', JSON.stringify({ unlocked: {}, proteinDays: [], prCount: 99 }))
 const profile = buildProfileV2Model(customization, { displayName: 'أحمد', email: null, signedIn: false }, 'ar')
-check('ثلاثة baselines لا تتحول إلى ثلاثة PRs', profile.stats.prCount === 1)
+check('baseline لا يُحسب، والتحسن الحقيقي وحده PR', profile.stats.prCount === 1)
 
 console.log(`\n${'─'.repeat(48)}`)
 if (fail === 0) console.log(`✅ كل فحوص مسار التقدّم نجحت — ${pass} فحصًا.`)

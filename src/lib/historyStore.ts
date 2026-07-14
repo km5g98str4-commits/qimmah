@@ -117,6 +117,12 @@ function writeJSON(key: string, value: unknown): void {
   }
 }
 
+/** Restore/hydration writes must surface quota failures so the caller can roll back. */
+function writeJSONStrict(key: string, value: unknown): void {
+  if (typeof window === 'undefined') return
+  window.localStorage.setItem(key, JSON.stringify(value))
+}
+
 function nowISO(): string {
   return new Date().toISOString()
 }
@@ -134,30 +140,34 @@ function normalizeSet(raw: unknown): SetLog | null {
   if (!raw || typeof raw !== 'object') return null
   const s = raw as Record<string, unknown>
   return {
-    setNumber: typeof s.setNumber === 'number' ? s.setNumber : 0,
-    targetReps: typeof s.targetReps === 'string' ? s.targetReps : '',
-    actualReps: typeof s.actualReps === 'string' ? s.actualReps : '',
-    weightKg: typeof s.weightKg === 'string' ? s.weightKg : '',
+    setNumber: typeof s.setNumber === 'number' && Number.isFinite(s.setNumber) ? Math.max(0, Math.min(100, Math.floor(s.setNumber))) : 0,
+    targetReps: typeof s.targetReps === 'string' ? s.targetReps.slice(0, 20) : '',
+    actualReps: typeof s.actualReps === 'string' ? s.actualReps.slice(0, 20) : '',
+    weightKg: typeof s.weightKg === 'string' ? s.weightKg.slice(0, 20) : '',
     completed: !!s.completed,
-    rpe: typeof s.rpe === 'number' ? s.rpe : undefined,
-    notes: typeof s.notes === 'string' ? s.notes : undefined,
+    rpe: typeof s.rpe === 'number' && Number.isFinite(s.rpe) ? Math.max(0, Math.min(10, s.rpe)) : undefined,
+    notes: typeof s.notes === 'string' ? s.notes.slice(0, 2000) : undefined,
   }
 }
 
 function normalizeExercise(raw: unknown): SessionExercise {
   const e = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>
   return {
-    // نُبقي الحقول القديمة (weight/repsDone/difficulty/painNote/notes) عبر النشر،
-    // ثم نضبط الحقول المعروفة بأنواعها الآمنة.
-    ...(e as object),
-    exerciseId: typeof e.exerciseId === 'string' ? e.exerciseId : '',
-    targetSets: typeof e.targetSets === 'number' ? e.targetSets : 0,
-    targetReps: typeof e.targetReps === 'string' ? e.targetReps : '',
-    targetRestSec: typeof e.targetRestSec === 'number' ? e.targetRestSec : 0,
+    exerciseId: typeof e.exerciseId === 'string' ? e.exerciseId.slice(0, 160) : '',
+    exerciseNameAr: typeof e.exerciseNameAr === 'string' ? e.exerciseNameAr.slice(0, 200) : undefined,
+    exerciseNameEn: typeof e.exerciseNameEn === 'string' ? e.exerciseNameEn.slice(0, 200) : undefined,
+    targetSets: typeof e.targetSets === 'number' && Number.isFinite(e.targetSets) ? Math.max(0, Math.min(100, Math.floor(e.targetSets))) : 0,
+    targetReps: typeof e.targetReps === 'string' ? e.targetReps.slice(0, 20) : '',
+    targetRestSec: typeof e.targetRestSec === 'number' && Number.isFinite(e.targetRestSec) ? Math.max(0, Math.min(3600, Math.floor(e.targetRestSec))) : 0,
     completed: !!e.completed,
     sets: Array.isArray(e.sets)
-      ? (e.sets.map(normalizeSet).filter(Boolean) as SetLog[])
+      ? (e.sets.slice(0, 100).map(normalizeSet).filter(Boolean) as SetLog[])
       : undefined,
+    weight: typeof e.weight === 'string' ? e.weight.slice(0, 20) : undefined,
+    repsDone: typeof e.repsDone === 'string' ? e.repsDone.slice(0, 20) : undefined,
+    difficulty: e.difficulty === 'easy' || e.difficulty === 'medium' || e.difficulty === 'hard' ? e.difficulty : undefined,
+    painNote: typeof e.painNote === 'string' ? e.painNote.slice(0, 2000) : undefined,
+    notes: typeof e.notes === 'string' ? e.notes.slice(0, 2000) : undefined,
   } as SessionExercise
 }
 
@@ -166,13 +176,13 @@ function normalizeSession(raw: unknown): WorkoutSession | null {
   const s = raw as Record<string, unknown>
   if (typeof s.id !== 'string' || !s.id) return null
   return {
-    id: s.id,
+    id: s.id.slice(0, 160),
     date: typeof s.date === 'string' ? s.date : '',
-    startedAt: typeof s.startedAt === 'string' ? s.startedAt : '',
-    finishedAt: typeof s.finishedAt === 'string' ? s.finishedAt : undefined,
-    workoutDayId: typeof s.workoutDayId === 'string' ? s.workoutDayId : '',
-    workoutDayName: typeof s.workoutDayName === 'string' ? s.workoutDayName : '',
-    exercises: Array.isArray(s.exercises) ? s.exercises.map(normalizeExercise) : [],
+    startedAt: typeof s.startedAt === 'string' ? s.startedAt.slice(0, 40) : '',
+    finishedAt: typeof s.finishedAt === 'string' ? s.finishedAt.slice(0, 40) : undefined,
+    workoutDayId: typeof s.workoutDayId === 'string' ? s.workoutDayId.slice(0, 160) : '',
+    workoutDayName: typeof s.workoutDayName === 'string' ? s.workoutDayName.slice(0, 200) : '',
+    exercises: Array.isArray(s.exercises) ? s.exercises.slice(0, 100).map(normalizeExercise) : [],
   }
 }
 
@@ -424,21 +434,98 @@ export function exportHistory(): HistorySnapshot {
   }
 }
 
-/** يستعيد المتجر من نسخة مُصدّرة (استبدال كامل، يُستخدم بعد تأكيد المستخدم). */
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
+const plainRecord = (value: unknown): Record<string, unknown> => value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {}
+const boolMap = (value: unknown): Record<string, boolean> => Object.fromEntries(Object.entries(plainRecord(value)).filter(([key]) => key.length <= 120).slice(0, 1000).map(([key, item]) => [key, Boolean(item)]))
+
+/** Runtime normalization for an untrusted restore payload. */
+export function normalizeHistorySnapshot(value: unknown): HistorySnapshot {
+  const input = plainRecord(value)
+  const workoutSessions = (Array.isArray(input.workoutSessions) ? input.workoutSessions : [])
+    .map(normalizeSession).filter((session): session is WorkoutSession => Boolean(session && DATE_RE.test(session.date))).slice(0, 500)
+  const exerciseHistory: ExerciseHistory = {}
+  Object.entries(plainRecord(input.exerciseHistory)).slice(0, 2000).forEach(([exerciseId, raw]) => {
+    if (!exerciseId || exerciseId.length > 160) return
+    const record = plainRecord(raw)
+    exerciseHistory[exerciseId] = {
+      lastWeight: typeof record.lastWeight === 'string' ? record.lastWeight.slice(0, 20) : undefined,
+      bestWeight: typeof record.bestWeight === 'string' ? record.bestWeight.slice(0, 20) : undefined,
+      lastReps: typeof record.lastReps === 'string' ? record.lastReps.slice(0, 20) : undefined,
+      bestEstimatedOneRepMax: typeof record.bestEstimatedOneRepMax === 'number' && Number.isFinite(record.bestEstimatedOneRepMax) ? Math.max(0, record.bestEstimatedOneRepMax) : undefined,
+      lastCompletedAt: typeof record.lastCompletedAt === 'string' ? record.lastCompletedAt.slice(0, 40) : undefined,
+      totalSessions: typeof record.totalSessions === 'number' ? Math.max(0, Math.floor(record.totalSessions)) : undefined,
+      streakFullReps: typeof record.streakFullReps === 'number' ? Math.max(0, Math.floor(record.streakFullReps)) : undefined,
+    }
+  })
+  const measurementLogs = (Array.isArray(input.measurementLogs) ? input.measurementLogs : []).slice(0, 1000).flatMap((raw) => {
+    const log = plainRecord(raw)
+    if (typeof log.id !== 'string' || !log.id || typeof log.date !== 'string' || !DATE_RE.test(log.date)) return []
+    const values = Object.fromEntries(Object.entries(plainRecord(log.values)).filter(([, item]) => typeof item === 'string' || typeof item === 'number' && Number.isFinite(item)).slice(0, 100))
+    return [{ id: log.id.slice(0, 160), date: log.date, values, notes: typeof log.notes === 'string' ? log.notes.slice(0, 2000) : undefined } as MeasurementLog]
+  })
+  const dailyLogs: ByDate<DailyLog> = {}
+  Object.entries(plainRecord(input.dailyLogs)).slice(0, 5000).forEach(([date, raw]) => {
+    if (!DATE_RE.test(date)) return
+    const item = plainRecord(raw)
+    const commitments = plainRecord(item.commitments)
+    dailyLogs[date] = {
+      date, done: boolMap(item.done), workoutCompleted: Boolean(item.workoutCompleted),
+      commitments: Object.keys(commitments).length ? { done: boolMap(commitments.done), notes: typeof commitments.notes === 'string' ? commitments.notes.slice(0, 2000) : undefined } : undefined,
+      updatedAt: typeof item.updatedAt === 'string' ? item.updatedAt.slice(0, 40) : nowISO(),
+    }
+  })
+  const nutritionLogs: ByDate<NutritionLog> = {}
+  Object.entries(plainRecord(input.nutritionLogs)).slice(0, 5000).forEach(([date, raw]) => {
+    if (!DATE_RE.test(date)) return
+    const item = plainRecord(raw)
+    const totals = plainRecord(item.loggedFood)
+    nutritionLogs[date] = {
+      date, doneMeals: boolMap(item.doneMeals), waterMl: typeof item.waterMl === 'number' ? Math.max(0, item.waterMl) : undefined,
+      loggedFood: Object.keys(totals).length ? {
+        calories: Math.max(0, Number(totals.calories) || 0), protein: Math.max(0, Number(totals.protein) || 0),
+        carbs: Math.max(0, Number(totals.carbs) || 0), fat: Math.max(0, Number(totals.fat) || 0),
+      } : undefined,
+      updatedAt: typeof item.updatedAt === 'string' ? item.updatedAt.slice(0, 40) : nowISO(),
+    }
+  })
+  const waterLogs: ByDate<WaterLog> = {}
+  const supplementLogs: ByDate<SupplementLog> = {}
+  const medicationLogs: ByDate<MedicationLog> = {}
+  Object.entries(plainRecord(input.waterLogs)).slice(0, 5000).forEach(([date, raw]) => { if (DATE_RE.test(date)) waterLogs[date] = { date, waterMl: Math.max(0, Number(plainRecord(raw).waterMl) || 0), updatedAt: String(plainRecord(raw).updatedAt ?? nowISO()).slice(0, 40) } })
+  Object.entries(plainRecord(input.supplementLogs)).slice(0, 5000).forEach(([date, raw]) => { if (DATE_RE.test(date)) supplementLogs[date] = { date, done: boolMap(plainRecord(raw).done), updatedAt: String(plainRecord(raw).updatedAt ?? nowISO()).slice(0, 40) } })
+  Object.entries(plainRecord(input.medicationLogs)).slice(0, 5000).forEach(([date, raw]) => { if (DATE_RE.test(date)) medicationLogs[date] = { date, done: boolMap(plainRecord(raw).done), updatedAt: String(plainRecord(raw).updatedAt ?? nowISO()).slice(0, 40) } })
+  return { workoutSessions, exerciseHistory, dailyLogs, measurementLogs, nutritionLogs, waterLogs, supplementLogs, medicationLogs }
+}
+
+/** يستعيد المتجر باستبدال كامل عبر الكتّاب القانونيين كي تبقى المزامنة صحيحة. */
 export function importHistory(snap: Partial<HistorySnapshot> | undefined | null): void {
-  if (!snap || typeof snap !== 'object') return
-  if (Array.isArray(snap.workoutSessions)) writeJSON(HISTORY_KEYS.workoutSessions, snap.workoutSessions)
-  if (snap.exerciseHistory && typeof snap.exerciseHistory === 'object')
-    writeJSON(HISTORY_KEYS.exerciseHistory, snap.exerciseHistory)
-  if (snap.dailyLogs && typeof snap.dailyLogs === 'object') writeJSON(HISTORY_KEYS.dailyLogs, snap.dailyLogs)
-  if (Array.isArray(snap.measurementLogs)) writeJSON(HISTORY_KEYS.measurementLogs, snap.measurementLogs)
-  if (snap.nutritionLogs && typeof snap.nutritionLogs === 'object')
-    writeJSON(HISTORY_KEYS.nutritionLogs, snap.nutritionLogs)
-  if (snap.waterLogs && typeof snap.waterLogs === 'object') writeJSON(HISTORY_KEYS.waterLogs, snap.waterLogs)
-  if (snap.supplementLogs && typeof snap.supplementLogs === 'object')
-    writeJSON(HISTORY_KEYS.supplementLogs, snap.supplementLogs)
-  if (snap.medicationLogs && typeof snap.medicationLogs === 'object')
-    writeJSON(HISTORY_KEYS.medicationLogs, snap.medicationLogs)
+  const safe = normalizeHistorySnapshot(snap)
+  const before = exportHistory()
+  setWorkoutSessions(safe.workoutSessions)
+  safe.workoutSessions.slice().reverse().forEach(saveWorkoutSession)
+  Object.keys(before.exerciseHistory).filter((id) => !safe.exerciseHistory[id]).forEach((id) => enqueueSyncDelete('exercise_history', id))
+  saveExerciseHistory(safe.exerciseHistory)
+  setMeasurementLogs(safe.measurementLogs)
+  safe.measurementLogs.slice().reverse().forEach(saveMeasurementLog)
+  writeJSON(HISTORY_KEYS.dailyLogs, safe.dailyLogs)
+  writeJSON(HISTORY_KEYS.nutritionLogs, safe.nutritionLogs)
+  writeJSON(HISTORY_KEYS.waterLogs, safe.waterLogs)
+  writeJSON(HISTORY_KEYS.supplementLogs, safe.supplementLogs)
+  writeJSON(HISTORY_KEYS.medicationLogs, safe.medicationLogs)
+  const beforeDates = new Set([...Object.keys(before.dailyLogs), ...Object.keys(before.nutritionLogs), ...Object.keys(before.waterLogs), ...Object.keys(before.supplementLogs), ...Object.keys(before.medicationLogs)])
+  const afterDates = new Set([...Object.keys(safe.dailyLogs), ...Object.keys(safe.nutritionLogs), ...Object.keys(safe.waterLogs), ...Object.keys(safe.supplementLogs), ...Object.keys(safe.medicationLogs)])
+  beforeDates.forEach((date) => { if (!afterDates.has(date)) enqueueSyncDelete('daily_logs', date) })
+  afterDates.forEach(enqueueDailySync)
+  // The regular writers intentionally swallow quota errors during casual app use.
+  // A confirmed restore cannot: strict final writes let dataPortability roll back.
+  writeJSONStrict(HISTORY_KEYS.workoutSessions, safe.workoutSessions)
+  writeJSONStrict(HISTORY_KEYS.exerciseHistory, safe.exerciseHistory)
+  writeJSONStrict(HISTORY_KEYS.measurementLogs, safe.measurementLogs)
+  writeJSONStrict(HISTORY_KEYS.dailyLogs, safe.dailyLogs)
+  writeJSONStrict(HISTORY_KEYS.nutritionLogs, safe.nutritionLogs)
+  writeJSONStrict(HISTORY_KEYS.waterLogs, safe.waterLogs)
+  writeJSONStrict(HISTORY_KEYS.supplementLogs, safe.supplementLogs)
+  writeJSONStrict(HISTORY_KEYS.medicationLogs, safe.medicationLogs)
 }
 
 // ————————————————————————————————————————————————————————————————

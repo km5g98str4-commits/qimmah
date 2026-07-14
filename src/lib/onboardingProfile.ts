@@ -83,18 +83,11 @@ function migrateLegacyOnbGoal(goal: OnboardingProfile['goal']): OnboardingProfil
 
 // ===== التخزين =====
 
-/** يقرأ مصدر الحقيقة المحفوظ مدموجًا فوق الافتراضي (آمن ضد بيانات تالفة/قديمة). */
-export function loadOnboardingProfile(): OnboardingProfile | null {
-  if (typeof window === 'undefined') return null
-  let raw: string | null
+/** يطبّع مصدر إعداد غير موثوق فوق الافتراضي. */
+export function normalizeOnboardingProfile(value: unknown): OnboardingProfile | null {
+  if (!value || typeof value !== 'object') return null
   try {
-    raw = window.localStorage.getItem(ONBOARDING_PROFILE_KEY)
-  } catch {
-    return null
-  }
-  if (!raw) return null
-  try {
-    const saved = JSON.parse(raw) as Partial<OnboardingProfile>
+    const saved = value as Partial<OnboardingProfile>
     const base = defaultOnboardingProfile()
     const goal = migrateLegacyOnbGoal(mergeSection(base.goal, saved.goal))
     return {
@@ -115,6 +108,17 @@ export function loadOnboardingProfile(): OnboardingProfile | null {
       },
       _meta: { ...base._meta, ...saved._meta, schemaVersion: ONBOARDING_SCHEMA_VERSION },
     }
+  } catch {
+    return null
+  }
+}
+
+/** يقرأ مصدر الحقيقة المحفوظ مدموجًا فوق الافتراضي (آمن ضد بيانات تالفة/قديمة). */
+export function loadOnboardingProfile(): OnboardingProfile | null {
+  if (typeof window === 'undefined') return null
+  try {
+    const raw = window.localStorage.getItem(ONBOARDING_PROFILE_KEY)
+    return raw ? normalizeOnboardingProfile(JSON.parse(raw)) : null
   } catch {
     return null
   }

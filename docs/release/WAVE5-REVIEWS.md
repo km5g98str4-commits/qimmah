@@ -22,8 +22,8 @@ Security review result for the integrated set: **No high-confidence vulnerabilit
 |---|---|---|---|
 | `feat/notifications-engine` | — | BRANCH ABSENT / TRUNK FIX-FORWARD ACCEPT | The branch never produced a reviewable tip. Commander implemented the bounded system on trunk with owner-scoped storage, recovery guard, pre-sign-out cancellation, generic lock-screen copy, 30 proofs, and 3-breakpoint RTL UI evidence. |
 | `feat/insights-engine` | `52fc851` | ACCEPT AFTER FIX | Removed raw-hex fallbacks, moved copy to `src/data`, made muscle coverage compare the saved plan rather than a fixed list, preserved immediate Progress refresh, and wired 28 checks into `test:gate`. |
-| `feat/plates-and-prs` | — | BLOCKED — NOT PRESENT | A local uncommitted worktree exists, but no origin tip/proof exists. |
-| `feat/data-portability` | — | BLOCKED — NOT PRESENT | The local worktree remains at the Wave 4 base with no system diff and no origin branch. |
+| `feat/plates-and-prs` | — | BRANCH ABSENT / TRUNK FIX-FORWARD ACCEPT | Commander implementation adds no storage key, derives PRs from canonical sessions, uses token-only UI, and ships 26 checks. |
+| `feat/data-portability` | — | BRANCH ABSENT / TRUNK FIX-FORWARD ACCEPT | Commander implementation is owner/recovery guarded, allowlisted, backup-first and rollback-proven; v1/v2 use the same path with 33 checks. |
 | `feat/arabic-coach-content` | `871d20c` | ACCEPT CODE / REJECT PACKAGE DIFF | 181 cues + 40 lessons + 25 rest tips; 25 proof checks and owner-scoped lesson key. Commander wired `test:coaching` into `test:gate`, hid Arabic-only rest copy in EN mode, and replaced raw component colors with semantic success/danger tokens. |
 
 ## Gate ledger
@@ -60,8 +60,21 @@ runtime owner with `recoveryActive=false`, and database RLS remains owner-only.
 | Exfiltration surface | ACCEPT | Explicit allowlist excludes auth/session tokens, sync queue/backup/meta, analytics IDs, caches, and other-owner registries; 10 MB cap limits accidental oversized output. |
 | Proof | ACCEPT | 12 deterministic checks plus real-browser download/error/status proof and 320/768/1280 RTL screenshots. |
 
-This trunk fix-forward closes the access-export gap; it does not claim that the absent
-`feat/data-portability` branch landed, and it intentionally does not implement import/restore.
+This trunk fix-forward now closes both access export and safe restore. It does not claim
+that the absent `feat/data-portability` branch landed; its independent implementation is
+reviewed and proven on `codex/v21-completion`.
+
+## Commander completion review — plates/PRs + safe restore
+
+| Review axis | Verdict | Evidence |
+|---|---|---|
+| PR truth | ACCEPT | Baseline is never a PR; later improvements are derived from finished canonical sessions, so hydrate/import cannot drift from a second counter. |
+| Plate calculator | ACCEPT | Bounded DP, exact/nearest-lower behavior, 500 kg cap, shared dialog, focus trap, Escape/return-focus, `aria-pressed`, token-only colors. |
+| Restore owner/recovery guard | ACCEPT | Source owner, current `accountScope` owner, and apply-time owner must match; `PASSWORD_RECOVERY` fails before read or write. |
+| Restore input security | ACCEPT | 10 MB cap, depth/node/array bounds, exact top/data allowlists, prototype-key rejection, bounded canonical normalizers. |
+| Atomicity | ACCEPT | Current export is persisted before replacement; injected write failure proves rollback; storage probe catches real quota/security failures. |
+| Exfiltration | ACCEPT | Auth tokens, sync queue/backup/meta, analytics ids, caches, and unknown payload fields are excluded or rejected. |
+| Accessibility | ACCEPT | Preview and explicit checkbox, status/alert semantics, icon+text errors, accessible file control and modal, RTL/no-overflow browser proof. |
 
 ## Commander notifications fix-forward
 
@@ -74,6 +87,6 @@ This trunk fix-forward closes the access-export gap; it does not claim that the 
 | Lifecycle safety | ACCEPT | Sign-out awaits native cancellation; serialized reconciliation and a generation guard prevent a stale account-switch task from winning. |
 | Proof | ACCEPT | 30 deterministic checks plus web unsupported-state semantics and 320/768/1280 RTL screenshots with no console error/overflow. |
 
-## Blocker record
+## Historical blocker record
 
-Five bounded fetch/review loops completed after the open-loop consolidation. `feat/insights-engine` appeared in the final refresh and was reviewed, corrected, and integrated. The two remaining unmerged system branches and `test/proof-deepening` never appeared on `origin`; therefore no immutable diff, proof, or tip existed to review or merge. Per the hard-cap rule, these remain release blockers rather than green systems. The absent notifications branch is recorded honestly above; the accepted trunk fix-forward is independently reviewed and proven.
+Five bounded fetch/review loops completed after the open-loop consolidation. `feat/insights-engine` appeared in the final refresh and was reviewed, corrected, and integrated. The plates/data-portability/proof branches never appeared on `origin`; their absence is retained here as history. They are no longer code blockers because bounded trunk fix-forwards now have independent standards/security review, deterministic proofs, full browser evidence, and the complete release gate.

@@ -17,6 +17,7 @@ import { loadHistory } from '@/lib/exerciseHistory'
 import { recentVolumes } from '@/lib/progressStats'
 import { getExercise } from '@/data/exercises'
 import { getDayStamp } from '@/lib/today'
+import { derivePersonalRecordEvents, type PersonalRecordEvent } from '@/lib/personalRecords'
 
 const DAY_MS = 86_400_000
 const WINDOW_DAYS = 14
@@ -86,6 +87,8 @@ export interface StrengthDetail {
   /** «يبدو أن قوّتك تتحسّن باطّراد» when improving, hedged prompt otherwise. */
   headline: string
   lifts: LiftLadder[]
+  /** Actual improvements only; the first logged load is a baseline. */
+  prEvents: PersonalRecordEvent[]
   hasData: boolean
 }
 
@@ -178,6 +181,7 @@ export function buildProgressV2Model(customization: Customization, lang: Lang): 
   // ── Sessions → strength ladders + momentum + adherence ──────────────────────
   const finished = loadSessions().filter((s) => s.finishedAt)
   const history = loadHistory()
+  const prEvents = derivePersonalRecordEvents(finished)
 
   // Per-lift ladders (top lifts by best weight).
   const exIds = Array.from(new Set(finished.flatMap((s) => s.exercises.map((e) => e.exerciseId)))).filter(Boolean)
@@ -195,13 +199,15 @@ export function buildProgressV2Model(customization: Customization, lang: Lang): 
     const best = Math.max(numOf(history[exId]?.bestWeight) || 0, ...tops)
     let status: LiftStatus = 'stable'
     let deltaKg: number | null = null
-    if (prev !== null && latest > prev) {
+    const previousBest = tops.length >= 2 ? Math.max(...tops.slice(0, -1)) : null
+    if (previousBest !== null && latest > previousBest && latest >= best) {
+      status = 'pr'
+      deltaKg = round1(latest - previousBest)
+      improvedCount++
+    } else if (prev !== null && latest > prev) {
       status = 'up'
       deltaKg = round1(latest - prev)
       improvedCount++
-    } else if (latest >= best && (prev === null || latest > tops[0])) {
-      status = 'pr'
-      if (prev !== null) improvedCount++
     }
     const ex = getExercise(exId)
     ladders.push({
@@ -223,6 +229,7 @@ export function buildProgressV2Model(customization: Customization, lang: Lang): 
         ? t('يبدو أن قوّتك ثابتة — واصل', 'Your strength looks steady — keep going')
         : t('أكمل تمرينين لنقرأ تطوّر قوّتك', 'Complete two workouts to read your strength'),
     lifts: topLadders,
+    prEvents: prEvents.slice(0, 6),
     hasData: ladders.length > 0,
   }
 

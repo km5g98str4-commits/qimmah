@@ -1,10 +1,10 @@
 # شروط الاستخدام — قِمّة / Terms of Service — Qimmah
 
-> **مسودة للمراجعة من المالك والمستشار القانوني — ليست استشارة قانونية.** الموضع **[OWNER-EMAIL]**
-> والمواضع **[يُؤكَّد من المالك]** تحتاج قرارًا قبل النشر.
+> **مسودة للمراجعة من المالك والمستشار القانوني — ليست استشارة قانونية.** المواضع
+> **[يُؤكَّد من المالك]** تحتاج قرارًا قبل النشر. قناة التواصل العامة: **support@qimmah.app**.
 > **Draft for owner + legal review — not legal advice.**
 
-آخر تحديث / Last updated: [DATE] · **تطبيق قِمّة — يمثله مالكه / Qimmah App — represented by its owner** · **[OWNER-EMAIL]**
+آخر تحديث / Last updated: 2026-07-14 · **تطبيق قِمّة — يمثله مالكه / Qimmah App — represented by its owner** · **support@qimmah.app**
 
 ---
 
@@ -59,7 +59,7 @@
 قد نحدّث هذه الشروط؛ يُنشر التاريخ أعلاه، والاستمرار في الاستخدام بعد التحديث يعني الموافقة.
 
 ### 13. التواصل
-**تطبيق قِمّة — يمثله مالكه** — **[OWNER-EMAIL]**
+**تطبيق قِمّة — يمثله مالكه** — **support@qimmah.app**
 
 ---
 
@@ -117,4 +117,4 @@ These Terms are governed by the laws of the Kingdom of Saudi Arabia. **[OWNER-TO
 We may update these Terms; the date above is published, and continued use after an update means acceptance.
 
 ### 13. Contact
-**Qimmah App — represented by its owner** — **[OWNER-EMAIL]**
+**Qimmah App — represented by its owner** — **support@qimmah.app**

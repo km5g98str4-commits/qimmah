@@ -16,20 +16,11 @@ change) and is prioritized here. Tags: `[bug]` `[improvement]` `[tech-debt]` `[f
    shared **template** URL + anon key as fallback. Production must set `VITE_SUPABASE_URL`
    / `VITE_SUPABASE_ANON_KEY` to a dedicated project with RLS, or all installs share one DB.
    (Anon key is public-by-design; the risk is the *shared default project*, not exposure.)
-3. `[improvement]` **Public Privacy Policy URL + App Privacy Labels + Support URL** — App
-   Store submission blockers. Content spec in the 4A doc.
-4. `[improvement]` **App icons + splash** — currently Capacitor defaults; cannot ship.
-   Needs the official 1024px asset → `@capacitor/assets`.
+3. `[external/legal]` **Owner/legal sign-off.** Public Privacy/Terms/Support pages and App Store listing copy now ship; final controller details and counsel approval remain owner actions.
 
 ## 🟠 High
 
-5. `[improvement/future]` **4.2 minimum-functionality mitigation** — add one native
-   capability (recommended: local reminders, design in
-   `docs/ios/milestone-4b-local-reminders-design.md`). Reduces web-wrapper rejection risk.
-6. `[tech-debt]` **iOS keyboard behavior** — untested on device (WKWebView default resize).
-   Evaluate `@capacitor/keyboard` if focused inputs get obscured.
-7. `[tech-debt/security]` **`npm audit`** reports 2 vulnerabilities (1 high) inherited from
-   deps. Triage and patch where non-breaking.
+4. `[device-qa]` **Physical iPhone validation.** Local notifications and the Capacitor Keyboard plugin now ship; validate real delivery timing, permission UX, camera/barcode, and fields above the keyboard on the owner's device.
 
 ## 🟡 Medium
 
@@ -70,14 +61,14 @@ change) and is prioritized here. Tags: `[bug]` `[improvement]` `[tech-debt]` `[f
   fixed during hardening. Data anomalies (#15) are corrected pending source verification.
 
 ### Improvements
-- #3 privacy/labels, #4 icons/splash, #5 reminders, #8 touch targets, #13 clean image assets.
+- #3 owner/legal sign-off, #8 touch targets, #13 clean image assets.
 
 ### Technical debt
-- #2 prod Supabase, #6 keyboard, #7 npm audit, #10 DEV chunk, #11 sync conflicts,
+- #2 prod Supabase, #10 DEV chunk, #11 sync conflicts,
   #12 web assets in native, #16 GIF seam, #17 guard leftover.
 
 ### Future ideas (product — not scheduled)
-- `[future]` Local reminders (workout/water/supplement) — also the 4.2 mitigation.
+- Local reminders are implemented; physical-device delivery remains in #4.
 - `[future]` Apple Health steps/weight read (the `registerStepBridge` seam exists).
 - `[future]` Progressive-overload suggestions + deload logic from logged history.
 - `[future]` Weekly progress photo (measurements already tracked).
@@ -95,3 +86,12 @@ change) and is prioritized here. Tags: `[bug]` `[improvement]` `[tech-debt]` `[f
 - **B6 Security:** audited (clean) + removed 8 sections orphaned by the DemoView removal.
 - **B7 Docs:** architecture, iOS setup, release checklist.
 - **B8 Backlog:** this document.
+
+## Resolved after the original audit
+
+- Official multi-size iOS app icons and 2732px splash assets are present in `Assets.xcassets`.
+- Five owner-scoped local reminder families ship through the native notifications bridge.
+- Capacitor Keyboard resize configuration ships alongside StatusBar/Splash configuration.
+- Public legal/support pages and App Store listing documentation ship in-repo.
+- `npm audit --omit=dev` reports zero production vulnerabilities (2026-07-14).
+- Plates/PRs and safe owner-scoped data restore are implemented and proof-gated.

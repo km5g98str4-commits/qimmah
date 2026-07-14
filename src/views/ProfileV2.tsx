@@ -9,6 +9,7 @@ import { dataPortabilityCopy } from '@/data/dataPortabilityCopy'
 import { buildQimmahDataExport, deliverQimmahDataExport } from '@/lib/dataPortability'
 import { buildProfileV2Model, COMMITMENT_WEEKS, type CommitmentWeek, type ProfileV2Model } from '@/lib/profileV2Model'
 import { NotificationSettingsPanel } from '@/components/NotificationSettingsPanel'
+import { DataRestorePanel } from '@/components/DataRestorePanel'
 
 interface ProfileV2Props {
   lang: Lang
@@ -225,6 +226,7 @@ function Privacy({ lang, model, ownerId, email, recoveryActive, onBack, onDelete
           </p>
         )}
         <p className="px-2 text-xs leading-relaxed text-ink-500">{copy.safetyNote}</p>
+        <DataRestorePanel lang={lang} ownerId={ownerId} email={email} recoveryActive={recoveryActive} />
         <button type="button" onClick={onDelete} className="v2-error-panel v2-pressable flex w-full items-center gap-3 rounded-2xl border px-4 py-3.5 text-start">
           <span className="v2-error-icon grid h-9 w-9 shrink-0 place-items-center rounded-xl"><Icon name="Trash2" className="h-4.5 w-4.5" /></span>
           <span className="min-w-0 flex-1"><span className="v2-error-icon block text-sm font-bold">{t('حذف الحساب نهائيًا', 'Delete account permanently')}</span><span className="block text-xs text-ink-500">{t('لا يمكن التراجع · يتطلب تأكيدًا', 'Irreversible · requires confirmation')}</span></span>

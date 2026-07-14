@@ -49,14 +49,13 @@ function swVersionPlugin() {
   }
 }
 
-// ترقية تصميم v2.1 إلى الافتراضي وقت البناء: عند `VITE_DESIGN_V2=true` نبصم
+// تصميم v2.1 هو الافتراضي المعتمد في بناء الإنتاج. نبصم
 // السمة `data-design="v2"` مباشرةً على وسم <html> في index.html المبني. بهذا يصبح
 // الوضع الافتراضي v2 جزءًا من الـ HTML المُقدَّم نفسه — قبل تشغيل أي JavaScript،
 // فلا اعتماد على ترتيب تنفيذ الوحدات ولا وميض هوية عند أول رسم، ويظهر التفعيل
-// مباشرةً عند فحص الناتج المبني. عندما لا يُضبط العلَم لا يُحقن شيء إطلاقًا
-// (index.html المبني مطابق تمامًا للافتراضي)، وتبقى معاينة المطوّر عبر `?design=`
-// تعمل كما هي. ملاحظة: `isDesignV2()` يقرأ هذه السمة فقط ولا يمسّ localStorage،
-// لذا أي حالة v1 قديمة محفوظة على الجهاز لا تُثبّت المستخدم على v1.
+// مباشرةً عند فحص الناتج المبني. الرجوع الطارئ فقط هو
+// `VITE_DESIGN_V2=false npm run build`. تبقى معاينة المطوّر عبر `?design=` تعمل
+// كما هي. `isDesignV2()` يقرأ هذه السمة فقط، فلا تثبّت حالة v1 قديمة المستخدم عليها.
 function designPromotionPlugin(enabled: boolean) {
   return {
     name: 'qimmah-design-promotion',
@@ -76,7 +75,7 @@ export default defineConfig(({ mode }) => {
   // `.env.production.local`) لوضع البناء الحالي — نحمّله صراحةً لأنه يؤثّر على
   // بصم الـ HTML وقت البناء، لا على كود التطبيق فقط.
   const env = loadEnv(mode, process.cwd(), '')
-  const designV2 = env.VITE_DESIGN_V2 === 'true'
+  const designV2 = mode === 'production' && env.VITE_DESIGN_V2 !== 'false'
 
   return {
     plugins: [react(), swVersionPlugin(), designPromotionPlugin(designV2)],
