@@ -7,7 +7,7 @@ export const saudiTraditionalFoods: FoodItem[] = [
   {
     id: 'sfct-1',
     nameAr: 'قرصان (الرياض)',
-    nameEn: 'Qursan',
+    nameEn: 'Qursan (Riyadh)',
     category: 'أطباق سعودية تقليدية',
     servingLabelAr: 'لكل 100غ',
     servingGrams: 100,
@@ -882,7 +882,7 @@ export const saudiTraditionalFoods: FoodItem[] = [
   {
     id: 'sfct-60',
     nameAr: 'مطازيز (القصيم)',
-    nameEn: 'Matazeez',
+    nameEn: 'Matazeez (Qassim)',
     category: 'أطباق سعودية تقليدية',
     servingLabelAr: 'لكل 100غ',
     servingGrams: 100,
@@ -1388,7 +1388,7 @@ export const saudiTraditionalFoods: FoodItem[] = [
   {
     id: 'sfct-94',
     nameAr: 'كبسة لحم غنم',
-    nameEn: 'Lamb Kabsa',
+    nameEn: 'Mutton Kabsa',
     category: 'أطباق سعودية تقليدية',
     servingLabelAr: 'لكل 100غ',
     servingGrams: 100,
@@ -1418,7 +1418,7 @@ export const saudiTraditionalFoods: FoodItem[] = [
   {
     id: 'sfct-96',
     nameAr: 'كبسة دجاج (الباحة)',
-    nameEn: 'Chicken Kabsa',
+    nameEn: 'Chicken Kabsa (Al-Bahah)',
     category: 'أطباق سعودية تقليدية',
     servingLabelAr: 'لكل 100غ',
     servingGrams: 100,
