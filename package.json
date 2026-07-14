@@ -43,7 +43,9 @@
     "test:e2e": "npm run build && node scripts/e2e-onboarding.mjs",
     "test:e2e:auth:preflight": "node scripts/e2e-auth/preflight.mjs",
     "test:e2e:auth": "node scripts/e2e-auth/run.mjs",
-    "test:e2e:auth:preload": "node scripts/e2e-auth/preload-images.mjs"
+    "test:e2e:auth:preload": "node scripts/e2e-auth/preload-images.mjs",
+    "coaching:build": "node scripts/coaching/extract-manifest.mjs && node scripts/coaching/build-cues.mjs",
+    "test:coaching": "node scripts/coaching/run-coaching-proof.mjs"
   },
   "dependencies": {
     "@capacitor/app": "^8.1.0",

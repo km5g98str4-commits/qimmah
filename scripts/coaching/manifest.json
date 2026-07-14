@@ -1,0 +1,2196 @@
+[
+  {
+    "id": "barbell-bench-press",
+    "nameAr": "بنش بريس بار",
+    "nameEn": "Barbell Bench Press",
+    "primaryMuscle": "chest",
+    "movementPattern": "push",
+    "equipment": [
+      "barbell",
+      "bench"
+    ],
+    "level": "intermediate",
+    "environment": "gym"
+  },
+  {
+    "id": "incline-barbell-press",
+    "nameAr": "بنش مائل بار",
+    "nameEn": "Incline Barbell Press",
+    "primaryMuscle": "chest",
+    "movementPattern": "push",
+    "equipment": [
+      "barbell",
+      "bench"
+    ],
+    "level": "intermediate",
+    "environment": "gym"
+  },
+  {
+    "id": "dumbbell-bench-press",
+    "nameAr": "بنش بريس دمبل",
+    "nameEn": "Dumbbell Bench Press",
+    "primaryMuscle": "chest",
+    "movementPattern": "push",
+    "equipment": [
+      "dumbbell",
+      "bench"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "incline-dumbbell-press",
+    "nameAr": "بنش مائل دمبل",
+    "nameEn": "Incline Dumbbell Press",
+    "primaryMuscle": "chest",
+    "movementPattern": "push",
+    "equipment": [
+      "dumbbell",
+      "bench"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "chest-press-machine",
+    "nameAr": "جهاز ضغط الصدر",
+    "nameEn": "Chest Press Machine",
+    "primaryMuscle": "chest",
+    "movementPattern": "push",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "iso-lateral-chest-press",
+    "nameAr": "ضغط صدر أيزو-لاترال",
+    "nameEn": "Iso-Lateral Chest Press",
+    "primaryMuscle": "chest",
+    "movementPattern": "push",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "incline-chest-press-machine",
+    "nameAr": "جهاز ضغط صدر علوي",
+    "nameEn": "Incline Chest Press Machine",
+    "primaryMuscle": "chest",
+    "movementPattern": "push",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "iso-lateral-incline-press",
+    "nameAr": "ضغط علوي أيزو-لاترال",
+    "nameEn": "Iso-Lateral Incline Press",
+    "primaryMuscle": "chest",
+    "movementPattern": "push",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "pec-deck-machine",
+    "nameAr": "جهاز فلاي صدر",
+    "nameEn": "Pec Deck Machine",
+    "primaryMuscle": "chest",
+    "movementPattern": "isolation",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "cable-crossover",
+    "nameAr": "تفتيح كيبل",
+    "nameEn": "Cable Crossover",
+    "primaryMuscle": "chest",
+    "movementPattern": "isolation",
+    "equipment": [
+      "cable"
+    ],
+    "level": "intermediate",
+    "environment": "gym"
+  },
+  {
+    "id": "dumbbell-fly",
+    "nameAr": "تفتيح دمبل",
+    "nameEn": "Dumbbell Fly",
+    "primaryMuscle": "chest",
+    "movementPattern": "isolation",
+    "equipment": [
+      "dumbbell",
+      "bench"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "push-up",
+    "nameAr": "ضغط (تمرين الجسم)",
+    "nameEn": "Push-Up",
+    "primaryMuscle": "chest",
+    "movementPattern": "push",
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "beginner",
+    "environment": "both"
+  },
+  {
+    "id": "incline-push-up",
+    "nameAr": "ضغط مائل",
+    "nameEn": "Incline Push-Up",
+    "primaryMuscle": "chest",
+    "movementPattern": "push",
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "beginner",
+    "environment": "home"
+  },
+  {
+    "id": "deadlift",
+    "nameAr": "رفعة ميتة",
+    "nameEn": "Deadlift",
+    "primaryMuscle": "back",
+    "movementPattern": "hinge",
+    "equipment": [
+      "barbell"
+    ],
+    "level": "advanced",
+    "environment": "gym"
+  },
+  {
+    "id": "barbell-row",
+    "nameAr": "تجديف بار",
+    "nameEn": "Barbell Row",
+    "primaryMuscle": "back",
+    "movementPattern": "pull",
+    "equipment": [
+      "barbell"
+    ],
+    "level": "intermediate",
+    "environment": "gym"
+  },
+  {
+    "id": "dumbbell-row",
+    "nameAr": "تجديف دمبل",
+    "nameEn": "Dumbbell Row",
+    "primaryMuscle": "back",
+    "movementPattern": "pull",
+    "equipment": [
+      "dumbbell",
+      "bench"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "lat-pulldown-machine",
+    "nameAr": "جهاز سحب علوي",
+    "nameEn": "Lat Pulldown Machine (Seated/Lever)",
+    "primaryMuscle": "back",
+    "movementPattern": "pull",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "single-arm-lat-pulldown",
+    "nameAr": "سحب علوي بذراع واحدة",
+    "nameEn": "Single-Arm Lat Pulldown",
+    "primaryMuscle": "back",
+    "movementPattern": "pull",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "iso-lateral-pulldown",
+    "nameAr": "سحب أيزو-لاترال",
+    "nameEn": "Iso-Lateral Pulldown",
+    "primaryMuscle": "back",
+    "movementPattern": "pull",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "iso-lateral-high-row",
+    "nameAr": "تجديف عالي أيزو-لاترال",
+    "nameEn": "Iso-Lateral High Row",
+    "primaryMuscle": "back",
+    "movementPattern": "pull",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "wide-grip-iso-lateral-pulldown",
+    "nameAr": "سحب أيزو-لاترال واسع",
+    "nameEn": "Wide-Grip Iso-Lateral Pulldown",
+    "primaryMuscle": "back",
+    "movementPattern": "pull",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "seated-cable-row",
+    "nameAr": "تجديف كيبل جالس",
+    "nameEn": "Seated Cable Row",
+    "primaryMuscle": "back",
+    "movementPattern": "pull",
+    "equipment": [
+      "cable"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "seated-row-machine",
+    "nameAr": "جهاز تجديف جالس",
+    "nameEn": "Seated Row Machine",
+    "primaryMuscle": "back",
+    "movementPattern": "pull",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "chest-supported-row-machine",
+    "nameAr": "تجديف بمسند صدر",
+    "nameEn": "Chest-Supported Row Machine",
+    "primaryMuscle": "back",
+    "movementPattern": "pull",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "t-bar-row-machine",
+    "nameAr": "جهاز تجديف تي-بار",
+    "nameEn": "T-Bar Row Machine",
+    "primaryMuscle": "back",
+    "movementPattern": "pull",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "rear-delt-row-machine",
+    "nameAr": "تجديف كتف خلفي",
+    "nameEn": "Rear Delt Row Machine",
+    "primaryMuscle": "back",
+    "movementPattern": "pull",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "pull-up",
+    "nameAr": "عقلة",
+    "nameEn": "Pull-Up",
+    "primaryMuscle": "back",
+    "movementPattern": "pull",
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "advanced",
+    "environment": "both"
+  },
+  {
+    "id": "chin-up",
+    "nameAr": "عقلة قبضة عكسية",
+    "nameEn": "Chin-Up",
+    "primaryMuscle": "back",
+    "movementPattern": "pull",
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "intermediate",
+    "environment": "both"
+  },
+  {
+    "id": "straight-arm-pulldown",
+    "nameAr": "سحب بذراع ممدودة كيبل",
+    "nameEn": "Straight-Arm Pulldown",
+    "primaryMuscle": "back",
+    "movementPattern": "isolation",
+    "equipment": [
+      "cable"
+    ],
+    "level": "intermediate",
+    "environment": "gym"
+  },
+  {
+    "id": "dumbbell-shrug",
+    "nameAr": "رفرفة الترابيس دمبل",
+    "nameEn": "Dumbbell Shrug",
+    "primaryMuscle": "back",
+    "movementPattern": "isolation",
+    "equipment": [
+      "dumbbell"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "overhead-press",
+    "nameAr": "ضغط كتف بار واقف",
+    "nameEn": "Overhead Press",
+    "primaryMuscle": "shoulders",
+    "movementPattern": "push",
+    "equipment": [
+      "barbell"
+    ],
+    "level": "intermediate",
+    "environment": "gym"
+  },
+  {
+    "id": "dumbbell-shoulder-press",
+    "nameAr": "ضغط كتف دمبل",
+    "nameEn": "Dumbbell Shoulder Press",
+    "primaryMuscle": "shoulders",
+    "movementPattern": "push",
+    "equipment": [
+      "dumbbell"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "shoulder-press-machine",
+    "nameAr": "جهاز ضغط كتف",
+    "nameEn": "Shoulder Press Machine",
+    "primaryMuscle": "shoulders",
+    "movementPattern": "push",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "cable-shoulder-press",
+    "nameAr": "ضغط كتف كيبل",
+    "nameEn": "Cable Shoulder Press",
+    "primaryMuscle": "shoulders",
+    "movementPattern": "push",
+    "equipment": [
+      "cable"
+    ],
+    "level": "intermediate",
+    "environment": "gym"
+  },
+  {
+    "id": "lateral-raise",
+    "nameAr": "رفرفة جانبي دمبل",
+    "nameEn": "Lateral Raise",
+    "primaryMuscle": "shoulders",
+    "movementPattern": "isolation",
+    "equipment": [
+      "dumbbell"
+    ],
+    "level": "beginner",
+    "environment": "both"
+  },
+  {
+    "id": "cable-lateral-raise",
+    "nameAr": "رفرفة جانبي كيبل",
+    "nameEn": "Cable Lateral Raise",
+    "primaryMuscle": "shoulders",
+    "movementPattern": "isolation",
+    "equipment": [
+      "cable"
+    ],
+    "level": "intermediate",
+    "environment": "gym"
+  },
+  {
+    "id": "rear-delt-fly",
+    "nameAr": "رفرفة خلفي دمبل",
+    "nameEn": "Rear Delt Fly",
+    "primaryMuscle": "shoulders",
+    "movementPattern": "isolation",
+    "equipment": [
+      "dumbbell"
+    ],
+    "level": "beginner",
+    "environment": "both"
+  },
+  {
+    "id": "reverse-pec-deck",
+    "nameAr": "بيك دك عكسي",
+    "nameEn": "Reverse Pec Deck",
+    "primaryMuscle": "shoulders",
+    "movementPattern": "isolation",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "front-raise",
+    "nameAr": "رفرفة أمامي دمبل",
+    "nameEn": "Front Raise",
+    "primaryMuscle": "shoulders",
+    "movementPattern": "isolation",
+    "equipment": [
+      "dumbbell"
+    ],
+    "level": "beginner",
+    "environment": "both"
+  },
+  {
+    "id": "face-pull",
+    "nameAr": "سحب للوجه كيبل",
+    "nameEn": "Face Pull",
+    "primaryMuscle": "shoulders",
+    "movementPattern": "pull",
+    "equipment": [
+      "cable"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "barbell-curl",
+    "nameAr": "تمرير بار",
+    "nameEn": "Barbell Curl",
+    "primaryMuscle": "biceps",
+    "movementPattern": "isolation",
+    "equipment": [
+      "barbell"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "dumbbell-curl",
+    "nameAr": "تمرير دمبل",
+    "nameEn": "Dumbbell Curl",
+    "primaryMuscle": "biceps",
+    "movementPattern": "isolation",
+    "equipment": [
+      "dumbbell"
+    ],
+    "level": "beginner",
+    "environment": "both"
+  },
+  {
+    "id": "hammer-curl",
+    "nameAr": "تمرير مطرقة",
+    "nameEn": "Hammer Curl",
+    "primaryMuscle": "biceps",
+    "movementPattern": "isolation",
+    "equipment": [
+      "dumbbell"
+    ],
+    "level": "beginner",
+    "environment": "both"
+  },
+  {
+    "id": "preacher-curl-machine",
+    "nameAr": "جهاز مرجحة بايسبس",
+    "nameEn": "Preacher Curl Machine",
+    "primaryMuscle": "biceps",
+    "movementPattern": "isolation",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "cable-biceps-curl",
+    "nameAr": "مرجحة بايسبس كيبل",
+    "nameEn": "Cable Biceps Curl",
+    "primaryMuscle": "biceps",
+    "movementPattern": "isolation",
+    "equipment": [
+      "cable"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "concentration-curl",
+    "nameAr": "تمرير مركّز",
+    "nameEn": "Concentration Curl",
+    "primaryMuscle": "biceps",
+    "movementPattern": "isolation",
+    "equipment": [
+      "dumbbell"
+    ],
+    "level": "beginner",
+    "environment": "both"
+  },
+  {
+    "id": "cable-triceps-pushdown",
+    "nameAr": "دفع ترايسبس كيبل",
+    "nameEn": "Cable Triceps Pushdown",
+    "primaryMuscle": "triceps",
+    "movementPattern": "isolation",
+    "equipment": [
+      "cable"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "triceps-extension-machine",
+    "nameAr": "جهاز مد ترايسبس",
+    "nameEn": "Triceps Extension Machine",
+    "primaryMuscle": "triceps",
+    "movementPattern": "isolation",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "rope-pushdown",
+    "nameAr": "دفع ترايسبس حبل",
+    "nameEn": "Rope Pushdown",
+    "primaryMuscle": "triceps",
+    "movementPattern": "isolation",
+    "equipment": [
+      "cable"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "overhead-triceps-extension",
+    "nameAr": "تمديد ترايسبس علوي دمبل",
+    "nameEn": "Overhead Triceps Extension",
+    "primaryMuscle": "triceps",
+    "movementPattern": "isolation",
+    "equipment": [
+      "dumbbell"
+    ],
+    "level": "beginner",
+    "environment": "both"
+  },
+  {
+    "id": "skull-crusher",
+    "nameAr": "سكال كراشر",
+    "nameEn": "Skull Crusher",
+    "primaryMuscle": "triceps",
+    "movementPattern": "isolation",
+    "equipment": [
+      "ez-bar",
+      "bench"
+    ],
+    "level": "intermediate",
+    "environment": "gym"
+  },
+  {
+    "id": "close-grip-bench-press",
+    "nameAr": "بنش قبضة ضيقة",
+    "nameEn": "Close-Grip Bench Press",
+    "primaryMuscle": "triceps",
+    "movementPattern": "push",
+    "equipment": [
+      "barbell",
+      "bench"
+    ],
+    "level": "intermediate",
+    "environment": "gym"
+  },
+  {
+    "id": "bench-dip",
+    "nameAr": "غطس على المقعد",
+    "nameEn": "Bench Dip",
+    "primaryMuscle": "triceps",
+    "movementPattern": "push",
+    "equipment": [
+      "bodyweight",
+      "bench"
+    ],
+    "level": "beginner",
+    "environment": "home"
+  },
+  {
+    "id": "barbell-back-squat",
+    "nameAr": "سكوات خلفي بار",
+    "nameEn": "Barbell Back Squat",
+    "primaryMuscle": "quads",
+    "movementPattern": "squat",
+    "equipment": [
+      "barbell"
+    ],
+    "level": "advanced",
+    "environment": "gym"
+  },
+  {
+    "id": "front-squat",
+    "nameAr": "سكوات أمامي",
+    "nameEn": "Front Squat",
+    "primaryMuscle": "quads",
+    "movementPattern": "squat",
+    "equipment": [
+      "barbell"
+    ],
+    "level": "advanced",
+    "environment": "gym"
+  },
+  {
+    "id": "leg-press-machine",
+    "nameAr": "جهاز دفع الأرجل",
+    "nameEn": "Leg Press Machine",
+    "primaryMuscle": "quads",
+    "movementPattern": "squat",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "sissy-squat",
+    "nameAr": "سيسي سكوات",
+    "nameEn": "Sissy Squat",
+    "primaryMuscle": "quads",
+    "movementPattern": "isolation",
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "intermediate",
+    "environment": "both"
+  },
+  {
+    "id": "hack-squat-machine",
+    "nameAr": "هاك سكوات جهاز",
+    "nameEn": "Hack Squat Machine",
+    "primaryMuscle": "quads",
+    "movementPattern": "squat",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "leg-extension-machine",
+    "nameAr": "جهاز مد الأرجل",
+    "nameEn": "Leg Extension Machine",
+    "primaryMuscle": "quads",
+    "movementPattern": "isolation",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "goblet-squat",
+    "nameAr": "سكوات جوبليت دمبل",
+    "nameEn": "Goblet Squat",
+    "primaryMuscle": "quads",
+    "movementPattern": "squat",
+    "equipment": [
+      "dumbbell"
+    ],
+    "level": "beginner",
+    "environment": "both"
+  },
+  {
+    "id": "bulgarian-split-squat",
+    "nameAr": "سكوات بلغاري",
+    "nameEn": "Bulgarian Split Squat",
+    "primaryMuscle": "quads",
+    "movementPattern": "lunge",
+    "equipment": [
+      "dumbbell"
+    ],
+    "level": "intermediate",
+    "environment": "both"
+  },
+  {
+    "id": "walking-lunge",
+    "nameAr": "طعنات مشي",
+    "nameEn": "Walking Lunge",
+    "primaryMuscle": "quads",
+    "movementPattern": "lunge",
+    "equipment": [
+      "dumbbell"
+    ],
+    "level": "beginner",
+    "environment": "both"
+  },
+  {
+    "id": "smith-machine-squat",
+    "nameAr": "سكوات سميث",
+    "nameEn": "Smith Machine Squat",
+    "primaryMuscle": "quads",
+    "movementPattern": "squat",
+    "equipment": [
+      "smith"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "bodyweight-squat",
+    "nameAr": "سكوات وزن الجسم",
+    "nameEn": "Bodyweight Squat",
+    "primaryMuscle": "quads",
+    "movementPattern": "squat",
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "beginner",
+    "environment": "home"
+  },
+  {
+    "id": "step-up",
+    "nameAr": "صعود على منصة",
+    "nameEn": "Step-Up",
+    "primaryMuscle": "quads",
+    "movementPattern": "lunge",
+    "equipment": [
+      "dumbbell",
+      "bodyweight"
+    ],
+    "level": "beginner",
+    "environment": "home"
+  },
+  {
+    "id": "romanian-deadlift",
+    "nameAr": "رفعة رومانية بار",
+    "nameEn": "Romanian Deadlift",
+    "primaryMuscle": "hamstrings",
+    "movementPattern": "hinge",
+    "equipment": [
+      "barbell"
+    ],
+    "level": "intermediate",
+    "environment": "gym"
+  },
+  {
+    "id": "dumbbell-rdl",
+    "nameAr": "رفعة رومانية دمبل",
+    "nameEn": "Dumbbell RDL",
+    "primaryMuscle": "hamstrings",
+    "movementPattern": "hinge",
+    "equipment": [
+      "dumbbell"
+    ],
+    "level": "beginner",
+    "environment": "both"
+  },
+  {
+    "id": "lying-leg-curl",
+    "nameAr": "ثني أرجل مستلقي",
+    "nameEn": "Lying Leg Curl",
+    "primaryMuscle": "hamstrings",
+    "movementPattern": "isolation",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "seated-leg-curl",
+    "nameAr": "ثني أرجل جالس",
+    "nameEn": "Seated Leg Curl",
+    "primaryMuscle": "hamstrings",
+    "movementPattern": "isolation",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "standing-leg-curl",
+    "nameAr": "ثني أرجل واقف",
+    "nameEn": "Standing Leg Curl",
+    "primaryMuscle": "hamstrings",
+    "movementPattern": "isolation",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "good-morning",
+    "nameAr": "غود مورننق بار",
+    "nameEn": "Good Morning",
+    "primaryMuscle": "hamstrings",
+    "movementPattern": "hinge",
+    "equipment": [
+      "barbell"
+    ],
+    "level": "advanced",
+    "environment": "gym"
+  },
+  {
+    "id": "hip-thrust",
+    "nameAr": "دفع الورك بار",
+    "nameEn": "Hip Thrust",
+    "primaryMuscle": "glutes",
+    "movementPattern": "hinge",
+    "equipment": [
+      "barbell",
+      "bench"
+    ],
+    "level": "intermediate",
+    "environment": "gym"
+  },
+  {
+    "id": "glute-bridge",
+    "nameAr": "جسر الجلوت",
+    "nameEn": "Glute Bridge",
+    "primaryMuscle": "glutes",
+    "movementPattern": "hinge",
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "beginner",
+    "environment": "home"
+  },
+  {
+    "id": "cable-kickback",
+    "nameAr": "رفسة كيبل للجلوت",
+    "nameEn": "Cable Kickback",
+    "primaryMuscle": "glutes",
+    "movementPattern": "isolation",
+    "equipment": [
+      "cable"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "sumo-deadlift",
+    "nameAr": "رفعة ميتة سومو",
+    "nameEn": "Sumo Deadlift",
+    "primaryMuscle": "glutes",
+    "movementPattern": "hinge",
+    "equipment": [
+      "barbell"
+    ],
+    "level": "advanced",
+    "environment": "gym"
+  },
+  {
+    "id": "cable-pull-through",
+    "nameAr": "سحب بين الأرجل كيبل",
+    "nameEn": "Cable Pull-Through",
+    "primaryMuscle": "glutes",
+    "movementPattern": "hinge",
+    "equipment": [
+      "cable"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "standing-calf-raise-machine",
+    "nameAr": "رفع بطات واقف",
+    "nameEn": "Standing Calf Raise Machine",
+    "primaryMuscle": "calves",
+    "movementPattern": "isolation",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "seated-calf-raise-machine",
+    "nameAr": "رفع بطات جالس",
+    "nameEn": "Seated Calf Raise Machine",
+    "primaryMuscle": "calves",
+    "movementPattern": "isolation",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "bodyweight-calf-raise",
+    "nameAr": "رفع السمانة وزن الجسم",
+    "nameEn": "Bodyweight Calf Raise",
+    "primaryMuscle": "calves",
+    "movementPattern": "isolation",
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "beginner",
+    "environment": "home"
+  },
+  {
+    "id": "plank",
+    "nameAr": "بلانك",
+    "nameEn": "Plank",
+    "primaryMuscle": "core",
+    "movementPattern": "core",
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "beginner",
+    "environment": "home"
+  },
+  {
+    "id": "side-plank",
+    "nameAr": "بلانك جانبي",
+    "nameEn": "Side Plank",
+    "primaryMuscle": "core",
+    "movementPattern": "core",
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "beginner",
+    "environment": "home"
+  },
+  {
+    "id": "hanging-leg-raise",
+    "nameAr": "رفع الأرجل معلق",
+    "nameEn": "Hanging Leg Raise",
+    "primaryMuscle": "core",
+    "movementPattern": "core",
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "intermediate",
+    "environment": "gym"
+  },
+  {
+    "id": "crunch",
+    "nameAr": "كرنش",
+    "nameEn": "Crunch",
+    "primaryMuscle": "core",
+    "movementPattern": "core",
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "beginner",
+    "environment": "home"
+  },
+  {
+    "id": "russian-twist",
+    "nameAr": "تويست روسي",
+    "nameEn": "Russian Twist",
+    "primaryMuscle": "core",
+    "movementPattern": "core",
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "beginner",
+    "environment": "home"
+  },
+  {
+    "id": "ab-wheel-rollout",
+    "nameAr": "عجلة البطن",
+    "nameEn": "Ab Wheel Rollout",
+    "primaryMuscle": "core",
+    "movementPattern": "core",
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "advanced",
+    "environment": "both"
+  },
+  {
+    "id": "mountain-climber",
+    "nameAr": "تسلق الجبل",
+    "nameEn": "Mountain Climber",
+    "primaryMuscle": "core",
+    "movementPattern": "core",
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "beginner",
+    "environment": "home"
+  },
+  {
+    "id": "treadmill-run",
+    "nameAr": "جري على السير",
+    "nameEn": "Treadmill Run",
+    "primaryMuscle": "cardio",
+    "movementPattern": "cardio",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "stationary-bike",
+    "nameAr": "دراجة ثابتة",
+    "nameEn": "Stationary Bike",
+    "primaryMuscle": "cardio",
+    "movementPattern": "cardio",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "rowing-machine",
+    "nameAr": "جهاز التجديف",
+    "nameEn": "Rowing Machine",
+    "primaryMuscle": "cardio",
+    "movementPattern": "cardio",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "elliptical",
+    "nameAr": "الإليبتيكال",
+    "nameEn": "Elliptical",
+    "primaryMuscle": "cardio",
+    "movementPattern": "cardio",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "jump-rope",
+    "nameAr": "نط الحبل",
+    "nameEn": "Jump Rope",
+    "primaryMuscle": "cardio",
+    "movementPattern": "cardio",
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "beginner",
+    "environment": "home"
+  },
+  {
+    "id": "kettlebell-swing",
+    "nameAr": "أرجحة الكيتل بل",
+    "nameEn": "Kettlebell Swing",
+    "primaryMuscle": "glutes",
+    "movementPattern": "hinge",
+    "equipment": [
+      "kettlebell"
+    ],
+    "level": "intermediate",
+    "environment": "both"
+  },
+  {
+    "id": "decline-barbell-press",
+    "nameAr": "بنش منخفض بار",
+    "nameEn": "Decline Barbell Press",
+    "primaryMuscle": "chest",
+    "movementPattern": "push",
+    "equipment": [
+      "barbell",
+      "bench"
+    ],
+    "level": "intermediate",
+    "environment": "gym"
+  },
+  {
+    "id": "decline-dumbbell-press",
+    "nameAr": "بنش منخفض دمبل",
+    "nameEn": "Decline Dumbbell Press",
+    "primaryMuscle": "chest",
+    "movementPattern": "push",
+    "equipment": [
+      "dumbbell",
+      "bench"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "smith-machine-bench",
+    "nameAr": "بنش سميث",
+    "nameEn": "Smith Machine Bench Press",
+    "primaryMuscle": "chest",
+    "movementPattern": "push",
+    "equipment": [
+      "smith",
+      "bench"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "low-cable-fly",
+    "nameAr": "تفتيح كيبل سفلي",
+    "nameEn": "Low Cable Fly",
+    "primaryMuscle": "chest",
+    "movementPattern": "isolation",
+    "equipment": [
+      "cable"
+    ],
+    "level": "intermediate",
+    "environment": "gym"
+  },
+  {
+    "id": "incline-cable-fly",
+    "nameAr": "تفتيح كيبل مائل",
+    "nameEn": "Incline Cable Fly",
+    "primaryMuscle": "chest",
+    "movementPattern": "isolation",
+    "equipment": [
+      "cable"
+    ],
+    "level": "intermediate",
+    "environment": "gym"
+  },
+  {
+    "id": "chest-dip",
+    "nameAr": "غطس الصدر (متوازي)",
+    "nameEn": "Chest Dip",
+    "primaryMuscle": "chest",
+    "movementPattern": "push",
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "intermediate",
+    "environment": "both"
+  },
+  {
+    "id": "svend-press",
+    "nameAr": "سفيند بريس",
+    "nameEn": "Svend Press",
+    "primaryMuscle": "chest",
+    "movementPattern": "isolation",
+    "equipment": [
+      "plate"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "machine-fly",
+    "nameAr": "تفتيح جهاز",
+    "nameEn": "Machine Fly",
+    "primaryMuscle": "chest",
+    "movementPattern": "isolation",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "knee-push-up",
+    "nameAr": "ضغط على الركبتين",
+    "nameEn": "Knee Push-Up",
+    "primaryMuscle": "chest",
+    "movementPattern": "push",
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "beginner",
+    "environment": "home"
+  },
+  {
+    "id": "pendlay-row",
+    "nameAr": "تجديف بندلاي",
+    "nameEn": "Pendlay Row",
+    "primaryMuscle": "back",
+    "movementPattern": "pull",
+    "equipment": [
+      "barbell"
+    ],
+    "level": "advanced",
+    "environment": "gym"
+  },
+  {
+    "id": "chest-supported-row",
+    "nameAr": "تجديف بإسناد الصدر",
+    "nameEn": "Chest-Supported Row",
+    "primaryMuscle": "back",
+    "movementPattern": "pull",
+    "equipment": [
+      "dumbbell",
+      "bench"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "wide-grip-lat-pulldown",
+    "nameAr": "سحب علوي قبضة واسعة",
+    "nameEn": "Wide-Grip Lat Pulldown",
+    "primaryMuscle": "back",
+    "movementPattern": "pull",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "close-grip-pulldown",
+    "nameAr": "سحب قبضة ضيقة",
+    "nameEn": "Close-Grip Pulldown",
+    "primaryMuscle": "back",
+    "movementPattern": "pull",
+    "equipment": [
+      "cable"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "single-arm-cable-row",
+    "nameAr": "تجديف كيبل بذراع واحدة",
+    "nameEn": "Single-Arm Cable Row",
+    "primaryMuscle": "back",
+    "movementPattern": "pull",
+    "equipment": [
+      "cable"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "inverted-row",
+    "nameAr": "تجديف مقلوب (وزن الجسم)",
+    "nameEn": "Inverted Row",
+    "primaryMuscle": "back",
+    "movementPattern": "pull",
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "beginner",
+    "environment": "both"
+  },
+  {
+    "id": "barbell-shrug",
+    "nameAr": "رفرفة الترابيس بار",
+    "nameEn": "Barbell Shrug",
+    "primaryMuscle": "back",
+    "movementPattern": "isolation",
+    "equipment": [
+      "barbell"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "rack-pull",
+    "nameAr": "راك بل (رفعة من الحامل)",
+    "nameEn": "Rack Pull",
+    "primaryMuscle": "back",
+    "movementPattern": "hinge",
+    "equipment": [
+      "barbell"
+    ],
+    "level": "intermediate",
+    "environment": "gym"
+  },
+  {
+    "id": "meadows-row",
+    "nameAr": "تجديف ميدوز",
+    "nameEn": "Meadows Row",
+    "primaryMuscle": "back",
+    "movementPattern": "pull",
+    "equipment": [
+      "barbell"
+    ],
+    "level": "advanced",
+    "environment": "gym"
+  },
+  {
+    "id": "neutral-grip-pulldown",
+    "nameAr": "سحب قبضة محايدة",
+    "nameEn": "Neutral-Grip Pulldown",
+    "primaryMuscle": "back",
+    "movementPattern": "pull",
+    "equipment": [
+      "cable"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "arnold-press",
+    "nameAr": "ضغط أرنولد",
+    "nameEn": "Arnold Press",
+    "primaryMuscle": "shoulders",
+    "movementPattern": "push",
+    "equipment": [
+      "dumbbell"
+    ],
+    "level": "intermediate",
+    "environment": "gym"
+  },
+  {
+    "id": "seated-dumbbell-press",
+    "nameAr": "ضغط كتف دمبل جالس",
+    "nameEn": "Seated Dumbbell Press",
+    "primaryMuscle": "shoulders",
+    "movementPattern": "push",
+    "equipment": [
+      "dumbbell",
+      "bench"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "push-press",
+    "nameAr": "بوش بريس",
+    "nameEn": "Push Press",
+    "primaryMuscle": "shoulders",
+    "movementPattern": "push",
+    "equipment": [
+      "barbell"
+    ],
+    "level": "advanced",
+    "environment": "gym"
+  },
+  {
+    "id": "upright-row",
+    "nameAr": "تجديف عمودي",
+    "nameEn": "Upright Row",
+    "primaryMuscle": "shoulders",
+    "movementPattern": "pull",
+    "equipment": [
+      "barbell"
+    ],
+    "level": "intermediate",
+    "environment": "gym"
+  },
+  {
+    "id": "lateral-raise-machine",
+    "nameAr": "جهاز رفرفة جانبية",
+    "nameEn": "Lateral Raise Machine",
+    "primaryMuscle": "shoulders",
+    "movementPattern": "isolation",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "seated-lateral-raise",
+    "nameAr": "رفرفة جانبي جالس",
+    "nameEn": "Seated Lateral Raise",
+    "primaryMuscle": "shoulders",
+    "movementPattern": "isolation",
+    "equipment": [
+      "dumbbell",
+      "bench"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "cable-rear-delt-fly",
+    "nameAr": "رفرفة خلفي كيبل",
+    "nameEn": "Cable Rear Delt Fly",
+    "primaryMuscle": "shoulders",
+    "movementPattern": "isolation",
+    "equipment": [
+      "cable"
+    ],
+    "level": "intermediate",
+    "environment": "gym"
+  },
+  {
+    "id": "landmine-press",
+    "nameAr": "ضغط لاندماين",
+    "nameEn": "Landmine Press",
+    "primaryMuscle": "shoulders",
+    "movementPattern": "push",
+    "equipment": [
+      "barbell"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "pike-push-up",
+    "nameAr": "ضغط بايك",
+    "nameEn": "Pike Push-Up",
+    "primaryMuscle": "shoulders",
+    "movementPattern": "push",
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "intermediate",
+    "environment": "home"
+  },
+  {
+    "id": "incline-dumbbell-curl",
+    "nameAr": "تمرير دمبل مائل",
+    "nameEn": "Incline Dumbbell Curl",
+    "primaryMuscle": "biceps",
+    "movementPattern": "isolation",
+    "equipment": [
+      "dumbbell",
+      "bench"
+    ],
+    "level": "intermediate",
+    "environment": "gym"
+  },
+  {
+    "id": "ez-bar-curl",
+    "nameAr": "تمرير بار متعرّج",
+    "nameEn": "EZ-Bar Curl",
+    "primaryMuscle": "biceps",
+    "movementPattern": "isolation",
+    "equipment": [
+      "ez-bar"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "spider-curl",
+    "nameAr": "تمرير سبايدر",
+    "nameEn": "Spider Curl",
+    "primaryMuscle": "biceps",
+    "movementPattern": "isolation",
+    "equipment": [
+      "dumbbell",
+      "bench"
+    ],
+    "level": "intermediate",
+    "environment": "gym"
+  },
+  {
+    "id": "cable-hammer-curl",
+    "nameAr": "تمرير مطرقة كيبل (حبل)",
+    "nameEn": "Cable Hammer Curl",
+    "primaryMuscle": "biceps",
+    "movementPattern": "isolation",
+    "equipment": [
+      "cable"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "reverse-curl",
+    "nameAr": "تمرير عكسي",
+    "nameEn": "Reverse Curl",
+    "primaryMuscle": "biceps",
+    "movementPattern": "isolation",
+    "equipment": [
+      "ez-bar"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "machine-curl",
+    "nameAr": "تمرير جهاز",
+    "nameEn": "Machine Curl",
+    "primaryMuscle": "biceps",
+    "movementPattern": "isolation",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "assisted-dip-machine",
+    "nameAr": "جهاز غطس مساعد",
+    "nameEn": "Assisted Dip Machine",
+    "primaryMuscle": "triceps",
+    "movementPattern": "push",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "single-arm-pushdown",
+    "nameAr": "دفع ترايسبس بذراع واحدة",
+    "nameEn": "Single-Arm Pushdown",
+    "primaryMuscle": "triceps",
+    "movementPattern": "isolation",
+    "equipment": [
+      "cable"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "cable-overhead-extension",
+    "nameAr": "تمديد ترايسبس علوي كيبل",
+    "nameEn": "Cable Overhead Extension",
+    "primaryMuscle": "triceps",
+    "movementPattern": "isolation",
+    "equipment": [
+      "cable"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "dumbbell-kickback",
+    "nameAr": "ركلة ترايسبس دمبل",
+    "nameEn": "Dumbbell Kickback",
+    "primaryMuscle": "triceps",
+    "movementPattern": "isolation",
+    "equipment": [
+      "dumbbell"
+    ],
+    "level": "beginner",
+    "environment": "both"
+  },
+  {
+    "id": "diamond-push-up",
+    "nameAr": "ضغط ماسي",
+    "nameEn": "Diamond Push-Up",
+    "primaryMuscle": "triceps",
+    "movementPattern": "push",
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "intermediate",
+    "environment": "home"
+  },
+  {
+    "id": "jm-press",
+    "nameAr": "جي إم بريس",
+    "nameEn": "JM Press",
+    "primaryMuscle": "triceps",
+    "movementPattern": "push",
+    "equipment": [
+      "barbell",
+      "bench"
+    ],
+    "level": "advanced",
+    "environment": "gym"
+  },
+  {
+    "id": "reverse-lunge",
+    "nameAr": "طعنة خلفية",
+    "nameEn": "Reverse Lunge",
+    "primaryMuscle": "quads",
+    "movementPattern": "lunge",
+    "equipment": [
+      "dumbbell"
+    ],
+    "level": "beginner",
+    "environment": "both"
+  },
+  {
+    "id": "leg-press-narrow",
+    "nameAr": "دفع أرجل قبضة ضيقة",
+    "nameEn": "Narrow-Stance Leg Press",
+    "primaryMuscle": "quads",
+    "movementPattern": "squat",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "belt-squat",
+    "nameAr": "سكوات بالحزام",
+    "nameEn": "Belt Squat",
+    "primaryMuscle": "quads",
+    "movementPattern": "squat",
+    "equipment": [
+      "machine"
+    ],
+    "level": "intermediate",
+    "environment": "gym"
+  },
+  {
+    "id": "wall-sit",
+    "nameAr": "جلسة الحائط",
+    "nameEn": "Wall Sit",
+    "primaryMuscle": "quads",
+    "movementPattern": "squat",
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "beginner",
+    "environment": "home"
+  },
+  {
+    "id": "stiff-leg-deadlift",
+    "nameAr": "رفعة بأرجل مفرودة",
+    "nameEn": "Stiff-Leg Deadlift",
+    "primaryMuscle": "hamstrings",
+    "movementPattern": "hinge",
+    "equipment": [
+      "barbell"
+    ],
+    "level": "intermediate",
+    "environment": "gym"
+  },
+  {
+    "id": "nordic-curl",
+    "nameAr": "نوردك كيرل",
+    "nameEn": "Nordic Hamstring Curl",
+    "primaryMuscle": "hamstrings",
+    "movementPattern": "isolation",
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "advanced",
+    "environment": "both"
+  },
+  {
+    "id": "single-leg-rdl",
+    "nameAr": "رفعة رومانية برجل واحدة",
+    "nameEn": "Single-Leg RDL",
+    "primaryMuscle": "hamstrings",
+    "movementPattern": "hinge",
+    "equipment": [
+      "dumbbell"
+    ],
+    "level": "intermediate",
+    "environment": "both"
+  },
+  {
+    "id": "glute-ham-raise",
+    "nameAr": "رفع الجلوت-هام (GHR)",
+    "nameEn": "Glute-Ham Raise",
+    "primaryMuscle": "hamstrings",
+    "movementPattern": "isolation",
+    "equipment": [
+      "machine"
+    ],
+    "level": "advanced",
+    "environment": "gym"
+  },
+  {
+    "id": "glute-machine",
+    "nameAr": "جهاز الألوية",
+    "nameEn": "Glute Machine",
+    "primaryMuscle": "glutes",
+    "movementPattern": "hinge",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "single-leg-hip-thrust",
+    "nameAr": "دفع الورك برجل واحدة",
+    "nameEn": "Single-Leg Hip Thrust",
+    "primaryMuscle": "glutes",
+    "movementPattern": "hinge",
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "intermediate",
+    "environment": "home"
+  },
+  {
+    "id": "hip-abduction-machine",
+    "nameAr": "جهاز مباعدة الأرجل",
+    "nameEn": "Hip Abduction Machine",
+    "primaryMuscle": "glutes",
+    "movementPattern": "isolation",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "banded-lateral-walk",
+    "nameAr": "مشي جانبي بالمطاط",
+    "nameEn": "Banded Lateral Walk",
+    "primaryMuscle": "glutes",
+    "movementPattern": "isolation",
+    "equipment": [
+      "band"
+    ],
+    "level": "beginner",
+    "environment": "both"
+  },
+  {
+    "id": "frog-pump",
+    "nameAr": "ضخّ الضفدع للجلوت",
+    "nameEn": "Frog Pump",
+    "primaryMuscle": "glutes",
+    "movementPattern": "hinge",
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "beginner",
+    "environment": "home"
+  },
+  {
+    "id": "leg-press-calf-raise",
+    "nameAr": "رفع السمانة على جهاز الدفع",
+    "nameEn": "Leg Press Calf Raise",
+    "primaryMuscle": "calves",
+    "movementPattern": "isolation",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "donkey-calf-raise",
+    "nameAr": "رفع السمانة (دونكي)",
+    "nameEn": "Donkey Calf Raise",
+    "primaryMuscle": "calves",
+    "movementPattern": "isolation",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "single-leg-calf-raise",
+    "nameAr": "رفع السمانة برجل واحدة",
+    "nameEn": "Single-Leg Calf Raise",
+    "primaryMuscle": "calves",
+    "movementPattern": "isolation",
+    "equipment": [
+      "dumbbell",
+      "bodyweight"
+    ],
+    "level": "beginner",
+    "environment": "both"
+  },
+  {
+    "id": "leg-raise",
+    "nameAr": "رفع الأرجل مستلقي",
+    "nameEn": "Lying Leg Raise",
+    "primaryMuscle": "core",
+    "movementPattern": "core",
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "beginner",
+    "environment": "home"
+  },
+  {
+    "id": "bicycle-crunch",
+    "nameAr": "كرنش الدراجة",
+    "nameEn": "Bicycle Crunch",
+    "primaryMuscle": "core",
+    "movementPattern": "core",
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "beginner",
+    "environment": "home"
+  },
+  {
+    "id": "dead-bug",
+    "nameAr": "الحشرة الميتة",
+    "nameEn": "Dead Bug",
+    "primaryMuscle": "core",
+    "movementPattern": "core",
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "beginner",
+    "environment": "home"
+  },
+  {
+    "id": "hollow-hold",
+    "nameAr": "ثبات الجسم المقعّر",
+    "nameEn": "Hollow Body Hold",
+    "primaryMuscle": "core",
+    "movementPattern": "core",
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "intermediate",
+    "environment": "home"
+  },
+  {
+    "id": "cable-woodchop",
+    "nameAr": "قطع الخشب كيبل",
+    "nameEn": "Cable Woodchop",
+    "primaryMuscle": "core",
+    "movementPattern": "core",
+    "equipment": [
+      "cable"
+    ],
+    "level": "intermediate",
+    "environment": "gym"
+  },
+  {
+    "id": "ab-crunch-machine",
+    "nameAr": "جهاز طحن البطن",
+    "nameEn": "Ab Crunch Machine",
+    "primaryMuscle": "core",
+    "movementPattern": "core",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "toes-to-bar",
+    "nameAr": "أصابع للبار",
+    "nameEn": "Toes to Bar",
+    "primaryMuscle": "core",
+    "movementPattern": "core",
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "advanced",
+    "environment": "gym"
+  },
+  {
+    "id": "pallof-press",
+    "nameAr": "ضغط بالوف (مقاومة دوران)",
+    "nameEn": "Pallof Press",
+    "primaryMuscle": "core",
+    "movementPattern": "core",
+    "equipment": [
+      "cable",
+      "band"
+    ],
+    "level": "beginner",
+    "environment": "both"
+  },
+  {
+    "id": "flutter-kicks",
+    "nameAr": "رفرفة الأرجل",
+    "nameEn": "Flutter Kicks",
+    "primaryMuscle": "core",
+    "movementPattern": "core",
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "beginner",
+    "environment": "home"
+  },
+  {
+    "id": "incline-treadmill-walk",
+    "nameAr": "مشي مائل على السير",
+    "nameEn": "Incline Treadmill Walk",
+    "primaryMuscle": "cardio",
+    "movementPattern": "cardio",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "stairmaster",
+    "nameAr": "جهاز الدرج (ستيرماستر)",
+    "nameEn": "Stairmaster",
+    "primaryMuscle": "cardio",
+    "movementPattern": "cardio",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "burpees",
+    "nameAr": "بيربي",
+    "nameEn": "Burpees",
+    "primaryMuscle": "cardio",
+    "movementPattern": "cardio",
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "intermediate",
+    "environment": "home"
+  },
+  {
+    "id": "high-knees",
+    "nameAr": "رفع الركب (جري ثابت)",
+    "nameEn": "High Knees",
+    "primaryMuscle": "cardio",
+    "movementPattern": "cardio",
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "beginner",
+    "environment": "home"
+  },
+  {
+    "id": "battle-ropes",
+    "nameAr": "حبال القتال",
+    "nameEn": "Battle Ropes",
+    "primaryMuscle": "cardio",
+    "movementPattern": "cardio",
+    "equipment": [
+      "rope"
+    ],
+    "level": "intermediate",
+    "environment": "gym"
+  },
+  {
+    "id": "assault-bike",
+    "nameAr": "الدراجة الهوائية (أسولت)",
+    "nameEn": "Assault Bike",
+    "primaryMuscle": "cardio",
+    "movementPattern": "cardio",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "outdoor-walk",
+    "nameAr": "مشي خارجي",
+    "nameEn": "Outdoor Walk",
+    "primaryMuscle": "cardio",
+    "movementPattern": "cardio",
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "beginner",
+    "environment": "home"
+  },
+  {
+    "id": "arm-circles",
+    "nameAr": "تدوير الذراعين (إحماء)",
+    "nameEn": "Arm Circles",
+    "primaryMuscle": "shoulders",
+    "movementPattern": "mobility",
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "beginner",
+    "environment": "both"
+  },
+  {
+    "id": "cat-cow",
+    "nameAr": "تمدّد القطة-البقرة",
+    "nameEn": "Cat-Cow Stretch",
+    "primaryMuscle": "back",
+    "movementPattern": "mobility",
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "beginner",
+    "environment": "home"
+  },
+  {
+    "id": "hip-flexor-stretch",
+    "nameAr": "تمدّد عضلة الورك القابضة",
+    "nameEn": "Hip Flexor Stretch",
+    "primaryMuscle": "quads",
+    "movementPattern": "mobility",
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "beginner",
+    "environment": "both"
+  },
+  {
+    "id": "world-greatest-stretch",
+    "nameAr": "أعظم تمدّد (World’s Greatest)",
+    "nameEn": "World’s Greatest Stretch",
+    "primaryMuscle": "hamstrings",
+    "movementPattern": "mobility",
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "beginner",
+    "environment": "both"
+  },
+  {
+    "id": "leg-swings",
+    "nameAr": "أرجحة الأرجل (إحماء)",
+    "nameEn": "Leg Swings",
+    "primaryMuscle": "hamstrings",
+    "movementPattern": "mobility",
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "beginner",
+    "environment": "both"
+  },
+  {
+    "id": "shoulder-dislocates",
+    "nameAr": "مرونة الكتف بالعصا/المطاط",
+    "nameEn": "Shoulder Dislocates",
+    "primaryMuscle": "shoulders",
+    "movementPattern": "mobility",
+    "equipment": [
+      "band"
+    ],
+    "level": "beginner",
+    "environment": "both"
+  },
+  {
+    "id": "thoracic-rotation",
+    "nameAr": "تدوير الفقرات الصدرية",
+    "nameEn": "Thoracic Rotation",
+    "primaryMuscle": "back",
+    "movementPattern": "mobility",
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "beginner",
+    "environment": "home"
+  },
+  {
+    "id": "ankle-mobility",
+    "nameAr": "مرونة الكاحل",
+    "nameEn": "Ankle Mobility Drill",
+    "primaryMuscle": "calves",
+    "movementPattern": "mobility",
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "beginner",
+    "environment": "both"
+  },
+  {
+    "id": "hamstring-stretch",
+    "nameAr": "تمدّد الهامسترنج",
+    "nameEn": "Standing Hamstring Stretch",
+    "primaryMuscle": "hamstrings",
+    "movementPattern": "mobility",
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "beginner",
+    "environment": "both"
+  },
+  {
+    "id": "child-pose",
+    "nameAr": "وضعية الطفل (استرخاء)",
+    "nameEn": "Child’s Pose",
+    "primaryMuscle": "back",
+    "movementPattern": "mobility",
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "beginner",
+    "environment": "home"
+  },
+  {
+    "id": "decline-chest-press-machine",
+    "nameAr": "جهاز ضغط صدر سفلي",
+    "nameEn": "Decline Chest Press Machine",
+    "primaryMuscle": "chest",
+    "movementPattern": "push",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "machine-rdl",
+    "nameAr": "الرفعة الرومانية بالجهاز",
+    "nameEn": "RDL Machine",
+    "primaryMuscle": "hamstrings",
+    "movementPattern": "hinge",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "glute-kickback-machine",
+    "nameAr": "جهاز ركل خلفي",
+    "nameEn": "Glute Kickback Machine",
+    "primaryMuscle": "glutes",
+    "movementPattern": "isolation",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "standing-hip-extension-machine",
+    "nameAr": "مد ورك واقف",
+    "nameEn": "Standing Hip Extension Machine",
+    "primaryMuscle": "glutes",
+    "movementPattern": "isolation",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "hip-adductor-machine",
+    "nameAr": "جهاز ضم الفخذ",
+    "nameEn": "Hip Adductor Machine",
+    "primaryMuscle": "glutes",
+    "movementPattern": "isolation",
+    "equipment": [
+      "machine"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  },
+  {
+    "id": "dumbbell-sumo-squat",
+    "nameAr": "سكوات سومو دمبل",
+    "nameEn": "Dumbbell Sumo Squat",
+    "primaryMuscle": "quads",
+    "movementPattern": "squat",
+    "equipment": [
+      "dumbbell"
+    ],
+    "level": "beginner",
+    "environment": "both"
+  },
+  {
+    "id": "cable-hip-adduction",
+    "nameAr": "ضم الفخذ كيبل",
+    "nameEn": "Cable Hip Adduction",
+    "primaryMuscle": "glutes",
+    "movementPattern": "isolation",
+    "equipment": [
+      "cable"
+    ],
+    "level": "beginner",
+    "environment": "gym"
+  }
+]
