@@ -12,6 +12,8 @@ import {
   type SummaryRow,
   type WeightDetail,
 } from '@/lib/progressV2Model'
+import { buildWeeklyInsights } from '@/lib/insights'
+import { InsightCardsView } from '@/lib/insights/InsightCardsView'
 
 interface ProgressV2Props {
   lang: Lang
@@ -40,6 +42,10 @@ export function ProgressV2({ lang, onNavigate }: ProgressV2Props) {
   const ar = lang !== 'en'
   const t = (a: string, e: string) => (ar ? a : e)
   const model = useMemo(() => buildProgressV2Model(customization, lang), [customization, lang])
+  // محرّك الرؤى الأسبوعية (رؤى مُحوَّطة فوق المتاجر الحقيقية) — يقود قسم الملخّص.
+  // نُبقي customization في التبعيات لإعادة الحساب عند أي تغيّر في بيانات المستخدم.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const insights = useMemo(() => buildWeeklyInsights(ar ? 'ar' : 'en'), [ar, customization])
   const [screen, setScreen] = useState<ProgressScreen>('home')
   const go = (r: AppRoute) => onNavigate?.(r)
 
@@ -66,6 +72,10 @@ export function ProgressV2({ lang, onNavigate }: ProgressV2Props) {
           </div>
           <div className="mt-4 space-y-3">
             {model.summary.map((row) => <BriefRow key={row.key} row={row} />)}
+          </div>
+          {/* رؤى الأسبوع — بطاقات المحرّك المُحوَّطة (فعل + وجهة، أو «نحتاج المزيد»). */}
+          <div className="mt-4 border-t border-line pt-4">
+            <InsightCardsView cards={insights.cards} lang={ar ? 'ar' : 'en'} onNavigate={go} title={t('رؤى الأسبوع', 'This week’s insights')} />
           </div>
           {model.stale.show && (
             <button type="button" onClick={() => setScreen('weight')} className="mt-4 flex w-full items-center justify-between gap-2 border-t border-line pt-3 text-start">

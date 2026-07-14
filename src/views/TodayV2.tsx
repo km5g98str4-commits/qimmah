@@ -5,6 +5,8 @@ import type { Lang } from '@/lib/appPreferences'
 import type { AppRoute } from '@/lib/appRoutes'
 import { useCustomization } from '@/lib/customizationContext'
 import { buildTodayV2Model, type TodayCard, type TodayPillar } from '@/lib/todayV2Model'
+import { buildWeeklyInsights } from '@/lib/insights'
+import { InsightCardsView } from '@/lib/insights/InsightCardsView'
 
 interface TodayV2Props {
   lang: Lang
@@ -31,6 +33,10 @@ export function TodayV2({ lang, onNavigate }: TodayV2Props) {
   const { customization } = useCustomization()
   const ar = lang !== 'en'
   const model = useMemo(() => buildTodayV2Model(customization, lang), [customization, lang])
+  // رؤى الأسبوع — أعلى رؤية واحدة (سطح خفيف على «اليوم»).
+  // نُبقي customization في التبعيات لإعادة الحساب عند تغيّر بيانات المستخدم.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const insights = useMemo(() => buildWeeklyInsights(ar ? 'ar' : 'en'), [ar, customization])
   const go = (dest: AppRoute | null) => dest && onNavigate(dest)
 
   return (
@@ -86,6 +92,9 @@ export function TodayV2({ lang, onNavigate }: TodayV2Props) {
             ))}
           </ul>
         </section>
+
+        {/* رؤى الأسبوع — بطاقة واحدة خفيفة من محرّك الرؤى (رؤية مُحوَّطة أو «نحتاج المزيد»). */}
+        <InsightCardsView cards={insights.cards} lang={ar ? 'ar' : 'en'} onNavigate={onNavigate} title={ar ? 'رؤى الأسبوع' : 'This week'} max={1} />
 
         {/* Cards — setup guides (new user) or actionable nudges; each verb + destination. */}
         {model.cards.length > 0 && (
