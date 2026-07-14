@@ -68,7 +68,7 @@ const ar: NutritionScreenStrings = {
   foodNameExample: 'مثال: صحن كبسة بيت',
   ingredientLibraryTitle: 'مكتبة المكونات',
   close: 'إغلاق',
-  noResultsDot: 'ما فيه نتائج.',
+  noResultsDot: 'لا توجد نتائج.',
   add: 'أضف',
   catAll: 'كل الأصناف',
   catProtein: 'بروتين',
@@ -95,7 +95,7 @@ const ar: NutritionScreenStrings = {
   scanTorch: 'الفلاش',
   scanNoCamera: 'ما لقينا كاميرا في هذا الجهاز — أضف المنتج يدويًا.',
   scanErrorGeneric: 'صار خطأ غير متوقّع أثناء المسح. حاول مرة ثانية أو أضف المنتج يدويًا.',
-  scanNetworkErrorTitle: 'ما فيه اتصال',
+  scanNetworkErrorTitle: 'لا يوجد اتصال',
   scanNetworkErrorHint: 'قرينا الباركود لكن تعذّر الوصول لقاعدة بيانات المنتجات. تحقّق من اتصالك وحاول مرة ثانية، أو أضف المنتج يدويًا.',
   scanRetry: 'حاول مرة ثانية',
 }

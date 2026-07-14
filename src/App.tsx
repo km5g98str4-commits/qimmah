@@ -52,7 +52,6 @@ import { SuccessToast } from '@/components/SuccessToast'
 import { AchievementToaster } from '@/features/achievements/AchievementToaster'
 import { BUILD_LABEL } from '@/lib/buildInfo'
 import { track } from '@/lib/analytics'
-import { syncWorkoutReminder } from '@/lib/reminders'
 
 /**
  * حراسة المسار: التبويبات الرئيسية لا تُفتح أبدًا قبل إكمال إعداد حقيقي **لهذا الحساب**
@@ -123,16 +122,26 @@ export default function App() {
     track('app_opened', {})
   }, [])
 
-  // مزامنة تذكير التمرين المحلي (iOS الأصلي فقط؛ لا شيء على الويب) عند الإقلاع
-  // والاستئناف — فيطابق الجدول التفضيل الحالي واللغة الحالية بعد كل عودة للتطبيق.
+  // جدولة إشعارات iOS من مالك الجلسة الحالي فقط. كل مصالحة تلغي معرّفات قِمّة
+  // أولًا؛ الاستعادة/الخروج/تبديل الحساب لا يمكن أن يترك جدول المالك السابق.
   useEffect(() => {
-    void syncWorkoutReminder()
+    if (auth.loading) return
+    let active = true
+    const reconcile = () => {
+      void import('@/lib/notifications').then(({ reconcileNotificationSchedule }) => {
+        if (active) void reconcileNotificationSchedule(uid, auth.recoveryActive, LANG)
+      }).catch(() => { /* Native reminders are optional; app startup must continue. */ })
+    }
+    reconcile()
     const onVisible = () => {
-      if (document.visibilityState === 'visible') void syncWorkoutReminder()
+      if (document.visibilityState === 'visible') reconcile()
     }
     document.addEventListener('visibilitychange', onVisible)
-    return () => document.removeEventListener('visibilitychange', onVisible)
-  }, [])
+    return () => {
+      active = false
+      document.removeEventListener('visibilitychange', onVisible)
+    }
+  }, [auth.loading, auth.recoveryActive, uid, LANG])
 
   const [view, setView] = useState<AppRoute>(() => initialRoute(auth.user?.id ?? null))
   // حِزم الشاشات الكسولة — تُستبدل بنسخة جديدة عند «أعد المحاولة» بعد فشل تحميل حزمة.

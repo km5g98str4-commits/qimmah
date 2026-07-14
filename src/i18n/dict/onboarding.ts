@@ -808,7 +808,7 @@ const ar: OnboardingStrings = {
   basicsUserType: 'نوعك',
 
   goalStepTitle: 'هدفي الحالي',
-  goalStepDescription: 'اكتب هدف واحد واضح تشتغل عليه. هذا اللي بيظهر كبير في صفحتك ويذكّرك كل يوم.',
+  goalStepDescription: 'اكتب هدفًا واحدًا واضحًا تعمل عليه. سيظهر بوضوح في صفحتك ويذكّرك كل يوم.',
   goalStepLabel: 'هدفك',
   goalStepHint: 'جملة بسيطة بلغتك أنت',
   goalStepPlaceholder: 'مثال: أوصل وزن 78 كجم وأبني عضلاتي خلال 3 أشهر',

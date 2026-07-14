@@ -53,7 +53,7 @@ const ar: WellnessScreenStrings = {
   commitmentLibraryTitle: 'مكتبة الالتزامات',
   close: 'إغلاق',
   add: 'أضف',
-  noResults: 'ما فيه نتائج.',
+  noResults: 'لا توجد نتائج.',
   allCategories: 'كل الفئات',
   supCatProtein: 'بروتين',
   supCatPerformance: 'أداء',

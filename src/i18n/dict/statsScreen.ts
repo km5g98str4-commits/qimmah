@@ -81,16 +81,16 @@ const ar: StatsScreenStrings = {
   ofTargetSuffix: 'من الهدف',
   trackedDaysPrefix: 'محسوب من',
   trackedDaysSuffix: 'أيام مسجّلة خلال آخر ٧ أيام',
-  nutritionEmptyTitle: 'ما فيه وجبات مسجّلة خلال آخر ٧ أيام.',
-  nutritionEmptyBody: 'علّم وجباتك المنجزة في تبويب التغذية وبيظهر متوسطك هنا.',
+  nutritionEmptyTitle: 'لا توجد وجبات مسجّلة خلال آخر ٧ أيام.',
+  nutritionEmptyBody: 'علّم وجباتك المنجزة في تبويب التغذية، وسيظهر متوسطك هنا.',
 
   weightTitle: 'مؤشّر وزنك',
   latestWeightLabel: 'آخر قياس',
   changeLabel: 'التغيّر خلال الفترة',
   weightUnit: 'كجم',
-  onePointNote: 'سجّل قياسًا ثانيًا وبيظهر خط الاتجاه هنا.',
-  weightEmptyTitle: 'ما فيه قياسات وزن بعد.',
-  weightEmptyBody: 'أضف قياس وزنك من تبويب التقدّم وبيظهر مؤشّره هنا.',
+  onePointNote: 'سجّل قياسًا ثانيًا، وسيظهر خط الاتجاه هنا.',
+  weightEmptyTitle: 'لا توجد قياسات وزن بعد.',
+  weightEmptyBody: 'أضف قياس وزنك من تبويب التقدّم، وسيظهر مؤشّره هنا.',
   chartAria: 'رسم مصغّر لاتجاه الوزن عبر آخر القياسات',
 }
 

@@ -160,7 +160,7 @@ export function buildProfileV2Model(customization: Customization, auth: AuthSumm
     privacy: {
       analyticsAnonymousEnabled: true, // anonymous, consent-based (existing disclosure)
       healthSharingAvailable: false, // no HealthKit integration yet — honest
-      dataExportAvailable: false, // no export built yet — honest disabled
+      dataExportAvailable: true,
       deleteAccountAvailable: true, // routes to the existing safe Settings flow
     },
     settings: {

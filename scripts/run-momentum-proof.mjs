@@ -65,6 +65,13 @@ async function openProfilePrivacy(page) {
   await page.getByRole('heading', { name: 'الخصوصية والبيانات' }).waitFor()
 }
 
+async function openProfileNotifications(page) {
+  await openSurface(page, 'profile')
+  await page.getByRole('button', { name: 'الإعدادات والخصوصية', exact: true }).click()
+  await page.getByRole('button', { name: /^التذكيرات/ }).click()
+  await page.getByRole('heading', { name: 'التذكيرات', level: 1 }).waitFor()
+}
+
 function ratio(lighter, darker) {
   return (lighter + 0.05) / (darker + 0.05)
 }
@@ -133,6 +140,30 @@ try {
     if (audit.overflow > 1) failures.push(`privacy-${width}: horizontal overflow ${audit.overflow}px`)
     if (consoleErrors.length) failures.push(`privacy-${width}: console ${consoleErrors.join(' | ')}`)
     await page.screenshot({ path: `${OUT}/privacy-${width}.png`, fullPage: true })
+    await context.close()
+  }
+
+  // Notification settings: unsupported web state remains honest, labelled,
+  // keyboard-semantic, and overflow-free; native behavior is proven separately.
+  for (const width of widths) {
+    const context = await browser.newContext({ viewport: { width, height: heights[width] }, locale: 'ar-SA' })
+    const page = await context.newPage()
+    const consoleErrors = []
+    page.on('console', (message) => message.type() === 'error' && consoleErrors.push(message.text()))
+    page.on('pageerror', (error) => consoleErrors.push(String(error)))
+    await openProfileNotifications(page)
+    await page.waitForTimeout(700)
+    const audit = await page.evaluate(() => ({
+      dir: document.documentElement.dir,
+      overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    }))
+    if (audit.dir !== 'rtl') failures.push(`notifications-${width}: dir=${audit.dir}`)
+    if (audit.overflow > 1) failures.push(`notifications-${width}: horizontal overflow ${audit.overflow}px`)
+    if (consoleErrors.length) failures.push(`notifications-${width}: console ${consoleErrors.join(' | ')}`)
+    const master = page.getByRole('switch', { name: /تفعيل تذكيرات قِمّة/ })
+    if (!(await master.isDisabled())) failures.push(`notifications-${width}: web master switch should be honestly disabled`)
+    if (!(await page.getByText(/متاحة داخل تطبيق قِمّة على iPhone/).count())) failures.push(`notifications-${width}: missing unsupported explanation`)
+    await page.screenshot({ path: `${OUT}/notifications-${width}.png`, fullPage: true })
     await context.close()
   }
 
@@ -259,6 +290,6 @@ if (failures.length) {
   console.error(failures.map((failure) => `FAIL ${failure}`).join('\n'))
   process.exitCode = 1
 } else {
-  console.log(`PASS ${surfaces.length * widths.length + widths.length} RTL screenshots, zero console errors, no horizontal overflow`)
+  console.log(`PASS ${surfaces.length * widths.length + widths.length * 2} RTL screenshots, zero console errors, no horizontal overflow`)
   console.log('PASS reduced-motion fallbacks and WCAG AA token contrast')
 }

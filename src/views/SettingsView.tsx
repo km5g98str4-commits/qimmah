@@ -18,6 +18,7 @@ import { getConsent, setConsent } from '@/lib/analytics'
 import { generatePlan } from '@/lib/planGenerator'
 import { markPendingSync } from '@/lib/syncService'
 import { BUILD_LABEL } from '@/lib/buildInfo'
+import { NotificationSettingsPanel } from '@/components/NotificationSettingsPanel'
 
 const EXPORT_VERSION = 2
 
@@ -349,7 +350,12 @@ export function SettingsView({
           </div>
         </SettingsGroup>
 
-        {/* 4) الخصوصية والثقة */}
+        {/* 4) التذكيرات المحلية — نفس المحرّك المالكـي الذي يستخدمه سطح v2. */}
+        <SettingsGroup icon="Bell" title={lang === 'ar' ? 'التذكيرات' : 'Reminders'}>
+          <NotificationSettingsPanel lang={lang} />
+        </SettingsGroup>
+
+        {/* 5) الخصوصية والثقة */}
         <SettingsGroup icon="ShieldCheck" title={t.settings.groupPrivacy}>
           <div className="flex flex-wrap gap-2">
             <button type="button" onClick={onOpenPrivacy} className="btn-ghost px-4 py-2.5 text-sm">
@@ -384,10 +390,10 @@ export function SettingsView({
           </p>
         </SettingsGroup>
 
-        {/* 5) التطبيق والتنبيهات — تثبيت PWA + إذن التنبيهات (نسخة صادقة، حدود آيفون واضحة) */}
+        {/* 6) التطبيق والتنبيهات — تثبيت PWA + حالة إمكانات الجهاز */}
         <DeviceSettings lang={lang} />
 
-        {/* 5.1) دليل «ثبّت التطبيق» — خطوات مكتوبة لكل منصّة (المكتشفة أولًا)، بلا صور خارجية. */}
+        {/* 6.1) دليل «ثبّت التطبيق» — خطوات مكتوبة لكل منصّة (المكتشفة أولًا)، بلا صور خارجية. */}
         <InstallGuideSection lang={lang} />
 
         {/* 6) أدوات داخلية — مراجعة المنتجات. أداة طاقم داخلية فقط: مُقصاة تمامًا من حزمة

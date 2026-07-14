@@ -33,7 +33,11 @@
 **هـ) الكاميرا:** تُستخدم **فقط** لمسح باركود المنتجات الغذائية. تُعالَج الصورة على الجهاز لقراءة الرمز، ولا
 تُخزَّن ولا تُرسَل صور.
 
-**و) تشخيص اختياري:** التطبيق **لا يجمع** بيانات استخدام افتراضيًا. عند تفعيله من قِبل المالك فقط، تُرسل أحداث
+**و) التنبيهات الاختيارية:** يمكنك تفعيل تنبيهات محلية للتمرين والراحة والماء والملخّص الأسبوعي والمكمّلات.
+تُحفظ أوقاتها وفترة الهدوء على جهازك، ولا تُرسل إلى خادم. لا يطلب التطبيق إذن الإشعارات إلا عند تفعيلك لها،
+ويستخدم نصًا عامًا على شاشة القفل دون أسماء أدوية أو مكمّلات أو تفاصيل صحية.
+
+**ز) تشخيص اختياري:** التطبيق **لا يجمع** بيانات استخدام افتراضيًا. عند تفعيله من قِبل المالك فقط، تُرسل أحداث
 مجهولة (أعداد وأحداث بلا أي معرّف: لا بريد، لا اسم، لا رقم باركود) بمعرّف عشوائي غير مرتبط بحسابك، وبموافقتك.
 
 ### 3. ما لا نفعله
@@ -111,7 +115,10 @@ and tailor your plan.
 **d) Daily logs:** nutrition/calorie logs, water, steps (entered manually — **we do not read Apple Health**),
 achievements, custom plans, and tasks are local-first and may sync to your account when sync is enabled.
 **e) Camera:** used **only** to scan food barcodes. Frames are decoded on-device; no images are stored or sent.
-**f) Optional diagnostics:** the app collects **no** usage data by default. Only if enabled by the owner,
+**f) Optional notifications:** you can enable local workout/rest, water, weekly-summary, and supplement reminders.
+Times and quiet hours remain on your device and are not sent to a server. Permission is requested only when you
+enable reminders, and lock-screen copy is generic—never medication/supplement names or health details.
+**g) Optional diagnostics:** the app collects **no** usage data by default. Only if enabled by the owner,
 anonymous events (counts/enums with **no** email, name, or barcode value) are sent under a random identifier
 unlinked to your account, with your consent.
 

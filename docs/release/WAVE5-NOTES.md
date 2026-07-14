@@ -1,6 +1,6 @@
 # Wave 5 — Integration Notes
 
-Status: **partial trunk, blocked on four missing system branches and one missing proof branch.** Nothing below labels absent work green.
+Status: **partial trunk, blocked on three missing system branches and one missing proof branch.** Nothing below labels absent work green.
 
 ## Integration status
 
@@ -14,7 +14,7 @@ Status: **partial trunk, blocked on four missing system branches and one missing
 | `integration/wave4 @ d2b6bd5` | Reconciled + gated | v2 is baked into the production build when `VITE_DESIGN_V2=true`. |
 | `feat/arabic-coach-content @ 871d20c` | Integrated + gated | Arabic exercise cues, 40 lessons, and contextual rest tips. |
 | PDF §05 progress follow-up | Integrated + gated | Weight logging now persists through the sync-ready history path; hydrated measurements and real PR events feed Progress/Profile. |
-| `feat/notifications-engine` | Blocked: no origin tip | No notification system claimed or exposed by this integration. |
+| Notifications (commander fix-forward) | Integrated + gated | Five opt-in native iOS reminder types, owner-scoped preferences, plan-aware workout/rest days, and quiet hours. Lock-screen copy is deliberately generic. |
 | `feat/insights-engine` | Blocked: no origin tip | No insights system claimed or exposed by this integration. |
 | `feat/plates-and-prs` | Blocked: no origin tip | No plates/PR system claimed or exposed by this integration. |
 | Data-access export (commander fix-forward) | Integrated + gated | Profile privacy exports an owner-guarded JSON copy of on-device data; recovery sessions are blocked and auth/sync secrets are excluded. Import/restore remains out of scope. |
@@ -22,8 +22,8 @@ Status: **partial trunk, blocked on four missing system branches and one missing
 
 ## Release blockers / tracked debt
 
-1. Push immutable, proof-bearing tips for the four missing systems, then run the standards/security court and full per-merge gate for each.
-2. Notifications must cancel the prior owner's native schedules on sign-out and account switch before acceptance.
+1. Push immutable, proof-bearing tips for the three missing systems, then run the standards/security court and full per-merge gate for each.
+2. Validate notification timing and permission UX on the owner's physical iPhone before public release; browser and simulator gates cannot prove real delivery timing.
 3. Insights must remove raw-hex fallbacks from its v2 card before acceptance.
 4. Replace legal `[OWNER-EMAIL]`/jurisdiction placeholders and obtain legal sign-off before public release.
 5. Run credentialed auth E2E, production Supabase/RLS verification, universal-link, and physical-device checks with owner-held credentials/device.
@@ -37,7 +37,7 @@ Status: **partial trunk, blocked on four missing system branches and one missing
 - The weight CTA opens a real validated logger, writes through `historyStore`, redraws immediately, and exposes icon + text errors accessibly.
 - Profile counts earned PR events from the achievements engine instead of counting exercise baselines.
 - Today keeps the approved command-center hierarchy by collapsing the optional coaching lesson until requested.
-- Browser proof: 27 RTL screenshots at 320/768/1280, including the privacy/export surface, with zero console errors/overflow, reduced-motion fallbacks, and AA token contrast.
+- Browser proof: 30 RTL screenshots at 320/768/1280, including the privacy/export and notification surfaces, with zero console errors/overflow, reduced-motion fallbacks, and AA token contrast.
 - Native proof: `npx cap sync ios` and the generic iOS Simulator `xcodebuild` both succeed for `com.qimmah.mobile`.
 
 ## Data-access export evidence
@@ -45,3 +45,10 @@ Status: **partial trunk, blocked on four missing system branches and one missing
 - Export is built from an explicit allowlist; it omits auth tokens, sync queues/backups/meta, analytics identifiers, caches, and other owners' registries.
 - Account-scope mismatch and password-recovery sessions fail closed; the JSON payload is capped at 10 MB.
 - `test:data-portability` covers 12 deterministic security/schema cases; browser proof covers real download, icon + text errors, and RTL screenshots at 320/768/1280.
+
+## Notification evidence
+
+- The master switch defaults off and is the only path that requests native permission; web presents an honest unavailable state.
+- Every preference key carries the current owner id. Reconciliation rejects owner mismatch and password recovery, and cancels all known Qimmah schedules before sign-out/account change.
+- Five reminder families use deterministic ids and quiet-hours-aware scheduling; the workout/rest week comes from the saved plan rather than a second plan model.
+- `test:notifications` covers 30 deterministic scheduling, privacy, owner, recovery, race, migration, and cancellation cases; the shared browser proof covers 320/768/1280 RTL.

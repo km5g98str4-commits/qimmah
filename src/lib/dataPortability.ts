@@ -8,7 +8,7 @@ import { exportHistory, type HistorySnapshot } from '@/lib/historyStore'
 import { loadNutritionDay } from '@/lib/nutritionV2Model'
 import { loadNutritionToday } from '@/lib/nutritionTracking'
 import { loadOnboardingProfile } from '@/lib/onboardingProfile'
-import { loadReminderPrefs } from '@/lib/reminderPrefs'
+import { loadNotificationPrefs } from '@/lib/notifications/prefs'
 import { getStepSource, loadStepGoal, loadStepLog } from '@/lib/stepCounter'
 import { loadToday } from '@/lib/today'
 import { loadWellnessToday } from '@/lib/wellnessTracking'
@@ -50,7 +50,7 @@ export interface QimmahDataExport {
       wellness: ReturnType<typeof loadWellnessToday>
       commitments: ReturnType<typeof loadCommitmentsToday>
     }
-    reminders: ReturnType<typeof loadReminderPrefs>
+    reminders: ReturnType<typeof loadNotificationPrefs>
     activeSession: ReturnType<typeof loadActiveSession>
     coaching: { shownLessonIds: string[] }
   }
@@ -103,7 +103,7 @@ export function buildQimmahDataExport(options: BuildDataExportOptions): QimmahDa
         wellness: loadWellnessToday(),
         commitments: loadCommitmentsToday(),
       },
-      reminders: loadReminderPrefs(),
+      reminders: loadNotificationPrefs(options.ownerId ?? 'guest'),
       activeSession: loadActiveSession(options.ownerId),
       coaching: { shownLessonIds: shownLessonIds(options.ownerId) },
     },

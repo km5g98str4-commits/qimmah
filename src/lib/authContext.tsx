@@ -253,6 +253,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       async signOut() {
         const supabase = await getSupabase()
         if (!supabase) return
+        // Native schedules outlive localStorage. Cancel before changing auth or
+        // wiping owner data so the next device user never receives old prompts.
+        try {
+          await import('./notifications').then(({ cancelAllNotifications }) => cancelAllNotifications())
+        } catch {
+          /* Never trap the user in-session if the optional native chunk cannot load. */
+        }
         try {
           await supabase.auth.signOut()
         } catch {

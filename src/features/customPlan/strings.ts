@@ -135,7 +135,7 @@ const ar: CustomPlanStrings = {
 
   pickerTitle: 'اختر تمرينًا',
   searchPlaceholder: 'ابحث عن تمرين…',
-  noResults: 'ما فيه نتائج مطابقة.',
+  noResults: 'لا توجد نتائج مطابقة.',
   add: 'إضافة',
   added: 'أُضيف',
   close: 'إغلاق',

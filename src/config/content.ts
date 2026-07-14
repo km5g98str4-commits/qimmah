@@ -25,7 +25,7 @@ export const sectionCopy: Record<string, SectionCopy> = {
   goal: {
     eyebrow: 'هدفك الحالي',
     icon: 'Target',
-    title: 'هدف واحد واضح تشتغل عليه',
+    title: 'هدف واحد واضح تعمل عليه',
     description: 'هدفك مكتوب أمامك دائمًا — عشان كل تمرين ووجبة تكون لها معنى.',
   },
   profile: {

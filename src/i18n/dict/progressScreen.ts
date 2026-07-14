@@ -115,7 +115,7 @@ const ar: ProgressScreenStrings = {
   statusRecovering: 'تحتاج راحة',
   statusFresh: 'تمرنت حديثًا',
   statusUndertrained: 'ناقصة',
-  gridEmptyTitle: 'ما فيه تغطية بعد — يوم تبدأ تمرينك بتتلوّن عضلاتك هنا.',
+  gridEmptyTitle: 'لا توجد تغطية بعد — عندما تبدأ تمرينك ستظهر العضلات هنا.',
   gridEmptyBody: 'كل مجموعة تسجّلها تنعكس على توزيع عضلاتك خلال الأسبوع.',
   setsWord: 'مجموعة',
 
