@@ -79,32 +79,32 @@ export default defineConfig(({ mode }) => {
   const designV2 = env.VITE_DESIGN_V2 === 'true'
 
   return {
-  plugins: [react(), swVersionPlugin(), designPromotionPlugin(designV2)],
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
+    plugins: [react(), swVersionPlugin(), designPromotionPlugin(designV2)],
+    resolve: {
+      alias: {
+        '@': path.resolve(__dirname, './src'),
+      },
     },
-  },
-  define: {
-    __APP_VERSION__: JSON.stringify(pkgVersion),
-    __BUILD_COMMIT__: JSON.stringify(buildCommit),
-  },
-  build: {
-    outDir: 'dist',
-    sourcemap: false,
-    rollupOptions: {
-      output: {
-        // فصل مكتبات الطرف الثالث عن كود التطبيق لتحسين التخزين المؤقت وتقليل حزمة الدخول.
-        // zxing (الباركود) و react-body-highlighter (خريطة العضلات) ثقيلتان وتُطلبان في
-        // أسطح محدّدة — نفصلهما ليُخزَّنا مستقلّين ويخرجا من حِزم الشاشات.
-        manualChunks: {
-          'vendor-react': ['react', 'react-dom'],
-          'vendor-icons': ['lucide-react'],
-          'vendor-zxing': ['@zxing/browser', '@zxing/library'],
-          'vendor-charts': ['react-body-highlighter'],
+    define: {
+      __APP_VERSION__: JSON.stringify(pkgVersion),
+      __BUILD_COMMIT__: JSON.stringify(buildCommit),
+    },
+    build: {
+      outDir: 'dist',
+      sourcemap: false,
+      rollupOptions: {
+        output: {
+          // فصل مكتبات الطرف الثالث عن كود التطبيق لتحسين التخزين المؤقت وتقليل حزمة الدخول.
+          // zxing (الباركود) و react-body-highlighter (خريطة العضلات) ثقيلتان وتُطلبان في
+          // أسطح محدّدة — نفصلهما ليُخزَّنا مستقلّين ويخرجا من حِزم الشاشات.
+          manualChunks: {
+            'vendor-react': ['react', 'react-dom'],
+            'vendor-icons': ['lucide-react'],
+            'vendor-zxing': ['@zxing/browser', '@zxing/library'],
+            'vendor-charts': ['react-body-highlighter'],
+          },
         },
       },
     },
-  },
   }
 })
