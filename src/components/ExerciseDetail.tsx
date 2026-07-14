@@ -136,12 +136,12 @@ function AboutTab({ ex, d, lang, onAddToPlan }: { ex: NonNullable<ReturnType<typ
 
       {/* نصائح تقنية (عام، ثنائي اللغة) */}
       <Block title={d.techniqueTips} icon="Sparkles">
-        <BulletList items={g.tips} dot="#3E9E6B" />
+        <BulletList items={g.tips} dotClassName="bg-success" />
       </Block>
 
       {/* أخطاء شائعة */}
       <Block title={d.commonMistakes} icon="AlertTriangle">
-        <BulletList items={lang !== 'en' ? cue.mistakes : g.mistakes} dot="#D6553A" />
+        <BulletList items={lang !== 'en' ? cue.mistakes : g.mistakes} dotClassName="bg-danger" />
       </Block>
 
       {/* سلامة — تمارين تحميل العمود/الركبة توجّه صراحةً لاستشارة مختص. */}
@@ -291,12 +291,12 @@ function Block({ title, icon, children }: { title: string; icon: string; childre
   )
 }
 
-function BulletList({ items, dot }: { items: string[]; dot: string }) {
+function BulletList({ items, dotClassName }: { items: string[]; dotClassName: 'bg-success' | 'bg-danger' }) {
   return (
     <ul className="space-y-1.5">
       {items.map((it, i) => (
         <li key={i} className="flex items-start gap-2 text-sm leading-relaxed text-ink-700">
-          <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: dot }} />
+          <span className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${dotClassName}`} />
           {it}
         </li>
       ))}
