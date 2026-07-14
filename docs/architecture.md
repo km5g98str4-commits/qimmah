@@ -3,6 +3,46 @@
 Arabic-first (RTL) fitness app. **Frontend-only**, local-first, with optional cloud
 backup/sync via Supabase. Wrapped for iOS with Capacitor 8.
 
+> Refreshed for `integration/wave3`: adds the **sync queue** (`syncQueue.ts`),
+> the **13-table** Supabase schema with RLS, the **recovery guard**, and the
+> **design-v2 seam**. See the runtime diagram below.
+
+## Runtime diagram (stores · sync · queue · auth · recovery · design-seam)
+
+```mermaid
+flowchart TB
+  subgraph UI["UI — src/views/**"]
+    seam{"isDesignV2()<br/>designPreview.ts"}
+    seam -->|v1| v1["v1 views"]
+    seam -->|v2| v2["TodayV2 · WorkoutV2 · ProgressV2<br/>NutritionV2 · OnboardingV2"]
+  end
+  subgraph LOCAL["Device stores — localStorage qimmah:*"]
+    hs["historyStore.ts (HISTORY_KEYS ×8)"]
+    cust["customization.ts"]; onb["onboarding.ts + draft"]; ach["achievements/engine.ts"]
+  end
+  v2 --> hs
+  v2 --> cust
+  subgraph SYNC["Sync — signed-in only"]
+    q["syncQueue.ts<br/>enqueueSyncOperation · gate syncAllowedFor()"]
+    svc["syncService.ts<br/>flushSyncQueue · hydrateFromCloud · startSyncLifecycle"]
+    q --> svc
+  end
+  hs -->|auto-enqueue on write| q
+  subgraph AUTH["Auth / isolation"]
+    ac["authContext.tsx (Supabase GoTrue)"]
+    rec["recoveryState.ts"]; scope["accountScope.ts wipeUserData"]
+    ac --> rec; ac --> scope
+  end
+  ac -->|setSyncRuntime(uid, recoveryActive)| q
+  ac -->|fullSync / lifecycle| svc
+  subgraph CLOUD["Supabase — supabase/migrations/**"]
+    tbl["13 tables · RLS own-row (auth.uid()=user_id)"]
+    rpc["delete_own_account · handle_new_user"]
+  end
+  svc <-->|RLS-scoped upsert / hydrate| tbl
+  ac --> rpc
+```
+
 ## Stack
 - React 18 + TypeScript (strict) + Vite + Tailwind CSS.
 - Hash routing (no router library) — `src/lib/appRoutes.ts`.
@@ -75,8 +115,10 @@ history store**, so data survives the daily reset.
 See also: `data-and-storage.md` isn't split out — storage/sync/auth/localization are below.
 
 ## Storage (local-first)
-- All app data lives in `localStorage` under `qimmah:*` keys. Canonical list:
-  `src/lib/resetQimmah.ts` (`QIMMAH_KEYS` + prefix sweep for per-account keys).
+- All app data lives in `localStorage` under `qimmah:*` keys. **Wipe path** is now a
+  prefix sweep with a global-safe allowlist: `accountScope.wipeUserData(userId?)`
+  (also clears sync artifacts); `resetQimmah.ts` delegates to it. `reconcileAccountScope`
+  wipes + reloads on account switch. Owner-scoped keys embed the uid (e.g. `activeSession`).
 - **Permanent history:** `src/lib/historyStore.ts` (`HISTORY_KEYS`) — workout sessions,
   exercise history, daily logs, measurements, nutrition logs, water, supplements,
   medications. Idempotent migration from older keys on first run.
@@ -84,13 +126,22 @@ See also: `data-and-storage.md` isn't split out — storage/sync/auth/localizati
   `commitmentsToday`, `today` — each mirrors into the permanent history on write.
 - Reminders: `qimmah:reminders:v1` (`reminderPrefs.ts`) — local, device-specific.
 
-## Cloud sync (`src/lib/syncService.ts`, `onboardingSync.ts`)
-- Opt-in, only when signed in. **Push:** `upsert` with `onConflict` keys
-  (`user_id,local_id` / `user_id,exercise_id` / `user_id,date`).
-- **Pull:** every query is `.eq('user_id', userId)` (defense-in-depth atop RLS).
-- Tables: `profiles`, `workout_sessions`, `exercise_history`, `measurement_logs`,
-  `daily_logs`. All keyed by `user_id`.
-- Sync states: `disabled | guest | idle | pending | syncing | synced | error`.
+## Cloud sync (`src/lib/syncQueue.ts`, `src/lib/syncService.ts`, `onboardingSync.ts`)
+- **Queue (wave3):** every `historyStore` write auto-enqueues a sync op via
+  `enqueueSyncOperation`/`enqueueSyncDelete`, gated by
+  `syncAllowedFor(userId)` = `isSyncEnabled() && !recoveryActive && userId && runtime.userId===userId`.
+  The queue persists in `localStorage` (per-owner `qimmah:syncQueue:v1:<uid>`), so nothing is lost offline.
+- Opt-in, only when signed in. **Push:** `flushSyncQueue` → `upsert` with `onConflict` keys.
+  **Pull:** `hydrateFromCloud`, every query `.eq('user_id', userId)` (defense-in-depth atop RLS).
+  **Lifecycle:** `startSyncLifecycle` flushes on foreground/connectivity.
+- **13 tables** (all keyed by `user_id`, RLS own-row): core (`…120002`) `profiles,
+  workout_sessions, exercise_history, measurement_logs, daily_logs`; sync targets
+  (`…120003`) `nutrition_logs, water_logs, supplement_logs, medication_logs, step_logs,
+  achievements, custom_plans, todos`.
+- Sync states (`SyncState`): `disabled | guest | idle | pending | syncing | synced | error`.
+- **Recovery guard:** during `PASSWORD_RECOVERY` (`recoveryState.ts` / `authContext.recoveryActive`)
+  the queue never captures and no wipe runs — three-layer guard.
+- **Export/restore:** `snapshotForExport()` / `restoreSnapshot()` (see `DATA-EXPORT-DESIGN.md`).
 
 ## Auth (`src/lib/authContext.tsx`, `supabaseClient.ts`)
 - Supabase email/password. `getSupabase()` lazy-loads the SDK after first paint.
@@ -109,7 +160,21 @@ See also: `data-and-storage.md` isn't split out — storage/sync/auth/localizati
 - **RTL discipline:** logical Tailwind properties only (`ms/me/ps/pe/text-start/text-end/
   start/end`) — 0 physical `left/right` classes in the codebase.
 
+## Design seam — v2.1 (`src/design-system/designPreview.ts`)
+- Single flag `isDesignV2()` reads `[data-design="v2"]` on `<html>`. Views branch v1 ↔ v2
+  on it (e.g. `WorkoutView` → `WorkoutV2`, `ProgressView` → `ProgressV2`).
+- **Dev:** `?design=v2` / localStorage via `initDesignPreview()`. **Prod:** a
+  `VITE_DESIGN_V2=true` build inlines it on everywhere (wave3 production switch).
+- Tokens: `src/design-system/tokens.css` (IBM Plex Sans Arabic, ember/green under v2);
+  v2 copy frozen in `src/design-system/v2/labels.ts`.
+
+## Auth recovery (`src/lib/recoveryState.ts`)
+- Password-reset deep links parsed by `parseRecoveryParams` / `isRecoveryUrl`;
+  `shouldRouteToRecovery` + `decideResetPhase` drive the flow. `authContext.recoveryActive`
+  pins the reset screen above all gates and disables sync + wipe until it clears.
+
 ## iOS / Capacitor
 See `docs/ios-setup.md`. Key points: `capacitor.config.ts` (`com.qimmah.mobile`, webDir
 `dist`), SW disabled on native, safe-area insets (`--safe-top`/`--safe-bottom`), camera
-permission for the barcode scanner.
+permission for the barcode scanner, Keyboard `resize:native`, deep-link URL scheme
+`com.qimmah.mobile` (Info.plist `CFBundleURLTypes`).
