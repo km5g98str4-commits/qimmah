@@ -7,6 +7,8 @@ import { REST_TIPS } from '@/data/coaching/restTips'
 import { pickRestTip } from '@/lib/coaching/restTips'
 import { selectNextLesson, currentTodayLesson, markLessonUnderstood, shownLessonIds } from '@/lib/coaching/lessonRotation'
 import type { Muscle } from '@/types/workout'
+import { getDefaultCustomization } from '@/lib/customization'
+import { buildWorkoutV2Model } from '@/lib/workoutV2Model'
 
 let pass = 0
 let fail = 0
@@ -133,6 +135,17 @@ console.log('\n⑦ عزل تدوير الدروس بين مستخدمَين (م�
   // guest is its own bucket too
   markLessonUnderstood(null, 5)
   check('الضيف صندوق مستقلّ', shownLessonIds(null).length === 1 && shownLessonIds('user-A').length === 3)
+}
+
+// ── ⑧ v2 integration: authored cues reach the active product surface ──
+console.log('\n⑧ تكامل v2 — إشارات الكتالوج تصل إلى شاشة التمرين')
+{
+  const model = buildWorkoutV2Model(getDefaultCustomization(), 'ar')
+  const first = model.exercises[0]
+  const authored = first ? getCue(first.exerciseId) : null
+  check('خطة v2 تحتوي تمرينًا قانونيًا', !!first)
+  check('إشارات v2 هي النص المعتمد لا fallback عام', !!first && !!authored && JSON.stringify(first.cues) === JSON.stringify(authored.steps))
+  check('خطأ شائع معتمد يصل إلى نموذج v2', !!first && !!authored && first.commonMistake === authored.mistakes[0])
 }
 
 console.log(`\n${'─'.repeat(48)}`)

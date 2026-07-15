@@ -8,6 +8,7 @@ import type { Lang } from '@/lib/appPreferences'
 import type { CalorieGoal } from '@/types/profile'
 import { todayPlanDay } from '@/lib/workoutPlan'
 import { getExercise } from '@/data/exercises'
+import { getCue } from '@/lib/coaching'
 
 export type ExCategory = 'primary' | 'support' | 'isolation' | 'finisher'
 
@@ -52,7 +53,8 @@ function categoryFor(index: number, total: number): ExCategory {
   return index <= Math.ceil(total / 2) ? 'support' : 'isolation'
 }
 
-// Universally-true form cues (not fabricated performance) — safe, honest coaching.
+// Universally-true fallback for an unknown custom exercise. Catalog exercises
+// use the commissioned Arabic coaching layer (coverage is proven 181/181).
 const GENERIC_CUES_AR = ['تحكّم في الهبوط', 'مدى حركة كامل', 'زفير عند الدفع']
 const GENERIC_CUES_EN = ['Control the descent', 'Full range of motion', 'Exhale on the push']
 
@@ -65,6 +67,7 @@ export function buildWorkoutV2Model(customization: Customization, lang: Lang): W
 
   const exercises: WorkoutV2Exercise[] = list.map((pe, i) => {
     const ex = getExercise(pe.exerciseId)
+    const authoredCue = ex ? getCue(ex.id) : null
     const muscles = ex ? [ex.primaryMuscle, ...ex.secondaryMuscles].filter(Boolean).slice(0, 3) : []
     return {
       id: pe.id,
@@ -79,8 +82,8 @@ export function buildWorkoutV2Model(customization: Customization, lang: Lang): W
       restSec: pe.restSec,
       targetWeightKg: null, // no real history yet — honest null
       lastPerformance: null, // never fake a previous weight
-      cues: ar ? GENERIC_CUES_AR : GENERIC_CUES_EN,
-      commonMistake: null,
+      cues: ar ? authoredCue?.steps ?? GENERIC_CUES_AR : GENERIC_CUES_EN,
+      commonMistake: ar ? authoredCue?.mistakes[0] ?? null : null,
       replaceable: true,
     }
   })
