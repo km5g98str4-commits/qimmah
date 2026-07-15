@@ -18,6 +18,9 @@ import {
 import { buildWeeklyInsights } from '@/lib/insights'
 import { InsightCardsView } from '@/lib/insights/InsightCardsView'
 import { insightCopy } from '@/data/insightCopy'
+// Strength system (this feature) — e1RM series + dated PR log for the detail.
+import { getExercise } from '@/data/exercises'
+import { e1rmSeries, currentBests, prHistory, type StrengthPR } from '@/lib/strength'
 
 interface ProgressV2Props {
   lang: Lang
@@ -366,9 +369,12 @@ function StrengthDetailScreen({ strength, lang, onBack, onTrain }: { strength: i
         </div>
 
         {strength.hasData ? (
-          <div className="mt-4 space-y-3">
-            {strength.lifts.map((lift) => <LiftRow key={lift.exerciseId} lift={lift} lang={lang} />)}
-          </div>
+          <>
+            <div className="mt-4 space-y-3">
+              {strength.lifts.map((lift) => <LiftRow key={lift.exerciseId} lift={lift} lang={lang} />)}
+            </div>
+            <PRLog exerciseIds={strength.lifts.map((l) => l.exerciseId)} lang={lang} />
+          </>
         ) : (
           <>
             <NeedsData text={t('أكمل تمرينين على الأقل لنعرض تطوّر قوّتك لكل تمرين.', 'Complete at least two workouts to show per-lift progress.')} />
@@ -390,6 +396,8 @@ function LiftRow({ lift, lang }: { lift: LiftLadder; lang: Lang }) {
     : lift.status === 'up'
       ? `↑ ${lift.deltaKg ?? ''}`
       : t('ثابت', 'Steady')
+  const bests = currentBests(lift.exerciseId)
+  const series = e1rmSeries(lift.exerciseId).map((p) => p.e1rm)
   return (
     <div className={cn('rounded-2xl border border-line bg-surface p-4', lift.status === 'pr' && 'v2-earned-moment')}>
       <div className="flex items-center justify-between">
@@ -405,7 +413,62 @@ function LiftRow({ lift, lang }: { lift: LiftLadder; lang: Lang }) {
           <span key={i} className="h-8 flex-1 rounded-md border" style={{ background: i === 0 ? statusColor : 'transparent', borderColor: i === 0 ? statusColor : 'rgb(var(--c-line))' }} />
         ))}
       </div>
+      {/* e1RM sparkline + estimated 1RM (hedged «تقديري»). */}
+      {series.length >= 2 && (
+        <div className="mt-3 flex items-center gap-3">
+          <E1rmSparkline values={series} />
+          {bests.e1RM != null && (
+            <span className="shrink-0 text-[0.7rem] font-bold tabular-nums text-ink-400">
+              e1RM ~{bests.e1RM} {t('كجم · تقديري', 'kg · est.')}
+            </span>
+          )}
+        </div>
+      )}
     </div>
+  )
+}
+
+/** Mini e1RM trend sparkline (static SVG — reduced-motion-safe). */
+function E1rmSparkline({ values }: { values: number[] }) {
+  const W = 120, H = 28, P = 3
+  const min = Math.min(...values), max = Math.max(...values)
+  const span = max - min || 1
+  const n = values.length
+  const x = (i: number) => (n <= 1 ? W / 2 : P + (i * (W - 2 * P)) / (n - 1))
+  const y = (v: number) => H - P - ((v - min) / span) * (H - 2 * P)
+  const line = values.map((v, i) => `${i === 0 ? 'M' : 'L'} ${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join(' ')
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} className="h-7 flex-1" preserveAspectRatio="none" role="img" aria-label="e1RM trend">
+      <path d={line} fill="none" stroke={SUCCESS_TEXT} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx={x(n - 1)} cy={y(values[n - 1])} r={2.5} fill={SUCCESS_TEXT} />
+    </svg>
+  )
+}
+
+/** Dated PR log — merged across lifts, newest first, honest per §05. */
+function PRLog({ exerciseIds, lang }: { exerciseIds: string[]; lang: Lang }) {
+  const ar = lang !== 'en'
+  const t = (a: string, e: string) => (ar ? a : e)
+  const log: StrengthPR[] = exerciseIds
+    .flatMap((id) => prHistory(id))
+    .sort((a, b) => Date.parse(`${b.date}T00:00:00`) - Date.parse(`${a.date}T00:00:00`))
+    .slice(0, 8)
+  if (log.length === 0) return null
+  return (
+    <section className="mt-5">
+      <p className="mb-2 text-sm font-black">{t('دفتر الأرقام القياسية', 'PR log')}</p>
+      <div className="space-y-1.5">
+        {log.map((pr, i) => {
+          const e = getExercise(pr.exerciseId)
+          return (
+            <div key={i} className="flex items-center justify-between rounded-xl border border-line bg-surface px-3 py-2 text-xs">
+              <span className="min-w-0 font-bold"><bdi>{ar ? e?.nameAr ?? pr.exerciseId : e?.nameEn ?? pr.exerciseId}</bdi> · <span className="text-ink-500">{pr.kind}</span></span>
+              <span className="shrink-0 font-black tabular-nums" style={{ color: SUCCESS_TEXT }}>{pr.valueKg} {t('كجم', 'kg')} <span className="font-normal text-ink-400">· {pr.date}</span></span>
+            </div>
+          )
+        })}
+      </div>
+    </section>
   )
 }
 

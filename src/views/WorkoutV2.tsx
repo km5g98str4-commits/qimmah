@@ -15,6 +15,15 @@ import { buildWorkoutV2Model, CATEGORY_LABEL, type ExCategory, type WorkoutV2Exe
 import { persistFinishedSession } from '@/lib/finishWorkout'
 import { getDayStamp } from '@/lib/today'
 import { buildV2WorkoutSession } from '@/lib/workoutV2Persist'
+// Strength system (this feature) — plate math, warm-up, unified PR detection.
+import { useAuth } from '@/lib/authContext'
+import { getExercise } from '@/data/exercises'
+import { registerWorkoutPRs } from '@/features/achievements/engine'
+import {
+  computeLoadout, loadPlateConfig, type PlateConfig,
+  generateWarmup, loadWarmupPref, saveWarmupPref, type WarmupSet,
+  detectPRsForSession, toPRCelebrations, type StrengthPR,
+} from '@/lib/strength'
 
 interface WorkoutV2Props {
   lang: Lang
@@ -43,6 +52,7 @@ const FOCUS = {
   blue: 'var(--v2-blue)',
   teal: 'var(--v2-teal)',
   success: 'var(--v2-green)',
+  error: 'var(--v2-error)',
 } as const
 
 type Screen = 'plan' | 'detail' | 'active' | 'complete'
@@ -117,11 +127,20 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   const t = (a: string, e: string) => (ar ? a : e)
   const model = useMemo(() => buildWorkoutV2Model(customization, lang), [customization, lang])
 
+  const userId = useAuth().user?.id ?? null
   const [screen, setScreen] = useState<Screen>('plan')
   const [detailIdx, setDetailIdx] = useState(0)
   const [active, setActive] = useState<ActiveState | null>(null)
   // Display clock for the timestamp-based rest timer (ticks only while resting).
   const [now, setNow] = useState(() => Date.now())
+  // Strength UI: owner-scoped plate config + warm-up pref, per-set plate panel,
+  // per-exercise warm-up dismissal, and PRs surfaced on the complete screen.
+  const plateConfig = useMemo(() => loadPlateConfig(userId), [userId])
+  const warmupPref = useMemo(() => loadWarmupPref(userId), [userId])
+  const [platesOpen, setPlatesOpen] = useState(false)
+  const [warmupDone, setWarmupDone] = useState<Record<string, boolean>>({})
+  const [warmupOff, setWarmupOff] = useState(!warmupPref.show)
+  const [sessionPRs, setSessionPRs] = useState<StrengthPR[]>([])
 
   // Restore an in-progress session on mount — but NEVER trust localStorage.
   // Only resume if the persisted session is fully usable for the current plan;
@@ -220,7 +239,7 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   const planScreen = <PlanScreen model={model} lang={lang} onExercise={(i) => { setDetailIdx(i); setScreen('detail') }} onStart={startSession} onBack={() => onNavigate('dashboard')} />
   if (screen === 'plan') return planScreen
   if (screen === 'detail') return <DetailScreen ex={model.exercises[detailIdx]} idx={detailIdx} total={model.exercises.length} lang={lang} onStart={startSession} onBack={() => setScreen('plan')} />
-  if (screen === 'complete') return <CompleteScreen model={model} active={active} lang={lang} onDone={() => { clearActive(); onNavigate('dashboard') }} />
+  if (screen === 'complete') return <CompleteScreen model={model} active={active} lang={lang} prs={sessionPRs} onDone={() => { clearActive(); onNavigate('dashboard') }} />
 
   // ── Active workout ── Render PURELY. If the session is not usable for the
   // current plan, render the Plan screen (the safety-net effect above resets the
@@ -260,7 +279,17 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
       // Canonical persist — feeds historyStore (auto-enqueues sync) + exercise
       // history, so Progress / Today / Profile all react to this v2 workout.
       try {
-        persistFinishedSession(buildV2WorkoutSession(finalActive, model, { date: getDayStamp(), finishedAtMs: Date.now() }))
+        const session = buildV2WorkoutSession(finalActive, model, { date: getDayStamp(), finishedAtMs: Date.now() })
+        persistFinishedSession(session)
+        // Unified PR detection (single source) — 1/3/5RM + e1RM vs prior sessions.
+        // Feed the SAME session into the existing achievements sink (extend, not
+        // duplicate) so prCount + the global toaster stay in sync; also show the
+        // dark-surface PR moment on the complete screen.
+        const prs = detectPRsForSession(session)
+        if (prs.length > 0) {
+          registerWorkoutPRs(toPRCelebrations(prs, (id) => { const e = getExercise(id); return { ar: e?.nameAr, en: e?.nameEn } }))
+        }
+        setSessionPRs(prs)
       } catch { /* local summary already saved; never trap the user on completion */ }
       setRow({ done: true })
       setScreen('complete')
@@ -321,11 +350,32 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
             })}
           </div>
 
+          {/* Warm-up ramp — before the first working set, dismissible, owner pref. */}
+          {!warmupOff && active.setIndex === 0 && !row.done && !warmupDone[ex.id] && row.weight > plateConfig.barKg && (
+            <WarmupPanel
+              lang={lang}
+              sets={generateWarmup(row.weight, plateConfig)}
+              onDismiss={() => setWarmupDone((m) => ({ ...m, [ex.id]: true }))}
+              onDisable={() => { setWarmupOff(true); saveWarmupPref(userId, { show: false }) }}
+            />
+          )}
+
           {/* current set editor — big controls */}
           <div className="mt-6 grid grid-cols-2 gap-3">
-            <Stepper label={t('الوزن · كجم', 'Weight · kg')} value={row.weight} step={2.5} onChange={(v) => setRow({ weight: Math.max(0, v) })} lang={lang} />
+            <Stepper
+              label={t('الوزن · كجم', 'Weight · kg')}
+              value={row.weight}
+              step={2.5}
+              onChange={(v) => setRow({ weight: Math.max(0, v) })}
+              lang={lang}
+              onPlates={() => setPlatesOpen((o) => !o)}
+              platesOpen={platesOpen}
+            />
             <Stepper label={t('التكرار', 'Reps')} value={row.reps} step={1} onChange={(v) => setRow({ reps: Math.max(0, v) })} lang={lang} />
           </div>
+
+          {/* Plate calculator — one tap from the weight field. */}
+          {platesOpen && <PlateStackPanel lang={lang} weight={row.weight} config={plateConfig} onClose={() => setPlatesOpen(false)} />}
 
           {/* single ember action */}
           <button type="button" onClick={finishSet} className="v2-pressable mt-6 w-full rounded-2xl py-4 text-[1.1875rem] font-black" style={{ background: FOCUS.ember, color: FOCUS.onColor }}>{t('أنهِ المجموعة', 'Complete set')}</button>
@@ -335,15 +385,92 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   )
 }
 
-function Stepper({ label, value, step, onChange, lang }: { label: string; value: number; step: number; onChange: (v: number) => void; lang: Lang }) {
+function Stepper({ label, value, step, onChange, lang, onPlates, platesOpen }: { label: string; value: number; step: number; onChange: (v: number) => void; lang: Lang; onPlates?: () => void; platesOpen?: boolean }) {
+  const ar = lang !== 'en'
   return (
     <div className="rounded-2xl p-3" style={{ background: FOCUS.card, border: `1px solid ${FOCUS.line}` }}>
-      <p className="text-center text-xs font-bold" style={{ color: FOCUS.inkMuted }}>{label}</p>
+      <div className="flex items-center justify-center gap-1.5">
+        <p className="text-center text-xs font-bold" style={{ color: FOCUS.inkMuted }}>{label}</p>
+        {onPlates && (
+          <button type="button" onClick={onPlates} aria-label={ar ? 'حاسبة الأقراص' : 'Plate calculator'} aria-pressed={platesOpen} className="grid h-6 w-6 place-items-center rounded-lg" style={{ background: platesOpen ? FOCUS.blue : FOCUS.cardActive, border: `1px solid ${FOCUS.line}`, color: platesOpen ? FOCUS.onColor : FOCUS.inkMuted }}>
+            <Icon name="Layers" className="h-3.5 w-3.5" />
+          </button>
+        )}
+      </div>
       <div className="mt-2 flex items-center justify-between gap-2">
         <button type="button" onClick={() => onChange(value - step)} aria-label={label + ' −'} className="grid h-12 w-12 shrink-0 place-items-center rounded-xl" style={{ background: FOCUS.cardActive, border: `1px solid ${FOCUS.line}`, color: FOCUS.ink }}><Icon name="Minus" className="h-6 w-6" /></button>
         <span className="text-3xl font-black tabular-nums" style={{ color: FOCUS.ink }}>{toAr(value, lang)}</span>
         <button type="button" onClick={() => onChange(value + step)} aria-label={label + ' +'} className="v2-pressable grid h-12 w-12 shrink-0 place-items-center rounded-xl" style={{ background: FOCUS.cardActive, border: `1px solid ${FOCUS.line}`, color: FOCUS.ink }}><Icon name="Plus" className="h-6 w-6" /></button>
       </div>
+    </div>
+  )
+}
+
+/** Plate calculator — dark-surface per-side loadout with a visual plate stack. */
+function PlateStackPanel({ lang, weight, config, onClose }: { lang: Lang; weight: number; config: PlateConfig; onClose: () => void }) {
+  const ar = lang !== 'en'
+  const t = (a: string, e: string) => (ar ? a : e)
+  const load = computeLoadout(weight, config)
+  return (
+    <div className="mt-3 rounded-2xl p-4" style={{ background: FOCUS.card, border: `1px solid ${FOCUS.line}` }} role="group" aria-label={t('حاسبة الأقراص', 'Plate calculator')}>
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-black" style={{ color: FOCUS.ink }}>{t('كل جهة', 'Per side')} · {t('بار', 'Bar')} {toAr(config.barKg, lang)}</span>
+        <button type="button" onClick={onClose} aria-label={t('إغلاق', 'Close')} className="grid h-7 w-7 place-items-center rounded-lg" style={{ background: FOCUS.cardActive, color: FOCUS.inkMuted }}><Icon name="X" className="h-4 w-4" /></button>
+      </div>
+      {/* visual plate stack (largest → smallest, per side) */}
+      <div className="mt-3 flex min-h-[4rem] items-center gap-1.5 overflow-x-auto py-1">
+        <span className="h-8 w-2 shrink-0 rounded-sm" style={{ background: FOCUS.inkFaint }} aria-hidden="true" />
+        {load.perSide.length === 0 && <span className="text-sm font-bold" style={{ color: FOCUS.inkMuted }}>{t('البار فقط', 'Bar only')}</span>}
+        {load.perSide.flatMap((p) =>
+          Array.from({ length: p.count }, (_, i) => (
+            <span key={`${p.kg}-${i}`} className="grid shrink-0 place-items-center rounded-md text-[0.7rem] font-black tabular-nums"
+              style={{ background: FOCUS.blue, color: FOCUS.onColor, height: `${Math.min(56, 30 + p.kg)}px`, width: '30px' }}>
+              {toAr(p.kg, lang)}
+            </span>
+          )),
+        )}
+      </div>
+      {load.reachable ? (
+        <p className="mt-1 text-sm font-bold tabular-nums" style={{ color: FOCUS.success }}>{t('المجموع', 'Total')}: {toAr(load.achievedKg, lang)} {t('كجم', 'kg')} ✓</p>
+      ) : (
+        <div className="mt-1 text-sm font-bold">
+          <p className="flex items-start gap-1.5 tabular-nums" style={{ color: FOCUS.error }}>
+            <Icon name="AlertCircle" className="mt-0.5 h-4 w-4 shrink-0" />
+            <span>{t('غير قابل تمامًا — أقرب', 'Not exact — nearest')} {toAr(load.achievedKg, lang)} {t('كجم', 'kg')} ({load.deltaKg > 0 ? '+' : ''}{toAr(load.deltaKg, lang)})</span>
+          </p>
+          {load.suggestion && (
+            <p className="mt-0.5 text-xs tabular-nums" style={{ color: FOCUS.inkMuted }}>
+              {load.suggestion.downKg != null && <>↓ {toAr(load.suggestion.downKg, lang)} </>}
+              {load.suggestion.upKg != null && <>↑ {toAr(load.suggestion.upKg, lang)}</>}
+              {' '}{t('كجم', 'kg')}
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+/** Warm-up ramp — dismissible, remembers the owner's "don't show" preference. */
+function WarmupPanel({ lang, sets, onDismiss, onDisable }: { lang: Lang; sets: WarmupSet[]; onDismiss: () => void; onDisable: () => void }) {
+  const ar = lang !== 'en'
+  const t = (a: string, e: string) => (ar ? a : e)
+  if (sets.length === 0) return null
+  return (
+    <div className="mt-5 rounded-2xl p-4" style={{ background: FOCUS.card, border: `1px solid ${FOCUS.line}` }} role="group" aria-label={t('إحماء', 'Warm-up')}>
+      <div className="flex items-center justify-between">
+        <span className="flex items-center gap-1.5 text-sm font-black" style={{ color: FOCUS.teal }}><Icon name="Flame" className="h-4 w-4" />{t('إحماء مقترح', 'Suggested warm-up')}</span>
+        <button type="button" onClick={onDismiss} aria-label={t('إخفاء', 'Dismiss')} className="grid h-7 w-7 place-items-center rounded-lg" style={{ background: FOCUS.cardActive, color: FOCUS.inkMuted }}><Icon name="X" className="h-4 w-4" /></button>
+      </div>
+      <div className="mt-3 space-y-1.5">
+        {sets.map((s, i) => (
+          <div key={i} className="flex items-center justify-between rounded-xl px-3 py-2" style={{ background: s.isWork ? FOCUS.cardActive : 'transparent', border: `1px solid ${s.isWork ? FOCUS.line : 'transparent'}` }}>
+            <span className="text-xs font-bold" style={{ color: FOCUS.inkMuted }}>{s.isWork ? t('العمل', 'Work') : s.label}</span>
+            <span className="text-sm font-black tabular-nums" style={{ color: s.isWork ? FOCUS.ink : FOCUS.inkMuted }}>{toAr(s.weightKg, lang)} <span className="text-xs" style={{ color: FOCUS.inkFaint }}>{t('كجم', 'kg')}</span> × {toAr(s.reps, lang)}</span>
+          </div>
+        ))}
+      </div>
+      <button type="button" onClick={onDisable} className="mt-2 text-[0.7rem] font-bold" style={{ color: FOCUS.inkFaint }}>{t('لا تُظهر الإحماء', 'Don’t show warm-ups')}</button>
     </div>
   )
 }
@@ -458,18 +585,36 @@ function DetailScreen({ ex, idx, total, lang, onStart, onBack }: { ex: WorkoutV2
   )
 }
 
-function CompleteScreen({ model, active, lang, onDone }: { model: ReturnType<typeof buildWorkoutV2Model>; active: ActiveState | null; lang: Lang; onDone: () => void }) {
+function CompleteScreen({ model, active, lang, prs, onDone }: { model: ReturnType<typeof buildWorkoutV2Model>; active: ActiveState | null; lang: Lang; prs: StrengthPR[]; onDone: () => void }) {
   const ar = lang !== 'en'
+  const t = (a: string, e: string) => (ar ? a : e)
   const rows = active ? Object.values(active.rows).flat() : []
   const totalSets = rows.length
   const volume = rows.reduce((v, r) => v + r.weight * r.reps, 0)
   const durationMin = active ? Math.max(1, Math.round((Date.now() - active.startedAt) / 60000)) : 0
+  // One green line per lift that set a PR (kind + value), reduced-motion-safe.
+  const prByLift = new Map<string, StrengthPR[]>()
+  for (const pr of prs) { const a = prByLift.get(pr.exerciseId) ?? []; a.push(pr); prByLift.set(pr.exerciseId, a) }
   return (
     <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-dark v2-screen-enter fixed inset-0 z-[60] flex flex-col items-center justify-center bg-page px-6 text-center text-ink-900">
       {/* success moment — green */}
       <span className="v2-earned-moment grid h-16 w-16 place-items-center rounded-2xl" style={{ background: FOCUS.success, color: FOCUS.onColor }}><Icon name="Check" className="h-8 w-8" strokeWidth={3} /></span>
       <h1 className="mt-5 text-3xl font-black">{ar ? 'أنهيت الجلسة' : 'Session complete'}</h1>
       <p className="mt-1 text-sm" style={{ color: FOCUS.inkMuted }}>{model.session.title}</p>
+      {/* PR moment — green, reduced-motion-safe (v2-earned-moment collapses under prefers-reduced-motion). */}
+      {prByLift.size > 0 && (
+        <div className="v2-earned-moment mt-5 w-full max-w-xs rounded-2xl p-3" role="status" aria-live="polite" style={{ background: 'color-mix(in srgb, var(--v2-green) 14%, transparent)', border: `1px solid ${FOCUS.success}` }}>
+          <p className="flex items-center justify-center gap-1.5 text-sm font-black" style={{ color: FOCUS.success }}><Icon name="Trophy" className="h-4 w-4" />{t('رقم قياسي جديد!', 'New PR!')}</p>
+          <div className="mt-2 space-y-1">
+            {[...prByLift.entries()].map(([id, list]) => {
+              const e = getExercise(id)
+              const kinds = list.map((p) => p.kind).join(' · ')
+              const top = Math.max(...list.map((p) => p.valueKg))
+              return <p key={id} className="text-xs font-bold tabular-nums" style={{ color: FOCUS.ink }}><bdi>{ar ? e?.nameAr ?? id : e?.nameEn ?? id}</bdi> · {kinds} · {toAr(top, lang)} {t('كجم', 'kg')}</p>
+            })}
+          </div>
+        </div>
+      )}
       <div className="mt-6 grid w-full max-w-xs grid-cols-3 gap-3">
         <FocusStat label={ar ? 'الدقائق' : 'Minutes'} value={toAr(durationMin, lang)} />
         <FocusStat label={ar ? 'المجموعات' : 'Sets'} value={toAr(totalSets, lang)} />
