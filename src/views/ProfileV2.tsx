@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from 'react'
+import { useMemo, useRef, useState, type ReactNode } from 'react'
 import { Icon } from '@/components/Icon'
 import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
@@ -6,13 +6,24 @@ import type { AppRoute } from '@/lib/appRoutes'
 import { useCustomization } from '@/lib/customizationContext'
 import { useAuth } from '@/lib/authContext'
 import { buildProfileV2Model, COMMITMENT_WEEKS, type CommitmentWeek, type ProfileV2Model } from '@/lib/profileV2Model'
+import {
+  buildExportBundle,
+  deliverBundle,
+  parseImportFile,
+  applyImport,
+  hasUndo,
+  undoImport,
+  readFileText,
+  PortabilityError,
+  type ImportPreview,
+} from '@/lib/portability'
 
 interface ProfileV2Props {
   lang: Lang
   onNavigate: (route: AppRoute) => void
 }
 
-type Screen = 'home' | 'privacy' | 'settings'
+type Screen = 'home' | 'privacy' | 'settings' | 'data'
 
 /**
  * Profile v2 — «ملفك التدريبي» — Qimmah v2.1 (§06). Preview-gated (ProfileView
@@ -33,8 +44,10 @@ export function ProfileV2({ lang, onNavigate }: ProfileV2Props) {
     [customization, auth.displayName, auth.user, lang],
   )
 
-  if (screen === 'privacy') return <Privacy lang={lang} model={model} onBack={() => setScreen('home')} onDelete={() => onNavigate('settings')} />
-  if (screen === 'settings') return <Settings lang={lang} model={model} onBack={() => setScreen('home')} onAccount={() => onNavigate('settings')} onPrivacy={() => setScreen('privacy')} />
+  const uid = auth.user?.id ?? null
+  if (screen === 'data') return <DataScreen lang={lang} uid={uid} recoveryActive={auth.recoveryActive} onBack={() => setScreen('settings')} />
+  if (screen === 'privacy') return <Privacy lang={lang} model={model} onBack={() => setScreen('home')} onDelete={() => onNavigate('settings')} onData={() => setScreen('data')} />
+  if (screen === 'settings') return <Settings lang={lang} model={model} onBack={() => setScreen('home')} onAccount={() => onNavigate('settings')} onPrivacy={() => setScreen('privacy')} onData={() => setScreen('data')} />
 
   const numerals = (n: number) => (ar ? n.toLocaleString('ar-EG') : String(n))
 
@@ -144,7 +157,7 @@ const HEAT: Record<CommitmentWeek['level'], string> = {
   3: 'v2-heat-3',
 }
 
-function Privacy({ lang, model, onBack, onDelete }: { lang: Lang; model: ProfileV2Model; onBack: () => void; onDelete: () => void }) {
+function Privacy({ lang, model, onBack, onDelete, onData }: { lang: Lang; model: ProfileV2Model; onBack: () => void; onDelete: () => void; onData: () => void }) {
   const ar = lang !== 'en'
   const t = (a: string, e: string) => (ar ? a : e)
   return (
@@ -156,7 +169,7 @@ function Privacy({ lang, model, onBack, onDelete }: { lang: Lang; model: Profile
       <section className="mt-4 space-y-2.5">
         <InfoRow icon="BarChart3" title={t('تحليلات مجهولة', 'Anonymous analytics')} sub={t('لتحسين التطبيق فقط', 'To improve the app only')} state={model.privacy.analyticsAnonymousEnabled ? t('مفعّل', 'On') : t('مطفأ', 'Off')} />
         <InfoRow icon="Activity" title={t('مشاركة بيانات الصحة', 'Health sharing')} sub={t('غير مربوطة بعد', 'Not connected yet')} disabled />
-        <InfoRow icon="Download" title={t('تنزيل نسخة من بياناتي', 'Export my data')} sub={t('قادم لاحقًا', 'Coming later')} disabled />
+        <InfoRow icon="Download" title={t('تصدير واستيراد بياناتي', 'Export & import my data')} sub={t('نسخة محلّية · بلا خادم', 'Local copy · no server')} onClick={onData} />
         <button type="button" onClick={onDelete} className="v2-error-panel v2-pressable flex w-full items-center gap-3 rounded-2xl border px-4 py-3.5 text-start">
           <span className="v2-error-icon grid h-9 w-9 shrink-0 place-items-center rounded-xl"><Icon name="Trash2" className="h-4.5 w-4.5" /></span>
           <span className="min-w-0 flex-1"><span className="v2-error-icon block text-sm font-bold">{t('حذف الحساب نهائيًا', 'Delete account permanently')}</span><span className="block text-xs text-ink-500">{t('لا يمكن التراجع · يتطلب تأكيدًا', 'Irreversible · requires confirmation')}</span></span>
@@ -167,7 +180,7 @@ function Privacy({ lang, model, onBack, onDelete }: { lang: Lang; model: Profile
   )
 }
 
-function Settings({ lang, model, onBack, onAccount, onPrivacy }: { lang: Lang; model: ProfileV2Model; onBack: () => void; onAccount: () => void; onPrivacy: () => void }) {
+function Settings({ lang, model, onBack, onAccount, onPrivacy, onData }: { lang: Lang; model: ProfileV2Model; onBack: () => void; onAccount: () => void; onPrivacy: () => void; onData: () => void }) {
   const ar = lang !== 'en'
   const t = (a: string, e: string) => (ar ? a : e)
   return (
@@ -186,10 +199,158 @@ function Settings({ lang, model, onBack, onAccount, onPrivacy }: { lang: Lang; m
       <Group title={t('الخصوصية والبيانات', 'Privacy & data')}>
         <InfoRow icon="ShieldCheck" title={t('الخصوصية والبيانات', 'Privacy & data')} sub={t('التحكم في بياناتك', 'Control your data')} onClick={onPrivacy} />
       </Group>
+      <Group title={t('بياناتي', 'My data')}>
+        <InfoRow icon="Database" title={t('تصدير واستيراد', 'Export & import')} sub={t('نسخة كاملة محلّية · بلا خادم', 'Full local copy · no server')} onClick={onData} />
+      </Group>
       <Group title={t('الحساب', 'Account')}>
         <InfoRow icon="User" title={t('الملف والبيانات', 'Profile & data')} sub={model.user.email ?? (ar ? 'ضيف' : 'Guest')} onClick={onAccount} />
         <InfoRow icon="LogOut" title={t('تسجيل الخروج · حذف الحساب', 'Log out · delete account')} sub={t('من إعدادات الحساب', 'in account settings')} onClick={onAccount} />
       </Group>
+    </SubScreen>
+  )
+}
+
+/**
+ * «بياناتي» — تصدير/استيراد نسخة كاملة محلّية (PDPL R-1). لا شبكة إطلاقًا.
+ * التصدير: لمسة واحدة → مشاركة/تنزيل. الاستيراد: اختيار ملفّ → معاينة عدّ لكل متجر
+ * → تأكيد صريح → تطبيق ذرّي معاد الترميز للمستخدم الحالي → تراجع بلمسة.
+ * يُرفض الاستيراد أثناء جلسة استعادة كلمة المرور.
+ */
+function DataScreen({ lang, uid, recoveryActive, onBack }: { lang: Lang; uid: string | null; recoveryActive: boolean; onBack: () => void }) {
+  const ar = lang !== 'en'
+  const t = (a: string, e: string) => (ar ? a : e)
+  type Phase = 'idle' | 'preview' | 'done' | 'error'
+  const [phase, setPhase] = useState<Phase>('idle')
+  const [busy, setBusy] = useState(false)
+  const [preview, setPreview] = useState<ImportPreview | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [note, setNote] = useState<string | null>(null)
+  const [undoable, setUndoable] = useState(() => hasUndo())
+  const fileRef = useRef<HTMLInputElement>(null)
+
+  const numerals = (n: number) => (ar ? n.toLocaleString('ar-EG') : n.toLocaleString('en-US'))
+
+  const onExport = async () => {
+    setBusy(true); setError(null); setNote(null)
+    try {
+      const method = await deliverBundle(buildExportBundle(uid))
+      setNote(method === 'download' ? t('تم تنزيل نسخة بياناتك على جهازك.', 'Your data was downloaded to your device.') : t('تمّت مشاركة نسخة بياناتك.', 'Your data copy was shared.'))
+    } catch {
+      setError(t('تعذّر إنشاء نسخة التصدير.', 'Could not create the export.'))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const onPick = () => fileRef.current?.click()
+  const onFile = async (file: File | undefined) => {
+    if (!file) return
+    setBusy(true); setError(null); setNote(null)
+    try {
+      const p = parseImportFile(await readFileText(file))
+      setPreview(p); setPhase('preview')
+    } catch (e) {
+      setError(e instanceof PortabilityError ? e.message : t('ملفّ غير صالح.', 'Invalid file.'))
+      setPhase('error')
+    } finally {
+      setBusy(false)
+      if (fileRef.current) fileRef.current.value = '' // اسمح بإعادة اختيار نفس الملفّ
+    }
+  }
+
+  const onConfirm = () => {
+    if (!preview) return
+    if (recoveryActive) { setError(t('لا يمكن الاستيراد أثناء استعادة كلمة المرور.', 'Import is disabled during password recovery.')); setPhase('error'); return }
+    setBusy(true); setError(null)
+    try {
+      applyImport(preview.bundle, uid)
+      setUndoable(true); setPhase('done'); setPreview(null)
+    } catch (e) {
+      setError(e instanceof PortabilityError ? e.message : t('فشل الاستيراد — أُلغيت كل التغييرات.', 'Import failed — all changes were reverted.'))
+      setPhase('error')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const onUndo = () => {
+    if (undoImport()) window.location.reload()
+  }
+
+  return (
+    <SubScreen title={t('بياناتي', 'My data')} onBack={onBack} lang={lang}>
+      {/* تنويه محلّي بالكامل — صادق وواضح */}
+      <div className="mb-4 flex items-start gap-3 rounded-2xl border border-line bg-surface p-4">
+        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-beige text-ink-500"><Icon name="ShieldCheck" className="h-4.5 w-4.5" /></span>
+        <p className="text-xs leading-relaxed text-ink-500">{t('كل شيء يتمّ على جهازك — لا يُرسَل أي شيء إلى أي خادم. النسخة ملفّ JSON تحفظه أو تشاركه كما تشاء.', 'Everything happens on your device — nothing is sent to any server. The backup is a JSON file you keep or share as you wish.')}</p>
+      </div>
+
+      {phase === 'preview' && preview ? (
+        <section className="rounded-3xl border border-line bg-surface p-5">
+          <h2 className="text-lg font-black">{t('معاينة الاستيراد', 'Import preview')}</h2>
+          <p className="mt-1 text-xs text-ink-500">{t('ستحلّ هذه البيانات محلّ ما على جهازك الآن. يمكنك التراجع بعد الاستيراد.', 'This will replace what is on your device now. You can undo after importing.')}</p>
+          <ul className="mt-4 divide-y divide-line">
+            {preview.lines.filter((l) => l.count > 0).map((l) => (
+              <li key={l.id} className="flex items-center justify-between py-2 text-sm">
+                <span className="font-bold text-ink-900">{l.labelAr}</span>
+                <span className="font-black tabular-nums text-ink-500">{numerals(l.count)}</span>
+              </li>
+            ))}
+          </ul>
+          {preview.unregisteredCount > 0 && <p className="mt-2 text-[0.7rem] text-ink-500">{t(`عناصر إضافية: ${numerals(preview.unregisteredCount)}`, `Extra items: ${preview.unregisteredCount}`)}</p>}
+          <p className="mt-3 text-[0.7rem] text-ink-400">{t(`أُنشئت النسخة: ${preview.exportedAt.slice(0, 16).replace('T', ' ')}`, `Backed up: ${preview.exportedAt.slice(0, 16).replace('T', ' ')}`)}</p>
+          {recoveryActive && <p className="mt-3 rounded-xl border border-line bg-beige/60 p-2.5 text-[0.7rem] font-bold text-ink-700">{t('الاستيراد معطّل أثناء استعادة كلمة المرور.', 'Import is disabled during password recovery.')}</p>}
+          <div className="mt-4 flex gap-2.5">
+            <button type="button" onClick={onConfirm} disabled={busy || recoveryActive} className="btn-primary flex-1 justify-center py-3 disabled:opacity-50">{t('تأكيد الاستيراد', 'Confirm import')}</button>
+            <button type="button" onClick={() => { setPreview(null); setPhase('idle') }} className="btn-ghost flex-1 justify-center py-3">{t('إلغاء', 'Cancel')}</button>
+          </div>
+        </section>
+      ) : phase === 'done' ? (
+        <section className="rounded-3xl border border-line bg-surface p-5 text-center">
+          <span className="mx-auto grid h-12 w-12 place-items-center rounded-2xl" style={{ backgroundColor: '#1F9D571A', color: '#157F46' }}><Icon name="CheckCircle2" className="h-6 w-6" /></span>
+          <h2 className="mt-3 text-lg font-black">{t('تمّ الاستيراد', 'Import complete')}</h2>
+          <p className="mt-1 text-sm text-ink-500">{t('استُعيدت بياناتك على هذا الجهاز.', 'Your data was restored on this device.')}</p>
+          <div className="mt-4 flex gap-2.5">
+            <button type="button" onClick={() => window.location.reload()} className="btn-primary flex-1 justify-center py-3">{t('عرض بياناتي', 'View my data')}</button>
+            <button type="button" onClick={onUndo} className="btn-ghost flex-1 justify-center py-3">{t('تراجع', 'Undo')}</button>
+          </div>
+        </section>
+      ) : (
+        <section className="space-y-2.5">
+          {error && (
+            <div className="flex items-start gap-3 rounded-2xl border p-4" style={{ borderColor: '#D6553A55', backgroundColor: '#D6553A0F' }}>
+              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl" style={{ backgroundColor: '#D6553A1A', color: '#B23A22' }}><Icon name="AlertTriangle" className="h-4.5 w-4.5" /></span>
+              <p className="text-sm font-bold" style={{ color: '#8f2f1c' }}>{error}</p>
+            </div>
+          )}
+          {note && (
+            <div className="flex items-start gap-3 rounded-2xl border border-line bg-surface p-4">
+              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl" style={{ backgroundColor: '#1F9D571A', color: '#157F46' }}><Icon name="CheckCircle2" className="h-4.5 w-4.5" /></span>
+              <p className="text-sm font-bold text-ink-800">{note}</p>
+            </div>
+          )}
+
+          <button type="button" onClick={onExport} disabled={busy} className="v2-pressable flex w-full items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3.5 text-start hover:border-[color:var(--v2-blue)] disabled:opacity-60">
+            <span className="v2-bg-blue-soft v2-text-blue grid h-10 w-10 shrink-0 place-items-center rounded-xl"><Icon name="Download" className="h-5 w-5" /></span>
+            <span className="min-w-0 flex-1"><span className="block text-sm font-black">{t('تصدير بياناتي', 'Export my data')}</span><span className="block text-xs text-ink-500">{t('نسخة كاملة (JSON) — تُحفظ أو تُشارك', 'Full copy (JSON) — save or share')}</span></span>
+            <Icon name="ChevronLeft" className="h-4 w-4 shrink-0 text-ink-400 rtl:rotate-0 ltr:rotate-180" />
+          </button>
+
+          <button type="button" onClick={onPick} disabled={busy} className="v2-pressable flex w-full items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3.5 text-start hover:border-[color:var(--v2-blue)] disabled:opacity-60">
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-beige text-ink-500"><Icon name="Save" className="h-5 w-5" /></span>
+            <span className="min-w-0 flex-1"><span className="block text-sm font-black">{t('استيراد نسخة', 'Import a backup')}</span><span className="block text-xs text-ink-500">{t('اختر ملفّ JSON صدّرته من قِمّة', 'Choose a JSON file exported from Qimmah')}</span></span>
+            <Icon name="ChevronLeft" className="h-4 w-4 shrink-0 text-ink-400 rtl:rotate-0 ltr:rotate-180" />
+          </button>
+          <input ref={fileRef} type="file" accept="application/json,.json" className="hidden" aria-hidden="true" onChange={(e) => onFile(e.target.files?.[0])} />
+
+          {undoable && (
+            <button type="button" onClick={onUndo} className="v2-pressable flex w-full items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3 text-start hover:border-[color:var(--v2-blue)]">
+              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-beige text-ink-500"><Icon name="RotateCcw" className="h-4.5 w-4.5" /></span>
+              <span className="min-w-0 flex-1"><span className="block text-sm font-bold">{t('تراجع عن آخر استيراد', 'Undo last import')}</span><span className="block text-xs text-ink-500">{t('يعيد بياناتك إلى ما قبل آخر استيراد', 'Restores your data to before the last import')}</span></span>
+            </button>
+          )}
+        </section>
+      )}
     </SubScreen>
   )
 }
