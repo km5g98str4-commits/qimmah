@@ -2,6 +2,11 @@
 
 Status: **partial trunk, blocked on two missing system branches and one missing proof branch.** Nothing below labels absent work green.
 
+Commander correction update (2026-07-14): `codex/v21-completion @ 98a4ff6` was reported
+and deliberately not merged. Its plates/PR and import/restore work is recorded as review
+input in `WAVE5-REVIEWS.md`; commissioned branches remain canonical. A fresh trunk gate and
+AA/RTL depth pass are green, but the missing branches remain honestly blocked.
+
 ## Integration status
 
 | System / branch | Status | What the owner sees in the next build |

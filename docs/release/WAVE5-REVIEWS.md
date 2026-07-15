@@ -77,3 +77,36 @@ This trunk fix-forward closes the access-export gap; it does not claim that the 
 ## Blocker record
 
 Five bounded fetch/review loops completed after the open-loop consolidation. `feat/insights-engine` appeared in the final refresh and was reviewed, corrected, and integrated. The two remaining unmerged system branches and `test/proof-deepening` never appeared on `origin`; therefore no immutable diff, proof, or tip existed to review or merge. Per the hard-cap rule, these remain release blockers rather than green systems. The absent notifications branch is recorded honestly above; the accepted trunk fix-forward is independently reviewed and proven.
+
+## Command-correction disclosure — 2026-07-14
+
+The commander pushed `codex/v21-completion @ 98a4ff6` before command correction. It is
+**not merged into Wave 5** because it overlaps the commissioned `plates-and-prs` and
+`data-portability` systems; their future origin branches remain canonical.
+
+| Overlap | Review notes available to the commissioned branch | Disposition |
+|---|---|---|
+| Plates + PRs | Bounded exact/nearest-lower plate solver (avoids greedy failure), first-load baseline is not a PR, events derive from canonical finished sessions, no second PR storage key, 26 proof checks. | Notes only; wait for `feat/plates-and-prs`. |
+| Data portability | Import allowlists and size/depth/node bounds, owner re-check at preview **and** apply, recovery fail-closed, pre-replacement backup, storage rollback, canonical writer/sync re-enqueue, 33 proof checks. | Notes only; wait for `feat/data-portability`. |
+| v2 production switch | The side branch made all production builds v2 by default. Wave 5 keeps the absolute-priority Wave 4 seam from `d2b6bd5`; no side-branch switch logic was imported. | Canonical Wave 4 decision wins. |
+
+Side-branch proof was independently green before disclosure: typecheck, lint 0, production
+build, 427 assertions + 274 media files, Capacitor sync, Xcode Simulator build, 30 RTL
+screenshots, zero console errors/overflow, reduced-motion and AA contrast.
+
+## Fresh trunk depth ladder — 2026-07-14
+
+| Review | Verdict | Evidence |
+|---|---|---|
+| Adversarial owner/recovery review | PASS | Notification reconcile cancels first, rejects missing/mismatched owner and `recoveryActive`, then generation-checks again before native scheduling. Coaching uses `qimmah:coach:lessons:v1:<owner>`; insights has no persistence/network boundary. |
+| Standards sweep | PASS | Zero raw hex literals in `src/views/*V2.tsx`; forbidden-copy grep produced only documented dish/exercise-name substrings, not real voice violations. |
+| Accessibility AA | PASS | 30 RTL screenshots at 320/768/1280; zero overflow/console errors; token contrast and reduced-motion fallbacks pass. Notification switches expose `role=switch` + `aria-checked`; errors/statuses use live roles and icon + text. |
+| Fresh full gate | PASS | Clean install; typecheck; lint 0; production build (2140 modules); 379 assertions + 274 media files; Capacitor iOS sync with 5 plugins. |
+
+Security-review conclusion: **No high-confidence vulnerabilities identified in the merged
+Wave 5 system diffs.** Production RLS deployment and physical-device notification delivery
+remain manual release checks, not inferred green results.
+
+The command-correction refresh loop also fetched origin five bounded times. No immutable tip
+appeared for `feat/plates-and-prs`, `feat/data-portability`, `feat/notifications-engine`, or
+`test/proof-deepening`; the commander therefore stopped polling and left them blocked.
