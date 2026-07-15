@@ -20,10 +20,10 @@ Security review result for the integrated set: **No high-confidence vulnerabilit
 
 | System branch | Tip | Verdict | Blocking findings / wiring |
 |---|---|---|---|
-| `feat/notifications-engine` | — | BRANCH ABSENT / TRUNK FIX-FORWARD ACCEPT | The branch never produced a reviewable tip. Commander implemented the bounded system on trunk with owner-scoped storage, recovery guard, pre-sign-out cancellation, generic lock-screen copy, 30 proofs, and 3-breakpoint RTL UI evidence. |
+| `feat/notifications-engine` | `4b8a0be` | ACCEPT AFTER SECURITY FIX | Kept the commissioned settings UI/copy and native adapter; retained the trunk's current-owner, recovery, generation-race, and pre-sign-out guards. `test:notifications` remains 30/30. |
 | `feat/insights-engine` | `52fc851` | ACCEPT AFTER FIX | Removed raw-hex fallbacks, moved copy to `src/data`, made muscle coverage compare the saved plan rather than a fixed list, preserved immediate Progress refresh, and wired 28 checks into `test:gate`. |
-| `feat/plates-and-prs` | — | BLOCKED — NOT PRESENT | A local uncommitted worktree exists, but no origin tip/proof exists. |
-| `feat/data-portability` | — | BLOCKED — NOT PRESENT | The local worktree remains at the Wave 4 base with no system diff and no origin branch. |
+| `feat/plates-and-prs` | `90ddbe1` | ACCEPT AFTER FIX | Bounded plate inputs/DP, preserved canonical history as the sole PR source, treated first session as baseline, corrected zero-rep handling, and wired 33 checks into `test:gate`. |
+| `feat/data-portability` | `bcf67c6` | ACCEPT AFTER SECURITY FIX | Explicit allowlist, owner/recovery re-check at preview and apply, owner-scoped backup/undo, bounded input, rollback, and canonical sync re-enqueue; 44 checks. |
 | `feat/arabic-coach-content` | `871d20c` | ACCEPT CODE / REJECT PACKAGE DIFF | 181 cues + 40 lessons + 25 rest tips; 25 proof checks and owner-scoped lesson key. Commander wired `test:coaching` into `test:gate`, hid Arabic-only rest copy in EN mode, and replaced raw component colors with semantic success/danger tokens. |
 
 ## Gate ledger
@@ -76,7 +76,7 @@ This trunk fix-forward closes the access-export gap; it does not claim that the 
 
 ## Blocker record
 
-Five bounded fetch/review loops completed after the open-loop consolidation. `feat/insights-engine` appeared in the final refresh and was reviewed, corrected, and integrated. The two remaining unmerged system branches and `test/proof-deepening` never appeared on `origin`; therefore no immutable diff, proof, or tip existed to review or merge. Per the hard-cap rule, these remain release blockers rather than green systems. The absent notifications branch is recorded honestly above; the accepted trunk fix-forward is independently reviewed and proven.
+All five commissioned system branches now have immutable reviewed tips and are integrated. `test/proof-deepening` remains the only requested branch absent from `origin`; its missing work is not claimed green. The commander's earlier overlapping side branch remains archive-only and contributed review notes, not competing implementations.
 
 ## Command-correction disclosure — 2026-07-14
 
@@ -107,9 +107,9 @@ Security-review conclusion: **No high-confidence vulnerabilities identified in t
 Wave 5 system diffs.** Production RLS deployment and physical-device notification delivery
 remain manual release checks, not inferred green results.
 
-The command-correction refresh loop also fetched origin five bounded times. No immutable tip
-appeared for `feat/plates-and-prs`, `feat/data-portability`, `feat/notifications-engine`, or
-`test/proof-deepening`; the commander therefore stopped polling and left them blocked.
+The command-correction refresh loop originally ended before three commissioned branches
+appeared. They were later reviewed and integrated at the immutable tips recorded above.
+`test/proof-deepening` is still absent and remains the only unreviewable requested branch.
 
 ## Data portability branch refresh — 2026-07-15
 
@@ -121,7 +121,7 @@ appeared for `feat/plates-and-prs`, `feat/data-portability`, `feat/notifications
 | Atomicity | PASS | Owner-scoped pre-import snapshot, loader verification, rollback on failure, one-step undo, and canonical sync re-enqueue when the guarded sync feature is enabled. |
 | Input limits | PASS | 25 MB, 250k-node, 64-depth, per-store shape/count limits, dangerous-key rejection, and schema gate. |
 | UI standards | FIXED | Existing notifications route retained; raw status/error hex removed for v2 semantic tokens; error/status live semantics added. |
-| Proof | PASS | 38 portability assertions; full typecheck/lint/build/`test:gate`; onboarding E2E 11/11; Capacitor iOS sync; flagged build contains `data-design="v2"`. |
+| Proof | PASS | 44 portability assertions; full typecheck/lint/build/`test:gate`; onboarding E2E 11/11; Capacitor iOS sync; flagged build contains `data-design="v2"`. |
 
 Security review conclusion: **No high-confidence exploitable vulnerability remains in the
 merged portability path.** The original branch's missing apply-time owner re-check and raw

@@ -1,12 +1,7 @@
 // سجلّ متاجر البيانات القابلة للنقل (تصدير/استيراد) — قِمّة (PDPL R-1).
 //
-// المبدأ (نفس نمط المسح fail-safe في accountScope.wipeUserData):
-//   • «مساحة المستخدم» = كل مفاتيح `qimmah:*` عدا قائمة الاستثناء الصريحة
-//     (تفضيلات الجهاز/الجلسة/سباكة المزامنة). فأي متجر جديد يُصدَّر افتراضيًا —
-//     لا يُنسى بصمت (نفس ضمان المسح).
-//   • هذا السجلّ يعرّف المتاجر المعروفة (بمُحمِّلها الحقيقي للتحقّق + شكلها + عدّها).
-//     ما لم يُعرَّف هنا لكنه ضمن مساحة المستخدم يُلتقط عبر «مسح البقايا» (registry.ts:sweepUnregistered)
-//     فلا تُفقد بيانات مستخدم جديدة.
+// المبدأ: allowlist صريحة فقط. لا يُصدَّر أو يُستورد أي مفتاح لم يُسجّل هنا
+// بمحمّله الحقيقي وشكله وحدوده. هذا يمنع التقاط جلسة/جهاز/مالك آخر بالحدس.
 //
 // الأمان (STRIDE): الاستيراد يكتب فقط إلى مفاتيح هذا السجلّ (المعروفة) + إعادة ترميز
 // المالك إلى المستخدم الحالي حصراً. لا يمسّ إطلاقاً رمز الجلسة (qimmah:supabase-auth)،
@@ -109,7 +104,7 @@ function objectStore(id: string, key: string, labelAr: string, load: () => unkno
 
 /**
  * سجلّ المتاجر المعروفة. الترتيب هو ترتيب العرض في الملخّص.
- * تُضاف المتاجر الجديدة هنا؛ وإن نُسيت فسيلتقطها sweepUnregistered afford (fail-safe).
+ * تُضاف المتاجر الجديدة هنا مع proof؛ وما لا يُسجّل يبقى خارج النسخة عمدًا.
  */
 export const STORE_DEFS: StoreDef[] = [
   // — سجلّ التاريخ (History namespace) —
@@ -194,77 +189,6 @@ export const STORE_DEFS: StoreDef[] = [
 
 /** خريطة id → تعريف (وصول سريع عند الاستيراد). */
 export const STORE_BY_ID: Record<string, StoreDef> = Object.fromEntries(STORE_DEFS.map((d) => [d.id, d]))
-
-// ————————————————————— fail-safe: التقاط البقايا غير المسجّلة —————————————————————
-
-/**
- * مفاتيح تُستثنى من التصدير/الاستيراد صراحةً (ليست بيانات مستخدم قابلة للنقل):
- *  • قائمة السماح العامّة في accountScope (تفضيلات جهاز/كاش/رمز جلسة) — أخطرها
- *    `qimmah:supabase-auth:v1` (استيراده = اختطاف حساب).
- *  • سباكة المزامنة العابرة (queue/backup/meta) — ليست بيانات مستخدم.
- *  • أعلام اختبار داخلية.
- *  • نسخ مفاتيح قديمة مكرّرة (هُوجرت إلى سجلّ التاريخ) — تصديرها يُكرّر العدّ.
- * مطابقة بالبادئة تغطّي المفاتيح المربوطة بالمالك (uid لاحقة).
- */
-const EXCLUDED_EXACT: ReadonlySet<string> = new Set([
-  // accountScope GLOBAL_SAFE_KEYS
-  'qimmah:prefs:v1', 'qimmah:uiMode:v1', 'qimmah:design-preview',
-  'qimmah:installPromptDismissed:v1', 'qimmah:install-banner:dismissed',
-  'qimmah:analytics:v1', 'qimmah:analytics:milestones:v1', 'qimmah:off:cache:v1',
-  'qimmah:products:v1', 'qimmah:products:audit:v1', 'qimmah:products:saudi-seed-done:v1',
-  'qimmah:history:migrated:v1', 'qimmah:onboarding:accounts:v1',
-  'qimmah:supabase-auth:v1', 'qimmah:lastUser:v1',
-  // أعلام اختبار
-  'qimmah:onboarding:force-fail',
-  // نسخ قديمة مكرّرة (مصدرها الحقيقي سجلّ التاريخ)
-  'qimmah:workoutSessions:v1', 'qimmah:exerciseHistory:v1',
-  'qimmah:measurementLogs:v1', 'qimmah:nutritionToday:v1',
-  // حالة تمرين محلّية للعرض (عابرة، بديلها activeSession)
-  'qimmah:active-workout:v2', 'qimmah:workout-summary:v2',
-])
-const EXCLUDED_PREFIXES: readonly string[] = [
-  'qimmah:syncQueue:v1', 'qimmah:syncBackup:v1', 'qimmah:sync:meta:v1',
-  'qimmah:portability:', // بقايا الاستيراد المرحلية (نسخة التراجع) — لا تُصدَّر
-]
-
-const QIMMAH_PREFIX = 'qimmah:'
-
-export function isExcludedKey(key: string): boolean {
-  if (EXCLUDED_EXACT.has(key)) return true
-  return EXCLUDED_PREFIXES.some((p) => key.startsWith(p))
-}
-
-/** كل المفاتيح التي يغطّيها السجلّ للمستخدم الحالي (لتحديد «البقايا»). */
-function registeredKeysFor(uid: string | null | undefined): Set<string> {
-  const s = new Set<string>()
-  for (const d of STORE_DEFS) s.add(d.keyFor(uid))
-  return s
-}
-
-/**
- * يمسح localStorage بحثًا عن مفاتيح `qimmah:*` ضمن مساحة المستخدم لكنها غير مسجّلة
- * وغير مستثناة — بيانات مستخدم «جديدة» يجب أن تُصدَّر افتراضيًا (fail-safe).
- * يُرجِع خريطة {key → قيمة خام مُحلَّلة}.
- */
-export function sweepUnregistered(uid: string | null | undefined): Record<string, unknown> {
-  const out: Record<string, unknown> = {}
-  if (typeof window === 'undefined') return out
-  const registered = registeredKeysFor(uid)
-  const ls = window.localStorage
-  const otherOwnerSuffix = new Set(
-    STORE_DEFS.filter((d) => d.kind === 'ownerSuffix').map((d) => `${d.key}:`),
-  )
-  for (let i = 0; i < ls.length; i += 1) {
-    const k = ls.key(i)
-    if (!k || !k.startsWith(QIMMAH_PREFIX)) continue
-    if (registered.has(k) || isExcludedKey(k)) continue
-    // متجر مربوط بمالك لكن لمالك آخر (لاحقة uid مختلفة) → ليس بيانات المستخدم الحالي.
-    if ([...otherOwnerSuffix].some((p) => k.startsWith(p))) continue
-    const val = readRaw(k)
-    if (val !== undefined) out[k] = val
-  }
-  return out
-}
 
 // ————————————————————— قراءة/كتابة خام آمنة —————————————————————
 

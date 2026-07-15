@@ -1,11 +1,11 @@
 # Wave 5 — Integration Notes
 
-Status: **partial trunk, blocked on two missing system branches and one missing proof branch.** Nothing below labels absent work green.
+Status: **all five commissioned systems integrated; optional proof-deepening branch absent.** Nothing below labels absent work green.
 
 Commander correction update (2026-07-14): `codex/v21-completion @ 98a4ff6` was reported
-and deliberately not merged. Its plates/PR and import/restore work is recorded as review
-input in `WAVE5-REVIEWS.md`; commissioned branches remain canonical. A fresh trunk gate and
-AA/RTL depth pass are green, but the missing branches remain honestly blocked.
+and deliberately not merged. Its review notes informed later fix-forwards, while the five
+commissioned branches remain canonical. The fresh trunk gate and AA/RTL depth pass are green;
+only the optional `test/proof-deepening` branch remains absent.
 
 ## Integration status
 
@@ -19,21 +19,20 @@ AA/RTL depth pass are green, but the missing branches remain honestly blocked.
 | `integration/wave4 @ d2b6bd5` | Reconciled + gated | v2 is baked into the production build when `VITE_DESIGN_V2=true`. |
 | `feat/arabic-coach-content @ 871d20c` | Integrated + gated | Arabic exercise cues, 40 lessons, and contextual rest tips. |
 | PDF §05 progress follow-up | Integrated + gated | Weight logging now persists through the sync-ready history path; hydrated measurements and real PR events feed Progress/Profile. |
-| Notifications (commander fix-forward) | Integrated + gated | Five opt-in native iOS reminder types, owner-scoped preferences, plan-aware workout/rest days, and quiet hours. Lock-screen copy is deliberately generic. |
+| `feat/notifications-engine @ 4b8a0be` | Integrated after security fix-forward | Five opt-in native iOS reminder types, owner-scoped preferences, plan-aware workout/rest days, quiet hours, and generic lock-screen copy. |
 | `feat/insights-engine @ 52fc851` | Integrated after standards fix-forward | Today and Progress show up to three hedged, actionable weekly insights from canonical workout, nutrition, weight, and plan data. |
-| `feat/plates-and-prs` | Blocked: no origin tip | No plates/PR system claimed or exposed by this integration. |
-| Data-access export (commander fix-forward) | Integrated + gated | Profile privacy exports an owner-guarded JSON copy of on-device data; recovery sessions are blocked and auth/sync secrets are excluded. Import/restore remains out of scope. |
+| `feat/plates-and-prs @ 90ddbe1` | Integrated after standards fix-forward | Canonical workout history now drives first-baseline-safe PRs, bounded plate loading, and warm-up guidance. |
+| `feat/data-portability @ bcf67c6` | Integrated after security fix-forward | Profile exports, previews, imports, rolls back, and undoes owner-scoped data with recovery blocking and sync re-enqueue. |
 | `test/proof-deepening` | Blocked: branch absent | Existing proofs remain green; no extra proof suite claimed. |
 
 ## Release blockers / tracked debt
 
-1. Push immutable, proof-bearing tips for the two missing systems, then run the standards/security court and full per-merge gate for each.
+1. `test/proof-deepening` still has no origin tip; no additional suite from that branch is claimed.
 2. Validate notification timing and permission UX on the owner's physical iPhone before public release; browser and simulator gates cannot prove real delivery timing.
 3. Replace legal `[OWNER-EMAIL]`/jurisdiction placeholders and obtain legal sign-off before public release.
 4. Run credentialed auth E2E, production Supabase/RLS verification, universal-link, and physical-device checks with owner-held credentials/device.
 5. Catalog proof reports 20 extension/content-type mismatches; runtime display is healthy, but asset normalization remains cleanup debt.
-6. `npm audit --omit=dev` is clean. The development toolchain still reports the Vite/esbuild advisory; its automated fix upgrades to Vite 8, so handle it as a tested migration rather than using `--force` in this release branch.
-7. Data portability currently provides a safe access export only. A future import/restore system needs separate schema migration, validation, and conflict-policy design.
+6. `npm ci` reports one moderate and one high development-toolchain advisory; migrate with a tested dependency update, never `audit fix --force` on the release branch.
 
 ## PDF §05 evidence
 

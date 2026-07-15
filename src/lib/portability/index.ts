@@ -19,7 +19,7 @@ export {
 } from './importer'
 export type { ImportPreview, PreviewLine, ApplyResult } from './importer'
 export { PortabilityError } from './errors'
-export { STORE_DEFS, isNative, isExcludedKey } from './registry'
+export { STORE_DEFS, isNative } from './registry'
 export {
   PORTABILITY_SCHEMA_VERSION,
   BUNDLE_KIND,

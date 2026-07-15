@@ -27,7 +27,7 @@ export function captureStore(def: StoreDef, uid: string | null | undefined): unk
 
 /**
  * يبني حزمة النقل الكاملة لبيانات المستخدم الحالي (owner-scoped).
- * fail-safe: يلتقط المتاجر المسجّلة + أي بقايا `qimmah:*` جديدة غير مستثناة.
+ * allowlist صريحة: يلتقط المتاجر المسجّلة فقط؛ أي مفتاح مجهول يبقى خارج النسخة.
  */
 export function buildExportBundle(uid: string | null | undefined, now: Date = new Date()): PortabilityBundle {
   const ownerId = requirePortabilityOwner(uid)
