@@ -42,6 +42,24 @@ try {
 // الأطباق السعودية التقليدية تُدمج في foodItems عبر spread بمعرّفات «sfct-*».
 const saudiCount = foodItems.filter((f) => typeof f.id === 'string' && f.id.startsWith('sfct-')).length
 const gccCount = foodItems.filter((f) => typeof f.id === 'string' && f.id.startsWith('gcc-')).length
+const r2Items = foodItems.filter((f) => typeof f.id === 'string' && f.id.startsWith('r2-eat-'))
+const r2Estimated = r2Items.filter((f) => typeof f.notesAr === 'string' && f.notesAr.includes('تقديري')).length
+const r2Categories = [...new Set(r2Items.map((f) => f.category))]
+const r2Ranges = [
+  { from: 1, to: 10, min: 150, max: 950, label: 'broast' },
+  { from: 11, to: 20, min: 250, max: 850, label: 'shawarma' },
+  { from: 21, to: 30, min: 250, max: 950, label: 'burgers' },
+  { from: 31, to: 40, min: 350, max: 1050, label: 'rice plates' },
+  { from: 41, to: 50, min: 0, max: 350, label: 'karak/coffee' },
+  { from: 51, to: 60, min: 180, max: 500, label: 'bakery' },
+]
+const r2RangeViolations = r2Items.flatMap((item) => {
+  const n = Number(item.id.slice(-3))
+  const rule = r2Ranges.find((candidate) => n >= candidate.from && n <= candidate.to)
+  return rule && item.calories >= rule.min && item.calories <= rule.max
+    ? []
+    : [{ id: item.id, calories: item.calories, expected: rule ? `${rule.min}-${rule.max}` : 'known R2 group' }]
+})
 
 // ————— إعدادات الفحص —————
 const KCAL_TOL = 0.15 // ±15% لقاعدة 4/4/9
@@ -164,7 +182,7 @@ const byCode = {}
 for (const f of findings) (byCode[f.code] ||= []).push(f)
 
 if (JSON_OUT) {
-  console.log(JSON.stringify({ total: foodItems.length, saudi: saudiCount, gcc: gccCount, errors: errors.length, warnings: warns.length, byCode: Object.fromEntries(Object.entries(byCode).map(([k, v]) => [k, v.length])), findings }, null, 2))
+  console.log(JSON.stringify({ total: foodItems.length, saudi: saudiCount, gcc: gccCount, r2: r2Items.length, r2Estimated, r2Categories, r2RangeViolations, errors: errors.length, warnings: warns.length, byCode: Object.fromEntries(Object.entries(byCode).map(([k, v]) => [k, v.length])), findings }, null, 2))
 } else {
   console.log('════════ مُدقِّق قاعدة الأطعمة — قِمّة ════════')
   console.log(`الإجمالي: ${foodItems.length} صنفًا (منها ${saudiCount} طبقًا سعوديًا)`)

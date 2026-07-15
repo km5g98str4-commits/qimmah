@@ -90,6 +90,13 @@ async function completeOnboarding(page, maxSteps = 8) {
     if (/مسار اليوم/.test(await page.locator('body').innerText().catch(() => ''))) break
     const heading = await page.locator('h1, h2').first().innerText().catch(() => '')
 
+    // v2 goal step has two independent requirements: select a goal and accept
+    // health-data processing. Satisfy them explicitly before generic traversal.
+    const goal = page.getByRole('button', { name: /تنشيف|Fat loss/ }).first()
+    if (await goal.isVisible().catch(() => false)) await goal.click().catch(() => {})
+    const consent = page.getByRole('checkbox', { name: /أوافق على معالجة بياناتي الصحية|health data/ }).first()
+    if (await consent.isVisible().catch(() => false)) await consent.check().catch(() => {})
+
     let advanced = false
     for (let attempt = 0; attempt < 6 && !advanced; attempt += 1) {
       const confirmBtn = page.getByRole('button', { name: CONFIRM_RE }).first()
@@ -132,6 +139,10 @@ async function logOneWorkout(page, { onMidSession, maxSets = 40 } = {}) {
   const startExercise = page.getByRole('button', { name: /ابدأ التمرين|Start exercise/ }).first()
   await startExercise.click({ timeout: 3000 }).catch(() => {})
   await page.waitForTimeout(400)
+
+  // Canonical persistence probe: enter a distinctive 99 kg before the first set.
+  const weightInput = page.locator('input[inputmode="decimal"], input[type="number"]').first()
+  if (await weightInput.isVisible().catch(() => false)) await weightInput.fill('99')
 
   // مجموعتان أوليتان → لقطة الشاشة (جلسة نشطة، مجموعة قيد التنفيذ) قبل إكمال البقية بصمت.
   for (let i = 0; i < 2; i += 1) {
@@ -242,6 +253,32 @@ try {
     onMidSession: async () => {
       await page.screenshot({ path: `${OUT_DIR}/03-workout.png` })
       console.log('✅ 03-workout.png (mid-session)')
+      // Persistence seam: WorkoutMode's stepper does not expose a text input and its
+      // fixed increments cannot represent the distinctive 99 kg probe. Update only the
+      // next unfinished set in the already-created owner-scoped snapshot, then reload a
+      // fresh document. The assertion below still exercises the production validator,
+      // owner key, restore path, and rendered UI rather than merely inspecting storage.
+      const persisted = await page.evaluate(() => {
+        const key = Object.keys(localStorage).find((candidate) => candidate.startsWith('qimmah:active-workout:v2:'))
+        if (!key) return false
+        const snapshot = JSON.parse(localStorage.getItem(key) || 'null')
+        const exerciseId = Object.keys(snapshot?.rows || {})[snapshot.exIndex]
+        const sets = exerciseId ? snapshot?.rows?.[exerciseId] : null
+        const nextSet = Array.isArray(sets) ? sets[snapshot.setIndex] : null
+        if (!nextSet) return false
+        nextSet.weight = 99
+        localStorage.setItem(key, JSON.stringify(snapshot))
+        return true
+      })
+      if (!persisted) throw new Error('active-session persistence probe could not seed the next set')
+      // Simulate kill/resume: a fresh document must restore the owner-scoped snapshot,
+      // including the distinctive 99 kg value, before the remaining sets are completed.
+      await page.reload({ waitUntil: 'domcontentloaded' })
+      await page.waitForTimeout(2600)
+      const body = await page.locator('body').innerText()
+      if (!body.includes('99') && !body.includes('٩٩')) throw new Error('active session did not restore 99 kg after reload')
+      await page.screenshot({ path: `${OUT_DIR}/03b-workout-resumed.png` })
+      console.log('✅ 03b-workout-resumed.png (fresh document)')
     },
   })
   console.log(workoutLogged ? '  workout session saved (Save & finish clicked)' : '  ⚠️ session not saved — Progress/Profile may still show empty state')

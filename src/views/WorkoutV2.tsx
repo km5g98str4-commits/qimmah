@@ -30,7 +30,8 @@ interface WorkoutV2Props {
   onNavigate: (route: AppRoute) => void
 }
 
-const ACTIVE_KEY = 'qimmah:active-workout:v2'
+const ACTIVE_KEY_BASE = 'qimmah:active-workout:v2'
+const activeKey = (ownerId: string | null) => `${ACTIVE_KEY_BASE}:${ownerId ?? 'guest'}`
 const SUMMARY_KEY = 'qimmah:workout-summary:v2'
 const REST_DEFAULT = 90
 const REST_ADD = 15
@@ -128,6 +129,7 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   const model = useMemo(() => buildWorkoutV2Model(customization, lang), [customization, lang])
 
   const userId = useAuth().user?.id ?? null
+  const ownerActiveKey = activeKey(userId)
   const [screen, setScreen] = useState<Screen>('plan')
   const [detailIdx, setDetailIdx] = useState(0)
   const [active, setActive] = useState<ActiveState | null>(null)
@@ -148,7 +150,7 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   useEffect(() => {
     let parsed: unknown = null
     try {
-      const raw = localStorage.getItem(ACTIVE_KEY)
+      const raw = localStorage.getItem(ownerActiveKey)
       if (!raw) return
       parsed = JSON.parse(raw)
     } catch {
@@ -160,14 +162,13 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
       setScreen('active')
     } else {
       try {
-        localStorage.removeItem(ACTIVE_KEY)
+        localStorage.removeItem(ownerActiveKey)
       } catch {
         /* storage unavailable */
       }
     }
     // Mount-only restore against the plan present at mount.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [model.exercises, ownerActiveKey])
 
   // Safety net: if we somehow end up on the active screen with an unusable
   // session (e.g. the plan regenerated mid-session), discard it and fall back to
@@ -175,23 +176,23 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   useEffect(() => {
     if (screen === 'active' && !isUsableSession(active, model.exercises)) {
       try {
-        localStorage.removeItem(ACTIVE_KEY)
+        localStorage.removeItem(ownerActiveKey)
       } catch {
         /* storage unavailable */
       }
       setActive(null)
       setScreen('plan')
     }
-  }, [screen, active, model.exercises])
+  }, [screen, active, model.exercises, ownerActiveKey])
 
   // Persist active session (rest timestamps included → refresh resumes the rest).
   useEffect(() => {
     try {
-      if (active) localStorage.setItem(ACTIVE_KEY, JSON.stringify(active))
+      if (active) localStorage.setItem(ownerActiveKey, JSON.stringify(active))
     } catch {
       /* storage full / unavailable — session stays in memory */
     }
-  }, [active])
+  }, [active, ownerActiveKey])
 
   const resting = active?.rest != null
   const restDone = active?.rest ? restIsFinished(active.rest, now) : false
@@ -232,7 +233,7 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   }
 
   const clearActive = () => {
-    try { localStorage.removeItem(ACTIVE_KEY) } catch { /* ignore */ }
+    try { localStorage.removeItem(ownerActiveKey) } catch { /* ignore */ }
     setActive(null)
   }
 

@@ -47,6 +47,7 @@
     "test:gate": "npm run test:active-session && npm run test:today-v2 && npm run test:progress-v2 && npm run test:data-portability && npm run test:portability && npm run test:notifications && npm run test:insights && npm run test:strength && npm run test:sync && npm run test:onboarding-async && npm run test:fixforward && npm run test:isolation && npm run test:reset-recovery && npm run test:seed && npm run test:catalog && npm run test:food-db && npm run test:coaching && npm run test:policy",
     "test:e2e:onboarding": "node scripts/e2e-onboarding.mjs",
     "test:e2e": "npm run build && node scripts/e2e-onboarding.mjs",
+    "test:e2e:journey": "VITE_DESIGN_V2=true npm run build && node scripts/e2e/journey.mjs",
     "test:e2e:auth:preflight": "node scripts/e2e-auth/preflight.mjs",
     "test:e2e:auth": "node scripts/e2e-auth/run.mjs",
     "test:e2e:auth:preload": "node scripts/e2e-auth/preload-images.mjs",
@@ -88,6 +89,6 @@
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.15",
     "typescript": "^5.6.3",
-    "vite": "^5.4.11"
+    "vite": "^6.4.3"
   }
 }

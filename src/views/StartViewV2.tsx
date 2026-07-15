@@ -1,6 +1,7 @@
 import type { Lang } from '@/lib/appPreferences'
 import { LanguageToggle } from '@/i18n'
 import { V2_WELCOME } from '@/design-system/v2/labels'
+import { CanonicalMark } from '@/components/CanonicalMark'
 
 interface StartViewV2Props {
   lang: Lang
@@ -46,7 +47,7 @@ export function StartViewV2({ lang, onLogin, onSignup }: StartViewV2Props) {
         {/* Brand + hero — top-anchored, start-aligned (RTL), headline-led. */}
         <div className="mt-9 flex flex-col items-start text-start">
           <div className="flex items-center gap-2.5">
-            <AscentMark className="h-9 w-9" />
+            <CanonicalMark className="h-9 w-9" />
             <span className="text-3xl font-black tracking-tight text-ink-900">{c.brand}</span>
           </div>
 
@@ -83,36 +84,19 @@ export function StartViewV2({ lang, onLogin, onSignup }: StartViewV2Props) {
 }
 
 /**
- * Ascent Bar — the Qimmah brand mark: three ascending bars, the tallest in
- * ember (Momentum). Abstract, geometric, survives small sizes; not a mountain
- * illustration, not a stock icon. TEMPORARY geometry — clean placeholder until
- * a canonical Cloud Design mark is confirmed. Uses theme tokens (no new hex).
+ * Canonical Qimmah mark. Geometry is a 1024-grid projection of the brand spec.
  */
-function AscentMark({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 32 32" fill="none" role="img" aria-label="Qimmah">
-      <rect x="4" y="19" width="5" height="9" rx="2.5" fill="rgb(var(--c-ink-500))" />
-      <rect x="13.5" y="13" width="5" height="15" rx="2.5" fill="rgb(var(--c-ink-700))" />
-      <rect x="23" y="6" width="5" height="22" rx="2.5" fill="var(--c-primary)" />
-    </svg>
-  )
-}
-
 /**
- * Large faint Ascent motif — the mark scaled up as a background texture to give
+ * Large faint canonical motif — the mark scaled up as a background texture to give
  * the lower half athletic depth and fill the composition (vs. an empty void).
  * Very low opacity, bottom-anchored, ember tail on the peak. Decorative only.
  */
 function AscentMotif({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 120 120" fill="none" preserveAspectRatio="xMaxYMax meet" aria-hidden="true">
-      <g>
-        <rect x="2" y="74" width="14" height="44" rx="7" fill="rgb(var(--c-ink-700))" opacity="0.10" />
-        <rect x="24" y="58" width="14" height="60" rx="7" fill="rgb(var(--c-ink-700))" opacity="0.14" />
-        <rect x="46" y="40" width="14" height="78" rx="7" fill="rgb(var(--c-ink-500))" opacity="0.14" />
-        <rect x="68" y="22" width="14" height="96" rx="7" fill="var(--c-primary)" opacity="0.16" />
-        <rect x="90" y="6" width="14" height="112" rx="7" fill="var(--c-primary)" opacity="0.24" />
-      </g>
+    <svg className={className} viewBox="0 0 1024 1024" fill="none" preserveAspectRatio="xMaxYMax meet" aria-hidden="true">
+      <path d="M302 640 L512 340 L722 640" stroke="currentColor" strokeWidth="96" strokeLinecap="round" strokeLinejoin="round" opacity="0.16" />
+      <circle cx="302" cy="640" r="96" fill="currentColor" opacity="0.2" />
+      <circle cx="722" cy="640" r="96" fill="currentColor" opacity="0.2" />
     </svg>
   )
 }

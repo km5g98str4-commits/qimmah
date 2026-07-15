@@ -1,0 +1,13 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["OWNER-TO-CONFIRM.com.qimmah.mobile"],
+        "components": [
+          { "/": "/reset*", "comment": "Password recovery" },
+          { "/": "/open*", "comment": "App routing" }
+        ]
+      }
+    ]
+  }
+}

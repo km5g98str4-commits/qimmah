@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { getLanguage } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
-import { Icon } from './Icon'
+import { CanonicalMark } from './CanonicalMark'
 
 const VISIBLE_MS = 1700
 const FADE_MS = 450
@@ -54,7 +54,7 @@ export function SplashScreen() {
     >
       <div className={reduceMotion ? 'text-center' : 'text-center animate-fade-up'}>
         <span className="mx-auto grid h-20 w-20 place-items-center rounded-3xl bg-primary text-white shadow-glow">
-          <Icon name="Mountain" className="h-10 w-10" strokeWidth={2.25} />
+          <CanonicalMark className="h-10 w-10" />
         </span>
         <p className="mt-5 text-2xl font-black tracking-tight text-ink-900">{s.brand}</p>
         <p className="mt-1 text-sm font-medium text-ink-500">{s.tagline}</p>

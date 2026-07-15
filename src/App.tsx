@@ -33,9 +33,9 @@ function createLazyViews() {
     TermsView: lazy(() => import('@/views/TermsView').then((m) => ({ default: m.TermsView }))),
     ContactView: lazy(() => import('@/views/ContactView').then((m) => ({ default: m.ContactView }))),
     NotFoundView: lazy(() => import('@/views/NotFoundView').then((m) => ({ default: m.NotFoundView }))),
-    ReviewPanelView: lazy(() =>
-      import('@/features/products/reviewPanel/ReviewPanelView').then((m) => ({ default: m.ReviewPanelView })),
-    ),
+    ReviewPanelView: import.meta.env.DEV
+      ? lazy(() => import('@/features/products/reviewPanel/ReviewPanelView').then((m) => ({ default: m.ReviewPanelView })))
+      : null,
     MyStatsView: lazy(() => import('@/views/MyStatsView').then((m) => ({ default: m.MyStatsView }))),
   }
 }
@@ -373,7 +373,7 @@ export default function App() {
   } else if (view === 'productReview') {
     // أداة طاقم داخلية فقط — تُعرَض في التطوير فقط؛ في الإنتاج الوصول إليها (حتى عبر
     // #/productReview مباشرةً) مُقصى ويُعاد المستخدم لشاشة «غير موجود».
-    content = import.meta.env.DEV ? (
+    content = import.meta.env.DEV && V.ReviewPanelView ? (
       <V.ReviewPanelView lang={LANG} onBack={() => setView('settings')} />
     ) : (
       <V.NotFoundView lang={LANG} onHome={() => setView('dashboard')} onBack={() => setView('dashboard')} />
