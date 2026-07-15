@@ -15,18 +15,18 @@ export interface PlateConfig { barKg: number; plates: PlateSpec[] }
 /** المجموعة القياسية في صالات السعودية (كجم لكل قرص). */
 export const KSA_PLATES_KG = [25, 20, 15, 10, 5, 2.5, 1.25] as const
 export const BAR_OPTIONS_KG = [20, 15] as const
-const PLATES_KEY_BASE = 'qimmah:plates:v1'
+export const PLATES_KEY_BASE = 'qimmah:plates:v1'
 
 /** إعداد افتراضي: بار ٢٠ كجم + مجموعة سعودية بأعداد وافرة (قابلة للتعديل). */
 export function defaultPlateConfig(): PlateConfig {
   return { barKg: 20, plates: KSA_PLATES_KG.map((kg) => ({ kg, pairs: kg >= 10 ? 8 : 6 })) }
 }
 
-function plateKey(userId?: string | null): string {
+export function plateKey(userId?: string | null): string {
   return `${PLATES_KEY_BASE}:${userId ?? 'guest'}`
 }
 
-function isValidConfig(v: unknown): v is PlateConfig {
+export function isValidPlateConfig(v: unknown): v is PlateConfig {
   if (!v || typeof v !== 'object') return false
   const c = v as Partial<PlateConfig>
   if (typeof c.barKg !== 'number' || !Number.isFinite(c.barKg) || c.barKg <= 0 || c.barKg > 100) return false
@@ -48,7 +48,7 @@ export function loadPlateConfig(userId?: string | null): PlateConfig {
     const raw = window.localStorage.getItem(plateKey(userId))
     if (!raw) return defaultPlateConfig()
     const parsed = JSON.parse(raw) as unknown
-    return isValidConfig(parsed) ? parsed : defaultPlateConfig()
+    return isValidPlateConfig(parsed) ? parsed : defaultPlateConfig()
   } catch {
     return defaultPlateConfig()
   }
@@ -56,7 +56,7 @@ export function loadPlateConfig(userId?: string | null): PlateConfig {
 
 /** يحفظ إعداد الأقراص لهذا الحساب. */
 export function savePlateConfig(userId: string | null | undefined, config: PlateConfig): void {
-  if (typeof window === 'undefined' || !isValidConfig(config)) return
+  if (typeof window === 'undefined' || !isValidPlateConfig(config)) return
   try {
     window.localStorage.setItem(plateKey(userId), JSON.stringify(config))
   } catch {

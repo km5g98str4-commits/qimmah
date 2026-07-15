@@ -110,3 +110,19 @@ remain manual release checks, not inferred green results.
 The command-correction refresh loop also fetched origin five bounded times. No immutable tip
 appeared for `feat/plates-and-prs`, `feat/data-portability`, `feat/notifications-engine`, or
 `test/proof-deepening`; the commander therefore stopped polling and left them blocked.
+
+## Data portability branch refresh — 2026-07-15
+
+| Review axis | Verdict | Evidence / fix-forward |
+|---|---|---|
+| Branch | ACCEPT AFTER FIX | `feat/data-portability @ bcf67c6` appeared after the earlier bounded loop and was merged with the existing export surface and notifications settings preserved. |
+| Owner boundary | FIXED | Preview captures the authenticated owner; apply re-checks runtime owner + recovery state; account switches fail closed. Export performs the same immediate owner check. |
+| Raw storage | FIXED | Export/import are explicit-allowlist only. Unknown `qimmah:*` keys are not exported and schema v1 rejects unregistered imports before any write. |
+| Atomicity | PASS | Owner-scoped pre-import snapshot, loader verification, rollback on failure, one-step undo, and canonical sync re-enqueue when the guarded sync feature is enabled. |
+| Input limits | PASS | 25 MB, 250k-node, 64-depth, per-store shape/count limits, dangerous-key rejection, and schema gate. |
+| UI standards | FIXED | Existing notifications route retained; raw status/error hex removed for v2 semantic tokens; error/status live semantics added. |
+| Proof | PASS | 38 portability assertions; full typecheck/lint/build/`test:gate`; onboarding E2E 11/11; Capacitor iOS sync; flagged build contains `data-design="v2"`. |
+
+Security review conclusion: **No high-confidence exploitable vulnerability remains in the
+merged portability path.** The original branch's missing apply-time owner re-check and raw
+unregistered-key import were rejected and fixed before the merge checkpoint.

@@ -5,17 +5,17 @@
 
 import { computeLoadout, type Loadout, type PlateConfig } from './plates'
 
-const WARMUP_PREF_BASE = 'qimmah:warmup-pref:v1'
+export const WARMUP_PREF_BASE = 'qimmah:warmup-pref:v1'
 
 export interface WarmupPref { show: boolean }
 
-function prefKey(userId?: string | null): string {
+export function warmupPrefKey(userId?: string | null): string {
   return `${WARMUP_PREF_BASE}:${userId ?? 'guest'}`
 }
 export function loadWarmupPref(userId?: string | null): WarmupPref {
   if (typeof window === 'undefined') return { show: true }
   try {
-    const raw = window.localStorage.getItem(prefKey(userId))
+    const raw = window.localStorage.getItem(warmupPrefKey(userId))
     if (!raw) return { show: true }
     const p = JSON.parse(raw) as Partial<WarmupPref>
     return { show: typeof p.show === 'boolean' ? p.show : true }
@@ -26,7 +26,7 @@ export function loadWarmupPref(userId?: string | null): WarmupPref {
 export function saveWarmupPref(userId: string | null | undefined, pref: WarmupPref): void {
   if (typeof window === 'undefined') return
   try {
-    window.localStorage.setItem(prefKey(userId), JSON.stringify(pref))
+    window.localStorage.setItem(warmupPrefKey(userId), JSON.stringify(pref))
   } catch {
     /* تجاهل */
   }

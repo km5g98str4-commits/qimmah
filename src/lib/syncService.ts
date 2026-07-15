@@ -374,6 +374,20 @@ function enqueueSnapshot(snapshot: HistorySnapshot, onboarding: OnboardingProfil
   if (onboarding) enqueueSyncOperation('profiles', 'profile', { data: { onboarding } })
 }
 
+/**
+ * Re-enqueue a user-confirmed local restore through the canonical sync mapping.
+ * This is deliberately owner/recovery/feature guarded by the same runtime used
+ * by normal store writes; callers never receive a transport or bypass RLS.
+ */
+export function enqueueImportedStateForSync(userId: string): boolean {
+  const runtime = getSyncRuntime()
+  if (!userId || runtime.userId !== userId || runtime.recoveryActive || !syncAllowedFor(userId)) return false
+  const before = readSyncQueue(userId).length
+  enqueueSnapshot(exportHistory(), loadOnboardingProfile())
+  enqueueAuxOperations(userId)
+  return readSyncQueue(userId).length > before
+}
+
 function mergedCloudOnboarding(cloud: unknown, local: OnboardingProfile | null): OnboardingProfile | null {
   if (!cloud || typeof cloud !== 'object') return local
   if ('_meta' in cloud) return cloud as OnboardingProfile

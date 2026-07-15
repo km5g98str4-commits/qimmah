@@ -325,6 +325,13 @@
   background-color: color-mix(in srgb, var(--v2-error) 9%, transparent);
 }
 :root[data-design='v2'] .v2-error-icon { color: var(--v2-error); }
+
+:root[data-design='v2'] .v2-success-panel {
+  border-color: color-mix(in srgb, var(--v2-green) 38%, transparent);
+  background-color: color-mix(in srgb, var(--v2-green) 10%, transparent);
+}
+
+:root[data-design='v2'] .v2-success-icon { color: var(--v2-green-text); }
 :root[data-design='v2'] .input-invalid,
 :root[data-design='v2'] .input-invalid:focus { border-color: var(--v2-error); }
 
