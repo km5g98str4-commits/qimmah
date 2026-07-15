@@ -9,7 +9,7 @@
 
 import { getDayStamp } from '@/lib/today'
 import { wipeUserData } from '@/lib/accountScope'
-import { setSyncRuntime } from '@/lib/syncQueue'
+import { readSyncQueue, setSyncFeatureEnabledForTests, setSyncRuntime } from '@/lib/syncQueue'
 import {
   buildExportBundle,
   parseImportFile,
@@ -18,6 +18,7 @@ import {
   hasUndo,
   PortabilityError,
   PORTABILITY_SCHEMA_VERSION,
+  undoKey,
 } from '@/lib/portability'
 import { STORE_BY_ID } from '@/lib/portability/registry'
 import { getWorkoutSessions, getNutritionLogs } from '@/lib/historyStore'
@@ -133,6 +134,10 @@ expectThrow('رفض البقايا غير المسجّلة بدل كتابتها
 // سقف العناصر (DoS)
 const huge = new Array(100_001).fill(0).map((_, i) => ({ id: `x${i}` }))
 expectThrow('رفض تجاوز سقف العناصر', () => parseImportFile(JSON.stringify({ ...bundleA, stores: { ...bundleA.stores, workoutSessions: huge } })), 'تمارين')
+let deep: unknown = 'leaf'
+for (let i = 0; i < 70; i += 1) deep = { value: deep }
+expectThrow('رفض عمق JSON غير آمن', () => parseImportFile(JSON.stringify({ ...bundleA, stores: { ...bundleA.stores, customization: deep } }), UID_A))
+expectThrow('التطبيق المباشر يعيد التحقّق', () => applyImport({ ...bundleA, stores: { ...bundleA.stores, ghostStore: [] } }, UID_A, UID_A))
 
 // ————— (٤) إعادة الترميز للمستخدم الحالي —————
 console.log('\n٤) إعادة الترميز: استيراد نسخة A إلى المستخدم B')
@@ -166,6 +171,7 @@ setSyncRuntime(UID_A, false)
 applyImport(otherBundle, UID_A, UID_A)
 check('بعد الاستيراد: البيانات تغيّرت', loadTodos(UID_A).items[0].text.includes(UID_B))
 check('نسخة التراجع متاحة', hasUndo(UID_A))
+check('مفتاح التراجع مربوط بالمالك', ls().getItem(undoKey(UID_A)) !== null && ls().getItem(undoKey(UID_B)) === null)
 check('undoImport نجح', undoImport(UID_A))
 const restored = loaderBaseline(UID_A)
 let undoOk = true
@@ -182,6 +188,8 @@ raw(`qimmah:todo:v1:${UID_B}`, { date: TODAY, items: [{ id: 'tb', text: 'مهم�
 const exportA = buildExportBundle(UID_A)
 check('تصدير A لا يحوي مفتاح todo:B الخام', JSON.stringify(exportA).indexOf('مهمة B') === -1)
 check('تصدير A: todo يخصّ A فقط', deepEq(exportA.stores.todo, { date: TODAY, items: [{ id: 't1', text: `مهمة ${UID_A}`, done: false }] }))
+raw(`qimmah:notifications:v1:${UID_B}`, { masterEnabled: true, marker: 'owner-b-secret' })
+check('لا يُصدّر المسح العام مفتاح مالك آخر', !JSON.stringify(buildExportBundle(UID_A)).includes('owner-b-secret'))
 // بوّابة الاستعادة
 setSyncRuntime(UID_A, true) // recoveryActive = true
 expectThrow('رفض الاستيراد أثناء جلسة الاستعادة', () => applyImport(exportA, UID_A, UID_A))
@@ -192,6 +200,20 @@ expectThrow('رفض الاستيراد عند تغيّر مالك runtime', () =
 let exportOwnerRejected = false
 try { buildExportBundle(UID_A) } catch { exportOwnerRejected = true }
 check('رفض التصدير عند تغيّر مالك runtime', exportOwnerRejected)
+
+setSyncRuntime(UID_A, false)
+const previewA = parseImportFile(JSON.stringify(exportA), UID_A)
+setSyncRuntime(UID_B, false)
+expectThrow('رفض تأكيد معاينة A بعد الانتقال إلى B', () => applyImport(previewA.bundle, UID_B, previewA.ownerId))
+
+clearAll()
+seedFor(UID_A)
+setSyncRuntime(UID_A, false)
+setSyncFeatureEnabledForTests(true)
+const syncBundle = buildExportBundle(UID_A)
+const syncResult = applyImport(syncBundle, UID_A, UID_A)
+check('الاستيراد يُعيد تعبئة طابور المزامنة', syncResult.syncQueued && readSyncQueue(UID_A).length > 0)
+setSyncFeatureEnabledForTests(undefined)
 
 // ————— النتيجة —————
 console.log(`\n=== النتيجة: ${pass} ✓ / ${fail} ✗ ===`)

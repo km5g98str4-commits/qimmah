@@ -22,6 +22,7 @@ import {
 import { PortabilityError } from './errors'
 import { requirePortabilityOwner } from './guard'
 import { enqueueImportedStateForSync } from '@/lib/syncService'
+import { getSyncRuntime } from '@/lib/syncQueue'
 import { BUNDLE_KIND, PORTABILITY_SCHEMA_VERSION, type PortabilityBundle } from './format'
 
 /** سقف حجم ملفّ الاستيراد — ٢٥ ميغابايت (حماية DoS). */
@@ -76,7 +77,7 @@ function byteLength(text: string): number {
  * يرمي PortabilityError برسالة عربية واضحة تسمّي المتجر الفاشل عند وجوده.
  */
 export function parseImportFile(text: string, uid?: string | null): ImportPreview {
-  const ownerId = requirePortabilityOwner(uid)
+  const ownerId = requirePortabilityOwner(uid ?? getSyncRuntime().userId)
   if (byteLength(text) > MAX_FILE_BYTES) {
     throw new PortabilityError('الملفّ أكبر من الحدّ المسموح (٢٥ ميغابايت)')
   }
@@ -165,16 +166,9 @@ export function undoKey(uid: string): string {
 }
 
 /** يجمع كل مفاتيح localStorage الفعلية التي سيمسّها هذا الاستيراد (لالتقاطها قبل الكتابة). */
-function targetKeys(bundle: PortabilityBundle, uid: string | null | undefined): string[] {
+function targetKeys(uid: string): string[] {
   const keys = new Set<string>()
-  for (const id of Object.keys(bundle.stores)) {
-    const def = STORE_BY_ID[id]
-    if (!def) continue
-    // ownerMap يُعدّل مفتاح الخريطة الكامل؛ غيره يُعدّل مفتاحه الفعلي.
-    keys.add(def.keyFor(uid))
-  }
-  const unreg = isObj(bundle.unregistered) ? bundle.unregistered : {}
-  for (const k of Object.keys(unreg)) keys.add(k)
+  for (const def of Object.values(STORE_BY_ID)) keys.add(def.keyFor(uid))
   return [...keys]
 }
 
@@ -208,6 +202,17 @@ function applyStore(def: StoreDef, value: unknown, uid: string | null | undefine
   writeRaw(def.keyFor(uid), value)
 }
 
+function clearStore(def: StoreDef, uid: string): void {
+  if (def.kind === 'ownerMap') {
+    const current = readRaw(def.key)
+    if (!isObj(current)) return
+    delete current[ownerToken(uid)]
+    writeRaw(def.key, Object.keys(current).length ? current : undefined)
+    return
+  }
+  writeRaw(def.keyFor(uid), undefined)
+}
+
 export interface ApplyResult {
   storesApplied: number
   unregisteredApplied: number
@@ -229,7 +234,7 @@ export function applyImport(bundle: PortabilityBundle, uid: string | null | unde
     throw error instanceof PortabilityError ? error : new PortabilityError('فشل التحقّق من النسخة.')
   }
 
-  const keys = targetKeys(checked, ownerId)
+  const keys = targetKeys(ownerId)
   const snapshot = captureSnapshot(keys, ownerId)
   const stagedKey = undoKey(ownerId)
   // ثبّت لقطة التراجع قبل أي كتابة كي يبقى التراجع ممكنًا حتى لو انقطع التنفيذ.
@@ -238,6 +243,9 @@ export function applyImport(bundle: PortabilityBundle, uid: string | null | unde
   let storesApplied = 0
   const unregisteredApplied = 0
   try {
+    for (const def of Object.values(STORE_BY_ID)) {
+      if (!(def.id in checked.stores)) clearStore(def, ownerId)
+    }
     for (const [id, value] of Object.entries(checked.stores)) {
       const def = STORE_BY_ID[id]
       if (!def) throw new PortabilityError(`متجر غير معروف: «${id}»`, id)
@@ -287,6 +295,11 @@ export function undoImport(uid: string | null | undefined): boolean {
   if (snap.uid !== ownerId) throw new PortabilityError('نسخة التراجع تخص حسابًا آخر — رُفضت.')
   restoreSnapshot(snap)
   writeRaw(stagedKey, undefined)
+  try {
+    enqueueImportedStateForSync(ownerId)
+  } catch {
+    // Local rollback remains authoritative; foreground sync can retry.
+  }
   return true
 }
 
