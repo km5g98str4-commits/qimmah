@@ -53,6 +53,8 @@ import { AchievementToaster } from '@/features/achievements/AchievementToaster'
 import { BUILD_LABEL } from '@/lib/buildInfo'
 import { track } from '@/lib/analytics'
 import { syncWorkoutReminder } from '@/lib/reminders'
+import { syncNotifications, cancelAllNotifications } from '@/lib/notifications/engine'
+import { loadNotificationPrefs } from '@/lib/notifications/prefs'
 
 /**
  * حراسة المسار: التبويبات الرئيسية لا تُفتح أبدًا قبل إكمال إعداد حقيقي **لهذا الحساب**
@@ -133,6 +135,31 @@ export default function App() {
     document.addEventListener('visibilitychange', onVisible)
     return () => document.removeEventListener('visibilitychange', onVisible)
   }, [])
+
+  // محرّك الإشعارات الجديد (src/lib/notifications) — يعيد الجدولة من تفضيلات **هذا**
+  // الحساب في كل مرة يتغيّر فيها uid (إقلاع/تبديل حساب) أو عودة الظهور. مصدر الحقيقة
+  // الحتمي: cancel-then-set من الصفر داخل syncNotifications نفسها. خامل على الويب/بلا
+  // حساب. يُختصر أثناء استعادة كلمة المرور — جلسة PASSWORD_RECOVERY المؤقتة ليست حسابًا
+  // مستقرًا يستحق جدولة، تمامًا كما تُختصر بوّابة عزل الحساب أعلاه لنفس السبب.
+  useEffect(() => {
+    if (auth.loading || auth.recoveryActive || !uid) return
+    void syncNotifications(uid, loadNotificationPrefs(uid))
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') void syncNotifications(uid, loadNotificationPrefs(uid))
+    }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => document.removeEventListener('visibilitychange', onVisible)
+  }, [auth.loading, auth.recoveryActive, uid])
+
+  // خروج فعلي (حساب حقيقي → null): syncNotifications أعلاه لا يعمل بلا uid فيُبقي جدول
+  // الحساب الخارج قائمًا على الجهاز. نُلغيه صراحةً هنا — لا نلمس authContext.tsx (auth
+  // file) لهذا؛ نكتفي بمراقبة تحوّل uid من قيمة حقيقية إلى null داخل حدود App.tsx.
+  const prevUidRef = useRef<string | null>(null)
+  useEffect(() => {
+    if (auth.loading) return
+    if (prevUidRef.current && !uid) void cancelAllNotifications()
+    prevUidRef.current = uid
+  }, [auth.loading, uid])
 
   const [view, setView] = useState<AppRoute>(() => initialRoute(auth.user?.id ?? null))
   // حِزم الشاشات الكسولة — تُستبدل بنسخة جديدة عند «أعد المحاولة» بعد فشل تحميل حزمة.

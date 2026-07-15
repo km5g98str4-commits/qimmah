@@ -6,13 +6,14 @@ import type { AppRoute } from '@/lib/appRoutes'
 import { useCustomization } from '@/lib/customizationContext'
 import { useAuth } from '@/lib/authContext'
 import { buildProfileV2Model, COMMITMENT_WEEKS, type CommitmentWeek, type ProfileV2Model } from '@/lib/profileV2Model'
+import { NotificationsSettingsV2 } from './NotificationsSettingsV2'
 
 interface ProfileV2Props {
   lang: Lang
   onNavigate: (route: AppRoute) => void
 }
 
-type Screen = 'home' | 'privacy' | 'settings'
+type Screen = 'home' | 'privacy' | 'settings' | 'notifications'
 
 /**
  * Profile v2 — «ملفك التدريبي» — Qimmah v2.1 (§06). Preview-gated (ProfileView
@@ -34,7 +35,18 @@ export function ProfileV2({ lang, onNavigate }: ProfileV2Props) {
   )
 
   if (screen === 'privacy') return <Privacy lang={lang} model={model} onBack={() => setScreen('home')} onDelete={() => onNavigate('settings')} />
-  if (screen === 'settings') return <Settings lang={lang} model={model} onBack={() => setScreen('home')} onAccount={() => onNavigate('settings')} onPrivacy={() => setScreen('privacy')} />
+  if (screen === 'notifications') return <NotificationsSettingsV2 lang={lang} onBack={() => setScreen('settings')} />
+  if (screen === 'settings')
+    return (
+      <Settings
+        lang={lang}
+        model={model}
+        onBack={() => setScreen('home')}
+        onAccount={() => onNavigate('settings')}
+        onPrivacy={() => setScreen('privacy')}
+        onNotifications={() => setScreen('notifications')}
+      />
+    )
 
   const numerals = (n: number) => (ar ? n.toLocaleString('ar-EG') : String(n))
 
@@ -167,7 +179,7 @@ function Privacy({ lang, model, onBack, onDelete }: { lang: Lang; model: Profile
   )
 }
 
-function Settings({ lang, model, onBack, onAccount, onPrivacy }: { lang: Lang; model: ProfileV2Model; onBack: () => void; onAccount: () => void; onPrivacy: () => void }) {
+function Settings({ lang, model, onBack, onAccount, onPrivacy, onNotifications }: { lang: Lang; model: ProfileV2Model; onBack: () => void; onAccount: () => void; onPrivacy: () => void; onNotifications: () => void }) {
   const ar = lang !== 'en'
   const t = (a: string, e: string) => (ar ? a : e)
   return (
@@ -181,7 +193,7 @@ function Settings({ lang, model, onBack, onAccount, onPrivacy }: { lang: Lang; m
         <InfoRow icon="Calculator" title={t('الأرقام', 'Numerals')} sub={model.settings.numerals} state="" />
       </Group>
       <Group title={t('الإشعارات', 'Notifications')}>
-        <InfoRow icon="Bell" title={t('التذكيرات', 'Reminders')} sub={t('تمرين · وجبات · مكملات', 'Workout · meals · supplements')} state="" onClick={onAccount} />
+        <InfoRow icon="Bell" title={t('التذكيرات', 'Reminders')} sub={t('تمرين · وجبات · مكملات', 'Workout · meals · supplements')} state="" onClick={onNotifications} />
       </Group>
       <Group title={t('الخصوصية والبيانات', 'Privacy & data')}>
         <InfoRow icon="ShieldCheck" title={t('الخصوصية والبيانات', 'Privacy & data')} sub={t('التحكم في بياناتك', 'Control your data')} onClick={onPrivacy} />
