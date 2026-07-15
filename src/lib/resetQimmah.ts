@@ -2,6 +2,7 @@
 
 import { resetAnalytics } from './analytics'
 import { cancelAllReminders } from './reminders'
+import { cancelAllNotifications } from './notifications/engine'
 import { wipeUserData } from './accountScope'
 
 // مفاتيح إضافية يمسحها «إعادة الضبط/الحذف» الكامل ولا يمسحها مسح تبديل الحساب:
@@ -37,6 +38,12 @@ export async function resetQimmah(): Promise<void> {
   // ألغِ تذكيرات iOS المجدوَلة (best-effort، محتوى الخطأ) — لا يحجب المسح/إعادة التحميل.
   try {
     await cancelAllReminders()
+  } catch {
+    /* لا يمنع الإكمال */
+  }
+  // ألغِ كل إشعارات محرّك الإشعارات الجديد أيضًا (نطاق معرّفات منفصل تمامًا عن أعلاه).
+  try {
+    await cancelAllNotifications()
   } catch {
     /* لا يمنع الإكمال */
   }

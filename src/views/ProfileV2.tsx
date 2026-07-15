@@ -8,7 +8,7 @@ import { useAuth } from '@/lib/authContext'
 import { dataPortabilityCopy } from '@/data/dataPortabilityCopy'
 import { buildQimmahDataExport, deliverQimmahDataExport } from '@/lib/dataPortability'
 import { buildProfileV2Model, COMMITMENT_WEEKS, type CommitmentWeek, type ProfileV2Model } from '@/lib/profileV2Model'
-import { NotificationSettingsPanel } from '@/components/NotificationSettingsPanel'
+import { NotificationsSettingsV2 } from './NotificationsSettingsV2'
 
 interface ProfileV2Props {
   lang: Lang
@@ -56,11 +56,7 @@ export function ProfileV2({ lang, onNavigate }: ProfileV2Props) {
     )
   }
   if (screen === 'notifications') {
-    return (
-      <SubScreen title={t('التذكيرات', 'Reminders')} onBack={() => setScreen('settings')} lang={lang}>
-        <NotificationSettingsPanel lang={lang} />
-      </SubScreen>
-    )
+    return <NotificationsSettingsV2 lang={lang} onBack={() => setScreen('settings')} />
   }
   if (screen === 'settings') return <Settings lang={lang} model={model} onBack={() => setScreen('home')} onAccount={() => onNavigate('settings')} onPrivacy={() => setScreen('privacy')} onNotifications={() => setScreen('notifications')} />
 
