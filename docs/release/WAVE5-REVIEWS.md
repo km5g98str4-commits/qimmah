@@ -126,3 +126,48 @@ appeared. They were later reviewed and integrated at the immutable tips recorded
 Security review conclusion: **No high-confidence exploitable vulnerability remains in the
 merged portability path.** The original branch's missing apply-time owner re-check and raw
 unregistered-key import were rejected and fixed before the merge checkpoint.
+
+## Finish-line decisions — 2026-07-16
+
+### Requested-branch dispositions
+
+| Branch / ref | Decision | One-line rationale |
+|---|---|---|
+| `test/proof-deepening` | **DROPPED** | Re-fetched `origin --prune`; still absent on origin. The open-loop agent never pushed it — unreviewable, so it is closed as dropped, not deferred. |
+| `codex/v21-completion @ 98a4ff6` | **SALVAGE-REVIEW ONLY — NO MERGE** | Parallel completion (62 files, +1473/-290) that duplicates commissioned systems. Not merged; commissioned branches are canonical. |
+
+### `codex/v21-completion` salvage notes (diff vs `integration/wave5`)
+
+Merge-base `cef7aad`. The branch's substantive additions all overlap systems already
+commissioned and integrated on wave5, generally with weaker proofs:
+
+- **Data restore/import** (`DataRestorePanel.tsx`, `dataRestoreCopy.ts`, `dataPortability.ts +234`) —
+  duplicates the canonical `src/lib/portability/*` (importer with preview/apply/undo, owner-guarded)
+  already wired into `ProfileV2`, which ships a **44-assertion** portability proof. No extraction.
+- **Plate calculator** (`PlateCalculatorPanel.tsx`, `plates.ts`) — overlaps the commissioned strength
+  system (`src/lib/strength.ts`: plate math, warm-up, unified PR detection) already in `WorkoutV2`.
+- **Personal records** (`personalRecords.ts`) — overlaps the unified PR detection in `strength.ts` +
+  achievements engine.
+- **Weekly insights / notifications / progress** deltas — overlap the commissioned insights (28-check)
+  and notifications (30-check) engines already on wave5.
+
+**No genuinely superior fragment warrants extraction.** wave5's canonical implementations carry
+stronger proofs (portability 44, isolation 39, coaching 37, notifications 30, insights 28). Verdict:
+do not merge; branch left in place on origin for the owner's reference only.
+
+### Four standards findings — closed on `integration/wave5`
+
+| # | Finding | Status | Proof |
+|---|---|---|---|
+| 7 | workout-summary key not owner-scoped | **FIXED** | owner-scoped `qimmah:workout-summary:v2:<owner>` + legacy-flat migration (ambiguous discarded) + export registry; isolation proof 28→**39** (two-user + wipe + migration). |
+| 8 | rest tips not rendered on Active Workout | **FIXED** | `WorkoutV2` RestPanel renders muscle-matched tip: dismissible, `role=note`/`aria-live`, AA (~9.3:1) on dark, reduced-motion-safe; coaching proof 28→**37** (behavioural + source wiring). |
+| 9 | LIVE-AUTH.md inaccurate Docker command | **FIXED** | Postgres-only compose can't serve auth; `test:e2e:auth` self-runs `supabase start`. Doc rewritten; offline preflight 19/0 verified; live run OWNER (no Docker here). |
+| 10 | portability count 38→44 | **FIXED** | Proof derives count (44); corrected the stale doc mirror in E2E.md, plus isolation 28→39 and coaching 25→37 doc reconciliation. |
+
+### Native proof (the sandbox-blocked chain)
+
+Both branches: `npm run build` → `npx cap sync ios` (5 plugins, SPM) →
+`xcodebuild -project ios/App/App.xcodeproj -scheme App` (iphonesimulator) **BUILD SUCCEEDED** →
+install `com.qimmah.mobile` on iPhone 17 Pro (iOS 26) → launch → render → home-icon visible.
+Screenshots: `docs/proof/native/wave5/*` (wave5, VITE_DESIGN_V2) and
+`docs/proof/native/promotion/*` (flagless v2-default StartView).
