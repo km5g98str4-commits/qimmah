@@ -1,0 +1,907 @@
+{
+  "base": "http://127.0.0.1:4327",
+  "generatedAt": "2026-07-16T12:56:03.148Z",
+  "results": [
+    {
+      "profile": "fresh",
+      "check": "authenticated shell renders",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "profile": "fresh",
+      "check": "route #/dashboard renders",
+      "ok": true,
+      "detail": "root=19636"
+    },
+    {
+      "profile": "fresh",
+      "check": "route #/workout renders",
+      "ok": true,
+      "detail": "root=7682"
+    },
+    {
+      "profile": "fresh",
+      "check": "route #/nutrition renders",
+      "ok": true,
+      "detail": "root=7682"
+    },
+    {
+      "profile": "fresh",
+      "check": "route #/progress renders",
+      "ok": true,
+      "detail": "root=8044"
+    },
+    {
+      "profile": "fresh",
+      "check": "route #/profile renders",
+      "ok": true,
+      "detail": "root=7687"
+    },
+    {
+      "profile": "fresh",
+      "check": "route #/settings renders",
+      "ok": true,
+      "detail": "root=7928"
+    },
+    {
+      "profile": "fresh",
+      "check": "route #/insights renders",
+      "ok": true,
+      "detail": "root=7928"
+    },
+    {
+      "profile": "fresh",
+      "check": "route #/privacy renders",
+      "ok": true,
+      "detail": "root=7928"
+    },
+    {
+      "profile": "fresh",
+      "check": "route #/terms renders",
+      "ok": true,
+      "detail": "root=4440"
+    },
+    {
+      "profile": "fresh",
+      "check": "route #/reset renders",
+      "ok": true,
+      "detail": "root=4440"
+    },
+    {
+      "profile": "fresh",
+      "check": "mobile-320 #/dashboard no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":320,\"innerWidth\":320}"
+    },
+    {
+      "profile": "fresh",
+      "check": "mobile-320 #/workout no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":320,\"innerWidth\":320}"
+    },
+    {
+      "profile": "fresh",
+      "check": "mobile-320 #/nutrition no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":320,\"innerWidth\":320}"
+    },
+    {
+      "profile": "fresh",
+      "check": "mobile-320 #/progress no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":320,\"innerWidth\":320}"
+    },
+    {
+      "profile": "fresh",
+      "check": "mobile-320 #/profile no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":320,\"innerWidth\":320}"
+    },
+    {
+      "profile": "fresh",
+      "check": "mobile-320 #/settings no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":320,\"innerWidth\":320}"
+    },
+    {
+      "profile": "fresh",
+      "check": "tablet-768 #/dashboard no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":768,\"innerWidth\":768}"
+    },
+    {
+      "profile": "fresh",
+      "check": "tablet-768 #/workout no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":768,\"innerWidth\":768}"
+    },
+    {
+      "profile": "fresh",
+      "check": "tablet-768 #/nutrition no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":768,\"innerWidth\":768}"
+    },
+    {
+      "profile": "fresh",
+      "check": "tablet-768 #/progress no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":768,\"innerWidth\":768}"
+    },
+    {
+      "profile": "fresh",
+      "check": "tablet-768 #/profile no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":768,\"innerWidth\":768}"
+    },
+    {
+      "profile": "fresh",
+      "check": "tablet-768 #/settings no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":768,\"innerWidth\":768}"
+    },
+    {
+      "profile": "fresh",
+      "check": "desktop-1280 #/dashboard no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":1280,\"innerWidth\":1280}"
+    },
+    {
+      "profile": "fresh",
+      "check": "desktop-1280 #/workout no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":1280,\"innerWidth\":1280}"
+    },
+    {
+      "profile": "fresh",
+      "check": "desktop-1280 #/nutrition no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":1280,\"innerWidth\":1280}"
+    },
+    {
+      "profile": "fresh",
+      "check": "desktop-1280 #/progress no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":1280,\"innerWidth\":1280}"
+    },
+    {
+      "profile": "fresh",
+      "check": "desktop-1280 #/profile no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":1280,\"innerWidth\":1280}"
+    },
+    {
+      "profile": "fresh",
+      "check": "desktop-1280 #/settings no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":1280,\"innerWidth\":1280}"
+    },
+    {
+      "profile": "fresh",
+      "check": "RTL document root",
+      "ok": true,
+      "detail": "{\"dir\":\"rtl\",\"lang\":\"ar\",\"unnamedButtons\":0,\"positiveTabindex\":0,\"imagesMissingAlt\":0,\"headings\":[\"H1\",\"H2\"]}"
+    },
+    {
+      "profile": "fresh",
+      "check": "document language Arabic",
+      "ok": true,
+      "detail": "ar"
+    },
+    {
+      "profile": "fresh",
+      "check": "no unnamed buttons on dashboard",
+      "ok": true,
+      "detail": "0"
+    },
+    {
+      "profile": "fresh",
+      "check": "no positive tabindex",
+      "ok": true,
+      "detail": "0"
+    },
+    {
+      "profile": "fresh",
+      "check": "images carry alt attribute",
+      "ok": true,
+      "detail": "0"
+    },
+    {
+      "profile": "fresh",
+      "check": "no console secrets",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "profile": "fresh",
+      "check": "zero console/page errors",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "profile": "fresh",
+      "check": "corrupt key fail-safe: qimmah:history:workoutSessions:v1",
+      "ok": true,
+      "detail": "root=20082"
+    },
+    {
+      "profile": "fresh",
+      "check": "corrupt key fail-safe: qimmah:history:waterLogs:v1",
+      "ok": true,
+      "detail": "root=20082"
+    },
+    {
+      "profile": "fresh",
+      "check": "corrupt key fail-safe: qimmah:lastUser:v1",
+      "ok": true,
+      "detail": "root=20385"
+    },
+    {
+      "profile": "fresh",
+      "check": "corrupt key fail-safe: qimmah:history:measurementLogs:v1",
+      "ok": true,
+      "detail": "root=20385"
+    },
+    {
+      "profile": "fresh",
+      "check": "corrupt key fail-safe: qimmah:measurementLogs:v1",
+      "ok": true,
+      "detail": "root=20385"
+    },
+    {
+      "profile": "fresh",
+      "check": "corrupt key fail-safe: qimmah:achievements:v1",
+      "ok": true,
+      "detail": "root=20385"
+    },
+    {
+      "profile": "fresh",
+      "check": "corrupt key fail-safe: qimmah:history:exerciseHistory:v1",
+      "ok": true,
+      "detail": "root=20385"
+    },
+    {
+      "profile": "fresh",
+      "check": "corrupt key fail-safe: qimmah:history:nutritionLogs:v1",
+      "ok": true,
+      "detail": "root=20385"
+    },
+    {
+      "profile": "fresh",
+      "check": "corrupt key fail-safe: qimmah:onboarding:v1",
+      "ok": true,
+      "detail": "root=20385"
+    },
+    {
+      "profile": "fresh",
+      "check": "corrupt key fail-safe: qimmah:onboarding:accounts:v1",
+      "ok": true,
+      "detail": "root=3795"
+    },
+    {
+      "profile": "fresh",
+      "check": "corrupt key fail-safe: qimmah:history:migrated:v1",
+      "ok": true,
+      "detail": "root=20385"
+    },
+    {
+      "profile": "fresh",
+      "check": "corrupt key fail-safe: qimmah:customization:v1",
+      "ok": true,
+      "detail": "root=20385"
+    },
+    {
+      "profile": "fresh",
+      "check": "corrupt key fail-safe: qimmah:history:dailyLogs:v1",
+      "ok": true,
+      "detail": "root=20385"
+    },
+    {
+      "profile": "reviewer",
+      "check": "authenticated shell renders",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "profile": "reviewer",
+      "check": "route #/dashboard renders",
+      "ok": true,
+      "detail": "root=16919"
+    },
+    {
+      "profile": "reviewer",
+      "check": "route #/workout renders",
+      "ok": true,
+      "detail": "root=7682"
+    },
+    {
+      "profile": "reviewer",
+      "check": "route #/nutrition renders",
+      "ok": true,
+      "detail": "root=7682"
+    },
+    {
+      "profile": "reviewer",
+      "check": "route #/progress renders",
+      "ok": true,
+      "detail": "root=8044"
+    },
+    {
+      "profile": "reviewer",
+      "check": "route #/profile renders",
+      "ok": true,
+      "detail": "root=7687"
+    },
+    {
+      "profile": "reviewer",
+      "check": "route #/settings renders",
+      "ok": true,
+      "detail": "root=7928"
+    },
+    {
+      "profile": "reviewer",
+      "check": "route #/insights renders",
+      "ok": true,
+      "detail": "root=7928"
+    },
+    {
+      "profile": "reviewer",
+      "check": "route #/privacy renders",
+      "ok": true,
+      "detail": "root=4129"
+    },
+    {
+      "profile": "reviewer",
+      "check": "route #/terms renders",
+      "ok": true,
+      "detail": "root=4440"
+    },
+    {
+      "profile": "reviewer",
+      "check": "route #/reset renders",
+      "ok": true,
+      "detail": "root=4440"
+    },
+    {
+      "profile": "reviewer",
+      "check": "mobile-320 #/dashboard no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":320,\"innerWidth\":320}"
+    },
+    {
+      "profile": "reviewer",
+      "check": "mobile-320 #/workout no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":320,\"innerWidth\":320}"
+    },
+    {
+      "profile": "reviewer",
+      "check": "mobile-320 #/nutrition no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":320,\"innerWidth\":320}"
+    },
+    {
+      "profile": "reviewer",
+      "check": "mobile-320 #/progress no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":320,\"innerWidth\":320}"
+    },
+    {
+      "profile": "reviewer",
+      "check": "mobile-320 #/profile no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":320,\"innerWidth\":320}"
+    },
+    {
+      "profile": "reviewer",
+      "check": "mobile-320 #/settings no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":320,\"innerWidth\":320}"
+    },
+    {
+      "profile": "reviewer",
+      "check": "tablet-768 #/dashboard no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":768,\"innerWidth\":768}"
+    },
+    {
+      "profile": "reviewer",
+      "check": "tablet-768 #/workout no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":768,\"innerWidth\":768}"
+    },
+    {
+      "profile": "reviewer",
+      "check": "tablet-768 #/nutrition no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":768,\"innerWidth\":768}"
+    },
+    {
+      "profile": "reviewer",
+      "check": "tablet-768 #/progress no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":768,\"innerWidth\":768}"
+    },
+    {
+      "profile": "reviewer",
+      "check": "tablet-768 #/profile no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":768,\"innerWidth\":768}"
+    },
+    {
+      "profile": "reviewer",
+      "check": "tablet-768 #/settings no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":768,\"innerWidth\":768}"
+    },
+    {
+      "profile": "reviewer",
+      "check": "desktop-1280 #/dashboard no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":1280,\"innerWidth\":1280}"
+    },
+    {
+      "profile": "reviewer",
+      "check": "desktop-1280 #/workout no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":1280,\"innerWidth\":1280}"
+    },
+    {
+      "profile": "reviewer",
+      "check": "desktop-1280 #/nutrition no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":1280,\"innerWidth\":1280}"
+    },
+    {
+      "profile": "reviewer",
+      "check": "desktop-1280 #/progress no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":1280,\"innerWidth\":1280}"
+    },
+    {
+      "profile": "reviewer",
+      "check": "desktop-1280 #/profile no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":1280,\"innerWidth\":1280}"
+    },
+    {
+      "profile": "reviewer",
+      "check": "desktop-1280 #/settings no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":1280,\"innerWidth\":1280}"
+    },
+    {
+      "profile": "reviewer",
+      "check": "RTL document root",
+      "ok": true,
+      "detail": "{\"dir\":\"rtl\",\"lang\":\"ar\",\"unnamedButtons\":0,\"positiveTabindex\":0,\"imagesMissingAlt\":0,\"headings\":[\"H1\",\"H2\"]}"
+    },
+    {
+      "profile": "reviewer",
+      "check": "document language Arabic",
+      "ok": true,
+      "detail": "ar"
+    },
+    {
+      "profile": "reviewer",
+      "check": "no unnamed buttons on dashboard",
+      "ok": true,
+      "detail": "0"
+    },
+    {
+      "profile": "reviewer",
+      "check": "no positive tabindex",
+      "ok": true,
+      "detail": "0"
+    },
+    {
+      "profile": "reviewer",
+      "check": "images carry alt attribute",
+      "ok": true,
+      "detail": "0"
+    },
+    {
+      "profile": "reviewer",
+      "check": "no console secrets",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "profile": "reviewer",
+      "check": "zero console/page errors",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "profile": "reviewer",
+      "check": "corrupt key fail-safe: qimmah:history:waterLogs:v1",
+      "ok": true,
+      "detail": "root=17343"
+    },
+    {
+      "profile": "reviewer",
+      "check": "corrupt key fail-safe: qimmah:measurementLogs:v1",
+      "ok": true,
+      "detail": "root=17343"
+    },
+    {
+      "profile": "reviewer",
+      "check": "corrupt key fail-safe: qimmah:nutrition:v2",
+      "ok": true,
+      "detail": "root=17343"
+    },
+    {
+      "profile": "reviewer",
+      "check": "corrupt key fail-safe: qimmah:onboarding:v1",
+      "ok": true,
+      "detail": "root=17343"
+    },
+    {
+      "profile": "reviewer",
+      "check": "corrupt key fail-safe: qimmah:onboarding:accounts:v1",
+      "ok": true,
+      "detail": "root=3795"
+    },
+    {
+      "profile": "reviewer",
+      "check": "corrupt key fail-safe: qimmah:history:migrated:v1",
+      "ok": true,
+      "detail": "root=17343"
+    },
+    {
+      "profile": "reviewer",
+      "check": "corrupt key fail-safe: qimmah:history:workoutSessions:v1",
+      "ok": true,
+      "detail": "root=18637"
+    },
+    {
+      "profile": "reviewer",
+      "check": "corrupt key fail-safe: qimmah:lastUser:v1",
+      "ok": true,
+      "detail": "root=20385"
+    },
+    {
+      "profile": "reviewer",
+      "check": "corrupt key fail-safe: qimmah:history:measurementLogs:v1",
+      "ok": true,
+      "detail": "root=20385"
+    },
+    {
+      "profile": "reviewer",
+      "check": "corrupt key fail-safe: qimmah:achievements:v1",
+      "ok": true,
+      "detail": "root=20385"
+    },
+    {
+      "profile": "reviewer",
+      "check": "corrupt key fail-safe: qimmah:history:exerciseHistory:v1",
+      "ok": true,
+      "detail": "root=20385"
+    },
+    {
+      "profile": "reviewer",
+      "check": "corrupt key fail-safe: qimmah:history:nutritionLogs:v1",
+      "ok": true,
+      "detail": "root=20385"
+    },
+    {
+      "profile": "reviewer",
+      "check": "corrupt key fail-safe: qimmah:customization:v1",
+      "ok": true,
+      "detail": "root=20385"
+    },
+    {
+      "profile": "reviewer",
+      "check": "corrupt key fail-safe: qimmah:history:dailyLogs:v1",
+      "ok": true,
+      "detail": "root=20385"
+    },
+    {
+      "profile": "veteran",
+      "check": "authenticated shell renders",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "profile": "veteran",
+      "check": "route #/dashboard renders",
+      "ok": true,
+      "detail": "root=3046"
+    },
+    {
+      "profile": "veteran",
+      "check": "route #/workout renders",
+      "ok": true,
+      "detail": "root=3046"
+    },
+    {
+      "profile": "veteran",
+      "check": "route #/nutrition renders",
+      "ok": true,
+      "detail": "root=3046"
+    },
+    {
+      "profile": "veteran",
+      "check": "route #/progress renders",
+      "ok": true,
+      "detail": "root=3046"
+    },
+    {
+      "profile": "veteran",
+      "check": "route #/profile renders",
+      "ok": true,
+      "detail": "root=3046"
+    },
+    {
+      "profile": "veteran",
+      "check": "route #/settings renders",
+      "ok": true,
+      "detail": "root=3046"
+    },
+    {
+      "profile": "veteran",
+      "check": "route #/insights renders",
+      "ok": true,
+      "detail": "root=3287"
+    },
+    {
+      "profile": "veteran",
+      "check": "route #/privacy renders",
+      "ok": true,
+      "detail": "root=3287"
+    },
+    {
+      "profile": "veteran",
+      "check": "route #/terms renders",
+      "ok": true,
+      "detail": "root=4440"
+    },
+    {
+      "profile": "veteran",
+      "check": "route #/reset renders",
+      "ok": true,
+      "detail": "root=4440"
+    },
+    {
+      "profile": "veteran",
+      "check": "mobile-320 #/dashboard no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":320,\"innerWidth\":320}"
+    },
+    {
+      "profile": "veteran",
+      "check": "mobile-320 #/workout no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":320,\"innerWidth\":320}"
+    },
+    {
+      "profile": "veteran",
+      "check": "mobile-320 #/nutrition no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":320,\"innerWidth\":320}"
+    },
+    {
+      "profile": "veteran",
+      "check": "mobile-320 #/progress no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":320,\"innerWidth\":320}"
+    },
+    {
+      "profile": "veteran",
+      "check": "mobile-320 #/profile no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":320,\"innerWidth\":320}"
+    },
+    {
+      "profile": "veteran",
+      "check": "mobile-320 #/settings no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":320,\"innerWidth\":320}"
+    },
+    {
+      "profile": "veteran",
+      "check": "tablet-768 #/dashboard no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":768,\"innerWidth\":768}"
+    },
+    {
+      "profile": "veteran",
+      "check": "tablet-768 #/workout no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":768,\"innerWidth\":768}"
+    },
+    {
+      "profile": "veteran",
+      "check": "tablet-768 #/nutrition no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":768,\"innerWidth\":768}"
+    },
+    {
+      "profile": "veteran",
+      "check": "tablet-768 #/progress no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":768,\"innerWidth\":768}"
+    },
+    {
+      "profile": "veteran",
+      "check": "tablet-768 #/profile no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":768,\"innerWidth\":768}"
+    },
+    {
+      "profile": "veteran",
+      "check": "tablet-768 #/settings no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":768,\"innerWidth\":768}"
+    },
+    {
+      "profile": "veteran",
+      "check": "desktop-1280 #/dashboard no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":1280,\"innerWidth\":1280}"
+    },
+    {
+      "profile": "veteran",
+      "check": "desktop-1280 #/workout no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":1280,\"innerWidth\":1280}"
+    },
+    {
+      "profile": "veteran",
+      "check": "desktop-1280 #/nutrition no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":1280,\"innerWidth\":1280}"
+    },
+    {
+      "profile": "veteran",
+      "check": "desktop-1280 #/progress no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":1280,\"innerWidth\":1280}"
+    },
+    {
+      "profile": "veteran",
+      "check": "desktop-1280 #/profile no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":1280,\"innerWidth\":1280}"
+    },
+    {
+      "profile": "veteran",
+      "check": "desktop-1280 #/settings no overflow",
+      "ok": true,
+      "detail": "{\"scrollWidth\":1280,\"innerWidth\":1280}"
+    },
+    {
+      "profile": "veteran",
+      "check": "RTL document root",
+      "ok": true,
+      "detail": "{\"dir\":\"rtl\",\"lang\":\"ar\",\"unnamedButtons\":0,\"positiveTabindex\":0,\"imagesMissingAlt\":0,\"headings\":[\"H1\"]}"
+    },
+    {
+      "profile": "veteran",
+      "check": "document language Arabic",
+      "ok": true,
+      "detail": "ar"
+    },
+    {
+      "profile": "veteran",
+      "check": "no unnamed buttons on dashboard",
+      "ok": true,
+      "detail": "0"
+    },
+    {
+      "profile": "veteran",
+      "check": "no positive tabindex",
+      "ok": true,
+      "detail": "0"
+    },
+    {
+      "profile": "veteran",
+      "check": "images carry alt attribute",
+      "ok": true,
+      "detail": "0"
+    },
+    {
+      "profile": "veteran",
+      "check": "no console secrets",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "profile": "veteran",
+      "check": "zero console/page errors",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "profile": "veteran",
+      "check": "corrupt key fail-safe: qimmah:history:workoutSessions:v1",
+      "ok": true,
+      "detail": "root=18637"
+    },
+    {
+      "profile": "veteran",
+      "check": "corrupt key fail-safe: qimmah:history:waterLogs:v1",
+      "ok": true,
+      "detail": "root=17343"
+    },
+    {
+      "profile": "veteran",
+      "check": "corrupt key fail-safe: qimmah:history:measurementLogs:v1",
+      "ok": true,
+      "detail": "root=17347"
+    },
+    {
+      "profile": "veteran",
+      "check": "corrupt key fail-safe: qimmah:measurementLogs:v1",
+      "ok": true,
+      "detail": "root=17343"
+    },
+    {
+      "profile": "veteran",
+      "check": "corrupt key fail-safe: qimmah:achievements:v1",
+      "ok": true,
+      "detail": "root=17343"
+    },
+    {
+      "profile": "veteran",
+      "check": "corrupt key fail-safe: qimmah:history:exerciseHistory:v1",
+      "ok": true,
+      "detail": "root=17343"
+    },
+    {
+      "profile": "veteran",
+      "check": "corrupt key fail-safe: qimmah:nutrition:v2",
+      "ok": true,
+      "detail": "root=17343"
+    },
+    {
+      "profile": "veteran",
+      "check": "corrupt key fail-safe: qimmah:history:nutritionLogs:v1",
+      "ok": true,
+      "detail": "root=17487"
+    },
+    {
+      "profile": "veteran",
+      "check": "corrupt key fail-safe: qimmah:onboarding:v1",
+      "ok": true,
+      "detail": "root=17343"
+    },
+    {
+      "profile": "veteran",
+      "check": "corrupt key fail-safe: qimmah:onboarding:accounts:v1",
+      "ok": true,
+      "detail": "root=3795"
+    },
+    {
+      "profile": "veteran",
+      "check": "corrupt key fail-safe: qimmah:customization:v1",
+      "ok": true,
+      "detail": "root=17668"
+    },
+    {
+      "profile": "veteran",
+      "check": "corrupt key fail-safe: qimmah:history:dailyLogs:v1",
+      "ok": true,
+      "detail": "root=17343"
+    },
+    {
+      "profile": "apple-reviewer",
+      "check": "#/reset renders without white screen",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "profile": "apple-reviewer",
+      "check": "privacy link resolves",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "profile": "apple-reviewer",
+      "check": "terms link resolves",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "failures": []
+}

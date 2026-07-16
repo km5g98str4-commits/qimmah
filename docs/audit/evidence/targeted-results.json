@@ -1,0 +1,92 @@
+{
+  "generatedAt": "2026-07-16T12:58:00.166Z",
+  "checks": [
+    {
+      "id": "welcome-rendered",
+      "ok": true,
+      "detail": "EN\nقِمّة\nدرّب بوضوح.\nتقدّم بثقة.\n\nتمرينك وتغذيتك وتقدمك في مكان واحد — بالعربية، وبخطوات واضحة.\n\nبلا إعلانات، وبلا مبالغ"
+    },
+    {
+      "id": "no-pwa-banner-web-flagless",
+      "ok": true,
+      "detail": "EN\nقِمّة\nدرّب بوضوح.\nتقدّم بثقة.\n\nتمرينك وتغذيتك وتقدمك في مكان واحد — بالعربية، وبخطوات واضحة.\n\nبلا إعلانات، وبلا مبالغات.\n\nابدأ الآنلديك حساب؟ تسجيل الدخول"
+    },
+    {
+      "id": "legal-/legal/privacy.html",
+      "ok": true,
+      "detail": "status=200 chars=7665"
+    },
+    {
+      "id": "legal-/legal/terms.html",
+      "ok": true,
+      "detail": "status=200 chars=5283"
+    },
+    {
+      "id": "reset-route-content",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "settings-import-exposed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "hostile-malformed",
+      "ok": true,
+      "detail": "{\"dialogs\":[{\"type\":\"alert\",\"message\":\"تعذّرت قراءة الملف. تأكّد أنّه نسخة قِمّة صحيحة.\"}],\"profileName\":\"أحمد\"}"
+    },
+    {
+      "id": "hostile-wrong-version",
+      "ok": false,
+      "detail": "{\"dialogs\":[{\"type\":\"confirm\",\"message\":\"سيستبدل الاستيراد خطّتك وسجلّك الحالي بمحتوى الملف. هل تريد المتابعة؟\"},{\"type\":\"alert\",\"message\":\"تم استيراد نسختك بنجاح.\"}],\"profileName\":\"WRONG_VERSION_ACCEPTED\"}"
+    },
+    {
+      "id": "hostile-cross-uid",
+      "ok": false,
+      "detail": "{\"dialogs\":[{\"type\":\"confirm\",\"message\":\"سيستبدل الاستيراد خطّتك وسجلّك الحالي بمحتوى الملف. هل تريد المتابعة؟\"},{\"type\":\"alert\",\"message\":\"تم استيراد نسختك بنجاح.\"}],\"profileName\":\"OWNER_B_INJECTED\"}"
+    },
+    {
+      "id": "hostile-oversized",
+      "ok": true,
+      "detail": "{\"dialogs\":[{\"type\":\"confirm\",\"message\":\"سيستبدل الاستيراد خطّتك وسجلّك الحالي بمحتوى الملف. هل تريد المتابعة؟\"},{\"type\":\"alert\",\"message\":\"تعذّرت قراءة الملف. تأكّد أنّه نسخة قِمّة صحيحة.\"}],\"profileName\":\"OWNER_B_INJECTED\"}"
+    },
+    {
+      "id": "xss-profile-name-escaped",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "service-worker-ready-in-audit-build",
+      "ok": false,
+      "detail": "custom docs/audit outDir cannot be post-processed by the hard-coded dist/sw.js build hook"
+    },
+    {
+      "id": "offline-kill-reload",
+      "ok": false,
+      "detail": "Error: page.reload: net::ERR_INTERNET_DISCONNECTED\nCall log:\n\u001b[2m  - waiting for navigation until \"domcontentloaded\"\u001b[22m\n"
+    }
+  ],
+  "failures": [
+    {
+      "id": "hostile-wrong-version",
+      "ok": false,
+      "detail": "{\"dialogs\":[{\"type\":\"confirm\",\"message\":\"سيستبدل الاستيراد خطّتك وسجلّك الحالي بمحتوى الملف. هل تريد المتابعة؟\"},{\"type\":\"alert\",\"message\":\"تم استيراد نسختك بنجاح.\"}],\"profileName\":\"WRONG_VERSION_ACCEPTED\"}"
+    },
+    {
+      "id": "hostile-cross-uid",
+      "ok": false,
+      "detail": "{\"dialogs\":[{\"type\":\"confirm\",\"message\":\"سيستبدل الاستيراد خطّتك وسجلّك الحالي بمحتوى الملف. هل تريد المتابعة؟\"},{\"type\":\"alert\",\"message\":\"تم استيراد نسختك بنجاح.\"}],\"profileName\":\"OWNER_B_INJECTED\"}"
+    },
+    {
+      "id": "service-worker-ready-in-audit-build",
+      "ok": false,
+      "detail": "custom docs/audit outDir cannot be post-processed by the hard-coded dist/sw.js build hook"
+    },
+    {
+      "id": "offline-kill-reload",
+      "ok": false,
+      "detail": "Error: page.reload: net::ERR_INTERNET_DISCONNECTED\nCall log:\n\u001b[2m  - waiting for navigation until \"domcontentloaded\"\u001b[22m\n"
+    }
+  ]
+}
