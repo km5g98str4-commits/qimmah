@@ -1,0 +1,65 @@
+<!doctype html>
+<!--
+  مُركِّب لقطات App Store — قِمّة (Round 2). يضع كل لقطة خام (raw/0N.png، 1320×2868)
+  داخل إطار Momentum مُعنوَن بشعار قِمّة العقدي (canonical mark) وتعليق فعلي قصير (≤6 كلمات).
+  يُصدَّر عبر Playwright بأبعاد 6.9" الإلزامية 1320×2868 (Apple: developer.apple.com/help/
+  app-store-connect/reference/screenshot-specifications — مُتحقَّق 2026-07-15).
+  بلا أي طلب خارجي: الخطّ محلي (site/fonts)، الصور محلية، والشعار SVG مضمّن.
+  الاستخدام: compositor.html?shot=02  (01..06)
+-->
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family: 'Plex Arabic'; src: url('../../../site/fonts/ipsa-arabic-700.woff2') format('woff2'); font-weight: 700 800; font-display: block; }
+  @font-face { font-family: 'Plex Arabic'; src: url('../../../site/fonts/ipsa-arabic-500.woff2') format('woff2'); font-weight: 500 600; font-display: block; }
+  :root { --ember:#F26A21; --ink:#181b21; --beige:#f6f2ec; }
+  * { margin:0; box-sizing:border-box; }
+  html,body { width:1320px; height:2868px; }
+  body {
+    font-family:'Plex Arabic', system-ui, sans-serif;
+    background: radial-gradient(120% 60% at 50% 0%, #fff 0%, var(--beige) 60%, #efe7db 100%);
+    display:flex; flex-direction:column; align-items:center; overflow:hidden;
+  }
+  .cap { width:100%; padding:150px 96px 40px; text-align:center; }
+  .mark { width:132px; height:132px; margin:0 auto 40px; display:block; }
+  h1 { font-weight:800; font-size:104px; line-height:1.22; color:var(--ink); letter-spacing:-1px; }
+  .device-wrap {
+    flex:1; display:flex; align-items:flex-start; justify-content:center; width:100%; padding-top:24px;
+  }
+  .device {
+    width:1040px; border-radius:64px; overflow:hidden;
+    box-shadow: 0 60px 120px -30px rgba(24,27,33,.38), 0 0 0 2px rgba(24,27,33,.06);
+    background:#fff;
+  }
+  .device img { width:100%; display:block; }
+</style>
+</head>
+<body>
+  <div class="cap">
+    <!-- شعار قِمّة العقدي (canonical): apex 512,340 · nodes 302,640/722,640 · stroke 96 · r 96 على 1024 -->
+    <svg class="mark" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" aria-label="قِمّة">
+      <path d="M302 640 L512 340 L722 640" fill="none" stroke="#F26A21" stroke-width="96" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="302" cy="640" r="96" fill="#F26A21"/>
+      <circle cx="722" cy="640" r="96" fill="#F26A21"/>
+    </svg>
+    <h1 id="cap"></h1>
+  </div>
+  <div class="device-wrap"><div class="device"><img id="shot" alt=""></div></div>
+<script>
+  // تعليقات فعلية قصيرة (≤6 كلمات، فصحى، صيغة أمر) — واحدة لكل سطح.
+  const CAPTIONS = {
+    '01': 'درّب بوضوح. تقدّم بثقة.',
+    '02': 'ابدأ يومك بخطوة واضحة',
+    '03': 'سجّل كل مجموعة بثقة',
+    '04': 'تتبّع تغذيتك بسهولة',
+    '05': 'اقرأ تقدّمك بصدق',
+    '06': 'تابع رحلتك التدريبية',
+  };
+  const FILES = { '01':'01-welcome','02':'02-today','03':'03-workout','04':'04-nutrition','05':'05-progress','06':'06-profile' };
+  const n = (new URLSearchParams(location.search).get('shot') || '02').padStart(2,'0');
+  document.getElementById('cap').textContent = CAPTIONS[n] || '';
+  document.getElementById('shot').src = 'raw/' + (FILES[n] || FILES['02']) + '.png';
+</script>
+</body>
+</html>
