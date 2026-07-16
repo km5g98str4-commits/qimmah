@@ -52,6 +52,14 @@ export function MobileShell({ lang, tab, badge, onNavigate, onOpenSettings, chil
 
   return (
     <div className="min-h-screen bg-page">
+      {/* رابط تخطٍّ للمحتوى — أول عنصر قابل للتركيز؛ مخفي حتى التركيز بلوحة المفاتيح. */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:z-[60] focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:text-white focus:shadow-glow"
+        style={{ insetInlineStart: '0.5rem' }}
+      >
+        {ar ? 'تخطَّ إلى المحتوى' : 'Skip to content'}
+      </a>
       <div className="app-container flex min-h-screen flex-col border-x border-line/60">
         {/* هيدر مدمج */}
         <header className="sticky top-0 z-40 glass" style={{ paddingTop: 'var(--safe-top)' }}>
@@ -93,8 +101,10 @@ export function MobileShell({ lang, tab, badge, onNavigate, onOpenSettings, chil
         {/* شريط تثبيت التطبيق — قابل للإغلاق، يظهر فقط عند الحاجة */}
         <InstallBanner lang={lang} onOpenSettings={onOpenSettings} />
 
-        {/* المحتوى */}
-        <main className="flex-1 pb-24">{children}</main>
+        {/* المحتوى — هدف رابط التخطّي؛ حشوة سفلية واعية بمنطقة الأمان فلا يُحجب المحتوى خلف الشريط. */}
+        <main id="main-content" tabIndex={-1} className="flex-1 focus:outline-none" style={{ paddingBottom: 'calc(var(--safe-bottom, 0px) + 5.75rem)' }}>
+          {children}
+        </main>
       </div>
 
       {/* شريط التنقّل السفلي — ثابت، مع مسافة أمان */}
