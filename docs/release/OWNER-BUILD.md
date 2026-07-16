@@ -1,16 +1,34 @@
 # بناء قِمّة صباحًا على iPhone زياد
 
-## خطوات البناء
+فرعان قانونيان، كلاهما **غير مدموج** بانتظار تحقّقك على الجهاز. اختر واحدًا:
+
+## خيار أ — بناء الترويج (v2 افتراضي بلا علم — الموصى به للنشر)
 
 ```bash
 cd /Users/ziyad/qimmah-promotion
 git switch design/v21-promotion
 git pull --ff-only origin design/v21-promotion
 npm ci
-npm run build
+npm run build            # بلا علم — v2 هو الافتراضي (v1 مُتقاعد)
 npx cap sync ios
 open ios/App/App.xcodeproj
 ```
+
+## خيار ب — بناء الترنك المتكامل wave5 (v2 خلف علم)
+
+```bash
+cd /Users/ziyad/qimmah-integration-w5
+git switch integration/wave5
+git pull --ff-only origin integration/wave5
+npm ci
+VITE_DESIGN_V2=true npm run build   # wave5 يحتاج العلم لتفعيل v2
+npx cap sync ios
+open ios/App/App.xcodeproj
+```
+
+> تم التحقّق الأصلي لكِلا الفرعين على المحاكي (iPhone 17 Pro · iOS 26): xcodebuild BUILD SUCCEEDED،
+> تثبيت `com.qimmah.mobile`، إقلاع ورسم، والأيقونة ظاهرة. لقطات في `docs/proof/native/`.
+> بناء الجهاز الفعلي والتوقيع يبقيان خطوتك.
 
 **احذف تطبيق قِمّة من الهاتف قبل كل تثبيت يغيّر غلاف iOS أو الأيقونات أو التخزين.**
 
