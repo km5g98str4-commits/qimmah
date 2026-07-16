@@ -1,8 +1,9 @@
-import { useRef, useState, type ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { AppNav, type AppView } from '@/components/AppNav'
 import { Footer } from '@/components/Footer'
 import { Icon } from '@/components/Icon'
 import { DeviceSettings } from '@/components/DeviceSettings'
+import { DataManagementPanel } from '@/components/DataManagementPanel'
 import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
 import { installGuideStrings } from '@/i18n/dict/installGuide'
@@ -10,9 +11,6 @@ import { isIOSSafari } from '@/lib/installState'
 import { LanguageToggle } from '@/i18n'
 import { useAuth } from '@/lib/authContext'
 import { useCustomization } from '@/lib/customizationContext'
-import { type Customization, getDefaultCustomization } from '@/lib/customization'
-import { exportHistory, importHistory, type HistorySnapshot } from '@/lib/historyStore'
-import { loadPreferences, savePreferences, type AppPreferences } from '@/lib/appPreferences'
 import { resetQimmah } from '@/lib/resetQimmah'
 import { getConsent, setConsent } from '@/lib/analytics'
 import { generatePlan } from '@/lib/planGenerator'
@@ -21,16 +19,6 @@ import { BUILD_LABEL } from '@/lib/buildInfo'
 import { NotificationSettingsPanel } from '@/components/NotificationSettingsPanel'
 import { NativeSettingsPanel } from '@/components/NativeSettingsPanel'
 import { NATIVE_SETTINGS_COPY } from '@/data/nativeSettings'
-
-const EXPORT_VERSION = 2
-
-interface QimmahExport {
-  version: number
-  exportedAt: string
-  customization: Customization
-  history: HistorySnapshot
-  preferences: AppPreferences
-}
 
 interface SettingsViewProps {
   lang: Lang
@@ -57,54 +45,12 @@ export function SettingsView({
   const t = getStrings(lang)
   const auth = useAuth()
   const { customization, applyCustomization } = useCustomization()
-  const fileRef = useRef<HTMLInputElement>(null)
 
   const badge: 'guest' | 'account' = auth.user ? 'account' : 'guest'
 
-  // — البيانات: تصدير —
-  const onExport = () => {
-    const payload: QimmahExport = {
-      version: EXPORT_VERSION,
-      exportedAt: new Date().toISOString(),
-      customization,
-      history: exportHistory(),
-      preferences: loadPreferences(),
-    }
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `qimmah-backup-${new Date().toISOString().slice(0, 10)}.json`
-    a.click()
-    URL.revokeObjectURL(url)
-  }
-
-  // — البيانات: استيراد —
-  const onImport = (file: File) => {
-    const reader = new FileReader()
-    reader.onload = () => {
-      try {
-        const parsed = JSON.parse(String(reader.result)) as Partial<QimmahExport> & Partial<Customization>
-        if (!window.confirm(t.settings.importConfirm)) return
-        const base = getDefaultCustomization()
-        const cust = (parsed.customization ?? (parsed as Partial<Customization>)) as Partial<Customization>
-        applyCustomization({
-          ...base,
-          ...cust,
-          identity: { ...base.identity, ...(cust.identity ?? {}) },
-          profile: { ...base.profile, ...(cust.profile ?? {}) },
-          targets: { ...base.targets, ...(cust.targets ?? {}) },
-        })
-        if (parsed.history) importHistory(parsed.history)
-        if (parsed.preferences) savePreferences({ ...loadPreferences(), ...parsed.preferences })
-        markPendingSync()
-        window.alert(t.settings.importSuccess)
-      } catch {
-        window.alert(t.settings.importError)
-      }
-    }
-    reader.readAsText(file)
-  }
+  // — البيانات: تصدير/استيراد يمرّان حصريًّا عبر <DataManagementPanel> (المسار المحصّن) —
+  // المستورد القديم (FileReader + JSON.parse بلا تحقّق) أُزيل: كان يقبل إصدارًا غير مدعوم
+  // وحقنًا من حساب آخر ويعرض «نجاحًا» دون تطبيق فعلي. QEA-001.
 
   // — البيانات: إعادة ضبط —
   const onReset = () => {
@@ -301,17 +247,10 @@ export function SettingsView({
           )}
         </SettingsGroup>
 
-        {/* 2) البيانات */}
+        {/* 2) البيانات — تصدير/استيراد محصّن (معاينة → تأكيد → تطبيق ذرّي → تراجع) + إعادة ضبط */}
         <SettingsGroup icon="Database" title={t.settings.groupData}>
-          <div className="flex flex-wrap gap-2">
-            <button type="button" onClick={onExport} className="btn-ghost px-4 py-2.5 text-sm">
-              <Icon name="TrendingDown" className="h-4 w-4" />
-              {t.settings.export}
-            </button>
-            <button type="button" onClick={() => fileRef.current?.click()} className="btn-ghost px-4 py-2.5 text-sm">
-              <Icon name="TrendingUp" className="h-4 w-4" />
-              {t.settings.import}
-            </button>
+          <DataManagementPanel lang={lang} uid={auth.user?.id ?? null} recoveryActive={auth.recoveryActive} />
+          <div className="mt-3 border-t border-line pt-3">
             <button
               type="button"
               onClick={onReset}
@@ -320,17 +259,6 @@ export function SettingsView({
               <Icon name="RotateCcw" className="h-4 w-4" />
               {t.settings.reset}
             </button>
-            <input
-              ref={fileRef}
-              type="file"
-              accept="application/json,.json"
-              className="hidden"
-              onChange={(e) => {
-                const f = e.target.files?.[0]
-                if (f) onImport(f)
-                e.target.value = ''
-              }}
-            />
           </div>
         </SettingsGroup>
 

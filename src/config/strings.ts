@@ -110,6 +110,25 @@ export interface ShellStrings {
     importConfirm: string
     importSuccess: string
     importError: string
+    // — نقل البيانات المحصّن (معاينة → تأكيد → تطبيق ذرّي → تراجع) —
+    dataLocalNote: string
+    exportShared: string
+    exportDownloaded: string
+    exportFailed: string
+    importPreviewTitle: string
+    importPreviewNote: string
+    importConfirmBtn: string
+    importCancel: string
+    importBackedUp: string
+    importExtra: string
+    importDoneTitle: string
+    importDoneNote: string
+    importViewData: string
+    importUndo: string
+    importUndoLast: string
+    importUndoDesc: string
+    importRecoveryBlocked: string
+    importInvalidFile: string
     regenerateSuccess: string
     groupDev: string
     devReviewProducts: string
@@ -550,6 +569,25 @@ const ar: ShellStrings = {
     importConfirm: 'سيستبدل الاستيراد خطّتك وسجلّك الحالي بمحتوى الملف. هل تريد المتابعة؟',
     importSuccess: 'تم استيراد نسختك بنجاح.',
     importError: 'تعذّرت قراءة الملف. تأكّد أنّه نسخة قِمّة صحيحة.',
+    dataLocalNote:
+      'كل شيء يتمّ على جهازك — لا يُرسَل أي شيء إلى أي خادم. النسخة ملفّ JSON تحفظه أو تشاركه كما تشاء.',
+    exportShared: 'تمّت مشاركة نسخة بياناتك.',
+    exportDownloaded: 'تم تنزيل نسخة بياناتك على جهازك.',
+    exportFailed: 'تعذّر إنشاء نسخة التصدير.',
+    importPreviewTitle: 'معاينة الاستيراد',
+    importPreviewNote: 'ستحلّ هذه البيانات محلّ ما على جهازك الآن. يمكنك التراجع بعد الاستيراد.',
+    importConfirmBtn: 'تأكيد الاستيراد',
+    importCancel: 'إلغاء',
+    importBackedUp: 'أُنشئت النسخة',
+    importExtra: 'عناصر إضافية',
+    importDoneTitle: 'تمّ الاستيراد',
+    importDoneNote: 'استُعيدت بياناتك على هذا الجهاز.',
+    importViewData: 'عرض بياناتي',
+    importUndo: 'تراجع',
+    importUndoLast: 'تراجع عن آخر استيراد',
+    importUndoDesc: 'يعيد بياناتك إلى ما قبل آخر استيراد.',
+    importRecoveryBlocked: 'لا يمكن الاستيراد أثناء استعادة كلمة المرور.',
+    importInvalidFile: 'ملفّ غير صالح.',
     regenerateSuccess: 'تم إعادة توليد خطتك من بياناتك الحالية.',
     groupDev: 'أدوات داخلية',
     devReviewProducts: 'مراجعة المنتجات',
@@ -998,6 +1036,25 @@ const en: ShellStrings = {
     importConfirm: 'Importing will replace your current plan and logs with the file contents. Continue?',
     importSuccess: 'Your backup was imported successfully.',
     importError: "Couldn't read the file. Make sure it's a valid Qimmah backup.",
+    dataLocalNote:
+      'Everything happens on your device — nothing is sent to any server. The backup is a JSON file you keep or share as you wish.',
+    exportShared: 'Your data copy was shared.',
+    exportDownloaded: 'Your data was downloaded to your device.',
+    exportFailed: 'Could not create the export.',
+    importPreviewTitle: 'Import preview',
+    importPreviewNote: 'This will replace what is on your device now. You can undo after importing.',
+    importConfirmBtn: 'Confirm import',
+    importCancel: 'Cancel',
+    importBackedUp: 'Backed up',
+    importExtra: 'Extra items',
+    importDoneTitle: 'Import complete',
+    importDoneNote: 'Your data was restored on this device.',
+    importViewData: 'View my data',
+    importUndo: 'Undo',
+    importUndoLast: 'Undo last import',
+    importUndoDesc: 'Restores your data to before the last import.',
+    importRecoveryBlocked: 'Import is disabled during password recovery.',
+    importInvalidFile: 'Invalid file.',
     regenerateSuccess: 'Your plan was regenerated from your current data.',
     groupDev: 'Internal tools',
     devReviewProducts: 'Product review',

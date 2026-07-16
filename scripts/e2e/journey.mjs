@@ -6,6 +6,7 @@ const steps = [
   ['signup/onboarding 12+ + health gate + retry', ['npm','run','test:e2e:onboarding']],
   ['reviewer journey: Today → workout 99 → reload/resume → finish → meal → progress/profile', ['node','scripts/appstore-screenshot-factory.mjs']],
   ['export/import bundle validity + owner isolation', ['npm','run','test:portability']],
+  ['#/settings hardened import: old exploit fails, valid import succeeds (browser)', ['node','scripts/e2e/settings-import-security.mjs']],
   ['logout wipe + user-B zero residue', ['npm','run','test:isolation']],
   ['policy gate: signup blocked until 12+', ['npm','run','test:policy']],
 ]
