@@ -1,7 +1,16 @@
 // Scientific formula proof vectors against the live Qimmah implementations.
 // Hand calculations and citations are documented in docs/features/FORMULAS.md.
 
-import { computeTargets, defaultProfile, totalActivityMultiplier } from '@/lib/calculators'
+import {
+  ADULT_MIN_AGE,
+  computeTargets,
+  defaultProfile,
+  MINOR_BMI_LABEL,
+  MINOR_PLAN_NOTE,
+  totalActivityMultiplier,
+  WATER_MAX_LITERS,
+  WATER_MIN_LITERS,
+} from '@/lib/calculators'
 import { computeAdherence, computeProtein, computeVolume, computeWeight, linregSlopePerDay, rollingSmooth } from '@/lib/insights/metrics'
 import type { InsightInput } from '@/lib/insights/types'
 import { brzycki, e1rm, epley, velocityKgPerWeek } from '@/lib/strength/e1rm'
@@ -82,13 +91,60 @@ verifyTargets('onboarding-min-age12', profile({
   activityLevel: 'sedentary', trainingDays: 0, goal: 'maintain', goalType: 'maintenance',
 }), { bmr: 829, tdee: 995, targetCalories: 995, proteinGrams: 54, fatGrams: 30, carbsGrams: 127, waterLiters: 2.5, bmi: 20.8 })
 
+// Water is now clamped to WATER_MAX_LITERS (4.0). Pre-fix this vector returned 9.0 L —
+// the guardrail regression below asserts it can never return there again.
 verifyTargets('onboarding-max', profile({
   gender: 'male', age: 80, heightCm: 220, weightKg: 250, targetWeightKg: 250,
   activityLevel: 'very_active', trainingDays: 7, goal: 'maintain', goalType: 'maintenance',
-}), { bmr: 3480, tdee: 5655, targetCalories: 5655, proteinGrams: 450, fatGrams: 170, carbsGrams: 581, waterLiters: 9, bmi: 51.7 })
+}), { bmr: 3480, tdee: 5655, targetCalories: 5655, proteinGrams: 450, fatGrams: 170, carbsGrams: 581, waterLiters: 4, bmi: 51.7 })
 
 check('zero-training activity multiplier', totalActivityMultiplier('sedentary', 0), 1.2)
 check('seven-day activity multiplier', totalActivityMultiplier('very_active', 7), 1.625)
+
+// ── SCIENTIFIC GUARDRAIL REGRESSION ────────────────────────────────────────
+// These assertions lock in the two safety fixes and must never regress:
+//   1) Water is clamped to [2.5, 4.0] L — the 9 L max-bound output can never return.
+//   2) Under-18 users never receive an adult BMI classification (WHO requires BMI-for-age);
+//      they get the safe specialist-referral label and a minor plan note instead.
+// The matrix covers age 12/17/18, both sexes, min/max weight+height, cut/bulk/maintain,
+// and zero activity, as required by the mission.
+console.log('\nSCIENTIFIC GUARDRAIL REGRESSION')
+
+const targetsFor = (o: Partial<Profile>) => computeTargets(profile(o))
+
+// (1) WATER GUARDRAIL — no output above WATER_MAX_LITERS at any allowed weight.
+check('water cap: male 250kg is 4.0 L (was 9.0)', targetsFor({ gender: 'male', weightKg: 250, heightCm: 220, age: 80, targetWeightKg: 250, goalType: 'maintenance', goal: 'maintain', activityLevel: 'very_active', trainingDays: 7 }).waterLiters, WATER_MAX_LITERS)
+check('water cap: female 250kg is 4.0 L', targetsFor({ gender: 'female', weightKg: 250, heightCm: 210, age: 70, targetWeightKg: 200, goalType: 'cutting', goal: 'cut', activityLevel: 'very_active', trainingDays: 7 }).waterLiters, WATER_MAX_LITERS)
+check('water floor: min 15kg is 2.5 L', targetsFor({ gender: 'female', weightKg: 15, heightCm: 100, age: 18, targetWeightKg: 15, goalType: 'maintenance', goal: 'maintain', activityLevel: 'sedentary', trainingDays: 0 }).waterLiters, WATER_MIN_LITERS)
+// Explicit "never 9 L again" across a sweep of the top of the allowed weight range.
+for (const kg of [115, 150, 200, 250]) {
+  const w = targetsFor({ gender: 'male', weightKg: kg, heightCm: 200, age: 30, targetWeightKg: kg, goalType: 'maintenance', goal: 'maintain', activityLevel: 'moderate', trainingDays: 4 }).waterLiters
+  check(`water never exceeds cap at ${kg}kg`, w <= WATER_MAX_LITERS && w >= WATER_MIN_LITERS, true)
+}
+
+// (2) MINOR BMI GUARDRAIL — under 18 never gets an adult label; gets safe wording + note.
+for (const age of [12, 15, 17]) {
+  for (const gender of ['male', 'female'] as const) {
+    const t = targetsFor({ gender, age, heightCm: 160, weightKg: 60, targetWeightKg: 60, goalType: 'maintenance', goal: 'maintain', activityLevel: 'sedentary', trainingDays: 0 })
+    check(`minor ${gender} age ${age}: safe BMI label`, t.bmiLabel, MINOR_BMI_LABEL)
+    check(`minor ${gender} age ${age}: BMI number still shown`, t.bmi > 0, true)
+    check(`minor ${gender} age ${age}: plan note present`, t.notes.includes(MINOR_PLAN_NOTE), true)
+  }
+}
+// Adult boundary: exactly ADULT_MIN_AGE (18) is treated as an adult again.
+for (const gender of ['male', 'female'] as const) {
+  const t = targetsFor({ gender, age: ADULT_MIN_AGE, heightCm: 172, weightKg: 68, targetWeightKg: 68, goalType: 'maintenance', goal: 'maintain', activityLevel: 'active', trainingDays: 5 })
+  check(`adult ${gender} age 18: not the minor label`, t.bmiLabel !== MINOR_BMI_LABEL, true)
+  check(`adult ${gender} age 18: adult BMI label present`, t.bmiLabel.startsWith('حسب BMI:'), true)
+  check(`adult ${gender} age 18: no minor note`, t.notes.includes(MINOR_PLAN_NOTE), false)
+}
+
+// Minor cut/bulk/maintain all keep the safe label (goal must not re-open the adult path).
+for (const goalType of ['cutting', 'bulking', 'maintenance'] as const) {
+  const goal = goalType === 'cutting' ? 'cut' : goalType === 'bulking' ? 'bulk' : 'maintain'
+  const t = targetsFor({ gender: 'male', age: 12, heightCm: 120, weightKg: 30, targetWeightKg: 30, goalType, goal, activityLevel: 'sedentary', trainingDays: 0 })
+  check(`minor age 12 ${goalType}: safe BMI label`, t.bmiLabel, MINOR_BMI_LABEL)
+}
 
 console.log('\nINSIGHTS VECTORS')
 near('OLS slope y=2x+1', linregSlopePerDay([{ x: 0, y: 1 }, { x: 1, y: 3 }, { x: 2, y: 5 }]), 2)

@@ -132,3 +132,123 @@ Fresh verification used an exact `/tmp` copy so this read-only worktree did not 
 - `test:e2e:journey`: deterministic journey, export/import, policy and account isolation green.
 - `test:e2e:auth:preflight`: **19/19**. The full local-Supabase auth suite was not applicable because the Docker daemon and Supabase images were unavailable; it exercises auth infrastructure, not formula behavior.
 - Diff audit: only this report, `scripts/science/**`, and comment-only additions in formula source files; zero logic-line additions/deletions and `git diff --check` clean.
+
+---
+
+# Remediation — scientific guardrails
+
+**Branch:** `fix/scientific-guardrails` (from `integration/wave6-staging`). **Date:** 2026-07-16.
+
+The audit above deliberately changed no logic. This section records the safety fixes that
+followed, **with the decision behind each — not only the resulting number.** Two risks were
+launch-relevant because the onboarding limits (`src/lib/validation.ts`: `age.min = 12`,
+`weightKg.max = 250`) let real users reach them: adult BMI labels applied to minors, and a
+hydration target that reached 9 L/day at the maximum weight.
+
+## Decision 1 — minors never receive an adult BMI classification
+
+**Problem.** `bmiLabelFor` applied the adult cut-points 18.5/25/30 to everyone, including a
+12-year-old. WHO is explicit that ages 5–19 require **BMI-for-age** (sex- and age-specific
+z-scores), and that the adult thresholds (25/30) only coincide with the reference at age 19
+([WHO growth reference 5–19](https://www.who.int/tools/growth-reference-data-for-5to19-years/indicators/bmi-for-age);
+[WHO obesity fact sheet](https://www.who.int/en/news-room/fact-sheets/detail/obesity-and-overweight)).
+
+**Options weighed.**
+1. *Implement BMI-for-age.* Rejected for now: it requires the WHO/CDC LMS reference tables and
+   exact sex+age, and inventing percentiles without that data would be a fabricated medical
+   classification — the exact failure the mission forbids.
+2. *Adult-only eligibility (block <18).* A product/policy change beyond this scope; noted as a
+   recommendation, not executed here.
+3. *Disable the classification for minors and refer to a specialist.* **Chosen.** It is fully
+   defensible with the data we have and invents nothing.
+
+**Decision.** For `age < ADULT_MIN_AGE` (18) the app still shows the raw BMI **number** (the
+`kg/m²` ratio is arithmetic and correct) but replaces the adult *label* with a neutral,
+non-diagnostic `MINOR_BMI_LABEL` that points to a specialist, and adds `MINOR_PLAN_NOTE` to the
+plan so the energy/macro figures (adult Mifflin–St Jeor, protein/kg — out of validated
+paediatric range) are read as rough estimates under professional supervision. 18 is the app's
+adult boundary; WHO's 5–19 band is documented here, and 18 is the conservative line consistent
+with the onboarding age model.
+
+## Decision 2 — hydration is clamped to a sourced, plausible range
+
+**Problem.** `max(2.5, roundHalf(weight × 0.035))` returned 9.0 L/day at 250 kg. The `35 mL/kg`
+rule is a common clinical rule of thumb, but fluid needs do not scale linearly with fat mass, so
+it overshoots badly at the top of the weight range.
+
+**Primary sources.**
+- EFSA 2010 total-water Adequate Intakes: **2.5 L/day men, 2.0 L/day women**, *including water
+  from food*, at moderate temperature/activity; adolescents ≥14 treated as adults
+  ([EFSA Journal 8(3):1459](https://doi.org/10.2903/j.efsa.2010.1459)).
+- IOM/NASEM 2004 total water: **3.7 L/day men, 2.7 L/day women**, of which **~80 % comes from
+  beverages** (≈3.0 L men / 2.2 L women) and ~20 % from food; the panel declined a fixed
+  "glasses per day" rule and noted excessive intake can rarely be life-threatening
+  ([National Academies report](https://www.nationalacademies.org/news/report-sets-dietary-intake-levels-for-water-salt-and-potassium-to-maintain-health-and-reduce-chronic-disease-risk)).
+
+**Total water vs drinking fluids.** The sources separate them, so the app number is framed as
+**drinking water only**; total daily water additionally includes ~20 % from food. This is stated
+in the code comment and the calc copy.
+
+**Decision.** Keep the `35 mL/kg` heuristic (labelled non-standard) but clamp the output to
+**[2.5 L, 4.0 L]** (`WATER_MIN_LITERS`/`WATER_MAX_LITERS`):
+- *Floor 2.5 L* sits inside the adult reference band (EFSA men total; IOM women total 2.7 L).
+- *Ceiling 4.0 L* is a **product safety cap, not a physiological formula** — it sits above the
+  highest cited beverage figure (~3.0 L men, IOM) with headroom for a hot climate and large
+  athletes, while removing the implausible 9 L. Only weights above ~114 kg are affected; anyone
+  needing more requires individual/medical guidance. The heuristic stays flagged as an estimate.
+
+No coefficient was changed on evidence we do not have; the clamp is a guardrail on an existing
+heuristic, and `CALC_FORMULA_VERSION` was bumped to `p25-water-cap4-minor-bmi` so existing
+profiles recompute.
+
+## Decision 3 — TDEE, deficit/surplus, floors: labelled, not silently "fixed"
+
+The custom activity multiplier, ±400/+300 offsets, and 1500/1200/1350 floors have no external
+standard and were left **unchanged** — the mission forbids editing a formula without a primary
+citation, and there is no citable universal calorie cap to add at the top end (the 5,655 kcal
+maximum is proportionate to a 250 kg very-active input, i.e. an estimate, not an error). The
+existing floors and `LOW_CALORIE_NOTE` remain the low-end guardrail; `MINOR_PLAN_NOTE` now covers
+the paediatric case. Honesty copy was corrected: the calc intro no longer implies every number is
+a "well-known equation" (some are Qimmah heuristics), and the fat rationale now cites the adult
+AMDR **20–35 %** (NASEM) instead of a narrower "healthy 25–30 %".
+
+## Before / after (mission proof vectors)
+
+| Profile | Metric | Before | After |
+|---|---|---|---|
+| F, 12 y, 120 cm, 30 kg, sed, maintain | BMI label | `ضمن النطاق الطبيعي` (adult) | `يحتاج تقييمًا حسب العمر … راجع مختصًا` + minor note |
+| M, 17 y, 170 cm, 60 kg, sed, cut | BMI label | `ضمن النطاق الطبيعي` (adult) | safe minor label + minor note |
+| F, 17 y, 160 cm, 55 kg, sed, bulk | BMI label | adult label | safe minor label + minor note |
+| M, 18 y, 172 cm, 68 kg, active, maintain | BMI label | `ضمن النطاق الطبيعي` | unchanged (adult) |
+| F, 18 y, 165 cm, 58 kg, sed, cut | BMI label / note | adult / low-cal | unchanged (adult) |
+| M, 80 y, 220 cm, 250 kg, very-active, maintain | water | **9.0 L** | **4.0 L** |
+| F, 70 y, 210 cm, 200 kg, very-active, cut | water | 7.0 L | 4.0 L |
+| any, min 15 kg | water | 2.5 L | 2.5 L (floor unchanged) |
+
+All mid-range vectors (`male-cut-30` 3.0 L, `female-bulk-35`/`female-cut-45` 2.5 L, adult BMI
+numbers and labels) are unchanged: the clamp only touches weights above ~114 kg, and the age gate
+only touches under-18.
+
+## Regression tests
+
+`scripts/science/formula-proof.ts` gained a **SCIENTIFIC GUARDRAIL REGRESSION** block asserting,
+across age 12/15/17/18, both sexes, min/max weight+height, and cut/bulk/maintain: water stays in
+`[2.5, 4.0]` at every allowed weight (the 9 L output can never return), under-18 always gets
+`MINOR_BMI_LABEL` + `MINOR_PLAN_NOTE`, and age 18 is treated as an adult with no minor note.
+Proof total: **111 passed, 0 failed** (was 77).
+
+## Residual risks / recommended next wave
+
+1. **Minors are still shown adult-equation energy/macros** (now flagged, not blocked). Product
+   decision needed: adult-only eligibility, or validated paediatric handling with clinical review.
+2. **Cutting floors are the adult 1500/1200** — inappropriate for a child; covered today only by
+   the minor note. Fold into the paediatric decision above.
+3. **Hydration ignores climate/exercise/renal-cardiac context.** The 4 L cap is a blunt guardrail;
+   a future version could offer a range and route high-need users to guidance.
+
+## Scope integrity (this section)
+
+Logic changes are confined to `src/lib/calculators.ts` (BMI age gate, water clamp, minor note,
+version bump) and honesty-copy in `src/i18n/dict/calcScreen.ts`; test additions to
+`scripts/science/formula-proof.ts`. No formula coefficient was changed without a primary citation,
+no percentiles were invented, and no view/component or `package.json` was touched.
