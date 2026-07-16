@@ -35,6 +35,8 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login' }: Lo
   const [msg, setMsg] = useState<string | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
   const [eligible12, setEligible12] = useState(false)
+  // كشف تدريجي: متطلّبات كلمة المرور تظهر بمجرّد نية الكتابة (تركيز الحقل أو أول حرف).
+  const [pwFocused, setPwFocused] = useState(false)
 
   const isSignup = mode === 'signup'
   const isForgot = mode === 'forgot'
@@ -125,8 +127,12 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login' }: Lo
             <p className="mt-2 text-center text-sm leading-relaxed text-ink-500">{subtitle}</p>
 
             {notice && (
-              <p className="mt-4 flex items-start gap-2 rounded-xl border border-line bg-surface p-3 text-xs leading-relaxed text-ink-700">
-                <Icon name="Mail" className="mt-0.5 h-4 w-4 shrink-0 text-primary-c" />
+              <p
+                role="status"
+                aria-live="polite"
+                className="mt-4 flex items-start gap-2 rounded-xl border border-line bg-surface p-3 text-xs leading-relaxed text-ink-700"
+              >
+                <Icon name="Mail" className="mt-0.5 h-4 w-4 shrink-0 text-primary-c" aria-hidden="true" />
                 {notice}
               </p>
             )}
@@ -183,14 +189,16 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login' }: Lo
                     aria-label={t.auth.password}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    onFocus={() => setPwFocused(true)}
                     minLength={isSignup ? PASSWORD_MIN_LENGTH : undefined}
                     aria-describedby={isSignup ? 'pw-requirements' : undefined}
                   />
                 </div>
               )}
 
-              {/* سياسة كلمة المرور (P0) — مؤشّر قوة + متطلّبات واضحة قبل الإرسال (عند التسجيل فقط). */}
-              {isSignup && (
+              {/* سياسة كلمة المرور (P0) — مؤشّر قوة + متطلّبات واضحة قبل الإرسال (عند التسجيل فقط).
+                  كشف تدريجي: يظهر بمجرّد تركيز الحقل أو كتابة أوّل حرف كي تبقى البداية هادئة. */}
+              {isSignup && (pwFocused || password.length > 0) && (
                 <div id="pw-requirements" className="-mt-1 space-y-1.5">
                   <div className="flex gap-1" aria-hidden="true">
                     {[0, 1, 2, 3].map((i) => (
@@ -256,13 +264,25 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login' }: Lo
                 </div>
               )}
 
-              {msg && <p className="text-xs leading-relaxed text-gold-600">{msg}</p>}
+              {/* خطأ واضح ومتاح: لوحة عالية التباين (AA) + أيقونة (لا دلالة لونية فقط) + إعلان فوري لقارئ الشاشة. */}
+              {msg && (
+                <p
+                  role="alert"
+                  aria-live="assertive"
+                  className="v2-error-panel flex items-start gap-2 rounded-xl border px-3 py-2.5 text-xs font-semibold leading-relaxed text-ink-900"
+                >
+                  <Icon name="AlertCircle" className="v2-error-icon mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+                  <span>{msg}</span>
+                </p>
+              )}
 
               <button
                 type="submit"
                 disabled={busy || !canSubmit}
-                className="btn-primary w-full py-3.5 text-base disabled:opacity-50"
+                aria-busy={busy}
+                className="btn-primary w-full py-3.5 text-base disabled:cursor-not-allowed disabled:opacity-50"
               >
+                {busy && <Icon name="RefreshCw" className="h-4 w-4 animate-spin" aria-hidden="true" />}
                 {primaryLabel}
               </button>
             </form>
