@@ -22,6 +22,7 @@ import { workoutScreenStrings } from '@/i18n/dict/workoutScreen'
 import { persistFinishedSession } from '@/lib/finishWorkout'
 import { clearActiveSession, loadActiveSession, type ActiveSessionSnapshot } from '@/lib/activeSession'
 import { evaluateAchievements, registerWorkoutPRs } from '@/features/achievements/engine'
+import { playHaptic } from '@/lib/nativeFeedback'
 import { weeklyAdherenceStreak } from '@/lib/streaks'
 import { getExercise } from '@/data/exercises'
 import { isDesignV2 } from '@/design-system/designPreview'
@@ -119,6 +120,7 @@ function WorkoutViewV1({ lang, onNavigate }: WorkoutViewProps) {
     const daysPerWeek = plan.days.length || 3
     // احتفل بالأرقام القياسية وافتح أوسمة التمرين/السلسلة/الأرقام القياسية فورًا.
     registerWorkoutPRs(prs)
+    if (prs.length > 0) void playHaptic('pr')
     evaluateAchievements({ daysPerWeek })
     const weekly = weeklyAdherenceStreak(daysPerWeek)
     const prLabels = prs.map((pr) => {

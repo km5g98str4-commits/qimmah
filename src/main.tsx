@@ -12,6 +12,7 @@ import { initAnalytics, track } from './lib/analytics'
 import { initNativeShell } from './lib/nativeShell'
 import { initDeepLinkRecovery } from './lib/deepLinkRecovery'
 import { captureMonitoringError, initMonitoring } from './lib/monitoring'
+import { refreshHealthKitStepsIfEnabled } from './lib/healthKit'
 // وحدة PWA: تلتقط حدث beforeinstallprompt مبكرًا (يُطلق مرّة واحدة فقط) لعرض زر التثبيت لاحقًا.
 import './lib/pwa'
 // خطوط مُستضافة ذاتيًا (Tajawal) — بلا CDN وقت التشغيل، مهم للنسخة الأصلية/دون اتصال.
@@ -24,8 +25,10 @@ import './design-system/tokens.css'
 // data-design="v2". لا شيء في الإنتاج (no-op)، فالسلوك الافتراضي لا يتغيّر.
 import { initDesignPreview } from './design-system/designPreview'
 
-// سيم الخطوات: يُتيح لغلاف أصلي مستقبلي (تطبيق آيفون يقرأ Apple Health) دفع الخطوات.
+// سيم الخطوات: يستقبل إجماليات HealthKit من plugin iOS المحلي داخل المتجر نفسه.
 registerStepBridge()
+// Refreshes only after a prior explicit opt-in; never requests HealthKit permission on launch.
+void refreshHealthKitStepsIfEnabled()
 
 // تهيئة التحليلات (مضبوطة بالموافقة، مجهولة، بلا SDK خارجي) قبل الرسم الأول.
 initAnalytics()

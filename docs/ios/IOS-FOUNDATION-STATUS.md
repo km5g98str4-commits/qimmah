@@ -38,7 +38,8 @@ Snapshot of the native foundation for the Qimmah iPhone app. Companion to
 | **MEDIUM** | Final icon/splash assets | Pending Cloud Design North Star (see APP-READINESS §7). Plugins are wired; assets are placeholders. |
 | **PENDING** | Final status-bar/splash **values** | Wired with **temporary** dark values; final colors/style await approved Cloud Design tokens. |
 | LOW | `.env.example` / package metadata branding | Cleaned earlier; watch for stale "Gym OS". |
-| DEFERRED | Haptics, local notifications (prod), camera prompt copy, HealthKit, background tasks | Later native milestones; not this phase. |
+| DONE / OWNER proof | Haptics + HealthKit steps | Compiles in Simulator; signed physical-device permission/sample/haptic checks remain OWNER. |
+| DEFERRED | Background tasks | Later native milestone; current HealthKit refresh occurs on app launch after explicit opt-in. |
 
 ## How to work with the iOS project
 

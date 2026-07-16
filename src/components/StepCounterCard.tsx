@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Icon } from './Icon'
 import { cn } from '@/lib/cn'
 import { progressScreenStrings } from '@/i18n/dict/progressScreen'
@@ -39,6 +39,17 @@ export function StepCounterCard({ className, lang }: { className?: string; lang:
   const [week, setWeek] = useState<DaySteps[]>(weeklySteps)
   const [editingGoal, setEditingGoal] = useState(false)
   const [goalDraft, setGoalDraft] = useState<string>('')
+
+  useEffect(() => {
+    const refresh = () => {
+      const next = getSteps()
+      setStepsState(next)
+      setDraft(next ? String(next) : '')
+      setWeek(weeklySteps())
+    }
+    window.addEventListener('qimmah:steps-updated', refresh)
+    return () => window.removeEventListener('qimmah:steps-updated', refresh)
+  }, [])
 
   const pct = goal > 0 ? Math.min(1, steps / goal) : 0
   const reached = steps >= goal && steps > 0
