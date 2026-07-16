@@ -1,6 +1,12 @@
-// أداة تطوير: تولّد أيقونات PWA من SVG عبر متصفح headless (Playwright chromium المحلي).
-// تُشغّل يدويًا عند الحاجة: node scripts/generate-pwa-assets.mjs
-// ليست جزءًا من حزمة الإنتاج — المخرجات تُحفظ في public/ وتُدفع مع المستودع.
+// ⚠️ DEPRECATED / RETIRED GLYPH — DO NOT RUN.
+// This generator draws the OLD "mountain-over-bar" glyph in the WRONG ember
+// (#F26A21). It is superseded by the canonical noded-Ascent pipeline:
+//     python3 scripts/brand/render.py
+// See docs/brand/MARK-SPEC.md. Kept only for historical reference; running it
+// would re-introduce the retired mark. (Left un-deleted per repo policy.)
+//
+// أداة تطوير (مهجورة): كانت تولّد أيقونات PWA من SVG عبر متصفح headless.
+// ليست جزءًا من حزمة الإنتاج — استُبدلت بـ scripts/brand/render.py.
 //
 // المخرجات:
 //   favicon.svg                    — العلامة (SVG) لتبويب المتصفح
