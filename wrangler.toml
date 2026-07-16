@@ -1,0 +1,8 @@
+# Cloudflare Pages project config for Qimmah (قِمّة).
+# Enables the owner's one-command deploy:  wrangler pages deploy dist
+# (project + output dir are read from here, so no flags are needed).
+# NOTE: assets/headers/redirects come from the built dist/ (public/_headers,
+# public/_redirects). This file only names the Pages project + output dir.
+name = "qimmah"
+pages_build_output_dir = "dist"
+compatibility_date = "2025-01-01"

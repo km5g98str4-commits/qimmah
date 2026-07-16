@@ -19,6 +19,8 @@ import { generatePlan } from '@/lib/planGenerator'
 import { markPendingSync } from '@/lib/syncService'
 import { BUILD_LABEL } from '@/lib/buildInfo'
 import { NotificationSettingsPanel } from '@/components/NotificationSettingsPanel'
+import { NativeSettingsPanel } from '@/components/NativeSettingsPanel'
+import { NATIVE_SETTINGS_COPY } from '@/data/nativeSettings'
 
 const EXPORT_VERSION = 2
 
@@ -353,6 +355,10 @@ export function SettingsView({
         {/* 4) التذكيرات المحلية — نفس المحرّك المالكـي الذي يستخدمه سطح v2. */}
         <SettingsGroup icon="Bell" title={lang === 'ar' ? 'التذكيرات' : 'Reminders'}>
           <NotificationSettingsPanel lang={lang} />
+        </SettingsGroup>
+
+        <SettingsGroup icon="Activity" title={NATIVE_SETTINGS_COPY[lang].group}>
+          <NativeSettingsPanel lang={lang} />
         </SettingsGroup>
 
         {/* 5) الخصوصية والثقة */}

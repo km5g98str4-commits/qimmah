@@ -27,8 +27,9 @@
 **ج) بيانات الصحة واللياقة:** جلسات التمرين (التمارين والأوزان والتكرارات)، الأرقام القياسية، القياسات الجسدية
 (الوزن، الخصر، نسبة الدهون)، الأدوية والمكمّلات التي تتابعها، والإصابات التي تُدخلها — لتتبّع تقدّمك وتخصيص خطتك.
 
-**د) تسجيلات يومية:** سجلّ التغذية والسعرات، الماء، الخطوات (تُدخَل يدويًا — **لا نقرأ Apple Health**)،
-والإنجازات، والخطط المخصّصة، والمهام. تبقى محلية أولًا، وقد تُزامَن إلى حسابك عند تفعيل المزامنة.
+**د) تسجيلات يومية:** سجلّ التغذية والسعرات، الماء، الخطوات (يدويًا، أو من Apple Health بعد ربطك الصريح)،
+والإنجازات، والخطط المخصّصة، والمهام. تبقى محلية أولًا، وقد تُزامَن إلى حسابك عند تفعيل المزامنة. يقرأ
+التطبيق عدد الخطوات فقط؛ لا يطلب إذن HealthKit عند الإقلاع ولا يشارك بيانات صحة مع طرف إعلاني.
 
 **هـ) الكاميرا:** تُستخدم **فقط** لمسح باركود المنتجات الغذائية. تُعالَج الصورة على الجهاز لقراءة الرمز، ولا
 تُخزَّن ولا تُرسَل صور.
@@ -52,6 +53,7 @@
 | **Open Food Facts** | عند مسح/بحث باركود غذائي | رقم الباركود فقط (لمعرفة المنتج) — بلا أي بيانات عنك |
 | **GitHub / jsDelivr** | عند عرض صورة توضيحية لتمرين | طلب تحميل صورة (يظهر عنوان IP لجهازك للمزوّد) — بلا بيانات عنك |
 | **YouTube** | عند الضغط «شاهد الأداء» | يفتح رابط بحث خارجيًا في المتصفّح — لا تضمين ولا تتبّع داخل التطبيق |
+| **Apple Health** | بعد ضغطك «ربط صحة Apple» ومنح إذن الخطوات | يقرأ قِمّة إجماليات `stepCount` لليوم وآخر ١٤ يومًا إلى جهازك؛ لا يكتب إلى Health ولا يرسلها إلى Apple |
 
 ### 5. بيانات الصحة
 نتعامل مع بيانات صحتك ولياقتك (التمارين، القياسات، الأدوية/المكمّلات) بعناية: تبقى محلية على جهازك، وعند تسجيل
@@ -112,19 +114,24 @@ by our auth provider (Supabase); we never see them.
 **c) Health & fitness:** workout sessions (exercises, weights, reps), personal records, body measurements
 (weight, waist, body-fat %), the supplements/medications you track, and injuries you enter — to track progress
 and tailor your plan.
-**d) Daily logs:** nutrition/calorie logs, water, steps (entered manually — **we do not read Apple Health**),
-achievements, custom plans, and tasks are local-first and may sync to your account when sync is enabled.
+**d) Daily logs:** nutrition/calorie logs, water, steps (manual, or Apple Health after your explicit connection),
+achievements, custom plans, and tasks are local-first and may sync to your account when sync is enabled. The app
+reads step totals only, never asks for HealthKit permission on launch, and never shares Health data for advertising.
 **e) Camera:** used **only** to scan food barcodes. Frames are decoded on-device; no images are stored or sent.
 **f) Optional notifications:** you can enable local workout/rest, water, weekly-summary, and supplement reminders.
 Times and quiet hours remain on your device and are not sent to a server. Permission is requested only when you
 enable reminders, and lock-screen copy is generic—never medication/supplement names or health details.
 **g) Optional diagnostics:** the app collects **no** usage data by default. Only if enabled by the owner,
 anonymous events (counts/enums with **no** email, name, or barcode value) are sent under a random identifier
-unlinked to your account, with your consent.
+unlinked to your account, with your consent. Error monitoring is also off by default; if the owner configures
+Sentry, only scrubbed exception diagnostics, build release, a hashed random identifier, and query-free navigation
+paths are sent. Emails, account identifiers, request payloads/headers, and device-storage payloads are removed
+before sending.
 
 ### 3. What we don’t do
 - **No ads, no cross-app/cross-site tracking, no selling your data.**
-- **No third-party tracking SDKs** (no Google/Meta/etc.) — verifiable in our dependency list.
+- **No third-party tracking SDKs** (no Google/Meta/etc.). Optional Sentry error monitoring is not used for ads,
+  attribution, profiling, or cross-app tracking.
 - **We do not request your location, contacts, or photos.**
 
 ### 4. What leaves your device, to whom
@@ -134,6 +141,8 @@ unlinked to your account, with your consent.
 | **Open Food Facts** | You scan/search a food barcode | The barcode number only — nothing about you |
 | **GitHub / jsDelivr** | Viewing an exercise demo image | An image GET request (your IP is visible to the CDN) — nothing about you |
 | **YouTube** | You tap “watch form” | Opens an external search URL in your browser — no in-app embed or tracking |
+| **Sentry** | Only when owner-configured and an error occurs | Scrubbed crash diagnostics; no email, account id, request/storage payload, or URL query |
+| **Apple Health** | After you tap Connect Apple Health and allow Steps | Qimmah reads today and the last 14 days of `stepCount` totals onto your device; it does not write to Health or send data to Apple |
 
 ### 5. Health data
 We treat your health & fitness data with care: it stays local, and when signed in it syncs only to your own

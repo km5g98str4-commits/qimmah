@@ -12,3 +12,6 @@ export const BUILD_COMMIT: string =
 
 /** تسمية مختصرة مثل: v1.0.0·a1b2c3d */
 export const BUILD_LABEL = `v${BUILD_VERSION}·${BUILD_COMMIT}`
+
+/** Sentry release name follows docs/release/VERSIONING.md: marketing version + build. */
+export const BUILD_RELEASE = `${BUILD_VERSION}+${BUILD_COMMIT}`

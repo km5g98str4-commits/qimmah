@@ -11,6 +11,8 @@ import { registerStepBridge } from './lib/stepCounter'
 import { initAnalytics, track } from './lib/analytics'
 import { initNativeShell } from './lib/nativeShell'
 import { initDeepLinkRecovery } from './lib/deepLinkRecovery'
+import { captureMonitoringError, initMonitoring } from './lib/monitoring'
+import { refreshHealthKitStepsIfEnabled } from './lib/healthKit'
 // وحدة PWA: تلتقط حدث beforeinstallprompt مبكرًا (يُطلق مرّة واحدة فقط) لعرض زر التثبيت لاحقًا.
 import './lib/pwa'
 // خطوط مُستضافة ذاتيًا (Tajawal) — بلا CDN وقت التشغيل، مهم للنسخة الأصلية/دون اتصال.
@@ -20,19 +22,25 @@ import './styles/index.css'
 // (ليست هوية معتمدة). نقطة الإسقاط لرموز Cloud Design المعتمدة لاحقًا.
 import './design-system/tokens.css'
 
-// سيم الخطوات: يُتيح لغلاف أصلي مستقبلي (تطبيق آيفون يقرأ Apple Health) دفع الخطوات.
+// سيم الخطوات: يستقبل إجماليات HealthKit من plugin iOS المحلي داخل المتجر نفسه.
 registerStepBridge()
+// Refreshes only after a prior explicit opt-in; never requests HealthKit permission on launch.
+void refreshHealthKitStepsIfEnabled()
 
 // تهيئة التحليلات (مضبوطة بالموافقة، مجهولة، بلا SDK خارجي) قبل الرسم الأول.
 initAnalytics()
+// Privacy-first monitoring: no DSN means the SDK is not even imported and no init/network can occur.
+void initMonitoring()
 // أخطاء عامّة غير ملتقَطة — إشارة استقرار فقط (اسم الخطأ، بلا رسالة/بيانات).
 if (typeof window !== 'undefined') {
   window.addEventListener('error', (e) => {
     track('unhandled_error', { source: 'window', name: e.error instanceof Error ? e.error.name : undefined })
+    captureMonitoringError(e.error ?? new Error('Window error'), 'window')
   })
   window.addEventListener('unhandledrejection', (e) => {
     const r = (e as PromiseRejectionEvent).reason
     track('unhandled_error', { source: 'promise', name: r instanceof Error ? r.name : undefined })
+    captureMonitoringError(r, 'promise')
   })
 }
 

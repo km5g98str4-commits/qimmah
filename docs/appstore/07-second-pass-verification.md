@@ -35,7 +35,7 @@
 | Water tracking | `src/lib/nutritionTracking.ts` |
 | Weight/measurements + chart | `src/lib/measurementLog.ts`, `src/components/LineChart.tsx` |
 | Strength/PRs, medals, streaks | `src/lib/exerciseStats.ts`, `src/features/achievements/engine.ts`, `streaks.ts` |
-| Steps — **manual only** | `src/lib/stepCounter.ts` (source `'manual'`; HealthKit is an inert seam) |
+| Steps — manual + opt-in HealthKit | `src/lib/healthKit.ts`, `HealthKitStepsPlugin.swift`, `src/lib/stepCounter.ts` |
 | Supplements/medications (tracking only) | `src/data/supplements.ts`, `src/data/medications.ts` |
 | Local reminder — **iOS only** | `src/lib/reminders.ts`, `@capacitor/local-notifications` |
 | Today command center + to-do | `src/views/TodayV2.tsx`, `src/features/todo/*` |
@@ -44,10 +44,10 @@
 | No ads/tracking; analytics no-op default | `src/lib/analytics/providers/noop.ts`, `consent.ts`; `docs/legal/app-privacy-labels.md` |
 | Arabic-first + English support | `src/config/product.ts`, `src/config/strings.ts` (`en`) |
 | Qimmah+ = one line, **no IAP** | `src/lib/profileV2Model.ts` (`subscription.enabled:false`) |
-| Camera = barcode only; no HealthKit/location | `ios/App/App/Info.plist` (only `NSCameraUsageDescription`) |
+| Camera = barcode only; HealthKit = read-only steps; no location | `ios/App/App/Info.plist`, `App.entitlements` |
 
-**Not claimed anywhere (verified absent in code):** HealthKit/Apple Health, automatic step counting,
-purchasable subscription/premium tier, background web push, "fully offline install", "fully bilingual".
+**Not claimed anywhere:** background pedometer collection, Google Fit, purchasable subscription/premium tier,
+background web push, "fully offline install", "fully bilingual".
 
 ## D. Consolidated TO-CONFIRM (owner / unverifiable-by-me)
 1. **Description char limit** — confirm ~4000 in the ASC field counter (Apple doesn't publish it).
@@ -56,6 +56,7 @@ purchasable subscription/premium tier, background web push, "fully offline insta
 4. **Hosted Privacy Policy + Terms public URLs** (domain) — `public/legal/*.html` exist; hosting = owner.
 5. **`VITE_DESIGN_V2`** in the shipped build must match the screenshots (v2.1 vs v1).
 6. **`VITE_ANALYTICS_ENDPOINT`** set or not → drives the Usage/Diagnostics privacy rows.
+7. **HealthKit signed-device proof** — permission sheet, real sample, and Today movement value.
 7. **Demo account** credentials + a known-good **test barcode** number.
 8. **Signing team / Apple Developer entity**, app **category** (secondary), support/marketing URLs.
 9. **iPad** in scope? (screenshots + device family) · optional **EN storefront** localization · optional **app preview video**.

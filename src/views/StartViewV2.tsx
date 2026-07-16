@@ -1,7 +1,6 @@
 import type { Lang } from '@/lib/appPreferences'
 import { LanguageToggle } from '@/i18n'
 import { V2_WELCOME } from '@/design-system/v2/labels'
-import { CanonicalMark } from '@/components/CanonicalMark'
 
 interface StartViewV2Props {
   lang: Lang
@@ -47,7 +46,7 @@ export function StartViewV2({ lang, onLogin, onSignup }: StartViewV2Props) {
         {/* Brand + hero — top-anchored, start-aligned (RTL), headline-led. */}
         <div className="mt-9 flex flex-col items-start text-start">
           <div className="flex items-center gap-2.5">
-            <CanonicalMark className="h-9 w-9" />
+            <AscentMark className="h-9 w-9" />
             <span className="text-3xl font-black tracking-tight text-ink-900">{c.brand}</span>
           </div>
 
@@ -84,19 +83,34 @@ export function StartViewV2({ lang, onLogin, onSignup }: StartViewV2Props) {
 }
 
 /**
- * Canonical Qimmah mark. Geometry is a 1024-grid projection of the brand spec.
+ * Ascent mark — the Qimmah brand glyph (owner-approved v2.1 "noded Ascent"): a
+ * chevron rising to an apex with two base nodes. Canonical geometry on a 1024
+ * grid — apex (512,340), nodes (302,640)/(722,640), stroke 96, node radius 96
+ * (see docs/brand/MARK-SPEC.md). Rendered in ember on the dark hero.
  */
+function AscentMark({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 1024 1024" fill="none" role="img" aria-label="Qimmah">
+      <path d="M302 640 L512 340 L722 640" fill="none" stroke="var(--c-primary)" strokeWidth={96} strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="302" cy="640" r="96" fill="var(--c-primary)" />
+      <circle cx="722" cy="640" r="96" fill="var(--c-primary)" />
+    </svg>
+  )
+}
+
 /**
- * Large faint canonical motif — the mark scaled up as a background texture to give
- * the lower half athletic depth and fill the composition (vs. an empty void).
- * Very low opacity, bottom-anchored, ember tail on the peak. Decorative only.
+ * Large faint Ascent motif — the canonical noded mark scaled up as a background
+ * texture to give the lower half athletic depth (vs. an empty void). Same
+ * geometry as AscentMark; very low opacity, bottom-anchored. Decorative only.
  */
 function AscentMotif({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 1024 1024" fill="none" preserveAspectRatio="xMaxYMax meet" aria-hidden="true">
-      <path d="M302 640 L512 340 L722 640" stroke="currentColor" strokeWidth="96" strokeLinecap="round" strokeLinejoin="round" opacity="0.16" />
-      <circle cx="302" cy="640" r="96" fill="currentColor" opacity="0.2" />
-      <circle cx="722" cy="640" r="96" fill="currentColor" opacity="0.2" />
+      <g opacity="0.16">
+        <path d="M302 640 L512 340 L722 640" fill="none" stroke="var(--c-primary)" strokeWidth={96} strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx="302" cy="640" r="96" fill="var(--c-primary)" />
+        <circle cx="722" cy="640" r="96" fill="var(--c-primary)" />
+      </g>
     </svg>
   )
 }
