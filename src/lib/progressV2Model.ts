@@ -235,6 +235,7 @@ export function buildProgressV2Model(customization: Customization, lang: Lang): 
     label: t('زخم التدريب', 'Training momentum'),
   }
 
+  // Source classification: NON-STANDARD two-week product KPI (distinct finished days / 2× weekly plan).
   // Adherence over the window (distinct finished-workout days vs plan target).
   const daysPerWeek = customization.workoutPlan.days.length || 3
   const workoutDays = new Set(finished.filter((s) => stampMs(s.date) >= windowStart).map((s) => s.date))
@@ -242,6 +243,7 @@ export function buildProgressV2Model(customization: Customization, lang: Lang): 
   const adherencePct = finished.length > 0 ? Math.min(100, Math.round((workoutDays.size / expectedDays) * 100)) : null
 
   // ── Brief summary rows ──────────────────────────────────────────────────────
+  // Source classification: NON-STANDARD product labels (±0.2 kg change; ±0.5 kg maintenance band).
   const weightOnTrack =
     changeKg !== null && goal
       ? goal === 'cut'

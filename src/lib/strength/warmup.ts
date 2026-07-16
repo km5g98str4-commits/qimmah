@@ -43,6 +43,7 @@ export interface WarmupSet {
   isWork: boolean
 }
 
+// Source classification: NON-STANDARD Qimmah warm-up heuristic; percentages/reps are not presented as a consensus prescription.
 const RAMP: { pct: number | null; reps: number; label: string }[] = [
   { pct: null, reps: 10, label: 'البار' },
   { pct: 0.4, reps: 8, label: '٤٠٪' },
