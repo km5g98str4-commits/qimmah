@@ -9,6 +9,12 @@ import { selectNextLesson, currentTodayLesson, markLessonUnderstood, shownLesson
 import type { Muscle } from '@/types/workout'
 import { getDefaultCustomization } from '@/lib/customization'
 import { buildWorkoutV2Model } from '@/lib/workoutV2Model'
+import { readFileSync } from 'node:fs'
+import { resolve as resolvePath } from 'node:path'
+
+// Injected by run-coaching-proof.mjs (esbuild define) so this bundled proof can
+// read the view source for the rest-tip UI wiring assertions in section ⑨.
+declare const __SRC_ROOT__: string
 
 let pass = 0
 let fail = 0
@@ -146,6 +152,30 @@ console.log('\n⑧ تكامل v2 — إشارات الكتالوج تصل إلى
   check('خطة v2 تحتوي تمرينًا قانونيًا', !!first)
   check('إشارات v2 هي النص المعتمد لا fallback عام', !!first && !!authored && JSON.stringify(first.cues) === JSON.stringify(authored.steps))
   check('خطأ شائع معتمد يصل إلى نموذج v2', !!first && !!authored && first.commonMistake === authored.mistakes[0])
+}
+
+// ── ⑨ rest-tip UI wiring: engine reaches every v2 plan muscle + rendered on the dark surface ──
+console.log('\n⑨ ربط نصيحة الراحة بالواجهة — كل عضلة خطة تُنتج نصيحة، وتُعرض وتُخفى على سطح التمرين')
+{
+  // Behavioural: every primary muscle a v2 plan can surface yields a rest tip.
+  const model = buildWorkoutV2Model(getDefaultCustomization(), 'ar')
+  const primary = model.exercises.map((e) => e.muscles[0]).filter(Boolean) as Muscle[]
+  check('خطة v2 تُعرّف عضلة أساسية لكل تمرين', primary.length === model.exercises.length)
+  check('كل عضلة أساسية في الخطة تُنتج نصيحة راحة (مطابقة أو عامّة)', primary.every((m, i) => pickRestTip(m, i + 1, []) !== null))
+  const chest = pickRestTip('chest', 3, [])
+  check('النصيحة مطابقة للعضلة حين توجد نصائح مخصّصة', !!chest && chest.muscles.includes('chest'))
+
+  // Wiring: the Active-Workout view actually imports the picker and RestPanel
+  // renders the tip on the dark rest surface — dismissible, reduced-motion-safe,
+  // AA-contrast muted ink. Source-level so a future refactor that drops the render
+  // (regressing to "engine exists but nothing shows") fails the gate.
+  const view = readFileSync(resolvePath(__SRC_ROOT__, 'src/views/WorkoutV2.tsx'), 'utf8')
+  check('شاشة التمرين تستورد منتقي النصيحة', /import\s*\{\s*pickRestTip\s*\}\s*from\s*'@\/lib\/coaching'/.test(view))
+  check('النصيحة تُنتقى عند بدء الراحة بعضلة التمرين', view.includes('pickRestTip(muscle, restEndsAt, shownTips)') && view.includes(".muscles[0] ?? 'chest') as Muscle"))
+  check('RestPanel يعرض نصّ النصيحة على سطح الراحة', view.includes('{tip.textAr}') && view.includes('const showTip = ar && !restDone && tip != null && !tipDismissed'))
+  check('النصيحة قابلة للإخفاء (زر + aria-label)', view.includes('onClick={onDismissTip}') && view.includes("aria-label=\"إخفاء النصيحة\""))
+  check('حركة الدخول آمنة لتقليل الحركة (v2-screen-enter مُقيّد بالتوكنز)', /className="v2-screen-enter[^"]*"[^>]*role="note"|role="note"[^>]*className="v2-screen-enter/.test(view) || view.includes('className="v2-screen-enter mt-6'))
+  check('تباين AA على الداكن (ink-muted على البطاقة)', view.includes('color: FOCUS.inkMuted }}><bdi>{tip.textAr}'))
 }
 
 console.log(`\n${'─'.repeat(48)}`)

@@ -31,7 +31,11 @@ const r = await build({
   write: false,
   banner: { js: banner },
   alias: { '@': resolve(root, 'src') },
-  define: { 'import.meta.env': JSON.stringify({ MODE: 'test', DEV: false, PROD: false }) },
+  define: {
+    'import.meta.env': JSON.stringify({ MODE: 'test', DEV: false, PROD: false }),
+    // Injected so the proof can read view source for the rest-tip UI wiring check.
+    '__SRC_ROOT__': JSON.stringify(root),
+  },
   logLevel: 'warning',
 })
 

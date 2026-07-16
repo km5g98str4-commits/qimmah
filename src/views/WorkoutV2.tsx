@@ -21,6 +21,11 @@ import { useAuth } from '@/lib/authContext'
 // one-time migration of the legacy flat key live in a lib so the storage contract
 // is unit-testable and shared with the data-export/isolation proofs.
 import { saveWorkoutSummary, migrateLegacySummary } from '@/lib/workoutSummary'
+// Coaching rest tips — muscle-matched, deterministic, authored in warm MSA.
+// Rendered on the dark rest surface below (finding #8).
+import { pickRestTip } from '@/lib/coaching'
+import type { RestTip } from '@/lib/coaching/types'
+import type { Muscle } from '@/types/workout'
 import { getExercise } from '@/data/exercises'
 import { registerWorkoutPRs } from '@/features/achievements/engine'
 import {
@@ -229,6 +234,26 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
     return () => window.clearTimeout(id)
   }, [restDone])
 
+  // Coaching rest tip (finding #8): pick ONE muscle-matched tip when a rest
+  // begins, avoiding tips already shown this session, and let the user dismiss it.
+  // Deterministic: same (muscle, rest, shown) → same tip. Arabic-authored, so it
+  // only renders in Arabic mode. The pick is intentionally keyed on the rest's
+  // identity (endsAt) alone — re-running when `shownTips` grows would re-pick mid-rest.
+  const [restTip, setRestTip] = useState<RestTip | null>(null)
+  const [tipDismissed, setTipDismissed] = useState(false)
+  const [shownTips, setShownTips] = useState<string[]>([])
+  const restEndsAt = active?.rest?.endsAt ?? null
+  useEffect(() => {
+    if (restEndsAt == null) { setRestTip(null); setTipDismissed(false); return }
+    const muscle = (model.exercises[active?.exIndex ?? 0]?.muscles[0] ?? 'chest') as Muscle
+    const tip = pickRestTip(muscle, restEndsAt, shownTips)
+    setRestTip(tip)
+    setTipDismissed(false)
+    if (tip) setShownTips((prev) => (prev.includes(tip.id) ? prev : [...prev, tip.id]))
+    // Pick once per rest — `shownTips`/`active` deliberately excluded (see note above).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [restEndsAt])
+
   if (!model.available) return <MissingPlan lang={lang} onNavigate={onNavigate} />
 
   const startSession = () => {
@@ -337,7 +362,7 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
       </div>
 
       {resting ? (
-        <RestPanel lang={lang} restLeft={restLeft} restDone={restDone} nextEx={model.exercises[active.exIndex]} setLabel={t(`المجموعة ${toAr(active.setIndex + 1, lang)}`, `Set ${active.setIndex + 1}`)} onAdd={addRest} onSkip={skipRest} />
+        <RestPanel lang={lang} restLeft={restLeft} restDone={restDone} nextEx={model.exercises[active.exIndex]} setLabel={t(`المجموعة ${toAr(active.setIndex + 1, lang)}`, `Set ${active.setIndex + 1}`)} tip={restTip} tipDismissed={tipDismissed} onDismissTip={() => setTipDismissed(true)} onAdd={addRest} onSkip={skipRest} />
       ) : (
         <main className="flex flex-1 flex-col overflow-y-auto px-5 pb-6">
           <h1 className="mt-2 text-2xl font-black leading-tight">{ar ? ex.nameAr : ex.nameEn}</h1>
@@ -484,8 +509,10 @@ function WarmupPanel({ lang, sets, onDismiss, onDisable }: { lang: Lang; sets: W
   )
 }
 
-function RestPanel({ lang, restLeft, restDone, nextEx, setLabel, onAdd, onSkip }: { lang: Lang; restLeft: number; restDone: boolean; nextEx: WorkoutV2Exercise; setLabel: string; onAdd: () => void; onSkip: () => void }) {
+function RestPanel({ lang, restLeft, restDone, nextEx, setLabel, tip, tipDismissed, onDismissTip, onAdd, onSkip }: { lang: Lang; restLeft: number; restDone: boolean; nextEx: WorkoutV2Exercise; setLabel: string; tip: RestTip | null; tipDismissed: boolean; onDismissTip: () => void; onAdd: () => void; onSkip: () => void }) {
   const ar = lang !== 'en'
+  // Rest tips are authored in Arabic (warm MSA) — only surface them in Arabic mode.
+  const showTip = ar && !restDone && tip != null && !tipDismissed
   return (
     <main className="flex flex-1 flex-col items-center justify-center px-6 text-center">
       {restDone ? (
@@ -499,6 +526,15 @@ function RestPanel({ lang, restLeft, restDone, nextEx, setLabel, onAdd, onSkip }
           <p className="text-sm font-bold" style={{ color: FOCUS.inkMuted }}>{ar ? 'راحة' : 'Rest'}</p>
           <p className="mt-2 text-7xl font-black tabular-nums" style={{ color: FOCUS.teal }}>{fmtTime(restLeft)}</p>
           <p className="mt-4 text-sm" style={{ color: FOCUS.inkMuted }}>{ar ? 'التالي' : 'Next'}: <bdi>{ar ? nextEx.nameAr : nextEx.nameEn}</bdi> · {setLabel}</p>
+          {showTip && (
+            // Subtle coaching tip — dark card, teal accent, AA-contrast muted ink.
+            // `.v2-screen-enter` is reduced-motion-safe (tokens.css forces no motion).
+            <div role="note" aria-live="polite" className="v2-screen-enter mt-6 flex w-full max-w-sm items-start gap-2.5 rounded-2xl px-4 py-3 text-start" style={{ background: FOCUS.card, border: `1px solid ${FOCUS.line}` }}>
+              <Icon name="Lightbulb" className="mt-0.5 h-4 w-4 shrink-0" style={{ color: FOCUS.teal }} aria-hidden />
+              <p className="flex-1 text-[0.8125rem] font-medium leading-relaxed" style={{ color: FOCUS.inkMuted }}><bdi>{tip.textAr}</bdi></p>
+              <button type="button" onClick={onDismissTip} aria-label="إخفاء النصيحة" className="-me-1 -mt-1 shrink-0 rounded-lg p-1.5" style={{ color: FOCUS.inkFaint }}><Icon name="X" className="h-4 w-4" /></button>
+            </div>
+          )}
           <div className="mt-8 flex items-center gap-3">
             <button type="button" onClick={onAdd} className="rounded-2xl px-6 py-3 font-bold" style={{ background: FOCUS.card, border: `1px solid ${FOCUS.line}`, color: FOCUS.ink }}>+{toAr(REST_ADD, lang)} {ar ? 'ث' : 's'}</button>
             <button type="button" onClick={onSkip} className="v2-pressable rounded-2xl px-8 py-3 text-[1.1875rem] font-black" style={{ background: FOCUS.ember, color: FOCUS.onColor }}>{ar ? 'تخطي' : 'Skip'}</button>
