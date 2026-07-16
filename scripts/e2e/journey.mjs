@@ -11,7 +11,7 @@ const steps = [
 ]
 for (const [label, [bin, ...args]] of steps) {
   console.log(`\n=== ${label} ===`)
-  const run = spawnSync(bin, args, { stdio: 'inherit', env: { ...process.env, VITE_DESIGN_V2: 'true' } })
+  const run = spawnSync(bin, args, { stdio: 'inherit', env: process.env })
   if (run.status !== 0) process.exit(run.status ?? 1)
 }
 const required = ['01-welcome.png','02-today.png','03-workout.png','03b-workout-resumed.png','04-nutrition.png','05-progress.png','06-profile.png']

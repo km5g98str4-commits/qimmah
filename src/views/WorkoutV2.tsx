@@ -114,7 +114,7 @@ function isUsableSession(value: unknown, exercises: WorkoutV2Exercise[]): value 
 }
 
 /**
- * Workout v2 — Qimmah v2.1 (Slice 4, "crown jewel"). Preview-gated (WorkoutView
+ * Workout v2 — Qimmah v2.1 (Slice 4, "crown jewel"). WorkoutView
  * branches here under isDesignV2). Self-contained internal navigation: Plan →
  * Exercise Detail → Active Workout (dark focus mode: set editor + rest timer) →
  * Complete. Reads the real generated plan; no fake previous weights/PRs. The

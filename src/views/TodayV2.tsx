@@ -29,7 +29,7 @@ const TONE_VAR: Record<TodayCard['tone'], string> = {
  * the top third; a four-pillar «مسار اليوم» track reads in 3s; every card carries
  * a verb + destination. Three states, all real-data-driven (buildTodayV2Model):
  * normal · new-user (guides setup, no empty rings) · after-workout (recovery +
- * fuel, green CTA). Preview-gated — rendered from DashboardView under isDesignV2.
+ * fuel, green CTA). Canonical v2.1 Today surface.
  */
 export function TodayV2({ lang, onNavigate }: TodayV2Props) {
   const { customization } = useCustomization()

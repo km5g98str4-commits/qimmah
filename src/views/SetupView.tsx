@@ -1,8 +1,6 @@
 import { Component, type ReactNode } from 'react'
 import { CustomizationCenter } from '@/sections/CustomizationCenter'
-import { PlanBuilder } from '@/components/PlanBuilder'
 import { OnboardingV2 } from '@/views/OnboardingV2'
-import { isDesignV2 } from '@/design-system/designPreview'
 import { getLanguage } from '@/lib/appPreferences'
 
 interface SetupViewProps {
@@ -54,19 +52,9 @@ export function SetupView({ onClose, onForceComplete, initialStep, mode = 'onboa
   // الإعداد الأولي = باني الخطة الجوال الكامل، محاطًا بمخرج طوارئ لا يحبس المستخدم أبدًا.
   if (mode !== 'advanced') {
     const escape = onForceComplete ?? (() => onClose(true))
-    // معاينة v2.1 (مطوّر فقط): تدفّق الإعداد المختصر (الهدف/الجدول/المعدّات). اختياراته
-    // محلّية للمعاينة ولا تُحفظ؛ زر «اعتمد خطتي» يستخدم مسار الإكمال المحلّي الآمن نفسه
-    // (escape). الإنتاج/الافتراضي يبقى PlanBuilder v1 دون تغيير.
-    if (isDesignV2()) {
-      return (
-        <SetupErrorBoundary onEscape={escape}>
-          <OnboardingV2 lang={getLanguage()} onComplete={escape} onExit={() => onClose(false)} />
-        </SetupErrorBoundary>
-      )
-    }
     return (
       <SetupErrorBoundary onEscape={escape}>
-        <PlanBuilder onComplete={() => onClose(true)} onExit={() => onClose(false)} onForceComplete={escape} />
+        <OnboardingV2 lang={getLanguage()} onComplete={escape} onExit={() => onClose(false)} />
       </SetupErrorBoundary>
     )
   }

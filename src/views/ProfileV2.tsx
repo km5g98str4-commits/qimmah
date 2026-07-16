@@ -27,7 +27,7 @@ interface ProfileV2Props {
 type Screen = 'home' | 'privacy' | 'settings' | 'notifications' | 'data'
 
 /**
- * Profile v2 — «ملفك التدريبي» — Qimmah v2.1 (§06). Preview-gated (ProfileView
+ * Profile v2 — «ملفك التدريبي» — Qimmah v2.1 (§06). ProfileView
  * branches here under isDesignV2). An earned training identity, not a settings
  * drawer: real stats, a program card, and a commitment heatmap wired to the
  * actual stores. Qimmah+ is ONE quiet line at the base — no filled block, no

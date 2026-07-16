@@ -19,9 +19,6 @@ import './styles/index.css'
 // طبقة الرموز الدلالية (seam) — إضافية وعكوسة، تُحيل للقيم الحالية المؤقتة فقط
 // (ليست هوية معتمدة). نقطة الإسقاط لرموز Cloud Design المعتمدة لاحقًا.
 import './design-system/tokens.css'
-// معاينة تصميم v2.1 للمطوّر فقط (Slice 1A): تفعّل seam الرموز الجاهز عبر
-// data-design="v2". لا شيء في الإنتاج (no-op)، فالسلوك الافتراضي لا يتغيّر.
-import { initDesignPreview } from './design-system/designPreview'
 
 // سيم الخطوات: يُتيح لغلاف أصلي مستقبلي (تطبيق آيفون يقرأ Apple Health) دفع الخطوات.
 registerStepBridge()
@@ -50,9 +47,6 @@ if (import.meta.env.PROD && !Capacitor.isNativePlatform() && 'serviceWorker' in 
     })
   })
 }
-
-// معاينة v2.1 (مطوّر فقط) — تُضبط قبل أول رسم لتفادي وميض تبديل الهوية؛ no-op في الإنتاج.
-initDesignPreview()
 
 const root = document.getElementById('root')
 if (!root) throw new Error('عنصر root غير موجود في index.html')

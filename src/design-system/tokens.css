@@ -236,7 +236,7 @@
 
 /* Activation seam — OPT-IN ONLY. The default document has no `data-design`
    attribute, so none of these overrides apply and v1 renders unchanged. */
-:root[data-design='v2'] {
+:root {
   --font-family-base: var(--font-ui-v2);
   --font-family-display: var(--font-display-v2);
   --font-numeric: var(--font-ui-v2);
@@ -260,8 +260,8 @@
 /* v2 is light by default. Put the legacy utility variables on body so they
    override any inherited, user-customized root values without touching the
    customization logic. v1 remains byte-for-byte inert. */
-:root[data-design='v2'] body,
-:root[data-design='v2'] .v2-surface-light {
+:root body,
+:root .v2-surface-light {
   color-scheme: light;
   --c-primary: var(--v2-ember);
   --c-accent: var(--v2-blue);
@@ -278,7 +278,7 @@
 }
 
 /* Only Welcome, Onboarding and Active Workout opt into this focus surface. */
-:root[data-design='v2'] .v2-surface-dark {
+:root .v2-surface-dark {
   color-scheme: dark;
   --c-primary: var(--v2-ember);
   --c-accent: var(--v2-teal);
@@ -292,73 +292,73 @@
   --c-ink-400: 167 159 148;
 }
 
-:root[data-design='v2'] .v2-text-ember { color: var(--v2-ember-text); }
-:root[data-design='v2'] .v2-text-blue { color: var(--v2-blue-text); }
-:root[data-design='v2'] .v2-text-green { color: var(--v2-green-text); }
-:root[data-design='v2'] .v2-text-teal { color: var(--v2-teal-text); }
-:root[data-design='v2'] .v2-bg-blue { background-color: var(--v2-blue); }
-:root[data-design='v2'] .v2-bg-blue-soft { background-color: color-mix(in srgb, var(--v2-blue) 10%, transparent); }
-:root[data-design='v2'] .v2-bg-green { background-color: var(--v2-green); }
-:root[data-design='v2'] .v2-bg-teal { background-color: var(--v2-teal); }
+:root .v2-text-ember { color: var(--v2-ember-text); }
+:root .v2-text-blue { color: var(--v2-blue-text); }
+:root .v2-text-green { color: var(--v2-green-text); }
+:root .v2-text-teal { color: var(--v2-teal-text); }
+:root .v2-bg-blue { background-color: var(--v2-blue); }
+:root .v2-bg-blue-soft { background-color: color-mix(in srgb, var(--v2-blue) 10%, transparent); }
+:root .v2-bg-green { background-color: var(--v2-green); }
+:root .v2-bg-teal { background-color: var(--v2-teal); }
 
 /* Textual Ember is darkened only on light surfaces so small labels meet AA;
    dark focus surfaces can use the exact Ember swatch at 5.18:1. */
-:root[data-design='v2'] body .text-primary,
-:root[data-design='v2'] body .text-primary-c { color: var(--v2-ember-text); }
-:root[data-design='v2'] body .v2-surface-dark .text-primary,
-:root[data-design='v2'] body .v2-surface-dark .text-primary-c { color: var(--v2-ember); }
+:root body .text-primary,
+:root body .text-primary-c { color: var(--v2-ember-text); }
+:root body .v2-surface-dark .text-primary,
+:root body .v2-surface-dark .text-primary-c { color: var(--v2-ember); }
 
-:root[data-design='v2'] .btn-primary {
+:root .btn-primary {
   color: var(--v2-on-color);
   font-size: max(1.1875rem, 1em);
   font-weight: 700;
 }
 
-:root[data-design='v2'] .shadow-card { box-shadow: var(--elevation-card); }
-:root[data-design='v2'] .shadow-elevated { box-shadow: var(--elevation-raised); }
-:root[data-design='v2'] .shadow-glow {
+:root .shadow-card { box-shadow: var(--elevation-card); }
+:root .shadow-elevated { box-shadow: var(--elevation-raised); }
+:root .shadow-glow {
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--v2-ember) 18%, transparent), 0 14px 32px -18px color-mix(in srgb, var(--v2-ember) 48%, transparent);
 }
 
-:root[data-design='v2'] .v2-error-panel {
+:root .v2-error-panel {
   border-color: color-mix(in srgb, var(--v2-error) 42%, transparent);
   background-color: color-mix(in srgb, var(--v2-error) 9%, transparent);
 }
-:root[data-design='v2'] .v2-error-icon { color: var(--v2-error); }
+:root .v2-error-icon { color: var(--v2-error); }
 
-:root[data-design='v2'] .v2-success-panel {
+:root .v2-success-panel {
   border-color: color-mix(in srgb, var(--v2-green) 38%, transparent);
   background-color: color-mix(in srgb, var(--v2-green) 10%, transparent);
 }
 
-:root[data-design='v2'] .v2-success-icon { color: var(--v2-green-text); }
-:root[data-design='v2'] .input-invalid,
-:root[data-design='v2'] .input-invalid:focus { border-color: var(--v2-error); }
+:root .v2-success-icon { color: var(--v2-green-text); }
+:root .input-invalid,
+:root .input-invalid:focus { border-color: var(--v2-error); }
 
-:root[data-design='v2'] .v2-choice-selected {
+:root .v2-choice-selected {
   border-color: var(--v2-blue);
   background-color: color-mix(in srgb, var(--v2-blue) 12%, transparent);
 }
-:root[data-design='v2'] .v2-choice-icon-selected {
+:root .v2-choice-icon-selected {
   background-color: var(--v2-blue);
   color: var(--v2-on-color);
 }
-:root[data-design='v2'] .v2-choice-accent { background-color: var(--v2-blue); }
-:root[data-design='v2'] .v2-info-panel {
+:root .v2-choice-accent { background-color: var(--v2-blue); }
+:root .v2-info-panel {
   border-color: color-mix(in srgb, var(--v2-blue) 30%, transparent);
   background-color: color-mix(in srgb, var(--v2-blue) 6%, transparent);
 }
-:root[data-design='v2'] .v2-heat-1 { background-color: color-mix(in srgb, var(--v2-green) 30%, var(--v2-paper-muted)); }
-:root[data-design='v2'] .v2-heat-2 { background-color: color-mix(in srgb, var(--v2-green) 60%, var(--v2-paper-muted)); }
-:root[data-design='v2'] .v2-heat-3 { background-color: var(--v2-green); }
+:root .v2-heat-1 { background-color: color-mix(in srgb, var(--v2-green) 30%, var(--v2-paper-muted)); }
+:root .v2-heat-2 { background-color: color-mix(in srgb, var(--v2-green) 60%, var(--v2-paper-muted)); }
+:root .v2-heat-3 { background-color: var(--v2-green); }
 
-:root[data-design='v2'] .v2-glow-ember {
+:root .v2-glow-ember {
   background: radial-gradient(closest-side, color-mix(in srgb, var(--v2-ember) 30%, transparent), transparent 72%);
 }
-:root[data-design='v2'] .v2-glow-green {
+:root .v2-glow-green {
   background: radial-gradient(closest-side, color-mix(in srgb, var(--v2-green) 22%, transparent), transparent 72%);
 }
-:root[data-design='v2'] .v2-bottom-fade {
+:root .v2-bottom-fade {
   background: linear-gradient(to top, var(--v2-dark-canvas) 22%, transparent);
 }
 
@@ -373,21 +373,21 @@
   100% { opacity: 1; transform: scale(1); }
 }
 
-:root[data-design='v2'] .v2-screen-enter {
+:root .v2-screen-enter {
   animation: v2-screen-enter var(--v2-motion-screen) var(--v2-motion-ease) both;
 }
 
-:root[data-design='v2'] .v2-pressable {
+:root .v2-pressable {
   transition: transform var(--v2-motion-press) var(--v2-motion-ease), border-color var(--v2-motion-press) ease, box-shadow var(--v2-motion-press) ease;
 }
 
-:root[data-design='v2'] .v2-pressable:active { transform: scale(0.985); }
+:root .v2-pressable:active { transform: scale(0.985); }
 
-:root[data-design='v2'] .v2-fill {
+:root .v2-fill {
   transition: width var(--v2-motion-fill) var(--v2-motion-ease), stroke-dashoffset var(--v2-motion-fill) var(--v2-motion-ease);
 }
 
-:root[data-design='v2'] .v2-earned-moment {
+:root .v2-earned-moment {
   animation: v2-earned-moment var(--v2-motion-moment) var(--v2-motion-ease) both;
 }
 
@@ -398,8 +398,8 @@
     --v2-motion-fill: 0.001ms;
     --v2-motion-moment: 0.001ms;
   }
-  :root[data-design='v2'] .v2-screen-enter,
-  :root[data-design='v2'] .v2-earned-moment {
+  :root .v2-screen-enter,
+  :root .v2-earned-moment {
     opacity: 1;
     transform: none;
   }

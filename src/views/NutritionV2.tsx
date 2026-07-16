@@ -62,7 +62,7 @@ const NUDGE_CLR: Record<Nudge['tone'], { accent: string; on: string }> = {
 }
 
 /**
- * Nutrition v2 — Qimmah v2.1 (Slice 5). Preview-gated (NutritionView branches
+ * Nutrition v2 — Qimmah v2.1 (Slice 5). NutritionView routes
  * here under isDesignV2). Goal-driven day view: calories + macros vs targets,
  * verb-first nudges, on-device water, fast logging + barcode. Adding food/water
  * updates a v2-local day log (qimmah:nutrition:v2). No fake logs, no cloud write.

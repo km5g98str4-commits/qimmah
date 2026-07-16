@@ -7,7 +7,6 @@ import { getStrings } from '@/config/strings'
 import type { AppRoute } from '@/lib/appRoutes'
 import type { AppBadge } from './AppNav'
 import { LanguageToggle } from '@/i18n'
-import { isDesignV2 } from '@/design-system/designPreview'
 import { V2_TAB_LABELS } from '@/design-system/v2/labels'
 
 export type MainTab = 'dashboard' | 'workout' | 'nutrition' | 'progress' | 'profile'
@@ -34,25 +33,14 @@ interface TabDef {
 export function MobileShell({ lang, tab, badge, onNavigate, onOpenSettings, children }: MobileShellProps) {
   const t = getStrings(lang)
   const ar = lang !== 'en'
-  const v2 = isDesignV2()
-
-  // v2.1 §03 — final tab labels + center «تسجيل» action, RTL order per the PDF
-  // mock (اليوم · التمارين · تسجيل · التغذية · التقدّم). v1 keeps its own set.
-  const tabs: TabDef[] = v2
-    ? [
+  // v2.1 §03 — final tab labels + center «تسجيل» action, RTL order per the PDF.
+  const tabs: TabDef[] = [
         { id: 'dashboard', route: 'dashboard', label: V2_TAB_LABELS.today, icon: 'Home' },
         { id: 'workout', route: 'workout', label: V2_TAB_LABELS.workout, icon: 'Dumbbell' },
         // Center action: quick-log → the nutrition logging surface (most-logged).
         { id: 'nutrition', route: 'nutrition', label: V2_TAB_LABELS.log, icon: 'Plus', action: true },
         { id: 'nutrition', route: 'nutrition', label: V2_TAB_LABELS.nutrition, icon: 'Salad' },
         { id: 'progress', route: 'progress', label: V2_TAB_LABELS.progress, icon: 'BarChart3' },
-      ]
-    : [
-        { id: 'dashboard', route: 'dashboard', label: t.tabs.home, icon: 'Flame' },
-        { id: 'workout', route: 'workout', label: t.tabs.workout, icon: 'Dumbbell' },
-        { id: 'nutrition', route: 'nutrition', label: t.tabs.nutrition, icon: 'Salad' },
-        { id: 'progress', route: 'progress', label: t.tabs.progress, icon: 'BarChart3' },
-        { id: 'profile', route: 'profile', label: t.tabs.profile, icon: 'User' },
       ]
 
   const badgeLabel = badge === 'account' ? t.badge.account : t.badge.guest
@@ -86,31 +74,18 @@ export function MobileShell({ lang, tab, badge, onNavigate, onOpenSettings, chil
                 {badgeLabel}
               </span>
               <LanguageToggle variant="compact" />
-              {v2 ? (
-                // v2 §06 — profile «ملفك التدريبي» rides in the header avatar (it
-                // is no longer a bottom tab). Settings live inside the profile.
-                <button
-                  type="button"
-                  onClick={() => onNavigate('profile')}
-                  aria-label={ar ? 'ملفك التدريبي' : 'Your training profile'}
-                  aria-current={tab === 'profile' ? 'page' : undefined}
-                  className={cn(
-                    'grid h-11 w-11 place-items-center rounded-full border transition-colors',
-                    tab === 'profile' ? 'border-primary bg-primary-soft text-primary-c' : 'border-line bg-surface text-ink-500 hover:text-ink-900',
-                  )}
-                >
-                  <Icon name="User" className="h-5 w-5" />
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={onOpenSettings}
-                  aria-label={t.nav.settings}
-                  className="grid h-11 w-11 place-items-center rounded-lg border border-line bg-surface text-ink-500 transition-colors hover:text-ink-900"
-                >
-                  <Icon name="Settings" className="h-5 w-5" />
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={() => onNavigate('profile')}
+                aria-label={ar ? 'ملفك التدريبي' : 'Your training profile'}
+                aria-current={tab === 'profile' ? 'page' : undefined}
+                className={cn(
+                  'grid h-11 w-11 place-items-center rounded-full border transition-colors',
+                  tab === 'profile' ? 'border-primary bg-primary-soft text-primary-c' : 'border-line bg-surface text-ink-500 hover:text-ink-900',
+                )}
+              >
+                <Icon name="User" className="h-5 w-5" />
+              </button>
             </div>
           </div>
         </header>
