@@ -8,10 +8,13 @@
 > **Two answers depend on the production build config — set them by the checkbox below:**
 > - [ ] The App Store build **does NOT** set `VITE_ANALYTICS_ENDPOINT` → **Diagnostics/Usage Data = Not Collected** (default; recommended).
 > - [ ] The App Store build **DOES** set `VITE_ANALYTICS_ENDPOINT` → complete the “Usage Data / Diagnostics” rows (still anonymous, still **not** Tracking).
+> - [ ] The App Store build **does NOT** set `VITE_SENTRY_DSN` → crash diagnostics are not transmitted (default).
+> - [ ] The App Store build **DOES** set `VITE_SENTRY_DSN` → disclose Diagnostics → Crash Data as not linked and not used for tracking.
 
 ## A. Tracking — the top question
 **Does this app use data for tracking?** → **NO.**
-Justification: no ads, no data brokers, no third-party analytics/attribution SDK (see dependency list); the only
+Justification: no ads, no data brokers, and no third-party analytics/attribution SDK; optional Sentry is limited
+to scrubbed error monitoring and is not used for cross-app/cross-site tracking. The only
 optional identifier (`anonId`) is app-generated, random, and explicitly **not** linked to the account or shared
 for cross-app/cross-site tracking (`analytics/provider.ts:9-12`). No ATT prompt is needed.
 
@@ -39,7 +42,7 @@ for cross-app/cross-site tracking (`analytics/provider.ts:9-12`). No ATT prompt 
 | **Identifiers → User ID** | **Yes** | **Yes** | No | App Functionality | Supabase `user_id` keys all synced rows (`syncService.ts:141`) |
 | **User Content → Other User Content** | **Yes** | **Yes** | No | App Functionality | Free-text daily/commitment notes synced in `daily_logs` (`commitmentTracking.ts:49`) |
 | **Usage Data → Product Interaction** | **Only if analytics endpoint set** (else **No**) | **No** | No | Analytics | Anonymous event counts, random `anonId`, no PII (`analytics/events.ts:4-45`) |
-| **Diagnostics → Crash Data / Other** | **Only if analytics endpoint set** (else **No**) | **No** | No | Analytics | `unhandled_error` event (anonymous) (`analytics/events.ts:39`) |
+| **Diagnostics → Crash Data / Other** | **Only if analytics endpoint or Sentry DSN is set** (else **No**) | **No** | No | Analytics | Anonymous `unhandled_error`, or scrubbed Sentry exception/release/navigation data (`monitoring.ts`) |
 
 ## C. Data types to mark **NOT Collected** (with the reason, in case Apple asks)
 
@@ -58,9 +61,10 @@ for cross-app/cross-site tracking (`analytics/provider.ts:9-12`). No ATT prompt 
 - **Open Food Facts** — receives only the scanned barcode number, no user data (`openFoodFacts.ts:88`).
 - **GitHub/jsDelivr** — serves exercise demo images; receives an image request (device IP), no user data.
 - **YouTube** — external search link only (no in-app embed/SDK).
+- **Sentry** — optional error processor only when `VITE_SENTRY_DSN` is configured; PII/storage payloads are scrubbed before send.
 
 ## E. Reminder before submitting
-- Set the checkbox in the header to match the actual App Store build’s `VITE_ANALYTICS_ENDPOINT`.
+- Set both header checkboxes to match the App Store build’s `VITE_ANALYTICS_ENDPOINT` and `VITE_SENTRY_DSN`.
 - Confirm the Supabase project has RLS enabled (data-isolation claim) — **OWNER-TO-CONFIRM**.
 - App age rating: eligibility age is **12** (Terms §3). Answer Apple's 2025 age-rating questionnaire
   truthfully for the app's fitness/wellness content and let Apple **compute** the band; ensure the stated
