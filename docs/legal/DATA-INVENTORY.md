@@ -11,7 +11,7 @@
 |---|---|
 | **No third-party analytics/ads/attribution SDK** (no Firebase, GA, Meta, AppsFlyer, Amplitude, Mixpanel, Sentry) | `package.json` dependencies — only Capacitor, `@supabase/supabase-js`, `@zxing/*` (barcode), `lucide-react`, `react`, `react-body-highlighter`, `@fontsource/*` |
 | **No IDFA / App Tracking Transparency / advertising APIs** | grep of `src` + `Info.plist`: no `AppTrackingTransparency`, `advertisingIdentifier`, `IDFA`, `AdSupport` |
-| **No location, contacts, photo-library, or microphone access** | `Info.plist` declares only `NSCameraUsageDescription`; no `NSLocation*`, `NSContacts*`, `NSPhotoLibrary*`, `NSMicrophone*` |
+| **No location, contacts, photo-library, or microphone access** | `Info.plist` declares camera + Health step-read purposes; no `NSLocation*`, `NSContacts*`, `NSPhotoLibrary*`, `NSMicrophone*` |
 | **Fonts are self-hosted (bundled), no font-CDN egress** | `src/design-system/fonts.ts:1` (“Self-hosted fonts — bundled via @fontsource … NO runtime”); `index.html:78` |
 | **Local-first architecture** — device is source of truth, cloud is optional backup | `src/lib/syncService.ts:1-11` |
 | **First-party diagnostics are OFF by default** (noop) — HTTP egress only if `VITE_ANALYTICS_ENDPOINT` is set at build time | `src/lib/analytics/index.ts:44-64` |
@@ -30,7 +30,7 @@
 | 8 | **Injuries / limitations** | Selected injury areas (knee, shoulder, …) | `profiles` (via profile) → synced | Exclude unsafe exercises | **Yes** | No | Supabase | `design-system/v2/labels.ts` (injuries); `onboardingSync.ts:69` |
 | 9 | **Nutrition logs** | Logged foods, calories, macros | Device (`nutrition:v2`, `history:nutritionLogs:v1`) + Supabase `daily_logs` when sync is enabled | Daily nutrition tracking | **Yes** when synced | No | Supabase | `nutritionV2Model.ts`; `syncService.ts` |
 | 10 | **Water intake** | Daily ml logged | Device (`nutrition:v2` / `history:waterLogs:v1`) + Supabase `daily_logs` when sync is enabled | Hydration tracking | **Yes** when synced | No | Supabase | `nutritionV2Model.ts`; `syncService.ts` |
-| 11 | **Steps** | Manually entered daily step count | Device (`steps:v1`) + Supabase `step_logs` when sync is enabled; **no HealthKit/Google Fit** | Movement pillar | **Yes** when synced | No | Supabase | `stepCounter.ts`; `syncStores.ts` |
+| 11 | **Steps** | Manual daily total, or Apple Health `stepCount` daily totals after explicit opt-in | Device (`steps:v1`) + Supabase `step_logs` when sync is enabled | Movement pillar | **Yes** when synced | No | Apple Health (read source) + Supabase when synced | `healthKit.ts`; `HealthKitStepsPlugin.swift`; `stepCounter.ts`; `syncStores.ts` |
 | 12 | **Achievements** | Earned badges/milestones | Device (`achievements:v1`) + Supabase `achievements` when sync is enabled | Motivation | **Yes** when synced | No | Supabase | `features/achievements/engine.ts`; `syncStores.ts` |
 | 13 | **Barcode (food) scans** | The scanned **barcode number** only (product lookup) | Sent to Open Food Facts; result cached on device (`off:cache:v1`) | Look up product nutrition | No | No | **Open Food Facts** | `openFoodFacts.ts:88-89` |
 | 14 | **Camera** | Live frames decoded **on-device** for barcodes; images not stored or transmitted | Not stored | Barcode scanning only | No | No | — | `Info.plist` (`NSCameraUsageDescription`); `BarcodeCamera.tsx` (zxing) |

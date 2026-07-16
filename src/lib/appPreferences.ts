@@ -7,9 +7,10 @@ export type Lang = 'ar' | 'en'
 
 export interface AppPreferences {
   language: Lang
+  hapticsEnabled: boolean
 }
 
-const DEFAULT: AppPreferences = { language: 'ar' }
+const DEFAULT: AppPreferences = { language: 'ar', hapticsEnabled: true }
 
 export function loadPreferences(): AppPreferences {
   if (typeof window === 'undefined') return { ...DEFAULT }
@@ -17,7 +18,10 @@ export function loadPreferences(): AppPreferences {
     const raw = window.localStorage.getItem(PREFS_KEY)
     if (!raw) return { ...DEFAULT }
     const parsed = JSON.parse(raw) as Partial<AppPreferences>
-    return { language: parsed.language === 'en' ? 'en' : 'ar' }
+    return {
+      language: parsed.language === 'en' ? 'en' : 'ar',
+      hapticsEnabled: parsed.hapticsEnabled !== false,
+    }
   } catch {
     return { ...DEFAULT }
   }
@@ -35,6 +39,10 @@ export function getLanguage(): Lang {
 export function setLanguage(language: Lang): void {
   savePreferences({ ...loadPreferences(), language })
   applyLanguage(language)
+}
+
+export function setHapticsEnabled(hapticsEnabled: boolean): void {
+  savePreferences({ ...loadPreferences(), hapticsEnabled })
 }
 
 /** يطبّق اللغة على عنصر الجذر: العربية RTL، الإنجليزية LTR. */

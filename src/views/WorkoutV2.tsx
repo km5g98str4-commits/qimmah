@@ -28,6 +28,7 @@ import type { RestTip } from '@/lib/coaching/types'
 import type { Muscle } from '@/types/workout'
 import { getExercise } from '@/data/exercises'
 import { registerWorkoutPRs } from '@/features/achievements/engine'
+import { playHaptic } from '@/lib/nativeFeedback'
 import {
   computeLoadout, loadPlateConfig, type PlateConfig,
   generateWarmup, loadWarmupPref, saveWarmupPref, type WarmupSet,
@@ -230,6 +231,7 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   // Keep the "done" state visible a beat, then clear the rest bar.
   useEffect(() => {
     if (!restDone) return
+    void playHaptic('rest')
     const id = window.setTimeout(() => setActive((prev) => (prev ? { ...prev, rest: null } : prev)), 2500)
     return () => window.clearTimeout(id)
   }, [restDone])
@@ -297,6 +299,7 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   }
 
   const finishSet = () => {
+    void playHaptic('set')
     const lastSet = active.setIndex >= rows.length - 1
     const lastEx = active.exIndex >= model.exercises.length - 1
     if (lastSet && lastEx) {
@@ -322,6 +325,7 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
         const prs = detectPRsForSession(session)
         if (prs.length > 0) {
           registerWorkoutPRs(toPRCelebrations(prs, (id) => { const e = getExercise(id); return { ar: e?.nameAr, en: e?.nameEn } }))
+          void playHaptic('pr')
         }
         setSessionPRs(prs)
       } catch { /* local summary already saved; never trap the user on completion */ }

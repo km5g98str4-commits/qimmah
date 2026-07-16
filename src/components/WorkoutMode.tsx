@@ -29,6 +29,7 @@ import type { RestTip } from '@/lib/coaching'
 import { muscleLabel } from '@/lib/muscles'
 import { getDayStamp } from '@/lib/today'
 import type { Difficulty, SetLog, WorkoutSession } from '@/lib/workoutSessions'
+import { playHaptic } from '@/lib/nativeFeedback'
 
 interface WorkoutModeProps {
   lang: Lang
@@ -171,6 +172,7 @@ export function WorkoutMode({ lang, day, ownerId, initialSnapshot, onClose, onFi
   // بعد انتهاء الراحة نُبقي حالة «خلصت» لحظةً ثم نزيل الشريط.
   useEffect(() => {
     if (!restDone) return
+    void playHaptic('rest')
     const id = window.setTimeout(() => setRest(null), 2500)
     return () => window.clearTimeout(id)
   }, [restDone])
@@ -274,6 +276,7 @@ export function WorkoutMode({ lang, day, ownerId, initialSnapshot, onClose, onFi
     const willComplete = !set.completed
     setSet(idx, { completed: willComplete })
     if (willComplete) {
+      void playHaptic('set')
       flash()
       startRest(pe.restSec)
     }

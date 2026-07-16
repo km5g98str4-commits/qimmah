@@ -78,7 +78,7 @@ change) and is prioritized here. Tags: `[bug]` `[improvement]` `[tech-debt]` `[f
 
 ### Future ideas (product — not scheduled)
 - `[future]` Local reminders (workout/water/supplement) — also the 4.2 mitigation.
-- `[future]` Apple Health steps/weight read (the `registerStepBridge` seam exists).
+- `[done wave6]` Apple Health step-count read through the local Capacitor bridge; weight remains future scope.
 - `[future]` Progressive-overload suggestions + deload logic from logged history.
 - `[future]` Weekly progress photo (measurements already tracked).
 - `[future]` PDF progress export; home-screen widget (next workout / steps).

@@ -96,7 +96,7 @@ Qimmah+ (later): deeper plans and insights — the essentials stay free.
 | Water tracking | `src/lib/nutritionTracking.ts` | — |
 | Weight/measurements + chart | `src/lib/measurementLog.ts`, `LineChart.tsx` | — |
 | Strength/PRs, medals, streaks | `exerciseStats.ts`, `features/achievements/*`, `streaks.ts` | — |
-| Steps (manual) | `src/lib/stepCounter.ts` | **manual entry** — copy never says HealthKit/auto |
+| Steps (manual + Apple Health) | `src/lib/stepCounter.ts`, `src/lib/healthKit.ts`, `HealthKitStepsPlugin.swift` | HealthKit is read-only, explicit opt-in; manual entry remains |
 | Supplements/medications (tracking only) | `data/supplements.ts`, `data/medications.ts` | disclaimer "not medical advice" kept |
 | Local reminder (iOS) | `src/lib/reminders.ts` | copy scopes it to iPhone; no web push claim |
 | Today + to-do | `TodayV2.tsx`, `features/todo/*` | — |
@@ -105,5 +105,5 @@ Qimmah+ (later): deeper plans and insights — the essentials stay free.
 | Arabic-first + English support | `product.ts`, `config/strings.ts` (en) | "with English support", **not** "fully bilingual" |
 | Qimmah+ one line, essentials free | `profileV2Model.ts` (`subscription.enabled:false`) | **no IAP/paywall** implied |
 
-**Deliberately NOT claimed:** Apple Health/HealthKit, automatic step counting, any subscription/premium
-tier for purchase, background web notifications, "fully offline install", "fully bilingual".
+**Deliberately NOT claimed:** background step collection beyond HealthKit's stored totals, Google Fit, any
+subscription/premium tier for purchase, background web notifications, "fully offline install", "fully bilingual".

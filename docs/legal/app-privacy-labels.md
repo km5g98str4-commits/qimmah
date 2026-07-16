@@ -35,7 +35,7 @@ for cross-app/cross-site tracking (`analytics/provider.ts:9-12`). No ATT prompt 
 | **Contact Info → Email Address** | **Yes** | **Yes** | No | App Functionality | Account sign-in (`authContext.tsx:62`) |
 | **Contact Info → Name** | **Yes** | **Yes** | No | App Functionality | Optional display name (`authContext.tsx:62,121`) |
 | **Health & Fitness → Health** | **Yes** | **Yes** | No | App Functionality | Body measurements, nutrition, water, and supplements/medications can sync (`syncService.ts`, `syncStores.ts`) |
-| **Health & Fitness → Fitness** | **Yes** | **Yes** | No | App Functionality | Workouts, sets, reps, PRs, manual steps, and achievements can sync (`syncService.ts`, `syncStores.ts`) |
+| **Health & Fitness → Fitness** | **Yes** | **Yes** | No | App Functionality | Workouts, sets, reps, PRs, manual/opt-in HealthKit steps, and achievements can sync (`healthKit.ts`, `syncStores.ts`) |
 | **Identifiers → User ID** | **Yes** | **Yes** | No | App Functionality | Supabase `user_id` keys all synced rows (`syncService.ts:141`) |
 | **User Content → Other User Content** | **Yes** | **Yes** | No | App Functionality | Free-text daily/commitment notes synced in `daily_logs` (`commitmentTracking.ts:49`) |
 | **Usage Data → Product Interaction** | **Only if analytics endpoint set** (else **No**) | **No** | No | Analytics | Anonymous event counts, random `anonId`, no PII (`analytics/events.ts:4-45`) |
@@ -58,6 +58,7 @@ for cross-app/cross-site tracking (`analytics/provider.ts:9-12`). No ATT prompt 
 - **Open Food Facts** — receives only the scanned barcode number, no user data (`openFoodFacts.ts:88`).
 - **GitHub/jsDelivr** — serves exercise demo images; receives an image request (device IP), no user data.
 - **YouTube** — external search link only (no in-app embed/SDK).
+- **Apple Health** — read-only source for daily step totals after an explicit settings action; no advertising/tracking use.
 
 ## E. Reminder before submitting
 - Set the checkbox in the header to match the actual App Store build’s `VITE_ANALYTICS_ENDPOINT`.
