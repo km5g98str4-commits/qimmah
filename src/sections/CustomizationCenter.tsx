@@ -121,12 +121,21 @@ export function CustomizationCenter({ onBack, initialStep = 0, mode = 'onboardin
     a.click()
     URL.revokeObjectURL(url)
   }
-  // استعادة من ملف نسخة
+  // استعادة من ملف نسخة الخطة (`qimmah-plan.json`).
+  // ملاحظة (QEA-001 / دفاع في العمق): هذا مسار استعادة *مسودّة الخطة* داخل المعالج — يكتب في
+  // حالة React فقط ولا يُثبَّت إلا بحفظ صريح، ولا يمسّ متاجر البيانات المرتبطة بالمالك (السجل/
+  // القياسات/الجلسات) ولا رمز الجلسة. مع ذلك نحرس المُدخل: reviver يرفض تلويث النموذج
+  // (`__proto__`/`constructor`/`prototype`) في أي عمق، ونتحقّق أنّه كائن Customization فعلي.
   const onImportFile = (file: File) => {
     const reader = new FileReader()
     reader.onload = () => {
       try {
-        const p = JSON.parse(String(reader.result)) as Partial<Customization>
+        const parsed = JSON.parse(String(reader.result), (key, value) => {
+          if (key === '__proto__' || key === 'constructor' || key === 'prototype') return undefined
+          return value
+        }) as unknown
+        if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return
+        const p = parsed as Partial<Customization>
         setData((prev) => ({
           ...prev,
           ...p,

@@ -215,6 +215,34 @@ const syncResult = applyImport(syncBundle, UID_A, UID_A)
 check('الاستيراد يُعيد تعبئة طابور المزامنة', syncResult.syncQueued && readSyncQueue(UID_A).length > 0)
 setSyncFeatureEnabledForTests(undefined)
 
+// ————— (QEA-001) متّجهات التدقيق الدقيقة —————
+// المستورد القديم غير المُتحقَّق في `#/settings` أُزيل؛ المسار الوحيد للاستيراد هو هذا الخطّ
+// المُتحقَّق. نُثبّت متّجهَي التدقيق الحرفيَّين: (أ) ملفّ إصدار خاطئ → مرفوض قبل أي كتابة،
+// (ب) ملفّ مالك آخر (uid=B) يُستورَد بواسطة A → يُعاد ترميزه إلى A حصراً وبيانات B على الجهاز
+//     تبقى سليمة (حقن حساب آخر مستحيل بنيويًّا).
+console.log('\nQEA-001) متّجهات التدقيق: رفض ملفّ الإصدار الخاطئ + استحالة حقن حساب آخر')
+clearAll()
+seedFor(UID_A)
+setSyncRuntime(UID_A, false)
+const qeaBundle = buildExportBundle(UID_A)
+// (أ) ملفّ إصدار غير متوافق (كما في تقرير التدقيق) → رفض قبل أي كتابة
+expectThrow('QEA-001(أ): رفض ملفّ schemaVersion خاطئ', () => parseImportFile(JSON.stringify({ ...qeaBundle, schemaVersion: 999 }), UID_A))
+// (ب) ملفّ مالك آخر: B له بيانات حقيقية على الجهاز، ثم يستورد A نسخة B
+clearAll()
+seedFor(UID_B)
+setSyncRuntime(UID_B, false)
+const fileFromB = buildExportBundle(UID_B)
+clearAll()
+seedFor(UID_A)
+raw(`qimmah:todo:v1:${UID_B}`, { date: TODAY, items: [{ id: 'b-real', text: 'بيانات B الحقيقية', done: false }] })
+setSyncRuntime(UID_A, false)
+const previewOfB = parseImportFile(JSON.stringify(fileFromB), UID_A)
+check('QEA-001(ب): المعاينة تربط الملكية بالمستورِد A لا B', previewOfB.ownerId === UID_A)
+applyImport(previewOfB.bundle, UID_A, previewOfB.ownerId)
+check('QEA-001(ب): مفتاح todo الخاص بـ B لم يُلمس (لا حقن)', ls().getItem(`qimmah:todo:v1:${UID_B}`) === JSON.stringify({ date: TODAY, items: [{ id: 'b-real', text: 'بيانات B الحقيقية', done: false }] }))
+check('QEA-001(ب): محتوى ملفّ B هبط تحت A حصراً (إعادة ترميز)', loadTodos(UID_A).items.some((i) => i.text.includes(UID_B)))
+check('QEA-001(ب): رمز الجلسة لم يُكتب من ملفّ خارجي', ls().getItem('qimmah:supabase-auth:v1') === null)
+
 // ————— النتيجة —————
 console.log(`\n=== النتيجة: ${pass} ✓ / ${fail} ✗ ===`)
 if (fail > 0) { console.error(`\n❌ فشل ${fail} فحصًا.`); process.exit(1) }
