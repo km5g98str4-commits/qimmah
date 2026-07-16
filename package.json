@@ -54,7 +54,8 @@
     "test:e2e:auth": "node scripts/e2e-auth/run.mjs",
     "test:e2e:auth:preload": "node scripts/e2e-auth/preload-images.mjs",
     "coaching:build": "node scripts/coaching/extract-manifest.mjs && node scripts/coaching/build-cues.mjs",
-    "test:coaching": "node scripts/coaching/run-coaching-proof.mjs"
+    "test:coaching": "node scripts/coaching/run-coaching-proof.mjs",
+    "test:chaos": "node scripts/resilience/run-chaos.mjs"
   },
   "dependencies": {
     "@capacitor/app": "^8.1.0",
