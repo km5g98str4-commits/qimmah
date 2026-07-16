@@ -1,4 +1,5 @@
 import { loadActiveSession } from '@/lib/activeSession'
+import { loadWorkoutSummary } from '@/lib/workoutSummary'
 import { getLastUser } from '@/lib/accountScope'
 import { BUILD_LABEL } from '@/lib/buildInfo'
 import { shownLessonIds } from '@/lib/coaching/lessonRotation'
@@ -52,6 +53,7 @@ export interface QimmahDataExport {
     }
     reminders: ReturnType<typeof loadNotificationPrefs>
     activeSession: ReturnType<typeof loadActiveSession>
+    lastWorkoutSummary: ReturnType<typeof loadWorkoutSummary>
     coaching: { shownLessonIds: string[] }
   }
 }
@@ -105,6 +107,7 @@ export function buildQimmahDataExport(options: BuildDataExportOptions): QimmahDa
       },
       reminders: loadNotificationPrefs(options.ownerId ?? 'guest'),
       activeSession: loadActiveSession(options.ownerId),
+      lastWorkoutSummary: loadWorkoutSummary(options.ownerId),
       coaching: { shownLessonIds: shownLessonIds(options.ownerId) },
     },
   }

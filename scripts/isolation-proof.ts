@@ -8,6 +8,12 @@ import {
   getLastUser,
   setLastUser,
 } from '@/lib/accountScope'
+import {
+  summaryKey,
+  saveWorkoutSummary,
+  loadWorkoutSummary,
+  migrateLegacySummary,
+} from '@/lib/workoutSummary'
 
 let pass = 0
 let fail = 0
@@ -36,6 +42,7 @@ function seedUserData(tag: string) {
   set('qimmah:today:v1', `{"date":"x"}`)
   set(`qimmah:todo:v1:${tag}`, '{"items":[]}') // owner-scoped
   set(`qimmah:activeSession:v1:${tag}`, '{"v":1}') // owner-scoped
+  set(`qimmah:workout-summary:v2:${tag}`, `{"title":"${tag}"}`) // owner-scoped (finding #7)
   set('qimmah:customPlan:v1', `{"${tag}":{}}`) // owner-in-value
   set('qimmah:nutrition:v2', `{"foods":[]}`)
 }
@@ -79,7 +86,7 @@ console.log('\n① wipeUserData: يمسح بيانات المستخدم، يُب
   set('other-app:token', 'keep-me') // مفتاح خارج قِمّة
   wipeUserData()
   check('كل مفاتيح بيانات المستخدم مُسحت', USER_KEYS.every((k) => !has(k)))
-  check('المفاتيح المنعزلة (todo:A / activeSession:A) مُسحت أيضًا', !has('qimmah:todo:v1:A') && !has('qimmah:activeSession:v1:A'))
+  check('المفاتيح المنعزلة (todo:A / activeSession:A / workout-summary:A) مُسحت أيضًا', !has('qimmah:todo:v1:A') && !has('qimmah:activeSession:v1:A') && !has('qimmah:workout-summary:v2:A'))
   check('كل مفاتيح السماح العامّة باقية', SAFE_KEYS.every((k) => has(k)))
   check('اللغة (prefs) باقية', ls.getItem('qimmah:prefs:v1') === '{"language":"ar"}')
   check('رمز الجلسة الحالي باقٍ (لا يُخرج المستخدم أثناء التبديل)', has('qimmah:supabase-auth:v1'))
@@ -157,6 +164,49 @@ console.log('\n⑥ حذف/إعادة ضبط كامل يتجاوز مسح الت�
   check('سجلّ الحسابات مُسح (يُعاد الإعداد عند العودة)', !has('qimmah:onboarding:accounts:v1'))
   check('الجلسة مُسحت (تسجيل خروج)', !has('qimmah:supabase-auth:v1'))
   check('اللغة تبقى حتى بعد إعادة الضبط الكامل', has('qimmah:prefs:v1'))
+}
+
+console.log('\n⑦ ملخّص التمرين معزول بالمالك + هجرة المفتاح المسطّح القديم (finding #7)')
+{
+  // عزل مستخدمَين: A وB لهما مفتاح مستقل، ولا يقرأ أحدهما ملخّص الآخر
+  clearAll()
+  saveWorkoutSummary('A', { date: '2026-07-16', title: 'A-workout', totalSets: 12, volume: 3000, durationMin: 40 })
+  saveWorkoutSummary('B', { date: '2026-07-16', title: 'B-workout', totalSets: 8, volume: 2000, durationMin: 30 })
+  check('مفتاح ملخّص A مُنعزل عن مفتاح B', summaryKey('A') !== summaryKey('B') && summaryKey('A') === 'qimmah:workout-summary:v2:A')
+  check('A يقرأ ملخّصه فقط', loadWorkoutSummary('A')?.title === 'A-workout')
+  check('B يرى ملخّصه هو لا ملخّص A', loadWorkoutSummary('B')?.title === 'B-workout')
+
+  // مسح التبديل: A→B يمسح ملخّص A فلا يتسرّب إلى B
+  clearAll()
+  reconcileAccountScope('A')
+  saveWorkoutSummary('A', { date: '2026-07-16', title: 'A-workout', totalSets: 12, volume: 3000, durationMin: 40 })
+  reconcileAccountScope('B')
+  check('ملخّص A مُسح عند التبديل إلى B', loadWorkoutSummary('A') === null)
+  check('B يبدأ بلا ملخّص (لا تسرّب عبر الجهاز)', loadWorkoutSummary('B') === null)
+
+  // الهجرة: المفتاح المسطّح القديم يُنقل لمالكه فقط عند تطابق آخر مالك
+  clearAll()
+  setLastUser('A')
+  ls.setItem('qimmah:workout-summary:v2', '{"date":"2026-07-10","title":"legacy-A","totalSets":10,"volume":2500,"durationMin":35}')
+  migrateLegacySummary('A')
+  check('الهجرة تنسب القيمة المسطّحة لمالكها (lastUser=A)', loadWorkoutSummary('A')?.title === 'legacy-A')
+  check('المفتاح المسطّح أُزيل بعد الهجرة', ls.getItem('qimmah:workout-summary:v2') === null)
+
+  // الغموض: آخر مالك مختلف → لا تُنسب، وتُهمَل، والمفتاح المسطّح يُزال دائمًا
+  clearAll()
+  setLastUser('A')
+  ls.setItem('qimmah:workout-summary:v2', '{"date":"2026-07-10","title":"legacy-A","totalSets":10,"volume":2500,"durationMin":35}')
+  migrateLegacySummary('B') // B ≠ lastUser(A) → غامض
+  check('القيمة الغامضة لا تُنسب لمالك مختلف', loadWorkoutSummary('B') === null)
+  check('المفتاح المسطّح الغامض أُزيل (لا يتسرّب لاحقًا)', ls.getItem('qimmah:workout-summary:v2') === null)
+
+  // الغموض: سياق ضيف (بلا مالك) → تُهمَل والمفتاح يُزال
+  clearAll()
+  setLastUser('A')
+  ls.setItem('qimmah:workout-summary:v2', '{"date":"2026-07-10","title":"legacy-A","totalSets":10,"volume":2500,"durationMin":35}')
+  migrateLegacySummary(null) // ضيف → غامض
+  check('سياق الضيف لا يستولي على قيمة مسطّحة', loadWorkoutSummary(null) === null)
+  check('المفتاح المسطّح أُزيل في سياق الضيف أيضًا', ls.getItem('qimmah:workout-summary:v2') === null)
 }
 
 console.log(`\n${'─'.repeat(46)}`)

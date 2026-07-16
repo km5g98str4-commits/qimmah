@@ -17,6 +17,10 @@ import { getDayStamp } from '@/lib/today'
 import { buildV2WorkoutSession } from '@/lib/workoutV2Persist'
 // Strength system (this feature) — plate math, warm-up, unified PR detection.
 import { useAuth } from '@/lib/authContext'
+// Owner-scoped last-workout summary (isolation finding #7): scoped storage +
+// one-time migration of the legacy flat key live in a lib so the storage contract
+// is unit-testable and shared with the data-export/isolation proofs.
+import { saveWorkoutSummary, migrateLegacySummary } from '@/lib/workoutSummary'
 import { getExercise } from '@/data/exercises'
 import { registerWorkoutPRs } from '@/features/achievements/engine'
 import {
@@ -32,7 +36,6 @@ interface WorkoutV2Props {
 
 const ACTIVE_KEY_BASE = 'qimmah:active-workout:v2'
 const activeKey = (ownerId: string | null) => `${ACTIVE_KEY_BASE}:${ownerId ?? 'guest'}`
-const SUMMARY_KEY = 'qimmah:workout-summary:v2'
 const REST_DEFAULT = 90
 const REST_ADD = 15
 
@@ -118,9 +121,10 @@ function isUsableSession(value: unknown, exercises: WorkoutV2Exercise[]): value 
  * branches here under isDesignV2). Self-contained internal navigation: Plan →
  * Exercise Detail → Active Workout (dark focus mode: set editor + rest timer) →
  * Complete. Reads the real generated plan; no fake previous weights/PRs. The
- * active session persists to localStorage (qimmah:active-workout:v2) so a refresh
- * resumes — including the rest timer, stored as timestamps. A completed summary
- * is saved locally (qimmah:workout-summary:v2). No cloud write.
+ * active session persists to localStorage (qimmah:active-workout:v2:<owner>) so a
+ * refresh resumes — including the rest timer, stored as timestamps. A completed
+ * summary is saved locally, owner-scoped (qimmah:workout-summary:v2:<owner>). No
+ * cloud write.
  */
 export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   const { customization } = useCustomization()
@@ -130,6 +134,10 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
 
   const userId = useAuth().user?.id ?? null
   const ownerActiveKey = activeKey(userId)
+
+  // One-time migration of the legacy flat summary key to the owner-scoped key
+  // (ambiguous data discarded — see migrateLegacySummary). Runs once per owner.
+  useEffect(() => { migrateLegacySummary(userId) }, [userId])
   const [screen, setScreen] = useState<Screen>('plan')
   const [detailIdx, setDetailIdx] = useState(0)
   const [active, setActive] = useState<ActiveState | null>(null)
@@ -275,7 +283,7 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
       try {
         const totalSets = doneSets + 1
         const volume = Object.values(active.rows).flat().reduce((v, r) => v + (r.done ? r.weight * r.reps : 0), 0) + row.weight * row.reps
-        localStorage.setItem(SUMMARY_KEY, JSON.stringify({ date: new Date().toISOString().slice(0, 10), title: model.session.title, totalSets, volume, durationMin: Math.round((Date.now() - active.startedAt) / 60000) }))
+        saveWorkoutSummary(userId, { date: new Date().toISOString().slice(0, 10), title: model.session.title, totalSets, volume, durationMin: Math.round((Date.now() - active.startedAt) / 60000) })
       } catch { /* ignore */ }
       // Canonical persist — feeds historyStore (auto-enqueues sync) + exercise
       // history, so Progress / Today / Profile all react to this v2 workout.
