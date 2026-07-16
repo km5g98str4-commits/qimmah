@@ -4,8 +4,8 @@
 
 **القاعدة:** بطاقة الجهاز تعرض **الجهاز نفسه** أو البديل الأنيق — لا بار/دمبل/حبل/وزن جسم إطلاقًا.
 ١٨ بطاقة جهاز لا تملك لقطة جهاز من قنوات المقاومة (WorkoutX/free-exercise-db تعيد وزنًا حرًّا) مُدرَجة
-في `PLACEHOLDER_ONLY_EXERCISE_IDS` (`src/data/exercises.ts`)، وتُعرَض لها — إن جُلبت — صورة جهاز حقيقية
-من `public/exercise-machine-images/{slug}.jpg|gif` عبر `src/data/machineImages.ts`، وإلا البديل الأنيق.
+في `PLACEHOLDER_ONLY_EXERCISE_IDS` (`src/data/exercises.ts`)، وتُعرَض لها رسم توضيحي داخلي (IN-HOUSE)
+من `public/exercise-machine-images/{slug}.svg` عبر `src/data/machineImages.ts` (انظر `docs/content/MEDIA-RIGHTS.md`)، وإلا البديل الأنيق.
 
 **الأجهزة الثمانية عشر:** decline-chest-press-machine · hack-squat-machine · preacher-curl-machine ·
 rear-delt-row-machine · seated-calf-raise-machine · standing-calf-raise-machine · seated-leg-curl ·

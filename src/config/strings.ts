@@ -600,6 +600,7 @@ const ar: ShellStrings = {
       'المحتوى داخل التطبيق (حسابات السعرات، اقتراحات الأوزان، الجرعات) تقديري وتعليمي فقط، وليس نصيحة طبية أو غذائية أو دوائية.',
       'استشر طبيبًا أو مختصًا مؤهّلًا قبل تغيير نظامك الغذائي أو الدوائي أو برنامج تمرينك، خصوصًا عند وجود حالة صحية.',
       'أنت مسؤول عن صحة البيانات التي تُدخلها وعن الاحتفاظ بنسخة احتياطية عبر خاصية التصدير.',
+      'مصادر الوسائط: صور إرشادات التمارين الثابتة مشتقة من قاعدتَي free-exercise-db و wrkout/exercises.json، ومتاحة بموجب Unlicense/إهداء الملك العام. أمّا الرسوم التوضيحية لبطاقات الأجهزة فهي أعمال أصلية من إنتاج قِمّة (IN-HOUSE) نملك حقوقها كاملةً.',
     ],
   },
   notFound: {
@@ -1048,6 +1049,7 @@ const en: ShellStrings = {
       'In-app content (calorie calculations, weight suggestions, doses) is estimated and educational only, not medical, nutritional, or pharmaceutical advice.',
       'Consult a qualified professional before changing your diet, medication, or training program, especially with a health condition.',
       'You are responsible for the accuracy of the data you enter and for keeping a backup via the export feature.',
+      'Media sources: Static exercise-instruction images are derived from free-exercise-db and wrkout/exercises.json, available under the Unlicense/public-domain dedication. Machine-card illustrations are original in-house Qimmah artwork that we fully own.',
     ],
   },
   notFound: {

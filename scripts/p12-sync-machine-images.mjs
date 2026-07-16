@@ -22,7 +22,7 @@ const ROOT = resolve(__dirname, '..')
 const IMG_DIR = resolve(ROOT, 'public/exercise-machine-images')
 const OUT_FILE = resolve(ROOT, 'src/data/machineImages.ts')
 const CHECK_ONLY = process.argv.includes('--check')
-const IMG_RE = /\.(jpg|jpeg|png|webp|gif)$/i
+const IMG_RE = /\.(svg|jpg|jpeg|png|webp|gif)$/i
 
 function main() {
   if (!existsSync(IMG_DIR)) mkdirSync(IMG_DIR, { recursive: true })
@@ -38,15 +38,16 @@ function main() {
   const ordered = Object.keys(map).sort()
   const entries = ordered.map((k) => `  '${k}': '${map[k]}',`).join('\n')
 
-  const out = `// ⚙️ ملف مُولّد آليًا — لا تُحرّره يدويًا. لإعادة التوليد:  node scripts/p12-sync-machine-images.mjs
-// خريطة: مُعرّف جهاز قانوني → صورة/لقطة **الجهاز نفسه** في public/exercise-machine-images/.
+  const out = `// ⚙️ ملف مُولّد آليًا — لا تُحرّره يدويًا. لإعادة التوليد:  node scripts/media/build-machine-placeholders.mjs
+// خريطة: مُعرّف جهاز قانوني → رسم توضيحي داخلي (IN-HOUSE) للجهاز في public/exercise-machine-images/.
 //
-// هذه بطاقات أجهزة لا تملك لقطة جهاز من قنوات المقاومة (WorkoutX/free-exercise-db تعيد وزنًا حرًّا)،
-// فنعرض لها صورة الجهاز الحقيقية المجلوبة من مصادر مفتوحة الترخيص عبر scripts/p12-fetch-machine-images.mjs.
-// حتى تُجلب الصور تبقى الخريطة فارغة وتظهر البطاقات على البديل الأنيق (لا لقطة وزن حرّ أبدًا).
+// هذه بطاقات أجهزة لا تملك لقطة جهاز مرخّصة قابلة لإعادة التوزيع من أي مصدر (WorkoutX/free-exercise-db
+// تعيدان وزنًا حرًّا، والملفات المحلّية السابقة كانت UNKNOWN/RESTRICTED بلا سلسلة حقوق — انظر
+// docs/content/MEDIA-RIGHTS.md). فنعرض رسمًا توضيحيًا متجهيًا أصليًا (SVG) نملك حقوقه بالكامل،
+// بدل مادة مقيّدة أو صورة «تشبه» الجهاز فتضلّل المستخدم. غياب الملف → البديل الأنيق (لا صورة مكسورة).
 // التغطية الحالية: ${ordered.length} جهازًا.
 
-/** خريطة ثابتة: مُعرّف جهاز قانوني → مسار صورة الجهاز المحلّية. */
+/** خريطة ثابتة: مُعرّف جهاز قانوني → مسار الرسم التوضيحي الداخلي. */
 export const machineImages: Record<string, string> = {
 ${entries}${entries ? '\n' : ''}}
 

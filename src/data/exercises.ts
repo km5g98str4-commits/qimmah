@@ -539,9 +539,9 @@ export function canonicalExerciseId(id: string): string {
 /**
  * بطاقات أجهزة لا نملك لها لقطة *جهاز* من قنوات المقاومة (WorkoutX/free-exercise-db تعطي وزنًا حرًّا).
  * قاعدة زياد: بطاقة الجهاز تعرض **صورة الجهاز نفسه** أو البديل الأنيق — لا شيء آخر (بار/دمبل/حبل/وزن جسم).
- * لذا نمنع عنها أي gif/صورة من تلك القنوات، وتُعرَض لها بدلًا من ذلك صورة جهاز مخصّصة إن توفّرت
- * (public/exercise-machine-images/{slug}.jpg|gif عبر machineImages.ts — يجلبها سكربت p12-fetch-machine-images
- * من مصادر مفتوحة الترخيص)، وإلا البديل الأنيق. المفاتيح **قانونية** (يُحلّ القديم عبر canonicalExerciseId).
+ * لذا نمنع عنها أي gif/صورة من تلك القنوات، وتُعرَض لها بدلًا من ذلك رسم توضيحي داخلي (IN-HOUSE) إن توفّر
+ * (public/exercise-machine-images/{slug}.svg عبر machineImages.ts — يولّده سكربت build-machine-placeholders
+ * ضمن pipeline الهوية؛ انظر docs/content/MEDIA-RIGHTS.md)، وإلا البديل الأنيق. المفاتيح **قانونية** (يُحلّ القديم عبر canonicalExerciseId).
  * مصدر واحد للحقيقة يستهلكه ExerciseMedia وسكربتات الوسائط.
  */
 export const PLACEHOLDER_ONLY_EXERCISE_IDS: readonly string[] = [
