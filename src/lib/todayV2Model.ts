@@ -70,8 +70,10 @@ export interface TodayV2Model {
 
 const GOAL_LABEL_AR: Record<CalorieGoal, string> = { cut: 'تنشيف', maintain: 'محافظة', bulk: 'تضخيم' }
 const GOAL_LABEL_EN: Record<CalorieGoal, string> = { cut: 'Cut', maintain: 'Maintain', bulk: 'Bulk' }
+// Source classification: exact product completion ratio, capped at 100%; not a scientific estimate.
 const pct = (cur: number, target: number) => (target > 0 ? Math.max(0, Math.min(100, Math.round((cur / target) * 100))) : 0)
 /** Honest session-length heuristic (~9 min/exercise incl. rest), rounded to 5. */
+// Source classification: NON-STANDARD Qimmah display heuristic; users can override workoutDuration.
 const estimateDurationMin = (exerciseCount: number) => (exerciseCount > 0 ? Math.max(20, Math.round((exerciseCount * 9) / 5) * 5) : 0)
 const num = (n: number) => n.toLocaleString('en-US')
 

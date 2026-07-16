@@ -10,6 +10,8 @@ const DAY_MS = 86400000
 const WEEK_START_DAY = 6 // السبت — بداية الأسبوع الخليجي (يطابق streaks.ts)
 
 // عتبات الحدّ الأدنى للبيانات لكل رؤية (تحتها → امتناع).
+// Source classification: NON-STANDARD product thresholds. They are abstention/wording guards,
+// not clinical cut-points; no external standard is claimed. See docs/features/FORMULAS.md.
 export const THRESHOLDS = {
   weightMinPoints: 4,
   weightMinSpanDays: 14,
@@ -32,6 +34,7 @@ function startOfWeekMs(ms: number): number {
   base.setDate(base.getDate() - ((base.getDay() - WEEK_START_DAY + 7) % 7))
   return base.getTime()
 }
+/** Method reference: NIST/SEMATECH e-Handbook §4.1.4.1 (accessed 2026-07-16), ordinary least squares. */
 /** انحدار خطّي بالمربّعات الصغرى: يُعيد الميل (وحدة y لكل يوم). */
 export function linregSlopePerDay(pts: { x: number; y: number }[]): number | null {
   const n = pts.length
@@ -42,6 +45,7 @@ export function linregSlopePerDay(pts: { x: number; y: number }[]): number | nul
   if (denom === 0) return null
   return (n * sxy - sx * sy) / denom
 }
+/** Source classification: NON-STANDARD centered, observation-weighted Qimmah smoother (not a calendar-day 7d mean). */
 /** تنعيم متحرّك بنافذة أيام (متوسّط النقاط ضمن ±windowDays/2 حول كل نقطة). */
 export function rollingSmooth(pts: { t: number; v: number }[], windowDays = 7): { t: number; v: number }[] {
   const half = (windowDays / 2) * DAY_MS
@@ -79,6 +83,7 @@ export function computeMuscleSplit(input: InsightInput, minSessions = 2): Muscle
   return { key: 'muscleSplit', status: 'ok', undertrained, covered }
 }
 
+// Source classification: NON-STANDARD product KPI: distinct completed days / planned days, capped at 100%.
 // ————— 3) الالتزام (المخطّط مقابل المُنجَز) —————
 export function computeAdherence(input: InsightInput): AdherenceMetric {
   const planned = input.plan.daysPerWeek
@@ -101,6 +106,8 @@ export function computeAdherence(input: InsightInput): AdherenceMetric {
   return { key: 'adherence', status: 'ok', pct, doneDays, plannedDays: planned, fourWeekAvgPct }
 }
 
+// Source classification: OLS is standard; 28d lookback, 7d centered smoother, ±0.6 kg band,
+// 3-week minimum, and |slope| <0.1 flat rule are NON-STANDARD Qimmah heuristics.
 // ————— 4) اتجاه الوزن: تنعيم 7 أيام + ميل + كشف الثبات —————
 export function computeWeight(input: InsightInput): WeightMetric {
   const pts = input.weights.map((w) => ({ t: parseDay(w.date), v: w.kg })).filter((p): p is { t: number; v: number } => p.t != null).sort((a, b) => a.t - b.t)

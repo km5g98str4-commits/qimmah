@@ -12,6 +12,8 @@ import type {
   WorkoutEnvironment,
 } from '@/types/profile'
 
+// Source classification (reviewed 2026-07-16): NON-STANDARD Qimmah heuristic;
+// no primary source was found for this exact NEAT + 0.025/training-day model. See docs/features/FORMULAS.md.
 // — معامل النشاط: نفصل حركة الحياة (NEAT) عن التمرين عمدًا حتى لا نحتسب التمرين مرّتين —
 // المعاملات القياسية 1.2–1.9 تتضمّن التمرين أصلًا؛ لذلك نأخذ NEAT أصغر ثم نضيف
 // إضافة بسيطة لكل جلسة (أيام×0.025) بدل القفزة الكبيرة في الجداول التقليدية.
@@ -30,14 +32,19 @@ const TRAINING_ADD_PER_DAY = 0.025
 const ACTIVITY_MULTIPLIER_CAP = 1.9
 
 // — ثوابت الماكروز والسعرات (مصدر حقيقة واحد، تستهلكها صفحة «كيف نحسب أرقامك») —
+/** Evidence: Morton et al. (2018), doi:10.1136/bjsports-2017-097608; plateau 1.62 g/kg/d (95% CI 1.03–2.20). */
 /** البروتين لكل كيلو من وزن الجسم — 1.8غ/كجم لكل الأهداف (ضمن نطاق 1.6–2.2 الموصى به رياضيًا). */
 export const PROTEIN_PER_KG = 1.8
+/** Consensus: National Academies DRI (2002/2005), adult fat AMDR 20–35%; 27% is Qimmah's in-range selection. */
 /** نسبة سعرات الدهون من إجمالي السعرات المستهدفة (~25–30% — نستخدم 27%). */
 export const FAT_CALORIE_RATIO = 0.27
+/** Source classification: NON-STANDARD fixed Qimmah policy; individual response is not encoded. */
 /** عجز التنشيف بالسعرات تحت TDEE. */
 export const CUT_DEFICIT = 400
+/** Source classification: NON-STANDARD fixed Qimmah policy; individual response is not encoded. */
 /** فائض التضخيم بالسعرات فوق TDEE. */
 export const BULK_SURPLUS = 300
+/** Historical source: Wishnofsky (1958), PMID 13594881; static 7700 kcal/kg rule, not a dynamic forecast. */
 /** طاقة الكيلوغرام من نسيج الجسم (تقريبي) — لاشتقاق معدّل تغيّر الوزن الأسبوعي من العجز/الفائض. */
 export const KCAL_PER_KG = 7700
 /**
@@ -121,6 +128,7 @@ export function mifflinSexConstant(gender: Gender): number {
   return -78
 }
 
+/** Primary source: Mifflin et al. (1990), doi:10.1093/ajcn/51.2.241, PMID 2305711. */
 /** BMR — Mifflin-St Jeor؛ «غير محدّد» = متوسط تقريبي. */
 function bmrFor(gender: Gender, weight: number, height: number, age: number): number {
   return 10 * weight + 6.25 * height - 5 * age + mifflinSexConstant(gender)
@@ -237,13 +245,19 @@ export function computeTargets(p: Profile): Targets {
   const rawCalories = rawCaloriesForGoalType(p.goalType, tdee)
   const isLowCalorie = rawCalories < lowCalorieThreshold(p.gender, bmr)
 
+  // General Atwater factors: National Academies, Dietary Reference Intakes for Energy (2023),
+  // https://doi.org/10.17226/26818. The fixed 27% split remains a Qimmah policy.
   // الماكروز محسوبة على السعرات المستهدفة الفعلية:
   // بروتين 1.8غ/كجم لكل الأهداف، دهون ~27% من السعرات، والباقي كارب.
   const protein = round(PROTEIN_PER_KG * w)
   const fat = round((calories * FAT_CALORIE_RATIO) / 9)
   const carbs = Math.max(0, round((calories - protein * 4 - fat * 9) / 4))
+  // Source classification: NON-STANDARD weight-based heuristic. EFSA (2010), doi:10.2903/j.efsa.2010.1459,
+  // gives sex-specific population AIs, not 35 mL/kg or this universal 2.5 L floor.
   // الماء: وزن×0.035 لأقرب نصف لتر، بحدّ أدنى 2.5 لتر.
   const water = Math.max(2.5, roundHalf(w * 0.035))
+  // Consensus classification reference: WHO adult BMI fact sheet (updated 2025); formula is kg/m².
+  // BMI remains descriptive, not diagnostic; ages 5–19 require BMI-for-age (see FORMULAS.md).
   const bmi = round1(w / Math.pow(h / 100, 2))
 
   // الوزن والمدة المقدّرة — يُشتقّ معدّل التغيّر الأسبوعي من نفس العجز/الفائض الذي تفرضه
