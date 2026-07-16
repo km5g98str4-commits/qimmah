@@ -11,7 +11,6 @@ const check = (label, condition) => {
 }
 
 const login = read('src/views/LoginView.tsx')
-const plan = read('src/components/PlanBuilder.tsx')
 const onbV2 = read('src/views/OnboardingV2.tsx')
 const flow = read('src/lib/onboardingV2Flow.ts')
 const profile = read('src/lib/planBuilderAnswers.ts')
@@ -28,7 +27,7 @@ check('حارس الإرسال يعيد التحقق قبل signUp', login.index
 check('روابط الشروط والخصوصية حقيقية وآمنة', login.includes('POLICY_LINKS.terms') && login.includes('POLICY_LINKS.privacy') && login.includes('noopener noreferrer'))
 
 console.log('\n② موافقة البيانات الصحية محفوظة وليست افتراضًا')
-check('v1 يحجب أول خطوة قياسات بلا موافقة', plan.includes("key: 'height'") && plan.includes('valid: a.healthDataConsent'))
+check('بوابة الموافقة مرتبطة بأول خطوة (الهدف) قبل أي جمع بيانات', onbV2.includes('step === 0 && <GoalStep') && onbV2.includes('healthDataConsent={healthDataConsent}') && onbV2.includes('onConsent={setHealthDataConsent}') && onbV2.includes('checked={healthDataConsent}'))
 check('v2 يحجب الانتقال بلا موافقة', flow.includes("return d.healthDataConsent ? null : 'healthConsent'"))
 check('الموافقة تدخل مصدر الحقيقة', profile.includes('accepted: a.healthDataConsent'))
 check('المسودة الجديدة لا تفترض الموافقة', flow.includes('healthDataConsent: false'))
