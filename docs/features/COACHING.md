@@ -40,9 +40,10 @@ safety line to «استشر مختصًا». The composer materialises a **static
 1. **Exercise detail «كيف تؤديه»** — `src/components/ExerciseDetail.tsx`: the authored cue (numbered
    steps + mistakes + safety) on the light detail surface in Arabic; English keeps the existing
    bilingual generic guidance. ![exercise](./coaching/exercise-how-to.png)
-2. **Rest-period tip** — `src/components/WorkoutMode.tsx`: a subtle, **dismissible** line on the dark
-   Active-Workout surface, picked for the current exercise's muscle, no-repeat within the session;
-   entrance animation is `motion-safe` only. ![rest](./coaching/rest-tip.png)
+2. **Rest-period tip** — `src/views/WorkoutV2.tsx` (`RestPanel`): a subtle, **dismissible** card on the
+   dark Active-Workout surface, picked for the current exercise's muscle, no-repeat within the session;
+   AA-contrast muted ink on dark, `role="note"` + `aria-live="polite"`, entrance via reduced-motion-safe
+   `.v2-screen-enter`. Arabic-authored tips render in Arabic mode only. ![rest](./coaching/rest-tip.png)
 3. **Today «تعلّم» card** — `src/components/coaching/TodayLearnCard.tsx` (rendered in `TodayV2`): one
    micro-lesson with a **«فهمت»** action that advances the per-account rotation. ![today](./coaching/today-learn-card.png)
 
@@ -51,7 +52,7 @@ No revenue/results promises, no «احرق دهون بسرعة», no guarantees.
 banned substring (`وش`, `الحين`, `تبي`, `كذا`, `احرق`, `مضمون`), on any `!`, on medical-claim phrases,
 and asserts spine/knee cues include the consult line.
 
-## Tests — `npm run test:coaching` (25 checks, hard-fail)
+## Tests — `npm run test:coaching` (37 checks, hard-fail)
 1. **181/181 cue coverage** (hard fail on any gap) + no orphan cues + structure bounds (3–5/2–3/1).
 2. **Content lint** across all 1,765 strings: banned slang/hype, exclamation, medical claims.
 3. **Lessons**: exactly 40, each **60–100 words**, unique ids, every lesson has a takeaway.

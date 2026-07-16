@@ -35,7 +35,7 @@ Runner: `ubuntu-latest`, **Node 22**, npm cache. Steps run in order and **fail f
    | Proof runner | Checks |
    |---|---|
    | `run-active-session-proof.mjs` | 31 |
-   | `run-isolation-proof.mjs` | 28 |
+   | `run-isolation-proof.mjs` | 39 |
    | `run-reset-recovery-proof.mjs` | 33 |
    | `run-today-v2-model-proof.mjs` | 32 |
    | `run-achievements-proof.mjs` | 19 |

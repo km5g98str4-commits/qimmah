@@ -11,8 +11,8 @@ preview and seeded reviewer state; no production account or network mutation.
 | workout 99 → kill/resume → finish | real workout UI, page reload, restored 99 assertion, 03/03b screenshots |
 | Today/Progress/Profile move | captured only after persisted finished session |
 | meal moves nutrition pillar | real add-meal interaction + 04 screenshot |
-| export is valid | 38 bundle/import validation assertions |
-| logout wipes; user B sees zero residue | 28 account-isolation assertions |
+| export is valid | 44 bundle/import validation assertions |
+| logout wipes; user B sees zero residue | 39 account-isolation assertions |
 
 Screenshots are deterministic artifacts under `docs/appstore/screenshots/raw/`. Live Supabase auth
 is separately OWNER-gated in `LIVE-AUTH.md` so the local suite never fakes credentialed coverage.

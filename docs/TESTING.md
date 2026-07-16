@@ -23,7 +23,7 @@ npm run test:gate
 | `sync` | 19 | sync queue: enqueue gating (`syncAllowedFor`), recovery guard, dedup, retry/backoff | `scripts/sync-proof.ts` |
 | `onboarding-async` | 28 | onboarding flow: step validation, finalize state machine, owner-scoped draft round-trip, discard-on-finish | `scripts/onboarding-async-proof.ts` |
 | `fixforward` | 17 | wave3 fixes: v2 workout → canonical session mapping; NutritionV2 → canonical `loggedFood` mirror | `scripts/fixforward-proof.ts` |
-| `isolation` | 28 | account-scope: prefix wipe, global-safe allowlist, no cross-account leak | `scripts/isolation-proof.ts` |
+| `isolation` | 39 | account-scope: prefix wipe, global-safe allowlist, no cross-account leak, owner-scoped workout-summary (two-user + wipe + legacy-key migration) | `scripts/isolation-proof.ts` |
 | `reset-recovery` | 33 | `PASSWORD_RECOVERY` routing, `decideResetPhase`, no sync/wipe during recovery | `scripts/reset-recovery-proof.ts` |
 
 The recovery + isolation + sync suites are the security-critical trio (they guard
