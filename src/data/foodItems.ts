@@ -1,5 +1,6 @@
 import { saudiTraditionalFoods } from './saudiFoods'
 import { gccStaples } from './gccStaples'
+import { gccEatingOut } from './gccEatingOut'
 
 export type FoodCategory =
   | 'بروتين'
@@ -5637,6 +5638,8 @@ export const foodItems: FoodItem[] = [
   ...saudiTraditionalFoods,
   // ===== أطباق ومشروبات ومقبّلات خليجية شائعة (Cycle 4) — انظر gccStaples.ts =====
   ...gccStaples,
+  // ===== أكل خارجي خليجي/سعودي شائع (Round 2) — انظر gccEatingOut.ts =====
+  ...gccEatingOut,
 ]
 
 export const foodMap: Record<string, FoodItem> = Object.fromEntries(

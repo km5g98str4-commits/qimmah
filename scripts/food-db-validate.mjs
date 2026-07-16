@@ -42,6 +42,8 @@ try {
 // الأطباق السعودية التقليدية تُدمج في foodItems عبر spread بمعرّفات «sfct-*».
 const saudiCount = foodItems.filter((f) => typeof f.id === 'string' && f.id.startsWith('sfct-')).length
 const gccCount = foodItems.filter((f) => typeof f.id === 'string' && f.id.startsWith('gcc-')).length
+// أكل خارجي خليجي/سعودي شائع (Round 2) — معرّفات «r2-*» (نطاق منفصل تمامًا عن gcc-).
+const r2Count = foodItems.filter((f) => typeof f.id === 'string' && f.id.startsWith('r2-')).length
 
 // ————— إعدادات الفحص —————
 const KCAL_TOL = 0.15 // ±15% لقاعدة 4/4/9
@@ -49,6 +51,53 @@ const MACRO_MAX_PER_100 = 100 // غرام لكل 100غ
 const ENERGY_DENSITY_MAX = 9.1 // سعرة/غرام (دهن نقي ≈ 9)
 const REQUIRED_STR = ['id', 'nameAr', 'nameEn', 'category', 'servingLabelAr']
 const REQUIRED_NUM = ['calories', 'protein', 'carbs', 'fat']
+
+// أسماء سلاسل مطاعم/مقاهٍ معروفة (سعودية/خليجية/عالمية شائعة محليًا) — التسمية في قاعدة
+// البيانات يجب أن تبقى عامّة (Round 2 brand-safety). القائمة إرشادية لا حصرية.
+const TRADEMARKS = [
+  /البيك|al[\s-]?baik/i,
+  /هرفي|herfy/i,
+  /كودو|kudu/i,
+  /ماكدونالدز|mcdonald/i,
+  /كنتاكي|\bkfc\b/i,
+  /هارديز|hardee/i,
+  /برجر\s?كنج|burger\s?king/i,
+  /دومينوز|domino/i,
+  /بيتزا\s?هت|pizza\s?hut/i,
+  /صب\s?واي|subway/i,
+  /ستاربكس|starbucks/i,
+  /كوستا\s?كوفي|costa\s?coffee/i,
+  /تيم\s?هورتنز|tim\s?hortons/i,
+  /دانكن|dunkin/i,
+  /كرسبي\s?كريم|krispy\s?kreme/i,
+  /شاورمر|shawarmer/i,
+  /الطازج|al[\s-]?tazaj/i,
+  /نمرة\s?تسعة/i,
+]
+
+// تصنيف فئة فرعية (Round 2) من نص الاسم/الكلمات المفتاحية — لفحص منطقية السعرات فقط.
+function classifyR2(blob) {
+  // \b على كل الكلمات اللاتينية لمنع تطابقات فرعية زائفة (مثل «platter» المحتوية «latte»،
+  // أو «steak» المحتوية «tea»). الكلمات العربية آمنة بلا حدود كلمة (لا مسافات صغيرة مماثلة).
+  const b = blob.toLowerCase()
+  if (/\bbroast\b|بروست|كرسبي|أصابع دجاج|قطع دجاج|أجنحة|\bwings\b/.test(b)) return 'broast'
+  if (/\bshawarma\b|شاورما/.test(b)) return 'shawarma'
+  if (/\bburger\b|برجر/.test(b)) return 'burger'
+  if (/\bmandi\b|\bmathbi\b|\bmadfoon\b|\bhaneeth\b|\bkabsa\b|مندي|مظبي|مدفون|حنيذ|كبسة|صالونة|مرق/.test(b)) return 'riceMeat'
+  if (/\bkarak\b|كرك|\bcoffee\b|قهوة|\blatte\b|لاتيه|\bmocha\b|موكا|شاي|\btea\b/.test(b)) return 'coffee'
+  if (/\bsamosa\b|\bfatayer\b|\bcroissant\b|\bdonut\b|\bcake\b|\bcheesecake\b|\bbrownie\b|\bknafeh\b|سمبوسة|فطيرة|كرواسون|دونات|كيك|براونيز|كنافة|آيس كريم|\bice cream\b/.test(b)) return 'bakery'
+  return null
+}
+
+// نطاقات معقولة (سعرة/100غ) لكل فئة فرعية — واسعة عمدًا (سلامة عامة، الدقّة عبر قاعدة 4/4/9).
+const R2_KCAL_BOUNDS = {
+  broast: [150, 400],
+  shawarma: [140, 320],
+  burger: [120, 320],
+  riceMeat: [55, 250], // الحدّ الأدنى يشمل مرق/صالونة جانبية (كثافة أقل من صحن أرز ولحم)
+  coffee: [0, 150],
+  bakery: [150, 480],
+}
 
 const findings = [] // {level, code, id, name, detail}
 const add = (level, code, id, name, detail) => findings.push({ level, code, id, name, detail })
@@ -124,6 +173,24 @@ for (const item of foodItems) {
   if (Array.isArray(item.sizes)) {
     for (const sz of item.sizes) checkMacros({ ...sz, servingGrams: sz.servingGrams }, `حجم:${sz.id || sz.labelAr || '?'}`)
   }
+  // علامات تجارية (Round 2): التسمية عامّة قصدًا — لا سلاسل مطاعم حقيقية في nameAr/nameEn/keywords.
+  if (/^r2-/.test(String(item.id))) {
+    const blob = `${item.nameAr || ''} ${item.nameEn || ''} ${Array.isArray(item.keywords) ? item.keywords.join(' ') : ''}`
+    for (const t of TRADEMARKS) {
+      if (t.test(blob)) add('ERROR', 'TRADEMARK', item.id, item.nameAr, `يحتمل احتواء اسم علامة تجارية: نمط «${t.source}»`)
+    }
+    // فحص منطقية السعرات لكل فئة فرعية (Round 2) — نطاقات واسعة عمدًا (سلامة عامة لا
+    // تدقيقًا دقيقًا؛ قاعدة 4/4/9 أعلاه تكفي للدقّة). يُطبَّق فقط على أصناف r2-* المصنَّفة.
+    const g = isNum(item.servingGrams) && item.servingGrams > 0 ? item.servingGrams : null
+    if (g) {
+      const per100 = (item.calories / g) * 100
+      const sub = classifyR2(blob)
+      if (sub) {
+        const [lo, hi] = R2_KCAL_BOUNDS[sub]
+        if (per100 < lo || per100 > hi) add('WARN', 'CATEGORY_KCAL_R2', item.id, item.nameAr, `فئة «${sub}»: ${per100.toFixed(0)} سعرة/100غ خارج النطاق المعقول [${lo}–${hi}]`)
+      }
+    }
+  }
 }
 
 // ————— تكرار المعرّفات والأسماء —————
@@ -164,12 +231,12 @@ const byCode = {}
 for (const f of findings) (byCode[f.code] ||= []).push(f)
 
 if (JSON_OUT) {
-  console.log(JSON.stringify({ total: foodItems.length, saudi: saudiCount, gcc: gccCount, errors: errors.length, warnings: warns.length, byCode: Object.fromEntries(Object.entries(byCode).map(([k, v]) => [k, v.length])), findings }, null, 2))
+  console.log(JSON.stringify({ total: foodItems.length, saudi: saudiCount, gcc: gccCount, r2: r2Count, errors: errors.length, warnings: warns.length, byCode: Object.fromEntries(Object.entries(byCode).map(([k, v]) => [k, v.length])), findings }, null, 2))
 } else {
   console.log('════════ مُدقِّق قاعدة الأطعمة — قِمّة ════════')
-  console.log(`الإجمالي: ${foodItems.length} صنفًا (منها ${saudiCount} طبقًا سعوديًا)`)
+  console.log(`الإجمالي: ${foodItems.length} صنفًا (منها ${saudiCount} طبقًا سعوديًا · ${gccCount} خليجيًا Cycle4 · ${r2Count} أكل خارجي Round2)`)
   console.log(`أخطاء (ERROR): ${errors.length} · تحذيرات (WARN): ${warns.length}\n`)
-  const order = ['MISSING_STR', 'MISSING_NUM', 'NEGATIVE', 'BAD_FIBER', 'RANGE_MACRO', 'RANGE_SUM', 'RANGE_KCAL', 'DUP_ID', 'DIVERGE_KCAL', 'UNIT_SPELL', 'UNIT_MSA', 'UNIT_BARE', 'NAME_SPELL', 'KCAL_449', 'DUP_NAME_AR', 'DUP_NAME_EN']
+  const order = ['MISSING_STR', 'MISSING_NUM', 'NEGATIVE', 'BAD_FIBER', 'RANGE_MACRO', 'RANGE_SUM', 'RANGE_KCAL', 'DUP_ID', 'TRADEMARK', 'DIVERGE_KCAL', 'UNIT_SPELL', 'UNIT_MSA', 'UNIT_BARE', 'NAME_SPELL', 'KCAL_449', 'DUP_NAME_AR', 'DUP_NAME_EN', 'CATEGORY_KCAL_R2']
   for (const code of order) {
     const rows = byCode[code]
     if (!rows || !rows.length) continue

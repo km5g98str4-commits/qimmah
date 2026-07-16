@@ -17,7 +17,7 @@ const r = JSON.parse(res.stdout)
 const c = (code) => r.byCode[code] || 0
 
 // ERROR-level codes — يجب أن تكون صفرًا.
-const ERROR_CODES = ['MISSING_STR', 'MISSING_NUM', 'NEGATIVE', 'BAD_FIBER', 'RANGE_MACRO', 'RANGE_SUM', 'RANGE_KCAL', 'DUP_ID']
+const ERROR_CODES = ['MISSING_STR', 'MISSING_NUM', 'NEGATIVE', 'BAD_FIBER', 'RANGE_MACRO', 'RANGE_SUM', 'RANGE_KCAL', 'DUP_ID', 'TRADEMARK']
 
 const checks = [
   ['لا أخطاء (ERROR)', r.errors === 0, `errors=${r.errors}`],
@@ -32,6 +32,11 @@ const checks = [
   ['لا أسماء عربية مكرّرة (Cycle 5)', c('DUP_NAME_AR') === 0, `${c('DUP_NAME_AR')}`],
   ['لا أسماء إنجليزية مكرّرة (Cycle 5)', c('DUP_NAME_EN') === 0, `${c('DUP_NAME_EN')}`],
   ['لا تباعد سعرات جديد — DIVERGE_KCAL ≤ 4 (المقبولة موثّقة)', c('DIVERGE_KCAL') <= 4, `${c('DIVERGE_KCAL')}`],
+  // ————— Round 2: أكل خارجي خليجي/سعودي (60 صنفًا) —————
+  ['إجمالي الأصناف ≥ 641 (581 + 60 Round 2)', r.total >= 641, `total=${r.total}`],
+  ['أصناف أكل خارجي مضافة = 60 (Round 2)', r.r2 === 60, `r2=${r.r2}`],
+  ['لا علامات تجارية في تسمية Round 2 (TRADEMARK)', c('TRADEMARK') === 0, `${c('TRADEMARK')}`],
+  ['منطقية السعرات لكل فئة فرعية Round 2 (CATEGORY_KCAL_R2)', c('CATEGORY_KCAL_R2') === 0, `${c('CATEGORY_KCAL_R2')}`],
 ]
 
 console.log('════════ إثبات قاعدة الأطعمة — قِمّة ════════')
