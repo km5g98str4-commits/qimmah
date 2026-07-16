@@ -120,11 +120,15 @@ Times and quiet hours remain on your device and are not sent to a server. Permis
 enable reminders, and lock-screen copy is generic—never medication/supplement names or health details.
 **g) Optional diagnostics:** the app collects **no** usage data by default. Only if enabled by the owner,
 anonymous events (counts/enums with **no** email, name, or barcode value) are sent under a random identifier
-unlinked to your account, with your consent.
+unlinked to your account, with your consent. Error monitoring is also off by default; if the owner configures
+Sentry, only scrubbed exception diagnostics, build release, a hashed random identifier, and query-free navigation
+paths are sent. Emails, account identifiers, request payloads/headers, and device-storage payloads are removed
+before sending.
 
 ### 3. What we don’t do
 - **No ads, no cross-app/cross-site tracking, no selling your data.**
-- **No third-party tracking SDKs** (no Google/Meta/etc.) — verifiable in our dependency list.
+- **No third-party tracking SDKs** (no Google/Meta/etc.). Optional Sentry error monitoring is not used for ads,
+  attribution, profiling, or cross-app tracking.
 - **We do not request your location, contacts, or photos.**
 
 ### 4. What leaves your device, to whom
@@ -134,6 +138,7 @@ unlinked to your account, with your consent.
 | **Open Food Facts** | You scan/search a food barcode | The barcode number only — nothing about you |
 | **GitHub / jsDelivr** | Viewing an exercise demo image | An image GET request (your IP is visible to the CDN) — nothing about you |
 | **YouTube** | You tap “watch form” | Opens an external search URL in your browser — no in-app embed or tracking |
+| **Sentry** | Only when owner-configured and an error occurs | Scrubbed crash diagnostics; no email, account id, request/storage payload, or URL query |
 
 ### 5. Health data
 We treat your health & fitness data with care: it stays local, and when signed in it syncs only to your own

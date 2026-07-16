@@ -9,7 +9,7 @@
 
 | Fact | Evidence |
 |---|---|
-| **No third-party analytics/ads/attribution SDK** (no Firebase, GA, Meta, AppsFlyer, Amplitude, Mixpanel, Sentry) | `package.json` dependencies — only Capacitor, `@supabase/supabase-js`, `@zxing/*` (barcode), `lucide-react`, `react`, `react-body-highlighter`, `@fontsource/*` |
+| **No third-party analytics/ads/attribution SDK** (no Firebase, GA, Meta, AppsFlyer, Amplitude, Mixpanel); optional Sentry is error monitoring only | `package.json`; `monitoring.ts` is gated by `VITE_SENTRY_DSN`, disables default PII, and deny-lists all but sanitized navigation breadcrumbs |
 | **No IDFA / App Tracking Transparency / advertising APIs** | grep of `src` + `Info.plist`: no `AppTrackingTransparency`, `advertisingIdentifier`, `IDFA`, `AdSupport` |
 | **No location, contacts, photo-library, or microphone access** | `Info.plist` declares only `NSCameraUsageDescription`; no `NSLocation*`, `NSContacts*`, `NSPhotoLibrary*`, `NSMicrophone*` |
 | **Fonts are self-hosted (bundled), no font-CDN egress** | `src/design-system/fonts.ts:1` (“Self-hosted fonts — bundled via @fontsource … NO runtime”); `index.html:78` |
@@ -41,6 +41,7 @@
 | 19 | **Reminders** | Owner-scoped choices for workout/rest, water, weekly summary, and supplement prompts; times, cadence, weekday, and quiet hours | Device-only (`qimmah:notifications:v1:<userId>`) + Capacitor Local Notifications; **no network** | Optional reminders requested by the user | Locally owner-scoped; not sent | No | — | `notifications/prefs.ts`; `notifications/engine.ts` |
 | 20 | **Custom plans** | User-authored workout plan structure | Device + Supabase `custom_plans` when sync is enabled | Deliver the user’s chosen plan across devices | **Yes** when synced | No | Supabase | `features/customPlan/storage.ts`; `syncStores.ts` |
 | 21 | **Tasks** | Current personal to-do items | Device + Supabase `todos` when sync is enabled | Daily organisation | **Yes** when synced | No | Supabase | `features/todo/store.ts`; `syncStores.ts` |
+| 22 | **Optional error diagnostics** | Exception type/stack, release, environment, error-source tag, hashed random anonymous id, query-free navigation paths | **None by default**; sent to Sentry only when `VITE_SENTRY_DSN` is configured | Crash diagnosis | No account identity; PII/storage payloads scrubbed | No | Sentry (**OWNER-TO-CONFIRM**) | `monitoring.ts`; `docs/features/OBSERVABILITY.md` |
 
 ## 2. What leaves the device, to whom
 
@@ -51,6 +52,7 @@
 | **GitHub raw / jsDelivr** | Viewing an exercise with a remote demo image | HTTP GET for the image (device IP visible to CDN) | No |
 | **YouTube** (`youtube.com/results?...`) | User taps “watch form” | Opens external search URL in the browser | No |
 | **Analytics endpoint** | Only if `VITE_ANALYTICS_ENDPOINT` configured **and** consent granted | Batched anonymous event counts (`{events:[…]}`) with random `anonId` | No |
+| **Sentry** | Only if `VITE_SENTRY_DSN` is configured and an error occurs | Scrubbed exception diagnostics, build release, hashed random anonymous id, query-free navigation paths | No account identity; `beforeSend` removes PII/storage payloads |
 
 Hosting region of the Supabase project is not encoded in the repo. **Confirmed by owner: `ap-northeast-1` (Tokyo, Japan).** Signed-in users' health/fitness data (categories 1–8) is therefore stored on Supabase infrastructure in **Japan** — a cross-border transfer from KSA users. Contractual safeguards apply via Supabase's Data Processing Addendum (DPA). No adequacy decision is claimed; final PDPL transfer-mechanism sign-off remains with OWNER+LEGAL (see pdpl-gap-checklist §X-1).
 
