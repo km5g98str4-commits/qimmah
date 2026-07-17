@@ -29,3 +29,28 @@ authority, a paid account, licensed source material, or physical hardware is req
 | Empty GIF seam | DROPPED | remote/local image fallback remains an intentional compatible media extension point |
 | Removed demo guard route | FIXED | no `demo` route remains in `guardRoute` |
 | `test/proof-deepening` branch absent | DROPPED | its intended coverage is superseded by the full 19-suite gate and deterministic journey |
+| CustomizationCenter / StepReview plan-template trust model | TRACKED | See dedicated entry below (added by grand consolidation 2026-07-17). |
+
+## Tracked debt — plan-template trust model (CustomizationCenter / StepReview)
+
+**Added:** 2026-07-17 (grand consolidation, `design/v21-promotion` @ `7b35435`). **Severity:** low, non-blocking. **Not** a release blocker; logged for a future gated wave.
+
+**What.** `src/sections/CustomizationCenter.tsx` (`onImportFile`, state-only plan-draft restore) and
+`src/components/customizer/steps/StepReview.tsx` accept/restore a **plan-template** object into in-memory
+customizer state. The QEA-001 remediation (`f4b2f95`) routes *persisted user-data* export/import through the
+hardened `src/lib/portability` pipeline (schemaVersion gate, per-store shape validation, owner rekey, atomic
+apply/undo) and `0e293bf` added a proto-pollution-safe reviver + object guard to `onImportFile` as
+defense-in-depth. **However** the plan-template restore/review path does **not** yet run through the same
+formal trust boundary as the data-portability pipeline — it trusts the template's shape beyond the reviver
+guard.
+
+**Why it's only debt (not a defect).** The plan template is application-generated (not persisted cross-owner
+account data), the restore is memory-only (no `localStorage`/account mutation), and the proto-pollution reviver
+already blocks the classic injection. The chaos harness (INV 6, 57/57) and `test:e2e:settings-security` (34/34)
+prove the *persisted* import surface is sealed; this item is about hardening the *plan-template* surface to the
+same explicit-schema standard for symmetry and future-proofing.
+
+**How to apply (future wave).** Introduce a `parsePlanTemplate()` validator (allowlisted keys, bounded
+depth/size, typed field checks) mirroring `parseImportFile`, and gate both `CustomizationCenter.onImportFile`
+and `StepReview` restore through it; add a proof block enumerating malformed/oversized/hostile templates.
+Relates to QEA-001; see `docs/security/QEA-001-secure-import-pipeline.md`.

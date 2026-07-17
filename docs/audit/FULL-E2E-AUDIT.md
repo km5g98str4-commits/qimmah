@@ -127,6 +127,52 @@ The three seed tools were run exactly as requested (`fresh`, `reviewer`, `vetera
 4. Parameterize the full browser journey to write under an injected evidence directory; enumerate every goal/equipment path.
 5. Add the WCAG skip link, then run keyboard/focus/reduced-motion checks and live duplicate-email/all-free-text XSS matrices.
 
+## Consolidation resolution — `design/v21-promotion` (2026-07-17)
+
+The audit above is a frozen point-in-time record against `80e31f7`. The grand consolidation
+merged every fix branch onto `design/v21-promotion` (HEAD `7b35435`). Per-finding disposition,
+each with a merge commit (FIXED) or an owner pointer (OWNER — cannot be closed in-branch):
+
+| ID | Disposition | Commit / pointer | Re-verification against the audit's own vectors |
+|---|---|---|---|
+| **QEA-001** legacy Settings importer accepts wrong-version/cross-owner | **FIXED** | `78aaf66` (merge of `f4b2f95` `fix/secure-import-pipeline`) | Legacy `onExport`/`onImport` deleted; `SettingsView` now renders `DataManagementPanel` routing export/import exclusively through `readFileText → parseImportFile → preview → applyImport` (atomic, owner-rekeyed, undo). **`test:e2e:settings-security` 34/34** — every hostile vector (v999, `__proto__`, unknown store, cross-owner) rejected with zero `localStorage` mutation; valid round-trip + A→B zero-residue pass. |
+| **QEA-002** production account deletion RPC unverified | **OWNER** | RC-CHECKLIST → "Production `delete_own_account` + RLS proof" | Client + SQL migration present; destructive completion needs the production RPC deployed and `npm run db:verify` run against prod with disposable A/B users. Not closable under any code branch. |
+| **QEA-003** exact offline reopen unverified (SW hook / audit-build limit) | **OWNER** (verification gap) | `docs/reliability/CHAOS-REPORT.md` (GO for offline-first) + RC-CHECKLIST on-device offline reopen | Root cause was the audit's `docs/audit/**` write boundary, not a production defect; the flagless `dist` build honors the SW. Offline-first resilience now proven at the logic layer by **chaos 57/57 / 12 invariants**. On-device connected-install → network-kill → process-kill/reopen stays owner work. |
+| **QEA-004** no exhaustive goal×equipment matrix | **OWNER / tracked debt** | Tech-debt item below + RC-CHECKLIST QA row | Journey E2E covers cut/gym/mixed + model validation; a fully table-driven goal×equipment×reload matrix remains QA scope. |
+| **QEA-005** missing WCAG 2.4.1 skip-link | **FIXED** | `4b8f266` (merge of `9c5520b` `ux/core-product-polish`) | `MobileShell` renders a first-focus `a[href="#main-content"]` ("تخطَّ إلى المحتوى / Skip to content") targeting `<main id="main-content" tabIndex={-1}>`; safe-area `--safe-top`/`--safe-bottom` paddings applied. Verified in source + native launch (safe-area clears notch/home-indicator). |
+| **QEA-006** duplicate-email localization + exhaustive XSS matrix | **OWNER** (live Supabase) | RC-CHECKLIST live-auth row | Password/age policy 14/14 and runtime profile-name XSS pass; live duplicate-email + generated all-free-text XSS matrix need a disposable Supabase account. |
+
+### New guarantees added by the consolidation (beyond the original audit scope)
+
+| Area | Commit | Re-verification |
+|---|---|---|
+| Hydration safety cap + minor-BMI phrasing | `b9f0e42`/`1d910cb` (`fix/scientific-guardrails`, already on promotion base) + `bd95db9` (`docs/formula-verification`) | **111/111 formula vectors.** Water caps **≤4.0 L** at 250 kg (was 9.0) and never exceeds cap at 115/150/200/250 kg; ages 12/15/17 (M+F) all receive the safe specialist-referral BMI label with number+plan-note retained; age 18 gets the adult label. |
+| Media rights remediation | `2f9f1b2` (merge of `1d4d64f`) | **FITWILL asset deleted** (returns SPA fallback, not an image); 24 unsafe machine assets replaced by in-house SVG schematics. `media-rights-proof` **inventory=274, 250 CLEARLY-LICENSED + 24 IN-HOUSE, UNKNOWN=0, RESTRICTED=0**; 3 schematic SVGs render (HTTP 200, valid `<svg>`). |
+| Chaos / data-loss resilience | `315746c` (merge of `8bc825b`) | **chaos 57/57**, 12 invariants, seed=1337, 0 data-loss / 0 account-mix / 0 false-success; quota-on-load read-path crash fixed. |
+| Observability + HealthKit + haptics (wave6) | on promotion base | `test:observability` + `test:native-bridge` green. **Updates the Guideline 4.2 verdict above:** HealthKit steps + `@capacitor/haptics` are now merged (the audit noted them absent at `80e31f7`); `NativeSettingsPanel` + `nativeSettings` render the HealthKit row and haptics toggle. |
+
+**Dedupe log (DEDUPE LAW — specialized branch kept, never applied twice):**
+- **secure-import:** the earlier fix-wave's homegrown `0e293bf` (delete importer → redirect to ProfileV2, +5 vectors) was **superseded** by specialized `f4b2f95` (in-place hardened `DataManagementPanel` + 34-vector Playwright proof + security doc). Kept specialized on the `SettingsView.tsx` conflict; the homegrown's *separate* CustomizationCenter proto-pollution guard + portability vectors do not overlap and were retained.
+- **media-rights:** the already-merged `content/media-rights` provenance manifest (pre-remediation NO-GO classification) conflicted add/add with specialized `1d4d64f`; kept specialized (post-remediation GO manifest with 24 IN-HOUSE) on all three provenance files. Complementary, not double-applied.
+- **package.json:** script unions resolved keeping the **flagless** `test:e2e:journey` (promotion default) + adding `test:e2e:settings-security` and `test:chaos`.
+
+### Consolidation verification ledger (fresh, HEAD `7b35435`)
+
+| Gate | Result |
+|---|---|
+| typecheck / lint (`--max-warnings 0`) / flagless build | PASS (green after every one of the 6 merges) |
+| `test:gate` (18 suites) | PASS |
+| `test:observability` / `test:native-bridge` | PASS |
+| `test:chaos` | PASS — 57/57 |
+| `test:e2e:settings-security` | PASS — 34/34 |
+| formula proof (`scripts/science/run-formula-proof.mjs`) | PASS — 111/111 |
+| media-rights proof | PASS — 274/274 (24 IN-HOUSE) |
+| `cap sync ios` | PASS |
+| Native: `xcodebuild` (iPhone 17 Pro sim) → install → launch → screenshots | **BUILD SUCCEEDED**, interactive welcome UI, canonical mark, safe-area respected (`docs/proof/native/consolidation/`) |
+| Web smoke | zero console errors on landing; canonical noded Ascent mark renders |
+
+**Updated verdict:** the two in-code P1/P2 defects the audit could act on (QEA-001 import, QEA-005 skip-link) are **FIXED and re-verified**. The remaining blockers (QEA-002 prod RPC, QEA-003 on-device offline, QEA-006 live-auth) are **OWNER device/deployment gates**, not code defects — tracked in `docs/release/RC-CHECKLIST.md`. Promotion stays **UNMERGED** pending owner on-device verification.
+
 ## ≤12-line handoff summary
 
 1. Frozen shipping base verified: `origin/design/v21-promotion` at `80e31f7`.

@@ -6,6 +6,13 @@ on-device verification:
 - `integration/wave5` — the integrated commissioned trunk (v2 behind `VITE_DESIGN_V2=true`).
 - `design/v21-promotion` — the promotion build (**v2 is the flagless default; v1 retired**).
 
+> **Grand consolidation update (2026-07-17):** `design/v21-promotion` is now the **single shipping
+> branch carrying everything** (HEAD `7b35435`). It contains wave5 + wave6-staging + the four wave6
+> fix branches (secure-import, scientific-guardrails, media-rights, chaos) + both ux polish branches
+> + the audit & formula-verification docs. Full gate is green after every merge; see §2.5 and the
+> consolidation-resolution table in `docs/audit/FULL-E2E-AUDIT.md`. It remains **UNMERGED** to any
+> trunk — owner's word only (§5).
+
 ## 1. Automated gate — `integration/wave5`
 
 Fresh `npm ci` → `typecheck` (0) → `lint --max-warnings 0` (0) → `build` → `test:gate` → three-profile smoke.
@@ -44,6 +51,32 @@ three-profile smoke (`fresh`/`reviewer`/`veteran`) **zero console errors**. ✅
 
 - v2-default proof: no `VITE_DESIGN` flag exists in source; `DashboardView` renders `<TodayV2>`
   unconditionally; `designPreview.ts`/`uiMode.ts` deleted.
+
+## 2.5 Consolidated gate — `design/v21-promotion` @ `7b35435` (grand consolidation)
+
+Fresh gate re-run after each of the 6 merges: `typecheck` (0) → `lint --max-warnings 0` (0) →
+`build` (flagless) → `test:gate` (18 suites) → `test:observability` → `test:native-bridge` →
+`test:chaos` → `npx cap sync ios`. All ✅.
+
+| Additional proof merged in | Vector | Status |
+|---|---|---|
+| `test:e2e:settings-security` (secure-import) | 34 hostile #/settings imports rejected, zero mutation | ✅ 34/34 |
+| formula proof (scientific-guardrails + formula-verification) | water ≤4.0 L at extremes; ages 12/15/17 safe BMI phrasing | ✅ 111/111 |
+| media-rights proof | FITWILL removed; 274 assets, 24 IN-HOUSE, UNKNOWN=0/RESTRICTED=0 | ✅ 274/274 |
+| chaos harness | 12 invariants, seed=1337, 0 data-loss/account-mix/false-success | ✅ 57/57 |
+| skip-link + safe-area (ux/core) | `#main-content` bypass + `--safe-*` paddings | ✅ source + native |
+| HealthKit + haptics (wave6) | `NativeSettingsPanel` row + toggle; native bridge | ✅ (updates audit 4.2 verdict) |
+
+Native (this consolidation): `xcodebuild` iPhone 17 Pro (iOS 26) **BUILD SUCCEEDED** → install
+`com.qimmah.mobile` → launch → interactive welcome (canonical mark, safe-area). Artifacts:
+`docs/proof/native/consolidation/*`.
+
+### OWNER items still open from the audit (mapped)
+
+- [ ] **QEA-002** — deploy production `delete_own_account` + run `npm run db:verify` on prod with disposable A/B users (also §4 Supabase row).
+- [ ] **QEA-003** — on physical device: connected-install → mid-workout network kill → process kill/reopen offline (chaos 57/57 proves the logic layer; device reopen is owner-only).
+- [ ] **QEA-006** — run live duplicate-email + generated all-free-text XSS matrix with a disposable Supabase account (also §4 live-auth row).
+- [ ] **QEA-004 / tracked debt** — parameterize the browser journey to table-drive every goal×equipment×reload path (see `docs/debt/` tracked item).
 
 ## 3. Native proof (iOS Simulator)
 
