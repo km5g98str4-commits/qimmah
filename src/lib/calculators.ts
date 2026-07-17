@@ -74,6 +74,29 @@ export const WATER_MAX_LITERS = 4.0
 export const ADULT_MIN_AGE = 18
 
 /**
+ * قرار المالك (Option B): التطبيق يبقى 12+، لكن القاصرين (دون 18) مقيّدون بهدف
+ * «المحافظة» فقط — لا تنشيف/تضخيم. عتبة العمر واحدة (ADULT_MIN_AGE) للتصنيف
+ * والهدف معًا. الحارس مبنيّ على نفس الأساس العلمي المُوثّق (WHO: تعديل الوزن للأطفال
+ * يحتاج مخططات نمو وإشراف مختص، لا عجز/فائض ثابت). `age > 0` يتفادى تقييد عمر غير مُدخل.
+ */
+export function isMinorAge(age: number): boolean {
+  return age > 0 && age < ADULT_MIN_AGE
+}
+
+/**
+ * الهدف الفعّال للحساب: القاصرون يُحسبون على «المحافظة» دائمًا مهما كان الهدف المخزّن،
+ * فلا يُطبَّق أي عجز/فائض في أي مكان من خطّ الحساب. مصدر حقيقة واحد تستهلكه الواجهة
+ * والهجرة والبراهين معًا.
+ */
+export function effectiveGoalTypeForAge(goalType: GoalType, age: number): GoalType {
+  return isMinorAge(age) ? 'maintenance' : goalType
+}
+
+/** الرسالة الصادقة على أهداف تعديل الوزن المعطّلة للقاصرين (واجهة الإعداد والتعديل). */
+export const MINOR_GOAL_RESTRICTION_NOTE =
+  'أهداف تعديل الوزن متاحة من 18 سنة — ننصح بمراجعة مختص تغذية'
+
+/**
  * إصدار صيغة الحساب — يُضمَّن في بصمة الملف الشخصي حتى تُعاد الحسابات تلقائيًا
  * للمستخدمين الحاليين عند تغيّر المعادلات (سقف الماء 4 لتر + تصنيف BMI للقاصرين).
  */
@@ -282,10 +305,12 @@ export function computeTargets(p: Profile): Targets {
   const cutting = Math.max(round(tdee - 400), calorieFloor(p.gender))
   const bulking = round(tdee + 300)
 
+  // الهدف الفعّال: القاصرون (دون 18) يُحسبون على «المحافظة» فقط — لا عجز/فائض إطلاقًا.
+  const effectiveGoalType = effectiveGoalTypeForAge(p.goalType, age)
   // السعرات المستهدفة الفعلية حسب الهدف المنظَّم (cut/bulk/maintain…)
-  const calories = targetCaloriesForGoalType(p.goalType, tdee, p.gender)
+  const calories = targetCaloriesForGoalType(effectiveGoalType, tdee, p.gender)
   // تنبيه السعرات المنخفضة (نصّ فقط) — نقارن الخام قبل الأرضية بعتبة الأمان.
-  const rawCalories = rawCaloriesForGoalType(p.goalType, tdee)
+  const rawCalories = rawCaloriesForGoalType(effectiveGoalType, tdee)
   const isLowCalorie = rawCalories < lowCalorieThreshold(p.gender, bmr)
 
   // General Atwater factors: National Academies, Dietary Reference Intakes for Energy (2023),
@@ -307,7 +332,8 @@ export function computeTargets(p: Profile): Targets {
   // الوزن والمدة المقدّرة — يُشتقّ معدّل التغيّر الأسبوعي من نفس العجز/الفائض الذي تفرضه
   // الخطة (عجز 400 → ≈0.36 كجم/أسبوع، فائض 300 → ≈0.27 كجم/أسبوع) عبر 7700 سعرة/كجم،
   // فلا يتناقض الرقم المعروض مع السعرات المستهدفة. المدة تُحسب بالمعدّل الدقيق قبل التقريب.
-  const diff = p.targetWeightKg - w
+  // القاصرون على المحافظة: لا تغيّر وزن مُخطَّط (صفر عجز/فائض) — نُلغي توقّع الوزن كليًّا.
+  const diff = isMinorAge(age) ? 0 : p.targetWeightKg - w
   let weeklyChange = 0
   let weeks = 0
   if (diff < -0.05) {

@@ -26,6 +26,7 @@ import {
   calorieGoalFromGoalType,
   computeTargets,
   defaultProfile,
+  effectiveGoalTypeForAge,
   profileHash,
 } from '@/lib/calculators'
 // P11.5: الاشتقاقات الخفيفة من planDerive — planGenerator (ومعه قاعدة التمارين)
@@ -194,7 +195,12 @@ const showsTargetWeight = (g?: OnbGoalType) => g === 'cut' || g === 'bulk'
 /** يحوّل مصدر الحقيقة إلى Profile الذي يستهلكه مولّد الخطة الحالي. */
 export function toLegacyProfile(op: OnboardingProfile, base: Profile = defaultProfile): Profile {
   const tp = op.trainingPreferences
-  const goalType: GoalType = op.goal.type ? GOAL_TO_GOALTYPE[op.goal.type] : base.goalType
+  const age = op.profile.age || base.age
+  // القاصرون (دون 18): «المحافظة» فقط — قرار المالك؛ نُثبّت الهدف عند بناء الملف من الإعداد.
+  const goalType: GoalType = effectiveGoalTypeForAge(
+    op.goal.type ? GOAL_TO_GOALTYPE[op.goal.type] : base.goalType,
+    age,
+  )
   const experienceLevel: ExperienceLevel | undefined = tp.experience
   const band = experienceLevel ? experienceToBand(experienceLevel) : base.experienceBand
   const trainingLevel = experienceLevel ? levelFromExperience(band) : base.trainingLevel
@@ -220,7 +226,7 @@ export function toLegacyProfile(op: OnboardingProfile, base: Profile = defaultPr
     ...base,
     name: op.profile.name?.trim() || '',
     gender: op.profile.sex ?? 'unspecified',
-    age: op.profile.age || base.age,
+    age,
     heightCm: op.bodyMetrics.heightCm || base.heightCm,
     weightKg,
     targetWeightKg,

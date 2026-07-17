@@ -7,7 +7,7 @@ import { meals as defaultMeals } from '@/data/meals'
 import { weeklyRoutine } from '@/data/routine'
 import type { RoutineDay, SupplementItem } from '@/types'
 import type { Profile, Targets } from '@/types/profile'
-import { computeTargets, defaultProfile, profileHash } from './calculators'
+import { computeTargets, defaultProfile, isMinorAge, profileHash } from './calculators'
 import type { WorkoutPlan } from '@/types/workout'
 import { generatePlanFromTemplate } from './workoutPlan'
 import { normalizePlanDayNames } from './planDayNames'
@@ -119,6 +119,13 @@ export interface Customization {
     manuallyEdited: boolean
     lastCalculatedFromProfileHash?: string
     updatedAt?: string
+    /**
+     * ختم هجرة القاصرين (Option B): يُضبَط مرّة عند تحويل هدف حساب قاصر من تنشيف/تضخيم
+     * إلى محافظة. وجوده = تمّت الهجرة (idempotent — لا تتكرّر)، ويُشغّل الإشعار اللطيف لمرّة.
+     */
+    minorGoalMigratedAt?: string
+    /** ختم إغلاق إشعار هجرة القاصرين (لمرّة واحدة). */
+    minorGoalNoticeDismissed?: boolean
   }
   workoutPlan: WorkoutPlan
   nutritionPlan: NutritionPlan
@@ -193,6 +200,27 @@ function migrateLegacyGoal(p: Profile): Profile {
   return p
 }
 
+/**
+ * هجرة حساب قاصر حالي (Option B، قرار المالك): من كان دون 18 واختار تنشيف/تضخيم سابقًا
+ * يُحوَّل هدفه إلى «المحافظة» عند الإقلاع، مرّة واحدة وبإشعار لطيف. الهجرة:
+ * - **idempotent**: بعدها يصبح الهدف maintenance فيتعذّر تكرارها؛ والختم الزمني يُحفظ ولا يُستبدل.
+ * - **مقيّدة بالمالك**: تعيش داخل التخصيص المخزّن (يُمسح عند تبديل الحساب عبر wipeUserData).
+ * - إلغاء بصمة الحساب يُجبر `withFreshTargets` على إعادة حساب سعرات المحافظة تلقائيًا.
+ */
+function migrateMinorGoal(c: Customization): Customization {
+  const isCutOrBulk = c.profile.goalType === 'cutting' || c.profile.goalType === 'bulking'
+  if (!isMinorAge(c.profile.age) || !isCutOrBulk) return c
+  return {
+    ...c,
+    profile: { ...c.profile, goalType: 'maintenance', goal: 'maintain' },
+    targetsMeta: {
+      ...c.targetsMeta,
+      minorGoalMigratedAt: c.targetsMeta.minorGoalMigratedAt ?? new Date().toISOString(),
+      lastCalculatedFromProfileHash: undefined, // يُجبر إعادة حساب المحافظة في withFreshTargets
+    },
+  }
+}
+
 /** قراءة التخصيص المحفوظ مدموجًا فوق الافتراضي (آمن ضد بيانات تالفة). */
 export function loadCustomization(): Customization {
   const base = getDefaultCustomization()
@@ -228,7 +256,7 @@ export function loadCustomization(): Customization {
       metrics: saved.metrics ?? base.metrics,
       routine: saved.routine ?? base.routine,
     }
-    return withFreshTargets(merged)
+    return withFreshTargets(migrateMinorGoal(merged))
   } catch {
     return base
   }

@@ -11,6 +11,8 @@ import {
   environmentOptions,
   genderOptions,
   goalTypeOptions,
+  isMinorAge,
+  MINOR_GOAL_RESTRICTION_NOTE,
   profileHash,
   trainingLevelOptions,
 } from '@/lib/calculators'
@@ -38,8 +40,19 @@ export function StepBody({ ctx }: { ctx: WizardCtx }) {
       })
     }
   }
-  const setGoal = (goalType: Profile['goalType']) => set({ goalType, goal: calorieGoalFromGoalType(goalType) })
+  // القاصرون (دون 18): «المحافظة» فقط — تنشيف/تضخيم معطّلان (قرار المالك، Option B).
+  const minor = isMinorAge(p.age)
+  const isWeightGoal = (g: Profile['goalType']) => g === 'cutting' || g === 'bulking'
+  const setGoal = (goalType: Profile['goalType']) => {
+    if (minor && isWeightGoal(goalType)) return // حارس دفاعي: الأزرار معطّلة أصلًا
+    set({ goalType, goal: calorieGoalFromGoalType(goalType) })
+  }
   const num = (v: string) => Number(v) || 0
+  // عند إدخال عمر قاصر بينما الهدف تنشيف/تضخيم: نُثبّت الهدف على المحافظة فورًا (تماسك الاختيار).
+  const setAge = (age: number) =>
+    isMinorAge(age) && isWeightGoal(p.goalType)
+      ? set({ age, goalType: 'maintenance', goal: 'maintain' })
+      : set({ age })
 
   return (
     <div>
@@ -49,23 +62,43 @@ export function StepBody({ ctx }: { ctx: WizardCtx }) {
         description={d.bodyDescription}
       />
 
-      {/* الهدف — اختيارات */}
+      {/* الهدف — اختيارات (القاصرون: المحافظة فقط، تنشيف/تضخيم معطّلان) */}
       <p className="mb-2 text-sm font-bold text-ink-900">{d.bodyGoalLabel}</p>
-      <div className="mb-6 grid grid-cols-2 gap-2 sm:grid-cols-4">
-        {goalTypeOptions.map((o) => (
-          <button
-            key={o.value}
-            type="button"
-            onClick={() => setGoal(o.value)}
-            className={cn(
-              'rounded-xl border px-3 py-2.5 text-sm font-bold transition-colors',
-              p.goalType === o.value ? 'border-primary-soft bg-primary text-white' : 'border-line bg-surface text-ink-700 hover:bg-beige',
-            )}
-          >
-            {o.label}
-          </button>
-        ))}
+      <div className="mb-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
+        {goalTypeOptions.map((o) => {
+          const selected = p.goalType === o.value
+          const disabled = minor && isWeightGoal(o.value)
+          return (
+            <button
+              key={o.value}
+              type="button"
+              onClick={() => setGoal(o.value)}
+              disabled={disabled}
+              aria-disabled={disabled}
+              aria-describedby={disabled ? 'goal-minor-note' : undefined}
+              className={cn(
+                'rounded-xl border px-3 py-2.5 text-sm font-bold transition-colors',
+                disabled
+                  // حالة معطّلة بتباين AA فعلي (نصّ ink-500 على بيج ≈ 5.06:1). لا opacity
+                  // حتى لا ينهار التباين عند المزج مع الخلفية.
+                  ? 'cursor-not-allowed border-line bg-beige text-ink-500'
+                  : selected
+                    ? 'border-primary-soft bg-primary text-white'
+                    : 'border-line bg-surface text-ink-700 hover:bg-beige',
+              )}
+            >
+              {o.label}
+            </button>
+          )
+        })}
       </div>
+      {minor && (
+        <p id="goal-minor-note" className="mb-6 flex items-start gap-2 rounded-xl border border-gold-400/40 bg-gold-200/40 p-3 text-xs font-bold text-ink-700">
+          <Icon name="Info" className="mt-0.5 h-4 w-4 shrink-0 text-gold-600" />
+          {MINOR_GOAL_RESTRICTION_NOTE}
+        </p>
+      )}
+      {!minor && <div className="mb-6" />}
 
       <div className="grid gap-5 sm:grid-cols-2">
         <Field label={d.bodyGender}>
@@ -74,7 +107,7 @@ export function StepBody({ ctx }: { ctx: WizardCtx }) {
           </select>
         </Field>
         <Field label={d.bodyAge} hint={errFor('age') ?? d.bodyAgeHint}>
-          <input type="number" min={LIMITS.age.min} max={LIMITS.age.max} className={cn(inputClass, errFor('age') && 'border-danger')} value={p.age} onChange={(e) => set({ age: num(e.target.value) })} />
+          <input type="number" min={LIMITS.age.min} max={LIMITS.age.max} className={cn(inputClass, errFor('age') && 'border-danger')} value={p.age} onChange={(e) => setAge(num(e.target.value))} />
         </Field>
         <Field label={d.bodyHeight} hint={errFor('heightCm') ?? d.bodyHeightHint}>
           <input type="number" min={LIMITS.heightCm.min} max={LIMITS.heightCm.max} className={cn(inputClass, errFor('heightCm') && 'border-danger')} value={p.heightCm} onChange={(e) => set({ heightCm: num(e.target.value) })} />

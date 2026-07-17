@@ -9,6 +9,7 @@ import { buildTodayV2Model, type TodayCard, type TodayPillar } from '@/lib/today
 import { buildWeeklyInsights } from '@/lib/insights'
 import { InsightCardsView } from '@/lib/insights/InsightCardsView'
 import { insightCopy } from '@/data/insightCopy'
+import { MinorGoalNotice } from '@/components/MinorGoalNotice'
 
 interface TodayV2Props {
   lang: Lang
@@ -54,6 +55,9 @@ export function TodayV2({ lang, onNavigate }: TodayV2Props) {
             {model.avatarInitial ?? <Icon name="User" className="h-5 w-5" />}
           </span>
         </header>
+
+        {/* إشعار هجرة القاصرين — لمرّة واحدة، يظهر فقط بعد تحويل الهدف إلى المحافظة. */}
+        <MinorGoalNotice lang={lang} />
 
         {/* Hero — الخطوة الواحدة (owns the top third). */}
         <section className="relative overflow-hidden rounded-3xl border border-line bg-surface p-5 shadow-card">
