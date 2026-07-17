@@ -3,6 +3,7 @@ import { AppNav, type AppView } from '@/components/AppNav'
 import { Footer } from '@/components/Footer'
 import { Icon } from '@/components/Icon'
 import { DeviceSettings } from '@/components/DeviceSettings'
+import { DataManagementPanel } from '@/components/DataManagementPanel'
 import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
 import { installGuideStrings } from '@/i18n/dict/installGuide'
@@ -47,10 +48,10 @@ export function SettingsView({
 
   const badge: 'guest' | 'account' = auth.user ? 'account' : 'guest'
 
+  // — البيانات: تصدير/استيراد يمرّان حصريًّا عبر <DataManagementPanel> (المسار المحصّن) —
+  // المستورد القديم (FileReader + JSON.parse بلا تحقّق) أُزيل: كان يقبل إصدارًا غير مدعوم
+  // وحقنًا من حساب آخر ويعرض «نجاحًا» دون تطبيق فعلي. QEA-001.
   // — البيانات: إعادة ضبط —
-  // ملاحظة (QEA-001): التصدير/الاستيراد القديم غير المُتحقَّق أُزيل من هنا. المسار الوحيد
-  // للتصدير/الاستيراد هو خطّ «بياناتي» المُتحقَّق في ProfileV2 (بوّابة إصدار + تحقّق شكل كل
-  // متجر + إعادة ترميز للمالك الحالي + معاينة/تأكيد + نسخة احتياطية/تراجع). لا مسار يتخطّى التحقّق.
   const onReset = () => {
     if (window.confirm(t.settings.resetConfirm)) resetQimmah()
   }
@@ -245,14 +246,10 @@ export function SettingsView({
           )}
         </SettingsGroup>
 
-        {/* 2) البيانات — التصدير/الاستيراد عبر «بياناتي» المُتحقَّق في الملف الشخصي (QEA-001) */}
+        {/* 2) البيانات — تصدير/استيراد محصّن (معاينة → تأكيد → تطبيق ذرّي → تراجع) + إعادة ضبط */}
         <SettingsGroup icon="Database" title={t.settings.groupData}>
-          <p className="mb-3 text-xs leading-relaxed text-ink-500">
-            {lang === 'ar'
-              ? 'لتصدير أو استيراد نسخة كاملة من بياناتك، افتح «الملف الشخصي ← بياناتي». الاستيراد هناك يتحقّق من كل متجر ويحفظ نسخة احتياطية قابلة للتراجع.'
-              : 'To export or import a full copy of your data, open “Profile → My data”. Import there validates every store and keeps an undoable backup.'}
-          </p>
-          <div className="flex flex-wrap gap-2">
+          <DataManagementPanel lang={lang} uid={auth.user?.id ?? null} recoveryActive={auth.recoveryActive} />
+          <div className="mt-3 border-t border-line pt-3">
             <button
               type="button"
               onClick={onReset}
