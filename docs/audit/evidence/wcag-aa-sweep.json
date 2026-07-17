@@ -1,0 +1,93 @@
+{
+  "evidenceDir": "/private/tmp/claude-501/-Users-ziyad-qimmah-deploy/ff67365d-478a-42ba-9f0f-a48a42946316/scratchpad/wcag-evidence",
+  "widths": [
+    320,
+    768,
+    1280
+  ],
+  "total": 16,
+  "passed": 16,
+  "failed": 0,
+  "results": [
+    {
+      "name": "320px: لا انسكاب أفقي (ضيف)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "320px: لا انسكاب أفقي (مُصادَق — لوحة اليوم)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "320px: RTL + lang=ar على الجذر",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "768px: لا انسكاب أفقي (ضيف)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "768px: لا انسكاب أفقي (مُصادَق — لوحة اليوم)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "768px: RTL + lang=ar على الجذر",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "1280px: لا انسكاب أفقي (ضيف)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "1280px: لا انسكاب أفقي (مُصادَق — لوحة اليوم)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "1280px: RTL + lang=ar على الجذر",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "أول عنصر تركيز (رابط التخطّي) له مؤشّر تركيز مرئي",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "تصفّح بلوحة مفاتيح فقط: 8 تبويبات متتالية كلّها تهبط على عناصر حقيقية (لا فخّ تركيز)",
+      "ok": true,
+      "detail": "BUTTON,BODY,A"
+    },
+    {
+      "name": "reducedMotion=reduce: الصفحة تُقلع بلا أخطاء وتُعرض بمحتوى",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "لا أزرار بلا اسم يمكن الوصول إليه (نص/aria-label)",
+      "ok": true,
+      "detail": "unnamed=0"
+    },
+    {
+      "name": "لا tabindex موجب يكسر ترتيب DOM الطبيعي",
+      "ok": true,
+      "detail": "count=0"
+    },
+    {
+      "name": "كل <img> له alt (ولو فارغًا للعناصر الزخرفية)",
+      "ok": true,
+      "detail": "missing=0"
+    },
+    {
+      "name": "بقع التباين التمثيلية (12 عنصرًا) ≥ 4.5:1 لمعظمها",
+      "ok": true,
+      "detail": "low=2/9 (بعض الفحوص تُقارِن خلفية أب لا خلفية فعلية شفّافة — قد تُبالغ في نسبة سلبية كاذبة)"
+    }
+  ]
+}

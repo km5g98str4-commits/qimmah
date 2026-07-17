@@ -1,8 +1,13 @@
-# Auth E2E Harness — Reset Password + Delete Account (local Supabase)
+# Auth E2E Harness — Reset Password + Delete Account + Duplicate Email (local Supabase)
 
-Full end-to-end tests for the two auth flows, run against a **local** Supabase stack
+Full end-to-end tests for the three auth flows, run against a **local** Supabase stack
 (Postgres + GoTrue + Inbucket) — never production. Built to run the moment access is
 available; today the full run is **blocked** only by Docker image pulls (see below).
+
+**QEA-006 (Full E2E Audit):** the Duplicate Email flow was added here for that finding.
+It could not be run in the audit's environment (no Docker) and cannot be run in this
+environment either — the OWNER runs it locally (steps below). Do not report it as a PASS
+until it has actually been executed and its console output reviewed.
 
 ## One command
 
@@ -43,8 +48,30 @@ edge-runtime (an rlimit issue under nested containers) are excluded from `supaba
 5. **Delete Account:** register + log in → create related rows → delete via the app's
    Settings UI (cancel first, then typed confirmation) → verify **directly in the DB**
    that the `auth.users` row is gone and all 5 tables are empty (cascade) → confirm login fails.
-6. **Cleanup always** (even on failure): deletes every `@qimmah-e2e.test` user, `supabase stop`,
+6. **Duplicate Email (QEA-006):** register a test account → clear local session → attempt
+   to register **again with the same email/password** → confirm the app shows the localized
+   Arabic error ("هذا البريد مسجّل مسبقًا. سجّل الدخول بدلًا من ذلك.") instead of silently
+   succeeding or crashing → verify **directly in the DB** that `auth.users` still has exactly
+   one row for that email (no duplicate account was created) → confirm the *original* account
+   can still log in normally (the duplicate attempt didn't corrupt or lock it).
+7. **Cleanup always** (even on failure): deletes every `@qimmah-e2e.test` user, `supabase stop`,
    removes the temp workdir.
+
+## Running just the Duplicate Email step (OWNER — precise steps)
+
+The full `npm run test:e2e:auth` runs all three flows in one process (~2-3 min once Docker
+images are available) and duplicate email is the last one, so no separate command exists —
+run the full suite and read the `Duplicate Email:` line in its final summary:
+
+1. Ensure Docker daemon is running: `docker info` should succeed, not error.
+2. Ensure the image CDN is reachable (see "Blocked image CDN" below if it 403s).
+3. From the repo root: `npm run test:e2e:auth`
+4. Watch the console for the `== Duplicate Email ==` section — four `PASS`/`FAIL` lines:
+   account creation, the localized duplicate-email error, no duplicate DB row, original
+   account still logs in.
+5. The final summary prints `Duplicate Email: PASS` or `FAIL` — treat anything but a real,
+   freshly-observed `PASS` line as **not verified**, regardless of what any prior report says.
+6. Cleanup is automatic (step 7 above) — no manual account deletion needed afterward.
 
 ## Production safety guards (`lib.mjs`)
 
