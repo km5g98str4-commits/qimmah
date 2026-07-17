@@ -16,6 +16,24 @@
 
 There are no observed P0 failures, but the exposed legacy Settings importer accepts incompatible and cross-owner-shaped files and reports success (QEA-001, P1). Production account deletion is still an unverified deployment dependency (QEA-002, P1), and the exact offline production artifact could not be exercised under the write-only audit boundary (QEA-003, P1 verification gap). These are release-evidence blockers, not permission to fix source in this branch.
 
+## FIX WAVE resolution (2026-07-17, `design/v21-promotion`)
+
+> The auditor's original **NO-GO stands** until the OWNER/verification items below are discharged on production. What changed in this wave: promotion now carries `integration/wave5` + `integration/wave6-staging` (observability, HealthKit, haptics, canonical mark, web headers, launch kit), and **every CODE finding is FIXED with a proof.** OWNER/verification-gap findings are unchanged and re-pointed. No product test was deleted to pass; promotion remains UNMERGED to any trunk.
+
+| Finding | Class | Status | Resolution / pointer |
+|---|---|---|---|
+| **QEA-001** legacy importer bypass | P1 **CODE** | ✅ **FIXED** — `0e293bf` | Legacy `SettingsView` raw-JSON export/import **removed**; the only import path is now the validated ProfileV2 «بياناتي» pipeline (schemaVersion gate → per-store shape validation → cross-owner re-key → preview/confirm → backup/undo). `CustomizationCenter` plan-draft restore hardened with a proto-safe reviver. `test:portability` extended with the audit's exact vectors — wrong-`schemaVersion` file **REJECTED**, cross-owner uid file **re-keyed to importer (no injection), foreign key untouched, session token never written**. 49/49 green. grep-proven: zero import path skips validation. |
+| Water target 9L (FORMULAS.md) | P1-class **CODE** | ✅ **FIXED** — `1d1e299`→merge | Hydration clamped to **[2.5, 4.0] L** (EFSA 2010; IOM/NASEM), cited in-code + FORMULAS.md. `formula-proof`: "male 250kg is 4.0 L (was 9.0)" + never-exceeds-cap. 111/111 green. |
+| Minor energy/BMI (FORMULAS.md) | P1-class **CODE** | ✅ **FIXED** — merge | Ages <18 keep the raw BMI number but drop the adult label for a specialist-referral label + «راجع مختصًا» plan note; `CALC_FORMULA_VERSION` bumped. (Owner-approved: adult MSJ retained with hedging rather than inventing paediatric equations from unavailable LMS data.) Proof vectors age 12/15/17/18. |
+| FITWILL asset + 23 UNKNOWN (MEDIA-RIGHTS.md) | P1/P2-class **CODE** | ✅ **FIXED** — `2abad8b` | RESTRICTED FITWILL `decline-chest-press-machine.jpg` **deleted**; card degrades to elegant placeholder with **no image request** (no 404/console error). Manifest 274→273, **0 RESTRICTED**. 23 UNKNOWN flagged `ownerAck: rights:unknown` — reported, not build-blocking, never auto-swapped. Stale `p3-media-proof` cable-biceps-curl expectation fixed. Media proofs green. |
+| **QEA-002** production account deletion | P1 **OWNER** | ⛔ **OWNER** (unchanged) | Backend/release: deploy `delete_own_account` RPC + migrations, run `npm run db:verify` on production with throwaway A/B users, capture auth-user deletion + row/RLS proof. Not a source defect. |
+| **QEA-003** exact-artifact offline SW | P1 verification gap | ⛔ **OWNER** (unchanged) | Build/release: make the SW hook honor resolved `build.outDir` (or authorize a standard `dist` audit build); re-run connected-install → mid-session offline → kill/reopen on device. |
+| **QEA-004** goal×equipment E2E matrix | P2 verification gap | ⛔ **OWNER** (unchanged) | QA: parameterize the journey output dir + table-drive every goal/equipment branch + reload-resume. |
+| **QEA-005** skip-to-main-content link | P2 **CODE** | 🔸 **OWNER/design-system** (out of FIX WAVE scope) | Small a11y addition (WCAG 2.4.1): add a first-focus skip link to a stable `main` + keyboard regression coverage. Deliberately not bundled into this wave to keep the four-fix scope frozen. |
+| **QEA-006** dup-email localization + XSS matrix | P2 verification gap | ⛔ **OWNER** (unchanged) | Auth+QA: live-auth suite with a disposable duplicate account + a generated free-text XSS matrix. |
+
+**Native (finding #3 — HealthKit/haptics absent):** dead by construction after the wave6 merge — `healthKit.ts`, `stepCounter.ts`, `NativeSettingsPanel.tsx`, `nativeFeedback.ts` present; `WorkoutV2` fires `playHaptic` on set/PR/rest; `cap sync ios` reports 6 plugins (incl. `@capacitor/haptics`); `NativeSettingsPanel` renders in-app (haptics toggle live, HealthKit row iOS-gated by `isHealthKitPlatform`) with zero console errors.
+
 ## Skills used
 
 - **verification-before-completion** — substituted for requested `verify/testing`; every pass claim below has a fresh command result.

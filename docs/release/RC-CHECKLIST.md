@@ -52,6 +52,27 @@ Both branches: `build` → `npx cap sync ios` (5 plugins, SPM) →
 install `com.qimmah.mobile` on iPhone 17 Pro (iOS 26) → launch → render → home-icon visible.
 Artifacts: `docs/proof/native/wave5/*`, `docs/proof/native/promotion/*`.
 
+## 3b. FIX WAVE — audit blockers closed (2026-07-17, `design/v21-promotion`)
+
+Promotion now **carries `integration/wave5` + `integration/wave6-staging`** (observability, HealthKit,
+haptics, canonical mark, web headers, launch kit) plus the science + media provenance branches. Fresh
+`npm ci` → flagless `typecheck`/`lint --max-warnings 0`/`build` → `test:gate` (15) → all extra proofs
+green. Every CODE finding from the three audit reports is FIXED (see
+[`docs/audit/FULL-E2E-AUDIT.md`](../audit/FULL-E2E-AUDIT.md) verdict table):
+
+| Fix | Proof | Result |
+|---|---|---|
+| QEA-001 legacy importer removed → single validated path | `test:portability` (+ QEA-001 hostile vectors) | **49/49** (was 44) |
+| Water target clamp [2.5, 4.0] L (EFSA/IOM) | `scripts/science/run-formula-proof.mjs` | **111/111** (250kg→4.0, was 9.0) |
+| Minor (<18) BMI label + specialist-referral note | same formula proof (age 12/15/17/18) | included in 111 |
+| FITWILL asset removed · 23 UNKNOWN `rights:unknown` · stale p3 fixed | `media-rights-proof.mjs` + `run-p3-media-proof.mjs` | **273/273**, 0 RESTRICTED, p3 ✅ |
+
+- **HealthKit/haptics (audit finding #3):** present + rendering post-merge (haptics toggle live,
+  HealthKit row iOS-gated); `cap sync ios` → **6 plugins** (incl. `@capacitor/haptics`).
+- **⚠ Commander wiring (package.json untouched per directive):** the science + media proofs are green
+  but **not yet in the `test:gate` chain**. To gate them permanently, append to the `test:gate` script:
+  `&& node scripts/science/run-formula-proof.mjs && node scripts/media/media-rights-proof.mjs && node scripts/run-p3-media-proof.mjs`.
+
 ## 4. OWNER release actions (cannot be automated / verified here)
 
 - [ ] **Device verification** on a physical iPhone — **delete the app before every reinstall** that
