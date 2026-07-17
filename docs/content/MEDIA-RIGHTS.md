@@ -4,19 +4,21 @@
 
 **قاعدة الفرع:** `integration/wave6-staging@82c53ceb0e873727a38b5cfebd641e8db14f7b23`
 
-**النطاق:** كل المراجع المشحونة في `exerciseMedia.ts` و`machineImages.ts`: **274/274**.
-**الحكم:** **NO-GO لصور الأجهزة الأربع والعشرين** حتى يقدّم المالك سلسلة حقوق مكتوبة أو يستبدلها. صور التمارين الثابتة البالغ عددها 250 قابلة للشحن وفق الأدلة الحالية.
+**النطاق:** كل المراجع المشحونة في `exerciseMedia.ts` و`machineImages.ts`: **273/273** (بعد إزالة أصل FITWILL).
+**الحكم:** **GO** — أصل FITWILL (RESTRICTED) أُزيل نهائيًّا؛ الأصول الثلاثة والعشرون «مجهولة الحق» مُقرّة صراحةً من المالك (`ownerAck: rights:unknown`) وتُشحن مع إفصاح، ولا تُبدَّل تلقائيًّا. صور التمارين الثابتة الـ250 نظيفة الترخيص.
 
 > هذا تدقيق هندسي لسلسلة المصدر، وليس رأياً قانونياً. «موافقة على الصورة» أو ظهورها في commit لا يثبت ملكية حق النشر أو ترخيص إعادة التوزيع.
+
+> **تحديث FIX WAVE (2026-07-17):** أصل FITWILL `decline-chest-press-machine.jpg` **حُذف من المستودع** ومن `machineImages.ts` (التمرين نفسه يبقى؛ بطاقته تتدهور لبديل أنيق بلا صورة). الأصول الـ23 المجهولة تحمل الآن علم `ownerAck: rights:unknown` في الم/manifest فيُبلّغ عنها الإثبات دون حجب الإطلاق. أيّ أصل `RESTRICTED` يبقى حاجب إطلاق صارمًا (العدد الآن صفر).
 
 ## النتيجة العددية
 
 | التصنيف | الأصول | حكم الإطلاق |
 | --- | ---: | --- |
 | `CLEARLY-LICENSED` | 250 | نظيف وفق Unlicense/إهداء الملك العام المثبّت في المستودعين المصدرين |
-| `UNKNOWN` | 23 | **مانع إطلاق**: لا رابط أصل، ولا صاحب حق، ولا نص ترخيص، ولا فاتورة/تنازل |
-| `RESTRICTED` | 1 | **مانع إطلاق**: علامة FITWILL مع شروط تمنع النسخ التجاري دون إذن مسبق |
-| **الإجمالي** | **274** | manifest متزامن 274/274 |
+| `UNKNOWN` | 23 | **مُقرّ من المالك** (`ownerAck: rights:unknown`): يُشحن مع إفصاح، لا يُبدَّل تلقائيًّا — الاستبدال قرار المالك |
+| `RESTRICTED` | 0 | ~~علامة FITWILL~~ أُزيل الأصل الوحيد نهائيًّا (كان `decline-chest-press-machine.jpg`) |
+| **الإجمالي** | **273** | manifest متزامن 273/273 |
 
 السجل القانوني الكامل، بما فيه المسار، رابط الأصل، SHA-256، نوع magic bytes، الدليل والحكم لكل أصل، موجود في
 [`scripts/media/provenance-manifest.json`](../../scripts/media/provenance-manifest.json). فشل الاختبار إذا ظهر مرجع جديد بلا صف صريح في هذا السجل.
@@ -28,7 +30,7 @@
 | `yuhonas/free-exercise-db` | 250 | `raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/...` | [README عند `b0eed061`](https://github.com/yuhonas/free-exercise-db/blob/b0eed061e1c832b3ed815fbaa4b45b3cdc14df49/README.md) يصرّح بأنها قاعدة عامة وباستخدام الصور محلياً؛ [LICENSE عند الهاش نفسه](https://github.com/yuhonas/free-exercise-db/blob/b0eed061e1c832b3ed815fbaa4b45b3cdc14df49/LICENSE.md) هو Unlicense | `CLEARLY-LICENSED` | لا يفرض Unlicense إسناداً |
 | `wrkout/exercises.json` (الأصل الذي يسميه README أعلاه) | سلسلة الـ250 نفسها | `github.com/wrkout/exercises.json` | [README عند `5994bea0`](https://github.com/wrkout/exercises.json/blob/5994bea047eee4d39a2c0872be3dd8fdd258ba31/README.md) يصف المجموعة Public Domain؛ [LICENSE](https://github.com/wrkout/exercises.json/blob/5994bea047eee4d39a2c0872be3dd8fdd258ba31/LICENSE.md) هو Unlicense | يدعم سلسلة `CLEARLY-LICENSED` | لا يوجد شرط إسناد |
 | إدخال محلي غير منسوب | 23 | ملفات ملتزمة مباشرة في `public/exercise-machine-images/` | سجل Git يثبت فقط من أدخل الملف، لا مصدره أو حقه | `UNKNOWN` | غير قابل للحسم؛ الإسناد لا يعالج غياب الترخيص |
-| FITWILL | 1 | `decline-chest-press-machine.jpg` ملتزم محلياً وعليه العلامة | [commit الإدخال](https://github.com/km5g98str4-commits/gym-os-template/commit/c53727983da8f6a895a2465bfda0ed7ed4b49625) يقرّ بالعلامة؛ [شروط Fitwill](https://fitwill.app/terms) تمنع نسخ/إعادة استخدام محتوى الخدمة تجارياً دون إذن مكتوب مسبق | `RESTRICTED` | لا يكفي الإسناد؛ يلزم إذن مكتوب |
+| ~~FITWILL~~ (أُزيل) | 0 | `decline-chest-press-machine.jpg` **حُذف** من `public/` و`machineImages.ts` (FIX WAVE) | [شروط Fitwill](https://fitwill.app/terms) كانت تمنع النسخ التجاري دون إذن مكتوب — لذا أُزيل الأصل بدل شحنه | ~~`RESTRICTED`~~ → مُزال | لا ينطبق (لم يعد مشحونًا) |
 
 ### تحقق الشبكة الثاني
 
@@ -41,7 +43,7 @@
 | الأصل | دليل الإدخال | الحكم | السبب/الإجراء |
 | --- | --- | --- | --- |
 | `chest-supported-row-machine.jpg` | `163a5868` | UNKNOWN | «verified» بصرياً فقط؛ اطلب الأصل والترخيص |
-| `decline-chest-press-machine.jpg` | `c5372798` | **RESTRICTED** | علامة FITWILL؛ احذف/استبدل أو احصل على إذن مكتوب |
+| ~~`decline-chest-press-machine.jpg`~~ | `c5372798` | **أُزيل** | علامة FITWILL — حُذف الأصل نهائيًّا (FIX WAVE)؛ التمرين يتدهور لبديل أنيق |
 | `glute-kickback-machine.jpg` | `600599e7` | UNKNOWN | عبارة «Ziyad's own» بلا ملف أصل/تنازل؛ وثّق الملكية |
 | `glute-machine.jpg` | `77edda97` | UNKNOWN | لا مصدر أو ترخيص في commit |
 | `hack-squat-machine.jpg` | `77edda97` | UNKNOWN | لا مصدر أو ترخيص في commit |

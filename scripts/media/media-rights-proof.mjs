@@ -65,9 +65,9 @@ function exerciseEntries() {
   return entries
 }
 
+// decline-chest-press-machine (FITWILL, RESTRICTED) أُزيلت صورته من الحزمة (MEDIA-RIGHTS.md).
 const machineEvidence = {
   'chest-supported-row-machine': '163a58684c3766fc319f9a00ab8ec9102d8b104b',
-  'decline-chest-press-machine': 'c53727983da8f6a895a2465bfda0ed7ed4b49625',
   'glute-kickback-machine': '600599e7bbf9c94b241a5b40183280dc93937a9a',
   'glute-machine': '77edda9770ffe59bf62fd7b19ed9b038243af8b1',
   'hack-squat-machine': '77edda9770ffe59bf62fd7b19ed9b038243af8b1',
@@ -97,22 +97,23 @@ function machineEntries() {
   return [...source.matchAll(/^[ ]{2}'([^']+)': '([^']+)',/gm)].map(([, slug, localPath]) => {
     const commit = machineEvidence[slug]
     if (!commit) throw new Error(`${slug}: missing reviewed Git-history evidence`)
-    const restricted = slug === 'decline-chest-press-machine'
+    // كل صور الأجهزة المتبقّية «مجهولة الأصل» (لا سلسلة حق قابلة للنقل). قرار المالك: تُشحن مع
+    // إفصاح صريح عبر علم `ownerAck: 'rights:unknown'` — مقبولة بوعي، غير حاجبة للإطلاق (لكنها
+    // مرئية في التقرير). لا يُبدَّل أيّ أصل مجهول تلقائيًّا؛ ذلك قرار المالك وحده.
     return {
       id: `machine:${slug}`,
       localPath,
       upstreamUrl: null,
-      sourceId: restricted ? 'fitwill-watermarked-local-ingest' : 'unattributed-local-ingest',
+      sourceId: 'unattributed-local-ingest',
       sourceRepo: null,
       evidenceUrl: `https://github.com/km5g98str4-commits/gym-os-template/commit/${commit}`,
-      evidenceReadmeUrl: restricted ? 'https://fitwill.app/terms' : null,
-      license: restricted ? 'No redistribution grant found; Fitwill terms reserve commercial reuse' : 'No source license or chain-of-title record found',
-      verdict: restricted ? 'RESTRICTED' : 'UNKNOWN',
+      evidenceReadmeUrl: null,
+      license: 'No source license or chain-of-title record found',
+      verdict: 'UNKNOWN',
+      ownerAck: 'rights:unknown',
       attributionRequired: false,
-      risk: 'launch-blocking',
-      note: restricted
-        ? 'Commit records explicit FITWILL watermark and approval to use, but no license grant.'
-        : 'Visual approval or an owner/agent commit statement is not a transferable rights record.',
+      risk: 'acknowledged-unknown',
+      note: 'Visual approval or an owner/agent commit statement is not a transferable rights record. Owner-acknowledged for launch; swap requires owner action.',
     }
   })
 }
@@ -137,7 +138,7 @@ function bootstrap(entries) {
     schemaVersion: 1,
     reviewedAt: '2026-07-16',
     baseCommit: '82c53ceb0e873727a38b5cfebd641e8db14f7b23',
-    policy: 'Every shipped media reference requires an explicit row; UNKNOWN and RESTRICTED remain visible launch blockers.',
+    policy: 'Every shipped media reference requires an explicit row. RESTRICTED is a hard launch blocker (zero shipped — FITWILL asset removed). UNKNOWN assets are owner-acknowledged (ownerAck: rights:unknown): shipped with disclosure, never auto-swapped; replacing them is an owner decision.',
     entries,
   }
   writeFileSync(MANIFEST, `${JSON.stringify(manifest, null, 2)}\n`)
@@ -198,7 +199,7 @@ if (!existsSync(MANIFEST)) throw new Error('provenance manifest missing; reviewe
 const manifest = JSON.parse(readFileSync(MANIFEST, 'utf8'))
 const reviewed = [...manifest.entries].sort((a, b) => a.id.localeCompare(b.id))
 
-if (live.length !== 274) throw new Error(`inventory count changed: expected 274, found ${live.length}`)
+if (live.length !== 273) throw new Error(`inventory count changed: expected 273, found ${live.length}`)
 if (reviewed.length !== live.length) throw new Error(`manifest count ${reviewed.length} != live count ${live.length}`)
 for (let i = 0; i < live.length; i++) {
   const actual = live[i]
@@ -215,3 +216,19 @@ const counts = reviewed.reduce((out, item) => ({ ...out, [item.verdict]: (out[it
 console.log(`MEDIA_RIGHTS_PROOF_OK inventory=${live.length} magic=${live.length} http=${httpPassed}`)
 if (REMOTE) console.log(`UPSTREAM_PROOF_OK http_magic_digest=${upstreamPassed}`)
 console.log(`VERDICTS ${Object.entries(counts).map(([key, value]) => `${key}=${value}`).join(' ')}`)
+
+// بوّابة صارمة: لا يجوز شحن أيّ أصل RESTRICTED (علامة FITWILL أُزيلت). حاجب إطلاق حقيقي.
+const restrictedCount = counts.RESTRICTED || 0
+if (restrictedCount > 0) {
+  const offenders = reviewed.filter((e) => e.verdict === 'RESTRICTED').map((e) => e.id).join(', ')
+  throw new Error(`RESTRICTED media still shipped (${restrictedCount}): ${offenders} — launch blocker`)
+}
+
+// إفصاح: الأصول «مجهولة الحق» المُقرّة من المالك (rights:unknown) — تُشحن بوعي، لا تُبدَّل تلقائيًّا.
+const acknowledged = reviewed.filter((e) => e.ownerAck === 'rights:unknown')
+const unknownTotal = counts.UNKNOWN || 0
+if (acknowledged.length !== unknownTotal) {
+  throw new Error(`UNKNOWN assets (${unknownTotal}) not all owner-acknowledged (${acknowledged.length}) — every UNKNOWN needs rights:unknown`)
+}
+console.log(`RIGHTS_UNKNOWN_ACKNOWLEDGED ${acknowledged.length} (owner decision — shipped with disclosure, not swapped):`)
+for (const e of acknowledged) console.log(`  • ${e.id} — ${e.localPath}`)

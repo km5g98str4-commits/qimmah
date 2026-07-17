@@ -4,12 +4,13 @@
 // هذه بطاقات أجهزة لا تملك لقطة جهاز من قنوات المقاومة (WorkoutX/free-exercise-db تعيد وزنًا حرًّا)،
 // فنعرض لها صورة الجهاز الحقيقية المجلوبة من مصادر مفتوحة الترخيص عبر scripts/p12-fetch-machine-images.mjs.
 // حتى تُجلب الصور تبقى الخريطة فارغة وتظهر البطاقات على البديل الأنيق (لا لقطة وزن حرّ أبدًا).
-// التغطية الحالية: 24 جهازًا.
+// التغطية الحالية: 23 جهازًا (أُزيلت decline-chest-press-machine — علامة FITWILL).
 
 /** خريطة ثابتة: مُعرّف جهاز قانوني → مسار صورة الجهاز المحلّية. */
 export const machineImages: Record<string, string> = {
   'chest-supported-row-machine': '/exercise-machine-images/chest-supported-row-machine.jpg',
-  'decline-chest-press-machine': '/exercise-machine-images/decline-chest-press-machine.jpg',
+  // decline-chest-press-machine: أُزيلت صورته (علامة FITWILL — RESTRICTED في MEDIA-RIGHTS.md).
+  // التمرين نفسه يبقى؛ البطاقة تتدهور للبديل الأنيق. لا تُعِد إضافتها دون إذن مكتوب.
   'glute-kickback-machine': '/exercise-machine-images/glute-kickback-machine.jpg',
   'glute-machine': '/exercise-machine-images/glute-machine.jpg',
   'hack-squat-machine': '/exercise-machine-images/hack-squat-machine.jpg',
