@@ -1,0 +1,39 @@
+Qimmah full E2E audit — sanitized static/console evidence
+Base: 80e31f7bb62970954c9fa3f33c365ecc88c8e6a1 (origin/design/v21-promotion at audit start)
+
+[IMPORT-LEGACY]
+src/views/SettingsView.tsx:81 starts a separate FileReader/JSON.parse import path.
+src/views/SettingsView.tsx:86 confirms before validating a format/schema/owner.
+src/views/SettingsView.tsx:91 imports parsed.history and line 92 merges parsed.preferences.
+The hardened path is separate: src/views/ProfileV2.tsx:260 calls parseImportFile.
+Runtime console: wrong-version → confirm + “تم استيراد نسختك بنجاح.”; profileName=WRONG_VERSION_ACCEPTED.
+Runtime console: cross-uid → confirm + “تم استيراد نسختك بنجاح.”; profileName=OWNER_B_INJECTED.
+
+[OFFLINE-AUDIT-LIMIT]
+vite.config.ts:27 and :31 hard-code post-processing to dist/sw.js and dist/index.html.
+The authorized audit build output was docs/audit/evidence/dist, so its copied sw.js retained placeholders.
+Runtime console: service-worker ready=false; offline reload net::ERR_INTERNET_DISCONNECTED.
+This is an audit-build limitation, not proof that the standard dist production build fails offline.
+
+[ACCOUNT-DELETION]
+docs/MERGE-DEPLOY-PLAN.md:33: “[ ] delete_own_account RPC deployed on production Supabase”.
+The client path and migration exist, but production deployment and destructive behavior were not verified without OWNER credentials.
+
+[A11Y]
+Runtime sweep: 150/150 route/RTL/overflow/alt/name/tabindex/corrupt-key/console checks passed.
+Static scanner: index.html, WCAG 2.1 AA, 0 findings.
+Contrast spot checks on warm canvas: muted 5.64:1; blue 5.30:1; strong ink 17.25:1 (AA pass).
+Repository search found no skip-link/skip-to-main implementation; repeated app chrome precedes main content.
+
+[NATIVE-4.2]
+Present: NSCameraUsageDescription, local-notifications package/engine, custom deep-link scheme + associated domains, app-shell offline service worker.
+Absent at this base: @capacitor/haptics and HealthKit integration; src/lib/profileV2Model.ts states healthSharingAvailable=false.
+
+[GATES]
+TypeScript app+node noEmit: PASS. Flagless Vite production transform: 2098 modules, PASS.
+Lint: PASS. npm audit: 0 vulnerabilities.
+Browser onboarding: 11/11 PASS, zero console errors.
+Portability 44/44; isolation 28/28; reset recovery 33/33; policy 14/14; notifications 30/30;
+insights 28/28; strength 33/33; onboarding async 29/29; active session 31/31; Today 32/32;
+Progress 11/11; data-export 12/12; Saudi/Arabic nutrition and calculation proof 57/57.
+test:food-db was BLOCKED after one attempt because its runner writes scripts/.food-db.bundle.mjs outside docs/audit/**.
