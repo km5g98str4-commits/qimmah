@@ -85,6 +85,36 @@ Both branches: `build` → `npx cap sync ios` (5 plugins, SPM) →
 install `com.qimmah.mobile` on iPhone 17 Pro (iOS 26) → launch → render → home-icon visible.
 Artifacts: `docs/proof/native/wave5/*`, `docs/proof/native/promotion/*`.
 
+## 3b. FIX WAVE — audit blockers closed (2026-07-17, `design/v21-promotion`)
+
+> **⚠ Superseded by §2.5 above.** This records the *earlier fix-wave* session's homegrown closure. The
+> grand consolidation later merged the **specialized** branches (deeper proofs) and per DEDUPE LAW
+> replaced two homegrown fixes: secure-import (`f4b2f95`, 34-vector e2e) and media (`1d4d64f`, **24
+> IN-HOUSE / UNKNOWN=0 / 274**, not the 23-UNKNOWN-acknowledged variant). QEA-005 skip-link is now
+> **FIXED** (`4b8f266`). Trust §2.5 + the consolidation table in `FULL-E2E-AUDIT.md`.
+
+Promotion now **carries `integration/wave5` + `integration/wave6-staging`** (observability, HealthKit,
+haptics, canonical mark, web headers, launch kit) plus every fix branch. Fresh
+`npm ci` → flagless `typecheck`/`lint --max-warnings 0`/`build` → `test:gate` → all extra proofs
+green. Every CODE finding from the three audit reports is FIXED (see
+[`docs/audit/FULL-E2E-AUDIT.md`](../audit/FULL-E2E-AUDIT.md) verdict table):
+
+| Fix | Proof | Result (consolidation) |
+|---|---|---|
+| QEA-001 legacy importer → hardened `DataManagementPanel` | `test:e2e:settings-security` | **34/34** hostile rejected |
+| Water target clamp [2.5, 4.0] L (EFSA/IOM) | `scripts/science/run-formula-proof.mjs` | **111/111** (250kg→4.0, was 9.0) |
+| Minor (<18) BMI label + specialist-referral note | same formula proof (age 12/15/17/18) | included in 111 |
+| 24 unsafe assets → in-house SVG schematics (FITWILL gone) | `media-rights-proof.mjs` + `run-p3-media-proof.mjs` | **274/274**, 24 IN-HOUSE, 0 UNKNOWN/RESTRICTED, p3 ✅ |
+| QEA-005 skip-link + safe-area | `MobileShell` source + native launch | ✅ |
+| Chaos / data-loss resilience | `test:chaos` | **57/57** |
+
+- **HealthKit/haptics (audit finding #3):** present + rendering post-merge (haptics toggle live,
+  HealthKit row iOS-gated); `cap sync ios` → plugins incl. `@capacitor/haptics`.
+- **Gate wiring:** `test:chaos` and `test:e2e:settings-security` are wired into `package.json`; the
+  science/media formula proofs (`run-formula-proof`, `media-rights-proof`, `run-p3-media-proof`) run as
+  named checks in the consolidation ledger but are **not yet folded into the `test:gate` chain** — a
+  future one-line addition, tracked, not a blocker.
+
 ## 4. OWNER release actions (cannot be automated / verified here)
 
 - [ ] **Device verification** on a physical iPhone — **delete the app before every reinstall** that
