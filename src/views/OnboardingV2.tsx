@@ -198,12 +198,12 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
             type="button"
             onClick={back}
             aria-label={t.back}
-            className="grid h-10 w-10 place-items-center rounded-xl border border-line bg-surface text-ink-700"
+            className="grid h-11 w-11 place-items-center rounded-xl border border-line bg-surface text-ink-700"
           >
             <Icon name="ChevronRight" className="h-5 w-5 rtl:rotate-0 ltr:rotate-180" />
           </button>
           <span className="text-sm font-bold text-ink-500">{t.stepOf(step + 1)}</span>
-          <span className="h-10 w-10" />
+          <span className="h-11 w-11" />
         </div>
         <div className="mx-auto mt-3 flex w-full max-w-md gap-1.5">
           {[0, 1, 2].map((i) => (
@@ -342,10 +342,16 @@ function Segmented({ options, value, onChange, render }: { options: readonly num
             onClick={() => onChange(o)}
             aria-pressed={on}
             className={cn(
-              'v2-pressable flex flex-col items-center justify-center gap-0.5 rounded-xl border py-3 text-center',
+              'v2-pressable relative flex min-h-[3rem] flex-col items-center justify-center gap-0.5 rounded-xl border py-3 text-center',
               on ? 'v2-choice-selected text-ink-900' : 'border-line bg-surface text-ink-700 hover:border-ink-400/40',
             )}
           >
+            {/* دلالة اختيار غير لونية (WCAG 1.4.1): شارة صح تظهر على المحدَّد فقط. */}
+            {on && (
+              <span className="v2-choice-icon-selected absolute -top-1.5 -end-1.5 grid h-4 w-4 place-items-center rounded-full" aria-hidden="true">
+                <Icon name="Check" className="h-2.5 w-2.5" strokeWidth={3} />
+              </span>
+            )}
             {render(o)}
           </button>
         )
@@ -411,10 +417,16 @@ function TileGroup({ options, value, onChange }: { options: readonly { value: st
             onClick={() => onChange(o.value)}
             aria-pressed={on}
             className={cn(
-              'v2-pressable flex min-h-[5rem] flex-col items-center justify-center gap-1.5 rounded-2xl border px-2 py-3 text-center',
+              'v2-pressable relative flex min-h-[5rem] flex-col items-center justify-center gap-1.5 rounded-2xl border px-2 py-3 text-center',
               on ? 'v2-choice-selected' : 'border-line bg-surface hover:border-ink-400/40',
             )}
           >
+            {/* دلالة اختيار غير لونية (WCAG 1.4.1): شارة صح تظهر على المحدَّد فقط. */}
+            {on && (
+              <span className="v2-choice-icon-selected absolute -top-1.5 -end-1.5 grid h-4 w-4 place-items-center rounded-full" aria-hidden="true">
+                <Icon name="Check" className="h-2.5 w-2.5" strokeWidth={3} />
+              </span>
+            )}
             <Icon name={o.icon} className={cn('h-6 w-6', on ? 'text-[color:var(--v2-blue)]' : 'text-ink-500')} strokeWidth={2.25} />
             <span className={cn('text-xs font-bold', on ? 'text-ink-900' : 'text-ink-700')}>{o.label}</span>
           </button>

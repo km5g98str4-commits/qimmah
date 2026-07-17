@@ -105,7 +105,7 @@ export function ResetPasswordView({ lang, onDone }: ResetPasswordViewProps) {
         {done ? (
           /* حالة النجاح — إجراء أساسي واحد: العودة لتسجيل الدخول. */
           <>
-            <p className="mt-2 text-center text-sm leading-relaxed text-ink-500">{t.auth.resetSuccessHint}</p>
+            <p role="status" aria-live="polite" className="mt-2 text-center text-sm leading-relaxed text-ink-500">{t.auth.resetSuccessHint}</p>
             <button type="button" onClick={onDone} className="btn-primary mt-6 w-full py-3.5 text-base">
               <Icon name="LogIn" className="h-4 w-4" />
               {t.auth.back}
@@ -113,8 +113,8 @@ export function ResetPasswordView({ lang, onDone }: ResetPasswordViewProps) {
           </>
         ) : phase === 'checking' ? (
           /* نتحقّق من الرابط ونستكمل جلسة الاستعادة قبل الحكم بانتهاء الصلاحية. */
-          <p className="mt-6 flex items-center justify-center gap-2 text-center text-sm text-ink-500">
-            <Icon name="RefreshCw" className="h-4 w-4 animate-spin" />
+          <p role="status" aria-live="polite" className="mt-6 flex items-center justify-center gap-2 text-center text-sm text-ink-500">
+            <Icon name="RefreshCw" className="h-4 w-4 animate-spin" aria-hidden="true" />
             {t.auth.resetChecking}
           </p>
         ) : phase === 'ready' ? (
@@ -178,10 +178,20 @@ export function ResetPasswordView({ lang, onDone }: ResetPasswordViewProps) {
                 </ul>
               </div>
 
-              {error && <p className="text-xs leading-relaxed text-gold-600">{error}</p>}
+              {/* خطأ واضح ومتاح: لوحة عالية التباين (AA) + أيقونة (لا دلالة لونية فقط) + إعلان فوري لقارئ الشاشة. */}
+              {error && (
+                <p
+                  role="alert"
+                  aria-live="assertive"
+                  className="v2-error-panel flex items-start gap-2 rounded-xl border px-3 py-2.5 text-xs font-semibold leading-relaxed text-ink-900"
+                >
+                  <Icon name="AlertCircle" className="v2-error-icon mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+                  <span>{error}</span>
+                </p>
+              )}
 
-              <button type="submit" disabled={!canSubmit} className="btn-primary w-full py-3.5 text-base disabled:opacity-50">
-                <Icon name="Check" className="h-4 w-4" />
+              <button type="submit" disabled={!canSubmit} aria-busy={busy} className="btn-primary w-full py-3.5 text-base disabled:cursor-not-allowed disabled:opacity-50">
+                <Icon name={busy ? 'RefreshCw' : 'Check'} className={busy ? 'h-4 w-4 animate-spin' : 'h-4 w-4'} aria-hidden="true" />
                 {t.auth.resetSave}
               </button>
             </form>
