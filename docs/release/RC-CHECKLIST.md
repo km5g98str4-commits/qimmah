@@ -110,10 +110,13 @@ green. Every CODE finding from the three audit reports is FIXED (see
 
 - **HealthKit/haptics (audit finding #3):** present + rendering post-merge (haptics toggle live,
   HealthKit row iOS-gated); `cap sync ios` → plugins incl. `@capacitor/haptics`.
-- **Gate wiring:** `test:chaos` and `test:e2e:settings-security` are wired into `package.json`; the
-  science/media formula proofs (`run-formula-proof`, `media-rights-proof`, `run-p3-media-proof`) run as
-  named checks in the consolidation ledger but are **not yet folded into the `test:gate` chain** — a
-  future one-line addition, tracked, not a blocker.
+- **Gate wiring (DONE 2026-07-17):** `test:chaos` and `test:e2e:settings-security` were already wired;
+  the two orphan proofs are now **folded into the `test:gate` chain** via new named scripts
+  `test:formula` (`scripts/science/run-formula-proof.mjs`) and `test:media-rights`
+  (`scripts/media/media-rights-proof.mjs`), plus the pre-existing `proof:media`
+  (`scripts/run-p3-media-proof.mjs`). Verified in a full gate run: `test:gate` now emits
+  `Formula proof: 111 passed, 0 failed` + `MEDIA_RIGHTS_PROOF_OK inventory=274` (250 CLEARLY-LICENSED +
+  24 IN-HOUSE, 0 UNKNOWN) + p3-media ✅. No remaining orphan proofs.
 
 ## 4. OWNER release actions (cannot be automated / verified here)
 
