@@ -1,8 +1,6 @@
-export interface HeartRateReading {
-  bpm: number
-  measuredAt: number
-  source: 'watch' | 'health'
-}
+import type { HeartRateReading } from '@/types/workout'
+
+export type { HeartRateReading }
 
 export const HEART_RATE_EVENT = 'qimmah:heart-rate'
 export const HEART_RATE_STALE_MS = 45_000
@@ -44,6 +42,20 @@ export function parseHeartRateReading(value: unknown, now: number = Date.now()):
 export function freshHeartRate(reading: HeartRateReading | null, now: number): HeartRateReading | null {
   if (!reading || now - reading.measuredAt > HEART_RATE_STALE_MS) return null
   return reading
+}
+
+/**
+ * True only when a real native health/watch bridge is actually present.
+ *
+ * The web base has NO live heart-rate provider: the HealthKit source ships with
+ * the wave6 native-muscle Capacitor plugin (branch `wave6-staging`, not merged
+ * here). Until that plugin lands and injects `window.QimmahHeartRateBridge`, this
+ * stays false and the dashboard hides the heart-rate tile entirely rather than
+ * rendering a fake/empty pulse. The interface above stays bridge-ready so the
+ * plugin is the only thing needed to light it up. NEVER simulate a pulse.
+ */
+export function heartRateProviderAvailable(): boolean {
+  return typeof window !== 'undefined' && Boolean(window.QimmahHeartRateBridge)
 }
 
 /**

@@ -1,6 +1,48 @@
 // أنواع مكتبة التمارين وقوالب الجداول وخطة التمرين (Qimmah v2).
 
 import type { MuscleId } from './muscles'
+import type { Lang } from '@/lib/appPreferences'
+
+// ── Live gym dashboard (v11 experience) ──────────────────────────────────────
+// Central home for the live-workout dashboard contracts so views, data, and the
+// metrics lib all share one definition instead of re-declaring their own.
+
+/** Self-reported energy level, 1 (very low) … 5 (peak). */
+export type EnergyValue = 1 | 2 | 3 | 4 | 5
+
+/** A selectable energy step with its bilingual label. */
+export interface EnergyLevelOption {
+  value: EnergyValue
+  ar: string
+  en: string
+}
+
+/**
+ * A single validated heart-rate sample delivered by a native/watch bridge.
+ * Never fabricated by the web app — see `heartRateProviderAvailable`.
+ */
+export interface HeartRateReading {
+  bpm: number
+  measuredAt: number
+  source: 'watch' | 'health'
+}
+
+/** Props for the live workout dashboard shown during an active v2 session. */
+export interface LiveGymDashboardProps {
+  lang: Lang
+  startedAt: number
+  now: number
+  currentExercise: string
+  currentSet: number
+  currentSetTotal: number
+  completedSets: number
+  totalSets: number
+  restLeft: number
+  isResting: boolean
+  /** null until the user explicitly picks a level — no default is preselected. */
+  energy: EnergyValue | null
+  onEnergyChange: (value: EnergyValue) => void
+}
 
 export type Muscle =
   | 'chest'

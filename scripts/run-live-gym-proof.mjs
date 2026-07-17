@@ -1,6 +1,6 @@
 import { build } from 'esbuild'
 import { createRequire } from 'node:module'
-import { mkdtempSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 
@@ -53,7 +53,7 @@ check(p.parseHeartRateReading({ bpm: 999 }, 11_000) === null, 'impossible readin
 check(p.freshHeartRate(valid, 55_000)?.bpm === 127, 'recent readings remain connected')
 check(p.freshHeartRate(valid, 55_001) === null, 'stale readings disconnect instead of showing old health data')
 
-const markup = p.renderToStaticMarkup(p.React.createElement(p.LiveGymDashboard, {
+const baseProps = {
   lang: 'ar',
   startedAt: 1_000,
   now: 62_900,
@@ -64,14 +64,35 @@ const markup = p.renderToStaticMarkup(p.React.createElement(p.LiveGymDashboard, 
   totalSets: 10,
   restLeft: 48,
   isResting: true,
-  energy: 4,
   onEnergyChange: () => undefined,
-}))
+}
+const render = (extra) => p.renderToStaticMarkup(p.React.createElement(p.LiveGymDashboard, { ...baseProps, ...extra }))
+
+const markup = render({ energy: 4 })
 check(markup.includes('لوحة التمرين الحية'), 'dashboard has an accessible Arabic name')
 check(markup.includes('ضغط الصدر'), 'current exercise is rendered from live session data')
 check(markup.includes('aria-pressed="true"'), 'energy control exposes its selected state')
 check(markup.includes('PT61S'), 'elapsed time uses semantic time markup')
 check(!markup.includes('127'), 'heart rate is never fabricated without a live bridge reading')
+
+// Heart-rate provider honesty — no bridge in this render, so the tile must be
+// hidden entirely (no fake/empty tile) and replaced by one honest settings note.
+check(!markup.includes('نبض القلب'), 'heart-rate tile is hidden when no provider is connected')
+check(markup.includes('يظهر النبض عند توفر مصدر صحي متصل'), 'an honest note replaces the hidden heart-rate tile')
+
+// Energy awaits an explicit pick — a null selection preselects nothing and shows
+// a neutral prompt rather than a fabricated default level.
+const unselected = render({ energy: null })
+check(!unselected.includes('aria-pressed="true"'), 'no energy level is preselected by default')
+check(unselected.includes('اختر مستوى طاقتك'), 'the unselected energy state shows a neutral prompt')
+
+// Ember-law — the one ember action per screen is the primary CTA (in WorkoutV2),
+// never this dashboard surface. Grep the source for the ember *role* being
+// applied (the `--v2-ember` token or a `.ember` role reference) — prose comments
+// that merely explain the law are ignored on purpose.
+const dashSource = readFileSync(join(root, 'src/components/workout/LiveGymDashboard.tsx'), 'utf8')
+const appliesEmber = /--v2-ember\b/.test(dashSource) || /\bember\s*:/.test(dashSource) || /\.ember\b/.test(dashSource)
+check(!appliesEmber, 'the dashboard surface never applies the ember role')
 
 if (failures > 0) process.exit(1)
 console.log(`\nLive Gym proof passed (${checks} checks).`)

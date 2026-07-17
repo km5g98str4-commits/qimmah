@@ -1,10 +1,5 @@
 import type { Lang } from '@/lib/appPreferences'
-
-export interface EnergyLevelOption {
-  value: 1 | 2 | 3 | 4 | 5
-  ar: string
-  en: string
-}
+import type { EnergyLevelOption } from '@/types/workout'
 
 export const LIVE_GYM_ENERGY_LEVELS: EnergyLevelOption[] = [
   { value: 1, ar: 'منخفضة جدًا', en: 'Very low' },
@@ -21,7 +16,9 @@ const COPY = {
     heartRate: 'نبض القلب',
     heartRateUnit: 'نبضة/د',
     watchConnected: 'قراءة حية من الساعة',
-    watchUnavailable: 'لا توجد قراءة من الساعة',
+    watchUnavailable: 'بانتظار قراءة من المصدر',
+    heartRateHidden: 'يظهر النبض عند توفر مصدر صحي متصل',
+    energyUnset: 'اختر مستوى طاقتك',
     currentExercise: 'التمرين الحالي',
     currentSet: 'المجموعة',
     remainingSets: 'المجموعات المتبقية',
@@ -36,7 +33,9 @@ const COPY = {
     heartRate: 'Heart rate',
     heartRateUnit: 'bpm',
     watchConnected: 'Live watch reading',
-    watchUnavailable: 'No watch reading',
+    watchUnavailable: 'Waiting for a reading',
+    heartRateHidden: 'Heart rate appears when a connected health source is available',
+    energyUnset: 'Select your energy',
     currentExercise: 'Current exercise',
     currentSet: 'Set',
     remainingSets: 'Sets remaining',

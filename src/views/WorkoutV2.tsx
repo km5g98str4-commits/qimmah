@@ -14,6 +14,8 @@ import { buildWorkoutV2Model, CATEGORY_LABEL, type ExCategory, type WorkoutV2Exe
 // Fix-forward A: finished v2 workouts persist through the canonical path so
 // Progress/Today/Profile react (and sync auto-enqueues) — not just a local summary.
 import { persistFinishedSession } from '@/lib/finishWorkout'
+import { formatDuration } from '@/lib/formatDuration'
+import type { EnergyValue } from '@/types/workout'
 import { getDayStamp } from '@/lib/today'
 import { buildV2WorkoutSession } from '@/lib/workoutV2Persist'
 // Strength system (this feature) — plate math, warm-up, unified PR detection.
@@ -66,8 +68,9 @@ interface ActiveState {
   rows: Record<string, SetRow[]>
   /** Rest timer as timestamps (survives refresh + background) — see activeSession.ts. */
   rest?: RestSnapshot | null
-  /** Self-reported, session-local energy. Stored only inside the owner-scoped active session. */
-  energy?: 1 | 2 | 3 | 4 | 5
+  /** Self-reported, session-local energy. Undefined until the user picks a level
+   *  — no default is preselected. Stored only inside the owner-scoped session. */
+  energy?: EnergyValue
 }
 
 const parseReps = (reps: string): number => {
@@ -75,7 +78,6 @@ const parseReps = (reps: string): number => {
   return m ? Number(m[0]) : 10
 }
 const toAr = (n: number, lang: Lang) => (lang === 'en' ? String(n) : String(n).replace(/\d/g, (x) => '٠١٢٣٤٥٦٧٨٩'[Number(x)]))
-const fmtTime = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
 
 /**
  * Validate a persisted/candidate active session against the CURRENT plan.
@@ -233,7 +235,8 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
     for (const ex of model.exercises) {
       rows[ex.id] = Array.from({ length: ex.sets }, () => ({ weight: ex.targetWeightKg ?? 20, reps: parseReps(ex.reps), done: false }))
     }
-    setActive({ startedAt: Date.now(), exIndex: 0, setIndex: 0, rows, rest: null, energy: 3 })
+    // No default energy — the user selects it explicitly on the live dashboard.
+    setActive({ startedAt: Date.now(), exIndex: 0, setIndex: 0, rows, rest: null })
     setScreen('active')
   }
 
@@ -318,7 +321,7 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   const restLeft = active.rest ? restRemainingSec(active.rest.endsAt, now) : 0
   const addRest = () => setActive((prev) => (prev?.rest ? { ...prev, rest: { ...prev.rest, endsAt: prev.rest.endsAt + REST_ADD * 1000 } } : prev))
   const skipRest = () => setActive((prev) => (prev ? { ...prev, rest: null } : prev))
-  const setEnergy = (energy: 1 | 2 | 3 | 4 | 5) => setActive((prev) => (prev ? { ...prev, energy } : prev))
+  const setEnergy = (energy: EnergyValue) => setActive((prev) => (prev ? { ...prev, energy } : prev))
 
   return (
     <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-dark v2-screen-enter fixed inset-0 z-[60] flex flex-col bg-page text-ink-900" style={{ paddingTop: 'max(0.75rem, var(--safe-top))', paddingBottom: 'var(--safe-bottom)' }}>
@@ -345,7 +348,7 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
         totalSets={totalPlannedSets}
         restLeft={restLeft}
         isResting={resting && !restDone}
-        energy={active.energy ?? 3}
+        energy={active.energy ?? null}
         onEnergyChange={setEnergy}
       />
 
@@ -510,7 +513,7 @@ function RestPanel({ lang, restLeft, restDone, nextEx, setLabel, onAdd, onSkip }
       ) : (
         <>
           <p className="text-sm font-bold" style={{ color: FOCUS.inkMuted }}>{ar ? 'راحة' : 'Rest'}</p>
-          <p className="mt-2 text-7xl font-black tabular-nums" style={{ color: FOCUS.teal }}>{fmtTime(restLeft)}</p>
+          <p className="mt-2 text-7xl font-black tabular-nums" style={{ color: FOCUS.teal }}>{formatDuration(restLeft)}</p>
           <p className="mt-4 text-sm" style={{ color: FOCUS.inkMuted }}>{ar ? 'التالي' : 'Next'}: <bdi>{ar ? nextEx.nameAr : nextEx.nameEn}</bdi> · {setLabel}</p>
           <div className="mt-8 flex items-center gap-3">
             <button type="button" onClick={onAdd} className="rounded-2xl px-6 py-3 font-bold" style={{ background: FOCUS.card, border: `1px solid ${FOCUS.line}`, color: FOCUS.ink }}>+{toAr(REST_ADD, lang)} {ar ? 'ث' : 's'}</button>
