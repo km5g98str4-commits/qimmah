@@ -4,6 +4,7 @@
 //
 // الحساب حتمي وخالٍ من أخطاء العشور: نعمل بوحدات ربع كيلو (integer) داخليًا.
 
+// Source classification: exact load arithmetic/limited-knapsack implementation, not a physiological claim.
 const QUARTER = 0.25
 const toQ = (kg: number): number => Math.round(kg / QUARTER)
 const fromQ = (q: number): number => Math.round((q / 4) * 100) / 100

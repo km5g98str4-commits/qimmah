@@ -16,16 +16,19 @@ const num = (v?: string | number): number => {
   return m ? Number(m[0]) : NaN
 }
 
+/** Published attribution: Boyd Epley, Poundage Chart (1985); equation is an estimate, not a direct 1RM. */
 /** Epley 1RM. */
 export function epley(weight: number, reps: number): number {
   return weight * (1 + reps / 30)
 }
+/** Primary source: Brzycki (1993), doi:10.1080/07303084.1993.10606684. */
 /** Brzycki 1RM (يُقيَّد دون ٣٧ تكرارًا). */
 export function brzycki(weight: number, reps: number): number {
   if (reps >= 37) return NaN
   return (weight * 36) / (37 - reps)
 }
 
+/** Source classification: NON-STANDARD Qimmah hybrid (Brzycki <=10, Epley >10) plus 0.5 kg rounding. */
 /** الصيغة المختارة حسب المدى، مقرّبة لأقرب ٠٫٥ كجم. NaN لمدخلات غير صالحة. */
 export function e1rm(weight: number, reps: number): number {
   if (!Number.isFinite(weight) || !Number.isFinite(reps) || weight <= 0 || reps <= 0) return NaN
@@ -69,6 +72,7 @@ export function bestE1RM(exerciseId: string, sessions?: WorkoutSession[]): numbe
   return s.length ? Math.max(...s.map((p) => p.e1rm)) : NaN
 }
 
+/** Source classification: NON-STANDARD descriptive endpoint slope; no causal performance model. */
 /**
  * سرعة التقدّم (كجم/أسبوع) من ميل e1RM بين أول وآخر نقطة — تقديرية.
  * تُرجِع null إن كانت النقاط < ٢ أو المدة صفر (لا نخترع اتجاهًا).

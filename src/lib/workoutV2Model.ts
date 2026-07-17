@@ -88,6 +88,7 @@ export function buildWorkoutV2Model(customization: Customization, lang: Lang): W
     }
   })
 
+  // Source classification: NON-STANDARD Qimmah display heuristic (~9 min/exercise, rounded to 5).
   const durationMin = total > 0 ? Math.max(20, Math.round((total * 9) / 5) * 5) : 0
   const muscles = Array.from(new Set(exercises.flatMap((e) => e.muscles))).slice(0, 4)
   const goalWordAr = goal === 'cut' ? 'التنشيف' : goal === 'bulk' ? 'التضخيم' : goal === 'maintain' ? 'المحافظة' : ''

@@ -68,7 +68,7 @@ const ar: CalcScreenStrings = {
   pageTitle: 'كيف نحسب أرقامك؟',
   pageSubtitle: 'كل رقم في خطتك وله معادلة واضحة — نفكّكها لك بأرقامك أنت، خطوة بخطوة.',
   intro:
-    'الأرقام اللي تشوفها في خطتك مبنية على معادلات معروفة في علم التغذية والرياضة. هنا نوريك من وين جت بالضبط، عشان تفهمها وتثق فيها. كلها تقديرات للتنظيم والمتابعة، تعدّلها حسب نتائجك على أرض الواقع.',
+    'الأرقام اللي تشوفها في خطتك مبنية على معادلات معروفة في علم التغذية والرياضة، وعلى قواعد تقدير عملية من Qimmah. هنا نوريك من وين جت بالضبط، عشان تفهمها وتثق فيها. كلها تقديرات للتنظيم والمتابعة، تعدّلها حسب نتائجك على أرض الواقع.',
   needData:
     'أكمل بيانات جسمك (الوزن والطول والعمر والجنس) في الإعداد حتى نعرض لك طريقة الحساب بأرقامك الفعلية.',
 
@@ -101,7 +101,7 @@ const ar: CalcScreenStrings = {
   proteinResult: 'بروتينك اليومي',
 
   macrosTitle: 'الدهون والكربوهيدرات',
-  fatDesc: 'الدهون ~27% من سعراتك المستهدفة (ضمن النطاق الصحّي 25–30%)، وكل غرام دهون = 9 سعرات.',
+  fatDesc: 'الدهون ~27% من سعراتك المستهدفة (ضمن نطاق الدهون المقبول للبالغين 20–35%)، وكل غرام دهون = 9 سعرات.',
   carbsDesc: 'الكربوهيدرات هي الباقي بعد البروتين والدهون، وكل غرام كارب = 4 سعرات.',
   fatLabel: 'الدهون',
   carbsLabel: 'الكربوهيدرات',
@@ -127,7 +127,7 @@ const en: CalcScreenStrings = {
   pageTitle: 'How we calculate your numbers',
   pageSubtitle: 'Every number in your plan has a clear formula — here it is, worked out with your own data.',
   intro:
-    'The numbers in your plan are based on well-known equations from nutrition and exercise science. Here we show exactly where each one comes from, so you understand and trust it. They are estimates for tracking and organizing — adjust them to your real-world results.',
+    'The numbers in your plan are based on well-known nutrition and exercise-science equations, plus practical Qimmah estimation rules. Here we show exactly where each one comes from, so you understand and trust it. They are estimates for tracking and organizing — adjust them to your real-world results.',
   needData:
     'Complete your body data (weight, height, age, sex) in setup so we can show the math with your actual numbers.',
 
@@ -160,7 +160,7 @@ const en: CalcScreenStrings = {
   proteinResult: 'Your daily protein',
 
   macrosTitle: 'Fat and carbs',
-  fatDesc: 'Fat is ~27% of your target calories (within the healthy 25–30% range); each gram of fat = 9 calories.',
+  fatDesc: 'Fat is ~27% of your target calories (within the adult acceptable range of 20–35%); each gram of fat = 9 calories.',
   carbsDesc: 'Carbs are the remainder after protein and fat; each gram of carbs = 4 calories.',
   fatLabel: 'Fat',
   carbsLabel: 'Carbs',
