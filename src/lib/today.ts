@@ -49,7 +49,13 @@ export function loadToday(): TodayState {
     /* تجاهل البيانات التالفة */
   }
   const fresh = freshState()
-  window.localStorage.setItem(TODAY_KEY, JSON.stringify(fresh))
+  // بذر الحالة الطازجة best-effort: التحميل يجب ألّا يرمي عند امتلاء التخزين
+  // (وإلّا انهارت الشاشة عبر ErrorBoundary لمجرّد فتحها). النمط نفسه في historyStore.
+  try {
+    window.localStorage.setItem(TODAY_KEY, JSON.stringify(fresh))
+  } catch {
+    /* تجاهل امتلاء/حجب التخزين — الحالة الطازجة تبقى في الذاكرة */
+  }
   return fresh
 }
 

@@ -30,7 +30,12 @@ export function loadCommitmentsToday(): CommitmentsTodayState {
     /* تجاهل */
   }
   const f = fresh()
-  window.localStorage.setItem(COMMITMENTS_TODAY_KEY, JSON.stringify(f))
+  // بذر best-effort: التحميل يجب ألّا يرمي عند امتلاء التخزين (لا انهيار للشاشة).
+  try {
+    window.localStorage.setItem(COMMITMENTS_TODAY_KEY, JSON.stringify(f))
+  } catch {
+    /* تجاهل امتلاء التخزين — الحالة الطازجة تبقى في الذاكرة */
+  }
   return f
 }
 
