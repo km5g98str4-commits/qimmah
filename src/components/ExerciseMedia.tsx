@@ -88,10 +88,10 @@ export function ExerciseMedia({ exerciseId, muscles = [], heightClass = 'h-40', 
   const placeholderOnly = isPlaceholderOnlyMedia(exerciseId)
   // بطاقة الجهاز الكبيرة كانت تعتمد فقط على خريطة machineImages (المولّدة) وهي فارغة، فتظهر
   // على البديل رغم وجود الملف المرفوع. الإصلاح: نقرأ الصورة بالاصطلاح مباشرةً من
-  // public/exercise-machine-images/{slug}.jpg (نفس مصدر البطاقات الصغيرة)، مع إبقاء الخريطة
+  // public/exercise-machine-images/{slug}.svg (الرسم التوضيحي الداخلي)، مع إبقاء الخريطة
   // أولويةً للتوافق. ملف مفقود → onError في FallbackImg يتدهور بأمان إلى البديل الأنيق.
   const machineImg = placeholderOnly
-    ? getMachineImage(canonicalExerciseId(exerciseId)) ?? `/exercise-machine-images/${canonicalExerciseId(exerciseId)}.jpg`
+    ? getMachineImage(canonicalExerciseId(exerciseId)) ?? `/exercise-machine-images/${canonicalExerciseId(exerciseId)}.svg`
     : undefined
   const media = placeholderOnly ? undefined : resolveByCandidates(exerciseId, getExerciseMedia)
   const [frame, setFrame] = useState(0)

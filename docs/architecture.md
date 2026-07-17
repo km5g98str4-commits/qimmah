@@ -106,8 +106,8 @@ history store**, so data survives the daily reset.
 - `supplements.ts`, `medications.ts` — tracking-only, no recommended doses, safety notes.
 
 ## Exercise media (`src/components/ExerciseMedia.tsx`)
-- **Placeholder-only machines** → `/exercise-machine-images/{slug}.jpg` (curated machine
-  photos), else an elegant placeholder.
+- **Placeholder-only machines** → `/exercise-machine-images/{slug}.svg` (in-house original
+  vector schematics; see `docs/content/MEDIA-RIGHTS.md`), else an elegant placeholder.
 - **Other exercises** → static frames from `exerciseMedia.ts` (`/exercise-images/{slug}/`),
   resolved by candidate ids (as-is → canonical → legacy). GIF layer intentionally empty
   (watermark removal).

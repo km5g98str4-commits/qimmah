@@ -400,14 +400,22 @@ function accessoryCategory(type: DayType, variation: number): 'triceps' | 'bicep
   }
 }
 
-/** يختار جهاز إضافة واحدًا من فئته (يتناوب حسب فهرس اليوم، ويتجنّب المكرّر داخل اليوم). */
-function pickAccessory(cat: 'triceps' | 'biceps' | 'abs', dayIndex: number, used: Set<string>): string | null {
-  const pool = ACCESSORY_POOL[cat]
+/**
+ * يختار جهاز إضافة واحدًا من فئته (يتناوب حسب فهرس اليوم، ويتجنّب المكرّر داخل اليوم).
+ * الإضافة تُلحَق خارج مسار المؤسّس فلا تمرّ على cableOk تلقائيًا — لذا نطبّق نفس قاعدة الكيبل هنا:
+ * الكيبل الحرّ للمتقدّم فقط، فلا يتسرّب «كيبل بايسبس/ترايسبس» إلى خطة المبتدئ عبر باب الإضافة.
+ * إن لم يتبقَّ مرشّح مسموح غير مستخدم → null (تُلحَق البطاقة من مكان آخر، بلا كيبل حرّ ولا تكرار).
+ */
+function pickAccessory(cat: 'triceps' | 'biceps' | 'abs', dayIndex: number, used: Set<string>, tier: ExpTier): string | null {
+  const pool = ACCESSORY_POOL[cat].filter((id) => {
+    const ex = getExercise(id)
+    return !ex || cableOk(ex, tier)
+  })
   for (let k = 0; k < pool.length; k++) {
     const cand = pool[(dayIndex + k) % pool.length]
     if (!used.has(cand)) return cand
   }
-  return pool[dayIndex % pool.length] ?? null
+  return null
 }
 
 /** ترتيب المرشّحين: الأجهزة أولًا عند تفضيلها (للمبتدئ)، ثم أبجديًا (ثبات الاختيار). */
@@ -756,7 +764,7 @@ function generateWorkoutPlan(p: Profile): { plan: WorkoutPlan; specs: DaySpec[] 
     let accId: string | null = null
     if (machinesOnly) {
       const cat = accessoryCategory(spec.type, variation)
-      const acc = cat ? pickAccessory(cat, variation, new Set(ids)) : null
+      const acc = cat ? pickAccessory(cat, variation, new Set(ids), tier) : null
       if (acc) { ids.push(acc); accId = acc }
     }
     return {

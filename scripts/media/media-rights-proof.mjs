@@ -33,6 +33,9 @@ function magic(bytes) {
   if (bytes.length >= 8 && bytes.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) return 'image/png'
   if (bytes.length >= 6 && /^GIF8[79]a$/.test(bytes.subarray(0, 6).toString('ascii'))) return 'image/gif'
   if (bytes.length >= 12 && bytes.subarray(0, 4).toString('ascii') === 'RIFF' && bytes.subarray(8, 12).toString('ascii') === 'WEBP') return 'image/webp'
+  // SVG متجهي — الرسوم الداخلية (IN-HOUSE) لبطاقات الأجهزة. صورة صالحة يعرضها المتصفّح/WKWebView.
+  const head = bytes.subarray(0, 64).toString('latin1').replace(/^\uFEFF/, '').trimStart()
+  if (head.startsWith('<svg') || head.startsWith('<?xml')) return 'image/svg+xml'
   return null
 }
 
@@ -65,54 +68,33 @@ function exerciseEntries() {
   return entries
 }
 
-const machineEvidence = {
-  'chest-supported-row-machine': '163a58684c3766fc319f9a00ab8ec9102d8b104b',
-  'decline-chest-press-machine': 'c53727983da8f6a895a2465bfda0ed7ed4b49625',
-  'glute-kickback-machine': '600599e7bbf9c94b241a5b40183280dc93937a9a',
-  'glute-machine': '77edda9770ffe59bf62fd7b19ed9b038243af8b1',
-  'hack-squat-machine': '77edda9770ffe59bf62fd7b19ed9b038243af8b1',
-  'hip-abduction-machine': '4f23850f0da19988280d46877b3424f0528ab14f',
-  'hip-adductor-machine': '77edda9770ffe59bf62fd7b19ed9b038243af8b1',
-  'iso-lateral-chest-press': '3bc50fc518fdec062358e7c65912ed1ab287403b',
-  'iso-lateral-high-row': '3bc50fc518fdec062358e7c65912ed1ab287403b',
-  'iso-lateral-incline-press': '966dbb209ddd10093f5ae088e9028f276f06b706',
-  'iso-lateral-pulldown': '3bc50fc518fdec062358e7c65912ed1ab287403b',
-  'lateral-raise-machine': '966dbb209ddd10093f5ae088e9028f276f06b706',
-  'pec-deck-machine': '600599e7bbf9c94b241a5b40183280dc93937a9a',
-  'preacher-curl-machine': '3e1788078676f52ee07ff165d0321a0834cb4d19',
-  'rear-delt-row-machine': '600599e7bbf9c94b241a5b40183280dc93937a9a',
-  'seated-calf-raise-machine': '3e1788078676f52ee07ff165d0321a0834cb4d19',
-  'seated-leg-curl': '3e1788078676f52ee07ff165d0321a0834cb4d19',
-  'shoulder-press-machine': '163a58684c3766fc319f9a00ab8ec9102d8b104b',
-  'single-arm-lat-pulldown': 'd4acbaf18c2ab97b19e0d7abf0f1a5c54bbf92da',
-  'standing-calf-raise-machine': '3e1788078676f52ee07ff165d0321a0834cb4d19',
-  'standing-hip-extension-machine': 'e0a41442a5789c0286a5cd81477ead50665469bd',
-  'standing-leg-curl': '163a58684c3766fc319f9a00ab8ec9102d8b104b',
-  'triceps-extension-machine': 'e0a41442a5789c0286a5cd81477ead50665469bd',
-  'wide-grip-iso-lateral-pulldown': '3bc50fc518fdec062358e7c65912ed1ab287403b',
-}
+// الأصول الأربعة والعشرون السابقة (٢٣ UNKNOWN + ١ FITWILL RESTRICTED) حُذفت من مسار الشحن
+// واستُبدلت برسوم توضيحية متجهية أصلية (SVG) مُولّدة من scripts/media/build-machine-placeholders.mjs.
+// عمل داخلي 100% بلا مصدر طرف ثالث ولا علامة تجارية → IN-HOUSE، سلسلة حقوق كاملة قابلة لإعادة التوليد.
+const INHOUSE_SOURCE_ID = 'qimmah-inhouse-schematic'
+const INHOUSE_GENERATOR = 'scripts/media/build-machine-placeholders.mjs'
+const INHOUSE_EVIDENCE = `https://github.com/km5g98str4-commits/gym-os-template/blob/design/v21-promotion/${INHOUSE_GENERATOR}`
+const INHOUSE_LICENSE = 'In-house original vector illustration — Qimmah owns full rights (no third-party source, no watermark)'
 
 function machineEntries() {
   const source = readFileSync(resolve(ROOT, 'src/data/machineImages.ts'), 'utf8')
   return [...source.matchAll(/^[ ]{2}'([^']+)': '([^']+)',/gm)].map(([, slug, localPath]) => {
-    const commit = machineEvidence[slug]
-    if (!commit) throw new Error(`${slug}: missing reviewed Git-history evidence`)
-    const restricted = slug === 'decline-chest-press-machine'
+    if (!localPath.endsWith('.svg')) {
+      throw new Error(`${slug}: in-house machine asset must be an .svg schematic, got ${localPath}`)
+    }
     return {
       id: `machine:${slug}`,
       localPath,
       upstreamUrl: null,
-      sourceId: restricted ? 'fitwill-watermarked-local-ingest' : 'unattributed-local-ingest',
+      sourceId: INHOUSE_SOURCE_ID,
       sourceRepo: null,
-      evidenceUrl: `https://github.com/km5g98str4-commits/gym-os-template/commit/${commit}`,
-      evidenceReadmeUrl: restricted ? 'https://fitwill.app/terms' : null,
-      license: restricted ? 'No redistribution grant found; Fitwill terms reserve commercial reuse' : 'No source license or chain-of-title record found',
-      verdict: restricted ? 'RESTRICTED' : 'UNKNOWN',
+      evidenceUrl: INHOUSE_EVIDENCE,
+      evidenceReadmeUrl: 'docs/content/MEDIA-RIGHTS.md',
+      license: INHOUSE_LICENSE,
+      verdict: 'IN-HOUSE',
       attributionRequired: false,
-      risk: 'launch-blocking',
-      note: restricted
-        ? 'Commit records explicit FITWILL watermark and approval to use, but no license grant.'
-        : 'Visual approval or an owner/agent commit statement is not a transferable rights record.',
+      risk: 'clean',
+      note: `Original branded schematic generated deterministically by ${INHOUSE_GENERATOR}; no third-party photo, watermark, or restricted material.`,
     }
   })
 }
@@ -193,6 +175,22 @@ async function remoteProof(entries) {
 }
 
 const live = liveInventory()
+
+// بوابة «URL مجهول» + «magic bytes خاطئة» لكل نوع أصل (تُطبَّق حتى أثناء --bootstrap).
+const TRUSTED_UPSTREAM = /^https:\/\/raw\.githubusercontent\.com\/yuhonas\/free-exercise-db\//
+for (const e of live) {
+  if (e.upstreamUrl !== null && !TRUSTED_UPSTREAM.test(e.upstreamUrl)) {
+    throw new Error(`${e.id}: untrusted/unknown upstream URL: ${e.upstreamUrl}`)
+  }
+  const isMachine = e.id.startsWith('machine:')
+  if (isMachine && e.magicMime !== 'image/svg+xml') {
+    throw new Error(`${e.id}: in-house machine asset must be image/svg+xml, got ${e.magicMime}`)
+  }
+  if (!isMachine && e.magicMime === 'image/svg+xml') {
+    throw new Error(`${e.id}: exercise frame unexpectedly SVG (raster expected)`)
+  }
+}
+
 if (BOOTSTRAP) bootstrap(live)
 if (!existsSync(MANIFEST)) throw new Error('provenance manifest missing; reviewed bootstrap required')
 const manifest = JSON.parse(readFileSync(MANIFEST, 'utf8'))
@@ -212,6 +210,12 @@ for (let i = 0; i < live.length; i++) {
 const httpPassed = await httpProof(reviewed)
 const upstreamPassed = REMOTE ? await remoteProof(reviewed) : 0
 const counts = reviewed.reduce((out, item) => ({ ...out, [item.verdict]: (out[item.verdict] || 0) + 1 }), {})
+// بوابة الحقوق النهائية: صفر UNKNOWN وصفر RESTRICTED؛ لا يُسمح إلا بـ CLEARLY-LICENSED أو IN-HOUSE.
+const ALLOWED_VERDICTS = new Set(['CLEARLY-LICENSED', 'IN-HOUSE'])
+const launchBlockers = reviewed.filter((e) => !ALLOWED_VERDICTS.has(e.verdict))
+if (launchBlockers.length) {
+  throw new Error(`launch-blocking verdicts present (${launchBlockers.length}): ${launchBlockers.map((b) => `${b.id}=${b.verdict}`).join(', ')}`)
+}
 console.log(`MEDIA_RIGHTS_PROOF_OK inventory=${live.length} magic=${live.length} http=${httpPassed}`)
 if (REMOTE) console.log(`UPSTREAM_PROOF_OK http_magic_digest=${upstreamPassed}`)
 console.log(`VERDICTS ${Object.entries(counts).map(([key, value]) => `${key}=${value}`).join(' ')}`)
