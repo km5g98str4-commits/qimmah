@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Icon } from '@/components/Icon'
+import { LiveGymDashboard } from '@/components/workout/LiveGymDashboard'
 import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
 import type { AppRoute } from '@/lib/appRoutes'
@@ -65,6 +66,8 @@ interface ActiveState {
   rows: Record<string, SetRow[]>
   /** Rest timer as timestamps (survives refresh + background) — see activeSession.ts. */
   rest?: RestSnapshot | null
+  /** Self-reported, session-local energy. Stored only inside the owner-scoped active session. */
+  energy?: 1 | 2 | 3 | 4 | 5
 }
 
 const parseReps = (reps: string): number => {
@@ -89,6 +92,7 @@ function isUsableSession(value: unknown, exercises: WorkoutV2Exercise[]): value 
   if (!Number.isInteger(s.exIndex) || (s.exIndex as number) < 0 || (s.exIndex as number) >= exercises.length) return false
   if (!Number.isInteger(s.setIndex) || (s.setIndex as number) < 0) return false
   if (!Number.isInteger(s.startedAt)) return false
+  if (s.energy != null && ![1, 2, 3, 4, 5].includes(s.energy)) return false
   if (!s.rows || typeof s.rows !== 'object') return false
   const rows = s.rows as Record<string, unknown>
   // Every exercise in the CURRENT plan must have a non-empty set array (i.e. the
@@ -197,12 +201,13 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   const resting = active?.rest != null
   const restDone = active?.rest ? restIsFinished(active.rest, now) : false
 
-  // Display pulse (¼s) while a rest is running — auto-stops when the rest clears.
+  // One timestamp-driven display clock powers both elapsed workout time and rest.
+  // The underlying rest calculation remains based on endsAt, never tick accumulation.
   useEffect(() => {
-    if (!resting) return
-    const id = window.setInterval(() => setNow(Date.now()), 250)
+    if (screen !== 'active') return
+    const id = window.setInterval(() => setNow(Date.now()), 1000)
     return () => window.clearInterval(id)
-  }, [resting])
+  }, [screen])
   // Recompute the instant the app returns to the foreground — JS timers freeze in
   // the background on iOS, so we never rely on the pulse alone (same fix as v1).
   useEffect(() => {
@@ -228,7 +233,7 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
     for (const ex of model.exercises) {
       rows[ex.id] = Array.from({ length: ex.sets }, () => ({ weight: ex.targetWeightKg ?? 20, reps: parseReps(ex.reps), done: false }))
     }
-    setActive({ startedAt: Date.now(), exIndex: 0, setIndex: 0, rows, rest: null })
+    setActive({ startedAt: Date.now(), exIndex: 0, setIndex: 0, rows, rest: null, energy: 3 })
     setScreen('active')
   }
 
@@ -313,6 +318,7 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   const restLeft = active.rest ? restRemainingSec(active.rest.endsAt, now) : 0
   const addRest = () => setActive((prev) => (prev?.rest ? { ...prev, rest: { ...prev.rest, endsAt: prev.rest.endsAt + REST_ADD * 1000 } } : prev))
   const skipRest = () => setActive((prev) => (prev ? { ...prev, rest: null } : prev))
+  const setEnergy = (energy: 1 | 2 | 3 | 4 | 5) => setActive((prev) => (prev ? { ...prev, energy } : prev))
 
   return (
     <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-dark v2-screen-enter fixed inset-0 z-[60] flex flex-col bg-page text-ink-900" style={{ paddingTop: 'max(0.75rem, var(--safe-top))', paddingBottom: 'var(--safe-bottom)' }}>
@@ -327,6 +333,21 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
       <div className="mx-5 mb-1 h-1.5 overflow-hidden rounded-full" style={{ background: FOCUS.line }}>
         <div className="v2-fill h-full rounded-full" style={{ width: `${totalPlannedSets ? (doneSets / totalPlannedSets) * 100 : 0}%`, background: FOCUS.blue }} />
       </div>
+
+      <LiveGymDashboard
+        lang={lang}
+        startedAt={active.startedAt}
+        now={now}
+        currentExercise={ar ? ex.nameAr : ex.nameEn}
+        currentSet={active.setIndex + 1}
+        currentSetTotal={rows.length}
+        completedSets={doneSets}
+        totalSets={totalPlannedSets}
+        restLeft={restLeft}
+        isResting={resting && !restDone}
+        energy={active.energy ?? 3}
+        onEnergyChange={setEnergy}
+      />
 
       {resting ? (
         <RestPanel lang={lang} restLeft={restLeft} restDone={restDone} nextEx={model.exercises[active.exIndex]} setLabel={t(`المجموعة ${toAr(active.setIndex + 1, lang)}`, `Set ${active.setIndex + 1}`)} onAdd={addRest} onSkip={skipRest} />
