@@ -17,6 +17,15 @@ const TEMP_STATUS_BAR_BG = '#101216'
 export async function initNativeShell(): Promise<void> {
   if (typeof window === 'undefined' || !Capacitor.isNativePlatform()) return
 
+  // قفل القرص (pinch-zoom) داخل WKWebView: أحداث gesture* خاصة بـ WebKit ولا يكفيها
+  // CSS/viewport وحدها لمنع القرص في التطبيق الأصلي. نُلغيها هنا (الأصلي فقط) — متصفّح
+  // الويب لا يصل هذا الفرع فتبقى إمكانية التكبير للوصول محفوظة على الويب.
+  // (النقر المزدوج مقفول أصلًا عبر touch-action: manipulation في CSS.)
+  const preventGesture = (e: Event) => e.preventDefault()
+  document.addEventListener('gesturestart', preventGesture, { passive: false })
+  document.addEventListener('gesturechange', preventGesture, { passive: false })
+  document.addEventListener('gestureend', preventGesture, { passive: false })
+
   // شريط الحالة: نصّ فاتح مناسب لخلفية داكنة مؤقتة، وبلا تراكب فوق الـ WebView.
   try {
     const { StatusBar, Style } = await import('@capacitor/status-bar')

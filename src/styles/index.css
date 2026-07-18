@@ -29,12 +29,50 @@
 
   html {
     scroll-behavior: smooth;
+    /* قفل التكبير بالنقر المزدوج على كل الأسطح (الويب والأصلي) — يُبقي القرص/التمرير. */
+    touch-action: manipulation;
+    /* لا سلسلة تمرير للمتصفّح (سحب مطاطي للصفحة الأم) — إحساس أصلي عند حدود التمرير. */
+    overscroll-behavior: contain;
   }
 
   body {
     @apply bg-page text-ink-900 font-sans antialiased;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    /* إزالة «إشارات الويب»: لا وميض رمادي عند اللمس، ولا قائمة منبثقة عند الضغط المطوّل. */
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior: contain;
+  }
+
+  /* عناصر واجهة التطبيق (أزرار/روابط/تنقّل/أيقونات): لا تحديد نص ولا قائمة لمس مطوّل —
+     تتصرّف كعناصر تحكّم أصلية لا كنص ويب. المحتوى القابل للقراءة يحتفظ بالتحديد أدناه. */
+  button,
+  a,
+  [role='button'],
+  [role='tab'],
+  [role='menuitem'],
+  label,
+  nav,
+  summary {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* استعادة تحديد النص للمحتوى القابل للقراءة والحقول — لا نكسر النسخ/اللصق. */
+  p,
+  input,
+  textarea,
+  [contenteditable='true'] {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+
+  /* حقول الإدخال ≥16px تمنع تكبير iOS التلقائي عند التركيز (طبقة أمان فوق قفل viewport). */
+  input,
+  textarea,
+  select {
+    font-size: 16px;
   }
 
   /* احترام تفضيل تقليل الحركة — يوقف كل الانتقالات/الرسوم للمستخدمين الحسّاسين. */
@@ -147,7 +185,8 @@
   /* حقل إدخال قياسي (Sprint UI 1) — يوحّد المدخلات المتناثرة سابقًا في عدة ملفات.
      44px حدّ أدنى للمس، سطح beige، حدّ line، وتركيز هادئ بلون العلامة. */
   .input {
-    @apply w-full min-h-[44px] rounded-xl border border-line bg-beige px-4 py-3 text-sm text-ink-900 placeholder:text-ink-400 transition-colors focus:outline-none;
+    /* text-base (16px) لا text-sm: يمنع تكبير iOS التلقائي عند التركيز على متصفّح الجوال. */
+    @apply w-full min-h-[44px] rounded-xl border border-line bg-beige px-4 py-3 text-base text-ink-900 placeholder:text-ink-400 transition-colors focus:outline-none;
   }
   .input:focus {
     border-color: color-mix(in srgb, var(--c-primary) 45%, transparent);

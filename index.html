@@ -2,7 +2,9 @@
 <html lang="ar" dir="rtl">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <!-- قفل التكبير للإحساس الأصلي: WKWebView يحترم maximum-scale/user-scalable فيُلغى التكبير
+         بالنقر المزدوج والقرص داخل التطبيق. متصفّح iOS Safari يتجاهلهما (يحفظ إمكانية الوصول على الويب). -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 
     <!-- الأيقونات -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
