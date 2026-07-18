@@ -13,6 +13,7 @@ import { persistOnboardingToProfile } from '@/lib/onboardingSync'
 import { track } from '@/lib/analytics'
 import { POLICY_LINKS, policyCopy } from '@/data/policyCopy'
 import { toAnswersFromV2, type V2Place, type V2Pref } from '@/lib/onboardingV2Adapter'
+import { isMinorAge, MINOR_GOAL_RESTRICTION_NOTE } from '@/lib/calculators'
 import {
   DAYS,
   DURATIONS,
@@ -94,6 +95,9 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
   const [healthDataConsent, setHealthDataConsent] = useState(initialDraft.healthDataConsent)
   const [validation, setValidation] = useState<StepValidation>(null)
 
+  // القاصرون (دون 18) — المحافظة فقط. العمر لا يُجمَع في تدفّق v2؛ نستنتجه من ملف محفوظ
+  // (حساب قاصر عائد لإعادة الإعداد). للضيف الجديد بلا عمر: لا تقييد (adult افتراضًا).
+  const minor = isMinorAge(customization.profile.age)
   const goalEntry = useMemo(() => V2_GOAL_MODEL.find((g) => g.value === goal) ?? null, [goal])
   const answers = { goal, days, duration, place: place as V2Place | null, pref: pref as V2Pref | null, healthDataConsent }
 
@@ -215,7 +219,7 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
       {/* Content — each step is a region named by its heading. */}
       <main className="flex-1 overflow-y-auto px-5 py-6">
         <div className="v2-screen-enter mx-auto w-full max-w-md">
-          {step === 0 && <GoalStep lang={lang} t={t} titleId={stepTitleId} goal={goal} healthDataConsent={healthDataConsent} onConsent={setHealthDataConsent} onPick={(g) => { setGoal(g); setValidation(null) }} />}
+          {step === 0 && <GoalStep lang={lang} t={t} titleId={stepTitleId} goal={goal} isMinor={minor} healthDataConsent={healthDataConsent} onConsent={setHealthDataConsent} onPick={(g) => { if (minor && (g === 'cut' || g === 'bulk')) return; setGoal(g); setValidation(null) }} />}
           {step === 1 && (
             <TrainingStep t={t} titleId={stepTitleId} lang={lang} days={days} duration={duration} onDays={setDays} onDuration={setDuration} goalLabel={goalEntry?.label ?? ''} split={splitFor(days, lang)} />
           )}
@@ -283,7 +287,7 @@ function StepTitle({ id, title, subtitle }: { id: string; title: string; subtitl
   )
 }
 
-function GoalStep({ lang, t, titleId, goal, healthDataConsent, onConsent, onPick }: { lang: Lang; t: T; titleId: string; goal: V2GoalValue | null; healthDataConsent: boolean; onConsent: (checked: boolean) => void; onPick: (g: V2GoalValue) => void }) {
+function GoalStep({ lang, t, titleId, goal, isMinor, healthDataConsent, onConsent, onPick }: { lang: Lang; t: T; titleId: string; goal: V2GoalValue | null; isMinor: boolean; healthDataConsent: boolean; onConsent: (checked: boolean) => void; onPick: (g: V2GoalValue) => void }) {
   const policy = policyCopy[lang]
   return (
     <section aria-labelledby={titleId}>
@@ -291,33 +295,44 @@ function GoalStep({ lang, t, titleId, goal, healthDataConsent, onConsent, onPick
       <Group legend={t.legends.goal} className="mt-6 block space-y-3">
         {V2_GOAL_MODEL.map((g) => {
           const on = goal === g.value
+          // القاصرون: تعديل الوزن (تنشيف/تضخيم) معطّل — المحافظة فقط.
+          const disabled = isMinor && (g.value === 'cut' || g.value === 'bulk')
           return (
             <button
               key={g.value}
               type="button"
               onClick={() => onPick(g.value)}
+              disabled={disabled}
               aria-pressed={on}
+              aria-disabled={disabled}
+              aria-describedby={disabled ? 'v2-goal-minor-note' : undefined}
               className={cn(
                 'v2-pressable relative flex w-full items-center gap-4 overflow-hidden rounded-2xl border p-4 text-start',
-                on ? 'v2-choice-selected' : 'border-line bg-surface hover:border-ink-400/40',
+                disabled ? 'cursor-not-allowed border-line bg-beige' : on ? 'v2-choice-selected' : 'border-line bg-surface hover:border-ink-400/40',
               )}
             >
               {/* Ember accent bar on selection. */}
-              <span className={cn('absolute inset-y-0 start-0 w-1 transition-colors', on ? 'v2-choice-accent' : 'bg-transparent')} />
-              <span className={cn('grid h-12 w-12 shrink-0 place-items-center rounded-xl transition-colors', on ? 'v2-choice-icon-selected' : 'bg-beige text-ink-500')}>
+              <span className={cn('absolute inset-y-0 start-0 w-1 transition-colors', on && !disabled ? 'v2-choice-accent' : 'bg-transparent')} />
+              <span className={cn('grid h-12 w-12 shrink-0 place-items-center rounded-xl transition-colors', on && !disabled ? 'v2-choice-icon-selected' : 'bg-beige text-ink-500')}>
                 <Icon name={GOAL_ICON[g.value]} className="h-6 w-6" strokeWidth={2.25} />
               </span>
               <span className="min-w-0 flex-1">
                 <span className="block text-lg font-black text-ink-900">{g.label}</span>
                 <span className="mt-0.5 block text-[0.8rem] leading-snug text-ink-500">{g.description}</span>
               </span>
-              <span className={cn('grid h-6 w-6 shrink-0 place-items-center rounded-full border-2 transition-colors', on ? 'v2-choice-icon-selected border-[color:var(--v2-blue)]' : 'border-line text-transparent')}>
+              <span className={cn('grid h-6 w-6 shrink-0 place-items-center rounded-full border-2 transition-colors', on && !disabled ? 'v2-choice-icon-selected border-[color:var(--v2-blue)]' : 'border-line text-transparent')}>
                 <Icon name="Check" className="h-3.5 w-3.5" strokeWidth={3} />
               </span>
             </button>
           )
         })}
       </Group>
+      {isMinor && (
+        <p id="v2-goal-minor-note" className="mt-3 flex items-start gap-2 rounded-2xl border border-gold-400/40 bg-gold-200/40 p-3 text-[0.8rem] font-bold leading-snug text-ink-700">
+          <Icon name="Info" className="mt-0.5 h-4 w-4 shrink-0 text-gold-600" />
+          {MINOR_GOAL_RESTRICTION_NOTE}
+        </p>
+      )}
       <div className="mt-5 rounded-2xl border border-line bg-surface p-4">
         <p className="text-sm leading-relaxed text-ink-500">{policy.healthExplanation}</p>
         <label className="mt-3 flex cursor-pointer items-start gap-3 text-start text-sm font-bold leading-relaxed text-ink-900">

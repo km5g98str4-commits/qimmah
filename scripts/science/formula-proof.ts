@@ -146,6 +146,30 @@ for (const goalType of ['cutting', 'bulking', 'maintenance'] as const) {
   check(`minor age 12 ${goalType}: safe BMI label`, t.bmiLabel, MINOR_BMI_LABEL)
 }
 
+// ── MINOR MAINTENANCE-ONLY (Option B) ──────────────────────────────────────
+// Under-18 users are maintenance-only: target calories == maintenance == TDEE for ANY
+// stored goalType (deficit/surplus impossible), and no weight-change forecast is applied.
+// A non-maintenance target weight is deliberately ignored so no cut/bulk leaks through.
+for (const age of [12, 15, 17]) {
+  for (const goalType of ['cutting', 'bulking', 'maintenance'] as const) {
+    const goal = goalType === 'cutting' ? 'cut' : goalType === 'bulking' ? 'bulk' : 'maintain'
+    // targetWeightKg set 8kg below current on purpose — a cut/bulk pipeline would react to it.
+    const t = targetsFor({ gender: 'male', age, heightCm: 165, weightKg: 60, targetWeightKg: 52, goalType, goal, activityLevel: 'moderate', trainingDays: 4 })
+    check(`minor age ${age} ${goalType}: target == maintenance (no deficit/surplus)`, t.targetCalories, t.maintenanceCalories)
+    check(`minor age ${age} ${goalType}: target == TDEE`, t.targetCalories, t.tdee)
+    check(`minor age ${age} ${goalType}: no weekly weight change`, t.weeklyWeightChangeKg, 0)
+    check(`minor age ${age} ${goalType}: no ETA weeks`, t.estimatedWeeksToGoal, 0)
+    check(`minor age ${age} ${goalType}: keeps «تقديري» minor plan note`, t.notes.includes(MINOR_PLAN_NOTE), true)
+  }
+}
+// Adult boundary (18) with cutting: the deficit is RESTORED — full goals return at 18.
+{
+  const t = targetsFor({ gender: 'male', age: ADULT_MIN_AGE, heightCm: 165, weightKg: 60, targetWeightKg: 52, goalType: 'cutting', goal: 'cut', activityLevel: 'moderate', trainingDays: 4 })
+  check('adult age 18 cutting: target < maintenance (deficit applied)', t.targetCalories < t.maintenanceCalories, true)
+  check('adult age 18 cutting: target == cuttingCalories', t.targetCalories, t.cuttingCalories)
+  check('adult age 18 cutting: weight-change forecast present', t.weeklyWeightChangeKg < 0, true)
+}
+
 console.log('\nINSIGHTS VECTORS')
 near('OLS slope y=2x+1', linregSlopePerDay([{ x: 0, y: 1 }, { x: 1, y: 3 }, { x: 2, y: 5 }]), 2)
 const DAY = 86_400_000

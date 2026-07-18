@@ -23,6 +23,8 @@
 الحد الأدنى للعمر لاستخدام قِمّة: **12 سنة**.
 يتطلّب إنشاء الحساب تأكيدًا صريحًا بأن العمر 12 سنة أو أكثر، مع الموافقة على هذه الشروط وسياسة الخصوصية. لا
 ندّعي التحقق من وثيقة هوية أو وجود مسار موافقة وليّ أمر.
+للمستخدمين دون 18 سنة، تقتصر أهداف التغذية على **المحافظة** فقط (لا تنشيف ولا تضخيم)؛ تبقى كل الأرقام
+**تقديرية**، وننصح بمراجعة مختص تغذية أو نمو قبل أي تعديل في الوزن.
 
 ### 4. حسابك
 أنت مسؤول عن سرية بيانات دخولك وعن النشاط على حسابك. زوّدنا ببيانات صحيحة وحدّثها عند الحاجة.
@@ -80,6 +82,8 @@ emergency, contact emergency services.
 Minimum age to use Qimmah: **12 years**.
 Account creation requires an explicit confirmation that the user is 12 or older and accepts these Terms and the
 Privacy Policy. We do not claim identity-document verification or a parental-consent flow.
+For users under 18, nutrition goals are limited to **Maintenance** only (no cut or bulk); all figures remain
+**estimates**, and we recommend consulting a nutrition or growth specialist before any weight-change goal.
 
 ### 4. Your account
 You are responsible for your credentials and account activity. Provide accurate information and keep it updated.
