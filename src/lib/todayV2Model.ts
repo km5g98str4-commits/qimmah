@@ -337,6 +337,8 @@ function buildAfterWorkoutNudges(a: { t: (ar: string, en: string) => string; rec
   const cards: TodayCard[] = []
   if (recoveryAvailable) {
     cards.push({ label: t('تذكيرات المساء · مكمّلاتك قبل النوم', 'Evening reminders · supplements before bed'), hint: null, actionLabel: t('عرض', 'View'), icon: 'Moon', tone: 'recover', destination: 'settings' })
+  } else {
+    cards.push({ label: t('جهّز تعافيك الليلة · ماء ونوم', 'Set up tonight’s recovery · water and sleep'), hint: null, actionLabel: t('راجع', 'Review'), icon: 'Moon', tone: 'recover', destination: 'settings' })
   }
   cards.push({ label: t('عرض ملخّص تمرين اليوم', 'View today’s workout summary'), hint: null, actionLabel: t('عرض', 'View'), icon: 'Trophy', tone: 'progress', destination: 'progress' })
   return cards.slice(0, 3)

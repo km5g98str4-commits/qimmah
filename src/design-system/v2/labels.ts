@@ -43,6 +43,7 @@ export const V2_GOAL_MODEL: readonly V2GoalModelEntry[] = [
 ] as const
 
 export interface V2WelcomeCopy {
+  wordmark: string
   brand: string
   /** Headline delivered as two short confident lines. */
   headline: readonly [string, string]
@@ -229,6 +230,7 @@ export const V2_ONBOARDING: Record<'ar' | 'en', V2OnboardingCopy> = {
 
 export const V2_WELCOME: Record<'ar' | 'en', V2WelcomeCopy> = {
   ar: {
+    wordmark: 'QIMMAH',
     brand: 'قِمّة',
     headline: ['درّب بوضوح.', 'تقدّم بثقة.'],
     support: 'تمرينك وتغذيتك وتقدمك في مكان واحد — بالعربية، وبخطوات واضحة.',
@@ -237,6 +239,7 @@ export const V2_WELCOME: Record<'ar' | 'en', V2WelcomeCopy> = {
     trust: 'بلا إعلانات، وبلا مبالغات.',
   },
   en: {
+    wordmark: 'QIMMAH',
     brand: 'Qimmah',
     headline: ['Train with clarity.', 'Progress with confidence.'],
     support: 'Your training, nutrition, and progress in one place — Arabic-first, in clear steps.',

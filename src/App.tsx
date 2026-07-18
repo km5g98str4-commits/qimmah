@@ -40,7 +40,6 @@ function createLazyViews() {
   }
 }
 import { MobileShell, type MainTab } from '@/components/MobileShell'
-import type { AppBadge } from '@/components/AppNav'
 import { useAuth } from '@/lib/authContext'
 import { isAccountOnboarded, isOnboardingComplete, markCompleted } from '@/lib/onboarding'
 import { reconcileAccountScope } from '@/lib/accountScope'
@@ -93,8 +92,6 @@ export default function App() {
   const auth = useAuth()
   // اللغة الحية من سياق i18n — التبديل يعيد رسم كل الشاشات فورًا (بلا إعادة تحميل).
   const { lang: LANG } = useLanguage()
-  // داخل التطبيق لا يوجد ضيف بعد الآن (كل التبويبات خلف حساب)، فالشارة دائمًا «حساب».
-  const badge: AppBadge = 'account'
   // المالك الحالي لقرار البوابة: معرّف الحساب المسجّل، أو null لوضع الضيف.
   const uid = auth.user?.id ?? null
 
@@ -387,7 +384,6 @@ export default function App() {
         <MobileShell
           lang={LANG}
           tab={(view === 'exercises' ? 'workout' : view === 'stats' ? 'dashboard' : view) as MainTab}
-          badge={badge}
           onNavigate={navigate}
           onOpenSettings={() => setView('settings')}
         >

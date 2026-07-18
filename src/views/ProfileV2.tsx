@@ -64,30 +64,30 @@ export function ProfileV2({ lang, onNavigate }: ProfileV2Props) {
   return (
     <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
       <div className="v2-screen-enter mx-auto w-full max-w-md space-y-5">
-        <h1 className="pt-1 text-2xl font-black tracking-tight">{t('ملفك التدريبي', 'Your training profile')}</h1>
-
-        {/* Earned-identity header — avatar · name · goal badge */}
-        <section className="flex items-center gap-4 rounded-3xl border border-line bg-surface p-5 shadow-card">
-          <span className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-beige text-2xl font-black text-ink-700">{model.user.initials}</span>
-          <div className="min-w-0">
-            <p className="truncate text-lg font-black">{model.user.displayName}</p>
-            {model.trainingIdentity.goalLabel && (
-              <span className="v2-bg-blue-soft v2-text-blue mt-1.5 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-black">
-                {t('الهدف', 'Goal')} · {model.trainingIdentity.goalLabel}
-              </span>
-            )}
+        {/* Earned identity is one dense dark composition, matching the approved mock. */}
+        <section className="-mx-4 -mt-3 rounded-b-[2rem] bg-[color:var(--v2-dark-canvas)] px-5 pb-5 pt-5 text-[color:var(--v2-dark-ink)] shadow-card">
+          <h1 className="text-sm font-bold text-[color:var(--v2-dark-ink-muted)]">{t('ملفك التدريبي', 'Your training profile')}</h1>
+          <div className="mt-4 flex items-center gap-4">
+            <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-primary text-xl font-black text-white shadow-glow">{model.user.initials}</span>
+            <div className="min-w-0">
+              <p className="truncate text-xl font-black text-white">{model.user.displayName}</p>
+              {model.trainingIdentity.goalLabel && (
+                <span className="mt-1.5 inline-flex items-center gap-1.5 rounded-full bg-[color:color-mix(in_srgb,var(--v2-ember)_18%,transparent)] px-2.5 py-1 text-xs font-black text-[color:var(--v2-ember)]">
+                  {t('الهدف', 'Goal')} · {model.trainingIdentity.goalLabel}
+                </span>
+              )}
+            </div>
           </div>
-        </section>
 
-        {/* Three stat blocks — real data only (RTL: تمرين · أيام متتالية · أرقام قياسية) */}
-        <section className="grid grid-cols-3 gap-3">
-          <Stat value={numerals(model.stats.workoutCount)} label={t('تمرين', 'Workouts')} />
-          <Stat value={numerals(model.stats.streakDays)} label={t('أيام متتالية', 'Day streak')} />
-          <Stat value={numerals(model.stats.prCount)} label={t('أرقام قياسية', 'PRs')} />
+          <div className="mt-5 grid grid-cols-3 gap-2">
+            <Stat value={numerals(model.stats.workoutCount)} label={t('تمرين', 'Workouts')} dark />
+            <Stat value={numerals(model.stats.streakDays)} label={t('أيام متتالية', 'Day streak')} dark />
+            <Stat value={numerals(model.stats.prCount)} label={t('أرقام قياسية', 'PRs')} dark />
+          </div>
+          {!model.stats.hasData && (
+            <p className="mt-3 text-center text-[0.7rem] text-[color:var(--v2-dark-ink-muted)]">{t('نحتاج بيانات أكثر — أكمل تمرينك الأول.', 'We need more data — complete your first workout.')}</p>
+          )}
         </section>
-        {!model.stats.hasData && (
-          <p className="-mt-2 px-1 text-center text-[0.7rem] text-ink-500">{t('نحتاج بيانات أكثر — أكمل تمرينك الأول.', 'We need more data — complete your first workout.')}</p>
-        )}
 
         {/* Program card */}
         <ProgramCard model={model} t={t} numerals={numerals} onOpen={() => onNavigate(model.program.onboarded ? 'workout' : 'setup')} />
@@ -390,8 +390,13 @@ function Group({ title, children }: { title: string; children: ReactNode }) {
   )
 }
 
-function Stat({ value, label }: { value: string; label: string }) {
-  return <div className="rounded-2xl border border-line bg-surface py-3 text-center"><p className="text-2xl font-black tabular-nums">{value}</p><p className="mt-0.5 text-[0.65rem] font-bold text-ink-500">{label}</p></div>
+function Stat({ value, label, dark = false }: { value: string; label: string; dark?: boolean }) {
+  return (
+    <div className={cn('rounded-2xl border py-3 text-center', dark ? 'border-[color:var(--v2-dark-border)] bg-[color:var(--v2-dark-paper-active)]' : 'border-line bg-surface')}>
+      <p className={cn('text-2xl font-black tabular-nums', dark && 'text-white')}>{value}</p>
+      <p className={cn('mt-0.5 text-[0.65rem] font-bold text-ink-500', dark && 'text-[color:var(--v2-dark-ink-muted)]')}>{label}</p>
+    </div>
+  )
 }
 function Row({ icon, label, onClick }: { icon: string; label: string; onClick: () => void }) {
   return (

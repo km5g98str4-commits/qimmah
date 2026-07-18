@@ -15,12 +15,7 @@ import {
   type SummaryRow,
   type WeightDetail,
 } from '@/lib/progressV2Model'
-import { buildWeeklyInsights } from '@/lib/insights'
-import { InsightCardsView } from '@/lib/insights/InsightCardsView'
-import { insightCopy } from '@/data/insightCopy'
-// Strength system (this feature) — e1RM series + dated PR log for the detail.
-import { getExercise } from '@/data/exercises'
-import { e1rmSeries, currentBests, prHistory, type StrengthPR } from '@/lib/strength'
+import { getSteps, getStepSource, loadStepGoal, saveStepGoal, setSteps, weeklySteps } from '@/lib/stepCounter'
 
 interface ProgressV2Props {
   lang: Lang
@@ -52,13 +47,20 @@ export function ProgressV2({ lang, onNavigate }: ProgressV2Props) {
   // The model reads the local-first stores; rebuilding on render makes a saved
   // measurement visible immediately without introducing a second UI cache.
   const model = buildProgressV2Model(customization, lang)
-  const insights = buildWeeklyInsights(ar ? 'ar' : 'en')
-  const insightsCopy = insightCopy(ar ? 'ar' : 'en')
   const [screen, setScreen] = useState<ProgressScreen>('home')
   const go = (r: AppRoute) => onNavigate?.(r)
 
   if (screen === 'weight') return <WeightDetailScreen model={model.weight} lang={lang} onBack={() => setScreen('home')} onLog={() => setScreen('log')} stale={model.stale.show ? model.stale.detailText : null} />
   if (screen === 'strength') return <StrengthDetailScreen strength={model.strength} lang={lang} onBack={() => setScreen('home')} onTrain={() => go('workout')} />
+  if (screen === 'steps') {
+    return (
+      <StepsDetailScreen
+        lang={lang}
+        onBack={() => setScreen('home')}
+        onSaved={() => setRevision((value) => value + 1)}
+      />
+    )
+  }
   if (screen === 'log') {
     return (
       <WeightLogScreen
@@ -86,21 +88,17 @@ export function ProgressV2({ lang, onNavigate }: ProgressV2Props) {
         </header>
 
         {/* Brief — last 14 days */}
-        <section className="rounded-3xl border border-line bg-surface p-5 shadow-card">
+        <section className="rounded-3xl border border-[color:var(--v2-dark-border)] bg-[color:var(--v2-dark-paper)] p-5 text-[color:var(--v2-dark-ink)] shadow-card">
           <div className="flex items-center gap-2">
-            <span className="v2-text-blue"><Icon name="Sparkles" className="h-4 w-4" /></span>
-            <p className="v2-text-blue text-xs font-black uppercase tracking-wider">{model.period.label}</p>
+            <span className="text-[color:var(--v2-green)]"><Icon name="Sparkles" className="h-4 w-4" /></span>
+            <p className="text-xs font-black uppercase tracking-wider text-[color:var(--v2-green)]">{model.period.label}</p>
           </div>
           <div className="mt-4 space-y-3">
-            {model.summary.map((row) => <BriefRow key={row.key} row={row} />)}
-          </div>
-          {/* رؤى الأسبوع — بطاقات المحرّك المُحوَّطة (فعل + وجهة، أو «نحتاج المزيد»). */}
-          <div className="mt-4 border-t border-line pt-4">
-            <InsightCardsView cards={insights.cards} lang={ar ? 'ar' : 'en'} onNavigate={go} title={insightsCopy.progressTitle} />
+            {model.summary.map((row) => <BriefRow key={row.key} row={row} dark />)}
           </div>
           {model.stale.show && (
-            <button type="button" onClick={() => setScreen('weight')} className="mt-4 flex w-full items-center justify-between gap-2 border-t border-line pt-3 text-start">
-              <span className="flex min-w-0 items-center gap-2 text-sm font-bold text-ink-500">
+            <button type="button" onClick={() => setScreen('weight')} className="mt-4 flex w-full items-center justify-between gap-2 border-t border-[color:var(--v2-dark-border)] pt-3 text-start">
+              <span className="flex min-w-0 items-center gap-2 text-sm font-bold text-[color:var(--v2-dark-ink-muted)]">
                 <Icon name="Clock" className="h-4 w-4 shrink-0" />
                 <span className="min-w-0">{model.stale.text}</span>
               </span>
@@ -137,6 +135,25 @@ export function ProgressV2({ lang, onNavigate }: ProgressV2Props) {
             onClick={() => setScreen('strength')}
           />
         </section>
+
+        <button
+          type="button"
+          onClick={() => setScreen('steps')}
+          className="v2-pressable flex w-full items-center gap-3 rounded-2xl border border-line bg-surface p-4 text-start hover:border-[color:var(--v2-blue)]"
+        >
+          <span className="v2-bg-blue-soft v2-text-blue grid h-10 w-10 shrink-0 place-items-center rounded-xl">
+            <Icon name="Footprints" className="h-5 w-5" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-sm font-black">{t('خطوات اليوم', 'Today’s steps')}</span>
+            <span className="mt-0.5 block text-xs text-ink-500">
+              {getSteps() > 0
+                ? t(`${getSteps().toLocaleString('en-US')} من ${loadStepGoal().toLocaleString('en-US')}`, `${getSteps().toLocaleString('en-US')} of ${loadStepGoal().toLocaleString('en-US')}`)
+                : t('أدخلها يدويًا أو اربط بيانات الصحة', 'Enter manually or connect health data')}
+            </span>
+          </span>
+          <span className="v2-text-blue text-xs font-black">{t('تعديل', 'Edit')} ›</span>
+        </button>
 
         <p className="px-1 text-center text-[0.7rem] text-ink-400">{model.disclaimer}</p>
       </div>
@@ -237,19 +254,118 @@ function MeasurementField({ id, label, unit, value, required = false, error = fa
   )
 }
 
-function BriefRow({ row }: { row: SummaryRow }) {
+function BriefRow({ row, dark = false }: { row: SummaryRow; dark?: boolean }) {
   const good = row.tone === 'good'
   return (
     <div className="flex items-center gap-3">
       <span className="shrink-0" style={good ? { color: SUCCESS_TEXT } : undefined}>
         <Icon name={row.icon} className={cn('h-4.5 w-4.5', !good && TONE_TEXT[row.tone])} />
       </span>
-      <span className="min-w-0 flex-1 text-sm font-bold">
-        {row.text}{row.value && <> <b className="tabular-nums text-ink-900">{row.value}</b></>}
+      <span className={cn('min-w-0 flex-1 text-sm font-bold', dark && 'text-[color:var(--v2-dark-ink)]')}>
+        {row.text}{row.value && <> <b className={cn('tabular-nums text-ink-900', dark && 'text-white')}>{row.value}</b></>}
       </span>
       <span className="shrink-0 text-xs font-black" style={good ? { color: SUCCESS_TEXT } : undefined}>
         <span className={good ? '' : row.tone === 'needsData' ? 'text-ink-400' : 'text-ink-500'}>{row.tag}</span>
       </span>
+    </div>
+  )
+}
+
+function StepsDetailScreen({ lang, onBack, onSaved }: { lang: Lang; onBack: () => void; onSaved: () => void }) {
+  const ar = lang !== 'en'
+  const t = (a: string, e: string) => (ar ? a : e)
+  const [steps, setStepValue] = useState(String(getSteps()))
+  const [goal, setGoal] = useState(String(loadStepGoal()))
+  const [saved, setSaved] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const source = getStepSource()
+  const week = weeklySteps()
+  const max = Math.max(loadStepGoal(), ...week.map((day) => day.steps), 1)
+
+  const submit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const nextSteps = Number(steps)
+    const nextGoal = Number(goal)
+    if (!Number.isInteger(nextSteps) || nextSteps < 0 || nextSteps > 200_000) {
+      setError(t('أدخل عدد خطوات صحيحًا بين 0 و200,000.', 'Enter a whole step count between 0 and 200,000.'))
+      return
+    }
+    if (!Number.isInteger(nextGoal) || nextGoal < 1_000 || nextGoal > 100_000) {
+      setError(t('اجعل الهدف بين 1,000 و100,000 خطوة.', 'Set a goal between 1,000 and 100,000 steps.'))
+      return
+    }
+    setSteps(nextSteps)
+    saveStepGoal(nextGoal)
+    setError(null)
+    setSaved(true)
+    onSaved()
+  }
+
+  return (
+    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
+      <div className="v2-screen-enter mx-auto w-full max-w-md">
+        <div className="flex items-center justify-between">
+          <button type="button" onClick={onBack} aria-label={t('رجوع', 'Back')} className="grid h-10 w-10 place-items-center rounded-xl border border-line bg-surface">
+            <Icon name="ChevronRight" className="h-5 w-5 rtl:rotate-0 ltr:rotate-180" />
+          </button>
+          <h1 className="text-lg font-black">{t('خطوات اليوم', 'Today’s steps')}</h1>
+        </div>
+
+        <section className="mt-5 rounded-3xl border border-line bg-surface p-5 shadow-card">
+          <div className="flex items-end justify-between gap-3">
+            <div>
+              <p className="text-xs font-bold text-ink-500">{t('الإجمالي الحالي', 'Current total')}</p>
+              <p className="mt-1 text-4xl font-black tabular-nums">{getSteps().toLocaleString('en-US')}</p>
+            </div>
+            <span className="rounded-full bg-beige px-3 py-1 text-xs font-bold text-ink-500">
+              {source === 'healthkit' ? 'HealthKit' : t('يدوي', 'Manual')}
+            </span>
+          </div>
+
+          <div className="mt-5 flex h-24 items-end gap-2" role="img" aria-label={t('خطوات آخر سبعة أيام', 'Steps over the last seven days')}>
+            {week.map((day) => (
+              <span key={day.date} className="flex flex-1 flex-col items-center justify-end gap-1.5">
+                <span
+                  className="w-full min-h-1 rounded-t-md bg-[color:var(--v2-blue)]"
+                  style={{ height: `${Math.max(4, Math.round((day.steps / max) * 72))}px`, opacity: day.steps > 0 ? 1 : 0.16 }}
+                />
+                <span className="text-[0.58rem] font-bold text-ink-400">{day.date.slice(8)}</span>
+              </span>
+            ))}
+          </div>
+        </section>
+
+        <form onSubmit={submit} className="mt-4 rounded-3xl border border-line bg-surface p-5" noValidate>
+          <label htmlFor="steps-today" className="block text-sm font-bold">{t('خطوات اليوم', 'Today’s steps')}</label>
+          <input
+            id="steps-today"
+            type="text"
+            inputMode="numeric"
+            autoComplete="off"
+            value={steps}
+            onChange={(event) => setStepValue(event.target.value.replace(/\D/g, '').slice(0, 6))}
+            className="input mt-2 text-start text-xl font-black tabular-nums"
+          />
+
+          <label htmlFor="steps-goal" className="mt-4 block text-sm font-bold">{t('الهدف اليومي', 'Daily goal')}</label>
+          <input
+            id="steps-goal"
+            type="text"
+            inputMode="numeric"
+            autoComplete="off"
+            value={goal}
+            onChange={(event) => setGoal(event.target.value.replace(/\D/g, '').slice(0, 6))}
+            className="input mt-2 text-start text-xl font-black tabular-nums"
+          />
+
+          <p className="mt-3 text-xs leading-relaxed text-ink-500">
+            {t('الإدخال اليدوي يستبدل إجمالي اليوم. يمكن لبيانات الصحة تحديثه لاحقًا عند المزامنة.', 'Manual entry replaces today’s total. Health data can refresh it later when synced.')}
+          </p>
+          {error && <p role="alert" className="v2-error-panel mt-3 rounded-xl border px-3 py-2 text-sm font-bold">{error}</p>}
+          {saved && !error && <p role="status" className="v2-success-panel mt-3 rounded-xl border px-3 py-2 text-sm font-bold">{t('حُفظت خطوات اليوم.', 'Today’s steps were saved.')}</p>}
+          <button type="submit" className="btn-primary mt-4 w-full py-4 text-[1.1875rem]">{t('حفظ الخطوات', 'Save steps')}</button>
+        </form>
+      </div>
     </div>
   )
 }
@@ -369,12 +485,9 @@ function StrengthDetailScreen({ strength, lang, onBack, onTrain }: { strength: i
         </div>
 
         {strength.hasData ? (
-          <>
-            <div className="mt-4 space-y-3">
-              {strength.lifts.map((lift) => <LiftRow key={lift.exerciseId} lift={lift} lang={lang} />)}
-            </div>
-            <PRLog exerciseIds={strength.lifts.map((l) => l.exerciseId)} lang={lang} />
-          </>
+          <div className="mt-4 space-y-3">
+            {strength.lifts.map((lift) => <LiftRow key={lift.exerciseId} lift={lift} lang={lang} />)}
+          </div>
         ) : (
           <>
             <NeedsData text={t('أكمل تمرينين على الأقل لنعرض تطوّر قوّتك لكل تمرين.', 'Complete at least two workouts to show per-lift progress.')} />
@@ -396,8 +509,6 @@ function LiftRow({ lift, lang }: { lift: LiftLadder; lang: Lang }) {
     : lift.status === 'up'
       ? `↑ ${lift.deltaKg ?? ''}`
       : t('ثابت', 'Steady')
-  const bests = currentBests(lift.exerciseId)
-  const series = e1rmSeries(lift.exerciseId).map((p) => p.e1rm)
   return (
     <div className={cn('rounded-2xl border border-line bg-surface p-4', lift.status === 'pr' && 'v2-earned-moment')}>
       <div className="flex items-center justify-between">
@@ -413,62 +524,7 @@ function LiftRow({ lift, lang }: { lift: LiftLadder; lang: Lang }) {
           <span key={i} className="h-8 flex-1 rounded-md border" style={{ background: i === 0 ? statusColor : 'transparent', borderColor: i === 0 ? statusColor : 'rgb(var(--c-line))' }} />
         ))}
       </div>
-      {/* e1RM sparkline + estimated 1RM (hedged «تقديري»). */}
-      {series.length >= 2 && (
-        <div className="mt-3 flex items-center gap-3">
-          <E1rmSparkline values={series} />
-          {bests.e1RM != null && (
-            <span className="shrink-0 text-[0.7rem] font-bold tabular-nums text-ink-400">
-              e1RM ~{bests.e1RM} {t('كجم · تقديري', 'kg · est.')}
-            </span>
-          )}
-        </div>
-      )}
     </div>
-  )
-}
-
-/** Mini e1RM trend sparkline (static SVG — reduced-motion-safe). */
-function E1rmSparkline({ values }: { values: number[] }) {
-  const W = 120, H = 28, P = 3
-  const min = Math.min(...values), max = Math.max(...values)
-  const span = max - min || 1
-  const n = values.length
-  const x = (i: number) => (n <= 1 ? W / 2 : P + (i * (W - 2 * P)) / (n - 1))
-  const y = (v: number) => H - P - ((v - min) / span) * (H - 2 * P)
-  const line = values.map((v, i) => `${i === 0 ? 'M' : 'L'} ${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join(' ')
-  return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="h-7 flex-1" preserveAspectRatio="none" role="img" aria-label="e1RM trend">
-      <path d={line} fill="none" stroke={SUCCESS_TEXT} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx={x(n - 1)} cy={y(values[n - 1])} r={2.5} fill={SUCCESS_TEXT} />
-    </svg>
-  )
-}
-
-/** Dated PR log — merged across lifts, newest first, honest per §05. */
-function PRLog({ exerciseIds, lang }: { exerciseIds: string[]; lang: Lang }) {
-  const ar = lang !== 'en'
-  const t = (a: string, e: string) => (ar ? a : e)
-  const log: StrengthPR[] = exerciseIds
-    .flatMap((id) => prHistory(id))
-    .sort((a, b) => Date.parse(`${b.date}T00:00:00`) - Date.parse(`${a.date}T00:00:00`))
-    .slice(0, 8)
-  if (log.length === 0) return null
-  return (
-    <section className="mt-5">
-      <p className="mb-2 text-sm font-black">{t('دفتر الأرقام القياسية', 'PR log')}</p>
-      <div className="space-y-1.5">
-        {log.map((pr, i) => {
-          const e = getExercise(pr.exerciseId)
-          return (
-            <div key={i} className="flex items-center justify-between rounded-xl border border-line bg-surface px-3 py-2 text-xs">
-              <span className="min-w-0 font-bold"><bdi>{ar ? e?.nameAr ?? pr.exerciseId : e?.nameEn ?? pr.exerciseId}</bdi> · <span className="text-ink-500">{pr.kind}</span></span>
-              <span className="shrink-0 font-black tabular-nums" style={{ color: SUCCESS_TEXT }}>{pr.valueKg} {t('كجم', 'kg')} <span className="font-normal text-ink-400">· {pr.date}</span></span>
-            </div>
-          )
-        })}
-      </div>
-    </section>
   )
 }
 

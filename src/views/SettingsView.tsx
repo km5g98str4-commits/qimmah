@@ -1,6 +1,5 @@
 import { useState, type ReactNode } from 'react'
-import { AppNav, type AppView } from '@/components/AppNav'
-import { Footer } from '@/components/Footer'
+import type { AppView } from '@/components/AppNav'
 import { Icon } from '@/components/Icon'
 import { DeviceSettings } from '@/components/DeviceSettings'
 import { DataManagementPanel } from '@/components/DataManagementPanel'
@@ -45,8 +44,6 @@ export function SettingsView({
   const t = getStrings(lang)
   const auth = useAuth()
   const { customization, applyCustomization } = useCustomization()
-
-  const badge: 'guest' | 'account' = auth.user ? 'account' : 'guest'
 
   // — البيانات: تصدير/استيراد يمرّان حصريًّا عبر <DataManagementPanel> (المسار المحصّن) —
   // المستورد القديم (FileReader + JSON.parse بلا تحقّق) أُزيل: كان يقبل إصدارًا غير مدعوم
@@ -138,11 +135,20 @@ export function SettingsView({
       : t.auth.guestNote
 
   return (
-    <div className="min-h-screen bg-page">
-      <AppNav current="settings" lang={lang} badge={badge} onNavigate={onNavigate} />
-
-      <main className="container-page space-y-6 py-8">
-        <h1 className="text-2xl font-black text-ink-900">{t.settings.title}</h1>
+    <div className="v2-surface-light min-h-screen bg-page text-ink-900">
+      <main className="app-container space-y-4 px-4 pb-10 pt-3">
+        <header className="flex items-center justify-between gap-3 pb-1">
+          <button
+            type="button"
+            onClick={() => onNavigate('dashboard')}
+            aria-label={lang === 'ar' ? 'العودة إلى اليوم' : 'Back to Today'}
+            className="grid h-11 w-11 place-items-center rounded-xl border border-line bg-surface"
+          >
+            <Icon name={lang === 'ar' ? 'ChevronRight' : 'ChevronLeft'} className="h-5 w-5" />
+          </button>
+          <h1 className="text-xl font-black text-ink-900">{t.settings.title}</h1>
+          <LanguageToggle variant="compact" />
+        </header>
 
         {/* 1) الحساب */}
         <SettingsGroup icon="User" title={t.settings.groupAccount}>
@@ -372,8 +378,6 @@ export function SettingsView({
           </div>
         </SettingsGroup>
       </main>
-
-      <Footer />
     </div>
   )
 }
@@ -391,8 +395,8 @@ function SettingsGroup({
   children: ReactNode
 }) {
   return (
-    <section className="card p-6" data-testid={testId}>
-      <div className="mb-4 flex items-center gap-2.5">
+    <section className="rounded-2xl border border-line bg-surface p-4 shadow-card" data-testid={testId}>
+      <div className="mb-3 flex items-center gap-2.5">
         <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary-soft text-primary-c">
           <Icon name={icon} className="h-4.5 w-4.5" />
         </span>

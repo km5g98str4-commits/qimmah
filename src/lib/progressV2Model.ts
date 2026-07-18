@@ -25,7 +25,7 @@ const WAIST_STALE_DAYS = 7
 export type NavDest = 'progress' | 'nutrition' | 'workout' | 'setup'
 export type RowTone = 'good' | 'neutral' | 'needsData'
 export type LiftStatus = 'pr' | 'up' | 'stable'
-export type ProgressScreen = 'home' | 'weight' | 'strength' | 'log'
+export type ProgressScreen = 'home' | 'weight' | 'strength' | 'steps' | 'log'
 
 /** One row of the «ملخّص آخر ١٤ يوم» Brief. */
 export interface SummaryRow {

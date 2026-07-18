@@ -207,40 +207,39 @@ export function CustomizationCenter({ onBack, initialStep = 0, mode = 'onboardin
   const Current = steps[step].Component
 
   return (
-    <div className="flex min-h-screen flex-col bg-page">
+    <div className="v2-surface-light flex min-h-screen flex-col bg-page text-ink-900">
       {/* شريط علوي */}
-      <header className="sticky top-0 z-40 glass border-b border-line">
-        <div className="container-page flex h-16 items-center justify-between gap-3">
+      <header className="sticky top-0 z-40 border-b border-line bg-page/95 backdrop-blur-xl">
+        <div className="app-container flex h-16 items-center justify-between gap-2 px-4">
           <div className="flex items-center gap-2.5">
-            <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-white">
-              <Icon name="Palette" className="h-5 w-5" strokeWidth={2.5} />
+            <span className="v2-bg-blue-soft v2-text-blue grid h-9 w-9 place-items-center rounded-xl">
+              <Icon name="SlidersHorizontal" className="h-5 w-5" strokeWidth={2.5} />
             </span>
-            <span className="text-base font-extrabold text-ink-900 sm:text-lg">{mode === 'advanced' ? d.editPlanTitle : d.setupPlanTitle}</span>
+            <span className="max-w-32 truncate text-sm font-extrabold text-ink-900 sm:max-w-none sm:text-base">{mode === 'advanced' ? d.editPlanTitle : d.setupPlanTitle}</span>
           </div>
           <div className="flex items-center gap-2">
-            <button type="button" onClick={saveDraft} className="btn-ghost px-3 py-2 text-xs sm:text-sm">
+            <button type="button" onClick={saveDraft} className="btn-ghost px-3 py-2 text-xs">
               <Icon name={saved ? 'CheckCircle2' : 'Check'} className="h-4 w-4" />
-              {saved ? d.saved : d.saveDraft}
+              <span className="hidden sm:inline">{saved ? d.saved : d.saveDraft}</span>
             </button>
-            <button type="button" onClick={() => onBack()} className="btn-ghost px-3 py-2 text-xs sm:text-sm">
-              <Icon name="Globe" className="h-4 w-4" />
+            <button type="button" onClick={() => onBack()} aria-label={d.previewOnSite} className="btn-ghost px-3 py-2 text-xs">
+              <Icon name="X" className="h-4 w-4" />
               <span className="hidden sm:inline">{d.previewOnSite}</span>
-              <span className="sm:hidden">{d.preview}</span>
             </button>
           </div>
         </div>
 
         {/* مؤشر التقدّم */}
-        <div className="container-page pb-3">
+        <div className="app-container px-4 pb-3">
           <div className="flex items-center justify-between text-xs">
             <span className="font-bold text-ink-700">
               {d.stepPrefix} {step + 1} {d.stepOf} {steps.length}: {d[steps[step].titleKey]}
             </span>
-            <span className="font-bold text-primary-c">{progress}%</span>
+            <span className="v2-text-blue font-bold">{progress}%</span>
           </div>
           <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-line">
             <div
-              className="h-full rounded-full bg-primary transition-all duration-300"
+              className="v2-bg-blue h-full rounded-full transition-all duration-300"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -260,7 +259,7 @@ export function CustomizationCenter({ onBack, initialStep = 0, mode = 'onboardin
                     'whitespace-nowrap rounded-full border px-3 py-1 text-[11px] font-bold transition-colors',
                     !reachable && 'cursor-not-allowed opacity-40',
                     i === step
-                      ? 'border-primary-soft bg-primary-soft text-primary-c'
+                      ? 'border-[color:var(--v2-blue)] v2-bg-blue-soft v2-text-blue'
                       : i < step
                         ? 'border-line bg-surface text-ink-500'
                         : 'border-line bg-surface text-ink-400',
@@ -278,7 +277,7 @@ export function CustomizationCenter({ onBack, initialStep = 0, mode = 'onboardin
               type="button"
               onClick={toggleAdvanced}
               aria-expanded={showAdvanced}
-              className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-bold text-ink-500 transition-colors hover:text-primary-c"
+              className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-bold text-ink-500 transition-colors hover:text-[color:var(--v2-blue)]"
             >
               <Icon name={showAdvanced ? 'ChevronDown' : 'SlidersHorizontal'} className="h-3.5 w-3.5" />
               {showAdvanced ? d.hideAdvanced : d.advancedOptions}
@@ -288,16 +287,16 @@ export function CustomizationCenter({ onBack, initialStep = 0, mode = 'onboardin
       </header>
 
       {/* المحتوى */}
-      <main className="container-page flex-1 py-8">
-        <div className="grid gap-8 lg:grid-cols-3">
-          <div className="lg:col-span-2">
-            <div className="card p-6 sm:p-8">
+      <main className="app-container flex-1 px-4 py-5">
+        <div>
+          <div>
+            <div className="rounded-3xl border border-line bg-surface p-5 shadow-card sm:p-6">
               <Current ctx={ctx} />
             </div>
           </div>
 
-          <aside className="lg:col-span-1">
-            <div className="sticky top-40 space-y-3">
+          <aside className="mt-5 hidden lg:block">
+            <div className="space-y-3">
               <p className="text-xs font-bold uppercase tracking-wide text-ink-400">{d.livePreview}</p>
               <PreviewSummary data={data} lang={lang} />
             </div>
@@ -307,7 +306,7 @@ export function CustomizationCenter({ onBack, initialStep = 0, mode = 'onboardin
 
       {/* شريط التنقّل السفلي */}
       <div className="sticky bottom-0 z-30 border-t border-line bg-page/90 backdrop-blur">
-        <div className="container-page flex items-center justify-between gap-3 py-3">
+        <div className="app-container flex items-center justify-between gap-3 px-4 py-3">
           <button
             type="button"
             onClick={prev}

@@ -6,10 +6,8 @@ import type { Lang } from '@/lib/appPreferences'
 import type { AppRoute } from '@/lib/appRoutes'
 import { useCustomization } from '@/lib/customizationContext'
 import { buildTodayV2Model, type TodayCard, type TodayPillar } from '@/lib/todayV2Model'
-import { buildWeeklyInsights } from '@/lib/insights'
-import { InsightCardsView } from '@/lib/insights/InsightCardsView'
-import { insightCopy } from '@/data/insightCopy'
 import { MinorGoalNotice } from '@/components/MinorGoalNotice'
+import { LanguageToggle } from '@/i18n'
 
 interface TodayV2Props {
   lang: Lang
@@ -36,31 +34,42 @@ export function TodayV2({ lang, onNavigate }: TodayV2Props) {
   const { customization } = useCustomization()
   const ar = lang !== 'en'
   const model = useMemo(() => buildTodayV2Model(customization, lang), [customization, lang])
-  // The store-backed insight model is rebuilt whenever Today renders, including
-  // after navigation back from a completed workout, meal, or measurement.
-  const insights = buildWeeklyInsights(ar ? 'ar' : 'en')
-  const insightsCopy = insightCopy(ar ? 'ar' : 'en')
   const go = (dest: AppRoute | null) => dest && onNavigate(dest)
 
   return (
     <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
       <div className="v2-screen-enter mx-auto w-full max-w-md space-y-5">
-        {/* Header — من أنا وأين أنا (avatar + greeting rewritten by state/time). */}
+        {/* Context header — no duplicate global brand chrome. */}
         <header className="flex items-center justify-between gap-3 pt-1">
           <div className="min-w-0">
             <p className="text-xs font-medium text-ink-500">{model.dateLabel}</p>
             <h1 className="mt-0.5 truncate text-2xl font-black tracking-tight">{model.greeting}</h1>
           </div>
-          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-beige text-lg font-black text-ink-700" aria-hidden="true">
-            {model.avatarInitial ?? <Icon name="User" className="h-5 w-5" />}
-          </span>
+          <div className="flex shrink-0 items-center gap-2">
+            <LanguageToggle variant="compact" />
+            <button
+              type="button"
+              onClick={() => onNavigate('profile')}
+              aria-label={ar ? 'افتح ملفك التدريبي' : 'Open your training profile'}
+              className="grid h-11 w-11 place-items-center rounded-full bg-beige text-lg font-black text-ink-700 transition-colors hover:bg-line"
+            >
+              {model.avatarInitial ?? <Icon name="User" className="h-5 w-5" />}
+            </button>
+          </div>
         </header>
 
         {/* إشعار هجرة القاصرين — لمرّة واحدة، يظهر فقط بعد تحويل الهدف إلى المحافظة. */}
         <MinorGoalNotice lang={lang} />
 
         {/* Hero — الخطوة الواحدة (owns the top third). */}
-        <section className="relative overflow-hidden rounded-3xl border border-line bg-surface p-5 shadow-card">
+        <section
+          className={cn(
+            'relative overflow-hidden rounded-3xl border p-5 shadow-card',
+            model.hero.ctaTone === 'green'
+              ? 'border-[color:color-mix(in_srgb,var(--v2-green)_34%,transparent)] bg-[color:color-mix(in_srgb,var(--v2-green)_22%,var(--v2-dark-canvas))] text-white'
+              : 'border-[color:var(--v2-dark-border)] bg-[color:var(--v2-dark-paper)] text-white',
+          )}
+        >
           <div className={cn('pointer-events-none absolute -top-8 end-[-10%] h-32 w-40 rounded-full opacity-70', model.hero.ctaTone === 'green' ? 'v2-glow-green' : 'v2-glow-ember')} aria-hidden="true" />
           <div className="relative">
             <p className={cn('flex items-center gap-1.5 text-xs font-black uppercase tracking-wider', model.hero.eyebrowDone ? 'v2-text-green' : 'text-primary')}>
@@ -71,8 +80,8 @@ export function TodayV2({ lang, onNavigate }: TodayV2Props) {
               )}
               {model.hero.eyebrow}
             </p>
-            <h2 className="mt-3 text-2xl font-black leading-tight">{model.hero.title}</h2>
-            <p className="mt-2 text-sm leading-relaxed text-ink-500">{model.hero.subtitle}</p>
+            <h2 className="mt-3 text-2xl font-black leading-tight text-white">{model.hero.title}</h2>
+            <p className="mt-2 text-sm leading-relaxed text-[color:var(--v2-dark-ink-muted)]">{model.hero.subtitle}</p>
             <button
               type="button"
               onClick={() => go(model.hero.destination)}
@@ -98,9 +107,6 @@ export function TodayV2({ lang, onNavigate }: TodayV2Props) {
             ))}
           </ul>
         </section>
-
-        {/* رؤى الأسبوع — بطاقة واحدة خفيفة من محرّك الرؤى (رؤية مُحوَّطة أو «نحتاج المزيد»). */}
-        <InsightCardsView cards={insights.cards} lang={ar ? 'ar' : 'en'} onNavigate={onNavigate} title={insightsCopy.todayTitle} max={1} />
 
         {/* Cards — setup guides (new user) or actionable nudges; each verb + destination. */}
         {model.cards.length > 0 && (
