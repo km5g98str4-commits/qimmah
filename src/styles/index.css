@@ -31,8 +31,8 @@
     scroll-behavior: smooth;
     /* قفل التكبير بالنقر المزدوج على كل الأسطح (الويب والأصلي) — يُبقي القرص/التمرير. */
     touch-action: manipulation;
-    /* لا سلسلة تمرير للمتصفّح (سحب مطاطي للصفحة الأم) — إحساس أصلي عند حدود التمرير. */
-    overscroll-behavior: contain;
+    /* لا سلسلة تمرير ولا سحب مطاطي للصفحة (pull-to-refresh/bounce) — إحساس أصلي كامل. */
+    overscroll-behavior: none;
   }
 
   body {
@@ -41,7 +41,7 @@
     text-rendering: optimizeLegibility;
     /* إزالة «إشارات الويب»: لا وميض رمادي عند اللمس، ولا قائمة منبثقة عند الضغط المطوّل. */
     -webkit-tap-highlight-color: transparent;
-    overscroll-behavior: contain;
+    overscroll-behavior: none;
   }
 
   /* عناصر واجهة التطبيق (أزرار/روابط/تنقّل/أيقونات): لا تحديد نص ولا قائمة لمس مطوّل —
