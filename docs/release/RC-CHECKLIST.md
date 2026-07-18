@@ -54,14 +54,17 @@ three-profile smoke (`fresh`/`reviewer`/`veteran`) **zero console errors**. ✅
 
 ## 2.5 Consolidated gate — `design/v21-promotion` @ `7b35435` (grand consolidation)
 
-Fresh gate re-run after each of the 6 merges: `typecheck` (0) → `lint --max-warnings 0` (0) →
-`build` (flagless) → `test:gate` (18 suites) → `test:observability` → `test:native-bridge` →
-`test:chaos` → `npx cap sync ios`. All ✅.
+Fresh gate re-run after each merge — now including the **final `fix/minors-maintenance-only`
+merge (Option B, `--no-ff` into `design/v21-promotion`)**: `npm ci` → `typecheck` (0) →
+`lint --max-warnings 0` (0) → `build` (flagless) → `test:gate` (now 19 suites incl. `test:minors` 82,
+`test:formula` 159, `test:media-rights` 274) → `test:e2e:settings-security` (34) → `test:chaos` (57) →
+`npx cap sync ios`. All ✅. Live browser sweep ×2 (seeded MINOR + seeded ADULT), **zero console errors**.
 
 | Additional proof merged in | Vector | Status |
 |---|---|---|
 | `test:e2e:settings-security` (secure-import) | 34 hostile #/settings imports rejected, zero mutation | ✅ 34/34 |
-| formula proof (scientific-guardrails + formula-verification) | water ≤4.0 L at extremes; ages 12/15/17 safe BMI phrasing | ✅ 111/111 |
+| formula proof (scientific-guardrails + formula-verification + minors maintenance-only) | water ≤4.0 L at extremes; ages 12/15/17 safe BMI phrasing; under-18 target==maintenance==TDEE for any goal + age-18 deficit restored | ✅ 159/159 |
+| **minors maintenance-only (`fix/minors-maintenance-only`, Option B)** | under-18 → maintenance only; owner-scoped idempotent goal migration + one-time notice; goal cards `aria-disabled` w/ AA note; age-18 re-enables | ✅ **82/82** (`test:minors`) |
 | media-rights proof | FITWILL removed; 274 assets, 24 IN-HOUSE, UNKNOWN=0/RESTRICTED=0 | ✅ 274/274 |
 | chaos harness | 12 invariants, seed=1337, 0 data-loss/account-mix/false-success | ✅ 57/57 |
 | skip-link + safe-area (ux/core) | `#main-content` bypass + `--safe-*` paddings | ✅ source + native |
@@ -103,7 +106,8 @@ green. Every CODE finding from the three audit reports is FIXED (see
 |---|---|---|
 | QEA-001 legacy importer → hardened `DataManagementPanel` | `test:e2e:settings-security` | **34/34** hostile rejected |
 | Water target clamp [2.5, 4.0] L (EFSA/IOM) | `scripts/science/run-formula-proof.mjs` | **111/111** (250kg→4.0, was 9.0) |
-| Minor (<18) BMI label + specialist-referral note | same formula proof (age 12/15/17/18) | included in 111 |
+| Minor (<18) BMI label + specialist-referral note | same formula proof (age 12/15/17/18) | included in formula 159 |
+| Minor (<18) **maintenance-only nutrition goals** (Option B) | `test:minors` + formula proof (target==maintenance==TDEE, age-18 restored) | **DONE** — ✅ 82/82 + 159/159 |
 | 24 unsafe assets → in-house SVG schematics (FITWILL gone) | `media-rights-proof.mjs` + `run-p3-media-proof.mjs` | **274/274**, 24 IN-HOUSE, 0 UNKNOWN/RESTRICTED, p3 ✅ |
 | QEA-005 skip-link + safe-area | `MobileShell` source + native launch | ✅ |
 | Chaos / data-loss resilience | `test:chaos` | **57/57** |
