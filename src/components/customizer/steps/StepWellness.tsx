@@ -18,7 +18,8 @@ import {
   supplementName,
 } from '@/lib/wellnessPlan'
 
-const inputCls = 'w-full rounded-lg border border-line bg-beige px-2.5 py-1.5 text-sm text-ink-900 focus:border-brand-500/50 focus:outline-none focus:ring-2 focus:ring-brand-500/30'
+// text-base (16px) لا text-sm: طبقة utilities تتغلّب على حارس @layer base، فبدونها يُكبّر iOS عند التركيز داخل WKWebView.
+const inputCls = 'w-full rounded-lg border border-line bg-beige px-2.5 py-1.5 text-base text-ink-900 focus:border-brand-500/50 focus:outline-none focus:ring-2 focus:ring-brand-500/30'
 
 /** خطوة المكملات والأدوية — مكتبتان + محرّر + إضافة مخصّصة + تنويه طبي. */
 export function StepWellness({ ctx }: { ctx: WizardCtx }) {
