@@ -10,7 +10,11 @@ import { useCustomization } from '@/lib/customizationContext'
 // the v2 rest timer on `endsAt`/`durationSec` (not a decrementing counter) keeps
 // it correct after the app returns from the background, exactly like WorkoutMode.
 import { restIsFinished, restRemainingSec, type RestSnapshot } from '@/lib/activeSession'
-import { buildWorkoutV2Model, CATEGORY_LABEL, type ExCategory, type WorkoutV2Exercise } from '@/lib/workoutV2Model'
+import { buildWorkoutV2Model, substituteWorkoutExercise, CATEGORY_LABEL, type ExCategory, type WorkoutV2Exercise } from '@/lib/workoutV2Model'
+// Screen 31 — equipment-aware substitution engine (pure). Screen 27 — one-handed
+// reach preference. Both feed the active session; neither writes the plan/history.
+import { findSubstitutes, type SubReason, type SubstituteOption } from '@/lib/workoutSubstitution'
+import { getHandedness, setHandedness, otherHand, type Handedness } from '@/lib/handedness'
 // Fix-forward A: finished v2 workouts persist through the canonical path so
 // Progress/Today/Profile react (and sync auto-enqueues) — not just a local summary.
 import { persistFinishedSession } from '@/lib/finishWorkout'
@@ -31,6 +35,7 @@ import { saveWorkoutSummary, migrateLegacySummary } from '@/lib/workoutSummary'
 import { pickRestTip } from '@/lib/coaching'
 import type { RestTip } from '@/lib/coaching/types'
 import type { Muscle } from '@/types/workout'
+import type { Profile } from '@/types/profile'
 import { getExercise } from '@/data/exercises'
 import { registerWorkoutPRs } from '@/features/achievements/engine'
 import { playHaptic } from '@/lib/nativeFeedback'
@@ -95,6 +100,16 @@ interface ActiveState {
   rows: Record<string, SetRow[]>
   /** Rest timer as timestamps (survives refresh + background) — see activeSession.ts. */
   rest?: RestSnapshot | null
+  /** Screen 31 — chosen substitutes, keyed by plan-slot id → catalog exercise id.
+   *  Lives inside the active session so it persists offline and survives refresh,
+   *  and is fully reversed by the finish-undo snapshot (it is never a plan write). */
+  subs?: Record<string, string>
+}
+
+/** Apply the slot→substitute map over the plan exercises (identity swap only). */
+function applySubs(list: WorkoutV2Exercise[], subs: Record<string, string> | undefined, lang: Lang): WorkoutV2Exercise[] {
+  if (!subs || Object.keys(subs).length === 0) return list
+  return list.map((e) => (subs[e.id] ? substituteWorkoutExercise(e, subs[e.id], lang) : e))
 }
 
 const parseReps = (reps: string): number => {
@@ -136,6 +151,13 @@ function isUsableSession(value: unknown, exercises: WorkoutV2Exercise[]): value 
   if (s.rest != null) {
     const r = s.rest as Partial<RestSnapshot>
     if (typeof r.endsAt !== 'number' || typeof r.durationSec !== 'number') return false
+  }
+  // Substitutions, when present, must be a plain string→string map (hostile input).
+  if (s.subs != null) {
+    if (typeof s.subs !== 'object') return false
+    for (const [k, v] of Object.entries(s.subs as Record<string, unknown>)) {
+      if (typeof k !== 'string' || typeof v !== 'string') return false
+    }
   }
   // Current set index must be inside the current exercise's rows.
   const curRows = rows[exercises[s.exIndex as number].id] as SetRow[]
@@ -183,6 +205,21 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   const [pendingFinish, setPendingFinish] = useState<PendingFinish | null>(null)
   const [completed, setCompleted] = useState<PendingFinish | null>(null)
   const [undoState, setUndoState] = useState<UndoState | null>(null)
+
+  // ── Screen 31 (substitution) + screen 27 (one-handed) session state ──
+  const profile = customization.profile
+  // Pre-session substitutions (chosen from the Detail screen before starting) —
+  // folded into the active session at startSession, then the active map is source.
+  const [preSubs, setPreSubs] = useState<Record<string, string>>({})
+  // The open substitution sheet (which slot + the identity it's swapping from).
+  const [subSheet, setSubSheet] = useState<{ planExId: string; currentExerciseId: string } | null>(null)
+  // The last applied swap, so a brief "تراجع" toast can reverse it (Rule D undo).
+  const [subUndo, setSubUndo] = useState<{ planExId: string; prev: string | null; toName: string; scope: 'active' | 'pre' } | null>(null)
+  // One-handed reach hand (device-level pref); the active controls mirror to it.
+  const [hand, setHand] = useState<Handedness>(() => getHandedness())
+  // Guard the destructive top "close" (discards the in-progress session) — screen
+  // 27: no critical action fires from the top without confirmation.
+  const [confirmDiscard, setConfirmDiscard] = useState(false)
 
   // Restore an in-progress session on mount — but NEVER trust localStorage.
   // Only resume if the persisted session is fully usable for the current plan;
@@ -282,6 +319,9 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [restEndsAt])
 
+  // Active-session exercises with substitutions applied (identity swap only).
+  const effExercises = useMemo(() => applySubs(model.exercises, active?.subs, lang), [model.exercises, active?.subs, lang])
+
   if (!model.available) return <MissingPlan lang={lang} onNavigate={onNavigate} />
 
   const startSession = () => {
@@ -289,7 +329,9 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
     for (const ex of model.exercises) {
       rows[ex.id] = Array.from({ length: ex.sets }, () => ({ weight: ex.targetWeightKg ?? 20, reps: parseReps(ex.reps), done: false }))
     }
-    setActive({ startedAt: Date.now(), exIndex: 0, setIndex: 0, rows, rest: null })
+    // Carry any pre-session substitutions into the session (rows are keyed by
+    // slot id, unaffected by an identity swap).
+    setActive({ startedAt: Date.now(), exIndex: 0, setIndex: 0, rows, rest: null, subs: Object.keys(preSubs).length ? { ...preSubs } : undefined })
     setScreen('active')
   }
 
@@ -365,9 +407,74 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
     setScreen('active')
   }
 
+  // ── Screen 31 — substitution (Rule D: suggestion → explicit choice → undo).
+  //    Choosing an option is the ONLY thing that swaps the slot; nothing is
+  //    written to the plan or history. Applied to the active session's `subs`
+  //    (persisted, offline) mid-workout, or to `preSubs` from the Detail screen. ──
+  const applySubstitute = (planExId: string, option: SubstituteOption, toName: string) => {
+    void playHaptic('set')
+    if (active) {
+      const prev = active.subs?.[planExId] ?? null
+      setActive((p) => (p ? { ...p, subs: { ...(p.subs ?? {}), [planExId]: option.exerciseId } } : p))
+      setSubUndo({ planExId, prev, toName, scope: 'active' })
+    } else {
+      const prev = preSubs[planExId] ?? null
+      setPreSubs((m) => ({ ...m, [planExId]: option.exerciseId }))
+      setSubUndo({ planExId, prev, toName, scope: 'pre' })
+    }
+    setSubSheet(null)
+  }
+
+  const undoSubstitute = () => {
+    if (!subUndo) return
+    const { planExId, prev, scope } = subUndo
+    const revert = (m: Record<string, string>) => {
+      const next = { ...m }
+      if (prev) next[planExId] = prev
+      else delete next[planExId]
+      return next
+    }
+    if (scope === 'active') setActive((p) => (p ? { ...p, subs: revert(p.subs ?? {}) } : p))
+    else setPreSubs((m) => revert(m))
+    setSubUndo(null)
+  }
+
+  // Screen 27 — flip the reach hand (persisted) so the controls mirror.
+  const toggleHand = () => setHand((h) => { const n = otherHand(h); setHandedness(n); return n })
+
+  // Guarded discard — the destructive close commits only after confirmation.
+  const discardWorkout = () => { setConfirmDiscard(false); clearActive(); setPreSubs({}); onNavigate('dashboard') }
+
   const planScreen = <PlanScreen model={model} lang={lang} onExercise={(i) => { setDetailIdx(i); setScreen('detail') }} onStart={startSession} onBack={() => onNavigate('dashboard')} />
   if (screen === 'plan') return planScreen
-  if (screen === 'detail') return <DetailScreen ex={model.exercises[detailIdx]} idx={detailIdx} total={model.exercises.length} lang={lang} onStart={startSession} onBack={() => setScreen('plan')} />
+  if (screen === 'detail') {
+    const base = model.exercises[detailIdx]
+    const detailEx = base ? applySubs([base], preSubs, lang)[0] : base
+    return (
+      <>
+        <DetailScreen
+          ex={detailEx}
+          idx={detailIdx}
+          total={model.exercises.length}
+          lang={lang}
+          swapped={base ? Boolean(preSubs[base.id]) : false}
+          onReplace={base ? () => setSubSheet({ planExId: base.id, currentExerciseId: detailEx.exerciseId }) : undefined}
+          onStart={startSession}
+          onBack={() => setScreen('plan')}
+        />
+        {subSheet && (
+          <SubstitutionSheet
+            lang={lang}
+            profile={profile}
+            currentExerciseId={subSheet.currentExerciseId}
+            onChoose={(opt) => applySubstitute(subSheet.planExId, opt, ar ? opt.nameAr : opt.nameEn)}
+            onCancel={() => setSubSheet(null)}
+          />
+        )}
+        {subUndo && <UndoSubToast lang={lang} toName={subUndo.toName} onUndo={undoSubstitute} onClose={() => setSubUndo(null)} />}
+      </>
+    )
+  }
   if (screen === 'complete') return (
     <CompleteScreen
       model={model}
@@ -384,7 +491,9 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   // current plan, render the Plan screen (the safety-net effect above resets the
   // screen state) — never call setState in render, never dereference undefined.
   if (!isUsableSession(active, model.exercises)) return planScreen
-  const ex = model.exercises[active.exIndex]
+  // Displayed exercise reflects any substitution; its slot id is unchanged, so
+  // rows (keyed by slot id) and length-based navigation stay valid.
+  const ex = effExercises[active.exIndex]
   const rows = active.rows[ex.id]
   const row = rows[active.setIndex]
   const doneSets = Object.values(active.rows).flat().filter((r) => r.done).length
@@ -437,7 +546,7 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   return (
     <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-dark v2-screen-enter fixed inset-0 z-[60] flex flex-col bg-page text-ink-900" style={{ paddingTop: 'max(0.75rem, var(--safe-top))', paddingBottom: 'var(--safe-bottom)' }}>
       <header className="flex items-center justify-between gap-3 px-5 py-2">
-        <button type="button" onClick={() => { clearActive(); onNavigate('dashboard') }} aria-label={t('إغلاق التمرين', 'Close workout')} className="grid h-10 w-10 place-items-center rounded-xl" style={{ background: FOCUS.card, border: `1px solid ${FOCUS.line}`, color: FOCUS.ink }}>
+        <button type="button" onClick={() => setConfirmDiscard(true)} aria-label={t('إغلاق التمرين', 'Close workout')} className="grid h-10 w-10 place-items-center rounded-xl" style={{ background: FOCUS.card, border: `1px solid ${FOCUS.line}`, color: FOCUS.ink }}>
           <Icon name="X" className="h-5 w-5" />
         </button>
         <span className="text-sm font-bold tabular-nums" style={{ color: FOCUS.inkMuted }}>{t(`التمرين ${toAr(active.exIndex + 1, lang)} من ${toAr(model.exercises.length, lang)}`, `Exercise ${active.exIndex + 1} of ${model.exercises.length}`)}</span>
@@ -449,74 +558,117 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
       </div>
 
       {resting ? (
-        <RestPanel lang={lang} restLeft={restLeft} restDone={restDone} nextEx={model.exercises[active.exIndex]} setLabel={t(`المجموعة ${toAr(active.setIndex + 1, lang)}`, `Set ${active.setIndex + 1}`)} tip={restTip} tipDismissed={tipDismissed} onDismissTip={() => setTipDismissed(true)} onAdd={addRest} onSkip={skipRest} />
+        <RestPanel lang={lang} restLeft={restLeft} restDone={restDone} nextEx={effExercises[active.exIndex]} setLabel={t(`المجموعة ${toAr(active.setIndex + 1, lang)}`, `Set ${active.setIndex + 1}`)} tip={restTip} tipDismissed={tipDismissed} onDismissTip={() => setTipDismissed(true)} onAdd={addRest} onSkip={skipRest} />
       ) : (
-        <main className="flex flex-1 flex-col overflow-y-auto px-5 pb-6">
-          <h1 className="mt-2 text-2xl font-black leading-tight">{ar ? ex.nameAr : ex.nameEn}</h1>
-          <p className="mt-1 text-sm font-bold" style={{ color: FOCUS.inkMuted }}>{CATEGORY_LABEL[ex.category][ar ? 'ar' : 'en']} · {ex.sets}×{ex.reps}</p>
+        <>
+          <main className="flex flex-1 flex-col overflow-y-auto px-5 pb-3">
+            <h1 className="mt-2 text-2xl font-black leading-tight">{ar ? ex.nameAr : ex.nameEn}</h1>
+            <p className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-sm font-bold" style={{ color: FOCUS.inkMuted }}>
+              <span>{CATEGORY_LABEL[ex.category][ar ? 'ar' : 'en']} · {ex.sets}×{ex.reps}</span>
+              {active.subs?.[ex.id] && (
+                <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[0.7rem] font-black" style={{ background: 'color-mix(in srgb, var(--v2-blue) 16%, transparent)', color: FOCUS.blue }}>
+                  <Icon name="Repeat" className="h-3 w-3" />{t('مُستبدَل', 'Swapped')}
+                </span>
+              )}
+            </p>
 
-          {/* set list — big tabular weight × reps */}
-          <div className="mt-5 space-y-2">
-            {rows.map((r, i) => {
-              const isCurrent = i === active.setIndex
-              return (
-                <div key={i} className="flex items-center justify-between rounded-2xl px-4 py-3" style={{ background: isCurrent ? FOCUS.cardActive : FOCUS.card, border: `1px solid ${isCurrent ? FOCUS.blue : FOCUS.line}` }}>
-                  <span className="text-sm font-bold" style={{ color: isCurrent ? FOCUS.ink : FOCUS.inkMuted }}>{t(`المجموعة ${toAr(i + 1, lang)}`, `Set ${i + 1}`)}</span>
-                  <span className="flex items-center gap-2">
-                    <span className="text-lg font-black tabular-nums" style={{ color: r.done ? FOCUS.success : FOCUS.ink }}>{toAr(r.weight, lang)}<span className="text-xs font-bold" style={{ color: FOCUS.inkFaint }}> {t('كجم', 'kg')} </span>×<span className="text-xs font-bold" style={{ color: FOCUS.inkFaint }}> </span>{toAr(r.reps, lang)}</span>
-                    {r.done && <span style={{ color: FOCUS.success }}><Icon name="Check" className="h-4 w-4" strokeWidth={3} /></span>}
-                  </span>
-                </div>
-              )
-            })}
+            {/* set list — big tabular weight × reps */}
+            <div className="mt-5 space-y-2">
+              {rows.map((r, i) => {
+                const isCurrent = i === active.setIndex
+                return (
+                  <div key={i} className="flex items-center justify-between rounded-2xl px-4 py-3" style={{ background: isCurrent ? FOCUS.cardActive : FOCUS.card, border: `1px solid ${isCurrent ? FOCUS.blue : FOCUS.line}` }}>
+                    <span className="text-sm font-bold" style={{ color: isCurrent ? FOCUS.ink : FOCUS.inkMuted }}>{t(`المجموعة ${toAr(i + 1, lang)}`, `Set ${i + 1}`)}</span>
+                    <span className="flex items-center gap-2">
+                      <span className="text-lg font-black tabular-nums" style={{ color: r.done ? FOCUS.success : FOCUS.ink }}>{toAr(r.weight, lang)}<span className="text-xs font-bold" style={{ color: FOCUS.inkFaint }}> {t('كجم', 'kg')} </span>×<span className="text-xs font-bold" style={{ color: FOCUS.inkFaint }}> </span>{toAr(r.reps, lang)}</span>
+                      {r.done && <span style={{ color: FOCUS.success }}><Icon name="Check" className="h-4 w-4" strokeWidth={3} /></span>}
+                    </span>
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Warm-up ramp — before the first working set, dismissible, owner pref. */}
+            {!warmupOff && active.setIndex === 0 && !row.done && !warmupDone[ex.id] && row.weight > plateConfig.barKg && (
+              <WarmupPanel
+                lang={lang}
+                sets={generateWarmup(row.weight, plateConfig)}
+                onDismiss={() => setWarmupDone((m) => ({ ...m, [ex.id]: true }))}
+                onDisable={() => { setWarmupOff(true); saveWarmupPref(userId, { show: false }) }}
+              />
+            )}
+          </main>
+
+          {/* ── One-handed control cluster (screen 27) — anchored in the bottom
+                thumb arc; the reach-hand toggle mirrors the paired controls. ── */}
+          <div className="shrink-0 px-5 pt-3" style={{ borderTop: `1px solid ${FOCUS.line}` }}>
+            {/* secondary row: substitute (screen 31) + reach-hand toggle */}
+            <div className="mb-3 flex items-center justify-between gap-2" style={{ flexDirection: hand === 'left' ? 'row-reverse' : 'row' }}>
+              <button type="button" onClick={() => setSubSheet({ planExId: ex.id, currentExerciseId: ex.exerciseId })} className="v2-pressable flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold" style={{ background: FOCUS.card, border: `1px solid ${FOCUS.line}`, color: FOCUS.inkMuted }}>
+                <Icon name="Repeat" className="h-4 w-4" />{t('استبدال التمرين', 'Replace exercise')}
+              </button>
+              <button type="button" onClick={toggleHand} aria-pressed={hand === 'left'} aria-label={t(hand === 'left' ? 'وضع اليد اليمنى' : 'وضع اليد اليسرى', hand === 'left' ? 'Switch to right hand' : 'Switch to left hand')} className="v2-pressable flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold" style={{ background: FOCUS.card, border: `1px solid ${FOCUS.line}`, color: FOCUS.inkMuted }}>
+                <Icon name="Hand" className="h-4 w-4" style={{ transform: hand === 'left' ? 'scaleX(-1)' : undefined }} />{t(hand === 'left' ? 'يسار' : 'يمين', hand === 'left' ? 'Left' : 'Right')}
+              </button>
+            </div>
+
+            {/* Plate calculator — one tap from the weight field. */}
+            {platesOpen && <PlateStackPanel lang={lang} weight={row.weight} config={plateConfig} onClose={() => setPlatesOpen(false)} />}
+
+            {/* current set editor — big controls, mirrored to the reach hand */}
+            <div className="mt-1 flex gap-3" style={{ flexDirection: hand === 'left' ? 'row-reverse' : 'row' }}>
+              <div className="flex-1">
+                <Stepper
+                  label={t('الوزن · كجم', 'Weight · kg')}
+                  value={row.weight}
+                  step={2.5}
+                  onChange={(v) => setRow({ weight: Math.max(0, v) })}
+                  lang={lang}
+                  mirror={hand === 'left'}
+                  onPlates={() => setPlatesOpen((o) => !o)}
+                  platesOpen={platesOpen}
+                />
+              </div>
+              <div className="flex-1">
+                <Stepper label={t('التكرار', 'Reps')} value={row.reps} step={1} onChange={(v) => setRow({ reps: Math.max(0, v) })} lang={lang} mirror={hand === 'left'} />
+              </div>
+            </div>
+
+            {/* single ember action */}
+            <button type="button" onClick={finishSet} className="v2-pressable mt-4 w-full rounded-2xl py-4 text-[1.1875rem] font-black" style={{ background: FOCUS.ember, color: FOCUS.onColor }}>{t('أنهِ المجموعة', 'Complete set')}</button>
+            {/* Explicit finish — Rule D: opens the confirm sheet, never saves directly.
+                Available once any set is logged, so an early finish still confirms. */}
+            {doneSets >= 1 && (
+              <button type="button" onClick={() => openFinish(active)} className="v2-pressable mb-2 mt-3 w-full rounded-2xl py-3 text-sm font-bold" style={{ background: 'transparent', border: `1px solid ${FOCUS.line}`, color: FOCUS.inkMuted }}>{t('أنهِ التمرين', 'Finish workout')}</button>
+            )}
           </div>
-
-          {/* Warm-up ramp — before the first working set, dismissible, owner pref. */}
-          {!warmupOff && active.setIndex === 0 && !row.done && !warmupDone[ex.id] && row.weight > plateConfig.barKg && (
-            <WarmupPanel
-              lang={lang}
-              sets={generateWarmup(row.weight, plateConfig)}
-              onDismiss={() => setWarmupDone((m) => ({ ...m, [ex.id]: true }))}
-              onDisable={() => { setWarmupOff(true); saveWarmupPref(userId, { show: false }) }}
-            />
-          )}
-
-          {/* current set editor — big controls */}
-          <div className="mt-6 grid grid-cols-2 gap-3">
-            <Stepper
-              label={t('الوزن · كجم', 'Weight · kg')}
-              value={row.weight}
-              step={2.5}
-              onChange={(v) => setRow({ weight: Math.max(0, v) })}
-              lang={lang}
-              onPlates={() => setPlatesOpen((o) => !o)}
-              platesOpen={platesOpen}
-            />
-            <Stepper label={t('التكرار', 'Reps')} value={row.reps} step={1} onChange={(v) => setRow({ reps: Math.max(0, v) })} lang={lang} />
-          </div>
-
-          {/* Plate calculator — one tap from the weight field. */}
-          {platesOpen && <PlateStackPanel lang={lang} weight={row.weight} config={plateConfig} onClose={() => setPlatesOpen(false)} />}
-
-          {/* single ember action */}
-          <button type="button" onClick={finishSet} className="v2-pressable mt-6 w-full rounded-2xl py-4 text-[1.1875rem] font-black" style={{ background: FOCUS.ember, color: FOCUS.onColor }}>{t('أنهِ المجموعة', 'Complete set')}</button>
-          {/* Explicit finish — Rule D: opens the confirm sheet, never saves directly.
-              Available once any set is logged, so an early finish still confirms. */}
-          {doneSets >= 1 && (
-            <button type="button" onClick={() => openFinish(active)} className="v2-pressable mt-3 w-full rounded-2xl py-3 text-sm font-bold" style={{ background: 'transparent', border: `1px solid ${FOCUS.line}`, color: FOCUS.inkMuted }}>{t('أنهِ التمرين', 'Finish workout')}</button>
-          )}
-        </main>
+        </>
       )}
 
       {/* هل انتهيت؟ — confirm sheet. NOTHING is written until "confirm". */}
       {pendingFinish && (
         <FinishConfirmSheet lang={lang} pending={pendingFinish} onConfirm={confirmFinish} onCancel={cancelFinish} />
       )}
+
+      {/* استبدال — non-destructive suggestion sheet (screen 31, Rule D). */}
+      {subSheet && (
+        <SubstitutionSheet
+          lang={lang}
+          profile={profile}
+          currentExerciseId={subSheet.currentExerciseId}
+          onChoose={(opt) => applySubstitute(subSheet.planExId, opt, ar ? opt.nameAr : opt.nameEn)}
+          onCancel={() => setSubSheet(null)}
+        />
+      )}
+      {subUndo && <UndoSubToast lang={lang} toName={subUndo.toName} onUndo={undoSubstitute} onClose={() => setSubUndo(null)} />}
+
+      {/* تجاهل التمرين؟ — guarded destructive close (screen 27). */}
+      {confirmDiscard && <DiscardConfirmSheet lang={lang} onDiscard={discardWorkout} onCancel={() => setConfirmDiscard(false)} />}
     </div>
   )
 }
 
-function Stepper({ label, value, step, onChange, lang, onPlates, platesOpen }: { label: string; value: number; step: number; onChange: (v: number) => void; lang: Lang; onPlates?: () => void; platesOpen?: boolean }) {
+function Stepper({ label, value, step, onChange, lang, mirror, onPlates, platesOpen }: { label: string; value: number; step: number; onChange: (v: number) => void; lang: Lang; mirror?: boolean; onPlates?: () => void; platesOpen?: boolean }) {
   const ar = lang !== 'en'
   return (
     <div className="rounded-2xl p-3" style={{ background: FOCUS.card, border: `1px solid ${FOCUS.line}` }}>
@@ -528,7 +680,8 @@ function Stepper({ label, value, step, onChange, lang, onPlates, platesOpen }: {
           </button>
         )}
       </div>
-      <div className="mt-2 flex items-center justify-between gap-2">
+      {/* − value + — mirrored to the reach hand so "+" lands under the thumb. */}
+      <div className="mt-2 flex items-center justify-between gap-2" style={{ flexDirection: mirror ? 'row-reverse' : 'row' }}>
         <button type="button" onClick={() => onChange(value - step)} aria-label={label + ' −'} className="grid h-12 w-12 shrink-0 place-items-center rounded-xl" style={{ background: FOCUS.cardActive, border: `1px solid ${FOCUS.line}`, color: FOCUS.ink }}><Icon name="Minus" className="h-6 w-6" /></button>
         <span className="text-3xl font-black tabular-nums" style={{ color: FOCUS.ink }}>{toAr(value, lang)}</span>
         <button type="button" onClick={() => onChange(value + step)} aria-label={label + ' +'} className="v2-pressable grid h-12 w-12 shrink-0 place-items-center rounded-xl" style={{ background: FOCUS.cardActive, border: `1px solid ${FOCUS.line}`, color: FOCUS.ink }}><Icon name="Plus" className="h-6 w-6" /></button>
@@ -690,7 +843,7 @@ function PlanScreen({ model, lang, onExercise, onStart, onBack }: { model: Retur
   )
 }
 
-function DetailScreen({ ex, idx, total, lang, onStart, onBack }: { ex: WorkoutV2Exercise; idx: number; total: number; lang: Lang; onStart: () => void; onBack: () => void }) {
+function DetailScreen({ ex, idx, total, lang, swapped, onReplace, onStart, onBack }: { ex: WorkoutV2Exercise; idx: number; total: number; lang: Lang; swapped?: boolean; onReplace?: () => void; onStart: () => void; onBack: () => void }) {
   const ar = lang !== 'en'
   return (
     <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
@@ -720,7 +873,9 @@ function DetailScreen({ ex, idx, total, lang, onStart, onBack }: { ex: WorkoutV2
 
         <div className="mt-6 space-y-2.5">
           <button type="button" onClick={onStart} className="btn-primary w-full py-4 text-[1.1875rem]">{ar ? 'ابدأ التمرين' : 'Start exercise'}</button>
-          <button type="button" disabled aria-disabled className="w-full rounded-2xl border border-line bg-surface py-3 text-sm font-bold text-ink-400" title={ar ? 'الاستبدال قادم لاحقًا' : 'Replace coming later'}>{ar ? 'استبدال · لاحقًا' : 'Replace · later'}</button>
+          <button type="button" onClick={onReplace} disabled={!onReplace} aria-disabled={!onReplace} className="v2-pressable flex w-full items-center justify-center gap-2 rounded-2xl border border-line bg-surface py-3 text-sm font-bold text-ink-700">
+            <Icon name="Repeat" className="h-4 w-4" />{swapped ? (ar ? 'استبدال آخر' : 'Replace again') : (ar ? 'استبدال التمرين' : 'Replace exercise')}
+          </button>
         </div>
       </div>
     </div>
@@ -807,6 +962,113 @@ function FinishConfirmSheet({ lang, pending, onConfirm, onCancel }: { lang: Lang
           </div>
         )}
         <button type="button" onClick={onConfirm} className="v2-pressable mt-5 w-full rounded-2xl py-4 text-[1.1875rem] font-black" style={{ background: FOCUS.ember, color: FOCUS.onColor }}>{ar ? 'نعم، احفظ وأنهِ' : 'Yes, save & finish'}</button>
+        <button type="button" onClick={onCancel} className="v2-pressable mt-3 w-full rounded-2xl py-3 text-sm font-bold" style={{ background: 'transparent', border: `1px solid ${FOCUS.line}`, color: FOCUS.inkMuted }}>{ar ? 'لا، أكمل التمرين' : 'No, keep training'}</button>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * استبدال — the substitution sheet (Rule D, standard screen 31). A NON-destructive
+ * suggestion: it lists equipment-aware alternatives that preserve the movement
+ * pattern, and only the user's explicit tap swaps the slot (with a follow-up undo
+ * toast). Cancel closes with zero writes. The reason chips reshape the equipment
+ * gate + ranking for the three real cases: جهاز مشغول / غير متاح / في المنزل.
+ */
+function SubstitutionSheet({ lang, profile, currentExerciseId, onChoose, onCancel }: { lang: Lang; profile: Profile; currentExerciseId: string; onChoose: (opt: SubstituteOption) => void; onCancel: () => void }) {
+  const ar = lang !== 'en'
+  const t = (a: string, e: string) => (ar ? a : e)
+  const [reason, setReason] = useState<SubReason>('busy')
+  const options = useMemo(() => findSubstitutes(currentExerciseId, profile, reason), [currentExerciseId, profile, reason])
+  const reasons: { id: SubReason; ar: string; en: string }[] = [
+    { id: 'busy', ar: 'الجهاز مشغول', en: 'Machine busy' },
+    { id: 'unavailable', ar: 'غير متاح', en: 'Unavailable' },
+    { id: 'home', ar: 'في المنزل', en: 'At home' },
+  ]
+  return (
+    <div className="fixed inset-0 z-[70] flex items-end justify-center" role="dialog" aria-modal="true" aria-label={t('استبدال التمرين', 'Replace exercise')}>
+      <button type="button" aria-label={t('إلغاء', 'Cancel')} onClick={onCancel} className="absolute inset-0 h-full w-full" style={{ background: 'rgba(0,0,0,0.55)' }} />
+      <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-dark v2-screen-enter relative flex w-full max-w-md flex-col rounded-t-3xl px-6 pb-8 pt-5 text-ink-900" style={{ background: FOCUS.card, borderTop: `1px solid ${FOCUS.line}`, maxHeight: '82vh', paddingBottom: 'calc(2rem + var(--safe-bottom))' }}>
+        <div className="mx-auto mb-4 h-1 w-10 shrink-0 rounded-full" style={{ background: FOCUS.line }} />
+        <h2 className="shrink-0 text-2xl font-black">{ar ? 'استبدال التمرين' : 'Replace exercise'}</h2>
+        <p className="mt-1 shrink-0 text-sm" style={{ color: FOCUS.inkMuted }}>{ar ? 'بدائل تحفظ نمط الحركة · بمعدّاتك فقط.' : 'Alternatives that keep the movement — your equipment only.'}</p>
+
+        {/* reason chips — reshape the equipment gate + ranking */}
+        <div className="mt-4 flex shrink-0 flex-wrap gap-2">
+          {reasons.map((r) => {
+            const on = r.id === reason
+            return (
+              <button key={r.id} type="button" onClick={() => setReason(r.id)} aria-pressed={on} className="rounded-full px-3 py-1.5 text-xs font-bold" style={{ background: on ? FOCUS.blue : FOCUS.cardActive, border: `1px solid ${on ? FOCUS.blue : FOCUS.line}`, color: on ? FOCUS.onColor : FOCUS.inkMuted }}>
+                {ar ? r.ar : r.en}
+              </button>
+            )
+          })}
+        </div>
+
+        {/* options list */}
+        <div className="mt-4 min-h-0 flex-1 space-y-2 overflow-y-auto">
+          {options.length === 0 ? (
+            <div className="rounded-2xl px-4 py-6 text-center" style={{ background: FOCUS.cardActive, border: `1px solid ${FOCUS.line}` }}>
+              <Icon name="Search" className="mx-auto h-6 w-6" style={{ color: FOCUS.inkFaint }} />
+              <p className="mt-2 text-sm font-bold" style={{ color: FOCUS.inkMuted }}>{ar ? 'لا بدائل بمعدّاتك لهذه الحالة.' : 'No alternatives for your equipment here.'}</p>
+              <p className="mt-1 text-xs" style={{ color: FOCUS.inkFaint }}>{ar ? 'جرّب حالة أخرى بالأعلى.' : 'Try another case above.'}</p>
+            </div>
+          ) : (
+            options.map((opt) => (
+              <button key={opt.exerciseId} type="button" onClick={() => onChoose(opt)} className="v2-pressable flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-start" style={{ background: FOCUS.cardActive, border: `1px solid ${FOCUS.line}` }}>
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl" style={{ background: FOCUS.card, color: FOCUS.inkMuted }}><Icon name="Dumbbell" className="h-5 w-5" /></span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-sm font-bold" style={{ color: FOCUS.ink }}>{ar ? opt.nameAr : opt.nameEn}</span>
+                  <span className="mt-0.5 flex flex-wrap items-center gap-1.5">
+                    <span className="text-xs" style={{ color: FOCUS.inkFaint }}>{opt.equipment.join(' · ')}</span>
+                    {opt.differentStation && (reason === 'busy' || reason === 'unavailable') && (
+                      <span className="rounded-full px-1.5 py-0.5 text-[0.65rem] font-black" style={{ background: 'color-mix(in srgb, var(--v2-teal) 18%, transparent)', color: FOCUS.teal }}>{ar ? 'محطة مختلفة' : 'Different station'}</span>
+                    )}
+                    {opt.curated && (
+                      <span className="rounded-full px-1.5 py-0.5 text-[0.65rem] font-black" style={{ background: 'color-mix(in srgb, var(--v2-blue) 16%, transparent)', color: FOCUS.blue }}>{ar ? 'مُوصى' : 'Recommended'}</span>
+                    )}
+                  </span>
+                </span>
+                <Icon name="Repeat" className="h-4 w-4 shrink-0" style={{ color: FOCUS.inkMuted }} />
+              </button>
+            ))
+          )}
+        </div>
+
+        <button type="button" onClick={onCancel} className="v2-pressable mt-4 w-full shrink-0 rounded-2xl py-3 text-sm font-bold" style={{ background: 'transparent', border: `1px solid ${FOCUS.line}`, color: FOCUS.inkMuted }}>{ar ? 'إلغاء' : 'Cancel'}</button>
+      </div>
+    </div>
+  )
+}
+
+/** Undo toast for a just-applied substitution — reverses the swap in one tap. */
+function UndoSubToast({ lang, toName, onUndo, onClose }: { lang: Lang; toName: string; onUndo: () => void; onClose: () => void }) {
+  const ar = lang !== 'en'
+  // Auto-dismiss after a short window; the swap itself stays applied.
+  useEffect(() => {
+    const id = window.setTimeout(onClose, 6000)
+    return () => window.clearTimeout(id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [toName])
+  return (
+    <div dir={ar ? 'rtl' : 'ltr'} className="v2-screen-enter fixed inset-x-4 z-[75] flex items-center justify-between gap-3 rounded-2xl px-4 py-3" role="status" aria-live="polite" style={{ bottom: 'calc(1.25rem + var(--safe-bottom))', background: FOCUS.cardActive, border: `1px solid ${FOCUS.line}`, boxShadow: '0 10px 30px rgba(0,0,0,0.35)' }}>
+      <span className="min-w-0 flex-1 text-sm font-bold" style={{ color: FOCUS.ink }}><bdi>{toName}</bdi> · {ar ? 'تم الاستبدال' : 'Swapped in'}</span>
+      <button type="button" onClick={onUndo} className="flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-black" style={{ background: FOCUS.card, color: FOCUS.blue }}><Icon name="RotateCcw" className="h-4 w-4" />{ar ? 'تراجع' : 'Undo'}</button>
+    </div>
+  )
+}
+
+/** تجاهل التمرين؟ — confirm before the destructive close discards the session. */
+function DiscardConfirmSheet({ lang, onDiscard, onCancel }: { lang: Lang; onDiscard: () => void; onCancel: () => void }) {
+  const ar = lang !== 'en'
+  return (
+    <div className="fixed inset-0 z-[80] flex items-end justify-center" role="dialog" aria-modal="true" aria-label={ar ? 'تأكيد تجاهل التمرين' : 'Confirm discard workout'}>
+      <button type="button" aria-label={ar ? 'إلغاء' : 'Cancel'} onClick={onCancel} className="absolute inset-0 h-full w-full" style={{ background: 'rgba(0,0,0,0.55)' }} />
+      <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-dark v2-screen-enter relative w-full max-w-md rounded-t-3xl px-6 pb-8 pt-5 text-ink-900" style={{ background: FOCUS.card, borderTop: `1px solid ${FOCUS.line}`, paddingBottom: 'calc(2rem + var(--safe-bottom))' }}>
+        <div className="mx-auto mb-4 h-1 w-10 rounded-full" style={{ background: FOCUS.line }} />
+        <h2 className="text-2xl font-black">{ar ? 'تجاهل التمرين؟' : 'Discard workout?'}</h2>
+        <p className="mt-1 text-sm" style={{ color: FOCUS.inkMuted }}>{ar ? 'لن يُحفظ تقدّمك في هذه الجلسة.' : "Your progress in this session won't be saved."}</p>
+        <button type="button" onClick={onDiscard} className="v2-pressable mt-5 w-full rounded-2xl py-4 text-[1.1875rem] font-black" style={{ background: FOCUS.error, color: FOCUS.onColor }}>{ar ? 'نعم، تجاهل' : 'Yes, discard'}</button>
         <button type="button" onClick={onCancel} className="v2-pressable mt-3 w-full rounded-2xl py-3 text-sm font-bold" style={{ background: 'transparent', border: `1px solid ${FOCUS.line}`, color: FOCUS.inkMuted }}>{ar ? 'لا، أكمل التمرين' : 'No, keep training'}</button>
       </div>
     </div>
