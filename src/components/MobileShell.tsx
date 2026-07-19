@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react'
 import { Icon } from './Icon'
 import { InstallBanner } from './InstallBanner'
+import { StateBlock } from './StateBlock'
+import { useOnlineStatus } from '@/lib/useOnlineStatus'
 import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
@@ -33,6 +35,7 @@ interface TabDef {
 export function MobileShell({ lang, tab, badge, onNavigate, onOpenSettings, children }: MobileShellProps) {
   const t = getStrings(lang)
   const ar = lang !== 'en'
+  const online = useOnlineStatus()
   // v2.1 §03 — final tab labels + center «تسجيل» action, RTL order per the PDF.
   const tabs: TabDef[] = [
         { id: 'dashboard', route: 'dashboard', label: V2_TAB_LABELS.today, icon: 'Home' },
@@ -97,6 +100,19 @@ export function MobileShell({ lang, tab, badge, onNavigate, onOpenSettings, chil
             </div>
           </div>
         </header>
+
+        {/* حالة الاتصال (شاشة 75) — بانر ثابت غير حاجب: العمل يستمر محليًا ويُزامَن لاحقًا. */}
+        {!online && (
+          <div className="app-container px-4 pt-2">
+            <StateBlock
+              variant="offline"
+              compact
+              testId="offline-banner"
+              title={ar ? 'دون اتصال' : 'Offline'}
+              body={ar ? 'تعمل محليًا — يُحفظ كل شيء ويُزامَن عند عودة الاتصال.' : 'Working locally — everything saves and syncs when you reconnect.'}
+            />
+          </div>
+        )}
 
         {/* شريط تثبيت التطبيق — قابل للإغلاق، يظهر فقط عند الحاجة */}
         <InstallBanner lang={lang} onOpenSettings={onOpenSettings} />
