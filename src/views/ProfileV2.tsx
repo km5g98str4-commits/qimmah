@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Icon } from '@/components/Icon'
 import { cn } from '@/lib/cn'
-import type { Lang } from '@/lib/appPreferences'
+import type { Lang, ThemePref } from '@/lib/appPreferences'
+import { getTheme, setTheme } from '@/lib/appPreferences'
 import type { AppRoute } from '@/lib/appRoutes'
 import { useCustomization } from '@/lib/customizationContext'
 import { useAuth } from '@/lib/authContext'
@@ -196,7 +197,7 @@ function Settings({ lang, model, onBack, onAccount, onPrivacy, onNotifications, 
   return (
     <SubScreen title={t('الإعدادات والخصوصية', 'Settings & privacy')} onBack={onBack} lang={lang}>
       <Group title={t('المظهر', 'Appearance')}>
-        <InfoRow icon="Sun" title={t('السمة', 'Theme')} sub={model.settings.appearance} disabled subNote={t('فاتح حاليًا', 'Light for now')} />
+        <ThemeControl lang={lang} />
       </Group>
       <Group title={t('عام', 'General')}>
         <InfoRow icon="Globe" title={t('اللغة', 'Language')} sub={model.settings.language} state="" />
@@ -377,6 +378,60 @@ function SubScreen({ title, onBack, lang, children }: { title: string; onBack: (
         </div>
         <div className="mt-4">{children}</div>
       </div>
+    </div>
+  )
+}
+
+/**
+ * Theme toggle — standard screen 66 (النظام · فاتح · داكن). Persists + applies
+ * via data-theme immediately. If a workout is active the change is deferred
+ * (setTheme returns false) and we say so — the theme never flips mid-set.
+ */
+function ThemeControl({ lang }: { lang: Lang }) {
+  const ar = lang !== 'en'
+  const t = (a: string, e: string) => (ar ? a : e)
+  const [pref, setPref] = useState<ThemePref>(() => getTheme())
+  const [deferred, setDeferred] = useState(false)
+  const OPTIONS: { value: ThemePref; label: string; icon: string }[] = [
+    { value: 'system', label: t('النظام', 'System'), icon: 'Smartphone' },
+    { value: 'light', label: t('فاتح', 'Light'), icon: 'Sun' },
+    { value: 'dark', label: t('داكن', 'Dark'), icon: 'Moon' },
+  ]
+  const choose = (value: ThemePref) => {
+    setPref(value)
+    const applied = setTheme(value)
+    setDeferred(!applied)
+  }
+  return (
+    <div className="rounded-2xl border border-line bg-surface p-4">
+      <div className="flex items-center gap-3">
+        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-beige text-ink-500"><Icon name="Sun" className="h-5 w-5" /></span>
+        <span className="text-sm font-bold text-ink-900">{t('السمة', 'Theme')}</span>
+      </div>
+      <div role="radiogroup" aria-label={t('السمة', 'Theme')} className="mt-3 grid grid-cols-3 gap-2">
+        {OPTIONS.map((o) => {
+          const active = pref === o.value
+          return (
+            <button
+              key={o.value}
+              type="button"
+              role="radio"
+              aria-checked={active}
+              onClick={() => choose(o.value)}
+              className={cn(
+                'press flex flex-col items-center gap-1 rounded-xl border px-2 py-2.5 text-xs font-bold transition-colors',
+                active ? 'border-primary bg-primary-soft text-primary-c' : 'border-line bg-page text-ink-500 hover:text-ink-900',
+              )}
+            >
+              <Icon name={o.icon} className="h-4 w-4" />
+              {o.label}
+            </button>
+          )
+        })}
+      </div>
+      {deferred && (
+        <p className="mt-2.5 text-[0.7rem] font-bold text-ink-500">{t('يُطبَّق بعد انتهاء تمرينك الحالي.', 'Applies after your current workout.')}</p>
+      )}
     </div>
   )
 }
