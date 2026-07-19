@@ -170,13 +170,17 @@
   /* v2.1 typefaces (self-hosted; Tajawal remains the tail fallback). */
   --font-ui-v2: 'IBM Plex Sans Arabic', 'Tajawal', system-ui, sans-serif;
   --font-display-v2: 'Readex Pro', 'IBM Plex Sans Arabic', 'Tajawal', system-ui, sans-serif;
+  /* v3.0 §E2 — JetBrains Mono for numerals/data; UI face carries the Arabic. */
+  --font-mono-v2: 'JetBrains Mono', 'IBM Plex Sans Arabic', 'Tajawal', ui-monospace, monospace;
 
-  /* Momentum roles. Ember is an action color, never a data series. */
+  /* Momentum roles (v3.0 §F1 semantic colour). Ember is an action color, never
+     a data series. Teal / Red are the exact v3.0 standard values. */
   --v2-ember: #f0512a;
   --v2-blue: #2a6ce0;
   --v2-green: #1f9d57;
-  --v2-teal: #12a594;
-  --v2-error: #e11d2e;
+  --v2-teal: #159aa0;   /* v3.0: rest / recovery */
+  --v2-error: #d23b2e;  /* v3.0: pain / destructive — separate from Ember */
+  --v2-amber: #d99400;  /* v3.0: estimate / attention */
 
   /* Accessible text variants retain the same hue while normal-size copy meets
      WCAG AA on the warm paper/card surfaces. */
@@ -239,7 +243,7 @@
 :root {
   --font-family-base: var(--font-ui-v2);
   --font-family-display: var(--font-display-v2);
-  --font-numeric: var(--font-ui-v2);
+  --font-numeric: var(--font-mono-v2);
 
   /* Tailwind-consumed font vars (font-sans / font-display utilities + body).
      Defining them here — and NOWHERE in the default :root — is what makes v2
@@ -255,13 +259,14 @@
   --color-destructive: var(--v2-feedback-error);
   --color-success: var(--v2-green);
   --color-info: var(--v2-blue);
+  --color-warning: var(--v2-amber);
 }
 
-/* v2 is light by default. Put the legacy utility variables on body so they
-   override any inherited, user-customized root values without touching the
-   customization logic. v1 remains byte-for-byte inert. */
+/* v2 LIGHT theme (default). Defined on <body> so it beats any inherited,
+   user-customized root values without touching the customization logic. This is
+   also the fallback before `data-theme` is set on the first paint. v1 inert. */
 :root body,
-:root .v2-surface-light {
+:root[data-theme='light'] body {
   color-scheme: light;
   --c-primary: var(--v2-ember);
   --c-accent: var(--v2-blue);
@@ -277,7 +282,31 @@
   --elevation-raised: 0 2px 4px rgba(14, 13, 10, 0.06), 0 22px 48px -28px rgba(14, 13, 10, 0.34);
 }
 
-/* Only Welcome, Onboarding and Active Workout opt into this focus surface. */
+/* v2 DARK theme (screen 66, manual). Graphite surfaces per §F1. Higher
+   specificity than `:root body`, so it wins app-wide when the user picks dark or
+   the OS is dark under 'system'. */
+:root[data-theme='dark'] body {
+  color-scheme: dark;
+  --c-primary: var(--v2-ember);
+  --c-accent: var(--v2-teal);
+  --c-page: 22 20 15;
+  --c-surface: 30 28 23;
+  --c-beige: 44 40 35;
+  --c-line: 55 51 45;
+  --c-ink-900: 241 238 232;
+  --c-ink-700: 221 214 203;
+  --c-ink-500: 197 191 181;
+  --c-ink-400: 167 159 148;
+  --elevation-card: 0 1px 2px rgba(0, 0, 0, 0.28), 0 12px 30px -22px rgba(0, 0, 0, 0.6);
+  --elevation-raised: 0 2px 4px rgba(0, 0, 0, 0.34), 0 22px 48px -28px rgba(0, 0, 0, 0.66);
+}
+
+/* `.v2-surface-light` used to force a light surface; under the global theme it
+   is a no-op marker so those view roots FOLLOW the chosen theme. (The class
+   stays in the views; only its token overrides are removed.) */
+
+/* Only Welcome, Onboarding and Active Workout opt into this dark focus surface —
+   they stay Graphite in ANY theme (and are thus theme-immune during a set). */
 :root .v2-surface-dark {
   color-scheme: dark;
   --c-primary: var(--v2-ember);

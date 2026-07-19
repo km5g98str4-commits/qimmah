@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Icon } from '@/components/Icon'
 import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
+import { applyTheme } from '@/lib/appPreferences'
 import type { AppRoute } from '@/lib/appRoutes'
 import { useCustomization } from '@/lib/customizationContext'
 // Reuse the SACRED, just-shipped timestamp rest-timer helpers from the v1 active
@@ -295,6 +296,8 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   const clearActive = () => {
     try { localStorage.removeItem(ownerActiveKey) } catch { /* ignore */ }
     setActive(null)
+    // Workout ended → apply any theme change that was deferred mid-set (screen 66).
+    applyTheme()
   }
 
   // ── Rule D finish handlers — defined before the screen returns so the complete

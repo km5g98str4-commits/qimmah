@@ -8,6 +8,7 @@ import { CustomizationProvider } from './lib/customizationContext'
 import { AuthProvider } from './lib/authContext'
 import { LanguageProvider } from './i18n'
 import { registerStepBridge } from './lib/stepCounter'
+import { initTheme } from './lib/appPreferences'
 import { initAnalytics, track } from './lib/analytics'
 import { initNativeShell } from './lib/nativeShell'
 import { initDeepLinkRecovery } from './lib/deepLinkRecovery'
@@ -21,6 +22,9 @@ import './styles/index.css'
 // طبقة الرموز الدلالية (seam) — إضافية وعكوسة، تُحيل للقيم الحالية المؤقتة فقط
 // (ليست هوية معتمدة). نقطة الإسقاط لرموز Cloud Design المعتمدة لاحقًا.
 import './design-system/tokens.css'
+
+// المظهر (شاشة 66): طبّق الثيم المختار قبل الرسم الأول وواكب النظام إن كان «النظام».
+initTheme()
 
 // سيم الخطوات: يستقبل إجماليات HealthKit من plugin iOS المحلي داخل المتجر نفسه.
 registerStepBridge()
