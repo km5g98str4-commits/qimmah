@@ -1,5 +1,6 @@
 import { lazy, Suspense, useMemo, useState } from 'react'
 import { Icon } from '@/components/Icon'
+import { StateBlock } from '@/components/StateBlock'
 import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
 import { useCustomization } from '@/lib/customizationContext'
@@ -176,6 +177,18 @@ export function NutritionV2({ lang }: NutritionV2Props) {
 
         {/* Meals */}
         <section className="space-y-2.5" aria-label={t('وجبات اليوم', 'Today’s meals')}>
+          {/* Smart-empty (standard screen 21/76): no log yet → explain why + a real
+              first action, above the still-tappable meal slots. */}
+          {model.meals.every((m) => !m.logged) && (
+            <StateBlock
+              variant="empty"
+              icon="Utensils"
+              testId="nutrition-empty"
+              title={t('لا سجلّ غذائي بعد', 'No meals logged yet')}
+              body={t('نعرض تقديراتك بعد أول وجبة — ابدأ بتسجيل ما أكلته اليوم.', 'We estimate your day after your first meal — start by logging what you ate today.')}
+              actions={[{ label: t('أضف أول وجبة', 'Add your first meal'), onClick: () => openAdd(targetSlot) }]}
+            />
+          )}
           {model.meals.map((m) => {
             const meta = SLOTS.find((s) => s.slot === m.slot)!
             return (

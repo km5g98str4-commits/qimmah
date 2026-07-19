@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { Icon } from '@/components/Icon'
+import { StateBlock } from '@/components/StateBlock'
 import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
 import type { AppRoute } from '@/lib/appRoutes'
@@ -264,8 +265,10 @@ function Tile({ icon, title, main, sub, onClick }: { icon: string; title: string
   )
 }
 
+// Reuses the unified StateBlock (empty variant) — icon + text, never text-only,
+// so "needs more data" reads consistently with every other system state.
 function NeedsData({ text }: { text: string }) {
-  return <p className="mt-3 rounded-xl border border-dashed border-line bg-page px-3 py-4 text-center text-xs text-ink-400">{text}</p>
+  return <StateBlock variant="empty" icon="LineChart" title={text} className="mt-3" />
 }
 
 // ── Weight detail ─────────────────────────────────────────────────────────────
