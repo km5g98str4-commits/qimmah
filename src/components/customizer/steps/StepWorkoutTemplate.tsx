@@ -11,8 +11,9 @@ import { analyzeWorkoutBalance } from '@/lib/workoutValidation'
 import { parseSafeNumber } from '@/lib/validation'
 import { onboardingStrings } from '@/i18n/dict/onboarding'
 
+// text-base (16px) لا text-sm: يمنع تكبير iOS التلقائي عند التركيز على الحقول الرقمية.
 const smallInput =
-  'w-full rounded-lg border border-line bg-beige px-2.5 py-1.5 text-sm text-ink-900 focus:border-brand-500/50 focus:outline-none focus:ring-2 focus:ring-brand-500/30'
+  'w-full rounded-lg border border-line bg-beige px-2.5 py-1.5 text-base text-ink-900 focus:border-brand-500/50 focus:outline-none focus:ring-2 focus:ring-brand-500/30'
 
 /** خطوة اختيار جدول التمرين — قوالب + أيام قابلة للتعديل + مكتبة تمارين. */
 export function StepWorkoutTemplate({ ctx }: { ctx: WizardCtx }) {

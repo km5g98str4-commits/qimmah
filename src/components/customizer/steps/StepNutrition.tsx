@@ -17,7 +17,8 @@ import { targetCaloriesFor } from '@/lib/calculators'
 import { NUM_LIMITS, parseSafeNumber } from '@/lib/validation'
 import { onboardingStrings } from '@/i18n/dict/onboarding'
 
-const inputCls = 'w-full rounded-lg border border-line bg-beige px-2.5 py-1.5 text-sm text-ink-900 focus:border-brand-500/50 focus:outline-none focus:ring-2 focus:ring-brand-500/30'
+// text-base (16px) لا text-sm: يمنع تكبير iOS التلقائي عند التركيز على الحقول.
+const inputCls = 'w-full rounded-lg border border-line bg-beige px-2.5 py-1.5 text-base text-ink-900 focus:border-brand-500/50 focus:outline-none focus:ring-2 focus:ring-brand-500/30'
 
 /** خطوة خطة الأكل — أهداف + قوالب وجبات + باني وجبات من المكونات. */
 export function StepNutrition({ ctx }: { ctx: WizardCtx }) {
@@ -200,7 +201,7 @@ export function StepNutrition({ ctx }: { ctx: WizardCtx }) {
                 return (
                   <li key={`${ig.ingredientId}-${k}`} className="flex items-center gap-2 rounded-lg border border-line bg-page p-2">
                     <span className="min-w-0 flex-1 truncate text-xs text-ink-900">{data ? ingredientDisplayName(data.nameAr, data.nameEn, ctx.lang) : ig.ingredientId}</span>
-                    <input type="number" inputMode="decimal" min={0} max={50} step="0.5" className="w-16 rounded-lg border border-line bg-beige px-2 py-1 text-xs text-ink-900 focus:outline-none" value={ig.servings} onChange={(e) => setServings(meal.id, k, parseSafeNumber(e.target.value, { min: 0, max: 50 }))} />
+                    <input type="number" inputMode="decimal" min={0} max={50} step="0.5" className="w-16 rounded-lg border border-line bg-beige px-2 py-1 text-base text-ink-900 focus:outline-none" value={ig.servings} onChange={(e) => setServings(meal.id, k, parseSafeNumber(e.target.value, { min: 0, max: 50 }))} />
                     <span className="text-[10px] text-ink-400">{d.nutServing}</span>
                     <button type="button" onClick={() => removeIngredient(meal.id, k)} className="grid h-6 w-6 place-items-center rounded text-rose-500 hover:bg-rose-500/10" aria-label={d.nutDelete}><Icon name="X" className="h-3.5 w-3.5" /></button>
                   </li>
