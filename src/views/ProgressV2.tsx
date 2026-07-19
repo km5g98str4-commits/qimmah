@@ -139,6 +139,16 @@ export function ProgressV2({ lang, onNavigate }: ProgressV2Props) {
           />
         </section>
 
+        {/* Recovery entry (v1.1) — self-reported check-in + suggestion (screens 37–39). */}
+        <button type="button" onClick={() => go('recovery')} className="press flex w-full items-center gap-3 rounded-2xl border bg-surface px-4 py-3 text-start" style={{ borderColor: 'var(--v2-teal)' }}>
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl" style={{ background: 'color-mix(in srgb, var(--v2-teal) 14%, transparent)', color: 'var(--v2-teal-text)' }}><Icon name="Activity" className="h-5 w-5" /></span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-sm font-bold">{t('التعافي', 'Recovery')}</span>
+            <span className="block text-xs text-ink-500">{t('سجّل شعورك — مؤشّر ذاتي، غير طبي', 'Log how you feel — self-reported, not medical')}</span>
+          </span>
+          <Icon name="ChevronLeft" className="h-4 w-4 shrink-0 text-ink-400 rtl:rotate-0 ltr:rotate-180" />
+        </button>
+
         <p className="px-1 text-center text-[0.7rem] text-ink-400">{model.disclaimer}</p>
       </div>
     </div>

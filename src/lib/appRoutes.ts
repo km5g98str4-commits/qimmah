@@ -24,6 +24,8 @@ export type AppRoute =
   | 'productReview'
   // «لوحتي» (P12-C) — ملخّص أرقام المستخدم الأسبوعية؛ مدخلها بطاقة على الرئيسية، ليست تبويبًا رئيسيًا.
   | 'stats'
+  // «التعافي» (v1.1) — تسجيل ذاتي + توصية غير طبية + سجل؛ مدخلها من اليوم (يوم راحة) والتقدّم.
+  | 'recovery'
   // مسار احتياطي داخلي فقط — لا يُسجَّل في ROUTES ولا يُكتب في hash مباشرة.
   | 'notfound'
 
@@ -38,6 +40,7 @@ const ROUTES: AppRoute[] = [
   'progress',
   'profile',
   'calc',
+  'recovery',
   'settings',
   'privacy',
   'terms',
