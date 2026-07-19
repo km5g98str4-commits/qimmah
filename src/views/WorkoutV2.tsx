@@ -15,6 +15,10 @@ import { buildWorkoutV2Model, CATEGORY_LABEL, type ExCategory, type WorkoutV2Exe
 import { persistFinishedSession } from '@/lib/finishWorkout'
 import { getDayStamp } from '@/lib/today'
 import { buildV2WorkoutSession } from '@/lib/workoutV2Persist'
+// Rule D — the finish is a suggestion, not a silent save: confirm before any
+// write, and keep a snapshot so the short undo window can fully reverse it.
+import { snapshotWorkoutStorage, restoreWorkoutStorage, type StorageSnapshot } from '@/lib/workoutFinishUndo'
+import type { WorkoutSession } from '@/lib/workoutSessions'
 // Strength system (this feature) — plate math, warm-up, unified PR detection.
 import { useAuth } from '@/lib/authContext'
 // Owner-scoped last-workout summary (isolation finding #7): scoped storage +
@@ -66,6 +70,22 @@ const FOCUS = {
 } as const
 
 type Screen = 'plan' | 'detail' | 'active' | 'complete'
+
+/** How long the "تراجع" (undo) affordance stays live on the complete screen. */
+const UNDO_WINDOW_MS = 8000
+
+/** A finish awaiting confirmation — computed with NO writes; the sheet shows it. */
+interface PendingFinish {
+  session: WorkoutSession
+  prs: StrengthPR[]
+  stats: { exercises: number; sets: number; minutes: number; volume: number }
+}
+
+/** State captured at confirm so the undo window can reverse the committed save. */
+interface UndoState {
+  snapshot: StorageSnapshot
+  active: ActiveState
+}
 interface SetRow { weight: number; reps: number; done: boolean }
 interface ActiveState {
   startedAt: number
@@ -156,7 +176,12 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   const [platesOpen, setPlatesOpen] = useState(false)
   const [warmupDone, setWarmupDone] = useState<Record<string, boolean>>({})
   const [warmupOff, setWarmupOff] = useState(!warmupPref.show)
-  const [sessionPRs, setSessionPRs] = useState<StrengthPR[]>([])
+  // Rule D finish flow: a finish awaiting confirmation (no writes yet), the
+  // committed result shown on the complete screen, and the reversal snapshot for
+  // the post-save undo window.
+  const [pendingFinish, setPendingFinish] = useState<PendingFinish | null>(null)
+  const [completed, setCompleted] = useState<PendingFinish | null>(null)
+  const [undoState, setUndoState] = useState<UndoState | null>(null)
 
   // Restore an in-progress session on mount — but NEVER trust localStorage.
   // Only resume if the persisted session is fully usable for the current plan;
@@ -272,10 +297,85 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
     setActive(null)
   }
 
+  // ── Rule D finish handlers — defined before the screen returns so the complete
+  //    screen can reference undo. None require an active session at declaration;
+  //    each guards internally. ──
+
+  // Open the finish confirmation sheet — computes the session + candidate PRs
+  // with NO writes (detectPRsForSession is read-only), so the sheet can show
+  // exactly what WILL be saved. Reachable from the last set or the explicit
+  // "أنهِ التمرين" button (early finish).
+  const openFinish = (fromActive: ActiveState) => {
+    const session = buildV2WorkoutSession(fromActive, model, { date: getDayStamp(), finishedAtMs: Date.now() })
+    const prs = detectPRsForSession(session) // read-only — no permanent PR yet
+    const done = Object.values(fromActive.rows).flat().filter((r) => r.done)
+    setPendingFinish({
+      session,
+      prs,
+      stats: {
+        exercises: model.exercises.length,
+        sets: done.length,
+        minutes: Math.max(1, Math.round((Date.now() - fromActive.startedAt) / 60000)),
+        volume: done.reduce((v, r) => v + r.weight * r.reps, 0),
+      },
+    })
+  }
+
+  // Cancel the sheet — return to the workout with ZERO writes.
+  const cancelFinish = () => setPendingFinish(null)
+
+  // Confirm — the ONLY place a finished session, its PRs, and the summary are
+  // written. Snapshot first so the undo window can fully reverse the save.
+  const confirmFinish = () => {
+    if (!pendingFinish || !active) return
+    const { session, prs, stats } = pendingFinish
+    const snapshot = snapshotWorkoutStorage()
+    try {
+      saveWorkoutSummary(userId, { date: new Date().toISOString().slice(0, 10), title: model.session.title, totalSets: stats.sets, volume: stats.volume, durationMin: stats.minutes })
+    } catch { /* ignore — the canonical persist below is what Progress reads */ }
+    try {
+      // Canonical persist — feeds historyStore (auto-enqueues sync) + exercise
+      // history, so Progress / Today / Profile all react to this v2 workout.
+      persistFinishedSession(session)
+      // PRs become permanent ONLY here, inside the confirmed save (honesty rule).
+      if (prs.length > 0) {
+        registerWorkoutPRs(toPRCelebrations(prs, (id) => { const e = getExercise(id); return { ar: e?.nameAr, en: e?.nameEn } }))
+        void playHaptic('pr')
+      }
+    } catch { /* never trap the user on completion */ }
+    setUndoState({ snapshot, active })
+    setCompleted(pendingFinish)
+    setPendingFinish(null)
+    clearActive()
+    setScreen('complete')
+  }
+
+  // Undo — reverse the confirmed save (sessions, exercise history, PRs, summary,
+  // sync queue) and drop the user back into the still-active workout.
+  const undoFinish = () => {
+    if (!undoState) return
+    restoreWorkoutStorage(undoState.snapshot)
+    setActive(undoState.active)
+    setCompleted(null)
+    setUndoState(null)
+    setNow(Date.now())
+    setScreen('active')
+  }
+
   const planScreen = <PlanScreen model={model} lang={lang} onExercise={(i) => { setDetailIdx(i); setScreen('detail') }} onStart={startSession} onBack={() => onNavigate('dashboard')} />
   if (screen === 'plan') return planScreen
   if (screen === 'detail') return <DetailScreen ex={model.exercises[detailIdx]} idx={detailIdx} total={model.exercises.length} lang={lang} onStart={startSession} onBack={() => setScreen('plan')} />
-  if (screen === 'complete') return <CompleteScreen model={model} active={active} lang={lang} prs={sessionPRs} onDone={() => { clearActive(); onNavigate('dashboard') }} />
+  if (screen === 'complete') return (
+    <CompleteScreen
+      model={model}
+      lang={lang}
+      stats={completed?.stats ?? null}
+      prs={completed?.prs ?? []}
+      canUndo={undoState != null}
+      onUndo={undoFinish}
+      onDone={() => { setCompleted(null); setUndoState(null); clearActive(); onNavigate('dashboard') }}
+    />
+  )
 
   // ── Active workout ── Render PURELY. If the session is not usable for the
   // current plan, render the Plan screen (the safety-net effect above resets the
@@ -303,34 +403,14 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
     const lastSet = active.setIndex >= rows.length - 1
     const lastEx = active.exIndex >= model.exercises.length - 1
     if (lastSet && lastEx) {
-      // Final state with the last set marked done (setRow below is async).
+      // Rule D: the last set does NOT save silently. Mark it done and OPEN the
+      // "هل انتهيت؟" confirm sheet — nothing is written until the user confirms.
       const finalActive = {
         ...active,
         rows: { ...active.rows, [ex.id]: rows.map((r, i) => (i === active.setIndex ? { ...r, done: true } : r)) },
       }
-      try {
-        const totalSets = doneSets + 1
-        const volume = Object.values(active.rows).flat().reduce((v, r) => v + (r.done ? r.weight * r.reps : 0), 0) + row.weight * row.reps
-        saveWorkoutSummary(userId, { date: new Date().toISOString().slice(0, 10), title: model.session.title, totalSets, volume, durationMin: Math.round((Date.now() - active.startedAt) / 60000) })
-      } catch { /* ignore */ }
-      // Canonical persist — feeds historyStore (auto-enqueues sync) + exercise
-      // history, so Progress / Today / Profile all react to this v2 workout.
-      try {
-        const session = buildV2WorkoutSession(finalActive, model, { date: getDayStamp(), finishedAtMs: Date.now() })
-        persistFinishedSession(session)
-        // Unified PR detection (single source) — 1/3/5RM + e1RM vs prior sessions.
-        // Feed the SAME session into the existing achievements sink (extend, not
-        // duplicate) so prCount + the global toaster stay in sync; also show the
-        // dark-surface PR moment on the complete screen.
-        const prs = detectPRsForSession(session)
-        if (prs.length > 0) {
-          registerWorkoutPRs(toPRCelebrations(prs, (id) => { const e = getExercise(id); return { ar: e?.nameAr, en: e?.nameEn } }))
-          void playHaptic('pr')
-        }
-        setSessionPRs(prs)
-      } catch { /* local summary already saved; never trap the user on completion */ }
-      setRow({ done: true })
-      setScreen('complete')
+      setActive(finalActive)
+      openFinish(finalActive)
       return
     }
     // Mark done, advance, and start the rest — a single atomic update.
@@ -417,7 +497,17 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
 
           {/* single ember action */}
           <button type="button" onClick={finishSet} className="v2-pressable mt-6 w-full rounded-2xl py-4 text-[1.1875rem] font-black" style={{ background: FOCUS.ember, color: FOCUS.onColor }}>{t('أنهِ المجموعة', 'Complete set')}</button>
+          {/* Explicit finish — Rule D: opens the confirm sheet, never saves directly.
+              Available once any set is logged, so an early finish still confirms. */}
+          {doneSets >= 1 && (
+            <button type="button" onClick={() => openFinish(active)} className="v2-pressable mt-3 w-full rounded-2xl py-3 text-sm font-bold" style={{ background: 'transparent', border: `1px solid ${FOCUS.line}`, color: FOCUS.inkMuted }}>{t('أنهِ التمرين', 'Finish workout')}</button>
+          )}
         </main>
+      )}
+
+      {/* هل انتهيت؟ — confirm sheet. NOTHING is written until "confirm". */}
+      {pendingFinish && (
+        <FinishConfirmSheet lang={lang} pending={pendingFinish} onConfirm={confirmFinish} onCancel={cancelFinish} />
       )}
     </div>
   )
@@ -634,13 +724,20 @@ function DetailScreen({ ex, idx, total, lang, onStart, onBack }: { ex: WorkoutV2
   )
 }
 
-function CompleteScreen({ model, active, lang, prs, onDone }: { model: ReturnType<typeof buildWorkoutV2Model>; active: ActiveState | null; lang: Lang; prs: StrengthPR[]; onDone: () => void }) {
+function CompleteScreen({ model, lang, stats, prs, canUndo, onUndo, onDone }: { model: ReturnType<typeof buildWorkoutV2Model>; lang: Lang; stats: PendingFinish['stats'] | null; prs: StrengthPR[]; canUndo: boolean; onUndo: () => void; onDone: () => void }) {
   const ar = lang !== 'en'
   const t = (a: string, e: string) => (ar ? a : e)
-  const rows = active ? Object.values(active.rows).flat() : []
-  const totalSets = rows.length
-  const volume = rows.reduce((v, r) => v + r.weight * r.reps, 0)
-  const durationMin = active ? Math.max(1, Math.round((Date.now() - active.startedAt) / 60000)) : 0
+  const totalSets = stats?.sets ?? 0
+  const volume = stats?.volume ?? 0
+  const durationMin = stats?.minutes ?? 0
+  // Undo window: the "تراجع" affordance is live for UNDO_WINDOW_MS, then retires.
+  const [undoLive, setUndoLive] = useState(canUndo)
+  useEffect(() => {
+    if (!canUndo) { setUndoLive(false); return }
+    setUndoLive(true)
+    const id = window.setTimeout(() => setUndoLive(false), UNDO_WINDOW_MS)
+    return () => window.clearTimeout(id)
+  }, [canUndo])
   // One green line per lift that set a PR (kind + value), reduced-motion-safe.
   const prByLift = new Map<string, StrengthPR[]>()
   for (const pr of prs) { const a = prByLift.get(pr.exerciseId) ?? []; a.push(pr); prByLift.set(pr.exerciseId, a) }
@@ -669,8 +766,46 @@ function CompleteScreen({ model, active, lang, prs, onDone }: { model: ReturnTyp
         <FocusStat label={ar ? 'المجموعات' : 'Sets'} value={toAr(totalSets, lang)} />
         <FocusStat label={ar ? 'الحجم كجم' : 'Volume kg'} value={toAr(volume, lang)} />
       </div>
-      <button type="button" onClick={onDone} className="v2-pressable mt-8 w-full max-w-xs rounded-2xl py-4 text-[1.1875rem] font-black" style={{ background: FOCUS.ember, color: FOCUS.onColor }}>{ar ? 'حفظ وإنهاء' : 'Save & finish'}</button>
-      <p className="mt-3 text-[0.7rem]" style={{ color: FOCUS.inkFaint }}>{ar ? 'محفوظ على هذا الجهاز فقط.' : 'Saved on this device only.'}</p>
+      <button type="button" onClick={onDone} className="v2-pressable mt-8 w-full max-w-xs rounded-2xl py-4 text-[1.1875rem] font-black" style={{ background: FOCUS.ember, color: FOCUS.onColor }}>{ar ? 'تم' : 'Done'}</button>
+      {/* Undo — reverses the just-saved session/PRs while the window is live. */}
+      {undoLive
+        ? <button type="button" onClick={onUndo} className="mt-3 flex items-center gap-1.5 text-sm font-bold underline underline-offset-4" style={{ color: FOCUS.inkMuted }}><Icon name="RotateCcw" className="h-4 w-4" />{ar ? 'تراجع عن الحفظ' : 'Undo save'}</button>
+        : <p className="mt-3 text-[0.7rem]" style={{ color: FOCUS.inkFaint }}>{ar ? 'محفوظ على هذا الجهاز فقط.' : 'Saved on this device only.'}</p>}
+    </div>
+  )
+}
+
+/**
+ * "هل انتهيت؟" — the finish confirmation sheet (Rule D, standard screen 34).
+ * Shows exactly what will be saved (exercises · sets · minutes · candidate PRs)
+ * before ANY write. Cancel returns to the workout untouched; confirm commits.
+ */
+function FinishConfirmSheet({ lang, pending, onConfirm, onCancel }: { lang: Lang; pending: PendingFinish; onConfirm: () => void; onCancel: () => void }) {
+  const ar = lang !== 'en'
+  const t = (a: string, e: string) => (ar ? a : e)
+  const { stats, prs } = pending
+  const prLifts = [...new Set(prs.map((p) => p.exerciseId))]
+  return (
+    <div className="fixed inset-0 z-[70] flex items-end justify-center" role="dialog" aria-modal="true" aria-label={t('تأكيد إنهاء التمرين', 'Confirm finish workout')}>
+      <button type="button" aria-label={t('إلغاء', 'Cancel')} onClick={onCancel} className="absolute inset-0 h-full w-full" style={{ background: 'rgba(0,0,0,0.55)' }} />
+      <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-dark v2-screen-enter relative w-full max-w-md rounded-t-3xl px-6 pb-8 pt-5 text-ink-900" style={{ background: FOCUS.card, borderTop: `1px solid ${FOCUS.line}`, paddingBottom: 'calc(2rem + var(--safe-bottom))' }}>
+        <div className="mx-auto mb-4 h-1 w-10 rounded-full" style={{ background: FOCUS.line }} />
+        <h2 className="text-2xl font-black">{ar ? 'هل انتهيت؟' : 'Finished?'}</h2>
+        <p className="mt-1 text-sm" style={{ color: FOCUS.inkMuted }}>{ar ? 'سنحفظ هذه الجلسة على جهازك.' : "We'll save this session on your device."}</p>
+        <div className="mt-5 grid grid-cols-3 gap-3">
+          <FocusStat label={ar ? 'تمارين' : 'Exercises'} value={toAr(stats.exercises, lang)} />
+          <FocusStat label={ar ? 'المجموعات' : 'Sets'} value={toAr(stats.sets, lang)} />
+          <FocusStat label={ar ? 'الدقائق' : 'Minutes'} value={toAr(stats.minutes, lang)} />
+        </div>
+        {prLifts.length > 0 && (
+          <div className="mt-3 flex items-center justify-center gap-1.5 rounded-2xl py-2 text-xs font-bold" style={{ background: 'color-mix(in srgb, var(--v2-green) 12%, transparent)', border: `1px solid ${FOCUS.success}`, color: FOCUS.success }}>
+            <Icon name="Trophy" className="h-4 w-4" />
+            {t(`${toAr(prLifts.length, lang)} رقم قياسي مرشّح`, `${prLifts.length} candidate PR${prLifts.length > 1 ? 's' : ''}`)}
+          </div>
+        )}
+        <button type="button" onClick={onConfirm} className="v2-pressable mt-5 w-full rounded-2xl py-4 text-[1.1875rem] font-black" style={{ background: FOCUS.ember, color: FOCUS.onColor }}>{ar ? 'نعم، احفظ وأنهِ' : 'Yes, save & finish'}</button>
+        <button type="button" onClick={onCancel} className="v2-pressable mt-3 w-full rounded-2xl py-3 text-sm font-bold" style={{ background: 'transparent', border: `1px solid ${FOCUS.line}`, color: FOCUS.inkMuted }}>{ar ? 'لا، أكمل التمرين' : 'No, keep training'}</button>
+      </div>
     </div>
   )
 }
