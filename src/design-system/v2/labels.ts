@@ -13,13 +13,17 @@
 // Arabic tone (v2.1): warm Modern Standard Arabic — confident and motivating,
 // not heavy slang, not cold/clinical. See docs/design/DESIGN-DECISIONS.md.
 
-/** Final v2.1 bottom-tab labels (order is the intended RTL nav order). */
+/**
+ * Final v2.1 bottom-tab labels — the central tab dictionary (enforced by the
+ * policy gate). Bilingual so the nav follows the active language; Arabic stays
+ * the approved §03 copy.
+ */
 export const V2_TAB_LABELS = {
-  today: 'اليوم',
-  workout: 'التمارين',
-  log: 'تسجيل',
-  nutrition: 'التغذية',
-  progress: 'التقدّم',
+  today: { ar: 'اليوم', en: 'Today' },
+  workout: { ar: 'التمارين', en: 'Workout' },
+  log: { ar: 'تسجيل', en: 'Log' },
+  nutrition: { ar: 'التغذية', en: 'Nutrition' },
+  progress: { ar: 'التقدّم', en: 'Progress' },
 } as const
 
 export type V2TabKey = keyof typeof V2_TAB_LABELS

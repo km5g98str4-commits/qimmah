@@ -113,7 +113,9 @@ export function buildTodayV2Model(customization: Customization, lang: Lang): Tod
   const workoutAvailable = onboarded && exerciseCount > 0
   const durationMin = customization.profile.workoutDuration > 0 ? customization.profile.workoutDuration : estimateDurationMin(exerciseCount)
   const finished = todaysFinishedSession()
-  const finishedName = finished ? finished.workoutDayName || workoutName : ''
+  // Prefer the localized plan-day name over the stored session name (which is a
+  // single string frozen at finish time) so English never shows an Arabic name.
+  const finishedName = finished ? workoutName || finished.workoutDayName : ''
 
   // ── Nutrition (target real; consumed from today's log — the manually logged
   //    food totals live under `loggedFood`, not top-level fields) ──

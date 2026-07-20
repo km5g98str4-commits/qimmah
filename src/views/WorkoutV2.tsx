@@ -15,6 +15,8 @@ import { buildWorkoutV2Model, substituteWorkoutExercise, CATEGORY_LABEL, type Ex
 // reach preference. Both feed the active session; neither writes the plan/history.
 import { findSubstitutes, type SubReason, type SubstituteOption } from '@/lib/workoutSubstitution'
 import { getHandedness, setHandedness, otherHand, type Handedness } from '@/lib/handedness'
+import { muscleLabel } from '@/lib/muscles'
+import { equipmentLabel } from '@/lib/exerciseLabels'
 import { loadHydrationPref, saveHydrationPref, addTodayWaterMl, remindersDue, type HydrationPref } from '@/lib/workoutHydration'
 // Fix-forward A: finished v2 workouts persist through the canonical path so
 // Progress/Today/Profile react (and sync auto-enqueues) — not just a local summary.
@@ -914,7 +916,7 @@ function PlanScreen({ model, lang, onExercise, onStart, onBack }: { model: Retur
         <div className="mt-3 flex flex-wrap gap-2 text-xs font-bold text-ink-500">
           <Chip icon="Dumbbell" text={`${model.session.exerciseCount} ${ar ? 'تمارين' : 'exercises'}`} />
           <Chip icon="Clock" text={`~${model.session.durationMin} ${ar ? 'دقيقة' : 'min'}`} />
-          {model.session.muscles.slice(0, 2).map((m) => <Chip key={m} icon="Target" text={m} />)}
+          {model.session.muscles.slice(0, 2).map((m) => <Chip key={m} icon="Target" text={muscleLabel(m as Muscle, lang)} />)}
         </div>
 
         <div className="mt-6 space-y-5">
@@ -927,7 +929,7 @@ function PlanScreen({ model, lang, onExercise, onStart, onBack }: { model: Retur
                     <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-beige text-ink-500"><Icon name="Dumbbell" className="h-5 w-5" /></span>
                     <span className="min-w-0 flex-1">
                       <span className="block text-sm font-bold">{ar ? ex.nameAr : ex.nameEn}</span>
-                      <span className="block text-xs text-ink-500">{ex.sets}×{ex.reps}{ex.equipment[0] ? ` · ${ex.equipment[0]}` : ''}</span>
+                      <span className="block text-xs text-ink-500">{ex.sets}×{ex.reps}{ex.equipment[0] ? ` · ${equipmentLabel(ex.equipment[0], lang)}` : ''}</span>
                     </span>
                     <Icon name="ChevronLeft" className="h-4 w-4 shrink-0 text-ink-400 rtl:rotate-0 ltr:rotate-180" />
                   </button>
