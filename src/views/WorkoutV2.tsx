@@ -15,6 +15,7 @@ import { buildWorkoutV2Model, substituteWorkoutExercise, CATEGORY_LABEL, type Ex
 // reach preference. Both feed the active session; neither writes the plan/history.
 import { findSubstitutes, type SubReason, type SubstituteOption } from '@/lib/workoutSubstitution'
 import { getHandedness, setHandedness, otherHand, type Handedness } from '@/lib/handedness'
+import { loadHydrationPref, saveHydrationPref, addTodayWaterMl, remindersDue, type HydrationPref } from '@/lib/workoutHydration'
 // Fix-forward A: finished v2 workouts persist through the canonical path so
 // Progress/Today/Profile react (and sync auto-enqueues) — not just a local summary.
 import { persistFinishedSession } from '@/lib/finishWorkout'
@@ -220,6 +221,28 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   // Guard the destructive top "close" (discards the in-progress session) — screen
   // 27: no critical action fires from the top without confirmation.
   const [confirmDiscard, setConfirmDiscard] = useState(false)
+
+  // In-workout hydration (screen 46) — user-controlled cadence, non-intrusive.
+  const [hydrationPref, setHydrationPref] = useState<HydrationPref>(loadHydrationPref)
+  const [hydrationNow, setHydrationNow] = useState(() => Date.now())
+  // Reminders already logged/snoozed this session; the banner shows only when a
+  // new interval falls due beyond this count.
+  const [hydrationActed, setHydrationActed] = useState(0)
+  const [hydrationUndo, setHydrationUndo] = useState<{ ml: number } | null>(null)
+
+  // Coarse 30s tick for the hydration cadence — only while an active session is
+  // open AND reminders are enabled; never runs otherwise (no idle timers).
+  useEffect(() => {
+    if (screen !== 'active' || !hydrationPref.enabled) return
+    const id = window.setInterval(() => setHydrationNow(Date.now()), 30_000)
+    return () => window.clearInterval(id)
+  }, [screen, hydrationPref.enabled])
+  // Reset the per-session reminder count whenever a new session starts.
+  useEffect(() => {
+    setHydrationActed(0)
+    setHydrationUndo(null)
+    setHydrationNow(Date.now())
+  }, [active?.startedAt])
 
   // Restore an in-progress session on mount — but NEVER trust localStorage.
   // Only resume if the persisted session is fully usable for the current plan;
@@ -543,6 +566,23 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   const addRest = () => setActive((prev) => (prev?.rest ? { ...prev, rest: { ...prev.rest, endsAt: prev.rest.endsAt + REST_ADD * 1000 } } : prev))
   const skipRest = () => setActive((prev) => (prev ? { ...prev, rest: null } : prev))
 
+  // Hydration reminder is "due" when a fresh interval has elapsed beyond those
+  // already handled this session. Derived from real elapsed time only.
+  const hydrationDue = hydrationPref.enabled && remindersDue(active.startedAt, hydrationNow, hydrationPref.intervalMin) > hydrationActed
+  const logWater = (ml: number) => {
+    addTodayWaterMl(ml) // writes the SAME daily waterMl the nutrition screen reads
+    setHydrationUndo({ ml })
+    setHydrationActed((c) => c + 1)
+  }
+  const undoWater = () => {
+    if (!hydrationUndo) return
+    addTodayWaterMl(-hydrationUndo.ml)
+    setHydrationUndo(null)
+  }
+  const snoozeHydration = () => { setHydrationActed((c) => c + 1); setHydrationUndo(null) }
+  const setHydrationInterval = (min: number) => setHydrationPref(saveHydrationPref({ ...hydrationPref, intervalMin: min }))
+  const disableHydration = () => { setHydrationPref(saveHydrationPref({ ...hydrationPref, enabled: false })); setHydrationUndo(null) }
+
   return (
     <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-dark v2-screen-enter fixed inset-0 z-[60] flex flex-col bg-page text-ink-900" style={{ paddingTop: 'max(0.75rem, var(--safe-top))', paddingBottom: 'var(--safe-bottom)' }}>
       <header className="flex items-center justify-between gap-3 px-5 py-2">
@@ -556,6 +596,18 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
       <div className="mx-5 mb-1 h-1.5 overflow-hidden rounded-full" style={{ background: FOCUS.line }}>
         <div className="v2-fill h-full rounded-full" style={{ width: `${totalPlannedSets ? (doneSets / totalPlannedSets) * 100 : 0}%`, background: FOCUS.blue }} />
       </div>
+
+      {/* Hydration reminder (screen 46) — slim, teal, above the editor; never
+          overlays the set editor or interrupts the rest timer. */}
+      {hydrationDue && (
+        <HydrationReminder lang={lang} intervalMin={hydrationPref.intervalMin} onLog={logWater} onSnooze={snoozeHydration} onSetInterval={setHydrationInterval} onDisable={disableHydration} />
+      )}
+      {hydrationUndo && (
+        <div className="mx-5 mb-1 flex items-center justify-between gap-3 rounded-xl px-3 py-2 text-xs font-bold" style={{ background: 'color-mix(in srgb, var(--v2-teal) 14%, transparent)', border: `1px solid var(--v2-teal)`, color: 'var(--v2-teal-text)' }} role="status">
+          <span>{t(`أُضيف ${toAr(hydrationUndo.ml, lang)} مل`, `Added ${hydrationUndo.ml} ml`)} 💧</span>
+          <button type="button" onClick={undoWater} className="v2-pressable underline underline-offset-2">{t('تراجع', 'Undo')}</button>
+        </div>
+      )}
 
       {resting ? (
         <RestPanel lang={lang} restLeft={restLeft} restDone={restDone} nextEx={effExercises[active.exIndex]} setLabel={t(`المجموعة ${toAr(active.setIndex + 1, lang)}`, `Set ${active.setIndex + 1}`)} tip={restTip} tipDismissed={tipDismissed} onDismissTip={() => setTipDismissed(true)} onAdd={addRest} onSkip={skipRest} />
@@ -736,6 +788,56 @@ function PlateStackPanel({ lang, weight, config, onClose }: { lang: Lang; weight
 }
 
 /** Warm-up ramp — dismissible, remembers the owner's "don't show" preference. */
+/**
+ * In-workout hydration reminder (screen 46). Teal, non-intrusive: sits above the
+ * set editor, never overlays it. The user logs a real amount (250/500/custom),
+ * can undo (handled by the parent), tune the cadence, or turn it off entirely.
+ * Basis shown ("every N min") — purely time-based, nothing invented.
+ */
+function HydrationReminder({ lang, intervalMin, onLog, onSnooze, onSetInterval, onDisable }: { lang: Lang; intervalMin: number; onLog: (ml: number) => void; onSnooze: () => void; onSetInterval: (min: number) => void; onDisable: () => void }) {
+  const ar = lang !== 'en'
+  const t = (a: string, e: string) => (ar ? a : e)
+  const [customOpen, setCustomOpen] = useState(false)
+  const [custom, setCustom] = useState('')
+  const INTERVALS = [15, 20, 30, 45, 60]
+  return (
+    <section
+      aria-label={t('تذكير الترطيب', 'Hydration reminder')}
+      className="mx-5 mb-2 rounded-2xl p-3"
+      style={{ background: 'color-mix(in srgb, var(--v2-teal) 12%, transparent)', border: `1px solid var(--v2-teal)`, color: 'var(--v2-teal-text)' }}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <span className="flex items-center gap-1.5 text-sm font-black">💧 {t('وقت الترطيب', 'Hydration time')}</span>
+        <button type="button" onClick={onSnooze} className="v2-pressable text-xs font-bold underline underline-offset-2">{t('لاحقًا', 'Later')}</button>
+      </div>
+      <p className="mt-0.5 text-[0.7rem] font-bold opacity-80">{t(`كل ${toAr(intervalMin, lang)} دقيقة أثناء الجلسة`, `Every ${intervalMin} min during your session`)}</p>
+      <div className="mt-2 flex flex-wrap items-center gap-2">
+        {[250, 500].map((ml) => (
+          <button key={ml} type="button" onClick={() => onLog(ml)} className="v2-pressable rounded-xl px-3 py-1.5 text-xs font-black" style={{ background: 'var(--v2-teal)', color: 'var(--c-white, #fff)' }}>
+            {toAr(ml, lang)} {t('مل', 'ml')}
+          </button>
+        ))}
+        <button type="button" onClick={() => setCustomOpen((o) => !o)} className="v2-pressable rounded-xl px-3 py-1.5 text-xs font-bold" style={{ border: `1px solid var(--v2-teal)` }}>{t('مخصّص', 'Custom')}</button>
+      </div>
+      {customOpen && (
+        <div className="mt-2 flex items-center gap-2">
+          <input type="number" inputMode="numeric" min={0} value={custom} onChange={(e) => setCustom(e.target.value)} aria-label={t('كمية مخصّصة بالمل', 'Custom amount in ml')} placeholder={t('مل', 'ml')} className="w-24 rounded-xl bg-transparent px-3 py-1.5 text-sm font-bold tabular-nums" style={{ border: `1px solid var(--v2-teal)`, color: 'var(--v2-teal-text)' }} />
+          <button type="button" onClick={() => { const v = Number(custom); if (Number.isFinite(v) && v > 0) { onLog(v); setCustom(''); setCustomOpen(false) } }} className="v2-pressable rounded-xl px-3 py-1.5 text-xs font-black" style={{ background: 'var(--v2-teal)', color: 'var(--c-white, #fff)' }}>{t('سجّل', 'Log')}</button>
+        </div>
+      )}
+      <div className="mt-2 flex flex-wrap items-center gap-1.5">
+        <span className="text-[0.7rem] font-bold opacity-80">{t('كل:', 'Every:')}</span>
+        {INTERVALS.map((m) => (
+          <button key={m} type="button" onClick={() => onSetInterval(m)} aria-pressed={m === intervalMin} className="v2-pressable rounded-lg px-2 py-1 text-[0.7rem] font-black" style={m === intervalMin ? { background: 'var(--v2-teal)', color: 'var(--c-white, #fff)' } : { border: `1px solid var(--v2-teal)` }}>
+            {toAr(m, lang)}
+          </button>
+        ))}
+        <button type="button" onClick={onDisable} className="v2-pressable ms-auto text-[0.7rem] font-bold underline underline-offset-2">{t('إيقاف التذكير', 'Turn off')}</button>
+      </div>
+    </section>
+  )
+}
+
 function WarmupPanel({ lang, sets, onDismiss, onDisable }: { lang: Lang; sets: WarmupSet[]; onDismiss: () => void; onDisable: () => void }) {
   const ar = lang !== 'en'
   const t = (a: string, e: string) => (ar ? a : e)
