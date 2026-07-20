@@ -268,14 +268,15 @@ function buildHero(a: {
   }
 
   if (state === 'returnAfterBreak') {
-    // Blameless re-entry: warm welcome, a light suggestion, progress preserved.
-    // Never scolds the streak, never mentions how long they were away.
+    // Blameless re-entry: warm welcome + an HONEST suggestion. The CTA opens
+    // today's real plan — the "15 minutes" is guidance to ease in (do the first
+    // part), NOT a separate generated session. No fake dual-option.
     return {
       eyebrow: t('سعيدون بعودتك', 'Good to have you back'),
       eyebrowDone: false,
-      title: t('تمرين عودة خفيف', 'An easy return workout'),
-      subtitle: t('ابدأ بـ ١٥ دقيقة اليوم · تقدّمك السابق محفوظ', 'Start with 15 minutes today · your progress is saved'),
-      ctaLabel: t('ابدأ تمرين العودة', 'Start your return workout'),
+      title: t('عُد بلطف اليوم', 'Ease back in today'),
+      subtitle: t('ابدأ بأول ١٥ دقيقة من خطتك وأكمل إن أحببت · تقدّمك السابق محفوظ', 'Do the first 15 minutes of your plan, continue if you like · your progress is saved'),
+      ctaLabel: t('ابدأ تمرين اليوم', 'Start today’s workout'),
       ctaTone: 'ember',
       destination: 'workout',
     }
@@ -385,8 +386,10 @@ function buildNormalNudges(a: {
  */
 function buildReturnNudges(a: { t: (ar: string, en: string) => string }): TodayCard[] {
   const { t } = a
+  // No "full plan" alternative here — it would open the SAME plan as the hero
+  // CTA (there is no separate light session), so offering it as a distinct
+  // choice would be a false promise. Just reassure that progress is intact.
   return [
-    { label: t('أفضّل خطة اليوم كاملة', 'I’d rather do today’s full plan'), hint: null, actionLabel: t('ابدأ', 'Start'), icon: 'Dumbbell', tone: 'train', destination: 'workout' },
     { label: t('راجع تقدّمك — محفوظ بالكامل', 'Review your progress — fully saved'), hint: null, actionLabel: t('عرض', 'View'), icon: 'TrendingUp', tone: 'progress', destination: 'progress' },
   ]
 }

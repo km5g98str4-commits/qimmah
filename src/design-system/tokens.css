@@ -185,7 +185,7 @@
   /* Accessible text variants retain the same hue while normal-size copy meets
      WCAG AA on the warm paper/card surfaces. */
   --v2-ember-text: color-mix(in srgb, var(--v2-ember) 74%, var(--v2-ink-strong));
-  --v2-green-text: #157f46;
+  --v2-green-text: #0f7a40; /* AA on white for small text (~5.4:1) — screen 66 contrast fix */
   --v2-teal-text: #0e8578;
   --v2-blue-text: #245fc5;
 
@@ -287,6 +287,7 @@
    the OS is dark under 'system'. */
 :root[data-theme='dark'] body {
   color-scheme: dark;
+  --v2-green-text: #3ddc84; /* lighter green for AA small text on the dark surface */
   --c-primary: var(--v2-ember);
   --c-accent: var(--v2-teal);
   --c-page: 22 20 15;

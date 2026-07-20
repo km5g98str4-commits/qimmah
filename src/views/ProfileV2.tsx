@@ -112,7 +112,7 @@ export function ProfileV2({ lang, onNavigate }: ProfileV2Props) {
           <p className="px-1 pt-1 text-center text-xs leading-relaxed text-ink-500">
             {model.subscription.text}
             {' — '}
-            <button type="button" onClick={() => setScreen('settings')} className="font-bold text-ink-500 underline decoration-line underline-offset-2 transition-colors hover:text-ink-900">
+            <button type="button" onClick={() => setScreen('settings')} className="inline-flex min-h-[44px] items-center font-bold text-ink-500 underline decoration-line underline-offset-2 transition-colors hover:text-ink-900">
               {model.subscription.cta}
             </button>
           </p>

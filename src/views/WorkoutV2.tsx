@@ -191,6 +191,14 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   // (ambiguous data discarded — see migrateLegacySummary). Runs once per owner.
   useEffect(() => { migrateLegacySummary(userId) }, [userId])
   const [screen, setScreen] = useState<Screen>('plan')
+  // Immersive focus: the active/complete screens are fullscreen takeovers. Signal
+  // the shell to make its chrome (header + nav) inert so VoiceOver can't reach
+  // the background behind the workout (screen 27 — real modal focus).
+  useEffect(() => {
+    const immersive = screen === 'active' || screen === 'complete'
+    window.dispatchEvent(new CustomEvent('qimmah:immersive', { detail: immersive }))
+    return () => { window.dispatchEvent(new CustomEvent('qimmah:immersive', { detail: false })) }
+  }, [screen])
   const [detailIdx, setDetailIdx] = useState(0)
   const [active, setActive] = useState<ActiveState | null>(null)
   // Display clock for the timestamp-based rest timer (ticks only while resting).
@@ -586,9 +594,9 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   const disableHydration = () => { setHydrationPref(saveHydrationPref({ ...hydrationPref, enabled: false })); setHydrationUndo(null) }
 
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-dark v2-screen-enter fixed inset-0 z-[60] flex flex-col bg-page text-ink-900" style={{ paddingTop: 'max(0.75rem, var(--safe-top))', paddingBottom: 'var(--safe-bottom)' }}>
+    <div role="dialog" aria-modal="true" aria-label={t('التمرين النشط', 'Active workout')} dir={ar ? 'rtl' : 'ltr'} className="v2-surface-dark v2-screen-enter fixed inset-0 z-[60] flex flex-col bg-page text-ink-900" style={{ paddingTop: 'max(0.75rem, var(--safe-top))', paddingBottom: 'var(--safe-bottom)' }}>
       <header className="flex items-center justify-between gap-3 px-5 py-2">
-        <button type="button" onClick={() => setConfirmDiscard(true)} aria-label={t('إغلاق التمرين', 'Close workout')} className="grid h-10 w-10 place-items-center rounded-xl" style={{ background: FOCUS.card, border: `1px solid ${FOCUS.line}`, color: FOCUS.ink }}>
+        <button type="button" onClick={() => setConfirmDiscard(true)} aria-label={t('إغلاق التمرين', 'Close workout')} className="grid h-11 w-11 place-items-center rounded-xl" style={{ background: FOCUS.card, border: `1px solid ${FOCUS.line}`, color: FOCUS.ink }}>
           <Icon name="X" className="h-5 w-5" />
         </button>
         <span className="text-sm font-bold tabular-nums" style={{ color: FOCUS.inkMuted }}>{t(`التمرين ${toAr(active.exIndex + 1, lang)} من ${toAr(model.exercises.length, lang)}`, `Exercise ${active.exIndex + 1} of ${model.exercises.length}`)}</span>
@@ -729,7 +737,7 @@ function Stepper({ label, value, step, onChange, lang, mirror, onPlates, platesO
       <div className="flex items-center justify-center gap-1.5">
         <p className="text-center text-xs font-bold" style={{ color: FOCUS.inkMuted }}>{label}</p>
         {onPlates && (
-          <button type="button" onClick={onPlates} aria-label={ar ? 'حاسبة الأقراص' : 'Plate calculator'} aria-pressed={platesOpen} className="grid h-6 w-6 place-items-center rounded-lg" style={{ background: platesOpen ? FOCUS.blue : FOCUS.cardActive, border: `1px solid ${FOCUS.line}`, color: platesOpen ? FOCUS.onColor : FOCUS.inkMuted }}>
+          <button type="button" onClick={onPlates} aria-label={ar ? 'حاسبة الأقراص' : 'Plate calculator'} aria-pressed={platesOpen} className="relative grid h-6 w-6 place-items-center rounded-lg before:absolute before:-inset-2.5 before:content-['']" style={{ background: platesOpen ? FOCUS.blue : FOCUS.cardActive, border: `1px solid ${FOCUS.line}`, color: platesOpen ? FOCUS.onColor : FOCUS.inkMuted }}>
             <Icon name="Layers" className="h-3.5 w-3.5" />
           </button>
         )}
@@ -848,7 +856,7 @@ function WarmupPanel({ lang, sets, onDismiss, onDisable }: { lang: Lang; sets: W
     <div className="mt-5 rounded-2xl p-4" style={{ background: FOCUS.card, border: `1px solid ${FOCUS.line}` }} role="group" aria-label={t('إحماء', 'Warm-up')}>
       <div className="flex items-center justify-between">
         <span className="flex items-center gap-1.5 text-sm font-black" style={{ color: FOCUS.teal }}><Icon name="Flame" className="h-4 w-4" />{t('إحماء مقترح', 'Suggested warm-up')}</span>
-        <button type="button" onClick={onDismiss} aria-label={t('إخفاء', 'Dismiss')} className="grid h-7 w-7 place-items-center rounded-lg" style={{ background: FOCUS.cardActive, color: FOCUS.inkMuted }}><Icon name="X" className="h-4 w-4" /></button>
+        <button type="button" onClick={onDismiss} aria-label={t('إخفاء', 'Dismiss')} className="relative grid h-7 w-7 place-items-center rounded-lg before:absolute before:-inset-2 before:content-['']" style={{ background: FOCUS.cardActive, color: FOCUS.inkMuted }}><Icon name="X" className="h-4 w-4" /></button>
       </div>
       <div className="mt-3 space-y-1.5">
         {sets.map((s, i) => (
