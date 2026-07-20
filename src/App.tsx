@@ -37,6 +37,7 @@ function createLazyViews() {
       ? lazy(() => import('@/features/products/reviewPanel/ReviewPanelView').then((m) => ({ default: m.ReviewPanelView })))
       : null,
     MyStatsView: lazy(() => import('@/views/MyStatsView').then((m) => ({ default: m.MyStatsView }))),
+    RecoveryView: lazy(() => import('@/views/RecoveryView').then((m) => ({ default: m.RecoveryView }))),
   }
 }
 import { MobileShell, type MainTab } from '@/components/MobileShell'
@@ -64,12 +65,13 @@ function guardRoute(route: AppRoute, userId: string | null): AppRoute {
     MAIN_TABS.includes(route) ||
     route === 'exercises' ||
     route === 'stats' ||
+    route === 'recovery' ||
     route === 'setup' ||
     route === 'settings' ||
     route === 'calc'
   if (needsAccount && !userId) return 'start'
   // بعد الحساب: التبويبات تتطلّب إعدادًا مكتملًا وإلا معالج الإعداد (الأسئلة).
-  if (MAIN_TABS.includes(route) || route === 'exercises' || route === 'stats') {
+  if (MAIN_TABS.includes(route) || route === 'exercises' || route === 'stats' || route === 'recovery') {
     if (!isOnboardingComplete(userId)) return 'setup'
   }
   return route
@@ -380,6 +382,8 @@ export default function App() {
     )
   } else if (view === 'calc') {
     content = <V.CalcExplainerView lang={LANG} onBack={() => navigate('profile')} />
+  } else if (view === 'recovery') {
+    content = <V.RecoveryView lang={LANG} onBack={() => navigate('dashboard')} onNavigate={navigate} />
   } else {
     // ——— التبويبات الرئيسية داخل قشرة الجوال ———
     content = (
