@@ -25,7 +25,7 @@
 	<key>NSCameraUsageDescription</key>
 	<string>يستخدم قِمّة الكاميرا لمسح باركود المنتجات الغذائية وإضافتها لسجلّك الغذائي. Qimmah uses the camera to scan food product barcodes and add them to your nutrition log.</string>
 	<key>NSHealthShareUsageDescription</key>
-	<string>يقرأ قِمّة عدد خطواتك من تطبيق صحة لتتبع نشاطك اليومي — لا تُشارك بياناتك مع أي طرف</string>
+	<string>يقرأ قِمّة خطواتك ووزنك ومعدّل قلبك من تطبيق صحة — فقط بعد موافقتك ولكل مقياس على حدة — لعرض نشاطك بصدق. لا تُشارك بياناتك مع أي طرف، ويبقى الإدخال اليدوي متاحًا دائمًا.</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>

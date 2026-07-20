@@ -64,4 +64,6 @@ export interface MeasurementLog {
   date: string
   values: Record<string, string | number>
   notes?: string
+  /** Provenance of the entry. Absent = user-typed (manual). 'health' = imported from Apple Health. */
+  source?: 'manual' | 'health'
 }
