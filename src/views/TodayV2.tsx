@@ -90,12 +90,22 @@ export function TodayV2({ lang, onNavigate }: TodayV2Props) {
             <span className={cn('text-xs font-bold tabular-nums', model.completedCount > 0 ? 'text-[color:var(--color-success)]' : 'text-ink-500')}>{model.progressLabel}</span>
           </div>
           <ul className="mt-4 grid grid-cols-4 gap-2">
-            {model.pillars.map((p) => (
-              <li key={p.key} className="flex flex-col items-center gap-2">
-                <PillarRing pillar={p} lang={lang} />
-                <span className="text-[0.7rem] font-bold text-ink-700">{ar ? p.labelAr : p.labelEn}</span>
-              </li>
-            ))}
+            {model.pillars.map((p) =>
+              p.key === 'recover' ? (
+                // Recovery pillar → the self-report check-in (screens 37–39).
+                <li key={p.key} className="flex flex-col items-center gap-2">
+                  <button type="button" onClick={() => onNavigate('recovery')} className="press flex flex-col items-center gap-2" aria-label={ar ? 'التعافي — تسجيل' : 'Recovery — check in'}>
+                    <PillarRing pillar={p} lang={lang} />
+                    <span className="text-[0.7rem] font-bold text-ink-700">{ar ? p.labelAr : p.labelEn}</span>
+                  </button>
+                </li>
+              ) : (
+                <li key={p.key} className="flex flex-col items-center gap-2">
+                  <PillarRing pillar={p} lang={lang} />
+                  <span className="text-[0.7rem] font-bold text-ink-700">{ar ? p.labelAr : p.labelEn}</span>
+                </li>
+              ),
+            )}
           </ul>
         </section>
 
