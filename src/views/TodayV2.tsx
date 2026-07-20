@@ -87,7 +87,7 @@ export function TodayV2({ lang, onNavigate }: TodayV2Props) {
         <section className="rounded-2xl border border-line bg-surface p-4" aria-label={ar ? 'مسار اليوم' : 'Today’s track'}>
           <div className="flex items-center justify-between">
             <span className="text-sm font-black">{ar ? 'مسار اليوم' : 'Today’s track'}</span>
-            <span className={cn('text-xs font-bold tabular-nums', model.completedCount > 0 ? 'text-[color:var(--color-success)]' : 'text-ink-500')}>{model.progressLabel}</span>
+            <span className={cn('text-xs font-bold tabular-nums', model.completedCount > 0 ? 'text-[color:var(--v2-green-text)]' : 'text-ink-500')}>{model.progressLabel}</span>
           </div>
           <ul className="mt-4 grid grid-cols-4 gap-2">
             {model.pillars.map((p) =>
@@ -191,7 +191,7 @@ function PillarRing({ pillar, lang }: { pillar: TodayPillar; lang: Lang }) {
             className="v2-fill"
           />
         </svg>
-        <span className="text-[0.72rem] font-black tabular-nums" style={{ color }}>
+        <span className="text-[0.72rem] font-black tabular-nums" style={{ color: pillar.key === 'nutrition' ? 'var(--v2-green-text)' : color }}>
           {pillar.percent}%
         </span>
       </span>

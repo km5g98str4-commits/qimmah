@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Icon } from './Icon'
 import { InstallBanner } from './InstallBanner'
 import { StateBlock } from './StateBlock'
@@ -37,6 +37,25 @@ export function MobileShell({ lang, tab, badge, onNavigate, onOpenSettings, chil
   const ar = lang !== 'en'
   const online = useOnlineStatus()
   const lg = ar ? 'ar' : 'en'
+
+  // Immersive focus (fullscreen workout/summary): make the shell chrome inert so
+  // assistive tech can't reach the header/nav behind the modal workout surface.
+  const [immersive, setImmersive] = useState(false)
+  const headerRef = useRef<HTMLElement>(null)
+  const navRef = useRef<HTMLElement>(null)
+  useEffect(() => {
+    const onImmersive = (e: Event) => setImmersive(!!(e as CustomEvent).detail)
+    window.addEventListener('qimmah:immersive', onImmersive)
+    return () => window.removeEventListener('qimmah:immersive', onImmersive)
+  }, [])
+  useEffect(() => {
+    for (const el of [headerRef.current, navRef.current]) {
+      if (!el) continue
+      el.inert = immersive
+      if (immersive) el.setAttribute('aria-hidden', 'true')
+      else el.removeAttribute('aria-hidden')
+    }
+  }, [immersive])
   // v2.1 §03 — final tab labels (central V2_TAB_LABELS, lang-aware) + center «تسجيل» action, RTL order per the PDF.
   const tabs: TabDef[] = [
         { id: 'dashboard', route: 'dashboard', label: V2_TAB_LABELS.today[lg], icon: 'Home' },
@@ -66,9 +85,9 @@ export function MobileShell({ lang, tab, badge, onNavigate, onOpenSettings, chil
       </a>
       <div className="app-container flex min-h-screen flex-col border-x border-line/60">
         {/* هيدر مدمج */}
-        <header className="sticky top-0 z-40 glass" style={{ paddingTop: 'var(--safe-top)' }}>
+        <header ref={headerRef} className="sticky top-0 z-40 glass" style={{ paddingTop: 'var(--safe-top)' }}>
           <div className="flex h-14 items-center justify-between gap-3 px-4">
-            <button type="button" onClick={() => onNavigate('dashboard')} className="flex items-center gap-2">
+            <button type="button" onClick={() => onNavigate('dashboard')} className="flex min-h-[44px] items-center gap-2">
               <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-white shadow-glow">
                 <Icon name="Dumbbell" className="h-5 w-5" strokeWidth={2.5} />
               </span>
@@ -126,6 +145,7 @@ export function MobileShell({ lang, tab, badge, onNavigate, onOpenSettings, chil
 
       {/* شريط التنقّل السفلي — ثابت، مع مسافة أمان */}
       <nav
+        ref={navRef}
         className="fixed inset-x-0 bottom-0 z-50 border-t border-line bg-surface/95 backdrop-blur-xl"
         style={{ paddingBottom: 'var(--safe-bottom)' }}
         aria-label={ar ? 'التنقّل الرئيسي' : 'Primary navigation'}
