@@ -114,7 +114,7 @@ export function NutritionV2({ lang }: NutritionV2Props) {
             <div className="mt-4">
               <div className="flex items-baseline justify-between text-xs font-bold">
                 <span className="text-ink-500">{t('السعرات', 'Calories')}</span>
-                <span className="tabular-nums text-ink-700">
+                <span dir="ltr" className="tabular-nums text-ink-700">
                   {calories.consumed.toLocaleString('en-US')}
                   <span className="text-ink-400"> / {calories.target.toLocaleString('en-US')} {t('سعرة', 'kcal')}</span>
                 </span>
@@ -163,7 +163,7 @@ export function NutritionV2({ lang }: NutritionV2Props) {
                 <Icon name="Droplets" className="h-4 w-4" style={{ color: CLR.water }} />
                 {t('الماء', 'Water')}
               </span>
-              <span className="text-sm font-black tabular-nums" style={{ color: CLR_ON.water }}>
+              <span dir="ltr" className="text-sm font-black tabular-nums" style={{ color: CLR_ON.water }}>
                 {(water.consumedMl / 1000).toFixed(2)} / {(water.targetMl / 1000).toFixed(1)} {t('ل', 'L')}
               </span>
             </div>

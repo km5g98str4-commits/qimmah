@@ -6,10 +6,10 @@ import { useOnlineStatus } from '@/lib/useOnlineStatus'
 import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
+import { V2_TAB_LABELS } from '@/design-system/v2/labels'
 import type { AppRoute } from '@/lib/appRoutes'
 import type { AppBadge } from './AppNav'
 import { LanguageToggle } from '@/i18n'
-import { V2_TAB_LABELS } from '@/design-system/v2/labels'
 
 export type MainTab = 'dashboard' | 'workout' | 'nutrition' | 'progress' | 'profile'
 
@@ -36,14 +36,15 @@ export function MobileShell({ lang, tab, badge, onNavigate, onOpenSettings, chil
   const t = getStrings(lang)
   const ar = lang !== 'en'
   const online = useOnlineStatus()
-  // v2.1 §03 — final tab labels + center «تسجيل» action, RTL order per the PDF.
+  const lg = ar ? 'ar' : 'en'
+  // v2.1 §03 — final tab labels (central V2_TAB_LABELS, lang-aware) + center «تسجيل» action, RTL order per the PDF.
   const tabs: TabDef[] = [
-        { id: 'dashboard', route: 'dashboard', label: V2_TAB_LABELS.today, icon: 'Home' },
-        { id: 'workout', route: 'workout', label: V2_TAB_LABELS.workout, icon: 'Dumbbell' },
+        { id: 'dashboard', route: 'dashboard', label: V2_TAB_LABELS.today[lg], icon: 'Home' },
+        { id: 'workout', route: 'workout', label: V2_TAB_LABELS.workout[lg], icon: 'Dumbbell' },
         // Center action: quick-log → the nutrition logging surface (most-logged).
-        { id: 'nutrition', route: 'nutrition', label: V2_TAB_LABELS.log, icon: 'Plus', action: true },
-        { id: 'nutrition', route: 'nutrition', label: V2_TAB_LABELS.nutrition, icon: 'Salad' },
-        { id: 'progress', route: 'progress', label: V2_TAB_LABELS.progress, icon: 'BarChart3' },
+        { id: 'nutrition', route: 'nutrition', label: V2_TAB_LABELS.log[lg], icon: 'Plus', action: true },
+        { id: 'nutrition', route: 'nutrition', label: V2_TAB_LABELS.nutrition[lg], icon: 'Salad' },
+        { id: 'progress', route: 'progress', label: V2_TAB_LABELS.progress[lg], icon: 'BarChart3' },
       ]
 
   const badgeLabel = badge === 'account' ? t.badge.account : t.badge.guest
