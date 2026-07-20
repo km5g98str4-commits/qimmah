@@ -172,6 +172,7 @@ export function NutritionV2({ lang }: NutritionV2Props) {
               <WaterBtn label={t('+ ٢٥٠ مل', '+250 ml')} onClick={() => { addWaterToDay(250); bump() }} />
               <WaterBtn label={t('+ ٥٠٠ مل', '+500 ml')} onClick={() => { addWaterToDay(500); bump() }} />
             </div>
+            <WaterCustomAdd lang={lang} onAdd={(ml) => { addWaterToDay(ml); bump() }} />
           </section>
         )}
 
@@ -287,6 +288,77 @@ function Bar({ pct: p, color, className }: { pct: number; color: string; classNa
   )
 }
 
+/**
+ * A search result with an adjustable serving count. Calories/protein recompute
+ * live and stay tagged as an estimate («~ · تقدير»); the logged values scale by
+ * the chosen servings before being added.
+ */
+function FoodRow({ f, lang, onLog }: { f: FoodItem; lang: Lang; onLog: (servings: number) => void }) {
+  const ar = lang !== 'en'
+  const t = (a: string, e: string) => (ar ? a : e)
+  const [servings, setServings] = useState(1)
+  const cal = Math.round(f.calories * servings)
+  const pro = Math.round(f.protein * servings)
+  const step = (d: number) => setServings((s) => Math.min(20, Math.max(0.5, Math.round((s + d) * 2) / 2)))
+  return (
+    <div className="rounded-2xl border border-line bg-surface px-4 py-3">
+      <div className="flex items-center gap-3">
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-bold">{ar ? f.nameAr : f.nameEn}</span>
+          <span className="block text-xs text-ink-500">
+            ~{cal} {t('سعرة', 'kcal')} · {pro}g {t('بروتين', 'protein')} · {t('تقدير', 'est.')} / {f.servingLabelAr}
+          </span>
+        </span>
+        <button
+          type="button"
+          onClick={() => onLog(servings)}
+          aria-label={t(`أضف ${f.nameAr} ×${servings}`, `Add ${f.nameEn} ×${servings}`)}
+          className="v2-bg-blue v2-pressable grid h-11 w-11 shrink-0 place-items-center rounded-xl text-white"
+        >
+          <Icon name="Plus" className="h-5 w-5" />
+        </button>
+      </div>
+      <div className="mt-2 flex items-center justify-between border-t border-line pt-2">
+        <span className="text-xs font-bold text-ink-500">{t('عدد الحصص', 'Servings')}</span>
+        <div className="flex items-center gap-2">
+          <button type="button" onClick={() => step(-0.5)} aria-label={t('أقل', 'Fewer')} className="grid h-9 w-9 place-items-center rounded-lg border border-line text-ink-700"><Icon name="Minus" className="h-4 w-4" /></button>
+          <span className="w-8 text-center text-sm font-black tabular-nums">{servings}</span>
+          <button type="button" onClick={() => step(0.5)} aria-label={t('أكثر', 'More')} className="grid h-9 w-9 place-items-center rounded-lg border border-line text-ink-700"><Icon name="Plus" className="h-4 w-4" /></button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/** Custom water amount (ml) — beyond the 250/500 quick-adds. Writes the same source. */
+function WaterCustomAdd({ lang, onAdd }: { lang: Lang; onAdd: (ml: number) => void }) {
+  const ar = lang !== 'en'
+  const t = (a: string, e: string) => (ar ? a : e)
+  const [ml, setMl] = useState('')
+  const submit = () => {
+    const v = Number(ml)
+    if (Number.isFinite(v) && v > 0) { onAdd(Math.min(5000, Math.round(v))); setMl('') }
+  }
+  return (
+    <div className="mt-2 flex gap-2">
+      <input
+        type="number"
+        inputMode="numeric"
+        min={0}
+        value={ml}
+        onChange={(e) => setMl(e.target.value)}
+        onKeyDown={(e) => { if (e.key === 'Enter') submit() }}
+        aria-label={t('كمية ماء مخصّصة بالمل', 'Custom water amount in ml')}
+        placeholder={t('مخصّص (مل)', 'Custom (ml)')}
+        className="input min-h-[44px] flex-1 text-start tabular-nums"
+      />
+      <button type="button" onClick={submit} className="min-h-[44px] shrink-0 rounded-xl px-4 text-xs font-black text-white transition-opacity hover:opacity-90 disabled:opacity-50" style={{ backgroundColor: CLR_ON.water }} disabled={!ml}>
+        {t('أضف', 'Add')}
+      </button>
+    </div>
+  )
+}
+
 function WaterBtn({ label, onClick }: { label: string; onClick: () => void }) {
   // White on AA-safe teal (4.52:1) — the quick-add is interactive text.
   return (
@@ -316,15 +388,15 @@ function AddMeal({ lang, slot, onAdd, onBack }: { lang: Lang; slot: MealSlot; on
     return list.slice(0, 30)
   }, [q, highProtein])
 
-  const logFood = (f: Pick<FoodItem, 'id' | 'nameAr' | 'nameEn' | 'calories' | 'protein' | 'carbs' | 'fat'>) => {
+  const logFood = (f: Pick<FoodItem, 'id' | 'nameAr' | 'nameEn' | 'calories' | 'protein' | 'carbs' | 'fat'>, servings = 1) => {
     addFoodToDay({
       id: String(f.id ?? f.nameAr),
       nameAr: f.nameAr,
       nameEn: f.nameEn,
-      calories: f.calories,
-      protein: f.protein,
-      carbs: f.carbs,
-      fat: f.fat,
+      calories: Math.round(f.calories * servings),
+      protein: Math.round(f.protein * servings),
+      carbs: Math.round(f.carbs * servings),
+      fat: Math.round(f.fat * servings),
       meal: slot,
     })
     onAdd()
@@ -375,22 +447,7 @@ function AddMeal({ lang, slot, onAdd, onBack }: { lang: Lang; slot: MealSlot; on
 
         <div className="mt-4 space-y-2">
           {results.map((f) => (
-            <div key={f.id ?? f.nameAr} className="flex items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3">
-              <span className="min-w-0 flex-1">
-                <span className="block text-sm font-bold">{ar ? f.nameAr : f.nameEn}</span>
-                <span className="block text-xs text-ink-500">
-                  {f.calories} {t('سعرة', 'kcal')} · {f.protein}g {t('بروتين', 'protein')} / {f.servingLabelAr}
-                </span>
-              </span>
-              <button
-                type="button"
-                onClick={() => logFood(f)}
-                aria-label={t(`أضف ${f.nameAr}`, `Add ${f.nameEn}`)}
-                className="v2-bg-blue v2-pressable grid h-11 w-11 shrink-0 place-items-center rounded-xl text-white"
-              >
-                <Icon name="Plus" className="h-5 w-5" />
-              </button>
-            </div>
+            <FoodRow key={f.id ?? f.nameAr} f={f} lang={lang} onLog={(servings) => logFood(f, servings)} />
           ))}
           {results.length === 0 && <p className="py-8 text-center text-sm text-ink-500">{t('لا نتائج', 'No results')}</p>}
         </div>

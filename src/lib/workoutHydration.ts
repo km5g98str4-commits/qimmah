@@ -4,8 +4,7 @@
 // التغذية؛ هذا الملف يكتب فيه نفسه — لا مصدر مزدوج. التذكير مبنيّ على وقت الجلسة
 // الحقيقي فقط (لا حرارة/مدة مُختلقة): كل N دقيقة يضبطها المستخدم، ويمكن إيقافه كليًا.
 
-import { getNutritionLog, saveNutritionLog, saveWaterLog } from './historyStore'
-import { getDayStamp } from './today'
+import { addWaterToDay, loadNutritionDay } from './nutritionV2Model'
 
 export const HYDRATION_PREF_KEY = 'qimmah:workoutHydration:v1'
 
@@ -53,23 +52,23 @@ export function saveHydrationPref(pref: HydrationPref): HydrationPref {
   return clean
 }
 
-// ── Single-source daily water (same waterMl the nutrition screen reads) ──
+// ── Single-source daily water ──
+// Both the in-workout reminder AND the Nutrition screen go through the ONE
+// canonical store (nutritionV2Model → qimmah:nutrition:v2, mirrored to the
+// history water log). No parallel counter.
 
-/** Today's logged water in ml — read from the canonical nutrition log. */
-export function getTodayWaterMl(date = getDayStamp()): number {
-  return getNutritionLog(date)?.waterMl ?? 0
+/** Today's logged water in ml — the same value the Nutrition screen shows. */
+export function getTodayWaterMl(): number {
+  return loadNutritionDay().waterMl
 }
 
 /**
- * Adds (or subtracts, for undo) water to today's total, writing the SAME
- * `waterMl` field the nutrition tracker uses — never a parallel store.
+ * Adds (or subtracts, for undo) water to today's total via the canonical
+ * nutrition store — the exact path the Nutrition screen uses.
  * @returns the new daily total (clamped ≥ 0).
  */
-export function addTodayWaterMl(deltaMl: number, date = getDayStamp()): number {
-  const next = Math.max(0, getTodayWaterMl(date) + Math.round(deltaMl))
-  saveNutritionLog(date, { waterMl: next })
-  saveWaterLog(date, next)
-  return next
+export function addTodayWaterMl(deltaMl: number): number {
+  return addWaterToDay(Math.round(deltaMl)).waterMl
 }
 
 // ── Pure reminder-due logic (from real session elapsed time only) ──
