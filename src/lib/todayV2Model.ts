@@ -2,8 +2,9 @@
 //
 // A small, HONEST view-model assembled from real local data (generated plan,
 // finished sessions, step log, nutrition log, wellness plan, onboarding). It
-// resolves ONE of three states the founder stress-tested — normal · new-user
-// (low data) · after-workout — and, for each, a single hero decision, a four
+// resolves ONE of four states the founder stress-tested — normal · new-user
+// (low data) · after-workout · return-after-break (a real ≥3-day workout gap) —
+// and, for each, a single hero decision, a four
 // pillar «مسار اليوم» track, and verb+destination cards. Every value is real or
 // an honest fallback; never a fake number, never an empty ring. Pure/read-only.
 
@@ -18,7 +19,7 @@ import { todaysFinishedSession } from '@/lib/workoutSessions'
 import { getDayStamp, weekdayName } from '@/lib/today'
 import { loadOnboardingProfile } from '@/lib/onboardingProfile'
 
-export type TodayState = 'normal' | 'newUser' | 'afterWorkout'
+export type TodayState = 'normal' | 'newUser' | 'afterWorkout' | 'returnAfterBreak'
 export type PillarKey = 'train' | 'nutrition' | 'move' | 'recover'
 /** done = complete (✓) · active = in-progress ring (%) · ready = today's focus, filled + icon · locked = dashed placeholder (no empty ring). */
 export type PillarState = 'done' | 'active' | 'ready' | 'locked'
@@ -77,6 +78,14 @@ const pct = (cur: number, target: number) => (target > 0 ? Math.max(0, Math.min(
 const estimateDurationMin = (exerciseCount: number) => (exerciseCount > 0 ? Math.max(20, Math.round((exerciseCount * 9) / 5) * 5) : 0)
 const num = (n: number) => n.toLocaleString('en-US')
 
+const DAY_MS = 86_400_000
+/** Whole days between a YYYY-MM-DD stamp and today (local). Derived from the real clock, never guessed. */
+function daysSince(stamp: string, now: Date): number {
+  const then = new Date(`${stamp}T00:00:00`).getTime()
+  const today = new Date(`${getDayStamp(now)}T00:00:00`).getTime()
+  return Math.round((today - then) / DAY_MS)
+}
+
 /** Part of day for the honest greeting/date line — from the real clock. */
 function partOfDay(ar: boolean, d = new Date()): string {
   const h = d.getHours()
@@ -132,8 +141,22 @@ export function buildTodayV2Model(customization: Customization, lang: Lang): Tod
   const recoveryAvailable = customization.wellnessPlan?.enabled !== false && supplements.length + medications.length > 0
 
   // ── State discriminator (from real data) ──
-  const hasHistory = getWorkoutSessions().length > 0 || loggedMeal || movementAvailable
-  const state: TodayState = finished ? 'afterWorkout' : !onboarded || !hasHistory ? 'newUser' : 'normal'
+  const sessions = getWorkoutSessions()
+  const hasHistory = sessions.length > 0 || loggedMeal || movementAvailable
+  // Real workout gap: whole days since the last FINISHED session. null when the
+  // user has never finished one (they are new, not returning).
+  const lastWorkoutStamp = sessions.filter((s) => s.finishedAt).map((s) => s.date).sort().at(-1) ?? null
+  const daysSinceWorkout = lastWorkoutStamp ? daysSince(lastWorkoutStamp, now) : null
+  // Return-after-break: an onboarded user, no session today, a real ≥3-day gap,
+  // and still a plan to come back to. Derived from the log — never assumed.
+  const returningGap = daysSinceWorkout !== null && daysSinceWorkout >= 3 && workoutAvailable
+  const state: TodayState = finished
+    ? 'afterWorkout'
+    : !onboarded || !hasHistory
+      ? 'newUser'
+      : returningGap
+        ? 'returnAfterBreak'
+        : 'normal'
 
   // ── Header: greeting + date line, rewritten by state & time-of-day ──
   const weekday = weekdayName(ar ? 'ar' : 'en', now)
@@ -153,7 +176,12 @@ export function buildTodayV2Model(customization: Customization, lang: Lang): Tod
       }
     })()
     dateLabel = dayMonth ? `${weekday} · ${dayMonth}` : weekday
-    greeting = state === 'newUser' ? (firstName ? t(`أهلاً ${firstName}`, `Hi ${firstName}`) : t('أهلاً بك', 'Welcome')) : t('يومك في قِمّة', 'Your day in Qimmah')
+    greeting =
+      state === 'newUser'
+        ? firstName ? t(`أهلاً ${firstName}`, `Hi ${firstName}`) : t('أهلاً بك', 'Welcome')
+        : state === 'returnAfterBreak'
+          ? firstName ? t(`سعيدون بعودتك، ${firstName}`, `Great to see you back, ${firstName}`) : t('سعيدون بعودتك', 'Great to see you back')
+          : t('يومك في قِمّة', 'Your day in Qimmah')
   }
 
   // ── Hero: the single top-third decision ──
@@ -181,7 +209,9 @@ export function buildTodayV2Model(customization: Customization, lang: Lang): Tod
       ? buildSetupCards(t)
       : state === 'afterWorkout'
         ? buildAfterWorkoutNudges({ t, recoveryAvailable, proteinRemaining })
-        : buildNormalNudges({ t, proteinRemaining, loggedMeal, movementAvailable, stepsRemaining, nutritionTarget })
+        : state === 'returnAfterBreak'
+          ? buildReturnNudges({ t })
+          : buildNormalNudges({ t, proteinRemaining, loggedMeal, movementAvailable, stepsRemaining, nutritionTarget })
 
   // ── Trust note (single, honest, only when something is genuinely unknown) ──
   let trustNote: string | null = null
@@ -232,6 +262,20 @@ function buildHero(a: {
       ctaLabel: t('عرض التقدّم', 'View progress'),
       ctaTone: 'green',
       destination: 'progress',
+    }
+  }
+
+  if (state === 'returnAfterBreak') {
+    // Blameless re-entry: warm welcome, a light suggestion, progress preserved.
+    // Never scolds the streak, never mentions how long they were away.
+    return {
+      eyebrow: t('سعيدون بعودتك', 'Good to have you back'),
+      eyebrowDone: false,
+      title: t('تمرين عودة خفيف', 'An easy return workout'),
+      subtitle: t('ابدأ بـ ١٥ دقيقة اليوم · تقدّمك السابق محفوظ', 'Start with 15 minutes today · your progress is saved'),
+      ctaLabel: t('ابدأ تمرين العودة', 'Start your return workout'),
+      ctaTone: 'ember',
+      destination: 'workout',
     }
   }
 
@@ -329,6 +373,20 @@ function buildNormalNudges(a: {
     cards.push({ label: t('سجّل وزنك الحالي · نقطة البداية', 'Log your current weight · your baseline'), hint: null, actionLabel: t('سجّل', 'Log'), icon: 'TrendingUp', tone: 'progress', destination: 'progress' })
   }
   return cards.slice(0, 3)
+}
+
+/**
+ * Return-after-break nudges — the full-plan alternative + a look back at saved
+ * progress. Rule D: both are explicit choices the user taps; nothing is applied
+ * automatically. Both open today's real plan — the hero frames easing in, this
+ * card frames doing the whole session; there is no separate light-workout yet.
+ */
+function buildReturnNudges(a: { t: (ar: string, en: string) => string }): TodayCard[] {
+  const { t } = a
+  return [
+    { label: t('أفضّل خطة اليوم كاملة', 'I’d rather do today’s full plan'), hint: null, actionLabel: t('ابدأ', 'Start'), icon: 'Dumbbell', tone: 'train', destination: 'workout' },
+    { label: t('راجع تقدّمك — محفوظ بالكامل', 'Review your progress — fully saved'), hint: null, actionLabel: t('عرض', 'View'), icon: 'TrendingUp', tone: 'progress', destination: 'progress' },
+  ]
 }
 
 /** After-workout nudges — recovery + a real look-back, each with a destination. */

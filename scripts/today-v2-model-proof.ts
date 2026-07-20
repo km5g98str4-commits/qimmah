@@ -44,6 +44,16 @@ const seedFinished = () =>
     'qimmah:history:workoutSessions:v1',
     JSON.stringify([{ id: 's1', date: stamp, startedAt: iso, finishedAt: iso, workoutDayId: 'd1', workoutDayName: 'الصدر والكتف', exercises: [{ exerciseId: 'x', targetSets: 4, targetReps: '8', targetRestSec: 90, completed: true }] }]),
   )
+/** A finished session `daysAgo` days back (no session today) — the return-after-break signal. */
+const seedFinishedDaysAgo = (daysAgo: number) => {
+  const d = new Date()
+  d.setDate(d.getDate() - daysAgo)
+  const past = getDayStamp(d)
+  ls.setItem(
+    'qimmah:history:workoutSessions:v1',
+    JSON.stringify([{ id: 'sPast', date: past, startedAt: `${past}T07:00:00.000Z`, finishedAt: `${past}T07:40:00.000Z`, workoutDayId: 'd1', workoutDayName: 'الصدر والكتف', exercises: [{ exerciseId: 'x', targetSets: 4, targetReps: '8', targetRestSec: 90, completed: true }] }]),
+  )
+}
 
 console.log('\n① لم يُكمل الإعداد → new-user، البطل يوجّه للإعداد')
 {
@@ -108,6 +118,36 @@ console.log('\n④ جلسة منتهية اليوم → after-workout، تعاف
   check('عمود التغذية active 70%', m.pillars[1].state === 'active' && m.pillars[1].percent === 70)
   check('عدّاد الإكمال ≥ 2', m.completedCount >= 2)
   check('بطاقة تذكير مساء (تعافي)', m.cards.some((c) => c.tone === 'recover'))
+}
+
+console.log('\n⑥ فجوة ≥٣ أيام منذ آخر تمرين → return-after-break (نبرة لطيفة، اقتراح لا تغيير)')
+{
+  ls.clear()
+  seedMigrated()
+  seedOnboarded()
+  seedFinishedDaysAgo(5) // آخر تمرين قبل ٥ أيام، لا جلسة اليوم
+  const m = buildTodayV2Model(baseCustomization(), 'ar')
+  check('state = returnAfterBreak', m.state === 'returnAfterBreak')
+  check('التحية بلا لوم «سعيدون بعودتك»', m.greeting.includes('بعودتك'))
+  check('البطل: عنوان تمرين عودة خفيف', m.hero.title.includes('عودة'))
+  check('البطل يذكر «١٥ دقيقة»', m.hero.subtitle.includes('١٥'))
+  check('«تقدّمك السابق محفوظ»', m.hero.subtitle.includes('محفوظ'))
+  check('صفر لوم/ذنب (لا ذكر لعدد أيام الغياب)', !/\d+\s*(يوم|أيام|days?)/.test(`${m.greeting} ${m.hero.eyebrow} ${m.hero.title} ${m.hero.subtitle}`))
+  check('الستريك غير مُوبَّخ (لا كلمات لوم)', !/(فاتك|انقطعت|خسرت|أضعت|للأسف|missed|lost|broke)/i.test(`${m.greeting} ${m.hero.subtitle}`))
+  check('القاعدة D: البطل اقتراح ببدء صريح → workout', m.hero.destination === 'workout')
+  check('خيار «خطة كاملة» ظاهر كبطاقة → workout', m.cards.some((c) => c.label.includes('كاملة') && c.destination === 'workout'))
+  check('كل بطاقة لها وجهة', m.cards.every((c) => c.destination !== null))
+  check('السياقات الأخرى سليمة: أعمدة غير مقفلة بالكامل', m.pillars.some((p) => p.state !== 'locked'))
+}
+
+console.log('\n⑦ فجوة يوم واحد فقط → يبقى normal (لا عودة قبل ٣ أيام)')
+{
+  ls.clear()
+  seedMigrated()
+  seedOnboarded()
+  seedFinishedDaysAgo(1)
+  const m = buildTodayV2Model(baseCustomization(), 'ar')
+  check('state = normal (فجوة < ٣ أيام)', m.state === 'normal')
 }
 
 console.log('\n⑤ الإنجليزية: نفس المنطق، نصوص EN')
