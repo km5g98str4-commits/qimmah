@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Icon } from '@/components/Icon'
 import { cn } from '@/lib/cn'
-import type { Lang, ThemePref } from '@/lib/appPreferences'
-import { getTheme, setTheme } from '@/lib/appPreferences'
+import type { Lang, ThemePref, ThemeSchedule } from '@/lib/appPreferences'
+import { getTheme, setTheme, getThemeSchedule, enableSunsetSchedule, disableSunsetSchedule } from '@/lib/appPreferences'
+import { requestGeolocation } from '@/lib/geolocation'
+import { SCHEDULE_CITIES } from '@/data/scheduleCities'
 import type { AppRoute } from '@/lib/appRoutes'
 import { useCustomization } from '@/lib/customizationContext'
 import { useAuth } from '@/lib/authContext'
@@ -399,15 +401,56 @@ function ThemeControl({ lang }: { lang: Lang }) {
   const t = (a: string, e: string) => (ar ? a : e)
   const [pref, setPref] = useState<ThemePref>(() => getTheme())
   const [deferred, setDeferred] = useState(false)
+  const [schedule, setSchedule] = useState<ThemeSchedule>(() => getThemeSchedule())
+  const [busy, setBusy] = useState(false)
+  const [showCities, setShowCities] = useState(false)
   const OPTIONS: { value: ThemePref; label: string; icon: string }[] = [
     { value: 'system', label: t('النظام', 'System'), icon: 'Smartphone' },
     { value: 'light', label: t('فاتح', 'Light'), icon: 'Sun' },
     { value: 'dark', label: t('داكن', 'Dark'), icon: 'Moon' },
   ]
   const choose = (value: ThemePref) => {
+    // Manual choice always wins — setTheme turns the schedule off.
     setPref(value)
     const applied = setTheme(value)
     setDeferred(!applied)
+    setSchedule(getThemeSchedule())
+    setShowCities(false)
+  }
+  const enableFromLocation = async () => {
+    setBusy(true)
+    try {
+      // On-demand: the OS location prompt fires only here, after the benefit is shown.
+      const coords = await requestGeolocation()
+      if (coords) {
+        const applied = enableSunsetSchedule({ lat: coords.lat, lon: coords.lon, cityLabel: t('موقعك', 'Your location') })
+        setDeferred(!applied)
+        setSchedule(getThemeSchedule())
+        setShowCities(false)
+      } else {
+        // Denied/unavailable → always a manual fallback, never blocked.
+        setShowCities(true)
+      }
+    } finally {
+      setBusy(false)
+    }
+  }
+  const chooseCity = (id: string) => {
+    const c = SCHEDULE_CITIES.find((x) => x.id === id)
+    if (!c) return
+    const applied = enableSunsetSchedule({ lat: c.lat, lon: c.lon, cityLabel: ar ? c.nameAr : c.nameEn })
+    setDeferred(!applied)
+    setSchedule(getThemeSchedule())
+    setShowCities(false)
+  }
+  const toggleSchedule = () => {
+    if (schedule.enabled) {
+      disableSunsetSchedule()
+      setSchedule(getThemeSchedule())
+      setShowCities(false)
+    } else {
+      void enableFromLocation()
+    }
   }
   return (
     <div className="rounded-2xl border border-line bg-surface p-4">
@@ -417,7 +460,7 @@ function ThemeControl({ lang }: { lang: Lang }) {
       </div>
       <div role="radiogroup" aria-label={t('السمة', 'Theme')} className="mt-3 grid grid-cols-3 gap-2">
         {OPTIONS.map((o) => {
-          const active = pref === o.value
+          const active = !schedule.enabled && pref === o.value
           return (
             <button
               key={o.value}
@@ -436,6 +479,34 @@ function ThemeControl({ lang }: { lang: Lang }) {
           )
         })}
       </div>
+
+      {/* Sunset schedule (screen 66) — optional, off by default. */}
+      <div className="mt-3 border-t border-line pt-3">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-sm font-bold text-ink-900">{t('جدولة حسب الغروب', 'Schedule by sunset')}</p>
+            <p className="mt-0.5 text-[0.7rem] leading-relaxed text-ink-500">{t('داكن تلقائيًا بعد الغروب، فاتح بعد الشروق — يتطلّب موقعك أو اختيار مدينة.', 'Dark after sunset, light after sunrise — needs your location or a chosen city.')}</p>
+          </div>
+          <button type="button" role="switch" aria-checked={schedule.enabled} aria-label={t('جدولة حسب الغروب', 'Schedule by sunset')} disabled={busy} onClick={toggleSchedule} className={cn('relative mt-0.5 h-6 w-11 shrink-0 rounded-full transition-colors disabled:opacity-50', schedule.enabled ? 'bg-primary' : 'bg-line')}>
+            <span className={cn('absolute top-0.5 h-5 w-5 rounded-full bg-white transition-all', schedule.enabled ? 'start-0.5' : 'end-0.5')} />
+          </button>
+        </div>
+        {schedule.enabled && schedule.cityLabel && (
+          <p className="mt-2 flex items-center gap-1.5 text-[0.7rem] font-bold text-primary-c"><Icon name="Moon" className="h-3.5 w-3.5" />{t(`يتبع الغروب · ${schedule.cityLabel}`, `Following sunset · ${schedule.cityLabel}`)}</p>
+        )}
+        {showCities && !schedule.enabled && (
+          <div className="mt-2">
+            <p className="mb-1 text-[0.7rem] font-bold text-ink-500">{t('تعذّر تحديد موقعك — اختر مدينة:', 'Couldn’t get your location — pick a city:')}</p>
+            <select aria-label={t('اختر مدينة', 'Pick a city')} defaultValue="" onChange={(e) => chooseCity(e.target.value)} className="w-full rounded-xl border border-line bg-page px-3 py-2 text-sm font-bold text-ink-900">
+              <option value="" disabled>{t('اختر مدينة…', 'Choose a city…')}</option>
+              {SCHEDULE_CITIES.map((c) => (
+                <option key={c.id} value={c.id}>{ar ? c.nameAr : c.nameEn}</option>
+              ))}
+            </select>
+          </div>
+        )}
+      </div>
+
       {deferred && (
         <p className="mt-2.5 text-[0.7rem] font-bold text-ink-500">{t('يُطبَّق بعد انتهاء تمرينك الحالي.', 'Applies after your current workout.')}</p>
       )}
