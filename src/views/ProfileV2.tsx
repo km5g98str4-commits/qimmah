@@ -8,6 +8,8 @@ import { useCustomization } from '@/lib/customizationContext'
 import { useAuth } from '@/lib/authContext'
 import { buildProfileV2Model, COMMITMENT_WEEKS, type CommitmentWeek, type ProfileV2Model } from '@/lib/profileV2Model'
 import { NotificationsSettingsV2 } from './NotificationsSettingsV2'
+import { NativeSettingsPanel } from '@/components/NativeSettingsPanel'
+import { NATIVE_SETTINGS_COPY } from '@/data/nativeSettings'
 import {
   buildExportBundle,
   deliverBundle,
@@ -206,6 +208,11 @@ function Settings({ lang, model, onBack, onAccount, onPrivacy, onNotifications, 
       </Group>
       <Group title={t('الإشعارات', 'Notifications')}>
         <InfoRow icon="Bell" title={t('التذكيرات', 'Reminders')} sub={t('تمرين · تعافٍ · ماء · ملخّص', 'Workout · recovery · water · brief')} state="" onClick={onNotifications} />
+      </Group>
+      <Group title={NATIVE_SETTINGS_COPY[lang].group}>
+        <div className="rounded-2xl border border-line bg-surface px-4 py-4">
+          <NativeSettingsPanel lang={lang} />
+        </div>
       </Group>
       <Group title={t('الخصوصية والبيانات', 'Privacy & data')}>
         <InfoRow icon="ShieldCheck" title={t('الخصوصية والبيانات', 'Privacy & data')} sub={t('التحكم في بياناتك', 'Control your data')} onClick={onPrivacy} />
