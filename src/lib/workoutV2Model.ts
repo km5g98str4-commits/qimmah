@@ -58,6 +58,33 @@ function categoryFor(index: number, total: number): ExCategory {
 const GENERIC_CUES_AR = ['تحكّم في الهبوط', 'مدى حركة كامل', 'زفير عند الدفع']
 const GENERIC_CUES_EN = ['Control the descent', 'Full range of motion', 'Exhale on the push']
 
+/**
+ * Re-skin one workout slot onto a substitute catalog exercise (screen 31). The
+ * SLOT is preserved — id, category, sets, reps, restSec, targetWeightKg — so the
+ * active session's rows (keyed by slot id) keep working and the prescription is
+ * unchanged; only the exercise IDENTITY (name, equipment, muscles, cues) swaps.
+ * Uses the same cue/muscle derivation as buildWorkoutV2Model (no divergence).
+ * Returns the base unchanged if the substitute id is unknown.
+ */
+export function substituteWorkoutExercise(base: WorkoutV2Exercise, catalogExerciseId: string, lang: Lang): WorkoutV2Exercise {
+  const ar = lang !== 'en'
+  const ex = getExercise(catalogExerciseId)
+  if (!ex) return base
+  const authoredCue = getCue(ex.id)
+  const muscles = [ex.primaryMuscle, ...ex.secondaryMuscles].filter(Boolean).slice(0, 3)
+  return {
+    ...base,
+    exerciseId: ex.id,
+    nameAr: ex.nameAr,
+    nameEn: ex.nameEn,
+    equipment: ex.equipment,
+    muscles,
+    cues: ar ? authoredCue?.steps ?? GENERIC_CUES_AR : GENERIC_CUES_EN,
+    commonMistake: ar ? authoredCue?.mistakes[0] ?? null : null,
+    lastPerformance: null, // never fake a previous weight for the swapped-in lift
+  }
+}
+
 export function buildWorkoutV2Model(customization: Customization, lang: Lang): WorkoutV2Model {
   const ar = lang !== 'en'
   const day = todayPlanDay(customization.workoutPlan)
