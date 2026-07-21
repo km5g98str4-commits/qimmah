@@ -190,7 +190,7 @@
   --v2-blue-text: #245fc5;
 
   /* Light system sampled from the PDF phone mocks (§04–§06). */
-  --v2-cream: #f1eee8;
+  --v2-cream: #efeae2; /* v3.0 §F1 Sand · Surface — exact standard value */
   --v2-paper: #ffffff;
   --v2-paper-muted: #e9e5de;
   --v2-border: #e0d9ce;
@@ -270,7 +270,7 @@
   color-scheme: light;
   --c-primary: var(--v2-ember);
   --c-accent: var(--v2-blue);
-  --c-page: 241 238 232;
+  --c-page: 239 234 226; /* v3.0 §F1 Sand #EFEAE2 */
   --c-surface: 255 255 255;
   --c-beige: 233 229 222;
   --c-line: 224 217 206;
