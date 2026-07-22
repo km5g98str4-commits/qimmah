@@ -12,6 +12,9 @@ import { buildProfileV2Model, COMMITMENT_WEEKS, type CommitmentWeek, type Profil
 import { NotificationsSettingsV2 } from './NotificationsSettingsV2'
 import { NativeSettingsPanel } from '@/components/NativeSettingsPanel'
 import { NATIVE_SETTINGS_COPY } from '@/data/nativeSettings'
+import { V2_ROUTINE_TRACKER } from '@/design-system/v2/labels'
+import { medicationName, supplementName } from '@/lib/wellnessPlan'
+import { useWellnessToday } from '@/lib/wellnessTracking'
 import {
   buildExportBundle,
   deliverBundle,
@@ -29,7 +32,7 @@ interface ProfileV2Props {
   onNavigate: (route: AppRoute) => void
 }
 
-type Screen = 'home' | 'privacy' | 'settings' | 'notifications' | 'data'
+type Screen = 'home' | 'privacy' | 'settings' | 'notifications' | 'data' | 'routine'
 
 /**
  * Profile v2 — «ملفك التدريبي» — Qimmah v2.1 (§06). ProfileView
@@ -45,6 +48,7 @@ export function ProfileV2({ lang, onNavigate }: ProfileV2Props) {
   const ar = lang !== 'en'
   const t = (a: string, e: string) => (ar ? a : e)
   const [screen, setScreen] = useState<Screen>('home')
+  const wellnessToday = useWellnessToday()
   const model = useMemo(
     () => buildProfileV2Model(customization, { displayName: auth.displayName, email: auth.user?.email ?? null, signedIn: !!auth.user }, lang),
     [customization, auth.displayName, auth.user, lang],
@@ -53,8 +57,21 @@ export function ProfileV2({ lang, onNavigate }: ProfileV2Props) {
   useEffect(() => {
     // Internal sub-screens replace the profile body in place. Reset retained
     // page scroll so their heading and first action stay inside the viewport.
-    window.scrollTo({ top: 0, behavior: 'auto' })
+    document.getElementById('main-content')?.scrollTo({ top: 0, behavior: 'auto' })
   }, [screen])
+
+  useEffect(() => {
+    const openRoutine = (event: Event) => {
+      if ((event as CustomEvent).detail === 'routine') setScreen('routine')
+    }
+    const pending = window.sessionStorage.getItem('qimmah:quick-log-intent')
+    if (pending === 'routine') {
+      window.sessionStorage.removeItem('qimmah:quick-log-intent')
+      setScreen('routine')
+    }
+    window.addEventListener('qimmah:quick-log', openRoutine)
+    return () => window.removeEventListener('qimmah:quick-log', openRoutine)
+  }, [])
 
   const uid = auth.user?.id ?? null
   if (screen === 'data') return <DataScreen lang={lang} uid={uid} recoveryActive={auth.recoveryActive} onBack={() => setScreen('settings')} />
@@ -62,12 +79,24 @@ export function ProfileV2({ lang, onNavigate }: ProfileV2Props) {
   if (screen === 'notifications') {
     return <NotificationsSettingsV2 lang={lang} onBack={() => setScreen('settings')} />
   }
+  if (screen === 'routine') {
+    return (
+      <RoutineScreen
+        lang={lang}
+        supplements={customization.wellnessPlan?.supplements ?? []}
+        medications={customization.wellnessPlan?.medications ?? []}
+        wellnessToday={wellnessToday}
+        onBack={() => setScreen('home')}
+        onEdit={() => onNavigate('setup')}
+      />
+    )
+  }
   if (screen === 'settings') return <Settings lang={lang} model={model} onBack={() => setScreen('home')} onAccount={() => onNavigate('settings')} onPrivacy={() => setScreen('privacy')} onNotifications={() => setScreen('notifications')} onData={() => setScreen('data')} />
 
   const numerals = (n: number) => (ar ? n.toLocaleString('ar-EG') : String(n))
 
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
+    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light bg-page px-4 pb-6 pt-3 text-ink-900">
       <div className="v2-screen-enter mx-auto w-full max-w-md space-y-5">
         <h1 className="pt-1 text-2xl font-black tracking-tight">{t('ملفك التدريبي', 'Your training profile')}</h1>
 
@@ -103,7 +132,7 @@ export function ProfileV2({ lang, onNavigate }: ProfileV2Props) {
         {/* Rows */}
         <section className="space-y-2.5">
           <Row icon="LayoutGrid" label={t('القياسات والصور', 'Measurements & photos')} onClick={() => onNavigate('progress')} />
-          <Row icon="Pill" label={t('الأدوية والمكمّلات', 'Supplements & meds')} onClick={() => onNavigate('settings')} />
+          <Row icon="Pill" label={t('الأدوية والمكمّلات', 'Supplements & meds')} onClick={() => setScreen('routine')} />
           <Row icon="Settings" label={t('الإعدادات والخصوصية', 'Settings & privacy')} onClick={() => setScreen('settings')} />
         </section>
 
@@ -159,6 +188,122 @@ function CommitmentHeatmap({ model, lang, t, numerals }: { model: ProfileV2Model
         ))}
       </div>
       <p className="mt-2 text-[0.7rem] text-ink-500" dir={ar ? 'rtl' : 'ltr'}>{summary}</p>
+    </section>
+  )
+}
+
+function RoutineScreen({
+  lang,
+  supplements,
+  medications,
+  wellnessToday,
+  onBack,
+  onEdit,
+}: {
+  lang: Lang
+  supplements: NonNullable<ReturnType<typeof useCustomization>['customization']['wellnessPlan']>['supplements']
+  medications: NonNullable<ReturnType<typeof useCustomization>['customization']['wellnessPlan']>['medications']
+  wellnessToday: ReturnType<typeof useWellnessToday>
+  onBack: () => void
+  onEdit: () => void
+}) {
+  const ar = lang !== 'en'
+  const copy = V2_ROUTINE_TRACKER[ar ? 'ar' : 'en']
+  const empty = supplements.length + medications.length === 0
+  return (
+    <SubScreen title={copy.title} onBack={onBack} lang={lang}>
+      {empty ? (
+        <section className="rounded-3xl border border-line bg-surface p-5 text-center shadow-card">
+          <span className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-beige text-ink-500">
+            <Icon name="Pill" className="h-6 w-6" />
+          </span>
+          <h2 className="mt-4 text-lg font-black">{copy.emptyTitle}</h2>
+          <p className="mt-1 text-sm leading-relaxed text-ink-500">{copy.emptyBody}</p>
+          <button type="button" onClick={onEdit} className="btn-primary mt-4 w-full justify-center py-3">{copy.edit}</button>
+        </section>
+      ) : (
+        <div className="space-y-5">
+          {medications.length > 0 && (
+            <RoutineGroup
+              title={copy.medications}
+              items={medications.map((item) => ({
+                id: item.id,
+                name: medicationName(item, lang),
+                detail: item.timing || item.frequency || '',
+                done: wellnessToday.isMedicationDone(item.id),
+                onToggle: () => wellnessToday.toggleMedication(item.id),
+              }))}
+              doneLabel={copy.done}
+              pendingLabel={copy.pending}
+            />
+          )}
+          {supplements.length > 0 && (
+            <RoutineGroup
+              title={copy.supplements}
+              items={supplements.map((item) => ({
+                id: item.id,
+                name: supplementName(item, lang),
+                detail: item.timing || item.frequency || '',
+                done: wellnessToday.isSupplementDone(item.id),
+                onToggle: () => wellnessToday.toggleSupplement(item.id),
+              }))}
+              doneLabel={copy.done}
+              pendingLabel={copy.pending}
+            />
+          )}
+          <button type="button" onClick={onEdit} className="btn-ghost w-full justify-center py-3">
+            <Icon name="Settings" className="h-4 w-4" />
+            {copy.edit}
+          </button>
+        </div>
+      )}
+      <p className="mt-4 flex items-start gap-2 rounded-2xl border border-line bg-beige/60 p-3 text-xs leading-relaxed text-ink-500">
+        <Icon name="ShieldCheck" className="mt-0.5 h-4 w-4 shrink-0" />
+        {copy.safety}
+      </p>
+    </SubScreen>
+  )
+}
+
+function RoutineGroup({
+  title,
+  items,
+  doneLabel,
+  pendingLabel,
+}: {
+  title: string
+  items: { id: string; name: string; detail: string; done: boolean; onToggle: () => void }[]
+  doneLabel: string
+  pendingLabel: string
+}) {
+  return (
+    <section>
+      <h2 className="mb-2 text-sm font-black text-ink-700">{title}</h2>
+      <div className="space-y-2">
+        {items.map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            onClick={item.onToggle}
+            aria-pressed={item.done}
+            className={cn(
+              'v2-pressable flex min-h-[4.25rem] w-full items-center gap-3 rounded-2xl border px-4 py-3 text-start',
+              item.done ? 'border-primary/25 bg-primary-soft' : 'border-line bg-surface',
+            )}
+          >
+            <span className={cn('grid h-10 w-10 shrink-0 place-items-center rounded-xl', item.done ? 'bg-primary text-white' : 'bg-beige text-ink-500')}>
+              <Icon name={item.done ? 'Check' : 'Pill'} className="h-5 w-5" strokeWidth={item.done ? 3 : 2} />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-sm font-black">{item.name}</span>
+              {item.detail && <span className="mt-0.5 block text-xs text-ink-500">{item.detail}</span>}
+            </span>
+            <span className={cn('text-xs font-bold', item.done ? 'text-primary-c' : 'text-ink-400')}>
+              {item.done ? doneLabel : pendingLabel}
+            </span>
+          </button>
+        ))}
+      </div>
     </section>
   )
 }

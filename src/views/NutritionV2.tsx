@@ -1,4 +1,4 @@
-import { lazy, Suspense, useMemo, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { Icon } from '@/components/Icon'
 import { StateBlock } from '@/components/StateBlock'
 import { cn } from '@/lib/cn'
@@ -84,6 +84,25 @@ export function NutritionV2({ lang }: NutritionV2Props) {
   const openAdd = (slot: MealSlot) => { setTargetSlot(slot); setScreen('add') }
   const onAdded = () => { bump(); setScreen('home') }
 
+  useEffect(() => {
+    const applyQuickLog = (target: 'meal' | 'water' | 'routine') => {
+      if (target === 'meal') {
+        setTargetSlot('lunch')
+        setScreen('add')
+      } else if (target === 'water') {
+        window.requestAnimationFrame(() => document.getElementById('nutrition-water')?.scrollIntoView({ behavior: 'smooth', block: 'center' }))
+      }
+      if (target !== 'routine') window.sessionStorage.removeItem('qimmah:quick-log-intent')
+    }
+    const onQuickLog = (event: Event) => {
+      applyQuickLog((event as CustomEvent<'meal' | 'water' | 'routine'>).detail)
+    }
+    const pending = window.sessionStorage.getItem('qimmah:quick-log-intent')
+    if (pending === 'meal' || pending === 'water') applyQuickLog(pending)
+    window.addEventListener('qimmah:quick-log', onQuickLog)
+    return () => window.removeEventListener('qimmah:quick-log', onQuickLog)
+  }, [])
+
   const runNudge = (n: Nudge) => {
     if (n.action === 'water250') { addWaterToDay(250); bump() }
     else if (n.action === 'water500') { addWaterToDay(500); bump() }
@@ -157,7 +176,7 @@ export function NutritionV2({ lang }: NutritionV2Props) {
 
         {/* Water — teal quick-add */}
         {water.targetMl > 0 && (
-          <section className="rounded-2xl border border-line bg-surface p-4">
+          <section id="nutrition-water" className="rounded-2xl border border-line bg-surface p-4">
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-1.5 text-sm font-bold text-ink-700">
                 <Icon name="Droplets" className="h-4 w-4" style={{ color: CLR.water }} />
