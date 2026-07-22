@@ -879,8 +879,7 @@ function WarmupPanel({ lang, sets, onDismiss, onDisable }: { lang: Lang; sets: W
 
 function RestPanel({ lang, restLeft, restDone, nextEx, setLabel, tip, tipDismissed, onDismissTip, onAdd, onSkip }: { lang: Lang; restLeft: number; restDone: boolean; nextEx: WorkoutV2Exercise; setLabel: string; tip: RestTip | null; tipDismissed: boolean; onDismissTip: () => void; onAdd: () => void; onSkip: () => void }) {
   const ar = lang !== 'en'
-  // Rest tips are authored in Arabic (warm MSA) — only surface them in Arabic mode.
-  const showTip = ar && !restDone && tip != null && !tipDismissed
+  const showTip = !restDone && tip != null && !tipDismissed
   return (
     <main className="flex flex-1 flex-col items-center justify-center px-6 text-center">
       {restDone ? (
@@ -899,8 +898,8 @@ function RestPanel({ lang, restLeft, restDone, nextEx, setLabel, tip, tipDismiss
             // `.v2-screen-enter` is reduced-motion-safe (tokens.css forces no motion).
             <div role="note" aria-live="polite" className="v2-screen-enter mt-6 flex w-full max-w-sm items-start gap-2.5 rounded-2xl px-4 py-3 text-start" style={{ background: FOCUS.card, border: `1px solid ${FOCUS.line}` }}>
               <Icon name="Lightbulb" className="mt-0.5 h-4 w-4 shrink-0" style={{ color: FOCUS.teal }} aria-hidden />
-              <p className="flex-1 text-[0.8125rem] font-medium leading-relaxed" style={{ color: FOCUS.inkMuted }}><bdi>{tip.textAr}</bdi></p>
-              <button type="button" onClick={onDismissTip} aria-label="إخفاء النصيحة" className="-me-1 -mt-1 shrink-0 rounded-lg p-1.5" style={{ color: FOCUS.inkFaint }}><Icon name="X" className="h-4 w-4" /></button>
+              <p className="flex-1 text-[0.8125rem] font-medium leading-relaxed" style={{ color: FOCUS.inkMuted }}><bdi>{ar ? tip.textAr : tip.textEn}</bdi></p>
+              <button type="button" onClick={onDismissTip} aria-label={ar ? 'إخفاء النصيحة' : 'Dismiss tip'} className="-me-1 -mt-1 shrink-0 rounded-lg p-1.5" style={{ color: FOCUS.inkFaint }}><Icon name="X" className="h-4 w-4" /></button>
             </div>
           )}
           <div className="mt-8 flex items-center gap-3">

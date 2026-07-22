@@ -182,10 +182,10 @@ console.log('\n⑨ ربط نصيحة الراحة بالواجهة — كل عض
   const view = readFileSync(resolvePath(__SRC_ROOT__, 'src/views/WorkoutV2.tsx'), 'utf8')
   check('شاشة التمرين تستورد منتقي النصيحة', /import\s*\{\s*pickRestTip\s*\}\s*from\s*'@\/lib\/coaching'/.test(view))
   check('النصيحة تُنتقى عند بدء الراحة بعضلة التمرين', view.includes('pickRestTip(muscle, restEndsAt, shownTips)') && view.includes(".muscles[0] ?? 'chest') as Muscle"))
-  check('RestPanel يعرض نصّ النصيحة على سطح الراحة', view.includes('{tip.textAr}') && view.includes('const showTip = ar && !restDone && tip != null && !tipDismissed'))
-  check('النصيحة قابلة للإخفاء (زر + aria-label)', view.includes('onClick={onDismissTip}') && view.includes("aria-label=\"إخفاء النصيحة\""))
+  check('RestPanel يعرض نصّ النصيحة باللغتين على سطح الراحة', view.includes('{ar ? tip.textAr : tip.textEn}') && view.includes('const showTip = !restDone && tip != null && !tipDismissed'))
+  check('النصيحة قابلة للإخفاء (زر + aria-label ثنائي اللغة)', view.includes('onClick={onDismissTip}') && view.includes("aria-label={ar ? 'إخفاء النصيحة' : 'Dismiss tip'}"))
   check('حركة الدخول آمنة لتقليل الحركة (v2-screen-enter مُقيّد بالتوكنز)', /className="v2-screen-enter[^"]*"[^>]*role="note"|role="note"[^>]*className="v2-screen-enter/.test(view) || view.includes('className="v2-screen-enter mt-6'))
-  check('تباين AA على الداكن (ink-muted على البطاقة)', view.includes('color: FOCUS.inkMuted }}><bdi>{tip.textAr}'))
+  check('تباين AA على الداكن (ink-muted على البطاقة)', view.includes('color: FOCUS.inkMuted }}><bdi>{ar ? tip.textAr : tip.textEn}'))
 }
 
 console.log(`\n${'─'.repeat(48)}`)

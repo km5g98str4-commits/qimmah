@@ -1,0 +1,59 @@
+import type { ReactNode } from 'react'
+import { Icon } from '@/components/Icon'
+import { cn } from '@/lib/cn'
+import type { Lang } from '@/lib/appPreferences'
+import { playHaptic } from '@/lib/nativeFeedback'
+
+interface StandaloneAppScreenProps {
+  lang: Lang
+  title: string
+  backLabel: string
+  onBack: () => void
+  children: ReactNode
+  contentClassName?: string
+}
+
+/** غلاف موحّد للمسارات العميقة التي تقع خارج تبويبات التطبيق الرئيسية. */
+export function StandaloneAppScreen({
+  lang,
+  title,
+  backLabel,
+  onBack,
+  children,
+  contentClassName,
+}: StandaloneAppScreenProps) {
+  const ar = lang !== 'en'
+
+  const handleBack = () => {
+    void playHaptic('selection')
+    onBack()
+  }
+
+  return (
+    <div dir={ar ? 'rtl' : 'ltr'} className="flex h-[100dvh] min-h-0 flex-col overflow-hidden bg-page">
+      <header
+        className="z-20 shrink-0 border-b border-line bg-page/95 backdrop-blur-xl"
+        style={{ paddingTop: 'env(safe-area-inset-top)' }}
+      >
+        <div className="mx-auto flex h-14 w-full max-w-2xl items-center gap-2 px-3">
+          <button
+            type="button"
+            onClick={handleBack}
+            aria-label={backLabel}
+            className="v2-pressable grid h-11 w-11 shrink-0 place-items-center rounded-full text-ink-700"
+          >
+            <Icon name={ar ? 'ChevronRight' : 'ChevronLeft'} className="h-5 w-5" />
+          </button>
+          <h1 className="min-w-0 truncate text-lg font-black text-ink-900">{title}</h1>
+        </div>
+      </header>
+
+      <main
+        className="app-scroll min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-4 py-5"
+        style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }}
+      >
+        <div className={cn('mx-auto w-full max-w-2xl', contentClassName)}>{children}</div>
+      </main>
+    </div>
+  )
+}
