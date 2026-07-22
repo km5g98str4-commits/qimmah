@@ -1,7 +1,7 @@
 import { Capacitor } from '@capacitor/core'
 import { loadPreferences } from './appPreferences'
 
-export type HapticMoment = 'set' | 'pr' | 'rest'
+export type HapticMoment = 'selection' | 'set' | 'pr' | 'rest'
 
 export function shouldPlayHaptic(isNative: boolean, enabled: boolean, reducedMotion: boolean): boolean {
   return isNative && enabled && !reducedMotion
