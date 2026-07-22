@@ -44,6 +44,17 @@
     overscroll-behavior: none;
   }
 
+  html.qimmah-shell-mounted,
+  body.qimmah-shell-mounted {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  body.qimmah-shell-mounted #root {
+    height: 100dvh;
+    overflow: hidden;
+  }
+
   /* عناصر واجهة التطبيق (أزرار/روابط/تنقّل/أيقونات): لا تحديد نص ولا قائمة لمس مطوّل —
      تتصرّف كعناصر تحكّم أصلية لا كنص ويب. المحتوى القابل للقراءة يحتفظ بالتحديد أدناه. */
   button,
@@ -122,6 +133,18 @@
   }
   ::-webkit-scrollbar-thumb:hover {
     @apply bg-ink-400;
+  }
+
+  /* متمرّر التطبيق وحده — نحافظ على تمرير iOS الطبيعي بلا خط ويب ظاهر. */
+  .app-scroll {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .app-scroll::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
   }
 }
 
