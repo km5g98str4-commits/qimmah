@@ -50,7 +50,7 @@ export function RecoveryView({ lang, onBack, onNavigate }: RecoveryViewProps) {
   }
 
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
+    <div dir={ar ? 'rtl' : 'ltr'} className="app-scroll v2-surface-light h-[100dvh] overflow-y-auto overscroll-y-contain bg-page px-4 text-ink-900" style={{ paddingTop: 'max(0.75rem, var(--safe-top))', paddingBottom: 'max(1.5rem, var(--safe-bottom))' }}>
       <div className="v2-screen-enter mx-auto w-full max-w-md space-y-5">
         <div className="flex items-center justify-between">
           <button type="button" onClick={onBack} aria-label={t('رجوع', 'Back')} className="grid h-10 w-10 place-items-center rounded-xl border border-line bg-surface"><Icon name="ChevronRight" className="h-5 w-5 rtl:rotate-0 ltr:rotate-180" /></button>
@@ -134,7 +134,7 @@ function ResultScreen({ lang, entry, onBack, onExit, onNavigate }: { lang: Lang;
   const t = (a: string, e: string) => (ar ? a : e)
   const m = REC_META[entry.rec]
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
+    <div dir={ar ? 'rtl' : 'ltr'} className="app-scroll v2-surface-light h-[100dvh] overflow-y-auto overscroll-y-contain bg-page px-4 text-ink-900" style={{ paddingTop: 'max(0.75rem, var(--safe-top))', paddingBottom: 'max(1.5rem, var(--safe-bottom))' }}>
       <div className="v2-screen-enter mx-auto w-full max-w-md space-y-5">
         <div className="flex items-center justify-between">
           <button type="button" onClick={onBack} aria-label={t('رجوع', 'Back')} className="grid h-10 w-10 place-items-center rounded-xl border border-line bg-surface"><Icon name="ChevronRight" className="h-5 w-5 rtl:rotate-0 ltr:rotate-180" /></button>
