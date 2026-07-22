@@ -14,6 +14,8 @@ interface LoginViewProps {
   onBack: () => void
   /** الوضع الابتدائي عند الفتح — تسجيل دخول أو إنشاء حساب. */
   initialMode?: Mode
+  /** يحفظ وضع الحساب خارج الشاشة حتى لا يضيع عند فتح الشروط أو الخصوصية. */
+  onModeChange?: (mode: 'login' | 'signup') => void
 }
 
 type Mode = 'login' | 'signup' | 'forgot'
@@ -23,7 +25,7 @@ type Mode = 'login' | 'signup' | 'forgot'
  * تجيب: أين أنا؟ (العنوان) · ماذا أفعل؟ (النموذج + إجراء أساسي واحد) · لماذا أثق؟ (نبرة هادئة صادقة).
  * منطق المصادقة والأحداث لم يتغيّر؛ التعديل بصري + إضافة وضع الاستعادة فقط.
  */
-export function LoginView({ lang, onSuccess, onBack, initialMode = 'login' }: LoginViewProps) {
+export function LoginView({ lang, onSuccess, onBack, initialMode = 'login', onModeChange }: LoginViewProps) {
   const t = getStrings(lang)
   const d = miscStrings[lang]
   const auth = useAuth()
@@ -49,6 +51,7 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login' }: Lo
 
   const switchMode = (next: Mode) => {
     setMode(next)
+    if (next !== 'forgot') onModeChange?.(next)
     setMsg(null)
     setNotice(null)
     if (next !== 'signup') setEligible12(false)
@@ -82,6 +85,7 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login' }: Lo
         track('signup_succeeded', { needsConfirmation: true })
         setNotice(d.accountCreatedConfirm)
         setMode('login')
+        onModeChange?.('login')
       } else {
         track('signup_succeeded', { needsConfirmation: false })
         onSuccess()
@@ -249,9 +253,9 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login' }: Lo
                   />
                   <span>
                     {policy.eligibilityPrefix}{' '}
-                    <a href={POLICY_LINKS.terms} target="_blank" rel="noopener noreferrer" className="font-black text-primary-c underline underline-offset-2">{policy.terms}</a>{' '}
+                    <a href={POLICY_LINKS.terms} className="font-black text-primary-c underline underline-offset-2">{policy.terms}</a>{' '}
                     {policy.joiner}{' '}
-                    <a href={POLICY_LINKS.privacy} target="_blank" rel="noopener noreferrer" className="font-black text-primary-c underline underline-offset-2">{policy.privacy}</a>
+                    <a href={POLICY_LINKS.privacy} className="font-black text-primary-c underline underline-offset-2">{policy.privacy}</a>
                   </span>
                 </label>
               )}

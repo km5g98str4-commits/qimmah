@@ -337,7 +337,7 @@ function GoalStep({ lang, t, titleId, goal, isMinor, healthDataConsent, onConsen
         <p className="text-sm leading-relaxed text-ink-500">{policy.healthExplanation}</p>
         <label className="mt-3 flex cursor-pointer items-start gap-3 text-start text-sm font-bold leading-relaxed text-ink-900">
           <input type="checkbox" checked={healthDataConsent} onChange={(e) => onConsent(e.target.checked)} className="mt-0.5 h-5 w-5 shrink-0 accent-primary" />
-          <span>{policy.healthConsent} · <a href={POLICY_LINKS.privacy} target="_blank" rel="noopener noreferrer" className="text-[color:var(--v2-blue)] underline underline-offset-2">{policy.privacy}</a></span>
+          <span>{policy.healthConsent} · <a href={POLICY_LINKS.privacy} className="text-[color:var(--v2-blue)] underline underline-offset-2">{policy.privacy}</a></span>
         </label>
       </div>
       <p className="mt-5 text-center text-xs font-medium text-ink-500">{t.goal.note}</p>
