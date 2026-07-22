@@ -30,4 +30,5 @@ export interface RestTip {
   id: string
   muscles: Muscle[]
   textAr: string
+  textEn: string
 }

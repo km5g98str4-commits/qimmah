@@ -3,6 +3,7 @@
 // تقديرات تعليمية للتنظيم والمتابعة فقط — لا نصائح طبية.
 
 import type { Lang } from '@/lib/appPreferences'
+import type { ActivityLevel, Gender, GoalType } from '@/types/profile'
 
 export interface CalcScreenStrings {
   back: string
@@ -10,6 +11,9 @@ export interface CalcScreenStrings {
   pageSubtitle: string
   intro: string
   needData: string
+  genderLabels: Record<Gender, string>
+  activityLabels: Record<ActivityLevel, string>
+  goalLabels: Record<GoalType, string>
 
   // BMR
   bmrTitle: string
@@ -71,6 +75,22 @@ const ar: CalcScreenStrings = {
     'الأرقام اللي تشوفها في خطتك مبنية على معادلات معروفة في علم التغذية والرياضة، وعلى قواعد تقدير عملية من Qimmah. هنا نوريك من وين جت بالضبط، عشان تفهمها وتثق فيها. كلها تقديرات للتنظيم والمتابعة، تعدّلها حسب نتائجك على أرض الواقع.',
   needData:
     'أكمل بيانات جسمك (الوزن والطول والعمر والجنس) في الإعداد حتى نعرض لك طريقة الحساب بأرقامك الفعلية.',
+  genderLabels: { male: 'ذكر', female: 'أنثى', unspecified: 'غير محدّد' },
+  activityLabels: {
+    sedentary: 'خامل (قليل الحركة)',
+    light: 'نشاط خفيف',
+    moderate: 'نشاط متوسط',
+    active: 'نشِط',
+    very_active: 'نشِط جدًا',
+  },
+  goalLabels: {
+    cutting: 'تنشيف',
+    bulking: 'تضخيم',
+    maintenance: 'محافظة على العضل',
+    recomposition: 'إعادة تشكيل الجسم',
+    returning: 'رجوع بعد انقطاع',
+    health: 'صحة عامة',
+  },
 
   bmrTitle: 'معدل الأيض الأساسي (BMR)',
   bmrBasis: 'الأساس: معادلة ميفلين–سانت جيور (Mifflin-St Jeor)',
@@ -130,6 +150,22 @@ const en: CalcScreenStrings = {
     'The numbers in your plan are based on well-known nutrition and exercise-science equations, plus practical Qimmah estimation rules. Here we show exactly where each one comes from, so you understand and trust it. They are estimates for tracking and organizing — adjust them to your real-world results.',
   needData:
     'Complete your body data (weight, height, age, sex) in setup so we can show the math with your actual numbers.',
+  genderLabels: { male: 'Male', female: 'Female', unspecified: 'Not specified' },
+  activityLabels: {
+    sedentary: 'Sedentary',
+    light: 'Light activity',
+    moderate: 'Moderate activity',
+    active: 'Active',
+    very_active: 'Very active',
+  },
+  goalLabels: {
+    cutting: 'Cutting',
+    bulking: 'Bulking',
+    maintenance: 'Maintenance',
+    recomposition: 'Body recomposition',
+    returning: 'Returning after a break',
+    health: 'General health',
+  },
 
   bmrTitle: 'Basal Metabolic Rate (BMR)',
   bmrBasis: 'Basis: the Mifflin-St Jeor equation',
