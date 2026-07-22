@@ -115,7 +115,7 @@ wipeUserData('A')
 check('owner queue cleared', readSyncQueue('A').length === 0)
 check('owner backup cleared', localStorage.getItem(backupKey('A')) === null)
 
-console.log('\n⑤ hydrate: backup first + server-wins merge + upload merged local')
+console.log('\n⑤ hydrate: backup first + LWW merge (both directions) + upload merged local')
 localStorage.clear()
 setSyncRuntime('A', false)
 owner = 'A'
@@ -123,25 +123,59 @@ const localSession = {
   id: 'same-id',
   date: '2026-07-10',
   startedAt: '2026-07-10T10:00:00.000Z',
+  finishedAt: '2026-07-10T10:40:00.000Z',
   workoutDayId: 'local-day',
   workoutDayName: 'Local',
   exercises: [],
 }
 saveWorkoutSession(localSession)
+// معيار القبول 5: سجل سحابي أحدث (finishedAt أحدث) يصل إلى الجهاز.
 cloudRows = {
   workout_sessions: [
     {
       local_id: 'same-id',
-      data: { ...localSession, workoutDayId: 'server-day', workoutDayName: 'Server' },
+      data: { ...localSession, finishedAt: '2026-07-10T11:30:00.000Z', workoutDayId: 'server-day', workoutDayName: 'Server' },
     },
   ],
 }
 calls.length = 0
+// كما في fullSync الحقيقي: الطابور يُفرَّغ قبل السحب، فالحسم هنا بالطوابع لا بحماية الطابور.
+localStorage.removeItem(`qimmah:syncQueue:v1:A`)
 await hydrateFromCloud()
 const backup = JSON.parse(localStorage.getItem(backupKey('A')) ?? 'null') as { history?: { workoutSessions?: unknown[] } } | null
 check('pre-hydration local snapshot exists', backup?.history?.workoutSessions?.length === 1)
-check('server wins the conflicting entity', exportHistory().workoutSessions[0]?.workoutDayId === 'server-day')
+check('LWW: NEWER cloud edit reaches the device', exportHistory().workoutSessions[0]?.workoutDayId === 'server-day')
 check('merged snapshot is uploaded through queue', calls.some((call) => call.table === 'workout_sessions'))
+
+// معيار القبول 4: سجل سحابي أقدم لا يستبدل تعديلًا محليًا أحدث (ولا الطابع المتساوي).
+const newerLocal = { ...localSession, finishedAt: '2026-07-10T12:00:00.000Z', workoutDayId: 'local-newer', workoutDayName: 'LocalNewer' }
+saveWorkoutSession(newerLocal)
+cloudRows = {
+  workout_sessions: [
+    {
+      local_id: 'same-id',
+      data: { ...localSession, finishedAt: '2026-07-10T11:30:00.000Z', workoutDayId: 'server-stale', workoutDayName: 'ServerStale' },
+    },
+  ],
+}
+// أفرغ الطابور أولًا حتى يكون الحسم بالطوابع وحدها (لا بحماية الطابور).
+localStorage.removeItem(`qimmah:syncQueue:v1:A`)
+await hydrateFromCloud()
+check('LWW: OLDER cloud row never overwrites a newer local edit', exportHistory().workoutSessions[0]?.workoutDayId === 'local-newer')
+
+// حماية الطابور: كيان معلّق بانتظار الرفع لا يُدهس حتى لو حمل السحابي طابعًا أحدث.
+const pendingLocal = { ...localSession, finishedAt: '2026-07-10T13:00:00.000Z', workoutDayId: 'pending-local', workoutDayName: 'PendingLocal' }
+saveWorkoutSession(pendingLocal) // يبقى في الطابور (لن نفرغه هذه المرة)
+cloudRows = {
+  workout_sessions: [
+    {
+      local_id: 'same-id',
+      data: { ...localSession, finishedAt: '2026-07-10T14:00:00.000Z', workoutDayId: 'server-race', workoutDayName: 'ServerRace' },
+    },
+  ],
+}
+await hydrateFromCloud()
+check('LWW: pending-queued local entity survives even a newer cloud stamp', exportHistory().workoutSessions[0]?.workoutDayId === 'pending-local')
 
 // Capture conflict logs (metadata only) to prove overwrites are logged, not dropped.
 const conflicts: { table: string; entityKey: string }[] = []

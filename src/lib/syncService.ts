@@ -25,6 +25,7 @@ import {
   type SyncTable,
 } from './syncQueue'
 import { enqueueAuxOperations, hydrateAuxFromCloud, readAuxBackup } from './syncStores'
+import { buildPendingSet, pendingKey, resolveLww, type LwwWinner } from './syncLww'
 import type { WorkoutSession } from './workoutSessions'
 import type { ExerciseHistory } from './exerciseHistory'
 import type { MeasurementLog } from '@/types/progress'
@@ -246,9 +247,9 @@ export function flushSyncQueue(now = Date.now()): Promise<SyncStatus> {
   return flushPromise
 }
 
-function conflict(table: SyncTable, entityKey: string): void {
+function conflict(table: SyncTable, entityKey: string, resolution: 'local-wins-lww' | 'cloud-wins-lww' = 'cloud-wins-lww'): void {
   // Metadata only: never log payloads, health values, notes, or auth material.
-  console.info('[qimmah-sync-conflict]', { table, entityKey, resolution: 'server-wins' })
+  console.info('[qimmah-sync-conflict]', { table, entityKey, resolution })
 }
 
 function dailySlices(data: unknown): {
@@ -265,13 +266,39 @@ function dailySlices(data: unknown): {
   return value as ReturnType<typeof dailySlices>
 }
 
-function mergeCloudIntoSnapshot(local: HistorySnapshot, rows: Record<SyncTable, Record<string, unknown>[]>): HistorySnapshot {
+/**
+ * دمج LWW فعلي (يستبدل server-wins الأعمى): لكل سجل يُقارن طابع التعديل المحلي
+ * بالسحابي، وأي كيان له عملية معلّقة في طابور الرفع يُعامل كأحدث محليًا. لا
+ * حذف صامت في أي مسار — السجلات المحلية غير الموجودة سحابيًا تبقى دائمًا.
+ */
+export function mergeCloudIntoSnapshot(
+  local: HistorySnapshot,
+  rows: Record<SyncTable, Record<string, unknown>[]>,
+  pending: ReadonlySet<string> = new Set(),
+): HistorySnapshot {
+  const decide = (table: SyncTable, key: string, localItem: { exists: boolean; stamp: unknown }, cloudStamp: unknown): LwwWinner => {
+    const winner = resolveLww({
+      localExists: localItem.exists,
+      localStamp: localItem.stamp,
+      cloudStamp,
+      pendingLocal: pending.has(pendingKey(table, key)),
+    })
+    if (localItem.exists) conflict(table, key, winner === 'cloud' ? 'cloud-wins-lww' : 'local-wins-lww')
+    return winner
+  }
+
   const sessions = new Map(local.workoutSessions.map((item) => [item.id, item]))
   for (const row of rows.workout_sessions) {
     const item = row.data as WorkoutSession | undefined
     if (!item?.id) continue
-    if (sessions.has(item.id)) conflict('workout_sessions', item.id)
-    sessions.set(item.id, item)
+    const existing = sessions.get(item.id)
+    const winner = decide(
+      'workout_sessions',
+      item.id,
+      { exists: !!existing, stamp: existing ? (existing.finishedAt ?? existing.startedAt) : 0 },
+      item.finishedAt ?? item.startedAt ?? row.updated_at,
+    )
+    if (winner === 'cloud') sessions.set(item.id, item)
   }
 
   const exerciseHistory: ExerciseHistory = { ...local.exerciseHistory }
@@ -279,21 +306,37 @@ function mergeCloudIntoSnapshot(local: HistorySnapshot, rows: Record<SyncTable, 
     const key = typeof row.exercise_id === 'string' ? row.exercise_id : ''
     const item = row.data as ExerciseHistory[string] | undefined
     if (!key || !item) continue
-    if (exerciseHistory[key]) conflict('exercise_history', key)
-    exerciseHistory[key] = item
+    const existing = exerciseHistory[key]
+    const winner = decide(
+      'exercise_history',
+      key,
+      { exists: !!existing, stamp: existing?.lastCompletedAt ?? 0 },
+      item.lastCompletedAt ?? row.updated_at,
+    )
+    if (winner === 'cloud') exerciseHistory[key] = item
   }
 
   const measurements = new Map(local.measurementLogs.map((item) => [item.id, item]))
   for (const row of rows.measurement_logs) {
     const id = typeof row.local_id === 'string' ? row.local_id : ''
     if (!id) continue
-    if (measurements.has(id)) conflict('measurement_logs', id)
-    measurements.set(id, {
+    const existing = measurements.get(id)
+    // سجل محلي قديم بلا updatedAt يسقط لدقّة اليوم (date) — لا يُقلب بلا دليل أحدثية.
+    const winner = decide(
+      'measurement_logs',
       id,
-      date: String(row.date ?? ''),
-      values: (row.values ?? {}) as MeasurementLog['values'],
-      notes: typeof row.notes === 'string' ? row.notes : undefined,
-    })
+      { exists: !!existing, stamp: existing?.updatedAt ?? existing?.date ?? 0 },
+      row.updated_at ?? row.date,
+    )
+    if (winner === 'cloud') {
+      measurements.set(id, {
+        id,
+        date: String(row.date ?? ''),
+        values: (row.values ?? {}) as MeasurementLog['values'],
+        notes: typeof row.notes === 'string' ? row.notes : undefined,
+        updatedAt: typeof row.updated_at === 'string' ? row.updated_at : undefined,
+      })
+    }
   }
 
   const next: HistorySnapshot = {
@@ -307,23 +350,28 @@ function mergeCloudIntoSnapshot(local: HistorySnapshot, rows: Record<SyncTable, 
     supplementLogs: { ...local.supplementLogs },
     medicationLogs: { ...local.medicationLogs },
   }
+  // daily_logs: الحسم لكل شريحة على حدة بطابعها الداخلي updatedAt — تعديل ماء
+  // أحدث محليًا لا يخسر أمام صف سحابي حمل تغذية أحدث، والعكس صحيح.
   for (const row of rows.daily_logs) {
     const date = typeof row.date === 'string' ? row.date : ''
     if (!date) continue
     const slices = dailySlices(row.data)
-    if (
-      next.dailyLogs[date] ||
-      next.nutritionLogs[date] ||
-      next.waterLogs[date] ||
-      next.supplementLogs[date] ||
-      next.medicationLogs[date]
-    )
-      conflict('daily_logs', date)
-    if (slices.daily) next.dailyLogs[date] = slices.daily
-    if (slices.nutrition) next.nutritionLogs[date] = slices.nutrition
-    if (slices.water) next.waterLogs[date] = slices.water
-    if (slices.supplements) next.supplementLogs[date] = slices.supplements
-    if (slices.medications) next.medicationLogs[date] = slices.medications
+    const slice = <T extends { updatedAt?: string }>(bucket: Record<string, T>, incoming: T | undefined) => {
+      if (!incoming) return
+      const existing = bucket[date]
+      const winner = decide(
+        'daily_logs',
+        date,
+        { exists: !!existing, stamp: existing?.updatedAt ?? 0 },
+        incoming.updatedAt ?? row.updated_at,
+      )
+      if (winner === 'cloud') bucket[date] = incoming
+    }
+    slice(next.dailyLogs, slices.daily)
+    slice(next.nutritionLogs, slices.nutrition)
+    slice(next.waterLogs, slices.water)
+    slice(next.supplementLogs, slices.supplements)
+    slice(next.medicationLogs, slices.medications)
   }
   return next
 }
@@ -451,7 +499,9 @@ async function hydrateImpl(): Promise<SyncStatus> {
     const pulled = await Promise.all(tables.map(async (table) => [table, await client.select(table, userId)] as const))
     if ((await guardedOwner(client)) !== userId) return buildStatus('error', userId, 'أُوقف السحب بسبب تغيّر الحساب.')
     const rows = Object.fromEntries(pulled) as Record<SyncTable, Record<string, unknown>[]>
-    const merged = mergeCloudIntoSnapshot(localHistory, rows)
+    // الكيانات المعلّقة بطابور الرفع = تعديلات محلية أحدث بالتعريف — تُحمى من الدهس.
+    const pendingOps = buildPendingSet(readSyncQueue(userId))
+    const merged = mergeCloudIntoSnapshot(localHistory, rows, pendingOps)
     const profileData = rows.profiles[0]?.data
     const cloudOnboardingRaw =
       profileData && typeof profileData === 'object'
@@ -477,6 +527,7 @@ async function hydrateImpl(): Promise<SyncStatus> {
           todos: rows.todos,
         },
         conflict,
+        pendingOps,
       )
     } finally {
       setSyncCapturePaused(false)

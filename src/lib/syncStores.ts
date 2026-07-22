@@ -19,6 +19,7 @@
 // hydrate conflict is logged, never silently dropped.
 
 import { enqueueSyncOperation, type SyncTable } from './syncQueue'
+import { pendingKey } from './syncLww'
 import { getSteps, getStepSource, loadStepLog, setSteps, type StepSource } from './stepCounter'
 import {
   loadCustomPlanRecord,
@@ -134,40 +135,62 @@ export function hydrateAuxFromCloud(
     custom_plans: Record<string, unknown>[]
     todos: Record<string, unknown>[]
   },
-  onConflict: (table: SyncTable, entityKey: string) => void,
+  onConflict: (table: SyncTable, entityKey: string, resolution?: 'local-wins-lww' | 'cloud-wins-lww') => void,
+  pending: ReadonlySet<string> = new Set(),
 ): void {
-  // steps — per-day; server value wins for shared dates, local-only dates stay.
+  // حماية LWW للمخازن المساعدة: هذه المخازن لا تحمل طوابع تعديل محلية لكل سجل،
+  // فالبديل الصادق للأحدثية المحلية هو طابور الرفع — أي كيان معلّق فيه هو تعديل
+  // محلي أحدث بالتعريف ولا يُدهس. غير المعلّق يبقى السحابي مصدره (كما قبل).
+  const localNewer = (table: SyncTable, key: string): boolean => pending.has(pendingKey(table, key))
+
+  // steps — per-day; a pending local day always survives; otherwise cloud fills/overlays.
   for (const row of rows.step_logs) {
     const date = typeof row.date === 'string' ? row.date : ''
     if (!date) continue
     const steps = typeof row.steps === 'number' ? row.steps : Number(row.steps)
     if (!Number.isFinite(steps)) continue
     const source = (typeof row.source === 'string' ? row.source : 'external') as StepSource
-    if (getSteps(date) > 0) onConflict('step_logs', date)
+    if (localNewer('step_logs', date)) {
+      onConflict('step_logs', date, 'local-wins-lww')
+      continue
+    }
+    if (getSteps(date) > 0) onConflict('step_logs', date, 'cloud-wins-lww')
     setSteps(steps, date, source)
   }
   // achievements — single aggregate row.
   const achRow = rows.achievements[0]
   if (achRow && achRow.data && typeof achRow.data === 'object') {
-    if (hasAchievementData(readAchievements())) onConflict('achievements', SELF)
-    writeAchievements(achRow.data)
+    if (localNewer('achievements', SELF)) {
+      onConflict('achievements', SELF, 'local-wins-lww')
+    } else {
+      if (hasAchievementData(readAchievements())) onConflict('achievements', SELF, 'cloud-wins-lww')
+      writeAchievements(achRow.data)
+    }
   }
   // custom plan — single row (data = WorkoutPlan, source = 'auto' | 'custom').
   const planRow = rows.custom_plans[0]
   if (planRow && planRow.data && typeof planRow.data === 'object') {
-    if (loadCustomPlanRecord(userId)) onConflict('custom_plans', SELF)
-    saveCustomPlan(userId, planRow.data as WorkoutPlan)
-    const source = planRow.source === 'auto' || planRow.source === 'custom' ? (planRow.source as PlanSource) : 'custom'
-    setPlanSource(userId, source)
+    if (localNewer('custom_plans', SELF)) {
+      onConflict('custom_plans', SELF, 'local-wins-lww')
+    } else {
+      if (loadCustomPlanRecord(userId)) onConflict('custom_plans', SELF, 'cloud-wins-lww')
+      saveCustomPlan(userId, planRow.data as WorkoutPlan)
+      const source = planRow.source === 'auto' || planRow.source === 'custom' ? (planRow.source as PlanSource) : 'custom'
+      setPlanSource(userId, source)
+    }
   }
   // todos — single row (data = TodoState).
   const todoRow = rows.todos[0]
   if (todoRow && todoRow.data && typeof todoRow.data === 'object') {
-    const local = loadTodos(userId)
-    if (local.items.length > 0) onConflict('todos', SELF)
-    const data = todoRow.data as Partial<TodoState>
-    if (typeof data.date === 'string' && Array.isArray(data.items)) {
-      saveTodos(userId, { date: data.date, items: data.items })
+    if (localNewer('todos', SELF)) {
+      onConflict('todos', SELF, 'local-wins-lww')
+    } else {
+      const local = loadTodos(userId)
+      if (local.items.length > 0) onConflict('todos', SELF, 'cloud-wins-lww')
+      const data = todoRow.data as Partial<TodoState>
+      if (typeof data.date === 'string' && Array.isArray(data.items)) {
+        saveTodos(userId, { date: data.date, items: data.items })
+      }
     }
   }
 }

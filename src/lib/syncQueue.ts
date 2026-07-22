@@ -4,6 +4,8 @@
  * Enable only for device testing after Supabase schema/RLS verification; every entry
  * point below also requires a matching authenticated owner and recoveryActive=false.
  */
+import { isAdoptionPending } from './dataOwnership'
+
 const ENV_SYNC_ENABLED = import.meta.env.VITE_SYNC_ENABLED === 'true'
 
 export const SYNC_QUEUE_PREFIX = 'qimmah:syncQueue:v1:'
@@ -80,7 +82,15 @@ export function getSyncRuntime(): Readonly<SyncRuntime> {
 }
 
 export function syncAllowedFor(userId: string): boolean {
-  return isSyncEnabled() && !runtime.recoveryActive && Boolean(userId) && runtime.userId === userId
+  // بوابة التبنّي: بيانات محلية مجهولة المالك تحت حساب حقيقي لا تُرفع للسحابة
+  // حتى قرار صريح (adoptPendingData) — يمنع تبنّي بيانات ضيف ضمنيًا في حساب.
+  return (
+    isSyncEnabled() &&
+    !runtime.recoveryActive &&
+    Boolean(userId) &&
+    runtime.userId === userId &&
+    !isAdoptionPending(userId)
+  )
 }
 
 function queueKey(userId: string): string {

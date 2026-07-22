@@ -291,14 +291,17 @@ export function getMeasurementLogs(): MeasurementLog[] {
 
 export function saveMeasurementLog(log: MeasurementLog): MeasurementLog[] {
   ensureMigrated()
-  const existing = getMeasurementLogs().filter((l) => l.id !== log.id)
-  const next = [log, ...existing].slice(0, 1000)
+  // طابع LWW: كل حفظ يحمل updatedAt؛ سجل قديم بلا طابع يُكمل كما هو (يسقط لدقّة اليوم عند الحسم).
+  const stamped: MeasurementLog = { ...log, updatedAt: log.updatedAt ?? nowISO() }
+  const existing = getMeasurementLogs().filter((l) => l.id !== stamped.id)
+  const next = [stamped, ...existing].slice(0, 1000)
   writeJSON(HISTORY_KEYS.measurementLogs, next)
-  enqueueSyncOperation('measurement_logs', log.id, {
-    local_id: log.id,
-    date: log.date,
-    values: log.values,
-    notes: log.notes ?? null,
+  enqueueSyncOperation('measurement_logs', stamped.id, {
+    local_id: stamped.id,
+    date: stamped.date,
+    values: stamped.values,
+    notes: stamped.notes ?? null,
+    updated_at: stamped.updatedAt,
   })
   return next
 }
