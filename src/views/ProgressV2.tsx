@@ -7,6 +7,7 @@ import type { AppRoute } from '@/lib/appRoutes'
 import { useCustomization } from '@/lib/customizationContext'
 import { addLog } from '@/lib/measurementLog'
 import { getDayStamp } from '@/lib/today'
+import { useAppScrollReset } from '@/lib/useAppScrollReset'
 import { inRange, LIMITS, sanitizeNumericInput } from '@/lib/validation'
 import {
   buildProgressV2Model,
@@ -56,6 +57,7 @@ export function ProgressV2({ lang, onNavigate }: ProgressV2Props) {
   const insights = buildWeeklyInsights(ar ? 'ar' : 'en')
   const insightsCopy = insightCopy(ar ? 'ar' : 'en')
   const [screen, setScreen] = useState<ProgressScreen>('home')
+  useAppScrollReset(screen)
   const go = (r: AppRoute) => onNavigate?.(r)
 
   if (screen === 'weight') return <WeightDetailScreen model={model.weight} lang={lang} onBack={() => setScreen('home')} onLog={() => setScreen('log')} stale={model.stale.show ? model.stale.detailText : null} />
@@ -75,7 +77,7 @@ export function ProgressV2({ lang, onNavigate }: ProgressV2Props) {
   }
 
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
+    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light bg-page px-4 pb-6 pt-3 text-ink-900">
       <div className="v2-screen-enter mx-auto w-full max-w-md space-y-5">
         <header className="pt-1">
           <div className="flex items-center justify-between">
@@ -97,7 +99,7 @@ export function ProgressV2({ lang, onNavigate }: ProgressV2Props) {
           </div>
           {/* رؤى الأسبوع — بطاقات المحرّك المُحوَّطة (فعل + وجهة، أو «نحتاج المزيد»). */}
           <div className="mt-4 border-t border-line pt-4">
-            <InsightCardsView cards={insights.cards} lang={ar ? 'ar' : 'en'} onNavigate={go} title={insightsCopy.progressTitle} />
+            <InsightCardsView cards={insights.cards} lang={ar ? 'ar' : 'en'} onNavigate={go} title={insightsCopy.progressTitle} max={1} />
           </div>
           {model.stale.show && (
             <button type="button" onClick={() => setScreen('weight')} className="mt-4 flex w-full items-center justify-between gap-2 border-t border-line pt-3 text-start">
@@ -193,7 +195,7 @@ function WeightLogScreen({ lang, current, onBack, onSaved }: { lang: Lang; curre
   }
 
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
+    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light bg-page px-4 pb-6 pt-3 text-ink-900">
       <div className="v2-screen-enter mx-auto w-full max-w-md">
         <div className="flex items-center justify-between">
           <button type="button" onClick={onBack} aria-label={t('رجوع', 'Back')} className="grid h-10 w-10 place-items-center rounded-xl border border-line bg-surface">
@@ -289,7 +291,7 @@ function WeightDetailScreen({ model, lang, onBack, onLog, stale }: { model: Weig
   const down = model.changeKg !== null && model.changeKg < 0
   const up = model.changeKg !== null && model.changeKg > 0
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
+    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light bg-page px-4 pb-6 pt-3 text-ink-900">
       <div className="v2-screen-enter mx-auto w-full max-w-md">
         <div className="flex items-center justify-between">
           <button type="button" onClick={onBack} aria-label={t('رجوع', 'Back')} className="grid h-10 w-10 place-items-center rounded-xl border border-line bg-surface"><Icon name="ChevronRight" className="h-5 w-5 rtl:rotate-0 ltr:rotate-180" /></button>
@@ -368,7 +370,7 @@ function StrengthDetailScreen({ strength, lang, onBack, onTrain }: { strength: i
   const ar = lang !== 'en'
   const t = (a: string, e: string) => (ar ? a : e)
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
+    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light bg-page px-4 pb-6 pt-3 text-ink-900">
       <div className="v2-screen-enter mx-auto w-full max-w-md">
         <div className="flex items-center justify-between">
           <button type="button" onClick={onBack} aria-label={t('رجوع', 'Back')} className="grid h-10 w-10 place-items-center rounded-xl border border-line bg-surface"><Icon name="ChevronRight" className="h-5 w-5 rtl:rotate-0 ltr:rotate-180" /></button>

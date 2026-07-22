@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Icon } from '@/components/Icon'
+import { ExerciseMedia } from '@/components/ExerciseMedia'
 import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
 import { applyTheme } from '@/lib/appPreferences'
 import type { AppRoute } from '@/lib/appRoutes'
 import { useCustomization } from '@/lib/customizationContext'
+import { useAppScrollReset } from '@/lib/useAppScrollReset'
 // Reuse the SACRED, just-shipped timestamp rest-timer helpers from the v1 active
 // session engine (read-only import — the logic is never rewritten here). Basing
 // the v2 rest timer on `endsAt`/`durationSec` (not a decrementing counter) keeps
@@ -191,6 +193,7 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   // (ambiguous data discarded — see migrateLegacySummary). Runs once per owner.
   useEffect(() => { migrateLegacySummary(userId) }, [userId])
   const [screen, setScreen] = useState<Screen>('plan')
+  useAppScrollReset(screen)
   // Immersive focus: the active/complete screens are fullscreen takeovers. Signal
   // the shell to make its chrome (header + nav) inert so VoiceOver can't reach
   // the background behind the workout (screen 27 — real modal focus).
@@ -478,7 +481,7 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   // Guarded discard — the destructive close commits only after confirmation.
   const discardWorkout = () => { setConfirmDiscard(false); clearActive(); setPreSubs({}); onNavigate('dashboard') }
 
-  const planScreen = <PlanScreen model={model} lang={lang} onExercise={(i) => { setDetailIdx(i); setScreen('detail') }} onStart={startSession} onBack={() => onNavigate('dashboard')} />
+  const planScreen = <PlanScreen model={model} lang={lang} onExercise={(i) => { setDetailIdx(i); setScreen('detail') }} onStart={startSession} />
   if (screen === 'plan') return planScreen
   if (screen === 'detail') {
     const base = model.exercises[detailIdx]
@@ -624,6 +627,9 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
       ) : (
         <>
           <main className="flex flex-1 flex-col overflow-y-auto px-5 pb-3">
+            <div className="mt-2 shrink-0 overflow-hidden rounded-2xl" aria-hidden="true">
+              <ExerciseMedia exerciseId={ex.exerciseId} heightClass="h-32" hideChips />
+            </div>
             <h1 className="mt-2 text-2xl font-black leading-tight">{ar ? ex.nameAr : ex.nameEn}</h1>
             <p className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-sm font-bold" style={{ color: FOCUS.inkMuted }}>
               <span>{CATEGORY_LABEL[ex.category][ar ? 'ar' : 'en']} · {ex.sets}×{ex.reps}</span>
@@ -907,7 +913,7 @@ function RestPanel({ lang, restLeft, restDone, nextEx, setLabel, tip, tipDismiss
   )
 }
 
-function PlanScreen({ model, lang, onExercise, onStart, onBack }: { model: ReturnType<typeof buildWorkoutV2Model>; lang: Lang; onExercise: (i: number) => void; onStart: () => void; onBack: () => void }) {
+function PlanScreen({ model, lang, onExercise, onStart }: { model: ReturnType<typeof buildWorkoutV2Model>; lang: Lang; onExercise: (i: number) => void; onStart: () => void }) {
   const ar = lang !== 'en'
   const groups: { cat: ExCategory; items: { ex: WorkoutV2Exercise; i: number }[] }[] = []
   model.exercises.forEach((ex, i) => {
@@ -916,16 +922,17 @@ function PlanScreen({ model, lang, onExercise, onStart, onBack }: { model: Retur
     else groups.push({ cat: ex.category, items: [{ ex, i }] })
   })
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
+    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light bg-page px-4 pb-6 pt-3 text-ink-900">
       <div className="v2-screen-enter mx-auto w-full max-w-md">
-        <button type="button" onClick={onBack} aria-label={ar ? 'رجوع' : 'Back'} className="grid h-10 w-10 place-items-center rounded-xl border border-line bg-surface"><Icon name="ChevronRight" className="h-5 w-5 rtl:rotate-0 ltr:rotate-180" /></button>
-        <p className="v2-text-blue mt-4 text-xs font-black uppercase tracking-wider">{ar ? model.program.titleAr : model.program.titleEn} · {ar ? model.program.contextAr : model.program.contextEn}</p>
+        <p className="v2-text-blue pt-1 text-xs font-black uppercase tracking-wider">{ar ? model.program.titleAr : model.program.titleEn} · {ar ? model.program.contextAr : model.program.contextEn}</p>
         <h1 className="mt-1 text-3xl font-black tracking-tight">{model.session.title}</h1>
         <div className="mt-3 flex flex-wrap gap-2 text-xs font-bold text-ink-500">
           <Chip icon="Dumbbell" text={`${model.session.exerciseCount} ${ar ? 'تمارين' : 'exercises'}`} />
           <Chip icon="Clock" text={`~${model.session.durationMin} ${ar ? 'دقيقة' : 'min'}`} />
           {model.session.muscles.slice(0, 2).map((m) => <Chip key={m} icon="Target" text={muscleLabel(m as Muscle, lang)} />)}
         </div>
+
+        <button type="button" onClick={onStart} className="btn-primary mt-5 w-full py-4 text-[1.1875rem] shadow-glow">{ar ? 'ابدأ الجلسة' : 'Start session'}</button>
 
         <div className="mt-6 space-y-5">
           {groups.map((g) => (
@@ -934,7 +941,9 @@ function PlanScreen({ model, lang, onExercise, onStart, onBack }: { model: Retur
               <div className="space-y-2">
                 {g.items.map(({ ex, i }) => (
                   <button key={ex.id} type="button" onClick={() => onExercise(i)} className="v2-pressable flex w-full items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3 text-start hover:border-[color:var(--v2-blue)]">
-                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-beige text-ink-500"><Icon name="Dumbbell" className="h-5 w-5" /></span>
+                    <span className="h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-beige">
+                      <ExerciseMedia exerciseId={ex.exerciseId} heightClass="h-14" hideChips />
+                    </span>
                     <span className="min-w-0 flex-1">
                       <span className="block text-sm font-bold">{ar ? ex.nameAr : ex.nameEn}</span>
                       <span className="block text-xs text-ink-500">{ex.sets}×{ex.reps}{ex.equipment[0] ? ` · ${equipmentLabel(ex.equipment[0], lang)}` : ''}</span>
@@ -946,10 +955,6 @@ function PlanScreen({ model, lang, onExercise, onStart, onBack }: { model: Retur
             </div>
           ))}
         </div>
-
-        {/* In-flow primary CTA — sits within the scroll (above the app tab bar,
-            which a fixed footer would collide with), so it's always tappable. */}
-        <button type="button" onClick={onStart} className="btn-primary mt-6 w-full py-4 text-[1.1875rem] shadow-glow">{ar ? 'ابدأ الجلسة' : 'Start session'}</button>
       </div>
     </div>
   )
@@ -958,11 +963,12 @@ function PlanScreen({ model, lang, onExercise, onStart, onBack }: { model: Retur
 function DetailScreen({ ex, idx, total, lang, swapped, onReplace, onStart, onBack }: { ex: WorkoutV2Exercise; idx: number; total: number; lang: Lang; swapped?: boolean; onReplace?: () => void; onStart: () => void; onBack: () => void }) {
   const ar = lang !== 'en'
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
+    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light bg-page px-4 pb-6 pt-3 text-ink-900">
       <div className="v2-screen-enter mx-auto w-full max-w-md">
         <button type="button" onClick={onBack} aria-label={ar ? 'رجوع' : 'Back'} className="grid h-10 w-10 place-items-center rounded-xl border border-line bg-surface"><Icon name="ChevronRight" className="h-5 w-5 rtl:rotate-0 ltr:rotate-180" /></button>
-        {/* media placeholder (no demo media in the plan template) */}
-        <div className="mt-4 grid aspect-video place-items-center rounded-2xl border border-line bg-surface text-ink-400"><Icon name="Dumbbell" className="h-10 w-10" /></div>
+        <div className="mt-4 aspect-video overflow-hidden rounded-2xl border border-line bg-surface">
+          <ExerciseMedia exerciseId={ex.exerciseId} heightClass="h-full" hideChips />
+        </div>
         <p className="v2-text-blue mt-4 text-xs font-black uppercase tracking-wider">{ar ? `التمرين ${toAr(idx + 1, lang)} من ${toAr(total, lang)}` : `Exercise ${idx + 1} of ${total}`}</p>
         <h1 className="mt-1 text-2xl font-black">{ar ? ex.nameAr : ex.nameEn}</h1>
         <div className="mt-3 flex flex-wrap gap-2 text-xs font-bold text-ink-500">
@@ -1190,7 +1196,7 @@ function DiscardConfirmSheet({ lang, onDiscard, onCancel }: { lang: Lang; onDisc
 function MissingPlan({ lang, onNavigate }: { lang: Lang; onNavigate: (r: AppRoute) => void }) {
   const ar = lang !== 'en'
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light v2-screen-enter flex min-h-screen flex-col items-center justify-center bg-page px-6 text-center text-ink-900">
+    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light v2-screen-enter flex min-h-full flex-col items-center justify-center bg-page px-6 py-10 text-center text-ink-900">
       <Icon name="Dumbbell" className="h-12 w-12 text-ink-400" />
       <h1 className="mt-5 text-2xl font-black">{ar ? 'أكمل إعداد خطتك' : 'Finish setting up your plan'}</h1>
       <p className="mt-2 max-w-xs text-sm text-ink-500">{ar ? 'نحتاج هدفك وجدولك لنبني تمرينك.' : 'We need your goal and schedule to build your workout.'}</p>

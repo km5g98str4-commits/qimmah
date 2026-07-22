@@ -13,6 +13,7 @@ import { loadLogs } from '@/lib/measurementLog'
 import { buildNutritionV2Model } from '@/lib/nutritionV2Model'
 import { getDayStamp } from '@/lib/today'
 import { buildTodayV2Model } from '@/lib/todayV2Model'
+import { playHaptic } from '@/lib/nativeFeedback'
 
 interface TodayV2Props {
   lang: Lang
@@ -156,7 +157,7 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
                 <button
                   key={action.key}
                   type="button"
-                  onClick={action.onClick}
+                  onClick={() => { void playHaptic('selection'); action.onClick() }}
                   className="v2-pressable flex min-h-[3.5rem] w-full items-center gap-3 rounded-2xl border border-line bg-surface px-3.5 py-2.5 text-start"
                 >
                   <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-primary-soft text-[color:var(--v2-green-text)]">
@@ -193,7 +194,7 @@ function ActionCard({ action, featured, lang }: { action: TodayAction; featured:
   return (
     <button
       type="button"
-      onClick={action.onClick}
+      onClick={() => { void playHaptic('selection'); action.onClick() }}
       className={cn(
         'v2-pressable relative flex min-h-[10.5rem] flex-col overflow-hidden rounded-3xl border p-4 text-start shadow-card',
         featured ? 'col-span-2 bg-ink-900 text-white' : 'bg-surface text-ink-900',

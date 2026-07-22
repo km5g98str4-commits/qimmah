@@ -9,6 +9,7 @@ import { getStrings } from '@/config/strings'
 import { V2_QUICK_LOG, V2_TAB_LABELS } from '@/design-system/v2/labels'
 import type { AppRoute } from '@/lib/appRoutes'
 import type { AppBadge } from './AppNav'
+import { playHaptic } from '@/lib/nativeFeedback'
 
 export type MainTab = 'dashboard' | 'workout' | 'nutrition' | 'progress' | 'profile'
 
@@ -45,6 +46,7 @@ export function MobileShell({ lang, tab, badge: _badge, onNavigate, onOpenSettin
   const scrollerRef = useRef<HTMLElement>(null)
   const previousTabRef = useRef<MainTab>(tab)
   const scrollPositionsRef = useRef<Partial<Record<MainTab, number>>>({})
+  const quickLogTriggerRef = useRef<HTMLButtonElement>(null)
 
   // Immersive focus (fullscreen workout/summary): make the shell chrome inert so
   // assistive tech can't reach the header/nav behind the modal workout surface.
@@ -155,7 +157,7 @@ export function MobileShell({ lang, tab, badge: _badge, onNavigate, onOpenSettin
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={() => onNavigate('profile')}
+                onClick={() => { void playHaptic('selection'); onNavigate('profile') }}
                 aria-label={ar ? 'ملفك التدريبي' : 'Your training profile'}
                 aria-current={tab === 'profile' ? 'page' : undefined}
                 className={cn(
@@ -209,8 +211,9 @@ export function MobileShell({ lang, tab, badge: _badge, onNavigate, onOpenSettin
               return (
                 <div key="log-action" className="flex items-start justify-center">
                   <button
+                    ref={quickLogTriggerRef}
                     type="button"
-                    onClick={() => setQuickLogOpen(true)}
+                    onClick={() => { void playHaptic('selection'); setQuickLogOpen(true) }}
                     aria-label={tb.label}
                     className="-mt-5 flex flex-col items-center gap-1 text-[10px] font-bold text-primary-c"
                   >
@@ -227,7 +230,7 @@ export function MobileShell({ lang, tab, badge: _badge, onNavigate, onOpenSettin
               <button
                 key={tb.id}
                 type="button"
-                onClick={() => onNavigate(tb.route)}
+                onClick={() => { void playHaptic('selection'); onNavigate(tb.route) }}
                 aria-current={active ? 'page' : undefined}
                 className={cn(
                   'flex flex-col items-center justify-center gap-1 py-2.5 text-[10px] font-bold transition-colors',
@@ -254,8 +257,12 @@ export function MobileShell({ lang, tab, badge: _badge, onNavigate, onOpenSettin
         <QuickLogSheet
           lang={lang}
           routineLabel={routineQuickLabel}
-          onClose={() => setQuickLogOpen(false)}
+          onClose={() => {
+            setQuickLogOpen(false)
+            window.requestAnimationFrame(() => quickLogTriggerRef.current?.focus())
+          }}
           onSelect={(target) => {
+            void playHaptic('selection')
             setQuickLogOpen(false)
             onQuickLog(target)
           }}
@@ -269,11 +276,24 @@ function QuickLogSheet({ lang, routineLabel, onClose, onSelect }: { lang: Lang; 
   const ar = lang !== 'en'
   const copy = V2_QUICK_LOG[ar ? 'ar' : 'en']
   const closeRef = useRef<HTMLButtonElement>(null)
+  const dialogRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
     closeRef.current?.focus()
     const onKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onClose()
+      if (event.key !== 'Tab') return
+      const focusable = dialogRef.current?.querySelectorAll<HTMLElement>('button:not([disabled]), [href], input:not([disabled]), [tabindex]:not([tabindex="-1"])')
+      if (!focusable?.length) return
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault()
+        last.focus()
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault()
+        first.focus()
+      }
     }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
@@ -281,8 +301,9 @@ function QuickLogSheet({ lang, routineLabel, onClose, onSelect }: { lang: Lang; 
 
   return (
     <div className="fixed inset-0 z-[80] flex items-end justify-center" role="presentation">
-      <button type="button" className="absolute inset-0 bg-black/55 backdrop-blur-[2px]" onClick={onClose} aria-label={copy.close} />
+      <button type="button" tabIndex={-1} aria-hidden="true" className="absolute inset-0 bg-black/55 backdrop-blur-[2px]" onClick={onClose} />
       <section
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="quick-log-title"

@@ -26,7 +26,7 @@ const ratio = contrast(greenText, '#ffffff')
 check(`--v2-green-text ${greenText} ≥ 4.5:1 on white (is ${ratio.toFixed(2)})`, ratio >= 4.5)
 const today = read('src/views/TodayV2.tsx')
 check('progress label uses the AA green-text token', today.includes("text-[color:var(--v2-green-text)]"))
-check('nutrition pillar % uses the AA green-text token', today.includes("pillar.key === 'nutrition' ? 'var(--v2-green-text)'"))
+check('food/completion actions use the AA green-text token', today.includes("green: 'var(--v2-green-text)'"))
 
 // ── B: active workout is a real modal; shell chrome goes inert ──
 const workout = read('src/views/WorkoutV2.tsx')
