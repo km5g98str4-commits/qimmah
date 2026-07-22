@@ -11,6 +11,7 @@ const check = (label, condition) => {
 }
 
 const login = read('src/views/LoginView.tsx')
+const policy = read('src/data/policyCopy.ts')
 const onbV2 = read('src/views/OnboardingV2.tsx')
 const flow = read('src/lib/onboardingV2Flow.ts')
 const profile = read('src/lib/planBuilderAnswers.ts')
@@ -24,7 +25,8 @@ const profileV2 = read('src/views/ProfileV2.tsx')
 console.log('\n① بوابة أهلية 12+ على سطح الحساب المشترك بين v1 وv2')
 check('زر التسجيل محجوب بلا موافقة', /pw\.valid && eligible12/.test(login))
 check('حارس الإرسال يعيد التحقق قبل signUp', login.indexOf('if (isSignup && !eligible12)') < login.indexOf('auth.signUp('))
-check('روابط الشروط والخصوصية حقيقية وآمنة', login.includes('POLICY_LINKS.terms') && login.includes('POLICY_LINKS.privacy') && login.includes('noopener noreferrer'))
+check('روابط الشروط والخصوصية داخلية ولا تفتح صفحة ويب منفصلة', login.includes('POLICY_LINKS.terms') && login.includes('POLICY_LINKS.privacy') && policy.includes("terms: '#/terms'") && policy.includes("privacy: '#/privacy'") && !login.includes('target="_blank"'))
+check('وضع إنشاء الحساب محفوظ عند فتح شاشة قانونية والرجوع', login.includes("onModeChange?.(next)") && read('src/App.tsx').includes('onModeChange={setLoginMode}'))
 
 console.log('\n② موافقة البيانات الصحية محفوظة وليست افتراضًا')
 check('بوابة الموافقة مرتبطة بأول خطوة (الهدف) قبل أي جمع بيانات', onbV2.includes('step === 0 && <GoalStep') && onbV2.includes('healthDataConsent={healthDataConsent}') && onbV2.includes('onConsent={setHealthDataConsent}') && onbV2.includes('checked={healthDataConsent}'))

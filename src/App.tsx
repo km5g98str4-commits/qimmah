@@ -364,7 +364,15 @@ export default function App() {
       />
     )
   } else if (view === 'login') {
-    content = <V.LoginView lang={LANG} initialMode={loginMode} onSuccess={enterApp} onBack={() => setView('start')} />
+    content = (
+      <V.LoginView
+        lang={LANG}
+        initialMode={loginMode}
+        onModeChange={setLoginMode}
+        onSuccess={enterApp}
+        onBack={() => setView('start')}
+      />
+    )
     // ملاحظة: مسار 'reset' يُعالَج في بوّابة الاستعادة أعلى الدالة (فوق كل البوّابات).
   } else if (view === 'privacy') {
     content = <V.PrivacyView lang={LANG} onBack={() => navigate(beforeLegalRef.current)} />
