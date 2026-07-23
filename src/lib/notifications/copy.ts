@@ -43,6 +43,14 @@ export function supplementsCopy(items: string[]): NotificationCopy {
   }
 }
 
+/** (P5) نهاية الراحة داخل الجلسة — النسخة الثنائية الفعلية في notificationCopy.ts. */
+export function restEndCopy(): NotificationCopy {
+  return {
+    title: 'انتهت الراحة',
+    body: 'جاهز للمجموعة التالية؟ ارجع لتمرينك.',
+  }
+}
+
 /** يبني نصّ إشعار لأيّ نوع — نقطة دخول واحدة يستخدمها schedule.ts. */
 export function copyFor(kind: ReminderKind, ctx: { dayTitle?: string | null; supplementItems?: string[] } = {}): NotificationCopy {
   switch (kind) {
@@ -56,5 +64,7 @@ export function copyFor(kind: ReminderKind, ctx: { dayTitle?: string | null; sup
       return weeklyBriefCopy()
     case 'supplements':
       return supplementsCopy(ctx.supplementItems ?? [])
+    case 'restEnd':
+      return restEndCopy()
   }
 }

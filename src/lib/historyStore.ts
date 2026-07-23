@@ -161,6 +161,9 @@ function normalizeExercise(raw: unknown): SessionExercise {
   } as SessionExercise
 }
 
+// (P5) قيم حالة الجلسة الصالحة — أي قيمة أخرى تُسقط (localStorage مدخل معادٍ).
+const SESSION_STATUSES = new Set(['in_progress', 'completed', 'ended_early', 'abandoned'])
+
 function normalizeSession(raw: unknown): WorkoutSession | null {
   if (!raw || typeof raw !== 'object') return null
   const s = raw as Record<string, unknown>
@@ -173,6 +176,8 @@ function normalizeSession(raw: unknown): WorkoutSession | null {
     workoutDayId: typeof s.workoutDayId === 'string' ? s.workoutDayId : '',
     workoutDayName: typeof s.workoutDayName === 'string' ? s.workoutDayName : '',
     exercises: Array.isArray(s.exercises) ? s.exercises.map(normalizeExercise) : [],
+    // (P5) حالة الجلسة تُحفظ عبر جولة القراءة/الكتابة؛ الغياب = جلسة قديمة (completed).
+    status: typeof s.status === 'string' && SESSION_STATUSES.has(s.status) ? (s.status as WorkoutSession['status']) : undefined,
   }
 }
 

@@ -15,7 +15,7 @@ import type { AppRoute } from '@/lib/appRoutes'
 import { scheduledDayFor } from '@/lib/workoutCalendar'
 import { getSteps, loadStepGoal } from '@/lib/stepCounter'
 import { getNutritionLog, getWorkoutSessions } from '@/lib/historyStore'
-import { todaysFinishedSession } from '@/lib/workoutSessions'
+import { todaysCompletion } from '@/lib/workoutSessionEngine'
 import { getDayStamp, weekdayName } from '@/lib/today'
 import { loadOnboardingProfile } from '@/lib/onboardingProfile'
 
@@ -120,7 +120,12 @@ export function buildTodayV2Model(customization: Customization, lang: Lang): Tod
   const workoutName = day ? (ar ? day.nameAr : day.nameEn) : ''
   const workoutAvailable = onboarded && exerciseCount > 0
   const durationMin = customization.profile.workoutDuration > 0 ? customization.profile.workoutDuration : estimateDurationMin(exerciseCount)
-  const finished = todaysFinishedSession()
+  // (P5) الاكتمال الصادق بدل «أي finishedAt»: جلسة completed فقط تُكمل اليوم؛
+  // الإنهاء المبكر (ended_early) = جزئي — لا يقلب الحالة إلى afterWorkout، ويظهر
+  // كتقدّم حقيقي على عمود التدريب. الجلسات القديمة بلا status تبقى completed.
+  const completion = todaysCompletion()
+  const finished = completion.state === 'complete' ? completion.session : undefined
+  const partialTrain = completion.state === 'partial' ? completion.partial : null
   // Prefer the localized plan-day name over the stored session name (which is a
   // single string frozen at finish time) so English never shows an Arabic name.
   const finishedName = finished ? workoutName || finished.workoutDayName : ''
@@ -198,13 +203,22 @@ export function buildTodayV2Model(customization: Customization, lang: Lang): Tod
   const hero = buildHero({ t, state, workoutAvailable, workoutName, exerciseCount, durationMin, finishedName, proteinRemaining, nutritionTarget, loggedMeal })
 
   // ── مسار اليوم: four pillars (real state each; all locked for new users) ──
-  const trainState: PillarState = finished ? 'done' : workoutAvailable ? 'ready' : 'locked'
+  // (P5) جزئي بتقدّم فعلي (>0%) → 'active' بنسبة المجموعات المنجزة الحقيقية؛
+  // جزئي صفر إنجاز → يبقى 'ready' (لا حلقة فارغة) واليوم غير مكتمل في الحالين.
+  const trainState: PillarState = finished
+    ? 'done'
+    : partialTrain && partialTrain.percent > 0
+      ? 'active'
+      : workoutAvailable
+        ? 'ready'
+        : 'locked'
+  const trainPercent = !finished && partialTrain ? partialTrain.percent : 0
   const nutritionState: PillarState = !nutritionTarget ? 'locked' : nutritionPercent >= 100 ? 'done' : nutritionPercent > 0 ? 'active' : 'locked'
   const moveState: PillarState = !movementAvailable ? 'locked' : movementPercent >= 100 ? 'done' : movementPercent > 0 ? 'active' : 'locked'
   const recoverState: PillarState = 'locked' // recovery completes in the evening flow; honest neutral until then
   const lockAll = state === 'newUser'
   const pillars: TodayPillar[] = [
-    { key: 'train', labelAr: 'تدريب', labelEn: 'Training', icon: 'Dumbbell', state: lockAll ? 'locked' : trainState, percent: 0 },
+    { key: 'train', labelAr: 'تدريب', labelEn: 'Training', icon: 'Dumbbell', state: lockAll ? 'locked' : trainState, percent: trainPercent },
     { key: 'nutrition', labelAr: 'تغذية', labelEn: 'Nutrition', icon: 'Flame', state: lockAll ? 'locked' : nutritionState, percent: nutritionPercent },
     { key: 'move', labelAr: 'حركة', labelEn: 'Movement', icon: 'Activity', state: lockAll ? 'locked' : moveState, percent: movementPercent },
     { key: 'recover', labelAr: 'تعافي', labelEn: 'Recovery', icon: 'Moon', state: lockAll ? 'locked' : recoverState, percent: 0 },

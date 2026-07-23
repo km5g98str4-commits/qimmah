@@ -136,5 +136,11 @@ export function notificationMessage(
         title: ar ? 'راجع روتينك الصحي' : 'Review your health routine',
         body: ar ? 'راجع روتينك وفق تعليمات مختصك. تبقى التفاصيل داخل التطبيق.' : 'Review your routine according to professional advice. Details stay inside the app.',
       }
+    // (P5) إشعار نهاية الراحة داخل الجلسة — يصل والتطبيق في الخلفية.
+    case 'restEnd':
+      return {
+        title: ar ? 'انتهت الراحة' : 'Rest is over',
+        body: ar ? 'جاهز للمجموعة التالية؟ ارجع لتمرينك.' : 'Ready for the next set? Head back to your workout.',
+      }
   }
 }

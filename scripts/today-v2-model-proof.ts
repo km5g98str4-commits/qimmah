@@ -162,6 +162,39 @@ console.log('\n⑤ الإنجليزية: نفس المنطق، نصوص EN')
   check('progress EN «Not started»', m.progressLabel.includes('Not started'))
 }
 
+// (P5 — تعديل توقّعات موثّق) محرّك حالة الجلسة غيّر تعريف «اليوم المكتمل»:
+// جلسة completed فقط تقلب اليوم إلى afterWorkout؛ الإنهاء المبكر (ended_early)
+// له finishedAt لكنه **لا** يُكمل اليوم — يظهر تقدّمًا جزئيًا صادقًا على عمود
+// التدريب بدل «أنهيت تمرينك» الزائفة. الجلسات القديمة بلا status تبقى completed
+// (السيناريوهات أعلاه لم تتغيّر — هذه إضافة تغطي السلوك الجديد المطلوب).
+console.log('\n⑧ (P5) إنهاء مبكر اليوم → اليوم غير مكتمل + تقدّم جزئي صادق')
+{
+  ls.clear()
+  seedMigrated()
+  seedOnboarded()
+  ls.setItem(
+    'qimmah:history:workoutSessions:v1',
+    JSON.stringify([{
+      id: 'sEarly', date: stamp, startedAt: iso, finishedAt: iso, status: 'ended_early',
+      workoutDayId: 'd1', workoutDayName: 'الصدر والكتف',
+      exercises: [
+        { exerciseId: 'x', targetSets: 2, targetReps: '8', targetRestSec: 90, completed: true, sets: [
+          { setNumber: 1, targetReps: '8', actualReps: '8', weightKg: '40', completed: true },
+          { setNumber: 2, targetReps: '8', actualReps: '8', weightKg: '40', completed: true },
+        ] },
+        { exerciseId: 'y', targetSets: 2, targetReps: '8', targetRestSec: 90, completed: false, sets: [
+          { setNumber: 1, targetReps: '8', actualReps: '', weightKg: '0', completed: false },
+          { setNumber: 2, targetReps: '8', actualReps: '', weightKg: '0', completed: false },
+        ] },
+      ],
+    }]),
+  )
+  const m = buildTodayV2Model(baseCustomization(), 'ar')
+  check('P5: إنهاء مبكر لا يقلب اليوم إلى afterWorkout', m.state !== 'afterWorkout')
+  check('P5: عمود التدريب active بنسبة مجموعات حقيقية 50%', m.pillars[0].state === 'active' && m.pillars[0].percent === 50)
+  check('P5: التدريب غير محسوب مكتملًا', m.pillars[0].state !== 'done')
+}
+
 console.log(`\n${'─'.repeat(46)}`)
 if (fail === 0) {
   console.log(`✅ كل فحوص نموذج اليوم v2.1 نجحت — ${pass} فحصًا.`)
