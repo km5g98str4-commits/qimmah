@@ -14,6 +14,7 @@ import { getDayStamp } from '@/lib/today'
 // nutrition store (historyStore), which is the same store Today's تغذية pillar
 // reads (loggedFood) and which auto-enqueues sync. One real store, both ways.
 import { saveNutritionLog, saveWaterLog } from '@/lib/historyStore'
+import { runMigration } from '@/lib/dataOwnership'
 
 export const NUTRITION_V2_KEY = 'qimmah:nutrition:v2'
 export type MealSlot = 'breakfast' | 'lunch' | 'dinner' | 'snack'
@@ -97,9 +98,47 @@ function readLegacyNutritionDay(): DayLog | null {
   }
 }
 
+// ── هجرة v1→v2 لمرة واحدة (تستبدل الـfallback القرائي القديم) ─────────────────
+// عبر مشغّل الهجرات الموحّد: idempotent (سجل qimmah:migrations:v1) + snapshot +
+// verify + rollback، ويحذف مفتاح v1 فقط بعد نجاح مثبت. بعدها القراءة من مصدر واحد.
+let unifyAttempted = false
+function ensureNutritionUnified(): void {
+  if (unifyAttempted || typeof window === 'undefined') return
+  unifyAttempted = true
+  runMigration({
+    id: 'nutrition-unify-v1-to-v2',
+    keys: [NUTRITION_V2_KEY, LEGACY_NUTRITION_KEY],
+    run: () => {
+      let hasV2Today = false
+      try {
+        const raw = localStorage.getItem(NUTRITION_V2_KEY)
+        const p = raw ? (JSON.parse(raw) as Partial<DayLog>) : null
+        hasV2Today = !!(p && p.date === getDayStamp() && Array.isArray(p.foods))
+      } catch {
+        hasV2Today = false
+      }
+      if (hasV2Today) return // v2 هو الأحدث — لا ننسخ فوقه
+      const legacy = readLegacyNutritionDay()
+      if (legacy) localStorage.setItem(NUTRITION_V2_KEY, JSON.stringify(legacy))
+    },
+    verify: () => {
+      const legacy = readLegacyNutritionDay()
+      if (!legacy) return true // لا بيانات يوم-حالي في v1 — لا شيء يُثبت
+      try {
+        const p = JSON.parse(localStorage.getItem(NUTRITION_V2_KEY) ?? 'null') as Partial<DayLog> | null
+        return !!p && p.date === getDayStamp() && Array.isArray(p.foods)
+      } catch {
+        return false
+      }
+    },
+    cleanup: () => localStorage.removeItem(LEGACY_NUTRITION_KEY),
+  })
+}
+
 export function loadNutritionDay(): DayLog {
   const empty: DayLog = { date: getDayStamp(), foods: [], waterMl: 0 }
   if (typeof window === 'undefined') return empty
+  ensureNutritionUnified()
   try {
     const raw = localStorage.getItem(NUTRITION_V2_KEY)
     const parsed = raw ? (JSON.parse(raw) as Partial<DayLog>) : null
@@ -109,8 +148,35 @@ export function loadNutritionDay(): DayLog {
   } catch {
     /* ignore */
   }
-  // Unified store has nothing for today → one-release read-only legacy fallback.
-  return readLegacyNutritionDay() ?? empty
+  return empty // مصدر واحد — لا fallback قرائي بعد الهجرة
+}
+
+// ── عقد المتجر القانوني: getSnapshot / subscribe / mutate(persist) / export ──
+const dayListeners = new Set<() => void>()
+let dayCache: DayLog | null = null
+
+/** إشعار المشتركين — يلغي حاجة الواجهات لعدّادات tick اليدوية. */
+function notifyNutritionDay(): void {
+  dayListeners.forEach((l) => l())
+}
+
+export function subscribeNutritionDay(cb: () => void): () => void {
+  dayListeners.add(cb)
+  return () => {
+    dayListeners.delete(cb)
+  }
+}
+
+/** لقطة مستقرة المرجع (صالحة لـ useSyncExternalStore) — تُجدَّد عند الكتابة/تغيّر اليوم. */
+export function getNutritionDaySnapshot(): DayLog {
+  if (!dayCache || dayCache.date !== getDayStamp()) dayCache = loadNutritionDay()
+  return dayCache
+}
+
+/** إبطال اللقطة عند كتابة خارجية (تبويب آخر/استيراد) ثم إشعار المشتركين. */
+export function invalidateNutritionDay(): void {
+  dayCache = null
+  notifyNutritionDay()
 }
 
 function persist(day: DayLog): DayLog {
@@ -120,7 +186,15 @@ function persist(day: DayLog): DayLog {
     /* storage unavailable */
   }
   mirrorToCanonical(day)
+  dayCache = day
+  notifyNutritionDay()
   return day
+}
+
+/** يحذف صنفًا من سجل اليوم — مصدر واحد، مع إشعار المشتركين. */
+export function removeFoodFromDay(id: string): DayLog {
+  const day = loadNutritionDay()
+  return persist({ ...day, date: getDayStamp(), foods: day.foods.filter((f) => f.id !== id) })
 }
 
 export function addFoodToDay(food: LoggedFood): DayLog {
