@@ -12,7 +12,7 @@ import type { Customization } from '@/lib/customization'
 import type { Lang } from '@/lib/appPreferences'
 import type { CalorieGoal } from '@/types/profile'
 import type { AppRoute } from '@/lib/appRoutes'
-import { todayPlanDay } from '@/lib/workoutPlan'
+import { scheduledDayFor } from '@/lib/workoutCalendar'
 import { getSteps, loadStepGoal } from '@/lib/stepCounter'
 import { getNutritionLog, getWorkoutSessions } from '@/lib/historyStore'
 import { todaysFinishedSession } from '@/lib/workoutSessions'
@@ -67,6 +67,11 @@ export interface TodayV2Model {
   totalCount: number
   cards: TodayCard[]
   trustNote: string | null
+  /**
+   * (P4) يوم راحة حقيقي من الجدول الأسبوعي — لا تمرين اليوم بقرار الجدولة، لا
+   * لغياب الخطة. إضافة متوافقة خلفيًا (workoutAvailable يبقى false في الحالتين).
+   */
+  restDay: boolean
 }
 
 const GOAL_LABEL_AR: Record<CalorieGoal, string> = { cut: 'تنشيف', maintain: 'محافظة', bulk: 'تضخيم' }
@@ -106,8 +111,11 @@ export function buildTodayV2Model(customization: Customization, lang: Lang): Tod
   const firstName = name ? name.split(/\s+/)[0] : ''
   const avatarInitial = name ? Array.from(name)[0] : null
 
-  // ── Workout (real: generated plan + finished sessions) ──
-  const day = todayPlanDay(customization.workoutPlan)
+  // ── Workout (real: weekly schedule → plan day | honest rest; legacy rotation
+  //    only as the documented fallback when no schedule is configured) ──
+  const resolved = scheduledDayFor(customization.workoutPlan, now)
+  const restDay = resolved?.type === 'rest'
+  const day = resolved?.type === 'training' ? resolved.day : undefined
   const exerciseCount = day?.exercises.length ?? 0
   const workoutName = day ? (ar ? day.nameAr : day.nameEn) : ''
   const workoutAvailable = onboarded && exerciseCount > 0
@@ -222,7 +230,7 @@ export function buildTodayV2Model(customization: Customization, lang: Lang): Tod
     else if (!loggedMeal && nutritionTarget) trustNote = t('لا وجبات مسجّلة اليوم بعد.', 'No meals logged yet today.')
   }
 
-  return { state, greeting, dateLabel, avatarInitial, goalLabel, hero, pillars, progressLabel, completedCount, totalCount, cards, trustNote }
+  return { state, greeting, dateLabel, avatarInitial, goalLabel, hero, pillars, progressLabel, completedCount, totalCount, cards, trustNote, restDay }
 }
 
 // ── Hero builders ────────────────────────────────────────────────────────────

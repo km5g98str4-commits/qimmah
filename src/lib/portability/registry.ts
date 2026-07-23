@@ -32,6 +32,7 @@ import { REMINDER_PREFS_KEY, loadReminderPrefs } from '@/lib/reminderPrefs'
 import { ONBOARDING_KEY, loadOnboarding } from '@/lib/onboarding'
 import { ONBOARDING_PROFILE_KEY, loadOnboardingProfile } from '@/lib/onboardingProfile'
 import { ACHIEVEMENTS_KEY, loadAchievementState } from '@/features/achievements/engine'
+import { WORKOUT_CALENDAR_KEY, loadWeeklySchedule } from '@/lib/workoutCalendar'
 import { CUSTOM_PLAN_KEY, loadCustomPlanRecord } from '@/features/customPlan/storage'
 import { TODO_KEY_BASE, loadTodos } from '@/features/todo/store'
 import { ACTIVE_SESSION_KEY_BASE } from '@/lib/activeSession'
@@ -134,6 +135,7 @@ export const STORE_DEFS: StoreDef[] = [
   objectStore('onboarding', ONBOARDING_KEY, 'الإعداد', loadOnboarding),
   objectStore('onboardingProfile', ONBOARDING_PROFILE_KEY, 'ملف الإعداد', loadOnboardingProfile),
   objectStore('achievements', ACHIEVEMENTS_KEY, 'الإنجازات', loadAchievementState),
+  objectStore('workoutCalendar', WORKOUT_CALENDAR_KEY, 'الجدول الأسبوعي', loadWeeklySchedule),
   // — متاجر مربوطة بالمالك (المعرّف في لاحقة المفتاح) —
   {
     id: 'todo', kind: 'ownerSuffix', key: TODO_KEY_BASE, labelAr: 'مهام',

@@ -56,6 +56,7 @@ export const DATA_KEYS: readonly DataKeyDef[] = [
   { key: 'qimmah:healthkit:v1', kind: 'user', scoped: false, exported: false, synced: false, owner: 'healthKit', migration: 'owner-suffix', note: 'حالة ربط لكل مقياس' },
   { key: 'qimmah:handedness', kind: 'user', scoped: false, exported: false, synced: false, owner: 'handedness', migration: 'owner-suffix', note: 'تفضيل حساب (وضع اليد)' },
   { key: 'qimmah:reminders:v1', kind: 'user', scoped: false, exported: true, synced: false, owner: 'reminderPrefs', migration: 'owner-suffix' },
+  { key: 'qimmah:workoutCalendar:v1', kind: 'user', scoped: false, exported: true, synced: false, owner: 'workoutCalendar', migration: 'owner-suffix', note: 'الجدول الأسبوعي (يوم أسبوع → يوم خطة/راحة) + تجاوزات اليوم الفائت' },
 
   // ── بيانات مستخدم موسومة بالمالك اليوم ──
   { key: 'qimmah:active-workout:v2', kind: 'user', scoped: true, exported: true, synced: false, owner: 'WorkoutV2', migration: 'already-scoped' },
