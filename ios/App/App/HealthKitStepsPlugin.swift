@@ -153,5 +153,6 @@ public class HealthKitStepsPlugin: CAPPlugin, CAPBridgedPlugin {
 final class QimmahBridgeViewController: CAPBridgeViewController {
     override func capacitorDidLoad() {
         bridge?.registerPluginInstance(HealthKitStepsPlugin())
+        bridge?.registerPluginInstance(BarcodeScanPlugin())
     }
 }

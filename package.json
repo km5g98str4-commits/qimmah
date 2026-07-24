@@ -57,6 +57,7 @@
     "test:sand": "node scripts/run-sand-surface-proof.mjs",
     "test:formula": "node scripts/science/run-formula-proof.mjs",
     "test:media-rights": "node scripts/media/media-rights-proof.mjs",
+    "test:barcode": "node scripts/run-barcode-proof.mjs",
     "test:gate": "npm run test:active-session && npm run test:today-v2 && npm run test:progress-v2 && npm run test:data-portability && npm run test:portability && npm run test:notifications && npm run test:insights && npm run test:strength && npm run test:finish-confirm && npm run test:substitution && npm run test:state-block && npm run test:theme && npm run test:recovery && npm run test:secure-ops && npm run test:canonical && npm run test:data-safety && npm run test:sync && npm run test:onboarding-async && npm run test:fixforward && npm run test:isolation && npm run test:reset-recovery && npm run test:seed && npm run test:catalog && npm run test:food-db && npm run test:coaching && npm run test:policy && npm run test:formula && npm run test:media-rights && npm run proof:media && npm run test:minors && npm run test:native-bridge && npm run test:hydration && npm run test:polish1 && npm run test:polish2 && npm run test:polish3 && npm run test:sand && npm run test:calendar && npm run test:session-engine",
     "test:e2e:onboarding": "node scripts/e2e-onboarding.mjs",
     "test:e2e": "npm run build && node scripts/e2e-onboarding.mjs",
