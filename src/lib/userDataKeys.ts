@@ -61,6 +61,7 @@ export const DATA_KEYS: readonly DataKeyDef[] = [
   // ── بيانات مستخدم موسومة بالمالك اليوم ──
   { key: 'qimmah:active-workout:v2', kind: 'user', scoped: true, exported: true, synced: false, owner: 'WorkoutV2', migration: 'already-scoped' },
   { key: 'qimmah:recovery-log:v1', kind: 'user', scoped: true, exported: true, synced: false, owner: 'recovery', migration: 'already-scoped', note: 'ترشيح مزامنة لاحقًا' },
+  { key: 'qimmah:recovery-log:v2', kind: 'user', scoped: true, exported: false, synced: false, owner: 'recoveryEngine', migration: 'already-scoped', note: 'سجلّ محرّك التعافي v2 (P11) — غير مُصدَّر بعد؛ يلحق بموجة التصدير مع v1' },
   { key: 'qimmah:workout-summary:v2', kind: 'user', scoped: true, exported: true, synced: false, owner: 'workoutSummary', migration: 'already-scoped' },
   { key: 'qimmah:todo:v1', kind: 'user', scoped: true, exported: true, synced: true, owner: 'features/todo', migration: 'already-scoped' },
   { key: 'qimmah:plates:v1', kind: 'user', scoped: true, exported: true, synced: false, owner: 'strength/plates', migration: 'already-scoped' },
