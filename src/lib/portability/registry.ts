@@ -35,6 +35,7 @@ import { ACHIEVEMENTS_KEY, loadAchievementState } from '@/features/achievements/
 import { WORKOUT_CALENDAR_KEY, loadWeeklySchedule } from '@/lib/workoutCalendar'
 import { CUSTOM_PLAN_KEY, loadCustomPlanRecord } from '@/features/customPlan/storage'
 import { PLAN_TEMPLATES_KEY, listTemplates, MAX_TEMPLATES } from '@/features/customPlan/templates'
+import { NUTRITION_HISTORY_KEY, PERSONAL_FOODS_KEY, MAX_PERSONAL_FOODS, loadLedgerDays, listPersonalFoods } from '@/lib/nutritionHistory'
 import { TODO_KEY_BASE, loadTodos } from '@/features/todo/store'
 import { ACTIVE_SESSION_KEY_BASE } from '@/lib/activeSession'
 import { notificationPrefsKey } from '@/lib/notifications/prefs'
@@ -200,6 +201,27 @@ export const STORE_DEFS: StoreDef[] = [
         ? true
         : 'شكل قوالب الجداول غير صالح',
     load: (uid) => listTemplates(uid),
+  },
+  {
+    id: 'nutritionHistory', kind: 'ownerMap', key: NUTRITION_HISTORY_KEY, labelAr: 'دفتر التغذية المؤرَّخ',
+    keyFor: () => NUTRITION_HISTORY_KEY,
+    count: objCount, // عدد الأيام المفصَّلة
+    validate: (v) =>
+      v == null || (isObj(v) && Object.keys(v).length <= MAX_ITEMS_PER_STORE && Object.values(v).every(isArr))
+        ? true
+        : 'شكل دفتر التغذية غير صالح',
+    load: (uid) => loadLedgerDays(uid),
+  },
+  {
+    id: 'personalFoods', kind: 'ownerMap', key: PERSONAL_FOODS_KEY, labelAr: 'أطعمة شخصية',
+    keyFor: () => PERSONAL_FOODS_KEY,
+    count: arrCount,
+    validate: (v) =>
+      v == null ||
+      (isArr(v) && v.length <= MAX_PERSONAL_FOODS && v.every((f) => isObj(f) && typeof (f as { nameAr?: unknown }).nameAr === 'string'))
+        ? true
+        : 'شكل الأطعمة الشخصية غير صالح',
+    load: (uid) => listPersonalFoods(uid ?? null), // null صراحةً = 'guest' (undefined عندنا = المالك الحالي)
   },
 ]
 

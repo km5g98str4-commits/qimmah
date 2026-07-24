@@ -15,6 +15,10 @@ import { getDayStamp } from '@/lib/today'
 // reads (loggedFood) and which auto-enqueues sync. One real store, both ways.
 import { saveNutritionLog, saveWaterLog } from '@/lib/historyStore'
 import { runMigration } from '@/lib/dataOwnership'
+// (P7) الدفتر المؤرَّخ: persist يكتب أصناف اليوم في سجلّ التاريخ لتاريخها — مسار
+// الكاتب الواحد نفسه، فالترحيل اليومي لا يفقد تفصيل الأمس بعد الآن.
+// (دورة استيراد محسوبة: nutritionHistory يستدعي دوالنا داخل دوالّه فقط — آمنة.)
+import { recordLedgerDay } from '@/lib/nutritionHistory'
 
 export const NUTRITION_V2_KEY = 'qimmah:nutrition:v2'
 export type MealSlot = 'breakfast' | 'lunch' | 'dinner' | 'snack'
@@ -28,6 +32,13 @@ export interface LoggedFood {
   carbs?: number
   fat?: number
   meal: MealSlot
+  /** (P7) مرجع عنصر المكتبة إن سُجّل منها — يتيح إعادة حساب الماكروز عند تعديل الكمية. */
+  foodId?: string
+  /** (P7) الكمية المسجّلة — جرامات و/أو حصص؛ اختيارية للتوافق مع سجلّات أقدم بلا كمية. */
+  grams?: number
+  servings?: number
+  /** (P7) وحدة الإدخال الأصلية. */
+  unit?: 'g' | 'serving'
 }
 interface DayLog { date: string; foods: LoggedFood[]; waterMl: number }
 
@@ -186,6 +197,11 @@ function persist(day: DayLog): DayLog {
     /* storage unavailable */
   }
   mirrorToCanonical(day)
+  try {
+    recordLedgerDay(day) // (P7) تفصيل اليوم يُدوَّن لتاريخه — best-effort مثل المرآة
+  } catch {
+    /* الدفتر best-effort — متجر اليوم ثبت بالفعل */
+  }
   dayCache = day
   notifyNutritionDay()
   return day
@@ -200,6 +216,12 @@ export function removeFoodFromDay(id: string): DayLog {
 export function addFoodToDay(food: LoggedFood): DayLog {
   const day = loadNutritionDay()
   return persist({ ...day, date: getDayStamp(), foods: [...day.foods, food] })
+}
+
+/** (P7) يستبدل صنفًا بمعرّفه في سجل اليوم (تعديل كمية/ماكروز) — نفس مسار الكاتب الواحد. */
+export function updateFoodInDay(food: LoggedFood): DayLog {
+  const day = loadNutritionDay()
+  return persist({ ...day, date: getDayStamp(), foods: day.foods.map((f) => (f.id === food.id ? food : f)) })
 }
 
 /** يضيف ماءً (مل) لليوم الحالي — يُثبّت التاريخ ويُراكم على المسجّل سابقًا. */

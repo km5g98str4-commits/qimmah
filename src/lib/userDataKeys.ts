@@ -69,6 +69,8 @@ export const DATA_KEYS: readonly DataKeyDef[] = [
   { key: 'qimmah:notifications:v1', kind: 'user', scoped: true, exported: true, synced: false, owner: 'notifications/prefs', migration: 'already-scoped' },
   { key: 'qimmah:customPlan:v1', kind: 'user', scoped: true, exported: true, synced: true, owner: 'features/customPlan', migration: 'already-scoped' },
   { key: 'qimmah:planTemplates:v1', kind: 'user', scoped: true, exported: true, synced: false, owner: 'features/customPlan/builder', migration: 'already-scoped', note: 'قوالب جداول مسمّاة لكل مالك (P6) — عقد مزامنتها موثّق دون بنائه' },
+  { key: 'qimmah:nutritionHistory:v1', kind: 'user', scoped: true, exported: true, synced: false, owner: 'nutritionHistory', migration: 'already-scoped', note: 'دفتر تغذية مؤرَّخ لكل مالك (P7) — تفصيل ~90 يومًا؛ المجاميع تُزامَن عبر daily_logs كما هي' },
+  { key: 'qimmah:personalFoods:v1', kind: 'user', scoped: true, exported: true, synced: false, owner: 'nutritionHistory', migration: 'already-scoped', note: 'أطعمة شخصية يدوية لكل مالك (P7)' },
   { key: 'qimmah:workoutHydration:v1', kind: 'user', scoped: false, exported: false, synced: false, owner: 'workoutHydration', migration: 'owner-suffix', note: 'تفضيل ترطيب' },
   { key: 'qimmah:syncQueue:v1', kind: 'user', scoped: true, exported: false, synced: false, owner: 'syncQueue', migration: 'already-scoped' },
   { key: 'qimmah:syncBackup:v1', kind: 'user', scoped: true, exported: false, synced: false, owner: 'syncQueue', migration: 'already-scoped' },
