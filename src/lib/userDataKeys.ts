@@ -68,6 +68,7 @@ export const DATA_KEYS: readonly DataKeyDef[] = [
   { key: 'qimmah:coach:lessons:v1', kind: 'user', scoped: true, exported: true, synced: false, owner: 'coaching', migration: 'already-scoped' },
   { key: 'qimmah:notifications:v1', kind: 'user', scoped: true, exported: true, synced: false, owner: 'notifications/prefs', migration: 'already-scoped' },
   { key: 'qimmah:customPlan:v1', kind: 'user', scoped: true, exported: true, synced: true, owner: 'features/customPlan', migration: 'already-scoped' },
+  { key: 'qimmah:planTemplates:v1', kind: 'user', scoped: true, exported: true, synced: false, owner: 'features/customPlan/builder', migration: 'already-scoped', note: 'قوالب جداول مسمّاة لكل مالك (P6) — عقد مزامنتها موثّق دون بنائه' },
   { key: 'qimmah:workoutHydration:v1', kind: 'user', scoped: false, exported: false, synced: false, owner: 'workoutHydration', migration: 'owner-suffix', note: 'تفضيل ترطيب' },
   { key: 'qimmah:syncQueue:v1', kind: 'user', scoped: true, exported: false, synced: false, owner: 'syncQueue', migration: 'already-scoped' },
   { key: 'qimmah:syncBackup:v1', kind: 'user', scoped: true, exported: false, synced: false, owner: 'syncQueue', migration: 'already-scoped' },

@@ -34,6 +34,7 @@ import { ONBOARDING_PROFILE_KEY, loadOnboardingProfile } from '@/lib/onboardingP
 import { ACHIEVEMENTS_KEY, loadAchievementState } from '@/features/achievements/engine'
 import { WORKOUT_CALENDAR_KEY, loadWeeklySchedule } from '@/lib/workoutCalendar'
 import { CUSTOM_PLAN_KEY, loadCustomPlanRecord } from '@/features/customPlan/storage'
+import { PLAN_TEMPLATES_KEY, listTemplates, MAX_TEMPLATES } from '@/features/customPlan/templates'
 import { TODO_KEY_BASE, loadTodos } from '@/features/todo/store'
 import { ACTIVE_SESSION_KEY_BASE } from '@/lib/activeSession'
 import { notificationPrefsKey } from '@/lib/notifications/prefs'
@@ -186,6 +187,19 @@ export const STORE_DEFS: StoreDef[] = [
     count: (v) => (isObj(v) && isObj((v as { plan?: unknown }).plan) && isArr(((v as { plan: { days?: unknown } }).plan).days) ? ((v as { plan: { days: unknown[] } }).plan.days).length : (v == null ? 0 : 1)),
     validate: (v) => (v == null || (isObj(v) && isObj((v as { plan?: unknown }).plan)) ? true : 'شكل الجدول المخصّص غير صالح'),
     load: (uid) => loadCustomPlanRecord(uid),
+  },
+  {
+    id: 'planTemplates', kind: 'ownerMap', key: PLAN_TEMPLATES_KEY, labelAr: 'قوالب الجداول',
+    keyFor: () => PLAN_TEMPLATES_KEY,
+    count: arrCount,
+    validate: (v) =>
+      v == null ||
+      (isArr(v) &&
+        v.length <= MAX_TEMPLATES &&
+        v.every((t) => isObj(t) && typeof (t as { nameAr?: unknown }).nameAr === 'string' && isObj((t as { plan?: unknown }).plan)))
+        ? true
+        : 'شكل قوالب الجداول غير صالح',
+    load: (uid) => listTemplates(uid),
   },
 ]
 
