@@ -10,6 +10,7 @@ import { buildWeeklyInsights } from '@/lib/insights'
 import { InsightCardsView } from '@/lib/insights/InsightCardsView'
 import { insightCopy } from '@/data/insightCopy'
 import { MinorGoalNotice } from '@/components/MinorGoalNotice'
+import { useAchievementsEngine } from '@/features/achievements/useAchievements'
 
 interface TodayV2Props {
   lang: Lang
@@ -34,6 +35,10 @@ const TONE_VAR: Record<TodayCard['tone'], string> = {
  */
 export function TodayV2({ lang, onNavigate }: TodayV2Props) {
   const { customization } = useCustomization()
+  // الرئيسية هي السطح الحيّ الدائم — تركيب محرّك الأوسمة هنا يُعيد وصله ببيانات
+  // المستخدم الحقيقية (بروتين اليوم/الهدف/أيام الخطة). بلا هذا يبقى المحرّك
+  // معزولًا وتصير أوسمة البروتين غير قابلة للفتح. لا أثر بصري.
+  useAchievementsEngine()
   const ar = lang !== 'en'
   const model = useMemo(() => buildTodayV2Model(customization, lang), [customization, lang])
   // The store-backed insight model is rebuilt whenever Today renders, including
