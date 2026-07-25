@@ -279,7 +279,7 @@ console.log('\n⑦ التصدير/الاستيراد عبر سجلّ النقل:
   saveCustomPlan(UID, plan)
   const tpl = saveTemplate(UID, { ar: 'قالب النقل' }, plan)
   check('تمهيد: خطة مخصّصة + قالب محفوظان', loadCustomPlanRecord(UID)?.plan.days.length === 2 && tpl.status === 'ok')
-  check('السجلّ المركزي: qimmah:planTemplates:v1 مسجّل (user/scoped/exported/غير مزامَن)', DATA_KEYS.some((d) => d.key === PLAN_TEMPLATES_KEY && d.kind === 'user' && d.scoped && d.exported && !d.synced))
+  check('السجلّ المركزي: qimmah:planTemplates:v1 مسجّل (user/scoped/exported/مُزامَن P12)', DATA_KEYS.some((d) => d.key === PLAN_TEMPLATES_KEY && d.kind === 'user' && d.scoped && d.exported && d.synced))
   check('سجلّ النقل: متجر planTemplates معرّف (ownerMap)', STORE_BY_ID.planTemplates?.kind === 'ownerMap' && STORE_BY_ID.planTemplates.key === PLAN_TEMPLATES_KEY)
 
   const bundle = buildExportBundle(UID)

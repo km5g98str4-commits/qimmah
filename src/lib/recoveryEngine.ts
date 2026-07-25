@@ -16,6 +16,7 @@
 
 import { getDayStamp } from './today'
 import { runMigration } from './dataOwnership'
+import { enqueueSyncOperation, getSyncRuntime } from './syncQueue'
 import { getWorkoutSessions } from './historyStore'
 import type { WorkoutSession } from './workoutSessions'
 import { samplesFor } from './health/store'
@@ -353,6 +354,8 @@ export interface RecoveryEngineEntry {
   score: number
   reasons: FactorContribution[]
   flags: RecoveryFlags
+  /** طابع آخر حفظ (P12) — دليل LWW لمزامنة recovery_logs؛ يغيب في الإدخالات الأقدم. */
+  updatedAt?: string
 }
 
 export function loadRecoveryEngineLog(ownerId: string | null): RecoveryEngineEntry[] {
@@ -387,10 +390,38 @@ export function saveRecoveryEngineEntry(ownerId: string | null, input: RecoveryE
     score: evaluation.score,
     reasons: evaluation.reasons,
     flags: evaluation.flags,
+    updatedAt: new Date().toISOString(),
   }
   const rest = loadRecoveryEngineLog(ownerId).filter((e) => e.date !== entry.date)
   writeEngineLog(ownerId, [entry, ...rest])
+  enqueueRecoveryEntrySync(ownerId, entry)
   return entry
+}
+
+/**
+ * مزامنة سجلّ التعافي (P12): صف لكل (مالك، يوم) في recovery_logs — يُرفع فقط حين
+ * يطابق مالك السجلّ مالكَ جلسة المزامنة الموثَّق (بوابات العلم/التبنّي في syncQueue).
+ * الفحص إدخال يدوي من المستخدم؛ إشارات الصحة داخله (نبض/HRV) تبقى محلية —
+ * anonymized إلى مدخلات القرار فقط ولا تُرفع عيّناتها الخام أبدًا (انظر SYNC-COVERAGE).
+ */
+function enqueueRecoveryEntrySync(ownerId: string | null, entry: RecoveryEngineEntry): void {
+  if (!ownerId || ownerId !== getSyncRuntime().userId) return
+  enqueueSyncOperation('recovery_logs', entry.date, {
+    date: entry.date,
+    data: entry,
+    updated_at: entry.updatedAt ?? new Date().toISOString(),
+  })
+}
+
+/**
+ * كتابة فحص من مسار المزامنة (hydrate) — إدراج/استبدال يومه دون إعادة رفع
+ * (capture موقوف أثناء الترطيب) مع الحفاظ على ترتيب الأحدث أولًا وسقف السجلّ.
+ */
+export function applyRecoveryEntryFromSync(ownerId: string | null, entry: RecoveryEngineEntry): void {
+  if (typeof window === 'undefined' || !entry?.date) return
+  const rest = loadRecoveryEngineLog(ownerId).filter((e) => e.date !== entry.date)
+  const next = [entry, ...rest].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))
+  writeEngineLog(ownerId, next)
 }
 
 export function todaysRecoveryEngineEntry(ownerId: string | null): RecoveryEngineEntry | null {

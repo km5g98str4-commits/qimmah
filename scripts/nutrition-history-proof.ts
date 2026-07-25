@@ -249,7 +249,7 @@ console.log('\n⑩ التخزين المعادي: تلف لا يرمي، وال�
 
 console.log('\n⑪ التسجيل المركزي + جولة تصدير/استيراد كاملة')
 {
-  check('السجلّ المركزي: مفتاح الدفتر مسجّل (user/scoped/exported/غير مزامَن)', DATA_KEYS.some((d) => d.key === NUTRITION_HISTORY_KEY && d.kind === 'user' && d.scoped && d.exported && !d.synced))
+  check('السجلّ المركزي: مفتاح الدفتر مسجّل (user/scoped/exported/مُزامَن P12)', DATA_KEYS.some((d) => d.key === NUTRITION_HISTORY_KEY && d.kind === 'user' && d.scoped && d.exported && d.synced))
   check('السجلّ المركزي: مفتاح الأطعمة الشخصية مسجّل', DATA_KEYS.some((d) => d.key === PERSONAL_FOODS_KEY && d.kind === 'user' && d.scoped && d.exported && !d.synced))
   check('سجلّ النقل: متجرا nutritionHistory وpersonalFoods معرّفان (ownerMap)', STORE_BY_ID.nutritionHistory?.kind === 'ownerMap' && STORE_BY_ID.personalFoods?.kind === 'ownerMap')
 

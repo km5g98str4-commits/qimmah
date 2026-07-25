@@ -20,6 +20,7 @@ import type { FoodItem } from '@/data/foodItems'
 import { foodItems } from '@/data/foodItems'
 import { getDayStamp } from '@/lib/today'
 import { getDataOwner, runMigration } from '@/lib/dataOwnership'
+import { enqueueSyncDelete, enqueueSyncOperation, getSyncRuntime } from '@/lib/syncQueue'
 import { getNutritionLog, saveNutritionLog } from '@/lib/historyStore'
 import {
   NUTRITION_V2_KEY,
@@ -69,6 +70,8 @@ export interface NutritionEntry {
   unit: 'g' | 'serving'
   macros: EntryMacros
   addedAt: string
+  /** طابع آخر تعديل (P12) — دليل LWW للمزامنة؛ يغيب في القيود الأقدم. */
+  updatedAt?: string
 }
 
 export interface HistoryError {
@@ -147,6 +150,7 @@ function normalizeEntry(raw: unknown): NutritionEntry | null {
       ...(typeof macros.fat === 'number' ? { fat: macros.fat } : {}),
     },
     addedAt: typeof e.addedAt === 'string' ? e.addedAt : '',
+    ...(typeof e.updatedAt === 'string' && e.updatedAt ? { updatedAt: e.updatedAt } : {}),
   }
 }
 
@@ -243,7 +247,7 @@ export function ensureNutritionHistoryInit(): void {
 function entryFromLoggedFood(f: LoggedFood, prior: NutritionEntry | undefined): NutritionEntry {
   const grams = typeof f.grams === 'number' && Number.isFinite(f.grams) && f.grams > 0 ? f.grams : prior?.quantity.grams
   const servings = typeof f.servings === 'number' && Number.isFinite(f.servings) && f.servings > 0 ? f.servings : prior?.quantity.servings
-  return {
+  const next: NutritionEntry = {
     id: f.id,
     ...(f.foodId ?? prior?.foodId ? { foodId: f.foodId ?? prior?.foodId } : {}),
     nameAr: f.nameAr,
@@ -259,6 +263,64 @@ function entryFromLoggedFood(f: LoggedFood, prior: NutritionEntry | undefined): 
     },
     addedAt: prior?.addedAt || new Date().toISOString(),
   }
+  // طابع LWW صادق: يُحدَّث فقط عند تغيّر محتوى القيد فعلًا (لا عند إعادة كتابة اليوم كما هو).
+  const changed =
+    !prior ||
+    prior.meal !== next.meal ||
+    prior.quantity.grams !== next.quantity.grams ||
+    prior.quantity.servings !== next.quantity.servings ||
+    prior.macros.calories !== next.macros.calories ||
+    prior.macros.protein !== next.macros.protein
+  const updatedAt = changed ? new Date().toISOString() : prior?.updatedAt
+  return updatedAt ? { ...next, updatedAt } : next
+}
+
+// ── مزامنة الدفتر (P12): جدول nutrition_ledger — صف لكل (مالك، يوم) ───────────
+
+/** أحدث دليل زمني ليوم دفتر — أقصى (addedAt | updatedAt) بين قيوده؛ '' بلا دليل. */
+export function ledgerDayStamp(entries: readonly NutritionEntry[]): string {
+  let max = ''
+  for (const e of entries) {
+    if (e.addedAt > max) max = e.addedAt
+    if ((e.updatedAt ?? '') > max) max = e.updatedAt as string
+  }
+  return max
+}
+
+/**
+ * يرفع كتابة يوم دفتر للطابور (upsert) أو شاهد قبر عند مسح اليوم — فقط حين يكون
+ * مالك الدفتر هو نفسه مالك جلسة المزامنة الموثَّق (لا رفع بيانات ضيف/مالك آخر).
+ * enqueueSyncOperation نفسها تتولى بوابات العلم/التبنّي/الاستعادة/الإيقاف.
+ */
+function enqueueLedgerDaySync(owner: string, date: string, entries: readonly NutritionEntry[] | null): void {
+  if (!owner || owner === 'guest' || owner !== getSyncRuntime().userId) return
+  if (!entries || entries.length === 0) {
+    enqueueSyncDelete('nutrition_ledger', date)
+    return
+  }
+  enqueueSyncOperation('nutrition_ledger', date, {
+    date,
+    data: { entries },
+    updated_at: ledgerDayStamp(entries) || new Date().toISOString(),
+    deleted_at: null,
+  })
+}
+
+/**
+ * كتابة يوم من مسار المزامنة (hydrate) — تكتب الدفتر فقط دون المجاميع القانونية
+ * (المجاميع تصل عبر daily_logs كما هي) ودون إعادة رفع (capture موقوف أثناء الترطيب).
+ * قائمة فارغة/null ⇒ يوم الدفتر يُمحى (تطبيق شاهد قبر فائز بالـLWW).
+ */
+export function setLedgerDayFromSync(userId: string, date: string, entries: NutritionEntry[] | null): void {
+  if (typeof window === 'undefined' || !userId || !date) return
+  const ledger = readLedger()
+  const owner = ownerKey(userId)
+  const days = ownerDays(ledger, owner)
+  const normalized = (entries ?? []).map(normalizeEntry).filter((e): e is NutritionEntry => e !== null)
+  if (normalized.length) days[date] = normalized
+  else delete days[date]
+  ledger[owner] = days
+  writeLedger(ledger)
 }
 
 /**
@@ -280,6 +342,7 @@ export function recordLedgerDay(day: { date: string; foods: LoggedFood[] }): voi
   }
   ledger[owner] = pruneDays(days, day.date)
   writeLedger(ledger)
+  enqueueLedgerDaySync(owner, day.date, days[day.date] ?? null)
 }
 
 // ── القراءة ───────────────────────────────────────────────────────────────────
@@ -315,6 +378,7 @@ function persistPastDay(date: string, entries: NutritionEntry[]): void {
   else delete days[date]
   ledger[owner] = days
   writeLedger(ledger)
+  enqueueLedgerDaySync(owner, date, entries.length ? entries : null)
   try {
     saveNutritionLog(date, { loggedFood: totalsFromEntries(entries) })
   } catch {
@@ -503,7 +567,7 @@ export function editEntry(id: string, patch: { quantity: EntryQuantity }): Entry
     }
   }
 
-  const updated: NutritionEntry = { ...entry, quantity, unit, macros }
+  const updated: NutritionEntry = { ...entry, quantity, unit, macros, updatedAt: new Date().toISOString() }
 
   if (date === getDayStamp()) {
     const live = loadNutritionDay()

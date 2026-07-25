@@ -11,8 +11,17 @@ import {
   type SupplementLog,
   type WaterLog,
 } from './historyStore'
-import { defaultOnboardingProfile, loadOnboardingProfile, saveOnboardingProfile } from './onboardingProfile'
 import {
+  defaultOnboardingProfile,
+  enqueueOnboardingProfileUpsert,
+  loadOnboardingProfile,
+  saveOnboardingProfileFromSync,
+} from './onboardingProfile'
+import { isAdoptionPending } from './dataOwnership'
+import {
+  MAX_SYNC_ATTEMPTS,
+  SYNC_ATTENTION_ATTEMPTS,
+  TOMBSTONE_TABLES,
   enqueueSyncOperation,
   getSyncRuntime,
   isSyncEnabled,
@@ -22,10 +31,18 @@ import {
   setSyncCapturePaused,
   syncAllowedFor,
   writeSyncBackup,
+  type SyncOperation,
   type SyncTable,
 } from './syncQueue'
-import { enqueueAuxOperations, hydrateAuxFromCloud, readAuxBackup } from './syncStores'
-import { buildPendingSet, pendingKey, resolveLww, type LwwWinner } from './syncLww'
+import {
+  enqueueAuxOperations,
+  enqueueCoverageSnapshot,
+  hydrateAccountSettingsFromCloud,
+  hydrateAuxFromCloud,
+  hydrateCoverageFromCloud,
+  readAuxBackup,
+} from './syncStores'
+import { buildPendingSet, pendingKey, resolveLww, stampMs, type LwwWinner } from './syncLww'
 import type { WorkoutSession } from './workoutSessions'
 import type { ExerciseHistory } from './exerciseHistory'
 import type { MeasurementLog } from '@/types/progress'
@@ -47,6 +64,9 @@ export interface SyncStatus {
 
 interface SyncMeta {
   lastSyncedAt?: string
+  /** نتيجة آخر دفعة (P12) — «synced» لا تُدّعى قبل أول نجاح فعلي. */
+  lastResult?: 'success' | 'error'
+  lastErrorAt?: string
 }
 
 export interface SyncTransport {
@@ -132,22 +152,25 @@ async function productionTransport(): Promise<SyncTransport | null> {
         onConflict:
           table === 'exercise_history'
             ? 'user_id,exercise_id'
-            : table === 'daily_logs' || table === 'step_logs'
+            : table === 'daily_logs' || table === 'step_logs' || table === 'nutrition_ledger' || table === 'recovery_logs'
               ? 'user_id,date'
-              : table === 'achievements' || table === 'custom_plans' || table === 'todos'
+              : table === 'achievements' || table === 'custom_plans' || table === 'todos' || table === 'workout_schedule'
                 ? 'user_id'
                 : 'user_id,local_id',
       })
       if (error) throw error
     },
     async delete(table, userId, entityKeys) {
+      // جداول tombstone لا تمرّ من هنا (flush يحوّل حذفها upsert شاهد قبر).
       const entityColumn =
         table === 'exercise_history'
           ? 'exercise_id'
-          : table === 'daily_logs' || table === 'step_logs'
+          : table === 'daily_logs' || table === 'step_logs' || table === 'nutrition_ledger' || table === 'recovery_logs'
             ? 'date'
             : 'local_id'
-      const { error } = await supabase.from(table).delete().eq('user_id', userId).in(entityColumn, entityKeys)
+      const query = supabase.from(table).delete().eq('user_id', userId)
+      const { error } =
+        table === 'workout_schedule' ? await query : await query.in(entityColumn, entityKeys)
       if (error) throw error
     },
     async select(table, userId) {
@@ -182,6 +205,51 @@ export function getSyncStatus(signedIn: boolean): SyncStatus {
   return buildStatus('idle', userId, 'جاهز للمزامنة.')
 }
 
+// ═══ حالة المزامنة المطبوعة للواجهة (عقد Codex — P12) ═══════════════════════
+
+export type SyncUiStateKind = 'local' | 'syncing' | 'synced' | 'attention'
+
+export interface SyncUiState {
+  state: SyncUiStateKind
+  /** عدد العمليات المنتظرة في طابور الرفع لمالك الجلسة (0 للضيف/المعطَّل). */
+  pendingCount: number
+  /** آخر مزامنة ناجحة فعلًا — null قبل أول نجاح (لا ادّعاء «متزامن» أبدًا قبله). */
+  lastSyncedAt: string | null
+  /** سبب مقروء آليًا لحالتي attention/local — للواجهة أن تترجمه. */
+  reason?:
+    | 'sync-disabled'
+    | 'signed-out'
+    | 'never-synced'
+    | 'adoption-pending'
+    | 'repeated-failures'
+    | 'retry-exhausted'
+}
+
+/**
+ * الحقيقة المطبوعة للواجهة:
+ *   • «synced» لا تُدّعى إلا وطابور الرفع فارغ **و**آخر دفعة نجحت فعلًا.
+ *   • «attention»: تبنٍّ معلّق، فشل متكرر (≥SYNC_ATTENTION_ATTEMPTS)، أو
+ *     استنفاد المحاولات (≥MAX_SYNC_ATTEMPTS — يعالجه retryExhaustedSyncOperations).
+ *   • «syncing»: عمل جارٍ (flush/ترطيب) أو عمليات منتظرة لم تفشل بعد.
+ *   • «local»: المزامنة مطفأة/ضيف/لم تحدث مزامنة ناجحة بعد — البيانات محلية موثوقة.
+ */
+export function getSyncUiState(): SyncUiState {
+  const userId = getSyncRuntime().userId
+  if (!isSyncEnabled()) return { state: 'local', pendingCount: 0, lastSyncedAt: null, reason: 'sync-disabled' }
+  if (!userId) return { state: 'local', pendingCount: 0, lastSyncedAt: null, reason: 'signed-out' }
+  const queue = readSyncQueue(userId)
+  const meta = readMeta(userId)
+  const lastSyncedAt = meta.lastResult === 'success' && meta.lastSyncedAt ? meta.lastSyncedAt : null
+  const base = { pendingCount: queue.length, lastSyncedAt }
+  if (isAdoptionPending(userId)) return { state: 'attention', ...base, reason: 'adoption-pending' }
+  if (queue.some((op) => op.attempts >= MAX_SYNC_ATTEMPTS)) return { state: 'attention', ...base, reason: 'retry-exhausted' }
+  if (queue.some((op) => op.attempts >= SYNC_ATTENTION_ATTEMPTS)) return { state: 'attention', ...base, reason: 'repeated-failures' }
+  if (flushPromise || hydrationFlight) return { state: 'syncing', ...base }
+  if (queue.length > 0) return { state: 'syncing', ...base }
+  if (lastSyncedAt) return { state: 'synced', ...base }
+  return { state: 'local', ...base, reason: 'never-synced' }
+}
+
 /** Compatibility hook: local stores now enqueue concrete operations directly. */
 export function markPendingSync(): void {
   // Intentionally empty; queue length is the durable pending source of truth.
@@ -191,6 +259,28 @@ function chunks<T>(items: T[], size: number): T[][] {
   const result: T[][] = []
   for (let i = 0; i < items.length; i += size) result.push(items.slice(i, i + size))
   return result
+}
+
+/**
+ * صف شاهد القبر (P12) لجداول TOMBSTONE_TABLES: upsert يمسح الحمولة (خصوصية —
+ * المحذوف لا يبقى قابلًا للقراءة سحابيًّا) ويثبت deleted_at/updated_at كطابع LWW،
+ * فلا يُبعث المحذوف على جهاز آخر بمزامنة أقدم ولا يُحذف أحدث منه بصمت.
+ */
+function tombstoneRow(op: SyncOperation): Record<string, unknown> {
+  const deletedAt = typeof op.payload.deleted_at === 'string' ? op.payload.deleted_at : op.createdAt
+  const base = { user_id: op.userId, deleted_at: deletedAt, updated_at: deletedAt }
+  switch (op.table) {
+    case 'measurement_logs':
+      return { ...base, local_id: op.entityKey, values: {}, notes: null }
+    case 'nutrition_ledger':
+      return { ...base, date: op.entityKey, data: {} }
+    case 'workout_schedule':
+      return { ...base, data: {} }
+    case 'plan_templates':
+      return { ...base, local_id: op.entityKey, data: {} }
+    default:
+      return { ...base, local_id: op.entityKey }
+  }
 }
 
 async function flushImpl(now = Date.now()): Promise<SyncStatus> {
@@ -219,8 +309,12 @@ async function flushImpl(now = Date.now()): Promise<SyncStatus> {
       }
       const ids = new Set(batch.map((op) => op.id))
       try {
-        if (action === 'delete') await client.delete(tableValue, userId, batch.map((op) => op.entityKey))
-        else {
+        if (action === 'delete') {
+          // جداول tombstone: الحذف upsert شاهد قبر بطابع (LWW على الأجهزة الأخرى)؛
+          // الباقي يبقى حذفًا مباشرًا (سلوكه الموروث الموثَّق).
+          if (TOMBSTONE_TABLES.has(tableValue)) await client.upsert(tableValue, batch.map(tombstoneRow))
+          else await client.delete(tableValue, userId, batch.map((op) => op.entityKey))
+        } else {
           await client.upsert(
             tableValue,
             batch.map((op) => ({ ...op.payload, user_id: op.userId })),
@@ -229,13 +323,14 @@ async function flushImpl(now = Date.now()): Promise<SyncStatus> {
         removeSyncOperations(userId, ids)
       } catch {
         scheduleSyncRetry(userId, ids, now)
+        writeMeta(userId, { ...readMeta(userId), lastResult: 'error', lastErrorAt: new Date(now).toISOString() })
         return buildStatus('error', userId, 'تعذّر الرفع؛ ستُعاد المحاولة تلقائيًا.')
       }
     }
   }
 
   const lastSyncedAt = new Date(now).toISOString()
-  writeMeta(userId, { lastSyncedAt })
+  writeMeta(userId, { ...readMeta(userId), lastSyncedAt, lastResult: 'success' })
   return buildStatus('synced', userId, 'تمت المزامنة بنجاح.')
 }
 
@@ -273,7 +368,7 @@ function dailySlices(data: unknown): {
  */
 export function mergeCloudIntoSnapshot(
   local: HistorySnapshot,
-  rows: Record<SyncTable, Record<string, unknown>[]>,
+  rows: Partial<Record<SyncTable, Record<string, unknown>[]>>,
   pending: ReadonlySet<string> = new Set(),
 ): HistorySnapshot {
   const decide = (table: SyncTable, key: string, localItem: { exists: boolean; stamp: unknown }, cloudStamp: unknown): LwwWinner => {
@@ -288,7 +383,7 @@ export function mergeCloudIntoSnapshot(
   }
 
   const sessions = new Map(local.workoutSessions.map((item) => [item.id, item]))
-  for (const row of rows.workout_sessions) {
+  for (const row of rows.workout_sessions ?? []) {
     const item = row.data as WorkoutSession | undefined
     if (!item?.id) continue
     const existing = sessions.get(item.id)
@@ -302,7 +397,7 @@ export function mergeCloudIntoSnapshot(
   }
 
   const exerciseHistory: ExerciseHistory = { ...local.exerciseHistory }
-  for (const row of rows.exercise_history) {
+  for (const row of rows.exercise_history ?? []) {
     const key = typeof row.exercise_id === 'string' ? row.exercise_id : ''
     const item = row.data as ExerciseHistory[string] | undefined
     if (!key || !item) continue
@@ -317,10 +412,23 @@ export function mergeCloudIntoSnapshot(
   }
 
   const measurements = new Map(local.measurementLogs.map((item) => [item.id, item]))
-  for (const row of rows.measurement_logs) {
+  for (const row of rows.measurement_logs ?? []) {
     const id = typeof row.local_id === 'string' ? row.local_id : ''
     if (!id) continue
     const existing = measurements.get(id)
+    // شاهد قبر (P12): حذفٌ من جهاز آخر يفوز فقط إذا كان أحدث من الدليل المحلي —
+    // تعديل محلي أحدث (أو معلّق بالطابور) يبقى ويُعيد إحياء الصف عند الرفع.
+    if (row.deleted_at) {
+      if (!existing) continue
+      const winner = decide(
+        'measurement_logs',
+        id,
+        { exists: true, stamp: existing.updatedAt ?? existing.date ?? 0 },
+        row.deleted_at,
+      )
+      if (winner === 'cloud') measurements.delete(id)
+      continue
+    }
     // سجل محلي قديم بلا updatedAt يسقط لدقّة اليوم (date) — لا يُقلب بلا دليل أحدثية.
     const winner = decide(
       'measurement_logs',
@@ -352,7 +460,7 @@ export function mergeCloudIntoSnapshot(
   }
   // daily_logs: الحسم لكل شريحة على حدة بطابعها الداخلي updatedAt — تعديل ماء
   // أحدث محليًا لا يخسر أمام صف سحابي حمل تغذية أحدث، والعكس صحيح.
-  for (const row of rows.daily_logs) {
+  for (const row of rows.daily_logs ?? []) {
     const date = typeof row.date === 'string' ? row.date : ''
     if (!date) continue
     const slices = dailySlices(row.data)
@@ -392,14 +500,20 @@ function enqueueSnapshot(snapshot: HistorySnapshot, onboarding: OnboardingProfil
   Object.entries(snapshot.exerciseHistory).forEach(([exerciseId, data]) =>
     enqueueSyncOperation('exercise_history', exerciseId, { exercise_id: exerciseId, data, updated_at: data.lastCompletedAt }),
   )
-  snapshot.measurementLogs.forEach((item) =>
-    enqueueSyncOperation('measurement_logs', item.id, {
-      local_id: item.id,
-      date: item.date,
-      values: item.values,
-      notes: item.notes ?? null,
-    }),
-  )
+  // سياسة خصوصية الصحة (P12): القياسات المستوردة من HealthKit (source:'health')
+  // لا تُرفع لسحابتنا أبدًا — اليدوي فقط يُزامَن (docs/data/SYNC-COVERAGE.md).
+  snapshot.measurementLogs
+    .filter((item) => item.source !== 'health')
+    .forEach((item) =>
+      enqueueSyncOperation('measurement_logs', item.id, {
+        local_id: item.id,
+        date: item.date,
+        values: item.values,
+        notes: item.notes ?? null,
+        updated_at: item.updatedAt ?? item.date,
+        deleted_at: null,
+      }),
+    )
   const dates = new Set([
     ...Object.keys(snapshot.dailyLogs),
     ...Object.keys(snapshot.nutritionLogs),
@@ -419,7 +533,8 @@ function enqueueSnapshot(snapshot: HistorySnapshot, onboarding: OnboardingProfil
       },
     }),
   )
-  if (onboarding) enqueueSyncOperation('profiles', 'profile', { data: { onboarding } })
+  // المسار القانوني الواحد لرفع onboarding (إصلاح سباق الكتّاب الثلاثة — P12).
+  if (onboarding) enqueueOnboardingProfileUpsert(onboarding)
 }
 
 /**
@@ -436,9 +551,26 @@ export function enqueueImportedStateForSync(userId: string): boolean {
   return readSyncQueue(userId).length > before
 }
 
-function mergedCloudOnboarding(cloud: unknown, local: OnboardingProfile | null): OnboardingProfile | null {
+function mergedCloudOnboarding(
+  cloud: unknown,
+  local: OnboardingProfile | null,
+  cloudRowStamp?: unknown,
+  pending: ReadonlySet<string> = new Set(),
+): OnboardingProfile | null {
   if (!cloud || typeof cloud !== 'object') return local
-  if ('_meta' in cloud) return cloud as OnboardingProfile
+  if ('_meta' in cloud) {
+    const cloudProfile = cloud as OnboardingProfile
+    if (!local) return cloudProfile
+    // LWW فعلي (P12): طوابع _meta.updatedAt تحسم — الشكل الكامل السحابي لم يعد
+    // يفوز بمجرد وجوده؛ التعديل المحلي الأحدث (أو المعلّق بالطابور) يبقى.
+    const winner = resolveLww({
+      localExists: true,
+      localStamp: stampMs(local._meta.updatedAt ?? local._meta.completedAt),
+      cloudStamp: stampMs(cloudProfile._meta.updatedAt ?? cloudProfile._meta.completedAt) || stampMs(cloudRowStamp as string),
+      pendingLocal: pending.has(pendingKey('profiles', 'profile')),
+    })
+    return winner === 'cloud' ? cloudProfile : local
+  }
   const legacy = cloud as Record<string, unknown>
   const base = local ?? defaultOnboardingProfile()
   const goalType = legacy.goalType
@@ -495,6 +627,10 @@ async function hydrateImpl(): Promise<SyncStatus> {
       'achievements',
       'custom_plans',
       'todos',
+      'nutrition_ledger',
+      'recovery_logs',
+      'workout_schedule',
+      'plan_templates',
     ]
     const pulled = await Promise.all(tables.map(async (table) => [table, await client.select(table, userId)] as const))
     if ((await guardedOwner(client)) !== userId) return buildStatus('error', userId, 'أُوقف السحب بسبب تغيّر الحساب.')
@@ -507,14 +643,24 @@ async function hydrateImpl(): Promise<SyncStatus> {
       profileData && typeof profileData === 'object'
         ? (profileData as Record<string, unknown>).onboarding
         : undefined
-    const resolvedOnboarding = mergedCloudOnboarding(cloudOnboardingRaw, localOnboarding)
+    const cloudSettingsRaw =
+      profileData && typeof profileData === 'object'
+        ? (profileData as Record<string, unknown>).settings
+        : undefined
+    const resolvedOnboarding = mergedCloudOnboarding(
+      cloudOnboardingRaw,
+      localOnboarding,
+      rows.profiles[0]?.updated_at,
+      pendingOps,
+    )
 
     setSyncCapturePaused(true)
     try {
       importHistory(merged)
-      if (cloudOnboardingRaw && resolvedOnboarding) {
+      if (cloudOnboardingRaw && resolvedOnboarding && resolvedOnboarding !== localOnboarding) {
         if (localOnboarding) conflict('profiles', 'profile')
-        saveOnboardingProfile(resolvedOnboarding)
+        // كتابة بلا إعادة ختم — إعادة الختم بـ«الآن» تزوّر أحدثية LWW للأجهزة الأخرى.
+        saveOnboardingProfileFromSync(resolvedOnboarding)
       }
       // Aux stores: server-wins overlay (backup already persisted above). Local-only
       // entries are kept; every overwrite of existing local data is logged.
@@ -529,12 +675,29 @@ async function hydrateImpl(): Promise<SyncStatus> {
         conflict,
         pendingOps,
       )
+      // مخازن التغطية الجديدة (P12): دمج LWW حقيقي لكل سجل + شواهد القبر.
+      hydrateCoverageFromCloud(
+        userId,
+        {
+          nutrition_ledger: rows.nutrition_ledger,
+          recovery_logs: rows.recovery_logs,
+          workout_schedule: rows.workout_schedule,
+          plan_templates: rows.plan_templates,
+        },
+        conflict,
+        pendingOps,
+      )
+      // إعدادات الحساب — شريحة profiles.data.settings بطابعها.
+      hydrateAccountSettingsFromCloud(cloudSettingsRaw, conflict, pendingOps)
     } finally {
       setSyncCapturePaused(false)
     }
     // enqueueSnapshot uploads the merged history; the merged aux stores are
     // enqueued by the flushSyncQueue() below (flush captures aux each cycle).
+    // مخازن التغطية الجديدة تُرفع لقطتها المدموجة هنا مرة واحدة (خطاطيف الكتابة
+    // داخل مخازنها تتولى التعديلات الحية بعد ذلك).
     enqueueSnapshot(merged, resolvedOnboarding)
+    enqueueCoverageSnapshot(userId)
     return flushSyncQueue()
   } catch {
     return buildStatus('error', userId, 'تعذّر سحب البيانات؛ بقيت النسخة المحلية دون تغيير.')

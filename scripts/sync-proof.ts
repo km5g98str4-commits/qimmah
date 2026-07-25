@@ -77,7 +77,13 @@ check('51 same-table operations flush in sane 50-row batches', calls.length === 
 calls.length = 0
 enqueueSyncDelete('measurement_logs', 'measurement-to-delete')
 await flushSyncQueue(3_000)
-check('idempotent delete reaches the owner-scoped transport', calls[0]?.rows[0].entityKey === 'measurement-to-delete' && calls[0]?.rows[0].user_id === 'A')
+// (P12) measurement_logs جدول tombstone: الحذف يصل upsert شاهد قبر بطابع deleted_at
+// وحمولة ممسوحة — لا حذف صف مباشر (LWW يحترم الحذف على الأجهزة الأخرى).
+const tombstone = calls[0]?.rows[0] as { user_id?: string; local_id?: string; deleted_at?: string; values?: unknown } | undefined
+check(
+  'idempotent delete ships as an owner-scoped stamped tombstone upsert',
+  tombstone?.local_id === 'measurement-to-delete' && tombstone?.user_id === 'A' && typeof tombstone?.deleted_at === 'string' && JSON.stringify(tombstone?.values) === '{}',
+)
 
 console.log('\n② retry + exponential backoff')
 enqueueSyncOperation('daily_logs', 'retry', { date: '2026-07-14', data: {} })
@@ -201,11 +207,13 @@ localStorage.setItem('qimmah:todo:v1:A', JSON.stringify({ date: today, items: [{
 await flushSyncQueue(20_000)
 const tbl = (t: string) => calls.filter((c) => c.table === t)
 const stepRows = tbl('step_logs')[0]?.rows ?? []
-check('step_logs uploaded per-day, owner-scoped', stepRows.length === 2 && stepRows.every((r) => r.user_id === 'A') && stepRows.some((r) => r.date === '2026-07-13' && r.steps === 8000 && r.source === 'manual'))
+// (P12) سياسة خصوصية الصحة: يوم الخطوات المستورد من HealthKit لا يُرفع — اليدوي فقط.
+check('manual step-day uploaded, owner-scoped', stepRows.every((r) => r.user_id === 'A') && stepRows.some((r) => r.date === '2026-07-13' && r.steps === 8000 && r.source === 'manual'))
+check('healthkit-imported step-day is NEVER uploaded (health privacy)', stepRows.length === 1 && !stepRows.some((r) => r.date === '2026-07-12'))
 check('achievements uploaded as single owner row', tbl('achievements')[0]?.rows[0]?.user_id === 'A' && (tbl('achievements')[0]?.rows[0]?.data as { prCount?: number })?.prCount === 3)
 check('custom_plans uploaded with source + plan data', tbl('custom_plans')[0]?.rows[0]?.user_id === 'A' && tbl('custom_plans')[0]?.rows[0]?.source === 'custom')
 check('todos uploaded as single owner row', tbl('todos')[0]?.rows[0]?.user_id === 'A' && Array.isArray((tbl('todos')[0]?.rows[0]?.data as { items?: unknown[] })?.items))
-check('re-capture de-duplicates (bounded queue, no growth)', (enqueueAuxOperations('A'), readSyncQueue('A').filter((op) => op.table === 'step_logs').length === 2))
+check('re-capture de-duplicates (bounded queue, no growth)', (enqueueAuxOperations('A'), readSyncQueue('A').filter((op) => op.table === 'step_logs').length === 1))
 
 console.log('\n⑦ aux hydrate: backup-first + server-wins + conflict logged')
 localStorage.clear()

@@ -3,10 +3,13 @@
 // سجلّ واحد مفتاحه معرّف المالك ('guest' للضيف)، مفتاحه مسجّل في userDataKeys
 // ويُمسح عند تبديل الحساب (allowlist عزل الحسابات fail-safe).
 //
-// المزامنة: القوالب **لا تُزامَن** سحابيًّا — عقد جدول template-sync موثّق (دون
-// بنائه) في docs/data/CUSTOM-PLAN-BUILDER.md.
+// المزامنة (P12): القوالب تُزامَن لجدول plan_templates — صف لكل (حساب، قالب)
+// بطابع updatedAt للـLWW، والحذف شاهد قبر بطابع (لا بعث لقالب محذوف). الرفع
+// محروس بمطابقة مالك السجلّ لمالك جلسة المزامنة + بوابات syncQueue نفسها.
+// العقد الكامل: docs/data/SYNC-COVERAGE.md.
 
 import type { WorkoutPlan } from '@/types/workout'
+import { enqueueSyncDelete, enqueueSyncOperation, getSyncRuntime } from '@/lib/syncQueue'
 import type { BuilderError, PlanResult, TemplateResult } from './builder'
 
 /** مفتاح قوالب الجداول المسمّاة — سجلّ واحد مفتاحه معرّف المالك. */
@@ -113,7 +116,44 @@ export function saveTemplate(userId: string | null | undefined, name: { ar: stri
   const reg = loadTemplateRegistry()
   reg[templatesOwnerKey(userId)] = [...existing, template]
   saveTemplateRegistry(reg)
+  enqueueTemplateSync(userId, template)
   return { status: 'ok', template }
+}
+
+/** يرفع upsert قالب للطابور — فقط حين يطابق مالك السجلّ مالكَ جلسة المزامنة. */
+function enqueueTemplateSync(userId: string | null | undefined, template: PlanTemplate): void {
+  if (!userId || userId !== getSyncRuntime().userId) return
+  enqueueSyncOperation('plan_templates', template.id, {
+    local_id: template.id,
+    data: template,
+    updated_at: template.updatedAt || new Date().toISOString(),
+    deleted_at: null,
+  })
+}
+
+/**
+ * كتابة قالب من مسار المزامنة (hydrate) بعد فوزه بالـLWW — إدراج/استبدال بمعرّفه
+ * دون إعادة ختم ودون رفع (capture موقوف أثناء الترطيب).
+ */
+export function applyTemplateFromSync(userId: string | null | undefined, template: unknown): boolean {
+  const normalized = normalizeTemplate(template)
+  if (!normalized) return false
+  const reg = loadTemplateRegistry()
+  const key = templatesOwnerKey(userId)
+  const rest = listTemplates(userId).filter((t) => t.id !== normalized.id)
+  reg[key] = [...rest, normalized]
+  saveTemplateRegistry(reg)
+  return true
+}
+
+/** حذف قالب من مسار المزامنة (شاهد قبر سحابي فائز) — بلا رفع مضاد. */
+export function removeTemplateFromSync(userId: string | null | undefined, templateId: string): void {
+  const reg = loadTemplateRegistry()
+  const key = templatesOwnerKey(userId)
+  const next = listTemplates(userId).filter((t) => t.id !== templateId)
+  if (next.length) reg[key] = next
+  else delete reg[key]
+  saveTemplateRegistry(reg)
 }
 
 /** يطبّق قالبًا: يُرجع نسخة عميقة من خطته (لا يكتب شيئًا — الحفظ عبر saveCustomPlan). */
@@ -138,5 +178,7 @@ export function deleteTemplate(userId: string | null | undefined, templateId: st
   if (next.length) reg[key] = next
   else delete reg[key]
   saveTemplateRegistry(reg)
+  // شاهد قبر بطابع (P12): الحذف يصل الأجهزة الأخرى ولا يُبعث القالب من السحابة.
+  if (userId && userId === getSyncRuntime().userId) enqueueSyncDelete('plan_templates', templateId)
   return true
 }

@@ -23,6 +23,7 @@
 import type { PlanDay, WorkoutPlan } from '@/types/workout'
 import { getDayStamp } from '@/lib/today'
 import { runMigration } from '@/lib/dataOwnership'
+import { enqueueSyncDelete, enqueueSyncOperation } from '@/lib/syncQueue'
 import { hasSavedCustomization, loadCustomization } from '@/lib/customization'
 
 export const WORKOUT_CALENDAR_KEY = 'qimmah:workoutCalendar:v1'
@@ -208,6 +209,13 @@ function writeSchedule(schedule: WeeklySchedule): void {
   } catch {
     /* امتلاء/حجب التخزين — لا نرمي؛ الاحتياط القديم يبقى صالحًا */
   }
+  // مزامنة الجدول (P12): صف واحد لكل حساب في workout_schedule — updatedAt الجدول
+  // هو طابع LWW. enqueueSyncOperation تتولى بوابات المالك/العلم/التبنّي/الإيقاف.
+  enqueueSyncOperation('workout_schedule', 'self', {
+    data: schedule,
+    updated_at: schedule.updatedAt || new Date().toISOString(),
+    deleted_at: null,
+  })
 }
 
 export function clearWeeklySchedule(): void {
@@ -216,6 +224,20 @@ export function clearWeeklySchedule(): void {
   } catch {
     /* تجاهل */
   }
+  // شاهد قبر بطابع (P12): مسح الجدول على جهاز لا يُبعث من السحابة بجدول أقدم.
+  enqueueSyncDelete('workout_schedule', 'self')
+}
+
+/**
+ * كتابة جدول من مسار المزامنة (hydrate) — بعد فوزه بالـLWW: تُطبَّع بنيته ويُكتب
+ * كما هو (بطابعه السحابي، دون إعادة ختم). إعادة الرفع ممنوعة أثناء الترطيب
+ * (capture موقوف)، وأي صدى لاحق upsert idempotent غير مؤذٍ.
+ */
+export function setScheduleFromSync(schedule: unknown): boolean {
+  const normalized = normalizeSchedule(schedule)
+  if (!normalized) return false
+  writeSchedule(normalized)
+  return true
 }
 
 // ── الاقتراحات الافتراضية ─────────────────────────────────────────────────────

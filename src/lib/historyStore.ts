@@ -301,13 +301,19 @@ export function saveMeasurementLog(log: MeasurementLog): MeasurementLog[] {
   const existing = getMeasurementLogs().filter((l) => l.id !== stamped.id)
   const next = [stamped, ...existing].slice(0, 1000)
   writeJSON(HISTORY_KEYS.measurementLogs, next)
-  enqueueSyncOperation('measurement_logs', stamped.id, {
-    local_id: stamped.id,
-    date: stamped.date,
-    values: stamped.values,
-    notes: stamped.notes ?? null,
-    updated_at: stamped.updatedAt,
-  })
+  // سياسة خصوصية الصحة (P12): القياسات المستوردة من HealthKit (source:'health')
+  // لا تُرفع لسحابتنا أبدًا — بياناتها تعيش في Apple Health ومصدر حقيقتها هناك؛
+  // اليدوي فقط يُزامَن. deleted_at:null يُحيي صفًا سبق أن حمل شاهد قبر (LWW).
+  if (stamped.source !== 'health') {
+    enqueueSyncOperation('measurement_logs', stamped.id, {
+      local_id: stamped.id,
+      date: stamped.date,
+      values: stamped.values,
+      notes: stamped.notes ?? null,
+      updated_at: stamped.updatedAt,
+      deleted_at: null,
+    })
+  }
   return next
 }
 
@@ -316,7 +322,8 @@ export function setMeasurementLogs(logs: MeasurementLog[]): void {
   ensureMigrated()
   const retained = new Set(logs.map((log) => log.id))
   getMeasurementLogs().forEach((log) => {
-    if (!retained.has(log.id)) enqueueSyncDelete('measurement_logs', log.id)
+    // شاهد قبر بطابع (P12) — المستورد من الصحة لم يُرفع أصلًا فلا يُقبَر.
+    if (!retained.has(log.id) && log.source !== 'health') enqueueSyncDelete('measurement_logs', log.id)
   })
   writeJSON(HISTORY_KEYS.measurementLogs, logs)
 }

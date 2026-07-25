@@ -26,6 +26,16 @@ export type SyncTable =
   | 'achievements'
   | 'custom_plans'
   | 'todos'
+  // Coverage completion (P12): dated nutrition ledger detail (unique user_id,date;
+  // aggregates keep flowing via daily_logs — the ledger row carries the entries),
+  // recovery engine v2 daily checks (unique user_id,date), the weekly workout
+  // schedule (single row, unique user_id) and named plan templates (unique
+  // user_id,local_id). Account-linked settings ride profiles.data.settings —
+  // no new table. See docs/data/SYNC-COVERAGE.md.
+  | 'nutrition_ledger'
+  | 'recovery_logs'
+  | 'workout_schedule'
+  | 'plan_templates'
 
 const SYNC_TABLES: ReadonlySet<string> = new Set<SyncTable>([
   'profiles',
@@ -37,6 +47,23 @@ const SYNC_TABLES: ReadonlySet<string> = new Set<SyncTable>([
   'achievements',
   'custom_plans',
   'todos',
+  'nutrition_ledger',
+  'recovery_logs',
+  'workout_schedule',
+  'plan_templates',
+])
+
+/**
+ * جداول tombstone (P12): الحذف لا يمسح صف السحابة بل يرفع شاهد قبر بطابع
+ * `deleted_at` (upsert) — فيحترم LWW على الأجهزة الأخرى ولا يُبعث المحذوف من
+ * جديد بمزامنة قديمة، ولا يُحذف أحدث منه بصمت. باقي الجداول تبقى على الحذف
+ * المباشر (سلوكها الموروث الموثّق).
+ */
+export const TOMBSTONE_TABLES: ReadonlySet<SyncTable> = new Set<SyncTable>([
+  'measurement_logs',
+  'nutrition_ledger',
+  'workout_schedule',
+  'plan_templates',
 ])
 
 export interface SyncOperation {
@@ -177,8 +204,12 @@ export function enqueueSyncOperation(
   return op
 }
 
-/** Idempotent entity delete; a later write for the same entity replaces the tombstone. */
-export function enqueueSyncDelete(table: SyncTable, entityKey: string): SyncOperation | null {
+/**
+ * Idempotent entity delete; a later write for the same entity replaces the tombstone.
+ * `deletedAt` (P12) هو طابع LWW للحذف — جداول TOMBSTONE_TABLES ترفعه صف شاهد قبر
+ * بدل الحذف المباشر (انظر syncService.flushImpl).
+ */
+export function enqueueSyncDelete(table: SyncTable, entityKey: string, deletedAt?: string): SyncOperation | null {
   const userId = runtime.userId
   if (!userId || runtime.capturePaused || !syncAllowedFor(userId)) return null
   const op: SyncOperation = {
@@ -187,7 +218,7 @@ export function enqueueSyncDelete(table: SyncTable, entityKey: string): SyncOper
     table,
     action: 'delete',
     entityKey,
-    payload: {},
+    payload: { deleted_at: deletedAt ?? new Date().toISOString() },
     createdAt: new Date().toISOString(),
     attempts: 0,
     nextAttemptAt: 0,
@@ -203,15 +234,48 @@ export function removeSyncOperations(userId: string, ids: ReadonlySet<string>): 
   writeSyncQueue(userId, readSyncQueue(userId).filter((op) => !ids.has(op.id)))
 }
 
+/** فشل متكرر يستحق انتباه الواجهة (state='attention' مع الاستمرار بالمحاولة). */
+export const SYNC_ATTENTION_ATTEMPTS = 3
+
+/**
+ * سقف المحاولات التلقائية (P12): بعده تتوقف إعادة المحاولة الآلية — العملية
+ * تبقى في الطابور (لا فقدان بيانات) لكنها مجمّدة حتى retryExhaustedSyncOperations
+ * (إجراء المستخدم اليدوي) أو نجاح دفعة تالية يعيد الحياة للطابور.
+ */
+export const MAX_SYNC_ATTEMPTS = 8
+
+/** قيمة nextAttemptAt للعمليات المجمّدة بعد استنفاد المحاولات. */
+export const RETRY_EXHAUSTED_AT = Number.MAX_SAFE_INTEGER
+
+/** Exponential backoff: 1s·2^n بسقف 5 دقائق؛ بعد MAX_SYNC_ATTEMPTS تُجمَّد العملية. */
 export function scheduleSyncRetry(userId: string, ids: ReadonlySet<string>, now = Date.now()): void {
   if (!syncAllowedFor(userId)) return
   const next = readSyncQueue(userId).map((op) => {
     if (!ids.has(op.id)) return op
     const attempts = op.attempts + 1
+    if (attempts >= MAX_SYNC_ATTEMPTS) return { ...op, attempts, nextAttemptAt: RETRY_EXHAUSTED_AT }
     const delay = Math.min(300_000, 1_000 * 2 ** Math.min(attempts - 1, 8))
     return { ...op, attempts, nextAttemptAt: now + delay }
   })
   writeSyncQueue(userId, next)
+}
+
+/** هل في طابور المالك عمليات مجمّدة (استنفدت المحاولات التلقائية)؟ */
+export function hasExhaustedSyncOperations(userId: string): boolean {
+  return readSyncQueue(userId).some((op) => op.attempts >= MAX_SYNC_ATTEMPTS)
+}
+
+/** عقد «إعادة المحاولة» اليدوي للواجهة: يصفّر عدّاد العمليات المجمّدة ويعيد جدولتها فورًا. */
+export function retryExhaustedSyncOperations(userId: string): number {
+  if (!syncAllowedFor(userId)) return 0
+  let resumed = 0
+  const next = readSyncQueue(userId).map((op) => {
+    if (op.attempts < MAX_SYNC_ATTEMPTS) return op
+    resumed += 1
+    return { ...op, attempts: 0, nextAttemptAt: 0 }
+  })
+  if (resumed > 0) writeSyncQueue(userId, next)
+  return resumed
 }
 
 export function clearSyncArtifacts(userId: string): void {
