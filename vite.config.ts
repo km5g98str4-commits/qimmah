@@ -79,13 +79,12 @@ export default defineConfig(() => {
       rollupOptions: {
         output: {
           // فصل مكتبات الطرف الثالث عن كود التطبيق لتحسين التخزين المؤقت وتقليل حزمة الدخول.
-          // zxing (الباركود) و react-body-highlighter (خريطة العضلات) ثقيلتان وتُطلبان في
-          // أسطح محدّدة — نفصلهما ليُخزَّنا مستقلّين ويخرجا من حِزم الشاشات.
+          // zxing (الباركود) ثقيلة وتُطلب في
+          // سطح محدّد — نفصلها لتُخزَّن مستقلّة وتخرج من حِزم الشاشات.
           manualChunks: {
             'vendor-react': ['react', 'react-dom'],
             'vendor-icons': ['lucide-react'],
             'vendor-zxing': ['@zxing/browser', '@zxing/library'],
-            'vendor-charts': ['react-body-highlighter'],
           },
         },
       },
