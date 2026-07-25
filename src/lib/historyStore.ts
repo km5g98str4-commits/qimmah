@@ -10,6 +10,7 @@ import type { SessionExercise, SetLog, WorkoutSession } from './workoutSessions'
 import type { ExerciseHistory } from './exerciseHistory'
 import type { MeasurementLog } from '@/types/progress'
 import { enqueueSyncDelete, enqueueSyncOperation } from './syncQueue'
+import { safeWrite, safeWriteJson } from '@/lib/safeStorage'
 
 // ختم اليوم المحلي (YYYY-MM-DD) — مكرّر هنا لكسر الاعتماد الدائري مع today.ts.
 function dayStamp(d = new Date()): string {
@@ -108,13 +109,16 @@ function readJSON<T>(key: string, fallback: T): T {
   }
 }
 
-function writeJSON(key: string, value: unknown): void {
-  if (typeof window === 'undefined') return
-  try {
-    window.localStorage.setItem(key, JSON.stringify(value))
-  } catch {
-    /* تجاهل امتلاء التخزين */
-  }
+/**
+ * يكتب قيمة إلى سجلّ التاريخ. **يُرجع نجاح الكتابة** — لا يبتلعه.
+ *
+ * كان هذا `void` مع `catch { /* تجاهل امتلاء التخزين *\/ }`، فإذا امتلأت الحصّة
+ * أثناء إنهاء تمرين كانت الواجهة تقول «تم الحفظ» ولا شيء يُكتب. الآن يستطيع
+ * النداء الأعلى أن يعرف، وتفاصيل الفشل (quota / unavailable / error) متاحة عبر
+ * `getStorageFailure()` من طبقة التخزين الآمنة.
+ */
+function writeJSON(key: string, value: unknown): boolean {
+  return safeWriteJson(key, value) === 'ok'
 }
 
 function nowISO(): string {
@@ -565,7 +569,7 @@ export function ensureMigrated(): void {
       }
     }
 
-    window.localStorage.setItem(MIGRATION_FLAG, 'done')
+    safeWrite(MIGRATION_FLAG, 'done')
   } catch {
     // لا نُفشل التطبيق بسبب الترحيل.
   }

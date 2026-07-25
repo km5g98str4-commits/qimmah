@@ -1,3 +1,4 @@
+import { safeWriteJson } from '@/lib/safeStorage'
 // حالة الإعداد الأولي (onboarding) — تتحكّم بفتح المعالج تلقائيًا أول زيارة.
 // منفصلة تمامًا عن بيانات التخصيص: إعادة التشغيل لا تمسح بيانات المستخدم.
 //
@@ -74,7 +75,7 @@ function loadAccountRegistry(): Record<string, { completedAt: string }> {
 function saveAccountRegistry(reg: Record<string, { completedAt: string }>): void {
   if (typeof window === 'undefined') return
   try {
-    window.localStorage.setItem(ONBOARDING_ACCOUNTS_KEY, JSON.stringify(reg))
+    safeWriteJson(ONBOARDING_ACCOUNTS_KEY, reg)
   } catch {
     /* تجاهل أخطاء التخزين */
   }
@@ -115,8 +116,7 @@ export function isOnboardingComplete(userId: string | null | undefined): boolean
 }
 
 export function saveOnboarding(state: OnboardingState): void {
-  if (typeof window === 'undefined') return
-  window.localStorage.setItem(ONBOARDING_KEY, JSON.stringify(state))
+  safeWriteJson(ONBOARDING_KEY, state)
 }
 
 /** يحدّث آخر خطوة دون المساس بحالة الإكمال (يُستخدم أثناء التنقّل/الحفظ المؤقت). */

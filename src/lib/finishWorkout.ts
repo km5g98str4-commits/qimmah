@@ -6,6 +6,7 @@ import { addSession, type WorkoutSession } from './workoutSessions'
 import { classifyFinishedSession } from './workoutSessionEngine'
 import { detectSessionPRs, loadHistory, recordExercise, saveHistory, topCompletedWeight } from './exerciseHistory'
 import { track, firstOnce } from './analytics'
+import { clearStorageFailure, getStorageFailure, type StorageFailure } from './safeStorage'
 
 /** رقم قياسي محقّق في الجلسة. */
 export interface SessionPR {
@@ -18,8 +19,15 @@ export interface SessionPR {
 /**
  * يحفظ الجلسة ويحدّث سجل الأداء عبر المتجر الدائم (historyStore).
  * يُرجع قائمة الأرقام القياسية الجديدة (تُحسب قبل تحديث السجل).
+ *
+ * **هل نزل الحفظ فعلًا؟** استعمل `didLastFinishPersist()` بعد النداء. كانت كتابات
+ * historyStore تبتلع فشل التخزين بصمت، فإذا امتلأت الحصّة تقول الواجهة «تم الحفظ»
+ * ولا شيء يُكتب. الآن يُسجَّل الفشل في طبقة التخزين الآمنة ويمكن للواجهة أن تصدق.
  */
 export function persistFinishedSession(session: WorkoutSession): SessionPR[] {
+  // نبدأ من حالة نظيفة كي يخصّ ما نقرأه لاحقًا هذه العملية وحدها.
+  clearStorageFailure()
+
   // (P5) اختم الحالة الصادقة عند الحفظ ما لم يمرّرها المستدعي صراحةً:
   // اكتملت كل التمارين → completed، وإلا → ended_early. الإنهاء المبكر يبقى
   // مسموحًا (بتأكيده القائم) — فقط يُسمّى بصدق، والمجموعات المنفّذة تُحسب كلها.
@@ -56,4 +64,15 @@ export function persistFinishedSession(session: WorkoutSession): SessionPR[] {
   if (firstOnce('firstWorkout')) track('first_workout_logged', {})
 
   return prs
+}
+
+/**
+ * هل نزل آخر حفظ جلسة إلى التخزين فعلًا؟
+ *
+ * يُقرأ مباشرةً بعد `persistFinishedSession`. `null` يعني نجاح كل الكتابات؛ وإلا
+ * يصف الكائن سبب الفشل (`quota` عند امتلاء الحصّة، `unavailable` في التصفّح الخاص
+ * أو عند حظر التخزين، `error` لغير ذلك) كي تعرض الواجهة رسالة صادقة بدل «تم الحفظ».
+ */
+export function lastFinishStorageFailure(): StorageFailure | null {
+  return getStorageFailure()
 }
