@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Icon } from '@/components/Icon'
 import { ProgressBar } from '@/components/ProgressBar'
 import { QuickMealLogger } from '@/components/nutrition/QuickMealLogger'
+import { AllergyNotice } from '@/components/AllergyNotice'
 import { useCustomization } from '@/lib/customizationContext'
 import { MEAL_SLOTS, useNutritionToday, type LoggedFood, type MealSlot } from '@/lib/nutritionTracking'
 import { inRange, NUM_LIMITS, NUM_MESSAGES, sanitizeNumericInput } from '@/lib/validation'
@@ -110,6 +111,7 @@ export function NutritionView({ lang }: NutritionViewProps) {
           </div>
         ) : (
           <div className="mt-6">
+            <AllergyNotice className="mb-3" />
             <QuickMealLogger lang={lang} targetCalories={targetCalories} targetProtein={targetProtein} />
           </div>
         )}
