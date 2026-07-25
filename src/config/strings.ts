@@ -570,7 +570,7 @@ const ar: ShellStrings = {
     importSuccess: 'تم استيراد نسختك بنجاح.',
     importError: 'تعذّرت قراءة الملف. تأكّد أنّه نسخة قِمّة صحيحة.',
     dataLocalNote:
-      'كل شيء يتمّ على جهازك — لا يُرسَل أي شيء إلى أي خادم. النسخة ملفّ JSON تحفظه أو تشاركه كما تشاء.',
+      'يُنشأ ملف التصدير على جهازك بصيغة JSON، وتقدر تحفظه أو تشاركه كما تشاء. هذا لا يغيّر إعداد المزامنة في حسابك.',
     exportShared: 'تمّت مشاركة نسخة بياناتك.',
     exportDownloaded: 'تم تنزيل نسخة بياناتك على جهازك.',
     exportFailed: 'تعذّر إنشاء نسخة التصدير.',
@@ -627,7 +627,7 @@ const ar: ShellStrings = {
     termsTitle: 'شروط الاستخدام',
     back: 'رجوع',
     privacyBody: [
-      'قِمّة تطبيق شخصي يعمل على جهازك أولًا (local-first). في وضع الضيف تُحفظ كل بياناتك في متصفّح هذا الجهاز فقط ولا تغادره.',
+      'قِمّة يتطلّب حسابًا، ويعمل بأسلوب محلي أولًا (local-first): تُحفظ بياناتك على جهازك أولًا، ثم تُزامَن إلى حسابك عند تفعيل المزامنة.',
       'عند تسجيل الدخول بحساب سحابي (Supabase) تُرفع بياناتك إلى حسابك الخاص لتتمكّن من الوصول إليها من أجهزة أخرى. لا يصل إلى صفوفك إلا أنت (Row Level Security).',
       'لا نبيع بياناتك ولا نشاركها مع معلنين. قياساتك وسجلّاتك الصحية تبقى ملكك ويمكنك حذفها في أي وقت عبر «إعادة ضبط البيانات».',
       'نستخدم إحصاءات استخدام مجهولة تمامًا (بلا اسم أو بريد أو أي بيانات شخصية) لتحسين قِمّة، دون بيعها أو تتبّعك خارج التطبيق. يمكنك إيقافها في أي وقت من «الإعدادات → الخصوصية».',
@@ -635,7 +635,7 @@ const ar: ShellStrings = {
     ],
     termsBody: [
       'قِمّة أداة لتنظيم ومتابعة التمرين والتغذية والمكملات والقياسات للرياضي الفرد. الاستخدام على مسؤوليتك الشخصية.',
-      'المحتوى داخل التطبيق (حسابات السعرات، اقتراحات الأوزان، الجرعات) تقديري وتعليمي فقط، وليس نصيحة طبية أو غذائية أو دوائية.',
+      'المحتوى داخل التطبيق (حسابات السعرات واقتراحات أوزان التمرين) تقديري وتعليمي فقط، وليس نصيحة طبية أو غذائية أو دوائية.',
       'استشر طبيبًا أو مختصًا مؤهّلًا قبل تغيير نظامك الغذائي أو الدوائي أو برنامج تمرينك، خصوصًا عند وجود حالة صحية.',
       'أنت مسؤول عن صحة البيانات التي تُدخلها وعن الاحتفاظ بنسخة احتياطية عبر خاصية التصدير.',
       'مصادر الوسائط: صور إرشادات التمارين الثابتة مشتقة من قاعدتَي free-exercise-db و wrkout/exercises.json، ومتاحة بموجب Unlicense/إهداء الملك العام. أمّا الرسوم التوضيحية لبطاقات الأجهزة فهي أعمال أصلية من إنتاج قِمّة (IN-HOUSE) نملك حقوقها كاملةً.',
@@ -1038,7 +1038,7 @@ const en: ShellStrings = {
     importSuccess: 'Your backup was imported successfully.',
     importError: "Couldn't read the file. Make sure it's a valid Qimmah backup.",
     dataLocalNote:
-      'Everything happens on your device — nothing is sent to any server. The backup is a JSON file you keep or share as you wish.',
+      'The export is created on your device as a JSON file that you can save or share. Exporting does not change your account sync setting.',
     exportShared: 'Your data copy was shared.',
     exportDownloaded: 'Your data was downloaded to your device.',
     exportFailed: 'Could not create the export.',
@@ -1095,7 +1095,7 @@ const en: ShellStrings = {
     termsTitle: 'Terms of Use',
     back: 'Back',
     privacyBody: [
-      'Qimmah is a local-first personal app. In guest mode, all your data stays in this device’s browser and never leaves it.',
+      'Qimmah requires an account and follows a local-first approach: your data is stored on your device first, then synced to your account when sync is enabled.',
       'When you log in with a cloud account (Supabase), your data is uploaded to your own account so you can access it from other devices. Only you can read your rows (Row Level Security).',
       'We do not sell or share your data with advertisers. Your measurements remain yours and can be deleted anytime via “Reset data”.',
       'We use fully anonymous usage analytics (no name, email, or personal data) to improve Qimmah — never sold and never used to track you across apps. You can turn this off anytime in Settings → Privacy.',
@@ -1103,7 +1103,7 @@ const en: ShellStrings = {
     ],
     termsBody: [
       'Qimmah is a tool to organize and track training, nutrition, supplements, and measurements for the individual athlete. Use is at your own responsibility.',
-      'In-app content (calorie calculations, weight suggestions, doses) is estimated and educational only, not medical, nutritional, or pharmaceutical advice.',
+      'In-app content (calorie calculations and suggested training weights) is estimated and educational only, not medical, nutritional, or pharmaceutical advice.',
       'Consult a qualified professional before changing your diet, medication, or training program, especially with a health condition.',
       'You are responsible for the accuracy of the data you enter and for keeping a backup via the export feature.',
       'Media sources: Static exercise-instruction images are derived from free-exercise-db and wrkout/exercises.json, available under the Unlicense/public-domain dedication. Machine-card illustrations are original in-house Qimmah artwork that we fully own.',
