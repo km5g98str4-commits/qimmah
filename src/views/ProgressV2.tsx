@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { Icon } from '@/components/Icon'
+import { BodyModel3D } from '@/components/BodyModel3D'
 import { StateBlock } from '@/components/StateBlock'
 import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
@@ -122,6 +123,8 @@ export function ProgressV2({ lang, onNavigate }: ProgressV2Props) {
             ? <MomentumArea values={model.momentum.series.map((p) => p.value)} lang={lang} />
             : <NeedsData text={t('أكمل تمارينك ليظهر زخمك هنا.', 'Complete workouts to see your momentum here.')} />}
         </section>
+
+        <BodyModel3D lang={lang} />
 
         {/* Weight + strength tiles → detail screens */}
         <section className="grid grid-cols-2 gap-3">
