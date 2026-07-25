@@ -795,7 +795,7 @@ const ar: OnboardingStrings = {
   reviewFullResetNote: 'يحذف بيانات قِمّة بس من هذا المتصفح، وبعدها يبدأ من جديد.',
 
   basicsTitle: 'بياناتي الأساسية',
-  basicsDescription: 'نبدأ باسمك وشكل التعريف بصفحتك. يمكنك تغيير كل ذلك لاحقًا.',
+  basicsDescription: 'نبدأ باسمك وشكل التعريف بصفحتك. تقدر تعدّل كل شي بعدين.',
   basicsNameLabel: 'اسمك',
   basicsNameHint: 'يظهر في صفحتك وفي ترحيب «اليوم»',
   basicsNamePlaceholder: 'مثال: محمد',
@@ -813,7 +813,7 @@ const ar: OnboardingStrings = {
   goalStepHint: 'جملة بسيطة بلغتك أنت',
   goalStepPlaceholder: 'مثال: أوصل وزن 78 كجم وأبني عضلاتي خلال 3 أشهر',
   goalStepSuggestionsIntro: 'أفكار تساعدك (اضغط لتختار):',
-  goalStepEditLater: 'تقدر تعدل كل شيء لاحقًا.',
+  goalStepEditLater: 'تقدر تعدل كل شي بعدين.',
   goalSuggestion1: 'الوصول إلى 78 كجم وزيادة الكتلة العضلية خلال 12 أسبوعًا',
   goalSuggestion2: 'إنقاص نسبة الدهون والثبات على روتين تمرين 4 أيام بالأسبوع',
   goalSuggestion3: 'بناء قوة في تمارين الضغط والسحب مع أكل صحي منتظم',
@@ -835,7 +835,7 @@ const ar: OnboardingStrings = {
   mealsAddLabel: 'إضافة وجبة',
 
   metricsTitle: 'القياسات والمتابعة',
-  metricsDescription: 'اختر الأرقام التي تريد متابعتها — وزنك، ونسبة دهونك، ومحيطاتك. ستساعدك على رؤية تقدّمك.',
+  metricsDescription: 'اختر الأرقام اللي تبي تتابعها — وزنك، ونسبة دهونك، ومحيطاتك. بتساعدك تشوف تقدّمك.',
   metricsColLabel: 'القياس',
   metricsColValue: 'القيمة',
   metricsColUnit: 'الوحدة',

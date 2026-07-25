@@ -138,14 +138,32 @@ export function runMigration(def: MigrationDef): { status: 'done' | 'skipped' | 
   const snapKey = SNAPSHOT_PREFIX + def.id
   const snapshot: Record<string, string | null> = {}
   for (const k of def.keys) snapshot[k] = s.getItem(k)
-  writeJSON(snapKey, snapshot)
 
+  // لا هجرة بلا نقطة رجوع: إن تعذّر كتابة الـsnapshot (امتلاء التخزين مثلًا) نتوقّف
+  // قبل لمس أي بيانات وتبقى الهجرة «غير منفَّذة» فتُعاد المحاولة لاحقًا. مسارات
+  // القراءة تستدعي runMigration، فالرمي هنا كان يُسقط الشاشة عند التركيب.
+  try {
+    writeJSON(snapKey, snapshot)
+  } catch {
+    return { status: 'skipped' }
+  }
+
+  // الاسترجاع نفسه يكتب — تحت الامتلاء قد يفشل جزئيًا. نحاول كل مفتاح على حدة كي
+  // لا يمنع فشل واحد استرجاع الباقي، ولا يخرج استثناء من مشغّل الهجرات إطلاقًا.
   const rollback = () => {
     for (const [k, v] of Object.entries(snapshot)) {
-      if (v === null) s.removeItem(k)
-      else s.setItem(k, v)
+      try {
+        if (v === null) s.removeItem(k)
+        else s.setItem(k, v)
+      } catch {
+        /* أفضل جهد — نُكمل بقية المفاتيح */
+      }
     }
-    s.removeItem(snapKey)
+    try {
+      s.removeItem(snapKey)
+    } catch {
+      /* أفضل جهد */
+    }
   }
 
   try {
