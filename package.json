@@ -62,7 +62,7 @@
     "test:barcode": "node scripts/run-barcode-proof.mjs",
     "test:media-pipeline": "node scripts/run-media-pipeline-proof.mjs",
     "test:sync-coverage": "node scripts/run-sync-coverage-proof.mjs",
-    "test:gate": "npm run test:active-session && npm run test:today-v2 && npm run test:progress-v2 && npm run test:data-portability && npm run test:portability && npm run test:notifications && npm run test:insights && npm run test:strength && npm run test:finish-confirm && npm run test:substitution && npm run test:state-block && npm run test:theme && npm run test:recovery && npm run test:secure-ops && npm run test:canonical && npm run test:data-safety && npm run test:sync && npm run test:onboarding-async && npm run test:fixforward && npm run test:isolation && npm run test:reset-recovery && npm run test:seed && npm run test:catalog && npm run test:food-db && npm run test:coaching && npm run test:policy && npm run test:formula && npm run test:media-rights && npm run proof:media && npm run test:password-policy && npm run test:minors && npm run test:native-bridge && npm run test:hydration && npm run test:polish1 && npm run test:polish2 && npm run test:polish3 && npm run test:sand && npm run test:calendar && npm run test:session-engine && npm run test:plan-builder && npm run test:nutrition-history && npm run test:health-foundation && npm run test:recovery-engine && npm run test:barcode && npm run test:media-pipeline && npm run test:sync-coverage",
+    "test:gate": "npm run test:active-session && npm run test:today-v2 && npm run test:progress-v2 && npm run test:data-portability && npm run test:portability && npm run test:notifications && npm run test:insights && npm run test:strength && npm run test:finish-confirm && npm run test:substitution && npm run test:state-block && npm run test:theme && npm run test:recovery && npm run test:secure-ops && npm run test:canonical && npm run test:data-safety && npm run test:sync && npm run test:onboarding-async && npm run test:fixforward && npm run test:isolation && npm run test:reset-recovery && npm run test:seed && npm run test:catalog && npm run test:food-db && npm run test:coaching && npm run test:policy && npm run test:formula && npm run test:media-rights && npm run proof:media && npm run test:password-policy && npm run test:sync-honesty && npm run test:minors && npm run test:native-bridge && npm run test:hydration && npm run test:polish1 && npm run test:polish2 && npm run test:polish3 && npm run test:sand && npm run test:calendar && npm run test:session-engine && npm run test:plan-builder && npm run test:nutrition-history && npm run test:health-foundation && npm run test:recovery-engine && npm run test:barcode && npm run test:media-pipeline && npm run test:sync-coverage",
     "test:e2e:onboarding": "node scripts/e2e-onboarding.mjs",
     "test:e2e": "npm run build && node scripts/e2e-onboarding.mjs",
     "test:e2e:journey": "npm run build && node scripts/e2e/journey.mjs",
@@ -82,7 +82,8 @@
     "test:session-engine": "node scripts/run-session-engine-proof.mjs",
     "test:health-foundation": "node scripts/run-health-foundation-proof.mjs",
     "test:recovery-engine": "node scripts/run-recovery-engine-proof.mjs",
-    "test:password-policy": "node scripts/run-password-policy-proof.mjs"
+    "test:password-policy": "node scripts/run-password-policy-proof.mjs",
+    "test:sync-honesty": "node scripts/run-sync-honesty-proof.mjs"
   },
   "dependencies": {
     "@capacitor/app": "^8.1.0",
