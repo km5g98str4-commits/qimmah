@@ -22,9 +22,11 @@ export function ProgressView({ lang }: ProgressViewProps) {
   const tw = getStrings(lang).workout
   const { customization } = useCustomization()
   const daysPerWeek = customization.workoutPlan.days.length || 3
+  // سجلّات القياسات في الحالة لا في الذاكرة المؤقّتة: بطاقة التسجيل تمرّر
+  // القائمة المحدّثة بعد الحفظ، فتتحدّث بطاقة الوزن فورًا بدل انتظار إعادة التركيب.
+  const [logs, setLogs] = useState(() => loadLogs())
 
   const stats = useMemo(() => {
-    const logs = loadLogs()
     const latest = latestLog(logs)
     const weight = latest?.values?.weightKg
     return {
@@ -36,7 +38,7 @@ export function ProgressView({ lang }: ProgressViewProps) {
       weekly: weeklyAdherenceStreak(daysPerWeek),
       counts: workoutCounts(),
     }
-  }, [daysPerWeek])
+  }, [daysPerWeek, logs])
 
   const hasWorkouts = stats.counts.total > 0
   const maxVol = Math.max(1, ...stats.volumes.map((v) => v.volume))
@@ -52,7 +54,7 @@ export function ProgressView({ lang }: ProgressViewProps) {
 
       <div>
         {/* تسجيل القياسات — المسار الوحيد لإدخال الوزن في التطبيق */}
-        <MeasurementLogCard className="mb-3" />
+        <MeasurementLogCard className="mb-3" onSaved={setLogs} />
 
         <div className="grid grid-cols-2 gap-3">
           {/* الوزن */}

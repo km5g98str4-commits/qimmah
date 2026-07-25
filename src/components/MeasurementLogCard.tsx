@@ -47,7 +47,13 @@ function errorFor(typeId: string, raw: string): string | undefined {
   return undefined
 }
 
-export function MeasurementLogCard({ className }: { className?: string }) {
+interface MeasurementLogCardProps {
+  className?: string
+  /** يُستدعى بعد حفظ قياس ويمرّر القائمة المحدّثة — كي تُحدّث البطاقات القارئة نفسها فورًا. */
+  onSaved?: (logs: MeasurementLog[]) => void
+}
+
+export function MeasurementLogCard({ className, onSaved }: MeasurementLogCardProps) {
   const { customization } = useCustomization()
   const [logs, setLogs] = useState<MeasurementLog[]>(() => loadLogs())
   const [values, setValues] = useState<Record<string, string>>({})
@@ -79,9 +85,11 @@ export function MeasurementLogCard({ className }: { className?: string }) {
       date: getDayStamp(),
       values: Object.fromEntries(filled.map((m) => [m.id, (values[m.id] ?? '').trim()])),
     }
-    setLogs(addLog(entry))
+    const next = addLog(entry)
+    setLogs(next)
     setValues({})
     setSaved(true)
+    onSaved?.(next)
     window.setTimeout(() => setSaved(false), 2200)
   }
 

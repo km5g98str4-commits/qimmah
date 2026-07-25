@@ -676,7 +676,7 @@ const ar: ShellStrings = {
   progress: {
     tabTitle: 'التقدّم',
     cardWeight: 'الوزن',
-    noWeight: 'سجّل وزنك من قسم القياسات ليظهر هنا.',
+    noWeight: 'سجّل وزنك من بطاقة «سجّل قياساتك» فوق ليظهر هنا.',
     cardStreak: 'سلسلة التمرين',
     streakDays: 'يوم متتالٍ',
     cardVolume: 'حجم التمرين',
