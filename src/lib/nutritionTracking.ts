@@ -2,6 +2,7 @@ import { useCallback, useEffect, useSyncExternalStore } from 'react'
 import { getDayStamp } from './today'
 import { useIsDemo } from './demoMode'
 import { saveNutritionLog, saveWaterLog } from './historyStore'
+import { writeJson } from './safeStorage'
 
 // تتبّع التغذية اليومي — وجبات الخطة المنجزة + وجبات مسجّلة (سعرات/بروتين) + كمية الماء.
 // يُصفّر تلقائيًا مع تغيّر اليوم. يستخدم مخزنًا مشتركًا (store) حتى تبقى كل المكوّنات متزامنة
@@ -71,7 +72,7 @@ function readStorage(): NutritionTodayState {
     /* تجاهل */
   }
   const f = fresh()
-  window.localStorage.setItem(NUTRITION_TODAY_KEY, JSON.stringify(f))
+  writeJson(NUTRITION_TODAY_KEY, f)
   return f
 }
 
@@ -81,7 +82,7 @@ export function loadNutritionToday(): NutritionTodayState {
 
 export function saveNutritionToday(state: NutritionTodayState): void {
   if (typeof window === 'undefined') return
-  window.localStorage.setItem(NUTRITION_TODAY_KEY, JSON.stringify(state))
+  writeJson(NUTRITION_TODAY_KEY, state)
 }
 
 /** مجاميع السعرات والماكروز من سجل اليوم. */

@@ -1,5 +1,6 @@
 import type { MeasurementLog } from '@/types/progress'
 import { saveMeasurementLog as saveMeasurementLogHistory, setMeasurementLogs } from './historyStore'
+import { writeJson } from './safeStorage'
 
 // سجلّات القياسات (محلي فقط).
 
@@ -17,7 +18,7 @@ export function loadLogs(): MeasurementLog[] {
 
 export function saveLogs(logs: MeasurementLog[]): void {
   if (typeof window === 'undefined') return
-  window.localStorage.setItem(MEASUREMENT_LOGS_KEY, JSON.stringify(logs))
+  writeJson(MEASUREMENT_LOGS_KEY, logs)
 }
 
 /** يضيف سجلًّا جديدًا (الأحدث أولًا) ويعيد القائمة المحدّثة. */

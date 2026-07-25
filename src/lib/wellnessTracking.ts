@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { getDayStamp } from './today'
 import { useIsDemo } from './demoMode'
 import { saveMedicationLog, saveSupplementLog } from './historyStore'
+import { writeJson } from './safeStorage'
 
 // تتبّع المكملات والأدوية اليومي — يُصفّر مع تغيّر اليوم.
 
@@ -30,13 +31,13 @@ export function loadWellnessToday(): WellnessTodayState {
     /* تجاهل */
   }
   const f = fresh()
-  window.localStorage.setItem(WELLNESS_TODAY_KEY, JSON.stringify(f))
+  writeJson(WELLNESS_TODAY_KEY, f)
   return f
 }
 
 export function saveWellnessToday(state: WellnessTodayState): void {
   if (typeof window === 'undefined') return
-  window.localStorage.setItem(WELLNESS_TODAY_KEY, JSON.stringify(state))
+  writeJson(WELLNESS_TODAY_KEY, state)
 }
 
 export function useWellnessToday() {

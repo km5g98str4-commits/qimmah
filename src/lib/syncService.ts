@@ -27,6 +27,7 @@ import {
 import type { WorkoutSession } from './workoutSessions'
 import type { ExerciseHistory } from './exerciseHistory'
 import type { MeasurementLog } from '@/types/progress'
+import { writeJson } from './safeStorage'
 
 const SYNC_META_KEY = 'qimmah:sync:meta:v1'
 
@@ -65,7 +66,7 @@ function readMeta(): SyncMeta {
 function writeMeta(meta: SyncMeta): void {
   if (typeof window === 'undefined') return
   try {
-    window.localStorage.setItem(SYNC_META_KEY, JSON.stringify(meta))
+    writeJson(SYNC_META_KEY, meta)
   } catch {
     /* تجاهل */
   }

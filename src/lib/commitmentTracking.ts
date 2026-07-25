@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { getDayStamp } from './today'
 import { useIsDemo } from './demoMode'
 import { saveDailyLog } from './historyStore'
+import { writeJson } from './safeStorage'
 
 // تتبّع الالتزامات اليومي — يُصفّر مع تغيّر اليوم.
 
@@ -30,13 +31,13 @@ export function loadCommitmentsToday(): CommitmentsTodayState {
     /* تجاهل */
   }
   const f = fresh()
-  window.localStorage.setItem(COMMITMENTS_TODAY_KEY, JSON.stringify(f))
+  writeJson(COMMITMENTS_TODAY_KEY, f)
   return f
 }
 
 export function saveCommitmentsToday(state: CommitmentsTodayState): void {
   if (typeof window === 'undefined') return
-  window.localStorage.setItem(COMMITMENTS_TODAY_KEY, JSON.stringify(state))
+  writeJson(COMMITMENTS_TODAY_KEY, state)
 }
 
 export function useCommitmentsToday() {

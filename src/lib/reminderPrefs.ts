@@ -1,6 +1,8 @@
 // تفضيلات التذكير (محلي فقط) — لا تنبيهات نظام، فقط تخزين تفضيل المستخدم.
 // دعم التنبيهات الكامل لاحقًا في تطبيق الجوال.
 
+import { writeJson } from './safeStorage'
+
 export const REMINDER_PREFS_KEY = 'qimmah:reminders:v1'
 
 export interface ReminderPrefs {
@@ -35,5 +37,5 @@ export function saveReminderPrefs(prefs: ReminderPrefs): void {
     trainingEnabled: Boolean(prefs.trainingEnabled),
     trainingTime: isValidTime(prefs.trainingTime) ? prefs.trainingTime : DEFAULT.trainingTime,
   }
-  window.localStorage.setItem(REMINDER_PREFS_KEY, JSON.stringify(safe))
+  writeJson(REMINDER_PREFS_KEY, safe)
 }

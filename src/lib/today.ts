@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useIsDemo } from './demoMode'
 import { saveDailyLog } from './historyStore'
+import { writeJson } from './safeStorage'
 
 // حالة «اليوم» — علامات الإنجاز اليومية، تُحفظ محليًا وتُصفّر تلقائيًا عند تغيّر اليوم.
 // نموذج بسيط: تاريخ اليوم + خريطة مفاتيح منجزة (key = "group:index").
@@ -49,13 +50,13 @@ export function loadToday(): TodayState {
     /* تجاهل البيانات التالفة */
   }
   const fresh = freshState()
-  window.localStorage.setItem(TODAY_KEY, JSON.stringify(fresh))
+  writeJson(TODAY_KEY, fresh)
   return fresh
 }
 
 export function saveToday(state: TodayState): void {
   if (typeof window === 'undefined') return
-  window.localStorage.setItem(TODAY_KEY, JSON.stringify(state))
+  writeJson(TODAY_KEY, state)
 }
 
 /** هوك حالة اليوم: تبديل العلامات + تصفير يومي تلقائي. */

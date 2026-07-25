@@ -37,6 +37,7 @@ import { experienceToBand, goalChoices, gymTypeToAccess } from '@/data/planBuild
 import type { Customization } from '@/lib/customization'
 import { hasSavedCustomization, loadCustomization } from '@/lib/customization'
 import { loadOnboarding } from '@/lib/onboarding'
+import { writeJson } from './safeStorage'
 
 export const ONBOARDING_PROFILE_KEY = 'qimmah:onboarding:profile:v1'
 
@@ -111,7 +112,7 @@ export function loadOnboardingProfile(): OnboardingProfile | null {
 export function saveOnboardingProfile(value: OnboardingProfile): void {
   if (typeof window === 'undefined') return
   try {
-    window.localStorage.setItem(ONBOARDING_PROFILE_KEY, JSON.stringify(value))
+    writeJson(ONBOARDING_PROFILE_KEY, value)
   } catch {
     /* تجاهل أخطاء التخزين (وضع التصفّح الخاص …) */
   }

@@ -9,6 +9,7 @@
 
 import { useCallback, useState } from 'react'
 import type { ExperienceLevel } from '@/types/profile'
+import { writeRaw } from './safeStorage'
 
 export type UiMode = 'simple' | 'advanced'
 
@@ -35,7 +36,7 @@ function loadOverride(): UiMode | null {
 function saveOverride(mode: UiMode): void {
   if (typeof window === 'undefined') return
   try {
-    window.localStorage.setItem(UI_MODE_KEY, mode)
+    writeRaw(UI_MODE_KEY, mode)
   } catch {
     /* تجاهل أخطاء التخزين */
   }

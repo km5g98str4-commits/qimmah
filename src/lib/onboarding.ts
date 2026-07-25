@@ -1,6 +1,8 @@
 // حالة الإعداد الأولي (onboarding) — تتحكّم بفتح المعالج تلقائيًا أول زيارة.
 // منفصلة تمامًا عن بيانات التخصيص: إعادة التشغيل لا تمسح بيانات المستخدم.
 
+import { writeJson } from './safeStorage'
+
 export const ONBOARDING_KEY = 'qimmah:onboarding:v1'
 
 export interface OnboardingState {
@@ -43,7 +45,7 @@ export function loadDraft<T>(): T | undefined {
 
 export function saveOnboarding(state: OnboardingState): void {
   if (typeof window === 'undefined') return
-  window.localStorage.setItem(ONBOARDING_KEY, JSON.stringify(state))
+  writeJson(ONBOARDING_KEY, state)
 }
 
 /** يحدّث آخر خطوة دون المساس بحالة الإكمال (يُستخدم أثناء التنقّل/الحفظ المؤقت). */

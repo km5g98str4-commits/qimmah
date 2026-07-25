@@ -9,6 +9,7 @@
 import type { SessionExercise, SetLog, WorkoutSession } from './workoutSessions'
 import type { ExerciseHistory } from './exerciseHistory'
 import type { MeasurementLog } from '@/types/progress'
+import { writeJson, writeRaw } from './safeStorage'
 
 // ختم اليوم المحلي (YYYY-MM-DD) — مكرّر هنا لكسر الاعتماد الدائري مع today.ts.
 function dayStamp(d = new Date()): string {
@@ -104,13 +105,13 @@ function readJSON<T>(key: string, fallback: T): T {
   }
 }
 
-function writeJSON(key: string, value: unknown): void {
-  if (typeof window === 'undefined') return
-  try {
-    window.localStorage.setItem(key, JSON.stringify(value))
-  } catch {
-    /* تجاهل امتلاء التخزين */
-  }
+/**
+ * كتابة إلى المتجر الدائم عبر الطبقة الآمنة.
+ * سابقًا كان الفشل يُبتلع صامتًا، فتظهر رسالة «تم الحفظ» بينما لم يُحفظ شيء؛
+ * الآن يُسجَّل الفشل في safeStorage كي تقدر الواجهة تُخبر المستخدم بصدق.
+ */
+function writeJSON(key: string, value: unknown): boolean {
+  return writeJson(key, value) === 'ok'
 }
 
 function nowISO(): string {
@@ -493,7 +494,7 @@ export function ensureMigrated(): void {
       }
     }
 
-    window.localStorage.setItem(MIGRATION_FLAG, 'done')
+    writeRaw(MIGRATION_FLAG, 'done')
   } catch {
     // لا نُفشل التطبيق بسبب الترحيل.
   }

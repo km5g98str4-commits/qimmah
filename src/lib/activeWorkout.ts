@@ -7,6 +7,8 @@
 //
 // المسوّدة ليست جلسة: الجلسة تُكتب في historyStore عند الإنهاء فقط.
 
+import { writeJson } from './safeStorage'
+
 export const ACTIVE_WORKOUT_KEY = 'qimmah:activeWorkout:v1'
 
 /** مدّة صلاحية المسوّدة — بعدها تُعدّ منسيّة ولا تُستأنف. */
@@ -89,12 +91,9 @@ export function peekDraft(): ActiveWorkoutDraft | null {
 /** يحفظ المسوّدة — يتجاهل امتلاء التخزين بصمت (التمرين أهم من المسوّدة). */
 export function saveDraft<TState>(draft: Omit<ActiveWorkoutDraft<TState>, 'updatedAt'>): void {
   if (typeof window === 'undefined') return
-  try {
-    const payload: ActiveWorkoutDraft<TState> = { ...draft, updatedAt: new Date().toISOString() }
-    window.localStorage.setItem(ACTIVE_WORKOUT_KEY, JSON.stringify(payload))
-  } catch {
-    // QuotaExceededError أو وضع خاص — لا نُسقط الشاشة على المستخدم.
-  }
+  const payload: ActiveWorkoutDraft<TState> = { ...draft, updatedAt: new Date().toISOString() }
+  // الكتابة الآمنة لا ترمي أبدًا: امتلاء التخزين لا يُسقط شاشة التمرين.
+  writeJson(ACTIVE_WORKOUT_KEY, payload)
 }
 
 /** يمسح المسوّدة (عند الإنهاء أو التخلّي الصريح). */

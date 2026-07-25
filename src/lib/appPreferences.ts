@@ -1,6 +1,8 @@
 // تفضيلات التطبيق على مستوى الواجهة (v2) — حاليًا اللغة فقط.
 // مفتاح مستقل لا يمسّ بيانات التخصيص.
 
+import { writeJson } from './safeStorage'
+
 export const PREFS_KEY = 'qimmah:prefs:v1'
 
 export type Lang = 'ar' | 'en'
@@ -25,7 +27,7 @@ export function loadPreferences(): AppPreferences {
 
 export function savePreferences(prefs: AppPreferences): void {
   if (typeof window === 'undefined') return
-  window.localStorage.setItem(PREFS_KEY, JSON.stringify(prefs))
+  writeJson(PREFS_KEY, prefs)
 }
 
 export function getLanguage(): Lang {

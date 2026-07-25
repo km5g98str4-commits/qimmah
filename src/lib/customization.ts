@@ -18,6 +18,7 @@ import type { WellnessPlan } from '@/types/wellness'
 import { defaultWellnessPlan } from './wellnessPlan'
 import type { CommitmentPlan, MeasurementPlan } from '@/types/progress'
 import { defaultCommitmentPlan } from './commitmentPlan'
+import { writeJson } from './safeStorage'
 
 export const STORAGE_KEY = 'qimmah:customization:v1'
 
@@ -255,7 +256,7 @@ function withFreshTargets(c: Customization): Customization {
 
 export function saveCustomization(value: Customization): void {
   if (typeof window === 'undefined') return
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(value))
+  writeJson(STORAGE_KEY, value)
 }
 
 export function clearCustomization(): void {
