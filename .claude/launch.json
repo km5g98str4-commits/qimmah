@@ -6,6 +6,24 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
       "port": 5173
+    },
+    {
+      "name": "dev-p6-deploy",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "cd ~/qimmah-p6-deploy && npm run dev -- --port 5180"],
+      "port": 5180
+    },
+    {
+      "name": "dev-body3d",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "cd /Users/ziyad/qimmah-deploy && npm run dev -- --port 5186 --strictPort"],
+      "port": 5186
+    },
+    {
+      "name": "dev-p10-1-qa",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "cd /private/tmp/claude-501/-Users-ziyad-qimmah-deploy/6315c2fd-f9ce-419e-b083-d9702568abe1/scratchpad/wt-integration && npm run dev -- --port 5199 --strictPort"],
+      "port": 5199
     }
   ]
 }

@@ -5,96 +5,36 @@ import { muscleGroups, muscleLabelAr } from '@/data/muscleGroups'
 import { computeWeeklyCoverage } from '@/lib/muscleCoverage'
 import { loadSessions } from '@/lib/workoutSessions'
 import { useCustomization } from '@/lib/customizationContext'
+import {
+  BACK_REGIONS,
+  FRONT_REGIONS,
+  buildClothing,
+  buildSilhouette,
+  type BodyRegion,
+} from '@/data/bodyAnatomy'
+import type { Gender } from '@/types/profile'
 import type { MuscleCoverage, MuscleId, MuscleView } from '@/types/muscles'
 
-// خريطة العضلات الأسبوعية — جسم SVG أمامي/خلفي، كل عضلة دُرّبت هذا الأسبوع «تُضيء»
-// بدرجة برتقالية حسب شدّة تغطيتها؛ غير المُدرّبة تبقى محايدة (تشجيع بلا أحكام).
-// تقرأ من محرّك التغطية القائم (computeWeeklyCoverage) دون أي تعديل عليه.
+// خريطة العضلات الأسبوعية (العرض المسطّح) — جسم بشري تشريحي أمامي/خلفي بـ SVG.
+// واعٍ بالجنس: ذكر بمظهر عضلي، أنثى بلباس رياضي محتشم وساتر تمامًا.
+// كل عضلة دُرّبت هذا الأسبوع «تُضيء» بدرجة برتقالية حسب شدّة تغطيتها؛
+// غير المُدرّبة تبقى محايدة (تشجيع بلا أحكام). الأشكال من data/bodyAnatomy.
+//
+// يُستخدم كبديل خفيف للمجسّم ثلاثي الأبعاد (components/BodyModel3D) على
+// الأجهزة الضعيفة أو لمن يفضّل عرضًا ثابتًا.
 
-// ===== أشكال الرسم =====
-type Shape =
-  | { k: 'e'; cx: number; cy: number; rx: number; ry: number }
-  | { k: 'r'; x: number; y: number; w: number; h: number; r: number }
-  | { k: 'p'; d: string }
-
-const ell = (cx: number, cy: number, rx: number, ry: number): Shape => ({ k: 'e', cx, cy, rx, ry })
-const rct = (x: number, y: number, w: number, h: number, r = 6): Shape => ({ k: 'r', x, y, w, h, r })
-const pth = (d: string): Shape => ({ k: 'p', d })
-
-/** يعكس شكلًا أفقيًا حول منتصف اللوحة (x=100) لتوليد الجانب المقابل. */
-function mirror(s: Shape): Shape {
-  if (s.k === 'e') return { ...s, cx: 200 - s.cx }
-  if (s.k === 'r') return { ...s, x: 200 - s.x - s.w }
-  return s
-}
-/** عضلة مزدوجة (يسار + يمين) من شكل الجانب الأيسر. */
-const pair = (s: Shape): Shape[] => [s, mirror(s)]
-
-interface RegionDef {
-  m: MuscleId
-  shapes: Shape[]
-}
-
-// أجزاء محايدة (رأس/رقبة/حوض/يدين/قدمين) — تربط الجسم بصريًا وليست عضلات.
-const FRONT_NEUTRAL: Shape[] = [
-  ell(100, 24, 15, 17), // رأس
-  rct(91, 37, 18, 12, 4), // رقبة
-  rct(82, 153, 36, 18, 8), // حوض
-  ...pair(ell(47, 178, 7, 7)), // يدان
-  ...pair(ell(85, 344, 9, 6)), // قدمان
-]
-const BACK_NEUTRAL: Shape[] = [
-  ell(100, 24, 15, 17),
-  rct(91, 37, 18, 12, 4),
-  rct(83, 150, 34, 16, 8),
-  ...pair(ell(47, 178, 7, 7)),
-  ...pair(ell(85, 350, 9, 6)),
-]
-
-const FRONT: RegionDef[] = [
-  { m: 'side_delts', shapes: pair(ell(60, 66, 16, 14)) },
-  { m: 'front_delts', shapes: pair(ell(76, 63, 11, 11)) },
-  { m: 'chest_upper', shapes: pair(rct(74, 57, 24, 12, 5)) },
-  { m: 'chest_mid', shapes: pair(rct(72, 71, 26, 18, 7)) },
-  { m: 'chest_lower', shapes: pair(rct(76, 91, 22, 11, 5)) },
-  { m: 'biceps', shapes: pair(ell(56, 104, 10, 22)) },
-  { m: 'forearms', shapes: pair(ell(49, 150, 9, 24)) },
-  { m: 'abs', shapes: [rct(88, 105, 24, 48, 8)] },
-  { m: 'obliques', shapes: pair(ell(80, 132, 7, 22)) },
-  { m: 'quads', shapes: pair(ell(85, 214, 17, 44)) },
-  { m: 'calves', shapes: pair(ell(85, 302, 12, 38)) },
-]
-
-const BACK: RegionDef[] = [
-  { m: 'traps', shapes: [pth('M100 48 L122 60 L112 74 L88 74 L78 60 Z')] },
-  { m: 'rear_delts', shapes: pair(ell(60, 68, 15, 13)) },
-  { m: 'upper_back', shapes: pair(rct(78, 74, 20, 16, 5)) },
-  {
-    m: 'lats',
-    shapes: [pth('M78 92 L98 92 L93 126 L82 118 Z'), pth('M122 92 L102 92 L107 126 L118 118 Z')],
-  },
-  { m: 'lower_back', shapes: [rct(86, 126, 28, 20, 6)] },
-  { m: 'triceps', shapes: pair(ell(56, 104, 10, 22)) },
-  { m: 'forearms', shapes: pair(ell(49, 150, 9, 24)) },
-  { m: 'glutes', shapes: pair(ell(88, 166, 15, 15)) },
-  { m: 'hamstrings', shapes: pair(ell(85, 232, 16, 42)) },
-  { m: 'calves', shapes: pair(ell(85, 312, 12, 38)) },
-]
-
-const NEUTRAL_FILL = '#ECE3D4'
-const NEUTRAL_STROKE = 'rgba(43,37,32,0.10)'
+const SKIN_FILL = '#E9D9C4'
+const SKIN_STROKE = 'rgba(43,37,32,0.16)'
+const MUSCLE_FILL = '#DBC7AC'
+const MUSCLE_STROKE = 'rgba(43,37,32,0.14)'
 const HEAT = '#F26A21'
+const GARMENT_FILL = '#3E6B8C'
+const GARMENT_STROKE = 'rgba(31,54,70,0.55)'
 
-function shapeEl(s: Shape, key: string, props: Record<string, unknown>) {
-  if (s.k === 'e') return <ellipse key={key} cx={s.cx} cy={s.cy} rx={s.rx} ry={s.ry} {...props} />
-  if (s.k === 'r') return <rect key={key} x={s.x} y={s.y} width={s.w} height={s.h} rx={s.r} {...props} />
-  return <path key={key} d={s.d} {...props} />
-}
-
-/** شدّة الإضاءة (0.28 → 0.92) أو لا شيء إن لم تُدرّب. */
+/** شدّة الإضاءة (0.30 → 0.92) أو لا شيء إن لم تُدرّب. */
 function heatOpacity(c?: MuscleCoverage): number | null {
   if (!c || c.sets <= 0) return null
-  return Math.min(0.92, 0.28 + c.intensity * 0.64)
+  return Math.min(0.92, 0.3 + c.intensity * 0.62)
 }
 
 function Region({
@@ -103,7 +43,7 @@ function Region({
   selected,
   onSelect,
 }: {
-  def: RegionDef
+  def: BodyRegion
   coverage: Record<string, MuscleCoverage>
   selected: boolean
   onSelect: (m: MuscleId) => void
@@ -123,22 +63,122 @@ function Region({
       className="cursor-pointer outline-none"
     >
       <title>{title}</title>
-      {/* الطبقة المحايدة (أساس العضلة) */}
-      {def.shapes.map((s, i) => shapeEl(s, `b${i}`, { fill: NEUTRAL_FILL, stroke: NEUTRAL_STROKE, strokeWidth: 1 }))}
+      {/* الطبقة المحايدة (نسيج العضلة) */}
+      {def.d.map((d, i) => (
+        <path key={`b${i}`} d={d} fill={MUSCLE_FILL} stroke={MUSCLE_STROKE} strokeWidth={1} />
+      ))}
       {/* طبقة الإضاءة البرتقالية حسب الشدّة */}
       {heat !== null &&
-        def.shapes.map((s, i) => shapeEl(s, `h${i}`, { fill: HEAT, fillOpacity: heat, stroke: 'none' }))}
+        def.d.map((d, i) => <path key={`h${i}`} d={d} fill={HEAT} fillOpacity={heat} stroke="none" />)}
       {/* تحديد العضلة المختارة */}
       {selected &&
-        def.shapes.map((s, i) => shapeEl(s, `s${i}`, { fill: 'none', stroke: HEAT, strokeWidth: 2 }))}
+        def.d.map((d, i) => (
+          <path key={`s${i}`} d={d} fill="none" stroke={HEAT} strokeWidth={2} strokeLinejoin="round" />
+        ))}
     </g>
   )
 }
 
+interface FlatMuscleBodyProps {
+  coverage: Record<string, MuscleCoverage>
+  gender: Gender
+  selected: MuscleId | null
+  onSelect: (m: MuscleId | null) => void
+  className?: string
+}
+
+/**
+ * الجسم المسطّح (SVG) بمبدّل أمامي/خلفي — مكوّن عرض خالص يستقبل التغطية جاهزة.
+ * يُستخدم داخل بطاقة المجسّم ثلاثي الأبعاد كوضع «مسطّح»، وداخل البطاقة الكاملة أدناه.
+ */
+export function FlatMuscleBody({ coverage, gender, selected, onSelect, className }: FlatMuscleBodyProps) {
+  const [view, setView] = useState<MuscleView>('front')
+
+  const silhouette = useMemo(() => buildSilhouette(gender, view), [gender, view])
+  const clothing = useMemo(() => buildClothing(gender, view), [gender, view])
+  const regions = view === 'front' ? FRONT_REGIONS : BACK_REGIONS
+
+  const trainedCount = muscleGroups.filter((m) => (coverage[m.id]?.sets ?? 0) > 0).length
+  const genderLabel = gender === 'female' ? 'أنثى' : gender === 'male' ? 'ذكر' : 'محايد'
+
+  return (
+    <div className={className}>
+      {/* مبدّل الجهة */}
+      <div className="flex justify-center">
+        <div className="inline-flex rounded-full border border-line bg-page p-1">
+          {(['front', 'back'] as MuscleView[]).map((v) => (
+            <button
+              key={v}
+              type="button"
+              onClick={() => {
+                setView(v)
+                onSelect(null)
+              }}
+              aria-pressed={view === v}
+              className={cn(
+                'min-h-[32px] rounded-full px-3 py-1 text-[11px] font-bold transition-colors',
+                view === v ? 'bg-primary text-white' : 'text-ink-500 hover:text-ink-900',
+              )}
+            >
+              {v === 'front' ? 'أمامي' : 'خلفي'}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* الجسم التشريحي */}
+      <div className="mt-2 flex justify-center">
+        <svg
+          viewBox="0 0 220 470"
+          className="h-auto w-full max-w-[240px]"
+          role="img"
+          aria-label={`خريطة العضلات — جسم ${genderLabel}، العرض ${view === 'front' ? 'الأمامي' : 'الخلفي'}، فعّلت ${trainedCount} عضلة هذا الأسبوع`}
+        >
+          {/* الهيكل الجلدي المحايد (حدود الجسم) */}
+          {silhouette.map((d, i) => (
+            <path
+              key={`sk${i}`}
+              d={d}
+              fill={SKIN_FILL}
+              stroke={SKIN_STROKE}
+              strokeWidth={1.2}
+              strokeLinejoin="round"
+            />
+          ))}
+          {/* العضلات القابلة للاختيار */}
+          {regions.map((def) => (
+            <Region
+              key={def.m}
+              def={def}
+              coverage={coverage}
+              selected={selected === def.m}
+              onSelect={(m) => onSelect(selected === m ? null : m)}
+            />
+          ))}
+          {/* طبقة اللباس الرياضي المحتشم (فوق العضلات، شفّافة جزئيًا) */}
+          {clothing.map((g, i) => (
+            <path
+              key={`cl${i}`}
+              d={g.d}
+              fill={GARMENT_FILL}
+              fillOpacity={g.opacity}
+              stroke={GARMENT_STROKE}
+              strokeWidth={1.4}
+              strokeLinejoin="round"
+            />
+          ))}
+        </svg>
+      </div>
+    </div>
+  )
+}
+
+/** البطاقة الكاملة للخريطة المسطّحة (عنوان + جسم + تعليق + وسيلة إيضاح). */
 export function WeeklyMuscleMap({ className }: { className?: string }) {
   const { customization } = useCustomization()
-  const [view, setView] = useState<MuscleView>('front')
   const [selected, setSelected] = useState<MuscleId | null>(null)
+
+  const gender = customization.profile.gender
 
   const coverage = useMemo(() => {
     const result = computeWeeklyCoverage({
@@ -150,8 +190,6 @@ export function WeeklyMuscleMap({ className }: { className?: string }) {
   }, [customization])
 
   const trainedCount = muscleGroups.filter((m) => (coverage[m.id]?.sets ?? 0) > 0).length
-  const regions = view === 'front' ? FRONT : BACK
-  const neutral = view === 'front' ? FRONT_NEUTRAL : BACK_NEUTRAL
 
   const sel = selected ? coverage[selected] : undefined
   const caption = selected
@@ -162,62 +200,22 @@ export function WeeklyMuscleMap({ className }: { className?: string }) {
       ? `فعّلت ${trainedCount} من ${muscleGroups.length} عضلة هذا الأسبوع 💪`
       : 'ابدأ تمرينك وبتشوف عضلاتك تتلوّن هنا.'
 
+  const genderLabel = gender === 'female' ? 'أنثى' : gender === 'male' ? 'ذكر' : 'محايد'
+
   return (
     <div className={cn('card p-5', className)}>
-      {/* العنوان + مبدّل الجهة */}
-      <div className="mb-3 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2.5">
-          <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary-soft text-primary-c">
-            <Icon name="Dumbbell" className="h-5 w-5" />
-          </span>
-          <div>
-            <p className="text-sm font-black text-ink-900">خريطة عضلاتك</p>
-            <p className="text-[11px] font-bold text-ink-400">هذا الأسبوع</p>
-          </div>
-        </div>
-        <div className="inline-flex rounded-full border border-line bg-page p-1">
-          {(['front', 'back'] as MuscleView[]).map((v) => (
-            <button
-              key={v}
-              type="button"
-              onClick={() => {
-                setView(v)
-                setSelected(null)
-              }}
-              aria-pressed={view === v}
-              className={cn(
-                'rounded-full px-3 py-1 text-[11px] font-bold transition-colors',
-                view === v ? 'bg-primary text-white' : 'text-ink-500 hover:text-ink-900',
-              )}
-            >
-              {v === 'front' ? 'أمامي' : 'خلفي'}
-            </button>
-          ))}
+      {/* العنوان */}
+      <div className="mb-3 flex items-center gap-2.5">
+        <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary-soft text-primary-c">
+          <Icon name="Dumbbell" className="h-5 w-5" />
+        </span>
+        <div>
+          <p className="text-sm font-black text-ink-900">خريطة عضلاتك</p>
+          <p className="text-[11px] font-bold text-ink-400">هذا الأسبوع · {genderLabel}</p>
         </div>
       </div>
 
-      {/* الجسم */}
-      <div className="flex justify-center">
-        <svg
-          viewBox="0 0 200 365"
-          className="h-auto w-full max-w-[230px]"
-          role="img"
-          aria-label={`خريطة العضلات — العرض ${view === 'front' ? 'الأمامي' : 'الخلفي'}، فعّلت ${trainedCount} عضلة هذا الأسبوع`}
-        >
-          {/* الأجزاء المحايدة */}
-          {neutral.map((s, i) => shapeEl(s, `n${i}`, { fill: NEUTRAL_FILL, stroke: NEUTRAL_STROKE, strokeWidth: 1 }))}
-          {/* العضلات */}
-          {regions.map((def) => (
-            <Region
-              key={def.m}
-              def={def}
-              coverage={coverage}
-              selected={selected === def.m}
-              onSelect={(m) => setSelected((cur) => (cur === m ? null : m))}
-            />
-          ))}
-        </svg>
-      </div>
+      <FlatMuscleBody coverage={coverage} gender={gender} selected={selected} onSelect={setSelected} />
 
       {/* التعليق التحفيزي / تفاصيل العضلة المختارة */}
       <p className="mt-1 text-center text-xs font-bold text-ink-700">{caption}</p>
@@ -225,11 +223,17 @@ export function WeeklyMuscleMap({ className }: { className?: string }) {
       {/* وسيلة الإيضاح */}
       <div className="mt-4 flex items-center justify-center gap-4 border-t border-line pt-3 text-[11px] text-ink-500">
         <span className="flex items-center gap-1.5">
-          <span className="inline-block h-3 w-6 rounded-full" style={{ background: `linear-gradient(90deg, ${HEAT}55, ${HEAT})` }} />
+          <span
+            className="inline-block h-3 w-6 rounded-full"
+            style={{ background: `linear-gradient(90deg, ${HEAT}55, ${HEAT})` }}
+          />
           درّبتها (الأغمق أكثر)
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="inline-block h-3 w-3 rounded-full" style={{ backgroundColor: NEUTRAL_FILL, border: '1px solid rgba(43,37,32,0.12)' }} />
+          <span
+            className="inline-block h-3 w-3 rounded-full"
+            style={{ backgroundColor: MUSCLE_FILL, border: '1px solid rgba(43,37,32,0.18)' }}
+          />
           لم تُدرّب
         </span>
       </div>

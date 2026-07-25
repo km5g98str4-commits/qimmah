@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Icon } from '@/components/Icon'
-import { WeeklyMuscleMap } from '@/components/WeeklyMuscleMap'
+import { BodyModel3D } from '@/components/BodyModel3D'
 import { StepCounterCard } from '@/components/StepCounterCard'
 import { MUSCLE_AR } from '@/lib/exerciseGuidance'
 import { loadLogs, latestLog, trendFor } from '@/lib/measurementLog'
@@ -128,8 +128,8 @@ export function ProgressView({ lang }: ProgressViewProps) {
           )}
         </Card>
 
-        {/* خريطة العضلات الأسبوعية — تُضيء ما درّبته هذا الأسبوع */}
-        <WeeklyMuscleMap className="mt-3" />
+        {/* مجسّم العضلات ثلاثي الأبعاد — يدور ٣٦٠° ويُضيء ما درّبته هذا الأسبوع */}
+        <BodyModel3D className="mt-3" />
 
         {/* عدّاد الخطوات اليدوي + الهدف اليومي */}
         <StepCounterCard className="mt-3" />
