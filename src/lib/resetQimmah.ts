@@ -1,5 +1,8 @@
 // إعادة ضبط قِمّة بالكامل — يحذف مفاتيح قِمّة فقط دون المساس بأي مفاتيح أخرى.
 
+import { STEP_GOAL_KEY, STEP_LOG_KEY, STEP_SOURCE_KEY } from './stepCounter'
+import { ACTIVE_WORKOUT_KEY } from './activeWorkout'
+
 export const QIMMAH_KEYS = [
   'qimmah:customization:v1',
   'qimmah:onboarding:v1',
@@ -29,6 +32,12 @@ export const QIMMAH_KEYS = [
   'qimmah:history:supplementLogs:v1',
   'qimmah:history:medicationLogs:v1',
   'qimmah:history:migrated:v1',
+  // الخطوات اليدوية + الهدف + مصدر البيانات — تُستورد من مالكها كي لا تتخلّف القائمة.
+  STEP_LOG_KEY,
+  STEP_SOURCE_KEY,
+  STEP_GOAL_KEY,
+  // مسوّدة التمرين النشط (استئناف جلسة لم تُنهَ).
+  ACTIVE_WORKOUT_KEY,
 ]
 
 /** يحذف مفاتيح قِمّة فقط، ثم يعيد التحميل إلى شاشة البداية. */

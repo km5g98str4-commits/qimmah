@@ -61,9 +61,50 @@ export function planExerciseVideo(pe: PlanExercise): string {
   return getExercise(pe.exerciseId)?.videoUrl ?? ''
 }
 
-/** يختار يوم اليوم من الخطة حسب يوم الأسبوع (تدوير على عدد الأيام). */
-export function todayPlanDay(plan: WorkoutPlan): PlanDay | undefined {
+/** صفّ واحد من الجدول الأسبوعي (يكفي منه النوع لتحديد أيام الراحة). */
+export interface WeekRow {
+  type: string
+}
+
+/**
+ * فهرس اليوم داخل الجدول الأسبوعي المخزَّن — الجدول يبدأ بالسبت،
+ * بينما getDay() يبدأ بالأحد، فنُزيح بمقدار يوم واحد.
+ */
+export function weekRowIndex(now: Date = new Date()): number {
+  return (now.getDay() + 1) % 7
+}
+
+/**
+ * يختار تمرين اليوم من الخطة اعتمادًا على الجدول الأسبوعي للمستخدم.
+ *
+ * قبل ذلك كان الاختيار `getDay() % days.length`، وهو خطأ مزدوج: يتجاهل أيام
+ * الراحة تمامًا (فيظهر تمرين كل يوم من السبت للجمعة)، ويكرّر نفس اليوم مرّتين
+ * في الأسبوع عشوائيًا. الآن: يوم الراحة يُعيد undefined، وأيام التدريب تأخذ
+ * أيام الخطة بالترتيب.
+ *
+ * `week` اختياري للتوافق: بدونه نعود للسلوك القديم بدل أن نكسر مستدعيًا قديمًا.
+ */
+export function todayPlanDay(
+  plan: WorkoutPlan,
+  week?: WeekRow[],
+  now: Date = new Date(),
+): PlanDay | undefined {
   if (!plan.days.length) return undefined
-  const index = new Date().getDay() % plan.days.length
-  return plan.days[index]
+  if (!week || week.length !== 7) return plan.days[now.getDay() % plan.days.length]
+
+  const idx = weekRowIndex(now)
+  if (week[idx]?.type === 'rest') return undefined
+
+  // ترتيب هذا اليوم بين أيام التدريب في الأسبوع → يوم الخطة المقابل.
+  let trainingIndex = 0
+  for (let i = 0; i < idx; i++) {
+    if (week[i]?.type !== 'rest') trainingIndex++
+  }
+  return plan.days[trainingIndex % plan.days.length]
+}
+
+/** هل اليوم يوم راحة حسب الجدول الأسبوعي؟ */
+export function isRestDay(week?: WeekRow[], now: Date = new Date()): boolean {
+  if (!week || week.length !== 7) return false
+  return week[weekRowIndex(now)]?.type === 'rest'
 }

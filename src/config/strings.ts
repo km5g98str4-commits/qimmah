@@ -121,6 +121,12 @@ export interface ShellStrings {
     finishBodyDone: string
     confirmFinish: string
     keepGoing: string
+    /** استئناف مسوّدة تمرين لم يكتمل. */
+    resumeNotice: string
+    exitTitle: string
+    exitBody: string
+    exitKeep: string
+    exitDiscard: string
     errWeight: string
     errReps: string
     progress: string
@@ -380,8 +386,8 @@ const ar: ShellStrings = {
     disabledBody: 'تقدر تستخدم وضع الضيف على هذا الجهاز.',
     guestBadge: 'ضيف',
     guestNote: 'بيانات الضيف محفوظة على هذا الجهاز فقط.',
-    accountNote: 'أنت مسجّل الدخول. بياناتك تُزامَن مع حسابك السحابي.',
-    cloudNote: 'بياناتك محفوظة على هذا الجهاز وعلى حسابك السحابي.',
+    accountNote: 'أنت مسجّل الدخول. بياناتك محفوظة على هذا الجهاز — المزامنة السحابية قيد التطوير.',
+    cloudNote: 'بياناتك محفوظة على هذا الجهاز. مزامنتها مع حسابك قيد التطوير — لا تعتمد عليها كنسخة احتياطية بعد.',
     back: 'رجوع',
   },
   settings: {
@@ -480,6 +486,11 @@ const ar: ShellStrings = {
     finishBodyDone: 'بنحفظ تمرينك ونعرض الملخّص.',
     confirmFinish: 'نعم، أنهِ واحفظ',
     keepGoing: 'أكمل التمرين',
+    resumeNotice: 'رجّعناك من حيث وقفت — اللي سجّلته محفوظ.',
+    exitTitle: 'تخرج من التمرين؟',
+    exitBody: 'سجّلت مجموعات ما انحفظت كجلسة بعد. نقدر نحفظها كمسوّدة وترجع لها متى ما بغيت.',
+    exitKeep: 'احفظ وأكمل لاحقًا',
+    exitDiscard: 'تخلَّ عن التمرين',
     errWeight: 'الوزن لازم بين ٠ و٥٠٠ كجم',
     errReps: 'التكرارات لازم بين ٠ و١٠٠',
     progress: 'الإنجاز',
@@ -737,8 +748,8 @@ const en: ShellStrings = {
     disabledBody: 'You can use guest mode on this device.',
     guestBadge: 'Guest',
     guestNote: 'Guest data is stored on this device only.',
-    accountNote: 'You are logged in. Your data syncs to your cloud account.',
-    cloudNote: 'Your data is stored on this device and on your cloud account.',
+    accountNote: 'You are signed in. Your data lives on this device — cloud sync is still in development.',
+    cloudNote: 'Your data is stored on this device. Syncing it to your account is still in development — do not rely on it as a backup yet.',
     back: 'Back',
   },
   settings: {
@@ -837,6 +848,11 @@ const en: ShellStrings = {
     finishBodyDone: 'We’ll save your workout and show the summary.',
     confirmFinish: 'Yes, finish & save',
     keepGoing: 'Keep going',
+    resumeNotice: 'Picked up where you left off — your logged sets are safe.',
+    exitTitle: 'Leave this workout?',
+    exitBody: 'You have logged sets that are not saved as a session yet. We can keep them as a draft so you can come back.',
+    exitKeep: 'Save & continue later',
+    exitDiscard: 'Discard workout',
     errWeight: 'Weight must be between 0 and 500 kg',
     errReps: 'Reps must be between 0 and 100',
     progress: 'Progress',

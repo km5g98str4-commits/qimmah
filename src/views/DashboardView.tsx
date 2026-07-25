@@ -35,7 +35,7 @@ export function DashboardView({ lang, onNavigate }: DashboardViewProps) {
   const s = customization.sections
   const signals = useDashboardSignals(customization.profile)
   const { isSimple, toggle } = useUiMode(signals.experience)
-  const planDay = todayPlanDay(customization.workoutPlan)
+  const planDay = todayPlanDay(customization.workoutPlan, customization.routine)
 
   // الأساسيات (تمرين اليوم + سعرات/ماء) دائمًا ظاهرة، مرتّبة حسب المحرّك.
   const essentialLeads = signals.leadOrder.filter((c) => c === 'workout' || c === 'nutrition')
@@ -228,7 +228,7 @@ function SystemIdentity({ onNavigate }: { onNavigate: (route: AppRoute) => void 
 function WorkoutLead({ lang, onNavigate }: { lang: Lang; onNavigate: (route: AppRoute) => void }) {
   const { customization } = useCustomization()
   const tw = getStrings(lang).workout
-  const planDay = todayPlanDay(customization.workoutPlan)
+  const planDay = todayPlanDay(customization.workoutPlan, customization.routine)
   const dayName = planDay ? (lang === 'en' ? planDay.nameEn : planDay.nameAr) : ''
 
   return (
@@ -264,7 +264,7 @@ function WorkoutLead({ lang, onNavigate }: { lang: Lang; onNavigate: (route: App
 /** بطاقة «خطوتك التالية» — إرشاد عملي للمبتدئ (بارزة في ترتيبه). */
 function NextActionCard({ lang, onNavigate }: { lang: Lang; onNavigate: (route: AppRoute) => void }) {
   const { customization } = useCustomization()
-  const planDay = todayPlanDay(customization.workoutPlan)
+  const planDay = todayPlanDay(customization.workoutPlan, customization.routine)
   const dayName = planDay ? (lang === 'en' ? planDay.nameEn : planDay.nameAr) : ''
 
   // خطوة عملية واحدة واضحة: تمرين اليوم إن وُجد، وإلا مراجعة الخطة/التغذية.

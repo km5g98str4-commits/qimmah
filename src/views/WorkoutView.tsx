@@ -30,7 +30,7 @@ interface WorkoutViewProps {
 export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
   const { customization } = useCustomization()
   const plan = customization.workoutPlan
-  const planDay = todayPlanDay(plan)
+  const planDay = todayPlanDay(plan, customization.routine)
 
   const [activeDay, setActiveDay] = useState<PlanDay | null>(null)
   const [summary, setSummary] = useState<FinishSummary | null>(null)

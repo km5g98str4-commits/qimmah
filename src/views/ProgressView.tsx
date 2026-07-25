@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Icon } from '@/components/Icon'
 import { BodyModel3D } from '@/components/BodyModel3D'
+import { MeasurementLogCard } from '@/components/MeasurementLogCard'
 import { StepCounterCard } from '@/components/StepCounterCard'
 import { MUSCLE_AR } from '@/lib/exerciseGuidance'
 import { loadLogs, latestLog, trendFor } from '@/lib/measurementLog'
@@ -50,6 +51,9 @@ export function ProgressView({ lang }: ProgressViewProps) {
       </div>
 
       <div>
+        {/* تسجيل القياسات — المسار الوحيد لإدخال الوزن في التطبيق */}
+        <MeasurementLogCard className="mb-3" />
+
         <div className="grid grid-cols-2 gap-3">
           {/* الوزن */}
           <Card icon="Scale" title={t.cardWeight}>

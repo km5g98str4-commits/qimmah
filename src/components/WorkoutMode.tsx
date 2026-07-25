@@ -11,6 +11,7 @@ import { getRecord, progressionHint } from '@/lib/exerciseHistory'
 import { exerciseGuidance } from '@/lib/exerciseGuidance'
 import { muscleLabel } from '@/lib/muscles'
 import { getDayStamp } from '@/lib/today'
+import { clearDraft, loadDraft, saveDraft } from '@/lib/activeWorkout'
 import type { Difficulty, SetLog, WorkoutSession } from '@/lib/workoutSessions'
 
 interface WorkoutModeProps {
@@ -70,14 +71,22 @@ function repsInvalid(v: string): boolean {
 /** وضع التمرين النشط — شاشة كاملة، تمرين واحد في كل خطوة، تسجيل سريع. */
 export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: WorkoutModeProps) {
   const t = getStrings(lang).workout
-  const [startedAt] = useState(() => new Date().toISOString())
-  const [current, setCurrent] = useState(0)
+  // مسوّدة محفوظة لنفس اليوم (إن وُجدت) — تُقرأ مرّة واحدة عند الفتح.
+  const draftRef = useRef(loadDraft<Record<string, ExState>>(day.id))
+  const draft = draftRef.current
+  const [resumed, setResumed] = useState(() => !!draft)
+  const [startedAt] = useState(() => draft?.startedAt ?? new Date().toISOString())
+  const [current, setCurrent] = useState(() => {
+    const c = draft?.current ?? 0
+    return c >= 0 && c < day.exercises.length ? c : 0
+  })
   const [openGuide, setOpenGuide] = useState(false)
   const [openAlt, setOpenAlt] = useState(false)
   const [openDetails, setOpenDetails] = useState(false)
-  const [swap, setSwap] = useState<Record<string, string>>({})
+  const [swap, setSwap] = useState<Record<string, string>>(() => draft?.swap ?? {})
   const [savedFlash, setSavedFlash] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
+  const [exitOpen, setExitOpen] = useState(false)
   const flashTimer = useRef<number | null>(null)
 
   const effExId = (peId: string, exerciseId: string) => swap[peId] ?? exerciseId
@@ -99,6 +108,12 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
         })),
         painNote: '',
         notes: pe.notes ?? '',
+      }
+      // استئناف المسوّدة: نأخذ حالة التمرين المحفوظة فقط إن طابق عدد المجموعات
+      // (تغيّرت الخطة ⇒ نبدأ ذلك التمرين نظيفًا بدل عرض بيانات لا تخصّه).
+      const saved = draft?.state?.[pe.id]
+      if (saved && Array.isArray(saved.sets) && saved.sets.length === count) {
+        init[pe.id] = { ...init[pe.id], ...saved, sets: saved.sets }
       }
     })
     return init
@@ -126,6 +141,18 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
     setOpenAlt(false)
     setOpenDetails(false)
   }, [current])
+
+  // حفظ مسوّدة التمرين بعد كل تغيير — الإغلاق أو تحديث الصفحة لم يعد يمحو شيئًا.
+  // لا بدّ أن يبقى هذا الخطّاف قبل أي return مشروط أدناه (ترتيب الخطّافات ثابت).
+  useEffect(() => {
+    const anyDone = Object.values(state).some((st) => st.sets.some((x) => x.completed))
+    if (!anyDone) return
+    const done = day.exercises.filter((p) => {
+      const st = state[p.id]
+      return st?.sets.length > 0 && st.sets.every((x) => x.completed)
+    }).length
+    saveDraft({ dayId: day.id, date: getDayStamp(), startedAt, state, swap, current, doneCount: done })
+  }, [state, swap, current, day.id, day.exercises, startedAt])
 
   // حارس: يوم بلا تمارين (مثل «تمرين فارغ») — لا نلمس مرجعًا غير موجود؛ نعرض حالة آمنة.
   if (day.exercises.length === 0) {
@@ -219,6 +246,18 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
   }
   const doneCount = day.exercises.filter((p) => exDone(p.id)).length
 
+  /** هل يوجد أي شيء يستحقّ الحفظ (مجموعة واحدة معتمدة على الأقل)؟ */
+  const hasProgress = Object.values(state).some((st) => st.sets.some((x) => x.completed))
+
+  /** الخروج: نطلب تأكيدًا فقط إن كان هناك تقدّم فعلي. */
+  const requestClose = () => {
+    if (hasProgress) setExitOpen(true)
+    else {
+      clearDraft()
+      onClose()
+    }
+  }
+
   const isLast = current >= total - 1
   const goNext = () => {
     if (isLast) return setConfirmOpen(true)
@@ -232,6 +271,8 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
 
   const doFinish = () => {
     setConfirmOpen(false)
+    // الجلسة ستُحفظ في السجلّ الدائم — المسوّدة لم تعد لازمة.
+    clearDraft()
     const session: WorkoutSession = {
       id: `session-${startedAt}`,
       date: getDayStamp(),
@@ -288,7 +329,7 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
       {/* الترويسة + شريط التقدّم */}
       <header className="sticky top-0 z-10 glass border-b border-line">
         <div className="container-page flex h-16 items-center justify-between gap-3">
-          <button type="button" onClick={onClose} aria-label="إغلاق" className="grid h-11 w-11 place-items-center rounded-xl border border-line bg-surface text-ink-700">
+          <button type="button" onClick={requestClose} aria-label="إغلاق" className="grid h-11 w-11 place-items-center rounded-xl border border-line bg-surface text-ink-700">
             <Icon name="X" className="h-5 w-5" />
           </button>
           <div className="min-w-0 text-center">
@@ -305,6 +346,22 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
       </header>
 
       <main className="container-page flex-1 space-y-4 overflow-y-auto py-5 pb-40">
+        {/* إشعار استئناف مسوّدة محفوظة */}
+        {resumed && (
+          <div className="flex items-center gap-2.5 rounded-xl border border-primary-soft bg-primary-soft/40 p-3">
+            <Icon name="RotateCcw" className="h-4 w-4 shrink-0 text-primary-c" />
+            <p className="flex-1 text-xs font-bold text-ink-700">{t.resumeNotice}</p>
+            <button
+              type="button"
+              onClick={() => setResumed(false)}
+              aria-label="إخفاء"
+              className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-ink-400 hover:text-ink-900"
+            >
+              <Icon name="X" className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+
         {/* رأس التمرين */}
         <div className="card p-5">
           <div className="flex items-start justify-between gap-3">
@@ -597,6 +654,47 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
               </button>
               <button type="button" onClick={() => setConfirmOpen(false)} className="btn-ghost w-full py-2.5 text-sm">
                 {t.keepGoing}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* تأكيد الخروج — لا نمحو تقدّم المستخدم بلا سؤال */}
+      {exitOpen && (
+        <div className="fixed inset-0 z-40 flex items-end justify-center bg-ink-900/40 p-4 sm:items-center" role="dialog" aria-modal="true">
+          <div className="w-full max-w-sm rounded-2xl border border-line bg-surface p-6 shadow-card">
+            <span className="grid h-12 w-12 place-items-center rounded-full bg-primary-soft text-primary-c">
+              <Icon name="Save" className="h-6 w-6" />
+            </span>
+            <h3 className="mt-4 text-lg font-black text-ink-900">{t.exitTitle}</h3>
+            <p className="mt-1 text-sm leading-relaxed text-ink-500">{t.exitBody}</p>
+            <p className="mt-3 text-xs font-bold text-ink-700">{t.progress}: {doneCount}/{total}</p>
+            <div className="mt-5 flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setExitOpen(false)
+                  onClose()
+                }}
+                className="btn-primary w-full py-3 text-base"
+              >
+                <Icon name="Save" className="h-5 w-5" />
+                {t.exitKeep}
+              </button>
+              <button type="button" onClick={() => setExitOpen(false)} className="btn-ghost w-full py-2.5 text-sm">
+                {t.keepGoing}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  clearDraft()
+                  setExitOpen(false)
+                  onClose()
+                }}
+                className="min-h-[44px] w-full rounded-xl py-2 text-sm font-bold text-danger"
+              >
+                {t.exitDiscard}
               </button>
             </div>
           </div>

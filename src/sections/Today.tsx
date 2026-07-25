@@ -42,7 +42,7 @@ export function Today({ lang, onStartWorkout, onEditPlan }: TodayProps) {
   const tn = getStrings(lang).nutrition
   const twell = getStrings(lang).wellness
   const tc = getStrings(lang).commit
-  const planDay = todayPlanDay(customization.workoutPlan)
+  const planDay = todayPlanDay(customization.workoutPlan, customization.routine)
   const finishedToday = todaysFinishedSession()
   const splitName = customization.workoutPlan.days.length
     ? planTitle(customization.workoutPlan.templateId, lang)

@@ -53,6 +53,8 @@ const BOUNDS = {
   age: { min: 14, max: 80 },
   height: { min: 120, max: 220 },
   weight: { min: 30, max: 250 },
+  /** وزن الهدف يتجاوز حدود الوزن الحالي بهامش كي يبقى «أقل/أعلى منه» ممكنًا دائمًا. */
+  targetWeight: { min: 25, max: 260 },
   days: { min: 3, max: 6 },
   meals: { min: 2, max: 6 },
   steps: { min: 2000, max: 20000 },
@@ -191,7 +193,7 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
   useEffect(() => {
     if (!showsTargetWeight(a.goalValue) || a.targetTouched) return
     const factor = a.goalValue === 'cut' ? 0.9 : 1.1
-    const next = clampN(Math.round(a.weightKg * factor), BOUNDS.weight.min, BOUNDS.weight.max)
+    const next = clampN(Math.round(a.weightKg * factor), BOUNDS.targetWeight.min, BOUNDS.targetWeight.max)
     if (next !== a.targetWeightKg) setA((p) => ({ ...p, targetWeightKg: next }))
   }, [a.goalValue, a.weightKg, a.targetTouched, a.targetWeightKg])
 
@@ -298,7 +300,9 @@ export function PlanBuilder({ onComplete, onExit }: PlanBuilderProps) {
       error: targetWeightError(a),
       content: (
         <Question title="وش وزنك الهدف؟" hint={a.goalValue === 'cut' ? 'أقل من وزنك الحالي.' : 'أعلى من وزنك الحالي.'}>
-          <Slider value={a.targetWeightKg} min={BOUNDS.weight.min} max={BOUNDS.weight.max} unit="كجم" onChange={(v) => set({ targetWeightKg: v, targetTouched: true })} ariaLabel="الوزن الهدف بالكيلوجرام" />
+          {/* حدود وزن الهدف موسّعة عن حدود الوزن الحالي: بلا ذلك يعلق من وزنه
+              عند حدّ النطاق (٣٠ كجم مع «تنشيف» أو ٢٥٠ مع «تضخيم») في خطوة لا مخرج منها. */}
+          <Slider value={a.targetWeightKg} min={BOUNDS.targetWeight.min} max={BOUNDS.targetWeight.max} unit="كجم" onChange={(v) => set({ targetWeightKg: v, targetTouched: true })} ariaLabel="الوزن الهدف بالكيلوجرام" />
         </Question>
       ),
     })
