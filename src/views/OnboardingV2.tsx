@@ -13,7 +13,8 @@ import { persistOnboardingToProfile } from '@/lib/onboardingSync'
 import { track } from '@/lib/analytics'
 import { POLICY_LINKS, policyCopy } from '@/data/policyCopy'
 import { toAnswersFromV2, type V2Place, type V2Pref } from '@/lib/onboardingV2Adapter'
-import { isMinorAge, MINOR_GOAL_RESTRICTION_NOTE } from '@/lib/calculators'
+import { isMinorAge } from '@/lib/calculators'
+import { profileChoiceStrings } from '@/i18n/dict/profileChoices'
 import {
   DAYS,
   DURATIONS,
@@ -330,7 +331,7 @@ function GoalStep({ lang, t, titleId, goal, isMinor, healthDataConsent, onConsen
       {isMinor && (
         <p id="v2-goal-minor-note" className="mt-3 flex items-start gap-2 rounded-2xl border border-gold-400/40 bg-gold-200/40 p-3 text-[0.8rem] font-bold leading-snug text-ink-700">
           <Icon name="Info" className="mt-0.5 h-4 w-4 shrink-0 text-gold-600" />
-          {MINOR_GOAL_RESTRICTION_NOTE}
+          {profileChoiceStrings[lang].minorGoalNote}
         </p>
       )}
       <div className="mt-5 rounded-2xl border border-line bg-surface p-4">

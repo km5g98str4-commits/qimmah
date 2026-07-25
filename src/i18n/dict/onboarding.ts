@@ -251,6 +251,7 @@ export interface OnboardingStrings {
   wtTitle: string
   wtDescription: string
   wtReplaceNotice: string
+  wtBalanceFallback: string
   wtCancel: string
   wtConfirm: string
   wtDayNameArPlaceholder: string
@@ -681,6 +682,7 @@ const ar: OnboardingStrings = {
   wtTitle: 'اختيار جدول التمرين',
   wtDescription: 'اختر قالب جاهز وعدّله مثل ما تحب — أضف من المكتبة أو احذف.',
   wtReplaceNotice: 'بنستبدل جدول التمرين الحالي. تقدر تعدل كل شي بعد الاختيار.',
+  wtBalanceFallback: 'راجع توازن جدولك قبل ما تحفظ التغييرات.',
   wtCancel: 'إلغاء',
   wtConfirm: 'تأكيد',
   wtDayNameArPlaceholder: 'اسم اليوم (عربي)',
@@ -1111,6 +1113,7 @@ const en: OnboardingStrings = {
   wtTitle: 'Choose your workout schedule',
   wtDescription: 'Pick a ready-made template, then tweak it however you like — add from the library or delete.',
   wtReplaceNotice: 'Your current workout schedule will be replaced. You can edit everything after choosing.',
+  wtBalanceFallback: 'Review your workout balance before saving these changes.',
   wtCancel: 'Cancel',
   wtConfirm: 'Confirm',
   wtDayNameArPlaceholder: 'Day name (Arabic)',

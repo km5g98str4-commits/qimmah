@@ -2,6 +2,7 @@ import { strict as assert } from 'node:assert'
 import { equipmentLabel } from '@/lib/exerciseLabels'
 import { muscleLabel } from '@/lib/muscles'
 import { V2_TAB_LABELS } from '@/design-system/v2/labels'
+import { profileChoiceStrings } from '@/i18n/dict/profileChoices'
 
 // ── Equipment labels follow language (display-layer, reused library dict) ──
 assert.equal(equipmentLabel('barbell', 'ar'), 'بار')
@@ -31,5 +32,15 @@ const arabic = /[؀-ۿ]/
 for (const [k, v] of Object.entries(V2_TAB_LABELS)) {
   assert.ok(!arabic.test(v.en), `EN tab "${k}" must not contain Arabic: "${v.en}"`)
 }
+
+// Advanced plan/profile editors use the same complete bilingual choice source.
+const englishChoices = profileChoiceStrings.en
+for (const [group, values] of Object.entries(englishChoices)) {
+  if (typeof values === 'function' || typeof values === 'string') continue
+  for (const [key, value] of Object.entries(values)) {
+    assert.ok(!arabic.test(value), `EN profile choice "${group}.${key}" must not contain Arabic: "${value}"`)
+  }
+}
+assert.ok(!arabic.test(englishChoices.generatedPlanReason('Full Body', 'Maintenance', 'Beginner', 3, false)))
 
 console.log('✅ polish-1 proof: equipment/muscle/tab labels follow language, no EN Arabic leak')
