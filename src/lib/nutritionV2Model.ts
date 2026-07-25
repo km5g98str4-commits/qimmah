@@ -280,8 +280,8 @@ export function buildNutritionV2Model(customization: Customization, lang: Lang):
     hero = {
       category: 'protein',
       priorityLabel: t('الأولوية · بروتين', 'Priority · protein'),
-      title: proTarget > 0 ? t(`بقي ${proRemaining}g بروتين`, `${proRemaining}g protein left`) : t('ركّز على البروتين', 'Focus on protein'),
-      subtitle: t('أضف وجبة عالية البروتين لتكمل هدفك.', 'Add a high-protein meal to hit your goal.'),
+      title: proTarget > 0 ? t(`باقي ${proRemaining}g بروتين`, `${proRemaining}g protein left`) : t('ركّز على البروتين', 'Focus on protein'),
+      subtitle: t('أضف وجبة عالية البروتين وتكمّل هدفك.', 'Add a high-protein meal to hit your goal.'),
       ctaLabel: t('أضف وجبة', 'Add a meal'),
     }
   } else if (goal === 'bulk') {
@@ -325,7 +325,7 @@ export function buildNutritionV2Model(customization: Customization, lang: Lang):
       id: 'protein',
       tone: 'protein',
       icon: 'Egg',
-      text: t(`بقي ${proRemaining}g بروتين لهدف اليوم`, `${proRemaining}g protein left for today’s goal`),
+      text: t(`باقي ${proRemaining}g بروتين لهدف اليوم`, `${proRemaining}g protein left for today’s goal`),
       actionLabel: t('أضف', 'Add'),
       action: 'add',
     })
@@ -338,7 +338,7 @@ export function buildNutritionV2Model(customization: Customization, lang: Lang):
       id: 'water',
       tone: 'water',
       icon: 'Droplets',
-      text: t(`اشرب ${glass}ml ماء لتكمل هدفك`, `Drink ${glass}ml water to hit your goal`),
+      text: t(`اشرب ${glass}ml ماء وتكمّل هدفك`, `Drink ${glass}ml water to hit your goal`),
       actionLabel: t('سجّل', 'Log'),
       action: glass === 500 ? 'water500' : 'water250',
     })
@@ -355,9 +355,9 @@ export function buildNutritionV2Model(customization: Customization, lang: Lang):
   }
 
   const suggestions: NutritionV2Model['suggestions'] = []
-  if (proStatus === 'low' || proStatus === 'onTrack') suggestions.push({ label: t('خيار عالي البروتين', 'High-protein option'), reason: t('لإكمال هدف البروتين', 'to hit your protein goal'), actionLabel: t('أضف', 'Add'), category: 'protein' })
+  if (proStatus === 'low' || proStatus === 'onTrack') suggestions.push({ label: t('خيار عالي البروتين', 'High-protein option'), reason: t('عشان تكمّل هدف البروتين', 'to hit your protein goal'), actionLabel: t('أضف', 'Add'), category: 'protein' })
   suggestions.push({ label: t('أكلات سعودية', 'Saudi foods'), reason: t('خيارات مألوفة', 'familiar options'), actionLabel: t('تصفّح', 'Browse'), category: 'saudi' })
-  if (anyLogged) suggestions.push({ label: t('الأكثر تسجيلًا', 'Recent foods'), reason: t('أضِف بسرعة', 'add quickly'), actionLabel: t('أضف', 'Add'), category: 'recent' })
+  if (anyLogged) suggestions.push({ label: t('الأكثر تسجيلًا', 'Recent foods'), reason: t('أضف بسرعة', 'add quickly'), actionLabel: t('أضف', 'Add'), category: 'recent' })
 
   return {
     goal,

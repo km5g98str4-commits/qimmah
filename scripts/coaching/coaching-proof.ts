@@ -43,14 +43,24 @@ console.log('\n① تغطية إرشاد الأداء — كل تمرين في �
 // ── ② content lint: banned slang/hype + exclamation ──
 console.log('\n② فحص المحتوى — لا عامية ولا مبالغة ولا علامات تعجّب')
 {
-  const bans = [/وش/, /الحين/, /تبي/, /كذا/, /احرق/, /مضمون/, /!/]
-  const strings: string[] = []
-  for (const id of cuedIds()) { const c = getCue(id); strings.push(...c.steps, ...c.mistakes, c.safety) }
-  for (const l of LESSONS) strings.push(l.titleAr, l.bodyAr, l.takeawayAr)
-  for (const r of REST_TIPS) strings.push(r.textAr)
+  // سجلّان بحسب دليل النبرة (docs/content/DIALECT-TONE-GUIDE.md):
+  // متن الدروس + إرشادات التمارين = فصحى مبسّطة (تُمنع العامية والمبالغة)،
+  // عناوين/خلاصات الدروس + نصائح الراحة = لهجة بيضاء (تُمنع المبالغة والتعجّب فقط).
+  const hypeBans = [/كذا/, /احرق/, /مضمون/, /!/]
+  const msaBans = [/وش/, /الحين/, /تبي/, ...hypeBans]
+  const msaStrings: string[] = []
+  for (const id of cuedIds()) { const c = getCue(id); msaStrings.push(...c.steps, ...c.mistakes, c.safety) }
+  for (const l of LESSONS) msaStrings.push(l.bodyAr)
+  const dialectStrings: string[] = []
+  for (const l of LESSONS) dialectStrings.push(l.titleAr, l.takeawayAr)
+  for (const r of REST_TIPS) dialectStrings.push(r.textAr)
+  const strings = [...msaStrings, ...dialectStrings]
   const hits: string[] = []
-  for (const s of strings) for (const b of bans) if (b.test(s)) hits.push(`${b}→${s.slice(0, 24)}`)
-  check(`لا كلمات محظورة عبر ${strings.length} نصًّا`, hits.length === 0, hits.slice(0, 4).join(' | '))
+  for (const s of msaStrings) for (const b of msaBans) if (b.test(s)) hits.push(`${b}→${s.slice(0, 24)}`)
+  check(`لا عامية/مبالغة في نصوص الفصحى عبر ${msaStrings.length} نصًّا`, hits.length === 0, hits.slice(0, 4).join(' | '))
+  const dHits: string[] = []
+  for (const s of dialectStrings) for (const b of hypeBans) if (b.test(s)) dHits.push(`${b}→${s.slice(0, 24)}`)
+  check(`لا مبالغة/تعجّب في نصوص اللهجة عبر ${dialectStrings.length} نصًّا`, dHits.length === 0, dHits.slice(0, 4).join(' | '))
   // no medical-claim / guarantee phrases (conservative)
   const claimBans = [/يشفي/, /علاج مضمون/, /نتيجة مضمونة/, /خسارة سريعة/]
   const claimHits = strings.filter((s) => claimBans.some((b) => b.test(s)))
