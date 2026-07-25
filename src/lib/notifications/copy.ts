@@ -1,4 +1,4 @@
-// نصوص الإشعارات — عربي فصيح مبسّط، فعل أمر أولًا، نبرة دافئة لا إلحاح (PDF §02).
+// نصوص الإشعارات — لهجة سعودية بيضاء (docs/content/DIALECT-TONE-GUIDE.md)، فعل أمر أولًا، نبرة ودّية لا إلحاح.
 // دالة خالصة لكل نوع: تُبنى وقت الجدولة من عنوان اليوم الحقيقي عند توفّره.
 
 import type { ReminderKind } from './types'
@@ -17,22 +17,22 @@ export function workoutDayCopy(dayTitle: string | null): NotificationCopy {
 
 export function restDayCopy(): NotificationCopy {
   return {
-    title: 'يوم راحة — اعتنِ بجسمك',
+    title: 'يوم راحة — خلّ جسمك يرتاح',
     body: 'مشي خفيف أو إطالة تكفي اليوم. الاستشفاء جزء من التقدّم.',
   }
 }
 
 export function waterCopy(): NotificationCopy {
   return {
-    title: 'اشرب كوب ماء الآن',
+    title: 'اشرب كوب ماء الحين',
     body: 'خطوة صغيرة تكمل هدفك اليومي.',
   }
 }
 
 export function weeklyBriefCopy(): NotificationCopy {
   return {
-    title: 'راجع ملخّص أسبوعك',
-    body: 'تقدّمك جاهز — أرقام صادقة بلا مبالغة.',
+    title: 'شوف ملخّص أسبوعك',
+    body: 'تقدّمك جاهز — أرقام صادقة بدون مبالغة.',
   }
 }
 
@@ -46,8 +46,8 @@ export function supplementsCopy(items: string[]): NotificationCopy {
 /** (P5) نهاية الراحة داخل الجلسة — النسخة الثنائية الفعلية في notificationCopy.ts. */
 export function restEndCopy(): NotificationCopy {
   return {
-    title: 'انتهت الراحة',
-    body: 'جاهز للمجموعة التالية؟ ارجع لتمرينك.',
+    title: 'خلصت الراحة',
+    body: 'جاهز للمجموعة الجاية؟ ارجع لتمرينك.',
   }
 }
 

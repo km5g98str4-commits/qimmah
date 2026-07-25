@@ -119,7 +119,7 @@ setLastUser(b)
 const latestOwnerRun = reconcileNotificationSchedule(b, false, 'en')
 await Promise.all([staleOwnerRun, latestOwnerRun])
 check('سباق تبديل المالك ينتهي بجدول واحد للمالك الأحدث', native.schedules.length === beforeRace + 1)
-check('الجدول النهائي يستخدم لغة المالك الأحدث', native.schedules.at(-1)?.some((item) => item.title === 'Review your weekly brief') === true)
+check('الجدول النهائي يستخدم لغة المالك الأحدث', native.schedules.at(-1)?.some((item) => item.title === 'Check your weekly recap') === true)
 await cancelAllNotifications()
 check('الإلغاء الصريح يمسح كل نطاقات قِمّة', native.cancels.at(-1)?.length === allNotificationIds().length)
 native.permission = 'denied'

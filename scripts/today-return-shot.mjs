@@ -45,7 +45,7 @@ await ctx.addInitScript(({ uid, session }) => {
 
 const page = await ctx.newPage()
 await page.goto(URL, { waitUntil: 'networkidle' })
-await page.getByText('سعيدون بعودتك').first().waitFor({ state: 'visible', timeout: 20000 })
+await page.getByText('حيّاك من جديد').first().waitFor({ state: 'visible', timeout: 20000 })
 // شاشة الإقلاع مؤقّتة (~2.15s) ثم تُزال؛ انتظر زوالها قبل اللقطة.
 await page.waitForTimeout(2700)
 await page.screenshot({ path: `${OUT}/20-return-after-break.png` })

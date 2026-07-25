@@ -189,7 +189,7 @@ console.log('\n⑦ إشعار نهاية الراحة: جدولة/إلغاء ع�
     setRestEndPortForTests(mockPort('granted'))
     const r1 = await scheduleRestEndNotification(endsAt, 'ar', now)
     check('بإذن ممنوح: تُجدول أحادية عند endsAt بالمعرّف 3600', r1 === 'scheduled' && calls.scheduled.length === 1 && calls.scheduled[0].id === REST_END_NOTIFICATION_ID && calls.scheduled[0].at.getTime() === endsAt)
-    check('نسخة عربية صادقة', calls.scheduled[0].title === 'انتهت الراحة' && calls.scheduled[0].body.length > 0)
+    check('نسخة عربية صادقة', calls.scheduled[0].title === 'خلصت الراحة' && calls.scheduled[0].body.length > 0)
     check('الاستبدال مدمج: أُلغي القديم قبل الجدولة', calls.cancelled.length === 1 && calls.cancelled[0] === REST_END_NOTIFICATION_ID)
 
     // «+وقت»: إعادة جدولة عند endsAt الجديد تستبدل ولا تراكم.

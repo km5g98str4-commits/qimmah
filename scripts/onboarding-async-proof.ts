@@ -32,7 +32,7 @@ function draft(over: Partial<OnboardingV2Draft> = {}): OnboardingV2Draft {
 
 console.log('\n① تحقّق الخطوات (رسالة خاصة بكل خطوة)')
 {
-  check('صياغة المكان تطابق النص العربي المعتمد', V2_ONBOARDING.ar.equipment.title === 'أين وكيف تتمرّن؟')
+  check('صياغة المكان تطابق النص العربي المعتمد', V2_ONBOARDING.ar.equipment.title === 'وين وكيف تتمرّن؟')
   // Step 0 — goal required.
   check('خطوة الهدف بلا هدف → «goal»', validateStep(0, { goal: null, days: 4, duration: 45, place: null, pref: null, healthDataConsent: false }) === 'goal')
   check('خطوة الهدف بلا موافقة صحية → محجوبة', validateStep(0, { goal: 'bulk', days: 4, duration: 45, place: null, pref: null, healthDataConsent: false }) === 'healthConsent')

@@ -15,17 +15,17 @@ export interface InsightsStrings {
 }
 
 const ar: InsightsStrings = {
-  pain: 'سجّلت ألمًا في «{exercise}». جرّب بديلًا أو خفّف الحمل.',
-  progress: 'أداؤك ثابت في «{exercise}». جرّب زيادة الوزن 2.5 كجم في التمرين القادم.',
-  hold: 'ثبّت الوزن في «{exercise}» حتى تكمل التكرارات المستهدفة.',
+  pain: 'سجّلت ألم في «{exercise}». جرّب بديل أو خفّف الحمل.',
+  progress: 'أداؤك ثابت في «{exercise}». جرّب تزيد الوزن 2.5 كجم في التمرين الجاي.',
+  hold: 'ثبّت الوزن في «{exercise}» لين تكمّل التكرارات المستهدفة.',
   undertrained: 'عضلة {muscle} ناقصة هذا الأسبوع.',
 }
 
 const en: InsightsStrings = {
-  pain: 'You logged pain on "{exercise}". Try an alternative or lighten the load.',
-  progress: 'Your performance is steady on "{exercise}". Try adding 2.5 kg next workout.',
-  hold: 'Hold the weight on "{exercise}" until you complete the target reps.',
-  undertrained: "{muscle} hasn't been trained this week.",
+  pain: 'You logged pain on "{exercise}". Try an alternative or go lighter.',
+  progress: 'You\'ve been steady on "{exercise}". Try adding 2.5 kg next workout.',
+  hold: 'Keep the weight on "{exercise}" where it is until you hit the target reps.',
+  undertrained: "{muscle} hasn't gotten much work this week.",
 }
 
 export const insightsStrings: Record<Lang, InsightsStrings> = { ar, en }

@@ -163,9 +163,9 @@ export function buildProgressV2Model(customization: Customization, lang: Lang): 
   const waistMissing = latestWaist === null
   const stale: StaleNudge = {
     show: waistStale || waistMissing,
-    text: waistMissing ? t('لا يوجد قياس خصر بعد', 'No waist measurement yet') : t('قياس الخصر قديم — يحتاج قياس جديد', 'Waist reading is old — needs a fresh one'),
+    text: waistMissing ? t('ما فيه قياس خصر لسا', 'No waist measurement yet') : t('قياس الخصر قديم — يحتاج قياس جديد', 'Waist reading is old — needs a fresh one'),
     detailText: waistMissing
-      ? t('سجّل قياس الخصر لقراءة أدق', 'Log a waist measurement for a sharper read')
+      ? t('سجّل قياس الخصر عشان تكون القراءة أدق', 'Log a waist measurement for a sharper read')
       : t(`آخر قياس للخصر قبل ${waistAge} ${ar ? 'أيام' : 'days'} — يحتاج قياس جديد`, `Last waist measurement ${waistAge} days ago — needs a fresh one`),
     actionLabel: t('قِس', 'Measure'),
     destination: 'progress',
@@ -218,10 +218,10 @@ export function buildProgressV2Model(customization: Customization, lang: Lang): 
   const strength: StrengthDetail = {
     improvedCount,
     headline: improvedCount > 0
-      ? t('يبدو أن قوّتك تتحسّن باطّراد', 'Your strength looks like it’s trending up')
+      ? t('شكله قوّتك تتحسّن بثبات', 'Your strength looks like it’s trending up')
       : ladders.length > 0
-        ? t('يبدو أن قوّتك ثابتة — واصل', 'Your strength looks steady — keep going')
-        : t('أكمل تمرينين لنقرأ تطوّر قوّتك', 'Complete two workouts to read your strength'),
+        ? t('شكله قوّتك ثابتة — واصل', 'Your strength looks steady — keep going')
+        : t('خلّص تمرينين ونقدر نقرأ تطوّر قوّتك', 'Complete two workouts to read your strength'),
     lifts: topLadders,
     hasData: ladders.length > 0,
   }
@@ -281,13 +281,13 @@ export function buildProgressV2Model(customization: Customization, lang: Lang): 
   } else if (strength.hasData) {
     summary.push({ key: 'strength', icon: 'Minus', text: t('القوة ثابتة', 'Strength steady'), value: '', tag: t('واصل', 'Keep on'), tone: 'neutral' })
   } else {
-    summary.push({ key: 'strength', icon: 'Dumbbell', text: t('أكمل تمرينين لقراءة القوة', 'Complete two workouts'), value: '', tag: t('لا بيانات', 'No data'), tone: 'needsData' })
+    summary.push({ key: 'strength', icon: 'Dumbbell', text: t('خلّص تمرينين لقراءة القوة', 'Complete two workouts'), value: '', tag: t('لا بيانات', 'No data'), tone: 'needsData' })
   }
   // Adherence
   if (adherencePct !== null) {
     summary.push({ key: 'adherence', icon: 'CalendarCheck', text: t('الالتزام', 'Consistency'), value: `${fmt(adherencePct)}%`, tag: adherencePct >= 70 ? t('جيد', 'Good') : t('واصل', 'Keep on'), tone: adherencePct >= 70 ? 'good' : 'neutral' })
   } else {
-    summary.push({ key: 'adherence', icon: 'CalendarCheck', text: t('لا تسجيل تمارين بعد', 'No workouts logged yet'), value: '', tag: t('ابدأ', 'Start'), tone: 'needsData' })
+    summary.push({ key: 'adherence', icon: 'CalendarCheck', text: t('ما فيه تمارين مسجّلة لسا', 'No workouts logged yet'), value: '', tag: t('ابدأ', 'Start'), tone: 'needsData' })
   }
 
   // ── Hedged headline ─────────────────────────────────────────────────────────
@@ -295,10 +295,10 @@ export function buildProgressV2Model(customization: Customization, lang: Lang): 
   const onTrack = weightOnTrack || improvedCount > 0 || adherentGood
   const hasAny = !!currentKg || finished.length > 0 || adherencePct !== null
   const headline = onTrack
-    ? t('يبدو أنك في المسار الصحيح', 'Looks like you’re on the right track')
+    ? t('شكلك ماشي على المسار الصحيح', 'Looks like you’re on the right track')
     : hasAny
-      ? t('يبدو أنك في بداية الطريق', 'Looks like you’re getting started')
-      : t('نحتاج بيانات أكثر لنقرأ تقدمك', 'We need more data to read your progress')
+      ? t('شكلك في بداية الطريق', 'Looks like you’re getting started')
+      : t('نحتاج بيانات أكثر عشان نقرأ تقدّمك', 'We need more data to read your progress')
 
   const weightDetail: WeightDetail = {
     currentKg: currentKg ? round1(currentKg) : null,
@@ -322,7 +322,7 @@ export function buildProgressV2Model(customization: Customization, lang: Lang): 
     momentum,
     weight: weightDetail,
     strength,
-    disclaimer: t('قراءة تقديرية — تصبح أدق كلما سجّلت أكثر.', 'An estimated read — sharper the more you log.'),
+    disclaimer: t('قراءة تقريبية — تصير أدق كل ما سجّلت أكثر.', 'An estimated read — sharper the more you log.'),
   }
 }
 

@@ -10,8 +10,9 @@
 //     rewording it would change the onboarding screen now.
 // Importing this module renders nothing; changing it changes nothing today.
 //
-// Arabic tone (v2.1): warm Modern Standard Arabic — confident and motivating,
-// not heavy slang, not cold/clinical. See docs/design/DESIGN-DECISIONS.md.
+// Arabic tone (dialect wave, supersedes the old "warm MSA" baseline): casual
+// white Saudi/Gulf dialect — friendly, clear, respectful, no hype, no heavy
+// slang. Canonical guide: docs/content/DIALECT-TONE-GUIDE.md.
 
 /**
  * Final v2.1 bottom-tab labels — the central tab dictionary (enforced by the
@@ -41,9 +42,9 @@ export interface V2GoalModelEntry {
 
 /** Final v2.1 goal model — تنشيف / محافظة / تضخيم. */
 export const V2_GOAL_MODEL: readonly V2GoalModelEntry[] = [
-  { value: 'cut', label: 'تنشيف', description: 'خفض الدهون مع الحفاظ على العضلات' },
-  { value: 'maintain', label: 'محافظة', description: 'تثبيت الوزن وتحسين الشكل والأداء' },
-  { value: 'bulk', label: 'تضخيم', description: 'زيادة الكتلة العضلية بشكل محسوب' },
+  { value: 'cut', label: 'تنشيف', description: 'تنزّل الدهون وتحافظ على عضلك' },
+  { value: 'maintain', label: 'محافظة', description: 'تثبّت وزنك وتحسّن شكلك وأداءك' },
+  { value: 'bulk', label: 'تضخيم', description: 'تبني عضل بزيادة محسوبة' },
 ] as const
 
 export interface V2WelcomeCopy {
@@ -89,24 +90,24 @@ export const V2_ONBOARDING: Record<'ar' | 'en', V2OnboardingCopy> = {
     back: 'رجوع',
     next: 'التالي',
     stepOf: (n) => `الخطوة ${['١', '٢', '٣'][n - 1] ?? n} من ٣`,
-    goal: { title: 'ما هدفك الآن؟', note: 'يمكنك تغييره في أي وقت.' },
+    goal: { title: 'وش هدفك الحين؟', note: 'تقدر تغيّره في أي وقت.' },
     training: {
-      title: 'نُعد جدولك',
-      subtitle: 'أسئلة قصيرة لنقترح خطة تناسب وقتك وهدفك.',
+      title: 'نجهّز جدولك',
+      subtitle: 'أسئلة قصيرة عشان نقترح خطة تناسب وقتك وهدفك.',
       daysQ: 'كم يوم تتمرن بالأسبوع؟',
-      durationQ: 'مدة التمرين المناسبة لك؟',
+      durationQ: 'وش مدة التمرين اللي تناسبك؟',
       daysUnit: 'أيام',
       summaryTitle: 'خطتك تتكوّن',
       perSession: 'للجلسة',
       suitsGoal: 'تناسب هدف',
     },
     equipment: {
-      title: 'أين وكيف تتمرّن؟',
-      subtitle: 'نختار التمارين المناسبة للمعدات المتاحة لك.',
+      title: 'وين وكيف تتمرّن؟',
+      subtitle: 'نختار التمارين المناسبة للمعدات اللي عندك.',
       placeQ: 'مكان التمرين',
-      prefQ: 'ماذا تفضّل؟',
+      prefQ: 'وش تفضّل؟',
       injuryQ: 'عندك إصابة أو تمرين ممنوع؟',
-      injuryNote: 'نستبعد الحركات غير المناسبة تلقائيًا.',
+      injuryNote: 'نستبعد الحركات اللي ما تناسبك تلقائيًا.',
       cta: 'اعتمد خطتي',
     },
     places: [
@@ -132,21 +133,21 @@ export const V2_ONBOARDING: Record<'ar' | 'en', V2OnboardingCopy> = {
       title: 'خطتك جاهزة',
       subtitle: 'بنيناها على هدفك ووقتك ومعداتك.',
       enter: 'الدخول للوحة',
-      previewNote: 'تُبنى خطتك وتُحفظ على هذا الجهاز. المزامنة السحابية تحتاج تسجيل الدخول.',
+      previewNote: 'خطتك تنبنى وتنحفظ على هذا الجهاز. المزامنة السحابية تحتاج تسجيل الدخول.',
     },
     building: {
-      title: 'يتم إعداد خطتك',
+      title: 'نجهّز خطتك',
       subtitle: 'نرتّب أيامك وتمارينك…',
     },
     error: {
-      title: 'تعذّر إعداد الخطة',
-      message: 'واجهنا مشكلة أثناء تجهيز خطتك. تأكّد من اتصالك ثم حاول مرة أخرى.',
-      retry: 'أعد المحاولة',
+      title: 'ما قدرنا نجهّز الخطة',
+      message: 'صارت مشكلة ونحن نجهّز خطتك. تأكّد من اتصالك وجرّب مرة ثانية.',
+      retry: 'جرّب مرة ثانية',
     },
     validation: {
-      goal: 'اختر هدفك أولًا للمتابعة.',
-      training: 'اختر عدد الأيام ومدة التمرين للمتابعة.',
-      equipment: 'اختر مكان التمرين وما تفضّله للمتابعة.',
+      goal: 'اختر هدفك أول عشان تكمّل.',
+      training: 'اختر عدد الأيام ومدة التمرين عشان تكمّل.',
+      equipment: 'اختر مكان التمرين ووش تفضّل عشان تكمّل.',
     },
     legends: {
       goal: 'اختيار الهدف',
@@ -237,7 +238,7 @@ export const V2_WELCOME: Record<'ar' | 'en', V2WelcomeCopy> = {
     headline: ['درّب بوضوح.', 'تقدّم بثقة.'],
     support: 'تمرينك وتغذيتك وتقدمك في مكان واحد — بالعربية، وبخطوات واضحة.',
     primary: 'ابدأ الآن',
-    secondary: 'لديك حساب؟ تسجيل الدخول',
+    secondary: 'عندك حساب؟ تسجيل الدخول',
     trust: 'بلا إعلانات، وبلا مبالغات.',
   },
   en: {
