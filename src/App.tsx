@@ -50,11 +50,17 @@ import { currentUserId, hydrateOnboardingFromProfile } from '@/lib/onboardingSyn
 import { useLanguage } from '@/i18n'
 import { type AppRoute, MAIN_TABS, isUnknownRouteHash, routeFromHash, setHashRoute } from '@/lib/appRoutes'
 import { SuccessToast } from '@/components/SuccessToast'
-import { AchievementToaster } from '@/features/achievements/AchievementToaster'
 import { BUILD_LABEL } from '@/lib/buildInfo'
 import { track } from '@/lib/analytics'
 import { useCustomization } from '@/lib/customizationContext'
 import { V2_QUICK_LOG } from '@/design-system/v2/labels'
+
+// Achievement evaluation reads workout + nutrition stores. It is only rendered
+// inside authenticated main tabs, so loading it in the public/account shell would
+// pull the full food catalogue into the first bundle for no user-visible benefit.
+const AchievementToaster = lazy(() =>
+  import('@/features/achievements/AchievementToaster').then((m) => ({ default: m.AchievementToaster })),
+)
 
 /**
  * حراسة المسار: التبويبات الرئيسية لا تُفتح أبدًا قبل إكمال إعداد حقيقي **لهذا الحساب**
@@ -471,7 +477,9 @@ export default function App() {
         {showSuccess && <SuccessToast onClose={dismissSuccess} />}
 
         {/* احتفالات الأوسمة والأرقام القياسية — فوق كل الشاشات الرئيسية */}
-        <AchievementToaster />
+        <Suspense fallback={null}>
+          <AchievementToaster />
+        </Suspense>
       </>
     )
   }

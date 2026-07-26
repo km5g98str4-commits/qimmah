@@ -67,14 +67,39 @@ export default defineConfig(() => {
       sourcemap: false,
       rollupOptions: {
         output: {
+          // Keep an application's dependency from being pulled into a manual chunk
+          // merely because one selected module imports it. This preserves route-level
+          // lazy boundaries (especially the nutrition catalogue below).
+          onlyExplicitManualChunks: true,
           // فصل مكتبات الطرف الثالث عن كود التطبيق لتحسين التخزين المؤقت وتقليل حزمة الدخول.
           // zxing (الباركود) و react-body-highlighter (خريطة العضلات) ثقيلتان وتُطلبان في
           // أسطح محدّدة — نفصلهما ليُخزَّنا مستقلّين ويخرجا من حِزم الشاشات.
-          manualChunks: {
-            'vendor-react': ['react', 'react-dom'],
-            'vendor-icons': ['lucide-react'],
-            'vendor-zxing': ['@zxing/browser', '@zxing/library'],
-            'vendor-charts': ['react-body-highlighter'],
+          manualChunks(id) {
+            if (id.includes('/node_modules/lucide-react/')) return 'vendor-icons'
+            if (
+              id.includes('/node_modules/react/') ||
+              id.includes('/node_modules/react-dom/') ||
+              id.includes('/node_modules/scheduler/')
+            ) {
+              return 'vendor-react'
+            }
+            if (id.includes('/node_modules/@zxing/')) return 'vendor-zxing'
+            if (id.includes('/node_modules/react-body-highlighter/')) return 'vendor-charts'
+
+            // The nutrition ledger is shared by Today, Nutrition, portability and sync.
+            // Without an explicit feature boundary Rollup promotes its full GCC food
+            // catalogue into the entry chunk. None of it is required to render the
+            // account/start shell, so keep it behind the screens that consume it.
+            if (
+              id.includes('/src/lib/nutritionHistory.ts') ||
+              id.includes('/src/lib/nutritionV2Model.ts') ||
+              id.includes('/src/data/foodItems.ts') ||
+              id.includes('/src/data/saudiFoods.ts') ||
+              id.includes('/src/data/gccStaples.ts') ||
+              id.includes('/src/data/foodR2')
+            ) {
+              return 'feature-nutrition-catalog'
+            }
           },
         },
       },

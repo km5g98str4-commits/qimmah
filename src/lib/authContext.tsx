@@ -11,7 +11,6 @@ import { getLanguage } from './appPreferences'
 import { wipeUserData, setLastUser } from './accountScope'
 import { miscStrings } from '@/i18n/dict/misc'
 import { parseRecoveryParams, implicitTokens } from './recoveryState'
-import { fullSync, startSyncLifecycle } from './syncService'
 import { isSyncEnabled, setSyncRuntime } from './syncQueue'
 
 export interface AuthResult {
@@ -216,8 +215,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSyncRuntime(userId, recoveryActive)
     if (!isSyncEnabled() || !userId || recoveryActive || loading) return
     // Login/session restoration hydrates once; lifecycle covers connectivity and foreground retries.
-    void fullSync()
-    return startSyncLifecycle()
+    // Keep the full sync graph out of the boot bundle: it includes every synced store
+    // (nutrition and exercise catalogues included) and is only needed when sync is enabled.
+    let active = true
+    let stopLifecycle: (() => void) | undefined
+    void import('./syncService').then(({ fullSync, startSyncLifecycle }) => {
+      if (!active) return
+      void fullSync()
+      stopLifecycle = startSyncLifecycle()
+    })
+    return () => {
+      active = false
+      stopLifecycle?.()
+    }
   }, [user?.id, recoveryActive, loading])
 
   const value = useMemo<AuthContextValue>(

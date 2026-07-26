@@ -19,7 +19,6 @@ import { getSupabase } from './supabaseClient'
 import { markAccountOnboarded } from './onboarding'
 import { enqueueOnboardingProfileUpsert } from './onboardingProfile'
 import { syncAllowedFor } from './syncQueue'
-import { flushSyncQueue } from './syncService'
 import type { OnboardingProfile } from '@/types/onboarding'
 
 /** الشكل القديم المختزل — يبقى مقروءًا للتوافق (صفوف كتبتها إصدارات سابقة). */
@@ -82,6 +81,7 @@ export async function persistOnboardingToProfile(userId: string, op: OnboardingP
     // الكاتب القانوني الوحيد — الطابور يدمج (استبدال بنفس المفتاح) وflush يرفع.
     enqueueOnboardingProfileUpsert(stamped)
     try {
+      const { flushSyncQueue } = await import('./syncService')
       await flushSyncQueue()
     } catch {
       /* الطابور دائم — سيُرفع مع أول مشغّل لاحق */

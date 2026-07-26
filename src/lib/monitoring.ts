@@ -114,7 +114,14 @@ export function initMonitoring(options: MonitoringInitOptions = {}): Promise<boo
   if (!dsn) return Promise.resolve(false)
   if (initialization) return initialization
 
-  const loadSdk = options.loadSdk ?? (() => import('@sentry/react') as Promise<unknown> as Promise<MonitoringSdk>)
+  const loadSdk =
+    options.loadSdk ??
+    (() =>
+      import('@sentry/react').then(({ init, captureException, setUser }) => ({
+        init,
+        captureException,
+        setUser,
+      })) as Promise<MonitoringSdk>)
   initialization = loadSdk()
     .then(async (loadedSdk) => {
       loadedSdk.init({

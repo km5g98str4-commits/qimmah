@@ -1,7 +1,7 @@
 {
   "ok": true,
-  "startedAt": "2026-07-26T01:48:10.020Z",
-  "totalMs": 182200,
+  "startedAt": "2026-07-26T02:26:33.245Z",
+  "totalMs": 182719,
   "totalHuman": "3.0د",
   "mode": "full",
   "counts": {
@@ -14,15 +14,15 @@
       "group": "أساس",
       "name": "typecheck",
       "status": "pass",
-      "ms": 5851,
+      "ms": 5839,
       "exitCode": 0,
-      "human": "5.9ث"
+      "human": "5.8ث"
     },
     {
       "group": "أساس",
       "name": "lint",
       "status": "pass",
-      "ms": 4099,
+      "ms": 4136,
       "exitCode": 0,
       "human": "4.1ث"
     },
@@ -30,31 +30,31 @@
       "group": "أساس",
       "name": "build",
       "status": "pass",
-      "ms": 10729,
+      "ms": 10156,
       "exitCode": 0,
-      "human": "10.7ث"
+      "human": "10.2ث"
     },
     {
       "group": "إثباتات",
       "name": "test:gate (كل سكربتات الإثبات)",
       "status": "pass",
-      "ms": 15973,
+      "ms": 16660,
       "exitCode": 0,
-      "human": "16.0ث"
+      "human": "16.7ث"
     },
     {
       "group": "متصفّح حيّ",
       "name": "e2e: onboarding",
       "status": "pass",
-      "ms": 3922,
+      "ms": 4450,
       "exitCode": 0,
-      "human": "3.9ث"
+      "human": "4.5ث"
     },
     {
       "group": "متصفّح حيّ",
       "name": "e2e: journey",
       "status": "pass",
-      "ms": 133431,
+      "ms": 133286,
       "exitCode": 0,
       "human": "2.2د"
     },
@@ -62,7 +62,7 @@
       "group": "متصفّح حيّ",
       "name": "e2e: settings-security",
       "status": "pass",
-      "ms": 8190,
+      "ms": 8189,
       "exitCode": 0,
       "human": "8.2ث"
     }
