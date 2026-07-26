@@ -22,6 +22,8 @@ export class SoftRaster {
   private depth = new Float32Array(0)
   /** معرّف العضلة لكل بكسل (-1 = لا عضلة) — للالتقاط الدقيق. */
   private mid = new Int8Array(0)
+  /** سعة المخازن بالبكسل — تنمو ولا تتقلّص، فلا يُعاد التخصيص عند تبديل الدقّة. */
+  private capacity = 0
   private img: ImageData | null = null
   /** أصغر مستطيل يحوي ما رُسم — يقصر تنعيم الحواف على منطقة الجسم فقط. */
   bbMinX = 0
@@ -29,22 +31,31 @@ export class SoftRaster {
   bbMaxX = 0
   bbMaxY = 0
 
-  /** يضبط أبعاد المخزن (يُعيد التخصيص عند التغيّر فقط). */
+  /**
+   * يضبط أبعاد المخزن. السعة تنمو ولا تتقلّص: التبديل بين دقّة السحب ودقّة
+   * الاستقرار يحدث عشرات المرّات في الجلسة، وإعادة تخصيص ميغابايتات في كل مرّة
+   * تُنتج ضغط جامع قمامة محسوسًا — فنُبقي أكبر مخزن مطلوب ونعيد استخدامه.
+   */
   resize(w: number, h: number): void {
     if (w === this.width && h === this.height) return
     this.width = w
     this.height = h
     const n = w * h
-    this.data = new Uint8ClampedArray(n * 4)
-    this.depth = new Float32Array(n)
-    this.mid = new Int8Array(n)
+    if (n > this.capacity) {
+      this.capacity = n
+      this.data = new Uint8ClampedArray(n * 4)
+      this.depth = new Float32Array(n)
+      this.mid = new Int8Array(n)
+    }
     this.img = null
   }
 
   clear(): void {
-    this.data.fill(0)
-    this.depth.fill(FAR)
-    this.mid.fill(-1)
+    // نمسح المنطقة المستخدمة فقط — لا كامل السعة.
+    const n = this.width * this.height
+    this.data.fill(0, 0, n * 4)
+    this.depth.fill(FAR, 0, n)
+    this.mid.fill(-1, 0, n)
     this.bbMinX = this.width
     this.bbMinY = this.height
     this.bbMaxX = 0
@@ -223,7 +234,8 @@ export class SoftRaster {
     if (!this.img || this.img.width !== this.width || this.img.height !== this.height) {
       this.img = new ImageData(this.width, this.height)
     }
-    this.img.data.set(this.data)
+    // المخزن قد يكون أكبر من الإطار الحالي (سعة محفوظة) — ننسخ الجزء المستخدم فقط.
+    this.img.data.set(this.data.subarray(0, this.width * this.height * 4))
     ctx.putImageData(this.img, 0, 0)
   }
 

@@ -140,6 +140,18 @@ export interface BodyMesh {
   bounds: { minY: number; maxY: number; maxR: number }
 }
 
+/**
+ * فهارس العضلات تُخزَّن في `Int8Array` (مدى −128..127) وتُكتب في مخزن الالتقاط،
+ * و−1 محجوزة لـ«لا عضلة». اليوم عددها ١٩ فالهامش واسع، لكن إضافة عضلات مستقبلًا
+ * حتى تجاوز ١٢٧ ستلتفّ بصمت إلى فهارس سالبة فتُلتقط العضلة الخطأ — نحرس الحدّ هنا
+ * بدل أن ينكشف الخطأ كعطل بصري غامض.
+ */
+if (ALL_MUSCLE_IDS.length > 127) {
+  throw new Error(
+    `body3d: عدد العضلات ${ALL_MUSCLE_IDS.length} يتجاوز سعة Int8Array؛ حوّل vertMuscle/quadMuscle ومخزن mid إلى Int16Array.`,
+  )
+}
+
 const MUSCLE_INDEX: Record<string, number> = Object.fromEntries(
   ALL_MUSCLE_IDS.map((id, i) => [id, i]),
 )
