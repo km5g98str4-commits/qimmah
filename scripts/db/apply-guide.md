@@ -46,8 +46,19 @@ Paste and run each file **in filename order**:
 5. `20260713120005_rls_enable_and_policies.sql`
 6. `20260713120006_new_user_profile_trigger.sql`
 7. `20260713120007_delete_own_account.sql`
+8. `20260726120001_p14_coverage_tables.sql`
+9. `20260726120002_p14_lww_updated_at.sql`
+10. `20260726120003_p14_rls_policies.sql`
+11. `20260726120004_p14_measurement_logs_tombstone.sql`
+12. `20260726120005_p14_schema_guard.sql`
 
-Re-running any file is safe.
+Re-running any file is safe — **and order matters on a re-run**: file 12 is the
+convergence step that resolves the one collision a full re-run can create (file 4
+re-adds the plain `set_updated_at` trigger to `measurement_logs`; file 12 removes
+it again in favour of the LWW one). It also refuses to finish if any sync table is
+missing RLS, a policy, a timestamp or its cascade FK — a failed guard means the
+migration transaction aborts, which is the point: a half-secured schema must never
+report as applied. Background: `docs/data/SUPABASE-P14-SCHEMA.md`.
 
 ---
 
@@ -79,12 +90,32 @@ It asserts, for **every** user table:
 - cross-user INSERT (`user_id` = other) is rejected by `WITH CHECK`
 - anon SELECT returns 0 rows, anon INSERT is rejected
 
+plus, on the four tombstone tables: a wiped tombstone upsert is accepted, the
+client's `deleted_at`/`updated_at` survive the trigger (the LWW evidence stays
+intact), a tombstone that still carries a payload is **rejected**, and a newer
+edit revives the row;
+
 then calls `delete_own_account()` and asserts every table is wiped for that user
 (service key) **or** that the deleted user can no longer authenticate (cascade
 guaranteed by the FKs). Both test users are removed at the end — no residue.
 
 Exit code `0` = all green; `1` = a check failed (printed in the FAILURES list);
 `2` = missing env / precondition.
+
+---
+
+### Offline pre-check (no project needed)
+
+```bash
+npm run test:db-schema
+```
+
+Reads the client's `SyncTable` union and the migration folder and proves they
+agree: column/key contract, RLS with four owner-only policies, **two-account
+isolation executed against the policy predicates parsed out of the migrations**,
+tombstone columns, re-runnability, and non-destructiveness. It runs inside
+`npm run test:gate`. It cannot replace `db:verify` — it does not prove Postgres
+accepts the SQL — but it catches every client↔DB drift before a project is touched.
 
 ---
 
@@ -99,9 +130,10 @@ where relnamespace = 'public'::regnamespace
   and relname in (
     'profiles','workout_sessions','exercise_history','measurement_logs','daily_logs',
     'nutrition_logs','water_logs','supplement_logs','medication_logs','step_logs',
-    'achievements','custom_plans','todos'
+    'achievements','custom_plans','todos',
+    'nutrition_ledger','recovery_logs','workout_schedule','plan_templates'
   )
-order by relname;   -- expect relrowsecurity = true for all 13
+order by relname;   -- expect relrowsecurity = true for all 17
 
 -- Exactly four policies per table, all owner-scoped:
 select tablename, policyname, cmd, qual, with_check

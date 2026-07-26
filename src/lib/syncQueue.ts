@@ -37,7 +37,12 @@ export type SyncTable =
   | 'workout_schedule'
   | 'plan_templates'
 
-const SYNC_TABLES: ReadonlySet<string> = new Set<SyncTable>([
+/**
+ * كل جدول يجوز للعميل الدفع إليه. مُصدَّر ليقارنه برهان المخطط
+ * (`npm run test:db-schema`) بجداول supabase/migrations — أي انحراف بين العميل
+ * وقاعدة البيانات يُسقط البوابة قبل أن يصل جهازًا.
+ */
+export const SYNC_TABLES: ReadonlySet<string> = new Set<SyncTable>([
   'profiles',
   'workout_sessions',
   'exercise_history',
