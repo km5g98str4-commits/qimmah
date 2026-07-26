@@ -6,12 +6,25 @@
 /** محرّك المسح الذي نفّذ المحاولة — للمقارنة الصادقة ويب/أصلي في دليل اختبار الجهاز. */
 export type ScanEngineId = 'zxing-web' | 'native-avfoundation'
 
-export type ScanOutcome = 'running' | 'detected' | 'cancelled' | 'error'
+/** المسار المختصر — 'native' للمسار الأصلي، 'web' لاحتياط zxing (تقرير الجهاز). */
+export type ScanPath = 'native' | 'web'
+
+/**
+ * نتيجة المحاولة. P14: أُضيفت 'permission-denied' و'no-camera' — قبلها كان رفض
+ * الصلاحية يُسجَّل 'error' فيتعذّر تمييزه عن عطل حقيقي في تقرير الجهاز.
+ */
+export type ScanOutcome = 'running' | 'detected' | 'cancelled' | 'permission-denied' | 'no-camera' | 'error'
+
+export function scanPathOf(engine: ScanEngineId): ScanPath {
+  return engine === 'native-avfoundation' ? 'native' : 'web'
+}
 
 /** سجل محاولة واحدة — كل الحقول بيانات وصفية أولية (لا بكسلات، لا قيمة الباركود نفسها). */
 export interface ScanAttemptRecord {
   id: number
   engine: ScanEngineId
+  /** المسار المشتق من المحرّك — 'native' | 'web'. */
+  path: ScanPath
   /** ISO — وقت بدء المحاولة. */
   startedAt: string
   /** null أثناء التشغيل. */
@@ -24,8 +37,10 @@ export interface ScanAttemptRecord {
   framesAnalyzed: number
   /** معدل محاولات الفك بالثانية — يُحسب عند نهاية المحاولة. */
   decodeLoopFps: number | null
-  /** صيغة الباركود الملتقطة (ean_13...) — الصيغة فقط، لا القيمة. */
+  /** صيغة الباركود الملتقطة (ean_13...) — الصيغة فقط، لا القيمة. المرادف: symbology. */
   formatHit: string | null
+  /** هل استُخدم الفلاش في هذه المحاولة؟ (بيان وصفي — يفسّر الفشل في الإضاءة الضعيفة). */
+  torch: boolean
   outcome: ScanOutcome
   /** ملاحظات وصفية قصيرة: قيود متقدمة مطبَّقة (focus:continuous، zoom:1.5)، أخطاء فك... */
   notes: string[]
@@ -37,6 +52,8 @@ export interface ScanAttemptHandle {
   recordRoi(widthFraction: number, heightFraction: number): void
   /** تُستدعى مرة لكل تكرار في حلقة الفك — أساس حساب FPS. */
   recordFrame(): void
+  /** يسجّل أن الفلاش شُغّل (لا يُلغى بالإطفاء — «استُخدم» حقيقة عن المحاولة). */
+  recordTorch(on: boolean): void
   note(text: string): void
   end(outcome: Exclude<ScanOutcome, 'running'>, formatHit?: string | null): ScanAttemptRecord
 }
@@ -55,6 +72,7 @@ export function beginScanAttempt(engine: ScanEngineId): ScanAttemptHandle {
   const record: ScanAttemptRecord = {
     id: nextId++,
     engine,
+    path: scanPathOf(engine),
     startedAt: new Date().toISOString(),
     durationMs: null,
     resolution: null,
@@ -62,6 +80,7 @@ export function beginScanAttempt(engine: ScanEngineId): ScanAttemptHandle {
     framesAnalyzed: 0,
     decodeLoopFps: null,
     formatHit: null,
+    torch: false,
     outcome: 'running',
     notes: [],
   }
@@ -80,6 +99,9 @@ export function beginScanAttempt(engine: ScanEngineId): ScanAttemptHandle {
     },
     recordFrame() {
       record.framesAnalyzed += 1
+    },
+    recordTorch(on) {
+      if (on) record.torch = true
     },
     note(text) {
       // نصوص قصيرة وصفية فقط — قصّ دفاعي حتى لا يتسرّب محتوى كبير إلى السجل.
@@ -118,7 +140,7 @@ export function scanDiagnosticsSummary(): string {
       const roi = a.roi ? `${Math.round(a.roi.widthFraction * 100)}%x${Math.round(a.roi.heightFraction * 100)}%` : 'full'
       const fps = a.decodeLoopFps ?? '—'
       const dur = a.durationMs ?? '…'
-      return `#${a.id} ${a.engine} ${a.outcome} dur=${dur}ms res=${res} roi=${roi} frames=${a.framesAnalyzed} fps=${fps} format=${a.formatHit ?? '—'}${a.notes.length ? ' | ' + a.notes.join('; ') : ''}`
+      return `#${a.id} ${a.path}(${a.engine}) ${a.outcome} dur=${dur}ms res=${res} roi=${roi} frames=${a.framesAnalyzed} fps=${fps} symbology=${a.formatHit ?? '—'} torch=${a.torch ? 'on' : 'off'}${a.notes.length ? ' | ' + a.notes.join('; ') : ''}`
     })
     .join('\n')
 }

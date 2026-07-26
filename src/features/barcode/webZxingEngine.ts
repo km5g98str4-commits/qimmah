@@ -119,7 +119,10 @@ export function startWebZxingScan(video: HTMLVideoElement, callbacks: WebScanCal
     track = null
   }
 
-  const finish = (outcome: 'detected' | 'cancelled' | 'error', format?: string | null) => {
+  const finish = (
+    outcome: 'detected' | 'cancelled' | 'permission-denied' | 'no-camera' | 'error',
+    format?: string | null,
+  ) => {
     if (stopped) return
     stopped = true
     diag.end(outcome, format ?? null)
@@ -233,7 +236,10 @@ export function startWebZxingScan(video: HTMLVideoElement, callbacks: WebScanCal
     } catch (err) {
       if (stopped) return
       diag.note(errName(err))
-      finish('error')
+      // P14: تُسجَّل الحالة الدقيقة في التشخيص — رفض الصلاحية/غياب الكاميرا لم يبقَ
+      // مخبوءًا تحت 'error' فيتعذّر تمييزه عن عطل حقيقي في تقرير الجهاز.
+      const failure = classifyCameraError(err)
+      finish(failure === 'start-failed' ? 'error' : failure)
       callbacks.onError(err)
     }
   }
@@ -249,6 +255,7 @@ export function startWebZxingScan(video: HTMLVideoElement, callbacks: WebScanCal
       try {
         const constraint: ExtendedConstraintSet = { torch: on }
         await track.applyConstraints({ advanced: [constraint as MediaTrackConstraintSet] })
+        diag.recordTorch(on)
         return true
       } catch {
         return false

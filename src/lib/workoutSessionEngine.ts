@@ -28,13 +28,24 @@ import { buildV2WorkoutSession } from '@/lib/workoutV2Persist'
 import type { WorkoutV2Model } from '@/lib/workoutV2Model'
 import type { SessionPR } from '@/lib/finishWorkout'
 
+import {
+  cancelRestEndNotification,
+  reconcileRestEndOnColdStart,
+  type RestEndColdStartResult,
+} from '@/lib/notifications/restEnd'
+
 export type { SessionStatus } from '@/lib/workoutSessions'
 // إعادة تصدير واجهة إشعار نهاية الراحة — سطح استيراد واحد لـCodex.
 export {
   REST_END_NOTIFICATION_ID,
   cancelRestEndNotification,
   scheduleRestEndNotification,
+  reconcileRestEndOnColdStart,
+  pendingRestEnd,
+  restEndPendingKey,
   type RestEndScheduleResult,
+  type RestEndColdStartResult,
+  type RestEndColdStartAction,
 } from '@/lib/notifications/restEnd'
 
 // ── حالة الجلسة ───────────────────────────────────────────────────────────────
@@ -204,4 +215,273 @@ export function buildFinishCelebration(args: {
 }): FinishCelebration {
   const nextExerciseId = args.model && args.currentSlotId ? nextExerciseAfter(args.model, args.currentSlotId) : null
   return { nextExerciseId, sessionStats: buildSessionStats(args.session), prs: args.prs }
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// مصالحة الإقلاع البارد للجلسة النشطة (P14) — طبقة بيانات، لا واجهة.
+//
+// المشكلة الحقيقية التي وجدها تدقيق P14: منطق الاستعادة كله يعيش داخل
+// `src/views/WorkoutV2.tsx` (محرَّم عليّ)، وهو:
+//   ① لا يصنّف الجلسة المهجورة إطلاقًا (classifyRestoredSession غير مستدعاة في
+//      أي مكان في المستودع) — فجلسة عمرها ٣ أيام تُستأنف كأنها «جارية».
+//   ② لا يلغي إشعار نهاية الراحة عند تجاهل الجلسة — فيبقى إشعار يتيم يرنّ.
+//   ③ يخلط «JSON تالف» بـ«الخطة تغيّرت» في مسار حذف صامت واحد، فتُفقد المجموعات
+//      المنفَّذة بلا أي تحذير.
+// هذه الوحدة تغلّف القرار كاملًا فلا يبقى لـCodex إلا نداء واحد. العقد الحرفي
+// للربط في docs/audit/P13-CODEX-HANDOFF.md §P14.
+// ═════════════════════════════════════════════════════════════════════════════
+
+/** مفتاح الجلسة النشطة v2 — نفس المفتاح الذي تستخدمه WorkoutV2 حرفيًا. */
+export const ACTIVE_WORKOUT_KEY_BASE = 'qimmah:active-workout:v2'
+
+export function activeWorkoutKey(ownerId: string | null | undefined): string {
+  return `${ACTIVE_WORKOUT_KEY_BASE}:${ownerId ?? 'guest'}`
+}
+
+/** صفّ مجموعة كما يُخزّنه v2. */
+export interface PersistedSetRow {
+  weight: number
+  reps: number
+  done: boolean
+}
+
+/** لقطة الراحة المخزّنة — طابعان زمنيان (مقاومة لتجميد الخلفية وقتل التطبيق). */
+export interface PersistedRest {
+  endsAt: number
+  durationSec: number
+}
+
+/** الشكل المخزّن للجلسة النشطة v2 (الحقول التي تلمسها هذه الطبقة). */
+export interface PersistedActiveWorkout {
+  exIndex: number
+  setIndex: number
+  startedAt: number
+  rows: Record<string, PersistedSetRow[]>
+  rest?: PersistedRest | null
+  subs?: Record<string, string>
+}
+
+/**
+ * هل القيمة جلسة نشطة صالحة **لهذه الخطة**؟ نسخة طبقة-بيانات من `isUsableSession`
+ * في WorkoutV2 (تُمرَّر معرّفات فتحات الخطة فقط، فلا اعتماد على الواجهة).
+ * localStorage يُعامل كمدخل معادٍ.
+ */
+export function isUsableActiveWorkout(
+  value: unknown,
+  exerciseIds: readonly string[],
+): value is PersistedActiveWorkout {
+  if (!value || typeof value !== 'object') return false
+  if (exerciseIds.length === 0) return false
+  const s = value as Partial<PersistedActiveWorkout>
+  if (!Number.isInteger(s.exIndex) || (s.exIndex as number) < 0 || (s.exIndex as number) >= exerciseIds.length) return false
+  if (!Number.isInteger(s.setIndex) || (s.setIndex as number) < 0) return false
+  if (!Number.isInteger(s.startedAt)) return false
+  if (!s.rows || typeof s.rows !== 'object') return false
+  const rows = s.rows as Record<string, unknown>
+  for (const id of exerciseIds) {
+    const r = rows[id]
+    if (!Array.isArray(r) || r.length === 0) return false
+    for (const item of r) {
+      if (!item || typeof item !== 'object') return false
+      const row = item as Partial<PersistedSetRow>
+      if (typeof row.weight !== 'number' || typeof row.reps !== 'number' || typeof row.done !== 'boolean') return false
+    }
+  }
+  if (s.rest != null) {
+    const r = s.rest as Partial<PersistedRest>
+    if (typeof r.endsAt !== 'number' || typeof r.durationSec !== 'number') return false
+  }
+  if (s.subs != null) {
+    if (typeof s.subs !== 'object') return false
+    for (const [k, v] of Object.entries(s.subs as Record<string, unknown>)) {
+      if (typeof k !== 'string' || typeof v !== 'string') return false
+    }
+  }
+  const curRows = rows[exerciseIds[s.exIndex as number]] as PersistedSetRow[]
+  if ((s.setIndex as number) >= curRows.length) return false
+  return true
+}
+
+/** يقرأ الجلسة المخزّنة كما هي (بلا تحقّق) — null عند الغياب/التلف. */
+export function readPersistedActiveWorkout(ownerId: string | null | undefined): unknown {
+  if (typeof window === 'undefined') return null
+  try {
+    const raw = window.localStorage.getItem(activeWorkoutKey(ownerId))
+    if (!raw) return null
+    return JSON.parse(raw)
+  } catch {
+    return null
+  }
+}
+
+/** يمسح مفتاح الجلسة النشطة لهذا المالك فقط. لا يرمي. */
+export function clearPersistedActiveWorkout(ownerId: string | null | undefined): void {
+  if (typeof window === 'undefined') return
+  try {
+    window.localStorage.removeItem(activeWorkoutKey(ownerId))
+  } catch {
+    /* تخزين محجوب */
+  }
+}
+
+/** حالة الراحة عند الاستعادة: لا راحة · جارية · انتهت أثناء موت التطبيق. */
+export type RestoredRestState = 'none' | 'running' | 'elapsed'
+
+export type ColdStartAction = 'none' | 'resume' | 'abandoned' | 'discard'
+
+export interface ColdStartDecision {
+  action: ColdStartAction
+  /** الجلسة الصالحة (resume/abandoned فقط). */
+  session: PersistedActiveWorkout | null
+  /** سبب التجاهل — يفرّق «تالف» عن «الخطة تغيّرت» (كانت مدمَجة في حذف صامت). */
+  discardReason: 'none' | 'empty' | 'malformed' | 'plan-changed'
+  restState: RestoredRestState
+  /** الثواني المتبقية للراحة، محسوبة من endsAt لا من عدّاد (0 عند none/elapsed). */
+  restRemainingSec: number
+  /** endsAt للراحة المستعادة أو null. */
+  restEndsAt: number | null
+  /** عمر الجلسة بالمللي ثانية (الآن − startedAt) — أساس عتبة الهجر. */
+  ageMs: number
+  /** عدد المجموعات المنجزة داخل الجلسة — يمنع «حذفًا صامتًا» لعمل حقيقي. */
+  completedSets: number
+}
+
+function countCompletedSets(rows: Record<string, PersistedSetRow[]> | undefined): number {
+  if (!rows || typeof rows !== 'object') return 0
+  let n = 0
+  for (const list of Object.values(rows)) {
+    if (!Array.isArray(list)) continue
+    for (const row of list) if (row && typeof row === 'object' && row.done === true) n += 1
+  }
+  return n
+}
+
+/**
+ * القرار **النقي** للإقلاع البارد — بلا أي أثر جانبي، فيُختبر مباشرة:
+ *   • لا شيء مخزّن                       ⇒ none
+ *   • غير صالح للخطة الحالية             ⇒ discard('plan-changed'|'malformed')
+ *   • صالح وعمره ≥ العتبة (٨ ساعات)     ⇒ abandoned (تصنيف فقط — لا حذف)
+ *   • صالح وحديث                         ⇒ resume + حالة الراحة محسوبة من endsAt
+ */
+export function decideColdStart(args: {
+  persisted: unknown
+  exerciseIds: readonly string[]
+  nowMs?: number
+  thresholdMs?: number
+}): ColdStartDecision {
+  const nowMs = args.nowMs ?? Date.now()
+  const threshold = args.thresholdMs ?? ABANDONED_AFTER_MS
+  const base: ColdStartDecision = {
+    action: 'none',
+    session: null,
+    discardReason: 'none',
+    restState: 'none',
+    restRemainingSec: 0,
+    restEndsAt: null,
+    ageMs: 0,
+    completedSets: 0,
+  }
+  if (args.persisted == null) return base
+
+  if (!isUsableActiveWorkout(args.persisted, args.exerciseIds)) {
+    // «الخطة تغيّرت» = جلسة معقولة بنيويًا (بدء + صفوف) لكن لا تطابق خطة اليوم.
+    const shape = args.persisted as Partial<PersistedActiveWorkout>
+    const plausible =
+      typeof args.persisted === 'object' &&
+      Number.isInteger(shape.startedAt) &&
+      !!shape.rows &&
+      typeof shape.rows === 'object'
+    return {
+      ...base,
+      action: 'discard',
+      discardReason: plausible ? 'plan-changed' : 'malformed',
+      ageMs: plausible && Number.isInteger(shape.startedAt) ? Math.max(0, nowMs - (shape.startedAt as number)) : 0,
+      completedSets: plausible ? countCompletedSets(shape.rows) : 0,
+    }
+  }
+
+  const session = args.persisted
+  const ageMs = Math.max(0, nowMs - session.startedAt)
+  const restEndsAt = session.rest?.endsAt ?? null
+  const restState: RestoredRestState = restEndsAt === null ? 'none' : restEndsAt > nowMs ? 'running' : 'elapsed'
+  const restRemainingSec = restState === 'running' ? Math.max(0, Math.ceil(((restEndsAt as number) - nowMs) / 1000)) : 0
+  const completedSets = countCompletedSets(session.rows)
+
+  return {
+    action: classifyRestoredSession({ startedAt: session.startedAt }, nowMs, threshold) === 'abandoned' ? 'abandoned' : 'resume',
+    session,
+    discardReason: 'none',
+    restState,
+    restRemainingSec,
+    restEndsAt,
+    ageMs,
+    completedSets,
+  }
+}
+
+/**
+ * هل حُفظت هذه الجلسة في التاريخ من قبل؟ معرّف v2 مبذور بـstartedAt
+ * (`session-v2-<startedAt>`) فالحفظ idempotent — هذا الفحص يمنع **الحفظ المزدوج**
+ * بعد «استعادة ثم إنهاء» أو بعد حفظ مهجورة مرّتين.
+ */
+export function isActiveWorkoutAlreadySaved(
+  startedAt: number,
+  sessions: readonly WorkoutSession[] = getWorkoutSessions(),
+): boolean {
+  const id = `session-v2-${startedAt}`
+  return sessions.some((s) => s.id === id)
+}
+
+export interface ColdStartReconciliation {
+  decision: ColdStartDecision
+  /** ما حدث لإشعار نهاية الراحة المعلّق. */
+  restEnd: RestEndColdStartResult
+  /** هل الجلسة محفوظة أصلًا في التاريخ؟ (حماية من الحفظ المزدوج) */
+  alreadySaved: boolean
+  /** هل مُسح مفتاح الجلسة فعلًا؟ (يحدث في discard الفاسد وحده) */
+  clearedKey: boolean
+}
+
+/**
+ * **النداء الوحيد** الذي يحتاجه Codex عند الإقلاع البارد (mount الأوّل لشاشة
+ * التمرين). يفعل بالترتيب:
+ *   ① يقرأ الجلسة المخزّنة ويقرّر (decideColdStart).
+ *   ② يصالح إشعار نهاية الراحة: بائت (endsAt مضى) ⇒ إلغاء + إزالة من مركز
+ *      الإشعارات؛ يتيم (لا راحة جارية) ⇒ إلغاء؛ راحة ما زالت جارية ⇒ يُترك.
+ *   ③ 'malformed' ⇒ يمسح المفتاح (لا عمل فيه يُفقد).
+ *      'plan-changed' ⇒ **لا يمسح**: قد تكون فيه مجموعات منفَّذة (completedSets)،
+ *      والقرار للواجهة بعد إشعار المستخدم — لا حذف صامت من طبقة البيانات.
+ *   ④ يخبر عن alreadySaved حتى لا يُحفظ نفس startedAt مرتين.
+ * لا يرمي أبدًا.
+ */
+export async function reconcileWorkoutColdStart(args: {
+  ownerId: string | null | undefined
+  exerciseIds: readonly string[]
+  nowMs?: number
+  thresholdMs?: number
+}): Promise<ColdStartReconciliation> {
+  const nowMs = args.nowMs ?? Date.now()
+  const persisted = readPersistedActiveWorkout(args.ownerId)
+  const decision = decideColdStart({ persisted, exerciseIds: args.exerciseIds, nowMs, thresholdMs: args.thresholdMs })
+
+  // الراحة «الجارية» وحدها تبرّر إبقاء إشعار مجدول؛ أي شيء آخر يتيم أو بائت.
+  const activeRestEndsAt = decision.action === 'resume' && decision.restState === 'running' ? decision.restEndsAt : null
+  const restEnd = await reconcileRestEndOnColdStart({ ownerId: args.ownerId, activeRestEndsAt, nowMs })
+
+  let clearedKey = false
+  if (decision.action === 'discard' && decision.discardReason === 'malformed') {
+    clearPersistedActiveWorkout(args.ownerId)
+    clearedKey = true
+  }
+
+  const alreadySaved = decision.session ? isActiveWorkoutAlreadySaved(decision.session.startedAt) : false
+  return { decision, restEnd, alreadySaved, clearedKey }
+}
+
+/**
+ * إنهاء الجلسة من ناحية الإشعارات: يُستدعى عند التخطّي/الإنهاء/التجاهل/حفظ
+ * المهجورة — يلغي إشعار الراحة ويمسح أثره المعلّق. مساعد رقيق يمنع نسيان الأثر.
+ */
+export async function releaseRestEndForSession(ownerId: string | null | undefined): Promise<void> {
+  await cancelRestEndNotification({ ownerId })
 }

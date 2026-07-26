@@ -2,7 +2,24 @@ import { Capacitor, registerPlugin } from '@capacitor/core'
 import { ingestExternalSteps, type DaySteps } from './stepCounter'
 import { importHealthWeight, removeHealthWeight, latestWeightImport } from './measurementLog'
 
-export type HealthKitPermission = 'not-determined' | 'authorized' | 'denied' | 'unavailable'
+/**
+ * حالة صلاحية جسر الصحة القديم (خطوات/وزن/نبض).
+ *
+ * P14 — عقد الصدق: **iOS لا يكشف أبدًا رفض قراءة نوع صحي**؛ `requestAuthorization`
+ * ينجح حتى لو رفض المستخدم كل شيء، والاستعلام المرفوض يعود فارغًا لا خاطئًا. لذلك:
+ *   • 'authorized'    = تدفّق الطلب اكتمل (لا يعني «مُنح»).
+ *   • 'unknown'       = تعذّر تشغيل التدفّق/الاستعلام — «ما وصلنا شيء ولا نعرف السبب».
+ *   • 'unavailable'   = HealthKit غير متاح على هذا الجهاز (iPad/غير مدعوم).
+ *   • 'denied'        = **مهجورة (deprecated)، لا ينتجها الجسر ولا هذه الوحدة بعد P14.**
+ *                        باقية في الاتحاد فقط للتوافق مع حالات مخزّنة قديمة.
+ * الصياغة المعروضة لا تدّعي الرفض أبدًا (انظر data/nativeSettings.ts).
+ */
+export type HealthKitPermission = 'not-determined' | 'authorized' | 'unknown' | 'denied' | 'unavailable'
+
+/** هل هذه الحالة تعني «ما وصلتنا بيانات ولا نعرف السبب»؟ (لا تدّعي رفضًا). */
+export function isUnknownHealthPermission(permission: HealthKitPermission): boolean {
+  return permission === 'unknown' || permission === 'denied' || permission === 'not-determined'
+}
 
 /** The metrics Qimmah can read, each gated by its own point-of-use consent (standard F6/F7). */
 export type HealthMetric = 'steps' | 'weight' | 'heartRate'
@@ -171,7 +188,8 @@ export async function refreshHealthKitStepsIfEnabled(
     saveMetric('steps', { enabled: true, permission: 'authorized', lastUpdate: new Date().toISOString() })
     return { permission: 'authorized', days, today: days.at(-1)?.steps ?? 0 }
   } catch {
-    return { permission: 'denied', days: [], today: 0 }
+    // بريدج غير متاح/استعلام فشل — ليس رفضًا (iOS لا يخبرنا بالرفض إطلاقًا).
+    return { permission: 'unknown', days: [], today: 0 }
   }
 }
 

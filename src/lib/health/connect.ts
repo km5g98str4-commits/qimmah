@@ -24,6 +24,13 @@ import {
   type RawWorkoutSample,
 } from './normalize'
 import { anchorFor, ingestSamples, purgeMetricSamples, samplesFor, saveAnchor } from './store'
+import {
+  clearHealthDiagnostics,
+  healthDiagnostics,
+  healthDiagnosticsSummary,
+  recordHealthQuery,
+  type HealthMetricDiagnostics,
+} from './diagnostics'
 
 // ── عقد الجسر السويفت (HealthKitStepsPlugin.swift) ─────────────────────────
 
@@ -207,15 +214,21 @@ export async function syncMetric(
   let imported = 0
   let stored = samplesFor(id).length
   let status: SamplePageStatus = 'ok'
+  // تشخيص (بيانات وصفية فقط): مدّة الاستعلام، عدد الصفحات، الوحدة، اسم المصدر.
+  const startedClock = Date.now()
+  let pages = 0
+  let lastMeta: { unit?: string; source?: { name?: string } } | null = null
 
   try {
     if (def.kind === 'workout') {
       const page = await bridge.getWorkouts({ days })
+      pages = 1
       status = page.status
       if (page.status === 'ok') {
         const normalized = page.samples.map(normalizeWorkout).filter((sample) => sample !== null)
         imported = normalized.length
         stored = ingestSamples(id, normalized)
+        if (normalized.length) lastMeta = { unit: normalized[0].unit, source: { name: normalized[0].source.name } }
       }
     } else {
       // كمّي أو نوم: نفس عقد المرساة/الصفحات.
@@ -224,6 +237,7 @@ export async function syncMetric(
         const page = def.kind === 'category'
           ? await bridge.getSleepSamples({ days, anchor })
           : await bridge.getQuantitySamples({ metric: id, days, anchor })
+        pages += 1
         status = page.status
         if (page.status !== 'ok') break
         const normalized = def.kind === 'category'
@@ -231,17 +245,22 @@ export async function syncMetric(
           : (page.samples as RawQuantitySample[]).map((raw) => normalizeQuantity(id, raw)).filter((sample) => sample !== null)
         imported += normalized.length
         stored = ingestSamples(id, normalized)
+        if (normalized.length) lastMeta = { unit: normalized[0].unit, source: { name: normalized[0].source.name } }
         if (page.anchor) {
           anchor = page.anchor
           saveAnchor(id, page.anchor)
         }
         if (!page.hasMore) break
+        // P14: صفحة تقول «يوجد المزيد» بلا مرساة جديدة ⇒ الصفحة التالية ستكون
+        // نفسها حرفيًا. نتوقّف بدل إعادة جلب الصفحة ذاتها حتى سقف الصفحات.
+        if (!page.anchor) break
       }
     }
   } catch {
     status = 'error'
   }
 
+  recordHealthQuery(id, { status, durationMs: Date.now() - startedClock, pages, sampleMeta: lastMeta })
   if (status === 'ok') recordSync(id)
   return { metric: id, status, imported, stored, dataState: metricDataState(id) }
 }
@@ -322,4 +341,47 @@ export function healthConnectionSummary(): MetricConnectionRow[] {
       storedSamples: samplesFor(metric).length,
     }
   })
+}
+
+// ── تقرير تشخيص الجهاز (P14) — بيانات وصفية فقط، لا قيمة صحية واحدة ──────────
+
+/**
+ * لقطة تشخيص لكل مقياس: {requested, enabled, hasData, lastQueryMs, sampleCount,
+ * unitUsed, source, lastStatus, lastPages}. **لا تحمل أي قيمة صحية** — مخصّصة
+ * لتقرير جهاز يجيب «هل وصلت البيانات ومن أين وبأي سرعة».
+ */
+export function healthDiagnosticsReport(): HealthMetricDiagnostics[] {
+  const envelope = readConnection()
+  return healthDiagnostics({
+    requested: envelope.requested,
+    isEnabled: (metric) => envelope.enabled[metric] === true,
+    storedCount: (metric) => samplesFor(metric).length,
+  })
+}
+
+/** ملخّص نصي للتقرير — سطر لكل مقياس، للنسخ من Safari Web Inspector. */
+export function healthDiagnosticsText(): string {
+  return healthDiagnosticsSummary(healthDiagnosticsReport())
+}
+
+export { clearHealthDiagnostics }
+export type { HealthMetricDiagnostics }
+
+// كشف للقراءة فقط على window (نفس نمط تشخيص الباركود) — لا واجهة داخل التطبيق.
+declare global {
+  interface Window {
+    __QIMMAH_HEALTH_DIAG__?: {
+      get: typeof healthDiagnosticsReport
+      summary: typeof healthDiagnosticsText
+      clear: typeof clearHealthDiagnostics
+    }
+  }
+}
+
+if (typeof window !== 'undefined') {
+  window.__QIMMAH_HEALTH_DIAG__ = {
+    get: healthDiagnosticsReport,
+    summary: healthDiagnosticsText,
+    clear: clearHealthDiagnostics,
+  }
 }

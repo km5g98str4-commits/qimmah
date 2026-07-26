@@ -95,3 +95,30 @@ import { toDisplay, dailySeries } from '@/lib/health/normalize'
 - `npx cap sync ios` يمرّ. **ملاحظة صادقة:** بناء Xcode الكامل للسويفت لم يُنفَّذ
   في هذه البيئة (يتطلب توقيع/محاكي) — يُتحقق منه على جهاز المالك، مثل موجات
   الجسر السابقة.
+
+---
+
+## تحديث P14 (تقوية الطبقة الأصلية)
+
+راجع `docs/audit/P14-NATIVE-HARDENING.md §1` للتفصيل. ما تغيّر في هذا العقد:
+
+- **صدق الرفض صار مفروضًا في الجسر نفسه:** الجسر لم يكن يلتزم بالقاعدة — كان يعيد
+  `"permission": "denied"` في ثلاثة مسارات (فشل الطلب المجمّع، وفشل استعلام الخطوات،
+  وفشل قراءة أحدث عيّنة). كلها الآن `"unknown"`، و`HealthKitPermission` في TS أضافت
+  `'unknown'` (و`'denied'` باقية للتوافق مع حالات مخزّنة قديمة فقط، ولا يُنتجها أي كود).
+  البرهان يفرض **صفر** ورود لـ`"permission": "denied"` في السويفت.
+- **النسخة المعروضة:** `nativeSettings.denied` كانت تقول «ما انعطى الإذن» — ادّعاء رفض
+  لا يمكن للتطبيق معرفته. أُعيدت صياغتها باللغتين، وأُضيف مفتاح `unknown` بنفس المعنى.
+- **حلقة الصفحات:** صفحة تقول `hasMore` بلا مرساة جديدة كانت تُعاد ٨ مرّات — الآن تتوقّف.
+- **`hasMore`** يُحسب من عدد العيّنات المُعادة لا من عدد الصفوف بعد التحويل (كان يقتطع
+  التاريخ بصمت).
+- **سجل المفاتيح:** `qimmah:health:samples:v1` و`qimmah:health:connection:v1` لم تكونا
+  مسجّلتين في `userDataKeys.ts` — سُجّلتا الآن (`user`, غير مُصدَّرة، غير مُزامَنة).
+- **جديد — تشخيص بيانات وصفية فقط:** `src/lib/health/diagnostics.ts` +
+  `healthDiagnosticsReport()` / `healthDiagnosticsText()` +
+  `window.__QIMMAH_HEALTH_DIAG__`. لكل مقياس: `{requested, enabled, hasData, lastQueryMs,
+  lastStatus, sampleCount, lastPages, unitUsed, source}` — **ولا قيمة صحية واحدة**
+  (مفروض ببرهانين: grep + فحص تسلسل).
+- **البرهان:** `npm run test:native-hardening` (٩٣ فحصًا) — مُسجَّل في `test:gate`.
+- **بناء Xcode للمحاكي نجح** في P14 (Xcode 26.6)، فسويفت تُترجم فعلًا. الجهاز الحقيقي
+  ما زال غير متحقَّق — `docs/audit/DEVICE-NOT-VERIFIED.md §①`.

@@ -119,9 +119,12 @@ public class HealthKitStepsPlugin: CAPPlugin, CAPBridgedPlugin {
     /// iOS shows a single aggregated Health sheet after the benefit screen.
     /// Defaults to steps for backward compatibility with the original bridge.
     ///
-    /// HONESTY NOTE: for READ types iOS never reveals what the user granted. `authorized`
-    /// here only means the request flow completed; `denied` means the request itself
-    /// failed to run. Per-metric truth is only "data" vs "no data (unknown-or-denied)".
+    /// HONESTY NOTE (tightened in P14): for READ types iOS never reveals what the user
+    /// granted — `requestAuthorization` succeeds even when the user denies every type.
+    /// So `authorized` here means ONLY "the request flow completed", and a failure
+    /// resolves `"unknown"` (the flow could not run) — **never `"denied"`**, because this
+    /// bridge has no way to learn a read denial. Per-metric truth is only
+    /// "data" vs "no data (unknown-or-denied)".
     @objc func requestAuthorization(_ call: CAPPluginCall) {
         guard HKHealthStore.isHealthDataAvailable() else {
             call.resolve(["permission": "unavailable"])
@@ -140,7 +143,9 @@ public class HealthKitStepsPlugin: CAPPlugin, CAPBridgedPlugin {
                 if success && error == nil {
                     call.resolve(["permission": "authorized"])
                 } else {
-                    call.resolve(["permission": "denied"])
+                    // The REQUEST failed to run (no entitlement, HealthKit off, OS error).
+                    // This is not a user denial — iOS never tells us that for read types.
+                    call.resolve(["permission": "unknown"])
                 }
             }
         }
@@ -173,7 +178,9 @@ public class HealthKitStepsPlugin: CAPPlugin, CAPBridgedPlugin {
         )
         query.initialResultsHandler = { _, results, error in
             if error != nil {
-                DispatchQueue.main.async { call.resolve(["permission": "denied", "days": []]) }
+                // A failed read query is NOT a denial (HealthKit hides read denial by
+                // returning empty results, not by erroring) — resolve "unknown".
+                DispatchQueue.main.async { call.resolve(["permission": "unknown", "days": []]) }
                 return
             }
             var output: [[String: Any]] = []
@@ -289,6 +296,10 @@ public class HealthKitStepsPlugin: CAPPlugin, CAPBridgedPlugin {
                 DispatchQueue.main.async { call.resolve(["status": "error", "samples": []]) }
                 return
             }
+            // `hasMore` must reflect how many samples HealthKit RETURNED, not how many
+            // survived the cast — otherwise a single non-quantity sample would end paging
+            // early and silently truncate history.
+            let returned = (samples ?? []).count
             var out: [[String: Any]] = []
             for case let sample as HKQuantitySample in (samples ?? []) {
                 var row: [String: Any] = [
@@ -301,7 +312,7 @@ public class HealthKitStepsPlugin: CAPPlugin, CAPBridgedPlugin {
                 row.merge(self.sourceFields(sample)) { a, _ in a }
                 out.append(row)
             }
-            var payload: [String: Any] = ["status": "ok", "samples": out, "hasMore": out.count >= limit]
+            var payload: [String: Any] = ["status": "ok", "samples": out, "hasMore": returned >= limit]
             if let encoded = self.encodeAnchor(newAnchor) { payload["anchor"] = encoded }
             DispatchQueue.main.async { call.resolve(payload) }
         }
@@ -341,6 +352,7 @@ public class HealthKitStepsPlugin: CAPPlugin, CAPBridgedPlugin {
                 DispatchQueue.main.async { call.resolve(["status": "error", "samples": []]) }
                 return
             }
+            let returned = (samples ?? []).count
             var out: [[String: Any]] = []
             for case let sample as HKCategorySample in (samples ?? []) {
                 var row: [String: Any] = [
@@ -353,7 +365,7 @@ public class HealthKitStepsPlugin: CAPPlugin, CAPBridgedPlugin {
                 row.merge(self.sourceFields(sample)) { a, _ in a }
                 out.append(row)
             }
-            var payload: [String: Any] = ["status": "ok", "samples": out, "hasMore": out.count >= limit]
+            var payload: [String: Any] = ["status": "ok", "samples": out, "hasMore": returned >= limit]
             if let encoded = self.encodeAnchor(newAnchor) { payload["anchor"] = encoded }
             DispatchQueue.main.async { call.resolve(payload) }
         }
@@ -388,6 +400,11 @@ public class HealthKitStepsPlugin: CAPPlugin, CAPBridgedPlugin {
 
     /// Logged workouts (most recent first). Same window/limit contract; energy and
     /// distance resolve to null when the workout carries none — never fabricated.
+    ///
+    /// SINGLE PAGE BY DESIGN: this uses `HKSampleQuery` (not anchored), so no `anchor`
+    /// is returned and the JS layer does not loop. `hasMore = true` therefore means
+    /// "the newest `limit` workouts were returned and older ones were not read" —
+    /// with limit 500 over a 90-day window that is not reachable in practice.
     @objc func getWorkouts(_ call: CAPPluginCall) {
         guard HKHealthStore.isHealthDataAvailable() else {
             call.resolve(["status": "unavailable", "samples": []])
@@ -407,6 +424,7 @@ public class HealthKitStepsPlugin: CAPPlugin, CAPBridgedPlugin {
                 DispatchQueue.main.async { call.resolve(["status": "error", "samples": []]) }
                 return
             }
+            let returned = (samples ?? []).count
             var out: [[String: Any]] = []
             for case let workout as HKWorkout in (samples ?? []) {
                 var row: [String: Any] = [
@@ -431,7 +449,7 @@ public class HealthKitStepsPlugin: CAPPlugin, CAPBridgedPlugin {
                 out.append(row)
             }
             DispatchQueue.main.async {
-                call.resolve(["status": "ok", "samples": out, "hasMore": out.count >= limit])
+                call.resolve(["status": "ok", "samples": out, "hasMore": returned >= limit])
             }
         }
         healthStore.execute(query)
@@ -446,7 +464,8 @@ public class HealthKitStepsPlugin: CAPPlugin, CAPBridgedPlugin {
         let sort = NSSortDescriptor(key: HKSampleSortIdentifierEndDate, ascending: false)
         let query = HKSampleQuery(sampleType: quantityType, predicate: predicate, limit: 1, sortDescriptors: [sort]) { _, samples, error in
             if error != nil {
-                DispatchQueue.main.async { call.resolve(["permission": "denied", "sample": NSNull()]) }
+                // Read-query failure ≠ user denial (see the honesty note above).
+                DispatchQueue.main.async { call.resolve(["permission": "unknown", "sample": NSNull()]) }
                 return
             }
             guard let sample = samples?.first as? HKQuantitySample else {
