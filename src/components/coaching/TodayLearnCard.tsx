@@ -15,6 +15,7 @@ const SEED = 1
  */
 export function TodayLearnCard({ lang }: { lang: Lang }) {
   const ar = lang !== 'en'
+  const t = (a: string, e: string) => (ar ? a : e)
   const { user } = useAuth()
   const uid = user?.id ?? null
   const [lesson, setLesson] = useState(() => currentTodayLesson(uid, SEED))
@@ -24,8 +25,6 @@ export function TodayLearnCard({ lang }: { lang: Lang }) {
     setLesson(currentTodayLesson(uid, SEED))
   }, [uid])
 
-  if (!ar) return null
-
   const understood = () => {
     markLessonUnderstood(uid, SEED)
     setLesson(currentTodayLesson(uid, SEED))
@@ -33,7 +32,7 @@ export function TodayLearnCard({ lang }: { lang: Lang }) {
   }
 
   return (
-    <section className="rounded-2xl border border-line bg-surface p-4" aria-label="تعلّم">
+    <section className="rounded-2xl border border-line bg-surface p-4" aria-label={t('تعلّم', 'Learn')}>
       <button
         type="button"
         aria-expanded={expanded}
@@ -45,22 +44,22 @@ export function TodayLearnCard({ lang }: { lang: Lang }) {
           <Icon name="Sparkles" className="h-4.5 w-4.5" />
         </span>
         <span className="min-w-0 flex-1">
-          <span className="v2-text-blue block text-xs font-black uppercase tracking-wider">تعلّم</span>
-          <span className="mt-0.5 block text-sm font-black text-ink-900">{lesson.titleAr}</span>
+          <span className="v2-text-blue block text-xs font-black uppercase tracking-wider">{t('تعلّم', 'Learn')}</span>
+          <span className="mt-0.5 block text-sm font-black text-ink-900">{ar ? lesson.titleAr : lesson.titleEn}</span>
         </span>
         <span className="v2-text-blue flex shrink-0 items-center gap-1 text-xs font-black">
-          {expanded ? 'أغلق' : 'اقرأ'}
+          {expanded ? t('أغلق', 'Close') : t('اقرأ', 'Read')}
           <Icon name="ChevronDown" className={`h-4 w-4 transition-transform motion-reduce:transition-none ${expanded ? 'rotate-180' : ''}`} />
         </span>
       </button>
       <div id="today-learning-detail" hidden={!expanded} className="pt-3">
-        <p className="text-sm leading-relaxed text-ink-700">{lesson.bodyAr}</p>
+        <p className="text-sm leading-relaxed text-ink-700">{ar ? lesson.bodyAr : lesson.bodyEn}</p>
         <p className="mt-2.5 flex items-start gap-1.5 rounded-xl bg-beige/60 p-2.5 text-xs leading-relaxed text-ink-700">
           <Icon name="CheckCircle2" className="mt-0.5 h-4 w-4 shrink-0 text-[color:var(--color-success)]" />
-          <span>{lesson.takeawayAr}</span>
+          <span>{ar ? lesson.takeawayAr : lesson.takeawayEn}</span>
         </p>
         <button type="button" onClick={understood} className="btn-ghost mt-3 w-full py-2.5 text-sm">
-          فهمت
+          {t('فهمت', 'Got it')}
         </button>
       </div>
     </section>

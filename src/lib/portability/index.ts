@@ -18,7 +18,7 @@ export {
   undoKey,
 } from './importer'
 export type { ImportPreview, PreviewLine, ApplyResult } from './importer'
-export { PortabilityError } from './errors'
+export { PortabilityError, portabilityErrorText } from './errors'
 export { STORE_DEFS, isNative } from './registry'
 export {
   PORTABILITY_SCHEMA_VERSION,

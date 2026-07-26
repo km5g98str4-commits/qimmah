@@ -24,6 +24,7 @@ import {
   undoImport,
   readFileText,
   PortabilityError,
+  portabilityErrorText,
   type ImportPreview,
 } from '@/lib/portability'
 
@@ -416,7 +417,7 @@ function DataScreen({ lang, uid, recoveryActive, onBack }: { lang: Lang; uid: st
       const p = parseImportFile(await readFileText(file), uid)
       setPreview(p); setPhase('preview')
     } catch (e) {
-      setError(e instanceof PortabilityError ? e.message : t('ملفّ غير صالح.', 'Invalid file.'))
+      setError(e instanceof PortabilityError ? portabilityErrorText(e, lang) : t('ملفّ غير صالح.', 'Invalid file.'))
       setPhase('error')
     } finally {
       setBusy(false)
@@ -432,7 +433,7 @@ function DataScreen({ lang, uid, recoveryActive, onBack }: { lang: Lang; uid: st
       applyImport(preview.bundle, uid, preview.ownerId)
       setUndoable(true); setPhase('done'); setPreview(null)
     } catch (e) {
-      setError(e instanceof PortabilityError ? e.message : t('فشل الاستيراد — أُلغيت كل التغييرات.', 'Import failed — all changes were reverted.'))
+      setError(e instanceof PortabilityError ? portabilityErrorText(e, lang) : t('فشل الاستيراد — أُلغيت كل التغييرات.', 'Import failed — all changes were reverted.'))
       setPhase('error')
     } finally {
       setBusy(false)

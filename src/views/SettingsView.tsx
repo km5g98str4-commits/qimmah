@@ -251,7 +251,7 @@ export function SettingsView({
         </SettingsGroup>
 
         {/* 2) البيانات — تصدير/استيراد محصّن (معاينة → تأكيد → تطبيق ذرّي → تراجع) + إعادة ضبط */}
-        <SettingsGroup icon="Database" title={t.settings.groupData}>
+        <SettingsGroup icon="Database" title={t.settings.groupData} testId="settings-group-data">
           <DataManagementPanel lang={lang} uid={auth.user?.id ?? null} recoveryActive={auth.recoveryActive} />
           <div className="mt-3 border-t border-line pt-3">
             <button

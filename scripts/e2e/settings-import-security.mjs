@@ -79,14 +79,34 @@ function seedInBrowser(uid, token) {
 async function gotoSettings(page, uid, token) {
   await page.goto(URL, { waitUntil: 'domcontentloaded' })
   const { session, registry } = seedInBrowser(uid, token)
-  await page.evaluate(({ session, registry, kAuth, kAccounts }) => {
-    localStorage.setItem(kAuth, JSON.stringify(session))
-    localStorage.setItem(kAccounts, JSON.stringify(registry))
-  }, { session, registry, kAuth: K_AUTH, kAccounts: K_ACCOUNTS })
+  const seed = { session, registry, kAuth: K_AUTH, kAccounts: K_ACCOUNTS }
+  let seeded = false
+  for (let attempt = 0; attempt < 3 && !seeded; attempt += 1) {
+    try {
+      await page.evaluate(({ session, registry, kAuth, kAccounts }) => {
+        localStorage.setItem(kAuth, JSON.stringify(session))
+        localStorage.setItem(kAccounts, JSON.stringify(registry))
+      }, seed)
+      seeded = true
+    } catch (error) {
+      // بعد الاستيراد/تبديل المالك قد يعيد التطبيق تحميل الوثيقة في نفس اللحظة.
+      // أعد المحاولة فقط لسباق التنقّل؛ أي خطأ آخر يبقى فشلًا صريحًا.
+      if (!String(error).includes('Execution context was destroyed') || attempt === 2) throw error
+      await page.waitForLoadState('domcontentloaded').catch(() => {})
+      await page.waitForTimeout(150)
+    }
+  }
   // اربط الجلسة المزروعة (reload) ثم انتقل للإعدادات (بعض التهيئة تحوّل للوحة عند الإقلاع).
   await page.reload({ waitUntil: 'domcontentloaded' })
   await page.evaluate(() => { window.location.hash = '#/settings' })
-  // زر الاستيراد مرئي؛ حقل الملفّ نفسه مخفي (display:none) عمدًا فننتظره «مرفقًا» فقط.
+  // البنية الجديدة تجعل أقسام الإعدادات مطوية. افتح «البيانات» كما يفعل المستخدم
+  // بدل افتراض أن زر الاستيراد ظاهر مباشرةً في الصفحة.
+  const dataGroup = page.locator('[data-testid="settings-group-data"]')
+  await dataGroup.waitFor({ state: 'visible', timeout: 15000 })
+  if (!(await dataGroup.evaluate((node) => (node instanceof HTMLDetailsElement ? node.open : false)))) {
+    await dataGroup.locator('summary').click()
+  }
+  // زر الاستيراد مرئي بعد فتح القسم؛ حقل الملفّ نفسه مخفي عمدًا فننتظره «مرفقًا» فقط.
   await page.waitForSelector('[data-testid="settings-data-import"]', { state: 'visible', timeout: 15000 })
   await page.waitForSelector('[data-testid="settings-data-file"]', { state: 'attached', timeout: 15000 })
 }
