@@ -100,7 +100,7 @@ export function ExerciseLibraryPicker({ lang, onAdd, onClose }: ExerciseLibraryP
         </div>
 
         {/* القائمة */}
-        <div className="flex-1 overflow-y-auto p-3">
+        <div className="app-scroll flex-1 overflow-y-auto p-3">
           {filtered.length === 0 ? (
             <p className="py-10 text-center text-sm text-ink-400">{d.pickerNoResults}</p>
           ) : (

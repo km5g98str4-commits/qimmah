@@ -44,10 +44,14 @@
     overscroll-behavior: none;
   }
 
+  /* ملكية التمرير: عند تركيب MobileShell يملك متمرّر القشرة (.app-scroll) التمرير وحده —
+     المستند نفسه لا يتمرّر ولا يرتدّ، فلا ينزلق الهيدر/الشريط السفلي ولا تظهر مساحة
+     بيضاء تحت منطقة الأمان. */
   html.qimmah-shell-mounted,
   body.qimmah-shell-mounted {
     height: 100%;
     overflow: hidden;
+    overscroll-behavior: none;
   }
 
   body.qimmah-shell-mounted #root {
@@ -120,25 +124,58 @@
     @apply text-ink-900;
   }
 
-  /* Scrollbar دافئ */
-  ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
-  }
-  ::-webkit-scrollbar-track {
-    @apply bg-page;
-  }
-  ::-webkit-scrollbar-thumb {
-    @apply bg-line rounded-full border-2 border-page;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    @apply bg-ink-400;
+  /* Scrollbar دافئ — لأجهزة المؤشّر الدقيق (سطح المكتب) فقط.
+     تنسيق ::-webkit-scrollbar يُخرج العنصر من «الشريط المتراكب المؤقّت» إلى شريط
+     كلاسيكي **دائم الظهور** داخل WebKit/WKWebView — فيظهر خطّ رمادي ثابت على حافة
+     الشاشة في التطبيق. لذا نحصره في (pointer: fine) ونُلغيه على اللمس وداخل القشرة. */
+  @media (pointer: fine) {
+    ::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+    ::-webkit-scrollbar-track {
+      @apply bg-page;
+    }
+    ::-webkit-scrollbar-thumb {
+      @apply bg-line rounded-full border-2 border-page;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      @apply bg-ink-400;
+    }
   }
 
-  /* متمرّر التطبيق وحده — نحافظ على تمرير iOS الطبيعي بلا خط ويب ظاهر. */
+  /* شاشات اللمس: لا خطّ تمرير مرئي إطلاقًا — التمرير نفسه يبقى كاملًا وطبيعيًا
+     (لمس، عجلة، لوحة مفاتيح، قارئ شاشة). إخفاء بصري فقط، لا تعطيل. */
+  @media (hover: none), (pointer: coarse) {
+    * {
+      scrollbar-width: none;
+    }
+    *::-webkit-scrollbar {
+      display: none;
+      width: 0;
+      height: 0;
+    }
+  }
+
+  /* داخل قشرة التطبيق (جوال أو معاينة سطح مكتب): لا خطّ تمرير على أي متمرّر —
+     القشرة تتصرّف كتطبيق أصلي لا كصفحة ويب. */
+  html.qimmah-shell-mounted,
+  html.qimmah-shell-mounted * {
+    scrollbar-width: none;
+  }
+  html.qimmah-shell-mounted::-webkit-scrollbar,
+  html.qimmah-shell-mounted *::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
+  /* متمرّر التطبيق — نحافظ على تمرير iOS الطبيعي بلا خط ويب ظاهر، ولا تُسلسَل حركة
+     التمرير إلى أي متمرّر أعلى (متمرّر القشرة أو المستند). */
   .app-scroll {
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
+    overscroll-behavior: contain;
   }
 
   .app-scroll::-webkit-scrollbar {
