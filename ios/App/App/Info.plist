@@ -27,7 +27,9 @@
 	<key>NSHealthShareUsageDescription</key>
 	<string>يقرأ قِمّة — بعد موافقتك في طلب واحد واضح — بياناتك من تطبيق صحة: النشاط (الخطوات، المسافة، الطوابق، السعرات، دقائق التمرين والوقوف، التمارين المسجّلة)، قياسات الجسم (الطول، الوزن، نسبة الدهون، الكتلة الصافية)، القلب (النبض، نبض الراحة، تغيّريته، VO₂ Max)، النوم ومراحله، التنفّس وأكسجين الدم وحرارة المعصم أثناء النوم، وما سجّلته تطبيقات التغذية الأخرى — لعرض تقدّمك بصدق داخل التطبيق فقط. قِمّة يقرأ ولا يكتب أي بيانات صحية، لا يشاركها مع أي طرف ولا يستخدمها في إعلانات، وفصل أي مقياس يحذف ما استُورد منه، ويبقى الإدخال اليدوي متاحًا دائمًا. Qimmah reads your Health data (activity, body measurements, heart, sleep, vitals, nutrition) after one clear consent request, to honestly show your progress inside the app only. Read-only, never shared, never used for ads; disconnecting a metric deletes its imported data.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>يستخدم قِمّة موقعك — فقط عند تفعيلك لجدولة الوضع الداكن — لحساب وقت الغروب والشروق في منطقتك. لا يُخزَّن موقعك ولا يُشارك، ويمكنك بدلًا منه اختيار مدينة يدويًا.</string>
+	<string>يستخدم قِمّة موقعك — فقط عند تفعيلك لجدولة الوضع الداكن — لحساب وقت الغروب والشروق في منطقتك. لا يُخزَّن موقعك ولا يُشارك، ويمكنك بدلًا منه اختيار مدينة يدويًا. Qimmah uses your location only when you turn on dark-mode scheduling, to work out your local sunset and sunrise times. Your location is never stored or shared, and you can pick a city manually instead.</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>

@@ -27,7 +27,15 @@ export interface NativeSettingsCopy {
   disconnect: string
   // outcome messages
   connected: string
+  /**
+   * P14 — عقد الصدق: هذا المفتاح اسمه قديم (`denied`) لكن **نصّه لا يدّعي رفضًا**.
+   * iOS لا يكشف أبدًا رفض قراءة نوع صحي، فأي نتيجة فارغة تعني «لا بيانات أو مرفوض»
+   * ولا يجوز عرض «رفضت الوصول». الاسم يبقى للتوافق مع الواجهة القائمة؛ المفتاح
+   * الجديد المفضّل لـCodex هو `unknown` بنفس المعنى.
+   */
   denied: string
+  /** «ما وصلتنا شيء ولا نعرف السبب» — الحالة الصادقة الوحيدة لغياب البيانات. */
+  unknown: string
   unavailable: string
   weightImported: string
   weightNoData: string
@@ -67,7 +75,8 @@ export const NATIVE_SETTINGS_COPY: Record<Lang, NativeSettingsCopy> = {
     checkHeart: 'شيّك على معدّل القلب',
     disconnect: 'فصل وحذف المستورد',
     connected: 'تم تحديث خطواتك من صحة Apple.',
-    denied: 'ما انعطى الإذن. كمّل بالإدخال اليدوي أو فعّله من إعدادات صحة Apple.',
+    denied: 'ما وصلنا شي من صحة Apple. يا إن الإذن مقفّل للمقياس هذا، يا إنه ما فيه بيانات مسجّلة — شيّك على إعدادات صحة Apple، والإدخال اليدوي متاح دائمًا.',
+    unknown: 'ما وصلنا شي من صحة Apple. يا إن الإذن مقفّل للمقياس هذا، يا إنه ما فيه بيانات مسجّلة — شيّك على إعدادات صحة Apple، والإدخال اليدوي متاح دائمًا.',
     unavailable: 'صحة Apple مو متاحة على هذا الجهاز.',
     weightImported: 'استوردنا آخر وزن من صحة Apple.',
     weightNoData: 'تم الربط، بس ما فيه وزن مسجّل في صحة Apple لسا.',
@@ -103,7 +112,8 @@ export const NATIVE_SETTINGS_COPY: Record<Lang, NativeSettingsCopy> = {
     checkHeart: 'Check heart rate',
     disconnect: 'Disconnect & remove imported',
     connected: 'Your steps were refreshed from Apple Health.',
-    denied: "Permission wasn't given. Keep using manual entry or turn it on in Apple Health settings.",
+    denied: "Nothing came through from Apple Health. Either the permission for this metric is off, or there's nothing recorded yet — check your Apple Health settings. Manual entry always works.",
+    unknown: "Nothing came through from Apple Health. Either the permission for this metric is off, or there's nothing recorded yet — check your Apple Health settings. Manual entry always works.",
     unavailable: 'Apple Health is unavailable on this device.',
     weightImported: 'Imported your latest weight from Apple Health.',
     weightNoData: 'Connected, but no weight is recorded in Apple Health yet.',

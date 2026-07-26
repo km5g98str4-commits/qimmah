@@ -54,6 +54,11 @@ export const DATA_KEYS: readonly DataKeyDef[] = [
   { key: 'qimmah:onboarding:v1', kind: 'user', scoped: false, exported: true, synced: false, owner: 'onboarding', migration: 'owner-suffix' },
   { key: 'qimmah:achievements:v1', kind: 'user', scoped: false, exported: true, synced: true, owner: 'achievements/engine', migration: 'owner-suffix' },
   { key: 'qimmah:healthkit:v1', kind: 'user', scoped: false, exported: false, synced: false, owner: 'healthKit', migration: 'owner-suffix', note: 'حالة ربط لكل مقياس' },
+  // P14: مفتاحا طبقة الصحة الواسعة (P9) لم يكونا مسجّلين — تسجيلهما يدخلهما في
+  // بوابة التبنّي/الحجر ويجعل الهجرة القادمة تراهما. لا يُصدَّران ولا يُزامَنان:
+  // العيّنات المستوردة من صحة Apple تبقى على الجهاز وحده (خصوصية App Review 27.3).
+  { key: 'qimmah:health:samples:v1', kind: 'user', scoped: false, exported: false, synced: false, owner: 'health/store', migration: 'owner-suffix', note: 'عيّنات HealthKit المستوردة + مراسي الاستعلام (P9) — محلية فقط، لا تُرفع ولا تُصدَّر' },
+  { key: 'qimmah:health:connection:v1', kind: 'user', scoped: false, exported: false, synced: false, owner: 'health/connect', migration: 'owner-suffix', note: 'حالة الطلب المجمّع/التفعيل/آخر مزامنة لكل مقياس (P9)' },
   { key: 'qimmah:handedness', kind: 'user', scoped: false, exported: false, synced: false, owner: 'handedness', migration: 'owner-suffix', note: 'تفضيل حساب (وضع اليد)' },
   { key: 'qimmah:reminders:v1', kind: 'user', scoped: false, exported: true, synced: false, owner: 'reminderPrefs', migration: 'owner-suffix' },
   { key: 'qimmah:workoutCalendar:v1', kind: 'user', scoped: false, exported: true, synced: true, owner: 'workoutCalendar', migration: 'owner-suffix', note: 'الجدول الأسبوعي (يوم أسبوع → يوم خطة/راحة) + تجاوزات اليوم الفائت — يُزامَن (P12: workout_schedule، شاهد قبر عند المسح)' },
@@ -68,6 +73,9 @@ export const DATA_KEYS: readonly DataKeyDef[] = [
   { key: 'qimmah:warmup-pref:v1', kind: 'user', scoped: true, exported: true, synced: false, owner: 'strength/warmup', migration: 'already-scoped' },
   { key: 'qimmah:coach:lessons:v1', kind: 'user', scoped: true, exported: true, synced: false, owner: 'coaching', migration: 'already-scoped' },
   { key: 'qimmah:notifications:v1', kind: 'user', scoped: true, exported: true, synced: false, owner: 'notifications/prefs', migration: 'already-scoped' },
+  // P14: أثر إشعار نهاية الراحة المعلّق — طابع زمني واحد (endsAt) لا بيانات تمرين.
+  // موسوم بالمالك، ولا يُصدَّر ولا يُزامَن؛ يُمسح عند الإلغاء وعند مصالحة الإقلاع البارد.
+  { key: 'qimmah:restEndPending:v1', kind: 'user', scoped: true, exported: false, synced: false, owner: 'notifications/restEnd', migration: 'already-scoped', note: 'endsAt لإشعار الراحة المجدول — يتيح تنظيف الإشعار البائت عند الإقلاع البارد' },
   { key: 'qimmah:customPlan:v1', kind: 'user', scoped: true, exported: true, synced: true, owner: 'features/customPlan', migration: 'already-scoped' },
   { key: 'qimmah:planTemplates:v1', kind: 'user', scoped: true, exported: true, synced: true, owner: 'features/customPlan/builder', migration: 'already-scoped', note: 'قوالب جداول مسمّاة لكل مالك (P6) — تُزامَن (P12: plan_templates، شاهد قبر للحذف)' },
   { key: 'qimmah:nutritionHistory:v1', kind: 'user', scoped: true, exported: true, synced: true, owner: 'nutritionHistory', migration: 'already-scoped', note: 'دفتر تغذية مؤرَّخ لكل مالك (P7) — يُزامَن (P12: nutrition_ledger صف لكل يوم، شاهد قبر لمسح اليوم)؛ المجاميع تبقى عبر daily_logs' },

@@ -30,6 +30,8 @@ interface NativeScanResult {
   hit: { value: string; format: string } | null
   status: 'detected' | 'cancelled' | 'permission-denied' | 'no-camera' | 'error'
   resolution?: { width: number; height: number }
+  /** بيان وصفي من الإضافة: هل شُغّل الفلاش خلال المحاولة؟ (P14 — للتشخيص). */
+  torchUsed?: boolean
   message?: string
 }
 
@@ -84,7 +86,9 @@ async function scanOnceNative(options: ScanOnceOptions): Promise<BarcodeHit | nu
     setTorch: async (on) => {
       try {
         const result = await plugin.setTorch({ on })
-        return result.on === on
+        const applied = result.on === on
+        if (applied) diag.recordTorch(on)
+        return applied
       } catch {
         return false
       }
@@ -96,6 +100,7 @@ async function scanOnceNative(options: ScanOnceOptions): Promise<BarcodeHit | nu
   try {
     const result = await plugin.scanOnce(options.labels)
     if (result.resolution) diag.recordResolution(result.resolution.width, result.resolution.height)
+    if (result.torchUsed === true) diag.recordTorch(true)
     if (result.message) diag.note(result.message)
     if (result.status === 'detected' && result.hit) {
       diag.end('detected', result.hit.format)
@@ -106,7 +111,8 @@ async function scanOnceNative(options: ScanOnceOptions): Promise<BarcodeHit | nu
       result.status === 'cancelled' || result.status === 'permission-denied' || result.status === 'no-camera'
         ? result.status
         : 'error'
-    diag.end(status === 'cancelled' ? 'cancelled' : 'error')
+    // P14: تُسجَّل الحالة الدقيقة كما هي — رفض الصلاحية لم يبقَ مخبوءًا تحت 'error'.
+    diag.end(status)
     options.onOutcome?.(status)
     return null
   } catch (err) {

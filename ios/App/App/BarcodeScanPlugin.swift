@@ -39,6 +39,14 @@ public class BarcodeScanPlugin: CAPPlugin, CAPBridgedPlugin {
         let torchLabel = call.getString("torch") ?? "Torch"
         let hintLabel = call.getString("hint") ?? ""
 
+        // P14: resolve "no camera" BEFORE presenting. Presenting a controller that
+        // immediately dismisses itself (simulator / no rear camera) can strand a black
+        // full-screen view, because `dismiss` during the present transition is dropped.
+        guard AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) != nil else {
+            call.resolve(["hit": NSNull(), "status": "no-camera"])
+            return
+        }
+
         AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in
             DispatchQueue.main.async {
                 guard let self = self else { return }
@@ -54,18 +62,20 @@ public class BarcodeScanPlugin: CAPPlugin, CAPBridgedPlugin {
                 scanner.onFinish = { [weak self] outcome in
                     self?.activeScanner = nil
                     switch outcome {
-                    case let .detected(value, format, width, height):
+                    case let .detected(value, format, width, height, torchUsed):
                         call.resolve([
                             "hit": ["value": value, "format": format],
                             "status": "detected",
-                            "resolution": ["width": width, "height": height]
+                            "resolution": ["width": width, "height": height],
+                            // Diagnostics metadata only (no pixels, no barcode value here).
+                            "torchUsed": torchUsed
                         ])
-                    case .cancelled:
-                        call.resolve(["hit": NSNull(), "status": "cancelled"])
+                    case let .cancelled(torchUsed):
+                        call.resolve(["hit": NSNull(), "status": "cancelled", "torchUsed": torchUsed])
                     case .noCamera:
-                        call.resolve(["hit": NSNull(), "status": "no-camera"])
+                        call.resolve(["hit": NSNull(), "status": "no-camera", "torchUsed": false])
                     case let .failed(message):
-                        call.resolve(["hit": NSNull(), "status": "error", "message": message])
+                        call.resolve(["hit": NSNull(), "status": "error", "message": message, "torchUsed": false])
                     }
                 }
                 scanner.modalPresentationStyle = .fullScreen
@@ -101,8 +111,8 @@ public class BarcodeScanPlugin: CAPPlugin, CAPBridgedPlugin {
 /// buttons (labels injected from the bilingual JS dictionary — no hardcoded copy).
 final class BarcodeScanViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
     enum Outcome {
-        case detected(value: String, format: String, width: Int, height: Int)
-        case cancelled
+        case detected(value: String, format: String, width: Int, height: Int, torchUsed: Bool)
+        case cancelled(torchUsed: Bool)
         case noCamera
         case failed(String)
     }
@@ -120,6 +130,12 @@ final class BarcodeScanViewController: UIViewController, AVCaptureMetadataOutput
     private var device: AVCaptureDevice?
     private var finished = false
     private var sessionObserver: NSObjectProtocol?
+    /// Did the torch get switched on at any point? Diagnostics metadata only.
+    private var torchUsed = false
+    /// A terminal outcome reached before the view finished presenting — `dismiss` is
+    /// unreliable mid-transition, so it is replayed from `viewDidAppear`.
+    private var pendingOutcome: Outcome?
+    private var didAppear = false
 
     private let reticleView = UIView()
     private let torchButton = UIButton(type: .system)
@@ -269,15 +285,31 @@ final class BarcodeScanViewController: UIViewController, AVCaptureMetadataOutput
             cancelButton.topAnchor.constraint(equalTo: guide.topAnchor, constant: 12),
             cancelButton.leadingAnchor.constraint(equalTo: guide.leadingAnchor, constant: 16),
             cancelButton.heightAnchor.constraint(greaterThanOrEqualToConstant: 44),
+            // P14: `contentEdgeInsets` is deprecated since iOS 15 and is ignored whenever
+            // UIKit resolves a UIButtonConfiguration, so horizontal padding alone cannot
+            // be trusted to keep the target ≥44pt. Constrain the width explicitly.
+            cancelButton.widthAnchor.constraint(greaterThanOrEqualToConstant: 44),
 
             torchButton.bottomAnchor.constraint(equalTo: guide.bottomAnchor, constant: -24),
             torchButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             torchButton.heightAnchor.constraint(greaterThanOrEqualToConstant: 44),
+            torchButton.widthAnchor.constraint(greaterThanOrEqualToConstant: 44),
 
             hint.bottomAnchor.constraint(equalTo: torchButton.topAnchor, constant: -16),
             hint.leadingAnchor.constraint(equalTo: guide.leadingAnchor, constant: 24),
             hint.trailingAnchor.constraint(equalTo: guide.trailingAnchor, constant: -24)
         ])
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        didAppear = true
+        // Replay an outcome that fired during `viewDidLoad` (e.g. session setup failure):
+        // dismissing mid-presentation is dropped by UIKit and would strand a black screen.
+        if let pending = pendingOutcome {
+            pendingOutcome = nil
+            deliver(pending)
+        }
     }
 
     override func viewDidLayoutSubviews() {
@@ -322,7 +354,7 @@ final class BarcodeScanViewController: UIViewController, AVCaptureMetadataOutput
                 width = Int(dims.width)
                 height = Int(dims.height)
             }
-            finish(.detected(value: value, format: format, width: width, height: height))
+            finish(.detected(value: value, format: format, width: width, height: height, torchUsed: torchUsed))
             return
         }
     }
@@ -334,6 +366,7 @@ final class BarcodeScanViewController: UIViewController, AVCaptureMetadataOutput
             try camera.lockForConfiguration()
             camera.torchMode = on ? .on : .off
             camera.unlockForConfiguration()
+            if on { torchUsed = true }
             return true
         } catch {
             return false
@@ -341,11 +374,11 @@ final class BarcodeScanViewController: UIViewController, AVCaptureMetadataOutput
     }
 
     func cancel() {
-        finish(.cancelled)
+        finish(.cancelled(torchUsed: torchUsed))
     }
 
     @objc private func cancelTapped() {
-        finish(.cancelled)
+        finish(.cancelled(torchUsed: torchUsed))
     }
 
     @objc private func torchTapped() {
@@ -356,18 +389,41 @@ final class BarcodeScanViewController: UIViewController, AVCaptureMetadataOutput
     private func finish(_ outcome: Outcome) {
         guard !finished else { return }
         finished = true
-        sessionQueue.async { [weak self] in
-            guard let self = self else { return }
-            if self.session.isRunning {
-                self.session.stopRunning()
-            }
+        teardownCapture()
+        // Presenting is still animating in → defer, UIKit drops a mid-transition dismiss.
+        guard didAppear || presentingViewController == nil else {
+            pendingOutcome = outcome
+            return
         }
+        deliver(outcome)
+    }
+
+    private func deliver(_ outcome: Outcome) {
         if presentingViewController != nil {
             dismiss(animated: true) { [weak self] in
                 self?.onFinish?(outcome)
             }
         } else {
             onFinish?(outcome)
+        }
+    }
+
+    /// Deterministic capture teardown: torch off first (so it can never be left burning),
+    /// then stop the session and detach input/output/delegate so the device is released
+    /// as soon as this controller goes away — no lingering capture session, no drain.
+    private func teardownCapture() {
+        _ = setTorch(false)
+        metadataOutput.setMetadataObjectsDelegate(nil, queue: nil)
+        if let observer = sessionObserver {
+            NotificationCenter.default.removeObserver(observer)
+            sessionObserver = nil
+        }
+        sessionQueue.async { [session] in
+            if session.isRunning { session.stopRunning() }
+            session.beginConfiguration()
+            for input in session.inputs { session.removeInput(input) }
+            for output in session.outputs { session.removeOutput(output) }
+            session.commitConfiguration()
         }
     }
 }

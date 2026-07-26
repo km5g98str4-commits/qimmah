@@ -359,8 +359,11 @@ await check('سجل التشخيص: حقول وصفية فقط (لا قيمة ب
   handle.recordRoi(0.9, 0.55)
   handle.recordFrame()
   handle.recordFrame()
+  handle.recordTorch(true)
   const record = handle.end('detected', 'ean_13')
   const keys = Object.keys(record).sort()
+  // قائمة سماح مضبوطة: أي حقل جديد يجب أن يُضاف هنا صراحةً، فلا يتسلّل حقل يحمل
+  // قيمة/بكسلات. P14 أضاف `path` (native|web) و`torch` — كلاهما بيان وصفي.
   assert.deepEqual(keys, [
     'decodeLoopFps',
     'durationMs',
@@ -370,11 +373,15 @@ await check('سجل التشخيص: حقول وصفية فقط (لا قيمة ب
     'id',
     'notes',
     'outcome',
+    'path',
     'resolution',
     'roi',
     'startedAt',
+    'torch',
   ])
   assert.equal(record.framesAnalyzed, 2)
+  assert.equal(record.path, 'web')
+  assert.equal(record.torch, true)
   assert.ok(scanDiagnosticsSummary().includes('zxing-web'))
 })
 

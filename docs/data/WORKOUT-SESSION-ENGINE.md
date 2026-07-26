@@ -76,3 +76,48 @@ buildFinishCelebration({ session, prs, model?, currentSlotId? })
 - الاستعادة بعد القتل + مؤقّت endsAt: active-session ✓.
 - الحفظ المزدوج بنفس المعرّف = جلسة واحدة (idempotent في `saveWorkoutSession`) — مُثبَت؛ لم يحتج إصلاحًا.
 - مجموعات/أوزان/أرقام الجلسات الجزئية تُحسب (exerciseHistory يسجّل المجموعات المنجزة حتى في ended_early) — مُثبَت.
+
+---
+
+## تحديث P14 (تقوية الطبقة الأصلية)
+
+راجع `docs/audit/P14-NATIVE-HARDENING.md §3–§4` وعقد الربط في
+`docs/audit/P13-CODEX-HANDOFF.md §P14`.
+
+**الحقيقة الأهم:** كل ما في هذا العقد عن إشعار نهاية الراحة وعن الجلسة المهجورة **غير
+موصول بالواجهة إطلاقًا** — `grep` لـ`scheduleRestEndNotification` /
+`cancelRestEndNotification` / `classifyRestoredSession` يعطي **صفر** موضع استدعاء خارج
+`src/lib/**` والبراهين. فلا إشعار راحة رنّ على جهاز قط، وجلسة عمرها ثلاثة أيام تُستأنف
+كأنها جارية.
+
+### إشعار نهاية الراحة — تغييرات العقد
+
+- التوقيع صار `scheduleRestEndNotification(endsAt, lang, nowMs?, { ownerId })` و
+  `cancelRestEndNotification({ ownerId })`. **مرّر `ownerId`** (نفس `userId` المستخدم في
+  `qimmah:active-workout:v2:<owner>`) — الأثر المعلّق موسوم بالمالك.
+- **إصلاح:** `endsAt` ماضٍ كان يعيد `'skipped'` **قبل** الإلغاء، فيبقى إشعار الراحة
+  السابق معلّقًا ويرنّ بعد انتهاء الراحة. الإلغاء الآن يسبق فحص الوقت الماضي.
+- **جديد:** أثر معلّق `qimmah:restEndPending:v1:<owner>` (فيه `endsAt` فقط، لا بيانات
+  تمرين) + `reconcileRestEndOnColdStart({ ownerId, activeRestEndsAt, nowMs })` تُعيد
+  `none | unsupported | kept | cleared-stale | cleared-orphan`. البائت يُلغى **ويُزال من
+  مركز الإشعارات** (`removeDeliveredNotifications`).
+- `releaseRestEndForSession(ownerId)` — نداء واحد للتخطّي/الإنهاء/التجاهل.
+
+### مصالحة الإقلاع البارد — API جديدة
+
+```ts
+isUsableActiveWorkout(value, exerciseIds)          // توأم isUsableSession في طبقة البيانات
+decideColdStart({ persisted, exerciseIds, nowMs, thresholdMs })   // نقية
+reconcileWorkoutColdStart({ ownerId, exerciseIds, nowMs?, thresholdMs? })  // النداء الوحيد
+isActiveWorkoutAlreadySaved(startedAt)             // حماية من الحفظ المزدوج
+activeWorkoutKey(ownerId) · readPersistedActiveWorkout · clearPersistedActiveWorkout
+```
+
+`decideColdStart` تفرّق أخيرًا بين **`malformed`** (تُمسح فورًا، لا عمل فيها) و
+**`plan-changed`** (**لا تُمسح** من طبقة البيانات، وتُبلّغ `completedSets` حتى تُحذّر
+الواجهة قبل إسقاط عمل حقيقي — السلوك القائم في `WorkoutV2.tsx` يحذفها صامتة).
+كما تحسب `restState: 'none'|'running'|'elapsed'` و`restRemainingSec` من `endsAt`.
+
+**البرهان:** `npm run test:native-hardening` (٩٣ فحصًا؛ منها ٣٥ لهذين السطحين) —
+مُسجَّل في `test:gate`. لا شيء منها متحقَّق على جهاز:
+`docs/audit/DEVICE-NOT-VERIFIED.md §③–§④`.
