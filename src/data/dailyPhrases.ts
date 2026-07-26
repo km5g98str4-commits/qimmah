@@ -7,6 +7,9 @@
 //
 // أي إضافة مستقبلية يجب أن تلتزم بنفس الخطوط. أبقِ العبارات قصيرة وعربية فصيحة مبسّطة.
 
+import type { Lang } from '@/lib/appPreferences'
+import { dailyPhrasesEn } from '@/data/dailyPhrasesEn'
+
 export const dailyPhrases: string[] = [
   // — الحضور والبدء —
   'ابدأ اليوم. الخطوة الأولى أهم خطوة.',
@@ -462,11 +465,16 @@ export function dayOfYear(d: Date = new Date()): number {
 }
 
 /**
- * عبارة اليوم — حتمية: نفس التاريخ يعطي نفس العبارة دائمًا.
- * تدور على طول السنة عبر باقي القسمة على عدد العبارات.
+ * عبارة اليوم — حتمية: نفس التاريخ يعطي نفس العبارة دائمًا (لا تتغيّر مع كل
+ * render)، وتتغيّر بتغيّر اليوم. تدور على طول السنة بباقي القسمة.
+ *
+ * اللغة: العربية افتراضًا؛ `'en'` تعيد المقابل الإنجليزي من `dailyPhrasesEn`
+ * بنفس الفهرس (عقد تماثل الفهارس — انظر dailyPhrasesEn.ts). إن اختلّ طول
+ * المصفوفة الإنجليزية لأي سبب نعود للعربية بدل إرجاع فراغ.
  */
-export function phraseForDay(d: Date = new Date()): string {
+export function phraseForDay(d: Date = new Date(), lang: Lang = 'ar'): string {
   if (dailyPhrases.length === 0) return ''
   const idx = (dayOfYear(d) - 1 + dailyPhrases.length) % dailyPhrases.length
+  if (lang === 'en') return dailyPhrasesEn[idx] ?? dailyPhrases[idx]
   return dailyPhrases[idx]
 }

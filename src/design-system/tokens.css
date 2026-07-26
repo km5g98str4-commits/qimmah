@@ -210,6 +210,17 @@
   --v2-dark-ink-faint: #a79f94;
   --v2-on-color: #ffffff;
 
+  /* Featured (emphasis) surface — the single card that inverts against the page.
+     SEMANTIC PAIR: never pair it with a hardcoded colour, and never build it from
+     an *ink* token, because ink flips with the theme; using `bg-ink-900` as a
+     surface produced white-on-light text in dark mode (the Q16 bug). Light theme:
+     deep ink card + white ink. Dark theme (override below): raised dark paper +
+     light ink — a near-black card on a near-black page would lose separation. */
+  --v2-surface-featured: var(--v2-ink-strong);
+  --v2-on-featured: var(--v2-on-color);
+  --v2-on-featured-muted: color-mix(in srgb, var(--v2-on-color) 74%, transparent);
+  --v2-featured-wash: color-mix(in srgb, var(--v2-on-color) 14%, transparent);
+
   --v2-brand-primary: var(--v2-ember);
   --v2-action-primary: var(--v2-ember);
   --v2-surface-canvas: var(--v2-cream);
@@ -288,6 +299,11 @@
 :root[data-theme='dark'] body {
   color-scheme: dark;
   --v2-green-text: #3ddc84; /* lighter green for AA small text on the dark surface */
+  /* Featured card on dark: raised paper + light ink (see the pair's note above). */
+  --v2-surface-featured: var(--v2-dark-paper-active);
+  --v2-on-featured: var(--v2-dark-ink-strong);
+  --v2-on-featured-muted: color-mix(in srgb, var(--v2-dark-ink-strong) 78%, transparent);
+  --v2-featured-wash: color-mix(in srgb, var(--v2-dark-ink-strong) 12%, transparent);
   --c-primary: var(--v2-ember);
   --c-accent: var(--v2-teal);
   --c-page: 22 20 15;
