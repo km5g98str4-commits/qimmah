@@ -89,7 +89,7 @@ export function ExerciseDetail({ lang, exerciseId, onClose, onAddToPlan }: Exerc
         </div>
 
         {/* المحتوى */}
-        <div className="flex-1 overflow-y-auto p-4">
+        <div className="app-scroll flex-1 overflow-y-auto p-4">
           {tab === 'about' && <AboutTab ex={ex} d={d} lang={lang} onAddToPlan={onAddToPlan} />}
           {tab === 'history' && <HistoryTab stats={stats} d={d} lastWeight={rec?.lastWeight} bestWeight={rec?.bestWeight} lastReps={rec?.lastReps} />}
           {tab === 'charts' && <ChartsTab stats={stats} d={d} />}
