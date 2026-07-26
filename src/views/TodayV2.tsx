@@ -121,7 +121,12 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
       <div className="v2-screen-enter mx-auto w-full max-w-md space-y-5">
         <header>
           <p className="text-xs font-bold text-ink-500">{model.dateLabel}</p>
+          {/* ترحيب بالاسم الحقيقي فقط (النموذج يعيد صياغة عامة عند غيابه)، وتحته
+              عبارة اليوم الحتمية — نفس العبارة طول اليوم، تتغيّر بتغيّر التاريخ. */}
           <h2 className="mt-1 text-2xl font-black tracking-tight">{model.greeting}</h2>
+          {model.dailyPhrase && (
+            <p className="mt-1.5 text-sm leading-relaxed text-ink-500">{model.dailyPhrase}</p>
+          )}
         </header>
 
         <MinorGoalNotice lang={lang} />
@@ -197,29 +202,39 @@ function ActionCard({ action, featured, lang }: { action: TodayAction; featured:
       onClick={() => { void playHaptic('selection'); action.onClick() }}
       className={cn(
         'v2-pressable relative flex min-h-[10.5rem] flex-col overflow-hidden rounded-3xl border p-4 text-start shadow-card',
-        featured ? 'col-span-2 bg-ink-900 text-white' : 'bg-surface text-ink-900',
+        // البطاقة المميّزة تستخدم زوجًا دلاليًا يتبع الثيم (سطح + حبر فوقه). ممنوع
+        // bg-ink-900/text-white: توكن الحبر ينقلب مع الثيم فيصير أبيض فوق فاتح.
+        featured
+          ? 'col-span-2 bg-[color:var(--v2-surface-featured)] text-[color:var(--v2-on-featured)]'
+          : 'bg-surface text-ink-900',
       )}
       style={{ borderColor: featured ? 'transparent' : `color-mix(in srgb, ${color} 24%, rgb(var(--c-line)))` }}
     >
       <span
-        className="pointer-events-none absolute -end-8 -top-10 h-28 w-28 rounded-full opacity-20"
+        className={cn('pointer-events-none absolute -end-8 -top-10 h-28 w-28 rounded-full', featured ? 'opacity-30' : 'opacity-20')}
         style={{ backgroundColor: color }}
         aria-hidden="true"
       />
       <span
         className="relative grid h-11 w-11 place-items-center rounded-2xl"
         style={{
-          backgroundColor: featured ? 'rgb(255 255 255 / 0.12)' : `color-mix(in srgb, ${color} 14%, transparent)`,
-          color: featured ? 'white' : color,
+          backgroundColor: featured ? 'var(--v2-featured-wash)' : `color-mix(in srgb, ${color} 14%, transparent)`,
+          color: featured ? 'var(--v2-on-featured)' : color,
         }}
       >
         <Icon name={action.icon} className="h-5 w-5" strokeWidth={2.5} />
       </span>
       <span className="relative mt-4 block text-lg font-black leading-tight">{action.title}</span>
-      <span className={cn('relative mt-1 block text-xs leading-relaxed', featured ? 'text-white/70' : 'text-ink-500')}>
+      <span
+        className={cn('relative mt-1 block text-xs leading-relaxed', !featured && 'text-ink-500')}
+        style={featured ? { color: 'var(--v2-on-featured-muted)' } : undefined}
+      >
         {action.body}
       </span>
-      <span className="relative mt-auto flex items-center gap-1 pt-4 text-xs font-black" style={{ color: featured ? 'white' : color }}>
+      <span
+        className="relative mt-auto flex items-center gap-1 pt-4 text-xs font-black"
+        style={{ color: featured ? 'var(--v2-on-featured)' : color }}
+      >
         {action.cta}
         <Icon name={ar ? 'ChevronLeft' : 'ChevronRight'} className="h-4 w-4" />
       </span>

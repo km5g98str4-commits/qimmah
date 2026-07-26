@@ -18,6 +18,7 @@ import { getNutritionLog, getWorkoutSessions } from '@/lib/historyStore'
 import { todaysCompletion } from '@/lib/workoutSessionEngine'
 import { getDayStamp, weekdayName } from '@/lib/today'
 import { loadOnboardingProfile } from '@/lib/onboardingProfile'
+import { phraseForDay } from '@/data/dailyPhrases'
 
 export type TodayState = 'normal' | 'newUser' | 'afterWorkout' | 'returnAfterBreak'
 export type PillarKey = 'train' | 'nutrition' | 'move' | 'recover'
@@ -66,6 +67,11 @@ export interface TodayV2Model {
   completedCount: number
   totalCount: number
   cards: TodayCard[]
+  /**
+   * عبارة اليوم التحفيزية — حتمية: نفس التاريخ يعطي نفس العبارة دائمًا (لا تتغيّر
+   * مع كل render)، وتتغيّر بتغيّر تاريخ اليوم. بلغة الواجهة الحالية.
+   */
+  dailyPhrase: string
   trustNote: string | null
   /**
    * (P4) يوم راحة حقيقي من الجدول الأسبوعي — لا تمرين اليوم بقرار الجدولة، لا
@@ -178,7 +184,10 @@ export function buildTodayV2Model(customization: Customization, lang: Lang): Tod
   let greeting: string
   let dateLabel: string
   if (state === 'afterWorkout') {
-    greeting = t('كفو عليك اليوم', 'Well done today')
+    // الاسم الحقيقي فقط — لا اسم وهمي عند غيابه (صياغة عامة سليمة).
+    greeting = firstName
+      ? t(`كفو عليك يا ${firstName}`, `Well done today, ${firstName}`)
+      : t('كفو عليك اليوم', 'Well done today')
     dateLabel = `${weekday} · ${partOfDay(ar, now)}`
   } else {
     const dayMonth = (() => {
@@ -196,7 +205,9 @@ export function buildTodayV2Model(customization: Customization, lang: Lang): Tod
         ? firstName ? t(`هلا ${firstName}`, `Hi ${firstName}`) : t('هلا فيك', 'Welcome')
         : state === 'returnAfterBreak'
           ? firstName ? t(`حيّاك من جديد يا ${firstName}`, `Great to see you back, ${firstName}`) : t('حيّاك من جديد', 'Great to see you back')
-          : t('يومك في قِمّة', 'Your day in Qimmah')
+          : firstName
+            ? t(`هلا ${firstName}، يومك في قِمّة`, `Hey ${firstName}, here's your day in Qimmah`)
+            : t('يومك في قِمّة', 'Your day in Qimmah')
   }
 
   // ── Hero: the single top-third decision ──
@@ -244,7 +255,7 @@ export function buildTodayV2Model(customization: Customization, lang: Lang): Tod
     else if (!loggedMeal && nutritionTarget) trustNote = t('ما فيه وجبات مسجّلة اليوم لسا.', 'No meals logged yet today.')
   }
 
-  return { state, greeting, dateLabel, avatarInitial, goalLabel, hero, pillars, progressLabel, completedCount, totalCount, cards, trustNote, restDay }
+  return { state, greeting, dateLabel, avatarInitial, goalLabel, hero, pillars, progressLabel, completedCount, totalCount, cards, dailyPhrase: phraseForDay(now, lang), trustNote, restDay }
 }
 
 // ── Hero builders ────────────────────────────────────────────────────────────
