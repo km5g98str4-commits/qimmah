@@ -1,0 +1,25 @@
+{
+  "files": 65,
+  "totalRaw": 2308485,
+  "totalGzip": 581278,
+  "totalRawHuman": "2254.4 KB",
+  "totalGzipHuman": "567.7 KB",
+  "progressChunks": [
+    {
+      "file": "ProgressView-DTBAiM4e.js",
+      "raw": 41185,
+      "gz": 13306,
+      "rawHuman": "40.2 KB",
+      "gzHuman": "13.0 KB"
+    },
+    {
+      "file": "progressStats-DjUZFnhp.js",
+      "raw": 718,
+      "gz": 456,
+      "rawHuman": "0.7 KB",
+      "gzHuman": "0.4 KB"
+    }
+  ],
+  "engineShipped": false,
+  "engineChunks": []
+}
