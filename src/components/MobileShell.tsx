@@ -141,7 +141,18 @@ export function MobileShell({ lang, tab, badge: _badge, onNavigate, onOpenSettin
       </a>
       <div className="app-container flex h-full min-h-0 flex-col border-x border-line/60">
         {/* هيدر مدمج */}
-        <header ref={headerRef} className="z-40 shrink-0 border-b border-line bg-surface" style={{ paddingTop: 'var(--safe-top)' }}>
+        {/* الهيدر يملك منطقة الأمان العلوية: مع تراكب شريط الحالة على iOS يمتد سطحه
+            (bg-surface) خلف الساعة/الشبكة/البطارية فيصير امتدادًا بصريًا للهيدر بلا شريط
+            منفصل. `relative` تجعل z-40 فعّالة (على عنصر static تُتجاهَل) فيبقى ترتيب
+            الطبقات صريحًا: محتوى < هيدر(40) < شريط سفلي(50) < أسطح ملء الشاشة(60+).
+            وفي وضع الانغماس (تمرين نشط/ملخّص) يُزال من التخطيط تمامًا — لا مجرّد inert —
+            فلا يمكن لأي كروم قشرة أن يعلو سطح التمرين أو يقصّ رأسه. */}
+        <header
+          ref={headerRef}
+          hidden={immersive}
+          className="relative z-40 shrink-0 border-b border-line bg-surface"
+          style={{ paddingTop: 'var(--safe-top)' }}
+        >
           <div className="flex h-14 items-center justify-between gap-3 px-4">
             {tab === 'dashboard' ? (
               <button type="button" onClick={() => onNavigate('dashboard')} className="flex min-h-[44px] items-center gap-2">
@@ -200,7 +211,7 @@ export function MobileShell({ lang, tab, badge: _badge, onNavigate, onOpenSettin
         <nav
           ref={navRef}
           hidden={keyboardOpen || immersive}
-          className="z-50 shrink-0 border-t border-line bg-surface"
+          className="relative z-50 shrink-0 border-t border-line bg-surface"
           style={{ paddingBottom: 'var(--safe-bottom)' }}
           aria-label={ar ? 'التنقّل الرئيسي' : 'Primary navigation'}
         >
