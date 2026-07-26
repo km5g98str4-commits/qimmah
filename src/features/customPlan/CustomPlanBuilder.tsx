@@ -388,7 +388,7 @@ function ExerciseRow({
     <li className="rounded-2xl border border-line bg-surface p-3">
       <div className="flex items-center gap-3">
         <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-line">
-          <ExerciseMedia exerciseId={pe.exerciseId} heightClass="h-12" hideChips />
+          <ExerciseMedia exerciseId={pe.exerciseId} lang={lang} heightClass="h-12" hideChips variant="thumb" />
         </div>
         <div className="min-w-0 flex-1">
           <ExerciseName
