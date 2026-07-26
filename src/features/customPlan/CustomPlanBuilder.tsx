@@ -96,8 +96,8 @@ export function CustomPlanBuilder({ lang, initialPlan, onSave, onCancel }: Custo
 
   return (
     <div dir={lang === 'ar' ? 'rtl' : 'ltr'} className="fixed inset-0 z-[70] flex flex-col bg-page text-ink-900">
-      {/* رأس */}
-      <header className="shrink-0 border-b border-line px-5 pt-4">
+      {/* رأس — سطح ملء الشاشة يبدأ تحت شريط الحالة، فحشوته العلوية تحترم منطقة الأمان. */}
+      <header className="shrink-0 border-b border-line px-5" style={{ paddingTop: 'max(1rem, var(--safe-top))' }}>
         <div className="mx-auto flex w-full max-w-md items-center justify-between gap-3">
           <button
             type="button"
@@ -125,7 +125,7 @@ export function CustomPlanBuilder({ lang, initialPlan, onSave, onCancel }: Custo
       </header>
 
       {/* المحتوى */}
-      <main className="flex-1 overflow-y-auto px-5 py-6">
+      <main className="app-scroll flex-1 overflow-y-auto px-5 py-6">
         <div className="mx-auto w-full max-w-md">
           {step === 'days' && (
             <Section title={d.daysTitle} hint={d.daysHint}>
