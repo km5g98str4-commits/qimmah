@@ -20,7 +20,11 @@
 //   • own INSERT/UPSERT succeeds            • own SELECT returns own rows
 //   • cross-user SELECT returns 0 rows      • cross-user UPDATE affects 0 rows
 //   • cross-user DELETE affects 0 rows      • cross-user INSERT is rejected
+//   • an UNFILTERED select as A returns only A's rows (RLS, not a where clause)
 //   • anon SELECT returns 0 rows            • anon INSERT is rejected
+// Then, on the four tombstone tables (P14): a wiped tombstone upsert is accepted,
+// the client's deleted_at/updated_at survive the trigger (LWW evidence intact), a
+// tombstone still carrying a payload is REJECTED, and a newer edit revives the row.
 // Then: delete_own_account wipes EVERY table for that user + removes the identity.
 // ============================================================================
 
@@ -47,7 +51,15 @@ const TABLES: TableSpec[] = [
   { name: 'achievements', onConflict: 'user_id', seed: (u) => ({ user_id: u, data: {} }) },
   { name: 'custom_plans', onConflict: 'user_id', seed: (u) => ({ user_id: u, data: {} }) },
   { name: 'todos', onConflict: 'user_id', seed: (u) => ({ user_id: u, data: {} }) },
+  // P14 — the four P12 coverage tables (supabase/migrations/20260726120001..3).
+  { name: 'nutrition_ledger', onConflict: 'user_id,date', seed: (u) => ({ user_id: u, date: '2026-07-13', data: { entries: [] } }) },
+  { name: 'recovery_logs', onConflict: 'user_id,date', seed: (u) => ({ user_id: u, date: '2026-07-13', data: { date: '2026-07-13' } }) },
+  { name: 'workout_schedule', onConflict: 'user_id', seed: (u) => ({ user_id: u, data: { days: [] } }) },
+  { name: 'plan_templates', onConflict: 'user_id,local_id', seed: (u) => ({ user_id: u, local_id: 'verify-1', data: { id: 'verify-1' } }) },
 ]
+
+/** Tables whose delete path is an upsert of a wiped row carrying deleted_at. */
+const TOMBSTONE_TABLES = ['measurement_logs', 'nutrition_ledger', 'workout_schedule', 'plan_templates']
 
 const results: { name: string; pass: boolean; detail: string }[] = []
 const record = (name: string, pass: boolean, detail = '') => {
@@ -117,6 +129,16 @@ async function main() {
     const ins = await A.client.from(spec.name).insert(spec.seed(B.id))
     record(`${spec.name}: cross-user INSERT rejected`, !!ins.error, ins.error ? 'rejected' : 'LEAK: insert allowed')
 
+    // UNFILTERED select as A → every returned row belongs to A. This is the real
+    // two-account isolation assertion: no `eq` filter is doing the hiding, RLS is.
+    const unfiltered = await A.client.from(spec.name).select('user_id')
+    const foreign = (unfiltered.data ?? []).filter((r) => (r as { user_id: string }).user_id !== A.id)
+    record(
+      `${spec.name}: unfiltered SELECT as A returns ONLY A's rows`,
+      !unfiltered.error && foreign.length === 0,
+      foreign.length ? `LEAK: ${foreign.length} foreign row(s)` : `${unfiltered.data?.length ?? 0} own rows`,
+    )
+
     // anon select → 0 rows; anon insert → rejected
     const anonSel = await anonClient.from(spec.name).select('user_id')
     record(`${spec.name}: anon SELECT blocked`, !anonSel.error ? (anonSel.data?.length ?? 0) === 0 : true, `${anonSel.data?.length ?? 0} rows`)
@@ -124,8 +146,65 @@ async function main() {
     record(`${spec.name}: anon INSERT rejected`, !!anonIns.error)
   }
 
+  // ── Tombstones (P12 delete path) + the LWW updated_at stamp (P14) ──
+  console.log('\n② tombstone upserts land, keep no payload, and preserve the LWW stamp')
+
+  const STAMP = '2020-01-02T03:04:05.000Z'
+  const tombstone = (table: string, userId: string, wiped: boolean): Record<string, unknown> => {
+    const base: Record<string, unknown> = { user_id: userId, deleted_at: STAMP, updated_at: STAMP }
+    const payload = wiped ? {} : { entries: ['leaked'] }
+    if (table === 'measurement_logs') return { ...base, local_id: 'verify-1', values: payload, notes: wiped ? null : 'leaked' }
+    if (table === 'nutrition_ledger') return { ...base, date: '2026-07-13', data: payload }
+    if (table === 'plan_templates') return { ...base, local_id: 'verify-1', data: payload }
+    return { ...base, data: payload }
+  }
+  const conflictOf = (table: string) => TABLES.find((t) => t.name === table)?.onConflict ?? 'user_id'
+
+  for (const table of TOMBSTONE_TABLES) {
+    // A wiped tombstone is accepted…
+    const okUp = await A.client.from(table).upsert(tombstone(table, A.id, true), { onConflict: conflictOf(table) })
+    record(`${table}: wiped tombstone upsert accepted`, !okUp.error, okUp.error?.message ?? '')
+
+    // …and the client's stamp survives (set_updated_at_lww, not now()).
+    const read = await A.client.from(table).select('deleted_at, updated_at').eq('user_id', A.id).limit(1)
+    const row = (read.data ?? [])[0] as { deleted_at?: string; updated_at?: string } | undefined
+    const same = (a?: string, b?: string) => !!a && !!b && new Date(a).getTime() === new Date(b).getTime()
+    record(`${table}: deleted_at stored as sent`, same(row?.deleted_at, STAMP), row?.deleted_at ?? 'missing')
+    record(
+      `${table}: updated_at NOT overwritten with now() — LWW evidence intact`,
+      same(row?.updated_at, STAMP),
+      row?.updated_at ?? 'missing',
+    )
+
+    // A tombstone that still carries a payload must be refused (privacy invariant).
+    const leak = await A.client.from(table).upsert(tombstone(table, A.id, false), { onConflict: conflictOf(table) })
+    record(
+      `${table}: tombstone carrying a payload is REJECTED`,
+      !!leak.error,
+      leak.error ? 'rejected by check constraint' : 'LEAK: deleted content stayed readable',
+    )
+
+    // Revive: a later edit beats the tombstone and clears it.
+    const revived = await A.client
+      .from(table)
+      .upsert({ ...(TABLES.find((t) => t.name === table)?.seed(A.id) ?? {}), deleted_at: null }, { onConflict: conflictOf(table) })
+    record(`${table}: a newer edit revives the row (deleted_at → null)`, !revived.error, revived.error?.message ?? '')
+  }
+
+  // The other half of the trigger: no stamp supplied ⇒ the server stamps.
+  const before = await A.client.from('nutrition_ledger').select('updated_at').eq('user_id', A.id).limit(1)
+  await A.client.from('nutrition_ledger').update({ data: { entries: [] } }).eq('user_id', A.id)
+  const after = await A.client.from('nutrition_ledger').select('updated_at').eq('user_id', A.id).limit(1)
+  const beforeAt = (before.data ?? [])[0] as { updated_at?: string } | undefined
+  const afterAt = (after.data ?? [])[0] as { updated_at?: string } | undefined
+  record(
+    'nutrition_ledger: update without a stamp still bumps updated_at',
+    !!beforeAt?.updated_at && !!afterAt?.updated_at && new Date(afterAt.updated_at) > new Date(beforeAt.updated_at),
+    `${beforeAt?.updated_at} → ${afterAt?.updated_at}`,
+  )
+
   // ── Deletion RPC: wipes everything for the caller ──
-  console.log('\n② delete_own_account wipes every table + removes identity')
+  console.log('\n③ delete_own_account wipes every table + removes identity')
   // Pre-count A's rows (as A) to prove there was something to wipe.
   let preTotal = 0
   for (const spec of TABLES) {
