@@ -1,6 +1,6 @@
 // ⚙️ ملف مُولّد آليًا — لا تُحرّره يدويًا. المولّد: scripts/build-media-manifest.mjs
 // إعادة التوليد: node scripts/build-media-manifest.mjs · الحارس: npm run test:media-pipeline
-// التغطية: 123/181 تمرينًا بإطارَي بداية/نهاية حقيقيَّين (المقاسات مفحوصة من الملفات).
+// التغطية: 121/181 تمرينًا بإطارَي بداية/نهاية حقيقيَّين (المقاسات مفحوصة من الملفات).
 // gif/video = null بصدق — لا مصدر متحرّك نظيف الحقوق حاليًا (روابط «بحث يوتيوب» ليست وسائط).
 // الحقوق من سجلّ scripts/media/provenance-manifest.json المُراجَع — أصل بلا صف = 'unverified'.
 
@@ -35,7 +35,7 @@ export interface ExerciseMediaManifestEntry {
 }
 
 /** عدد التمارين المغطاة بإطارات حقيقية. */
-export const MEDIA_STILLS_COVERAGE = 123
+export const MEDIA_STILLS_COVERAGE = 121
 /** إجمالي تمارين الكتالوج وقت التوليد. */
 export const MEDIA_CATALOG_TOTAL = 181
 /** تمارين بلا وسائط مطابقة بعد (لا تشمل بطاقات placeholder-only المتعمّدة). */
@@ -82,9 +82,9 @@ export const exerciseMediaManifest: Record<string, ExerciseMediaManifestEntry> =
   "incline-barbell-press": { "id": "incline-barbell-press", "status": "stills", "stillStart": { "path": "/exercise-images/incline-barbell-press/0.jpg", "width": 850, "height": 567, "bytes": 72311 }, "stillEnd": { "path": "/exercise-images/incline-barbell-press/1.jpg", "width": 850, "height": 567, "bytes": 71198 }, "gif": null, "video": null, "source": "yuhonas/free-exercise-db", "license": "Unlicense / public-domain dedication", "attribution": null },
   "dumbbell-bench-press": { "id": "dumbbell-bench-press", "status": "stills", "stillStart": { "path": "/exercise-images/dumbbell-bench-press/0.jpg", "width": 850, "height": 567, "bytes": 63319 }, "stillEnd": { "path": "/exercise-images/dumbbell-bench-press/1.jpg", "width": 850, "height": 567, "bytes": 64120 }, "gif": null, "video": null, "source": "yuhonas/free-exercise-db", "license": "Unlicense / public-domain dedication", "attribution": null },
   "incline-dumbbell-press": { "id": "incline-dumbbell-press", "status": "stills", "stillStart": { "path": "/exercise-images/incline-dumbbell-press/0.jpg", "width": 850, "height": 567, "bytes": 61978 }, "stillEnd": { "path": "/exercise-images/incline-dumbbell-press/1.jpg", "width": 850, "height": 567, "bytes": 61629 }, "gif": null, "video": null, "source": "yuhonas/free-exercise-db", "license": "Unlicense / public-domain dedication", "attribution": null },
-  "chest-press-machine": { "id": "chest-press-machine", "status": "stills", "stillStart": { "path": "/exercise-images/chest-press-machine/0.jpg", "width": 850, "height": 567, "bytes": 70215 }, "stillEnd": { "path": "/exercise-images/chest-press-machine/1.jpg", "width": 850, "height": 567, "bytes": 71498 }, "gif": null, "video": null, "source": "yuhonas/free-exercise-db", "license": "Unlicense / public-domain dedication", "attribution": null },
+  "chest-press-machine": { "id": "chest-press-machine", "status": "placeholder-only", "stillStart": null, "stillEnd": null, "gif": null, "video": null, "source": null, "license": null, "attribution": null },
   "iso-lateral-chest-press": { "id": "iso-lateral-chest-press", "status": "placeholder-only", "stillStart": null, "stillEnd": null, "gif": null, "video": null, "source": null, "license": null, "attribution": null },
-  "incline-chest-press-machine": { "id": "incline-chest-press-machine", "status": "stills", "stillStart": { "path": "/exercise-images/incline-machine-press/0.jpg", "width": 500, "height": 750, "bytes": 45401 }, "stillEnd": { "path": "/exercise-images/incline-machine-press/1.jpg", "width": 500, "height": 750, "bytes": 45822 }, "gif": null, "video": null, "source": "yuhonas/free-exercise-db", "license": "Unlicense / public-domain dedication", "attribution": null },
+  "incline-chest-press-machine": { "id": "incline-chest-press-machine", "status": "placeholder-only", "stillStart": null, "stillEnd": null, "gif": null, "video": null, "source": null, "license": null, "attribution": null },
   "iso-lateral-incline-press": { "id": "iso-lateral-incline-press", "status": "placeholder-only", "stillStart": null, "stillEnd": null, "gif": null, "video": null, "source": null, "license": null, "attribution": null },
   "pec-deck-machine": { "id": "pec-deck-machine", "status": "stills", "stillStart": { "path": "/exercise-images/pec-deck/0.jpg", "width": 850, "height": 567, "bytes": 85665 }, "stillEnd": { "path": "/exercise-images/pec-deck/1.jpg", "width": 850, "height": 567, "bytes": 82097 }, "gif": null, "video": null, "source": "yuhonas/free-exercise-db", "license": "Unlicense / public-domain dedication", "attribution": null },
   "cable-crossover": { "id": "cable-crossover", "status": "stills", "stillStart": { "path": "/exercise-images/cable-crossover/0.jpg", "width": 850, "height": 567, "bytes": 74524 }, "stillEnd": { "path": "/exercise-images/cable-crossover/1.jpg", "width": 850, "height": 567, "bytes": 76451 }, "gif": null, "video": null, "source": "yuhonas/free-exercise-db", "license": "Unlicense / public-domain dedication", "attribution": null },

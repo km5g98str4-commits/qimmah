@@ -649,7 +649,7 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
         <>
           <main className="app-scroll flex flex-1 flex-col overflow-y-auto px-5 pb-3">
             <div className="mt-2 shrink-0 overflow-hidden rounded-2xl" aria-hidden="true">
-              <ExerciseMedia exerciseId={ex.exerciseId} heightClass="h-32" hideChips />
+              <ExerciseMedia exerciseId={ex.exerciseId} lang={lang} heightClass="h-32" hideChips />
             </div>
             {/* Q19 — visual pyramid: program·day context → current exercise → category·sets.
                 The day/program line grounds "which session am I in" without leaving the set. */}
@@ -1028,7 +1028,7 @@ function PlanScreen({ model, lang, onExercise, onStart }: { model: ReturnType<ty
                 {g.items.map(({ ex, i }) => (
                   <button key={ex.id} type="button" onClick={() => onExercise(i)} className="v2-pressable flex w-full items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3 text-start hover:border-[color:var(--v2-blue)]">
                     <span className="h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-beige">
-                      <ExerciseMedia exerciseId={ex.exerciseId} heightClass="h-14" hideChips />
+                      <ExerciseMedia exerciseId={ex.exerciseId} lang={lang} heightClass="h-14" hideChips variant="thumb" />
                     </span>
                     <span className="min-w-0 flex-1">
                       <span className="block text-sm font-bold">{ar ? ex.nameAr : ex.nameEn}</span>
@@ -1053,7 +1053,7 @@ function DetailScreen({ ex, idx, total, lang, swapped, onReplace, onStart, onBac
       <div className="v2-screen-enter mx-auto w-full max-w-md">
         <button type="button" onClick={onBack} aria-label={ar ? 'رجوع' : 'Back'} className="grid h-10 w-10 place-items-center rounded-xl border border-line bg-surface"><Icon name="ChevronRight" className="h-5 w-5 rtl:rotate-0 ltr:rotate-180" /></button>
         <div className="mt-4 aspect-video overflow-hidden rounded-2xl border border-line bg-surface">
-          <ExerciseMedia exerciseId={ex.exerciseId} heightClass="h-full" hideChips />
+          <ExerciseMedia exerciseId={ex.exerciseId} lang={lang} heightClass="h-full" hideChips />
         </div>
         <p className="v2-text-blue mt-4 text-xs font-black uppercase tracking-wider">{ar ? `التمرين ${toAr(idx + 1, lang)} من ${toAr(total, lang)}` : `Exercise ${idx + 1} of ${total}`}</p>
         <h1 className="mt-1 text-2xl font-black">{ar ? ex.nameAr : ex.nameEn}</h1>
