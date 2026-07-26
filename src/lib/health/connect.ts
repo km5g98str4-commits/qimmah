@@ -178,6 +178,11 @@ export function hasRequestedHealthAccess(): boolean {
   return readConnection().requested
 }
 
+/** متى اكتمل الطلب المجمّع (ISO) — null قبله. لبطاقة الربط في الإعدادات (Q18). */
+export function healthRequestedAt(): string | null {
+  return readConnection().requestedAt
+}
+
 // ── المزامنة (قراءة فقط — لا تطلب التفويض أبدًا) ────────────────────────────
 
 export interface MetricSyncResult {
