@@ -8,7 +8,8 @@ import { loadSessions } from '@/lib/workoutSessions'
 import { useCustomization } from '@/lib/customizationContext'
 import { buildBodySpec, type BodyQuality } from '@/data/bodyModel3d'
 import { buildBodyMesh, type BodyMesh } from '@/lib/body3d/mesh'
-import { BodyRenderer, type Palette, type RGB } from '@/lib/body3d/render'
+import { advanceGlide, GLIDE_EPSILON, pointerVelocity } from '@/lib/body3d/motion'
+import { BodyRenderer, rasterScaleFor, type Palette, type RGB } from '@/lib/body3d/render'
 import type { Lang } from '@/lib/appPreferences'
 import type { MuscleCoverage, MuscleId } from '@/types/muscles'
 
@@ -33,10 +34,10 @@ const PRESETS: { key: string; ar: string; en: string; yaw: number }[] = [
 const MAX_PITCH = 0.42
 const IDLE_SPIN_MS = 5200
 const SELECT_PULSE_S = 1.6
-/** بكسلات المخزن لكل بكسل CSS — 2× يعطي حوافًا ناعمة على كل الشاشات. */
-const RASTER_SCALE = 2
-/** دقّة أخفّ أثناء السحب كي تبقى الحركة ٦٠ إطارًا على الأجهزة المتوسطة. */
-const RASTER_SCALE_DRAG = 1.35
+/** نسبة دقّة السحب إلى دقّة الاستقرار — حركة أخفّ ثم عودة للحدّة عند الثبات. */
+const DRAG_SCALE_RATIO = 0.7
+/** نصف قطر التسامح للنقر بالبكسل المنطقي. */
+const PICK_RADIUS_CSS = 4
 
 /** يحوّل لونًا نصيًا (hex أو rgb) إلى مكوّناته. */
 function parseColor(input: string, fallback: RGB): RGB {
@@ -93,6 +94,8 @@ export function BodyModel3D({ lang, className }: { lang: Lang; className?: strin
   const [ready, setReady] = useState(false)
   /** تلميح السحب يظهر حتى أول تفاعل فقط. */
   const [showHint, setShowHint] = useState(true)
+  /** هل البطاقة داخل إطار العرض؟ المجسّم يقع أسفل الطيّة في «التقدّم». */
+  const [visible, setVisible] = useState(false)
 
   const wrapRef = useRef<HTMLDivElement | null>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
@@ -100,22 +103,36 @@ export function BodyModel3D({ lang, className }: { lang: Lang; className?: strin
   const rafRef = useRef(0)
   const selectedRef = useRef<MuscleId | null>(null)
   const paletteRef = useRef<Palette>(readPalette(null))
+  const visibleRef = useRef(false)
+  visibleRef.current = visible
+
+  /** كثافة بكسل الجهاز — تحدّد التكبير الداخلي بدل ثابت مكتوب يدويًا. */
+  const [dpr, setDpr] = useState(() =>
+    typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1,
+  )
+  const idleScale = rasterScaleFor(dpr)
+  const dragScale = Math.max(1, idleScale * DRAG_SCALE_RATIO)
+  const scalesRef = useRef({ idle: idleScale, drag: dragScale })
+  scalesRef.current = { idle: idleScale, drag: dragScale }
 
   /** حالة الحركة — في ref كي لا يعيد السحب بناء المكوّن. */
   const anim = useRef({
     yaw: 0,
     pitch: -0.05,
+    /** سرعة الانزلاق بوحدة راديان لكل إطار مرجعي ٦٠هرتز (انظر body3d/motion). */
     vyaw: 0,
     targetYaw: null as number | null,
     dragging: false,
     pointerId: -1,
     lastX: 0,
     lastY: 0,
+    lastMoveT: 0,
     travelled: 0,
     pulse: 0,
     idleUntil: 0,
+    introShown: false,
     lastT: 0,
-    scale: RASTER_SCALE,
+    scale: idleScale,
   })
 
   // --- التغطية الأسبوعية ---
@@ -143,16 +160,49 @@ export function BodyModel3D({ lang, className }: { lang: Lang; className?: strin
     return cores <= 4 ? 'low' : 'high'
   }, [])
 
-  // --- بناء الشبكة (مرّة لكل جنس/جودة) ---
-  const mesh: BodyMesh = useMemo(() => buildBodyMesh(buildBodySpec(gender, quality)), [gender, quality])
+  // --- بناء الشبكة: خارج مسار الرسم ---
+  // بناء الشبكة يستغرق عشرات الميلي‌ثانية (وأضعافها على الجوال). كان يجري داخل
+  // useMemo أثناء العرض فيوقف الخيط الرئيسي قبل أن تُرسم البطاقة، فلا تظهر حالة
+  // «نبني المجسّم…» أصلًا. الآن يُبنى بعد أول ظهور فعلي للبطاقة على الشاشة.
+  const [mesh, setMesh] = useState<BodyMesh | null>(null)
 
-  const reducedMotion = useMemo(
+  useEffect(() => {
+    if (mode !== '3d' || !visible) return
+    let cancelled = false
+    const id = window.setTimeout(() => {
+      if (!cancelled) setMesh(buildBodyMesh(buildBodySpec(gender, quality)))
+    }, 0)
+    return () => {
+      cancelled = true
+      window.clearTimeout(id)
+    }
+  }, [gender, quality, mode, visible])
+
+  // --- تفضيل تقليل الحركة — متفاعل مع تغيّر الإعداد، لا لقطة عند التركيب ---
+  const [reducedMotion, setReducedMotion] = useState(
     () =>
       typeof window !== 'undefined' &&
       typeof window.matchMedia === 'function' &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches,
-    [],
   )
+  const reducedMotionRef = useRef(reducedMotion)
+  reducedMotionRef.current = reducedMotion
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const onChange = () => setReducedMotion(mq.matches)
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
+  }, [])
+
+  // --- كثافة البكسل قد تتغيّر (تكبير المتصفّح أو نقل النافذة بين شاشتين) ---
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const onResize = () => setDpr(window.devicePixelRatio || 1)
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
 
   /** يرسم إطارًا واحدًا بالحالة الحالية. */
   const paint = useCallback(() => {
@@ -166,8 +216,8 @@ export function BodyModel3D({ lang, className }: { lang: Lang; className?: strin
     if (w === 0 || h === 0) return
     const a = anim.current
     // أثناء الحركة نرسم بدقّة أقل ثم نعود للدقّة الكاملة عند الاستقرار.
-    const moving = a.dragging || a.targetYaw !== null || Math.abs(a.vyaw) > 0.0006
-    const s = moving ? RASTER_SCALE_DRAG : RASTER_SCALE
+    const moving = a.dragging || a.targetYaw !== null || Math.abs(a.vyaw) > GLIDE_EPSILON
+    const s = moving ? scalesRef.current.drag : scalesRef.current.idle
     a.scale = s
     if (canvas.width !== Math.round(w * s) || canvas.height !== Math.round(h * s)) {
       canvas.width = Math.round(w * s)
@@ -195,17 +245,25 @@ export function BodyModel3D({ lang, className }: { lang: Lang; className?: strin
       a.lastT = t
       let animating = false
 
+      // البطاقة خارج الشاشة: نوقف الحلقة تمامًا. requestAnimationFrame يُخنق
+      // عند إخفاء التبويب فقط، أمّا التمرير بعيدًا فيُبقيها تعمل بكامل معدّلها.
+      if (!visibleRef.current) {
+        a.lastT = 0
+        return
+      }
+
       // دوران تلقائي تعريفي عند أول ظهور — يتوقّف فور لمس المستخدم.
-      if (!a.dragging && a.targetYaw === null && t < a.idleUntil && !reducedMotion) {
+      if (!a.dragging && a.targetYaw === null && t < a.idleUntil && !reducedMotionRef.current) {
         a.yaw += dt * 0.55
         animating = true
       }
 
-      // انزلاق بعد رفع الإصبع.
-      if (!a.dragging && a.targetYaw === null && Math.abs(a.vyaw) > 0.0006) {
-        a.yaw += a.vyaw
-        a.vyaw *= Math.pow(0.02, dt)
-        animating = true
+      // انزلاق بعد رفع الإصبع — تكامل مستقلّ عن معدّل الإطارات (body3d/motion).
+      if (!a.dragging && a.targetYaw === null && a.vyaw !== 0) {
+        const step = advanceGlide(a.vyaw, dt)
+        a.yaw += step.dYaw
+        a.vyaw = step.moving ? step.velocity : 0
+        if (step.moving) animating = true
       }
 
       // انتقال ناعم إلى زاوية جاهزة.
@@ -232,23 +290,54 @@ export function BodyModel3D({ lang, className }: { lang: Lang; className?: strin
         a.lastT = 0
       }
     },
-    [paint, reducedMotion],
+    [paint],
   )
 
   const requestFrame = useCallback(() => {
     if (!rafRef.current) rafRef.current = requestAnimationFrame(tick)
   }, [tick])
 
-  // --- تهيئة الراسم عند تغيّر الشبكة ---
+  /** يوقف حلقة الرسم فورًا (تبديل الوضع، الخروج من الشاشة، التفكيك). */
+  const stopLoop = useCallback(() => {
+    if (rafRef.current) cancelAnimationFrame(rafRef.current)
+    rafRef.current = 0
+    anim.current.lastT = 0
+  }, [])
+
+  // --- رصد ظهور البطاقة على الشاشة ---
+  // المجسّم يقع أسفل الطيّة في «التقدّم»: بلا هذا الرصد كان يبني شبكته ويدور
+  // تعريفيًا ٥٫٢ ثوانٍ بستّين إطارًا في الثانية قبل أن يصل إليه المستخدم أصلًا.
   useEffect(() => {
-    if (mode !== '3d') return
+    const el = wrapRef.current
+    if (!el) return
+    if (typeof IntersectionObserver === 'undefined') {
+      setVisible(true)
+      return
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) setVisible(entry.isIntersecting)
+      },
+      { rootMargin: '120px' },
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [])
+
+  // --- تهيئة الراسم عند جهوز الشبكة ---
+  useEffect(() => {
+    if (mode !== '3d' || !mesh) return
     paletteRef.current = readPalette(wrapRef.current)
     if (rendererRef.current) rendererRef.current.setMesh(mesh)
     else rendererRef.current = new BodyRenderer(mesh)
     setReady(true)
-    anim.current.idleUntil = performance.now() + IDLE_SPIN_MS
-    anim.current.lastT = 0
-    // رسم فوري لا ينتظر إطار الرسوم (يضمن ظهور المجسّم حتى لو كانت الصفحة مخفيّة).
+    const a = anim.current
+    // الدوران التعريفي يبدأ عند أوّل ظهور فعلي، لا عند التركيب — كي يراه المستخدم.
+    if (!a.introShown) {
+      a.introShown = true
+      a.idleUntil = performance.now() + IDLE_SPIN_MS
+    }
+    a.lastT = 0
     paint()
     requestFrame()
   }, [mesh, mode, paint, requestFrame])
@@ -259,7 +348,7 @@ export function BodyModel3D({ lang, className }: { lang: Lang; className?: strin
     if (mode === '3d') requestFrame()
   }, [selected, heat, mode, requestFrame])
 
-  // --- إعادة الرسم عند تغيّر المقاس ---
+  // --- إعادة الرسم عند تغيّر المقاس أو كثافة البكسل ---
   useEffect(() => {
     if (mode !== '3d') return
     const el = canvasRef.current
@@ -269,14 +358,33 @@ export function BodyModel3D({ lang, className }: { lang: Lang; className?: strin
     return () => ro.disconnect()
   }, [mode, requestFrame])
 
-  // --- إيقاف الحلقة عند التفكيك ---
-  useEffect(
-    () => () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current)
-      rafRef.current = 0
-    },
-    [],
-  )
+  useEffect(() => {
+    if (mode === '3d') requestFrame()
+  }, [dpr, mode, requestFrame])
+
+  // --- لوحة الألوان تتبع السمة الحيّة (<html data-theme>) ---
+  useEffect(() => {
+    if (mode !== '3d' || typeof MutationObserver === 'undefined') return
+    const root = document.documentElement
+    const mo = new MutationObserver(() => {
+      paletteRef.current = readPalette(wrapRef.current)
+      rendererRef.current?.invalidateColors()
+      requestFrame()
+    })
+    mo.observe(root, { attributes: true, attributeFilter: ['data-theme', 'class'] })
+    return () => mo.disconnect()
+  }, [mode, requestFrame])
+
+  // --- إيقاف الحلقة عند مغادرة وضع المجسّم أو الخروج من الشاشة أو التفكيك ---
+  useEffect(() => {
+    if (mode !== '3d' || !visible) {
+      stopLoop()
+      return
+    }
+    requestFrame()
+  }, [mode, visible, stopLoop, requestFrame])
+
+  useEffect(() => stopLoop, [stopLoop])
 
   /** يحدّث تسمية الزاوية المعروضة. */
   const syncAngleLabel = useCallback(() => {
@@ -300,6 +408,7 @@ export function BodyModel3D({ lang, className }: { lang: Lang; className?: strin
     a.pointerId = e.pointerId
     a.lastX = e.clientX
     a.lastY = e.clientY
+    a.lastMoveT = 0
     a.travelled = 0
     a.vyaw = 0
     a.targetYaw = null
@@ -316,9 +425,14 @@ export function BodyModel3D({ lang, className }: { lang: Lang; className?: strin
     a.lastX = e.clientX
     a.lastY = e.clientY
     a.travelled += Math.abs(dx) + Math.abs(dy)
-    a.yaw += dx * 0.011
+    const dYaw = dx * 0.011
+    a.yaw += dYaw
     a.pitch = Math.max(-MAX_PITCH, Math.min(MAX_PITCH, a.pitch + dy * 0.006))
-    a.vyaw = dx * 0.011
+    // السرعة تُشتقّ من الزمن بين حدثين لا من إزاحة الحدث وحدها، وإلّا ضعُفت
+    // قوّة القذف إلى النصف على الأجهزة التي ترسل أحداث مؤشّر بـ١٢٠هرتز.
+    const dtMs = a.lastMoveT ? e.timeStamp - a.lastMoveT : 0
+    a.lastMoveT = e.timeStamp
+    a.vyaw = pointerVelocity(dYaw, dtMs)
     requestFrame()
   }
 
@@ -333,9 +447,15 @@ export function BodyModel3D({ lang, className }: { lang: Lang; className?: strin
     if (a.travelled < 8) {
       const rect = e.currentTarget.getBoundingClientRect()
       const hit =
-        rendererRef.current?.pick(e.clientX - rect.left, e.clientY - rect.top, a.scale) ?? null
+        rendererRef.current?.pick(
+          e.clientX - rect.left,
+          e.clientY - rect.top,
+          a.scale,
+          PICK_RADIUS_CSS,
+        ) ?? null
       setSelected((cur) => (cur === hit ? null : hit))
-      if (hit) a.pulse = SELECT_PULSE_S
+      // النبضة زينة متحرّكة — تُلغى مع «تقليل الحركة»، ويبقى التحديد ظاهرًا ثابتًا.
+      if (hit && !reducedMotionRef.current) a.pulse = SELECT_PULSE_S
       a.vyaw = 0
     }
     syncAngleLabel()

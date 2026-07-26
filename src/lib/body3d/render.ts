@@ -12,6 +12,7 @@
 // ============================================================================
 
 import type { MuscleId } from '@/types/muscles'
+import { ALL_MUSCLE_IDS } from '@/data/muscleGroups'
 import { clamp, mulMM, rotX, rotY, type Mat3 } from './math'
 import { muscleAt, type BodyMesh } from './mesh'
 import { SoftRaster } from './raster'
@@ -66,6 +67,31 @@ const RIM_STRENGTH = 0.34
 /** مسافة الكاميرا بوحدات النموذج — تتحكّم بقوة المنظور. */
 const CAMERA_DISTANCE = 520
 
+// ---------------------------------------------------------------------------
+// التكبير الداخلي مقابل كثافة بكسل الجهاز
+// ---------------------------------------------------------------------------
+
+/**
+ * سقف التكبير الداخلي. الكلفة تتناسب مع مربّع المعامل: 3× تكلّف ٢٫٢٥ ضعف 2×،
+ * بينما الفرق البصري بعد تنعيم الحواف غير محسوس على شاشة جوال — فنقف عند 2×.
+ */
+export const MAX_RASTER_SCALE = 2
+/**
+ * أرضية التكبير. على شاشة بكثافة 1× يبقى 1.5× تنعيمًا فوق-عيّنيًا حقيقيًا
+ * (٤٤٪ بكسلات أقل من 2× بلا خسارة محسوسة).
+ */
+export const MIN_RASTER_SCALE = 1.5
+
+/**
+ * يشتقّ معامل التكبير الداخلي من كثافة بكسل الجهاز.
+ * كان المعامل ثابتًا 2× بلا قراءة `devicePixelRatio` إطلاقًا، فكان يهدر البكسلات
+ * على الشاشات العادية ولا يستفيد من شيء على شاشات 3×.
+ */
+export function rasterScaleFor(dpr: number): number {
+  if (!Number.isFinite(dpr) || dpr <= 0) return MAX_RASTER_SCALE
+  return clamp(dpr, MIN_RASTER_SCALE, MAX_RASTER_SCALE)
+}
+
 export class BodyRenderer {
   private mesh: BodyMesh
   private raster = new SoftRaster()
@@ -81,7 +107,10 @@ export class BodyRenderer {
   private br = new Float32Array(0)
   private bg = new Float32Array(0)
   private bb = new Float32Array(0)
-  private baseKey = ''
+  /** آخر شدّات حرارة استُخدمت في حساب ألوان الأساس — للمقارنة بلا تخصيص ذاكرة. */
+  private heatCache = new Float32Array(ALL_MUSCLE_IDS.length)
+  private paletteCache = -1
+  private baseValid = false
   private centerY = 0
 
   constructor(mesh: BodyMesh) {
@@ -95,6 +124,11 @@ export class BodyRenderer {
     this.allocate()
   }
 
+  /** يُبطل ذاكرة ألوان الأساس — يُستدعى عند تبديل السمة (تتغيّر لوحة الهوية). */
+  invalidateColors(): void {
+    this.baseValid = false
+  }
+
   private allocate(): void {
     const n = this.mesh.vertCount
     this.sx = new Float32Array(n)
@@ -106,7 +140,7 @@ export class BodyRenderer {
     this.br = new Float32Array(n)
     this.bg = new Float32Array(n)
     this.bb = new Float32Array(n)
-    this.baseKey = ''
+    this.baseValid = false
     this.centerY = (this.mesh.bounds.minY + this.mesh.bounds.maxY) / 2
   }
 
@@ -117,10 +151,20 @@ export class BodyRenderer {
   private updateBaseColors(o: RenderOptions): void {
     const m = this.mesh
     const pal = o.palette
-    // مفتاح التغيّر: أي اختلاف في الحرارة أو اللوحة يعيد الحساب.
-    const key = `${pal.heat.r},${pal.heat.g},${pal.heat.b}|${JSON.stringify(o.heat)}`
-    if (key === this.baseKey) return
-    this.baseKey = key
+    // كشف التغيّر بلا تخصيص ذاكرة: كان هذا السطر يبني نصًّا عبر JSON.stringify
+    // في كل إطار — قمامة دورية في المسار الساخن رغم أن الملف يَعِد بصفر تخصيص.
+    const palKey = (pal.heat.r << 16) | (pal.heat.g << 8) | pal.heat.b
+    let changed = !this.baseValid || palKey !== this.paletteCache
+    for (let k = 0; k < ALL_MUSCLE_IDS.length; k++) {
+      const hv = o.heat[ALL_MUSCLE_IDS[k]] ?? 0
+      if (hv !== this.heatCache[k]) {
+        this.heatCache[k] = hv
+        changed = true
+      }
+    }
+    if (!changed) return
+    this.paletteCache = palKey
+    this.baseValid = true
 
     for (let i = 0; i < m.vertCount; i++) {
       const inf = m.vertInf[i] / 255
@@ -257,8 +301,9 @@ export class BodyRenderer {
     raster.antialiasEdges(raster.bbMinX - 1, raster.bbMinY - 1, raster.bbMaxX + 1, raster.bbMaxY + 1)
 
     // --- النقل إلى الشاشة ثم إضافة ظل الأرضية خلف الجسم ---
+    // putImageData يستبدل كل بكسلات الإطار (بما فيها ألفا) ولا يمزج، وأبعاده
+    // هي أبعاد الـcanvas كاملة — فلا حاجة لـclearRect قبله.
     ctx.setTransform(1, 0, 0, 1, 0, 0)
-    ctx.clearRect(0, 0, W, H)
     raster.blit(ctx)
 
     const groundY = halfH - (m.bounds.minY - cy) * zoom
@@ -277,25 +322,34 @@ export class BodyRenderer {
     ctx.restore()
   }
 
-  /** يُعيد العضلة الظاهرة عند نقطة (بإحداثيات CSS)، أو null. */
-  pick(x: number, y: number, scale: number): MuscleId | null {
+  /**
+   * يُعيد العضلة الظاهرة عند نقطة (بإحداثيات CSS)، أو null.
+   *
+   * يمسح قرصًا كاملًا حول نقطة اللمس ويختار **الأقرب فعليًا**. النسخة السابقة
+   * كانت تمسح شبكة متفرّقة (dx,dy ∈ {−r,0,r} لـ r ∈ {0,2,4,7}) وتُرجع أوّل ما
+   * تجده بترتيب المسح، فكانت تُحابي الجهة العليا-اليسرى وتُخطئ العضلة الأقرب،
+   * بل وتُرجع null أحيانًا وعضلةٌ على بُعد ٣ بكسلات لأن النمط لا يمرّ عليها.
+   *
+   * @param radiusCss نصف قطر التسامح بالبكسل المنطقي (CSS).
+   */
+  pick(x: number, y: number, scale: number, radiusCss = 4): MuscleId | null {
     const px = Math.round(x * scale)
     const py = Math.round(y * scale)
-    // بحث في جوار صغير كي لا تفشل النقرة بفارق بكسل واحد.
-    for (const r of [0, 2, 4, 7]) {
-      for (let dy = -r; dy <= r; dy += r || 1) {
-        for (let dx = -r; dx <= r; dx += r || 1) {
-          const mi = this.raster.muscleAtPixel(px + dx, py + dy)
-          if (mi >= 0) return muscleAt(mi)
+    const r = Math.max(1, Math.round(radiusCss * scale))
+    const r2 = r * r
+    let bestD = Infinity
+    let best = -1
+    for (let dy = -r; dy <= r; dy++) {
+      for (let dx = -r; dx <= r; dx++) {
+        const d = dx * dx + dy * dy
+        if (d > r2 || d >= bestD) continue
+        const mi = this.raster.muscleAtPixel(px + dx, py + dy)
+        if (mi >= 0) {
+          bestD = d
+          best = mi
         }
-        if (r === 0) break
       }
     }
-    return null
-  }
-
-  /** هل تقع النقطة على الجسم أصلًا؟ */
-  hitsBody(x: number, y: number, scale: number): boolean {
-    return this.raster.hasSurface(Math.round(x * scale), Math.round(y * scale))
+    return best >= 0 ? muscleAt(best) : null
   }
 }

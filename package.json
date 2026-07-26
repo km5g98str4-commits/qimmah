@@ -31,6 +31,7 @@
     "test:active-session": "node scripts/run-active-session-proof.mjs",
     "test:today-v2": "node scripts/run-today-v2-model-proof.mjs",
     "test:progress-v2": "node scripts/run-progress-v2-proof.mjs",
+    "test:body3d": "node scripts/run-body3d-proof.mjs",
     "test:data-portability": "node scripts/run-data-portability-proof.mjs",
     "test:portability": "node scripts/run-portability-proof.mjs",
     "test:notifications": "node scripts/run-notifications-proof.mjs",
