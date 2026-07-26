@@ -41,6 +41,8 @@ import { ACTIVE_SESSION_KEY_BASE } from '@/lib/activeSession'
 import { notificationPrefsKey } from '@/lib/notifications/prefs'
 import { PLATES_KEY_BASE, plateKey, isValidPlateConfig, WARMUP_PREF_BASE, warmupPrefKey } from '@/lib/strength'
 import { lessonProgressKey } from '@/lib/coaching/lessonRotation'
+import type { Lang } from '@/lib/appPreferences'
+import type { InvalidReason } from './errors'
 
 /** معرّف المالك في المفتاح/الخريطة: الحساب المسجّل أو 'guest'. مطابق لبُناة المفاتيح. */
 export function ownerToken(uid: string | null | undefined): string {
@@ -57,12 +59,17 @@ export interface StoreDef {
   key: string
   /** تسمية عربية للملخّص. */
   labelAr: string
+  /** English label for the same summary line. */
+  labelEn: string
   /** يبني مفتاح localStorage الفعلي للمستخدم الحالي. */
   keyFor(uid: string | null | undefined): string
   /** عدّ العناصر داخل القيمة (للملخّص/المعاينة). 0 عند الغياب. */
   count(value: unknown): number
-  /** تحقّق بنيوي من الشكل قبل أي كتابة. يعيد true أو سبب الرفض (نص). */
-  validate(value: unknown): true | string
+  /**
+   * تحقّق بنيوي من الشكل قبل أي كتابة. يعيد true أو سبب الرفض بلغتين.
+   * العربية تبقى نفس الجملة التي كانت تُرمى قبل التوطين — لا تغيير في نصّها.
+   */
+  validate(value: unknown): true | InvalidReason
   /** المُحمِّل الحقيقي — بوابة التحقّق النهائية بعد الكتابة (يجب ألّا يرمي). */
   load(uid: string | null | undefined): unknown
 }
@@ -77,30 +84,30 @@ const arrCount = (v: unknown): number => (isArr(v) ? v.length : 0)
 /** حدّ أقصى لعدد العناصر لكل متجر (حماية DoS من ملفّ معادٍ). */
 export const MAX_ITEMS_PER_STORE = 100_000
 
-function arrayStore(id: string, key: string, labelAr: string, load: () => unknown): StoreDef {
+function arrayStore(id: string, key: string, labelAr: string, labelEn: string, load: () => unknown): StoreDef {
   return {
-    id, kind: 'fixed', key, labelAr,
+    id, kind: 'fixed', key, labelAr, labelEn,
     keyFor: () => key,
     count: arrCount,
-    validate: (v) => (v == null || (isArr(v) && v.length <= MAX_ITEMS_PER_STORE) ? true : `الشكل غير صالح (${labelAr})`),
+    validate: (v) => (v == null || (isArr(v) && v.length <= MAX_ITEMS_PER_STORE) ? true : { ar: `الشكل غير صالح (${labelAr})`, en: `Invalid format (${labelEn})` }),
     load,
   }
 }
-function mapStore(id: string, key: string, labelAr: string, load: () => unknown): StoreDef {
+function mapStore(id: string, key: string, labelAr: string, labelEn: string, load: () => unknown): StoreDef {
   return {
-    id, kind: 'fixed', key, labelAr,
+    id, kind: 'fixed', key, labelAr, labelEn,
     keyFor: () => key,
     count: objCount,
-    validate: (v) => (v == null || (isObj(v) && Object.keys(v).length <= MAX_ITEMS_PER_STORE) ? true : `الشكل غير صالح (${labelAr})`),
+    validate: (v) => (v == null || (isObj(v) && Object.keys(v).length <= MAX_ITEMS_PER_STORE) ? true : { ar: `الشكل غير صالح (${labelAr})`, en: `Invalid format (${labelEn})` }),
     load,
   }
 }
-function objectStore(id: string, key: string, labelAr: string, load: () => unknown, present = 1): StoreDef {
+function objectStore(id: string, key: string, labelAr: string, labelEn: string, load: () => unknown, present = 1): StoreDef {
   return {
-    id, kind: 'fixed', key, labelAr,
+    id, kind: 'fixed', key, labelAr, labelEn,
     keyFor: () => key,
     count: (v) => (v == null ? 0 : present),
-    validate: (v) => (v == null || isObj(v) ? true : `الشكل غير صالح (${labelAr})`),
+    validate: (v) => (v == null || isObj(v) ? true : { ar: `الشكل غير صالح (${labelAr})`, en: `Invalid format (${labelEn})` }),
     load,
   }
 }
@@ -111,86 +118,86 @@ function objectStore(id: string, key: string, labelAr: string, load: () => unkno
  */
 export const STORE_DEFS: StoreDef[] = [
   // — سجلّ التاريخ (History namespace) —
-  arrayStore('workoutSessions', HISTORY_KEYS.workoutSessions, 'تمارين', getWorkoutSessions),
-  mapStore('exerciseHistory', HISTORY_KEYS.exerciseHistory, 'سجلّ التمارين', getExerciseHistory),
-  mapStore('dailyLogs', HISTORY_KEYS.dailyLogs, 'أيام مسجّلة', getDailyLogs),
-  arrayStore('measurementLogs', HISTORY_KEYS.measurementLogs, 'قياسات', getMeasurementLogs),
-  mapStore('nutritionLogs', HISTORY_KEYS.nutritionLogs, 'أيام تغذية', getNutritionLogs),
-  mapStore('waterLogs', HISTORY_KEYS.waterLogs, 'أيام ماء', getWaterLogs),
-  mapStore('supplementLogs', HISTORY_KEYS.supplementLogs, 'أيام مكمّلات', getSupplementLogs),
-  mapStore('medicationLogs', HISTORY_KEYS.medicationLogs, 'أيام أدوية', getMedicationLogs),
+  arrayStore('workoutSessions', HISTORY_KEYS.workoutSessions, 'تمارين', 'Workout sessions', getWorkoutSessions),
+  mapStore('exerciseHistory', HISTORY_KEYS.exerciseHistory, 'سجلّ التمارين', 'Exercise history', getExerciseHistory),
+  mapStore('dailyLogs', HISTORY_KEYS.dailyLogs, 'أيام مسجّلة', 'Logged days', getDailyLogs),
+  arrayStore('measurementLogs', HISTORY_KEYS.measurementLogs, 'قياسات', 'Body measurements', getMeasurementLogs),
+  mapStore('nutritionLogs', HISTORY_KEYS.nutritionLogs, 'أيام تغذية', 'Daily nutrition logs', getNutritionLogs),
+  mapStore('waterLogs', HISTORY_KEYS.waterLogs, 'أيام ماء', 'Daily water logs', getWaterLogs),
+  mapStore('supplementLogs', HISTORY_KEYS.supplementLogs, 'أيام مكمّلات', 'Daily supplement logs', getSupplementLogs),
+  mapStore('medicationLogs', HISTORY_KEYS.medicationLogs, 'أيام أدوية', 'Daily medication logs', getMedicationLogs),
   // — متاجر مفردة —
-  objectStore('customization', CUSTOMIZATION_KEY, 'الإعدادات والخطة', loadCustomization),
-  objectStore('nutritionV2', NUTRITION_V2_KEY, 'تغذية اليوم', loadNutritionDay),
-  objectStore('wellnessToday', WELLNESS_TODAY_KEY, 'تعافي اليوم', loadWellnessToday),
-  objectStore('commitmentsToday', COMMITMENTS_TODAY_KEY, 'التزامات اليوم', loadCommitmentsToday),
-  objectStore('today', TODAY_KEY, 'حالة اليوم', loadToday),
-  mapStore('steps', STEP_LOG_KEY, 'أيام خطوات', loadStepLog),
+  objectStore('customization', CUSTOMIZATION_KEY, 'الإعدادات والخطة', 'Settings and plan', loadCustomization),
+  objectStore('nutritionV2', NUTRITION_V2_KEY, 'تغذية اليوم', 'Today\'s nutrition', loadNutritionDay),
+  objectStore('wellnessToday', WELLNESS_TODAY_KEY, 'تعافي اليوم', 'Today\'s supplement and medication check-ins', loadWellnessToday),
+  objectStore('commitmentsToday', COMMITMENTS_TODAY_KEY, 'التزامات اليوم', 'Today\'s commitments', loadCommitmentsToday),
+  objectStore('today', TODAY_KEY, 'حالة اليوم', 'Today\'s status', loadToday),
+  mapStore('steps', STEP_LOG_KEY, 'أيام خطوات', 'Daily step counts', loadStepLog),
   {
-    id: 'stepGoal', kind: 'fixed', key: STEP_GOAL_KEY, labelAr: 'هدف الخطوات',
+    id: 'stepGoal', kind: 'fixed', key: STEP_GOAL_KEY, labelAr: 'هدف الخطوات', labelEn: 'Step goal',
     keyFor: () => STEP_GOAL_KEY, count: (v) => (v == null ? 0 : 1),
-    validate: (v) => (v == null || typeof v === 'number' ? true : 'هدف الخطوات غير صالح'),
+    validate: (v) => (v == null || typeof v === 'number' ? true : { ar: 'هدف الخطوات غير صالح', en: 'The step goal in this backup is not valid. Nothing was imported.' }),
     load: loadStepGoal,
   },
-  mapStore('stepSource', STEP_SOURCE_KEY, 'مصدر الخطوات', () => readRaw(STEP_SOURCE_KEY)),
-  objectStore('reminders', REMINDER_PREFS_KEY, 'التذكيرات', loadReminderPrefs),
-  objectStore('onboarding', ONBOARDING_KEY, 'الإعداد', loadOnboarding),
-  objectStore('onboardingProfile', ONBOARDING_PROFILE_KEY, 'ملف الإعداد', loadOnboardingProfile),
-  objectStore('achievements', ACHIEVEMENTS_KEY, 'الإنجازات', loadAchievementState),
-  objectStore('workoutCalendar', WORKOUT_CALENDAR_KEY, 'الجدول الأسبوعي', loadWeeklySchedule),
+  mapStore('stepSource', STEP_SOURCE_KEY, 'مصدر الخطوات', 'Step data source', () => readRaw(STEP_SOURCE_KEY)),
+  objectStore('reminders', REMINDER_PREFS_KEY, 'التذكيرات', 'Reminders', loadReminderPrefs),
+  objectStore('onboarding', ONBOARDING_KEY, 'الإعداد', 'Setup', loadOnboarding),
+  objectStore('onboardingProfile', ONBOARDING_PROFILE_KEY, 'ملف الإعداد', 'Setup profile', loadOnboardingProfile),
+  objectStore('achievements', ACHIEVEMENTS_KEY, 'الإنجازات', 'Achievements', loadAchievementState),
+  objectStore('workoutCalendar', WORKOUT_CALENDAR_KEY, 'الجدول الأسبوعي', 'Weekly schedule', loadWeeklySchedule),
   // — متاجر مربوطة بالمالك (المعرّف في لاحقة المفتاح) —
   {
-    id: 'todo', kind: 'ownerSuffix', key: TODO_KEY_BASE, labelAr: 'مهام',
+    id: 'todo', kind: 'ownerSuffix', key: TODO_KEY_BASE, labelAr: 'مهام', labelEn: 'Tasks',
     keyFor: (uid) => `${TODO_KEY_BASE}:${ownerToken(uid)}`,
     count: (v) => (isObj(v) && isArr((v as { items?: unknown }).items) ? ((v as { items: unknown[] }).items).length : 0),
-    validate: (v) => (v == null || (isObj(v) && typeof (v as { date?: unknown }).date === 'string' && isArr((v as { items?: unknown }).items)) ? true : 'شكل المهام غير صالح'),
+    validate: (v) => (v == null || (isObj(v) && typeof (v as { date?: unknown }).date === 'string' && isArr((v as { items?: unknown }).items)) ? true : { ar: 'شكل المهام غير صالح', en: 'The tasks in this backup are not in the expected format. Nothing was imported.' }),
     load: (uid) => loadTodos(uid),
   },
   {
-    id: 'activeSession', kind: 'ownerSuffix', key: ACTIVE_SESSION_KEY_BASE, labelAr: 'جلسة تمرين نشطة',
+    id: 'activeSession', kind: 'ownerSuffix', key: ACTIVE_SESSION_KEY_BASE, labelAr: 'جلسة تمرين نشطة', labelEn: 'Active workout session',
     keyFor: (uid) => `${ACTIVE_SESSION_KEY_BASE}:${ownerToken(uid)}`,
     count: (v) => (v == null ? 0 : 1),
-    validate: (v) => (v == null || isObj(v) ? true : 'شكل الجلسة النشطة غير صالح'),
+    validate: (v) => (v == null || isObj(v) ? true : { ar: 'شكل الجلسة النشطة غير صالح', en: 'The active workout session in this backup is not in the expected format. Nothing was imported.' }),
     load: (uid) => readRaw(`${ACTIVE_SESSION_KEY_BASE}:${ownerToken(uid)}`),
   },
   {
-    id: 'notificationPrefs', kind: 'ownerSuffix', key: 'qimmah:notifications:v1', labelAr: 'تفضيلات التذكيرات',
+    id: 'notificationPrefs', kind: 'ownerSuffix', key: 'qimmah:notifications:v1', labelAr: 'تفضيلات التذكيرات', labelEn: 'Reminder preferences',
     keyFor: (uid) => notificationPrefsKey(ownerToken(uid)),
     count: (v) => (v == null ? 0 : 1),
-    validate: (v) => (v == null || isObj(v) ? true : 'شكل تفضيلات التذكيرات غير صالح'),
+    validate: (v) => (v == null || isObj(v) ? true : { ar: 'شكل تفضيلات التذكيرات غير صالح', en: 'The reminder preferences in this backup are not in the expected format. Nothing was imported.' }),
     load: (uid) => readRaw(notificationPrefsKey(ownerToken(uid))),
   },
   {
-    id: 'plateConfig', kind: 'ownerSuffix', key: PLATES_KEY_BASE, labelAr: 'إعداد الأقراص',
+    id: 'plateConfig', kind: 'ownerSuffix', key: PLATES_KEY_BASE, labelAr: 'إعداد الأقراص', labelEn: 'Barbell plate setup',
     keyFor: (uid) => plateKey(uid),
     count: (v) => (v == null ? 0 : 1),
-    validate: (v) => (v == null || isValidPlateConfig(v) ? true : 'شكل إعداد الأقراص غير صالح'),
+    validate: (v) => (v == null || isValidPlateConfig(v) ? true : { ar: 'شكل إعداد الأقراص غير صالح', en: 'The barbell plate setup in this backup is not in the expected format. Nothing was imported.' }),
     load: (uid) => readRaw(plateKey(uid)),
   },
   {
-    id: 'warmupPref', kind: 'ownerSuffix', key: WARMUP_PREF_BASE, labelAr: 'تفضيل الإحماء',
+    id: 'warmupPref', kind: 'ownerSuffix', key: WARMUP_PREF_BASE, labelAr: 'تفضيل الإحماء', labelEn: 'Warm-up preference',
     keyFor: (uid) => warmupPrefKey(uid),
     count: (v) => (v == null ? 0 : 1),
-    validate: (v) => (v == null || (isObj(v) && typeof v.show === 'boolean') ? true : 'شكل تفضيل الإحماء غير صالح'),
+    validate: (v) => (v == null || (isObj(v) && typeof v.show === 'boolean') ? true : { ar: 'شكل تفضيل الإحماء غير صالح', en: 'The warm-up preference in this backup is not in the expected format. Nothing was imported.' }),
     load: (uid) => readRaw(warmupPrefKey(uid)),
   },
   {
-    id: 'coachLessons', kind: 'ownerSuffix', key: 'qimmah:coach:lessons:v1', labelAr: 'تقدّم الدروس',
+    id: 'coachLessons', kind: 'ownerSuffix', key: 'qimmah:coach:lessons:v1', labelAr: 'تقدّم الدروس', labelEn: 'Lesson progress',
     keyFor: (uid) => lessonProgressKey(uid),
     count: arrCount,
-    validate: (v) => (v == null || (isArr(v) && v.length <= MAX_ITEMS_PER_STORE && v.every((item) => typeof item === 'string')) ? true : 'شكل تقدّم الدروس غير صالح'),
+    validate: (v) => (v == null || (isArr(v) && v.length <= MAX_ITEMS_PER_STORE && v.every((item) => typeof item === 'string')) ? true : { ar: 'شكل تقدّم الدروس غير صالح', en: 'The lesson progress in this backup is not in the expected format. Nothing was imported.' }),
     load: (uid) => readRaw(lessonProgressKey(uid)),
   },
   // — متجر مربوط بالمالك (المعرّف مفتاحٌ في خريطة) —
   {
-    id: 'customPlan', kind: 'ownerMap', key: CUSTOM_PLAN_KEY, labelAr: 'الجدول المخصّص',
+    id: 'customPlan', kind: 'ownerMap', key: CUSTOM_PLAN_KEY, labelAr: 'الجدول المخصّص', labelEn: 'Custom schedule',
     keyFor: () => CUSTOM_PLAN_KEY,
     count: (v) => (isObj(v) && isObj((v as { plan?: unknown }).plan) && isArr(((v as { plan: { days?: unknown } }).plan).days) ? ((v as { plan: { days: unknown[] } }).plan.days).length : (v == null ? 0 : 1)),
-    validate: (v) => (v == null || (isObj(v) && isObj((v as { plan?: unknown }).plan)) ? true : 'شكل الجدول المخصّص غير صالح'),
+    validate: (v) => (v == null || (isObj(v) && isObj((v as { plan?: unknown }).plan)) ? true : { ar: 'شكل الجدول المخصّص غير صالح', en: 'The custom schedule in this backup is not in the expected format. Nothing was imported.' }),
     load: (uid) => loadCustomPlanRecord(uid),
   },
   {
-    id: 'planTemplates', kind: 'ownerMap', key: PLAN_TEMPLATES_KEY, labelAr: 'قوالب الجداول',
+    id: 'planTemplates', kind: 'ownerMap', key: PLAN_TEMPLATES_KEY, labelAr: 'قوالب الجداول', labelEn: 'Schedule templates',
     keyFor: () => PLAN_TEMPLATES_KEY,
     count: arrCount,
     validate: (v) =>
@@ -199,31 +206,36 @@ export const STORE_DEFS: StoreDef[] = [
         v.length <= MAX_TEMPLATES &&
         v.every((t) => isObj(t) && typeof (t as { nameAr?: unknown }).nameAr === 'string' && isObj((t as { plan?: unknown }).plan)))
         ? true
-        : 'شكل قوالب الجداول غير صالح',
+        : { ar: 'شكل قوالب الجداول غير صالح', en: 'The schedule templates in this backup are not in the expected format. Nothing was imported.' },
     load: (uid) => listTemplates(uid),
   },
   {
-    id: 'nutritionHistory', kind: 'ownerMap', key: NUTRITION_HISTORY_KEY, labelAr: 'دفتر التغذية المؤرَّخ',
+    id: 'nutritionHistory', kind: 'ownerMap', key: NUTRITION_HISTORY_KEY, labelAr: 'دفتر التغذية المؤرَّخ', labelEn: 'Nutrition history by date',
     keyFor: () => NUTRITION_HISTORY_KEY,
     count: objCount, // عدد الأيام المفصَّلة
     validate: (v) =>
       v == null || (isObj(v) && Object.keys(v).length <= MAX_ITEMS_PER_STORE && Object.values(v).every(isArr))
         ? true
-        : 'شكل دفتر التغذية غير صالح',
+        : { ar: 'شكل دفتر التغذية غير صالح', en: 'The nutrition history in this backup is not in the expected format. Nothing was imported.' },
     load: (uid) => loadLedgerDays(uid),
   },
   {
-    id: 'personalFoods', kind: 'ownerMap', key: PERSONAL_FOODS_KEY, labelAr: 'أطعمة شخصية',
+    id: 'personalFoods', kind: 'ownerMap', key: PERSONAL_FOODS_KEY, labelAr: 'أطعمة شخصية', labelEn: 'Personal foods',
     keyFor: () => PERSONAL_FOODS_KEY,
     count: arrCount,
     validate: (v) =>
       v == null ||
       (isArr(v) && v.length <= MAX_PERSONAL_FOODS && v.every((f) => isObj(f) && typeof (f as { nameAr?: unknown }).nameAr === 'string'))
         ? true
-        : 'شكل الأطعمة الشخصية غير صالح',
+        : { ar: 'شكل الأطعمة الشخصية غير صالح', en: 'The personal foods in this backup are not in the expected format. Nothing was imported.' },
     load: (uid) => listPersonalFoods(uid ?? null), // null صراحةً = 'guest' (undefined عندنا = المالك الحالي)
   },
 ]
+
+/** تسمية المتجر بلغة الواجهة. العربية افتراضًا حفاظًا على سلوك المستدعين القدامى. */
+export function storeLabel(def: StoreDef, lang: Lang = 'ar'): string {
+  return lang === 'en' ? def.labelEn : def.labelAr
+}
 
 /** خريطة id → تعريف (وصول سريع عند الاستيراد). */
 export const STORE_BY_ID: Record<string, StoreDef> = Object.fromEntries(STORE_DEFS.map((d) => [d.id, d]))
