@@ -38,6 +38,7 @@ function createLazyViews() {
       : null,
     MyStatsView: lazy(() => import('@/views/MyStatsView').then((m) => ({ default: m.MyStatsView }))),
     RecoveryView: lazy(() => import('@/views/RecoveryView').then((m) => ({ default: m.RecoveryView }))),
+    HealthLinkView: lazy(() => import('@/views/HealthLinkView').then((m) => ({ default: m.HealthLinkView }))),
   }
 }
 import { MobileShell, type MainTab, type QuickLogTarget } from '@/components/MobileShell'
@@ -74,6 +75,7 @@ function guardRoute(route: AppRoute, userId: string | null): AppRoute {
     route === 'exercises' ||
     route === 'stats' ||
     route === 'recovery' ||
+    route === 'health' ||
     route === 'setup' ||
     route === 'settings' ||
     route === 'calc'
@@ -422,6 +424,8 @@ export default function App() {
     content = <V.CalcExplainerView lang={LANG} onBack={() => navigate('profile')} />
   } else if (view === 'recovery') {
     content = <V.RecoveryView lang={LANG} onBack={() => navigate('dashboard')} onNavigate={navigate} />
+  } else if (view === 'health') {
+    content = <V.HealthLinkView lang={LANG} onBack={() => navigate('settings')} />
   } else {
     // ——— التبويبات الرئيسية داخل قشرة الجوال ———
     content = (

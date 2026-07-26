@@ -26,6 +26,7 @@ export type AppRoute =
   | 'stats'
   // «التعافي» (v1.1) — تسجيل ذاتي + توصية غير طبية + سجل؛ مدخلها من اليوم (يوم راحة) والتقدّم.
   | 'recovery'
+  | 'health'
   // مسار احتياطي داخلي فقط — لا يُسجَّل في ROUTES ولا يُكتب في hash مباشرة.
   | 'notfound'
 
@@ -41,6 +42,7 @@ const ROUTES: AppRoute[] = [
   'profile',
   'calc',
   'recovery',
+  'health',
   'settings',
   'privacy',
   'terms',

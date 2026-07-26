@@ -18,6 +18,7 @@ import { NotificationSettingsPanel } from '@/components/NotificationSettingsPane
 import { NativeSettingsPanel } from '@/components/NativeSettingsPanel'
 import { NATIVE_SETTINGS_COPY } from '@/data/nativeSettings'
 import type { AppRoute } from '@/lib/appRoutes'
+import { HealthLinkCard } from '@/components/health/HealthLinkCard'
 
 interface SettingsViewProps {
   lang: Lang
@@ -147,6 +148,10 @@ export function SettingsView({
 
       <main className="app-scroll min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-y-contain px-4 py-4" style={{ paddingBottom: 'calc(var(--safe-bottom) + 1rem)' }}>
         <div className="mx-auto w-full max-w-md space-y-3">
+
+        {/* 0) صحتي من Apple — أعلى الإعدادات عمدًا: كان الأساس المجمّع بلا مدخل
+            في الواجهة إطلاقًا، والمستخدم لا يجد الربط. */}
+        <HealthLinkCard lang={lang} onOpenDetails={() => onNavigate('health')} />
 
         {/* 1) الحساب */}
         <SettingsGroup icon="User" title={t.settings.groupAccount} defaultOpen>
