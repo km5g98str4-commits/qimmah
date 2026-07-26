@@ -54,7 +54,7 @@ export function MachineAltCards({ lang, machineId, alt, slots, onSwitch }: Machi
               onClick={() => onSwitch(i as 0 | 1, exerciseId)}
               className="card overflow-hidden text-start transition-transform active:scale-[0.98]"
             >
-              <ExerciseMedia exerciseId={exerciseId} heightClass="h-20" hideChips />
+              <ExerciseMedia exerciseId={exerciseId} lang={lang} heightClass="h-20" hideChips variant="thumb" />
               <div className="p-3">
                 <p className="text-[10px] font-black uppercase tracking-wide text-primary-c">{labelFor(exerciseId)}</p>
                 <ExerciseName

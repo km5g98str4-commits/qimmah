@@ -135,7 +135,7 @@ export function ExercisePickerSheet({ lang, onAdd, onClose }: ExercisePickerShee
     return (
       <li key={e.id} className="flex items-center gap-3 rounded-xl border border-line bg-page p-2.5">
         <div className="h-14 w-14 shrink-0 overflow-hidden rounded-lg border border-line">
-          <ExerciseMedia exerciseId={e.id} heightClass="h-14" hideChips />
+          <ExerciseMedia exerciseId={e.id} lang={lang} heightClass="h-14" hideChips variant="thumb" />
         </div>
         <div className="min-w-0 flex-1">
           <ExerciseName
