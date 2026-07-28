@@ -4,7 +4,7 @@
   "description": "قِمّة — مرشدك الهادئ نحو صحة أفضل: تمارين وتغذية وقياسات وأهداف بالعربية. Qimmah — a calm, Arabic-first health & fitness companion.",
   "private": true,
   "type": "module",
-  "license": "Commercial",
+  "license": "UNLICENSED",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",

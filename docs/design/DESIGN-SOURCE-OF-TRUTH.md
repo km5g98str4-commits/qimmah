@@ -1,5 +1,17 @@
 # Qimmah — Design Source of Truth
 
+> ## ⚠️ متجاوَز — SUPERSEDED (2026-07-28)
+>
+> **المرجع الرسمي الآن هو `Qimmah Design Standard v3.0`** — انظر
+> [`docs/design/README.md`](./README.md) و`docs/design/v3/Qimmah-Design-Standard-v3.0.html`.
+>
+> هذه الوثيقة تصف اتجاه **v2.1** وتبقى **مرجعًا تاريخيًا فقط، بلا سلطة**.
+> كل ما يرد أدناه بصيغة «APPROVED DIRECTION» يخصّ v2.1 ولا يُعتمد لأي عمل جديد.
+> عند أي تعارض بين هذه الوثيقة و v3.0 — **v3.0 يفوز**.
+>
+> *The official standard is now Qimmah Design Standard v3.0. This document describes
+> the v2.1 direction and is retained as a historical reference only — no authority.*
+
 Read this before making **any** visual change. It exists so no future agent
 silently re-enshrines a rejected direction or invents an unapproved one.
 
