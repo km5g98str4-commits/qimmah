@@ -1,4 +1,5 @@
 import type { NotificationPrefs } from './types'
+import { safeRemove, safeWriteJson } from '@/lib/safeStorage'
 
 const KEY_PREFIX = 'qimmah:notifications:v1:'
 const LEGACY_KEY = 'qimmah:reminders:v1'
@@ -86,10 +87,10 @@ function migrateLegacy(ownerId: string): NotificationPrefs | null {
     migrated.workoutDay.enabled = Boolean(legacy.trainingEnabled)
     if (isValidNotificationTime(legacy.trainingTime)) migrated.workoutDay.time = legacy.trainingTime
     saveNotificationPrefs(ownerId, migrated)
-    window.localStorage.removeItem(LEGACY_KEY)
+    safeRemove(LEGACY_KEY)
     return migrated
   } catch {
-    window.localStorage.removeItem(LEGACY_KEY)
+    safeRemove(LEGACY_KEY)
     return null
   }
 }
@@ -107,13 +108,11 @@ export function loadNotificationPrefs(ownerId: string): NotificationPrefs {
 
 export function saveNotificationPrefs(ownerId: string, prefs: NotificationPrefs): NotificationPrefs {
   const safe = sanitizeNotificationPrefs(prefs)
-  if (typeof window !== 'undefined' && ownerId) {
-    window.localStorage.setItem(notificationPrefsKey(ownerId), JSON.stringify(safe))
-  }
+  if (ownerId) safeWriteJson(notificationPrefsKey(ownerId), safe)
   return safe
 }
 
 export function clearNotificationPrefs(ownerId: string): void {
-  if (typeof window !== 'undefined' && ownerId) window.localStorage.removeItem(notificationPrefsKey(ownerId))
+  if (ownerId) safeRemove(notificationPrefsKey(ownerId))
 }
 

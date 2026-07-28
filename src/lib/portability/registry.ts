@@ -32,7 +32,10 @@ import { REMINDER_PREFS_KEY, loadReminderPrefs } from '@/lib/reminderPrefs'
 import { ONBOARDING_KEY, loadOnboarding } from '@/lib/onboarding'
 import { ONBOARDING_PROFILE_KEY, loadOnboardingProfile } from '@/lib/onboardingProfile'
 import { ACHIEVEMENTS_KEY, loadAchievementState } from '@/features/achievements/engine'
+import { WORKOUT_CALENDAR_KEY, loadWeeklySchedule } from '@/lib/workoutCalendar'
 import { CUSTOM_PLAN_KEY, loadCustomPlanRecord } from '@/features/customPlan/storage'
+import { PLAN_TEMPLATES_KEY, listTemplates, MAX_TEMPLATES } from '@/features/customPlan/templates'
+import { NUTRITION_HISTORY_KEY, PERSONAL_FOODS_KEY, MAX_PERSONAL_FOODS, loadLedgerDays, listPersonalFoods } from '@/lib/nutritionHistory'
 import { TODO_KEY_BASE, loadTodos } from '@/features/todo/store'
 import { ACTIVE_SESSION_KEY_BASE } from '@/lib/activeSession'
 import { notificationPrefsKey } from '@/lib/notifications/prefs'
@@ -134,6 +137,7 @@ export const STORE_DEFS: StoreDef[] = [
   objectStore('onboarding', ONBOARDING_KEY, 'الإعداد', loadOnboarding),
   objectStore('onboardingProfile', ONBOARDING_PROFILE_KEY, 'ملف الإعداد', loadOnboardingProfile),
   objectStore('achievements', ACHIEVEMENTS_KEY, 'الإنجازات', loadAchievementState),
+  objectStore('workoutCalendar', WORKOUT_CALENDAR_KEY, 'الجدول الأسبوعي', loadWeeklySchedule),
   // — متاجر مربوطة بالمالك (المعرّف في لاحقة المفتاح) —
   {
     id: 'todo', kind: 'ownerSuffix', key: TODO_KEY_BASE, labelAr: 'مهام',
@@ -184,6 +188,40 @@ export const STORE_DEFS: StoreDef[] = [
     count: (v) => (isObj(v) && isObj((v as { plan?: unknown }).plan) && isArr(((v as { plan: { days?: unknown } }).plan).days) ? ((v as { plan: { days: unknown[] } }).plan.days).length : (v == null ? 0 : 1)),
     validate: (v) => (v == null || (isObj(v) && isObj((v as { plan?: unknown }).plan)) ? true : 'شكل الجدول المخصّص غير صالح'),
     load: (uid) => loadCustomPlanRecord(uid),
+  },
+  {
+    id: 'planTemplates', kind: 'ownerMap', key: PLAN_TEMPLATES_KEY, labelAr: 'قوالب الجداول',
+    keyFor: () => PLAN_TEMPLATES_KEY,
+    count: arrCount,
+    validate: (v) =>
+      v == null ||
+      (isArr(v) &&
+        v.length <= MAX_TEMPLATES &&
+        v.every((t) => isObj(t) && typeof (t as { nameAr?: unknown }).nameAr === 'string' && isObj((t as { plan?: unknown }).plan)))
+        ? true
+        : 'شكل قوالب الجداول غير صالح',
+    load: (uid) => listTemplates(uid),
+  },
+  {
+    id: 'nutritionHistory', kind: 'ownerMap', key: NUTRITION_HISTORY_KEY, labelAr: 'دفتر التغذية المؤرَّخ',
+    keyFor: () => NUTRITION_HISTORY_KEY,
+    count: objCount, // عدد الأيام المفصَّلة
+    validate: (v) =>
+      v == null || (isObj(v) && Object.keys(v).length <= MAX_ITEMS_PER_STORE && Object.values(v).every(isArr))
+        ? true
+        : 'شكل دفتر التغذية غير صالح',
+    load: (uid) => loadLedgerDays(uid),
+  },
+  {
+    id: 'personalFoods', kind: 'ownerMap', key: PERSONAL_FOODS_KEY, labelAr: 'أطعمة شخصية',
+    keyFor: () => PERSONAL_FOODS_KEY,
+    count: arrCount,
+    validate: (v) =>
+      v == null ||
+      (isArr(v) && v.length <= MAX_PERSONAL_FOODS && v.every((f) => isObj(f) && typeof (f as { nameAr?: unknown }).nameAr === 'string'))
+        ? true
+        : 'شكل الأطعمة الشخصية غير صالح',
+    load: (uid) => listPersonalFoods(uid ?? null), // null صراحةً = 'guest' (undefined عندنا = المالك الحالي)
   },
 ]
 

@@ -40,7 +40,7 @@ const cut = buildInsightsFromInput(baseInput({
 }))
 const cutCard = cut.cards.find((c) => c.key === 'weight')
 ok('تنشيف: بطاقة وزن باتجاه نزول', !!cutCard && cutCard.text.includes('ينزل'))
-ok('تنشيف: تقدير مُعلَّم (~/تقديري)', !!cutCard && cutCard.estimate && cutCard.text.includes('~') && cutCard.text.includes('تقديري'))
+ok('تنشيف: تقدير مُعلَّم (~/تقريبي)', !!cutCard && cutCard.estimate && cutCard.text.includes('~') && cutCard.text.includes('تقريبي'))
 ok('تنشيف: لم تمتنع', cut.abstained === false)
 
 // ——— 3) تضخيم (وزن صاعد) ———

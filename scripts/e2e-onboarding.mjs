@@ -46,9 +46,9 @@ try {
   check('Next unlocks only after consent', await next.getAttribute('aria-disabled') === 'false')
   await next.click()
 
-  check('training step rendered', await page.getByRole('heading', { name: 'نُعد جدولك' }).isVisible())
+  check('training step rendered', await page.getByRole('heading', { name: 'نجهّز جدولك' }).isVisible())
   await page.getByRole('button', { name: 'التالي' }).click()
-  check('equipment step exact MSA', await page.getByRole('heading', { name: 'أين وكيف تتمرّن؟' }).isVisible())
+  check('equipment step exact dialect copy', await page.getByRole('heading', { name: 'وين وكيف تتمرّن؟' }).isVisible())
   await page.getByRole('button', { name: 'نادي', exact: true }).click()
   await page.getByRole('button', { name: 'مزيج', exact: true }).click()
   await page.getByRole('button', { name: 'اعتمد خطتي' }).click()
@@ -56,10 +56,10 @@ try {
 
   await page.evaluate(() => localStorage.setItem('qimmah:onboarding:force-fail', '1'))
   await page.getByRole('button', { name: 'الدخول للوحة' }).click()
-  check('forced failure is visible', await page.getByRole('heading', { name: 'تعذّر إعداد الخطة' }).isVisible())
+  check('forced failure is visible', await page.getByRole('heading', { name: 'ما قدرنا نجهّز الخطة' }).isVisible())
   await page.evaluate(() => localStorage.removeItem('qimmah:onboarding:force-fail'))
-  await page.getByRole('button', { name: 'أعد المحاولة' }).click()
-  await page.getByRole('heading', { name: 'تعذّر إعداد الخطة' }).waitFor({ state: 'hidden' })
+  await page.getByRole('button', { name: 'جرّب مرة ثانية' }).click()
+  await page.getByRole('heading', { name: 'ما قدرنا نجهّز الخطة' }).waitFor({ state: 'hidden' })
   check('retry clears failure', true)
   check('zero console errors', consoleErrors.length === 0, consoleErrors.join(' | '))
 } catch (error) {

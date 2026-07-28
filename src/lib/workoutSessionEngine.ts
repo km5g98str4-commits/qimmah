@@ -1,0 +1,207 @@
+// محرّك حالة جلسة التمرين (P5) — طبقة بيانات نقية، لا واجهة هنا (Codex يربط).
+//
+// المشكلة القديمة: أي جلسة لها finishedAt كانت تُحسب «يومًا مكتملًا»
+// (todaysFinishedSession)، فالإنهاء المبكر يقلب اليوم إلى «أنهيت تمرينك» زورًا،
+// والجلسة المستعادة القديمة لا تصنيف لها. هذه الوحدة تملك الحقيقة:
+//   • حالة الجلسة: in_progress · completed · ended_early · abandoned —
+//     تُختم عند الحفظ (persistFinishedSession) وتُحفظ على WorkoutSession.status
+//     (الغياب = جلسة قديمة تُقرأ completed — توافق خلفي كامل).
+//   • اكتمال اليوم: dayCompletion(date) = 'complete' فقط بجلسة completed؛
+//     ended_early = partial بمعلومات صادقة (عدد التمارين/المجموعات المنجزة).
+//   • الجلسة المهجورة: تصنيف فقط — **لا تُحذف المجموعات المنفَّذة أبدًا**.
+//   • المجموعات/الأوزان/الأرقام القياسية من الجلسات الجزئية تبقى محسوبة
+//     (تمرّ من persistFinishedSession → exerciseHistory كما هي — مُثبَت بالإثبات).
+//   • إشعار نهاية الراحة: أحادي عند rest.endsAt عبر محرّك الإشعارات القائم
+//     (kind='restEnd') — يُجدول عند بدء الراحة ويُلغى عند التخطّي/الإنهاء،
+//     وإعادة الجدولة عند «+وقت» تستبدل القديم. لا-شيء على الويب وبلا إذن.
+//
+// ما لا يتغيّر (مقصود، تحرسه الإثباتات القائمة): الإنهاء المبكر يبقى مسموحًا
+// بتأكيد؛ نافذة التراجع snapshot/restore؛ استعادة الجلسة بعد قتل التطبيق؛
+// مؤقّت الراحة على endsAt؛ وdailyLogs.workoutCompleted تبقى «تمرّن هذا اليوم»
+// (مؤشّر نشاط) لا «اكتمل اليوم» — الاكتمال الصادق مصدره dayCompletion هنا.
+
+import type { SessionStatus, WorkoutSession } from '@/lib/workoutSessions'
+import { getWorkoutSessions } from '@/lib/historyStore'
+import { getDayStamp } from '@/lib/today'
+import type { V2ActiveSnapshot } from '@/lib/workoutV2Persist'
+import { buildV2WorkoutSession } from '@/lib/workoutV2Persist'
+import type { WorkoutV2Model } from '@/lib/workoutV2Model'
+import type { SessionPR } from '@/lib/finishWorkout'
+
+export type { SessionStatus } from '@/lib/workoutSessions'
+// إعادة تصدير واجهة إشعار نهاية الراحة — سطح استيراد واحد لـCodex.
+export {
+  REST_END_NOTIFICATION_ID,
+  cancelRestEndNotification,
+  scheduleRestEndNotification,
+  type RestEndScheduleResult,
+} from '@/lib/notifications/restEnd'
+
+// ── حالة الجلسة ───────────────────────────────────────────────────────────────
+
+/**
+ * الحالة الفعلية لجلسة محفوظة — تحترم الجلسات القديمة:
+ * status موجود → هو الحقيقة؛ غائب + finishedAt → 'completed' (قبل P5)؛
+ * غائب بلا finishedAt → 'in_progress'.
+ */
+export function sessionStatus(session: WorkoutSession): SessionStatus {
+  if (session.status) return session.status
+  return session.finishedAt ? 'completed' : 'in_progress'
+}
+
+/**
+ * تصنيف جلسة تُنهى الآن: 'completed' فقط حين اكتملت **كل** تمارين الجلسة
+ * المطلوبة (exercise.completed = كل مجموعاته منجزة — يضبطها buildV2WorkoutSession)،
+ * وإلا 'ended_early'. جلسة بلا تمارين = 'ended_early' (لا اكتمال بصفر عمل).
+ */
+export function classifyFinishedSession(session: WorkoutSession): Extract<SessionStatus, 'completed' | 'ended_early'> {
+  if (!session.exercises.length) return 'ended_early'
+  return session.exercises.every((e) => e.completed) ? 'completed' : 'ended_early'
+}
+
+/** يختم الحالة على جلسة تُنهى (نقية) — الإنهاء المبكر يبقى مسموحًا، فقط يُسمّى بصدق. */
+export function withSessionStatus(session: WorkoutSession): WorkoutSession {
+  return { ...session, status: classifyFinishedSession(session) }
+}
+
+// ── اكتمال اليوم (الصدق بدل «أي finishedAt») ─────────────────────────────────
+
+export interface PartialDayInfo {
+  session: WorkoutSession
+  completedExercises: number
+  totalExercises: number
+  completedSets: number
+  totalSets: number
+  /** نسبة المجموعات المنجزة 0..100 — للعمود/الحلقة في الواجهة. */
+  percent: number
+}
+
+export type DayCompletion =
+  | { state: 'complete'; session: WorkoutSession }
+  | { state: 'partial'; partial: PartialDayInfo }
+  | { state: 'none' }
+
+function partialInfo(session: WorkoutSession): PartialDayInfo {
+  const totalExercises = session.exercises.length
+  const completedExercises = session.exercises.filter((e) => e.completed).length
+  let completedSets = 0
+  let totalSets = 0
+  for (const e of session.exercises) {
+    const sets = e.sets ?? []
+    totalSets += Math.max(e.targetSets, sets.length)
+    completedSets += sets.filter((s) => s.completed).length
+  }
+  const percent = totalSets > 0 ? Math.max(0, Math.min(100, Math.round((completedSets / totalSets) * 100))) : 0
+  return { session, completedExercises, totalExercises, completedSets, totalSets, percent }
+}
+
+/**
+ * اكتمال يومٍ ما — **نقية** فوق قائمة جلسات تُمرَّر صراحة (افتراضيًا المتجر):
+ *   • 'complete' فقط حين توجد جلسة بحالة فعلية completed في هذا التاريخ.
+ *   • ended_early ⇒ 'partial' بمعلومات جزئية صادقة (لا يقلب اليوم مكتملًا).
+ *   • abandoned/in_progress لا تُكمل اليوم ولا تُحسب جزئية منتهية.
+ */
+export function dayCompletion(date: string, sessions: readonly WorkoutSession[] = getWorkoutSessions()): DayCompletion {
+  const daySessions = sessions.filter((s) => s.date === date)
+  const complete = daySessions.find((s) => sessionStatus(s) === 'completed')
+  if (complete) return { state: 'complete', session: complete }
+  const endedEarly = daySessions.find((s) => sessionStatus(s) === 'ended_early')
+  if (endedEarly) return { state: 'partial', partial: partialInfo(endedEarly) }
+  return { state: 'none' }
+}
+
+/** البديل الصادق لـtodaysFinishedSession المهجورة — اكتمال اليوم الحالي. */
+export function todaysCompletion(): DayCompletion {
+  return dayCompletion(getDayStamp())
+}
+
+// ── الجلسة المهجورة (تصنيف فقط — لا حذف تلقائي أبدًا) ────────────────────────
+
+/** عتبة الهجر: جلسة نشطة بدأت قبل ≥8 ساعات لم تعد «تمرينًا جاريًا» واقعيًا. */
+export const ABANDONED_AFTER_MS = 8 * 60 * 60 * 1000
+
+/**
+ * تصنيف جلسة نشطة مستعادة (من localStorage بعد قتل التطبيق): قديمة عن العتبة
+ * ⇒ 'abandoned'، وإلا تبقى 'in_progress'. **تصنيف بحت** — لا يحذف ولا يكتب شيئًا؛
+ * قرار العرض/الحفظ للواجهة (القاعدة D).
+ */
+export function classifyRestoredSession(
+  active: Pick<V2ActiveSnapshot, 'startedAt'>,
+  nowMs: number = Date.now(),
+  thresholdMs: number = ABANDONED_AFTER_MS,
+): Extract<SessionStatus, 'in_progress' | 'abandoned'> {
+  return nowMs - active.startedAt >= thresholdMs ? 'abandoned' : 'in_progress'
+}
+
+/**
+ * يبني جلسة «مهجورة» قابلة للحفظ من اللقطة النشطة — المجموعات المنفَّذة تبقى
+ * كاملة (لا حذف)، بلا finishedAt (لم تُنهَ)، وبحالة 'abandoned' صريحة.
+ * الحفظ نفسه قرار للمستدعي عبر addSession (idempotent بالمعرّف).
+ */
+export function abandonedSessionFrom(
+  active: V2ActiveSnapshot,
+  model: WorkoutV2Model,
+  opts: { date: string; nowMs: number },
+): WorkoutSession {
+  const built = buildV2WorkoutSession(active, model, { date: opts.date, finishedAtMs: opts.nowMs })
+  return { ...built, finishedAt: undefined, status: 'abandoned' }
+}
+
+// ── عقد الاحتفال/الانتقال للواجهة (Codex) — أنواع + بُناة نقية ────────────────
+
+export interface SessionStats {
+  exercises: number
+  sets: number
+  minutes: number
+  volume: number
+}
+
+/** حمولة شاشة الإنهاء/الاحتفال — ما يحتاجه Codex بالضبط. */
+export interface FinishCelebration {
+  nextExerciseId: string | null
+  sessionStats: SessionStats
+  prs: SessionPR[]
+}
+
+/** إحصاءات الجلسة من المجموعات المنجزة فعلًا (حجم = Σ وزن×تكرار للمنجز فقط). */
+export function buildSessionStats(session: WorkoutSession): SessionStats {
+  let sets = 0
+  let volume = 0
+  for (const e of session.exercises) {
+    for (const s of e.sets ?? []) {
+      if (!s.completed) continue
+      sets += 1
+      const w = Number.parseFloat(s.weightKg) || 0
+      const r = Number.parseInt(s.actualReps, 10) || 0
+      volume += w * r
+    }
+  }
+  const started = Date.parse(session.startedAt)
+  const finished = session.finishedAt ? Date.parse(session.finishedAt) : NaN
+  const minutes = Number.isFinite(started) && Number.isFinite(finished) && finished > started
+    ? Math.max(1, Math.round((finished - started) / 60_000))
+    : 0
+  return { exercises: session.exercises.filter((e) => e.completed || (e.sets ?? []).some((s) => s.completed)).length, sets, minutes, volume }
+}
+
+/**
+ * التمرين التالي بعد فتحة معيّنة في خطة اليوم (انتقال «التالي» بين التمارين):
+ * null = كانت الأخيرة (الواجهة تعرض الإنهاء). المطابقة بمعرّف الفتحة (slot id)
+ * الثابت عبر الاستبدال، وتُرجع معرّف فتحة التمرين التالي.
+ */
+export function nextExerciseAfter(model: WorkoutV2Model, currentSlotId: string): string | null {
+  const idx = model.exercises.findIndex((e) => e.id === currentSlotId)
+  if (idx < 0 || idx + 1 >= model.exercises.length) return null
+  return model.exercises[idx + 1].id
+}
+
+/** يبني حمولة الاحتفال كاملة — نقية؛ الواجهة تمرّر ما حسبته لحظة التأكيد. */
+export function buildFinishCelebration(args: {
+  session: WorkoutSession
+  prs: SessionPR[]
+  model?: WorkoutV2Model | null
+  currentSlotId?: string | null
+}): FinishCelebration {
+  const nextExerciseId = args.model && args.currentSlotId ? nextExerciseAfter(args.model, args.currentSlotId) : null
+  return { nextExerciseId, sessionStats: buildSessionStats(args.session), prs: args.prs }
+}

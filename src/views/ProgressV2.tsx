@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { lazy, Suspense, useState, type FormEvent } from 'react'
 import { Icon } from '@/components/Icon'
 import { StateBlock } from '@/components/StateBlock'
 import { cn } from '@/lib/cn'
@@ -22,6 +22,9 @@ import { insightCopy } from '@/data/insightCopy'
 // Strength system (this feature) — e1RM series + dated PR log for the detail.
 import { getExercise } from '@/data/exercises'
 import { e1rmSeries, currentBests, prHistory, type StrengthPR } from '@/lib/strength'
+
+// محرّك المجسّم ثقيل — يبقى خارج حزمة الشاشة حتى تُفتح فعلًا.
+const BodyModel3D = lazy(() => import('@/components/BodyModel3D').then((mod) => ({ default: mod.BodyModel3D })))
 
 interface ProgressV2Props {
   lang: Lang
@@ -120,6 +123,13 @@ export function ProgressV2({ lang, onNavigate }: ProgressV2Props) {
             ? <MomentumArea values={model.momentum.series.map((p) => p.value)} lang={lang} />
             : <NeedsData text={t('أكمل تمارينك ليظهر زخمك هنا.', 'Complete workouts to see your momentum here.')} />}
         </section>
+
+        {/* مجسّم العضلات — أي عضلة درّبتها هذا الأسبوع تُضيء بشدّة تتناسب مع حجم
+            تدريبها. يُحمَّل كسولًا: محرّك الرسم (~2.5k سطر + canvas) لا يدخل حزمة
+            شاشة التقدّم ولا يُجلب إلا عند وصول المستخدم إليها. */}
+        <Suspense fallback={<div className="h-64 rounded-2xl border border-line bg-surface" aria-hidden="true" />}>
+          <BodyModel3D lang={lang} />
+        </Suspense>
 
         {/* Weight + strength tiles → detail screens */}
         <section className="grid grid-cols-2 gap-3">
