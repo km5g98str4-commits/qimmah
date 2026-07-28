@@ -10,6 +10,7 @@ import type { SessionExercise, SetLog, WorkoutSession } from './workoutSessions'
 import type { ExerciseHistory } from './exerciseHistory'
 import type { MeasurementLog } from '@/types/progress'
 import { enqueueSyncDelete, enqueueSyncOperation } from './syncQueue'
+import { writeJson } from './safeStorage'
 
 // ختم اليوم المحلي (YYYY-MM-DD) — مكرّر هنا لكسر الاعتماد الدائري مع today.ts.
 function dayStamp(d = new Date()): string {
@@ -108,13 +109,11 @@ function readJSON<T>(key: string, fallback: T): T {
   }
 }
 
+// كل كتابة دائمة تمرّ من الطبقة الآمنة: لا ترمي (فلا تنكسر أي واجهة)، لكنها
+// تُسجّل الفشل في مؤشّر عالمي بدل ابتلاعه — فيستطيع مسار إنهاء التمرين أن يعرف
+// أن الحفظ لم يحدث ويقول ذلك للمستخدم بدل عرض نجاح زائف.
 function writeJSON(key: string, value: unknown): void {
-  if (typeof window === 'undefined') return
-  try {
-    window.localStorage.setItem(key, JSON.stringify(value))
-  } catch {
-    /* تجاهل امتلاء التخزين */
-  }
+  writeJson(key, value)
 }
 
 function nowISO(): string {
