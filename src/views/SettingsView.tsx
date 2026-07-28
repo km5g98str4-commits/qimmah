@@ -1,6 +1,4 @@
 import { useState, type ReactNode } from 'react'
-import { AppNav, type AppView } from '@/components/AppNav'
-import { Footer } from '@/components/Footer'
 import { Icon } from '@/components/Icon'
 import { DeviceSettings } from '@/components/DeviceSettings'
 import { DataManagementPanel } from '@/components/DataManagementPanel'
@@ -19,10 +17,11 @@ import { BUILD_LABEL } from '@/lib/buildInfo'
 import { NotificationSettingsPanel } from '@/components/NotificationSettingsPanel'
 import { NativeSettingsPanel } from '@/components/NativeSettingsPanel'
 import { NATIVE_SETTINGS_COPY } from '@/data/nativeSettings'
+import type { AppRoute } from '@/lib/appRoutes'
 
 interface SettingsViewProps {
   lang: Lang
-  onNavigate: (view: AppView) => void
+  onNavigate: (view: AppRoute) => void
   onEditPlan: () => void
   onLogin: () => void
   onOpenPrivacy: () => void
@@ -45,8 +44,6 @@ export function SettingsView({
   const t = getStrings(lang)
   const auth = useAuth()
   const { customization, applyCustomization } = useCustomization()
-
-  const badge: 'guest' | 'account' = auth.user ? 'account' : 'guest'
 
   // — البيانات: تصدير/استيراد يمرّان حصريًّا عبر <DataManagementPanel> (المسار المحصّن) —
   // المستورد القديم (FileReader + JSON.parse بلا تحقّق) أُزيل: كان يقبل إصدارًا غير مدعوم
@@ -138,14 +135,21 @@ export function SettingsView({
       : t.auth.guestNote
 
   return (
-    <div className="min-h-screen bg-page">
-      <AppNav current="settings" lang={lang} badge={badge} onNavigate={onNavigate} />
+    <div className="flex h-[100dvh] min-h-0 flex-col overflow-hidden bg-page">
+      <header className="shrink-0 border-b border-line bg-surface" style={{ paddingTop: 'var(--safe-top)' }}>
+        <div className="mx-auto flex h-14 w-full max-w-md items-center gap-3 px-4">
+          <button type="button" onClick={() => onNavigate('profile')} className="grid h-11 w-11 place-items-center rounded-full bg-beige text-ink-700" aria-label={lang === 'ar' ? 'الرجوع لملفك' : 'Back to profile'}>
+            <Icon name={lang === 'ar' ? 'ChevronRight' : 'ChevronLeft'} className="h-5 w-5" />
+          </button>
+          <h1 className="text-lg font-black text-ink-900">{t.settings.title}</h1>
+        </div>
+      </header>
 
-      <main className="container-page space-y-6 py-8">
-        <h1 className="text-2xl font-black text-ink-900">{t.settings.title}</h1>
+      <main className="app-scroll min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-y-contain px-4 py-4" style={{ paddingBottom: 'calc(var(--safe-bottom) + 1rem)' }}>
+        <div className="mx-auto w-full max-w-md space-y-3">
 
         {/* 1) الحساب */}
-        <SettingsGroup icon="User" title={t.settings.groupAccount}>
+        <SettingsGroup icon="User" title={t.settings.groupAccount} defaultOpen>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
               <span
@@ -247,7 +251,7 @@ export function SettingsView({
         </SettingsGroup>
 
         {/* 2) البيانات — تصدير/استيراد محصّن (معاينة → تأكيد → تطبيق ذرّي → تراجع) + إعادة ضبط */}
-        <SettingsGroup icon="Database" title={t.settings.groupData}>
+        <SettingsGroup icon="Database" title={t.settings.groupData} testId="settings-group-data">
           <DataManagementPanel lang={lang} uid={auth.user?.id ?? null} recoveryActive={auth.recoveryActive} />
           <div className="mt-3 border-t border-line pt-3">
             <button
@@ -371,9 +375,8 @@ export function SettingsView({
             </button>
           </div>
         </SettingsGroup>
+        </div>
       </main>
-
-      <Footer />
     </div>
   )
 }
@@ -383,23 +386,26 @@ function SettingsGroup({
   icon,
   title,
   testId,
+  defaultOpen = false,
   children,
 }: {
   icon: string
   title: string
   testId?: string
+  defaultOpen?: boolean
   children: ReactNode
 }) {
   return (
-    <section className="card p-6" data-testid={testId}>
-      <div className="mb-4 flex items-center gap-2.5">
+    <details className="card group overflow-hidden" data-testid={testId} open={defaultOpen}>
+      <summary className="flex min-h-[4rem] cursor-pointer list-none items-center gap-2.5 px-4 py-3 [&::-webkit-details-marker]:hidden">
         <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary-soft text-primary-c">
           <Icon name={icon} className="h-4.5 w-4.5" />
         </span>
-        <h2 className="text-base font-black text-ink-900">{title}</h2>
-      </div>
-      {children}
-    </section>
+        <h2 className="min-w-0 flex-1 text-base font-black text-ink-900">{title}</h2>
+        <Icon name="ChevronDown" className="h-4 w-4 text-ink-400 transition-transform group-open:rotate-180" />
+      </summary>
+      <div className="border-t border-line px-4 pb-4 pt-4">{children}</div>
+    </details>
   )
 }
 

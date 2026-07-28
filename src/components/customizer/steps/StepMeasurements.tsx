@@ -25,6 +25,7 @@ export function StepMeasurements({ ctx }: { ctx: WizardCtx }) {
 
   const Chip = ({ id, nameAr, nameEn, unit }: { id: string; nameAr: string; nameEn: string; unit: string }) => {
     const on = mp.selectedTypeIds.includes(id)
+    const name = ctx.lang === 'en' ? nameEn : nameAr
     return (
       <button
         type="button"
@@ -35,7 +36,7 @@ export function StepMeasurements({ ctx }: { ctx: WizardCtx }) {
         <span className={`grid h-6 w-6 shrink-0 place-items-center rounded-md ${on ? 'bg-primary text-white' : 'bg-beige text-ink-400'}`}>
           <Icon name={on ? 'Check' : 'Plus'} className="h-3.5 w-3.5" strokeWidth={3} />
         </span>
-        <span className="min-w-0 truncate">{nameAr} <span className="text-[11px] text-ink-400">{nameEn}{unit ? ` · ${unit}` : ''}</span></span>
+        <span className="min-w-0 truncate">{name}{unit ? <span className="text-[11px] text-ink-400"> · {unit}</span> : null}</span>
       </button>
     )
   }
@@ -46,6 +47,7 @@ export function StepMeasurements({ ctx }: { ctx: WizardCtx }) {
 
       <button
         type="button"
+        aria-pressed={mp.enabled}
         onClick={() => setMp({ enabled: !mp.enabled })}
         className={`mb-5 flex w-full items-center justify-between rounded-2xl border p-4 ${mp.enabled ? 'border-primary-soft bg-primary-soft' : 'border-line bg-surface'}`}
       >

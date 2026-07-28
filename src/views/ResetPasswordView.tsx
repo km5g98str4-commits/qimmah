@@ -87,11 +87,15 @@ export function ResetPasswordView({ lang, onDone }: ResetPasswordViewProps) {
   }
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-page px-5 py-12">
+    <div className="relative h-[100dvh] min-h-0 overflow-hidden bg-page">
       <div className="pointer-events-none absolute inset-0 bg-radial-brand opacity-70" />
       <div className="pointer-events-none absolute inset-0 bg-grid-faint [background-size:44px_44px] opacity-25" />
 
-      <div className="relative w-full max-w-md">
+      <main
+        className="app-scroll relative flex h-full min-h-0 flex-col items-center overflow-y-auto overscroll-y-contain px-5 py-12"
+        style={{ paddingTop: 'max(3rem, var(--safe-top))', paddingBottom: 'max(3rem, var(--safe-bottom))' }}
+      >
+      <div className="relative my-auto w-full max-w-md">
         {/* أين أنا؟ */}
         <div className="text-center">
           <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-primary text-white shadow-glow">
@@ -207,6 +211,7 @@ export function ResetPasswordView({ lang, onDone }: ResetPasswordViewProps) {
           </>
         )}
       </div>
+      </main>
     </div>
   )
 }

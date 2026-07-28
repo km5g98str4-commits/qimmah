@@ -60,7 +60,10 @@ create table if not exists public.measurement_logs (
   user_id     uuid not null references auth.users(id) on delete cascade,
   local_id    text,
   date        date not null,
-  values      jsonb not null default '{}'::jsonb,
+  -- VALUES is a reserved key word in Postgres — a column named `values` MUST be
+  -- quoted or CREATE TABLE fails to parse. The quoted name is still exactly
+  -- `values` (already lower-case), so PostgREST and the client are unaffected.
+  "values"    jsonb not null default '{}'::jsonb,
   notes       text,
   created_at  timestamptz not null default now(),
   updated_at  timestamptz not null default now(),

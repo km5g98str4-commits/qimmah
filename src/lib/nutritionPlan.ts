@@ -134,8 +134,7 @@ export function mealAlternatives(meal: PlanMeal, dietPattern?: DietPattern): Pla
 }
 
 export function ingredientDisplayName(nameAr: string, nameEn: string, lang: Lang): string {
-  if (lang === 'en') return nameEn
-  return nameAr && nameEn ? `${nameAr} — ${nameEn}` : nameAr || nameEn
+  return lang === 'en' ? nameEn || nameAr : nameAr || nameEn
 }
 
 export function mealDisplayName(m: PlanMeal, lang: Lang): string {

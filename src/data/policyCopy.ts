@@ -1,8 +1,8 @@
 import type { Lang } from '@/lib/appPreferences'
 
 export const POLICY_LINKS = {
-  terms: '/legal/terms.html',
-  privacy: '/legal/privacy.html',
+  terms: '#/terms',
+  privacy: '#/privacy',
 } as const
 
 export const policyCopy: Record<Lang, {

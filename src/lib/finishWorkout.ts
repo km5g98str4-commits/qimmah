@@ -3,6 +3,7 @@
 // ويُرجع التمارين التي حقّقت رقمًا قياسيًا (PR) لعرضها في ملخّص النهاية.
 
 import { addSession, type WorkoutSession } from './workoutSessions'
+import { classifyFinishedSession } from './workoutSessionEngine'
 import { detectSessionPRs, loadHistory, recordExercise, saveHistory, topCompletedWeight } from './exerciseHistory'
 import { track, firstOnce } from './analytics'
 
@@ -19,10 +20,15 @@ export interface SessionPR {
  * يُرجع قائمة الأرقام القياسية الجديدة (تُحسب قبل تحديث السجل).
  */
 export function persistFinishedSession(session: WorkoutSession): SessionPR[] {
+  // (P5) اختم الحالة الصادقة عند الحفظ ما لم يمرّرها المستدعي صراحةً:
+  // اكتملت كل التمارين → completed، وإلا → ended_early. الإنهاء المبكر يبقى
+  // مسموحًا (بتأكيده القائم) — فقط يُسمّى بصدق، والمجموعات المنفّذة تُحسب كلها.
+  const stamped: WorkoutSession = session.status ? session : { ...session, status: classifyFinishedSession(session) }
+
   // 1) التقط السجل قبل التحديث لاكتشاف الأرقام القياسية.
   const before = loadHistory()
   const prs: SessionPR[] = []
-  session.exercises.forEach((e) => {
+  stamped.exercises.forEach((e) => {
     if (detectSessionPRs(before, e)) {
       prs.push({
         exerciseId: e.exerciseId,
@@ -33,8 +39,9 @@ export function persistFinishedSession(session: WorkoutSession): SessionPR[] {
     }
   })
 
-  // 2) احفظ الجلسة (يحدّث أيضًا لقطة اليوم workoutCompleted في historyStore).
-  addSession(session)
+  // 2) احفظ الجلسة (يحدّث أيضًا لقطة اليوم workoutCompleted في historyStore —
+  //    التي تبقى مؤشّر «تمرّن هذا اليوم»؛ الاكتمال الصادق مصدره dayCompletion).
+  addSession(stamped)
 
   // 3) حدّث سجل الأداء لكل تمرين.
   let history = loadHistory()

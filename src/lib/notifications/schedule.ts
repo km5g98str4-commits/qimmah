@@ -8,6 +8,9 @@ export const NOTIFICATION_ID_RANGES = {
   water: [3300, 3311],
   weeklyBrief: [3400, 3400],
   supplements: [3500, 3500],
+  // (P5) إشعار نهاية الراحة الأحادي داخل الجلسة — ضمن النطاقات المعروفة حتى
+  // يلغيه cancelKnown أيضًا عند كل مصالحة (لا إشعار يتيم بعد تبديل الحساب).
+  restEnd: [3600, 3600],
   legacyWorkout: [1001, 1001],
 } as const
 

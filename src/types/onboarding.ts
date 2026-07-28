@@ -148,6 +148,8 @@ export interface OnbMeta {
   lastStep?: number
   /** مصدر البيانات — onboarding أو migrated من شكل قديم. */
   source: 'onboarding' | 'migrated'
+  /** طابع آخر حفظ (P12) — دليل LWW لمزامنة profiles.data.onboarding. */
+  updatedAt?: string
 }
 
 /** كائن مصدر الحقيقة الكامل للإعداد. */
