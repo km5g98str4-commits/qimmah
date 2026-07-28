@@ -40,6 +40,9 @@ export function totalActivityMultiplier(activityLevel: ActivityLevel, trainingDa
 }
 
 // خيارات للقوائم المنسدلة (عربية)
+// TODO(data-driven): هذه القوائم نصوص عربية للعرض، ومكانها الصحيح `src/data`/`src/config`
+// حسب قاعدة المشروع «لا hardcoding للنصوص داخل lib» (CLAUDE.md + .claude/rules/product.md).
+// النقل يمسّ ملفات خارج نطاق هذه الموجة (مستهلكوها كثيرون) — يُنفَّذ في موجة تخصيص مستقلة.
 export const genderOptions: { value: Gender; label: string }[] = [
   { value: 'male', label: 'ذكر' },
   { value: 'female', label: 'أنثى' },
@@ -176,6 +179,42 @@ function suggestedSplit(
   return 'جسم كامل (Full Body)'
 }
 
+// ===== المدّة المقدّرة ومعدّل التغيّر — مشتقّان من العجز/الفائض الفعلي =====
+
+/** تقدير شائع: ≈7700 سعرة تعادل كيلوغرام دهون واحدًا. */
+const KCAL_PER_KG_FAT = 7700
+/** سقف عقلاني للمدّة المقدّرة (٥ سنوات) — يمنع أرقامًا سخيفة عند معدّل ضئيل جدًا. */
+const MAX_ESTIMATED_WEEKS = 260
+
+/**
+ * معدّل تغيّر الوزن الأسبوعي **مشتقًّا من السعرات المستهدفة فعليًا** لا من رقم ثابت:
+ *   (السعرات المستهدفة − TDEE) × ٧ ÷ ٧٧٠٠.
+ * سالب = نقصان، موجب = زيادة، صفر = هدف محافظة.
+ * سبب الاشتقاق: المعدّل الثابت القديم (٠.٥ للتنشيف و٠.٢٥ للتضخيم) كان مستقلًا عن العجز
+ * المطبَّق (−٤٠٠ سعرة/يوم ≈ ٠.٣٦ كجم/أسبوع)، فيرى المستخدم رقمين متناقضين.
+ */
+export function weeklyWeightChangeFrom(tdee: number, targetCalories: number): number {
+  if (!Number.isFinite(tdee) || !Number.isFinite(targetCalories) || tdee <= 0) return 0
+  const weekly = ((targetCalories - tdee) * 7) / KCAL_PER_KG_FAT
+  const rounded = Math.round(weekly * 100) / 100
+  return Object.is(rounded, -0) ? 0 : rounded
+}
+
+/**
+ * المدّة المقدّرة بالأسابيع = فرق الوزن ÷ المعدّل الأسبوعي الفعلي (بلا قسمة على صفر).
+ * تُرجع 0 بمعنى «لا مدّة تقديرية» في ثلاث حالات:
+ *  - معدّل صفري (هدف محافظة/ثبات).
+ *  - فرق وزن مهمَل (≤ ٠.٠٥ كجم).
+ *  - تعارض الاتجاه (عجز سعرات مع هدف زيادة أو العكس) — رقم مضلّل لا يُعرض.
+ */
+export function estimatedWeeksFrom(weightDiffKg: number, weeklyChangeKg: number): number {
+  if (!Number.isFinite(weightDiffKg) || !weeklyChangeKg) return 0
+  if (Math.abs(weightDiffKg) <= 0.05) return 0
+  if (Math.sign(weightDiffKg) !== Math.sign(weeklyChangeKg)) return 0
+  const weeks = Math.ceil(Math.abs(weightDiffKg) / Math.abs(weeklyChangeKg))
+  return Math.min(weeks, MAX_ESTIMATED_WEEKS)
+}
+
 export function emptyTargets(): Targets {
   return {
     bmi: 0,
@@ -226,17 +265,11 @@ export function computeTargets(p: Profile): Targets {
   const water = Math.max(2.5, roundHalf(w * 0.035))
   const bmi = round1(w / Math.pow(h / 100, 2))
 
-  // الوزن والمدة المقدّرة
+  // الوزن والمدة المقدّرة — مشتقّان من العجز/الفائض المطبَّق فعليًا (لا معدّل ثابت)،
+  // فيتّسق الرقمان دائمًا: ما يُعرض من سعرات هو ما يفسّر معدّل التغيّر والمدّة.
   const diff = p.targetWeightKg - w
-  let weeklyChange = 0
-  let weeks = 0
-  if (diff < -0.05) {
-    weeklyChange = -0.5
-    weeks = Math.ceil(Math.abs(diff) / 0.5)
-  } else if (diff > 0.05) {
-    weeklyChange = 0.25
-    weeks = Math.ceil(diff / 0.25)
-  }
+  const weeklyChange = weeklyWeightChangeFrom(tdee, calories)
+  const weeks = estimatedWeeksFrom(diff, weeklyChange)
 
   return {
     bmi,

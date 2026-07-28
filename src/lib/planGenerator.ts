@@ -438,8 +438,12 @@ function focusDay(focus?: MuscleFocus): DaySpec {
     case 'core':
       return { type: 'core', baseAr: 'بطن وكور', baseEn: 'Core', routineType: 'cardio' }
     case 'arms':
-    default:
       return { type: 'arms', baseAr: 'ذراعين وأكتاف', baseEn: 'Arms & Shoulders', routineType: 'push' }
+    case 'balanced':
+    default:
+      // «متوازن» (أو تركيز غير محدّد) لا يزيد حجم عضلة بعينها في applyMuscleFocus،
+      // فاليوم الإضافي يبقى جسمًا كاملًا بدل فرض يوم ذراعين لم يطلبه المستخدم.
+      return fullDay()
   }
 }
 
@@ -728,7 +732,10 @@ export function generateNutrition(p: Profile, targets: Targets): { plan: Nutriti
     (goal === 'cut' ? targets.cuttingCalories : goal === 'bulk' ? targets.bulkingCalories : targets.maintenanceCalories)
   // أسلوب العرض من الإعداد — افتراضيًا اقتراح وجبات للحفاظ على سلوك المستخدمين الحاليين.
   const displayStyle = p.nutritionDisplayStyle ?? 'meal_suggestions'
-  const mealsCount = Math.max(3, Math.min(5, p.mealsPerDay))
+  // مصدر واحد لعدد الوجبات: اختيار المستخدم كما هو (٢-٦ حسب حدود الإعداد).
+  // كنّا نقصّه إلى ٣-٥ للتوليد بينما نعرض اختياره في البطاقة — فيرى من اختار ٦ وجبات
+  // خمسة اقتراحات فقط. الآن العدد المولَّد = العدد المعروض = اختيار المستخدم.
+  const mealsCount = clamp(Math.round(p.mealsPerDay) || 3, 2, 6)
 
   // ماكروز فقط / إرشاد مبسّط: لا نفرض اقتراح وجبات — نكتفي بالأهداف + التسجيل (لا بيانات وهمية).
   if (displayStyle !== 'meal_suggestions') {
@@ -741,17 +748,19 @@ export function generateNutrition(p: Profile, targets: Targets): { plan: Nutriti
       targetWaterLiters: targets.waterLiters,
       meals: [],
       style: displayStyle,
-      mealsPerDay: p.mealsPerDay,
+      mealsPerDay: mealsCount,
     }
     return { plan }
   }
 
   const s = STYLE_TEMPLATES[p.nutritionStyle] ?? STYLE_TEMPLATES.high_protein
 
-  // اقتراح الوجبات يُبنى حسب عدد الوجبات من الإعداد (meals_per_day).
-  const slots: string[] = [s.breakfast, s.lunch, s.dinner]
+  // اقتراح الوجبات يُبنى حسب عدد الوجبات من الإعداد (meals_per_day):
+  // وجبتان = فطور وعشاء، ثم تُضاف الغداء فالسناكات كلّما زاد العدد حتى ٦.
+  const slots: string[] = mealsCount <= 2 ? [s.breakfast, s.dinner] : [s.breakfast, s.lunch, s.dinner]
   if (mealsCount >= 4) slots.push(s.snack)
   if (mealsCount >= 5) slots.push('protein-shake')
+  if (mealsCount >= 6) slots.push('pre-workout-snack')
 
   let meals: PlanMeal[] = slots.map((id, i) => createPlanMealFromTemplate(id, i))
 
@@ -784,8 +793,9 @@ export function generateNutrition(p: Profile, targets: Targets): { plan: Nutriti
     targetFat: targets.fatGrams,
     targetWaterLiters: targets.waterLiters,
     meals,
+    // العدد المعروض = عدد الشرائح المولَّدة فعلًا (لا تناقض بين البطاقة والقائمة).
+    mealsPerDay: meals.length,
     style: displayStyle,
-    mealsPerDay: p.mealsPerDay,
   }
   return { plan, warning: within ? undefined : 'هذه أمثلة وجبات مبدئية وليست خطة كاملة مطابقة للأهداف.' }
 }

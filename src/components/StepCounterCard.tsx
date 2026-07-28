@@ -1,12 +1,14 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Icon } from './Icon'
 import { cn } from '@/lib/cn'
+import { getDayStamp } from '@/lib/today'
 import {
   loadStepGoal,
   saveStepGoal,
   clampGoal,
   getSteps,
   setSteps,
+  addSteps,
   weeklySteps,
   type DaySteps,
 } from '@/lib/stepCounter'
@@ -36,6 +38,28 @@ export function StepCounterCard({ className }: { className?: string }) {
   const [week, setWeek] = useState<DaySteps[]>(weeklySteps)
   const [editingGoal, setEditingGoal] = useState(false)
   const [goalDraft, setGoalDraft] = useState<string>('')
+  const dayRef = useRef<string>(getDayStamp())
+
+  // تحقّق من تغيّر اليوم عند العودة للصفحة (لو بقيت مفتوحة بعد منتصف الليل):
+  // نعيد قراءة خطوات اليوم الجديد والرسم الأسبوعي حتى لا يعرض الرقم أرقام أمس
+  // بينما الحفظ يذهب لليوم الجديد. نفس نمط useToday.
+  useEffect(() => {
+    const check = () => {
+      const today = getDayStamp()
+      if (today === dayRef.current) return
+      dayRef.current = today
+      const fresh = getSteps()
+      setStepsState(fresh)
+      setDraft(fresh ? String(fresh) : '')
+      setWeek(weeklySteps())
+    }
+    window.addEventListener('focus', check)
+    document.addEventListener('visibilitychange', check)
+    return () => {
+      window.removeEventListener('focus', check)
+      document.removeEventListener('visibilitychange', check)
+    }
+  }, [])
 
   const pct = goal > 0 ? Math.min(1, steps / goal) : 0
   const reached = steps >= goal && steps > 0
@@ -50,6 +74,17 @@ export function StepCounterCard({ className }: { className?: string }) {
   /** يطبّق قيمة خطوات مطلقة على اليوم ويُحدّث الحالة + الرسم. */
   function applySteps(value: number) {
     const saved = setSteps(value)
+    setStepsState(saved)
+    setDraft(saved ? String(saved) : '')
+    setWeek(weeklySteps())
+  }
+
+  /**
+   * إضافة سريعة تراكمية: نقرأ المجموع من المخزن لا من حالة الرندر،
+   * فنقرتان متتاليتان قبل إعادة الرندر تُجمعان بدل أن تتجاوز إحداهما الأخرى.
+   */
+  function addQuick(delta: number) {
+    const saved = addSteps(delta)
     setStepsState(saved)
     setDraft(saved ? String(saved) : '')
     setWeek(weeklySteps())
@@ -191,7 +226,7 @@ export function StepCounterCard({ className }: { className?: string }) {
           <button
             key={q}
             type="button"
-            onClick={() => applySteps(steps + q)}
+            onClick={() => addQuick(q)}
             className="flex items-center justify-center gap-1 rounded-xl bg-primary-soft py-2 text-xs font-black text-primary-c hover:brightness-95"
           >
             <Icon name="Plus" className="h-3.5 w-3.5" />

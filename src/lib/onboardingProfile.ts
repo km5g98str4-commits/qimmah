@@ -28,7 +28,6 @@ import {
   profileHash,
 } from '@/lib/calculators'
 import {
-  deriveActivityLevel,
   deriveTargetWeight,
   generatePlan,
   levelFromExperience,
@@ -37,7 +36,7 @@ import { experienceToBand, goalChoices, gymTypeToAccess } from '@/data/planBuild
 import type { Customization } from '@/lib/customization'
 import { hasSavedCustomization, loadCustomization } from '@/lib/customization'
 import { loadOnboarding } from '@/lib/onboarding'
-import { writeJson } from './safeStorage'
+import { readRaw, removeKey, writeJson } from './safeStorage'
 
 export const ONBOARDING_PROFILE_KEY = 'qimmah:onboarding:profile:v1'
 
@@ -60,10 +59,39 @@ export function defaultOnboardingProfile(): OnboardingProfile {
   }
 }
 
-/** دمج آمن لقسم محفوظ فوق الافتراضي. */
+/**
+ * دمج آمن لقسم محفوظ فوق الافتراضي — **محصَّن ضد الأنواع الغريبة**.
+ *
+ * الدمج السطحي القديم كان يسمح لملف محفوظ فيه `"injuries": null` بأن يتجاوز الافتراضي `[]`،
+ * فينفجر `null.join('، ')` لاحقًا أثناء توليد الخطة → استثناء غير ملتقَط يُبيّض الشاشة.
+ * القواعد هنا (عامة، فلا يتكرّر العطل في أي حقل مصفوفي آخر):
+ *  1. القسم المحفوظ يجب أن يكون كائنًا (لا مصفوفة ولا نصًّا) وإلا نرجع الافتراضي كاملًا.
+ *  2. الحقل الذي افتراضيه **مصفوفة** لا يُقبل إلا مصفوفة، وتُنقّى عناصرها إلى نصوص غير فارغة
+ *     (كل الحقول المصفوفية في مصدر الحقيقة هي string[]).
+ *  3. `null`/`undefined` الصريحان لا يتجاوزان الافتراضي أبدًا (يُهمَلان).
+ * أي حقل تالف يسقط وحده — بقيّة القسم تنجو (لا إعادة تعيين كاملة للمستخدم).
+ */
 function mergeSection<T extends object>(base: T, saved: unknown): T {
-  if (!saved || typeof saved !== 'object') return base
-  return { ...base, ...(saved as Partial<T>) }
+  if (!saved || typeof saved !== 'object' || Array.isArray(saved)) return base
+  const out: T = { ...base }
+  for (const [k, v] of Object.entries(saved as Record<string, unknown>)) {
+    if (v === null || v === undefined) continue
+    const key = k as keyof T
+    if (Array.isArray(base[key])) {
+      // حقل مصفوفي: نقبل المصفوفات فقط، وننقّي العناصر إلى نصوص.
+      if (!Array.isArray(v)) continue
+      out[key] = v.filter((x): x is string => typeof x === 'string' && x.trim() !== '') as T[keyof T]
+      continue
+    }
+    out[key] = v as T[keyof T]
+  }
+  return out
+}
+
+/** مصفوفة نصوص مضمونة — حارس أخير عند نقاط الاستهلاك (حزام وحمّالة). */
+function safeStrings(value: unknown): string[] {
+  if (!Array.isArray(value)) return []
+  return value.filter((x): x is string => typeof x === 'string' && x.trim() !== '')
 }
 
 /**
@@ -77,36 +105,50 @@ function migrateLegacyOnbGoal(goal: OnboardingProfile['goal']): OnboardingProfil
 
 // ===== التخزين =====
 
-/** يقرأ مصدر الحقيقة المحفوظ مدموجًا فوق الافتراضي (آمن ضد بيانات تالفة/قديمة). */
+/** يبني مصدر حقيقة كاملًا من كائن محفوظ (سليم أو تالف جزئيًا) فوق الافتراضي. */
+function mergeSavedProfile(saved: unknown): OnboardingProfile {
+  const s = (saved && typeof saved === 'object' && !Array.isArray(saved) ? saved : {}) as Partial<OnboardingProfile>
+  const base = defaultOnboardingProfile()
+  return {
+    profile: mergeSection(base.profile, s.profile),
+    bodyMetrics: mergeSection(base.bodyMetrics, s.bodyMetrics),
+    goal: migrateLegacyOnbGoal(mergeSection(base.goal, s.goal)),
+    trainingPreferences: mergeSection(base.trainingPreferences, s.trainingPreferences),
+    activityProfile: mergeSection(base.activityProfile, s.activityProfile),
+    nutritionPreferences: mergeSection(base.nutritionPreferences, s.nutritionPreferences),
+    foodPreferences: mergeSection(base.foodPreferences, s.foodPreferences),
+    limitations: mergeSection(base.limitations, s.limitations),
+    wellnessTracking: mergeSection(base.wellnessTracking, s.wellnessTracking),
+    // اللغة مثبّتة عربية، ونسخة المخطّط دائمًا الحالية (لا نثق بقيمة محفوظة قديمة).
+    appPreferences: { ...mergeSection(base.appPreferences, s.appPreferences), language: 'ar' },
+    _meta: { ...mergeSection(base._meta, s._meta), schemaVersion: ONBOARDING_SCHEMA_VERSION },
+  }
+}
+
+/**
+ * يقرأ مصدر الحقيقة المحفوظ مدموجًا فوق الافتراضي (آمن ضد بيانات تالفة/قديمة).
+ *
+ * إنقاذ جزئي: ما دام النص يُحلَّل إلى كائن، **ننقذ كل قسم سليم** ونسقط الحقول التالفة وحدها
+ * (عبر mergeSection) — بدل رفض الملف كاملًا لأن حقلًا واحدًا خرج عن نوعه.
+ *
+ * أما فشل التحليل الكلّي (بايت تالف يكسر JSON) فلا يمكن إنقاذ أقسامه بنظافة من نصّ مكسور،
+ * ونرجع `null` **عمدًا**: هذا ليس «إعدادًا فارغًا» بل إشارة «لا مصدر حقيقة مقروء»،
+ * وهي التي تفتح مسار الإنقاذ الأعلى في ensureOnboardingProfile (هجرة من التخصيص القديم المحفوظ)
+ * قبل السقوط إلى إعداد فارغ. إرجاع كائن هنا كان سيقطع مسار الإنقاذ ذاك.
+ */
 export function loadOnboardingProfile(): OnboardingProfile | null {
   if (typeof window === 'undefined') return null
-  let raw: string | null
-  try {
-    raw = window.localStorage.getItem(ONBOARDING_PROFILE_KEY)
-  } catch {
-    return null
-  }
+  const raw = readRaw(ONBOARDING_PROFILE_KEY)
   if (!raw) return null
+  let parsed: unknown
   try {
-    const saved = JSON.parse(raw) as Partial<OnboardingProfile>
-    const base = defaultOnboardingProfile()
-    const goal = migrateLegacyOnbGoal(mergeSection(base.goal, saved.goal))
-    return {
-      profile: mergeSection(base.profile, saved.profile),
-      bodyMetrics: mergeSection(base.bodyMetrics, saved.bodyMetrics),
-      goal,
-      trainingPreferences: mergeSection(base.trainingPreferences, saved.trainingPreferences),
-      activityProfile: mergeSection(base.activityProfile, saved.activityProfile),
-      nutritionPreferences: mergeSection(base.nutritionPreferences, saved.nutritionPreferences),
-      foodPreferences: mergeSection(base.foodPreferences, saved.foodPreferences),
-      limitations: mergeSection(base.limitations, saved.limitations),
-      wellnessTracking: mergeSection(base.wellnessTracking, saved.wellnessTracking),
-      appPreferences: { ...base.appPreferences, ...saved.appPreferences, language: 'ar' },
-      _meta: { ...base._meta, ...saved._meta, schemaVersion: ONBOARDING_SCHEMA_VERSION },
-    }
+    parsed = JSON.parse(raw)
   } catch {
     return null
   }
+  // نصّ يحلّل إلى قيمة غير كائن (مثل "null" أو رقم) = ملف غير مقروء → مسار الإنقاذ الأعلى.
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return null
+  return mergeSavedProfile(parsed)
 }
 
 export function saveOnboardingProfile(value: OnboardingProfile): void {
@@ -119,12 +161,8 @@ export function saveOnboardingProfile(value: OnboardingProfile): void {
 }
 
 export function clearOnboardingProfile(): void {
-  if (typeof window === 'undefined') return
-  try {
-    window.localStorage.removeItem(ONBOARDING_PROFILE_KEY)
-  } catch {
-    /* تجاهل */
-  }
+  // removeKey لا يرمي أبدًا (تخزين محظور/خاص) — لا حاجة لـ try/catch هنا.
+  removeKey(ONBOARDING_PROFILE_KEY)
 }
 
 // ===== خرائط مصدر-الحقيقة → الشكل القديم (للمولّد) =====
@@ -160,35 +198,46 @@ const showsTargetWeight = (g?: OnbGoalType) => g === 'cut' || g === 'bulk'
 
 /** يحوّل مصدر الحقيقة إلى Profile الذي يستهلكه مولّد الخطة الحالي. */
 export function toLegacyProfile(op: OnboardingProfile, base: Profile = defaultProfile): Profile {
-  const tp = op.trainingPreferences
-  const goalType: GoalType = op.goal.type ? GOAL_TO_GOALTYPE[op.goal.type] : base.goalType
+  // أقسام مضمونة الوجود: قد يصل كائن قديم/يدوي ينقصه قسم كامل — لا نُسقط الشاشة عليه.
+  const tp = op.trainingPreferences ?? {}
+  const goal = op.goal ?? {}
+  const body = op.bodyMetrics ?? {}
+  const activity = op.activityProfile ?? {}
+  const nutrition = op.nutritionPreferences ?? {}
+  const identity = op.profile ?? {}
+  const goalType: GoalType = goal.type ? GOAL_TO_GOALTYPE[goal.type] : base.goalType
   const experienceLevel: ExperienceLevel | undefined = tp.experience
   const band = experienceLevel ? experienceToBand(experienceLevel) : base.experienceBand
   const trainingLevel = experienceLevel ? levelFromExperience(band) : base.trainingLevel
   const gymType: GymType = tp.environment ? ENVIRONMENT_TO_GYMTYPE[tp.environment] : (base.gymType ?? 'commercial')
   const gymAccess = gymTypeToAccess(gymType)
-  const weightKg = op.bodyMetrics.currentWeightKg || base.weightKg
+  const weightKg = body.currentWeightKg || base.weightKg
   const trainingDays = tp.daysPerWeek || base.trainingDays
   const consistency: Consistency = tp.consistency
     ? CONSISTENCY_TO_LEGACY[tp.consistency]
     : base.consistency ?? 'regular'
   // وزن الهدف يُسأل مرّة واحدة لـ cut/bulk فقط؛ القوة لا هدف وزن لها (لا مدة/تغيّر مضلّل).
-  const targetWeightKg = showsTargetWeight(op.goal.type)
-    ? op.bodyMetrics.targetWeightKg || deriveTargetWeight(weightKg, goalType)
+  const targetWeightKg = showsTargetWeight(goal.type)
+    ? body.targetWeightKg || deriveTargetWeight(weightKg, goalType)
     : weightKg
-  const activityLevel: ActivityLevel = op.activityProfile.neat
-    ? NEAT_TO_ACTIVITY[op.activityProfile.neat]
-    : deriveActivityLevel(trainingDays)
+  // حركة الحياة (NEAT) مفصولة عن التمرين عمدًا في computeTargets:
+  // المعامل الكلّي = NEAT + (أيام التمرين × 0.025).
+  // لذلك عند غياب NEAT **لا نشتقّه من أيام التمرين** (deriveActivityLevel) — كان ذلك يحتسب
+  // أيام التمرين مرّتين (مرّة داخل مستوى النشاط ومرّة في الإضافة) فيتضخّم TDEE في مسار الهجرة.
+  // الافتراضي المحافظ = خامل (1.20)، وأثر التمرين يأتي من الأيام وحدها.
+  const activityLevel: ActivityLevel = activity.neat
+    ? NEAT_TO_ACTIVITY[activity.neat]
+    : 'sedentary'
   // أسلوب التغذية الجديد دلالي (طريقة العرض)؛ نُبقي أسلوب الطبخ القديم للمولّد.
   const nutritionStyle: NutritionStyle = base.nutritionStyle ?? 'high_protein'
-  const mealsPerDay = op.nutritionPreferences.mealsPerDay || base.mealsPerDay
+  const mealsPerDay = nutrition.mealsPerDay || base.mealsPerDay
 
   return {
     ...base,
-    name: op.profile.name?.trim() || '',
-    gender: op.profile.sex ?? 'unspecified',
-    age: op.profile.age || base.age,
-    heightCm: op.bodyMetrics.heightCm || base.heightCm,
+    name: identity.name?.trim() || '',
+    gender: identity.sex ?? 'unspecified',
+    age: identity.age || base.age,
+    heightCm: body.heightCm || base.heightCm,
     weightKg,
     targetWeightKg,
     activityLevel,
@@ -200,14 +249,15 @@ export function toLegacyProfile(op: OnboardingProfile, base: Profile = defaultPr
     splitMode: tp.splitMode ?? 'auto',
     splitChoice: tp.splitMode === 'advanced' ? tp.advancedSplit : undefined,
     workoutEnvironment: gymAccess === 'home' || gymAccess === 'bodyweight' ? 'home' : 'gym',
-    injuries: op.limitations.injuries.join('، '),
-    healthNotes: op.limitations.notes ?? '',
+    // حارس أخير: ملف قديم/تالف قد يحمل null مكان المصفوفة — لا نستدعي join عليه مباشرة.
+    injuries: safeStrings(op.limitations?.injuries).join('، '),
+    healthNotes: typeof op.limitations?.notes === 'string' ? op.limitations.notes : '',
     trackNutrition: true,
     mealsPerDay,
     nutritionStyle,
     // أسلوب العرض الدلالي من الإعداد — يقود واجهة التغذية (اقتراح وجبات / ماكروز فقط).
-    nutritionDisplayStyle: op.nutritionPreferences.style ?? base.nutritionDisplayStyle,
-    dislikedFoods: op.foodPreferences.dislikedFoods.join('، '),
+    nutritionDisplayStyle: nutrition.style ?? base.nutritionDisplayStyle,
+    dislikedFoods: safeStrings(op.foodPreferences?.dislikedFoods).join('، '),
     muscleFocus: 'balanced',
     consistency,
     experienceBand: band,
@@ -217,7 +267,7 @@ export function toLegacyProfile(op: OnboardingProfile, base: Profile = defaultPr
     equipment: [],
     schedulingStyle: 'flexible',
     preferredDays: [],
-    remindersOptIn: op.appPreferences.reminders,
+    remindersOptIn: !!op.appPreferences?.reminders,
   }
 }
 
@@ -237,7 +287,7 @@ export function nutritionTargetsFromOnboarding(op: OnboardingProfile, base: Prof
 export function buildCustomizationFromOnboarding(op: OnboardingProfile, current: Customization): Customization {
   const profile = toLegacyProfile(op, current.profile)
   const g = generatePlan(profile)
-  const goalLabel = goalChoices.find((x) => x.value === op.goal.type)?.label
+  const goalLabel = goalChoices.find((x) => x.value === op.goal?.type)?.label
   return {
     ...current,
     identity: {
@@ -259,7 +309,7 @@ export function buildCustomizationFromOnboarding(op: OnboardingProfile, current:
     routine: g.weeklySchedule,
     // تتبّع المكملات/الأدوية يتبع اختيار الإعداد: «none» → معطّل (لا بطاقة وهمية)،
     // basic/detailed → مُفعّل بقوائم فارغة (قشرة تتبّع فقط، يملؤها المستخدم).
-    wellnessPlan: { enabled: op.wellnessTracking.mode !== 'none', supplements: [], medications: [] },
+    wellnessPlan: { enabled: (op.wellnessTracking?.mode ?? 'none') !== 'none', supplements: [], medications: [] },
     workouts: [],
     supplements: [],
     meals: [],
@@ -318,14 +368,22 @@ function experienceFromLegacy(p: Profile): ExperienceLevel | undefined {
 
 /** يبني مصدر حقيقة من تخصيص قديم محفوظ (لحفظ المستخدمين الحاليين). */
 export function migrateFromCustomization(c: Customization): OnboardingProfile {
-  const p = c.profile
+  const p = c.profile ?? defaultProfile
   const base = defaultOnboardingProfile()
   const goalOnb = GOALTYPE_TO_ONB[p.goalType] ?? 'cut'
-  const dislikes = (p.dislikedFoods ?? '').split(/[،,]/).map((s) => s.trim()).filter(Boolean)
-  const injuries = (p.injuries ?? '').split(/[،,]/).map((s) => s.trim()).filter(Boolean)
+  // النصوص القديمة قد تكون null/رقمًا في ملف تالف — نتعامل معها كنصّ فارغ لا كـ crash.
+  const splitList = (v: unknown) =>
+    (typeof v === 'string' ? v : '').split(/[،,]/).map((s) => s.trim()).filter(Boolean)
+  const dislikes = splitList(p.dislikedFoods)
+  const injuries = splitList(p.injuries)
   const wp = c.wellnessPlan
-  const suppIds = wp?.supplements?.map((s) => s.supplementId || s.id).filter(Boolean) ?? []
-  const medIds = wp?.medications?.map((m) => m.medicationId || m.id).filter(Boolean) ?? []
+  // قوائم الويلنس قد تُحفظ null/كائنًا — Array.isArray قبل map (map على غير مصفوفة = استثناء).
+  const suppIds = Array.isArray(wp?.supplements)
+    ? wp.supplements.map((s) => s.supplementId || s.id).filter(Boolean)
+    : []
+  const medIds = Array.isArray(wp?.medications)
+    ? wp.medications.map((m) => m.medicationId || m.id).filter(Boolean)
+    : []
   return {
     profile: {
       name: c.identity?.userName?.trim() || undefined,

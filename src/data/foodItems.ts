@@ -495,8 +495,9 @@ export const foodItems: FoodItem[] = [
     nameAr: 'زيت زيتون',
     nameEn: 'Olive oil',
     category: 'دهون صحية',
-    servingLabelAr: 'ملعقة كبيرة (15غ)',
-    servingGrams: 15,
+    // ملعقة الزيت الكبيرة ≈ ١٤غ دهون خالصة ≈ ١٢٠ سعرة (متّسق مع mealIngredients).
+    servingLabelAr: 'ملعقة كبيرة (14غ)',
+    servingGrams: 14,
     calories: 120,
     protein: 0,
     carbs: 0,

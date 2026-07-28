@@ -2,6 +2,8 @@
 
 import { STEP_GOAL_KEY, STEP_LOG_KEY, STEP_SOURCE_KEY } from './stepCounter'
 import { ACTIVE_WORKOUT_KEY } from './activeWorkout'
+import { SYNC_BOOKKEEPING_KEYS } from './historyStore'
+import { removeKey } from './safeStorage'
 
 export const QIMMAH_KEYS = [
   'qimmah:customization:v1',
@@ -38,12 +40,20 @@ export const QIMMAH_KEYS = [
   STEP_GOAL_KEY,
   // مسوّدة التمرين النشط (استئناف جلسة لم تُنهَ).
   ACTIVE_WORKOUT_KEY,
+  // دفاتر المزامنة (طوابع آخر كتابة + شواهد الحذف) — تُستورد من مالكها كي لا تتخلّف القائمة.
+  // بدونها تبقى شواهد حذف قديمة بعد إعادة الضبط فتمنع عودة بيانات سحابية مشروعة.
+  SYNC_BOOKKEEPING_KEYS.stamps,
+  SYNC_BOOKKEEPING_KEYS.tombstones,
 ]
 
-/** يحذف مفاتيح قِمّة فقط، ثم يعيد التحميل إلى شاشة البداية. */
+/**
+ * يحذف مفاتيح قِمّة فقط، ثم يعيد التحميل إلى شاشة البداية.
+ * الحذف يمرّ من الطبقة الآمنة (removeKey لا يرمي): الحذف الخام كان يرمي عند حظر التخزين
+ * فتُجهَض إعادة الضبط في منتصف الحلقة قبل reload — أسوأ حالة ممكنة (مسح جزئي).
+ */
 export function resetQimmah(): void {
   if (typeof window === 'undefined') return
-  QIMMAH_KEYS.forEach((k) => window.localStorage.removeItem(k))
+  QIMMAH_KEYS.forEach((k) => removeKey(k))
   window.location.hash = '/start'
   window.location.reload()
 }

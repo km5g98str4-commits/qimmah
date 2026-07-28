@@ -22,8 +22,19 @@ export type StepSource = 'manual' | 'healthkit' | 'google-fit' | 'external'
 const DEFAULT_SOURCE: StepSource = 'manual'
 const VALID_SOURCES: readonly StepSource[] = ['manual', 'healthkit', 'google-fit', 'external']
 
-/** يتحقّق أن المصدر ضمن القيم المعروفة وإلا يرجع 'external'. */
+/**
+ * تطبيع مصدر مخزَّن (أو ممرَّر لـ setSteps): المجهول/التالف يرجع للافتراضي 'manual'
+ * حتى يبقى متّسقًا مع getStepSource — تصنيف إدخال يدوي كـ 'external' مضلّل للمستخدم.
+ */
 function normalizeSource(s: unknown): StepSource {
+  return VALID_SOURCES.includes(s as StepSource) ? (s as StepSource) : DEFAULT_SOURCE
+}
+
+/**
+ * تطبيع مصدر وارد من الجسر الخارجي: القيمة المجهولة تبقى 'external' لأن البيانات
+ * وصلت من غلاف أصلي — ليست إدخالًا يدويًا بأي حال.
+ */
+function normalizeIncomingSource(s: unknown): StepSource {
   return VALID_SOURCES.includes(s as StepSource) ? (s as StepSource) : 'external'
 }
 
@@ -171,7 +182,8 @@ export interface ExternalStepPayload {
  */
 export function ingestExternalSteps(payload: ExternalStepPayload): DaySteps {
   const date = payload.date || getDayStamp()
-  const source = normalizeSource(payload.source)
+  // مصدر وارد من الغلاف — يُطبَّع بقاعدة الجسر لا بقاعدة التخزين اليدوي.
+  const source = normalizeIncomingSource(payload.source)
   const steps = setSteps(payload.steps, date, source)
   return { date, steps, source: steps > 0 ? source : DEFAULT_SOURCE }
 }

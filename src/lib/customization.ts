@@ -18,7 +18,7 @@ import type { WellnessPlan } from '@/types/wellness'
 import { defaultWellnessPlan } from './wellnessPlan'
 import type { CommitmentPlan, MeasurementPlan } from '@/types/progress'
 import { defaultCommitmentPlan } from './commitmentPlan'
-import { writeJson } from './safeStorage'
+import { readRaw, removeKey, writeJson } from './safeStorage'
 
 export const STORAGE_KEY = 'qimmah:customization:v1'
 
@@ -194,7 +194,8 @@ export function loadCustomization(): Customization {
   const base = getDefaultCustomization()
   if (typeof window === 'undefined') return base
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY)
+    // القراءة عبر الطبقة الآمنة (لا ترمي في التصفّح الخاص/حظر تخزين الطرف الأول).
+    const raw = readRaw(STORAGE_KEY)
     if (!raw) return base
     const saved = JSON.parse(raw) as Partial<Customization>
     const merged: Customization = {
@@ -260,11 +261,15 @@ export function saveCustomization(value: Customization): void {
 }
 
 export function clearCustomization(): void {
-  if (typeof window === 'undefined') return
-  window.localStorage.removeItem(STORAGE_KEY)
+  // removeKey لا يرمي أبدًا — الحذف الخام كان يرمي عند حظر التخزين ويوقف مسار المسح.
+  removeKey(STORAGE_KEY)
 }
 
+/**
+ * هل يوجد تخصيص محفوظ؟ تُستدعى ضمن قرار التوجيه عند الإقلاع (ensureOnboardingProfile)،
+ * لذلك **يجب ألا ترمي أبدًا**: getItem الخام يرمي في وضع Safari الخاص/حظر تخزين الطرف الأول،
+ * واستثناء أثناء التهيئة يُبيّض الشاشة كاملة. readRaw يرجع null بدل الرمي.
+ */
 export function hasSavedCustomization(): boolean {
-  if (typeof window === 'undefined') return false
-  return window.localStorage.getItem(STORAGE_KEY) !== null
+  return readRaw(STORAGE_KEY) !== null
 }

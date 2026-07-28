@@ -11,13 +11,6 @@ export interface NavItem {
   href: string
 }
 
-/** ميزة عامة (بطاقة) */
-export interface Feature {
-  icon: IconName
-  title: string
-  description: string
-}
-
 /** إحصائية مختصرة */
 export interface Stat {
   value: string
@@ -100,14 +93,6 @@ export interface CustomizationOption {
   description: string
 }
 
-/** حقل في البيانات الأساسية (البروفايل) */
-export interface ProfileField {
-  icon: IconName
-  label: string
-  value: string
-  unit?: string
-}
-
 /** معلومات الهدف الحالي */
 export interface GoalInfo {
   currentLabel: string
@@ -116,62 +101,6 @@ export interface GoalInfo {
   targetValue: string
   deadline: string
   progress: number // 0..100
-}
-
-/** مفتاح التزام (عادة/مبدأ) */
-export interface CommitmentKey {
-  icon: IconName
-  title: string
-  description: string
-}
-
-/** نقطة ألم في قسم المشكلة */
-export interface PainPoint {
-  icon: IconName
-  title: string
-  description: string
-}
-
-/** ركيزة قيمة في قسم الحل */
-export interface ValuePillar {
-  icon: IconName
-  title: string
-  description: string
-}
-
-/** عنصر جمهور (لمن هذا / لمن ليس) */
-export interface AudienceItem {
-  icon: IconName
-  title: string
-  description: string
-}
-
-/** سؤال شائع */
-export interface FaqItem {
-  question: string
-  answer: string
-}
-
-/** خطة تسعير */
-export interface PricingPlan {
-  id: string
-  name: string
-  price: string
-  period: string
-  description: string
-  features: string[]
-  cta: string
-  highlighted?: boolean
-  badge?: string
-}
-
-/** بطاقة معاينة في الداشبورد */
-export interface DashboardCard {
-  icon: IconName
-  label: string
-  value: string
-  sub: string
-  accent: string
 }
 
 export type IconComponent = LucideIcon

@@ -10,3 +10,21 @@
   from = "/*"
   to = "/index.html"
   status = 200
+
+# رؤوس أمان أساسية.
+# ملاحظة: لم نضف Content-Security-Policy عمدًا — التطبيق يحمّل خطوط Google
+# ويتصل بمشروع Supabase يختلف عنوانه لكل نشر، وسياسة خاطئة تكسر الإنتاج بصمت.
+# عند تثبيت العناوين النهائية أضف CSP بـ connect-src لعنوان Supabase فقط.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # منع تضمين الموقع في إطار (clickjacking)
+    X-Frame-Options = "DENY"
+    # منع المتصفّح من تخمين نوع المحتوى
+    X-Content-Type-Options = "nosniff"
+    # لا تسرّب المسار الكامل للمواقع الخارجية
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    # تعطيل صلاحيات لا يستخدمها التطبيق حاليًا (تحقّقنا: لا geolocation ولا mediaDevices في src).
+    # ⚠️ عند دمج ميزة «داكن حسب الغروب» أو ماسح الباركود، احذف الصلاحية المقابلة من هذه القائمة
+    # وإلا مُنعت بصمت في الإنتاج.
+    Permissions-Policy = "geolocation=(), microphone=(), camera=(), payment=(), usb=()"
