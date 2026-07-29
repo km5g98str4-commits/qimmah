@@ -5,6 +5,7 @@
 // الحقيقي فقط (لا حرارة/مدة مُختلقة): كل N دقيقة يضبطها المستخدم، ويمكن إيقافه كليًا.
 
 import { addWaterToDay, loadNutritionDay } from './nutritionV2Model'
+import { safeWriteJson } from '@/lib/safeStorage'
 
 export const HYDRATION_PREF_KEY = 'qimmah:workoutHydration:v1'
 
@@ -48,7 +49,7 @@ export function loadHydrationPref(): HydrationPref {
 
 export function saveHydrationPref(pref: HydrationPref): HydrationPref {
   const clean: HydrationPref = { enabled: pref.enabled !== false, intervalMin: clampInterval(pref.intervalMin), amountMl: clampAmount(pref.amountMl) }
-  if (typeof window !== 'undefined') window.localStorage.setItem(HYDRATION_PREF_KEY, JSON.stringify(clean))
+  safeWriteJson(HYDRATION_PREF_KEY, clean)
   return clean
 }
 

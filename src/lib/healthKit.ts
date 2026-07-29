@@ -1,6 +1,7 @@
 import { Capacitor, registerPlugin } from '@capacitor/core'
 import { ingestExternalSteps, type DaySteps } from './stepCounter'
 import { importHealthWeight, removeHealthWeight, latestWeightImport } from './measurementLog'
+import { safeWriteJson } from '@/lib/safeStorage'
 
 /**
  * حالة صلاحية جسر الصحة القديم (خطوات/وزن/نبض).
@@ -98,8 +99,7 @@ function readState(): HealthState {
 }
 
 function writeState(state: HealthState): void {
-  if (typeof window === 'undefined') return
-  window.localStorage.setItem(HEALTHKIT_PREF_KEY, JSON.stringify(state))
+  safeWriteJson(HEALTHKIT_PREF_KEY, state)
 }
 
 function saveMetric(metric: HealthMetric, patch: MetricState): void {

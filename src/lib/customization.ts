@@ -17,6 +17,7 @@ import { defaultNutritionPlan } from './nutritionPlan'
 import type { WellnessPlan } from '@/types/wellness'
 import type { CommitmentPlan, MeasurementPlan } from '@/types/progress'
 import { defaultCommitmentPlan } from './commitmentPlan'
+import { safeRemove, safeWriteJson } from '@/lib/safeStorage'
 
 export const STORAGE_KEY = 'qimmah:customization:v1'
 
@@ -339,7 +340,7 @@ function withFreshTargets(c: Customization): Customization {
 export function saveCustomization(value: Customization): void {
   if (typeof window === 'undefined') return
   const stamped: Customization = { ...value, settingsUpdatedAt: new Date().toISOString() }
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(stamped))
+  safeWriteJson(STORAGE_KEY, stamped)
   // مزامنة إعدادات الحساب (P12): شريحة الحساب فقط تركب صف profiles (data.settings)
   // بمفتاح كيان مستقل عن onboarding كي لا يستبدل أحدهما الآخر في دمج الطابور.
   enqueueSyncOperation('profiles', 'settings', {
@@ -371,12 +372,11 @@ export function applyAccountSettingsFromSync(slice: Partial<AccountSettings>, st
       : local.measurementPlan,
     settingsUpdatedAt: stamp,
   }
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(merged))
+  safeWriteJson(STORAGE_KEY, merged)
 }
 
 export function clearCustomization(): void {
-  if (typeof window === 'undefined') return
-  window.localStorage.removeItem(STORAGE_KEY)
+  safeRemove(STORAGE_KEY)
 }
 
 export function hasSavedCustomization(): boolean {

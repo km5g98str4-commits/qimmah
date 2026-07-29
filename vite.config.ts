@@ -24,18 +24,29 @@ const buildCommit = (() => {
   }
 })()
 
-// يحقن هاش الـ commit في dist/sw.js بعد النسخ من public/ — كل نشر يحمل إصدار
+// يحقن هاش الـ commit في sw.js بعد النسخ من public/ — كل نشر يحمل إصدار
 // كاش جديدًا فيُبطل عامل الخدمة كاش النشرة السابقة تلقائيًا (لا bump يدوي).
+//
+// (QEA-003) كان المسار مثبّتًا حرفيًا على 'dist/' بصرف النظر عن build.outDir المُهيَّأ
+// فعليًا — فأي بناء بمخرج مختلف (مثل بناء تدقيق معزول عبر --outDir أو outDir مخصّص في
+// تهيئة أخرى) يُنتج sw.js لا يحمل __SW_VERSION__/__SW_PRECACHE_ASSETS__ المُستبدَلين،
+// فيفشل عامل الخدمة بصمت ويظهر عطل «غير متصل» لا علاقة له بسلوك الإنتاج الحقيقي.
+// الإصلاح: نلتقط outDir المُحلَّل فعليًا عبر configResolved (يعكس أي --outDir أو تخصيصًا
+// آخر) بدل افتراض 'dist' دائمًا.
 function swVersionPlugin() {
+  let outDir = path.resolve(__dirname, 'dist')
   return {
     name: 'qimmah-sw-version',
     apply: 'build' as const,
+    configResolved(config: { build: { outDir: string }; root: string }) {
+      outDir = path.isAbsolute(config.build.outDir) ? config.build.outDir : path.resolve(config.root, config.build.outDir)
+    },
     closeBundle() {
-      const swPath = path.resolve(__dirname, 'dist/sw.js')
+      const swPath = path.resolve(outDir, 'sw.js')
       try {
-        // أصول الإقلاع من dist/index.html (entry + modulepreload + CSS) — تُخزَّن
-        // مسبقًا عند التثبيت كي تعمل القشرة دون اتصال من أول زيارة.
-        const html = readFileSync(path.resolve(__dirname, 'dist/index.html'), 'utf-8')
+        // أصول الإقلاع من index.html (entry + modulepreload + CSS) داخل outDir الفعلي —
+        // تُخزَّن مسبقًا عند التثبيت كي تعمل القشرة دون اتصال من أول زيارة.
+        const html = readFileSync(path.resolve(outDir, 'index.html'), 'utf-8')
         const bootAssets = [...new Set([...html.matchAll(/(?:src|href)="(\/assets\/[\w.-]+\.(?:js|css))"/g)].map((m) => m[1]))]
         const src = readFileSync(swPath, 'utf-8')
         writeFileSync(
@@ -72,8 +83,8 @@ export default defineConfig(() => {
           // lazy boundaries (especially the nutrition catalogue below).
           onlyExplicitManualChunks: true,
           // فصل مكتبات الطرف الثالث عن كود التطبيق لتحسين التخزين المؤقت وتقليل حزمة الدخول.
-          // zxing (الباركود) و react-body-highlighter (خريطة العضلات) ثقيلتان وتُطلبان في
-          // أسطح محدّدة — نفصلهما ليُخزَّنا مستقلّين ويخرجا من حِزم الشاشات.
+          // zxing (الباركود) ثقيلة وتُطلب في سطح محدّد — نفصلها لتُخزَّن مستقلّة
+          // وتخرج من حِزم الشاشات.
           manualChunks(id) {
             if (id.includes('/node_modules/lucide-react/')) return 'vendor-icons'
             if (
@@ -84,7 +95,6 @@ export default defineConfig(() => {
               return 'vendor-react'
             }
             if (id.includes('/node_modules/@zxing/')) return 'vendor-zxing'
-            if (id.includes('/node_modules/react-body-highlighter/')) return 'vendor-charts'
 
             // The nutrition ledger is shared by Today, Nutrition, portability and sync.
             // Without an explicit feature boundary Rollup promotes its full GCC food

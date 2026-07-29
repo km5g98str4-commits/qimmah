@@ -46,5 +46,25 @@ check('empty → level empty, not valid', empty.level === 'empty' && empty.valid
 const sym = evaluatePassword('abcd1234!')
 check('a real symbol raises score above the plain letter+number password', sym.score > latin.score)
 
+// ── The tightening half of this change (intentional, and previously untested) ──
+// The old rule was `hasLetter = /[A-Za-z؀-ۿ]/`. That range is U+0600–U+06FF, which
+// contains Arabic PUNCTUATION, DIACRITICS and DIGITS — not just letters. So the old
+// check accepted passwords holding zero actual letters. `\p{L}` does not, which means
+// these go valid → INVALID. That is the correct reading of the «حرف» requirement, but
+// it is a real behaviour change in the opposite direction from the headline fix, so it
+// is asserted here rather than left to chance.
+const punctOnly = evaluatePassword('؟؟؟؟؟؟12') // Arabic question marks U+061F + digits
+check('Arabic punctuation is NOT a letter → not valid', punctOnly.hasLetter === false && punctOnly.valid === false)
+
+const diacriticsOnly = evaluatePassword('ًًًًًً12') // Arabic fathatan U+064B + digits
+check('Arabic diacritics are NOT letters → not valid', diacriticsOnly.hasLetter === false && diacriticsOnly.valid === false)
+
+const persianDigitsOnly = evaluatePassword('۱۲۳۴۵۶۷8') // Persian digits + ASCII digit, NO letter
+check('Persian digits alone are NOT letters → not valid', persianDigitsOnly.hasLetter === false && persianDigitsOnly.valid === false)
+
+// Non-Latin, non-Arabic scripts now count as letters (they used to score as symbols).
+const cjk = evaluatePassword('你好你好你好12')
+check('CJK characters count as letters → valid with a number', cjk.hasLetter === true && cjk.valid === true)
+
 console.log(`\nPassword-policy proof: ${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)

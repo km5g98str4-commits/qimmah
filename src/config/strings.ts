@@ -70,6 +70,14 @@ export interface ShellStrings {
     guestNote: string
     accountNote: string
     cloudNote: string
+    /** مسجّل دخول لكن المزامنة مطفأة في هذا البناء — البيانات على الجهاز فقط. */
+    cloudNoteLocalOnly: string
+    /** مسجّل دخول والمزامنة شغّالة لكن ما تمّت أول مزامنة ناجحة بعد. */
+    cloudNoteNeverSynced: string
+    /** في طابور تغييرات لسه ما رُفعت. */
+    cloudNotePending: string
+    /** المزامنة متعثّرة وتحتاج انتباه (محاولات فاشلة متكرّرة أو تبنّي معلّق). */
+    cloudNoteAttention: string
     back: string
     deleteAccount: string
     deleteAccountDesc: string
@@ -525,6 +533,10 @@ const ar: ShellStrings = {
     guestNote: 'بيانات الضيف تنحفظ على هذا الجهاز بس.',
     accountNote: 'أنت مسجّل دخولك، وبياناتك تتزامن مع حسابك السحابي.',
     cloudNote: 'بياناتك محفوظة على هذا الجهاز وعلى حسابك السحابي.',
+    cloudNoteLocalOnly: 'بياناتك محفوظة على هذا الجهاز فقط — المزامنة السحابية مو مفعّلة في هذي النسخة.',
+    cloudNoteNeverSynced: 'بياناتك على هذا الجهاز، وأول مزامنة سحابية ما تمّت بعد.',
+    cloudNotePending: 'بياناتك على هذا الجهاز، وفيه تغييرات لسه ترفع لحسابك السحابي.',
+    cloudNoteAttention: 'بياناتك على هذا الجهاز، بس المزامنة السحابية متعثّرة — افتح «بياناتي» عشان تشوف التفاصيل.',
     back: 'رجوع',
     deleteAccount: 'حذف الحساب',
     deleteAccountDesc: 'يحذف حسابك وكل بياناتك نهائيًا — وما تقدر ترجّعها.',
@@ -993,6 +1005,10 @@ const en: ShellStrings = {
     guestNote: 'Guest data is stored on this device only.',
     accountNote: 'You are logged in. Your data syncs to your cloud account.',
     cloudNote: 'Your data is stored on this device and on your cloud account.',
+    cloudNoteLocalOnly: "Your data is stored on this device only — cloud sync isn't enabled in this build.",
+    cloudNoteNeverSynced: "Your data is on this device. It hasn't synced to the cloud yet.",
+    cloudNotePending: 'Your data is on this device. Some changes are still waiting to upload.',
+    cloudNoteAttention: 'Your data is on this device, but cloud sync is stuck — open "My data" for details.',
     back: 'Back',
     deleteAccount: 'Delete account',
     deleteAccountDesc: "Permanently delete your account and all your data. This can't be undone.",
