@@ -10,7 +10,7 @@ import type { SessionExercise, SetLog, WorkoutSession } from './workoutSessions'
 import type { ExerciseHistory } from './exerciseHistory'
 import type { MeasurementLog } from '@/types/progress'
 import { enqueueSyncDelete, enqueueSyncOperation } from './syncQueue'
-import { writeJson } from './safeStorage'
+import { writeJson, writeRaw } from '@/lib/safeStorage'
 
 // ختم اليوم المحلي (YYYY-MM-DD) — مكرّر هنا لكسر الاعتماد الدائري مع today.ts.
 function dayStamp(d = new Date()): string {
@@ -112,8 +112,8 @@ function readJSON<T>(key: string, fallback: T): T {
 // كل كتابة دائمة تمرّ من الطبقة الآمنة: لا ترمي (فلا تنكسر أي واجهة)، لكنها
 // تُسجّل الفشل في مؤشّر عالمي بدل ابتلاعه — فيستطيع مسار إنهاء التمرين أن يعرف
 // أن الحفظ لم يحدث ويقول ذلك للمستخدم بدل عرض نجاح زائف.
-function writeJSON(key: string, value: unknown): void {
-  writeJson(key, value)
+function writeJSON(key: string, value: unknown): boolean {
+  return writeJson(key, value) === 'ok'
 }
 
 function nowISO(): string {
@@ -564,7 +564,9 @@ export function ensureMigrated(): void {
       }
     }
 
-    window.localStorage.setItem(MIGRATION_FLAG, 'done')
+    // راية الترحيل تمرّ من الطبقة الآمنة كغيرها (§5) — الكتابة الخام هنا كانت
+    // آخر تجاوز في الملف، والتقطه إثبات `test:safe-storage`.
+    writeRaw(MIGRATION_FLAG, 'done')
   } catch {
     // لا نُفشل التطبيق بسبب الترحيل.
   }

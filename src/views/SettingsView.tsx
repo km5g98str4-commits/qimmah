@@ -12,12 +12,27 @@ import { useCustomization } from '@/lib/customizationContext'
 import { resetQimmah } from '@/lib/resetQimmah'
 import { getConsent, setConsent } from '@/lib/analytics'
 import { generatePlan } from '@/lib/planGenerator'
-import { markPendingSync } from '@/lib/syncService'
+import { getSyncUiState, markPendingSync } from '@/lib/syncService'
 import { BUILD_LABEL } from '@/lib/buildInfo'
 import { NotificationSettingsPanel } from '@/components/NotificationSettingsPanel'
 import { NativeSettingsPanel } from '@/components/NativeSettingsPanel'
 import { NATIVE_SETTINGS_COPY } from '@/data/nativeSettings'
 import type { AppRoute } from '@/lib/appRoutes'
+
+/**
+ * يترجم حالة المزامنة الحقيقية إلى جملة صادقة للمستخدم.
+ *
+ * لا يُدّعى «متزامن مع حسابك السحابي» إلا عند `state === 'synced'`، أي بعد أول
+ * مزامنة ناجحة فعلًا (getSyncUiState لا يُرجع 'synced' قبل `lastSyncedAt`).
+ */
+function syncNote(t: ReturnType<typeof getStrings>, sync: ReturnType<typeof getSyncUiState>): string {
+  if (sync.state === 'synced') return t.auth.cloudNote
+  if (sync.state === 'attention') return t.auth.cloudNoteAttention
+  if (sync.state === 'syncing') return t.auth.cloudNotePending
+  // state === 'local'
+  if (sync.reason === 'sync-disabled') return t.auth.cloudNoteLocalOnly
+  return t.auth.cloudNoteNeverSynced
+}
 
 interface SettingsViewProps {
   lang: Lang
@@ -128,10 +143,14 @@ export function SettingsView({
   }
 
   // — الحساب: حالة + خروج —
+  // لا نعد المستخدم بمزامنة سحابية إلا إذا كانت حاصلة فعلًا. `VITE_SYNC_ENABLED`
+  // مطفأة افتراضيًا، فالنص الثابت القديم («محفوظة على هذا الجهاز وعلى حسابك السحابي»)
+  // كان يكذب على كل مستخدم مسجّل في التهيئة الافتراضية للشحن. المصدر الوحيد للحقيقة
+  // هو getSyncUiState() — كان موجودًا بلا مستدعٍ واحد.
   const accountStatus = !auth.configured
     ? t.auth.disabledTitle
     : auth.user
-      ? t.auth.cloudNote
+      ? syncNote(t, getSyncUiState())
       : t.auth.guestNote
 
   return (

@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { Icon } from '@/components/Icon'
+import { AllergyNotice } from '@/components/AllergyNotice'
 import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
 import { useCustomization } from '@/lib/customizationContext'
@@ -124,6 +125,10 @@ export function NutritionV2({ lang }: NutritionV2Props) {
             </span>
           )}
         </header>
+
+        {/* تحذير الحساسيات — يظهر فقط لمن سجّل حساسية. الخطة لا تُفلترها تلقائيًا
+            بعد، فنقولها صراحةً بدل الصمت عنها. */}
+        <AllergyNotice lang={lang} />
 
         {/* Goal-driven hero */}
         <section className="relative overflow-hidden rounded-3xl border border-line bg-surface p-5 shadow-card">

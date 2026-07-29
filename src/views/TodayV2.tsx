@@ -14,6 +14,7 @@ import { buildNutritionV2Model } from '@/lib/nutritionV2Model'
 import { getDayStamp } from '@/lib/today'
 import { buildTodayV2Model } from '@/lib/todayV2Model'
 import { playHaptic } from '@/lib/nativeFeedback'
+import { useAchievementsEngine } from '@/features/achievements/useAchievements'
 
 interface TodayV2Props {
   lang: Lang
@@ -47,6 +48,10 @@ const ACTION_TONE: Record<TodayAction['tone'], string> = {
  */
 export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
   const { customization } = useCustomization()
+  // الرئيسية هي السطح الحيّ الدائم — تركيب محرّك الأوسمة هنا يُعيد وصله ببيانات
+  // المستخدم الحقيقية (بروتين اليوم/الهدف/أيام الخطة). بلا هذا يبقى المحرّك
+  // معزولًا وتصير أوسمة البروتين غير قابلة للفتح. لا أثر بصري.
+  useAchievementsEngine()
   const ar = lang !== 'en'
   const copy = V2_TODAY[ar ? 'ar' : 'en']
   const model = useMemo(() => buildTodayV2Model(customization, lang), [customization, lang])

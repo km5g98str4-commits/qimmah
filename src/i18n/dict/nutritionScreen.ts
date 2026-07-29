@@ -51,6 +51,11 @@ export interface NutritionScreenStrings {
   scanNetworkErrorTitle: string
   scanNetworkErrorHint: string
   scanRetry: string
+  // تنبيه الحساسيات — الخطة لا تُفلتر تلقائيًا بعد
+  allergyNoticeTitle: string
+  allergyNoticeBodyPrefix: string
+  allergyNoticeBodySuffix: string
+  allergyNoticeSeparator: string
 }
 
 const ar: NutritionScreenStrings = {
@@ -98,6 +103,11 @@ const ar: NutritionScreenStrings = {
   scanNetworkErrorTitle: 'ما فيه نت',
   scanNetworkErrorHint: 'قرينا الباركود بس ما قدرنا نوصل لقاعدة بيانات المنتجات. شيّك على النت وجرّب مرة ثانية، أو أضف المنتج يدوي.',
   scanRetry: 'جرّب مرة ثانية',
+  allergyNoticeTitle: 'راجع مكوّنات وجباتك',
+  allergyNoticeBodyPrefix: 'سجّلت حساسية من:',
+  allergyNoticeBodySuffix:
+    'خطة الوجبات الحالية ما تستبعدها تلقائيًا بعد — تأكّد من مكوّنات أي وجبة قبل ما تنفّذها، وبدّلها إذا لزم.',
+  allergyNoticeSeparator: '، ',
 }
 
 const en: NutritionScreenStrings = {
@@ -145,6 +155,10 @@ const en: NutritionScreenStrings = {
   scanNetworkErrorTitle: 'No connection',
   scanNetworkErrorHint: "We read the barcode but couldn't reach the product database. Check your connection and try again, or add the product manually.",
   scanRetry: 'Try again',
+  allergyNoticeTitle: 'Check your meal ingredients',
+  allergyNoticeBodyPrefix: 'You told us you are allergic to:',
+  allergyNoticeBodySuffix: 'Your meal plan does not exclude these automatically yet — check the ingredients of any meal before you make it, and swap it if needed.',
+  allergyNoticeSeparator: ', ',
 }
 
 export const nutritionScreenStrings: Record<Lang, NutritionScreenStrings> = { ar, en }
