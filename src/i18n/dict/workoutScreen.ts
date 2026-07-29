@@ -57,6 +57,18 @@ export interface WorkoutScreenStrings {
   altMachineLabel: string
   /** (P12) زر التبديل داخل البطاقة الصغيرة. */
   switchHere: string
+  /** فشل حفظ التمرين — واجهة صادقة بدل «تم الحفظ» الزائف. */
+  saveFailedTitle: string
+  /** سبب: مساحة التخزين ممتلئة. */
+  saveFailedQuota: string
+  /** سبب: التخزين محجوب (تصفّح خاص / منع تخزين المواقع). */
+  saveFailedBlocked: string
+  /** سبب: خطأ غير معروف أثناء الحفظ. */
+  saveFailedGeneric: string
+  /** طمأنة: التمرين الجاري لم يُفقد. */
+  saveFailedKept: string
+  /** زر إعادة محاولة الحفظ. */
+  saveRetry: string
 }
 
 const ar: WorkoutScreenStrings = {
@@ -100,6 +112,12 @@ const ar: WorkoutScreenStrings = {
   altCableFallbackLabel: 'بديل بوزن الجسم/دمبل',
   altMachineLabel: 'الجهاز الأساسي',
   switchHere: 'بدّل له',
+  saveFailedTitle: 'لم نتمكّن من حفظ التمرين',
+  saveFailedQuota: 'مساحة التخزين على جهازك ممتلئة. أفرغ بعض المساحة ثم أعد المحاولة.',
+  saveFailedBlocked: 'التخزين محجوب في هذا المتصفّح (تصفّح خاص أو منع حفظ بيانات المواقع). فعّل التخزين ثم أعد المحاولة.',
+  saveFailedGeneric: 'حدث خطأ أثناء الحفظ ولم يُسجَّل شيء.',
+  saveFailedKept: 'تمرينك ما زال مفتوحًا كما هو — لم تفقد أي مجموعة.',
+  saveRetry: 'أعد محاولة الحفظ',
 }
 
 const en: WorkoutScreenStrings = {
@@ -143,6 +161,12 @@ const en: WorkoutScreenStrings = {
   altCableFallbackLabel: 'Bodyweight/dumbbell fallback',
   altMachineLabel: 'Primary machine',
   switchHere: 'Switch to this',
+  saveFailedTitle: "We couldn't save this workout",
+  saveFailedQuota: 'Your device storage is full. Free up some space, then try again.',
+  saveFailedBlocked: 'Storage is blocked in this browser (private browsing, or site data is turned off). Enable storage, then try again.',
+  saveFailedGeneric: 'Something went wrong while saving — nothing was recorded.',
+  saveFailedKept: 'Your workout is still open exactly as it was — no set was lost.',
+  saveRetry: 'Try saving again',
 }
 
 export const workoutScreenStrings: Record<Lang, WorkoutScreenStrings> = { ar, en }

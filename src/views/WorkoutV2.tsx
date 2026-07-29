@@ -22,8 +22,12 @@ import { equipmentLabel } from '@/lib/exerciseLabels'
 import { loadHydrationPref, saveHydrationPref, addTodayWaterMl, remindersDue, type HydrationPref } from '@/lib/workoutHydration'
 // Fix-forward A: finished v2 workouts persist through the canonical path so
 // Progress/Today/Profile react (and sync auto-enqueues) — not just a local summary.
-import { persistFinishedSession } from '@/lib/finishWorkout'
+// P0 — «نجاح زائف»: الحفظ يُفحص الآن بنتيجة صريحة (كتابة + قراءة تحقّق) بدل
+// try/catch فارغ، فلا نمسح الجلسة الجارية ولا نعرض «أحسنت» إن لم يُحفظ شيء.
+import { commitFinishedSession } from '@/lib/finishWorkout'
 import { addSession } from '@/lib/workoutSessions'
+import type { WriteResult } from '@/lib/safeStorage'
+import { workoutScreenStrings } from '@/i18n/dict/workoutScreen'
 import { getDayStamp } from '@/lib/today'
 import { buildV2WorkoutSession } from '@/lib/workoutV2Persist'
 import {
@@ -187,6 +191,9 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   const [pendingFinish, setPendingFinish] = useState<PendingFinish | null>(null)
   const [completed, setCompleted] = useState<PendingFinish | null>(null)
   const [undoState, setUndoState] = useState<UndoState | null>(null)
+  // سبب فشل آخر محاولة حفظ (null = لا فشل). يُعرض داخل ورقة التأكيد نفسها،
+  // فيبقى المستخدم في تمرينه بدل أن يُقذف لشاشة نجاح كاذبة.
+  const [saveError, setSaveError] = useState<WriteResult | null>(null)
 
   // ── Screen 31 (substitution) + screen 27 (one-handed) session state ──
   const profile = customization.profile
@@ -376,7 +383,7 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   }
 
   // Cancel the sheet — return to the workout with ZERO writes.
-  const cancelFinish = () => setPendingFinish(null)
+  const cancelFinish = () => { setPendingFinish(null); setSaveError(null) }
 
   // Confirm — the ONLY place a finished session, its PRs, and the summary are
   // written. Snapshot first so the undo window can fully reverse the save.
@@ -387,16 +394,26 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
     try {
       saveWorkoutSummary(userId, { date: new Date().toISOString().slice(0, 10), title: model.session.title, totalSets: stats.sets, volume: stats.volume, durationMin: stats.minutes })
     } catch { /* ignore — the canonical persist below is what Progress reads */ }
-    try {
-      // Canonical persist — feeds historyStore (auto-enqueues sync) + exercise
-      // history, so Progress / Today / Profile all react to this v2 workout.
-      persistFinishedSession(session)
-      // PRs become permanent ONLY here, inside the confirmed save (honesty rule).
-      if (prs.length > 0) {
+    // Canonical persist — feeds historyStore (auto-enqueues sync) + exercise
+    // history, so Progress / Today / Profile all react to this v2 workout. Unlike
+    // before, it reports a real result: written-and-verified, or why it failed.
+    const commit = commitFinishedSession(session)
+    if (!commit.ok) {
+      // Honest failure. Roll the partial write back to the pre-confirm snapshot so
+      // a retry starts clean, then STAY here: the active workout is NOT cleared,
+      // no completion screen, and the sheet explains what actually happened.
+      restoreWorkoutStorage(snapshot)
+      setSaveError(commit.failure ?? 'error')
+      return
+    }
+    setSaveError(null)
+    // PRs become permanent ONLY here, inside the confirmed AND verified save.
+    if (prs.length > 0) {
+      try {
         registerWorkoutPRs(toPRCelebrations(prs, (id) => { const e = getExercise(id); return { ar: e?.nameAr, en: e?.nameEn } }))
         void playHaptic('pr')
-      }
-    } catch { /* never trap the user on completion */ }
+      } catch { /* a PR badge is a celebration, not the record — never trap the user */ }
+    }
     setUndoState({ snapshot, active })
     setCompleted(pendingFinish)
     setPendingFinish(null)
@@ -732,7 +749,7 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
 
       {/* هل انتهيت؟ — confirm sheet. NOTHING is written until "confirm". */}
       {pendingFinish && (
-        <FinishConfirmSheet lang={lang} pending={pendingFinish} onConfirm={confirmFinish} onCancel={cancelFinish} />
+        <FinishConfirmSheet lang={lang} pending={pendingFinish} saveError={saveError} onConfirm={confirmFinish} onCancel={cancelFinish} />
       )}
 
       {/* استبدال — non-destructive suggestion sheet (screen 31, Rule D). */}
@@ -1130,11 +1147,14 @@ function CompleteScreen({ model, lang, stats, prs, canUndo, onUndo, onDone }: { 
  * Shows exactly what will be saved (exercises · sets · minutes · candidate PRs)
  * before ANY write. Cancel returns to the workout untouched; confirm commits.
  */
-function FinishConfirmSheet({ lang, pending, onConfirm, onCancel }: { lang: Lang; pending: PendingFinish; onConfirm: () => void; onCancel: () => void }) {
+function FinishConfirmSheet({ lang, pending, saveError, onConfirm, onCancel }: { lang: Lang; pending: PendingFinish; saveError: WriteResult | null; onConfirm: () => void; onCancel: () => void }) {
   const ar = lang !== 'en'
   const t = (a: string, e: string) => (ar ? a : e)
+  const d = workoutScreenStrings[lang]
   const { stats, prs } = pending
   const prLifts = [...new Set(prs.map((p) => p.exerciseId))]
+  // نصّ صادق يميّز «المساحة ممتلئة» عن «التخزين محجوب» عن خطأ غير معروف.
+  const failureBody = saveError === 'quota' ? d.saveFailedQuota : saveError === 'unavailable' ? d.saveFailedBlocked : d.saveFailedGeneric
   return (
     <div className="fixed inset-0 z-[70] flex items-end justify-center" role="dialog" aria-modal="true" aria-label={t('تأكيد إنهاء التمرين', 'Confirm finish workout')}>
       <button type="button" aria-label={t('إلغاء', 'Cancel')} onClick={onCancel} className="absolute inset-0 h-full w-full" style={{ background: 'rgba(0,0,0,0.55)' }} />
@@ -1153,7 +1173,17 @@ function FinishConfirmSheet({ lang, pending, onConfirm, onCancel }: { lang: Lang
             {t(`${toAr(prLifts.length, lang)} رقم قياسي مرشّح`, `${prLifts.length} candidate PR${prLifts.length > 1 ? 's' : ''}`)}
           </div>
         )}
-        <button type="button" onClick={onConfirm} className="v2-pressable mt-5 w-full rounded-2xl py-4 text-[1.1875rem] font-black" style={{ background: FOCUS.ember, color: FOCUS.onColor }}>{ar ? 'نعم، احفظ وأنهِ' : 'Yes, save & finish'}</button>
+        {saveError && (
+          <div role="alert" aria-live="assertive" className="mt-4 rounded-2xl px-4 py-3 text-start" style={{ background: 'color-mix(in srgb, var(--v2-error) 12%, transparent)', border: `1px solid ${FOCUS.error}` }}>
+            <div className="flex items-center gap-2 text-sm font-black" style={{ color: FOCUS.error }}>
+              <Icon name="AlertTriangle" className="h-4 w-4 shrink-0" />
+              <span>{d.saveFailedTitle}</span>
+            </div>
+            <p className="mt-1 text-xs font-bold leading-relaxed" style={{ color: FOCUS.inkMuted }}>{failureBody}</p>
+            <p className="mt-1 text-xs font-bold leading-relaxed" style={{ color: FOCUS.inkMuted }}>{d.saveFailedKept}</p>
+          </div>
+        )}
+        <button type="button" onClick={onConfirm} className="v2-pressable mt-5 w-full rounded-2xl py-4 text-[1.1875rem] font-black" style={{ background: FOCUS.ember, color: FOCUS.onColor }}>{saveError ? d.saveRetry : ar ? 'نعم، احفظ وأنهِ' : 'Yes, save & finish'}</button>
         <button type="button" onClick={onCancel} className="v2-pressable mt-3 w-full rounded-2xl py-3 text-sm font-bold" style={{ background: 'transparent', border: `1px solid ${FOCUS.line}`, color: FOCUS.inkMuted }}>{ar ? 'لا، أكمل التمرين' : 'No, keep training'}</button>
       </div>
     </div>
