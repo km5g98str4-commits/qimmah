@@ -14,6 +14,8 @@ interface LoginViewProps {
   onBack: () => void
   /** الوضع الابتدائي عند الفتح — تسجيل دخول أو إنشاء حساب. */
   initialMode?: Mode
+  /** يحفظ وضع الحساب خارج الشاشة حتى لا يضيع عند فتح الشروط أو الخصوصية. */
+  onModeChange?: (mode: 'login' | 'signup') => void
 }
 
 type Mode = 'login' | 'signup' | 'forgot'
@@ -23,7 +25,7 @@ type Mode = 'login' | 'signup' | 'forgot'
  * تجيب: أين أنا؟ (العنوان) · ماذا أفعل؟ (النموذج + إجراء أساسي واحد) · لماذا أثق؟ (نبرة هادئة صادقة).
  * منطق المصادقة والأحداث لم يتغيّر؛ التعديل بصري + إضافة وضع الاستعادة فقط.
  */
-export function LoginView({ lang, onSuccess, onBack, initialMode = 'login' }: LoginViewProps) {
+export function LoginView({ lang, onSuccess, onBack, initialMode = 'login', onModeChange }: LoginViewProps) {
   const t = getStrings(lang)
   const d = miscStrings[lang]
   const auth = useAuth()
@@ -49,6 +51,7 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login' }: Lo
 
   const switchMode = (next: Mode) => {
     setMode(next)
+    if (next !== 'forgot') onModeChange?.(next)
     setMsg(null)
     setNotice(null)
     if (next !== 'signup') setEligible12(false)
@@ -82,6 +85,7 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login' }: Lo
         track('signup_succeeded', { needsConfirmation: true })
         setNotice(d.accountCreatedConfirm)
         setMode('login')
+        onModeChange?.('login')
       } else {
         track('signup_succeeded', { needsConfirmation: false })
         onSuccess()
@@ -100,11 +104,15 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login' }: Lo
   const primaryLabel = isForgot ? t.auth.sendReset : isSignup ? t.auth.createAccount : t.auth.login
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-page px-5 py-12">
+    <div className="relative h-[100dvh] min-h-0 overflow-hidden bg-page">
       <div className="pointer-events-none absolute inset-0 bg-radial-brand opacity-70" />
       <div className="pointer-events-none absolute inset-0 bg-grid-faint [background-size:44px_44px] opacity-25" />
 
-      <div className="relative w-full max-w-md">
+      <main
+        className="app-scroll relative flex h-full min-h-0 flex-col items-center overflow-y-auto overscroll-y-contain px-5 py-12"
+        style={{ paddingTop: 'max(3rem, var(--safe-top))', paddingBottom: 'max(3rem, var(--safe-bottom))' }}
+      >
+      <div className="relative my-auto w-full max-w-md">
         <button
           type="button"
           onClick={isForgot ? () => switchMode('login') : onBack}
@@ -249,9 +257,9 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login' }: Lo
                   />
                   <span>
                     {policy.eligibilityPrefix}{' '}
-                    <a href={POLICY_LINKS.terms} target="_blank" rel="noopener noreferrer" className="font-black text-primary-c underline underline-offset-2">{policy.terms}</a>{' '}
+                    <a href={POLICY_LINKS.terms} className="font-black text-primary-c underline underline-offset-2">{policy.terms}</a>{' '}
                     {policy.joiner}{' '}
-                    <a href={POLICY_LINKS.privacy} target="_blank" rel="noopener noreferrer" className="font-black text-primary-c underline underline-offset-2">{policy.privacy}</a>
+                    <a href={POLICY_LINKS.privacy} className="font-black text-primary-c underline underline-offset-2">{policy.privacy}</a>
                   </span>
                 </label>
               )}
@@ -314,6 +322,7 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login' }: Lo
           </div>
         )}
       </div>
+      </main>
     </div>
   )
 }

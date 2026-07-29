@@ -92,7 +92,12 @@ export function exerciseVideoSearchUrl(nameEn: string): string {
   return `https://www.youtube.com/results?search_query=${encodeURIComponent(nameEn)}+form`
 }
 
-/** يختار يوم اليوم من الخطة حسب يوم الأسبوع (تدوير على عدد الأيام). */
+/**
+ * @deprecated (P4) التدوير الأعمى القديم — لا يعرف أيام الراحة ولا أيام الأسبوع
+ * المختارة. استُبدل بـ`scheduledDayFor` في `@/lib/workoutCalendar` الذي يحلّ من
+ * جدول أسبوعي حقيقي ويُعيد الراحة بصدق. يبقى هنا كسلوك الاحتياط الموثّق فقط
+ * (حين لا جدول مضبوطًا) — لا تستهلكه في كود جديد.
+ */
 export function todayPlanDay(plan: WorkoutPlan): PlanDay | undefined {
   if (!plan.days.length) return undefined
   const index = new Date().getDay() % plan.days.length

@@ -1,14 +1,12 @@
 import type { ReactNode } from 'react'
 import { Icon } from '@/components/Icon'
-import { Footer } from '@/components/Footer'
+import { StandaloneAppScreen } from '@/components/StandaloneAppScreen'
 import { useCustomization } from '@/lib/customizationContext'
 import {
   activityOptions,
   BULK_SURPLUS,
   CUT_DEFICIT,
   FAT_CALORIE_RATIO,
-  genderOptions,
-  goalTypeLabel,
   mifflinSexConstant,
   PROTEIN_PER_KG,
   totalActivityMultiplier,
@@ -38,41 +36,26 @@ export function CalcExplainerView({ lang, onBack }: CalcExplainerViewProps) {
   const h = p.heightCm
   const age = p.age
   const sexConst = mifflinSexConstant(p.gender)
-  const sexLabel = genderOptions.find((o) => o.value === p.gender)?.label ?? ''
+  const sexLabel = d.genderLabels[p.gender]
   const sexSign = sexConst >= 0 ? '+' : '−'
   const sexAbs = Math.abs(sexConst)
 
   const multiplier = totalActivityMultiplier(p.activityLevel, p.trainingDays)
-  const activityLabel = activityOptions.find((o) => o.value === p.activityLevel)?.label ?? ''
+  const activityLabel = d.activityLabels[p.activityLevel]
 
   const goalAdj = p.goalType === 'cutting' ? -CUT_DEFICIT : p.goalType === 'bulking' ? BULK_SURPLUS : 0
   const proteinPerKg = w > 0 ? Math.round((t.proteinGrams / w) * 10) / 10 : PROTEIN_PER_KG
   const fatPct = Math.round(FAT_CALORIE_RATIO * 100)
 
   return (
-    <div className="min-h-screen bg-page">
-      <header className="sticky top-0 z-40 glass border-b border-line">
-        <div className="container-page flex h-16 items-center gap-3">
-          <button
-            type="button"
-            onClick={onBack}
-            className="inline-flex items-center gap-1.5 text-sm font-bold text-ink-700 transition-colors hover:text-ink-900"
-          >
-            <Icon name="ChevronLeft" className="h-5 w-5 rtl:rotate-180" />
-            {d.back}
-          </button>
-        </div>
-      </header>
-
-      <main className="container-page py-8">
-        <div className="mx-auto max-w-2xl">
+    <StandaloneAppScreen lang={lang} title={d.pageTitle} backLabel={d.back} onBack={onBack}>
+      <div>
           {/* الترويسة */}
           <div className="flex items-center gap-3">
             <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-primary-soft text-primary-c">
               <Icon name="Calculator" className="h-6 w-6" />
             </span>
             <div>
-              <h1 className="text-2xl font-black text-ink-900">{d.pageTitle}</h1>
               <p className="mt-0.5 text-sm text-ink-500">{d.pageSubtitle}</p>
             </div>
           </div>
@@ -116,7 +99,7 @@ export function CalcExplainerView({ lang, onBack }: CalcExplainerViewProps) {
                         return (
                           <tr key={o.value} className={picked ? 'bg-primary-soft font-bold text-primary-c' : 'text-ink-700'}>
                             <td className="p-2.5 text-start">
-                              {o.label}
+                              {d.activityLabels[o.value]}
                               {picked && <span className="ms-1.5 text-[10px]">• {d.tdeeYourPick}</span>}
                             </td>
                             <td className="p-2.5 text-end tabular-nums" dir="ltr">
@@ -144,7 +127,7 @@ export function CalcExplainerView({ lang, onBack }: CalcExplainerViewProps) {
                 <Formula>
                   {goalAdj !== 0
                     ? `${t.tdee} ${goalAdj < 0 ? '−' : '+'} ${Math.abs(goalAdj)} = ${t.targetCalories}`
-                    : `${t.tdee} (${goalTypeLabel(p.goalType)}) = ${t.targetCalories}`}
+                    : `${t.tdee} (${d.goalLabels[p.goalType]}) = ${t.targetCalories}`}
                 </Formula>
                 <Result label={d.caloriesResult} value={`${t.targetCalories}`} unit={d.unitCalPerDay} highlight />
               </Card>
@@ -187,11 +170,8 @@ export function CalcExplainerView({ lang, onBack }: CalcExplainerViewProps) {
             <Icon name="Info" className="mt-0.5 h-3.5 w-3.5 shrink-0" />
             {d.disclaimer}
           </p>
-        </div>
-      </main>
-
-      <Footer />
-    </div>
+      </div>
+    </StandaloneAppScreen>
   )
 }
 

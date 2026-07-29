@@ -6,7 +6,7 @@
 import type { Customization } from '@/lib/customization'
 import type { Lang } from '@/lib/appPreferences'
 import type { CalorieGoal } from '@/types/profile'
-import { todayPlanDay } from '@/lib/workoutPlan'
+import { scheduledDayFor } from '@/lib/workoutCalendar'
 import { getExercise } from '@/data/exercises'
 import { getCue } from '@/lib/coaching'
 
@@ -39,6 +39,11 @@ export interface WorkoutV2Exercise {
 
 export interface WorkoutV2Model {
   available: boolean
+  /**
+   * (P4) يوم راحة حقيقي من الجدول الأسبوعي: available=false مع restDay=true —
+   * التبويب يعرض راحة صادقة بدل تدوير يوم خطة. إضافة متوافقة خلفيًا.
+   */
+  restDay: boolean
   goal: CalorieGoal | null
   program: { titleAr: string; titleEn: string; contextAr: string; contextEn: string; estimatedDurationMin: number }
   session: { title: string; muscles: string[]; durationMin: number; exerciseCount: number; source: string }
@@ -87,7 +92,10 @@ export function substituteWorkoutExercise(base: WorkoutV2Exercise, catalogExerci
 
 export function buildWorkoutV2Model(customization: Customization, lang: Lang): WorkoutV2Model {
   const ar = lang !== 'en'
-  const day = todayPlanDay(customization.workoutPlan)
+  // (P4) الجدول الأسبوعي الحقيقي: يوم تدريب أو راحة صادقة — التدوير القديم احتياط موثّق فقط.
+  const resolved = scheduledDayFor(customization.workoutPlan)
+  const restDay = resolved?.type === 'rest'
+  const day = resolved?.type === 'training' ? resolved.day : undefined
   const goal = customization.profile.goal ?? null
   const list = day?.exercises ?? []
   const total = list.length
@@ -122,6 +130,7 @@ export function buildWorkoutV2Model(customization: Customization, lang: Lang): W
 
   return {
     available: total > 0,
+    restDay,
     goal,
     program: {
       titleAr: goalWordAr ? `برنامج ${goalWordAr}` : 'برنامجك',

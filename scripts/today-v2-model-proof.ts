@@ -77,7 +77,7 @@ console.log('\n② مُعَدّ + خطة جاهزة بلا سجلّ → new-user
   check('hero → workout', m.hero.destination === 'workout')
   check('عنوان البطل يذكر «الأول»', m.hero.title.includes('الأول'))
   check('نبرة الزر ember', m.hero.ctaTone === 'ember')
-  check('«لم يبدأ بعد»', m.progressLabel.includes('لم يبدأ'))
+  check('«ما بدأ لسا»', m.progressLabel.includes('ما بدأ لسا'))
 }
 
 console.log('\n③ مُعَدّ + خطوات + وجبة جزئية بلا جلسة منتهية → normal')
@@ -108,9 +108,9 @@ console.log('\n④ جلسة منتهية اليوم → after-workout، تعاف
   seedFinished()
   const m = buildTodayV2Model(baseCustomization({ wellnessPlan: { enabled: true, supplements: [{ id: 's', supplementId: 'mag', order: 0 }], medications: [] } }), 'ar')
   check('state = afterWorkout', m.state === 'afterWorkout')
-  check('التحية «أحسنت اليوم»', m.greeting.includes('أحسنت'))
-  check('البطل: eyebrow «أنهيت …» بعلامة صح', m.hero.eyebrowDone === true && m.hero.eyebrow.includes('أنهيت'))
-  check('عنوان: وجبة ما بعد التمرين', m.hero.title.includes('ما بعد التمرين'))
+  check('التحية «كفو عليك اليوم»', m.greeting.includes('كفو عليك'))
+  check('البطل: eyebrow «خلّصت …» بعلامة صح', m.hero.eyebrowDone === true && m.hero.eyebrow.includes('خلّصت'))
+  check('عنوان: أكل ما بعد التمرين', m.hero.title.includes('أكلك بعد التمرين'))
   check('نبرة الزر green', m.hero.ctaTone === 'green')
   check('hero → nutrition', m.hero.destination === 'nutrition')
   check('عمود التدريب done', m.pillars[0].state === 'done')
@@ -128,8 +128,8 @@ console.log('\n⑥ فجوة ≥٣ أيام منذ آخر تمرين → return-a
   seedFinishedDaysAgo(5) // آخر تمرين قبل ٥ أيام، لا جلسة اليوم
   const m = buildTodayV2Model(baseCustomization(), 'ar')
   check('state = returnAfterBreak', m.state === 'returnAfterBreak')
-  check('التحية بلا لوم «سعيدون بعودتك»', m.greeting.includes('بعودتك'))
-  check('البطل: نبرة عودة لطيفة', m.hero.title.includes('عُد') || m.hero.title.includes('بلطف'))
+  check('التحية بلا لوم «حيّاك من جديد»', m.greeting.includes('حيّاك من جديد'))
+  check('البطل: نبرة عودة لطيفة', m.hero.title.includes('ارجع') || m.hero.title.includes('بهدوء'))
   check('البطل: وعد صادق «أول ١٥ دقيقة من خطتك» (نفس الخطة، لا جلسة منفصلة)', m.hero.subtitle.includes('١٥') && m.hero.subtitle.includes('خطتك'))
   check('«تقدّمك السابق محفوظ»', m.hero.subtitle.includes('محفوظ'))
   check('صفر لوم/ذنب (لا ذكر لعدد أيام الغياب)', !/\d+\s*(يوم|أيام|days?)/.test(`${m.greeting} ${m.hero.eyebrow} ${m.hero.title} ${m.hero.subtitle}`))
@@ -160,6 +160,39 @@ console.log('\n⑤ الإنجليزية: نفس المنطق، نصوص EN')
   check('state = newUser', m.state === 'newUser')
   check('greeting EN', m.greeting.startsWith('Hi') || m.greeting.startsWith('Welcome'))
   check('progress EN «Not started»', m.progressLabel.includes('Not started'))
+}
+
+// (P5 — تعديل توقّعات موثّق) محرّك حالة الجلسة غيّر تعريف «اليوم المكتمل»:
+// جلسة completed فقط تقلب اليوم إلى afterWorkout؛ الإنهاء المبكر (ended_early)
+// له finishedAt لكنه **لا** يُكمل اليوم — يظهر تقدّمًا جزئيًا صادقًا على عمود
+// التدريب بدل «أنهيت تمرينك» الزائفة. الجلسات القديمة بلا status تبقى completed
+// (السيناريوهات أعلاه لم تتغيّر — هذه إضافة تغطي السلوك الجديد المطلوب).
+console.log('\n⑧ (P5) إنهاء مبكر اليوم → اليوم غير مكتمل + تقدّم جزئي صادق')
+{
+  ls.clear()
+  seedMigrated()
+  seedOnboarded()
+  ls.setItem(
+    'qimmah:history:workoutSessions:v1',
+    JSON.stringify([{
+      id: 'sEarly', date: stamp, startedAt: iso, finishedAt: iso, status: 'ended_early',
+      workoutDayId: 'd1', workoutDayName: 'الصدر والكتف',
+      exercises: [
+        { exerciseId: 'x', targetSets: 2, targetReps: '8', targetRestSec: 90, completed: true, sets: [
+          { setNumber: 1, targetReps: '8', actualReps: '8', weightKg: '40', completed: true },
+          { setNumber: 2, targetReps: '8', actualReps: '8', weightKg: '40', completed: true },
+        ] },
+        { exerciseId: 'y', targetSets: 2, targetReps: '8', targetRestSec: 90, completed: false, sets: [
+          { setNumber: 1, targetReps: '8', actualReps: '', weightKg: '0', completed: false },
+          { setNumber: 2, targetReps: '8', actualReps: '', weightKg: '0', completed: false },
+        ] },
+      ],
+    }]),
+  )
+  const m = buildTodayV2Model(baseCustomization(), 'ar')
+  check('P5: إنهاء مبكر لا يقلب اليوم إلى afterWorkout', m.state !== 'afterWorkout')
+  check('P5: عمود التدريب active بنسبة مجموعات حقيقية 50%', m.pillars[0].state === 'active' && m.pillars[0].percent === 50)
+  check('P5: التدريب غير محسوب مكتملًا', m.pillars[0].state !== 'done')
 }
 
 console.log(`\n${'─'.repeat(46)}`)

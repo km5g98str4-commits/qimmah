@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Icon } from '@/components/Icon'
+import { ExerciseMedia } from '@/components/ExerciseMedia'
 import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
 import { applyTheme } from '@/lib/appPreferences'
 import type { AppRoute } from '@/lib/appRoutes'
 import { useCustomization } from '@/lib/customizationContext'
+import { useAppScrollReset } from '@/lib/useAppScrollReset'
 // Reuse the SACRED, just-shipped timestamp rest-timer helpers from the v1 active
 // session engine (read-only import — the logic is never rewritten here). Basing
 // the v2 rest timer on `endsAt`/`durationSec` (not a decrementing counter) keeps
@@ -23,10 +25,19 @@ import { loadHydrationPref, saveHydrationPref, addTodayWaterMl, remindersDue, ty
 // P0 — «نجاح زائف»: الحفظ يُفحص الآن بنتيجة صريحة (كتابة + قراءة تحقّق) بدل
 // try/catch فارغ، فلا نمسح الجلسة الجارية ولا نعرض «أحسنت» إن لم يُحفظ شيء.
 import { commitFinishedSession } from '@/lib/finishWorkout'
+import { addSession } from '@/lib/workoutSessions'
 import type { WriteResult } from '@/lib/safeStorage'
 import { workoutScreenStrings } from '@/i18n/dict/workoutScreen'
 import { getDayStamp } from '@/lib/today'
 import { buildV2WorkoutSession } from '@/lib/workoutV2Persist'
+import {
+  abandonedSessionFrom,
+  clearPersistedActiveWorkout,
+  isUsableActiveWorkout,
+  reconcileWorkoutColdStart,
+  releaseRestEndForSession,
+  scheduleRestEndNotification,
+} from '@/lib/workoutSessionEngine'
 // Rule D — the finish is a suggestion, not a silent save: confirm before any
 // write, and keep a snapshot so the short undo window can fully reverse it.
 import { snapshotWorkoutStorage, restoreWorkoutStorage, type StorageSnapshot } from '@/lib/workoutFinishUndo'
@@ -113,6 +124,10 @@ interface ActiveState {
   subs?: Record<string, string>
 }
 
+type RecoveryPrompt =
+  | { kind: 'abandoned'; session: ActiveState; ageMs: number; completedSets: number; alreadySaved: boolean }
+  | { kind: 'plan-changed'; completedSets: number }
+
 /** Apply the slot→substitute map over the plan exercises (identity swap only). */
 function applySubs(list: WorkoutV2Exercise[], subs: Record<string, string> | undefined, lang: Lang): WorkoutV2Exercise[] {
   if (!subs || Object.keys(subs).length === 0) return list
@@ -125,52 +140,6 @@ const parseReps = (reps: string): number => {
 }
 const toAr = (n: number, lang: Lang) => (lang === 'en' ? String(n) : String(n).replace(/\d/g, (x) => '٠١٢٣٤٥٦٧٨٩'[Number(x)]))
 const fmtTime = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
-
-/**
- * Validate a persisted/candidate active session against the CURRENT plan.
- * localStorage is treated as hostile input: the stored session may belong to an
- * older generated workout (different/removed exercises), be malformed, or have
- * out-of-range indices. Returns true only if the session is fully usable for the
- * current plan — every current exercise has a non-empty rows array, and the
- * exIndex/setIndex are in bounds. A type guard so callers get a real ActiveState.
- */
-function isUsableSession(value: unknown, exercises: WorkoutV2Exercise[]): value is ActiveState {
-  if (!value || typeof value !== 'object') return false
-  const s = value as Partial<ActiveState>
-  if (exercises.length === 0) return false
-  if (!Number.isInteger(s.exIndex) || (s.exIndex as number) < 0 || (s.exIndex as number) >= exercises.length) return false
-  if (!Number.isInteger(s.setIndex) || (s.setIndex as number) < 0) return false
-  if (!Number.isInteger(s.startedAt)) return false
-  if (!s.rows || typeof s.rows !== 'object') return false
-  const rows = s.rows as Record<string, unknown>
-  // Every exercise in the CURRENT plan must have a non-empty set array (i.e. the
-  // session belongs to this plan — stale ids fail here on exercise 0).
-  for (const ex of exercises) {
-    const r = rows[ex.id]
-    if (!Array.isArray(r) || r.length === 0) return false
-    for (const item of r) {
-      if (!item || typeof item !== 'object') return false
-      const row = item as Partial<SetRow>
-      if (typeof row.weight !== 'number' || typeof row.reps !== 'number' || typeof row.done !== 'boolean') return false
-    }
-  }
-  // Rest, when present, must be a well-formed timestamp snapshot (optional field).
-  if (s.rest != null) {
-    const r = s.rest as Partial<RestSnapshot>
-    if (typeof r.endsAt !== 'number' || typeof r.durationSec !== 'number') return false
-  }
-  // Substitutions, when present, must be a plain string→string map (hostile input).
-  if (s.subs != null) {
-    if (typeof s.subs !== 'object') return false
-    for (const [k, v] of Object.entries(s.subs as Record<string, unknown>)) {
-      if (typeof k !== 'string' || typeof v !== 'string') return false
-    }
-  }
-  // Current set index must be inside the current exercise's rows.
-  const curRows = rows[exercises[s.exIndex as number].id] as SetRow[]
-  if ((s.setIndex as number) >= curRows.length) return false
-  return true
-}
 
 /**
  * Workout v2 — Qimmah v2.1 (Slice 4, "crown jewel"). WorkoutView
@@ -187,6 +156,7 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   const ar = lang !== 'en'
   const t = (a: string, e: string) => (ar ? a : e)
   const model = useMemo(() => buildWorkoutV2Model(customization, lang), [customization, lang])
+  const exerciseIds = useMemo(() => model.exercises.map((exercise) => exercise.id), [model.exercises])
 
   const userId = useAuth().user?.id ?? null
   const ownerActiveKey = activeKey(userId)
@@ -195,6 +165,7 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   // (ambiguous data discarded — see migrateLegacySummary). Runs once per owner.
   useEffect(() => { migrateLegacySummary(userId) }, [userId])
   const [screen, setScreen] = useState<Screen>('plan')
+  useAppScrollReset(screen)
   // Immersive focus: the active/complete screens are fullscreen takeovers. Signal
   // the shell to make its chrome (header + nav) inert so VoiceOver can't reach
   // the background behind the workout (screen 27 — real modal focus).
@@ -238,6 +209,7 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   // Guard the destructive top "close" (discards the in-progress session) — screen
   // 27: no critical action fires from the top without confirmation.
   const [confirmDiscard, setConfirmDiscard] = useState(false)
+  const [recoveryPrompt, setRecoveryPrompt] = useState<RecoveryPrompt | null>(null)
 
   // In-workout hydration (screen 46) — user-controlled cadence, non-intrusive.
   const [hydrationPref, setHydrationPref] = useState<HydrationPref>(loadHydrationPref)
@@ -261,46 +233,46 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
     setHydrationNow(Date.now())
   }, [active?.startedAt])
 
-  // Restore an in-progress session on mount — but NEVER trust localStorage.
-  // Only resume if the persisted session is fully usable for the current plan;
-  // otherwise discard just our own key and stay safely on the Plan screen.
+  // Reconcile persisted work and stale rest notifications on cold start. Old or
+  // plan-mismatched sessions are never deleted without an explicit user choice.
   useEffect(() => {
-    let parsed: unknown = null
-    try {
-      const raw = localStorage.getItem(ownerActiveKey)
-      if (!raw) return
-      parsed = JSON.parse(raw)
-    } catch {
-      parsed = null // malformed JSON
-    }
-    if (isUsableSession(parsed, model.exercises)) {
-      setActive(parsed)
-      setNow(Date.now())
-      setScreen('active')
-    } else {
-      try {
-        localStorage.removeItem(ownerActiveKey)
-      } catch {
-        /* storage unavailable */
+    if (!model.available) return
+    let alive = true
+    void reconcileWorkoutColdStart({ ownerId: userId, exerciseIds }).then((result) => {
+      if (!alive) return
+      const decision = result.decision
+      if (decision.action === 'resume' && decision.session) {
+        setActive(decision.session as ActiveState)
+        setNow(Date.now())
+        setScreen('active')
+      } else if (decision.action === 'abandoned' && decision.session) {
+        setRecoveryPrompt({
+          kind: 'abandoned',
+          session: decision.session as ActiveState,
+          ageMs: decision.ageMs,
+          completedSets: decision.completedSets,
+          alreadySaved: result.alreadySaved,
+        })
+      } else if (decision.action === 'discard' && decision.discardReason === 'plan-changed' && decision.completedSets > 0) {
+        setRecoveryPrompt({ kind: 'plan-changed', completedSets: decision.completedSets })
+      } else if (decision.action === 'discard' && decision.discardReason === 'plan-changed') {
+        // No completed work exists to preserve, so the stale empty shell can be
+        // removed without asking the user to decide about data that is not there.
+        clearPersistedActiveWorkout(userId)
       }
-    }
-    // Mount-only restore against the plan present at mount.
-  }, [model.exercises, ownerActiveKey])
+    })
+    return () => { alive = false }
+  }, [exerciseIds, model.available, userId])
 
   // Safety net: if we somehow end up on the active screen with an unusable
   // session (e.g. the plan regenerated mid-session), discard it and fall back to
   // Plan — from an EFFECT, so render stays pure and never dereferences undefined.
   useEffect(() => {
-    if (screen === 'active' && !isUsableSession(active, model.exercises)) {
-      try {
-        localStorage.removeItem(ownerActiveKey)
-      } catch {
-        /* storage unavailable */
-      }
+    if (screen === 'active' && !isUsableActiveWorkout(active, exerciseIds)) {
       setActive(null)
       setScreen('plan')
     }
-  }, [screen, active, model.exercises, ownerActiveKey])
+  }, [screen, active, exerciseIds])
 
   // Persist active session (rest timestamps included → refresh resumes the rest).
   useEffect(() => {
@@ -335,9 +307,12 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   useEffect(() => {
     if (!restDone) return
     void playHaptic('rest')
-    const id = window.setTimeout(() => setActive((prev) => (prev ? { ...prev, rest: null } : prev)), 2500)
+    const id = window.setTimeout(() => {
+      void releaseRestEndForSession(userId)
+      setActive((prev) => (prev ? { ...prev, rest: null } : prev))
+    }, 2500)
     return () => window.clearTimeout(id)
-  }, [restDone])
+  }, [restDone, userId])
 
   // Coaching rest tip (finding #8): pick ONE muscle-matched tip when a rest
   // begins, avoiding tips already shown this session, and let the user dismiss it.
@@ -377,6 +352,7 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
 
   const clearActive = () => {
     try { localStorage.removeItem(ownerActiveKey) } catch { /* ignore */ }
+    void releaseRestEndForSession(userId)
     setActive(null)
     // Workout ended → apply any theme change that was deferred mid-set (screen 66).
     applyTheme()
@@ -455,6 +431,29 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
     setUndoState(null)
     setNow(Date.now())
     setScreen('active')
+    if (undoState.active.rest?.endsAt && undoState.active.rest.endsAt > Date.now()) {
+      void scheduleRestEndNotification(undoState.active.rest.endsAt, lang, Date.now(), { ownerId: userId })
+    }
+  }
+
+  const saveAbandoned = () => {
+    if (recoveryPrompt?.kind !== 'abandoned') return
+    if (!recoveryPrompt.alreadySaved) {
+      addSession(abandonedSessionFrom(recoveryPrompt.session, model, { date: getDayStamp(), nowMs: Date.now() }))
+    }
+    clearPersistedActiveWorkout(userId)
+    void releaseRestEndForSession(userId)
+    setRecoveryPrompt(null)
+    setActive(null)
+    setScreen('plan')
+  }
+
+  const discardRecovered = () => {
+    clearPersistedActiveWorkout(userId)
+    void releaseRestEndForSession(userId)
+    setRecoveryPrompt(null)
+    setActive(null)
+    setScreen('plan')
   }
 
   // ── Screen 31 — substitution (Rule D: suggestion → explicit choice → undo).
@@ -495,8 +494,17 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   // Guarded discard — the destructive close commits only after confirmation.
   const discardWorkout = () => { setConfirmDiscard(false); clearActive(); setPreSubs({}); onNavigate('dashboard') }
 
-  const planScreen = <PlanScreen model={model} lang={lang} onExercise={(i) => { setDetailIdx(i); setScreen('detail') }} onStart={startSession} onBack={() => onNavigate('dashboard')} />
-  if (screen === 'plan') return planScreen
+  const planScreen = <PlanScreen model={model} lang={lang} onExercise={(i) => { setDetailIdx(i); setScreen('detail') }} onStart={startSession} />
+  const recoverySheet = recoveryPrompt ? (
+    <RecoveryDecisionSheet
+      lang={lang}
+      prompt={recoveryPrompt}
+      onSave={saveAbandoned}
+      onDiscard={discardRecovered}
+      onKeep={() => setRecoveryPrompt(null)}
+    />
+  ) : null
+  if (screen === 'plan') return <>{planScreen}{recoverySheet}</>
   if (screen === 'detail') {
     const base = model.exercises[detailIdx]
     const detailEx = base ? applySubs([base], preSubs, lang)[0] : base
@@ -540,7 +548,9 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   // ── Active workout ── Render PURELY. If the session is not usable for the
   // current plan, render the Plan screen (the safety-net effect above resets the
   // screen state) — never call setState in render, never dereference undefined.
-  if (!isUsableSession(active, model.exercises)) return planScreen
+  if (!isUsableActiveWorkout(active, exerciseIds)) {
+    return <>{planScreen}{recoverySheet}</>
+  }
   // Displayed exercise reflects any substitution; its slot id is unchanged, so
   // rows (keyed by slot id) and length-based navigation stay valid.
   const ex = effExercises[active.exIndex]
@@ -576,6 +586,7 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
       return
     }
     // Mark done, advance, and start the rest — a single atomic update.
+    const endsAt = Date.now() + REST_DEFAULT * 1000
     setActive((prev) => {
       if (!prev) return prev
       const arr = [...prev.rows[ex.id]]
@@ -584,14 +595,23 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
       const advance = prev.setIndex < rows.length - 1
         ? { setIndex: prev.setIndex + 1 }
         : { exIndex: prev.exIndex + 1, setIndex: 0 }
-      return { ...prev, ...advance, rows: rowsNext, rest: { endsAt: Date.now() + REST_DEFAULT * 1000, durationSec: REST_DEFAULT } }
+      return { ...prev, ...advance, rows: rowsNext, rest: { endsAt, durationSec: REST_DEFAULT } }
     })
+    void scheduleRestEndNotification(endsAt, lang, Date.now(), { ownerId: userId })
     setNow(Date.now())
   }
 
   const restLeft = active.rest ? restRemainingSec(active.rest.endsAt, now) : 0
-  const addRest = () => setActive((prev) => (prev?.rest ? { ...prev, rest: { ...prev.rest, endsAt: prev.rest.endsAt + REST_ADD * 1000 } } : prev))
-  const skipRest = () => setActive((prev) => (prev ? { ...prev, rest: null } : prev))
+  const addRest = () => {
+    if (!active.rest) return
+    const endsAt = active.rest.endsAt + REST_ADD * 1000
+    setActive({ ...active, rest: { ...active.rest, endsAt } })
+    void scheduleRestEndNotification(endsAt, lang, Date.now(), { ownerId: userId })
+  }
+  const skipRest = () => {
+    void releaseRestEndForSession(userId)
+    setActive((prev) => (prev ? { ...prev, rest: null } : prev))
+  }
 
   // Hydration reminder is "due" when a fresh interval has elapsed beyond those
   // already handled this session. Derived from real elapsed time only.
@@ -641,6 +661,9 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
       ) : (
         <>
           <main className="flex flex-1 flex-col overflow-y-auto px-5 pb-3">
+            <div className="mt-2 shrink-0 overflow-hidden rounded-2xl" aria-hidden="true">
+              <ExerciseMedia exerciseId={ex.exerciseId} heightClass="h-32" hideChips />
+            </div>
             <h1 className="mt-2 text-2xl font-black leading-tight">{ar ? ex.nameAr : ex.nameEn}</h1>
             <p className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-sm font-bold" style={{ color: FOCUS.inkMuted }}>
               <span>{CATEGORY_LABEL[ex.category][ar ? 'ar' : 'en']} · {ex.sets}×{ex.reps}</span>
@@ -743,6 +766,64 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
 
       {/* تجاهل التمرين؟ — guarded destructive close (screen 27). */}
       {confirmDiscard && <DiscardConfirmSheet lang={lang} onDiscard={discardWorkout} onCancel={() => setConfirmDiscard(false)} />}
+    </div>
+  )
+}
+
+function RecoveryDecisionSheet({
+  lang,
+  prompt,
+  onSave,
+  onDiscard,
+  onKeep,
+}: {
+  lang: Lang
+  prompt: RecoveryPrompt
+  onSave: () => void
+  onDiscard: () => void
+  onKeep: () => void
+}) {
+  const ar = lang !== 'en'
+  const t = (a: string, e: string) => (ar ? a : e)
+  const ageHours = prompt.kind === 'abandoned' ? Math.max(1, Math.floor(prompt.ageMs / 3_600_000)) : 0
+  return (
+    <div className="fixed inset-0 z-[80] flex items-end bg-black/45 p-3" role="dialog" aria-modal="true" aria-label={t('استعادة تمرين سابق', 'Recover an earlier workout')}>
+      <section className="mx-auto w-full max-w-md rounded-[1.75rem] bg-surface p-5 shadow-2xl">
+        <span className="grid h-11 w-11 place-items-center rounded-2xl bg-beige text-ink-700">
+          <Icon name="History" className="h-5 w-5" />
+        </span>
+        <h2 className="mt-4 text-xl font-black text-ink-900">
+          {prompt.kind === 'abandoned'
+            ? t('لقينا تمرينًا قديمًا', 'We found an older workout')
+            : t('تغيّرت خطتك وفيه تمرين محفوظ', 'Your plan changed with a workout still saved')}
+        </h2>
+        <p className="mt-2 text-sm leading-relaxed text-ink-500">
+          {prompt.kind === 'abandoned'
+            ? t(
+                `بدأ قبل ${ageHours.toLocaleString('ar-SA')} ساعة وفيه ${prompt.completedSets.toLocaleString('ar-SA')} مجموعات مسجّلة. اختر حفظ العمل الفعلي أو تجاهله.`,
+                `It started ${ageHours} hours ago and contains ${prompt.completedSets} logged sets. Save the recorded work or discard it.`,
+              )
+            : t(
+                `عندك ${prompt.completedSets.toLocaleString('ar-SA')} مجموعات من الخطة السابقة. لن نحذفها بدون قرارك.`,
+                `You have ${prompt.completedSets} sets from the previous plan. We will not delete them without your choice.`,
+              )}
+        </p>
+        <div className="mt-5 grid gap-2">
+          {prompt.kind === 'abandoned' && (
+            <button type="button" onClick={onSave} className="btn-primary w-full py-3">
+              {prompt.alreadySaved ? t('تم الحفظ · أغلق', 'Already saved · close') : t('احفظ المجموعات المسجّلة', 'Save logged sets')}
+            </button>
+          )}
+          <button type="button" onClick={onDiscard} className="btn-ghost w-full py-3 text-danger">
+            {t('تجاهل التمرين', 'Discard workout')}
+          </button>
+          {prompt.kind === 'plan-changed' && (
+            <button type="button" onClick={onKeep} className="btn-ghost w-full py-3">
+              {t('احتفظ به الآن', 'Keep it for now')}
+            </button>
+          )}
+        </div>
+      </section>
     </div>
   )
 }
@@ -890,8 +971,7 @@ function WarmupPanel({ lang, sets, onDismiss, onDisable }: { lang: Lang; sets: W
 
 function RestPanel({ lang, restLeft, restDone, nextEx, setLabel, tip, tipDismissed, onDismissTip, onAdd, onSkip }: { lang: Lang; restLeft: number; restDone: boolean; nextEx: WorkoutV2Exercise; setLabel: string; tip: RestTip | null; tipDismissed: boolean; onDismissTip: () => void; onAdd: () => void; onSkip: () => void }) {
   const ar = lang !== 'en'
-  // Rest tips are authored in Arabic (warm MSA) — only surface them in Arabic mode.
-  const showTip = ar && !restDone && tip != null && !tipDismissed
+  const showTip = !restDone && tip != null && !tipDismissed
   return (
     <main className="flex flex-1 flex-col items-center justify-center px-6 text-center">
       {restDone ? (
@@ -910,8 +990,8 @@ function RestPanel({ lang, restLeft, restDone, nextEx, setLabel, tip, tipDismiss
             // `.v2-screen-enter` is reduced-motion-safe (tokens.css forces no motion).
             <div role="note" aria-live="polite" className="v2-screen-enter mt-6 flex w-full max-w-sm items-start gap-2.5 rounded-2xl px-4 py-3 text-start" style={{ background: FOCUS.card, border: `1px solid ${FOCUS.line}` }}>
               <Icon name="Lightbulb" className="mt-0.5 h-4 w-4 shrink-0" style={{ color: FOCUS.teal }} aria-hidden />
-              <p className="flex-1 text-[0.8125rem] font-medium leading-relaxed" style={{ color: FOCUS.inkMuted }}><bdi>{tip.textAr}</bdi></p>
-              <button type="button" onClick={onDismissTip} aria-label="إخفاء النصيحة" className="-me-1 -mt-1 shrink-0 rounded-lg p-1.5" style={{ color: FOCUS.inkFaint }}><Icon name="X" className="h-4 w-4" /></button>
+              <p className="flex-1 text-[0.8125rem] font-medium leading-relaxed" style={{ color: FOCUS.inkMuted }}><bdi>{ar ? tip.textAr : tip.textEn}</bdi></p>
+              <button type="button" onClick={onDismissTip} aria-label={ar ? 'إخفاء النصيحة' : 'Dismiss tip'} className="-me-1 -mt-1 shrink-0 rounded-lg p-1.5" style={{ color: FOCUS.inkFaint }}><Icon name="X" className="h-4 w-4" /></button>
             </div>
           )}
           <div className="mt-8 flex items-center gap-3">
@@ -924,7 +1004,7 @@ function RestPanel({ lang, restLeft, restDone, nextEx, setLabel, tip, tipDismiss
   )
 }
 
-function PlanScreen({ model, lang, onExercise, onStart, onBack }: { model: ReturnType<typeof buildWorkoutV2Model>; lang: Lang; onExercise: (i: number) => void; onStart: () => void; onBack: () => void }) {
+function PlanScreen({ model, lang, onExercise, onStart }: { model: ReturnType<typeof buildWorkoutV2Model>; lang: Lang; onExercise: (i: number) => void; onStart: () => void }) {
   const ar = lang !== 'en'
   const groups: { cat: ExCategory; items: { ex: WorkoutV2Exercise; i: number }[] }[] = []
   model.exercises.forEach((ex, i) => {
@@ -933,16 +1013,17 @@ function PlanScreen({ model, lang, onExercise, onStart, onBack }: { model: Retur
     else groups.push({ cat: ex.category, items: [{ ex, i }] })
   })
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
+    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light bg-page px-4 pb-6 pt-3 text-ink-900">
       <div className="v2-screen-enter mx-auto w-full max-w-md">
-        <button type="button" onClick={onBack} aria-label={ar ? 'رجوع' : 'Back'} className="grid h-10 w-10 place-items-center rounded-xl border border-line bg-surface"><Icon name="ChevronRight" className="h-5 w-5 rtl:rotate-0 ltr:rotate-180" /></button>
-        <p className="v2-text-blue mt-4 text-xs font-black uppercase tracking-wider">{ar ? model.program.titleAr : model.program.titleEn} · {ar ? model.program.contextAr : model.program.contextEn}</p>
+        <p className="v2-text-blue pt-1 text-xs font-black uppercase tracking-wider">{ar ? model.program.titleAr : model.program.titleEn} · {ar ? model.program.contextAr : model.program.contextEn}</p>
         <h1 className="mt-1 text-3xl font-black tracking-tight">{model.session.title}</h1>
         <div className="mt-3 flex flex-wrap gap-2 text-xs font-bold text-ink-500">
           <Chip icon="Dumbbell" text={`${model.session.exerciseCount} ${ar ? 'تمارين' : 'exercises'}`} />
           <Chip icon="Clock" text={`~${model.session.durationMin} ${ar ? 'دقيقة' : 'min'}`} />
           {model.session.muscles.slice(0, 2).map((m) => <Chip key={m} icon="Target" text={muscleLabel(m as Muscle, lang)} />)}
         </div>
+
+        <button type="button" onClick={onStart} className="btn-primary mt-5 w-full py-4 text-[1.1875rem] shadow-glow">{ar ? 'ابدأ الجلسة' : 'Start session'}</button>
 
         <div className="mt-6 space-y-5">
           {groups.map((g) => (
@@ -951,7 +1032,9 @@ function PlanScreen({ model, lang, onExercise, onStart, onBack }: { model: Retur
               <div className="space-y-2">
                 {g.items.map(({ ex, i }) => (
                   <button key={ex.id} type="button" onClick={() => onExercise(i)} className="v2-pressable flex w-full items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3 text-start hover:border-[color:var(--v2-blue)]">
-                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-beige text-ink-500"><Icon name="Dumbbell" className="h-5 w-5" /></span>
+                    <span className="h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-beige">
+                      <ExerciseMedia exerciseId={ex.exerciseId} heightClass="h-14" hideChips />
+                    </span>
                     <span className="min-w-0 flex-1">
                       <span className="block text-sm font-bold">{ar ? ex.nameAr : ex.nameEn}</span>
                       <span className="block text-xs text-ink-500">{ex.sets}×{ex.reps}{ex.equipment[0] ? ` · ${equipmentLabel(ex.equipment[0], lang)}` : ''}</span>
@@ -963,10 +1046,6 @@ function PlanScreen({ model, lang, onExercise, onStart, onBack }: { model: Retur
             </div>
           ))}
         </div>
-
-        {/* In-flow primary CTA — sits within the scroll (above the app tab bar,
-            which a fixed footer would collide with), so it's always tappable. */}
-        <button type="button" onClick={onStart} className="btn-primary mt-6 w-full py-4 text-[1.1875rem] shadow-glow">{ar ? 'ابدأ الجلسة' : 'Start session'}</button>
       </div>
     </div>
   )
@@ -975,11 +1054,12 @@ function PlanScreen({ model, lang, onExercise, onStart, onBack }: { model: Retur
 function DetailScreen({ ex, idx, total, lang, swapped, onReplace, onStart, onBack }: { ex: WorkoutV2Exercise; idx: number; total: number; lang: Lang; swapped?: boolean; onReplace?: () => void; onStart: () => void; onBack: () => void }) {
   const ar = lang !== 'en'
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
+    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light bg-page px-4 pb-6 pt-3 text-ink-900">
       <div className="v2-screen-enter mx-auto w-full max-w-md">
         <button type="button" onClick={onBack} aria-label={ar ? 'رجوع' : 'Back'} className="grid h-10 w-10 place-items-center rounded-xl border border-line bg-surface"><Icon name="ChevronRight" className="h-5 w-5 rtl:rotate-0 ltr:rotate-180" /></button>
-        {/* media placeholder (no demo media in the plan template) */}
-        <div className="mt-4 grid aspect-video place-items-center rounded-2xl border border-line bg-surface text-ink-400"><Icon name="Dumbbell" className="h-10 w-10" /></div>
+        <div className="mt-4 aspect-video overflow-hidden rounded-2xl border border-line bg-surface">
+          <ExerciseMedia exerciseId={ex.exerciseId} heightClass="h-full" hideChips />
+        </div>
         <p className="v2-text-blue mt-4 text-xs font-black uppercase tracking-wider">{ar ? `التمرين ${toAr(idx + 1, lang)} من ${toAr(total, lang)}` : `Exercise ${idx + 1} of ${total}`}</p>
         <h1 className="mt-1 text-2xl font-black">{ar ? ex.nameAr : ex.nameEn}</h1>
         <div className="mt-3 flex flex-wrap gap-2 text-xs font-bold text-ink-500">
@@ -1220,7 +1300,7 @@ function DiscardConfirmSheet({ lang, onDiscard, onCancel }: { lang: Lang; onDisc
 function MissingPlan({ lang, onNavigate }: { lang: Lang; onNavigate: (r: AppRoute) => void }) {
   const ar = lang !== 'en'
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light v2-screen-enter flex min-h-screen flex-col items-center justify-center bg-page px-6 text-center text-ink-900">
+    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light v2-screen-enter flex min-h-full flex-col items-center justify-center bg-page px-6 py-10 text-center text-ink-900">
       <Icon name="Dumbbell" className="h-12 w-12 text-ink-400" />
       <h1 className="mt-5 text-2xl font-black">{ar ? 'أكمل إعداد خطتك' : 'Finish setting up your plan'}</h1>
       <p className="mt-2 max-w-xs text-sm text-ink-500">{ar ? 'نحتاج هدفك وجدولك لنبني تمرينك.' : 'We need your goal and schedule to build your workout.'}</p>

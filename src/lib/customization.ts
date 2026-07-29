@@ -8,6 +8,7 @@ import { weeklyRoutine } from '@/data/routine'
 import type { RoutineDay, SupplementItem } from '@/types'
 import type { Profile, Targets } from '@/types/profile'
 import { computeTargets, defaultProfile, isMinorAge, profileHash } from './calculators'
+import { enqueueSyncOperation } from './syncQueue'
 import type { WorkoutPlan } from '@/types/workout'
 import { generatePlanFromTemplate } from './workoutPlan'
 import { normalizePlanDayNames } from './planDayNames'
@@ -137,6 +138,51 @@ export interface Customization {
   meals: MealRow[]
   metrics: MetricRow[]
   routine: RoutineRow[]
+  /** طابع آخر حفظ (P12) — دليل LWW لمزامنة إعدادات الحساب (profiles.data.settings). */
+  settingsUpdatedAt?: string
+}
+
+/**
+ * إعدادات الحساب المُزامَنة (P12) — الحقول التي تتبع الحساب لا الجهاز:
+ * ملفه (عمر/طول/وزن/هدف)، أهدافه المحسوبة وحالتها، خطط التغذية/المكملات/الالتزام/
+ * القياس، هويته الشخصية (الاسم/الهدف/النوع) وإظهار الأقسام.
+ *
+ * تبقى على الجهاز (لا تُزامَن): ألوان القالب وهوية العلامة (brandName/tagline)،
+ * صفوف قالب v1 التسويقية (workouts/supplements/meals/metrics/routine)، وكل
+ * تفضيلات الجهاز العامة (لغة/ثيم/هابتكس في qimmah:prefs، uiMode…). خطة التمرين
+ * workoutPlan مستثناة عمدًا — مزامنتها عبر جدول custom_plans (لا ازدواج مصدر).
+ */
+export interface AccountSettings {
+  identity: Pick<Customization['identity'], 'userName' | 'mainGoal' | 'userType'>
+  sections: SectionVisibility
+  profile: Profile
+  targets: Targets
+  targetsMeta: Customization['targetsMeta']
+  nutritionPlan: NutritionPlan
+  wellnessPlan: WellnessPlan
+  commitmentPlan: CommitmentPlan
+  measurementPlan: MeasurementPlan
+  updatedAt: string
+}
+
+/** يستخرج شريحة إعدادات الحساب من التخصيص الكامل (انظر AccountSettings). */
+export function accountSettingsSlice(c: Customization): AccountSettings {
+  return {
+    identity: {
+      userName: c.identity.userName,
+      mainGoal: c.identity.mainGoal,
+      userType: c.identity.userType,
+    },
+    sections: { ...c.sections },
+    profile: { ...c.profile },
+    targets: { ...c.targets },
+    targetsMeta: { ...c.targetsMeta },
+    nutritionPlan: c.nutritionPlan,
+    wellnessPlan: c.wellnessPlan,
+    commitmentPlan: c.commitmentPlan,
+    measurementPlan: c.measurementPlan,
+    updatedAt: c.settingsUpdatedAt ?? new Date().toISOString(),
+  }
 }
 
 /** القيم الافتراضية مأخوذة مباشرة من config/data — مصدر الحقيقة الوحيد. */
@@ -255,6 +301,9 @@ export function loadCustomization(): Customization {
       meals: saved.meals ?? base.meals,
       metrics: saved.metrics ?? base.metrics,
       routine: saved.routine ?? base.routine,
+      ...(typeof saved.settingsUpdatedAt === 'string' && saved.settingsUpdatedAt
+        ? { settingsUpdatedAt: saved.settingsUpdatedAt }
+        : {}),
     }
     return withFreshTargets(migrateMinorGoal(merged))
   } catch {
@@ -289,7 +338,40 @@ function withFreshTargets(c: Customization): Customization {
 
 export function saveCustomization(value: Customization): void {
   if (typeof window === 'undefined') return
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(value))
+  const stamped: Customization = { ...value, settingsUpdatedAt: new Date().toISOString() }
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(stamped))
+  // مزامنة إعدادات الحساب (P12): شريحة الحساب فقط تركب صف profiles (data.settings)
+  // بمفتاح كيان مستقل عن onboarding كي لا يستبدل أحدهما الآخر في دمج الطابور.
+  enqueueSyncOperation('profiles', 'settings', {
+    data: { settings: accountSettingsSlice(stamped) },
+    updated_at: stamped.settingsUpdatedAt,
+  })
+}
+
+/**
+ * كتابة إعدادات الحساب من مسار المزامنة (hydrate) بعد فوزها بالـLWW: حقول الحساب
+ * تُدمج فوق المحلي، حقول الجهاز (ألوان/هوية علامة/صفوف القالب/workoutPlan) تبقى
+ * كما هي، والطابع المحفوظ هو طابع السحابة (لا إعادة ختم بـ«الآن» — وإلا انقلب LWW).
+ */
+export function applyAccountSettingsFromSync(slice: Partial<AccountSettings>, stamp: string): void {
+  if (typeof window === 'undefined' || !slice || typeof slice !== 'object') return
+  const local = loadCustomization()
+  const merged: Customization = {
+    ...local,
+    identity: { ...local.identity, ...slice.identity },
+    sections: { ...local.sections, ...slice.sections },
+    profile: { ...local.profile, ...slice.profile },
+    targets: { ...local.targets, ...slice.targets },
+    targetsMeta: { ...local.targetsMeta, ...slice.targetsMeta },
+    nutritionPlan: slice.nutritionPlan ? { ...local.nutritionPlan, ...slice.nutritionPlan } : local.nutritionPlan,
+    wellnessPlan: slice.wellnessPlan ? { ...local.wellnessPlan, ...slice.wellnessPlan } : local.wellnessPlan,
+    commitmentPlan: slice.commitmentPlan ? { ...local.commitmentPlan, ...slice.commitmentPlan } : local.commitmentPlan,
+    measurementPlan: slice.measurementPlan
+      ? { ...local.measurementPlan, ...slice.measurementPlan }
+      : local.measurementPlan,
+    settingsUpdatedAt: stamp,
+  }
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(merged))
 }
 
 export function clearCustomization(): void {

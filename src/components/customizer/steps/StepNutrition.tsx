@@ -107,6 +107,7 @@ export function StepNutrition({ ctx }: { ctx: WizardCtx }) {
       {/* تفعيل المتابعة */}
       <button
         type="button"
+        aria-pressed={np.enabled}
         onClick={() => setNp({ enabled: !np.enabled })}
         className={`mb-5 flex w-full items-center justify-between rounded-2xl border p-4 ${np.enabled ? 'border-primary-soft bg-primary-soft' : 'border-line bg-surface'}`}
       >
@@ -166,7 +167,7 @@ export function StepNutrition({ ctx }: { ctx: WizardCtx }) {
               <select className="rounded-lg border border-line bg-surface px-2.5 py-2 text-xs font-bold text-ink-700" value={tplType} onChange={(e) => setTplType(e.target.value as MealType | 'all')}>
                 <option value="all">{d.nutAllTypes}</option>
                 {(Object.keys(mealTypeLabels) as MealType[]).map((mt) => (
-                  <option key={mt} value={mt}>{mealTypeLabels[mt].ar}</option>
+                  <option key={mt} value={mt}>{mealTypeLabels[mt][ctx.lang]}</option>
                 ))}
               </select>
             </div>
@@ -174,8 +175,8 @@ export function StepNutrition({ ctx }: { ctx: WizardCtx }) {
               {filteredTemplates.map((t) => (
                 <li key={t.id} className="flex items-center justify-between gap-2 rounded-xl border border-line bg-page p-2.5">
                   <span className="min-w-0">
-                    <span className="block truncate text-sm font-bold text-ink-900">{t.nameAr} — {t.nameEn}</span>
-                    <span className="text-[11px] text-ink-400">{mealTypeLabels[t.mealType].ar}</span>
+                    <span className="block truncate text-sm font-bold text-ink-900">{ctx.lang === 'en' ? t.nameEn : t.nameAr}</span>
+                    <span className="text-[11px] text-ink-400">{mealTypeLabels[t.mealType][ctx.lang]}</span>
                   </span>
                   <button type="button" onClick={() => addTemplate(t.id)} className="btn-primary px-3 py-1.5 text-xs">{d.nutAdd}</button>
                 </li>
@@ -189,9 +190,12 @@ export function StepNutrition({ ctx }: { ctx: WizardCtx }) {
       <div className="mt-5 space-y-4">
         {np.meals.map((meal, mi) => (
           <div key={meal.id} className="card p-4">
-            <div className="mb-3 grid gap-2 sm:grid-cols-2">
-              <input className={inputCls} value={meal.nameAr} onChange={(e) => updateMeal(meal.id, { nameAr: e.target.value })} placeholder={d.nutMealNameArPlaceholder} />
-              <input className={inputCls} value={meal.nameEn} onChange={(e) => updateMeal(meal.id, { nameEn: e.target.value })} placeholder={d.nutMealNameEnPlaceholder} />
+            <div className="mb-3">
+              {ctx.lang === 'en' ? (
+                <input className={inputCls} value={meal.nameEn} onChange={(e) => updateMeal(meal.id, { nameEn: e.target.value })} placeholder={d.nutMealNameEnPlaceholder} />
+              ) : (
+                <input className={inputCls} value={meal.nameAr} onChange={(e) => updateMeal(meal.id, { nameAr: e.target.value })} placeholder={d.nutMealNameArPlaceholder} />
+              )}
             </div>
 
             {/* المكونات */}

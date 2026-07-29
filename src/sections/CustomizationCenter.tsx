@@ -207,10 +207,10 @@ export function CustomizationCenter({ onBack, initialStep = 0, mode = 'onboardin
   const Current = steps[step].Component
 
   return (
-    <div className="flex min-h-screen flex-col bg-page">
+    <div className="flex h-[100dvh] min-h-0 flex-col overflow-hidden bg-page">
       {/* شريط علوي */}
-      <header className="sticky top-0 z-40 glass border-b border-line">
-        <div className="container-page flex h-16 items-center justify-between gap-3">
+      <header className="z-40 shrink-0 border-b border-line glass pt-[env(safe-area-inset-top)]">
+        <div className="container-page flex min-h-16 items-center justify-between gap-3 py-2">
           <div className="flex items-center gap-2.5">
             <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-white">
               <Icon name="Palette" className="h-5 w-5" strokeWidth={2.5} />
@@ -288,7 +288,7 @@ export function CustomizationCenter({ onBack, initialStep = 0, mode = 'onboardin
       </header>
 
       {/* المحتوى */}
-      <main className="container-page flex-1 py-8">
+      <main className="app-scroll container-page min-h-0 flex-1 overflow-y-auto overscroll-y-contain py-5 sm:py-8">
         <div className="grid gap-8 lg:grid-cols-3">
           <div className="lg:col-span-2">
             <div className="card p-6 sm:p-8">
@@ -306,7 +306,7 @@ export function CustomizationCenter({ onBack, initialStep = 0, mode = 'onboardin
       </main>
 
       {/* شريط التنقّل السفلي */}
-      <div className="sticky bottom-0 z-30 border-t border-line bg-page/90 backdrop-blur">
+      <div className="z-30 shrink-0 border-t border-line bg-page/90 pb-[env(safe-area-inset-bottom)] backdrop-blur">
         <div className="container-page flex items-center justify-between gap-3 py-3">
           <button
             type="button"

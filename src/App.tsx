@@ -40,7 +40,7 @@ function createLazyViews() {
     RecoveryView: lazy(() => import('@/views/RecoveryView').then((m) => ({ default: m.RecoveryView }))),
   }
 }
-import { MobileShell, type MainTab } from '@/components/MobileShell'
+import { MobileShell, type MainTab, type QuickLogTarget } from '@/components/MobileShell'
 import type { AppBadge } from '@/components/AppNav'
 import { useAuth } from '@/lib/authContext'
 import { isAccountOnboarded, isOnboardingComplete, markCompleted } from '@/lib/onboarding'
@@ -50,9 +50,17 @@ import { currentUserId, hydrateOnboardingFromProfile } from '@/lib/onboardingSyn
 import { useLanguage } from '@/i18n'
 import { type AppRoute, MAIN_TABS, isUnknownRouteHash, routeFromHash, setHashRoute } from '@/lib/appRoutes'
 import { SuccessToast } from '@/components/SuccessToast'
-import { AchievementToaster } from '@/features/achievements/AchievementToaster'
 import { BUILD_LABEL } from '@/lib/buildInfo'
 import { track } from '@/lib/analytics'
+import { useCustomization } from '@/lib/customizationContext'
+import { V2_QUICK_LOG } from '@/design-system/v2/labels'
+
+// Achievement evaluation reads workout + nutrition stores. It is only rendered
+// inside authenticated main tabs, so loading it in the public/account shell would
+// pull the full food catalogue into the first bundle for no user-visible benefit.
+const AchievementToaster = lazy(() =>
+  import('@/features/achievements/AchievementToaster').then((m) => ({ default: m.AchievementToaster })),
+)
 
 /**
  * حراسة المسار: التبويبات الرئيسية لا تُفتح أبدًا قبل إكمال إعداد حقيقي **لهذا الحساب**
@@ -93,12 +101,23 @@ function initialRoute(userId: string | null): AppRoute {
 /** قشرة تطبيق قِمّة — توجيه بسيط عبر hash (بلا مكتبات خارجية). */
 export default function App() {
   const auth = useAuth()
+  const { customization } = useCustomization()
   // اللغة الحية من سياق i18n — التبديل يعيد رسم كل الشاشات فورًا (بلا إعادة تحميل).
   const { lang: LANG } = useLanguage()
   // داخل التطبيق لا يوجد ضيف بعد الآن (كل التبويبات خلف حساب)، فالشارة دائمًا «حساب».
   const badge: AppBadge = 'account'
   // المالك الحالي لقرار البوابة: معرّف الحساب المسجّل، أو null لوضع الضيف.
   const uid = auth.user?.id ?? null
+  const quickCopy = V2_QUICK_LOG[LANG === 'en' ? 'en' : 'ar']
+  const hasMedication = customization.wellnessPlan.medications.length > 0
+  const hasSupplement = customization.wellnessPlan.supplements.length > 0
+  const routineQuickLabel = hasMedication && hasSupplement
+    ? quickCopy.routineBoth
+    : hasMedication
+      ? quickCopy.routineMedication
+      : hasSupplement
+        ? quickCopy.routineSupplement
+        : quickCopy.routineEmpty
 
   // عزل الحساب (شبكة أمان): بمجرّد جهوزية المصادقة، إن ظهر حساب مختلف عن آخر ما رأيناه
   // (مثلًا استعادة جلسة لحساب آخر دون مرور بتسجيل خروج) → امسح بقايا السابق قبل الرسم،
@@ -293,6 +312,17 @@ export default function App() {
     else setView(guardRoute(v, uid))
   }
 
+  const openQuickLog = (target: QuickLogTarget) => {
+    window.sessionStorage.setItem('qimmah:quick-log-intent', target)
+    if (target === 'routine') {
+      navigate('profile')
+      window.setTimeout(() => window.dispatchEvent(new CustomEvent('qimmah:quick-log', { detail: target })), 0)
+      return
+    }
+    navigate('nutrition')
+    window.setTimeout(() => window.dispatchEvent(new CustomEvent('qimmah:quick-log', { detail: target })), 0)
+  }
+
   // ——— بوابة الإقلاع: أثناء استعادة جلسة المصادقة نعرض حالة تحميل قصيرة (لا شاشة دخول)
   //     حتى لا يُطالَب مستخدم لديه جلسة صالحة بتسجيل الدخول من جديد. ———
   if (auth.loading) {
@@ -340,7 +370,15 @@ export default function App() {
       />
     )
   } else if (view === 'login') {
-    content = <V.LoginView lang={LANG} initialMode={loginMode} onSuccess={enterApp} onBack={() => setView('start')} />
+    content = (
+      <V.LoginView
+        lang={LANG}
+        initialMode={loginMode}
+        onModeChange={setLoginMode}
+        onSuccess={enterApp}
+        onBack={() => setView('start')}
+      />
+    )
     // ملاحظة: مسار 'reset' يُعالَج في بوّابة الاستعادة أعلى الدالة (فوق كل البوّابات).
   } else if (view === 'privacy') {
     content = <V.PrivacyView lang={LANG} onBack={() => navigate(beforeLegalRef.current)} />
@@ -394,12 +432,14 @@ export default function App() {
           badge={badge}
           onNavigate={navigate}
           onOpenSettings={() => setView('settings')}
+          onQuickLog={openQuickLog}
+          routineQuickLabel={routineQuickLabel}
         >
           {/* الرئيسية والتقدّم: fallback هيكلي لكل مسار (بدل AppLoading العام) — البيانات
               محلية متزامنة فلا يظهر الهيكل إلا أثناء تحميل حزمة الشاشة عند الطلب. */}
           {view === 'dashboard' && (
             <Suspense fallback={<DashboardSkeleton />}>
-              <V.DashboardView lang={LANG} onNavigate={navigate} />
+              <V.DashboardView lang={LANG} onNavigate={navigate} onQuickLog={openQuickLog} />
             </Suspense>
           )}
           {view === 'workout' && (
@@ -437,7 +477,9 @@ export default function App() {
         {showSuccess && <SuccessToast onClose={dismissSuccess} />}
 
         {/* احتفالات الأوسمة والأرقام القياسية — فوق كل الشاشات الرئيسية */}
-        <AchievementToaster />
+        <Suspense fallback={null}>
+          <AchievementToaster />
+        </Suspense>
       </>
     )
   }

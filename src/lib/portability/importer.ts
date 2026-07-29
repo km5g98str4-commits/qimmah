@@ -19,7 +19,7 @@ import {
   writeRaw,
   type StoreDef,
 } from './registry'
-import { PortabilityError } from './errors'
+import { PortabilityError, portabilityError, invalidShapeError } from './errors'
 import { requirePortabilityOwner } from './guard'
 import { enqueueImportedStateForSync } from '@/lib/syncService'
 import { getSyncRuntime } from '@/lib/syncQueue'
@@ -43,7 +43,7 @@ const isObj = (v: unknown): v is Record<string, unknown> => !!v && typeof v === 
  */
 function safeJsonParse(text: string): unknown {
   return JSON.parse(text, (key, value) => {
-    if (DANGEROUS_KEYS.has(key)) throw new PortabilityError('الملفّ يحتوي مفاتيح غير آمنة — رُفض')
+    if (DANGEROUS_KEYS.has(key)) throw portabilityError('UNSAFE_KEYS')
     return value
   })
 }
@@ -79,7 +79,7 @@ function byteLength(text: string): number {
 export function parseImportFile(text: string, uid?: string | null): ImportPreview {
   const ownerId = requirePortabilityOwner(uid ?? getSyncRuntime().userId)
   if (byteLength(text) > MAX_FILE_BYTES) {
-    throw new PortabilityError('الملفّ أكبر من الحدّ المسموح (٢٥ ميغابايت)')
+    throw portabilityError('FILE_TOO_LARGE')
   }
   let parsed: unknown
   try {
@@ -87,7 +87,7 @@ export function parseImportFile(text: string, uid?: string | null): ImportPrevie
   } catch (e) {
     // خطأ التلويط (PortabilityError) يُعاد كما هو؛ أي خطأ تحليل آخر = JSON غير صالح.
     if (e instanceof PortabilityError) throw e
-    throw new PortabilityError('الملفّ ليس JSON صالحًا')
+    throw portabilityError('NOT_JSON')
   }
 
   let nodes = 0
@@ -96,7 +96,7 @@ export function parseImportFile(text: string, uid?: string | null): ImportPrevie
     const current = stack.pop()!
     nodes += 1
     if (nodes > MAX_IMPORT_NODES || current.depth > MAX_IMPORT_DEPTH) {
-      throw new PortabilityError('بنية الملفّ معقّدة أكثر من الحدّ الآمن.')
+      throw portabilityError('TOO_DEEP')
     }
     if (Array.isArray(current.value)) {
       current.value.forEach((value) => stack.push({ value, depth: current.depth + 1 }))
@@ -105,27 +105,25 @@ export function parseImportFile(text: string, uid?: string | null): ImportPrevie
     }
   }
 
-  if (!isObj(parsed)) throw new PortabilityError('صيغة الملفّ غير معروفة')
+  if (!isObj(parsed)) throw portabilityError('UNKNOWN_FORMAT')
   const bundle = parsed as unknown as PortabilityBundle
   if (bundle.kind !== BUNDLE_KIND) {
-    throw new PortabilityError('هذا الملفّ ليس نسخة بيانات قِمّة')
+    throw portabilityError('NOT_A_QIMMAH_BACKUP')
   }
   if (bundle.schemaVersion !== PORTABILITY_SCHEMA_VERSION) {
-    throw new PortabilityError(
-      `إصدار النسخة (${bundle.schemaVersion ?? '؟'}) غير متوافق مع هذا الإصدار (${PORTABILITY_SCHEMA_VERSION}).`,
-    )
+    throw portabilityError('UNSUPPORTED_VERSION', [String(bundle.schemaVersion ?? '؟'), String(PORTABILITY_SCHEMA_VERSION)])
   }
-  if (!isObj(bundle.stores)) throw new PortabilityError('محتوى النسخة غير صالح (stores)')
+  if (!isObj(bundle.stores)) throw portabilityError('INVALID_STORES')
   const unregistered = isObj(bundle.unregistered) ? bundle.unregistered : {}
 
   // تحقّق بنيوي من كل متجر معروف + سقوف. متجر مجهول ضمن نفس الإصدار = رفض.
   const lines: PreviewLine[] = []
   for (const [id, value] of Object.entries(bundle.stores)) {
-    if (DANGEROUS_KEYS.has(id)) throw new PortabilityError('معرّف متجر غير آمن — رُفض')
+    if (DANGEROUS_KEYS.has(id)) throw portabilityError('UNSAFE_STORE_ID')
     const def = STORE_BY_ID[id]
-    if (!def) throw new PortabilityError(`متجر غير معروف في النسخة: «${id}»`, id)
+    if (!def) throw portabilityError('UNKNOWN_STORE_IN_BACKUP', [id], id)
     const ok = def.validate(value)
-    if (ok !== true) throw new PortabilityError(ok, def.labelAr)
+    if (ok !== true) throw invalidShapeError(ok, def.labelAr)
     lines.push({ id, labelAr: def.labelAr, count: def.count(value) })
   }
 
@@ -133,7 +131,7 @@ export function parseImportFile(text: string, uid?: string | null): ImportPrevie
   // another owner's state, so reject them before preview or any write.
   const unregisteredCount = Object.keys(unregistered).length
   if (unregisteredCount > 0) {
-    throw new PortabilityError('تحتوي النسخة بيانات من إصدار أحدث لا يمكن استيرادها بأمان.')
+    throw portabilityError('NEWER_VERSION')
   }
 
   return {
@@ -231,7 +229,7 @@ export function applyImport(bundle: PortabilityBundle, uid: string | null | unde
   try {
     checked = parseImportFile(JSON.stringify(bundle), ownerId).bundle
   } catch (error) {
-    throw error instanceof PortabilityError ? error : new PortabilityError('فشل التحقّق من النسخة.')
+    throw error instanceof PortabilityError ? error : portabilityError('VERIFY_FAILED')
   }
 
   const keys = targetKeys(ownerId)
@@ -248,7 +246,7 @@ export function applyImport(bundle: PortabilityBundle, uid: string | null | unde
     }
     for (const [id, value] of Object.entries(checked.stores)) {
       const def = STORE_BY_ID[id]
-      if (!def) throw new PortabilityError(`متجر غير معروف: «${id}»`, id)
+      if (!def) throw portabilityError('UNKNOWN_STORE', [id], id)
       applyStore(def, value, ownerId)
       storesApplied += 1
     }
@@ -260,14 +258,14 @@ export function applyImport(bundle: PortabilityBundle, uid: string | null | unde
       try {
         def.load(ownerId)
       } catch {
-        throw new PortabilityError(`تعذّر قراءة «${def.labelAr}» بعد الاستيراد — أُلغي كل شيء.`, def.labelAr)
+        throw portabilityError('READBACK_FAILED', [def.labelAr], def.labelAr)
       }
     }
   } catch (err) {
     // فشل ذرّي: أعِد الحالة تمامًا وامسح لقطة التراجع، ثم أعِد رمي الخطأ.
     restoreSnapshot(snapshot)
     writeRaw(stagedKey, undefined)
-    throw err instanceof PortabilityError ? err : new PortabilityError('فشل الاستيراد — أُلغيت كل التغييرات.')
+    throw err instanceof PortabilityError ? err : portabilityError('IMPORT_FAILED')
   }
 
   let syncQueued = false
@@ -292,7 +290,7 @@ export function undoImport(uid: string | null | undefined): boolean {
   const stagedKey = undoKey(ownerId)
   const snap = readRaw(stagedKey) as UndoSnapshot | undefined
   if (!snap || !isObj(snap) || !isObj(snap.keys)) return false
-  if (snap.uid !== ownerId) throw new PortabilityError('نسخة التراجع تخص حسابًا آخر — رُفضت.')
+  if (snap.uid !== ownerId) throw portabilityError('UNDO_WRONG_OWNER')
   restoreSnapshot(snap)
   writeRaw(stagedKey, undefined)
   try {

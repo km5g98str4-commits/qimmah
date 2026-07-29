@@ -3,10 +3,12 @@ import { StepHeader } from '../StepHeader'
 import type { WizardCtx } from '../stepProps'
 import { userTypeOptions, type Customization } from '@/lib/customization'
 import { onboardingStrings } from '@/i18n/dict/onboarding'
+import { profileChoiceStrings } from '@/i18n/dict/profileChoices'
 
 /** خطوة البيانات الأساسية — الاسم، اسم الصفحة، الوصف، والنوع. */
 export function StepBasics({ ctx }: { ctx: WizardCtx }) {
   const d = onboardingStrings[ctx.lang]
+  const choices = profileChoiceStrings[ctx.lang]
   const { data, updateIdentity } = ctx
   return (
     <div>
@@ -51,7 +53,7 @@ export function StepBasics({ ctx }: { ctx: WizardCtx }) {
           >
             {userTypeOptions.map((o) => (
               <option key={o.value} value={o.value}>
-                {o.label}
+                {choices.userType[o.value]}
               </option>
             ))}
           </select>

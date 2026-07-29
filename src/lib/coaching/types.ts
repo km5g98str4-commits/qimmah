@@ -23,6 +23,10 @@ export interface Lesson {
   bodyAr: string
   /** One concrete action the reader can take. */
   takeawayAr: string
+  titleEn: string
+  /** Same 60–100 word bound as the Arabic body; gated by the coaching proof. */
+  bodyEn: string
+  takeawayEn: string
 }
 
 /** Rest-period contextual tip keyed to one or more muscle groups. */
@@ -30,4 +34,14 @@ export interface RestTip {
   id: string
   muscles: Muscle[]
   textAr: string
+  textEn: string
 }
+
+/**
+ * A content record with its language-resolved text attached.
+ *
+ * The `*Ar` / `*En` fields stay on the object untouched, so every existing caller
+ * that reads `tip.textAr` or `lesson.bodyAr` keeps working unchanged. Callers that
+ * pass a `lang` additionally get the resolved fields, and never have to branch.
+ */
+export type Localized<T, K extends string> = T & { [P in K]: string }
