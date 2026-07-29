@@ -22,6 +22,11 @@ export interface V2OnboardingChoices {
   pref: V2Pref | null
   injuries: string[]
   healthDataConsent: boolean
+  /** بيانات الجسم — تُجمع في الخطوة الأولى؛ null يعني «لم تُجَب بعد». */
+  age?: number | null
+  gender?: 'male' | 'female' | null
+  heightCm?: number | null
+  weightKg?: number | null
 }
 
 /** v2 training place → the closest existing `Environment`. */
@@ -32,15 +37,20 @@ const PLACE_TO_ENV: Record<V2Place, Environment> = {
 }
 
 /**
- * Convert v2 onboarding choices into a full `Answers` object. Un-asked fields
- * come from `defaultAnswers`; target weight is derived from the goal the same
- * way v1 does (cut ×0.9, bulk ×1.1, maintain =) so calorie direction is sane.
+ * Convert v2 onboarding choices into a full `Answers` object. Target weight is
+ * derived from the goal the same way v1 does (cut ×0.9, bulk ×1.1, maintain =)
+ * so calorie direction is sane.
+ *
+ * **بيانات الجسم تأتي من المستخدم الآن.** كان التدفّق لا يسألها إطلاقًا فتسقط
+ * كلها على `defaultAnswers` (25 سنة · 170سم · 75كجم) — أي **نفس BMR لكل
+ * مستخدمي التطبيق**. القيم المُجابة تحلّ محلّها؛ وما لم يُجَب بعد يسقط على
+ * الافتراضي كما كان (توافق رجعي مع مسودّات قديمة).
  *
  * NOTE (documented gap): `choices.pref` (machines/free/mixed) has no field in
  * `Answers`, so it is NOT persisted. We do not invent a backend field.
  */
 export function toAnswersFromV2(choices: V2OnboardingChoices): Answers {
-  const weightKg = defaultAnswers.weightKg
+  const weightKg = choices.weightKg ?? defaultAnswers.weightKg
   const targetWeightKg =
     choices.goal === 'cut'
       ? Math.round(weightKg * 0.9)
@@ -50,6 +60,10 @@ export function toAnswersFromV2(choices: V2OnboardingChoices): Answers {
 
   return {
     ...defaultAnswers,
+    age: choices.age ?? defaultAnswers.age,
+    sex: choices.gender ?? defaultAnswers.sex,
+    heightCm: choices.heightCm ?? defaultAnswers.heightCm,
+    weightKg,
     goalValue: choices.goal ?? undefined,
     trainingDays: choices.days,
     daysTouched: true,
