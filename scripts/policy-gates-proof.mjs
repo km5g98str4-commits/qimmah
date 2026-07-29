@@ -31,8 +31,13 @@ check('وضع إنشاء الحساب محفوظ عند فتح شاشة قانو
 check('روابط HTML القانونية القديمة تحوّل للشاشات الداخلية ولا تُشحن كمسودات', publicRedirects.includes('/legal/terms.html      /#/terms') && publicRedirects.includes('/legal/privacy.html    /#/privacy') && !existsSync(resolve(root, 'public/legal/terms.html')) && !existsSync(resolve(root, 'public/legal/privacy.html')))
 
 console.log('\n② موافقة البيانات الصحية محفوظة وليست افتراضًا')
-check('بوابة الموافقة مرتبطة بأول خطوة (الهدف) قبل أي جمع بيانات', onbV2.includes('step === 0 && <GoalStep') && onbV2.includes('healthDataConsent={healthDataConsent}') && onbV2.includes('onConsent={setHealthDataConsent}') && onbV2.includes('checked={healthDataConsent}'))
-check('v2 يحجب الانتقال بلا موافقة', flow.includes("return d.healthDataConsent ? null : 'healthConsent'"))
+// المقصد نفسه، والبنية تغيّرت: الخطوة الأولى صارت «الجسد» (تجمع العمر/الجنس/
+// الطول/الوزن) بدل «الهدف»، لأن حاجز القاصرين يحتاج العمر قبل عرض الأهداف.
+// فالموافقة انتقلت معها لتبقى **قبل** أي جمع — وشرطها في validateStep(0) يسبق
+// فحص الحقول، فلا يتقدّم أحد خطوة دون إذن صريح.
+check('بوابة الموافقة على أول خطوة قبل أي جمع بيانات', onbV2.includes('step === 0 && (') && onbV2.includes('<BodyStep') && onbV2.includes('healthDataConsent={healthDataConsent}') && onbV2.includes('onConsent={setHealthDataConsent}') && onbV2.includes('checked={healthDataConsent}'))
+check('الموافقة شرط سابق لحقول الجسد في منطق التحقق', /if \(!d\.healthDataConsent\) return 'healthConsent'/.test(flow))
+check('v2 يحجب الانتقال بلا موافقة', /if \(!d\.healthDataConsent\) return 'healthConsent'/.test(flow))
 check('الموافقة تدخل مصدر الحقيقة', profile.includes('accepted: a.healthDataConsent'))
 check('المسودة الجديدة لا تفترض الموافقة', flow.includes('healthDataConsent: false'))
 check('سطح v2 يعرض رابط الخصوصية', onbV2.includes('POLICY_LINKS.privacy'))

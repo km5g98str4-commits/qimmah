@@ -34,18 +34,21 @@ console.log('\n① تحقّق الخطوات (رسالة خاصة بكل خطو�
 {
   check('صياغة المكان تطابق النص العربي المعتمد', V2_ONBOARDING.ar.equipment.title === 'وين وكيف تتمرّن؟')
   // Step 0 — goal required.
-  check('خطوة الهدف بلا هدف → «goal»', validateStep(0, { goal: null, days: 4, duration: 45, place: null, pref: null, healthDataConsent: false }) === 'goal')
-  check('خطوة الهدف بلا موافقة صحية → محجوبة', validateStep(0, { goal: 'bulk', days: 4, duration: 45, place: null, pref: null, healthDataConsent: false }) === 'healthConsent')
-  check('خطوة الهدف مع الموافقة → صالحة', validateStep(0, { goal: 'bulk', days: 4, duration: 45, place: null, pref: null, healthDataConsent: true }) === null)
-  check('canAdvance(0) يتبع الموافقة', canAdvance(0, { goal: 'cut', days: 4, duration: 45, place: null, pref: null, healthDataConsent: true }) === true)
+  check('خطوة الهدف بلا هدف → «goal»', validateStep(1, { age: 30, gender: 'male' as const, heightCm: 180, weightKg: 90, goal: null, days: 4, duration: 45, place: null, pref: null, healthDataConsent: false }) === 'goal')
+  // الموافقة انتقلت إلى الخطوة 0 (الجسد) لتسبق أي جمع بيانات — فهي شرط
+  // الخطوة الأولى لا الهدف، وتُفحص قبل حقول الجسد نفسها.
+  check('الموافقة شرط الخطوة الأولى (قبل حقول الجسد)', validateStep(0, { age: null, gender: null, heightCm: null, weightKg: null, goal: null, days: 4, duration: 45, place: null, pref: null, healthDataConsent: false }) === 'healthConsent')
+  check('بعد الموافقة تُطلب حقول الجسد', validateStep(0, { age: null, gender: null, heightCm: null, weightKg: null, goal: null, days: 4, duration: 45, place: null, pref: null, healthDataConsent: true }) === 'body')
+  check('خطوة الهدف مع الموافقة → صالحة', validateStep(1, { age: 30, gender: 'male' as const, heightCm: 180, weightKg: 90, goal: 'bulk', days: 4, duration: 45, place: null, pref: null, healthDataConsent: true }) === null)
+  check('canAdvance(0) يتبع الموافقة', canAdvance(1, { age: 30, gender: 'male' as const, heightCm: 180, weightKg: 90, goal: 'cut', days: 4, duration: 45, place: null, pref: null, healthDataConsent: true }) === true)
   // Step 1 — training defaults are always valid; an off-set value is caught.
-  check('خطوة التدريب بالقيم الافتراضية → صالحة', validateStep(1, { goal: 'cut', days: 4, duration: 45, place: null, pref: null, healthDataConsent: true }) === null)
-  check('خطوة التدريب بقيمة أيام خارج المجموعة → «training»', validateStep(1, { goal: 'cut', days: 7, duration: 45, place: null, pref: null, healthDataConsent: true }) === 'training')
+  check('خطوة التدريب بالقيم الافتراضية → صالحة', validateStep(2, { age: 30, gender: 'male' as const, heightCm: 180, weightKg: 90, goal: 'cut', days: 4, duration: 45, place: null, pref: null, healthDataConsent: true }) === null)
+  check('خطوة التدريب بقيمة أيام خارج المجموعة → «training»', validateStep(2, { age: 30, gender: 'male' as const, heightCm: 180, weightKg: 90, goal: 'cut', days: 7, duration: 45, place: null, pref: null, healthDataConsent: true }) === 'training')
   // Step 2 — place + pref required.
-  check('خطوة المعدات بلا مكان → «equipment»', validateStep(2, { goal: 'cut', days: 4, duration: 45, place: null, pref: 'mixed', healthDataConsent: true }) === 'equipment')
-  check('خطوة المعدات بلا تفضيل → «equipment»', validateStep(2, { goal: 'cut', days: 4, duration: 45, place: 'gym', pref: null, healthDataConsent: true }) === 'equipment')
-  check('خطوة المعدات بمكان وتفضيل → صالحة', validateStep(2, { goal: 'cut', days: 4, duration: 45, place: 'gym', pref: 'mixed', healthDataConsent: true }) === null)
-  check('canAdvance(2) ناقص → false', canAdvance(2, { goal: 'cut', days: 4, duration: 45, place: 'gym', pref: null, healthDataConsent: true }) === false)
+  check('خطوة المعدات بلا مكان → «equipment»', validateStep(3, { age: 30, gender: 'male' as const, heightCm: 180, weightKg: 90, goal: 'cut', days: 4, duration: 45, place: null, pref: 'mixed', healthDataConsent: true }) === 'equipment')
+  check('خطوة المعدات بلا تفضيل → «equipment»', validateStep(3, { age: 30, gender: 'male' as const, heightCm: 180, weightKg: 90, goal: 'cut', days: 4, duration: 45, place: 'gym', pref: null, healthDataConsent: true }) === 'equipment')
+  check('خطوة المعدات بمكان وتفضيل → صالحة', validateStep(3, { age: 30, gender: 'male' as const, heightCm: 180, weightKg: 90, goal: 'cut', days: 4, duration: 45, place: 'gym', pref: 'mixed', healthDataConsent: true }) === null)
+  check('canAdvance(2) ناقص → false', canAdvance(3, { age: 30, gender: 'male' as const, heightCm: 180, weightKg: 90, goal: 'cut', days: 4, duration: 45, place: 'gym', pref: null, healthDataConsent: true }) === false)
 }
 
 console.log('\n② مسار إعادة المحاولة (آلة حالة الإنهاء)')
@@ -94,8 +97,12 @@ console.log('\n④ تجاهل المسودة عند الإنهاء')
 console.log('\n⑤ افتراضيات أول تشغيل')
 {
   clearDraftV2('newUser')
-  check('بلا مسودة يبدأ من الهدف مع قيم التدريب الآمنة', JSON.stringify(initialDraftV2('newUser')) === JSON.stringify({
+  check('بلا مسودة يبدأ من الجسد مع قيم التدريب الآمنة', JSON.stringify(initialDraftV2('newUser')) === JSON.stringify({
     step: 0,
+    age: null,
+    gender: null,
+    heightCm: null,
+    weightKg: null,
     goal: null,
     days: 4,
     duration: 45,

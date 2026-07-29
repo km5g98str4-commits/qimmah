@@ -183,7 +183,7 @@ export interface V2OnboardingCopy {
   /** Visible plan-generation failure + retry (never a silent drop into the app). */
   error: { title: string; message: string; retry: string }
   /** Per-step inline validation messages shown when Next is tapped incomplete. */
-  validation: { goal: string; training: string; equipment: string }
+  validation: { body: string; goal: string; training: string; equipment: string }
   /** sr-only fieldset legends for each choice group (a11y — not shown visually). */
   legends: { goal: string; days: string; duration: string; place: string; pref: string; injuries: string }
 }
@@ -193,7 +193,7 @@ export const V2_ONBOARDING: Record<'ar' | 'en', V2OnboardingCopy> = {
   ar: {
     back: 'رجوع',
     next: 'التالي',
-    stepOf: (n) => `الخطوة ${['١', '٢', '٣'][n - 1] ?? n} من ٣`,
+    stepOf: (n) => `الخطوة ${['١', '٢', '٣', '٤'][n - 1] ?? n} من ٤`,
     goal: { title: 'وش هدفك الحين؟', note: 'تقدر تغيّره في أي وقت.' },
     training: {
       title: 'نجهّز جدولك',
@@ -249,6 +249,7 @@ export const V2_ONBOARDING: Record<'ar' | 'en', V2OnboardingCopy> = {
       retry: 'جرّب مرة ثانية',
     },
     validation: {
+      body: 'أكمل الأربعة بقيم منطقية عشان نكمّل.',
       goal: 'اختر هدفك أول عشان تكمّل.',
       training: 'اختر عدد الأيام ومدة التمرين عشان تكمّل.',
       equipment: 'اختر مكان التمرين ووش تفضّل عشان تكمّل.',
@@ -265,7 +266,7 @@ export const V2_ONBOARDING: Record<'ar' | 'en', V2OnboardingCopy> = {
   en: {
     back: 'Back',
     next: 'Next',
-    stepOf: (n) => `Step ${n} of 3`,
+    stepOf: (n) => `Step ${n} of 4`,
     goal: { title: 'What is your goal now?', note: 'You can change it anytime.' },
     training: {
       title: 'Setting up your schedule',
@@ -321,6 +322,7 @@ export const V2_ONBOARDING: Record<'ar' | 'en', V2OnboardingCopy> = {
       retry: 'Try again',
     },
     validation: {
+      body: 'Fill in all four with sensible values to continue.',
       goal: 'Pick your goal to continue.',
       training: 'Pick your days and session length to continue.',
       equipment: 'Pick where you train and what you prefer to continue.',

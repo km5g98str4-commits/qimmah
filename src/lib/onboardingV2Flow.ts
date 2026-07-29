@@ -20,12 +20,29 @@ import type { V2Place, V2Pref } from '@/lib/onboardingV2Adapter'
 export const DAYS = [3, 4, 5, 6] as const
 export const DURATIONS = [30, 45, 60, 75] as const
 
+/**
+ * حدود بيانات الجسم — نطاقات فسيولوجية معقولة تمنع القيم الشاذّة دون أن تُقصي
+ * أحدًا. الحدّ الأدنى للعمر 13 لا 18: القاصر **يُقبل** ثم تُقيَّد أهدافه
+ * (المحافظة فقط) — الحاجز تقييد لا طرد.
+ */
+export const AGE_RANGE = { min: 13, max: 100 } as const
+export const HEIGHT_RANGE = { min: 120, max: 220 } as const
+export const WEIGHT_RANGE = { min: 30, max: 250 } as const
+
+/** الجنس — يقود معادلة BMR (Mifflin-St Jeor) ولا يُستخدم لغير ذلك. */
+export type V2Gender = 'male' | 'female'
+
 /** Version stamp for the persisted v2 draft — a shape change bumps this and old drafts are ignored. */
-export const DRAFT_VERSION = 3
+export const DRAFT_VERSION = 4
 
 /** Full resumable state of the v2 onboarding flow. */
 export interface OnboardingV2Draft {
   step: number
+  /** بيانات الجسم — null قبل الإجابة (لا قيمة افتراضية صامتة). */
+  age: number | null
+  gender: V2Gender | null
+  heightCm: number | null
+  weightKg: number | null
   goal: V2GoalValue | null
   days: number
   duration: number
@@ -36,6 +53,11 @@ export interface OnboardingV2Draft {
   healthDataConsent: boolean
 }
 
+/** هل القيمة عدد صحيح داخل النطاق؟ */
+export function inRange(v: number | null, r: { min: number; max: number }): boolean {
+  return typeof v === 'number' && Number.isFinite(v) && v >= r.min && v <= r.max
+}
+
 /**
  * Resolve the first render's state synchronously. This prevents the persistence
  * effect from overwriting a saved draft with defaults before React applies an
@@ -44,6 +66,10 @@ export interface OnboardingV2Draft {
 export function initialDraftV2(userId?: string | null): OnboardingV2Draft {
   return loadDraftV2(userId) ?? {
     step: 0,
+    age: null,
+    gender: null,
+    heightCm: null,
+    weightKg: null,
     goal: null,
     days: 4,
     duration: 45,
@@ -61,7 +87,7 @@ interface PersistedDraft extends OnboardingV2Draft {
 }
 
 /** Which step-specific validation message to surface, or null when the step is complete. */
-export type StepValidation = 'goal' | 'healthConsent' | 'training' | 'equipment' | null
+export type StepValidation = 'body' | 'goal' | 'healthConsent' | 'training' | 'equipment' | null
 
 /** Async plan-assembly status driving the loading / error / done screens. */
 export type FinalizeStatus = 'idle' | 'building' | 'error' | 'done'
@@ -86,20 +112,36 @@ export function finalizeReduce(status: FinalizeStatus, action: FinalizeAction): 
   }
 }
 
-type Validatable = Pick<OnboardingV2Draft, 'goal' | 'days' | 'duration' | 'place' | 'pref' | 'healthDataConsent'>
+type Validatable = Pick<
+  OnboardingV2Draft,
+  'age' | 'gender' | 'heightCm' | 'weightKg' | 'goal' | 'days' | 'duration' | 'place' | 'pref' | 'healthDataConsent'
+>
+
+/** آخر خطوة قبل شاشة «خطتك جاهزة». */
+export const LAST_INPUT_STEP = 3
 
 /**
  * Validate one step. Returns the step's message key when incomplete, else null.
- * Step 0 needs a goal; step 2 needs place + preference; step 1 (training) is only
- * incomplete if a control was somehow left off its allowed value set.
+ *
+ * ترتيب الخطوات: 0 الجسد · 1 الهدف · 2 التدريب · 3 المعدّات · 4 جاهز.
+ * **الجسد أولًا وليس اعتباطًا**: حاجز القاصرين يقرأ العمر، وخطوة الهدف تمنع
+ * التنشيف/التضخيم للقاصر — فلو جاء الهدف قبل العمر لما عمل الحاجز إطلاقًا.
  */
 export function validateStep(step: number, d: Validatable): StepValidation {
   if (step === 0) {
-    if (!d.goal) return 'goal'
-    return d.healthDataConsent ? null : 'healthConsent'
+    // الموافقة الصحية **قبل** أي حقل — الإذن يسبق الجمع لا يليه. هذا ترتيب
+    // خصوصية مقصود يحرسه `test:policy`، لا مجرّد ترتيب واجهة.
+    if (!d.healthDataConsent) return 'healthConsent'
+    const ok =
+      inRange(d.age, AGE_RANGE) &&
+      (d.gender === 'male' || d.gender === 'female') &&
+      inRange(d.heightCm, HEIGHT_RANGE) &&
+      inRange(d.weightKg, WEIGHT_RANGE)
+    return ok ? null : 'body'
   }
-  if (step === 1) return DAYS.includes(d.days as (typeof DAYS)[number]) && DURATIONS.includes(d.duration as (typeof DURATIONS)[number]) ? null : 'training'
-  if (step === 2) return d.place && d.pref ? null : 'equipment'
+  if (step === 1) return d.goal ? null : 'goal'
+  if (step === 2) return DAYS.includes(d.days as (typeof DAYS)[number]) && DURATIONS.includes(d.duration as (typeof DURATIONS)[number]) ? null : 'training'
+  if (step === 3) return d.place && d.pref ? null : 'equipment'
   return null
 }
 
