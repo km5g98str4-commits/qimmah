@@ -5,7 +5,9 @@ import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
 import { useCustomization } from '@/lib/customizationContext'
 import { useAppScrollReset } from '@/lib/useAppScrollReset'
-import { foodItems, type FoodItem } from '@/data/foodItems'
+import { searchFood, type FoodItem } from '@/data/foodItems'
+import { nutritionScreenStrings } from '@/i18n/dict/nutritionScreen'
+import { servingSummary } from '@/lib/servingDisplay'
 import {
   addFoodToDay,
   addWaterToDay,
@@ -317,13 +319,19 @@ function FoodRow({ f, lang, onLog }: { f: FoodItem; lang: Lang; onLog: (servings
   const cal = Math.round(f.calories * servings)
   const pro = Math.round(f.protein * servings)
   const step = (d: number) => setServings((s) => Math.min(20, Math.max(0.5, Math.round((s + d) * 2) / 2)))
+  // تسمية الحصة: العربية تعرض التسمية الأصلية كما هي («صحن (350غ)»)، والإنجليزية تُشتق
+  // من الجرامات نفسها عبر servingDisplay («350 g · plate») — لا نصّ عربي في واجهة إنجليزية،
+  // ولا وحدة مخترعة: الجرام هو مصدر الحقيقة في الحالتين.
+  const servingText = ar
+    ? f.servingLabelAr
+    : servingSummary(f, lang, nutritionScreenStrings[lang].gramsUnit) ?? f.servingLabelAr
   return (
     <div className="rounded-2xl border border-line bg-surface px-4 py-3">
       <div className="flex items-center gap-3">
         <span className="min-w-0 flex-1">
           <span className="block text-sm font-bold">{ar ? f.nameAr : f.nameEn}</span>
           <span className="block text-xs text-ink-500">
-            ~{cal} {t('سعرة', 'kcal')} · {pro}g {t('بروتين', 'protein')} · {t('تقدير', 'est.')} / {f.servingLabelAr}
+            ~{cal} {t('سعرة', 'kcal')} · {pro}g {t('بروتين', 'protein')} · {t('تقدير', 'est.')} / {servingText}
           </span>
         </span>
         <button
@@ -397,10 +405,11 @@ function AddMeal({ lang, slot, onAdd, onBack }: { lang: Lang; slot: MealSlot; on
   const [highProtein, setHighProtein] = useState(false)
   const [scanning, setScanning] = useState(false)
   const slotLabel = SLOTS.find((s) => s.slot === slot)!
+  // البحث يمرّ عبر searchFood: تطبيع عربي (كبسة/كبسه) + الكلمات المفتاحية (المنطقة،
+  // الكتابات البديلة، الأسماء اللاتينية) + ترتيب بالصلة. مطابقة النص الخام كانت تُسقط
+  // كل ذلك: «كبسه» و«عسير» و«قهوه» كانت تُرجع صفر نتائج مع أنّ البيانات موجودة.
   const results = useMemo(() => {
-    let list = foodItems
-    const query = q.trim()
-    if (query) list = list.filter((f) => f.nameAr.includes(query) || f.nameEn.toLowerCase().includes(query.toLowerCase()))
+    let list = searchFood(q)
     if (highProtein) list = list.filter((f) => f.protein >= 15)
     return list.slice(0, 30)
   }, [q, highProtein])
