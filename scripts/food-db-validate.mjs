@@ -33,9 +33,13 @@ await build({
   logLevel: 'silent',
 })
 let foodItems
+let loanwordSpellings = []
 try {
   const mod = await import(pathToFileURL(outfile).href)
   foodItems = mod.foodItems
+  // مصدر واحد لمقابلات الكلمات الدخيلة: نقرأها من طبقة البيانات نفسها التي يستخدمها
+  // البحث، فلا تتباعد قائمة المُدقِّق عن قائمة `searchFood` أبدًا.
+  loanwordSpellings = mod.LOANWORD_SPELLINGS ?? []
 } finally {
   try { rmSync(outfile) } catch { /* ignore */ }
 }
@@ -109,6 +113,20 @@ const R2_KCAL_BOUNDS = {
   coffee: [0, 150],
   bakery: [150, 480],
 }
+
+// ————— إملاء الأسماء (NAME_SPELL) —————
+// كانت القاعدة تفرض إملاءً واحدًا («برجر» لا «برغر») لأن البحث كان يطابق النص حرفيًا،
+// فأي كتابة أخرى تعني صفر نتائج — أي أنّ الإملاء كان **شرط عثور**. بعد أن صار
+// `searchFood` يوحّد متغيّرات الكلمات الدخيلة عبر `LOANWORD_SPELLINGS`، لم يبقَ الإملاء
+// شرط عثور، فالقاعدة تنتقل من «فرض إملاء» إلى «قبول المتغيّرين لما في القائمة»:
+// كل زوج تُوحّده طبقة البحث يُستثنى، وما عداه يبقى صارمًا كما هو.
+const NAME_SPELL_RULES = [
+  { wrong: 'برغر', right: 'برجر' },
+]
+const isLoanwordVariant = (a, b) =>
+  loanwordSpellings.some((group) => group.includes(a) && group.includes(b))
+const nameSpellExempt = NAME_SPELL_RULES.filter((r) => isLoanwordVariant(r.wrong, r.right))
+const nameSpellActive = NAME_SPELL_RULES.filter((r) => !isLoanwordVariant(r.wrong, r.right))
 
 // ————— إعدادات الفحص —————
 const KCAL_TOL = 0.15 // ±15% لقاعدة 4/4/9
@@ -185,9 +203,11 @@ for (const item of foodItems) {
   if (/برغر/.test(lbl)) add('WARN', 'UNIT_SPELL', item.id, item.nameAr, `«برغر» غير قياسي — استخدم «برجر»: «${lbl}»`)
   if (/^نص\s/.test(lbl)) add('WARN', 'UNIT_MSA', item.id, item.nameAr, `«نص» عامّية — استخدم «نصف»: «${lbl}»`)
   if (/^\d+\s*(غ|مل)$/.test(lbl)) add('WARN', 'UNIT_BARE', item.id, item.nameAr, `وحدة مجرّدة بلا وصف «${lbl}» — استخدم «لكل Nغ» أو «حصة (Nغ)»`)
-  // تناسق التسمية (Cycle 5): إملاء «برجر» القياسي بدل «برغر».
+  // تناسق التسمية (Cycle 5، مُحدَّثة): صارمة لكل إملاء غير قياسي **لا** يوحّده البحث.
   const nameBlob = `${item.nameAr || ''} ${Array.isArray(item.keywords) ? item.keywords.join(' ') : ''}`
-  if (/برغر/.test(nameBlob)) add('WARN', 'NAME_SPELL', item.id, item.nameAr, '«برغر» غير قياسي — استخدم «برجر»')
+  for (const rule of nameSpellActive) {
+    if (nameBlob.includes(rule.wrong)) add('WARN', 'NAME_SPELL', item.id, item.nameAr, `«${rule.wrong}» غير قياسي — استخدم «${rule.right}»`)
+  }
   if (Array.isArray(item.sizes)) {
     for (const sz of item.sizes) checkMacros({ ...sz, servingGrams: sz.servingGrams }, `حجم:${sz.id || sz.labelAr || '?'}`)
   }
@@ -246,12 +266,19 @@ const warns = findings.filter((f) => f.level === 'WARN')
 const byCode = {}
 for (const f of findings) (byCode[f.code] ||= []).push(f)
 
+// إملاء الأسماء: نُصرّح بما يُطبَّق وما يُستثنى — الاستثناء المعلَن لا الصامت (§4).
+const nameSpellReport = {
+  active: nameSpellActive.map((r) => `${r.wrong}→${r.right}`),
+  exempt: nameSpellExempt.map((r) => `${r.wrong}≡${r.right}`),
+}
+
 if (JSON_OUT) {
-  console.log(JSON.stringify({ total: foodItems.length, saudi: saudiCount, gcc: gccCount, r2: r2Items.length, r2Estimated, r2Categories, r2RangeViolations, errors: errors.length, warnings: warns.length, byCode: Object.fromEntries(Object.entries(byCode).map(([k, v]) => [k, v.length])), findings }, null, 2))
+  console.log(JSON.stringify({ total: foodItems.length, saudi: saudiCount, gcc: gccCount, r2: r2Items.length, r2Estimated, r2Categories, r2RangeViolations, nameSpell: nameSpellReport, errors: errors.length, warnings: warns.length, byCode: Object.fromEntries(Object.entries(byCode).map(([k, v]) => [k, v.length])), findings }, null, 2))
 } else {
   console.log('════════ مُدقِّق قاعدة الأطعمة — قِمّة ════════')
   console.log(`الإجمالي: ${foodItems.length} صنفًا (منها ${saudiCount} طبقًا سعوديًا)`)
-  console.log(`أخطاء (ERROR): ${errors.length} · تحذيرات (WARN): ${warns.length}\n`)
+  console.log(`أخطاء (ERROR): ${errors.length} · تحذيرات (WARN): ${warns.length}`)
+  console.log(`إملاء الأسماء: ${nameSpellReport.active.length} قاعدة مطبَّقة · ${nameSpellReport.exempt.length} مستثناة بتوحيد البحث (${nameSpellReport.exempt.join('، ') || 'لا شيء'})\n`)
   const order = ['MISSING_STR', 'MISSING_NUM', 'NEGATIVE', 'BAD_FIBER', 'RANGE_MACRO', 'RANGE_SUM', 'RANGE_KCAL', 'DUP_ID', 'TRADEMARK', 'DIVERGE_KCAL', 'UNIT_SPELL', 'UNIT_MSA', 'UNIT_BARE', 'NAME_SPELL', 'KCAL_449', 'DUP_NAME_AR', 'DUP_NAME_EN', 'CATEGORY_KCAL_R2']
   for (const code of order) {
     const rows = byCode[code]
