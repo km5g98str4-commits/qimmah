@@ -20,6 +20,7 @@ import {
 import { buildWeeklyInsights } from '@/lib/insights'
 import { InsightCardsView } from '@/lib/insights/InsightCardsView'
 import { insightCopy } from '@/data/insightCopy'
+import { eCalcStrings } from '@/i18n/dict/eCalc'
 // Strength system (this feature) — e1RM series + dated PR log for the detail.
 import { getExercise } from '@/data/exercises'
 import { e1rmSeries, currentBests, prHistory, type StrengthPR } from '@/lib/strength'
@@ -59,11 +60,12 @@ export function ProgressV2({ lang, onNavigate }: ProgressV2Props) {
   const model = buildProgressV2Model(customization, lang)
   const insights = buildWeeklyInsights(ar ? 'ar' : 'en')
   const insightsCopy = insightCopy(ar ? 'ar' : 'en')
+  const calcCopy = eCalcStrings[lang]
   const [screen, setScreen] = useState<ProgressScreen>('home')
   useAppScrollReset(screen)
   const go = (r: AppRoute) => onNavigate?.(r)
 
-  if (screen === 'weight') return <WeightDetailScreen model={model.weight} lang={lang} onBack={() => setScreen('home')} onLog={() => setScreen('log')} stale={model.stale.show ? model.stale.detailText : null} />
+  if (screen === 'weight') return <WeightDetailScreen model={model.weight} lang={lang} onBack={() => setScreen('home')} onLog={() => setScreen('log')} onExplain={() => go('calc')} stale={model.stale.show ? model.stale.detailText : null} />
   if (screen === 'strength') return <StrengthDetailScreen strength={model.strength} lang={lang} onBack={() => setScreen('home')} onTrain={() => go('workout')} />
   if (screen === 'log') {
     return (
@@ -161,6 +163,22 @@ export function ProgressV2({ lang, onNavigate }: ProgressV2Props) {
             onClick={() => setScreen('strength')}
           />
         </section>
+
+        <button
+          type="button"
+          onClick={() => go('calc')}
+          data-testid="progress-calc-link"
+          className="press flex w-full items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3 text-start shadow-card"
+        >
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary-c">
+            <Icon name="Calculator" className="h-5 w-5" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-sm font-black text-ink-900">{calcCopy.progressLink}</span>
+            <span className="mt-0.5 block text-xs leading-relaxed text-ink-500">{calcCopy.progressLinkDetail}</span>
+          </span>
+          <Icon name="ChevronLeft" className="h-4 w-4 shrink-0 text-ink-400 rtl:rotate-0 ltr:rotate-180" />
+        </button>
 
         {/* Recovery entry (v1.1) — self-reported check-in + suggestion (screens 37–39). */}
         <button type="button" onClick={() => go('recovery')} className="press flex w-full items-center gap-3 rounded-2xl border bg-surface px-4 py-3 text-start" style={{ borderColor: 'var(--v2-teal)' }}>
@@ -315,9 +333,10 @@ function NeedsData({ text }: { text: string }) {
 
 // ── Weight detail ─────────────────────────────────────────────────────────────
 
-function WeightDetailScreen({ model, lang, onBack, onLog, stale }: { model: WeightDetail; lang: Lang; onBack: () => void; onLog: () => void; stale: string | null }) {
+function WeightDetailScreen({ model, lang, onBack, onLog, onExplain, stale }: { model: WeightDetail; lang: Lang; onBack: () => void; onLog: () => void; onExplain: () => void; stale: string | null }) {
   const ar = lang !== 'en'
   const t = (a: string, e: string) => (ar ? a : e)
+  const calcCopy = eCalcStrings[lang]
   const down = model.changeKg !== null && model.changeKg < 0
   const up = model.changeKg !== null && model.changeKg > 0
   return (
@@ -389,6 +408,15 @@ function WeightDetailScreen({ model, lang, onBack, onLog, stale }: { model: Weig
         )}
 
         <button type="button" onClick={onLog} className="btn-primary mt-4 w-full py-4 text-[1.1875rem]">{t('تسجيل وزن اليوم', 'Log today’s weight')}</button>
+        <button
+          type="button"
+          onClick={onExplain}
+          data-testid="weight-detail-calc-link"
+          className="btn-ghost mt-2 w-full justify-center py-3 text-sm"
+        >
+          <Icon name="Calculator" className="h-4 w-4" />
+          {calcCopy.progressLink}
+        </button>
       </div>
     </div>
   )
