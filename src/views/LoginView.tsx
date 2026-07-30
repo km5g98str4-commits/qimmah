@@ -3,6 +3,7 @@ import { Icon } from '@/components/Icon'
 import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
 import { miscStrings } from '@/i18n/dict/misc'
+import { authFlowStrings } from '@/i18n/dict/authFlow'
 import { useAuth } from '@/lib/authContext'
 import { evaluatePassword, PASSWORD_MIN_LENGTH } from '@/lib/passwordPolicy'
 import { track } from '@/lib/analytics'
@@ -28,6 +29,7 @@ type Mode = 'login' | 'signup' | 'forgot'
 export function LoginView({ lang, onSuccess, onBack, initialMode = 'login', onModeChange }: LoginViewProps) {
   const t = getStrings(lang)
   const d = miscStrings[lang]
+  const af = authFlowStrings[lang]
   const auth = useAuth()
   const [mode, setMode] = useState<Mode>(initialMode)
   const [name, setName] = useState('')
@@ -66,35 +68,47 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login', onMo
     setBusy(true)
     setMsg(null)
     setNotice(null)
-    if (isForgot) {
-      // استعادة كلمة المرور — رسالة عامة دائمًا (لا تكشف وجود الحساب). لا حدث تحليلات جديد.
-      const r = await auth.resetPassword(email)
-      setBusy(false)
-      if (r.ok) setNotice(t.auth.forgotSent)
-      else setMsg(r.error ?? t.auth.forgotFailed)
-      return
-    }
-    if (isSignup) {
-      track('signup_started', {})
-      const r = await auth.signUp(email, password, name)
-      setBusy(false)
-      if (!r.ok) {
-        setMsg(r.error ?? d.createFailed)
-      } else if (r.needsConfirmation) {
-        // تأكيد البريد مطلوب — نعرض تنبيهًا واضحًا ونعيد المستخدم لوضع الدخول.
-        track('signup_succeeded', { needsConfirmation: true })
-        setNotice(d.accountCreatedConfirm)
-        setMode('login')
-        onModeChange?.('login')
-      } else {
-        track('signup_succeeded', { needsConfirmation: false })
-        onSuccess()
+    // `finally` يضمن أنّ الزرّ لا يبقى دائرًا أبدًا. طبقة المصادقة صارت لا ترمي
+    // (guardedAuthCall) — وهذا خطّ دفاع ثانٍ: شاشة عالقة على «جارٍ…» بلا رسالة
+    // أسوأ من أي خطأ صريح، فلا نقبلها ولو من استثناء غير متوقّع.
+    try {
+      if (isForgot) {
+        // استعادة كلمة المرور — رسالة عامة دائمًا (لا تكشف وجود الحساب). لا حدث تحليلات جديد.
+        const r = await auth.resetPassword(email)
+        if (r.ok) setNotice(t.auth.forgotSent)
+        else setMsg(r.error ?? t.auth.forgotFailed)
+        return
       }
-    } else {
+      if (isSignup) {
+        track('signup_started', {})
+        const r = await auth.signUp(email, password, name)
+        if (!r.ok) {
+          setMsg(r.error ?? d.createFailed)
+        } else if (r.ambiguousExistingAccount) {
+          // الخادم يُخفي وجود البريد (منع تعداد الحسابات) فلا نعرف هل أُنشئ حساب.
+          // رسالة صادقة في الحالتين + طريق الدخول جاهز، ولا حدث «نجاح تسجيل» لم يثبت.
+          setNotice(af.emailMaybeRegistered)
+          setMode('login')
+          onModeChange?.('login')
+        } else if (r.needsConfirmation) {
+          // تأكيد البريد مطلوب — نعرض تنبيهًا واضحًا ونعيد المستخدم لوضع الدخول.
+          track('signup_succeeded', { needsConfirmation: true })
+          setNotice(d.accountCreatedConfirm)
+          setMode('login')
+          onModeChange?.('login')
+        } else {
+          track('signup_succeeded', { needsConfirmation: false })
+          onSuccess()
+        }
+        return
+      }
       const r = await auth.signIn(email, password)
-      setBusy(false)
       if (r.ok) onSuccess()
       else setMsg(r.error ?? d.loginFailed)
+    } catch {
+      setMsg(d.authGeneric)
+    } finally {
+      setBusy(false)
     }
   }
 
