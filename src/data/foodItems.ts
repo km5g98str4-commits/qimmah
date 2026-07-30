@@ -5670,19 +5670,70 @@ export function normalizeSearch(text: string): string {
 }
 
 /**
+ * مقابلات إملائية للكلمات الدخيلة — **قائمة مغلقة لا قاعدة عامّة**.
+ *
+ * لماذا قائمة: الأصوات الأجنبية (g، ch، تركيب sandwich) لا مقابل واحد لها في العربية،
+ * فينقلها الناس بإملاءين شائعين — «برجر/برغر»، «مانجو/مانغو». والإغراء هو تعميم
+ * القاعدة (كل «ج» تساوي «غ») — وهي **كارثة على القاعدة**: «لحم جمل» يتطابق مع «غمل»،
+ * و«جريش» مع «غريش»، ويصير كل بحث عربي أصيل مليئًا بنتائج لا علاقة لها به. فالتكافؤ
+ * يُمنح لكلمة مسمّاة بعينها، ولا يُشتق من حرف أبدًا.
+ *
+ * شروط إضافة زوج (الثلاثة معًا):
+ *   ١. الكلمة نقل صوتي لكلمة أجنبية، لا كلمة عربية أصيلة.
+ *   ٢. الإملاءان شائعان فعلًا في الكتابة السعودية.
+ *   ٣. الاستبدال لا يُنتج كلمة عربية أصيلة أخرى.
+ *
+ * الصيغة الأولى في كل مجموعة هي المعتمدة في البيانات، والباقي **مقبول في البحث فقط**
+ * (لا يغيّر أي نصّ معروض). المتغيّرات تُرتَّب الأطول أولًا كي لا يبتلع الأقصر الأطول.
+ */
+export const LOANWORD_SPELLINGS: readonly (readonly string[])[] = [
+  // burger — الإملاء في البيانات «برجر» (60 موضعًا)، و«برغر» كان يُرجع صفر نتائج.
+  ['برجر', 'برغر'],
+  // mango — البيانات «مانجو»، و«مانغو» شائعة بالقدر نفسه.
+  ['مانجو', 'مانغو'],
+  // nuggets — القاعدة نفسها تحمل الإملاءين («نجت دجاج» و«ناجتس دجاج»)، وكانا
+  // غير مرئيين لبعضهما في البحث. تُدرَج صيغة الجمع لأنها نفس الكلمة لا كلمة أخرى.
+  ['نجت', 'ناجتس', 'نجتس', 'ناجت'],
+  // sandwich — البيانات «ساندويتش» (36 موضعًا)، والصيغ الأخرى شائعة في الكتابة اليومية.
+  ['ساندويتش', 'سندويتش', 'ساندوتش', 'سندوتش', 'سندويش'],
+  // broccoli — البيانات «بروكلي»، و«بروكولي» شائعة.
+  ['بروكلي', 'بروكولي'],
+]
+
+// خريطة مطبَّعة مسبقًا: [متغيّر → الصيغة المعتمدة]، مرتّبة بطول المتغيّر تنازليًا.
+const LOANWORD_REPLACEMENTS: readonly (readonly [string, string])[] = LOANWORD_SPELLINGS
+  .flatMap(([canonical, ...variants]) =>
+    variants.map((v) => [normalizeSearch(v), normalizeSearch(canonical)] as const),
+  )
+  .sort((a, b) => b[0].length - a[0].length)
+
+/**
+ * يوحّد إملاء الكلمات الدخيلة داخل نصّ **مطبَّع مسبقًا** إلى الصيغة المعتمدة.
+ * يُطبَّق في `searchFood` وحدها على الاستعلام وعلى نصوص العنصر معًا — لا داخل
+ * `normalizeSearch` كي يبقى التطبيع العربي العام نقيًّا وقابلًا للاستخدام في مواضع أخرى.
+ */
+function canonicalizeLoanwords(normalized: string): string {
+  let out = normalized
+  for (const [variant, canonical] of LOANWORD_REPLACEMENTS) {
+    if (out.includes(variant)) out = out.split(variant).join(canonical)
+  }
+  return out
+}
+
+/**
  * بحث في قاعدة الأطعمة — عربي أولًا، يتحمّل الأخطاء الإملائية الشائعة والمرادفات
- * (عبر التطبيع + الكلمات المفتاحية اللاتينية). النتائج مرتّبة: تطابق تام → بادئة → تضمين،
- * مع أولوية الاسم العربي ثم الإنجليزي ثم الكلمات المفتاحية.
+ * (عبر التطبيع + مقابلات الكلمات الدخيلة + الكلمات المفتاحية اللاتينية). النتائج مرتّبة:
+ * تطابق تام → بادئة → تضمين، مع أولوية الاسم العربي ثم الإنجليزي ثم الكلمات المفتاحية.
  */
 export function searchFood(query: string): FoodItem[] {
-  const q = normalizeSearch(query)
+  const q = canonicalizeLoanwords(normalizeSearch(query))
   if (!q) return foodItems
 
   const scored: { item: FoodItem; score: number }[] = []
   for (const f of foodItems) {
-    const ar = normalizeSearch(f.nameAr)
-    const en = normalizeSearch(f.nameEn)
-    const kws = (f.keywords ?? []).map(normalizeSearch)
+    const ar = canonicalizeLoanwords(normalizeSearch(f.nameAr))
+    const en = canonicalizeLoanwords(normalizeSearch(f.nameEn))
+    const kws = (f.keywords ?? []).map((k) => canonicalizeLoanwords(normalizeSearch(k)))
 
     let score = Infinity
     if (ar === q) score = 0
