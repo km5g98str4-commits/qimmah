@@ -5,10 +5,14 @@
 // محاولات كثيرة…) وهي تغطّي الأخطاء التي يُجيب بها الخادم. ما هنا يغطّي الحالات التي
 // **لا جواب فيها من الخادم أصلًا**: لا اتصال، أو اتصال بلا رد، أو ردّ لا نعرف معناه.
 //
-// النبرة (§6): فصحى دافئة. المبدأ الحاكم هو الصدق قبل الطمأنينة:
-//   • حين لا نعرف هل اكتملت العملية، **نقول ذلك صراحةً** ونعطي الخطوة التالية.
+// النبرة (§6): **عامية بيضاء** — سعودية/خليجية دافئة يفهمها كل عربي، لا عامية
+// غميقة ولا فصحى كتب. والإنجليزية غير رسمية ودودة. المبدأ الحاكم هو الصدق قبل
+// الطمأنينة:
+//   • حين لا نعرف هل اكتملت العملية، **نقولها صريحة** ونعطي الخطوة التالية.
 //   • لا لوم على المستخدم ولا على شبكته، ولا تهويل، ولا تعجّب مكدّس.
-//   • حين يكون العطل من جهتنا نصرّح به بدل تحميله على المستخدم.
+//   • حين يكون العطل من جهتنا نصرّح به بدل ما نحمّله على المستخدم.
+//   • اللغة المتحفّظة للمُستنتَج باقية («يبدو» · «ما نعرف») — الانقلاب في النبرة
+//     لا في الصدق.
 
 import type { Lang } from '@/lib/appPreferences'
 
@@ -38,29 +42,29 @@ export interface AuthFlowStrings {
 }
 
 const ar: AuthFlowStrings = {
-  offline: 'يبدو أن الجهاز غير متصل بالإنترنت. أعد المحاولة بعد عودة الاتصال.',
+  offline: 'يبدو ما فيه اتصال بالنت. جرّب مرة ثانية لمّا يرجع.',
   timeoutSignUp:
-    'استغرق الاتصال وقتًا أطول من المعتاد، ولا نعرف إن اكتمل إنشاء الحساب. جرّب تسجيل الدخول أولًا، وإن لم ينجح فأعد إنشاء الحساب.',
-  timeoutSignIn: 'استغرق الاتصال وقتًا أطول من المعتاد ولم يكتمل تسجيل الدخول. تحقّق من اتصالك وأعد المحاولة.',
-  timeoutGeneric: 'استغرق الاتصال وقتًا أطول من المعتاد ولم تكتمل العملية. تحقّق من اتصالك وأعد المحاولة.',
-  serverDown: 'الخادم لا يستجيب الآن، والعطل من جهتنا. أعد المحاولة بعد قليل.',
-  samePassword: 'كلمة المرور الجديدة مماثلة للسابقة. اختر كلمة مرور مختلفة.',
-  signupDisabled: 'إنشاء الحسابات موقوف مؤقتًا.',
+    'الاتصال طوّل أكثر من العادة، وما نعرف إذا الحساب انفتح ولا لا. جرّب تسجّل دخولك أول، وإذا ما ضبط افتح الحساب من جديد.',
+  timeoutSignIn: 'الاتصال طوّل أكثر من العادة وما اكتمل تسجيل الدخول. شيّك على اتصالك وجرّب مرة ثانية.',
+  timeoutGeneric: 'الاتصال طوّل أكثر من العادة وما اكتملت العملية. شيّك على اتصالك وجرّب مرة ثانية.',
+  serverDown: 'الخادم ما يستجيب الحين، والخلل من عندنا. جرّب بعد شوي.',
+  samePassword: 'كلمة المرور الجديدة نفس القديمة. اختر وحدة غيرها.',
+  signupDisabled: 'فتح الحسابات موقوف مؤقتًا.',
   emailMaybeRegistered:
-    'إن كان هذا البريد جديدًا فرسالة التأكيد في طريقها إليه. وإن كان لك حساب به من قبل فسجّل الدخول من هنا، أو استعد كلمة المرور.',
+    'إذا هذا البريد جديد فرسالة التأكيد في طريقها له. وإذا لك حساب فيه من قبل، سجّل دخولك من هنا أو استعد كلمة المرور.',
 }
 
 const en: AuthFlowStrings = {
-  offline: 'Your device appears to be offline. Try again once the connection is back.',
+  offline: "Looks like you're offline. Give it another go once you're back.",
   timeoutSignUp:
-    "The connection took longer than usual, and we can't tell whether the account was created. Try signing in first; if that doesn't work, create the account again.",
-  timeoutSignIn: "The connection took longer than usual and sign-in did not complete. Check your connection and try again.",
-  timeoutGeneric: "The connection took longer than usual and the request did not complete. Check your connection and try again.",
-  serverDown: 'The server is not responding right now, and the fault is on our side. Try again shortly.',
-  samePassword: 'The new password matches your previous one. Choose a different password.',
-  signupDisabled: 'New account creation is paused for now.',
+    "That took longer than usual, and we can't tell if the account went through. Try signing in first — if that doesn't work, just create it again.",
+  timeoutSignIn: "That took longer than usual and sign-in didn't go through. Check your connection and give it another go.",
+  timeoutGeneric: "That took longer than usual and it didn't go through. Check your connection and give it another go.",
+  serverDown: "Our server isn't responding right now — that one's on us. Try again in a bit.",
+  samePassword: "That's the same password as before. Pick a different one.",
+  signupDisabled: 'New sign-ups are paused for now.',
   emailMaybeRegistered:
-    'If this email is new, a confirmation message is on its way to it. If you already have an account with it, sign in here or reset your password.',
+    "If this email is new, a confirmation is on its way. If you already have an account with it, sign in here or reset your password.",
 }
 
 export const authFlowStrings: Record<Lang, AuthFlowStrings> = { ar, en }
