@@ -10,6 +10,9 @@ import { useCustomization } from '@/lib/customizationContext'
 // the v2 rest timer on `endsAt`/`durationSec` (not a decrementing counter) keeps
 // it correct after the app returns from the background, exactly like WorkoutMode.
 import { restIsFinished, restRemainingSec, type RestSnapshot } from '@/lib/activeSession'
+// ح-١ · resume-offer helpers (pure) + this lane's dictionary.
+import { isFreshEnough, summarizeSession, writeActiveSession, type ResumeWriteResult } from '@/lib/workoutResume'
+import { workoutResumeStrings } from '@/i18n/dict/h-workout-resume'
 import { buildWorkoutV2Model, substituteWorkoutExercise, CATEGORY_LABEL, type ExCategory, type WorkoutV2Exercise } from '@/lib/workoutV2Model'
 // Screen 31 — equipment-aware substitution engine (pure). Screen 27 — one-handed
 // reach preference. Both feed the active session; neither writes the plan/history.
@@ -201,6 +204,13 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   }, [screen])
   const [detailIdx, setDetailIdx] = useState(0)
   const [active, setActive] = useState<ActiveState | null>(null)
+  // ح-١ · A restorable session found at mount, waiting for the user's answer.
+  // It is NOT `active` yet: nothing resumes until "نكمّل" is pressed.
+  const [resumeOffer, setResumeOffer] = useState<ActiveState | null>(null)
+  // Guard on the destructive "start fresh" answer (deletes logged sets).
+  const [resumeDiscardAsk, setResumeDiscardAsk] = useState(false)
+  // Honest save state: the reason of the last failed write, or null when saved.
+  const [saveFailure, setSaveFailure] = useState<Extract<ResumeWriteResult, { ok: false }>['reason'] | null>(null)
   // Display clock for the timestamp-based rest timer (ticks only while resting).
   const [now, setNow] = useState(() => Date.now())
   // Strength UI: owner-scoped plate config + warm-up pref, per-set plate panel,
@@ -254,9 +264,10 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
     setHydrationNow(Date.now())
   }, [active?.startedAt])
 
-  // Restore an in-progress session on mount — but NEVER trust localStorage.
-  // Only resume if the persisted session is fully usable for the current plan;
-  // otherwise discard just our own key and stay safely on the Plan screen.
+  // ح-١ · Restore an in-progress session on mount — but NEVER trust localStorage,
+  // and never resume SILENTLY. A usable + fresh snapshot is held aside and offered
+  // ("عندك تمرين مفتوح — نكمّل؟"); the user decides. Anything unusable or stale is
+  // discarded (our key only) and we stay safely on the Plan screen.
   useEffect(() => {
     let parsed: unknown = null
     try {
@@ -266,10 +277,9 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
     } catch {
       parsed = null // malformed JSON
     }
-    if (isUsableSession(parsed, model.exercises)) {
-      setActive(parsed)
+    if (isUsableSession(parsed, model.exercises) && isFreshEnough(parsed, Date.now())) {
+      setResumeOffer(parsed)
       setNow(Date.now())
-      setScreen('active')
     } else {
       try {
         localStorage.removeItem(ownerActiveKey)
@@ -296,12 +306,18 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   }, [screen, active, model.exercises, ownerActiveKey])
 
   // Persist active session (rest timestamps included → refresh resumes the rest).
+  // ح-١ · The write result is no longer swallowed: a failed write raises an honest
+  // banner ("لم يُحفظ آخر تغيير — جولاتك السابقة سليمة") instead of pretending the
+  // session is safe on disk. A later successful write clears it.
   useEffect(() => {
-    try {
-      if (active) localStorage.setItem(ownerActiveKey, JSON.stringify(active))
-    } catch {
-      /* storage full / unavailable — session stays in memory */
-    }
+    if (!active) return
+    const res = writeActiveSession(
+      typeof window === 'undefined' ? null : window.localStorage,
+      ownerActiveKey,
+      active,
+      Date.now(),
+    )
+    setSaveFailure(res.ok ? null : res.reason)
   }, [active, ownerActiveKey])
 
   const resting = active?.rest != null
@@ -478,7 +494,45 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   // Guarded discard — the destructive close commits only after confirmation.
   const discardWorkout = () => { setConfirmDiscard(false); clearActive(); setPreSubs({}); onNavigate('dashboard') }
 
-  const planScreen = <PlanScreen model={model} lang={lang} onExercise={(i) => { setDetailIdx(i); setScreen('detail') }} onStart={startSession} onBack={() => onNavigate('dashboard')} />
+  // ح-١ · Answer the resume offer. "نكمّل" promotes the held snapshot to the live
+  // session; "أبدأ من جديد" only deletes after an explicit confirmation.
+  const acceptResume = () => {
+    if (!resumeOffer) return
+    setActive(resumeOffer)
+    setResumeOffer(null)
+    setNow(Date.now())
+    setScreen('active')
+  }
+  const rejectResume = () => {
+    setResumeDiscardAsk(false)
+    setResumeOffer(null)
+    try {
+      localStorage.removeItem(ownerActiveKey)
+    } catch {
+      /* storage unavailable */
+    }
+  }
+
+  const resumeSheet = resumeOffer ? (
+    <ResumeSheet
+      lang={lang}
+      session={resumeOffer}
+      exercises={model.exercises}
+      now={now}
+      askDiscard={resumeDiscardAsk}
+      onResume={acceptResume}
+      onAskDiscard={() => setResumeDiscardAsk(true)}
+      onCancelDiscard={() => setResumeDiscardAsk(false)}
+      onDiscard={rejectResume}
+    />
+  ) : null
+
+  const planScreen = (
+    <>
+      <PlanScreen model={model} lang={lang} onExercise={(i) => { setDetailIdx(i); setScreen('detail') }} onStart={startSession} onBack={() => onNavigate('dashboard')} />
+      {resumeSheet}
+    </>
+  )
   if (screen === 'plan') return planScreen
   if (screen === 'detail') {
     const base = model.exercises[detailIdx]
@@ -726,6 +780,18 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
 
       {/* تجاهل التمرين؟ — guarded destructive close (screen 27). */}
       {confirmDiscard && <DiscardConfirmSheet lang={lang} onDiscard={discardWorkout} onCancel={() => setConfirmDiscard(false)} />}
+
+      {/* ح-١ · Honest save banner: the session could not be written to this device.
+          It states plainly that earlier sets are safe — no false reassurance, and
+          no silent failure that only surfaces as lost work after an app kill. */}
+      {saveFailure && (
+        <div role="status" aria-live="polite" className="fixed inset-x-0 bottom-0 z-[70] px-4" style={{ paddingBottom: 'calc(0.75rem + var(--safe-bottom))' }}>
+          <div dir={ar ? 'rtl' : 'ltr'} className="mx-auto flex w-full max-w-md items-start gap-2 rounded-2xl px-4 py-3 text-sm font-bold" style={{ background: FOCUS.card, border: `1px solid ${FOCUS.error}`, color: FOCUS.ink }}>
+            <Icon name="AlertTriangle" className="mt-0.5 h-4 w-4 shrink-0" style={{ color: FOCUS.error }} />
+            <span>{saveFailure === 'quota' ? workoutResumeStrings[lang].saveFailedQuota : workoutResumeStrings[lang].saveFailedGeneric}</span>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -1171,6 +1237,68 @@ function UndoSubToast({ lang, toName, onUndo, onClose }: { lang: Lang; toName: s
 }
 
 /** تجاهل التمرين؟ — confirm before the destructive close discards the session. */
+/**
+ * ح-١ · The resume offer (P0). Shown on the Plan screen when a fresh, usable
+ * session is found at mount: it states exactly what will be resumed — sets
+ * LOGGED (measured, not estimated), where you stopped, and the rest left — then
+ * asks. Nothing resumes and nothing is deleted without an explicit answer.
+ */
+function ResumeSheet({
+  lang, session, exercises, now, askDiscard, onResume, onAskDiscard, onCancelDiscard, onDiscard,
+}: {
+  lang: Lang
+  session: ActiveState
+  exercises: WorkoutV2Exercise[]
+  now: number
+  askDiscard: boolean
+  onResume: () => void
+  onAskDiscard: () => void
+  onCancelDiscard: () => void
+  onDiscard: () => void
+}) {
+  const ar = lang !== 'en'
+  const d = workoutResumeStrings[lang]
+  const s = summarizeSession(session, exercises.map((e) => e.id), now)
+  const num = (n: number) => toAr(n, lang)
+  const stoppedName = exercises[s.exIndex] ? (ar ? exercises[s.exIndex].nameAr : exercises[s.exIndex].nameEn) : ''
+  const ageLine = s.ageMinutes >= 60 ? d.ageOverAnHour : d.ageMinutes(num(s.ageMinutes))
+
+  if (askDiscard) {
+    return (
+      <div className="fixed inset-0 z-[80] flex items-end justify-center" role="dialog" aria-modal="true" aria-label={d.discardConfirmTitle}>
+        <button type="button" aria-label={d.discardConfirmNo} onClick={onCancelDiscard} className="absolute inset-0 h-full w-full" style={{ background: 'rgba(0,0,0,0.55)' }} />
+        <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-dark v2-screen-enter relative w-full max-w-md rounded-t-3xl px-6 pb-8 pt-5 text-ink-900" style={{ background: FOCUS.card, borderTop: `1px solid ${FOCUS.line}`, paddingBottom: 'calc(2rem + var(--safe-bottom))' }}>
+          <div className="mx-auto mb-4 h-1 w-10 rounded-full" style={{ background: FOCUS.line }} />
+          <h2 className="text-2xl font-black">{d.discardConfirmTitle}</h2>
+          <p className="mt-1 text-sm" style={{ color: FOCUS.inkMuted }}>{d.discardConfirmBody(num(s.loggedSets))}</p>
+          <button type="button" onClick={onDiscard} className="v2-pressable mt-5 w-full rounded-2xl py-4 text-[1.1875rem] font-black" style={{ background: FOCUS.error, color: FOCUS.onColor }}>{d.discardConfirmYes}</button>
+          <button type="button" onClick={onCancelDiscard} className="v2-pressable mt-3 w-full rounded-2xl py-3 text-sm font-bold" style={{ background: 'transparent', border: `1px solid ${FOCUS.line}`, color: FOCUS.inkMuted }}>{d.discardConfirmNo}</button>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="fixed inset-0 z-[80] flex items-end justify-center" role="dialog" aria-modal="true" aria-label={d.sheetAria}>
+      <div className="absolute inset-0 h-full w-full" style={{ background: 'rgba(0,0,0,0.55)' }} />
+      <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-dark v2-screen-enter relative w-full max-w-md rounded-t-3xl px-6 pb-8 pt-5 text-ink-900" style={{ background: FOCUS.card, borderTop: `1px solid ${FOCUS.line}`, paddingBottom: 'calc(2rem + var(--safe-bottom))' }}>
+        <div className="mx-auto mb-4 h-1 w-10 rounded-full" style={{ background: FOCUS.line }} />
+        <h2 className="text-2xl font-black">{d.title}</h2>
+        <p className="mt-1 text-sm" style={{ color: FOCUS.inkMuted }}>{d.subtitle}</p>
+        <ul className="mt-4 space-y-2 text-sm font-bold">
+          <li className="flex items-center gap-2"><Icon name="CheckCircle2" className="h-4 w-4 shrink-0" style={{ color: FOCUS.ember }} /><span>{d.loggedSets(num(s.loggedSets))}</span></li>
+          {stoppedName && <li className="flex items-center gap-2"><Icon name="Dumbbell" className="h-4 w-4 shrink-0" style={{ color: FOCUS.ember }} /><span>{d.stoppedAt(stoppedName)}</span></li>}
+          <li className="flex items-center gap-2"><Icon name="ListChecks" className="h-4 w-4 shrink-0" style={{ color: FOCUS.ember }} /><span>{d.nextSet(num(s.nextSetNumber))}</span></li>
+          {s.restLeftSec > 0 && <li className="flex items-center gap-2"><Icon name="Timer" className="h-4 w-4 shrink-0" style={{ color: FOCUS.ember }} /><span>{d.restLeft(fmtTime(s.restLeftSec))}</span></li>}
+        </ul>
+        <p className="mt-3 text-xs" style={{ color: FOCUS.inkMuted }}>{ageLine}</p>
+        <button type="button" onClick={onResume} className="v2-pressable mt-5 w-full rounded-2xl py-4 text-[1.1875rem] font-black" style={{ background: FOCUS.ember, color: FOCUS.onColor }}>{d.resume}</button>
+        <button type="button" onClick={onAskDiscard} className="v2-pressable mt-3 w-full rounded-2xl py-3 text-sm font-bold" style={{ background: 'transparent', border: `1px solid ${FOCUS.line}`, color: FOCUS.inkMuted }}>{d.discard}</button>
+      </div>
+    </div>
+  )
+}
+
 function DiscardConfirmSheet({ lang, onDiscard, onCancel }: { lang: Lang; onDiscard: () => void; onCancel: () => void }) {
   const ar = lang !== 'en'
   return (
