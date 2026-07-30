@@ -11,6 +11,8 @@ export type AppRoute =
   | 'exercises'
   | 'nutrition'
   | 'progress'
+  // صفحة الخطوات المستقلة — مدخلها من التقدّم، وليست تبويبًا رئيسيًا.
+  | 'steps'
   | 'profile'
   // صفحة «كيف نحسب أرقامك؟» — مدخلها من تبويب حسابي، ليست تبويبًا رئيسيًا.
   | 'calc'
@@ -38,6 +40,7 @@ const ROUTES: AppRoute[] = [
   'exercises',
   'nutrition',
   'progress',
+  'steps',
   'profile',
   'calc',
   'recovery',
