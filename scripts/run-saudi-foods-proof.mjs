@@ -18,6 +18,7 @@
 //   node scripts/run-saudi-foods-proof.mjs
 
 import { build } from 'esbuild'
+import { spawnSync } from 'node:child_process'
 import { readFileSync, rmSync } from 'node:fs'
 import { pathToFileURL } from 'node:url'
 import { resolve } from 'node:path'
@@ -37,7 +38,7 @@ const outfile = resolve(root, 'scripts/.saudi-foods-proof.bundle.mjs')
 await build({
   stdin: {
     contents: `
-      export { foodItems, searchFood, normalizeSearch } from '@/data/foodItems'
+      export { foodItems, searchFood, normalizeSearch, LOANWORD_SPELLINGS } from '@/data/foodItems'
       export { servingSummary } from '@/lib/servingDisplay'
     `,
     resolveDir: root,
@@ -57,7 +58,7 @@ try {
 } finally {
   try { rmSync(outfile) } catch { /* ignore */ }
 }
-const { foodItems, searchFood, normalizeSearch, servingSummary } = mod
+const { foodItems, searchFood, normalizeSearch, LOANWORD_SPELLINGS, servingSummary } = mod
 
 const saudi = foodItems.filter((f) => typeof f.id === 'string' && f.id.startsWith('sfct-'))
 const ARABIC = /[؀-ۿ]/
@@ -116,13 +117,59 @@ check('«هارديس» (كتابة بديلة في الكلمات المفتا�
 check('بحث فارغ يُرجع القاعدة كاملة', searchFood('').length === foodItems.length, `${searchFood('').length}`)
 check('«كبسة» تُصدَّر بمطابقة عربية لا إنجليزية (ترتيب بالصلة)', ARABIC.test(searchFood('كبسة')[0]?.nameAr ?? '') && searchFood('كبسة')[0].nameAr.includes('كبسة'), searchFood('كبسة')[0]?.nameAr)
 
-console.log('\n═══ 5) التوصيل: الشاشة تستخدم البحث فعلًا ═══')
+console.log('\n═══ 5) الكلمات الدخيلة: تكافؤ بقائمة مسمّاة لا بقاعدة حرف ═══')
+// حارس أوّل: غياب القائمة نفسها يجب أن يسقط بفحص **مسمّى**، لا باستثناء تشغيل غامض.
+check('طبقة البيانات تُصدّر قائمة المقابلات LOANWORD_SPELLINGS', Array.isArray(LOANWORD_SPELLINGS) && LOANWORD_SPELLINGS.length > 0, `${Array.isArray(LOANWORD_SPELLINGS) ? `${LOANWORD_SPELLINGS.length} مجموعات` : 'غير مُصدَّرة'}`)
+// كل متغيّر في المجموعة يجب أن يُرجع **النتائج نفسها بأعيانها** لا مجرّد عدد مشابه.
+for (const group of LOANWORD_SPELLINGS) {
+  const [canonical] = group
+  const canonicalIds = searchFood(canonical).map((f) => f.id).join(',')
+  check(`«${canonical}» تُرجع نتائج فعلية`, searchFood(canonical).length > 0, `${searchFood(canonical).length}`)
+  for (const variant of group.slice(1)) {
+    check(`«${variant}» = «${canonical}» (النتائج نفسها بأعيانها)`, searchFood(variant).map((f) => f.id).join(',') === canonicalIds, `${searchFood(variant).length} نتيجة`)
+  }
+}
+// الحالة التي فتحت الموجة: «برغر» كانت صفرًا والبيانات تحمل «برجر» في 60 موضعًا.
+check('«برغر» و«برجر» تُرجعان النتائج نفسها وعددها > 0', searchFood('برغر').length > 0 && searchFood('برغر').map((f) => f.id).join(',') === searchFood('برجر').map((f) => f.id).join(','), `${searchFood('برغر').length} نتيجة`)
+
+// ————— التأكيد المضادّ: القيد نفسه محروس —————
+// لو استُبدلت القائمة يومًا بقاعدة عامّة «ج ≡ غ» لمرّت الفحوص أعلاه كلها وسقطت هذه:
+// «جمل» ليست «غمل»، و«برغل» ليست «برجل» (وهي ألصق ما تكون بـ«برجر/برغر»).
+const NATIVE_PAIRS = [
+  ['جمل', 'غمل'], // لحم جمل — كلمة عربية أصيلة
+  ['جريش', 'غريش'], // طبق سعودي
+  ['دجاج', 'دغاغ'],
+  ['جبن', 'غبن'],
+  ['غنم', 'جنم'], // الاتجاه المعاكس: غ أصيلة لا تصير ج
+  ['برغل', 'برجل'], // جار «برجر» حرفيًا — ومع ذلك لا تكافؤ
+]
+for (const [native, flipped] of NATIVE_PAIRS) {
+  check(`«${native}» موجودة في القاعدة (المثال حقيقي لا افتراضي)`, searchFood(native).length > 0, `${searchFood(native).length}`)
+  check(`«${flipped}» لا تُطابق «${native}» — لا تعميم ج↔غ`, searchFood(flipped).length === 0, `${searchFood(flipped).length} نتيجة`)
+}
+
+// انضباط القائمة نفسها: مغلقة، ومسنودة بالبيانات، وبلا تعارض داخلي.
+check('القائمة مغلقة وصغيرة (≤ 12 مجموعة)', LOANWORD_SPELLINGS.length <= 12, `${LOANWORD_SPELLINGS.length} مجموعات`)
+const ungrounded = LOANWORD_SPELLINGS.filter(([canonical]) => !foodItems.some((f) => `${f.nameAr} ${f.servingLabelAr} ${(f.keywords ?? []).join(' ')}`.includes(canonical)))
+check('كل صيغة معتمدة موجودة فعلًا في البيانات (لا مدخلات تخمينية)', ungrounded.length === 0, ungrounded.map((g) => g[0]).join(',') || `${LOANWORD_SPELLINGS.length}/${LOANWORD_SPELLINGS.length}`)
+const allForms = LOANWORD_SPELLINGS.flat()
+check('لا صيغة مكرّرة بين المجموعات', new Set(allForms).size === allForms.length)
+
+// قاعدة المُدقِّق NAME_SPELL: تقبل المتغيّرين لما توحّده طبقة البحث، وتبقى صارمة لما عداه.
+// نُثبتها بتشغيل المُدقِّق فعلًا لا بقراءة مصدره — الاستثناء معلَن في مخرجاته.
+const validator = spawnSync(process.execPath, [resolve(root, 'scripts/food-db-validate.mjs'), '--json'], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 })
+const report = JSON.parse(validator.stdout)
+check('المُدقِّق يستثني «برغر≡برجر» صراحةً (استثناء معلَن لا صامت)', (report.nameSpell?.exempt ?? []).includes('برغر≡برجر'), JSON.stringify(report.nameSpell))
+check('لا انحدار: NAME_SPELL ما زالت صفرًا', (report.byCode?.NAME_SPELL ?? 0) === 0, `${report.byCode?.NAME_SPELL ?? 0}`)
+check('لا انحدار: أخطاء المُدقِّق ما زالت صفرًا', report.errors === 0, `errors=${report.errors}`)
+
+console.log('\n═══ 6) التوصيل: الشاشة تستخدم البحث فعلًا ═══')
 const view = read('src/views/NutritionV2.tsx')
 check('شاشة التغذية تستورد searchFood', /import \{[^}]*\bsearchFood\b[^}]*\} from '@\/data\/foodItems'/.test(view))
 check('شاشة التغذية تستدعيه على نصّ البحث', /searchFood\(q\)/.test(view))
 check('لا رجوع للمطابقة الخام في الشاشة', !/nameAr\.includes\(query\)/.test(view))
 
-console.log('\n═══ 6) صدق عرض الحصة في الواجهة الإنجليزية ═══')
+console.log('\n═══ 7) صدق عرض الحصة في الواجهة الإنجليزية ═══')
 check('الشاشة لا تعرض servingLabelAr مباشرة في JSX', !/\{f\.servingLabelAr\}/.test(view))
 check('الشاشة تشتقّ تسمية إنجليزية عبر servingSummary', /servingSummary\(f, lang,/.test(view))
 check('وحدة الجرام من قاموس شاشة التغذية لا نصًّا صلبًا', /nutritionScreenStrings\[lang\]\.gramsUnit/.test(view))
