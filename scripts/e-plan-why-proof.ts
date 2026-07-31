@@ -14,6 +14,7 @@ import { resolve } from 'node:path'
 import { defaultProfile } from '@/lib/calculators'
 import { generatePlan } from '@/lib/planGenerator'
 import { buildPlanRationale } from '@/lib/planRationale'
+import { defaultOnboardingProfile, toLegacyProfile } from '@/lib/onboardingProfile'
 import { PlanWhyPanel } from '@/components/plan/PlanWhyPanel'
 import { ePlanStrings } from '@/i18n/dict/ePlan'
 import type { EPlanStrings } from '@/i18n/dict/ePlan'
@@ -177,6 +178,27 @@ check('past performance is named on screen', en.includes(ePlanStrings.en.axisLab
 check('the neutral reason is stated, not implied', en.includes(ePlanStrings.en.axisReasons.fieldNotCollected))
 check('the same is true in Arabic', ar.includes(ePlanStrings.ar.axisLabels.trainingFocus) && ar.includes(ePlanStrings.ar.axisReasons.fieldNotCollected))
 check('no line claims a focus was applied', !en.toLowerCase().includes('hypertrophy-focused') && !ar.includes('خصّصنا حسب تركيز التدريب'))
+
+console.log('\n═══ 4b) A PINNED FIELD IS NEVER PHRASED AS THE USER’S ANSWER ═══')
+// الملف هنا يمرّ عبر جسر الإعداد الحقيقي، أي ما يراه مستخدم التطبيق فعلًا.
+const bridged = toLegacyProfile({
+  ...defaultOnboardingProfile(),
+  profile: { age: 27, sex: 'male' },
+  bodyMetrics: { heightCm: 178, currentWeightKg: 82 },
+  goal: { type: 'bulk' },
+  trainingPreferences: { daysPerWeek: 5, sessionDurationMin: 60, experience: 'intermediate', environment: 'commercial_gym', consistency: 'consistent' },
+})
+const bridgedRationale = buildPlanRationale(bridged, generatePlan(bridged))
+const bridgedAr = renderToStaticMarkup(h(PlanWhyPanel, { lang: 'ar', rationale: bridgedRationale }))
+const bridgedEn = renderToStaticMarkup(h(PlanWhyPanel, { lang: 'en', rationale: bridgedRationale }))
+
+check('the screen never says «تركيزك» for a bridge-built profile', !bridgedAr.includes('تركيزك'))
+check('the screen never says “your focus” for a bridge-built profile', !bridgedEn.includes('your focus'))
+check('no muscle-focus decision row is drawn', !bridgedAr.includes(ePlanStrings.ar.areaLabels.muscleFocus))
+check('the axis is named in the “not personalised yet” section instead', bridgedAr.includes(ePlanStrings.ar.axisLabels.muscleFocus))
+check('its honest reason is stated', bridgedAr.includes(ePlanStrings.ar.axisReasons.pinnedByBridge))
+check('the same holds in English', bridgedEn.includes(ePlanStrings.en.axisLabels.muscleFocus) && bridgedEn.includes(ePlanStrings.en.axisReasons.pinnedByBridge))
+check('the panel still shows real drivers, it did not go empty', bridgedAr.includes(ePlanStrings.ar.areaLabels.split) && bridgedAr.includes(ePlanStrings.ar.areaLabels.calorieTarget))
 
 console.log('\n═══ 5) MEASURED VOLUME IS RENDERED AS MEASURED ═══')
 check('the volume heading is rendered', en.includes(ePlanStrings.en.volumeHeading))

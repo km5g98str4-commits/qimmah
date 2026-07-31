@@ -55,6 +55,40 @@ function resolveTrainingFocus(_profile: Profile): TrainingFocusAxis {
 }
 
 // ============================================================================
+// حارس المحاور المشلولة في الجسر
+// ============================================================================
+
+/**
+ * **الحقل الحاضر المشلول أخطر من الغائب.**
+ *
+ * `trainingFocus` غائب عن النوع فأُعلن محايدًا بلا لبس. أمّا `muscleFocus`
+ * فـ**حاضر في `Profile`** — يبدو مجموعًا وهو ليس كذلك: جسر الإعداد
+ * `toLegacyProfile` يثبّته على `'balanced'` لكل مستخدم مهما أجاب
+ * (`src/lib/onboardingProfile.ts:283`). فلو عرضناه سائقًا لقرار، لقالت الواجهة
+ * لكل مستخدم «تركيزك: متوازن» **كأنها إجابته**، وهي ثابت في الجسر. ادّعاء
+ * يبدو صادقًا — وهو أسوأ صنف (§5).
+ *
+ * **جردة الجسر كاملة (فُحصت على المصدر لا افتراضًا):** الحقول التي يثبّتها
+ * `toLegacyProfile` خمسة، وهذه حالة كلٍّ منها في هذه الطبقة:
+ *
+ * | الحقل المثبَّت | الموضع | هل نعرضه سائقًا؟ |
+ * |---|---|---|
+ * | `muscleFocus: 'balanced'` | `onboardingProfile.ts:283` | **نعم ⇒ يُحرَس هنا** |
+ * | `equipment: []`           | `:289` | لا — `resolveGymAccess` و`makeEquipmentGate` **لا يقرآن `p.equipment` إطلاقًا**؛ سائق `gymAccess` يقرأ `gymAccess`/`gymType`/`workoutEnvironment` وكلها مُسنَدة من إجابات فعلية. |
+ * | `schedulingStyle: 'flexible'` | `:290` | لا — غير معروض. |
+ * | `preferredDays: []`       | `:291` | لا — غير معروض (يؤثّر في ترتيب أيام الأسبوع لا في قرار مُعلَّل). |
+ * | `nutritionStyle: 'high_protein'` | `:250` | لا — غير معروض. |
+ *
+ * **الحارس يسقط من نفسه:** يُقارَن بالقيمة المثبَّتة لا بوجود الحقل. فحالما
+ * يمرّر الجسر اختيارًا حقيقيًا (`'lower'` مثلًا) يعود المحور سائقًا معلنًا بلا
+ * تعديل هنا. ويبقى خطأ التحفّظ في اتجاهه الصحيح: مستخدم اختار «متوازن» عمدًا
+ * يُعامَل محايدًا — **نبخس تخصيصًا حدث، ولا ندّعي تخصيصًا لم يحدث.**
+ *
+ * يُحذف هذا الحارس كاملًا حين يتوقّف `toLegacyProfile` عن التثبيت.
+ */
+const BRIDGE_PINNED_MUSCLE_FOCUS: MuscleFocus = 'balanced'
+
+// ============================================================================
 // الأنواع المنظَّمة
 // ============================================================================
 
@@ -86,7 +120,7 @@ export type PlanDriverKey =
   | 'age'
 
 /** المحاور المعروفة التي قد تُخصِّص الخطة — مفتاح ثابت. */
-export type PlanAxisKey = 'trainingFocus' | 'pastPerformance'
+export type PlanAxisKey = 'trainingFocus' | 'pastPerformance' | 'muscleFocus'
 
 export interface PlanDriver {
   key: PlanDriverKey
@@ -122,7 +156,7 @@ export interface InactiveAxis {
   /** السلوك الفعلي القائم مكانه — محايد بالتعريف. */
   neutralValue: string
   /** سبب عدم التفعيل بمفتاح ثابت لا نصّ. */
-  reason: 'fieldNotCollected' | 'notWiredToGenerator'
+  reason: 'fieldNotCollected' | 'notWiredToGenerator' | 'pinnedByBridge'
 }
 
 export interface PlanRationale {
@@ -192,6 +226,9 @@ export function buildPlanRationale(profile: Profile, plan: GeneratedPlan): PlanR
   const compound = firstCompound(plan.workoutPlan)
   const access = resolveGymAccess(profile)
   const focus: MuscleFocus = profile.muscleFocus ?? 'balanced'
+  // ما دامت القيمة هي المثبَّتة في الجسر فهي ليست إجابة المستخدم — تُعلَن محايدة
+  // ولا تُعرض سائقًا لأي قرار (انظر `BRIDGE_PINNED_MUSCLE_FOCUS` أعلاه).
+  const focusIsPinned = focus === BRIDGE_PINNED_MUSCLE_FOCUS
   const usedAdvancedSplit = profile.splitMode === 'advanced' && Boolean(profile.splitChoice)
   const conservativeStart =
     effectiveGoal === 'returning' || profile.consistency === 'returning' || profile.consistency === 'onoff'
@@ -209,7 +246,8 @@ export function buildPlanRationale(profile: Profile, plan: GeneratedPlan): PlanR
         ]
       : [
           { key: 'trainingDays', value: days },
-          ...(days === 5 ? [{ key: 'muscleFocus' as const, value: focus }] : []),
+          // التركيز يدخل قرار التقسيمة عند خمسة أيام — لكن لا يُذكر سائقًا وهو مثبَّت.
+          ...(days === 5 && !focusIsPinned ? [{ key: 'muscleFocus' as const, value: focus }] : []),
         ],
     outcome: { key: 'templateId', value: plan.suggestedWorkoutTemplateId },
     basis: 'measured',
@@ -270,13 +308,17 @@ export function buildPlanRationale(profile: Profile, plan: GeneratedPlan): PlanR
     basis: 'structural',
   })
 
-  // ٨) التركيز العضلي — مجموعة إضافية لعضلات التركيز، أو توازن.
-  decisions.push({
-    area: 'muscleFocus',
-    drivers: [{ key: 'muscleFocus', value: focus }],
-    outcome: { key: 'extraSets', value: focus === 'balanced' ? 'none' : 'applied' },
-    basis: 'structural',
-  })
+  // ٨) التركيز العضلي — مجموعة إضافية لعضلات التركيز.
+  //    **القرار يُحذف كليًّا وهو مثبَّت في الجسر**، ولا يُعرض «متوازنًا» كأنه
+  //    اختيار المستخدم. مكانه حينها قسم «ما لم نخصّصه بعد» أدناه.
+  if (!focusIsPinned) {
+    decisions.push({
+      area: 'muscleFocus',
+      drivers: [{ key: 'muscleFocus', value: focus }],
+      outcome: { key: 'extraSets', value: 'applied' },
+      basis: 'structural',
+    })
+  }
 
   // ٩) حمل البداية — الرجوع بعد انقطاع أو الانتظام المتقطّع يخفّف الأسبوع الأول.
   decisions.push({
@@ -320,6 +362,10 @@ export function buildPlanRationale(profile: Profile, plan: GeneratedPlan): PlanR
       // الأداء السابق: `exerciseHistory` قائم لكن لا يستورده المولّد إطلاقًا،
       // و`startingWeight` يخرج فارغًا دائمًا (planGenerator.ts:682).
       { axis: 'pastPerformance', neutralValue: 'none', reason: 'notWiredToGenerator' },
+      // التركيز العضلي: حاضر في النوع، مشلول في الجسر (onboardingProfile.ts:283).
+      ...(focusIsPinned
+        ? [{ axis: 'muscleFocus' as const, neutralValue: focus, reason: 'pinnedByBridge' as const }]
+        : []),
     ],
   }
 }
