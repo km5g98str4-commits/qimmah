@@ -41,8 +41,8 @@ import { MobileShell, type MainTab } from '@/components/MobileShell'
 import type { AppBadge } from '@/components/AppNav'
 import { useAuth } from '@/lib/authContext'
 import { adoptGuestOnboarding, isAccountOnboarded, isOnboardingComplete, loadOnboarding, markCompleted } from '@/lib/onboarding'
-import { ensureOnboardingProfile, loadOnboardingProfile } from '@/lib/onboardingProfile'
-import { currentUserId, hydrateOnboardingFromProfile, persistOnboardingToProfile } from '@/lib/onboardingSync'
+import { ensureOnboardingProfile } from '@/lib/onboardingProfile'
+import { currentUserId, hydrateOnboardingFromProfile } from '@/lib/onboardingSync'
 import { useLanguage } from '@/i18n'
 import { type AppRoute, MAIN_TABS, isUnknownRouteHash, routeFromHash, setHashRoute } from '@/lib/appRoutes'
 import { SuccessToast } from '@/components/SuccessToast'
@@ -64,17 +64,6 @@ function guardRoute(route: AppRoute, userId: string | null): AppRoute {
     }
   }
   return route
-}
-
-/**
- * يتبنّى إعداد الضيف لهذا الحساب إن كان إعداد الجهاز مكتملًا وغير محجوز لحساب آخر،
- * ويرفع إشارة الإكمال للسحابة (best-effort) حتى لا يتكرّر الطلب على جهاز ثانٍ.
- */
-function adoptOwnGuestSetup(userId: string): boolean {
-  if (!adoptGuestOnboarding(userId)) return false
-  const op = loadOnboardingProfile()
-  if (op) void persistOnboardingToProfile(userId, op)
-  return true
 }
 
 function initialRoute(userId: string | null): AppRoute {
@@ -155,7 +144,7 @@ export default function App() {
     void (async () => {
       // ترتيب القرار: السجلّ المحلي ← تبنّي إعداد الضيف على هذا الجهاز (فوري، بلا شبكة)
       // ← الملف السحابي (للحساب العائد على جهاز جديد).
-      if (uid && !isAccountOnboarded(uid) && !adoptOwnGuestSetup(uid)) {
+      if (uid && !isAccountOnboarded(uid) && !adoptGuestOnboarding(uid)) {
         await hydrateOnboardingFromProfile(uid)
       }
       if (cancelled) return
@@ -196,7 +185,7 @@ export default function App() {
     // مسجّل دخول — القرار لكل حساب: السجلّ المحلي، وإلا الملف السحابي.
     let onboarded = isAccountOnboarded(signedInId)
     // من أكمل إعداده كضيف ثم أنشأ حسابًا لحفظ تقدّمه يدخل على خطته، لا على معالج جديد.
-    if (!onboarded) onboarded = adoptOwnGuestSetup(signedInId)
+    if (!onboarded) onboarded = adoptGuestOnboarding(signedInId)
     if (!onboarded) onboarded = await hydrateOnboardingFromProfile(signedInId)
     if (onboarded) setView('dashboard')
     else openSetup()
