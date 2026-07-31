@@ -92,6 +92,49 @@ for (const rule of REQUIRED) {
   }
 }
 
+// ٣) حارس السجلّين — كل صياغة في صفحتها، ولا واحدة في صفحة الأخرى.
+//
+// نفس المعلومة (إذن الموقع لجدولة الوضع الداكن) مكتوبة **بصياغتين مختلفتين
+// عمدًا**: القانونية في privacy.html مُعنونة ومفصولة بصريًا («و) موقعك — يُطلب
+// فقط إذا…»)، والسردية في support.html داخل جواب سؤال شائع.
+//
+// **الخطر الذي يحرسه:** محرّر لاحق يرى «تكرارًا» فيوحّدهما — فتفقد إحدى
+// الصفحتين سجلّها. §6: الشاشة ذرّة في صوت المنتج، والكتلة القانونية صوت ثانٍ
+// **معلَن مفصول بصريًا**. والتوحيد يهدم الفصل.
+const REGISTERS = [
+  {
+    file: 'privacy.html',
+    own: { pattern: /<strong>و\)\s*موقعك<\/strong>/u, what: 'الصياغة القانونية المُعنونة' },
+    foreign: { pattern: /لا\s+نطلب\s+موقعك\s+إلا\s+في\s+حالة\s+واحدة/u, what: 'الصياغة السردية (صفحة الدعم)' },
+  },
+  {
+    file: 'support.html',
+    own: { pattern: /لا\s+نطلب\s+موقعك\s+إلا\s+في\s+حالة\s+واحدة/u, what: 'الصياغة السردية' },
+    foreign: { pattern: /<strong>و\)\s*موقعك<\/strong>/u, what: 'الصياغة القانونية المُعنونة (صفحة الخصوصية)' },
+  },
+]
+for (const r of REGISTERS) {
+  const text = readFileSync(join(SITE_DIR, r.file), 'utf8')
+  checks++
+  if (!r.own.pattern.test(text)) {
+    failures.push(`${r.file} — سجلّها الخاص غائب: ${r.own.what}\n      السبب: كل صفحة تحمل صياغتها، والغياب يعني توحيدًا هدم الفصل.`)
+  }
+  checks++
+  if (r.foreign.pattern.test(text)) {
+    failures.push(`${r.file} — تسرّبت إليها صياغة صفحة أخرى: ${r.foreign.what}\n      السبب: الكتلة القانونية صوت ثانٍ معلَن مفصول بصريًا (§6) — لا تُنسخ في سطح سردي ولا العكس.`)
+  }
+}
+
+// ٤) تأكيد مضادّ (§4.2) — الحارس أعلاه ليس فارغًا.
+// لو تغيّر مسار إحدى الصفحتين أو فرغت لمرّت فحوص السجلّين مجّانًا.
+for (const r of REGISTERS) {
+  checks++
+  const text = readFileSync(join(SITE_DIR, r.file), 'utf8')
+  if (text.length < 500 || !/موقعك/u.test(text)) {
+    failures.push(`${r.file} — التأكيد المضادّ سقط: الصفحة فارغة أو لا تذكر الموقع أصلًا، فحارس السجلّين يمرّ مجّانًا.`)
+  }
+}
+
 if (failures.length > 0) {
   console.error(`\n❌ إثبات صدق الموقع فشل — ${failures.length} مخالفة من ${checks} فحصًا:\n`)
   for (const f of failures) console.error(`   • ${f}\n`)
