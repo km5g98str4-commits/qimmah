@@ -17,7 +17,13 @@ import type { Exercise, Muscle, MovementPattern, PlanDay, PlanExercise, WorkoutP
 import type { RoutineDay } from '@/types'
 import type { RoutineRow } from '@/lib/customization'
 import type { Lang } from '@/lib/appPreferences'
-import { computeTargets, calorieGoalFromGoalType, goalTypeLabel } from '@/lib/calculators'
+import {
+  computeTargets,
+  calorieGoalFromGoalType,
+  effectiveGoalTypeForAge,
+  goalTypeLabel,
+  MINOR_GOAL_RESTRICTION_NOTE,
+} from '@/lib/calculators'
 import { makeEquipmentGate, resolveGymAccess } from '@/lib/equipmentAccess'
 import { canonicalExerciseId, exercises, getExercise } from '@/data/exercises'
 import { primaryMachineIdSet } from '@/data/machineCatalog'
@@ -1060,7 +1066,16 @@ export function planLabel(p: Profile, templateId: string): string {
 
 /** المولّد الكامل. */
 export function generatePlan(profile: Profile): GeneratedPlan {
-  const p: Profile = { ...profile, goal: calorieGoalFromGoalType(profile.goalType) }
+  // حدّ دفاعي عند مدخل المحرّك: المخطط/الهجرة يحاولان تثبيت هدف القاصر، لكن
+  // generatePlan قد يُستدعى بملف قديم أو مباشر. لذلك يُشتق الهدف الفعّال مرة
+  // واحدة من القيم المنظَّمة (العمر + GoalType)، ثم يقود كل مخرجات المحرّك.
+  const effectiveGoalType = effectiveGoalTypeForAge(profile.goalType, profile.age)
+  const goalWasRestricted = effectiveGoalType !== profile.goalType
+  const p: Profile = {
+    ...profile,
+    goalType: effectiveGoalType,
+    goal: calorieGoalFromGoalType(effectiveGoalType),
+  }
   const targets = computeTargets(p)
   // بداية متحفّظة: الرجوع بعد انقطاع أو الانتظام المتقطّع → حجم أسبوع أوّل أخفّ.
   const isConservativeStart =
@@ -1075,6 +1090,7 @@ export function generatePlan(profile: Profile): GeneratedPlan {
   const { plan: nutritionPlan, warning: nutritionWarning } = generateNutrition(p, targets)
 
   const warnings: string[] = []
+  if (goalWasRestricted) warnings.push(MINOR_GOAL_RESTRICTION_NOTE)
   if (isConservativeStart) warnings.push('بدأنا بحجم أخفّ هذا الأسبوع لبداية آمنة — زِد تدريجيًا بعدها.')
   if (p.trainingLevel === 'beginner' && p.trainingDays >= 5) {
     warnings.push('للمبتدئ ننصح بـ3–4 أيام في البداية لبناء الالتزام والاستشفاء.')
