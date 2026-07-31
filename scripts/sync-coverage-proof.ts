@@ -1,3 +1,4 @@
+import { setCloudSyncConsent } from '@/lib/syncConsent'
 // برهان تغطية المزامنة (P12) — الجداول الجديدة + شواهد القبر + عقد حالة الواجهة.
 //
 // يثبت: عزل حسابين على الجداول الجديدة؛ تعارضات جهازين لكل جدول (سحابي أقدم
@@ -74,7 +75,11 @@ const transport: SyncTransport = {
   },
 }
 
+// (ج-١) بوابة الموافقة تحجب الإدراج بلا موافقة سارية — سلوك صحيح خارج موضوع هذا
+// الإثبات (تغطية الجداول). حجبُها المستقلّ مُثبَت في run-sync-consent-proof.
+const grantConsent = () => { for (const u of ['A','B','C','D','E','user-A','user-B','u1']) setCloudSyncConsent(u, true) }
 setSyncFeatureEnabledForTests(true)
+grantConsent()
 setSyncTransportForTests(transport)
 
 const PAST = '2020-01-01T00:00:00.000Z'
@@ -99,6 +104,7 @@ const queueOf = (uid: string, table: string) => readSyncQueue(uid).filter((op) =
 
 console.log('\n① dedup على الجداول الجديدة (latest-write coalescing)')
 localStorage.clear()
+grantConsent()
 setSyncRuntime('A', false)
 stampDataOwner('A')
 recordLedgerDay({ date: '2026-07-20', foods: [{ id: 'f1', nameAr: 'رز', calories: 200, protein: 5, meal: 'lunch' }] })
@@ -260,9 +266,11 @@ check('حذف المستورد الصحي لا يرفع قبرًا (لم يُر�
 
 console.log('\n⑦ عقد getSyncUiState — لا «متزامن» قبل نجاح فعلي')
 localStorage.clear()
+grantConsent()
 setSyncFeatureEnabledForTests(false)
 check('المزامنة مطفأة ⇒ local/sync-disabled', getSyncUiState().state === 'local' && getSyncUiState().reason === 'sync-disabled')
 setSyncFeatureEnabledForTests(true)
+grantConsent()
 setSyncRuntime(null, false)
 check('بلا جلسة ⇒ local/signed-out', getSyncUiState().state === 'local' && getSyncUiState().reason === 'signed-out')
 setSyncRuntime('D', false)
@@ -298,11 +306,13 @@ check('بعد أول نجاح فعلي فقط: synced + lastSyncedAt + طابو�
 
 console.log('\n⑨ attention عند تبنٍّ معلّق + مسار profiles الواحد (إصلاح سباق الكتّاب)')
 localStorage.clear()
+grantConsent()
 localStorage.setItem('qimmah:steps:v1', JSON.stringify({ '2026-07-13': 900 })) // بيانات غير منسوبة
 markAdoptionPendingIfUnowned('E')
 setSyncRuntime('E', false)
 check('تبنٍّ معلّق ⇒ attention/adoption-pending (لا رفع صامت)', getSyncUiState().state === 'attention' && getSyncUiState().reason === 'adoption-pending')
 localStorage.clear()
+grantConsent()
 setSyncRuntime('A', false)
 owner = 'A'
 stampDataOwner('A')

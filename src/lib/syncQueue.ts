@@ -5,6 +5,8 @@
  * point below also requires a matching authenticated owner and recoveryActive=false.
  */
 import { isAdoptionPending } from './dataOwnership'
+import { hasCloudSyncConsent, hasSensitiveHealthConsent } from './syncConsent'
+import { sanitizeSyncPayload } from './syncFieldPolicy'
 
 const ENV_SYNC_ENABLED = import.meta.env.VITE_SYNC_ENABLED === 'true'
 
@@ -116,12 +118,17 @@ export function getSyncRuntime(): Readonly<SyncRuntime> {
 export function syncAllowedFor(userId: string): boolean {
   // بوابة التبنّي: بيانات محلية مجهولة المالك تحت حساب حقيقي لا تُرفع للسحابة
   // حتى قرار صريح (adoptPendingData) — يمنع تبنّي بيانات ضيف ضمنيًا في حساب.
+  //
+  // وبوابة الموافقة (ج-١): بلا موافقة صريحة سارية لا يُدرَج بايت واحد. موضعها هنا
+  // مقصود — هذه نقطة الاختناق التي يمرّ منها كل مسارات الإدراج والحذف والإزالة،
+  // فالضمانة بنيوية لا انضباطًا من كل مستدعٍ على حدة.
   return (
     isSyncEnabled() &&
     !runtime.recoveryActive &&
     Boolean(userId) &&
     runtime.userId === userId &&
-    !isAdoptionPending(userId)
+    !isAdoptionPending(userId) &&
+    hasCloudSyncConsent(userId)
   )
 }
 
@@ -191,6 +198,10 @@ export function enqueueSyncOperation(
 ): SyncOperation | null {
   const userId = runtime.userId
   if (!userId || runtime.capturePaused || !syncAllowedFor(userId)) return null
+  // التنقية بقائمة السماح عند حدّ الإدراج — الحقول الحسّاسة لا تدخل الطابور أصلًا
+  // ما لم تكن الموافقة الثانية سارية. تُطبَّق على الحمولة قبل بنائها في العملية،
+  // فلا يوجد طريق يكتب في الطابور بلا مرورها.
+  const safePayload = sanitizeSyncPayload(table, payload, hasSensitiveHealthConsent(userId))
   const now = new Date().toISOString()
   const op: SyncOperation = {
     id: operationId(),
@@ -198,7 +209,7 @@ export function enqueueSyncOperation(
     table,
     action: 'upsert',
     entityKey,
-    payload,
+    payload: safePayload,
     createdAt: now,
     attempts: 0,
     nextAttemptAt: 0,

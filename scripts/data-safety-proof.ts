@@ -20,6 +20,7 @@ import {
 } from '@/lib/dataOwnership'
 import { reconcileAccountScope, setLastUser } from '@/lib/accountScope'
 import { setSyncRuntime, setSyncFeatureEnabledForTests, syncAllowedFor } from '@/lib/syncQueue'
+import { setCloudSyncConsent } from '@/lib/syncConsent'
 import { unscopedUserKeys, retiredKeys, DATA_KEYS } from '@/lib/userDataKeys'
 
 let pass = 0
@@ -54,6 +55,9 @@ reconcileAccountScope('user-A')
 check('بيانات ضيف + دخول حقيقي ⇒ تبنٍّ معلّق', adoptionPendingFor() === 'user-A')
 setSyncRuntime('user-A', false)
 check('الرفع محجوب أثناء التعليق (لا تُرفع بيانات مجهولة لسحابة الحساب)', syncAllowedFor('user-A') === false)
+// (ج-١) الموافقة بوابة مستقلة عن التبنّي؛ تُمنح هنا ليُعزل أثر التبنّي وحده.
+// وبدونها يبقى الرفع محجوبًا لسبب صحيح لكنه ليس موضوع هذا الفحص.
+setCloudSyncConsent('user-A', true)
 adoptPendingData('user-A')
 check('التبنّي الصريح يختم المالك ويفتح الرفع', getDataOwner() === 'user-A' && syncAllowedFor('user-A') === true)
 // discard: يزيل التعليق فقط.
