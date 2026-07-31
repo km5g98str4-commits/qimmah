@@ -16,21 +16,21 @@ export const policyCopy: Record<Lang, {
   healthConsentRequired: string
 }> = {
   ar: {
-    eligibilityPrefix: 'عمري 12 سنة أو أكثر، وأوافق على',
+    eligibilityPrefix: 'عمري 13 سنة أو أكثر، وأوافق على',
     terms: 'الشروط',
     joiner: 'و',
     privacy: 'سياسة الخصوصية',
-    eligibilityRequired: 'أكّد أن عمرك 12 سنة أو أكثر، ووافق على الشروط وسياسة الخصوصية.',
+    eligibilityRequired: 'أكّد أن عمرك 13 سنة أو أكثر، ووافق على الشروط وسياسة الخصوصية.',
     healthExplanation: 'نستخدم العمر والطول والوزن لإعداد أهدافك وخطتك. تُحفظ بياناتك على جهازك، وتُزامَن مع حسابك عند تفعيل المزامنة.',
     healthConsent: 'أوافق على معالجة بياناتي الصحية لإعداد خطتي',
     healthConsentRequired: 'وافق على معالجة بياناتك الصحية للمتابعة.',
   },
   en: {
-    eligibilityPrefix: 'I am 12 or older and agree to the',
+    eligibilityPrefix: 'I am 13 or older and agree to the',
     terms: 'Terms',
     joiner: 'and',
     privacy: 'Privacy Policy',
-    eligibilityRequired: 'Confirm that you are 12 or older and accept the Terms and Privacy Policy.',
+    eligibilityRequired: 'Confirm that you are 13 or older and accept the Terms and Privacy Policy.',
     healthExplanation: 'We use your age, height, and weight to prepare your goals and plan. Your data is stored on your device and synced to your account when sync is enabled.',
     healthConsent: 'I agree to the processing of my health data to prepare my plan',
     healthConsentRequired: 'Agree to the processing of your health data to continue.',
