@@ -184,6 +184,12 @@ export default function App() {
   useEffect(() => {
     if (view !== 'privacy' && view !== 'terms') beforeLegalRef.current = view
   }, [view])
+  // تُفتح صفحة شرح الحساب من الإعداد أو التقدّم؛ الرجوع يعيد المستخدم إلى
+  // المصدر الحقيقي بدل افتراض أن نقطة الدخول هي الملف الشخصي دائمًا.
+  const beforeCalcRef = useRef<AppRoute>('profile')
+  useEffect(() => {
+    if (view !== 'calc') beforeCalcRef.current = view
+  }, [view])
 
   // تغيّر المسار — إشارة تنقّل (اسم المسار فقط، بلا أي بيانات مستخدم).
   const prevViewRef = useRef<AppRoute | null>(null)
@@ -409,7 +415,7 @@ export default function App() {
         onOpenPrivacy={() => setView('privacy')}
         onOpenTerms={() => setView('terms')}
         onOpenProductReview={() => setView('productReview')}
-        onOpenCalc={() => setView('calc')}
+        onOpenCalc={() => navigate('calc')}
       />
     )
   } else if (view === 'productReview') {
@@ -421,7 +427,13 @@ export default function App() {
       <V.NotFoundView lang={LANG} onHome={() => setView('dashboard')} onBack={() => setView('dashboard')} />
     )
   } else if (view === 'calc') {
-    content = <V.CalcExplainerView lang={LANG} onBack={() => navigate('profile')} />
+    content = (
+      <V.CalcExplainerView
+        lang={LANG}
+        onBack={() => navigate(beforeCalcRef.current)}
+        onEditProfile={openSetup}
+      />
+    )
   } else if (view === 'recovery') {
     content = <V.RecoveryView lang={LANG} onBack={() => navigate('dashboard')} onNavigate={navigate} />
   } else if (view === 'steps') {
