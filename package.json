@@ -100,7 +100,9 @@
     "test:onboarding-intent": "node scripts/run-onboarding-intent-proof.mjs",
     "test:e-progress-v3": "node scripts/run-e-progress-v3-proof.mjs",
     "test:age-13": "node scripts/run-age-13-proof.mjs",
-    "test:sync-consent": "node scripts/run-sync-consent-proof.mjs"
+    "test:sync-consent": "node scripts/run-sync-consent-proof.mjs",
+    "test:journey:newcomer": "node scripts/e2e/journeys/newcomer.mjs",
+    "journeys:sheet": "node scripts/e2e/journeys/build-contact-sheet.mjs"
   },
   "dependencies": {
     "@capacitor/app": "^8.1.0",
