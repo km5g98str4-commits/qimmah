@@ -36,8 +36,12 @@ globalThis.window = { localStorage: globalThis.localStorage, dispatchEvent() {},
 const src = `
 import { setSyncRuntime, setSyncFeatureEnabledForTests, syncAllowedFor } from '@/lib/syncQueue'
 import { stampDataOwner } from '@/lib/dataOwnership'
+import { setCloudSyncConsent } from '@/lib/syncConsent'
 setSyncFeatureEnabledForTests(true)
 stampDataOwner('u1')
+// (ج-١) الموافقة شرط مستقل عن الاستعادة؛ تُمنح هنا لتُعزل بوابة الاستعادة وحدها.
+// وبدونها يفشل هذا الإثبات لسبب صحيح لكنه ليس موضوعه — وخلط البوابتين يُخفي أيّهما حجب.
+setCloudSyncConsent('u1', true)
 setSyncRuntime('u1', true) // جلسة استعادة نشطة
 if (syncAllowedFor('u1')) { console.error('✗ recovery لا يحجب الرفع'); process.exit(1) }
 console.log('  ✓ جلسة الاستعادة تجمّد الرفع (syncAllowedFor=false)')

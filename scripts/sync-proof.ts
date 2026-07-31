@@ -16,6 +16,7 @@ import {
   type SyncTransport,
 } from '@/lib/syncService'
 import { enqueueAuxOperations } from '@/lib/syncStores'
+import { setCloudSyncConsent } from '@/lib/syncConsent'
 import { getSteps } from '@/lib/stepCounter'
 import { getDayStamp } from '@/lib/today'
 
@@ -55,8 +56,15 @@ const transport: SyncTransport = {
 setSyncFeatureEnabledForTests(true)
 setSyncTransportForTests(transport)
 
+// (ج-١) بوابة الموافقة تحجب الإدراج بلا موافقة سارية — وهو سلوكها الصحيح، وليس
+// موضوع هذا الإثبات. تُمنح للحسابين بعد كل مسح تخزين ليُعزل ما يفحصه فعلًا:
+// الطابور والدفعات والـLWW والنقل. حجبَها المستقلّ مُثبَت في run-sync-consent-proof.
+const grantConsent = () => { setCloudSyncConsent('A', true); setCloudSyncConsent('B', true) }
+grantConsent()
+
 console.log('\n① enqueue / persistence / batching / idempotent owner rows')
 localStorage.clear()
+grantConsent()
 setSyncRuntime('A', false)
 enqueueSyncOperation('daily_logs', '2026-07-13', { date: '2026-07-13', data: { a: 1 } })
 enqueueSyncOperation('daily_logs', '2026-07-13', { date: '2026-07-13', data: { a: 2 } })
@@ -118,11 +126,13 @@ check('PASSWORD_RECOVERY performs no network operation', calls.length === before
 console.log('\n④ wipe clears owner queue + backup')
 localStorage.setItem(backupKey('A'), '{"private":true}')
 wipeUserData('A')
+grantConsent()
 check('owner queue cleared', readSyncQueue('A').length === 0)
 check('owner backup cleared', localStorage.getItem(backupKey('A')) === null)
 
 console.log('\n⑤ hydrate: backup first + LWW merge (both directions) + upload merged local')
 localStorage.clear()
+grantConsent()
 setSyncRuntime('A', false)
 owner = 'A'
 const localSession = {
@@ -196,6 +206,7 @@ const today = getDayStamp()
 
 console.log('\n⑥ coverage extension: aux stores → dedicated tables')
 localStorage.clear()
+grantConsent()
 setSyncRuntime('A', false)
 owner = 'A'
 calls.length = 0
@@ -217,6 +228,7 @@ check('re-capture de-duplicates (bounded queue, no growth)', (enqueueAuxOperatio
 
 console.log('\n⑦ aux hydrate: backup-first + server-wins + conflict logged')
 localStorage.clear()
+grantConsent()
 setSyncRuntime('A', false)
 owner = 'A'
 localStorage.setItem('qimmah:steps:v1', JSON.stringify({ '2026-07-12': 100 }))
@@ -243,6 +255,7 @@ check('merged aux re-uploaded through queue', calls.some((c) => c.table === 'ste
 
 console.log('\n⑧ owner/recovery guard covers aux capture')
 localStorage.clear()
+grantConsent()
 setSyncRuntime('A', true) // recovery active
 owner = 'A'
 localStorage.setItem('qimmah:steps:v1', JSON.stringify({ '2026-07-13': 500 }))
@@ -252,6 +265,7 @@ check('recovery session performs NO aux upload', calls.length === 0)
 
 console.log('\n⑨ wipe clears aux queue ops + aux store keys')
 localStorage.clear()
+grantConsent()
 setSyncRuntime('A', false)
 owner = 'A'
 localStorage.setItem('qimmah:steps:v1', JSON.stringify({ '2026-07-13': 700 }))
@@ -259,6 +273,7 @@ localStorage.setItem('qimmah:achievements:v1', JSON.stringify({ unlocked: { m: '
 enqueueAuxOperations('A')
 check('aux ops enqueued into the owner queue', readSyncQueue('A').some((op) => op.table === 'step_logs'))
 wipeUserData('A')
+grantConsent()
 check('wipe clears aux queue ops', readSyncQueue('A').length === 0)
 check('wipe clears steps store key', localStorage.getItem('qimmah:steps:v1') === null)
 check('wipe clears achievements store key', localStorage.getItem('qimmah:achievements:v1') === null)
