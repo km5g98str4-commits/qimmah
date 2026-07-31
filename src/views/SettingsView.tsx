@@ -404,10 +404,11 @@ function SettingsGroup({
         <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-primary-soft text-primary-c">
           <Icon name={icon} className="h-5 w-5" />
         </span>
-        <span className="min-w-0 flex-1">
-          <span className="block text-base font-black text-ink-900">{title}</span>
-          <span className="mt-0.5 block text-xs leading-relaxed text-ink-500">{description}</span>
-        </span>
+        {/* عنوان المجموعة يبقى h2 حتى لا ينكسر تسلسل العناوين (h1 الشاشة → h2 المجموعة → h3 القسم). */}
+        <div className="min-w-0 flex-1">
+          <h2 className="text-base font-black text-ink-900">{title}</h2>
+          <p className="mt-0.5 text-xs leading-relaxed text-ink-500">{description}</p>
+        </div>
         <Icon name="ChevronDown" className="h-4 w-4 shrink-0 text-ink-400 transition-transform group-open:rotate-180" />
       </summary>
       <div className="border-t border-line px-4 pb-4 pt-4">{children}</div>

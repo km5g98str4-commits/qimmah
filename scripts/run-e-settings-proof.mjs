@@ -22,6 +22,8 @@ check('خمس مجموعات عليا فقط', (view.match(/<SettingsGroup/g) ??
 check('كل مجموعة تحمل وصفًا واضحًا', (view.match(/description=\{e\.groups\./g) ?? []).length === 5)
 check('البطاقات تستخدم سطح v3 وشكله', view.includes('rounded-3xl border border-line bg-surface shadow-card'))
 check('أهداف اللمس الأساسية 44px', view.includes('min-h-11'))
+check('تسلسل العناوين سليم: عنوان المجموعة h2 لا span', view.includes('<h2 className="text-base font-black text-ink-900">{title}</h2>'))
+check('تسلسل العناوين سليم: عنوان القسم h3 تحت h2', view.includes('<h3 className="text-sm font-black">{title}</h3>'))
 check('لا زر أو وسم قريبًا', !view.includes('قريبًا') && !view.includes('Coming soon'))
 
 console.log('\n② السلوك القديم باقٍ')
