@@ -107,6 +107,53 @@
         <figcaption><span class="n">13</span> لوحة إضافة وجبة<br><span class="en">Add-a-meal sheet</span></figcaption>
       </figure></div>
   </section>
+  <section>
+    <h2>رحلة القاصر — حاجز الامتثال <span class="meta">ar · ar-large</span></h2>
+    <p class="sub">The minor journey — the compliance gate</p>
+    <div class="stats">
+      <span class="ok">22 فحصًا ناجحًا</span>
+      
+      <span>8 لقطة</span>
+      <span class="warn">1 التقاطة</span>
+      <span class="skip">1 خطوة محجوبة</span>
+    </div>
+    <div class="box"><h3>التقاطات مرفوعة — لا تُصلَح في هذه الحارة</h3><ul class="findings"><li class="sev-mid"><b>اختيار مقيَّد ينجو من خفض العمر — القاصر يبقى على هدف تنشيف مختار</b><p>اختير «خسارة دهون» بعمر 28، ثم خُفض العمر إلى 15: الزرّ عاد disabled وظهر التنويه، لكن aria-pressed بقي &quot;true&quot; — أي أن الحالة المخزَّنة ما زالت هدفًا مقيَّدًا على مستخدم قاصر. الحاجز يمنع **الاختيار الجديد** ولا يُبطل **اختيارًا سابقًا** عند تغيّر العمر. الأثر محدود بالعرض لأن effectiveGoalTypeForAge (src/lib/calculators.ts) يفرض المحافظة عند الحساب — لكن شاشةً تُظهر «تنشيف» مختارًا لابن ١٥ بند امتثال بصري قائم.</p></li></ul></div>
+    <div class="box"><h3>خطوات متخطّاة (معلَنة)</h3><ul class="skips"><li><b>تمرين القاصر من شاشة التمارين</b> — محجوب بـ: التقاطة ط-١: شاشة التمارين لا ترى الخطة المبنيّة (أُسندت لحارة H موجةً طارئة) — تُعاد بعد هبوط الإصلاح</li></ul></div>
+    
+    <div class="strip">
+      <figure>
+        <img src="j2-minor/ar-large/01-body-15.png" alt="الأساسيات — العمر 15 سنة" loading="lazy">
+        <figcaption><span class="n">1</span> الأساسيات — العمر 15 سنة<br><span class="en">Basics — age 15</span></figcaption>
+      </figure>
+      <figure>
+        <img src="j2-minor/ar-large/02-goal-minor.png" alt="شاشة الهدف — القاصر يرى المحافظة وحدها متاحة" loading="lazy">
+        <figcaption><span class="n">2</span> شاشة الهدف — القاصر يرى المحافظة وحدها متاحة<br><span class="en">Goal step — only maintenance available to a minor</span></figcaption>
+      </figure>
+      <figure>
+        <img src="j2-minor/ar-large/03-goal-force-click-blocked.png" alt="بعد نقر قسري على هدف محجوب — لا شيء تغيّر" loading="lazy">
+        <figcaption><span class="n">3</span> بعد نقر قسري على هدف محجوب — لا شيء تغيّر<br><span class="en">After force-clicking a blocked goal — nothing changed</span></figcaption>
+      </figure>
+      <figure>
+        <img src="j2-minor/ar-large/04-goal-adult-cut.png" alt="بعمر 28 — «خسارة دهون» مختار" loading="lazy">
+        <figcaption><span class="n">4</span> بعمر 28 — «خسارة دهون» مختار<br><span class="en">At 28 — restricted goal selected</span></figcaption>
+      </figure>
+      <figure>
+        <img src="j2-minor/ar-large/05-age-lowered-to-15.png" alt="خفض العمر إلى ١٥ بعد اختيار هدف مقيَّد" loading="lazy">
+        <figcaption><span class="n">5</span> خفض العمر إلى ١٥ بعد اختيار هدف مقيَّد<br><span class="en">Age lowered to 15 after picking a restricted goal</span></figcaption>
+      </figure>
+      <figure>
+        <img src="j2-minor/ar-large/06-goal-after-age-lowered.png" alt="شاشة الهدف بعد خفض العمر — هل بقي المقيَّد مختارًا؟" loading="lazy">
+        <figcaption><span class="n">6</span> شاشة الهدف بعد خفض العمر — هل بقي المقيَّد مختارًا؟<br><span class="en">Goal step after lowering age — did the restricted pick survive?</span></figcaption>
+      </figure>
+      <figure>
+        <img src="j2-minor/ar-large/07-plan-minor.png" alt="خطة القاصر — على المحافظة" loading="lazy">
+        <figcaption><span class="n">7</span> خطة القاصر — على المحافظة<br><span class="en">The minor's plan — on maintenance</span></figcaption>
+      </figure>
+      <figure>
+        <img src="j2-minor/ar-large/08-nutrition-minor.png" alt="تغذية القاصر — بلا عجز أو فائض" loading="lazy">
+        <figcaption><span class="n">8</span> تغذية القاصر — بلا عجز أو فائض<br><span class="en">Minor's nutrition — no deficit or surplus</span></figcaption>
+      </figure></div>
+  </section>
 <footer>
   <p>تُبنى هذه الورقة آليًا من <code>docs/proof/journeys/*/manifest.json</code>. كل لقطة من تشغيل حقيقي لحزمة الإنتاج.</p>
 </footer>
