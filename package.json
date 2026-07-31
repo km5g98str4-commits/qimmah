@@ -24,6 +24,7 @@
     "proof:p5medals": "node scripts/run-p5-medals-shot.mjs",
     "proof:p8a2off": "node scripts/run-p8a2-off-proof.mjs",
     "proof:p8a3": "node scripts/run-p8a3-proof.mjs",
+    "proof:h0": "node scripts/run-h0-workout-gate-proof.mjs",
     "proof:p10a5": "node scripts/run-p10-a5-proof.mjs",
     "proof:p10qa": "node scripts/run-p10-integration-qa.mjs",
     "test:e2e:onboarding": "node scripts/e2e-onboarding.mjs",
