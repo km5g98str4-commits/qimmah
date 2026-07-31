@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>حارس الرحلات — التوثيق البصري | قِمّة</title>
+<style>
+  :root { --bg:#F4F1EC; --card:#fff; --ink:#161513; --mut:#6b675f; --line:#e2ddd4; --ok:#1f8a4c; --bad:#c0392b; --warn:#b8571b; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#141312; --card:#1d1b19; --ink:#f1eee8; --mut:#a49e94; --line:#2e2b27; } }
+  * { box-sizing: border-box }
+  body { margin:0; background:var(--bg); color:var(--ink); font-family:-apple-system,"SF Arabic","IBM Plex Sans Arabic",system-ui,sans-serif; line-height:1.6 }
+  header { padding:40px 24px 8px; max-width:1200px; margin:0 auto }
+  h1 { margin:0 0 4px; font-size:2rem; letter-spacing:-.02em }
+  header p { margin:0; color:var(--mut) }
+  section { max-width:1200px; margin:32px auto; padding:24px; background:var(--card); border:1px solid var(--line); border-radius:18px }
+  h2 { margin:0; font-size:1.35rem }
+  h2 .meta { font-size:.8rem; color:var(--mut); font-weight:400 }
+  .sub { margin:2px 0 14px; color:var(--mut); direction:ltr; text-align:start; font-size:.9rem }
+  .stats { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px }
+  .stats span { font-size:.8rem; padding:4px 10px; border-radius:999px; border:1px solid var(--line) }
+  .stats .ok { color:var(--ok) } .stats .bad { color:var(--bad) } .stats .warn { color:var(--warn) } .stats .skip { color:var(--mut) }
+  .box { border:1px solid var(--line); border-radius:12px; padding:12px 16px; margin-bottom:16px }
+  .box h3 { margin:0 0 8px; font-size:.95rem }
+  .box ul { margin:0; padding-inline-start:18px }
+  .findings li { margin-bottom:10px }
+  .findings p { margin:2px 0 0; color:var(--mut); font-size:.85rem }
+  .sev-high > b { color:var(--bad) } .sev-mid > b { color:var(--warn) }
+  .strip { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:16px }
+  figure { margin:0 }
+  figure img { width:100%; border-radius:12px; border:1px solid var(--line); display:block; background:#000 }
+  figcaption { font-size:.78rem; color:var(--mut); margin-top:6px }
+  figcaption .n { display:inline-grid; place-items:center; width:20px; height:20px; border-radius:6px; background:var(--ink); color:var(--bg); font-size:.7rem; margin-inline-end:4px }
+  figcaption .en { direction:ltr; display:inline-block; opacity:.75 }
+  footer { max-width:1200px; margin:0 auto 60px; padding:0 24px; color:var(--mut); font-size:.85rem }
+</style>
+</head>
+<body>
+<header>
+  <h1>حارس الرحلات</h1>
+  <p>التطبيق كما يشغّله إنسان — رحلة كاملة، شاشة شاشة.</p>
+</header>
+
+  <section>
+    <h2>رحلة المولود الجديد <span class="meta">ar · ar-large</span></h2>
+    <p class="sub">The newcomer journey</p>
+    <div class="stats">
+      <span class="ok">24 فحصًا ناجحًا</span>
+      
+      <span>13 لقطة</span>
+      <span class="warn">3 التقاطة</span>
+      <span class="skip">2 خطوة محجوبة</span>
+    </div>
+    <div class="box"><h3>التقاطات مرفوعة — لا تُصلَح في هذه الحارة</h3><ul class="findings"><li class="sev-high"><b>لا مسار ضيف من شاشة الترحيب — «ابدأ الآن» تقود إلى إنشاء حساب</b><p>أزرار الترحيب: EN · ابدأ الآن · عندك حساب؟ تسجيل الدخول — و«ابدأ الآن» تنقل إلى #/login. ونصّ «كمّل كضيف» موجود في src/config/strings.ts (٤ مداخل عربي+إنجليزي) ولا يشير إليه أي مكوّن: StartViewV2 يرسم onSignup وonLogin فقط. وعد «محلي افتراضيًا» (الميثاق §9) بلا مدخل في تدفّق v2.</p></li><li class="sev-mid"><b>مسارات التطبيق محجوبة للزائر غير المسجَّل — #/today و#/onboarding تعرضان «الصفحة غير موجودة»</b><p>زائر بلا جلسة لا يصل إلى أي شاشة منتج، والرسالة المعروضة «غير موجودة» لا «تحتاج حسابًا» — رسالة مضلّلة تصف الحجب كعطل.</p></li><li class="sev-high"><b>الإعداد يكتب الخطة وشاشة التمارين لا تراها — مسار المولود الجديد ينتهي إلى طريق مسدود</b><p>بعد إعداد كامل واعتماد الخطة، تعرض #/workout «أكمل إعداد خطتك» بينما التخزين يحمل الخطة فعلًا: qimmah:workoutCalendar:v1 = {split:&quot;upper_lower&quot;, daysPerWeek:4, source:&quot;migration&quot;} ويطابق ملخّص «خطتك جاهزة» المعروض قبل لحظات · qimmah:customization:v1 مكتوب (6669 حرفًا). أي أن الحالة محفوظة وشرط «الإعداد مكتمل» في شاشة التمارين لا يقرؤها. واللوحة تعد المستخدم بـ«تمرين اليوم» فيصل إلى «ابدأ الإعداد» — وعدٌ يخلفه المنتج في أول دقيقة.</p></li></ul></div>
+    <div class="box"><h3>خطوات متخطّاة (معلَنة)</h3><ul class="skips"><li><b>جولة تُسجَّل وتُنهى بالتأكيد</b> — محجوب بـ: الالتقاطة: شاشة التمارين لا ترى الخطة المبنيّة</li><li><b>البحث عن «كبسة» وتسجيلها</b> — محجوب بـ: لوحة إضافة الوجبة لم تُفتح — حقل البحث غير متاح</li></ul></div>
+    
+    <div class="strip">
+      <figure>
+        <img src="j1-newcomer/ar-large/01-welcome.png" alt="شاشة الترحيب — أول ما يراه المستخدم" loading="lazy">
+        <figcaption><span class="n">1</span> شاشة الترحيب — أول ما يراه المستخدم<br><span class="en">Welcome — the first screen</span></figcaption>
+      </figure>
+      <figure>
+        <img src="j1-newcomer/ar-large/02-setup-1-body.png" alt="خطوة ١ — الأساسيات والموافقة الصحية" loading="lazy">
+        <figcaption><span class="n">2</span> خطوة ١ — الأساسيات والموافقة الصحية<br><span class="en">Step 1 — basics and health consent</span></figcaption>
+      </figure>
+      <figure>
+        <img src="j1-newcomer/ar-large/03-setup-1-body-filled.png" alt="الأساسيات بعد التعبئة — ٢٨ سنة · ١٧٨سم · ٨٢كجم" loading="lazy">
+        <figcaption><span class="n">3</span> الأساسيات بعد التعبئة — ٢٨ سنة · ١٧٨سم · ٨٢كجم<br><span class="en">Basics filled — 28y · 178cm · 82kg</span></figcaption>
+      </figure>
+      <figure>
+        <img src="j1-newcomer/ar-large/04-setup-2-intent.png" alt="خطوة ٢ — النية والمستوى" loading="lazy">
+        <figcaption><span class="n">4</span> خطوة ٢ — النية والمستوى<br><span class="en">Step 2 — intent and level</span></figcaption>
+      </figure>
+      <figure>
+        <img src="j1-newcomer/ar-large/05-setup-2-intent-picked.png" alt="النية «خطة تمرين أمشي عليها» والمستوى «مبتدئ»" loading="lazy">
+        <figcaption><span class="n">5</span> النية «خطة تمرين أمشي عليها» والمستوى «مبتدئ»<br><span class="en">Intent and beginner level picked</span></figcaption>
+      </figure>
+      <figure>
+        <img src="j1-newcomer/ar-large/06-setup-3-goal.png" alt="خطوة ٣ — الهدف بصياغة المبتدئ" loading="lazy">
+        <figcaption><span class="n">6</span> خطوة ٣ — الهدف بصياغة المبتدئ<br><span class="en">Step 3 — goal in beginner wording</span></figcaption>
+      </figure>
+      <figure>
+        <img src="j1-newcomer/ar-large/07-setup-4-training.png" alt="خطوة ٤ — أيام التمرين ومدّته" loading="lazy">
+        <figcaption><span class="n">7</span> خطوة ٤ — أيام التمرين ومدّته<br><span class="en">Step 4 — training days and duration</span></figcaption>
+      </figure>
+      <figure>
+        <img src="j1-newcomer/ar-large/08-setup-5-equipment.png" alt="خطوة ٥ — المكان والمعدّات" loading="lazy">
+        <figcaption><span class="n">8</span> خطوة ٥ — المكان والمعدّات<br><span class="en">Step 5 — place and equipment</span></figcaption>
+      </figure>
+      <figure>
+        <img src="j1-newcomer/ar-large/09-plan-ready.png" alt="الخطة جاهزة — أول مخرَج يراه المستخدم" loading="lazy">
+        <figcaption><span class="n">9</span> الخطة جاهزة — أول مخرَج يراه المستخدم<br><span class="en">Plan ready — the first output</span></figcaption>
+      </figure>
+      <figure>
+        <img src="j1-newcomer/ar-large/10-dashboard.png" alt="لوحة اليوم — بعد اعتماد الخطة" loading="lazy">
+        <figcaption><span class="n">10</span> لوحة اليوم — بعد اعتماد الخطة<br><span class="en">Today dashboard — after approving the plan</span></figcaption>
+      </figure>
+      <figure>
+        <img src="j1-newcomer/ar-large/11-workout.png" alt="شاشة التمارين بعد اعتماد الخطة" loading="lazy">
+        <figcaption><span class="n">11</span> شاشة التمارين بعد اعتماد الخطة<br><span class="en">Workout tab after approving the plan</span></figcaption>
+      </figure>
+      <figure>
+        <img src="j1-newcomer/ar-large/12-nutrition.png" alt="شاشة التغذية" loading="lazy">
+        <figcaption><span class="n">12</span> شاشة التغذية<br><span class="en">Nutrition screen</span></figcaption>
+      </figure>
+      <figure>
+        <img src="j1-newcomer/ar-large/13-nutrition-add-sheet.png" alt="لوحة إضافة وجبة" loading="lazy">
+        <figcaption><span class="n">13</span> لوحة إضافة وجبة<br><span class="en">Add-a-meal sheet</span></figcaption>
+      </figure></div>
+  </section>
+<footer>
+  <p>تُبنى هذه الورقة آليًا من <code>docs/proof/journeys/*/manifest.json</code>. كل لقطة من تشغيل حقيقي لحزمة الإنتاج.</p>
+</footer>
+</body>
+</html>
