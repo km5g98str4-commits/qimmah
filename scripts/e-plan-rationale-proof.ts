@@ -10,6 +10,7 @@
 import { defaultProfile } from '@/lib/calculators'
 import { generatePlan } from '@/lib/planGenerator'
 import { getExercise } from '@/data/exercises'
+import { defaultOnboardingProfile, toLegacyProfile } from '@/lib/onboardingProfile'
 import {
   buildPlanRationale,
   PLAN_TRAINING_FOCUS_DEFAULT,
@@ -129,8 +130,8 @@ check('muscle focus changes its own outcome', outcomeOf(rationaleFor({ muscleFoc
 check('an on-and-off history reports a lighter first week', outcomeOf(rationaleFor({ consistency: 'onoff' }), 'startingLoad') === 'reduced')
 check('a regular history reports a standard first week', outcomeOf(rationaleFor({ consistency: 'regular' }), 'startingLoad') === 'standard')
 check(
-  'the five-day split declares muscle focus as a driver, the four-day one does not',
-  rationaleFor({ trainingDays: 5 }).decisions.find((d) => d.area === 'split')?.drivers.some((dr) => dr.key === 'muscleFocus') === true
+  'a five-day split with a real focus declares it as a driver, the four-day one does not',
+  rationaleFor({ trainingDays: 5, muscleFocus: 'lower' }).decisions.find((d) => d.area === 'split')?.drivers.some((dr) => dr.key === 'muscleFocus') === true
     && base.decisions.find((d) => d.area === 'split')?.drivers.some((dr) => dr.key === 'muscleFocus') === false,
 )
 
@@ -163,6 +164,57 @@ check('the rationale is deterministic for the same profile', JSON.stringify(rati
 check(
   'a name change (display data) does not move a single structured value',
   JSON.stringify(rationaleFor({ name: 'Ziyad' })) === JSON.stringify(rationaleFor({ name: 'زياد' })),
+)
+
+console.log('\n═══ 8) A FIELD PINNED BY THE BRIDGE IS NEVER SHOWN AS AN ANSWER (§5) ═══')
+// الفحص على المصدر لا على الافتراض: نمرّر ملفّات عبر جسر الإعداد الحقيقي
+// (`toLegacyProfile`) ثم نطالب التعليل بألّا يعرض أي حقل يثبّته الجسر سائقًا.
+// الحقول المثبَّتة الخمسة — onboardingProfile.ts:250,283,289,290,291.
+const BRIDGE_PINNED_KEYS = ['muscleFocus', 'equipment', 'schedulingStyle', 'preferredDays', 'nutritionStyle']
+
+const bridgeProfiles: Profile[] = [
+  toLegacyProfile(defaultOnboardingProfile()),
+  toLegacyProfile({
+    ...defaultOnboardingProfile(),
+    profile: { age: 27, sex: 'male' },
+    bodyMetrics: { heightCm: 178, currentWeightKg: 82 },
+    goal: { type: 'bulk' },
+    trainingPreferences: { daysPerWeek: 5, sessionDurationMin: 60, experience: 'intermediate', environment: 'commercial_gym', consistency: 'consistent' },
+  }),
+  toLegacyProfile({
+    ...defaultOnboardingProfile(),
+    profile: { age: 34, sex: 'female' },
+    bodyMetrics: { heightCm: 165, currentWeightKg: 70 },
+    goal: { type: 'cut' },
+    trainingPreferences: { daysPerWeek: 3, sessionDurationMin: 45, experience: 'beginner', environment: 'home_gym', consistency: 'returning' },
+  }),
+]
+
+check('the bridge really does pin muscleFocus to balanced', bridgeProfiles.every((p) => p.muscleFocus === 'balanced'))
+check('the bridge really does pin equipment to empty', bridgeProfiles.every((p) => (p.equipment ?? []).length === 0))
+check('a five-day bridge profile is among the cases', bridgeProfiles.some((p) => p.trainingDays === 5))
+
+for (const [i, p] of bridgeProfiles.entries()) {
+  const r = buildPlanRationale(p, generatePlan(p))
+  const driverKeys = r.decisions.flatMap((d) => d.drivers.map((dr) => String(dr.key)))
+  check(`bridge profile ${i + 1}: no pinned field appears as an active driver`, driverKeys.every((k) => !BRIDGE_PINNED_KEYS.includes(k)))
+  check(`bridge profile ${i + 1}: no muscleFocus decision is emitted`, r.decisions.every((d) => d.area !== 'muscleFocus'))
+  check(`bridge profile ${i + 1}: muscleFocus is declared inactive instead`, r.inactiveAxes.some((a) => a.axis === 'muscleFocus' && a.reason === 'pinnedByBridge'))
+  check(`bridge profile ${i + 1}: the declared neutral value is the pinned one`, r.inactiveAxes.find((a) => a.axis === 'muscleFocus')?.neutralValue === 'balanced')
+  check(`bridge profile ${i + 1}: the honest axes still leave real drivers`, driverKeys.includes('trainingDays') && driverKeys.includes('goalType'))
+}
+
+console.log('\n═══ 9) THE GUARD DROPS ITSELF WHEN A REAL ANSWER ARRIVES ═══')
+// مقارنة بالقيمة المثبَّتة لا بوجود الحقل: أي اختيار حقيقي يعيد المحور سائقًا
+// معلنًا بلا تعديل في هذا الملف — فالحارس مؤقّت بطبيعته لا دائم.
+const realFocus = rationaleFor({ muscleFocus: 'lower', trainingDays: 5 })
+check('a real focus is reported as a driver again', realFocus.decisions.some((d) => d.drivers.some((dr) => dr.key === 'muscleFocus')))
+check('a real focus emits its own decision again', realFocus.decisions.some((d) => d.area === 'muscleFocus'))
+check('a real focus is no longer listed as inactive', realFocus.inactiveAxes.every((a) => a.axis !== 'muscleFocus'))
+check('the pinned value stays guarded', rationaleFor({ muscleFocus: 'balanced' }).inactiveAxes.some((a) => a.axis === 'muscleFocus'))
+check(
+  'the error only ever understates personalisation, never overstates it',
+  rationaleFor({ muscleFocus: 'balanced' }).decisions.every((d) => d.area !== 'muscleFocus'),
 )
 
 console.log(`\nE plan rationale: ${passed} passed, ${failures.length} failed`)

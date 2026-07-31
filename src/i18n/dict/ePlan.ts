@@ -58,7 +58,7 @@ export interface EPlanStrings {
   inactiveHeading: string
   inactiveIntro: string
   axisLabels: Record<PlanAxisKey, string>
-  axisReasons: Record<'fieldNotCollected' | 'notWiredToGenerator', string>
+  axisReasons: Record<'fieldNotCollected' | 'notWiredToGenerator' | 'pinnedByBridge', string>
 }
 
 export const ePlanStrings: Record<Lang, EPlanStrings> = {
@@ -210,10 +210,12 @@ export const ePlanStrings: Record<Lang, EPlanStrings> = {
     axisLabels: {
       trainingFocus: 'تركيز التدريب (قوّة أو تضخيم)',
       pastPerformance: 'أداؤك السابق في التمارين',
+      muscleFocus: 'التركيز على عضلة بعينها',
     },
     axisReasons: {
       fieldNotCollected: 'لا نسألك عنه بعد، فخطتك محايدة تجاهه.',
       notWiredToGenerator: 'مسجَّل عندك، لكنه لا يدخل في بناء الخطة بعد.',
+      pinnedByBridge: 'إجابتك عنه لا تصل إلى المولّد بعد، فالتوزيع متوازن على كل المجموعات.',
     },
   },
   en: {
@@ -364,10 +366,12 @@ export const ePlanStrings: Record<Lang, EPlanStrings> = {
     axisLabels: {
       trainingFocus: 'Training focus (strength or hypertrophy)',
       pastPerformance: 'Your past performance on exercises',
+      muscleFocus: 'Focusing on one muscle group',
     },
     axisReasons: {
       fieldNotCollected: 'We do not ask about it yet, so your plan stays neutral on it.',
       notWiredToGenerator: 'It is recorded for you, but it does not feed plan building yet.',
+      pinnedByBridge: 'Your answer does not reach the generator yet, so the spread stays even across all groups.',
     },
   },
 }
