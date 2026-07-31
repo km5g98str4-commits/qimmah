@@ -5,7 +5,7 @@
 
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
-import type { Session, User } from '@supabase/supabase-js'
+import type { AuthError, Session, User } from '@supabase/supabase-js'
 import { getSupabase, isSupabaseConfigured } from './supabaseClient'
 import { getLanguage } from './appPreferences'
 import { miscStrings } from '@/i18n/dict/misc'
@@ -65,12 +65,34 @@ function cloudDisabledError(): string {
 }
 
 /**
- * يحوّل رسالة خطأ Supabase (بالإنجليزية) إلى رسالة واضحة باللغة الحالية للمستخدم.
- * منطق المطابقة ثابت؛ فقط النص المُرجَع صار ثنائي اللغة.
+ * يحوّل خطأ Supabase (بالإنجليزية) إلى رسالة واضحة باللغة الحالية للمستخدم.
+ *
+ * المبدأ: لا يُعرض للمستخدم أي نص خام من الخادم أبدًا. بعض أخطاء المصادقة تصل
+ * بجسم JSON فارغ، فتضع مكتبة Supabase حرفيًا `{}` في `error.message` — وكان ذلك
+ * يظهر للمستخدم كأقواس مبهمة. الآن الترتيب: رمز الخطأ ← نص الخطأ ← حالة HTTP،
+ * وأي خطأ غير معروف يسقط على رسالة عامة مفهومة، مع تسجيل التفاصيل في الـ console
+ * للتشخيص فقط (بلا بريد أو كلمة مرور).
  */
-function localizedAuthError(message: string | undefined): string {
+function localizedAuthError(error: AuthError | null | undefined): string {
   const t = miscStrings[getLanguage()]
-  const m = (message ?? '').toLowerCase()
+  const code = (error?.code ?? '').toLowerCase()
+  const status = error?.status
+  const m = (error?.message ?? '').toLowerCase()
+
+  // للتشخيص من devtools — لا يحوي أي بيانات حسّاسة.
+  console.warn('[auth] error', { code: error?.code, status, message: error?.message })
+
+  // 1) رموز Supabase الثابتة — الأدقّ حين تتوفّر.
+  if (code === 'invalid_credentials') return t.authInvalidCredentials
+  if (code === 'user_already_exists' || code === 'email_exists') return t.authAlreadyRegistered
+  if (code === 'email_not_confirmed') return t.authEmailNotConfirmed
+  if (code === 'weak_password') return t.authWeakPassword
+  if (code === 'email_address_invalid') return t.authInvalidEmail
+  if (code === 'over_email_send_rate_limit' || code === 'over_request_rate_limit') return t.authRateLimit
+  if (code === 'request_timeout') return t.authNetwork
+  if (code === 'signup_disabled' || code === 'email_provider_disabled') return t.authSignupDisabled
+
+  // 2) مطابقة النص — تغطّي الأخطاء التي تصل بلا رمز.
   if (m.includes('invalid login') || m.includes('invalid credentials')) return t.authInvalidCredentials
   if (m.includes('already registered') || m.includes('already been registered') || m.includes('user already'))
     return t.authAlreadyRegistered
@@ -79,8 +101,15 @@ function localizedAuthError(message: string | undefined): string {
     return t.authWeakPassword
   if (m.includes('email') && m.includes('valid')) return t.authInvalidEmail
   if (m.includes('rate limit') || m.includes('too many')) return t.authRateLimit
+  if (m.includes('signups not allowed') || m.includes('signup is disabled')) return t.authSignupDisabled
   if (m.includes('network') || m.includes('failed to fetch') || m.includes('fetch')) return t.authNetwork
-  return message || t.authGeneric
+
+  // 3) حالة HTTP — الملاذ حين يصل الخطأ بجسم فارغ («{}») بلا نص مفهوم.
+  if (status === 429) return t.authRateLimit
+  if (status !== undefined && status >= 500) return t.authServerBusy
+  if (status === undefined) return t.authNetwork
+
+  return t.authGeneric
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -151,7 +180,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // الاسم يُخزَّن في user_metadata؛ trigger المنصّة يقرأ display_name لإنشاء صف profile.
           options: name ? { data: { display_name: name } } : undefined,
         })
-        if (error) return { ok: false, error: localizedAuthError(error.message) }
+        if (error) return { ok: false, error: localizedAuthError(error) }
         // إن لم تُرجع جلسة فالأرجح أنّ تأكيد البريد مطلوب.
         return { ok: true, needsConfirmation: !data.session }
       },
@@ -159,7 +188,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const supabase = await getSupabase()
         if (!supabase) return { ok: false, error: cloudDisabledError() }
         const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
-        if (error) return { ok: false, error: localizedAuthError(error.message) }
+        if (error) return { ok: false, error: localizedAuthError(error) }
         return { ok: true }
       },
       async signOut() {
@@ -173,7 +202,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const supabase = await getSupabase()
         if (!supabase) return { ok: false, error: cloudDisabledError() }
         const { error } = await supabase.auth.resend({ type: 'signup', email: email.trim() })
-        if (error) return { ok: false, error: localizedAuthError(error.message) }
+        if (error) return { ok: false, error: localizedAuthError(error) }
         return { ok: true }
       },
       async refreshUser() {
