@@ -35,6 +35,8 @@ export interface MiscStrings {
   authInvalidEmail: string
   authRateLimit: string
   authNetwork: string
+  authSignupDisabled: string
+  authServerBusy: string
   authGeneric: string
   authCloudDisabled: string
 }
@@ -77,6 +79,8 @@ const ar: MiscStrings = {
   authInvalidEmail: 'البريد الإلكتروني غير صالح.',
   authRateLimit: 'محاولات كثيرة. انتظر قليلًا ثم أعد المحاولة.',
   authNetwork: 'تعذّر الاتصال بالخادم. تحقّق من الإنترنت وحاول مجددًا.',
+  authSignupDisabled: 'إنشاء الحسابات غير متاح حاليًا. تابع كضيف أو حاول لاحقًا.',
+  authServerBusy: 'الخدمة مشغولة مؤقتًا. حاول بعد قليل.',
   authGeneric: 'حدث خطأ غير متوقع. حاول مجددًا.',
   authCloudDisabled: 'المزامنة السحابية غير مفعّلة في هذه النسخة.',
 }
@@ -120,6 +124,8 @@ const en: MiscStrings = {
   authInvalidEmail: 'That email address is not valid.',
   authRateLimit: 'Too many attempts. Wait a moment and try again.',
   authNetwork: "Couldn't reach the server. Check your connection and try again.",
+  authSignupDisabled: 'Account creation is unavailable right now. Continue as a guest or try later.',
+  authServerBusy: 'The service is busy. Please try again shortly.',
   authGeneric: 'Something went wrong. Please try again.',
   authCloudDisabled: 'Cloud sync is not enabled in this build.',
 }
