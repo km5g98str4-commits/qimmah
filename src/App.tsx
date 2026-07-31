@@ -24,6 +24,7 @@ function createLazyViews() {
     ),
     NutritionView: lazy(() => import('@/views/NutritionView').then((m) => ({ default: m.NutritionView }))),
     ProgressView: lazy(() => import('@/views/ProgressView').then((m) => ({ default: m.ProgressView }))),
+    StepsView: lazy(() => import('@/views/StepsView').then((m) => ({ default: m.StepsView }))),
     ProfileView: lazy(() => import('@/views/ProfileView').then((m) => ({ default: m.ProfileView }))),
     CalcExplainerView: lazy(() =>
       import('@/views/CalcExplainerView').then((m) => ({ default: m.CalcExplainerView })),
@@ -74,12 +75,13 @@ function guardRoute(route: AppRoute, userId: string | null): AppRoute {
     route === 'exercises' ||
     route === 'stats' ||
     route === 'recovery' ||
+    route === 'steps' ||
     route === 'setup' ||
     route === 'settings' ||
     route === 'calc'
   if (needsAccount && !userId) return 'start'
   // بعد الحساب: التبويبات تتطلّب إعدادًا مكتملًا وإلا معالج الإعداد (الأسئلة).
-  if (MAIN_TABS.includes(route) || route === 'exercises' || route === 'stats' || route === 'recovery') {
+  if (MAIN_TABS.includes(route) || route === 'exercises' || route === 'stats' || route === 'recovery' || route === 'steps') {
     if (!isOnboardingComplete(userId)) return 'setup'
   }
   return route
@@ -422,6 +424,8 @@ export default function App() {
     content = <V.CalcExplainerView lang={LANG} onBack={() => navigate('profile')} />
   } else if (view === 'recovery') {
     content = <V.RecoveryView lang={LANG} onBack={() => navigate('dashboard')} onNavigate={navigate} />
+  } else if (view === 'steps') {
+    content = <V.StepsView lang={LANG} onBack={() => navigate('progress')} onOpenSettings={() => navigate('settings')} />
   } else {
     // ——— التبويبات الرئيسية داخل قشرة الجوال ———
     content = (
