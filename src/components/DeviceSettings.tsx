@@ -18,7 +18,7 @@ import {
  *  - تثبيت PWA (زر أصلي على أندرويد/كروم، وتعليمات صريحة على آيفون).
  *  - تفعيل إذن التنبيهات حيث يُدعم — بنسخة صادقة بلا وعود خلفية.
  */
-export function DeviceSettings({ lang }: { lang: Lang }) {
+export function DeviceSettings({ lang, embedded = false }: { lang: Lang; embedded?: boolean }) {
   const t = getStrings(lang)
   const [installable, setInstallable] = useState(canPromptInstall())
   const [standalone, setStandalone] = useState(isStandalone())
@@ -46,7 +46,7 @@ export function DeviceSettings({ lang }: { lang: Lang }) {
   }
 
   return (
-    <section className="card p-6">
+    <section className={embedded ? 'border-t border-line py-4' : 'card p-6'}>
       <div className="mb-4 flex items-center gap-2.5">
         <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary-soft text-primary-c">
           <Icon name="Smartphone" className="h-4.5 w-4.5" />

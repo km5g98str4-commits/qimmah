@@ -18,6 +18,7 @@ import { NotificationSettingsPanel } from '@/components/NotificationSettingsPane
 import { NativeSettingsPanel } from '@/components/NativeSettingsPanel'
 import { NATIVE_SETTINGS_COPY } from '@/data/nativeSettings'
 import type { AppRoute } from '@/lib/appRoutes'
+import { eSettingsCopy } from '@/i18n/dict/eSettings'
 
 /**
  * يترجم حالة المزامنة الحقيقية إلى جملة صادقة للمستخدم.
@@ -57,6 +58,7 @@ export function SettingsView({
   onOpenCalc,
 }: SettingsViewProps) {
   const t = getStrings(lang)
+  const e = eSettingsCopy[lang]
   const auth = useAuth()
   const { customization, applyCustomization } = useCustomization()
 
@@ -156,244 +158,224 @@ export function SettingsView({
   return (
     <div className="flex h-[100dvh] min-h-0 flex-col overflow-hidden bg-page">
       <header className="shrink-0 border-b border-line bg-surface" style={{ paddingTop: 'var(--safe-top)' }}>
-        <div className="mx-auto flex h-14 w-full max-w-md items-center gap-3 px-4">
-          <button type="button" onClick={() => onNavigate('profile')} className="grid h-11 w-11 place-items-center rounded-full bg-beige text-ink-700" aria-label={lang === 'ar' ? 'الرجوع لملفك' : 'Back to profile'}>
+        <div className="mx-auto flex min-h-16 w-full max-w-md items-center gap-3 px-4 py-2">
+          <button type="button" onClick={() => onNavigate('profile')} className="grid h-11 w-11 place-items-center rounded-xl border border-line bg-surface text-ink-700" aria-label={e.backToProfile}>
             <Icon name={lang === 'ar' ? 'ChevronRight' : 'ChevronLeft'} className="h-5 w-5" />
           </button>
-          <h1 className="text-lg font-black text-ink-900">{t.settings.title}</h1>
+          <div className="min-w-0">
+            <h1 className="text-lg font-black text-ink-900">{e.title}</h1>
+            <p className="text-xs leading-relaxed text-ink-500">{e.subtitle}</p>
+          </div>
         </div>
       </header>
 
-      <main className="app-scroll min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-y-contain px-4 py-4" style={{ paddingBottom: 'calc(var(--safe-bottom) + 1rem)' }}>
-        <div className="mx-auto w-full max-w-md space-y-3">
-
-        {/* 1) الحساب */}
-        <SettingsGroup icon="User" title={t.settings.groupAccount} defaultOpen>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-3">
-              <span
-                className={
-                  'inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-black ' +
-                  (auth.user ? 'bg-primary-soft text-primary-c' : 'border border-line bg-surface text-ink-700')
-                }
-              >
-                <Icon name={auth.user ? 'CheckCircle2' : 'User'} className="h-3.5 w-3.5" />
-                {auth.user ? t.badge.account : t.badge.guest}
-              </span>
-              <div>
-                {auth.displayName && <p className="text-sm font-bold text-ink-900">{auth.displayName}</p>}
-                <p className="text-xs leading-relaxed text-ink-500">{accountStatus}</p>
-              </div>
-            </div>
-            {auth.user ? (
-              <button type="button" onClick={() => auth.signOut()} className="btn-ghost px-4 py-2 text-xs">
-                <Icon name="LogOut" className="h-4 w-4" />
-                {t.auth.logout}
-              </button>
-            ) : (
-              <button type="button" onClick={onLogin} className="btn-primary px-4 py-2 text-xs">
-                <Icon name="LogIn" className="h-4 w-4" />
-                {t.auth.login}
-              </button>
-            )}
-          </div>
-
-          {/* حذف الحساب نهائيًا — إلزامي لمتاجر التطبيقات (يُعرض فقط لمستخدم مسجّل) */}
-          {auth.user && (
-            <div className="mt-4 border-t border-line pt-4">
-              {!confirmDelete ? (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => setConfirmDelete(true)}
-                    className="inline-flex items-center gap-1.5 rounded-xl border border-danger/40 px-4 py-2 text-xs font-bold text-danger transition-colors hover:bg-danger/10"
-                  >
-                    <Icon name="Trash2" className="h-4 w-4" />
-                    {t.auth.deleteAccount}
-                  </button>
-                  <p className="mt-2 text-[11px] leading-relaxed text-ink-400">{t.auth.deleteAccountDesc}</p>
-                </>
-              ) : (
-                <div className="rounded-xl border border-danger/40 bg-danger/[0.06] p-4">
-                  <p className="flex items-center gap-1.5 text-sm font-black text-danger">
-                    <Icon name="AlertTriangle" className="h-4 w-4" />
-                    {t.auth.deleteConfirmTitle}
-                  </p>
-                  <p className="mt-2 text-xs leading-relaxed text-ink-700">{t.auth.deleteConfirmBody}</p>
-                  <label htmlFor="delete-confirm" className="mt-3 block text-[11px] font-bold text-ink-500">
-                    {t.auth.deleteConfirmHint}
-                  </label>
-                  <input
-                    id="delete-confirm"
-                    type="text"
-                    value={deleteWord}
-                    onChange={(e) => setDeleteWord(e.target.value)}
-                    aria-label={t.auth.deleteConfirmHint}
-                    autoComplete="off"
-                    className="mt-1 w-full max-w-xs rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink-900 outline-none focus:border-danger"
-                  />
-                  {/* فشل حذف مستخدم المصادقة — رسالة صادقة (لا ادّعاء نجاح) + مسار تواصل. */}
-                  {deleteFailed && (
-                    <p role="alert" className="mt-3 flex items-start gap-2 rounded-lg border border-danger/40 bg-danger/[0.08] p-3 text-xs leading-relaxed text-ink-700">
-                      <Icon name="AlertTriangle" className="mt-0.5 h-4 w-4 shrink-0 text-danger" />
-                      <span>
-                        {t.auth.deleteFailed}{' '}
-                        <a href="#/contact" className="font-bold text-danger underline underline-offset-2">
-                          {t.auth.deleteContactCta}
-                        </a>
-                      </span>
-                    </p>
-                  )}
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      onClick={onDeleteAccount}
-                      disabled={!canConfirmDelete}
-                      className="inline-flex items-center gap-1.5 rounded-xl bg-danger px-4 py-2 text-xs font-bold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      <Icon name="Trash2" className="h-4 w-4" />
-                      {deleting ? t.auth.deleting : deleteFailed ? t.auth.deleteRetry : t.auth.deleteConfirmCta}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={cancelDelete}
-                      disabled={deleting}
-                      className="btn-ghost px-4 py-2 text-xs"
-                    >
-                      {t.auth.cancel}
-                    </button>
-                  </div>
+      <main className="app-scroll min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-4 py-4" style={{ paddingBottom: 'calc(var(--safe-bottom) + 1rem)' }}>
+        <div className="mx-auto w-full max-w-md space-y-3" data-testid="e-settings-groups">
+          <SettingsGroup
+            icon="User"
+            title={e.groups.account.title}
+            description={e.groups.account.description}
+            testId="settings-group-account"
+            defaultOpen
+          >
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-3">
+                <span
+                  className={
+                    'inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-black ' +
+                    (auth.user ? 'bg-primary-soft text-primary-c' : 'border border-line bg-surface text-ink-700')
+                  }
+                >
+                  <Icon name={auth.user ? 'CheckCircle2' : 'User'} className="h-3.5 w-3.5" />
+                  {auth.user ? t.badge.account : t.badge.guest}
+                </span>
+                <div className="min-w-0">
+                  {auth.displayName && <p className="truncate text-sm font-bold text-ink-900">{auth.displayName}</p>}
+                  <p className="text-xs leading-relaxed text-ink-500">{accountStatus}</p>
                 </div>
+              </div>
+              {auth.user ? (
+                <button type="button" onClick={() => auth.signOut()} className="btn-ghost min-h-11 px-4 py-2 text-xs">
+                  <Icon name="LogOut" className="h-4 w-4" />
+                  {t.auth.logout}
+                </button>
+              ) : (
+                <button type="button" onClick={onLogin} className="btn-primary min-h-11 px-4 py-2 text-xs">
+                  <Icon name="LogIn" className="h-4 w-4" />
+                  {t.auth.login}
+                </button>
               )}
             </div>
-          )}
-        </SettingsGroup>
 
-        {/* 2) البيانات — تصدير/استيراد محصّن (معاينة → تأكيد → تطبيق ذرّي → تراجع) + إعادة ضبط */}
-        <SettingsGroup icon="Database" title={t.settings.groupData} testId="settings-group-data">
-          <DataManagementPanel lang={lang} uid={auth.user?.id ?? null} recoveryActive={auth.recoveryActive} />
-          <div className="mt-3 border-t border-line pt-3">
-            <button
-              type="button"
-              onClick={onReset}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-danger/40 px-4 py-2.5 text-sm font-bold text-danger transition-colors hover:bg-danger/10"
-            >
-              <Icon name="RotateCcw" className="h-4 w-4" />
-              {t.settings.reset}
-            </button>
-          </div>
-        </SettingsGroup>
-
-        {/* 3) خطتي */}
-        <SettingsGroup icon="Palette" title={t.settings.groupPlan}>
-          <div className="flex flex-wrap gap-2">
-            <button type="button" onClick={onEditPlan} className="btn-primary px-4 py-2.5 text-sm">
-              <Icon name="Palette" className="h-4 w-4" />
-              {t.settings.editPlan}
-            </button>
-            <button type="button" onClick={onRegenerate} className="btn-ghost px-4 py-2.5 text-sm">
-              <Icon name="RotateCcw" className="h-4 w-4" />
-              {t.settings.regenerate}
-            </button>
-            <button type="button" onClick={onSwitchToMachines} className="btn-ghost px-4 py-2.5 text-sm">
-              <Icon name="Dumbbell" className="h-4 w-4" />
-              {t.settings.switchMachines}
-            </button>
-          </div>
-        </SettingsGroup>
-
-        {/* 4) التذكيرات المحلية — نفس المحرّك المالكـي الذي يستخدمه سطح v2. */}
-        <SettingsGroup icon="Bell" title={lang === 'ar' ? 'التذكيرات' : 'Reminders'}>
-          <NotificationSettingsPanel lang={lang} />
-        </SettingsGroup>
-
-        <SettingsGroup icon="Activity" title={NATIVE_SETTINGS_COPY[lang].group}>
-          <NativeSettingsPanel lang={lang} />
-        </SettingsGroup>
-
-        {/* 5) الخصوصية والثقة */}
-        <SettingsGroup icon="ShieldCheck" title={t.settings.groupPrivacy}>
-          <div className="flex flex-wrap gap-2">
-            <button type="button" onClick={onOpenPrivacy} className="btn-ghost px-4 py-2.5 text-sm">
-              <Icon name="Lock" className="h-4 w-4" />
-              {t.settings.privacyLink}
-            </button>
-            <button type="button" onClick={onOpenTerms} className="btn-ghost px-4 py-2.5 text-sm">
-              <Icon name="FileText" className="h-4 w-4" />
-              {t.settings.termsLink}
-            </button>
-          </div>
-          {/* تحليلات مجهولة اختيارية (opt-out) — بلا أي بيانات شخصية، تُحفظ محليًا. */}
-          <div className="mt-4 flex items-start justify-between gap-3 border-t border-line pt-4">
-            <div className="min-w-0">
-              <p className="text-sm font-bold text-ink-900">{t.settings.analyticsTitle}</p>
-              <p className="mt-1 text-xs leading-relaxed text-ink-500">{t.settings.analyticsDesc}</p>
-            </div>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={analyticsOn}
-              aria-label={t.settings.analyticsToggle}
-              onClick={toggleAnalytics}
-              className={`relative mt-0.5 h-6 w-11 shrink-0 rounded-full transition-colors ${analyticsOn ? 'bg-primary' : 'bg-line'}`}
-            >
-              <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-all ${analyticsOn ? 'start-0.5' : 'end-0.5'}`} />
-            </button>
-          </div>
-          <p className="mt-3 flex items-start gap-2 rounded-xl border border-gold-400/40 bg-gold-200/40 p-3 text-xs leading-relaxed text-ink-700">
-            <Icon name="AlertTriangle" className="mt-0.5 h-4 w-4 shrink-0 text-gold-600" />
-            {t.settings.healthDisclaimer}
-          </p>
-        </SettingsGroup>
-
-        {/* 6) التطبيق والتنبيهات — تثبيت PWA + حالة إمكانات الجهاز */}
-        <DeviceSettings lang={lang} />
-
-        {/* 6.1) دليل «ثبّت التطبيق» — خطوات مكتوبة لكل منصّة (المكتشفة أولًا)، بلا صور خارجية. */}
-        <InstallGuideSection lang={lang} />
-
-        {/* 6) أدوات داخلية — مراجعة المنتجات. أداة طاقم داخلية فقط: مُقصاة تمامًا من حزمة
-            الإنتاج الاستهلاكية (import.meta.env.DEV=false في البناء) فلا تظهر لأي مستخدم. */}
-        {import.meta.env.DEV && (
-          <SettingsGroup icon="Wrench" title={t.settings.groupDev}>
-            <div className="flex flex-col gap-2">
-              <button
-                type="button"
-                onClick={onOpenProductReview}
-                className="btn-ghost justify-start px-4 py-2.5 text-sm"
-              >
-                <Icon name="ClipboardList" className="h-4 w-4" />
-                {t.settings.devReviewProducts}
-              </button>
-              <p className="text-xs leading-relaxed text-ink-500">{t.settings.devReviewHint}</p>
-            </div>
+            {auth.user && (
+              <div className="mt-4 border-t border-line pt-4">
+                {!confirmDelete ? (
+                  <>
+                    <button type="button" onClick={() => setConfirmDelete(true)} className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-danger/40 px-4 py-2 text-xs font-bold text-danger transition-colors hover:bg-danger/10">
+                      <Icon name="Trash2" className="h-4 w-4" />
+                      {t.auth.deleteAccount}
+                    </button>
+                    <p className="mt-2 text-[11px] leading-relaxed text-ink-400">{t.auth.deleteAccountDesc}</p>
+                  </>
+                ) : (
+                  <div className="rounded-xl border border-danger/40 bg-danger/[0.06] p-4">
+                    <p className="flex items-center gap-1.5 text-sm font-black text-danger">
+                      <Icon name="AlertTriangle" className="h-4 w-4" />
+                      {t.auth.deleteConfirmTitle}
+                    </p>
+                    <p className="mt-2 text-xs leading-relaxed text-ink-700">{t.auth.deleteConfirmBody}</p>
+                    <label htmlFor="delete-confirm" className="mt-3 block text-[11px] font-bold text-ink-500">{t.auth.deleteConfirmHint}</label>
+                    <input
+                      id="delete-confirm"
+                      type="text"
+                      value={deleteWord}
+                      onChange={(event) => setDeleteWord(event.target.value)}
+                      aria-label={t.auth.deleteConfirmHint}
+                      autoComplete="off"
+                      className="mt-1 min-h-11 w-full max-w-xs rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink-900 outline-none focus:border-danger"
+                    />
+                    {deleteFailed && (
+                      <p role="alert" className="mt-3 flex items-start gap-2 rounded-lg border border-danger/40 bg-danger/[0.08] p-3 text-xs leading-relaxed text-ink-700">
+                        <Icon name="AlertTriangle" className="mt-0.5 h-4 w-4 shrink-0 text-danger" />
+                        <span>
+                          {t.auth.deleteFailed}{' '}
+                          <a href="#/contact" className="font-bold text-danger underline underline-offset-2">{t.auth.deleteContactCta}</a>
+                        </span>
+                      </p>
+                    )}
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <button type="button" onClick={onDeleteAccount} disabled={!canConfirmDelete} className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-danger px-4 py-2 text-xs font-bold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-40">
+                        <Icon name="Trash2" className="h-4 w-4" />
+                        {deleting ? t.auth.deleting : deleteFailed ? t.auth.deleteRetry : t.auth.deleteConfirmCta}
+                      </button>
+                      <button type="button" onClick={cancelDelete} disabled={deleting} className="btn-ghost min-h-11 px-4 py-2 text-xs">{t.auth.cancel}</button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </SettingsGroup>
-        )}
 
-        {/* 7) اللغة — تبديل حيّ عربي/English (يبدّل النص والاتجاه فورًا). */}
-        <SettingsGroup icon="Globe" title={t.settings.groupLanguage}>
-          <div className="flex flex-col gap-3">
-            <LanguageToggle />
-            <p className="text-xs leading-relaxed text-ink-500">{t.settings.languageHint}</p>
-          </div>
-        </SettingsGroup>
+          <SettingsGroup
+            icon="SlidersHorizontal"
+            title={e.groups.preferences.title}
+            description={e.groups.preferences.description}
+            testId="settings-group-preferences"
+          >
+            <SettingsSubsection icon="Palette" title={e.sections.plan}>
+              <div className="flex flex-wrap gap-2">
+                <button type="button" onClick={onEditPlan} className="btn-primary min-h-11 px-4 py-2.5 text-sm">
+                  <Icon name="Palette" className="h-4 w-4" />
+                  {t.settings.editPlan}
+                </button>
+                <button type="button" onClick={onRegenerate} className="btn-ghost min-h-11 px-4 py-2.5 text-sm">
+                  <Icon name="RotateCcw" className="h-4 w-4" />
+                  {t.settings.regenerate}
+                </button>
+                <button type="button" onClick={onSwitchToMachines} className="btn-ghost min-h-11 px-4 py-2.5 text-sm">
+                  <Icon name="Dumbbell" className="h-4 w-4" />
+                  {t.settings.switchMachines}
+                </button>
+              </div>
+            </SettingsSubsection>
+            <SettingsSubsection icon="Globe" title={e.sections.language}>
+              <div className="space-y-3">
+                <LanguageToggle />
+                <p className="text-xs leading-relaxed text-ink-500">{t.settings.languageHint}</p>
+              </div>
+            </SettingsSubsection>
+            <SettingsSubsection icon="Activity" title={e.sections.healthDevice}>
+              <p className="mb-4 text-xs font-bold text-ink-500">{NATIVE_SETTINGS_COPY[lang].group}</p>
+              <NativeSettingsPanel lang={lang} />
+            </SettingsSubsection>
+          </SettingsGroup>
 
-        {/* 8) عن التطبيق — إصدار البناء (BUILD_LABEL) + رابط «كيف نحسب أرقامك؟» */}
-        <SettingsGroup icon="Info" title={t.settings.groupAbout}>
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center justify-between gap-3">
-              <span className="text-sm text-ink-700">{t.settings.versionLabel}</span>
-              {/* معرّف البناء دائمًا LTR (لاتيني) حتى داخل الواجهة العربية */}
-              <span dir="ltr" data-testid="settings-build-label" className="rounded-lg bg-beige px-2.5 py-1 font-mono text-xs font-bold text-ink-500">
-                {BUILD_LABEL}
-              </span>
-            </div>
-            <button type="button" onClick={onOpenCalc} data-testid="settings-calc-link" className="btn-ghost justify-start px-4 py-2.5 text-sm">
-              <Icon name="Calculator" className="h-4 w-4" />
-              {t.settings.calcLink}
-            </button>
-          </div>
-        </SettingsGroup>
+          <SettingsGroup
+            icon="Bell"
+            title={e.groups.notifications.title}
+            description={e.groups.notifications.description}
+            testId="settings-group-notifications"
+          >
+            <NotificationSettingsPanel lang={lang} />
+          </SettingsGroup>
+
+          <SettingsGroup
+            icon="ShieldCheck"
+            title={e.groups.privacyData.title}
+            description={e.groups.privacyData.description}
+            testId="settings-group-privacy-data"
+          >
+            <SettingsSubsection icon="Lock" title={e.sections.privacy}>
+              <div className="flex flex-wrap gap-2">
+                <button type="button" onClick={onOpenPrivacy} className="btn-ghost min-h-11 px-4 py-2.5 text-sm">
+                  <Icon name="Lock" className="h-4 w-4" />
+                  {t.settings.privacyLink}
+                </button>
+                <button type="button" onClick={onOpenTerms} className="btn-ghost min-h-11 px-4 py-2.5 text-sm">
+                  <Icon name="FileText" className="h-4 w-4" />
+                  {t.settings.termsLink}
+                </button>
+              </div>
+              <div className="mt-4 flex items-start justify-between gap-3 border-t border-line pt-4">
+                <div className="min-w-0">
+                  <p className="text-sm font-bold text-ink-900">{t.settings.analyticsTitle}</p>
+                  <p className="mt-1 text-xs leading-relaxed text-ink-500">{t.settings.analyticsDesc}</p>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={analyticsOn}
+                  aria-label={t.settings.analyticsToggle}
+                  onClick={toggleAnalytics}
+                  className={`relative mt-0.5 h-7 w-12 shrink-0 rounded-full transition-colors ${analyticsOn ? 'bg-primary' : 'bg-line'}`}
+                >
+                  <span className={`absolute top-1 h-5 w-5 rounded-full bg-white transition-all ${analyticsOn ? 'start-1' : 'end-1'}`} />
+                </button>
+              </div>
+              <p className="mt-3 flex items-start gap-2 rounded-xl border border-gold-400/40 bg-gold-200/40 p-3 text-xs leading-relaxed text-ink-700">
+                <Icon name="AlertTriangle" className="mt-0.5 h-4 w-4 shrink-0 text-gold-600" />
+                {t.settings.healthDisclaimer}
+              </p>
+            </SettingsSubsection>
+            <SettingsSubsection icon="Database" title={e.sections.data}>
+              <DataManagementPanel lang={lang} uid={auth.user?.id ?? null} recoveryActive={auth.recoveryActive} />
+              <div className="mt-3 border-t border-line pt-3">
+                <button type="button" onClick={onReset} className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-danger/40 px-4 py-2.5 text-sm font-bold text-danger transition-colors hover:bg-danger/10">
+                  <Icon name="RotateCcw" className="h-4 w-4" />
+                  {t.settings.reset}
+                </button>
+              </div>
+            </SettingsSubsection>
+          </SettingsGroup>
+
+          <SettingsGroup
+            icon="Info"
+            title={e.groups.about.title}
+            description={e.groups.about.description}
+            testId="settings-group-about"
+          >
+            <SettingsSubsection icon="Info" title={e.sections.app}>
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-sm text-ink-700">{t.settings.versionLabel}</span>
+                <span dir="ltr" data-testid="settings-build-label" className="rounded-lg bg-beige px-2.5 py-1 font-mono text-xs font-bold text-ink-500">{BUILD_LABEL}</span>
+              </div>
+              <button type="button" onClick={onOpenCalc} data-testid="settings-calc-link" className="btn-ghost mt-3 min-h-11 w-full justify-start px-4 py-2.5 text-sm">
+                <Icon name="Calculator" className="h-4 w-4" />
+                {t.settings.calcLink}
+              </button>
+            </SettingsSubsection>
+            <DeviceSettings lang={lang} embedded />
+            <InstallGuideSection lang={lang} />
+            {import.meta.env.DEV && (
+              <SettingsSubsection icon="Wrench" title={e.sections.internal}>
+                <button type="button" onClick={onOpenProductReview} className="btn-ghost min-h-11 justify-start px-4 py-2.5 text-sm">
+                  <Icon name="ClipboardList" className="h-4 w-4" />
+                  {t.settings.devReviewProducts}
+                </button>
+                <p className="mt-2 text-xs leading-relaxed text-ink-500">{t.settings.devReviewHint}</p>
+              </SettingsSubsection>
+            )}
+          </SettingsGroup>
         </div>
       </main>
     </div>
@@ -404,27 +386,44 @@ export function SettingsView({
 function SettingsGroup({
   icon,
   title,
+  description,
   testId,
   defaultOpen = false,
   children,
 }: {
   icon: string
   title: string
+  description: string
   testId?: string
   defaultOpen?: boolean
   children: ReactNode
 }) {
   return (
-    <details className="card group overflow-hidden" data-testid={testId} open={defaultOpen}>
-      <summary className="flex min-h-[4rem] cursor-pointer list-none items-center gap-2.5 px-4 py-3 [&::-webkit-details-marker]:hidden">
-        <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary-soft text-primary-c">
-          <Icon name={icon} className="h-4.5 w-4.5" />
+    <details className="group overflow-hidden rounded-3xl border border-line bg-surface shadow-card" data-testid={testId} open={defaultOpen}>
+      <summary className="flex min-h-[4.75rem] cursor-pointer list-none items-center gap-3 px-4 py-3 [&::-webkit-details-marker]:hidden">
+        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-primary-soft text-primary-c">
+          <Icon name={icon} className="h-5 w-5" />
         </span>
-        <h2 className="min-w-0 flex-1 text-base font-black text-ink-900">{title}</h2>
-        <Icon name="ChevronDown" className="h-4 w-4 text-ink-400 transition-transform group-open:rotate-180" />
+        <span className="min-w-0 flex-1">
+          <span className="block text-base font-black text-ink-900">{title}</span>
+          <span className="mt-0.5 block text-xs leading-relaxed text-ink-500">{description}</span>
+        </span>
+        <Icon name="ChevronDown" className="h-4 w-4 shrink-0 text-ink-400 transition-transform group-open:rotate-180" />
       </summary>
       <div className="border-t border-line px-4 pb-4 pt-4">{children}</div>
     </details>
+  )
+}
+
+function SettingsSubsection({ icon, title, children }: { icon: string; title: string; children: ReactNode }) {
+  return (
+    <section className="border-t border-line py-4 first:border-t-0 first:pt-0 last:pb-0">
+      <div className="mb-3 flex items-center gap-2 text-ink-900">
+        <Icon name={icon} className="h-4 w-4 text-primary-c" />
+        <h3 className="text-sm font-black">{title}</h3>
+      </div>
+      {children}
+    </section>
   )
 }
 
@@ -435,6 +434,7 @@ function SettingsGroup({
 function InstallGuideSection({ lang }: { lang: Lang }) {
   const g = installGuideStrings[lang]
   const iosFirst = isIOSSafari()
+  const e = eSettingsCopy[lang]
 
   const ios = (
     <PlatformSteps
@@ -454,7 +454,9 @@ function InstallGuideSection({ lang }: { lang: Lang }) {
   )
 
   return (
-    <SettingsGroup icon="Download" title={g.sectionTitle} testId="install-guide-section">
+    <SettingsSubsection icon="Download" title={e.sections.install}>
+      <div data-testid="install-guide-section">
+      <h4 className="mb-1 text-sm font-black text-ink-900">{g.sectionTitle}</h4>
       <p className="mb-4 text-xs leading-relaxed text-ink-500">{g.sectionIntro}</p>
       <div className="space-y-3">
         {iosFirst ? (
@@ -469,7 +471,8 @@ function InstallGuideSection({ lang }: { lang: Lang }) {
           </>
         )}
       </div>
-    </SettingsGroup>
+      </div>
+    </SettingsSubsection>
   )
 }
 
