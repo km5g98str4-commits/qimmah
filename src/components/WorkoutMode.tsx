@@ -18,6 +18,7 @@ import { exerciseGuidance } from '@/lib/exerciseGuidance'
 import { muscleLabel } from '@/lib/muscles'
 import { getDayStamp } from '@/lib/today'
 import type { Difficulty, SetLog, WorkoutSession } from '@/lib/workoutSessions'
+import { clearActiveWorkout, saveActiveWorkout, type ActiveWorkout } from '@/lib/activeWorkout'
 
 interface WorkoutModeProps {
   lang: Lang
@@ -26,6 +27,10 @@ interface WorkoutModeProps {
   onFinish: (session: WorkoutSession) => void
   /** حفظ بديل في الخطة بشكل دائم (اختياري). */
   onSwapExercise?: (dayId: string, planExerciseId: string, newExerciseId: string) => void
+  /** هوية صاحب الجلسة — تُعزل الجلسة الجارية بها (ضيف/حساب). */
+  userId?: string | null
+  /** جلسة جارية تُستأنف بدل البدء من الصفر (ح-١). */
+  resume?: ActiveWorkout
 }
 
 interface ExState {
@@ -74,18 +79,21 @@ function repsInvalid(v: string): boolean {
 }
 
 /** وضع التمرين النشط — شاشة كاملة، تمرين واحد في كل خطوة، تسجيل سريع. */
-export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: WorkoutModeProps) {
+export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, userId = null, resume }: WorkoutModeProps) {
   const t = getStrings(lang).workout
   const d = workoutScreenStrings[lang]
   // (P10.1) أسهم التنقّل تتبع اتجاه اللغة: «التالي» مع اتجاه القراءة و«السابق/الرجوع» عكسه.
   const nextChevron = lang === 'en' ? 'ChevronRight' : 'ChevronLeft'
   const prevChevron = lang === 'en' ? 'ChevronLeft' : 'ChevronRight'
-  const [startedAt] = useState(() => new Date().toISOString())
-  const [current, setCurrent] = useState(0)
+  // الاستئناف (ح-١): وقت البدء والموضع يأتيان من الجلسة المحفوظة إن وُجدت.
+  const [startedAt] = useState(() => resume?.startedAt ?? new Date().toISOString())
+  const [current, setCurrent] = useState(() =>
+    resume ? Math.min(resume.current, Math.max(0, day.exercises.length - 1)) : 0,
+  )
   const [openGuide, setOpenGuide] = useState(false)
   const [openAlt, setOpenAlt] = useState(false)
   const [openDetails, setOpenDetails] = useState(false)
-  const [swap, setSwap] = useState<Record<string, string>>({})
+  const [swap, setSwap] = useState<Record<string, string>>(() => resume?.swap ?? {})
   // (P12) محتوى بطاقتي البديل الصغيرتين لكل عنصر خطة (يتبدّل مع البطاقة الكبيرة في هذه الجلسة فقط).
   const [altSlots, setAltSlots] = useState<Record<string, [string, string]>>({})
   const [savedFlash, setSavedFlash] = useState(false)
@@ -97,6 +105,12 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
   const [state, setState] = useState<Record<string, ExState>>(() => {
     const init: Record<string, ExState> = {}
     day.exercises.forEach((pe) => {
+      // الاستئناف: ما حُفظ لهذا العنصر يفوز على القيم الافتراضية.
+      const saved = resume?.exercises[pe.id]
+      if (saved) {
+        init[pe.id] = { sets: saved.sets, painNote: saved.painNote, notes: saved.notes }
+        return
+      }
       const rec = getRecord(pe.exerciseId)
       const w = rec?.lastWeight ?? pe.startingWeight ?? ''
       const r = rec?.lastReps ?? lowerReps(pe.reps)
@@ -115,6 +129,37 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
     })
     return init
   })
+
+  // (ح-١) حفظ الجلسة الجارية بعد كل تغيير — فإن قُتل التطبيق أو أُعيد التحميل عاد
+  // المستخدم إلى موضعه وجولاته. المخزَّن قيم ثابتة (معرّفات وأرقام) لا نصوص معروضة.
+  useEffect(() => {
+    // «تمرين فارغ» (بلا عناصر خطة) لا جلسة له تُستأنف.
+    if (day.exercises.length === 0) return
+    saveActiveWorkout(userId, {
+      dayId: day.id,
+      dayNameAr: day.nameAr,
+      dayNameEn: day.nameEn,
+      startedAt,
+      current,
+      exercises: Object.fromEntries(
+        Object.entries(state).map(([id, st]) => [
+          id,
+          {
+            sets: st.sets.map((s) => ({
+              setNumber: s.setNumber,
+              targetReps: s.targetReps,
+              actualReps: s.actualReps,
+              weightKg: s.weightKg,
+              completed: s.completed,
+            })),
+            painNote: st.painNote,
+            notes: st.notes,
+          },
+        ]),
+      ),
+      swap,
+    })
+  }, [userId, day.id, day.nameAr, day.nameEn, day.exercises.length, startedAt, current, state, swap])
 
   // مؤقّت الراحة
   const [timer, setTimer] = useState<{ left: number; running: boolean }>({ left: 0, running: false })
@@ -295,6 +340,7 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise }: Wo
         }
       }),
     }
+    clearActiveWorkout(userId)
     onFinish(session)
   }
 

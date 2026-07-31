@@ -55,6 +55,11 @@ export interface WorkoutScreenStrings {
   altCableLabel: string
   altCableFallbackLabel: string
   altMachineLabel: string
+  /** (ح-١) استئناف جلسة تمرين لم تُنهَ. */
+  resumeTitle: string
+  resumeBody: string
+  resumeAction: string
+  resumeDiscard: string
   /** (P12) زر التبديل داخل البطاقة الصغيرة. */
   switchHere: string
 }
@@ -99,6 +104,10 @@ const ar: WorkoutScreenStrings = {
   altCableLabel: 'بديل كيبل',
   altCableFallbackLabel: 'بديل بوزن الجسم/دمبل',
   altMachineLabel: 'الجهاز الأساسي',
+  resumeTitle: 'عندك تمرين لم ينتهِ',
+  resumeBody: 'توقّفت في {day}. تكمّل من مكانك أو تبدأ من جديد؟',
+  resumeAction: 'أكمل تمريني',
+  resumeDiscard: 'ابدأ نظيفًا',
   switchHere: 'بدّل إليه',
 }
 
@@ -142,6 +151,10 @@ const en: WorkoutScreenStrings = {
   altCableLabel: 'Cable alternative',
   altCableFallbackLabel: 'Bodyweight/dumbbell fallback',
   altMachineLabel: 'Primary machine',
+  resumeTitle: 'You have an unfinished workout',
+  resumeBody: 'You stopped at {day}. Pick up where you left off, or start fresh?',
+  resumeAction: 'Resume workout',
+  resumeDiscard: 'Start fresh',
   switchHere: 'Switch to this',
 }
 
