@@ -62,6 +62,7 @@ export interface LibraryStrings {
   howToPerform: string
   techniqueTips: string
   commonMistakes: string
+  guidanceUnavailable: string
   watchOnYouTube: string
   addToMyPlan: string
   // HistoryTab
@@ -154,6 +155,7 @@ const ar: LibraryStrings = {
   howToPerform: 'طريقة الأداء',
   techniqueTips: 'نصائح تقنية',
   commonMistakes: 'أخطاء شائعة',
+  guidanceUnavailable: 'الإرشاد الإنجليزي لهذا التمرين لسا ما توفر.',
   watchOnYouTube: 'شوف على يوتيوب',
   addToMyPlan: 'أضف لخطتي',
   historyEmpty: 'لسا ما فيه سجلّ لهذا التمرين. سجّل تمرينك وبيظهر هنا.',
@@ -239,6 +241,7 @@ const en: LibraryStrings = {
   howToPerform: 'How to perform',
   techniqueTips: 'Technique tips',
   commonMistakes: 'Common mistakes',
+  guidanceUnavailable: 'English guidance for this exercise is not available yet.',
   watchOnYouTube: 'Watch on YouTube',
   addToMyPlan: 'Add to my plan',
   historyEmpty: "Nothing logged for this exercise yet. Log a workout and it'll show up here.",

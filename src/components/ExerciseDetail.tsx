@@ -106,8 +106,12 @@ function ExerciseHero({ ex }: { ex: NonNullable<ReturnType<typeof getExercise>> 
 }
 
 function AboutTab({ ex, d, lang, onAddToPlan }: { ex: NonNullable<ReturnType<typeof getExercise>>; d: LibraryStrings; lang: Lang; onAddToPlan?: (id: string) => void }) {
-  const g = guidanceFor(ex)
+  const g = guidanceFor(ex, lang)
   const cue = getCue(ex.id)
+  const howTo = lang !== 'en' ? cue.steps : g.howTo
+  const tips = g.tips
+  const mistakes = lang !== 'en' ? cue.mistakes : g.mistakes
+  const safety = lang !== 'en' ? cue.safety : g.safety
   return (
     <div className="space-y-5">
       {/* العضلات المستهدفة — رقائق بلغة الواجهة الحالية (قاموس العضلات المشترك) */}
@@ -124,30 +128,30 @@ function AboutTab({ ex, d, lang, onAddToPlan }: { ex: NonNullable<ReturnType<typ
 
       {/* كيف تؤديه — إرشاد قِمّة المكتوب لكل تمرين (عربي)؛ للإنجليزية يبقى الإرشاد العام. */}
       <Block title={lang !== 'en' ? 'كيف تؤديه' : d.howToPerform} icon="CheckCircle2">
-        <ol className="space-y-1.5">
-          {(lang !== 'en' ? cue.steps : g.howTo).map((h, i) => (
+        {howTo.length > 0 ? <ol className="space-y-1.5">
+          {howTo.map((h, i) => (
             <li key={i} className="flex gap-2 text-sm leading-relaxed text-ink-700">
               <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-primary-soft text-[11px] font-black text-primary-c">{i + 1}</span>
               {h}
             </li>
           ))}
-        </ol>
+        </ol> : <p className="text-sm leading-relaxed text-ink-500">{d.guidanceUnavailable}</p>}
       </Block>
 
       {/* نصائح تقنية (عام، ثنائي اللغة) */}
       <Block title={d.techniqueTips} icon="Sparkles">
-        <BulletList items={g.tips} dotClassName="bg-success" />
+        {tips.length > 0 ? <BulletList items={tips} dotClassName="bg-success" /> : <p className="text-sm leading-relaxed text-ink-500">{d.guidanceUnavailable}</p>}
       </Block>
 
       {/* أخطاء شائعة */}
       <Block title={d.commonMistakes} icon="AlertTriangle">
-        <BulletList items={lang !== 'en' ? cue.mistakes : g.mistakes} dotClassName="bg-danger" />
+        {mistakes.length > 0 ? <BulletList items={mistakes} dotClassName="bg-danger" /> : <p className="text-sm leading-relaxed text-ink-500">{d.guidanceUnavailable}</p>}
       </Block>
 
       {/* سلامة — تمارين تحميل العمود/الركبة توجّه صراحةً لاستشارة مختص. */}
       <p className="flex items-start gap-2 rounded-xl border border-gold-400/40 bg-gold-200/40 p-3 text-xs leading-relaxed text-ink-700">
         <Icon name="ShieldCheck" className="mt-0.5 h-4 w-4 shrink-0 text-gold-600" />
-        {lang !== 'en' ? cue.safety : g.safety}
+        {safety || d.guidanceUnavailable}
       </p>
 
       {/* أزرار — زر يوتيوب فقط عند توفّر رابط (لا فيديو مُضمّن ولا صور خارجية) */}

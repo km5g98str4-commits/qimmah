@@ -54,6 +54,11 @@ export interface Exercise {
   alternatives: string[]
   notesAr: string
   notesEn: string
+  /** Optional authored English guidance; absence is rendered honestly in English. */
+  howToEn?: string[]
+  techniqueTipsEn?: string[]
+  commonMistakesEn?: string[]
+  safetyNotesEn?: string[]
   techniqueTipsAr: string[]
   commonMistakesAr: string[]
   safetyNotesAr: string[]
