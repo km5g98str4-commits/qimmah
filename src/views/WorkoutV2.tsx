@@ -4,6 +4,7 @@ import { ExerciseMedia } from '@/components/ExerciseMedia'
 import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
 import { applyTheme } from '@/lib/appPreferences'
+import { getStrings } from '@/config/strings'
 import type { AppRoute } from '@/lib/appRoutes'
 import { useCustomization } from '@/lib/customizationContext'
 import { useAppScrollReset } from '@/lib/useAppScrollReset'
@@ -337,6 +338,7 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   // Active-session exercises with substitutions applied (identity swap only).
   const effExercises = useMemo(() => applySubs(model.exercises, active?.subs, lang), [model.exercises, active?.subs, lang])
 
+  if (model.restDay) return <RestDayScreen lang={lang} onNavigate={onNavigate} />
   if (!model.available) return <MissingPlan lang={lang} onNavigate={onNavigate} />
 
   const startSession = () => {
@@ -1305,6 +1307,21 @@ function MissingPlan({ lang, onNavigate }: { lang: Lang; onNavigate: (r: AppRout
       <h1 className="mt-5 text-2xl font-black">{ar ? 'أكمل إعداد خطتك' : 'Finish setting up your plan'}</h1>
       <p className="mt-2 max-w-xs text-sm text-ink-500">{ar ? 'نحتاج هدفك وجدولك لنبني تمرينك.' : 'We need your goal and schedule to build your workout.'}</p>
       <button type="button" onClick={() => onNavigate('setup')} className="btn-primary mt-6 w-full max-w-xs py-4 text-[1.1875rem]">{ar ? 'ابدأ الإعداد' : 'Start setup'}</button>
+    </div>
+  )
+}
+
+function RestDayScreen({ lang, onNavigate }: { lang: Lang; onNavigate: (r: AppRoute) => void }) {
+  const t = getStrings(lang).workout
+  const ar = lang !== 'en'
+  return (
+    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light v2-screen-enter flex min-h-full flex-col items-center justify-center bg-page px-6 py-10 text-center text-ink-900">
+      <Icon name="Moon" className="h-12 w-12 text-primary-c" />
+      <h1 className="mt-5 text-2xl font-black">{t.restDayTitle}</h1>
+      <p className="mt-2 max-w-xs text-sm leading-relaxed text-ink-500">{t.restDayBody}</p>
+      <button type="button" onClick={() => onNavigate('dashboard')} className="btn-primary mt-6 w-full max-w-xs py-4 text-[1.1875rem]">
+        {t.backToToday}
+      </button>
     </div>
   )
 }

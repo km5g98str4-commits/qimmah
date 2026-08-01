@@ -252,6 +252,8 @@ export interface ShellStrings {
     recentTitle: string
     completedToday: string
     emptyPlan: string
+    restDayTitle: string
+    restDayBody: string
     workoutsTitle: string
     workoutsDesc: string
     // — وضع التمرين النشط —
@@ -735,6 +737,8 @@ const ar: ShellStrings = {
     recentTitle: 'آخر تمرين',
     completedToday: 'تمرين اليوم مكتمل',
     emptyPlan: 'اختر جدولك من الإعداد عشان تبدأ.',
+    restDayTitle: 'اليوم راحة',
+    restDayBody: 'جدولك ما فيه تمرين اليوم — خذ راحتك، ونشوفك في أقرب يوم تدريب.',
     workoutsTitle: 'تماريني',
     workoutsDesc: 'جدولك الحالي بكل أيامه وتمارينه — مع شرح كل تمرين.',
     heroReady: 'تمرينك اليوم جاهز',
@@ -1214,6 +1218,8 @@ const en: ShellStrings = {
     recentTitle: 'Recent workout',
     completedToday: "Today's workout completed",
     emptyPlan: 'Choose your plan in Setup to get started.',
+    restDayTitle: 'Rest day',
+    restDayBody: 'Your schedule has no workout today — take the rest and we’ll see you on the next training day.',
     workoutsTitle: 'My workouts',
     workoutsDesc: 'Your current plan with all days and exercises — each with a guide.',
     heroReady: "Today's workout is ready",
