@@ -17,11 +17,31 @@
 // وكل تأكيد سلبي يُحرَس بتأكيد أن ما ننفيه **موجود في المصدر أصلًا** — وإلا كان
 // مروره غير مستحقّ.
 
-import { spawn } from 'node:child_process'
+import { spawn, execFileSync } from 'node:child_process'
 import { mkdirSync, writeFileSync, rmSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { setTimeout as sleep } from 'node:timers/promises'
 import { chromium } from 'playwright'
+
+/**
+ * ختم الأرض — الفرع والـcommit اللذان جرت عليهما الرحلة.
+ *
+ * قاعدة ملزمة: **كل تقرير وكل ورقة توثيق تسمّي أرضها.** لقطة بلا أرض لا تُقرأ:
+ * «الطريق مسدود» على بناء بائت ليست نفسها على الجذع، وبلاغ أحمر بلا أرض يُرسل
+ * حارةً كاملة تطارد عطلًا لا وجود له عندها.
+ */
+export function groundStamp() {
+  const git = (...args) => execFileSync('git', args, { encoding: 'utf8' }).trim()
+  try {
+    const commit = git('rev-parse', '--short', 'HEAD')
+    const branch = git('rev-parse', '--abbrev-ref', 'HEAD')
+    const subject = git('log', '-1', '--format=%s')
+    const dirty = git('status', '--porcelain').length > 0
+    return { branch, commit, subject, dirty }
+  } catch {
+    return { branch: 'unknown', commit: 'unknown', subject: '', dirty: false }
+  }
+}
 
 /** أبعاد منطقية مطابقة لـiPhone 16/17 Pro Max — نفس ما يعتمده مصنع اللقطات. */
 export const VIEWPORTS = {
@@ -65,6 +85,7 @@ export async function startApp(port) {
  * @param {object} o.viewport أحد VIEWPORTS
  */
 export function createRecorder({ id, titleAr, titleEn, lang, viewport }) {
+  const ground = groundStamp()
   const dir = join(PROOF_ROOT, id, `${lang}-${viewport.name}`)
   rmSync(dir, { recursive: true, force: true })
   mkdirSync(dir, { recursive: true })
@@ -124,12 +145,12 @@ export function createRecorder({ id, titleAr, titleEn, lang, viewport }) {
     writeFileSync(
       join(dir, 'manifest.json'),
       JSON.stringify(
-        { id, titleAr, titleEn, lang, viewport: viewport.name, frames, checks, findings, skipped },
+        { id, titleAr, titleEn, lang, viewport: viewport.name, ground, frames, checks, findings, skipped },
         null,
         2,
       ),
     )
-    return { checks, frames, failed, findings, skipped, dir }
+    return { checks, frames, failed, findings, skipped, ground, dir }
   }
 
   return { check, shot, finding, skip, finish, dir, get frameCount() { return seq } }
@@ -219,6 +240,11 @@ export async function seedSession(page, { uid = 'journey-user', email = 'journey
 
 /** ملخّص وخروج — يفشل بالاسم لا بالعدد وحده. */
 export function report(journeyName, results) {
+  const g = results[0]?.ground
+  if (g) {
+    console.log(`\n📍 الأرض: ${g.branch} @ ${g.commit}${g.dirty ? ' (شجرة عمل غير نظيفة ⚠️)' : ''}`)
+    if (g.subject) console.log(`   ${g.subject}`)
+  }
   const all = results.flatMap((r) => r.checks)
   const failed = all.filter((c) => !c.ok)
   const allFindings = results.flatMap((r) => r.findings ?? [])

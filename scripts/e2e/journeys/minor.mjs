@@ -248,11 +248,22 @@ try {
   const nutriText = await visit('nutrition-minor', 'تغذية القاصر — بلا عجز أو فائض', "Minor's nutrition — no deficit or surplus")
   rec.check('شاشة التغذية لا تعرض هدف تنشيف للقاصر', !nutriText.includes('تنشيف'))
 
-  // محجوب بعطل ط-١ المرفوع — بأمر [CTO-43/أ] يُعلَن ولا يُنتظر.
-  rec.skip(
-    'تمرين القاصر من شاشة التمارين',
-    'التقاطة ط-١: شاشة التمارين لا ترى الخطة المبنيّة (أُسندت لحارة H موجةً طارئة) — تُعاد بعد هبوط الإصلاح',
+  // كانت هذه الخطوة متخطّاة بإعلان في التشغيل السابق (أرضه 488210d) لأن شاشة
+  // التمارين لم ترَ الخطة. الحجب زال على الجذع — تُشغَّل الآن كاملة.
+  await page.evaluate(() => { location.hash = '#/workout' })
+  await page.waitForTimeout(1200)
+  const workoutText = await visit('workout-minor', 'شاشة تمارين القاصر', "Minor's workout screen")
+  rec.check(
+    'شاشة التمارين ترى خطة القاصر (لا «أكمل إعداد خطتك»)',
+    !workoutText.includes('أكمل إعداد خطتك'),
   )
+  const startSession = page.getByRole('button', { name: /ابدأ الجلسة|ابدأ التمرين/ }).first()
+  rec.check(
+    'جلسة القاصر تبدأ من شاشة التمارين',
+    await startSession.click({ timeout: 5000 }).then(() => true).catch(() => false),
+  )
+  await page.waitForTimeout(700)
+  await visit('workout-minor-active', 'جلسة القاصر نشطة', "Minor's session active")
 
   const realErrors = errors.filter((e) => !(/401/.test(e) && /Failed to load resource/.test(e)))
   rec.check('لا أخطاء طرف عميل (عدا 401 الجلسة المزروعة — استثناء معلَن)', realErrors.length === 0,

@@ -54,6 +54,7 @@ const section = (run) => {
   <section>
     <h2>${esc(run.titleAr)} <span class="meta">${esc(run.lang)} · ${esc(run.variant)}</span></h2>
     <p class="sub">${esc(run.titleEn)}</p>
+    <p class="ground">📍 الأرض: <code>${esc(run.ground?.branch ?? 'غير مسجَّلة')}</code> @ <code>${esc(run.ground?.commit ?? '—')}</code>${run.ground?.dirty ? ' <b>(شجرة غير نظيفة)</b>' : ''}${run.ground?.subject ? ` — ${esc(run.ground.subject)}` : ''}</p>
     <div class="stats">
       <span class="ok">${passed} فحصًا ناجحًا</span>
       ${failed.length ? `<span class="bad">${failed.length} ساقطًا</span>` : ''}
@@ -85,7 +86,9 @@ const html = `<!doctype html>
   section { max-width:1200px; margin:32px auto; padding:24px; background:var(--card); border:1px solid var(--line); border-radius:18px }
   h2 { margin:0; font-size:1.35rem }
   h2 .meta { font-size:.8rem; color:var(--mut); font-weight:400 }
-  .sub { margin:2px 0 14px; color:var(--mut); direction:ltr; text-align:start; font-size:.9rem }
+  .ground { margin:0 0 14px; font-size:.8rem; color:var(--mut) }
+  .ground code { background:rgba(128,128,128,.15); padding:1px 6px; border-radius:5px }
+  .sub { margin:2px 0 4px; color:var(--mut); direction:ltr; text-align:start; font-size:.9rem }
   .stats { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px }
   .stats span { font-size:.8rem; padding:4px 10px; border-radius:999px; border:1px solid var(--line) }
   .stats .ok { color:var(--ok) } .stats .bad { color:var(--bad) } .stats .warn { color:var(--warn) } .stats .skip { color:var(--mut) }
