@@ -5,6 +5,7 @@ interface StartViewProps {
   lang: Lang
   onLogin: () => void
   onSignup: () => void
+  onGuest: () => void
 }
 
 /** Stable route adapter for the canonical v2.1 welcome screen. */
