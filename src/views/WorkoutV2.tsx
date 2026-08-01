@@ -371,7 +371,10 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   // Active-session exercises with substitutions applied (identity swap only).
   const effExercises = useMemo(() => applySubs(model.exercises, active?.subs, lang), [model.exercises, active?.subs, lang])
 
-  if (!model.available) return <MissingPlan lang={lang} onNavigate={onNavigate} />
+  // ح-٠ · حالتان لا حالة واحدة. «أكمل إعداد خطتك» لا تُقال إلا حين لا خطة
+  // محفوظة أصلًا؛ ووجود خطة بلا تمارين لليوم حالةٌ صادقة أخرى، لا طريق مسدود.
+  if (!model.planAvailable) return <MissingPlan lang={lang} onNavigate={onNavigate} />
+  if (!model.available) return <NoTrainingToday lang={lang} days={model.planTrainingDays} onNavigate={onNavigate} />
 
   const startSession = () => {
     const rows: Record<string, SetRow[]> = {}
@@ -1311,6 +1314,23 @@ function DiscardConfirmSheet({ lang, onDiscard, onCancel }: { lang: Lang; onDisc
         <button type="button" onClick={onDiscard} className="v2-pressable mt-5 w-full rounded-2xl py-4 text-[1.1875rem] font-black" style={{ background: FOCUS.error, color: FOCUS.onColor }}>{ar ? 'نعم، تجاهل' : 'Yes, discard'}</button>
         <button type="button" onClick={onCancel} className="v2-pressable mt-3 w-full rounded-2xl py-3 text-sm font-bold" style={{ background: 'transparent', border: `1px solid ${FOCUS.line}`, color: FOCUS.inkMuted }}>{ar ? 'لا، أكمل التمرين' : 'No, keep training'}</button>
       </div>
+    </div>
+  )
+}
+
+/**
+ * ح-٠ · خطة محفوظة موجودة، ويومُ اليوم بلا تمارين. الفرق عن `MissingPlan` جوهري:
+ * هناك **لا نطلب إعدادًا** لأن الإعداد تمّ — نقول الحقيقة ونترك الطريق مفتوحًا.
+ */
+function NoTrainingToday({ lang, days, onNavigate }: { lang: Lang; days: number; onNavigate: (r: AppRoute) => void }) {
+  const ar = lang !== 'en'
+  const d = workoutResumeStrings[lang]
+  return (
+    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light v2-screen-enter flex min-h-screen flex-col items-center justify-center bg-page px-6 text-center text-ink-900">
+      <Icon name="CalendarDays" className="h-12 w-12 text-ink-400" />
+      <h1 className="mt-5 text-2xl font-black">{d.noTrainingTodayTitle}</h1>
+      <p className="mt-2 max-w-xs text-sm text-ink-500">{d.noTrainingTodayBody(toAr(days, lang))}</p>
+      <button type="button" onClick={() => onNavigate('dashboard')} className="btn-primary mt-6 w-full max-w-xs py-4 text-[1.1875rem]">{d.noTrainingTodayCta}</button>
     </div>
   )
 }

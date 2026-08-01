@@ -38,7 +38,19 @@ export interface WorkoutV2Exercise {
 }
 
 export interface WorkoutV2Model {
+  /** هل ليومِ اليوم تمارين؟ (يقود شاشة الجلسة). */
   available: boolean
+  /**
+   * ح-٠ · هل تُوجد **خطة محفوظة فعلًا** (أي يوم فيه تمرين واحد على الأقل)؟
+   *
+   * كان `available` وحده يحكم، فيخلط حالتين مختلفتين تمامًا: «لا خطة» و«خطة
+   * موجودة لكن يومَ اليوم بلا تمارين». والنتيجة أن مستخدمًا أكمل إعداده ورأى
+   * «خطتك جاهزة» يُقابَل في تبويب التمارين بـ«أكمل إعداد خطتك» — طريق مسدود
+   * يكذّب ما قاله له التطبيق قبل ثوانٍ. الشرط الآن يقرأ الخطة المحفوظة نفسها.
+   */
+  planAvailable: boolean
+  /** عدد أيام التدريب في الخطة المحفوظة (للعرض الصادق في حالة «ليس اليوم»). */
+  planTrainingDays: number
   goal: CalorieGoal | null
   program: { titleAr: string; titleEn: string; contextAr: string; contextEn: string; estimatedDurationMin: number }
   session: { title: string; muscles: string[]; durationMin: number; exerciseCount: number; source: string }
@@ -120,8 +132,13 @@ export function buildWorkoutV2Model(customization: Customization, lang: Lang): W
   const muscles = Array.from(new Set(exercises.flatMap((e) => e.muscles))).slice(0, 4)
   const goalWordAr = goal === 'cut' ? 'التنشيف' : goal === 'bulk' ? 'التضخيم' : goal === 'maintain' ? 'المحافظة' : ''
 
+  // ح-٠ · تُقرأ الخطة المحفوظة كاملة، لا يومُ اليوم وحده.
+  const trainingDays = customization.workoutPlan.days.filter((d) => d.exercises.length > 0)
+
   return {
     available: total > 0,
+    planAvailable: trainingDays.length > 0,
+    planTrainingDays: trainingDays.length,
     goal,
     program: {
       titleAr: goalWordAr ? `برنامج ${goalWordAr}` : 'برنامجك',

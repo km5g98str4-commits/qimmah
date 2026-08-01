@@ -33,6 +33,10 @@ export interface WorkoutResumeStrings {
   saveFailedGeneric: string
   /** وصف وصولي لورقة الاستئناف. */
   sheetAria: string
+  /** ح-٠ · خطة محفوظة موجودة ويومُ اليوم بلا تمارين — لا «أكمل إعدادك». */
+  noTrainingTodayTitle: string
+  noTrainingTodayBody: (days: string) => string
+  noTrainingTodayCta: string
 }
 
 const ar: WorkoutResumeStrings = {
@@ -53,6 +57,9 @@ const ar: WorkoutResumeStrings = {
   saveFailedQuota: 'مساحة التخزين ممتلئة، فلم يُحفظ آخر تغيير. جولاتك السابقة سليمة.',
   saveFailedGeneric: 'تعذّر حفظ آخر تغيير على هذا الجهاز. جولاتك السابقة سليمة.',
   sheetAria: 'استئناف تمرين مفتوح',
+  noTrainingTodayTitle: 'اليوم ليس يوم تمرين',
+  noTrainingTodayBody: (days) => `خطتك محفوظة وفيها ${days} أيام تدريب. لا تمارين مجدولة لليوم.`,
+  noTrainingTodayCta: 'رجوع للرئيسية',
 }
 
 const en: WorkoutResumeStrings = {
@@ -73,6 +80,9 @@ const en: WorkoutResumeStrings = {
   saveFailedQuota: 'Storage is full, so the last change was not saved. Your earlier sets are safe.',
   saveFailedGeneric: 'The last change could not be saved on this device. Your earlier sets are safe.',
   sheetAria: 'Resume workout in progress',
+  noTrainingTodayTitle: 'No training scheduled today',
+  noTrainingTodayBody: (days) => `Your plan is saved with ${days} training days. Nothing is scheduled for today.`,
+  noTrainingTodayCta: 'Back to home',
 }
 
 export const workoutResumeStrings: Record<Lang, WorkoutResumeStrings> = { ar, en }
