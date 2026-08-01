@@ -89,7 +89,9 @@ console.log('\n③ الطزاجة (حدّ ١٢ ساعة)')
   check('لقطة عمرها < ١٢س → تُستأنَف', loadActiveSession('u', NOW) !== null)
   saveActiveSession('u', validSnapshot({ savedAt: NOW - (ACTIVE_SESSION_MAX_AGE_MS + 1000) }))
   check('لقطة عمرها > ١٢س → تُرفض وتُمسح', loadActiveSession('u', NOW) === null)
-  check('اللقطة القديمة مُسحت فعليًا من التخزين', loadActiveSession('u', NOW) === null)
+  // يُقرأ المفتاح الخام: تكرار loadActiveSession يُعيد null سواء مُسحت أو رُفضت فقط،
+  // فلا يُثبت المسح. المسح الفعلي شرط ألّا يُسأل المستخدم عن الجلسة نفسها مرّتين.
+  check('اللقطة القديمة مُسحت فعليًا من التخزين', window.localStorage.getItem(activeSessionKey('u')) === null)
 }
 
 console.log('\n④ الحارس يرفض المدخلات المعطوبة')
@@ -136,6 +138,44 @@ console.log('\n⑥ سيناريو الخلفية دقيقتين (جوهر الإ
   const long = { endsAt: start + 180_000, durationSec: 180 }
   check('راحة ٣د بعد خلفية دقيقتين → ٦٠ث بالضبط', restRemainingSec(long.endsAt, afterBackground) === 60)
   check('راحة ٣د ليست منتهية بعد دقيقتين', restIsFinished(long, afterBackground) === false)
+}
+
+console.log('\n⑦ التلف الخام في التخزين (يعبر JSON.parse)')
+{
+  // القسم ④ يفحص الحارس على كائنات جاهزة، فلا يمرّ قطّ بمسار try/catch حول JSON.parse
+  // في loadActiveSession. وهو أكثر صور التلف واقعيةً: كتابة مبتورة لحظة قتل التطبيق.
+  const key = activeSessionKey('userC')
+  const rawCases: [string, string][] = [
+    ['نصّ غير JSON', '}{ ليس JSON'],
+    ['JSON مبتور (كتابة انقطعت)', '{"version":1,"savedAt":180000000'],
+    ['مصفوفة بدل كائن', JSON.stringify([1, 2, 3])],
+  ]
+  for (const [label, raw] of rawCases) {
+    window.localStorage.setItem(key, raw)
+    // نلتقط الحالة قبل القراءة: بدونها يمرّ توكيد «مُسح» حتى لو لم يُكتب شيء أصلًا.
+    const writtenBefore = window.localStorage.getItem(key) !== null
+    check(`${label} → بداية نظيفة (لا انهيار)`, loadActiveSession('userC', NOW) === null)
+    check(`${label} → مُسح من التخزين`, writtenBefore && window.localStorage.getItem(key) === null)
+  }
+}
+
+console.log('\n⑧ عزل الضيف (ownerId = null) عن الحسابات')
+{
+  // وضع الضيف قادم (مدخل «كمّل كضيف»)، ومسار null قائم في activeSessionKey
+  // ويمرّره dataPortability. الضلعان مطلوبان اليوم وغدًا.
+  clearActiveSession(null)
+  clearActiveSession('userD')
+  check('مفتاح الضيف ≠ مفتاح الحساب', activeSessionKey(null) !== activeSessionKey('userD'))
+
+  saveActiveSession('userD', validSnapshot({ startedAt: 'D-session' }))
+  check('الضيف لا يرى جلسة حساب', loadActiveSession(null, NOW) === null)
+
+  clearActiveSession('userD')
+  saveActiveSession(null, validSnapshot({ startedAt: 'guest-session' }))
+  check('حساب لا يرى جلسة الضيف', loadActiveSession('userD', NOW) === null)
+  check('الضيف يرى جلسته هو', loadActiveSession(null, NOW)?.startedAt === 'guest-session')
+  clearActiveSession(null)
+  check('مسح جلسة الضيف يمسحها فعليًا', window.localStorage.getItem(activeSessionKey(null)) === null)
 }
 
 console.log(`\n${'─'.repeat(44)}`)
