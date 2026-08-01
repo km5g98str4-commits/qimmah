@@ -13,7 +13,7 @@ import type { WorkoutV2Model } from './workoutV2Model'
 /** The subset of the v2 Active state needed to build a session (rows per exercise id). */
 export interface V2ActiveSnapshot {
   startedAt: number
-  rows: Record<string, { weight: number; reps: number; done: boolean }[]>
+  rows: Record<string, { weight: number; reps: number; done: boolean; rpe?: number }[]>
 }
 
 /**
@@ -34,6 +34,7 @@ export function buildV2WorkoutSession(
       actualReps: String(r.reps),
       weightKg: String(r.weight),
       completed: r.done,
+      ...(typeof r.rpe === 'number' ? { rpe: r.rpe } : {}),
     }))
     return {
       exerciseId: ex.exerciseId,

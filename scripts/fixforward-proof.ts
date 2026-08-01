@@ -37,7 +37,7 @@ console.log('\n① إصلاح A — تحويل جلسة التمرين v2 إلى
   const active: V2ActiveSnapshot = {
     startedAt: 1_800_000_000_000,
     rows: {
-      'pe-1': [{ weight: 60, reps: 10, done: true }, { weight: 62.5, reps: 8, done: true }],
+      'pe-1': [{ weight: 60, reps: 10, done: true, rpe: 8 }, { weight: 62.5, reps: 8, done: true }],
       'pe-2': [{ weight: 120, reps: 5, done: true }],
     },
   }
@@ -50,6 +50,7 @@ console.log('\n① إصلاح A — تحويل جلسة التمرين v2 إلى
   check('معرّف التمرين قانوني (من الكتالوج)', s.exercises[0].exerciseId === 'barbell-bench-press')
   check('المجموعة الأولى: وزن نصّي 60', s.exercises[0].sets?.[0].weightKg === '60')
   check('المجموعة الأولى: تكرار نصّي 10', s.exercises[0].sets?.[0].actualReps === '10')
+  check('RPE اختياري يُحفظ للمجموعة المتقدمة', s.exercises[0].sets?.[0].rpe === 8 && s.exercises[0].sets?.[1].rpe === undefined)
   check('كل مجموعات pe-1 مكتملة → التمرين مكتمل', s.exercises[0].completed === true)
   check('حجم بنش = 60×10 + 62.5×8 يُحسب لاحقًا من sets', s.exercises[0].sets?.length === 2)
 }

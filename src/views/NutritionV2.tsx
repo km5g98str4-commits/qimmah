@@ -15,6 +15,8 @@ import {
   type MealSlot,
   type Nudge,
 } from '@/lib/nutritionV2Model'
+import { copyMealToToday, getDayEntries, getWeeklyNutritionStats } from '@/lib/nutritionHistory'
+import { getDayStamp } from '@/lib/today'
 
 // الماسح (ScanFoodPanel → BarcodeCamera → @zxing) يُحمَّل كسولًا: محرّك الباركود
 // الثقيل (~443kB) لا يدخل حزمة شاشة التغذية، ويُجلب فقط عند فتح المستخدم للماسح.
@@ -79,14 +81,27 @@ export function NutritionV2({ lang }: NutritionV2Props) {
   const [screen, setScreen] = useState<'home' | 'add'>('home')
   useAppScrollReset(screen)
   const [targetSlot, setTargetSlot] = useState<MealSlot>('lunch')
+  const [copyNote, setCopyNote] = useState<string | null>(null)
   // `tick` forces a recompute after a food/water is added (the model reads
   // localStorage, which the deps linter can't observe).
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const model = useMemo(() => buildNutritionV2Model(customization, lang), [customization, lang, tick])
+  // tick invalidates the read-only historical snapshot after copying a meal.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const savedDays = useMemo(() => getWeeklyNutritionStats().filter((day) => day.date !== getDayStamp() && day.source === 'entries'), [tick])
 
   const bump = () => setTick((x) => x + 1)
   const openAdd = (slot: MealSlot) => { setTargetSlot(slot); setScreen('add') }
   const onAdded = () => { bump(); setScreen('home') }
+  const copySavedMeal = (date: string, slot: MealSlot) => {
+    const result = copyMealToToday(date, slot)
+    if (result.status === 'ok') {
+      setCopyNote(t(`نسخنا ${result.copied} أصناف لليوم.`, `Copied ${result.copied} items to today.`))
+      bump()
+    } else {
+      setCopyNote(ar ? result.errors[0]?.messageAr ?? 'ما فيه أصناف للنسخ.' : result.errors[0]?.messageEn ?? 'There are no items to copy.')
+    }
+  }
 
   useEffect(() => {
     const applyQuickLog = (target: 'meal' | 'water' | 'routine') => {
@@ -235,6 +250,37 @@ export function NutritionV2({ lang }: NutritionV2Props) {
             )
           })}
         </section>
+
+        {savedDays.length > 0 && (
+          <details className="rounded-2xl border border-line bg-surface" open>
+            <summary className="flex min-h-[3.75rem] cursor-pointer list-none items-center gap-3 px-4 py-3 [&::-webkit-details-marker]:hidden">
+              <span className="grid h-9 w-9 place-items-center rounded-xl bg-beige text-ink-500"><Icon name="History" className="h-4 w-4" /></span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm font-black">{t('وجبات محفوظة', 'Saved meals')}</span>
+                <span className="block text-xs text-ink-500">{t('انسخ وجبة من الأيام الماضية لليوم.', 'Copy a meal from a previous day to today.')}</span>
+              </span>
+              <Icon name="ChevronDown" className="h-4 w-4 text-ink-400" />
+            </summary>
+            <div className="space-y-2 border-t border-line px-3 pb-3 pt-3">
+              {savedDays.map((day) => {
+                const slots = new Set(getDayEntries(day.date).map((entry) => entry.meal))
+                return (
+                  <div key={day.date} className="rounded-xl border border-line bg-page px-3 py-2.5">
+                    <p className="text-xs font-black text-ink-700" dir="ltr">{day.date}</p>
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {SLOTS.filter((slot) => slots.has(slot.slot)).map((slot) => (
+                        <button key={slot.slot} type="button" onClick={() => copySavedMeal(day.date, slot.slot)} className="rounded-lg border border-line bg-surface px-2.5 py-1.5 text-xs font-bold text-ink-700 hover:border-[color:var(--v2-blue)]">
+                          {t(`انسخ ${slot.ar}`, `Copy ${slot.en}`)}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </details>
+        )}
+        {copyNote && <p role="status" className="rounded-xl border border-line bg-surface px-3 py-2 text-center text-xs font-bold text-ink-600">{copyNote}</p>}
 
         <p className="px-1 text-center text-[0.7rem] text-ink-400">
           {t('القيم تقديرية · محفوظة على هذا الجهاز.', 'Values are estimates · saved on this device.')}
