@@ -4,6 +4,12 @@
   "titleEn": "The minor journey — the compliance gate",
   "lang": "ar",
   "viewport": "large",
+  "ground": {
+    "branch": "i/journey-advanced",
+    "commit": "b47cbf3",
+    "subject": "chore(e2e): توثيق أداة تشخيص الحراسة وضمّها",
+    "dirty": false
+  },
   "frames": [
     {
       "seq": 1,
@@ -60,6 +66,20 @@
       "slug": "nutrition-minor",
       "captionAr": "تغذية القاصر — بلا عجز أو فائض",
       "captionEn": "Minor's nutrition — no deficit or surplus"
+    },
+    {
+      "seq": 9,
+      "file": "09-workout-minor.png",
+      "slug": "workout-minor",
+      "captionAr": "شاشة تمارين القاصر",
+      "captionEn": "Minor's workout screen"
+    },
+    {
+      "seq": 10,
+      "file": "10-workout-minor-active.png",
+      "slug": "workout-minor-active",
+      "captionAr": "جلسة القاصر نشطة",
+      "captionEn": "Minor's session active"
     }
   ],
   "checks": [
@@ -169,6 +189,16 @@
       "detail": ""
     },
     {
+      "name": "شاشة التمارين ترى خطة القاصر (لا «أكمل إعداد خطتك»)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "جلسة القاصر تبدأ من شاشة التمارين",
+      "ok": true,
+      "detail": ""
+    },
+    {
       "name": "لا أخطاء طرف عميل (عدا 401 الجلسة المزروعة — استثناء معلَن)",
       "ok": true,
       "detail": ""
@@ -181,10 +211,5 @@
       "severity": "متوسط"
     }
   ],
-  "skipped": [
-    {
-      "name": "تمرين القاصر من شاشة التمارين",
-      "blockedBy": "التقاطة ط-١: شاشة التمارين لا ترى الخطة المبنيّة (أُسندت لحارة H موجةً طارئة) — تُعاد بعد هبوط الإصلاح"
-    }
-  ]
+  "skipped": []
 }

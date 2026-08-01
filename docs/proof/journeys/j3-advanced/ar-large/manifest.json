@@ -1,0 +1,149 @@
+{
+  "id": "j3-advanced",
+  "titleAr": "رحلة المتقدّم — تأكيد عددي",
+  "titleEn": "The advanced journey — numeric assertion",
+  "lang": "ar",
+  "viewport": "large",
+  "ground": {
+    "branch": "i/journey-advanced",
+    "commit": "b47cbf3",
+    "subject": "chore(e2e): توثيق أداة تشخيص الحراسة وضمّها",
+    "dirty": false
+  },
+  "frames": [
+    {
+      "seq": 1,
+      "file": "01-مبتدئ-1-level.png",
+      "slug": "مبتدئ-1-level",
+      "captionAr": "مبتدئ — المستوى «مبتدئ»",
+      "captionEn": "مبتدئ — level \"مبتدئ\""
+    },
+    {
+      "seq": 2,
+      "file": "02-مبتدئ-2-goal.png",
+      "slug": "مبتدئ-2-goal",
+      "captionAr": "مبتدئ — شاشة الهدف بصياغته",
+      "captionEn": "مبتدئ — goal step in its own wording"
+    },
+    {
+      "seq": 3,
+      "file": "03-مبتدئ-3-training.png",
+      "slug": "مبتدئ-3-training",
+      "captionAr": "مبتدئ — الأيام والمدّة كما يقترحها التطبيق",
+      "captionEn": "مبتدئ — days and duration as suggested"
+    },
+    {
+      "seq": 4,
+      "file": "04-مبتدئ-4-plan.png",
+      "slug": "مبتدئ-4-plan",
+      "captionAr": "مبتدئ — «خطتك جاهزة»",
+      "captionEn": "مبتدئ — plan ready"
+    },
+    {
+      "seq": 5,
+      "file": "05-مبتدئ-5-nutrition.png",
+      "slug": "مبتدئ-5-nutrition",
+      "captionAr": "مبتدئ — أرقامه الغذائية",
+      "captionEn": "مبتدئ — its nutrition numbers"
+    },
+    {
+      "seq": 6,
+      "file": "06-مبتدئ-6-workout.png",
+      "slug": "مبتدئ-6-workout",
+      "captionAr": "مبتدئ — بنية تمرينه",
+      "captionEn": "مبتدئ — its workout structure"
+    },
+    {
+      "seq": 7,
+      "file": "07-متقدّم-1-level.png",
+      "slug": "متقدّم-1-level",
+      "captionAr": "متقدّم — المستوى «متقدّم»",
+      "captionEn": "متقدّم — level \"متقدّم\""
+    },
+    {
+      "seq": 8,
+      "file": "08-متقدّم-2-goal.png",
+      "slug": "متقدّم-2-goal",
+      "captionAr": "متقدّم — شاشة الهدف بصياغته",
+      "captionEn": "متقدّم — goal step in its own wording"
+    },
+    {
+      "seq": 9,
+      "file": "09-متقدّم-3-training.png",
+      "slug": "متقدّم-3-training",
+      "captionAr": "متقدّم — الأيام والمدّة كما يقترحها التطبيق",
+      "captionEn": "متقدّم — days and duration as suggested"
+    },
+    {
+      "seq": 10,
+      "file": "10-متقدّم-4-plan.png",
+      "slug": "متقدّم-4-plan",
+      "captionAr": "متقدّم — «خطتك جاهزة»",
+      "captionEn": "متقدّم — plan ready"
+    },
+    {
+      "seq": 11,
+      "file": "11-متقدّم-5-nutrition.png",
+      "slug": "متقدّم-5-nutrition",
+      "captionAr": "متقدّم — أرقامه الغذائية",
+      "captionEn": "متقدّم — its nutrition numbers"
+    },
+    {
+      "seq": 12,
+      "file": "12-متقدّم-6-workout.png",
+      "slug": "متقدّم-6-workout",
+      "captionAr": "متقدّم — بنية تمرينه",
+      "captionEn": "متقدّم — its workout structure"
+    }
+  ],
+  "checks": [
+    {
+      "name": "المتقدّم يرى «تنشيف (Cut)»",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "المتقدّم يرى «إعادة تركيب (Recomposition)» — وهي المفردة المحجوبة عن المبتدئ في ط-١",
+      "ok": true,
+      "detail": "Recomposition"
+    },
+    {
+      "name": "المتقدّم يرى «تضخيم نظيف (Lean Bulk)»",
+      "ok": true,
+      "detail": "Lean Bulk"
+    },
+    {
+      "name": "والمبتدئ لم يرَ أيًّا من الثلاث في شاشته",
+      "ok": true,
+      "detail": "تأكيد متقابل: نفس التشغيل، شاشتان، مفردتان"
+    },
+    {
+      "name": "الجسد متطابق بين المسارين (شرط عزل المتغيّر)",
+      "ok": true,
+      "detail": "28 سنة · 178سم · 82كجم — مُدخَل حرفيًا في الاثنين"
+    },
+    {
+      "name": "المتغيّر المستقلّ (المستوى) تغيّر فعلًا بين المسارين — شرط صحّة المقارنة",
+      "ok": true,
+      "detail": "beginner → advanced (مستبعَد من جدول المخرَجات: مدخل لا مخرَج)"
+    },
+    {
+      "name": "الفارق مُقاس لا مُفترَض — البصمتان مسجَّلتان في البيان",
+      "ok": true,
+      "detail": "النتيجة سلبية ومرفوعة، لا مُطوَّعة"
+    },
+    {
+      "name": "لا أخطاء طرف عميل في المسارين (عدا 401 الجلسة المزروعة — استثناء معلَن)",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "findings": [
+    {
+      "title": "المستوى لا يغيّر رقمًا واحدًا في الخطة — مبتدئ ومتقدّم بنفس الجسد يحصلان على خطة متطابقة",
+      "evidence": "قُورن 6 مقياسًا داخل التشغيل الواحد وعلى البناء نفسه، بجسد متطابق (28/178/82) وهدف ونية ومكان متطابقة، والمتغيّر الوحيد المستوى. المتطابق: السعرات المستهدفة · البروتين (غ) · أيام التدريب · التقسيمة · مدّة الجلسة (د) · نمط التقسيمة. المستوى يُخزَّن فعلًا (experience) ويغيّر **صياغة** الأهداف، لكنه لا يصل إلى أي رقم في المخرَج. أي أن سؤال المستوى يجمع إجابة لا تُغيّر شيئًا يراه المستخدم في خطته.",
+      "severity": "عالٍ"
+    }
+  ],
+  "skipped": []
+}
