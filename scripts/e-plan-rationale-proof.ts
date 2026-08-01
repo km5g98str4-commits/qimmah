@@ -91,6 +91,9 @@ check('raw injury text is absent from the rationale', !JSON.stringify(injured).i
 check('raw injury text is absent in Arabic too', !JSON.stringify(injured).includes('الركبة'))
 check('injury presence is reported as a stable token', outcomeOf(injured, 'injuryFilter') === 'applied')
 check('no declared injury reports notApplied', outcomeOf(base, 'injuryFilter') === 'notApplied')
+const unrecognizedInjury = rationaleFor({ injuries: 'hip pain' })
+check('an unrecognized injury note never claims that filtering happened', outcomeOf(unrecognizedInjury, 'injuryFilter') === 'unrecognized')
+check('an unrecognized injury note still never leaks its raw text', !JSON.stringify(unrecognizedInjury).includes('hip pain'))
 
 console.log('\n═══ 3) INACTIVE AXES ARE DECLARED, NOT CLAIMED (§5) ═══')
 const focusAxis = base.inactiveAxes.find((a) => a.axis === 'trainingFocus')
@@ -134,6 +137,28 @@ check(
   rationaleFor({ trainingDays: 5, muscleFocus: 'lower' }).decisions.find((d) => d.area === 'split')?.drivers.some((dr) => dr.key === 'muscleFocus') === true
     && base.decisions.find((d) => d.area === 'split')?.drivers.some((dr) => dr.key === 'muscleFocus') === false,
 )
+check(
+  'session duration changes measured weekly volume',
+  outcomeOf(rationaleFor({ workoutDuration: 30 }), 'weeklyVolume') !== outcomeOf(rationaleFor({ workoutDuration: 90 }), 'weeklyVolume'),
+)
+check(
+  'consistency changes measured weekly volume through the lighter first week',
+  outcomeOf(rationaleFor({ consistency: 'onoff' }), 'weeklyVolume') !== outcomeOf(rationaleFor({ consistency: 'regular' }), 'weeklyVolume'),
+)
+check(
+  'a real muscle focus changes measured weekly volume',
+  outcomeOf(rationaleFor({ muscleFocus: 'lower' }), 'weeklyVolume') !== outcomeOf(rationaleFor({ muscleFocus: 'balanced' }), 'weeklyVolume'),
+)
+
+const calorieDrivers = ['goalType', 'gender', 'weightKg', 'heightCm', 'age', 'activityLevel', 'trainingDays']
+const calorieDecision = base.decisions.find((d) => d.area === 'calorieTarget')
+check('the calorie reason names every input used by the equation', calorieDrivers.every((key) => calorieDecision?.drivers.some((driver) => driver.key === key)))
+check('weight changes the calorie target', outcomeOf(rationaleFor({ weightKg: 62 }), 'calorieTarget') !== outcomeOf(rationaleFor({ weightKg: 92 }), 'calorieTarget'))
+check('height changes the calorie target', outcomeOf(rationaleFor({ heightCm: 155 }), 'calorieTarget') !== outcomeOf(rationaleFor({ heightCm: 190 }), 'calorieTarget'))
+check('sex changes the calorie target', outcomeOf(rationaleFor({ gender: 'female' }), 'calorieTarget') !== outcomeOf(rationaleFor({ gender: 'male' }), 'calorieTarget'))
+check('daily activity changes the calorie target', outcomeOf(rationaleFor({ activityLevel: 'sedentary' }), 'calorieTarget') !== outcomeOf(rationaleFor({ activityLevel: 'very_active' }), 'calorieTarget'))
+check('age changes the calorie target', outcomeOf(rationaleFor({ age: 24 }), 'calorieTarget') !== outcomeOf(rationaleFor({ age: 54 }), 'calorieTarget'))
+check('training days change the calorie target', outcomeOf(rationaleFor({ trainingDays: 2 }), 'calorieTarget') !== outcomeOf(rationaleFor({ trainingDays: 6 }), 'calorieTarget'))
 
 console.log('\n═══ 5) MEASURED VALUES MATCH THE PLAN, NOT A RE-DERIVATION ═══')
 const plan = generatePlan(profileFor())
@@ -216,6 +241,53 @@ check(
   'the error only ever understates personalisation, never overstates it',
   rationaleFor({ muscleFocus: 'balanced' }).decisions.every((d) => d.area !== 'muscleFocus'),
 )
+
+console.log('\n═══ 10) THREE REAL PROFILES PRODUCE DISTINCT PLANS ═══')
+const acceptanceProfiles = [
+  profileFor({
+    age: 22,
+    goalType: 'maintenance',
+    trainingDays: 3,
+    workoutDuration: 30,
+    trainingLevel: 'beginner',
+    experienceBand: 'lt1m',
+    workoutEnvironment: 'home',
+    gymType: 'home',
+    gymAccess: 'home',
+  }),
+  profileFor({
+    age: 31,
+    goalType: 'bulking',
+    trainingDays: 4,
+    workoutDuration: 60,
+    trainingLevel: 'intermediate',
+    experienceBand: '1to2y',
+    workoutEnvironment: 'gym',
+    gymType: 'full',
+    gymAccess: 'full',
+  }),
+  profileFor({
+    age: 39,
+    goalType: 'cutting',
+    trainingDays: 6,
+    workoutDuration: 90,
+    trainingLevel: 'advanced',
+    experienceBand: 'gt2y',
+    workoutEnvironment: 'gym',
+    gymType: 'full',
+    gymAccess: 'full',
+  }),
+]
+const acceptancePlans = acceptanceProfiles.map((profile) => generatePlan(profile))
+const acceptanceFingerprints = acceptancePlans.map((plan) => JSON.stringify({
+  template: plan.suggestedWorkoutTemplateId,
+  firstDay: plan.workoutPlan.days[0]?.exercises.map((exercise) => exercise.exerciseId),
+  calories: plan.targets.targetCalories,
+  protein: plan.targets.proteinGrams,
+}))
+check('all three profile fingerprints are distinct', new Set(acceptanceFingerprints).size === 3)
+check('all three profile schedules are non-empty', acceptancePlans.every((plan) => plan.workoutPlan.days.length > 0 && plan.workoutPlan.days[0].exercises.length > 0))
+check('the profiles resolve to three different split templates', new Set(acceptancePlans.map((plan) => plan.suggestedWorkoutTemplateId)).size === 3)
 
 console.log(`\nE plan rationale: ${passed} passed, ${failures.length} failed`)
 if (failures.length) {

@@ -204,6 +204,11 @@ function detectInjuries(injuries?: string): Set<InjuryArea> {
   return out
 }
 
+/** هل نصّ القيود يفعّل فعلًا واحدًا على الأقل من مرشّحات الإصابة في المولّد؟ */
+export function hasRecognizedInjuryArea(injuries?: string): boolean {
+  return detectInjuries(injuries).size > 0
+}
+
 // تمارين نستبعدها افتراضيًا لكل إصابة — مع إبقاء بدائل أأمن لنفس المجموعة العضلية.
 // المبدأ: عند الشك نستبعد (محافظ)، مع ضمان بقاء بدائل تملأ الخطة (أجهزة/كيبل/دمبل).
 // المعرّفات هنا قانونية (P12): كائنات التمارين تحمل المعرّف القانوني وفحص العضوية يتم عليه.
@@ -1098,7 +1103,7 @@ export function generatePlan(profile: Profile): GeneratedPlan {
   // تنبيه عند تصفية الإصابات: استبعدنا تمارين عالية الخطورة واخترنا بدائل أأمن.
   const injuryAreas = detectInjuries(p.injuries)
   if (injuryAreas.size) {
-    warnings.push('راعينا الإصابات المحددة باستبعاد تمارين عالية الخطورة واختيار بدائل أأمن لنفس العضلات.')
+    warnings.push('راعينا مناطق الإصابة التي تعرّفنا عليها باستبعاد التمارين المطابقة لقائمة المخاطر واختيار بدائل لنفس العضلات.')
   }
   // فحص تكرار الأرجل: القاعدة مضمونة في التلقائي؛ هنا ننبّه إذا اختار المستخدم تقسيمة متقدّمة تدرّب الأرجل أقل من مرّتين.
   const legDays = weeklySchedule.filter((d) => d.type === 'legs' || d.type === 'full').length

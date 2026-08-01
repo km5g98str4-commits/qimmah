@@ -14,6 +14,19 @@ import type { Muscle } from '@/types/workout'
 import type { PlanAxisKey, PlanDecisionArea, PlanDriverKey } from '@/lib/planRationale'
 
 export interface EPlanStrings {
+  screenTitle: string
+  back: string
+  loadingTitle: string
+  loadingBody: string
+  emptyTitle: string
+  emptyBody: string
+  errorTitle: string
+  errorBody: string
+  retry: string
+  editAnswers: string
+  savePlan: string
+  saveHint: string
+  whySummary: string
   previewTitle: string
   previewIntro: string
   /** «{goal} · {days} · {split}» — تُملأ من مفاتيح الخطة. */
@@ -21,7 +34,13 @@ export interface EPlanStrings {
   daysValue: string
   scheduleHeading: string
   exercisesValue: string
+  firstDayHeading: string
+  exerciseFallback: string
+  setsRepsValue: string
+  restValue: string
+  secondsUnit: string
   targetsHeading: string
+  targetsNote: string
   calories: string
   caloriesUnit: string
   protein: string
@@ -63,13 +82,32 @@ export interface EPlanStrings {
 
 export const ePlanStrings: Record<Lang, EPlanStrings> = {
   ar: {
+    screenTitle: 'خطتك الأولى',
+    back: 'ارجع',
+    loadingTitle: 'نبني خطتك من إجاباتك',
+    loadingBody: 'لحظات ونرتّب أسبوعك وأهدافك اليومية.',
+    emptyTitle: 'نحتاج إجاباتك أول',
+    emptyBody: 'كمّل أسئلة الهدف والتدريب عشان نبني لك خطة تقدر تراجعها.',
+    errorTitle: 'ما قدرنا نبني الخطة',
+    errorBody: 'إجاباتك محفوظة. جرّب مرة ثانية، أو ارجع وعدّلها.',
+    retry: 'جرّب مرة ثانية',
+    editAnswers: 'عدّل إجاباتك',
+    savePlan: 'احفظ خطتك',
+    saveHint: 'بنطلب منك إنشاء حساب عشان نحفظ الخطة ونربط تقدّمك فيها.',
+    whySummary: 'ليش بنيناها كذا؟',
     previewTitle: 'معاينة خطتك',
-    previewIntro: 'هذه صورة أسبوعك كما بناه المحرّك من إجاباتك. راجعها قبل أن تعتمدها.',
+    previewIntro: 'هذا شكل أسبوعك من إجاباتك. راجعه وعدّل اللي ما يناسبك قبل ما تحفظه.',
     planLabel: '{goal} · {days} · {split}',
     daysValue: '{n} أيام تدريب',
     scheduleHeading: 'أيام الأسبوع',
     exercisesValue: '{n} تمارين',
+    firstDayHeading: 'أول يوم تدريب كامل',
+    exerciseFallback: 'تمرين من خطتك',
+    setsRepsValue: '{sets} مجموعات × {reps}',
+    restValue: 'راحة {seconds} {unit}',
+    secondsUnit: 'ثانية',
     targetsHeading: 'أهدافك اليومية',
+    targetsNote: 'هذه تقديرات بداية من بياناتك، وتقدر تعدّلها مع تغيّر جسمك ونشاطك.',
     calories: 'السعرات',
     caloriesUnit: 'سعرة',
     protein: 'بروتين',
@@ -101,8 +139,8 @@ export const ePlanStrings: Record<Lang, EPlanStrings> = {
       recomposition: 'إعادة تكوين',
     },
 
-    whyTitle: 'لماذا هذه خطتك؟',
-    whyIntro: 'كل سطر هنا يربط قرارًا في خطتك بالإجابة التي أنتجته. لا شيء اختير عشوائيًا.',
+    whyTitle: 'ليش هذي خطتك؟',
+    whyIntro: 'هنا تشوف الإجابات اللي دخلت فعلًا في كل قرار، والمحاور اللي ما خصّصناها للحين.',
     becauseMeasured: 'مبنيّة على',
     becauseStructural: 'راعينا فيها',
     driverJoin: ' و',
@@ -130,6 +168,10 @@ export const ePlanStrings: Record<Lang, EPlanStrings> = {
       muscleFocus: 'تركيزك: {value}',
       consistency: 'انتظامك: {value}',
       age: 'عمرك {value} سنة',
+      gender: 'الجنس المستخدم في معادلة الاحتياج: {value}',
+      weightKg: 'وزنك {value} كجم',
+      heightCm: 'طولك {value} سم',
+      activityLevel: 'نشاطك اليومي: {value}',
     },
     outcomeText: {
       templateId: 'تقسيمة {value}',
@@ -155,8 +197,9 @@ export const ePlanStrings: Record<Lang, EPlanStrings> = {
       'resolvedAccess:bodyweight': 'وزن الجسم',
       'injuries:declared': 'الإصابة التي ذكرتها',
       'injuries:none': 'أنك لم تذكر إصابة',
-      'filter:applied': 'استبعدنا تمارين عالية الخطورة واخترنا بدائل أأمن لنفس العضلات',
+      'filter:applied': 'شِلنا التمارين المطابقة لقائمة المخاطر لهذه المنطقة، واخترنا بدائل لنفس العضلات',
       'filter:notApplied': 'بلا استبعاد — لم تذكر إصابة',
+      'filter:unrecognized': 'ملاحظتك محفوظة، لكنها ما طابقت مناطق التصفية الحالية — راجع تمارينك قبل البدء',
       'extraSets:applied': 'مجموعة إضافية لعضلات تركيزك',
       'extraSets:none': 'توزيع متوازن على المجموعات العضلية',
       'firstWeek:reduced': 'أسبوع أول أخفّ',
@@ -187,6 +230,13 @@ export const ePlanStrings: Record<Lang, EPlanStrings> = {
       'splitChoice:push_pull_legs': 'دفع / سحب / أرجل',
       'splitChoice:arnold': 'أرنولد',
       'splitChoice:bro_split': 'عضلة باليوم',
+      'gender:male': 'ذكر',
+      'gender:female': 'أنثى',
+      'activityLevel:sedentary': 'قليل الحركة',
+      'activityLevel:light': 'خفيف',
+      'activityLevel:moderate': 'متوسط',
+      'activityLevel:active': 'نشيط',
+      'activityLevel:very_active': 'نشيط جدًا',
     },
     volumeHeading: 'حجم أسبوعك لكل عضلة',
     volumeNote: 'مقيس من خطتك: مجموع مجموعات العمل وعدد الأيام التي تلمس كل عضلة.',
@@ -219,13 +269,32 @@ export const ePlanStrings: Record<Lang, EPlanStrings> = {
     },
   },
   en: {
+    screenTitle: 'Your first plan',
+    back: 'Go back',
+    loadingTitle: 'Building your plan from your answers',
+    loadingBody: 'One moment while we shape your week and daily targets.',
+    emptyTitle: 'We need your answers first',
+    emptyBody: 'Finish the goal and training questions so we can build a plan for you to review.',
+    errorTitle: "We couldn't build your plan",
+    errorBody: 'Your answers are still here. Try again, or go back and edit them.',
+    retry: 'Try again',
+    editAnswers: 'Edit your answers',
+    savePlan: 'Save your plan',
+    saveHint: 'Create an account next so we can save this plan and connect your progress to it.',
+    whySummary: 'Why did we build it this way?',
     previewTitle: 'Your plan preview',
-    previewIntro: 'This is your week as the engine built it from your answers. Review it before you adopt it.',
+    previewIntro: 'This is the week built from your answers. Review it and change anything that does not fit before saving.',
     planLabel: '{goal} · {days} · {split}',
     daysValue: '{n} training days',
     scheduleHeading: 'Your week',
     exercisesValue: '{n} exercises',
+    firstDayHeading: 'Your first full training day',
+    exerciseFallback: 'Exercise from your plan',
+    setsRepsValue: '{sets} sets × {reps}',
+    restValue: '{seconds} {unit} rest',
+    secondsUnit: 'sec',
     targetsHeading: 'Your daily targets',
+    targetsNote: 'These are starting estimates from your data. You can adjust them as your body and activity change.',
     calories: 'Calories',
     caloriesUnit: 'kcal',
     protein: 'Protein',
@@ -258,7 +327,7 @@ export const ePlanStrings: Record<Lang, EPlanStrings> = {
     },
 
     whyTitle: 'Why is this your plan?',
-    whyIntro: 'Every line here ties one decision in your plan to the answer that produced it. Nothing was picked at random.',
+    whyIntro: 'See which answers actually fed each decision, and which parts we have not personalised yet.',
     becauseMeasured: 'Based on',
     becauseStructural: 'We took into account',
     driverJoin: ' and ',
@@ -286,6 +355,10 @@ export const ePlanStrings: Record<Lang, EPlanStrings> = {
       muscleFocus: 'your focus: {value}',
       consistency: 'your consistency: {value}',
       age: 'your age of {value}',
+      gender: 'sex used in the energy equation: {value}',
+      weightKg: 'weight {value} kg',
+      heightCm: 'height {value} cm',
+      activityLevel: 'daily activity: {value}',
     },
     outcomeText: {
       templateId: 'A {value} split',
@@ -311,8 +384,9 @@ export const ePlanStrings: Record<Lang, EPlanStrings> = {
       'resolvedAccess:bodyweight': 'bodyweight only',
       'injuries:declared': 'the injury you told us about',
       'injuries:none': 'that you reported no injury',
-      'filter:applied': 'we left out higher-risk exercises and chose safer alternatives for the same muscles',
+      'filter:applied': 'we left out exercises on the risk list for that area and chose alternatives for the same muscles',
       'filter:notApplied': 'nothing was left out — no injury was reported',
+      'filter:unrecognized': 'your note is saved, but it did not match the current filter areas — review your exercises before starting',
       'extraSets:applied': 'an extra set for the muscles you focus on',
       'extraSets:none': 'an even spread across muscle groups',
       'firstWeek:reduced': 'a lighter first week',
@@ -343,6 +417,13 @@ export const ePlanStrings: Record<Lang, EPlanStrings> = {
       'splitChoice:push_pull_legs': 'Push / Pull / Legs',
       'splitChoice:arnold': 'Arnold',
       'splitChoice:bro_split': 'Bro Split',
+      'gender:male': 'male',
+      'gender:female': 'female',
+      'activityLevel:sedentary': 'sedentary',
+      'activityLevel:light': 'light',
+      'activityLevel:moderate': 'moderate',
+      'activityLevel:active': 'active',
+      'activityLevel:very_active': 'very active',
     },
     volumeHeading: 'Your weekly volume per muscle',
     volumeNote: 'Measured from your plan: total working sets and how many days touch each muscle.',

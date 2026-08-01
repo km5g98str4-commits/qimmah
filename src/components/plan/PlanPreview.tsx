@@ -2,6 +2,7 @@ import type { Lang } from '@/lib/appPreferences'
 import type { GoalType } from '@/types/profile'
 import type { GeneratedPlan } from '@/lib/planGenerator'
 import { ePlanStrings, fillTemplate } from '@/i18n/dict/ePlan'
+import { getExercise } from '@/data/exercises'
 
 /**
  * معاينة الخطة (حارة E · المرحلة الثانية — الموجة ٢) — **مكوّن عرضي بحت.**
@@ -37,6 +38,7 @@ export function PlanPreview({
   const s = ePlanStrings[lang]
   const num = (n: number) => (lang === 'ar' ? n.toLocaleString('ar-EG') : n.toLocaleString('en-US'))
   const days = plan.workoutPlan.days
+  const firstDay = days[0]
   const splitTitle = s.splitTitles[plan.suggestedWorkoutTemplateId] ?? plan.suggestedWorkoutTemplateId
 
   const label = fillTemplate(s.planLabel, {
@@ -86,7 +88,41 @@ export function PlanPreview({
         </ul>
       )}
 
+      {firstDay && (
+        <>
+          <h3 className="mt-5 text-sm font-medium text-ink-900">{s.firstDayHeading}</h3>
+          <p className="mt-1 text-sm font-semibold text-ink-700">
+            {lang === 'en' ? firstDay.nameEn : firstDay.nameAr}
+          </p>
+          <ol className="mt-2 space-y-2" data-testid="plan-preview-first-day">
+            {firstDay.exercises.map((plannedExercise) => {
+              const exercise = getExercise(plannedExercise.exerciseId)
+              const name = lang === 'en'
+                ? plannedExercise.customNameEn ?? exercise?.nameEn ?? s.exerciseFallback
+                : plannedExercise.customNameAr ?? exercise?.nameAr ?? s.exerciseFallback
+              return (
+                <li key={plannedExercise.id} className="rounded-xl border border-line px-3 py-2 text-sm">
+                  <p className="font-medium text-ink-900">{name}</p>
+                  <p className="mt-0.5 text-ink-500">
+                    {fillTemplate(s.setsRepsValue, {
+                      sets: num(plannedExercise.sets),
+                      reps: plannedExercise.reps,
+                    })}
+                    {' · '}
+                    {fillTemplate(s.restValue, {
+                      seconds: num(plannedExercise.restSec),
+                      unit: s.secondsUnit,
+                    })}
+                  </p>
+                </li>
+              )
+            })}
+          </ol>
+        </>
+      )}
+
       <h3 className="mt-5 text-sm font-medium text-ink-900">{s.targetsHeading}</h3>
+      <p className="mt-1 text-sm leading-relaxed text-ink-500">{s.targetsNote}</p>
       <p className="mt-2 text-2xl font-semibold text-ink-900">
         {num(plan.targets.targetCalories)}{' '}
         <span className="text-sm font-normal text-ink-500">{s.caloriesUnit}</span>

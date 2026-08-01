@@ -22,7 +22,7 @@ import type { Muscle, WorkoutPlan } from '@/types/workout'
 import { effectiveGoalTypeForAge } from '@/lib/calculators'
 import { resolveGymAccess } from '@/lib/equipmentAccess'
 import { getExercise } from '@/data/exercises'
-import type { GeneratedPlan } from '@/lib/planGenerator'
+import { hasRecognizedInjuryArea, type GeneratedPlan } from '@/lib/planGenerator'
 
 // ============================================================================
 // نقطة الامتداد الموثّقة — محور trainingFocus
@@ -118,6 +118,10 @@ export type PlanDriverKey =
   | 'muscleFocus'
   | 'consistency'
   | 'age'
+  | 'gender'
+  | 'weightKg'
+  | 'heightCm'
+  | 'activityLevel'
 
 /** المحاور المعروفة التي قد تُخصِّص الخطة — مفتاح ثابت. */
 export type PlanAxisKey = 'trainingFocus' | 'pastPerformance' | 'muscleFocus'
@@ -232,6 +236,8 @@ export function buildPlanRationale(profile: Profile, plan: GeneratedPlan): PlanR
   const usedAdvancedSplit = profile.splitMode === 'advanced' && Boolean(profile.splitChoice)
   const conservativeStart =
     effectiveGoal === 'returning' || profile.consistency === 'returning' || profile.consistency === 'onoff'
+  const hasInjuryText = Boolean(profile.injuries?.trim())
+  const injuryFilterApplied = hasRecognizedInjuryArea(profile.injuries)
 
   const decisions: PlanDecision[] = []
 
@@ -270,6 +276,11 @@ export function buildPlanRationale(profile: Profile, plan: GeneratedPlan): PlanR
     drivers: [
       { key: 'trainingDays', value: days },
       { key: 'experience', value: profile.experienceBand ?? profile.trainingLevel },
+      { key: 'sessionMinutes', value: profile.workoutDuration },
+      { key: 'consistency', value: profile.consistency ?? 'unspecified' },
+      ...(!focusIsPinned && focus !== 'balanced'
+        ? [{ key: 'muscleFocus' as const, value: focus }]
+        : []),
     ],
     outcome: { key: 'weeklySets', value: totalWeeklySets(volume) },
     basis: 'measured',
@@ -303,8 +314,11 @@ export function buildPlanRationale(profile: Profile, plan: GeneratedPlan): PlanR
   // ٧) تصفية الإصابات — **لا يخرج نصّ الإصابة** (§9)، وجودها فقط.
   decisions.push({
     area: 'injuryFilter',
-    drivers: [{ key: 'injuries', value: profile.injuries ? 'declared' : 'none' }],
-    outcome: { key: 'filter', value: profile.injuries ? 'applied' : 'notApplied' },
+    drivers: [{ key: 'injuries', value: hasInjuryText ? 'declared' : 'none' }],
+    outcome: {
+      key: 'filter',
+      value: injuryFilterApplied ? 'applied' : hasInjuryText ? 'unrecognized' : 'notApplied',
+    },
     basis: 'structural',
   })
 
@@ -334,7 +348,15 @@ export function buildPlanRationale(profile: Profile, plan: GeneratedPlan): PlanR
   // ١٠) سعرات الهدف — رقم مقيس من مخرجات الحاسبات.
   decisions.push({
     area: 'calorieTarget',
-    drivers: [{ key: 'goalType', value: effectiveGoal }],
+    drivers: [
+      { key: 'goalType', value: effectiveGoal },
+      { key: 'gender', value: profile.gender },
+      { key: 'weightKg', value: profile.weightKg },
+      { key: 'heightCm', value: profile.heightCm },
+      { key: 'age', value: profile.age },
+      { key: 'activityLevel', value: profile.activityLevel },
+      { key: 'trainingDays', value: days },
+    ],
     outcome: { key: 'targetCalories', value: plan.targets.targetCalories },
     basis: 'measured',
   })
