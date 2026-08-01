@@ -36,7 +36,12 @@ export function groundStamp() {
     const commit = git('rev-parse', '--short', 'HEAD')
     const branch = git('rev-parse', '--abbrev-ref', 'HEAD')
     const subject = git('log', '-1', '--format=%s')
-    const dirty = git('status', '--porcelain').length > 0
+    // النظافة تُقاس على **الكود تحت الاختبار** لا على مخرَجات الرحلة:
+    // الرحلة تكتب لقطاتها أثناء تشغيلها، فقياس الشجرة كلها يجعل العَلَم
+    // `true` دائمًا — ضجيج لا معلومة. نستثني مجلد الإثبات وحده.
+    const dirty = git('status', '--porcelain', '--', ':!docs/proof/journeys')
+      .split('\n')
+      .filter(Boolean).length > 0
     return { branch, commit, subject, dirty }
   } catch {
     return { branch: 'unknown', commit: 'unknown', subject: '', dirty: false }
