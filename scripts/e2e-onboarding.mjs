@@ -19,6 +19,7 @@ const check = (name, ok, detail = '') => {
   results.push({ name, ok })
   console.log(`${ok ? '✅' : '❌'} ${name}${detail ? ` — ${detail}` : ''}`)
 }
+const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
 async function waitForServer() {
   for (let i = 0; i < 60; i++) {
@@ -31,8 +32,7 @@ async function waitForServer() {
 let browser
 try {
   // القواميس المركزية — نفس المصدر الذي يرسم منه المكوّن.
-  const { onboarding: t, goals, policy } = await loadAppCopy()
-  const cutGoal = labelOf(goals, 'cut')
+  const { onboarding: t, policy, intent } = await loadAppCopy()
   const gymPlace = labelOf(t.places, 'gym')
   const mixedPref = labelOf(t.prefs, 'mixed')
   // عَلَم تطوير (ليس مفتاح بيانات) — نتحقّق أنه ما زال مقروءًا في المكوّن.
@@ -40,26 +40,53 @@ try {
 
   await waitForServer()
   browser = await chromium.launch()
-  const page = await browser.newPage({ viewport: { width: 320, height: 720 }, locale: 'ar-SA' })
   const consoleErrors = []
-  page.on('console', (m) => m.type() === 'error' && consoleErrors.push(m.text()))
-  page.on('pageerror', (e) => consoleErrors.push(String(e)))
-  await page.goto(BASE, { waitUntil: 'networkidle' })
+  const makePage = async () => {
+    const p = await browser.newPage({ viewport: { width: 320, height: 720 }, locale: 'ar-SA' })
+    p.on('console', (m) => m.type() === 'error' && consoleErrors.push(m.text()))
+    p.on('pageerror', (e) => consoleErrors.push(String(e)))
+    await p.goto(BASE, { waitUntil: 'networkidle' })
+    return p
+  }
+  const fillBodyAndConsent = async (p) => {
+    await p.getByRole('textbox', { name: /العمر/ }).fill('24')
+    await p.getByRole('textbox', { name: /الطول/ }).fill('175')
+    await p.getByRole('textbox', { name: /الوزن/ }).fill('78')
+    await p.getByRole('button', { name: 'ذكر', exact: true }).click()
+    await p.getByRole('checkbox', { name: new RegExp(policy.healthConsent) }).check()
+  }
 
-  check('RTL root', await page.evaluate(() => document.documentElement.dir === 'rtl'))
-  check('320px has no horizontal overflow', await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth))
+  // The live order is body + consent → intent/level → goal → training → equipment.
+  const advancedPage = await makePage()
+  check('RTL root', await advancedPage.evaluate(() => document.documentElement.dir === 'rtl'))
+  check('320px has no horizontal overflow', await advancedPage.evaluate(() => document.documentElement.scrollWidth <= innerWidth))
+  const advancedNext = advancedPage.getByRole('button', { name: t.next })
+  check('Next starts blocked', await advancedNext.getAttribute('aria-disabled') === 'true')
+  await advancedNext.click({ force: true })
+  check('body validation is visible', await advancedPage.getByRole('alert').isVisible())
+  await fillBodyAndConsent(advancedPage)
+  check('Next unlocks after body + consent', await advancedNext.getAttribute('aria-disabled') === 'false')
+  await advancedNext.click()
+  await advancedPage.getByRole('button', { name: new RegExp(intent.intents[0].label) }).click()
+  await advancedPage.getByRole('button', { name: new RegExp(intent.levels.find((x) => x.value === 'advanced').label) }).click()
+  await advancedNext.click()
+  const advancedCut = intent.goalWording.advanced.cut.label
+  check('advanced goal uses level-specific wording', advancedCut.startsWith('تنشيف') && await advancedPage.getByRole('button', { name: new RegExp(escapeRegExp(advancedCut)) }).isVisible())
+  await advancedPage.close()
+
+  const page = await makePage()
   const next = page.getByRole('button', { name: t.next })
-  check('Next starts blocked', await next.getAttribute('aria-disabled') === 'true')
-
-  await page.getByRole('button', { name: new RegExp(cutGoal) }).click()
-  await next.click({ force: true })
-  check('health consent validation is visible', await page.getByRole('alert').isVisible())
-  await page.getByRole('checkbox', { name: new RegExp(policy.healthConsent) }).check()
-  check('Next unlocks only after consent', await next.getAttribute('aria-disabled') === 'false')
+  await fillBodyAndConsent(page)
   await next.click()
-
+  await page.getByRole('button', { name: new RegExp(intent.intents[0].label) }).click()
+  await page.getByRole('button', { name: new RegExp(intent.levels.find((x) => x.value === 'beginner').label) }).click()
+  await next.click()
+  const beginnerCut = intent.goalWording.beginner.cut.label
+  check('beginner goal uses level-specific wording', beginnerCut === 'خسارة دهون' && await page.getByRole('button', { name: new RegExp(escapeRegExp(beginnerCut)) }).isVisible())
+  await page.getByRole('button', { name: new RegExp(escapeRegExp(beginnerCut)) }).click()
+  await next.click()
   check('training step rendered', await page.getByRole('heading', { name: t.training.title }).isVisible())
-  await page.getByRole('button', { name: t.next }).click()
+  await next.click()
   check('equipment step exact dialect copy', await page.getByRole('heading', { name: t.equipment.title }).isVisible())
   await page.getByRole('button', { name: gymPlace, exact: true }).click()
   await page.getByRole('button', { name: mixedPref, exact: true }).click()
