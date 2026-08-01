@@ -183,6 +183,13 @@ export interface ShellStrings {
     home: string
     back: string
   }
+  accountRequired: {
+    title: string
+    body: string
+    login: string
+    guest: string
+    back: string
+  }
   errorBoundary: {
     title: string
     body: string
@@ -660,6 +667,13 @@ const ar: ShellStrings = {
     home: 'ارجع للرئيسية',
     back: 'الشاشة السابقة',
   },
+  accountRequired: {
+    title: 'هالمسار يحتاج حساب',
+    body: 'سجّل دخولك أو كمّل كضيف عشان تفتح التطبيق وتحفظ بياناتك على جهازك.',
+    login: 'تسجيل الدخول',
+    guest: 'كمّل كضيف',
+    back: 'رجوع للبداية',
+  },
   errorBoundary: {
     title: 'صار خلل بسيط',
     body: 'واجهنا مشكلة غير متوقعة في هذي الشاشة. جرّب تحدّث الصفحة وبيرجع كل شي مكانه — بياناتك محفوظة على جهازك.',
@@ -1131,6 +1145,13 @@ const en: ShellStrings = {
     body: 'The link you opened doesn’t exist or has changed.',
     home: 'Back to home',
     back: 'Previous screen',
+  },
+  accountRequired: {
+    title: 'This path needs an account',
+    body: 'Log in or continue as a guest to open the app and keep your data on this device.',
+    login: 'Log in',
+    guest: 'Continue as guest',
+    back: 'Back to start',
   },
   errorBoundary: {
     title: 'Something went wrong',

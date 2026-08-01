@@ -30,6 +30,7 @@ export type AppRoute =
   | 'recovery'
   // مسار احتياطي داخلي فقط — لا يُسجَّل في ROUTES ولا يُكتب في hash مباشرة.
   | 'notfound'
+  | 'accountRequired'
 
 const ROUTES: AppRoute[] = [
   'start',

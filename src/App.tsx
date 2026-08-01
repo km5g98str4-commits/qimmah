@@ -1,6 +1,7 @@
 import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 // شاشة البداية (الهبوط) تبقى مُحمّلة مباشرةً لأول رسم سريع.
 import { StartView } from '@/views/StartView'
+import { AccountRequiredView } from '@/views/AccountRequiredView'
 import { AppLoading } from '@/components/AppLoading'
 import { VerifyEmailView } from '@/views/VerifyEmailView'
 import { RouteErrorBoundary } from '@/components/ErrorBoundary'
@@ -80,7 +81,7 @@ function guardRoute(route: AppRoute, userId: string | null): AppRoute {
     route === 'calc'
   const guestReady = !userId && isOnboardingComplete(null)
   // الإعداد هو باب الضيف نفسه؛ لا نعيده للبداية قبل أن يأخذ فرصته في بناء بياناته.
-  if (route !== 'setup' && needsAccount && !userId && !guestReady) return 'start'
+  if (route !== 'setup' && needsAccount && !userId && !guestReady) return 'accountRequired'
   // بعد الحساب: التبويبات تتطلّب إعدادًا مكتملًا وإلا معالج الإعداد (الأسئلة).
   if (MAIN_TABS.includes(route) || route === 'exercises' || route === 'stats' || route === 'recovery' || route === 'steps') {
     if (!isOnboardingComplete(userId)) return 'setup'
@@ -208,7 +209,7 @@ export default function App() {
   // بالدخول رغم وجود جلسة صالحة.
   useEffect(() => {
     if (auth.loading || !didInitialAuthRoute.current) return
-    if (view !== 'notfound') setHashRoute(view)
+    if (view !== 'notfound' && view !== 'accountRequired') setHashRoute(view)
   }, [view, auth.loading])
 
   // استعادة كلمة المرور مصدر حقيقته حدث PASSWORD_RECOVERY (لا الـ hash): متى نُشِّط، نُثبّت
@@ -396,6 +397,15 @@ export default function App() {
       setView(guardRoute(target, uid))
     }
     content = <V.NotFoundView lang={LANG} onHome={goHome} onBack={() => window.history.back()} />
+  } else if (view === 'accountRequired') {
+    content = (
+      <AccountRequiredView
+        lang={LANG}
+        onLogin={() => { setLoginMode('login'); setView('login') }}
+        onGuest={() => setView('setup')}
+        onBack={() => setView('start')}
+      />
+    )
   } else if (view === 'setup') {
     // النمط يُشتقّ من حالة الحساب وقت العرض: مكتمل → محرّرات متقدّمة (تعديل الخطة)؛
     // غير مكتمل → معالج الإعداد الأولي (وزنه/هدفه هو).
