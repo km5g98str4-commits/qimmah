@@ -14,6 +14,9 @@ import {
   loadWorkoutSummary,
   migrateLegacySummary,
 } from '@/lib/workoutSummary'
+import { setSyncFeatureEnabledForTests, setSyncRuntime, syncAllowedFor } from '@/lib/syncQueue'
+import { setCloudSyncConsent } from '@/lib/syncConsent'
+import { adoptionPendingFor, adoptPendingData } from '@/lib/dataOwnership'
 
 let pass = 0
 let fail = 0
@@ -208,6 +211,78 @@ console.log('\n⑦ ملخّص التمرين معزول بالمالك + هجر�
   check('سياق الضيف لا يستولي على قيمة مسطّحة', loadWorkoutSummary(null) === null)
   check('المفتاح المسطّح أُزيل في سياق الضيف أيضًا', ls.getItem('qimmah:workout-summary:v2') === null)
 }
+
+// ═══════════ (ج-٢-أ) شروط قبول عزل الحسابات — ترقية سيناريوهات المِسبار ═══════════
+//
+// ثلاثة سيناريوهات قيست بمسبار يدوي ثم رُقّيت هنا لتصير دائمة. سيناريو ثالث
+// (فقد الجلسة بلا تسجيل خروج ⇒ الضيف يقرأ بيانات الحساب) **أحمر اليوم** ولا يدخل
+// بوابة خضراء — محفوظ في فرع ج-٢-ب حتى ينقلب مع علم `sessionResolved`، وموثّق
+// في «اكتشاف مفتوح» أدناه.
+{
+  console.log('\n⑥ (ج-٢-أ) ذهاب وعودة A → B → A')
+  clearAll()
+  setLastUser(null)
+  reconcileAccountScope('A')
+  seedUserData('A')
+  reconcileAccountScope('B')
+  check('التبديل إلى B مسح بيانات A', !has('qimmah:history:workoutSessions:v1'))
+  seedUserData('B')
+  const back = reconcileAccountScope('A')
+  check('العودة إلى A تمسح بقايا B (wiped)', back.wiped === true)
+  check('A لا يرى سجلّ B بعد العودة', !has('qimmah:history:workoutSessions:v1'))
+  check('A لا يرى تخصيص B بعد العودة', !has('qimmah:customization:v1'))
+  check('lastUser عاد إلى A', getLastUser() === 'A')
+  // التأكيد المضادّ (§4.2): المسح لم يبتلع تفضيل الجهاز في الذهاب ولا في العودة.
+  seedGlobalSafe()
+  reconcileAccountScope('B')
+  check('اللغة نجت من دورة الذهاب والعودة كاملة', has('qimmah:prefs:v1'))
+}
+
+{
+  console.log('\n⑦ (ج-٢-أ) بيانات الضيف غير المنسوبة لا تُرفع أبدًا')
+  // الضمانة السحابية المستقلّة عن المسح: بيانات بلا مالك تحت حساب حقيقي تدخل
+  // «تعليق تبنٍّ» فلا تُرفع حتى قرار صريح. هذه هي الحماية التي **تعمل اليوم**
+  // حتى في السيناريو المتسرّب — فالتسرّب قراءةٌ محلية لا رفعٌ سحابي.
+  clearAll()
+  setSyncFeatureEnabledForTests(true)
+  setCloudSyncConsent('A', true) // موافقة ج-١ ممنوحة — لنعزل بوابة الملكية وحدها
+  set('qimmah:history:workoutSessions:v1', '[{"u":"ضيف"}]') // بيانات ضيف بلا ختم
+  setLastUser(null)
+  reconcileAccountScope('A')
+  setSyncRuntime('A', false)
+  check('بيانات ضيف تحت حساب حقيقي ⇒ تعليق تبنٍّ', adoptionPendingFor() === 'A')
+  check('والرفع محجوب ما دام التعليق قائمًا', syncAllowedFor('A') === false)
+  // التأكيد المضادّ (§4.2): التعليق ليس حجبًا دائمًا — القرار الصريح يفتحه.
+  adoptPendingData('A')
+  check('التبنّي الصريح وحده يفتح الرفع', syncAllowedFor('A') === true)
+  setCloudSyncConsent('A', false)
+  setSyncFeatureEnabledForTests(undefined)
+}
+
+{
+  console.log('\n⑧ (ج-٢-أ) التأكيدات المضادّة لقائمة السماح العامّة')
+  // §4.2: كل قائمة استثناء تُحرَس بتأكيد يثبت أنها لم تصر قاعدة. قائمة
+  // GLOBAL_SAFE_KEYS استثناء من المسح — فيجب أن يثبت أن جارًا لها يُمسح.
+  clearAll()
+  set('qimmah:prefs:v1', '{"language":"ar"}') // في القائمة
+  set('qimmah:prefs:v2', '{"language":"ar"}') // ليس فيها — جار بحرف واحد
+  set('qimmah:analytics:v1', '{"id":"x"}') // في القائمة
+  set('qimmah:analytics:events:v1', '[]') // ليس فيها
+  wipeUserData()
+  check('«qimmah:prefs:v1» المُعلَن بقي', has('qimmah:prefs:v1'))
+  check('و«qimmah:prefs:v2» — جاره بحرف — مُسح (القائمة لم تصر قاعدة)', !has('qimmah:prefs:v2'))
+  check('«qimmah:analytics:v1» المُعلَن بقي', has('qimmah:analytics:v1'))
+  check('و«qimmah:analytics:events:v1» غير المُعلَن مُسح', !has('qimmah:analytics:events:v1'))
+}
+
+// ⚠️ اكتشاف مفتوح مسمّى (ج-٢-ب) — لا يدخل هذه البوابة لأنه أحمر:
+//    فقدُ جلسة حساب حقيقي **بلا تسجيل خروج** (انتهاء رمز · إعادة إقلاع · مسح iOS)
+//    يترك بيانات الحساب مقروءةً لسياق الضيف: reconcileAccountScope(null) لا يمسح
+//    عمدًا، لأن null قد يكون وميضًا عابرًا.
+//    ولا يُصلَح بـ`auth.loading === false` — فهي ترتفع أيضًا عبر failsafe بعد 8 ثوانٍ
+//    (authContext.tsx:170) وعبر catch، أي أنها تعني «يئسنا» أحيانًا لا «حُسمت».
+//    العلاج المعتمد: علم `sessionResolved` من حارة B، ثم **حجر لا مسح**
+//    (quarantineUnscopedUserData) — فتُغلق القراءة بلا إتلاف بيانات صاحبها.
 
 console.log(`\n${'─'.repeat(46)}`)
 if (fail === 0) {
