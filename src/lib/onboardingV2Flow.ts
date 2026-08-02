@@ -12,6 +12,7 @@
 // `qimmah:onboarding:v1`, which is NOT in accountScope's GLOBAL_SAFE_KEYS, so
 // wipeUserData() clears it on account switch/sign-out — no accountScope change.
 
+import { AGE_RANGE, HEIGHT_RANGE, WEIGHT_RANGE } from '@/config/profileDomain'
 import { loadDraft, saveDraft } from '@/lib/onboarding'
 import type { V2GoalValue } from '@/design-system/v2/labels'
 import type { ExperienceLevel } from '@/types/onboarding'
@@ -35,13 +36,12 @@ export type V2Level = 'beginner' | 'intermediate' | 'advanced'
 export const TRAINING_YEARS_RANGE = { min: 0, max: 60 } as const
 
 /**
- * حدود بيانات الجسم — نطاقات فسيولوجية معقولة تمنع القيم الشاذّة دون أن تُقصي
- * أحدًا. الحدّ الأدنى للعمر 13 لا 18: القاصر **يُقبل** ثم تُقيَّد أهدافه
- * (المحافظة فقط) — الحاجز تقييد لا طرد.
+ * حدود بيانات الجسم — **مصدرها الوحيد `config/profileDomain`** منذ [CTO-65]
+ * البند ٢. كانت مُعلنة هنا وبأرقام أخرى في `lib/validation.ts`، فيُقبل المستخدم
+ * في مسار ويُرفض في الآخر. تُصدَّر من هنا كما كانت حفاظًا على كل مستهلك قائم
+ * (`OnboardingV2` · `body-fields-proof` · عقد e2e) — لكنها **لا تُعلَن هنا**.
  */
-export const AGE_RANGE = { min: 13, max: 100 } as const
-export const HEIGHT_RANGE = { min: 120, max: 220 } as const
-export const WEIGHT_RANGE = { min: 30, max: 250 } as const
+export { AGE_RANGE, HEIGHT_RANGE, WEIGHT_RANGE } from '@/config/profileDomain'
 
 /** الجنس — يقود معادلة BMR (Mifflin-St Jeor) ولا يُستخدم لغير ذلك. */
 export type V2Gender = 'male' | 'female'

@@ -25,7 +25,8 @@ export function StepBody({ ctx }: { ctx: WizardCtx }) {
   const choices = profileChoiceStrings[ctx.lang]
   const p = ctx.data.profile
   const manual = ctx.data.targetsMeta.manuallyEdited
-  const errors = validateProfile(p)
+  // رسالة الحدّ بلغة الشاشة: كانت عربية دائمًا فتظهر عربية داخل واجهة إنجليزية.
+  const errors = validateProfile(p, ctx.lang)
   const errFor = (f: string) => errors.find((e) => e.field === (f as (typeof errors)[number]['field']))?.message
 
   // عند تغيّر الملف: إن لم تُعدَّل الحسابات يدويًا، أعد حسابها تلقائيًا

@@ -1,38 +1,62 @@
 import type { Profile } from '@/types/profile'
+import {
+  AGE_RANGE,
+  HEIGHT_RANGE,
+  SESSION_DURATION_RANGE,
+  TARGET_WEIGHT_RANGE,
+  TRAINING_DAYS_RANGE,
+  WEIGHT_RANGE,
+  ageRangeCopy,
+  heightRangeCopy,
+  sessionDurationRangeCopy,
+  targetWeightRangeCopy,
+  trainingDaysRangeCopy,
+  weightRangeCopy,
+  type RangeCopy,
+} from '@/config/profileDomain'
 
-// حدود إدخال واقعية + رسائل عربية ودّية.
+// حدود إدخال واقعية + رسائل ودّية — **كلاهما من `config/profileDomain`**.
+//
+// [CTO-65] البند ٢: كان هذا الملف يعلن حدودًا خاصّة به (طول 100–230، وزن 15–250)
+// تخالف حدود مسار الإعداد (120–220، 30–250)، ورسائله تحمل الأرقام نصًّا صلبًا.
+// فالمستخدم يُرفض عند رقم وتُخبره الرسالة برقم آخر. الآن: رقم واحد، ورسالة
+// مبنيّة منه — يستحيل أن يتباعدا.
 
 export const LIMITS = {
-  age: { min: 13, max: 100 },
-  heightCm: { min: 100, max: 230 },
-  weightKg: { min: 15, max: 250 },
-  targetWeightKg: { min: 15, max: 250 },
-  trainingDays: { min: 1, max: 7 },
-  workoutDuration: { min: 20, max: 150 },
-}
+  age: AGE_RANGE,
+  heightCm: HEIGHT_RANGE,
+  weightKg: WEIGHT_RANGE,
+  targetWeightKg: TARGET_WEIGHT_RANGE,
+  trainingDays: TRAINING_DAYS_RANGE,
+  workoutDuration: SESSION_DURATION_RANGE,
+} as const
 
 export interface FieldError {
   field: keyof typeof LIMITS
   message: string
 }
 
-const MESSAGES: Record<keyof typeof LIMITS, string> = {
-  age: 'أدخل عمرًا بين 13 و100 سنة.',
-  heightCm: 'أدخل طولًا بين 100 و230 سم.',
-  weightKg: 'أدخل وزنًا بين 15 و250 كجم.',
-  targetWeightKg: 'أدخل وزنًا هدفًا بين 15 و250 كجم.',
-  trainingDays: 'اختر عدد أيام تمرين بين 1 و7.',
-  workoutDuration: 'اختر مدة تمرين بين 20 و150 دقيقة.',
+/** الرسائل مبنيّة من نفس النطاقات أعلاه — لا رقم مكتوب بجانب رقم. */
+const MESSAGES: Record<keyof typeof LIMITS, RangeCopy> = {
+  age: ageRangeCopy(),
+  heightCm: heightRangeCopy(),
+  weightKg: weightRangeCopy(),
+  targetWeightKg: targetWeightRangeCopy(),
+  trainingDays: trainingDaysRangeCopy(),
+  workoutDuration: sessionDurationRangeCopy(),
 }
 
-/** يعيد قائمة أخطاء الملف الشخصي (فارغة = صالح). */
-export function validateProfile(p: Profile): FieldError[] {
+/**
+ * يعيد قائمة أخطاء الملف الشخصي (فارغة = صالح).
+ * `lang` يختار سجلّ الرسالة؛ العربية هي الافتراضي (سلوك ما قبل التوحيد).
+ */
+export function validateProfile(p: Profile, lang: 'ar' | 'en' = 'ar'): FieldError[] {
   const errors: FieldError[] = []
   ;(Object.keys(LIMITS) as (keyof typeof LIMITS)[]).forEach((f) => {
     const v = Number((p as unknown as Record<string, unknown>)[f])
     const { min, max } = LIMITS[f]
     if (!Number.isFinite(v) || v < min || v > max) {
-      errors.push({ field: f, message: MESSAGES[f] })
+      errors.push({ field: f, message: MESSAGES[f][lang] })
     }
   })
   return errors

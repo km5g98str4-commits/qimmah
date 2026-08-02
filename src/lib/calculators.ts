@@ -11,6 +11,7 @@ import type {
   TrainingLevel,
   WorkoutEnvironment,
 } from '@/types/profile'
+import { GOAL_TYPE_TO_CALORIE_GOAL, PICKABLE_GOAL_TYPES } from '@/config/profileDomain'
 
 // Source classification (reviewed 2026-07-16): NON-STANDARD Qimmah heuristic;
 // no primary source was found for this exact NEAT + 0.025/training-day model. See docs/features/FORMULAS.md.
@@ -139,13 +140,28 @@ export const environmentOptions: { value: WorkoutEnvironment; label: string }[] 
   { value: 'gym', label: 'نادي' },
   { value: 'home', label: 'منزل' },
 ]
-export const goalTypeOptions: { value: GoalType; label: string }[] = [
-  { value: 'cutting', label: 'تنشيف' },
-  { value: 'bulking', label: 'تضخيم' },
-  { value: 'maintenance', label: 'محافظة على العضل' },
-  { value: 'returning', label: 'رجوع بعد انقطاع' },
-  { value: 'health', label: 'صحة عامة' },
-]
+/**
+ * تسمية كل هدف منظَّم. سجلّ **شامل** (`Record<GoalType, …>`) لا قائمة: أي هدف
+ * جديد يصير خطأ ترجمة حتى تُكتب تسميته، بدل أن يظهر بلا اسم.
+ */
+const GOAL_TYPE_LABELS_AR: Readonly<Record<GoalType, string>> = {
+  cutting: 'تنشيف',
+  bulking: 'تضخيم',
+  maintenance: 'محافظة على العضل',
+  returning: 'رجوع بعد انقطاع',
+  health: 'صحة عامة',
+  recomposition: 'إعادة تكوين', // هدف ملغى — لا يُعرض للاختيار، وتبقى تسميته لبيانات قديمة
+}
+
+/**
+ * الأهداف المعروضة — **مشتقّة** من `PICKABLE_GOAL_TYPES` في مصدر الحقيقة
+ * ([CTO-65] البند ٢) لا مكتوبة هنا. فلا يمكن أن يوجد هدف في الجسر الحراري
+ * وتغيب بطاقته من الاختيار، ولا العكس.
+ */
+export const goalTypeOptions: { value: GoalType; label: string }[] = PICKABLE_GOAL_TYPES.map((value) => ({
+  value,
+  label: GOAL_TYPE_LABELS_AR[value],
+}))
 export const nutritionStyleOptions: { value: NutritionStyle; label: string }[] = [
   { value: 'simple', label: 'بسيط' },
   { value: 'high_protein', label: 'عالي البروتين' },
@@ -154,15 +170,18 @@ export const nutritionStyleOptions: { value: NutritionStyle; label: string }[] =
   { value: 'flexible', label: 'مرن بالسعرات' },
 ]
 
-/** يربط الهدف المنظَّم بهدف السعرات (للحاسبة). */
+/**
+ * يربط الهدف المنظَّم بهدف السعرات (للحاسبة) — **من السجلّ الشامل** في
+ * `config/profileDomain`. الصيغة القديمة كانت سلسلة `if` بافتراضي `maintain`،
+ * فأي هدف جديد يسقط على «المحافظة» بلا خطأ ولا كاشف.
+ */
 export function calorieGoalFromGoalType(g: GoalType): CalorieGoal {
-  if (g === 'cutting') return 'cut'
-  if (g === 'bulking') return 'bulk'
-  return 'maintain' // maintenance / returning / health / recomposition
+  return GOAL_TYPE_TO_CALORIE_GOAL[g]
 }
 
+/** تسمية الهدف — من السجلّ الشامل، فتشمل حتى الأهداف غير المعروضة للاختيار. */
 export function goalTypeLabel(g: GoalType): string {
-  return goalTypeOptions.find((o) => o.value === g)?.label ?? ''
+  return GOAL_TYPE_LABELS_AR[g] ?? ''
 }
 
 const round = (n: number) => Math.round(n)
