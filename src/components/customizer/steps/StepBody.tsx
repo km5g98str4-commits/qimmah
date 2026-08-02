@@ -161,8 +161,16 @@ export function StepBody({ ctx }: { ctx: WizardCtx }) {
           <Icon name="BarChart3" className="h-4 w-4 text-primary-c" />
           {d.bodyCalcIntro}
         </div>
+        {/*
+          [CTO-65] البند ٣ — كان هذا الحقل يحمل تسمية «سعرات الهدف» ويعرض
+          `maintenanceCalories` (سعرات الصيانة/TDEE). فالمستخدم المُنشِّف يرى على
+          اللوحة ٢٬٢٤٥ ثم يفتح «تعديل خطتي» فيرى ٢٬٦٤٥ — والفارق **بالضبط**
+          `CUT_DEFICIT` (٤٠٠). قِيس قبل الإصلاح: لا شيء يُعاد حسابه ولا يُكتب —
+          الخلل تسمية على قيمة، لا تعديل صامت. البروتين والماء بجانبه كانا
+          يعرضان قيم الهدف أصلًا، فكانت السعرات وحدها خارج السرب.
+        */}
         <div className="mt-3 grid grid-cols-3 gap-3 text-center">
-          <LivePreview label={d.bodyTargetCalories} value={`${ctx.data.targets.maintenanceCalories}`} unit={d.unitCalories} />
+          <LivePreview label={d.bodyTargetCalories} value={`${ctx.data.targets.targetCalories}`} unit={d.unitCalories} />
           <LivePreview label={d.bodyProtein} value={`${ctx.data.targets.proteinGrams}`} unit={d.unitG} />
           <LivePreview label={d.bodyWater} value={`${ctx.data.targets.waterLiters}`} unit={d.unitLiter} />
         </div>
