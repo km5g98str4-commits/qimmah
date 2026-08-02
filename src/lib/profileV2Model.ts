@@ -8,13 +8,33 @@
 import type { Customization } from '@/lib/customization'
 import type { Lang } from '@/lib/appPreferences'
 import type { CalorieGoal } from '@/types/profile'
+import { goalWordingFor } from '@/i18n/dict/onboardingIntent'
 import { loadOnboardingProfile } from '@/lib/onboardingProfile'
+import { v2LevelFromExperience, type V2Level } from '@/lib/onboardingV2Flow'
 import { workoutCounts } from '@/lib/progressStats'
 import { workoutStreak } from '@/lib/streaks'
 import { loadSessions } from '@/lib/workoutSessions'
 import { loadAchievementState } from '@/features/achievements/engine'
 
-const GOAL_AR: Record<CalorieGoal, string> = { cut: 'تنشيف', maintain: 'محافظة', bulk: 'تضخيم' }
+/**
+ * [CTO-65] البند ٥ — أُزيلت خريطة المصطلحات الثابتة.
+ *
+ * كانت `GOAL_AR = { cut: 'تنشيف', maintain: 'محافظة', bulk: 'تضخيم' }` تُعرض لكل
+ * مستخدم مهما كان مستواه، فيرى المبتدئ الذي اختار «خسارة دهون» كلمةَ «تنشيف» في
+ * ملفه وفي عنوان برنامجه. الصياغة الآن تتبع المستوى عبر `goalWordingFor` —
+ * نفس مصدر صياغة الأهداف في الإعداد، فلا مصدرا تسمية متناقضان.
+ */
+
+/**
+ * المستوى المُعتمَد حين لا يكون محفوظًا — [CTO-65] البند ٥.
+ *
+ * **`beginner` لا `intermediate` عمدًا.** توقيع `goalWordingFor` هو
+ * `s.goalWording[level ?? 'intermediate']`، فتمرير `null` إليه **يعيد «تنشيف»
+ * ويجعل البند يبدو منجزًا وهو ليس كذلك**. لذلك يُحسم السقوط هنا باسم معلَن،
+ * ونحو أوسع الصياغتين فهمًا: لغة النتيجة يفهمها كل مستوى، ومصطلح الصالة لا
+ * يفهمه المبتدئ. حين لا نعرف، لا نخاطر بالتسريب.
+ */
+const LEVEL_WHEN_UNKNOWN: V2Level = 'beginner'
 
 // Program template length per goal (weeks). A product/plan default — NOT
 // fabricated user data — mirroring the standard تنشيف/محافظة/تضخيم block lengths.
@@ -116,7 +136,23 @@ export function buildProfileV2Model(customization: Customization, auth: AuthSumm
   const onb = loadOnboardingProfile()
   const onboarded = onb !== null
   const daysPerWeek = onb?.trainingPreferences?.daysPerWeek ?? null
-  const goalWord = goal === 'cut' ? (ar ? 'التنشيف' : 'Cut') : goal === 'bulk' ? (ar ? 'التضخيم' : 'Bulk') : goal === 'maintain' ? (ar ? 'المحافظة' : 'Maintain') : ''
+  /**
+   * [CTO-65] البند ٥ — المستوى **المُعلَن** لا قيمة افتراضية.
+   *
+   * ⚠️ فخّان مقيسان يجعلان المصدر الخطأ يبدو صحيحًا:
+   *   • `defaultProfile.trainingLevel = 'intermediate'` — فقراءة
+   *     `customization.profile.trainingLevel` تُلبِس **كل** مستخدم صياغةَ المتوسط
+   *     حتى قبل أن يُجيب شيئًا.
+   *   • `toLegacyProfile` يسقط على نفس الافتراضي حين لا تُحفظ خبرة، فحتى شرط
+   *     «أكمل الإعداد» لا يكفي وحده.
+   * لذلك نقرأ **الإجابة المحفوظة نفسها** (`trainingPreferences.experience`) عبر
+   * `v2LevelFromExperience`، وهي وحدها التي تعيد `null` حين لا إجابة.
+   *
+   * ولا نمرّر `null` إلى `goalWordingFor`: توقيعها `level ?? 'intermediate'`
+   * يسقط صامتًا على المتوسط — وهو بالضبط ما نتجنّبه (انظر `LEVEL_WHEN_UNKNOWN`).
+   */
+  const declaredLevel: V2Level | null = v2LevelFromExperience(onb?.trainingPreferences?.experience)
+  const wording = goalWordingFor(lang, declaredLevel ?? LEVEL_WHEN_UNKNOWN)
 
   // ——— REAL training data (honest, never invented) ———
   const now = new Date()
@@ -142,14 +178,16 @@ export function buildProfileV2Model(customization: Customization, auth: AuthSumm
     },
     trainingIdentity: {
       goal,
-      goalLabel: goal ? GOAL_AR[goal] : null,
-      planTitle: goalWord ? (ar ? `برنامج ${goalWord}` : `${goalWord} program`) : ar ? 'خطتك' : 'Your plan',
+      goalLabel: goal ? wording[goal].label : null,
+      // `programTitle` اسم مستقلّ من القاموس لا تركيب على `label`: تركيب
+      // «برنامج {label}» يعطي «برنامج ثبات وتحسين عام» — جملة لا عنوان.
+      planTitle: goal ? wording[goal].programTitle : ar ? 'خطتك' : 'Your plan',
       trainingDaysPerWeek: daysPerWeek,
       onboarded,
     },
     stats: { workoutCount, streakDays, prCount, hasData },
     program: {
-      title: goalWord ? (ar ? `برنامج ${goalWord}` : `${goalWord} program`) : ar ? 'خطتك' : 'Your plan',
+      title: goal ? wording[goal].programTitle : ar ? 'خطتك' : 'Your plan',
       weekOf: weekOfProgram(finishedDates, totalWeeks, now),
       totalWeeks,
       daysPerWeek,

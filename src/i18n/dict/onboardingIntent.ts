@@ -41,6 +41,12 @@ export interface LevelOption {
 export interface GoalWording {
   label: string
   desc: string
+  /**
+   * اسم البرنامج كما يظهر في «ملفك» — [CTO-65] البند ٥. اسم مستقلّ لا تركيب
+   * على `label`: «برنامج ثبات وتحسين عام» / "Stay steady and improve program"
+   * جملة لا عنوان. والمقصد نفسه: مبتدئ يرى لغة نتيجة، لا مصطلح صالة.
+   */
+  programTitle: string
 }
 
 export interface OnboardingIntentStrings {
@@ -136,23 +142,23 @@ const ar: OnboardingIntentStrings = {
   goalWording: {
     // المبتدئ — لغة نتيجة، صفر مصطلحات صالة.
     beginner: {
-      cut: { label: 'خسارة دهون', desc: 'تنزل دهونك بهدوء وتحافظ على قوتك.' },
-      maintain: { label: 'ثبات وتحسين عام', desc: 'تثبّت وزنك وتحسّن شكلك وأداءك.' },
-      bulk: { label: 'بناء عضل', desc: 'تزيد عضلك بزيادة محسوبة في الأكل.' },
+      cut: { label: 'خسارة دهون', desc: 'تنزل دهونك بهدوء وتحافظ على قوتك.', programTitle: 'برنامج خسارة الدهون' },
+      maintain: { label: 'ثبات وتحسين عام', desc: 'تثبّت وزنك وتحسّن شكلك وأداءك.', programTitle: 'برنامج الثبات والتحسين' },
+      bulk: { label: 'بناء عضل', desc: 'تزيد عضلك بزيادة محسوبة في الأكل.', programTitle: 'برنامج بناء العضل' },
     },
     // المتوسط — المصطلح الشائع في الصالة.
     intermediate: {
-      cut: { label: 'تنشيف', desc: 'تنزل الدهون بعجز محسوب وتحافظ على عضلك.' },
-      maintain: { label: 'محافظة', desc: 'تثبت وزنك وتطوّر أداءك بسعرات الصيانة.' },
-      bulk: { label: 'تضخيم', desc: 'تبني عضل بفائض محسوب.' },
+      cut: { label: 'تنشيف', desc: 'تنزل الدهون بعجز محسوب وتحافظ على عضلك.', programTitle: 'برنامج التنشيف' },
+      maintain: { label: 'محافظة', desc: 'تثبت وزنك وتطوّر أداءك بسعرات الصيانة.', programTitle: 'برنامج المحافظة' },
+      bulk: { label: 'تضخيم', desc: 'تبني عضل بفائض محسوب.', programTitle: 'برنامج التضخيم' },
     },
     // المتقدّم — المصطلحات القياسية كما تُستخدم فعلًا.
     // المسافة داخل «Lean Bulk» غير فاصلة (U+00A0) عن قصد: على عرض 320–375px
     // كان السطر ينكسر بين «(Lean» و«Bulk)» فيتشطّر القوسان في نصّ RTL.
     advanced: {
-      cut: { label: 'تنشيف (Cut)', desc: 'عجز موجّه مع بروتين مرتفع للحفاظ على الكتلة والقوة.' },
-      maintain: { label: 'إعادة تركيب (Recomposition)', desc: 'صيانة تقريبية: عضل يزيد ودهن ينزل — تقدّم أبطأ يحتاج دقّة.' },
-      bulk: { label: 'تضخيم نظيف (Lean\u00A0Bulk)', desc: 'فائض ضيّق يقلّل الدهن المكتسب مقابل نمو أهدأ.' },
+      cut: { label: 'تنشيف (Cut)', desc: 'عجز موجّه مع بروتين مرتفع للحفاظ على الكتلة والقوة.', programTitle: 'برنامج التنشيف' },
+      maintain: { label: 'إعادة تركيب (Recomposition)', desc: 'صيانة تقريبية: عضل يزيد ودهن ينزل — تقدّم أبطأ يحتاج دقّة.', programTitle: 'برنامج إعادة التركيب' },
+      bulk: { label: 'تضخيم نظيف (Lean\u00A0Bulk)', desc: 'فائض ضيّق يقلّل الدهن المكتسب مقابل نمو أهدأ.', programTitle: 'برنامج التضخيم النظيف' },
     },
   },
 
@@ -221,19 +227,19 @@ const en: OnboardingIntentStrings = {
 
   goalWording: {
     beginner: {
-      cut: { label: 'Fat loss', desc: 'Lose fat steadily while keeping your strength.' },
-      maintain: { label: 'Stay steady and improve', desc: 'Hold your weight and improve your shape and performance.' },
-      bulk: { label: 'Build muscle', desc: 'Add muscle with a measured increase in food.' },
+      cut: { label: 'Fat loss', desc: 'Lose fat steadily while keeping your strength.', programTitle: 'Fat loss program' },
+      maintain: { label: 'Stay steady and improve', desc: 'Hold your weight and improve your shape and performance.', programTitle: 'Steady progress program' },
+      bulk: { label: 'Build muscle', desc: 'Add muscle with a measured increase in food.', programTitle: 'Muscle building program' },
     },
     intermediate: {
-      cut: { label: 'Cut', desc: 'A measured deficit that drops fat and protects muscle.' },
-      maintain: { label: 'Maintain', desc: 'Maintenance calories that hold your weight and lift performance.' },
-      bulk: { label: 'Bulk', desc: 'A measured surplus to build muscle.' },
+      cut: { label: 'Cut', desc: 'A measured deficit that drops fat and protects muscle.', programTitle: 'Cut program' },
+      maintain: { label: 'Maintain', desc: 'Maintenance calories that hold your weight and lift performance.', programTitle: 'Maintain program' },
+      bulk: { label: 'Bulk', desc: 'A measured surplus to build muscle.', programTitle: 'Bulk program' },
     },
     advanced: {
-      cut: { label: 'Cut', desc: 'A directed deficit with high protein to defend mass and strength.' },
-      maintain: { label: 'Recomposition', desc: 'Around maintenance: muscle up, fat down — slower progress, tighter execution.' },
-      bulk: { label: 'Lean Bulk', desc: 'A tight surplus that limits fat gain in exchange for calmer growth.' },
+      cut: { label: 'Cut', desc: 'A directed deficit with high protein to defend mass and strength.', programTitle: 'Cut program' },
+      maintain: { label: 'Recomposition', desc: 'Around maintenance: muscle up, fat down — slower progress, tighter execution.', programTitle: 'Recomposition program' },
+      bulk: { label: 'Lean Bulk', desc: 'A tight surplus that limits fat gain in exchange for calmer growth.', programTitle: 'Lean bulk program' },
     },
   },
 

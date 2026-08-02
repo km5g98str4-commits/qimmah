@@ -218,6 +218,21 @@ export function resolveExperienceLevel(level: V2Level | null, years: number | nu
   return undefined
 }
 
+/**
+ * المعكوس: الخبرة المحفوظة ⇒ المستوى المُعلن — [CTO-65] البند ٥.
+ *
+ * يقف بجانب `resolveExperienceLevel` عمدًا: خريطة واحدة واتّجاهاها في موضع
+ * واحد، فلا يتباعدان. **و`undefined` يخرج `null` لا افتراضًا:** الملف الشخصي
+ * يحتاج أن يعرف «لا مستوى محفوظ» ليقرّر بنفسه، لا أن يُسلَّم «متوسّط» مصنوعًا
+ * فيعرض مصطلح صالة لمبتدئ صامتًا.
+ */
+export function v2LevelFromExperience(experience: ExperienceLevel | undefined): V2Level | null {
+  if (experience === 'beginner') return 'beginner'
+  if (experience === 'advanced') return 'advanced'
+  if (experience === 'novice' || experience === 'intermediate') return 'intermediate'
+  return null
+}
+
 /** Can the user advance from this step? */
 export function canAdvance(step: number, d: Validatable): boolean {
   return validateStep(step, d) === null
