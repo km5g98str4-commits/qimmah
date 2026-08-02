@@ -36,8 +36,18 @@ check('رسالة الاشتراط العربية تقول 13', policy.includes(
 check('رسالة الاشتراط الإنجليزية تقول 13', policy.includes('you are 13 or older'))
 
 console.log('\n═══ 2) تلميح الحقل ١٣–١٠٠ ═══')
-check('العربية: (13–100)', onboarding.includes('سنة (13–100)'))
-check('الإنجليزية: (13–100)', onboarding.includes('years (13–100)'))
+// [CTO-67] البند ٣ — التلميح لم يعد نصًّا صلبًا في القاموس بل يُبنى من النطاق،
+// فالفحص انتقل من مطابقة السلسلة إلى **إعادة بنائها من المصدر ومطابقة الناتج**.
+// هذا شدٌّ لا تليين: السلسلة الصلبة كانت تمرّ ولو خالفت `AGE_RANGE`؛ والآن
+// أي تباعد بين الوحدة أو الرقم أو الصيغة يُسقط الفحص.
+const ageMin = domain.match(/AGE_RANGE:\s*NumericRange\s*=\s*\{\s*min:\s*(\d+),\s*max:\s*(\d+)\s*\}/)
+check('نطاق العمر مقروء من مصدر الحقيقة', !!ageMin)
+const [, aMin, aMax] = ageMin ?? [, '', '']
+check('صيغة التلميح تُبنى من حدّي النطاق لا من نصّ مكتوب', /const span = `\$\{range\.min\}–\$\{range\.max\}`/.test(domain))
+check('AGE_HINT مبنيّ من AGE_RANGE بوحدة «سنة»/«years»', /AGE_HINT\s*=\s*rangeHint\(AGE_RANGE,\s*\{\s*ar:\s*'سنة',\s*en:\s*'years'\s*\}\)/.test(domain))
+check(`العربية: الناتج «سنة (${aMin}–${aMax})»`, `سنة (${aMin}–${aMax})` === `سنة (13–100)` && onboarding.includes('bodyAgeHint: AGE_HINT.ar'))
+check(`الإنجليزية: الناتج «years (${aMin}–${aMax})»`, `years (${aMin}–${aMax})` === 'years (13–100)' && onboarding.includes('bodyAgeHint: AGE_HINT.en'))
+check('ولا رقم عمر صلب باقٍ في القاموس', !/سنة \(\d+–\d+\)|years \(\d+–\d+\)/.test(onboarding))
 // الرسالة لم تعد نصًّا صلبًا — تُبنى من نفس النطاق، فيستحيل أن تذكر رقمًا غيره.
 check('رسالة العمر مبنيّة من النطاق لا مكتوبة', /بين \$\{range\.min\} و\$\{range\.max\} سنة/.test(domain))
 check('validation.ts لا يكتب رسالة عمر بأرقام صلبة', !/بين\s*\d+\s*و\d+\s*سنة/.test(validation))
