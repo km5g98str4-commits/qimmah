@@ -182,9 +182,14 @@ interface ExInput {
   videoUrl?: string
   alternatives?: string[]
   notesAr?: string
+  notesEn?: string
+  howToEn?: string[]
   techniqueTipsAr?: string[]
+  techniqueTipsEn?: string[]
   commonMistakesAr?: string[]
+  commonMistakesEn?: string[]
   safetyNotesAr?: string[]
+  safetyNotesEn?: string[]
 }
 
 function ex(p: ExInput): Exercise {
@@ -212,7 +217,11 @@ function ex(p: ExInput): Exercise {
     videoSource: hasCustomVideo ? 'trusted_video' : 'youtube_search',
     alternatives: p.alternatives ?? [],
     notesAr: p.notesAr ?? '',
-    notesEn: '',
+    notesEn: p.notesEn ?? '',
+    howToEn: p.howToEn,
+    techniqueTipsEn: p.techniqueTipsEn,
+    commonMistakesEn: p.commonMistakesEn,
+    safetyNotesEn: p.safetyNotesEn,
     techniqueTipsAr: p.techniqueTipsAr ?? [],
     commonMistakesAr: p.commonMistakesAr ?? [],
     safetyNotesAr: p.safetyNotesAr ?? [],

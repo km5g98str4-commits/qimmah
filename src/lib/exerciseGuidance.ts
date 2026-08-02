@@ -158,6 +158,11 @@ export function muscleName(m: Muscle, lang: Lang = 'ar'): string {
 /** نقاط تكنيك للتمرين — الخاصة به إن وُجدت، وإلا افتراضية حسب نمط الحركة. */
 export function getTechniqueTips(exercise: Exercise, lang: Lang = 'ar'): string[] {
   if (lang !== 'en' && exercise.techniqueTipsAr?.length) return exercise.techniqueTipsAr
+  if (lang === 'en') {
+    if (exercise.techniqueTipsEn?.length) return exercise.techniqueTipsEn
+    // A catalog item without authored English is intentionally not translated by inference.
+    if (getExercise(exercise.id)) return []
+  }
   const table = lang === 'en' ? TECHNIQUE_BY_PATTERN_EN : TECHNIQUE_BY_PATTERN
   const base = table[exercise.movementPattern] ?? table.isolation
   const lead =
@@ -170,6 +175,10 @@ export function getTechniqueTips(exercise: Exercise, lang: Lang = 'ar'): string[
 /** أخطاء شائعة للتمرين — الخاصة به إن وُجدت، وإلا افتراضية حسب نمط الحركة. */
 export function getCommonMistakes(exercise: Exercise, lang: Lang = 'ar'): string[] {
   if (lang !== 'en' && exercise.commonMistakesAr?.length) return exercise.commonMistakesAr
+  if (lang === 'en') {
+    if (exercise.commonMistakesEn?.length) return exercise.commonMistakesEn
+    if (getExercise(exercise.id)) return []
+  }
   const table = lang === 'en' ? MISTAKES_BY_PATTERN_EN : MISTAKES_BY_PATTERN
   return table[exercise.movementPattern] ?? table.isolation
 }
@@ -177,6 +186,10 @@ export function getCommonMistakes(exercise: Exercise, lang: Lang = 'ar'): string
 /** تنبيهات أمان للتمرين — الخاصة به إن وُجدت، وإلا افتراضية حسب نمط الحركة. */
 export function getSafetyNotes(exercise: Exercise, lang: Lang = 'ar'): string[] {
   if (lang !== 'en' && exercise.safetyNotesAr?.length) return exercise.safetyNotesAr
+  if (lang === 'en') {
+    if (exercise.safetyNotesEn?.length) return exercise.safetyNotesEn
+    if (getExercise(exercise.id)) return []
+  }
   const table = lang === 'en' ? SAFETY_BY_PATTERN_EN : SAFETY_BY_PATTERN
   const base = table[exercise.movementPattern] ?? table.isolation
   const priorInjury =
@@ -327,6 +340,9 @@ export function exerciseGuidance(exerciseId: string, lang: Lang): GuidanceText {
   const ex = getExercise(exerciseId)
   const pattern = ex?.movementPattern ?? 'isolation'
   const g = byPattern[pattern] ?? byPattern.isolation
+  if (lang === 'en' && ex) {
+    return { tips: getTechniqueTips(ex, 'en'), mistakes: getCommonMistakes(ex, 'en') }
+  }
   if (lang === 'en') return g.en
   if (ex) {
     return { tips: getTechniqueTips(ex), mistakes: getCommonMistakes(ex) }
@@ -497,5 +513,22 @@ const GUIDANCE_BY_PATTERN_EN: Record<MovementPattern, ExerciseGuidance> = {
 
 export function guidanceFor(ex: Exercise, lang: Lang = 'ar'): ExerciseGuidance {
   const table = lang === 'en' ? GUIDANCE_BY_PATTERN_EN : GUIDANCE_BY_PATTERN
-  return table[ex.movementPattern] ?? table.isolation
+  const generic = table[ex.movementPattern] ?? table.isolation
+  const known = Boolean(getExercise(ex.id))
+  // Synthetic callers (and legacy probes) still receive the stable pattern card.
+  if (!known) return generic
+  if (lang === 'en') {
+    return {
+      howTo: ex.howToEn ?? [],
+      tips: getTechniqueTips(ex, 'en'),
+      mistakes: getCommonMistakes(ex, 'en'),
+      safety: getSafetyNotes(ex, 'en')[0] ?? '',
+    }
+  }
+  return {
+    ...generic,
+    tips: getTechniqueTips(ex),
+    mistakes: getCommonMistakes(ex),
+    safety: getSafetyNotes(ex)[0] ?? generic.safety,
+  }
 }

@@ -1,11 +1,13 @@
 import type { Lang } from '@/lib/appPreferences'
 import { LanguageToggle } from '@/i18n'
 import { V2_WELCOME } from '@/design-system/v2/labels'
+import { getStrings } from '@/config/strings'
 
 interface StartViewV2Props {
   lang: Lang
   onLogin: () => void
   onSignup: () => void
+  onGuest: () => void
 }
 
 /**
@@ -19,7 +21,7 @@ interface StartViewV2Props {
  * MSA set (V2_WELCOME). Functional routes are unchanged — `onSignup` is the
  * primary path, `onLogin` the secondary, exactly as the v1 screen wired them.
  */
-export function StartViewV2({ lang, onLogin, onSignup }: StartViewV2Props) {
+export function StartViewV2({ lang, onLogin, onSignup, onGuest }: StartViewV2Props) {
   const c = V2_WELCOME[lang] ?? V2_WELCOME.ar
 
   return (
@@ -69,6 +71,14 @@ export function StartViewV2({ lang, onLogin, onSignup }: StartViewV2Props) {
           <button type="button" onClick={onSignup} className="btn-primary w-full py-4 text-[1.1875rem] shadow-glow">
             {c.primary}
           </button>
+          <button
+            type="button"
+            onClick={onGuest}
+            className="w-full rounded-2xl border border-line/70 bg-surface/70 py-3 text-center text-sm font-bold text-ink-700 transition-colors hover:border-primary/50 hover:text-ink-900"
+          >
+            {getStrings(lang).start.continueGuest}
+          </button>
+          <p className="text-center text-xs leading-relaxed text-ink-500">{getStrings(lang).start.guestNote}</p>
           <button
             type="button"
             onClick={onLogin}

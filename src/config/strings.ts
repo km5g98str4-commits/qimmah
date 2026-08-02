@@ -183,6 +183,13 @@ export interface ShellStrings {
     home: string
     back: string
   }
+  accountRequired: {
+    title: string
+    body: string
+    login: string
+    guest: string
+    back: string
+  }
   errorBoundary: {
     title: string
     body: string
@@ -245,6 +252,8 @@ export interface ShellStrings {
     recentTitle: string
     completedToday: string
     emptyPlan: string
+    restDayTitle: string
+    restDayBody: string
     workoutsTitle: string
     workoutsDesc: string
     // — وضع التمرين النشط —
@@ -643,7 +652,7 @@ const ar: ShellStrings = {
       'عند تسجيل الدخول بحساب سحابي (Supabase) تُرفع بياناتك إلى حسابك الخاص لتتمكّن من الوصول إليها من أجهزة أخرى. لا يصل إلى صفوفك إلا أنت (Row Level Security).',
       'لا نبيع بياناتك ولا نشاركها مع معلنين. قياساتك وسجلّاتك الصحية تبقى ملكك ويمكنك حذفها في أي وقت عبر «إعادة ضبط البيانات».',
       'نستخدم إحصاءات استخدام مجهولة تمامًا (بلا اسم أو بريد أو أي بيانات شخصية) لتحسين قِمّة، دون بيعها أو تتبّعك خارج التطبيق. يمكنك إيقافها في أي وقت من «الإعدادات → الخصوصية».',
-      'تقدر تحذف حسابك وكل بياناته نهائيًا من «الإعدادات → الحساب → حذف الحساب»، أو تصدّر نسخة كاملة من بياناتك في أي وقت من «الإعدادات → البيانات».',
+    'يمكنك حذف حسابك وكل بياناته نهائيًا من «الإعدادات → الحساب → حذف الحساب»، أو تصدير نسخة كاملة من بياناتك في أي وقت من «الإعدادات → البيانات».',
     ],
     termsBody: [
       'قِمّة أداة لتنظيم ومتابعة التمرين والتغذية والمكملات والقياسات للرياضي الفرد. الاستخدام على مسؤوليتك الشخصية.',
@@ -659,6 +668,13 @@ const ar: ShellStrings = {
     body: 'الرابط اللي فتحته مو موجود أو اتغيّر.',
     home: 'ارجع للرئيسية',
     back: 'الشاشة السابقة',
+  },
+  accountRequired: {
+    title: 'هالمسار يحتاج حساب',
+    body: 'سجّل دخولك أو كمّل كضيف عشان تفتح التطبيق وتحفظ بياناتك على جهازك.',
+    login: 'تسجيل الدخول',
+    guest: 'كمّل كضيف',
+    back: 'رجوع للبداية',
   },
   errorBoundary: {
     title: 'صار خلل بسيط',
@@ -721,6 +737,8 @@ const ar: ShellStrings = {
     recentTitle: 'آخر تمرين',
     completedToday: 'تمرين اليوم مكتمل',
     emptyPlan: 'اختر جدولك من الإعداد عشان تبدأ.',
+    restDayTitle: 'اليوم راحة',
+    restDayBody: 'جدولك ما فيه تمرين اليوم — خذ راحتك، ونشوفك في أقرب يوم تدريب.',
     workoutsTitle: 'تماريني',
     workoutsDesc: 'جدولك الحالي بكل أيامه وتمارينه — مع شرح كل تمرين.',
     heroReady: 'تمرينك اليوم جاهز',
@@ -1132,6 +1150,13 @@ const en: ShellStrings = {
     home: 'Back to home',
     back: 'Previous screen',
   },
+  accountRequired: {
+    title: 'This path needs an account',
+    body: 'Log in or continue as a guest to open the app and keep your data on this device.',
+    login: 'Log in',
+    guest: 'Continue as guest',
+    back: 'Back to start',
+  },
   errorBoundary: {
     title: 'Something went wrong',
     body: 'We hit an unexpected problem on this screen. Try reloading the page and it should be back to normal — your data is saved on your device.',
@@ -1193,6 +1218,8 @@ const en: ShellStrings = {
     recentTitle: 'Recent workout',
     completedToday: "Today's workout completed",
     emptyPlan: 'Choose your plan in Setup to get started.',
+    restDayTitle: 'Rest day',
+    restDayBody: 'Your schedule has no workout today — take the rest and we’ll see you on the next training day.',
     workoutsTitle: 'My workouts',
     workoutsDesc: 'Your current plan with all days and exercises — each with a guide.',
     heroReady: "Today's workout is ready",

@@ -25,6 +25,7 @@ import {
   exerciseGuidance,
 } from '@/lib/exerciseGuidance'
 import type { Exercise, MovementPattern, Muscle } from '@/types/workout'
+import { getExercise } from '@/data/exercises'
 
 let pass = 0
 const fails: string[] = []
@@ -216,6 +217,9 @@ console.log('\n④ إرشاد التمارين (exerciseGuidance)')
   // تنبيه استشارة المختص موجود في اللغتين (قاعدة «لا ادّعاءات طبية»)
   check('تنبيه استشارة المختص يظهر بالعربية', getSafetyNotes(ex).some((t) => t.includes('استشر مختصًا')))
   check('تنبيه استشارة المختص يظهر بالإنجليزية', getSafetyNotes(ex, 'en').some((t) => /qualified professional/i.test(t)))
+  const catalogExercise = getExercise('barbell-bench-press')!
+  const catalogEn = guidanceFor(catalogExercise, 'en')
+  check('التمرين الحقيقي بلا إنجليزي مؤلف لا يتلقى ترجمة مخترعة', catalogEn.howTo.length === 0 && catalogEn.tips.length === 0 && catalogEn.mistakes.length === 0 && catalogEn.safety === '')
 }
 
 console.log(`\n${fails.length === 0 ? '✅' : '❌'} إثبات المحتوى الإنجليزي: ${pass} نجح · ${fails.length} فشل`)

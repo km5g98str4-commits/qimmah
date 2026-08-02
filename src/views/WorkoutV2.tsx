@@ -4,6 +4,7 @@ import { ExerciseMedia } from '@/components/ExerciseMedia'
 import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
 import { applyTheme } from '@/lib/appPreferences'
+import { getStrings } from '@/config/strings'
 import type { AppRoute } from '@/lib/appRoutes'
 import { useCustomization } from '@/lib/customizationContext'
 import { useAppScrollReset } from '@/lib/useAppScrollReset'
@@ -111,7 +112,7 @@ interface UndoState {
   snapshot: StorageSnapshot
   active: ActiveState
 }
-interface SetRow { weight: number; reps: number; done: boolean }
+interface SetRow { weight: number; reps: number; done: boolean; rpe?: number }
 interface ActiveState {
   startedAt: number
   exIndex: number
@@ -198,6 +199,8 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
 
   // ── Screen 31 (substitution) + screen 27 (one-handed) session state ──
   const profile = customization.profile
+  const rpeLevel = profile.experienceLevel ?? profile.trainingLevel
+  const rpeEnabled = rpeLevel === 'intermediate' || rpeLevel === 'advanced'
   // Pre-session substitutions (chosen from the Detail screen before starting) —
   // folded into the active session at startSession, then the active map is source.
   const [preSubs, setPreSubs] = useState<Record<string, string>>({})
@@ -338,6 +341,7 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   // Active-session exercises with substitutions applied (identity swap only).
   const effExercises = useMemo(() => applySubs(model.exercises, active?.subs, lang), [model.exercises, active?.subs, lang])
 
+  if (model.restDay) return <RestDayScreen lang={lang} onNavigate={onNavigate} />
   if (!model.available) return <MissingPlan lang={lang} onNavigate={onNavigate} />
 
   const startSession = () => {
@@ -695,6 +699,7 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
                     <span className="text-sm font-bold" style={{ color: isCurrent ? FOCUS.ink : FOCUS.inkMuted }}>{t(`المجموعة ${toAr(i + 1, lang)}`, `Set ${i + 1}`)}</span>
                     <span className="flex items-center gap-2">
                       <span className="text-lg font-black tabular-nums" style={{ color: r.done ? FOCUS.success : FOCUS.ink }}>{toAr(r.weight, lang)}<span className="text-xs font-bold" style={{ color: FOCUS.inkFaint }}> {t('كجم', 'kg')} </span>×<span className="text-xs font-bold" style={{ color: FOCUS.inkFaint }}> </span>{toAr(r.reps, lang)}</span>
+                      {rpeEnabled && r.rpe != null && <span className="rounded-full px-2 py-0.5 text-[0.65rem] font-black" style={{ background: 'color-mix(in srgb, var(--v2-blue) 16%, transparent)', color: FOCUS.blue }}>RPE {toAr(r.rpe, lang)}</span>}
                       {r.done && <span style={{ color: FOCUS.success }}><Icon name="Check" className="h-4 w-4" strokeWidth={3} /></span>}
                     </span>
                   </div>
@@ -747,6 +752,9 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
                 <Stepper label={t('التكرار', 'Reps')} value={row.reps} step={1} onChange={(v) => setRow({ reps: Math.max(0, v) })} lang={lang} mirror={hand === 'left'} />
               </div>
             </div>
+            {rpeEnabled && (
+              <RpePicker lang={lang} value={row.rpe} onChange={(rpe) => setRow({ rpe })} />
+            )}
 
             {/* single ember action */}
             <button type="button" onClick={finishSet} className="press mt-4 w-full rounded-2xl py-4 text-[1.1875rem] font-black" style={{ background: FOCUS.ember, color: FOCUS.onColor }}>{t('أنهِ المجموعة', 'Complete set')}</button>
@@ -857,6 +865,32 @@ function Stepper({ label, value, step, onChange, lang, mirror, onPlates, platesO
         <button type="button" onClick={() => onChange(value - step)} aria-label={label + ' −'} className="grid h-12 w-12 shrink-0 place-items-center rounded-xl" style={{ background: FOCUS.cardActive, border: `1px solid ${FOCUS.line}`, color: FOCUS.ink }}><Icon name="Minus" className="h-6 w-6" /></button>
         <span className="text-3xl font-black tabular-nums" style={{ color: FOCUS.ink }}>{toAr(value, lang)}</span>
         <button type="button" onClick={() => onChange(value + step)} aria-label={label + ' +'} className="press grid h-12 w-12 shrink-0 place-items-center rounded-xl" style={{ background: FOCUS.cardActive, border: `1px solid ${FOCUS.line}`, color: FOCUS.ink }}><Icon name="Plus" className="h-6 w-6" /></button>
+      </div>
+    </div>
+  )
+}
+
+function RpePicker({ lang, value, onChange }: { lang: Lang; value?: number; onChange: (value: number | undefined) => void }) {
+  const ar = lang !== 'en'
+  return (
+    <div className="mt-3 rounded-2xl p-3" style={{ background: FOCUS.card, border: `1px solid ${FOCUS.line}` }} role="group" aria-label={ar ? 'مجهود المجموعة (RPE)' : 'Set effort (RPE)'}>
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-xs font-bold" style={{ color: FOCUS.inkMuted }}>{ar ? 'المجهود (RPE)' : 'Effort (RPE)'}</p>
+        <span className="text-xs font-black tabular-nums" style={{ color: value == null ? FOCUS.inkFaint : FOCUS.blue }}>{value == null ? '—' : toAr(value, lang)} / {toAr(10, lang)}</span>
+      </div>
+      <div className="mt-2 grid grid-cols-5 gap-1.5">
+        {Array.from({ length: 10 }, (_, i) => i + 1).map((rpe) => (
+          <button
+            key={rpe}
+            type="button"
+            onClick={() => onChange(value === rpe ? undefined : rpe)}
+            aria-pressed={value === rpe}
+            className="v2-pressable rounded-lg py-2 text-xs font-black tabular-nums"
+            style={{ background: value === rpe ? FOCUS.blue : FOCUS.cardActive, border: `1px solid ${value === rpe ? FOCUS.blue : FOCUS.line}`, color: value === rpe ? FOCUS.onColor : FOCUS.inkMuted }}
+          >
+            {toAr(rpe, lang)}
+          </button>
+        ))}
       </div>
     </div>
   )
@@ -1321,6 +1355,21 @@ function MissingPlan({ lang, onNavigate }: { lang: Lang; onNavigate: (r: AppRout
       <h1 className="mt-5 text-2xl font-black">{ar ? 'أكمل إعداد خطتك' : 'Finish setting up your plan'}</h1>
       <p className="mt-2 max-w-xs text-sm text-ink-500">{ar ? 'نحتاج هدفك وجدولك لنبني تمرينك.' : 'We need your goal and schedule to build your workout.'}</p>
       <button type="button" onClick={() => onNavigate('setup')} className="btn-primary mt-6 w-full max-w-xs py-4 text-[1.1875rem]">{ar ? 'ابدأ الإعداد' : 'Start setup'}</button>
+    </div>
+  )
+}
+
+function RestDayScreen({ lang, onNavigate }: { lang: Lang; onNavigate: (r: AppRoute) => void }) {
+  const t = getStrings(lang).workout
+  const ar = lang !== 'en'
+  return (
+    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light v2-screen-enter flex min-h-full flex-col items-center justify-center bg-page px-6 py-10 text-center text-ink-900">
+      <Icon name="Moon" className="h-12 w-12 text-primary-c" />
+      <h1 className="mt-5 text-2xl font-black">{t.restDayTitle}</h1>
+      <p className="mt-2 max-w-xs text-sm leading-relaxed text-ink-500">{t.restDayBody}</p>
+      <button type="button" onClick={() => onNavigate('dashboard')} className="btn-primary mt-6 w-full max-w-xs py-4 text-[1.1875rem]">
+        {t.backToToday}
+      </button>
     </div>
   )
 }

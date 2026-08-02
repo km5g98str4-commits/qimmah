@@ -16,7 +16,7 @@
 // وممنوع أن يرى المبتدئ مصطلحات الحمل المتقدّمة (RIR · RPE · Deload · 1RM ·
 // AMRAP) في أي نص من مساره — يحرسه `onboarding-intent-proof`.
 //
-// النبرة (§6): فصحى دافئة، نشرح **أثر** كل إجابة بلا وعود ولا تهويل.
+// النبرة (§6): عامية بيضاء سعودية، نشرح **أثر** كل إجابة بلا وعود ولا تهويل.
 
 import type { Lang } from '@/lib/appPreferences'
 import type { V2GoalValue } from '@/design-system/v2/labels'
@@ -78,9 +78,9 @@ export interface OnboardingIntentStrings {
 
 const ar: OnboardingIntentStrings = {
   title: 'وش تبحث عنه في قِمّة؟',
-  subtitle: 'إجابتان قصيرتان تحدّدان شكل خطتك ولغة الأهداف اللي نعرضها لك.',
+  subtitle: 'جوابين سريعين يحدّدون شكل خطتك والكلام اللي نعرضه لك.',
 
-  intentQ: 'أكثر شيء تحتاج مساعدة فيه',
+  intentQ: 'وش أكثر شيء تحتاج مساعدة فيه؟',
   intents: [
     {
       value: 'plan',
@@ -102,36 +102,36 @@ const ar: OnboardingIntentStrings = {
     },
   ],
 
-  levelQ: 'مستواك في التمرين',
+  levelQ: 'مستواك بالتمرين',
   levels: [
     {
       value: 'beginner',
       label: 'مبتدئ',
-      desc: 'جديد على التمرين أو أقل من ستة شهور.',
+      desc: 'توّك تبدأ أو لك أقل من ستة شهور.',
       icon: 'Sparkles',
     },
     {
       value: 'intermediate',
       label: 'متوسط',
-      desc: 'تتمرن بانتظام وتعرف الحركات الأساسية.',
+      desc: 'تتمرّن بانتظام وتعرف الحركات الأساسية.',
       icon: 'CalendarDays',
     },
     {
       value: 'advanced',
       label: 'متقدّم',
-      desc: 'سنوات من التمرين المنتظم وتعرف تفاصيل خطتك.',
+      desc: 'لك سنين تتمرّن بانتظام وتعرف تفاصيل خطتك.',
       icon: 'Trophy',
     },
   ],
 
-  yearsLabel: 'سنوات التدريب (اختياري)',
+  yearsLabel: 'سنوات التمرين (اختياري)',
   yearsUnit: 'سنة',
   yearsPlaceholder: 'مثال: ٢',
   yearsNote: 'تضبط عدد التمارين في الجلسة بدقّة أكبر. اتركها فارغة لو ما تذكرها.',
 
-  validation: 'اختر ما تبحث عنه ومستواك لنكمل.',
+  validation: 'اختر وش تحتاج ومستواك ونكمل.',
 
-  legends: { intent: 'ما تبحث عنه في قِمّة', level: 'مستواك في التمرين' },
+  legends: { intent: 'وش تحتاج في قِمّة', level: 'مستواك بالتمرين' },
 
   goalWording: {
     // المبتدئ — لغة نتيجة، صفر مصطلحات صالة.
@@ -142,9 +142,9 @@ const ar: OnboardingIntentStrings = {
     },
     // المتوسط — المصطلح الشائع في الصالة.
     intermediate: {
-      cut: { label: 'تنشيف', desc: 'عجز محسوب تنزل به الدهون وتحافظ على عضلك.' },
-      maintain: { label: 'محافظة', desc: 'سعرات صيانة تثبّت وزنك وتحسّن أداءك.' },
-      bulk: { label: 'تضخيم', desc: 'فائض محسوب تبني به عضلًا.' },
+      cut: { label: 'تنشيف', desc: 'تنزل الدهون بعجز محسوب وتحافظ على عضلك.' },
+      maintain: { label: 'محافظة', desc: 'تثبت وزنك وتطوّر أداءك بسعرات الصيانة.' },
+      bulk: { label: 'تضخيم', desc: 'تبني عضل بفائض محسوب.' },
     },
     // المتقدّم — المصطلحات القياسية كما تُستخدم فعلًا.
     // المسافة داخل «Lean Bulk» غير فاصلة (U+00A0) عن قصد: على عرض 320–375px
