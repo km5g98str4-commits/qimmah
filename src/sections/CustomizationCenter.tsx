@@ -188,6 +188,9 @@ export function CustomizationCenter({ onBack, initialStep = 0, mode = 'onboardin
   const ctx: WizardCtx = {
     lang,
     data,
+    // [CTO-65] البند ٤ — المرجع المحفوظ لعرض «كان → صار» في المراجعة.
+    // `customization` من السياق هو آخر ما حُفظ فعلًا؛ `data` نسخة العمل.
+    saved: customization,
     update,
     updateIdentity,
     updateColors,
