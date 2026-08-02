@@ -651,10 +651,10 @@ const ar: ShellStrings = {
     termsTitle: 'شروط الاستخدام',
     back: 'رجوع',
     privacyBody: [
-      'قِمّة يتطلّب حسابًا، ويعمل بأسلوب محلي أولًا (local-first): تُحفظ بياناتك على جهازك أولًا، ثم تُزامَن إلى حسابك عند تفعيل المزامنة.',
-      'عند تسجيل الدخول بحساب سحابي (Supabase) تُرفع بياناتك إلى حسابك الخاص لتتمكّن من الوصول إليها من أجهزة أخرى. لا يصل إلى صفوفك إلا أنت (Row Level Security).',
+      'قِمّة يعمل محليًا أولًا (local-first): تُحفظ بياناتك على جهازك، ويمكنك استخدام التطبيق كاملًا كضيف دون إنشاء حساب. الحساب اختياري، والغرض منه مزامنة بياناتك بين أجهزتك عند تفعيل المزامنة.',
+      'المزامنة السحابية غير مفعّلة في هذه النسخة، فلا تُرفع بياناتك إلى أي خادم عند تسجيل الدخول. وعند تفعيلها تُرفع بياناتك إلى حسابك الخاص عبر Supabase، ولا يصل إلى صفوفك إلا أنت (Row Level Security).',
       'لا نبيع بياناتك ولا نشاركها مع معلنين. قياساتك وسجلّاتك الصحية تبقى ملكك ويمكنك حذفها في أي وقت عبر «إعادة ضبط البيانات».',
-      'نستخدم إحصاءات استخدام مجهولة تمامًا (بلا اسم أو بريد أو أي بيانات شخصية) لتحسين قِمّة، دون بيعها أو تتبّعك خارج التطبيق. يمكنك إيقافها في أي وقت من «الإعدادات → الخصوصية».',
+      'نستخدم إحصاءات استخدام مجهولة تمامًا (بلا اسم أو بريد أو أي بيانات شخصية) لتحسين قِمّة، دون بيعها أو تتبّعك خارج التطبيق. وفي هذه النسخة لا تُرسَل هذه الإحصاءات إلى أي خادم، بل تبقى على جهازك.',
     'يمكنك حذف حسابك وكل بياناته نهائيًا من «الإعدادات → الحساب → حذف الحساب»، أو تصدير نسخة كاملة من بياناتك في أي وقت من «الإعدادات → البيانات».',
     ],
     termsBody: [
@@ -1133,10 +1133,10 @@ const en: ShellStrings = {
     termsTitle: 'Terms of Use',
     back: 'Back',
     privacyBody: [
-      'Qimmah requires an account and follows a local-first approach: your data is stored on your device first, then synced to your account when sync is enabled.',
-      'When you log in with a cloud account (Supabase), your data is uploaded to your own account so you can access it from other devices. Only you can read your rows (Row Level Security).',
+      'Qimmah is local-first: your data is stored on your device, and you can use the whole app as a guest without creating an account. An account is optional; its purpose is to sync your data across your devices once sync is enabled.',
+      'Cloud sync is not enabled in this version, so logging in does not upload your data to any server. Once it is enabled, your data is uploaded to your own account via Supabase, and only you can read your rows (Row Level Security).',
       'We do not sell or share your data with advertisers. Your measurements remain yours and can be deleted anytime via “Reset data”.',
-      'We use fully anonymous usage analytics (no name, email, or personal data) to improve Qimmah — never sold and never used to track you across apps. You can turn this off anytime in Settings → Privacy.',
+      'We use fully anonymous usage analytics (no name, email, or personal data) to improve Qimmah — never sold and never used to track you across apps. In this version these analytics are not sent to any server; they stay on your device.',
       'You can permanently delete your account and all its data from Settings → Account → Delete account, or export a full copy of your data anytime from Settings → Data.',
     ],
     termsBody: [

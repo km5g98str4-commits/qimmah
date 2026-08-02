@@ -80,4 +80,54 @@ check('تسميات §03 الخمس موجودة', ['اليوم', 'التمار�
 check('قِمّة+ سطر هادئ واحد', (profileV2.match(/Qimmah\+ — ONE quiet line/g) ?? []).length === 1)
 check('شاشات الدخول العامة تستخدم viewport داخليًا بدل تمرير صفحة ويب', ['LoginView', 'ResetPasswordView', 'VerifyEmailView', 'NotFoundView'].every((name) => { const source = read(`src/views/${name}.tsx`); return source.includes('h-[100dvh]') && source.includes('app-scroll') && !source.includes('min-h-screen') }))
 
+// ─────────────────────────────────────────────────────────────────────────────
+// ④ صدق سياسة الخصوصية — [CTO-67] البند ١
+//
+// الفجوة التي يُغلقها: السياسة **المنشورة** كانت تفتح بـ«قِمّة يتطلّب حسابًا»
+// بينما الضيف مواطن كامل يعبر الحارس بـ`guestReady` ويستخدم كل التبويبات بلا
+// حساب. ووصفُ المنتج خطأً في نصّ قانوني بند امتثال لا سهو كاتب (§0 · §9).
+//
+// ولماذا يُحرَس بالكود لا بالعين: النصّ القانوني يُقرأ مرّة عند كتابته ثم لا
+// يقرأه أحد، بينما الكود من حوله يتغيّر. الفحص هنا **يقرن النصّ بالواقع**:
+// ما دام لا مستهلك واجهة لـ`setConsent`، يُمنع على السياسة أن تَعِد بمفتاح
+// إيقاف في الإعدادات. فإن بُني المفتاح يومًا، يسقط الفحص فيُذكّر بتحديث النصّ —
+// وهو السلوك المطلوب: بوابة تتكلّم عند تغيّر الحقيقة لا بوابة تصمت للأبد.
+console.log('\n④ صدق سياسة الخصوصية — النصّ المنشور يطابق ما يفعله التطبيق')
+const strings = read('src/config/strings.ts')
+/** يستخرج كتلة `privacyBody: [...]` رقم n (0 = العربية، 1 = الإنجليزية) بحدودها. */
+const privacyBlock = (index) => {
+  let from = -1
+  for (let i = 0; i <= index; i++) from = strings.indexOf('privacyBody: [', from + 1)
+  if (from < 0) return ''
+  const to = strings.indexOf('],', from)
+  return to < 0 ? '' : strings.slice(from, to)
+}
+const privacyAr = privacyBlock(0)
+const privacyEn = privacyBlock(1)
+check('كتلتا الخصوصية استُخرجتا بحدودهما لا الملف كله', privacyAr.length > 200 && privacyEn.length > 200 && privacyAr !== privacyEn && privacyAr.length < strings.length * 0.2)
+check('العربية لا تدّعي أن الحساب مطلوب', !/يتطلّب\s+حساب|يشترط\s+حساب|تحتاج\s+حسابًا\s+لاستخدام/.test(privacyAr))
+check('الإنجليزية لا تدّعي أن الحساب مطلوب', !/requires?\s+an\s+account/i.test(privacyEn))
+check('العربية تنصّ صراحةً على أن الضيف يستخدم التطبيق بلا حساب', /كضيف\s+دون\s+إنشاء\s+حساب/.test(privacyAr))
+check('الإنجليزية تنصّ صراحةً على مسار الضيف', /as\s+a\s+guest\s+without\s+creating\s+an\s+account/i.test(privacyEn))
+check('العربية تعلن أن المزامنة غير مفعّلة في هذه النسخة', /المزامنة\s+السحابية\s+غير\s+مفعّلة/.test(privacyAr))
+check('الإنجليزية تعلن أن المزامنة غير مفعّلة', /sync\s+is\s+not\s+enabled\s+in\s+this\s+version/i.test(privacyEn))
+// اقتران النصّ بالكود: علم المزامنة ما زال مطفأً افتراضيًا، فالجملة أعلاه صادقة.
+check('علم المزامنة ما زال مطفأً افتراضيًا (وإلا كذبت الجملة)', /VITE_SYNC_ENABLED === 'true'/.test(read('src/lib/syncQueue.ts')))
+// اقتران ثانٍ: لا مفتاح إيقاف تحليلات في الواجهة ⇒ لا وعد به في السياسة.
+const analyticsToggleInUi = ['src/views/SettingsView.tsx', 'src/views/ProfileV2.tsx', 'src/views/PrivacyView.tsx'].some((p) => /setConsent\s*\(/.test(read(p)))
+check('لا وعد بمفتاح إيقاف تحليلات ما دام غير مبنيّ في الواجهة', analyticsToggleInUi || (!/الإعدادات\s*→\s*الخصوصية/.test(privacyAr) && !/Settings\s*→\s*Privacy/i.test(privacyEn)))
+check('وبديله المعلَن: لا إرسال إلى أي خادم في هذه النسخة', /لا\s+تُرسَل\s+هذه\s+الإحصاءات\s+إلى\s+أي\s+خادم/.test(privacyAr) && /not\s+sent\s+to\s+any\s+server/i.test(privacyEn))
+// وعدُ الحذف يبقى مسنودًا بمسار حقيقي (أُغلق في [CTO-65] البند ١) — لا يُعاد فتحه.
+check('وعد «الإعدادات → الحساب → حذف الحساب» ما زال له مسار فعلي', /الإعدادات\s*→\s*الحساب\s*→\s*حذف الحساب/.test(privacyAr) && read('src/views/SettingsView.tsx').includes('DeleteAccountDialog'))
+
+// التأكيد المضادّ (§4.2) — الفحوص أعلاه تُكشَف عند الالتفاف ولا تصرخ على السليم.
+console.log('\n④-ب التأكيد المضادّ — البوابة تُمسك النصّ المخالف ولا تُمسك السليم')
+const SMUGGLED_AR = "      'قِمّة يتطلّب حسابًا، ويعمل بأسلوب محلي أولًا: تُحفظ بياناتك على جهازك أولًا.',"
+const SMUGGLED_EN = "      'Qimmah requires an account and follows a local-first approach.',"
+check('التفاف: عودة «يتطلّب حسابًا» تُكشَف', /يتطلّب\s+حساب/.test(SMUGGLED_AR))
+check('التفاف: عودة "requires an account" تُكشَف', /requires?\s+an\s+account/i.test(SMUGGLED_EN))
+check('التفاف: نصّ يذكر الضيف لكن يشترط الحساب لا يمرّ', /يتطلّب\s+حساب/.test(SMUGGLED_AR + '\nويمكنك استخدام التطبيق كضيف دون إنشاء حساب.'))
+check('ولا تُكشَف الجملة السليمة الحالية', !/يتطلّب\s+حساب/.test(privacyAr) && !/requires?\s+an\s+account/i.test(privacyEn))
+check('«الحساب اختياري» المشروعة لا تُعدّ اشتراطًا', !/يتطلّب\s+حساب/.test('الحساب اختياري، والغرض منه مزامنة بياناتك بين أجهزتك.'))
+
 console.log(`\n✅ نجحت ${pass} فحوص سياسة/غلاف أصلي.`)
