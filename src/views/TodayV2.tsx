@@ -5,7 +5,6 @@ import { MinorGoalNotice } from '@/components/MinorGoalNotice'
 import { V2_TODAY } from '@/design-system/v2/labels'
 import type { Lang } from '@/lib/appPreferences'
 import type { AppRoute } from '@/lib/appRoutes'
-import { cn } from '@/lib/cn'
 import { useCustomization } from '@/lib/customizationContext'
 import { buildWeeklyInsights } from '@/lib/insights'
 import { InsightCardsView } from '@/lib/insights/InsightCardsView'
@@ -41,6 +40,14 @@ const ACTION_TONE: Record<TodayAction['tone'], string> = {
   blue: 'var(--v2-pillar-move)',
   violet: 'var(--v2-pillar-recover)',
 }
+
+/** ألوان أشرطة الماكروز — نفس دلالات شاشة التغذية: بروتين أخضر · كارب أزرق · دهون كهرماني · ماء بلون الهوية. */
+const MACRO_TONE = {
+  protein: 'var(--v2-green-text)',
+  carbs: 'var(--v2-pillar-move)',
+  fat: '#e0941f',
+  water: 'var(--c-primary)',
+} as const
 
 /**
  * الصفحة الرئيسية هي مركز تنفيذ سريع: أربع مهام مفهومة، مرتبة حسب ما بقي فعلًا.
@@ -131,6 +138,26 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
 
         <MinorGoalNotice lang={lang} />
 
+        {/* ماكروز اليوم — حلّت محلّ البطاقة البارزة. تلك كانت `bg-ink-900`، وهو
+            لون ينقلب فاتحًا في السمة الداكنة فيظهر مربعًا أبيض يضرب الخلفية.
+            والمحتوى هنا أنفع: أرقام اليوم مباشرةً بدل تكرار زرّ التمرين. */}
+        <section aria-labelledby="today-macros-title" className="rounded-3xl border border-line bg-surface p-4 shadow-card">
+          <div className="mb-3 flex items-end justify-between gap-3">
+            <h2 id="today-macros-title" className="text-base font-black">{copy.macrosTitle}</h2>
+            <span className="text-xs font-bold text-ink-500">
+              {nutrition.calories.target > 0
+                ? copy.macroCalories(nutrition.calories.consumed, nutrition.calories.target)
+                : copy.macroNoTarget}
+            </span>
+          </div>
+          <div className="grid grid-cols-4 gap-2">
+            <MacroStat label={copy.macroProtein} consumed={nutrition.macros.protein.consumed} target={nutrition.macros.protein.target} unit="g" color={MACRO_TONE.protein} />
+            <MacroStat label={copy.macroCarbs} consumed={nutrition.macros.carbs.consumed} target={nutrition.macros.carbs.target} unit="g" color={MACRO_TONE.carbs} />
+            <MacroStat label={copy.macroFat} consumed={nutrition.macros.fat.consumed} target={nutrition.macros.fat.target} unit="g" color={MACRO_TONE.fat} />
+            <MacroStat label={copy.macroWater} consumed={nutrition.water.consumedMl / 1000} target={nutrition.water.targetMl / 1000} unit={ar ? 'ل' : 'L'} decimals={1} color={MACRO_TONE.water} />
+          </div>
+        </section>
+
         <section aria-labelledby="today-remaining-title">
           <div className="mb-3 flex items-end justify-between gap-3">
             <h2 id="today-remaining-title" className="text-base font-black">{copy.remainingTitle}</h2>
@@ -139,8 +166,9 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
 
           {pending.length > 0 ? (
             <div className="grid grid-cols-2 gap-3">
-              {pending.map((action, index) => (
-                <ActionCard key={action.key} action={action} featured={index === 0} lang={lang} />
+              {/* كل المهام مربّعات صغيرة متساوية — بما فيها التمرين. لا بطاقة بارزة. */}
+              {pending.map((action) => (
+                <ActionCard key={action.key} action={action} lang={lang} />
               ))}
             </div>
           ) : (
@@ -193,18 +221,15 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
   )
 }
 
-function ActionCard({ action, featured, lang }: { action: TodayAction; featured: boolean; lang: Lang }) {
+function ActionCard({ action, lang }: { action: TodayAction; lang: Lang }) {
   const ar = lang !== 'en'
   const color = ACTION_TONE[action.tone]
   return (
     <button
       type="button"
       onClick={() => { void playHaptic('selection'); action.onClick() }}
-      className={cn(
-        'v2-pressable relative flex min-h-[10.5rem] flex-col overflow-hidden rounded-3xl border p-4 text-start shadow-card',
-        featured ? 'col-span-2 bg-ink-900 text-white' : 'bg-surface text-ink-900',
-      )}
-      style={{ borderColor: featured ? 'transparent' : `color-mix(in srgb, ${color} 24%, rgb(var(--c-line)))` }}
+      className="v2-pressable relative flex min-h-[10.5rem] flex-col overflow-hidden rounded-3xl border bg-surface p-4 text-start text-ink-900 shadow-card"
+      style={{ borderColor: `color-mix(in srgb, ${color} 24%, rgb(var(--c-line)))` }}
     >
       <span
         className="pointer-events-none absolute -end-8 -top-10 h-28 w-28 rounded-full opacity-20"
@@ -213,21 +238,53 @@ function ActionCard({ action, featured, lang }: { action: TodayAction; featured:
       />
       <span
         className="relative grid h-11 w-11 place-items-center rounded-2xl"
-        style={{
-          backgroundColor: featured ? 'rgb(255 255 255 / 0.12)' : `color-mix(in srgb, ${color} 14%, transparent)`,
-          color: featured ? 'white' : color,
-        }}
+        style={{ backgroundColor: `color-mix(in srgb, ${color} 14%, transparent)`, color }}
       >
         <Icon name={action.icon} className="h-5 w-5" strokeWidth={2.5} />
       </span>
       <span className="relative mt-4 block text-lg font-black leading-tight">{action.title}</span>
-      <span className={cn('relative mt-1 block text-xs leading-relaxed', featured ? 'text-white/70' : 'text-ink-500')}>
-        {action.body}
-      </span>
-      <span className="relative mt-auto flex items-center gap-1 pt-4 text-xs font-black" style={{ color: featured ? 'white' : color }}>
+      <span className="relative mt-1 block text-xs leading-relaxed text-ink-500">{action.body}</span>
+      <span className="relative mt-auto flex items-center gap-1 pt-4 text-xs font-black" style={{ color }}>
         {action.cta}
         <Icon name={ar ? 'ChevronLeft' : 'ChevronRight'} className="h-4 w-4" />
       </span>
     </button>
+  )
+}
+
+/**
+ * رقم ماكرو واحد على الرئيسية — شريط نسبة + المستهلَك من الهدف.
+ * بلا هدف مضبوط نعرض «—» بدل رقم مخترَع (§5: الصدق قبل الطمأنينة).
+ */
+function MacroStat({
+  label,
+  consumed,
+  target,
+  unit,
+  color,
+  decimals = 0,
+}: { label: string; consumed: number; target: number; unit: string; color: string; decimals?: number }) {
+  const hasTarget = target > 0
+  const pct = hasTarget ? Math.min(1, consumed / target) : 0
+  const consumedText = consumed.toFixed(decimals)
+  const targetText = target.toFixed(decimals)
+  return (
+    <div className="flex flex-col gap-1.5">
+      <span className="text-[0.68rem] font-bold text-ink-500">{label}</span>
+      <span dir="ltr" className="text-sm font-black tabular-nums text-ink-900">
+        {hasTarget ? consumedText : '—'}
+        <span className="text-[0.62rem] font-bold text-ink-400">{hasTarget ? ` / ${targetText}${unit}` : ''}</span>
+      </span>
+      <span
+        className="h-1.5 w-full overflow-hidden rounded-full bg-line"
+        role="progressbar"
+        aria-label={label}
+        aria-valuenow={Math.round(pct * 100)}
+        aria-valuemin={0}
+        aria-valuemax={100}
+      >
+        <span className="block h-full rounded-full transition-all duration-700" style={{ width: `${pct * 100}%`, backgroundColor: color }} />
+      </span>
+    </div>
   )
 }

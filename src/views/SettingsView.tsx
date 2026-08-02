@@ -1,29 +1,40 @@
-import { useState, type ReactNode } from 'react'
+import { useRef, type ReactNode } from 'react'
+import { AppNav, type AppView } from '@/components/AppNav'
+import { Footer } from '@/components/Footer'
 import { Icon } from '@/components/Icon'
 import { DeviceSettings } from '@/components/DeviceSettings'
-import { DataManagementPanel } from '@/components/DataManagementPanel'
 import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
+import { getSyncUiState } from '@/lib/syncService'
 import { installGuideStrings } from '@/i18n/dict/installGuide'
 import { isIOSSafari } from '@/lib/installState'
 import { LanguageToggle } from '@/i18n'
 import { useAuth } from '@/lib/authContext'
 import { useCustomization } from '@/lib/customizationContext'
+import { type Customization, getDefaultCustomization } from '@/lib/customization'
+import { exportHistory, importHistory, type HistorySnapshot } from '@/lib/historyStore'
+import { loadPreferences, savePreferences, type AppPreferences } from '@/lib/appPreferences'
 import { resetQimmah } from '@/lib/resetQimmah'
-import { getConsent, setConsent } from '@/lib/analytics'
 import { generatePlan } from '@/lib/planGenerator'
-import { getSyncUiState, markPendingSync } from '@/lib/syncService'
+import { markPendingSync } from '@/lib/syncService'
 import { BUILD_LABEL } from '@/lib/buildInfo'
-import { NotificationSettingsPanel } from '@/components/NotificationSettingsPanel'
-import { NativeSettingsPanel } from '@/components/NativeSettingsPanel'
-import { NATIVE_SETTINGS_COPY } from '@/data/nativeSettings'
-import type { AppRoute } from '@/lib/appRoutes'
+
+const EXPORT_VERSION = 2
+
+interface QimmahExport {
+  version: number
+  exportedAt: string
+  customization: Customization
+  history: HistorySnapshot
+  preferences: AppPreferences
+}
 
 /**
  * يترجم حالة المزامنة الحقيقية إلى جملة صادقة للمستخدم.
  *
  * لا يُدّعى «متزامن مع حسابك السحابي» إلا عند `state === 'synced'`، أي بعد أول
  * مزامنة ناجحة فعلًا (getSyncUiState لا يُرجع 'synced' قبل `lastSyncedAt`).
+ * منقول كما هو من موجة صدق المزامنة — الشاشة عادت لتصميمها الكلاسيكي، والضمانة تبقى.
  */
 function syncNote(t: ReturnType<typeof getStrings>, sync: ReturnType<typeof getSyncUiState>): string {
   if (sync.state === 'synced') return t.auth.cloudNote
@@ -36,7 +47,7 @@ function syncNote(t: ReturnType<typeof getStrings>, sync: ReturnType<typeof getS
 
 interface SettingsViewProps {
   lang: Lang
-  onNavigate: (view: AppRoute) => void
+  onNavigate: (view: AppView) => void
   onEditPlan: () => void
   onLogin: () => void
   onOpenPrivacy: () => void
@@ -59,50 +70,58 @@ export function SettingsView({
   const t = getStrings(lang)
   const auth = useAuth()
   const { customization, applyCustomization } = useCustomization()
+  const fileRef = useRef<HTMLInputElement>(null)
 
-  // — البيانات: تصدير/استيراد يمرّان حصريًّا عبر <DataManagementPanel> (المسار المحصّن) —
-  // المستورد القديم (FileReader + JSON.parse بلا تحقّق) أُزيل: كان يقبل إصدارًا غير مدعوم
-  // وحقنًا من حساب آخر ويعرض «نجاحًا» دون تطبيق فعلي. QEA-001.
+  const badge: 'guest' | 'account' = auth.user ? 'account' : 'guest'
+
+  // — البيانات: تصدير —
+  const onExport = () => {
+    const payload: QimmahExport = {
+      version: EXPORT_VERSION,
+      exportedAt: new Date().toISOString(),
+      customization,
+      history: exportHistory(),
+      preferences: loadPreferences(),
+    }
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `qimmah-backup-${new Date().toISOString().slice(0, 10)}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  // — البيانات: استيراد —
+  const onImport = (file: File) => {
+    const reader = new FileReader()
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(String(reader.result)) as Partial<QimmahExport> & Partial<Customization>
+        if (!window.confirm(t.settings.importConfirm)) return
+        const base = getDefaultCustomization()
+        const cust = (parsed.customization ?? (parsed as Partial<Customization>)) as Partial<Customization>
+        applyCustomization({
+          ...base,
+          ...cust,
+          identity: { ...base.identity, ...(cust.identity ?? {}) },
+          profile: { ...base.profile, ...(cust.profile ?? {}) },
+          targets: { ...base.targets, ...(cust.targets ?? {}) },
+        })
+        if (parsed.history) importHistory(parsed.history)
+        if (parsed.preferences) savePreferences({ ...loadPreferences(), ...parsed.preferences })
+        markPendingSync()
+        window.alert(t.settings.importSuccess)
+      } catch {
+        window.alert(t.settings.importError)
+      }
+    }
+    reader.readAsText(file)
+  }
+
   // — البيانات: إعادة ضبط —
   const onReset = () => {
     if (window.confirm(t.settings.resetConfirm)) resetQimmah()
-  }
-
-  // — الحساب: حذف نهائي (Apple 5.1.1(v)) — تأكيد صريح ثم حذف سحابي best-effort + مسح محلي كامل —
-  const [confirmDelete, setConfirmDelete] = useState(false)
-  const [deleteWord, setDeleteWord] = useState('')
-  const [deleting, setDeleting] = useState(false)
-  const [deleteFailed, setDeleteFailed] = useState(false)
-  const canConfirmDelete = deleteWord.trim() === t.auth.deleteConfirmWord && !deleting
-
-  const onDeleteAccount = async () => {
-    if (!canConfirmDelete) return
-    setDeleting(true)
-    setDeleteFailed(false)
-    // الحذف يكتمل فقط عند تأكيد إزالة مستخدم المصادقة على الخادم (أو في الوضع المحلي/الضيف).
-    // res.ok يعكس ذلك بصدق: لا نمسح ونُعيد التحميل (ما يُقرأ كنجاح) إلا عند اكتمال الحذف فعلًا.
-    let ok = false
-    try {
-      const res = await auth.deleteAccount()
-      ok = res.ok
-    } catch {
-      ok = false
-    }
-    if (ok) {
-      // حذف مؤكَّد → مسح كامل لبيانات قِمّة على الجهاز ثم إعادة التحميل لشاشة الحساب.
-      resetQimmah()
-      return
-    }
-    // لم يُؤكَّد حذف مستخدم المصادقة — لا ندّعي نجاحًا. نُبقي الجلسة ونعرض خطأً صادقًا مع خيار
-    // إعادة المحاولة أو التواصل (الجلسة ما زالت قائمة لأنّ authContext لم يُنهِها عند الفشل).
-    setDeleting(false)
-    setDeleteFailed(true)
-  }
-
-  const cancelDelete = () => {
-    setConfirmDelete(false)
-    setDeleteWord('')
-    setDeleteFailed(false)
   }
 
   // — خطتي: إعادة توليد —
@@ -134,19 +153,7 @@ export function SettingsView({
     window.alert(t.settings.switchMachinesSuccess)
   }
 
-  // — الخصوصية: موافقة التحليلات المجهولة (opt-out، تُحفظ محليًا فورًا) —
-  const [analyticsOn, setAnalyticsOn] = useState(() => getConsent() === 'granted')
-  const toggleAnalytics = () => {
-    const next = !analyticsOn
-    setAnalyticsOn(next)
-    setConsent(next ? 'granted' : 'denied')
-  }
-
   // — الحساب: حالة + خروج —
-  // لا نعد المستخدم بمزامنة سحابية إلا إذا كانت حاصلة فعلًا. `VITE_SYNC_ENABLED`
-  // مطفأة افتراضيًا، فالنص الثابت القديم («محفوظة على هذا الجهاز وعلى حسابك السحابي»)
-  // كان يكذب على كل مستخدم مسجّل في التهيئة الافتراضية للشحن. المصدر الوحيد للحقيقة
-  // هو getSyncUiState() — كان موجودًا بلا مستدعٍ واحد.
   const accountStatus = !auth.configured
     ? t.auth.disabledTitle
     : auth.user
@@ -154,27 +161,20 @@ export function SettingsView({
       : t.auth.guestNote
 
   return (
-    <div className="flex h-[100dvh] min-h-0 flex-col overflow-hidden bg-page">
-      <header className="shrink-0 border-b border-line bg-surface" style={{ paddingTop: 'var(--safe-top)' }}>
-        <div className="mx-auto flex h-14 w-full max-w-md items-center gap-3 px-4">
-          <button type="button" onClick={() => onNavigate('profile')} className="grid h-11 w-11 place-items-center rounded-full bg-beige text-ink-700" aria-label={lang === 'ar' ? 'الرجوع لملفك' : 'Back to profile'}>
-            <Icon name={lang === 'ar' ? 'ChevronRight' : 'ChevronLeft'} className="h-5 w-5" />
-          </button>
-          <h1 className="text-lg font-black text-ink-900">{t.settings.title}</h1>
-        </div>
-      </header>
+    <div className="min-h-screen bg-page">
+      <AppNav current="settings" lang={lang} badge={badge} onNavigate={onNavigate} />
 
-      <main className="app-scroll min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-y-contain px-4 py-4" style={{ paddingBottom: 'calc(var(--safe-bottom) + 1rem)' }}>
-        <div className="mx-auto w-full max-w-md space-y-3">
+      <main className="container-page space-y-6 py-8">
+        <h1 className="text-2xl font-black text-ink-900">{t.settings.title}</h1>
 
         {/* 1) الحساب */}
-        <SettingsGroup icon="User" title={t.settings.groupAccount} defaultOpen>
+        <SettingsGroup icon="User" title={t.settings.groupAccount}>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
               <span
                 className={
                   'inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-black ' +
-                  (auth.user ? 'bg-primary-soft text-primary-c' : 'border border-line bg-surface text-ink-700')
+                  (auth.user ? 'bg-primary-soft text-primary-c' : 'border border-line bg-surface text-ink-600')
                 }
               >
                 <Icon name={auth.user ? 'CheckCircle2' : 'User'} className="h-3.5 w-3.5" />
@@ -197,82 +197,19 @@ export function SettingsView({
               </button>
             )}
           </div>
-
-          {/* حذف الحساب نهائيًا — إلزامي لمتاجر التطبيقات (يُعرض فقط لمستخدم مسجّل) */}
-          {auth.user && (
-            <div className="mt-4 border-t border-line pt-4">
-              {!confirmDelete ? (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => setConfirmDelete(true)}
-                    className="inline-flex items-center gap-1.5 rounded-xl border border-danger/40 px-4 py-2 text-xs font-bold text-danger transition-colors hover:bg-danger/10"
-                  >
-                    <Icon name="Trash2" className="h-4 w-4" />
-                    {t.auth.deleteAccount}
-                  </button>
-                  <p className="mt-2 text-[11px] leading-relaxed text-ink-400">{t.auth.deleteAccountDesc}</p>
-                </>
-              ) : (
-                <div className="rounded-xl border border-danger/40 bg-danger/[0.06] p-4">
-                  <p className="flex items-center gap-1.5 text-sm font-black text-danger">
-                    <Icon name="AlertTriangle" className="h-4 w-4" />
-                    {t.auth.deleteConfirmTitle}
-                  </p>
-                  <p className="mt-2 text-xs leading-relaxed text-ink-700">{t.auth.deleteConfirmBody}</p>
-                  <label htmlFor="delete-confirm" className="mt-3 block text-[11px] font-bold text-ink-500">
-                    {t.auth.deleteConfirmHint}
-                  </label>
-                  <input
-                    id="delete-confirm"
-                    type="text"
-                    value={deleteWord}
-                    onChange={(e) => setDeleteWord(e.target.value)}
-                    aria-label={t.auth.deleteConfirmHint}
-                    autoComplete="off"
-                    className="mt-1 w-full max-w-xs rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink-900 outline-none focus:border-danger"
-                  />
-                  {/* فشل حذف مستخدم المصادقة — رسالة صادقة (لا ادّعاء نجاح) + مسار تواصل. */}
-                  {deleteFailed && (
-                    <p role="alert" className="mt-3 flex items-start gap-2 rounded-lg border border-danger/40 bg-danger/[0.08] p-3 text-xs leading-relaxed text-ink-700">
-                      <Icon name="AlertTriangle" className="mt-0.5 h-4 w-4 shrink-0 text-danger" />
-                      <span>
-                        {t.auth.deleteFailed}{' '}
-                        <a href="#/contact" className="font-bold text-danger underline underline-offset-2">
-                          {t.auth.deleteContactCta}
-                        </a>
-                      </span>
-                    </p>
-                  )}
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      onClick={onDeleteAccount}
-                      disabled={!canConfirmDelete}
-                      className="inline-flex items-center gap-1.5 rounded-xl bg-danger px-4 py-2 text-xs font-bold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      <Icon name="Trash2" className="h-4 w-4" />
-                      {deleting ? t.auth.deleting : deleteFailed ? t.auth.deleteRetry : t.auth.deleteConfirmCta}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={cancelDelete}
-                      disabled={deleting}
-                      className="btn-ghost px-4 py-2 text-xs"
-                    >
-                      {t.auth.cancel}
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
         </SettingsGroup>
 
-        {/* 2) البيانات — تصدير/استيراد محصّن (معاينة → تأكيد → تطبيق ذرّي → تراجع) + إعادة ضبط */}
-        <SettingsGroup icon="Database" title={t.settings.groupData} testId="settings-group-data">
-          <DataManagementPanel lang={lang} uid={auth.user?.id ?? null} recoveryActive={auth.recoveryActive} />
-          <div className="mt-3 border-t border-line pt-3">
+        {/* 2) البيانات */}
+        <SettingsGroup icon="Database" title={t.settings.groupData}>
+          <div className="flex flex-wrap gap-2">
+            <button type="button" onClick={onExport} className="btn-ghost px-4 py-2.5 text-sm">
+              <Icon name="TrendingDown" className="h-4 w-4" />
+              {t.settings.export}
+            </button>
+            <button type="button" onClick={() => fileRef.current?.click()} className="btn-ghost px-4 py-2.5 text-sm">
+              <Icon name="TrendingUp" className="h-4 w-4" />
+              {t.settings.import}
+            </button>
             <button
               type="button"
               onClick={onReset}
@@ -281,6 +218,17 @@ export function SettingsView({
               <Icon name="RotateCcw" className="h-4 w-4" />
               {t.settings.reset}
             </button>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="application/json,.json"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0]
+                if (f) onImport(f)
+                e.target.value = ''
+              }}
+            />
           </div>
         </SettingsGroup>
 
@@ -302,16 +250,7 @@ export function SettingsView({
           </div>
         </SettingsGroup>
 
-        {/* 4) التذكيرات المحلية — نفس المحرّك المالكـي الذي يستخدمه سطح v2. */}
-        <SettingsGroup icon="Bell" title={lang === 'ar' ? 'التذكيرات' : 'Reminders'}>
-          <NotificationSettingsPanel lang={lang} />
-        </SettingsGroup>
-
-        <SettingsGroup icon="Activity" title={NATIVE_SETTINGS_COPY[lang].group}>
-          <NativeSettingsPanel lang={lang} />
-        </SettingsGroup>
-
-        {/* 5) الخصوصية والثقة */}
+        {/* 4) الخصوصية والثقة */}
         <SettingsGroup icon="ShieldCheck" title={t.settings.groupPrivacy}>
           <div className="flex flex-wrap gap-2">
             <button type="button" onClick={onOpenPrivacy} className="btn-ghost px-4 py-2.5 text-sm">
@@ -323,33 +262,16 @@ export function SettingsView({
               {t.settings.termsLink}
             </button>
           </div>
-          {/* تحليلات مجهولة اختيارية (opt-out) — بلا أي بيانات شخصية، تُحفظ محليًا. */}
-          <div className="mt-4 flex items-start justify-between gap-3 border-t border-line pt-4">
-            <div className="min-w-0">
-              <p className="text-sm font-bold text-ink-900">{t.settings.analyticsTitle}</p>
-              <p className="mt-1 text-xs leading-relaxed text-ink-500">{t.settings.analyticsDesc}</p>
-            </div>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={analyticsOn}
-              aria-label={t.settings.analyticsToggle}
-              onClick={toggleAnalytics}
-              className={`relative mt-0.5 h-6 w-11 shrink-0 rounded-full transition-colors ${analyticsOn ? 'bg-primary' : 'bg-line'}`}
-            >
-              <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-all ${analyticsOn ? 'start-0.5' : 'end-0.5'}`} />
-            </button>
-          </div>
           <p className="mt-3 flex items-start gap-2 rounded-xl border border-gold-400/40 bg-gold-200/40 p-3 text-xs leading-relaxed text-ink-700">
             <Icon name="AlertTriangle" className="mt-0.5 h-4 w-4 shrink-0 text-gold-600" />
             {t.settings.healthDisclaimer}
           </p>
         </SettingsGroup>
 
-        {/* 6) التطبيق والتنبيهات — تثبيت PWA + حالة إمكانات الجهاز */}
+        {/* 5) التطبيق والتنبيهات — تثبيت PWA + إذن التنبيهات (نسخة صادقة، حدود آيفون واضحة) */}
         <DeviceSettings lang={lang} />
 
-        {/* 6.1) دليل «ثبّت التطبيق» — خطوات مكتوبة لكل منصّة (المكتشفة أولًا)، بلا صور خارجية. */}
+        {/* 5.1) دليل «ثبّت التطبيق» — خطوات مكتوبة لكل منصّة (المكتشفة أولًا)، بلا صور خارجية. */}
         <InstallGuideSection lang={lang} />
 
         {/* 6) أدوات داخلية — مراجعة المنتجات. أداة طاقم داخلية فقط: مُقصاة تمامًا من حزمة
@@ -394,8 +316,9 @@ export function SettingsView({
             </button>
           </div>
         </SettingsGroup>
-        </div>
       </main>
+
+      <Footer />
     </div>
   )
 }
@@ -405,26 +328,23 @@ function SettingsGroup({
   icon,
   title,
   testId,
-  defaultOpen = false,
   children,
 }: {
   icon: string
   title: string
   testId?: string
-  defaultOpen?: boolean
   children: ReactNode
 }) {
   return (
-    <details className="card group overflow-hidden" data-testid={testId} open={defaultOpen}>
-      <summary className="flex min-h-[4rem] cursor-pointer list-none items-center gap-2.5 px-4 py-3 [&::-webkit-details-marker]:hidden">
+    <section className="card p-6" data-testid={testId}>
+      <div className="mb-4 flex items-center gap-2.5">
         <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary-soft text-primary-c">
           <Icon name={icon} className="h-4.5 w-4.5" />
         </span>
-        <h2 className="min-w-0 flex-1 text-base font-black text-ink-900">{title}</h2>
-        <Icon name="ChevronDown" className="h-4 w-4 text-ink-400 transition-transform group-open:rotate-180" />
-      </summary>
-      <div className="border-t border-line px-4 pb-4 pt-4">{children}</div>
-    </details>
+        <h2 className="text-base font-black text-ink-900">{title}</h2>
+      </div>
+      {children}
+    </section>
   )
 }
 
