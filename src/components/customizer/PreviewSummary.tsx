@@ -1,13 +1,24 @@
 import { Icon } from '@/components/Icon'
-import { userTypeOptions, type Customization } from '@/lib/customization'
+import type { Customization } from '@/lib/customization'
 import type { Lang } from '@/lib/appPreferences'
 import { onboardingStrings } from '@/i18n/dict/onboarding'
 
-/** معاينة مختصرة حيّة لصفحة المستخدم — تتحدّث مع كل تعديل. */
+/**
+ * معاينة مختصرة حيّة لخطة المستخدم — تتحدّث مع كل تعديل.
+ *
+ * [CTO-67] البند ٢ — حُذف صفّ «النوع: فرد».
+ *
+ * قيمته كانت تأتي من `userTypeOptions` (فرد · مدرب · صانع محتوى): **شرائح
+ * مشترين في قالب يُباع**، لا حقل في تطبيق لياقة شخصي — وهو ما يمنعه §0 نصًّا.
+ * وكانت القائمة بلا ترجمة إنجليزية أصلًا، فالواجهة الإنجليزية تعرض «Type: فرد»
+ * — لغة قالب وتسريب i18n في سطر واحد.
+ *
+ * الحقل `identity.userType` **باقٍ في نموذج البيانات** عمدًا: يقرؤه/يكتبه ملفّ
+ * التصدير والاستيراد، وحذفه من النموذج يكسر توافق النسخ الاحتياطية القائمة.
+ * المحذوف هو عرضه للمستخدم، وهو موضع المخالفة.
+ */
 export function PreviewSummary({ data, lang }: { data: Customization; lang: Lang }) {
   const d = onboardingStrings[lang]
-  const userTypeLabel =
-    userTypeOptions.find((o) => o.value === data.identity.userType)?.label ?? ''
 
   return (
     <div
@@ -33,10 +44,6 @@ export function PreviewSummary({ data, lang }: { data: Customization; lang: Lang
       <div className="mt-4 flex items-center justify-between text-sm">
         <span className="text-ink-500">{d.previewPageOwner}</span>
         <span className="font-bold text-ink-900">{data.identity.userName}</span>
-      </div>
-      <div className="mt-1.5 flex items-center justify-between text-sm">
-        <span className="text-ink-500">{d.previewType}</span>
-        <span className="font-bold text-ink-900">{userTypeLabel}</span>
       </div>
 
       <div className="mt-5 flex gap-2">

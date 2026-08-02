@@ -137,7 +137,6 @@ export interface OnboardingStrings {
   previewYourPage: string
   previewYourGoal: string
   previewPageOwner: string
-  previewType: string
   previewWorkouts: string
   previewMeals: string
   previewSupplements: string
@@ -573,7 +572,6 @@ const ar: OnboardingStrings = {
   previewYourPage: 'معاينة خطتك',
   previewYourGoal: 'هدفك',
   previewPageOwner: 'صاحب الخطة',
-  previewType: 'النوع',
   previewWorkouts: 'تمارين',
   previewMeals: 'وجبات',
   previewSupplements: 'مكملات',
@@ -1001,7 +999,6 @@ const en: OnboardingStrings = {
   previewYourPage: 'Preview your plan',
   previewYourGoal: 'Your goal',
   previewPageOwner: 'Plan owner',
-  previewType: 'Type',
   previewWorkouts: 'Workouts',
   previewMeals: 'Meals',
   previewSupplements: 'Supplements',

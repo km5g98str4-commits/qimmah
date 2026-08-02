@@ -79,6 +79,47 @@ check('English: "Shows on your page" تُكشَف', FORBIDDEN.some(([, re]) => r
 check('كل الأسطح قُرئت بمحتوى فعلي', SURFACES.length > 25 && SURFACES.every(([, s]) => s.length > 100))
 check('قاموس الإعداد ضمن المفحوص فعلًا', SURFACES.some(([n]) => n.endsWith('onboarding.ts')))
 
+// ─────────────────────────────────────────────────────────────────────────────
+console.log('\n═══ 3.5) صفّ «النوع: فرد» محذوف من المعاينة الحيّة — [CTO-67] البند ٢ ═══')
+// **لماذا لم يكفِ توسيع قائمة الكلمات:** «النوع» مفردة مشروعة في مواضع أخرى
+// (رأس عمود «النوع» في جدولَي الجدول والمكمّلات). حظرها بالجملة يُسقط البوابة
+// على نصّ سليم، وتركها يُبقي المخالفة. فالحارس هنا **بنيوي على الموضع** لا
+// معجمي على الكلمة: يمنع عودة الصفّ إلى `PreviewSummary` تحديدًا.
+//
+// والمخالفة كانت مزدوجة: «النوع: فرد» مفهوم قالب متعدّد المستأجرين (فرد/مدرب/
+// صانع محتوى)، **وقيمتها بلا ترجمة** فتظهر «Type: فرد» في الواجهة الإنجليزية.
+// التعليقات تُنزع قبل الفحص: الحارس يحكم على **الكود المنفَّذ** لا على شرحه،
+// وإلا أسقطه تعليق يشرح ما حُذف — وهو ما وقع فعلًا عند كتابة هذا الفحص.
+const stripComments = (src) => src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '')
+const preview = stripComments(read('src/components/customizer/PreviewSummary.tsx'))
+const onboardingDict = read('src/i18n/dict/onboarding.ts')
+check('المعاينة لا تستورد `userTypeOptions`', !/userTypeOptions/.test(preview))
+check('المعاينة لا تعرض `identity.userType`', !/identity\.userType/.test(preview))
+check('المعاينة لا تعرض مفتاح `previewType`', !/previewType/.test(preview))
+check('ومفتاح `previewType` نفسه أُزيل من القاموس بلغتيه', !/previewType/.test(onboardingDict))
+
+// اقتران بالخطوات الحيّة: المفهوم قد يعود من باب آخر — خطوة تعرض `userType`
+// وتُدرَج في المعالج. فنقرأ **مصفوفات الخطوات المركَّبة فعلًا** في وضع «متقدّم»
+// (وهو الوضع الوحيد الذي يُركِّب المعالج — `SetupView.tsx`)، ونفحص ملفّاتها.
+// ⚠️ استثناء مُعلَن: `StepBasics` يعرض `userType` وهو **خارج هذه المصفوفات**
+// (لا مسار يصل إليه اليوم). فحصه هنا يقول ذلك صراحةً بدل السكوت عنه.
+const center = read('src/sections/CustomizationCenter.tsx')
+const liveStepBlock = center.slice(center.indexOf('const advancedEssentialSteps'), center.indexOf('/** مركز التخصيص'))
+const liveStepComponents = [...liveStepBlock.matchAll(/Component:\s*(\w+)/g)].map((m) => m[1])
+check('مصفوفات الخطوات الحيّة استُخرجت بمحتوى فعلي', liveStepComponents.length >= 8 && liveStepComponents.includes('StepReview'))
+check('`StepBasics` خارج الخطوات الحيّة (وإلا عاد الحقل من بابه)', !liveStepComponents.includes('StepBasics'))
+const liveStepSources = liveStepComponents.map((name) => [name, stripComments(read(`src/components/customizer/steps/${name}.tsx`))])
+const typeLeaks = liveStepSources.filter(([, src]) => /identity\.userType|userTypeOptions|صانع\s+محتوى/.test(src)).map(([n]) => n)
+check('ولا خطوة حيّة تعرض شريحة المشتري (فرد/مدرب/صانع محتوى)', typeLeaks.length === 0)
+if (typeLeaks.length) console.log('       ظهرت في: ' + typeLeaks.join(', '))
+// الاستثناء المشروع يُحرَس (§4.2): «النوع» كرأس عمود جدول باقٍ ولم يُمسح بالجملة.
+check('«النوع» المشروعة (رأس عمود الجدول) باقية ولم تُمسح بالجملة', /scheduleColType:\s*'النوع'/.test(onboardingDict) && /suppColType:\s*'النوع'/.test(onboardingDict))
+// التأكيد المضادّ: نسخة تعيد الصفّ تُكشَف، والنسخة الحالية لا تُكشَف.
+const SMUGGLED_ROW = "<span className=\"text-ink-500\">{d.previewType}</span>"
+check('التفاف: عودة صفّ النوع إلى المعاينة تُكشَف', /previewType/.test(SMUGGLED_ROW))
+check('التفاف: عودة القيمة عبر `userTypeOptions` تُكشَف كذلك', /userTypeOptions/.test("const t = userTypeOptions.find((o) => o.value === data.identity.userType)"))
+check('ولا يُكشَف رأس عمود «النوع» المشروع', !/previewType|userTypeOptions/.test("  scheduleColType: 'النوع',"))
+
 console.log('\n═══ 4) الفصحى القانونية لم تُمس — القيد المحفوظ ═══')
 const policy = read('src/data/policyCopy.ts')
 // النصّ القانوني نفسه يعيش في `strings.ts → legal`، لا في ملفّي العرض — فحصه
