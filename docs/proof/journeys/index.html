@@ -15,7 +15,9 @@
   section { max-width:1200px; margin:32px auto; padding:24px; background:var(--card); border:1px solid var(--line); border-radius:18px }
   h2 { margin:0; font-size:1.35rem }
   h2 .meta { font-size:.8rem; color:var(--mut); font-weight:400 }
-  .sub { margin:2px 0 14px; color:var(--mut); direction:ltr; text-align:start; font-size:.9rem }
+  .ground { margin:0 0 14px; font-size:.8rem; color:var(--mut) }
+  .ground code { background:rgba(128,128,128,.15); padding:1px 6px; border-radius:5px }
+  .sub { margin:2px 0 4px; color:var(--mut); direction:ltr; text-align:start; font-size:.9rem }
   .stats { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px }
   .stats span { font-size:.8rem; padding:4px 10px; border-radius:999px; border:1px solid var(--line) }
   .stats .ok { color:var(--ok) } .stats .bad { color:var(--bad) } .stats .warn { color:var(--warn) } .stats .skip { color:var(--mut) }
@@ -43,15 +45,16 @@
   <section>
     <h2>رحلة المولود الجديد <span class="meta">ar · ar-large</span></h2>
     <p class="sub">The newcomer journey</p>
+    <p class="ground">📍 الأرض: <code>i/journey-advanced</code> @ <code>b47cbf3</code> — chore(e2e): توثيق أداة تشخيص الحراسة وضمّها</p>
     <div class="stats">
-      <span class="ok">24 فحصًا ناجحًا</span>
+      <span class="ok">28 فحصًا ناجحًا</span>
       
-      <span>13 لقطة</span>
-      <span class="warn">3 التقاطة</span>
-      <span class="skip">2 خطوة محجوبة</span>
+      <span>16 لقطة</span>
+      <span class="warn">1 التقاطة</span>
+      
     </div>
-    <div class="box"><h3>التقاطات مرفوعة — لا تُصلَح في هذه الحارة</h3><ul class="findings"><li class="sev-high"><b>لا مسار ضيف من شاشة الترحيب — «ابدأ الآن» تقود إلى إنشاء حساب</b><p>أزرار الترحيب: EN · ابدأ الآن · عندك حساب؟ تسجيل الدخول — و«ابدأ الآن» تنقل إلى #/login. ونصّ «كمّل كضيف» موجود في src/config/strings.ts (٤ مداخل عربي+إنجليزي) ولا يشير إليه أي مكوّن: StartViewV2 يرسم onSignup وonLogin فقط. وعد «محلي افتراضيًا» (الميثاق §9) بلا مدخل في تدفّق v2.</p></li><li class="sev-mid"><b>مسارات التطبيق محجوبة للزائر غير المسجَّل — #/today و#/onboarding تعرضان «الصفحة غير موجودة»</b><p>زائر بلا جلسة لا يصل إلى أي شاشة منتج، والرسالة المعروضة «غير موجودة» لا «تحتاج حسابًا» — رسالة مضلّلة تصف الحجب كعطل.</p></li><li class="sev-high"><b>الإعداد يكتب الخطة وشاشة التمارين لا تراها — مسار المولود الجديد ينتهي إلى طريق مسدود</b><p>بعد إعداد كامل واعتماد الخطة، تعرض #/workout «أكمل إعداد خطتك» بينما التخزين يحمل الخطة فعلًا: qimmah:workoutCalendar:v1 = {split:&quot;upper_lower&quot;, daysPerWeek:4, source:&quot;migration&quot;} ويطابق ملخّص «خطتك جاهزة» المعروض قبل لحظات · qimmah:customization:v1 مكتوب (6669 حرفًا). أي أن الحالة محفوظة وشرط «الإعداد مكتمل» في شاشة التمارين لا يقرؤها. واللوحة تعد المستخدم بـ«تمرين اليوم» فيصل إلى «ابدأ الإعداد» — وعدٌ يخلفه المنتج في أول دقيقة.</p></li></ul></div>
-    <div class="box"><h3>خطوات متخطّاة (معلَنة)</h3><ul class="skips"><li><b>جولة تُسجَّل وتُنهى بالتأكيد</b> — محجوب بـ: الالتقاطة: شاشة التمارين لا ترى الخطة المبنيّة</li><li><b>البحث عن «كبسة» وتسجيلها</b> — محجوب بـ: لوحة إضافة الوجبة لم تُفتح — حقل البحث غير متاح</li></ul></div>
+    <div class="box"><h3>التقاطات مرفوعة — لا تُصلَح في هذه الحارة</h3><ul class="findings"><li class="sev-high"><b>لا مسار ضيف من شاشة الترحيب — «ابدأ الآن» تقود إلى إنشاء حساب</b><p>أزرار الترحيب: EN · ابدأ الآن · عندك حساب؟ تسجيل الدخول — و«ابدأ الآن» تنقل إلى #/login. ونصّ «كمّل كضيف» موجود في src/config/strings.ts (٤ مداخل عربي+إنجليزي) ولا يشير إليه أي مكوّن: StartViewV2 يرسم onSignup وonLogin فقط. وعد «محلي افتراضيًا» (الميثاق §9) بلا مدخل في تدفّق v2.</p></li></ul></div>
+    
     
     <div class="strip">
       <figure>
@@ -99,26 +102,39 @@
         <figcaption><span class="n">11</span> شاشة التمارين بعد اعتماد الخطة<br><span class="en">Workout tab after approving the plan</span></figcaption>
       </figure>
       <figure>
-        <img src="j1-newcomer/ar-large/12-nutrition.png" alt="شاشة التغذية" loading="lazy">
-        <figcaption><span class="n">12</span> شاشة التغذية<br><span class="en">Nutrition screen</span></figcaption>
+        <img src="j1-newcomer/ar-large/12-workout-active.png" alt="الجلسة نشطة — أول تمرين" loading="lazy">
+        <figcaption><span class="n">12</span> الجلسة نشطة — أول تمرين<br><span class="en">Session active — first exercise</span></figcaption>
       </figure>
       <figure>
-        <img src="j1-newcomer/ar-large/13-nutrition-add-sheet.png" alt="لوحة إضافة وجبة" loading="lazy">
-        <figcaption><span class="n">13</span> لوحة إضافة وجبة<br><span class="en">Add-a-meal sheet</span></figcaption>
+        <img src="j1-newcomer/ar-large/13-workout-set-logged.png" alt="جولة مسجَّلة — ٤٠ كجم" loading="lazy">
+        <figcaption><span class="n">13</span> جولة مسجَّلة — ٤٠ كجم<br><span class="en">A set logged — 40 kg</span></figcaption>
+      </figure>
+      <figure>
+        <img src="j1-newcomer/ar-large/14-nutrition.png" alt="شاشة التغذية" loading="lazy">
+        <figcaption><span class="n">14</span> شاشة التغذية<br><span class="en">Nutrition screen</span></figcaption>
+      </figure>
+      <figure>
+        <img src="j1-newcomer/ar-large/15-nutrition-add-sheet.png" alt="لوحة إضافة وجبة" loading="lazy">
+        <figcaption><span class="n">15</span> لوحة إضافة وجبة<br><span class="en">Add-a-meal sheet</span></figcaption>
+      </figure>
+      <figure>
+        <img src="j1-newcomer/ar-large/16-nutrition-search-kabsa.png" alt="البحث عن «كبسة» — نتائج القاعدة السعودية" loading="lazy">
+        <figcaption><span class="n">16</span> البحث عن «كبسة» — نتائج القاعدة السعودية<br><span class="en">Searching &quot;Kabsa&quot; — Saudi food results</span></figcaption>
       </figure></div>
   </section>
   <section>
     <h2>رحلة القاصر — حاجز الامتثال <span class="meta">ar · ar-large</span></h2>
     <p class="sub">The minor journey — the compliance gate</p>
+    <p class="ground">📍 الأرض: <code>i/journey-advanced</code> @ <code>b47cbf3</code> — chore(e2e): توثيق أداة تشخيص الحراسة وضمّها</p>
     <div class="stats">
-      <span class="ok">22 فحصًا ناجحًا</span>
+      <span class="ok">24 فحصًا ناجحًا</span>
       
-      <span>8 لقطة</span>
+      <span>10 لقطة</span>
       <span class="warn">1 التقاطة</span>
-      <span class="skip">1 خطوة محجوبة</span>
+      
     </div>
     <div class="box"><h3>التقاطات مرفوعة — لا تُصلَح في هذه الحارة</h3><ul class="findings"><li class="sev-mid"><b>اختيار مقيَّد ينجو من خفض العمر — القاصر يبقى على هدف تنشيف مختار</b><p>اختير «خسارة دهون» بعمر 28، ثم خُفض العمر إلى 15: الزرّ عاد disabled وظهر التنويه، لكن aria-pressed بقي &quot;true&quot; — أي أن الحالة المخزَّنة ما زالت هدفًا مقيَّدًا على مستخدم قاصر. الحاجز يمنع **الاختيار الجديد** ولا يُبطل **اختيارًا سابقًا** عند تغيّر العمر. الأثر محدود بالعرض لأن effectiveGoalTypeForAge (src/lib/calculators.ts) يفرض المحافظة عند الحساب — لكن شاشةً تُظهر «تنشيف» مختارًا لابن ١٥ بند امتثال بصري قائم.</p></li></ul></div>
-    <div class="box"><h3>خطوات متخطّاة (معلَنة)</h3><ul class="skips"><li><b>تمرين القاصر من شاشة التمارين</b> — محجوب بـ: التقاطة ط-١: شاشة التمارين لا ترى الخطة المبنيّة (أُسندت لحارة H موجةً طارئة) — تُعاد بعد هبوط الإصلاح</li></ul></div>
+    
     
     <div class="strip">
       <figure>
@@ -152,6 +168,78 @@
       <figure>
         <img src="j2-minor/ar-large/08-nutrition-minor.png" alt="تغذية القاصر — بلا عجز أو فائض" loading="lazy">
         <figcaption><span class="n">8</span> تغذية القاصر — بلا عجز أو فائض<br><span class="en">Minor's nutrition — no deficit or surplus</span></figcaption>
+      </figure>
+      <figure>
+        <img src="j2-minor/ar-large/09-workout-minor.png" alt="شاشة تمارين القاصر" loading="lazy">
+        <figcaption><span class="n">9</span> شاشة تمارين القاصر<br><span class="en">Minor's workout screen</span></figcaption>
+      </figure>
+      <figure>
+        <img src="j2-minor/ar-large/10-workout-minor-active.png" alt="جلسة القاصر نشطة" loading="lazy">
+        <figcaption><span class="n">10</span> جلسة القاصر نشطة<br><span class="en">Minor's session active</span></figcaption>
+      </figure></div>
+  </section>
+  <section>
+    <h2>رحلة المتقدّم — تأكيد عددي <span class="meta">ar · ar-large</span></h2>
+    <p class="sub">The advanced journey — numeric assertion</p>
+    <p class="ground">📍 الأرض: <code>i/journey-advanced</code> @ <code>b47cbf3</code> — chore(e2e): توثيق أداة تشخيص الحراسة وضمّها</p>
+    <div class="stats">
+      <span class="ok">8 فحصًا ناجحًا</span>
+      
+      <span>12 لقطة</span>
+      <span class="warn">1 التقاطة</span>
+      
+    </div>
+    <div class="box"><h3>التقاطات مرفوعة — لا تُصلَح في هذه الحارة</h3><ul class="findings"><li class="sev-high"><b>المستوى لا يغيّر رقمًا واحدًا في الخطة — مبتدئ ومتقدّم بنفس الجسد يحصلان على خطة متطابقة</b><p>قُورن 6 مقياسًا داخل التشغيل الواحد وعلى البناء نفسه، بجسد متطابق (28/178/82) وهدف ونية ومكان متطابقة، والمتغيّر الوحيد المستوى. المتطابق: السعرات المستهدفة · البروتين (غ) · أيام التدريب · التقسيمة · مدّة الجلسة (د) · نمط التقسيمة. المستوى يُخزَّن فعلًا (experience) ويغيّر **صياغة** الأهداف، لكنه لا يصل إلى أي رقم في المخرَج. أي أن سؤال المستوى يجمع إجابة لا تُغيّر شيئًا يراه المستخدم في خطته.</p></li></ul></div>
+    
+    
+    <div class="strip">
+      <figure>
+        <img src="j3-advanced/ar-large/01-مبتدئ-1-level.png" alt="مبتدئ — المستوى «مبتدئ»" loading="lazy">
+        <figcaption><span class="n">1</span> مبتدئ — المستوى «مبتدئ»<br><span class="en">مبتدئ — level &quot;مبتدئ&quot;</span></figcaption>
+      </figure>
+      <figure>
+        <img src="j3-advanced/ar-large/02-مبتدئ-2-goal.png" alt="مبتدئ — شاشة الهدف بصياغته" loading="lazy">
+        <figcaption><span class="n">2</span> مبتدئ — شاشة الهدف بصياغته<br><span class="en">مبتدئ — goal step in its own wording</span></figcaption>
+      </figure>
+      <figure>
+        <img src="j3-advanced/ar-large/03-مبتدئ-3-training.png" alt="مبتدئ — الأيام والمدّة كما يقترحها التطبيق" loading="lazy">
+        <figcaption><span class="n">3</span> مبتدئ — الأيام والمدّة كما يقترحها التطبيق<br><span class="en">مبتدئ — days and duration as suggested</span></figcaption>
+      </figure>
+      <figure>
+        <img src="j3-advanced/ar-large/04-مبتدئ-4-plan.png" alt="مبتدئ — «خطتك جاهزة»" loading="lazy">
+        <figcaption><span class="n">4</span> مبتدئ — «خطتك جاهزة»<br><span class="en">مبتدئ — plan ready</span></figcaption>
+      </figure>
+      <figure>
+        <img src="j3-advanced/ar-large/05-مبتدئ-5-nutrition.png" alt="مبتدئ — أرقامه الغذائية" loading="lazy">
+        <figcaption><span class="n">5</span> مبتدئ — أرقامه الغذائية<br><span class="en">مبتدئ — its nutrition numbers</span></figcaption>
+      </figure>
+      <figure>
+        <img src="j3-advanced/ar-large/06-مبتدئ-6-workout.png" alt="مبتدئ — بنية تمرينه" loading="lazy">
+        <figcaption><span class="n">6</span> مبتدئ — بنية تمرينه<br><span class="en">مبتدئ — its workout structure</span></figcaption>
+      </figure>
+      <figure>
+        <img src="j3-advanced/ar-large/07-متقدّم-1-level.png" alt="متقدّم — المستوى «متقدّم»" loading="lazy">
+        <figcaption><span class="n">7</span> متقدّم — المستوى «متقدّم»<br><span class="en">متقدّم — level &quot;متقدّم&quot;</span></figcaption>
+      </figure>
+      <figure>
+        <img src="j3-advanced/ar-large/08-متقدّم-2-goal.png" alt="متقدّم — شاشة الهدف بصياغته" loading="lazy">
+        <figcaption><span class="n">8</span> متقدّم — شاشة الهدف بصياغته<br><span class="en">متقدّم — goal step in its own wording</span></figcaption>
+      </figure>
+      <figure>
+        <img src="j3-advanced/ar-large/09-متقدّم-3-training.png" alt="متقدّم — الأيام والمدّة كما يقترحها التطبيق" loading="lazy">
+        <figcaption><span class="n">9</span> متقدّم — الأيام والمدّة كما يقترحها التطبيق<br><span class="en">متقدّم — days and duration as suggested</span></figcaption>
+      </figure>
+      <figure>
+        <img src="j3-advanced/ar-large/10-متقدّم-4-plan.png" alt="متقدّم — «خطتك جاهزة»" loading="lazy">
+        <figcaption><span class="n">10</span> متقدّم — «خطتك جاهزة»<br><span class="en">متقدّم — plan ready</span></figcaption>
+      </figure>
+      <figure>
+        <img src="j3-advanced/ar-large/11-متقدّم-5-nutrition.png" alt="متقدّم — أرقامه الغذائية" loading="lazy">
+        <figcaption><span class="n">11</span> متقدّم — أرقامه الغذائية<br><span class="en">متقدّم — its nutrition numbers</span></figcaption>
+      </figure>
+      <figure>
+        <img src="j3-advanced/ar-large/12-متقدّم-6-workout.png" alt="متقدّم — بنية تمرينه" loading="lazy">
+        <figcaption><span class="n">12</span> متقدّم — بنية تمرينه<br><span class="en">متقدّم — its workout structure</span></figcaption>
       </figure></div>
   </section>
 <footer>

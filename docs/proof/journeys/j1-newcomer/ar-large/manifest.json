@@ -4,6 +4,12 @@
   "titleEn": "The newcomer journey",
   "lang": "ar",
   "viewport": "large",
+  "ground": {
+    "branch": "i/journey-advanced",
+    "commit": "b47cbf3",
+    "subject": "chore(e2e): توثيق أداة تشخيص الحراسة وضمّها",
+    "dirty": false
+  },
   "frames": [
     {
       "seq": 1,
@@ -84,17 +90,38 @@
     },
     {
       "seq": 12,
-      "file": "12-nutrition.png",
+      "file": "12-workout-active.png",
+      "slug": "workout-active",
+      "captionAr": "الجلسة نشطة — أول تمرين",
+      "captionEn": "Session active — first exercise"
+    },
+    {
+      "seq": 13,
+      "file": "13-workout-set-logged.png",
+      "slug": "workout-set-logged",
+      "captionAr": "جولة مسجَّلة — ٤٠ كجم",
+      "captionEn": "A set logged — 40 kg"
+    },
+    {
+      "seq": 14,
+      "file": "14-nutrition.png",
       "slug": "nutrition",
       "captionAr": "شاشة التغذية",
       "captionEn": "Nutrition screen"
     },
     {
-      "seq": 13,
-      "file": "13-nutrition-add-sheet.png",
+      "seq": 15,
+      "file": "15-nutrition-add-sheet.png",
       "slug": "nutrition-add-sheet",
       "captionAr": "لوحة إضافة وجبة",
       "captionEn": "Add-a-meal sheet"
+    },
+    {
+      "seq": 16,
+      "file": "16-nutrition-search-kabsa.png",
+      "slug": "nutrition-search-kabsa",
+      "captionAr": "البحث عن «كبسة» — نتائج القاعدة السعودية",
+      "captionEn": "Searching \"Kabsa\" — Saudi food results"
     }
   ],
   "checks": [
@@ -107,6 +134,11 @@
       "name": "لا تمرير أفقي على شاشة الترحيب",
       "ok": true,
       "detail": ""
+    },
+    {
+      "name": "المسارات المحمية لا تُفتح للزائر ولا تُعرض كـ«صفحة غير موجودة»",
+      "ok": true,
+      "detail": "dashboard→#/dashboard · workout→#/workout · setup→#/setup · settings→#/settings"
     },
     {
       "name": "المتابعة محجوبة قبل الموافقة الصحية والبيانات",
@@ -174,6 +206,16 @@
       "detail": ""
     },
     {
+      "name": "الجلسة تبدأ من شاشة التمارين",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "جولة تُسجَّل فعليًا",
+      "ok": true,
+      "detail": ""
+    },
+    {
       "name": "«التغذية» وصل إلى شاشة التغذية",
       "ok": true,
       "detail": ""
@@ -190,6 +232,11 @@
     },
     {
       "name": "زرّ «أضف وجبة» يفتح لوحة الإضافة",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "البحث عن «كبسة» يُرجع نتيجة من قاعدة الأطعمة السعودية",
       "ok": true,
       "detail": ""
     },
@@ -224,26 +271,7 @@
       "title": "لا مسار ضيف من شاشة الترحيب — «ابدأ الآن» تقود إلى إنشاء حساب",
       "evidence": "أزرار الترحيب: EN · ابدأ الآن · عندك حساب؟ تسجيل الدخول — و«ابدأ الآن» تنقل إلى #/login. ونصّ «كمّل كضيف» موجود في src/config/strings.ts (٤ مداخل عربي+إنجليزي) ولا يشير إليه أي مكوّن: StartViewV2 يرسم onSignup وonLogin فقط. وعد «محلي افتراضيًا» (الميثاق §9) بلا مدخل في تدفّق v2.",
       "severity": "عالٍ"
-    },
-    {
-      "title": "مسارات التطبيق محجوبة للزائر غير المسجَّل — #/today و#/onboarding تعرضان «الصفحة غير موجودة»",
-      "evidence": "زائر بلا جلسة لا يصل إلى أي شاشة منتج، والرسالة المعروضة «غير موجودة» لا «تحتاج حسابًا» — رسالة مضلّلة تصف الحجب كعطل.",
-      "severity": "متوسط"
-    },
-    {
-      "title": "الإعداد يكتب الخطة وشاشة التمارين لا تراها — مسار المولود الجديد ينتهي إلى طريق مسدود",
-      "evidence": "بعد إعداد كامل واعتماد الخطة، تعرض #/workout «أكمل إعداد خطتك» بينما التخزين يحمل الخطة فعلًا: qimmah:workoutCalendar:v1 = {split:\"upper_lower\", daysPerWeek:4, source:\"migration\"} ويطابق ملخّص «خطتك جاهزة» المعروض قبل لحظات · qimmah:customization:v1 مكتوب (6669 حرفًا). أي أن الحالة محفوظة وشرط «الإعداد مكتمل» في شاشة التمارين لا يقرؤها. واللوحة تعد المستخدم بـ«تمرين اليوم» فيصل إلى «ابدأ الإعداد» — وعدٌ يخلفه المنتج في أول دقيقة.",
-      "severity": "عالٍ"
     }
   ],
-  "skipped": [
-    {
-      "name": "جولة تُسجَّل وتُنهى بالتأكيد",
-      "blockedBy": "الالتقاطة: شاشة التمارين لا ترى الخطة المبنيّة"
-    },
-    {
-      "name": "البحث عن «كبسة» وتسجيلها",
-      "blockedBy": "لوحة إضافة الوجبة لم تُفتح — حقل البحث غير متاح"
-    }
-  ]
+  "skipped": []
 }

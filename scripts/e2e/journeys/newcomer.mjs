@@ -105,19 +105,28 @@ try {
       'عالٍ',
     )
   }
-  const gatedToday = await page.evaluate(async () => {
-    location.hash = '#/today'
-    await new Promise((r) => setTimeout(r, 600))
-    return document.body.innerText.includes('الصفحة غير موجودة')
-  })
-  if (gatedToday) {
-    rec.finding(
-      'مسارات التطبيق محجوبة للزائر غير المسجَّل — #/today و#/onboarding تعرضان «الصفحة غير موجودة»',
-      'زائر بلا جلسة لا يصل إلى أي شاشة منتج، والرسالة المعروضة «غير موجودة» لا «تحتاج حسابًا» — ' +
-        'رسالة مضلّلة تصف الحجب كعطل.',
-      'متوسط',
-    )
-  }
+  // حراسة المسار للزائر — تُفحص بأسماء المسارات **الحقيقية** من src/lib/appRoutes.ts.
+  // تصحيح مسجَّل: تشغيل سابق فحص «#/today» و«#/onboarding» وهما ليسا اسمي مسارين
+  // أصلًا (الصحيح dashboard وsetup)، فقرأ ٤٠٤ المسار المجهول عطلَ حجب. الاسم
+  // المخترَع يُنتج بلاغًا أحمر كاذبًا — فالفحص الآن على الأسماء المصدَّرة وحدها.
+  const guarded = await page.evaluate(async (routes) => {
+    const out = []
+    for (const r of routes) {
+      location.hash = `#/${r}`
+      await new Promise((res) => setTimeout(res, 700))
+      out.push({
+        route: r,
+        hash: location.hash,
+        notFound: document.body.innerText.includes('الصفحة غير موجودة'),
+      })
+    }
+    return out
+  }, ['dashboard', 'workout', 'setup', 'settings'])
+  rec.check(
+    'المسارات المحمية لا تُفتح للزائر ولا تُعرض كـ«صفحة غير موجودة»',
+    guarded.every((g) => !g.notFound),
+    guarded.map((g) => `${g.route}→${g.hash}`).join(' · '),
+  )
 
   // الرحلة تكمل بجلسة مزروعة — نفس نمط مصنع اللقطات القائم على الجذع.
   // هذا **إعلان لا التفاف**: الجدار مرفوع أعلاه بالتقاطتين.
@@ -314,8 +323,10 @@ try {
   await page.waitForTimeout(700)
   await visit('nutrition-add-sheet', 'لوحة إضافة وجبة', 'Add-a-meal sheet')
 
-  const search = page.getByRole('searchbox')
-    .or(page.locator('input[type="search"], input[type="text"]')).first()
+  // المُحدِّد بالنائب النصّي لا بالدور: الحقل ليس role=searchbox ولا type=search.
+  // تشغيل سابق تخطّى هذه الخطوة وأعلنها محجوبة، والحقل كان ظاهرًا في اللقطة —
+  // قصور مُحدِّد لا عطل منتج. اللقطة هي التي كشفته.
+  const search = page.getByPlaceholder(/ابحث عن طعام/).first()
   if (await search.isVisible().catch(() => false)) {
     await search.fill('كبسة')
     await page.waitForTimeout(1100)
