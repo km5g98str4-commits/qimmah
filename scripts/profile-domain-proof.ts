@@ -26,6 +26,7 @@ import {
 import { AGE_RANGE as FLOW_AGE, HEIGHT_RANGE as FLOW_HEIGHT, WEIGHT_RANGE as FLOW_WEIGHT } from '@/lib/onboardingV2Flow'
 import { LIMITS, validateProfile } from '@/lib/validation'
 import { calorieGoalFromGoalType, defaultProfile, goalTypeLabel, goalTypeOptions } from '@/lib/calculators'
+import { onboardingStrings } from '@/i18n/dict/onboarding'
 import type { GoalType, Profile } from '@/types/profile'
 
 let pass = 0
@@ -103,6 +104,48 @@ check('التفاف ٤: قائمة يدوية ناقصة تُكشَف بمقار
 // هـ) `withinRange` لا يقبل الفراغ — وإلا مرّ ملف بلا بيانات جسم.
 check('withinRange يرفض null/NaN', !withinRange(null, AGE_RANGE) && !withinRange(Number('س'), AGE_RANGE))
 check('withinRange يقبل الحدّين ويرفض ما حولهما', withinRange(AGE_RANGE.min, AGE_RANGE) && withinRange(AGE_RANGE.max, AGE_RANGE) && !withinRange(AGE_RANGE.min - 1, AGE_RANGE) && !withinRange(AGE_RANGE.max + 1, AGE_RANGE))
+
+// ─────────────────────────────────────────────────────────────────────────────
+console.log('\n═══ 6) التلميح المعروض تحت الحقل يطابق الحدّ المطبَّق — [CTO-67] البند ٣ ═══')
+// [CTO-65] البند ٢ وحّد الحدود وبنى **رسائل الأخطاء** منها، وبقيت **التلميحات**
+// أرقامًا صلبة في القاموس («كجم (15–250)» · «سم (100–230)») بلغتيها. فالشاشة
+// الواحدة تقول رقمين: التلميح يَعِد بـ15 والمدقّق يرفض عند 30.
+// الفحص هنا على **القاموس المعروض فعلًا**، لا على الثوابت وحدها.
+const hintFields: [string, string, string, { min: number; max: number }][] = [
+  ['العمر', onboardingStrings.ar.bodyAgeHint, onboardingStrings.en.bodyAgeHint, LIMITS.age],
+  ['الطول', onboardingStrings.ar.bodyHeightHint, onboardingStrings.en.bodyHeightHint, LIMITS.heightCm],
+  ['الوزن', onboardingStrings.ar.bodyWeightHint, onboardingStrings.en.bodyWeightHint, LIMITS.weightKg],
+  ['الوزن الهدف', onboardingStrings.ar.bodyTargetWeightHint, onboardingStrings.en.bodyTargetWeightHint, LIMITS.targetWeightKg],
+  ['أيام التدريب', onboardingStrings.ar.bodyTrainingDaysHint, onboardingStrings.en.bodyTrainingDaysHint, LIMITS.trainingDays],
+  ['مدة التمرين', onboardingStrings.ar.bodyWorkoutDurationHint, onboardingStrings.en.bodyWorkoutDurationHint, LIMITS.workoutDuration],
+]
+for (const [name, ar, en, range] of hintFields) {
+  check(`${name}: التلميح العربي يذكر ${range.min}–${range.max} ولا شيء غيره`, ar.includes(`${range.min}–${range.max}`))
+  check(`${name}: التلميح الإنجليزي يذكر ${range.min}–${range.max}`, en.includes(`${range.min}–${range.max}`))
+  // والأهمّ: ألّا يحمل التلميح **أي** رقم خارج الحدّين — فرقم ثالث في السطر كذبة.
+  const strayAr = (ar.match(/\d+/g) ?? []).filter((n) => n !== String(range.min) && n !== String(range.max))
+  const strayEn = (en.match(/\d+/g) ?? []).filter((n) => n !== String(range.min) && n !== String(range.max))
+  check(`${name}: لا رقم ثالث في التلميح بلغتيه`, strayAr.length === 0 && strayEn.length === 0)
+}
+// اقتران بالمدقّق: نفس القيمة التي يرفضها المدقّق **خارج** ما يَعِد به التلميح.
+const belowWeight = { ...defaultProfile, weightKg: 15 } as Profile
+check(
+  'وزن 15 مرفوض فعلًا، والتلميح لا يَعِد به',
+  validateProfile(belowWeight).some((e) => e.field === 'weightKg') && !onboardingStrings.ar.bodyWeightHint.includes('15'),
+)
+
+console.log('\n═══ 6-ب) التأكيد المضادّ للتلميحات (§4.2) ═══')
+// أ) تلميح صلب قديم يجب أن يسقط في الفحص أعلاه.
+const LYING_HINT = 'كجم (15–250)'
+check('التفاف: التلميح الصلب القديم يُكشَف بعدم ذكره الحدّ المطبَّق', !LYING_HINT.includes(`${LIMITS.weightKg.min}–${LIMITS.weightKg.max}`))
+// ب) وتلميح يذكر الحدّ الصحيح **ومعه رقم ثالث** يجب أن يسقط كذلك — وإلا مرّ
+//    «كجم (30–250، وسابقًا 15)» وهو كذب مغلَّف بصدق.
+const SMUGGLED_HINT = `كجم (${LIMITS.weightKg.min}–${LIMITS.weightKg.max}، وسابقًا 15)`
+const smuggledStray = (SMUGGLED_HINT.match(/\d+/g) ?? []).filter((n) => n !== String(LIMITS.weightKg.min) && n !== String(LIMITS.weightKg.max))
+check('التفاف: رقم ثالث مهرَّب داخل تلميح صحيح يُكشَف', smuggledStray.length > 0)
+// ج) والعكس: التلميح الحالي لا يُكشَف — البوابة لا تصرخ على السليم.
+const currentStray = (onboardingStrings.ar.bodyWeightHint.match(/\d+/g) ?? []).filter((n) => n !== String(LIMITS.weightKg.min) && n !== String(LIMITS.weightKg.max))
+check('ولا يُكشَف التلميح الحالي الصحيح', currentStray.length === 0)
 
 console.log(`\n${fails.length === 0 ? '✅' : '❌'} إثبات مصدر الحقيقة الواحد: ${pass} فحصًا، ${fails.length} فشل.`)
 if (fails.length) { for (const f of fails) console.log('   ✗ ' + f); process.exit(1) }

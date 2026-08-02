@@ -102,6 +102,35 @@ export function sessionDurationRangeCopy(range: NumericRange = SESSION_DURATION_
   }
 }
 
+// ===== تلميحات الحقول — نفس المبدأ: الرقم المعروض هو الرقم المطبَّق =====
+
+/**
+ * التلميح المكتوب تحت الحقل («كجم (30–250)») — **يُبنى من النطاق نفسه**
+ * كالرسائل أعلاه تمامًا — [CTO-67] البند ٣.
+ *
+ * **الفجوة التي يُغلقها:** [CTO-65] البند ٢ وحّد الحدود وبنى **رسائل الأخطاء**
+ * منها، وبقيت **التلميحات** أرقامًا صلبة في القاموس («كجم (15–250)» ·
+ * «سم (100–230)») بلغتيها. فصارت الشاشة الواحدة تقول رقمين: التلميح يَعِد بـ15
+ * والمدقّق يرفض عند 30 — وهي **رسالة تكذب على المستخدم**، أسوأ من حدّ غير
+ * موحّد لأنها تُعلّمه أن أرقام التطبيق لا تُصدَّق.
+ *
+ * `unit` فارغة ⇒ يُعرض النطاق وحده (حقل الأيام: «1–7» بلا وحدة).
+ */
+export function rangeHint(range: NumericRange, unit: RangeCopy = { ar: '', en: '' }): RangeCopy {
+  const span = `${range.min}–${range.max}`
+  return {
+    ar: unit.ar ? `${unit.ar} (${span})` : span,
+    en: unit.en ? `${unit.en} (${span})` : span,
+  }
+}
+
+export const AGE_HINT = rangeHint(AGE_RANGE, { ar: 'سنة', en: 'years' })
+export const HEIGHT_HINT = rangeHint(HEIGHT_RANGE, { ar: 'سم', en: 'cm' })
+export const WEIGHT_HINT = rangeHint(WEIGHT_RANGE, { ar: 'كجم', en: 'kg' })
+export const TARGET_WEIGHT_HINT = rangeHint(TARGET_WEIGHT_RANGE, { ar: 'كجم', en: 'kg' })
+export const TRAINING_DAYS_HINT = rangeHint(TRAINING_DAYS_RANGE)
+export const SESSION_DURATION_HINT = rangeHint(SESSION_DURATION_RANGE, { ar: 'دقيقة', en: 'minutes' })
+
 // ===== الأهداف =====
 
 /**
