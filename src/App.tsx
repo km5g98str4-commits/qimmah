@@ -44,7 +44,7 @@ function createLazyViews() {
 import { MobileShell, type MainTab, type QuickLogTarget } from '@/components/MobileShell'
 import type { AppBadge } from '@/components/AppNav'
 import { useAuth } from '@/lib/authContext'
-import { isAccountOnboarded, isOnboardingComplete, markCompleted } from '@/lib/onboarding'
+import { adoptGuestOnboarding, isAccountOnboarded, isOnboardingComplete, markCompleted } from '@/lib/onboarding'
 import { reconcileAccountScope } from '@/lib/accountScope'
 import { ensureOnboardingProfile } from '@/lib/onboardingProfile'
 import { currentUserId, hydrateOnboardingFromProfile } from '@/lib/onboardingSync'
@@ -250,7 +250,11 @@ export default function App() {
     }
     let cancelled = false
     void (async () => {
-      if (uid && !isAccountOnboarded(uid)) await hydrateOnboardingFromProfile(uid)
+      // ترتيب القرار: السجلّ المحلي ← تبنّي إعداد الضيف على هذا الجهاز (فوري، بلا شبكة)
+      // ← الملف السحابي (للحساب العائد على جهاز جديد).
+      if (uid && !isAccountOnboarded(uid) && !adoptGuestOnboarding(uid)) {
+        await hydrateOnboardingFromProfile(uid)
+      }
       if (cancelled) return
       if (!didInitialAuthRoute.current) {
         // أول حسم للمسار بعد استعادة الجلسة: نحسب مسار الإقلاع بمعرّف الحساب الحقيقي
@@ -293,6 +297,8 @@ export default function App() {
     // مسجّل دخول — القرار لكل حساب: السجلّ المحلي، وإلا الملف السحابي.
     // الأسئلة (الإعداد) تبدأ الآن فقط بعد الحساب.
     let onboarded = isAccountOnboarded(signedInId)
+    // من أكمل إعداده كضيف ثم أنشأ حسابًا لحفظ تقدّمه يدخل على خطته، لا على معالج جديد.
+    if (!onboarded) onboarded = adoptGuestOnboarding(signedInId)
     if (!onboarded) onboarded = await hydrateOnboardingFromProfile(signedInId)
     if (onboarded) setView('dashboard')
     else openSetup()

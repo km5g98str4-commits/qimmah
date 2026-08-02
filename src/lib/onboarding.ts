@@ -145,6 +145,30 @@ export function markCompleted(userId?: string | null, step?: number): void {
 }
 
 /**
+ * تبنّي إعداد الضيف عند أوّل حساب يُنشأ على هذا الجهاز.
+ *
+ * شاشة إنشاء الحساب تَعِد: «أنشئ حسابك مرّة واحدة لحفظ تقدّمك». من أكمل إعداده كضيف
+ * ثم أنشأ حسابًا لحفظ ذلك التقدّم يجب أن يدخل على خطته لا أن يُطالَب بإعداد جديد.
+ *
+ * الشرط ضيّق عمدًا حتى تبقى العزلة بين الحسابات كما صُمّمت:
+ *   • إعداد الجهاز مكتمل فعلًا (علم الضيف)،
+ *   • ولم يُطالب به أي حساب سابق (`owner` غير محدّد) — فلا يرث حسابٌ ثانٍ إعداد الأول،
+ *   • والحساب نفسه لم يُكمل إعدادًا بعد.
+ *
+ * عند التبنّي يُختم الإعداد باسم هذا الحساب فيصير محجوزًا له وحده.
+ * يعيد true إن تبنّى فعلًا.
+ */
+export function adoptGuestOnboarding(userId: string | null | undefined): boolean {
+  if (!userId) return false
+  if (isAccountOnboarded(userId)) return false
+  const prev = loadOnboarding()
+  if (!prev.completed || prev.owner) return false
+  markAccountOnboarded(userId)
+  saveOnboarding({ ...prev, owner: userId })
+  return true
+}
+
+/**
  * يعيد تشغيل الإعداد الأولي للمالك الحالي — يلغي الإكمال فقط دون مسح بيانات التخصيص.
  * مسجّل الدخول → يُلغى إكمال حسابه؛ الضيف → علم الجهاز.
  */
