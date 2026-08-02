@@ -28,6 +28,27 @@ const today = read('src/views/TodayV2.tsx')
 check('progress label uses the AA green-text token', today.includes("text-[color:var(--v2-green-text)]"))
 check('food/completion actions use the AA green-text token', today.includes("green: 'var(--v2-green-text)'"))
 
+// ── D-2 [CTO-67] البند ٥: النصّ الأزرق الصغير يمرّ AA في **الثيمين** ──
+// «نبض أسبوعك» (`v2-text-blue` · 12px/900) كان يبقى على قيمة الفاتح في الثيم
+// الداكن: 3.08:1 على سطح الجرافيت — المخالف الوحيد للـAA في اللوحة كلها.
+// الأخضر عولج هكذا من قبل (سطر واحد فوق) والأزرق نُسي؛ فيُقاس الاثنان معًا الآن.
+const DARK_SURFACE = '#161410' // --c-page في الثيم الداكن (22 20 15)
+const LIGHT_SURFACE = '#efeae2' // Sand
+const darkBlock = tokens.slice(tokens.indexOf("[data-theme='dark'] body"), tokens.indexOf('.v2-text-ember'))
+check('كتلة الثيم الداكن استُخرجت بحدودها لا الملف كله', darkBlock.length > 100 && darkBlock.length < tokens.length * 0.5)
+const blueLight = tokens.match(/--v2-blue-text:\s*(#[0-9a-fA-F]{6})/)[1]
+const blueOnDark = tokens.match(/--v2-blue-on-dark:\s*(#[0-9a-fA-F]{6})/)[1]
+check('الثيم الداكن يعيد ربط --v2-blue-text بنغمة السطح الداكن', /--v2-blue-text:\s*var\(--v2-blue-on-dark\)/.test(darkBlock))
+const blueDarkRatio = contrast(blueOnDark, DARK_SURFACE)
+const blueLightRatio = contrast(blueLight, LIGHT_SURFACE)
+check(`الأزرق على السطح الداكن ${blueOnDark} ≥ 4.5:1 (هو ${blueDarkRatio.toFixed(2)})`, blueDarkRatio >= 4.5)
+check(`والأزرق على السطح الفاتح ${blueLight} ≥ 4.5:1 (هو ${blueLightRatio.toFixed(2)})`, blueLightRatio >= 4.5)
+// نفس المعاملة للأخضر — الاستثناء الذي سبق يُحرَس معه لا بمعزل عنه.
+check('والأخضر ما زال معاد الربط في الثيم الداكن', /--v2-green-text:\s*#[0-9a-fA-F]{6}/.test(darkBlock))
+// التأكيد المضادّ (§4.2): القيمة القديمة تسقط بالحساب نفسه، فالفحص ليس تحصيل حاصل.
+check(`التفاف: قيمة الفاتح على السطح الداكن كانت ${contrast(blueLight, DARK_SURFACE).toFixed(2)} — دون AA`, contrast(blueLight, DARK_SURFACE) < 4.5)
+check('ولذلك حذف إعادة الربط يُسقط الفحص أعلاه', contrast(blueLight, DARK_SURFACE) < 4.5 && blueDarkRatio >= 4.5)
+
 // ── B: active workout is a real modal; shell chrome goes inert ──
 const workout = read('src/views/WorkoutV2.tsx')
 check('active overlay is aria-modal dialog', workout.includes('role="dialog"') && workout.includes('aria-modal="true"'))

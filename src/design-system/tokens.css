@@ -295,6 +295,11 @@
 :root[data-theme='dark'] body {
   color-scheme: dark;
   --v2-green-text: #3ddc84; /* lighter green for AA small text on the dark surface */
+  /* [CTO-67] البند ٥ — `.v2-text-blue` كان يبقى على `--v2-blue-text` (#245fc5)
+     في الثيم الداكن: 3.08:1 على #161410 عند 12px/900 — دون AA، وهو المخالف
+     الوحيد في اللوحة كلها («نبض أسبوعك»). نفس علاج الأخضر أعلاه ونفس علاج رابط
+     الخصوصية في Q-101: النغمة تُفتَّح للسطح الداكن بدل أن تُغمَّق له. */
+  --v2-blue-text: var(--v2-blue-on-dark);
   --c-primary: var(--v2-ember);
   --c-accent: var(--v2-teal);
   --c-page: 22 20 15;
