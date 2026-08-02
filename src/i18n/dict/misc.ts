@@ -47,7 +47,7 @@ const ar: MiscStrings = {
   terms: 'الشروط',
   contact: 'تواصل معنا',
   buildIdTitle: 'معرّف البناء',
-  toastTitle: 'تم تجهيز صفحتك',
+  toastTitle: 'تم تجهيز خطتك',
   toastBody: 'ابدأ من قسم اليوم وتابع تمرينك، أكلك، ومكملاتك من مكان واحد.',
   toastAction: 'افتح يومي',
   close: 'إغلاق',

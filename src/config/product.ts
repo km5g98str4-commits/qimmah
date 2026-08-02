@@ -4,7 +4,7 @@
 import type { NavItem } from '@/types'
 
 export const product = {
-  // اسم الصفحة الشخصية (يمكن أيضًا ضبطه عبر VITE_APP_NAME في .env)
+  // اسم التطبيق المعروض (يمكن أيضًا ضبطه عبر VITE_APP_NAME في .env)
   name: import.meta.env.VITE_APP_NAME ?? 'قِمّة',
   nameLatin: 'Qimmah',
   tagline: 'خطتك الشخصية للنادي',

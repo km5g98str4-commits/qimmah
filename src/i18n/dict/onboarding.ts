@@ -570,9 +570,9 @@ const ar: OnboardingStrings = {
   ccSections: 'إظهار الأقسام',
   ccCommitments: 'الأقسام',
 
-  previewYourPage: 'معاينة صفحتك',
+  previewYourPage: 'معاينة خطتك',
   previewYourGoal: 'هدفك',
-  previewPageOwner: 'صاحب الصفحة',
+  previewPageOwner: 'صاحب الخطة',
   previewType: 'النوع',
   previewWorkouts: 'تمارين',
   previewMeals: 'وجبات',
@@ -589,11 +589,11 @@ const ar: OnboardingStrings = {
   welcomeDescription:
     'بنجهّز تطبيقك الشخصي خطوة بخطوة. جاوب على أسئلة بسيطة، وتقدر ترجع تعدّل أي شي وقت ما تبي.',
   welcomeNameLabel: 'اسمك',
-  welcomeNameHint: 'يظهر في صفحتك وفي ترحيب «اليوم» — مطلوب للبدء',
+  welcomeNameHint: 'يظهر في خطتك وفي ترحيب «اليوم» — مطلوب للبدء',
   welcomeNamePlaceholder: 'مثال: محمد',
   welcomeNameRequired: 'اكتب اسمك عشان تكمّل.',
-  welcomeFirstTime: 'بنجهّز صفحتك لأول مرة. تقدر تعدل كل شي بعدين.',
-  welcomeLivePreviewNote: 'كل ما تكمل خطوة، تشوف معاينة صفحتك تتحدّث على طول. جاهز؟ اضغط «التالي» نبدأ.',
+  welcomeFirstTime: 'بنجهّز خطتك لأول مرة. تقدر تعدل كل شي بعدين.',
+  welcomeLivePreviewNote: 'كل ما تكمل خطوة، تشوف معاينة خطتك تتحدّث على طول. جاهز؟ اضغط «التالي» نبدأ.',
 
   bodyTitle: 'بياناتك',
   bodyDescription: 'جاوب على بياناتك وهدفك، وقِمّة بتجهّز خطتك تلقائيًا. تقدر تعدّل أي شي بعدين.',
@@ -750,7 +750,7 @@ const ar: OnboardingStrings = {
 
   measTitle: 'القياسات والمتابعة',
 
-  secTitle: 'الأقسام اللي تبيها في صفحتك',
+  secTitle: 'الأقسام اللي تبيها في قِمّة',
   secDescription: 'اختر الأقسام اللي تبي تشوفها. تقدر تشغّل أي قسم أو توقفه بعدين.',
   secToday: 'اليوم',
   secTodayHint: 'متابعة يومك خطوة بخطوة',
@@ -771,7 +771,7 @@ const ar: OnboardingStrings = {
   secAlwaysVisible: 'الملف الشخصي والهدف يبقون ظاهرين دايمًا.',
 
   reviewTitle: 'المراجعة والحفظ',
-  reviewDescription: 'راجع صفحتك بسرعة، وإذا كل شي تمام احفظ وأقفل. كل شي محفوظ على جهازك.',
+  reviewDescription: 'راجع خطتك بسرعة، وإذا كل شي تمام احفظ وأقفل. كل شي محفوظ على جهازك.',
   reviewName: 'اسمك',
   reviewGoal: 'الهدف',
   reviewWeight: 'الوزن',
@@ -784,7 +784,7 @@ const ar: OnboardingStrings = {
   reviewEditLater: 'تقدر ترجع تعدّل أي شي بعدين — ما يحتاج معرفة تقنية.',
   reviewAdvancedOptions: 'خيارات متقدمة',
   reviewAdvancedIntro:
-    'تقدر تحفظ نسخة احتياطية من صفحتك على جهازك، أو تستعيدها بعدين، أو ترجع للإعداد الأساسي.',
+    'تقدر تحفظ نسخة احتياطية من بياناتك على جهازك، أو تستعيدها بعدين، أو ترجع للإعداد الأساسي.',
   reviewBackup: 'حفظ نسخة احتياطية',
   reviewRestore: 'استعادة من نسخة',
   reviewResetBasic: 'رجوع للإعداد الأساسي',
@@ -797,20 +797,20 @@ const ar: OnboardingStrings = {
   reviewFullResetNote: 'يحذف بيانات قِمّة بس من هذا المتصفح، وبعدها يبدأ من جديد.',
 
   basicsTitle: 'بياناتي الأساسية',
-  basicsDescription: 'نبدأ باسمك وشكل التعريف بصفحتك. تقدر تعدّل كل شي بعدين.',
+  basicsDescription: 'نبدأ باسمك وشكل التعريف بخطتك. تقدر تعدّل كل شي بعدين.',
   basicsNameLabel: 'اسمك',
-  basicsNameHint: 'يظهر في صفحتك وفي ترحيب «اليوم»',
+  basicsNameHint: 'يظهر في خطتك وفي ترحيب «اليوم»',
   basicsNamePlaceholder: 'مثال: محمد',
-  basicsBrandLabel: 'اسم صفحتك',
+  basicsBrandLabel: 'اسم خطتك',
   basicsBrandHint: 'العنوان اللي يظهر فوق',
   basicsBrandPlaceholder: 'مثال: قِمّة',
   basicsTaglineLabel: 'وصف قصير',
-  basicsTaglineHint: 'جملة تعرّف بصفحتك',
+  basicsTaglineHint: 'جملة تعرّف بخطتك',
   basicsTaglinePlaceholder: 'مثال: خطتي الشخصية للنادي',
   basicsUserType: 'نوعك',
 
   goalStepTitle: 'هدفي الحالي',
-  goalStepDescription: 'اكتب هدفًا واحدًا واضحًا تعمل عليه. سيظهر بوضوح في صفحتك ويذكّرك كل يوم.',
+  goalStepDescription: 'اكتب هدف واحد واضح تشتغل عليه. بيظهر واضح في خطتك ويذكّرك كل يوم.',
   goalStepLabel: 'هدفك',
   goalStepHint: 'جملة بسيطة بلغتك أنت',
   goalStepPlaceholder: 'مثال: أوصل وزن 78 كجم وأبني عضلاتي خلال 3 أشهر',
@@ -820,8 +820,8 @@ const ar: OnboardingStrings = {
   goalSuggestion2: 'إنقاص نسبة الدهون والثبات على روتين تمرين 4 أيام بالأسبوع',
   goalSuggestion3: 'بناء قوة في تمارين الضغط والسحب مع أكل صحي منتظم',
 
-  lookTitle: 'شكل الصفحة',
-  lookDescription: 'اختر ألوان صفحتك. تنعكس مباشرة على أزرارك ومؤشراتك في كل مكان.',
+  lookTitle: 'شكل التطبيق',
+  lookDescription: 'اختر ألوانك في قِمّة. تنعكس مباشرة على أزرارك ومؤشراتك في كل مكان.',
   lookPresetColors: 'ألوان جاهزة:',
   lookPrimaryColor: 'اللون الأساسي',
   lookAccentColor: 'لون التمييز',
@@ -998,9 +998,9 @@ const en: OnboardingStrings = {
   ccSections: 'Show sections',
   ccCommitments: 'Sections',
 
-  previewYourPage: 'Preview your page',
+  previewYourPage: 'Preview your plan',
   previewYourGoal: 'Your goal',
-  previewPageOwner: 'Page owner',
+  previewPageOwner: 'Plan owner',
   previewType: 'Type',
   previewWorkouts: 'Workouts',
   previewMeals: 'Meals',
@@ -1017,12 +1017,12 @@ const en: OnboardingStrings = {
   welcomeDescription:
     "We'll set up your personal app step by step. Just answer a few simple questions — you can come back and change anything anytime.",
   welcomeNameLabel: 'Your name',
-  welcomeNameHint: 'Shows on your page and in the "Today" greeting — required to start',
+  welcomeNameHint: 'Shows in your plan and in the "Today" greeting — required to start',
   welcomeNamePlaceholder: 'e.g. Mohammed',
   welcomeNameRequired: 'Enter your name to continue.',
-  welcomeFirstTime: "We'll set up your page for the first time. You can edit everything later.",
+  welcomeFirstTime: "We'll set up your plan for the first time. You can edit everything later.",
   welcomeLivePreviewNote:
-    'Each step you finish, your page preview updates instantly. Ready? Tap "Next" to start.',
+    'Each step you finish, your plan preview updates instantly. Ready? Tap "Next" to start.',
 
   bodyTitle: 'Your data',
   bodyDescription:
@@ -1181,7 +1181,7 @@ const en: OnboardingStrings = {
 
   measTitle: 'Measurements & tracking',
 
-  secTitle: 'The sections you want on your page',
+  secTitle: 'The sections you want in Qimmah',
   secDescription: 'Choose the sections you want to see. You can turn any section on or off later.',
   secToday: 'Today',
   secTodayHint: 'Track your day step by step',
@@ -1202,7 +1202,7 @@ const en: OnboardingStrings = {
   secAlwaysVisible: 'Your profile and goal always stay visible.',
 
   reviewTitle: 'Review & save',
-  reviewDescription: 'Take a quick look at your page, and if everything looks good, save and close. Everything is saved on your device.',
+  reviewDescription: 'Take a quick look at your plan, and if everything looks good, save and close. Everything is saved on your device.',
   reviewName: 'Name',
   reviewGoal: 'Goal',
   reviewWeight: 'Weight',
@@ -1215,7 +1215,7 @@ const en: OnboardingStrings = {
   reviewEditLater: 'You can come back and edit anything later — no technical knowledge needed.',
   reviewAdvancedOptions: 'Advanced options',
   reviewAdvancedIntro:
-    'You can save a backup of your page to your device, restore it later, or go back to the basic setup.',
+    'You can save a backup of your data to your device, restore it later, or go back to the basic setup.',
   reviewBackup: 'Save backup',
   reviewRestore: 'Restore from backup',
   reviewResetBasic: 'Back to basic setup',
@@ -1228,20 +1228,20 @@ const en: OnboardingStrings = {
   reviewFullResetNote: 'Deletes only Qimmah data from this browser, then starts fresh.',
 
   basicsTitle: 'My basic info',
-  basicsDescription: 'We start with your name and how your page is introduced. You can change all of this later.',
+  basicsDescription: 'We start with your name and how your plan is introduced. You can change all of this later.',
   basicsNameLabel: 'Your name',
-  basicsNameHint: 'Shows on your page and in the "Today" greeting',
+  basicsNameHint: 'Shows in your plan and in the "Today" greeting',
   basicsNamePlaceholder: 'e.g. Mohammed',
-  basicsBrandLabel: 'Your page name',
+  basicsBrandLabel: 'Your plan name',
   basicsBrandHint: 'The title shown at the top',
   basicsBrandPlaceholder: 'e.g. Qimmah',
   basicsTaglineLabel: 'Short description',
-  basicsTaglineHint: 'A sentence that introduces your page',
+  basicsTaglineHint: 'A sentence that introduces your plan',
   basicsTaglinePlaceholder: 'e.g. My personal gym plan',
   basicsUserType: 'Your type',
 
   goalStepTitle: 'My current goal',
-  goalStepDescription: 'Write one clear goal to work on. This shows large on your page and reminds you every day.',
+  goalStepDescription: 'Write one clear goal to work on. It shows large in your plan and reminds you every day.',
   goalStepLabel: 'Your goal',
   goalStepHint: 'A simple sentence in your own words',
   goalStepPlaceholder: 'e.g. reach 78 kg and build muscle in 3 months',
@@ -1251,8 +1251,8 @@ const en: OnboardingStrings = {
   goalSuggestion2: 'Lower body fat and stick to a 4-day-a-week training routine',
   goalSuggestion3: 'Build strength in push and pull movements with regular healthy eating',
 
-  lookTitle: 'Page look',
-  lookDescription: 'Choose your page colors. They apply instantly to your buttons and indicators everywhere.',
+  lookTitle: 'App look',
+  lookDescription: 'Choose your colors in Qimmah. They apply instantly to your buttons and indicators everywhere.',
   lookPresetColors: 'Preset colors:',
   lookPrimaryColor: 'Primary color',
   lookAccentColor: 'Accent color',

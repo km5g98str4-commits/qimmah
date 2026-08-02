@@ -5,7 +5,7 @@ import { userTypeOptions, type Customization } from '@/lib/customization'
 import { onboardingStrings } from '@/i18n/dict/onboarding'
 import { profileChoiceStrings } from '@/i18n/dict/profileChoices'
 
-/** خطوة البيانات الأساسية — الاسم، اسم الصفحة، الوصف، والنوع. */
+/** خطوة البيانات الأساسية — الاسم، اسم الخطة، الوصف، والنوع. */
 export function StepBasics({ ctx }: { ctx: WizardCtx }) {
   const d = onboardingStrings[ctx.lang]
   const choices = profileChoiceStrings[ctx.lang]
