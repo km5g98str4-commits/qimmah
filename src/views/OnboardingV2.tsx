@@ -131,6 +131,8 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
   // عليه التنشيف/التضخيم مهما كان عمره — وهو بند امتثال لا خلل وظيفي فحسب.
   const minor = isMinorAge(ageNum ?? customization.profile.age)
   const intentT = onboardingIntentStrings[lang] ?? onboardingIntentStrings.ar
+  // ن٢: نصوص خطوة الأساسيات تلزم الفوتر أيضًا — رسالة «تحت الحدّ» تُعرض هناك.
+  const bodyT = bodyStepStrings[lang] ?? bodyStepStrings.ar
   // صياغة الأهداف تتبع المستوى المُعلن — نفس القيم المخزّنة، لغة مختلفة.
   const goalWording = useMemo(() => goalWordingFor(lang, level), [lang, level])
   const goalLabel = goal ? goalWording[goal].label : ''
@@ -317,7 +319,9 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
                   ? policyCopy[lang].healthConsentRequired
                   : validation === 'intentLevel'
                     ? intentT.validation
-                    : t.validation[validation]}
+                    : validation === 'ageBelowMin'
+                      ? bodyT.ageBelowMin
+                      : t.validation[validation]}
               </span>
             </p>
           )}

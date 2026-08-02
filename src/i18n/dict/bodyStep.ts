@@ -33,6 +33,12 @@ export interface BodyStepStrings {
 
   /** رسالة التحقق عند نقص أو خروج قيمة عن نطاقها. */
   validation: string
+  /**
+   * ن٢: يُعرض حين يقع العمر تحت ١٣ — الحدّ الأدنى للتطبيق.
+   * يسمّي السبب بهدوء بدل رسالة الحقول العامة، وبلا لهجة اتهام:
+   * المستخدم لم يُخطئ، والتطبيق ليس له بعد.
+   */
+  ageBelowMin: string
   /** يُعرض حين يقع العمر تحت 18 — تقييد لا طرد. */
   minorNote: string
 }
@@ -60,6 +66,7 @@ const ar: BodyStepStrings = {
   weightUnit: 'كجم',
 
   validation: 'عبّ الأربعة بأرقام منطقية ونكمل.',
+  ageBelowMin: 'قِمّة لعمر ١٣ وفوق — نشوفك قريب.',
   minorNote: 'لأن عمرك تحت ١٨، نقتصر على أهداف المحافظة على الوزن والصحة العامة — لا تنشيف ولا تضخيم.',
 }
 
@@ -86,6 +93,7 @@ const en: BodyStepStrings = {
   weightUnit: 'kg',
 
   validation: 'Fill in all four with sensible values to continue.',
+  ageBelowMin: 'Qimmah is for ages 13 and up — see you soon.',
   minorNote: 'Since you are under 18, we keep to weight-maintenance and general-health goals — no cutting or bulking.',
 }
 

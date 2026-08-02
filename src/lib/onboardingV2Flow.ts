@@ -109,7 +109,7 @@ interface PersistedDraft extends OnboardingV2Draft {
 }
 
 /** Which step-specific validation message to surface, or null when the step is complete. */
-export type StepValidation = 'body' | 'intentLevel' | 'goal' | 'healthConsent' | 'training' | 'equipment' | null
+export type StepValidation = 'body' | 'ageBelowMin' | 'intentLevel' | 'goal' | 'healthConsent' | 'training' | 'equipment' | null
 
 /** Async plan-assembly status driving the loading / error / done screens. */
 export type FinalizeStatus = 'idle' | 'building' | 'error' | 'done'
@@ -180,6 +180,10 @@ export function validateStep(step: number, d: Validatable): StepValidation {
     // الموافقة الصحية **قبل** أي حقل — الإذن يسبق الجمع لا يليه. هذا ترتيب
     // خصوصية مقصود يحرسه `test:policy`، لا مجرّد ترتيب واجهة.
     if (!d.healthDataConsent) return 'healthConsent'
+    // ن٢: العمر تحت الحدّ الأدنى سببٌ مسمّى لا «حقل غير صالح». يُفصل قبل الفحص
+    // العام حتى تصل الرسالة الصحيحة؛ رقم مكتمل تحت ١٣ فقط — الحقل الفارغ أو
+    // النصّ غير الرقمي يبقى على رسالة الحقول العامة، فلا يُتّهم من لم يكتب بعد.
+    if (d.age !== null && Number.isFinite(d.age) && d.age > 0 && d.age < AGE_RANGE.min) return 'ageBelowMin'
     const ok =
       inRange(d.age, AGE_RANGE) &&
       (d.gender === 'male' || d.gender === 'female') &&
