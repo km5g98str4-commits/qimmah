@@ -569,6 +569,17 @@ export const PLACEHOLDER_ONLY_EXERCISE_IDS: readonly string[] = [
   'chest-supported-row-machine',
   'hip-adductor-machine',
   'hip-abduction-machine',
+  // (Q20) نُسِبت لهذين الجهازين صورتا **كيبل** لا صورتا جهاز — تحقّق بصري من الملفات:
+  //   chest-press-machine        → free-exercise-db «Cable_Chest_Press»: رجل واقف يضغط
+  //                                 بمقبضَي كيبل من محطة تقاطع. ليس جهاز ضغط صدر جالسًا.
+  //   incline-chest-press-machine → «incline-machine-press/0.jpg»: رجل على بنش مائل قابل
+  //                                 للتعديل يسحب مقبضَي كيبل. ليس جهاز ضغط صدر علوي.
+  // القوالب «أجهزة فقط»، فمستخدمٌ يبحث في النادي عن الجهاز كان يرى محطة كيبل — نسبة خاطئة
+  // صريحة. لا يوجد لهما رسم داخلي بعد، فيتدهوران إلى «الشرح المرئي قيد الإضافة»: حالة
+  // صادقة خير من صورة تدلّ على جهاز آخر. (بقيّة الستّة تحقّقت بصريًا وهي مطابقة — انظر
+  // docs/content/EXERCISE-MEDIA-COVERAGE.md §التحقّق البصري.)
+  'chest-press-machine',
+  'incline-chest-press-machine',
 ]
 
 const placeholderOnlySet = new Set(PLACEHOLDER_ONLY_EXERCISE_IDS)

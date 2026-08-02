@@ -46,7 +46,7 @@ export function ExerciseDetail({ lang, exerciseId, onClose, onAddToPlan }: Exerc
       <div className="flex max-h-[92vh] w-full max-w-xl flex-col rounded-t-3xl bg-page shadow-card sm:rounded-3xl">
         {/* رأس بطاقة مع صورة بديلة داكنة فاخرة */}
         <div className="relative shrink-0 overflow-hidden rounded-t-3xl">
-          <ExerciseHero ex={ex} />
+          <ExerciseHero ex={ex} lang={lang} />
           <button
             type="button"
             onClick={onClose}
@@ -101,8 +101,8 @@ export function ExerciseDetail({ lang, exerciseId, onClose, onAddToPlan }: Exerc
 }
 
 /** رأس بطاقة التمرين — صورة حقيقية (مع تلاشٍ متبادل) عند توفّر مطابقة، وإلا بديل فاخر. */
-function ExerciseHero({ ex }: { ex: NonNullable<ReturnType<typeof getExercise>> }) {
-  return <ExerciseMedia exerciseId={ex.id} muscles={ex.primaryMusclesDetailed} heightClass="h-40" />
+function ExerciseHero({ ex, lang }: { ex: NonNullable<ReturnType<typeof getExercise>>; lang: Lang }) {
+  return <ExerciseMedia exerciseId={ex.id} lang={lang} muscles={ex.primaryMusclesDetailed} heightClass="h-40" />
 }
 
 function AboutTab({ ex, d, lang, onAddToPlan }: { ex: NonNullable<ReturnType<typeof getExercise>>; d: LibraryStrings; lang: Lang; onAddToPlan?: (id: string) => void }) {
