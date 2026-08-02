@@ -74,23 +74,23 @@ const REST_DEFAULT = 90
 const REST_ADD = 15
 
 /**
- * Dedicated DARK focus roles for the active workout — the v2.1 crown jewel.
- * Values resolve through tokens.css: Ember = one primary action, blue = progress,
- * teal = recovery and green = completion.
+ * أدوار ألوان وضع التمرين النشط بالهوية الكلاسيكية — سطح فاتح كما كان قبل موجة
+ * v2: البطاقات على `surface`، والفعل الأساسي بلون الهوية، والأخضر للإكمال.
+ * القيم تُحلّ عبر متغيّرات `tokens.css` فتتبع السمة (فاتح/داكن) تلقائيًا.
  */
 const FOCUS = {
-  card: 'var(--v2-dark-paper)',
-  cardActive: 'var(--v2-dark-paper-active)',
-  line: 'var(--v2-dark-border)',
-  ink: 'var(--v2-dark-ink-strong)',
-  inkMuted: 'var(--v2-dark-ink-muted)',
-  inkFaint: 'var(--v2-dark-ink-faint)',
-  ember: 'var(--v2-ember)',
-  onColor: 'var(--v2-on-color)',
-  blue: 'var(--v2-blue)',
-  teal: 'var(--v2-teal)',
-  success: 'var(--v2-green)',
-  error: 'var(--v2-error)',
+  card: 'var(--c-surface)',
+  cardActive: 'var(--c-beige)',
+  line: 'var(--c-line)',
+  ink: 'var(--c-ink-900)',
+  inkMuted: 'var(--c-ink-500)',
+  inkFaint: 'var(--c-ink-400)',
+  ember: 'var(--c-primary)',
+  onColor: '#fff',
+  blue: 'var(--c-primary)',
+  teal: 'var(--c-primary)',
+  success: '#3E9E6B',
+  error: '#D6553A',
 } as const
 
 type Screen = 'plan' | 'detail' | 'active' | 'complete'
@@ -631,7 +631,7 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   const disableHydration = () => { setHydrationPref(saveHydrationPref({ ...hydrationPref, enabled: false })); setHydrationUndo(null) }
 
   return (
-    <div role="dialog" aria-modal="true" aria-label={t('التمرين النشط', 'Active workout')} dir={ar ? 'rtl' : 'ltr'} className="v2-surface-dark v2-screen-enter fixed inset-0 z-[60] flex flex-col bg-page text-ink-900" style={{ paddingTop: 'max(0.75rem, var(--safe-top))', paddingBottom: 'var(--safe-bottom)' }}>
+    <div role="dialog" aria-modal="true" aria-label={t('التمرين النشط', 'Active workout')} dir={ar ? 'rtl' : 'ltr'} className="fixed inset-0 z-[60] flex flex-col bg-page text-ink-900" style={{ paddingTop: 'max(0.75rem, var(--safe-top))', paddingBottom: 'var(--safe-bottom)' }}>
       <header className="flex items-center justify-between gap-3 px-5 py-2">
         <button type="button" onClick={() => setConfirmDiscard(true)} aria-label={t('إغلاق التمرين', 'Close workout')} className="grid h-11 w-11 place-items-center rounded-xl" style={{ background: FOCUS.card, border: `1px solid ${FOCUS.line}`, color: FOCUS.ink }}>
           <Icon name="X" className="h-5 w-5" />
@@ -641,7 +641,7 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
       </header>
       {/* session progress (completed sets) */}
       <div className="mx-5 mb-1 h-1.5 overflow-hidden rounded-full" style={{ background: FOCUS.line }}>
-        <div className="v2-fill h-full rounded-full" style={{ width: `${totalPlannedSets ? (doneSets / totalPlannedSets) * 100 : 0}%`, background: FOCUS.blue }} />
+        <div className="h-full rounded-full transition-all duration-700" style={{ width: `${totalPlannedSets ? (doneSets / totalPlannedSets) * 100 : 0}%`, background: FOCUS.blue }} />
       </div>
 
       {/* Hydration reminder (screen 46) — slim, teal, above the editor; never
@@ -650,9 +650,9 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
         <HydrationReminder lang={lang} intervalMin={hydrationPref.intervalMin} onLog={logWater} onSnooze={snoozeHydration} onSetInterval={setHydrationInterval} onDisable={disableHydration} />
       )}
       {hydrationUndo && (
-        <div className="mx-5 mb-1 flex items-center justify-between gap-3 rounded-xl px-3 py-2 text-xs font-bold" style={{ background: 'color-mix(in srgb, var(--v2-teal) 14%, transparent)', border: `1px solid var(--v2-teal)`, color: 'var(--v2-teal-text)' }} role="status">
+        <div className="mx-5 mb-1 flex items-center justify-between gap-3 rounded-xl px-3 py-2 text-xs font-bold" style={{ background: 'color-mix(in srgb, var(--c-primary) 14%, transparent)', border: '1px solid var(--c-primary)', color: 'var(--c-primary)' }} role="status">
           <span>{t(`أُضيف ${toAr(hydrationUndo.ml, lang)} مل`, `Added ${hydrationUndo.ml} ml`)} 💧</span>
-          <button type="button" onClick={undoWater} className="v2-pressable underline underline-offset-2">{t('تراجع', 'Undo')}</button>
+          <button type="button" onClick={undoWater} className="press underline underline-offset-2">{t('تراجع', 'Undo')}</button>
         </div>
       )}
 
@@ -668,7 +668,7 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
             <p className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-sm font-bold" style={{ color: FOCUS.inkMuted }}>
               <span>{CATEGORY_LABEL[ex.category][ar ? 'ar' : 'en']} · {ex.sets}×{ex.reps}</span>
               {active.subs?.[ex.id] && (
-                <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[0.7rem] font-black" style={{ background: 'color-mix(in srgb, var(--v2-blue) 16%, transparent)', color: FOCUS.blue }}>
+                <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[0.7rem] font-black" style={{ background: 'color-mix(in srgb, var(--c-primary) 16%, transparent)', color: FOCUS.blue }}>
                   <Icon name="Repeat" className="h-3 w-3" />{t('مُستبدَل', 'Swapped')}
                 </span>
               )}
@@ -706,10 +706,10 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
           <div className="shrink-0 px-5 pt-3" style={{ borderTop: `1px solid ${FOCUS.line}` }}>
             {/* secondary row: substitute (screen 31) + reach-hand toggle */}
             <div className="mb-3 flex items-center justify-between gap-2" style={{ flexDirection: hand === 'left' ? 'row-reverse' : 'row' }}>
-              <button type="button" onClick={() => setSubSheet({ planExId: ex.id, currentExerciseId: ex.exerciseId })} className="v2-pressable flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold" style={{ background: FOCUS.card, border: `1px solid ${FOCUS.line}`, color: FOCUS.inkMuted }}>
+              <button type="button" onClick={() => setSubSheet({ planExId: ex.id, currentExerciseId: ex.exerciseId })} className="press flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold" style={{ background: FOCUS.card, border: `1px solid ${FOCUS.line}`, color: FOCUS.inkMuted }}>
                 <Icon name="Repeat" className="h-4 w-4" />{t('استبدال التمرين', 'Replace exercise')}
               </button>
-              <button type="button" onClick={toggleHand} aria-pressed={hand === 'left'} aria-label={t(hand === 'left' ? 'وضع اليد اليمنى' : 'وضع اليد اليسرى', hand === 'left' ? 'Switch to right hand' : 'Switch to left hand')} className="v2-pressable flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold" style={{ background: FOCUS.card, border: `1px solid ${FOCUS.line}`, color: FOCUS.inkMuted }}>
+              <button type="button" onClick={toggleHand} aria-pressed={hand === 'left'} aria-label={t(hand === 'left' ? 'وضع اليد اليمنى' : 'وضع اليد اليسرى', hand === 'left' ? 'Switch to right hand' : 'Switch to left hand')} className="press flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold" style={{ background: FOCUS.card, border: `1px solid ${FOCUS.line}`, color: FOCUS.inkMuted }}>
                 <Icon name="Hand" className="h-4 w-4" style={{ transform: hand === 'left' ? 'scaleX(-1)' : undefined }} />{t(hand === 'left' ? 'يسار' : 'يمين', hand === 'left' ? 'Left' : 'Right')}
               </button>
             </div>
@@ -737,11 +737,11 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
             </div>
 
             {/* single ember action */}
-            <button type="button" onClick={finishSet} className="v2-pressable mt-4 w-full rounded-2xl py-4 text-[1.1875rem] font-black" style={{ background: FOCUS.ember, color: FOCUS.onColor }}>{t('أنهِ المجموعة', 'Complete set')}</button>
+            <button type="button" onClick={finishSet} className="press mt-4 w-full rounded-2xl py-4 text-[1.1875rem] font-black" style={{ background: FOCUS.ember, color: FOCUS.onColor }}>{t('أنهِ المجموعة', 'Complete set')}</button>
             {/* Explicit finish — Rule D: opens the confirm sheet, never saves directly.
                 Available once any set is logged, so an early finish still confirms. */}
             {doneSets >= 1 && (
-              <button type="button" onClick={() => openFinish(active)} className="v2-pressable mb-2 mt-3 w-full rounded-2xl py-3 text-sm font-bold" style={{ background: 'transparent', border: `1px solid ${FOCUS.line}`, color: FOCUS.inkMuted }}>{t('أنهِ التمرين', 'Finish workout')}</button>
+              <button type="button" onClick={() => openFinish(active)} className="press mb-2 mt-3 w-full rounded-2xl py-3 text-sm font-bold" style={{ background: 'transparent', border: `1px solid ${FOCUS.line}`, color: FOCUS.inkMuted }}>{t('أنهِ التمرين', 'Finish workout')}</button>
             )}
           </div>
         </>
@@ -788,11 +788,11 @@ function RecoveryDecisionSheet({
   const ageHours = prompt.kind === 'abandoned' ? Math.max(1, Math.floor(prompt.ageMs / 3_600_000)) : 0
   return (
     <div className="fixed inset-0 z-[80] flex items-end bg-black/45 p-3" role="dialog" aria-modal="true" aria-label={t('استعادة تمرين سابق', 'Recover an earlier workout')}>
-      <section className="mx-auto w-full max-w-md rounded-[1.75rem] bg-surface p-5 shadow-2xl">
-        <span className="grid h-11 w-11 place-items-center rounded-2xl bg-beige text-ink-700">
+      <section className="card mx-auto w-full max-w-md p-5">
+        <span className="grid h-11 w-11 place-items-center rounded-xl bg-primary-soft text-primary-c">
           <Icon name="History" className="h-5 w-5" />
         </span>
-        <h2 className="mt-4 text-xl font-black text-ink-900">
+        <h2 className="mt-4 text-base font-black text-ink-900">
           {prompt.kind === 'abandoned'
             ? t('لقينا تمرينًا قديمًا', 'We found an older workout')
             : t('تغيّرت خطتك وفيه تمرين محفوظ', 'Your plan changed with a workout still saved')}
@@ -844,7 +844,7 @@ function Stepper({ label, value, step, onChange, lang, mirror, onPlates, platesO
       <div className="mt-2 flex items-center justify-between gap-2" style={{ flexDirection: mirror ? 'row-reverse' : 'row' }}>
         <button type="button" onClick={() => onChange(value - step)} aria-label={label + ' −'} className="grid h-12 w-12 shrink-0 place-items-center rounded-xl" style={{ background: FOCUS.cardActive, border: `1px solid ${FOCUS.line}`, color: FOCUS.ink }}><Icon name="Minus" className="h-6 w-6" /></button>
         <span className="text-3xl font-black tabular-nums" style={{ color: FOCUS.ink }}>{toAr(value, lang)}</span>
-        <button type="button" onClick={() => onChange(value + step)} aria-label={label + ' +'} className="v2-pressable grid h-12 w-12 shrink-0 place-items-center rounded-xl" style={{ background: FOCUS.cardActive, border: `1px solid ${FOCUS.line}`, color: FOCUS.ink }}><Icon name="Plus" className="h-6 w-6" /></button>
+        <button type="button" onClick={() => onChange(value + step)} aria-label={label + ' +'} className="press grid h-12 w-12 shrink-0 place-items-center rounded-xl" style={{ background: FOCUS.cardActive, border: `1px solid ${FOCUS.line}`, color: FOCUS.ink }}><Icon name="Plus" className="h-6 w-6" /></button>
       </div>
     </div>
   )
@@ -912,35 +912,35 @@ function HydrationReminder({ lang, intervalMin, onLog, onSnooze, onSetInterval, 
     <section
       aria-label={t('تذكير الترطيب', 'Hydration reminder')}
       className="mx-5 mb-2 rounded-2xl p-3"
-      style={{ background: 'color-mix(in srgb, var(--v2-teal) 12%, transparent)', border: `1px solid var(--v2-teal)`, color: 'var(--v2-teal-text)' }}
+      style={{ background: 'color-mix(in srgb, var(--c-primary) 12%, transparent)', border: '1px solid var(--c-primary)', color: 'var(--c-primary)' }}
     >
       <div className="flex items-center justify-between gap-2">
         <span className="flex items-center gap-1.5 text-sm font-black">💧 {t('وقت الترطيب', 'Hydration time')}</span>
-        <button type="button" onClick={onSnooze} className="v2-pressable text-xs font-bold underline underline-offset-2">{t('لاحقًا', 'Later')}</button>
+        <button type="button" onClick={onSnooze} className="press text-xs font-bold underline underline-offset-2">{t('لاحقًا', 'Later')}</button>
       </div>
       <p className="mt-0.5 text-[0.7rem] font-bold opacity-80">{t(`كل ${toAr(intervalMin, lang)} دقيقة أثناء الجلسة`, `Every ${intervalMin} min during your session`)}</p>
       <div className="mt-2 flex flex-wrap items-center gap-2">
         {[250, 500].map((ml) => (
-          <button key={ml} type="button" onClick={() => onLog(ml)} className="v2-pressable rounded-xl px-3 py-1.5 text-xs font-black" style={{ background: 'var(--v2-teal)', color: 'var(--c-white, #fff)' }}>
+          <button key={ml} type="button" onClick={() => onLog(ml)} className="press rounded-xl px-3 py-1.5 text-xs font-black" style={{ background: 'var(--c-primary)', color: '#fff' }}>
             {toAr(ml, lang)} {t('مل', 'ml')}
           </button>
         ))}
-        <button type="button" onClick={() => setCustomOpen((o) => !o)} className="v2-pressable rounded-xl px-3 py-1.5 text-xs font-bold" style={{ border: `1px solid var(--v2-teal)` }}>{t('مخصّص', 'Custom')}</button>
+        <button type="button" onClick={() => setCustomOpen((o) => !o)} className="press rounded-xl px-3 py-1.5 text-xs font-bold" style={{ border: '1px solid var(--c-primary)' }}>{t('مخصّص', 'Custom')}</button>
       </div>
       {customOpen && (
         <div className="mt-2 flex items-center gap-2">
-          <input type="number" inputMode="numeric" min={0} value={custom} onChange={(e) => setCustom(e.target.value)} aria-label={t('كمية مخصّصة بالمل', 'Custom amount in ml')} placeholder={t('مل', 'ml')} className="w-24 rounded-xl bg-transparent px-3 py-1.5 text-sm font-bold tabular-nums" style={{ border: `1px solid var(--v2-teal)`, color: 'var(--v2-teal-text)' }} />
-          <button type="button" onClick={() => { const v = Number(custom); if (Number.isFinite(v) && v > 0) { onLog(v); setCustom(''); setCustomOpen(false) } }} className="v2-pressable rounded-xl px-3 py-1.5 text-xs font-black" style={{ background: 'var(--v2-teal)', color: 'var(--c-white, #fff)' }}>{t('سجّل', 'Log')}</button>
+          <input type="number" inputMode="numeric" min={0} value={custom} onChange={(e) => setCustom(e.target.value)} aria-label={t('كمية مخصّصة بالمل', 'Custom amount in ml')} placeholder={t('مل', 'ml')} className="w-24 rounded-xl bg-transparent px-3 py-1.5 text-sm font-bold tabular-nums" style={{ border: '1px solid var(--c-primary)', color: 'var(--c-primary)' }} />
+          <button type="button" onClick={() => { const v = Number(custom); if (Number.isFinite(v) && v > 0) { onLog(v); setCustom(''); setCustomOpen(false) } }} className="press rounded-xl px-3 py-1.5 text-xs font-black" style={{ background: 'var(--c-primary)', color: '#fff' }}>{t('سجّل', 'Log')}</button>
         </div>
       )}
       <div className="mt-2 flex flex-wrap items-center gap-1.5">
         <span className="text-[0.7rem] font-bold opacity-80">{t('كل:', 'Every:')}</span>
         {INTERVALS.map((m) => (
-          <button key={m} type="button" onClick={() => onSetInterval(m)} aria-pressed={m === intervalMin} className="v2-pressable rounded-lg px-2 py-1 text-[0.7rem] font-black" style={m === intervalMin ? { background: 'var(--v2-teal)', color: 'var(--c-white, #fff)' } : { border: `1px solid var(--v2-teal)` }}>
+          <button key={m} type="button" onClick={() => onSetInterval(m)} aria-pressed={m === intervalMin} className="press rounded-lg px-2 py-1 text-[0.7rem] font-black" style={m === intervalMin ? { background: 'var(--c-primary)', color: '#fff' } : { border: '1px solid var(--c-primary)' }}>
             {toAr(m, lang)}
           </button>
         ))}
-        <button type="button" onClick={onDisable} className="v2-pressable ms-auto text-[0.7rem] font-bold underline underline-offset-2">{t('إيقاف التذكير', 'Turn off')}</button>
+        <button type="button" onClick={onDisable} className="press ms-auto text-[0.7rem] font-bold underline underline-offset-2">{t('إيقاف التذكير', 'Turn off')}</button>
       </div>
     </section>
   )
@@ -987,7 +987,8 @@ function RestPanel({ lang, restLeft, restDone, nextEx, setLabel, tip, tipDismiss
           <p className="mt-4 text-sm" style={{ color: FOCUS.inkMuted }}>{ar ? 'التالي' : 'Next'}: <bdi>{ar ? nextEx.nameAr : nextEx.nameEn}</bdi> · {setLabel}</p>
           {showTip && (
             // Subtle coaching tip — dark card, teal accent, AA-contrast muted ink.
-            // `.v2-screen-enter` is reduced-motion-safe (tokens.css forces no motion).
+            // `.v2-screen-enter` حركة دخول آمنة لتقليل الحركة (tokens.css تُلغيها
+            // تحت prefers-reduced-motion) — أداة حركة لا هوية بصرية، فتبقى.
             <div role="note" aria-live="polite" className="v2-screen-enter mt-6 flex w-full max-w-sm items-start gap-2.5 rounded-2xl px-4 py-3 text-start" style={{ background: FOCUS.card, border: `1px solid ${FOCUS.line}` }}>
               <Icon name="Lightbulb" className="mt-0.5 h-4 w-4 shrink-0" style={{ color: FOCUS.teal }} aria-hidden />
               <p className="flex-1 text-[0.8125rem] font-medium leading-relaxed" style={{ color: FOCUS.inkMuted }}><bdi>{ar ? tip.textAr : tip.textEn}</bdi></p>
@@ -996,7 +997,7 @@ function RestPanel({ lang, restLeft, restDone, nextEx, setLabel, tip, tipDismiss
           )}
           <div className="mt-8 flex items-center gap-3">
             <button type="button" onClick={onAdd} className="rounded-2xl px-6 py-3 font-bold" style={{ background: FOCUS.card, border: `1px solid ${FOCUS.line}`, color: FOCUS.ink }}>+{toAr(REST_ADD, lang)} {ar ? 'ث' : 's'}</button>
-            <button type="button" onClick={onSkip} className="v2-pressable rounded-2xl px-8 py-3 text-[1.1875rem] font-black" style={{ background: FOCUS.ember, color: FOCUS.onColor }}>{ar ? 'تخطي' : 'Skip'}</button>
+            <button type="button" onClick={onSkip} className="press rounded-2xl px-8 py-3 text-[1.1875rem] font-black" style={{ background: FOCUS.ember, color: FOCUS.onColor }}>{ar ? 'تخطي' : 'Skip'}</button>
           </div>
         </>
       )}
@@ -1013,17 +1014,20 @@ function PlanScreen({ model, lang, onExercise, onStart }: { model: ReturnType<ty
     else groups.push({ cat: ex.category, items: [{ ex, i }] })
   })
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light bg-page px-4 pb-6 pt-3 text-ink-900">
-      <div className="v2-screen-enter mx-auto w-full max-w-md">
-        <p className="v2-text-blue pt-1 text-xs font-black uppercase tracking-wider">{ar ? model.program.titleAr : model.program.titleEn} · {ar ? model.program.contextAr : model.program.contextEn}</p>
-        <h1 className="mt-1 text-3xl font-black tracking-tight">{model.session.title}</h1>
+    <div dir={ar ? 'rtl' : 'ltr'} className="overflow-x-hidden px-4 py-4 text-ink-900">
+      <div>
+        <span className="eyebrow">
+          <Icon name="Dumbbell" className="h-3.5 w-3.5" />
+          {ar ? model.program.titleAr : model.program.titleEn} · {ar ? model.program.contextAr : model.program.contextEn}
+        </span>
+        <h1 className="mt-3 text-2xl font-black text-ink-900 sm:text-3xl">{model.session.title}</h1>
         <div className="mt-3 flex flex-wrap gap-2 text-xs font-bold text-ink-500">
           <Chip icon="Dumbbell" text={`${model.session.exerciseCount} ${ar ? 'تمارين' : 'exercises'}`} />
           <Chip icon="Clock" text={`~${model.session.durationMin} ${ar ? 'دقيقة' : 'min'}`} />
           {model.session.muscles.slice(0, 2).map((m) => <Chip key={m} icon="Target" text={muscleLabel(m as Muscle, lang)} />)}
         </div>
 
-        <button type="button" onClick={onStart} className="btn-primary mt-5 w-full py-4 text-[1.1875rem] shadow-glow">{ar ? 'ابدأ الجلسة' : 'Start session'}</button>
+        <button type="button" onClick={onStart} className="btn-primary mt-5 w-full py-3.5">{ar ? 'ابدأ الجلسة' : 'Start session'}</button>
 
         <div className="mt-6 space-y-5">
           {groups.map((g) => (
@@ -1031,7 +1035,7 @@ function PlanScreen({ model, lang, onExercise, onStart }: { model: ReturnType<ty
               <p className="mb-2 text-sm font-black text-ink-700">{CATEGORY_LABEL[g.cat][ar ? 'ar' : 'en']}</p>
               <div className="space-y-2">
                 {g.items.map(({ ex, i }) => (
-                  <button key={ex.id} type="button" onClick={() => onExercise(i)} className="v2-pressable flex w-full items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3 text-start hover:border-[color:var(--v2-blue)]">
+                  <button key={ex.id} type="button" onClick={() => onExercise(i)} className="card flex w-full items-center gap-3 p-4 text-start transition-colors hover:border-primary-soft">
                     <span className="h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-beige">
                       <ExerciseMedia exerciseId={ex.exerciseId} heightClass="h-14" hideChips />
                     </span>
@@ -1054,13 +1058,13 @@ function PlanScreen({ model, lang, onExercise, onStart }: { model: ReturnType<ty
 function DetailScreen({ ex, idx, total, lang, swapped, onReplace, onStart, onBack }: { ex: WorkoutV2Exercise; idx: number; total: number; lang: Lang; swapped?: boolean; onReplace?: () => void; onStart: () => void; onBack: () => void }) {
   const ar = lang !== 'en'
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light bg-page px-4 pb-6 pt-3 text-ink-900">
-      <div className="v2-screen-enter mx-auto w-full max-w-md">
+    <div dir={ar ? 'rtl' : 'ltr'} className="overflow-x-hidden px-4 py-4 text-ink-900">
+      <div>
         <button type="button" onClick={onBack} aria-label={ar ? 'رجوع' : 'Back'} className="grid h-10 w-10 place-items-center rounded-xl border border-line bg-surface"><Icon name="ChevronRight" className="h-5 w-5 rtl:rotate-0 ltr:rotate-180" /></button>
         <div className="mt-4 aspect-video overflow-hidden rounded-2xl border border-line bg-surface">
           <ExerciseMedia exerciseId={ex.exerciseId} heightClass="h-full" hideChips />
         </div>
-        <p className="v2-text-blue mt-4 text-xs font-black uppercase tracking-wider">{ar ? `التمرين ${toAr(idx + 1, lang)} من ${toAr(total, lang)}` : `Exercise ${idx + 1} of ${total}`}</p>
+        <p className="mt-4 text-xs font-bold text-ink-500">{ar ? `التمرين ${toAr(idx + 1, lang)} من ${toAr(total, lang)}` : `Exercise ${idx + 1} of ${total}`}</p>
         <h1 className="mt-1 text-2xl font-black">{ar ? ex.nameAr : ex.nameEn}</h1>
         <div className="mt-3 flex flex-wrap gap-2 text-xs font-bold text-ink-500">
           {ex.muscles.map((m) => <Chip key={m} icon="Target" text={m} />)}
@@ -1076,13 +1080,13 @@ function DetailScreen({ ex, idx, total, lang, swapped, onReplace, onStart, onBac
         <p className="mt-6 mb-2 text-sm font-black text-ink-700">{ar ? 'إشارات سريعة' : 'Quick cues'}</p>
         <ul className="space-y-2">
           {ex.cues.map((c, i) => (
-            <li key={i} className="flex items-center gap-2 rounded-xl border border-line bg-surface px-3 py-2.5 text-sm"><Icon name="Check" className="h-4 w-4 shrink-0 text-[color:var(--v2-green)]" strokeWidth={3} />{c}</li>
+            <li key={i} className="card flex items-center gap-2 px-3 py-2.5 text-sm"><Icon name="Check" className="h-4 w-4 shrink-0 text-success" strokeWidth={3} />{c}</li>
           ))}
         </ul>
 
         <div className="mt-6 space-y-2.5">
           <button type="button" onClick={onStart} className="btn-primary w-full py-4 text-[1.1875rem]">{ar ? 'ابدأ التمرين' : 'Start exercise'}</button>
-          <button type="button" onClick={onReplace} disabled={!onReplace} aria-disabled={!onReplace} className="v2-pressable flex w-full items-center justify-center gap-2 rounded-2xl border border-line bg-surface py-3 text-sm font-bold text-ink-700">
+          <button type="button" onClick={onReplace} disabled={!onReplace} aria-disabled={!onReplace} className="btn-ghost w-full py-3 text-sm">
             <Icon name="Repeat" className="h-4 w-4" />{swapped ? (ar ? 'استبدال آخر' : 'Replace again') : (ar ? 'استبدال التمرين' : 'Replace exercise')}
           </button>
         </div>
@@ -1109,14 +1113,14 @@ function CompleteScreen({ model, lang, stats, prs, canUndo, onUndo, onDone }: { 
   const prByLift = new Map<string, StrengthPR[]>()
   for (const pr of prs) { const a = prByLift.get(pr.exerciseId) ?? []; a.push(pr); prByLift.set(pr.exerciseId, a) }
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-dark v2-screen-enter fixed inset-0 z-[60] flex flex-col items-center justify-center bg-page px-6 text-center text-ink-900">
+    <div dir={ar ? 'rtl' : 'ltr'} className="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-page px-6 text-center text-ink-900">
       {/* success moment — green */}
       <span className="v2-earned-moment grid h-16 w-16 place-items-center rounded-2xl" style={{ background: FOCUS.success, color: FOCUS.onColor }}><Icon name="Check" className="h-8 w-8" strokeWidth={3} /></span>
       <h1 className="mt-5 text-3xl font-black">{ar ? 'أنهيت الجلسة' : 'Session complete'}</h1>
       <p className="mt-1 text-sm" style={{ color: FOCUS.inkMuted }}>{model.session.title}</p>
       {/* PR moment — green, reduced-motion-safe (v2-earned-moment collapses under prefers-reduced-motion). */}
       {prByLift.size > 0 && (
-        <div className="v2-earned-moment mt-5 w-full max-w-xs rounded-2xl p-3" role="status" aria-live="polite" style={{ background: 'color-mix(in srgb, var(--v2-green) 14%, transparent)', border: `1px solid ${FOCUS.success}` }}>
+        <div className="mt-5 w-full max-w-xs rounded-2xl p-3" role="status" aria-live="polite" style={{ background: `color-mix(in srgb, ${FOCUS.success} 14%, transparent)`, border: `1px solid ${FOCUS.success}` }}>
           <p className="flex items-center justify-center gap-1.5 text-sm font-black" style={{ color: FOCUS.success }}><Icon name="Trophy" className="h-4 w-4" />{t('رقم قياسي جديد!', 'New PR!')}</p>
           <div className="mt-2 space-y-1">
             {[...prByLift.entries()].map(([id, list]) => {
@@ -1133,7 +1137,7 @@ function CompleteScreen({ model, lang, stats, prs, canUndo, onUndo, onDone }: { 
         <FocusStat label={ar ? 'المجموعات' : 'Sets'} value={toAr(totalSets, lang)} />
         <FocusStat label={ar ? 'الحجم كجم' : 'Volume kg'} value={toAr(volume, lang)} />
       </div>
-      <button type="button" onClick={onDone} className="v2-pressable mt-8 w-full max-w-xs rounded-2xl py-4 text-[1.1875rem] font-black" style={{ background: FOCUS.ember, color: FOCUS.onColor }}>{ar ? 'تم' : 'Done'}</button>
+      <button type="button" onClick={onDone} className="press mt-8 w-full max-w-xs rounded-2xl py-4 text-[1.1875rem] font-black" style={{ background: FOCUS.ember, color: FOCUS.onColor }}>{ar ? 'تم' : 'Done'}</button>
       {/* Undo — reverses the just-saved session/PRs while the window is live. */}
       {undoLive
         ? <button type="button" onClick={onUndo} className="mt-3 flex items-center gap-1.5 text-sm font-bold underline underline-offset-4" style={{ color: FOCUS.inkMuted }}><Icon name="RotateCcw" className="h-4 w-4" />{ar ? 'تراجع عن الحفظ' : 'Undo save'}</button>
@@ -1158,7 +1162,7 @@ function FinishConfirmSheet({ lang, pending, saveError, onConfirm, onCancel }: {
   return (
     <div className="fixed inset-0 z-[70] flex items-end justify-center" role="dialog" aria-modal="true" aria-label={t('تأكيد إنهاء التمرين', 'Confirm finish workout')}>
       <button type="button" aria-label={t('إلغاء', 'Cancel')} onClick={onCancel} className="absolute inset-0 h-full w-full" style={{ background: 'rgba(0,0,0,0.55)' }} />
-      <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-dark v2-screen-enter relative w-full max-w-md rounded-t-3xl px-6 pb-8 pt-5 text-ink-900" style={{ background: FOCUS.card, borderTop: `1px solid ${FOCUS.line}`, paddingBottom: 'calc(2rem + var(--safe-bottom))' }}>
+      <div dir={ar ? 'rtl' : 'ltr'} className="relative w-full max-w-md rounded-t-2xl px-6 pb-8 pt-5 text-ink-900" style={{ background: FOCUS.card, borderTop: `1px solid ${FOCUS.line}`, paddingBottom: 'calc(2rem + var(--safe-bottom))' }}>
         <div className="mx-auto mb-4 h-1 w-10 rounded-full" style={{ background: FOCUS.line }} />
         <h2 className="text-2xl font-black">{ar ? 'هل انتهيت؟' : 'Finished?'}</h2>
         <p className="mt-1 text-sm" style={{ color: FOCUS.inkMuted }}>{ar ? 'سنحفظ هذه الجلسة على جهازك.' : "We'll save this session on your device."}</p>
@@ -1168,13 +1172,13 @@ function FinishConfirmSheet({ lang, pending, saveError, onConfirm, onCancel }: {
           <FocusStat label={ar ? 'الدقائق' : 'Minutes'} value={toAr(stats.minutes, lang)} />
         </div>
         {prLifts.length > 0 && (
-          <div className="mt-3 flex items-center justify-center gap-1.5 rounded-2xl py-2 text-xs font-bold" style={{ background: 'color-mix(in srgb, var(--v2-green) 12%, transparent)', border: `1px solid ${FOCUS.success}`, color: FOCUS.success }}>
+          <div className="mt-3 flex items-center justify-center gap-1.5 rounded-2xl py-2 text-xs font-bold" style={{ background: `color-mix(in srgb, ${FOCUS.success} 12%, transparent)`, border: `1px solid ${FOCUS.success}`, color: FOCUS.success }}>
             <Icon name="Trophy" className="h-4 w-4" />
             {t(`${toAr(prLifts.length, lang)} رقم قياسي مرشّح`, `${prLifts.length} candidate PR${prLifts.length > 1 ? 's' : ''}`)}
           </div>
         )}
         {saveError && (
-          <div role="alert" aria-live="assertive" className="mt-4 rounded-2xl px-4 py-3 text-start" style={{ background: 'color-mix(in srgb, var(--v2-error) 12%, transparent)', border: `1px solid ${FOCUS.error}` }}>
+          <div role="alert" aria-live="assertive" className="mt-4 rounded-2xl px-4 py-3 text-start" style={{ background: `color-mix(in srgb, ${FOCUS.error} 12%, transparent)`, border: `1px solid ${FOCUS.error}` }}>
             <div className="flex items-center gap-2 text-sm font-black" style={{ color: FOCUS.error }}>
               <Icon name="AlertTriangle" className="h-4 w-4 shrink-0" />
               <span>{d.saveFailedTitle}</span>
@@ -1183,8 +1187,8 @@ function FinishConfirmSheet({ lang, pending, saveError, onConfirm, onCancel }: {
             <p className="mt-1 text-xs font-bold leading-relaxed" style={{ color: FOCUS.inkMuted }}>{d.saveFailedKept}</p>
           </div>
         )}
-        <button type="button" onClick={onConfirm} className="v2-pressable mt-5 w-full rounded-2xl py-4 text-[1.1875rem] font-black" style={{ background: FOCUS.ember, color: FOCUS.onColor }}>{saveError ? d.saveRetry : ar ? 'نعم، احفظ وأنهِ' : 'Yes, save & finish'}</button>
-        <button type="button" onClick={onCancel} className="v2-pressable mt-3 w-full rounded-2xl py-3 text-sm font-bold" style={{ background: 'transparent', border: `1px solid ${FOCUS.line}`, color: FOCUS.inkMuted }}>{ar ? 'لا، أكمل التمرين' : 'No, keep training'}</button>
+        <button type="button" onClick={onConfirm} className="press mt-5 w-full rounded-2xl py-4 text-[1.1875rem] font-black" style={{ background: FOCUS.ember, color: FOCUS.onColor }}>{saveError ? d.saveRetry : ar ? 'نعم، احفظ وأنهِ' : 'Yes, save & finish'}</button>
+        <button type="button" onClick={onCancel} className="press mt-3 w-full rounded-2xl py-3 text-sm font-bold" style={{ background: 'transparent', border: `1px solid ${FOCUS.line}`, color: FOCUS.inkMuted }}>{ar ? 'لا، أكمل التمرين' : 'No, keep training'}</button>
       </div>
     </div>
   )
@@ -1210,7 +1214,7 @@ function SubstitutionSheet({ lang, profile, currentExerciseId, onChoose, onCance
   return (
     <div className="fixed inset-0 z-[70] flex items-end justify-center" role="dialog" aria-modal="true" aria-label={t('استبدال التمرين', 'Replace exercise')}>
       <button type="button" aria-label={t('إلغاء', 'Cancel')} onClick={onCancel} className="absolute inset-0 h-full w-full" style={{ background: 'rgba(0,0,0,0.55)' }} />
-      <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-dark v2-screen-enter relative flex w-full max-w-md flex-col rounded-t-3xl px-6 pb-8 pt-5 text-ink-900" style={{ background: FOCUS.card, borderTop: `1px solid ${FOCUS.line}`, maxHeight: '82vh', paddingBottom: 'calc(2rem + var(--safe-bottom))' }}>
+      <div dir={ar ? 'rtl' : 'ltr'} className="relative flex w-full max-w-md flex-col rounded-t-2xl px-6 pb-8 pt-5 text-ink-900" style={{ background: FOCUS.card, borderTop: `1px solid ${FOCUS.line}`, maxHeight: '82vh', paddingBottom: 'calc(2rem + var(--safe-bottom))' }}>
         <div className="mx-auto mb-4 h-1 w-10 shrink-0 rounded-full" style={{ background: FOCUS.line }} />
         <h2 className="shrink-0 text-2xl font-black">{ar ? 'استبدال التمرين' : 'Replace exercise'}</h2>
         <p className="mt-1 shrink-0 text-sm" style={{ color: FOCUS.inkMuted }}>{ar ? 'بدائل تحفظ نمط الحركة · بمعدّاتك فقط.' : 'Alternatives that keep the movement — your equipment only.'}</p>
@@ -1237,17 +1241,17 @@ function SubstitutionSheet({ lang, profile, currentExerciseId, onChoose, onCance
             </div>
           ) : (
             options.map((opt) => (
-              <button key={opt.exerciseId} type="button" onClick={() => onChoose(opt)} className="v2-pressable flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-start" style={{ background: FOCUS.cardActive, border: `1px solid ${FOCUS.line}` }}>
+              <button key={opt.exerciseId} type="button" onClick={() => onChoose(opt)} className="press flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-start" style={{ background: FOCUS.cardActive, border: `1px solid ${FOCUS.line}` }}>
                 <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl" style={{ background: FOCUS.card, color: FOCUS.inkMuted }}><Icon name="Dumbbell" className="h-5 w-5" /></span>
                 <span className="min-w-0 flex-1">
                   <span className="block text-sm font-bold" style={{ color: FOCUS.ink }}>{ar ? opt.nameAr : opt.nameEn}</span>
                   <span className="mt-0.5 flex flex-wrap items-center gap-1.5">
                     <span className="text-xs" style={{ color: FOCUS.inkFaint }}>{opt.equipment.join(' · ')}</span>
                     {opt.differentStation && (reason === 'busy' || reason === 'unavailable') && (
-                      <span className="rounded-full px-1.5 py-0.5 text-[0.65rem] font-black" style={{ background: 'color-mix(in srgb, var(--v2-teal) 18%, transparent)', color: FOCUS.teal }}>{ar ? 'محطة مختلفة' : 'Different station'}</span>
+                      <span className="rounded-full px-1.5 py-0.5 text-[0.65rem] font-black" style={{ background: 'color-mix(in srgb, var(--c-primary) 18%, transparent)', color: FOCUS.teal }}>{ar ? 'محطة مختلفة' : 'Different station'}</span>
                     )}
                     {opt.curated && (
-                      <span className="rounded-full px-1.5 py-0.5 text-[0.65rem] font-black" style={{ background: 'color-mix(in srgb, var(--v2-blue) 16%, transparent)', color: FOCUS.blue }}>{ar ? 'مُوصى' : 'Recommended'}</span>
+                      <span className="rounded-full px-1.5 py-0.5 text-[0.65rem] font-black" style={{ background: 'color-mix(in srgb, var(--c-primary) 16%, transparent)', color: FOCUS.blue }}>{ar ? 'مُوصى' : 'Recommended'}</span>
                     )}
                   </span>
                 </span>
@@ -1257,7 +1261,7 @@ function SubstitutionSheet({ lang, profile, currentExerciseId, onChoose, onCance
           )}
         </div>
 
-        <button type="button" onClick={onCancel} className="v2-pressable mt-4 w-full shrink-0 rounded-2xl py-3 text-sm font-bold" style={{ background: 'transparent', border: `1px solid ${FOCUS.line}`, color: FOCUS.inkMuted }}>{ar ? 'إلغاء' : 'Cancel'}</button>
+        <button type="button" onClick={onCancel} className="press mt-4 w-full shrink-0 rounded-2xl py-3 text-sm font-bold" style={{ background: 'transparent', border: `1px solid ${FOCUS.line}`, color: FOCUS.inkMuted }}>{ar ? 'إلغاء' : 'Cancel'}</button>
       </div>
     </div>
   )
@@ -1273,7 +1277,7 @@ function UndoSubToast({ lang, toName, onUndo, onClose }: { lang: Lang; toName: s
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [toName])
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="v2-screen-enter fixed inset-x-4 z-[75] flex items-center justify-between gap-3 rounded-2xl px-4 py-3" role="status" aria-live="polite" style={{ bottom: 'calc(1.25rem + var(--safe-bottom))', background: FOCUS.cardActive, border: `1px solid ${FOCUS.line}`, boxShadow: '0 10px 30px rgba(0,0,0,0.35)' }}>
+    <div dir={ar ? 'rtl' : 'ltr'} className="fixed inset-x-4 z-[75] flex items-center justify-between gap-3 rounded-2xl px-4 py-3" role="status" aria-live="polite" style={{ bottom: 'calc(1.25rem + var(--safe-bottom))', background: FOCUS.cardActive, border: `1px solid ${FOCUS.line}`, boxShadow: '0 10px 30px rgba(0,0,0,0.35)' }}>
       <span className="min-w-0 flex-1 text-sm font-bold" style={{ color: FOCUS.ink }}><bdi>{toName}</bdi> · {ar ? 'تم الاستبدال' : 'Swapped in'}</span>
       <button type="button" onClick={onUndo} className="flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-black" style={{ background: FOCUS.card, color: FOCUS.blue }}><Icon name="RotateCcw" className="h-4 w-4" />{ar ? 'تراجع' : 'Undo'}</button>
     </div>
@@ -1286,12 +1290,12 @@ function DiscardConfirmSheet({ lang, onDiscard, onCancel }: { lang: Lang; onDisc
   return (
     <div className="fixed inset-0 z-[80] flex items-end justify-center" role="dialog" aria-modal="true" aria-label={ar ? 'تأكيد تجاهل التمرين' : 'Confirm discard workout'}>
       <button type="button" aria-label={ar ? 'إلغاء' : 'Cancel'} onClick={onCancel} className="absolute inset-0 h-full w-full" style={{ background: 'rgba(0,0,0,0.55)' }} />
-      <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-dark v2-screen-enter relative w-full max-w-md rounded-t-3xl px-6 pb-8 pt-5 text-ink-900" style={{ background: FOCUS.card, borderTop: `1px solid ${FOCUS.line}`, paddingBottom: 'calc(2rem + var(--safe-bottom))' }}>
+      <div dir={ar ? 'rtl' : 'ltr'} className="relative w-full max-w-md rounded-t-2xl px-6 pb-8 pt-5 text-ink-900" style={{ background: FOCUS.card, borderTop: `1px solid ${FOCUS.line}`, paddingBottom: 'calc(2rem + var(--safe-bottom))' }}>
         <div className="mx-auto mb-4 h-1 w-10 rounded-full" style={{ background: FOCUS.line }} />
         <h2 className="text-2xl font-black">{ar ? 'تجاهل التمرين؟' : 'Discard workout?'}</h2>
         <p className="mt-1 text-sm" style={{ color: FOCUS.inkMuted }}>{ar ? 'لن يُحفظ تقدّمك في هذه الجلسة.' : "Your progress in this session won't be saved."}</p>
-        <button type="button" onClick={onDiscard} className="v2-pressable mt-5 w-full rounded-2xl py-4 text-[1.1875rem] font-black" style={{ background: FOCUS.error, color: FOCUS.onColor }}>{ar ? 'نعم، تجاهل' : 'Yes, discard'}</button>
-        <button type="button" onClick={onCancel} className="v2-pressable mt-3 w-full rounded-2xl py-3 text-sm font-bold" style={{ background: 'transparent', border: `1px solid ${FOCUS.line}`, color: FOCUS.inkMuted }}>{ar ? 'لا، أكمل التمرين' : 'No, keep training'}</button>
+        <button type="button" onClick={onDiscard} className="press mt-5 w-full rounded-2xl py-4 text-[1.1875rem] font-black" style={{ background: FOCUS.error, color: FOCUS.onColor }}>{ar ? 'نعم، تجاهل' : 'Yes, discard'}</button>
+        <button type="button" onClick={onCancel} className="press mt-3 w-full rounded-2xl py-3 text-sm font-bold" style={{ background: 'transparent', border: `1px solid ${FOCUS.line}`, color: FOCUS.inkMuted }}>{ar ? 'لا، أكمل التمرين' : 'No, keep training'}</button>
       </div>
     </div>
   )
@@ -1300,7 +1304,7 @@ function DiscardConfirmSheet({ lang, onDiscard, onCancel }: { lang: Lang; onDisc
 function MissingPlan({ lang, onNavigate }: { lang: Lang; onNavigate: (r: AppRoute) => void }) {
   const ar = lang !== 'en'
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light v2-screen-enter flex min-h-full flex-col items-center justify-center bg-page px-6 py-10 text-center text-ink-900">
+    <div dir={ar ? 'rtl' : 'ltr'} className="flex min-h-full flex-col items-center justify-center bg-page px-6 py-10 text-center text-ink-900">
       <Icon name="Dumbbell" className="h-12 w-12 text-ink-400" />
       <h1 className="mt-5 text-2xl font-black">{ar ? 'أكمل إعداد خطتك' : 'Finish setting up your plan'}</h1>
       <p className="mt-2 max-w-xs text-sm text-ink-500">{ar ? 'نحتاج هدفك وجدولك لنبني تمرينك.' : 'We need your goal and schedule to build your workout.'}</p>

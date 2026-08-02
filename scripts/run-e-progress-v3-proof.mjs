@@ -11,12 +11,16 @@ const check = (label, condition) => {
   console.log(`  ✓ ${label}`)
 }
 
-console.log('\n① دلالة ألوان v3.0')
-check('Ember هو لون قصة البيانات الرئيسية', progress.includes("const EMBER = 'var(--v2-ember)'"))
-check('Amber يوسم التقديرات', progress.includes("const AMBER = 'var(--v2-amber)'"))
-check('مخططا الزخم والوزن يرسمان بـ Ember', (progress.match(/stroke=\{EMBER\}/g) ?? []).length >= 2)
-check('مخطط e1RM التقديري يرسم بـ Amber', progress.includes('stroke={AMBER}'))
+// الأدوار الدلالية هي الثابت؛ القيم تتبع هوية الشاشة. بعد عودة شاشة التقدّم
+// للتصميم الكلاسيكي صار لون الهوية (--c-primary) هو حامل قصّة البيانات بدل Ember،
+// والكهرماني بقي وسم التقديرات. الفحوص تحرس الدور لا الاسم القديم.
+console.log('\n① دلالة الألوان — الأدوار محفوظة')
+check('لون الهوية هو حامل قصة البيانات الرئيسية', progress.includes("const DATA = 'var(--c-primary)'"))
+check('الكهرماني يوسم التقديرات', progress.includes("const ESTIMATE = '#e0941f'"))
+check('مخططا الزخم والوزن يرسمان بلون البيانات', (progress.match(/stroke=\{DATA\}/g) ?? []).length >= 2)
+check('مخطط e1RM التقديري يرسم بلون التقدير', progress.includes('stroke={ESTIMATE}'))
 check('الأزرق غير مستخدم كلون رسم بياني', !progress.includes('stroke={BLUE}') && !progress.includes('fill={BLUE}'))
+check('لم يبقَ أثر لوحة v2 في الشاشة', !progress.includes('var(--v2-'))
 
 console.log('\n② الخط والمس والمسارات المنطقية')
 check('أرقام القياسات تستخدم خط البيانات', (progress.match(/font-mono/g) ?? []).length >= 6)

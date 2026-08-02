@@ -1,5 +1,6 @@
 import { lazy, Suspense, useState, type FormEvent } from 'react'
 import { Icon } from '@/components/Icon'
+import { ScreenHeader } from '@/components/ScreenHeader'
 import { StateBlock } from '@/components/StateBlock'
 import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
@@ -33,13 +34,14 @@ interface ProgressV2Props {
   onNavigate?: (route: AppRoute) => void
 }
 
-// v3 semantic palette: green confirms measured progress, Ember carries the
-// primary data story, blue stays reserved for links, and amber marks estimates.
-const SUCCESS = 'var(--v2-green)'
-const SUCCESS_TEXT = 'var(--v2-green-text)'
-const EMBER = 'var(--v2-ember)'
-const EMBER_TEXT = 'var(--v2-ember-text)'
-const AMBER = 'var(--v2-amber)'
+// لوحة الهوية الكلاسيكية بأدوار دلالية: الأخضر يؤكّد تقدّمًا مقاسًا، ولون الهوية
+// (DATA) يحمل قصّة البيانات الأساسية، والكهرماني (ESTIMATE) يوسم التقديرات.
+// الأزرق ليس لون رسم بياني — يبقى للروابط وحدها.
+const SUCCESS = '#3E9E6B'
+const SUCCESS_TEXT = '#2F7B53'
+const DATA = 'var(--c-primary)'
+const DATA_TEXT = 'var(--c-primary)'
+const ESTIMATE = '#e0941f'
 
 const TONE_TEXT: Record<RowTone, string> = { good: '', neutral: 'text-ink-500', needsData: 'text-ink-400' }
 
@@ -82,33 +84,26 @@ export function ProgressV2({ lang, onNavigate }: ProgressV2Props) {
   }
 
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light bg-page px-4 pb-6 pt-3 text-ink-900">
-      <div className="v2-screen-enter mx-auto w-full max-w-md space-y-5">
-        <header className="pt-1">
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-black uppercase tracking-wider text-[color:var(--v2-ember-text)]">{t('التقدّم', 'Progress')}</p>
-            {model.goalLabel && (
-              <span
-                className="rounded-full border px-3 py-1 text-xs font-bold"
-                style={{
-                  background: 'color-mix(in srgb, var(--v2-ember) 8%, transparent)',
-                  borderColor: EMBER,
-                  color: EMBER_TEXT,
-                }}
-              >
-                {model.goalLabel}
-              </span>
-            )}
-          </div>
-          {/* Hedged header — always «يبدو…», never a verdict. */}
-          <h1 className="mt-2 text-2xl font-black leading-snug tracking-tight">{model.headline}</h1>
-        </header>
+    <div dir={ar ? 'rtl' : 'ltr'} className="overflow-x-hidden px-4 py-4 text-ink-900">
+      <ScreenHeader
+        icon="BarChart3"
+        title={t('التقدّم', 'Progress')}
+        action={
+          model.goalLabel ? (
+            <span className="shrink-0 rounded-full bg-primary-soft px-3 py-1 text-xs font-bold text-primary-c">{model.goalLabel}</span>
+          ) : undefined
+        }
+      />
 
-        {/* Brief — last 14 days */}
-        <section className="rounded-2xl border border-line bg-surface p-5 shadow-card">
+      <div className="space-y-4">
+        {/* عنوان محوّط — «يبدو…» دائمًا، لا حكم قاطع. */}
+        <h2 className="text-base font-black leading-snug text-ink-900">{model.headline}</h2>
+
+        {/* الملخّص — آخر ١٤ يومًا */}
+        <section className="card p-5">
           <div className="flex items-center gap-2">
-            <span className="text-[color:var(--v2-ember-text)]"><Icon name="Sparkles" className="h-4 w-4" /></span>
-            <p className="text-xs font-black uppercase tracking-wider text-[color:var(--v2-ember-text)]">{model.period.label}</p>
+            <span className="text-primary-c"><Icon name="Sparkles" className="h-4 w-4" /></span>
+            <p className="text-xs font-bold text-ink-500">{model.period.label}</p>
           </div>
           <div className="mt-4 space-y-3">
             {model.summary.map((row) => <BriefRow key={row.key} row={row} />)}
@@ -123,16 +118,16 @@ export function ProgressV2({ lang, onNavigate }: ProgressV2Props) {
                 <Icon name="Clock" className="h-4 w-4 shrink-0" />
                 <span className="min-w-0">{model.stale.text}</span>
               </span>
-              <span className="v2-text-blue shrink-0 text-xs font-black">{model.stale.actionLabel} ›</span>
+              <span className="shrink-0 text-xs font-black text-primary-c">{model.stale.actionLabel} ›</span>
             </button>
           )}
         </section>
 
         {/* Training momentum — area chart of real session volumes */}
-        <section className="rounded-2xl border border-line bg-surface p-4 shadow-card">
+        <section className="card p-5">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-black">{model.momentum.label}</span>
-            <span className="text-xs font-bold text-ink-500">{model.momentum.hasData ? t(`آخر ${model.momentum.weeks} جلسات`, `Last ${model.momentum.weeks} sessions`) : t('لا بيانات بعد', 'No data yet')}</span>
+            <span className="text-base font-black text-ink-900">{model.momentum.label}</span>
+            <span className="text-[11px] font-bold text-ink-400">{model.momentum.hasData ? t(`آخر ${model.momentum.weeks} جلسات`, `Last ${model.momentum.weeks} sessions`) : t('لا بيانات بعد', 'No data yet')}</span>
           </div>
           {model.momentum.hasData
             ? <MomentumArea values={model.momentum.series.map((p) => p.value)} lang={lang} />
@@ -142,7 +137,7 @@ export function ProgressV2({ lang, onNavigate }: ProgressV2Props) {
         {/* مجسّم العضلات — أي عضلة درّبتها هذا الأسبوع تُضيء بشدّة تتناسب مع حجم
             تدريبها. يُحمَّل كسولًا: محرّك الرسم (~2.5k سطر + canvas) لا يدخل حزمة
             شاشة التقدّم ولا يُجلب إلا عند وصول المستخدم إليها. */}
-        <Suspense fallback={<div className="h-64 rounded-2xl border border-line bg-surface" aria-hidden="true" />}>
+        <Suspense fallback={<div className="card h-64" aria-hidden="true" />}>
           <BodyModel3D lang={lang} />
         </Suspense>
 
@@ -168,9 +163,9 @@ export function ProgressV2({ lang, onNavigate }: ProgressV2Props) {
           type="button"
           onClick={() => go('calc')}
           data-testid="progress-calc-link"
-          className="press flex w-full items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3 text-start shadow-card"
+          className="card flex w-full items-center gap-3 p-5 text-start transition-colors hover:border-primary-soft"
         >
-          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary-c">
+          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary-c">
             <Icon name="Calculator" className="h-5 w-5" />
           </span>
           <span className="min-w-0 flex-1">
@@ -181,25 +176,25 @@ export function ProgressV2({ lang, onNavigate }: ProgressV2Props) {
         </button>
 
         {/* Recovery entry (v1.1) — self-reported check-in + suggestion (screens 37–39). */}
-        <button type="button" onClick={() => go('recovery')} className="press flex w-full items-center gap-3 rounded-2xl border bg-surface px-4 py-3 text-start" style={{ borderColor: 'var(--v2-teal)' }}>
-          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl" style={{ background: 'color-mix(in srgb, var(--v2-teal) 14%, transparent)', color: 'var(--v2-teal-text)' }}><Icon name="Activity" className="h-5 w-5" /></span>
+        <button type="button" onClick={() => go('recovery')} className="card flex w-full items-center gap-3 p-5 text-start transition-colors hover:border-primary-soft">
+          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary-c"><Icon name="Activity" className="h-5 w-5" /></span>
           <span className="min-w-0 flex-1">
-            <span className="block text-sm font-bold">{t('التعافي', 'Recovery')}</span>
-            <span className="block text-xs text-ink-500">{t('سجّل شعورك — مؤشّر ذاتي، غير طبي', 'Log how you feel — self-reported, not medical')}</span>
+            <span className="block text-sm font-black text-ink-900">{t('التعافي', 'Recovery')}</span>
+            <span className="block text-xs leading-relaxed text-ink-500">{t('سجّل شعورك — مؤشّر ذاتي، غير طبي', 'Log how you feel — self-reported, not medical')}</span>
           </span>
           <Icon name="ChevronLeft" className="h-4 w-4 shrink-0 text-ink-400 rtl:rotate-0 ltr:rotate-180" />
         </button>
 
-        <button type="button" onClick={() => go('steps')} className="press flex w-full items-center gap-3 rounded-2xl border bg-surface px-4 py-3 text-start shadow-card" style={{ borderColor: 'var(--v2-ember)' }}>
-          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl" style={{ background: 'color-mix(in srgb, var(--v2-ember) 12%, transparent)', color: 'var(--v2-ember-text)' }}><Icon name="Footprints" className="h-5 w-5" /></span>
+        <button type="button" onClick={() => go('steps')} className="card flex w-full items-center gap-3 p-5 text-start transition-colors hover:border-primary-soft">
+          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary-c"><Icon name="Footprints" className="h-5 w-5" /></span>
           <span className="min-w-0 flex-1">
-            <span className="block text-sm font-bold">{t('خطواتك', 'Your steps')}</span>
-            <span className="block text-xs text-ink-500">{t('اليوم والأسبوع والشهر من سجلك الفعلي', 'Today, week and month from your real log')}</span>
+            <span className="block text-sm font-black text-ink-900">{t('خطواتك', 'Your steps')}</span>
+            <span className="block text-xs leading-relaxed text-ink-500">{t('اليوم والأسبوع والشهر من سجلك الفعلي', 'Today, week and month from your real log')}</span>
           </span>
           <Icon name="ChevronLeft" className="h-4 w-4 shrink-0 text-ink-400 rtl:rotate-0 ltr:rotate-180" />
         </button>
 
-        <p className="px-1 text-center text-[0.7rem] text-ink-400">{model.disclaimer}</p>
+        <p className="mt-6 flex items-start gap-2 text-[11px] text-ink-400"><Icon name="Info" className="mt-0.5 h-3.5 w-3.5 shrink-0" />{model.disclaimer}</p>
       </div>
     </div>
   )
@@ -243,8 +238,8 @@ function WeightLogScreen({ lang, current, onBack, onSaved }: { lang: Lang; curre
   }
 
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light bg-page px-4 pb-6 pt-3 text-ink-900">
-      <div className="v2-screen-enter mx-auto w-full max-w-md">
+    <div dir={ar ? 'rtl' : 'ltr'} className="overflow-x-hidden px-4 py-4 text-ink-900">
+      <div>
         <div className="flex items-center justify-between">
           <button type="button" onClick={onBack} aria-label={t('رجوع', 'Back')} className="grid h-11 w-11 place-items-center rounded-xl border border-line bg-surface">
             <Icon name="ChevronRight" className="h-5 w-5 rtl:rotate-0 ltr:rotate-180" />
@@ -261,8 +256,8 @@ function WeightLogScreen({ lang, current, onBack, onSaved }: { lang: Lang; curre
           </div>
 
           {error && (
-            <p id="measurement-error" role="alert" className="v2-error-panel mt-4 flex items-start gap-2 rounded-xl border px-3 py-2.5 text-sm font-bold text-ink-900">
-              <Icon name="AlertCircle" className="v2-error-icon mt-0.5 h-4 w-4 shrink-0" />
+            <p id="measurement-error" role="alert" className="mt-4 flex items-start gap-2 rounded-xl border border-danger bg-surface px-3 py-2.5 text-sm font-bold text-danger">
+              <Icon name="AlertCircle" className="mt-0.5 h-4 w-4 shrink-0" />
               <span>{error}</span>
             </p>
           )}
@@ -317,7 +312,7 @@ function BriefRow({ row }: { row: SummaryRow }) {
 
 function Tile({ icon, title, main, sub, onClick }: { icon: string; title: string; main: string; sub: string; onClick: () => void }) {
   return (
-    <button type="button" onClick={onClick} className="v2-pressable min-h-28 rounded-2xl border border-line bg-surface p-4 text-start shadow-card hover:border-[color:var(--v2-ember)]">
+    <button type="button" onClick={onClick} className="card min-h-28 p-4 text-start transition-colors hover:border-primary-soft">
       <span className="flex items-center gap-2 text-xs font-bold text-ink-500"><Icon name={icon} className="h-4 w-4" />{title}</span>
       <p className="mt-2 font-mono text-lg font-black tabular-nums">{main}</p>
       <p className="text-xs text-ink-500">{sub}</p>
@@ -340,8 +335,8 @@ function WeightDetailScreen({ model, lang, onBack, onLog, onExplain, stale }: { 
   const down = model.changeKg !== null && model.changeKg < 0
   const up = model.changeKg !== null && model.changeKg > 0
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light bg-page px-4 pb-6 pt-3 text-ink-900">
-      <div className="v2-screen-enter mx-auto w-full max-w-md">
+    <div dir={ar ? 'rtl' : 'ltr'} className="overflow-x-hidden px-4 py-4 text-ink-900">
+      <div>
         <div className="flex items-center justify-between">
           <button type="button" onClick={onBack} aria-label={t('رجوع', 'Back')} className="grid h-11 w-11 place-items-center rounded-xl border border-line bg-surface"><Icon name="ChevronRight" className="h-5 w-5 rtl:rotate-0 ltr:rotate-180" /></button>
           <h1 className="text-lg font-black">{t('الوزن والجسم', 'Weight & body')}</h1>
@@ -352,7 +347,7 @@ function WeightDetailScreen({ model, lang, onBack, onLog, onExplain, stale }: { 
           <p className="font-mono text-4xl font-black tabular-nums">{model.currentKg ?? '—'}<span className="ms-1 font-sans text-sm font-bold text-ink-400">{t('كجم', 'kg')}</span></p>
           <div className="text-end text-sm font-bold">
             {model.changeKg !== null && (
-              <span className="inline-flex items-center gap-1" style={{ color: down ? SUCCESS_TEXT : up ? EMBER_TEXT : undefined }}>
+              <span className="inline-flex items-center gap-1" style={{ color: down ? SUCCESS_TEXT : up ? DATA_TEXT : undefined }}>
                 <Icon name={down ? 'TrendingDown' : up ? 'TrendingUp' : 'Minus'} className="h-4 w-4" />
                 <span className="font-mono tabular-nums">{Math.abs(model.changeKg)}</span>
               </span>
@@ -378,18 +373,18 @@ function WeightDetailScreen({ model, lang, onBack, onLog, onExplain, stale }: { 
             <p className="text-xs font-bold text-ink-500">{t('الخصر', 'Waist')}</p>
             <p className="mt-1 font-mono text-2xl font-black tabular-nums">{model.waistCm ?? '—'}<span className="ms-1 font-sans text-xs font-bold text-ink-400">{t('سم', 'cm')}</span></p>
             {model.waistChangeCm !== null && (
-              <p className="mt-0.5 inline-flex items-center gap-1 text-xs font-bold" style={{ color: model.waistChangeCm < 0 ? SUCCESS_TEXT : model.waistChangeCm > 0 ? EMBER_TEXT : undefined }}>
+              <p className="mt-0.5 inline-flex items-center gap-1 text-xs font-bold" style={{ color: model.waistChangeCm < 0 ? SUCCESS_TEXT : model.waistChangeCm > 0 ? DATA_TEXT : undefined }}>
                 <Icon name={model.waistChangeCm < 0 ? 'TrendingDown' : model.waistChangeCm > 0 ? 'TrendingUp' : 'Minus'} className="h-3.5 w-3.5" />
                 <span className="tabular-nums">{Math.abs(model.waistChangeCm)} {t('سم', 'cm')}</span>
               </p>
             )}
           </div>
-          <div className="rounded-2xl border bg-surface p-4" style={{ borderColor: 'color-mix(in srgb, var(--v2-amber) 38%, transparent)' }}>
+          <div className="card p-4" style={{ borderColor: `color-mix(in srgb, ${ESTIMATE} 38%, transparent)` }}>
             <p className="text-xs font-bold text-ink-500">{t('نسبة الدهون', 'Body fat')}</p>
             {model.bodyFatPct !== null ? (
               <>
                 <p className="mt-1 font-mono text-2xl font-black tabular-nums">~{model.bodyFatPct}<span className="ms-0.5 text-xs font-bold">%</span></p>
-                <p className="mt-0.5 text-xs font-bold" style={{ color: AMBER }}>{t('تقديري', 'Estimated')}</p>
+                <p className="mt-0.5 text-xs font-bold" style={{ color: ESTIMATE }}>{t('تقديري', 'Estimated')}</p>
               </>
             ) : (
               <p className="mt-1 text-xs text-ink-400">{t('غير مسجّلة', 'Not logged')}</p>
@@ -399,11 +394,11 @@ function WeightDetailScreen({ model, lang, onBack, onLog, onExplain, stale }: { 
 
         {/* stale waist callout */}
         {stale && (
-          <button type="button" onClick={onLog} className="v2-info-panel v2-pressable mt-3 flex w-full items-center justify-between gap-2 rounded-2xl border px-4 py-3 text-start">
-            <span className="v2-text-blue flex min-w-0 items-center gap-2 text-sm font-bold">
+          <button type="button" onClick={onLog} className="card mt-3 flex w-full items-center justify-between gap-2 px-4 py-3 text-start transition-colors hover:border-primary-soft">
+            <span className="flex min-w-0 items-center gap-2 text-sm font-bold text-primary-c">
               <Icon name="Clock" className="h-4 w-4 shrink-0" /><span className="min-w-0">{stale}</span>
             </span>
-            <span className="v2-text-blue shrink-0 text-xs font-black">{t('قِس', 'Measure')} ›</span>
+            <span className="shrink-0 text-xs font-black text-primary-c">{t('قِس', 'Measure')} ›</span>
           </button>
         )}
 
@@ -428,8 +423,8 @@ function StrengthDetailScreen({ strength, lang, onBack, onTrain }: { strength: i
   const ar = lang !== 'en'
   const t = (a: string, e: string) => (ar ? a : e)
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light bg-page px-4 pb-6 pt-3 text-ink-900">
-      <div className="v2-screen-enter mx-auto w-full max-w-md">
+    <div dir={ar ? 'rtl' : 'ltr'} className="overflow-x-hidden px-4 py-4 text-ink-900">
+      <div>
         <div className="flex items-center justify-between">
           <button type="button" onClick={onBack} aria-label={t('رجوع', 'Back')} className="grid h-11 w-11 place-items-center rounded-xl border border-line bg-surface"><Icon name="ChevronRight" className="h-5 w-5 rtl:rotate-0 ltr:rotate-180" /></button>
           <h1 className="text-lg font-black">{t('تطوّر القوة', 'Strength progress')}</h1>
@@ -463,7 +458,7 @@ function LiftRow({ lift, lang }: { lift: LiftLadder; lang: Lang }) {
   const ar = lang !== 'en'
   const t = (a: string, e: string) => (ar ? a : e)
   const positive = lift.status === 'pr' || lift.status === 'up'
-  const statusColor = positive ? SUCCESS_TEXT : 'var(--v2-ink-muted)'
+  const statusColor = positive ? SUCCESS_TEXT : 'var(--c-ink-500)'
   const statusLabel = lift.status === 'pr'
     ? t('رقم قياسي', 'PR')
     : lift.status === 'up'
@@ -491,7 +486,7 @@ function LiftRow({ lift, lang }: { lift: LiftLadder; lang: Lang }) {
         <div className="mt-3 flex items-center gap-3">
           <E1rmSparkline values={series} />
           {bests.e1RM != null && (
-            <span className="shrink-0 font-mono text-[0.7rem] font-bold tabular-nums" style={{ color: AMBER }}>
+            <span className="shrink-0 font-mono text-[0.7rem] font-bold tabular-nums" style={{ color: ESTIMATE }}>
               e1RM ~{bests.e1RM} {t('كجم · تقديري', 'kg · est.')}
             </span>
           )}
@@ -512,8 +507,8 @@ function E1rmSparkline({ values }: { values: number[] }) {
   const line = values.map((v, i) => `${i === 0 ? 'M' : 'L'} ${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join(' ')
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="h-7 flex-1" preserveAspectRatio="none" role="img" aria-label="e1RM trend">
-      <path d={line} fill="none" stroke={AMBER} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx={x(n - 1)} cy={y(values[n - 1])} r={2.5} fill={AMBER} />
+      <path d={line} fill="none" stroke={ESTIMATE} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx={x(n - 1)} cy={y(values[n - 1])} r={2.5} fill={ESTIMATE} />
     </svg>
   )
 }
@@ -564,13 +559,13 @@ function MomentumArea({ values, lang }: { values: number[]; lang: Lang }) {
     <svg viewBox={`0 0 ${W} ${H}`} className="mt-3 h-24 w-full" preserveAspectRatio="none" role="img" aria-label={ar ? 'مخطّط زخم التدريب' : 'Training momentum chart'}>
       <defs>
         <linearGradient id="momentumFill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={EMBER} stopOpacity="0.32" />
-          <stop offset="100%" stopColor={EMBER} stopOpacity="0.02" />
+          <stop offset="0%" stopColor={DATA} stopOpacity="0.32" />
+          <stop offset="100%" stopColor={DATA} stopOpacity="0.02" />
         </linearGradient>
       </defs>
       <path d={area} fill="url(#momentumFill)" />
-      <path d={line} fill="none" stroke={EMBER} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="v2-fill" />
-      {values.map((v, i) => <circle key={i} cx={x(i)} cy={y(v)} r={2.5} fill={EMBER} />)}
+      <path d={line} fill="none" stroke={DATA} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
+      {values.map((v, i) => <circle key={i} cx={x(i)} cy={y(v)} r={2.5} fill={DATA} />)}
     </svg>
   )
 }
@@ -592,8 +587,8 @@ function WeightLine({ series, band }: { series: number[]; band: [number, number]
           <line x1={0} y1={y((band[0] + band[1]) / 2)} x2={W} y2={y((band[0] + band[1]) / 2)} stroke={SUCCESS} strokeWidth={1.5} strokeDasharray="5 4" opacity={0.7} />
         </>
       )}
-      <path d={line} fill="none" stroke={EMBER} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
-      {series.map((v, i) => <circle key={i} cx={x(i)} cy={y(v)} r={i === n - 1 ? 4 : 2.5} fill={EMBER} />)}
+      <path d={line} fill="none" stroke={DATA} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
+      {series.map((v, i) => <circle key={i} cx={x(i)} cy={y(v)} r={i === n - 1 ? 4 : 2.5} fill={DATA} />)}
     </svg>
   )
 }
