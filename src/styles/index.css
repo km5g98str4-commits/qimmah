@@ -224,6 +224,22 @@
       0 14px 40px -12px color-mix(in srgb, var(--c-primary) 40%, transparent);
   }
 
+  /* ن٤: الزرّ المحجوب يُرى محجوبًا — الحالة لا تُحمَل بالسلوك وحده.
+     عمدًا بلا `disabled` وبلا `pointer-events: none`: النقر يبقى عاملًا
+     ويعرض رسالة الإرشاد التي تقول للمستخدم ما ينقصه. الخفوت في الخلفية
+     لا في النصّ، فيبقى الوسم أبيض صريحًا (7.38:1 فوق الخلفية المخفوتة). */
+  .btn-primary[aria-disabled='true'] {
+    background-color: color-mix(in srgb, var(--c-primary) 38%, rgb(var(--c-line)));
+    box-shadow: none;
+  }
+  .btn-primary[aria-disabled='true']:hover {
+    filter: none;
+    box-shadow: none;
+  }
+  .btn-primary[aria-disabled='true']:active {
+    transform: none;
+  }
+
   .btn-ghost {
     @apply btn border border-line bg-surface text-ink-900 hover:bg-beige;
   }
