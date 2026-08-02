@@ -14,6 +14,7 @@ import { NotificationsSettingsV2 } from './NotificationsSettingsV2'
 import { NativeSettingsPanel } from '@/components/NativeSettingsPanel'
 import { NATIVE_SETTINGS_COPY } from '@/data/nativeSettings'
 import { V2_ROUTINE_TRACKER } from '@/design-system/v2/labels'
+import { requestSetupFocus } from '@/lib/setupFocus'
 import { medicationName, supplementName } from '@/lib/wellnessPlan'
 import { useWellnessToday } from '@/lib/wellnessTracking'
 import {
@@ -89,7 +90,12 @@ export function ProfileV2({ lang, onNavigate }: ProfileV2Props) {
         medications={customization.wellnessPlan?.medications ?? []}
         wellnessToday={wellnessToday}
         onBack={() => setScreen('home')}
-        onEdit={() => onNavigate('setup')}
+        // [CTO-65] البند ٨: كان يفتح المعالج من أوّله فيصل المستخدم لخطوة الأساسيات
+        // لا للمكمّلات. النيّة تُسجَّل قبل التنقّل فيفتح المعالج على خطوة الروتين.
+        onEdit={() => {
+          requestSetupFocus('wellness')
+          onNavigate('setup')
+        }}
       />
     )
   }

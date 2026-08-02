@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Icon } from '@/components/Icon'
+import { SETUP_FOCUS_KEY } from '@/lib/setupFocus'
 import { cn } from '@/lib/cn'
 import { type Customization, getDefaultCustomization } from '@/lib/customization'
 import { useCustomization } from '@/lib/customizationContext'
@@ -74,7 +75,23 @@ export function CustomizationCenter({ onBack, initialStep = 0, mode = 'onboardin
   // المالك الحالي — الإكمال/إعادة التشغيل يُنسبان للحساب لا للجهاز.
   const userId = auth.user?.id ?? null
   // الخيارات المتقدّمة في «تعديل خطتي» مطويّة بالافتراض (تقليل التعقيد).
-  const [showAdvanced, setShowAdvanced] = useState(false)
+  // [CTO-65] البند ٨ — نيّة فتح موضعية: زرّ «تعديل» في بطاقة المكمّلات والأدوية
+  // (ProfileV2) يكتب هذا المفتاح قبل التنقّل، فيفتح المعالج على خطوة الروتين بدل
+  // أوّله. يُقرأ مرّة واحدة ويُمسح فورًا فلا يعلق على فتحات لاحقة. نفس نمط
+  // `qimmah:quick-log-intent` القائم — لا آلية جديدة.
+  const focusIntent = useMemo(() => {
+    if (typeof window === 'undefined') return null
+    try {
+      const v = window.sessionStorage.getItem(SETUP_FOCUS_KEY)
+      if (v) window.sessionStorage.removeItem(SETUP_FOCUS_KEY)
+      return v
+    } catch {
+      return null
+    }
+  }, [])
+  // خطوة الروتين تقع في «الخيارات المتقدّمة» المطويّة افتراضيًا — فالنيّة تفتحها،
+  // وإلا وصل المستخدم لمعالج لا تظهر فيه الخطوة المقصودة أصلًا.
+  const [showAdvanced, setShowAdvanced] = useState(focusIntent === 'wellness')
   const steps = useMemo<StepDef[]>(() => {
     if (mode !== 'advanced') return onboardingSteps
     return showAdvanced
@@ -82,9 +99,15 @@ export function CustomizationCenter({ onBack, initialStep = 0, mode = 'onboardin
       : [...advancedEssentialSteps, advancedReviewStep]
   }, [mode, showAdvanced])
   const [data, setData] = useState<Customization>(() => customization)
-  const [step, setStep] = useState(() =>
-    Math.min(Math.max(0, initialStep), steps.length - 1),
-  )
+  const [step, setStep] = useState(() => {
+    // النيّة الموضعية تسبق initialStep: نبحث عن الخطوة بمفتاح عنوانها لا برقم ثابت،
+    // فإعادة ترتيب الخطوات لاحقًا لا تكسر الوجهة (رقم صلب كان سيصير خاطئًا بصمت).
+    if (focusIntent === 'wellness') {
+      const i = steps.findIndex((s) => s.titleKey === 'ccWellness')
+      if (i >= 0) return i
+    }
+    return Math.min(Math.max(0, initialStep), steps.length - 1)
+  })
   const [saved, setSaved] = useState(false)
   const stepValid = !steps[step].validate || steps[step].validate!(data)
   // أول خطوة مطلوبة غير مكتملة (-1 إذا كل الخطوات صالحة).
