@@ -41,12 +41,16 @@ const ACTION_TONE: Record<TodayAction['tone'], string> = {
   violet: 'var(--v2-pillar-recover)',
 }
 
-/** ألوان أشرطة الماكروز — نفس دلالات شاشة التغذية: بروتين أخضر · كارب أزرق · دهون كهرماني · ماء بلون الهوية. */
+/**
+ * ألوان حلقات الماكروز — سعرات أزرق · كارب كهرماني · بروتين أخضر · دهون بنفسجي.
+ * الدهون لا نظير لها في التوكنز (`--v2-pillar-recover` فيروزي = لون التعافي)،
+ * فلها لون مسمّى هنا حتى لا تتكرّر دلالة الفيروزي على سطحين مختلفين.
+ */
 const MACRO_TONE = {
+  calories: 'var(--v2-pillar-move)',
+  carbs: '#e0941f',
   protein: 'var(--v2-green-text)',
-  carbs: 'var(--v2-pillar-move)',
-  fat: '#e0941f',
-  water: 'var(--c-primary)',
+  fat: '#8b8fd6',
 } as const
 
 /**
@@ -142,19 +146,33 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
             لون ينقلب فاتحًا في السمة الداكنة فيظهر مربعًا أبيض يضرب الخلفية.
             والمحتوى هنا أنفع: أرقام اليوم مباشرةً بدل تكرار زرّ التمرين. */}
         <section aria-labelledby="today-macros-title" className="rounded-3xl border border-line bg-surface p-4 shadow-card">
-          <div className="mb-3 flex items-end justify-between gap-3">
-            <h2 id="today-macros-title" className="text-base font-black">{copy.macrosTitle}</h2>
-            <span className="text-xs font-bold text-ink-500">
-              {nutrition.calories.target > 0
-                ? copy.macroCalories(nutrition.calories.consumed, nutrition.calories.target)
-                : copy.macroNoTarget}
-            </span>
+          <div className="flex items-center justify-between gap-3">
+            <h2 id="today-macros-title" className="flex items-center gap-2 text-base font-black">
+              <Icon name="Flame" className="h-5 w-5" style={{ color: MACRO_TONE.calories }} />
+              {copy.macrosTitle}
+            </h2>
+            <button
+              type="button"
+              onClick={() => { void playHaptic('selection'); onNavigate('nutrition') }}
+              className="v2-pressable flex shrink-0 items-center gap-1.5 text-xs font-bold text-ink-500 transition-colors hover:text-ink-900"
+            >
+              {copy.macrosLink}
+              <Icon name="Sparkles" className="h-4 w-4" />
+            </button>
           </div>
-          <div className="grid grid-cols-4 gap-2">
-            <MacroStat label={copy.macroProtein} consumed={nutrition.macros.protein.consumed} target={nutrition.macros.protein.target} unit="g" color={MACRO_TONE.protein} />
-            <MacroStat label={copy.macroCarbs} consumed={nutrition.macros.carbs.consumed} target={nutrition.macros.carbs.target} unit="g" color={MACRO_TONE.carbs} />
-            <MacroStat label={copy.macroFat} consumed={nutrition.macros.fat.consumed} target={nutrition.macros.fat.target} unit="g" color={MACRO_TONE.fat} />
-            <MacroStat label={copy.macroWater} consumed={nutrition.water.consumedMl / 1000} target={nutrition.water.targetMl / 1000} unit={ar ? 'ل' : 'L'} decimals={1} color={MACRO_TONE.water} />
+
+          <p className="mt-1 text-sm font-black text-ink-500">
+            {nutrition.calories.target > 0
+              ? copy.macroCaloriesLine(nutrition.calories.consumed, nutrition.calories.target)
+              : copy.macroNoTarget}
+          </p>
+
+          {/* أربع حلقات: المستهلَك داخل الحلقة، والمتبقّي تحتها. */}
+          <div className="mt-4 grid grid-cols-4 gap-2">
+            <MacroRing label={copy.macroCaloriesLabel} consumed={nutrition.calories.consumed} target={nutrition.calories.target} color={MACRO_TONE.calories} remainingLabel={copy.macroRemaining} />
+            <MacroRing label={`${copy.macroCarbs}${copy.macroGrams}`} consumed={nutrition.macros.carbs.consumed} target={nutrition.macros.carbs.target} color={MACRO_TONE.carbs} remainingLabel={copy.macroRemaining} />
+            <MacroRing label={`${copy.macroProtein}${copy.macroGrams}`} consumed={nutrition.macros.protein.consumed} target={nutrition.macros.protein.target} color={MACRO_TONE.protein} remainingLabel={copy.macroRemaining} />
+            <MacroRing label={`${copy.macroFat}${copy.macroGrams}`} consumed={nutrition.macros.fat.consumed} target={nutrition.macros.fat.target} color={MACRO_TONE.fat} remainingLabel={copy.macroRemaining} />
           </div>
         </section>
 
@@ -253,38 +271,47 @@ function ActionCard({ action, lang }: { action: TodayAction; lang: Lang }) {
 }
 
 /**
- * رقم ماكرو واحد على الرئيسية — شريط نسبة + المستهلَك من الهدف.
+ * حلقة ماكرو واحدة — التسمية والمستهلَك داخل الحلقة، والمتبقّي تحتها.
  * بلا هدف مضبوط نعرض «—» بدل رقم مخترَع (§5: الصدق قبل الطمأنينة).
  */
-function MacroStat({
+function MacroRing({
   label,
   consumed,
   target,
-  unit,
   color,
-  decimals = 0,
-}: { label: string; consumed: number; target: number; unit: string; color: string; decimals?: number }) {
+  remainingLabel,
+}: { label: string; consumed: number; target: number; color: string; remainingLabel: string }) {
   const hasTarget = target > 0
   const pct = hasTarget ? Math.min(1, consumed / target) : 0
-  const consumedText = consumed.toFixed(decimals)
-  const targetText = target.toFixed(decimals)
+  const remaining = Math.max(0, Math.round(target - consumed))
+  const r = 16
+  const c = 2 * Math.PI * r
+  const dash = pct * c
   return (
-    <div className="flex flex-col gap-1.5">
-      <span className="text-[0.68rem] font-bold text-ink-500">{label}</span>
-      <span dir="ltr" className="text-sm font-black tabular-nums text-ink-900">
-        {hasTarget ? consumedText : '—'}
-        <span className="text-[0.62rem] font-bold text-ink-400">{hasTarget ? ` / ${targetText}${unit}` : ''}</span>
+    <div className="flex flex-col items-center gap-1.5">
+      <div className="relative h-[4.25rem] w-[4.25rem]">
+        <svg
+          viewBox="0 0 40 40"
+          className="h-full w-full -rotate-90"
+          role="img"
+          aria-label={`${label}: ${Math.round(consumed)}${hasTarget ? ` / ${Math.round(target)}` : ''}`}
+        >
+          <circle cx="20" cy="20" r={r} fill="none" stroke="currentColor" strokeWidth="2.5" className="text-line" />
+          {hasTarget && pct > 0 && (
+            <circle cx="20" cy="20" r={r} fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeDasharray={`${dash} ${c - dash}`} />
+          )}
+        </svg>
+        <span className="absolute inset-0 flex flex-col items-center justify-center gap-0.5">
+          <span className="text-[0.55rem] font-bold leading-none text-ink-500">{label}</span>
+          <span dir="ltr" className="text-base font-black leading-none tabular-nums text-ink-900">
+            {Math.round(consumed)}
+          </span>
+        </span>
+      </div>
+      <span dir="ltr" className="text-xs font-bold tabular-nums text-ink-700">
+        {hasTarget ? remaining.toLocaleString('en-US') : '—'}
       </span>
-      <span
-        className="h-1.5 w-full overflow-hidden rounded-full bg-line"
-        role="progressbar"
-        aria-label={label}
-        aria-valuenow={Math.round(pct * 100)}
-        aria-valuemin={0}
-        aria-valuemax={100}
-      >
-        <span className="block h-full rounded-full transition-all duration-700" style={{ width: `${pct * 100}%`, backgroundColor: color }} />
-      </span>
+      <span className="text-[0.6rem] leading-none text-ink-400">{remainingLabel}</span>
     </div>
   )
 }
