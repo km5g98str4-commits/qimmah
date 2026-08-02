@@ -80,6 +80,13 @@ export const V2_TODAY = {
     progressBody: 'راجع اتجاهك أو سجّل وزن اليوم.',
     completed: 'مكتمل',
     weeklyTitle: 'نبض أسبوعك',
+    macrosTitle: 'ماكروز اليوم',
+    macroProtein: 'بروتين',
+    macroCarbs: 'كارب',
+    macroFat: 'دهون',
+    macroWater: 'ماء',
+    macroCalories: (consumed: number, target: number) => `${consumed.toLocaleString('ar-SA')} من ${target.toLocaleString('ar-SA')} سعرة`,
+    macroNoTarget: 'كمّل إعدادك عشان نحسب أهدافك.',
   },
   en: {
     remainingTitle: 'What is left today?',
@@ -105,6 +112,13 @@ export const V2_TODAY = {
     progressBody: 'Review your trend or log today’s weight.',
     completed: 'Complete',
     weeklyTitle: 'Your weekly pulse',
+    macrosTitle: 'Today’s macros',
+    macroProtein: 'Protein',
+    macroCarbs: 'Carbs',
+    macroFat: 'Fat',
+    macroWater: 'Water',
+    macroCalories: (consumed: number, target: number) => `${consumed.toLocaleString('en-US')} of ${target.toLocaleString('en-US')} kcal`,
+    macroNoTarget: 'Finish your setup so we can work out your targets.',
   },
 } as const
 
