@@ -1,6 +1,7 @@
 import { Icon } from '@/components/Icon'
 import type { Customization } from '@/lib/customization'
 import type { Lang } from '@/lib/appPreferences'
+import { declaredGoalLabel } from '@/lib/declaredGoalWording'
 import { onboardingStrings } from '@/i18n/dict/onboarding'
 
 /**
@@ -19,6 +20,7 @@ import { onboardingStrings } from '@/i18n/dict/onboarding'
  */
 export function PreviewSummary({ data, lang }: { data: Customization; lang: Lang }) {
   const d = onboardingStrings[lang]
+  const goalLabel = declaredGoalLabel(lang, data.profile.goal)
 
   return (
     <div
@@ -38,7 +40,10 @@ export function PreviewSummary({ data, lang }: { data: Customization; lang: Lang
 
       <div className="mt-5 rounded-xl border border-line bg-page p-3">
         <p className="text-[11px] text-ink-400">{d.previewYourGoal}</p>
-        <p className="mt-1 text-sm leading-relaxed text-ink-900">{data.identity.mainGoal}</p>
+        {/* [CTO-67] البند ٤: التسمية تتبع المستوى المُعلَن لا `identity.mainGoal`
+            المخزَّنة بالمصطلح الخام — فلا يقرأ المبتدئ «تنشيف» بعد أن اختار
+            «خسارة دهون». والسقوط على المخزَّن يبقى لملفّ بلا هدف محفوظ. */}
+        <p className="mt-1 text-sm leading-relaxed text-ink-900">{goalLabel ?? data.identity.mainGoal}</p>
       </div>
 
       <div className="mt-4 flex items-center justify-between text-sm">

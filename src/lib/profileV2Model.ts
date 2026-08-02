@@ -10,7 +10,8 @@ import type { Lang } from '@/lib/appPreferences'
 import type { CalorieGoal } from '@/types/profile'
 import { goalWordingFor } from '@/i18n/dict/onboardingIntent'
 import { loadOnboardingProfile } from '@/lib/onboardingProfile'
-import { v2LevelFromExperience, type V2Level } from '@/lib/onboardingV2Flow'
+import { type V2Level } from '@/lib/onboardingV2Flow'
+import { LEVEL_WHEN_UNKNOWN, declaredTrainingLevel } from '@/lib/declaredGoalWording'
 import { workoutCounts } from '@/lib/progressStats'
 import { workoutStreak } from '@/lib/streaks'
 import { loadSessions } from '@/lib/workoutSessions'
@@ -24,17 +25,6 @@ import { loadAchievementState } from '@/features/achievements/engine'
  * ملفه وفي عنوان برنامجه. الصياغة الآن تتبع المستوى عبر `goalWordingFor` —
  * نفس مصدر صياغة الأهداف في الإعداد، فلا مصدرا تسمية متناقضان.
  */
-
-/**
- * المستوى المُعتمَد حين لا يكون محفوظًا — [CTO-65] البند ٥.
- *
- * **`beginner` لا `intermediate` عمدًا.** توقيع `goalWordingFor` هو
- * `s.goalWording[level ?? 'intermediate']`، فتمرير `null` إليه **يعيد «تنشيف»
- * ويجعل البند يبدو منجزًا وهو ليس كذلك**. لذلك يُحسم السقوط هنا باسم معلَن،
- * ونحو أوسع الصياغتين فهمًا: لغة النتيجة يفهمها كل مستوى، ومصطلح الصالة لا
- * يفهمه المبتدئ. حين لا نعرف، لا نخاطر بالتسريب.
- */
-const LEVEL_WHEN_UNKNOWN: V2Level = 'beginner'
 
 // Program template length per goal (weeks). A product/plan default — NOT
 // fabricated user data — mirroring the standard تنشيف/محافظة/تضخيم block lengths.
@@ -150,8 +140,12 @@ export function buildProfileV2Model(customization: Customization, auth: AuthSumm
    *
    * ولا نمرّر `null` إلى `goalWordingFor`: توقيعها `level ?? 'intermediate'`
    * يسقط صامتًا على المتوسط — وهو بالضبط ما نتجنّبه (انظر `LEVEL_WHEN_UNKNOWN`).
+   *
+   * [CTO-67] البند ٤: المنطق نفسه انتقل إلى `lib/declaredGoalWording` ليستهلكه
+   * **كل** سطح يعرض اسم الهدف (الملف الشخصي · معاينة الخطة · المراجعة) — نسخة
+   * ثانية منه هنا كانت ستصنع مصدرَي تسمية، وهو أصل العطب لا علاجه.
    */
-  const declaredLevel: V2Level | null = v2LevelFromExperience(onb?.trainingPreferences?.experience)
+  const declaredLevel: V2Level | null = declaredTrainingLevel()
   const wording = goalWordingFor(lang, declaredLevel ?? LEVEL_WHEN_UNKNOWN)
 
   // ——— REAL training data (honest, never invented) ———

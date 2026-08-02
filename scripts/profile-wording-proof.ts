@@ -14,6 +14,8 @@ import { getDefaultCustomization } from '@/lib/customization'
 import { goalWordingFor } from '@/i18n/dict/onboardingIntent'
 import { onboardingIntentStrings } from '@/i18n/dict/onboardingIntent'
 import { v2LevelFromExperience } from '@/lib/onboardingV2Flow'
+import { declaredGoalLabel } from '@/lib/declaredGoalWording'
+import { goalChoices } from '@/data/planBuilder'
 import { saveOnboardingProfile, clearOnboardingProfile, defaultOnboardingProfile } from '@/lib/onboardingProfile'
 import type { ExperienceLevel } from '@/types/profile'
 import type { V2Level } from '@/lib/onboardingV2Flow'
@@ -92,10 +94,59 @@ for (const lang of ['ar', 'en'] as Lang[]) {
 check('عنوان برنامج المبتدئ يختلف عن المتوسّط (ar)', onboardingIntentStrings.ar.goalWording.beginner.cut.programTitle !== onboardingIntentStrings.ar.goalWording.intermediate.cut.programTitle)
 check('عنوان برنامج المبتدئ يختلف عن المتوسّط (en)', onboardingIntentStrings.en.goalWording.beginner.cut.programTitle !== onboardingIntentStrings.en.goalWording.intermediate.cut.programTitle)
 
+// ─────────────────────────────────────────────────────────────────────────────
+console.log('\n═══ 4.5) الوعد نفسه في معاينة الخطة والمراجعة — [CTO-67] البند ٤ ═══')
+// الفجوة: [CTO-65] البند ٥ أصلح **الملف الشخصي**، وبقيت معاينة «تعديل خطتي»
+// تعرض `identity.mainGoal` — سلسلة تُكتب عند إكمال الإعداد من `goalChoices`
+// بالمصطلح الخام. فالمبتدئ الذي اختار «خسارة دهون» يقرأ «تنشيف» في معاينته:
+// **نفس الوعد مكسورًا على شاشة أخرى**، وهو نمط تكرّر مرّتين فيُحرَس مرّتين.
+const wordingFor = (experience: ExperienceLevel | undefined, lang: Lang) => {
+  clearOnboardingProfile()
+  const op = defaultOnboardingProfile()
+  op.trainingPreferences = { ...op.trainingPreferences, experience, daysPerWeek: 4 }
+  op._meta = { ...op._meta, completed: true }
+  saveOnboardingProfile(op)
+  return declaredGoalLabel(lang, 'cut')
+}
+check('المعاينة: المبتدئ يرى لغة النتيجة', wordingFor('beginner', 'ar') === 'خسارة دهون')
+check('المعاينة: المتوسّط يرى المصطلح الشائع', wordingFor('intermediate', 'ar') === GYM_TERM_AR)
+check('المعاينة: المتقدّم يرى المصطلح القياسي', wordingFor('advanced', 'ar')!.includes('Cut'))
+check('المعاينة: بلا مستوى محفوظ لا يتسرّب «تنشيف»', wordingFor(undefined, 'ar') !== GYM_TERM_AR)
+check('المعاينة بالإنجليزية: لغة نتيجة للمبتدئ', wordingFor('beginner', 'en') === 'Fat loss')
+check('المعاينة: بلا هدف محفوظ تُعاد null (فتسقط الشاشة على المخزَّن)', declaredGoalLabel('ar', null) === null)
+// اقتران بالملف الشخصي: **مصدر واحد** لا مصدران — نفس المدخل يعطي نفس المخرج.
+check(
+  'المعاينة والملف الشخصي يعطيان التسمية نفسها لنفس المستخدم',
+  wordingFor('beginner', 'ar') === modelFor('beginner', 'ar').trainingIdentity.goalLabel &&
+    wordingFor('advanced', 'ar') === modelFor('advanced', 'ar').trainingIdentity.goalLabel,
+)
+// وشاشتا العرض تستهلكان المصدر الواحد فعلًا — لا تحسبان الصياغة بأنفسهما.
+const previewSrc = read('src/components/customizer/PreviewSummary.tsx')
+const reviewSrc = read('src/components/customizer/steps/StepReview.tsx')
+check('المعاينة تستهلك المصدر الواحد', previewSrc.includes("declaredGoalLabel") && previewSrc.includes("from '@/lib/declaredGoalWording'"))
+check('والمراجعة كذلك', reviewSrc.includes('declaredGoalLabel') && reviewSrc.includes("from '@/lib/declaredGoalWording'"))
+check('ولا واحدة منهما تعرض `identity.mainGoal` عاريًا', !/>\{data\.identity\.mainGoal\}</.test(previewSrc) && !/>\{data\.identity\.mainGoal\}</.test(reviewSrc))
+
 console.log('\n═══ 5) محاكاة الالتفاف — تفشل بفحص مسمّى (§4.2) ═══')
 const model = read('src/lib/profileV2Model.ts')
+const bridge = read('src/lib/declaredGoalWording.ts')
 check('خريطة المصطلحات الثابتة أُزيلت من الملف', !/const GOAL_AR\s*[:=]/.test(model))
 check('الصياغة تُقرأ من قاموس الإعداد', model.includes("from '@/i18n/dict/onboardingIntent'"))
+check('ومصدر المستوى واحد يستهلكه الملف الشخصي', model.includes("from '@/lib/declaredGoalWording'"))
+check('والمصدر الواحد نفسه يقرأ من قاموس الإعداد لا من خريطة ثابتة', bridge.includes("from '@/i18n/dict/onboardingIntent'") && !/const GOAL_AR\s*[:=]/.test(bridge))
+// التعليقات تُنزع: الحكم على الكود المنفَّذ لا على شرحه — تعليق يشرح ما نتجنّبه
+// كان يُسقط الفحص، وهو ما وقع فعلًا عند كتابته.
+const bridgeCode = bridge.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '')
+check('ولا يقرأ المستوى من `profile.trainingLevel` الملوَّث', !/profile\.trainingLevel/.test(bridgeCode))
+// التفاف: عرض `identity.mainGoal` عاريًا في المعاينة كان يعيد «تنشيف» للمبتدئ.
+clearOnboardingProfile()
+const opBeginner = defaultOnboardingProfile()
+opBeginner.trainingPreferences = { ...opBeginner.trainingPreferences, experience: 'beginner' }
+opBeginner._meta = { ...opBeginner._meta, completed: true }
+saveOnboardingProfile(opBeginner)
+const RAW_STORED_GOAL = goalChoices.find((x) => x.value === 'cut')?.label ?? ''
+check('التفاف: المخزَّن الخام هو «تنشيف» فعلًا (وإلا كان الفحص فارغًا)', RAW_STORED_GOAL === GYM_TERM_AR)
+check('التفاف: ولذلك عرضه عاريًا كان يخالف ما يراه المبتدئ', RAW_STORED_GOAL !== declaredGoalLabel('ar', 'cut'))
 check('لا تمرير null مباشر إلى goalWordingFor', !/goalWordingFor\([^)]*,\s*null\s*\)/.test(model))
 // التفاف: إعادة المصدر إلى `profile.trainingLevel` (الافتراضي الملوَّث) يجب أن
 // يسقط الفحص (ج) — نبرهن ذلك بحساب ما كانت ستعطيه تلك القراءة لنفس الحالة.

@@ -11,6 +11,7 @@ import { onboardingStrings } from '@/i18n/dict/onboarding'
 import { profileChoiceStrings } from '@/i18n/dict/profileChoices'
 import { planChangeStrings } from '@/i18n/dict/planChanges'
 import { buildPlanChanges } from '@/lib/planChanges'
+import { declaredGoalLabel } from '@/lib/declaredGoalWording'
 
 /** خطوة المراجعة والحفظ — ملخّص الخطة + منطقة متقدمة. */
 export function StepReview({ ctx }: { ctx: WizardCtx }) {
@@ -68,7 +69,9 @@ export function StepReview({ ctx }: { ctx: WizardCtx }) {
       />
 
       <div className="rounded-2xl border border-line bg-page p-5">
-        <p className="text-sm font-bold text-ink-900">{data.identity.mainGoal}</p>
+        {/* [CTO-67] البند ٤ — نفس مصدر التسمية الذي تستهلكه المعاينة والملف
+            الشخصي: المستوى المُعلَن يقود الصياغة، لا المصطلح المخزَّن. */}
+        <p className="text-sm font-bold text-ink-900">{declaredGoalLabel(ctx.lang, data.profile.goal) ?? data.identity.mainGoal}</p>
         <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {summary.map((s) => (
             <div key={s.label} className="rounded-xl border border-line bg-surface p-3">
