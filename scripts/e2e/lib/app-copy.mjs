@@ -28,15 +28,23 @@ export { policyCopy } from '@/data/policyCopy'
 export { DATA_KEYS } from '@/lib/userDataKeys'
 `
 
-let cached = null
+/**
+ * نقطة دخول ثانية — **منطق** تدفّق الإعداد وقواميس خطواته.
+ *
+ * منفصلة عن `ENTRY` عن قصد: تلك يستهلكها أربعة سكربتات، فتوسيعها يوسّع سطح
+ * تصادمها. هذه يستهلكها اختبار الـOnboarding وحده.
+ */
+const FLOW_ENTRY = `
+export { bodyStepStrings } from '@/i18n/dict/bodyStep'
+export { onboardingIntentStrings, goalWordingFor } from '@/i18n/dict/onboardingIntent'
+export { LAST_INPUT_STEP, validateStep, inRange, AGE_RANGE, HEIGHT_RANGE, WEIGHT_RANGE } from '@/lib/onboardingV2Flow'
+`
 
-/** يحمّل القواميس المركزية مرّة واحدة لكل عملية. */
-export async function loadAppCopy() {
-  if (cached) return cached
-
+/** يحزم نقطة دخول TS مؤقّتة ويُعيد الوحدة المستوردة. */
+async function bundleEntry(source) {
   const dir = mkdtempSync(join(tmpdir(), 'e2e-copy-'))
   const entryFile = join(dir, 'entry.ts')
-  writeFileSync(entryFile, ENTRY)
+  writeFileSync(entryFile, source)
 
   const result = await build({
     entryPoints: [entryFile],
@@ -54,7 +62,16 @@ export async function loadAppCopy() {
 
   const outFile = join(dir, 'app-copy.mjs')
   writeFileSync(outFile, result.outputFiles[0].text)
-  const mod = await import(pathToFileURL(outFile).href)
+  return import(pathToFileURL(outFile).href)
+}
+
+let cached = null
+
+/** يحمّل القواميس المركزية مرّة واحدة لكل عملية. */
+export async function loadAppCopy() {
+  if (cached) return cached
+
+  const mod = await bundleEntry(ENTRY)
 
   const ar = mod.V2_ONBOARDING.ar
   cached = {
@@ -68,6 +85,39 @@ export async function loadAppCopy() {
     dataKeys: mod.DATA_KEYS,
   }
   return cached
+}
+
+let cachedFlow = null
+
+/**
+ * يحمّل تدفّق الإعداد: **المنطق** (ترتيب الخطوات وحدود القيم) وقواميس خطواته.
+ *
+ * لماذا المنطق لا النصّ وحده؟ ترتيب خطوات الإعداد تبدّل مرّتين خلال يومين
+ * (بيانات الجسم ثم النية)، وصياغة الأهداف صارت تابعة للمستوى — فأي هيكل يثبّت
+ * الترتيب أو الوسم عنده يصير بائتًا عند أوّل إعادة صياغة. باشتقاق الاثنين من
+ * `validateStep` والقواميس، يتبع الهيكلُ التدفّقَ بدل أن يتخلّف عنه.
+ */
+export async function loadOnboardingFlow() {
+  if (cachedFlow) return cachedFlow
+
+  const mod = await bundleEntry(FLOW_ENTRY)
+
+  cachedFlow = {
+    /** نصوص خطوة بيانات الجسم (العربية). */
+    body: mod.bodyStepStrings.ar,
+    /** نصوص خطوة النية والمستوى (العربية). */
+    intent: mod.onboardingIntentStrings.ar,
+    /** صياغة الأهداف الواعية بالمستوى — دالّة لا جدول ثابت. */
+    goalWordingFor: mod.goalWordingFor,
+    /** آخر خطوة إدخال قبل شاشة «خطتك جاهزة». */
+    lastInputStep: mod.LAST_INPUT_STEP,
+    /** تحقّق الخطوة الواحدة — منه يُشتقّ ترتيب الخطوات. */
+    validateStep: mod.validateStep,
+    /** النطاقات الفسيولوجية — بها نتحقّق أن بيانات الاختبار ما زالت مقبولة. */
+    ranges: { age: mod.AGE_RANGE, height: mod.HEIGHT_RANGE, weight: mod.WEIGHT_RANGE },
+    inRange: mod.inRange,
+  }
+  return cachedFlow
 }
 
 /**
