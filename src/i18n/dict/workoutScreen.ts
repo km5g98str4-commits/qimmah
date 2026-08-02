@@ -55,6 +55,11 @@ export interface WorkoutScreenStrings {
   altCableLabel: string
   altCableFallbackLabel: string
   altMachineLabel: string
+  /** (ح-١) استئناف جلسة تمرين لم تُنهَ. */
+  resumeTitle: string
+  resumeBody: string
+  resumeAction: string
+  resumeDiscard: string
   /** (P12) زر التبديل داخل البطاقة الصغيرة. */
   switchHere: string
   /** فشل حفظ التمرين — واجهة صادقة بدل «تم الحفظ» الزائف. */
@@ -118,6 +123,10 @@ const ar: WorkoutScreenStrings = {
   saveFailedGeneric: 'حدث خطأ أثناء الحفظ ولم يُسجَّل شيء.',
   saveFailedKept: 'تمرينك ما زال مفتوحًا كما هو — لم تفقد أي مجموعة.',
   saveRetry: 'أعد محاولة الحفظ',
+  resumeTitle: 'عندك تمرين لم ينتهِ',
+  resumeBody: 'توقّفت في {day}. تكمّل من مكانك أو تبدأ من جديد؟',
+  resumeAction: 'أكمل تمريني',
+  resumeDiscard: 'ابدأ نظيفًا',
 }
 
 const en: WorkoutScreenStrings = {
@@ -160,6 +169,10 @@ const en: WorkoutScreenStrings = {
   altCableLabel: 'Cable alternative',
   altCableFallbackLabel: 'Bodyweight/dumbbell fallback',
   altMachineLabel: 'Primary machine',
+  resumeTitle: 'You have an unfinished workout',
+  resumeBody: 'You stopped at {day}. Pick up where you left off, or start fresh?',
+  resumeAction: 'Resume workout',
+  resumeDiscard: 'Start fresh',
   switchHere: 'Switch to this',
   saveFailedTitle: "We couldn't save this workout",
   saveFailedQuota: 'Your device storage is full. Free up some space, then try again.',

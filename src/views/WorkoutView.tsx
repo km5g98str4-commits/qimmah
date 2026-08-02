@@ -7,6 +7,7 @@ import type { AppRoute } from '@/lib/appRoutes'
 import { useAuth } from '@/lib/authContext'
 import { useCustomization } from '@/lib/customizationContext'
 import { todayPlanDay, planExerciseName } from '@/lib/workoutPlan'
+import { clearActiveWorkout, loadActiveWorkout, type ActiveWorkout } from '@/lib/activeWorkout'
 import { planTitle } from '@/lib/planGenerator'
 import { cn } from '@/lib/cn'
 import {
@@ -65,12 +66,39 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
     refreshCustom()
   }
 
+  // (ح-١) الجلسة الجارية لهذه الهوية — تُقرأ عند الدخول وبعد كل تغيّر في الحساب.
+  const [pendingResume, setPendingResume] = useState<ActiveWorkout | undefined>(() =>
+    loadActiveWorkout(userId),
+  )
+  useEffect(() => {
+    setPendingResume(loadActiveWorkout(userId))
+  }, [userId])
+  const [resumeFrom, setResumeFrom] = useState<ActiveWorkout | undefined>(undefined)
+
   const [activeDay, setActiveDay] = useState<PlanDay | null>(null)
   const [summary, setSummary] = useState<FinishSummary | null>(null)
   const tw = getStrings(lang).workout
   const d = workoutScreenStrings[lang]
 
-  const startDay = (day: PlanDay) => setActiveDay(day)
+  const startDay = (day: PlanDay) => {
+    setResumeFrom(undefined)
+    setActiveDay(day)
+  }
+
+  /** يوم الجلسة المعلّقة كما هو في الخطة الحالية — القرار على المعرّف لا على الاسم. */
+  const resumeDay = pendingResume ? plan.days.find((dd) => dd.id === pendingResume.dayId) : undefined
+
+  const resumeWorkout = () => {
+    if (!pendingResume || !resumeDay) return
+    setResumeFrom(pendingResume)
+    setActiveDay(resumeDay)
+    setPendingResume(undefined)
+  }
+
+  const discardResume = () => {
+    clearActiveWorkout(userId)
+    setPendingResume(undefined)
+  }
 
   const startEmpty = () =>
     setActiveDay({ id: `empty-${Date.now()}`, nameAr: d.emptyWorkoutNameAr, nameEn: d.emptyWorkoutNameEn, exercises: [] })
@@ -153,6 +181,32 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
             </button>
           </div>
         </section>
+
+        {/* (ح-١) جلسة لم تُنهَ — تُعرض فقط إن كان يومها ما زال في الخطة الحالية. */}
+        {pendingResume && resumeDay && (
+          <div className="card border-primary-soft p-4">
+            <div className="flex items-start gap-3">
+              <span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary-c">
+                <Icon name="RotateCcw" className="h-5 w-5" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-black text-ink-900">{d.resumeTitle}</p>
+                <p dir="auto" className="mt-0.5 text-xs leading-relaxed text-ink-500">
+                  {d.resumeBody.replace('{day}', lang === 'en' ? resumeDay.nameEn : resumeDay.nameAr)}
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <button type="button" onClick={resumeWorkout} className="btn-primary px-4 py-2.5 text-xs">
+                    <Icon name="Play" className="h-4 w-4" />
+                    {d.resumeAction}
+                  </button>
+                  <button type="button" onClick={discardResume} className="btn-ghost px-4 py-2.5 text-xs">
+                    {d.resumeDiscard}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* خطتي */}
         <section id="workout-myplan">
@@ -310,7 +364,7 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
       {/* وضع التمرين — فوق الشريط السفلي */}
       {activeDay && (
         <div className="fixed inset-0 z-[60]">
-          <WorkoutMode lang={lang} day={activeDay} onClose={() => setActiveDay(null)} onFinish={finish} />
+          <WorkoutMode lang={lang} day={activeDay} userId={userId} resume={resumeFrom} onClose={() => { setActiveDay(null); setPendingResume(loadActiveWorkout(userId)) }} onFinish={finish} />
         </div>
       )}
 
