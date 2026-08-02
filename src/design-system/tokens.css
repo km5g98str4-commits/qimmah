@@ -188,6 +188,10 @@
   --v2-green-text: #0f7a40; /* AA on white for small text (~5.4:1) — screen 66 contrast fix */
   --v2-teal-text: #0e8578;
   --v2-blue-text: #245fc5;
+  /* Q-101: أزرق الروابط فوق أسطح التركيز الداكنة (.v2-surface-dark).
+     --v2-blue الأصلي يعطي 3.78:1 على #161410 — دون AA. هذا يعطي 5.72:1.
+     نظير --v2-blue-text المعكوس: ذاك يُغمَّق للأسطح الفاتحة، وهذا يُفتَّح للداكنة. */
+  --v2-blue-on-dark: #5a8fe8;
 
   /* Light system sampled from the PDF phone mocks (§04–§06). */
   --v2-cream: #efeae2; /* v3.0 §F1 Sand · Surface — exact standard value */
@@ -277,7 +281,10 @@
   --c-ink-900: 14 13 10;
   --c-ink-700: 42 37 30;
   --c-ink-500: 98 95 90;
-  --c-ink-400: 114 107 98;
+  /* Q-101: كان #726b62 → 4.39:1 على رمل الصفحة (#EFEAE2) — دون AA للنصّ الصغير.
+     #69625a يعطي 5.02:1 على الصفحة · 6.01:1 على البطاقة · 4.79:1 على البيج،
+     فيمرّ الحدّ في كل أسطح الثيم الفاتح لا في أحدها. */
+  --c-ink-400: 105 98 90;
   --elevation-card: 0 1px 2px rgba(14, 13, 10, 0.04), 0 12px 30px -22px rgba(14, 13, 10, 0.28);
   --elevation-raised: 0 2px 4px rgba(14, 13, 10, 0.06), 0 22px 48px -28px rgba(14, 13, 10, 0.34);
 }

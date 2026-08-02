@@ -1,0 +1,2989 @@
+{
+ "_field_names_note": "الأسماء النهائية تُثبَّت من غرفة الهندسة",
+ "batch": "PKG-001",
+ "title_ar": "المنتجات المعبأة السعودية والخليجية — الدفعة الأولى",
+ "produced_by": "غرفة مصنع البيانات",
+ "produced_on": "2026-07-30",
+ "sources": {
+  "official_brand_site": {
+   "name": "الموقع الرسمي للمراعي/لوزين",
+   "base": "https://www.almarai.com",
+   "note": "بطاقة غذائية معلنة لكل منتج (لكل حصة) — حُوِّلت إلى 100غ/100مل"
+  },
+  "open_food_facts": {
+   "name": "Open Food Facts",
+   "base": "https://world.openfoodfacts.org",
+   "note": "لا تُقبل إلا مدخلات عليها صورة بطاقة مختارة (en:nutrition-photo-selected)"
+  }
+ },
+ "integrity_checks_ar": [
+  "أتواتر: 4×بروتين + 4×كربوهيدرات + 9×دهن مقابل الطاقة المعلنة — الحد 12%.",
+  "مجموع (بروتين + دهن + كربوهيدرات) ≤ 100غ.",
+  "السكر ≤ الكربوهيدرات · الدهن المشبع ≤ الدهن الكلي.",
+  "الصوديوم ≤ 2000 مغ/100غ (يكشف مدخلات الوحدات المغلوطة).",
+  "نطاق طاقة معقول لكل فئة (حليب 28–85 · جبن 120–420 · شيبس 430–580 …).",
+  "**قاعدة سادسة عند وجود مصدرين:** يُقاس التباعد بينهما، والتباعد فوق 8% يُخرج الصنف إلى «يحتاج مراجعة»."
+ ],
+ "stats": {
+  "items": 55,
+  "by_tier": {
+   "official+off": 6,
+   "off": 45,
+   "official+off_divergent": 4
+  },
+  "by_category": {
+   "حليب سائل": 8,
+   "لبن رائب": 4,
+   "زبادي": 5,
+   "زبادي وقشدة": 1,
+   "جبن": 7,
+   "عصائر": 6,
+   "خبز": 5,
+   "شوفان وحبوب": 3,
+   "حبوب": 2,
+   "معلبات سمك": 2,
+   "معلبات": 2,
+   "تمور": 2,
+   "مكسرات وزبدة": 2,
+   "مكسرات": 1,
+   "بروتين": 3,
+   "وجبات خفيفة": 2
+  },
+  "documented_rejects": 113,
+  "category_gaps": 8
+ },
+ "items": [
+  {
+   "barcode": "6281007034043",
+   "name_ar": "حليب المراعي طازج كامل الدسم",
+   "name_en": "Almarai Fresh Milk Full Fat",
+   "brand_ar": "المراعي",
+   "category_ar": "حليب سائل",
+   "origin_inferred_from_gs1_prefix": "السعودية",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": null,
+   "serving_size": "كوب 250 مل",
+   "per_100g_or_100ml": {
+    "energy_kcal": 60.8,
+    "protein_g": 3.2,
+    "fat_g": 3.2,
+    "saturated_fat_g": 2.0,
+    "carbohydrates_g": 4.8,
+    "sugars_g": 4.8,
+    "fiber_g": 0.0,
+    "sodium_mg": 51.6
+   },
+   "allergens_ar": null,
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "official+off",
+   "confidence": "مؤكد رسميًا ومطابَق بمصدرين مستقلين (موقع العلامة + بطاقة OFF)",
+   "source_official_url": "https://www.almarai.com/en/brands/almarai/liquid-dairy/fresh-milk/fresh-milk-full-fat",
+   "source_off_url": "https://world.openfoodfacts.org/product/6281007034043",
+   "off_atwater_dev_pct": 1.9,
+   "cross_source_max_divergence_pct": 4.6,
+   "last_verified": "2026-07-30",
+   "note_ar": "أعلى تباعد بين المصدرين 4.6% — القيم من الموقع الرسمي."
+  },
+  {
+   "barcode": "6281039101119",
+   "name_ar": "حليب السعودية كامل الدسم",
+   "name_en": "Saudia Whole Milk",
+   "brand_ar": "السعودية (سدافكو)",
+   "category_ar": "حليب سائل",
+   "origin_inferred_from_gs1_prefix": "السعودية",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": "١لتر",
+   "serving_size": null,
+   "per_100g_or_100ml": {
+    "energy_kcal": 60,
+    "protein_g": 3,
+    "fat_g": 3,
+    "saturated_fat_g": 1.6,
+    "carbohydrates_g": 5,
+    "sugars_g": 5,
+    "fiber_g": 0,
+    "sodium_mg": 40.0
+   },
+   "allergens_ar": null,
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "off",
+   "confidence": "مؤكد من ملصق — صورة بطاقة في OFF + خمس فحوص سلامة",
+   "source_official_url": null,
+   "source_off_url": "https://world.openfoodfacts.org/product/6281039101119",
+   "off_atwater_dev_pct": 1.7,
+   "cross_source_max_divergence_pct": null,
+   "last_verified": "2026-07-30",
+   "note_ar": null
+  },
+  {
+   "barcode": "6281039100914",
+   "name_ar": "حليب السعودية كامل الدسم 2 لتر",
+   "name_en": "Saudia Whole Milk 2L",
+   "brand_ar": "السعودية (سدافكو)",
+   "category_ar": "حليب سائل",
+   "origin_inferred_from_gs1_prefix": "السعودية",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": "2L",
+   "serving_size": null,
+   "per_100g_or_100ml": {
+    "energy_kcal": 60,
+    "protein_g": 3,
+    "fat_g": 3,
+    "saturated_fat_g": 1.6,
+    "carbohydrates_g": 5,
+    "sugars_g": 5,
+    "fiber_g": null,
+    "sodium_mg": 40.0
+   },
+   "allergens_ar": null,
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "off",
+   "confidence": "مؤكد من ملصق — صورة بطاقة في OFF + خمس فحوص سلامة",
+   "source_official_url": null,
+   "source_off_url": "https://world.openfoodfacts.org/product/6281039100914",
+   "off_atwater_dev_pct": 1.7,
+   "cross_source_max_divergence_pct": null,
+   "last_verified": "2026-07-30",
+   "note_ar": null
+  },
+  {
+   "barcode": "6281057010011",
+   "name_ar": "حليب نادك كامل الدسم 1 لتر",
+   "name_en": "Nadec Milk Full Fat 1L",
+   "brand_ar": "نادك",
+   "category_ar": "حليب سائل",
+   "origin_inferred_from_gs1_prefix": "السعودية",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": "1litre",
+   "serving_size": null,
+   "per_100g_or_100ml": {
+    "energy_kcal": 60,
+    "protein_g": 3.1,
+    "fat_g": 3.1,
+    "saturated_fat_g": null,
+    "carbohydrates_g": 4.7,
+    "sugars_g": null,
+    "fiber_g": null,
+    "sodium_mg": null
+   },
+   "allergens_ar": null,
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "off",
+   "confidence": "مؤكد من ملصق — صورة بطاقة في OFF + خمس فحوص سلامة",
+   "source_official_url": null,
+   "source_off_url": "https://world.openfoodfacts.org/product/6281057010011",
+   "off_atwater_dev_pct": 1.5,
+   "cross_source_max_divergence_pct": null,
+   "last_verified": "2026-07-30",
+   "note_ar": null
+  },
+  {
+   "barcode": "6271002106364",
+   "name_ar": "حليب كي دي دي كامل الدسم",
+   "name_en": "KDD Full Cream Milk",
+   "brand_ar": "كي دي دي",
+   "category_ar": "حليب سائل",
+   "origin_inferred_from_gs1_prefix": "الكويت",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": null,
+   "serving_size": null,
+   "per_100g_or_100ml": {
+    "energy_kcal": 62,
+    "protein_g": 3.2,
+    "fat_g": 3.2,
+    "saturated_fat_g": 1.03,
+    "carbohydrates_g": 5.4,
+    "sugars_g": 5.4,
+    "fiber_g": null,
+    "sodium_mg": null
+   },
+   "allergens_ar": null,
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "off",
+   "confidence": "مؤكد من ملصق — صورة بطاقة في OFF + خمس فحوص سلامة",
+   "source_official_url": null,
+   "source_off_url": "https://world.openfoodfacts.org/product/6271002106364",
+   "off_atwater_dev_pct": 1.9,
+   "cross_source_max_divergence_pct": null,
+   "last_verified": "2026-07-30",
+   "note_ar": null
+  },
+  {
+   "barcode": "6281007033565",
+   "name_ar": "حليب المراعي خالٍ من اللاكتوز",
+   "name_en": "Almarai Lacto Free Milk",
+   "brand_ar": "المراعي",
+   "category_ar": "حليب سائل",
+   "origin_inferred_from_gs1_prefix": "السعودية",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": null,
+   "serving_size": null,
+   "per_100g_or_100ml": {
+    "energy_kcal": 58,
+    "protein_g": 3,
+    "fat_g": 3,
+    "saturated_fat_g": 2.04,
+    "carbohydrates_g": 4.7,
+    "sugars_g": 4.7,
+    "fiber_g": null,
+    "sodium_mg": 0
+   },
+   "allergens_ar": [
+    "حليب"
+   ],
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "off",
+   "confidence": "مؤكد من ملصق — صورة بطاقة في OFF + خمس فحوص سلامة",
+   "source_official_url": null,
+   "source_off_url": "https://world.openfoodfacts.org/product/6281007033565",
+   "off_atwater_dev_pct": 0.3,
+   "cross_source_max_divergence_pct": null,
+   "last_verified": "2026-07-30",
+   "note_ar": null
+  },
+  {
+   "barcode": "6291108090541",
+   "name_ar": "حليب مزون طويل الأجل كامل الدسم",
+   "name_en": "Mazoon Long Life Milk Full Fat",
+   "brand_ar": "مزون",
+   "category_ar": "حليب سائل",
+   "origin_inferred_from_gs1_prefix": "الإمارات",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": null,
+   "serving_size": null,
+   "per_100g_or_100ml": {
+    "energy_kcal": 61.4,
+    "protein_g": 3.3,
+    "fat_g": 3.3,
+    "saturated_fat_g": 1.9,
+    "carbohydrates_g": 4.7,
+    "sugars_g": 4.7,
+    "fiber_g": null,
+    "sodium_mg": null
+   },
+   "allergens_ar": null,
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "off",
+   "confidence": "مؤكد من ملصق — صورة بطاقة في OFF + خمس فحوص سلامة",
+   "source_official_url": null,
+   "source_off_url": "https://world.openfoodfacts.org/product/6291108090541",
+   "off_atwater_dev_pct": 0.5,
+   "cross_source_max_divergence_pct": null,
+   "last_verified": "2026-07-30",
+   "note_ar": null
+  },
+  {
+   "barcode": "6281021110105",
+   "name_ar": "حليب رينبو كامل الدسم",
+   "name_en": "Rainbow Full Cream Milk",
+   "brand_ar": "رينبو",
+   "category_ar": "حليب سائل",
+   "origin_inferred_from_gs1_prefix": "السعودية",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": "1000 ml",
+   "serving_size": null,
+   "per_100g_or_100ml": {
+    "energy_kcal": 59,
+    "protein_g": 3,
+    "fat_g": 3,
+    "saturated_fat_g": 1.6,
+    "carbohydrates_g": 5,
+    "sugars_g": 5,
+    "fiber_g": 0,
+    "sodium_mg": 40.0
+   },
+   "allergens_ar": null,
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "off",
+   "confidence": "مؤكد من ملصق — صورة بطاقة في OFF + خمس فحوص سلامة",
+   "source_official_url": null,
+   "source_off_url": "https://world.openfoodfacts.org/product/6281021110105",
+   "off_atwater_dev_pct": 0.0,
+   "cross_source_max_divergence_pct": null,
+   "last_verified": "2026-07-30",
+   "note_ar": null
+  },
+  {
+   "barcode": "6281007110501",
+   "name_ar": "لبن المراعي طازج قليل الدسم 2 لتر",
+   "name_en": "Almarai Fresh Laban Low Fat 2L",
+   "brand_ar": "المراعي",
+   "category_ar": "لبن رائب",
+   "origin_inferred_from_gs1_prefix": "السعودية",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": "2l",
+   "serving_size": "كوب 250 مل",
+   "per_100g_or_100ml": {
+    "energy_kcal": 42.8,
+    "protein_g": 3.2,
+    "fat_g": 1.2,
+    "saturated_fat_g": 0.8,
+    "carbohydrates_g": 4.8,
+    "sugars_g": 4.8,
+    "fiber_g": 0.0,
+    "sodium_mg": 50.0
+   },
+   "allergens_ar": null,
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "official+off",
+   "confidence": "مؤكد رسميًا ومطابَق بمصدرين مستقلين (موقع العلامة + بطاقة OFF)",
+   "source_official_url": "https://www.almarai.com/en/brands/almarai/liquid-dairy/fresh-laban/fresh-laban-low-fat",
+   "source_off_url": "https://world.openfoodfacts.org/product/6281007110501",
+   "off_atwater_dev_pct": 0.0,
+   "cross_source_max_divergence_pct": 0.0,
+   "last_verified": "2026-07-30",
+   "note_ar": "أعلى تباعد بين المصدرين 0.0% — القيم من الموقع الرسمي."
+  },
+  {
+   "barcode": "6281007023504",
+   "name_ar": "لبن المراعي طازج قليل الدسم 1 لتر",
+   "name_en": "Almarai Fresh Laban Low Fat 1L",
+   "brand_ar": "المراعي",
+   "category_ar": "لبن رائب",
+   "origin_inferred_from_gs1_prefix": "السعودية",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": "100.0cL",
+   "serving_size": "كوب 250 مل",
+   "per_100g_or_100ml": {
+    "energy_kcal": 42.8,
+    "protein_g": 3.2,
+    "fat_g": 1.2,
+    "saturated_fat_g": 0.8,
+    "carbohydrates_g": 4.8,
+    "sugars_g": 4.8,
+    "fiber_g": 0.0,
+    "sodium_mg": 50.0
+   },
+   "allergens_ar": null,
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "official+off",
+   "confidence": "مؤكد رسميًا ومطابَق بمصدرين مستقلين (موقع العلامة + بطاقة OFF)",
+   "source_official_url": "https://www.almarai.com/en/brands/almarai/liquid-dairy/fresh-laban/fresh-laban-low-fat",
+   "source_off_url": "https://world.openfoodfacts.org/product/6281007023504",
+   "off_atwater_dev_pct": 0.4,
+   "cross_source_max_divergence_pct": 2.4,
+   "last_verified": "2026-07-30",
+   "note_ar": "أعلى تباعد بين المصدرين 2.4% — القيم من الموقع الرسمي."
+  },
+  {
+   "barcode": "6281007041195",
+   "name_ar": "لبن المراعي المملّح",
+   "name_en": "Almarai Salted Laban Drink",
+   "brand_ar": "المراعي",
+   "category_ar": "لبن رائب",
+   "origin_inferred_from_gs1_prefix": "السعودية",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": null,
+   "serving_size": null,
+   "per_100g_or_100ml": {
+    "energy_kcal": 47.22,
+    "protein_g": 2.22,
+    "fat_g": 2.78,
+    "saturated_fat_g": 1.67,
+    "carbohydrates_g": 3.33,
+    "sugars_g": 3.33,
+    "fiber_g": 0,
+    "sodium_mg": 310.6
+   },
+   "allergens_ar": null,
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "off",
+   "confidence": "مؤكد من ملصق — صورة بطاقة في OFF + خمس فحوص سلامة",
+   "source_official_url": null,
+   "source_off_url": "https://world.openfoodfacts.org/product/6281007041195",
+   "off_atwater_dev_pct": 0.0,
+   "cross_source_max_divergence_pct": null,
+   "last_verified": "2026-07-30",
+   "note_ar": null
+  },
+  {
+   "barcode": "6281022118070",
+   "name_ar": "لبن أكتيفيا طازج قليل الدسم",
+   "name_en": "Activia Fresh Laban Low Fat",
+   "brand_ar": "أكتيفيا (الصافي دانون)",
+   "category_ar": "لبن رائب",
+   "origin_inferred_from_gs1_prefix": "السعودية",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": "375 ml",
+   "serving_size": null,
+   "per_100g_or_100ml": {
+    "energy_kcal": 40,
+    "protein_g": 3,
+    "fat_g": 1,
+    "saturated_fat_g": 0.6,
+    "carbohydrates_g": 4.8,
+    "sugars_g": 4.8,
+    "fiber_g": null,
+    "sodium_mg": 196.0
+   },
+   "allergens_ar": [
+    "حليب"
+   ],
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "off",
+   "confidence": "مؤكد من ملصق — صورة بطاقة في OFF + خمس فحوص سلامة",
+   "source_official_url": null,
+   "source_off_url": "https://world.openfoodfacts.org/product/6281022118070",
+   "off_atwater_dev_pct": 0.5,
+   "cross_source_max_divergence_pct": null,
+   "last_verified": "2026-07-30",
+   "note_ar": null
+  },
+  {
+   "barcode": "6281007063067",
+   "name_ar": "زبادي المراعي طازج كامل الدسم",
+   "name_en": "Almarai Fresh Zabadi Full Fat",
+   "brand_ar": "المراعي",
+   "category_ar": "زبادي",
+   "origin_inferred_from_gs1_prefix": "السعودية",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": null,
+   "serving_size": "عبوة 170 غ",
+   "per_100g_or_100ml": {
+    "energy_kcal": 70.59,
+    "protein_g": 4.12,
+    "fat_g": 3.53,
+    "saturated_fat_g": 1.76,
+    "carbohydrates_g": 6.47,
+    "sugars_g": 6.47,
+    "fiber_g": 0.0,
+    "sodium_mg": 67.65
+   },
+   "allergens_ar": [
+    "حليب"
+   ],
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "official+off_divergent",
+   "confidence": "يحتاج مراجعة — مصدران موثّقان يتباعدان",
+   "source_official_url": "https://www.almarai.com/en/brands/almarai/yoghurts/zabadi/full-fat-zabadi",
+   "source_off_url": "https://world.openfoodfacts.org/product/6281007063067",
+   "off_atwater_dev_pct": 0.3,
+   "cross_source_max_divergence_pct": 8.2,
+   "last_verified": "2026-07-30",
+   "note_ar": "تباعد 8.2% بين الموقع الرسمي وبطاقة OFF. القيم المعروضة من الموقع الرسمي، وقيم OFF لكل 100: طاقة 70.6 · بروتين 4.12 · دهن 3.24 · كربوهيدرات 6.18. قد يكون اختلاف تركيبة أو إصدار عبوة — يُحسم بقراءة ملصق العبوة الحالية."
+  },
+  {
+   "barcode": "6281007028363",
+   "name_ar": "كريمة حامضة المراعي",
+   "name_en": "Almarai Sour Cream",
+   "brand_ar": "المراعي",
+   "category_ar": "زبادي وقشدة",
+   "origin_inferred_from_gs1_prefix": "السعودية",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": null,
+   "serving_size": "50 غ",
+   "per_100g_or_100ml": {
+    "energy_kcal": 212.0,
+    "protein_g": 2.0,
+    "fat_g": 20.0,
+    "saturated_fat_g": 12.0,
+    "carbohydrates_g": 4.0,
+    "sugars_g": 4.0,
+    "fiber_g": 0.0,
+    "sodium_mg": 52.0
+   },
+   "allergens_ar": null,
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "official+off",
+   "confidence": "مؤكد رسميًا ومطابَق بمصدرين مستقلين (موقع العلامة + بطاقة OFF)",
+   "source_official_url": "https://www.almarai.com/en/brands/almarai/yoghurts/zabadi/sour-cream-zabadi",
+   "source_off_url": "https://world.openfoodfacts.org/product/6281007028363",
+   "off_atwater_dev_pct": 3.8,
+   "cross_source_max_divergence_pct": 0.0,
+   "last_verified": "2026-07-30",
+   "note_ar": "أعلى تباعد بين المصدرين 0.0% — القيم من الموقع الرسمي."
+  },
+  {
+   "barcode": "6281057001149",
+   "name_ar": "زبادي نادك طازج قليل الدسم",
+   "name_en": "Nadec Fresh Yoghurt Low Fat",
+   "brand_ar": "نادك",
+   "category_ar": "زبادي",
+   "origin_inferred_from_gs1_prefix": "السعودية",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": null,
+   "serving_size": null,
+   "per_100g_or_100ml": {
+    "energy_kcal": 50,
+    "protein_g": 4.7,
+    "fat_g": 0.25,
+    "saturated_fat_g": 0.15,
+    "carbohydrates_g": 7.2,
+    "sugars_g": 7.2,
+    "fiber_g": 0,
+    "sodium_mg": 66.0
+   },
+   "allergens_ar": null,
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "off",
+   "confidence": "مؤكد من ملصق — صورة بطاقة في OFF + خمس فحوص سلامة",
+   "source_official_url": null,
+   "source_off_url": "https://world.openfoodfacts.org/product/6281057001149",
+   "off_atwater_dev_pct": 0.3,
+   "cross_source_max_divergence_pct": null,
+   "last_verified": "2026-07-30",
+   "note_ar": null
+  },
+  {
+   "barcode": "6281018262947",
+   "name_ar": "زبادي ندى اليوناني",
+   "name_en": "Nada Greek Yoghurt",
+   "brand_ar": "ندى",
+   "category_ar": "زبادي",
+   "origin_inferred_from_gs1_prefix": "السعودية",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": null,
+   "serving_size": null,
+   "per_100g_or_100ml": {
+    "energy_kcal": 63,
+    "protein_g": 10,
+    "fat_g": 0.3,
+    "saturated_fat_g": null,
+    "carbohydrates_g": 5,
+    "sugars_g": 5,
+    "fiber_g": null,
+    "sodium_mg": null
+   },
+   "allergens_ar": null,
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "off",
+   "confidence": "مؤكد من ملصق — صورة بطاقة في OFF + خمس فحوص سلامة",
+   "source_official_url": null,
+   "source_off_url": "https://world.openfoodfacts.org/product/6281018262947",
+   "off_atwater_dev_pct": 0.5,
+   "cross_source_max_divergence_pct": null,
+   "last_verified": "2026-07-30",
+   "note_ar": null
+  },
+  {
+   "barcode": "6281057005918",
+   "name_ar": "زبادي نادك اليوناني",
+   "name_en": "Nadec Greek Yoghurt",
+   "brand_ar": "نادك",
+   "category_ar": "زبادي",
+   "origin_inferred_from_gs1_prefix": "السعودية",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": null,
+   "serving_size": null,
+   "per_100g_or_100ml": {
+    "energy_kcal": 120,
+    "protein_g": 5,
+    "fat_g": 8,
+    "saturated_fat_g": 4.8,
+    "carbohydrates_g": 6.4,
+    "sugars_g": 0,
+    "fiber_g": null,
+    "sodium_mg": 60.0
+   },
+   "allergens_ar": null,
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "off",
+   "confidence": "مؤكد من ملصق — صورة بطاقة في OFF + خمس فحوص سلامة",
+   "source_official_url": null,
+   "source_off_url": "https://world.openfoodfacts.org/product/6281057005918",
+   "off_atwater_dev_pct": 2.0,
+   "cross_source_max_divergence_pct": null,
+   "last_verified": "2026-07-30",
+   "note_ar": null
+  },
+  {
+   "barcode": "6291056060504",
+   "name_ar": "زبادي العين 170 غ",
+   "name_en": "Al Ain Farms Yoghurt 170g",
+   "brand_ar": "مزارع العين",
+   "category_ar": "زبادي",
+   "origin_inferred_from_gs1_prefix": "الإمارات",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": "170 grams",
+   "serving_size": null,
+   "per_100g_or_100ml": {
+    "energy_kcal": 63,
+    "protein_g": 3.8,
+    "fat_g": 4.3,
+    "saturated_fat_g": 1.8,
+    "carbohydrates_g": 2,
+    "sugars_g": 0,
+    "fiber_g": null,
+    "sodium_mg": 208.0
+   },
+   "allergens_ar": null,
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "off",
+   "confidence": "مؤكد من ملصق — صورة بطاقة في OFF + خمس فحوص سلامة",
+   "source_official_url": null,
+   "source_off_url": "https://world.openfoodfacts.org/product/6291056060504",
+   "off_atwater_dev_pct": 1.7,
+   "cross_source_max_divergence_pct": null,
+   "last_verified": "2026-07-30",
+   "note_ar": null
+  },
+  {
+   "barcode": "6281007184489",
+   "name_ar": "شرائح جبن المراعي لايت",
+   "name_en": "Almarai Lite Cheese Slices",
+   "brand_ar": "المراعي",
+   "category_ar": "جبن",
+   "origin_inferred_from_gs1_prefix": "السعودية",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": "200 g",
+   "serving_size": "شريحة 20 غ",
+   "per_100g_or_100ml": {
+    "energy_kcal": 235.0,
+    "protein_g": 15.0,
+    "fat_g": 15.0,
+    "saturated_fat_g": 15.0,
+    "carbohydrates_g": 7.0,
+    "sugars_g": 4.5,
+    "fiber_g": 0.0,
+    "sodium_mg": 1185.0
+   },
+   "allergens_ar": [
+    "حليب"
+   ],
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "official+off",
+   "confidence": "مؤكد رسميًا ومطابَق بمصدرين مستقلين (موقع العلامة + بطاقة OFF)",
+   "source_official_url": "https://www.almarai.com/en/brands/almarai/cheeses-and-foods/cheese-slices/cheddar-cheese-slices-low-fat",
+   "source_off_url": "https://world.openfoodfacts.org/product/6281007184489",
+   "off_atwater_dev_pct": 5.1,
+   "cross_source_max_divergence_pct": 0.0,
+   "last_verified": "2026-07-30",
+   "note_ar": "أعلى تباعد بين المصدرين 0.0% — القيم من الموقع الرسمي."
+  },
+  {
+   "barcode": "6281007031240",
+   "name_ar": "جبنة فيتا المراعي",
+   "name_en": "Almarai Feta Cheese",
+   "brand_ar": "المراعي",
+   "category_ar": "جبن",
+   "origin_inferred_from_gs1_prefix": "السعودية",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": null,
+   "serving_size": null,
+   "per_100g_or_100ml": {
+    "energy_kcal": 184,
+    "protein_g": 14.5,
+    "fat_g": 11.6,
+    "saturated_fat_g": 7.9,
+    "carbohydrates_g": 5.3,
+    "sugars_g": 5.3,
+    "fiber_g": null,
+    "sodium_mg": 480.0
+   },
+   "allergens_ar": null,
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "off",
+   "confidence": "مؤكد من ملصق — صورة بطاقة في OFF + خمس فحوص سلامة",
+   "source_official_url": null,
+   "source_off_url": "https://world.openfoodfacts.org/product/6281007031240",
+   "off_atwater_dev_pct": 0.2,
+   "cross_source_max_divergence_pct": null,
+   "last_verified": "2026-07-30",
+   "note_ar": null
+  },
+  {
+   "barcode": "6281048105580",
+   "name_ar": "مثلثات جبن بوك للدهن",
+   "name_en": "Puck Cheese Spread Triangles",
+   "brand_ar": "بوك",
+   "category_ar": "جبن",
+   "origin_inferred_from_gs1_prefix": "السعودية",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": "8 Portions",
+   "serving_size": null,
+   "per_100g_or_100ml": {
+    "energy_kcal": 280,
+    "protein_g": 7.2,
+    "fat_g": 25,
+    "saturated_fat_g": 13,
+    "carbohydrates_g": 5.2,
+    "sugars_g": 0.1,
+    "fiber_g": 1,
+    "sodium_mg": null
+   },
+   "allergens_ar": null,
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "off",
+   "confidence": "مؤكد من ملصق — صورة بطاقة في OFF + خمس فحوص سلامة",
+   "source_official_url": null,
+   "source_off_url": "https://world.openfoodfacts.org/product/6281048105580",
+   "off_atwater_dev_pct": 1.9,
+   "cross_source_max_divergence_pct": null,
+   "last_verified": "2026-07-30",
+   "note_ar": null
+  },
+  {
+   "barcode": "6281048106990",
+   "name_ar": "مثلثات جبن بوك مطبوخ 24 حبة",
+   "name_en": "Puck Processed Cheese Triangles 24",
+   "brand_ar": "بوك",
+   "category_ar": "جبن",
+   "origin_inferred_from_gs1_prefix": "السعودية",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": "24 portions",
+   "serving_size": null,
+   "per_100g_or_100ml": {
+    "energy_kcal": 270,
+    "protein_g": 8.92,
+    "fat_g": 24.76,
+    "saturated_fat_g": 15,
+    "carbohydrates_g": 3.85,
+    "sugars_g": 0,
+    "fiber_g": null,
+    "sodium_mg": 436.0
+   },
+   "allergens_ar": null,
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "off",
+   "confidence": "مؤكد من ملصق — صورة بطاقة في OFF + خمس فحوص سلامة",
+   "source_official_url": null,
+   "source_off_url": "https://world.openfoodfacts.org/product/6281048106990",
+   "off_atwater_dev_pct": 1.5,
+   "cross_source_max_divergence_pct": null,
+   "last_verified": "2026-07-30",
+   "note_ar": null
+  },
+  {
+   "barcode": "6281048107188",
+   "name_ar": "جبن بوك كريمي قليل الدسم 500 غ",
+   "name_en": "Puck Low Fat Cream Cheese 500g",
+   "brand_ar": "بوك",
+   "category_ar": "جبن",
+   "origin_inferred_from_gs1_prefix": "السعودية",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": "500g",
+   "serving_size": null,
+   "per_100g_or_100ml": {
+    "energy_kcal": 251,
+    "protein_g": 11,
+    "fat_g": 22,
+    "saturated_fat_g": 13,
+    "carbohydrates_g": 2.6,
+    "sugars_g": 2.6,
+    "fiber_g": 0,
+    "sodium_mg": 770.0
+   },
+   "allergens_ar": null,
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "off",
+   "confidence": "مؤكد من ملصق — صورة بطاقة في OFF + خمس فحوص سلامة",
+   "source_official_url": null,
+   "source_off_url": "https://world.openfoodfacts.org/product/6281048107188",
+   "off_atwater_dev_pct": 0.6,
+   "cross_source_max_divergence_pct": null,
+   "last_verified": "2026-07-30",
+   "note_ar": null
+  },
+  {
+   "barcode": "6281057062676",
+   "name_ar": "شرائح جبن نادك قليلة الدسم 200 غ",
+   "name_en": "Nadec Cheese Slices Low Fat 200g",
+   "brand_ar": "نادك",
+   "category_ar": "جبن",
+   "origin_inferred_from_gs1_prefix": "السعودية",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": "200 g",
+   "serving_size": null,
+   "per_100g_or_100ml": {
+    "energy_kcal": 241,
+    "protein_g": 15,
+    "fat_g": 17,
+    "saturated_fat_g": 10,
+    "carbohydrates_g": 7,
+    "sugars_g": 7,
+    "fiber_g": 0,
+    "sodium_mg": 672.0
+   },
+   "allergens_ar": null,
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "off",
+   "confidence": "مؤكد من ملصق — صورة بطاقة في OFF + خمس فحوص سلامة",
+   "source_official_url": null,
+   "source_off_url": "https://world.openfoodfacts.org/product/6281057062676",
+   "off_atwater_dev_pct": 0.0,
+   "cross_source_max_divergence_pct": null,
+   "last_verified": "2026-07-30",
+   "note_ar": null
+  },
+  {
+   "barcode": "6281057040018",
+   "name_ar": "جبنة بيضاء نادك (فيتا)",
+   "name_en": "Nadec Feta White Cheese",
+   "brand_ar": "نادك",
+   "category_ar": "جبن",
+   "origin_inferred_from_gs1_prefix": "السعودية",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": null,
+   "serving_size": null,
+   "per_100g_or_100ml": {
+    "energy_kcal": 255,
+    "protein_g": 12,
+    "fat_g": 19,
+    "saturated_fat_g": 11.4,
+    "carbohydrates_g": 9,
+    "sugars_g": 9,
+    "fiber_g": 0,
+    "sodium_mg": 928.0
+   },
+   "allergens_ar": null,
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "off",
+   "confidence": "مؤكد من ملصق — صورة بطاقة في OFF + خمس فحوص سلامة",
+   "source_official_url": null,
+   "source_off_url": "https://world.openfoodfacts.org/product/6281057040018",
+   "off_atwater_dev_pct": 0.0,
+   "cross_source_max_divergence_pct": null,
+   "last_verified": "2026-07-30",
+   "note_ar": null
+  },
+  {
+   "barcode": "6281007055420",
+   "name_ar": "عصير برتقال المراعي",
+   "name_en": "Almarai Orange Juice",
+   "brand_ar": "المراعي",
+   "category_ar": "عصائر",
+   "origin_inferred_from_gs1_prefix": "السعودية",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": null,
+   "serving_size": "200 مل",
+   "per_100g_or_100ml": {
+    "energy_kcal": 46.0,
+    "protein_g": 0.5,
+    "fat_g": 0.0,
+    "saturated_fat_g": 0.0,
+    "carbohydrates_g": 11.0,
+    "sugars_g": 10.5,
+    "fiber_g": 0.2,
+    "sodium_mg": 4.3
+   },
+   "allergens_ar": null,
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "official+off_divergent",
+   "confidence": "يحتاج مراجعة — مصدران موثّقان يتباعدان",
+   "source_official_url": "https://www.almarai.com/en/brands/almarai/juices/orange-juices/orange",
+   "source_off_url": "https://world.openfoodfacts.org/product/6281007055420",
+   "off_atwater_dev_pct": 0.0,
+   "cross_source_max_divergence_pct": 9.1,
+   "last_verified": "2026-07-30",
+   "note_ar": "تباعد 9.1% بين الموقع الرسمي وبطاقة OFF. القيم المعروضة من الموقع الرسمي، وقيم OFF لكل 100: طاقة 42 · بروتين 0.5 · دهن 0 · كربوهيدرات 10. قد يكون اختلاف تركيبة أو إصدار عبوة — يُحسم بقراءة ملصق العبوة الحالية."
+  },
+  {
+   "barcode": "6281026120727",
+   "name_ar": "عصير برتقال الربيع 185 مل",
+   "name_en": "Al Rabie Orange Juice 185ml",
+   "brand_ar": "الربيع",
+   "category_ar": "عصائر",
+   "origin_inferred_from_gs1_prefix": "السعودية",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": "185ml",
+   "serving_size": null,
+   "per_100g_or_100ml": {
+    "energy_kcal": 44,
+    "protein_g": 0,
+    "fat_g": 0,
+    "saturated_fat_g": 0,
+    "carbohydrates_g": 11,
+    "sugars_g": 10,
+    "fiber_g": 1,
+    "sodium_mg": null
+   },
+   "allergens_ar": null,
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "off",
+   "confidence": "مؤكد من ملصق — صورة بطاقة في OFF + خمس فحوص سلامة",
+   "source_official_url": null,
+   "source_off_url": "https://world.openfoodfacts.org/product/6281026120727",
+   "off_atwater_dev_pct": 0.0,
+   "cross_source_max_divergence_pct": null,
+   "last_verified": "2026-07-30",
+   "note_ar": null
+  },
+  {
+   "barcode": "6281026170128",
+   "name_ar": "عصير أناناس الربيع 330 مل",
+   "name_en": "Al Rabie Pineapple Juice 330ml",
+   "brand_ar": "الربيع",
+   "category_ar": "عصائر",
+   "origin_inferred_from_gs1_prefix": "السعودية",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": "330ml",
+   "serving_size": null,
+   "per_100g_or_100ml": {
+    "energy_kcal": 48,
+    "protein_g": 0,
+    "fat_g": 0,
+    "saturated_fat_g": 0,
+    "carbohydrates_g": 12,
+    "sugars_g": 12,
+    "fiber_g": 0,
+    "sodium_mg": null
+   },
+   "allergens_ar": null,
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "off",
+   "confidence": "مؤكد من ملصق — صورة بطاقة في OFF + خمس فحوص سلامة",
+   "source_official_url": null,
+   "source_off_url": "https://world.openfoodfacts.org/product/6281026170128",
+   "off_atwater_dev_pct": 0.0,
+   "cross_source_max_divergence_pct": null,
+   "last_verified": "2026-07-30",
+   "note_ar": null
+  },
+  {
+   "barcode": "6271002211518",
+   "name_ar": "رحيق مانجو كي دي دي",
+   "name_en": "KDD Mango Nectar",
+   "brand_ar": "كي دي دي",
+   "category_ar": "عصائر",
+   "origin_inferred_from_gs1_prefix": "الكويت",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": null,
+   "serving_size": null,
+   "per_100g_or_100ml": {
+    "energy_kcal": 63,
+    "protein_g": 0.2,
+    "fat_g": 0.06,
+    "saturated_fat_g": 0.04,
+    "carbohydrates_g": 15.3,
+    "sugars_g": 15.3,
+    "fiber_g": 0.65,
+    "sodium_mg": 0
+   },
+   "allergens_ar": null,
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "off",
+   "confidence": "مؤكد من ملصق — صورة بطاقة في OFF + خمس فحوص سلامة",
+   "source_official_url": null,
+   "source_off_url": "https://world.openfoodfacts.org/product/6271002211518",
+   "off_atwater_dev_pct": 0.7,
+   "cross_source_max_divergence_pct": null,
+   "last_verified": "2026-07-30",
+   "note_ar": null
+  },
+  {
+   "barcode": "6291016114025",
+   "name_ar": "عصير كوكتيل فواكه لاكنور 180 مل",
+   "name_en": "Lacnor Fruit Cocktail 180ml",
+   "brand_ar": "لاكنور",
+   "category_ar": "عصائر",
+   "origin_inferred_from_gs1_prefix": "الإمارات",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": "180 ml",
+   "serving_size": null,
+   "per_100g_or_100ml": {
+    "energy_kcal": 55.8,
+    "protein_g": 0.1,
+    "fat_g": 0.1,
+    "saturated_fat_g": 0.1,
+    "carbohydrates_g": 13.95,
+    "sugars_g": 13.95,
+    "fiber_g": null,
+    "sodium_mg": null
+   },
+   "allergens_ar": null,
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "off",
+   "confidence": "مؤكد من ملصق — صورة بطاقة في OFF + خمس فحوص سلامة",
+   "source_official_url": null,
+   "source_off_url": "https://world.openfoodfacts.org/product/6291016114025",
+   "off_atwater_dev_pct": 2.3,
+   "cross_source_max_divergence_pct": null,
+   "last_verified": "2026-07-30",
+   "note_ar": null
+  },
+  {
+   "barcode": "6281007053624",
+   "name_ar": "عصير المراعي فواكه مشكلة بالمانجو",
+   "name_en": "Almarai Mixed Fruit Mango Juice",
+   "brand_ar": "المراعي",
+   "category_ar": "عصائر",
+   "origin_inferred_from_gs1_prefix": "السعودية",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": null,
+   "serving_size": null,
+   "per_100g_or_100ml": {
+    "energy_kcal": 53,
+    "protein_g": 0,
+    "fat_g": 0,
+    "saturated_fat_g": 0,
+    "carbohydrates_g": 13,
+    "sugars_g": 12.5,
+    "fiber_g": 0.2,
+    "sodium_mg": 0
+   },
+   "allergens_ar": null,
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "off",
+   "confidence": "مؤكد من ملصق — صورة بطاقة في OFF + خمس فحوص سلامة",
+   "source_official_url": null,
+   "source_off_url": "https://world.openfoodfacts.org/product/6281007053624",
+   "off_atwater_dev_pct": 1.9,
+   "cross_source_max_divergence_pct": null,
+   "last_verified": "2026-07-30",
+   "note_ar": null
+  },
+  {
+   "barcode": "6281007047654",
+   "name_ar": "خبز لوزين توست بالبران",
+   "name_en": "L'usine Sliced Bread Bran",
+   "brand_ar": "لوزين (المراعي)",
+   "category_ar": "خبز",
+   "origin_inferred_from_gs1_prefix": "السعودية",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": null,
+   "serving_size": "شريحة 30 غ",
+   "per_100g_or_100ml": {
+    "energy_kcal": 256.67,
+    "protein_g": 10.0,
+    "fat_g": 3.33,
+    "saturated_fat_g": 3.33,
+    "carbohydrates_g": 43.33,
+    "sugars_g": 3.33,
+    "fiber_g": 6.67,
+    "sodium_mg": 343.33
+   },
+   "allergens_ar": null,
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "official+off_divergent",
+   "confidence": "يحتاج مراجعة — مصدران موثّقان يتباعدان",
+   "source_official_url": "https://www.almarai.com/en/brands/lusine/bakery/bread/sliced-bread-bran",
+   "source_off_url": "https://world.openfoodfacts.org/product/6281007047654",
+   "off_atwater_dev_pct": 3.0,
+   "cross_source_max_divergence_pct": 16.8,
+   "last_verified": "2026-07-30",
+   "note_ar": "تباعد 16.8% بين الموقع الرسمي وبطاقة OFF. القيم المعروضة من الموقع الرسمي، وقيم OFF لكل 100: طاقة 257 · بروتين 10 · دهن 4 · كربوهيدرات 43.3. قد يكون اختلاف تركيبة أو إصدار عبوة — يُحسم بقراءة ملصق العبوة الحالية."
+  },
+  {
+   "barcode": "6281007029612",
+   "name_ar": "خبز لوزين متعدد الحبوب",
+   "name_en": "L'usine Multigrain Sliced Bread",
+   "brand_ar": "لوزين (المراعي)",
+   "category_ar": "خبز",
+   "origin_inferred_from_gs1_prefix": "السعودية",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": null,
+   "serving_size": "شريحة 30 غ",
+   "per_100g_or_100ml": {
+    "energy_kcal": 260.0,
+    "protein_g": 10.0,
+    "fat_g": 6.67,
+    "saturated_fat_g": 3.33,
+    "carbohydrates_g": 43.33,
+    "sugars_g": 3.33,
+    "fiber_g": 3.33,
+    "sodium_mg": 376.67
+   },
+   "allergens_ar": [
+    "جلوتين",
+    "صويا"
+   ],
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "official+off",
+   "confidence": "مؤكد رسميًا ومطابَق بمصدرين مستقلين (موقع العلامة + بطاقة OFF)",
+   "source_official_url": "https://www.almarai.com/en/brands/lusine/bakery/bread/sliced-bread-multigrain",
+   "source_off_url": "https://world.openfoodfacts.org/product/6281007029612",
+   "off_atwater_dev_pct": 1.4,
+   "cross_source_max_divergence_pct": 6.1,
+   "last_verified": "2026-07-30",
+   "note_ar": "أعلى تباعد بين المصدرين 6.1% — القيم من الموقع الرسمي."
+  },
+  {
+   "barcode": "6291106450019",
+   "name_ar": "خبز يومي أسمر",
+   "name_en": "Yaumi Brown Bread",
+   "brand_ar": "يومي",
+   "category_ar": "خبز",
+   "origin_inferred_from_gs1_prefix": "الإمارات",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": "20 Slices / 30g per serving",
+   "serving_size": "شريحة 30 غ",
+   "per_100g_or_100ml": {
+    "energy_kcal": 261,
+    "protein_g": 8.1,
+    "fat_g": 3.8,
+    "saturated_fat_g": 2.5,
+    "carbohydrates_g": 47.9,
+    "sugars_g": 2.6,
+    "fiber_g": 3.4,
+    "sodium_mg": 424.2
+   },
+   "allergens_ar": null,
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "off",
+   "confidence": "مؤكد من ملصق — صورة بطاقة في OFF + خمس فحوص سلامة",
+   "source_official_url": null,
+   "source_off_url": "https://world.openfoodfacts.org/product/6291106450019",
+   "off_atwater_dev_pct": 1.1,
+   "cross_source_max_divergence_pct": null,
+   "last_verified": "2026-07-30",
+   "note_ar": null
+  },
+  {
+   "barcode": "6281102680305",
+   "name_ar": "خبز هرفي توست أسمر",
+   "name_en": "Herfy Sliced Brown Bread",
+   "brand_ar": "هرفي",
+   "category_ar": "خبز",
+   "origin_inferred_from_gs1_prefix": "السعودية",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": null,
+   "serving_size": null,
+   "per_100g_or_100ml": {
+    "energy_kcal": 257,
+    "protein_g": 9.5,
+    "fat_g": 3.67,
+    "saturated_fat_g": 1.67,
+    "carbohydrates_g": 49,
+    "sugars_g": 5,
+    "fiber_g": 6.33,
+    "sodium_mg": 365.0
+   },
+   "allergens_ar": [
+    "جلوتين",
+    "حليب",
+    "صويا"
+   ],
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "off",
+   "confidence": "مؤكد من ملصق — صورة بطاقة في OFF + خمس فحوص سلامة",
+   "source_official_url": null,
+   "source_off_url": "https://world.openfoodfacts.org/product/6281102680305",
+   "off_atwater_dev_pct": 3.9,
+   "cross_source_max_divergence_pct": null,
+   "last_verified": "2026-07-30",
+   "note_ar": null
+  },
+  {
+   "barcode": "6271100330364",
+   "name_ar": "خبز تورتيلا (رول)",
+   "name_en": "MF Wrap Tortilla 320g",
+   "brand_ar": "MF",
+   "category_ar": "خبز",
+   "origin_inferred_from_gs1_prefix": "الكويت",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": "320 g",
+   "serving_size": null,
+   "per_100g_or_100ml": {
+    "energy_kcal": 306,
+    "protein_g": 8.55,
+    "fat_g": 5.97,
+    "saturated_fat_g": 3.23,
+    "carbohydrates_g": 52.4,
+    "sugars_g": 2.42,
+    "fiber_g": 3.87,
+    "sodium_mg": 360.0
+   },
+   "allergens_ar": [
+    "جلوتين"
+   ],
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "off",
+   "confidence": "مؤكد من ملصق — صورة بطاقة في OFF + خمس فحوص سلامة",
+   "source_official_url": null,
+   "source_off_url": "https://world.openfoodfacts.org/product/6271100330364",
+   "off_atwater_dev_pct": 2.8,
+   "cross_source_max_divergence_pct": null,
+   "last_verified": "2026-07-30",
+   "note_ar": null
+  },
+  {
+   "barcode": "6290400013425",
+   "name_ar": "شوفان كويكر كامل 400 غ",
+   "name_en": "Quaker Whole Oats 400g",
+   "brand_ar": "كويكر",
+   "category_ar": "شوفان وحبوب",
+   "origin_inferred_from_gs1_prefix": "الإمارات",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": "400 g",
+   "serving_size": null,
+   "per_100g_or_100ml": {
+    "energy_kcal": 392,
+    "protein_g": 13,
+    "fat_g": 8,
+    "saturated_fat_g": 1.7,
+    "carbohydrates_g": 65.7,
+    "sugars_g": 1.1,
+    "fiber_g": 4,
+    "sodium_mg": 0
+   },
+   "allergens_ar": null,
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "off",
+   "confidence": "مؤكد من ملصق — صورة بطاقة في OFF + خمس فحوص سلامة",
+   "source_official_url": null,
+   "source_off_url": "https://world.openfoodfacts.org/product/6290400013425",
+   "off_atwater_dev_pct": 1.3,
+   "cross_source_max_divergence_pct": null,
+   "last_verified": "2026-07-30",
+   "note_ar": null
+  },
+  {
+   "barcode": "6281055065778",
+   "name_ar": "شوفان هناء كامل",
+   "name_en": "Hanaa Whole Oats",
+   "brand_ar": "هناء",
+   "category_ar": "شوفان وحبوب",
+   "origin_inferred_from_gs1_prefix": "السعودية",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": null,
+   "serving_size": null,
+   "per_100g_or_100ml": {
+    "energy_kcal": 408,
+    "protein_g": 10.5,
+    "fat_g": 9.3,
+    "saturated_fat_g": null,
+    "carbohydrates_g": 70.5,
+    "sugars_g": 1,
+    "fiber_g": 11,
+    "sodium_mg": null
+   },
+   "allergens_ar": null,
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "off",
+   "confidence": "مؤكد من ملصق — صورة بطاقة في OFF + خمس فحوص سلامة",
+   "source_official_url": null,
+   "source_off_url": "https://world.openfoodfacts.org/product/6281055065778",
+   "off_atwater_dev_pct": 0.1,
+   "cross_source_max_divergence_pct": null,
+   "last_verified": "2026-07-30",
+   "note_ar": null
+  },
+  {
+   "barcode": "6291104283725",
+   "name_ar": "أرز بسمتي عضوي",
+   "name_en": "Organic Larder Organic Basmati Rice 1kg",
+   "brand_ar": "Organic Larder",
+   "category_ar": "حبوب",
+   "origin_inferred_from_gs1_prefix": "الإمارات",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": "1 kg",
+   "serving_size": null,
+   "per_100g_or_100ml": {
+    "energy_kcal": 344,
+    "protein_g": 11.4,
+    "fat_g": 3.4,
+    "saturated_fat_g": 1,
+    "carbohydrates_g": 66,
+    "sugars_g": 1,
+    "fiber_g": null,
+    "sodium_mg": null
+   },
+   "allergens_ar": null,
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "off",
+   "confidence": "مؤكد من ملصق — صورة بطاقة في OFF + خمس فحوص سلامة",
+   "source_official_url": null,
+   "source_off_url": "https://world.openfoodfacts.org/product/6291104283725",
+   "off_atwater_dev_pct": 1.1,
+   "cross_source_max_divergence_pct": null,
+   "last_verified": "2026-07-30",
+   "note_ar": null
+  },
+  {
+   "barcode": "6291047020876",
+   "name_ar": "معكرونة بيني الإمارات 400 غ",
+   "name_en": "Emirates Macaroni Penne 400g",
+   "brand_ar": "الإمارات ماكاروني",
+   "category_ar": "حبوب",
+   "origin_inferred_from_gs1_prefix": "الإمارات",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": "400 g",
+   "serving_size": null,
+   "per_100g_or_100ml": {
+    "energy_kcal": 370,
+    "protein_g": 12.5,
+    "fat_g": 1.5,
+    "saturated_fat_g": 0.24,
+    "carbohydrates_g": 73,
+    "sugars_g": null,
+    "fiber_g": 3,
+    "sodium_mg": null
+   },
+   "allergens_ar": [
+    "جلوتين"
+   ],
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "off",
+   "confidence": "مؤكد من ملصق — صورة بطاقة في OFF + خمس فحوص سلامة",
+   "source_official_url": null,
+   "source_off_url": "https://world.openfoodfacts.org/product/6291047020876",
+   "off_atwater_dev_pct": 3.9,
+   "cross_source_max_divergence_pct": null,
+   "last_verified": "2026-07-30",
+   "note_ar": null
+  },
+  {
+   "barcode": "6290050414412",
+   "name_ar": "رقائق الذرة (كورن فليكس)",
+   "name_en": "Corn Flakes",
+   "brand_ar": "غير مذكورة في المصدر",
+   "category_ar": "شوفان وحبوب",
+   "origin_inferred_from_gs1_prefix": "الإمارات",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": null,
+   "serving_size": null,
+   "per_100g_or_100ml": {
+    "energy_kcal": 378,
+    "protein_g": 7,
+    "fat_g": 0.9,
+    "saturated_fat_g": 0.2,
+    "carbohydrates_g": 84,
+    "sugars_g": 8,
+    "fiber_g": 3,
+    "sodium_mg": 44.0
+   },
+   "allergens_ar": null,
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "off",
+   "confidence": "مؤكد من ملصق — صورة بطاقة في OFF + خمس فحوص سلامة",
+   "source_official_url": null,
+   "source_off_url": "https://world.openfoodfacts.org/product/6290050414412",
+   "off_atwater_dev_pct": 1.6,
+   "cross_source_max_divergence_pct": null,
+   "last_verified": "2026-07-30",
+   "note_ar": null
+  },
+  {
+   "barcode": "6281174009028",
+   "name_ar": "تونة لحم فاتح في الماء",
+   "name_en": "Light Meat Tuna in Water",
+   "brand_ar": "غير مذكورة في المصدر",
+   "category_ar": "معلبات سمك",
+   "origin_inferred_from_gs1_prefix": "السعودية",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": null,
+   "serving_size": null,
+   "per_100g_or_100ml": {
+    "energy_kcal": 114,
+    "protein_g": 25.3,
+    "fat_g": 1.32,
+    "saturated_fat_g": 0.48,
+    "carbohydrates_g": 0.18,
+    "sugars_g": 0,
+    "fiber_g": 0,
+    "sodium_mg": 350.0
+   },
+   "allergens_ar": null,
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "off",
+   "confidence": "مؤكد من ملصق — صورة بطاقة في OFF + خمس فحوص سلامة",
+   "source_official_url": null,
+   "source_off_url": "https://world.openfoodfacts.org/product/6281174009028",
+   "off_atwater_dev_pct": 0.2,
+   "cross_source_max_divergence_pct": null,
+   "last_verified": "2026-07-30",
+   "note_ar": null
+  },
+  {
+   "barcode": "6281014300018",
+   "name_ar": "تونة لحم فاتح",
+   "name_en": "Light Meat Tuna",
+   "brand_ar": "غير مذكورة في المصدر",
+   "category_ar": "معلبات سمك",
+   "origin_inferred_from_gs1_prefix": "السعودية",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": null,
+   "serving_size": null,
+   "per_100g_or_100ml": {
+    "energy_kcal": 130,
+    "protein_g": 24,
+    "fat_g": 4,
+    "saturated_fat_g": 0.59,
+    "carbohydrates_g": 0,
+    "sugars_g": 0,
+    "fiber_g": 0,
+    "sodium_mg": 310.0
+   },
+   "allergens_ar": null,
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "off",
+   "confidence": "مؤكد من ملصق — صورة بطاقة في OFF + خمس فحوص سلامة",
+   "source_official_url": null,
+   "source_off_url": "https://world.openfoodfacts.org/product/6281014300018",
+   "off_atwater_dev_pct": 1.5,
+   "cross_source_max_divergence_pct": null,
+   "last_verified": "2026-07-30",
+   "note_ar": null
+  },
+  {
+   "barcode": "6281014134026",
+   "name_ar": "ذرة ذهبية كاملة — قودي",
+   "name_en": "Goody Golden Whole Corn",
+   "brand_ar": "قودي",
+   "category_ar": "معلبات",
+   "origin_inferred_from_gs1_prefix": "السعودية",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": "الوزن الصافي 165جرام",
+   "serving_size": null,
+   "per_100g_or_100ml": {
+    "energy_kcal": 77,
+    "protein_g": 2.6,
+    "fat_g": 1.7,
+    "saturated_fat_g": 0.2,
+    "carbohydrates_g": 11.5,
+    "sugars_g": 5.5,
+    "fiber_g": 2.8,
+    "sodium_mg": 180.0
+   },
+   "allergens_ar": null,
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "off",
+   "confidence": "مؤكد من ملصق — صورة بطاقة في OFF + خمس فحوص سلامة",
+   "source_official_url": null,
+   "source_off_url": "https://world.openfoodfacts.org/product/6281014134026",
+   "off_atwater_dev_pct": 6.9,
+   "cross_source_max_divergence_pct": null,
+   "last_verified": "2026-07-30",
+   "note_ar": null
+  },
+  {
+   "barcode": "6084000085827",
+   "name_ar": "فاصولياء بالصلصة (بيكد بينز)",
+   "name_en": "Baked Beans",
+   "brand_ar": "غير مذكورة في المصدر",
+   "category_ar": "معلبات",
+   "origin_inferred_from_gs1_prefix": "البحرين",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": null,
+   "serving_size": null,
+   "per_100g_or_100ml": {
+    "energy_kcal": 87,
+    "protein_g": 4.4,
+    "fat_g": 0.5,
+    "saturated_fat_g": 0.1,
+    "carbohydrates_g": 14.1,
+    "sugars_g": 5.3,
+    "fiber_g": null,
+    "sodium_mg": 452.0
+   },
+   "allergens_ar": null,
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "off",
+   "confidence": "مؤكد من ملصق — صورة بطاقة في OFF + خمس فحوص سلامة",
+   "source_official_url": null,
+   "source_off_url": "https://world.openfoodfacts.org/product/6084000085827",
+   "off_atwater_dev_pct": 9.8,
+   "cross_source_max_divergence_pct": null,
+   "last_verified": "2026-07-30",
+   "note_ar": null
+  },
+  {
+   "barcode": "6287004643981",
+   "name_ar": "تمر سكري — الضيف",
+   "name_en": "Dayfe Sukkari Dates",
+   "brand_ar": "الضيف",
+   "category_ar": "تمور",
+   "origin_inferred_from_gs1_prefix": "السعودية",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": "8 kg",
+   "serving_size": null,
+   "per_100g_or_100ml": {
+    "energy_kcal": 310,
+    "protein_g": 2,
+    "fat_g": 0,
+    "saturated_fat_g": 0,
+    "carbohydrates_g": 72,
+    "sugars_g": 68,
+    "fiber_g": 7,
+    "sodium_mg": 0
+   },
+   "allergens_ar": null,
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "off",
+   "confidence": "مؤكد من ملصق — صورة بطاقة في OFF + خمس فحوص سلامة",
+   "source_official_url": null,
+   "source_off_url": "https://world.openfoodfacts.org/product/6287004643981",
+   "off_atwater_dev_pct": 4.5,
+   "cross_source_max_divergence_pct": null,
+   "last_verified": "2026-07-30",
+   "note_ar": null
+  },
+  {
+   "barcode": "6271000708812",
+   "name_ar": "تمر عضوي",
+   "name_en": "Organic Dates",
+   "brand_ar": "غير مذكورة في المصدر",
+   "category_ar": "تمور",
+   "origin_inferred_from_gs1_prefix": "الكويت",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": null,
+   "serving_size": null,
+   "per_100g_or_100ml": {
+    "energy_kcal": 330,
+    "protein_g": 2,
+    "fat_g": 0.3,
+    "saturated_fat_g": 0,
+    "carbohydrates_g": 79,
+    "sugars_g": 70,
+    "fiber_g": 6,
+    "sodium_mg": 0
+   },
+   "allergens_ar": null,
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "off",
+   "confidence": "مؤكد من ملصق — صورة بطاقة في OFF + خمس فحوص سلامة",
+   "source_official_url": null,
+   "source_off_url": "https://world.openfoodfacts.org/product/6271000708812",
+   "off_atwater_dev_pct": 1.0,
+   "cross_source_max_divergence_pct": null,
+   "last_verified": "2026-07-30",
+   "note_ar": null
+  },
+  {
+   "barcode": "6281014110020",
+   "name_ar": "زبدة فول سوداني — قودي",
+   "name_en": "Goody Peanut Butter",
+   "brand_ar": "قودي",
+   "category_ar": "مكسرات وزبدة",
+   "origin_inferred_from_gs1_prefix": "السعودية",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": null,
+   "serving_size": null,
+   "per_100g_or_100ml": {
+    "energy_kcal": 562,
+    "protein_g": 21.9,
+    "fat_g": 46.9,
+    "saturated_fat_g": 9.38,
+    "carbohydrates_g": 25,
+    "sugars_g": 12.5,
+    "fiber_g": 6.25,
+    "sodium_mg": 375.0
+   },
+   "allergens_ar": [
+    "فول سوداني",
+    "صويا"
+   ],
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "off",
+   "confidence": "مؤكد من ملصق — صورة بطاقة في OFF + خمس فحوص سلامة",
+   "source_official_url": null,
+   "source_off_url": "https://world.openfoodfacts.org/product/6281014110020",
+   "off_atwater_dev_pct": 8.5,
+   "cross_source_max_divergence_pct": null,
+   "last_verified": "2026-07-30",
+   "note_ar": null
+  },
+  {
+   "barcode": "6281073113314",
+   "name_ar": "زبدة فول سوداني عضوية كريمية — ولنس",
+   "name_en": "Wellness Organic Creamy Peanut Butter",
+   "brand_ar": "ولنس (سنبلة)",
+   "category_ar": "مكسرات وزبدة",
+   "origin_inferred_from_gs1_prefix": "السعودية",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": "340 g",
+   "serving_size": null,
+   "per_100g_or_100ml": {
+    "energy_kcal": 597,
+    "protein_g": 19.7,
+    "fat_g": 46,
+    "saturated_fat_g": 8.67,
+    "carbohydrates_g": 11.7,
+    "sugars_g": 6,
+    "fiber_g": 8.67,
+    "sodium_mg": 2.0
+   },
+   "allergens_ar": [
+    "فول سوداني"
+   ],
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "off",
+   "confidence": "مؤكد من ملصق — صورة بطاقة في OFF + خمس فحوص سلامة",
+   "source_official_url": null,
+   "source_off_url": "https://world.openfoodfacts.org/product/6281073113314",
+   "off_atwater_dev_pct": 9.6,
+   "cross_source_max_divergence_pct": null,
+   "last_verified": "2026-07-30",
+   "note_ar": null
+  },
+  {
+   "barcode": "6291106330380",
+   "name_ar": "فستق محمّص ومملّح 400 غ",
+   "name_en": "Nutty Nuts Pistachios Roasted & Salted 400g",
+   "brand_ar": "Nutty Nuts",
+   "category_ar": "مكسرات",
+   "origin_inferred_from_gs1_prefix": "الإمارات",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": "400g",
+   "serving_size": null,
+   "per_100g_or_100ml": {
+    "energy_kcal": 619.76,
+    "protein_g": 20.86,
+    "fat_g": 47.56,
+    "saturated_fat_g": 5.92,
+    "carbohydrates_g": 27.07,
+    "sugars_g": 5.67,
+    "fiber_g": 15.2,
+    "sodium_mg": 300.0
+   },
+   "allergens_ar": [
+    "مكسرات"
+   ],
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "off",
+   "confidence": "مؤكد من ملصق — صورة بطاقة في OFF + خمس فحوص سلامة",
+   "source_official_url": null,
+   "source_off_url": "https://world.openfoodfacts.org/product/6291106330380",
+   "off_atwater_dev_pct": 0.0,
+   "cross_source_max_divergence_pct": null,
+   "last_verified": "2026-07-30",
+   "note_ar": null
+  },
+  {
+   "barcode": "6281007061261",
+   "name_ar": "حليب بروتين المراعي بالشوكولاتة 400 مل",
+   "name_en": "Almarai Chocolate Protein Milk 400ml",
+   "brand_ar": "المراعي",
+   "category_ar": "بروتين",
+   "origin_inferred_from_gs1_prefix": "السعودية",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": "400 ml",
+   "serving_size": "100 مل",
+   "per_100g_or_100ml": {
+    "energy_kcal": 73.0,
+    "protein_g": 8.5,
+    "fat_g": 0.4,
+    "saturated_fat_g": 0.3,
+    "carbohydrates_g": 9.6,
+    "sugars_g": 8.9,
+    "fiber_g": 0.3,
+    "sodium_mg": 119.0
+   },
+   "allergens_ar": [
+    "حليب"
+   ],
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "official+off_divergent",
+   "confidence": "يحتاج مراجعة — مصدران موثّقان يتباعدان",
+   "source_official_url": "https://www.almarai.com/en/brands/almarai/liquid-dairy/protein-milk/protein-milk-chocolate",
+   "source_off_url": "https://world.openfoodfacts.org/product/6281007061261",
+   "off_atwater_dev_pct": 1.1,
+   "cross_source_max_divergence_pct": 12.7,
+   "last_verified": "2026-07-30",
+   "note_ar": "تباعد 12.7% بين الموقع الرسمي وبطاقة OFF. القيم المعروضة من الموقع الرسمي، وقيم OFF لكل 100: طاقة 82.5 · بروتين 8.5 · دهن 0.4 · كربوهيدرات 11. قد يكون اختلاف تركيبة أو إصدار عبوة — يُحسم بقراءة ملصق العبوة الحالية."
+  },
+  {
+   "barcode": "6281018154846",
+   "name_ar": "حليب بروتين ندى سادة",
+   "name_en": "Nada Protein Plain Milk",
+   "brand_ar": "ندى",
+   "category_ar": "بروتين",
+   "origin_inferred_from_gs1_prefix": "السعودية",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": null,
+   "serving_size": null,
+   "per_100g_or_100ml": {
+    "energy_kcal": 87,
+    "protein_g": 8.5,
+    "fat_g": 2,
+    "saturated_fat_g": 1.4,
+    "carbohydrates_g": 8.7,
+    "sugars_g": 8.7,
+    "fiber_g": 0,
+    "sodium_mg": 43.0
+   },
+   "allergens_ar": null,
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "off",
+   "confidence": "مؤكد من ملصق — صورة بطاقة في OFF + خمس فحوص سلامة",
+   "source_official_url": null,
+   "source_off_url": "https://world.openfoodfacts.org/product/6281018154846",
+   "off_atwater_dev_pct": 0.2,
+   "cross_source_max_divergence_pct": null,
+   "last_verified": "2026-07-30",
+   "note_ar": null
+  },
+  {
+   "barcode": "6281057009121",
+   "name_ar": "شراب حليب بروتين نادك 250 مل",
+   "name_en": "Nadec Protein Milk Drink 250ml",
+   "brand_ar": "نادك",
+   "category_ar": "بروتين",
+   "origin_inferred_from_gs1_prefix": "السعودية",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": "250ml",
+   "serving_size": null,
+   "per_100g_or_100ml": {
+    "energy_kcal": 76,
+    "protein_g": 6,
+    "fat_g": 0.2,
+    "saturated_fat_g": 0.2,
+    "carbohydrates_g": 12.3,
+    "sugars_g": 11.8,
+    "fiber_g": 0.6,
+    "sodium_mg": 90.0
+   },
+   "allergens_ar": [
+    "تفاح",
+    "حليب"
+   ],
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "off",
+   "confidence": "مؤكد من ملصق — صورة بطاقة في OFF + خمس فحوص سلامة",
+   "source_official_url": null,
+   "source_off_url": "https://world.openfoodfacts.org/product/6281057009121",
+   "off_atwater_dev_pct": 1.3,
+   "cross_source_max_divergence_pct": null,
+   "last_verified": "2026-07-30",
+   "note_ar": null
+  },
+  {
+   "barcode": "6281036108005",
+   "name_ar": "شيبس ليز بالملح 155 غ",
+   "name_en": "Lay's Salted Chips 155g",
+   "brand_ar": "ليز",
+   "category_ar": "وجبات خفيفة",
+   "origin_inferred_from_gs1_prefix": "السعودية",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": "155g",
+   "serving_size": null,
+   "per_100g_or_100ml": {
+    "energy_kcal": 536,
+    "protein_g": 6.6,
+    "fat_g": 35.4,
+    "saturated_fat_g": 15.8,
+    "carbohydrates_g": 47.7,
+    "sugars_g": 0.8,
+    "fiber_g": 3.9,
+    "sodium_mg": 240.0
+   },
+   "allergens_ar": null,
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "off",
+   "confidence": "مؤكد من ملصق — صورة بطاقة في OFF + خمس فحوص سلامة",
+   "source_official_url": null,
+   "source_off_url": "https://world.openfoodfacts.org/product/6281036108005",
+   "off_atwater_dev_pct": 0.0,
+   "cross_source_max_divergence_pct": null,
+   "last_verified": "2026-07-30",
+   "note_ar": null
+  },
+  {
+   "barcode": "6291003010347",
+   "name_ar": "كوكيز تيفاني بقطع الشوكولاتة 90 غ",
+   "name_en": "Tiffany Choco Chip Cookies 90g",
+   "brand_ar": "تيفاني",
+   "category_ar": "وجبات خفيفة",
+   "origin_inferred_from_gs1_prefix": "الإمارات",
+   "origin_confidence": "مستنتج من بادئة الباركود — يحتاج تأكيدًا من العبوة",
+   "package_size": "90 g",
+   "serving_size": null,
+   "per_100g_or_100ml": {
+    "energy_kcal": 510,
+    "protein_g": 6,
+    "fat_g": 24.7,
+    "saturated_fat_g": 12.3,
+    "carbohydrates_g": 66.3,
+    "sugars_g": 31.7,
+    "fiber_g": 1.67,
+    "sodium_mg": 187.0
+   },
+   "allergens_ar": [
+    "بيض",
+    "جلوتين",
+    "حليب",
+    "صويا"
+   ],
+   "allergens_completeness": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+   "source_tier": "off",
+   "confidence": "مؤكد من ملصق — صورة بطاقة في OFF + خمس فحوص سلامة",
+   "source_official_url": null,
+   "source_off_url": "https://world.openfoodfacts.org/product/6291003010347",
+   "off_atwater_dev_pct": 0.3,
+   "cross_source_max_divergence_pct": null,
+   "last_verified": "2026-07-30",
+   "note_ar": null
+  }
+ ],
+ "needs_field_verification": {
+  "rejected_entries": [
+   {
+    "barcode": "6281007032261",
+    "brand": "حليب,  Almarai,  المراعي",
+    "name_off": "Milk",
+    "package_size": "١٢٣",
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281007032261"
+   },
+   {
+    "barcode": "6281007023498",
+    "brand": "Almarai,  المراعي",
+    "name_off": "Fresh Laban",
+    "package_size": "500",
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281007023498"
+   },
+   {
+    "barcode": "6281007120401",
+    "brand": "المراعي, Almarai",
+    "name_off": "Almarai fresh Milk",
+    "package_size": "2 litres",
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281007120401"
+   },
+   {
+    "barcode": "6281007045872",
+    "brand": "Lusine,  Almarai,  المراعي",
+    "name_off": "Cupcake CARAMEL",
+    "package_size": null,
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281007045872"
+   },
+   {
+    "barcode": "6281007026819",
+    "brand": "Almarai,  المراعي",
+    "name_off": "Feta cheese",
+    "package_size": "200g",
+    "reasons_ar": [
+     "حقول أساسية ناقصة"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281007026819"
+   },
+   {
+    "barcode": "6281018143949",
+    "brand": "Nada",
+    "name_off": "Drinking greek yoghurt",
+    "package_size": null,
+    "reasons_ar": [
+     "صوديوم غير معقول (65000 مغ/100غ)"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281018143949"
+   },
+   {
+    "barcode": "6281007120807",
+    "brand": "Almarai,  المراعي",
+    "name_off": "Fresh Milk",
+    "package_size": null,
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281007120807"
+   },
+   {
+    "barcode": "6281020010314",
+    "brand": "Luna",
+    "name_off": "بازيلا ( لونا)",
+    "package_size": "الوزن الصافي 380 غرام",
+    "reasons_ar": [
+     "حقول أساسية ناقصة",
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281020010314"
+   },
+   {
+    "barcode": "6281057050246",
+    "brand": "السعر 3.50 ريال",
+    "name_off": "جبنة مثلثات كابتن نادك",
+    "package_size": "الوزن الصافي 120 جرام",
+    "reasons_ar": [
+     "حقول أساسية ناقصة",
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281057050246"
+   },
+   {
+    "barcode": "6281018146841",
+    "brand": "NADA",
+    "name_off": "Greek yogurt low fat",
+    "package_size": null,
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281018146841"
+   },
+   {
+    "barcode": "6281022118247",
+    "brand": "Activia",
+    "name_off": "Peach & Apricot Yoghurt",
+    "package_size": null,
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281022118247"
+   },
+   {
+    "barcode": "6281039122015",
+    "brand": "Saudia",
+    "name_off": null,
+    "package_size": "200ml",
+    "reasons_ar": [
+     "حقول أساسية ناقصة"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281039122015"
+   },
+   {
+    "barcode": "6281007038928",
+    "brand": "السعر 1.50 ريال,  Almarai,  المراعي",
+    "name_off": "Al marai StrawbMilk",
+    "package_size": "200gr",
+    "reasons_ar": [
+     "صوديوم غير معقول (2800 مغ/100غ)"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281007038928"
+   },
+   {
+    "barcode": "6281007046381",
+    "brand": "Almarai,  المراعي",
+    "name_off": "Greek style yoghurt",
+    "package_size": null,
+    "reasons_ar": [
+     "صوديوم غير معقول (3120 مغ/100غ)",
+     "فشل أتواتر (85%)"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281007046381"
+   },
+   {
+    "barcode": "6281022118308",
+    "brand": "Activia",
+    "name_off": "Activia Stirred Plain Yogurt",
+    "package_size": null,
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281022118308"
+   },
+   {
+    "barcode": "6291003045790",
+    "brand": "Tiffany",
+    "name_off": "Crunchy wafer Fingers",
+    "package_size": "12",
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6291003045790"
+   },
+   {
+    "barcode": "6281007034067",
+    "brand": "المراعي,  Almarai",
+    "name_off": "Laban",
+    "package_size": "L 2.85",
+    "reasons_ar": [
+     "فشل أتواتر (20%)",
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281007034067"
+   },
+   {
+    "barcode": "6281007026031",
+    "brand": "السعر 22 ريال,  Almarai,  المراعي",
+    "name_off": "Labneh Full Fat",
+    "package_size": "الوزن الصافي 700g",
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281007026031"
+   },
+   {
+    "barcode": "6281041029012",
+    "brand": "السعر 15 ريال",
+    "name_off": "طحينة فاخرة حلواني صغير",
+    "package_size": "الوزن الصافي 250 غرام",
+    "reasons_ar": [
+     "فشل أتواتر (133%)",
+     "لا صورة بطاقة في المصدر",
+     "مجموع الماكروز > 100غ"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281041029012"
+   },
+   {
+    "barcode": "6281033213023",
+    "brand": "americana cake",
+    "name_off": "بتر كوكيز butter cookies",
+    "package_size": "454 g",
+    "reasons_ar": [
+     "حقول أساسية ناقصة"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281033213023"
+   },
+   {
+    "barcode": "6281026120840",
+    "brand": "Al Rabie",
+    "name_off": "Alrabie Mango juice",
+    "package_size": "185ml",
+    "reasons_ar": [
+     "حقول أساسية ناقصة"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281026120840"
+   },
+   {
+    "barcode": "6281007032568",
+    "brand": "Almarai,  المراعي",
+    "name_off": null,
+    "package_size": "150ml",
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281007032568"
+   },
+   {
+    "barcode": "6281100362043",
+    "brand": "Yaumi",
+    "name_off": "whole wheat sliced bread",
+    "package_size": null,
+    "reasons_ar": [
+     "فشل أتواتر (16%)"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281100362043"
+   },
+   {
+    "barcode": "6281057007028",
+    "brand": "Nadec",
+    "name_off": "Banana flavored milk",
+    "package_size": null,
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281057007028"
+   },
+   {
+    "barcode": "6281020101210",
+    "brand": "luna, لونا",
+    "name_off": "Luna tomato paste",
+    "package_size": "400 g",
+    "reasons_ar": [
+     "فشل أتواتر (13%)",
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281020101210"
+   },
+   {
+    "barcode": "6281063883418",
+    "brand": "Freshly",
+    "name_off": "Freshly Popcorn Microwave",
+    "package_size": "297g",
+    "reasons_ar": [
+     "فشل أتواتر (41%)"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281063883418"
+   },
+   {
+    "barcode": "6281007070768",
+    "brand": "Almarai",
+    "name_off": "Mixed berry juice",
+    "package_size": null,
+    "reasons_ar": [
+     "حقول أساسية ناقصة",
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281007070768"
+   },
+   {
+    "barcode": "6281007058124",
+    "brand": "7days,  Almarai,  المراعي",
+    "name_off": "Bake rolls Zaataar",
+    "package_size": null,
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281007058124"
+   },
+   {
+    "barcode": "6281034910389",
+    "brand": "Rani",
+    "name_off": "Rani fruit cocktail threejewels",
+    "package_size": "180ml",
+    "reasons_ar": [
+     "حقول أساسية ناقصة",
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281034910389"
+   },
+   {
+    "barcode": "6281063632528",
+    "brand": "Freshly",
+    "name_off": "Plum Tomatoes",
+    "package_size": null,
+    "reasons_ar": [
+     "فشل أتواتر (31%)"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281063632528"
+   },
+   {
+    "barcode": "6281007051736",
+    "brand": "Almarai,  المراعي",
+    "name_off": "Fresh milk",
+    "package_size": null,
+    "reasons_ar": [
+     "فشل أتواتر (479%)"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281007051736"
+   },
+   {
+    "barcode": "6281063881698",
+    "brand": null,
+    "name_off": "Freshly Tomato ketchup",
+    "package_size": "34oz",
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281063881698"
+   },
+   {
+    "barcode": "6281020010512",
+    "brand": "Luna",
+    "name_off": "فاصوليا بيضاء لونا",
+    "package_size": null,
+    "reasons_ar": [
+     "فشل أتواتر (17%)"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281020010512"
+   },
+   {
+    "barcode": "6281007028288",
+    "brand": "Almarai,  المراعي",
+    "name_off": "Al Marai Low fat milk",
+    "package_size": "250ml",
+    "reasons_ar": [
+     "حقول أساسية ناقصة"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281007028288"
+   },
+   {
+    "barcode": "6281007806831",
+    "brand": "Almarai, المراعي",
+    "name_off": "orange & carrot juice",
+    "package_size": "300ml",
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281007806831"
+   },
+   {
+    "barcode": "6281007055017",
+    "brand": "Almarai",
+    "name_off": "Apple Juice",
+    "package_size": "180ML",
+    "reasons_ar": [
+     "صوديوم غير معقول (3330 مغ/100غ)",
+     "فشل أتواتر (96212%)"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281007055017"
+   },
+   {
+    "barcode": "6281057100477",
+    "brand": "Nadec",
+    "name_off": "Organic Extra Virgin Olive Oil",
+    "package_size": "500ml",
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281057100477"
+   },
+   {
+    "barcode": "6281007032520",
+    "brand": "Almarai,  المراعي",
+    "name_off": null,
+    "package_size": null,
+    "reasons_ar": [
+     "فشل أتواتر (263%)",
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281007032520"
+   },
+   {
+    "barcode": "6281020010710",
+    "brand": "السعر 4.50 ريال, ",
+    "name_off": "فاصوليا بالطماطم (لونا)",
+    "package_size": "الوزن الصافي 380 غرام",
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281020010710"
+   },
+   {
+    "barcode": "6281063882701",
+    "brand": "Freshly",
+    "name_off": "Pancakes syrup buttery taste",
+    "package_size": "355ml",
+    "reasons_ar": [
+     "فشل أتواتر (13%)"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281063882701"
+   },
+   {
+    "barcode": "6281007039994",
+    "brand": "Almarai,  المراعي",
+    "name_off": "Sandwich rolls milk",
+    "package_size": null,
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281007039994"
+   },
+   {
+    "barcode": "6281050114402",
+    "brand": "Americana Quality",
+    "name_off": "HEROZ chicken popcorn",
+    "package_size": "50-60 pcs",
+    "reasons_ar": [
+     "حقول أساسية ناقصة"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281050114402"
+   },
+   {
+    "barcode": "6281014302661",
+    "brand": "GOODY",
+    "name_off": "Natural peanut butter",
+    "package_size": "340g",
+    "reasons_ar": [
+     "حقول أساسية ناقصة"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281014302661"
+   },
+   {
+    "barcode": "6281007045780",
+    "brand": "almarai,  المراعي",
+    "name_off": "yogurt greek style",
+    "package_size": "150 g",
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281007045780"
+   },
+   {
+    "barcode": "6281022116472",
+    "brand": "Activia",
+    "name_off": "Activia Yoghurt (Full fat)",
+    "package_size": null,
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281022116472"
+   },
+   {
+    "barcode": "6281007042857",
+    "brand": "l'usine,  Almarai,  المراعي",
+    "name_off": "SANDWICH ROLLS BROWN",
+    "package_size": null,
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281007042857"
+   },
+   {
+    "barcode": "6281007034791",
+    "brand": "Almarai,  المراعي",
+    "name_off": "Pizza Puff",
+    "package_size": null,
+    "reasons_ar": [
+     "فشل أتواتر (98527%)"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281007034791"
+   },
+   {
+    "barcode": "6281007052931",
+    "brand": "Almarai,  المراعي",
+    "name_off": "Milk",
+    "package_size": null,
+    "reasons_ar": [
+     "فشل أتواتر (2050%)"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281007052931"
+   },
+   {
+    "barcode": "6281026083633",
+    "brand": "Al Rabie",
+    "name_off": "Grape Apple & Berry Mix Fortified Juice",
+    "package_size": null,
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281026083633"
+   },
+   {
+    "barcode": "6281026164004",
+    "brand": "Al Rabie",
+    "name_off": "Orange drink",
+    "package_size": "250 ml",
+    "reasons_ar": [
+     "فشل أتواتر (99900%)"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281026164004"
+   },
+   {
+    "barcode": "6281007054980",
+    "brand": "Almarai, المراعي",
+    "name_off": "Orange juice",
+    "package_size": "150 ml",
+    "reasons_ar": [
+     "فشل أتواتر (101490%)"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281007054980"
+   },
+   {
+    "barcode": "6281039102017",
+    "brand": null,
+    "name_off": "Saudia Milk",
+    "package_size": "500",
+    "reasons_ar": [
+     "فشل أتواتر (23%)",
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281039102017"
+   },
+   {
+    "barcode": "6281007046046",
+    "brand": "المراعي,  Almarai",
+    "name_off": "Vanilla dessert CUSTARD",
+    "package_size": "85غم",
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281007046046"
+   },
+   {
+    "barcode": "6281018110323",
+    "brand": null,
+    "name_off": "حليب الندى",
+    "package_size": "٣لتر",
+    "reasons_ar": [
+     "فشل أتواتر (100%)"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281018110323"
+   },
+   {
+    "barcode": "6281007055468",
+    "brand": "Almarai,  المراعي",
+    "name_off": "Apple Juice",
+    "package_size": null,
+    "reasons_ar": [
+     "حقول أساسية ناقصة",
+     "صوديوم غير معقول (3000 مغ/100غ)"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281007055468"
+   },
+   {
+    "barcode": "6291100850044",
+    "brand": "Al ain",
+    "name_off": "Al ain water",
+    "package_size": "500 ml",
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6291100850044"
+   },
+   {
+    "barcode": "6281022118063",
+    "brand": "Activia, Al Safi-Danone Co. Ltd, Al Safi-Danone",
+    "name_off": "Activia laban light",
+    "package_size": "180 mL",
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281022118063"
+   },
+   {
+    "barcode": "6281007038959",
+    "brand": "Almarai,  المراعي سعر1.50",
+    "name_off": "حليب بنكهة الفانيلا (المراعي)",
+    "package_size": "الوزن الصافي 150مل",
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281007038959"
+   },
+   {
+    "barcode": "6291016005361",
+    "brand": "Lacnor",
+    "name_off": "Lacnor Fruit Cocktail",
+    "package_size": null,
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6291016005361"
+   },
+   {
+    "barcode": "6281007032575",
+    "brand": "Almarai,  المراعي",
+    "name_off": "low fat milk",
+    "package_size": "200ml",
+    "reasons_ar": [
+     "حقول أساسية ناقصة"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281007032575"
+   },
+   {
+    "barcode": "6291003000157",
+    "brand": "Tiffany",
+    "name_off": "Digestive Natural Wheat Biscuit",
+    "package_size": "2packs 400g",
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6291003000157"
+   },
+   {
+    "barcode": "6291016111062",
+    "brand": null,
+    "name_off": "LACNOR APPLE JUICE",
+    "package_size": "1L",
+    "reasons_ar": [
+     "فشل أتواتر (3182%)"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6291016111062"
+   },
+   {
+    "barcode": "6291100850075",
+    "brand": null,
+    "name_off": "Al ain bottled drinking water",
+    "package_size": null,
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6291100850075"
+   },
+   {
+    "barcode": "6291003017957",
+    "brand": "Tiffany",
+    "name_off": "Movie theater butter popcorn",
+    "package_size": "85 g",
+    "reasons_ar": [
+     "فشل أتواتر (316%)"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6291003017957"
+   },
+   {
+    "barcode": "6281018154747",
+    "brand": "Nada",
+    "name_off": "Protein milk vanilla",
+    "package_size": "320 ml",
+    "reasons_ar": [
+     "فشل أتواتر (13%)",
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281018154747"
+   },
+   {
+    "barcode": "6271002118411",
+    "brand": "KDD",
+    "name_off": "Milk chocolate",
+    "package_size": "125ml",
+    "reasons_ar": [
+     "فشل أتواتر (193%)"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6271002118411"
+   },
+   {
+    "barcode": "6291056002474",
+    "brand": "Al ain farms",
+    "name_off": "Greek yoghurt",
+    "package_size": null,
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6291056002474"
+   },
+   {
+    "barcode": "6291003012556",
+    "brand": "Tiffany",
+    "name_off": "Oatsville",
+    "package_size": null,
+    "reasons_ar": [
+     "صوديوم غير معقول (2840 مغ/100غ)",
+     "فشل أتواتر (76%)",
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6291003012556"
+   },
+   {
+    "barcode": "6281007905121",
+    "brand": "Almarai,  المراعي",
+    "name_off": "Chedder cheese",
+    "package_size": "454",
+    "reasons_ar": [
+     "فشل أتواتر (68%)"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281007905121"
+   },
+   {
+    "barcode": "6271002110712",
+    "brand": "Kdd",
+    "name_off": "Skimmed milk",
+    "package_size": null,
+    "reasons_ar": [
+     "فشل أتواتر (66%)"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6271002110712"
+   },
+   {
+    "barcode": "6281063881308",
+    "brand": "Freshly",
+    "name_off": "Foll sudani",
+    "package_size": "510g",
+    "reasons_ar": [
+     "حقول أساسية ناقصة",
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281063881308"
+   },
+   {
+    "barcode": "6271002122012",
+    "brand": "KDD",
+    "name_off": "Royal yogurt",
+    "package_size": null,
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6271002122012"
+   },
+   {
+    "barcode": "6291003085895",
+    "brand": "السعر 1.25 ريال",
+    "name_off": "FARO (Tiffany)",
+    "package_size": "الوزن الصافي 45 جرام",
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6291003085895"
+   },
+   {
+    "barcode": "6281007728379",
+    "brand": "Almarai,  المراعي",
+    "name_off": "Mixed brerry",
+    "package_size": null,
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281007728379"
+   },
+   {
+    "barcode": "6281057005611",
+    "brand": "Nadec",
+    "name_off": "Ayran Laban Drink",
+    "package_size": null,
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281057005611"
+   },
+   {
+    "barcode": "6281050826756",
+    "brand": "Americana",
+    "name_off": "Craves Chicken Fillet Burger - BBQ",
+    "package_size": null,
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281050826756"
+   },
+   {
+    "barcode": "6281007060356",
+    "brand": "السعر3 ريال,  Almarai,  المراعي",
+    "name_off": "حليب دبل الشوكولاتة",
+    "package_size": "الوزن الصافي 225 مل",
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281007060356"
+   },
+   {
+    "barcode": "6281018130987",
+    "brand": "Nada",
+    "name_off": "Low Fat Blueberry Greek Yoghurt",
+    "package_size": "160 grams",
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281018130987"
+   },
+   {
+    "barcode": "6271101130260",
+    "brand": "Diet center",
+    "name_off": "Penna arraniata",
+    "package_size": null,
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6271101130260"
+   },
+   {
+    "barcode": "6281050214751",
+    "brand": "Americana",
+    "name_off": "Boneless chicken wings",
+    "package_size": null,
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281050214751"
+   },
+   {
+    "barcode": "6281050520036",
+    "brand": "Americana",
+    "name_off": "Mixed Vegetables",
+    "package_size": "450 g",
+    "reasons_ar": [
+     "فشل أتواتر (17%)"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281050520036"
+   },
+   {
+    "barcode": "6271008330404",
+    "brand": "Kitco",
+    "name_off": "Mexita sweet and sour tortilla chips",
+    "package_size": null,
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر",
+     "مجموع الماكروز > 100غ"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6271008330404"
+   },
+   {
+    "barcode": "6271001230800",
+    "brand": "KITCO",
+    "name_off": "NICE Salt",
+    "package_size": null,
+    "reasons_ar": [
+     "حقول أساسية ناقصة",
+     "صوديوم غير معقول (800000 مغ/100غ)"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6271001230800"
+   },
+   {
+    "barcode": "6270024000988",
+    "brand": "Americana",
+    "name_off": "Chicken Mayonnaise",
+    "package_size": null,
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6270024000988"
+   },
+   {
+    "barcode": "6281073150180",
+    "brand": "Sunbulah",
+    "name_off": "Mixed vegetables",
+    "package_size": null,
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281073150180"
+   },
+   {
+    "barcode": "6281050113177",
+    "brand": "Americana",
+    "name_off": "Beef Burger - BBQ",
+    "package_size": null,
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281050113177"
+   },
+   {
+    "barcode": "6271002107545",
+    "brand": null,
+    "name_off": "KDD cafe latte",
+    "package_size": null,
+    "reasons_ar": [
+     "فشل أتواتر (269%)"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6271002107545"
+   },
+   {
+    "barcode": "6270024002562",
+    "brand": "Americana",
+    "name_off": "Chicken Pasta",
+    "package_size": null,
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6270024002562"
+   },
+   {
+    "barcode": "6270024001046",
+    "brand": "Americana",
+    "name_off": "Smoked Turkey",
+    "package_size": null,
+    "reasons_ar": [
+     "حقول أساسية ناقصة",
+     "صوديوم غير معقول (491000 مغ/100غ)"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6270024001046"
+   },
+   {
+    "barcode": "6270024001022",
+    "brand": "Americana",
+    "name_off": "Mortadella",
+    "package_size": null,
+    "reasons_ar": [
+     "حقول أساسية ناقصة",
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6270024001022"
+   },
+   {
+    "barcode": "6291100850068",
+    "brand": "Al ain",
+    "name_off": "Al ain pure natural bottled water",
+    "package_size": "1,5 l",
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6291100850068"
+   },
+   {
+    "barcode": "6291107050362",
+    "brand": null,
+    "name_off": "Baladna fresh yoghurt full fat",
+    "package_size": null,
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6291107050362"
+   },
+   {
+    "barcode": "6281022101119",
+    "brand": "Alsafi, Danone, الصافي، دانون",
+    "name_off": "Danao - juice milk - orange mango",
+    "package_size": "180 ml",
+    "reasons_ar": [
+     "حقول أساسية ناقصة"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281022101119"
+   },
+   {
+    "barcode": "6271002195511",
+    "brand": "KDD",
+    "name_off": "KDD Thick Cream",
+    "package_size": null,
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6271002195511"
+   },
+   {
+    "barcode": "6291107052342",
+    "brand": null,
+    "name_off": "Baladna 100% Fresh Milk, Low Fat",
+    "package_size": null,
+    "reasons_ar": [
+     "فشل أتواتر (13%)"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6291107052342"
+   },
+   {
+    "barcode": "6291107052908",
+    "brand": "Baladna",
+    "name_off": "100% Fresh Milk",
+    "package_size": "1 liter",
+    "reasons_ar": [
+     "حقول أساسية ناقصة"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6291107052908"
+   },
+   {
+    "barcode": "6271002283119",
+    "brand": null,
+    "name_off": "KDD Mango Nectar",
+    "package_size": null,
+    "reasons_ar": [
+     "حقول أساسية ناقصة",
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6271002283119"
+   },
+   {
+    "barcode": "6291107054513",
+    "brand": "Baladna",
+    "name_off": "feta baladna 200g",
+    "package_size": null,
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6291107054513"
+   },
+   {
+    "barcode": "6281018139980",
+    "brand": "Coca-Cola",
+    "name_off": "Nada Small",
+    "package_size": null,
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281018139980"
+   },
+   {
+    "barcode": "6291107055961",
+    "brand": "Baladna",
+    "name_off": "Mango Long Lasting Juice",
+    "package_size": null,
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6291107055961"
+   },
+   {
+    "barcode": "6281014303354",
+    "brand": "Goody",
+    "name_off": "Goody LIGHT Meat Tuna",
+    "package_size": null,
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281014303354"
+   },
+   {
+    "barcode": "6281007027380",
+    "brand": "Almarai,  المراعي",
+    "name_off": "Fresh yogurt",
+    "package_size": null,
+    "reasons_ar": [
+     "فشل أتواتر (32%)"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281007027380"
+   },
+   {
+    "barcode": "6281007033176",
+    "brand": "السعر 15 ريال,  Almarai,  المراعي",
+    "name_off": null,
+    "package_size": "200 جرام",
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281007033176"
+   },
+   {
+    "barcode": "6281063882916",
+    "brand": "freshly",
+    "name_off": "Italian salad dressing",
+    "package_size": "16 fl. oz.",
+    "reasons_ar": [
+     "فشل أتواتر (1233%)"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281063882916"
+   },
+   {
+    "barcode": "6281063881414",
+    "brand": "Freshly",
+    "name_off": "French Salad Dressing",
+    "package_size": "473ml",
+    "reasons_ar": [
+     "فشل أتواتر (29%)"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281063881414"
+   },
+   {
+    "barcode": "6281018130154",
+    "brand": "ندى",
+    "name_off": "زبادي طازج كامل الدسم",
+    "package_size": null,
+    "reasons_ar": [
+     "حقول أساسية ناقصة",
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281018130154"
+   },
+   {
+    "barcode": "6281063882503",
+    "brand": "Freshly",
+    "name_off": "Hot buffalo sauce",
+    "package_size": null,
+    "reasons_ar": [
+     "صوديوم غير معقول (2800 مغ/100غ)"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281063882503"
+   },
+   {
+    "barcode": "6281057007387",
+    "brand": "Nadec",
+    "name_off": "Cheddar Cheese Slices",
+    "package_size": null,
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281057007387"
+   },
+   {
+    "barcode": "6291106423297",
+    "brand": "Freshly Foods",
+    "name_off": "Chicken Shawarma Meat",
+    "package_size": null,
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6291106423297"
+   },
+   {
+    "barcode": "6281057008759",
+    "brand": "Nadec",
+    "name_off": "Triangle Cheese",
+    "package_size": null,
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281057008759"
+   },
+   {
+    "barcode": "6281018131786",
+    "brand": null,
+    "name_off": "Nada 0% fat greek yoghurt",
+    "package_size": null,
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281018131786"
+   },
+   {
+    "barcode": "6281022118230",
+    "brand": "Activia",
+    "name_off": "Activia Strawberry Stirred Yoghurt",
+    "package_size": "120g",
+    "reasons_ar": [
+     "لا صورة بطاقة في المصدر"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6281022118230"
+   },
+   {
+    "barcode": "6291003634192",
+    "brand": "Tiffany",
+    "name_off": "Day BREAK Chocolate",
+    "package_size": "12×25g",
+    "reasons_ar": [
+     "حقول أساسية ناقصة"
+    ],
+    "off_url": "https://world.openfoodfacts.org/product/6291003634192"
+   }
+  ],
+  "category_gaps_ar": [
+   {
+    "gap": "فول مدمس معلّب (العلالي · الشرق · أميرة)",
+    "why": "لا صنف واحد بصورة بطاقة موثّقة في المصدر المفتوح"
+   },
+   {
+    "gap": "حمص بالطحينة معلّب",
+    "why": "لا صنف موثّق"
+   },
+   {
+    "gap": "طحينة ودبس",
+    "why": "لا صنف موثّق"
+   },
+   {
+    "gap": "تمور بعلامات كبرى (العجوة · البركة · نخيل)",
+    "why": "الموجود صنفان بلا علامة مسجّلة"
+   },
+   {
+    "gap": "حليب مجفف (نيدو · المراعي بودرة)",
+    "why": "بطاقة الموقع الرسمي متاحة، والباركود غير مؤكَّد المطابقة"
+   },
+   {
+    "gap": "مكملات بروتين رياضية (واي بروتين)",
+    "why": "لا صنف خليجي بصورة بطاقة؛ العلامات المستوردة تحتاج قراءة عبوة السوق المحلي"
+   },
+   {
+    "gap": "لبنة وجبن قريش بعلامات محلية",
+    "why": "أصناف موجودة بلا بطاقة مصوّرة"
+   },
+   {
+    "gap": "مشروبات غازية ومشروبات طاقة",
+    "why": "خارج أولوية الدفعة، وبياناتها متفرّقة"
+   }
+  ]
+ }
+}

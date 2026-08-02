@@ -1,0 +1,893 @@
+{
+ "_field_names_note": "الأسماء النهائية تُثبَّت من غرفة الهندسة",
+ "correction_id": "CORR-001",
+ "title_ar": "حسم تعارضات السعرات في الأطباق السعودية التقليدية",
+ "produced_by": "غرفة مصنع البيانات (Data Factory)",
+ "produced_on": "2026-07-30",
+ "primary_source": {
+  "name": "Saudi Food Composition Tables (SFCT) — الهيئة العامة للغذاء والدواء (SFDA)",
+  "edition": "نسخة PDF إنجليزية منشورة 2026-04، 312 صفحة، 130 طبقًا",
+  "pdf_url": "https://www.sfda.gov.sa/sites/default/files/2026-04/SFCT-E.pdf",
+  "landing_page": "https://www.sfda.gov.sa/en/regulations/5521782",
+  "downloaded_on": "2026-07-30",
+  "sha_note": "حجم الملف 44,923,833 بايت"
+ },
+ "method_ar": [
+  "تنزيل جدول تركيب الأغذية السعودي الرسمي (SFCT) واستخراج نصّه بـpdftotext -layout.",
+  "تفكيك 130 بطاقة طبق: الوصفة + جدول «المحتوى الغذائي للطبق» لكل 100غ وللوصفة الكاملة.",
+  "مطابقة الـ130 صنفًا في src/data/saudiFoods.ts بالترتيب وبالاسم الإنجليزي معًا.",
+  "تطبيق خمس علامات سلامة على الصفوف الـ130 كلها (الجدول أدناه) قبل قبول أي رقم.",
+  "فحص هوية الطبق من قائمة مكوّنات المصدر قبل أي مساواة بالأرقام — لا بالاسم وحده."
+ ],
+ "audit_summary": {
+  "sfct_recipes_in_source": 130,
+  "repo_items_in_saudiFoods_ts": 130,
+  "exact_match_repo_vs_source": 128,
+  "source_rows_failing_integrity_checks": 4,
+  "source_rows_clean": 126,
+  "duplicate_dishes_across_datasets": 12,
+  "value_conflicts_resolved": 9,
+  "name_collisions_flagged": 3,
+  "repo_values_changed_by_source_defects": 1,
+  "corrections_total": 10,
+  "corrections_official_value_governs": 9,
+  "corrections_derived_method_documented": 1,
+  "labeling_only_changes": 1,
+  "authorized_by": "[CTO-25]"
+ },
+ "resolutions": [
+  {
+   "dish_ar": "مطازيز",
+   "dish_en_sfct": "Matazeez",
+   "classification": "official_value_governs",
+   "repo_food_item": {
+    "file": "src/data/foodItems.ts",
+    "id": "matazeez",
+    "line": 1126,
+    "serving_label_ar": "صحن (300غ)",
+    "serving_g": 300.0,
+    "current_calories_per_serving": 410.0,
+    "current_calories_per_100g": 136.7
+   },
+   "repo_sfct_item": {
+    "file": "src/data/saudiFoods.ts",
+    "id": "sfct-60",
+    "line": 882,
+    "calories_per_100g": 51.0,
+    "protein": 3.3,
+    "carbs": 8.0,
+    "fat": 1.3,
+    "fiber": 2.8
+   },
+   "official_per_100g": {
+    "energy_kcal": 51.0,
+    "energy_kj": 215.0,
+    "moisture_g": 86.8,
+    "protein_g": 3.3,
+    "fat_g": 1.3,
+    "saturated_fat_g": 0.49,
+    "carbs_total_g": 8.0,
+    "carbs_available_g": 5.0,
+    "sugars_g": null,
+    "fiber_g": 2.8,
+    "sodium_mg": 105.0,
+    "ash_g": 0.6,
+    "cholesterol_mg": 4.0
+   },
+   "divergence_pct_vs_official": 168.0,
+   "resolved_value_per_100g": 51.0,
+   "resolved_serving_values": {
+    "serving_g": 300.0,
+    "calories": 153.0,
+    "protein": 9.9,
+    "fat": 3.9,
+    "carbs": 24.0,
+    "fiber": 8.4
+   },
+   "source": "Saudi Food Composition Tables (SFCT) — الهيئة العامة للغذاء والدواء (SFDA)",
+   "source_edition": "نسخة PDF إنجليزية منشورة 2026-04، 312 صفحة، 130 طبقًا",
+   "source_url": "https://www.sfda.gov.sa/sites/default/files/2026-04/SFCT-E.pdf",
+   "source_pages": {
+    "recipe": "142",
+    "nutrition_table": "143"
+   },
+   "confidence": "مؤكد — جدول رسمي",
+   "verification": {
+    "mass_balance_sum_pct": 100.0,
+    "atwater_estimate_kcal": 50.5,
+    "atwater_deviation_pct": 1.0
+   },
+   "last_verified": "2026-07-30",
+   "notes_ar": "الرقم الرسمي 51 سعرة/100غ صحيح: وصفة المصدر تستخدم 2.8 لتر ماء ورطوبة الطبق 86.8%. الصحن 300غ = 153 سعرة. الاستبعاد الواقعي كان في غير محلّه هنا."
+  },
+  {
+   "dish_ar": "مرقوق",
+   "dish_en_sfct": "Margaouq",
+   "classification": "official_value_governs",
+   "repo_food_item": {
+    "file": "src/data/foodItems.ts",
+    "id": "marqooq",
+    "line": 1113,
+    "serving_label_ar": "صحن (300غ)",
+    "serving_g": 300.0,
+    "current_calories_per_serving": 400.0,
+    "current_calories_per_100g": 133.3
+   },
+   "repo_sfct_item": {
+    "file": "src/data/saudiFoods.ts",
+    "id": "sfct-3",
+    "line": 37,
+    "calories_per_100g": 98.0,
+    "protein": 6.0,
+    "carbs": 16.0,
+    "fat": 2.5,
+    "fiber": 5.7
+   },
+   "official_per_100g": {
+    "energy_kcal": 98.0,
+    "energy_kj": 412.0,
+    "moisture_g": 75.2,
+    "protein_g": 6.0,
+    "fat_g": 2.5,
+    "saturated_fat_g": 1.39,
+    "carbs_total_g": 16.0,
+    "carbs_available_g": 10.3,
+    "sugars_g": null,
+    "fiber_g": 5.7,
+    "sodium_mg": 165.0,
+    "ash_g": 0.6,
+    "cholesterol_mg": 15.0
+   },
+   "divergence_pct_vs_official": 36.0,
+   "resolved_value_per_100g": 98.0,
+   "resolved_serving_values": {
+    "serving_g": 300.0,
+    "calories": 294.0,
+    "protein": 18.0,
+    "fat": 7.5,
+    "carbs": 48.0,
+    "fiber": 17.1
+   },
+   "source": "Saudi Food Composition Tables (SFCT) — الهيئة العامة للغذاء والدواء (SFDA)",
+   "source_edition": "نسخة PDF إنجليزية منشورة 2026-04، 312 صفحة، 130 طبقًا",
+   "source_url": "https://www.sfda.gov.sa/sites/default/files/2026-04/SFCT-E.pdf",
+   "source_pages": {
+    "recipe": "18",
+    "nutrition_table": "19"
+   },
+   "confidence": "مؤكد — جدول رسمي",
+   "verification": {
+    "mass_balance_sum_pct": 100.3,
+    "atwater_estimate_kcal": 99.1,
+    "atwater_deviation_pct": 1.1
+   },
+   "last_verified": "2026-07-30",
+   "notes_ar": "طبق عجين بمرق ولحم برطوبة 75.2% — القيمة الرسمية 98 سعرة/100غ."
+  },
+  {
+   "dish_ar": "مصابيب",
+   "dish_en_sfct": "Masabeeb",
+   "classification": "official_value_governs",
+   "repo_food_item": {
+    "file": "src/data/foodItems.ts",
+    "id": "musabbeb",
+    "line": 4419,
+    "serving_label_ar": "صحن (200غ)",
+    "serving_g": 200.0,
+    "current_calories_per_serving": 460.0,
+    "current_calories_per_100g": 230.0
+   },
+   "repo_sfct_item": {
+    "file": "src/data/saudiFoods.ts",
+    "id": "sfct-57",
+    "line": 837,
+    "calories_per_100g": 173.0,
+    "protein": 5.8,
+    "carbs": 32.3,
+    "fat": 4.1,
+    "fiber": 8.7
+   },
+   "official_per_100g": {
+    "energy_kcal": 173.0,
+    "energy_kj": 724.0,
+    "moisture_g": 56.5,
+    "protein_g": 5.8,
+    "fat_g": 4.1,
+    "saturated_fat_g": 2.12,
+    "carbs_total_g": 32.3,
+    "carbs_available_g": 23.3,
+    "sugars_g": 4.0,
+    "fiber_g": 8.7,
+    "sodium_mg": 199.0,
+    "ash_g": 1.3,
+    "cholesterol_mg": 6.0
+   },
+   "divergence_pct_vs_official": 32.9,
+   "resolved_value_per_100g": 173.0,
+   "resolved_serving_values": {
+    "serving_g": 200.0,
+    "calories": 346.0,
+    "protein": 11.6,
+    "fat": 8.2,
+    "carbs": 64.6,
+    "fiber": 17.4
+   },
+   "source": "Saudi Food Composition Tables (SFCT) — الهيئة العامة للغذاء والدواء (SFDA)",
+   "source_edition": "نسخة PDF إنجليزية منشورة 2026-04، 312 صفحة، 130 طبقًا",
+   "source_url": "https://www.sfda.gov.sa/sites/default/files/2026-04/SFCT-E.pdf",
+   "source_pages": {
+    "recipe": "136",
+    "nutrition_table": "137"
+   },
+   "confidence": "مؤكد — جدول رسمي",
+   "verification": {
+    "mass_balance_sum_pct": 100.0,
+    "atwater_estimate_kcal": 170.7,
+    "atwater_deviation_pct": 1.3
+   },
+   "last_verified": "2026-07-30",
+   "notes_ar": "تطابق الهوية مؤكَّد من مكوّنات المصدر (دقيق بر · سمن · عسل)."
+  },
+  {
+   "dish_ar": "معصوب",
+   "dish_en_sfct": "Ma’soub",
+   "classification": "official_value_governs",
+   "repo_food_item": {
+    "file": "src/data/foodItems.ts",
+    "id": "masoub",
+    "line": 932,
+    "serving_label_ar": "صحن (250غ)",
+    "serving_g": 250.0,
+    "current_calories_per_serving": 450.0,
+    "current_calories_per_100g": 180.0
+   },
+   "repo_sfct_item": {
+    "file": "src/data/saudiFoods.ts",
+    "id": "sfct-30",
+    "line": 436,
+    "calories_per_100g": 233.0,
+    "protein": 5.3,
+    "carbs": 41.3,
+    "fat": 6.4,
+    "fiber": 6.2
+   },
+   "official_per_100g": {
+    "energy_kcal": 233.0,
+    "energy_kj": 973.0,
+    "moisture_g": 44.9,
+    "protein_g": 5.3,
+    "fat_g": 6.4,
+    "saturated_fat_g": 4.1,
+    "carbs_total_g": 41.3,
+    "carbs_available_g": 35.0,
+    "sugars_g": 16.3,
+    "fiber_g": 6.2,
+    "sodium_mg": 588.0,
+    "ash_g": 2.1,
+    "cholesterol_mg": 12.3
+   },
+   "divergence_pct_vs_official": -22.7,
+   "resolved_value_per_100g": 233.0,
+   "resolved_serving_values": {
+    "serving_g": 250.0,
+    "calories": 582.5,
+    "protein": 13.2,
+    "fat": 16.0,
+    "carbs": 103.2,
+    "fiber": 15.5
+   },
+   "source": "Saudi Food Composition Tables (SFCT) — الهيئة العامة للغذاء والدواء (SFDA)",
+   "source_edition": "نسخة PDF إنجليزية منشورة 2026-04، 312 صفحة، 130 طبقًا",
+   "source_url": "https://www.sfda.gov.sa/sites/default/files/2026-04/SFCT-E.pdf",
+   "source_pages": {
+    "recipe": "74",
+    "nutrition_table": "75"
+   },
+   "confidence": "مؤكد — جدول رسمي",
+   "verification": {
+    "mass_balance_sum_pct": 100.0,
+    "atwater_estimate_kcal": 231.2,
+    "atwater_deviation_pct": 0.8
+   },
+   "last_verified": "2026-07-30",
+   "notes_ar": "تطابق الهوية مؤكَّد (دقيق بر · موز · سمن · عسل). القيمة الرسمية أعلى من الحالية لا أدنى."
+  },
+  {
+   "dish_ar": "جريش",
+   "dish_en_sfct": "Al-Jareesh",
+   "classification": "official_value_governs",
+   "repo_food_item": {
+    "file": "src/data/foodItems.ts",
+    "id": "jareesh",
+    "line": 1087,
+    "serving_label_ar": "صحن (300غ)",
+    "serving_g": 300.0,
+    "current_calories_per_serving": 380.0,
+    "current_calories_per_100g": 126.7
+   },
+   "repo_sfct_item": {
+    "file": "src/data/saudiFoods.ts",
+    "id": "sfct-2",
+    "line": 22,
+    "calories_per_100g": 163.0,
+    "protein": 8.4,
+    "carbs": 17.3,
+    "fat": 7.4,
+    "fiber": 3.7
+   },
+   "official_per_100g": {
+    "energy_kcal": 163.0,
+    "energy_kj": 680.0,
+    "moisture_g": 66.0,
+    "protein_g": 8.4,
+    "fat_g": 7.4,
+    "saturated_fat_g": 2.78,
+    "carbs_total_g": 17.3,
+    "carbs_available_g": 14.0,
+    "sugars_g": null,
+    "fiber_g": 3.7,
+    "sodium_mg": 206.0,
+    "ash_g": 0.7,
+    "cholesterol_mg": 12.7
+   },
+   "divergence_pct_vs_official": -22.3,
+   "resolved_value_per_100g": 163.0,
+   "resolved_serving_values": {
+    "serving_g": 300.0,
+    "calories": 489.0,
+    "protein": 25.2,
+    "fat": 22.2,
+    "carbs": 51.9,
+    "fiber": 11.1
+   },
+   "source": "Saudi Food Composition Tables (SFCT) — الهيئة العامة للغذاء والدواء (SFDA)",
+   "source_edition": "نسخة PDF إنجليزية منشورة 2026-04، 312 صفحة، 130 طبقًا",
+   "source_url": "https://www.sfda.gov.sa/sites/default/files/2026-04/SFCT-E.pdf",
+   "source_pages": {
+    "recipe": "16",
+    "nutrition_table": "17"
+   },
+   "confidence": "مؤكد — جدول رسمي",
+   "verification": {
+    "mass_balance_sum_pct": 99.8,
+    "atwater_estimate_kcal": 163.6,
+    "atwater_deviation_pct": 0.4
+   },
+   "last_verified": "2026-07-30",
+   "notes_ar": "تطابق الهوية مؤكَّد (جريش مجروش · سمن · بصل). القيمة الرسمية أعلى من الحالية."
+  },
+  {
+   "dish_ar": "خبز ملة",
+   "dish_en_sfct": "Malla Bread (Jamri)",
+   "classification": "official_value_governs",
+   "repo_food_item": {
+    "file": "src/data/foodItems.ts",
+    "id": "khubz-milla",
+    "line": 5610,
+    "serving_label_ar": "لكل 100غ",
+    "serving_g": 100.0,
+    "current_calories_per_serving": 265.0,
+    "current_calories_per_100g": 265.0
+   },
+   "repo_sfct_item": {
+    "file": "src/data/saudiFoods.ts",
+    "id": "sfct-81",
+    "line": 1193,
+    "calories_per_100g": 222.0,
+    "protein": 10.8,
+    "carbs": 45.3,
+    "fat": 1.6,
+    "fiber": 9.7
+   },
+   "official_per_100g": {
+    "energy_kcal": 222.0,
+    "energy_kj": 929.0,
+    "moisture_g": 40.5,
+    "protein_g": 10.8,
+    "fat_g": 1.6,
+    "saturated_fat_g": 0.27,
+    "carbs_total_g": 45.3,
+    "carbs_available_g": 36.0,
+    "sugars_g": 2.8,
+    "fiber_g": 9.7,
+    "sodium_mg": 193.0,
+    "ash_g": 1.6,
+    "cholesterol_mg": null
+   },
+   "divergence_pct_vs_official": 19.4,
+   "resolved_value_per_100g": 222.0,
+   "resolved_serving_values": {
+    "serving_g": 100.0,
+    "calories": 222.0,
+    "protein": 10.8,
+    "fat": 1.6,
+    "carbs": 45.3,
+    "fiber": 9.7
+   },
+   "source": "Saudi Food Composition Tables (SFCT) — الهيئة العامة للغذاء والدواء (SFDA)",
+   "source_edition": "نسخة PDF إنجليزية منشورة 2026-04، 312 صفحة، 130 طبقًا",
+   "source_url": "https://www.sfda.gov.sa/sites/default/files/2026-04/SFCT-E.pdf",
+   "source_pages": {
+    "recipe": "190",
+    "nutrition_table": "191"
+   },
+   "confidence": "مؤكد — جدول رسمي",
+   "verification": {
+    "mass_balance_sum_pct": 99.8,
+    "atwater_estimate_kcal": 221.0,
+    "atwater_deviation_pct": 0.5
+   },
+   "last_verified": "2026-07-30",
+   "notes_ar": "تطابق الهوية مؤكَّد (دقيق بر · ماء · ملح)."
+  },
+  {
+   "dish_ar": "سليق بالدجاج",
+   "dish_en_sfct": "Al-Saleeg with Chicken",
+   "classification": "official_value_governs",
+   "repo_food_item": {
+    "file": "src/data/foodItems.ts",
+    "id": "saleeg-dajaj",
+    "line": 5345,
+    "serving_label_ar": "صحن (350غ)",
+    "serving_g": 350.0,
+    "current_calories_per_serving": 420.0,
+    "current_calories_per_100g": 120.0
+   },
+   "repo_sfct_item": {
+    "file": "src/data/saudiFoods.ts",
+    "id": "sfct-18",
+    "line": 259,
+    "calories_per_100g": 146.0,
+    "protein": 8.3,
+    "carbs": 18.3,
+    "fat": 4.2,
+    "fiber": null
+   },
+   "official_per_100g": {
+    "energy_kcal": 146.0,
+    "energy_kj": 610.0,
+    "moisture_g": 67.5,
+    "protein_g": 8.3,
+    "fat_g": 4.2,
+    "saturated_fat_g": 1.98,
+    "carbs_total_g": 18.3,
+    "carbs_available_g": 18.3,
+    "sugars_g": null,
+    "fiber_g": null,
+    "sodium_mg": 542.0,
+    "ash_g": 1.6,
+    "cholesterol_mg": 25.7
+   },
+   "divergence_pct_vs_official": -17.8,
+   "resolved_value_per_100g": 146.0,
+   "resolved_serving_values": {
+    "serving_g": 350.0,
+    "calories": 511.0,
+    "protein": 29.1,
+    "fat": 14.7,
+    "carbs": 64.0,
+    "fiber": null
+   },
+   "source": "Saudi Food Composition Tables (SFCT) — الهيئة العامة للغذاء والدواء (SFDA)",
+   "source_edition": "نسخة PDF إنجليزية منشورة 2026-04، 312 صفحة، 130 طبقًا",
+   "source_url": "https://www.sfda.gov.sa/sites/default/files/2026-04/SFCT-E.pdf",
+   "source_pages": {
+    "recipe": "50",
+    "nutrition_table": "51"
+   },
+   "confidence": "مؤكد — جدول رسمي",
+   "verification": {
+    "mass_balance_sum_pct": 99.9,
+    "atwater_estimate_kcal": 144.2,
+    "atwater_deviation_pct": 1.2
+   },
+   "last_verified": "2026-07-30",
+   "notes_ar": "تطابق الهوية مؤكَّد (أرز مصري · دجاج · مستكة). الألياف غير منشورة في المصدر (—) فتُترك فارغة."
+  },
+  {
+   "dish_ar": "قرصان",
+   "dish_en_sfct": "Qursan",
+   "classification": "official_value_governs",
+   "repo_food_item": {
+    "file": "src/data/foodItems.ts",
+    "id": "qursan",
+    "line": 1100,
+    "serving_label_ar": "صحن (300غ)",
+    "serving_g": 300.0,
+    "current_calories_per_serving": 420.0,
+    "current_calories_per_100g": 140.0
+   },
+   "repo_sfct_item": {
+    "file": "src/data/saudiFoods.ts",
+    "id": "sfct-1",
+    "line": 7,
+    "calories_per_100g": 132.0,
+    "protein": 3.7,
+    "carbs": 14.3,
+    "fat": 7.5,
+    "fiber": 4.1
+   },
+   "official_per_100g": {
+    "energy_kcal": 132.0,
+    "energy_kj": 554.0,
+    "moisture_g": 72.5,
+    "protein_g": 3.7,
+    "fat_g": 7.5,
+    "saturated_fat_g": 2.22,
+    "carbs_total_g": 14.3,
+    "carbs_available_g": 10.3,
+    "sugars_g": 1.03,
+    "fiber_g": 4.1,
+    "sodium_mg": 422.0,
+    "ash_g": 1.6,
+    "cholesterol_mg": 15.7
+   },
+   "divergence_pct_vs_official": 6.1,
+   "resolved_value_per_100g": 132.0,
+   "resolved_serving_values": {
+    "serving_g": 300.0,
+    "calories": 396.0,
+    "protein": 11.1,
+    "fat": 22.5,
+    "carbs": 42.9,
+    "fiber": 12.3
+   },
+   "source": "Saudi Food Composition Tables (SFCT) — الهيئة العامة للغذاء والدواء (SFDA)",
+   "source_edition": "نسخة PDF إنجليزية منشورة 2026-04، 312 صفحة، 130 طبقًا",
+   "source_url": "https://www.sfda.gov.sa/sites/default/files/2026-04/SFCT-E.pdf",
+   "source_pages": {
+    "recipe": "14",
+    "nutrition_table": "15"
+   },
+   "confidence": "مؤكد — جدول رسمي",
+   "verification": {
+    "mass_balance_sum_pct": 99.6,
+    "atwater_estimate_kcal": 131.7,
+    "atwater_deviation_pct": 0.2
+   },
+   "last_verified": "2026-07-30",
+   "notes_ar": "الفارق 6.1% فقط — تصحيح تنسيقي لا جوهري، ويُوحَّد على المصدر."
+  },
+  {
+   "dish_ar": "كبسة دجاج",
+   "dish_en_sfct": "Chicken Kabsa",
+   "classification": "official_value_governs",
+   "repo_food_item": {
+    "file": "src/data/foodItems.ts",
+    "id": "kabsa-chicken",
+    "line": 1022,
+    "serving_label_ar": "صحن (350غ)",
+    "serving_g": 350.0,
+    "current_calories_per_serving": 620.0,
+    "current_calories_per_100g": 177.1
+   },
+   "repo_sfct_item": {
+    "file": "src/data/saudiFoods.ts",
+    "id": "sfct-96",
+    "line": 1418,
+    "calories_per_100g": 187.0,
+    "protein": 8.4,
+    "carbs": 26.0,
+    "fat": 5.6,
+    "fiber": 1.4
+   },
+   "official_per_100g": {
+    "energy_kcal": 187.0,
+    "energy_kj": 784.0,
+    "moisture_g": 58.2,
+    "protein_g": 8.4,
+    "fat_g": 5.6,
+    "saturated_fat_g": 2.22,
+    "carbs_total_g": 26.0,
+    "carbs_available_g": 25.0,
+    "sugars_g": null,
+    "fiber_g": 1.4,
+    "sodium_mg": 666.0,
+    "ash_g": 1.6,
+    "cholesterol_mg": 23.7
+   },
+   "divergence_pct_vs_official": -5.3,
+   "resolved_value_per_100g": 187.0,
+   "resolved_serving_values": {
+    "serving_g": 350.0,
+    "calories": 654.5,
+    "protein": 29.4,
+    "fat": 19.6,
+    "carbs": 91.0,
+    "fiber": 4.9
+   },
+   "source": "Saudi Food Composition Tables (SFCT) — الهيئة العامة للغذاء والدواء (SFDA)",
+   "source_edition": "نسخة PDF إنجليزية منشورة 2026-04، 312 صفحة، 130 طبقًا",
+   "source_url": "https://www.sfda.gov.sa/sites/default/files/2026-04/SFCT-E.pdf",
+   "source_pages": {
+    "recipe": "224",
+    "nutrition_table": "225"
+   },
+   "confidence": "مؤكد — جدول رسمي",
+   "verification": {
+    "mass_balance_sum_pct": 99.8,
+    "atwater_estimate_kcal": 186.8,
+    "atwater_deviation_pct": 0.1
+   },
+   "last_verified": "2026-07-30",
+   "notes_ar": "الفارق 5.3% فقط — تصحيح تنسيقي لا جوهري، ويُوحَّد على المصدر."
+  },
+  {
+   "dish_ar": "قشد",
+   "dish_en_sfct": "Qishd",
+   "classification": "name_collision",
+   "repo_food_item": {
+    "file": "src/data/foodItems.ts",
+    "id": "qishd",
+    "line": 5624,
+    "serving_label_ar": "لكل 100غ",
+    "serving_g": 100.0,
+    "current_calories_per_serving": 360.0,
+    "current_calories_per_100g": 360.0
+   },
+   "repo_sfct_item": {
+    "file": "src/data/saudiFoods.ts",
+    "id": "sfct-5",
+    "line": 67,
+    "calories_per_100g": 382.0,
+    "protein": 3.1,
+    "carbs": 63.3,
+    "fat": 14.3,
+    "fiber": 7.1
+   },
+   "official_per_100g": {
+    "energy_kcal": 382.0,
+    "energy_kj": 1600.0,
+    "moisture_g": 17.5,
+    "protein_g": 3.1,
+    "fat_g": 14.3,
+    "saturated_fat_g": 8.11,
+    "carbs_total_g": 63.3,
+    "carbs_available_g": 56.7,
+    "sugars_g": 52.6,
+    "fiber_g": 7.1,
+    "sodium_mg": 20.0,
+    "ash_g": 1.5,
+    "cholesterol_mg": 37.7
+   },
+   "divergence_pct_vs_official": -5.8,
+   "resolved_value_per_100g": null,
+   "resolved_serving_values": null,
+   "source": "Saudi Food Composition Tables (SFCT) — الهيئة العامة للغذاء والدواء (SFDA)",
+   "source_edition": "نسخة PDF إنجليزية منشورة 2026-04، 312 صفحة، 130 طبقًا",
+   "source_url": "https://www.sfda.gov.sa/sites/default/files/2026-04/SFCT-E.pdf",
+   "source_pages": {
+    "recipe": "22",
+    "nutrition_table": "23"
+   },
+   "confidence": "يحتاج قرار تسمية (لا قرار رقم)",
+   "verification": {
+    "mass_balance_sum_pct": 99.7,
+    "atwater_estimate_kcal": 382.1,
+    "atwater_deviation_pct": 0.0
+   },
+   "last_verified": "2026-07-30",
+   "notes_ar": "ليس تعارض أرقام بل تصادم أسماء: «قشد» في المصدر طبقٌ من زبدة ودقيق وتمر خلاص (382 سعرة، 63.3غ كربوهيدرات)، و«قشد» في المستودع قشطة تُقدَّم مع التمر (360 سعرة، 36غ دهن). صنفان مختلفان — لا يُصحَّح أحدهما بالآخر."
+  },
+  {
+   "dish_ar": "مراصيع",
+   "dish_en_sfct": "Marasee’",
+   "classification": "name_collision",
+   "repo_food_item": {
+    "file": "src/data/foodItems.ts",
+    "id": "muraasee",
+    "line": 4433,
+    "serving_label_ar": "صحن (150غ)",
+    "serving_g": 150.0,
+    "current_calories_per_serving": 420.0,
+    "current_calories_per_100g": 280.0
+   },
+   "repo_sfct_item": {
+    "file": "src/data/saudiFoods.ts",
+    "id": "sfct-56",
+    "line": 822,
+    "calories_per_100g": 233.0,
+    "protein": 6.4,
+    "carbs": 36.3,
+    "fat": 8.7,
+    "fiber": 8.3
+   },
+   "official_per_100g": {
+    "energy_kcal": 233.0,
+    "energy_kj": 976.0,
+    "moisture_g": 47.1,
+    "protein_g": 6.4,
+    "fat_g": 8.7,
+    "saturated_fat_g": 5.38,
+    "carbs_total_g": 36.3,
+    "carbs_available_g": 28.0,
+    "sugars_g": null,
+    "fiber_g": 8.3,
+    "sodium_mg": 230.0,
+    "ash_g": 1.4,
+    "cholesterol_mg": 22.7
+   },
+   "divergence_pct_vs_official": 20.2,
+   "resolved_value_per_100g": null,
+   "resolved_serving_values": null,
+   "source": "Saudi Food Composition Tables (SFCT) — الهيئة العامة للغذاء والدواء (SFDA)",
+   "source_edition": "نسخة PDF إنجليزية منشورة 2026-04، 312 صفحة، 130 طبقًا",
+   "source_url": "https://www.sfda.gov.sa/sites/default/files/2026-04/SFCT-E.pdf",
+   "source_pages": {
+    "recipe": "134",
+    "nutrition_table": "135"
+   },
+   "confidence": "يحتاج قرار تسمية (لا قرار رقم)",
+   "verification": {
+    "mass_balance_sum_pct": 99.9,
+    "atwater_estimate_kcal": 232.5,
+    "atwater_deviation_pct": 0.2
+   },
+   "last_verified": "2026-07-30",
+   "notes_ar": "تصادم أسماء محتمل: مراصيع المصدر طبق مالح (كشنة: بصل · طماطم · سمن · بهارات + عجين)، ومراصيع المستودع «كبيبات حلوة بالسمن والسكر». الهوية تحتاج حسمًا قبل أي مساواة بالأرقام."
+  },
+  {
+   "dish_ar": "رغفان",
+   "dish_en_sfct": "Raghfan",
+   "classification": "name_collision",
+   "repo_food_item": {
+    "file": "src/data/foodItems.ts",
+    "id": "righfan",
+    "line": 5387,
+    "serving_label_ar": "رغيف (150غ)",
+    "serving_g": 150.0,
+    "current_calories_per_serving": 260.0,
+    "current_calories_per_100g": 173.3
+   },
+   "repo_sfct_item": {
+    "file": "src/data/saudiFoods.ts",
+    "id": "sfct-82",
+    "line": 1208,
+    "calories_per_100g": 137.0,
+    "protein": 8.6,
+    "carbs": 19.0,
+    "fat": 4.5,
+    "fiber": 4.9
+   },
+   "official_per_100g": {
+    "energy_kcal": 137.0,
+    "energy_kj": 574.0,
+    "moisture_g": 66.7,
+    "protein_g": 8.6,
+    "fat_g": 4.5,
+    "saturated_fat_g": 1.87,
+    "carbs_total_g": 19.0,
+    "carbs_available_g": 12.33,
+    "sugars_g": null,
+    "fiber_g": 4.9,
+    "sodium_mg": 569.0,
+    "ash_g": 1.4,
+    "cholesterol_mg": 16.3
+   },
+   "divergence_pct_vs_official": 26.5,
+   "resolved_value_per_100g": null,
+   "resolved_serving_values": null,
+   "source": "Saudi Food Composition Tables (SFCT) — الهيئة العامة للغذاء والدواء (SFDA)",
+   "source_edition": "نسخة PDF إنجليزية منشورة 2026-04، 312 صفحة، 130 طبقًا",
+   "source_url": "https://www.sfda.gov.sa/sites/default/files/2026-04/SFCT-E.pdf",
+   "source_pages": {
+    "recipe": "192",
+    "nutrition_table": "193"
+   },
+   "confidence": "يحتاج قرار تسمية (لا قرار رقم)",
+   "verification": {
+    "mass_balance_sum_pct": 100.2,
+    "atwater_estimate_kcal": 134.0,
+    "atwater_deviation_pct": 2.2
+   },
+   "last_verified": "2026-07-30",
+   "notes_ar": "تصادم مستوى لا رقم: رغفان المصدر طبق كامل (لحم ضأن 2.2كغ · مريس · دقيق) بصوديوم 569مغ/100غ، ورغفان المستودع رغيف خبز 150غ. الصنفان ليسا الشيء نفسه."
+  }
+ ],
+ "source_defect_ledger": [
+  {
+   "dish_en": "Khawadhah (Saweeq)",
+   "dish_ar": "خواضة (سويق)",
+   "page": "43",
+   "defect_signature": "توازن الكتلة = 102.4غ",
+   "assessment_ar": "زيادة 2.4غ فوق 100 — على الأرجح تدوير تراكمي. **الطاقة غير متأثرة** (أتواتر يطابق)، ولا صنف من الأصناف المصحَّحة يعتمد عليه."
+  },
+  {
+   "dish_en": "Melon Kunafah",
+   "dish_ar": "كنافة شمام",
+   "page": "103",
+   "defect_signature": "متاح 45.3 > كلي 21.0 · توازن الكتلة 73.0غ · سكر مضاف 48 > سكر كلي 18.9",
+   "assessment_ar": "إزاحة صفوف. القيمة الصحيحة للكربوهيدرات الكلية = **48.0** (انظر 5.2)."
+  },
+  {
+   "dish_en": "Ruwakah",
+   "dish_ar": "رواكة",
+   "page": "157",
+   "defect_signature": "مشبع 114غ > دهن كلي 3.5غ · نسبة kJ/kcal = 0.03",
+   "assessment_ar": "خانتا الطاقة والمشبع معطوبتان. الطاقة الصحيحة محسوبة = **118** سعرة (انظر 5.2)."
+  },
+  {
+   "dish_en": "Salted Mashed Citron (Trunj)",
+   "dish_ar": "ترنج مملّح مدقوق",
+   "page": "267",
+   "defect_signature": "سكر مضاف 1.3 > سكر كلي 0.0",
+   "assessment_ar": "عطب وسم في خانة السكر. **الطاقة غير متأثرة** (21 سعرة، وتوازن الكتلة 100.2غ)، ولا صنف مصحَّح يعتمد عليه."
+  }
+ ],
+ "defect_driven_repo_updates": [
+  {
+   "dish_ar": "كنافة شمام",
+   "dish_en_sfct": "Melon Kunafah",
+   "repo_item": {
+    "file": "src/data/saudiFoods.ts",
+    "id": "sfct-42",
+    "line": 614
+   },
+   "field": "carbs",
+   "current_value": 46.0,
+   "resolved_value": 48.0,
+   "printed_in_source": 21.0,
+   "official_per_100g": {
+    "energy_kcal": 359.0,
+    "energy_kj": 1503.0,
+    "moisture_g": 30.8,
+    "protein_g": 3.0,
+    "fat_g": 17.9,
+    "saturated_fat_g": 12.7,
+    "carbs_total_g": 21.0,
+    "carbs_available_g": 45.3,
+    "sugars_g": 18.9,
+    "fiber_g": 2.7,
+    "sodium_mg": 150.0,
+    "ash_g": 0.3,
+    "cholesterol_mg": 44.0
+   },
+   "source": "Saudi Food Composition Tables (SFCT) — الهيئة العامة للغذاء والدواء (SFDA)",
+   "source_url": "https://www.sfda.gov.sa/sites/default/files/2026-04/SFCT-E.pdf",
+   "source_pages": {
+    "recipe": "102",
+    "nutrition_table": "103"
+   },
+   "confidence": "derived — method documented (مشتق — الطريقة موثّقة) · بدليلين متفقين",
+   "last_verified": "2026-07-30",
+   "notes_ar": "**عطب في المصدر لا في المستودع.** صفحة الطبق مُزاحة الصفوف: «Total Carbohydrates» تطبع 21.0 بينما «Added Sugar» تطبع 48.0 — و48.0 هي قيمة الكربوهيدرات الكلية بدليلين مستقلين: (أ) 100 − بروتين 3.0 − دهن 17.9 − رطوبة 30.8 − رماد 0.3 = **48.0** بالضبط، (ب) الكربوهيدرات المتاحة 45.3 + الألياف 2.7 = **48.0**. ويؤكدهما أتواتر: 4×3.0 + 4×45.3 + 9×17.9 + 2×2.7 = 359.7 مقابل 359 سعرة مطبوعة. وسكر مضاف 48غ في كنافة سكرها الكلي 18.9غ مستحيل أصلًا. فالقيمة 46 المحمولة في المستودع قريبة لكن الصحيح **48.0**، ولا يجوز نقل الـ21.0 المطبوعة."
+  },
+  {
+   "dish_ar": "رواكة",
+   "dish_en_sfct": "Ruwakah",
+   "repo_item": {
+    "file": "src/data/saudiFoods.ts",
+    "id": "sfct-66",
+    "line": 972
+   },
+   "field": "calories",
+   "current_value": 118.0,
+   "resolved_value": 118.0,
+   "printed_in_source": 477.0,
+   "official_per_100g": {
+    "energy_kcal": 477.0,
+    "energy_kj": 16.0,
+    "moisture_g": 73.7,
+    "protein_g": 5.5,
+    "fat_g": 3.5,
+    "saturated_fat_g": 114.0,
+    "carbs_total_g": 16.0,
+    "carbs_available_g": 14.0,
+    "sugars_g": null,
+    "fiber_g": 2.0,
+    "sodium_mg": 198.0,
+    "ash_g": 1.3,
+    "cholesterol_mg": 8.0
+   },
+   "source": "Saudi Food Composition Tables (SFCT) — الهيئة العامة للغذاء والدواء (SFDA)",
+   "source_url": "https://www.sfda.gov.sa/sites/default/files/2026-04/SFCT-E.pdf",
+   "source_pages": {
+    "recipe": "156",
+    "nutrition_table": "157"
+   },
+   "confidence": "derived — method documented (مشتق — الطريقة موثّقة) · أتواتر على ماكروز المصدر",
+   "last_verified": "2026-07-30",
+   "notes_ar": "**عطب في المصدر لا في المستودع.** خانة Energy (kcal) تطبع 477/100غ وخانة Energy (kJ) تطبع 16 — والاثنتان متناقضتان (477 سعرة = 1996 كيلوجول). وخانة الدهون المشبعة تطبع 114غ مع دهن كلي 3.5غ. عمود الماكروز سليم: بروتين 5.5 + دهن 3.5 + كربوهيدرات 16.0 + رطوبة 73.7 + رماد 1.3 = **100.0 بالضبط**، وأتواتر عليه يعطي 117.5 سعرة. فالقيمة 118 المحمولة في المستودع **صحيحة لكنها محسوبة لا مقتبسة** — تبقى كما هي وتُوسم كذلك."
+  }
+ ]
+}
