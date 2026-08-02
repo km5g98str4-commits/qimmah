@@ -31,7 +31,9 @@ interface CustomPlanBuilderProps {
 }
 
 // خيارات التكرارات الشائعة (شرطة en-dash مطابقة للجدول المولّد).
-const REP_OPTIONS = ['6–8', '8–10', '8–12', '10–12', '10–15', '12–15', '15–20', '20', '30 ث']
+// آخر خيار «توقيت» بقيمة محايدة لغويًا (لا تُخزَّن بالعربية) — تُعرض تسميته حسب اللغة.
+const REP_SECONDS_VALUE = '30s'
+const REP_OPTIONS = ['6–8', '8–10', '8–12', '10–12', '10–15', '12–15', '15–20', '20', REP_SECONDS_VALUE]
 
 type StepKey = 'days' | 'build' | 'review'
 const STEPS: StepKey[] = ['days', 'build', 'review']
@@ -335,7 +337,7 @@ function DaysStepper({
         type="button"
         onClick={() => onChange(Math.max(MIN_DAYS, value - 1))}
         disabled={value <= MIN_DAYS}
-        aria-label={dec.moveDown}
+        aria-label={dec.decrease}
         className="grid h-14 w-14 place-items-center rounded-xl bg-beige text-ink-900 disabled:opacity-30"
       >
         <Icon name="Minus" className="h-6 w-6" />
@@ -348,7 +350,7 @@ function DaysStepper({
         type="button"
         onClick={() => onChange(Math.min(MAX_DAYS, value + 1))}
         disabled={value >= MAX_DAYS}
-        aria-label={dec.moveUp}
+        aria-label={dec.increase}
         className="grid h-14 w-14 place-items-center rounded-xl bg-primary text-white disabled:opacity-30"
       >
         <Icon name="Plus" className="h-6 w-6" />
@@ -379,7 +381,9 @@ function ExerciseRow({
   onReps: (reps: string) => void
 }) {
   const ex = getExercise(pe.exerciseId)
-  const repOptions = REP_OPTIONS.includes(pe.reps) ? REP_OPTIONS : [pe.reps, ...REP_OPTIONS]
+  // توحيد القيمة القديمة «30 ث» إلى الرمز المحايد كي لا يظهر خياران متطابقان في العربية.
+  const reps = pe.reps === '30 ث' ? REP_SECONDS_VALUE : pe.reps
+  const repOptions = REP_OPTIONS.includes(reps) ? REP_OPTIONS : [reps, ...REP_OPTIONS]
   return (
     <li className="rounded-2xl border border-line bg-surface p-3">
       <div className="flex items-center gap-3">
@@ -435,7 +439,7 @@ function ExerciseRow({
               type="button"
               onClick={() => onSets(Math.max(1, pe.sets - 1))}
               disabled={pe.sets <= 1}
-              aria-label={d.moveDown}
+              aria-label={d.decrease}
               className="grid h-8 w-8 place-items-center rounded-lg bg-surface text-ink-900 disabled:opacity-30"
             >
               <Icon name="Minus" className="h-4 w-4" />
@@ -445,7 +449,7 @@ function ExerciseRow({
               type="button"
               onClick={() => onSets(Math.min(8, pe.sets + 1))}
               disabled={pe.sets >= 8}
-              aria-label={d.moveUp}
+              aria-label={d.increase}
               className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-white disabled:opacity-30"
             >
               <Icon name="Plus" className="h-4 w-4" />
@@ -455,14 +459,14 @@ function ExerciseRow({
         <div className="flex flex-1 items-center justify-between gap-2 rounded-xl border border-line bg-beige px-2 py-1.5">
           <span className="ps-1 text-[11px] font-bold text-ink-500">{d.repsLabel}</span>
           <select
-            value={pe.reps}
+            value={reps}
             onChange={(e) => onReps(e.target.value)}
             aria-label={d.repsLabel}
             className="rounded-lg border border-line bg-surface px-2 py-1.5 text-sm font-black text-ink-900 focus:outline-none"
           >
             {repOptions.map((r) => (
               <option key={r} value={r}>
-                {r}
+                {r === REP_SECONDS_VALUE ? d.repsSecondsOption : r}
               </option>
             ))}
           </select>

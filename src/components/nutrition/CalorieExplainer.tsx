@@ -75,7 +75,15 @@ export function CalorieExplainer() {
                   desc={goalAdj < 0 ? d.descCut : goalAdj > 0 ? d.descBulk : d.descMaintain}
                   value={`${t.targetCalories}`}
                   unit={d.targetDayUnit}
-                  formula={goalAdj !== 0 ? `${t.tdee} ${goalAdj < 0 ? '−' : '+'} ${Math.abs(goalAdj)}` : `${t.tdee}`}
+                  // حين تُطبَّق أرضية السعرات الآمنة (تنشيف) يختلف الناتج عن (TDEE−٤٠٠)،
+                  // فنعرض «الحد الأدنى الآمن» بدل معادلة لا تساوي الرقم المعروض.
+                  formula={
+                    goalAdj === 0
+                      ? `${t.tdee}`
+                      : t.targetCalories !== t.tdee + goalAdj
+                        ? d.floorLabel
+                        : `${t.tdee} ${goalAdj < 0 ? '−' : '+'} ${Math.abs(goalAdj)}`
+                  }
                   highlight
                 />
                 <Step
@@ -135,7 +143,7 @@ function Step({
         </div>
         <p className="mt-0.5 text-xs leading-relaxed text-ink-500">{desc}</p>
         {formula && (
-          <p className="mt-1 inline-block rounded-md bg-page px-2 py-0.5 text-[11px] font-bold text-ink-600" dir="ltr">
+          <p className="mt-1 inline-block rounded-md bg-page px-2 py-0.5 text-[11px] font-bold text-ink-700" dir="ltr">
             {formula}
           </p>
         )}

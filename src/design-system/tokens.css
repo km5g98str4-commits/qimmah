@@ -1,0 +1,436 @@
+/* ============================================================================
+ * Qimmah — Semantic Design Tokens (SEAM / drop-in point)
+ * ============================================================================
+ *
+ * ⚠️ TEMPORARY VALUES — NOT AN APPROVED VISUAL DIRECTION.
+ *
+ * This file is the single semantic seam that Cloud Design's *approved* tokens
+ * drop into later. Today it only ALIASES the values already shipping in
+ * `styles/index.css` (the current dark build). Those inherited values are the
+ * previous deep-night / warm-stone look, which the founder explicitly did NOT
+ * approve for the app — see docs/design/DESIGN-SOURCE-OF-TRUTH.md. Do NOT treat
+ * anything here as final branding, and do NOT let the old luxury palette be
+ * silently re-enshrined through this file.
+ *
+ * Rules:
+ *   • One source of truth: raw color values live in styles/index.css as
+ *     `--c-*`. This file maps them to *semantic* names only (no new raw hex for
+ *     colors). Non-color scales (spacing/radius/motion/type) are neutral
+ *     engineering scales, not brand decisions.
+ *   • Components should migrate to these semantic names over time so that a
+ *     future approved-token drop changes the whole app from one place.
+ *   • Additive & reversible: importing this file changes no rendered pixel
+ *     (aliases resolve to the current values).
+ *
+ * When Cloud Design ships approved tokens: replace the right-hand sides here
+ * (and/or the `--c-*` source in index.css) — components stay untouched.
+ * ============================================================================ */
+
+:root {
+  /* ---- Color · semantic (alias → current temporary source in index.css) ---- */
+  --color-bg-page: rgb(var(--c-page));
+  --color-surface: rgb(var(--c-surface));
+  --color-surface-raised: rgb(var(--c-beige));
+  --color-border: rgb(var(--c-line));
+
+  --color-text-primary: rgb(var(--c-ink-900));
+  --color-text-secondary: rgb(var(--c-ink-700));
+  --color-text-muted: rgb(var(--c-ink-500));
+  --color-text-disabled: rgb(var(--c-ink-400));
+
+  --color-action-primary: var(--c-primary);
+  --color-action-accent: var(--c-accent);
+  --color-focus-ring: var(--c-primary);
+
+  /* Status — meaning must never be color-only (pair with icon/text). */
+  --color-success: #3e9e6b;
+  --color-info: var(--c-accent);
+  --color-warning: #e0941f;
+  --color-danger: #d6553a;
+  --color-destructive: #d6553a;
+
+  /* Domain states — placeholders until Cloud Design defines them.
+     Intentionally alias to primary/accent so nothing looks broken. */
+  --color-state-workout: var(--c-primary);
+  --color-state-nutrition: var(--c-accent);
+  --color-state-progress: #3e9e6b;
+  --color-state-reminder: var(--c-accent);
+
+  /* Skeleton / loading */
+  --color-skeleton: rgb(var(--c-beige));
+
+  /* ---- Typography · semantic (family centralized; scale is neutral) ---- */
+  /* Family kept as the current safe font (Tajawal). Native self-hosting is a
+     documented follow-up — see docs/ios/IOS-FOUNDATION-STATUS.md. */
+  --font-family-base: 'Tajawal', system-ui, sans-serif;
+  --font-family-display: 'Tajawal', system-ui, sans-serif;
+  /* Tabular numerals for metrics/timers (weights, calories, countdowns). */
+  --font-numeric: 'Tajawal', system-ui, sans-serif;
+  --font-numeric-feature: 'tnum' 1, 'lnum' 1;
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+  --font-weight-black: 900;
+
+  /* Type scale (rem) — neutral, matches current usage; not a brand decision. */
+  --font-size-caption: 0.75rem;
+  --font-size-body-sm: 0.875rem;
+  --font-size-body: 1rem;
+  --font-size-title-sm: 1.125rem;
+  --font-size-title: 1.5rem;
+  --font-size-display: 2rem;
+  --font-size-metric: 2.25rem;
+
+  --line-height-tight: 1.2;
+  --line-height-snug: 1.4;
+  --line-height-normal: 1.6;
+
+  /* ---- Spacing · 4px base (neutral engineering scale) ---- */
+  --space-0: 0;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+
+  /* ---- Radius (matches current rounded-* usage) ---- */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+  --radius-2xl: 1.5rem;
+  --radius-pill: 9999px;
+
+  /* ---- Elevation (alias to current dark-tuned shadows; temporary) ---- */
+  --elevation-card: 0 1px 2px 0 rgba(0, 0, 0, 0.3), 0 14px 34px -18px rgba(0, 0, 0, 0.55);
+  --elevation-raised: 0 2px 4px 0 rgba(0, 0, 0, 0.35), 0 24px 56px -20px rgba(0, 0, 0, 0.7);
+
+  /* ---- Icon sizes ---- */
+  --icon-sm: 1rem;
+  --icon-md: 1.25rem;
+  --icon-lg: 1.5rem;
+
+  /* ---- Opacity ---- */
+  --opacity-disabled: 0.5;
+  --opacity-muted: 0.7;
+
+  /* ---- Motion · duration + easing (respects Reduced Motion globally) ---- */
+  --motion-duration-instant: 80ms;
+  --motion-duration-fast: 150ms;
+  --motion-duration-base: 250ms;
+  --motion-duration-slow: 400ms;
+  --motion-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --motion-ease-decelerate: cubic-bezier(0, 0, 0, 1);
+  --motion-ease-accelerate: cubic-bezier(0.3, 0, 1, 1);
+
+  /* ---- Layout · mobile shell ---- */
+  --layout-max-width: 30rem; /* content column cap on large screens */
+  --layout-tabbar-height: 3.5rem;
+  --layout-touch-min: 2.75rem; /* 44px — Apple HIG minimum target */
+  --safe-area-top: var(--safe-top);
+  --safe-area-bottom: var(--safe-bottom);
+}
+
+/* Reduced Motion: neutralize motion durations at the token layer too, so any
+   token-driven animation collapses (belt-and-suspenders with the global rule
+   in styles/index.css). */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-duration-instant: 0.001ms;
+    --motion-duration-fast: 0.001ms;
+    --motion-duration-base: 0.001ms;
+    --motion-duration-slow: 0.001ms;
+  }
+}
+
+/* ============================================================================
+ * Qimmah Design v2.1 — approved direction baseline (Founder Refinement Pass)
+ * ----------------------------------------------------------------------------
+ * SLICE 0 — SEAM ONLY. Everything below is *defined* but NOT active in the
+ * default (v1) build. It renders zero pixels differently until a screen slice
+ * opts in by setting `data-design="v2"` on <html>. Fully reversible: delete
+ * this block (and the v2 font imports in fonts.ts) to remove it entirely.
+ *
+ * v2.1 approved decisions captured here:
+ *   • UI typeface   → IBM Plex Sans Arabic (self-hosted, see fonts.ts)
+ *   • Display face  → Readex Pro (brand/display only; falls back to UI face)
+ *   • Momentum color family → Ember / warm paper / ink / Blue / Green / Teal
+ *       - Ember is reserved for the primary action + momentum moments.
+ *       - Error/destructive stays SEPARATE from Ember.
+ *
+ * The concrete values below are sampled from the approved v2.1 PDF mocks.
+ * They remain inert until `[data-design="v2"]` is active.
+ * ============================================================================ */
+:root {
+  /* v2.1 typefaces (self-hosted; Tajawal remains the tail fallback). */
+  --font-ui-v2: 'IBM Plex Sans Arabic', 'Tajawal', system-ui, sans-serif;
+  --font-display-v2: 'Readex Pro', 'IBM Plex Sans Arabic', 'Tajawal', system-ui, sans-serif;
+  /* v3.0 §E2 — JetBrains Mono for numerals/data; UI face carries the Arabic. */
+  --font-mono-v2: 'JetBrains Mono', 'IBM Plex Sans Arabic', 'Tajawal', ui-monospace, monospace;
+
+  /* Momentum roles (v3.0 §F1 semantic colour). Ember is an action color, never
+     a data series. Teal / Red are the exact v3.0 standard values. */
+  --v2-ember: #f0512a;
+  --v2-blue: #2a6ce0;
+  --v2-green: #1f9d57;
+  --v2-teal: #159aa0;   /* v3.0: rest / recovery */
+  --v2-error: #d23b2e;  /* v3.0: pain / destructive — separate from Ember */
+  --v2-amber: #d99400;  /* v3.0: estimate / attention */
+
+  /* Accessible text variants retain the same hue while normal-size copy meets
+     WCAG AA on the warm paper/card surfaces. */
+  --v2-ember-text: color-mix(in srgb, var(--v2-ember) 74%, var(--v2-ink-strong));
+  --v2-green-text: #0f7a40; /* AA on white for small text (~5.4:1) — screen 66 contrast fix */
+  --v2-teal-text: #0e8578;
+  --v2-blue-text: #245fc5;
+
+  /* Light system sampled from the PDF phone mocks (§04–§06). */
+  --v2-cream: #efeae2; /* v3.0 §F1 Sand · Surface — exact standard value */
+  --v2-paper: #ffffff;
+  --v2-paper-muted: #e9e5de;
+  --v2-border: #e0d9ce;
+  --v2-ink-strong: #0e0d0a;
+  --v2-ink: #2a251e;
+  --v2-ink-muted: #625f5a;
+  --v2-ink-faint: #726b62;
+
+  /* Dark focus system sampled from Welcome / Active Workout mocks. */
+  --v2-dark-canvas: #16140f;
+  --v2-dark-paper: #1e1c17;
+  --v2-dark-paper-active: #2c2823;
+  --v2-dark-border: #37332d;
+  --v2-dark-ink-strong: #f1eee8;
+  --v2-dark-ink: #ddd6cb;
+  --v2-dark-ink-muted: #c5bfb5;
+  --v2-dark-ink-faint: #a79f94;
+  --v2-on-color: #ffffff;
+
+  --v2-brand-primary: var(--v2-ember);
+  --v2-action-primary: var(--v2-ember);
+  --v2-surface-canvas: var(--v2-cream);
+  --v2-surface-next-step: var(--v2-paper);
+  --v2-feedback-error: var(--v2-error);
+  --v2-data-1: var(--v2-blue);
+  --v2-data-2: var(--v2-green);
+  --v2-data-3: var(--v2-teal);
+  --v2-data-4: var(--v2-blue);
+
+  /* Today command center — the four «مسار اليوم» pillar colors (Slice 3).
+     Meaning is never color-only: every pillar also carries an icon + text label.
+     Centralised here (not inlined in the view) so the Momentum hex drop replaces
+     the right-hand sides only. Movement Blue is the one genuinely new value —
+     the palette had no blue yet. Additive: consumed only by TodayV2. */
+  --v2-pillar-train: var(--v2-blue);
+  --v2-pillar-nutrition: var(--v2-green);
+  --v2-pillar-move: var(--v2-blue);
+  --v2-pillar-recover: var(--v2-teal);
+
+  /* Motion serves hierarchy: entrance, press, fill, earned moments. */
+  --v2-motion-screen: 280ms;
+  --v2-motion-press: 120ms;
+  --v2-motion-fill: 600ms;
+  --v2-motion-moment: 420ms;
+  --v2-motion-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Activation seam — OPT-IN ONLY. The default document has no `data-design`
+   attribute, so none of these overrides apply and v1 renders unchanged. */
+:root {
+  --font-family-base: var(--font-ui-v2);
+  --font-family-display: var(--font-display-v2);
+  --font-numeric: var(--font-mono-v2);
+
+  /* Tailwind-consumed font vars (font-sans / font-display utilities + body).
+     Defining them here — and NOWHERE in the default :root — is what makes v2
+     actually render IBM Plex Sans Arabic while the default stays Tajawal. */
+  --font-sans: var(--font-ui-v2);
+  --font-display: var(--font-display-v2);
+
+  --color-action-primary: var(--v2-action-primary);
+  --color-focus-ring: var(--v2-action-primary);
+  --color-bg-page: var(--v2-surface-canvas);
+  --color-surface: var(--v2-surface-next-step);
+  --color-danger: var(--v2-feedback-error);
+  --color-destructive: var(--v2-feedback-error);
+  --color-success: var(--v2-green);
+  --color-info: var(--v2-blue);
+  --color-warning: var(--v2-amber);
+}
+
+/* v2 LIGHT theme (default). Defined on <body> so it beats any inherited,
+   user-customized root values without touching the customization logic. This is
+   also the fallback before `data-theme` is set on the first paint. v1 inert. */
+:root body,
+:root[data-theme='light'] body {
+  color-scheme: light;
+  --c-primary: var(--v2-ember);
+  --c-accent: var(--v2-blue);
+  --c-page: 239 234 226; /* v3.0 §F1 Sand #EFEAE2 */
+  --c-surface: 255 255 255;
+  --c-beige: 233 229 222;
+  --c-line: 224 217 206;
+  --c-ink-900: 14 13 10;
+  --c-ink-700: 42 37 30;
+  --c-ink-500: 98 95 90;
+  --c-ink-400: 114 107 98;
+  --elevation-card: 0 1px 2px rgba(14, 13, 10, 0.04), 0 12px 30px -22px rgba(14, 13, 10, 0.28);
+  --elevation-raised: 0 2px 4px rgba(14, 13, 10, 0.06), 0 22px 48px -28px rgba(14, 13, 10, 0.34);
+}
+
+/* v2 DARK theme (screen 66, manual). Graphite surfaces per §F1. Higher
+   specificity than `:root body`, so it wins app-wide when the user picks dark or
+   the OS is dark under 'system'. */
+:root[data-theme='dark'] body {
+  color-scheme: dark;
+  --v2-green-text: #3ddc84; /* lighter green for AA small text on the dark surface */
+  --c-primary: var(--v2-ember);
+  --c-accent: var(--v2-teal);
+  --c-page: 22 20 15;
+  --c-surface: 30 28 23;
+  --c-beige: 44 40 35;
+  --c-line: 55 51 45;
+  --c-ink-900: 241 238 232;
+  --c-ink-700: 221 214 203;
+  --c-ink-500: 197 191 181;
+  --c-ink-400: 167 159 148;
+  --elevation-card: 0 1px 2px rgba(0, 0, 0, 0.28), 0 12px 30px -22px rgba(0, 0, 0, 0.6);
+  --elevation-raised: 0 2px 4px rgba(0, 0, 0, 0.34), 0 22px 48px -28px rgba(0, 0, 0, 0.66);
+}
+
+/* `.v2-surface-light` used to force a light surface; under the global theme it
+   is a no-op marker so those view roots FOLLOW the chosen theme. (The class
+   stays in the views; only its token overrides are removed.) */
+
+/* Only Welcome, Onboarding and Active Workout opt into this dark focus surface —
+   they stay Graphite in ANY theme (and are thus theme-immune during a set). */
+:root .v2-surface-dark {
+  color-scheme: dark;
+  --c-primary: var(--v2-ember);
+  --c-accent: var(--v2-teal);
+  --c-page: 22 20 15;
+  --c-surface: 30 28 23;
+  --c-beige: 44 40 35;
+  --c-line: 55 51 45;
+  --c-ink-900: 241 238 232;
+  --c-ink-700: 221 214 203;
+  --c-ink-500: 197 191 181;
+  --c-ink-400: 167 159 148;
+}
+
+:root .v2-text-ember { color: var(--v2-ember-text); }
+:root .v2-text-blue { color: var(--v2-blue-text); }
+:root .v2-text-green { color: var(--v2-green-text); }
+:root .v2-text-teal { color: var(--v2-teal-text); }
+:root .v2-bg-blue { background-color: var(--v2-blue); }
+:root .v2-bg-blue-soft { background-color: color-mix(in srgb, var(--v2-blue) 10%, transparent); }
+:root .v2-bg-green { background-color: var(--v2-green); }
+:root .v2-bg-teal { background-color: var(--v2-teal); }
+
+/* Textual Ember is darkened only on light surfaces so small labels meet AA;
+   dark focus surfaces can use the exact Ember swatch at 5.18:1. */
+:root body .text-primary,
+:root body .text-primary-c { color: var(--v2-ember-text); }
+:root body .v2-surface-dark .text-primary,
+:root body .v2-surface-dark .text-primary-c { color: var(--v2-ember); }
+
+:root .btn-primary {
+  color: var(--v2-on-color);
+  font-size: max(1.1875rem, 1em);
+  font-weight: 700;
+}
+
+:root .shadow-card { box-shadow: var(--elevation-card); }
+:root .shadow-elevated { box-shadow: var(--elevation-raised); }
+:root .shadow-glow {
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--v2-ember) 18%, transparent), 0 14px 32px -18px color-mix(in srgb, var(--v2-ember) 48%, transparent);
+}
+
+:root .v2-error-panel {
+  border-color: color-mix(in srgb, var(--v2-error) 42%, transparent);
+  background-color: color-mix(in srgb, var(--v2-error) 9%, transparent);
+}
+:root .v2-error-icon { color: var(--v2-error); }
+
+:root .v2-success-panel {
+  border-color: color-mix(in srgb, var(--v2-green) 38%, transparent);
+  background-color: color-mix(in srgb, var(--v2-green) 10%, transparent);
+}
+
+:root .v2-success-icon { color: var(--v2-green-text); }
+:root .input-invalid,
+:root .input-invalid:focus { border-color: var(--v2-error); }
+
+:root .v2-choice-selected {
+  border-color: var(--v2-blue);
+  background-color: color-mix(in srgb, var(--v2-blue) 12%, transparent);
+}
+:root .v2-choice-icon-selected {
+  background-color: var(--v2-blue);
+  color: var(--v2-on-color);
+}
+:root .v2-choice-accent { background-color: var(--v2-blue); }
+:root .v2-info-panel {
+  border-color: color-mix(in srgb, var(--v2-blue) 30%, transparent);
+  background-color: color-mix(in srgb, var(--v2-blue) 6%, transparent);
+}
+:root .v2-heat-1 { background-color: color-mix(in srgb, var(--v2-green) 30%, var(--v2-paper-muted)); }
+:root .v2-heat-2 { background-color: color-mix(in srgb, var(--v2-green) 60%, var(--v2-paper-muted)); }
+:root .v2-heat-3 { background-color: var(--v2-green); }
+
+:root .v2-glow-ember {
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--v2-ember) 30%, transparent), transparent 72%);
+}
+:root .v2-glow-green {
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--v2-green) 22%, transparent), transparent 72%);
+}
+:root .v2-bottom-fade {
+  background: linear-gradient(to top, var(--v2-dark-canvas) 22%, transparent);
+}
+
+@keyframes v2-screen-enter {
+  from { opacity: 0; transform: translateY(0.5rem); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes v2-earned-moment {
+  0% { opacity: 0; transform: scale(0.92); }
+  70% { opacity: 1; transform: scale(1.035); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+:root .v2-screen-enter {
+  animation: v2-screen-enter var(--v2-motion-screen) var(--v2-motion-ease) both;
+}
+
+:root .v2-pressable {
+  transition: transform var(--v2-motion-press) var(--v2-motion-ease), border-color var(--v2-motion-press) ease, box-shadow var(--v2-motion-press) ease;
+}
+
+:root .v2-pressable:active { transform: scale(0.985); }
+
+:root .v2-fill {
+  transition: width var(--v2-motion-fill) var(--v2-motion-ease), stroke-dashoffset var(--v2-motion-fill) var(--v2-motion-ease);
+}
+
+:root .v2-earned-moment {
+  animation: v2-earned-moment var(--v2-motion-moment) var(--v2-motion-ease) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --v2-motion-screen: 0.001ms;
+    --v2-motion-press: 0.001ms;
+    --v2-motion-fill: 0.001ms;
+    --v2-motion-moment: 0.001ms;
+  }
+  :root .v2-screen-enter,
+  :root .v2-earned-moment {
+    opacity: 1;
+    transform: none;
+  }
+}

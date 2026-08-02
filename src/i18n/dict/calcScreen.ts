@@ -3,6 +3,7 @@
 // تقديرات تعليمية للتنظيم والمتابعة فقط — لا نصائح طبية.
 
 import type { Lang } from '@/lib/appPreferences'
+import type { ActivityLevel, Gender, GoalType } from '@/types/profile'
 
 export interface CalcScreenStrings {
   back: string
@@ -10,6 +11,9 @@ export interface CalcScreenStrings {
   pageSubtitle: string
   intro: string
   needData: string
+  genderLabels: Record<Gender, string>
+  activityLabels: Record<ActivityLevel, string>
+  goalLabels: Record<GoalType, string>
 
   // BMR
   bmrTitle: string
@@ -68,19 +72,35 @@ const ar: CalcScreenStrings = {
   pageTitle: 'كيف نحسب أرقامك؟',
   pageSubtitle: 'كل رقم في خطتك وله معادلة واضحة — نفكّكها لك بأرقامك أنت، خطوة بخطوة.',
   intro:
-    'الأرقام اللي تشوفها في خطتك مبنية على معادلات معروفة في علم التغذية والرياضة. هنا نوريك من وين جت بالضبط، عشان تفهمها وتثق فيها. كلها تقديرات للتنظيم والمتابعة، تعدّلها حسب نتائجك على أرض الواقع.',
+    'الأرقام اللي تشوفها في خطتك مبنية على معادلات معروفة في علم التغذية والرياضة، وعلى قواعد تقدير عملية من Qimmah. هنا نوريك من وين جت بالضبط، عشان تفهمها وتثق فيها. كلها تقديرات للتنظيم والمتابعة، تعدّلها حسب نتائجك على أرض الواقع.',
   needData:
-    'أكمل بيانات جسمك (الوزن والطول والعمر والجنس) في الإعداد حتى نعرض لك طريقة الحساب بأرقامك الفعلية.',
+    'كمّل بيانات جسمك (الوزن والطول والعمر والجنس) في الإعداد عشان نوريك طريقة الحساب بأرقامك الفعلية.',
+  genderLabels: { male: 'ذكر', female: 'أنثى', unspecified: 'غير محدّد' },
+  activityLabels: {
+    sedentary: 'خامل (قليل الحركة)',
+    light: 'نشاط خفيف',
+    moderate: 'نشاط متوسط',
+    active: 'نشِط',
+    very_active: 'نشِط جدًا',
+  },
+  goalLabels: {
+    cutting: 'تنشيف',
+    bulking: 'تضخيم',
+    maintenance: 'محافظة على العضل',
+    recomposition: 'إعادة تشكيل الجسم',
+    returning: 'رجوع بعد انقطاع',
+    health: 'صحة عامة',
+  },
 
   bmrTitle: 'معدل الأيض الأساسي (BMR)',
   bmrBasis: 'الأساس: معادلة ميفلين–سانت جيور (Mifflin-St Jeor)',
   bmrDesc:
-    'كم سعرة يحرقها جسمك وأنت مرتاح تمامًا طول اليوم — للتنفّس ونبض القلب ووظائف الأعضاء. هذه أدق معادلة شائعة لتقدير BMR.',
+    'كم سعرة يحرقها جسمك وأنت مرتاح بالكامل طول اليوم — للتنفّس ونبض القلب ووظائف الأعضاء. هذي أدق معادلة شائعة لتقدير BMR.',
   bmrResult: 'معدل أيضك الأساسي',
 
   tdeeTitle: 'إجمالي صرف الطاقة اليومي (TDEE)',
   tdeeDesc:
-    'نضرب BMR في معامل نشاطك اليومي عشان نقدّر سعرات يومك الكامل (حركة + تمرين). المعامل يفصل حركة حياتك اليومية (NEAT) عن التمرين حتى لا نحتسب التمرين مرّتين.',
+    'نضرب BMR في معامل نشاطك اليومي عشان نقدّر سعرات يومك الكامل (حركة + تمرين). المعامل يفصل حركة حياتك اليومية (NEAT) عن التمرين عشان ما نحسب التمرين مرتين.',
   tdeeTableActivity: 'مستوى النشاط',
   tdeeTableMultiplier: 'المعامل',
   tdeeYourPick: 'اختيارك',
@@ -88,20 +108,20 @@ const ar: CalcScreenStrings = {
   tdeeResult: 'إجمالي صرفك اليومي',
 
   caloriesTitle: 'سعراتك المستهدفة حسب هدفك',
-  caloriesDesc: 'نعدّل TDEE حسب هدفك للوصول لسعراتك اليومية المستهدفة:',
-  goalCut: 'تنشيف: ننقص عن سعرات صيانتك لخسارة الدهون بثبات.',
-  goalMaintain: 'محافظة على العضل: نبقى على سعرات صيانتك (TDEE) تمامًا — بلا عجز ولا فائض.',
-  goalBulk: 'تضخيم: نزيد فوق سعرات صيانتك لبناء العضل تدريجيًا.',
+  caloriesDesc: 'نعدّل TDEE حسب هدفك عشان نوصل لسعراتك اليومية المستهدفة:',
+  goalCut: 'تنشيف: ننقص عن سعرات صيانتك عشان تخسر الدهون بثبات.',
+  goalMaintain: 'محافظة على العضل: نثبت على سعرات صيانتك (TDEE) بالضبط — بدون عجز ولا فائض.',
+  goalBulk: 'تضخيم: نزيد فوق سعرات صيانتك عشان تبني العضل بالتدريج.',
   caloriesResult: 'سعراتك المستهدفة',
 
   proteinTitle: 'البروتين',
   proteinDesc: 'نحسب البروتين من وزنك: 1.8غ لكل كيلوغرام من وزن الجسم — لكل الأهداف.',
   proteinRationale:
-    'الأبحاث الرياضية توصي عادةً بـ 1.6–2.2غ/كجم للحفاظ على العضل أو بنائه؛ نختار 1.8غ/كجم كنقطة متوازنة تناسب التنشيف والتضخيم والمحافظة.',
+    'الأبحاث الرياضية عادة توصي بـ 1.6–2.2غ/كجم للحفاظ على العضل أو بنائه، واخترنا 1.8غ/كجم كنقطة متوازنة تناسب التنشيف والتضخيم والمحافظة.',
   proteinResult: 'بروتينك اليومي',
 
   macrosTitle: 'الدهون والكربوهيدرات',
-  fatDesc: 'الدهون ~27% من سعراتك المستهدفة (ضمن النطاق الصحّي 25–30%)، وكل غرام دهون = 9 سعرات.',
+  fatDesc: 'الدهون ~27% من سعراتك المستهدفة (ضمن نطاق الدهون المقبول للبالغين 20–35%)، وكل غرام دهون = 9 سعرات.',
   carbsDesc: 'الكربوهيدرات هي الباقي بعد البروتين والدهون، وكل غرام كارب = 4 سعرات.',
   fatLabel: 'الدهون',
   carbsLabel: 'الكربوهيدرات',
@@ -109,7 +129,7 @@ const ar: CalcScreenStrings = {
   bmiTitle: 'مؤشر كتلة الجسم (BMI)',
   bmiDesc: 'الوزن (كجم) ÷ مربّع الطول (متر). مؤشر وصفي عام لعلاقة وزنك بطولك.',
   bmiNote:
-    'مهم: BMI مؤشر وصفي فقط ولا يفرّق بين العضل والدهون، ولا يحكم على صحتك. رياضي بعضلات كثيرة قد يظهر «مرتفعًا» وهو بصحة ممتازة. استخدمه كإشارة عامة لا كتشخيص.',
+    'مهم: BMI مؤشر وصفي بس، ما يفرّق بين العضل والدهون وما يحكم على صحتك. رياضي بعضلات كثيرة ممكن يطلع «مرتفع» وهو بصحة ممتازة. خذه كإشارة عامة، مو تشخيص.',
   bmiResult: 'مؤشرك',
 
   unitCal: 'سعرة',
@@ -119,7 +139,7 @@ const ar: CalcScreenStrings = {
   unitKg: 'كجم',
 
   disclaimer:
-    'كل ما سبق تقديرات تعليمية لمساعدتك على تنظيم أكلك ومتابعة تقدّمك، وليست نصيحة طبية أو تشخيصًا. راجع مختصًا لأي قرار صحي.',
+    'كل اللي فوق تقديرات تعليمية تساعدك تنظّم أكلك وتتابع تقدّمك — مو نصيحة طبية ولا تشخيص. راجع مختص لأي قرار صحي.',
 }
 
 const en: CalcScreenStrings = {
@@ -127,19 +147,35 @@ const en: CalcScreenStrings = {
   pageTitle: 'How we calculate your numbers',
   pageSubtitle: 'Every number in your plan has a clear formula — here it is, worked out with your own data.',
   intro:
-    'The numbers in your plan are based on well-known equations from nutrition and exercise science. Here we show exactly where each one comes from, so you understand and trust it. They are estimates for tracking and organizing — adjust them to your real-world results.',
+    "The numbers in your plan come from well-known nutrition and exercise-science equations, plus Qimmah's practical estimation rules. Here's exactly where each one comes from, so you can understand it and trust it. They're estimates for tracking and organizing — tweak them based on your real-world results.",
   needData:
-    'Complete your body data (weight, height, age, sex) in setup so we can show the math with your actual numbers.',
+    "Fill in your body data (weight, height, age, sex) in setup and we'll show the math with your actual numbers.",
+  genderLabels: { male: 'Male', female: 'Female', unspecified: 'Not specified' },
+  activityLabels: {
+    sedentary: 'Sedentary',
+    light: 'Light activity',
+    moderate: 'Moderate activity',
+    active: 'Active',
+    very_active: 'Very active',
+  },
+  goalLabels: {
+    cutting: 'Cutting',
+    bulking: 'Bulking',
+    maintenance: 'Maintenance',
+    recomposition: 'Body recomposition',
+    returning: 'Returning after a break',
+    health: 'General health',
+  },
 
   bmrTitle: 'Basal Metabolic Rate (BMR)',
   bmrBasis: 'Basis: the Mifflin-St Jeor equation',
   bmrDesc:
-    'How many calories your body burns fully at rest all day — breathing, heartbeat, organ function. This is the most accurate common BMR estimate.',
+    "How many calories your body burns just resting all day — breathing, heartbeat, keeping your organs running. It's the most accurate of the common BMR estimates.",
   bmrResult: 'Your BMR',
 
   tdeeTitle: 'Total Daily Energy Expenditure (TDEE)',
   tdeeDesc:
-    'We multiply BMR by your daily activity factor to estimate your full-day calories (movement + training). The factor separates everyday movement (NEAT) from training so training is not counted twice.',
+    "We multiply BMR by your daily activity factor to estimate your full-day calories (movement + training). The factor separates everyday movement (NEAT) from training so training doesn't get counted twice.",
   tdeeTableActivity: 'Activity level',
   tdeeTableMultiplier: 'Factor',
   tdeeYourPick: 'Your pick',
@@ -156,11 +192,11 @@ const en: CalcScreenStrings = {
   proteinTitle: 'Protein',
   proteinDesc: 'We set protein from your weight: 1.8 g per kilogram of bodyweight — for every goal.',
   proteinRationale:
-    'Sports research commonly recommends 1.6–2.2 g/kg to retain or build muscle; we pick 1.8 g/kg as a balanced point that fits cutting, bulking, and maintenance.',
+    'Sports research usually recommends 1.6–2.2 g/kg to keep or build muscle; we go with 1.8 g/kg as a balanced middle ground that works for cutting, bulking, and maintenance.',
   proteinResult: 'Your daily protein',
 
   macrosTitle: 'Fat and carbs',
-  fatDesc: 'Fat is ~27% of your target calories (within the healthy 25–30% range); each gram of fat = 9 calories.',
+  fatDesc: 'Fat is ~27% of your target calories (within the adult acceptable range of 20–35%); each gram of fat = 9 calories.',
   carbsDesc: 'Carbs are the remainder after protein and fat; each gram of carbs = 4 calories.',
   fatLabel: 'Fat',
   carbsLabel: 'Carbs',
@@ -168,7 +204,7 @@ const en: CalcScreenStrings = {
   bmiTitle: 'Body Mass Index (BMI)',
   bmiDesc: 'Weight (kg) ÷ height squared (m). A general descriptive index of weight relative to height.',
   bmiNote:
-    'Important: BMI is descriptive only. It does not distinguish muscle from fat and is not a health verdict. A muscular athlete may read as "high" while in excellent health. Treat it as a general signal, not a diagnosis.',
+    'Heads up: BMI is descriptive only. It can\'t tell muscle from fat, and it\'s not a health verdict. A muscular athlete can read as "high" while being in great health. Treat it as a general signal, not a diagnosis.',
   bmiResult: 'Your BMI',
 
   unitCal: 'cal',
@@ -178,7 +214,7 @@ const en: CalcScreenStrings = {
   unitKg: 'kg',
 
   disclaimer:
-    'All of the above are educational estimates to help you organize your eating and track progress — not medical advice or a diagnosis. Consult a professional for any health decision.',
+    'Everything above is an educational estimate to help you organize your eating and track progress — not medical advice or a diagnosis. Talk to a professional for any health decision.',
 }
 
 export const calcScreenStrings: Record<Lang, CalcScreenStrings> = { ar, en }

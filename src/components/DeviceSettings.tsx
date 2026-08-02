@@ -119,7 +119,7 @@ export function DeviceSettings({ lang }: { lang: Lang }) {
             )}
           </div>
           {perm === 'denied' && (
-            <p className="mt-2 flex items-start gap-2 rounded-xl border border-gold-400/40 bg-gold-200/40 p-2.5 text-[11px] leading-relaxed text-ink-600">
+            <p className="mt-2 flex items-start gap-2 rounded-xl border border-gold-400/40 bg-gold-200/40 p-2.5 text-[11px] leading-relaxed text-ink-700">
               <Icon name="Info" className="mt-0.5 h-3.5 w-3.5 shrink-0 text-gold-600" />
               {t.pwa.notifDenied}
             </p>

@@ -56,7 +56,7 @@ const ar: StatsScreenStrings = {
   entryTitle: 'لوحتي',
   entryHint: 'ملخّص أسبوعك: تمرين وتغذية ووزن',
   entryAria: 'افتح لوحتي — ملخّص أرقامك الأسبوعية',
-  localNote: 'أرقام للعرض فقط من بياناتك المحفوظة على جهازك — بلا أي تفسير طبي.',
+  localNote: 'أرقام للعرض بس من بياناتك المحفوظة على جهازك — بدون أي تفسير طبي.',
 
   trainingTitle: 'تمرينك هذا الأسبوع',
   workoutsLabel: 'جلسات مكتملة',
@@ -67,9 +67,9 @@ const ar: StatsScreenStrings = {
   ofWord: 'من',
   daysUnit: 'أيام',
   coveredLabel: 'عضلات غطّيتها',
-  missedLabel: 'عضلات لم تُسجَّل بعد',
+  missedLabel: 'عضلات ما تسجّلت بعد',
   noneMissed: 'كل عضلات خطتك سجّلت مجموعات هذا الأسبوع.',
-  trainingEmptyTitle: 'ما سجّلت تمرينًا هذا الأسبوع بعد.',
+  trainingEmptyTitle: 'لسا ما سجّلت تمرين هذا الأسبوع.',
   trainingEmptyBody: 'أكمل جلسة واحدة وبتشوف جلساتك ومجموعاتك وعضلاتك هنا.',
 
   nutritionTitle: 'تغذيتك هذا الأسبوع',
@@ -81,16 +81,16 @@ const ar: StatsScreenStrings = {
   ofTargetSuffix: 'من الهدف',
   trackedDaysPrefix: 'محسوب من',
   trackedDaysSuffix: 'أيام مسجّلة خلال آخر ٧ أيام',
-  nutritionEmptyTitle: 'ما فيه وجبات مسجّلة خلال آخر ٧ أيام.',
-  nutritionEmptyBody: 'علّم وجباتك المنجزة في تبويب التغذية وبيظهر متوسطك هنا.',
+  nutritionEmptyTitle: 'ما فيه وجبات مسجّلة في آخر ٧ أيام.',
+  nutritionEmptyBody: 'علّم وجباتك المنجزة في تبويب التغذية، وبيظهر متوسطك هنا.',
 
   weightTitle: 'مؤشّر وزنك',
   latestWeightLabel: 'آخر قياس',
   changeLabel: 'التغيّر خلال الفترة',
   weightUnit: 'كجم',
-  onePointNote: 'سجّل قياسًا ثانيًا وبيظهر خط الاتجاه هنا.',
+  onePointNote: 'سجّل قياس ثاني، وبيظهر خط الاتجاه هنا.',
   weightEmptyTitle: 'ما فيه قياسات وزن بعد.',
-  weightEmptyBody: 'أضف قياس وزنك من تبويب التقدّم وبيظهر مؤشّره هنا.',
+  weightEmptyBody: 'أضف قياس وزنك من تبويب التقدّم، وبيظهر مؤشّره هنا.',
   chartAria: 'رسم مصغّر لاتجاه الوزن عبر آخر القياسات',
 }
 

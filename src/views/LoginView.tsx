@@ -3,107 +3,163 @@ import { Icon } from '@/components/Icon'
 import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
 import { miscStrings } from '@/i18n/dict/misc'
+import { authFlowStrings } from '@/i18n/dict/authFlow'
 import { useAuth } from '@/lib/authContext'
 import { evaluatePassword, PASSWORD_MIN_LENGTH } from '@/lib/passwordPolicy'
+import { track } from '@/lib/analytics'
+import { POLICY_LINKS, policyCopy } from '@/data/policyCopy'
 
 interface LoginViewProps {
   lang: Lang
   onSuccess: () => void
-  onGuest: () => void
   onBack: () => void
+  /** الوضع الابتدائي عند الفتح — تسجيل دخول أو إنشاء حساب. */
+  initialMode?: Mode
+  /** يحفظ وضع الحساب خارج الشاشة حتى لا يضيع عند فتح الشروط أو الخصوصية. */
+  onModeChange?: (mode: 'login' | 'signup') => void
 }
 
-type Mode = 'login' | 'signup'
+type Mode = 'login' | 'signup' | 'forgot'
 
-/** شاشة الحساب — تبديل بين تسجيل الدخول وإنشاء حساب (Supabase) أو المتابعة كضيف. */
-export function LoginView({ lang, onSuccess, onGuest, onBack }: LoginViewProps) {
+/**
+ * شاشة الحساب (Sprint UI 1) — دخول / إنشاء حساب / استعادة كلمة المرور (Supabase). لا وضع ضيف.
+ * تجيب: أين أنا؟ (العنوان) · ماذا أفعل؟ (النموذج + إجراء أساسي واحد) · لماذا أثق؟ (نبرة هادئة صادقة).
+ * منطق المصادقة والأحداث لم يتغيّر؛ التعديل بصري + إضافة وضع الاستعادة فقط.
+ */
+export function LoginView({ lang, onSuccess, onBack, initialMode = 'login', onModeChange }: LoginViewProps) {
   const t = getStrings(lang)
   const d = miscStrings[lang]
+  const af = authFlowStrings[lang]
   const auth = useAuth()
-  const [mode, setMode] = useState<Mode>('login')
+  const [mode, setMode] = useState<Mode>(initialMode)
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)
   const [msg, setMsg] = useState<string | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
+  const [eligible12, setEligible12] = useState(false)
+  // كشف تدريجي: متطلّبات كلمة المرور تظهر بمجرّد نية الكتابة (تركيز الحقل أو أول حرف).
+  const [pwFocused, setPwFocused] = useState(false)
 
   const isSignup = mode === 'signup'
+  const isForgot = mode === 'forgot'
   // سياسة كلمة المرور (P0): عند التسجيل يجب أن تجتاز الحدّ الأدنى ٨ + حرف + رقم قبل الإرسال.
   const pw = evaluatePassword(password)
-  const canSubmit = Boolean(email && password && (!isSignup || (name.trim() && pw.valid)))
-
-  const input =
-    'w-full rounded-lg border border-line bg-beige px-3 py-3 text-sm text-ink-900 focus:border-brand-500/50 focus:outline-none'
+  const policy = policyCopy[lang]
+  const canSubmit = isForgot
+    ? Boolean(email)
+    : Boolean(email && password && (!isSignup || (name.trim() && pw.valid && eligible12)))
 
   const switchMode = (next: Mode) => {
     setMode(next)
+    if (next !== 'forgot') onModeChange?.(next)
     setMsg(null)
     setNotice(null)
+    if (next !== 'signup') setEligible12(false)
   }
 
   const submit = async () => {
     if (!canSubmit) return
+    if (isSignup && !eligible12) {
+      setMsg(policy.eligibilityRequired)
+      return
+    }
     setBusy(true)
     setMsg(null)
     setNotice(null)
-    if (isSignup) {
-      const r = await auth.signUp(email, password, name)
-      setBusy(false)
-      if (!r.ok) {
-        setMsg(r.error ?? d.createFailed)
-      } else if (r.needsConfirmation) {
-        // تأكيد البريد مطلوب — نعرض تنبيهًا واضحًا ونعيد المستخدم لوضع الدخول.
-        setNotice(d.accountCreatedConfirm)
-        setMode('login')
-      } else {
-        onSuccess()
+    // `finally` يضمن أنّ الزرّ لا يبقى دائرًا أبدًا. طبقة المصادقة صارت لا ترمي
+    // (guardedAuthCall) — وهذا خطّ دفاع ثانٍ: شاشة عالقة على «جارٍ…» بلا رسالة
+    // أسوأ من أي خطأ صريح، فلا نقبلها ولو من استثناء غير متوقّع.
+    try {
+      if (isForgot) {
+        // استعادة كلمة المرور — رسالة عامة دائمًا (لا تكشف وجود الحساب). لا حدث تحليلات جديد.
+        const r = await auth.resetPassword(email)
+        if (r.ok) setNotice(t.auth.forgotSent)
+        else setMsg(r.error ?? t.auth.forgotFailed)
+        return
       }
-    } else {
+      if (isSignup) {
+        track('signup_started', {})
+        const r = await auth.signUp(email, password, name)
+        if (!r.ok) {
+          setMsg(r.error ?? d.createFailed)
+        } else if (r.ambiguousExistingAccount) {
+          // الخادم يُخفي وجود البريد (منع تعداد الحسابات) فلا نعرف هل أُنشئ حساب.
+          // رسالة صادقة في الحالتين + طريق الدخول جاهز، ولا حدث «نجاح تسجيل» لم يثبت.
+          setNotice(af.emailMaybeRegistered)
+          setMode('login')
+          onModeChange?.('login')
+        } else if (r.needsConfirmation) {
+          // تأكيد البريد مطلوب — نعرض تنبيهًا واضحًا ونعيد المستخدم لوضع الدخول.
+          track('signup_succeeded', { needsConfirmation: true })
+          setNotice(d.accountCreatedConfirm)
+          setMode('login')
+          onModeChange?.('login')
+        } else {
+          track('signup_succeeded', { needsConfirmation: false })
+          onSuccess()
+        }
+        return
+      }
       const r = await auth.signIn(email, password)
-      setBusy(false)
       if (r.ok) onSuccess()
       else setMsg(r.error ?? d.loginFailed)
+    } catch {
+      setMsg(d.authGeneric)
+    } finally {
+      setBusy(false)
     }
   }
 
-  return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-page px-5 py-12">
-      <div className="pointer-events-none absolute inset-0 bg-radial-brand" />
-      <div className="pointer-events-none absolute inset-0 bg-grid-faint [background-size:44px_44px] opacity-60" />
+  const headerIcon = isForgot ? 'KeyRound' : isSignup ? 'UserPlus' : 'LogIn'
+  const title = isForgot ? t.auth.forgotTitle : isSignup ? t.auth.signupTitle : t.auth.title
+  const subtitle = isForgot ? t.auth.forgotSubtitle : isSignup ? t.auth.signupSubtitle : t.auth.subtitle
+  const primaryLabel = isForgot ? t.auth.sendReset : isSignup ? t.auth.createAccount : t.auth.login
 
-      <div className="relative w-full max-w-md">
+  return (
+    <div className="relative h-[100dvh] min-h-0 overflow-hidden bg-page">
+      <div className="pointer-events-none absolute inset-0 bg-radial-brand opacity-70" />
+      <div className="pointer-events-none absolute inset-0 bg-grid-faint [background-size:44px_44px] opacity-25" />
+
+      <main
+        className="app-scroll relative flex h-full min-h-0 flex-col items-center overflow-y-auto overscroll-y-contain px-5 py-12"
+        style={{ paddingTop: 'max(3rem, var(--safe-top))', paddingBottom: 'max(3rem, var(--safe-bottom))' }}
+      >
+      <div className="relative my-auto w-full max-w-md">
         <button
           type="button"
-          onClick={onBack}
-          className="mb-4 inline-flex items-center gap-1.5 text-xs font-bold text-ink-500 transition-colors hover:text-ink-900"
+          onClick={isForgot ? () => switchMode('login') : onBack}
+          className="mb-4 inline-flex min-h-[44px] items-center gap-1.5 text-xs font-bold text-ink-500 transition-colors hover:text-ink-900"
         >
           <Icon name="ChevronLeft" className="h-4 w-4 rtl:rotate-180" />
           {t.auth.back}
         </button>
 
+        {/* أين أنا؟ */}
         <div className="text-center">
           <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-primary text-white shadow-glow">
-            <Icon name={isSignup ? 'UserPlus' : 'LogIn'} className="h-7 w-7" strokeWidth={2.5} />
+            <Icon name={headerIcon} className="h-7 w-7" strokeWidth={2.25} />
           </span>
-          <h1 className="mt-4 text-2xl font-black text-ink-900">
-            {isSignup ? t.auth.signupTitle : t.auth.title}
-          </h1>
+          <h1 className="heading mt-4 text-2xl">{title}</h1>
         </div>
 
         {auth.configured ? (
           <>
-            <p className="mt-2 text-center text-sm leading-relaxed text-ink-500">
-              {isSignup ? t.auth.signupSubtitle : t.auth.subtitle}
-            </p>
+            <p className="mt-2 text-center text-sm leading-relaxed text-ink-500">{subtitle}</p>
 
             {notice && (
-              <p className="mt-4 flex items-start gap-2 rounded-xl border border-line bg-surface p-3 text-xs leading-relaxed text-ink-700">
-                <Icon name="Mail" className="mt-0.5 h-4 w-4 shrink-0 text-primary-c" />
+              <p
+                role="status"
+                aria-live="polite"
+                className="mt-4 flex items-start gap-2 rounded-xl border border-line bg-surface p-3 text-xs leading-relaxed text-ink-700"
+              >
+                <Icon name="Mail" className="mt-0.5 h-4 w-4 shrink-0 text-primary-c" aria-hidden="true" />
                 {notice}
               </p>
             )}
 
+            {/* ماذا أفعل؟ */}
             <form
               className="mt-6 space-y-3"
               onSubmit={(e) => {
@@ -117,10 +173,13 @@ export function LoginView({ lang, onSuccess, onGuest, onBack }: LoginViewProps) 
                     <Icon name="User" className="h-4 w-4" />
                   </span>
                   <input
-                    className={input}
+                    className="input pe-10"
                     type="text"
                     autoComplete="name"
+                    autoCapitalize="words"
+                    autoCorrect="off"
                     placeholder={t.auth.name}
+                    aria-label={t.auth.name}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                   />
@@ -131,33 +190,42 @@ export function LoginView({ lang, onSuccess, onGuest, onBack }: LoginViewProps) 
                   <Icon name="Mail" className="h-4 w-4" />
                 </span>
                 <input
-                  className={input}
+                  className="input pe-10"
                   type="email"
                   inputMode="email"
                   autoComplete="email"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
                   placeholder={t.auth.email}
+                  aria-label={t.auth.email}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
-              <div className="relative">
-                <span className="pointer-events-none absolute inset-y-0 end-3 grid place-items-center text-ink-400">
-                  <Icon name="Lock" className="h-4 w-4" />
-                </span>
-                <input
-                  className={input}
-                  type="password"
-                  autoComplete={isSignup ? 'new-password' : 'current-password'}
-                  placeholder={t.auth.password}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  minLength={isSignup ? PASSWORD_MIN_LENGTH : undefined}
-                  aria-describedby={isSignup ? 'pw-requirements' : undefined}
-                />
-              </div>
+              {!isForgot && (
+                <div className="relative">
+                  <span className="pointer-events-none absolute inset-y-0 end-3 grid place-items-center text-ink-400">
+                    <Icon name="Lock" className="h-4 w-4" />
+                  </span>
+                  <input
+                    className="input pe-10"
+                    type="password"
+                    autoComplete={isSignup ? 'new-password' : 'current-password'}
+                    placeholder={t.auth.password}
+                    aria-label={t.auth.password}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    onFocus={() => setPwFocused(true)}
+                    minLength={isSignup ? PASSWORD_MIN_LENGTH : undefined}
+                    aria-describedby={isSignup ? 'pw-requirements' : undefined}
+                  />
+                </div>
+              )}
 
-              {/* سياسة كلمة المرور (P0) — مؤشّر قوة + متطلّبات واضحة قبل الإرسال (عند التسجيل فقط). */}
-              {isSignup && (
+              {/* سياسة كلمة المرور (P0) — مؤشّر قوة + متطلّبات واضحة قبل الإرسال (عند التسجيل فقط).
+                  كشف تدريجي: يظهر بمجرّد تركيز الحقل أو كتابة أوّل حرف كي تبقى البداية هادئة. */}
+              {isSignup && (pwFocused || password.length > 0) && (
                 <div id="pw-requirements" className="-mt-1 space-y-1.5">
                   <div className="flex gap-1" aria-hidden="true">
                     {[0, 1, 2, 3].map((i) => (
@@ -170,7 +238,7 @@ export function LoginView({ lang, onSuccess, onGuest, onBack }: LoginViewProps) 
                               ? 'bg-danger'
                               : pw.score === 2
                                 ? 'bg-gold-500'
-                                : 'bg-emerald-500'
+                                : 'bg-success'
                         }`}
                       />
                     ))}
@@ -181,7 +249,7 @@ export function LoginView({ lang, onSuccess, onGuest, onBack }: LoginViewProps) 
                       { ok: pw.hasLetter, ar: 'حرف', en: 'a letter' },
                       { ok: pw.hasNumber, ar: 'رقم', en: 'a number' },
                     ].map((r, i) => (
-                      <li key={i} className={`flex items-center gap-1 ${r.ok ? 'text-emerald-600' : 'text-ink-400'}`}>
+                      <li key={i} className={`flex items-center gap-1 ${r.ok ? 'text-success' : 'text-ink-500'}`}>
                         <Icon name={r.ok ? 'Check' : 'Circle'} className="h-3 w-3 shrink-0" />
                         {lang === 'en' ? r.en : r.ar}
                       </li>
@@ -190,28 +258,75 @@ export function LoginView({ lang, onSuccess, onGuest, onBack }: LoginViewProps) 
                 </div>
               )}
 
-              {msg && <p className="text-xs leading-relaxed text-gold-600">{msg}</p>}
+              {isSignup && (
+                <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-line bg-surface p-3 text-start text-xs leading-relaxed text-ink-700">
+                  <input
+                    type="checkbox"
+                    checked={eligible12}
+                    onChange={(e) => {
+                      setEligible12(e.target.checked)
+                      if (e.target.checked && msg === policy.eligibilityRequired) setMsg(null)
+                    }}
+                    className="mt-0.5 h-5 w-5 shrink-0 accent-primary"
+                  />
+                  <span>
+                    {policy.eligibilityPrefix}{' '}
+                    <a href={POLICY_LINKS.terms} className="font-black text-primary-c underline underline-offset-2">{policy.terms}</a>{' '}
+                    {policy.joiner}{' '}
+                    <a href={POLICY_LINKS.privacy} className="font-black text-primary-c underline underline-offset-2">{policy.privacy}</a>
+                  </span>
+                </label>
+              )}
+
+              {/* رابط استعادة كلمة المرور — وضع الدخول فقط */}
+              {mode === 'login' && (
+                <div className="text-end">
+                  <button
+                    type="button"
+                    onClick={() => switchMode('forgot')}
+                    className="text-xs font-bold text-ink-500 transition-colors hover:text-primary-c"
+                  >
+                    {t.auth.forgotLink}
+                  </button>
+                </div>
+              )}
+
+              {/* خطأ واضح ومتاح: لوحة عالية التباين (AA) + أيقونة (لا دلالة لونية فقط) + إعلان فوري لقارئ الشاشة. */}
+              {msg && (
+                <p
+                  role="alert"
+                  aria-live="assertive"
+                  className="v2-error-panel flex items-start gap-2 rounded-xl border px-3 py-2.5 text-xs font-semibold leading-relaxed text-ink-900"
+                >
+                  <Icon name="AlertCircle" className="v2-error-icon mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+                  <span>{msg}</span>
+                </p>
+              )}
 
               <button
                 type="submit"
                 disabled={busy || !canSubmit}
-                className="btn-primary w-full py-3.5 text-base disabled:opacity-50"
+                aria-busy={busy}
+                className="btn-primary w-full py-3.5 text-base disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {isSignup ? t.auth.createAccount : t.auth.login}
+                {busy && <Icon name="RefreshCw" className="h-4 w-4 animate-spin" aria-hidden="true" />}
+                {primaryLabel}
               </button>
             </form>
 
-            {/* تبديل بين الدخول وإنشاء حساب */}
-            <p className="mt-4 text-center text-xs text-ink-500">
-              {isSignup ? t.auth.haveAccount : t.auth.noAccount}{' '}
-              <button
-                type="button"
-                onClick={() => switchMode(isSignup ? 'login' : 'signup')}
-                className="font-black text-primary-c transition-colors hover:underline"
-              >
-                {isSignup ? t.auth.switchToLogin : t.auth.switchToSignup}
-              </button>
-            </p>
+            {/* تبديل بين الدخول وإنشاء حساب — يُخفى في وضع الاستعادة (الرجوع بالسهم أعلاه) */}
+            {!isForgot && (
+              <p className="mt-4 text-center text-xs text-ink-500">
+                {isSignup ? t.auth.haveAccount : t.auth.noAccount}{' '}
+                <button
+                  type="button"
+                  onClick={() => switchMode(isSignup ? 'login' : 'signup')}
+                  className="font-black text-primary-c transition-colors hover:underline"
+                >
+                  {isSignup ? t.auth.switchToLogin : t.auth.switchToSignup}
+                </button>
+              </p>
+            )}
           </>
         ) : (
           // — Supabase غير مضبوط —
@@ -220,19 +335,8 @@ export function LoginView({ lang, onSuccess, onGuest, onBack }: LoginViewProps) 
             <p className="mt-1 text-xs leading-relaxed text-ink-500">{t.auth.disabledBody}</p>
           </div>
         )}
-
-        {/* المتابعة كضيف — متاحة دائمًا */}
-        <div className="mt-5 border-t border-line pt-5">
-          <button type="button" onClick={onGuest} className="btn-ghost w-full py-3.5 text-base">
-            <Icon name="User" className="h-5 w-5" />
-            {t.auth.continueGuest}
-          </button>
-          <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-xs text-ink-400">
-            <Icon name="ShieldCheck" className="h-3.5 w-3.5" />
-            {t.auth.guestNote}
-          </p>
-        </div>
       </div>
+      </main>
     </div>
   )
 }

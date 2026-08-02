@@ -11,12 +11,14 @@ import { generatePlanFromTemplate, planExerciseName } from '@/lib/workoutPlan'
 import { mealDisplayName } from '@/lib/nutritionPlan'
 import { commitmentName } from '@/lib/commitmentPlan'
 import { workoutTemplates } from '@/data/workoutTemplates'
-import { routineTypeColors, routineTypeLabels } from '@/data/routine'
+import { routineTypeColors } from '@/data/routine'
 import { onboardingStrings } from '@/i18n/dict/onboarding'
+import { profileChoiceStrings } from '@/i18n/dict/profileChoices'
 
 /** خطوة توليد الخطة — قِمّة تجهّز خطة جاهزة من بياناتك (الأهداف للعرض فقط). */
 export function StepGeneratePlan({ ctx }: { ctx: WizardCtx }) {
   const d = onboardingStrings[ctx.lang]
+  const choices = profileChoiceStrings[ctx.lang]
   const p = ctx.data.profile
   const [showTemplates, setShowTemplates] = useState(false)
   // لا «سوق قوالب» للمبتدئ — نُبقي الخطة المولّدة تلقائيًا بلا تشتيت.
@@ -41,10 +43,19 @@ export function StepGeneratePlan({ ctx }: { ctx: WizardCtx }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const warnings = useMemo(() => generatePlan(p).warningsAr, [p])
-  const explanation = useMemo(() => generatePlan(p).explanationAr, [p])
+  const generated = useMemo(() => generatePlan(p), [p])
+  const warnings = generated.warningsAr.map((warning) =>
+    ctx.lang === 'en' ? choices.generatedWarning[warning] ?? choices.generatedWarningFallback : warning,
+  )
 
   const planName = planTitle(ctx.data.workoutPlan.templateId, ctx.lang)
+  const explanation = choices.generatedPlanReason(
+    planName,
+    choices.goal[p.goalType],
+    choices.trainingLevel[p.trainingLevel],
+    Math.max(1, Math.min(7, Math.round(p.trainingDays))),
+    p.workoutEnvironment === 'home',
+  )
   const firstDay = ctx.data.workoutPlan.days[0]
   const calories = targetCaloriesFor(p.goal, ctx.data.targets)
   const np = ctx.data.nutritionPlan
@@ -92,14 +103,14 @@ export function StepGeneratePlan({ ctx }: { ctx: WizardCtx }) {
         <div className="mt-3 flex flex-wrap gap-1.5">
           {ctx.data.routine.map((d) => (
             <span key={d.day} className={cn('rounded-md border px-2 py-0.5 text-[11px] font-bold', routineTypeColors[d.type])}>
-              {d.day.slice(0, 3)}: {routineTypeLabels[d.type]}
+              {(choices.weekdays[d.day] ?? d.day).slice(0, 3)}: {choices.routineType[d.type]}
             </span>
           ))}
         </div>
 
         {firstDay && (
           <div className="mt-3 rounded-xl border border-line bg-page p-3">
-            <p className="text-xs font-bold text-ink-700">{firstDay.nameAr}</p>
+            <p className="text-xs font-bold text-ink-700">{ctx.lang === 'en' ? firstDay.nameEn : firstDay.nameAr}</p>
             <ul className="mt-1.5 space-y-0.5">
               {firstDay.exercises.slice(0, 5).map((pe) => (
                 <li key={pe.id} className="truncate text-xs text-ink-500">• {planExerciseName(pe, ctx.lang)} — {pe.sets}×{pe.reps}</li>
@@ -118,8 +129,8 @@ export function StepGeneratePlan({ ctx }: { ctx: WizardCtx }) {
           <div className="mt-3 grid gap-2 sm:grid-cols-2">
             {workoutTemplates.filter((t) => t.id !== 'custom').map((t) => (
               <button key={t.id} type="button" onClick={() => chooseTemplate(t.id)} className={cn('rounded-xl border p-3 text-start text-sm', t.id === ctx.data.workoutPlan.templateId ? 'border-primary-soft bg-primary-soft' : 'border-line bg-surface hover:bg-beige')}>
-                <span className="font-bold text-ink-900">{t.nameAr}</span>
-                <span className="block text-[11px] text-ink-400">{t.days.length} {d.daysWord} · {t.recommendedFor}</span>
+                <span className="font-bold text-ink-900">{ctx.lang === 'en' ? t.nameEn : t.nameAr}</span>
+                <span className="block text-[11px] text-ink-400">{t.days.length} {d.daysWord} · {choices.recommendedFor[t.recommendedFor] ?? t.recommendedFor}</span>
               </button>
             ))}
           </div>
@@ -128,7 +139,7 @@ export function StepGeneratePlan({ ctx }: { ctx: WizardCtx }) {
 
       {/* التغذية */}
       <Card icon="Salad" title={d.genNutritionPlan}>
-        <button type="button" onClick={() => setNutPref({ trackNutrition: !p.trackNutrition })} className={cn('flex w-full items-center justify-between rounded-xl border p-3', p.trackNutrition ? 'border-primary-soft bg-primary-soft' : 'border-line bg-surface')}>
+        <button type="button" aria-pressed={p.trackNutrition} onClick={() => setNutPref({ trackNutrition: !p.trackNutrition })} className={cn('flex w-full items-center justify-between rounded-xl border p-3', p.trackNutrition ? 'border-primary-soft bg-primary-soft' : 'border-line bg-surface')}>
           <span className="text-sm font-bold text-ink-900">{d.genTrackNutrition}</span>
           <span className={cn('relative h-6 w-11 rounded-full', p.trackNutrition ? 'bg-primary' : 'bg-line')}>
             <span className={cn('absolute top-0.5 h-5 w-5 rounded-full bg-surface shadow', p.trackNutrition ? 'start-0.5' : 'end-0.5')} />
@@ -149,7 +160,7 @@ export function StepGeneratePlan({ ctx }: { ctx: WizardCtx }) {
               <label className="flex flex-col gap-1">
                 <span className="text-[11px] font-bold text-ink-500">{d.genNutritionStyle}</span>
                 <select className="w-full rounded-lg border border-line bg-beige px-2.5 py-2 text-sm text-ink-900 focus:outline-none" value={p.nutritionStyle} onChange={(e) => setNutPref({ nutritionStyle: e.target.value as Profile['nutritionStyle'] })}>
-                  {nutritionStyleOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  {nutritionStyleOptions.map((o) => <option key={o.value} value={o.value}>{choices.nutritionStyle[o.value]}</option>)}
                 </select>
               </label>
             </div>

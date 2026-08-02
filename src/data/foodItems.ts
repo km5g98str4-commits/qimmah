@@ -1,3 +1,7 @@
+import { saudiTraditionalFoods } from './saudiFoods'
+import { gccStaples } from './gccStaples'
+import { foodR2EatingOut } from './foodR2EatingOut'
+
 export type FoodCategory =
   | 'بروتين'
   | 'كارب'
@@ -6,6 +10,7 @@ export type FoodCategory =
   | 'فطور'
   | 'أكلات سعودية/خليجية'
   | 'أطباق سعودية / شعبية'
+  | 'أطباق سعودية تقليدية'
   | 'مطاعم/وجبات سريعة تقديرية'
   | 'مطاعم'
   | 'مشروبات'
@@ -56,6 +61,26 @@ export interface FoodItem {
 export const FOOD_ESTIMATE_NOTE =
   'القيم الغذائية تقديرية وقد تختلف حسب طريقة الطبخ والكمية.'
 
+/** تسمية إنجليزية لكل تصنيف طعام — لعرض التصنيف في الواجهة الإنجليزية بدل النص العربي. */
+export const foodCategoryEn: Record<FoodCategory, string> = {
+  'بروتين': 'Protein',
+  'كارب': 'Carbs',
+  'دهون صحية': 'Healthy fats',
+  'ألبان': 'Dairy',
+  'فطور': 'Breakfast',
+  'أكلات سعودية/خليجية': 'Saudi / Gulf dishes',
+  'أطباق سعودية / شعبية': 'Saudi / popular dishes',
+  'أطباق سعودية تقليدية': 'Traditional Saudi dishes',
+  'مطاعم/وجبات سريعة تقديرية': 'Restaurants / fast food (est.)',
+  'مطاعم': 'Restaurants',
+  'مشروبات': 'Drinks',
+  'فواكه': 'Fruits',
+  'خضار': 'Vegetables',
+  'حلويات': 'Desserts',
+  'مكملات غذائية': 'Supplements',
+  'منتج ممسوح بالباركود': 'Scanned product',
+}
+
 export const foodItems: FoodItem[] = [
   // ===== بروتين =====
   {
@@ -99,7 +124,7 @@ export const foodItems: FoodItem[] = [
     nameAr: 'لحم غنم',
     nameEn: 'Lamb meat',
     category: 'بروتين',
-    servingLabelAr: '100غ',
+    servingLabelAr: 'لكل 100غ',
     servingGrams: 100,
     calories: 294,
     protein: 25,
@@ -111,7 +136,7 @@ export const foodItems: FoodItem[] = [
     nameAr: 'لحم بقر',
     nameEn: 'Beef meat',
     category: 'بروتين',
-    servingLabelAr: '100غ',
+    servingLabelAr: 'لكل 100غ',
     servingGrams: 100,
     calories: 250,
     protein: 26,
@@ -123,7 +148,7 @@ export const foodItems: FoodItem[] = [
     nameAr: 'لحم مفروم',
     nameEn: 'Ground beef',
     category: 'بروتين',
-    servingLabelAr: '100غ',
+    servingLabelAr: 'لكل 100غ',
     servingGrams: 100,
     calories: 254,
     protein: 24,
@@ -135,7 +160,7 @@ export const foodItems: FoodItem[] = [
     nameAr: 'لحم جمل',
     nameEn: 'Camel meat',
     category: 'بروتين',
-    servingLabelAr: '100غ',
+    servingLabelAr: 'لكل 100غ',
     servingGrams: 100,
     calories: 160,
     protein: 26,
@@ -172,7 +197,7 @@ export const foodItems: FoodItem[] = [
     nameAr: 'سمك هامور',
     nameEn: 'Hammour (grouper) fish',
     category: 'بروتين',
-    servingLabelAr: '150غ',
+    servingLabelAr: 'شريحة (150غ)',
     servingGrams: 150,
     calories: 165,
     protein: 35,
@@ -196,7 +221,7 @@ export const foodItems: FoodItem[] = [
     nameAr: 'روبيان',
     nameEn: 'Shrimp',
     category: 'بروتين',
-    servingLabelAr: '100غ',
+    servingLabelAr: 'لكل 100غ',
     servingGrams: 100,
     calories: 99,
     protein: 24,
@@ -245,7 +270,7 @@ export const foodItems: FoodItem[] = [
     nameAr: 'صدر ديك رومي',
     nameEn: 'Turkey breast',
     category: 'بروتين',
-    servingLabelAr: '100غ',
+    servingLabelAr: 'لكل 100غ',
     servingGrams: 100,
     calories: 135,
     protein: 30,
@@ -257,7 +282,7 @@ export const foodItems: FoodItem[] = [
     nameAr: 'كبدة دجاج',
     nameEn: 'Chicken liver',
     category: 'بروتين',
-    servingLabelAr: '100غ',
+    servingLabelAr: 'لكل 100غ',
     servingGrams: 100,
     calories: 167,
     protein: 24,
@@ -281,7 +306,7 @@ export const foodItems: FoodItem[] = [
     nameAr: 'دجاج مفروم',
     nameEn: 'Ground chicken',
     category: 'بروتين',
-    servingLabelAr: '100غ',
+    servingLabelAr: 'لكل 100غ',
     servingGrams: 100,
     calories: 143,
     protein: 17,
@@ -760,7 +785,7 @@ export const foodItems: FoodItem[] = [
     nameAr: 'جبن فيتا',
     nameEn: 'Feta cheese',
     category: 'ألبان',
-    servingLabelAr: '30غ',
+    servingLabelAr: 'حصة (30غ)',
     servingGrams: 30,
     calories: 80,
     protein: 4,
@@ -796,7 +821,7 @@ export const foodItems: FoodItem[] = [
     nameAr: 'جبن حلوم',
     nameEn: 'Halloumi cheese',
     category: 'ألبان',
-    servingLabelAr: '50غ',
+    servingLabelAr: 'حصة (50غ)',
     servingGrams: 50,
     calories: 160,
     protein: 11,
@@ -2935,7 +2960,7 @@ export const foodItems: FoodItem[] = [
     nameAr: 'الطازج - نص دجاجة مشوية',
     nameEn: 'Al Tazaj - Half grilled chicken',
     category: 'مطاعم',
-    servingLabelAr: 'نص دجاجة (250غ)',
+    servingLabelAr: 'نصف دجاجة (250غ)',
     servingGrams: 250,
     calories: 520,
     protein: 50,
@@ -3682,7 +3707,7 @@ export const foodItems: FoodItem[] = [
     nameAr: 'هارديز - فيمس ستار بالجبن',
     nameEn: "Hardee's - Famous Star with cheese",
     category: 'مطاعم',
-    servingLabelAr: 'برغر (230غ)',
+    servingLabelAr: 'برجر (230غ)',
     servingGrams: 230,
     calories: 670,
     protein: 28,
@@ -3692,16 +3717,16 @@ export const foodItems: FoodItem[] = [
   },
   {
     id: 'hardees-thickburger',
-    nameAr: 'هارديز - ثيك برغر أصلي',
+    nameAr: 'هارديز - ثيك برجر أصلي',
     nameEn: "Hardee's - Original Thickburger",
     category: 'مطاعم',
-    servingLabelAr: 'برغر (270غ)',
+    servingLabelAr: 'برجر (270غ)',
     servingGrams: 270,
     calories: 820,
     protein: 40,
     carbs: 50,
     fat: 51,
-    keywords: ['hardees', "hardee's", 'هارديز', 'هارديس', 'thickburger', 'ثيك برغر'],
+    keywords: ['hardees', "hardee's", 'هارديز', 'هارديس', 'thickburger', 'ثيك برجر'],
   },
   {
     id: 'hardees-charbroiled-chicken',
@@ -3803,39 +3828,39 @@ export const foodItems: FoodItem[] = [
     nameAr: 'برجرايزر - كلاسيك سنجل',
     nameEn: 'Burgerizzr - Classic single burger',
     category: 'مطاعم',
-    servingLabelAr: 'برغر (190غ)',
+    servingLabelAr: 'برجر (190غ)',
     servingGrams: 190,
     calories: 470,
     protein: 24,
     carbs: 38,
     fat: 24,
-    keywords: ['burgerizzr', 'برجرايزر', 'برغرايزر', 'classic', 'كلاسيك'],
+    keywords: ['burgerizzr', 'برجرايزر', 'برجرايزر', 'classic', 'كلاسيك'],
   },
   {
     id: 'burgerizzr-double',
-    nameAr: 'برجرايزر - دبل برغر',
+    nameAr: 'برجرايزر - دبل برجر',
     nameEn: 'Burgerizzr - Double burger',
     category: 'مطاعم',
-    servingLabelAr: 'برغر (260غ)',
+    servingLabelAr: 'برجر (260غ)',
     servingGrams: 260,
     calories: 700,
     protein: 40,
     carbs: 40,
     fat: 42,
-    keywords: ['burgerizzr', 'برجرايزر', 'برغرايزر', 'double', 'دبل'],
+    keywords: ['burgerizzr', 'برجرايزر', 'برجرايزر', 'double', 'دبل'],
   },
   {
     id: 'burgerizzr-crispy-chicken',
-    nameAr: 'برجرايزر - كرسبي تشيكن برغر',
+    nameAr: 'برجرايزر - كرسبي تشيكن برجر',
     nameEn: 'Burgerizzr - Crispy chicken burger',
     category: 'مطاعم',
-    servingLabelAr: 'برغر (220غ)',
+    servingLabelAr: 'برجر (220غ)',
     servingGrams: 220,
     calories: 540,
     protein: 26,
     carbs: 45,
     fat: 28,
-    keywords: ['burgerizzr', 'برجرايزر', 'برغرايزر', 'crispy chicken', 'كرسبي'],
+    keywords: ['burgerizzr', 'برجرايزر', 'برجرايزر', 'crispy chicken', 'كرسبي'],
   },
   {
     id: 'burgerizzr-fries',
@@ -3848,7 +3873,7 @@ export const foodItems: FoodItem[] = [
     protein: 5,
     carbs: 45,
     fat: 18,
-    keywords: ['burgerizzr', 'برجرايزر', 'برغرايزر', 'fries', 'بطاطس'],
+    keywords: ['burgerizzr', 'برجرايزر', 'برجرايزر', 'fries', 'بطاطس'],
   },
 
   // --- كاريبو كوفي (Caribou Coffee) ---
@@ -5504,7 +5529,7 @@ export const foodItems: FoodItem[] = [
     nameAr: 'سمك مشرمل',
     nameEn: 'Musharmal fish (spiced tomato-stewed fish)',
     category: 'أطباق سعودية / شعبية',
-    servingLabelAr: '100غ',
+    servingLabelAr: 'لكل 100غ',
     servingGrams: 100,
     calories: 180,
     protein: 20,
@@ -5587,7 +5612,7 @@ export const foodItems: FoodItem[] = [
     nameAr: 'خبز ملة',
     nameEn: 'Khubz milla (bread baked buried in embers)',
     category: 'أطباق سعودية / شعبية',
-    servingLabelAr: '100غ',
+    servingLabelAr: 'لكل 100غ',
     servingGrams: 100,
     calories: 265,
     protein: 8,
@@ -5601,7 +5626,7 @@ export const foodItems: FoodItem[] = [
     nameAr: 'قشد',
     nameEn: 'Qishd (clotted cream served with dates & bread)',
     category: 'أطباق سعودية / شعبية',
-    servingLabelAr: '100غ',
+    servingLabelAr: 'لكل 100غ',
     servingGrams: 100,
     calories: 360,
     protein: 4,
@@ -5609,6 +5634,12 @@ export const foodItems: FoodItem[] = [
     fat: 36,
     keywords: ['qishda', 'قشطة عربية'],
   },
+  // ===== أطباق سعودية تقليدية (إقليمية) — جداول تركيب الأغذية السعودية، القيم لكل 100غ =====
+  ...saudiTraditionalFoods,
+  // ===== أطباق ومشروبات ومقبّلات خليجية شائعة (Cycle 4) — انظر gccStaples.ts =====
+  ...gccStaples,
+  // ===== Food R2: 60 Saudi/GCC eating-out estimates =====
+  ...foodR2EatingOut,
 ]
 
 export const foodMap: Record<string, FoodItem> = Object.fromEntries(
@@ -5639,19 +5670,70 @@ export function normalizeSearch(text: string): string {
 }
 
 /**
+ * مقابلات إملائية للكلمات الدخيلة — **قائمة مغلقة لا قاعدة عامّة**.
+ *
+ * لماذا قائمة: الأصوات الأجنبية (g، ch، تركيب sandwich) لا مقابل واحد لها في العربية،
+ * فينقلها الناس بإملاءين شائعين — «برجر/برغر»، «مانجو/مانغو». والإغراء هو تعميم
+ * القاعدة (كل «ج» تساوي «غ») — وهي **كارثة على القاعدة**: «لحم جمل» يتطابق مع «غمل»،
+ * و«جريش» مع «غريش»، ويصير كل بحث عربي أصيل مليئًا بنتائج لا علاقة لها به. فالتكافؤ
+ * يُمنح لكلمة مسمّاة بعينها، ولا يُشتق من حرف أبدًا.
+ *
+ * شروط إضافة زوج (الثلاثة معًا):
+ *   ١. الكلمة نقل صوتي لكلمة أجنبية، لا كلمة عربية أصيلة.
+ *   ٢. الإملاءان شائعان فعلًا في الكتابة السعودية.
+ *   ٣. الاستبدال لا يُنتج كلمة عربية أصيلة أخرى.
+ *
+ * الصيغة الأولى في كل مجموعة هي المعتمدة في البيانات، والباقي **مقبول في البحث فقط**
+ * (لا يغيّر أي نصّ معروض). المتغيّرات تُرتَّب الأطول أولًا كي لا يبتلع الأقصر الأطول.
+ */
+export const LOANWORD_SPELLINGS: readonly (readonly string[])[] = [
+  // burger — الإملاء في البيانات «برجر» (60 موضعًا)، و«برغر» كان يُرجع صفر نتائج.
+  ['برجر', 'برغر'],
+  // mango — البيانات «مانجو»، و«مانغو» شائعة بالقدر نفسه.
+  ['مانجو', 'مانغو'],
+  // nuggets — القاعدة نفسها تحمل الإملاءين («نجت دجاج» و«ناجتس دجاج»)، وكانا
+  // غير مرئيين لبعضهما في البحث. تُدرَج صيغة الجمع لأنها نفس الكلمة لا كلمة أخرى.
+  ['نجت', 'ناجتس', 'نجتس', 'ناجت'],
+  // sandwich — البيانات «ساندويتش» (36 موضعًا)، والصيغ الأخرى شائعة في الكتابة اليومية.
+  ['ساندويتش', 'سندويتش', 'ساندوتش', 'سندوتش', 'سندويش'],
+  // broccoli — البيانات «بروكلي»، و«بروكولي» شائعة.
+  ['بروكلي', 'بروكولي'],
+]
+
+// خريطة مطبَّعة مسبقًا: [متغيّر → الصيغة المعتمدة]، مرتّبة بطول المتغيّر تنازليًا.
+const LOANWORD_REPLACEMENTS: readonly (readonly [string, string])[] = LOANWORD_SPELLINGS
+  .flatMap(([canonical, ...variants]) =>
+    variants.map((v) => [normalizeSearch(v), normalizeSearch(canonical)] as const),
+  )
+  .sort((a, b) => b[0].length - a[0].length)
+
+/**
+ * يوحّد إملاء الكلمات الدخيلة داخل نصّ **مطبَّع مسبقًا** إلى الصيغة المعتمدة.
+ * يُطبَّق في `searchFood` وحدها على الاستعلام وعلى نصوص العنصر معًا — لا داخل
+ * `normalizeSearch` كي يبقى التطبيع العربي العام نقيًّا وقابلًا للاستخدام في مواضع أخرى.
+ */
+function canonicalizeLoanwords(normalized: string): string {
+  let out = normalized
+  for (const [variant, canonical] of LOANWORD_REPLACEMENTS) {
+    if (out.includes(variant)) out = out.split(variant).join(canonical)
+  }
+  return out
+}
+
+/**
  * بحث في قاعدة الأطعمة — عربي أولًا، يتحمّل الأخطاء الإملائية الشائعة والمرادفات
- * (عبر التطبيع + الكلمات المفتاحية اللاتينية). النتائج مرتّبة: تطابق تام → بادئة → تضمين،
- * مع أولوية الاسم العربي ثم الإنجليزي ثم الكلمات المفتاحية.
+ * (عبر التطبيع + مقابلات الكلمات الدخيلة + الكلمات المفتاحية اللاتينية). النتائج مرتّبة:
+ * تطابق تام → بادئة → تضمين، مع أولوية الاسم العربي ثم الإنجليزي ثم الكلمات المفتاحية.
  */
 export function searchFood(query: string): FoodItem[] {
-  const q = normalizeSearch(query)
+  const q = canonicalizeLoanwords(normalizeSearch(query))
   if (!q) return foodItems
 
   const scored: { item: FoodItem; score: number }[] = []
   for (const f of foodItems) {
-    const ar = normalizeSearch(f.nameAr)
-    const en = normalizeSearch(f.nameEn)
-    const kws = (f.keywords ?? []).map(normalizeSearch)
+    const ar = canonicalizeLoanwords(normalizeSearch(f.nameAr))
+    const en = canonicalizeLoanwords(normalizeSearch(f.nameEn))
+    const kws = (f.keywords ?? []).map((k) => canonicalizeLoanwords(normalizeSearch(k)))
 
     let score = Infinity
     if (ar === q) score = 0

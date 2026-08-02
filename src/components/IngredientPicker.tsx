@@ -48,7 +48,7 @@ export function IngredientPicker({ lang, onAdd, onClose }: IngredientPickerProps
       <div className="flex max-h-[90vh] w-full max-w-lg flex-col rounded-t-3xl bg-surface shadow-card sm:rounded-3xl">
         <div className="flex items-center justify-between border-b border-line p-4">
           <h3 className="text-base font-bold text-ink-900">{d.ingredientLibraryTitle}</h3>
-          <button type="button" onClick={onClose} aria-label={d.close} className="grid h-8 w-8 place-items-center rounded-lg text-ink-500 hover:bg-beige">
+          <button type="button" onClick={onClose} aria-label={d.close} className="grid h-11 w-11 place-items-center rounded-lg text-ink-500 hover:bg-beige">
             <Icon name="X" className="h-5 w-5" />
           </button>
         </div>

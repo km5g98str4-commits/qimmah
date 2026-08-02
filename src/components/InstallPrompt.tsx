@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Icon } from './Icon'
 import type { Lang } from '@/lib/appPreferences'
 import { installGuideStrings } from '@/i18n/dict/installGuide'
-import { canPromptInstall, isStandalone, onInstallStateChange, promptInstall } from '@/lib/pwa'
+import { canPromptInstall, isNativePlatform, isStandalone, onInstallStateChange, promptInstall } from '@/lib/pwa'
 import { dismissInstallPrompt, isIOSSafari, isInstallPromptDismissed } from '@/lib/installState'
 
 /**
@@ -29,8 +29,10 @@ export function InstallPrompt({ lang }: { lang: Lang }) {
     [],
   )
 
+  // داخل تطبيق iOS/Android الأصلي (Capacitor) لا نعرض دعوة تثبيت PWA إطلاقًا —
+  // التطبيق مثبّت أصلًا، وإظهارها قد يسبّب رفض App Store.
   // مثبّت أو مُغلق → لا شيء. غير ذلك: زر أصلي (أندرويد) أو تلميح (آيفون/سفاري).
-  if (standalone || dismissed) return null
+  if (isNativePlatform() || standalone || dismissed) return null
   const showAndroid = installable
   const showIos = !installable && ios
   if (!showAndroid && !showIos) return null

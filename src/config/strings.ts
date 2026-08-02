@@ -6,10 +6,10 @@ import type { Lang } from '@/lib/appPreferences'
 export interface ShellStrings {
   brand: string
   tagline: string
-  nav: { home: string; setup: string; demo: string; settings: string }
-  tabs: { home: string; workout: string; nutrition: string; progress: string; profile: string }
+  nav: { home: string; setup: string; settings: string }
+  tabs: { home: string; today: string; workout: string; nutrition: string; progress: string; profile: string }
   lang: { ar: string; en: string; label: string }
-  badge: { guest: string; account: string; demo: string }
+  badge: { guest: string; account: string }
   start: {
     welcome: string
     headline: string
@@ -22,6 +22,7 @@ export interface ShellStrings {
     chooseLang: string
     note: string
     positioning: string
+    trust: string
     login: string
     continueGuest: string
     guestNote: string
@@ -37,6 +38,26 @@ export interface ShellStrings {
     login: string
     createAccount: string
     logout: string
+    // استعادة كلمة المرور (Sprint UI 1)
+    forgotLink: string
+    forgotTitle: string
+    forgotSubtitle: string
+    sendReset: string
+    forgotSent: string
+    forgotFailed: string
+    // تعيين كلمة مرور جديدة (Sprint A) — شاشة استكمال الاستعادة بعد فتح رابط البريد
+    resetTitle: string
+    resetSubtitle: string
+    resetNewPassword: string
+    resetConfirmPassword: string
+    resetSave: string
+    resetSuccess: string
+    resetSuccessHint: string
+    resetMismatch: string
+    resetWeak: string
+    resetExpiredTitle: string
+    resetExpired: string
+    resetChecking: string
     continueGuest: string
     noAccount: string
     haveAccount: string
@@ -49,7 +70,28 @@ export interface ShellStrings {
     guestNote: string
     accountNote: string
     cloudNote: string
+    /** مسجّل دخول لكن المزامنة مطفأة في هذا البناء — البيانات على الجهاز فقط. */
+    cloudNoteLocalOnly: string
+    /** مسجّل دخول والمزامنة شغّالة لكن ما تمّت أول مزامنة ناجحة بعد. */
+    cloudNoteNeverSynced: string
+    /** في طابور تغييرات لسه ما رُفعت. */
+    cloudNotePending: string
+    /** المزامنة متعثّرة وتحتاج انتباه (محاولات فاشلة متكرّرة أو تبنّي معلّق). */
+    cloudNoteAttention: string
     back: string
+    deleteAccount: string
+    deleteAccountDesc: string
+    deleteConfirmTitle: string
+    deleteConfirmBody: string
+    deleteConfirmHint: string
+    deleteConfirmWord: string
+    deleteConfirmCta: string
+    deleting: string
+    // فشل حذف مستخدم المصادقة على الخادم — رسالة صادقة بلا ادّعاء نجاح (Sprint B)
+    deleteFailed: string
+    deleteRetry: string
+    deleteContactCta: string
+    cancel: string
   }
   settings: {
     title: string
@@ -59,7 +101,6 @@ export interface ShellStrings {
     groupPrivacy: string
     groupLanguage: string
     languageActive: string
-    languageSoon: string
     languageHint: string
     export: string
     import: string
@@ -77,6 +118,25 @@ export interface ShellStrings {
     importConfirm: string
     importSuccess: string
     importError: string
+    // — نقل البيانات المحصّن (معاينة → تأكيد → تطبيق ذرّي → تراجع) —
+    dataLocalNote: string
+    exportShared: string
+    exportDownloaded: string
+    exportFailed: string
+    importPreviewTitle: string
+    importPreviewNote: string
+    importConfirmBtn: string
+    importCancel: string
+    importBackedUp: string
+    importExtra: string
+    importDoneTitle: string
+    importDoneNote: string
+    importViewData: string
+    importUndo: string
+    importUndoLast: string
+    importUndoDesc: string
+    importRecoveryBlocked: string
+    importInvalidFile: string
     regenerateSuccess: string
     groupDev: string
     devReviewProducts: string
@@ -84,6 +144,10 @@ export interface ShellStrings {
     groupAbout: string
     versionLabel: string
     calcLink: string
+    // تحليلات مجهولة اختيارية (opt-out)
+    analyticsTitle: string
+    analyticsDesc: string
+    analyticsToggle: string
   }
   pwa: {
     group: string
@@ -138,7 +202,6 @@ export interface ShellStrings {
     reportSubject: string
     back: string
   }
-  demo: { badge: string; title: string; body: string; back: string }
   workout: {
     start: string
     watch: string
@@ -148,6 +211,9 @@ export interface ShellStrings {
     startRest: string
     pause: string
     resume: string
+    resumeTitle: string
+    resumeBody: string
+    resumeDiscard: string
     reset: string
     rest: string
     sets: string
@@ -233,6 +299,11 @@ export interface ShellStrings {
     backToToday: string
     viewProgress: string
     newPr: string
+    // — دعوة تفعيل تذكير التمرين بعد الجلسة (iOS الأصلي فقط) —
+    reminderCtaText: string
+    reminderCtaButton: string
+    reminderCtaEnabled: string
+    reminderCtaDenied: string
     // — سلسلة الالتزام الأسبوعي —
     weeklyStreakTitle: string
     weeklyDonePrefix: string
@@ -247,9 +318,6 @@ export interface ShellStrings {
     exerciseCals: string
     equationNote: string
     addShort: string
-    copy: string
-    favorite: string
-    soon: string
     title: string
     desc: string
     enable: string
@@ -374,6 +442,11 @@ export interface ShellStrings {
     reminderEnabled: string
     reminderTrainingTime: string
     reminderNote: string
+    // نص إشعار التمرين + تلميحات الإذن/الويب
+    reminderNotifTitle: string
+    reminderNotifBody: string
+    reminderDeniedHint: string
+    reminderWebHint: string
     title: string
     desc: string
     enable: string
@@ -397,51 +470,87 @@ export interface ShellStrings {
 
 const ar: ShellStrings = {
   brand: 'قِمّة',
-  tagline: 'تطبيقك الشخصي لكمال الأجسام والتمرين',
-  nav: { home: 'الرئيسية', setup: 'الإعداد', demo: 'النموذج', settings: 'الإعدادات' },
-  tabs: { home: 'الرئيسية', workout: 'تمرين', nutrition: 'تغذية', progress: 'تقدّم', profile: 'حسابي' },
+  tagline: 'مرشدك الهادئ نحو صحة أفضل',
+  nav: { home: 'الرئيسية', setup: 'الإعداد', settings: 'الإعدادات' },
+  tabs: { home: 'الرئيسية', today: 'اليوم', workout: 'تمرين', nutrition: 'تغذية', progress: 'تقدّم', profile: 'حسابي' },
   lang: { ar: 'العربية', en: 'English', label: 'اللغة' },
-  badge: { guest: 'ضيف', account: 'حساب', demo: 'نموذج تجريبي' },
+  badge: { guest: 'ضيف', account: 'حساب' },
   start: {
     welcome: 'هلا فيك في قِمّة',
-    headline: 'كل رحلتك في كمال الأجسام في نظام واحد',
-    intro: 'تمارينك، أوزانك، التضخيم التدريجي، تغذيتك، وقياساتك — كلها في مكان واحد.',
+    headline: 'كل قمة تبدأ بخطوة.',
+    intro: 'تمارينك، أكلك، وتقدّمك — كلها في مكان واحد، بوضوح وهدوء.',
     startSetup: 'ابدأ إعداد صفحتي',
-    buildPlan: 'ابنِ خطتي الآن',
-    continueSetup: 'أكمل إعداد صفحتي',
-    seeDemo: 'شاهد نموذجًا',
+    buildPlan: 'جهّز خطتي الحين',
+    continueSetup: 'كمّل إعداد صفحتي',
+    seeDemo: 'شوف نموذج',
     importPrevious: 'استورد نسخة سابقة',
     chooseLang: 'اختر اللغة',
-    note: 'بياناتك محفوظة على جهازك. تقدر تعدّل كل شيء لاحقًا.',
-    positioning: 'نظام كمال أجسام للرياضي الفرد: تابع أوزانك وتكراراتك وتضخّمك التدريجي يومًا بيوم.',
+    note: 'بياناتك محفوظة على جهازك، وتقدر تعدّل كل شي بعدين.',
+    positioning: 'مرشدك الهادئ نحو صحة أفضل.',
+    trust: 'بلا إعلانات، وبلا مبالغات.',
     login: 'تسجيل الدخول',
-    continueGuest: 'المتابعة كضيف',
-    guestNote: 'بيانات الضيف محفوظة على هذا الجهاز فقط.',
+    continueGuest: 'كمّل كضيف',
+    guestNote: 'بيانات الضيف تنحفظ على هذا الجهاز بس.',
   },
   auth: {
     title: 'تسجيل الدخول',
-    subtitle: 'سجّل الدخول لحفظ بياناتك على حسابك السحابي والوصول إليها من أي جهاز.',
+    subtitle: 'سجّل دخولك عشان بياناتك تنحفظ في حسابك السحابي وتوصل لها من أي جهاز.',
     signupTitle: 'حساب جديد',
-    signupSubtitle: 'أنشئ حسابك مرّة واحدة لحفظ تقدّمك والوصول إليه من أي جهاز.',
+    signupSubtitle: 'افتح حسابك مرة وحدة، وتقدّمك ينحفظ وتوصل له من أي جهاز.',
     name: 'الاسم',
     email: 'البريد الإلكتروني',
     password: 'كلمة المرور',
     login: 'تسجيل الدخول',
-    createAccount: 'إنشاء حساب جديد',
+    createAccount: 'افتح حساب جديد',
     logout: 'تسجيل الخروج',
-    continueGuest: 'المتابعة كضيف',
+    forgotLink: 'نسيت كلمة المرور؟',
+    forgotTitle: 'استعادة كلمة المرور',
+    forgotSubtitle: 'اكتب بريدك، وبنرسل لك رابط تغيير كلمة المرور.',
+    sendReset: 'أرسل رابط الاستعادة',
+    forgotSent: 'إذا بريدك مسجّل عندنا، بيوصلك رابط الاستعادة — شيّك على بريدك.',
+    forgotFailed: 'ما قدرنا نرسل الرابط الحين. جرّب بعد شوي.',
+    resetTitle: 'تعيين كلمة مرور جديدة',
+    resetSubtitle: 'اختر كلمة مرور جديدة لحسابك في قِمّة.',
+    resetNewPassword: 'كلمة المرور الجديدة',
+    resetConfirmPassword: 'تأكيد كلمة المرور',
+    resetSave: 'حفظ كلمة المرور',
+    resetSuccess: 'تم — كلمة مرورك الجديدة انحفظت.',
+    resetSuccessHint: 'تقدر الحين تسجّل دخولك بكلمة المرور الجديدة.',
+    resetMismatch: 'كلمتا المرور مو متطابقتين — تأكّد منهم مرة ثانية.',
+    resetWeak: 'كلمة المرور ضعيفة — ٨ أحرف على الأقل مع حرف ورقم.',
+    resetExpiredTitle: 'الرابط خلصت صلاحيته',
+    resetExpired: 'الرابط انتهت صلاحيته أو ما عاد يشتغل. اطلب رابط جديد وبيوصلك على بريدك.',
+    resetChecking: 'نتأكّد من الرابط…',
+    continueGuest: 'كمّل كضيف',
     noAccount: 'ما عندك حساب؟',
     haveAccount: 'عندك حساب؟',
-    switchToSignup: 'أنشئ حسابًا',
+    switchToSignup: 'افتح حساب',
     switchToLogin: 'سجّل الدخول',
-    savePrompt: 'سجّل لحفظ تقدّمك',
-    disabledTitle: 'تسجيل الدخول السحابي غير مفعّل حاليًا',
-    disabledBody: 'تقدر تستخدم وضع الضيف على هذا الجهاز.',
+    savePrompt: 'سجّل عشان تقدّمك ينحفظ',
+    disabledTitle: 'تسجيل الدخول السحابي مو مفعّل حاليًا',
+    disabledBody: 'المزامنة السحابية مو مفعّلة في هذي النسخة. كلّم مزوّد الخدمة عشان يفعّل لك الحساب.',
     guestBadge: 'ضيف',
-    guestNote: 'بيانات الضيف محفوظة على هذا الجهاز فقط.',
-    accountNote: 'أنت مسجّل الدخول. بياناتك تُزامَن مع حسابك السحابي.',
+    guestNote: 'بيانات الضيف تنحفظ على هذا الجهاز بس.',
+    accountNote: 'أنت مسجّل دخولك، وبياناتك تتزامن مع حسابك السحابي.',
     cloudNote: 'بياناتك محفوظة على هذا الجهاز وعلى حسابك السحابي.',
+    cloudNoteLocalOnly: 'بياناتك محفوظة على هذا الجهاز فقط — المزامنة السحابية مو مفعّلة في هذي النسخة.',
+    cloudNoteNeverSynced: 'بياناتك على هذا الجهاز، وأول مزامنة سحابية ما تمّت بعد.',
+    cloudNotePending: 'بياناتك على هذا الجهاز، وفيه تغييرات لسه ترفع لحسابك السحابي.',
+    cloudNoteAttention: 'بياناتك على هذا الجهاز، بس المزامنة السحابية متعثّرة — افتح «بياناتي» عشان تشوف التفاصيل.',
     back: 'رجوع',
+    deleteAccount: 'حذف الحساب',
+    deleteAccountDesc: 'يحذف حسابك وكل بياناتك نهائيًا — وما تقدر ترجّعها.',
+    deleteConfirmTitle: 'تحذف الحساب نهائيًا؟',
+    deleteConfirmBody:
+      'بينحذف حسابك وكل بياناتك (خطتك، سجلّاتك، قياساتك) نهائيًا من هذا الجهاز ومن حسابك السحابي، وما تقدر ترجّعها.',
+    deleteConfirmHint: 'اكتب «حذف» للتأكيد',
+    deleteConfirmWord: 'حذف',
+    deleteConfirmCta: 'احذف حسابي نهائيًا',
+    deleting: 'جاري الحذف…',
+    deleteFailed: 'ما قدرنا نحذف الحساب كامل — العملية ما اكتملت. جرّب مرة ثانية أو',
+    deleteRetry: 'جرّب مرة ثانية',
+    deleteContactCta: 'تواصل معنا',
+    cancel: 'إلغاء',
   },
   settings: {
     title: 'الإعدادات',
@@ -451,55 +560,77 @@ const ar: ShellStrings = {
     groupPrivacy: 'الخصوصية والثقة',
     groupLanguage: 'اللغة',
     languageActive: 'العربية — مفعّلة',
-    languageSoon: 'الإنجليزية قريبًا (English coming soon)',
-    languageHint: 'يتغيّر النص واتجاه الصفحة فورًا، ويُحفظ اختيارك على هذا الجهاز.',
+    languageHint: 'النص واتجاه الصفحة يتغيّرون على طول، واختيارك ينحفظ على هذا الجهاز.',
     export: 'تصدير نسخة احتياطية',
     import: 'استيراد نسخة',
     reset: 'إعادة ضبط البيانات',
     resetConfirm:
-      'سيتم حذف كل بيانات قِمّة من هذا المتصفح نهائيًا (الإعداد، الخطة، المتابعات، السجلّات). لا يمكن التراجع. هل أنت متأكد؟',
+      'بتنحذف كل بيانات قِمّة من هذا المتصفح نهائيًا (الإعداد، الخطة، المتابعات، السجلّات) وما تقدر ترجّعها. متأكد؟',
     editPlan: 'تعديل خطتي',
     regenerate: 'إعادة توليد الخطة',
     regenerateConfirm:
-      'سيُعاد توليد خطة التمرين والتغذية من بياناتك الحالية، وستُستبدل خطتك الحالية. هل تريد المتابعة؟',
+      'بنسوّي لك خطة تمرين وتغذية جديدة من بياناتك الحالية، وبتحل مكان خطتك الحالية. تبي تكمّل؟',
     switchMachines: 'التحويل لنسخة الأجهزة',
     switchMachinesConfirm:
-      'سيُعاد توليد خطتك التلقائية بتمارين أجهزة الكتالوج فقط، وتُستبدل الخطة التلقائية الحالية. جدولك المخصّص وسجلّ تمارينك لن يتغيّرا. هل تريد المتابعة؟',
-    switchMachinesSuccess: 'تم التحويل — خطتك التلقائية الآن بنسخة الأجهزة.',
+      'بنعيد توليد خطتك التلقائية بتمارين أجهزة الكتالوج بس، وبتحل مكان الخطة التلقائية الحالية. جدولك المخصّص وسجل تمارينك ما بيتغيّرون. تبي تكمّل؟',
+    switchMachinesSuccess: 'تم — خطتك التلقائية صارت بنسخة الأجهزة.',
     privacyLink: 'سياسة الخصوصية',
     termsLink: 'شروط الاستخدام',
     healthDisclaimer:
-      'قِمّة أداة تنظيم ومتابعة شخصية، وليست بديلًا عن الاستشارة الطبية. لا تبدأ أو توقف أي دواء أو نظام بدون مختص.',
-    importConfirm: 'سيستبدل الاستيراد خطّتك وسجلّك الحالي بمحتوى الملف. هل تريد المتابعة؟',
+      'قِمّة أداة تنظيم ومتابعة شخصية، ومو بديل عن استشارة الطبيب. لا تبدأ ولا توقف أي دواء أو نظام بدون مختص.',
+    importConfirm: 'الاستيراد بيستبدل خطتك وسجلك الحالي بمحتوى الملف. تبي تكمّل؟',
     importSuccess: 'تم استيراد نسختك بنجاح.',
-    importError: 'تعذّرت قراءة الملف. تأكّد أنّه نسخة قِمّة صحيحة.',
-    regenerateSuccess: 'تم إعادة توليد خطتك من بياناتك الحالية.',
+    importError: 'ما قدرنا نقرأ الملف. تأكّد إنه نسخة قِمّة صحيحة.',
+    dataLocalNote:
+      'ملف التصدير ينسوي على جهازك بصيغة JSON، وتقدر تحفظه أو تشاركه مثل ما تبي. هذا ما يغيّر إعداد المزامنة في حسابك.',
+    exportShared: 'تمت مشاركة نسخة بياناتك.',
+    exportDownloaded: 'تم تنزيل نسخة بياناتك على جهازك.',
+    exportFailed: 'ما قدرنا نسوّي نسخة التصدير.',
+    importPreviewTitle: 'معاينة الاستيراد',
+    importPreviewNote: 'هذي البيانات بتحل مكان اللي على جهازك الحين، وتقدر تتراجع بعد الاستيراد.',
+    importConfirmBtn: 'تأكيد الاستيراد',
+    importCancel: 'إلغاء',
+    importBackedUp: 'أخذنا نسخة احتياطية',
+    importExtra: 'عناصر إضافية',
+    importDoneTitle: 'تمّ الاستيراد',
+    importDoneNote: 'رجّعنا بياناتك على هذا الجهاز.',
+    importViewData: 'عرض بياناتي',
+    importUndo: 'تراجع',
+    importUndoLast: 'تراجع عن آخر استيراد',
+    importUndoDesc: 'يرجّع بياناتك مثل ما كانت قبل آخر استيراد.',
+    importRecoveryBlocked: 'ما تقدر تستورد وأنت في وضع استعادة كلمة المرور.',
+    importInvalidFile: 'الملف مو صالح.',
+    regenerateSuccess: 'تم — سوّينا لك خطة جديدة من بياناتك الحالية.',
     groupDev: 'أدوات داخلية',
     devReviewProducts: 'مراجعة المنتجات',
     devReviewHint: 'مراجعة منتجات ممسوحة/مُضافة بانتظار الاعتماد قبل ظهورها للمستخدمين.',
     groupAbout: 'عن التطبيق',
     versionLabel: 'إصدار التطبيق',
     calcLink: 'كيف نحسب أرقامك؟',
+    analyticsTitle: 'تحليلات مجهولة',
+    analyticsDesc:
+      'إحصاءات استخدام مجهولة تمامًا (بلا اسم أو بريد أو أي بيانات شخصية) تساعدنا على تحسين قِمّة. لا نبيع بياناتك ولا نتتبّعك خارج التطبيق. تقدر توقفها في أي وقت.',
+    analyticsToggle: 'المشاركة في التحليلات المجهولة',
   },
   pwa: {
     group: 'التطبيق والتنبيهات',
     installTitle: 'ثبّت قِمّة على جهازك',
-    installBody: 'أضف قِمّة كتطبيق ليفتح بلمسة واحدة ويعمل حتى دون اتصال.',
+    installBody: 'أضف قِمّة كتطبيق — يفتح بلمسة وحدة ويشتغل حتى بدون نت.',
     installBtn: 'تثبيت التطبيق',
     installIosTitle: 'أضف قِمّة للشاشة الرئيسية',
     installIosBody:
-      'في متصفح آيفون: اضغط زر المشاركة ثم «أضف إلى الشاشة الرئيسية». التنبيهات محدودة في متصفح الآيفون — للتجربة الكاملة أضف قِمّة للشاشة الرئيسية.',
+      'في متصفح آيفون: اضغط زر المشاركة ثم «أضف إلى الشاشة الرئيسية». التنبيهات محدودة في متصفح الآيفون — عشان التجربة الكاملة أضف قِمّة للشاشة الرئيسية.',
     installedTitle: 'قِمّة مثبّتة ✓',
-    installedBody: 'أنت تستخدم قِمّة كتطبيق مثبّت. استمتع بالتجربة الكاملة.',
+    installedBody: 'تستخدم قِمّة كتطبيق مثبّت — استمتع بالتجربة الكاملة.',
     notifTitle: 'تنبيهات التذكير',
     notifBody:
-      'فعّل التنبيهات لتذكيرات لطيفة بتمرينك ووجباتك. التذكيرات محلية داخل هذا المتصفح، وقد لا تصل في الخلفية على بعض الأجهزة — بلا وعود مضمونة.',
+      'فعّل التنبيهات عشان توصلك تذكيرات لطيفة بتمرينك ووجباتك. التذكيرات محلية داخل هذا المتصفح، وممكن ما توصل في الخلفية على بعض الأجهزة — بلا وعود مضمونة.',
     notifEnable: 'تفعيل التنبيهات',
     notifGranted: 'التنبيهات مفعّلة ✓',
-    notifDenied: 'التنبيهات محظورة من إعدادات المتصفح. فعّلها يدويًا من إعدادات الموقع.',
-    notifUnsupported: 'متصفحك لا يدعم التنبيهات هنا. أضف قِمّة للشاشة الرئيسية لتجربة أفضل.',
-    notifConfirm: 'رائع! سنُذكّرك بمواعيد تمرينك ووجباتك.',
-    bannerText: 'أضف قِمّة لشاشتك الرئيسية — أسرع وتعمل دون اتصال.',
+    notifDenied: 'التنبيهات موقوفة من إعدادات المتصفح. فعّلها بنفسك من إعدادات الموقع.',
+    notifUnsupported: 'متصفحك ما يدعم التنبيهات هنا. أضف قِمّة للشاشة الرئيسية وبتكون التجربة أفضل.',
+    notifConfirm: 'تمام! بنذكّرك بمواعيد تمرينك ووجباتك.',
+    bannerText: 'أضف قِمّة لشاشتك الرئيسية — أسرع وتشتغل بدون نت.',
     bannerInstall: 'تثبيت',
     bannerDismiss: 'لاحقًا',
   },
@@ -508,16 +639,18 @@ const ar: ShellStrings = {
     termsTitle: 'شروط الاستخدام',
     back: 'رجوع',
     privacyBody: [
-      'قِمّة تطبيق شخصي يعمل على جهازك أولًا (local-first). في وضع الضيف تُحفظ كل بياناتك في متصفّح هذا الجهاز فقط ولا تغادره.',
+      'قِمّة يتطلّب حسابًا، ويعمل بأسلوب محلي أولًا (local-first): تُحفظ بياناتك على جهازك أولًا، ثم تُزامَن إلى حسابك عند تفعيل المزامنة.',
       'عند تسجيل الدخول بحساب سحابي (Supabase) تُرفع بياناتك إلى حسابك الخاص لتتمكّن من الوصول إليها من أجهزة أخرى. لا يصل إلى صفوفك إلا أنت (Row Level Security).',
       'لا نبيع بياناتك ولا نشاركها مع معلنين. قياساتك وسجلّاتك الصحية تبقى ملكك ويمكنك حذفها في أي وقت عبر «إعادة ضبط البيانات».',
-      'تقدر تصدّر نسخة كاملة من بياناتك في أي وقت من «الإعدادات → البيانات».',
+      'نستخدم إحصاءات استخدام مجهولة تمامًا (بلا اسم أو بريد أو أي بيانات شخصية) لتحسين قِمّة، دون بيعها أو تتبّعك خارج التطبيق. يمكنك إيقافها في أي وقت من «الإعدادات → الخصوصية».',
+      'تقدر تحذف حسابك وكل بياناته نهائيًا من «الإعدادات → الحساب → حذف الحساب»، أو تصدّر نسخة كاملة من بياناتك في أي وقت من «الإعدادات → البيانات».',
     ],
     termsBody: [
       'قِمّة أداة لتنظيم ومتابعة التمرين والتغذية والمكملات والقياسات للرياضي الفرد. الاستخدام على مسؤوليتك الشخصية.',
-      'المحتوى داخل التطبيق (حسابات السعرات، اقتراحات الأوزان، الجرعات) تقديري وتعليمي فقط، وليس نصيحة طبية أو غذائية أو دوائية.',
+      'المحتوى داخل التطبيق (حسابات السعرات واقتراحات أوزان التمرين) تقديري وتعليمي فقط، وليس نصيحة طبية أو غذائية أو دوائية.',
       'استشر طبيبًا أو مختصًا مؤهّلًا قبل تغيير نظامك الغذائي أو الدوائي أو برنامج تمرينك، خصوصًا عند وجود حالة صحية.',
       'أنت مسؤول عن صحة البيانات التي تُدخلها وعن الاحتفاظ بنسخة احتياطية عبر خاصية التصدير.',
+      'مصادر الوسائط: صور إرشادات التمارين الثابتة مشتقة من قاعدتَي free-exercise-db و wrkout/exercises.json، ومتاحة بموجب Unlicense/إهداء الملك العام. أمّا الرسوم التوضيحية لبطاقات الأجهزة فهي أعمال أصلية من إنتاج قِمّة (IN-HOUSE) نملك حقوقها كاملةً.',
     ],
   },
   notFound: {
@@ -531,9 +664,9 @@ const ar: ShellStrings = {
     title: 'صار خلل بسيط',
     body: 'واجهنا مشكلة غير متوقعة في هذي الشاشة. جرّب تحدّث الصفحة وبيرجع كل شي مكانه — بياناتك محفوظة على جهازك.',
     reload: 'حدّث الصفحة',
-    routeTitle: 'حدث خطأ غير متوقّع',
-    routeBody: 'تعذّر تحميل هذه الشاشة — قد يكون الاتصال ضعيفًا. بياناتك محفوظة على جهازك.',
-    retry: 'أعد المحاولة',
+    routeTitle: 'صار خطأ غير متوقّع',
+    routeBody: 'ما قدرنا نحمّل هذي الشاشة — يمكن النت ضعيف. بياناتك محفوظة على جهازك.',
+    retry: 'جرّب مرة ثانية',
   },
   contact: {
     title: 'تواصل معنا',
@@ -545,21 +678,18 @@ const ar: ShellStrings = {
     reportSubject: 'الإبلاغ عن مشكلة في قِمّة',
     back: 'رجوع',
   },
-  demo: {
-    badge: 'نموذج تجريبي',
-    title: 'هذا نموذج تجريبي',
-    body: 'هذا نموذج تجريبي ولا يغيّر بياناتك.',
-    back: 'رجوع',
-  },
   workout: {
     start: 'ابدأ تمريني',
-    watch: 'شاهد الشرح',
+    watch: 'شوف الشرح',
     trustedGuide: 'رابط شرح موثوق',
     alternatives: 'بدائل',
-    altPrompt: 'الجهاز مشغول؟ جرّب بديلًا',
+    altPrompt: 'الجهاز مشغول؟ جرّب بديل',
     startRest: 'ابدأ الراحة',
     pause: 'إيقاف',
     resume: 'متابعة',
+    resumeTitle: 'عندك تمرين ما خلص',
+    resumeBody: 'تكمّل من مكان ما وقفت؟',
+    resumeDiscard: 'تجاهل',
     reset: 'تصفير',
     rest: 'راحة',
     sets: 'مجموعات',
@@ -574,11 +704,11 @@ const ar: ShellStrings = {
     medium: 'متوسط',
     hard: 'صعب',
     painLabel: 'ألم أو انزعاج (اختياري)',
-    painPlaceholder: 'صف أي انزعاج لاحظته',
-    safety: 'إذا شعرت بألم غير طبيعي، أوقف التمرين واستشر مختصًا.',
+    painPlaceholder: 'اكتب أي انزعاج حسّيت فيه',
+    safety: 'إذا حسّيت بألم غير طبيعي، وقّف التمرين واستشر مختص.',
     finish: 'إنهاء التمرين',
     confirmUnfinished: 'لسا فيه تمارين ما خلّصتها. تبي تنهي التمرين؟',
-    finishTitle: 'تنهي التمرين؟',
+    finishTitle: 'خلصت التمرين؟',
     finishBodyUnfinished: 'لسا فيه تمارين ما خلّصتها — بنحفظ اللي سجّلته ونعرض الملخّص.',
     finishBodyDone: 'بنحفظ تمرينك ونعرض الملخّص.',
     confirmFinish: 'نعم، أنهِ واحفظ',
@@ -590,7 +720,7 @@ const ar: ShellStrings = {
     savedBody: 'حدّثنا أوزانك وسجل تمرينك.',
     recentTitle: 'آخر تمرين',
     completedToday: 'تمرين اليوم مكتمل',
-    emptyPlan: 'اختر جدولك من الإعداد لتبدأ.',
+    emptyPlan: 'اختر جدولك من الإعداد عشان تبدأ.',
     workoutsTitle: 'تماريني',
     workoutsDesc: 'جدولك الحالي بكل أيامه وتمارينه — مع شرح كل تمرين.',
     heroReady: 'تمرينك اليوم جاهز',
@@ -608,7 +738,7 @@ const ar: ShellStrings = {
     target: 'الهدف',
     prevPerf: 'آخر مرة',
     bestPerf: 'أفضل أداء',
-    noHistory: 'لا يوجد سجل سابق',
+    noHistory: 'ما فيه سجل سابق',
     repeatLast: 'كرّر آخر مرة',
     nextExercise: 'التمرين التالي',
     prevExercise: 'السابق',
@@ -630,38 +760,39 @@ const ar: ShellStrings = {
     swapped: 'تم الاستبدال لهذا اليوم',
     equipment: 'المعدّات',
     summaryTitle: 'تمرينك انحفظ 🎉',
-    summarySub: 'شغل ممتاز — استمر على هذا الإيقاع.',
+    summarySub: 'كفو عليك — استمر على نفس الإيقاع.',
     duration: 'المدة',
     exercisesDone: 'تمارين',
     setsDone: 'جولات',
     totalVolume: 'الحجم الكلي',
     volumeUnit: 'كجم',
     prsLabel: 'أرقام قياسية',
-    noPrs: 'ما فيه رقم قياسي هالمرة — بس كل جولة تقربك.',
+    noPrs: 'ما فيه رقم قياسي هالمرة — بس كل جولة تقرّبك.',
     musclesTrained: 'عضلات مرّنتها',
-    nextWorkout: 'تمرينك القادم',
-    backToToday: 'العودة لليوم',
-    viewProgress: 'عرض تقدمي',
+    nextWorkout: 'تمرينك الجاي',
+    backToToday: 'ارجع لليوم',
+    viewProgress: 'شوف تقدّمي',
+    reminderCtaText: 'تبي تذكير بموعد تمرينك الجاي؟',
+    reminderCtaButton: 'ذكّرني بموعد تمريني',
+    reminderCtaEnabled: 'تذكير التمرين مفعّل — بيوصلك على وقتك.',
+    reminderCtaDenied: 'الإشعارات موقوفة. فعّلها من إعدادات آيفون ← الإشعارات ← قِمّة.',
     newPr: 'رقم قياسي جديد',
     weeklyStreakTitle: 'سلسلة الالتزام الأسبوعي',
-    weeklyDonePrefix: 'أنجزت',
+    weeklyDonePrefix: 'خلّصت',
     weeklyWorkoutsWord: 'تمارين هذا الأسبوع',
     weeksUnit: 'أسبوع',
-    weeklyStreakEmpty: 'ابدأ أسبوعك — كل تمرين يقربك لهدفك.',
+    weeklyStreakEmpty: 'ابدأ أسبوعك — كل تمرين يقرّبك لهدفك.',
   },
   nutrition: {
     tabTitle: 'التغذية',
     needCals: 'احتياجك',
-    foodCals: 'الطعام',
+    foodCals: 'الأكل',
     exerciseCals: 'التمرين',
-    equationNote: 'احتياجك − الطعام + التمرين = المتبقّي',
+    equationNote: 'احتياجك − الأكل + التمرين = المتبقّي',
     addShort: 'أضف',
-    copy: 'نسخ',
-    favorite: 'مفضّلة',
-    soon: 'قريبًا',
     title: 'خطة الأكل',
-    desc: 'وجباتك وأهدافك الغذائية — مبنية على حساباتك الذكية وقابلة للتعديل.',
-    enable: 'أريد متابعة الأكل',
+    desc: 'وجباتك وأهدافك الغذائية — مبنية على حساباتك الذكية وتقدر تعدّلها.',
+    enable: 'أبغى أتابع أكلي',
     useSmart: 'استخدم حساباتي الذكية',
     calories: 'سعرات',
     protein: 'بروتين',
@@ -676,7 +807,7 @@ const ar: ShellStrings = {
     addIngredient: 'أضف مكوّن',
     servings: 'حصص',
     recalc: 'احسب من المكونات',
-    estimateNote: 'القيم الغذائية تقديرية وقد تختلف حسب المنتج وطريقة التحضير.',
+    estimateNote: 'القيم الغذائية تقريبية وممكن تختلف حسب المنتج وطريقة التحضير.',
     empty: 'فعّل خطة الأكل من الإعداد إذا تبغى تتابع وجباتك.',
     mealsDone: 'وجبات مكتملة',
     addWater250: '+250 مل',
@@ -687,8 +818,8 @@ const ar: ShellStrings = {
     customWaterPlaceholder: 'كمية بالمل (مثال: 350)',
     search: 'ابحث…',
     allTypes: 'كل الأنواع',
-    logMeal: '+ سجّل وجبة',
-    quickAdd: 'أضف سعرات وبروتين سريعًا',
+    logMeal: '+ سجّل أكلك',
+    quickAdd: 'أضف سعرات وبروتين بسرعة',
     eaten: 'مأكول',
     remaining: 'المتبقّي',
     remainingCalories: 'سعرات متبقّية',
@@ -696,31 +827,31 @@ const ar: ShellStrings = {
     remainingWater: 'ماء متبقّي',
     addToLog: 'أضف للسجل',
     customQuickAdd: 'إضافة سريعة مخصّصة',
-    foodName: 'اسم الطعام/الوجبة',
-    quickAddHint: 'أدخل سعرات أو بروتين على الأقل للإضافة.',
+    foodName: 'اسم الأكل/الوجبة',
+    quickAddHint: 'اكتب سعرات أو بروتين على الأقل عشان تضيف.',
     note: 'ملاحظة',
     optional: 'اختياري',
-    searchFood: 'ابحث عن طعام…',
+    searchFood: 'ابحث عن أكل…',
     servingsCount: 'عدد الحصص',
     gramsAmount: 'الكمية (غرام)',
     gramsUnit: 'غ',
     perServingNote: 'القيم لكل',
     todayLog: 'سجل اليوم',
-    emptyLog: 'لا يوجد شيء مسجّل اليوم بعد.',
+    emptyLog: 'ما سجّلت شي اليوم لسا.',
     removeEntry: 'حذف',
     swapMeal: 'بدّل الوجبة',
     swapMealTitle: 'بدائل بسعرات وبروتين متقارب',
-    noAlternatives: 'لا توجد بدائل متقاربة حاليًا.',
+    noAlternatives: 'ما فيه بدائل قريبة حاليًا.',
     close: 'إغلاق',
     per100g: 'لكل 100غ',
     perPortion: 'لكل حصة',
     emptyStateTitle: 'ابدأ — سجّل أول وجبة',
-    emptyStateHint: 'اضغط «أضف» عند أي وجبة، ابحث عن أكلتك، وحدّد الكمية بالغرام.',
+    emptyStateHint: 'اضغط «أضف» عند أي وجبة، دوّر أكلتك، وحدّد الكمية بالغرام.',
   },
   wellness: {
     title: 'المكملات والأدوية',
-    desc: 'نظّم مكملاتك وأدويتك وتابعها يوميًا — للتنظيم فقط، وليست نصيحة طبية.',
-    enable: 'أريد متابعة المكملات والأدوية',
+    desc: 'نظّم مكملاتك وأدويتك وتابعها يوميًا — للتنظيم بس، ومو نصيحة طبية.',
+    enable: 'أبغى أتابع مكملاتي وأدويتي',
     supplementsTab: 'المكملات',
     medicationsTab: 'الأدوية',
     addSupplement: 'أضف مكمّلًا من المكتبة',
@@ -729,7 +860,7 @@ const ar: ShellStrings = {
     addCustomMedication: 'أضف دواءً مخصّصًا',
     amount: 'الكمية',
     dose: 'الجرعة',
-    doseHint: 'أدخل الجرعة بحسب وصف الطبيب',
+    doseHint: 'اكتب الجرعة مثل ما وصفها الطبيب',
     timing: 'التوقيت',
     frequency: 'التكرار',
     food: 'مع الأكل',
@@ -742,19 +873,19 @@ const ar: ShellStrings = {
     caution: 'تنبيه',
     purpose: 'الغرض من المتابعة',
     medSafety:
-      'قِمّة يساعدك على تنظيم ومتابعة أدويتك فقط. لا تبدأ أو توقف أو تغيّر جرعة أي دواء بدون استشارة الطبيب أو الصيدلي.',
-    suppSafety: 'قِمّة يساعدك على تتبّع المكملات فقط، ولا يوصي بجرعات علاجية.',
+      'قِمّة يساعدك تنظّم وتتابع أدويتك بس. لا تبدأ ولا توقف ولا تغيّر جرعة أي دواء بدون استشارة الطبيب أو الصيدلي.',
+    suppSafety: 'قِمّة يساعدك تتابع مكملاتك بس، وما يوصي بجرعات علاجية.',
     empty: 'فعّل المكملات والأدوية من الإعداد إذا تبغى تتابعها.',
-    emptySupp: 'أضف مكمّلاتك إذا كنت تستخدمها.',
-    emptyMed: 'أضف ما تريد متابعته فقط.',
+    emptySupp: 'أضف مكمّلاتك إذا تستخدمها.',
+    emptyMed: 'أضف بس اللي تبغى تتابعه.',
     search: 'ابحث…',
     allCategories: 'كل الفئات',
   },
   commit: {
     title: 'التزاماتي',
-    desc: 'الأشياء اللي تبي تلتزم فيها يوميًا أو أسبوعيًا.',
-    enable: 'أريد متابعة الالتزامات اليومية',
-    intro: 'اختر الأشياء اللي تبي تلتزم فيها يوميًا أو أسبوعيًا. تقدر تعدّلها لاحقًا.',
+    desc: 'الأشياء اللي تبغى تلتزم فيها يوميًا أو أسبوعيًا.',
+    enable: 'أبغى أتابع التزاماتي اليومية',
+    intro: 'اختر الأشياء اللي تبغى تلتزم فيها يوميًا أو أسبوعيًا، وتقدر تعدّلها بعدين.',
     add: 'أضف من المكتبة',
     addCustom: 'أضف التزامًا مخصّصًا',
     name: 'الاسم',
@@ -772,24 +903,28 @@ const ar: ShellStrings = {
   progress: {
     tabTitle: 'التقدّم',
     cardWeight: 'الوزن',
-    noWeight: 'سجّل وزنك من قسم القياسات ليظهر هنا.',
+    noWeight: 'سجّل وزنك من قسم القياسات وبيظهر هنا.',
     cardStreak: 'سلسلة التمرين',
     streakDays: 'يوم متتالٍ',
     cardVolume: 'حجم التمرين',
-    noWorkouts: 'لا توجد تمارين مسجّلة بعد. ابدأ تمرينك ليظهر تقدّمك هنا.',
+    noWorkouts: 'ما فيه تمارين مسجّلة لسا. ابدأ تمرينك وبيظهر تقدّمك هنا.',
     cardPRs: 'أفضل الأوزان (PRs)',
-    noPRs: 'أكمل تمرينًا بأوزان لتظهر أرقامك القياسية.',
+    noPRs: 'خلّص تمرين بأوزان وبتظهر أرقامك القياسية.',
     cardMuscles: 'العضلات هذا الأسبوع',
     remindersTitle: 'التذكيرات',
     reminderEnabled: 'تفعيل التذكير',
     reminderTrainingTime: 'وقت تذكير التمرين',
-    reminderNote: 'التذكيرات داخل المتصفح محدودة. دعم التنبيهات الكامل لاحقًا في تطبيق الجوال.',
+    reminderNote: 'التذكيرات داخل المتصفح محدودة — دعم التنبيهات الكامل بيجي لاحقًا في تطبيق الجوال.',
+    reminderNotifTitle: 'وقت تمرينك 💪',
+    reminderNotifBody: 'تمرينك بانتظارك — خلّك مستمر.',
+    reminderDeniedHint: 'الإشعارات موقوفة لقِمّة. فعّلها من إعدادات آيفون ← الإشعارات ← قِمّة، ثم جرّب مرة ثانية.',
+    reminderWebHint: 'التذكيرات المجدولة تشتغل في تطبيق آيفون. داخل المتصفح ما بيوصلك إشعار في الخلفية.',
     title: 'القياسات والتقدّم',
-    desc: 'سجّل قياساتك وتابع تقدّمك بمرور الوقت.',
-    enable: 'أريد متابعة القياسات والتقدّم',
-    selectTypes: 'اختر القياسات اللي تبي تتابعها',
+    desc: 'سجّل قياساتك وشوف تقدّمك مع الوقت.',
+    enable: 'أبغى أتابع قياساتي وتقدّمي',
+    selectTypes: 'اختر القياسات اللي تبغى تتابعها',
     advanced: 'قياسات صحية متقدمة',
-    advancedNote: 'القياسات الصحية المتقدمة للتسجيل فقط، وليست للتشخيص.',
+    advancedNote: 'القياسات الصحية المتقدمة للتسجيل بس، ومو للتشخيص.',
     quickLog: 'تسجيل سريع',
     save: 'احفظ القياس',
     latest: 'آخر قياس',
@@ -798,7 +933,7 @@ const ar: ShellStrings = {
     up: 'ارتفاع',
     down: 'انخفاض',
     same: 'بدون تغيير',
-    noLogs: 'لا توجد قياسات بعد.',
+    noLogs: 'ما فيه قياسات لسا.',
     empty: 'فعّل القياسات من الإعداد إذا تبغى تتابع تقدّمك.',
     notes: 'ملاحظات',
     delete: 'حذف',
@@ -807,15 +942,15 @@ const ar: ShellStrings = {
 
 const en: ShellStrings = {
   brand: 'Qimmah',
-  tagline: 'Your personal bodybuilding & training app',
-  nav: { home: 'Home', setup: 'Setup', demo: 'Demo', settings: 'Settings' },
-  tabs: { home: 'Home', workout: 'Workout', nutrition: 'Nutrition', progress: 'Progress', profile: 'Profile' },
+  tagline: 'Your calm guide to better health',
+  nav: { home: 'Home', setup: 'Setup', settings: 'Settings' },
+  tabs: { home: 'Home', today: 'Today', workout: 'Workout', nutrition: 'Nutrition', progress: 'Progress', profile: 'Profile' },
   lang: { ar: 'العربية', en: 'English', label: 'Language' },
-  badge: { guest: 'Guest', account: 'Account', demo: 'Demo' },
+  badge: { guest: 'Guest', account: 'Account' },
   start: {
     welcome: 'Welcome to Qimmah',
-    headline: 'Your entire bodybuilding journey in one system',
-    intro: 'Your workouts, weights, progressive overload, nutrition, and measurements — all in one place.',
+    headline: 'Every summit begins with a step.',
+    intro: 'Your workouts, nutrition, and progress — all in one place, with clarity and calm.',
     startSetup: 'Set up my page',
     buildPlan: 'Build my plan now',
     continueSetup: 'Continue my setup',
@@ -823,7 +958,8 @@ const en: ShellStrings = {
     importPrevious: 'Import a previous copy',
     chooseLang: 'Choose language',
     note: 'Your data is saved on your device. You can edit anything later.',
-    positioning: 'A bodybuilding OS for the individual athlete: track your weights, reps, and progressive overload day by day.',
+    positioning: 'Your calm guide to better health.',
+    trust: 'No ads. No hype.',
     login: 'Log in',
     continueGuest: 'Continue as guest',
     guestNote: 'Guest data is stored on this device only.',
@@ -839,19 +975,54 @@ const en: ShellStrings = {
     login: 'Log in',
     createAccount: 'Create account',
     logout: 'Log out',
+    forgotLink: 'Forgot your password?',
+    forgotTitle: 'Reset your password',
+    forgotSubtitle: "Enter your email and we'll send you a link to reset your password.",
+    sendReset: 'Send reset link',
+    forgotSent: "If that email is registered, a reset link is on its way. Check your inbox.",
+    forgotFailed: "Couldn't send the link right now. Try again later.",
+    resetTitle: 'Set a new password',
+    resetSubtitle: 'Choose a new password for your Qimmah account.',
+    resetNewPassword: 'New password',
+    resetConfirmPassword: 'Confirm password',
+    resetSave: 'Save password',
+    resetSuccess: 'Your password has been updated.',
+    resetSuccessHint: 'You can now sign in with your new password.',
+    resetMismatch: "The passwords don't match — double-check them.",
+    resetWeak: 'Password too weak — at least 8 characters with a letter and a number.',
+    resetExpiredTitle: 'This link is no longer valid',
+    resetExpired: 'This link has expired or no longer works. Just request a new one.',
+    resetChecking: 'Checking the link…',
     continueGuest: 'Continue as guest',
     noAccount: 'No account?',
     haveAccount: 'Have an account?',
     switchToSignup: 'Create one',
     switchToLogin: 'Log in',
     savePrompt: 'Sign up to save your progress',
-    disabledTitle: 'Cloud login is not enabled right now',
-    disabledBody: 'You can use guest mode on this device.',
+    disabledTitle: "Cloud login isn't available right now",
+    disabledBody: "Cloud sync isn't enabled in this build. Contact the provider to enable accounts.",
     guestBadge: 'Guest',
     guestNote: 'Guest data is stored on this device only.',
     accountNote: 'You are logged in. Your data syncs to your cloud account.',
     cloudNote: 'Your data is stored on this device and on your cloud account.',
+    cloudNoteLocalOnly: "Your data is stored on this device only — cloud sync isn't enabled in this build.",
+    cloudNoteNeverSynced: "Your data is on this device. It hasn't synced to the cloud yet.",
+    cloudNotePending: 'Your data is on this device. Some changes are still waiting to upload.',
+    cloudNoteAttention: 'Your data is on this device, but cloud sync is stuck — open "My data" for details.',
     back: 'Back',
+    deleteAccount: 'Delete account',
+    deleteAccountDesc: "Permanently delete your account and all your data. This can't be undone.",
+    deleteConfirmTitle: 'Delete account permanently?',
+    deleteConfirmBody:
+      "Your account and all your data (plan, logs, measurements) will be permanently deleted from this device and your cloud account. It can't be recovered.",
+    deleteConfirmHint: 'Type "DELETE" to confirm',
+    deleteConfirmWord: 'DELETE',
+    deleteConfirmCta: 'Delete my account',
+    deleting: 'Deleting…',
+    deleteFailed: "We couldn't fully delete your account. The process didn't complete. Try again or",
+    deleteRetry: 'Try again',
+    deleteContactCta: 'contact us',
+    cancel: 'Cancel',
   },
   settings: {
     title: 'Settings',
@@ -861,13 +1032,12 @@ const en: ShellStrings = {
     groupPrivacy: 'Privacy & Trust',
     groupLanguage: 'Language',
     languageActive: 'Arabic — active',
-    languageSoon: 'English coming soon',
     languageHint: 'Text and page direction switch instantly, and your choice is saved on this device.',
     export: 'Export backup',
     import: 'Import backup',
     reset: 'Reset data',
     resetConfirm:
-      'This will permanently delete all Qimmah data from this browser (setup, plan, tracking, logs). This cannot be undone. Are you sure?',
+      "This will permanently delete all Qimmah data from this browser (setup, plan, tracking, logs). This can't be undone. Are you sure?",
     editPlan: 'Edit my plan',
     regenerate: 'Regenerate plan',
     regenerateConfirm:
@@ -883,6 +1053,25 @@ const en: ShellStrings = {
     importConfirm: 'Importing will replace your current plan and logs with the file contents. Continue?',
     importSuccess: 'Your backup was imported successfully.',
     importError: "Couldn't read the file. Make sure it's a valid Qimmah backup.",
+    dataLocalNote:
+      'The export is created on your device as a JSON file that you can save or share. Exporting does not change your account sync setting.',
+    exportShared: 'Your data copy was shared.',
+    exportDownloaded: 'Your data was downloaded to your device.',
+    exportFailed: "Couldn't create the export.",
+    importPreviewTitle: 'Import preview',
+    importPreviewNote: 'This will replace what is on your device now. You can undo after importing.',
+    importConfirmBtn: 'Confirm import',
+    importCancel: 'Cancel',
+    importBackedUp: 'Backed up',
+    importExtra: 'Extra items',
+    importDoneTitle: 'Import complete',
+    importDoneNote: 'Your data was restored on this device.',
+    importViewData: 'View my data',
+    importUndo: 'Undo',
+    importUndoLast: 'Undo last import',
+    importUndoDesc: 'Restores your data to before the last import.',
+    importRecoveryBlocked: 'Import is disabled during password recovery.',
+    importInvalidFile: 'Invalid file.',
     regenerateSuccess: 'Your plan was regenerated from your current data.',
     groupDev: 'Internal tools',
     devReviewProducts: 'Product review',
@@ -890,6 +1079,10 @@ const en: ShellStrings = {
     groupAbout: 'About',
     versionLabel: 'App version',
     calcLink: 'How we calculate your numbers',
+    analyticsTitle: 'Anonymous analytics',
+    analyticsDesc:
+      "Fully anonymous usage stats (no name, email, or personal data) that help us improve Qimmah. We don't sell your data or track you across apps. You can turn this off any time.",
+    analyticsToggle: 'Share anonymous analytics',
   },
   pwa: {
     group: 'App & Notifications',
@@ -906,8 +1099,8 @@ const en: ShellStrings = {
       'Enable notifications for gentle nudges about your workouts and meals. Reminders are local to this browser and may not arrive in the background on some devices — no guarantees.',
     notifEnable: 'Enable notifications',
     notifGranted: 'Notifications enabled ✓',
-    notifDenied: 'Notifications are blocked in your browser settings. Enable them manually from site settings.',
-    notifUnsupported: 'Your browser does not support notifications here. Add Qimmah to your Home Screen for a better experience.',
+    notifDenied: 'Notifications are blocked in your browser settings. Turn them on in your site settings.',
+    notifUnsupported: "Your browser doesn't support notifications here. Add Qimmah to your Home Screen for a better experience.",
     notifConfirm: 'Great! We’ll remind you about your workouts and meals.',
     bannerText: 'Add Qimmah to your Home Screen — faster and works offline.',
     bannerInstall: 'Install',
@@ -918,16 +1111,18 @@ const en: ShellStrings = {
     termsTitle: 'Terms of Use',
     back: 'Back',
     privacyBody: [
-      'Qimmah is a local-first personal app. In guest mode, all your data stays in this device’s browser and never leaves it.',
+      'Qimmah requires an account and follows a local-first approach: your data is stored on your device first, then synced to your account when sync is enabled.',
       'When you log in with a cloud account (Supabase), your data is uploaded to your own account so you can access it from other devices. Only you can read your rows (Row Level Security).',
       'We do not sell or share your data with advertisers. Your measurements remain yours and can be deleted anytime via “Reset data”.',
-      'You can export a full copy of your data anytime from Settings → Data.',
+      'We use fully anonymous usage analytics (no name, email, or personal data) to improve Qimmah — never sold and never used to track you across apps. You can turn this off anytime in Settings → Privacy.',
+      'You can permanently delete your account and all its data from Settings → Account → Delete account, or export a full copy of your data anytime from Settings → Data.',
     ],
     termsBody: [
       'Qimmah is a tool to organize and track training, nutrition, supplements, and measurements for the individual athlete. Use is at your own responsibility.',
-      'In-app content (calorie calculations, weight suggestions, doses) is estimated and educational only, not medical, nutritional, or pharmaceutical advice.',
+      'In-app content (calorie calculations and suggested training weights) is estimated and educational only, not medical, nutritional, or pharmaceutical advice.',
       'Consult a qualified professional before changing your diet, medication, or training program, especially with a health condition.',
       'You are responsible for the accuracy of the data you enter and for keeping a backup via the export feature.',
+      'Media sources: Static exercise-instruction images are derived from free-exercise-db and wrkout/exercises.json, available under the Unlicense/public-domain dedication. Machine-card illustrations are original in-house Qimmah artwork that we fully own.',
     ],
   },
   notFound: {
@@ -955,12 +1150,6 @@ const en: ShellStrings = {
     reportSubject: 'Reporting a problem in Qimmah',
     back: 'Back',
   },
-  demo: {
-    badge: 'Demo',
-    title: 'This is a demo',
-    body: 'This is a demo and does not change your data.',
-    back: 'Back',
-  },
   workout: {
     start: 'Start workout',
     watch: 'Watch video',
@@ -970,6 +1159,9 @@ const en: ShellStrings = {
     startRest: 'Start rest',
     pause: 'Pause',
     resume: 'Resume',
+    resumeTitle: 'You have an unfinished workout',
+    resumeBody: 'Continue where you left off?',
+    resumeDiscard: 'Discard',
     reset: 'Reset',
     rest: 'Rest',
     sets: 'Sets',
@@ -987,8 +1179,8 @@ const en: ShellStrings = {
     painPlaceholder: 'Describe any discomfort you noticed',
     safety: 'If you feel unusual pain, stop and consult a professional.',
     finish: 'Finish workout',
-    confirmUnfinished: 'Some exercises are not done yet. Finish the workout anyway?',
-    finishTitle: 'Finish workout?',
+    confirmUnfinished: "Some exercises aren't done yet. Finish anyway?",
+    finishTitle: 'All done?',
     finishBodyUnfinished: 'Some exercises aren’t done — we’ll save what you logged and show the summary.',
     finishBodyDone: 'We’ll save your workout and show the summary.',
     confirmFinish: 'Yes, finish & save',
@@ -1052,9 +1244,13 @@ const en: ShellStrings = {
     nextWorkout: 'Next workout',
     backToToday: 'Back to Today',
     viewProgress: 'View progress',
+    reminderCtaText: 'Want a reminder for your next workout?',
+    reminderCtaButton: 'Remind me at my workout time',
+    reminderCtaEnabled: 'Workout reminder on — we’ll nudge you at your time.',
+    reminderCtaDenied: 'Notifications are off. Enable them in iOS Settings → Notifications → Qimmah.',
     newPr: 'New PR',
     weeklyStreakTitle: 'Weekly commitment streak',
-    weeklyDonePrefix: 'You completed',
+    weeklyDonePrefix: 'You finished',
     weeklyWorkoutsWord: 'workouts this week',
     weeksUnit: 'weeks',
     weeklyStreakEmpty: 'Start your week — every workout counts.',
@@ -1066,9 +1262,6 @@ const en: ShellStrings = {
     exerciseCals: 'Exercise',
     equationNote: 'Needs − Food + Exercise = Remaining',
     addShort: 'Add',
-    copy: 'Copy',
-    favorite: 'Favorite',
-    soon: 'Soon',
     title: 'Meal plan',
     desc: 'Your meals and nutrition targets — based on your smart calculations and editable.',
     enable: 'Track my food',
@@ -1097,8 +1290,8 @@ const en: ShellStrings = {
     customWaterPlaceholder: 'Amount in ml (e.g. 350)',
     search: 'Search…',
     allTypes: 'All types',
-    logMeal: '+ Log meal',
-    quickAdd: 'Quickly add calories & protein',
+    logMeal: '+ Log food',
+    quickAdd: 'Quick-add calories & protein',
     eaten: 'Eaten',
     remaining: 'Remaining',
     remainingCalories: 'Calories left',
@@ -1194,6 +1387,10 @@ const en: ShellStrings = {
     reminderEnabled: 'Enable reminder',
     reminderTrainingTime: 'Training reminder time',
     reminderNote: 'In-browser reminders are limited. Full notifications later in the mobile app.',
+    reminderNotifTitle: 'Time to train 💪',
+    reminderNotifBody: 'Your workout is waiting — keep your momentum going.',
+    reminderDeniedHint: 'Notifications are off for Qimmah. Enable them in iOS Settings → Notifications → Qimmah, then try again.',
+    reminderWebHint: 'Scheduled reminders work in the iOS app. In the browser you won’t get a background notification.',
     title: 'Measurements & progress',
     desc: 'Log your measurements and track progress over time.',
     enable: 'Track measurements & progress',

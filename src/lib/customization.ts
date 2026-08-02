@@ -7,7 +7,8 @@ import { meals as defaultMeals } from '@/data/meals'
 import { weeklyRoutine } from '@/data/routine'
 import type { RoutineDay, SupplementItem } from '@/types'
 import type { Profile, Targets } from '@/types/profile'
-import { computeTargets, defaultProfile, profileHash } from './calculators'
+import { computeTargets, defaultProfile, isMinorAge, profileHash } from './calculators'
+import { enqueueSyncOperation } from './syncQueue'
 import type { WorkoutPlan } from '@/types/workout'
 import { generatePlanFromTemplate } from './workoutPlan'
 import { normalizePlanDayNames } from './planDayNames'
@@ -16,6 +17,7 @@ import { defaultNutritionPlan } from './nutritionPlan'
 import type { WellnessPlan } from '@/types/wellness'
 import type { CommitmentPlan, MeasurementPlan } from '@/types/progress'
 import { defaultCommitmentPlan } from './commitmentPlan'
+import { safeRemove, safeWriteJson } from '@/lib/safeStorage'
 
 export const STORAGE_KEY = 'qimmah:customization:v1'
 
@@ -119,6 +121,13 @@ export interface Customization {
     manuallyEdited: boolean
     lastCalculatedFromProfileHash?: string
     updatedAt?: string
+    /**
+     * ختم هجرة القاصرين (Option B): يُضبَط مرّة عند تحويل هدف حساب قاصر من تنشيف/تضخيم
+     * إلى محافظة. وجوده = تمّت الهجرة (idempotent — لا تتكرّر)، ويُشغّل الإشعار اللطيف لمرّة.
+     */
+    minorGoalMigratedAt?: string
+    /** ختم إغلاق إشعار هجرة القاصرين (لمرّة واحدة). */
+    minorGoalNoticeDismissed?: boolean
   }
   workoutPlan: WorkoutPlan
   nutritionPlan: NutritionPlan
@@ -130,6 +139,51 @@ export interface Customization {
   meals: MealRow[]
   metrics: MetricRow[]
   routine: RoutineRow[]
+  /** طابع آخر حفظ (P12) — دليل LWW لمزامنة إعدادات الحساب (profiles.data.settings). */
+  settingsUpdatedAt?: string
+}
+
+/**
+ * إعدادات الحساب المُزامَنة (P12) — الحقول التي تتبع الحساب لا الجهاز:
+ * ملفه (عمر/طول/وزن/هدف)، أهدافه المحسوبة وحالتها، خطط التغذية/المكملات/الالتزام/
+ * القياس، هويته الشخصية (الاسم/الهدف/النوع) وإظهار الأقسام.
+ *
+ * تبقى على الجهاز (لا تُزامَن): ألوان القالب وهوية العلامة (brandName/tagline)،
+ * صفوف قالب v1 التسويقية (workouts/supplements/meals/metrics/routine)، وكل
+ * تفضيلات الجهاز العامة (لغة/ثيم/هابتكس في qimmah:prefs، uiMode…). خطة التمرين
+ * workoutPlan مستثناة عمدًا — مزامنتها عبر جدول custom_plans (لا ازدواج مصدر).
+ */
+export interface AccountSettings {
+  identity: Pick<Customization['identity'], 'userName' | 'mainGoal' | 'userType'>
+  sections: SectionVisibility
+  profile: Profile
+  targets: Targets
+  targetsMeta: Customization['targetsMeta']
+  nutritionPlan: NutritionPlan
+  wellnessPlan: WellnessPlan
+  commitmentPlan: CommitmentPlan
+  measurementPlan: MeasurementPlan
+  updatedAt: string
+}
+
+/** يستخرج شريحة إعدادات الحساب من التخصيص الكامل (انظر AccountSettings). */
+export function accountSettingsSlice(c: Customization): AccountSettings {
+  return {
+    identity: {
+      userName: c.identity.userName,
+      mainGoal: c.identity.mainGoal,
+      userType: c.identity.userType,
+    },
+    sections: { ...c.sections },
+    profile: { ...c.profile },
+    targets: { ...c.targets },
+    targetsMeta: { ...c.targetsMeta },
+    nutritionPlan: c.nutritionPlan,
+    wellnessPlan: c.wellnessPlan,
+    commitmentPlan: c.commitmentPlan,
+    measurementPlan: c.measurementPlan,
+    updatedAt: c.settingsUpdatedAt ?? new Date().toISOString(),
+  }
 }
 
 /** القيم الافتراضية مأخوذة مباشرة من config/data — مصدر الحقيقة الوحيد. */
@@ -193,6 +247,27 @@ function migrateLegacyGoal(p: Profile): Profile {
   return p
 }
 
+/**
+ * هجرة حساب قاصر حالي (Option B، قرار المالك): من كان دون 18 واختار تنشيف/تضخيم سابقًا
+ * يُحوَّل هدفه إلى «المحافظة» عند الإقلاع، مرّة واحدة وبإشعار لطيف. الهجرة:
+ * - **idempotent**: بعدها يصبح الهدف maintenance فيتعذّر تكرارها؛ والختم الزمني يُحفظ ولا يُستبدل.
+ * - **مقيّدة بالمالك**: تعيش داخل التخصيص المخزّن (يُمسح عند تبديل الحساب عبر wipeUserData).
+ * - إلغاء بصمة الحساب يُجبر `withFreshTargets` على إعادة حساب سعرات المحافظة تلقائيًا.
+ */
+function migrateMinorGoal(c: Customization): Customization {
+  const isCutOrBulk = c.profile.goalType === 'cutting' || c.profile.goalType === 'bulking'
+  if (!isMinorAge(c.profile.age) || !isCutOrBulk) return c
+  return {
+    ...c,
+    profile: { ...c.profile, goalType: 'maintenance', goal: 'maintain' },
+    targetsMeta: {
+      ...c.targetsMeta,
+      minorGoalMigratedAt: c.targetsMeta.minorGoalMigratedAt ?? new Date().toISOString(),
+      lastCalculatedFromProfileHash: undefined, // يُجبر إعادة حساب المحافظة في withFreshTargets
+    },
+  }
+}
+
 /** قراءة التخصيص المحفوظ مدموجًا فوق الافتراضي (آمن ضد بيانات تالفة). */
 export function loadCustomization(): Customization {
   const base = getDefaultCustomization()
@@ -227,8 +302,11 @@ export function loadCustomization(): Customization {
       meals: saved.meals ?? base.meals,
       metrics: saved.metrics ?? base.metrics,
       routine: saved.routine ?? base.routine,
+      ...(typeof saved.settingsUpdatedAt === 'string' && saved.settingsUpdatedAt
+        ? { settingsUpdatedAt: saved.settingsUpdatedAt }
+        : {}),
     }
-    return withFreshTargets(merged)
+    return withFreshTargets(migrateMinorGoal(merged))
   } catch {
     return base
   }
@@ -261,12 +339,44 @@ function withFreshTargets(c: Customization): Customization {
 
 export function saveCustomization(value: Customization): void {
   if (typeof window === 'undefined') return
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(value))
+  const stamped: Customization = { ...value, settingsUpdatedAt: new Date().toISOString() }
+  safeWriteJson(STORAGE_KEY, stamped)
+  // مزامنة إعدادات الحساب (P12): شريحة الحساب فقط تركب صف profiles (data.settings)
+  // بمفتاح كيان مستقل عن onboarding كي لا يستبدل أحدهما الآخر في دمج الطابور.
+  enqueueSyncOperation('profiles', 'settings', {
+    data: { settings: accountSettingsSlice(stamped) },
+    updated_at: stamped.settingsUpdatedAt,
+  })
+}
+
+/**
+ * كتابة إعدادات الحساب من مسار المزامنة (hydrate) بعد فوزها بالـLWW: حقول الحساب
+ * تُدمج فوق المحلي، حقول الجهاز (ألوان/هوية علامة/صفوف القالب/workoutPlan) تبقى
+ * كما هي، والطابع المحفوظ هو طابع السحابة (لا إعادة ختم بـ«الآن» — وإلا انقلب LWW).
+ */
+export function applyAccountSettingsFromSync(slice: Partial<AccountSettings>, stamp: string): void {
+  if (typeof window === 'undefined' || !slice || typeof slice !== 'object') return
+  const local = loadCustomization()
+  const merged: Customization = {
+    ...local,
+    identity: { ...local.identity, ...slice.identity },
+    sections: { ...local.sections, ...slice.sections },
+    profile: { ...local.profile, ...slice.profile },
+    targets: { ...local.targets, ...slice.targets },
+    targetsMeta: { ...local.targetsMeta, ...slice.targetsMeta },
+    nutritionPlan: slice.nutritionPlan ? { ...local.nutritionPlan, ...slice.nutritionPlan } : local.nutritionPlan,
+    wellnessPlan: slice.wellnessPlan ? { ...local.wellnessPlan, ...slice.wellnessPlan } : local.wellnessPlan,
+    commitmentPlan: slice.commitmentPlan ? { ...local.commitmentPlan, ...slice.commitmentPlan } : local.commitmentPlan,
+    measurementPlan: slice.measurementPlan
+      ? { ...local.measurementPlan, ...slice.measurementPlan }
+      : local.measurementPlan,
+    settingsUpdatedAt: stamp,
+  }
+  safeWriteJson(STORAGE_KEY, merged)
 }
 
 export function clearCustomization(): void {
-  if (typeof window === 'undefined') return
-  window.localStorage.removeItem(STORAGE_KEY)
+  safeRemove(STORAGE_KEY)
 }
 
 export function hasSavedCustomization(): boolean {

@@ -17,5 +17,6 @@ export function Field({ label, hint, children }: FieldProps) {
   )
 }
 
+// text-base (16px) لا text-sm: حجم أصلي يمنع تكبير iOS التلقائي عند التركيز على الجوال.
 export const inputClass =
-  'w-full rounded-lg border border-line bg-beige px-3 py-2 text-sm text-ink-900 placeholder:text-ink-400 transition-colors focus:border-brand-500/50 focus:outline-none focus:ring-2 focus:ring-brand-500/30'
+  'w-full rounded-lg border border-line bg-beige px-3 py-2 text-base text-ink-900 placeholder:text-ink-400 transition-colors focus:border-brand-500/50 focus:outline-none focus:ring-2 focus:ring-brand-500/30'

@@ -3,14 +3,14 @@ import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
 
-export type AppView = 'dashboard' | 'setup' | 'demo' | 'settings'
+export type AppView = 'dashboard' | 'setup' | 'settings'
 
-export type AppBadge = 'guest' | 'account' | 'demo'
+export type AppBadge = 'guest' | 'account'
 
 interface AppNavProps {
   current: AppView
   lang: Lang
-  /** شارة الحالة: ضيف / حساب / نموذج تجريبي. */
+  /** شارة الحالة: ضيف / حساب. */
   badge: AppBadge
   onNavigate: (view: AppView) => void
 }
@@ -18,16 +18,13 @@ interface AppNavProps {
 /** شريط تنقّل التطبيق — مبسّط: الشعار + الرئيسية + الإعدادات + شارة الحالة. */
 export function AppNav({ current, lang, badge, onNavigate }: AppNavProps) {
   const t = getStrings(lang)
-  const isDemo = current === 'demo'
 
-  const badgeLabel = badge === 'demo' ? t.badge.demo : badge === 'account' ? t.badge.account : t.badge.guest
-  const badgeIcon = badge === 'demo' ? 'Sparkles' : badge === 'account' ? 'CheckCircle2' : 'User'
+  const badgeLabel = badge === 'account' ? t.badge.account : t.badge.guest
+  const badgeIcon = badge === 'account' ? 'CheckCircle2' : 'User'
   const badgeClass =
-    badge === 'demo'
-      ? 'bg-primary text-white'
-      : badge === 'account'
-        ? 'bg-primary-soft text-primary-c'
-        : 'border border-line bg-surface text-ink-600'
+    badge === 'account'
+      ? 'bg-primary-soft text-primary-c'
+      : 'border border-line bg-surface text-ink-700'
 
   const tabs: { id: AppView; label: string; icon: string }[] = [
     { id: 'dashboard', label: t.nav.home, icon: 'Flame' },
@@ -35,7 +32,7 @@ export function AppNav({ current, lang, badge, onNavigate }: AppNavProps) {
   ]
 
   return (
-    <header className="sticky top-0 z-40 glass border-b border-line">
+    <header className="sticky top-0 z-40 glass border-b border-line" style={{ paddingTop: 'var(--safe-top)' }}>
       <div className="container-page flex h-16 items-center justify-between gap-3">
         <button type="button" onClick={() => onNavigate('dashboard')} className="flex items-center gap-2.5">
           <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-white shadow-glow">
@@ -45,27 +42,25 @@ export function AppNav({ current, lang, badge, onNavigate }: AppNavProps) {
         </button>
 
         <div className="flex items-center gap-2">
-          {/* تبويبات التنقّل — مخفية في النموذج (معزول) */}
-          {!isDemo && (
-            <nav className="flex items-center gap-1 rounded-full border border-line bg-surface p-1">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => onNavigate(tab.id)}
-                  className={cn(
-                    'flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition-colors sm:text-sm',
-                    current === tab.id
-                      ? 'bg-primary text-white'
-                      : 'text-ink-500 hover:bg-beige hover:text-ink-900',
-                  )}
-                >
-                  <Icon name={tab.icon} className="h-4 w-4" />
-                  <span className="hidden sm:inline">{tab.label}</span>
-                </button>
-              ))}
-            </nav>
-          )}
+          <nav className="flex items-center gap-1 rounded-full border border-line bg-surface p-1">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => onNavigate(tab.id)}
+                aria-label={tab.label}
+                className={cn(
+                  'flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition-colors sm:text-sm',
+                  current === tab.id
+                    ? 'bg-primary text-white'
+                    : 'text-ink-500 hover:bg-beige hover:text-ink-900',
+                )}
+              >
+                <Icon name={tab.icon} className="h-4 w-4" />
+                <span className="hidden sm:inline">{tab.label}</span>
+              </button>
+            ))}
+          </nav>
 
           {/* شارة الحالة */}
           <span

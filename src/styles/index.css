@@ -23,16 +23,67 @@
 
     /* مسافة أمان أسفل الشاشة (للشريط السفلي على الجوال) */
     --safe-bottom: env(safe-area-inset-bottom, 0px);
+    /* مسافة أمان أعلى الشاشة (نتوء/شريط الحالة على iPhone تحت viewport-fit=cover) — 0 على الويب */
+    --safe-top: env(safe-area-inset-top, 0px);
   }
 
   html {
     scroll-behavior: smooth;
+    /* قفل التكبير بالنقر المزدوج على كل الأسطح (الويب والأصلي) — يُبقي القرص/التمرير. */
+    touch-action: manipulation;
+    /* لا سلسلة تمرير ولا سحب مطاطي للصفحة (pull-to-refresh/bounce) — إحساس أصلي كامل. */
+    overscroll-behavior: none;
   }
 
   body {
     @apply bg-page text-ink-900 font-sans antialiased;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    /* إزالة «إشارات الويب»: لا وميض رمادي عند اللمس، ولا قائمة منبثقة عند الضغط المطوّل. */
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior: none;
+  }
+
+  html.qimmah-shell-mounted,
+  body.qimmah-shell-mounted {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  body.qimmah-shell-mounted #root {
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  /* عناصر واجهة التطبيق (أزرار/روابط/تنقّل/أيقونات): لا تحديد نص ولا قائمة لمس مطوّل —
+     تتصرّف كعناصر تحكّم أصلية لا كنص ويب. المحتوى القابل للقراءة يحتفظ بالتحديد أدناه. */
+  button,
+  a,
+  [role='button'],
+  [role='tab'],
+  [role='menuitem'],
+  label,
+  nav,
+  summary {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* استعادة تحديد النص للمحتوى القابل للقراءة والحقول — لا نكسر النسخ/اللصق. */
+  p,
+  input,
+  textarea,
+  [contenteditable='true'] {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+
+  /* حقول الإدخال ≥16px تمنع تكبير iOS التلقائي عند التركيز (طبقة أمان فوق قفل viewport). */
+  input,
+  textarea,
+  select {
+    font-size: 16px;
   }
 
   /* احترام تفضيل تقليل الحركة — يوقف كل الانتقالات/الرسوم للمستخدمين الحسّاسين. */
@@ -83,6 +134,18 @@
   ::-webkit-scrollbar-thumb:hover {
     @apply bg-ink-400;
   }
+
+  /* متمرّر التطبيق وحده — نحافظ على تمرير iOS الطبيعي بلا خط ويب ظاهر. */
+  .app-scroll {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .app-scroll::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
 }
 
 @layer components {
@@ -126,6 +189,35 @@
 
   .btn-ghost {
     @apply btn border border-line bg-surface text-ink-900 hover:bg-beige;
+  }
+
+  /* Recovery/after-workout CTA (v2.1 Today) — green, reserved for the
+     post-workout «سجّل وجبة» moment where ember would misread as «start».
+     Mirrors .btn-primary; uses the success token so the meaning stays green. */
+  .btn-success {
+    @apply btn text-white active:scale-[0.98];
+    background-color: var(--color-success);
+  }
+  .btn-success:hover {
+    filter: brightness(0.94);
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--color-success) 22%, transparent),
+      0 14px 40px -12px color-mix(in srgb, var(--color-success) 40%, transparent);
+  }
+
+  /* حقل إدخال قياسي (Sprint UI 1) — يوحّد المدخلات المتناثرة سابقًا في عدة ملفات.
+     44px حدّ أدنى للمس، سطح beige، حدّ line، وتركيز هادئ بلون العلامة. */
+  .input {
+    /* text-base (16px) لا text-sm: يمنع تكبير iOS التلقائي عند التركيز على متصفّح الجوال. */
+    @apply w-full min-h-[44px] rounded-xl border border-line bg-beige px-4 py-3 text-base text-ink-900 placeholder:text-ink-400 transition-colors focus:outline-none;
+  }
+  .input:focus {
+    border-color: color-mix(in srgb, var(--c-primary) 45%, transparent);
+  }
+  /* حالة الخطأ — حدّ خطر واضح دون صراخ. */
+  .input-invalid,
+  .input-invalid:focus {
+    @apply border-danger;
   }
 
   /* أقسام مدمجة بمظهر تطبيق (بدل المسافات التسويقية الكبيرة) */

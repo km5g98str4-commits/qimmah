@@ -120,8 +120,9 @@ function Card({
   )
 }
 
+// text-base (16px) لا text-sm: يمنع تكبير iOS التلقائي عند التركيز على الحقول الرقمية.
 const fieldInput =
-  'w-28 rounded-lg border border-line bg-beige px-3 py-2 text-sm font-bold text-ink-900 transition-colors focus:border-brand-500/50 focus:outline-none focus:ring-2 focus:ring-brand-500/30'
+  'w-28 rounded-lg border border-line bg-beige px-3 py-2 text-base font-bold text-ink-900 transition-colors focus:border-brand-500/50 focus:outline-none focus:ring-2 focus:ring-brand-500/30'
 
 function NumField({
   label,

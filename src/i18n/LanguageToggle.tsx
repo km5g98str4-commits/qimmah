@@ -23,7 +23,7 @@ export function LanguageToggle({ variant = 'segmented', className }: LanguageTog
         aria-label={`${t.lang.label}: ${nextLabel}`}
         title={nextLabel}
         className={cn(
-          'inline-flex items-center gap-1 rounded-lg border border-line bg-surface px-2 py-1 text-[11px] font-black text-ink-600 transition-colors hover:text-ink-900',
+          'inline-flex min-h-[44px] items-center gap-1 rounded-lg border border-line bg-surface px-3 py-1 text-[11px] font-black text-ink-700 transition-colors hover:text-ink-900',
           className,
         )}
       >

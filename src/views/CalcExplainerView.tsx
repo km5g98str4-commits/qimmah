@@ -1,274 +1,372 @@
-import type { ReactNode } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Icon } from '@/components/Icon'
-import { Footer } from '@/components/Footer'
+import { StandaloneAppScreen } from '@/components/StandaloneAppScreen'
+import { StateBlock } from '@/components/StateBlock'
+import { eCalcStrings, type ECalcInputId, type ECalcStrings } from '@/i18n/dict/eCalc'
+import {
+  FAT_CALORIE_RATIO,
+  KCAL_PER_KG,
+  PROTEIN_PER_KG,
+  WATER_ML_PER_KG,
+  isMinorAge,
+} from '@/lib/calculators'
+import type { Lang } from '@/lib/appPreferences'
 import { useCustomization } from '@/lib/customizationContext'
 import {
-  activityOptions,
-  BULK_SURPLUS,
-  CUT_DEFICIT,
-  FAT_CALORIE_RATIO,
-  genderOptions,
-  goalTypeLabel,
-  mifflinSexConstant,
-  PROTEIN_PER_KG,
-  totalActivityMultiplier,
-} from '@/lib/calculators'
-import { calcScreenStrings } from '@/i18n/dict/calcScreen'
-import type { Lang } from '@/lib/appPreferences'
+  buildCalcExplainerSnapshot,
+  type CalcExplainerData,
+  type CalcExplainerSnapshot,
+} from '@/lib/eCalcExplainerModel'
+import { loadLogs } from '@/lib/measurementLog'
 
 interface CalcExplainerViewProps {
   lang: Lang
   onBack: () => void
+  onEditProfile: () => void
 }
 
-/**
- * صفحة «كيف نحسب أرقامك؟» — تشرح كل حساب (BMR/TDEE/سعرات/بروتين/كارب/دهون/BMI)
- * بأساسه العلمي وبأرقام المستخدم الفعلية محسوبة حيًّا. تقديرات تعليمية — لا نصيحة طبية.
- */
-export function CalcExplainerView({ lang, onBack }: CalcExplainerViewProps) {
-  const d = calcScreenStrings[lang]
+export function CalcExplainerView({ lang, onBack, onEditProfile }: CalcExplainerViewProps) {
+  const d = eCalcStrings[lang]
   const { customization } = useCustomization()
-  const p = customization.profile
-  const t = customization.targets
+  const [attempt, setAttempt] = useState(0)
+  const [snapshot, setSnapshot] = useState<CalcExplainerSnapshot | null>(null)
 
-  const hasData = t.bmr > 0 && t.tdee > 0 && p.weightKg > 0
-
-  // — أرقام حيّة من ملف المستخدم (لا قيم ثابتة) —
-  const w = p.weightKg
-  const h = p.heightCm
-  const age = p.age
-  const sexConst = mifflinSexConstant(p.gender)
-  const sexLabel = genderOptions.find((o) => o.value === p.gender)?.label ?? ''
-  const sexSign = sexConst >= 0 ? '+' : '−'
-  const sexAbs = Math.abs(sexConst)
-
-  const multiplier = totalActivityMultiplier(p.activityLevel, p.trainingDays)
-  const activityLabel = activityOptions.find((o) => o.value === p.activityLevel)?.label ?? ''
-
-  const goalAdj = p.goalType === 'cutting' ? -CUT_DEFICIT : p.goalType === 'bulking' ? BULK_SURPLUS : 0
-  const proteinPerKg = w > 0 ? Math.round((t.proteinGrams / w) * 10) / 10 : PROTEIN_PER_KG
-  const fatPct = Math.round(FAT_CALORIE_RATIO * 100)
+  useEffect(() => {
+    setSnapshot(null)
+    const frame = window.requestAnimationFrame(() => {
+      setSnapshot(
+        buildCalcExplainerSnapshot(
+          customization.profile,
+          customization.targets,
+          customization.targetsMeta.manuallyEdited,
+          loadLogs(),
+        ),
+      )
+    })
+    return () => window.cancelAnimationFrame(frame)
+  }, [attempt, customization.profile, customization.targets, customization.targetsMeta.manuallyEdited])
 
   return (
-    <div className="min-h-screen bg-page">
-      <header className="sticky top-0 z-40 glass border-b border-line">
-        <div className="container-page flex h-16 items-center gap-3">
-          <button
-            type="button"
-            onClick={onBack}
-            className="inline-flex items-center gap-1.5 text-sm font-bold text-ink-700 transition-colors hover:text-ink-900"
-          >
-            <Icon name="ChevronLeft" className="h-5 w-5 rtl:rotate-180" />
-            {d.back}
-          </button>
-        </div>
+    <StandaloneAppScreen lang={lang} title={d.pageTitle} backLabel={d.back} onBack={onBack}>
+      <div data-testid="e-calc-screen" className="space-y-5">
+        {!snapshot ? (
+          <StateBlock
+            variant="loading"
+            title={d.loadingTitle}
+            body={d.loadingBody}
+            testId="e-calc-loading"
+          />
+        ) : snapshot.status === 'empty' ? (
+          <StateBlock
+            variant="empty"
+            title={d.emptyTitle}
+            body={d.emptyBody}
+            actions={[{ label: d.completeProfileAction, onClick: onEditProfile, primary: true }]}
+            testId="e-calc-empty"
+          />
+        ) : snapshot.status === 'error' ? (
+          <StateBlock
+            variant="error"
+            title={d.errorTitle}
+            body={d.errorBody}
+            actions={[
+              { label: d.retryAction, onClick: () => setAttempt((value) => value + 1), primary: true },
+              { label: d.completeProfileAction, onClick: onEditProfile },
+            ]}
+            testId="e-calc-error"
+          />
+        ) : (
+          <CalcFilled data={snapshot.data} lang={lang} d={d} />
+        )}
+      </div>
+    </StandaloneAppScreen>
+  )
+}
+
+function CalcFilled({ data, lang, d }: { data: CalcExplainerData; lang: Lang; d: ECalcStrings }) {
+  const n = useMemo(
+    () => new Intl.NumberFormat(lang === 'ar' ? 'ar-SA-u-nu-arab' : 'en-US', { maximumFractionDigits: 2 }),
+    [lang],
+  )
+  const value = (number: number) => n.format(number)
+  const p = data.profile
+  const t = data.calculated
+  const minor = isMinorAge(p.age)
+  const sign = data.sexConstant >= 0 ? '+' : '−'
+  const fatPercent = FAT_CALORIE_RATIO * 100
+  const expectedRate = data.expectedWeeklyChangeKg
+
+  const inputValue = (id: ECalcInputId): string => {
+    switch (id) {
+      case 'age': return `${value(p.age)} ${d.inputValueUnits.age}`
+      case 'height': return `${value(p.heightCm)} ${d.inputValueUnits.height}`
+      case 'weight': return `${value(p.weightKg)} ${d.inputValueUnits.weight}`
+      case 'training_days': return `${value(p.trainingDays)} ${d.inputValueUnits.training_days}`
+      case 'gender': return d.genderLabels[p.gender]
+      case 'activity_level': return d.activityLabels[p.activityLevel]
+      case 'goal': return d.goalLabels[p.goalType]
+    }
+  }
+
+  return (
+    <div data-testid="e-calc-filled" className="space-y-5">
+      <header className="flex items-start gap-3">
+        <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-primary-soft text-primary-c">
+          <Icon name="Calculator" className="h-6 w-6" />
+        </span>
+        <p className="pt-1 text-sm leading-relaxed text-ink-500">{d.pageSubtitle}</p>
       </header>
 
-      <main className="container-page py-8">
-        <div className="mx-auto max-w-2xl">
-          {/* الترويسة */}
-          <div className="flex items-center gap-3">
-            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-primary-soft text-primary-c">
-              <Icon name="Calculator" className="h-6 w-6" />
-            </span>
-            <div>
-              <h1 className="text-2xl font-black text-ink-900">{d.pageTitle}</h1>
-              <p className="mt-0.5 text-sm text-ink-500">{d.pageSubtitle}</p>
+      <div className="rounded-2xl border border-line bg-surface p-5">
+        <p className="text-sm leading-relaxed text-ink-700">{d.intro}</p>
+        <p className="mt-3 rounded-xl bg-beige p-3 text-sm font-bold leading-relaxed text-ink-700">
+          {d.introEstimate}
+        </p>
+      </div>
+
+      <section className="rounded-2xl border border-line bg-surface p-5">
+        <h2 className="text-base font-black text-ink-900">{d.inputsTitle}</h2>
+        <p className="mt-1 text-sm text-ink-500">{d.inputsNote}</p>
+        <div className="mt-4 divide-y divide-line">
+          {d.inputRows.map((row) => (
+            <div key={row.id} className="grid grid-cols-[minmax(0,1fr)_auto] gap-3 py-3 first:pt-0 last:pb-0">
+              <div>
+                <p className="text-sm font-bold text-ink-900">{row.label}</p>
+                <p className="mt-0.5 text-xs leading-relaxed text-ink-400">{row.usedBy}</p>
+              </div>
+              <span className="self-start rounded-lg bg-beige px-2.5 py-1 font-mono text-xs font-black text-ink-700">
+                {inputValue(row.id)}
+              </span>
             </div>
-          </div>
-
-          <p className="mt-6 rounded-2xl border border-line bg-surface p-5 text-sm leading-relaxed text-ink-600">
-            {d.intro}
-          </p>
-
-          {!hasData ? (
-            <p className="mt-6 flex items-start gap-2 rounded-2xl border border-line bg-surface p-5 text-sm text-ink-500">
-              <Icon name="Info" className="mt-0.5 h-4 w-4 shrink-0 text-primary-c" />
-              {d.needData}
-            </p>
-          ) : (
-            <div className="mt-6 space-y-4">
-              {/* 1) BMR */}
-              <Card icon="Flame" title={d.bmrTitle} basis={d.bmrBasis}>
-                <p className="text-sm leading-relaxed text-ink-600">{d.bmrDesc}</p>
-                <Formula>{`BMR = 10×${w} + 6.25×${h} − 5×${age} ${sexSign} ${sexAbs}`}</Formula>
-                <p className="text-[11px] text-ink-400" dir="ltr">
-                  {`(${sexSign}${sexAbs} = ${sexLabel})`}
-                </p>
-                <Result label={d.bmrResult} value={`${t.bmr}`} unit={d.unitCal} />
-              </Card>
-
-              {/* 2) TDEE */}
-              <Card icon="Activity" title={d.tdeeTitle}>
-                <p className="text-sm leading-relaxed text-ink-600">{d.tdeeDesc}</p>
-                <div className="overflow-hidden rounded-xl border border-line">
-                  <table className="w-full text-sm">
-                    <thead className="bg-beige text-ink-500">
-                      <tr>
-                        <th className="p-2.5 text-start font-bold">{d.tdeeTableActivity}</th>
-                        <th className="p-2.5 text-end font-bold">{d.tdeeTableMultiplier}</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-line">
-                      {activityOptions.map((o) => {
-                        const picked = o.value === p.activityLevel
-                        const factor = totalActivityMultiplier(o.value, p.trainingDays)
-                        return (
-                          <tr key={o.value} className={picked ? 'bg-primary-soft font-bold text-primary-c' : 'text-ink-700'}>
-                            <td className="p-2.5 text-start">
-                              {o.label}
-                              {picked && <span className="ms-1.5 text-[10px]">• {d.tdeeYourPick}</span>}
-                            </td>
-                            <td className="p-2.5 text-end tabular-nums" dir="ltr">
-                              ×{factor.toFixed(2)}
-                            </td>
-                          </tr>
-                        )
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-                <p className="text-[11px] text-ink-400">{d.tdeeTrainingAdd}</p>
-                <Formula>{`TDEE = ${t.bmr} × ${multiplier.toFixed(2)}  (${activityLabel} + ${p.trainingDays})`}</Formula>
-                <Result label={d.tdeeResult} value={`${t.tdee}`} unit={d.unitCal} />
-              </Card>
-
-              {/* 3) السعرات المستهدفة حسب الهدف */}
-              <Card icon="Target" title={d.caloriesTitle}>
-                <p className="text-sm leading-relaxed text-ink-600">{d.caloriesDesc}</p>
-                <ul className="space-y-1.5 text-sm text-ink-600">
-                  <GoalLine active={p.goalType === 'cutting'} text={d.goalCut} />
-                  <GoalLine active={p.goalType === 'maintenance'} text={d.goalMaintain} />
-                  <GoalLine active={p.goalType === 'bulking'} text={d.goalBulk} />
-                </ul>
-                <Formula>
-                  {goalAdj !== 0
-                    ? `${t.tdee} ${goalAdj < 0 ? '−' : '+'} ${Math.abs(goalAdj)} = ${t.targetCalories}`
-                    : `${t.tdee} (${goalTypeLabel(p.goalType)}) = ${t.targetCalories}`}
-                </Formula>
-                <Result label={d.caloriesResult} value={`${t.targetCalories}`} unit={d.unitCalPerDay} highlight />
-              </Card>
-
-              {/* 4) البروتين */}
-              <Card icon="Salad" title={d.proteinTitle}>
-                <p className="text-sm leading-relaxed text-ink-600">{d.proteinDesc}</p>
-                <p className="text-sm leading-relaxed text-ink-500">{d.proteinRationale}</p>
-                <Formula>{`${proteinPerKg} × ${w} ${d.unitKg} = ${t.proteinGrams} ${d.unitGram}`}</Formula>
-                <Result label={d.proteinResult} value={`${t.proteinGrams}`} unit={d.unitGramPerDay} />
-              </Card>
-
-              {/* 5) الدهون والكربوهيدرات */}
-              <Card icon="Percent" title={d.macrosTitle}>
-                <p className="text-sm leading-relaxed text-ink-600">{d.fatDesc}</p>
-                <Formula>{`(${t.targetCalories} × ${fatPct}%) ÷ 9 = ${t.fatGrams} ${d.unitGram}`}</Formula>
-                <p className="text-sm leading-relaxed text-ink-600">{d.carbsDesc}</p>
-                <Formula>{`(${t.targetCalories} − ${t.proteinGrams}×4 − ${t.fatGrams}×9) ÷ 4 = ${t.carbsGrams} ${d.unitGram}`}</Formula>
-                <div className="grid grid-cols-2 gap-3">
-                  <Result label={d.fatLabel} value={`${t.fatGrams}`} unit={d.unitGramPerDay} />
-                  <Result label={d.carbsLabel} value={`${t.carbsGrams}`} unit={d.unitGramPerDay} />
-                </div>
-              </Card>
-
-              {/* 6) BMI */}
-              <Card icon="Scale" title={d.bmiTitle}>
-                <p className="text-sm leading-relaxed text-ink-600">{d.bmiDesc}</p>
-                <Formula>{`${w} ÷ (${(h / 100).toFixed(2)})² = ${t.bmi}`}</Formula>
-                <Result label={d.bmiResult} value={`${t.bmi}`} unit={t.bmiLabel} />
-                <p className="flex items-start gap-2 rounded-xl border border-line bg-beige p-3 text-xs leading-relaxed text-ink-500">
-                  <Icon name="Info" className="mt-0.5 h-3.5 w-3.5 shrink-0 text-ink-400" />
-                  {d.bmiNote}
-                </p>
-              </Card>
-            </div>
-          )}
-
-          {/* تنويه ختامي — لا نصيحة طبية */}
-          <p className="mt-6 flex items-start gap-2 text-xs leading-relaxed text-ink-400">
-            <Icon name="Info" className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-            {d.disclaimer}
-          </p>
+          ))}
         </div>
-      </main>
+        <p className="mt-4 text-xs font-bold leading-relaxed text-primary-c">{d.inputsAccuracy}</p>
+      </section>
 
-      <Footer />
+      <ExplainerSection icon="Scale" title={d.bmiTitle} result={value(t.bmi)}>
+        <Body>{d.bmiWhat}</Body>
+        <Formula>{`${value(p.weightKg)} ÷ (${value(p.heightCm / 100)})² = ${value(t.bmi)}`}</Formula>
+        <Body>{d.bmiSource}</Body>
+        <Note>{minor ? d.bmiMinor : d.bmiLimits}</Note>
+      </ExplainerSection>
+
+      <ExplainerSection icon="Flame" title={d.bmrTitle} result={value(t.bmr)} unit={d.unitKcalPerDay}>
+        <Body>{d.bmrWhat}</Body>
+        <Formula>
+          {`10×${value(p.weightKg)} + 6.25×${value(p.heightCm)} − 5×${value(p.age)} ${sign} ${value(Math.abs(data.sexConstant))} = ${value(t.bmr)}`}
+        </Formula>
+        <Body>{d.bmrSource}</Body>
+        <Note>{d.bmrAssume} {d.bmrLimits} {d.bmrWhyNoBodyFat}</Note>
+      </ExplainerSection>
+
+      <ExplainerSection icon="Activity" title={d.tdeeTitle} result={value(t.tdee)} unit={d.unitKcalPerDay}>
+        <Body>{d.tdeeWhat}</Body>
+        <Formula>{`${value(t.bmr)} × ${value(data.activityMultiplier)} = ${value(t.tdee)}`}</Formula>
+        <Body>{d.tdeeApproach}</Body>
+        <Note>{d.tdeeTrainingAdd} {d.tdeeCap}</Note>
+        <Honesty>{d.tdeeHonesty}</Honesty>
+        <Body>{d.tdeeLimits} {d.tdeeCalibrate}</Body>
+      </ExplainerSection>
+
+      <ExplainerSection
+        icon="Target"
+        title={d.caloriesTitle}
+        result={value(data.manuallyEdited ? data.saved.targetCalories : t.targetCalories)}
+        unit={d.unitKcalPerDay}
+        highlight
+      >
+        <Body>{d.caloriesWhat}</Body>
+        <Formula>
+          {data.calorieAdjustment === 0
+            ? `${value(t.tdee)} = ${value(t.targetCalories)}`
+            : `${value(t.tdee)} ${data.calorieAdjustment < 0 ? '−' : '+'} ${value(Math.abs(data.calorieAdjustment))} = ${value(t.targetCalories)}`}
+        </Formula>
+        {data.calorieFloorApplied && <Note>{d.caloriesFloor}</Note>}
+        {minor && <Note>{d.caloriesMinor}</Note>}
+        {data.manuallyEdited && (
+          <div className="rounded-xl border border-primary/20 bg-primary-soft p-3">
+            <p className="text-sm font-black text-primary-c">{d.manualOverrideTitle}</p>
+            <p className="mt-1 text-xs leading-relaxed text-ink-600">{d.manualOverrideBody}</p>
+            <ResultLine value={value(data.saved.targetCalories)} unit={d.unitKcalPerDay} />
+          </div>
+        )}
+        <Honesty>{d.caloriesHonesty}</Honesty>
+        <Body>{d.caloriesAdjust}</Body>
+      </ExplainerSection>
+
+      <ExplainerSection icon="Percent" title={d.macrosTitle} result={value(t.proteinGrams)} unit={d.unitGramPerDay}>
+        <MetricBlock title={d.proteinTitle} result={value(t.proteinGrams)} unit={d.unitGramPerDay}>
+          <Formula>{`${value(PROTEIN_PER_KG)} × ${value(p.weightKg)} = ${value(t.proteinGrams)}`}</Formula>
+          <Body>{d.proteinWhy} {d.proteinSource}</Body>
+        </MetricBlock>
+        <MetricBlock title={d.fatTitle} result={value(t.fatGrams)} unit={d.unitGramPerDay}>
+          <Formula>{`(${value(t.targetCalories)} × ${value(fatPercent)}%) ÷ 9 = ${value(t.fatGrams)}`}</Formula>
+          <Body>{d.fatWhy} {d.fatSource}</Body>
+        </MetricBlock>
+        <MetricBlock title={d.carbsTitle} result={value(t.carbsGrams)} unit={d.unitGramPerDay}>
+          <Formula>{`(${value(t.targetCalories)} − ${value(t.proteinGrams)}×4 − ${value(t.fatGrams)}×9) ÷ 4 = ${value(t.carbsGrams)}`}</Formula>
+          <Body>{d.carbsWhy}</Body>
+        </MetricBlock>
+        <Note>{d.macrosConversion} {d.macrosLimits}</Note>
+      </ExplainerSection>
+
+      <ExplainerSection icon="Droplets" title={d.waterTitle} result={value(t.waterLiters)} unit={d.unitLiterPerDay}>
+        <Formula>{`${value(p.weightKg)} × ${value(WATER_ML_PER_KG)} → ${value(t.waterLiters)}`}</Formula>
+        <Body>{d.waterFormula} {d.waterRange}</Body>
+        <Honesty>{d.waterHonesty}</Honesty>
+        <Body>{d.waterFloorWhy} {d.waterCapWhy} {d.waterDrinking} {d.waterHeat}</Body>
+      </ExplainerSection>
+
+      <ExplainerSection icon="TrendingUp" title={d.rateTitle} result={value(expectedRate)} unit={d.unitKgPerWeek}>
+        <Body>{d.rateWhat}</Body>
+        <Formula>{`${value(Math.abs(data.calorieAdjustment))} × 7 ÷ ${value(KCAL_PER_KG)} = ${value(Math.abs(expectedRate))}`}</Formula>
+        <Body>{d.rateWhyKcalPerKg}</Body>
+        <Honesty>{d.rateHonesty}</Honesty>
+        <Body>{d.rateWater} {d.rateReal}</Body>
+        <div className="rounded-xl border border-line bg-beige p-3">
+          {data.actualWeeklyChangeKg === null ? (
+            <p className="text-sm font-bold leading-relaxed text-ink-500">{d.actualRateMissing}</p>
+          ) : (
+            <>
+              <ResultLine value={value(data.actualWeeklyChangeKg)} unit={d.unitKgPerWeek} />
+              <p className="mt-1 text-xs leading-relaxed text-ink-500">{d.actualRateAvailable}</p>
+            </>
+          )}
+        </div>
+      </ExplainerSection>
+
+      <section className="rounded-2xl border border-line bg-surface p-5">
+        <h2 className="text-base font-black text-ink-900">{d.accuracyTitle}</h2>
+        <p className="mt-2 text-sm font-bold text-ink-700">{d.accuracyIntro}</p>
+        <p className="mt-2 text-sm leading-relaxed text-ink-600">{d.accuracyBody}</p>
+        <p className="mt-3 text-sm font-bold leading-relaxed text-ink-800">{d.accuracyWhatMatters}</p>
+        <p className="mt-3 text-xs leading-relaxed text-ink-500">{d.accuracyHelp}</p>
+      </section>
+
+      <section className="rounded-2xl border border-line bg-surface p-5">
+        <h2 className="text-base font-black text-ink-900">{d.sourcesTitle}</h2>
+        <p className="mt-1 text-sm text-ink-500">{d.sourcesIntro}</p>
+        <div className="mt-4 space-y-3">
+          {d.sourceRows.map((row) => (
+            <div key={row.id} className="rounded-xl border border-line p-3">
+              <div className="flex items-start justify-between gap-3">
+                <p className="min-w-0 text-sm font-black text-ink-900">{row.label}</p>
+                <CertaintyBadge certainty={row.certainty} label={d.certaintyLabels[row.certainty]} />
+              </div>
+              <p className="mt-1 text-xs text-ink-500">{row.source}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-line bg-beige p-5">
+        <div className="flex items-center gap-2">
+          <Icon name="Info" className="h-4 w-4 text-primary-c" />
+          <h2 className="text-sm font-black text-ink-900">{d.disclaimerTitle}</h2>
+        </div>
+        <p className="mt-2 text-xs leading-relaxed text-ink-600">{d.disclaimerBody}</p>
+        <p className="mt-2 text-xs leading-relaxed text-ink-500">{d.disclaimerWhen}</p>
+        <p className="mt-2 text-xs font-bold leading-relaxed text-ink-700">{d.disclaimerYou}</p>
+      </section>
     </div>
   )
 }
 
-function Card({
+function ExplainerSection({
   icon,
   title,
-  basis,
+  result,
+  unit,
+  highlight,
   children,
 }: {
   icon: string
   title: string
-  basis?: string
+  result: string
+  unit?: string
+  highlight?: boolean
   children: ReactNode
 }) {
   return (
-    <section className="card space-y-3 p-5">
-      <div className="flex items-center gap-3">
+    <details className="group overflow-hidden rounded-2xl border border-line bg-surface shadow-card">
+      <summary className="flex cursor-pointer list-none items-center gap-3 p-4 marker:hidden">
         <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary-c">
           <Icon name={icon} className="h-5 w-5" />
         </span>
-        <div>
-          <h2 className="text-base font-black text-ink-900">{title}</h2>
-          {basis && <p className="text-[11px] font-bold text-primary-c">{basis}</p>}
-        </div>
-      </div>
-      {children}
-    </section>
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-black text-ink-900">{title}</span>
+          <span className={`mt-0.5 block font-mono text-lg font-black tabular-nums ${highlight ? 'text-primary-c' : 'text-ink-900'}`}>
+            {result}
+            {unit && <span className="ms-1 font-sans text-[0.65rem] text-ink-400">{unit}</span>}
+          </span>
+        </span>
+        <Icon name="ChevronDown" className="h-4 w-4 shrink-0 text-ink-400 transition-transform group-open:rotate-180" />
+      </summary>
+      <div className="space-y-3 border-t border-line p-4">{children}</div>
+    </details>
   )
 }
 
-function Formula({ children }: { children: ReactNode }) {
+function Body({ children }: { children: ReactNode }) {
+  return <p className="text-sm leading-relaxed text-ink-600">{children}</p>
+}
+
+function Note({ children }: { children: ReactNode }) {
+  return <p className="rounded-xl bg-beige p-3 text-xs leading-relaxed text-ink-500">{children}</p>
+}
+
+function Honesty({ children }: { children: ReactNode }) {
   return (
-    <p
-      className="overflow-x-auto rounded-lg bg-beige px-3 py-2 text-[13px] font-bold text-ink-700"
-      dir="ltr"
-    >
+    <p className="rounded-xl border border-amber-300/40 bg-amber-50 p-3 text-xs font-bold leading-relaxed text-amber-950">
       {children}
     </p>
   )
 }
 
-function Result({
-  label,
-  value,
-  unit,
-  highlight = false,
-}: {
-  label: string
-  value: string
-  unit?: string
-  highlight?: boolean
-}) {
+function Formula({ children }: { children: ReactNode }) {
   return (
-    <div
-      className={`flex items-baseline justify-between rounded-xl px-4 py-3 ${
-        highlight ? 'bg-primary text-white' : 'border border-line bg-surface'
-      }`}
-    >
-      <span className={`text-sm font-bold ${highlight ? 'text-white/90' : 'text-ink-600'}`}>{label}</span>
-      <span className={`text-lg font-black ${highlight ? 'text-white' : 'text-ink-900'}`}>
-        {value}
-        {unit && (
-          <span className={`ms-1 text-[11px] font-bold ${highlight ? 'text-white/80' : 'text-ink-400'}`}>{unit}</span>
-        )}
-      </span>
+    <p dir="ltr" className="overflow-x-auto whitespace-pre-wrap rounded-xl bg-ink-900 px-3 py-2.5 font-mono text-xs font-bold tabular-nums text-white">
+      {children}
+    </p>
+  )
+}
+
+function ResultLine({ value, unit }: { value: string; unit: string }) {
+  return (
+    <p className="font-mono text-lg font-black tabular-nums text-ink-900">
+      {value}
+      <span className="ms-1 font-sans text-[0.65rem] text-ink-400">{unit}</span>
+    </p>
+  )
+}
+
+function MetricBlock({ title, result, unit, children }: { title: string; result: string; unit: string; children: ReactNode }) {
+  return (
+    <div className="rounded-xl border border-line p-3">
+      <div className="flex items-baseline justify-between gap-3">
+        <h3 className="text-sm font-black text-ink-900">{title}</h3>
+        <ResultLine value={result} unit={unit} />
+      </div>
+      <div className="mt-3 space-y-2">{children}</div>
     </div>
   )
 }
 
-function GoalLine({ active, text }: { active: boolean; text: string }) {
+function CertaintyBadge({
+  certainty,
+  label,
+}: {
+  certainty: 'published_equation' | 'established_range_choice' | 'qimmah_practical_estimate'
+  label: string
+}) {
+  const tone = {
+    published_equation: 'bg-emerald-50 text-emerald-800',
+    established_range_choice: 'bg-blue-50 text-blue-800',
+    qimmah_practical_estimate: 'bg-amber-50 text-amber-900',
+  }[certainty]
   return (
-    <li className={`flex items-start gap-2 ${active ? 'font-bold text-ink-900' : ''}`}>
-      <Icon
-        name={active ? 'CheckCircle2' : 'Circle'}
-        className={`mt-0.5 h-4 w-4 shrink-0 ${active ? 'text-primary-c' : 'text-ink-300'}`}
-      />
-      <span>{text}</span>
-    </li>
+    <span title={label} className={`max-w-[55%] shrink-0 rounded-full px-2 py-1 text-center text-[0.6rem] font-black leading-tight ${tone}`}>
+      {label.split('—')[0]}
+    </span>
   )
 }

@@ -55,7 +55,7 @@ export function Meals() {
                       {labels.meals.fats}
                     </span>
                   </div>
-                  <span className="shrink-0 rounded-lg bg-orange-500/15 px-2.5 py-1 text-xs font-bold text-orange-300">
+                  <span className="shrink-0 rounded-lg bg-primary-soft px-2.5 py-1 text-xs font-bold text-primary-c">
                     {meal.calories} سعرة
                   </span>
                 </li>

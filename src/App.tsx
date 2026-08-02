@@ -1,10 +1,10 @@
-import { lazy, Suspense, useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 // شاشة البداية (الهبوط) تبقى مُحمّلة مباشرةً لأول رسم سريع.
 import { StartView } from '@/views/StartView'
 import { AppLoading } from '@/components/AppLoading'
 import { VerifyEmailView } from '@/views/VerifyEmailView'
 import { RouteErrorBoundary } from '@/components/ErrorBoundary'
-import { DashboardSkeleton, ProgressSkeleton } from '@/components/ViewSkeletons'
+import { DashboardSkeleton, ProgressSkeleton, TabSkeleton } from '@/components/ViewSkeletons'
 import { InstallPrompt } from '@/components/InstallPrompt'
 
 // باقي الشاشات مُقسّمة إلى حِزم عند الطلب (code-splitting) لتقليل حزمة الدخول الأولى.
@@ -13,6 +13,9 @@ import { InstallPrompt } from '@/components/InstallPrompt'
 function createLazyViews() {
   return {
     LoginView: lazy(() => import('@/views/LoginView').then((m) => ({ default: m.LoginView }))),
+    ResetPasswordView: lazy(() =>
+      import('@/views/ResetPasswordView').then((m) => ({ default: m.ResetPasswordView })),
+    ),
     SetupView: lazy(() => import('@/views/SetupView').then((m) => ({ default: m.SetupView }))),
     DashboardView: lazy(() => import('@/views/DashboardView').then((m) => ({ default: m.DashboardView }))),
     WorkoutView: lazy(() => import('@/views/WorkoutView').then((m) => ({ default: m.WorkoutView }))),
@@ -21,47 +24,65 @@ function createLazyViews() {
     ),
     NutritionView: lazy(() => import('@/views/NutritionView').then((m) => ({ default: m.NutritionView }))),
     ProgressView: lazy(() => import('@/views/ProgressView').then((m) => ({ default: m.ProgressView }))),
+    StepsView: lazy(() => import('@/views/StepsView').then((m) => ({ default: m.StepsView }))),
     ProfileView: lazy(() => import('@/views/ProfileView').then((m) => ({ default: m.ProfileView }))),
     CalcExplainerView: lazy(() =>
       import('@/views/CalcExplainerView').then((m) => ({ default: m.CalcExplainerView })),
     ),
-    DemoView: lazy(() => import('@/views/DemoView').then((m) => ({ default: m.DemoView }))),
     SettingsView: lazy(() => import('@/views/SettingsView').then((m) => ({ default: m.SettingsView }))),
     PrivacyView: lazy(() => import('@/views/PrivacyView').then((m) => ({ default: m.PrivacyView }))),
     TermsView: lazy(() => import('@/views/TermsView').then((m) => ({ default: m.TermsView }))),
     ContactView: lazy(() => import('@/views/ContactView').then((m) => ({ default: m.ContactView }))),
     NotFoundView: lazy(() => import('@/views/NotFoundView').then((m) => ({ default: m.NotFoundView }))),
-    ReviewPanelView: lazy(() =>
-      import('@/features/products/reviewPanel/ReviewPanelView').then((m) => ({ default: m.ReviewPanelView })),
-    ),
+    ReviewPanelView: import.meta.env.DEV
+      ? lazy(() => import('@/features/products/reviewPanel/ReviewPanelView').then((m) => ({ default: m.ReviewPanelView })))
+      : null,
     MyStatsView: lazy(() => import('@/views/MyStatsView').then((m) => ({ default: m.MyStatsView }))),
+    RecoveryView: lazy(() => import('@/views/RecoveryView').then((m) => ({ default: m.RecoveryView }))),
   }
 }
-import { MobileShell, type MainTab } from '@/components/MobileShell'
+import { MobileShell, type MainTab, type QuickLogTarget } from '@/components/MobileShell'
 import type { AppBadge } from '@/components/AppNav'
 import { useAuth } from '@/lib/authContext'
-import { isAccountOnboarded, isOnboardingComplete, loadOnboarding, markCompleted } from '@/lib/onboarding'
+import { isAccountOnboarded, isOnboardingComplete, markCompleted } from '@/lib/onboarding'
+import { reconcileAccountScope } from '@/lib/accountScope'
 import { ensureOnboardingProfile } from '@/lib/onboardingProfile'
 import { currentUserId, hydrateOnboardingFromProfile } from '@/lib/onboardingSync'
 import { useLanguage } from '@/i18n'
 import { type AppRoute, MAIN_TABS, isUnknownRouteHash, routeFromHash, setHashRoute } from '@/lib/appRoutes'
 import { SuccessToast } from '@/components/SuccessToast'
-import { AchievementToaster } from '@/features/achievements/AchievementToaster'
 import { BUILD_LABEL } from '@/lib/buildInfo'
+import { track } from '@/lib/analytics'
+import { useCustomization } from '@/lib/customizationContext'
+import { V2_QUICK_LOG } from '@/design-system/v2/labels'
+
+// Achievement evaluation reads workout + nutrition stores. It is only rendered
+// inside authenticated main tabs, so loading it in the public/account shell would
+// pull the full food catalogue into the first bundle for no user-visible benefit.
+const AchievementToaster = lazy(() =>
+  import('@/features/achievements/AchievementToaster').then((m) => ({ default: m.AchievementToaster })),
+)
 
 /**
  * حراسة المسار: التبويبات الرئيسية لا تُفتح أبدًا قبل إكمال إعداد حقيقي **لهذا الحساب**
  * (وبالتالي حساب جديد يُطالَب بالإعداد ولو أُكمل على الجهاز بحساب آخر).
  */
 function guardRoute(route: AppRoute, userId: string | null): AppRoute {
-  // التبويبات الرئيسية + مكتبة التمارين + «لوحتي» كلها تتطلّب إعدادًا مكتملًا.
-  if (MAIN_TABS.includes(route) || route === 'exercises' || route === 'stats') {
-    if (!isOnboardingComplete(userId)) {
-      // مسجّل دخول لم يُكمل → مباشرةً لمعالج الإعداد؛ ضيف بمسودة بدأها → استئناف الإعداد؛
-      // وإلا شاشة البداية.
-      if (userId) return 'setup'
-      return (loadOnboarding().lastStep ?? 0) > 0 ? 'setup' : 'start'
-    }
+  // لا حساب = لا وصول: الإعداد (الأسئلة) والتبويبات ومكتبة التمارين و«لوحتي» والإعدادات
+  // وصفحة الحساب والحاسبة والعرض التوضيحي كلها تتطلّب حسابًا أولًا. لا وضع ضيف ولا تصفّح بلا حساب.
+  const needsAccount =
+    MAIN_TABS.includes(route) ||
+    route === 'exercises' ||
+    route === 'stats' ||
+    route === 'recovery' ||
+    route === 'steps' ||
+    route === 'setup' ||
+    route === 'settings' ||
+    route === 'calc'
+  if (needsAccount && !userId) return 'start'
+  // بعد الحساب: التبويبات تتطلّب إعدادًا مكتملًا وإلا معالج الإعداد (الأسئلة).
+  if (MAIN_TABS.includes(route) || route === 'exercises' || route === 'stats' || route === 'recovery' || route === 'steps') {
+    if (!isOnboardingComplete(userId)) return 'setup'
   }
   return route
 }
@@ -74,24 +95,76 @@ function initialRoute(userId: string | null): AppRoute {
   if (isUnknownRouteHash()) {
     return 'notfound'
   }
-  return isOnboardingComplete(userId) ? 'dashboard' : 'start'
+  // بلا حساب → شاشة الحساب (تسجيل دخول/إنشاء حساب). بحساب → اللوحة أو الأسئلة.
+  if (!userId) return 'start'
+  return isOnboardingComplete(userId) ? 'dashboard' : 'setup'
 }
 
 /** قشرة تطبيق قِمّة — توجيه بسيط عبر hash (بلا مكتبات خارجية). */
 export default function App() {
   const auth = useAuth()
+  const { customization } = useCustomization()
   // اللغة الحية من سياق i18n — التبديل يعيد رسم كل الشاشات فورًا (بلا إعادة تحميل).
   const { lang: LANG } = useLanguage()
-  const badge: AppBadge = auth.user ? 'account' : 'guest'
+  // داخل التطبيق لا يوجد ضيف بعد الآن (كل التبويبات خلف حساب)، فالشارة دائمًا «حساب».
+  const badge: AppBadge = 'account'
   // المالك الحالي لقرار البوابة: معرّف الحساب المسجّل، أو null لوضع الضيف.
   const uid = auth.user?.id ?? null
+  const quickCopy = V2_QUICK_LOG[LANG === 'en' ? 'en' : 'ar']
+  const hasMedication = customization.wellnessPlan.medications.length > 0
+  const hasSupplement = customization.wellnessPlan.supplements.length > 0
+  const routineQuickLabel = hasMedication && hasSupplement
+    ? quickCopy.routineBoth
+    : hasMedication
+      ? quickCopy.routineMedication
+      : hasSupplement
+        ? quickCopy.routineSupplement
+        : quickCopy.routineEmpty
+
+  // عزل الحساب (شبكة أمان): بمجرّد جهوزية المصادقة، إن ظهر حساب مختلف عن آخر ما رأيناه
+  // (مثلًا استعادة جلسة لحساب آخر دون مرور بتسجيل خروج) → امسح بقايا السابق قبل الرسم،
+  // ثم أعِد التحميل نظيفًا فلا تبقى أي حالة في الذاكرة من الحساب السابق. تسجيل الخروج
+  // العادي يمسح مباشرةً في signOut، فهذه الحالة تلتقط المسارات غير المتوقّعة فقط.
+  // useLayoutEffect ليتمّ المسح قبل أن يرسم المتصفح واجهة الحساب الجديد.
+  useLayoutEffect(() => {
+    if (auth.loading) return
+    // بوّابة الاستعادة قبل منطق المسح: جلسة PASSWORD_RECOVERY المؤقتة ليست «تبديل حساب».
+    // مسحها هنا يحذف بيانات المستخدم ويقذفه من شاشة «كلمة مرور جديدة» (حلقة إعادة تحميل).
+    // لذا نختصر أثناء الاستعادة؛ recoveryActive في التبعيات ليُعاد التوفيق بأمان بعد انتهائها.
+    if (auth.recoveryActive) return
+    const { wiped } = reconcileAccountScope(uid)
+    if (wiped && typeof window !== 'undefined') window.location.reload()
+  }, [auth.loading, uid, auth.recoveryActive])
 
   useEffect(() => {
     // تطبيق اللغة/الاتجاه يتكفّل به LanguageProvider. هنا هجرات لمرّة واحدة فقط.
     ensureOnboardingProfile()
     // معرّف البناء في الـ console — للتحقق من نشر النسخة الصحيحة.
     console.info(`%cقِمّة ${BUILD_LABEL}`, 'color:#F26A21;font-weight:bold')
+    // فتح التطبيق — يُطلق مرّة واحدة لكل تحميل.
+    track('app_opened', {})
   }, [])
+
+  // جدولة إشعارات iOS من مالك الجلسة الحالي فقط. كل مصالحة تلغي معرّفات قِمّة
+  // أولًا؛ الاستعادة/الخروج/تبديل الحساب لا يمكن أن يترك جدول المالك السابق.
+  useEffect(() => {
+    if (auth.loading) return
+    let active = true
+    const reconcile = () => {
+      void import('@/lib/notifications').then(({ reconcileNotificationSchedule }) => {
+        if (active) void reconcileNotificationSchedule(uid, auth.recoveryActive, LANG)
+      }).catch(() => { /* Native reminders are optional; app startup must continue. */ })
+    }
+    reconcile()
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') reconcile()
+    }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => {
+      active = false
+      document.removeEventListener('visibilitychange', onVisible)
+    }
+  }, [auth.loading, auth.recoveryActive, uid, LANG])
 
   const [view, setView] = useState<AppRoute>(() => initialRoute(auth.user?.id ?? null))
   // حِزم الشاشات الكسولة — تُستبدل بنسخة جديدة عند «أعد المحاولة» بعد فشل تحميل حزمة.
@@ -102,6 +175,8 @@ export default function App() {
   const didInitialAuthRoute = useRef(false)
   const [showSuccess, setShowSuccess] = useState(false)
   const dismissSuccess = useCallback(() => setShowSuccess(false), [])
+  // وضع شاشة الحساب (تسجيل دخول/إنشاء حساب) — يُحدَّد من زرّ شاشة البداية.
+  const [loginMode, setLoginMode] = useState<'login' | 'signup'>('login')
 
   // آخر مسار غير قانوني (للرجوع الآمن من الخصوصية/الشروط دون الاعتماد على history.back
   // الذي قد يقذف المستخدم خارج التطبيق عند فتح الصفحة مباشرةً/التحديث).
@@ -109,6 +184,23 @@ export default function App() {
   useEffect(() => {
     if (view !== 'privacy' && view !== 'terms') beforeLegalRef.current = view
   }, [view])
+  // تُفتح صفحة شرح الحساب من الإعداد أو التقدّم؛ الرجوع يعيد المستخدم إلى
+  // المصدر الحقيقي بدل افتراض أن نقطة الدخول هي الملف الشخصي دائمًا.
+  const beforeCalcRef = useRef<AppRoute>('profile')
+  useEffect(() => {
+    if (view !== 'calc') beforeCalcRef.current = view
+  }, [view])
+
+  // تغيّر المسار — إشارة تنقّل (اسم المسار فقط، بلا أي بيانات مستخدم).
+  const prevViewRef = useRef<AppRoute | null>(null)
+  useEffect(() => {
+    if (auth.loading) return
+    const from = prevViewRef.current
+    if (from !== view) {
+      track('route_changed', { route: view, from: from ?? undefined })
+      prevViewRef.current = view
+    }
+  }, [view, auth.loading])
 
   // view → hash (نُبقي مسار 404 على hash الخاطئ كما هو حتى لا نطمس الرابط الأصلي).
   // مهم: لا نكتب الـ hash قبل حسم مسار الإقلاع الأول بعد استعادة الجلسة، وإلّا طمسنا
@@ -118,6 +210,16 @@ export default function App() {
     if (auth.loading || !didInitialAuthRoute.current) return
     if (view !== 'notfound') setHashRoute(view)
   }, [view, auth.loading])
+
+  // استعادة كلمة المرور مصدر حقيقته حدث PASSWORD_RECOVERY (لا الـ hash): متى نُشِّط، نُثبّت
+  // العرض على شاشة إعادة التعيين ونكتب الـ hash صراحةً — فحتى لو هبط الرابط على جذر التطبيق
+  // (بلا #/reset) يصل المستخدم لشاشة كلمة المرور الجديدة بدل قذفه لتسجيل الدخول.
+  useEffect(() => {
+    if (auth.recoveryActive && view !== 'reset') {
+      setView('reset')
+      setHashRoute('reset')
+    }
+  }, [auth.recoveryActive, view])
 
   // hash → view (تنقّل المتصفح / تحديث الصفحة) مع الحراسة لكل حساب.
   useEffect(() => {
@@ -140,6 +242,12 @@ export default function App() {
   // الصحيحة — فحساب جديد لم يُكمل الإعداد لا يبقى على اللوحة بعد التحديث.
   useEffect(() => {
     if (auth.loading) return
+    // أثناء استعادة كلمة المرور لا نحسب مسار إقلاع ولا نكتب hash — بوّابة الاستعادة تتكفّل
+    // بالعرض، وأي حساب جلسة استعادة (uid) يجب ألّا يُحوَّل للأسئلة/اللوحة.
+    if (auth.recoveryActive) {
+      didInitialAuthRoute.current = true
+      return
+    }
     let cancelled = false
     void (async () => {
       if (uid && !isAccountOnboarded(uid)) await hydrateOnboardingFromProfile(uid)
@@ -161,24 +269,29 @@ export default function App() {
     return () => {
       cancelled = true
     }
-  }, [auth.loading, uid])
+  }, [auth.loading, uid, auth.recoveryActive])
 
   // فتح شاشة الإعداد — النمط (معالج أولي مقابل محرّرات متقدّمة) يُشتقّ من حالة الحساب
   // وقت العرض، فلا حاجة لحالة نمط مخزّنة قد تتقادم.
   const openSetup = useCallback(() => {
+    // الأسئلة/الإعداد لا تُفتح أبدًا بلا حساب — مرور عبر البوابة صراحةً.
+    if (!uid) {
+      setView('start')
+      return
+    }
     setView('setup')
-  }, [])
+  }, [uid])
 
-  /** دخول التطبيق بعد تسجيل الدخول أو المتابعة كضيف — بوابة لكل حساب. */
+  /** دخول التطبيق بعد تسجيل الدخول/إنشاء الحساب — بوابة لكل حساب (لا وضع ضيف). */
   const enterApp = useCallback(async () => {
     const signedInId = await currentUserId()
     if (!signedInId) {
-      // ضيف — علم الجهاز كما كان.
-      if (loadOnboarding().completed) setView('dashboard')
-      else openSetup()
+      // لا حساب → يعود لشاشة الحساب (لا دخول بلا تسجيل).
+      setView('login')
       return
     }
     // مسجّل دخول — القرار لكل حساب: السجلّ المحلي، وإلا الملف السحابي.
+    // الأسئلة (الإعداد) تبدأ الآن فقط بعد الحساب.
     let onboarded = isAccountOnboarded(signedInId)
     if (!onboarded) onboarded = await hydrateOnboardingFromProfile(signedInId)
     if (onboarded) setView('dashboard')
@@ -187,7 +300,9 @@ export default function App() {
 
   const closeSetup = (completed?: boolean) => {
     const done = completed || isOnboardingComplete(uid)
-    setView(done ? 'dashboard' : 'start')
+    // كل وجهة تمرّ عبر البوابة. مستخدم مسجّل لم يُكمل الأسئلة يبقى في الإعداد (لا يُقذف
+    // لشاشة الحساب)، وغير المسجّل فقط يعود لشاشة تسجيل الدخول/إنشاء الحساب.
+    setView(guardRoute(done ? 'dashboard' : uid ? 'setup' : 'start', uid))
     if (completed) setShowSuccess(true)
   }
 
@@ -195,11 +310,9 @@ export default function App() {
   // «تخطّي» الدائم في المعالج وحاجز الأخطاء — فلا يُحبَس مستخدم أبدًا حتى لو تعطّلت خطوة.
   const skipOnboarding = useCallback(() => {
     markCompleted(uid)
-    setView('dashboard')
+    setView(guardRoute('dashboard', uid))
     setShowSuccess(true)
   }, [uid])
-
-  const closeDemo = () => setView(isOnboardingComplete(uid) ? 'dashboard' : 'start')
 
   // تنقّل عام — يمرّ عبر الحراسة حتى لا تُفتح لوحة بلا إعداد.
   const navigate = (v: AppRoute) => {
@@ -207,10 +320,43 @@ export default function App() {
     else setView(guardRoute(v, uid))
   }
 
+  const openQuickLog = (target: QuickLogTarget) => {
+    window.sessionStorage.setItem('qimmah:quick-log-intent', target)
+    if (target === 'routine') {
+      navigate('profile')
+      window.setTimeout(() => window.dispatchEvent(new CustomEvent('qimmah:quick-log', { detail: target })), 0)
+      return
+    }
+    navigate('nutrition')
+    window.setTimeout(() => window.dispatchEvent(new CustomEvent('qimmah:quick-log', { detail: target })), 0)
+  }
+
   // ——— بوابة الإقلاع: أثناء استعادة جلسة المصادقة نعرض حالة تحميل قصيرة (لا شاشة دخول)
   //     حتى لا يُطالَب مستخدم لديه جلسة صالحة بتسجيل الدخول من جديد. ———
   if (auth.loading) {
     return <AppLoading />
+  }
+
+  // ——— بوّابة الاستعادة (فوق كل البوّابات): جلسة استعادة كلمة المرور يجب أن تهبط دائمًا على
+  //     شاشة «كلمة مرور جديدة» — لا تُقذف لتسجيل الدخول ولا لتأكيد البريد ولا للأسئلة، ولو
+  //     لم يكن hash هو #/reset (قالب Supabase الافتراضي أو Deep Link على iOS). مصدر الحقيقة:
+  //     حدث PASSWORD_RECOVERY أو مؤشّر استعادة في عنوان الإقلاع. ———
+  if (view === 'reset' || auth.recoveryActive) {
+    return (
+      <RouteErrorBoundary onRetry={retryLazyViews}>
+        <Suspense fallback={<AppLoading />}>
+          <V.ResetPasswordView
+            lang={LANG}
+            onDone={() => {
+              auth.endRecovery()
+              setLoginMode('login')
+              setView('login')
+            }}
+          />
+        </Suspense>
+        <InstallPrompt lang={LANG} />
+      </RouteErrorBoundary>
+    )
   }
 
   // ——— بوّابة تأكيد البريد (P0، دفاع عميق): حساب مسجّل ببريد لم يُؤكَّد بعد لا يُمنح وصولًا
@@ -224,19 +370,24 @@ export default function App() {
   let content: ReactNode
 
   if (view === 'start') {
-    const ob = loadOnboarding()
     content = (
       <StartView
         lang={LANG}
-        hasStartedSetup={!isOnboardingComplete(uid) && (ob.lastStep ?? 0) > 0}
-        onBuildPlan={openSetup}
-        onLogin={() => setView('login')}
-        onContinueGuest={enterApp}
-        onSeeDemo={() => setView('demo')}
+        onLogin={() => { setLoginMode('login'); setView('login') }}
+        onSignup={() => { setLoginMode('signup'); setView('login') }}
       />
     )
   } else if (view === 'login') {
-    content = <V.LoginView lang={LANG} onSuccess={enterApp} onGuest={enterApp} onBack={() => setView('start')} />
+    content = (
+      <V.LoginView
+        lang={LANG}
+        initialMode={loginMode}
+        onModeChange={setLoginMode}
+        onSuccess={enterApp}
+        onBack={() => setView('start')}
+      />
+    )
+    // ملاحظة: مسار 'reset' يُعالَج في بوّابة الاستعادة أعلى الدالة (فوق كل البوّابات).
   } else if (view === 'privacy') {
     content = <V.PrivacyView lang={LANG} onBack={() => navigate(beforeLegalRef.current)} />
   } else if (view === 'terms') {
@@ -254,8 +405,6 @@ export default function App() {
     // غير مكتمل → معالج الإعداد الأولي (وزنه/هدفه هو).
     const onboarded = isOnboardingComplete(uid)
     content = <V.SetupView onClose={closeSetup} onForceComplete={skipOnboarding} initialStep={0} mode={onboarded ? 'advanced' : 'onboarding'} />
-  } else if (view === 'demo') {
-    content = <V.DemoView lang={LANG} onNavigate={navigate} onBack={closeDemo} />
   } else if (view === 'settings') {
     content = (
       <V.SettingsView
@@ -266,19 +415,29 @@ export default function App() {
         onOpenPrivacy={() => setView('privacy')}
         onOpenTerms={() => setView('terms')}
         onOpenProductReview={() => setView('productReview')}
-        onOpenCalc={() => setView('calc')}
+        onOpenCalc={() => navigate('calc')}
       />
     )
   } else if (view === 'productReview') {
     // أداة طاقم داخلية فقط — تُعرَض في التطوير فقط؛ في الإنتاج الوصول إليها (حتى عبر
     // #/productReview مباشرةً) مُقصى ويُعاد المستخدم لشاشة «غير موجود».
-    content = import.meta.env.DEV ? (
+    content = import.meta.env.DEV && V.ReviewPanelView ? (
       <V.ReviewPanelView lang={LANG} onBack={() => setView('settings')} />
     ) : (
       <V.NotFoundView lang={LANG} onHome={() => setView('dashboard')} onBack={() => setView('dashboard')} />
     )
   } else if (view === 'calc') {
-    content = <V.CalcExplainerView lang={LANG} onBack={() => navigate('profile')} />
+    content = (
+      <V.CalcExplainerView
+        lang={LANG}
+        onBack={() => navigate(beforeCalcRef.current)}
+        onEditProfile={openSetup}
+      />
+    )
+  } else if (view === 'recovery') {
+    content = <V.RecoveryView lang={LANG} onBack={() => navigate('dashboard')} onNavigate={navigate} />
+  } else if (view === 'steps') {
+    content = <V.StepsView lang={LANG} onBack={() => navigate('progress')} onOpenSettings={() => navigate('settings')} />
   } else {
     // ——— التبويبات الرئيسية داخل قشرة الجوال ———
     content = (
@@ -289,30 +448,54 @@ export default function App() {
           badge={badge}
           onNavigate={navigate}
           onOpenSettings={() => setView('settings')}
+          onQuickLog={openQuickLog}
+          routineQuickLabel={routineQuickLabel}
         >
           {/* الرئيسية والتقدّم: fallback هيكلي لكل مسار (بدل AppLoading العام) — البيانات
               محلية متزامنة فلا يظهر الهيكل إلا أثناء تحميل حزمة الشاشة عند الطلب. */}
           {view === 'dashboard' && (
             <Suspense fallback={<DashboardSkeleton />}>
-              <V.DashboardView lang={LANG} onNavigate={navigate} />
+              <V.DashboardView lang={LANG} onNavigate={navigate} onQuickLog={openQuickLog} />
             </Suspense>
           )}
-          {view === 'workout' && <V.WorkoutView lang={LANG} onNavigate={navigate} />}
-          {view === 'exercises' && <V.ExerciseLibraryView lang={LANG} />}
-          {view === 'nutrition' && <V.NutritionView lang={LANG} />}
+          {view === 'workout' && (
+            <Suspense fallback={<TabSkeleton />}>
+              <V.WorkoutView lang={LANG} onNavigate={navigate} />
+            </Suspense>
+          )}
+          {view === 'exercises' && (
+            <Suspense fallback={<TabSkeleton />}>
+              <V.ExerciseLibraryView lang={LANG} />
+            </Suspense>
+          )}
+          {view === 'nutrition' && (
+            <Suspense fallback={<TabSkeleton />}>
+              <V.NutritionView lang={LANG} />
+            </Suspense>
+          )}
           {view === 'progress' && (
             <Suspense fallback={<ProgressSkeleton />}>
-              <V.ProgressView lang={LANG} />
+              <V.ProgressView lang={LANG} onNavigate={navigate} />
             </Suspense>
           )}
-          {view === 'profile' && <V.ProfileView lang={LANG} onNavigate={navigate} />}
-          {view === 'stats' && <V.MyStatsView lang={LANG} />}
+          {view === 'profile' && (
+            <Suspense fallback={<TabSkeleton />}>
+              <V.ProfileView lang={LANG} onNavigate={navigate} />
+            </Suspense>
+          )}
+          {view === 'stats' && (
+            <Suspense fallback={<TabSkeleton />}>
+              <V.MyStatsView lang={LANG} />
+            </Suspense>
+          )}
         </MobileShell>
 
         {showSuccess && <SuccessToast onClose={dismissSuccess} />}
 
         {/* احتفالات الأوسمة والأرقام القياسية — فوق كل الشاشات الرئيسية */}
-        <AchievementToaster />
+        <Suspense fallback={null}>
+          <AchievementToaster />
+        </Suspense>
       </>
     )
   }

@@ -5,6 +5,7 @@ import { nutritionScreenStrings, type NutritionScreenStrings } from '@/i18n/dict
 import type { FoodItem } from '@/data/foodItems'
 import { lookupBarcode } from './openFoodFacts'
 import { BarcodeCamera, type CameraFailure } from './BarcodeCamera'
+import { track } from '@/lib/analytics'
 
 interface ScanFoodPanelProps {
   lang: Lang
@@ -72,6 +73,8 @@ export function ScanFoodPanel({ lang, onResolved, onManualFallback, onClose }: S
     setStatus('looking-up')
     try {
       const result = await lookupBarcode(barcode)
+      // نتيجة المسح — الحالة فقط (found/not-found/network-error)، بلا قيمة الباركود أو المنتج.
+      track('barcode_scan_result', { result: result.status })
       if (result.status !== 'found') {
         setStatus(result.status === 'network-error' ? 'network-error' : 'not-found')
         return
@@ -111,7 +114,7 @@ export function ScanFoodPanel({ lang, onResolved, onManualFallback, onClose }: S
       <div className="flex max-h-[90vh] w-full max-w-md flex-col rounded-t-3xl bg-surface shadow-card sm:rounded-3xl">
         <div className="flex items-center justify-between border-b border-line p-4">
           <h3 className="text-base font-bold text-ink-900">{d.scanTitle}</h3>
-          <button type="button" onClick={onClose} aria-label={d.close} className="grid h-8 w-8 place-items-center rounded-lg text-ink-500 hover:bg-beige">
+          <button type="button" onClick={onClose} aria-label={d.close} className="grid h-11 w-11 place-items-center rounded-lg text-ink-500 hover:bg-beige">
             <Icon name="X" className="h-5 w-5" />
           </button>
         </div>
@@ -133,7 +136,7 @@ export function ScanFoodPanel({ lang, onResolved, onManualFallback, onClose }: S
 
           {status === 'looking-up' && (
             <div className="flex flex-col items-center gap-3 py-10">
-              <Icon name="RefreshCw" className="h-6 w-6 animate-spin text-primary-c" />
+              <Icon name="RefreshCw" className="h-6 w-6 animate-spin" style={{ color: '#12A594' }} />
               <p className="text-sm text-ink-500">{d.scanLookingUp}</p>
             </div>
           )}

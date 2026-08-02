@@ -1,14 +1,19 @@
-// طبقة المصادقة — Supabase email/password مع بقاء Guest Mode ممكنًا دائمًا.
+// طبقة المصادقة — Supabase email/password. الحساب مطلوب للدخول (لا وضع ضيف داخل التطبيق).
 //
-// إن لم يُضبط Supabase تبقى الحالة «ضيف» (user = null, configured = false)
-// ولا تنهار الواجهة. كل الدوال آمنة عند غياب العميل.
+// إن لم يُضبط Supabase تبقى الحالة user = null, configured = false ولا تنهار الواجهة،
+// وتَعرض شاشة الحساب أنّ المزامنة غير مفعّلة. كل الدوال آمنة عند غياب العميل.
 
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
-import type { AuthError, Session, User } from '@supabase/supabase-js'
+import type { Session, User } from '@supabase/supabase-js'
 import { getSupabase, isSupabaseConfigured } from './supabaseClient'
 import { getLanguage } from './appPreferences'
+import { wipeUserData, setLastUser } from './accountScope'
 import { miscStrings } from '@/i18n/dict/misc'
+import { parseRecoveryParams, implicitTokens } from './recoveryState'
+import { isSyncEnabled, setSyncRuntime } from './syncQueue'
+import type { AuthOp } from './authErrors'
+import { describeAuthError, guardedAuthCall, isAmbiguousSignup } from './authErrors'
 
 export interface AuthResult {
   ok: boolean
@@ -16,6 +21,29 @@ export interface AuthResult {
   error?: string
   /** هل يحتاج المستخدم لتأكيد بريده (sign up)؟ */
   needsConfirmation?: boolean
+  /**
+   * ردّ إنشاء الحساب غامض: الخادم يُخفي وجود البريد (منع تعداد الحسابات) فلا نعرف هل
+   * أُنشئ حساب جديد أم أنّ البريد مسجّل من قبل. المستدعي **لا يجوز** أن يقول «فتحنا
+   * حسابك» في هذه الحالة — يعرض رسالة صادقة في الحالتين ويعرض طريق تسجيل الدخول.
+   */
+  ambiguousExistingAccount?: boolean
+}
+
+export interface DeleteAccountResult {
+  /**
+   * هل اكتمل الحذف فعليًا؟ للحساب السحابي = تأكيد حذف مستخدم المصادقة (authUserDeleted).
+   * للوضع المحلي/الضيف (لا سحابة) = صحيح (لا شيء على الخادم). المستدعي يُكمل التنظيف المحلي
+   * ويعيد التحميل فقط عند ok=true — وإلا يعرض حالة فشل صادقة بلا ادّعاء نجاح.
+   */
+  ok: boolean
+  /**
+   * هل حُذف صفّ مستخدم المصادقة (auth.users) فعليًا من الخادم؟
+   * يتطلّب دالة Postgres آمنة (security definer) اسمها delete_own_account — بلا service role في العميل.
+   * false إن لم تُنشَر تلك الدالة بعد؛ عندها تبقى الجلسة قائمة لإعادة المحاولة (لا نُنهيها كذبًا).
+   */
+  authUserDeleted: boolean
+  /** رسالة الخطأ الخادمي إن تعذّر حذف مستخدم المصادقة. */
+  error?: string
 }
 
 export interface AuthContextValue {
@@ -27,6 +55,12 @@ export interface AuthContextValue {
   session: Session | null
   /** ما زالت حالة المصادقة قيد التحميل (أول إقلاع). */
   loading: boolean
+  /**
+   * هل نحن في تدفّق استعادة كلمة المرور؟ مصدر الحقيقة للتوجيه: يصبح true عند حدث
+   * PASSWORD_RECOVERY من Supabase، أو إن حمل عنوان الإقلاع مؤشّر استعادة. عند true
+   * يجب أن يهبط المستخدم على شاشة «كلمة مرور جديدة» ولا يُقذف أبدًا لتسجيل الدخول/الأسئلة.
+   */
+  recoveryActive: boolean
   /** الاسم المعروض للمستخدم (من user_metadata) أو البريد كبديل، أو null كضيف. */
   displayName: string | null
   /**
@@ -39,8 +73,49 @@ export interface AuthContextValue {
   signOut: () => Promise<void>
   /** يعيد إرسال رسالة تأكيد البريد. */
   resendConfirmation: (email: string) => Promise<AuthResult>
+  /** يرسل رابط استعادة كلمة المرور للبريد (Sprint UI 1 — إضافة فقط، لا تغيّر تدفّقات المصادقة القائمة). */
+  resetPassword: (email: string) => Promise<AuthResult>
+  /**
+   * يضبط كلمة مرور جديدة للجلسة الحالية (Sprint A — استكمال الاستعادة بعد فتح رابط البريد).
+   * يعمل على جلسة الاستعادة التي أنشأها Supabase من رابط البريد، أو أي جلسة مسجّلة.
+   */
+  updatePassword: (password: string) => Promise<AuthResult>
+  /**
+   * يستكمل جلسة الاستعادة من رابط البريد (H1 fallback). إن لم يلتقط detectSessionInUrl الرمز
+   * تلقائيًا — مثلًا حين يقع code داخل hash التوجيه (#/reset?code=…) — نستخرجه يدويًا ونبادله
+   * بجلسة عبر exchangeCodeForSession. يعيد true إن توفّرت جلسة صالحة بعدها. آمن عند غياب رمز.
+   */
+  completeRecovery: () => Promise<boolean>
+  /** يُنهي وضع الاستعادة صراحةً (عند مغادرة الشاشة بعد النجاح أو من حالة الرابط المنتهي). */
+  endRecovery: () => void
   /** يعيد جلب المستخدم من الخادم لالتقاط تأكيد البريد بعد الضغط على الرابط. */
   refreshUser: () => Promise<void>
+  /**
+   * يحذف حساب المستخدم وبياناته السحابية (best-effort) ويُنهي الجلسة.
+   * لا يمسّ التخزين المحلي — المستدعي يتكفّل به (resetQimmah) ليضمن مسحًا كاملًا حتى عند غياب السحابة.
+   */
+  deleteAccount: () => Promise<DeleteAccountResult>
+}
+
+/**
+ * لقطة عنوان الصفحة وقت تحميل الوحدة (قبل أول رسم React). هذا حاسم لتدفّق الاستعادة:
+ * توجيه التطبيق يعيد كتابة الـ hash إلى «#/reset» بعد الإقلاع (يطمس الـ fragment الثاني
+ * «#access_token=…»)، فلو قرأنا الرموز من window.location لحظة الاستكمال لوجدناها مطموسة.
+ * الوحدة تُقيَّم عند الاستيراد الساكن (main.tsx) قبل أي effect، فالعنوان هنا سليم. لا نطبع أبدًا.
+ */
+const INITIAL_URL: string = typeof window !== 'undefined' ? `${window.location.hash}&${window.location.search}` : ''
+
+/** مؤشّرات الاستعادة المُلتقطة من عنوان الإقلاع مرّة واحدة (قبل أن يطمس التوجيه الـ fragment). */
+const INITIAL_RECOVERY = parseRecoveryParams(INITIAL_URL)
+
+/** رمز استعادة PKCE من لقطة الإقلاع (يقرأ من اللقطة لا من العنوان الحالي المطموس بعد التوجيه). */
+function extractRecoveryCode(): string | null {
+  return INITIAL_RECOVERY.code
+}
+
+/** زوج رموز التدفّق الضمني من لقطة الإقلاع (access_token + refresh_token) أو null إن نقص أحدهما. */
+function extractImplicitTokens(): { access_token: string; refresh_token: string } | null {
+  return implicitTokens(INITIAL_RECOVERY)
 }
 
 /** هل بريد هذا المستخدم مؤكَّد؟ ضيف/بلا بريد = مؤكَّد ضمنيًا (لا يُحبَس). */
@@ -65,51 +140,15 @@ function cloudDisabledError(): string {
 }
 
 /**
- * يحوّل خطأ Supabase (بالإنجليزية) إلى رسالة واضحة باللغة الحالية للمستخدم.
+ * يحوّل خطأ Supabase إلى رسالة واضحة باللغة الحالية للمستخدم.
  *
- * المبدأ: لا يُعرض للمستخدم أي نص خام من الخادم أبدًا. بعض أخطاء المصادقة تصل
- * بجسم JSON فارغ، فتضع مكتبة Supabase حرفيًا `{}` في `error.message` — وكان ذلك
- * يظهر للمستخدم كأقواس مبهمة. الآن الترتيب: رمز الخطأ ← نص الخطأ ← حالة HTTP،
- * وأي خطأ غير معروف يسقط على رسالة عامة مفهومة، مع تسجيل التفاصيل في الـ console
- * للتشخيص فقط (بلا بريد أو كلمة مرور).
+ * التصنيف كلّه في `authErrors.ts` (طبقة نقيّة مثبَتة بسكربت): يعتمد على `code` الثابت
+ * من GoTrue أوّلًا ثم `status` ثم النصّ، و**لا يُعيد نصّ الخادم الخام أبدًا** (§9).
+ * النسخة السابقة كانت تُعيد `message` كما هو عند عدم المطابقة، فكان مستخدم عربي يقرأ
+ * «Load failed» على iOS — وهي بالذات رسالة انقطاع الشبكة في WKWebView.
  */
-function localizedAuthError(error: AuthError | null | undefined): string {
-  const t = miscStrings[getLanguage()]
-  const code = (error?.code ?? '').toLowerCase()
-  const status = error?.status
-  const m = (error?.message ?? '').toLowerCase()
-
-  // للتشخيص من devtools — لا يحوي أي بيانات حسّاسة.
-  console.warn('[auth] error', { code: error?.code, status, message: error?.message })
-
-  // 1) رموز Supabase الثابتة — الأدقّ حين تتوفّر.
-  if (code === 'invalid_credentials') return t.authInvalidCredentials
-  if (code === 'user_already_exists' || code === 'email_exists') return t.authAlreadyRegistered
-  if (code === 'email_not_confirmed') return t.authEmailNotConfirmed
-  if (code === 'weak_password') return t.authWeakPassword
-  if (code === 'email_address_invalid') return t.authInvalidEmail
-  if (code === 'over_email_send_rate_limit' || code === 'over_request_rate_limit') return t.authRateLimit
-  if (code === 'request_timeout') return t.authNetwork
-  if (code === 'signup_disabled' || code === 'email_provider_disabled') return t.authSignupDisabled
-
-  // 2) مطابقة النص — تغطّي الأخطاء التي تصل بلا رمز.
-  if (m.includes('invalid login') || m.includes('invalid credentials')) return t.authInvalidCredentials
-  if (m.includes('already registered') || m.includes('already been registered') || m.includes('user already'))
-    return t.authAlreadyRegistered
-  if (m.includes('email not confirmed')) return t.authEmailNotConfirmed
-  if (m.includes('password') && (m.includes('6') || m.includes('short') || m.includes('weak') || m.includes('least')))
-    return t.authWeakPassword
-  if (m.includes('email') && m.includes('valid')) return t.authInvalidEmail
-  if (m.includes('rate limit') || m.includes('too many')) return t.authRateLimit
-  if (m.includes('signups not allowed') || m.includes('signup is disabled')) return t.authSignupDisabled
-  if (m.includes('network') || m.includes('failed to fetch') || m.includes('fetch')) return t.authNetwork
-
-  // 3) حالة HTTP — الملاذ حين يصل الخطأ بجسم فارغ («{}») بلا نص مفهوم.
-  if (status === 429) return t.authRateLimit
-  if (status !== undefined && status >= 500) return t.authServerBusy
-  if (status === undefined) return t.authNetwork
-
-  return t.authGeneric
+function localizedAuthError(error: unknown, op: AuthOp): string {
+  return describeAuthError(error, getLanguage(), op)
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -117,6 +156,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState<boolean>(configured)
+  // يبدأ من مؤشّر عنوان الإقلاع (يلتقط الحالة قبل أن يحسم Supabase الحدث)، ثم يُرفع أيضًا
+  // عند حدث PASSWORD_RECOVERY. لا يُخفَض تلقائيًا — الشاشة نفسها تُنهيه بعد النجاح/العودة.
+  const [recoveryActive, setRecoveryActive] = useState<boolean>(() => INITIAL_RECOVERY.hasRecovery)
 
   useEffect(() => {
     if (!configured) {
@@ -148,10 +190,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (active) setLoading(false)
         })
 
-      const { data: sub } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      const { data: sub } = supabase.auth.onAuthStateChange((event, newSession) => {
         if (!active) return
         setSession(newSession)
         setUser(newSession?.user ?? null)
+        // مصدر الحقيقة للاستعادة: حين يكتشف Supabase رابط الاستعادة (ويب أو Deep Link) يُطلق
+        // PASSWORD_RECOVERY مع جلسة مؤقتة — نرفع العلم فيُثبَّت المستخدم على شاشة كلمة المرور
+        // الجديدة فوق كل البوّابات، ولا يُقذف لتسجيل الدخول ولو لم يكن hash هو #/reset.
+        if (event === 'PASSWORD_RECOVERY') {
+          setSyncRuntime(newSession?.user.id ?? null, true)
+          setRecoveryActive(true)
+        }
       })
       unsubscribe = () => sub.subscription.unsubscribe()
     })
@@ -162,48 +211,200 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [configured])
 
+  useEffect(() => {
+    const userId = user?.id ?? null
+    setSyncRuntime(userId, recoveryActive)
+    if (!isSyncEnabled() || !userId || recoveryActive || loading) return
+    // Login/session restoration hydrates once; lifecycle covers connectivity and foreground retries.
+    // Keep the full sync graph out of the boot bundle: it includes every synced store
+    // (nutrition and exercise catalogues included) and is only needed when sync is enabled.
+    let active = true
+    let stopLifecycle: (() => void) | undefined
+    void import('./syncService').then(({ fullSync, startSyncLifecycle }) => {
+      if (!active) return
+      void fullSync()
+      stopLifecycle = startSyncLifecycle()
+    })
+    return () => {
+      active = false
+      stopLifecycle?.()
+    }
+  }, [user?.id, recoveryActive, loading])
+
   const value = useMemo<AuthContextValue>(
     () => ({
       configured,
       user,
       session,
       loading,
+      recoveryActive,
       displayName: userDisplayName(user),
       emailVerified: isEmailVerified(user),
       async signUp(email, password, displayName) {
         const supabase = await getSupabase()
         if (!supabase) return { ok: false, error: cloudDisabledError() }
         const name = displayName?.trim()
-        const { data, error } = await supabase.auth.signUp({
-          email: email.trim(),
-          password,
-          // الاسم يُخزَّن في user_metadata؛ trigger المنصّة يقرأ display_name لإنشاء صف profile.
-          options: name ? { data: { display_name: name } } : undefined,
-        })
-        if (error) return { ok: false, error: localizedAuthError(error) }
-        // إن لم تُرجع جلسة فالأرجح أنّ تأكيد البريد مطلوب.
-        return { ok: true, needsConfirmation: !data.session }
+        // guardedAuthCall: الجهاز المقطوع يُجاب فورًا، والطلب المعلّق ينتهي بمهلة، وأي
+        // استثناء مرمي (تخزين مقفل في التصفّح الخاص مثلًا) يعود نتيجةً لا وعدًا مرفوضًا.
+        const call = await guardedAuthCall('signUp', getLanguage(), () =>
+          supabase.auth.signUp({
+            email: email.trim(),
+            password,
+            // الاسم يُخزَّن في user_metadata؛ trigger المنصّة يقرأ display_name لإنشاء صف profile.
+            options: name ? { data: { display_name: name } } : undefined,
+          }),
+        )
+        if (!call.ok) return { ok: false, error: call.error }
+        const { data, error } = call.value
+        if (error) return { ok: false, error: localizedAuthError(error, 'signUp') }
+        // إن لم تُرجع جلسة فالأرجح أنّ تأكيد البريد مطلوب — إلا أن يكون الردّ مموّهًا
+        // لبريد مسجّل من قبل، وحينها لا يجوز ادّعاء أنّ الحساب أُنشئ (§5).
+        return { ok: true, needsConfirmation: !data.session, ambiguousExistingAccount: isAmbiguousSignup(data) }
       },
       async signIn(email, password) {
         const supabase = await getSupabase()
         if (!supabase) return { ok: false, error: cloudDisabledError() }
-        const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
-        if (error) return { ok: false, error: localizedAuthError(error) }
+        const call = await guardedAuthCall('signIn', getLanguage(), () =>
+          supabase.auth.signInWithPassword({ email: email.trim(), password }),
+        )
+        if (!call.ok) return { ok: false, error: call.error }
+        if (call.value.error) return { ok: false, error: localizedAuthError(call.value.error, 'signIn') }
         return { ok: true }
       },
       async signOut() {
         const supabase = await getSupabase()
         if (!supabase) return
-        await supabase.auth.signOut()
+        // Native schedules outlive localStorage. Cancel before changing auth or
+        // wiping owner data so the next device user never receives old prompts.
+        try {
+          await import('./notifications').then(({ cancelAllNotifications }) => cancelAllNotifications())
+        } catch {
+          /* Never trap the user in-session if the optional native chunk cannot load. */
+        }
+        try {
+          await supabase.auth.signOut()
+        } catch {
+          /* Local owner isolation must complete even when the network is unavailable. */
+        }
+        // عزل الحساب: امسح كل بيانات المستخدم على الجهاز عند الخروج (لا تبقى بقايا
+        // يقرؤها المستخدم التالي)، وثبّت المالك على «ضيف» فلا يُعيد التوفيق المسح مجددًا.
+        wipeUserData(user?.id)
+        setLastUser(null)
+        // امسح رمز الجلسة صراحةً: wipeUserData يُبقيه (كي لا يُطرد مستخدم أثناء تبديل)،
+        // لكن الخروج يجب أن يُنهي الجلسة حتى لو تعذّر نداء signOut الشبكي (فلا يُستعاد الحساب عند إعادة التحميل).
+        if (typeof window !== 'undefined') {
+          try {
+            window.localStorage.removeItem('qimmah:supabase-auth:v1')
+          } catch {
+            /* تجاهل */
+          }
+        }
         setSession(null)
         setUser(null)
+        // انتهى أي تدفّق استعادة بمجرّد الخروج (نجاح إعادة التعيين يُنهي الجلسة أيضًا).
+        setRecoveryActive(false)
       },
       async resendConfirmation(email) {
         const supabase = await getSupabase()
         if (!supabase) return { ok: false, error: cloudDisabledError() }
-        const { error } = await supabase.auth.resend({ type: 'signup', email: email.trim() })
-        if (error) return { ok: false, error: localizedAuthError(error) }
+        const call = await guardedAuthCall('resendConfirmation', getLanguage(), () =>
+          supabase.auth.resend({ type: 'signup', email: email.trim() }),
+        )
+        if (!call.ok) return { ok: false, error: call.error }
+        if (call.value.error) return { ok: false, error: localizedAuthError(call.value.error, 'resendConfirmation') }
         return { ok: true }
+      },
+      async resetPassword(email) {
+        const supabase = await getSupabase()
+        if (!supabase) return { ok: false, error: cloudDisabledError() }
+        // رابط استعادة عبر البريد — دالة Supabase قياسية، لا تكشف وجود الحساب من عدمه.
+        // redirectTo يعيد المستخدم لشاشة تعيين كلمة مرور جديدة داخل التطبيق (#/reset).
+        //
+        // الويب: أصل النشر الحالي + #/reset (لا localhost مثبّت). تدفّق PKCE يضع الرمز في
+        // query فيبقى hash المسار سليمًا. يجب أن يسمح Supabase بهذا الأصل في Redirect URLs.
+        //
+        // iOS الأصلي: window.location.origin هو capacitor://localhost — غير صالح كوجهة بريد.
+        // يُضبط VITE_RESET_REDIRECT_URL لرابط عميق مُهيّأ (نطاق Universal Link مثل
+        // https://qimmah.app/#/reset، أو مخطّط مخصّص com.qimmah.mobile://reset) ويُضاف لقائمة
+        // Redirect URLs في Supabase. مستمع appUrlOpen (deepLinkRecovery) يلتقطه على الجهاز.
+        const configuredRedirect = import.meta.env.VITE_RESET_REDIRECT_URL?.trim()
+        const redirectTo =
+          configuredRedirect ||
+          (typeof window !== 'undefined'
+            ? `${window.location.origin}${window.location.pathname}#/reset`
+            : undefined)
+        const call = await guardedAuthCall('resetPassword', getLanguage(), () =>
+          supabase.auth.resetPasswordForEmail(email.trim(), redirectTo ? { redirectTo } : undefined),
+        )
+        if (!call.ok) return { ok: false, error: call.error }
+        if (call.value.error) return { ok: false, error: localizedAuthError(call.value.error, 'resetPassword') }
+        return { ok: true }
+      },
+      async updatePassword(password) {
+        const supabase = await getSupabase()
+        if (!supabase) return { ok: false, error: cloudDisabledError() }
+        // يعمل على جلسة الاستعادة (أو أي جلسة نشطة). لا يكشف وجود الحساب — يتطلّب جلسة صالحة.
+        const call = await guardedAuthCall('updatePassword', getLanguage(), () =>
+          supabase.auth.updateUser({ password }),
+        )
+        if (!call.ok) return { ok: false, error: call.error }
+        if (call.value.error) return { ok: false, error: localizedAuthError(call.value.error, 'updatePassword') }
+        return { ok: true }
+      },
+      async completeRecovery() {
+        const supabase = await getSupabase()
+        if (!supabase) return false
+        // جلسة قائمة أصلًا (نجح detectSessionInUrl، أو مستخدم مسجّل) → لا حاجة للتبادل.
+        const { data: cur } = await supabase.auth.getSession()
+        if (cur.session) return true
+
+        // مؤشّرات الاستعادة في الرابط: implicit (access_token+refresh_token) أو PKCE (code).
+        const implicit = extractImplicitTokens()
+        const code = extractRecoveryCode()
+        // لا مؤشّر إطلاقًا → رابط منتهٍ/زيارة مباشرة؛ نعود فورًا (بلا انتظار) لعرض حالة «منتهٍ».
+        if (!implicit && !code) return false
+
+        // Codex M1: مؤشّر موجود — نمنح detectSessionInUrl فرصة (حتى ~3s) لإنشاء الجلسة تلقائيًا
+        // قبل أي تبادل يدوي، تفاديًا للتسابق على رمز أحادي الاستخدام (فشل زائف = «منتهٍ»).
+        for (let i = 0; i < 12; i++) {
+          await new Promise((r) => setTimeout(r, 250))
+          const { data } = await supabase.auth.getSession()
+          if (data.session) return true
+        }
+
+        // (أ) التدفّق الضمني: الرموز في الـ fragment مباشرة — نضبط الجلسة بها. لا نطبع أي رمز.
+        if (implicit) {
+          try {
+            const { data, error } = await supabase.auth.setSession(implicit)
+            if (!error && data.session) {
+              setSession(data.session)
+              setUser(data.session.user)
+              return true
+            }
+          } catch {
+            /* نتابع لمحاولة PKCE */
+          }
+        }
+
+        // (ب) تدفّق PKCE: نبادل الرمز بجلسة.
+        if (code) {
+          try {
+            const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+            if (!error && data.session) {
+              setSession(data.session)
+              setUser(data.session.user)
+              return true
+            }
+          } catch {
+            /* تجاهل */
+          }
+        }
+
+        // لا PKCE ولا implicit نجح → تُعرض حالة الرابط المنتهي الهادئة.
+        return false
+      },
+      endRecovery() {
+        setRecoveryActive(false)
       },
       async refreshUser() {
         const supabase = await getSupabase()
@@ -211,8 +412,59 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const { data } = await supabase.auth.getUser()
         if (data.user) setUser(data.user)
       },
+      async deleteAccount() {
+        const supabase = await getSupabase()
+        const uid = user?.id
+        // لا سحابة/لا مستخدم — لا شيء على الخادم؛ المستدعي يُكمل التنظيف المحلي.
+        if (!supabase || !uid) return { ok: true, authUserDeleted: false }
+
+        let authUserDeleted = false
+        let error: string | undefined
+        // 1) النمط الآمن لحذف الحساب ذاتيًا: دالة Postgres security-definer تحذف auth.uid()
+        //    (delete_own_account) — لا تكشف مفتاح service role في العميل إطلاقًا.
+        try {
+          const { error: rpcErr } = await supabase.rpc('delete_own_account')
+          if (!rpcErr) authUserDeleted = true
+          else error = rpcErr.message
+        } catch (e) {
+          error = e instanceof Error ? e.message : String(e)
+        }
+        // فشل حذف مستخدم المصادقة (مثلًا لم تُنشَر دالة delete_own_account) → لا نحذف أي صفّ
+        // بيانات ولا نُنهي الجلسة، فيبقى الحساب سليمًا تمامًا لإعادة المحاولة/التواصل، ولا ندّعي
+        // نجاحًا كاذبًا. (يمنع حالة الحذف الجزئي: صفوف محذوفة ومستخدم مصادقة باقٍ.)
+        if (!authUserDeleted) {
+          return { ok: false, authUserDeleted: false, error }
+        }
+        // 2) بعد تأكيد حذف مستخدم المصادقة: best-effort تنظيف صفوف بيانات المستخدم من الجداول
+        //    السحابية (حذف ذاتي عبر RLS) في حال لم تُضبط سلسلة الحذف المتتالي (cascade) على الخادم.
+        //    كلها مفهرسة بعمود user_id (لا id). لا يُفشل العملية — الحذف الأساسي تمّ فعلًا.
+        const USER_OWNED_TABLES = [
+          'profiles',
+          'workout_sessions',
+          'exercise_history',
+          'measurement_logs',
+          'daily_logs',
+        ] as const
+        for (const table of USER_OWNED_TABLES) {
+          try {
+            await supabase.from(table).delete().eq('user_id', uid)
+          } catch {
+            /* تجاهل — قد لا تسمح السياسة أو الجدول غير موجود */
+          }
+        }
+        // 3) إنهاء الجلسة وتنظيف الحالة في الذاكرة.
+        try {
+          await supabase.auth.signOut()
+        } catch {
+          /* تجاهل — سنُعيد التحميل على أي حال */
+        }
+        setSession(null)
+        setUser(null)
+        // ok يعكس اكتمال الحذف فعليًا: وصلنا هنا فقط بعد إزالة مستخدم المصادقة من الخادم.
+        return { ok: true, authUserDeleted: true }
+      },
     }),
-    [configured, user, session, loading],
+    [configured, user, session, loading, recoveryActive],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
@@ -228,6 +480,7 @@ export function useAuth(): AuthContextValue {
     user: null,
     session: null,
     loading: false,
+    recoveryActive: false,
     displayName: null,
     emailVerified: true,
     async signUp() {
@@ -240,6 +493,19 @@ export function useAuth(): AuthContextValue {
     async resendConfirmation() {
       return { ok: false, error: cloudDisabledError() }
     },
+    async resetPassword() {
+      return { ok: false, error: cloudDisabledError() }
+    },
+    async updatePassword() {
+      return { ok: false, error: cloudDisabledError() }
+    },
+    async completeRecovery() {
+      return false
+    },
+    endRecovery() {},
     async refreshUser() {},
+    async deleteAccount() {
+      return { ok: true, authUserDeleted: false }
+    },
   }
 }

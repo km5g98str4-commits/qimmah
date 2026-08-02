@@ -1,44 +1,70 @@
 import type { MeasurementLog } from '@/types/progress'
-import { saveMeasurementLog as saveMeasurementLogHistory, setMeasurementLogs } from './historyStore'
-
-// سجلّات القياسات (محلي فقط).
-
-export const MEASUREMENT_LOGS_KEY = 'qimmah:measurementLogs:v1'
+import { getMeasurementLogs, saveMeasurementLog as saveMeasurementLogHistory, setMeasurementLogs } from './historyStore'
+import { getDayStamp } from './today'
 
 export function loadLogs(): MeasurementLog[] {
-  if (typeof window === 'undefined') return []
-  try {
-    const raw = window.localStorage.getItem(MEASUREMENT_LOGS_KEY)
-    return raw ? (JSON.parse(raw) as MeasurementLog[]) : []
-  } catch {
-    return []
-  }
+  // historyStore is the canonical source hydrated by syncService. Reading the
+  // retired key here made cloud-restored measurements invisible to Progress.
+  return getMeasurementLogs()
 }
 
 export function saveLogs(logs: MeasurementLog[]): void {
-  if (typeof window === 'undefined') return
-  window.localStorage.setItem(MEASUREMENT_LOGS_KEY, JSON.stringify(logs))
+  setMeasurementLogs(logs)
 }
 
 /** يضيف سجلًّا جديدًا (الأحدث أولًا) ويعيد القائمة المحدّثة. */
 export function addLog(log: MeasurementLog): MeasurementLog[] {
-  const next = [log, ...loadLogs()].slice(0, 200)
-  saveLogs(next)
-  // عكس في المتجر التاريخي الدائم.
-  saveMeasurementLogHistory(log)
-  return next
+  return saveMeasurementLogHistory(log).slice(0, 200)
 }
 
 export function deleteLog(id: string): MeasurementLog[] {
   const next = loadLogs().filter((l) => l.id !== id)
   saveLogs(next)
-  // أبقِ المتجر التاريخي متوافقًا.
-  setMeasurementLogs(next)
   return next
 }
 
 export function latestLog(logs: MeasurementLog[]): MeasurementLog | undefined {
   return logs[0]
+}
+
+// ── Apple Health weight import ─────────────────────────────────────────────
+// Weight is manual by default. An imported sample is stored as a separate log
+// keyed by its day and tagged `source: 'health'` so it can be labeled and
+// removed on disconnect without ever touching the user's manual entries.
+
+/** Deterministic id per day so re-importing updates the same entry instead of duplicating. */
+function healthWeightId(dayStamp: string): string {
+  return `health-weight-${dayStamp}`
+}
+
+/** Upserts the latest Health-sourced weight (kg) for the day of `isoDate`. */
+export function importHealthWeight(kg: number, isoDate: string): MeasurementLog {
+  const parsed = new Date(isoDate)
+  const dayStamp = Number.isNaN(parsed.getTime()) ? getDayStamp() : getDayStamp(parsed)
+  const value = Math.round(kg * 10) / 10
+  const entry: MeasurementLog = {
+    id: healthWeightId(dayStamp),
+    date: dayStamp,
+    values: { weightKg: value },
+    source: 'health',
+  }
+  const rest = loadLogs().filter((l) => l.id !== entry.id)
+  saveLogs([entry, ...rest])
+  return entry
+}
+
+/** Removes every Health-imported weight log; leaves manual entries intact. */
+export function removeHealthWeight(): MeasurementLog[] {
+  const next = loadLogs().filter((l) => l.source !== 'health')
+  saveLogs(next)
+  return next
+}
+
+/** Most recent Health-imported weight log, or undefined when none exist. */
+export function latestWeightImport(): MeasurementLog | undefined {
+  return loadLogs()
+    .filter((l) => l.source === 'health' && l.values.weightKg !== undefined && l.values.weightKg !== '')
+    .sort((a, b) => (a.date < b.date ? 1 : -1))[0]
 }
 
 export type Trend = 'up' | 'down' | 'same' | null

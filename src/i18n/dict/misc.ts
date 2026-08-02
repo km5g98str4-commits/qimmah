@@ -35,16 +35,14 @@ export interface MiscStrings {
   authInvalidEmail: string
   authRateLimit: string
   authNetwork: string
-  authSignupDisabled: string
-  authServerBusy: string
   authGeneric: string
   authCloudDisabled: string
 }
 
 const ar: MiscStrings = {
-  loginFailed: 'تعذّر تسجيل الدخول.',
-  createFailed: 'تعذّر إنشاء الحساب.',
-  accountCreatedConfirm: 'أنشئنا حسابك. تحقّق من بريدك لتأكيد الحساب ثم سجّل الدخول.',
+  loginFailed: 'ما قدرنا نسجّل دخولك.',
+  createFailed: 'ما قدرنا نفتح الحساب.',
+  accountCreatedConfirm: 'فتحنا حسابك. شيّك على بريدك وأكّد الحساب، بعدها سجّل دخولك.',
   privacy: 'الخصوصية',
   terms: 'الشروط',
   contact: 'تواصل معنا',
@@ -58,7 +56,7 @@ const ar: MiscStrings = {
   menu: 'القائمة',
   healthNoticeTitle: 'تنبيه صحي بسيط',
   healthNoticeBody:
-    'هذه الصفحة لتنظيم خطتك الشخصية فقط، وليست بديلًا عن استشارة طبية. قبل تغيير تمارينك أو أكلك أو أي دواء أو مكمّل، راجع مختصًّا — خصوصًا إن كانت لديك حالة صحية.',
+    'هذي الصفحة لتنظيم خطتك الشخصية بس، ومو بديل عن استشارة طبية. قبل ما تغيّر تمارينك أو أكلك أو أي دواء أو مكمّل، راجع مختص — خصوصًا إذا عندك حالة صحية.',
   footerBlurb: 'قِمّة يجمع تمارينك وأكلك ومكملاتك وقياساتك والتزامك اليومي في مكان واحد — يعمل على جهازك.',
   footerRights: 'تطبيق شخصي للرياضي الفرد.',
   footerNote: 'تطبيقك الشخصي للتمرين والتغذية والمتابعة',
@@ -72,17 +70,15 @@ const ar: MiscStrings = {
     supplements: 'مكملاتي',
     commitment: 'التزامي',
   },
-  authInvalidCredentials: 'البريد أو كلمة المرور غير صحيحة.',
-  authAlreadyRegistered: 'هذا البريد مسجّل مسبقًا. سجّل الدخول بدلًا من ذلك.',
-  authEmailNotConfirmed: 'راجع بريدك وأكّد الحساب أولًا ثم سجّل الدخول.',
+  authInvalidCredentials: 'البريد أو كلمة المرور مو صحيحة.',
+  authAlreadyRegistered: 'هذا البريد مسجّل من قبل — سجّل دخولك على طول.',
+  authEmailNotConfirmed: 'شيّك على بريدك وأكّد الحساب أول، بعدها سجّل دخولك.',
   authWeakPassword: 'كلمة المرور ضعيفة — استخدم 8 أحرف على الأقل مع حرف ورقم.',
-  authInvalidEmail: 'البريد الإلكتروني غير صالح.',
-  authRateLimit: 'محاولات كثيرة. انتظر قليلًا ثم أعد المحاولة.',
-  authNetwork: 'تعذّر الاتصال بالخادم. تحقّق من الإنترنت وحاول مجددًا.',
-  authSignupDisabled: 'إنشاء الحسابات غير متاح حاليًا. تابع كضيف أو حاول لاحقًا.',
-  authServerBusy: 'الخدمة مشغولة مؤقتًا. حاول بعد قليل.',
-  authGeneric: 'حدث خطأ غير متوقع. حاول مجددًا.',
-  authCloudDisabled: 'المزامنة السحابية غير مفعّلة في هذه النسخة.',
+  authInvalidEmail: 'البريد الإلكتروني مو صالح.',
+  authRateLimit: 'محاولات كثيرة — انتظر شوي وجرّب مرة ثانية.',
+  authNetwork: 'ما قدرنا نتصل بالخادم. تأكّد من النت وجرّب مرة ثانية.',
+  authGeneric: 'صار خطأ غير متوقع. جرّب مرة ثانية.',
+  authCloudDisabled: 'المزامنة السحابية مو مفعّلة في هذي النسخة.',
 }
 
 const en: MiscStrings = {
@@ -124,9 +120,7 @@ const en: MiscStrings = {
   authInvalidEmail: 'That email address is not valid.',
   authRateLimit: 'Too many attempts. Wait a moment and try again.',
   authNetwork: "Couldn't reach the server. Check your connection and try again.",
-  authSignupDisabled: 'Account creation is unavailable right now. Continue as a guest or try later.',
-  authServerBusy: 'The service is busy. Please try again shortly.',
-  authGeneric: 'Something went wrong. Please try again.',
+  authGeneric: 'Something went wrong. Try again.',
   authCloudDisabled: 'Cloud sync is not enabled in this build.',
 }
 

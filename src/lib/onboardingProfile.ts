@@ -11,7 +11,7 @@ import type {
   OnbGoalType,
   OnboardingProfile,
 } from '@/types/onboarding'
-import { ONBOARDING_SCHEMA_VERSION } from '@/types/onboarding'
+import { HEALTH_CONSENT_POLICY_VERSION, ONBOARDING_SCHEMA_VERSION } from '@/types/onboarding'
 import type {
   ActivityLevel,
   Consistency,
@@ -26,6 +26,7 @@ import {
   calorieGoalFromGoalType,
   computeTargets,
   defaultProfile,
+  effectiveGoalTypeForAge,
   profileHash,
 } from '@/lib/calculators'
 // P11.5: الاشتقاقات الخفيفة من planDerive — planGenerator (ومعه قاعدة التمارين)
@@ -35,6 +36,7 @@ import { experienceToBand, goalChoices, gymTypeToAccess } from '@/data/planBuild
 import type { Customization } from '@/lib/customization'
 import { hasSavedCustomization, loadCustomization } from '@/lib/customization'
 import { loadOnboarding } from '@/lib/onboarding'
+import { enqueueSyncOperation } from '@/lib/syncQueue'
 
 export const ONBOARDING_PROFILE_KEY = 'qimmah:onboarding:profile:v1'
 
@@ -53,6 +55,12 @@ export function defaultOnboardingProfile(): OnboardingProfile {
     limitations: { injuries: [] },
     wellnessTracking: { mode: 'none', supplements: [], medications: [] },
     appPreferences: { language: 'ar', reminders: false },
+    consents: {
+      healthData: {
+        accepted: false,
+        policyVersion: HEALTH_CONSENT_POLICY_VERSION,
+      },
+    },
     _meta: { schemaVersion: ONBOARDING_SCHEMA_VERSION, completed: false, source: 'onboarding' },
   }
 }
@@ -101,6 +109,11 @@ export function loadOnboardingProfile(): OnboardingProfile | null {
       limitations: mergeSection(base.limitations, saved.limitations),
       wellnessTracking: mergeSection(base.wellnessTracking, saved.wellnessTracking),
       appPreferences: { ...base.appPreferences, ...saved.appPreferences, language: 'ar' },
+      consents: {
+        ...base.consents,
+        ...saved.consents,
+        healthData: mergeSection(base.consents.healthData, saved.consents?.healthData),
+      },
       _meta: { ...base._meta, ...saved._meta, schemaVersion: ONBOARDING_SCHEMA_VERSION },
     }
   } catch {
@@ -108,12 +121,41 @@ export function loadOnboardingProfile(): OnboardingProfile | null {
   }
 }
 
+/**
+ * المسار القانوني الوحيد لرفع onboarding إلى صف profiles (إصلاح سباق الكتّاب
+ * الثلاثة — P12): كل كاتب (حفظ محلي، ترطيب المزامنة، بوابة إكمال الإعداد) يمرّ
+ * من هنا بنفس الشكل الكامل وبطابع LWW (updated_at) — لا كتابة مباشرة لعمود
+ * onboarding خارج طابور المزامنة عندما تكون المزامنة مفعّلة.
+ */
+export function enqueueOnboardingProfileUpsert(value: OnboardingProfile): void {
+  enqueueSyncOperation('profiles', 'profile', {
+    data: { onboarding: value },
+    updated_at: value._meta.updatedAt ?? value._meta.completedAt ?? new Date().toISOString(),
+  })
+}
+
 export function saveOnboardingProfile(value: OnboardingProfile): void {
+  if (typeof window === 'undefined') return
+  try {
+    // ختم LWW عند كل حفظ محلي — دليل الأحدثية لدمج profiles.data.onboarding.
+    const stamped: OnboardingProfile = { ...value, _meta: { ...value._meta, updatedAt: new Date().toISOString() } }
+    window.localStorage.setItem(ONBOARDING_PROFILE_KEY, JSON.stringify(stamped))
+    enqueueOnboardingProfileUpsert(stamped)
+  } catch {
+    /* تجاهل أخطاء التخزين (وضع التصفّح الخاص …) */
+  }
+}
+
+/**
+ * كتابة ملف الإعداد من مسار المزامنة (hydrate) بعد فوزه بالـLWW — **دون إعادة
+ * ختم** (إعادة الختم بـ«الآن» تزوّر الأحدثية وتقلب دمج الأجهزة اللاحق).
+ */
+export function saveOnboardingProfileFromSync(value: OnboardingProfile): void {
   if (typeof window === 'undefined') return
   try {
     window.localStorage.setItem(ONBOARDING_PROFILE_KEY, JSON.stringify(value))
   } catch {
-    /* تجاهل أخطاء التخزين (وضع التصفّح الخاص …) */
+    /* تجاهل أخطاء التخزين */
   }
 }
 
@@ -181,7 +223,12 @@ const showsTargetWeight = (g?: OnbGoalType) => g === 'cut' || g === 'bulk'
 /** يحوّل مصدر الحقيقة إلى Profile الذي يستهلكه مولّد الخطة الحالي. */
 export function toLegacyProfile(op: OnboardingProfile, base: Profile = defaultProfile): Profile {
   const tp = op.trainingPreferences
-  const goalType: GoalType = op.goal.type ? GOAL_TO_GOALTYPE[op.goal.type] : base.goalType
+  const age = op.profile.age || base.age
+  // القاصرون (دون 18): «المحافظة» فقط — قرار المالك؛ نُثبّت الهدف عند بناء الملف من الإعداد.
+  const goalType: GoalType = effectiveGoalTypeForAge(
+    op.goal.type ? GOAL_TO_GOALTYPE[op.goal.type] : base.goalType,
+    age,
+  )
   const experienceLevel: ExperienceLevel | undefined = tp.experience
   const band = experienceLevel ? experienceToBand(experienceLevel) : base.experienceBand
   const trainingLevel = experienceLevel ? levelFromExperience(band) : base.trainingLevel
@@ -207,7 +254,7 @@ export function toLegacyProfile(op: OnboardingProfile, base: Profile = defaultPr
     ...base,
     name: op.profile.name?.trim() || '',
     gender: op.profile.sex ?? 'unspecified',
-    age: op.profile.age || base.age,
+    age,
     heightCm: op.bodyMetrics.heightCm || base.heightCm,
     weightKg,
     targetWeightKg,
@@ -393,6 +440,8 @@ export function migrateFromCustomization(c: Customization): OnboardingProfile {
       medications: medIds,
     },
     appPreferences: { language: 'ar', reminders: !!p.remindersOptIn },
+    // البيانات القديمة لا تُعد موافقة صريحة؛ يُطلب الإقرار في الإعداد بدل استنتاجه.
+    consents: base.consents,
     _meta: { ...base._meta, completed: true, source: 'migrated', completedAt: new Date().toISOString() },
   }
 }

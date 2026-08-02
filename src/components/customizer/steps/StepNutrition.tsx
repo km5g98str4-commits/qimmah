@@ -17,7 +17,8 @@ import { targetCaloriesFor } from '@/lib/calculators'
 import { NUM_LIMITS, parseSafeNumber } from '@/lib/validation'
 import { onboardingStrings } from '@/i18n/dict/onboarding'
 
-const inputCls = 'w-full rounded-lg border border-line bg-beige px-2.5 py-1.5 text-sm text-ink-900 focus:border-brand-500/50 focus:outline-none focus:ring-2 focus:ring-brand-500/30'
+// text-base (16px) لا text-sm: يمنع تكبير iOS التلقائي عند التركيز على الحقول.
+const inputCls = 'w-full rounded-lg border border-line bg-beige px-2.5 py-1.5 text-base text-ink-900 focus:border-brand-500/50 focus:outline-none focus:ring-2 focus:ring-brand-500/30'
 
 /** خطوة خطة الأكل — أهداف + قوالب وجبات + باني وجبات من المكونات. */
 export function StepNutrition({ ctx }: { ctx: WizardCtx }) {
@@ -106,6 +107,7 @@ export function StepNutrition({ ctx }: { ctx: WizardCtx }) {
       {/* تفعيل المتابعة */}
       <button
         type="button"
+        aria-pressed={np.enabled}
         onClick={() => setNp({ enabled: !np.enabled })}
         className={`mb-5 flex w-full items-center justify-between rounded-2xl border p-4 ${np.enabled ? 'border-primary-soft bg-primary-soft' : 'border-line bg-surface'}`}
       >
@@ -165,7 +167,7 @@ export function StepNutrition({ ctx }: { ctx: WizardCtx }) {
               <select className="rounded-lg border border-line bg-surface px-2.5 py-2 text-xs font-bold text-ink-700" value={tplType} onChange={(e) => setTplType(e.target.value as MealType | 'all')}>
                 <option value="all">{d.nutAllTypes}</option>
                 {(Object.keys(mealTypeLabels) as MealType[]).map((mt) => (
-                  <option key={mt} value={mt}>{mealTypeLabels[mt].ar}</option>
+                  <option key={mt} value={mt}>{mealTypeLabels[mt][ctx.lang]}</option>
                 ))}
               </select>
             </div>
@@ -173,8 +175,8 @@ export function StepNutrition({ ctx }: { ctx: WizardCtx }) {
               {filteredTemplates.map((t) => (
                 <li key={t.id} className="flex items-center justify-between gap-2 rounded-xl border border-line bg-page p-2.5">
                   <span className="min-w-0">
-                    <span className="block truncate text-sm font-bold text-ink-900">{t.nameAr} — {t.nameEn}</span>
-                    <span className="text-[11px] text-ink-400">{mealTypeLabels[t.mealType].ar}</span>
+                    <span className="block truncate text-sm font-bold text-ink-900">{ctx.lang === 'en' ? t.nameEn : t.nameAr}</span>
+                    <span className="text-[11px] text-ink-400">{mealTypeLabels[t.mealType][ctx.lang]}</span>
                   </span>
                   <button type="button" onClick={() => addTemplate(t.id)} className="btn-primary px-3 py-1.5 text-xs">{d.nutAdd}</button>
                 </li>
@@ -188,9 +190,12 @@ export function StepNutrition({ ctx }: { ctx: WizardCtx }) {
       <div className="mt-5 space-y-4">
         {np.meals.map((meal, mi) => (
           <div key={meal.id} className="card p-4">
-            <div className="mb-3 grid gap-2 sm:grid-cols-2">
-              <input className={inputCls} value={meal.nameAr} onChange={(e) => updateMeal(meal.id, { nameAr: e.target.value })} placeholder={d.nutMealNameArPlaceholder} />
-              <input className={inputCls} value={meal.nameEn} onChange={(e) => updateMeal(meal.id, { nameEn: e.target.value })} placeholder={d.nutMealNameEnPlaceholder} />
+            <div className="mb-3">
+              {ctx.lang === 'en' ? (
+                <input className={inputCls} value={meal.nameEn} onChange={(e) => updateMeal(meal.id, { nameEn: e.target.value })} placeholder={d.nutMealNameEnPlaceholder} />
+              ) : (
+                <input className={inputCls} value={meal.nameAr} onChange={(e) => updateMeal(meal.id, { nameAr: e.target.value })} placeholder={d.nutMealNameArPlaceholder} />
+              )}
             </div>
 
             {/* المكونات */}
@@ -200,7 +205,7 @@ export function StepNutrition({ ctx }: { ctx: WizardCtx }) {
                 return (
                   <li key={`${ig.ingredientId}-${k}`} className="flex items-center gap-2 rounded-lg border border-line bg-page p-2">
                     <span className="min-w-0 flex-1 truncate text-xs text-ink-900">{data ? ingredientDisplayName(data.nameAr, data.nameEn, ctx.lang) : ig.ingredientId}</span>
-                    <input type="number" inputMode="decimal" min={0} max={50} step="0.5" className="w-16 rounded-lg border border-line bg-beige px-2 py-1 text-xs text-ink-900 focus:outline-none" value={ig.servings} onChange={(e) => setServings(meal.id, k, parseSafeNumber(e.target.value, { min: 0, max: 50 }))} />
+                    <input type="number" inputMode="decimal" min={0} max={50} step="0.5" className="w-16 rounded-lg border border-line bg-beige px-2 py-1 text-base text-ink-900 focus:outline-none" value={ig.servings} onChange={(e) => setServings(meal.id, k, parseSafeNumber(e.target.value, { min: 0, max: 50 }))} />
                     <span className="text-[10px] text-ink-400">{d.nutServing}</span>
                     <button type="button" onClick={() => removeIngredient(meal.id, k)} className="grid h-6 w-6 place-items-center rounded text-rose-500 hover:bg-rose-500/10" aria-label={d.nutDelete}><Icon name="X" className="h-3.5 w-3.5" /></button>
                   </li>

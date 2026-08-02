@@ -11,18 +11,23 @@ export type AppRoute =
   | 'exercises'
   | 'nutrition'
   | 'progress'
+  // صفحة الخطوات المستقلة — مدخلها من التقدّم، وليست تبويبًا رئيسيًا.
+  | 'steps'
   | 'profile'
   // صفحة «كيف نحسب أرقامك؟» — مدخلها من تبويب حسابي، ليست تبويبًا رئيسيًا.
   | 'calc'
-  | 'demo'
   | 'settings'
   | 'privacy'
   | 'terms'
   | 'contact'
+  // شاشة تعيين كلمة مرور جديدة (Sprint A) — وجهة رابط استعادة كلمة المرور، عامّة بلا حساب.
+  | 'reset'
   // شاشة داخلية لمراجعة المنتجات (باركود/OCR) — مدخلها من الإعدادات، ليست تبويبًا رئيسيًا.
   | 'productReview'
   // «لوحتي» (P12-C) — ملخّص أرقام المستخدم الأسبوعية؛ مدخلها بطاقة على الرئيسية، ليست تبويبًا رئيسيًا.
   | 'stats'
+  // «التعافي» (v1.1) — تسجيل ذاتي + توصية غير طبية + سجل؛ مدخلها من اليوم (يوم راحة) والتقدّم.
+  | 'recovery'
   // مسار احتياطي داخلي فقط — لا يُسجَّل في ROUTES ولا يُكتب في hash مباشرة.
   | 'notfound'
 
@@ -35,13 +40,15 @@ const ROUTES: AppRoute[] = [
   'exercises',
   'nutrition',
   'progress',
+  'steps',
   'profile',
   'calc',
-  'demo',
+  'recovery',
   'settings',
   'privacy',
   'terms',
   'contact',
+  'reset',
   'productReview',
   'stats',
 ]
@@ -51,7 +58,11 @@ export const MAIN_TABS: AppRoute[] = ['dashboard', 'workout', 'nutrition', 'prog
 
 export function routeFromHash(): AppRoute | null {
   if (typeof window === 'undefined') return null
-  const h = window.location.hash.replace(/^#\/?/, '')
+  // نتساهل مع لواحق رمز الاستعادة التي يُلحقها Supabase بالـ fragment:
+  //   • تدفّق PKCE:     «/reset?code=…»       (قبل «?»)
+  //   • تدفّق ضمني (implicit): «/reset#access_token=…»  (هاش ثانٍ)
+  // نأخذ مقطع المسار الأول فقط قبل أي «&» أو «?» أو «#».
+  const h = window.location.hash.replace(/^#\/?/, '').split(/[&?#]/)[0]
   return (ROUTES as string[]).includes(h) ? (h as AppRoute) : null
 }
 

@@ -1,0 +1,7 @@
+<svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="قِمّة — Qimmah ascent mark">
+  <!-- CANONICAL noded mark, rendered to spec (assets/canonical-mark had not landed on integration/wave5):
+       apex 512,340 · base nodes 302,640 & 722,640 · stroke 96 · node radius 96 on a 1024 grid. -->
+  <path d="M302 640 L512 340 L722 640" fill="none" stroke="#F26A21" stroke-width="96" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="302" cy="640" r="96" fill="#F26A21"/>
+  <circle cx="722" cy="640" r="96" fill="#F26A21"/>
+</svg>

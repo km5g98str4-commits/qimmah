@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { getDayStamp } from './today'
 import { useIsDemo } from './demoMode'
 import { saveDailyLog } from './historyStore'
+import { safeWriteJson } from '@/lib/safeStorage'
 
 // تتبّع الالتزامات اليومي — يُصفّر مع تغيّر اليوم.
 
@@ -30,13 +31,17 @@ export function loadCommitmentsToday(): CommitmentsTodayState {
     /* تجاهل */
   }
   const f = fresh()
-  window.localStorage.setItem(COMMITMENTS_TODAY_KEY, JSON.stringify(f))
+  // بذر best-effort: التحميل يجب ألّا يرمي عند امتلاء التخزين (لا انهيار للشاشة).
+  try {
+    safeWriteJson(COMMITMENTS_TODAY_KEY, f)
+  } catch {
+    /* تجاهل امتلاء التخزين — الحالة الطازجة تبقى في الذاكرة */
+  }
   return f
 }
 
 export function saveCommitmentsToday(state: CommitmentsTodayState): void {
-  if (typeof window === 'undefined') return
-  window.localStorage.setItem(COMMITMENTS_TODAY_KEY, JSON.stringify(state))
+  safeWriteJson(COMMITMENTS_TODAY_KEY, state)
 }
 
 export function useCommitmentsToday() {

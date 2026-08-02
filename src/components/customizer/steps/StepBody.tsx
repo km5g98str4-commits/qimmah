@@ -11,15 +11,18 @@ import {
   environmentOptions,
   genderOptions,
   goalTypeOptions,
+  isMinorAge,
   profileHash,
   trainingLevelOptions,
 } from '@/lib/calculators'
 import { LIMITS, validateProfile } from '@/lib/validation'
 import { onboardingStrings } from '@/i18n/dict/onboarding'
+import { profileChoiceStrings } from '@/i18n/dict/profileChoices'
 
 /** خطوة بياناتك — جسم + هدف + تمرين، مع تحقّق من القيم. */
 export function StepBody({ ctx }: { ctx: WizardCtx }) {
   const d = onboardingStrings[ctx.lang]
+  const choices = profileChoiceStrings[ctx.lang]
   const p = ctx.data.profile
   const manual = ctx.data.targetsMeta.manuallyEdited
   const errors = validateProfile(p)
@@ -38,8 +41,19 @@ export function StepBody({ ctx }: { ctx: WizardCtx }) {
       })
     }
   }
-  const setGoal = (goalType: Profile['goalType']) => set({ goalType, goal: calorieGoalFromGoalType(goalType) })
+  // القاصرون (دون 18): «المحافظة» فقط — تنشيف/تضخيم معطّلان (قرار المالك، Option B).
+  const minor = isMinorAge(p.age)
+  const isWeightGoal = (g: Profile['goalType']) => g === 'cutting' || g === 'bulking'
+  const setGoal = (goalType: Profile['goalType']) => {
+    if (minor && isWeightGoal(goalType)) return // حارس دفاعي: الأزرار معطّلة أصلًا
+    set({ goalType, goal: calorieGoalFromGoalType(goalType) })
+  }
   const num = (v: string) => Number(v) || 0
+  // عند إدخال عمر قاصر بينما الهدف تنشيف/تضخيم: نُثبّت الهدف على المحافظة فورًا (تماسك الاختيار).
+  const setAge = (age: number) =>
+    isMinorAge(age) && isWeightGoal(p.goalType)
+      ? set({ age, goalType: 'maintenance', goal: 'maintain' })
+      : set({ age })
 
   return (
     <div>
@@ -49,61 +63,81 @@ export function StepBody({ ctx }: { ctx: WizardCtx }) {
         description={d.bodyDescription}
       />
 
-      {/* الهدف — اختيارات */}
+      {/* الهدف — اختيارات (القاصرون: المحافظة فقط، تنشيف/تضخيم معطّلان) */}
       <p className="mb-2 text-sm font-bold text-ink-900">{d.bodyGoalLabel}</p>
-      <div className="mb-6 grid grid-cols-2 gap-2 sm:grid-cols-4">
-        {goalTypeOptions.map((o) => (
-          <button
-            key={o.value}
-            type="button"
-            onClick={() => setGoal(o.value)}
-            className={cn(
-              'rounded-xl border px-3 py-2.5 text-sm font-bold transition-colors',
-              p.goalType === o.value ? 'border-primary-soft bg-primary text-white' : 'border-line bg-surface text-ink-700 hover:bg-beige',
-            )}
-          >
-            {o.label}
-          </button>
-        ))}
+      <div className="mb-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
+        {goalTypeOptions.map((o) => {
+          const selected = p.goalType === o.value
+          const disabled = minor && isWeightGoal(o.value)
+          return (
+            <button
+              key={o.value}
+              type="button"
+              onClick={() => setGoal(o.value)}
+              disabled={disabled}
+              aria-disabled={disabled}
+              aria-describedby={disabled ? 'goal-minor-note' : undefined}
+              className={cn(
+                'rounded-xl border px-3 py-2.5 text-sm font-bold transition-colors',
+                disabled
+                  // حالة معطّلة بتباين AA فعلي (نصّ ink-500 على بيج ≈ 5.06:1). لا opacity
+                  // حتى لا ينهار التباين عند المزج مع الخلفية.
+                  ? 'cursor-not-allowed border-line bg-beige text-ink-500'
+                  : selected
+                    ? 'border-primary-soft bg-primary text-white'
+                    : 'border-line bg-surface text-ink-700 hover:bg-beige',
+              )}
+            >
+              {choices.goal[o.value]}
+            </button>
+          )
+        })}
       </div>
+      {minor && (
+        <p id="goal-minor-note" className="mb-6 flex items-start gap-2 rounded-xl border border-gold-400/40 bg-gold-200/40 p-3 text-xs font-bold text-ink-700">
+          <Icon name="Info" className="mt-0.5 h-4 w-4 shrink-0 text-gold-600" />
+          {choices.minorGoalNote}
+        </p>
+      )}
+      {!minor && <div className="mb-6" />}
 
       <div className="grid gap-5 sm:grid-cols-2">
         <Field label={d.bodyGender}>
           <select className={inputClass} value={p.gender} onChange={(e) => set({ gender: e.target.value as Profile['gender'] })}>
-            {genderOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+            {genderOptions.map((o) => <option key={o.value} value={o.value}>{choices.gender[o.value]}</option>)}
           </select>
         </Field>
         <Field label={d.bodyAge} hint={errFor('age') ?? d.bodyAgeHint}>
-          <input type="number" min={LIMITS.age.min} max={LIMITS.age.max} className={cn(inputClass, errFor('age') && 'border-danger')} value={p.age} onChange={(e) => set({ age: num(e.target.value) })} />
+          <input type="number" inputMode="numeric" min={LIMITS.age.min} max={LIMITS.age.max} className={cn(inputClass, errFor('age') && 'border-danger')} value={p.age} onChange={(e) => setAge(num(e.target.value))} />
         </Field>
         <Field label={d.bodyHeight} hint={errFor('heightCm') ?? d.bodyHeightHint}>
-          <input type="number" min={LIMITS.heightCm.min} max={LIMITS.heightCm.max} className={cn(inputClass, errFor('heightCm') && 'border-danger')} value={p.heightCm} onChange={(e) => set({ heightCm: num(e.target.value) })} />
+          <input type="number" inputMode="decimal" min={LIMITS.heightCm.min} max={LIMITS.heightCm.max} className={cn(inputClass, errFor('heightCm') && 'border-danger')} value={p.heightCm} onChange={(e) => set({ heightCm: num(e.target.value) })} />
         </Field>
         <Field label={d.bodyWeight} hint={errFor('weightKg') ?? d.bodyWeightHint}>
-          <input type="number" min={LIMITS.weightKg.min} max={LIMITS.weightKg.max} className={cn(inputClass, errFor('weightKg') && 'border-danger')} value={p.weightKg} onChange={(e) => set({ weightKg: num(e.target.value) })} />
+          <input type="number" inputMode="decimal" min={LIMITS.weightKg.min} max={LIMITS.weightKg.max} className={cn(inputClass, errFor('weightKg') && 'border-danger')} value={p.weightKg} onChange={(e) => set({ weightKg: num(e.target.value) })} />
         </Field>
         <Field label={d.bodyTargetWeight} hint={errFor('targetWeightKg') ?? d.bodyTargetWeightHint}>
-          <input type="number" min={LIMITS.targetWeightKg.min} max={LIMITS.targetWeightKg.max} className={cn(inputClass, errFor('targetWeightKg') && 'border-danger')} value={p.targetWeightKg} onChange={(e) => set({ targetWeightKg: num(e.target.value) })} />
+          <input type="number" inputMode="decimal" min={LIMITS.targetWeightKg.min} max={LIMITS.targetWeightKg.max} className={cn(inputClass, errFor('targetWeightKg') && 'border-danger')} value={p.targetWeightKg} onChange={(e) => set({ targetWeightKg: num(e.target.value) })} />
         </Field>
         <Field label={d.bodyActivityLevel}>
           <select className={inputClass} value={p.activityLevel} onChange={(e) => set({ activityLevel: e.target.value as Profile['activityLevel'] })}>
-            {activityOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+            {activityOptions.map((o) => <option key={o.value} value={o.value}>{choices.activity[o.value]}</option>)}
           </select>
         </Field>
         <Field label={d.bodyTrainingLevel}>
           <select className={inputClass} value={p.trainingLevel} onChange={(e) => set({ trainingLevel: e.target.value as Profile['trainingLevel'] })}>
-            {trainingLevelOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+            {trainingLevelOptions.map((o) => <option key={o.value} value={o.value}>{choices.trainingLevel[o.value]}</option>)}
           </select>
         </Field>
         <Field label={d.bodyTrainingDays} hint={errFor('trainingDays') ?? d.bodyTrainingDaysHint}>
-          <input type="number" min={LIMITS.trainingDays.min} max={LIMITS.trainingDays.max} className={cn(inputClass, errFor('trainingDays') && 'border-danger')} value={p.trainingDays} onChange={(e) => set({ trainingDays: num(e.target.value) })} />
+          <input type="number" inputMode="numeric" min={LIMITS.trainingDays.min} max={LIMITS.trainingDays.max} className={cn(inputClass, errFor('trainingDays') && 'border-danger')} value={p.trainingDays} onChange={(e) => set({ trainingDays: num(e.target.value) })} />
         </Field>
         <Field label={d.bodyWorkoutDuration} hint={errFor('workoutDuration') ?? d.bodyWorkoutDurationHint}>
-          <input type="number" min={LIMITS.workoutDuration.min} max={LIMITS.workoutDuration.max} className={cn(inputClass, errFor('workoutDuration') && 'border-danger')} value={p.workoutDuration} onChange={(e) => set({ workoutDuration: num(e.target.value) })} />
+          <input type="number" inputMode="numeric" min={LIMITS.workoutDuration.min} max={LIMITS.workoutDuration.max} className={cn(inputClass, errFor('workoutDuration') && 'border-danger')} value={p.workoutDuration} onChange={(e) => set({ workoutDuration: num(e.target.value) })} />
         </Field>
         <Field label={d.bodyWorkoutEnvironment}>
           <select className={inputClass} value={p.workoutEnvironment} onChange={(e) => set({ workoutEnvironment: e.target.value as Profile['workoutEnvironment'] })}>
-            {environmentOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+            {environmentOptions.map((o) => <option key={o.value} value={o.value}>{choices.environment[o.value]}</option>)}
           </select>
         </Field>
         <div className="sm:col-span-2">

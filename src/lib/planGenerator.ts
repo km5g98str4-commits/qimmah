@@ -18,6 +18,7 @@ import type { RoutineDay } from '@/types'
 import type { RoutineRow } from '@/lib/customization'
 import type { Lang } from '@/lib/appPreferences'
 import { computeTargets, calorieGoalFromGoalType, goalTypeLabel } from '@/lib/calculators'
+import { makeEquipmentGate, resolveGymAccess } from '@/lib/equipmentAccess'
 import { canonicalExerciseId, exercises, getExercise } from '@/data/exercises'
 import { primaryMachineIdSet } from '@/data/machineCatalog'
 import { getTemplate } from '@/data/workoutTemplates'
@@ -142,38 +143,11 @@ const SCHEMES: Record<GoalType, RepScheme> = {
   returning: { compoundReps: '10–12', isoReps: '12–15', compoundRest: 90, isoRest: 75 },
 }
 
-/** يحسم بيئة التمرين الفعلية من الملف — الأولوية لـ gymAccess الصريح، ثم الاشتقاق الاحتياطي. */
-function resolveGymAccess(p: Profile): NonNullable<Profile['gymAccess']> {
-  // نشتق احتياطيًا من gymType أو workoutEnvironment للملفّات القديمة
-  // كي لا يحصل مستخدم «جيم منزلي» على أجهزة لمجرد غياب حقل واحد.
-  const fallback: NonNullable<Profile['gymAccess']> =
-    p.gymType === 'home' || p.workoutEnvironment === 'home'
-      ? 'home'
-      : p.gymType === 'bodyweight'
-        ? 'bodyweight'
-        : p.gymType === 'small'
-          ? 'small'
-          : 'full'
-  return p.gymAccess ?? fallback
-}
-
-/** فلتر الأدوات حسب نوع النادي (gymType). لا نولّد تمارين مستحيلة للبيئة المختارة. */
+/** فلتر الأدوات حسب نوع النادي (gymType). لا نولّد تمارين مستحيلة للبيئة المختارة.
+ *  المنطق يعيش في equipmentAccess.ts — مصدر واحد يشاركه محرّك الاستبدال (شاشة ٣١). */
 function makeEquipFilter(p: Profile): (ex: Exercise) => boolean {
-  const access = resolveGymAccess(p)
-  if (access === 'full') return () => true
-  if (access === 'small') {
-    // نادٍ صغير: وزن حر + أجهزة أساسية + كيبل أساسي — نستبعد المتخصّص فقط (سميث/حبل).
-    const banned = new Set(['smith', 'rope'])
-    return (ex) => ex.equipment.every((e) => !banned.has(e))
-  }
-  if (access === 'home') {
-    // دمبل/بار/وزن جسم/مطاط (+ مقعد شائع منزليًا).
-    const allowed = new Set(['dumbbell', 'barbell', 'bodyweight', 'band', 'bench'])
-    return (ex) => ex.equipment.every((e) => allowed.has(e))
-  }
-  // bodyweight: وزن الجسم فقط.
-  const allowed = new Set(['bodyweight'])
-  return (ex) => ex.equipment.every((e) => allowed.has(e))
+  const gate = makeEquipmentGate(p)
+  return (ex) => gate(ex.equipment)
 }
 
 /** هل التمرين مناسب لمستوى الخبرة؟ المبتدئ/المستجد لا نعطيه تمارين متقدّمة. */
@@ -400,14 +374,22 @@ function accessoryCategory(type: DayType, variation: number): 'triceps' | 'bicep
   }
 }
 
-/** يختار جهاز إضافة واحدًا من فئته (يتناوب حسب فهرس اليوم، ويتجنّب المكرّر داخل اليوم). */
-function pickAccessory(cat: 'triceps' | 'biceps' | 'abs', dayIndex: number, used: Set<string>): string | null {
-  const pool = ACCESSORY_POOL[cat]
+/**
+ * يختار جهاز إضافة واحدًا من فئته (يتناوب حسب فهرس اليوم، ويتجنّب المكرّر داخل اليوم).
+ * الإضافة تُلحَق خارج مسار المؤسّس فلا تمرّ على cableOk تلقائيًا — لذا نطبّق نفس قاعدة الكيبل هنا:
+ * الكيبل الحرّ للمتقدّم فقط، فلا يتسرّب «كيبل بايسبس/ترايسبس» إلى خطة المبتدئ عبر باب الإضافة.
+ * إن لم يتبقَّ مرشّح مسموح غير مستخدم → null (تُلحَق البطاقة من مكان آخر، بلا كيبل حرّ ولا تكرار).
+ */
+function pickAccessory(cat: 'triceps' | 'biceps' | 'abs', dayIndex: number, used: Set<string>, tier: ExpTier): string | null {
+  const pool = ACCESSORY_POOL[cat].filter((id) => {
+    const ex = getExercise(id)
+    return !ex || cableOk(ex, tier)
+  })
   for (let k = 0; k < pool.length; k++) {
     const cand = pool[(dayIndex + k) % pool.length]
     if (!used.has(cand)) return cand
   }
-  return pool[dayIndex % pool.length] ?? null
+  return null
 }
 
 /** ترتيب المرشّحين: الأجهزة أولًا عند تفضيلها (للمبتدئ)، ثم أبجديًا (ثبات الاختيار). */
@@ -756,7 +738,7 @@ function generateWorkoutPlan(p: Profile): { plan: WorkoutPlan; specs: DaySpec[] 
     let accId: string | null = null
     if (machinesOnly) {
       const cat = accessoryCategory(spec.type, variation)
-      const acc = cat ? pickAccessory(cat, variation, new Set(ids)) : null
+      const acc = cat ? pickAccessory(cat, variation, new Set(ids), tier) : null
       if (acc) { ids.push(acc); accId = acc }
     }
     return {

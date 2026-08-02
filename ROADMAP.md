@@ -5,7 +5,7 @@
 ## ✅ المرحلة 0 — القالب (مكتملة)
 - 9 أقسام، Dark mode، RTL، Mobile-first.
 - بنية data-driven كاملة.
-- جاهزية النشر Netlify/Vercel.
+- جاهزية النشر على Cloudflare Pages.
 
 ## 🔜 المرحلة 1 — تفاعل حقيقي (Frontend)
 - [ ] تخزين محلي (localStorage) لتعليم التمارين/المكملات كمنجزة فعليًا.

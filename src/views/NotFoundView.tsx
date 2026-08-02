@@ -1,5 +1,4 @@
 import { Icon } from '@/components/Icon'
-import { Footer } from '@/components/Footer'
 import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
 
@@ -15,9 +14,12 @@ interface NotFoundViewProps {
 export function NotFoundView({ lang, onHome, onBack }: NotFoundViewProps) {
   const t = getStrings(lang)
   return (
-    <div className="flex min-h-screen flex-col bg-page">
-      <main className="container-page flex flex-1 items-center justify-center py-16">
-        <div className="mx-auto w-full max-w-md text-center">
+    <div dir={lang === 'en' ? 'ltr' : 'rtl'} className="h-[100dvh] min-h-0 overflow-hidden bg-page">
+      <main
+        className="app-scroll flex h-full min-h-0 flex-col items-center overflow-y-auto overscroll-y-contain px-6 py-12"
+        style={{ paddingTop: 'max(3rem, var(--safe-top))', paddingBottom: 'max(3rem, var(--safe-bottom))' }}
+      >
+        <div className="my-auto w-full max-w-md text-center">
           <span className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-primary-soft text-primary-c">
             <Icon name="Compass" className="h-8 w-8" />
           </span>
@@ -41,8 +43,6 @@ export function NotFoundView({ lang, onHome, onBack }: NotFoundViewProps) {
           </div>
         </div>
       </main>
-
-      <Footer />
     </div>
   )
 }

@@ -80,3 +80,19 @@ export function ProgressSkeleton() {
     </SkeletonScreen>
   )
 }
+
+/** هيكل عام لبقية التبويبات (تمرين/تغذية/مكتبة/بياناتي/لوحتي) — يُبقي القشرة مثبّتة أثناء
+ *  تحميل حزمة الشاشة بدل شاشة تحميل كاملة تُخفي الشريط السفلي. */
+export function TabSkeleton() {
+  return (
+    <SkeletonScreen testId="tab-skeleton">
+      <div className="flex items-center gap-2.5" aria-hidden>
+        <Skeleton className="h-9 w-9 rounded-xl" />
+        <Skeleton className="h-5 w-28" />
+      </div>
+      <CardBlock tall />
+      <CardBlock />
+      <CardBlock />
+    </SkeletonScreen>
+  )
+}

@@ -51,6 +51,11 @@ export interface NutritionScreenStrings {
   scanNetworkErrorTitle: string
   scanNetworkErrorHint: string
   scanRetry: string
+  // تنبيه الحساسيات — الخطة لا تُفلتر تلقائيًا بعد
+  allergyNoticeTitle: string
+  allergyNoticeBodyPrefix: string
+  allergyNoticeBodySuffix: string
+  allergyNoticeSeparator: string
 }
 
 const ar: NutritionScreenStrings = {
@@ -64,7 +69,7 @@ const ar: NutritionScreenStrings = {
   opEquals: '=',
   caloriesDotProteinG: 'بروتين',
   quickAddLabel: 'إضافة سريعة',
-  noResults: 'لا نتائج',
+  noResults: 'ما فيه نتائج',
   foodNameExample: 'مثال: صحن كبسة بيت',
   ingredientLibraryTitle: 'مكتبة المكونات',
   close: 'إغلاق',
@@ -81,23 +86,28 @@ const ar: NutritionScreenStrings = {
   catOther: 'أخرى',
   scanBarcode: 'امسح الباركود 📷',
   scanTitle: 'مسح الباركود',
-  scanHint: 'وجّه الكاميرا نحو الباركود',
+  scanHint: 'وجّه الكاميرا على الباركود',
   scanCancel: 'إلغاء',
-  scanPermissionDenied: 'ما قدرنا نوصل للكاميرا. تأكد من منح صلاحية الكاميرا من إعدادات المتصفح.',
-  scanLookingUp: 'جارٍ البحث عن المنتج…',
+  scanPermissionDenied: 'ما قدرنا نوصل للكاميرا. تأكد إن صلاحية الكاميرا مسموحة من إعدادات المتصفح.',
+  scanLookingUp: 'ندوّر على المنتج…',
   scanNotFoundTitle: 'ما لقينا المنتج',
-  scanNotFoundHint: 'تغطية قاعدة البيانات ما تشمل كل المنتجات المحلية بعد — تقدر تضيفه يدويًا.',
+  scanNotFoundHint: 'قاعدة البيانات ما تغطي كل المنتجات المحلية لسا — تقدر تضيفه يدوي.',
   scanAddManually: 'إضافة يدوية',
-  scanTryAgain: 'أعد المسح',
+  scanTryAgain: 'امسح مرة ثانية',
   scanFoundHint: 'لقينا المنتج — راجع القيم وسجّله.',
   scanAttribution: 'بيانات المنتج من Open Food Facts (رخصة ODbL)',
   scanUnsupported: 'المتصفح ما يدعم مسح الباركود — استخدم الإضافة اليدوية.',
   scanTorch: 'الفلاش',
-  scanNoCamera: 'ما لقينا كاميرا في هذا الجهاز — أضف المنتج يدويًا.',
-  scanErrorGeneric: 'صار خطأ غير متوقّع أثناء المسح. حاول مرة ثانية أو أضف المنتج يدويًا.',
-  scanNetworkErrorTitle: 'ما فيه اتصال',
-  scanNetworkErrorHint: 'قرينا الباركود لكن تعذّر الوصول لقاعدة بيانات المنتجات. تحقّق من اتصالك وحاول مرة ثانية، أو أضف المنتج يدويًا.',
-  scanRetry: 'حاول مرة ثانية',
+  scanNoCamera: 'ما لقينا كاميرا في الجهاز — أضف المنتج يدوي.',
+  scanErrorGeneric: 'صار خطأ مو متوقّع وقت المسح. جرّب مرة ثانية أو أضف المنتج يدوي.',
+  scanNetworkErrorTitle: 'ما فيه نت',
+  scanNetworkErrorHint: 'قرينا الباركود بس ما قدرنا نوصل لقاعدة بيانات المنتجات. شيّك على النت وجرّب مرة ثانية، أو أضف المنتج يدوي.',
+  scanRetry: 'جرّب مرة ثانية',
+  allergyNoticeTitle: 'راجع مكوّنات وجباتك',
+  allergyNoticeBodyPrefix: 'سجّلت حساسية من:',
+  allergyNoticeBodySuffix:
+    'خطة الوجبات الحالية ما تستبعدها تلقائيًا بعد — تأكّد من مكوّنات أي وجبة قبل ما تنفّذها، وبدّلها إذا لزم.',
+  allergyNoticeSeparator: '، ',
 }
 
 const en: NutritionScreenStrings = {
@@ -145,6 +155,10 @@ const en: NutritionScreenStrings = {
   scanNetworkErrorTitle: 'No connection',
   scanNetworkErrorHint: "We read the barcode but couldn't reach the product database. Check your connection and try again, or add the product manually.",
   scanRetry: 'Try again',
+  allergyNoticeTitle: 'Check your meal ingredients',
+  allergyNoticeBodyPrefix: 'You told us you are allergic to:',
+  allergyNoticeBodySuffix: 'Your meal plan does not exclude these automatically yet — check the ingredients of any meal before you make it, and swap it if needed.',
+  allergyNoticeSeparator: ', ',
 }
 
 export const nutritionScreenStrings: Record<Lang, NutritionScreenStrings> = { ar, en }

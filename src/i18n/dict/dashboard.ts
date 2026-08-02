@@ -41,6 +41,16 @@ export interface DashboardStrings {
   longestStreak: string
   progressEmpty: string
 
+  // إشارة الزخم (الرئيسية — لكل المستخدمين)
+  momentumDayStreak: string
+  momentumTodayDone: string
+  momentumStart: string
+
+  // بطاقة «تطبيق قِمّة قريبًا» — إعلامية هادئة (ويب فقط، بلا CTA حتى تتوفّر وجهة حقيقية)
+  appSoonTitle: string
+  appSoonBody: string
+  appSoonTrust: string
+
   // Today section
   yourDay: string
   yourDayNamedPrefix: string // "يومك، " + name
@@ -86,10 +96,10 @@ const ar: DashboardStrings = {
   greetGuest: 'أهلًا بك 👋',
   editPlan: 'تعديل خطتي',
 
-  logMealAria: 'سجّل وجبة بسرعة',
+  logMealAria: 'سجّل أكلك بسرعة',
   startTodayWorkoutAria: 'ابدأ تمرين اليوم',
   logFood: 'سجّل أكل',
-  logFoodHint: 'أضف وجبتك الآن',
+  logFoodHint: 'أضف وجبتك الحين',
   startWorkout: 'ابدأ تمرين',
   startWorkoutHint: 'افتح تمرين اليوم',
 
@@ -100,11 +110,11 @@ const ar: DashboardStrings = {
   daysPerWeek: 'أيام/أسبوع',
   caloriesPerDay: 'سعرة/يوم',
 
-  nextStep: 'خطوتك التالية',
+  nextStep: 'خطوتك الجاية',
   startTodayPrefix: 'ابدأ بتمرين اليوم: ',
   restDayTitle: 'اليوم راحة — جهّز تغذيتك',
   workoutTodayHint: 'خطوة وحدة تكفي اليوم. افتح التمرين وعلّم كل مجموعة وأنت تخلّصها.',
-  restDayHint: 'لا تمرين اليوم. راجع وجباتك واشرب ماءك — الالتزام في يوم الراحة جزء من الخطة.',
+  restDayHint: 'ما فيه تمرين اليوم. شوف وجباتك واشرب ماءك — الالتزام في يوم الراحة جزء من الخطة.',
   openTodayWorkout: 'افتح تمرين اليوم',
   openMealPlan: 'افتح خطة الأكل',
 
@@ -113,6 +123,12 @@ const ar: DashboardStrings = {
   streakWeeks: 'أسابيع متتالية',
   longestStreak: 'أطول سلسلة',
   progressEmpty: 'سجّل أول تمرين وتبدأ أرقامك تظهر هنا — الحجم، الأرقام القياسية، والسلسلة الأسبوعية.',
+  momentumDayStreak: 'يوم متتالي',
+  momentumTodayDone: 'تمرّنت اليوم',
+  momentumStart: 'أول تمرين هذا الأسبوع يبدأ سلسلتك.',
+  appSoonTitle: 'تطبيق قِمّة جاي قريب',
+  appSoonBody: 'نشتغل على تجربة آيفون أهدأ وأسلس، عشان خطوتك الصحية تكون معك دايم.',
+  appSoonTrust: 'نفس الوضوح. نفس الهدوء. أقرب لك.',
 
   yourDay: 'يومك',
   yourDayNamedPrefix: 'يومك، ',
@@ -121,9 +137,9 @@ const ar: DashboardStrings = {
   todaySubtitle: 'علّم كل شي تخلّصه — وتابع التزامك خطوة بخطوة.',
   todayProgressLabel: 'إنجاز اليوم',
   resetDay: 'إعادة ضبط اليوم',
-  autoResetHint: 'يتصفّر تلقائيًا كل يوم عند منتصف الليل',
+  autoResetHint: 'يتصفّر تلقائي كل يوم عند منتصف الليل',
   todayWorkoutTitle: 'تمرين اليوم',
-  noItemsToday: 'لا عناصر لهذا اليوم.',
+  noItemsToday: 'ما فيه عناصر لهذا اليوم.',
   waterUnit: 'لتر',
   proteinUnit: 'غ',
 
@@ -173,7 +189,7 @@ const en: DashboardStrings = {
   startTodayPrefix: "Start today's workout: ",
   restDayTitle: 'Rest day — dial in your nutrition',
   workoutTodayHint: "One step is enough today. Open the workout and check off each set as you finish it.",
-  restDayHint: "No workout today. Review your meals and drink your water — staying consistent on rest days is part of the plan.",
+  restDayHint: "No workout today. Check your meals and drink your water — staying consistent on rest days is part of the plan.",
   openTodayWorkout: "Open today's workout",
   openMealPlan: 'Open meal plan',
 
@@ -182,6 +198,12 @@ const en: DashboardStrings = {
   streakWeeks: 'Weeks in a row',
   longestStreak: 'Longest streak',
   progressEmpty: 'Log your first workout and your numbers start showing up here — volume, PRs, and your weekly streak.',
+  momentumDayStreak: 'day streak',
+  momentumTodayDone: 'Trained today',
+  momentumStart: 'Your first workout this week starts your streak.',
+  appSoonTitle: 'Qimmah app coming soon',
+  appSoonBody: 'We’re building a calmer, smoother iPhone experience so your next healthy step stays with you.',
+  appSoonTrust: 'Same clarity. Same calm. Closer to you.',
 
   yourDay: 'Your day',
   yourDayNamedPrefix: 'Your day, ',
@@ -190,7 +212,7 @@ const en: DashboardStrings = {
   todaySubtitle: 'Check off everything you finish — and track your consistency step by step.',
   todayProgressLabel: "Today's progress",
   resetDay: 'Reset day',
-  autoResetHint: 'Resets automatically each day at midnight',
+  autoResetHint: 'Resets automatically every day at midnight',
   todayWorkoutTitle: "Today's workout",
   noItemsToday: 'Nothing scheduled for today.',
   waterUnit: 'L',
@@ -214,7 +236,7 @@ const en: DashboardStrings = {
   goalNamedPrefix: '',
   goalNamedSuffix: "'s goal",
   goalMine: 'My goal',
-  goalUnset: 'Set your goal from “Settings → Edit my plan”.',
+  goalUnset: 'Set your goal in “Settings → Edit my plan”.',
 }
 
 export const dashboardStrings: Record<Lang, DashboardStrings> = { ar, en }

@@ -1,6 +1,8 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react'
 import { getStrings } from '@/config/strings'
 import { getLanguage } from '@/lib/appPreferences'
+import { track } from '@/lib/analytics'
+import { captureMonitoringError } from '@/lib/monitoring'
 import { Icon } from './Icon'
 
 interface ErrorBoundaryProps {
@@ -32,6 +34,9 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   componentDidCatch(error: Error, info: ErrorInfo): void {
     // تسجيل للـ console فقط (بلا إرسال خارجي) — يساعد على التشخيص دون تسريب بيانات.
     console.error('ErrorBoundary caught an error:', error, info.componentStack)
+    // إشارة استقرار — اسم الخطأ فقط (مثل TypeError)، بلا الرسالة أو المكدّس.
+    track('unhandled_error', { source: 'render', name: error?.name })
+    captureMonitoringError(error, 'render')
   }
 
   private handleReload = (): void => {
@@ -54,7 +59,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     }
 
     return (
-      <div dir={dir} className="flex min-h-screen flex-col items-center justify-center bg-page px-6 py-16 text-center">
+      <div dir={dir} className="app-scroll flex h-[100dvh] min-h-0 flex-col items-center justify-center overflow-y-auto overscroll-y-contain bg-page px-6 py-16 text-center">
         <div className="mx-auto w-full max-w-md">
           <span className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-primary-soft text-primary-c">
             <svg
@@ -125,6 +130,9 @@ export class RouteErrorBoundary extends Component<RouteErrorBoundaryProps, Error
   componentDidCatch(error: Error, info: ErrorInfo): void {
     // console فقط (بلا إرسال خارجي) — يساعد على تشخيص فشل تحميل الحِزم.
     console.error('RouteErrorBoundary caught an error:', error, info.componentStack)
+    // إشارة استقرار — اسم الخطأ فقط، بلا الرسالة أو المكدّس.
+    track('unhandled_error', { source: 'route', name: error?.name })
+    captureMonitoringError(error, 'route')
     // بعض المتصفحات (Chromium) تخزّن فشل استيراد الوحدة في خريطة الوحدات، فتفشل
     // إعادة الاستيراد داخل الصفحة فورًا حتى بعد عودة الاتصال. إن فشل تحميل حزمة
     // مباشرةً بعد «أعد المحاولة» نعيد تحميل الصفحة مرة واحدة — تحميل كامل يجدّد
@@ -153,7 +161,7 @@ export class RouteErrorBoundary extends Component<RouteErrorBoundaryProps, Error
     return (
       <div
         dir={lang === 'en' ? 'ltr' : 'rtl'}
-        className="flex min-h-screen items-center justify-center bg-page px-6 py-16"
+        className="app-scroll flex h-[100dvh] min-h-0 items-center justify-center overflow-y-auto overscroll-y-contain bg-page px-6 py-16"
       >
         <div className="card w-full max-w-md p-8 text-center" data-testid="route-error-card">
           <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-primary-soft text-primary-c">

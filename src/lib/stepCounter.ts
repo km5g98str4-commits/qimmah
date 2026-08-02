@@ -1,7 +1,8 @@
-// عدّاد الخطوات (محلي فقط) — إدخال يدوي للخطوات اليومية + هدف يومي قابل للتعديل.
-// لا مزامنة مع Apple Health / Google Fit (مؤجَّلة). كل القيم تُحفظ في localStorage لكل يوم.
+// عدّاد الخطوات المحلي — إدخال يدوي دائم + مصدر HealthKit اختياري من غلاف iOS.
+// كل القيم تهبط في المتجر نفسه لكل يوم، مع حفظ المصدر بوضوح.
 
 import { getDayStamp } from './today'
+import { safeWriteJson } from '@/lib/safeStorage'
 
 export const STEP_LOG_KEY = 'qimmah:steps:v1'
 export const STEP_SOURCE_KEY = 'qimmah:stepSource:v1'
@@ -13,8 +14,8 @@ const MAX_GOAL = 100000
 const MAX_STEPS = 200000 // سقف منطقي يمنع القيم الشاذّة
 
 /**
- * مصدر بيانات الخطوات. حاليًا 'manual' فقط فعليًا؛ بقية القيم محجوزة لغلاف
- * iOS/Android مستقبلي يدفع البيانات عبر ingestExternalSteps (انظر السيم بالأسفل).
+ * مصدر بيانات الخطوات. HealthKit يدفع الإجماليات عبر ingestExternalSteps،
+ * بينما Google Fit يبقى محجوزًا لغلاف Android مستقبلي.
  */
 export type StepSource = 'manual' | 'healthkit' | 'google-fit' | 'external'
 
@@ -61,8 +62,7 @@ export function loadStepGoal(): number {
 }
 
 export function saveStepGoal(goal: number): void {
-  if (typeof window === 'undefined') return
-  window.localStorage.setItem(STEP_GOAL_KEY, JSON.stringify(clampGoal(goal)))
+  safeWriteJson(STEP_GOAL_KEY, clampGoal(goal))
 }
 
 // ===== سجلّ الخطوات اليومي =====
@@ -86,8 +86,7 @@ export function loadStepLog(): Record<string, number> {
 }
 
 function persist(log: Record<string, number>): void {
-  if (typeof window === 'undefined') return
-  window.localStorage.setItem(STEP_LOG_KEY, JSON.stringify(log))
+  safeWriteJson(STEP_LOG_KEY, log)
 }
 
 /** يقرأ خريطة مصادر الخطوات { date: source }. */
@@ -106,8 +105,7 @@ function loadSourceLog(): Record<string, StepSource> {
 }
 
 function persistSources(sources: Record<string, StepSource>): void {
-  if (typeof window === 'undefined') return
-  window.localStorage.setItem(STEP_SOURCE_KEY, JSON.stringify(sources))
+  safeWriteJson(STEP_SOURCE_KEY, sources)
 }
 
 /** خطوات يوم محدّد (افتراضيًا اليوم). */
@@ -159,12 +157,11 @@ export interface ExternalStepPayload {
 }
 
 /**
- * السيم (Integration Seam): نقطة دخول وحيدة ومُصنّفة بالأنواع يستدعيها غلاف أصلي
- * مستقبلي (مثلًا تطبيق آيفون يقرأ Apple Health) ليدفع خطوات يوم ما داخل الويب.
+ * السيم (Integration Seam): نقطة دخول وحيدة ومُصنّفة بالأنواع يستدعيها الغلاف
+ * الأصلي ليدفع خطوات يوم ما إلى متجر الويب.
  *
- * ⚠️ لا تتصل هذه الدالة بأي واجهة HealthKit / Google Fit — هذا مستحيل في تطبيق ويب.
- * هي فقط تخزّن القيمة المُمرّرة محليًا (نفس مخزن الإدخال اليدوي) مع تسجيل مصدرها،
- * بحيث يكفي الغلاف الأصلي أن يستدعيها دون لمس منطق التخزين.
+ * هذه الدالة لا تتصل بالمنصّة بنفسها؛ plugin HealthKit المحلي يقرأ بإذن المستخدم
+ * ثم يمرّر الإجماليات هنا، مع بقاء الإدخال اليدوي بلا تغيير.
  *
  * @returns حالة اليوم بعد الحفظ (الخطوات + المصدر).
  */

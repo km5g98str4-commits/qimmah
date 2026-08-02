@@ -1,54 +1,51 @@
 // إعادة ضبط قِمّة بالكامل — يحذف مفاتيح قِمّة فقط دون المساس بأي مفاتيح أخرى.
 
-export const QIMMAH_KEYS = [
-  'qimmah:customization:v1',
-  'qimmah:onboarding:v1',
-  // سجلّ الحسابات التي أكملت الإعداد (بوابة الإعداد لكل حساب).
-  'qimmah:onboarding:accounts:v1',
-  // مصدر الحقيقة للإعداد (Phase 1) — لازم يُمسح وإلا بقيت بيانات إعداد قديمة بعد الضبط.
-  'qimmah:onboarding:profile:v1',
-  'qimmah:today:v1',
-  'qimmah:nutritionToday:v1',
-  'qimmah:wellnessToday:v1',
-  'qimmah:commitmentsToday:v1',
-  'qimmah:measurementLogs:v1',
-  'qimmah:workoutSessions:v1',
-  'qimmah:exerciseHistory:v1',
-  'qimmah:prefs:v1',
-  // تفضيل وضع الواجهة (بسيط/متقدّم)
-  'qimmah:uiMode:v1',
-  // تفضيلات التذكير + بيانات المزامنة (إن وُجدت)
-  'qimmah:reminders:v1',
-  'qimmah:sync:meta:v1',
-  'qimmah:supabase-auth:v1',
-  // المتجر التاريخي الدائم (v1)
-  'qimmah:history:workoutSessions:v1',
-  'qimmah:history:exerciseHistory:v1',
-  'qimmah:history:dailyLogs:v1',
-  'qimmah:history:measurementLogs:v1',
-  'qimmah:history:nutritionLogs:v1',
-  'qimmah:history:waterLogs:v1',
-  'qimmah:history:supplementLogs:v1',
-  'qimmah:history:medicationLogs:v1',
-  'qimmah:history:migrated:v1',
-  // الأوسمة والإنجازات
-  'qimmah:achievements:v1',
-]
+import { resetAnalytics } from './analytics'
+import { cancelAllReminders } from './reminders'
+import { cancelAllNotifications } from './notifications/engine'
+import { wipeUserData } from './accountScope'
 
-// مفاتيح ذات لاحقة ديناميكية (منعزلة لكل حساب) تُمسح بالبادئة لا بالمطابقة التامة.
-// مثال: مهام اليوم `qimmah:todo:v1:<userId>` / `qimmah:todo:v1:guest`.
-const QIMMAH_KEY_PREFIXES = ['qimmah:todo:v1:']
+// مفاتيح إضافية يمسحها «إعادة الضبط/الحذف» الكامل ولا يمسحها مسح تبديل الحساب:
+// سجلّ الحسابات (فيُعاد الإعداد عند عودة الحساب) ورمز الجلسة (تسجيل خروج).
+const FULL_RESET_EXTRA_KEYS = ['qimmah:onboarding:accounts:v1', 'qimmah:supabase-auth:v1']
 
-/** يحذف مفاتيح قِمّة فقط، ثم يعيد التحميل إلى شاشة البداية. */
-export function resetQimmah(): void {
+/**
+ * يحذف كل بيانات مستخدم قِمّة ثم يعيد التحميل إلى شاشة البداية.
+ *
+ * المسح صار عبر `wipeUserData()` (مسح بالبادئة مع قائمة سماح عامّة) بدل قائمة تضمين
+ * ثابتة — فيُمسح **كل** مفتاح بيانات مستخدم بما فيها المفاتيح التي كانت القائمة القديمة
+ * تُغفلها (الخطوات، الخطة المخصّصة، مفاتيح v2، الجلسة النشطة…). هذا يُصلح الخلل المعروف
+ * في resetQimmah.
+ *
+ * async لأنّ إلغاء تذكيرات iOS المجدوَلة يمرّ عبر جسر أصلي. آمن للاستدعاء fire-and-forget:
+ * المسح المحلي الحرج يتمّ **أولًا** ولا يعتمد على أي نظام خارجي.
+ */
+export async function resetQimmah(): Promise<void> {
   if (typeof window === 'undefined') return
-  QIMMAH_KEYS.forEach((k) => window.localStorage.removeItem(k))
-  // اكنس المفاتيح ذات البادئة (لكل الحسابات على هذا الجهاز).
-  for (let i = window.localStorage.length - 1; i >= 0; i -= 1) {
-    const key = window.localStorage.key(i)
-    if (key && QIMMAH_KEY_PREFIXES.some((p) => key.startsWith(p))) {
-      window.localStorage.removeItem(key)
+  // أسقط حالة التحليلات في الذاكرة أولًا (طابور/دفعة معلّقة + الموافقة والمعرّف المجهول
+  // المخزَّنان في cache) — لا يكفي مسح localStorage وحده لأن المعرّف القديم يبقى في الذاكرة.
+  resetAnalytics()
+  // مسح fail-safe لكل بيانات المستخدم (كل `qimmah:*` عدا قائمة السماح العامّة).
+  wipeUserData()
+  // إعادة الضبط/الحذف الكامل تتجاوز مسح التبديل: تمسح سجلّ الحسابات وتُنهي الجلسة أيضًا.
+  FULL_RESET_EXTRA_KEYS.forEach((k) => {
+    try {
+      window.localStorage.removeItem(k)
+    } catch {
+      /* تجاهل */
     }
+  })
+  // ألغِ تذكيرات iOS المجدوَلة (best-effort، محتوى الخطأ) — لا يحجب المسح/إعادة التحميل.
+  try {
+    await cancelAllReminders()
+  } catch {
+    /* لا يمنع الإكمال */
+  }
+  // ألغِ كل إشعارات محرّك الإشعارات الجديد أيضًا (نطاق معرّفات منفصل تمامًا عن أعلاه).
+  try {
+    await cancelAllNotifications()
+  } catch {
+    /* لا يمنع الإكمال */
   }
   window.location.hash = '/start'
   window.location.reload()

@@ -117,6 +117,12 @@ export function nutritionWeekSummary(
       dayCalories += meal.calories || 0
       dayProtein += meal.protein || 0
     })
+    // أطعمة مُسجّلة يدويًا (تشمل الأطباق السعودية) — تُضاف لسعرات/بروتين اليوم فتظهر في المتوسط.
+    if (log.loggedFood && (log.loggedFood.calories > 0 || log.loggedFood.protein > 0)) {
+      any = true
+      dayCalories += log.loggedFood.calories || 0
+      dayProtein += log.loggedFood.protein || 0
+    }
     if (!any) continue
     trackedDays += 1
     calories += dayCalories

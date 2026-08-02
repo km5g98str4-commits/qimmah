@@ -22,12 +22,14 @@ export interface CalorieExplainerStrings {
   proteinDayUnit: string
   kg: string
   disclaimer: string
+  /** يظهر بدل معادلة (TDEE−٤٠٠) حين تُطبَّق أرضية السعرات الآمنة فتصبح المعادلة غير مطابقة للناتج. */
+  floorLabel: string
 }
 
 const ar: CalorieExplainerStrings = {
   toggleTitle: 'كيف نحسب سعراتك؟',
   toggleHint: 'اعرف من وين جت أرقامك خطوة بخطوة',
-  needData: 'أكمل بيانات جسمك (الوزن والطول والعمر) في الإعداد حتى نعرض لك طريقة الحساب بأرقامك.',
+  needData: 'كمّل بيانات جسمك (الوزن والطول والعمر) في الإعداد عشان نوريك طريقة الحساب بأرقامك.',
   bmrTitle: 'سعرات جسمك وأنت مرتاح (BMR)',
   bmrDesc: 'كم يحرق جسمك لو ما تحركت طول اليوم — نحسبها بمعادلة Mifflin-St Jeor من وزنك وطولك وعمرك.',
   calorieUnit: 'سعرة',
@@ -35,9 +37,9 @@ const ar: CalorieExplainerStrings = {
   tdeeDescPrefix: 'نضرب BMR في معامل حركتك',
   daysWord: 'أيام تمرين',
   goalTitlePrefix: 'تعديل حسب هدفك',
-  descCut: 'للتنشيف ننقص ٤٠٠ سعرة عن سعرات يومك لخسارة الدهون بثبات.',
-  descBulk: 'للتضخيم نزيد ٣٠٠ سعرة فوق سعرات يومك لبناء العضل تدريجيًا.',
-  descMaintain: 'لهدف الثبات نبقى على سعرات يومك بدون زيادة أو نقص.',
+  descCut: 'للتنشيف ننقص ٤٠٠ سعرة عن سعرات يومك عشان تخسر الدهون بثبات.',
+  descBulk: 'للتضخيم نزيد ٣٠٠ سعرة فوق سعرات يومك عشان تبني العضل بالتدريج.',
+  descMaintain: 'لهدف الثبات نثبت على سعرات يومك بدون زيادة ولا نقص.',
   targetDayUnit: 'سعرة / يوم',
   proteinTitle: 'بروتينك اليومي',
   proteinDescA: 'نحسب ',
@@ -45,13 +47,14 @@ const ar: CalorieExplainerStrings = {
   proteinDayUnit: 'غرام / يوم',
   kg: 'كجم',
   disclaimer:
-    'هذه تقديرات لتنظيم أكلك ومتابعة تقدّمك فقط، وليست نصيحة طبية. عدّلها حسب إحساسك ونتائجك على أرض الواقع.',
+    'هذي تقديرات عشان تنظّم أكلك وتتابع تقدّمك بس، ومو نصيحة طبية. عدّلها حسب إحساسك ونتائجك على أرض الواقع.',
+  floorLabel: 'الحد الأدنى الآمن',
 }
 
 const en: CalorieExplainerStrings = {
   toggleTitle: 'How do we calculate your calories?',
   toggleHint: 'See exactly where your numbers come from, step by step',
-  needData: 'Complete your body data (weight, height, age) in setup so we can show the calculation with your numbers.',
+  needData: "Fill in your body data (weight, height, age) in setup and we'll show the math with your numbers.",
   bmrTitle: 'Calories at rest (BMR)',
   bmrDesc:
     'How much your body burns if you never moved all day — from the Mifflin-St Jeor equation using your weight, height, and age.',
@@ -71,7 +74,8 @@ const en: CalorieExplainerStrings = {
   proteinDayUnit: 'g / day',
   kg: 'kg',
   disclaimer:
-    'These are estimates to organize your eating and track your progress only, not medical advice. Adjust them to how you feel and your real-world results.',
+    'These are just estimates to organize your eating and track your progress — not medical advice. Adjust them based on how you feel and your real-world results.',
+  floorLabel: 'Safe minimum',
 }
 
 export const calorieExplainerStrings: Record<Lang, CalorieExplainerStrings> = { ar, en }

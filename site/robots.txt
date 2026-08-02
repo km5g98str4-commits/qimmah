@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://qimmah.app/sitemap.xml

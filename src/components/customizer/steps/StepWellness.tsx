@@ -18,7 +18,8 @@ import {
   supplementName,
 } from '@/lib/wellnessPlan'
 
-const inputCls = 'w-full rounded-lg border border-line bg-beige px-2.5 py-1.5 text-sm text-ink-900 focus:border-brand-500/50 focus:outline-none focus:ring-2 focus:ring-brand-500/30'
+// text-base (16px) لا text-sm: طبقة utilities تتغلّب على حارس @layer base، فبدونها يُكبّر iOS عند التركيز داخل WKWebView.
+const inputCls = 'w-full rounded-lg border border-line bg-beige px-2.5 py-1.5 text-base text-ink-900 focus:border-brand-500/50 focus:outline-none focus:ring-2 focus:ring-brand-500/30'
 
 /** خطوة المكملات والأدوية — مكتبتان + محرّر + إضافة مخصّصة + تنويه طبي. */
 export function StepWellness({ ctx }: { ctx: WizardCtx }) {
@@ -52,6 +53,7 @@ export function StepWellness({ ctx }: { ctx: WizardCtx }) {
       {/* تفعيل */}
       <button
         type="button"
+        aria-pressed={wp.enabled}
         onClick={() => setWp({ enabled: !wp.enabled })}
         className={`mb-5 flex w-full items-center justify-between rounded-2xl border p-4 ${wp.enabled ? 'border-primary-soft bg-primary-soft' : 'border-line bg-surface'}`}
       >
@@ -85,9 +87,12 @@ export function StepWellness({ ctx }: { ctx: WizardCtx }) {
                   <button type="button" onClick={() => setWp({ supplements: reindexS(wp.supplements.filter((x) => x.id !== s.id)) })} className="grid h-8 w-8 place-items-center rounded-lg border border-rose-500/20 bg-rose-500/10 text-rose-500" aria-label={d.wellDelete}><Icon name="X" className="h-4 w-4" /></button>
                 </div>
                 {!s.supplementId && (
-                  <div className="mb-2 grid gap-2 sm:grid-cols-2">
-                    <input className={inputCls} value={s.customNameAr ?? ''} onChange={(e) => updateSupp(s.id, { customNameAr: e.target.value })} placeholder={d.wellSuppNameArPlaceholder} />
-                    <input className={inputCls} value={s.customNameEn ?? ''} onChange={(e) => updateSupp(s.id, { customNameEn: e.target.value })} placeholder={d.wellSuppNameEnPlaceholder} />
+                  <div className="mb-2">
+                    {ctx.lang === 'en' ? (
+                      <input className={inputCls} value={s.customNameEn ?? ''} onChange={(e) => updateSupp(s.id, { customNameEn: e.target.value })} placeholder={d.wellSuppNameEnPlaceholder} />
+                    ) : (
+                      <input className={inputCls} value={s.customNameAr ?? ''} onChange={(e) => updateSupp(s.id, { customNameAr: e.target.value })} placeholder={d.wellSuppNameArPlaceholder} />
+                    )}
                   </div>
                 )}
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -121,9 +126,12 @@ export function StepWellness({ ctx }: { ctx: WizardCtx }) {
                   <button type="button" onClick={() => setWp({ medications: reindexM(wp.medications.filter((x) => x.id !== m.id)) })} className="grid h-8 w-8 place-items-center rounded-lg border border-rose-500/20 bg-rose-500/10 text-rose-500" aria-label={d.wellDelete}><Icon name="X" className="h-4 w-4" /></button>
                 </div>
                 {!m.medicationId && (
-                  <div className="mb-2 grid gap-2 sm:grid-cols-2">
-                    <input className={inputCls} value={m.customNameAr ?? ''} onChange={(e) => updateMed(m.id, { customNameAr: e.target.value })} placeholder={d.wellMedNameArPlaceholder} />
-                    <input className={inputCls} value={m.customNameEn ?? ''} onChange={(e) => updateMed(m.id, { customNameEn: e.target.value })} placeholder={d.wellMedNameEnPlaceholder} />
+                  <div className="mb-2">
+                    {ctx.lang === 'en' ? (
+                      <input className={inputCls} value={m.customNameEn ?? ''} onChange={(e) => updateMed(m.id, { customNameEn: e.target.value })} placeholder={d.wellMedNameEnPlaceholder} />
+                    ) : (
+                      <input className={inputCls} value={m.customNameAr ?? ''} onChange={(e) => updateMed(m.id, { customNameAr: e.target.value })} placeholder={d.wellMedNameArPlaceholder} />
+                    )}
                   </div>
                 )}
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">

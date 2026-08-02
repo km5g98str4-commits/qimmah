@@ -1,6 +1,6 @@
 import { Component, type ReactNode } from 'react'
 import { CustomizationCenter } from '@/sections/CustomizationCenter'
-import { PlanBuilder } from '@/components/PlanBuilder'
+import { OnboardingV2 } from '@/views/OnboardingV2'
 import { getLanguage } from '@/lib/appPreferences'
 
 interface SetupViewProps {
@@ -33,7 +33,7 @@ class SetupErrorBoundary extends Component<{ onEscape: () => void; children: Rea
         <p className="mt-3 max-w-sm text-sm text-night-300">
           {en
             ? "No problem — you can finish setup later from Settings. Let's get you into the app."
-            : 'ما فيه مشكلة — تقدر تكمل الإعداد لاحقًا من الإعدادات. نوصلك للتطبيق الحين.'}
+            : 'لا بأس — يمكنك إكمال الإعداد لاحقًا من الإعدادات. سننقلك إلى التطبيق الآن.'}
         </p>
         <button
           type="button"
@@ -54,7 +54,7 @@ export function SetupView({ onClose, onForceComplete, initialStep, mode = 'onboa
     const escape = onForceComplete ?? (() => onClose(true))
     return (
       <SetupErrorBoundary onEscape={escape}>
-        <PlanBuilder onComplete={() => onClose(true)} onExit={() => onClose(false)} onForceComplete={escape} />
+        <OnboardingV2 lang={getLanguage()} onComplete={escape} onExit={() => onClose(false)} />
       </SetupErrorBoundary>
     )
   }

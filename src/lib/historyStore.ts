@@ -9,6 +9,8 @@
 import type { SessionExercise, SetLog, WorkoutSession } from './workoutSessions'
 import type { ExerciseHistory } from './exerciseHistory'
 import type { MeasurementLog } from '@/types/progress'
+import { enqueueSyncDelete, enqueueSyncOperation } from './syncQueue'
+import { writeJson, writeRaw } from '@/lib/safeStorage'
 
 // ختم اليوم المحلي (YYYY-MM-DD) — مكرّر هنا لكسر الاعتماد الدائري مع today.ts.
 function dayStamp(d = new Date()): string {
@@ -51,6 +53,9 @@ export interface NutritionLog {
   date: string
   doneMeals: Record<string, boolean>
   waterMl?: number
+  /** مجاميع الأطعمة المُسجّلة يدويًا في هذا اليوم (سعرات/ماكروز) — تبقى بعد تصفير اليوم
+   *  فتظهر في الملخّص الأسبوعي/التقدّم. تُكتب من مسجّل الوجبات. */
+  loggedFood?: { calories: number; protein: number; carbs: number; fat: number }
   updatedAt: string
 }
 
@@ -104,13 +109,11 @@ function readJSON<T>(key: string, fallback: T): T {
   }
 }
 
-function writeJSON(key: string, value: unknown): void {
-  if (typeof window === 'undefined') return
-  try {
-    window.localStorage.setItem(key, JSON.stringify(value))
-  } catch {
-    /* تجاهل امتلاء التخزين */
-  }
+// كل كتابة دائمة تمرّ من الطبقة الآمنة: لا ترمي (فلا تنكسر أي واجهة)، لكنها
+// تُسجّل الفشل في مؤشّر عالمي بدل ابتلاعه — فيستطيع مسار إنهاء التمرين أن يعرف
+// أن الحفظ لم يحدث ويقول ذلك للمستخدم بدل عرض نجاح زائف.
+function writeJSON(key: string, value: unknown): boolean {
+  return writeJson(key, value) === 'ok'
 }
 
 function nowISO(): string {
@@ -157,6 +160,9 @@ function normalizeExercise(raw: unknown): SessionExercise {
   } as SessionExercise
 }
 
+// (P5) قيم حالة الجلسة الصالحة — أي قيمة أخرى تُسقط (localStorage مدخل معادٍ).
+const SESSION_STATUSES = new Set(['in_progress', 'completed', 'ended_early', 'abandoned'])
+
 function normalizeSession(raw: unknown): WorkoutSession | null {
   if (!raw || typeof raw !== 'object') return null
   const s = raw as Record<string, unknown>
@@ -169,6 +175,8 @@ function normalizeSession(raw: unknown): WorkoutSession | null {
     workoutDayId: typeof s.workoutDayId === 'string' ? s.workoutDayId : '',
     workoutDayName: typeof s.workoutDayName === 'string' ? s.workoutDayName : '',
     exercises: Array.isArray(s.exercises) ? s.exercises.map(normalizeExercise) : [],
+    // (P5) حالة الجلسة تُحفظ عبر جولة القراءة/الكتابة؛ الغياب = جلسة قديمة (completed).
+    status: typeof s.status === 'string' && SESSION_STATUSES.has(s.status) ? (s.status as WorkoutSession['status']) : undefined,
   }
 }
 
@@ -185,6 +193,16 @@ export function saveWorkoutSession(session: WorkoutSession): WorkoutSession[] {
   const existing = getWorkoutSessions().filter((s) => s.id !== session.id)
   const next = [session, ...existing].slice(0, 500)
   writeJSON(HISTORY_KEYS.workoutSessions, next)
+  enqueueSyncOperation('workout_sessions', session.id, {
+    local_id: session.id,
+    date: session.date,
+    started_at: session.startedAt,
+    finished_at: session.finishedAt ?? null,
+    workout_day_id: session.workoutDayId,
+    workout_day_name: session.workoutDayName,
+    data: session,
+    updated_at: session.finishedAt ?? session.startedAt,
+  })
   // لقطة يومية: علّم أنّ اليوم فيه تمرين مكتمل.
   if (session.finishedAt) {
     saveDailyLog(session.date, { workoutCompleted: true })
@@ -195,6 +213,10 @@ export function saveWorkoutSession(session: WorkoutSession): WorkoutSession[] {
 /** يستبدل كامل قائمة الجلسات (لمزامنة/استيراد أو حفظ مجمّع). */
 export function setWorkoutSessions(sessions: WorkoutSession[]): void {
   ensureMigrated()
+  const retained = new Set(sessions.map((session) => session.id))
+  getWorkoutSessions().forEach((session) => {
+    if (!retained.has(session.id)) enqueueSyncDelete('workout_sessions', session.id)
+  })
   writeJSON(HISTORY_KEYS.workoutSessions, sessions.slice(0, 500))
 }
 
@@ -218,6 +240,13 @@ export function getExerciseHistory(): ExerciseHistory {
 export function saveExerciseHistory(history: ExerciseHistory): void {
   ensureMigrated()
   writeJSON(HISTORY_KEYS.exerciseHistory, history)
+  Object.entries(history).forEach(([exerciseId, record]) => {
+    enqueueSyncOperation('exercise_history', exerciseId, {
+      exercise_id: exerciseId,
+      data: record,
+      updated_at: record.lastCompletedAt ?? nowISO(),
+    })
+  })
 }
 
 // ————————————————————————————————————————————————————————————————
@@ -239,6 +268,7 @@ export function saveDailyLog(date: string, partial: Partial<Omit<DailyLog, 'date
   const prev = logs[date] ?? { date, updatedAt: nowISO() }
   logs[date] = { ...prev, ...partial, date, updatedAt: nowISO() }
   writeJSON(HISTORY_KEYS.dailyLogs, logs)
+  enqueueDailySync(date)
 }
 
 /** آخر 7 أيام من اللقطات اليومية (الأحدث أولًا). */
@@ -265,15 +295,35 @@ export function getMeasurementLogs(): MeasurementLog[] {
 
 export function saveMeasurementLog(log: MeasurementLog): MeasurementLog[] {
   ensureMigrated()
-  const existing = getMeasurementLogs().filter((l) => l.id !== log.id)
-  const next = [log, ...existing].slice(0, 1000)
+  // طابع LWW: كل حفظ يحمل updatedAt؛ سجل قديم بلا طابع يُكمل كما هو (يسقط لدقّة اليوم عند الحسم).
+  const stamped: MeasurementLog = { ...log, updatedAt: log.updatedAt ?? nowISO() }
+  const existing = getMeasurementLogs().filter((l) => l.id !== stamped.id)
+  const next = [stamped, ...existing].slice(0, 1000)
   writeJSON(HISTORY_KEYS.measurementLogs, next)
+  // سياسة خصوصية الصحة (P12): القياسات المستوردة من HealthKit (source:'health')
+  // لا تُرفع لسحابتنا أبدًا — بياناتها تعيش في Apple Health ومصدر حقيقتها هناك؛
+  // اليدوي فقط يُزامَن. deleted_at:null يُحيي صفًا سبق أن حمل شاهد قبر (LWW).
+  if (stamped.source !== 'health') {
+    enqueueSyncOperation('measurement_logs', stamped.id, {
+      local_id: stamped.id,
+      date: stamped.date,
+      values: stamped.values,
+      notes: stamped.notes ?? null,
+      updated_at: stamped.updatedAt,
+      deleted_at: null,
+    })
+  }
   return next
 }
 
 /** يستبدل كامل قائمة القياسات (لمزامنة/استيراد). */
 export function setMeasurementLogs(logs: MeasurementLog[]): void {
   ensureMigrated()
+  const retained = new Set(logs.map((log) => log.id))
+  getMeasurementLogs().forEach((log) => {
+    // شاهد قبر بطابع (P12) — المستورد من الصحة لم يُرفع أصلًا فلا يُقبَر.
+    if (!retained.has(log.id) && log.source !== 'health') enqueueSyncDelete('measurement_logs', log.id)
+  })
   writeJSON(HISTORY_KEYS.measurementLogs, logs)
 }
 
@@ -295,6 +345,7 @@ export function saveNutritionLog(date: string, partial: Partial<Omit<NutritionLo
   const prev = logs[date] ?? { date, doneMeals: {}, updatedAt: nowISO() }
   logs[date] = { ...prev, ...partial, date, updatedAt: nowISO() }
   writeJSON(HISTORY_KEYS.nutritionLogs, logs)
+  enqueueDailySync(date)
 }
 
 // ————————————————————————————————————————————————————————————————
@@ -310,6 +361,7 @@ export function saveWaterLog(date: string, waterMl: number): void {
   const logs = getWaterLogs()
   logs[date] = { date, waterMl: Math.max(0, waterMl), updatedAt: nowISO() }
   writeJSON(HISTORY_KEYS.waterLogs, logs)
+  enqueueDailySync(date)
 }
 
 // ————————————————————————————————————————————————————————————————
@@ -325,6 +377,7 @@ export function saveSupplementLog(date: string, done: Record<string, boolean>): 
   const logs = getSupplementLogs()
   logs[date] = { date, done, updatedAt: nowISO() }
   writeJSON(HISTORY_KEYS.supplementLogs, logs)
+  enqueueDailySync(date)
 }
 
 export function getMedicationLogs(): ByDate<MedicationLog> {
@@ -336,6 +389,24 @@ export function saveMedicationLog(date: string, done: Record<string, boolean>): 
   const logs = getMedicationLogs()
   logs[date] = { date, done, updatedAt: nowISO() }
   writeJSON(HISTORY_KEYS.medicationLogs, logs)
+  enqueueDailySync(date)
+}
+
+/** daily_logs is the approved aggregate cloud home for these daily local stores. */
+function enqueueDailySync(date: string): void {
+  const daily = getDailyLogs()[date]
+  const nutrition = getNutritionLogs()[date]
+  const water = getWaterLogs()[date]
+  const supplements = getSupplementLogs()[date]
+  const medications = getMedicationLogs()[date]
+  const timestamps = [daily?.updatedAt, nutrition?.updatedAt, water?.updatedAt, supplements?.updatedAt, medications?.updatedAt]
+    .filter((value): value is string => Boolean(value))
+    .sort()
+  enqueueSyncOperation('daily_logs', date, {
+    date,
+    data: { daily, nutrition, water, supplements, medications },
+    updated_at: timestamps.at(-1) ?? nowISO(),
+  })
 }
 
 // ————————————————————————————————————————————————————————————————
@@ -493,7 +564,9 @@ export function ensureMigrated(): void {
       }
     }
 
-    window.localStorage.setItem(MIGRATION_FLAG, 'done')
+    // راية الترحيل تمرّ من الطبقة الآمنة كغيرها (§5) — الكتابة الخام هنا كانت
+    // آخر تجاوز في الملف، والتقطه إثبات `test:safe-storage`.
+    writeRaw(MIGRATION_FLAG, 'done')
   } catch {
     // لا نُفشل التطبيق بسبب الترحيل.
   }

@@ -1,6 +1,22 @@
 // أدوات PWA: التقاط حدث تثبيت التطبيق + صلاحية التنبيهات.
 // صادق بلا وعود زائفة: لا Push في الخلفية (لا Backend)، والتنبيهات محدودة في متصفح آيفون.
 
+import { Capacitor } from '@capacitor/core'
+
+/**
+ * هل نعمل داخل غلاف native (Capacitor على iOS/Android)؟
+ * حينها التطبيق «مثبّت» أصلًا بحُكم كونه تطبيقًا من المتجر — فأي دعوة تثبيت PWA
+ * («ثبّت قِمّة على جهازك») لا معنى لها بل قد تُرفض في مراجعة App Store.
+ * مصدر حقيقة واحد يعتمد عليه كل واجهات التثبيت (البانر + الدعوة + إعدادات الجهاز).
+ */
+export function isNativePlatform(): boolean {
+  try {
+    return Capacitor.isNativePlatform()
+  } catch {
+    return false
+  }
+}
+
 /** حدث beforeinstallprompt (غير معرّف في TS القياسي). */
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>
@@ -36,6 +52,8 @@ export function onInstallStateChange(fn: () => void): () => void {
 /** هل التطبيق يعمل مثبّتًا (standalone) على الشاشة الرئيسية؟ */
 export function isStandalone(): boolean {
   if (typeof window === 'undefined') return false
+  // داخل الغلاف الأصلي (Capacitor) التطبيق مثبّت فعلًا → عامله كـ standalone دائمًا.
+  if (isNativePlatform()) return true
   // iOS يستخدم navigator.standalone؛ البقية display-mode: standalone.
   const iosStandalone = (window.navigator as unknown as { standalone?: boolean }).standalone === true
   return iosStandalone || window.matchMedia?.('(display-mode: standalone)').matches === true
@@ -51,9 +69,9 @@ export function isIOS(): boolean {
   return iOSDevice || iPadOS
 }
 
-/** هل يمكن إطلاق مربّع تثبيت أصلي الآن (Android/Chrome/Edge)؟ */
+/** هل يمكن إطلاق مربّع تثبيت أصلي الآن (Android/Chrome/Edge)؟ لا شيء داخل الغلاف الأصلي. */
 export function canPromptInstall(): boolean {
-  return deferredPrompt !== null
+  return !isNativePlatform() && deferredPrompt !== null
 }
 
 /** يُطلق مربّع تثبيت المتصفح الأصلي؛ يُعيد true إذا قبل المستخدم. */

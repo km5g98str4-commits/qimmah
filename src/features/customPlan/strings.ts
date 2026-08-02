@@ -41,6 +41,9 @@ export interface CustomPlanStrings {
   repsLabel: string
   moveUp: string
   moveDown: string
+  decrease: string
+  increase: string
+  repsSecondsOption: string
   removeExercise: string
   dayTab: string
 
@@ -85,11 +88,11 @@ export interface CustomPlanStrings {
 const ar: CustomPlanStrings = {
   choiceEyebrow: 'جدول التمرين',
   choiceTitle: 'كيف تبي جدول تمرينك؟',
-  choiceHint: 'اختر الطريقة اللي تناسبك — تقدر تغيّرها في أي وقت لاحقًا.',
+  choiceHint: 'اختر الطريقة اللي تناسبك — تقدر تغيّرها في أي وقت.',
   autoTitle: 'جدول جاهز حسب هدفك',
   autoDesc: 'نولّد لك خطة متكاملة من بياناتك وهدفك — جاهزة على طول.',
   customTitle: 'أصمّم جدولي بنفسي',
-  customDesc: 'اختر أيامك وتمارينك ورتّبها كما تحب — تحكّم كامل.',
+  customDesc: 'اختر أيامك وتمارينك ورتّبها مثل ما تحب — تحكّم كامل.',
   recommendedBadge: 'موصى به',
 
   createTitle: 'إنشاء جدول مخصّص',
@@ -103,22 +106,25 @@ const ar: CustomPlanStrings = {
   daysUnit: 'أيام',
 
   buildTitle: 'ابنِ أيامك',
-  buildHint: 'سمِّ كل يوم، أضف تمارينه، ورتّبها بالترتيب اللي تبيه.',
+  buildHint: 'سمِّ كل يوم، وأضف تمارينه، ورتّبها مثل ما تبي.',
   dayNameLabel: 'اسم اليوم',
   dayNamePlaceholder: 'مثال: صدر + ترايسبس',
   addExercise: 'أضف تمرين',
   emptyDayTitle: 'ما أضفت تمارين لهذا اليوم بعد',
-  emptyDayHint: 'اضغط «أضف تمرين» لاختيار تمارينك من المكتبة.',
+  emptyDayHint: 'اضغط «أضف تمرين» واختر تمارينك من المكتبة.',
   setsLabel: 'مجموعات',
   repsLabel: 'تكرار',
   moveUp: 'تحريك لأعلى',
   moveDown: 'تحريك لأسفل',
+  decrease: 'إنقاص',
+  increase: 'زيادة',
+  repsSecondsOption: '30 ث',
   removeExercise: 'حذف التمرين',
   dayTab: 'اليوم',
 
   reviewTitle: 'راجع جدولك',
   reviewHint: 'تأكد من كل يوم وتمارينه قبل الحفظ.',
-  reviewEmptyWarning: 'أضف تمرينًا واحدًا على الأقل في يوم واحد قبل الحفظ.',
+  reviewEmptyWarning: 'أضف تمرين واحد على الأقل في يوم واحد قبل الحفظ.',
   totalExercises: 'إجمالي التمارين',
 
   next: 'التالي',
@@ -127,7 +133,7 @@ const ar: CustomPlanStrings = {
   cancel: 'إلغاء',
   exercisesUnit: 'تمارين',
 
-  pickerTitle: 'اختر تمرينًا',
+  pickerTitle: 'اختر تمرين',
   searchPlaceholder: 'ابحث عن تمرين…',
   noResults: 'ما فيه نتائج مطابقة.',
   add: 'إضافة',
@@ -154,12 +160,12 @@ const ar: CustomPlanStrings = {
   customPlanBadge: 'جدول مخصّص',
   autoPlanBadge: 'جدول تلقائي',
   editMyPlan: 'تعديل جدولي',
-  createCustom: 'أنشئ جدولًا مخصّصًا',
+  createCustom: 'أنشئ جدول مخصّص',
   createCustomDesc: 'اختر أيامك وتمارينك بنفسك',
   useCustom: 'جدولي المخصّص',
   useAuto: 'الجدول التلقائي',
   planSourceTitle: 'الجدول المعتمد',
-  planSavedToast: 'تم حفظ جدولك المخصّص',
+  planSavedToast: 'انحفظ جدولك المخصّص',
 }
 
 const en: CustomPlanStrings = {
@@ -179,7 +185,7 @@ const en: CustomPlanStrings = {
   stepReview: 'Review',
 
   daysTitle: 'How many training days per week?',
-  daysHint: 'Pick the number of days and we prepare a card for each with a suggested name.',
+  daysHint: "Pick the number of days and we'll set up a card for each with a suggested name.",
   daysUnit: 'days',
 
   buildTitle: 'Build your days',
@@ -193,6 +199,9 @@ const en: CustomPlanStrings = {
   repsLabel: 'Reps',
   moveUp: 'Move up',
   moveDown: 'Move down',
+  decrease: 'Decrease',
+  increase: 'Increase',
+  repsSecondsOption: '30 s',
   removeExercise: 'Remove exercise',
   dayTab: 'Day',
 
@@ -239,7 +248,7 @@ const en: CustomPlanStrings = {
   useCustom: 'My custom plan',
   useAuto: 'Auto plan',
   planSourceTitle: 'Active plan',
-  planSavedToast: 'Your custom plan was saved',
+  planSavedToast: 'Custom plan saved',
 }
 
 export const customPlanStrings: Record<Lang, CustomPlanStrings> = { ar, en }
