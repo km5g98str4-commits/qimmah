@@ -9,6 +9,14 @@ import { evaluatePassword, PASSWORD_MIN_LENGTH } from '@/lib/passwordPolicy'
 import { track } from '@/lib/analytics'
 import { POLICY_LINKS, policyCopy } from '@/data/policyCopy'
 
+/**
+ * [CTO-65] البند ٧ — صلاحية شكل البريد.
+ * متعمّد التساهل: يمنع الأخطاء الحقيقية (بلا `@`، بلا نطاق، بمسافة) ولا يدّعي
+ * التحقّق من وجود العنوان فعلًا — ذاك لا يثبته إلا بريد التأكيد. الصدق قبل
+ * الطمأنينة: نرفض ما نعرف أنه خطأ، ولا نعِد بما لا نستطيع.
+ */
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
+
 interface LoginViewProps {
   lang: Lang
   onSuccess: () => void
@@ -34,6 +42,8 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login', onMo
   const [mode, setMode] = useState<Mode>(initialMode)
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
+  // [CTO-65] البند ٧ — الرسالة تُعرض عند مغادرة الحقل لا مع أول حرف.
+  const [emailTouched, setEmailTouched] = useState(false)
   const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)
   const [msg, setMsg] = useState<string | null>(null)
@@ -50,6 +60,13 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login', onMo
   const canSubmit = isForgot
     ? Boolean(email)
     : Boolean(email && password && (!isSignup || (name.trim() && pw.valid && eligible12)))
+  // [CTO-65] البند ٧ — صلاحية البريد **تحقّق منفصل**، لا داخل `canSubmit` أعلاه.
+  // ⚠️ `scripts/policy-gates-proof.mjs:27` يطابق التعبير الحرفي `pw.valid && eligible12`
+  // في السطر السابق. أي إعادة صياغة له تكسر العقد — لا إعادة التسمية وحدها. فالسطر
+  // يبقى نصًّا كما هو، ويُضاف الشرط الجديد بجانبه لا بداخله.
+  const emailValid = EMAIL_PATTERN.test(email.trim())
+  // الرسالة لا تظهر أثناء الكتابة — فقط بعد مغادرة الحقل، وبمحتوى فعلي.
+  const showEmailError = emailTouched && email.trim().length > 0 && !emailValid
 
   const switchMode = (next: Mode) => {
     setMode(next)
@@ -61,6 +78,12 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login', onMo
 
   const submit = async () => {
     if (!canSubmit) return
+    // حارس إرسال منفصل — نفس نمط حارس الأهلية أدناه. يمنع الإرسال ببريد غير صالح
+    // حتى لو وصل التدفّق من مسار آخر، ويُظهر السبب بدل الفشل الصامت.
+    if (!emailValid) {
+      setEmailTouched(true)
+      return
+    }
     if (isSignup && !eligible12) {
       setMsg(policy.eligibilityRequired)
       return
@@ -201,8 +224,22 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login', onMo
                   aria-label={t.auth.email}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  onBlur={() => setEmailTouched(true)}
+                  aria-invalid={showEmailError || undefined}
+                  aria-describedby={showEmailError ? 'login-email-error' : undefined}
                 />
               </div>
+              {/* [CTO-65] البند ٧ — السبب مسمّى تحت الحقل بدل زرّ صامت. */}
+              {showEmailError && (
+                <p
+                  id="login-email-error"
+                  role="alert"
+                  className="-mt-1 flex items-center gap-1.5 text-xs font-bold text-danger"
+                >
+                  <Icon name="AlertCircle" className="h-3.5 w-3.5 shrink-0" />
+                  {t.auth.emailInvalid}
+                </p>
+              )}
               {!isForgot && (
                 <div className="relative">
                   <span className="pointer-events-none absolute inset-y-0 end-3 grid place-items-center text-ink-400">
@@ -305,7 +342,7 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login', onMo
 
               <button
                 type="submit"
-                disabled={busy || !canSubmit}
+                disabled={busy || !canSubmit || !emailValid}
                 aria-busy={busy}
                 className="btn-primary w-full py-3.5 text-base disabled:cursor-not-allowed disabled:opacity-50"
               >

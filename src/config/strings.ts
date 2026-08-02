@@ -79,6 +79,8 @@ export interface ShellStrings {
     /** المزامنة متعثّرة وتحتاج انتباه (محاولات فاشلة متكرّرة أو تبنّي معلّق). */
     cloudNoteAttention: string
     back: string
+    /** [CTO-65] البند ٧ — سبب رفض البريد، يُعرض تحت الحقل. */
+    emailInvalid: string
     deleteAccount: string
     deleteAccountDesc: string
     deleteConfirmTitle: string
@@ -547,6 +549,7 @@ const ar: ShellStrings = {
     cloudNotePending: 'بياناتك على هذا الجهاز، وفيه تغييرات لسه ترفع لحسابك السحابي.',
     cloudNoteAttention: 'بياناتك على هذا الجهاز، بس المزامنة السحابية متعثّرة — افتح «بياناتي» عشان تشوف التفاصيل.',
     back: 'رجوع',
+    emailInvalid: 'البريد ناقص شيء — لازم يكون فيه @ واسم نطاق، مثل name@mail.com',
     deleteAccount: 'حذف الحساب',
     deleteAccountDesc: 'يحذف حسابك وكل بياناتك نهائيًا — وما تقدر ترجّعها.',
     deleteConfirmTitle: 'تحذف الحساب نهائيًا؟',
@@ -1028,6 +1031,7 @@ const en: ShellStrings = {
     cloudNotePending: 'Your data is on this device. Some changes are still waiting to upload.',
     cloudNoteAttention: 'Your data is on this device, but cloud sync is stuck — open "My data" for details.',
     back: 'Back',
+    emailInvalid: "That email doesn't look right — it needs an @ and a domain, like name@mail.com",
     deleteAccount: 'Delete account',
     deleteAccountDesc: "Permanently delete your account and all your data. This can't be undone.",
     deleteConfirmTitle: 'Delete account permanently?',
