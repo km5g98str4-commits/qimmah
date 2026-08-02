@@ -1,6 +1,8 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { Icon } from '@/components/Icon'
 import { AllergyNotice } from '@/components/AllergyNotice'
+import { ProgressBar } from '@/components/ProgressBar'
+import { ScreenHeader } from '@/components/ScreenHeader'
 import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
 import { useCustomization } from '@/lib/customizationContext'
@@ -25,29 +27,27 @@ interface NutritionV2Props {
 }
 
 /**
- * Qimmah v2.1 Momentum data palette (Slice 5). Protein green + water/recovery
- * teal are semantic per the v2.1 spec; carbs/fat ride the blue/amber data
- * series; calories are data and therefore use blue, never Ember.
+ * لوحة بيانات التغذية بالهوية الكلاسيكية: نفس ألوان الماكروز التي كانت قبل موجة
+ * v2 (بروتين أخضر · كارب أزرق · دهون كهرماني) والماء بلون الهوية. الألوان هنا
+ * تزيينية (حلقات، أشرطة، تلوين أيقونات) وكلّها تتجاوز عتبة 3:1 لعناصر الواجهة.
  */
 const CLR = {
-  protein: 'var(--v2-green)',
-  water: 'var(--v2-teal)',
-  carbs: 'var(--v2-blue)',
-  fat: 'var(--v2-blue)',
-  calorie: 'var(--v2-blue)',
+  protein: '#3E9E6B',
+  water: 'var(--c-primary)',
+  carbs: '#0ea5e9',
+  fat: '#e0941f',
+  calorie: 'var(--c-primary)',
 } as const
 
 /**
- * AA-safe (≥4.5:1 with white) shades of the same hues, used ONLY where white
- * text sits on the accent (nudge pills, water quick-add). The spec hexes above
- * stay for decorative use (rings, borders, icon tints, progress bars — all pass
- * the 3:1 UI-component bar). Keeps the palette identity while meeting WCAG 1.4.3.
+ * درجات داكنة آمنة (≥4.5:1 مع الأبيض) من نفس الأطياف، لأي نصّ ملوّن على خلفية
+ * فاتحة داخل بطاقات التنبيه — التزامًا بـWCAG 1.4.3.
  */
 const CLR_ON = {
-  protein: 'var(--v2-green-text)',
-  water: 'var(--v2-teal-text)',
-  trend: 'var(--v2-blue-text)',
-  calorie: 'var(--v2-blue-text)',
+  protein: '#2F7B53',
+  water: 'var(--c-primary)',
+  trend: '#0369a1',
+  calorie: 'var(--c-primary)',
 } as const
 
 const SLOTS: { slot: MealSlot; ar: string; en: string; icon: string }[] = [
@@ -117,26 +117,29 @@ export function NutritionV2({ lang }: NutritionV2Props) {
 
   const { calories, macros, water } = model
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light bg-page px-4 pb-6 pt-3 text-ink-900">
-      <div className="v2-screen-enter mx-auto w-full max-w-md space-y-5">
-        <header className="flex items-center justify-between pt-1">
-          <h2 className="text-xl font-black tracking-tight">{t('ملخّص اليوم', 'Today’s summary')}</h2>
-          {model.goalLabel && (
-            <span className="v2-bg-blue-soft v2-text-blue rounded-full border border-[color:var(--v2-blue)] px-3 py-1 text-xs font-bold">
+    <div dir={ar ? 'rtl' : 'ltr'} className="overflow-x-hidden px-4 py-4 text-ink-900">
+      <ScreenHeader
+        icon="Salad"
+        title={t('التغذية', 'Nutrition')}
+        action={
+          model.goalLabel ? (
+            <span className="shrink-0 rounded-full bg-primary-soft px-3 py-1 text-xs font-bold text-primary-c">
               {t('الهدف · ', 'Goal · ')}{model.goalLabel}
             </span>
-          )}
-        </header>
+          ) : undefined
+        }
+      />
 
+      <div className="space-y-4">
         {/* تحذير الحساسيات — يظهر فقط لمن سجّل حساسية. الخطة لا تُفلترها تلقائيًا
             بعد، فنقولها صراحةً بدل الصمت عنها. */}
         <AllergyNotice lang={lang} />
 
-        {/* Goal-driven hero */}
-        <section className="relative overflow-hidden rounded-3xl border border-line bg-surface p-5 shadow-card">
-          <p className="v2-text-blue text-xs font-black uppercase tracking-wider">{model.hero.priorityLabel}</p>
-          <h2 className="mt-2 text-2xl font-black leading-tight">{model.hero.title}</h2>
-          <p className="mt-2 text-sm text-ink-500">{model.hero.subtitle}</p>
+        {/* بطاقة اليوم — الأولوية + السعرات مقابل الهدف + زر التسجيل */}
+        <section className="card p-5">
+          <p className="text-xs font-bold text-ink-500">{model.hero.priorityLabel}</p>
+          <h2 className="mt-2 text-lg font-black leading-tight text-ink-900">{model.hero.title}</h2>
+          <p className="mt-1.5 text-sm leading-relaxed text-ink-500">{model.hero.subtitle}</p>
           {calories.target > 0 && (
             <div className="mt-4">
               <div className="flex items-baseline justify-between text-xs font-bold">
@@ -146,60 +149,53 @@ export function NutritionV2({ lang }: NutritionV2Props) {
                   <span className="text-ink-400"> / {calories.target.toLocaleString('en-US')} {t('سعرة', 'kcal')}</span>
                 </span>
               </div>
-              <Bar pct={pct(calories.consumed, calories.target)} color={CLR.calorie} className="mt-1.5" />
+              <ProgressBar current={calories.consumed} target={calories.target || 1} color="bg-primary" className="mt-2" />
             </div>
           )}
-          <button type="button" onClick={() => openAdd(targetSlot)} className="btn-primary mt-4 w-full py-3.5 text-[1.1875rem]">
+          <button type="button" onClick={() => openAdd(targetSlot)} className="btn-primary mt-4 w-full py-3">
             <Icon name="Plus" className="h-5 w-5" />
             {model.hero.ctaLabel}
           </button>
         </section>
 
-        {/* A single next-best nudge keeps the home surface calm. */}
+        {/* خطوة تالية واحدة تُبقي الشاشة هادئة. */}
         {model.nudges.length > 0 && (
-          <section className="space-y-2.5" aria-label={t('خطوتك التالية', 'Your next step')}>
+          <section className="space-y-3" aria-label={t('خطوتك التالية', 'Your next step')}>
             {model.nudges.slice(0, 1).map((n) => (
               <NudgeRow key={n.id} lang={lang} nudge={n} onAction={() => runNudge(n)} />
             ))}
           </section>
         )}
 
-        {/* Details stay available without making the first view feel like a dashboard. */}
-        <details className="group rounded-2xl border border-line bg-surface">
-          <summary className="flex min-h-[3.75rem] cursor-pointer list-none items-center gap-3 px-4 py-3 [&::-webkit-details-marker]:hidden">
-            <span className="grid h-9 w-9 place-items-center rounded-xl bg-beige text-ink-500"><Icon name="ChartPie" className="h-4 w-4" /></span>
-            <h3 className="min-w-0 flex-1 text-sm font-black">{t('تفاصيل الماكروز', 'Macro details')}</h3>
-            <Icon name="ChevronDown" className="h-4 w-4 text-ink-400 transition-transform group-open:rotate-180" />
-          </summary>
-          <div className="grid grid-cols-4 gap-2 border-t border-line px-3 pb-3 pt-3">
-            <MacroRing label={t('بروتين', 'Protein')} consumed={macros.protein.consumed} target={macros.protein.target} unit="g" color={CLR.protein} />
-            <MacroRing label={t('كارب', 'Carbs')} consumed={macros.carbs.consumed} target={macros.carbs.target} unit="g" color={CLR.carbs} />
-            <MacroRing label={t('دهون', 'Fat')} consumed={macros.fat.consumed} target={macros.fat.target} unit="g" color={CLR.fat} />
-            <MacroRing
-              label={t('ماء', 'Water')}
-              consumed={water.consumedMl / 1000}
-              target={water.targetMl / 1000}
-              unit={t('ل', 'L')}
-              decimals={1}
-              color={CLR.water}
-            />
-          </div>
-        </details>
+        {/* ملخّص الماكروز + الماء — بطاقات حلقات كلاسيكية */}
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <MacroCard label={t('بروتين', 'Protein')} consumed={macros.protein.consumed} target={macros.protein.target} unit="g" color={CLR.protein} />
+          <MacroCard label={t('كارب', 'Carbs')} consumed={macros.carbs.consumed} target={macros.carbs.target} unit="g" color={CLR.carbs} />
+          <MacroCard label={t('دهون', 'Fat')} consumed={macros.fat.consumed} target={macros.fat.target} unit="g" color={CLR.fat} />
+          <MacroCard
+            label={t('ماء', 'Water')}
+            consumed={water.consumedMl / 1000}
+            target={water.targetMl / 1000}
+            unit={t('ل', 'L')}
+            decimals={1}
+            color={CLR.water}
+          />
+        </div>
 
-        {/* Water — teal quick-add */}
+        {/* الماء */}
         {water.targetMl > 0 && (
-          <section id="nutrition-water" className="rounded-2xl border border-line bg-surface p-4">
+          <section id="nutrition-water" className="card p-5">
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-1.5 text-sm font-bold text-ink-700">
-                <Icon name="Droplets" className="h-4 w-4" style={{ color: CLR.water }} />
+                <Icon name="Droplets" className="h-4 w-4 text-primary-c" />
                 {t('الماء', 'Water')}
               </span>
-              <span dir="ltr" className="text-sm font-black tabular-nums" style={{ color: CLR_ON.water }}>
+              <span dir="ltr" className="text-sm font-black tabular-nums text-primary-c">
                 {(water.consumedMl / 1000).toFixed(2)} / {(water.targetMl / 1000).toFixed(1)} {t('ل', 'L')}
               </span>
             </div>
-            <Bar pct={pct(water.consumedMl, water.targetMl)} color={CLR.water} className="mt-2.5" />
-            <div className="mt-3 flex gap-2">
+            <ProgressBar current={water.consumedMl} target={water.targetMl || 1} color="bg-primary" className="mt-3 h-1.5" />
+            <div className="mt-3 flex flex-wrap gap-2">
               <WaterBtn label={t('+ ٢٥٠ مل', '+250 ml')} onClick={() => { addWaterToDay(250); bump() }} />
               <WaterBtn label={t('+ ٥٠٠ مل', '+500 ml')} onClick={() => { addWaterToDay(500); bump() }} />
             </div>
@@ -207,8 +203,8 @@ export function NutritionV2({ lang }: NutritionV2Props) {
           </section>
         )}
 
-        {/* Meals */}
-        <section className="space-y-2.5" aria-label={t('وجبات اليوم', 'Today’s meals')}>
+        {/* الوجبات */}
+        <section className="space-y-3" aria-label={t('وجبات اليوم', 'Today’s meals')}>
           {model.meals.map((m) => {
             const meta = SLOTS.find((s) => s.slot === m.slot)!
             return (
@@ -216,27 +212,30 @@ export function NutritionV2({ lang }: NutritionV2Props) {
                 key={m.slot}
                 type="button"
                 onClick={() => openAdd(m.slot)}
-                className="v2-pressable flex w-full items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3 text-start hover:border-[color:var(--v2-blue)]"
+                className="card flex w-full items-center gap-3 p-4 text-start transition-colors hover:border-primary-soft"
               >
                 <span
-                  className={cn('grid h-11 w-11 shrink-0 place-items-center rounded-xl', m.logged ? 'text-white' : 'bg-beige text-ink-500')}
-                  style={m.logged ? { backgroundColor: CLR.protein } : undefined}
+                  className={cn(
+                    'grid h-9 w-9 shrink-0 place-items-center rounded-xl',
+                    m.logged ? 'bg-primary text-white' : 'bg-primary-soft text-primary-c',
+                  )}
                 >
-                  <Icon name={m.logged ? 'Check' : meta.icon} className="h-5 w-5" />
+                  <Icon name={m.logged ? 'Check' : meta.icon} className="h-4 w-4" />
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-bold">{ar ? m.nameAr : m.nameEn}</span>
-                  <span className="block text-xs text-ink-500">
+                  <span className="block text-sm font-bold text-ink-900">{ar ? m.nameAr : m.nameEn}</span>
+                  <span className="block text-[11px] text-ink-400">
                     {m.logged ? `${m.calories} ${t('سعرة', 'kcal')} · ${m.proteinGrams}g ${t('بروتين', 'protein')}` : t('لم تُسجّل بعد', 'Not logged yet')}
                   </span>
                 </span>
-                <span className="v2-text-blue shrink-0 text-xs font-black">{t('أضف', 'Add')} ‹</span>
+                <span className="shrink-0 text-xs font-black text-primary-c">{t('أضف', 'Add')} ‹</span>
               </button>
             )
           })}
         </section>
 
-        <p className="px-1 text-center text-[0.7rem] text-ink-400">
+        <p className="mt-6 flex items-start gap-2 text-[11px] text-ink-400">
+          <Icon name="Info" className="mt-0.5 h-3.5 w-3.5 shrink-0" />
           {t('القيم تقديرية · محفوظة على هذا الجهاز.', 'Values are estimates · saved on this device.')}
         </p>
       </div>
@@ -246,64 +245,67 @@ export function NutritionV2({ lang }: NutritionV2Props) {
 
 const pct = (consumed: number, target: number) => (target > 0 ? Math.min(1, consumed / target) : 0)
 
-/** Verb-first nudge row — colored inline-start accent + icon + action pill. */
+/** سطر الخطوة التالية — بطاقة كلاسيكية بأيقونة ملوّنة وزر إجراء. */
 function NudgeRow({ lang, nudge, onAction }: { lang: Lang; nudge: Nudge; onAction: () => void }) {
   const ar = lang !== 'en'
-  const { accent, on } = NUDGE_CLR[nudge.tone]
+  const { accent } = NUDGE_CLR[nudge.tone]
   return (
-    <div
-      className="flex items-center gap-3 rounded-2xl border border-line bg-surface py-3 pe-4 ps-3.5"
-      style={{ borderInlineStartWidth: 3, borderInlineStartColor: accent }}
-    >
-      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl" style={{ backgroundColor: `color-mix(in srgb, ${accent} 10%, transparent)`, color: on }}>
-        <Icon name={nudge.icon} className="h-4.5 w-4.5" />
+    <div className="card flex items-center gap-3 p-4">
+      <span
+        className="grid h-9 w-9 shrink-0 place-items-center rounded-xl"
+        style={{ backgroundColor: `color-mix(in srgb, ${accent} 12%, transparent)`, color: accent }}
+      >
+        <Icon name={nudge.icon} className="h-4 w-4" />
       </span>
       <p className="min-w-0 flex-1 text-sm font-bold leading-snug text-ink-900">{nudge.text}</p>
-      <button
-        type="button"
-        onClick={onAction}
-        className="shrink-0 rounded-full px-3.5 py-1.5 text-xs font-black text-white"
-        style={{ backgroundColor: on }}
-      >
+      <button type="button" onClick={onAction} className="btn-primary shrink-0 px-3 py-1.5 text-xs">
         {nudge.actionLabel} {ar ? '‹' : '›'}
       </button>
     </div>
   )
 }
 
-/** Local SVG progress ring (no libs) — consumed / target. */
-function MacroRing({ label, consumed, target, unit, color, decimals = 0 }: { label: string; consumed: number; target: number; unit: string; color: string; decimals?: number }) {
+/**
+ * بطاقة ماكرو كلاسيكية — حلقة SVG محلية (بلا مكتبات) بجانب التسمية والقيمة.
+ */
+function MacroCard({ label, consumed, target, unit, color, decimals = 0 }: { label: string; consumed: number; target: number; unit: string; color: string; decimals?: number }) {
   const p = pct(consumed, target)
-  const r = 16
-  const c = 2 * Math.PI * r
-  const dash = p * c
   const hasTarget = target > 0
   const consumedText = consumed.toFixed(decimals)
   const targetText = target.toFixed(decimals)
   return (
-    <div className="flex flex-col items-center gap-1.5 rounded-2xl border border-line bg-surface px-1 py-3">
-      <div className="relative h-14 w-14">
-        <svg viewBox="0 0 40 40" className="h-14 w-14 -rotate-90" role="img" aria-label={`${label}: ${consumedText} / ${hasTarget ? targetText : '—'} ${unit}`}>
-          <circle cx="20" cy="20" r={r} fill="none" stroke="currentColor" strokeWidth="4" className="text-line" />
-          {hasTarget && p > 0 && (
-            <circle cx="20" cy="20" r={r} fill="none" stroke={color} strokeWidth="4" strokeLinecap="round" strokeDasharray={`${dash} ${c - dash}`} className="v2-fill" />
-          )}
-        </svg>
-        <span className="absolute inset-0 grid place-items-center text-[0.68rem] font-black tabular-nums text-ink-900">
+    <div className="card flex items-center gap-3 p-4">
+      <Ring pct={p} color={color} label={`${label}: ${consumedText} / ${hasTarget ? targetText : '—'} ${unit}`} />
+      <div className="min-w-0">
+        <p className="truncate text-xs text-ink-500">{label}</p>
+        <p className="mt-0.5 text-sm font-black tabular-nums text-ink-900">
           {hasTarget ? consumedText : '—'}
-        </span>
+          <span className="text-[11px] font-bold text-ink-400"> / {hasTarget ? `${targetText}${unit}` : '—'}</span>
+        </p>
       </div>
-      <span className="text-[0.68rem] font-bold text-ink-500">{label}</span>
-      <span className="text-[0.6rem] tabular-nums text-ink-400">{hasTarget ? `${targetText}${unit}` : '—'}</span>
     </div>
   )
 }
 
-function Bar({ pct: p, color, className }: { pct: number; color: string; className?: string }) {
+/** حلقة تقدّم SVG محلية (بلا مكتبات) — نسبة المستهلَك إلى الهدف. */
+function Ring({ pct: p, color, label }: { pct: number; color: string; label: string }) {
+  const r = 15
+  const c = 2 * Math.PI * r
+  const dash = Math.max(0, Math.min(1, p)) * c
   return (
-    <div className={cn('h-2 w-full overflow-hidden rounded-full bg-line', className)} role="progressbar" aria-valuenow={Math.round(p * 100)} aria-valuemin={0} aria-valuemax={100}>
-      <div className="v2-fill h-full rounded-full" style={{ width: `${Math.max(0, Math.min(1, p)) * 100}%`, backgroundColor: color }} />
-    </div>
+    <svg viewBox="0 0 40 40" className="h-10 w-10 shrink-0 -rotate-90" role="img" aria-label={label}>
+      <circle cx="20" cy="20" r={r} fill="none" stroke="currentColor" strokeWidth="4" className="text-line" />
+      <circle
+        cx="20"
+        cy="20"
+        r={r}
+        fill="none"
+        stroke={color}
+        strokeWidth="4"
+        strokeLinecap="round"
+        strokeDasharray={`${dash} ${c - dash}`}
+      />
+    </svg>
   )
 }
 
@@ -326,11 +328,11 @@ function FoodRow({ f, lang, onLog }: { f: FoodItem; lang: Lang; onLog: (servings
     ? f.servingLabelAr
     : servingSummary(f, lang, nutritionScreenStrings[lang].gramsUnit) ?? f.servingLabelAr
   return (
-    <div className="rounded-2xl border border-line bg-surface px-4 py-3">
+    <div className="card px-4 py-3">
       <div className="flex items-center gap-3">
         <span className="min-w-0 flex-1">
-          <span className="block text-sm font-bold">{ar ? f.nameAr : f.nameEn}</span>
-          <span className="block text-xs text-ink-500">
+          <span className="block text-sm font-bold text-ink-900">{ar ? f.nameAr : f.nameEn}</span>
+          <span className="block text-[11px] text-ink-400">
             ~{cal} {t('سعرة', 'kcal')} · {pro}g {t('بروتين', 'protein')} · {t('تقدير', 'est.')} / {servingText}
           </span>
         </span>
@@ -338,7 +340,7 @@ function FoodRow({ f, lang, onLog }: { f: FoodItem; lang: Lang; onLog: (servings
           type="button"
           onClick={() => onLog(servings)}
           aria-label={t(`أضف ${f.nameAr} ×${servings}`, `Add ${f.nameEn} ×${servings}`)}
-          className="v2-bg-blue v2-pressable grid h-11 w-11 shrink-0 place-items-center rounded-xl text-white"
+          className="btn-primary grid h-11 w-11 shrink-0 place-items-center rounded-xl px-0 py-0"
         >
           <Icon name="Plus" className="h-5 w-5" />
         </button>
@@ -346,9 +348,9 @@ function FoodRow({ f, lang, onLog }: { f: FoodItem; lang: Lang; onLog: (servings
       <div className="mt-2 flex items-center justify-between border-t border-line pt-2">
         <span className="text-xs font-bold text-ink-500">{t('عدد الحصص', 'Servings')}</span>
         <div className="flex items-center gap-2">
-          <button type="button" onClick={() => step(-0.5)} aria-label={t('أقل', 'Fewer')} className="grid h-9 w-9 place-items-center rounded-lg border border-line text-ink-700"><Icon name="Minus" className="h-4 w-4" /></button>
-          <span className="w-8 text-center text-sm font-black tabular-nums">{servings}</span>
-          <button type="button" onClick={() => step(0.5)} aria-label={t('أكثر', 'More')} className="grid h-9 w-9 place-items-center rounded-lg border border-line text-ink-700"><Icon name="Plus" className="h-4 w-4" /></button>
+          <button type="button" onClick={() => step(-0.5)} aria-label={t('أقل', 'Fewer')} className="grid h-9 w-9 place-items-center rounded-lg border border-line text-ink-700 hover:bg-beige"><Icon name="Minus" className="h-4 w-4" /></button>
+          <span className="w-8 text-center text-sm font-black tabular-nums text-ink-900">{servings}</span>
+          <button type="button" onClick={() => step(0.5)} aria-label={t('أكثر', 'More')} className="grid h-9 w-9 place-items-center rounded-lg border border-line text-ink-700 hover:bg-beige"><Icon name="Plus" className="h-4 w-4" /></button>
         </div>
       </div>
     </div>
@@ -377,7 +379,7 @@ function WaterCustomAdd({ lang, onAdd }: { lang: Lang; onAdd: (ml: number) => vo
         placeholder={t('مخصّص (مل)', 'Custom (ml)')}
         className="input min-h-[44px] flex-1 text-start tabular-nums"
       />
-      <button type="button" onClick={submit} className="min-h-[44px] shrink-0 rounded-xl px-4 text-xs font-black text-white transition-opacity hover:opacity-90 disabled:opacity-50" style={{ backgroundColor: CLR_ON.water }} disabled={!ml}>
+      <button type="button" onClick={submit} className="btn-primary shrink-0 px-4 py-2 text-xs disabled:cursor-not-allowed disabled:opacity-40" disabled={!ml}>
         {t('أضف', 'Add')}
       </button>
     </div>
@@ -385,14 +387,8 @@ function WaterCustomAdd({ lang, onAdd }: { lang: Lang; onAdd: (ml: number) => vo
 }
 
 function WaterBtn({ label, onClick }: { label: string; onClick: () => void }) {
-  // White on AA-safe teal (4.52:1) — the quick-add is interactive text.
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="flex-1 rounded-xl py-2.5 text-xs font-black text-white transition-opacity hover:opacity-90"
-      style={{ backgroundColor: CLR_ON.water }}
-    >
+    <button type="button" onClick={onClick} className="btn-ghost px-3 py-2 text-xs">
       {label}
     </button>
   )
@@ -429,18 +425,18 @@ function AddMeal({ lang, slot, onAdd, onBack }: { lang: Lang; slot: MealSlot; on
   }
 
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light bg-page px-4 pb-6 pt-3 text-ink-900">
-      <div className="v2-screen-enter mx-auto w-full max-w-md">
-        <div className="flex items-center gap-3">
-          <button type="button" onClick={onBack} aria-label={t('رجوع', 'Back')} className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-line bg-surface">
+    <div dir={ar ? 'rtl' : 'ltr'} className="overflow-x-hidden px-4 py-4 text-ink-900">
+      <div>
+        <div className="mb-4 flex items-center gap-2.5">
+          <button type="button" onClick={onBack} aria-label={t('رجوع', 'Back')} className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-line bg-surface text-ink-700 hover:bg-beige">
             <Icon name="ChevronRight" className={cn('h-5 w-5', !ar && 'rotate-180')} />
           </button>
-          <h1 className="text-xl font-black">{t(`أضف لـ ${slotLabel.ar}`, `Add to ${slotLabel.en}`)}</h1>
+          <h1 className="min-w-0 flex-1 truncate text-lg font-black text-ink-900">{t(`أضف لـ ${slotLabel.ar}`, `Add to ${slotLabel.en}`)}</h1>
         </div>
 
-        {/* Fast logging: search + barcode */}
-        <div className="mt-4 flex items-center gap-2">
-          <div className="flex flex-1 items-center gap-2 rounded-2xl border border-line bg-surface px-4 py-3">
+        {/* التسجيل السريع: بحث + باركود */}
+        <div className="flex items-center gap-2">
+          <div className="card flex flex-1 items-center gap-2 px-4 py-3">
             <Icon name="Search" className="h-5 w-5 text-ink-400" />
             <input
               value={q}
@@ -454,8 +450,7 @@ function AddMeal({ lang, slot, onAdd, onBack }: { lang: Lang; slot: MealSlot; on
             type="button"
             onClick={() => setScanning(true)}
             aria-label={t('مسح باركود', 'Scan barcode')}
-            className="grid h-[3.25rem] w-[3.25rem] shrink-0 place-items-center rounded-2xl border text-white"
-            style={{ backgroundColor: CLR.water, borderColor: CLR.water }}
+            className="btn-primary grid h-[3.25rem] w-[3.25rem] shrink-0 place-items-center rounded-xl px-0 py-0"
           >
             <Icon name="ScanLine" className="h-5 w-5" />
           </button>
@@ -465,13 +460,15 @@ function AddMeal({ lang, slot, onAdd, onBack }: { lang: Lang; slot: MealSlot; on
           type="button"
           onClick={() => setHighProtein((v) => !v)}
           aria-pressed={highProtein}
-          className={cn('mt-3 rounded-full border px-3.5 py-1.5 text-xs font-bold', highProtein ? 'text-white' : 'border-line bg-surface text-ink-700')}
-          style={highProtein ? { backgroundColor: CLR_ON.protein, borderColor: CLR_ON.protein } : undefined}
+          className={cn(
+            'mt-3 rounded-full border px-3.5 py-1.5 text-xs font-bold transition-colors',
+            highProtein ? 'border-primary-soft bg-primary-soft text-primary-c' : 'border-line bg-surface text-ink-700 hover:bg-beige',
+          )}
         >
           {t('عالي البروتين', 'High protein')}
         </button>
 
-        <div className="mt-4 space-y-2">
+        <div className="mt-4 space-y-3">
           {results.map((f) => (
             <FoodRow key={f.id ?? f.nameAr} f={f} lang={lang} onLog={(servings) => logFood(f, servings)} />
           ))}

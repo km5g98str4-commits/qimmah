@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Icon } from '@/components/Icon'
+import { ScreenHeader } from '@/components/ScreenHeader'
 import { cn } from '@/lib/cn'
 import type { Lang, ThemePref, ThemeSchedule } from '@/lib/appPreferences'
 import { getTheme, setTheme, getThemeSchedule, enableSunsetSchedule, disableSunsetSchedule } from '@/lib/appPreferences'
@@ -97,41 +98,41 @@ export function ProfileV2({ lang, onNavigate }: ProfileV2Props) {
   const numerals = (n: number) => (ar ? n.toLocaleString('ar-EG') : String(n))
 
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light bg-page px-4 pb-6 pt-3 text-ink-900">
-      <div className="v2-screen-enter mx-auto w-full max-w-md space-y-5">
-        <h1 className="pt-1 text-2xl font-black tracking-tight">{t('ملفك التدريبي', 'Your training profile')}</h1>
+    <div dir={ar ? 'rtl' : 'ltr'} className="overflow-x-hidden px-4 py-4 text-ink-900">
+      <ScreenHeader icon="User" title={t('حسابي', 'Profile')} />
 
-        {/* Earned-identity header — avatar · name · goal badge */}
-        <section className="flex items-center gap-4 rounded-3xl border border-line bg-surface p-5 shadow-card">
-          <span className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-beige text-2xl font-black text-ink-700">{model.user.initials}</span>
+      <div className="space-y-4">
+        {/* بطاقة الهوية — الاسم + شارة الهدف */}
+        <section className="card flex items-center gap-4 p-5">
+          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary-soft text-lg font-black text-primary-c">{model.user.initials}</span>
           <div className="min-w-0">
-            <p className="truncate text-lg font-black">{model.user.displayName}</p>
+            <p className="truncate text-sm font-black text-ink-900">{model.user.displayName}</p>
             {model.trainingIdentity.goalLabel && (
-              <span className="v2-bg-blue-soft v2-text-blue mt-1.5 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-black">
+              <span className="mt-1.5 inline-flex items-center gap-1.5 rounded-full bg-primary-soft px-2.5 py-1 text-xs font-bold text-primary-c">
                 {t('الهدف', 'Goal')} · {model.trainingIdentity.goalLabel}
               </span>
             )}
           </div>
         </section>
 
-        {/* Three stat blocks — real data only (RTL: تمرين · أيام متتالية · أرقام قياسية) */}
+        {/* ثلاث بطاقات أرقام — بيانات حقيقية فقط (تمرين · أيام متتالية · أرقام قياسية) */}
         <section className="grid grid-cols-3 gap-3">
           <Stat value={numerals(model.stats.workoutCount)} label={t('تمرين', 'Workouts')} />
           <Stat value={numerals(model.stats.streakDays)} label={t('أيام متتالية', 'Day streak')} />
           <Stat value={numerals(model.stats.prCount)} label={t('أرقام قياسية', 'PRs')} />
         </section>
         {!model.stats.hasData && (
-          <p className="-mt-2 px-1 text-center text-[0.7rem] text-ink-500">{t('نحتاج بيانات أكثر — أكمل تمرينك الأول.', 'We need more data — complete your first workout.')}</p>
+          <p className="px-1 text-center text-[11px] text-ink-400">{t('نحتاج بيانات أكثر — أكمل تمرينك الأول.', 'We need more data — complete your first workout.')}</p>
         )}
 
-        {/* Program card */}
+        {/* بطاقة البرنامج */}
         <ProgramCard model={model} t={t} numerals={numerals} onOpen={() => onNavigate(model.program.onboarded ? 'workout' : 'setup')} />
 
-        {/* Commitment heatmap — «الالتزام · آخر 10 أسابيع» */}
+        {/* خريطة الالتزام — «الالتزام · آخر ١٠ أسابيع» */}
         <CommitmentHeatmap model={model} lang={lang} t={t} numerals={numerals} />
 
-        {/* Rows */}
-        <section className="space-y-2.5">
+        {/* روابط */}
+        <section className="space-y-3">
           <Row icon="LayoutGrid" label={t('القياسات والصور', 'Measurements & photos')} onClick={() => onNavigate('progress')} />
           <Row icon="Pill" label={t('الأدوية والمكمّلات', 'Supplements & meds')} onClick={() => setScreen('routine')} />
           <Row icon="Settings" label={t('الإعدادات والخصوصية', 'Settings & privacy')} onClick={() => setScreen('settings')} />
@@ -160,11 +161,11 @@ function ProgramCard({ model, t, numerals, onOpen }: { model: ProfileV2Model; t:
       ? t(`الأسبوع ${numerals(program.weekOf)} من ${numerals(program.totalWeeks)} · ${numerals(program.daysPerWeek)} أيام/أسبوع`, `Week ${program.weekOf} of ${program.totalWeeks} · ${program.daysPerWeek} days/week`)
       : t(`الأسبوع ${numerals(program.weekOf)} من ${numerals(program.totalWeeks)}`, `Week ${program.weekOf} of ${program.totalWeeks}`)
   return (
-    <button type="button" onClick={onOpen} className="v2-pressable flex w-full items-center gap-3 rounded-2xl border border-line bg-surface p-4 text-start hover:border-[color:var(--v2-blue)]">
-      <span className="v2-bg-blue-soft v2-text-blue grid h-10 w-10 shrink-0 place-items-center rounded-xl"><Icon name="Dumbbell" className="h-5 w-5" /></span>
+    <button type="button" onClick={onOpen} className="card flex w-full items-center gap-3 p-5 text-start transition-colors hover:border-primary-soft">
+      <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary-c"><Icon name="Dumbbell" className="h-5 w-5" /></span>
       <span className="min-w-0 flex-1">
-        <span className="block text-sm font-black">{program.title}</span>
-        <span className="mt-0.5 block text-xs text-ink-500">{sub}</span>
+        <span className="block text-sm font-black text-ink-900">{program.title}</span>
+        <span className="mt-0.5 block text-xs leading-relaxed text-ink-500">{sub}</span>
       </span>
       <Icon name="ChevronLeft" className="h-4 w-4 shrink-0 text-ink-400 rtl:rotate-0 ltr:rotate-180" />
     </button>
@@ -178,17 +179,17 @@ function CommitmentHeatmap({ model, lang, t, numerals }: { model: ProfileV2Model
     ? t(`تمرّنت في ${numerals(active)} من آخر ${numerals(COMMITMENT_WEEKS)} أسابيع`, `Trained in ${active} of the last ${COMMITMENT_WEEKS} weeks`)
     : t('لا تمارين مسجّلة بعد', 'No workouts logged yet')
   return (
-    <section className="rounded-2xl border border-line bg-surface p-4">
+    <section className="card p-5">
       <p className="flex items-center justify-between gap-2">
-        <span className="text-sm font-black">{t('الالتزام', 'Consistency')}</span>
-        <span className="text-[0.7rem] font-bold text-ink-500">{t(`آخر ${numerals(COMMITMENT_WEEKS)} أسابيع`, `Last ${COMMITMENT_WEEKS} weeks`)}</span>
+        <span className="text-base font-black text-ink-900">{t('الالتزام', 'Consistency')}</span>
+        <span className="text-[11px] font-bold text-ink-400">{t(`آخر ${numerals(COMMITMENT_WEEKS)} أسابيع`, `Last ${COMMITMENT_WEEKS} weeks`)}</span>
       </p>
       <div className="mt-3 flex items-center gap-1.5" role="img" aria-label={summary}>
         {model.commitment.weeks.map((w, i) => (
           <span key={i} aria-hidden="true" className={cn('h-7 flex-1 rounded-md', HEAT[w.level])} />
         ))}
       </div>
-      <p className="mt-2 text-[0.7rem] text-ink-500" dir={ar ? 'rtl' : 'ltr'}>{summary}</p>
+      <p className="mt-2 text-[11px] text-ink-400" dir={ar ? 'rtl' : 'ltr'}>{summary}</p>
     </section>
   )
 }
@@ -214,12 +215,12 @@ function RoutineScreen({
   return (
     <SubScreen title={copy.title} onBack={onBack} lang={lang}>
       {empty ? (
-        <section className="rounded-3xl border border-line bg-surface p-5 text-center shadow-card">
-          <span className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-beige text-ink-500">
-            <Icon name="Pill" className="h-6 w-6" />
+        <section className="card p-6 text-center">
+          <span className="mx-auto grid h-11 w-11 place-items-center rounded-2xl bg-primary-soft text-primary-c">
+            <Icon name="Pill" className="h-5 w-5" />
           </span>
-          <h2 className="mt-4 text-lg font-black">{copy.emptyTitle}</h2>
-          <p className="mt-1 text-sm leading-relaxed text-ink-500">{copy.emptyBody}</p>
+          <h2 className="mt-4 text-sm font-black text-ink-900">{copy.emptyTitle}</h2>
+          <p className="mt-1 text-xs leading-relaxed text-ink-400">{copy.emptyBody}</p>
           <button type="button" onClick={onEdit} className="btn-primary mt-4 w-full justify-center py-3">{copy.edit}</button>
         </section>
       ) : (
@@ -258,7 +259,7 @@ function RoutineScreen({
           </button>
         </div>
       )}
-      <p className="mt-4 flex items-start gap-2 rounded-2xl border border-line bg-beige/60 p-3 text-xs leading-relaxed text-ink-500">
+      <p className="mt-4 flex items-start gap-2 text-[11px] leading-relaxed text-ink-400">
         <Icon name="ShieldCheck" className="mt-0.5 h-4 w-4 shrink-0" />
         {copy.safety}
       </p>
@@ -279,7 +280,7 @@ function RoutineGroup({
 }) {
   return (
     <section>
-      <h2 className="mb-2 text-sm font-black text-ink-700">{title}</h2>
+      <h2 className="mb-2 text-base font-black text-ink-900">{title}</h2>
       <div className="space-y-2">
         {items.map((item) => (
           <button
@@ -288,16 +289,16 @@ function RoutineGroup({
             onClick={item.onToggle}
             aria-pressed={item.done}
             className={cn(
-              'v2-pressable flex min-h-[4.25rem] w-full items-center gap-3 rounded-2xl border px-4 py-3 text-start',
-              item.done ? 'border-primary/25 bg-primary-soft' : 'border-line bg-surface',
+              'card flex min-h-[4.25rem] w-full items-center gap-3 px-4 py-3 text-start transition-colors',
+              item.done ? 'border-primary-soft bg-primary-soft' : 'hover:border-primary-soft',
             )}
           >
-            <span className={cn('grid h-10 w-10 shrink-0 place-items-center rounded-xl', item.done ? 'bg-primary text-white' : 'bg-beige text-ink-500')}>
-              <Icon name={item.done ? 'Check' : 'Pill'} className="h-5 w-5" strokeWidth={item.done ? 3 : 2} />
+            <span className={cn('grid h-9 w-9 shrink-0 place-items-center rounded-xl', item.done ? 'bg-primary text-white' : 'bg-primary-soft text-primary-c')}>
+              <Icon name={item.done ? 'Check' : 'Pill'} className="h-4 w-4" strokeWidth={item.done ? 3 : 2} />
             </span>
             <span className="min-w-0 flex-1">
-              <span className="block text-sm font-black">{item.name}</span>
-              {item.detail && <span className="mt-0.5 block text-xs text-ink-500">{item.detail}</span>}
+              <span className="block text-sm font-bold text-ink-900">{item.name}</span>
+              {item.detail && <span className="mt-0.5 block text-[11px] text-ink-400">{item.detail}</span>}
             </span>
             <span className={cn('text-xs font-bold', item.done ? 'text-primary-c' : 'text-ink-400')}>
               {item.done ? doneLabel : pendingLabel}
@@ -309,13 +310,13 @@ function RoutineGroup({
   )
 }
 
-// NOTE: `primary` is a var()-based color, so the Tailwind `/opacity` shorthand
-// renders transparent. Use element `opacity-*` utilities for the intensity ramp.
+// ملاحظة: `primary` لون مبنيّ على var()، فاختصار `/opacity` في Tailwind يُخرجه
+// شفافًا. نستخدم أدوات `opacity-*` على العنصر نفسه لتدرّج الشدّة بلون الهوية.
 const HEAT: Record<CommitmentWeek['level'], string> = {
   0: 'bg-beige',
-  1: 'v2-heat-1',
-  2: 'v2-heat-2',
-  3: 'v2-heat-3',
+  1: 'bg-primary opacity-30',
+  2: 'bg-primary opacity-60',
+  3: 'bg-primary',
 }
 
 function Privacy({ lang, model, onBack, onDelete, onData }: { lang: Lang; model: ProfileV2Model; onBack: () => void; onDelete: () => void; onData: () => void }) {
@@ -323,17 +324,17 @@ function Privacy({ lang, model, onBack, onDelete, onData }: { lang: Lang; model:
   const t = (a: string, e: string) => (ar ? a : e)
   return (
     <SubScreen title={t('الخصوصية والبيانات', 'Privacy & data')} onBack={onBack} lang={lang}>
-      <section className="rounded-3xl border border-line bg-surface p-5">
-        <h2 className="text-xl font-black">{t('بياناتك ملكك', 'Your data is yours')}</h2>
-        <p className="mt-2 text-sm leading-relaxed text-ink-500">{t('نجمع الحد الأدنى فقط. كل التقديرات شفافة وقابلة للتعديل، ويمكنك تصدير أو حذف بياناتك في أي وقت.', 'We collect the minimum. Every estimate is transparent and editable, and you can export or delete your data anytime.')}</p>
+      <section className="card p-5">
+        <h2 className="text-base font-black text-ink-900">{t('بياناتك ملكك', 'Your data is yours')}</h2>
+        <p className="mt-2 text-xs leading-relaxed text-ink-500">{t('نجمع الحد الأدنى فقط. كل التقديرات شفافة وقابلة للتعديل، ويمكنك تصدير أو حذف بياناتك في أي وقت.', 'We collect the minimum. Every estimate is transparent and editable, and you can export or delete your data anytime.')}</p>
       </section>
-      <section className="mt-4 space-y-2.5">
+      <section className="mt-4 space-y-3">
         <InfoRow icon="BarChart3" title={t('تحليلات مجهولة', 'Anonymous analytics')} sub={t('لتحسين التطبيق فقط', 'To improve the app only')} state={model.privacy.analyticsAnonymousEnabled ? t('مفعّل', 'On') : t('مطفأ', 'Off')} />
         <InfoRow icon="Activity" title={t('مشاركة بيانات الصحة', 'Health sharing')} sub={t('غير مربوطة بعد', 'Not connected yet')} disabled />
         <InfoRow icon="Download" title={t('تصدير واستيراد بياناتي', 'Export & import my data')} sub={t('نسخة محلّية · بلا خادم', 'Local copy · no server')} onClick={onData} />
-        <button type="button" onClick={onDelete} className="v2-error-panel v2-pressable flex w-full items-center gap-3 rounded-2xl border px-4 py-3.5 text-start">
-          <span className="v2-error-icon grid h-9 w-9 shrink-0 place-items-center rounded-xl"><Icon name="Trash2" className="h-4.5 w-4.5" /></span>
-          <span className="min-w-0 flex-1"><span className="v2-error-icon block text-sm font-bold">{t('حذف الحساب نهائيًا', 'Delete account permanently')}</span><span className="block text-xs text-ink-500">{t('لا يمكن التراجع · يتطلب تأكيدًا', 'Irreversible · requires confirmation')}</span></span>
+        <button type="button" onClick={onDelete} className="card flex w-full items-center gap-3 px-4 py-3.5 text-start transition-colors hover:border-danger">
+          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-beige text-danger"><Icon name="Trash2" className="h-4 w-4" /></span>
+          <span className="min-w-0 flex-1"><span className="block text-sm font-bold text-danger">{t('حذف الحساب نهائيًا', 'Delete account permanently')}</span><span className="block text-[11px] text-ink-400">{t('لا يمكن التراجع · يتطلب تأكيدًا', 'Irreversible · requires confirmation')}</span></span>
           <Icon name="ChevronLeft" className="h-4 w-4 shrink-0 text-ink-400 rtl:rotate-0 ltr:rotate-180" />
         </button>
       </section>
@@ -358,7 +359,7 @@ function Settings({ lang, model, onBack, onAccount, onPrivacy, onNotifications, 
         <InfoRow icon="Bell" title={t('التذكيرات', 'Reminders')} sub={t('تمرين · تعافٍ · ماء · ملخّص', 'Workout · recovery · water · brief')} state="" onClick={onNotifications} />
       </Group>
       <Group title={NATIVE_SETTINGS_COPY[lang].group}>
-        <div className="rounded-2xl border border-line bg-surface px-4 py-4">
+        <div className="card px-4 py-4">
           <NativeSettingsPanel lang={lang} />
         </div>
       </Group>
@@ -447,20 +448,20 @@ function DataScreen({ lang, uid, recoveryActive, onBack }: { lang: Lang; uid: st
   return (
     <SubScreen title={t('بياناتي', 'My data')} onBack={onBack} lang={lang}>
       {/* تنويه محلّي بالكامل — صادق وواضح */}
-      <div className="mb-4 flex items-start gap-3 rounded-2xl border border-line bg-surface p-4">
-        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-beige text-ink-500"><Icon name="ShieldCheck" className="h-4.5 w-4.5" /></span>
-        <p className="text-xs leading-relaxed text-ink-500">{t('كل شيء يتمّ على جهازك — لا يُرسَل أي شيء إلى أي خادم. النسخة ملفّ JSON تحفظه أو تشاركه كما تشاء.', 'Everything happens on your device — nothing is sent to any server. The backup is a JSON file you keep or share as you wish.')}</p>
+      <div className="card mb-4 flex items-start gap-3 p-4">
+        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-beige text-ink-500"><Icon name="ShieldCheck" className="h-4 w-4" /></span>
+        <p className="text-[11px] leading-relaxed text-ink-400">{t('كل شيء يتمّ على جهازك — لا يُرسَل أي شيء إلى أي خادم. النسخة ملفّ JSON تحفظه أو تشاركه كما تشاء.', 'Everything happens on your device — nothing is sent to any server. The backup is a JSON file you keep or share as you wish.')}</p>
       </div>
 
       {phase === 'preview' && preview ? (
-        <section className="rounded-3xl border border-line bg-surface p-5">
-          <h2 className="text-lg font-black">{t('معاينة الاستيراد', 'Import preview')}</h2>
-          <p className="mt-1 text-xs text-ink-500">{t('ستحلّ هذه البيانات محلّ ما على جهازك الآن. يمكنك التراجع بعد الاستيراد.', 'This will replace what is on your device now. You can undo after importing.')}</p>
+        <section className="card p-5">
+          <h2 className="text-base font-black text-ink-900">{t('معاينة الاستيراد', 'Import preview')}</h2>
+          <p className="mt-1 text-[11px] text-ink-400">{t('ستحلّ هذه البيانات محلّ ما على جهازك الآن. يمكنك التراجع بعد الاستيراد.', 'This will replace what is on your device now. You can undo after importing.')}</p>
           <ul className="mt-4 divide-y divide-line">
             {preview.lines.filter((l) => l.count > 0).map((l) => (
               <li key={l.id} className="flex items-center justify-between py-2 text-sm">
                 <span className="font-bold text-ink-900">{l.labelAr}</span>
-                <span className="font-black tabular-nums text-ink-500">{numerals(l.count)}</span>
+                <span className="font-black tabular-nums text-ink-400">{numerals(l.count)}</span>
               </li>
             ))}
           </ul>
@@ -473,47 +474,47 @@ function DataScreen({ lang, uid, recoveryActive, onBack }: { lang: Lang; uid: st
           </div>
         </section>
       ) : phase === 'done' ? (
-        <section role="status" className="rounded-3xl border border-line bg-surface p-5 text-center">
-          <span className="v2-success-panel v2-success-icon mx-auto grid h-12 w-12 place-items-center rounded-2xl border"><Icon name="CheckCircle2" className="h-6 w-6" /></span>
-          <h2 className="mt-3 text-lg font-black">{t('تمّ الاستيراد', 'Import complete')}</h2>
-          <p className="mt-1 text-sm text-ink-500">{t('استُعيدت بياناتك على هذا الجهاز.', 'Your data was restored on this device.')}</p>
+        <section role="status" className="card p-6 text-center">
+          <span className="mx-auto grid h-11 w-11 place-items-center rounded-2xl bg-primary-soft text-success"><Icon name="CheckCircle2" className="h-5 w-5" /></span>
+          <h2 className="mt-3 text-sm font-black text-ink-900">{t('تمّ الاستيراد', 'Import complete')}</h2>
+          <p className="mt-1 text-xs text-ink-400">{t('استُعيدت بياناتك على هذا الجهاز.', 'Your data was restored on this device.')}</p>
           <div className="mt-4 flex gap-2.5">
             <button type="button" onClick={() => window.location.reload()} className="btn-primary flex-1 justify-center py-3">{t('عرض بياناتي', 'View my data')}</button>
             <button type="button" onClick={onUndo} className="btn-ghost flex-1 justify-center py-3">{t('تراجع', 'Undo')}</button>
           </div>
         </section>
       ) : (
-        <section className="space-y-2.5">
+        <section className="space-y-3">
           {error && (
-            <div role="alert" className="v2-error-panel flex items-start gap-3 rounded-2xl border p-4">
-              <span className="v2-error-icon grid h-9 w-9 shrink-0 place-items-center rounded-xl"><Icon name="AlertTriangle" className="h-4.5 w-4.5" /></span>
-              <p className="v2-error-icon text-sm font-bold">{error}</p>
+            <div role="alert" className="card flex items-start gap-3 border-danger p-4">
+              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-beige text-danger"><Icon name="AlertTriangle" className="h-4 w-4" /></span>
+              <p className="text-sm font-bold text-danger">{error}</p>
             </div>
           )}
           {note && (
-            <div role="status" className="flex items-start gap-3 rounded-2xl border border-line bg-surface p-4">
-              <span className="v2-success-panel v2-success-icon grid h-9 w-9 shrink-0 place-items-center rounded-xl border"><Icon name="CheckCircle2" className="h-4.5 w-4.5" /></span>
-              <p className="text-sm font-bold text-ink-800">{note}</p>
+            <div role="status" className="card flex items-start gap-3 p-4">
+              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-primary-soft text-success"><Icon name="CheckCircle2" className="h-4 w-4" /></span>
+              <p className="text-sm font-bold text-ink-700">{note}</p>
             </div>
           )}
 
-          <button type="button" onClick={onExport} disabled={busy} className="v2-pressable flex w-full items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3.5 text-start hover:border-[color:var(--v2-blue)] disabled:opacity-60">
-            <span className="v2-bg-blue-soft v2-text-blue grid h-10 w-10 shrink-0 place-items-center rounded-xl"><Icon name="Download" className="h-5 w-5" /></span>
-            <span className="min-w-0 flex-1"><span className="block text-sm font-black">{t('تصدير بياناتي', 'Export my data')}</span><span className="block text-xs text-ink-500">{t('نسخة كاملة (JSON) — تُحفظ أو تُشارك', 'Full copy (JSON) — save or share')}</span></span>
+          <button type="button" onClick={onExport} disabled={busy} className="card flex w-full items-center gap-3 px-4 py-3.5 text-start transition-colors hover:border-primary-soft disabled:opacity-60">
+            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary-c"><Icon name="Download" className="h-4 w-4" /></span>
+            <span className="min-w-0 flex-1"><span className="block text-sm font-bold text-ink-900">{t('تصدير بياناتي', 'Export my data')}</span><span className="block text-[11px] text-ink-400">{t('نسخة كاملة (JSON) — تُحفظ أو تُشارك', 'Full copy (JSON) — save or share')}</span></span>
             <Icon name="ChevronLeft" className="h-4 w-4 shrink-0 text-ink-400 rtl:rotate-0 ltr:rotate-180" />
           </button>
 
-          <button type="button" onClick={onPick} disabled={busy || recoveryActive} className="v2-pressable flex w-full items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3.5 text-start hover:border-[color:var(--v2-blue)] disabled:opacity-60">
-            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-beige text-ink-500"><Icon name="Save" className="h-5 w-5" /></span>
-            <span className="min-w-0 flex-1"><span className="block text-sm font-black">{t('استيراد نسخة', 'Import a backup')}</span><span className="block text-xs text-ink-500">{t('اختر ملفّ JSON صدّرته من قِمّة', 'Choose a JSON file exported from Qimmah')}</span></span>
+          <button type="button" onClick={onPick} disabled={busy || recoveryActive} className="card flex w-full items-center gap-3 px-4 py-3.5 text-start transition-colors hover:border-primary-soft disabled:opacity-60">
+            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-beige text-ink-500"><Icon name="Save" className="h-4 w-4" /></span>
+            <span className="min-w-0 flex-1"><span className="block text-sm font-bold text-ink-900">{t('استيراد نسخة', 'Import a backup')}</span><span className="block text-[11px] text-ink-400">{t('اختر ملفّ JSON صدّرته من قِمّة', 'Choose a JSON file exported from Qimmah')}</span></span>
             <Icon name="ChevronLeft" className="h-4 w-4 shrink-0 text-ink-400 rtl:rotate-0 ltr:rotate-180" />
           </button>
           <input ref={fileRef} type="file" accept="application/json,.json" className="hidden" aria-hidden="true" onChange={(e) => onFile(e.target.files?.[0])} />
 
           {undoable && (
-            <button type="button" onClick={onUndo} className="v2-pressable flex w-full items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3 text-start hover:border-[color:var(--v2-blue)]">
-              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-beige text-ink-500"><Icon name="RotateCcw" className="h-4.5 w-4.5" /></span>
-              <span className="min-w-0 flex-1"><span className="block text-sm font-bold">{t('تراجع عن آخر استيراد', 'Undo last import')}</span><span className="block text-xs text-ink-500">{t('يعيد بياناتك إلى ما قبل آخر استيراد', 'Restores your data to before the last import')}</span></span>
+            <button type="button" onClick={onUndo} className="card flex w-full items-center gap-3 px-4 py-3 text-start transition-colors hover:border-primary-soft">
+              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-beige text-ink-500"><Icon name="RotateCcw" className="h-4 w-4" /></span>
+              <span className="min-w-0 flex-1"><span className="block text-sm font-bold text-ink-900">{t('تراجع عن آخر استيراد', 'Undo last import')}</span><span className="block text-[11px] text-ink-400">{t('يعيد بياناتك إلى ما قبل آخر استيراد', 'Restores your data to before the last import')}</span></span>
             </button>
           )}
         </section>
@@ -525,13 +526,13 @@ function DataScreen({ lang, uid, recoveryActive, onBack }: { lang: Lang; uid: st
 function SubScreen({ title, onBack, lang, children }: { title: string; onBack: () => void; lang: Lang; children: ReactNode }) {
   const ar = lang !== 'en'
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light bg-page px-4 pb-6 pt-3 text-ink-900">
-      <div className="v2-screen-enter mx-auto w-full max-w-md">
-        <div className="flex items-center gap-3">
-          <button type="button" onClick={onBack} aria-label={ar ? 'رجوع' : 'Back'} className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-line bg-surface"><Icon name="ChevronRight" className="h-5 w-5 rtl:rotate-0 ltr:rotate-180" /></button>
-          <h1 className="text-xl font-black">{title}</h1>
+    <div dir={ar ? 'rtl' : 'ltr'} className="overflow-x-hidden px-4 py-4 text-ink-900">
+      <div>
+        <div className="mb-4 flex items-center gap-2.5">
+          <button type="button" onClick={onBack} aria-label={ar ? 'رجوع' : 'Back'} className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-line bg-surface text-ink-700 hover:bg-beige"><Icon name="ChevronRight" className="h-5 w-5 rtl:rotate-0 ltr:rotate-180" /></button>
+          <h1 className="min-w-0 flex-1 truncate text-lg font-black text-ink-900">{title}</h1>
         </div>
-        <div className="mt-4">{children}</div>
+        <div>{children}</div>
       </div>
     </div>
   )
@@ -599,9 +600,9 @@ function ThemeControl({ lang }: { lang: Lang }) {
     }
   }
   return (
-    <div className="rounded-2xl border border-line bg-surface p-4">
+    <div className="card p-5">
       <div className="flex items-center gap-3">
-        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-beige text-ink-500"><Icon name="Sun" className="h-5 w-5" /></span>
+        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-beige text-ink-500"><Icon name="Sun" className="h-4 w-4" /></span>
         <span className="text-sm font-bold text-ink-900">{t('السمة', 'Theme')}</span>
       </div>
       <div role="radiogroup" aria-label={t('السمة', 'Theme')} className="mt-3 grid grid-cols-3 gap-2">
@@ -662,21 +663,21 @@ function ThemeControl({ lang }: { lang: Lang }) {
 
 function Group({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="mb-5">
-      <p className="mb-2 text-xs font-black uppercase tracking-wider text-ink-500">{title}</p>
-      <div className="space-y-2">{children}</div>
+    <section className="mb-4">
+      <h2 className="mb-2 text-base font-black text-ink-900">{title}</h2>
+      <div className="space-y-3">{children}</div>
     </section>
   )
 }
 
 function Stat({ value, label }: { value: string; label: string }) {
-  return <div className="rounded-2xl border border-line bg-surface py-3 text-center"><p className="text-2xl font-black tabular-nums">{value}</p><p className="mt-0.5 text-[0.65rem] font-bold text-ink-500">{label}</p></div>
+  return <div className="card py-3 text-center"><p className="text-lg font-black tabular-nums text-ink-900">{value}</p><p className="mt-0.5 text-[10px] font-bold text-ink-400">{label}</p></div>
 }
 function Row({ icon, label, onClick }: { icon: string; label: string; onClick: () => void }) {
   return (
-    <button type="button" onClick={onClick} className="v2-pressable flex w-full items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3 text-start hover:border-[color:var(--v2-blue)]">
-      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-beige text-ink-500"><Icon name={icon} className="h-4.5 w-4.5" /></span>
-      <span className="flex-1 text-sm font-bold">{label}</span>
+    <button type="button" onClick={onClick} className="card flex w-full items-center gap-3 p-5 text-start transition-colors hover:border-primary-soft">
+      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-beige text-ink-500"><Icon name={icon} className="h-4 w-4" /></span>
+      <span className="flex-1 text-sm font-bold text-ink-700">{label}</span>
       <Icon name="ChevronLeft" className="h-4 w-4 shrink-0 text-ink-400 rtl:rotate-0 ltr:rotate-180" />
     </button>
   )
@@ -684,9 +685,9 @@ function Row({ icon, label, onClick }: { icon: string; label: string; onClick: (
 function InfoRow({ icon, title, sub, state, disabled, subNote, onClick }: { icon: string; title: string; sub: string; state?: string; disabled?: boolean; subNote?: string; onClick?: () => void }) {
   const Comp = onClick ? 'button' : 'div'
   return (
-    <Comp type={onClick ? 'button' : undefined} onClick={onClick} className={cn('flex w-full items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3 text-start', disabled && 'opacity-70', onClick && 'v2-pressable hover:border-[color:var(--v2-blue)]')}>
-      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-beige text-ink-500"><Icon name={icon} className="h-4.5 w-4.5" /></span>
-      <span className="min-w-0 flex-1"><span className="block text-sm font-bold">{title}</span><span className="block text-xs text-ink-500">{subNote ?? sub}</span></span>
+    <Comp type={onClick ? 'button' : undefined} onClick={onClick} className={cn('card flex w-full items-center gap-3 px-4 py-3 text-start', disabled && 'opacity-70', onClick && 'transition-colors hover:border-primary-soft')}>
+      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-beige text-ink-500"><Icon name={icon} className="h-4 w-4" /></span>
+      <span className="min-w-0 flex-1"><span className="block text-sm font-bold text-ink-900">{title}</span><span className="block text-[11px] text-ink-400">{subNote ?? sub}</span></span>
       {state != null && state !== '' && <span className="shrink-0 text-xs font-black text-ink-500">{state}</span>}
       {disabled && <span className="shrink-0 text-[0.65rem] font-bold text-ink-500">{subNote ? '' : sub}</span>}
     </Comp>
