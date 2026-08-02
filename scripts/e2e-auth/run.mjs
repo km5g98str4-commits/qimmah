@@ -334,6 +334,45 @@ async function testDelete(browser) {
 }
 
 // ————————————————————————————————————————————————————————————————
+// اختبار Duplicate Email (QEA-006)
+// ————————————————————————————————————————————————————————————————
+async function testDuplicateEmail(browser) {
+  console.log('\n== Duplicate Email ==')
+  currentFlow = 'duplicate-email'
+  const email = randomTestEmail(2)
+  assertTestEmail(email)
+  const pw = randomPassword('Dup')
+  const ctx = await browser.newContext({ locale: 'ar' })
+  const page = await ctx.newPage()
+  try {
+    await register(page, email, pw)
+    const uid = psql(`select id from auth.users where email = '${email}'`).trim()
+    record('التسجيل الأول ينجئ الحساب', !!uid, mask(email))
+
+    // خروج (إن دخلنا تلقائيًا) قبل محاولة تسجيل ثانية بنفس البريد من شاشة حساب نظيفة.
+    await page.evaluate(() => localStorage.clear()).catch(() => {})
+    await register(page, email, pw) // نفس البريد وكلمة المرور — يجب أن يُرفَض لا أن يُسجَّل حسابًا ثانيًا.
+
+    const errorText = await page.locator('body').innerText().catch(() => '')
+    const showsDuplicateError = /مسجّل مسبقًا|already registered/i.test(errorText)
+    record('رسالة «البريد مسجّل مسبقًا» تظهر بالعربية', showsDuplicateError, showsDuplicateError ? 'localized error shown' : errorText.slice(0, 120))
+
+    // لا حساب ثانٍ فعليًا أُنشئ (لا تكرار في auth.users لنفس البريد).
+    const authCountAfter = authUserCount(email)
+    record('لا تكرار فعلي في auth.users لنفس البريد', authCountAfter === 1, `count=${authCountAfter}`)
+
+    // الحساب الأصلي ما زال يعمل (لم يُعطَّل بمحاولة التكرار).
+    await page.evaluate(() => localStorage.clear()).catch(() => {})
+    await login(page, email, pw)
+    record('تسجيل الدخول بالحساب الأصلي ما زال يعمل بعد محاولة التكرار', await isSignedIn(page))
+  } finally {
+    await ctx.close()
+  }
+  const steps = results.filter((r) => r.flow === 'duplicate-email')
+  return steps.length >= 4 && steps.every((r) => r.pass)
+}
+
+// ————————————————————————————————————————————————————————————————
 // التشغيل
 // ————————————————————————————————————————————————————————————————
 let preview
@@ -341,6 +380,7 @@ let browser
 let startedStack = false
 let resetResult = 'DID NOT RUN'
 let deleteResult = 'DID NOT RUN'
+let duplicateResult = 'DID NOT RUN'
 try {
   requirePrereqs()
   const env = startStack()
@@ -352,9 +392,10 @@ try {
   const exe = execSync('find /opt/pw-browsers -name chrome -path "*chromium-*" | head -1').toString().trim()
   browser = await chromium.launch({ executablePath: exe || undefined })
 
-  // تدفّقان مستقلّان: فشل أحدهما لا يمنع تشغيل الآخر.
+  // ثلاثة تدفّقات مستقلّة: فشل أحدها لا يمنع تشغيل البقية.
   resetResult = (await testReset(browser).catch((e) => { console.error('✖ reset:', e.message); return false })) ? 'PASS' : 'FAIL'
   deleteResult = (await testDelete(browser).catch((e) => { console.error('✖ delete:', e.message); return false })) ? 'PASS' : 'FAIL'
+  duplicateResult = (await testDuplicateEmail(browser).catch((e) => { console.error('✖ duplicate-email:', e.message); return false })) ? 'PASS' : 'FAIL'
 } catch (e) {
   console.error('\n✖ خطأ أثناء الاختبار:', e.message)
   results.push({ name: 'تشغيل الحزمة', pass: false, evidence: e.message })
@@ -383,5 +424,6 @@ const passed = results.filter((r) => r.pass).length
 console.log(`\n==== خطوات مُنفَّذة: ${passed}/${results.length} PASS ====`)
 console.log(`Reset Password: ${resetResult}`)
 console.log(`Delete Account: ${deleteResult}`)
-const bothPass = resetResult === 'PASS' && deleteResult === 'PASS'
-process.exit(bothPass ? 0 : 1)
+console.log(`Duplicate Email: ${duplicateResult}`)
+const allPass = resetResult === 'PASS' && deleteResult === 'PASS' && duplicateResult === 'PASS'
+process.exit(allPass ? 0 : 1)

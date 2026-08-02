@@ -1,0 +1,164 @@
+{
+  "evidenceDir": "/private/tmp/claude-501/-Users-ziyad-qimmah-deploy/ff67365d-478a-42ba-9f0f-a48a42946316/scratchpad/qea004-evidence",
+  "totalCombos": 27,
+  "total": 31,
+  "passed": 31,
+  "failed": 0,
+  "results": [
+    {
+      "name": "[1/27] تنشيف × نادي × أجهزة",
+      "ok": true,
+      "detail": "summary reflects choices"
+    },
+    {
+      "name": "[2/27] تنشيف × نادي × أوزان حرة",
+      "ok": true,
+      "detail": "summary reflects choices"
+    },
+    {
+      "name": "[3/27] تنشيف × نادي × مزيج",
+      "ok": true,
+      "detail": "summary reflects choices"
+    },
+    {
+      "name": "[4/27] تنشيف × منزل × أجهزة",
+      "ok": true,
+      "detail": "summary reflects choices"
+    },
+    {
+      "name": "[5/27] تنشيف × منزل × أوزان حرة",
+      "ok": true,
+      "detail": "summary reflects choices"
+    },
+    {
+      "name": "[6/27] تنشيف × منزل × مزيج",
+      "ok": true,
+      "detail": "summary reflects choices"
+    },
+    {
+      "name": "[7/27] تنشيف × أجهزة فقط × أجهزة",
+      "ok": true,
+      "detail": "summary reflects choices"
+    },
+    {
+      "name": "[8/27] تنشيف × أجهزة فقط × أوزان حرة",
+      "ok": true,
+      "detail": "summary reflects choices"
+    },
+    {
+      "name": "[9/27] تنشيف × أجهزة فقط × مزيج",
+      "ok": true,
+      "detail": "summary reflects choices"
+    },
+    {
+      "name": "[10/27] محافظة × نادي × أجهزة",
+      "ok": true,
+      "detail": "summary reflects choices"
+    },
+    {
+      "name": "[11/27] محافظة × نادي × أوزان حرة",
+      "ok": true,
+      "detail": "summary reflects choices"
+    },
+    {
+      "name": "[12/27] محافظة × نادي × مزيج",
+      "ok": true,
+      "detail": "summary reflects choices"
+    },
+    {
+      "name": "[13/27] محافظة × منزل × أجهزة",
+      "ok": true,
+      "detail": "summary reflects choices"
+    },
+    {
+      "name": "[14/27] محافظة × منزل × أوزان حرة",
+      "ok": true,
+      "detail": "summary reflects choices"
+    },
+    {
+      "name": "[15/27] محافظة × منزل × مزيج",
+      "ok": true,
+      "detail": "summary reflects choices"
+    },
+    {
+      "name": "[16/27] محافظة × أجهزة فقط × أجهزة",
+      "ok": true,
+      "detail": "summary reflects choices"
+    },
+    {
+      "name": "[17/27] محافظة × أجهزة فقط × أوزان حرة",
+      "ok": true,
+      "detail": "summary reflects choices"
+    },
+    {
+      "name": "[18/27] محافظة × أجهزة فقط × مزيج",
+      "ok": true,
+      "detail": "summary reflects choices"
+    },
+    {
+      "name": "[19/27] تضخيم × نادي × أجهزة",
+      "ok": true,
+      "detail": "summary reflects choices"
+    },
+    {
+      "name": "[20/27] تضخيم × نادي × أوزان حرة",
+      "ok": true,
+      "detail": "summary reflects choices"
+    },
+    {
+      "name": "[21/27] تضخيم × نادي × مزيج",
+      "ok": true,
+      "detail": "summary reflects choices"
+    },
+    {
+      "name": "[22/27] تضخيم × منزل × أجهزة",
+      "ok": true,
+      "detail": "summary reflects choices"
+    },
+    {
+      "name": "[23/27] تضخيم × منزل × أوزان حرة",
+      "ok": true,
+      "detail": "summary reflects choices"
+    },
+    {
+      "name": "[24/27] تضخيم × منزل × مزيج",
+      "ok": true,
+      "detail": "summary reflects choices"
+    },
+    {
+      "name": "[25/27] تضخيم × أجهزة فقط × أجهزة",
+      "ok": true,
+      "detail": "summary reflects choices"
+    },
+    {
+      "name": "[26/27] تضخيم × أجهزة فقط × أوزان حرة",
+      "ok": true,
+      "detail": "summary reflects choices"
+    },
+    {
+      "name": "[27/27] تضخيم × أجهزة فقط × مزيج",
+      "ok": true,
+      "detail": "summary reflects choices"
+    },
+    {
+      "name": "فشل مجبَر: شاشة الخطأ تظهر",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "إعادة المحاولة: شاشة الخطأ تختفي",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "استئناف بعد إعادة التحميل: يبقى على خطوة التدريب (لا يعود للبداية)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "استئناف بعد إعادة التحميل: اختيار الهدف (تضخيم) محفوظ أيضًا",
+      "ok": true,
+      "detail": "true"
+    }
+  ]
+}

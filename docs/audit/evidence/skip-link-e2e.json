@@ -1,0 +1,42 @@
+{
+  "total": 7,
+  "passed": 7,
+  "failed": 0,
+  "results": [
+    {
+      "name": "ضيف: أول Tab من الصفحة يركّز رابط التخطّي",
+      "ok": true,
+      "detail": "{\"tag\":\"A\",\"href\":\"#main-content\",\"text\":\"تخطَّ إلى المحتوى الرئيسي\"}"
+    },
+    {
+      "name": "ضيف: الرابط مخفي بصريًا افتراضيًا (sr-only) لا يظهر بلا تركيز",
+      "ok": true,
+      "detail": "true"
+    },
+    {
+      "name": "ضيف: تفعيل الرابط ينقل التركيز إلى #main-content",
+      "ok": true,
+      "detail": "main-content"
+    },
+    {
+      "name": "مُصادَق: الإعداد اكتمل (وصول للوحة)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "مُصادَق: أول Tab من الصفحة يركّز رابط التخطّي (فوق قشرة MobileShell)",
+      "ok": true,
+      "detail": "{\"tag\":\"A\",\"href\":\"#main-content\",\"text\":\"تخطَّ إلى المحتوى الرئيسي\"}"
+    },
+    {
+      "name": "مُصادَق: تفعيل الرابط ينقل التركيز إلى #main-content",
+      "ok": true,
+      "detail": "main-content"
+    },
+    {
+      "name": "مُصادَق: #main-content يحتوي محتوى حقيقيًا (ليس هدفًا فارغًا)",
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}

@@ -1,0 +1,234 @@
+{
+  "evidenceDir": "/private/tmp/claude-501/-Users-ziyad-qimmah-deploy/ff67365d-478a-42ba-9f0f-a48a42946316/scratchpad/qea006-xss-evidence-v2",
+  "payloadCount": 7,
+  "total": 45,
+  "passed": 44,
+  "failed": 1,
+  "results": [
+    {
+      "name": "TodoWidget: كود غير موصول بأي شاشة حاليًا (لا سطح هجوم حيّ — تحقّق عبر grep)",
+      "ok": true,
+      "detail": "no importer found in src/ — dead code, not a reachable field, correctly excluded from the live matrix"
+    },
+    {
+      "name": "NutritionV2 بحث طعام × script: لا تنفيذ (window flags)",
+      "ok": true,
+      "detail": "clean"
+    },
+    {
+      "name": "NutritionV2 بحث طعام × script: لا حوار (alert/confirm/prompt)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "NutritionV2 بحث طعام × script: لا تسريب console",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "NutritionV2 بحث طعام × img: لا تنفيذ (window flags)",
+      "ok": true,
+      "detail": "clean"
+    },
+    {
+      "name": "NutritionV2 بحث طعام × img: لا حوار (alert/confirm/prompt)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "NutritionV2 بحث طعام × img: لا تسريب console",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "NutritionV2 بحث طعام × svg: لا تنفيذ (window flags)",
+      "ok": true,
+      "detail": "clean"
+    },
+    {
+      "name": "NutritionV2 بحث طعام × svg: لا حوار (alert/confirm/prompt)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "NutritionV2 بحث طعام × svg: لا تسريب console",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "NutritionV2 بحث طعام × attribute-breakout: لا تنفيذ (window flags)",
+      "ok": true,
+      "detail": "clean"
+    },
+    {
+      "name": "NutritionV2 بحث طعام × attribute-breakout: لا حوار (alert/confirm/prompt)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "NutritionV2 بحث طعام × attribute-breakout: لا تسريب console",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "NutritionV2 بحث طعام × attribute-breakout-single: لا تنفيذ (window flags)",
+      "ok": true,
+      "detail": "clean"
+    },
+    {
+      "name": "NutritionV2 بحث طعام × attribute-breakout-single: لا حوار (alert/confirm/prompt)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "NutritionV2 بحث طعام × attribute-breakout-single: لا تسريب console",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "NutritionV2 بحث طعام × url-protocol-js: لا تنفيذ (window flags)",
+      "ok": true,
+      "detail": "clean"
+    },
+    {
+      "name": "NutritionV2 بحث طعام × url-protocol-js: لا حوار (alert/confirm/prompt)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "NutritionV2 بحث طعام × url-protocol-js: لا تسريب console",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "NutritionV2 بحث طعام × url-protocol-data: لا تنفيذ (window flags)",
+      "ok": true,
+      "detail": "clean"
+    },
+    {
+      "name": "NutritionV2 بحث طعام × url-protocol-data: لا حوار (alert/confirm/prompt)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "NutritionV2 بحث طعام × url-protocol-data: لا تسريب console",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "SupplementLibraryPicker: نقطة الدخول موجودة على سطح profile",
+      "ok": true,
+      "detail": "reachable"
+    },
+    {
+      "name": "LoginView بريد إلكتروني × script: لا تنفيذ (window flags)",
+      "ok": true,
+      "detail": "clean"
+    },
+    {
+      "name": "LoginView بريد إلكتروني × script: لا حوار (alert/confirm/prompt)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "LoginView بريد إلكتروني × script: لا تسريب console",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "LoginView بريد إلكتروني × img: لا تنفيذ (window flags)",
+      "ok": true,
+      "detail": "clean"
+    },
+    {
+      "name": "LoginView بريد إلكتروني × img: لا حوار (alert/confirm/prompt)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "LoginView بريد إلكتروني × img: لا تسريب console",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "LoginView بريد إلكتروني × svg: لا تنفيذ (window flags)",
+      "ok": true,
+      "detail": "clean"
+    },
+    {
+      "name": "LoginView بريد إلكتروني × svg: لا حوار (alert/confirm/prompt)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "LoginView بريد إلكتروني × svg: لا تسريب console",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "LoginView بريد إلكتروني × attribute-breakout: لا تنفيذ (window flags)",
+      "ok": true,
+      "detail": "clean"
+    },
+    {
+      "name": "LoginView بريد إلكتروني × attribute-breakout: لا حوار (alert/confirm/prompt)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "LoginView بريد إلكتروني × attribute-breakout: لا تسريب console",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "LoginView بريد إلكتروني × attribute-breakout-single: لا تنفيذ (window flags)",
+      "ok": true,
+      "detail": "clean"
+    },
+    {
+      "name": "LoginView بريد إلكتروني × attribute-breakout-single: لا حوار (alert/confirm/prompt)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "LoginView بريد إلكتروني × attribute-breakout-single: لا تسريب console",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "LoginView بريد إلكتروني × url-protocol-js: لا تنفيذ (window flags)",
+      "ok": true,
+      "detail": "clean"
+    },
+    {
+      "name": "LoginView بريد إلكتروني × url-protocol-js: لا حوار (alert/confirm/prompt)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "LoginView بريد إلكتروني × url-protocol-js: لا تسريب console",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "LoginView بريد إلكتروني × url-protocol-data: لا تنفيذ (window flags)",
+      "ok": true,
+      "detail": "clean"
+    },
+    {
+      "name": "LoginView بريد إلكتروني × url-protocol-data: لا حوار (alert/confirm/prompt)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "LoginView بريد إلكتروني × url-protocol-data: لا تسريب console",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "SettingsView: حقل تأكيد الحذف — قابلية الوصول عبر جلسة QA",
+      "ok": false,
+      "detail": "not directly reachable without full settings navigation — documented gap, not a false PASS"
+    }
+  ]
+}

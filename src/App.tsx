@@ -503,10 +503,23 @@ export default function App() {
   // حدّ أخطاء المسارات فوق Suspense: فشل تحميل حزمة أو انهيار شاشة يعرض بطاقة
   // «أعد المحاولة» (تعيد إنشاء الحِزم الكسولة وتعيد الاستيراد) — لا شاشة بيضاء.
   return (
-    <RouteErrorBoundary onRetry={retryLazyViews}>
-      <Suspense fallback={<AppLoading />}>{content}</Suspense>
-      {/* دعوة تثبيت التطبيق (P12) — شريط سفلي قابل للإغلاق، لا يظهر مثبّتًا أو بعد الإغلاق. */}
-      <InstallPrompt lang={LANG} />
-    </RouteErrorBoundary>
+    <>
+      {/* رابط التخطّي (QEA-005 — WCAG 2.4.1) — أول عنصر قابل للتركيز في الصفحة، قبل أي
+          قشرة تطبيق. مخفي بصريًا افتراضيًا، يظهر عند تركيز لوحة المفاتيح (Tab من عنوان
+          الصفحة). الهدف id="main-content" ثابت عبر كل الشاشات (وسم/تبويب/شاشة بداية…). */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:start-3 focus:top-3 focus:z-[999] focus:rounded-xl focus:bg-primary focus:px-4 focus:py-2.5 focus:text-sm focus:font-bold focus:text-white focus:shadow-lg"
+      >
+        {LANG === 'en' ? 'Skip to main content' : 'تخطَّ إلى المحتوى الرئيسي'}
+      </a>
+      <RouteErrorBoundary onRetry={retryLazyViews}>
+        <div id="main-content" tabIndex={-1} className="outline-none">
+          <Suspense fallback={<AppLoading />}>{content}</Suspense>
+        </div>
+        {/* دعوة تثبيت التطبيق (P12) — شريط سفلي قابل للإغلاق، لا يظهر مثبّتًا أو بعد الإغلاق. */}
+        <InstallPrompt lang={LANG} />
+      </RouteErrorBoundary>
+    </>
   )
 }
