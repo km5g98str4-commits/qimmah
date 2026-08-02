@@ -214,7 +214,7 @@ export function ExercisePickerSheet({ lang, onAdd, onClose }: ExercisePickerShee
         </div>
 
         {/* القائمة: الأجهزة أولًا (مجموعة ← تصنيف فرعي)، ثم التمارين الحرة */}
-        <div className="flex-1 overflow-y-auto p-3">
+        <div className="app-scroll flex-1 overflow-y-auto p-3">
           {isEmpty ? (
             <p className="py-12 text-center text-sm text-ink-400">{d.noResults}</p>
           ) : (

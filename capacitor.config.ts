@@ -25,9 +25,14 @@ const config: CapacitorConfig = {
       fadeOutDuration: 250,
     },
     StatusBar: {
-      // لا تراكب فوق الـ WebView — لا محتوى تحت النتوء؛ منطقة الشريط منفصلة.
-      overlaysWebView: false,
-      // خلفية داكنة ⇒ نصّ فاتح (Style.Dark) يناسب شاشة الترحيب الداكنة وأسطح التطبيق.
+      // تراكب فوق الـ WebView. بدونه يُقصّ إطار الـ WebView أسفل شريط الحالة، فتظهر منطقة
+      // الساعة/الشبكة/البطارية شريطًا أسود منفصلًا (خلفية النافذة الأصلية) لا يطابق الهيدر،
+      // ويصير env(safe-area-inset-top) = 0 فلا يملك أي عنصر ويب رسم تلك المنطقة.
+      // مع التراكب: الـ WebView يمتد خلف الشريط، و--safe-top يعود بقيمته الحقيقية، وهيدر
+      // القشرة (bg-surface + padding-top: var(--safe-top)) يرسمها بنفسه — امتداد بصري
+      // طبيعي بلا خياطة. (أندرويد يُعاد ضبطه إلى «بلا تراكب» في initNativeShell.)
+      overlaysWebView: true,
+      // خلفية داكنة ⇒ نصّ فاتح (Style.Dark). تُحدَّث حيًّا مع سمة التطبيق في initNativeShell.
       style: 'DARK',
       backgroundColor: '#101216',
     },

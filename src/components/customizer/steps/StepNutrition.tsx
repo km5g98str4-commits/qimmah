@@ -171,7 +171,7 @@ export function StepNutrition({ ctx }: { ctx: WizardCtx }) {
                 ))}
               </select>
             </div>
-            <ul className="max-h-64 space-y-1.5 overflow-y-auto">
+            <ul className="app-scroll max-h-64 space-y-1.5 overflow-y-auto">
               {filteredTemplates.map((t) => (
                 <li key={t.id} className="flex items-center justify-between gap-2 rounded-xl border border-line bg-page p-2.5">
                   <span className="min-w-0">

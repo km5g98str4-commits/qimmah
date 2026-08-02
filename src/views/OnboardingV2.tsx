@@ -262,7 +262,7 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
       </header>
 
       {/* Content — each step is a region named by its heading. */}
-      <main className="flex-1 overflow-y-auto px-5 py-6">
+      <main className="app-scroll flex-1 overflow-y-auto px-5 py-6">
         <div className="v2-screen-enter mx-auto w-full max-w-md">
           {step === 0 && (
             <BodyStep

@@ -18,7 +18,10 @@
     <meta name="theme-color" content="#101216" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <!-- black-translucent: الصفحة تمتد خلف شريط الحالة فتعمل env(safe-area-inset-top)
+         ويرسم هيدر القشرة منطقة الساعة بلونه. القيمة "default" كانت تحجز شريطًا منفصلًا
+         بخلفية لا تطابق الهيدر — نفس عيب overlaysWebView:false في النسخة الأصلية. -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="قِمّة" />
 
     <!-- SEO -->

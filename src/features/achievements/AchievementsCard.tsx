@@ -116,7 +116,9 @@ function AchievementsSheet({
 
   return (
     <div className="fixed inset-0 z-[75] flex flex-col bg-page/95 backdrop-blur-sm">
-      <div className="flex items-center justify-between border-b border-line px-4 py-4">
+      {/* سطح ملء الشاشة يبدأ من أعلى الشاشة تحت شريط الحالة: تُؤخَذ الحشوة العلوية من
+          منطقة الأمان حتى لا يُقصّ العنوان/زر الإغلاق خلف الساعة والبطارية. */}
+      <div className="flex items-center justify-between border-b border-line px-4 pb-4" style={{ paddingTop: 'calc(1rem + var(--safe-top))' }}>
         <div>
           <span className="eyebrow">
             <Icon name="Trophy" className="h-3.5 w-3.5" />
@@ -136,7 +138,7 @@ function AchievementsSheet({
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 py-5">
+      <div className="app-scroll flex-1 overflow-y-auto px-4 py-5" style={{ paddingBottom: 'calc(1.25rem + var(--safe-bottom))' }}>
         <div className="mx-auto max-w-lg space-y-6">
           {categories.map((cat) => {
             const items = all.filter((a) => a.def.category === cat)

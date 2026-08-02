@@ -660,7 +660,7 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
         <RestPanel lang={lang} restLeft={restLeft} restDone={restDone} nextEx={effExercises[active.exIndex]} setLabel={t(`المجموعة ${toAr(active.setIndex + 1, lang)}`, `Set ${active.setIndex + 1}`)} tip={restTip} tipDismissed={tipDismissed} onDismissTip={() => setTipDismissed(true)} onAdd={addRest} onSkip={skipRest} />
       ) : (
         <>
-          <main className="flex flex-1 flex-col overflow-y-auto px-5 pb-3">
+          <main className="app-scroll flex flex-1 flex-col overflow-y-auto px-5 pb-3">
             <div className="mt-2 shrink-0 overflow-hidden rounded-2xl" aria-hidden="true">
               <ExerciseMedia exerciseId={ex.exerciseId} heightClass="h-32" hideChips />
             </div>
@@ -1232,7 +1232,7 @@ function SubstitutionSheet({ lang, profile, currentExerciseId, onChoose, onCance
         </div>
 
         {/* options list */}
-        <div className="mt-4 min-h-0 flex-1 space-y-2 overflow-y-auto">
+        <div className="app-scroll mt-4 min-h-0 flex-1 space-y-2 overflow-y-auto">
           {options.length === 0 ? (
             <div className="rounded-2xl px-4 py-6 text-center" style={{ background: FOCUS.cardActive, border: `1px solid ${FOCUS.line}` }}>
               <Icon name="Search" className="mx-auto h-6 w-6" style={{ color: FOCUS.inkFaint }} />

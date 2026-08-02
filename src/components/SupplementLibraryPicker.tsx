@@ -56,7 +56,7 @@ export function SupplementLibraryPicker({ lang, onAdd, onClose }: Props) {
             {catOptions(d).map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
         </div>
-        <div className="flex-1 overflow-y-auto p-3">
+        <div className="app-scroll flex-1 overflow-y-auto p-3">
           {filtered.length === 0 ? (
             <p className="py-10 text-center text-sm text-ink-400">{d.noResults}</p>
           ) : (

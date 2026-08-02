@@ -119,7 +119,7 @@ export function ScanFoodPanel({ lang, onResolved, onManualFallback, onClose }: S
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4">
+        <div className="app-scroll flex-1 overflow-y-auto p-4">
           {status === 'scanning' && (
             <>
               <BarcodeCamera
