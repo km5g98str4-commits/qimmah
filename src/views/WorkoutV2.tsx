@@ -13,6 +13,7 @@ import { useAppScrollReset } from '@/lib/useAppScrollReset'
 // it correct after the app returns from the background, exactly like WorkoutMode.
 import { restIsFinished, restRemainingSec, type RestSnapshot } from '@/lib/activeSession'
 import { buildWorkoutV2Model, substituteWorkoutExercise, CATEGORY_LABEL, type ExCategory, type WorkoutV2Exercise } from '@/lib/workoutV2Model'
+import { stepActiveSession } from '@/lib/workoutV2Session'
 // Screen 31 — equipment-aware substitution engine (pure). Screen 27 — one-handed
 // reach preference. Both feed the active session; neither writes the plan/history.
 import { findSubstitutes, type SubReason, type SubstituteOption } from '@/lib/workoutSubstitution'
@@ -572,9 +573,15 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
 
   const finishSet = () => {
     void playHaptic('set')
-    const lastSet = active.setIndex >= rows.length - 1
-    const lastEx = active.exIndex >= model.exercises.length - 1
-    if (lastSet && lastEx) {
+    // Pure progression decision (Q19): advance within the exercise, roll to the
+    // next exercise, or complete the whole day — only on the last set of the LAST
+    // exercise. Every exercise is worked through in the plan order; one finished
+    // exercise never ends the day early.
+    const step = stepActiveSession(
+      { exIndex: active.exIndex, setIndex: active.setIndex },
+      model.exercises.map((e) => e.sets),
+    )
+    if (step.dayComplete) {
       // Rule D: the last set does NOT save silently. Mark it done and OPEN the
       // "هل انتهيت؟" confirm sheet — nothing is written until the user confirms.
       const finalActive = {
@@ -592,10 +599,7 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
       const arr = [...prev.rows[ex.id]]
       arr[prev.setIndex] = { ...arr[prev.setIndex], done: true }
       const rowsNext = { ...prev.rows, [ex.id]: arr }
-      const advance = prev.setIndex < rows.length - 1
-        ? { setIndex: prev.setIndex + 1 }
-        : { exIndex: prev.exIndex + 1, setIndex: 0 }
-      return { ...prev, ...advance, rows: rowsNext, rest: { endsAt, durationSec: REST_DEFAULT } }
+      return { ...prev, exIndex: step.exIndex, setIndex: step.setIndex, rows: rowsNext, rest: { endsAt, durationSec: REST_DEFAULT } }
     })
     void scheduleRestEndNotification(endsAt, lang, Date.now(), { ownerId: userId })
     setNow(Date.now())
@@ -664,7 +668,15 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
             <div className="mt-2 shrink-0 overflow-hidden rounded-2xl" aria-hidden="true">
               <ExerciseMedia exerciseId={ex.exerciseId} heightClass="h-32" hideChips />
             </div>
-            <h1 className="mt-2 text-2xl font-black leading-tight">{ar ? ex.nameAr : ex.nameEn}</h1>
+            {/* Q19 — visual pyramid: program·day context → current exercise → category·sets.
+                The day/program line grounds "which session am I in" without leaving the set. */}
+            {(ar ? model.program.titleAr : model.program.titleEn) && (
+              <p className="mt-3 text-xs font-black uppercase tracking-wider" style={{ color: FOCUS.blue }}>
+                {ar ? model.program.titleAr : model.program.titleEn}
+                {(ar ? model.program.contextAr : model.program.contextEn) ? ` · ${ar ? model.program.contextAr : model.program.contextEn}` : ''}
+              </p>
+            )}
+            <h1 className="mt-1 text-2xl font-black leading-tight">{ar ? ex.nameAr : ex.nameEn}</h1>
             <p className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-sm font-bold" style={{ color: FOCUS.inkMuted }}>
               <span>{CATEGORY_LABEL[ex.category][ar ? 'ar' : 'en']} · {ex.sets}×{ex.reps}</span>
               {active.subs?.[ex.id] && (
