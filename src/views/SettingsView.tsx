@@ -1,7 +1,9 @@
-import { useRef, type ReactNode } from 'react'
+import { useRef, useState, type ReactNode } from 'react'
 import { AppNav, type AppView } from '@/components/AppNav'
 import { Footer } from '@/components/Footer'
 import { Icon } from '@/components/Icon'
+import { DeleteAccountDialog } from '@/components/DeleteAccountDialog'
+import { setHashRoute } from '@/lib/appRoutes'
 import { DeviceSettings } from '@/components/DeviceSettings'
 import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
@@ -71,6 +73,8 @@ export function SettingsView({
   const auth = useAuth()
   const { customization, applyCustomization } = useCustomization()
   const fileRef = useRef<HTMLInputElement>(null)
+  // [CTO-65] البند ١ — نافذة حذف الحساب بتأكيد مكتوب.
+  const [deleteOpen, setDeleteOpen] = useState(false)
 
   const badge: 'guest' | 'account' = auth.user ? 'account' : 'guest'
 
@@ -197,6 +201,28 @@ export function SettingsView({
               </button>
             )}
           </div>
+
+          {/* [CTO-65] البند ١ — حذف الحساب داخل التطبيق (App Store 5.1.1(v)).
+              الوجهة الحقيقية لزرّ «حذف الحساب نهائيًا» في شاشة الخصوصية، الذي كان
+              يحوّل إلى هنا ولا يجد شيئًا. يُعرض داخل فرع auth.user حصرًا — الضيف
+              لا حساب سحابيًا له، ومسح جهازه هو «إعادة الضبط» في مجموعة البيانات.
+
+              ⚠️ عقد e2e-auth (run.mjs:303-315) يطابق الاسم المتاح «حذف الحساب»
+              بـexact:true — فالوصف خارج الزرّ عمدًا لا داخله، وإلا صار الاسم
+              المتاح «حذف الحساب يحذف حسابك…» وسقط العقد. */}
+          {auth.user && (
+            <div className="mt-4 border-t border-line pt-4" data-testid="settings-delete-account">
+              <button
+                type="button"
+                onClick={() => setDeleteOpen(true)}
+                className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-danger/40 px-4 py-2.5 text-sm font-bold text-danger transition-colors hover:bg-danger/10"
+              >
+                <Icon name="Trash2" className="h-4 w-4" />
+                {t.auth.deleteAccount}
+              </button>
+              <p className="mt-2 text-xs leading-relaxed text-ink-500">{t.auth.deleteAccountDesc}</p>
+            </div>
+          )}
         </SettingsGroup>
 
         {/* 2) البيانات */}
@@ -317,6 +343,16 @@ export function SettingsView({
           </div>
         </SettingsGroup>
       </main>
+
+      {deleteOpen && (
+        <DeleteAccountDialog
+          lang={lang}
+          onClose={() => setDeleteOpen(false)}
+          // «تواصل معنا» ليست ضمن AppView (dashboard|setup|settings) فتُفتح بمسار
+          // الـhash مباشرةً — نفس وجهة رابط الفوتر أسفل هذه الشاشة (#/contact).
+          onContact={() => setHashRoute('contact')}
+        />
+      )}
 
       <Footer />
     </div>

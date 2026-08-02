@@ -161,7 +161,10 @@ export function buildProfileV2Model(customization: Customization, auth: AuthSumm
       analyticsAnonymousEnabled: true, // anonymous, consent-based (existing disclosure)
       healthSharingAvailable: false, // no HealthKit integration yet — honest
       dataExportAvailable: true,
-      deleteAccountAvailable: true, // routes to the existing safe Settings flow
+      // [CTO-65] البند ١: التعليق السابق ادّعى «routes to the existing safe Settings
+      // flow» ولم يكن لذلك المسار وجود — الزرّ يحوّل إلى الإعدادات وليس فيها حذف.
+      // صار الادّعاء صحيحًا: صفّ الحذف + نافذة التأكيد المكتوب في SettingsView.
+      deleteAccountAvailable: true, // routes to the delete-account row in SettingsView
     },
     settings: {
       language: ar ? 'العربية' : 'English',
