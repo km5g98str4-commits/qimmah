@@ -1,4 +1,5 @@
-import { readFileSync } from 'node:fs'
+import { readFileSync, existsSync } from 'node:fs'
+import { execSync } from 'node:child_process'
 import { resolve } from 'node:path'
 
 /**
@@ -125,5 +126,24 @@ check(
   '§4.2 محاكاة الالتفاف (نداء بلا معالجة ok:false) تسقط بفحص «فرع صريح يعالج ok === false»',
   circumventionCaught,
 )
+
+// ─────────── [CTO-71] البند ٤ — بقايا الهوية بعد الحذف الناجح ───────────
+// بعد نجاح الحذف يجب ألّا يبقى على الجهاز ما يشير إلى **من كان** المستخدم.
+const reset = readFileSync(resolve(root, 'src/lib/resetQimmah.ts'), 'utf8')
+const extras = reset.match(/const FULL_RESET_EXTRA_KEYS = \[([^\]]*)\]/)?.[1] ?? ''
+check('الحذف الكامل يمسح مؤشّر آخر مالك (معرّف الحساب المحذوف نصًّا)', extras.includes("'qimmah:lastUser:v1'"))
+check('ويمسح سجلّ الحسابات ورمز الجلسة كما كان', extras.includes("'qimmah:onboarding:accounts:v1'") && extras.includes("'qimmah:supabase-auth:v1'"))
+// `anonId` زال ببنيته: طبقة التحليلات كلّها حُذفت في البند ١ من هذه الحزمة.
+check('لا معرّف مجهول باقٍ أصلًا (طبقة التحليلات محذوفة)', !existsSync(resolve(root, 'src/lib/analytics')))
+// الدقّة تهمّ: المطلوب غياب **معرّف مجهول مخزَّن**، لا غياب الكلمة. `monitoring`
+// ما زال يحمل متغيّرًا محليًّا بالاسم — لكنه بذرة جلسة في الذاكرة لا تُكتب.
+check('لا مستهلك لـgetAnonId المحذوفة في أي ملف', execSync("grep -rl 'getAnonId' src/ || true", { cwd: root, encoding: 'utf8' }).trim() === '')
+const monitoring = readFileSync(resolve(root, 'src/lib/monitoring.ts'), 'utf8')
+check('بذرة المراقبة المجهولة لا تُكتب في التخزين إطلاقًا', /sessionAnonSeed/.test(monitoring) && !/setItem|writeJson|safeWrite/.test(monitoring))
+check('ولا مفتاح تخزين باسم معرّف مجهول في سجلّ المفاتيح', !/anon/i.test(readFileSync(resolve(root, 'src/lib/userDataKeys.ts'), 'utf8')))
+// التأكيد المضادّ: المؤشّر **يبقى** في مسح تبديل الحساب — وهو الصحيح هناك،
+// فمسحه وسط تبديل يُفسَّر «تشغيلًا أوّل» فلا يُمسح شيء. الفرق مقصود لا سهو.
+const scope = readFileSync(resolve(root, 'src/lib/accountScope.ts'), 'utf8')
+check('وفي المقابل يبقى ضمن قائمة السماح لمسح التبديل (فرق مقصود)', /LAST_USER_KEY, \/\/ مؤشّر هذه الوحدة نفسه/.test(scope))
 
 console.log(`\n✅ واجهة حذف الحساب: ${pass} فحصًا، 0 فشل.`)
