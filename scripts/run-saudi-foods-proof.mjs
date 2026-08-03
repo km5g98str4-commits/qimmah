@@ -38,7 +38,7 @@ const outfile = resolve(root, 'scripts/.saudi-foods-proof.bundle.mjs')
 await build({
   stdin: {
     contents: `
-      export { foodItems, searchFood, normalizeSearch, LOANWORD_SPELLINGS } from '@/data/foodItems'
+      export { foodItems, searchFood, normalizeSearch, LOANWORD_SPELLINGS, SCRIPT_TRANSLITERATIONS } from '@/data/foodItems'
       export { servingSummary } from '@/lib/servingDisplay'
     `,
     resolveDir: root,
@@ -58,7 +58,7 @@ try {
 } finally {
   try { rmSync(outfile) } catch { /* ignore */ }
 }
-const { foodItems, searchFood, normalizeSearch, LOANWORD_SPELLINGS, servingSummary } = mod
+const { foodItems, searchFood, normalizeSearch, LOANWORD_SPELLINGS, SCRIPT_TRANSLITERATIONS, servingSummary } = mod
 
 const saudi = foodItems.filter((f) => typeof f.id === 'string' && f.id.startsWith('sfct-'))
 const ARABIC = /[؀-ۿ]/
@@ -181,5 +181,111 @@ const enLeaks = foodItems.filter((f) => {
 check('لا نصّ عربي في تسمية الحصة الإنجليزية لأي صنف', enLeaks.length === 0, `${enLeaks.length} من ${foodItems.length}`)
 const noGrams = foodItems.filter((f) => servingSummary(f, 'en', 'g') == null)
 check('كل الأصناف لها غرامات حصة (لا سقوط للتسمية العربية)', noGrams.length === 0, `${noGrams.length} بلا servingGrams`)
+
+console.log('\n═══ 8) [CTO-72] البند ٥ — البحث ثنائي الخطّ (نقل صوتي) ═══')
+
+// أ) الفجوات المقيسة قبل الموجة تُغلق فعلًا — بنتيجة **صحيحة** لا بمجرّد «> صفر».
+const BRIDGED = [
+  ['kabsa', 'كبسة'],       // المثال المسمّى في الأمر
+  ['tamees', 'تميس'],       // كان صفرًا (البيانات تكتبها Tameez)
+  ['tamis', 'تميس'],
+  ['shakshuka', 'شكشوكة'],  // كان صفرًا (البيانات Shakshouka)
+  ['tamr', 'تمر'],          // كان يُرجع نتيجتين خاطئتين
+  ['margoog', 'مرقوق'],
+  ['اوتميل', 'شوفان'],       // والعكس: عربي ⇒ صنف إنجليزي الأصل
+  ['سالمون', 'سلمون'],
+  ['تونا', 'تونة'],
+  ['باستا', 'مكرونة'],
+  ['بانكيك', 'بان كيك'],
+  ['يوغرت', 'زبادي'],
+  ['بوتيتو', 'بطاطس'],
+]
+for (const [query, expectIn] of BRIDGED) {
+  const hits = searchFood(query)
+  const ok = hits.length > 0 && hits.some((f) => normalizeSearch(f.nameAr).includes(normalizeSearch(expectIn)))
+  check(`«${query}» ⇒ يلقى «${expectIn}»`, ok, `${hits.length} نتيجة · أولاها «${hits[0]?.nameAr ?? '—'}»`)
+}
+
+// ب) التكافؤ **متماثل**: الخطّان يعطيان النتيجة نفسها لا نتيجتين متقاربتين.
+for (const [latin, arabic] of [['tamees', 'تميس'], ['tamr', 'تمر'], ['تونا', 'تونة'], ['باستا', 'مكرونة']]) {
+  check(
+    `«${latin}» و«${arabic}» يعطيان النتائج نفسها بالضبط`,
+    searchFood(latin).length === searchFood(arabic).length,
+    `${searchFood(latin).length} ≡ ${searchFood(arabic).length}`,
+  )
+}
+
+// ج) لا خريطة إلى طعام غير موجود: كل صيغة معتمدة تُرجع صنفًا حقيقيًا.
+//    هذا يمنع تعفّن القائمة حين يُعاد تسمية صنف أو يُحذف.
+for (const group of SCRIPT_TRANSLITERATIONS) {
+  check(`الصيغة المعتمدة «${group[0]}» تُرجع صنفًا حقيقيًا`, searchFood(group[0]).length > 0)
+}
+check(
+  'لا صيغة مكرّرة بين مجموعات النقل الصوتي',
+  new Set(SCRIPT_TRANSLITERATIONS.flat().map(normalizeSearch)).size === SCRIPT_TRANSLITERATIONS.flat().length,
+)
+
+// د) ⚔️ **التأكيد المضادّ** (§4.2) — القائمة لم تصر قاعدة.
+//    الشرط ٤ في رأس `SCRIPT_TRANSLITERATIONS`: الصيغة المعتمدة ليست جزءًا من
+//    كلمة أخرى. نُثبته على الحالة التي استُبعدت لأجلها بالضبط.
+check(
+  'الصيغة المعتمدة ليست جزءًا من كلمة أخرى — «تين» مستبعدة',
+  !SCRIPT_TRANSLITERATIONS.some((g) => normalizeSearch(g[0]) === normalizeSearch('تين')),
+)
+{
+  // الخطر **مقيس لا مفترض**: «تين» داخل «بروتين» و«كرياتين» في القاعدة نفسها.
+  const wouldDrag = foodItems.filter(
+    (f) => normalizeSearch(f.nameAr).includes(normalizeSearch('تين')) && /بروتين|كرياتين/.test(f.nameAr),
+  )
+  check(
+    'ولو أُدرجت لجرّت البروتين والكرياتين إلى بحث التين',
+    wouldDrag.length >= 3,
+    `${wouldDrag.length} صنفًا · مثل «${wouldDrag[0]?.nameAr ?? '—'}»`,
+  )
+}
+// وكل صيغة معتمدة **مدرَجة فعلًا** تجتاز الشرط نفسه: لا تُجرّ صنفًا لا يحمل معناها.
+for (const group of SCRIPT_TRANSLITERATIONS) {
+  const canonical = normalizeSearch(group[0])
+  // «على حدّ كلمة»: بداية الاسم أو بعد فاصل، مع السماح بـ«ال» التعريف —
+  // فـ«دبس **التمر**» يحمل معنى «تمر»، و«بروتين» لا يحمل معنى «تين».
+  // (يقبل الصيغ متعدّدة الكلمات مثل «بان كيك» لأن المطابقة على النصّ لا على الكلمات.)
+  const atWordStart = new RegExp(`(^|[\\s()،/-])(ال)?${canonical.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`)
+  const dragged = foodItems.filter(
+    (f) => normalizeSearch(f.nameAr).includes(canonical) && !atWordStart.test(normalizeSearch(f.nameAr)),
+  )
+  check(
+    `«${group[0]}» لا تُجرّ صنفًا لا يحمل معناها`,
+    dragged.length === 0,
+    dragged.length ? `جرّت: ${dragged.slice(0, 3).map((f) => f.nameAr).join(' · ')}` : '',
+  )
+}
+// جارة بحرف واحد — نفس منطق «برغل ≠ برجر»: «تونا» مربوطة و«توتا» ليست.
+check('جارة غير مدرجة لا تُكافأ — «توتا» لا تلقى «تونة»', searchFood('توتا').length === 0)
+check('ولا «سالمو» الناقصة تُكافأ «سلمون»', !searchFood('سالمو').some((f) => f.nameAr === 'سلمون'))
+// محاكاة التعميم المحظور: قاعدة صوتية حرفية (كل a ⇒ ا) تُنتج ضجيجًا لا تكافؤًا.
+{
+  const naive = (s) => normalizeSearch(s).replace(/a/g, 'ا').replace(/k/g, 'ك')
+  check(
+    '⚔️ محاكاة القاعدة الصوتية العامّة تُنتج نصًّا لا يطابق الصيغة المعتمدة',
+    naive('kabsa') !== normalizeSearch('كبسة'),
+    `«${naive('kabsa')}» ≠ «${normalizeSearch('كبسة')}»`,
+  )
+}
+
+// هـ) الضوابط: ما كان يعمل ما زال يعمل، وبلا ضجيج جديد.
+for (const [query, expect] of [['برغل', 1], ['فطيرة', 6], ['تمر', 16], ['شوفان', 2], ['بطاطس', 16]]) {
+  check(`ضابط: «${query}» ما زال يُرجع ${expect}`, searchFood(query).length === expect, `${searchFood(query).length}`)
+}
+check('ضابط: «برغل» لا تُكافأ «برجر» (سابقة القائمة المغلقة)', !searchFood('برغل').some((f) => f.nameAr.includes('برجر')))
+
+console.log('\n═══ 9) التوصيل الحيّ: الشاشة **المرسومة** تستخدم البحث ═══')
+// ⚠️ القسم ٦ أعلاه يفحص `NutritionV2.tsx` — وهي شاشة **يتيمة بلا مستورد**
+// (معلَنة في `run-analytics-proof.mjs:105`). فحصها وحده يقيس الطبقة الخطأ:
+// بوّابة خضراء على كود لا يصل المستخدم. الشاشة الحيّة هي `NutritionView` عبر
+// `QuickMealLogger`، فتُفحص هنا صراحةً حتى يصل البند ٥ إلى مستخدم حقيقي.
+const liveLogger = read('src/components/nutrition/QuickMealLogger.tsx')
+check('مسجّل الوجبة الحيّ يستورد searchFood', /import \{[^}]*\bsearchFood\b[^}]*\} from '@\/data\/foodItems'/.test(liveLogger))
+check('ويستدعيه على نصّ بحث المستخدم', /searchFood\(query\)/.test(liveLogger))
+check('والشاشة الحيّة تركّبه فعلًا', /QuickMealLogger/.test(read('src/views/NutritionView.tsx')))
 
 console.log(`\n✅ نجحت كل الفحوص — ${pass} فحصًا (${saudi.length} طبقًا سعوديًا · ${foodItems.length} صنفًا في القاعدة).`)

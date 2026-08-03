@@ -5700,6 +5700,60 @@ export const LOANWORD_SPELLINGS: readonly (readonly string[])[] = [
   ['بروكلي', 'بروكولي'],
 ]
 
+/**
+ * النقل الصوتي عبر الخطّين — **قائمة مغلقة لا قاعدة صوتية**. [CTO-72] البند ٥.
+ *
+ * ═══ الفجوة المقيسة ═══
+ * البحث كان يجد الكلمة **بالإملاء الواحد الذي صادف أن تحمله البيانات** لا غير.
+ * فقياسًا على الجذع قبل هذه الموجة:
+ *   • `tamees` ⇒ **صفر** نتيجة (البيانات تكتبها `Tameez`)، و«تميس» ⇒ نتيجتان.
+ *   • `shakshuka` ⇒ **صفر** (البيانات `Shakshouka`)، و«شكشوكة» ⇒ نتيجة.
+ *   • `tamr` ⇒ نتيجتان **خاطئتان** (عريكة · قهوة عربية+تمر)، و«تمر» ⇒ ١٦.
+ *   • والاتجاه المعاكس أسوأ: «اوتميل» · «سالمون» · «تونا» · «باستا» · «بانكيك»
+ *     · «يوغرت» ⇒ **صفر لكلٍّ**، وأصنافها موجودة كلّها في القاعدة.
+ *
+ * ═══ لماذا قائمة لا قاعدة (نفس منطق `LOANWORD_SPELLINGS` بحذافيره) ═══
+ * الإغراء هو اشتقاق قاعدة صوتية عامّة (كل `a` ألف، كل `k` كاف…). وهي **كارثة**:
+ * أي كلمة لاتينية تصير عربيةً مشوّهة تطابق ما لا علاقة له بها، ويمتلئ كل بحث
+ * بضجيج. فالتكافؤ يُمنح **لصنف مسمّى بعينه**، ولا يُشتق من حرف أبدًا.
+ *
+ * شروط إضافة مجموعة (الأربعة معًا):
+ *   ١. الصنف موجود فعلًا في القاعدة — والإثبات يفحص ذلك آليًا لكل مجموعة،
+ *      فلا تبقى خريطة إلى طعام غير موجود.
+ *   ٢. الإملاء الآخر شائع فعلًا في الكتابة السعودية اليومية.
+ *   ٣. البحث به يُرجع صفرًا أو نتائج خاطئة **قبل** الإضافة (فجوة مقيسة لا مفترضة).
+ *   ٤. الصيغة المعتمدة (الأولى) **ليست جزءًا من كلمة أخرى** في القاعدة، وإلا
+ *      صار المطابق يجرّ ما لا علاقة له.
+ *      *مثال مقيس على القاعدة نفسها:* «تين» صيغةٌ معتمدة مغرية (مقابل `fig`
+ *      و`teen`) — وهي **داخل «بروتين» و«كرياتين»**. فإدراجها كان سيجعل بحث
+ *      التين يُرجع واي بروتين وكازيين بروتين وبار بروتين وكرياتين. لذلك
+ *      استُبعدت، ويحرس استبعادَها تأكيدٌ مضادّ في `run-saudi-foods-proof`.
+ *
+ * الصيغة الأولى في كل مجموعة هي المعتمدة، والباقي **مقبول في البحث فقط**
+ * (لا يغيّر أي نصّ معروض). والتحويل يُطبَّق على الاستعلام وعلى نصوص الصنف معًا،
+ * فيلتقيان على صيغة واحدة أيًّا كان خطّ الكتابة.
+ */
+export const SCRIPT_TRANSLITERATIONS: readonly (readonly string[])[] = [
+  // ── لاتيني ⇒ عربي: أطباق سعودية/خليجية يكتبها الناس بالحرف اللاتيني ──
+  // المثال المسمّى في الأمر. يعمل أصلًا عبر الاسم الإنجليزي، ويُثبَّت هنا
+  // ليصمد أمام الإملاءات الأخرى ولا يعتمد على صدفة كتابة البيانات.
+  ['كبسة', 'kabsa', 'kabsah', 'kapsa'],
+  ['تميس', 'tamees', 'tamis', 'tameis'],
+  ['شكشوكة', 'shakshuka', 'shakshoka'],
+  ['تمر', 'tamr', 'tamer'],
+  ['مرقوق', 'margoog', 'margoug', 'marqoog'],
+  // ── عربي ⇒ عربي: أصناف إنجليزية الأصل يكتبها الناس بالحرف العربي ──
+  // «والعكس للأصناف الإنجليزية»: القاعدة تحمل الاسم العربي الفصيح، والمستخدم
+  // يكتب النقل الصوتي الدارج — فلا يلتقيان بلا هذه المجموعات.
+  ['شوفان', 'اوتميل', 'oatmeal'],
+  ['سلمون', 'سالمون'],
+  ['تونة', 'تونا'],
+  ['مكرونة', 'باستا', 'معكرونة', 'pasta'],
+  ['بان كيك', 'بانكيك', 'pancake'],
+  ['زبادي', 'يوغرت', 'يوجرت', 'yogurt', 'yoghurt'],
+  ['بطاطس', 'بوتيتو'],
+]
+
 // خريطة مطبَّعة مسبقًا: [متغيّر → الصيغة المعتمدة]، مرتّبة بطول المتغيّر تنازليًا.
 const LOANWORD_REPLACEMENTS: readonly (readonly [string, string])[] = LOANWORD_SPELLINGS
   .flatMap(([canonical, ...variants]) =>
@@ -5720,20 +5774,47 @@ function canonicalizeLoanwords(normalized: string): string {
   return out
 }
 
+/** نفس البناء لخريطة النقل الصوتي عبر الخطّين. */
+const TRANSLITERATION_REPLACEMENTS: readonly (readonly [string, string])[] = SCRIPT_TRANSLITERATIONS
+  .flatMap(([canonical, ...variants]) =>
+    variants.map((v) => [normalizeSearch(v), normalizeSearch(canonical)] as const),
+  )
+  .sort((a, b) => b[0].length - a[0].length)
+
+/**
+ * يوحّد النقل الصوتي عبر الخطّين داخل نصّ **مطبَّع مسبقًا**. [CTO-72] البند ٥.
+ *
+ * يُطبَّق على الاستعلام وعلى نصوص الصنف معًا داخل `searchFood` وحدها — تمامًا
+ * كـ`canonicalizeLoanwords` — فيلتقي الطرفان على صيغة واحدة أيًّا كان خطّ الكتابة،
+ * ويبقى `normalizeSearch` نقيًّا صالحًا للاستخدام في مواضع أخرى.
+ */
+function canonicalizeTransliterations(normalized: string): string {
+  let out = normalized
+  for (const [variant, canonical] of TRANSLITERATION_REPLACEMENTS) {
+    if (out.includes(variant)) out = out.split(variant).join(canonical)
+  }
+  return out
+}
+
+/** التطبيع الكامل للبحث: عربي عام ← مقابلات دخيلة ← نقل صوتي عبر الخطّين. */
+function canonicalizeForSearch(text: string): string {
+  return canonicalizeTransliterations(canonicalizeLoanwords(normalizeSearch(text)))
+}
+
 /**
  * بحث في قاعدة الأطعمة — عربي أولًا، يتحمّل الأخطاء الإملائية الشائعة والمرادفات
  * (عبر التطبيع + مقابلات الكلمات الدخيلة + الكلمات المفتاحية اللاتينية). النتائج مرتّبة:
  * تطابق تام → بادئة → تضمين، مع أولوية الاسم العربي ثم الإنجليزي ثم الكلمات المفتاحية.
  */
 export function searchFood(query: string): FoodItem[] {
-  const q = canonicalizeLoanwords(normalizeSearch(query))
+  const q = canonicalizeForSearch(query)
   if (!q) return foodItems
 
   const scored: { item: FoodItem; score: number }[] = []
   for (const f of foodItems) {
-    const ar = canonicalizeLoanwords(normalizeSearch(f.nameAr))
-    const en = canonicalizeLoanwords(normalizeSearch(f.nameEn))
-    const kws = (f.keywords ?? []).map((k) => canonicalizeLoanwords(normalizeSearch(k)))
+    const ar = canonicalizeForSearch(f.nameAr)
+    const en = canonicalizeForSearch(f.nameEn)
+    const kws = (f.keywords ?? []).map((k) => canonicalizeForSearch(k))
 
     let score = Infinity
     if (ar === q) score = 0
