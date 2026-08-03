@@ -18,11 +18,16 @@ import {
   type PlanWeek,
 } from '@/lib/notifications'
 
+interface DeliveredItem { id: number; title: string; body: string }
+
 interface NativeHarness {
   permission: 'granted' | 'denied'
   cancels: number[][]
   schedules: Array<Array<{ id: number; title: string; body: string }>>
   requests: number
+  /** [CTO-72] البند ٦ — ما رنّ فعلًا وجلس في مركز الإشعارات/شاشة القفل. */
+  delivered: DeliveredItem[]
+  removedDelivered: Array<number[] | 'ALL'>
 }
 
 const native = (globalThis as typeof globalThis & { __notificationHarness: NativeHarness }).__notificationHarness
@@ -135,6 +140,57 @@ await cancelAllNotifications()
 check('الإلغاء الصريح يمسح كل نطاقات قِمّة', native.cancels.at(-1)?.length === allNotificationIds().length)
 native.permission = 'denied'
 check('طلب الإذن الصريح يعكس الرفض', await requestNotificationPermission() === 'denied' && native.requests === 1)
+
+console.log('\n④ [CTO-72] البند ٦ — لا بقايا حساب مُلغى على شاشة القفل')
+{
+  native.cancels.length = 0
+  native.removedDelivered.length = 0
+  // إشعاران **رنّا فعلًا**: أحدهما يحمل عنوان يوم خطة المستخدم، والآخر يُفصح أن
+  // صاحب الجهاز يتابع أدوية. وإشعار غريب من خارج مدى قِمّة لا يخصّنا.
+  const OURS_WORKOUT = allNotificationIds()[0]
+  const OURS_SUPPLEMENTS = 3500
+  native.delivered = [
+    { id: OURS_WORKOUT, title: 'وقت تمرينك', body: 'دفع · صدر وكتف' },
+    { id: OURS_SUPPLEMENTS, title: 'المكمّلات والأدوية', body: 'تذكير عام — التزم بتعليمات مختصك' },
+    { id: 999_001, title: 'تطبيق آخر', body: 'ليس لقِمّة' },
+  ]
+
+  await cancelAllNotifications()
+
+  const removed = native.removedDelivered.at(-1)
+  check('التنظيف يشمل المُسلَّم لا المجدول وحده', Array.isArray(removed) && removed.length === 2)
+  check('بقايا قِمّة على شاشة القفل زالت', !native.delivered.some((n) => n.id === OURS_WORKOUT || n.id === OURS_SUPPLEMENTS))
+  // تأكيد مضادّ (§4.2): «امسح كل شيء» ليس تنظيفًا موصوفًا.
+  check('ولا يمسح ما ليس لقِمّة (لا removeAllDelivered)', native.delivered.some((n) => n.id === 999_001) && removed !== 'ALL')
+
+  // ولا يُطلق نداء حذف بلا داعٍ حين لا شيء مُسلَّمًا.
+  native.removedDelivered.length = 0
+  native.delivered = []
+  await cancelAllNotifications()
+  check('بلا إشعار مُسلَّم لا يُطلق نداء حذف', native.removedDelivered.length === 0)
+}
+
+console.log('\n⑤ [CTO-72] البند ٦ — السلاح الموضوع: الأسماء لا تصل الجدولة')
+{
+  // النصّ الحيّ عامّ عمدًا. والفحص هنا **على المخرجات** لا على القصد: نُشغّل
+  // المخطِّط بكل الأنواع ونؤكّد أن لا اسم مكمّل/دواء يظهر في أي متن.
+  const all = planNotifications(
+    sanitizeNotificationPrefs({
+      ...DEFAULT_NOTIFICATION_PREFS,
+      masterEnabled: true,
+      supplements: { enabled: true, time: '09:00' },
+      water: { enabled: true, cadenceHours: 3, time: '10:00' },
+      weeklyBrief: { enabled: true, weekday: 0, time: '19:00' },
+      workoutDay: { enabled: true, time: '06:00' },
+      restDay: { enabled: true, time: '20:00' },
+    } as NotificationPrefs),
+    [{ weekday: 0, isRestDay: false, title: 'دفع' }],
+    'ar',
+  )
+  const bodies = all.map((item) => `${item.title} ${item.body}`).join(' | ')
+  check('لا اسم مكمّل في أي متن مجدول', !/كرياتين|أوميغا|بروتين واي|فيتامين د/.test(bodies))
+  check('ولا صيغة «موعد: …» التي تسرد الأسماء', !/موعد: /.test(bodies))
+}
 
 console.log(`\n${'─'.repeat(48)}`)
 if (fail === 0) console.log(`✅ كل فحوص محرّك الإشعارات نجحت — ${pass} فحصًا.`)

@@ -26,10 +26,43 @@ async function plugin() {
   return LocalNotifications
 }
 
+/**
+ * يُسقط كل إشعارات قِمّة المعروفة — **المجدولة والمسلَّمة معًا**. [CTO-72] البند ٦.
+ *
+ * ═══ الفجوة التي أُغلقت هنا ═══
+ * `cancel()` تُلغي **المعلَّق** (ما لم يرنّ بعد) ولا تمسّ ما **رنّ فعلًا** وجلس في
+ * مركز الإشعارات وعلى شاشة القفل. فكان هذا المسار مفتوحًا:
+ *   ٦:٠٠ يرنّ تذكير التمرين، ومتنُه يحمل **عنوان يوم خطة المستخدم** («دفع»)
+ *   وتذكير المكمّلات يُعلن أن صاحب الجهاز يتابع أدوية
+ *   ← المستخدم يضغط «إعادة ضبط البيانات» أو «حذف حسابي نهائيًا»
+ *   ← `resetQimmah` يمسح التخزين ويُلغي **المعلَّق** فقط
+ *   ← **بقايا حساب مُلغى تبقى مقروءة على شاشة القفل بلا فتح التطبيق.**
+ *
+ * ⚠️ **تصحيح لتوصيف سابق:** النصّ الحيّ اليوم **لا يذكر أسماء** المكمّلات —
+ * `data/notificationCopy.ts` عامّ عمدًا («تذكير عام — التزم بتعليمات مختصك»)
+ * ويحرسه تأكيد قائم. لكن `lib/notifications/copy.ts` **يتيم بلا مستورد** ويحمل
+ * `supplementsCopy` التي تبني «موعد: كرياتين، أوميغا ٣…» من بيانات المستخدم —
+ * سلاحٌ موضوع لا مطلَق. توصيله يومًا يضع الأسماء على شاشة القفل، فيحرسه الآن
+ * تأكيد يحمرّ عند أول استيراد له (§2-٦: اليتيم يُعلَن، والخطر منه يُحرَس).
+ *
+ * والعلاج عند جذره لا عند `resetQimmah`: كل مصالحة تمرّ من هنا — تبديل الحساب،
+ * تسجيل الخروج، الاستعادة، إعادة الضبط، الحذف — فسدُّها هنا يسدّها للجميع دفعةً
+ * واحدة، بدل خمسة نداءات موزّعة يُنسى أحدها.
+ *
+ * **الحذف مُصفّى بمعرّفاتنا** (`allNotificationIds`) لا `removeAllDelivered...`:
+ * المدى المعروف ملك قِمّة وحدها، والتصفية تُبقي الفعل موصوفًا بدل «امسح كل شيء».
+ *
+ * ولا `catch` هنا: فشل التنظيف يصعد إلى `reconcileNotificationSchedule` فيعيد
+ * `'error'` — والحالة **ليست نظيفة فعلًا**، فادّعاء غير ذلك كذبٌ صامت (§2-٣).
+ */
 async function cancelKnown(): Promise<void> {
   if (!notificationsSupported()) return
   const localNotifications = await plugin()
-  await localNotifications.cancel({ notifications: allNotificationIds().map((id) => ({ id })) })
+  const ids = allNotificationIds()
+  await localNotifications.cancel({ notifications: ids.map((id) => ({ id })) })
+  const delivered = await localNotifications.getDeliveredNotifications()
+  const ours = (delivered?.notifications ?? []).filter((item) => ids.includes(Number(item.id)))
+  if (ours.length > 0) await localNotifications.removeDeliveredNotifications({ notifications: ours })
 }
 
 async function schedule(items: PlannedNotification[]): Promise<void> {

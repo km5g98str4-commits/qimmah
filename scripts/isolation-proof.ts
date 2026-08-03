@@ -48,7 +48,24 @@ function seedUserData(tag: string) {
   set(`qimmah:workout-summary:v2:${tag}`, `{"title":"${tag}"}`) // owner-scoped (finding #7)
   set('qimmah:customPlan:v1', `{"${tag}":{}}`) // owner-in-value
   set('qimmah:nutrition:v2', `{"foods":[]}`)
+  // [CTO-72] البند ٦ — عائلة v2 كاملة **بالاسم**: المسح بالبادئة يشملها بحكم
+  // بنيته، لكن «يشملها بحكم البنية» ليس إثباتًا. تُزرع صراحةً فتُفحص صراحةً،
+  // فلو عاد يومًا مسحٌ بقائمة تضمين ثابتة سقط الفحص **باسم المفتاح** لا بعمومية.
+  set(`qimmah:active-workout:v2:${tag}`, `{"exIndex":0}`)
+  set('qimmah:activeWorkout:v1', `{"${tag}":{"dayId":"d"}}`)
+  set(`qimmah:notifications:v1:${tag}`, '{"masterEnabled":true,"supplements":{"enabled":true}}')
+  set(`qimmah:restEndPending:v1:${tag}`, '{"endsAt":1}')
 }
+
+/** مفاتيح عائلة v2 وما يلحق بها — تُفحص بالاسم في ① و⑥. */
+const V2_FAMILY_KEYS = (tag: string) => [
+  'qimmah:nutrition:v2',
+  `qimmah:workout-summary:v2:${tag}`,
+  `qimmah:active-workout:v2:${tag}`,
+  'qimmah:activeWorkout:v1',
+  `qimmah:notifications:v1:${tag}`,
+  `qimmah:restEndPending:v1:${tag}`,
+]
 function seedGlobalSafe() {
   set('qimmah:prefs:v1', '{"language":"ar"}') // اللغة — يجب أن تبقى
   set('qimmah:uiMode:v1', 'advanced')
@@ -88,6 +105,8 @@ console.log('\n① wipeUserData: يمسح بيانات المستخدم، يُب
   wipeUserData()
   check('كل مفاتيح بيانات المستخدم مُسحت', USER_KEYS.every((k) => !has(k)))
   check('المفاتيح المنعزلة (todo:A / activeSession:A / workout-summary:A) مُسحت أيضًا', !has('qimmah:todo:v1:A') && !has('qimmah:activeSession:v1:A') && !has('qimmah:workout-summary:v2:A'))
+  // [CTO-72] البند ٦ — عائلة v2 بالاسم، لا «يشملها المسح بالبادئة».
+  for (const k of V2_FAMILY_KEYS('A')) check(`مفتاح v2 مُسح بالاسم: ${k}`, !has(k))
   check('كل مفاتيح السماح العامّة باقية', SAFE_KEYS.every((k) => has(k)))
   check('اللغة (prefs) باقية', ls.getItem('qimmah:prefs:v1') === '{"language":"ar"}')
   check('رمز الجلسة الحالي باقٍ (لا يُخرج المستخدم أثناء التبديل)', has('qimmah:supabase-auth:v1'))
@@ -162,6 +181,10 @@ console.log('\n⑥ حذف/إعادة ضبط كامل يتجاوز مسح الت�
   ls.removeItem('qimmah:onboarding:accounts:v1')
   ls.removeItem('qimmah:supabase-auth:v1')
   check('بيانات المستخدم مُسحت', USER_KEYS.every((k) => !has(k)))
+  // [CTO-72] البند ٦ — إعادة الضبط الكاملة تمسح عائلة v2 كاملة كذلك: لا بقايا
+  // جلسة ولا تفضيلات إشعارات (وهي مصدر ما يُرسَل لشاشة القفل) لمستخدم سابق.
+  for (const k of V2_FAMILY_KEYS('A')) check(`إعادة الضبط تمسح: ${k}`, !has(k))
+  check('ولا يبقى أي مفتاح تفضيلات إشعارات لأي مالك', !Object.keys(globalThis.localStorage).some((k) => k.startsWith('qimmah:notifications:')))
   check('سجلّ الحسابات مُسح (يُعاد الإعداد عند العودة)', !has('qimmah:onboarding:accounts:v1'))
   check('الجلسة مُسحت (تسجيل خروج)', !has('qimmah:supabase-auth:v1'))
   check('اللغة تبقى حتى بعد إعادة الضبط الكامل', has('qimmah:prefs:v1'))
