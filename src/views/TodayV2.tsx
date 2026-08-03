@@ -17,6 +17,8 @@ import { trackLocal } from '@/lib/tracking'
 import { FirstWinCard } from '@/components/today/FirstWinCard'
 import { NotifyAskSheet } from '@/components/today/NotifyAskSheet'
 import { MissedDayCard } from '@/components/today/MissedDayCard'
+import { WeekSummaryScreen } from '@/components/today/WeekSummaryScreen'
+import { buildWeekSummary, markWeekSummarySeen, shouldShowWeekSummary } from '@/lib/weekSummary'
 import { easyMinutesFor, enableEasyToday, isThursdayMorning } from '@/lib/easySession'
 import { firstWeekStrings } from '@/i18n/dict/firstWeek'
 import { loadFirstWin, suggestFirstWin } from '@/lib/firstWin'
@@ -25,7 +27,7 @@ import { useAuth } from '@/lib/authContext'
 import { DEFAULT_NOTIFICATION_PREFS, loadNotificationPrefs, saveNotificationPrefs } from '@/lib/notifications/prefs'
 import type { NotificationPrefs } from '@/lib/notifications/types'
 import { requestNotificationPermission, reconcileNotificationSchedule } from '@/lib/notifications/engine'
-import { hasEventToday } from '@/lib/tracking/signals'
+import { hasEventToday, journeyDayIndex } from '@/lib/tracking/signals'
 import { useAchievementsEngine } from '@/features/achievements/useAchievements'
 
 interface TodayV2Props {
@@ -132,6 +134,25 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
     if (perm === 'granted') setAskOpen(false)
     return perm
   }
+
+  // [CTO-70] البند ٥ — ملخّص اليوم السابع: يُعرض عند فتح اليوم ٨، مرّة واحدة.
+  const [weekOpen, setWeekOpen] = useState(() => shouldShowWeekSummary(uid))
+  const weekStats = useMemo(() => (weekOpen ? buildWeekSummary() : null), [weekOpen])
+  useEffect(() => {
+    // الحدث يُطلق عند **الوصول للشاشة** لا عند حساب شرطها.
+    if (weekOpen) trackLocal('day7_summary_reached', { dayIndex: journeyDayIndex() ?? 8 })
+  }, [weekOpen])
+  /**
+   * آخر وزن مسجَّل — أو `null` فيُقال ذلك صراحةً بدل رقم مخترع.
+   * يُحسب عند فتح الشاشة وحدها (قراءة واحدة رخيصة)، فلا حاجة لتذكيره.
+   */
+  const lastWeight = weekOpen
+    ? (loadLogs()
+        .filter((l) => l.values.weightKg !== undefined && l.values.weightKg !== '')
+        .sort((a, b) => a.date.localeCompare(b.date))
+        .at(-1)?.values.weightKg ?? null)
+    : null
+  const lastWeightText = lastWeight === null ? null : String(lastWeight)
 
   const trainPillar = model.pillars.find((pillar) => pillar.key === 'train')
   const workoutDone = trainPillar?.state === 'done'
@@ -333,6 +354,19 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
           <p className="px-2 text-center text-[0.7rem] leading-relaxed text-ink-400">{model.trustNote}</p>
         )}
       </div>
+
+      {/* [CTO-70] البند ٥ — ملخّص اليوم السابع فوق كل شيء: شاشة واحدة كاملة. */}
+      {weekOpen && weekStats && (
+        <WeekSummaryScreen
+          lang={lang}
+          stats={weekStats}
+          weightKg={lastWeightText}
+          // عرض الحساب للضيف وحده — صاحب الحساب لا يُعرض عليه ما يملكه.
+          showAccountOffer={!uid}
+          onCreateAccount={() => { markWeekSummarySeen(uid); setWeekOpen(false); onNavigate('login') }}
+          onClose={() => { markWeekSummarySeen(uid); setWeekOpen(false) }}
+        />
+      )}
 
       {/* [CTO-70] البند ٢ — يُعرض مرّة واحدة بعد أول انتصار. الرفض يُثبَّت فلا يعود. */}
       {askOpen && (

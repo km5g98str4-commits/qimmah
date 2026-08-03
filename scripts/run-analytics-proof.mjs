@@ -7,7 +7,7 @@
 import { build } from 'esbuild'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { dirname, resolve, join } from 'node:path'
-import { writeFileSync, mkdtempSync, readFileSync, readdirSync, statSync } from 'node:fs'
+import { writeFileSync, mkdtempSync, readFileSync, readdirSync, statSync, existsSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -214,6 +214,40 @@ check('ليس في قائمة السماح العامّة في accountScope (و�
 check('مسجّل في allowlist النقل', read('src/lib/portability/registry.ts').includes("id: 'trackingEvents'"))
 
 // ————————————————————————————————————————————————————————————————
+console.log('\n⑦-أ حزمة الأسبوع الأول ([CTO-70]) — الأسطح الجديدة حيّة ومحايدة')
+// التعليقات تُزال قبل فحص النبرة: ترويسة القاموس **توثّق** المنع بذكر الكلمات
+// الممنوعة (streak/لوم)، فتُسقط نفسها. نفس درس ترويسة store.ts في [CTO-68].
+const firstWeekDict = stripComments(read('src/i18n/dict/firstWeek.ts'))
+// ترتيب ملخّص اليوم السابع **إلزامي** (Q-212): السلوك ← التحصين ← الوزن ← الحساب.
+const weekScreen = stripComments(read('src/components/today/WeekSummaryScreen.tsx'))
+const order = ['weekBehaviourHeading', 'weekScaleBody', 'weekWeightHeading', 'weekAccountBody'].map((k) => weekScreen.indexOf(k))
+check('ترتيب ملخّص اليوم ٧: السلوك ← تحصين الميزان ← الوزن ← الحساب', order.every((i) => i > 0) && order.every((v, i) => i === 0 || v > order[i - 1]))
+check('تحصين الميزان يسبق الوزن نصًّا لا ترتيبًا فقط', weekScreen.indexOf('weekScaleBody') < weekScreen.indexOf('weekWeightLine'))
+// عرض الحساب بالصياغة الموقّعة — لا وعد حفظ/استعادة والمزامنة مطفأة.
+check('عرض الحساب لا يعد بحفظ أو استعادة (المزامنة مطفأة)', /أول ما تنزل المزامنة/.test(firstWeekDict) && !/نحفظ لك|نسترجع|احفظ بياناتك|back ?up your data|restore/i.test(firstWeekDict))
+// لا لوم ولا streak ولا أحمر في أي حالة فوات.
+const missedCard = stripComments(read('src/components/today/MissedDayCard.tsx'))
+check('بطاقة اليوم الفائت بلا أحمر', !/text-danger|bg-danger|--c-danger|#(e|f)[0-9a-f]{2}[0-3][0-9a-f]{3}/i.test(missedCard))
+check('ولا streak في نصوص الحزمة', !/streak|سلسلة أيام|يومًا متتاليًا/i.test(firstWeekDict))
+check('ولا لوم/تهويل في نصوص الحزمة', !/فشلت|خسرت|ضاع|للأسف|you failed|you lost/i.test(firstWeekDict))
+check('ولا تكديس علامات تعجّب', !/!!|؟!/.test(firstWeekDict))
+// النبرة عامية بيضاء — علامات محكيّة حاضرة في العربية.
+check('النبرة عامية بيضاء (علامات محكيّة حاضرة)', ['وش', 'تقدر', 'خلّ', 'بكرة'].some((w) => firstWeekDict.includes(w)))
+check('كل نصّ جديد بلغتيه (قاموس واحد يحمل ar وen)', /const AR: FirstWeekStrings/.test(firstWeekDict) && /const EN: FirstWeekStrings/.test(firstWeekDict))
+// الأسطح الأربعة داخل رسم الوصول — الحارس البنيوي يفرضه تلقائيًا.
+for (const surface of ['src/components/today/FirstWinCard.tsx', 'src/components/today/NotifyAskSheet.tsx', 'src/components/today/MissedDayCard.tsx', 'src/components/today/WeekSummaryScreen.tsx']) {
+  check(`سطح حيّ يصل المستخدم: ${surface.split('/').pop()}`, reachable.has(surface))
+}
+// ذرّية الإذن منسوخة لا مُعاد اختراعها: الإذن قبل رفع المفتاح، والرفع عند granted وحده.
+const todayView = read('src/views/TodayV2.tsx')
+const permIdx = todayView.indexOf('await requestNotificationPermission()')
+const raiseIdx = todayView.indexOf('masterEnabled: true')
+check('م١: الإذن يُطلب قبل رفع masterEnabled', permIdx > 0 && raiseIdx > permIdx)
+check('م١: المفتاح لا يُرفع إلا عند granted', /perm === 'granted' && uid/.test(todayView))
+check('م١: الرفض يُثبَّت فلا يتكرّر السؤال', /markNotifyAsked\(/.test(todayView) && /markNotifyAsked\('declined'\)/.test(todayView))
+// م١-ب: اللوحة اليتيمة حُذفت ولا مرجع لها.
+check('م١-ب: NotificationSettingsPanel محذوفة ولا مرجع لها', !existsSync(resolve(root, 'src/components/NotificationSettingsPanel.tsx')) && appSource.every(({ text }) => !text.includes('NotificationSettingsPanel')))
+
 console.log('\n⑦ سياسة الخصوصية تبقى صادقة')
 const strings = read('src/config/strings.ts')
 check('العربية ما زالت تنصّ على أن الإحصاءات لا تُرسَل لأي خادم', /لا\s+تُرسَل\s+هذه\s+الإحصاءات\s+إلى\s+أي\s+خادم/.test(strings))

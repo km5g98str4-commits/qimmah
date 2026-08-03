@@ -120,7 +120,10 @@ export interface TrackedEventProps {
  * الإثبات يتحقّق من الأمرين معًا: أن هذه لا تُنادى، وأن **كل ما عداها يُنادى**.
  * حذف اسم من هنا بلا زرع نداء يُسقط البوابة — فلا يُنسى سطح عند بنائه.
  */
-export const AWAITING_SURFACE: readonly TrackedEventName[] = ['day7_summary_reached'] as const
+// [CTO-70] وصل السطحين الأخيرين (أول انتصار · ملخّص اليوم ٧) فأُفرِغت القائمة.
+// تبقى معرَّفة لا محذوفة: القاعدة ذات الاتجاهين في `test:analytics` تسري عليها
+// فارغةً كما تسري ممتلئة، وأي حدث جديد يُضاف بلا سطح يُعلَن هنا لا يُهرَّب.
+export const AWAITING_SURFACE: readonly TrackedEventName[] = [] as const
 
 /** هل هذا الحدث ينتظر سطحه (فلا يُتوقَّع له موضع نداء اليوم)؟ */
 export function isAwaitingSurface(name: TrackedEventName): boolean {
