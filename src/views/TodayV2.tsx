@@ -173,6 +173,32 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
   const waterDone = nutrition.water.targetMl > 0 && nutrition.water.consumedMl >= nutrition.water.targetMl
   const hasMeal = nutrition.meals.some((meal) => meal.logged)
 
+  /**
+   * [CTO-72] البند ١ — اللوحة تفتح بحالة فارغة ذكية.
+   *
+   * ما كان يحدث: القادم الجديد يدخل اللوحة فيستقبله **صفٌّ من الأصفار** — أربع
+   * حلقات ماكرو تعرض `0`/`0`/`0`/`0` بحجمها الكامل، وسطر `0/2,207 كالوري`
+   * فوقها، وبطاقة «نبض أسبوعك» بحجم بطاقة ممتلئة لتقول «نحتاج بيانات أكثر»،
+   * وبطاقتا مهمّة تعيدان الرقم نفسه صفرًا («٠ من ٢٬٢٠٧ سعرة» · «٠ من ٣ لتر»).
+   * فأول انطباع عن التطبيق **لوحة قياس معطّلة**، لا دعوة للبدء.
+   *
+   * `hasTodaySignal` يسأل سؤالًا واحدًا: **هل يوجد شيء يُعرض أصلًا اليوم؟**
+   * وهو مشتقّ من نفس المصادر التي تُغذّي البطاقات — لا علم منفصل يشيخ.
+   *
+   * والقيد `model.state === 'newUser'` مقصود: `newUser` تعني «لا تاريخ إطلاقًا»
+   * (`!onboarded || !hasHistory` في `todayV2Model`). صاحبُ تاريخٍ يفتح صباح يوم
+   * جديد **يريد** رؤية حلقاته صفرًا — تلك أرقام يومه لا فراغ. فالإخفاء للقادم
+   * الجديد وحده، ويزول عند **أول** تسجيل: كوب ماء واحد يُعيد اللوحة كاملة.
+   */
+  const hasTodaySignal =
+    nutrition.calories.consumed > 0 ||
+    nutrition.water.consumedMl > 0 ||
+    hasMeal ||
+    todayWeightLogged ||
+    trainPillar?.state === 'done' ||
+    trainPillar?.state === 'active'
+  const blankSlate = model.state === 'newUser' && !hasTodaySignal
+
   const quick = (target: QuickLogTarget, fallback: AppRoute) => {
     if (onQuickLog) onQuickLog(target)
     else onNavigate(fallback)
@@ -192,7 +218,8 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
     {
       key: 'meal',
       title: hasMeal ? copy.meal : copy.firstMeal,
-      body: nutrition.calories.target > 0
+      // البند ١: قبل أول تسجيل نقول ما الذي سيحدث، لا «٠ من ٢٬٢٠٧».
+      body: nutrition.calories.target > 0 && !blankSlate
         ? copy.calories(nutrition.calories.consumed, nutrition.calories.target)
         : copy.mealFallback,
       cta: copy.mealCta,
@@ -204,7 +231,7 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
     {
       key: 'water',
       title: copy.water,
-      body: nutrition.water.targetMl > 0
+      body: nutrition.water.targetMl > 0 && !blankSlate
         ? copy.waterAmount(nutrition.water.consumedMl, nutrition.water.targetMl)
         : copy.waterFallback,
       cta: copy.waterCta,
@@ -276,7 +303,11 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
 
         {/* ماكروز اليوم — حلّت محلّ البطاقة البارزة. تلك كانت `bg-ink-900`، وهو
             لون ينقلب فاتحًا في السمة الداكنة فيظهر مربعًا أبيض يضرب الخلفية.
-            والمحتوى هنا أنفع: أرقام اليوم مباشرةً بدل تكرار زرّ التمرين. */}
+            والمحتوى هنا أنفع: أرقام اليوم مباشرةً بدل تكرار زرّ التمرين.
+
+            [CTO-72] البند ١ — لكنها **أرقام**، والقادم الجديد بلا أرقام. تظهر
+            عند أول تسجيل لا قبله: بطاقة أصفار ليست معلومة، هي ضجيج بحجم بطاقة. */}
+        {!blankSlate && (
         <section aria-labelledby="today-macros-title" className="rounded-3xl border border-line bg-surface p-4 shadow-card">
           <div className="flex items-center justify-between gap-3">
             <h2 id="today-macros-title" className="flex items-center gap-2 text-base font-black">
@@ -307,6 +338,7 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
             <MacroRing label={`${copy.macroFat}${copy.macroGrams}`} consumed={nutrition.macros.fat.consumed} target={nutrition.macros.fat.target} color={MACRO_TONE.fat} remainingLabel={copy.macroRemaining} />
           </div>
         </section>
+        )}
 
         <section aria-labelledby="today-remaining-title">
           <div className="mb-3 flex items-end justify-between gap-3">
@@ -355,13 +387,17 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
           </section>
         )}
 
-        <InsightCardsView
-          cards={insights.cards}
-          lang={ar ? 'ar' : 'en'}
-          onNavigate={onNavigate}
-          title={copy.weeklyTitle}
-          max={1}
-        />
+        {/* [CTO-72] البند ١ — «نبض أسبوعك» بلا أسبوع ليس نبضًا: بطاقة بحجم
+            البطاقة الممتلئة تقول «نحتاج بيانات أكثر». تظهر عند وجود ما يُقرأ. */}
+        {!blankSlate && (
+          <InsightCardsView
+            cards={insights.cards}
+            lang={ar ? 'ar' : 'en'}
+            onNavigate={onNavigate}
+            title={copy.weeklyTitle}
+            max={1}
+          />
+        )}
 
         {model.trustNote && (
           <p className="px-2 text-center text-[0.7rem] leading-relaxed text-ink-400">{model.trustNote}</p>
