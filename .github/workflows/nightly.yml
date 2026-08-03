@@ -1,9 +1,17 @@
 name: Nightly
 
-# Scheduled full drift check on the long-lived integration branches. Re-runs the
-# same deterministic gate as ci.yml (so a dependency bump, a force-push, or an
-# environment change that breaks the build is caught even without a new push),
-# plus a NON-BLOCKING best-effort pass of the browser proofs for visibility.
+# Scheduled full drift check on the TRUNK. Re-runs the same deterministic gate as
+# ci.yml (so a dependency bump, a force-push, or an environment change that breaks
+# the build is caught even without a new push), plus a NON-BLOCKING best-effort
+# pass of the browser proofs for visibility.
+#
+# [CTO-71] — scope narrowed to `main` only. This workflow used to run the gate on
+# `integration/wave3` and `integration/wave4`. Its first-ever scheduled run went RED
+# on `integration/wave3` — last touched 2026-07-13, three weeks stale — failing the
+# lazy-chunk perf budget (NutritionView 151.6KB vs a 130KB ceiling). That red says
+# nothing about the trunk and cannot be fixed without reviving an abandoned branch.
+# Owner decision: archive the scope, keep both branches (NOT deleted, still on the
+# remote, still checkoutable). Drift on the trunk is what this gate is for.
 #
 # NOTE: GitHub only fires `schedule` from the workflow file on the repository's
 # DEFAULT branch (main). This file therefore starts running nightly once it lands
@@ -17,7 +25,7 @@ on:
       ref:
         description: 'Branch/ref to run the gate on (manual runs)'
         required: false
-        default: 'integration/wave4'
+        default: 'main'
 
 permissions:
   contents: read
@@ -30,7 +38,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ref: [integration/wave3, integration/wave4]
+        ref: [main]
     steps:
       - name: Checkout ${{ github.event.inputs.ref || matrix.ref }}
         uses: actions/checkout@v4
@@ -74,10 +82,11 @@ jobs:
     timeout-minutes: 25
     continue-on-error: true # informational only — never blocks
     steps:
-      - name: Checkout integration/wave4
+      # [CTO-71] — كان يفحص `integration/wave4`؛ صار على الجذع مثل بوابة الانحراف.
+      - name: Checkout main
         uses: actions/checkout@v4
         with:
-          ref: integration/wave4
+          ref: main
 
       - name: Setup Node 22 (+ npm cache)
         uses: actions/setup-node@v4
