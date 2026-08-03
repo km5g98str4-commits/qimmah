@@ -17,6 +17,7 @@ import { isMinorAge } from '@/lib/calculators'
 import { profileChoiceStrings } from '@/i18n/dict/profileChoices'
 import { bodyStepStrings } from '@/i18n/dict/bodyStep'
 import { goalWordingFor, onboardingIntentStrings } from '@/i18n/dict/onboardingIntent'
+import { setupWhyLines } from '@/i18n/dict/setupWhy'
 import {
   AGE_RANGE,
   DAYS,
@@ -135,6 +136,8 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
   const bodyT = bodyStepStrings[lang] ?? bodyStepStrings.ar
   // صياغة الأهداف تتبع المستوى المُعلن — نفس القيم المخزّنة، لغة مختلفة.
   const goalWording = useMemo(() => goalWordingFor(lang, level), [lang, level])
+  // [CTO-72] البند ٢ — سطر «ليش نسأل» للخطوات الخمس من مصدر واحد، بترتيب التدفّق.
+  const whyLines = useMemo(() => setupWhyLines(lang), [lang])
   const goalLabel = goal ? goalWording[goal].label : ''
   const levelLabel = intentT.levels.find((l) => l.value === level)?.label ?? ''
   const intentLabel = intentT.intents.find((i) => i.value === intent)?.label ?? ''
@@ -289,6 +292,7 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
             <BodyStep
               lang={lang}
               titleId={stepTitleId}
+              why={whyLines[0]}
               age={ageText}
               gender={gender}
               heightCm={heightText}
@@ -305,6 +309,7 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
             <IntentStep
               lang={lang}
               titleId={stepTitleId}
+              why={whyLines[1]}
               intent={intent}
               level={level}
               years={yearsText}
@@ -315,12 +320,12 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
               onYears={(v) => { setYearsText(v); setValidation(null) }}
             />
           )}
-          {step === 2 && <GoalStep lang={lang} t={t} titleId={stepTitleId} goal={goal} wording={goalWording} isMinor={minor} onPick={(g) => { if (minor && (g === 'cut' || g === 'bulk')) return; setGoal(g); setValidation(null) }} />}
+          {step === 2 && <GoalStep lang={lang} t={t} titleId={stepTitleId} why={whyLines[2]} goal={goal} wording={goalWording} isMinor={minor} onPick={(g) => { if (minor && (g === 'cut' || g === 'bulk')) return; setGoal(g); setValidation(null) }} />}
           {step === 3 && (
-            <TrainingStep t={t} titleId={stepTitleId} lang={lang} days={days} duration={duration} onDays={setDays} onDuration={setDuration} goalLabel={goalLabel} split={splitFor(days, lang)} />
+            <TrainingStep t={t} titleId={stepTitleId} why={whyLines[3]} lang={lang} days={days} duration={duration} onDays={setDays} onDuration={setDuration} goalLabel={goalLabel} split={splitFor(days, lang)} />
           )}
           {step === 4 && (
-            <EquipmentStep t={t} titleId={stepTitleId} place={place} pref={pref} hasInjury={hasInjury} injuries={injuries} onPlace={(v) => { setPlace(v); setValidation(null) }} onPref={(v) => { setPref(v); setValidation(null) }} onToggleInjury={() => setHasInjury((v) => !v)} onInjury={toggleInjury} />
+            <EquipmentStep t={t} titleId={stepTitleId} why={whyLines[4]} place={place} pref={pref} hasInjury={hasInjury} injuries={injuries} onPlace={(v) => { setPlace(v); setValidation(null) }} onPref={(v) => { setPref(v); setValidation(null) }} onToggleInjury={() => setHasInjury((v) => !v)} onInjury={toggleInjury} />
           )}
         </div>
       </main>
@@ -382,11 +387,18 @@ function Group({ legend, children, className }: { legend: string; children: Reac
   )
 }
 
-function StepTitle({ id, title, subtitle }: { id: string; title: string; subtitle?: string }) {
+/**
+ * عنوان الخطوة + سطر «ليش نسأل». [CTO-72] البند ٢.
+ *
+ * `why` **إلزامي** لا اختياري عمدًا: حين كان `subtitle?` اختياريًا، شحنت خطوة
+ * الهدف بلا أي سياق ولم يعترض شيء. الآن خطوة تُرسم بعنوان بلا سياق **لا
+ * تُترجم**. والمصدر واحد (`setupWhyLines`) فلا يتفرّق السطر بين خمسة قواميس.
+ */
+function StepTitle({ id, title, why }: { id: string; title: string; why: string }) {
   return (
     <div className="animate-fade-up">
       <h1 id={id} className="text-[1.7rem] font-black leading-tight tracking-tight text-ink-900">{title}</h1>
-      {subtitle && <p className="mt-2 text-sm leading-relaxed text-ink-500">{subtitle}</p>}
+      <p className="mt-2 text-sm leading-relaxed text-ink-500">{why}</p>
     </div>
   )
 }
@@ -429,9 +441,9 @@ function NumField({
  * لكل مستخدمي التطبيق**. وبلا عمر، حاجز القاصرين لا يُفعَّل أصلًا.
  */
 function BodyStep({
-  lang, titleId, age, gender, heightCm, weightKg, healthDataConsent, onAge, onGender, onHeight, onWeight, onConsent,
+  lang, titleId, why, age, gender, heightCm, weightKg, healthDataConsent, onAge, onGender, onHeight, onWeight, onConsent,
 }: {
-  lang: Lang; titleId: string
+  lang: Lang; titleId: string; why: string
   age: string; gender: V2Gender | null; heightCm: string; weightKg: string; healthDataConsent: boolean
   onAge: (v: string) => void; onGender: (g: V2Gender) => void; onHeight: (v: string) => void; onWeight: (v: string) => void
   onConsent: (checked: boolean) => void
@@ -442,7 +454,7 @@ function BodyStep({
   const showMinorNote = Number.isFinite(parsedAge) && parsedAge >= AGE_RANGE.min && parsedAge < 18
   return (
     <section aria-labelledby={titleId}>
-      <StepTitle id={titleId} title={s.title} subtitle={s.subtitle} />
+      <StepTitle id={titleId} title={s.title} why={why} />
 
       {/* الموافقة الصحية **قبل** أي حقل — الإذن يسبق الجمع لا يليه. */}
       <div className="mt-5 rounded-2xl border border-line bg-surface p-4">
@@ -488,7 +500,6 @@ function BodyStep({
         </p>
       )}
 
-      <p className="mt-5 text-[0.8rem] leading-relaxed text-ink-500">{s.whyNote}</p>
     </section>
   )
 }
@@ -535,9 +546,9 @@ function ChoiceRow({ label, desc, icon, selected, onSelect }: { label: string; d
  * التعليق المطوّل فوق `validateStep` في `onboardingV2Flow.ts`.
  */
 function IntentStep({
-  lang, titleId, intent, level, years, onIntent, onLevel, onYears,
+  lang, titleId, why, intent, level, years, onIntent, onLevel, onYears,
 }: {
-  lang: Lang; titleId: string
+  lang: Lang; titleId: string; why: string
   intent: V2Intent | null; level: V2Level | null; years: string
   onIntent: (v: V2Intent) => void; onLevel: (v: V2Level) => void; onYears: (v: string) => void
 }) {
@@ -546,7 +557,7 @@ function IntentStep({
   const showYears = level === 'intermediate' || level === 'advanced'
   return (
     <section aria-labelledby={titleId}>
-      <StepTitle id={titleId} title={s.title} subtitle={s.subtitle} />
+      <StepTitle id={titleId} title={s.title} why={why} />
 
       <Group legend={s.legends.intent} className="block">
         <p className="mt-6 mb-3 text-sm font-bold text-ink-700">{s.intentQ}</p>
@@ -576,10 +587,10 @@ function IntentStep({
   )
 }
 
-function GoalStep({ lang, t, titleId, goal, wording, isMinor, onPick }: { lang: Lang; t: T; titleId: string; goal: V2GoalValue | null; wording: Record<V2GoalValue, { label: string; desc: string }>; isMinor: boolean; onPick: (g: V2GoalValue) => void }) {
+function GoalStep({ lang, t, titleId, why, goal, wording, isMinor, onPick }: { lang: Lang; t: T; titleId: string; why: string; goal: V2GoalValue | null; wording: Record<V2GoalValue, { label: string; desc: string }>; isMinor: boolean; onPick: (g: V2GoalValue) => void }) {
   return (
     <section aria-labelledby={titleId}>
-      <StepTitle id={titleId} title={t.goal.title} />
+      <StepTitle id={titleId} title={t.goal.title} why={why} />
       <Group legend={t.legends.goal} className="mt-6 block space-y-3">
         {/* القيم والأيقونات من النموذج المركزي؛ **الصياغة** من قاموس المستوى. */}
         {V2_GOAL_MODEL.map((g) => {
@@ -657,10 +668,10 @@ function Segmented({ options, value, onChange, render }: { options: readonly num
   )
 }
 
-function TrainingStep({ t, titleId, lang, days, duration, onDays, onDuration, goalLabel, split }: { t: T; titleId: string; lang: Lang; days: number; duration: number; onDays: (v: number) => void; onDuration: (v: number) => void; goalLabel: string; split: string }) {
+function TrainingStep({ t, titleId, why, lang, days, duration, onDays, onDuration, goalLabel, split }: { t: T; titleId: string; why: string; lang: Lang; days: number; duration: number; onDays: (v: number) => void; onDuration: (v: number) => void; goalLabel: string; split: string }) {
   return (
     <section aria-labelledby={titleId}>
-      <StepTitle id={titleId} title={t.training.title} subtitle={t.training.subtitle} />
+      <StepTitle id={titleId} title={t.training.title} why={why} />
 
       <Group legend={t.legends.days}>
         <p className="mt-6 mb-3 text-sm font-bold text-ink-700">{t.training.daysQ}</p>
@@ -733,10 +744,10 @@ function TileGroup({ options, value, onChange }: { options: readonly { value: st
   )
 }
 
-function EquipmentStep({ t, titleId, place, pref, hasInjury, injuries, onPlace, onPref, onToggleInjury, onInjury }: { t: T; titleId: string; place: string | null; pref: string | null; hasInjury: boolean; injuries: string[]; onPlace: (v: string) => void; onPref: (v: string) => void; onToggleInjury: () => void; onInjury: (v: string) => void }) {
+function EquipmentStep({ t, titleId, why, place, pref, hasInjury, injuries, onPlace, onPref, onToggleInjury, onInjury }: { t: T; titleId: string; why: string; place: string | null; pref: string | null; hasInjury: boolean; injuries: string[]; onPlace: (v: string) => void; onPref: (v: string) => void; onToggleInjury: () => void; onInjury: (v: string) => void }) {
   return (
     <section aria-labelledby={titleId}>
-      <StepTitle id={titleId} title={t.equipment.title} subtitle={t.equipment.subtitle} />
+      <StepTitle id={titleId} title={t.equipment.title} why={why} />
 
       <Group legend={t.legends.place}>
         <p className="mt-6 mb-3 text-sm font-bold text-ink-700">{t.equipment.placeQ}</p>

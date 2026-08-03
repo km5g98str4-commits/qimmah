@@ -10,8 +10,14 @@ import type { Lang } from '@/lib/appPreferences'
 
 export interface BodyStepStrings {
   title: string
-  subtitle: string
-  /** يشرح سبب السؤال — يبني الثقة بدل أن يبدو استجوابًا. */
+  /**
+   * يشرح سبب السؤال — يبني الثقة بدل أن يبدو استجوابًا.
+   *
+   * [CTO-72] البند ٢: صار **سطر السياق الوحيد** لهذه الخطوة ويُعرض تحت العنوان
+   * مباشرةً (كان في أسفل الشاشة بعد كل الحقول). وأُسقط معه `subtitle` الذي كان
+   * يقول الشيء نفسه بصياغة أخرى — سطران للمعنى الواحد ازدحامٌ لا تأكيد.
+   * يُقرأ الآن عبر `setupWhyLines()` مع أسطر الخطوات الأربع الأخرى.
+   */
   whyNote: string
 
   ageLabel: string
@@ -45,7 +51,6 @@ export interface BodyStepStrings {
 
 const ar: BodyStepStrings = {
   title: 'نبدأ بأساسياتك',
-  subtitle: 'أربع أرقام ونقدّر احتياجك اليومي.',
   whyNote: 'نستخدمها عشان نقدّر سعراتك وماكروزك. تقدر تعدّلها بأي وقت من ملفك.',
 
   ageLabel: 'العمر',
@@ -72,7 +77,6 @@ const ar: BodyStepStrings = {
 
 const en: BodyStepStrings = {
   title: "Let's start with your basics",
-  subtitle: 'Four numbers are enough to estimate your daily needs accurately.',
   whyNote: 'We use these to estimate your calories and macros. You can change them anytime from your profile.',
 
   ageLabel: 'Age',

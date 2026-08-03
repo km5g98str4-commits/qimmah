@@ -131,5 +131,73 @@ check(
 }
 
 // ═════════════════════════════════════════════════════════════════════════
+console.log('\n② البند ٢ — سياق «ليش نسأل» فوق كل خطوة إعداد (OnboardingV2)')
+// ═════════════════════════════════════════════════════════════════════════
+
+const onboarding = read('src/views/OnboardingV2.tsx')
+const whyDict = read('src/i18n/dict/setupWhy.ts')
+
+// أ) الضمان البنيوي: الصفّ خمسة بالضبط، فخطوة سادسة بلا سطر **لا تُترجم**.
+check(
+  '`SetupWhyLines` صفٌّ بطول خمسة بالضبط (المترجم يحرس الاكتمال)',
+  /export type SetupWhyLines = readonly \[string, string, string, string, string\]/.test(whyDict),
+)
+check(
+  '`StepTitle.why` إلزامي لا اختياري (لا خطوة بعنوان بلا سياق)',
+  /function StepTitle\(\{ id, title, why \}: \{ id: string; title: string; why: string \}\)/.test(onboarding),
+)
+check(
+  '`StepTitle` يرسم السطر بلا شرط (لا `why &&` يبتلعه بصمت)',
+  /<p className="mt-2 text-sm leading-relaxed text-ink-500">\{why\}<\/p>/.test(onboarding)
+    && !/\{why && </.test(onboarding),
+)
+
+// ب) المُجمِّع يقرأ من مصادر الأربعة القائمة ولا ينسخها (نسخة ثانية تشيخ).
+const SOURCES = [
+  ['خطوة ٠ الأساسيات', 'bodyStepStrings[lang].whyNote'],
+  ['خطوة ١ النية والمستوى', 'intent.subtitle'],
+  ['خطوة ٣ التدريب', 't.training.subtitle'],
+  ['خطوة ٤ المعدّات', 't.equipment.subtitle'],
+]
+SOURCES.forEach(([name, expr]) =>
+  check(`المُجمِّع يقرأ ${name} من قاموسه لا بنسخة`, whyDict.includes(expr)),
+)
+check('خطوة ٢ الهدف — السطر المفقود يُضاف هنا (بالعربية والإنجليزية)', /const goalWhy: Record<Lang, string> = \{[\s\S]*?ar: '[^']+',[\s\S]*?en: '[^']+',/.test(whyDict))
+
+// ج) الخطوات الخمس تُغذَّى بالفهرس الصحيح — لا خطوة تأخذ سطر جارتها.
+for (let i = 0; i <= 4; i += 1) {
+  check(`الخطوة ${i} تمرّر \`whyLines[${i}]\``, onboarding.includes(`why={whyLines[${i}]}`))
+}
+check(
+  'خمسة تمريرات لا أقل (كل خطوة لها سطرها)',
+  (onboarding.match(/why=\{whyLines\[\d\]\}/g) || []).length === 5,
+)
+
+// د) الازدواج المُزال: لم يعد لخطوة الأساسيات سطران شارحان.
+check(
+  'سطر «ليش» لم يعد مكرَّرًا أسفل خطوة الأساسيات',
+  !onboarding.includes('{s.whyNote}'),
+)
+check(
+  '`bodyStepStrings` لم يعد يحمل `subtitle` الذي كان يعيد المعنى نفسه',
+  !/^\s*subtitle: /m.test(read('src/i18n/dict/bodyStep.ts')),
+)
+check(
+  'خطوة الهدف لم تعد تكرّر «تقدر تغيّره» (السياق أثرٌ · والملاحظة رجعة)',
+  !/goalWhy[\s\S]{0,200}تقدر تغيّره/.test(whyDict),
+)
+
+// هـ) ⚔️ محاكاة التفاف: أعِد `why` اختياريًا ⇒ يسقط الفحص باسمه.
+{
+  const tampered = onboarding.replace('title: string; why: string }', 'title: string; why?: string }')
+  const stillRequired = /function StepTitle\(\{ id, title, why \}: \{ id: string; title: string; why: string \}\)/.test(tampered)
+  check(
+    '⚔️ جعل `why` اختياريًا يُسقط فحص الإلزام (لا يمرّ بوجود الاسم وحده)',
+    stillRequired === false,
+    'الفحص مرّ على توقيع اختياري — البوابة رخوة',
+  )
+}
+
+// ═════════════════════════════════════════════════════════════════════════
 console.log(`\n${'─'.repeat(58)}\nالنتيجة: ${pass} ناجح · ${fail} فاشل`)
 if (fail > 0) process.exit(1)
