@@ -16,6 +16,16 @@ export interface FirstWeekStrings {
   firstWinOther: string
   win: Record<'warmup' | 'meal' | 'water' | 'dinner', { label: string; cta: string; minutes: string }>
 
+  // — سطح إذن الإشعارات (ADV-14م · م١) —
+  /** المقابل محدّد: الوقت نصّ قابل للنقر لتغييره **قبل** القبول. */
+  notifyAskLine: (time: string) => string
+  notifyAskChangeTime: string
+  notifyAskYes: string
+  notifyAskNo: string
+  /** رفض النظام بعد القبول — صدق بلا وعد كاذب بالعمل. */
+  notifyAskDenied: string
+  notifyAskHome: string
+
   // — بروتوكول التعثّر (ADV-18) —
   missedTitle: string
   missedBody: string
@@ -57,6 +67,13 @@ const AR: FirstWeekStrings = {
     dinner: { label: 'سجّل عشاك', cta: 'سجّله', minutes: 'دقيقة' },
   },
 
+  notifyAskLine: (time) => `نذكّرك بكرة الساعة ${time} بتمرينك — نرسل لك؟`,
+  notifyAskChangeTime: 'غيّر الوقت',
+  notifyAskYes: 'إي، ذكّرني',
+  notifyAskNo: 'لا، شكرًا',
+  notifyAskDenied: 'الإشعارات موقوفة لقِمّة من إعدادات iPhone. تقدر تفعّلها من هناك ثم من إعدادات قِمّة.',
+  notifyAskHome: 'تقدر تغيّرها أي وقت من الإعدادات.',
+
   missedTitle: 'يوم عادي. نبدأ من اليوم',
   missedBody: 'ما فات شي. تمرين اليوم في مكانه، وتقدر تبدأ بأخفّ منه.',
   missedEasierCta: 'ابدأ بنسخة أخفّ',
@@ -92,6 +109,13 @@ const EN: FirstWeekStrings = {
     water: { label: 'Log a glass of water', cta: 'Log it', minutes: 'seconds' },
     dinner: { label: 'Log your dinner', cta: 'Log it', minutes: '1 min' },
   },
+
+  notifyAskLine: (time) => `We'll remind you tomorrow at ${time} about your workout — send it?`,
+  notifyAskChangeTime: 'Change the time',
+  notifyAskYes: 'Yes, remind me',
+  notifyAskNo: 'No thanks',
+  notifyAskDenied: 'Notifications are off for Qimmah in iPhone Settings. You can turn them on there, then from Qimmah settings.',
+  notifyAskHome: 'You can change this anytime in Settings.',
 
   missedTitle: 'Just a normal day. We start today',
   missedBody: 'Nothing’s lost. Today’s workout is right here, and you can start with a lighter version.',

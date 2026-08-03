@@ -85,6 +85,17 @@ check('يخطط الأنواع الخمسة', ['workoutDay', 'restDay', 'water',
 check('كل المعرّفات فريدة', new Set(planned.map((item) => item.id)).size === planned.length)
 check('لا موعد داخل الهدوء', planned.every((item) => !isWithinQuietHours(item.hour, item.minute, quiet)))
 check('تعطيل المفتاح الرئيسي ينتج صفرًا', planNotifications({ ...enabledPrefs(), masterEnabled: false }, week, 'ar').length === 0)
+
+// [CTO-70] البند ٢ · م٢ — إشعار يوم التمرين يحمل **اسم اليوم الحقيقي بلا مدة**.
+// كان `planWeek` يحمل العنوان ولا يصل إلى النصّ أبدًا، فيسقط كل إشعار تمرين
+// إلى النصّ العام رغم توفّر الاسم. هذه الفحوص تقفل الفجوة في الاتجاهين.
+const workoutItem = planned.find((item) => item.kind === 'workoutDay')!
+check('م٢: إشعار التمرين يحمل اسم يوم الخطة الحقيقي', workoutItem.body.includes('دفع'))
+check('م٢: ولا يحمل أي مدة مخترعة (لا «٤٥» ولا رقم دقائق)', !/\d+\s*(دقيقة|min)/.test(workoutItem.body) && !/45|٤٥/.test(workoutItem.body))
+// تأكيد مضادّ (§4.2): بلا عنوان في الخطة نعود للنصّ العام ولا نخترع اسمًا.
+const untitled = planNotifications(enabledPrefs({ workoutDay: { enabled: true, time: '18:00' } }), [{ weekday: 0, isRestDay: false, title: null }], 'ar')
+check('م٢: بلا عنوان يوم يعود النصّ العام ولا يُخترع اسم', untitled.find((i) => i.kind === 'workoutDay')?.body === 'خطتك جاهزة — افتحها وابدأ.')
+check('م٢: الإنجليزية كذلك تحمل الاسم الحقيقي', planNotifications(enabledPrefs({ workoutDay: { enabled: true, time: '18:00' } }), week, 'en').find((i) => i.kind === 'workoutDay')?.body.includes('دفع') === true)
 const skipped = planNotifications(enabledPrefs({ workoutDay: { enabled: true, time: '23:00' } }), week, 'ar')
 check('وقت تمرين داخل الهدوء لا يُجدول', !skipped.some((item) => item.kind === 'workoutDay'))
 const daily = planned.find((item) => item.kind === 'supplements')!

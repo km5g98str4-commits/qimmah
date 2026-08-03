@@ -57,10 +57,13 @@ function fixedNotification(
   time: string,
   quiet: QuietHours,
   lang: Lang,
+  // [CTO-70] م٢ — عنوان يوم الخطة يمرّ إلى النصّ. كان `planWeek` يحمله ولا يصل
+  // إلى النسخة أبدًا، فيسقط كل إشعار تمرين إلى النصّ العام رغم توفّر الاسم.
+  ctx: { dayTitle?: string | null } = {},
 ): PlannedNotification | null {
   const { hour, minute } = parseTime(time)
   if (isWithinQuietHours(hour, minute, quiet)) return null
-  const copy = notificationMessage(kind, lang)
+  const copy = notificationMessage(kind, lang, ctx)
   return { id, kind, weekday, hour, minute, ...copy }
 }
 
@@ -77,7 +80,8 @@ export function planNotifications(
       const setting = day.isRestDay ? prefs.restDay : prefs.workoutDay
       const range = day.isRestDay ? NOTIFICATION_ID_RANGES.restDay : NOTIFICATION_ID_RANGES.workoutDay
       if (!setting.enabled) continue
-      const item = fixedNotification(range[0] + day.weekday, kind, day.weekday, setting.time, prefs.quietHours, lang)
+      // اسم اليوم يُمرَّر لأيام التمرين فقط — أيام الراحة نصّها لا يحمل عنوانًا.
+      const item = fixedNotification(range[0] + day.weekday, kind, day.weekday, setting.time, prefs.quietHours, lang, kind === 'workoutDay' ? { dayTitle: day.title } : {})
       if (item) planned.push(item)
     }
   }

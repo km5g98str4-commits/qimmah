@@ -105,17 +105,30 @@ interface NotificationMessage {
   body: string
 }
 
+/**
+ * [CTO-70] البند ٢ · م٢ — إشعار يوم التمرين يحمل **اسم يوم التمرين الحقيقي**
+ * من خطة المستخدم (`day.title`)، **بلا مدة**.
+ *
+ * لماذا بلا مدة: المدة المعروضة كانت ستكون رقمًا عامًّا لا يعرف جلسة المستخدم
+ * (قرار المجلس: «رقم ٤٥ الكاذب ممنوع»). واسم اليوم متاح وصادق، فيُعرض وحده.
+ * وحين لا يكون للخطة عنوان يوم، نعود للنصّ العام بدل اختراع اسم.
+ */
 export function notificationMessage(
   kind: ReminderKind,
   lang: Lang,
+  ctx: { dayTitle?: string | null } = {},
 ): NotificationMessage {
   const ar = lang === 'ar'
   switch (kind) {
-    case 'workoutDay':
+    case 'workoutDay': {
+      const dayTitle = ctx.dayTitle?.trim() || null
       return {
         title: ar ? 'ابدأ تمرين اليوم' : 'Start today’s workout',
-        body: ar ? 'خطتك جاهزة — افتحها وابدأ.' : 'Your plan is ready. Open it and get going.',
+        body: dayTitle
+          ? (ar ? `خطتك جاهزة · ${dayTitle}` : `Your plan is ready · ${dayTitle}`)
+          : (ar ? 'خطتك جاهزة — افتحها وابدأ.' : 'Your plan is ready. Open it and get going.'),
       }
+    }
     case 'restDay':
       return {
         title: ar ? 'خصّص وقت للتعافي' : 'Make time for recovery',

@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { QuickLogTarget } from '@/components/MobileShell'
 import { Icon } from '@/components/Icon'
 import { MinorGoalNotice } from '@/components/MinorGoalNotice'
@@ -15,7 +15,13 @@ import { buildTodayV2Model } from '@/lib/todayV2Model'
 import { playHaptic } from '@/lib/nativeFeedback'
 import { trackLocal } from '@/lib/tracking'
 import { FirstWinCard } from '@/components/today/FirstWinCard'
+import { NotifyAskSheet } from '@/components/today/NotifyAskSheet'
 import { loadFirstWin, suggestFirstWin } from '@/lib/firstWin'
+import { markNotifyAsked, shouldAskNotify } from '@/lib/notifyAsk'
+import { useAuth } from '@/lib/authContext'
+import { DEFAULT_NOTIFICATION_PREFS, loadNotificationPrefs, saveNotificationPrefs } from '@/lib/notifications/prefs'
+import type { NotificationPrefs } from '@/lib/notifications/types'
+import { requestNotificationPermission, reconcileNotificationSchedule } from '@/lib/notifications/engine'
 import { hasEventToday } from '@/lib/tracking/signals'
 import { useAchievementsEngine } from '@/features/achievements/useAchievements'
 
@@ -67,6 +73,7 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
   // المستخدم الحقيقية (بروتين اليوم/الهدف/أيام الخطة). بلا هذا يبقى المحرّك
   // معزولًا وتصير أوسمة البروتين غير قابلة للفتح. لا أثر بصري.
   useAchievementsEngine()
+  const auth = useAuth()
   const ar = lang !== 'en'
   const copy = V2_TODAY[ar ? 'ar' : 'en']
   const model = useMemo(() => buildTodayV2Model(customization, lang), [customization, lang])
@@ -96,6 +103,32 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
   // بقيّة يوم الإنجاز وحده ثم تختفي. من لديه تاريخ فعلي ليس قادمًا جديدًا فلا تُلاحقه.
   const firstWinDoneToday = firstWin.completed && !!firstWin.at && getDayStamp(new Date(firstWin.at)) === getDayStamp()
   const showFirstWin = (!firstWin.completed && model.state === 'newUser') || firstWinDoneToday
+
+  // [CTO-70] البند ٢ — سطح إذن الإشعارات: مرّة واحدة، **بعد** أول انتصار.
+  // الترتيب مقصود: نطلب الإذن بعد أن يرى المستخدم قيمة، لا قبلها.
+  const uid = auth.user?.id ?? null
+  const [askOpen, setAskOpen] = useState(() => shouldAskNotify(loadFirstWin().completed))
+  const [askPrefs] = useState<NotificationPrefs>(() => (uid ? loadNotificationPrefs(uid) : DEFAULT_NOTIFICATION_PREFS))
+  useEffect(() => {
+    if (firstWin.completed && shouldAskNotify(true)) setAskOpen(true)
+  }, [firstWin.completed])
+
+  /**
+   * التفعيل الذرّي — منسوخ حرفيًا من `NotificationsSettingsV2.onToggleMaster:97`:
+   * الإذن أولًا، ورفع `masterEnabled` **فقط** عند `granted`، ثم مصالحة الجدول.
+   * القرار يُثبَّت في الحالتين فلا يتكرّر السؤال (الرفض المحترَم هو المسجَّل).
+   */
+  const acceptNotify = async (time: string): Promise<'granted' | 'denied' | 'unsupported'> => {
+    const perm = await requestNotificationPermission()
+    if (perm === 'granted' && uid) {
+      const next: NotificationPrefs = { ...askPrefs, masterEnabled: true, workoutDay: { ...askPrefs.workoutDay, enabled: true, time } }
+      saveNotificationPrefs(uid, next)
+      void reconcileNotificationSchedule(uid, auth.recoveryActive, lang)
+    }
+    markNotifyAsked(perm === 'granted' ? 'accepted' : 'declined')
+    if (perm === 'granted') setAskOpen(false)
+    return perm
+  }
 
   const trainPillar = model.pillars.find((pillar) => pillar.key === 'train')
   const workoutDone = trainPillar?.state === 'done'
@@ -278,6 +311,16 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
           <p className="px-2 text-center text-[0.7rem] leading-relaxed text-ink-400">{model.trustNote}</p>
         )}
       </div>
+
+      {/* [CTO-70] البند ٢ — يُعرض مرّة واحدة بعد أول انتصار. الرفض يُثبَّت فلا يعود. */}
+      {askOpen && (
+        <NotifyAskSheet
+          lang={lang}
+          prefs={askPrefs}
+          onAccept={acceptNotify}
+          onDecline={() => { markNotifyAsked('declined'); setAskOpen(false) }}
+        />
+      )}
     </div>
   )
 }
