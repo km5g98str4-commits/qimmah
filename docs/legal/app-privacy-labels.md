@@ -6,8 +6,10 @@
 > plans, and tasks can leave the device and therefore must be disclosed as collected.
 >
 > **Two answers depend on the production build config — set them by the checkbox below:**
-> - [ ] The App Store build **does NOT** set `VITE_ANALYTICS_ENDPOINT` → **Diagnostics/Usage Data = Not Collected** (default; recommended).
-> - [ ] The App Store build **DOES** set `VITE_ANALYTICS_ENDPOINT` → complete the “Usage Data / Diagnostics” rows (still anonymous, still **not** Tracking).
+> - [x] **Diagnostics/Usage Data = Not Collected** — now a *structural* fact, not a build-time choice.
+>   [CTO-71] deleted the transmit-capable analytics layer outright; there is no endpoint variable and no
+>   HTTP provider in the codebase. Usage events are written to a local ring buffer (`src/lib/tracking/`)
+>   that has **no network primitive at all** — guarded by `test:analytics`.
 > - [ ] The App Store build **does NOT** set `VITE_SENTRY_DSN` → crash diagnostics are not transmitted (default).
 > - [ ] The App Store build **DOES** set `VITE_SENTRY_DSN` → disclose Diagnostics → Crash Data as not linked and not used for tracking.
 
@@ -65,7 +67,7 @@ for cross-app/cross-site tracking (`analytics/provider.ts:9-12`). No ATT prompt 
 - **Apple Health** — read-only source for daily step totals after an explicit settings action; no advertising/tracking use.
 
 ## E. Reminder before submitting
-- Set both header checkboxes to match the App Store build’s `VITE_ANALYTICS_ENDPOINT` and `VITE_SENTRY_DSN`.
+- The analytics row is settled structurally (see header). Only `VITE_SENTRY_DSN` still depends on the build.
 - Confirm the Supabase project has RLS enabled (data-isolation claim) — **OWNER-TO-CONFIRM**.
 - App age rating: eligibility age is **12** (Terms §3). Answer Apple's 2025 age-rating questionnaire
   truthfully for the app's fitness/wellness content and let Apple **compute** the band; ensure the stated

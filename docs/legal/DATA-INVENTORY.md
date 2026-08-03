@@ -14,7 +14,7 @@
 | **No location, contacts, photo-library, or microphone access** | `Info.plist` declares camera + Health step-read purposes; no `NSLocation*`, `NSContacts*`, `NSPhotoLibrary*`, `NSMicrophone*` |
 | **Fonts are self-hosted (bundled), no font-CDN egress** | `src/design-system/fonts.ts:1` (“Self-hosted fonts — bundled via @fontsource … NO runtime”); `index.html:78` |
 | **Local-first architecture** — device is source of truth, cloud is optional backup | `src/lib/syncService.ts:1-11` |
-| **First-party diagnostics are OFF by default** (noop) — HTTP egress only if `VITE_ANALYTICS_ENDPOINT` is set at build time | `src/lib/analytics/index.ts:44-64` |
+| **First-party diagnostics cannot egress at all** — the transmit-capable layer was deleted in [CTO-71]; usage events live in a local ring buffer with no network primitive | `src/lib/tracking/store.ts` · guarded by `test:analytics` |
 
 ## 1. Data categories
 
@@ -36,7 +36,7 @@
 | 14 | **Camera** | Live frames decoded **on-device** for barcodes; images not stored or transmitted | Not stored | Barcode scanning only | No | No | — | `Info.plist` (`NSCameraUsageDescription`); `BarcodeCamera.tsx` (zxing) |
 | 15 | **Exercise demo media** | Fetches static demo images by exercise | Loaded from GitHub raw / jsDelivr CDN; local fallback frame | Show exercise form | No (no user data sent) | No | **GitHub / jsDelivr** | `exerciseMedia.ts:29`; `ExerciseMedia.tsx:66` |
 | 16 | **“Watch form” video** | Opens an **external** YouTube *search* URL (no embed, no SDK) | N/A (external browser) | Optional form reference | No | No | YouTube (external link only) | `workoutPlan.ts:92`; `exercises.ts:13` |
-| 17 | **Diagnostics / product analytics** | Anonymous event counts (e.g. `workout_logged`, `route_changed`) — **counts/enums only, never id/email/name/barcode** | **None by default** (noop). If `VITE_ANALYTICS_ENDPOINT` set → batched to that endpoint | Product health | No (random `anonId`, unlinked) | No | Owner-chosen endpoint (**OWNER-TO-CONFIRM**) | `analytics/index.ts:44-64`; `analytics/events.ts:4-45`; `analytics/provider.ts:9-12` |
+| 17 | **Usage events (local only)** | 15 signed event names + light key/value props — **counts/enums only**; one free-text field (`food_search_no_result.query`, truncated) | **Never transmitted.** Owner-scoped ring buffer (1000 events, ≤256KB); wiped on sign-out/switch/account deletion; exported only by explicit user action | Product health | No — no device or ad identifier is stored in an event | No | None — there is no destination | `tracking/registry.ts`; `tracking/store.ts` |
 | 18 | **Device preferences** | Language, UI density, install/banner-dismissed flags, v2 design flag | Device-only (survive account wipe) | UX | No | No | — | `accountScope.ts:25-38` |
 | 19 | **Reminders** | Owner-scoped choices for workout/rest, water, weekly summary, and supplement prompts; times, cadence, weekday, and quiet hours | Device-only (`qimmah:notifications:v1:<userId>`) + Capacitor Local Notifications; **no network** | Optional reminders requested by the user | Locally owner-scoped; not sent | No | — | `notifications/prefs.ts`; `notifications/engine.ts` |
 | 20 | **Custom plans** | User-authored workout plan structure | Device + Supabase `custom_plans` when sync is enabled | Deliver the user’s chosen plan across devices | **Yes** when synced | No | Supabase | `features/customPlan/storage.ts`; `syncStores.ts` |
@@ -51,7 +51,7 @@
 | **Open Food Facts** (`world.openfoodfacts.org`) | User scans/searches a food barcode | Barcode number + static `User-Agent: Qimmah/1.0` | No |
 | **GitHub raw / jsDelivr** | Viewing an exercise with a remote demo image | HTTP GET for the image (device IP visible to CDN) | No |
 | **YouTube** (`youtube.com/results?...`) | User taps “watch form” | Opens external search URL in the browser | No |
-| **Analytics endpoint** | Only if `VITE_ANALYTICS_ENDPOINT` configured **and** consent granted | Batched anonymous event counts (`{events:[…]}`) with random `anonId` | No |
+| ~~Analytics endpoint~~ | **Removed in [CTO-71]** — no endpoint variable, no HTTP provider, no egress path exists | — | — |
 | **Sentry** | Only if `VITE_SENTRY_DSN` is configured and an error occurs | Scrubbed exception diagnostics, build release, hashed random anonymous id, query-free navigation paths | No account identity; `beforeSend` removes PII/storage payloads |
 
 Hosting region of the Supabase project is not encoded in the repo. **Confirmed by owner: `ap-northeast-1` (Tokyo, Japan).** Signed-in users' health/fitness data (categories 1–8) is therefore stored on Supabase infrastructure in **Japan** — a cross-border transfer from KSA users. Contractual safeguards apply via Supabase's Data Processing Addendum (DPA). No adequacy decision is claimed; final PDPL transfer-mechanism sign-off remains with OWNER+LEGAL (see pdpl-gap-checklist §X-1).

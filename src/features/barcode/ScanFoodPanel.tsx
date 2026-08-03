@@ -5,7 +5,6 @@ import { nutritionScreenStrings, type NutritionScreenStrings } from '@/i18n/dict
 import type { FoodItem } from '@/data/foodItems'
 import { lookupBarcode } from './openFoodFacts'
 import { BarcodeCamera, type CameraFailure } from './BarcodeCamera'
-import { track } from '@/lib/analytics'
 
 interface ScanFoodPanelProps {
   lang: Lang
@@ -74,7 +73,6 @@ export function ScanFoodPanel({ lang, onResolved, onManualFallback, onClose }: S
     try {
       const result = await lookupBarcode(barcode)
       // نتيجة المسح — الحالة فقط (found/not-found/network-error)، بلا قيمة الباركود أو المنتج.
-      track('barcode_scan_result', { result: result.status })
       if (result.status !== 'found') {
         setStatus(result.status === 'network-error' ? 'network-error' : 'not-found')
         return

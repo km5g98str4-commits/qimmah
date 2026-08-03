@@ -55,7 +55,7 @@ background web push, "fully offline install", "fully bilingual".
 3. **Exact age rating** Apple computes from the questionnaire answers.
 4. **Hosted Privacy Policy + Terms public URLs** (domain) — `public/legal/*.html` exist; hosting = owner.
 5. **`VITE_DESIGN_V2`** in the shipped build must match the screenshots (v2.1 vs v1).
-6. **`VITE_ANALYTICS_ENDPOINT`** set or not → drives the Usage/Diagnostics privacy rows.
+6. ~~`VITE_ANALYTICS_ENDPOINT`~~ — removed in [CTO-71]. Usage/Diagnostics = **Not Collected**, structurally.
 7. **HealthKit signed-device proof** — permission sheet, real sample, and Today movement value.
 7. **Demo account** credentials + a known-good **test barcode** number.
 8. **Signing team / Apple Developer entity**, app **category** (secondary), support/marketing URLs.

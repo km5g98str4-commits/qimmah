@@ -162,6 +162,11 @@ for (const file of trackingFiles) {
   check(`${file} خالٍ من بدائيات الشبكة${found.length ? ` — وُجد: ${found.join(', ')}` : ''}`, found.length === 0)
 }
 check('لا متغيّر بيئة endpoint في طبقة التتبّع', trackingFiles.every((f) => !/VITE_[A-Z_]*ENDPOINT|VITE_[A-Z_]*URL|VITE_[A-Z_]*DSN/.test(stripComments(read(f)))))
+// [CTO-71] البند ١ — الغياب البنيوي: لا طبقة إرسال في المستودع أصلًا.
+check('طبقة lib/analytics القادرة على الإرسال محذوفة بالكامل', !existsSync(resolve(root, 'src/lib/analytics')))
+check('لا مزوّد HTTP ولا sendBeacon في أي مكان من المصدر', appSource.every(({ file, text }) => file.startsWith('src/lib/tracking') || !/sendBeacon|createHttpProvider/.test(stripComments(text))))
+check('لا متغيّر VITE_ANALYTICS_ENDPOINT في المصدر ولا في أنواع البيئة', !/VITE_ANALYTICS_ENDPOINT/.test(read('src/vite-env.d.ts')) && appSource.every(({ text }) => !/VITE_ANALYTICS_ENDPOINT/.test(stripComments(text))))
+check('لا مفتاح تحليلات ناجٍ في سجلّ المفاتيح ولا في قائمة السماح', !/qimmah:analytics/.test(read('src/lib/userDataKeys.ts')) && !/qimmah:analytics/.test(read('src/lib/accountScope.ts')))
 check('لا مكتبة تحليلات خارجية في الاعتماديات', (() => {
   const pkg = JSON.parse(read('package.json'))
   const deps = Object.keys({ ...pkg.dependencies, ...pkg.devDependencies }).join(' ')

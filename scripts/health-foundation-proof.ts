@@ -4,7 +4,7 @@
 // المرساة/الصفحات/نافذة ٩٠ يومًا · قائمة الكتابة فارغة · حارس الخصوصية (grep).
 
 import { strict as assert } from 'node:assert'
-import { readFileSync } from 'node:fs'
+import { readFileSync, existsSync } from 'node:fs'
 import { execSync } from 'node:child_process'
 import { resolve } from 'node:path'
 
@@ -265,14 +265,19 @@ check('قائمة أنواع الكتابة (share) فارغة — قراءة ف
   // مواقع نداء فعلية فقط — سطور التعليقات (// أو *) لا تُحتسب.
   const healthCallsTrack = grep("grep -rn 'track(' src/lib/health --include='*.ts' | grep -vE ':[0-9]+:\\s*(//|\\*|/\\*)' || true")
   check('وحدات الصحة لا تستدعي track() إطلاقًا', healthCallsTrack === '')
-  const healthImportsAnalytics = grep("grep -rn \"from '.*analytics\" src/lib/health --include='*.ts' || true")
-  check('وحدات الصحة لا تستورد طبقة التحليلات', healthImportsAnalytics === '')
-  const analyticsImportsHealth = grep("grep -rn \"lib/health\" src/lib/analytics --include='*.ts' || true")
-  check('طبقة التحليلات لا تستورد وحدات الصحة', analyticsImportsHealth === '')
-  const eventsCarryHealth = grep("grep -rniE 'bpm|heartRate|hrv|vo2|bodyMass|bodyFat|sleepAnalysis|oxygenSaturation|restingHeart' src/lib/analytics --include='*.ts' || true")
-  check('عقد أحداث التحليلات خالٍ من أي حقل قيمة صحية', eventsCarryHealth === '')
-  const healthKitCallsTrack = grep("grep -rn 'track(' src/lib/healthKit.ts || true")
-  check('الجسر القديم healthKit.ts لا يستدعي track() أيضًا', healthKitCallsTrack === '')
+  // [CTO-71] البند ١ — حُذفت طبقة `lib/analytics`، فالفحوص التي كانت تستجوبها
+  // صارت تمرّ لأن هدفها غير موجود (نجاح غير مستحقّ، §4.2). أُعيد توجيهها إلى
+  // الطبقة **الحيّة** `lib/tracking` فتبقى تحرس شيئًا حقيقيًا: عزل الصحة عن التتبّع.
+  const healthImportsTracking = grep("grep -rn \"from '.*tracking\" src/lib/health --include='*.ts' || true")
+  check('وحدات الصحة لا تستورد طبقة التتبّع', healthImportsTracking === '')
+  const trackingImportsHealth = grep("grep -rn \"lib/health\" src/lib/tracking --include='*.ts' || true")
+  check('طبقة التتبّع لا تستورد وحدات الصحة', trackingImportsHealth === '')
+  const eventsCarryHealth = grep("grep -rniE 'bpm|heartRate|hrv|vo2|bodyMass|bodyFat|sleepAnalysis|oxygenSaturation|restingHeart' src/lib/tracking --include='*.ts' || true")
+  check('عقد أحداث التتبّع خالٍ من أي حقل قيمة صحية', eventsCarryHealth === '')
+  const healthCallsTrackLocal = grep("grep -rn 'trackLocal(' src/lib/health src/lib/healthKit.ts --include='*.ts' | grep -vE ':[0-9]+:\\s*(//|\\*|/\\*)' || true")
+  check('وحدات الصحة والجسر القديم لا تستدعيان trackLocal() أيضًا', healthCallsTrackLocal === '')
+  // تأكيد مضادّ: الهدف موجود فعلًا — فحصٌ على مجلّد غائب يمرّ بلا معنى.
+  check('طبقة التتبّع موجودة فعلًا (الفحوص أعلاه ليست على هدف غائب)', existsSync(resolve(ROOT, 'src/lib/tracking')))
 }
 
 console.log(`\nبرهان أساس الصحة (P9): ${passed} ناجح، ${failed} فاشل`)

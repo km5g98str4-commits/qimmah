@@ -1,5 +1,4 @@
 import { BUILD_RELEASE } from '@/lib/buildInfo'
-import { getAnonId } from '@/lib/analytics'
 
 type UnknownRecord = Record<string, unknown>
 
@@ -97,9 +96,32 @@ export function scrubMonitoringBreadcrumb<T extends UnknownRecord>(breadcrumb: T
   return scrubValue(breadcrumb) as T
 }
 
+/**
+ * معرّف مجهول **لهذه الجلسة وحدها** — [CTO-71] البند ١.
+ *
+ * كان يُشتقّ من `anonId` المخزَّن في طبقة التحليلات المحذوفة. البديل لا يُخزَّن
+ * إطلاقًا: يُولَّد في الذاكرة عند الإقلاع ويموت بإغلاق التطبيق. النتيجة **أخصّ**
+ * لا أقلّ — لم يعد على الجهاز أي معرّف دائم يربط الجلسات ببعضها.
+ * ولا أثر عمليًا اليوم: المراقبة لا تُهيّأ أصلًا بلا `VITE_SENTRY_DSN`.
+ */
+let sessionAnonSeed: string | null = null
+function anonSessionSeed(): string {
+  if (sessionAnonSeed) return sessionAnonSeed
+  try {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+      sessionAnonSeed = crypto.randomUUID()
+      return sessionAnonSeed
+    }
+  } catch {
+    /* البديل أدناه */
+  }
+  sessionAnonSeed = `session-${Math.random().toString(36).slice(2)}`
+  return sessionAnonSeed
+}
+
 async function hashedAnonymousId(): Promise<string | null> {
   if (typeof crypto === 'undefined' || !crypto.subtle) return null
-  const source = new TextEncoder().encode(getAnonId())
+  const source = new TextEncoder().encode(anonSessionSeed())
   const digest = await crypto.subtle.digest('SHA-256', source)
   const hex = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('')
   return `anon-${hex}`

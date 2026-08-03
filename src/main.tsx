@@ -9,7 +9,6 @@ import { AuthProvider } from './lib/authContext'
 import { LanguageProvider } from './i18n'
 import { registerStepBridge } from './lib/stepCounter'
 import { initTheme } from './lib/appPreferences'
-import { initAnalytics, track } from './lib/analytics'
 import { initTrackingDevViewer } from './lib/tracking'
 import { initNativeShell } from './lib/nativeShell'
 import { initDeepLinkRecovery } from './lib/deepLinkRecovery'
@@ -32,8 +31,6 @@ registerStepBridge()
 // Refreshes only after a prior explicit opt-in; never requests HealthKit permission on launch.
 void refreshHealthKitStepsIfEnabled()
 
-// تهيئة التحليلات (مضبوطة بالموافقة، مجهولة، بلا SDK خارجي) قبل الرسم الأول.
-initAnalytics()
 // [CTO-68] البند ٥ — عارض أحداث التتبّع المحلي في وحدة التحكّم. تطوير فقط:
 // جسم الدالة محكوم بـ`import.meta.env.DEV` فيسقط من حزمة الإنتاج، ولا شاشة مستخدم له.
 initTrackingDevViewer()
@@ -42,12 +39,10 @@ void initMonitoring()
 // أخطاء عامّة غير ملتقَطة — إشارة استقرار فقط (اسم الخطأ، بلا رسالة/بيانات).
 if (typeof window !== 'undefined') {
   window.addEventListener('error', (e) => {
-    track('unhandled_error', { source: 'window', name: e.error instanceof Error ? e.error.name : undefined })
     captureMonitoringError(e.error ?? new Error('Window error'), 'window')
   })
   window.addEventListener('unhandledrejection', (e) => {
     const r = (e as PromiseRejectionEvent).reason
-    track('unhandled_error', { source: 'promise', name: r instanceof Error ? r.name : undefined })
     captureMonitoringError(r, 'promise')
   })
 }

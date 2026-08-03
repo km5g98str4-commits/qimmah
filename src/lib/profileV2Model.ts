@@ -55,7 +55,7 @@ export interface ProfileV2Model {
   /** Commitment heatmap — last COMMITMENT_WEEKS weeks, oldest → newest. */
   commitment: { weeks: CommitmentWeek[]; hasData: boolean }
   body: { weightKg: number | null; targetKg: number | null }
-  privacy: { analyticsAnonymousEnabled: boolean; healthSharingAvailable: boolean; dataExportAvailable: boolean; deleteAccountAvailable: boolean }
+  privacy: { usageEventsLocalOnly: boolean; healthSharingAvailable: boolean; dataExportAvailable: boolean; deleteAccountAvailable: boolean }
   settings: { language: string; units: string; numerals: string; appearance: string; remindersAvailable: boolean }
   subscription: { showQuietLine: boolean; text: string; cta: string; enabled: boolean }
 }
@@ -190,7 +190,8 @@ export function buildProfileV2Model(customization: Customization, auth: AuthSumm
     commitment: { weeks, hasData: finishedDates.length > 0 },
     body: { weightKg: customization.profile.weightKg || null, targetKg: customization.profile.targetWeightKg || null },
     privacy: {
-      analyticsAnonymousEnabled: true, // anonymous, consent-based (existing disclosure)
+      // [CTO-71] البند ١: لم تعد هناك طبقة قادرة على الإرسال. الأحداث محلية حصرًا.
+      usageEventsLocalOnly: true,
       healthSharingAvailable: false, // no HealthKit integration yet — honest
       dataExportAvailable: true,
       // [CTO-65] البند ١: التعليق السابق ادّعى «routes to the existing safe Settings

@@ -101,8 +101,6 @@ export const DATA_KEYS: readonly DataKeyDef[] = [
   // ── إعدادات جهاز تبقى عامة ──
   { key: 'qimmah:prefs:v1', kind: 'device', scoped: false, exported: false, synced: false, owner: 'appPreferences', migration: 'keep-global', note: 'لغة/ثيم/هابتكس' },
   { key: 'qimmah:uiMode:v1', kind: 'device', scoped: false, exported: false, synced: false, owner: 'uiMode', migration: 'keep-global' },
-  { key: 'qimmah:analytics:v1', kind: 'device', scoped: false, exported: false, synced: false, owner: 'analytics', migration: 'keep-global' },
-  { key: 'qimmah:analytics:milestones:v1', kind: 'device', scoped: false, exported: false, synced: false, owner: 'analytics', migration: 'keep-global' },
   { key: 'qimmah:off:cache:v1', kind: 'device', scoped: false, exported: false, synced: false, owner: 'openFoodFacts', migration: 'keep-global' },
   { key: 'qimmah:products:v1', kind: 'device', scoped: false, exported: false, synced: false, owner: 'products', migration: 'keep-global' },
   { key: 'qimmah:products:audit:v1', kind: 'device', scoped: false, exported: false, synced: false, owner: 'products', migration: 'keep-global' },

@@ -30,8 +30,6 @@ const GLOBAL_SAFE_KEYS: ReadonlySet<string> = new Set([
   'qimmah:design-preview', // علم معاينة v2 (تطوير فقط)
   'qimmah:installPromptDismissed:v1', // علم واجهة (تثبيت PWA)
   'qimmah:install-banner:dismissed', // علم واجهة
-  'qimmah:analytics:v1', // موافقة + معرّف مجهول على مستوى الجهاز (تُقطع هويته عند الحذف عبر resetAnalytics)
-  'qimmah:analytics:milestones:v1', // أعلام «أول مرّة» على مستوى الجهاز (غير PII)
   'qimmah:off:cache:v1', // كاش Open Food Facts المجهول (بيانات عامّة قابلة لإعادة الجلب)
   'qimmah:products:v1', // كتالوج منتجات على مستوى الجهاز
   'qimmah:products:audit:v1', // سجلّ تدقيق المنتجات على مستوى الجهاز

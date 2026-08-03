@@ -52,7 +52,6 @@ function seedUserData(tag: string) {
 function seedGlobalSafe() {
   set('qimmah:prefs:v1', '{"language":"ar"}') // اللغة — يجب أن تبقى
   set('qimmah:uiMode:v1', 'advanced')
-  set('qimmah:analytics:v1', '{"anonId":"device-123"}')
   set('qimmah:off:cache:v1', '{"6281":{}}')
   set('qimmah:products:v1', '{"cat":[]}')
   set('qimmah:install-banner:dismissed', '1')
@@ -73,7 +72,6 @@ const USER_KEYS = [
 const SAFE_KEYS = [
   'qimmah:prefs:v1',
   'qimmah:uiMode:v1',
-  'qimmah:analytics:v1',
   'qimmah:off:cache:v1',
   'qimmah:products:v1',
   'qimmah:install-banner:dismissed',
@@ -266,13 +264,21 @@ console.log('\n⑦ ملخّص التمرين معزول بالمالك + هجر�
   clearAll()
   set('qimmah:prefs:v1', '{"language":"ar"}') // في القائمة
   set('qimmah:prefs:v2', '{"language":"ar"}') // ليس فيها — جار بحرف واحد
-  set('qimmah:analytics:v1', '{"id":"x"}') // في القائمة
-  set('qimmah:analytics:events:v1', '[]') // ليس فيها
+  // [CTO-71] البند ١ — كان الزوج الثاني هنا `qimmah:analytics:v1` (المُعلَن) مقابل
+  // `qimmah:analytics:events:v1` (غير المُعلَن). حُذفت طبقة التحليلات ومفاتيحها من
+  // قائمة السماح، فلم يعد المفتاح مُعلَنًا. أُبدل بزوج حيّ يحفظ **مقصد** الفحص:
+  // مفتاح جهاز مُعلَن يبقى، وجارٌ له غير مُعلَن يُمسح — القائمة لم تصر قاعدة.
+  set('qimmah:uiMode:v1', 'advanced') // في القائمة
+  set('qimmah:uiMode:events:v1', '[]') // ليس فيها
   wipeUserData()
   check('«qimmah:prefs:v1» المُعلَن بقي', has('qimmah:prefs:v1'))
   check('و«qimmah:prefs:v2» — جاره بحرف — مُسح (القائمة لم تصر قاعدة)', !has('qimmah:prefs:v2'))
-  check('«qimmah:analytics:v1» المُعلَن بقي', has('qimmah:analytics:v1'))
-  check('و«qimmah:analytics:events:v1» غير المُعلَن مُسح', !has('qimmah:analytics:events:v1'))
+  check('«qimmah:uiMode:v1» المُعلَن بقي', has('qimmah:uiMode:v1'))
+  check('و«qimmah:uiMode:events:v1» غير المُعلَن مُسح', !has('qimmah:uiMode:events:v1'))
+  // وتأكيد الحذف نفسه: مفتاح التحليلات المحذوف لم يعد ينجو من المسح.
+  set('qimmah:analytics:v1', '{"id":"x"}')
+  wipeUserData()
+  check('«qimmah:analytics:v1» بعد حذف طبقته لم يعد مستثنى — يُمسح', !has('qimmah:analytics:v1'))
 }
 
 // ⚠️ اكتشاف مفتوح مسمّى (ج-٢-ب) — لا يدخل هذه البوابة لأنه أحمر:

@@ -1,6 +1,5 @@
 // إعادة ضبط قِمّة بالكامل — يحذف مفاتيح قِمّة فقط دون المساس بأي مفاتيح أخرى.
 
-import { resetAnalytics } from './analytics'
 import { cancelAllReminders } from './reminders'
 import { cancelAllNotifications } from './notifications/engine'
 import { wipeUserData } from './accountScope'
@@ -22,9 +21,6 @@ const FULL_RESET_EXTRA_KEYS = ['qimmah:onboarding:accounts:v1', 'qimmah:supabase
  */
 export async function resetQimmah(): Promise<void> {
   if (typeof window === 'undefined') return
-  // أسقط حالة التحليلات في الذاكرة أولًا (طابور/دفعة معلّقة + الموافقة والمعرّف المجهول
-  // المخزَّنان في cache) — لا يكفي مسح localStorage وحده لأن المعرّف القديم يبقى في الذاكرة.
-  resetAnalytics()
   // مسح fail-safe لكل بيانات المستخدم (كل `qimmah:*` عدا قائمة السماح العامّة).
   wipeUserData()
   // إعادة الضبط/الحذف الكامل تتجاوز مسح التبديل: تمسح سجلّ الحسابات وتُنهي الجلسة أيضًا.

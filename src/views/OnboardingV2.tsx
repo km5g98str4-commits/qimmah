@@ -10,7 +10,6 @@ import { buildOnboardingProfile } from '@/lib/planBuilderAnswers'
 import { buildCustomizationFromOnboarding, saveOnboardingProfile } from '@/lib/onboardingProfile'
 import { markCompleted } from '@/lib/onboarding'
 import { persistOnboardingToProfile } from '@/lib/onboardingSync'
-import { track } from '@/lib/analytics'
 import { trackLocal, SETUP_STEP_NAMES } from '@/lib/tracking'
 import { POLICY_LINKS, policyCopy } from '@/data/policyCopy'
 import { toAnswersFromV2, type V2Place, type V2Pref } from '@/lib/onboardingV2Adapter'
@@ -216,9 +215,7 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
         saveOnboardingProfile(op)
         const built = await buildCustomizationFromOnboarding(op, customization)
         applyCustomization(built)
-        track('plan_generated', { source: 'onboarding' })
         markCompleted(userId)
-        track('onboarding_completed', { planMode: 'auto' })
         // [CTO-68] الحدث ٣ — إكمال الإعداد. **بعد** بناء الخطة وحفظها ووسمها مكتملة،
         // لا عند ضغط الزر: الفشل يرمي قبل هذا السطر فلا يُسجَّل إكمال لم يحدث.
         trackLocal('setup_completed', {})

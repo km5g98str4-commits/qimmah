@@ -6,7 +6,6 @@ import { miscStrings } from '@/i18n/dict/misc'
 import { authFlowStrings } from '@/i18n/dict/authFlow'
 import { useAuth } from '@/lib/authContext'
 import { evaluatePassword, PASSWORD_MIN_LENGTH } from '@/lib/passwordPolicy'
-import { track } from '@/lib/analytics'
 import { POLICY_LINKS, policyCopy } from '@/data/policyCopy'
 
 /**
@@ -103,7 +102,6 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login', onMo
         return
       }
       if (isSignup) {
-        track('signup_started', {})
         const r = await auth.signUp(email, password, name)
         if (!r.ok) {
           setMsg(r.error ?? d.createFailed)
@@ -115,12 +113,10 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login', onMo
           onModeChange?.('login')
         } else if (r.needsConfirmation) {
           // تأكيد البريد مطلوب — نعرض تنبيهًا واضحًا ونعيد المستخدم لوضع الدخول.
-          track('signup_succeeded', { needsConfirmation: true })
           setNotice(d.accountCreatedConfirm)
           setMode('login')
           onModeChange?.('login')
         } else {
-          track('signup_succeeded', { needsConfirmation: false })
           onSuccess()
         }
         return

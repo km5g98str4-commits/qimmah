@@ -335,7 +335,9 @@ function Privacy({ lang, model, onBack, onDelete, onData }: { lang: Lang; model:
         <p className="mt-2 text-xs leading-relaxed text-ink-500">{t('نجمع الحد الأدنى فقط. كل التقديرات شفافة وقابلة للتعديل، ويمكنك تصدير أو حذف بياناتك في أي وقت.', 'We collect the minimum. Every estimate is transparent and editable, and you can export or delete your data anytime.')}</p>
       </section>
       <section className="mt-4 space-y-3">
-        <InfoRow icon="BarChart3" title={t('تحليلات مجهولة', 'Anonymous analytics')} sub={t('لتحسين التطبيق فقط', 'To improve the app only')} state={model.privacy.analyticsAnonymousEnabled ? t('مفعّل', 'On') : t('مطفأ', 'Off')} />
+        {/* [CTO-71] البند ١ — الصفّ كان يقول «تحليلات مجهولة · مفعّل» وطبقة الإرسال
+            حُذفت. الصياغة الآن تصف الواقع البنيوي: أحداث استخدام تبقى على الجهاز. */}
+        <InfoRow icon="BarChart3" title={t('أحداث الاستخدام', 'Usage events')} sub={t('تبقى على جهازك ولا تُرسَل', 'Stay on your device, never sent')} state={model.privacy.usageEventsLocalOnly ? t('محلي', 'Local') : t('مطفأ', 'Off')} />
         <InfoRow icon="Activity" title={t('مشاركة بيانات الصحة', 'Health sharing')} sub={t('غير مربوطة بعد', 'Not connected yet')} disabled />
         <InfoRow icon="Download" title={t('تصدير واستيراد بياناتي', 'Export & import my data')} sub={t('نسخة محلّية · بلا خادم', 'Local copy · no server')} onClick={onData} />
         <button type="button" onClick={onDelete} className="card flex w-full items-center gap-3 px-4 py-3.5 text-start transition-colors hover:border-danger">

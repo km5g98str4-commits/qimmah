@@ -5,7 +5,6 @@
 import { addSession, type WorkoutSession } from './workoutSessions'
 import { classifyFinishedSession } from './workoutSessionEngine'
 import { detectSessionPRs, loadHistory, recordExercise, saveHistory, topCompletedWeight } from './exerciseHistory'
-import { track, firstOnce } from './analytics'
 import { getWorkoutSessions } from './historyStore'
 import { getStorageFailure, isStorageWritable, type WriteResult } from './safeStorage'
 
@@ -54,8 +53,6 @@ export function persistFinishedSession(session: WorkoutSession): SessionPR[] {
   saveHistory(history)
 
   // إشارات التمرين — تعدادات فقط (عدد التمارين والأرقام القياسية)، بلا أي تفاصيل.
-  track('workout_logged', { exercises: session.exercises.length, prs: prs.length })
-  if (firstOnce('firstWorkout')) track('first_workout_logged', {})
 
   return prs
 }

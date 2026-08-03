@@ -1,7 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react'
 import { getStrings } from '@/config/strings'
 import { getLanguage } from '@/lib/appPreferences'
-import { track } from '@/lib/analytics'
 import { captureMonitoringError } from '@/lib/monitoring'
 import { Icon } from './Icon'
 
@@ -35,7 +34,6 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     // تسجيل للـ console فقط (بلا إرسال خارجي) — يساعد على التشخيص دون تسريب بيانات.
     console.error('ErrorBoundary caught an error:', error, info.componentStack)
     // إشارة استقرار — اسم الخطأ فقط (مثل TypeError)، بلا الرسالة أو المكدّس.
-    track('unhandled_error', { source: 'render', name: error?.name })
     captureMonitoringError(error, 'render')
   }
 
@@ -131,7 +129,6 @@ export class RouteErrorBoundary extends Component<RouteErrorBoundaryProps, Error
     // console فقط (بلا إرسال خارجي) — يساعد على تشخيص فشل تحميل الحِزم.
     console.error('RouteErrorBoundary caught an error:', error, info.componentStack)
     // إشارة استقرار — اسم الخطأ فقط، بلا الرسالة أو المكدّس.
-    track('unhandled_error', { source: 'route', name: error?.name })
     captureMonitoringError(error, 'route')
     // بعض المتصفحات (Chromium) تخزّن فشل استيراد الوحدة في خريطة الوحدات، فتفشل
     // إعادة الاستيراد داخل الصفحة فورًا حتى بعد عودة الاتصال. إن فشل تحميل حزمة

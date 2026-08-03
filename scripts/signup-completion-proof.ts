@@ -304,9 +304,18 @@ check('authContext: لم يبقَ إرجاع نصّ الخادم عند عدم �
 check('authContext: علم الردّ الغامض معلن ومُملأ', authCtx.includes('ambiguousExistingAccount: isAmbiguousSignup(data)'))
 check('LoginView: الزرّ يُصفَّر في finally (لا دوران أبدي)', /finally\s*\{\s*setBusy\(false\)/.test(loginView))
 check('LoginView: الحالة الغامضة تُعرض بنصّها الصادق لا برسالة «فتحنا حسابك»', loginView.includes('af.emailMaybeRegistered'))
+// [CTO-71] البند ١ — كان هذا الفحص يقارن ترتيب النصّ الغامض بنداء
+// `track('signup_succeeded')`. حُذفت طبقة التحليلات فاختفى النداء، و`indexOf`
+// يعيد −١ فيسقط الفحص على تغيّر **لا علاقة له بمقصده**. المقصد نفسه صار أقوى
+// وأسهل إثباتًا: لا إشارة «نجاح تسجيل» في الشاشة **إطلاقًا**، لا في الحالة
+// الغامضة ولا في غيرها. يُشدّ لا يُحذف.
 check(
-  'LoginView: لا حدث «نجاح تسجيل» في الحالة الغامضة',
-  loginView.indexOf('af.emailMaybeRegistered') < loginView.indexOf("track('signup_succeeded', { needsConfirmation: true })"),
+  'LoginView: لا إشارة «نجاح تسجيل» في الشاشة إطلاقًا (فبالأولى في الحالة الغامضة)',
+  !/signup_succeeded/.test(loginView),
+)
+check(
+  'LoginView: الحالة الغامضة ما زالت تُعرض (الفحص أعلاه ليس على شاشة فارغة)',
+  loginView.indexOf('af.emailMaybeRegistered') > 0,
 )
 
 // بقاء الجلسة (بند الرؤية ٥): العميل يحفظها ويحدّثها تلقائيًا بمفتاح ثابت.

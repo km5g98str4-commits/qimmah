@@ -1,3 +1,11 @@
+> **مُحدَّث بـ[CTO-71] البند ١.** طبقة `src/lib/analytics/` القادرة على الإرسال
+> **حُذفت بالكامل** (وسم الاستعادة: `pre-delete/lib-analytics-cto71`). لم يعد
+> هناك `VITE_ANALYTICS_ENDPOINT` ولا مزوّد HTTP ولا مسار خروج من الجهاز.
+>
+> البديل الحيّ هو **التتبّع المحلي** `src/lib/tracking/` ([CTO-68]): مخزن دوّار
+> معزول بالمالك، بلا أي بدائية شبكة، يحرسه `test:analytics`. ما دون هذا السطر
+> مرجع تاريخي للطبقة المحذوفة ولا سلطة له.
+
 # Qimmah — Analytics Layer (internal)
 
 Phase 2. A **lightweight, privacy-friendly, provider-abstracted** telemetry layer.

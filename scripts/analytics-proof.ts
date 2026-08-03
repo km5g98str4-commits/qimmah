@@ -23,7 +23,6 @@ import { wipeUserData, setLastUser } from '@/lib/accountScope'
 import { setSyncRuntime } from '@/lib/syncQueue'
 import { buildExportBundle } from '@/lib/portability/exporter'
 import { STORE_BY_ID } from '@/lib/portability/registry'
-import { ANALYTICS_EVENTS } from '@/lib/analytics/events'
 import { getDayStamp } from '@/lib/today'
 
 let pass = 0
@@ -65,9 +64,8 @@ setLastUser(null)
 check('السجلّ يحمل خمسة عشر حدثًا بالضبط', TRACKED_EVENTS.length === 15)
 check('كل الأسماء snake_case إنجليزية خالصة', TRACKED_EVENTS.every((n) => /^[a-z][a-z0-9]*(_[a-z0-9]+)*$/.test(n)))
 check('لا تكرار في السجلّ', new Set(TRACKED_EVENTS).size === TRACKED_EVENTS.length)
-// حارس الالتباس مع الطبقة القديمة القادرة على الإرسال: لا اسم مشترك بين السجلّين.
-const overlap = TRACKED_EVENTS.filter((n) => (ANALYTICS_EVENTS as readonly string[]).includes(n))
-check('تقاطع السجلّ مع سجلّ analytics القديم خالٍ (لا يلتبس محلّي بقابل للإرسال)', overlap.length === 0)
+// [CTO-71] البند ١: الطبقة القديمة القادرة على الإرسال حُذفت، فحارس التقاطع
+// لم يعد له طرف ثانٍ. بديله أقوى — غياب الطبقة نفسه (يُفحص مصدريًا في المُشغّل).
 
 for (const name of TRACKED_EVENTS) {
   trackLocal(name as never, SAMPLE_PROPS[name] as never)

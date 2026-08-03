@@ -11,7 +11,6 @@ import { useCallback, useEffect, useSyncExternalStore } from 'react'
 import { getDayStamp } from './today'
 import { useIsDemo } from './demoMode'
 import { getNutritionLog, saveNutritionLog } from './historyStore'
-import { track, firstOnce } from './analytics'
 import { completeFirstWin } from './firstWin'
 import {
   addFoodToDay,
@@ -230,9 +229,6 @@ export function useNutritionToday() {
           fat: item.fat,
           meal: item.meal ?? 'snack',
         })
-        // إشارة وجبة — خانة الوجبة فقط (تعداد)، بلا اسم الطبق أو الكمية.
-        track('meal_logged', { mealSlot: item.meal })
-        if (firstOnce('firstMeal')) track('first_meal_logged', {})
         // [CTO-70] البند ١ — أول انتصار بتسجيل وجبة (يصير «عشاء» مساءً).
         completeFirstWin('meal')
       }
