@@ -20,7 +20,8 @@ import {
 } from '@/features/customPlan'
 import { getStrings } from '@/config/strings'
 import { workoutScreenStrings } from '@/i18n/dict/workoutScreen'
-import { persistFinishedSession } from '@/lib/finishWorkout'
+import { commitFinishedSession } from '@/lib/finishWorkout'
+import type { WriteResult } from '@/lib/safeStorage'
 import { trackLocal } from '@/lib/tracking'
 import { completeFirstWin } from '@/lib/firstWin'
 import { cappedSessionMinutes, easyExerciseCount, easyMinutesFor, isEasyToday } from '@/lib/easySession'
@@ -81,6 +82,8 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
 
   const [activeDay, setActiveDay] = useState<PlanDay | null>(null)
   const [summary, setSummary] = useState<FinishSummary | null>(null)
+  /** فشل كتابة الجلسة — يُعرض بصدق ولا يُبتلع ([CTO-71] البند ٢). */
+  const [saveError, setSaveError] = useState<WriteResult | null>(null)
   const tw = getStrings(lang).workout
   const d = workoutScreenStrings[lang]
 
@@ -158,8 +161,22 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
     setPendingResume(saved ?? undefined)
   }
 
+  /**
+   * [CTO-71] البند ٢ — إنهاء الجلسة بكتابة **متحقَّق منها**.
+   *
+   * كان يستدعي `persistFinishedSession` ويمضي إلى شاشة الملخّص مهما حدث: تخزين
+   * ممتلئ أو محجوب ⇒ تختفي الجلسة بلا أثر ويُعرض «أحسنت». فشل صامت يكذب.
+   * الآن نفس نمط V2: تأكيد ← كتابة ← **فحص** ← عند الفشل رسالة صادقة بالعامية،
+   * والجلسة **تبقى قائمة** فلا يضيع عمل المستخدم ويستطيع إعادة المحاولة.
+   */
   const finish = (session: WorkoutSession) => {
-    const prs = persistFinishedSession(session)
+    const commit = commitFinishedSession(session)
+    if (!commit.ok) {
+      setSaveError(commit.failure ?? 'error')
+      return
+    }
+    setSaveError(null)
+    const prs = commit.prs
     // [CTO-68] الحدث ١١ — إكمال تمرين، بعد كتابة الجلسة في السجلّ الدائم.
     trackLocal('workout_session_completed', {
       exercises: session.exercises.length,
@@ -425,6 +442,21 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
       {activeDay && (
         <div className="fixed inset-0 z-[60]">
           <WorkoutMode lang={lang} day={activeDay} userId={userId} resume={resumeFrom} onClose={closeWithoutFinishing} onFinish={finish} />
+          {/* [CTO-71] البند ٢ — فشل الحفظ يُقال صراحةً فوق الجلسة القائمة.
+              لا شاشة ملخّص ولا «أحسنت»: العمل لم يُحفَظ، والجلسة باقية للمحاولة. */}
+          {saveError && (
+            <div role="alert" className="pointer-events-none absolute inset-x-0 bottom-0 z-[65] p-4" style={{ paddingBottom: 'max(1rem, var(--safe-bottom))' }}>
+              <div className="pointer-events-auto mx-auto max-w-md rounded-2xl border border-line bg-surface p-4 shadow-card">
+                <p className="text-sm font-black text-ink-900">{d.saveFailedTitle}</p>
+                <p className="mt-1 text-sm leading-relaxed text-ink-500">
+                  {saveError === 'quota' ? d.saveFailedQuota : saveError === 'unavailable' ? d.saveFailedBlocked : d.saveFailedGeneric}
+                </p>
+                <button type="button" onClick={() => setSaveError(null)} className="btn-ghost mt-3 w-full py-2.5 text-xs">
+                  {d.saveRetry}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

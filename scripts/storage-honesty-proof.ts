@@ -12,6 +12,9 @@
 // Runs on a localStorage shim with a switchable quota fault (no browser) via
 // run-storage-honesty-proof.mjs.
 
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
+const ROOT = process.cwd()
 import { writeRaw, writeJson, readJson, readRaw, getStorageFailure, isStorageWritable } from '@/lib/safeStorage'
 import { commitFinishedSession } from '@/lib/finishWorkout'
 import { buildV2WorkoutSession } from '@/lib/workoutV2Persist'
@@ -128,6 +131,32 @@ check('readJson returned the fallback', value.ok === false)
 check('readJson returns the fallback for a missing key', readJson('qimmah:absent:v1', 'fallback') === 'fallback')
 writeRaw('qimmah:null:v1', 'null')
 check('a stored null degrades to the fallback', readJson('qimmah:null:v1', 'fallback') === 'fallback')
+
+// ── (5) [CTO-71] البند ٢ — الشاشة الحيّة v1 تفحص نتيجة الكتابة ولا تبتلعها ──
+// كانت `WorkoutView.finish` تستدعي `persistFinishedSession` وتمضي لشاشة الملخّص
+// مهما حدث: تخزين ممتلئ ⇒ تختفي الجلسة ويُعرض «أحسنت». فحص بنيوي مقترن يمنع عودته.
+console.log('\n(5) the live v1 workout screen reports save failures honestly')
+const liveWorkout = readFileSync(resolve(ROOT, 'src/views/WorkoutView.tsx'), 'utf8')
+check('WorkoutView commits through the verified path', liveWorkout.includes('commitFinishedSession(session)'))
+check('WorkoutView no longer uses the fire-and-forget persist', !liveWorkout.includes('persistFinishedSession('))
+const commitAt = liveWorkout.indexOf('const commit = commitFinishedSession(session)')
+const bailAt = liveWorkout.indexOf('setSaveError(commit.failure ?? \'error\')')
+const summaryAt = liveWorkout.indexOf('setSummary({ session')
+check('it bails on failure BEFORE showing any summary', commitAt > 0 && bailAt > commitAt && summaryAt > bailAt)
+check('the failure surfaces an honest message, not a silent drop', liveWorkout.includes('d.saveFailedTitle') && liveWorkout.includes('role="alert"'))
+// الفحص مقصور على **كتلة `finish` نفسها**: `setActiveDay(null)` يظهر أيضًا في
+// `closeWithoutFinishing` المعرَّفة قبلها، فالمقارنة على الملف كلّه تكذب.
+const finishBlock = (() => {
+  const start = liveWorkout.indexOf('const finish = (session: WorkoutSession) => {')
+  if (start < 0) return ''
+  const end = liveWorkout.indexOf('\n  }', liveWorkout.indexOf('setSummary({ session', start))
+  return end < 0 ? liveWorkout.slice(start) : liveWorkout.slice(start, end)
+})()
+check('the finish block was extracted with its own bounds', finishBlock.length > 200 && finishBlock.includes('commitFinishedSession'))
+check('and the active session is NOT cleared on failure (work survives)', finishBlock.indexOf('setSaveError(commit.failure') < finishBlock.indexOf('setActiveDay(null)'))
+// تأكيد مضادّ: لو أُزيل الخروج المبكر لسقط الفحص — نحاكيه ونتأكّد أنه يُكشف.
+const smuggled = finishBlock.replace(/if \(!commit\.ok\)[\s\S]*?\}\n/, '')
+check('a smuggled removal of the early bail is caught by name', !/setSaveError\(commit\.failure/.test(smuggled))
 
 console.log(`\nStorage-honesty proof: ${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)
