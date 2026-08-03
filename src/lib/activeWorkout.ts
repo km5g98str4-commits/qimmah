@@ -150,6 +150,25 @@ export function saveActiveWorkout(
   saveRegistry(reg)
 }
 
+/**
+ * عدد المجموعات المنفَّذة في جلسة جارية. [CTO-72] البند ٤.
+ *
+ * **لماذا هنا:** كان هذا الحساب مكرَّرًا حرفيًا في موضعين داخل `WorkoutView`
+ * (`closeWithoutFinishing` و`discardResume`)، وكلاهما يستعمله للرصد فقط ثم
+ * يمضي في فعله بلا سؤال. وهو **الإشارة الوحيدة** التي تفرّق بين «جلسة فيها عمل
+ * المستخدم» و«قشرة فارغة»: بلا تقدّم لا معنى للسؤال، ومع تقدّم لا يجوز الفعل
+ * بلا سؤال. فوُضع في مالك الشكل، فيراه الحارسان من مصدر واحد.
+ *
+ * `undefined`/`null` ⇒ صفر — لا جلسة أصلًا لا جلسة فارغة.
+ */
+export function completedSetCount(active: ActiveWorkout | undefined | null): number {
+  if (!active) return 0
+  return Object.values(active.exercises).reduce(
+    (n, ex) => n + ex.sets.filter((s) => s.completed).length,
+    0,
+  )
+}
+
 /** يمسح الجلسة الجارية لهذه الهوية (عند الإنهاء أو التجاهل). */
 export function clearActiveWorkout(userId: string | null | undefined): void {
   const reg = loadRegistry()

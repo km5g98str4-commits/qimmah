@@ -7,7 +7,8 @@ import type { AppRoute } from '@/lib/appRoutes'
 import { useAuth } from '@/lib/authContext'
 import { useCustomization } from '@/lib/customizationContext'
 import { todayPlanDay, planExerciseName } from '@/lib/workoutPlan'
-import { clearActiveWorkout, loadActiveWorkout, type ActiveWorkout } from '@/lib/activeWorkout'
+import { clearActiveWorkout, completedSetCount, loadActiveWorkout, type ActiveWorkout } from '@/lib/activeWorkout'
+import { SessionGuardDialog, type SessionGuardKind } from '@/components/SessionGuardDialog'
 import { planTitle } from '@/lib/planGenerator'
 import { cn } from '@/lib/cn'
 import {
@@ -132,12 +133,35 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
   const discardResume = () => {
     // [CTO-68] الحدث ١٢ — قطع تمرين من نافذة استرجاع جلسة معلّقة، بموضع القطع.
     // المجموعات المنفّذة تُحصى **قبل** المسح — بعده تضيع الحالة.
-    const completedSets = pendingResume
-      ? Object.values(pendingResume.exercises).reduce((n, ex) => n + ex.sets.filter((s) => s.completed).length, 0)
-      : 0
+    const completedSets = completedSetCount(pendingResume)
     trackLocal('workout_session_abandoned', { at: 'recovered-prompt', completedSets })
     clearActiveWorkout(userId)
     setPendingResume(undefined)
+  }
+
+  /**
+   * [CTO-72] البند ٤ — حارس ترك الجلسة، عند جذره.
+   *
+   * كان للتخلّي عن جلسة مساران، وكلاهما يمضي **بلا سؤال**:
+   *   • ✕ في وضع الجلسة ⇒ خروج فوري. العمل يبقى محفوظًا — فلا فقد، لكن لا طمأنة.
+   *   • «ابدأ نظيفًا» ⇒ **مسح نهائي**. قِيس: مجموعة مسجَّلة واحدة، ضغطة واحدة،
+   *     و`qimmah:activeWorkout:v1` يصير `{}` بلا حوار وبلا تراجع (§2-٣ من دستور
+   *     الجودة: فشل/فقد صامت ممنوع).
+   *
+   * الحارس واحد لأن السؤال واحد: **هل في هذه الجلسة عمل للمستخدم؟** فإن لم يكن،
+   * فالفعلان فوريّان كما كانا (الأمر: «مع بقاء الرجوع الفوري إذا لا تقدم») —
+   * سؤالٌ عن قشرة فارغة ضريبةٌ بلا مقابل تُعلّم تجاهل النوافذ.
+   * وإن كان، فلكلٍّ نصّه الصادق: التوقّف يطمئن أن العمل باقٍ، والمسح يقول إنه يزول.
+   */
+  const [guard, setGuard] = useState<{ kind: SessionGuardKind; sets: number } | null>(null)
+
+  const requestDiscardResume = () => {
+    const sets = completedSetCount(pendingResume)
+    if (sets === 0) {
+      discardResume()
+      return
+    }
+    setGuard({ kind: 'discard', sets })
   }
 
   const startEmpty = () => {
@@ -153,12 +177,30 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
    */
   const closeWithoutFinishing = () => {
     const saved = loadActiveWorkout(userId)
-    const completedSets = saved
-      ? Object.values(saved.exercises).reduce((n, ex) => n + ex.sets.filter((s) => s.completed).length, 0)
-      : 0
-    trackLocal('workout_session_abandoned', { at: 'session', completedSets })
+    trackLocal('workout_session_abandoned', { at: 'session', completedSets: completedSetCount(saved) })
     setActiveDay(null)
     setPendingResume(saved ?? undefined)
+  }
+
+  /**
+   * [CTO-72] البند ٤ — ما يستدعيه ✕ في وضع الجلسة. بلا تقدّم يخرج فورًا؛
+   * ومع تقدّم يسأل أولًا. الحدث `workout_session_abandoned` يبقى في
+   * `closeWithoutFinishing` — فلا يُسجَّل قطعٌ لم يقع لأن المستخدم تراجع.
+   */
+  const requestClose = () => {
+    const sets = completedSetCount(loadActiveWorkout(userId))
+    if (sets === 0) {
+      closeWithoutFinishing()
+      return
+    }
+    setGuard({ kind: 'stop', sets })
+  }
+
+  const confirmGuard = () => {
+    const kind = guard?.kind
+    setGuard(null)
+    if (kind === 'stop') closeWithoutFinishing()
+    else if (kind === 'discard') discardResume()
   }
 
   /**
@@ -276,7 +318,7 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
                     <Icon name="Play" className="h-4 w-4" />
                     {d.resumeAction}
                   </button>
-                  <button type="button" onClick={discardResume} className="btn-ghost px-4 py-2.5 text-xs">
+                  <button type="button" onClick={requestDiscardResume} className="btn-ghost px-4 py-2.5 text-xs">
                     {d.resumeDiscard}
                   </button>
                 </div>
@@ -441,7 +483,7 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
       {/* وضع التمرين — فوق الشريط السفلي */}
       {activeDay && (
         <div className="fixed inset-0 z-[60]">
-          <WorkoutMode lang={lang} day={activeDay} userId={userId} resume={resumeFrom} onClose={closeWithoutFinishing} onFinish={finish} />
+          <WorkoutMode lang={lang} day={activeDay} userId={userId} resume={resumeFrom} onClose={requestClose} onFinish={finish} />
           {/* [CTO-71] البند ٢ — فشل الحفظ يُقال صراحةً فوق الجلسة القائمة.
               لا شاشة ملخّص ولا «أحسنت»: العمل لم يُحفَظ، والجلسة باقية للمحاولة. */}
           {saveError && (
@@ -476,6 +518,18 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
             }}
           />
         </div>
+      )}
+
+      {/* [CTO-72] البند ٤ — حارس ترك الجلسة. z-[80] فوق وضع الجلسة (60) وفوق
+          الملخّص (70): سؤالٌ يُغطّى بما يسأل عنه ليس سؤالًا. */}
+      {guard && (
+        <SessionGuardDialog
+          lang={lang}
+          kind={guard.kind}
+          sets={guard.sets}
+          onConfirm={confirmGuard}
+          onCancel={() => setGuard(null)}
+        />
       )}
     </div>
   )

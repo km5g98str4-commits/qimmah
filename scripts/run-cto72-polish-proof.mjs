@@ -66,6 +66,24 @@ function guardedBlocks(src, opener) {
 /** هل يقع `needle` داخل إحدى الكتل المحروسة بـ`opener`؟ */
 const insideGuard = (src, opener, needle) => guardedBlocks(src, opener).some((b) => b.includes(needle))
 
+/**
+ * جسم دالّة سهمية بحدوده — `const NAME = () => { … }` بعدّ أقواس معقوفة متوازن.
+ * (لا يصلح `guardedBlocks` هنا: قوس المعاملات يُغلق فورًا فتصير الكتلة فارغة.)
+ */
+function arrowBody(src, name) {
+  const opener = `const ${name} = () => {`
+  const start = src.indexOf(opener)
+  if (start === -1) return ''
+  let depth = 1
+  let i = start + opener.length
+  while (i < src.length && depth > 0) {
+    if (src[i] === '{') depth += 1
+    else if (src[i] === '}') depth -= 1
+    i += 1
+  }
+  return src.slice(start, i)
+}
+
 // ═════════════════════════════════════════════════════════════════════════
 console.log('\n① البند ١ — اللوحة تفتح بحالة فارغة ذكية (TodayV2)')
 // ═════════════════════════════════════════════════════════════════════════
@@ -195,6 +213,85 @@ check(
     '⚔️ جعل `why` اختياريًا يُسقط فحص الإلزام (لا يمرّ بوجود الاسم وحده)',
     stillRequired === false,
     'الفحص مرّ على توقيع اختياري — البوابة رخوة',
+  )
+}
+
+// ═════════════════════════════════════════════════════════════════════════
+console.log('\n③ البند ٤ — لا تخلٍّ عن جلسة فيها عمل بلا سؤال (WorkoutView)')
+// ═════════════════════════════════════════════════════════════════════════
+
+const workoutView = read('src/views/WorkoutView.tsx')
+const activeWorkout = read('src/lib/activeWorkout.ts')
+const guardCopy = read('src/i18n/dict/sessionGuard.ts')
+const guardDialog = read('src/components/SessionGuardDialog.tsx')
+
+// أ) الإشارة عند جذرها — دالّة واحدة يقرأها المساران، لا حسابان متوازيان يتباعدان.
+check(
+  '`completedSetCount` معرَّفة في مالك شكل الجلسة (`activeWorkout.ts`)',
+  /export function completedSetCount\(active: ActiveWorkout \| undefined \| null\): number/.test(activeWorkout),
+)
+check(
+  'لا جلسة ⇒ صفر (لا انهيار على `undefined`)',
+  /if \(!active\) return 0/.test(activeWorkout),
+)
+check(
+  'الحساب المكرَّر أُزيل من الشاشة (لا نسخة ثانية تتباعد)',
+  !/Object\.values\((?:saved|pendingResume)\.exercises\)\.reduce/.test(workoutView),
+)
+check(
+  'المساران يقرآن من الدالّة نفسها',
+  (workoutView.match(/completedSetCount\(/g) || []).length >= 4,
+)
+
+// ب) المساران محروسان — **كلاهما**، ولا يُستدعى الفعل الخام من الواجهة.
+check('زرّ ✕ يمرّ بالحارس لا بالفعل الخام', /onClose=\{requestClose\}/.test(workoutView) && !/onClose=\{closeWithoutFinishing\}/.test(workoutView))
+check('«ابدأ نظيفًا» يمرّ بالحارس لا بالفعل الخام', /onClick=\{requestDiscardResume\}/.test(workoutView) && !/onClick=\{discardResume\}/.test(workoutView))
+
+// ج) بلا تقدّم ⇒ فوري (الأمر: «مع بقاء الرجوع الفوري إذا لا تقدم»).
+for (const [name, fn, act] of [
+  ['✕', 'requestClose', 'closeWithoutFinishing'],
+  ['ابدأ نظيفًا', 'requestDiscardResume', 'discardResume'],
+]) {
+  const body = arrowBody(workoutView, fn)
+  check(`${name}: بلا تقدّم ⇒ الفعل فوري بلا حوار`, new RegExp(`if \\(sets === 0\\) \\{\\s*${act}\\(\\)`).test(body))
+  check(`${name}: مع تقدّم ⇒ يُفتح الحارس`, /setGuard\(\{ kind: '(stop|discard)', sets \}\)/.test(body))
+}
+
+// د) الصدق (§5) — الجملتان تصفان **نتيجتين مختلفتين فعلًا**.
+check(
+  'نصّ التوقّف يطمئن أن العمل **باقٍ** (ولا يحذّر من فقدٍ لا يقع)',
+  /stopBody: \(sets\) =>[\s\S]{0,180}بتنحفظ لك/.test(guardCopy) && !/stopBody[\s\S]{0,180}بيروح/.test(guardCopy),
+)
+check(
+  'نصّ المحو يقول إن الفقد **حقيقي ولا تراجع بعده**',
+  /discardTitle: 'تقدّمك في الجلسة بيروح — متأكد؟'/.test(guardCopy) && /discardBody[\s\S]{0,200}ما فيه تراجع/.test(guardCopy),
+)
+check('النصّان بالعربية والإنجليزية معًا (§6)', /const en: SessionGuardCopy/.test(guardCopy) && /const ar: SessionGuardCopy/.test(guardCopy))
+check('العدد يُذكر في السؤال (كم على المحكّ لا «بيانات»)', /sets\b/.test(guardCopy) && /\$\{arNum\(sets\)\}/.test(guardCopy))
+
+// هـ) الوصولية والسلامة (§4 من دستور الجودة).
+check('نافذة داخل التطبيق لا `window.confirm` خام', /role="dialog"[\s\S]{0,120}aria-modal="true"/.test(guardDialog) && !/window\.confirm/.test(workoutView))
+check('التركيز يبدأ على الخيار **الآمن** (Enter بلا قراءة لا يُتلف)', /cancelRef\.current\?\.focus\(\)/.test(guardDialog))
+check('Esc = البقاء لا الفعل', /e\.key === 'Escape'\) onCancel\(\)/.test(guardDialog))
+check('هدفا لمس ≥44px', (guardDialog.match(/min-h-\[44px\]/g) || []).length >= 2)
+check('الفعل المدمّر مميَّز بنصّه لا بلونه وحده (§4)', /destructive \? s\.discardConfirm : s\.stopConfirm/.test(guardDialog))
+check('الحارس فوق وضع الجلسة والملخّص (z-80 > 70 > 60)', /className="fixed inset-0 z-\[80\]/.test(guardDialog))
+
+// و) الرصد لا يكذب: لا يُسجَّل قطعٌ لم يقع لأن المستخدم تراجع.
+check(
+  'حدث القطع يبقى في الفعل نفسه لا في طلب الحارس',
+  /const requestClose = \(\) => \{[\s\S]{0,300}?\}/.test(workoutView)
+    && !/const requestClose[\s\S]{0,300}?trackLocal\('workout_session_abandoned'/.test(workoutView),
+)
+
+// ز) ⚔️ محاكاة التفاف: أعِد توصيل الفعل الخام بالزرّ ⇒ يسقط الفحص باسمه.
+{
+  const tampered = workoutView.replace('onClick={requestDiscardResume}', 'onClick={discardResume}')
+  const stillGuarded = /onClick=\{requestDiscardResume\}/.test(tampered) && !/onClick=\{discardResume\}/.test(tampered)
+  check(
+    '⚔️ إعادة الفعل الخام إلى الزرّ تُسقط فحص «ابدأ نظيفًا محروس»',
+    stillGuarded === false,
+    'الفحص مرّ على زرّ موصول بالمسح المباشر — البوابة رخوة',
   )
 }
 
