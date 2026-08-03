@@ -246,6 +246,10 @@ check('كل نصّ جديد بلغتيه (قاموس واحد يحمل ar وen)'
 for (const surface of ['src/components/today/FirstWinCard.tsx', 'src/components/today/NotifyAskSheet.tsx', 'src/components/today/MissedDayCard.tsx', 'src/components/today/WeekSummaryScreen.tsx']) {
   check(`سطح حيّ يصل المستخدم: ${surface.split('/').pop()}`, reachable.has(surface))
 }
+// [CTO-71] البند ٧ — تسلسل العناوين يبدأ من h1 في المعالج (QA-44).
+const stepHeader = read('src/components/customizer/StepHeader.tsx')
+check('البند ٧: ترويسة خطوات المعالج <h1> لا <h2>', /<h1 className/.test(stepHeader) && !/<h2 className/.test(stepHeader))
+check('البند ٧: خطوة واحدة تُركَّب في كل مرّة (فلا تعدّد h1)', /const Current = steps\[step\]\.Component/.test(read('src/sections/CustomizationCenter.tsx')))
 // [CTO-71] البند ٦ — نافذة الخميس تُلتقط مرّة عند التركيب فلا تضيع تحت سطح أولى.
 check('البند ٦: نافذة الخميس محفوظة لهذه الجلسة لا مُعاد تقييمها كل رسم', /const \[thursdayWindow\] = useState\(\(\) => isThursdayMorning\(\)\)/.test(read('src/views/TodayV2.tsx')))
 check('البند ٦: العرض يستهلك النافذة المحفوظة لا النداء المباشر', /\{thursdayWindow && \(/.test(read('src/views/TodayV2.tsx')) && !/\{isThursdayMorning\(\) && \(/.test(read('src/views/TodayV2.tsx')))
