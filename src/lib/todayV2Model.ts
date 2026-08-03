@@ -78,6 +78,12 @@ export interface TodayV2Model {
    * ([CTO-68] الحدث ١٣) بدل إعادة حساب نفس الفجوة من السجلّ مرّة ثانية.
    */
   daysSinceLastWorkout: number | null
+  /**
+   * مدّة جلسة اليوم بالدقائق كما تُعرض في البطل — مصدرها مدّة المستخدم المضبوطة
+   * إن وُجدت، وإلا التقدير المعلَن. كُشفت ليقرأها بروتوكول التعثّر ([CTO-70] البند ٣)
+   * فيبني عليها البديل المخفّف **من نفس الرقم المعروض** لا من رقم ثانٍ يخالفه.
+   */
+  durationMin: number
 }
 
 const GOAL_LABEL_AR: Record<CalorieGoal, string> = { cut: 'تنشيف', maintain: 'محافظة', bulk: 'تضخيم' }
@@ -250,7 +256,7 @@ export function buildTodayV2Model(customization: Customization, lang: Lang): Tod
     else if (!loggedMeal && nutritionTarget) trustNote = t('ما فيه وجبات مسجّلة اليوم لسا.', 'No meals logged yet today.')
   }
 
-  return { state, greeting, dateLabel, avatarInitial, goalLabel, hero, pillars, progressLabel, completedCount, totalCount, cards, trustNote, restDay, daysSinceLastWorkout: daysSinceWorkout }
+  return { state, greeting, dateLabel, avatarInitial, goalLabel, hero, pillars, progressLabel, completedCount, totalCount, cards, trustNote, restDay, daysSinceLastWorkout: daysSinceWorkout, durationMin }
 }
 
 // ── Hero builders ────────────────────────────────────────────────────────────

@@ -23,6 +23,7 @@ import { workoutScreenStrings } from '@/i18n/dict/workoutScreen'
 import { persistFinishedSession } from '@/lib/finishWorkout'
 import { trackLocal } from '@/lib/tracking'
 import { completeFirstWin } from '@/lib/firstWin'
+import { easyExerciseCount, isEasyToday } from '@/lib/easySession'
 import { evaluateAchievements, registerWorkoutPRs } from '@/features/achievements/engine'
 import { weeklyAdherenceStreak } from '@/lib/streaks'
 import { getExercise } from '@/data/exercises'
@@ -82,7 +83,22 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
   const tw = getStrings(lang).workout
   const d = workoutScreenStrings[lang]
 
-  const startDay = (day: PlanDay) => {
+  /**
+   * [CTO-70] البند ٣ — النسخة المخفّفة ليوم واحد.
+   * تقتطع **أوائل** تمارين اليوم (لا عيّنة عشوائية) فما يُنجزه المستخدم بداية
+   * جلسته الحقيقية. والاقتطاع في الذاكرة فقط: `plan` المحفوظة لا تُمَس إطلاقًا،
+   * والعلم مختوم باليوم فينتهي وحده — لا تعديل خطة ولا كتابة دائمة.
+   */
+  const applyEasyIfActive = (day: PlanDay): PlanDay => {
+    if (!isEasyToday(userId)) return day
+    const fullMin = customization.profile.workoutDuration > 0 ? customization.profile.workoutDuration : 0
+    const keep = easyExerciseCount(day.exercises.length, fullMin)
+    if (keep <= 0 || keep >= day.exercises.length) return day
+    return { ...day, exercises: day.exercises.slice(0, keep) }
+  }
+
+  const startDay = (rawDay: PlanDay) => {
+    const day = applyEasyIfActive(rawDay)
     setResumeFrom(undefined)
     // [CTO-68] الحدث ١٠ — بدء تمرين، لحظة دخول وضع الجلسة.
     trackLocal('workout_session_started', { exercises: day.exercises.length })

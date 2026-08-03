@@ -16,6 +16,8 @@ import { playHaptic } from '@/lib/nativeFeedback'
 import { trackLocal } from '@/lib/tracking'
 import { FirstWinCard } from '@/components/today/FirstWinCard'
 import { NotifyAskSheet } from '@/components/today/NotifyAskSheet'
+import { MissedDayCard } from '@/components/today/MissedDayCard'
+import { easyMinutesFor, enableEasyToday } from '@/lib/easySession'
 import { loadFirstWin, suggestFirstWin } from '@/lib/firstWin'
 import { markNotifyAsked, shouldAskNotify } from '@/lib/notifyAsk'
 import { useAuth } from '@/lib/authContext'
@@ -102,7 +104,7 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
   // البطاقة ترحيبية لا دائمة: تُعرض للقادم الجديد ما دام لم يُنجز، وتبقى معلَّمة «تم»
   // بقيّة يوم الإنجاز وحده ثم تختفي. من لديه تاريخ فعلي ليس قادمًا جديدًا فلا تُلاحقه.
   const firstWinDoneToday = firstWin.completed && !!firstWin.at && getDayStamp(new Date(firstWin.at)) === getDayStamp()
-  const showFirstWin = (!firstWin.completed && model.state === 'newUser') || firstWinDoneToday
+  const showFirstWin = ((!firstWin.completed && model.state === 'newUser') || firstWinDoneToday) && model.state !== 'returnAfterBreak'
 
   // [CTO-70] البند ٢ — سطح إذن الإشعارات: مرّة واحدة، **بعد** أول انتصار.
   // الترتيب مقصود: نطلب الإذن بعد أن يرى المستخدم قيمة، لا قبلها.
@@ -201,6 +203,17 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
         </header>
 
         <MinorGoalNotice lang={lang} />
+
+        {/* [CTO-70] البند ٣ — بروتوكول التعثّر: يحلّ محلّ أول انتصار عند العودة
+            بعد انقطاع، فلا تتزاحم بطاقتا ترحيب على نفس الشاشة. */}
+        {model.state === 'returnAfterBreak' && (
+          <MissedDayCard
+            lang={lang}
+            fullMin={model.durationMin}
+            easyMin={easyMinutesFor(model.durationMin)}
+            onStartEasy={() => { enableEasyToday(); onNavigate('workout') }}
+          />
+        )}
 
         {/* [CTO-70] البند ١ — أول انتصار: أعلى الشاشة لأنه أول ما يجب أن يُرى. */}
         {showFirstWin && (
