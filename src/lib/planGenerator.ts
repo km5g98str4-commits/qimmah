@@ -770,15 +770,49 @@ function generateWorkoutPlan(p: Profile): { plan: WorkoutPlan; specs: DaySpec[] 
 }
 
 const WEEKDAYS = ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة']
-// توزيع أيام التمرين على الأسبوع (فهارس الأيام المدرَّبة)
+/**
+ * توزيع أيام التمرين على الأسبوع (فهارس `WEEKDAYS`: ٠ السبت … ٥ الخميس · ٦ الجمعة).
+ *
+ * [CTO-70] البند ٤ (ADV-19/21) — **إيقاع الأسبوع السعودي**:
+ * الخميس مساءً والجمعة موعد العزايم والاجتماع، وجدولة تمرين ثقيل فيهما تُنتج
+ * فواتًا متكرّرًا يقرؤه المستخدم فشلًا شخصيًا. فالجدولة تحترم الواقع بدل أن
+ * تصارعه: **الجمعة تبقى راحة حتى ٦ أيام/أسبوع، والخميس يبقى راحة حتى ٥**.
+ *
+ * الفارق عن السابق: ٥ أيام كانت [0,1,2,4,5] فتضع تمرينًا على **الخميس**، و٦ أيام
+ * كانت تصل إليه أيضًا. الآن ٥ = السبت→الأربعاء متتابعة، و٦ تضيف الخميس أخيرًا.
+ * ٧ أيام تبقى كما هي — من طلب سبعة أيام طلبها صراحةً، ويعالَج ثقلها في الاختيار
+ * أدناه (`LIGHT_ROUTINES`) لا بحجب اليوم.
+ */
 const TRAIN_PATTERN: Record<number, number[]> = {
   1: [0],
   2: [0, 3],
   3: [0, 2, 4],
   4: [0, 1, 3, 4],
-  5: [0, 1, 2, 4, 5],
+  5: [0, 1, 2, 3, 4],
   6: [0, 1, 2, 3, 4, 5],
   7: [0, 1, 2, 3, 4, 5, 6],
+}
+
+/** فهارس الخميس والجمعة — يومَا العزايم اللذان يُخفَّف حملهما. */
+const THU_INDEX = 5
+const FRI_INDEX = 6
+
+/** الأنماط الأخفّ حملًا — تُقدَّم على الخميس والجمعة حين لا مفرّ من التمرين فيهما. */
+const LIGHT_ROUTINES: ReadonlySet<RoutineRow['type']> = new Set(['cardio', 'full'])
+
+/**
+ * يختار فهرس المواصفة لهذا اليوم: على الخميس/الجمعة يُقدَّم **الأخفّ** إن وُجد،
+ * وإلا يمضي الدور الطبيعي. لا آلية جديدة — ترتيب اختيار داخل نفس الدوران.
+ */
+function specIndexForDay(
+  weekdayIndex: number,
+  cursor: number,
+  types: readonly RoutineRow['type'][],
+): number {
+  if (types.length === 0) return 0
+  if (weekdayIndex !== THU_INDEX && weekdayIndex !== FRI_INDEX) return cursor % types.length
+  const light = types.findIndex((t) => LIGHT_ROUTINES.has(t))
+  return light >= 0 ? light : cursor % types.length
 }
 
 /** يحسب فهارس أيام التمرين خلال الأسبوع (من تفضيل المستخدم أو النمط الافتراضي). */
@@ -815,10 +849,13 @@ function buildScheduleFromSpecs(specs: DaySpec[], trainingDays: number, preferre
   const trainIdx = trainingIndexes(days, preferredDays)
   const rows: RoutineRow[] = []
   let c = 0
+  const types = specs.map((s) => s.routineType)
   WEEKDAYS.forEach((d, i) => {
     if (specs.length && trainIdx.includes(i)) {
-      const spec = specs[c % specs.length]
-      rows.push({ day: d, title: workoutDayNameAr(spec.nameAr, c % specs.length), type: spec.routineType })
+      // [CTO-70] البند ٤ — الخميس/الجمعة يأخذان الأخفّ إن وُجد (ADV-19/21).
+      const pick = specIndexForDay(i, c, types)
+      const spec = specs[pick]
+      rows.push({ day: d, title: workoutDayNameAr(spec.nameAr, pick), type: spec.routineType })
       c++
     } else {
       rows.push({ day: d, title: 'راحة واستشفاء', type: 'rest' })

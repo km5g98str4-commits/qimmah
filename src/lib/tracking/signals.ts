@@ -34,6 +34,24 @@ export function dayGap(fromStamp: string, toStamp: string): number {
 }
 
 /**
+ * رقم يوم الرحلة (١ = اليوم الذي بدأ فيه المستخدم)، أو `null` لمن لا أثر له بعد.
+ *
+ * المرساة هي **أقدم حدث في المخزن** — لا مفتاح تاريخ رابع. `setup_completed`
+ * أولها عادةً، وهو مربوط بالمالك ويُمسح معه، فالرحلة تُعاد من الصفر عند حساب جديد
+ * كما يجب. وحدّ المخزن الدوّار (١٠٠٠ حدث) لا يبتلع المرساة في أسبوع أول واقعي؛
+ * ولو ابتلعها في استخدام كثيف جدًا، تنزاح المرساة للأحدث فيقصر عمر الرحلة —
+ * وهو فشل آمن (لا ملخّص مبكّر كاذب) لا فشل صامت في الاتجاه الخطر.
+ */
+export function journeyDayIndex(now: Date = new Date()): number | null {
+  const events = readEvents()
+  if (events.length === 0) return null
+  const first = events[0]
+  const gap = dayGap(trackingDayStamp(new Date(first.ts)), trackingDayStamp(now))
+  if (gap < 0) return 1
+  return gap + 1
+}
+
+/**
  * هل سُجّل هذا الحدث اليوم بالفعل لهذا المالك؟
  *
  * المخزن نفسه هو دفتر منع التكرار — لا علم إضافي ولا مفتاح ثانٍ. يخدم الأحداث التي

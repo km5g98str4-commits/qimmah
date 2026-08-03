@@ -17,7 +17,8 @@ import { trackLocal } from '@/lib/tracking'
 import { FirstWinCard } from '@/components/today/FirstWinCard'
 import { NotifyAskSheet } from '@/components/today/NotifyAskSheet'
 import { MissedDayCard } from '@/components/today/MissedDayCard'
-import { easyMinutesFor, enableEasyToday } from '@/lib/easySession'
+import { easyMinutesFor, enableEasyToday, isThursdayMorning } from '@/lib/easySession'
+import { firstWeekStrings } from '@/i18n/dict/firstWeek'
 import { loadFirstWin, suggestFirstWin } from '@/lib/firstWin'
 import { markNotifyAsked, shouldAskNotify } from '@/lib/notifyAsk'
 import { useAuth } from '@/lib/authContext'
@@ -203,6 +204,14 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
         </header>
 
         <MinorGoalNotice lang={lang} />
+
+        {/* [CTO-70] البند ٤ — سطر الخميس الاستباقي (ADV-19/21): يُعرض صباح الخميس
+            وحده، **قبل** أن يفوت اليوم لا بعده. استباق لا لوم، ونبرة محايدة. */}
+        {isThursdayMorning() && (
+          <p className="rounded-2xl border border-line bg-surface px-4 py-3 text-sm leading-relaxed text-ink-700">
+            {firstWeekStrings[ar ? 'ar' : 'en'].thursdayHeadsUp}
+          </p>
+        )}
 
         {/* [CTO-70] البند ٣ — بروتوكول التعثّر: يحلّ محلّ أول انتصار عند العودة
             بعد انقطاع، فلا تتزاحم بطاقتا ترحيب على نفس الشاشة. */}

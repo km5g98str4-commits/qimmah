@@ -54,9 +54,41 @@ export function easyMinutesFor(fullMin: number): number {
  * وواحد على الأقل. الترتيب محفوظ: يأخذ **أوائل** تمارين اليوم لا عيّنة عشوائية،
  * فما يُنجزه المستخدم هو بداية جلسته الحقيقية لا جلسة أخرى.
  */
-export function easyExerciseCount(total: number, fullMin: number): number {
+/**
+ * سقف دقائق الأسبوع الأول ([CTO-70] البند ٤ · ADV-21): **≤ ١٥ دقيقة** لكل جلسة
+ * في الأيام السبعة الأولى. قرار محتوى لا آلية جديدة — نفس اقتطاع الجلسة أعلاه،
+ * ولا كتابة في الخطة المحفوظة إطلاقًا.
+ */
+export const FIRST_WEEK_MAX_MIN = 15
+export const FIRST_WEEK_DAYS = 7
+
+/**
+ * صباح الخميس ([CTO-70] البند ٤) — نافذة السطر الاستباقي.
+ * الخميس = ٤ في `Date.getDay()`، و«صباحًا» حتى الظهر: السطر استباق لا تعقيب،
+ * فعرضه مساءً بعد أن يفوت اليوم يقلبه لومًا — وهو ممنوع (§6).
+ */
+export function isThursdayMorning(now: Date = new Date()): boolean {
+  return now.getDay() === 4 && now.getHours() < 12
+}
+
+/** هل نحن داخل الأيام السبعة الأولى؟ `null` (لا رحلة بعد) يُعامَل «نعم» — أول يوم. */
+export function isFirstWeek(dayIndex: number | null): boolean {
+  return dayIndex === null || dayIndex <= FIRST_WEEK_DAYS
+}
+
+/**
+ * المدّة المستهدفة للجلسة بعد تطبيق سقف الأسبوع الأول.
+ * تُرجع المدّة كما هي خارج الأسبوع الأول، والأصغر منها ومن ١٥ داخله — فلا نطيل
+ * جلسة قصيرة أصلًا باسم «السقف».
+ */
+export function cappedSessionMinutes(fullMin: number, dayIndex: number | null): number {
+  if (!Number.isFinite(fullMin) || fullMin <= 0) return 0
+  return isFirstWeek(dayIndex) ? Math.min(fullMin, FIRST_WEEK_MAX_MIN) : fullMin
+}
+
+export function easyExerciseCount(total: number, fullMin: number, targetMin?: number): number {
   if (total <= 0) return 0
-  const easy = easyMinutesFor(fullMin)
-  if (easy <= 0 || fullMin <= 0) return total
-  return Math.min(total, Math.max(1, Math.round((total * easy) / fullMin)))
+  const target = targetMin ?? easyMinutesFor(fullMin)
+  if (target <= 0 || fullMin <= 0) return total
+  return Math.min(total, Math.max(1, Math.round((total * target) / fullMin)))
 }

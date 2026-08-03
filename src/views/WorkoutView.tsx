@@ -23,7 +23,8 @@ import { workoutScreenStrings } from '@/i18n/dict/workoutScreen'
 import { persistFinishedSession } from '@/lib/finishWorkout'
 import { trackLocal } from '@/lib/tracking'
 import { completeFirstWin } from '@/lib/firstWin'
-import { easyExerciseCount, isEasyToday } from '@/lib/easySession'
+import { cappedSessionMinutes, easyExerciseCount, easyMinutesFor, isEasyToday } from '@/lib/easySession'
+import { journeyDayIndex } from '@/lib/tracking/signals'
 import { evaluateAchievements, registerWorkoutPRs } from '@/features/achievements/engine'
 import { weeklyAdherenceStreak } from '@/lib/streaks'
 import { getExercise } from '@/data/exercises'
@@ -90,9 +91,17 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
    * والعلم مختوم باليوم فينتهي وحده — لا تعديل خطة ولا كتابة دائمة.
    */
   const applyEasyIfActive = (day: PlanDay): PlanDay => {
-    if (!isEasyToday(userId)) return day
     const fullMin = customization.profile.workoutDuration > 0 ? customization.profile.workoutDuration : 0
-    const keep = easyExerciseCount(day.exercises.length, fullMin)
+    if (fullMin <= 0 || day.exercises.length === 0) return day
+
+    // [CTO-70] البند ٤ — سقف الأسبوع الأول (≤١٥ دقيقة)، ثم البند ٣ — التخفيف
+    // اليدوي. الأصغر منهما يفوز: من ضغط «ابدأ بنسخة أخفّ» في أسبوعه الأول
+    // يحصل على الأخفّ فعلًا لا على السقف وحده.
+    const capMin = cappedSessionMinutes(fullMin, journeyDayIndex())
+    const targetMin = isEasyToday(userId) ? Math.min(capMin, easyMinutesFor(fullMin)) : capMin
+    if (targetMin >= fullMin) return day
+
+    const keep = easyExerciseCount(day.exercises.length, fullMin, targetMin)
     if (keep <= 0 || keep >= day.exercises.length) return day
     return { ...day, exercises: day.exercises.slice(0, keep) }
   }
