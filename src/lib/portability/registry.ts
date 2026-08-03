@@ -41,6 +41,7 @@ import { ACTIVE_SESSION_KEY_BASE } from '@/lib/activeSession'
 import { notificationPrefsKey } from '@/lib/notifications/prefs'
 import { PLATES_KEY_BASE, plateKey, isValidPlateConfig, WARMUP_PREF_BASE, warmupPrefKey } from '@/lib/strength'
 import { lessonProgressKey } from '@/lib/coaching/lessonRotation'
+import { TRACKING_EVENTS_KEY_BASE, trackingEventsKey, isValidEvent as isValidTrackedEvent, MAX_EVENTS as MAX_TRACKED_EVENTS } from '@/lib/tracking/store'
 import type { Lang } from '@/lib/appPreferences'
 import type { InvalidReason } from './errors'
 
@@ -180,6 +181,20 @@ export const STORE_DEFS: StoreDef[] = [
     count: (v) => (v == null ? 0 : 1),
     validate: (v) => (v == null || (isObj(v) && typeof v.show === 'boolean') ? true : { ar: 'شكل تفضيل الإحماء غير صالح', en: 'The warm-up preference in this backup is not in the expected format. Nothing was imported.' }),
     load: (uid) => readRaw(warmupPrefKey(uid)),
+  },
+  // أحداث الاستخدام المحلية ([CTO-68] البند ٤) — تدخل النسخة بنفس التصليب:
+  // allowlist صريحة · حدّ عناصر أضيق من العام (سقف المخزن الدوّار نفسه) · تحقّق
+  // بنيوي لكل عنصر عبر مُحقِّق الوحدة المالكة. تُصدَّر ليُحلّلها الميدان يدويًا،
+  // ولا تُزامَن إطلاقًا (`synced: false` في userDataKeys) — لا وجهة سحابية لها.
+  {
+    id: 'trackingEvents', kind: 'ownerSuffix', key: TRACKING_EVENTS_KEY_BASE, labelAr: 'أحداث الاستخدام', labelEn: 'Usage events',
+    keyFor: (uid) => trackingEventsKey(uid),
+    count: arrCount,
+    validate: (v) =>
+      v == null || (isArr(v) && v.length <= MAX_TRACKED_EVENTS && v.every(isValidTrackedEvent))
+        ? true
+        : { ar: 'شكل أحداث الاستخدام غير صالح', en: 'The usage events in this backup are not in the expected format. Nothing was imported.' },
+    load: (uid) => readRaw(trackingEventsKey(uid)),
   },
   {
     id: 'coachLessons', kind: 'ownerSuffix', key: 'qimmah:coach:lessons:v1', labelAr: 'تقدّم الدروس', labelEn: 'Lesson progress',
