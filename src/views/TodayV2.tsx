@@ -135,6 +135,19 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
     return perm
   }
 
+  /**
+   * [CTO-71] البند ٦ — تحفّظ [CTO-70] الليلي: سطر الخميس الاستباقي كان يضيع.
+   *
+   * السبب الحقيقي: `isThursdayMorning()` يُقيَّم **عند كل رسم**. فإذا فتح المستخدم
+   * التطبيق ١١:٣٠ صباح الخميس وعلاه سطحٌ أولى منه (ملخّص اليوم ٧ أو سؤال الإذن)
+   * ثم أغلقه ١٢:٠٥ — صار الشرط كاذبًا ولم يرَ السطر أبدًا. النافذة استُهلكت بسطح
+   * آخر، والسطر استباق: عرضه بعد فوات اليوم يقلبه لومًا (§6).
+   *
+   * العلاج: تُلتقط النافذة **مرّة عند التركيب** وتبقى لهذه الجلسة. فيُرحَّل السطر
+   * إلى ما بعد انزياح السطح — **في صباح الخميس نفسه** لا في يوم آخر.
+   */
+  const [thursdayWindow] = useState(() => isThursdayMorning())
+
   // [CTO-70] البند ٥ — ملخّص اليوم السابع: يُعرض عند فتح اليوم ٨، مرّة واحدة.
   const [weekOpen, setWeekOpen] = useState(() => shouldShowWeekSummary(uid))
   const weekStats = useMemo(() => (weekOpen ? buildWeekSummary() : null), [weekOpen])
@@ -228,7 +241,7 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
 
         {/* [CTO-70] البند ٤ — سطر الخميس الاستباقي (ADV-19/21): يُعرض صباح الخميس
             وحده، **قبل** أن يفوت اليوم لا بعده. استباق لا لوم، ونبرة محايدة. */}
-        {isThursdayMorning() && (
+        {thursdayWindow && (
           <p className="rounded-2xl border border-line bg-surface px-4 py-3 text-sm leading-relaxed text-ink-700">
             {firstWeekStrings[ar ? 'ar' : 'en'].thursdayHeadsUp}
           </p>

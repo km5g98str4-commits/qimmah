@@ -124,9 +124,12 @@ check('مُطلق الإشارة مربوط فعلًا بإقلاع التطبي
 // اقتران النصّ بالكود: الحدث ١١ يُسجَّل **بعد** كتابة الجلسة لا قبلها — فلا يُسجَّل
 // إكمالٌ لجلسة لم تُكتب. (الشاشة الحيّة v1 تكتب عبر persistFinishedSession.)
 const workout = read('src/views/WorkoutView.tsx')
-const persistIdx = workout.indexOf('const prs = persistFinishedSession(session)')
+// [CTO-71] البند ٢ حوّل الشاشة إلى المسار المتحقَّق، فالمرساة صارت `commit`.
+// والشرط أقوى الآن: التسجيل بعد **نجاح** الكتابة لا بعد محاولتها.
+const commitIdx = workout.indexOf('const commit = commitFinishedSession(session)')
+const bailIdx = workout.indexOf("setSaveError(commit.failure ?? 'error')")
 const completedIdx = workout.indexOf("trackLocal('workout_session_completed'")
-check('إكمال التمرين يُسجَّل بعد كتابة الجلسة لا قبلها', persistIdx > 0 && completedIdx > persistIdx)
+check('إكمال التمرين يُسجَّل بعد نجاح الكتابة لا بعد محاولتها', commitIdx > 0 && bailIdx > commitIdx && completedIdx > bailIdx)
 // وموضع القطع يُقرأ قبل المسح — بعده تضيع الحالة فيُسجَّل صفر كاذب.
 const discardIdx = workout.indexOf('clearActiveWorkout(userId)')
 const abandonIdx = workout.indexOf("trackLocal('workout_session_abandoned', { at: 'recovered-prompt'")
@@ -243,6 +246,9 @@ check('كل نصّ جديد بلغتيه (قاموس واحد يحمل ar وen)'
 for (const surface of ['src/components/today/FirstWinCard.tsx', 'src/components/today/NotifyAskSheet.tsx', 'src/components/today/MissedDayCard.tsx', 'src/components/today/WeekSummaryScreen.tsx']) {
   check(`سطح حيّ يصل المستخدم: ${surface.split('/').pop()}`, reachable.has(surface))
 }
+// [CTO-71] البند ٦ — نافذة الخميس تُلتقط مرّة عند التركيب فلا تضيع تحت سطح أولى.
+check('البند ٦: نافذة الخميس محفوظة لهذه الجلسة لا مُعاد تقييمها كل رسم', /const \[thursdayWindow\] = useState\(\(\) => isThursdayMorning\(\)\)/.test(read('src/views/TodayV2.tsx')))
+check('البند ٦: العرض يستهلك النافذة المحفوظة لا النداء المباشر', /\{thursdayWindow && \(/.test(read('src/views/TodayV2.tsx')) && !/\{isThursdayMorning\(\) && \(/.test(read('src/views/TodayV2.tsx')))
 // ذرّية الإذن منسوخة لا مُعاد اختراعها: الإذن قبل رفع المفتاح، والرفع عند granted وحده.
 const todayView = read('src/views/TodayV2.tsx')
 const permIdx = todayView.indexOf('await requestNotificationPermission()')
