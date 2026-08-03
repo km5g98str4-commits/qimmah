@@ -55,7 +55,10 @@ console.log('\n② موضع التقاط حقيقي لكل حدث مبنيّ')
 // `readonly TrackedEventName[]` يحمل قوسًا مغلقًا قبلها ويقصّ الكتلة خطأً.
 const awaitingLiteral = registry.match(/AWAITING_SURFACE[^=]*=\s*\[([^\]]*)\]/)?.[1] ?? ''
 const awaiting = [...awaitingLiteral.matchAll(/'([a-z0-9_]+)'/g)].map((m) => m[1])
-check('حدثان معلَّمان «ينتظر سطحه»', awaiting.length === 2)
+// العدد يتقلّص كلّما بُني سطح ([CTO-70] وصل «أول انتصار» ثم «ملخّص اليوم ٧»).
+// فلا يُثبَّت رقم: المطلوب أن تبقى القائمة **متّسقة** — كل اسم فيها من السجلّ،
+// والقاعدة ذات الاتجاهين أدناه هي الحارس الحقيقي لا العدّ.
+check('قائمة «ينتظر سطحه» كلّها أسماء من السجلّ', awaiting.every((n) => names.includes(n)))
 
 /** مواضع نداء trackLocal لهذا الاسم في كود المنتج (خارج طبقة التتبّع نفسها). */
 const callSites = (name) =>

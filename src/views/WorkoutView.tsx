@@ -22,6 +22,7 @@ import { getStrings } from '@/config/strings'
 import { workoutScreenStrings } from '@/i18n/dict/workoutScreen'
 import { persistFinishedSession } from '@/lib/finishWorkout'
 import { trackLocal } from '@/lib/tracking'
+import { completeFirstWin } from '@/lib/firstWin'
 import { evaluateAchievements, registerWorkoutPRs } from '@/features/achievements/engine'
 import { weeklyAdherenceStreak } from '@/lib/streaks'
 import { getExercise } from '@/data/exercises'
@@ -85,6 +86,8 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
     setResumeFrom(undefined)
     // [CTO-68] الحدث ١٠ — بدء تمرين، لحظة دخول وضع الجلسة.
     trackLocal('workout_session_started', { exercises: day.exercises.length })
+    // [CTO-70] البند ١ — بدء التمرين هو «الإحماء القصير» المقترح كأول انتصار.
+    completeFirstWin('warmup')
     setActiveDay(day)
   }
 

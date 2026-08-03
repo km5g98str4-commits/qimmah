@@ -12,6 +12,7 @@ import { getDayStamp } from './today'
 import { useIsDemo } from './demoMode'
 import { getNutritionLog, saveNutritionLog } from './historyStore'
 import { track, firstOnce } from './analytics'
+import { completeFirstWin } from './firstWin'
 import {
   addFoodToDay,
   addWaterToDay,
@@ -194,6 +195,9 @@ export function useNutritionToday() {
         return
       }
       addWaterToDay(ml) // المصدر القانوني الواحد — يُشعرنا عبر الاشتراك
+      // [CTO-70] البند ١ — أول انتصار: تسجيل ماء حقيقي يُنهي الانتصار الأول.
+      // هنا لا في البطاقة: الضغطة نيّة، والإنجاز ما وقع — ويُحتسب من أي سطح.
+      if (ml > 0) completeFirstWin('water')
     },
     [demo],
   )
@@ -229,6 +233,8 @@ export function useNutritionToday() {
         // إشارة وجبة — خانة الوجبة فقط (تعداد)، بلا اسم الطبق أو الكمية.
         track('meal_logged', { mealSlot: item.meal })
         if (firstOnce('firstMeal')) track('first_meal_logged', {})
+        // [CTO-70] البند ١ — أول انتصار بتسجيل وجبة (يصير «عشاء» مساءً).
+        completeFirstWin('meal')
       }
     },
     [demo],

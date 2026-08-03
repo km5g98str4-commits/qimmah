@@ -24,7 +24,7 @@ export const TRACKED_EVENTS = [
   'setup_completed',
   // — المدخل وأول قيمة (٤–٥) —
   'entry_choice_made',
-  'first_action_completed',
+  'first_win_completed',
   // — الإذن والعودة (٦–٧) —
   'notification_permission_decided',
   'next_day_opened',
@@ -42,6 +42,12 @@ export const TRACKED_EVENTS = [
 ] as const
 
 export type TrackedEventName = (typeof TRACKED_EVENTS)[number]
+
+/**
+ * أنواع «أول انتصار» (ADV-13) — إجراء واحد يُنجَز في أقل من دقيقتين.
+ * `warmup` و`meal` لوقت النهار · `water` و`dinner` للمساء (الأخفّ).
+ */
+export type FirstWinKind = 'warmup' | 'meal' | 'water' | 'dinner'
 
 /** أسماء خطوات الإعداد — مطابقة لترتيب `OnboardingV2` (0..4 مدخلات + 5 جاهز). */
 export const SETUP_STEP_NAMES = ['body', 'intent', 'goal', 'training', 'equipment', 'ready'] as const
@@ -79,11 +85,11 @@ export interface TrackedEventProps {
   /** ٤ — توزيع الشاشة الأولى: أي مسار اختاره القادم الجديد. */
   entry_choice_made: { choice: 'guest' | 'signup' | 'login' }
   /**
-   * ٥ — أول إجراء منجز، بنوعه.
-   * ⏳ **ينتظر سطحه** — «أول انتصار» لم يُبنَ بعد. مُعرَّف هنا ليلتقطه CTO-70 فور
-   * بناء السطح دون تعديل هذا السجلّ. لا موضع نداء له اليوم (يحرسه الإثبات).
+   * ٥ — أول انتصار منجز، بنوعه (ADV-13).
+   * كان اسمه `first_action_completed` في [CTO-68] حين كان ينتظر سطحه؛ سمّاه
+   * [CTO-70] `first_win_completed` عند بناء السطح، والأعلى رقمًا يُنفَّذ (§1.2).
    */
-  first_action_completed: { kind: 'workout' | 'meal' | 'water' | 'steps' | 'measurement' }
+  first_win_completed: { kind: FirstWinKind; partOfDay: 'day' | 'evening' }
   /** ٦ — قرار إذن الإشعارات (قبول/رفض) عند جذره: نداء طلب الإذن نفسه. */
   notification_permission_decided: { decision: 'granted' | 'denied' | 'unsupported' }
   /** ٧ — فتح اليوم التالي: أول فتح في يوم تقويمي بعد يوم استُخدم فيه التطبيق. */
@@ -114,7 +120,7 @@ export interface TrackedEventProps {
  * الإثبات يتحقّق من الأمرين معًا: أن هذه لا تُنادى، وأن **كل ما عداها يُنادى**.
  * حذف اسم من هنا بلا زرع نداء يُسقط البوابة — فلا يُنسى سطح عند بنائه.
  */
-export const AWAITING_SURFACE: readonly TrackedEventName[] = ['first_action_completed', 'day7_summary_reached'] as const
+export const AWAITING_SURFACE: readonly TrackedEventName[] = ['day7_summary_reached'] as const
 
 /** هل هذا الحدث ينتظر سطحه (فلا يُتوقَّع له موضع نداء اليوم)؟ */
 export function isAwaitingSurface(name: TrackedEventName): boolean {

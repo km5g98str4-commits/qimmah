@@ -8,7 +8,7 @@ import type { TrackedEventName, TrackedEventProps } from './registry'
 import { appendEvent, makeEvent, readEvents, type TrackedEvent } from './store'
 
 export { TRACKED_EVENTS, AWAITING_SURFACE, SETUP_STEP_NAMES, isAwaitingSurface } from './registry'
-export type { TrackedEventName, TrackedEventProps, SetupStepName, WorkoutAbandonPoint } from './registry'
+export type { TrackedEventName, TrackedEventProps, SetupStepName, WorkoutAbandonPoint, FirstWinKind } from './registry'
 export {
   TRACKING_EVENTS_KEY_BASE,
   MAX_EVENTS,

@@ -14,6 +14,8 @@ import { getDayStamp } from '@/lib/today'
 import { buildTodayV2Model } from '@/lib/todayV2Model'
 import { playHaptic } from '@/lib/nativeFeedback'
 import { trackLocal } from '@/lib/tracking'
+import { FirstWinCard } from '@/components/today/FirstWinCard'
+import { loadFirstWin, suggestFirstWin } from '@/lib/firstWin'
 import { hasEventToday } from '@/lib/tracking/signals'
 import { useAchievementsEngine } from '@/features/achievements/useAchievements'
 
@@ -80,6 +82,20 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
     if (hasEventToday('return_after_missed_day')) return
     trackLocal('return_after_missed_day', { daysAway: model.daysSinceLastWorkout ?? 0 })
   }, [model.state, model.daysSinceLastWorkout])
+
+  // [CTO-70] البند ١ — أول انتصار. يُعرض للقادم الجديد حتى يُنجزه، ثم يبقى معلَّمًا
+  // «تم» بقية اليوم. `nutrition`/`model` في التبعيات لأن الإنجاز يقع في سطح آخر
+  // (تسجيل ماء/وجبة/بدء تمرين) فتُعاد القراءة عند أول عودة للوحة.
+  const firstWin = useMemo(
+    () => loadFirstWin(),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [nutrition.calories.consumed, nutrition.water.consumedMl, model.state],
+  )
+  const firstWinSuggestion = useMemo(() => suggestFirstWin(), [])
+  // البطاقة ترحيبية لا دائمة: تُعرض للقادم الجديد ما دام لم يُنجز، وتبقى معلَّمة «تم»
+  // بقيّة يوم الإنجاز وحده ثم تختفي. من لديه تاريخ فعلي ليس قادمًا جديدًا فلا تُلاحقه.
+  const firstWinDoneToday = firstWin.completed && !!firstWin.at && getDayStamp(new Date(firstWin.at)) === getDayStamp()
+  const showFirstWin = (!firstWin.completed && model.state === 'newUser') || firstWinDoneToday
 
   const trainPillar = model.pillars.find((pillar) => pillar.key === 'train')
   const workoutDone = trainPillar?.state === 'done'
@@ -152,6 +168,22 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
         </header>
 
         <MinorGoalNotice lang={lang} />
+
+        {/* [CTO-70] البند ١ — أول انتصار: أعلى الشاشة لأنه أول ما يجب أن يُرى. */}
+        {showFirstWin && (
+          <FirstWinCard
+            lang={lang}
+            suggestion={firstWinSuggestion}
+            done={firstWin.completed}
+            doneKind={firstWin.kind}
+            onPick={(kind) => {
+              // الضغطة توصّل للسطح الحيّ؛ الإنجاز يُسجَّل عند وقوع الفعل هناك.
+              if (kind === 'warmup') onNavigate('workout')
+              else if (kind === 'water') quick('water', 'nutrition')
+              else quick('meal', 'nutrition')
+            }}
+          />
+        )}
 
         {/* ماكروز اليوم — حلّت محلّ البطاقة البارزة. تلك كانت `bg-ink-900`، وهو
             لون ينقلب فاتحًا في السمة الداكنة فيظهر مربعًا أبيض يضرب الخلفية.

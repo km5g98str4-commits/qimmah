@@ -46,7 +46,7 @@ const SAMPLE_PROPS: Record<TrackedEventName, Record<string, string | number | bo
   setup_step_reached: { step: 'body' },
   setup_completed: {},
   entry_choice_made: { choice: 'guest' },
-  first_action_completed: { kind: 'workout' },
+  first_win_completed: { kind: 'warmup', partOfDay: 'day' },
   notification_permission_decided: { decision: 'granted' },
   next_day_opened: { gapDays: 1 },
   food_search_no_result: { query: 'مندي لحم' },
@@ -188,14 +188,14 @@ try { void (globalThis as unknown as { navigator: { sendBeacon: (u: string) => u
 check('مصيدة sendBeacon حيّة كذلك', netCalls().length === 2 && netCalls()[1] === 'sendBeacon')
 
 console.log('\n⑧ الأحداث المنتظِرة لسطحها')
-check('حدثان بالضبط ينتظران سطحهما', AWAITING_SURFACE.length === 2)
-check('كلاهما مُعرَّف في السجلّ الموحّد', AWAITING_SURFACE.every((n) => (TRACKED_EVENTS as readonly string[]).includes(n)))
-check('وهما «أول انتصار» و«ملخّص اليوم ٧»', AWAITING_SURFACE.includes('first_action_completed') && AWAITING_SURFACE.includes('day7_summary_reached'))
-// مُعرَّفان فعلًا لا اسمين فارغين: يقبلان الكتابة فور بناء سطحهما.
+check('كل منتظِر مُعرَّف في السجلّ الموحّد', AWAITING_SURFACE.every((n) => (TRACKED_EVENTS as readonly string[]).includes(n)))
+// [CTO-70] وصل «أول انتصار» بسطحه، فخرج من الانتظار ولم يعد اسمًا معلَّقًا.
+check('«first_win_completed» لم يعد ينتظر سطحه', !AWAITING_SURFACE.includes('first_win_completed'))
+// مُعرَّفة فعلًا لا أسماء فارغة: تقبل الكتابة فور بناء سطحها.
 resetStore()
 setLastUser(null)
-trackLocal('first_action_completed', { kind: 'meal' })
+trackLocal('first_win_completed', { kind: 'meal', partOfDay: 'day' })
 trackLocal('day7_summary_reached', { dayIndex: 7 })
-check('الحدثان قابلان للكتابة فور وجود السطح (لا اسم ميت)', readEvents().length === 2)
+check('الأسماء المعرَّفة قابلة للكتابة فور وجود السطح (لا اسم ميت)', readEvents().length === 2)
 
 console.log(`\n✅ نجحت ${pass} فحوص تتبّع محلي (تنفيذية).`)
