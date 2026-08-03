@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import type { QuickLogTarget } from '@/components/MobileShell'
 import { Icon } from '@/components/Icon'
 import { MinorGoalNotice } from '@/components/MinorGoalNotice'
@@ -13,6 +13,8 @@ import { buildNutritionV2Model } from '@/lib/nutritionV2Model'
 import { getDayStamp } from '@/lib/today'
 import { buildTodayV2Model } from '@/lib/todayV2Model'
 import { playHaptic } from '@/lib/nativeFeedback'
+import { trackLocal } from '@/lib/tracking'
+import { hasEventToday } from '@/lib/tracking/signals'
 import { useAchievementsEngine } from '@/features/achievements/useAchievements'
 
 interface TodayV2Props {
@@ -70,6 +72,15 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
   const todayWeightLogged = loadLogs().some(
     (log) => log.date === getDayStamp() && log.values.weightKg !== undefined && log.values.weightKg !== '',
   )
+  // [CTO-68] الحدث ١٣ — عودة بعد يوم فائت: أول عرض لحالة «العودة بعد انقطاع».
+  // مرّة واحدة في اليوم لا مرّة في كل تركيب: الشاشة تُركَّب مع كل رجوع لتبويب اليوم،
+  // والمقصود عودةُ المستخدم لا عددُ زياراته للتبويب. المخزن نفسه هو دفتر منع التكرار.
+  useEffect(() => {
+    if (model.state !== 'returnAfterBreak') return
+    if (hasEventToday('return_after_missed_day')) return
+    trackLocal('return_after_missed_day', { daysAway: model.daysSinceLastWorkout ?? 0 })
+  }, [model.state, model.daysSinceLastWorkout])
+
   const trainPillar = model.pillars.find((pillar) => pillar.key === 'train')
   const workoutDone = trainPillar?.state === 'done'
   const mealDone = nutrition.calories.target > 0 && nutrition.calories.consumed >= nutrition.calories.target

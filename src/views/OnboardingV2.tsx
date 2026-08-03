@@ -11,6 +11,7 @@ import { buildCustomizationFromOnboarding, saveOnboardingProfile } from '@/lib/o
 import { markCompleted } from '@/lib/onboarding'
 import { persistOnboardingToProfile } from '@/lib/onboardingSync'
 import { track } from '@/lib/analytics'
+import { trackLocal, SETUP_STEP_NAMES } from '@/lib/tracking'
 import { POLICY_LINKS, policyCopy } from '@/data/policyCopy'
 import { toAnswersFromV2, type V2Place, type V2Pref } from '@/lib/onboardingV2Adapter'
 import { isMinorAge } from '@/lib/calculators'
@@ -144,6 +145,24 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
     goal, days, duration, place: place as V2Place | null, pref: pref as V2Pref | null, healthDataConsent,
   }
 
+  // [CTO-68] الحدثان ١ و٢ — بدء الإعداد، والوصول إلى كل خطوة **باسمها**.
+  //
+  // «بدء الإعداد» مرّة واحدة لكل دخول للتدفّق، ومعه `resumed` لتمييز من استأنف
+  // مسوّدة محفوظة عمّن بدأ من الصفر — وإلا اختلط المستأنِفون بالقادمين الجدد.
+  useEffect(() => {
+    trackLocal('setup_started', { resumed: initialDraft.step > 0 })
+    // مرّة واحدة عند التركيب فقط — الاستئناف تركيب جديد بطبيعته.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // «الوصول إلى الخطوة» هو الأصل الذي يُشتقّ منه السقوط: آخر خطوة وُصلت في جلسة
+  // لم يتبعها `setup_completed` هي نقطة السقوط. يشمل خطوة «جاهز» (الوصول للمراجعة
+  // دون ضغط الدخول سقوطٌ في أغلى نقطة، ولا يُرى بلا هذا الحدث).
+  useEffect(() => {
+    const name = SETUP_STEP_NAMES[step]
+    if (name) trackLocal('setup_step_reached', { step: name })
+  }, [step])
+
   // Persist the draft on every answer/step change — a reload resumes here.
   // Never while the plan is being built or after a successful finish.
   useEffect(() => {
@@ -200,6 +219,9 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
         track('plan_generated', { source: 'onboarding' })
         markCompleted(userId)
         track('onboarding_completed', { planMode: 'auto' })
+        // [CTO-68] الحدث ٣ — إكمال الإعداد. **بعد** بناء الخطة وحفظها ووسمها مكتملة،
+        // لا عند ضغط الزر: الفشل يرمي قبل هذا السطر فلا يُسجَّل إكمال لم يحدث.
+        trackLocal('setup_completed', {})
         // Cloud parity — EXACTLY as v1 (PlanBuilder): best-effort, fire-and-forget,
         // only when signed in. persistOnboardingToProfile never throws.
         if (userId) void persistOnboardingToProfile(userId, op)

@@ -72,6 +72,12 @@ export interface TodayV2Model {
    * لغياب الخطة. إضافة متوافقة خلفيًا (workoutAvailable يبقى false في الحالتين).
    */
   restDay: boolean
+  /**
+   * أيام كاملة منذ آخر تمرين **منتهٍ**، أو `null` لمن لم يُنهِ تمرينًا قط.
+   * محسوبة أصلًا لتمييز حالة «العودة بعد انقطاع»؛ كُشفت ليقرأها التتبّع المحلي
+   * ([CTO-68] الحدث ١٣) بدل إعادة حساب نفس الفجوة من السجلّ مرّة ثانية.
+   */
+  daysSinceLastWorkout: number | null
 }
 
 const GOAL_LABEL_AR: Record<CalorieGoal, string> = { cut: 'تنشيف', maintain: 'محافظة', bulk: 'تضخيم' }
@@ -244,7 +250,7 @@ export function buildTodayV2Model(customization: Customization, lang: Lang): Tod
     else if (!loggedMeal && nutritionTarget) trustNote = t('ما فيه وجبات مسجّلة اليوم لسا.', 'No meals logged yet today.')
   }
 
-  return { state, greeting, dateLabel, avatarInitial, goalLabel, hero, pillars, progressLabel, completedCount, totalCount, cards, trustNote, restDay }
+  return { state, greeting, dateLabel, avatarInitial, goalLabel, hero, pillars, progressLabel, completedCount, totalCount, cards, trustNote, restDay, daysSinceLastWorkout: daysSinceWorkout }
 }
 
 // ── Hero builders ────────────────────────────────────────────────────────────

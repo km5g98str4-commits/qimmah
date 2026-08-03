@@ -15,6 +15,7 @@ import {
   reconcileNotificationSchedule,
 } from '@/lib/notifications/engine'
 import { readSupplementNames } from '@/lib/notifications/supplementNames'
+import { trackLocal } from '@/lib/tracking'
 import type { NotificationPermission, NotificationPrefs } from '@/lib/notifications/types'
 
 interface Props {
@@ -47,6 +48,13 @@ export function NotificationsSettingsV2({ lang, onBack }: Props) {
   const lockRef = useRef(false)
   const native = Capacitor.isNativePlatform()
   const supplementNames = readSupplementNames()
+
+  // [CTO-68] الحدث ١٥ — فتح شاشة التذكيرات ذاتيًا: المؤشّر المجاني على نيّة الالتزام.
+  // «ذاتيًا» مضمون بنيويًا: لا مسار في التطبيق يفتح هذه الشاشة إلا نقرة المستخدم في
+  // «حسابي ← الإعدادات» — لا مسار hash ولا إعادة توجيه ولا فتح تلقائي.
+  useEffect(() => {
+    trackLocal('reminders_screen_opened', {})
+  }, [])
 
   useEffect(() => {
     setPrefs(uid ? loadNotificationPrefs(uid) : DEFAULT_NOTIFICATION_PREFS)

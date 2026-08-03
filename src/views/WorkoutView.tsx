@@ -21,6 +21,7 @@ import {
 import { getStrings } from '@/config/strings'
 import { workoutScreenStrings } from '@/i18n/dict/workoutScreen'
 import { persistFinishedSession } from '@/lib/finishWorkout'
+import { trackLocal } from '@/lib/tracking'
 import { evaluateAchievements, registerWorkoutPRs } from '@/features/achievements/engine'
 import { weeklyAdherenceStreak } from '@/lib/streaks'
 import { getExercise } from '@/data/exercises'
@@ -82,6 +83,8 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
 
   const startDay = (day: PlanDay) => {
     setResumeFrom(undefined)
+    // [CTO-68] الحدث ١٠ — بدء تمرين، لحظة دخول وضع الجلسة.
+    trackLocal('workout_session_started', { exercises: day.exercises.length })
     setActiveDay(day)
   }
 
@@ -96,15 +99,44 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
   }
 
   const discardResume = () => {
+    // [CTO-68] الحدث ١٢ — قطع تمرين من نافذة استرجاع جلسة معلّقة، بموضع القطع.
+    // المجموعات المنفّذة تُحصى **قبل** المسح — بعده تضيع الحالة.
+    const completedSets = pendingResume
+      ? Object.values(pendingResume.exercises).reduce((n, ex) => n + ex.sets.filter((s) => s.completed).length, 0)
+      : 0
+    trackLocal('workout_session_abandoned', { at: 'recovered-prompt', completedSets })
     clearActiveWorkout(userId)
     setPendingResume(undefined)
   }
 
-  const startEmpty = () =>
+  const startEmpty = () => {
+    // تمرين فارغ = بدء جلسة أيضًا (بلا تمارين من الخطة).
+    trackLocal('workout_session_started', { exercises: 0 })
     setActiveDay({ id: `empty-${Date.now()}`, nameAr: d.emptyWorkoutNameAr, nameEn: d.emptyWorkoutNameEn, exercises: [] })
+  }
+
+  /**
+   * الخروج من وضع الجلسة بلا إنهاء — [CTO-68] الحدث ١٢ بموضع القطع «session».
+   * الجلسة نفسها **تبقى محفوظة** (تظهر لاحقًا كجلسة معلّقة للاستئناف)؛ الحدث يرصد
+   * مغادرة الجلسة لا حذفها، والحذف يرصده `discardResume` بموضعه الخاص.
+   */
+  const closeWithoutFinishing = () => {
+    const saved = loadActiveWorkout(userId)
+    const completedSets = saved
+      ? Object.values(saved.exercises).reduce((n, ex) => n + ex.sets.filter((s) => s.completed).length, 0)
+      : 0
+    trackLocal('workout_session_abandoned', { at: 'session', completedSets })
+    setActiveDay(null)
+    setPendingResume(saved ?? undefined)
+  }
 
   const finish = (session: WorkoutSession) => {
     const prs = persistFinishedSession(session)
+    // [CTO-68] الحدث ١١ — إكمال تمرين، بعد كتابة الجلسة في السجلّ الدائم.
+    trackLocal('workout_session_completed', {
+      exercises: session.exercises.length,
+      sets: session.exercises.reduce((n, ex) => n + (ex.sets?.length ?? 0), 0),
+    })
     const daysPerWeek = plan.days.length || 3
     // احتفل بالأرقام القياسية وافتح أوسمة التمرين/السلسلة/الأرقام القياسية فورًا.
     registerWorkoutPRs(prs)
@@ -364,7 +396,7 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
       {/* وضع التمرين — فوق الشريط السفلي */}
       {activeDay && (
         <div className="fixed inset-0 z-[60]">
-          <WorkoutMode lang={lang} day={activeDay} userId={userId} resume={resumeFrom} onClose={() => { setActiveDay(null); setPendingResume(loadActiveWorkout(userId)) }} onFinish={finish} />
+          <WorkoutMode lang={lang} day={activeDay} userId={userId} resume={resumeFrom} onClose={closeWithoutFinishing} onFinish={finish} />
         </div>
       )}
 

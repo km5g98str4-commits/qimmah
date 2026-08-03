@@ -1,6 +1,7 @@
 import { Capacitor } from '@capacitor/core'
 import type { Lang } from '@/lib/appPreferences'
 import { getLastUser } from '@/lib/accountScope'
+import { trackLocal } from '@/lib/tracking'
 import { loadNotificationPrefs } from './prefs'
 import { readPlanWeek } from './planWeek'
 import { allNotificationIds, planNotifications } from './schedule'
@@ -46,13 +47,22 @@ async function schedule(items: PlannedNotification[]): Promise<void> {
   })
 }
 
+/**
+ * [CTO-68] الحدث ٦ — قرار إذن الإشعارات، **عند جذره**: نداء الطلب نفسه.
+ * كل مدخل في الواجهة يطلب الإذن يمرّ من هنا، فلا يُفلت قرارٌ لأن سطحًا جديدًا نسي
+ * أن يسجّل. و«غير مدعوم» تُسجَّل كذلك — لتمييز الرفض الحقيقي من غياب القناة أصلًا.
+ */
 export async function requestNotificationPermission(): Promise<NotificationPermission> {
-  if (!notificationsSupported()) return 'unsupported'
+  const decided = (decision: NotificationPermission): NotificationPermission => {
+    trackLocal('notification_permission_decided', { decision })
+    return decision
+  }
+  if (!notificationsSupported()) return decided('unsupported')
   try {
     const result = await (await plugin()).requestPermissions()
-    return result.display === 'granted' ? 'granted' : 'denied'
+    return decided(result.display === 'granted' ? 'granted' : 'denied')
   } catch {
-    return 'denied'
+    return decided('denied')
   }
 }
 

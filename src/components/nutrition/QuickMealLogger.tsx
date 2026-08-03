@@ -1,4 +1,4 @@
-import { lazy, Suspense, useMemo, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { Icon } from '@/components/Icon'
 import { ProgressBar } from '@/components/ProgressBar'
 import { searchFood, type FoodItem, type FoodSize } from '@/data/foodItems'
@@ -7,6 +7,7 @@ import { NUM_LIMITS, parseSafeNumber, sanitizeNumericInput } from '@/lib/validat
 import { getStrings } from '@/config/strings'
 import { nutritionScreenStrings } from '@/i18n/dict/nutritionScreen'
 import type { Lang } from '@/lib/appPreferences'
+import { trackLocal } from '@/lib/tracking'
 
 // يُحمَّل عند الحاجة فقط — مكتبة مسح الباركود ثقيلة ولا يلزم تحميلها إلا عند فتح الماسح.
 const ScanFoodPanel = lazy(() => import('@/features/barcode/ScanFoodPanel').then((m) => ({ default: m.ScanFoodPanel })))
@@ -53,6 +54,23 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
   const [cFat, setCFat] = useState('')
 
   const results = useMemo(() => searchFood(query).slice(0, 10), [query])
+
+  // [CTO-68] الحدث ٨ — بحث طعام بلا نتيجة، بنصّ الاستعلام: فجوة مباشرة في قاعدة الطعام.
+  //
+  // مؤجَّل ٧٠٠ ملّي: بلا تأجيل يُسجَّل كل حرف أثناء الكتابة («ك» ثم «كب» ثم «كبس»)
+  // فيمتلئ المخزن الدوّار بضجيج ويطرد أحداثًا حقيقية. التأجيل يجعل المسجَّل ما
+  // **استقرّ** عليه المستخدم، وحارس التكرار يمنع تسجيل نفس الاستعلام مرّتين.
+  const lastReportedQuery = useRef('')
+  useEffect(() => {
+    const q = query.trim()
+    if (q.length < 2 || results.length > 0) return
+    if (lastReportedQuery.current === q) return
+    const timer = setTimeout(() => {
+      lastReportedQuery.current = q
+      trackLocal('food_search_no_result', { query: q })
+    }, 700)
+    return () => clearTimeout(timer)
+  }, [query, results.length])
 
   const eatenCal = round(totals.calories)
   const eatenProt = round(totals.protein)
@@ -103,6 +121,8 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
       fat: round(baseFat * factor),
       meal: defaultMeal,
     })
+    // [CTO-68] الحدث ٩ — تسجيل وجبة، بعد الإضافة الفعلية لسجلّ اليوم.
+    trackLocal('meal_entry_logged', { slot: defaultMeal ?? 'unspecified' })
     setSelected(null)
     setSizeId(null)
     setQuery('')
@@ -127,6 +147,8 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
       meal: defaultMeal,
       note: cName.trim() || undefined,
     })
+    // نفس الحدث ٩ — الإضافة السريعة/المخصّصة تسجيل وجبة أيضًا، ولو بلا عنصر من القاعدة.
+    trackLocal('meal_entry_logged', { slot: defaultMeal ?? 'unspecified' })
     setCName('')
     setCCal('')
     setCProt('')

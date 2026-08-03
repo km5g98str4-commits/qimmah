@@ -54,6 +54,8 @@ import { type AppRoute, MAIN_TABS, isUnknownRouteHash, routeFromHash, setHashRou
 import { SuccessToast } from '@/components/SuccessToast'
 import { BUILD_LABEL } from '@/lib/buildInfo'
 import { track } from '@/lib/analytics'
+import { trackLocal } from '@/lib/tracking'
+import { recordDayOpen } from '@/lib/tracking/signals'
 import { useCustomization } from '@/lib/customizationContext'
 import { V2_QUICK_LOG } from '@/design-system/v2/labels'
 
@@ -145,6 +147,16 @@ export default function App() {
     // فتح التطبيق — يُطلق مرّة واحدة لكل تحميل.
     track('app_opened', {})
   }, [])
+
+  // [CTO-68] الحدث ٧ — «فتح اليوم التالي». يُؤجَّل حتى تستقرّ المصادقة: قبلها يكون
+  // مؤشّر المالك «ضيف» افتراضًا، فتُكتب عودةُ صاحب حساب في مخزن الضيف. مرّة واحدة
+  // لكل تحميل عبر الحارس المرجعي (تغيّر uid لاحقًا تبديلُ حساب لا فتحُ يوم).
+  const dayOpenLogged = useRef(false)
+  useEffect(() => {
+    if (auth.loading || dayOpenLogged.current) return
+    dayOpenLogged.current = true
+    recordDayOpen()
+  }, [auth.loading])
 
   // جدولة إشعارات iOS من مالك الجلسة الحالي فقط. كل مصالحة تلغي معرّفات قِمّة
   // أولًا؛ الاستعادة/الخروج/تبديل الحساب لا يمكن أن يترك جدول المالك السابق.
@@ -375,9 +387,11 @@ export default function App() {
     content = (
       <StartView
         lang={LANG}
-        onLogin={() => { setLoginMode('login'); setView('login') }}
-        onSignup={() => { setLoginMode('signup'); setView('login') }}
-        onGuest={() => setView('setup')}
+        // [CTO-68] الحدث ٤ — توزيع الشاشة الأولى. يُلتقط عند **الاختيار** لا عند
+        // العرض، فالتوزيع يقيس ما فعله القادم الجديد لا ما رآه.
+        onLogin={() => { trackLocal('entry_choice_made', { choice: 'login' }); setLoginMode('login'); setView('login') }}
+        onSignup={() => { trackLocal('entry_choice_made', { choice: 'signup' }); setLoginMode('signup'); setView('login') }}
+        onGuest={() => { trackLocal('entry_choice_made', { choice: 'guest' }); setView('setup') }}
       />
     )
   } else if (view === 'login') {
