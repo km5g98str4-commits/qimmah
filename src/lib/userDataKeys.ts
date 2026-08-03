@@ -85,6 +85,11 @@ export const DATA_KEYS: readonly DataKeyDef[] = [
   { key: 'qimmah:syncBackup:v1', kind: 'user', scoped: true, exported: false, synced: false, owner: 'syncQueue', migration: 'already-scoped' },
   { key: 'qimmah:sync:meta:v1', kind: 'user', scoped: true, exported: false, synced: false, owner: 'syncService', migration: 'already-scoped' },
   { key: 'qimmah:portability:undoBackup:v1', kind: 'user', scoped: true, exported: false, synced: false, owner: 'portability', migration: 'already-scoped' },
+  // [CTO-68] أحداث الاستخدام المحلية — مخزن دوّار (١٠٠٠ حدث) موسوم بالمالك.
+  // `kind: 'user'` عمدًا لا `device`: يحمل نصّ بحث المستخدم ويجب أن يُمسح مع بياناته
+  // عند التبديل/الخروج/الحذف (خارج قائمة السماح العامّة في accountScope).
+  // `synced: false` قاطع — لا وجهة سحابية لهذه الأحداث بأي حال.
+  { key: 'qimmah:tracking:events:v1', kind: 'user', scoped: true, exported: true, synced: false, owner: 'tracking/store', migration: 'already-scoped', note: 'أحداث محلية فقط — صفر endpoint؛ تُصدَّر يدويًا لتحليل الميدان ولا تُزامَن' },
 
   // ── legacy تُحذف بعد هجرة مثبتة ──
   { key: 'qimmah:workoutSessions:v1', kind: 'user', scoped: false, exported: false, synced: false, owner: 'historyStore(legacy)', migration: 'retire' },
