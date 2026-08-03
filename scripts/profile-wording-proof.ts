@@ -14,7 +14,7 @@ import { getDefaultCustomization } from '@/lib/customization'
 import { goalWordingFor } from '@/i18n/dict/onboardingIntent'
 import { onboardingIntentStrings } from '@/i18n/dict/onboardingIntent'
 import { v2LevelFromExperience } from '@/lib/onboardingV2Flow'
-import { declaredGoalLabel } from '@/lib/declaredGoalWording'
+import { declaredGoalLabel, declaredGoalTypeLabel } from '@/lib/declaredGoalWording'
 import { goalChoices } from '@/data/planBuilder'
 import { saveOnboardingProfile, clearOnboardingProfile, defaultOnboardingProfile } from '@/lib/onboardingProfile'
 import type { ExperienceLevel } from '@/types/profile'
@@ -153,6 +153,23 @@ check('لا تمرير null مباشر إلى goalWordingFor', !/goalWordingFor\
 const SMUGGLED_LEVEL: V2Level = 'intermediate' // ما كان `profile.trainingLevel` سيسلّمه
 check('التفاف: قراءة trainingLevel الافتراضي كانت تعيد «تنشيف»', goalWordingFor('ar', SMUGGLED_LEVEL).cut.label === GYM_TERM_AR)
 check('التفاف: ولذلك الفحص (ج) كان سيسقط بها', goalWordingFor('ar', SMUGGLED_LEVEL).cut.label !== unknown.trainingIdentity.goalLabel)
+
+// ── [CTO-71] البند ٣ — السطحان الثالث والرابع: تفسير الخطة والحاسبة ──
+// الوعد نفسه امتدّ من الملف الشخصي ([CTO-65]) والمعاينة ([CTO-67]) إلى هذين.
+// الحارس يغطّيهما الآن بنفس صرامة السطحين الأوّلين.
+const explainer = read('src/components/nutrition/CalorieExplainer.tsx')
+const planStep = read('src/components/customizer/steps/StepGeneratePlan.tsx')
+const stripC = (t: string) => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '')
+check('الحاسبة تمرّ بالمصدر الواحد للصياغة', stripC(explainer).includes('declaredGoalTypeLabel('))
+check('تفسير الخطة يمرّ بالمصدر الواحد للصياغة', stripC(planStep).includes('declaredGoalTypeLabel('))
+// ولا يكفي وجود النداء: يجب ألّا تبقى التسمية الخام هي المعروضة.
+check('الحاسبة لم تعد تعرض goalTypeLabel الخام مباشرةً', !/goalTypeLabelI18n\(p\.goalType,\s*goalTypeLabel\(p\.goalType\),/.test(stripC(explainer)))
+check('تفسير الخطة لم يعد يمرّر choices.goal الخام مباشرةً', !/generatedPlanReason\(\s*planName,\s*choices\.goal\[p\.goalType\],/.test(stripC(planStep)))
+// السلوك نفسه: للمبتدئ لا تظهر «تنشيف»، وللمتقدّم تظهر.
+check('السلوك: المبتدئ يرى لغة النتيجة لا مصطلح الصالة', declaredGoalTypeLabel('ar', 'cutting', 'خام') !== GYM_TERM_AR)
+check('وما لا مقابل له يبقى على تسميته الأصلية بلا إسقاط', declaredGoalTypeLabel('ar', 'health', 'صحة عامة') === 'صحة عامة')
+// تأكيد مضادّ: لو أعاد أحدهم التسمية الخام لسقط الفحص أعلاه بفحص مسمّى.
+check('التفاف: إعادة التسمية الخام تُكشف', /goalTypeLabelI18n\(p\.goalType,\s*goalTypeLabel\(p\.goalType\),/.test('const goalLabel = goalTypeLabelI18n(p.goalType, goalTypeLabel(p.goalType), lang)'))
 
 console.log(`\n${fails.length === 0 ? '✅' : '❌'} إثبات صياغة الملف الواعية بالمستوى: ${pass} فحصًا، ${fails.length} فشل.`)
 if (fails.length) { for (const f of fails) console.log('   ✗ ' + f); process.exit(1) }

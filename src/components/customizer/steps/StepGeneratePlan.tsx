@@ -9,6 +9,7 @@ import { nutritionStyleOptions, targetCaloriesFor } from '@/lib/calculators'
 import { generatePlan, generateNutrition, buildWeeklySchedule, planTitle } from '@/lib/planGenerator'
 import { generatePlanFromTemplate, planExerciseName } from '@/lib/workoutPlan'
 import { mealDisplayName } from '@/lib/nutritionPlan'
+import { declaredGoalTypeLabel } from '@/lib/declaredGoalWording'
 import { commitmentName } from '@/lib/commitmentPlan'
 import { workoutTemplates } from '@/data/workoutTemplates'
 import { routineTypeColors } from '@/data/routine'
@@ -49,9 +50,13 @@ export function StepGeneratePlan({ ctx }: { ctx: WizardCtx }) {
   )
 
   const planName = planTitle(ctx.data.workoutPlan.templateId, ctx.lang)
+  // [CTO-71] البند ٣ — السطح الثالث: صياغة الهدف في **تفسير الخطة** تتبع المستوى
+  // المُعلَن، فلا يقرأ المبتدئ «لأنك تنشيف» بعد أن عُولج الملف ومعاينة الخطة.
+  // العلاج عند العرض لا عند التوليد — نفس مذهب الوحدة: التفسير المخزَّن عند
+  // المستخدمين القائمين يحمل المصطلح الخام أصلًا، والاشتقاق هنا يشمل الجميع.
   const explanation = choices.generatedPlanReason(
     planName,
-    choices.goal[p.goalType],
+    declaredGoalTypeLabel(ctx.lang, p.goalType, choices.goal[p.goalType]),
     choices.trainingLevel[p.trainingLevel],
     Math.max(1, Math.min(7, Math.round(p.trainingDays))),
     p.workoutEnvironment === 'home',

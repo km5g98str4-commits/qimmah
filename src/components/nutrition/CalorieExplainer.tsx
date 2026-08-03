@@ -11,6 +11,7 @@ import {
 import { useLang } from '@/i18n'
 import { calorieExplainerStrings } from '@/i18n/dict/calorieExplainer'
 import { activityLabelI18n, goalTypeLabelI18n } from '@/lib/i18nLabels'
+import { declaredGoalTypeLabel } from '@/lib/declaredGoalWording'
 
 /**
  * «كيف نحسب سعراتك؟» — يفكّك منطق الحساب بأرقامك الفعلية (BMR ← TDEE ← تعديل الهدف ← البروتين)
@@ -29,7 +30,10 @@ export function CalorieExplainer() {
   const activityLabelAr = activityOptions.find((o) => o.value === p.activityLevel)?.label ?? ''
   const activityLabel = activityLabelI18n(p.activityLevel, activityLabelAr, lang)
   const goalAdj = p.goalType === 'cutting' ? -CUT_DEFICIT : p.goalType === 'bulking' ? BULK_SURPLUS : 0
-  const goalLabel = goalTypeLabelI18n(p.goalType, goalTypeLabel(p.goalType), lang)
+  // [CTO-71] البند ٣ — السطح الثالث: صياغة الهدف هنا تتبع المستوى المُعلَن مثل
+  // الملف الشخصي ومعاينة الخطة. المبتدئ الذي اختار «خسارة دهون» لا يقرأ «تنشيف»
+  // في شرح سعراته. الإنجليزية تمرّ بمُعرِّبها كما كانت.
+  const goalLabel = goalTypeLabelI18n(p.goalType, declaredGoalTypeLabel('ar', p.goalType, goalTypeLabel(p.goalType)), lang)
   const proteinPerKg = p.weightKg > 0 ? Math.round((t.proteinGrams / p.weightKg) * 10) / 10 : 0
 
   // بدون بيانات جسم كافية لا توجد أرقام نشرحها.

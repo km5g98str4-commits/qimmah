@@ -19,7 +19,7 @@ import { goalWordingFor } from '@/i18n/dict/onboardingIntent'
 import { loadOnboardingProfile } from '@/lib/onboardingProfile'
 import { v2LevelFromExperience, type V2Level } from '@/lib/onboardingV2Flow'
 import type { Lang } from '@/lib/appPreferences'
-import type { CalorieGoal } from '@/types/profile'
+import type { CalorieGoal, GoalType } from '@/types/profile'
 
 /**
  * المستوى المُعتمَد حين لا يكون محفوظًا — [CTO-65] البند ٥.
@@ -51,4 +51,33 @@ export function declaredGoalWording(lang: Lang, goal: CalorieGoal) {
 /** التسمية وحدها — ما تعرضه بطاقات المعاينة والمراجعة. */
 export function declaredGoalLabel(lang: Lang, goal: CalorieGoal | null | undefined): string | null {
   return goal ? declaredGoalWording(lang, goal).label : null
+}
+
+/**
+ * خريطة الهدف المنظَّم → هدف السعرات الذي تملك له صياغة واعية بالمستوى.
+ *
+ * ثلاثة فقط لها صياغتان (لغة نتيجة للمبتدئ · مصطلح قياسي للمتقدّم):
+ * `cutting`/`bulking`/`maintenance`. أمّا `returning` و`health` و`recomposition`
+ * فلا مقابل لها في `goalWording` — وهي **ليست زينة**: تسميتها تُقرأ فعلًا
+ * (`profileDomain.ts:144`). فتُترك لتسميتها الأصلية بدل إسقاطها على هدف آخر.
+ */
+const GOAL_TYPE_TO_CALORIE_GOAL: Partial<Record<GoalType, CalorieGoal>> = {
+  cutting: 'cut',
+  bulking: 'bulk',
+  maintenance: 'maintain',
+}
+
+/**
+ * تسمية الهدف المنظَّم بالمستوى المُعلَن — [CTO-71] البند ٣.
+ *
+ * السطح الثالث: «تفسير الخطة» و«الحاسبة» كانا يقرآن `goalTypeLabel` الخام،
+ * فيرى المبتدئ الذي اختار «خسارة دهون» كلمة «تنشيف» في شرح سعراته وفي سبب
+ * خطته — بعد أن عُولج الملف الشخصي ([CTO-65]) ومعاينة الخطة ([CTO-67]).
+ * **نفس الوعد، شاشة ثالثة.**
+ *
+ * ما لا مقابل له يعود إلى `fallbackLabel` كما هو — لا اختراع ولا إسقاط.
+ */
+export function declaredGoalTypeLabel(lang: Lang, goalType: GoalType, fallbackLabel: string): string {
+  const mapped = GOAL_TYPE_TO_CALORIE_GOAL[goalType]
+  return mapped ? declaredGoalWording(lang, mapped).label : fallbackLabel
 }
