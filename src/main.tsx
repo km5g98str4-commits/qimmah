@@ -10,6 +10,7 @@ import { LanguageProvider } from './i18n'
 import { registerStepBridge } from './lib/stepCounter'
 import { initTheme } from './lib/appPreferences'
 import { initAnalytics, track } from './lib/analytics'
+import { initTrackingDevViewer } from './lib/tracking'
 import { initNativeShell } from './lib/nativeShell'
 import { initDeepLinkRecovery } from './lib/deepLinkRecovery'
 import { captureMonitoringError, initMonitoring } from './lib/monitoring'
@@ -33,6 +34,9 @@ void refreshHealthKitStepsIfEnabled()
 
 // تهيئة التحليلات (مضبوطة بالموافقة، مجهولة، بلا SDK خارجي) قبل الرسم الأول.
 initAnalytics()
+// [CTO-68] البند ٥ — عارض أحداث التتبّع المحلي في وحدة التحكّم. تطوير فقط:
+// جسم الدالة محكوم بـ`import.meta.env.DEV` فيسقط من حزمة الإنتاج، ولا شاشة مستخدم له.
+initTrackingDevViewer()
 // Privacy-first monitoring: no DSN means the SDK is not even imported and no init/network can occur.
 void initMonitoring()
 // أخطاء عامّة غير ملتقَطة — إشارة استقرار فقط (اسم الخطأ، بلا رسالة/بيانات).
