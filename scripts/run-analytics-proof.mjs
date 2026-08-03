@@ -246,6 +246,16 @@ check('كل نصّ جديد بلغتيه (قاموس واحد يحمل ar وen)'
 for (const surface of ['src/components/today/FirstWinCard.tsx', 'src/components/today/NotifyAskSheet.tsx', 'src/components/today/MissedDayCard.tsx', 'src/components/today/WeekSummaryScreen.tsx']) {
   check(`سطح حيّ يصل المستخدم: ${surface.split('/').pop()}`, reachable.has(surface))
 }
+// [CTO-71] البند ٨ / [QA-27] — نيّة فتح خطوة المكمّلات تُقرأ **بنقاء**.
+// أثر جانبي داخل حساب يُفترض نقاؤه يضيع تحت StrictMode (يُستدعى مرّتين عمدًا)،
+// فتُقرأ النيّة وتُمسح في الأولى ويُحتفظ بنتيجة الثانية `null`. والمسح موضعه أثر.
+const center = stripComments(read('src/sections/CustomizationCenter.tsx'))
+const readIdx = center.indexOf('getItem(SETUP_FOCUS_KEY)')
+const clearIdx = center.indexOf('removeItem(SETUP_FOCUS_KEY)')
+check('[QA-27]: قراءة النيّة والمسح مفصولان (لا أثر جانبي في الحساب)', readIdx > 0 && clearIdx > readIdx)
+check('[QA-27]: المسح داخل useEffect لا داخل المُهيّئ', /useEffect\(\(\) => \{[^}]*removeItem\(SETUP_FOCUS_KEY\)/s.test(center))
+check('[QA-27]: المُهيّئ لا يمسح شيئًا (وإلا عاد العطل بشكل آخر)', !/useState<string \| null>\(\(\) => \{[\s\S]{0,220}?removeItem/.test(center))
+
 // [CTO-71] البند ٧ — تسلسل العناوين يبدأ من h1 في المعالج (QA-44).
 const stepHeader = read('src/components/customizer/StepHeader.tsx')
 check('البند ٧: ترويسة خطوات المعالج <h1> لا <h2>', /<h1 className/.test(stepHeader) && !/<h2 className/.test(stepHeader))

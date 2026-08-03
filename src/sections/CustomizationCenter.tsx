@@ -79,16 +79,37 @@ export function CustomizationCenter({ onBack, initialStep = 0, mode = 'onboardin
   // (ProfileV2) يكتب هذا المفتاح قبل التنقّل، فيفتح المعالج على خطوة الروتين بدل
   // أوّله. يُقرأ مرّة واحدة ويُمسح فورًا فلا يعلق على فتحات لاحقة. نفس نمط
   // `qimmah:quick-log-intent` القائم — لا آلية جديدة.
-  const focusIntent = useMemo(() => {
+  //
+  // ⚠️ [QA-27] — كان `useMemo` يقرأ النيّة **ويمسحها داخله**: أثر جانبي في حساب
+  // يُفترض أنه نقيّ. و`<StrictMode>` يستدعي الحساب **مرّتين** في التطوير عمدًا
+  // لكشف هذا بالضبط: الاستدعاء الأول يقرأ `'wellness'` ويمسحها، والثاني يقرأ
+  // `null` — وهي المحتفَظ بها، فتضيع الوجهة. الإنتاج يستدعيها مرّة فيمرّ سليمًا،
+  // فيبقى العطل مخفيًا حتى يتحقّق أحدهم على خادم التطوير فيراه مكسورًا.
+  //
+  // العلاج: **قراءة نقيّة** بلا مسح — فتكرارها يعطي نفس القيمة مهما استُدعيت —
+  // والمسح في `useEffect` بعد التثبيت.
+  //
+  // ⚠️ ولا يكفي نقل الحساب إلى مُهيّئ `useState` مع إبقاء المسح داخله: React 18
+  // يُكرّر **مُهيّئات `useState`/`useMemo` كليهما** تحت StrictMode، فيبقى نفس
+  // العطل بشكل آخر. النقاء نفسه هو الإصلاح لا نوع الخطّاف.
+  const [focusIntent] = useState<string | null>(() => {
     if (typeof window === 'undefined') return null
     try {
-      const v = window.sessionStorage.getItem(SETUP_FOCUS_KEY)
-      if (v) window.sessionStorage.removeItem(SETUP_FOCUS_KEY)
-      return v
+      return window.sessionStorage.getItem(SETUP_FOCUS_KEY)
     } catch {
       return null
     }
-  }, [])
+  })
+  // المسح أثر جانبي فموضعه بعد التثبيت. تكراره تحت StrictMode غير ضارّ (مُتَعادِد):
+  // القيمة التُقطت في الحالة أصلًا، والمفتاح يُمسح مرّة أو مرّتين بنفس النتيجة.
+  useEffect(() => {
+    if (!focusIntent) return
+    try {
+      window.sessionStorage.removeItem(SETUP_FOCUS_KEY)
+    } catch {
+      /* تجاهل — النيّة استُهلكت في الحالة بالفعل */
+    }
+  }, [focusIntent])
   // خطوة الروتين تقع في «الخيارات المتقدّمة» المطويّة افتراضيًا — فالنيّة تفتحها،
   // وإلا وصل المستخدم لمعالج لا تظهر فيه الخطوة المقصودة أصلًا.
   const [showAdvanced, setShowAdvanced] = useState(focusIntent === 'wellness')
