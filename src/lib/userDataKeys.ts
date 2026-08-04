@@ -52,6 +52,12 @@ export const DATA_KEYS: readonly DataKeyDef[] = [
   { key: 'qimmah:today:v1', kind: 'user', scoped: false, exported: true, synced: false, owner: 'today', migration: 'owner-suffix' },
   { key: 'qimmah:onboarding:profile:v1', kind: 'user', scoped: false, exported: true, synced: true, owner: 'onboardingProfile', migration: 'owner-suffix', note: 'ضمن profiles' },
   { key: 'qimmah:onboarding:v1', kind: 'user', scoped: false, exported: true, synced: false, owner: 'onboarding', migration: 'owner-suffix' },
+  // محرّك التخصيص التكيّفي — موسومان بالمالك بنيويًا منذ أول سطر (`:u:<uid>`
+  // في `personalization/persistence.ts`)، فلا يحتاجان هجرة لاحقة.
+  // **لا يُزامَنان:** الحالة تحمل إجابات فرز صحّي وقيودًا جسدية، ورفعها يحتاج
+  // موافقة منفصلة صريحة (الميثاق §8-٥) لم تُبنَ بعد.
+  { key: 'qimmah:personalization:state:v1', kind: 'user', scoped: true, exported: true, synced: false, owner: 'personalization/persistence', migration: 'already-scoped', note: 'إجابات خام تشمل فرزًا صحّيًا — لا تُزامَن بلا موافقة منفصلة' },
+  { key: 'qimmah:personalization:profile:v1', kind: 'user', scoped: true, exported: true, synced: false, owner: 'personalization/persistence', migration: 'already-scoped', note: 'الملف المشتقّ — يُعاد بناؤه من الحالة عند رفع ALGO_VERSION' },
   { key: 'qimmah:achievements:v1', kind: 'user', scoped: false, exported: true, synced: true, owner: 'achievements/engine', migration: 'owner-suffix' },
   { key: 'qimmah:healthkit:v1', kind: 'user', scoped: false, exported: false, synced: false, owner: 'healthKit', migration: 'owner-suffix', note: 'حالة ربط لكل مقياس' },
   // P14: مفتاحا طبقة الصحة الواسعة (P9) لم يكونا مسجّلين — تسجيلهما يدخلهما في
