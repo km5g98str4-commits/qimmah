@@ -140,16 +140,16 @@ export const LOGISTICS_QUESTIONS: QuestionDef[] = [
     priority: 34,
     infoGain: 4,
   }),
-  q({
-    id: 'a-ramadan-aware',
-    key: 'ramadanAware',
-    category: 'availability',
-    answer: 'single',
-    options: opts('yes', 'no', 'maybe'),
-    affects: ['planConstraints'],
-    priority: 22,
-    infoGain: 3,
-  }),
+  // ⛔ **`a-ramadan-aware` حُذف بـ[CTO-76] القرار ٢** — «السياق الخليجي افتراض
+  // لا سؤال». مراعاة رمضان لم تعد تُسأل: صارت **افتراضًا دائمًا** يخرج في
+  // `planConstraints.assumesGulfContext`، وتُفعّله طبقة الخطة موسميًا بنفسها.
+  //
+  // وهذا **ينسخ القرار المقفل رقم ٢** في §8 من الميثاق («سؤال رمضان دائم
+  // بصياغة محايدة») — نسخًا بأمر مرقّم موقّع، لا اجتهادًا. مذكور هنا وفي
+  // التقرير حتى لا يُقرأ الحذف يومًا كسهو فيُعاد.
+  //
+  // وحارس عودته في `personalization-proof.ts` (§ك): البنك يجب أن يبقى خاليًا
+  // من أي سؤال تقييد ديني/ثقافي.
   q({
     id: 'a-heat-sensitivity',
     key: 'heatSensitivity',

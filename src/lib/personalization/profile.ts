@@ -11,7 +11,7 @@
 // `assumptions[]`، لا رقم يمرّ كأنّه مقيس.
 
 import { classifyExperience, classifyTrainingStatus } from './experience'
-import { CORE_PATTERNS, PRIORITISABLE_MUSCLES } from './constants'
+import { CORE_PATTERNS, GULF_CONTEXT_ASSUMED, PRIORITISABLE_MUSCLES } from './constants'
 import { ALGO_VERSION, BANK_VERSION, type AnswerValue, type CardioPreference, type GoalKey, type Limitation, type PersonalizationProfile, type PersonalizationState, type PlanConstraints, type ProgressionStyle, type RecoveryClass, type SafetyFlags, type SplitKey, type TrainingPlace } from './types'
 import type { Muscle, MovementPattern } from '@/types/workout'
 
@@ -268,6 +268,8 @@ export function deriveConstraints(state: PersonalizationState, safety: SafetyFla
     cardio: deriveCardio(state, goal),
     maxExercisesPerSession: maxExercises,
     allowSubstitution: str(a.substitutionOpenness) !== 'never',
+    // مفترَض دائمًا ولا يُسأل ([CTO-76] القرار ٢) — انظر `GULF_CONTEXT_ASSUMED`.
+    assumesGulfContext: GULF_CONTEXT_ASSUMED,
   }
 }
 

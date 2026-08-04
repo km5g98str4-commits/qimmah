@@ -437,10 +437,7 @@ const Q: Record<string, RawQuestion> = {
     title: t('كيف تبي أيام الراحة؟', 'How do you want rest days?'),
     opts: { spread: t('موزّعة', 'Spread out'), block: t('متتالية', 'Together'), no_pref: t('ما يفرق', 'No preference') },
   },
-  'a-ramadan-aware': {
-    title: t('تبي نراعي رمضان بجدولك؟', 'Want us to account for Ramadan?'),
-    opts: { yes: t('إيه', 'Yes'), no: t('لا', 'No'), maybe: t('لاحقًا', 'Later') },
-  },
+  // 'a-ramadan-aware' حُذف بـ[CTO-76] القرار ٢ — السياق الخليجي افتراض لا سؤال.
   'a-heat-sensitivity': {
     title: t('الحر يأثّر عليك؟', 'Does the heat affect you?'),
     opts: { fine: t('عادي', 'Fine'), some: t('شوي', 'A bit'), avoid: t('أتجنبه', 'I avoid it') },

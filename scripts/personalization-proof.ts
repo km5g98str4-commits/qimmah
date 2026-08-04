@@ -444,6 +444,45 @@ check('وكلاهما غير مُزامَن (بيانات صحّية بلا مو
   check(`تغطية أنماط الحركة كاملة (${Object.entries(cov).map(([k, v]) => `${k}:${v}`).join(' ')})`, Object.values(cov).every((v) => v > 0))
 }
 
+// ═════════════════════ ك · [CTO-76] السياق الخليجي افتراض لا سؤال ═════════════════════
+console.log('\n— ك · السياق الخليجي مفترَض —')
+
+// حارس عودة: البنك يبقى خاليًا من أي سؤال تقييد ديني/ثقافي. الفحص على
+// **المعرّف والمفتاح والنصّ معًا** — إعادة السؤال باسم آخر تسقط هي الأخرى.
+const CULTURAL_TERMS = ['ramadan', 'رمضان', 'prayer', 'صلاة', 'صيام', 'fasting', 'حلال', 'halal', 'عيد', 'eid']
+const culturalHits = QUESTION_BANK.flatMap((q) => {
+  const blob = [q.id, q.key, ar[q.id]?.title, ar[q.id]?.hint, en[q.id]?.title, en[q.id]?.hint, ...Object.values(ar[q.id]?.opts ?? {}), ...Object.values(en[q.id]?.opts ?? {})]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase()
+  return CULTURAL_TERMS.filter((t) => blob.includes(t)).map((t) => `${q.id}:${t}`)
+})
+check(`لا سؤال تقييد ديني/ثقافي في البنك (وُجد: ${culturalHits.join(',') || 'لا شيء'})`, culturalHits.length === 0)
+
+// تأكيد مضادّ (§4.2): الحارس يمسك العودة فعلًا — لا يمرّ لأنه يفحص لا شيء.
+const revived = { id: 'a-fasting-window', key: 'fastingWindow', title: 'تبي نراعي الصيام؟' }
+const revivedBlob = `${revived.id} ${revived.key} ${revived.title}`.toLowerCase()
+check('محاكاة عودة السؤال تسقط بمصطلح مسمّى', CULTURAL_TERMS.some((t) => revivedBlob.includes(t)))
+
+// والسلوك انتقل إلى المخرجات: كل ملف يعلن السياق مفترَضًا، صراحةً لا ضمنًا.
+{
+  const { state } = run(S[0])
+  const { profile } = deriveProfile(state, clock)
+  check('والقيود تعلن السياق الخليجي مفترَضًا (مخرَج صريح)', profile.planConstraints.assumesGulfContext === true)
+  check('ولا إجابة للمستخدم عنه (لم يُسأل أصلًا)', state.answers.ramadanAware === undefined)
+}
+
+// قاعدة السؤالين ([CTO-76] القرار ٣): كل حقل لم يأتِ من إجابة صريحة يظهر في
+// `assumptions` — لا رقم يمرّ كأنّه مقيس وهو مفترَض.
+{
+  const partial = consented(30)
+  const { profile, assumptions } = deriveProfile(partial, clock)
+  check(`الحقول غير المُجابة معلَنة افتراضًا (${assumptions.length})`, assumptions.length > 0)
+  check('و«الثقة» تعكس التغطية لا الدقّة', profile.confidence < 1 && profile.confidence >= 0)
+  const full = run(S[6]).state
+  check('وتغطية أعلى ⇒ ثقة أعلى (الرقم يعني شيئًا)', deriveProfile(full, clock).profile.confidence > profile.confidence)
+}
+
 console.log(`\n${fails.length ? '✗' : '✓'} إثبات التخصيص: ${pass} نجحت · ${fails.length} فشلت`)
 if (fails.length) {
   for (const f of fails) console.log('   ✗ ' + f)
