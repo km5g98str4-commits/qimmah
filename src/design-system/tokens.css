@@ -97,6 +97,8 @@
   --space-8: 2rem;
   --space-10: 2.5rem;
   --space-12: 3rem;
+  --space-screen-inline: 1rem;
+  --space-screen-bottom: 8rem;
 
   /* ---- Radius (matches current rounded-* usage) ---- */
   --radius-sm: 0.5rem;
@@ -105,6 +107,8 @@
   --radius-xl: 1.25rem;
   --radius-2xl: 1.5rem;
   --radius-pill: 9999px;
+  --radius-card: 1.25rem;
+  --radius-control: 0.875rem;
 
   /* ---- Elevation (alias to current dark-tuned shadows; temporary) ---- */
   --elevation-card: 0 1px 2px 0 rgba(0, 0, 0, 0.3), 0 14px 34px -18px rgba(0, 0, 0, 0.55);
@@ -132,6 +136,8 @@
   --layout-max-width: 30rem; /* content column cap on large screens */
   --layout-tabbar-height: 3.5rem;
   --layout-touch-min: 2.75rem; /* 44px — Apple HIG minimum target */
+  --layout-screen-gutter: 1rem;
+  --layout-content-measure: 30rem;
   --safe-area-top: var(--safe-top);
   --safe-area-bottom: var(--safe-bottom);
 }

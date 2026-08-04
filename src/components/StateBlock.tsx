@@ -47,7 +47,7 @@ export function StateBlock({ variant, title, body, icon, actions, compact, class
         data-testid={testId}
         role={meta.role}
         aria-live={meta.role === 'alert' ? 'assertive' : 'polite'}
-        className={cn('flex items-center gap-2.5 rounded-xl border border-line bg-surface px-3.5 py-2.5 text-start', className)}
+        className={cn('state-block state-block--compact flex items-center gap-2.5 rounded-[1.125rem] border border-line bg-surface px-3.5 py-2.5 text-start', className)}
       >
         <span className="grid h-6 w-6 shrink-0 place-items-center">{iconEl}</span>
         <span className="min-w-0 flex-1">
@@ -68,8 +68,8 @@ export function StateBlock({ variant, title, body, icon, actions, compact, class
       data-testid={testId}
       role={meta.role}
       aria-live={meta.role === 'alert' ? 'assertive' : 'polite'}
-      className={cn(
-        'flex animate-fade-in flex-col items-center gap-3 rounded-2xl border border-dashed border-line bg-surface/60 px-6 py-10 text-center motion-reduce:animate-none',
+        className={cn(
+        'state-block flex animate-fade-in flex-col items-center gap-3 rounded-[1.5rem] border border-dashed border-line bg-surface/60 px-6 py-10 text-center motion-reduce:animate-none',
         className,
       )}
     >

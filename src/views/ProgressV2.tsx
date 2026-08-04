@@ -84,7 +84,7 @@ export function ProgressV2({ lang, onNavigate }: ProgressV2Props) {
   }
 
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="overflow-x-hidden px-4 py-4 text-ink-900">
+    <div dir={ar ? 'rtl' : 'ltr'} className="app-screen overflow-x-hidden text-ink-900">
       <ScreenHeader
         icon="BarChart3"
         title={t('التقدّم', 'Progress')}
@@ -100,7 +100,7 @@ export function ProgressV2({ lang, onNavigate }: ProgressV2Props) {
         <h2 className="text-base font-black leading-snug text-ink-900">{model.headline}</h2>
 
         {/* الملخّص — آخر ١٤ يومًا */}
-        <section className="card p-5">
+        <section className="surface-section">
           <div className="flex items-center gap-2">
             <span className="text-primary-c"><Icon name="Sparkles" className="h-4 w-4" /></span>
             <p className="text-xs font-bold text-ink-500">{model.period.label}</p>
@@ -124,7 +124,7 @@ export function ProgressV2({ lang, onNavigate }: ProgressV2Props) {
         </section>
 
         {/* Training momentum — area chart of real session volumes */}
-        <section className="card p-5">
+        <section className="surface-section">
           <div className="flex items-center justify-between">
             <span className="text-base font-black text-ink-900">{model.momentum.label}</span>
             <span className="text-[11px] font-bold text-ink-400">{model.momentum.hasData ? t(`آخر ${model.momentum.weeks} جلسات`, `Last ${model.momentum.weeks} sessions`) : t('لا بيانات بعد', 'No data yet')}</span>
@@ -163,7 +163,7 @@ export function ProgressV2({ lang, onNavigate }: ProgressV2Props) {
           type="button"
           onClick={() => go('calc')}
           data-testid="progress-calc-link"
-          className="card flex w-full items-center gap-3 p-5 text-start transition-colors hover:border-primary-soft"
+          className="list-row p-5"
         >
           <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary-c">
             <Icon name="Calculator" className="h-5 w-5" />
@@ -176,7 +176,7 @@ export function ProgressV2({ lang, onNavigate }: ProgressV2Props) {
         </button>
 
         {/* Recovery entry (v1.1) — self-reported check-in + suggestion (screens 37–39). */}
-        <button type="button" onClick={() => go('recovery')} className="card flex w-full items-center gap-3 p-5 text-start transition-colors hover:border-primary-soft">
+        <button type="button" onClick={() => go('recovery')} className="list-row p-5">
           <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary-c"><Icon name="Activity" className="h-5 w-5" /></span>
           <span className="min-w-0 flex-1">
             <span className="block text-sm font-black text-ink-900">{t('التعافي', 'Recovery')}</span>
@@ -185,7 +185,7 @@ export function ProgressV2({ lang, onNavigate }: ProgressV2Props) {
           <Icon name="ChevronLeft" className="h-4 w-4 shrink-0 text-ink-400 rtl:rotate-0 ltr:rotate-180" />
         </button>
 
-        <button type="button" onClick={() => go('steps')} className="card flex w-full items-center gap-3 p-5 text-start transition-colors hover:border-primary-soft">
+        <button type="button" onClick={() => go('steps')} className="list-row p-5">
           <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary-c"><Icon name="Footprints" className="h-5 w-5" /></span>
           <span className="min-w-0 flex-1">
             <span className="block text-sm font-black text-ink-900">{t('خطواتك', 'Your steps')}</span>
@@ -238,7 +238,7 @@ function WeightLogScreen({ lang, current, onBack, onSaved }: { lang: Lang; curre
   }
 
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="overflow-x-hidden px-4 py-4 text-ink-900">
+    <div dir={ar ? 'rtl' : 'ltr'} className="app-screen overflow-x-hidden text-ink-900">
       <div>
         <div className="flex items-center justify-between">
           <button type="button" onClick={onBack} aria-label={t('رجوع', 'Back')} className="grid h-11 w-11 place-items-center rounded-xl border border-line bg-surface">
@@ -312,7 +312,7 @@ function BriefRow({ row }: { row: SummaryRow }) {
 
 function Tile({ icon, title, main, sub, onClick }: { icon: string; title: string; main: string; sub: string; onClick: () => void }) {
   return (
-    <button type="button" onClick={onClick} className="card min-h-28 p-4 text-start transition-colors hover:border-primary-soft">
+    <button type="button" onClick={onClick} className="metric-tile min-h-28 p-4 text-start transition-colors hover:border-primary-soft">
       <span className="flex items-center gap-2 text-xs font-bold text-ink-500"><Icon name={icon} className="h-4 w-4" />{title}</span>
       <p className="mt-2 font-mono text-lg font-black tabular-nums">{main}</p>
       <p className="text-xs text-ink-500">{sub}</p>
@@ -335,7 +335,7 @@ function WeightDetailScreen({ model, lang, onBack, onLog, onExplain, stale }: { 
   const down = model.changeKg !== null && model.changeKg < 0
   const up = model.changeKg !== null && model.changeKg > 0
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="overflow-x-hidden px-4 py-4 text-ink-900">
+    <div dir={ar ? 'rtl' : 'ltr'} className="app-screen overflow-x-hidden text-ink-900">
       <div>
         <div className="flex items-center justify-between">
           <button type="button" onClick={onBack} aria-label={t('رجوع', 'Back')} className="grid h-11 w-11 place-items-center rounded-xl border border-line bg-surface"><Icon name="ChevronRight" className="h-5 w-5 rtl:rotate-0 ltr:rotate-180" /></button>
@@ -423,7 +423,7 @@ function StrengthDetailScreen({ strength, lang, onBack, onTrain }: { strength: i
   const ar = lang !== 'en'
   const t = (a: string, e: string) => (ar ? a : e)
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="overflow-x-hidden px-4 py-4 text-ink-900">
+    <div dir={ar ? 'rtl' : 'ltr'} className="app-screen overflow-x-hidden text-ink-900">
       <div>
         <div className="flex items-center justify-between">
           <button type="button" onClick={onBack} aria-label={t('رجوع', 'Back')} className="grid h-11 w-11 place-items-center rounded-xl border border-line bg-surface"><Icon name="ChevronRight" className="h-5 w-5 rtl:rotate-0 ltr:rotate-180" /></button>

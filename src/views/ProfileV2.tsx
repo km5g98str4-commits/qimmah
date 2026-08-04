@@ -104,12 +104,12 @@ export function ProfileV2({ lang, onNavigate }: ProfileV2Props) {
   const numerals = (n: number) => (ar ? n.toLocaleString('ar-EG') : String(n))
 
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="overflow-x-hidden px-4 py-4 text-ink-900">
+    <div dir={ar ? 'rtl' : 'ltr'} className="app-screen overflow-x-hidden text-ink-900">
       <ScreenHeader icon="User" title={t('حسابي', 'Profile')} />
 
       <div className="space-y-4">
         {/* بطاقة الهوية — الاسم + شارة الهدف */}
-        <section className="card flex items-center gap-4 p-5">
+        <section className="surface-hero flex items-center gap-4">
           <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary-soft text-lg font-black text-primary-c">{model.user.initials}</span>
           <div className="min-w-0">
             <p className="truncate text-sm font-black text-ink-900">{model.user.displayName}</p>
@@ -122,7 +122,7 @@ export function ProfileV2({ lang, onNavigate }: ProfileV2Props) {
         </section>
 
         {/* ثلاث بطاقات أرقام — بيانات حقيقية فقط (تمرين · أيام متتالية · أرقام قياسية) */}
-        <section className="grid grid-cols-3 gap-3">
+        <section className="grid grid-cols-3 gap-3" aria-label={t('ملخّص ملفك', 'Profile summary')}>
           <Stat value={numerals(model.stats.workoutCount)} label={t('تمرين', 'Workouts')} />
           <Stat value={numerals(model.stats.streakDays)} label={t('أيام متتالية', 'Day streak')} />
           <Stat value={numerals(model.stats.prCount)} label={t('أرقام قياسية', 'PRs')} />
@@ -167,7 +167,7 @@ function ProgramCard({ model, t, numerals, onOpen }: { model: ProfileV2Model; t:
       ? t(`الأسبوع ${numerals(program.weekOf)} من ${numerals(program.totalWeeks)} · ${numerals(program.daysPerWeek)} أيام/أسبوع`, `Week ${program.weekOf} of ${program.totalWeeks} · ${program.daysPerWeek} days/week`)
       : t(`الأسبوع ${numerals(program.weekOf)} من ${numerals(program.totalWeeks)}`, `Week ${program.weekOf} of ${program.totalWeeks}`)
   return (
-    <button type="button" onClick={onOpen} className="card flex w-full items-center gap-3 p-5 text-start transition-colors hover:border-primary-soft">
+    <button type="button" onClick={onOpen} className="list-row p-5">
       <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary-c"><Icon name="Dumbbell" className="h-5 w-5" /></span>
       <span className="min-w-0 flex-1">
         <span className="block text-sm font-black text-ink-900">{program.title}</span>
@@ -185,7 +185,7 @@ function CommitmentHeatmap({ model, lang, t, numerals }: { model: ProfileV2Model
     ? t(`تمرّنت في ${numerals(active)} من آخر ${numerals(COMMITMENT_WEEKS)} أسابيع`, `Trained in ${active} of the last ${COMMITMENT_WEEKS} weeks`)
     : t('لا تمارين مسجّلة بعد', 'No workouts logged yet')
   return (
-    <section className="card p-5">
+    <section className="surface-section">
       <p className="flex items-center justify-between gap-2">
         <span className="text-base font-black text-ink-900">{t('الالتزام', 'Consistency')}</span>
         <span className="text-[11px] font-bold text-ink-400">{t(`آخر ${numerals(COMMITMENT_WEEKS)} أسابيع`, `Last ${COMMITMENT_WEEKS} weeks`)}</span>
@@ -534,7 +534,7 @@ function DataScreen({ lang, uid, recoveryActive, onBack }: { lang: Lang; uid: st
 function SubScreen({ title, onBack, lang, children }: { title: string; onBack: () => void; lang: Lang; children: ReactNode }) {
   const ar = lang !== 'en'
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="overflow-x-hidden px-4 py-4 text-ink-900">
+    <div dir={ar ? 'rtl' : 'ltr'} className="app-screen overflow-x-hidden text-ink-900">
       <div>
         <div className="mb-4 flex items-center gap-2.5">
           <button type="button" onClick={onBack} aria-label={ar ? 'رجوع' : 'Back'} className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-line bg-surface text-ink-700 hover:bg-beige"><Icon name="ChevronRight" className="h-5 w-5 rtl:rotate-0 ltr:rotate-180" /></button>
@@ -608,7 +608,7 @@ function ThemeControl({ lang }: { lang: Lang }) {
     }
   }
   return (
-    <div className="card p-5">
+    <div className="surface-section">
       <div className="flex items-center gap-3">
         <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-beige text-ink-500"><Icon name="Sun" className="h-4 w-4" /></span>
         <span className="text-sm font-bold text-ink-900">{t('السمة', 'Theme')}</span>
@@ -679,11 +679,11 @@ function Group({ title, children }: { title: string; children: ReactNode }) {
 }
 
 function Stat({ value, label }: { value: string; label: string }) {
-  return <div className="card py-3 text-center"><p className="text-lg font-black tabular-nums text-ink-900">{value}</p><p className="mt-0.5 text-[10px] font-bold text-ink-400">{label}</p></div>
+  return <div className="metric-tile py-3"><p className="text-lg font-black tabular-nums text-ink-900">{value}</p><p className="mt-0.5 text-[10px] font-bold text-ink-400">{label}</p></div>
 }
 function Row({ icon, label, onClick }: { icon: string; label: string; onClick: () => void }) {
   return (
-    <button type="button" onClick={onClick} className="card flex w-full items-center gap-3 p-5 text-start transition-colors hover:border-primary-soft">
+    <button type="button" onClick={onClick} className="list-row p-5">
       <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-beige text-ink-500"><Icon name={icon} className="h-4 w-4" /></span>
       <span className="flex-1 text-sm font-bold text-ink-700">{label}</span>
       <Icon name="ChevronLeft" className="h-4 w-4 shrink-0 text-ink-400 rtl:rotate-0 ltr:rotate-180" />
@@ -693,7 +693,7 @@ function Row({ icon, label, onClick }: { icon: string; label: string; onClick: (
 function InfoRow({ icon, title, sub, state, disabled, subNote, onClick }: { icon: string; title: string; sub: string; state?: string; disabled?: boolean; subNote?: string; onClick?: () => void }) {
   const Comp = onClick ? 'button' : 'div'
   return (
-    <Comp type={onClick ? 'button' : undefined} onClick={onClick} className={cn('card flex w-full items-center gap-3 px-4 py-3 text-start', disabled && 'opacity-70', onClick && 'transition-colors hover:border-primary-soft')}>
+    <Comp type={onClick ? 'button' : undefined} onClick={onClick} className={cn('list-row', disabled && 'opacity-70')}>
       <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-beige text-ink-500"><Icon name={icon} className="h-4 w-4" /></span>
       <span className="min-w-0 flex-1"><span className="block text-sm font-bold text-ink-900">{title}</span><span className="block text-[11px] text-ink-400">{subNote ?? sub}</span></span>
       {state != null && state !== '' && <span className="shrink-0 text-xs font-black text-ink-500">{state}</span>}

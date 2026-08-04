@@ -24,7 +24,7 @@ export function PreviewSummary({ data, lang }: { data: Customization; lang: Lang
 
   return (
     <div
-      className="card overflow-hidden p-6"
+      className="surface-hero overflow-hidden"
       style={{ boxShadow: `0 18px 50px -22px ${data.colors.primary}55` }}
     >
       <span

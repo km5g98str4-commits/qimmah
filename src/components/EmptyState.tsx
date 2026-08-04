@@ -18,7 +18,7 @@ export function EmptyState({ icon = 'Sparkles', title, body, actionLabel, onActi
   return (
     <div
       className={cn(
-        'flex animate-fade-in flex-col items-center gap-3 rounded-2xl border border-dashed border-line bg-surface/60 px-6 py-10 text-center',
+        'state-block flex animate-fade-in flex-col items-center gap-3 rounded-[1.5rem] border border-dashed border-line bg-surface/60 px-6 py-10 text-center',
         className,
       )}
     >

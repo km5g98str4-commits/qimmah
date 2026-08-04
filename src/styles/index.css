@@ -195,7 +195,155 @@
   }
 
   .card {
-    @apply bg-surface border border-line rounded-2xl shadow-card;
+    @apply rounded-[1.25rem] border border-line bg-surface shadow-card;
+    transition: border-color var(--motion-duration-fast) var(--motion-ease-standard),
+      box-shadow var(--motion-duration-fast) var(--motion-ease-standard),
+      transform var(--motion-duration-fast) var(--motion-ease-standard);
+  }
+
+  /* Shared app surfaces — every main tab uses the same reading width, rhythm,
+     and lower breathing room so the fixed shell never competes with content. */
+  .app-screen {
+    @apply mx-auto w-full max-w-md px-4 pt-4;
+    padding-bottom: var(--space-screen-bottom);
+  }
+
+  .screen-header {
+    @apply mb-5 flex min-h-11 items-center gap-3;
+  }
+
+  .screen-header__icon {
+    @apply grid h-10 w-10 shrink-0 place-items-center rounded-[0.875rem] text-white;
+    background: linear-gradient(145deg, var(--c-primary), color-mix(in srgb, var(--c-primary) 72%, #111));
+    box-shadow: 0 8px 18px -10px color-mix(in srgb, var(--c-primary) 80%, transparent);
+  }
+
+  .screen-header__title {
+    @apply min-w-0 flex-1 truncate text-xl font-black leading-tight text-ink-900;
+    letter-spacing: -0.025em;
+  }
+
+  .surface-hero {
+    @apply overflow-hidden rounded-[1.5rem] border border-line bg-surface p-5;
+    background-image: radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--v2-ember) 11%, transparent), transparent 42%);
+    box-shadow: var(--elevation-raised);
+  }
+
+  .surface-section {
+    @apply rounded-[1.25rem] border border-line bg-surface p-5;
+  }
+
+  .surface-section--quiet {
+    background: color-mix(in srgb, rgb(var(--c-surface)) 76%, rgb(var(--c-page)));
+    box-shadow: none;
+  }
+
+  .list-row {
+    @apply flex min-h-[4.25rem] w-full items-center gap-3 rounded-[1.125rem] border border-line bg-surface px-4 py-3 text-start;
+    transition: border-color var(--motion-duration-fast) var(--motion-ease-standard),
+      background-color var(--motion-duration-fast) var(--motion-ease-standard),
+      transform var(--motion-duration-fast) var(--motion-ease-standard);
+  }
+
+  .list-row:hover {
+    @apply border-primary-soft;
+    background: color-mix(in srgb, rgb(var(--c-surface)) 86%, var(--c-primary));
+  }
+
+  .list-row:active {
+    transform: scale(0.985);
+  }
+
+  .metric-tile {
+    @apply rounded-[1.125rem] border border-line bg-surface px-3 py-3 text-center;
+    box-shadow: 0 6px 18px -16px rgba(14, 13, 10, 0.55);
+  }
+
+  .progress-track {
+    @apply h-2 w-full overflow-hidden rounded-full bg-line;
+  }
+
+  .progress-track > * {
+    @apply h-full rounded-full;
+    transition: width var(--v2-motion-fill) var(--v2-motion-ease);
+  }
+
+  .app-shell-header {
+    @apply border-b border-line bg-surface;
+    box-shadow: 0 6px 18px -18px rgba(14, 13, 10, 0.5);
+  }
+
+  .app-bottom-nav {
+    @apply border-t border-line bg-surface;
+    box-shadow: 0 -8px 24px -22px rgba(14, 13, 10, 0.65);
+  }
+
+  .app-bottom-nav > div > button {
+    position: relative;
+    min-height: 3.75rem;
+  }
+
+  .app-bottom-nav > div > button[aria-current='page']::after {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline: 35%;
+    height: 2px;
+    border-radius: 999px;
+    background: var(--c-primary);
+    content: '';
+  }
+
+  .settings-content {
+    @apply mx-auto w-full max-w-3xl;
+  }
+
+  .settings-title {
+    @apply text-3xl font-black leading-tight text-ink-900;
+    letter-spacing: -0.04em;
+  }
+
+  .section-heading .eyebrow {
+    letter-spacing: 0.02em;
+  }
+
+  .wizard-step-header {
+    @apply mb-6 rounded-[1.5rem] border border-line bg-surface p-5;
+    background-image: linear-gradient(135deg, color-mix(in srgb, var(--c-primary) 8%, transparent), transparent 58%);
+  }
+
+  .field-label {
+    @apply text-sm font-bold text-ink-700;
+  }
+
+  .table-row {
+    @apply rounded-[1.125rem] border border-line bg-beige/70 p-3;
+  }
+
+  .today-intro {
+    @apply rounded-[1.5rem] border border-line bg-surface px-5 py-4;
+    background-image: linear-gradient(120deg, color-mix(in srgb, var(--v2-blue) 9%, transparent), transparent 62%);
+  }
+
+  .macro-strip {
+    background: color-mix(in srgb, rgb(var(--c-surface)) 78%, rgb(var(--c-page)));
+    box-shadow: inset 0 1px 0 color-mix(in srgb, white 18%, transparent);
+  }
+
+  .action-card--compact {
+    box-shadow: 0 8px 22px -24px rgba(14, 13, 10, 0.75);
+  }
+
+  .action-card--hero {
+    background-image: linear-gradient(135deg, color-mix(in srgb, var(--v2-blue) 5%, transparent), transparent 58%);
+  }
+
+  .completed-row {
+    background: color-mix(in srgb, var(--v2-green) 6%, rgb(var(--c-surface)));
+  }
+
+  .workout-plan-hero {
+    @apply rounded-[1.5rem] border border-line bg-surface p-5;
+    background-image: linear-gradient(145deg, color-mix(in srgb, var(--v2-blue) 9%, transparent), transparent 58%);
   }
 
   /* بطاقة تفاعلية (قابلة للنقر): ارتفاع خفيف عند المرور وضغطة لطيفة عند اللمس. */
@@ -210,7 +358,7 @@
   }
 
   .btn {
-    @apply inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-page;
+    @apply inline-flex min-h-[46px] items-center justify-center gap-2 rounded-[0.875rem] px-5 py-3 text-sm font-bold transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-page;
   }
 
   .btn-primary {
@@ -262,10 +410,12 @@
      44px حدّ أدنى للمس، سطح beige، حدّ line، وتركيز هادئ بلون العلامة. */
   .input {
     /* text-base (16px) لا text-sm: يمنع تكبير iOS التلقائي عند التركيز على متصفّح الجوال. */
-    @apply w-full min-h-[44px] rounded-xl border border-line bg-beige px-4 py-3 text-base text-ink-900 placeholder:text-ink-400 transition-colors focus:outline-none;
+    @apply w-full min-h-[46px] rounded-[0.875rem] border border-line bg-beige px-4 py-3 text-base text-ink-900 placeholder:text-ink-400 transition-colors focus:outline-none;
+    box-shadow: inset 0 1px 0 color-mix(in srgb, white 18%, transparent);
   }
   .input:focus {
     border-color: color-mix(in srgb, var(--c-primary) 45%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-primary) 14%, transparent);
   }
   /* حالة الخطأ — حدّ خطر واضح دون صراخ. */
   .input-invalid,

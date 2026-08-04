@@ -132,7 +132,7 @@ export function NutritionV2({ lang }: NutritionV2Props) {
 
   const { calories, macros, water } = model
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="overflow-x-hidden px-4 py-4 text-ink-900">
+    <div dir={ar ? 'rtl' : 'ltr'} className="app-screen overflow-x-hidden text-ink-900">
       <ScreenHeader
         icon="Salad"
         title={t('التغذية', 'Nutrition')}
@@ -151,7 +151,7 @@ export function NutritionV2({ lang }: NutritionV2Props) {
         <AllergyNotice lang={lang} />
 
         {/* بطاقة اليوم — الأولوية + السعرات مقابل الهدف + زر التسجيل */}
-        <section className="card p-5">
+        <section className="surface-hero">
           <p className="text-xs font-bold text-ink-500">{model.hero.priorityLabel}</p>
           <h2 className="mt-2 text-lg font-black leading-tight text-ink-900">{model.hero.title}</h2>
           <p className="mt-1.5 text-sm leading-relaxed text-ink-500">{model.hero.subtitle}</p>
@@ -183,7 +183,7 @@ export function NutritionV2({ lang }: NutritionV2Props) {
         )}
 
         {/* ملخّص الماكروز + الماء — بطاقات حلقات كلاسيكية */}
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3" aria-label={t('ملخّص المغذيات', 'Nutrition summary')}>
           <MacroCard label={t('بروتين', 'Protein')} consumed={macros.protein.consumed} target={macros.protein.target} unit="g" color={CLR.protein} />
           <MacroCard label={t('كارب', 'Carbs')} consumed={macros.carbs.consumed} target={macros.carbs.target} unit="g" color={CLR.carbs} />
           <MacroCard label={t('دهون', 'Fat')} consumed={macros.fat.consumed} target={macros.fat.target} unit="g" color={CLR.fat} />
@@ -199,7 +199,7 @@ export function NutritionV2({ lang }: NutritionV2Props) {
 
         {/* الماء */}
         {water.targetMl > 0 && (
-          <section id="nutrition-water" className="card p-5">
+          <section id="nutrition-water" className="surface-section">
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-1.5 text-sm font-bold text-ink-700">
                 <Icon name="Droplets" className="h-4 w-4 text-primary-c" />
@@ -227,7 +227,7 @@ export function NutritionV2({ lang }: NutritionV2Props) {
                 key={m.slot}
                 type="button"
                 onClick={() => openAdd(m.slot)}
-                className="card flex w-full items-center gap-3 p-4 text-start transition-colors hover:border-primary-soft"
+                className="list-row"
               >
                 <span
                   className={cn(
@@ -250,7 +250,7 @@ export function NutritionV2({ lang }: NutritionV2Props) {
         </section>
 
         {savedDays.length > 0 && (
-          <details className="rounded-2xl border border-line bg-surface" open>
+          <details className="rounded-[1.25rem] border border-line bg-surface shadow-card" open>
             <summary className="flex min-h-[3.75rem] cursor-pointer list-none items-center gap-3 px-4 py-3 [&::-webkit-details-marker]:hidden">
               <span className="grid h-9 w-9 place-items-center rounded-xl bg-beige text-ink-500"><Icon name="History" className="h-4 w-4" /></span>
               <span className="min-w-0 flex-1">
@@ -296,7 +296,7 @@ function NudgeRow({ lang, nudge, onAction }: { lang: Lang; nudge: Nudge; onActio
   const ar = lang !== 'en'
   const { accent } = NUDGE_CLR[nudge.tone]
   return (
-    <div className="card flex items-center gap-3 p-4">
+    <div className="list-row">
       <span
         className="grid h-9 w-9 shrink-0 place-items-center rounded-xl"
         style={{ backgroundColor: `color-mix(in srgb, ${accent} 12%, transparent)`, color: accent }}
@@ -320,7 +320,7 @@ function MacroCard({ label, consumed, target, unit, color, decimals = 0 }: { lab
   const consumedText = consumed.toFixed(decimals)
   const targetText = target.toFixed(decimals)
   return (
-    <div className="card flex items-center gap-3 p-4">
+    <div className="metric-tile flex items-center gap-3 text-start">
       <Ring pct={p} color={color} label={`${label}: ${consumedText} / ${hasTarget ? targetText : '—'} ${unit}`} />
       <div className="min-w-0">
         <p className="truncate text-xs text-ink-500">{label}</p>

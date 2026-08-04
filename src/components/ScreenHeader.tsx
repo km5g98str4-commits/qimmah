@@ -16,12 +16,12 @@ interface ScreenHeaderProps {
  */
 export function ScreenHeader({ icon, title, action }: ScreenHeaderProps) {
   return (
-    <div className="mb-4 flex items-center gap-2.5">
-      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-primary text-white">
+    <header className="screen-header">
+      <span className="screen-header__icon">
         <Icon name={icon} className="h-5 w-5" />
       </span>
-      <h1 className="min-w-0 flex-1 truncate text-lg font-black text-ink-900">{title}</h1>
+      <h1 className="screen-header__title">{title}</h1>
       {action}
-    </div>
+    </header>
   )
 }

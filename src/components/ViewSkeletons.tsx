@@ -10,7 +10,7 @@ import { miscStrings } from '@/i18n/dict/misc'
 /** غلاف مشترك: منطقة مشغولة مع تسمية قارئ شاشة بلغة الواجهة. */
 function SkeletonScreen({ testId, children }: { testId: string; children: React.ReactNode }) {
   return (
-    <div className="space-y-4 px-4 py-4" data-testid={testId} aria-busy="true" aria-live="polite">
+    <div className="app-screen space-y-4" data-testid={testId} aria-busy="true" aria-live="polite">
       <span className="sr-only">{miscStrings[getLanguage()].loadingLabel}…</span>
       {children}
     </div>
@@ -20,7 +20,7 @@ function SkeletonScreen({ testId, children }: { testId: string; children: React.
 /** هيكل بطاقة رصاصية عامة — سطر عنوان + سطران محتوى. */
 function CardBlock({ tall }: { tall?: boolean }) {
   return (
-    <div className="card p-5" aria-hidden>
+    <div className="surface-section" aria-hidden>
       <Skeleton className="h-3.5 w-24" />
       <Skeleton className="mt-3 h-6 w-2/3" />
       <Skeleton className={tall ? 'mt-3 h-20 w-full' : 'mt-2 h-3.5 w-1/2'} />

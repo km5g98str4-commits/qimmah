@@ -165,11 +165,15 @@ export function SettingsView({
       : t.auth.guestNote
 
   return (
-    <div className="min-h-screen bg-page">
+    <div className="settings-page min-h-screen bg-page">
       <AppNav current="settings" lang={lang} badge={badge} onNavigate={onNavigate} />
 
-      <main className="container-page space-y-6 py-8">
-        <h1 className="text-2xl font-black text-ink-900">{t.settings.title}</h1>
+      <main className="container-page settings-content space-y-6 py-8">
+        <div className="rounded-[1.5rem] border border-line bg-surface px-5 py-5 shadow-card">
+          <p className="eyebrow">{t.brand}</p>
+          <h1 className="settings-title mt-4">{t.settings.title}</h1>
+          <p className="mt-2 max-w-xl text-sm leading-relaxed text-ink-500">{t.settings.languageHint}</p>
+        </div>
 
         {/* 1) الحساب */}
         <SettingsGroup icon="User" title={t.settings.groupAccount}>
@@ -372,7 +376,7 @@ function SettingsGroup({
   children: ReactNode
 }) {
   return (
-    <section className="card p-6" data-testid={testId}>
+    <section className="card settings-group p-6" data-testid={testId}>
       <div className="mb-4 flex items-center gap-2.5">
         <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary-soft text-primary-c">
           <Icon name={icon} className="h-4.5 w-4.5" />

@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { Icon } from './Icon'
 import { InstallBanner } from './InstallBanner'
 import { StateBlock } from './StateBlock'
@@ -121,14 +121,6 @@ export function MobileShell({ lang, tab, badge: _badge, onNavigate, onOpenSettin
         { id: 'progress', route: 'progress', label: V2_TAB_LABELS.progress[lg], icon: 'BarChart3' },
       ]
 
-  const pageTitle = useMemo(() => {
-    if (tab === 'dashboard') return t.brand
-    if (tab === 'workout') return V2_TAB_LABELS.workout[lg]
-    if (tab === 'nutrition') return V2_TAB_LABELS.nutrition[lg]
-    if (tab === 'progress') return V2_TAB_LABELS.progress[lg]
-    return V2_TAB_LABELS.profile[lg]
-  }, [lg, tab, t.brand])
-
   return (
     <div className="qimmah-app-shell h-[100dvh] overflow-hidden bg-page">
       {/* رابط تخطٍّ للمحتوى — أول عنصر قابل للتركيز؛ مخفي حتى التركيز بلوحة المفاتيح. */}
@@ -150,20 +142,16 @@ export function MobileShell({ lang, tab, badge: _badge, onNavigate, onOpenSettin
         <header
           ref={headerRef}
           hidden={immersive}
-          className="relative z-40 shrink-0 border-b border-line bg-surface"
+          className="app-shell-header relative z-40 shrink-0"
           style={{ paddingTop: 'var(--safe-top)' }}
         >
           <div className="flex h-14 items-center justify-between gap-3 px-4">
-            {tab === 'dashboard' ? (
-              <button type="button" onClick={() => onNavigate('dashboard')} className="flex min-h-[44px] items-center gap-2">
-                <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-white shadow-glow">
-                  <Icon name="Dumbbell" className="h-5 w-5" strokeWidth={2.5} />
-                </span>
-                <span className="text-base font-extrabold text-ink-900">{pageTitle}</span>
-              </button>
-            ) : (
-              <h1 className="text-lg font-black text-ink-900">{pageTitle}</h1>
-            )}
+            <button type="button" onClick={() => onNavigate('dashboard')} className="flex min-h-[44px] items-center gap-2">
+              <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-white shadow-glow">
+                <Icon name="Dumbbell" className="h-5 w-5" strokeWidth={2.5} />
+              </span>
+              <span className="text-base font-extrabold text-ink-900">{t.brand}</span>
+            </button>
 
             <div className="flex items-center gap-2">
               <button
@@ -211,7 +199,7 @@ export function MobileShell({ lang, tab, badge: _badge, onNavigate, onOpenSettin
         <nav
           ref={navRef}
           hidden={keyboardOpen || immersive}
-          className="relative z-50 shrink-0 border-t border-line bg-surface"
+          className="app-bottom-nav relative z-50 shrink-0"
           style={{ paddingBottom: 'var(--safe-bottom)' }}
           aria-label={ar ? 'التنقّل الرئيسي' : 'Primary navigation'}
         >

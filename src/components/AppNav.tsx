@@ -32,7 +32,7 @@ export function AppNav({ current, lang, badge, onNavigate }: AppNavProps) {
   ]
 
   return (
-    <header className="sticky top-0 z-40 glass border-b border-line" style={{ paddingTop: 'var(--safe-top)' }}>
+    <header className="app-shell-header sticky top-0 z-40" style={{ paddingTop: 'var(--safe-top)' }}>
       <div className="container-page flex h-16 items-center justify-between gap-3">
         <button type="button" onClick={() => onNavigate('dashboard')} className="flex items-center gap-2.5">
           <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-white shadow-glow">

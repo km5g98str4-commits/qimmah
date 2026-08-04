@@ -259,11 +259,11 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
   // [CTO-73] التصادم — زرّ «تسجيل» المرفوع كان يغطّي آخر صفّ مهمّة
   // (elementFromPoint في مركزه يعيد «تسجيل»). `pb-28` تُخلّصه.
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light bg-page px-4 pb-36 pt-4 text-ink-900">
+    <div dir={ar ? 'rtl' : 'ltr'} className="app-screen v2-surface-light bg-page text-ink-900">
       <div className="v2-screen-enter mx-auto w-full max-w-md space-y-5">
         {/* [CTO-73] الشاشة ٢ — التحية والتاريخ سطر واحد. كانا سطرين مستقلّين،
             والتاريخ **سياقٌ للتحية** لا خبرٌ ثانٍ يستحقّ صفًّا خاصًّا به. */}
-        <header>
+        <header className="today-intro">
           <h2 className="text-2xl font-black tracking-tight">
             {model.greeting}
             <span className="ms-2 align-middle text-sm font-bold text-ink-500">{model.dateLabel}</span>
@@ -324,7 +324,7 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
             type="button"
             onClick={() => { void playHaptic('selection'); onNavigate('nutrition') }}
             aria-label={`${copy.macrosTitle} — ${copy.macrosLink}`}
-            className="v2-pressable flex min-h-[44px] w-full items-center gap-2 overflow-x-auto rounded-2xl border border-line bg-surface px-3.5 py-2.5 text-start"
+            className="macro-strip v2-pressable flex min-h-[44px] w-full items-center gap-2 overflow-x-auto rounded-[1.125rem] border border-line px-3.5 py-2.5 text-start"
           >
             <Icon name="Flame" className="h-4 w-4 shrink-0" style={{ color: MACRO_TONE.calories }} />
             <span className="shrink-0 text-sm font-bold text-ink-500">{copy.macroStripLead}</span>
@@ -352,7 +352,7 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
           </h2>
 
           {pending.length > 0 ? (
-            <div className="space-y-2.5">
+            <div className="today-action-stack space-y-2.5">
               <ActionCard action={pending[0]} lang={lang} hero eyebrow={copy.heroEyebrow} />
               {pending.slice(1).map((action) => (
                 <ActionCard key={action.key} action={action} lang={lang} />
@@ -378,7 +378,7 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
                   key={action.key}
                   type="button"
                   onClick={() => { void playHaptic('selection'); action.onClick() }}
-                  className="v2-pressable flex min-h-[3.5rem] w-full items-center gap-3 rounded-2xl border border-line bg-surface px-3.5 py-2.5 text-start"
+                  className="completed-row v2-pressable flex min-h-[3.5rem] w-full items-center gap-3 rounded-[1.125rem] border border-line px-3.5 py-2.5 text-start"
                 >
                   <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-primary-soft text-[color:var(--v2-green-text)]">
                     <Icon name="Check" className="h-4 w-4" strokeWidth={3} />
@@ -454,7 +454,7 @@ function ActionCard({ action, lang, hero, eyebrow }: { action: TodayAction; lang
       <button
         type="button"
         onClick={() => { void playHaptic('selection'); action.onClick() }}
-        className="v2-pressable flex min-h-[3.75rem] w-full items-center gap-3 rounded-2xl border border-line bg-surface px-3.5 py-3 text-start text-ink-900"
+        className="action-card--compact v2-pressable flex min-h-[3.75rem] w-full items-center gap-3 rounded-[1.125rem] border border-line bg-surface px-3.5 py-3 text-start text-ink-900"
       >
         <span
           className="grid h-10 w-10 shrink-0 place-items-center rounded-xl"
@@ -475,7 +475,7 @@ function ActionCard({ action, lang, hero, eyebrow }: { action: TodayAction; lang
     <button
       type="button"
       onClick={() => { void playHaptic('selection'); action.onClick() }}
-      className="v2-pressable relative flex w-full flex-col overflow-hidden rounded-3xl border bg-surface p-4 text-start text-ink-900 shadow-card"
+      className="action-card--hero v2-pressable relative flex w-full flex-col overflow-hidden rounded-[1.5rem] border bg-surface p-5 text-start text-ink-900 shadow-card"
       style={{ borderColor: `color-mix(in srgb, ${color} 32%, rgb(var(--c-line)))` }}
     >
       <span

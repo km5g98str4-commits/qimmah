@@ -1060,8 +1060,8 @@ function PlanScreen({ model, lang, onExercise, onStart }: { model: ReturnType<ty
     else groups.push({ cat: ex.category, items: [{ ex, i }] })
   })
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="overflow-x-hidden px-4 py-4 text-ink-900">
-      <div>
+    <div dir={ar ? 'rtl' : 'ltr'} className="app-screen overflow-x-hidden text-ink-900">
+      <div className="workout-plan-hero">
         <span className="eyebrow">
           <Icon name="Dumbbell" className="h-3.5 w-3.5" />
           {ar ? model.program.titleAr : model.program.titleEn} · {ar ? model.program.contextAr : model.program.contextEn}
@@ -1081,7 +1081,7 @@ function PlanScreen({ model, lang, onExercise, onStart }: { model: ReturnType<ty
               <p className="mb-2 text-sm font-black text-ink-700">{CATEGORY_LABEL[g.cat][ar ? 'ar' : 'en']}</p>
               <div className="space-y-2">
                 {g.items.map(({ ex, i }) => (
-                  <button key={ex.id} type="button" onClick={() => onExercise(i)} className="card flex w-full items-center gap-3 p-4 text-start transition-colors hover:border-primary-soft">
+                  <button key={ex.id} type="button" onClick={() => onExercise(i)} className="list-row p-4">
                     <span className="h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-beige">
                       <ExerciseMedia exerciseId={ex.exerciseId} lang={lang} heightClass="h-14" hideChips variant="thumb" />
                     </span>
@@ -1104,10 +1104,10 @@ function PlanScreen({ model, lang, onExercise, onStart }: { model: ReturnType<ty
 function DetailScreen({ ex, idx, total, lang, swapped, onReplace, onStart, onBack }: { ex: WorkoutV2Exercise; idx: number; total: number; lang: Lang; swapped?: boolean; onReplace?: () => void; onStart: () => void; onBack: () => void }) {
   const ar = lang !== 'en'
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="overflow-x-hidden px-4 py-4 text-ink-900">
+    <div dir={ar ? 'rtl' : 'ltr'} className="app-screen overflow-x-hidden text-ink-900">
       <div>
         <button type="button" onClick={onBack} aria-label={ar ? 'رجوع' : 'Back'} className="grid h-10 w-10 place-items-center rounded-xl border border-line bg-surface"><Icon name="ChevronRight" className="h-5 w-5 rtl:rotate-0 ltr:rotate-180" /></button>
-        <div className="mt-4 aspect-video overflow-hidden rounded-2xl border border-line bg-surface">
+        <div className="mt-4 aspect-video overflow-hidden rounded-[1.5rem] border border-line bg-surface shadow-card">
           <ExerciseMedia exerciseId={ex.exerciseId} lang={lang} heightClass="h-full" hideChips />
         </div>
         <p className="mt-4 text-xs font-bold text-ink-500">{ar ? `التمرين ${toAr(idx + 1, lang)} من ${toAr(total, lang)}` : `Exercise ${idx + 1} of ${total}`}</p>
@@ -1126,7 +1126,7 @@ function DetailScreen({ ex, idx, total, lang, swapped, onReplace, onStart, onBac
         <p className="mt-6 mb-2 text-sm font-black text-ink-700">{ar ? 'إشارات سريعة' : 'Quick cues'}</p>
         <ul className="space-y-2">
           {ex.cues.map((c, i) => (
-            <li key={i} className="card flex items-center gap-2 px-3 py-2.5 text-sm"><Icon name="Check" className="h-4 w-4 shrink-0 text-success" strokeWidth={3} />{c}</li>
+            <li key={i} className="list-row min-h-0 px-3 py-2.5 text-sm"><Icon name="Check" className="h-4 w-4 shrink-0 text-success" strokeWidth={3} />{c}</li>
           ))}
         </ul>
 
@@ -1378,7 +1378,7 @@ function Chip({ icon, text }: { icon: string; text: string }) {
   return <span className="flex items-center gap-1 rounded-full border border-line bg-surface px-2.5 py-1"><Icon name={icon} className="h-3.5 w-3.5" />{text}</span>
 }
 function Stat({ label, value, muted }: { label: string; value: string; muted?: boolean }) {
-  return <div className="rounded-xl border border-line bg-surface px-2 py-3 text-center"><p className={cn('text-lg font-black tabular-nums', muted && 'text-ink-400')}>{value}</p><p className="mt-0.5 text-[0.65rem] font-bold text-ink-500">{label}</p></div>
+  return <div className="metric-tile"><p className={cn('text-lg font-black tabular-nums', muted && 'text-ink-400')}>{value}</p><p className="mt-0.5 text-[0.65rem] font-bold text-ink-500">{label}</p></div>
 }
 function FocusStat({ label, value }: { label: string; value: string }) {
   return <div className="rounded-xl px-2 py-3 text-center" style={{ background: FOCUS.card, border: `1px solid ${FOCUS.line}` }}><p className="text-lg font-black tabular-nums" style={{ color: FOCUS.ink }}>{value}</p><p className="mt-0.5 text-[0.65rem] font-bold" style={{ color: FOCUS.inkMuted }}>{label}</p></div>

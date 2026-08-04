@@ -18,7 +18,7 @@ export function SectionHeading({
 }: SectionHeadingProps) {
   const alignment = align === 'center' ? 'items-center text-center mx-auto' : 'items-start text-start'
   return (
-    <div className={`flex flex-col ${alignment} max-w-2xl`}>
+    <div className={`section-heading flex flex-col ${alignment} max-w-2xl`}>
       <span className="eyebrow">
         <Icon name={icon} className="h-3.5 w-3.5" />
         {eyebrow}
