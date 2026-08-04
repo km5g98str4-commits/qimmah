@@ -91,8 +91,8 @@
 
 ## بنود تحتاج قرارك
 
-1. **الحذف الجماعي للـ245 المدموجة** — جاهز للتنفيذ فور توقيعك.
-2. **الحذف للـ23 المتجاوزة** — موسومة، جاهزة.
+1. ~~الحذف الجماعي للـ245 المدموجة~~ — **نُفِّذ** (انظر الختام).
+2. ~~الحذف للـ23 المتجاوزة~~ — **نُفِّذ** (انظر الختام).
 3. **الـ50 الحية** — أعلاه، مقسومة ثلاثًا.
 4. **`feat/onboarding-magic` غير موجود** — لا محليًا ولا بعيدًا (ولا `a12676e`/`56bc4c1` في المستودع). CTO-77 لم يصل `origin`.
 5. **«الفرع المتبقي»** — لم أستطع تحديده: تصنيفي (٢٤٥/٧٦) لا يطابق تصنيف توقيعك (٣١٢/٩٤/٢٦)، فلا سبيل لاشتقاق أيّ فرع تقصد. القائمة أعلاه كاملة — سمِّه منها.
@@ -123,7 +123,7 @@ HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this fe
 أو بأمر واحد:
 
 ```bash
-gh api -X PUT repos/km5g98str4-commits/gym-os-template/branches/main/protection -f required_status_checks=null -F enforce_admins=true -f required_pull_request_reviews=null -f restrictions=null -F allow_force_pushes=false -F allow_deletions=false
+gh api -X PUT repos/km5g98str4-commits/qimmah/branches/main/protection -f required_status_checks=null -F enforce_admins=true -f required_pull_request_reviews=null -f restrictions=null -F allow_force_pushes=false -F allow_deletions=false
 ```
 
 ---
