@@ -93,6 +93,12 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
   const [openGuide, setOpenGuide] = useState(false)
   const [openAlt, setOpenAlt] = useState(false)
   const [openDetails, setOpenDetails] = useState(false)
+  /**
+   * [CTO-73] الشاشة ١ — طيّة «تفاصيل التمرين»: الرسم · العضلات · طريقة الجهاز ·
+   * الفيديو · البدائل. مغلقة افتراضيًا، و`key` على `exId` يُعيد إغلاقها عند
+   * تبديل التمرين — فمرجعٌ فُتح لتمرين لا يبقى مفتوحًا للتالي.
+   */
+  const [openRef, setOpenRef] = useState(false)
   const [swap, setSwap] = useState<Record<string, string>>(() => resume?.swap ?? {})
   // (P12) محتوى بطاقتي البديل الصغيرتين لكل عنصر خطة (يتبدّل مع البطاقة الكبيرة في هذه الجلسة فقط).
   const [altSlots, setAltSlots] = useState<Record<string, [string, string]>>({})
@@ -177,11 +183,30 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
     if (flashTimer.current) window.clearTimeout(flashTimer.current)
   }, [])
 
+  /**
+   * [CTO-73] الشاشة ١ — «زرّ + العائم يختفي في هذه الشاشة».
+   *
+   * القشرة تملك آليّة الانغماس أصلًا (`MobileShell` يسمع `qimmah:immersive`
+   * فيُخفي شريط التنقّل وزرّ «تسجيل» ويجعل الخلفية `inert`) — لكن الذي كان
+   * يُطلقها هو `WorkoutV2` **اليتيم**. فالشاشة الحيّة تُركت خارجها: الشريط
+   * والزرّ يبقيان مركَّبين خلف الغطاء، مغطَّيين بصريًا لكن **قابلين للوصول
+   * بالتركيز وقارئ الشاشة** — نافذة مشروعة على ما خلف النافذة.
+   *
+   * فتُطلقها الشاشة الحيّة الآن. لا آليّة جديدة — توصيل القائمة إلى مكانها.
+   */
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent('qimmah:immersive', { detail: true }))
+    return () => { window.dispatchEvent(new CustomEvent('qimmah:immersive', { detail: false })) }
+  }, [])
+
   // أعد ضبط اللوحات عند الانتقال بين التمارين
   useEffect(() => {
     setOpenGuide(false)
     setOpenAlt(false)
     setOpenDetails(false)
+    // [CTO-73] الشاشة ١ — طيّة المرجع تتبع القاعدة نفسها: مرجعٌ فُتح لتمرين
+    // لا يبقى مفتوحًا للتمرين التالي.
+    setOpenRef(false)
   }, [current])
 
   // حارس: يوم بلا تمارين (مثل «تمرين فارغ») — لا نلمس مرجعًا غير موجود؛ نعرض حالة آمنة.
@@ -380,8 +405,8 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
             <Icon name="X" className="h-5 w-5" />
           </button>
           <div className="min-w-0 text-center">
-            <p dir="auto" className="truncate text-sm font-black text-ink-900">{lang === 'en' ? day.nameEn || day.nameAr : day.nameAr || day.nameEn}</p>
-            <p className="text-xs text-ink-500">{current + 1} {t.of} {total}</p>
+            <p dir="auto" className="truncate text-base font-black text-ink-900">{lang === 'en' ? day.nameEn || day.nameAr : day.nameAr || day.nameEn}</p>
+            <p className="text-sm text-ink-500">{current + 1} {t.of} {total}</p>
           </div>
           <div className="h-11 w-11" />
         </div>
@@ -393,123 +418,66 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
       </header>
 
       <main className="container-page flex-1 space-y-4 overflow-y-auto py-5 pb-40">
-        {/* رأس التمرين */}
-        <div className="card overflow-hidden">
-          <ExerciseMedia exerciseId={exId} heightClass="h-48" hideChips />
-          <div className="p-5">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              {/* (P10.1) اسم موحّد بعزل <bdi>: عربي أساسي + إنجليزي ثانوي. */}
-              <div className="flex flex-wrap items-center gap-x-2">
-                <ExerciseName
-                  nameAr={nameAr}
-                  nameEn={nameEn}
-                  lang={lang}
-                  className="text-lg font-black leading-tight text-ink-900"
-                  secondaryClassName="mt-0.5 text-xs font-bold text-ink-400"
-                />
-                {/* (جولة 3) إضافة نهاية اليوم (ذراعان/بطن) اختيارية — وسم واضح بجانب الاسم. */}
-                {pe.optional && (
-                  <span className="shrink-0 rounded-full bg-beige px-2 py-0.5 text-[11px] font-bold text-ink-500">
-                    {d.optionalTag}
-                  </span>
-                )}
-              </div>
-              {machineInfo ? (
-                // (P12) وسوم الجهاز: التصنيف الفرعي + المجموعة (ثنائية اللغة من الكتالوج).
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  <span className="rounded-full bg-primary-soft px-2.5 py-1 text-xs font-bold text-primary-c">
-                    {lang === 'en' ? machineInfo.item.subGroup.en : machineInfo.item.subGroup.ar}
-                  </span>
-                  <span className="rounded-full bg-beige px-2.5 py-1 text-xs font-bold text-ink-700">
-                    {lang === 'en' ? machineInfo.group.titleEn : machineInfo.group.titleAr}
-                  </span>
-                </div>
-              ) : (
-                <>
-                  {muscles && (
-                    <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-beige px-2.5 py-1 text-xs font-bold text-ink-700">
-                      <Icon name="Target" className="h-3.5 w-3.5 text-primary-c" />
-                      {muscles}
-                    </span>
-                  )}
-                  {ex?.primaryMusclesDetailed?.length ? (
-                    // رقائق العضلات بلغة الواجهة الحالية (تُحلّ عبر قاموس العضلات المشترك)
-                    <div className="mt-2 flex flex-wrap gap-1.5">
-                      {ex.primaryMusclesDetailed.map((m) => (
-                        <span key={`p-${m}`} className="rounded-full bg-primary-soft px-2 py-0.5 text-[10px] font-bold text-primary-c">
-                          {detailedMuscleLabel(m, lang)}
-                        </span>
-                      ))}
-                      {ex.secondaryMusclesDetailed.map((m) => (
-                        <span key={`s-${m}`} className="rounded-full border border-line bg-surface px-2 py-0.5 text-[10px] font-medium text-ink-500">
-                          {detailedMuscleLabel(m, lang)}
-                        </span>
-                      ))}
-                    </div>
-                  ) : null}
-                </>
-              )}
-            </div>
-            <span className="shrink-0 rounded-full bg-primary-soft px-3 py-1.5 text-xs font-black text-primary-c">
-              {current + 1} {t.of} {total}
-            </span>
-          </div>
+        {/* ═══ [CTO-73] الشاشة ١ — «وش أسوي الحين؟» ═══
+            كان فوق الطية ١٩ عنصرًا متنافسًا، والمجموعة — وهي **الفعل** — تحت
+            التمرير: رسمٌ بارتفاع ١٩٢px، ثم الاسم مكرّرًا (داخل الرسم وتحته)،
+            ثم «١ من ٢» مرّة ثانية بجانبه، ثم **بطاقتان تحملان جملة الفراغ
+            نفسها حرفيًا**، ثم الهدف، ثم طريقة الجهاز، ثم الفيديو، ثم بطاقتا
+            بديل بصور فوتوغرافية تكسر لغة الرسم.
 
-          {/* الأداء السابق + الأفضل */}
-          <div className="mt-3 grid grid-cols-2 gap-2">
-            <PerfCard
-              label={t.prevPerf}
-              value={rec?.lastWeight ? `${rec.lastWeight} ${t.volumeUnit}${rec.lastReps ? ` × ${rec.lastReps}` : ''}` : t.noHistory}
-              icon="RotateCcw"
-            />
-            <PerfCard
-              label={t.bestPerf}
-              value={rec?.bestWeight ? `${rec.bestWeight} ${t.volumeUnit}` : t.noHistory}
-              icon="Trophy"
-              gold
-            />
-          </div>
-          {hint && <p className="mt-2 flex items-center gap-1.5 text-xs font-bold text-primary-c"><Icon name="TrendingUp" className="h-3.5 w-3.5" />{hint}</p>}
+            الترتيب الآن يتبع السؤال: **مَن أنا الآن → ماذا سجّلت سابقًا →
+            سجّل الآن**. وكل ما هو **مرجع** لا أمرَ تنفيذ (الرسم · طريقة الجهاز
+            · الفيديو · البدائل) نزل خلف طيّة واحدة بضغطة — لم يُحذف منه شيء. */}
 
-          {/* الهدف */}
-          <p className="mt-3 flex items-center gap-2 rounded-xl border border-line bg-page px-3 py-2.5 text-sm font-bold text-ink-700">
-            <Icon name="Target" className="h-4 w-4 text-primary-c" />
+        {/* ١) هويّة التمرين — مرّة واحدة: الاسم والهدف في كتلة واحدة. */}
+        <div className="card p-4">
+          <div className="flex flex-wrap items-center gap-x-2">
+            <ExerciseName
+              nameAr={nameAr}
+              nameEn={nameEn}
+              lang={lang}
+              className="text-lg font-black leading-tight text-ink-900"
+              secondaryClassName="mt-0.5 text-sm font-bold text-ink-400"
+            />
+            {pe.optional && (
+              <span className="shrink-0 rounded-full bg-beige px-2 py-0.5 text-sm font-bold text-ink-500">
+                {d.optionalTag}
+              </span>
+            )}
+          </div>
+          {/* الهدف سطر داخل الهويّة لا بطاقة مستقلّة — هو وصفُ التمرين لا مهمّة ثانية. */}
+          <p className="mt-1.5 flex items-center gap-2 text-base font-bold text-ink-700">
+            <Icon name="Target" className="h-4 w-4 shrink-0 text-primary-c" />
             {t.target}: {pe.sets} {t.setsDone} × {pe.reps}
           </p>
 
-          {/* (P12) طريقة استخدام الجهاز — قابلة للطي (مطوية افتراضيًا)، تظهر فقط عند توفّر
-              خطوات للتمرين المعروض؛ key يعيد الطي عند تبديل التمرين. */}
-          <MachineHowTo key={exId} exerciseId={exId} lang={lang} />
-
-          {/* (P12) شاهد الطريقة — رابط خارجي: videoUrl إن وُجد وإلا بحث يوتيوب بالاسم الإنجليزي. */}
-          {videoUrl && (
-            <a href={videoUrl} target="_blank" rel="noopener noreferrer" className="btn-ghost mt-3 w-full py-2.5 text-sm">
-              <Icon name="Video" className="h-4 w-4 text-primary-c" />
-              {d.watchVideo}
-            </a>
+          {/* ٢) السجلّ — سطر واحد. بلا سجلّ: دعوة خفيفة بدل بطاقتَي فراغ
+                 متطابقتين. بسجلّ: الرقمان في سطر واحد ومعهما «كرّر آخر مرة». */}
+          {rec?.lastWeight || rec?.bestWeight ? (
+            <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 border-t border-line pt-3">
+              {rec?.lastWeight && (
+                <span className="text-base font-bold text-ink-700">
+                  <span className="text-ink-500">{d.historyLast}:</span> {rec.lastWeight} {t.volumeUnit}
+                  {rec.lastReps ? ` × ${rec.lastReps}` : ''}
+                </span>
+              )}
+              {rec?.bestWeight && (
+                <span className="text-base font-bold text-ink-700">
+                  <span className="text-ink-500">{d.historyBest}:</span> {rec.bestWeight} {t.volumeUnit}
+                </span>
+              )}
+              {(rec?.lastWeight || rec?.lastReps) && (
+                <button type="button" onClick={repeatLast} className="ms-auto inline-flex min-h-[44px] items-center gap-1.5 text-base font-bold text-primary-c">
+                  <Icon name="Repeat" className="h-4 w-4" />
+                  {t.repeatLast}
+                </button>
+              )}
+            </div>
+          ) : (
+            <p className="mt-3 border-t border-line pt-3 text-base text-ink-500">{d.firstTimeHint}</p>
           )}
-
-          {/* كرّر آخر مرة */}
-          {(rec?.lastWeight || rec?.lastReps) && (
-            <button type="button" onClick={repeatLast} className="btn-ghost mt-3 w-full py-2.5 text-sm">
-              <Icon name="Repeat" className="h-4 w-4" />
-              {t.repeatLast}
-            </button>
-          )}
-          </div>
+          {hint && <p className="mt-2 flex items-center gap-1.5 text-sm font-bold text-primary-c"><Icon name="TrendingUp" className="h-4 w-4" />{hint}</p>}
         </div>
-
-        {/* (P12) بطاقتا البديل (دمبل/كيبل) لأجهزة الكتالوج — تبديل بضغطة لهذه الجلسة فقط. */}
-        {machineAlt && machineSlots && (
-          <MachineAltCards
-            lang={lang}
-            machineId={pe.exerciseId}
-            alt={machineAlt}
-            slots={machineSlots}
-            onSwitch={switchMachineAlt}
-          />
-        )}
 
         {/* جولات التمرين الحالي */}
         <div className="space-y-3">
@@ -526,8 +494,8 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
                 )}
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-black text-ink-900">{d.setSingular} {st.setNumber}</span>
-                  <span className="text-xs font-bold text-ink-500">{t.target}: {st.targetReps}</span>
+                  <span className="text-base font-black text-ink-900">{d.setSingular} {st.setNumber}</span>
+                  <span className="text-sm font-bold text-ink-500">{t.target}: {st.targetReps}</span>
                 </div>
 
                 <div className="mt-3 grid grid-cols-2 gap-3">
@@ -565,7 +533,7 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
                   aria-pressed={st.completed}
                   disabled={!st.completed && invalid}
                   className={cn(
-                    'mt-3 flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold transition-colors',
+                    'mt-3 flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl py-3 text-base font-bold transition-colors',
                     st.completed ? 'bg-primary text-white' : 'border border-line bg-beige text-ink-700 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40',
                   )}
                 >
@@ -575,6 +543,84 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
               </div>
             )
           })}
+        </div>
+
+        {/* ═══ [CTO-73] المرجع خلف طيّة واحدة — نُقل ولم يُحذف ═══
+            الرسم التوضيحي · رقائق العضلات · طريقة استخدام الجهاز · الفيديو ·
+            البدائل. كلّها كانت **فوق** المجموعة تزاحمها، وكلّها متاحة بضغطة. */}
+        <div className="card overflow-hidden">
+          <button
+            type="button"
+            onClick={() => setOpenRef((o) => !o)}
+            aria-expanded={openRef}
+            className="flex min-h-[44px] w-full items-center justify-between px-4 py-3.5 text-base font-bold text-ink-900"
+          >
+            <span className="flex items-center gap-2">
+              <Icon name="Info" className="h-4 w-4 text-primary-c" />
+              {d.detailsToggle}
+            </span>
+            <Icon name={openRef ? 'Minus' : 'Plus'} className="h-4 w-4 text-ink-400" />
+          </button>
+          {openRef && (
+            <div className="border-t border-line">
+              <ExerciseMedia exerciseId={exId} heightClass="h-48" hideChips />
+              <div className="space-y-3 p-4">
+                {machineInfo ? (
+                  <div className="flex flex-wrap gap-1.5">
+                    <span className="rounded-full bg-primary-soft px-2.5 py-1 text-sm font-bold text-primary-c">
+                      {lang === 'en' ? machineInfo.item.subGroup.en : machineInfo.item.subGroup.ar}
+                    </span>
+                    <span className="rounded-full bg-beige px-2.5 py-1 text-sm font-bold text-ink-700">
+                      {lang === 'en' ? machineInfo.group.titleEn : machineInfo.group.titleAr}
+                    </span>
+                  </div>
+                ) : (
+                  <>
+                    {muscles && (
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-beige px-2.5 py-1 text-sm font-bold text-ink-700">
+                        <Icon name="Target" className="h-3.5 w-3.5 text-primary-c" />
+                        {muscles}
+                      </span>
+                    )}
+                    {ex?.primaryMusclesDetailed?.length ? (
+                      <div className="flex flex-wrap gap-1.5">
+                        {ex.primaryMusclesDetailed.map((m) => (
+                          <span key={`p-${m}`} className="rounded-full bg-primary-soft px-2 py-0.5 text-sm font-bold text-primary-c">
+                            {detailedMuscleLabel(m, lang)}
+                          </span>
+                        ))}
+                        {ex.secondaryMusclesDetailed.map((m) => (
+                          <span key={`s-${m}`} className="rounded-full border border-line bg-surface px-2 py-0.5 text-sm font-medium text-ink-500">
+                            {detailedMuscleLabel(m, lang)}
+                          </span>
+                        ))}
+                      </div>
+                    ) : null}
+                  </>
+                )}
+
+                <MachineHowTo key={exId} exerciseId={exId} lang={lang} />
+
+                {videoUrl && (
+                  <a href={videoUrl} target="_blank" rel="noopener noreferrer" className="btn-ghost min-h-[44px] w-full py-2.5 text-base">
+                    <Icon name="Video" className="h-4 w-4 text-primary-c" />
+                    {d.watchVideo}
+                  </a>
+                )}
+
+                {machineAlt && machineSlots && (
+                  <MachineAltCards
+                    lang={lang}
+                    machineId={pe.exerciseId}
+                    alt={machineAlt}
+                    slots={machineSlots}
+                    onSwitch={switchMachineAlt}
+                    noMedia
+                  />
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* شرح سريع */}
@@ -757,17 +803,10 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
   )
 }
 
-function PerfCard({ label, value, icon, gold }: { label: string; value: string; icon: string; gold?: boolean }) {
-  return (
-    <div className={cn('rounded-xl border p-2.5', gold ? 'border-gold-400/40 bg-gold-200/30' : 'border-line bg-page')}>
-      <p className="flex items-center gap-1 text-[11px] font-bold text-ink-500">
-        <Icon name={icon} className={cn('h-3.5 w-3.5', gold ? 'text-gold-600' : 'text-primary-c')} />
-        {label}
-      </p>
-      <p className="mt-0.5 truncate text-sm font-black text-ink-900">{value}</p>
-    </div>
-  )
-}
+// [CTO-73] الشاشة ١ — `PerfCard` أُزيلت: كانت تُرسَم مرّتين لتقول الجملة نفسها
+// («ما فيه سجل سابق») في بطاقتين متجاورتين. **الوظيفة باقية** — آخر أداء وأفضل
+// أداء يُعرضان الآن في سطر السجلّ المضغوط داخل بطاقة الهويّة، وحين لا سجلّ يحلّ
+// محلّهما سطر دعوة واحد (`firstTimeHint`). لا معلومة فُقدت، والبطاقتان اندمجتا.
 
 interface StepperProps {
   label: string
@@ -783,7 +822,9 @@ interface StepperProps {
 function Stepper({ label, value, placeholder, step, mode, invalid, onChange, onStep }: StepperProps) {
   return (
     <div>
-      <p className="mb-1 text-center text-[11px] font-bold text-ink-500">{label}</p>
+      {/* [CTO-73] سلّم الخطوط — ١١px كان أصغر نصّ في الشاشة (ملاحظة الميدان ٥).
+          تسمية الحقل ليست زخرفًا: بلا قراءتها لا يُعرف أيّ رقم يُدخَل. رُفعت إلى ١٤px. */}
+      <p className="mb-1 text-center text-sm font-bold text-ink-500">{label}</p>
       <div className="flex items-stretch gap-1.5">
         <button type="button" onClick={() => onStep(-step)} aria-label="-" className="grid h-11 w-11 shrink-0 place-items-center rounded-lg border border-line bg-surface text-ink-700 active:scale-95">
           <Icon name="Minus" className="h-4 w-4" />

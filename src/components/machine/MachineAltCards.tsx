@@ -16,6 +16,15 @@ interface MachineAltCardsProps {
   slots: [string, string]
   /** ضغطة واحدة: يرقّي محتوى البطاقة للبطاقة الكبيرة وينزل المعروض حاليًا مكانه. */
   onSwitch: (slotIdx: 0 | 1, exerciseId: string) => void
+  /**
+   * [CTO-73] الشاشة ١ — بطاقات نصّية بلا وسائط.
+   *
+   * البدائل كانت تُعرض بصور **فوتوغرافية** لصالة حقيقية، بينما التمرين الأساسي
+   * فوقها **رسم خطّي** على تدرّج داكن — لغتان بصريّتان في شبكة واحدة، وهو أحد
+   * كسور اللغة الثلاثة في التشخيص. وإنتاج رسوم للبدائل ليس عملَ هذه الموجة،
+   * فالبديل المُعتمد في الأمر: «بطاقات نصّية نظيفة».
+   */
+  noMedia?: boolean
 }
 
 /**
@@ -23,7 +32,7 @@ interface MachineAltCardsProps {
  * (أو بديل حر بصدق عند cableIsFallback) جنبًا إلى جنب تحت البطاقة الكبيرة.
  * التبديل لهذه الجلسة فقط — لا يُحفظ في الخطة.
  */
-export function MachineAltCards({ lang, machineId, alt, slots, onSwitch }: MachineAltCardsProps) {
+export function MachineAltCards({ lang, machineId, alt, slots, onSwitch, noMedia }: MachineAltCardsProps) {
   const d = workoutScreenStrings[lang]
 
   // تسمية البطاقة بحسب محتواها الحالي (الجهاز المُنزَّل يحمل تسمية «الجهاز الأساسي»).
@@ -52,19 +61,19 @@ export function MachineAltCards({ lang, machineId, alt, slots, onSwitch }: Machi
               key={`${i}-${exerciseId}`}
               type="button"
               onClick={() => onSwitch(i as 0 | 1, exerciseId)}
-              className="card overflow-hidden text-start transition-transform active:scale-[0.98]"
+              className="card min-h-[44px] overflow-hidden text-start transition-transform active:scale-[0.98]"
             >
-              <ExerciseMedia exerciseId={exerciseId} lang={lang} heightClass="h-20" hideChips variant="thumb" />
+              {!noMedia && <ExerciseMedia exerciseId={exerciseId} lang={lang} heightClass="h-20" hideChips variant="thumb" />}
               <div className="p-3">
-                <p className="text-[10px] font-black uppercase tracking-wide text-primary-c">{labelFor(exerciseId)}</p>
+                <p className="text-sm font-black uppercase tracking-wide text-primary-c">{labelFor(exerciseId)}</p>
                 <ExerciseName
                   nameAr={ex?.nameAr ?? ''}
                   nameEn={ex?.nameEn ?? ''}
                   lang={lang}
-                  className="mt-1 truncate text-sm font-black leading-tight text-ink-900"
-                  secondaryClassName="truncate text-[11px] font-bold text-ink-400"
+                  className="mt-1 truncate text-base font-black leading-tight text-ink-900"
+                  secondaryClassName="truncate text-sm font-bold text-ink-400"
                 />
-                <span className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold text-primary-c">
+                <span className="mt-2 inline-flex items-center gap-1.5 text-sm font-bold text-primary-c">
                   <Icon name="Repeat" className="h-3.5 w-3.5" />
                   {d.switchHere}
                 </span>

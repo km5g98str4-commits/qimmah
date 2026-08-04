@@ -46,6 +46,18 @@ export interface WorkoutScreenStrings {
   howToTitle: string
   /** (P12) زر مشاهدة فيديو الشرح (يفتح خارجيًا). */
   watchVideo: string
+
+  /**
+   * [CTO-73] الشاشة ١ — طيّة «تفاصيل التمرين».
+   * الشاشة تجاوب سؤالًا واحدًا: «وش أسوي الحين؟». والرسم وطريقة الجهاز والفيديو
+   * والبدائل **مراجع** لا أوامر تنفيذ — تبقى بضغطة واحدة، ولا تزاحم المجموعة.
+   */
+  detailsToggle: string
+  /** يحلّ محلّ بطاقتَي «آخر مرة»/«أفضل أداء» حين لا سجلّ — سطر دعوة لا بطاقتا فراغ. */
+  firstTimeHint: string
+  /** سطر السجلّ المضغوط حين يوجد سجلّ فعلًا. */
+  historyLast: string
+  historyBest: string
   /** (P12) بطاقتا البديل — العنوان والتوضيح. */
   altBlockTitle: string
   altBlockNote: string
@@ -109,6 +121,10 @@ const ar: WorkoutScreenStrings = {
   safetyNote: 'تنبيه أمان',
   howToTitle: 'طريقة استخدام الجهاز',
   watchVideo: 'شوف الطريقة',
+  detailsToggle: 'تفاصيل التمرين',
+  firstTimeHint: 'أول مرة؟ عادي — سجّل وبنتذكّر لك.',
+  historyLast: 'آخر مرة',
+  historyBest: 'أفضل',
   altBlockTitle: 'البديل إذا الجهاز مو متوفر',
   altBlockNote: 'التبديل لهذي الجلسة بس — خطتك تبقى مثل ما هي.',
   altDumbbellLabel: 'بديل دمبل',
@@ -162,6 +178,10 @@ const en: WorkoutScreenStrings = {
   safetyNote: 'Safety note',
   howToTitle: 'How to use this machine',
   watchVideo: 'Watch video',
+  detailsToggle: 'Exercise details',
+  firstTimeHint: "First time? That's fine — log it and we'll remember.",
+  historyLast: 'Last time',
+  historyBest: 'Best',
   altBlockTitle: "If the machine isn't available",
   altBlockNote: 'The swap is just for this session — your plan stays the same.',
   altDumbbellLabel: 'Dumbbell alternative',
