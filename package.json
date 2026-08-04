@@ -62,6 +62,7 @@
     "test:formula": "node scripts/science/run-formula-proof.mjs",
     "test:media-rights": "node scripts/media/media-rights-proof.mjs",
     "test:plan-builder": "node scripts/run-plan-builder-proof.mjs",
+    "test:plan-golden": "node scripts/run-plan-golden-proof.mjs --check",
     "test:nutrition-history": "node scripts/run-nutrition-history-proof.mjs",
     "test:barcode": "node scripts/run-barcode-proof.mjs",
     "test:media-pipeline": "node scripts/run-media-pipeline-proof.mjs",
