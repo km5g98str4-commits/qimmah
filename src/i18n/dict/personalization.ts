@@ -64,6 +64,24 @@ interface RawQuestion {
 
 const t = (ar: string, en: string): Bilingual => ({ ar, en })
 
+/**
+ * تسميات مناطق الجسم — تُستعمل في كل أسئلة `bodyAreas` الخمسة.
+ * موحّدة عمدًا: «الركبة» يجب أن تُسمّى «الركبة» في سؤال الإصابة وسؤال العملية
+ * وسؤال مدى الحركة. اختلاف التسمية بين سؤالين يجعل المستخدم يظنّهما شيئين.
+ */
+const AREAS: Record<string, Bilingual> = {
+  neck: t('الرقبة', 'Neck'),
+  shoulder: t('الكتف', 'Shoulder'),
+  elbow: t('الكوع', 'Elbow'),
+  wrist: t('الرسغ', 'Wrist'),
+  upper_back: t('أعلى الظهر', 'Upper back'),
+  lower_back: t('أسفل الظهر', 'Lower back'),
+  hip: t('الورك', 'Hip'),
+  knee: t('الركبة', 'Knee'),
+  ankle: t('الكاحل', 'Ankle'),
+  core: t('الوسط', 'Core'),
+}
+
 // ————————————————————————— الأسئلة —————————————————————————
 
 const Q: Record<string, RawQuestion> = {
@@ -300,13 +318,13 @@ const Q: Record<string, RawQuestion> = {
   },
   's-fainting': { title: t('صار لك دوخة أو إغماء وقت المجهود؟', 'Have you felt faint or dizzy during effort?') },
   's-doctor-restriction': { title: t('فيه دكتور قال لك تتجنب شي معيّن؟', 'Has a doctor told you to avoid something?') },
-  's-restriction-area': { title: t('وش المناطق اللي قالك تتجنبها؟', 'Which areas were you told to avoid?') },
+  's-restriction-area': { title: t('وش المناطق اللي قالك تتجنبها؟', 'Which areas were you told to avoid?'), opts: AREAS },
   's-recent-surgery': { title: t('سويت عملية آخر ٦ شهور؟', 'Any surgery in the last 6 months?') },
   's-surgery-when': {
     title: t('متى كانت؟', 'When was it?'),
     opts: { under6w: t('أقل من ٦ أسابيع', 'Under 6 weeks'), w6_12: t('٦–١٢ أسبوع', '6–12 weeks'), m3_6: t('٣–٦ شهور', '3–6 months'), over6m: t('أكثر من ٦ شهور', 'Over 6 months') },
   },
-  's-surgery-area': { title: t('وش المنطقة؟', 'Which area?') },
+  's-surgery-area': { title: t('وش المنطقة؟', 'Which area?'), opts: AREAS },
   's-pregnancy': {
     title: t('فيه حمل أو ولادة قريبة؟', 'Pregnancy or recent birth?'),
     hint: t('اختياري — ونحترم إذا ما تبين تجاوبين.', "Optional — and it's fine to skip."),
@@ -328,8 +346,8 @@ const Q: Record<string, RawQuestion> = {
     title: t('عندك إصابة أو ألم يمنعك من حركة؟', 'Any injury or pain that limits a movement?'),
     opts: { none: t('لا', 'No'), past: t('سابقة وخفّت', 'Past, healed'), current: t('حالية', 'Current') },
   },
-  'l-current-areas': { title: t('وين بالضبط؟', 'Where exactly?'), hint: t('اختر كل المناطق اللي تنطبق.', 'Pick every area that applies.') },
-  'l-past-areas': { title: t('وين كانت؟', 'Where was it?') },
+  'l-current-areas': { title: t('وين بالضبط؟', 'Where exactly?'), hint: t('اختر كل المناطق اللي تنطبق.', 'Pick every area that applies.'), opts: AREAS },
+  'l-past-areas': { title: t('وين كانت؟', 'Where was it?'), opts: AREAS },
   'l-past-recovered': {
     title: t('رجعت طبيعية؟', 'Is it back to normal?'),
     opts: { fully: t('تمامًا', 'Fully'), mostly: t('غالبًا', 'Mostly'), flares: t('ترجع أحيانًا', 'It flares up') },
@@ -360,7 +378,7 @@ const Q: Record<string, RawQuestion> = {
     title: t('توازنك؟', 'Your balance?'),
     opts: { none: t('ممتاز', 'No issues'), some: t('فيه شوي', 'A little shaky'), significant: t('ضعيف', 'Poor') },
   },
-  'l-rom-limits': { title: t('فيه مفصل حركته محدودة؟', 'Any joint with limited range?') },
+  'l-rom-limits': { title: t('فيه مفصل حركته محدودة؟', 'Any joint with limited range?'), opts: AREAS },
   'l-joint-sensitivity': {
     title: t('فيه مفصل يزعجك مع الحمل؟', 'Any joint that complains under load?'),
     opts: { none: t('لا', 'None'), shoulder: t('كتف', 'Shoulder'), elbow: t('كوع', 'Elbow'), wrist: t('رسغ', 'Wrist'), hip: t('ورك', 'Hip'), knee: t('ركبة', 'Knee'), ankle: t('كاحل', 'Ankle') },
