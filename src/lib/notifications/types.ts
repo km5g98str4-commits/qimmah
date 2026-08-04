@@ -1,4 +1,4 @@
-export type ReminderKind = 'workoutDay' | 'restDay' | 'water' | 'weeklyBrief' | 'supplements'
+export type ReminderKind = 'workoutDay' | 'restDay' | 'water' | 'weeklyBrief' | 'supplements' | 'restEnd'
 
 export interface QuietHours {
   /** Start of the do-not-disturb window, HH:MM. */

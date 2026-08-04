@@ -22,8 +22,7 @@ export function commitmentName(pc: PlanCommitment, lang: Lang): string {
   const item = getCommitment(pc.commitmentId ?? '')
   const ar = pc.customNameAr || item?.nameAr || ''
   const en = pc.customNameEn || item?.nameEn || ''
-  if (lang === 'en') return en || ar
-  return ar && en ? `${ar} — ${en}` : ar || en
+  return lang === 'en' ? en || ar : ar || en
 }
 
 export function defaultCommitmentPlan(): CommitmentPlan {

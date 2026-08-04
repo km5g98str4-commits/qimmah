@@ -9,6 +9,12 @@
 -- table with a user_id column (not a hardcoded list). Apply per scripts/db/apply-guide.md
 -- and verify with `npm run db:verify`. This file is kept for historical reference
 -- only; it remains idempotent and non-destructive if ever re-run.
+--
+-- STILL LIVE FOR ONE CALLER: scripts/e2e-auth/run.mjs applies THIS file (not the
+-- migration folder) to the local Supabase stack. That is why the P14 section near
+-- the end mirrors supabase/migrations/20260726120001..4 — without it the local
+-- e2e database would be missing four tables the client knows about.
+-- `npm run test:db-schema` fails if the mirror ever drifts.
 -- ============================================================================
 --
 -- ============================================================================
@@ -119,7 +125,9 @@ create table if not exists public.measurement_logs (
   user_id     uuid not null references auth.users(id) on delete cascade,
   local_id    text,
   date        date not null,
-  values      jsonb not null default '{}'::jsonb,
+  -- VALUES مفتاحية محجوزة في Postgres — عمود بهذا الاسم يجب أن يُقتبس وإلا فشل
+  -- تحليل CREATE TABLE. الاسم المقتبس يبقى `values` نفسه (حروف صغيرة أصلًا).
+  "values"    jsonb not null default '{}'::jsonb,
   notes       text,
   created_at  timestamptz not null default now(),
   updated_at  timestamptz not null default now(),
@@ -258,6 +266,122 @@ $$;
 
 revoke all on function public.delete_own_account() from public, anon;
 grant execute on function public.delete_own_account() to authenticated;
+
+-- ============================================================================
+-- P14 — جداول تغطية P12 الأربعة (مرآة supabase/migrations/20260726120001..3)
+-- ============================================================================
+-- المرجع القانوني للسحابة هو مجلد `supabase/migrations/`. هذا القسم موجود هنا
+-- لأن مكدّس الاختبار المحلي (scripts/e2e-auth/run.mjs) يطبّق هذا الملف وحده على
+-- قاعدة Supabase المحلية — فبدونه تنقص القاعدةَ المحلية أربعةُ جداول يعرفها
+-- العميل. برهان `npm run test:db-schema` يفشل إن انحرف القسمان.
+--
+--   nutrition_ledger  فريد (user_id, date)      · شاهد قبر
+--   recovery_logs     فريد (user_id, date)      · بلا شاهد قبر (لا مسار حذف)
+--   workout_schedule  فريد (user_id)            · شاهد قبر (مسح الجدول)
+--   plan_templates    فريد (user_id, local_id)  · شاهد قبر
+-- ============================================================================
+
+create table if not exists public.nutrition_ledger (
+  id          uuid primary key default gen_random_uuid(),
+  user_id     uuid not null references auth.users(id) on delete cascade,
+  date        date not null,
+  data        jsonb not null default '{}'::jsonb,
+  deleted_at  timestamptz,
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now(),
+  unique (user_id, date)
+);
+
+create table if not exists public.recovery_logs (
+  id          uuid primary key default gen_random_uuid(),
+  user_id     uuid not null references auth.users(id) on delete cascade,
+  date        date not null,
+  data        jsonb not null default '{}'::jsonb,
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now(),
+  unique (user_id, date)
+);
+
+create table if not exists public.workout_schedule (
+  id          uuid primary key default gen_random_uuid(),
+  user_id     uuid not null references auth.users(id) on delete cascade,
+  data        jsonb not null default '{}'::jsonb,
+  deleted_at  timestamptz,
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now(),
+  unique (user_id)
+);
+
+create table if not exists public.plan_templates (
+  id          uuid primary key default gen_random_uuid(),
+  user_id     uuid not null references auth.users(id) on delete cascade,
+  local_id    text not null,
+  data        jsonb not null default '{}'::jsonb,
+  deleted_at  timestamptz,
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now(),
+  unique (user_id, local_id)
+);
+
+-- الجداول القديمة تُنشئ عمود deleted_at لاحقًا (measurement_logs شاهد قبر أيضًا).
+alter table public.measurement_logs add column if not exists deleted_at timestamptz;
+
+-- ختم updated_at يحافظ على طابع العميل (دليل LWW) — انظر
+-- supabase/migrations/20260726120002_p14_lww_updated_at.sql لسبب وجود ختمين.
+create or replace function public.set_updated_at_lww()
+returns trigger
+language plpgsql
+set search_path = ''
+as $$
+begin
+  if new.updated_at is null or new.updated_at is not distinct from old.updated_at then
+    new.updated_at = now();
+  end if;
+  return new;
+end;
+$$;
+
+do $$
+declare
+  t text;
+  pol text;
+begin
+  foreach t in array array[
+    'nutrition_ledger','recovery_logs','workout_schedule','plan_templates','measurement_logs'
+  ]
+  loop
+    execute format('drop trigger if exists set_updated_at on public.%I;', t);
+    execute format('drop trigger if exists set_updated_at_lww on public.%I;', t);
+    execute format(
+      'create trigger set_updated_at_lww before update on public.%I
+         for each row execute function public.set_updated_at_lww();', t);
+
+    execute format('alter table public.%I enable row level security;', t);
+
+    for pol in
+      select policyname from pg_policies
+      where schemaname = 'public' and tablename = t
+    loop
+      execute format('drop policy if exists %I on public.%I;', pol, t);
+    end loop;
+
+    execute format(
+      'create policy "%1$s_select_own" on public.%1$s
+         for select to authenticated using ((select auth.uid()) = user_id);', t);
+    execute format(
+      'create policy "%1$s_insert_own" on public.%1$s
+         for insert to authenticated with check ((select auth.uid()) = user_id);', t);
+    execute format(
+      'create policy "%1$s_update_own" on public.%1$s
+         for update to authenticated
+         using ((select auth.uid()) = user_id)
+         with check ((select auth.uid()) = user_id);', t);
+    execute format(
+      'create policy "%1$s_delete_own" on public.%1$s
+         for delete to authenticated using ((select auth.uid()) = user_id);', t);
+  end loop;
+end;
+$$;
 
 -- ============================================================================
 -- ============================================================================

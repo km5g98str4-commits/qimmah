@@ -13,6 +13,7 @@ import {
   buildArabicSummary,
   type PortabilityBundle,
 } from './format'
+import type { Lang } from '@/lib/appPreferences'
 
 const isObj = (v: unknown): v is Record<string, unknown> => !!v && typeof v === 'object' && !Array.isArray(v)
 
@@ -69,7 +70,19 @@ export type DeliveryMethod = 'share' | 'download' | 'unavailable'
  * — تعمل داخل WKWebView على iOS ١٥+ — وإلا يسقط لتنزيل Blob على الويب.
  * لا شبكة. يعيد الطريقة المستخدمة. يبتلع إلغاء المستخدم للمشاركة بهدوء.
  */
-export async function deliverBundle(bundle: PortabilityBundle, now: Date = new Date()): Promise<DeliveryMethod> {
+/**
+ * عنوان ورقة المشاركة الأصلية. كان مثبّتًا بالعربية فيراه مستخدم الإنجليزية عربيًا
+ * في كل تصدير — وهو نصّ يظهر خارج التطبيق (ورقة مشاركة النظام).
+ */
+export function exportShareTitle(lang: Lang = 'ar'): string {
+  return lang === 'en' ? 'Qimmah data backup' : 'نسخة بيانات قِمّة'
+}
+
+export async function deliverBundle(
+  bundle: PortabilityBundle,
+  now: Date = new Date(),
+  lang: Lang = 'ar',
+): Promise<DeliveryMethod> {
   if (typeof window === 'undefined') return 'unavailable'
   const json = JSON.stringify(bundle, null, 2)
   const filename = exportFilename(now)
@@ -85,7 +98,7 @@ export async function deliverBundle(bundle: PortabilityBundle, now: Date = new D
       const file = new File([blob], filename, { type: 'application/json' })
       if (nav.canShare({ files: [file] })) {
         try {
-          await nav.share({ files: [file], title: 'نسخة بيانات قِمّة' })
+          await nav.share({ files: [file], title: exportShareTitle(lang) })
           return 'share'
         } catch (err) {
           // إلغاء المستخدم (AbortError) ليس فشلًا — لا نُكمل للتنزيل كي لا نُكرّر.

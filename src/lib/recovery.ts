@@ -1,3 +1,13 @@
+// ⚠️ DEPRECATED (P11) — وحدة التعافي القديمة (v1).
+// المحرّك الجديد مُرقَّم القواعد في src/lib/recoveryEngine.ts (v2): اقتراح
+// proceed/reduce_volume/reduce_intensity/rest + ثقة + أثر قرار لكل عامل + اتجاه ٧/٢٨ يومًا.
+// تبقى هذه الوحدة تعمل كما هي لأن RecoveryView.tsx (شاشات 37–39) ما زالت تقرأ/تكتب
+// سجلّ v1، وسجلّ v1 يُستورد للقراءة في v2 عبر ensureRecoveryEngineMigrated (بلا حذف).
+// لا تُضِف منطقًا جديدًا هنا — أي تطوير يذهب إلى recoveryEngine.ts.
+// DEPRECATED (P11): legacy v1 recovery module. The rules-versioned engine lives in
+// src/lib/recoveryEngine.ts; this stays functional (view + v1 log intact, read-imported
+// into v2 without deletion). Do not add new logic here.
+//
 // Recovery check-in — Qimmah Design Standard v3.0, Recovery area (screens 37–39).
 // HONESTY RULE: a recommendation is derived ONLY from what the user self-reports
 // (effort · sleep · soreness · energy). It is NEVER medical and is NEVER derived

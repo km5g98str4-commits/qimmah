@@ -36,6 +36,11 @@ const checks = [
   ['لا أسماء عربية مكرّرة (Cycle 5)', c('DUP_NAME_AR') === 0, `${c('DUP_NAME_AR')}`],
   ['لا أسماء إنجليزية مكرّرة (Cycle 5)', c('DUP_NAME_EN') === 0, `${c('DUP_NAME_EN')}`],
   ['لا تباعد سعرات جديد — DIVERGE_KCAL ≤ 4 (المقبولة موثّقة)', c('DIVERGE_KCAL') <= 4, `${c('DIVERGE_KCAL')}`],
+  ['لا أسماء سلاسل تجارية في Food R2 — TRADEMARK', c('TRADEMARK') === 0, `${c('TRADEMARK')}`],
+  // كثافة السعرات لكل فئة (CATEGORY_KCAL_R2): سقف انحدار لا هدف. القيمة الحالية 5 صفوف
+  // بروست معلّقة على قرار المالك (انظر docs/release/RC-v1.2.0.md) — العتبة تمنع أي زيادة
+  // جديدة، وتُشدَّد إلى 0 فور اعتماد الأرقام المصحّحة.
+  ['كثافة سعرات Food R2 لا تتراجع — CATEGORY_KCAL_R2 ≤ 5', c('CATEGORY_KCAL_R2') <= 5, `${c('CATEGORY_KCAL_R2')}`],
 ]
 
 console.log('════════ إثبات قاعدة الأطعمة — قِمّة ════════')

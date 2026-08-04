@@ -121,13 +121,41 @@ export function loadOnboardingProfile(): OnboardingProfile | null {
   }
 }
 
+/**
+ * المسار القانوني الوحيد لرفع onboarding إلى صف profiles (إصلاح سباق الكتّاب
+ * الثلاثة — P12): كل كاتب (حفظ محلي، ترطيب المزامنة، بوابة إكمال الإعداد) يمرّ
+ * من هنا بنفس الشكل الكامل وبطابع LWW (updated_at) — لا كتابة مباشرة لعمود
+ * onboarding خارج طابور المزامنة عندما تكون المزامنة مفعّلة.
+ */
+export function enqueueOnboardingProfileUpsert(value: OnboardingProfile): void {
+  enqueueSyncOperation('profiles', 'profile', {
+    data: { onboarding: value },
+    updated_at: value._meta.updatedAt ?? value._meta.completedAt ?? new Date().toISOString(),
+  })
+}
+
 export function saveOnboardingProfile(value: OnboardingProfile): void {
   if (typeof window === 'undefined') return
   try {
-    window.localStorage.setItem(ONBOARDING_PROFILE_KEY, JSON.stringify(value))
-    enqueueSyncOperation('profiles', 'profile', { data: { onboarding: value } })
+    // ختم LWW عند كل حفظ محلي — دليل الأحدثية لدمج profiles.data.onboarding.
+    const stamped: OnboardingProfile = { ...value, _meta: { ...value._meta, updatedAt: new Date().toISOString() } }
+    window.localStorage.setItem(ONBOARDING_PROFILE_KEY, JSON.stringify(stamped))
+    enqueueOnboardingProfileUpsert(stamped)
   } catch {
     /* تجاهل أخطاء التخزين (وضع التصفّح الخاص …) */
+  }
+}
+
+/**
+ * كتابة ملف الإعداد من مسار المزامنة (hydrate) بعد فوزه بالـLWW — **دون إعادة
+ * ختم** (إعادة الختم بـ«الآن» تزوّر الأحدثية وتقلب دمج الأجهزة اللاحق).
+ */
+export function saveOnboardingProfileFromSync(value: OnboardingProfile): void {
+  if (typeof window === 'undefined') return
+  try {
+    window.localStorage.setItem(ONBOARDING_PROFILE_KEY, JSON.stringify(value))
+  } catch {
+    /* تجاهل أخطاء التخزين */
   }
 }
 

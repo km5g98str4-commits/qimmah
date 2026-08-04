@@ -27,25 +27,40 @@ function check(label: string, cond: boolean): void {
 }
 
 function draft(over: Partial<OnboardingV2Draft> = {}): OnboardingV2Draft {
-  return { step: 2, goal: 'cut', days: 4, duration: 45, place: 'gym', pref: 'mixed', hasInjury: true, injuries: ['knee'], healthDataConsent: true, ...over }
+  return { step: 2, age: null, gender: null, heightCm: null, weightKg: null, intent: 'meals', level: 'intermediate', trainingYears: null, goal: 'cut', days: 4, duration: 45, place: 'gym', pref: 'mixed', hasInjury: true, injuries: ['knee'], healthDataConsent: true, ...over }
 }
+
+/** حالة تحقّق كاملة — الأرقام أُزيحت بعد إدراج خطوة «النية والمستوى» (1). */
+const V = (over: Partial<OnboardingV2Draft> = {}) => ({
+  age: 30, gender: 'male' as const, heightCm: 180, weightKg: 90,
+  intent: 'meals' as const, level: 'intermediate' as const, trainingYears: null,
+  goal: 'cut' as const, days: 4, duration: 45,
+  place: null, pref: null, healthDataConsent: true,
+  ...over,
+})
 
 console.log('\n① تحقّق الخطوات (رسالة خاصة بكل خطوة)')
 {
-  check('صياغة المكان تطابق النص العربي المعتمد', V2_ONBOARDING.ar.equipment.title === 'أين وكيف تتمرّن؟')
-  // Step 0 — goal required.
-  check('خطوة الهدف بلا هدف → «goal»', validateStep(0, { goal: null, days: 4, duration: 45, place: null, pref: null, healthDataConsent: false }) === 'goal')
-  check('خطوة الهدف بلا موافقة صحية → محجوبة', validateStep(0, { goal: 'bulk', days: 4, duration: 45, place: null, pref: null, healthDataConsent: false }) === 'healthConsent')
-  check('خطوة الهدف مع الموافقة → صالحة', validateStep(0, { goal: 'bulk', days: 4, duration: 45, place: null, pref: null, healthDataConsent: true }) === null)
-  check('canAdvance(0) يتبع الموافقة', canAdvance(0, { goal: 'cut', days: 4, duration: 45, place: null, pref: null, healthDataConsent: true }) === true)
-  // Step 1 — training defaults are always valid; an off-set value is caught.
-  check('خطوة التدريب بالقيم الافتراضية → صالحة', validateStep(1, { goal: 'cut', days: 4, duration: 45, place: null, pref: null, healthDataConsent: true }) === null)
-  check('خطوة التدريب بقيمة أيام خارج المجموعة → «training»', validateStep(1, { goal: 'cut', days: 7, duration: 45, place: null, pref: null, healthDataConsent: true }) === 'training')
-  // Step 2 — place + pref required.
-  check('خطوة المعدات بلا مكان → «equipment»', validateStep(2, { goal: 'cut', days: 4, duration: 45, place: null, pref: 'mixed', healthDataConsent: true }) === 'equipment')
-  check('خطوة المعدات بلا تفضيل → «equipment»', validateStep(2, { goal: 'cut', days: 4, duration: 45, place: 'gym', pref: null, healthDataConsent: true }) === 'equipment')
-  check('خطوة المعدات بمكان وتفضيل → صالحة', validateStep(2, { goal: 'cut', days: 4, duration: 45, place: 'gym', pref: 'mixed', healthDataConsent: true }) === null)
-  check('canAdvance(2) ناقص → false', canAdvance(2, { goal: 'cut', days: 4, duration: 45, place: 'gym', pref: null, healthDataConsent: true }) === false)
+  check('صياغة المكان تطابق النص العربي المعتمد', V2_ONBOARDING.ar.equipment.title === 'وين وكيف تتمرّن؟')
+  // الموافقة على الخطوة 0 (الجسد) لتسبق أي جمع بيانات — وتُفحص قبل حقول الجسد.
+  check('الموافقة شرط الخطوة الأولى (قبل حقول الجسد)', validateStep(0, V({ age: null, gender: null, heightCm: null, weightKg: null, goal: null, healthDataConsent: false })) === 'healthConsent')
+  check('بعد الموافقة تُطلب حقول الجسد', validateStep(0, V({ age: null, gender: null, heightCm: null, weightKg: null, goal: null })) === 'body')
+  // Step 1 — النية والمستوى.
+  check('خطوة النية بلا نية → «intentLevel»', validateStep(1, V({ intent: null })) === 'intentLevel')
+  check('خطوة النية بلا مستوى → «intentLevel»', validateStep(1, V({ level: null })) === 'intentLevel')
+  check('النية والمستوى معًا → صالحة', validateStep(1, V()) === null)
+  // Step 2 — goal required.
+  check('خطوة الهدف بلا هدف → «goal»', validateStep(2, V({ goal: null })) === 'goal')
+  check('خطوة الهدف مع الموافقة → صالحة', validateStep(2, V({ goal: 'bulk' })) === null)
+  check('canAdvance(2) يتبع الهدف', canAdvance(2, V()) === true)
+  // Step 3 — training defaults are always valid; an off-set value is caught.
+  check('خطوة التدريب بالقيم الافتراضية → صالحة', validateStep(3, V()) === null)
+  check('خطوة التدريب بقيمة أيام خارج المجموعة → «training»', validateStep(3, V({ days: 7 })) === 'training')
+  // Step 4 — place + pref required.
+  check('خطوة المعدات بلا مكان → «equipment»', validateStep(4, V({ pref: 'mixed' })) === 'equipment')
+  check('خطوة المعدات بلا تفضيل → «equipment»', validateStep(4, V({ place: 'gym' })) === 'equipment')
+  check('خطوة المعدات بمكان وتفضيل → صالحة', validateStep(4, V({ place: 'gym', pref: 'mixed' })) === null)
+  check('canAdvance(4) ناقص → false', canAdvance(4, V({ place: 'gym' })) === false)
 }
 
 console.log('\n② مسار إعادة المحاولة (آلة حالة الإنهاء)')
@@ -81,6 +96,11 @@ console.log('\n③ جولة المسودة (مربوطة بالمالك، آمن
   check('مسودة بإصدار قديم → تُتجاهَل', loadDraftV2('userA') === undefined)
   globalThis.localStorage.setItem('qimmah:onboarding:v1', JSON.stringify({ owner: 'userA', draft: { v: 2, step: 99, goal: 'nope', days: 'x' } }))
   check('مسودة مشوّهة → تُتجاهَل', loadDraftV2('userA') === undefined)
+  // نية/مستوى مزيّفان في التخزين → تُرفض المسودة كلها (إدخال غير موثوق).
+  globalThis.localStorage.setItem('qimmah:onboarding:v1', JSON.stringify({ owner: 'userA', draft: { ...draft(), v: 5, intent: 'hack' } }))
+  check('نية غير معروفة → تُتجاهَل المسودة', loadDraftV2('userA') === undefined)
+  globalThis.localStorage.setItem('qimmah:onboarding:v1', JSON.stringify({ owner: 'userA', draft: { ...draft(), v: 5, level: 'elite' } }))
+  check('مستوى غير معروف → تُتجاهَل المسودة', loadDraftV2('userA') === undefined)
 }
 
 console.log('\n④ تجاهل المسودة عند الإنهاء')
@@ -94,8 +114,15 @@ console.log('\n④ تجاهل المسودة عند الإنهاء')
 console.log('\n⑤ افتراضيات أول تشغيل')
 {
   clearDraftV2('newUser')
-  check('بلا مسودة يبدأ من الهدف مع قيم التدريب الآمنة', JSON.stringify(initialDraftV2('newUser')) === JSON.stringify({
+  check('بلا مسودة يبدأ من الجسد مع قيم التدريب الآمنة', JSON.stringify(initialDraftV2('newUser')) === JSON.stringify({
     step: 0,
+    age: null,
+    gender: null,
+    heightCm: null,
+    weightKg: null,
+    intent: null,
+    level: null,
+    trainingYears: null,
     goal: null,
     days: 4,
     duration: 45,

@@ -10,6 +10,7 @@ import type { SessionExercise, SetLog, WorkoutSession } from './workoutSessions'
 import type { ExerciseHistory } from './exerciseHistory'
 import type { MeasurementLog } from '@/types/progress'
 import { enqueueSyncDelete, enqueueSyncOperation } from './syncQueue'
+import { writeJson, writeRaw } from '@/lib/safeStorage'
 
 // ختم اليوم المحلي (YYYY-MM-DD) — مكرّر هنا لكسر الاعتماد الدائري مع today.ts.
 function dayStamp(d = new Date()): string {
@@ -108,13 +109,11 @@ function readJSON<T>(key: string, fallback: T): T {
   }
 }
 
-function writeJSON(key: string, value: unknown): void {
-  if (typeof window === 'undefined') return
-  try {
-    window.localStorage.setItem(key, JSON.stringify(value))
-  } catch {
-    /* تجاهل امتلاء التخزين */
-  }
+// كل كتابة دائمة تمرّ من الطبقة الآمنة: لا ترمي (فلا تنكسر أي واجهة)، لكنها
+// تُسجّل الفشل في مؤشّر عالمي بدل ابتلاعه — فيستطيع مسار إنهاء التمرين أن يعرف
+// أن الحفظ لم يحدث ويقول ذلك للمستخدم بدل عرض نجاح زائف.
+function writeJSON(key: string, value: unknown): boolean {
+  return writeJson(key, value) === 'ok'
 }
 
 function nowISO(): string {
@@ -161,6 +160,9 @@ function normalizeExercise(raw: unknown): SessionExercise {
   } as SessionExercise
 }
 
+// (P5) قيم حالة الجلسة الصالحة — أي قيمة أخرى تُسقط (localStorage مدخل معادٍ).
+const SESSION_STATUSES = new Set(['in_progress', 'completed', 'ended_early', 'abandoned'])
+
 function normalizeSession(raw: unknown): WorkoutSession | null {
   if (!raw || typeof raw !== 'object') return null
   const s = raw as Record<string, unknown>
@@ -173,6 +175,8 @@ function normalizeSession(raw: unknown): WorkoutSession | null {
     workoutDayId: typeof s.workoutDayId === 'string' ? s.workoutDayId : '',
     workoutDayName: typeof s.workoutDayName === 'string' ? s.workoutDayName : '',
     exercises: Array.isArray(s.exercises) ? s.exercises.map(normalizeExercise) : [],
+    // (P5) حالة الجلسة تُحفظ عبر جولة القراءة/الكتابة؛ الغياب = جلسة قديمة (completed).
+    status: typeof s.status === 'string' && SESSION_STATUSES.has(s.status) ? (s.status as WorkoutSession['status']) : undefined,
   }
 }
 
@@ -291,15 +295,24 @@ export function getMeasurementLogs(): MeasurementLog[] {
 
 export function saveMeasurementLog(log: MeasurementLog): MeasurementLog[] {
   ensureMigrated()
-  const existing = getMeasurementLogs().filter((l) => l.id !== log.id)
-  const next = [log, ...existing].slice(0, 1000)
+  // طابع LWW: كل حفظ يحمل updatedAt؛ سجل قديم بلا طابع يُكمل كما هو (يسقط لدقّة اليوم عند الحسم).
+  const stamped: MeasurementLog = { ...log, updatedAt: log.updatedAt ?? nowISO() }
+  const existing = getMeasurementLogs().filter((l) => l.id !== stamped.id)
+  const next = [stamped, ...existing].slice(0, 1000)
   writeJSON(HISTORY_KEYS.measurementLogs, next)
-  enqueueSyncOperation('measurement_logs', log.id, {
-    local_id: log.id,
-    date: log.date,
-    values: log.values,
-    notes: log.notes ?? null,
-  })
+  // سياسة خصوصية الصحة (P12): القياسات المستوردة من HealthKit (source:'health')
+  // لا تُرفع لسحابتنا أبدًا — بياناتها تعيش في Apple Health ومصدر حقيقتها هناك؛
+  // اليدوي فقط يُزامَن. deleted_at:null يُحيي صفًا سبق أن حمل شاهد قبر (LWW).
+  if (stamped.source !== 'health') {
+    enqueueSyncOperation('measurement_logs', stamped.id, {
+      local_id: stamped.id,
+      date: stamped.date,
+      values: stamped.values,
+      notes: stamped.notes ?? null,
+      updated_at: stamped.updatedAt,
+      deleted_at: null,
+    })
+  }
   return next
 }
 
@@ -308,7 +321,8 @@ export function setMeasurementLogs(logs: MeasurementLog[]): void {
   ensureMigrated()
   const retained = new Set(logs.map((log) => log.id))
   getMeasurementLogs().forEach((log) => {
-    if (!retained.has(log.id)) enqueueSyncDelete('measurement_logs', log.id)
+    // شاهد قبر بطابع (P12) — المستورد من الصحة لم يُرفع أصلًا فلا يُقبَر.
+    if (!retained.has(log.id) && log.source !== 'health') enqueueSyncDelete('measurement_logs', log.id)
   })
   writeJSON(HISTORY_KEYS.measurementLogs, logs)
 }
@@ -550,7 +564,9 @@ export function ensureMigrated(): void {
       }
     }
 
-    window.localStorage.setItem(MIGRATION_FLAG, 'done')
+    // راية الترحيل تمرّ من الطبقة الآمنة كغيرها (§5) — الكتابة الخام هنا كانت
+    // آخر تجاوز في الملف، والتقطه إثبات `test:safe-storage`.
+    writeRaw(MIGRATION_FLAG, 'done')
   } catch {
     // لا نُفشل التطبيق بسبب الترحيل.
   }

@@ -45,100 +45,203 @@
 <div class="page-head">
   <div class="container legal">
     <h1>سياسة الخصوصية</h1>
-    <p class="meta">آخر تحديث: <strong>[DATE]</strong> · المسؤول عن البيانات: <strong>تطبيق قِمّة — يمثله مالكه / Qimmah App — represented by its owner</strong> · التواصل: <a href="mailto:[OWNER-EMAIL]">[OWNER-EMAIL]</a></p>
+    <p class="meta">آخر تحديث: <strong>٣٠ يوليو ٢٠٢٦</strong> · المسؤول عن البيانات: <strong>تطبيق قِمّة — يمثله مالكه / Qimmah App — represented by its owner</strong> · التواصل: <a href="mailto:qimmah.support@gmail.com">qimmah.support@gmail.com</a></p>
     <p class="toc"><a href="#ar">العربية</a><a href="#en">English</a></p>
   </div>
 </div>
 
 <main id="main" class="section">
   <div class="container prose legal">
-    <div class="note"><strong>مسودة للمراجعة القانونية — ليست استشارة قانونية.</strong> كل بند مبني على سلوك التطبيق الفعلي في الشيفرة. المواضع بين [ ] تحتاج قرارًا قبل النشر.</div>
 
     <section id="ar">
-      <h2>١) من نحن ومبدأنا</h2>
-      <p>قِمّة تطبيق لياقة عربي (تمارين، تغذية، قياسات، تقدّم). التطبيق <strong>«محلي أولًا»</strong>: بياناتك تُحفظ على جهازك أولًا، والمزامنة السحابية اختيارية وتعمل فقط عند تسجيل الدخول. بلا حساب، تبقى بياناتك على جهازك.</p>
+      <h2>١) مبدأنا في جملة واحدة</h2>
+      <p><strong>قِمّة محلي افتراضيًا.</strong> بياناتك تُحفظ على جهازك أولًا. المزامنة السحابية <strong>اختيارية</strong> ولا تعمل إلا عند تسجيل الدخول بحساب. بلا حساب، لا تغادر بياناتك جهازك.</p>
+      <p>هذا ليس وعدًا تسويقيًا، بل وصف لكيفية بناء التطبيق: التخزين المحلي هو المسار الأصلي، والمزامنة طبقة فوقه تُفعَّل باختيارك.</p>
 
-      <h2>٢) ما الذي نجمعه ولماذا</h2>
-      <h3>أ) بيانات الحساب</h3><p>البريد الإلكتروني وكلمة المرور واسم العرض (اختياري) — لتسجيل الدخول والمزامنة. تُدار كلمة المرور بأمان عبر مزوّد المصادقة (Supabase) ولا نطّلع عليها.</p>
-      <h3>ب) ملفك وبياناتك الجسدية</h3><p>الاسم، العمر، الجنس، الطول، الوزن، الوزن المستهدف، مستوى الخبرة، والهدف (تنشيف/محافظة/تضخيم) — لبناء خطتك وحساب سعراتك.</p>
-      <h3>ج) بيانات الصحة واللياقة</h3><p>جلسات التمرين (التمارين والأوزان والتكرارات)، الأرقام القياسية، القياسات (الوزن، الخصر، نسبة الدهون)، الأدوية والمكمّلات التي تتابعها، والإصابات — لتتبّع تقدّمك وتخصيص خطتك.</p>
-      <h3>د) تسجيلات يومية</h3><p>سجلّ التغذية والسعرات، الماء، الخطوات (تُدخَل يدويًا — <strong>لا نقرأ Apple Health</strong>)، والإنجازات، والخطط المخصّصة، والمهام. تبقى محلية أولًا، وقد تُزامَن إلى حسابك عند تفعيل المزامنة.</p>
-      <h3>هـ) الكاميرا</h3><p>تُستخدم <strong>فقط</strong> لمسح باركود المنتجات الغذائية. تُعالَج الصورة على الجهاز لقراءة الرمز؛ لا تُخزَّن ولا تُرسَل صور.</p>
-      <h3>و) التنبيهات الاختيارية</h3><p>يمكنك تفعيل تنبيهات محلية للتمرين والراحة والماء والملخّص الأسبوعي والمكمّلات. تبقى الأوقات وفترة الهدوء على جهازك ولا تُرسل إلى خادم. لا نطلب الإذن إلا عند تفعيلها، ويظل نص شاشة القفل عامًا بلا أسماء أدوية أو مكمّلات أو تفاصيل صحية.</p>
-      <h3>ز) تشخيص اختياري</h3><p>التطبيق <strong>لا يجمع</strong> بيانات استخدام افتراضيًا. عند تفعيله من المالك فقط، تُرسل أحداث مجهولة (أعداد بلا بريد أو اسم أو رقم باركود) بمعرّف عشوائي غير مرتبط بحسابك وبموافقتك.</p>
+      <h2>٢) ما الذي نجمعه، ولماذا</h2>
+      <p><strong>أ) بيانات الحساب</strong> — البريد الإلكتروني وكلمة المرور واسم العرض (اختياري). الغرض: تسجيل الدخول والمزامنة. تُدار كلمة المرور لدى مزوّد المصادقة (Supabase) ولا نطّلع عليها إطلاقًا.</p>
+      <p><strong>ب) بيانات جسدك</strong> — العمر، الجنس، الطول، الوزن، الوزن المستهدف، مستوى الخبرة، والهدف. الغرض: حساب احتياجك التقديري من الطاقة وبناء خطتك. <strong>لا نجمع هذه البيانات قبل موافقتك الصحية الصريحة</strong> (انظر §٣).</p>
+      <p><strong>ج) بيانات تمرينك وقياساتك</strong> — الجلسات (التمارين والأوزان والتكرارات)، الأرقام القياسية، القياسات (الوزن، الخصر، نسبة الدهون)، المكمّلات والأدوية التي تختار متابعتها، والإصابات التي تُدخلها. الغرض: عرض تقدّمك وتكييف خطتك.</p>
+      <p><strong>د) سجلّاتك اليومية</strong> — التغذية والسعرات، الماء، الخطوات، الإنجازات، الخطط المخصّصة، والمهام.</p>
+      <p><strong>هـ) الكاميرا</strong> — تُستخدم <strong>لمسح باركود المنتجات الغذائية فقط</strong>. تُقرأ الصورة على جهازك لفكّ الرمز، ولا تُحفظ صورة ولا تُرسَل.</p>
+      <p><strong>و) موقعك</strong> — يُطلب <strong>فقط</strong> إذا فعّلت جدولة الوضع الداكن، ولمرّة واحدة في كل مرّة، لحساب وقت الغروب والشروق في منطقتك. <strong>لا يُخزَّن ولا يُرسَل إلى أي جهة.</strong> ولك بديل كامل: اختيار مدينتك يدويًا. رفض الإذن <strong>لا يحجب عنك الميزة</strong>.</p>
+      <p><strong>ز) الإشعارات</strong> — تنبيهات <strong>محلية</strong> على جهازك (التمرين، الراحة، الماء، المكمّلات، الملخّص الأسبوعي). أوقاتها وفترة هدوئها تبقى على جهازك ولا تُرسل إلى خادم. <strong>لا يوجد خادم إشعارات.</strong> ونص شاشة القفل عام دائمًا — لا أسماء أدوية ولا مكمّلات ولا تفاصيل صحية.</p>
+      <p><strong>ح) التشخيص</strong> — التطبيق <strong>لا يجمع بيانات استخدام افتراضيًا</strong>. إن فعّلها المالك مستقبلًا، فأحداث مجهولة بلا معرّف شخصي وبموافقتك.</p>
 
-      <h2>٣) ما لا نفعله</h2>
+      <h2>٣) الموافقة الصحية — منفصلة، وقبل الجمع لا بعده</h2>
+      <p>بيانات جسدك وصحتك تُعامَل معاملة خاصة:</p>
+      <ol>
+        <li><strong>الموافقة تسبق الحقل.</strong> في أول خطوة من الإعداد، لا يُقبل منك عمر ولا طول ولا وزن قبل موافقتك الصريحة على معالجة بياناتك الصحية. الإذن أولًا، ثم الجمع.</li>
+        <li><strong>الموافقة على المعالجة ليست موافقة على المزامنة.</strong> موافقتك على أن يحسب التطبيق خطتك من بياناتك <strong>لا تعني</strong> أنها تغادر جهازك. مزامنة بياناتك الصحية الحسّاسة تحتاج <strong>موافقة منفصلة صريحة</strong> — قرار ثانٍ مستقل، لا بندًا مطويًّا في الأول.</li>
+        <li><strong>الرجوع متاح.</strong> يمكنك سحب الموافقة، وحينها تتوقّف المعالجة المبنيّة عليها.</li>
+      </ol>
+
+      <h2>٤) ما الذي يبقى على جهازك، وما الذي يُزامَن</h2>
+      <p><strong>على جهازك دائمًا:</strong> كل ما سبق في §٢، افتراضيًا وبالكامل.</p>
+      <p><strong>يُزامَن — وفقط عند اجتماع كل هذه الشروط:</strong> أن تسجّل الدخول بحساب · وأن تكون المزامنة مفعّلة · وأن تكون قد وافقت موافقة منفصلة على مزامنة بياناتك الصحية الحسّاسة.</p>
+      <p>عند المزامنة، تُرسَل بياناتك عبر اتصال مشفّر (HTTPS) إلى حسابك أنت وحدك، ومحميّة بصلاحيات على مستوى الصف (RLS) بحيث لا يصل إليها غيرك.</p>
+
+      <h2>٥) ما الذي يغادر جهازك، ولمن</h2>
+      <table>
+        <thead><tr><th>الوجهة</th><th>متى</th><th>ماذا يُرسَل</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Supabase</strong></td><td>عند تسجيل الدخول وتفعيل المزامنة</td><td>بيانات حسابك وملفك وسجلّاتك — مرتبطة بمعرّف حسابك، خلف RLS</td></tr>
+          <tr><td><strong>Open Food Facts</strong></td><td>عند مسح أو بحث باركود</td><td><strong>رقم الباركود فقط</strong> — ولا شيء عنك</td></tr>
+          <tr><td><strong>GitHub / jsDelivr</strong></td><td>عند عرض صورة تمرين توضيحية</td><td>طلب تحميل صورة (يظهر عنوان IP لجهازك للمزوّد كأي طلب ويب) — بلا بيانات عنك</td></tr>
+          <tr><td><strong>YouTube</strong></td><td>عند ضغطك «شاهد الأداء»</td><td>يُفتح رابط بحث في متصفّحك خارج التطبيق — لا تضمين ولا تتبّع داخلي</td></tr>
+          <tr><td><strong>Apple Health</strong></td><td>بعد ربطك الصريح</td><td><strong>لا شيء يُرسَل.</strong> الاتجاه قراءة فقط: من Health إلى جهازك</td></tr>
+        </tbody>
+      </table>
+
+      <h2>٦) بيانات Apple Health — ماذا نقرأ، ولماذا، وماذا لا نفعل</h2>
+      <p><strong>لا يطلب قِمّة أي بيانات صحية عند الإقلاع.</strong> لا يحدث شيء حتى تختار بنفسك ربط تطبيق الصحة.</p>
+      <p><strong>ماذا نقرأ:</strong> بعد موافقتك، نقرأ ما تسمح به من: النشاط (الخطوات، المسافة، الطوابق، الطاقة النشطة وطاقة الأساس، دقائق التمرين والوقوف) · قياسات الجسم (الطول، الوزن، نسبة الدهون، الكتلة الصافية) · القلب (النبض، نبض الراحة، متوسط نبض المشي، تغيّرية النبض، VO₂ Max، تعافي النبض) · النوم ومراحله · التنفّس وأكسجين الدم وحرارة المعصم أثناء النوم · ما سجّلته تطبيقات التغذية الأخرى (الماء، السعرات، البروتين، الكربوهيدرات، الدهون) · وسجلّ تمارينك المسجَّلة.</p>
+      <p><strong>لماذا:</strong> لعرض تقدّمك بصدق دون أن تُدخل يدويًا ما سجّلته أجهزتك أصلًا.</p>
+      <p><strong>وماذا لا نفعل — بوضوح:</strong></p>
       <ul>
-        <li><strong>لا إعلانات، ولا تتبّع عبر التطبيقات أو المواقع</strong>، ولا بيع لبياناتك.</li>
-        <li><strong>لا نستخدم أي أدوات تتبّع من طرف ثالث</strong> (لا Google/Meta/غيرها).</li>
-        <li><strong>لا نطلب موقعك أو جهات اتصالك أو صورك.</strong></li>
+        <li><strong>لا نكتب شيئًا إلى تطبيق الصحة.</strong> الصلاحية المطلوبة قراءة فقط، ومجموعة الكتابة فارغة في الشيفرة.</li>
+        <li><strong>لا نبيع بياناتك الصحية، ولا نشاركها مع أي طرف ثالث، ولا نستخدمها في أي إعلان أو تسويق أو تحليل سلوكي.</strong></li>
+        <li><strong>لا نرسلها إلى Apple</strong> — القراءة من تطبيق الصحة إلى جهازك.</li>
+        <li><strong>التحكّم بيدك مقياسًا مقياسًا.</strong> تختار ما تربطه وما تتركه، وفصل أي مقياس <strong>يحذف ما استُورد منه</strong>.</li>
+        <li><strong>الإدخال اليدوي يبقى متاحًا دائمًا.</strong> الرفض لا يعطّل التطبيق.</li>
       </ul>
 
-      <h2>٤) ما الذي يغادر جهازك ولمن</h2>
-      <table><thead><tr><th>الوجهة</th><th>متى</th><th>ماذا يُرسَل</th></tr></thead><tbody>
-        <tr><td>Supabase (الخادم)</td><td>تسجيل الدخول وتفعيل المزامنة</td><td>بيانات الحساب والملف والتمارين والقياسات والتغذية والماء والخطوات والإنجازات والخطط والمهام والأدوية/المكمّلات — مرتبطة بمعرّف حسابك</td></tr>
-        <tr><td>Open Food Facts</td><td>مسح/بحث باركود غذائي</td><td>رقم الباركود فقط — بلا أي بيانات عنك</td></tr>
-        <tr><td>GitHub / jsDelivr</td><td>عرض صورة توضيحية لتمرين</td><td>طلب تحميل صورة (يظهر IP جهازك) — بلا بيانات عنك</td></tr>
-        <tr><td>YouTube</td><td>الضغط «شاهد الأداء»</td><td>يفتح رابط بحث خارجيًا — لا تضمين ولا تتبّع داخل التطبيق</td></tr>
-      </tbody></table>
+      <h2>٧) ما لا نفعله — إطلاقًا</h2>
+      <ul>
+        <li><strong>لا إعلانات.</strong> لا لافتة، ولا مدمجة، ولا برعاية.</li>
+        <li><strong>لا تتبّع عبر التطبيقات أو المواقع.</strong> لا نطلب إذن التتبّع (ATT) لأننا لا نتتبّع.</li>
+        <li><strong>لا بيع لبياناتك، ولا مشاركتها لأغراض تسويقية</strong> — لا الصحية ولا غيرها.</li>
+        <li><strong>لا أدوات تتبّع من طرف ثالث</strong> (لا Google ولا Meta ولا سواها).</li>
+        <li><strong>لا نطلب جهات اتصالك ولا صورك ولا ميكروفونك.</strong></li>
+      </ul>
 
-      <h2>٥) بيانات الصحة</h2>
-      <p>تبقى بيانات صحتك محلية، وعند تسجيل الدخول تُزامَن إلى حسابك الخاص فقط ومحميّة بصلاحيات على مستوى الصف (RLS) بحيث لا يصل إليها إلا أنت. <strong>لا نبيعها ولا نشاركها لأغراض تسويقية.</strong></p>
+      <h2>٨) حقوقك</h2>
+      <p><strong>الاطّلاع والتصحيح</strong> — بياناتك معروضة داخل التطبيق، وملفك قابل للتعديل في أي وقت.</p>
+      <p><strong>التصدير</strong> — «الملف الشخصي ← الإعدادات والخصوصية ← الخصوصية والبيانات» ينزّل نسخة JSON من بياناتك المتاحة على جهازك. لا حاجة لطلب ولا انتظار.</p>
+      <p><strong>حذف الحساب وأثره الكامل</strong> — «الإعدادات والخصوصية ← حذف الحساب نهائيًا»، ويؤدي إلى:</p>
+      <ol>
+        <li>حذف صفوفك من جميع جداول بيانات المستخدم على الخادم، <strong>قبل</strong> حذف حساب المصادقة؛</li>
+        <li>ثم حذف حساب المصادقة نفسه؛</li>
+        <li>ثم مسح كل بيانات قِمّة من جهازك — ولا يبقى إلا تفضيل غير شخصي كاللغة.</li>
+      </ol>
+      <p><strong>وإن تعذّر الحذف من الخادم، لا يُحذف شيء ولا يُدَّعى نجاح.</strong> تُخبَر بصراحة، وتعيد المحاولة أو تتواصل معنا. حذف التطبيق وحده لا يحذف حسابك السحابي إن كنت قد فعّلت المزامنة — استخدم الحذف داخل التطبيق.</p>
+      <p><strong>الاعتراض وتقييد المعالجة</strong> — سحب الموافقة الصحية يوقف المعالجة المبنيّة عليها.</p>
+      <p><strong>حقوقك بموجب نظام حماية البيانات الشخصية (السعودية)</strong> محفوظة، ولأي طلب: <a href="mailto:qimmah.support@gmail.com">qimmah.support@gmail.com</a>.</p>
 
-      <h2>٦) المزامنة والاستضافة وموقع التخزين</h2>
-      <p>تُزامَن البيانات عبر اتصال مشفّر (HTTPS). تُخزَّن بياناتك على بنية Supabase التحتية في <strong>اليابان</strong> (منطقة <code>ap-northeast-1</code> — طوكيو)، أي نقل عبر الحدود من المملكة العربية السعودية إلى اليابان. تُحكَم هذه المعالجة تعاقديًّا عبر مُلحق معالجة البيانات (DPA) الخاص بـ Supabase. لا ندّعي وجود قرار كفاية أو اعتماد رسمي لأي وجهة؛ ويبقى الاعتماد النهائي لآلية النقل عبر الحدود (PDPL) بيد المالك والمستشار القانوني قبل الإطلاق العام.</p>
+      <h2>٩) القاصرون</h2>
+      <p><strong>الحد الأدنى للعمر: ١٣ سنة.</strong></p>
+      <p><strong>للمستخدمين دون ١٨ سنة:</strong> تُقصر أهداف التغذية على <strong>المحافظة</strong> فقط — لا تنشيف ولا تضخيم. هذا اختيار مقصود: أجسام النمو ليست مكانًا لعجز أو فائض حراري يقترحه تطبيق. تبقى كل الأرقام تقديرية، وننصح بمراجعة مختص تغذية أو نمو قبل أي هدف يتعلّق بتغيير الوزن.</p>
+      <p><strong>لا يوجد مسار موافقة وليّ أمر في هذه النسخة</strong>، ولا ندّعي التحقّق من وثيقة هوية.</p>
 
-      <h2>٧) مدة الاحتفاظ</h2>
-      <p>نحتفظ ببياناتك ما دام حسابك قائمًا. البيانات المحلية تبقى على جهازك حتى تحذفها أو تحذف التطبيق. عند حذف الحساب تُمحى من الخادم والجهاز (§٨).</p>
+      <h2>١٠) مكان التخزين والنقل عبر الحدود</h2>
+      <p>عند تفعيل المزامنة، تُخزَّن بياناتك على بنية Supabase في <strong>اليابان</strong> (<code>ap-northeast-1</code> — طوكيو)، أي نقل عبر الحدود من المملكة. تُحكَم هذه المعالجة تعاقديًّا عبر مُلحق معالجة البيانات (DPA) الخاص بالمزوّد. <strong>لا ندّعي قرار كفاية ولا اعتمادًا رسميًا لأي وجهة.</strong></p>
 
-      <h2>٨) حذف بياناتك</h2>
-      <p>داخل التطبيق: «الإعدادات والخصوصية ← حذف الحساب نهائيًا»، ويؤدي إلى حذف صفوفك من جميع جداول بيانات المستخدم، ثم حساب المصادقة، ثم كل بيانات قِمّة من جهازك (تبقى تفضيلات غير شخصية كاللغة). إن تعذّر الحذف من الخادم لا يُحذف شيء ولا يُدّعى نجاح.</p>
+      <h2>١١) مدة الاحتفاظ</h2>
+      <p>بياناتك المحلية تبقى على جهازك حتى تحذفها أو تحذف التطبيق. بياناتك السحابية — إن فعّلت المزامنة — تبقى ما دام حسابك قائمًا، وتُمحى بحذفه (§٨).</p>
 
-      <h2>٩) حقوقك (نظام حماية البيانات الشخصية)</h2>
-      <p>لك الحق في <strong>الوصول</strong> و<strong>التصحيح</strong> و<strong>الحذف</strong> و<strong>الاعتراض/التقييد</strong>. يمكنك تنزيل نسخة JSON من البيانات المتاحة على جهازك من «الملف الشخصي ← الإعدادات والخصوصية ← الخصوصية والبيانات»، كما يمكنك تعديل ملفك أو حذف حسابك داخل التطبيق. لأي طلب إضافي راسلنا على <a href="mailto:support@qimmah.app">support@qimmah.app</a>.</p>
+      <h2>١٢) الأمان</h2>
+      <p>اتصالات مشفّرة (HTTPS) · مصادقة وصلاحيات صف (RLS) على الخادم · <strong>لا مفاتيح سرّية داخل التطبيق</strong> (المفاتيح العامة فقط، والحماية الحقيقية في RLS لا في إخفاء المفتاح).</p>
 
-      <h2>١٠) الأطفال والفئة العمرية</h2>
-      <p>الحد الأدنى للعمر المؤهّل: <strong>١٢ سنة</strong>، ويجب تأكيد ذلك صراحةً عند إنشاء الحساب. لا يوجد مسار موافقة وليّ أمر في هذه النسخة.</p>
+      <h2>١٣) تغييرات هذه السياسة</h2>
+      <p>قد نحدّثها؛ يُنشر التاريخ أعلاه، والتغييرات الجوهرية تُبلَّغ داخل التطبيق أو بالبريد.</p>
 
-      <h2>١١) الأمان</h2>
-      <p>اتصالات مشفّرة (HTTPS)، ومصادقة وصلاحيات صف (RLS) على الخادم. لا نخزّن مفاتيح سرية داخل التطبيق (مفاتيح عامة فقط محميّة بـ RLS).</p>
-
-      <h2>١٢) تغييرات هذه السياسة</h2>
-      <p>قد نحدّث السياسة؛ يُنشر التاريخ أعلاه، والتغييرات الجوهرية تُبلَّغ داخل التطبيق أو بالبريد.</p>
-
-      <h2>١٣) التواصل</h2>
-      <p><strong>تطبيق قِمّة — يمثله مالكه</strong> — <a href="mailto:[OWNER-EMAIL]">[OWNER-EMAIL]</a></p>
+      <h2>١٤) التواصل</h2>
+      <p>تطبيق قِمّة — يمثّله مالكه — <a href="mailto:qimmah.support@gmail.com">qimmah.support@gmail.com</a></p>
     </section>
 
-    <section id="en" class="en" lang="en">
-      <h2>1) Who we are &amp; our principle</h2>
-      <p>Qimmah is an Arabic-first fitness app (workouts, nutrition, measurements, progress). It is <strong>local-first</strong>: your data is stored on your device first; cloud sync is optional and runs only when you sign in. Without an account, your data stays on your device.</p>
-      <h2>2) What we collect and why</h2>
-      <p><strong>a) Account:</strong> email, password, optional display name — for sign-in and sync; passwords are managed securely by Supabase and we never see them.<br>
-      <strong>b) Profile &amp; body metrics:</strong> name, age, gender, height, weight, target weight, experience, goal — to build your plan and calorie targets.<br>
-      <strong>c) Health &amp; fitness:</strong> workouts (exercises, weights, reps), personal records, body measurements (weight, waist, body-fat %), tracked supplements/medications, and injuries — to track progress and tailor your plan.<br>
-      <strong>d) Daily logs:</strong> nutrition/calorie logs, water, steps (manual — <strong>we do not read Apple Health</strong>), achievements, custom plans, and tasks are local-first and may sync when sync is enabled.<br>
-      <strong>e) Camera:</strong> used <strong>only</strong> to scan food barcodes; frames are decoded on-device, no images stored or sent.<br>
-      <strong>f) Optional notifications:</strong> local workout/rest, water, weekly-summary, and supplement reminders. Times and quiet hours remain on-device and are not sent to a server. Permission is requested only when enabled; lock-screen copy is generic and contains no medication/supplement names or health details.<br>
-      <strong>g) Optional diagnostics:</strong> <strong>no</strong> usage data by default. Only if enabled by the owner, anonymous events (no email, name, or barcode) under a random identifier unlinked to your account, with consent.</p>
-      <h2>3) What we don’t do</h2>
-      <ul><li><strong>No ads, no cross-app/cross-site tracking, no selling your data.</strong></li><li><strong>No third-party tracking SDKs</strong> (no Google/Meta/etc.).</li><li><strong>We do not request your location, contacts, or photos.</strong></li></ul>
-      <h2>4) What leaves your device, to whom</h2>
-      <table><thead><tr><th>Destination</th><th>When</th><th>What is sent</th></tr></thead><tbody>
-        <tr><td>Supabase</td><td>Sign-in &amp; enabled sync</td><td>Account, profile, workouts, measurements, nutrition, water, steps, achievements, plans, tasks, meds/supplements — linked to your account id</td></tr>
-        <tr><td>Open Food Facts</td><td>Scan/search a barcode</td><td>The barcode number only — nothing about you</td></tr>
-        <tr><td>GitHub / jsDelivr</td><td>Viewing an exercise image</td><td>An image GET (your IP visible to the CDN) — nothing about you</td></tr>
-        <tr><td>YouTube</td><td>Tap “watch form”</td><td>Opens an external search URL — no in-app embed or tracking</td></tr>
-      </tbody></table>
-      <h2>5) Health data</h2><p>Your health data stays local and, when signed in, syncs only to your own account, protected by row-level security so only you can access it. We never sell or share it for marketing.</p>
-      <h2>6) Sync, hosting &amp; storage location</h2><p>Data syncs to Supabase over HTTPS. Your data is stored on Supabase infrastructure in <strong>Japan</strong> (region <code>ap-northeast-1</code>, Tokyo) — a cross-border transfer from Saudi Arabia to Japan. This processing is safeguarded contractually through Supabase's Data Processing Addendum (DPA). We claim no adequacy decision or formal approval for any destination; final sign-off on the cross-border transfer mechanism under the Saudi PDPL rests with the owner and legal counsel before public launch.</p>
-      <h2>7) Retention</h2><p>We keep your data while your account exists. Local data stays until you delete it or the app. Deleting your account erases data from server and device (§8).</p>
-      <h2>8) Deleting your data</h2><p>In-app: <strong>Settings &amp; privacy → Delete account permanently</strong> — deletes your rows from all Qimmah user-data tables, your auth account, and all Qimmah data on your device. If server deletion fails, nothing is deleted and no success is claimed.</p>
-      <h2>9) Your rights (Saudi PDPL)</h2><p>Access, correction, deletion, objection/restriction — export a JSON copy of the data available on your device from Profile → Settings &amp; privacy → Privacy &amp; data; for anything else, email <a href="mailto:support@qimmah.app">support@qimmah.app</a>.</p>
-      <h2>10) Children &amp; age</h2><p>Minimum eligible age: <strong>12 years</strong>. Account creation requires an explicit 12+ confirmation. This version has no parental-consent flow.</p>
-      <h2>11) Security</h2><p>Encrypted (HTTPS) connections; server-side auth and row-level security. No secret keys embedded in the app.</p>
-      <h2>12) Changes</h2><p>We may update this policy; the date above is published and material changes are notified.</p>
-      <h2>13) Contact</h2><p><strong>Qimmah App — represented by its owner</strong> — <a href="mailto:[OWNER-EMAIL]">[OWNER-EMAIL]</a></p>
+    <section id="en" class="en" lang="en" dir="ltr">
+      <h2>1) Our principle, in one sentence</h2>
+      <p><strong>Qimmah is local-first.</strong> Your data is stored on your device first. Cloud sync is <strong>optional</strong> and runs only when you sign in with an account. Without an account, your data never leaves your device.</p>
+      <p>This is not a marketing promise — it describes how the app is built: local storage is the primary path, and sync is a layer above it that you switch on.</p>
+
+      <h2>2) What we collect, and why</h2>
+      <p><strong>a) Account</strong> — email, password, optional display name. Purpose: sign-in and sync. Passwords are handled by our auth provider (Supabase); we never see them.</p>
+      <p><strong>b) Your body data</strong> — age, gender, height, weight, target weight, experience level, and goal. Purpose: to estimate your energy needs and build your plan. <strong>We do not collect any of this before your explicit health consent</strong> (see §3).</p>
+      <p><strong>c) Training and measurements</strong> — sessions (exercises, weights, reps), personal records, measurements (weight, waist, body-fat %), the supplements and medications you choose to track, and injuries you enter. Purpose: to show your progress and adapt your plan.</p>
+      <p><strong>d) Daily logs</strong> — nutrition and calories, water, steps, achievements, custom plans, and tasks.</p>
+      <p><strong>e) Camera</strong> — used <strong>only</strong> to scan food-product barcodes. Frames are decoded on your device; no image is stored or sent.</p>
+      <p><strong>f) Location</strong> — requested <strong>only</strong> if you turn on dark-mode scheduling, one shot at a time, to work out your local sunset and sunrise. <strong>It is never stored and never sent anywhere.</strong> You have a full alternative: pick your city manually. Denying the permission <strong>does not block the feature</strong>.</p>
+      <p><strong>g) Notifications</strong> — <strong>local</strong> reminders on your device (workout, rest, water, supplements, weekly summary). Their times and quiet hours stay on your device and are never sent to a server. <strong>There is no push server.</strong> Lock-screen copy is always generic — never medication or supplement names, never health details.</p>
+      <p><strong>h) Diagnostics</strong> — the app collects <strong>no usage data by default</strong>. If the owner enables it later, only anonymous events with no personal identifier, and with your consent.</p>
+
+      <h2>3) Health consent — separate, and before collection</h2>
+      <ol>
+        <li><strong>Consent comes before the field.</strong> On the first setup step, no age, height, or weight is accepted until you explicitly consent to your health data being processed. Permission first, collection second.</li>
+        <li><strong>Consent to process is not consent to sync.</strong> Agreeing that the app may compute your plan from your data does <strong>not</strong> mean that data leaves your device. Syncing sensitive health data requires a <strong>separate, explicit consent</strong> — a second independent decision, not a clause folded into the first.</li>
+        <li><strong>You can withdraw.</strong> Withdrawing consent stops the processing that relies on it.</li>
+      </ol>
+
+      <h2>4) What stays on your device, and what syncs</h2>
+      <p><strong>On your device, always:</strong> everything in §2, by default and in full.</p>
+      <p><strong>Synced — only when all of these are true:</strong> you are signed in · sync is enabled · and you have separately consented to syncing your sensitive health data.</p>
+      <p>When syncing, data travels over an encrypted (HTTPS) connection to your own account only, protected by row-level security so nobody else can reach it.</p>
+
+      <h2>5) What leaves your device, and to whom</h2>
+      <table>
+        <thead><tr><th>Destination</th><th>When</th><th>What is sent</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Supabase</strong></td><td>Signed in, with sync enabled</td><td>Your account, profile, and logs — tied to your account id, behind RLS</td></tr>
+          <tr><td><strong>Open Food Facts</strong></td><td>You scan or search a barcode</td><td><strong>The barcode number only</strong> — nothing about you</td></tr>
+          <tr><td><strong>GitHub / jsDelivr</strong></td><td>Viewing an exercise demo image</td><td>An image request (your IP is visible to the CDN, as with any web request) — nothing about you</td></tr>
+          <tr><td><strong>YouTube</strong></td><td>You tap "watch form"</td><td>Opens a search URL in your browser, outside the app — no embed, no in-app tracking</td></tr>
+          <tr><td><strong>Apple Health</strong></td><td>After you explicitly connect</td><td><strong>Nothing is sent.</strong> The direction is read-only: from Health onto your device</td></tr>
+        </tbody>
+      </table>
+
+      <h2>6) Apple Health data — what we read, why, and what we never do</h2>
+      <p><strong>Qimmah requests no health data at launch.</strong> Nothing happens until you choose to connect the Health app yourself.</p>
+      <p><strong>What we read:</strong> with your permission — activity (steps, distance, flights, active and resting energy, exercise and stand minutes) · body measurements (height, weight, body-fat %, lean mass) · heart (heart rate, resting and walking heart rate, HRV, VO₂ Max, heart-rate recovery) · sleep and its stages · respiratory rate, blood oxygen, and sleeping wrist temperature · nutrition logged by other apps (water, calories, protein, carbohydrates, fat) · and your recorded workouts.</p>
+      <p><strong>Why:</strong> to show your progress honestly, without asking you to retype what your devices already recorded.</p>
+      <p><strong>And what we never do — plainly:</strong></p>
+      <ul>
+        <li><strong>We never write anything to the Health app.</strong> The requested scope is read-only, and the write set is empty in code.</li>
+        <li><strong>We never sell your health data, never share it with any third party, and never use it for advertising, marketing, or behavioural profiling.</strong></li>
+        <li><strong>We never send it to Apple</strong> — the flow is from Health onto your device.</li>
+        <li><strong>Control is per metric.</strong> You choose what to connect; disconnecting a metric <strong>deletes what was imported from it</strong>.</li>
+        <li><strong>Manual entry always remains available.</strong> Declining does not disable the app.</li>
+      </ul>
+
+      <h2>7) What we never do</h2>
+      <ul>
+        <li><strong>No ads.</strong> Not banner, not embedded, not sponsored.</li>
+        <li><strong>No cross-app or cross-site tracking.</strong> We do not show the tracking (ATT) prompt because we do not track.</li>
+        <li><strong>We never sell your data or share it for marketing</strong> — health data or otherwise.</li>
+        <li><strong>No third-party tracking SDKs</strong> (no Google, no Meta, none).</li>
+        <li><strong>We never ask for your contacts, photos, or microphone.</strong></li>
+      </ul>
+
+      <h2>8) Your rights</h2>
+      <p><strong>Access and correction</strong> — your data is visible in the app, and your profile is editable at any time.</p>
+      <p><strong>Export</strong> — <strong>Profile → Settings &amp; privacy → Privacy &amp; data</strong> downloads a JSON copy of the data available on your device. No request, no waiting.</p>
+      <p><strong>Account deletion, and exactly what it does</strong> — <strong>Settings &amp; privacy → Delete account permanently</strong>:</p>
+      <ol>
+        <li>deletes your rows from every user-data table on the server, <strong>before</strong> deleting the auth account;</li>
+        <li>then deletes the auth account itself;</li>
+        <li>then wipes all Qimmah data from your device — leaving only a non-personal preference such as language.</li>
+      </ol>
+      <p><strong>If server deletion fails, nothing is deleted and no success is claimed.</strong> You are told plainly, and you can retry or contact us. Deleting the app alone does not delete your cloud account if you enabled sync — use in-app deletion.</p>
+      <p><strong>Objection and restriction</strong> — withdrawing health consent stops the processing that relies on it.</p>
+      <p><strong>Your rights under the Saudi PDPL</strong> are preserved. For any request: <a href="mailto:qimmah.support@gmail.com">qimmah.support@gmail.com</a>.</p>
+
+      <h2>9) Minors</h2>
+      <p><strong>Minimum age: 13 years.</strong></p>
+      <p><strong>For users under 18:</strong> nutrition goals are limited to <strong>Maintenance</strong> only — no cut, no bulk. This is deliberate: a growing body is not a place for an app-suggested caloric deficit or surplus. All figures remain estimates, and we recommend consulting a nutrition or growth specialist before any weight-change goal.</p>
+      <p><strong>There is no parental-consent flow in this version</strong>, and we make no claim of identity-document verification.</p>
+
+      <h2>10) Storage location and cross-border transfer</h2>
+      <p>With sync enabled, your data is stored on Supabase infrastructure in <strong>Japan</strong> (<code>ap-northeast-1</code>, Tokyo) — a cross-border transfer out of the Kingdom. This processing is safeguarded contractually through the provider's Data Processing Addendum (DPA). <strong>We claim no adequacy decision or formal approval for any destination.</strong></p>
+
+      <h2>11) Retention</h2>
+      <p>Local data stays on your device until you delete it or the app. Cloud data — if you enabled sync — remains while your account exists, and is erased when you delete it (§8).</p>
+
+      <h2>12) Security</h2>
+      <p>Encrypted (HTTPS) connections · server-side auth and row-level security · <strong>no secret keys inside the app</strong> (public keys only; the real protection is RLS, not key obscurity).</p>
+
+      <h2>13) Changes</h2>
+      <p>We may update this policy; the date above is published, and material changes are notified in-app or by email.</p>
+
+      <h2>14) Contact</h2>
+      <p>Qimmah App — represented by its owner — <a href="mailto:qimmah.support@gmail.com">qimmah.support@gmail.com</a></p>
     </section>
   </div>
 </main>

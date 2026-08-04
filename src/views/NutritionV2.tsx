@@ -1,10 +1,13 @@
-import { lazy, Suspense, useMemo, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { Icon } from '@/components/Icon'
-import { StateBlock } from '@/components/StateBlock'
+import { AllergyNotice } from '@/components/AllergyNotice'
 import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
 import { useCustomization } from '@/lib/customizationContext'
-import { foodItems, type FoodItem } from '@/data/foodItems'
+import { useAppScrollReset } from '@/lib/useAppScrollReset'
+import { searchFood, type FoodItem } from '@/data/foodItems'
+import { nutritionScreenStrings } from '@/i18n/dict/nutritionScreen'
+import { servingSummary } from '@/lib/servingDisplay'
 import {
   addFoodToDay,
   addWaterToDay,
@@ -74,6 +77,7 @@ export function NutritionV2({ lang }: NutritionV2Props) {
   const t = (a: string, e: string) => (ar ? a : e)
   const [tick, setTick] = useState(0)
   const [screen, setScreen] = useState<'home' | 'add'>('home')
+  useAppScrollReset(screen)
   const [targetSlot, setTargetSlot] = useState<MealSlot>('lunch')
   // `tick` forces a recompute after a food/water is added (the model reads
   // localStorage, which the deps linter can't observe).
@@ -83,6 +87,25 @@ export function NutritionV2({ lang }: NutritionV2Props) {
   const bump = () => setTick((x) => x + 1)
   const openAdd = (slot: MealSlot) => { setTargetSlot(slot); setScreen('add') }
   const onAdded = () => { bump(); setScreen('home') }
+
+  useEffect(() => {
+    const applyQuickLog = (target: 'meal' | 'water' | 'routine') => {
+      if (target === 'meal') {
+        setTargetSlot('lunch')
+        setScreen('add')
+      } else if (target === 'water') {
+        window.requestAnimationFrame(() => document.getElementById('nutrition-water')?.scrollIntoView({ behavior: 'smooth', block: 'center' }))
+      }
+      if (target !== 'routine') window.sessionStorage.removeItem('qimmah:quick-log-intent')
+    }
+    const onQuickLog = (event: Event) => {
+      applyQuickLog((event as CustomEvent<'meal' | 'water' | 'routine'>).detail)
+    }
+    const pending = window.sessionStorage.getItem('qimmah:quick-log-intent')
+    if (pending === 'meal' || pending === 'water') applyQuickLog(pending)
+    window.addEventListener('qimmah:quick-log', onQuickLog)
+    return () => window.removeEventListener('qimmah:quick-log', onQuickLog)
+  }, [])
 
   const runNudge = (n: Nudge) => {
     if (n.action === 'water250') { addWaterToDay(250); bump() }
@@ -94,16 +117,20 @@ export function NutritionV2({ lang }: NutritionV2Props) {
 
   const { calories, macros, water } = model
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
+    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light bg-page px-4 pb-6 pt-3 text-ink-900">
       <div className="v2-screen-enter mx-auto w-full max-w-md space-y-5">
         <header className="flex items-center justify-between pt-1">
-          <h1 className="text-2xl font-black tracking-tight">{t('التغذية · اليوم', 'Nutrition · Today')}</h1>
+          <h2 className="text-xl font-black tracking-tight">{t('ملخّص اليوم', 'Today’s summary')}</h2>
           {model.goalLabel && (
             <span className="v2-bg-blue-soft v2-text-blue rounded-full border border-[color:var(--v2-blue)] px-3 py-1 text-xs font-bold">
               {t('الهدف · ', 'Goal · ')}{model.goalLabel}
             </span>
           )}
         </header>
+
+        {/* تحذير الحساسيات — يظهر فقط لمن سجّل حساسية. الخطة لا تُفلترها تلقائيًا
+            بعد، فنقولها صراحةً بدل الصمت عنها. */}
+        <AllergyNotice lang={lang} />
 
         {/* Goal-driven hero */}
         <section className="relative overflow-hidden rounded-3xl border border-line bg-surface p-5 shadow-card">
@@ -128,19 +155,23 @@ export function NutritionV2({ lang }: NutritionV2Props) {
           </button>
         </section>
 
-        {/* Verb-first nudges */}
+        {/* A single next-best nudge keeps the home surface calm. */}
         {model.nudges.length > 0 && (
-          <section className="space-y-2.5" aria-label={t('تنبيهات اليوم', 'Today’s nudges')}>
-            {model.nudges.map((n) => (
+          <section className="space-y-2.5" aria-label={t('خطوتك التالية', 'Your next step')}>
+            {model.nudges.slice(0, 1).map((n) => (
               <NudgeRow key={n.id} lang={lang} nudge={n} onAction={() => runNudge(n)} />
             ))}
           </section>
         )}
 
-        {/* Macros vs targets */}
-        <section>
-          <h3 className="mb-2.5 text-sm font-black">{t('الماكروز مقابل هدفك', 'Macros vs your goal')}</h3>
-          <div className="grid grid-cols-4 gap-2">
+        {/* Details stay available without making the first view feel like a dashboard. */}
+        <details className="group rounded-2xl border border-line bg-surface">
+          <summary className="flex min-h-[3.75rem] cursor-pointer list-none items-center gap-3 px-4 py-3 [&::-webkit-details-marker]:hidden">
+            <span className="grid h-9 w-9 place-items-center rounded-xl bg-beige text-ink-500"><Icon name="ChartPie" className="h-4 w-4" /></span>
+            <h3 className="min-w-0 flex-1 text-sm font-black">{t('تفاصيل الماكروز', 'Macro details')}</h3>
+            <Icon name="ChevronDown" className="h-4 w-4 text-ink-400 transition-transform group-open:rotate-180" />
+          </summary>
+          <div className="grid grid-cols-4 gap-2 border-t border-line px-3 pb-3 pt-3">
             <MacroRing label={t('بروتين', 'Protein')} consumed={macros.protein.consumed} target={macros.protein.target} unit="g" color={CLR.protein} />
             <MacroRing label={t('كارب', 'Carbs')} consumed={macros.carbs.consumed} target={macros.carbs.target} unit="g" color={CLR.carbs} />
             <MacroRing label={t('دهون', 'Fat')} consumed={macros.fat.consumed} target={macros.fat.target} unit="g" color={CLR.fat} />
@@ -153,11 +184,11 @@ export function NutritionV2({ lang }: NutritionV2Props) {
               color={CLR.water}
             />
           </div>
-        </section>
+        </details>
 
         {/* Water — teal quick-add */}
         {water.targetMl > 0 && (
-          <section className="rounded-2xl border border-line bg-surface p-4">
+          <section id="nutrition-water" className="rounded-2xl border border-line bg-surface p-4">
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-1.5 text-sm font-bold text-ink-700">
                 <Icon name="Droplets" className="h-4 w-4" style={{ color: CLR.water }} />
@@ -178,18 +209,6 @@ export function NutritionV2({ lang }: NutritionV2Props) {
 
         {/* Meals */}
         <section className="space-y-2.5" aria-label={t('وجبات اليوم', 'Today’s meals')}>
-          {/* Smart-empty (standard screen 21/76): no log yet → explain why + a real
-              first action, above the still-tappable meal slots. */}
-          {model.meals.every((m) => !m.logged) && (
-            <StateBlock
-              variant="empty"
-              icon="Utensils"
-              testId="nutrition-empty"
-              title={t('لا سجلّ غذائي بعد', 'No meals logged yet')}
-              body={t('نعرض تقديراتك بعد أول وجبة — ابدأ بتسجيل ما أكلته اليوم.', 'We estimate your day after your first meal — start by logging what you ate today.')}
-              actions={[{ label: t('أضف أول وجبة', 'Add your first meal'), onClick: () => openAdd(targetSlot) }]}
-            />
-          )}
           {model.meals.map((m) => {
             const meta = SLOTS.find((s) => s.slot === m.slot)!
             return (
@@ -300,13 +319,19 @@ function FoodRow({ f, lang, onLog }: { f: FoodItem; lang: Lang; onLog: (servings
   const cal = Math.round(f.calories * servings)
   const pro = Math.round(f.protein * servings)
   const step = (d: number) => setServings((s) => Math.min(20, Math.max(0.5, Math.round((s + d) * 2) / 2)))
+  // تسمية الحصة: العربية تعرض التسمية الأصلية كما هي («صحن (350غ)»)، والإنجليزية تُشتق
+  // من الجرامات نفسها عبر servingDisplay («350 g · plate») — لا نصّ عربي في واجهة إنجليزية،
+  // ولا وحدة مخترعة: الجرام هو مصدر الحقيقة في الحالتين.
+  const servingText = ar
+    ? f.servingLabelAr
+    : servingSummary(f, lang, nutritionScreenStrings[lang].gramsUnit) ?? f.servingLabelAr
   return (
     <div className="rounded-2xl border border-line bg-surface px-4 py-3">
       <div className="flex items-center gap-3">
         <span className="min-w-0 flex-1">
           <span className="block text-sm font-bold">{ar ? f.nameAr : f.nameEn}</span>
           <span className="block text-xs text-ink-500">
-            ~{cal} {t('سعرة', 'kcal')} · {pro}g {t('بروتين', 'protein')} · {t('تقدير', 'est.')} / {f.servingLabelAr}
+            ~{cal} {t('سعرة', 'kcal')} · {pro}g {t('بروتين', 'protein')} · {t('تقدير', 'est.')} / {servingText}
           </span>
         </span>
         <button
@@ -380,10 +405,11 @@ function AddMeal({ lang, slot, onAdd, onBack }: { lang: Lang; slot: MealSlot; on
   const [highProtein, setHighProtein] = useState(false)
   const [scanning, setScanning] = useState(false)
   const slotLabel = SLOTS.find((s) => s.slot === slot)!
+  // البحث يمرّ عبر searchFood: تطبيع عربي (كبسة/كبسه) + الكلمات المفتاحية (المنطقة،
+  // الكتابات البديلة، الأسماء اللاتينية) + ترتيب بالصلة. مطابقة النص الخام كانت تُسقط
+  // كل ذلك: «كبسه» و«عسير» و«قهوه» كانت تُرجع صفر نتائج مع أنّ البيانات موجودة.
   const results = useMemo(() => {
-    let list = foodItems
-    const query = q.trim()
-    if (query) list = list.filter((f) => f.nameAr.includes(query) || f.nameEn.toLowerCase().includes(query.toLowerCase()))
+    let list = searchFood(q)
     if (highProtein) list = list.filter((f) => f.protein >= 15)
     return list.slice(0, 30)
   }, [q, highProtein])
@@ -403,7 +429,7 @@ function AddMeal({ lang, slot, onAdd, onBack }: { lang: Lang; slot: MealSlot; on
   }
 
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light min-h-screen bg-page px-4 pb-28 pt-3 text-ink-900">
+    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light bg-page px-4 pb-6 pt-3 text-ink-900">
       <div className="v2-screen-enter mx-auto w-full max-w-md">
         <div className="flex items-center gap-3">
           <button type="button" onClick={onBack} aria-label={t('رجوع', 'Back')} className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-line bg-surface">
