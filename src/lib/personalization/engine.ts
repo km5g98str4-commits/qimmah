@@ -200,16 +200,60 @@ export function selectNext(state: PersonalizationState, cfg: EngineConfig = DEFA
   }
 
   if (asked >= budget.hardCap) return { question: null, reason: 'cap_reached', offBudget: false }
+
+  // (2.5) **متابعة سلامة مفتوحة — خارج الميزانية الناعمة.**
+  //
+  // ⚠️ عطل أمسكه الإثبات قبل أن يشحن: مستخدم يقول «نعم عندي ما يقلقني» في
+  // بوابة الفرز، فتُرفع متابعاته (ألم صدر · إغماء · قيد طبيب · عملية) إلى
+  // الطابور — ثم **يبلغ الحدّ الأقصى الناعم قبلها فتسقط صامتة**، وتُبنى له خطة
+  // كأن لا شيء. أي أننا فتحنا موضوع السلامة وتركناه مفتوحًا.
+  //
+  // فسؤال `safety: 'clear'` مؤهَّل لا تحكمه الميزانية الناعمة — يحكمه السقف
+  // المطلق وحده. لا نسأل عن السلامة إلا حين يفتحها المستخدم، وحين يفتحها
+  // نُكملها.
+  const safetyCritical = ready.filter((x) => x.safety === 'clear').sort(byRank)
+  if (safetyCritical.length) return { question: safetyCritical[0], reason: null, offBudget: true }
+
   if (asked >= budget.max) return { question: null, reason: 'complete', offBudget: false }
 
-  // (3) طابور المتابعات — ما فتحته إجابة سابقة يسبق البنك العام.
-  for (const id of state.queue) {
-    const qd = ready.find((x) => x.id === id)
-    if (qd) return { question: qd, reason: null, offBudget: false }
+  // (3) الباقي بالترتيب، والمتابعات المرفوعة تأخذ **حافزًا** لا أسبقية مطلقة.
+  //
+  // الأسبقية المطلقة كانت تجعل متابعة مكسبها ٤ (زحمة النادي) تزيح سؤالًا
+  // مكسبه ٨ (إتقان التمارين) لمجرّد أنها رُفعت. الحافز يبقي المتابعة ملاصقة
+  // لمُطلِقها في الغالب، ولا يسمح لها بمصادرة مقعد أنفع منها.
+  // الحافز والغرامة يدخلان الترتيب فقط — التعريف المُعاد يبقى الأصلي بلا تحوير.
+  const queued = new Set(state.queue)
+
+  // **غرامة التنويع.** كتلة الخبرة وحدها ٢١ سؤالًا بأولويات ٧٠–٩٤، فكانت
+  // تلتهم الميزانية كلّها لمستخدم متمرّس: نسأله ثمانية أسئلة عن خبرته ثم
+  // ينفد السقف قبل أن نسأله عمّا يكرهه من التمارين أو كيف ينام. أمسكه الإثبات
+  // كسؤال غائب، وجذره أن الأولوية وحدها لا تعرف التخمة.
+  //
+  // كل سؤال مُجاب من الفئة يخصم ٦ من أولوية أخواتها. فئات **بنيوية** معفاة:
+  // الأساسيات والسلامة والقيود لا يجوز تجويعها أصلًا.
+  const EXEMPT: readonly QuestionDef['category'][] = ['basics', 'safety', 'limitations', 'clarify']
+  const perCategory = new Map<string, number>()
+  for (const h of state.history) {
+    if (h.answeredAt === null) continue
+    const cat = QUESTION_BY_ID[h.id]?.category
+    if (cat) perCategory.set(cat, (perCategory.get(cat) ?? 0) + 1)
+  }
+  const effective = (x: QuestionDef): number => {
+    const boost = queued.has(x.id) ? 15 : 0
+    const glut = EXEMPT.includes(x.category) ? 0 : (perCategory.get(x.category) ?? 0) * 6
+    return x.priority + boost - glut
   }
 
-  // (4) الباقي بالترتيب. وإن نفد المؤهَّل قبل الحدّ الأدنى ⇒ `exhausted` لا حشو.
-  const rest = ready.filter((x) => x.category !== 'clarify').sort(byRank)
+  // (4) وإن نفد المؤهَّل قبل الحدّ الأدنى ⇒ `exhausted` لا حشو.
+  const rest = ready
+    .filter((x) => x.category !== 'clarify')
+    .sort((a, b) => {
+      const pa = effective(a)
+      const pb = effective(b)
+      if (pa !== pb) return pb - pa
+      if (a.infoGain !== b.infoGain) return b.infoGain - a.infoGain
+      return a.id.localeCompare(b.id)
+    })
   if (!rest.length) return { question: null, reason: 'exhausted', offBudget: false }
   if (asked >= budget.min && !required.length) {
     // بلغنا الحدّ الأدنى والإلزامي مكتمل: نستمرّ فقط بما مكسبه معتبَر.

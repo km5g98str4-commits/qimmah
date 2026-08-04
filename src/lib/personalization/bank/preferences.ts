@@ -40,7 +40,10 @@ export const PREFERENCE_QUESTIONS: QuestionDef[] = [
     category: 'preferences',
     answer: 'exercises',
     affects: ['excludedExercises', 'planConstraints'],
-    priority: 56,
+    // أولوية عالية عن قصد: هذا السؤال **يحذف عناصر من الخطة المسلَّمة**، فأثره
+    // أكبر من زحمة النادي أو عادة الإحماء. كانت ٥٦ فكان يسقط خارج مسار
+    // المتوسّط — أمسكه الإثبات، ورُفع لأن ترتيبه كان خطأً لا لأن اختبارًا رسب.
+    priority: 72,
     infoGain: 7,
   }),
   q({
