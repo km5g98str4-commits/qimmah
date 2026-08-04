@@ -1,0 +1,187 @@
+// البنك — أسئلة التوضيح عند التناقض.
+//
+// ═══ قاعدة حاكمة: لا تخمين صامت ═══
+// حين يتناقض جوابان، **الجواب سؤال لا افتراض**. سؤال توضيح واحد بلغة بسيطة،
+// ثم يُستأنف التدفّق من موضعه — **لا إعادة تشغيل للإعداد** (§15 من المواصفة).
+// وكل سؤال هنا معلَّق بشرط `eligible` يصف التناقض نفسه، فلا يظهر بلا سببه.
+//
+// وهذه الأسئلة **خارج ميزانية الأسئلة العادية**: توضيح تناقض ليس سؤالًا
+// إضافيًا اختاره المحرّك، بل ثمن جوابين لا يجتمعان. احتسابها داخل الميزانية
+// كان سيعاقب المستخدم على تناقضه بحذف سؤال نافع.
+
+import { q, opts } from './define'
+import { all, any, eq, gte, oneOf, lt, hasNone, has, ne } from '../rules'
+import type { QuestionDef } from '../types'
+
+export const CLARIFY_QUESTIONS: QuestionDef[] = [
+  q({
+    id: 'c-level-mismatch',
+    key: 'clarifyLevel',
+    category: 'clarify',
+    answer: 'single',
+    options: opts('im_newer', 'im_experienced', 'in_between'),
+    eligible: eq('derived.conflict_level', true),
+    affects: ['experience', 'experienceConfidence'],
+    priority: 99,
+    skippable: false,
+    infoGain: 9,
+  }),
+  q({
+    id: 'c-equipment-mismatch',
+    key: 'clarifyEquipment',
+    category: 'clarify',
+    answer: 'single',
+    options: opts('have_access', 'no_access', 'sometimes'),
+    eligible: eq('derived.conflict_equipment', true),
+    affects: ['equipment', 'place', 'trainingStyle'],
+    priority: 99,
+    skippable: false,
+    infoGain: 9,
+  }),
+  q({
+    id: 'c-days-split-mismatch',
+    key: 'clarifyDaysSplit',
+    category: 'clarify',
+    answer: 'single',
+    options: opts('keep_days', 'more_days', 'change_split'),
+    eligible: eq('derived.conflict_days_split', true),
+    affects: ['daysPerWeek', 'split'],
+    priority: 99,
+    skippable: false,
+    infoGain: 9,
+  }),
+  q({
+    id: 'c-limitation-mismatch',
+    key: 'clarifyLimitation',
+    category: 'clarify',
+    answer: 'single',
+    options: opts('keep_limit', 'limit_eased', 'drop_exercise'),
+    eligible: eq('derived.conflict_limitation', true),
+    affects: ['limitations', 'excludedExercises', 'safetyFlags'],
+    safety: 'restrict',
+    priority: 99,
+    skippable: false,
+    infoGain: 10,
+  }),
+  q({
+    id: 'c-goal-pace-mismatch',
+    key: 'clarifyGoalPace',
+    category: 'clarify',
+    answer: 'single',
+    options: opts('slower_pace', 'more_days', 'keep_both'),
+    eligible: eq('derived.conflict_goal_pace', true),
+    affects: ['planConstraints', 'daysPerWeek'],
+    priority: 99,
+    skippable: false,
+    infoGain: 8,
+  }),
+  q({
+    id: 'c-progression-mismatch',
+    key: 'clarifyProgression',
+    category: 'clarify',
+    answer: 'single',
+    options: opts('explain_it', 'i_know_it', 'pick_for_me'),
+    eligible: eq('derived.conflict_progression', true),
+    affects: ['progression', 'experience', 'controlLevel'],
+    priority: 99,
+    skippable: false,
+    infoGain: 8,
+  }),
+  q({
+    id: 'c-time-volume-mismatch',
+    key: 'clarifyTimeVolume',
+    category: 'clarify',
+    answer: 'single',
+    options: opts('shorter_sessions', 'fewer_exercises', 'longer_sessions'),
+    eligible: eq('derived.conflict_time_volume', true),
+    affects: ['sessionMinutes', 'volume', 'planConstraints'],
+    priority: 99,
+    skippable: false,
+    infoGain: 8,
+  }),
+  q({
+    id: 'c-cardio-mismatch',
+    key: 'clarifyCardio',
+    category: 'clarify',
+    answer: 'single',
+    options: opts('drop_cardio', 'keep_cardio', 'short_cardio'),
+    eligible: eq('derived.conflict_cardio', true),
+    affects: ['cardio', 'planConstraints'],
+    priority: 99,
+    skippable: false,
+    infoGain: 7,
+  }),
+
+  // ═══════════════════ أسئلة سدّ فجوة — تُطرح حين ينقص المطلوب ═══════════════════
+  //
+  // ليست توضيحًا لتناقض بل **إكمالًا لنقص**: المحرّك يعرف أنّ حقلًا إلزاميًا
+  // بقي فارغًا رغم انتهاء مسار الفئة، فيطلبه صراحةً بدل أن يخترع افتراضًا.
+  q({
+    id: 'c-fill-equipment',
+    key: 'fillEquipment',
+    category: 'clarify',
+    answer: 'single',
+    options: opts('gym_full', 'dumbbells_only', 'bands_only', 'bodyweight_only'),
+    eligible: all(oneOf('answers.place', ['home', 'outdoor', 'mixed']), hasNone('answers.equipmentList', ['machine', 'dumbbell', 'barbell', 'cable', 'band', 'bodyweight'])),
+    affects: ['equipment', 'trainingStyle'],
+    priority: 97,
+    skippable: false,
+    infoGain: 9,
+  }),
+  q({
+    id: 'c-fill-goal-minor',
+    key: 'fillGoalMinor',
+    category: 'clarify',
+    answer: 'single',
+    options: opts('get_fitter', 'general_health'),
+    eligible: all(lt('answers.age', 18), ne('answers.age', null)),
+    affects: ['primaryGoal'],
+    priority: 93,
+    skippable: false,
+    infoGain: 8,
+  }),
+  q({
+    id: 'c-confirm-high-frequency',
+    key: 'confirmHighFrequency',
+    category: 'clarify',
+    answer: 'boolean',
+    eligible: all(oneOf('answers.daysPerWeek', ['5', '6']), any(eq('derived.experienceClass', 'complete_beginner'), eq('derived.experienceClass', 'beginner'))),
+    affects: ['daysPerWeek', 'planConstraints'],
+    priority: 96,
+    infoGain: 8,
+  }),
+  q({
+    id: 'c-confirm-injury-load',
+    key: 'confirmInjuryLoad',
+    category: 'clarify',
+    answer: 'boolean',
+    eligible: all(eq('answers.hasInjury', 'current'), gte('answers.painLevel', 6)),
+    affects: ['safetyFlags', 'intensity', 'volume'],
+    safety: 'clear',
+    priority: 98,
+    skippable: false,
+    infoGain: 10,
+  }),
+  q({
+    id: 'c-confirm-bodyweight-goal',
+    key: 'confirmBodyweightGoal',
+    category: 'clarify',
+    answer: 'single',
+    options: opts('ok_bodyweight', 'will_get_gear', 'change_goal'),
+    eligible: all(eq('answers.bodyweightOnly', true), oneOf('answers.primaryGoalDisplay', ['muscle_gain', 'strength'])),
+    affects: ['equipment', 'primaryGoal', 'planConstraints'],
+    priority: 95,
+    infoGain: 8,
+  }),
+  q({
+    id: 'c-confirm-short-session',
+    key: 'confirmShortSession',
+    category: 'clarify',
+    answer: 'single',
+    options: opts('keep_short', 'add_time', 'fewer_days_longer'),
+    eligible: all(eq('answers.sessionMinutes', '20'), has('answers.musclePriority', 'balanced')),
+    affects: ['sessionMinutes', 'planConstraints', 'split'],
+    priority: 90,
+    infoGain: 7,
+  }),
+]
