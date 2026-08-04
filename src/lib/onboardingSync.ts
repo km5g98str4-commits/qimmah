@@ -6,13 +6,23 @@
 //   • لا يُعاد إعداد الحساب العائد (ملفه يحمل بيانات الإعداد) حتى على جهاز جديد.
 // كل الدوال آمنة عند غياب الضبط/الشبكة (best-effort) ولا ترمي استثناءً؛ المصدر
 // الأساسي لقرار البوابة يبقى السجلّ المحلي (isAccountOnboarded).
+//
+// إصلاح سباق الكتّاب الثلاثة (P12 — docs/audit/CODE-NOTES-FULL.md): هذه الوحدة
+// كانت الكاتب المباشر الثاني لعمود profiles.data.onboarding بشكل «essentials»
+// مختزل يتجاوز طابور المزامنة وLWW. الآن:
+//   • المزامنة مفعّلة ومسموحة ⇒ يمرّ الإكمال عبر المسار القانوني الواحد
+//     (enqueueOnboardingProfileUpsert → طابور → LWW) — لا كتابة مباشرة إطلاقًا.
+//   • المزامنة مطفأة (بوابة الإكمال فقط) ⇒ كتابة مباشرة **بالشكل الكامل نفسه**
+//     وبطابع LWW، محروسة بالأحدثية: لا تدهس onboarding سحابيًّا أحدث طابعًا.
 
 import { getSupabase } from './supabaseClient'
 import { markAccountOnboarded } from './onboarding'
+import { enqueueOnboardingProfileUpsert } from './onboardingProfile'
+import { syncAllowedFor } from './syncQueue'
 import type { OnboardingProfile } from '@/types/onboarding'
 
-/** الحقول الجوهرية التي تُثبت أنّ الحساب أكمل الإعداد (وزنه/هدفه/طوله هو). */
-interface OnboardingSnapshot {
+/** الشكل القديم المختزل — يبقى مقروءًا للتوافق (صفوف كتبتها إصدارات سابقة). */
+interface LegacyOnboardingSnapshot {
   heightCm?: number
   currentWeightKg?: number
   targetWeightKg?: number
@@ -21,21 +31,24 @@ interface OnboardingSnapshot {
   updatedAt?: string
 }
 
-function essentialsFrom(op: OnboardingProfile): OnboardingSnapshot {
-  return {
-    heightCm: op.bodyMetrics.heightCm,
-    currentWeightKg: op.bodyMetrics.currentWeightKg,
-    targetWeightKg: op.bodyMetrics.targetWeightKg,
-    goalType: op.goal.type,
-    onboardingCompleted: true,
-    updatedAt: new Date().toISOString(),
+/** هل يحمل ملف الحساب بيانات إعداد فعلية (إشارة أنّه أكمل الإعداد)؟ يقرأ الشكلين. */
+function snapshotLooksOnboarded(ob: unknown): boolean {
+  if (!ob || typeof ob !== 'object') return false
+  const full = ob as Partial<OnboardingProfile>
+  if (full._meta && typeof full._meta === 'object') {
+    return full._meta.completed === true || full.bodyMetrics?.currentWeightKg != null || full.goal?.type != null
   }
+  const legacy = ob as LegacyOnboardingSnapshot
+  return legacy.onboardingCompleted === true || legacy.currentWeightKg != null || legacy.goalType != null
 }
 
-/** هل يحمل ملف الحساب بيانات إعداد فعلية (إشارة أنّه أكمل الإعداد)؟ */
-function snapshotLooksOnboarded(ob: OnboardingSnapshot | undefined): boolean {
-  if (!ob) return false
-  return ob.onboardingCompleted === true || ob.currentWeightKg != null || ob.goalType != null
+/** طابع أحدثية onboarding سحابي (كامل أو legacy) — 0 عند غياب الدليل. */
+function cloudOnboardingStampMs(ob: unknown): number {
+  if (!ob || typeof ob !== 'object') return 0
+  const full = ob as Partial<OnboardingProfile> & LegacyOnboardingSnapshot
+  const stamp = full._meta?.updatedAt ?? full._meta?.completedAt ?? full.updatedAt
+  const ms = typeof stamp === 'string' ? Date.parse(stamp) : NaN
+  return Number.isFinite(ms) ? ms : 0
 }
 
 /** يجلب معرّف المستخدم الحالي مباشرةً من Supabase (لا يعتمد على حالة React). */
@@ -51,12 +64,32 @@ export async function currentUserId(): Promise<string | null> {
 }
 
 /**
- * best-effort: يحفظ جوهر الإعداد في صف ملف المستخدم (عمود data من نوع JSON).
- * يدمج فوق البيانات الموجودة حتى لا يمحو مفاتيح أخرى. لا يرمي أبدًا.
+ * best-effort: يوصل إكمال الإعداد لصف ملف المستخدم. لا يرمي أبدًا.
+ *
+ * المسار الواحد (P12): مع مزامنة مفعّلة يمرّ عبر الطابور القانوني (نفس الشكل
+ * الكامل ونفس طابع LWW ككل الكتّاب) ثم يُستحث flush. مع مزامنة مطفأة (بوابة
+ * الإكمال وحدها) يكتب مباشرة بالشكل الكامل، محروسًا بالأحدثية: onboarding
+ * سحابي بطابع أحدث لا يُداس.
  */
 export async function persistOnboardingToProfile(userId: string, op: OnboardingProfile): Promise<void> {
+  if (!userId) return
+  const stamped: OnboardingProfile = {
+    ...op,
+    _meta: { ...op._meta, updatedAt: op._meta.updatedAt ?? new Date().toISOString() },
+  }
+  if (syncAllowedFor(userId)) {
+    // الكاتب القانوني الوحيد — الطابور يدمج (استبدال بنفس المفتاح) وflush يرفع.
+    enqueueOnboardingProfileUpsert(stamped)
+    try {
+      const { flushSyncQueue } = await import('./syncService')
+      await flushSyncQueue()
+    } catch {
+      /* الطابور دائم — سيُرفع مع أول مشغّل لاحق */
+    }
+    return
+  }
   const supabase = await getSupabase()
-  if (!supabase || !userId) return
+  if (!supabase) return
   try {
     const { data: existing } = await supabase
       .from('profiles')
@@ -65,7 +98,10 @@ export async function persistOnboardingToProfile(userId: string, op: OnboardingP
       .maybeSingle()
     const prevData =
       existing?.data && typeof existing.data === 'object' ? (existing.data as Record<string, unknown>) : {}
-    const nextData = { ...prevData, onboarding: essentialsFrom(op) }
+    // حارس LWW: لا نكتب فوق onboarding سحابي أحدث طابعًا (جهاز آخر أكمل بعده).
+    const ourStamp = Date.parse(stamped._meta.updatedAt ?? '') || 0
+    if (cloudOnboardingStampMs(prevData.onboarding) > ourStamp) return
+    const nextData = { ...prevData, onboarding: stamped }
     await supabase.from('profiles').upsert({ user_id: userId, data: nextData }, { onConflict: 'user_id' })
   } catch {
     /* السجلّ المحلي هو مصدر الحقيقة للبوابة — تجاهل فشل السحابة */
@@ -83,8 +119,7 @@ export async function hydrateOnboardingFromProfile(userId: string): Promise<bool
   try {
     const { data } = await supabase.from('profiles').select('data').eq('user_id', userId).maybeSingle()
     const d = data?.data && typeof data.data === 'object' ? (data.data as Record<string, unknown>) : {}
-    const ob = d.onboarding as OnboardingSnapshot | undefined
-    const done = snapshotLooksOnboarded(ob)
+    const done = snapshotLooksOnboarded(d.onboarding)
     if (done) markAccountOnboarded(userId)
     return done
   } catch {

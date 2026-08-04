@@ -101,7 +101,7 @@ export function NativeSettingsPanel({ lang }: { lang: Lang }) {
         setManualSteps(String(getSteps() || ''))
       }
     } catch {
-      setStepsPerm('denied')
+      setStepsPerm('unknown')
       setStepsConnected(false)
     } finally {
       setBusy(null)
@@ -131,7 +131,7 @@ export function NativeSettingsPanel({ lang }: { lang: Lang }) {
       setWeightSample(result.sample ?? importedWeightSummary())
       setWeightMsg(result.sample ? copy.weightImported : result.permission === 'authorized' ? copy.weightNoData : '')
     } catch {
-      setWeightPerm('denied')
+      setWeightPerm('unknown')
       setWeightConnected(false)
     } finally {
       setBusy(null)
@@ -191,7 +191,7 @@ export function NativeSettingsPanel({ lang }: { lang: Lang }) {
             </div>
             {stepsPerm !== 'not-determined' && (
               <p role="status" className="text-xs text-ink-500">
-                {stepsPerm === 'authorized' ? copy.connected : stepsPerm === 'unavailable' ? copy.unavailable : copy.denied}
+                {stepsPerm === 'authorized' ? copy.connected : stepsPerm === 'unavailable' ? copy.unavailable : copy.unknown}
               </p>
             )}
             <div>
@@ -234,7 +234,7 @@ export function NativeSettingsPanel({ lang }: { lang: Lang }) {
               )}
             </div>
             {weightMsg && <p role="status" className="text-xs text-ink-500">{weightMsg}</p>}
-            {weightPerm === 'denied' && <p role="status" className="text-xs text-ink-500">{copy.denied}</p>}
+            {(weightPerm === 'unknown' || weightPerm === 'denied') && <p role="status" className="text-xs text-ink-500">{copy.unknown}</p>}
             <p className="text-[11px] text-ink-400">{copy.weightManualNote}</p>
           </MetricRow>
 

@@ -1,7 +1,7 @@
 // واجهة نظام نقل البيانات (تصدير/استيراد) — قِمّة (PDPL R-1). محلّي بالكامل، بلا شبكة.
 
 import { MAX_FILE_BYTES } from './importer'
-import { PortabilityError } from './errors'
+import { portabilityError } from './errors'
 
 export { buildExportBundle, deliverBundle, exportFilename, captureStore } from './exporter'
 export type { DeliveryMethod } from './exporter'
@@ -18,7 +18,7 @@ export {
   undoKey,
 } from './importer'
 export type { ImportPreview, PreviewLine, ApplyResult } from './importer'
-export { PortabilityError } from './errors'
+export { PortabilityError, portabilityErrorText } from './errors'
 export { STORE_DEFS, isNative } from './registry'
 export {
   PORTABILITY_SCHEMA_VERSION,
@@ -30,7 +30,7 @@ export type { PortabilityBundle } from './format'
 /** يقرأ ملفًّا مختارًا نصًّا (UTF-8) — للاستيراد. يرمي عند تعذّر القراءة. */
 export function readFileText(file: File): Promise<string> {
   if (file.size > MAX_FILE_BYTES) {
-    return Promise.reject(new PortabilityError('الملفّ أكبر من الحدّ المسموح (٢٥ ميغابايت)'))
+    return Promise.reject(portabilityError('FILE_TOO_LARGE'))
   }
   return new Promise((resolve, reject) => {
     const reader = new FileReader()

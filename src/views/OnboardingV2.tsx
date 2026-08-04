@@ -13,10 +13,15 @@ import { persistOnboardingToProfile } from '@/lib/onboardingSync'
 import { track } from '@/lib/analytics'
 import { POLICY_LINKS, policyCopy } from '@/data/policyCopy'
 import { toAnswersFromV2, type V2Place, type V2Pref } from '@/lib/onboardingV2Adapter'
-import { isMinorAge, MINOR_GOAL_RESTRICTION_NOTE } from '@/lib/calculators'
+import { isMinorAge } from '@/lib/calculators'
+import { profileChoiceStrings } from '@/i18n/dict/profileChoices'
+import { bodyStepStrings } from '@/i18n/dict/bodyStep'
+import { goalWordingFor, onboardingIntentStrings } from '@/i18n/dict/onboardingIntent'
 import {
+  AGE_RANGE,
   DAYS,
   DURATIONS,
+  LAST_INPUT_STEP,
   canAdvance,
   clearDraftV2,
   finalizeReduce,
@@ -26,6 +31,9 @@ import {
   type FinalizeStatus,
   type OnboardingV2Draft,
   type StepValidation,
+  type V2Gender,
+  type V2Intent,
+  type V2Level,
 } from '@/lib/onboardingV2Flow'
 
 interface OnboardingV2Props {
@@ -39,7 +47,8 @@ interface OnboardingV2Props {
 const GOAL_ICON: Record<V2GoalValue, string> = { cut: 'Flame', maintain: 'ShieldCheck', bulk: 'TrendingUp' }
 
 // Stable ids linking each step's region to its heading (aria-labelledby).
-const TITLE_ID = ['onb-title-goal', 'onb-title-training', 'onb-title-equipment'] as const
+// الترتيب: الأساسيات · النية والمستوى · الهدف · التدريب · المعدّات.
+const TITLE_ID = ['onb-title-body', 'onb-title-intent', 'onb-title-goal', 'onb-title-training', 'onb-title-equipment'] as const
 
 /**
  * Suggested split label from weekly days — a real split descriptor (NOT
@@ -82,8 +91,22 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
   const auth = useAuth()
   const userId = auth.user?.id ?? null
   const [initialDraft] = useState(() => initialDraftV2(userId))
-  const [step, setStep] = useState(initialDraft.step) // 0 goal · 1 training · 2 equipment · 3 ready
+  // 0 الأساسيات · 1 النية والمستوى · 2 الهدف · 3 التدريب · 4 المعدّات · 5 جاهز.
+  const [step, setStep] = useState(initialDraft.step)
   const [status, setStatus] = useState<FinalizeStatus>('idle')
+
+  // بيانات الجسم — تُحفظ نصًّا أثناء الكتابة (حالات وسيطة كـ«١» أو «» مسموحة)
+  // وتُحوَّل إلى أرقام عند التحقق والحفظ. هكذا لا يُمحى ما يكتبه المستخدم.
+  const [ageText, setAgeText] = useState(initialDraft.age == null ? '' : String(initialDraft.age))
+  const [gender, setGender] = useState<V2Gender | null>(initialDraft.gender)
+  const [heightText, setHeightText] = useState(initialDraft.heightCm == null ? '' : String(initialDraft.heightCm))
+  const [weightText, setWeightText] = useState(initialDraft.weightKg == null ? '' : String(initialDraft.weightKg))
+
+  // النية والمستوى — سؤالان قبل الهدف: الأول يحدّد شكل الخطة، والثاني يحدّد
+  // **لغة** الأهداف المعروضة (مبتدئ بلغة نتيجة · متقدّم بالمصطلحات القياسية).
+  const [intent, setIntent] = useState<V2Intent | null>(initialDraft.intent)
+  const [level, setLevel] = useState<V2Level | null>(initialDraft.level)
+  const [yearsText, setYearsText] = useState(initialDraft.trainingYears == null ? '' : String(initialDraft.trainingYears))
 
   const [goal, setGoal] = useState<V2GoalValue | null>(initialDraft.goal)
   const [days, setDays] = useState(initialDraft.days)
@@ -95,26 +118,44 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
   const [healthDataConsent, setHealthDataConsent] = useState(initialDraft.healthDataConsent)
   const [validation, setValidation] = useState<StepValidation>(null)
 
-  // القاصرون (دون 18) — المحافظة فقط. العمر لا يُجمَع في تدفّق v2؛ نستنتجه من ملف محفوظ
-  // (حساب قاصر عائد لإعادة الإعداد). للضيف الجديد بلا عمر: لا تقييد (adult افتراضًا).
-  const minor = isMinorAge(customization.profile.age)
-  const goalEntry = useMemo(() => V2_GOAL_MODEL.find((g) => g.value === goal) ?? null, [goal])
-  const answers = { goal, days, duration, place: place as V2Place | null, pref: pref as V2Pref | null, healthDataConsent }
+  // أرقام الجسم المُحوَّلة (NaN حين يكون الحقل فارغًا أو نصًّا غير رقمي).
+  const ageNum = ageText.trim() === '' ? null : Number(ageText)
+  const heightNum = heightText.trim() === '' ? null : Number(heightText)
+  const weightNum = weightText.trim() === '' ? null : Number(weightText)
+  // السنوات اختيارية: فراغ = null (تمرّ)، ونصّ غير رقمي = NaN (يُحجب لا يُبتلع).
+  const yearsNum = yearsText.trim() === '' ? null : Number(yearsText)
+
+  // القاصرون (دون 18) — المحافظة فقط.
+  // العمر يُجمَع الآن في الخطوة الأولى، فالحاجز يعمل للضيف الجديد أيضًا. سابقًا
+  // كان يُستنتج من ملف محفوظ فقط، ما يعني أن كل ضيف جديد يُعامَل كبالغ ويُعرض
+  // عليه التنشيف/التضخيم مهما كان عمره — وهو بند امتثال لا خلل وظيفي فحسب.
+  const minor = isMinorAge(ageNum ?? customization.profile.age)
+  const intentT = onboardingIntentStrings[lang] ?? onboardingIntentStrings.ar
+  // صياغة الأهداف تتبع المستوى المُعلن — نفس القيم المخزّنة، لغة مختلفة.
+  const goalWording = useMemo(() => goalWordingFor(lang, level), [lang, level])
+  const goalLabel = goal ? goalWording[goal].label : ''
+  const levelLabel = intentT.levels.find((l) => l.value === level)?.label ?? ''
+  const intentLabel = intentT.intents.find((i) => i.value === intent)?.label ?? ''
+  const answers = {
+    age: ageNum, gender, heightCm: heightNum, weightKg: weightNum,
+    intent, level, trainingYears: yearsNum,
+    goal, days, duration, place: place as V2Place | null, pref: pref as V2Pref | null, healthDataConsent,
+  }
 
   // Persist the draft on every answer/step change — a reload resumes here.
   // Never while the plan is being built or after a successful finish.
   useEffect(() => {
     if (status === 'building' || status === 'done') return
-    const draft: OnboardingV2Draft = { step, goal, days, duration, place: place as V2Place | null, pref: pref as V2Pref | null, hasInjury, injuries, healthDataConsent }
+    const draft: OnboardingV2Draft = { step, age: ageNum, gender, heightCm: heightNum, weightKg: weightNum, intent, level, trainingYears: yearsNum, goal, days, duration, place: place as V2Place | null, pref: pref as V2Pref | null, hasInjury, injuries, healthDataConsent }
     saveDraftV2(draft, userId)
-  }, [step, goal, days, duration, place, pref, hasInjury, injuries, healthDataConsent, status, userId])
+  }, [step, ageNum, gender, heightNum, weightNum, intent, level, yearsNum, goal, days, duration, place, pref, hasInjury, injuries, healthDataConsent, status, userId])
 
   // Auto-dismiss a shown validation message once the step becomes complete.
   useEffect(() => {
     if (validation && canAdvance(step, answers)) setValidation(null)
     // answers is derived each render; the primitive fields are the real deps.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [validation, step, goal, days, duration, place, pref, healthDataConsent])
+  }, [validation, step, intent, level, yearsNum, goal, days, duration, place, pref, healthDataConsent])
 
   const next = () => {
     const v = validateStep(step, answers)
@@ -123,7 +164,7 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
       return
     }
     setValidation(null)
-    setStep((s) => Math.min(3, s + 1))
+    setStep((s) => Math.min(LAST_INPUT_STEP + 1, s + 1))
   }
   const back = () => {
     setValidation(null)
@@ -149,7 +190,7 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
           if (mode === 'hang') await new Promise(() => {})
           if (mode === 'error') throw new Error('forced onboarding failure (dev preview)')
         }
-        const built0 = toAnswersFromV2({ goal, days, duration, place: place as V2Place | null, pref: pref as V2Pref | null, injuries: hasInjury ? injuries : [], healthDataConsent })
+        const built0 = toAnswersFromV2({ age: ageNum, gender, heightCm: heightNum, weightKg: weightNum, intent, level, trainingYears: yearsNum, goal, days, duration, place: place as V2Place | null, pref: pref as V2Pref | null, injuries: hasInjury ? injuries : [], healthDataConsent })
         const op = buildOnboardingProfile(built0)
         saveOnboardingProfile(op)
         const built = await buildCustomizationFromOnboarding(op, customization)
@@ -172,17 +213,19 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
 
   // Ready screen (+ async overlays). Building/error overlay ON TOP so the CTA
   // stays mounted with aria-busy during async work.
-  if (step === 3) {
+  if (step === LAST_INPUT_STEP + 1) {
     return (
       <>
         <ReadyScreen
           lang={lang}
           t={t}
-          goalLabel={goalEntry?.label ?? ''}
+          goalLabel={goalLabel}
           days={days}
           duration={duration}
           split={splitFor(days, lang)}
           placeLabel={t.places.find((p) => p.value === place)?.label ?? ''}
+          levelRow={levelLabel ? intentT.summaryLevel(levelLabel) : ''}
+          focusRow={intentLabel ? intentT.summaryFocus(intentLabel) : ''}
           busy={status === 'building'}
           onEnter={finalize}
         />
@@ -206,11 +249,13 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
           >
             <Icon name="ChevronRight" className="h-5 w-5 rtl:rotate-0 ltr:rotate-180" />
           </button>
-          <span className="text-sm font-bold text-ink-500">{t.stepOf(step + 1)}</span>
+          {/* عدّاد الخطوات من قاموس هذه الموجة: عدد الخطوات صار خمسًا، والنص
+              المركزي في labels.ts مثبَّت على «من ٤» — فلا نعدّل قاموسًا مشتركًا. */}
+          <span className="text-sm font-bold text-ink-500">{intentT.stepOf(toAr(step + 1, lang), toAr(LAST_INPUT_STEP + 1, lang))}</span>
           <span className="h-11 w-11" />
         </div>
         <div className="mx-auto mt-3 flex w-full max-w-md gap-1.5">
-          {[0, 1, 2].map((i) => (
+          {Array.from({ length: LAST_INPUT_STEP + 1 }, (_, i) => i).map((i) => (
             <span key={i} className={cn('h-1.5 flex-1 rounded-full transition-colors', i <= step ? 'v2-bg-blue' : 'bg-line')} />
           ))}
         </div>
@@ -219,11 +264,41 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
       {/* Content — each step is a region named by its heading. */}
       <main className="flex-1 overflow-y-auto px-5 py-6">
         <div className="v2-screen-enter mx-auto w-full max-w-md">
-          {step === 0 && <GoalStep lang={lang} t={t} titleId={stepTitleId} goal={goal} isMinor={minor} healthDataConsent={healthDataConsent} onConsent={setHealthDataConsent} onPick={(g) => { if (minor && (g === 'cut' || g === 'bulk')) return; setGoal(g); setValidation(null) }} />}
-          {step === 1 && (
-            <TrainingStep t={t} titleId={stepTitleId} lang={lang} days={days} duration={duration} onDays={setDays} onDuration={setDuration} goalLabel={goalEntry?.label ?? ''} split={splitFor(days, lang)} />
+          {step === 0 && (
+            <BodyStep
+              lang={lang}
+              titleId={stepTitleId}
+              age={ageText}
+              gender={gender}
+              heightCm={heightText}
+              weightKg={weightText}
+              healthDataConsent={healthDataConsent}
+              onConsent={setHealthDataConsent}
+              onAge={(v) => { setAgeText(v); setValidation(null) }}
+              onGender={(g) => { setGender(g); setValidation(null) }}
+              onHeight={(v) => { setHeightText(v); setValidation(null) }}
+              onWeight={(v) => { setWeightText(v); setValidation(null) }}
+            />
           )}
-          {step === 2 && (
+          {step === 1 && (
+            <IntentStep
+              lang={lang}
+              titleId={stepTitleId}
+              intent={intent}
+              level={level}
+              years={yearsText}
+              onIntent={(v) => { setIntent(v); setValidation(null) }}
+              // اختيار «مبتدئ» يُلغي السنوات: الحقل لا يُعرض له، فبقاء قيمة
+              // مخفيّة تؤثّر على الخبرة إدخال شبح.
+              onLevel={(v) => { setLevel(v); if (v === 'beginner') setYearsText(''); setValidation(null) }}
+              onYears={(v) => { setYearsText(v); setValidation(null) }}
+            />
+          )}
+          {step === 2 && <GoalStep lang={lang} t={t} titleId={stepTitleId} goal={goal} wording={goalWording} isMinor={minor} onPick={(g) => { if (minor && (g === 'cut' || g === 'bulk')) return; setGoal(g); setValidation(null) }} />}
+          {step === 3 && (
+            <TrainingStep t={t} titleId={stepTitleId} lang={lang} days={days} duration={duration} onDays={setDays} onDuration={setDuration} goalLabel={goalLabel} split={splitFor(days, lang)} />
+          )}
+          {step === 4 && (
             <EquipmentStep t={t} titleId={stepTitleId} place={place} pref={pref} hasInjury={hasInjury} injuries={injuries} onPlace={(v) => { setPlace(v); setValidation(null) }} onPref={(v) => { setPref(v); setValidation(null) }} onToggleInjury={() => setHasInjury((v) => !v)} onInjury={toggleInjury} />
           )}
         </div>
@@ -237,7 +312,13 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
           {validation && (
             <p role="alert" className="v2-error-panel mb-3 flex items-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-bold text-ink-900">
               <Icon name="AlertCircle" className="v2-error-icon h-4 w-4 shrink-0" />
-              <span>{validation === 'healthConsent' ? policyCopy[lang].healthConsentRequired : t.validation[validation]}</span>
+              <span>
+                {validation === 'healthConsent'
+                  ? policyCopy[lang].healthConsentRequired
+                  : validation === 'intentLevel'
+                    ? intentT.validation
+                    : t.validation[validation]}
+              </span>
             </p>
           )}
           <button
@@ -246,7 +327,7 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
             aria-disabled={!canAdvance(step, answers)}
             className="btn-primary w-full py-4 text-[1.1875rem]"
           >
-            {step === 2 ? t.equipment.cta : t.next}
+            {step === LAST_INPUT_STEP ? t.equipment.cta : t.next}
           </button>
         </div>
       </footer>
@@ -287,12 +368,197 @@ function StepTitle({ id, title, subtitle }: { id: string; title: string; subtitl
   )
 }
 
-function GoalStep({ lang, t, titleId, goal, isMinor, healthDataConsent, onConsent, onPick }: { lang: Lang; t: T; titleId: string; goal: V2GoalValue | null; isMinor: boolean; healthDataConsent: boolean; onConsent: (checked: boolean) => void; onPick: (g: V2GoalValue) => void }) {
+/**
+ * حقل رقمي واحد من خطوة الجسد.
+ *
+ * `inputMode="numeric"` لا `type="number"`: يفتح لوحة أرقام على الجوال بلا
+ * أسهم زيادة/نقصان ولا تمرير عجلة يغيّر القيمة بالخطأ. والقيمة تبقى نصًّا
+ * أثناء الكتابة كي لا يُمحى ما يكتبه المستخدم عند حالة وسيطة غير صالحة.
+ */
+function NumField({
+  id, label, unit, placeholder, value, onChange,
+}: { id: string; label: string; unit: string; placeholder: string; value: string; onChange: (v: string) => void }) {
+  return (
+    <label htmlFor={id} className="block">
+      <span className="mb-1.5 block text-[0.82rem] font-bold text-ink-700">{label}</span>
+      <span className="flex items-center gap-2 rounded-2xl border border-line bg-surface px-4 py-3 focus-within:border-ink-400">
+        <input
+          id={id}
+          inputMode="numeric"
+          autoComplete="off"
+          placeholder={placeholder}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          // ≥16px يمنع تكبير iOS التلقائي عند التركيز.
+          className="min-w-0 flex-1 bg-transparent text-[1rem] font-bold text-ink-900 outline-none placeholder:font-normal placeholder:text-ink-400"
+        />
+        <span className="shrink-0 text-[0.8rem] font-bold text-ink-500">{unit}</span>
+      </span>
+    </label>
+  )
+}
+
+/**
+ * الخطوة الأولى — بيانات الجسم.
+ *
+ * كانت غائبة تمامًا: التدفّق لا يسأل العمر ولا الجنس ولا الطول ولا الوزن،
+ * فتسقط كلها على قيم افتراضية ثابتة (٢٥ سنة · ١٧٠سم · ٧٥كجم) — أي **نفس BMR
+ * لكل مستخدمي التطبيق**. وبلا عمر، حاجز القاصرين لا يُفعَّل أصلًا.
+ */
+function BodyStep({
+  lang, titleId, age, gender, heightCm, weightKg, healthDataConsent, onAge, onGender, onHeight, onWeight, onConsent,
+}: {
+  lang: Lang; titleId: string
+  age: string; gender: V2Gender | null; heightCm: string; weightKg: string; healthDataConsent: boolean
+  onAge: (v: string) => void; onGender: (g: V2Gender) => void; onHeight: (v: string) => void; onWeight: (v: string) => void
+  onConsent: (checked: boolean) => void
+}) {
+  const s = bodyStepStrings[lang]
   const policy = policyCopy[lang]
+  const parsedAge = Number(age)
+  const showMinorNote = Number.isFinite(parsedAge) && parsedAge >= AGE_RANGE.min && parsedAge < 18
+  return (
+    <section aria-labelledby={titleId}>
+      <StepTitle id={titleId} title={s.title} subtitle={s.subtitle} />
+
+      {/* الموافقة الصحية **قبل** أي حقل — الإذن يسبق الجمع لا يليه. */}
+      <div className="mt-5 rounded-2xl border border-line bg-surface p-4">
+        <p className="text-sm leading-relaxed text-ink-500">{policy.healthExplanation}</p>
+        <label className="mt-3 flex cursor-pointer items-start gap-3 text-start text-sm font-bold leading-relaxed text-ink-900">
+          <input type="checkbox" checked={healthDataConsent} onChange={(e) => onConsent(e.target.checked)} className="mt-0.5 h-5 w-5 shrink-0 accent-primary" />
+          <span>{policy.healthConsent} · <a href={POLICY_LINKS.privacy} target="_blank" rel="noopener noreferrer" className="text-[color:var(--v2-blue)] underline underline-offset-2">{policy.privacy}</a></span>
+        </label>
+      </div>
+
+      <Group legend={s.title} className="mt-5 block space-y-4">
+        <div className="grid grid-cols-2 gap-3">
+          <NumField id="v2-body-age" label={s.ageLabel} unit={s.ageUnit} placeholder={s.agePlaceholder} value={age} onChange={onAge} />
+          <NumField id="v2-body-height" label={s.heightLabel} unit={s.heightUnit} placeholder={s.heightPlaceholder} value={heightCm} onChange={onHeight} />
+        </div>
+        <NumField id="v2-body-weight" label={s.weightLabel} unit={s.weightUnit} placeholder={s.weightPlaceholder} value={weightKg} onChange={onWeight} />
+
+        <div>
+          <span className="mb-1.5 block text-[0.82rem] font-bold text-ink-700">{s.genderLabel}</span>
+          <div className="flex gap-3">
+            {(['male', 'female'] as const).map((g) => (
+              <button
+                key={g}
+                type="button"
+                onClick={() => onGender(g)}
+                aria-pressed={gender === g}
+                className={cn(
+                  'min-h-[44px] flex-1 rounded-2xl border px-4 py-3 text-[0.9rem] font-bold transition',
+                  gender === g ? 'border-ink-900 bg-ink-900 text-page' : 'border-line bg-surface text-ink-700',
+                )}
+              >
+                {g === 'male' ? s.genderMale : s.genderFemale}
+              </button>
+            ))}
+          </div>
+          <p className="mt-2 text-[0.78rem] leading-snug text-ink-500">{s.genderNote}</p>
+        </div>
+      </Group>
+
+      {showMinorNote && (
+        <p className="mt-4 flex items-start gap-2 rounded-2xl border border-gold-400/40 bg-gold-200/40 p-3 text-[0.8rem] font-bold leading-snug text-ink-700">
+          {s.minorNote}
+        </p>
+      )}
+
+      <p className="mt-5 text-[0.8rem] leading-relaxed text-ink-500">{s.whyNote}</p>
+    </section>
+  )
+}
+
+/**
+ * صف اختيار واحد بعنوان ووصف — يُستخدم للنية والمستوى.
+ * هدف لمس ≥44px، ودلالة اختيار غير لونية (شارة صح) لا لونًا فقط (WCAG 1.4.1).
+ */
+function ChoiceRow({ label, desc, icon, selected, onSelect }: { label: string; desc: string; icon: string; selected: boolean; onSelect: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      aria-pressed={selected}
+      className={cn(
+        'v2-pressable relative flex min-h-[44px] w-full items-center gap-3.5 overflow-hidden rounded-2xl border p-3.5 text-start',
+        selected ? 'v2-choice-selected' : 'border-line bg-surface hover:border-ink-400/40',
+      )}
+    >
+      <span className={cn('absolute inset-y-0 start-0 w-1 transition-colors', selected ? 'v2-choice-accent' : 'bg-transparent')} />
+      <span className={cn('grid h-10 w-10 shrink-0 place-items-center rounded-xl transition-colors', selected ? 'v2-choice-icon-selected' : 'bg-beige text-ink-500')}>
+        <Icon name={icon} className="h-5 w-5" strokeWidth={2.25} />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-[0.95rem] font-black text-ink-900">{label}</span>
+        <span className="mt-0.5 block text-[0.78rem] leading-snug text-ink-500">{desc}</span>
+      </span>
+      <span className={cn('grid h-5 w-5 shrink-0 place-items-center rounded-full border-2 transition-colors', selected ? 'v2-choice-icon-selected border-[color:var(--v2-blue)]' : 'border-line text-transparent')}>
+        <Icon name="Check" className="h-3 w-3" strokeWidth={3} />
+      </span>
+    </button>
+  )
+}
+
+/**
+ * الخطوة الثانية — النية والمستوى.
+ *
+ * سؤالان **يغيّران المخرجات فعلًا**، لا تجميل:
+ *   • النية ⇒ أسلوب التغذية (اقتراح وجبات / أرقام فقط / إرشاد مبسّط).
+ *   • المستوى (+ السنوات اختياريًا) ⇒ مستوى الخبرة ⇒ عدد تمارين الجلسة وتثبيت
+ *     التقسيمة على «تلقائي» للمبتدئ، **و**لغة الأهداف في الخطوة التالية.
+ *
+ * لماذا هنا لا في الموضع الأول؟ الموضع الأول يملكه حاجز الموافقة الصحية — انظر
+ * التعليق المطوّل فوق `validateStep` في `onboardingV2Flow.ts`.
+ */
+function IntentStep({
+  lang, titleId, intent, level, years, onIntent, onLevel, onYears,
+}: {
+  lang: Lang; titleId: string
+  intent: V2Intent | null; level: V2Level | null; years: string
+  onIntent: (v: V2Intent) => void; onLevel: (v: V2Level) => void; onYears: (v: string) => void
+}) {
+  const s = onboardingIntentStrings[lang] ?? onboardingIntentStrings.ar
+  // السنوات تُسأل لغير المبتدئ فقط — المبتدئ بلا سنوات يُذكرها أصلًا.
+  const showYears = level === 'intermediate' || level === 'advanced'
+  return (
+    <section aria-labelledby={titleId}>
+      <StepTitle id={titleId} title={s.title} subtitle={s.subtitle} />
+
+      <Group legend={s.legends.intent} className="block">
+        <p className="mt-6 mb-3 text-sm font-bold text-ink-700">{s.intentQ}</p>
+        <div className="space-y-2.5">
+          {s.intents.map((o) => (
+            <ChoiceRow key={o.value} label={o.label} desc={o.desc} icon={o.icon} selected={intent === o.value} onSelect={() => onIntent(o.value)} />
+          ))}
+        </div>
+      </Group>
+
+      <Group legend={s.legends.level} className="block">
+        <p className="mt-7 mb-3 text-sm font-bold text-ink-700">{s.levelQ}</p>
+        <div className="space-y-2.5">
+          {s.levels.map((o) => (
+            <ChoiceRow key={o.value} label={o.label} desc={o.desc} icon={o.icon} selected={level === o.value} onSelect={() => onLevel(o.value)} />
+          ))}
+        </div>
+      </Group>
+
+      {showYears && (
+        <div className="mt-5">
+          <NumField id="v2-training-years" label={s.yearsLabel} unit={s.yearsUnit} placeholder={s.yearsPlaceholder} value={years} onChange={onYears} />
+          <p className="mt-2 text-[0.78rem] leading-snug text-ink-500">{s.yearsNote}</p>
+        </div>
+      )}
+    </section>
+  )
+}
+
+function GoalStep({ lang, t, titleId, goal, wording, isMinor, onPick }: { lang: Lang; t: T; titleId: string; goal: V2GoalValue | null; wording: Record<V2GoalValue, { label: string; desc: string }>; isMinor: boolean; onPick: (g: V2GoalValue) => void }) {
   return (
     <section aria-labelledby={titleId}>
       <StepTitle id={titleId} title={t.goal.title} />
       <Group legend={t.legends.goal} className="mt-6 block space-y-3">
+        {/* القيم والأيقونات من النموذج المركزي؛ **الصياغة** من قاموس المستوى. */}
         {V2_GOAL_MODEL.map((g) => {
           const on = goal === g.value
           // القاصرون: تعديل الوزن (تنشيف/تضخيم) معطّل — المحافظة فقط.
@@ -317,8 +583,8 @@ function GoalStep({ lang, t, titleId, goal, isMinor, healthDataConsent, onConsen
                 <Icon name={GOAL_ICON[g.value]} className="h-6 w-6" strokeWidth={2.25} />
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block text-lg font-black text-ink-900">{g.label}</span>
-                <span className="mt-0.5 block text-[0.8rem] leading-snug text-ink-500">{g.description}</span>
+                <span className="block text-lg font-black text-ink-900">{wording[g.value].label}</span>
+                <span className="mt-0.5 block text-[0.8rem] leading-snug text-ink-500">{wording[g.value].desc}</span>
               </span>
               <span className={cn('grid h-6 w-6 shrink-0 place-items-center rounded-full border-2 transition-colors', on && !disabled ? 'v2-choice-icon-selected border-[color:var(--v2-blue)]' : 'border-line text-transparent')}>
                 <Icon name="Check" className="h-3.5 w-3.5" strokeWidth={3} />
@@ -330,16 +596,9 @@ function GoalStep({ lang, t, titleId, goal, isMinor, healthDataConsent, onConsen
       {isMinor && (
         <p id="v2-goal-minor-note" className="mt-3 flex items-start gap-2 rounded-2xl border border-gold-400/40 bg-gold-200/40 p-3 text-[0.8rem] font-bold leading-snug text-ink-700">
           <Icon name="Info" className="mt-0.5 h-4 w-4 shrink-0 text-gold-600" />
-          {MINOR_GOAL_RESTRICTION_NOTE}
+          {profileChoiceStrings[lang].minorGoalNote}
         </p>
       )}
-      <div className="mt-5 rounded-2xl border border-line bg-surface p-4">
-        <p className="text-sm leading-relaxed text-ink-500">{policy.healthExplanation}</p>
-        <label className="mt-3 flex cursor-pointer items-start gap-3 text-start text-sm font-bold leading-relaxed text-ink-900">
-          <input type="checkbox" checked={healthDataConsent} onChange={(e) => onConsent(e.target.checked)} className="mt-0.5 h-5 w-5 shrink-0 accent-primary" />
-          <span>{policy.healthConsent} · <a href={POLICY_LINKS.privacy} target="_blank" rel="noopener noreferrer" className="text-[color:var(--v2-blue)] underline underline-offset-2">{policy.privacy}</a></span>
-        </label>
-      </div>
       <p className="mt-5 text-center text-xs font-medium text-ink-500">{t.goal.note}</p>
     </section>
   )
@@ -543,7 +802,7 @@ function ErrorScreen({ lang, t, onRetry, onDismiss }: { lang: Lang; t: T; onRetr
   )
 }
 
-function ReadyScreen({ lang, t, goalLabel, days, duration, split, placeLabel, busy, onEnter }: { lang: Lang; t: T; goalLabel: string; days: number; duration: number; split: string; placeLabel: string; busy: boolean; onEnter: () => void }) {
+function ReadyScreen({ lang, t, goalLabel, days, duration, split, placeLabel, levelRow, focusRow, busy, onEnter }: { lang: Lang; t: T; goalLabel: string; days: number; duration: number; split: string; placeLabel: string; levelRow: string; focusRow: string; busy: boolean; onEnter: () => void }) {
   return (
     <div dir={lang === 'en' ? 'ltr' : 'rtl'} aria-busy={busy} className="v2-surface-light fixed inset-0 z-50 flex flex-col overflow-hidden bg-page text-ink-900">
       <div className="pointer-events-none absolute inset-0" aria-hidden="true">
@@ -563,6 +822,9 @@ function ReadyScreen({ lang, t, goalLabel, days, duration, split, placeLabel, bu
             <SummaryRow icon="Clock" text={`${toAr(duration, lang)} ${lang === 'en' ? 'min' : 'دقيقة'} ${t.training.perSession}`} />
             {goalLabel && <SummaryRow icon="Target" text={`${t.training.suitsGoal} ${goalLabel}`} />}
             {placeLabel && <SummaryRow icon="Building2" text={placeLabel} />}
+            {/* المستوى والنية يظهران في الملخّص — إجابة تراها في المخرجات. */}
+            {levelRow && <SummaryRow icon="Trophy" text={levelRow} />}
+            {focusRow && <SummaryRow icon="Compass" text={focusRow} />}
           </div>
         </div>
 

@@ -3,6 +3,7 @@ import { Icon } from '@/components/Icon'
 import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
 import { miscStrings } from '@/i18n/dict/misc'
+import { authFlowStrings } from '@/i18n/dict/authFlow'
 import { useAuth } from '@/lib/authContext'
 import { evaluatePassword, PASSWORD_MIN_LENGTH } from '@/lib/passwordPolicy'
 import { track } from '@/lib/analytics'
@@ -14,6 +15,8 @@ interface LoginViewProps {
   onBack: () => void
   /** الوضع الابتدائي عند الفتح — تسجيل دخول أو إنشاء حساب. */
   initialMode?: Mode
+  /** يحفظ وضع الحساب خارج الشاشة حتى لا يضيع عند فتح الشروط أو الخصوصية. */
+  onModeChange?: (mode: 'login' | 'signup') => void
 }
 
 type Mode = 'login' | 'signup' | 'forgot'
@@ -23,9 +26,10 @@ type Mode = 'login' | 'signup' | 'forgot'
  * تجيب: أين أنا؟ (العنوان) · ماذا أفعل؟ (النموذج + إجراء أساسي واحد) · لماذا أثق؟ (نبرة هادئة صادقة).
  * منطق المصادقة والأحداث لم يتغيّر؛ التعديل بصري + إضافة وضع الاستعادة فقط.
  */
-export function LoginView({ lang, onSuccess, onBack, initialMode = 'login' }: LoginViewProps) {
+export function LoginView({ lang, onSuccess, onBack, initialMode = 'login', onModeChange }: LoginViewProps) {
   const t = getStrings(lang)
   const d = miscStrings[lang]
+  const af = authFlowStrings[lang]
   const auth = useAuth()
   const [mode, setMode] = useState<Mode>(initialMode)
   const [name, setName] = useState('')
@@ -49,6 +53,7 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login' }: Lo
 
   const switchMode = (next: Mode) => {
     setMode(next)
+    if (next !== 'forgot') onModeChange?.(next)
     setMsg(null)
     setNotice(null)
     if (next !== 'signup') setEligible12(false)
@@ -63,34 +68,47 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login' }: Lo
     setBusy(true)
     setMsg(null)
     setNotice(null)
-    if (isForgot) {
-      // استعادة كلمة المرور — رسالة عامة دائمًا (لا تكشف وجود الحساب). لا حدث تحليلات جديد.
-      const r = await auth.resetPassword(email)
-      setBusy(false)
-      if (r.ok) setNotice(t.auth.forgotSent)
-      else setMsg(r.error ?? t.auth.forgotFailed)
-      return
-    }
-    if (isSignup) {
-      track('signup_started', {})
-      const r = await auth.signUp(email, password, name)
-      setBusy(false)
-      if (!r.ok) {
-        setMsg(r.error ?? d.createFailed)
-      } else if (r.needsConfirmation) {
-        // تأكيد البريد مطلوب — نعرض تنبيهًا واضحًا ونعيد المستخدم لوضع الدخول.
-        track('signup_succeeded', { needsConfirmation: true })
-        setNotice(d.accountCreatedConfirm)
-        setMode('login')
-      } else {
-        track('signup_succeeded', { needsConfirmation: false })
-        onSuccess()
+    // `finally` يضمن أنّ الزرّ لا يبقى دائرًا أبدًا. طبقة المصادقة صارت لا ترمي
+    // (guardedAuthCall) — وهذا خطّ دفاع ثانٍ: شاشة عالقة على «جارٍ…» بلا رسالة
+    // أسوأ من أي خطأ صريح، فلا نقبلها ولو من استثناء غير متوقّع.
+    try {
+      if (isForgot) {
+        // استعادة كلمة المرور — رسالة عامة دائمًا (لا تكشف وجود الحساب). لا حدث تحليلات جديد.
+        const r = await auth.resetPassword(email)
+        if (r.ok) setNotice(t.auth.forgotSent)
+        else setMsg(r.error ?? t.auth.forgotFailed)
+        return
       }
-    } else {
+      if (isSignup) {
+        track('signup_started', {})
+        const r = await auth.signUp(email, password, name)
+        if (!r.ok) {
+          setMsg(r.error ?? d.createFailed)
+        } else if (r.ambiguousExistingAccount) {
+          // الخادم يُخفي وجود البريد (منع تعداد الحسابات) فلا نعرف هل أُنشئ حساب.
+          // رسالة صادقة في الحالتين + طريق الدخول جاهز، ولا حدث «نجاح تسجيل» لم يثبت.
+          setNotice(af.emailMaybeRegistered)
+          setMode('login')
+          onModeChange?.('login')
+        } else if (r.needsConfirmation) {
+          // تأكيد البريد مطلوب — نعرض تنبيهًا واضحًا ونعيد المستخدم لوضع الدخول.
+          track('signup_succeeded', { needsConfirmation: true })
+          setNotice(d.accountCreatedConfirm)
+          setMode('login')
+          onModeChange?.('login')
+        } else {
+          track('signup_succeeded', { needsConfirmation: false })
+          onSuccess()
+        }
+        return
+      }
       const r = await auth.signIn(email, password)
-      setBusy(false)
       if (r.ok) onSuccess()
       else setMsg(r.error ?? d.loginFailed)
+    } catch {
+      setMsg(d.authGeneric)
+    } finally {
+      setBusy(false)
     }
   }
 
@@ -100,11 +118,15 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login' }: Lo
   const primaryLabel = isForgot ? t.auth.sendReset : isSignup ? t.auth.createAccount : t.auth.login
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-page px-5 py-12">
+    <div className="relative h-[100dvh] min-h-0 overflow-hidden bg-page">
       <div className="pointer-events-none absolute inset-0 bg-radial-brand opacity-70" />
       <div className="pointer-events-none absolute inset-0 bg-grid-faint [background-size:44px_44px] opacity-25" />
 
-      <div className="relative w-full max-w-md">
+      <main
+        className="app-scroll relative flex h-full min-h-0 flex-col items-center overflow-y-auto overscroll-y-contain px-5 py-12"
+        style={{ paddingTop: 'max(3rem, var(--safe-top))', paddingBottom: 'max(3rem, var(--safe-bottom))' }}
+      >
+      <div className="relative my-auto w-full max-w-md">
         <button
           type="button"
           onClick={isForgot ? () => switchMode('login') : onBack}
@@ -249,9 +271,9 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login' }: Lo
                   />
                   <span>
                     {policy.eligibilityPrefix}{' '}
-                    <a href={POLICY_LINKS.terms} target="_blank" rel="noopener noreferrer" className="font-black text-primary-c underline underline-offset-2">{policy.terms}</a>{' '}
+                    <a href={POLICY_LINKS.terms} className="font-black text-primary-c underline underline-offset-2">{policy.terms}</a>{' '}
                     {policy.joiner}{' '}
-                    <a href={POLICY_LINKS.privacy} target="_blank" rel="noopener noreferrer" className="font-black text-primary-c underline underline-offset-2">{policy.privacy}</a>
+                    <a href={POLICY_LINKS.privacy} className="font-black text-primary-c underline underline-offset-2">{policy.privacy}</a>
                   </span>
                 </label>
               )}
@@ -314,6 +336,7 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login' }: Lo
           </div>
         )}
       </div>
+      </main>
     </div>
   )
 }

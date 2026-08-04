@@ -16,6 +16,18 @@ import { mkdtempSync, writeFileSync, mkdirSync, readFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { chromium } from 'playwright'
+import { loadAppCopy, requireKey, assertUnregistered } from './lib/app-copy.mjs'
+
+// مفاتيح التخزين تُقرأ من السجلّ المركزي (src/lib/userDataKeys.ts) لا مكرّرة هنا:
+// مفتاح يُحذف أو يُعاد تسميته يجب أن يُسقط الاختبار بخطأ واضح، لا أن يمرّ صامتًا.
+const { dataKeys } = await loadAppCopy()
+const K_AUTH = requireKey(dataKeys, 'qimmah:supabase-auth:v1')
+const K_ACCOUNTS = requireKey(dataKeys, 'qimmah:onboarding:accounts:v1')
+const K_STEP_GOAL = requireKey(dataKeys, 'qimmah:stepGoal:v1')
+// متجر مجهول عمدًا — حمولة هجوم، لا مفتاح تطبيق.
+const K_UNKNOWN_STORE = assertUnregistered(dataKeys, 'qimmah:custom-plan:v1')
+/** بادئة كل مفاتيح قِمّة — مشتقّة من السجلّ لا مكتوبة يدويًا. */
+const KEY_PREFIX = dataKeys[0].key.slice(0, dataKeys[0].key.indexOf(':') + 1)
 
 const PORT = 5311
 const EXTERNAL = process.env.PREVIEW_URL || ''
@@ -67,14 +79,34 @@ function seedInBrowser(uid, token) {
 async function gotoSettings(page, uid, token) {
   await page.goto(URL, { waitUntil: 'domcontentloaded' })
   const { session, registry } = seedInBrowser(uid, token)
-  await page.evaluate(({ session, registry }) => {
-    localStorage.setItem('qimmah:supabase-auth:v1', JSON.stringify(session))
-    localStorage.setItem('qimmah:onboarding:accounts:v1', JSON.stringify(registry))
-  }, { session, registry })
+  const seed = { session, registry, kAuth: K_AUTH, kAccounts: K_ACCOUNTS }
+  let seeded = false
+  for (let attempt = 0; attempt < 3 && !seeded; attempt += 1) {
+    try {
+      await page.evaluate(({ session, registry, kAuth, kAccounts }) => {
+        localStorage.setItem(kAuth, JSON.stringify(session))
+        localStorage.setItem(kAccounts, JSON.stringify(registry))
+      }, seed)
+      seeded = true
+    } catch (error) {
+      // بعد الاستيراد/تبديل المالك قد يعيد التطبيق تحميل الوثيقة في نفس اللحظة.
+      // أعد المحاولة فقط لسباق التنقّل؛ أي خطأ آخر يبقى فشلًا صريحًا.
+      if (!String(error).includes('Execution context was destroyed') || attempt === 2) throw error
+      await page.waitForLoadState('domcontentloaded').catch(() => {})
+      await page.waitForTimeout(150)
+    }
+  }
   // اربط الجلسة المزروعة (reload) ثم انتقل للإعدادات (بعض التهيئة تحوّل للوحة عند الإقلاع).
   await page.reload({ waitUntil: 'domcontentloaded' })
   await page.evaluate(() => { window.location.hash = '#/settings' })
-  // زر الاستيراد مرئي؛ حقل الملفّ نفسه مخفي (display:none) عمدًا فننتظره «مرفقًا» فقط.
+  // البنية الجديدة تجعل أقسام الإعدادات مطوية. افتح «البيانات» كما يفعل المستخدم
+  // بدل افتراض أن زر الاستيراد ظاهر مباشرةً في الصفحة.
+  const dataGroup = page.locator('[data-testid="settings-group-data"]')
+  await dataGroup.waitFor({ state: 'visible', timeout: 15000 })
+  if (!(await dataGroup.evaluate((node) => (node instanceof HTMLDetailsElement ? node.open : false)))) {
+    await dataGroup.locator('summary').click()
+  }
+  // زر الاستيراد مرئي بعد فتح القسم؛ حقل الملفّ نفسه مخفي عمدًا فننتظره «مرفقًا» فقط.
   await page.waitForSelector('[data-testid="settings-data-import"]', { state: 'visible', timeout: 15000 })
   await page.waitForSelector('[data-testid="settings-data-file"]', { state: 'attached', timeout: 15000 })
 }
@@ -101,7 +133,7 @@ function exploitFiles() {
   // حقن من حساب آخر: خريطة مالك أجنبية في مفتاح خام غير مسجّل → يجب أن تُرفض قبل أي كتابة.
   const crossOwner = { kind: 'qimmah-data-export', schemaVersion: 1, app: 'qimmah', appVersion: '1.0.0',
     exportedAt: '2026-01-01T00:00:00.000Z', summaryAr: '', counts: {}, stores: {},
-    unregistered: { 'qimmah:supabase-auth:v1': { access_token: 'attacker' }, 'qimmah:custom-plan:v1': { [UID_B]: { plan: {} } } } }
+    unregistered: { [K_AUTH]: { access_token: 'attacker' }, [K_UNKNOWN_STORE]: { [UID_B]: { plan: {} } } } }
   return [
     ['JSON تالف', writeCase('corrupt.json', '{ this is not valid json ')],
     ['نسخة قديمة (إصدار غير مدعوم)', writeCase('legacy-v2.json', legacyV2)],
@@ -147,7 +179,7 @@ async function run() {
     // ===== الاستيراد الصحيح ينجح (round-trip عبر واجهة #/settings) =====
     console.log('\n=== user A: تصدير حقيقي ثم استيراده يجب أن ينجح ===')
     // ازرع متجرًا بسيطًا (هدف الخطوات) كي تحمل النسخة محتوى قابلًا للمعاينة.
-    await page.evaluate(() => localStorage.setItem('qimmah:stepGoal:v1', JSON.stringify(8000)))
+    await page.evaluate((k) => localStorage.setItem(k, JSON.stringify(8000)), K_STEP_GOAL)
     const [download] = await Promise.all([
       page.waitForEvent('download'),
       page.locator('[data-testid="settings-data-export"]').click(),
@@ -158,29 +190,29 @@ async function run() {
     check('اسم ملفّ التصدير لا يحوي token/بريد', !/sk-|@qimmah|access_token/i.test(dlName))
 
     // غيّر القيمة محليًا لنتأكّد أن الاستيراد يستعيدها فعلًا
-    await page.evaluate(() => localStorage.setItem('qimmah:stepGoal:v1', JSON.stringify(1)))
+    await page.evaluate((k) => localStorage.setItem(k, JSON.stringify(1)), K_STEP_GOAL)
     await page.setInputFiles('[data-testid="settings-data-file"]', validPath)
     await page.waitForSelector('[data-testid="settings-import-preview"]', { timeout: 8000 })
     check('النسخة الصحيحة فتحت معاينة', await page.locator('[data-testid="settings-import-preview"]').isVisible())
     await page.locator('[data-testid="settings-import-confirm"]').click()
     await page.waitForSelector('[data-testid="settings-import-success"]', { timeout: 8000 })
     check('عُرضت «تمّ الاستيراد» بعد التطبيق الفعلي', await page.locator('[data-testid="settings-import-success"]').isVisible())
-    const restored = await page.evaluate(() => JSON.parse(localStorage.getItem('qimmah:stepGoal:v1') || 'null'))
+    const restored = await page.evaluate((k) => JSON.parse(localStorage.getItem(k) || 'null'), K_STEP_GOAL)
     check('استُعيدت القيمة الأصلية (8000) بعد الاستيراد', restored === 8000)
 
     // التحقّق من عدم كتابة رمز الجلسة عبر الاستيراد (لم يُمسّ auth)
-    const authAfter = await page.evaluate(() => localStorage.getItem('qimmah:supabase-auth:v1'))
+    const authAfter = await page.evaluate((k) => localStorage.getItem(k), K_AUTH)
     check('رمز الجلسة لم يُستبدَل عبر الاستيراد', typeof authAfter === 'string' && authAfter.includes(UID_A))
 
     // ===== المستخدم B: صفر بقايا من A =====
     console.log('\n=== user B: لا بقايا من بيانات A ===')
-    await page.evaluate(() => {
+    await page.evaluate(({ kAuth, prefix }) => {
       // حاكِ تبديل الحساب: امسح مفاتيح قِمّة عدا رمز الجلسة (كما يفعل wipeUserData عند الدخول)
-      const keep = new Set(['qimmah:supabase-auth:v1'])
-      for (const k of Object.keys(localStorage)) if (k.startsWith('qimmah:') && !keep.has(k)) localStorage.removeItem(k)
-    })
+      const keep = new Set([kAuth])
+      for (const k of Object.keys(localStorage)) if (k.startsWith(prefix) && !keep.has(k)) localStorage.removeItem(k)
+    }, { kAuth: K_AUTH, prefix: KEY_PREFIX })
     await gotoSettings(page, UID_B, 'sk-tokenB-CAFEBABE')
-    const bStepGoal = await page.evaluate(() => localStorage.getItem('qimmah:stepGoal:v1'))
+    const bStepGoal = await page.evaluate((k) => localStorage.getItem(k), K_STEP_GOAL)
     check('B لا يملك هدف خطوات A (صفر بقايا)', bStepGoal === null)
     // تصدير B الحقيقي يجب أن يخلو من قيمة A (8000) — إثبات العزل عبر الواجهة.
     const [dlB] = await Promise.all([

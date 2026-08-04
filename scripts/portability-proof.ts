@@ -10,6 +10,7 @@
 import { getDayStamp } from '@/lib/today'
 import { wipeUserData } from '@/lib/accountScope'
 import { readSyncQueue, setSyncFeatureEnabledForTests, setSyncRuntime } from '@/lib/syncQueue'
+import { setCloudSyncConsent } from '@/lib/syncConsent'
 import {
   buildExportBundle,
   parseImportFile,
@@ -211,8 +212,21 @@ seedFor(UID_A)
 setSyncRuntime(UID_A, false)
 setSyncFeatureEnabledForTests(true)
 const syncBundle = buildExportBundle(UID_A)
+
+// (ج-١) التأكيد المضادّ أوّلًا: بلا موافقة صريحة لا يُعبَّأ الطابور **ولو كان العلم
+// مفعّلًا**. أُضيف مع بوابة الموافقة — الاستيراد مسار كتابة كامل، ولو نجا من
+// البوابة لكان بابًا خلفيًا يرفع بيانات مستخدم لم يوافق.
+const noConsentResult = applyImport(syncBundle, UID_A, UID_A)
+check(
+  'بلا موافقة: الاستيراد لا يُعبّئ طابور المزامنة رغم تفعيل العلم',
+  !noConsentResult.syncQueued && readSyncQueue(UID_A).length === 0,
+)
+
+// وبالموافقة: السلوك الأصلي كما كان.
+setCloudSyncConsent(UID_A, true)
 const syncResult = applyImport(syncBundle, UID_A, UID_A)
 check('الاستيراد يُعيد تعبئة طابور المزامنة', syncResult.syncQueued && readSyncQueue(UID_A).length > 0)
+setCloudSyncConsent(UID_A, false)
 setSyncFeatureEnabledForTests(undefined)
 
 // ————— (QEA-001) متّجهات التدقيق الدقيقة —————

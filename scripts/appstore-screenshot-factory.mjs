@@ -132,12 +132,29 @@ async function completeOnboarding(page, maxSteps = 8) {
 async function logOneWorkout(page, { onMidSession, maxSets = 40 } = {}) {
   await page.goto(`${URL}/#/workout`, { waitUntil: 'domcontentloaded' })
   await page.waitForTimeout(600)
+  // قد يترك المتجوّل العام خطوة الإعداد داخل تفاصيل تمرين أو مع لوحة استبدال
+  // مفتوحة. أغلق اللوحة ثم ابدأ من السطح الحالي (الخطة أو التفاصيل).
+  const cancelSheet = page.getByRole('button', { name: /إلغاء|Cancel/ }).last()
+  if (await cancelSheet.isVisible().catch(() => false)) {
+    await cancelSheet.click({ timeout: 2000 }).catch(() => {})
+    await page.waitForTimeout(200)
+  }
   const startSession = page.getByRole('button', { name: /ابدأ الجلسة|Start session/ }).first()
-  if (!(await startSession.isVisible().catch(() => false))) return false
-  await startSession.click({ timeout: 3000 }).catch(() => {})
-  await page.waitForTimeout(400)
   const startExercise = page.getByRole('button', { name: /ابدأ التمرين|Start exercise/ }).first()
-  await startExercise.click({ timeout: 3000 }).catch(() => {})
+  const started = await startSession.isVisible().catch(() => false)
+    ? await startSession.click({ timeout: 3000 }).then(() => true).catch(() => false)
+    : await startExercise.isVisible().catch(() => false)
+      ? await startExercise.click({ timeout: 3000 }).then(() => true).catch(() => false)
+      : false
+  if (!started) {
+    const diagnostic = await page.evaluate(() => ({
+      body: document.body.innerText.slice(0, 1200),
+      qimmahKeys: Object.keys(localStorage).filter((key) => key.startsWith('qimmah:')).sort(),
+      calendar: localStorage.getItem('qimmah:workoutCalendar:v1'),
+    }))
+    console.log('  workout start unavailable:', JSON.stringify(diagnostic))
+    return false
+  }
   await page.waitForTimeout(400)
 
   // Canonical persistence probe: enter a distinctive 99 kg before the first set.
@@ -175,7 +192,7 @@ async function logOneWorkout(page, { onMidSession, maxSets = 40 } = {}) {
       await page.waitForTimeout(250)
     }
   }
-  const saveFinish = page.getByRole('button', { name: /حفظ وإنهاء|Save & finish/ }).first()
+  const saveFinish = page.getByRole('button', { name: /احفظ وأنهِ|حفظ وإنهاء|save & finish/i }).first()
   const saved = await saveFinish
     .click({ timeout: 3000 })
     .then(() => true)
@@ -247,6 +264,41 @@ try {
   console.log('— onboarding —')
   await completeOnboarding(page)
 
+  // لقطة المراجعة يجب أن تختبر جلسة فعلية مهما كان يوم تشغيل البوابة. إن صادف
+  // اليوم يوم راحة في الجدول المولّد، أضف تجاوزًا محليًا لهذا التاريخ إلى أول
+  // يوم في الخطة. هذا fixture للـE2E فقط، ولا يغيّر سلوك المنتج أو خطة حقيقية.
+  await page.evaluate(() => {
+    const key = 'qimmah:workoutCalendar:v1'
+    const now = new Date()
+    const date = [
+      now.getFullYear(),
+      String(now.getMonth() + 1).padStart(2, '0'),
+      String(now.getDate()).padStart(2, '0'),
+    ].join('-')
+    const raw = localStorage.getItem(key)
+    const current = raw ? JSON.parse(raw) : null
+    const schedule = current && Array.isArray(current.weekdays) && current.weekdays.length === 7
+      ? current
+      : {
+          version: 1,
+          weekdays: ['rest', 'rest', 'rest', 'rest', 'rest', 'rest', 'rest'],
+          split: 'full_body',
+          daysPerWeek: 1,
+          weekStart: 6,
+          overrides: {},
+          missedDecisions: {},
+          source: 'user',
+          updatedAt: new Date().toISOString(),
+        }
+    schedule.overrides = { ...(schedule.overrides ?? {}), [date]: 0 }
+    schedule.updatedAt = new Date().toISOString()
+    localStorage.setItem(key, JSON.stringify(schedule))
+  })
+  // أعد تحميل الوثيقة حتى يقرأ نموذج التمرين نفس التجاوز قبل إنشاء الجلسة؛
+  // تغيير hash داخل الوثيقة وحده قد يُبقي نموذج اليوم السابق في الذاكرة.
+  await page.reload({ waitUntil: 'domcontentloaded' })
+  await page.waitForTimeout(700)
+
   // التمرين: لقطة الجلسة النشطة عند مجموعتين، ثم إكمال الجلسة كاملة بصمت (23 مجموعة على
   // الأرجح) وحفظها فعليًا — بيانات التقدّم/الملف الشخصي الحقيقية تعتمد على جلسة محفوظة.
   const workoutLogged = await logOneWorkout(page, {
@@ -276,12 +328,19 @@ try {
       await page.reload({ waitUntil: 'domcontentloaded' })
       await page.waitForTimeout(2600)
       const body = await page.locator('body').innerText()
-      if (!body.includes('99') && !body.includes('٩٩')) throw new Error('active session did not restore 99 kg after reload')
+      if (!body.includes('99') && !body.includes('٩٩')) {
+        const stored = await page.evaluate(() => {
+          const key = Object.keys(localStorage).find((candidate) => candidate.startsWith('qimmah:active-workout:v2:'))
+          return key ? localStorage.getItem(key) : null
+        })
+        throw new Error(`active session did not restore 99 kg after reload; body=${body.slice(0, 600)}; stored=${stored?.slice(0, 800)}`)
+      }
       await page.screenshot({ path: `${OUT_DIR}/03b-workout-resumed.png` })
       console.log('✅ 03b-workout-resumed.png (fresh document)')
     },
   })
-  console.log(workoutLogged ? '  workout session saved (Save & finish clicked)' : '  ⚠️ session not saved — Progress/Profile may still show empty state')
+  if (!workoutLogged) throw new Error('reviewer journey did not save a workout session')
+  console.log('  workout session saved (Save & finish clicked)')
 
   await logMealAndWater(page)
   await page.screenshot({ path: `${OUT_DIR}/04-nutrition.png` })

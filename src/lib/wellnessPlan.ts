@@ -44,16 +44,14 @@ export function supplementName(ps: PlanSupplement, lang: Lang): string {
   const s = getSupplement(ps.supplementId)
   const ar = ps.customNameAr || s?.nameAr || ''
   const en = ps.customNameEn || s?.nameEn || ''
-  if (lang === 'en') return en || ar
-  return ar && en ? `${ar} — ${en}` : ar || en
+  return lang === 'en' ? en || ar : ar || en
 }
 
 export function medicationName(pm: PlanMedication, lang: Lang): string {
   const m = getMedication(pm.medicationId)
   const ar = pm.customNameAr || m?.nameAr || ''
   const en = pm.customNameEn || m?.nameEn || ''
-  if (lang === 'en') return en || ar
-  return ar && en ? `${ar} — ${en}` : ar || en
+  return lang === 'en' ? en || ar : ar || en
 }
 
 // defaultWellnessPlan انتقلت إلى customization.ts (P11.5) — كي لا تسحب حزمة

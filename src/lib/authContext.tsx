@@ -11,8 +11,9 @@ import { getLanguage } from './appPreferences'
 import { wipeUserData, setLastUser } from './accountScope'
 import { miscStrings } from '@/i18n/dict/misc'
 import { parseRecoveryParams, implicitTokens } from './recoveryState'
-import { fullSync, startSyncLifecycle } from './syncService'
 import { isSyncEnabled, setSyncRuntime } from './syncQueue'
+import type { AuthOp } from './authErrors'
+import { describeAuthError, guardedAuthCall, isAmbiguousSignup } from './authErrors'
 
 export interface AuthResult {
   ok: boolean
@@ -20,6 +21,12 @@ export interface AuthResult {
   error?: string
   /** هل يحتاج المستخدم لتأكيد بريده (sign up)؟ */
   needsConfirmation?: boolean
+  /**
+   * ردّ إنشاء الحساب غامض: الخادم يُخفي وجود البريد (منع تعداد الحسابات) فلا نعرف هل
+   * أُنشئ حساب جديد أم أنّ البريد مسجّل من قبل. المستدعي **لا يجوز** أن يقول «فتحنا
+   * حسابك» في هذه الحالة — يعرض رسالة صادقة في الحالتين ويعرض طريق تسجيل الدخول.
+   */
+  ambiguousExistingAccount?: boolean
 }
 
 export interface DeleteAccountResult {
@@ -133,22 +140,15 @@ function cloudDisabledError(): string {
 }
 
 /**
- * يحوّل رسالة خطأ Supabase (بالإنجليزية) إلى رسالة واضحة باللغة الحالية للمستخدم.
- * منطق المطابقة ثابت؛ فقط النص المُرجَع صار ثنائي اللغة.
+ * يحوّل خطأ Supabase إلى رسالة واضحة باللغة الحالية للمستخدم.
+ *
+ * التصنيف كلّه في `authErrors.ts` (طبقة نقيّة مثبَتة بسكربت): يعتمد على `code` الثابت
+ * من GoTrue أوّلًا ثم `status` ثم النصّ، و**لا يُعيد نصّ الخادم الخام أبدًا** (§9).
+ * النسخة السابقة كانت تُعيد `message` كما هو عند عدم المطابقة، فكان مستخدم عربي يقرأ
+ * «Load failed» على iOS — وهي بالذات رسالة انقطاع الشبكة في WKWebView.
  */
-function localizedAuthError(message: string | undefined): string {
-  const t = miscStrings[getLanguage()]
-  const m = (message ?? '').toLowerCase()
-  if (m.includes('invalid login') || m.includes('invalid credentials')) return t.authInvalidCredentials
-  if (m.includes('already registered') || m.includes('already been registered') || m.includes('user already'))
-    return t.authAlreadyRegistered
-  if (m.includes('email not confirmed')) return t.authEmailNotConfirmed
-  if (m.includes('password') && (m.includes('6') || m.includes('short') || m.includes('weak') || m.includes('least')))
-    return t.authWeakPassword
-  if (m.includes('email') && m.includes('valid')) return t.authInvalidEmail
-  if (m.includes('rate limit') || m.includes('too many')) return t.authRateLimit
-  if (m.includes('network') || m.includes('failed to fetch') || m.includes('fetch')) return t.authNetwork
-  return message || t.authGeneric
+function localizedAuthError(error: unknown, op: AuthOp): string {
+  return describeAuthError(error, getLanguage(), op)
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -216,8 +216,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSyncRuntime(userId, recoveryActive)
     if (!isSyncEnabled() || !userId || recoveryActive || loading) return
     // Login/session restoration hydrates once; lifecycle covers connectivity and foreground retries.
-    void fullSync()
-    return startSyncLifecycle()
+    // Keep the full sync graph out of the boot bundle: it includes every synced store
+    // (nutrition and exercise catalogues included) and is only needed when sync is enabled.
+    let active = true
+    let stopLifecycle: (() => void) | undefined
+    void import('./syncService').then(({ fullSync, startSyncLifecycle }) => {
+      if (!active) return
+      void fullSync()
+      stopLifecycle = startSyncLifecycle()
+    })
+    return () => {
+      active = false
+      stopLifecycle?.()
+    }
   }, [user?.id, recoveryActive, loading])
 
   const value = useMemo<AuthContextValue>(
@@ -233,21 +244,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const supabase = await getSupabase()
         if (!supabase) return { ok: false, error: cloudDisabledError() }
         const name = displayName?.trim()
-        const { data, error } = await supabase.auth.signUp({
-          email: email.trim(),
-          password,
-          // الاسم يُخزَّن في user_metadata؛ trigger المنصّة يقرأ display_name لإنشاء صف profile.
-          options: name ? { data: { display_name: name } } : undefined,
-        })
-        if (error) return { ok: false, error: localizedAuthError(error.message) }
-        // إن لم تُرجع جلسة فالأرجح أنّ تأكيد البريد مطلوب.
-        return { ok: true, needsConfirmation: !data.session }
+        // guardedAuthCall: الجهاز المقطوع يُجاب فورًا، والطلب المعلّق ينتهي بمهلة، وأي
+        // استثناء مرمي (تخزين مقفل في التصفّح الخاص مثلًا) يعود نتيجةً لا وعدًا مرفوضًا.
+        const call = await guardedAuthCall('signUp', getLanguage(), () =>
+          supabase.auth.signUp({
+            email: email.trim(),
+            password,
+            // الاسم يُخزَّن في user_metadata؛ trigger المنصّة يقرأ display_name لإنشاء صف profile.
+            options: name ? { data: { display_name: name } } : undefined,
+          }),
+        )
+        if (!call.ok) return { ok: false, error: call.error }
+        const { data, error } = call.value
+        if (error) return { ok: false, error: localizedAuthError(error, 'signUp') }
+        // إن لم تُرجع جلسة فالأرجح أنّ تأكيد البريد مطلوب — إلا أن يكون الردّ مموّهًا
+        // لبريد مسجّل من قبل، وحينها لا يجوز ادّعاء أنّ الحساب أُنشئ (§5).
+        return { ok: true, needsConfirmation: !data.session, ambiguousExistingAccount: isAmbiguousSignup(data) }
       },
       async signIn(email, password) {
         const supabase = await getSupabase()
         if (!supabase) return { ok: false, error: cloudDisabledError() }
-        const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
-        if (error) return { ok: false, error: localizedAuthError(error.message) }
+        const call = await guardedAuthCall('signIn', getLanguage(), () =>
+          supabase.auth.signInWithPassword({ email: email.trim(), password }),
+        )
+        if (!call.ok) return { ok: false, error: call.error }
+        if (call.value.error) return { ok: false, error: localizedAuthError(call.value.error, 'signIn') }
         return { ok: true }
       },
       async signOut() {
@@ -286,8 +307,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       async resendConfirmation(email) {
         const supabase = await getSupabase()
         if (!supabase) return { ok: false, error: cloudDisabledError() }
-        const { error } = await supabase.auth.resend({ type: 'signup', email: email.trim() })
-        if (error) return { ok: false, error: localizedAuthError(error.message) }
+        const call = await guardedAuthCall('resendConfirmation', getLanguage(), () =>
+          supabase.auth.resend({ type: 'signup', email: email.trim() }),
+        )
+        if (!call.ok) return { ok: false, error: call.error }
+        if (call.value.error) return { ok: false, error: localizedAuthError(call.value.error, 'resendConfirmation') }
         return { ok: true }
       },
       async resetPassword(email) {
@@ -309,19 +333,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           (typeof window !== 'undefined'
             ? `${window.location.origin}${window.location.pathname}#/reset`
             : undefined)
-        const { error } = await supabase.auth.resetPasswordForEmail(
-          email.trim(),
-          redirectTo ? { redirectTo } : undefined,
+        const call = await guardedAuthCall('resetPassword', getLanguage(), () =>
+          supabase.auth.resetPasswordForEmail(email.trim(), redirectTo ? { redirectTo } : undefined),
         )
-        if (error) return { ok: false, error: localizedAuthError(error.message) }
+        if (!call.ok) return { ok: false, error: call.error }
+        if (call.value.error) return { ok: false, error: localizedAuthError(call.value.error, 'resetPassword') }
         return { ok: true }
       },
       async updatePassword(password) {
         const supabase = await getSupabase()
         if (!supabase) return { ok: false, error: cloudDisabledError() }
         // يعمل على جلسة الاستعادة (أو أي جلسة نشطة). لا يكشف وجود الحساب — يتطلّب جلسة صالحة.
-        const { error } = await supabase.auth.updateUser({ password })
-        if (error) return { ok: false, error: localizedAuthError(error.message) }
+        const call = await guardedAuthCall('updatePassword', getLanguage(), () =>
+          supabase.auth.updateUser({ password }),
+        )
+        if (!call.ok) return { ok: false, error: call.error }
+        if (call.value.error) return { ok: false, error: localizedAuthError(call.value.error, 'updatePassword') }
         return { ok: true }
       },
       async completeRecovery() {

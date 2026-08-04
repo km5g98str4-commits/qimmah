@@ -2,6 +2,7 @@
 // كل القيم تهبط في المتجر نفسه لكل يوم، مع حفظ المصدر بوضوح.
 
 import { getDayStamp } from './today'
+import { safeWriteJson } from '@/lib/safeStorage'
 
 export const STEP_LOG_KEY = 'qimmah:steps:v1'
 export const STEP_SOURCE_KEY = 'qimmah:stepSource:v1'
@@ -61,8 +62,7 @@ export function loadStepGoal(): number {
 }
 
 export function saveStepGoal(goal: number): void {
-  if (typeof window === 'undefined') return
-  window.localStorage.setItem(STEP_GOAL_KEY, JSON.stringify(clampGoal(goal)))
+  safeWriteJson(STEP_GOAL_KEY, clampGoal(goal))
 }
 
 // ===== سجلّ الخطوات اليومي =====
@@ -86,8 +86,7 @@ export function loadStepLog(): Record<string, number> {
 }
 
 function persist(log: Record<string, number>): void {
-  if (typeof window === 'undefined') return
-  window.localStorage.setItem(STEP_LOG_KEY, JSON.stringify(log))
+  safeWriteJson(STEP_LOG_KEY, log)
 }
 
 /** يقرأ خريطة مصادر الخطوات { date: source }. */
@@ -106,8 +105,7 @@ function loadSourceLog(): Record<string, StepSource> {
 }
 
 function persistSources(sources: Record<string, StepSource>): void {
-  if (typeof window === 'undefined') return
-  window.localStorage.setItem(STEP_SOURCE_KEY, JSON.stringify(sources))
+  safeWriteJson(STEP_SOURCE_KEY, sources)
 }
 
 /** خطوات يوم محدّد (افتراضيًا اليوم). */

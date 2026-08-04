@@ -19,10 +19,10 @@ export interface MuscleCoverageStrings {
 }
 
 const ar: MuscleCoverageStrings = {
-  missingSingle: '{muscles} تمرّن أقل من باقي العضلات هذا الأسبوع — أضف لها تمرينًا.',
-  missingMultiple: '{muscles} تمرّنت أقل من باقي العضلات هذا الأسبوع — أضف لها تمرينًا.',
-  needsRest: '{muscle} يحتاج راحة اليوم — تعافيه لم يكتمل بعد.',
-  overtrained: '{muscles} تجاوز الحد الموصى به من المجموعات — خفّف الحجم قليلًا.',
+  missingSingle: '{muscles} تمرّن أقل من باقي العضلات هذا الأسبوع — أضف له تمرين.',
+  missingMultiple: '{muscles} تمرّنت أقل من باقي العضلات هذا الأسبوع — أضف لها تمارين.',
+  needsRest: '{muscle} يحتاج راحة اليوم — لسا ما تعافى بالكامل.',
+  overtrained: '{muscles} تجاوز الحد الموصى به من المجموعات — خفّف الحجم شوي.',
   readyToTrain: '{muscle} تعافى وجاهز للتمرين اليوم.',
   listSeparator: '، ',
 }
@@ -30,7 +30,7 @@ const ar: MuscleCoverageStrings = {
 const en: MuscleCoverageStrings = {
   missingSingle: '{muscles} got less work than the rest this week — add an exercise for it.',
   missingMultiple: '{muscles} got less work than the rest this week — add exercises for them.',
-  needsRest: '{muscle} needs rest today — it has not fully recovered yet.',
+  needsRest: "{muscle} needs rest today — it hasn't fully recovered yet.",
   overtrained: '{muscles} exceeded the recommended weekly sets — dial the volume back a little.',
   readyToTrain: '{muscle} has recovered and is ready to train today.',
   listSeparator: ', ',

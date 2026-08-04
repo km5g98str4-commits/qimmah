@@ -11,6 +11,7 @@ import {
   undoImport,
   readFileText,
   PortabilityError,
+  portabilityErrorText,
   type ImportPreview,
 } from '@/lib/portability'
 
@@ -75,7 +76,7 @@ export function DataManagementPanel({
       setPhase('preview')
     } catch (e) {
       // خطأ النقل يحمل رسالة عربية آمنة تسمّي المتجر الفاشل؛ غيره → رسالة عامّة.
-      setError(e instanceof PortabilityError ? e.message : t.settings.importInvalidFile)
+      setError(e instanceof PortabilityError ? portabilityErrorText(e, lang) : t.settings.importInvalidFile)
       setPhase('idle')
     } finally {
       setBusy(false)
@@ -99,7 +100,7 @@ export function DataManagementPanel({
       setPhase('done')
       setPreview(null)
     } catch (e) {
-      setError(e instanceof PortabilityError ? e.message : t.settings.importError)
+      setError(e instanceof PortabilityError ? portabilityErrorText(e, lang) : t.settings.importError)
       setPhase('idle')
       setPreview(null)
     } finally {

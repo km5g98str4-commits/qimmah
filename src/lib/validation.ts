@@ -3,7 +3,7 @@ import type { Profile } from '@/types/profile'
 // حدود إدخال واقعية + رسائل عربية ودّية.
 
 export const LIMITS = {
-  age: { min: 12, max: 90 },
+  age: { min: 13, max: 100 },
   heightCm: { min: 100, max: 230 },
   weightKg: { min: 15, max: 250 },
   targetWeightKg: { min: 15, max: 250 },
@@ -17,7 +17,7 @@ export interface FieldError {
 }
 
 const MESSAGES: Record<keyof typeof LIMITS, string> = {
-  age: 'أدخل عمرًا بين 12 و90 سنة.',
+  age: 'أدخل عمرًا بين 13 و100 سنة.',
   heightCm: 'أدخل طولًا بين 100 و230 سم.',
   weightKg: 'أدخل وزنًا بين 15 و250 كجم.',
   targetWeightKg: 'أدخل وزنًا هدفًا بين 15 و250 كجم.',
