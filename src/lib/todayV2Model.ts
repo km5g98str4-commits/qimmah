@@ -12,10 +12,10 @@ import type { Customization } from '@/lib/customization'
 import type { Lang } from '@/lib/appPreferences'
 import type { CalorieGoal } from '@/types/profile'
 import type { AppRoute } from '@/lib/appRoutes'
-import { todayPlanDay } from '@/lib/workoutPlan'
+import { scheduledDayFor } from '@/lib/workoutCalendar'
 import { getSteps, loadStepGoal } from '@/lib/stepCounter'
 import { getNutritionLog, getWorkoutSessions } from '@/lib/historyStore'
-import { todaysFinishedSession } from '@/lib/workoutSessions'
+import { todaysCompletion } from '@/lib/workoutSessionEngine'
 import { getDayStamp, weekdayName } from '@/lib/today'
 import { loadOnboardingProfile } from '@/lib/onboardingProfile'
 
@@ -67,6 +67,11 @@ export interface TodayV2Model {
   totalCount: number
   cards: TodayCard[]
   trustNote: string | null
+  /**
+   * (P4) يوم راحة حقيقي من الجدول الأسبوعي — لا تمرين اليوم بقرار الجدولة، لا
+   * لغياب الخطة. إضافة متوافقة خلفيًا (workoutAvailable يبقى false في الحالتين).
+   */
+  restDay: boolean
 }
 
 const GOAL_LABEL_AR: Record<CalorieGoal, string> = { cut: 'تنشيف', maintain: 'محافظة', bulk: 'تضخيم' }
@@ -106,13 +111,21 @@ export function buildTodayV2Model(customization: Customization, lang: Lang): Tod
   const firstName = name ? name.split(/\s+/)[0] : ''
   const avatarInitial = name ? Array.from(name)[0] : null
 
-  // ── Workout (real: generated plan + finished sessions) ──
-  const day = todayPlanDay(customization.workoutPlan)
+  // ── Workout (real: weekly schedule → plan day | honest rest; legacy rotation
+  //    only as the documented fallback when no schedule is configured) ──
+  const resolved = scheduledDayFor(customization.workoutPlan, now)
+  const restDay = resolved?.type === 'rest'
+  const day = resolved?.type === 'training' ? resolved.day : undefined
   const exerciseCount = day?.exercises.length ?? 0
   const workoutName = day ? (ar ? day.nameAr : day.nameEn) : ''
   const workoutAvailable = onboarded && exerciseCount > 0
   const durationMin = customization.profile.workoutDuration > 0 ? customization.profile.workoutDuration : estimateDurationMin(exerciseCount)
-  const finished = todaysFinishedSession()
+  // (P5) الاكتمال الصادق بدل «أي finishedAt»: جلسة completed فقط تُكمل اليوم؛
+  // الإنهاء المبكر (ended_early) = جزئي — لا يقلب الحالة إلى afterWorkout، ويظهر
+  // كتقدّم حقيقي على عمود التدريب. الجلسات القديمة بلا status تبقى completed.
+  const completion = todaysCompletion()
+  const finished = completion.state === 'complete' ? completion.session : undefined
+  const partialTrain = completion.state === 'partial' ? completion.partial : null
   // Prefer the localized plan-day name over the stored session name (which is a
   // single string frozen at finish time) so English never shows an Arabic name.
   const finishedName = finished ? workoutName || finished.workoutDayName : ''
@@ -165,7 +178,7 @@ export function buildTodayV2Model(customization: Customization, lang: Lang): Tod
   let greeting: string
   let dateLabel: string
   if (state === 'afterWorkout') {
-    greeting = t('أحسنت اليوم', 'Well done today')
+    greeting = t('كفو عليك اليوم', 'Well done today')
     dateLabel = `${weekday} · ${partOfDay(ar, now)}`
   } else {
     const dayMonth = (() => {
@@ -180,9 +193,9 @@ export function buildTodayV2Model(customization: Customization, lang: Lang): Tod
     dateLabel = dayMonth ? `${weekday} · ${dayMonth}` : weekday
     greeting =
       state === 'newUser'
-        ? firstName ? t(`أهلاً ${firstName}`, `Hi ${firstName}`) : t('أهلاً بك', 'Welcome')
+        ? firstName ? t(`هلا ${firstName}`, `Hi ${firstName}`) : t('هلا فيك', 'Welcome')
         : state === 'returnAfterBreak'
-          ? firstName ? t(`سعيدون بعودتك، ${firstName}`, `Great to see you back, ${firstName}`) : t('سعيدون بعودتك', 'Great to see you back')
+          ? firstName ? t(`حيّاك من جديد يا ${firstName}`, `Great to see you back, ${firstName}`) : t('حيّاك من جديد', 'Great to see you back')
           : t('يومك في قِمّة', 'Your day in Qimmah')
   }
 
@@ -190,20 +203,29 @@ export function buildTodayV2Model(customization: Customization, lang: Lang): Tod
   const hero = buildHero({ t, state, workoutAvailable, workoutName, exerciseCount, durationMin, finishedName, proteinRemaining, nutritionTarget, loggedMeal })
 
   // ── مسار اليوم: four pillars (real state each; all locked for new users) ──
-  const trainState: PillarState = finished ? 'done' : workoutAvailable ? 'ready' : 'locked'
+  // (P5) جزئي بتقدّم فعلي (>0%) → 'active' بنسبة المجموعات المنجزة الحقيقية؛
+  // جزئي صفر إنجاز → يبقى 'ready' (لا حلقة فارغة) واليوم غير مكتمل في الحالين.
+  const trainState: PillarState = finished
+    ? 'done'
+    : partialTrain && partialTrain.percent > 0
+      ? 'active'
+      : workoutAvailable
+        ? 'ready'
+        : 'locked'
+  const trainPercent = !finished && partialTrain ? partialTrain.percent : 0
   const nutritionState: PillarState = !nutritionTarget ? 'locked' : nutritionPercent >= 100 ? 'done' : nutritionPercent > 0 ? 'active' : 'locked'
   const moveState: PillarState = !movementAvailable ? 'locked' : movementPercent >= 100 ? 'done' : movementPercent > 0 ? 'active' : 'locked'
   const recoverState: PillarState = 'locked' // recovery completes in the evening flow; honest neutral until then
   const lockAll = state === 'newUser'
   const pillars: TodayPillar[] = [
-    { key: 'train', labelAr: 'تدريب', labelEn: 'Training', icon: 'Dumbbell', state: lockAll ? 'locked' : trainState, percent: 0 },
+    { key: 'train', labelAr: 'تدريب', labelEn: 'Training', icon: 'Dumbbell', state: lockAll ? 'locked' : trainState, percent: trainPercent },
     { key: 'nutrition', labelAr: 'تغذية', labelEn: 'Nutrition', icon: 'Flame', state: lockAll ? 'locked' : nutritionState, percent: nutritionPercent },
     { key: 'move', labelAr: 'حركة', labelEn: 'Movement', icon: 'Activity', state: lockAll ? 'locked' : moveState, percent: movementPercent },
     { key: 'recover', labelAr: 'تعافي', labelEn: 'Recovery', icon: 'Moon', state: lockAll ? 'locked' : recoverState, percent: 0 },
   ]
   const completedCount = pillars.filter((p) => p.state === 'done').length
   const totalCount = pillars.length
-  const progressLabel = state === 'newUser' ? t('لم يبدأ بعد', 'Not started yet') : t(`${completedCount} من ${totalCount} مكتمل`, `${completedCount} of ${totalCount} done`)
+  const progressLabel = state === 'newUser' ? t('ما بدأ لسا', 'Not started yet') : t(`${completedCount} من ${totalCount} مكتمل`, `${completedCount} of ${totalCount} done`)
 
   // ── Cards: setup guides (new user) or actionable nudges (normal/after) ──
   const cards =
@@ -218,11 +240,11 @@ export function buildTodayV2Model(customization: Customization, lang: Lang): Tod
   // ── Trust note (single, honest, only when something is genuinely unknown) ──
   let trustNote: string | null = null
   if (state !== 'newUser') {
-    if (!movementAvailable) trustNote = t('لا تُعرض خطوات وهمية — مصدر الحركة غير مربوط.', 'No fake steps — movement source not connected.')
-    else if (!loggedMeal && nutritionTarget) trustNote = t('لا وجبات مسجّلة اليوم بعد.', 'No meals logged yet today.')
+    if (!movementAvailable) trustNote = t('ما نعرض خطوات وهمية — مصدر الحركة مو مربوط.', 'No fake steps — movement source not connected.')
+    else if (!loggedMeal && nutritionTarget) trustNote = t('ما فيه وجبات مسجّلة اليوم لسا.', 'No meals logged yet today.')
   }
 
-  return { state, greeting, dateLabel, avatarInitial, goalLabel, hero, pillars, progressLabel, completedCount, totalCount, cards, trustNote }
+  return { state, greeting, dateLabel, avatarInitial, goalLabel, hero, pillars, progressLabel, completedCount, totalCount, cards, trustNote, restDay }
 }
 
 // ── Hero builders ────────────────────────────────────────────────────────────
@@ -243,14 +265,14 @@ function buildHero(a: {
   const withPrefix = (n: string) => (n.startsWith('تمرين') ? n : `تمرين ${n}`)
 
   if (state === 'afterWorkout') {
-    const doneLine = finishedName ? t(`أنهيت ${withPrefix(finishedName)}`, `Finished ${finishedName}`) : t('أنهيت تمرين اليوم', 'Workout done')
+    const doneLine = finishedName ? t(`خلّصت ${withPrefix(finishedName)}`, `Finished ${finishedName}`) : t('خلّصت تمرين اليوم', 'Workout done')
     if (proteinRemaining !== null && proteinRemaining > 0) {
       return {
         eyebrow: doneLine,
         eyebrowDone: true,
-        title: t('سجّل وجبة ما بعد التمرين', 'Log your post-workout meal'),
-        subtitle: t(`بروتين الآن يسرّع التعافي · بقي ${proteinRemaining}g`, `Protein now speeds recovery · ${proteinRemaining}g left`),
-        ctaLabel: t('سجّل وجبة', 'Log a meal'),
+        title: t('سجّل أكلك بعد التمرين', 'Log your post-workout meal'),
+        subtitle: t(`بروتين الحين يسرّع التعافي · باقي ${proteinRemaining}g`, `Protein now speeds recovery · ${proteinRemaining}g left`),
+        ctaLabel: t('سجّل أكلك', 'Log your food'),
         ctaTone: 'green',
         destination: 'nutrition',
       }
@@ -259,9 +281,9 @@ function buildHero(a: {
     return {
       eyebrow: doneLine,
       eyebrowDone: true,
-      title: proteinRemaining === 0 ? t('اكتمل بروتين اليوم', 'Protein goal met') : t('خذ قسط تعافٍ', 'Take your recovery'),
-      subtitle: t('راحة جيدة الليلة تُثبّت تقدّمك.', 'Good rest tonight locks in your progress.'),
-      ctaLabel: t('عرض التقدّم', 'View progress'),
+      title: proteinRemaining === 0 ? t('كمّلت بروتين اليوم', 'Protein goal met') : t('خذ قسطك من الراحة', 'Take your recovery'),
+      subtitle: t('راحة زينة الليلة تثبّت تقدّمك.', 'Good rest tonight locks in your progress.'),
+      ctaLabel: t('شوف التقدّم', 'View progress'),
       ctaTone: 'green',
       destination: 'progress',
     }
@@ -272,10 +294,10 @@ function buildHero(a: {
     // today's real plan — the "15 minutes" is guidance to ease in (do the first
     // part), NOT a separate generated session. No fake dual-option.
     return {
-      eyebrow: t('سعيدون بعودتك', 'Good to have you back'),
+      eyebrow: t('حيّاك من جديد', 'Good to have you back'),
       eyebrowDone: false,
-      title: t('عُد بلطف اليوم', 'Ease back in today'),
-      subtitle: t('ابدأ بأول ١٥ دقيقة من خطتك وأكمل إن أحببت · تقدّمك السابق محفوظ', 'Do the first 15 minutes of your plan, continue if you like · your progress is saved'),
+      title: t('ارجع بهدوء اليوم', 'Ease back in today'),
+      subtitle: t('ابدأ بأول ١٥ دقيقة من خطتك وكمّل إذا حبيت · تقدّمك السابق محفوظ', 'Do the first 15 minutes of your plan, keep going if you feel like it · your progress is saved'),
       ctaLabel: t('ابدأ تمرين اليوم', 'Start today’s workout'),
       ctaTone: 'ember',
       destination: 'workout',
@@ -297,8 +319,8 @@ function buildHero(a: {
     return {
       eyebrow: t('أول خطوة معنا', 'Your first step with us'),
       eyebrowDone: false,
-      title: t('أكمل إعداد خطتك', 'Finish setting up your plan'),
-      subtitle: t('دقيقتان لنُعِدّ تمرينك وتغذيتك.', 'Two minutes to build your training and nutrition.'),
+      title: t('كمّل إعداد خطتك', 'Finish setting up your plan'),
+      subtitle: t('دقيقتين ونجهّز تمرينك وتغذيتك.', 'Two minutes to build your training and nutrition.'),
       ctaLabel: t('ابدأ الإعداد', 'Start setup'),
       ctaTone: 'ember',
       destination: 'setup',
@@ -308,7 +330,7 @@ function buildHero(a: {
   // normal
   if (workoutAvailable) {
     return {
-      eyebrow: t('خطوتك التالية · الآن', 'Your next step · now'),
+      eyebrow: t('خطوتك الجاية · الحين', 'Your next step · now'),
       eyebrowDone: false,
       title: t(withPrefix(workoutName), workoutName),
       subtitle: t(`${exerciseCount} تمارين · ${durationMin} دقيقة · جاهز لك`, `${exerciseCount} exercises · ${durationMin} min · ready for you`),
@@ -320,21 +342,21 @@ function buildHero(a: {
   // rest day / no workout scheduled → next best real action
   if (a.nutritionTarget && !a.loggedMeal) {
     return {
-      eyebrow: t('خطوتك التالية · الآن', 'Your next step · now'),
+      eyebrow: t('خطوتك الجاية · الحين', 'Your next step · now'),
       eyebrowDone: false,
-      title: t('سجّل وجبتك القادمة', 'Log your next meal'),
-      subtitle: proteinRemaining !== null && proteinRemaining > 0 ? t(`بقي ${proteinRemaining}g بروتين لهدف اليوم`, `${proteinRemaining}g protein left today`) : t('يوم راحة — تغذيتك تصنع الفرق.', 'Rest day — nutrition makes the difference.'),
-      ctaLabel: t('سجّل وجبة', 'Log a meal'),
+      title: t('سجّل وجبتك الجاية', 'Log your next meal'),
+      subtitle: proteinRemaining !== null && proteinRemaining > 0 ? t(`باقي ${proteinRemaining}g بروتين لهدف اليوم`, `${proteinRemaining}g protein left today`) : t('يوم راحة — أكلك يصنع الفرق.', 'Rest day — food makes the difference.'),
+      ctaLabel: t('سجّل أكلك', 'Log your food'),
       ctaTone: 'ember',
       destination: 'nutrition',
     }
   }
   return {
-    eyebrow: t('خطوتك التالية · الآن', 'Your next step · now'),
+    eyebrow: t('خطوتك الجاية · الحين', 'Your next step · now'),
     eyebrowDone: false,
-    title: t('راجع تقدّمك', 'Review your progress'),
+    title: t('شوف تقدّمك', 'Check your progress'),
     subtitle: t('يوم راحة — حركة خفيفة تكفي اليوم.', 'Rest day — light movement is enough today.'),
-    ctaLabel: t('عرض التقدّم', 'View progress'),
+    ctaLabel: t('شوف التقدّم', 'View progress'),
     ctaTone: 'ember',
     destination: 'progress',
   }
@@ -345,9 +367,9 @@ function buildHero(a: {
 /** New-user setup guides — always the three first-steps, never empty rings. */
 function buildSetupCards(t: (ar: string, en: string) => string): TodayCard[] {
   return [
-    { label: t('سجّل أول وجبة لنضبط سعراتك', 'Log your first meal to set your calories'), hint: null, actionLabel: t('سجّل', 'Log'), icon: 'Utensils', tone: 'nutrition', destination: 'nutrition' },
+    { label: t('سجّل أول وجبة عشان نضبط سعراتك', 'Log your first meal to set your calories'), hint: null, actionLabel: t('سجّل', 'Log'), icon: 'Utensils', tone: 'nutrition', destination: 'nutrition' },
     { label: t('سجّل وزنك الحالي · نقطة البداية', 'Log your current weight · your baseline'), hint: null, actionLabel: t('سجّل', 'Log'), icon: 'TrendingUp', tone: 'progress', destination: 'progress' },
-    { label: t('فعّل التذكيرات · لا تفوّت تمرين', 'Turn on reminders · never miss a workout'), hint: null, actionLabel: t('فعّل', 'Enable'), icon: 'Bell', tone: 'recover', destination: 'settings' },
+    { label: t('فعّل التذكيرات · لا يفوتك تمرين', 'Turn on reminders · never miss a workout'), hint: null, actionLabel: t('فعّل', 'Enable'), icon: 'Bell', tone: 'recover', destination: 'settings' },
   ]
 }
 
@@ -363,14 +385,14 @@ function buildNormalNudges(a: {
   const { t, proteinRemaining, loggedMeal, movementAvailable, stepsRemaining, nutritionTarget } = a
   const cards: TodayCard[] = []
   if (proteinRemaining !== null && proteinRemaining > 0) {
-    cards.push({ label: t(`بقي ${proteinRemaining}g بروتين لهدف اليوم`, `${proteinRemaining}g protein left for today’s goal`), hint: null, actionLabel: t('أضف', 'Add'), icon: 'Flame', tone: 'nutrition', destination: 'nutrition' })
+    cards.push({ label: t(`باقي ${proteinRemaining}g بروتين لهدف اليوم`, `${proteinRemaining}g protein left for today’s goal`), hint: null, actionLabel: t('أضف', 'Add'), icon: 'Flame', tone: 'nutrition', destination: 'nutrition' })
   } else if (nutritionTarget && !loggedMeal) {
-    cards.push({ label: t('سجّل أول وجبة لنضبط سعراتك', 'Log your first meal to set your calories'), hint: null, actionLabel: t('سجّل', 'Log'), icon: 'Utensils', tone: 'nutrition', destination: 'nutrition' })
+    cards.push({ label: t('سجّل أول وجبة عشان نضبط سعراتك', 'Log your first meal to set your calories'), hint: null, actionLabel: t('سجّل', 'Log'), icon: 'Utensils', tone: 'nutrition', destination: 'nutrition' })
   }
   if (movementAvailable && (stepsRemaining ?? 0) > 0) {
-    cards.push({ label: t(`امشِ ${num(stepsRemaining as number)} خطوة تكمل هدفك`, `Walk ${num(stepsRemaining as number)} steps to finish your goal`), hint: null, actionLabel: '', icon: 'Activity', tone: 'move', destination: 'progress' })
+    cards.push({ label: t(`امشِ ${num(stepsRemaining as number)} خطوة وتكمّل هدفك`, `Walk ${num(stepsRemaining as number)} steps to finish your goal`), hint: null, actionLabel: '', icon: 'Activity', tone: 'move', destination: 'progress' })
   } else if (!movementAvailable) {
-    cards.push({ label: t('فعّل عدّاد الخطوات لتتبّع حركتك', 'Turn on the step counter to track movement'), hint: null, actionLabel: t('فعّل', 'Enable'), icon: 'Activity', tone: 'move', destination: 'settings' })
+    cards.push({ label: t('فعّل عدّاد الخطوات وتابع حركتك', 'Turn on the step counter to track movement'), hint: null, actionLabel: t('فعّل', 'Enable'), icon: 'Activity', tone: 'move', destination: 'settings' })
   }
   if (cards.length < 2) {
     cards.push({ label: t('سجّل وزنك الحالي · نقطة البداية', 'Log your current weight · your baseline'), hint: null, actionLabel: t('سجّل', 'Log'), icon: 'TrendingUp', tone: 'progress', destination: 'progress' })
@@ -390,7 +412,7 @@ function buildReturnNudges(a: { t: (ar: string, en: string) => string }): TodayC
   // CTA (there is no separate light session), so offering it as a distinct
   // choice would be a false promise. Just reassure that progress is intact.
   return [
-    { label: t('راجع تقدّمك — محفوظ بالكامل', 'Review your progress — fully saved'), hint: null, actionLabel: t('عرض', 'View'), icon: 'TrendingUp', tone: 'progress', destination: 'progress' },
+    { label: t('شوف تقدّمك — محفوظ بالكامل', 'Check your progress — fully saved'), hint: null, actionLabel: t('عرض', 'View'), icon: 'TrendingUp', tone: 'progress', destination: 'progress' },
   ]
 }
 
@@ -401,6 +423,6 @@ function buildAfterWorkoutNudges(a: { t: (ar: string, en: string) => string; rec
   if (recoveryAvailable) {
     cards.push({ label: t('تذكيرات المساء · مكمّلاتك قبل النوم', 'Evening reminders · supplements before bed'), hint: null, actionLabel: t('عرض', 'View'), icon: 'Moon', tone: 'recover', destination: 'settings' })
   }
-  cards.push({ label: t('عرض ملخّص تمرين اليوم', 'View today’s workout summary'), hint: null, actionLabel: t('عرض', 'View'), icon: 'Trophy', tone: 'progress', destination: 'progress' })
+  cards.push({ label: t('شوف ملخّص تمرين اليوم', 'View today’s workout summary'), hint: null, actionLabel: t('عرض', 'View'), icon: 'Trophy', tone: 'progress', destination: 'progress' })
   return cards.slice(0, 3)
 }

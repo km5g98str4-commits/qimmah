@@ -101,5 +101,9 @@ export interface PlanDay {
 
 export interface WorkoutPlan {
   templateId: string
+  /** اسم اختياري للخطة اليدوية (P6) — حقل إضافي متوافق خلفيًّا؛ السجلات القديمة بلا اسم تبقى صالحة. */
+  nameAr?: string
+  /** الاسم الإنجليزي الاختياري للخطة اليدوية (P6). */
+  nameEn?: string
   days: PlanDay[]
 }

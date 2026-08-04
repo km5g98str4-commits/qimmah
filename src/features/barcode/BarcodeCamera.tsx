@@ -1,10 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
-import { BarcodeFormat, DecodeHintType } from '@zxing/library'
-import { BrowserMultiFormatReader } from '@zxing/browser'
 import { Icon } from '@/components/Icon'
+import {
+  startWebZxingScan,
+  classifyCameraError,
+  type WebScanController,
+  type CameraFailure,
+} from './webZxingEngine'
 
-/** سبب فشل تشغيل الكاميرا — يميّز رفض الصلاحية عن غياب الكاميرا عن أي عطل آخر. */
-export type CameraFailure = 'permission-denied' | 'no-camera' | 'start-failed'
+// يُعاد تصديره للحفاظ على عقد الاستيراد القائم في ScanFoodPanel وغيره.
+export type { CameraFailure }
 
 interface BarcodeCameraProps {
   onDetected: (barcode: string) => void
@@ -14,119 +18,51 @@ interface BarcodeCameraProps {
   torchLabel: string
 }
 
-/** يصنّف خطأ getUserMedia/zxing إلى سبب واجهة — حسب اسم DOMException القياسي. */
-function classifyCameraError(err: unknown): CameraFailure {
-  const name =
-    err instanceof DOMException
-      ? err.name
-      : err && typeof err === 'object' && 'name' in err
-        ? String((err as { name: unknown }).name)
-        : ''
-  if (name === 'NotAllowedError' || name === 'PermissionDeniedError' || name === 'SecurityError') {
-    return 'permission-denied'
-  }
-  if (name === 'NotFoundError' || name === 'DevicesNotFoundError' || name === 'OverconstrainedError') {
-    return 'no-camera'
-  }
-  return 'start-failed'
-}
-
-// صيغ باركود منتجات التجزئة الشائعة فقط — تسريع القراءة وتقليل الأخطاء بدل مسح كل الصيغ (QR/PDF417...).
-const RETAIL_FORMATS = [BarcodeFormat.EAN_13, BarcodeFormat.EAN_8, BarcodeFormat.UPC_A, BarcodeFormat.UPC_E]
-
-function buildHints(): Map<DecodeHintType, unknown> {
-  const hints = new Map<DecodeHintType, unknown>()
-  hints.set(DecodeHintType.POSSIBLE_FORMATS, RETAIL_FORMATS)
-  hints.set(DecodeHintType.TRY_HARDER, true)
-  return hints
-}
-
-// خاصية "torch" من MediaStream Image Capture API — تجريبية وغير مُدرجة بعد في أنواع TypeScript الرسمية.
-interface TorchConstraintSet extends MediaTrackConstraintSet {
-  torch?: boolean
-}
-
-/** يتحقق إن كان المسار يُعلن دعم الفلاش عبر قدراته (بعض المتصفحات/الأجهزة لا تدعمه). */
-function trackSupportsTorch(track: MediaStreamTrack): boolean {
-  try {
-    return 'torch' in (track.getCapabilities?.() ?? {})
-  } catch {
-    return false
-  }
-}
-
 /**
- * فيديو كاميرا حيّ يمسح الباركود عبر @zxing/browser — يستهدف صيغ التجزئة الشائعة فقط،
- * ويعرض زر فلاش حين يُعلن المسار دعمه فعليًا (Image Capture API).
+ * فيديو كاميرا حيّ يمسح الباركود عبر محرّك zxing المحسّن (webZxingEngine):
+ * دقة 1080p، تركيز مستمر/زوم حين يتاحان، وفكّ ROI مقصوص عبر canvas.
+ * يعرض زر فلاش حين يُعلن المسار دعمه فعليًا.
  * يبدأ المسح عند الوصل (يتطلب لمسة مستخدم قبله من المكوّن الأب — قيد Safari/iOS).
  */
 export function BarcodeCamera({ onDetected, onError, torchLabel }: BarcodeCameraProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
-  const trackRef = useRef<MediaStreamTrack | null>(null)
-  const [ready, setReady] = useState(false)
+  const controllerRef = useRef<WebScanController | null>(null)
   const [torchSupported, setTorchSupported] = useState(false)
   const [torchOn, setTorchOn] = useState(false)
 
   useEffect(() => {
-    let stopped = false
-    let controls: { stop: () => void } | undefined
-
-    // كل مسار البدء داخل try — أي استثناء متزامن (تهيئة القارئ/القيود) يتحوّل لحالة خطأ
-    // معروضة في الواجهة بدل شاشة بيضاء.
-    try {
-      const reader = new BrowserMultiFormatReader(buildHints())
-
-      const constraints: MediaStreamConstraints = {
-        video: {
-          facingMode: 'environment',
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-        },
-      }
-
-      reader
-        .decodeFromConstraints(constraints, videoRef.current ?? undefined, (result, _err, ctrl) => {
-          controls = ctrl
-          if (stopped) return
-          if (!ready) {
-            setReady(true)
-            const stream = videoRef.current?.srcObject
-            const track = stream instanceof MediaStream ? stream.getVideoTracks()[0] : undefined
-            trackRef.current = track ?? null
-            setTorchSupported(track ? trackSupportsTorch(track) : false)
-          }
-          if (result) {
-            stopped = true
-            ctrl.stop()
-            onDetected(result.getText())
-          }
-        })
-        .catch((err: unknown) => {
-          if (!stopped) onError(classifyCameraError(err))
-        })
-    } catch (err) {
-      if (!stopped) onError(classifyCameraError(err))
+    const video = videoRef.current
+    if (!video) {
+      onError('start-failed')
+      return
     }
-
+    let disposed = false
+    const controller = startWebZxingScan(video, {
+      onReady: ({ torchSupported: supported }) => {
+        if (!disposed) setTorchSupported(supported)
+      },
+      onDetected: (hit) => {
+        if (!disposed) onDetected(hit.value)
+      },
+      onError: (err) => {
+        if (!disposed) onError(classifyCameraError(err))
+      },
+    })
+    controllerRef.current = controller
     return () => {
-      stopped = true
-      controls?.stop()
-      trackRef.current = null
+      disposed = true
+      controller.stop()
+      controllerRef.current = null
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const toggleTorch = async () => {
-    const track = trackRef.current
-    if (!track) return
+    const controller = controllerRef.current
+    if (!controller) return
     const next = !torchOn
-    try {
-      const constraintSet: TorchConstraintSet = { torch: next }
-      await track.applyConstraints({ advanced: [constraintSet] })
-      setTorchOn(next)
-    } catch {
-      // بعض الأجهزة تُعلن الدعم في getCapabilities لكن ترفض applyConstraints فعليًا — نتجاهل بصمت.
-    }
+    // بعض الأجهزة تُعلن الدعم ثم ترفض التطبيق فعليًا — لا نغيّر الحالة إلا عند نجاح التطبيق.
+    if (await controller.setTorch(next)) setTorchOn(next)
   }
 
   return (

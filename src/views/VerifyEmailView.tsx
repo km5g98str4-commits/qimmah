@@ -43,8 +43,12 @@ export function VerifyEmailView({ lang, onSignedOut }: VerifyEmailViewProps) {
   }
 
   return (
-    <div dir={en ? 'ltr' : 'rtl'} className="flex min-h-screen flex-col items-center justify-center bg-page px-6 py-12 text-center">
-      <div className="mx-auto w-full max-w-md">
+    <div dir={en ? 'ltr' : 'rtl'} className="h-[100dvh] min-h-0 overflow-hidden bg-page text-center">
+      <main
+        className="app-scroll flex h-full min-h-0 flex-col items-center overflow-y-auto overscroll-y-contain px-6 py-12"
+        style={{ paddingTop: 'max(3rem, var(--safe-top))', paddingBottom: 'max(3rem, var(--safe-bottom))' }}
+      >
+      <div className="my-auto w-full max-w-md">
         <span className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-primary-soft text-primary-c">
           <Icon name="Mail" className="h-8 w-8" />
         </span>
@@ -66,6 +70,7 @@ export function VerifyEmailView({ lang, onSignedOut }: VerifyEmailViewProps) {
           </button>
         </div>
       </div>
+      </main>
     </div>
   )
 }

@@ -1,5 +1,5 @@
 import { getSyncRuntime } from '@/lib/syncQueue'
-import { PortabilityError } from './errors'
+import { portabilityError } from './errors'
 
 /**
  * Data export/import is an authenticated, owner-bound action even though the
@@ -13,10 +13,10 @@ export function requirePortabilityOwner(
   const runtime = getSyncRuntime()
   const ownerId = candidate ?? runtime.userId
   if (!ownerId || runtime.recoveryActive) {
-    throw new PortabilityError('لا يمكن نقل البيانات أثناء استعادة كلمة المرور أو بدون حساب.')
+    throw portabilityError('RECOVERY_OR_NO_ACCOUNT')
   }
   if (runtime.userId !== ownerId || (expectedOwner !== undefined && expectedOwner !== ownerId)) {
-    throw new PortabilityError('تغيّر الحساب. أعد فتح معاينة النسخة من الحساب الحالي.')
+    throw portabilityError('ACCOUNT_CHANGED')
   }
   return ownerId
 }

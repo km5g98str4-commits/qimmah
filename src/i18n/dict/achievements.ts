@@ -24,10 +24,10 @@ export interface AchievementsStrings {
 
 const ar: AchievementsStrings = {
   eyebrow: 'أوسمتك',
-  unlockedNote: 'وسام مفتوح — استمر يزيدون.',
-  emptyTitle: 'أول وسام على بُعد تمرين واحد',
-  emptyBody: 'خلّص تمرينك أو سجّل وجبتك وتبدأ تجمع أوسمتك.',
-  nextPrefix: 'القادم:',
+  unlockedNote: 'وسام مفتوح — كمّل وخلّهم يزيدون.',
+  emptyTitle: 'أول وسام بينك وبينه تمرين واحد',
+  emptyBody: 'خلّص تمرينك أو سجّل أكلك وتبدأ تجمع أوسمتك.',
+  nextPrefix: 'الجاي:',
   allBadges: 'كل الأوسمة',
   unlockedCountSuffix: 'وسام مفتوح',
   unlocked: 'مفتوح',
@@ -44,7 +44,7 @@ const en: AchievementsStrings = {
   eyebrow: 'Your badges',
   unlockedNote: 'badges unlocked — keep them coming.',
   emptyTitle: 'Your first badge is one workout away',
-  emptyBody: 'Finish a workout or log a meal and your badges start rolling in.',
+  emptyBody: 'Finish a workout or log your food and the badges start rolling in.',
   nextPrefix: 'Next:',
   allBadges: 'All badges',
   unlockedCountSuffix: 'badges unlocked',
@@ -54,7 +54,7 @@ const en: AchievementsStrings = {
   achievementEyebrow: 'Achievement',
   prTitle: 'New personal record!',
   prKg: 'kg',
-  prTail: 'a new best you had never hit before.',
+  prTail: "a new best you've never hit before.",
   prFallbackName: 'your exercise',
 }
 

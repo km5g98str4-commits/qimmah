@@ -17,7 +17,8 @@ authority, a paid account, licensed source material, or physical hardware is req
 | Icons and splash defaults | FIXED | canonical reproducible brand renderer and pixel proof |
 | Native minimum functionality | FIXED | local notification engine and native scheduling |
 | iOS keyboard behavior | OWNER | physical-device checklist |
-| npm audit high/moderate | FIXED | Vite 6.4.3; `npm audit` reports zero |
+| npm audit — production dependencies | FIXED | safe lockfile updates applied; `npm audit --omit=dev` reports zero |
+| npm audit — legacy ESLint 8 toolchain | TRACKED | 9 high dev-only findings remain behind a breaking ESLint 10 migration; no `--force` upgrade |
 | 32 px legacy touch targets | DROPPED | v2 promotion removes legacy surfaces; v2 contract uses 44 px actions |
 | 16 MB exercise images | DROPPED | shipped offline media is intentional product content, not boot JS |
 | DEV review-panel production chunk | FIXED | compile-time DEV import; absent from final production build |

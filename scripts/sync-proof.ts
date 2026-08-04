@@ -16,6 +16,7 @@ import {
   type SyncTransport,
 } from '@/lib/syncService'
 import { enqueueAuxOperations } from '@/lib/syncStores'
+import { setCloudSyncConsent } from '@/lib/syncConsent'
 import { getSteps } from '@/lib/stepCounter'
 import { getDayStamp } from '@/lib/today'
 
@@ -55,8 +56,15 @@ const transport: SyncTransport = {
 setSyncFeatureEnabledForTests(true)
 setSyncTransportForTests(transport)
 
+// (ج-١) بوابة الموافقة تحجب الإدراج بلا موافقة سارية — وهو سلوكها الصحيح، وليس
+// موضوع هذا الإثبات. تُمنح للحسابين بعد كل مسح تخزين ليُعزل ما يفحصه فعلًا:
+// الطابور والدفعات والـLWW والنقل. حجبَها المستقلّ مُثبَت في run-sync-consent-proof.
+const grantConsent = () => { setCloudSyncConsent('A', true); setCloudSyncConsent('B', true) }
+grantConsent()
+
 console.log('\n① enqueue / persistence / batching / idempotent owner rows')
 localStorage.clear()
+grantConsent()
 setSyncRuntime('A', false)
 enqueueSyncOperation('daily_logs', '2026-07-13', { date: '2026-07-13', data: { a: 1 } })
 enqueueSyncOperation('daily_logs', '2026-07-13', { date: '2026-07-13', data: { a: 2 } })
@@ -77,7 +85,13 @@ check('51 same-table operations flush in sane 50-row batches', calls.length === 
 calls.length = 0
 enqueueSyncDelete('measurement_logs', 'measurement-to-delete')
 await flushSyncQueue(3_000)
-check('idempotent delete reaches the owner-scoped transport', calls[0]?.rows[0].entityKey === 'measurement-to-delete' && calls[0]?.rows[0].user_id === 'A')
+// (P12) measurement_logs جدول tombstone: الحذف يصل upsert شاهد قبر بطابع deleted_at
+// وحمولة ممسوحة — لا حذف صف مباشر (LWW يحترم الحذف على الأجهزة الأخرى).
+const tombstone = calls[0]?.rows[0] as { user_id?: string; local_id?: string; deleted_at?: string; values?: unknown } | undefined
+check(
+  'idempotent delete ships as an owner-scoped stamped tombstone upsert',
+  tombstone?.local_id === 'measurement-to-delete' && tombstone?.user_id === 'A' && typeof tombstone?.deleted_at === 'string' && JSON.stringify(tombstone?.values) === '{}',
+)
 
 console.log('\n② retry + exponential backoff')
 enqueueSyncOperation('daily_logs', 'retry', { date: '2026-07-14', data: {} })
@@ -112,36 +126,72 @@ check('PASSWORD_RECOVERY performs no network operation', calls.length === before
 console.log('\n④ wipe clears owner queue + backup')
 localStorage.setItem(backupKey('A'), '{"private":true}')
 wipeUserData('A')
+grantConsent()
 check('owner queue cleared', readSyncQueue('A').length === 0)
 check('owner backup cleared', localStorage.getItem(backupKey('A')) === null)
 
-console.log('\n⑤ hydrate: backup first + server-wins merge + upload merged local')
+console.log('\n⑤ hydrate: backup first + LWW merge (both directions) + upload merged local')
 localStorage.clear()
+grantConsent()
 setSyncRuntime('A', false)
 owner = 'A'
 const localSession = {
   id: 'same-id',
   date: '2026-07-10',
   startedAt: '2026-07-10T10:00:00.000Z',
+  finishedAt: '2026-07-10T10:40:00.000Z',
   workoutDayId: 'local-day',
   workoutDayName: 'Local',
   exercises: [],
 }
 saveWorkoutSession(localSession)
+// معيار القبول 5: سجل سحابي أحدث (finishedAt أحدث) يصل إلى الجهاز.
 cloudRows = {
   workout_sessions: [
     {
       local_id: 'same-id',
-      data: { ...localSession, workoutDayId: 'server-day', workoutDayName: 'Server' },
+      data: { ...localSession, finishedAt: '2026-07-10T11:30:00.000Z', workoutDayId: 'server-day', workoutDayName: 'Server' },
     },
   ],
 }
 calls.length = 0
+// كما في fullSync الحقيقي: الطابور يُفرَّغ قبل السحب، فالحسم هنا بالطوابع لا بحماية الطابور.
+localStorage.removeItem(`qimmah:syncQueue:v1:A`)
 await hydrateFromCloud()
 const backup = JSON.parse(localStorage.getItem(backupKey('A')) ?? 'null') as { history?: { workoutSessions?: unknown[] } } | null
 check('pre-hydration local snapshot exists', backup?.history?.workoutSessions?.length === 1)
-check('server wins the conflicting entity', exportHistory().workoutSessions[0]?.workoutDayId === 'server-day')
+check('LWW: NEWER cloud edit reaches the device', exportHistory().workoutSessions[0]?.workoutDayId === 'server-day')
 check('merged snapshot is uploaded through queue', calls.some((call) => call.table === 'workout_sessions'))
+
+// معيار القبول 4: سجل سحابي أقدم لا يستبدل تعديلًا محليًا أحدث (ولا الطابع المتساوي).
+const newerLocal = { ...localSession, finishedAt: '2026-07-10T12:00:00.000Z', workoutDayId: 'local-newer', workoutDayName: 'LocalNewer' }
+saveWorkoutSession(newerLocal)
+cloudRows = {
+  workout_sessions: [
+    {
+      local_id: 'same-id',
+      data: { ...localSession, finishedAt: '2026-07-10T11:30:00.000Z', workoutDayId: 'server-stale', workoutDayName: 'ServerStale' },
+    },
+  ],
+}
+// أفرغ الطابور أولًا حتى يكون الحسم بالطوابع وحدها (لا بحماية الطابور).
+localStorage.removeItem(`qimmah:syncQueue:v1:A`)
+await hydrateFromCloud()
+check('LWW: OLDER cloud row never overwrites a newer local edit', exportHistory().workoutSessions[0]?.workoutDayId === 'local-newer')
+
+// حماية الطابور: كيان معلّق بانتظار الرفع لا يُدهس حتى لو حمل السحابي طابعًا أحدث.
+const pendingLocal = { ...localSession, finishedAt: '2026-07-10T13:00:00.000Z', workoutDayId: 'pending-local', workoutDayName: 'PendingLocal' }
+saveWorkoutSession(pendingLocal) // يبقى في الطابور (لن نفرغه هذه المرة)
+cloudRows = {
+  workout_sessions: [
+    {
+      local_id: 'same-id',
+      data: { ...localSession, finishedAt: '2026-07-10T14:00:00.000Z', workoutDayId: 'server-race', workoutDayName: 'ServerRace' },
+    },
+  ],
+}
+await hydrateFromCloud()
+check('LWW: pending-queued local entity survives even a newer cloud stamp', exportHistory().workoutSessions[0]?.workoutDayId === 'pending-local')
 
 // Capture conflict logs (metadata only) to prove overwrites are logged, not dropped.
 const conflicts: { table: string; entityKey: string }[] = []
@@ -156,6 +206,7 @@ const today = getDayStamp()
 
 console.log('\n⑥ coverage extension: aux stores → dedicated tables')
 localStorage.clear()
+grantConsent()
 setSyncRuntime('A', false)
 owner = 'A'
 calls.length = 0
@@ -167,14 +218,17 @@ localStorage.setItem('qimmah:todo:v1:A', JSON.stringify({ date: today, items: [{
 await flushSyncQueue(20_000)
 const tbl = (t: string) => calls.filter((c) => c.table === t)
 const stepRows = tbl('step_logs')[0]?.rows ?? []
-check('step_logs uploaded per-day, owner-scoped', stepRows.length === 2 && stepRows.every((r) => r.user_id === 'A') && stepRows.some((r) => r.date === '2026-07-13' && r.steps === 8000 && r.source === 'manual'))
+// (P12) سياسة خصوصية الصحة: يوم الخطوات المستورد من HealthKit لا يُرفع — اليدوي فقط.
+check('manual step-day uploaded, owner-scoped', stepRows.every((r) => r.user_id === 'A') && stepRows.some((r) => r.date === '2026-07-13' && r.steps === 8000 && r.source === 'manual'))
+check('healthkit-imported step-day is NEVER uploaded (health privacy)', stepRows.length === 1 && !stepRows.some((r) => r.date === '2026-07-12'))
 check('achievements uploaded as single owner row', tbl('achievements')[0]?.rows[0]?.user_id === 'A' && (tbl('achievements')[0]?.rows[0]?.data as { prCount?: number })?.prCount === 3)
 check('custom_plans uploaded with source + plan data', tbl('custom_plans')[0]?.rows[0]?.user_id === 'A' && tbl('custom_plans')[0]?.rows[0]?.source === 'custom')
 check('todos uploaded as single owner row', tbl('todos')[0]?.rows[0]?.user_id === 'A' && Array.isArray((tbl('todos')[0]?.rows[0]?.data as { items?: unknown[] })?.items))
-check('re-capture de-duplicates (bounded queue, no growth)', (enqueueAuxOperations('A'), readSyncQueue('A').filter((op) => op.table === 'step_logs').length === 2))
+check('re-capture de-duplicates (bounded queue, no growth)', (enqueueAuxOperations('A'), readSyncQueue('A').filter((op) => op.table === 'step_logs').length === 1))
 
 console.log('\n⑦ aux hydrate: backup-first + server-wins + conflict logged')
 localStorage.clear()
+grantConsent()
 setSyncRuntime('A', false)
 owner = 'A'
 localStorage.setItem('qimmah:steps:v1', JSON.stringify({ '2026-07-12': 100 }))
@@ -201,6 +255,7 @@ check('merged aux re-uploaded through queue', calls.some((c) => c.table === 'ste
 
 console.log('\n⑧ owner/recovery guard covers aux capture')
 localStorage.clear()
+grantConsent()
 setSyncRuntime('A', true) // recovery active
 owner = 'A'
 localStorage.setItem('qimmah:steps:v1', JSON.stringify({ '2026-07-13': 500 }))
@@ -210,6 +265,7 @@ check('recovery session performs NO aux upload', calls.length === 0)
 
 console.log('\n⑨ wipe clears aux queue ops + aux store keys')
 localStorage.clear()
+grantConsent()
 setSyncRuntime('A', false)
 owner = 'A'
 localStorage.setItem('qimmah:steps:v1', JSON.stringify({ '2026-07-13': 700 }))
@@ -217,6 +273,7 @@ localStorage.setItem('qimmah:achievements:v1', JSON.stringify({ unlocked: { m: '
 enqueueAuxOperations('A')
 check('aux ops enqueued into the owner queue', readSyncQueue('A').some((op) => op.table === 'step_logs'))
 wipeUserData('A')
+grantConsent()
 check('wipe clears aux queue ops', readSyncQueue('A').length === 0)
 check('wipe clears steps store key', localStorage.getItem('qimmah:steps:v1') === null)
 check('wipe clears achievements store key', localStorage.getItem('qimmah:achievements:v1') === null)

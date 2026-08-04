@@ -20,9 +20,13 @@ export interface PasswordStrength {
 /** يقيّم كلمة المرور: يحسب المتطلّبات والقوة دون أي اعتماد على الشبكة. */
 export function evaluatePassword(pw: string): PasswordStrength {
   const lengthOk = pw.length >= PASSWORD_MIN_LENGTH
-  const hasLetter = /[A-Za-z؀-ۿ]/.test(pw)
-  const hasNumber = /\d/.test(pw)
-  const hasSymbol = /[^A-Za-z0-9؀-ۿ]/.test(pw)
+  // Unicode-aware so Arabic-first users pass: `\p{Nd}` matches ASCII 0-9 AND
+  // Arabic-Indic ٠-٩ (U+0660–0669) and Persian ۰-۹ (U+06F0–06F9); `\p{L}` is any
+  // letter but never a digit (the old `؀-ۿ` range wrongly counted Arabic digits
+  // as letters, so `\d` rejected a password whose only number was Arabic).
+  const hasLetter = /\p{L}/u.test(pw)
+  const hasNumber = /\p{Nd}/u.test(pw)
+  const hasSymbol = /[^\p{L}\p{Nd}\s]/u.test(pw)
   const hasMixedCase = /[a-z]/.test(pw) && /[A-Z]/.test(pw)
 
   let score = 0

@@ -45,7 +45,7 @@ const progress = buildProgressV2Model(customization, 'ar')
 check('الوزن الحالي يأتي من السجل لا من fallback الملف', progress.weight.currentKg === 78)
 check('الاتجاه يضم نقطتين حقيقيتين', progress.weight.series.length === 2)
 check('تغيّر الوزن محسوب بصدق', progress.weight.changeKg === -1)
-check('لغة الخلاصة متحوّطة بـ «يبدو»', progress.headline.startsWith('يبدو'))
+check('لغة الخلاصة متحوّطة بـ «شكلك/شكله»', progress.headline.startsWith('شكل') || progress.headline.startsWith('نحتاج بيانات'))
 check('نسبة الدهون موسومة كبيان حقيقي تقديري', progress.weight.bodyFatPct === 18)
 
 console.log('\n② تسجيل اليوم → التاريخ القانوني')

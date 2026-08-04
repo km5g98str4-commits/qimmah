@@ -10,6 +10,7 @@
 //     لتبقى ظاهرة لكن مميّزة بصريًا. لا تراكم صامت ولا فقدان لمهمة لم تُنجَز.
 
 import { getDayStamp } from '@/lib/today'
+import { safeWriteJson } from '@/lib/safeStorage'
 
 export const TODO_KEY_BASE = 'qimmah:todo:v1'
 
@@ -67,7 +68,7 @@ export function loadTodos(ownerId: string | null | undefined): TodoState {
         }
         const rolled = applyRollover(safe, today)
         // اكتب فقط عند تغيّر اليوم (تثبيت نتيجة التدوير) لتفادي كتابة زائدة.
-        if (rolled !== safe) window.localStorage.setItem(key, JSON.stringify(rolled))
+        if (rolled !== safe) safeWriteJson(key, rolled)
         return rolled
       }
     }
@@ -75,11 +76,10 @@ export function loadTodos(ownerId: string | null | undefined): TodoState {
     /* بيانات تالفة → نبدأ نظيفًا */
   }
   const f = fresh()
-  window.localStorage.setItem(key, JSON.stringify(f))
+  safeWriteJson(key, f)
   return f
 }
 
 export function saveTodos(ownerId: string | null | undefined, state: TodoState): void {
-  if (typeof window === 'undefined') return
-  window.localStorage.setItem(todoKey(ownerId), JSON.stringify(state))
+  safeWriteJson(todoKey(ownerId), state)
 }

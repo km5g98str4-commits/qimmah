@@ -39,6 +39,16 @@ export interface SessionExercise {
   notes?: string
 }
 
+/**
+ * (P5) حالة الجلسة الصادقة:
+ *   • in_progress: جلسة نشطة لم تُحفظ نهايتها بعد.
+ *   • completed: كل تمارين الجلسة المطلوبة أُنجزت.
+ *   • ended_early: إنهاء مبكر مؤكَّد — بعض التمارين لم تكتمل (اليوم **ليس** مكتملًا).
+ *   • abandoned: جلسة مستعادة قديمة صُنّفت مهجورة — المجموعات المنفّذة تبقى محفوظة.
+ * غياب الحقل = جلسة قديمة (قبل P5): تُقرأ completed عند وجود finishedAt (توافق خلفي).
+ */
+export type SessionStatus = 'in_progress' | 'completed' | 'ended_early' | 'abandoned'
+
 export interface WorkoutSession {
   id: string
   date: string
@@ -47,6 +57,8 @@ export interface WorkoutSession {
   workoutDayId: string
   workoutDayName: string
   exercises: SessionExercise[]
+  /** (P5) حالة الجلسة — اختيارية للتوافق الخلفي؛ الغياب = completed القديمة. */
+  status?: SessionStatus
 }
 
 export function loadSessions(): WorkoutSession[] {
@@ -66,7 +78,12 @@ export function lastSession(): WorkoutSession | undefined {
   return getWorkoutSessions()[0]
 }
 
-/** هل توجد جلسة مكتملة اليوم؟ */
+/**
+ * @deprecated (P5) «أي finishedAt = يوم مكتمل» لم تعد صادقة: الإنهاء المبكر
+ * (ended_early) له finishedAt لكنه **لا** يكمل اليوم. استخدم `todaysCompletion()`
+ * من `@/lib/workoutSessionEngine` (تفرّق complete/partial/none). تبقى هذه الدالة
+ * بسلوكها القديم حرفيًا (أي جلسة منتهية اليوم) للمستهلكين القدامى فقط.
+ */
 export function todaysFinishedSession(): WorkoutSession | undefined {
   const today = getDayStamp()
   return getWorkoutSessions().find((s) => s.date === today && s.finishedAt)

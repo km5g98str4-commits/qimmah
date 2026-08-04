@@ -11,6 +11,7 @@
 // بيانات مستخدم عبر مفتاح نُسي.
 
 import { clearSyncArtifacts } from './syncQueue'
+import { markAdoptionPendingIfUnowned, stampDataOwner } from './dataOwnership'
 
 const PREFIX = 'qimmah:'
 
@@ -36,6 +37,7 @@ const GLOBAL_SAFE_KEYS: ReadonlySet<string> = new Set([
   'qimmah:products:audit:v1', // سجلّ تدقيق المنتجات على مستوى الجهاز
   'qimmah:products:saudi-seed-done:v1', // علم اكتمال البذرة
   'qimmah:history:migrated:v1', // علم هجرة (بيان محاسبي على مستوى الجهاز)
+  'qimmah:migrations:v1', // سجل هجرات dataOwnership (محاسبة جهاز — لا بيانات مستخدم)
   'qimmah:onboarding:accounts:v1', // سجلّ الحسابات التي أكملت الإعداد (يُبقى فلا يُعاد الإعداد عند عودة نفس الحساب)
   'qimmah:supabase-auth:v1', // رمز الجلسة الحالي — يجب أن يبقى عبر مسح التبديل
   LAST_USER_KEY, // مؤشّر هذه الوحدة نفسه
@@ -112,9 +114,16 @@ export function reconcileAccountScope(uid: string | null): { wiped: boolean } {
   if (uid !== null && last !== undefined && last !== null && last !== uid) {
     wipeUserData()
     setLastUser(uid)
+    stampDataOwner(uid) // الجهاز نظيف الآن — البيانات القادمة ملك الحساب الحالي
     return { wiped: true }
   }
   // خلاف ذلك: سجّل المالك الحقيقي الحالي (فيُلتقط أي حساب حقيقي مختلف لاحقًا) بلا مسح.
   if (uid !== null && last !== uid) setLastUser(uid)
+  if (uid !== null) {
+    // لا تبنٍّ تلقائيًا لبيانات مجهولة المالك: بيانات بلا ختم (أو بختم ضيف) تحت حساب
+    // حقيقي تدخل حالة تعليق — تبقى محلية ولا تُرفع للسحابة حتى قرار صريح
+    // (adoptPendingData/discardPendingData في dataOwnership).
+    markAdoptionPendingIfUnowned(uid)
+  }
   return { wiped: false }
 }

@@ -23,7 +23,7 @@ export function StartViewV2({ lang, onLogin, onSignup }: StartViewV2Props) {
   const c = V2_WELCOME[lang] ?? V2_WELCOME.ar
 
   return (
-    <div className="v2-surface-dark relative min-h-screen overflow-hidden bg-page">
+    <div className="v2-surface-dark relative h-[100dvh] min-h-0 overflow-hidden bg-page">
       {/* Background depth — ember glow behind the headline + faint grid + large
           Ascent motif anchored low. Purely decorative, non-interactive. */}
       <div className="pointer-events-none absolute inset-0" aria-hidden="true">
@@ -35,7 +35,7 @@ export function StartViewV2({ lang, onLogin, onSignup }: StartViewV2Props) {
       </div>
 
       <div
-        className="app-container v2-screen-enter relative z-10 flex min-h-screen flex-col px-6"
+        className="app-container app-scroll v2-screen-enter relative z-10 flex h-full min-h-0 flex-col overflow-y-auto overscroll-y-contain px-6"
         style={{ paddingTop: 'max(1rem, var(--safe-top))', paddingBottom: 'max(1.75rem, var(--safe-bottom))' }}
       >
         {/* Top row — language toggle only. */}

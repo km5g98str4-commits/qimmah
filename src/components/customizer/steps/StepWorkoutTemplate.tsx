@@ -6,10 +6,11 @@ import { ExerciseLibraryPicker } from '@/components/ExerciseLibraryPicker'
 import type { WizardCtx } from '../stepProps'
 import type { PlanDay, PlanExercise, WorkoutPlan } from '@/types/workout'
 import { workoutTemplates } from '@/data/workoutTemplates'
-import { createPlanExercise, generatePlanFromTemplate, planExerciseName, planExerciseVideo } from '@/lib/workoutPlan'
+import { createPlanExercise, generatePlanFromTemplate, planExerciseName } from '@/lib/workoutPlan'
 import { analyzeWorkoutBalance } from '@/lib/workoutValidation'
 import { parseSafeNumber } from '@/lib/validation'
 import { onboardingStrings } from '@/i18n/dict/onboarding'
+import { profileChoiceStrings } from '@/i18n/dict/profileChoices'
 
 // text-base (16px) لا text-sm: يمنع تكبير iOS التلقائي عند التركيز على الحقول الرقمية.
 const smallInput =
@@ -18,6 +19,7 @@ const smallInput =
 /** خطوة اختيار جدول التمرين — قوالب + أيام قابلة للتعديل + مكتبة تمارين. */
 export function StepWorkoutTemplate({ ctx }: { ctx: WizardCtx }) {
   const d = onboardingStrings[ctx.lang]
+  const choices = profileChoiceStrings[ctx.lang]
   const plan = ctx.data.workoutPlan
   const setPlan = (p: WorkoutPlan) => ctx.update({ workoutPlan: p })
   const [pendingTemplate, setPendingTemplate] = useState<string | null>(null)
@@ -119,12 +121,11 @@ export function StepWorkoutTemplate({ ctx }: { ctx: WizardCtx }) {
               }`}
             >
               <div className="flex items-center justify-between">
-                <span className="text-sm font-bold text-ink-900">{tpl.nameAr}</span>
+                <span className="text-sm font-bold text-ink-900">{ctx.lang === 'en' ? tpl.nameEn : tpl.nameAr}</span>
                 {active && <Icon name="CheckCircle2" className="h-4 w-4 text-primary-c" />}
               </div>
-              <p className="mt-1 text-[11px] text-ink-400">{tpl.nameEn}</p>
-              <p className="mt-2 text-xs leading-relaxed text-ink-500">{tpl.descriptionAr}</p>
-              <p className="mt-2 text-[11px] font-bold text-primary-c">{tpl.days.length} {d.daysAndRecommended} · {tpl.recommendedFor}</p>
+              <p className="mt-2 text-xs leading-relaxed text-ink-500">{ctx.lang === 'en' ? tpl.descriptionEn : tpl.descriptionAr}</p>
+              <p className="mt-2 text-[11px] font-bold text-primary-c">{tpl.days.length} {d.daysAndRecommended} · {choices.recommendedFor[tpl.recommendedFor] ?? tpl.recommendedFor}</p>
             </button>
           )
         })}
@@ -136,7 +137,7 @@ export function StepWorkoutTemplate({ ctx }: { ctx: WizardCtx }) {
           {balanceWarnings.map((w, i) => (
             <div key={i} className="flex items-start gap-2 rounded-xl border border-gold-400/40 bg-gold-200/40 p-3 text-sm text-ink-700">
               <Icon name="AlertTriangle" className="mt-0.5 h-4 w-4 shrink-0 text-gold-600" />
-              <span>{w.message}</span>
+              <span>{ctx.lang === 'en' ? choices.workoutBalanceWarning[w.message] ?? d.wtBalanceFallback : w.message}</span>
             </div>
           ))}
         </div>
@@ -146,9 +147,12 @@ export function StepWorkoutTemplate({ ctx }: { ctx: WizardCtx }) {
       <div className="mt-8 space-y-5">
         {plan.days.map((day) => (
           <div key={day.id} className="card p-5">
-            <div className="mb-4 grid gap-2 sm:grid-cols-2">
-              <input className={smallInput} value={day.nameAr} onChange={(e) => updateDay(day.id, { nameAr: e.target.value })} placeholder={d.wtDayNameArPlaceholder} />
-              <input className={smallInput} value={day.nameEn} onChange={(e) => updateDay(day.id, { nameEn: e.target.value })} placeholder={d.wtDayNameEnPlaceholder} />
+            <div className="mb-4">
+              {ctx.lang === 'en' ? (
+                <input className={smallInput} value={day.nameEn} onChange={(e) => updateDay(day.id, { nameEn: e.target.value })} placeholder={d.wtDayNameEnPlaceholder} />
+              ) : (
+                <input className={smallInput} value={day.nameAr} onChange={(e) => updateDay(day.id, { nameAr: e.target.value })} placeholder={d.wtDayNameArPlaceholder} />
+              )}
             </div>
 
             <ul className="space-y-3">
@@ -157,9 +161,6 @@ export function StepWorkoutTemplate({ ctx }: { ctx: WizardCtx }) {
                   <div className="flex items-start justify-between gap-2">
                     <p className="text-sm font-bold text-ink-900">{planExerciseName(pe, ctx.lang)}</p>
                     <div className="flex shrink-0 items-center gap-1">
-                      <a href={planExerciseVideo(pe)} target="_blank" rel="noopener noreferrer" className="grid h-7 w-7 place-items-center rounded-lg border border-line text-ink-500 hover:bg-beige" aria-label={d.wtWatchGuide}>
-                        <Icon name="Globe" className="h-3.5 w-3.5" />
-                      </a>
                       <button type="button" onClick={() => moveExercise(day.id, i, -1)} className="grid h-7 w-7 place-items-center rounded-lg border border-line text-ink-500 hover:bg-beige" aria-label={d.wtMoveUp}>
                         <Icon name="ChevronLeft" className="h-3.5 w-3.5 rotate-90" />
                       </button>
