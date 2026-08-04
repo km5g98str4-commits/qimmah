@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { getDayStamp } from './today'
 import { useIsDemo } from './demoMode'
 import { saveMedicationLog, saveSupplementLog } from './historyStore'
+import { safeWriteJson } from '@/lib/safeStorage'
 
 // تتبّع المكملات والأدوية اليومي — يُصفّر مع تغيّر اليوم.
 
@@ -32,7 +33,7 @@ export function loadWellnessToday(): WellnessTodayState {
   const f = fresh()
   // بذر best-effort: التحميل يجب ألّا يرمي عند امتلاء التخزين (لا انهيار للشاشة).
   try {
-    window.localStorage.setItem(WELLNESS_TODAY_KEY, JSON.stringify(f))
+    safeWriteJson(WELLNESS_TODAY_KEY, f)
   } catch {
     /* تجاهل امتلاء التخزين — الحالة الطازجة تبقى في الذاكرة */
   }
@@ -40,8 +41,7 @@ export function loadWellnessToday(): WellnessTodayState {
 }
 
 export function saveWellnessToday(state: WellnessTodayState): void {
-  if (typeof window === 'undefined') return
-  window.localStorage.setItem(WELLNESS_TODAY_KEY, JSON.stringify(state))
+  safeWriteJson(WELLNESS_TODAY_KEY, state)
 }
 
 export function useWellnessToday() {

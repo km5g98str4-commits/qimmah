@@ -59,7 +59,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     }
 
     return (
-      <div dir={dir} className="flex min-h-screen flex-col items-center justify-center bg-page px-6 py-16 text-center">
+      <div dir={dir} className="app-scroll flex h-[100dvh] min-h-0 flex-col items-center justify-center overflow-y-auto overscroll-y-contain bg-page px-6 py-16 text-center">
         <div className="mx-auto w-full max-w-md">
           <span className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-primary-soft text-primary-c">
             <svg
@@ -161,7 +161,7 @@ export class RouteErrorBoundary extends Component<RouteErrorBoundaryProps, Error
     return (
       <div
         dir={lang === 'en' ? 'ltr' : 'rtl'}
-        className="flex min-h-screen items-center justify-center bg-page px-6 py-16"
+        className="app-scroll flex h-[100dvh] min-h-0 items-center justify-center overflow-y-auto overscroll-y-contain bg-page px-6 py-16"
       >
         <div className="card w-full max-w-md p-8 text-center" data-testid="route-error-card">
           <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-primary-soft text-primary-c">

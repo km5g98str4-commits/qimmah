@@ -66,4 +66,6 @@ export interface MeasurementLog {
   notes?: string
   /** Provenance of the entry. Absent = user-typed (manual). 'health' = imported from Apple Health. */
   source?: 'manual' | 'health'
+  /** آخر تعديل (ISO) — أساس حسم LWW في المزامنة. القديم بلا طابع يسقط لدقّة اليوم (date). */
+  updatedAt?: string
 }

@@ -1,13 +1,28 @@
+// تتبّع التغذية اليومي — **محوّل (adapter) فوق المصدر القانوني الواحد**.
+//
+// موجة توحيد المخازن: كاتب v1 القديم (مفتاح qimmah:nutritionToday:v1) حُذف نهائيًا —
+// كل القراءة/الكتابة هنا تمرّ عبر nutritionV2Model (qimmah:nutrition:v2 للأصناف
+// والماء) وhistoryStore (doneMeals في سجل التغذية اليومي الدائم). الواجهة العامة
+// نفسها بقيت (types + loadNutritionToday + useNutritionToday) حفاظًا على مستهلكيها
+// (achievements/dataPortability) بلا لمس واجهات. بيانات v1 القديمة تُهاجَر لمرة
+// واحدة داخل nutritionV2Model (idempotent + snapshot + rollback) ثم يُحذف مفتاحها.
+
 import { useCallback, useEffect, useSyncExternalStore } from 'react'
 import { getDayStamp } from './today'
 import { useIsDemo } from './demoMode'
-import { saveNutritionLog, saveWaterLog } from './historyStore'
+import { getNutritionLog, saveNutritionLog } from './historyStore'
 import { track, firstOnce } from './analytics'
+import {
+  addFoodToDay,
+  addWaterToDay,
+  getNutritionDaySnapshot,
+  removeFoodFromDay,
+  subscribeNutritionDay,
+  NUTRITION_V2_KEY,
+  type LoggedFood as CanonicalFood,
+} from './nutritionV2Model'
 
-// تتبّع التغذية اليومي — وجبات الخطة المنجزة + وجبات مسجّلة (سعرات/بروتين) + كمية الماء.
-// يُصفّر تلقائيًا مع تغيّر اليوم. يستخدم مخزنًا مشتركًا (store) حتى تبقى كل المكوّنات متزامنة
-// (مثل قسم «اليوم» ومسجّل الوجبات على نفس الصفحة) بلا تعارض في الكتابة.
-
+/** @deprecated مفتاح v1 — لم يعد يُكتب؛ يُحذف عبر هجرة nutrition-unify-v1-to-v2. */
 export const NUTRITION_TODAY_KEY = 'qimmah:nutritionToday:v1'
 
 /** خانة الوجبة لتصنيف العنصر المسجّل. */
@@ -21,13 +36,13 @@ export const MEAL_SLOTS: { id: MealSlot; ar: string; en: string; icon: string }[
   { id: 'snack', ar: 'سناك', en: 'Snack', icon: 'Salad' },
 ]
 
-/** عنصر مسجّل في سجل اليوم — من قاعدة الأطعمة أو إضافة سريعة مخصّصة. */
+/** عنصر مسجّل في سجل اليوم (شكل v1 التاريخي — يُشتق من المصدر القانوني). */
 export interface LoggedFood {
   id: string
   label: string
-  /** نسبة الكمية المُسجّلة إلى الحصة المرجعية (grams / servingGrams) — للتوافق التاريخي. */
+  /** نسبة الكمية المُسجّلة إلى الحصة المرجعية — للتوافق التاريخي. */
   servings: number
-  /** الكمية المُسجّلة بالغرام (الإدخال الأساسي لعناصر قاعدة الأطعمة). */
+  /** الكمية المُسجّلة بالغرام (إن توفرت). */
   grams?: number
   calories: number
   protein: number
@@ -48,46 +63,30 @@ function fresh(): NutritionTodayState {
   return { date: getDayStamp(), doneMeals: {}, waterMl: 0, log: [] }
 }
 
-function readStorage(): NutritionTodayState {
-  if (typeof window === 'undefined') return fresh()
-  const today = getDayStamp()
-  try {
-    const raw = window.localStorage.getItem(NUTRITION_TODAY_KEY)
-    if (raw) {
-      const p = JSON.parse(raw) as Partial<NutritionTodayState>
-      if (p && p.date === today && p.doneMeals) {
-        // ترحيل: أي عنصر مسجّل قديم بلا خانة وجبة → سناك.
-        const log = Array.isArray(p.log)
-          ? p.log.map((e) => (e.meal ? e : { ...e, meal: 'snack' as MealSlot }))
-          : []
-        return {
-          date: today,
-          doneMeals: p.doneMeals,
-          waterMl: p.waterMl || 0,
-          log,
-        }
-      }
-    }
-  } catch {
-    /* تجاهل */
+function fromCanonical(f: CanonicalFood): LoggedFood {
+  return {
+    id: f.id,
+    label: f.nameAr,
+    servings: 1,
+    calories: f.calories,
+    protein: f.protein,
+    carbs: f.carbs ?? 0,
+    fat: f.fat ?? 0,
+    meal: f.meal,
   }
-  const f = fresh()
-  // بذر best-effort: التحميل يجب ألّا يرمي عند امتلاء التخزين (لا انهيار للشاشة).
-  try {
-    window.localStorage.setItem(NUTRITION_TODAY_KEY, JSON.stringify(f))
-  } catch {
-    /* تجاهل امتلاء التخزين — الحالة الطازجة تبقى في الذاكرة */
-  }
-  return f
 }
 
+/** يبني حالة اليوم من المصدرين القانونيين (v2: أصناف+ماء · historyStore: doneMeals). */
+function assemble(): NutritionTodayState {
+  const day = getNutritionDaySnapshot()
+  const doneMeals = getNutritionLog(day.date)?.doneMeals ?? {}
+  return { date: day.date, doneMeals, waterMl: day.waterMl, log: day.foods.map(fromCanonical) }
+}
+
+/** قراءة حالة اليوم (للتصدير وغير-الهوك) — من المصدر القانوني، لا من مفتاح v1. */
 export function loadNutritionToday(): NutritionTodayState {
-  return readStorage()
-}
-
-export function saveNutritionToday(state: NutritionTodayState): void {
-  if (typeof window === 'undefined') return
-  window.localStorage.setItem(NUTRITION_TODAY_KEY, JSON.stringify(state))
+  if (typeof window === 'undefined') return fresh()
+  return assemble()
 }
 
 /** مجاميع السعرات والماكروز من سجل اليوم. */
@@ -103,46 +102,32 @@ export function logTotals(log: LoggedFood[]) {
   )
 }
 
-// ===== مخزن مشترك (module-level) =====
-// مرجع واحد لكل وضع (حقيقي/تجريبي) يضمن تزامن كل النسخ بلا تعارض كتابة.
-
+// ── مخزن المحوّل: لقطة مستقرة + مشتركون (لا tick يدوي) ───────────────────────
 const listeners = new Set<() => void>()
 let realCache: NutritionTodayState | null = null
 let demoCache: NutritionTodayState | null = null
+
+function notify(): void {
+  listeners.forEach((l) => l())
+}
+
+function invalidateReal(): void {
+  realCache = null
+  notify()
+}
+
+// أي كتابة في المصدر القانوني (من أي شاشة) تُبطل اللقطة وتُشعر المشتركين هنا.
+if (typeof window !== 'undefined') {
+  subscribeNutritionDay(invalidateReal)
+}
 
 function snapshot(demo: boolean): NutritionTodayState {
   if (demo) {
     if (!demoCache) demoCache = fresh()
     return demoCache
   }
-  if (!realCache) realCache = readStorage()
+  if (!realCache || realCache.date !== getDayStamp()) realCache = assemble()
   return realCache
-}
-
-function notify() {
-  listeners.forEach((l) => l())
-}
-
-function setState(demo: boolean, mutate: (prev: NutritionTodayState) => NutritionTodayState): void {
-  const prev = snapshot(demo)
-  const next = mutate(prev)
-  if (demo) {
-    demoCache = next
-  } else {
-    realCache = next
-    saveNutritionToday(next)
-    // عكس الحالة في المتجر التاريخي الدائم (لا يُصفّر مع تغيّر اليوم). نحفظ أيضًا مجاميع
-    // الأطعمة المُسجّلة يدويًا حتى تبقى بعد تصفير اليوم وتظهر في الملخّص الأسبوعي والتقدّم.
-    saveNutritionLog(next.date, { doneMeals: next.doneMeals, waterMl: next.waterMl, loggedFood: logTotals(next.log) })
-    saveWaterLog(next.date, next.waterMl)
-  }
-  notify()
-}
-
-function rolloverIfNeeded(demo: boolean): void {
-  const today = getDayStamp()
-  const cur = snapshot(demo)
-  if (cur.date !== today) setState(demo, () => fresh())
 }
 
 // معرّف بسيط لعناصر السجل بلا اعتماد على Date.now (يكفي للتمييز محليًا).
@@ -152,7 +137,7 @@ function nextLogId(): string {
   return `log-${logSeq}-${Math.round(performance.now())}`
 }
 
-/** هوك تتبّع التغذية اليومي مع تصفير عند تغيّر اليوم — مزامَن عبر مخزن مشترك. */
+/** هوك تتبّع التغذية اليومي — مشترك في المصدر القانوني مباشرة. */
 export function useNutritionToday() {
   const demo = useIsDemo()
   const subscribe = useCallback((cb: () => void) => {
@@ -168,13 +153,10 @@ export function useNutritionToday() {
   )
 
   useEffect(() => {
-    const check = () => rolloverIfNeeded(demo)
+    const check = () => invalidateReal() // تغيّر اليوم/العودة للواجهة — أعِد التجميع من المصدر
     const onStorage = (e: StorageEvent) => {
-      // مزامنة بين التبويبات (الوضع الحقيقي فقط)
-      if (!demo && e.key === NUTRITION_TODAY_KEY) {
-        realCache = readStorage()
-        notify()
-      }
+      // مزامنة بين التبويبات (الوضع الحقيقي فقط) — المفتاح القانوني لا مفتاح v1.
+      if (!demo && (e.key === NUTRITION_V2_KEY || e.key === null)) invalidateReal()
     }
     window.addEventListener('focus', check)
     document.addEventListener('visibilitychange', check)
@@ -188,29 +170,63 @@ export function useNutritionToday() {
 
   const toggleMeal = useCallback(
     (mealId: string) => {
-      setState(demo, (prev) => ({ ...prev, doneMeals: { ...prev.doneMeals, [mealId]: !prev.doneMeals[mealId] } }))
+      if (demo) {
+        const prev = snapshot(true)
+        demoCache = { ...prev, doneMeals: { ...prev.doneMeals, [mealId]: !prev.doneMeals[mealId] } }
+        notify()
+        return
+      }
+      const date = getDayStamp()
+      const doneMeals = { ...(getNutritionLog(date)?.doneMeals ?? {}) }
+      doneMeals[mealId] = !doneMeals[mealId]
+      saveNutritionLog(date, { doneMeals })
+      invalidateReal()
     },
     [demo],
   )
 
   const addWater = useCallback(
     (ml: number) => {
-      setState(demo, (prev) => ({ ...prev, waterMl: Math.max(0, prev.waterMl + ml) }))
+      if (demo) {
+        const prev = snapshot(true)
+        demoCache = { ...prev, waterMl: Math.max(0, prev.waterMl + ml) }
+        notify()
+        return
+      }
+      addWaterToDay(ml) // المصدر القانوني الواحد — يُشعرنا عبر الاشتراك
     },
     [demo],
   )
 
   const resetWater = useCallback(() => {
-    setState(demo, (prev) => ({ ...prev, waterMl: 0 }))
+    if (demo) {
+      const prev = snapshot(true)
+      demoCache = { ...prev, waterMl: 0 }
+      notify()
+      return
+    }
+    addWaterToDay(-getNutritionDaySnapshot().waterMl)
   }, [demo])
 
   /** إضافة عنصر للسجل (سعرات/ماكروز). يُولَّد المعرّف تلقائيًا إن لم يُمرَّر. */
   const addLog = useCallback(
     (entry: Omit<LoggedFood, 'id'> & { id?: string }) => {
       const item: LoggedFood = { ...entry, id: entry.id ?? nextLogId() }
-      setState(demo, (prev) => ({ ...prev, log: [...prev.log, item] }))
-      // إشارة وجبة — خانة الوجبة فقط (تعداد)، بلا اسم الطبق أو الكمية. وضع النموذج لا يُرسل شيئًا.
-      if (!demo) {
+      if (demo) {
+        const prev = snapshot(true)
+        demoCache = { ...prev, log: [...prev.log, item] }
+        notify()
+      } else {
+        addFoodToDay({
+          id: item.id,
+          nameAr: item.label,
+          calories: item.calories,
+          protein: item.protein,
+          carbs: item.carbs,
+          fat: item.fat,
+          meal: item.meal ?? 'snack',
+        })
+        // إشارة وجبة — خانة الوجبة فقط (تعداد)، بلا اسم الطبق أو الكمية.
         track('meal_logged', { mealSlot: item.meal })
         if (firstOnce('firstMeal')) track('first_meal_logged', {})
       }
@@ -220,7 +236,13 @@ export function useNutritionToday() {
 
   const removeLog = useCallback(
     (id: string) => {
-      setState(demo, (prev) => ({ ...prev, log: prev.log.filter((e) => e.id !== id) }))
+      if (demo) {
+        const prev = snapshot(true)
+        demoCache = { ...prev, log: prev.log.filter((e) => e.id !== id) }
+        notify()
+        return
+      }
+      removeFoodFromDay(id)
     },
     [demo],
   )

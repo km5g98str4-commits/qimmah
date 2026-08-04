@@ -12,16 +12,17 @@ import {
   genderOptions,
   goalTypeOptions,
   isMinorAge,
-  MINOR_GOAL_RESTRICTION_NOTE,
   profileHash,
   trainingLevelOptions,
 } from '@/lib/calculators'
 import { LIMITS, validateProfile } from '@/lib/validation'
 import { onboardingStrings } from '@/i18n/dict/onboarding'
+import { profileChoiceStrings } from '@/i18n/dict/profileChoices'
 
 /** خطوة بياناتك — جسم + هدف + تمرين، مع تحقّق من القيم. */
 export function StepBody({ ctx }: { ctx: WizardCtx }) {
   const d = onboardingStrings[ctx.lang]
+  const choices = profileChoiceStrings[ctx.lang]
   const p = ctx.data.profile
   const manual = ctx.data.targetsMeta.manuallyEdited
   const errors = validateProfile(p)
@@ -87,7 +88,7 @@ export function StepBody({ ctx }: { ctx: WizardCtx }) {
                     : 'border-line bg-surface text-ink-700 hover:bg-beige',
               )}
             >
-              {o.label}
+              {choices.goal[o.value]}
             </button>
           )
         })}
@@ -95,7 +96,7 @@ export function StepBody({ ctx }: { ctx: WizardCtx }) {
       {minor && (
         <p id="goal-minor-note" className="mb-6 flex items-start gap-2 rounded-xl border border-gold-400/40 bg-gold-200/40 p-3 text-xs font-bold text-ink-700">
           <Icon name="Info" className="mt-0.5 h-4 w-4 shrink-0 text-gold-600" />
-          {MINOR_GOAL_RESTRICTION_NOTE}
+          {choices.minorGoalNote}
         </p>
       )}
       {!minor && <div className="mb-6" />}
@@ -103,7 +104,7 @@ export function StepBody({ ctx }: { ctx: WizardCtx }) {
       <div className="grid gap-5 sm:grid-cols-2">
         <Field label={d.bodyGender}>
           <select className={inputClass} value={p.gender} onChange={(e) => set({ gender: e.target.value as Profile['gender'] })}>
-            {genderOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+            {genderOptions.map((o) => <option key={o.value} value={o.value}>{choices.gender[o.value]}</option>)}
           </select>
         </Field>
         <Field label={d.bodyAge} hint={errFor('age') ?? d.bodyAgeHint}>
@@ -120,12 +121,12 @@ export function StepBody({ ctx }: { ctx: WizardCtx }) {
         </Field>
         <Field label={d.bodyActivityLevel}>
           <select className={inputClass} value={p.activityLevel} onChange={(e) => set({ activityLevel: e.target.value as Profile['activityLevel'] })}>
-            {activityOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+            {activityOptions.map((o) => <option key={o.value} value={o.value}>{choices.activity[o.value]}</option>)}
           </select>
         </Field>
         <Field label={d.bodyTrainingLevel}>
           <select className={inputClass} value={p.trainingLevel} onChange={(e) => set({ trainingLevel: e.target.value as Profile['trainingLevel'] })}>
-            {trainingLevelOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+            {trainingLevelOptions.map((o) => <option key={o.value} value={o.value}>{choices.trainingLevel[o.value]}</option>)}
           </select>
         </Field>
         <Field label={d.bodyTrainingDays} hint={errFor('trainingDays') ?? d.bodyTrainingDaysHint}>
@@ -136,7 +137,7 @@ export function StepBody({ ctx }: { ctx: WizardCtx }) {
         </Field>
         <Field label={d.bodyWorkoutEnvironment}>
           <select className={inputClass} value={p.workoutEnvironment} onChange={(e) => set({ workoutEnvironment: e.target.value as Profile['workoutEnvironment'] })}>
-            {environmentOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+            {environmentOptions.map((o) => <option key={o.value} value={o.value}>{choices.environment[o.value]}</option>)}
           </select>
         </Field>
         <div className="sm:col-span-2">

@@ -3,20 +3,22 @@ import { Icon } from '@/components/Icon'
 import { StepHeader } from '../StepHeader'
 import type { WizardCtx } from '../stepProps'
 import { resetQimmah } from '@/lib/resetQimmah'
-import { goalTypeLabel, targetCaloriesFor } from '@/lib/calculators'
+import { targetCaloriesFor } from '@/lib/calculators'
 import { planTitle } from '@/lib/planGenerator'
 import { onboardingStrings } from '@/i18n/dict/onboarding'
+import { profileChoiceStrings } from '@/i18n/dict/profileChoices'
 
 /** خطوة المراجعة والحفظ — ملخّص الخطة + منطقة متقدمة. */
 export function StepReview({ ctx }: { ctx: WizardCtx }) {
   const d = onboardingStrings[ctx.lang]
+  const choices = profileChoiceStrings[ctx.lang]
   const { data } = ctx
   const [advanced, setAdvanced] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
 
   const summary: { label: string; value: string }[] = [
     { label: d.reviewName, value: data.identity.userName },
-    { label: d.reviewGoal, value: goalTypeLabel(data.profile.goalType) },
+    { label: d.reviewGoal, value: choices.goal[data.profile.goalType] },
     { label: d.reviewWeight, value: `${data.profile.weightKg} → ${data.profile.targetWeightKg} ${d.unitKg}` },
     { label: d.reviewTargetCalories, value: `${targetCaloriesFor(data.profile.goal, data.targets)}` },
     { label: d.reviewProtein, value: `${data.targets.proteinGrams}${d.gGram}` },

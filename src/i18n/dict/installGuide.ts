@@ -37,30 +37,30 @@ export interface InstallGuideStrings {
 
 const ar: InstallGuideStrings = {
   promptTitle: 'ثبّت قِمّة على جهازك',
-  promptBody: 'أضِفه لشاشتك الرئيسية ليعمل كتطبيق كامل — أسرع وبلا شريط المتصفح.',
-  promptIosHint: 'من Safari: زر المشاركة ثم «أضف إلى الشاشة الرئيسية».',
+  promptBody: 'أضِفه لشاشتك الرئيسية عشان يشتغل كتطبيق كامل — أسرع وبدون شريط المتصفح.',
+  promptIosHint: 'من Safari: اضغط زر المشاركة، وبعدين «أضف إلى الشاشة الرئيسية».',
   installBtn: 'ثبّت التطبيق',
   dismiss: 'إغلاق',
 
   sectionTitle: 'ثبّت التطبيق',
   sectionIntro:
-    'أضِف قِمّة إلى شاشتك الرئيسية ليفتح كتطبيق مستقل بملء الشاشة — بلا شريط المتصفح، ووصول أسرع في كل مرّة.',
+    'أضِف قِمّة لشاشتك الرئيسية عشان يفتح كتطبيق مستقل بملء الشاشة — بدون شريط المتصفح، ووصول أسرع كل مرّة.',
   currentDeviceBadge: 'جهازك الحالي',
   iosTitle: 'آيفون / آيباد (Safari)',
   iosSteps: [
-    'افتح قِمّة داخل متصفح Safari.',
-    'اضغط زر المشاركة في شريط الأدوات (مربّع يخرج منه سهم متّجه للأعلى ↑).',
-    'مرّر لأسفل واختر «أضف إلى الشاشة الرئيسية».',
-    'اضغط «إضافة» — ستظهر أيقونة قِمّة على شاشتك الرئيسية.',
+    'افتح قِمّة في متصفح Safari.',
+    'اضغط زر المشاركة في شريط الأدوات (مربّع يطلع منه سهم لفوق ↑).',
+    'مرّر لتحت واختر «أضف إلى الشاشة الرئيسية».',
+    'اضغط «إضافة» — وبتظهر أيقونة قِمّة على شاشتك الرئيسية.',
   ],
   androidTitle: 'أندرويد (Chrome / Edge)',
   androidSteps: [
-    'افتح قِمّة داخل متصفح Chrome أو Edge.',
+    'افتح قِمّة في متصفح Chrome أو Edge.',
     'اضغط قائمة المتصفح (⋮) أعلى الشاشة.',
     'اختر «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية».',
-    'أكّد التثبيت — ستفتح قِمّة كتطبيق مستقل.',
+    'أكّد التثبيت — وبتفتح قِمّة كتطبيق مستقل.',
   ],
-  shareIconNote: 'زر المشاركة يظهر كمربّع يخرج منه سهم متّجه للأعلى.',
+  shareIconNote: 'زر المشاركة شكله مربّع يطلع منه سهم لفوق.',
 }
 
 const en: InstallGuideStrings = {
@@ -72,21 +72,21 @@ const en: InstallGuideStrings = {
 
   sectionTitle: 'Install app',
   sectionIntro:
-    'Add Qimmah to your home screen to open as a standalone full-screen app — no browser bar, and faster access every time.',
+    "Add Qimmah to your home screen and it opens as its own full-screen app — no browser bar, and it's quicker to get to every time.",
   currentDeviceBadge: 'Your device',
   iosTitle: 'iPhone / iPad (Safari)',
   iosSteps: [
     'Open Qimmah in the Safari browser.',
     'Tap the Share button in the toolbar (a square with an arrow pointing up ↑).',
     'Scroll down and choose "Add to Home Screen".',
-    'Tap "Add" — the Qimmah icon appears on your home screen.',
+    'Tap "Add" — the Qimmah icon shows up on your home screen.',
   ],
   androidTitle: 'Android (Chrome / Edge)',
   androidSteps: [
     'Open Qimmah in the Chrome or Edge browser.',
     'Tap the browser menu (⋮) at the top.',
     'Choose "Install app" or "Add to Home screen".',
-    'Confirm — Qimmah opens as a standalone app.',
+    'Confirm — Qimmah opens as its own app.',
   ],
   shareIconNote: 'The Share button looks like a square with an arrow pointing up.',
 }

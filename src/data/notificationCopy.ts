@@ -34,37 +34,37 @@ export interface NotificationSettingsCopy {
 const SETTINGS: Record<Lang, Omit<NotificationSettingsCopy, 'everyHours'>> = {
   ar: {
     title: 'التذكيرات',
-    intro: 'اختر ما يفيد يومك. تُجدول التنبيهات على هذا الجهاز فقط، ويمكنك إيقافها في أي وقت.',
+    intro: 'اختر اللي يفيد يومك. التنبيهات تنجدول على هذا الجهاز بس، وتقدر توقفها في أي وقت.',
     master: 'تفعيل تذكيرات قِمّة',
-    masterHint: 'لن نطلب الإذن إلا بعد اختيارك التفعيل.',
+    masterHint: 'ما نطلب الإذن إلا إذا اخترت تفعّلها.',
     workout: 'أيام التمرين',
-    workoutHint: 'وفق أيام خطتك الحالية',
+    workoutHint: 'على أيام خطتك الحالية',
     rest: 'أيام الراحة',
     restHint: 'تذكير هادئ بالتعافي',
     water: 'الماء',
-    waterHint: 'خلال ساعات الاستيقاظ فقط',
+    waterHint: 'خلال ساعات الاستيقاظ بس',
     weekly: 'ملخّص الأسبوع',
     weeklyHint: 'مراجعة قصيرة لتقدّمك',
     supplements: 'المكمّلات والأدوية',
-    supplementsHint: 'تذكير عام؛ اتبع تعليمات مختصك',
+    supplementsHint: 'تذكير عام — التزم بتعليمات مختصك',
     quietHours: 'ساعات الهدوء',
-    quietHint: 'لا تُجدول تنبيهات داخل هذه الفترة',
+    quietHint: 'ما تنجدول تنبيهات داخل هذي الفترة',
     from: 'من',
     to: 'إلى',
     unsupported: 'التنبيهات المجدولة متاحة داخل تطبيق قِمّة على iPhone.',
-    denied: 'الإشعارات متوقفة لقِمّة. فعّلها من إعدادات iPhone ثم أعد المحاولة.',
-    recoveryBlocked: 'تتوقف التذكيرات مؤقتًا أثناء استعادة كلمة المرور.',
+    denied: 'الإشعارات موقوفة لقِمّة. فعّلها من إعدادات iPhone ثم جرّب مرة ثانية.',
+    recoveryBlocked: 'التذكيرات موقوفة مؤقتًا وأنت في وضع استعادة كلمة المرور.',
     saved: 'تم تحديث جدول التذكيرات على هذا الجهاز.',
-    saving: 'يتم تحديث الجدول…',
-    error: 'تعذّر تحديث الجدول. حاول مرة أخرى.',
-    scheduleSkipped: 'أي وقت يقع داخل ساعات الهدوء لن يُجدول.',
+    saving: 'نحدّث الجدول…',
+    error: 'ما قدرنا نحدّث الجدول. جرّب مرة ثانية.',
+    scheduleSkipped: 'أي وقت داخل ساعات الهدوء ما بينجدول.',
     weekdays: ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'],
   },
   en: {
     title: 'Reminders',
     intro: 'Choose what helps your day. Notifications are scheduled only on this device and can be stopped anytime.',
     master: 'Enable Qimmah reminders',
-    masterHint: 'We ask for permission only after you choose to enable them.',
+    masterHint: 'We only ask for permission once you turn them on.',
     workout: 'Workout days',
     workoutHint: 'Follows your current plan days',
     rest: 'Rest days',
@@ -84,8 +84,8 @@ const SETTINGS: Record<Lang, Omit<NotificationSettingsCopy, 'everyHours'>> = {
     recoveryBlocked: 'Reminders pause while password recovery is active.',
     saved: 'The reminder schedule was updated on this device.',
     saving: 'Updating schedule…',
-    error: 'The schedule could not be updated. Try again.',
-    scheduleSkipped: 'A time inside quiet hours will not be scheduled.',
+    error: "Couldn't update the schedule. Try again.",
+    scheduleSkipped: "Times inside quiet hours won't be scheduled.",
     weekdays: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
   },
 }
@@ -114,27 +114,33 @@ export function notificationMessage(
     case 'workoutDay':
       return {
         title: ar ? 'ابدأ تمرين اليوم' : 'Start today’s workout',
-        body: ar ? 'خطتك جاهزة. افتحها وابدأ.' : 'Your plan is ready. Open it and begin.',
+        body: ar ? 'خطتك جاهزة — افتحها وابدأ.' : 'Your plan is ready. Open it and get going.',
       }
     case 'restDay':
       return {
-        title: ar ? 'خصص وقتًا للتعافي' : 'Make time for recovery',
-        body: ar ? 'مشي خفيف أو إطالة يكفي اليوم. التعافي جزء من التقدّم.' : 'A light walk or mobility is enough today. Recovery supports progress.',
+        title: ar ? 'خصّص وقت للتعافي' : 'Make time for recovery',
+        body: ar ? 'مشي خفيف أو إطالة تكفي اليوم — التعافي جزء من التقدّم.' : 'A light walk or a stretch is enough today. Recovery is part of progress.',
       }
     case 'water':
       return {
         title: ar ? 'اشرب كوب ماء' : 'Have a glass of water',
-        body: ar ? 'خطوة صغيرة تكمل هدفك اليومي.' : 'A small step toward today’s target.',
+        body: ar ? 'خطوة صغيرة تكمّل هدفك اليومي.' : 'A small step toward today’s target.',
       }
     case 'weeklyBrief':
       return {
-        title: ar ? 'راجع ملخّص أسبوعك' : 'Review your weekly brief',
-        body: ar ? 'تقدّمك جاهز للقراءة بأرقام واضحة.' : 'Your progress is ready to review with clear numbers.',
+        title: ar ? 'شوف ملخّص أسبوعك' : 'Check your weekly recap',
+        body: ar ? 'تقدّمك جاهز — بأرقام واضحة.' : 'Your progress is ready — in clear numbers.',
       }
     case 'supplements':
       return {
-        title: ar ? 'راجع روتينك الصحي' : 'Review your health routine',
-        body: ar ? 'راجع روتينك وفق تعليمات مختصك. تبقى التفاصيل داخل التطبيق.' : 'Review your routine according to professional advice. Details stay inside the app.',
+        title: ar ? 'راجع روتينك الصحي' : 'Check your health routine',
+        body: ar ? 'راجع روتينك حسب تعليمات مختصك — التفاصيل داخل التطبيق.' : 'Go over your routine as your professional advised. Details are in the app.',
+      }
+    // (P5) إشعار نهاية الراحة داخل الجلسة — يصل والتطبيق في الخلفية.
+    case 'restEnd':
+      return {
+        title: ar ? 'خلصت الراحة' : 'Rest is over',
+        body: ar ? 'جاهز للمجموعة الجاية؟ ارجع لتمرينك.' : 'Ready for the next set? Head back to your workout.',
       }
   }
 }
