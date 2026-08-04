@@ -167,7 +167,20 @@ recordDayOpen(now)
 check('فتح ثانٍ في نفس اليوم لا يُكرّر الحدث', readEvents().filter((e) => e.name === 'next_day_opened').length === 1)
 recordDayOpen(new Date(2026, 6, 1))
 check('ساعة رجعت للخلف لا تخترع إشارة', readEvents().filter((e) => e.name === 'next_day_opened').length === 1)
-check('hasEventToday يميّز اليوم من الأمس', hasEventToday('next_day_opened', now) && !hasEventToday('next_day_opened', new Date(2026, 7, 9)))
+// [CTO-73] قنبلة توقيت في هذا التأكيد نفسه — لا في الكود.
+// كان: `hasEventToday('next_day_opened', now)` و`now` مثبّت على **2026-08-03**.
+// لكن `recordDayOpen(now)` يمرّر `now` للمقارنة فقط، ويكتب الحدث عبر
+// `trackLocal` الذي يختمه بـ`Date.now()` **الحقيقي**. فالتأكيد كان يمرّ في يوم
+// تقويمي واحد من العام ويحمرّ في الباقي كلّه — ومرّ في CI أمس لأن التاريخ صادف
+// أن يكون 2026-08-03، واحمرّ اليوم بلا أن يتغيّر سطر واحد من الكود المفحوص.
+// الإصلاح يُبقي المقصد كما هو ويحرّره من التقويم: الحدث المكتوب للتوّ يحمل
+// ختم اليوم الحقيقي، فيُسأل عنه باليوم الحقيقي، ويُنفى بيوم بعيد محسوب منه.
+const realToday = new Date()
+const farOtherDay = new Date(realToday.getTime() + 6 * 24 * 60 * 60 * 1000)
+check(
+  'hasEventToday يميّز اليوم من يوم آخر (بلا اعتماد على تاريخ التشغيل)',
+  hasEventToday('next_day_opened', realToday) && !hasEventToday('next_day_opened', farOtherDay),
+)
 
 console.log('\n⑦ صفر نداء شبكي — المصائد التنفيذية')
 resetStore()

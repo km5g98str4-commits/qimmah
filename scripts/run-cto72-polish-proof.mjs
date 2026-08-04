@@ -108,13 +108,20 @@ const SIGNALS = [
 SIGNALS.forEach(([name, expr]) => check(`الإشارة تشمل: ${name}`, signalBlock.includes(expr)))
 
 // ج) البنية: بطاقة الماكروز **داخل** الحارس لا بجواره.
+// [CTO-73] الشاشة ٢ حوّلت الحلقات الأربع إلى **سطر مضغوط** بأربع رقاقات.
+// المقصد لم يتغيّر — سطح الماكروز لا يُعرض للقادم الجديد قبل أول تسجيل — فالتأكيد
+// **يُحدَّث ولا يُحذف**: يتتبّع البنية الجديدة بنفس الصرامة (الأربعة داخل الحارس).
 check(
-  'بطاقة الماكروز (الحلقات الأربع) داخل حارس الحالة الفارغة',
-  insideGuard(today, BLANK_GUARD, 'today-macros-title'),
+  'سطر الماكروز داخل حارس الحالة الفارغة',
+  insideGuard(today, BLANK_GUARD, 'copy.macroStripLead'),
 )
 check(
-  'حلقات الماكرو الأربع كلّها داخل نفس الكتلة المحروسة',
-  guardedBlocks(today, BLANK_GUARD).some((b) => (b.match(/<MacroRing/g) || []).length === 4),
+  'رقائق الماكرو الأربع كلّها داخل نفس الكتلة المحروسة',
+  guardedBlocks(today, BLANK_GUARD).some((b) => (b.match(/<MacroChip/g) || []).length === 4),
+)
+check(
+  'ولا حلقات متبقّية على اللوحة (السطر حلّ محلّها لا أُضيف إليها)',
+  !/<MacroRing/.test(today),
 )
 check(
   'بطاقة «نبض أسبوعك» داخل حارس الحالة الفارغة',
@@ -140,9 +147,9 @@ check(
 // و) ⚔️ محاكاة التفاف: انزع الحارس ⇒ يجب أن يسقط فحص بنيوي **مسمّى**.
 {
   const tampered = today.split(BLANK_GUARD).join('{true && (')
-  const stillGuarded = insideGuard(tampered, BLANK_GUARD, 'today-macros-title')
+  const stillGuarded = insideGuard(tampered, BLANK_GUARD, 'copy.macroStripLead')
   check(
-    '⚔️ نزع الحارس يُسقط فحص «الماكروز داخل الحارس» (لا يمرّ بوجود النصّين)',
+    '⚔️ نزع الحارس يُسقط فحص «سطر الماكروز داخل الحارس» (لا يمرّ بوجود النصّين)',
     stillGuarded === false,
     'الفحص مرّ على مصدر منزوع الحارس — البوابة رخوة',
   )
