@@ -57,7 +57,7 @@ export function DeviceSettings({ lang }: { lang: Lang }) {
       {/* — التثبيت — */}
       <div className="space-y-3">
         {standalone ? (
-          <div className="flex items-start gap-3 rounded-xl border border-primary-soft bg-primary-soft/40 p-3">
+          <div className="flex items-start gap-3 rounded-xl border border-primary-soft bg-primary-soft p-3">
             <Icon name="CheckCircle2" className="mt-0.5 h-5 w-5 shrink-0 text-primary-c" />
             <div>
               <p className="text-sm font-bold text-ink-900">{t.pwa.installedTitle}</p>

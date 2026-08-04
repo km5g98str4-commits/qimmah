@@ -90,6 +90,10 @@ export const V2_TODAY = {
     macroRemaining: 'متبقي',
     macroCaloriesLine: (consumed: number, target: number) => `${consumed.toLocaleString('en-US')}/${target.toLocaleString('en-US')} كالوري`,
     macroNoTarget: 'كمّل إعدادك عشان نحسب أهدافك.',
+    /** [CTO-73] الشاشة ٢ — الماكروز سطر مضغوط لا أربع بطاقات حلقات. */
+    macroStrip: (label: string, remaining: number) => `${label} ${remaining.toLocaleString('ar-SA')}`,
+    macroStripLead: 'باقي لك اليوم',
+    heroEyebrow: 'الحين',
   },
   en: {
     remainingTitle: 'What is left today?',
@@ -124,6 +128,9 @@ export const V2_TODAY = {
     macroGrams: '(g)',
     macroRemaining: 'left',
     macroCaloriesLine: (consumed: number, target: number) => `${consumed.toLocaleString('en-US')}/${target.toLocaleString('en-US')} kcal`,
+    macroStrip: (label: string, remaining: number) => `${label} ${remaining.toLocaleString('en-US')}`,
+    macroStripLead: 'Left today',
+    heroEyebrow: 'Now',
     macroNoTarget: 'Finish your setup so we can work out your targets.',
   },
 } as const

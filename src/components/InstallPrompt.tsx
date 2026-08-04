@@ -14,6 +14,24 @@ import { dismissInstallPrompt, isIOSSafari, isInstallPromptDismissed } from '@/l
  */
 export function InstallPrompt({ lang }: { lang: Lang }) {
   const s = installGuideStrings[lang]
+  /**
+   * [CTO-73] التصادم ع-١ — الشريط كان يغطّي زرّ إنهاء الإعداد.
+   *
+   * قِيس في التشخيص: `elementFromPoint` في **مركز** زرّ «الدخول للوحة» يعيد
+   * الشريط لا الزرّ (الشريط `z-[60]` والمعالج `z-50`)، ونفسه على «التالي» في
+   * خطوات الإعداد الخمس. ورأس هذا الملف نفسه كان يقول «لا تحجب الواجهة أبدًا».
+   *
+   * العلاج بالآليّة القائمة لا بآليّة جديدة: التدفّقات التي تستولي على الشاشة
+   * (الإعداد · الجلسة النشطة) تُطلق `qimmah:immersive` أصلًا، والقشرة تسمعه.
+   * فيسمعه الشريط كذلك ويصمت أثناءها. **لا وظيفة تُحذف** — دعوة التثبيت تعود
+   * لحظة الخروج من التدفّق، ومدخلها الدائم في الإعدادات لم يُمَس.
+   */
+  const [immersive, setImmersive] = useState(false)
+  useEffect(() => {
+    const onImmersive = (e: Event) => setImmersive(Boolean((e as CustomEvent<boolean>).detail))
+    window.addEventListener('qimmah:immersive', onImmersive)
+    return () => window.removeEventListener('qimmah:immersive', onImmersive)
+  }, [])
   const [installable, setInstallable] = useState(canPromptInstall())
   const [standalone, setStandalone] = useState(isStandalone())
   const [dismissed, setDismissed] = useState(isInstallPromptDismissed())
@@ -32,7 +50,7 @@ export function InstallPrompt({ lang }: { lang: Lang }) {
   // داخل تطبيق iOS/Android الأصلي (Capacitor) لا نعرض دعوة تثبيت PWA إطلاقًا —
   // التطبيق مثبّت أصلًا، وإظهارها قد يسبّب رفض App Store.
   // مثبّت أو مُغلق → لا شيء. غير ذلك: زر أصلي (أندرويد) أو تلميح (آيفون/سفاري).
-  if (isNativePlatform() || standalone || dismissed) return null
+  if (isNativePlatform() || standalone || dismissed || immersive) return null
   const showAndroid = installable
   const showIos = !installable && ios
   if (!showAndroid && !showIos) return null

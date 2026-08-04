@@ -200,7 +200,7 @@ function MachineCatalogBrowser({ onOpen, d, lang }: { onOpen: (id: string) => vo
   const total = machineCatalog.reduce((n, g) => n + g.items.length, 0)
   return (
     <div className="mt-5">
-      <p className="mb-3 flex items-start gap-2 rounded-xl border border-primary-soft bg-primary-soft/40 p-3 text-[11px] leading-relaxed text-ink-700">
+      <p className="mb-3 flex items-start gap-2 rounded-xl border border-primary-soft bg-primary-soft p-3 text-[11px] leading-relaxed text-ink-700">
         <Icon name="Info" className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary-c" />
         {d.machineHint} {total} {d.machineHintSuffix}
       </p>

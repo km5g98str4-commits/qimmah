@@ -490,7 +490,7 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
                 key={i}
                 className={cn(
                   'rounded-2xl border p-4 transition-colors',
-                  st.completed ? 'border-primary-soft bg-primary-soft/60' : 'border-line bg-surface',
+                  st.completed ? 'border-primary-soft bg-primary-soft' : 'border-line bg-surface',
                 )}
               >
                 <div className="flex items-center justify-between">
@@ -739,7 +739,7 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
 
       {/* مؤقّت الراحة النشط */}
       {timer.running && (
-        <div className="fixed inset-x-0 bottom-[4.75rem] z-20 border-t border-primary-soft bg-primary-soft/95 backdrop-blur">
+        <div className="fixed inset-x-0 bottom-[4.75rem] z-20 border-t border-primary-soft bg-surface backdrop-blur">
           <div className="container-page flex items-center justify-between gap-3 py-3">
             <div className="flex items-center gap-3">
               <span className="relative grid h-12 w-12 shrink-0 place-items-center">

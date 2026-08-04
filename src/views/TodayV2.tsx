@@ -256,12 +256,18 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
   const completed = actions.filter((action) => action.done)
   const insights = buildWeeklyInsights(ar ? 'ar' : 'en')
 
+  // [CTO-73] التصادم — زرّ «تسجيل» المرفوع كان يغطّي آخر صفّ مهمّة
+  // (elementFromPoint في مركزه يعيد «تسجيل»). `pb-28` تُخلّصه.
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light bg-page px-4 pb-6 pt-4 text-ink-900">
+    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light bg-page px-4 pb-36 pt-4 text-ink-900">
       <div className="v2-screen-enter mx-auto w-full max-w-md space-y-5">
+        {/* [CTO-73] الشاشة ٢ — التحية والتاريخ سطر واحد. كانا سطرين مستقلّين،
+            والتاريخ **سياقٌ للتحية** لا خبرٌ ثانٍ يستحقّ صفًّا خاصًّا به. */}
         <header>
-          <p className="text-xs font-bold text-ink-500">{model.dateLabel}</p>
-          <h2 className="mt-1 text-2xl font-black tracking-tight">{model.greeting}</h2>
+          <h2 className="text-2xl font-black tracking-tight">
+            {model.greeting}
+            <span className="ms-2 align-middle text-sm font-bold text-ink-500">{model.dateLabel}</span>
+          </h2>
         </header>
 
         <MinorGoalNotice lang={lang} />
@@ -269,7 +275,7 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
         {/* [CTO-70] البند ٤ — سطر الخميس الاستباقي (ADV-19/21): يُعرض صباح الخميس
             وحده، **قبل** أن يفوت اليوم لا بعده. استباق لا لوم، ونبرة محايدة. */}
         {thursdayWindow && (
-          <p className="rounded-2xl border border-line bg-surface px-4 py-3 text-sm leading-relaxed text-ink-700">
+          <p className="rounded-2xl border border-line bg-surface px-4 py-3 text-base leading-relaxed text-ink-700">
             {firstWeekStrings[ar ? 'ar' : 'en'].thursdayHeadsUp}
           </p>
         )}
@@ -307,49 +313,48 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
 
             [CTO-72] البند ١ — لكنها **أرقام**، والقادم الجديد بلا أرقام. تظهر
             عند أول تسجيل لا قبله: بطاقة أصفار ليست معلومة، هي ضجيج بحجم بطاقة. */}
+        {/* [CTO-73] الشاشة ٢ — الماكروز **سطر مضغوط لا أربع بطاقات حلقات**.
+            الحلقات كانت تحجز ثلث الطية لتقول أربعة أرقام؛ والسطر يقولها كلّها
+            في صفّ واحد قابل للنقر إلى التغذية. لا معلومة نقصت — الحلقات كاملةً
+            في شاشة التغذية، وهذا سطرُ حالةٍ لا لوحةُ قياس.
+
+            [CTO-72] البند ١ ساري كما هو: بلا أي تسجيل لا يُعرض السطر أصلًا. */}
         {!blankSlate && (
-        <section aria-labelledby="today-macros-title" className="rounded-3xl border border-line bg-surface p-4 shadow-card">
-          <div className="flex items-center justify-between gap-3">
-            <h2 id="today-macros-title" className="flex items-center gap-2 text-base font-black">
-              <Icon name="Flame" className="h-5 w-5" style={{ color: MACRO_TONE.calories }} />
-              {copy.macrosTitle}
-            </h2>
-            <button
-              type="button"
-              onClick={() => { void playHaptic('selection'); onNavigate('nutrition') }}
-              className="v2-pressable flex shrink-0 items-center gap-1.5 text-xs font-bold text-ink-500 transition-colors hover:text-ink-900"
-            >
-              {copy.macrosLink}
-              <Icon name="Sparkles" className="h-4 w-4" />
-            </button>
-          </div>
-
-          <p className="mt-1 text-sm font-black text-ink-500">
-            {nutrition.calories.target > 0
-              ? copy.macroCaloriesLine(nutrition.calories.consumed, nutrition.calories.target)
-              : copy.macroNoTarget}
-          </p>
-
-          {/* أربع حلقات: المستهلَك داخل الحلقة، والمتبقّي تحتها. */}
-          <div className="mt-4 grid grid-cols-4 gap-2">
-            <MacroRing label={copy.macroCaloriesLabel} consumed={nutrition.calories.consumed} target={nutrition.calories.target} color={MACRO_TONE.calories} remainingLabel={copy.macroRemaining} />
-            <MacroRing label={`${copy.macroCarbs}${copy.macroGrams}`} consumed={nutrition.macros.carbs.consumed} target={nutrition.macros.carbs.target} color={MACRO_TONE.carbs} remainingLabel={copy.macroRemaining} />
-            <MacroRing label={`${copy.macroProtein}${copy.macroGrams}`} consumed={nutrition.macros.protein.consumed} target={nutrition.macros.protein.target} color={MACRO_TONE.protein} remainingLabel={copy.macroRemaining} />
-            <MacroRing label={`${copy.macroFat}${copy.macroGrams}`} consumed={nutrition.macros.fat.consumed} target={nutrition.macros.fat.target} color={MACRO_TONE.fat} remainingLabel={copy.macroRemaining} />
-          </div>
-        </section>
+          <button
+            type="button"
+            onClick={() => { void playHaptic('selection'); onNavigate('nutrition') }}
+            aria-label={`${copy.macrosTitle} — ${copy.macrosLink}`}
+            className="v2-pressable flex min-h-[44px] w-full items-center gap-2 overflow-x-auto rounded-2xl border border-line bg-surface px-3.5 py-2.5 text-start"
+          >
+            <Icon name="Flame" className="h-4 w-4 shrink-0" style={{ color: MACRO_TONE.calories }} />
+            <span className="shrink-0 text-sm font-bold text-ink-500">{copy.macroStripLead}</span>
+            <span className="flex flex-1 items-center gap-3 whitespace-nowrap">
+              <MacroChip label={copy.macroCaloriesLabel} consumed={nutrition.calories.consumed} target={nutrition.calories.target} color={MACRO_TONE.calories} />
+              <MacroChip label={copy.macroCarbs} consumed={nutrition.macros.carbs.consumed} target={nutrition.macros.carbs.target} color={MACRO_TONE.carbs} />
+              <MacroChip label={copy.macroProtein} consumed={nutrition.macros.protein.consumed} target={nutrition.macros.protein.target} color={MACRO_TONE.protein} />
+              <MacroChip label={copy.macroFat} consumed={nutrition.macros.fat.consumed} target={nutrition.macros.fat.target} color={MACRO_TONE.fat} />
+            </span>
+            <Icon name={ar ? 'ChevronLeft' : 'ChevronRight'} className="h-4 w-4 shrink-0 text-ink-400" />
+          </button>
         )}
 
+        {/* ═══ [CTO-73] الشاشة ٢ — «وين أنا اليوم؟» ═══
+            كانت أربع مهامّ **متساوية** في مربّعات كبيرة بعمودين، فلا شيء يقول
+            «ابدأ من هنا»؛ والشاشة تعرض قائمة لا إجابة.
+
+            الآن: **البطاقة الأولى هي الإجراء التالي** — أبرزُ ما في الشاشة —
+            والبقيّة صفوف مضغوطة تحتها. لا مهمّة حُذفت؛ تغيّر **وزنها البصري**
+            بحسب دورها. والعنوان صار `sr-only`: الصفوف تقول نفسها، وعنوانٌ فوق
+            قائمة بديهية يزاحمها ولا يشرحها (لقارئ الشاشة يبقى كما هو). */}
         <section aria-labelledby="today-remaining-title">
-          <div className="mb-3 flex items-end justify-between gap-3">
-            <h2 id="today-remaining-title" className="text-base font-black">{copy.remainingTitle}</h2>
-            <span className="text-xs font-bold text-ink-500">{copy.remainingCount(pending.length)}</span>
-          </div>
+          <h2 id="today-remaining-title" className="sr-only">
+            {copy.remainingTitle} — {copy.remainingCount(pending.length)}
+          </h2>
 
           {pending.length > 0 ? (
-            <div className="grid grid-cols-2 gap-3">
-              {/* كل المهام مربّعات صغيرة متساوية — بما فيها التمرين. لا بطاقة بارزة. */}
-              {pending.map((action) => (
+            <div className="space-y-2.5">
+              <ActionCard action={pending[0]} lang={lang} hero eyebrow={copy.heroEyebrow} />
+              {pending.slice(1).map((action) => (
                 <ActionCard key={action.key} action={action} lang={lang} />
               ))}
             </div>
@@ -359,14 +364,14 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
                 <Icon name="Check" className="h-5 w-5" strokeWidth={3} />
               </span>
               <h3 className="mt-4 text-lg font-black">{copy.allDoneTitle}</h3>
-              <p className="mt-1 text-sm leading-relaxed text-ink-500">{copy.allDoneBody}</p>
+              <p className="mt-1 text-base leading-relaxed text-ink-500">{copy.allDoneBody}</p>
             </div>
           )}
         </section>
 
         {completed.length > 0 && (
           <section aria-labelledby="today-completed-title">
-            <h2 id="today-completed-title" className="mb-2 text-sm font-black text-ink-700">{copy.completedTitle}</h2>
+            <h2 id="today-completed-title" className="mb-2 text-base font-black text-ink-700">{copy.completedTitle}</h2>
             <div className="space-y-2">
               {completed.map((action) => (
                 <button
@@ -378,8 +383,8 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
                   <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-primary-soft text-[color:var(--v2-green-text)]">
                     <Icon name="Check" className="h-4 w-4" strokeWidth={3} />
                   </span>
-                  <span className="min-w-0 flex-1 text-sm font-black">{action.title}</span>
-                  <span className="text-xs font-bold text-[color:var(--v2-green-text)]">{copy.completed}</span>
+                  <span className="min-w-0 flex-1 text-base font-black">{action.title}</span>
+                  <span className="text-sm font-bold text-[color:var(--v2-green-text)]">{copy.completed}</span>
                   <Icon name={ar ? 'ChevronLeft' : 'ChevronRight'} className="h-4 w-4 text-ink-400" />
                 </button>
               ))}
@@ -400,7 +405,7 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
         )}
 
         {model.trustNote && (
-          <p className="px-2 text-center text-[0.7rem] leading-relaxed text-ink-400">{model.trustNote}</p>
+          <p className="px-2 text-center text-sm leading-relaxed text-ink-400">{model.trustNote}</p>
         )}
       </div>
 
@@ -430,79 +435,93 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
   )
 }
 
-function ActionCard({ action, lang }: { action: TodayAction; lang: Lang }) {
+/**
+ * بطاقة مهمّة — [CTO-73] الشاشة ٢.
+ *
+ * صيغتان لدورين مختلفين، لا حجمان لذوق:
+ *   • `hero` — **الإجراء التالي**. بطاقة بارزة بلمحة لون وعنوان كبير: هي إجابة
+ *     الشاشة عن «وين أنا اليوم؟»، فتأخذ وزنها البصري.
+ *   • الافتراضي — صفٌّ مضغوط للمهامّ الباقية: أيقونة · عنوان · حالة · سهم.
+ *     المهمّة نفسها والفعل نفسه؛ ما تغيّر هو **ادّعاؤها للانتباه**.
+ */
+function ActionCard({ action, lang, hero, eyebrow }: { action: TodayAction; lang: Lang; hero?: boolean; eyebrow?: string }) {
   const ar = lang !== 'en'
   const color = ACTION_TONE[action.tone]
+  const chevron = ar ? 'ChevronLeft' : 'ChevronRight'
+
+  if (!hero) {
+    return (
+      <button
+        type="button"
+        onClick={() => { void playHaptic('selection'); action.onClick() }}
+        className="v2-pressable flex min-h-[3.75rem] w-full items-center gap-3 rounded-2xl border border-line bg-surface px-3.5 py-3 text-start text-ink-900"
+      >
+        <span
+          className="grid h-10 w-10 shrink-0 place-items-center rounded-xl"
+          style={{ backgroundColor: `color-mix(in srgb, ${color} 14%, transparent)`, color }}
+        >
+          <Icon name={action.icon} className="h-5 w-5" strokeWidth={2.5} />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-base font-black leading-tight">{action.title}</span>
+          <span className="mt-0.5 block truncate text-sm text-ink-500">{action.body}</span>
+        </span>
+        <Icon name={chevron} className="h-4 w-4 shrink-0 text-ink-400" />
+      </button>
+    )
+  }
+
   return (
     <button
       type="button"
       onClick={() => { void playHaptic('selection'); action.onClick() }}
-      className="v2-pressable relative flex min-h-[10.5rem] flex-col overflow-hidden rounded-3xl border bg-surface p-4 text-start text-ink-900 shadow-card"
-      style={{ borderColor: `color-mix(in srgb, ${color} 24%, rgb(var(--c-line)))` }}
+      className="v2-pressable relative flex w-full flex-col overflow-hidden rounded-3xl border bg-surface p-4 text-start text-ink-900 shadow-card"
+      style={{ borderColor: `color-mix(in srgb, ${color} 32%, rgb(var(--c-line)))` }}
     >
       <span
         className="pointer-events-none absolute -end-8 -top-10 h-28 w-28 rounded-full opacity-20"
         style={{ backgroundColor: color }}
         aria-hidden="true"
       />
-      <span
-        className="relative grid h-11 w-11 place-items-center rounded-2xl"
-        style={{ backgroundColor: `color-mix(in srgb, ${color} 14%, transparent)`, color }}
-      >
-        <Icon name={action.icon} className="h-5 w-5" strokeWidth={2.5} />
+      <span className="relative flex items-center gap-2">
+        <span
+          className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl"
+          style={{ backgroundColor: `color-mix(in srgb, ${color} 14%, transparent)`, color }}
+        >
+          <Icon name={action.icon} className="h-5 w-5" strokeWidth={2.5} />
+        </span>
+        {/* [CTO-73] AA — لون اللمحة كان لون النغمة (3.5:1 عند 14px). اللمحة
+            **تسمية** لا لهجة؛ فأخذت لون النصّ الثانوي، وبقي لون النغمة للفعل. */}
+        {eyebrow && (
+          <span className="text-sm font-black uppercase tracking-widest text-ink-700">{eyebrow}</span>
+        )}
       </span>
-      <span className="relative mt-4 block text-lg font-black leading-tight">{action.title}</span>
-      <span className="relative mt-1 block text-xs leading-relaxed text-ink-500">{action.body}</span>
-      <span className="relative mt-auto flex items-center gap-1 pt-4 text-xs font-black" style={{ color }}>
+      <span className="relative mt-3 block text-xl font-black leading-tight">{action.title}</span>
+      <span className="relative mt-1 block text-base leading-relaxed text-ink-500">{action.body}</span>
+      <span className="relative mt-3 flex items-center gap-1 text-base font-black" style={{ color }}>
         {action.cta}
-        <Icon name={ar ? 'ChevronLeft' : 'ChevronRight'} className="h-4 w-4" />
+        <Icon name={chevron} className="h-4 w-4" />
       </span>
     </button>
   )
 }
 
 /**
- * حلقة ماكرو واحدة — التسمية والمستهلَك داخل الحلقة، والمتبقّي تحتها.
- * بلا هدف مضبوط نعرض «—» بدل رقم مخترَع (§5: الصدق قبل الطمأنينة).
+ * رقاقة ماكرو واحدة داخل السطر المضغوط — [CTO-73] الشاشة ٢.
+ *
+ * تقول **المتبقّي** لأنه الرقم الذي يُتصرَّف به («باقي لك اليوم»)، لا المستهلَك.
+ * وبلا هدف مضبوط تعرض «—» لا رقمًا مخترَعًا (§5: الصدق قبل الطمأنينة) — نفس
+ * عقد `MacroRing` التي حلّت محلّها، بمساحة صفٍّ واحد بدل ثلث الطية.
  */
-function MacroRing({
-  label,
-  consumed,
-  target,
-  color,
-  remainingLabel,
-}: { label: string; consumed: number; target: number; color: string; remainingLabel: string }) {
+function MacroChip({ label, consumed, target, color }: { label: string; consumed: number; target: number; color: string }) {
   const hasTarget = target > 0
-  const pct = hasTarget ? Math.min(1, consumed / target) : 0
   const remaining = Math.max(0, Math.round(target - consumed))
-  const r = 16
-  const c = 2 * Math.PI * r
-  const dash = pct * c
   return (
-    <div className="flex flex-col items-center gap-1.5">
-      <div className="relative h-[4.25rem] w-[4.25rem]">
-        <svg
-          viewBox="0 0 40 40"
-          className="h-full w-full -rotate-90"
-          role="img"
-          aria-label={`${label}: ${Math.round(consumed)}${hasTarget ? ` / ${Math.round(target)}` : ''}`}
-        >
-          <circle cx="20" cy="20" r={r} fill="none" stroke="currentColor" strokeWidth="2.5" className="text-line" />
-          {hasTarget && pct > 0 && (
-            <circle cx="20" cy="20" r={r} fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeDasharray={`${dash} ${c - dash}`} />
-          )}
-        </svg>
-        <span className="absolute inset-0 flex flex-col items-center justify-center gap-0.5">
-          <span className="text-[0.55rem] font-bold leading-none text-ink-500">{label}</span>
-          <span dir="ltr" className="text-base font-black leading-none tabular-nums text-ink-900">
-            {Math.round(consumed)}
-          </span>
-        </span>
-      </div>
-      <span dir="ltr" className="text-xs font-bold tabular-nums text-ink-700">
+    <span className="flex items-baseline gap-1">
+      <span className="text-sm font-bold text-ink-500">{label}</span>
+      <span dir="ltr" className="text-base font-black tabular-nums" style={{ color }}>
         {hasTarget ? remaining.toLocaleString('en-US') : '—'}
       </span>
-      <span className="text-[0.6rem] leading-none text-ink-400">{remainingLabel}</span>
-    </div>
+    </span>
   )
 }

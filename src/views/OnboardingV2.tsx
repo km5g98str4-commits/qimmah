@@ -147,6 +147,16 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
     goal, days, duration, place: place as V2Place | null, pref: pref as V2Pref | null, healthDataConsent,
   }
 
+  /**
+   * [CTO-73] التصادم ع-١ — الإعداد تدفّق يستولي على الشاشة (`fixed inset-0 z-50`)،
+   * فيُعلن ذلك كما تُعلنه الجلسة النشطة. الأثر المباشر: شريط «ثبّت التطبيق»
+   * (`z-[60]`) يتوقّف عن تغطية زرّ «التالي» وزرّ «الدخول للوحة».
+   */
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent('qimmah:immersive', { detail: true }))
+    return () => { window.dispatchEvent(new CustomEvent('qimmah:immersive', { detail: false })) }
+  }, [])
+
   // [CTO-68] الحدثان ١ و٢ — بدء الإعداد، والوصول إلى كل خطوة **باسمها**.
   //
   // «بدء الإعداد» مرّة واحدة لكل دخول للتدفّق، ومعه `resumed` لتمييز من استأنف
