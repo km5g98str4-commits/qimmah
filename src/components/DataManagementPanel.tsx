@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Icon } from '@/components/Icon'
 import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
@@ -46,6 +46,14 @@ export function DataManagementPanel({
   const [note, setNote] = useState<string | null>(null)
   const [undoable, setUndoable] = useState(() => hasUndo(uid))
   const fileRef = useRef<HTMLInputElement>(null)
+  const importButtonRef = useRef<HTMLButtonElement>(null)
+  const previewRef = useRef<HTMLElement>(null)
+  const successRef = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    if (phase === 'preview' && preview) previewRef.current?.focus()
+    if (phase === 'done') successRef.current?.focus()
+  }, [phase, preview])
 
   const onExport = async () => {
     setBusy(true)
@@ -111,6 +119,7 @@ export function DataManagementPanel({
   const onCancel = () => {
     setPreview(null)
     setPhase('idle')
+    window.requestAnimationFrame(() => importButtonRef.current?.focus())
   }
 
   const onUndo = () => {
@@ -122,8 +131,8 @@ export function DataManagementPanel({
   // — معاينة الاستيراد: عدّ لكل متجر + تأكيد صريح (لا تطبيق قبل الضغط) —
   if (phase === 'preview' && preview) {
     return (
-      <section data-testid="settings-import-preview" className="rounded-xl border border-line bg-surface p-4">
-        <h3 className="text-sm font-black text-ink-900">{t.settings.importPreviewTitle}</h3>
+      <section ref={previewRef} tabIndex={-1} aria-labelledby="settings-import-preview-title" data-testid="settings-import-preview" className="rounded-xl border border-line bg-surface p-4">
+        <h3 id="settings-import-preview-title" className="text-sm font-black text-ink-900">{t.settings.importPreviewTitle}</h3>
         <p className="mt-1 text-xs leading-relaxed text-ink-500">{t.settings.importPreviewNote}</p>
         <ul className="mt-3 divide-y divide-line">
           {preview.lines
@@ -156,7 +165,7 @@ export function DataManagementPanel({
             <Icon name="CheckCircle2" className="h-4 w-4" />
             {t.settings.importConfirmBtn}
           </button>
-          <button type="button" onClick={onCancel} className="btn-ghost px-4 py-2.5 text-sm">
+          <button type="button" data-testid="settings-import-cancel" onClick={onCancel} className="btn-ghost px-4 py-2.5 text-sm">
             {t.settings.importCancel}
           </button>
         </div>
@@ -167,11 +176,11 @@ export function DataManagementPanel({
   // — تمّ الاستيراد فعليًّا (بعد تطبيق ذرّي ناجح فقط) —
   if (phase === 'done') {
     return (
-      <section data-testid="settings-import-success" role="status" className="rounded-xl border border-line bg-surface p-4 text-center">
+      <section ref={successRef} tabIndex={-1} aria-labelledby="settings-import-success-title" data-testid="settings-import-success" role="status" className="rounded-xl border border-line bg-surface p-4 text-center">
         <span className="mx-auto grid h-11 w-11 place-items-center rounded-2xl bg-primary-soft text-primary-c">
           <Icon name="CheckCircle2" className="h-5.5 w-5.5" />
         </span>
-        <h3 className="mt-2 text-sm font-black text-ink-900">{t.settings.importDoneTitle}</h3>
+        <h3 id="settings-import-success-title" className="mt-2 text-sm font-black text-ink-900">{t.settings.importDoneTitle}</h3>
         <p className="mt-1 text-xs text-ink-500">{t.settings.importDoneNote}</p>
         <div className="mt-4 flex flex-wrap justify-center gap-2">
           <button type="button" onClick={() => window.location.reload()} className="btn-primary px-4 py-2.5 text-sm">
@@ -213,6 +222,7 @@ export function DataManagementPanel({
           {t.settings.export}
         </button>
         <button
+          ref={importButtonRef}
           type="button"
           data-testid="settings-data-import"
           onClick={() => fileRef.current?.click()}
@@ -228,6 +238,7 @@ export function DataManagementPanel({
           type="file"
           accept="application/json,.json"
           className="hidden"
+          aria-hidden="true"
           onChange={(e) => onPickFile(e.target.files?.[0])}
         />
       </div>

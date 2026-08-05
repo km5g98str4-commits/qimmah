@@ -99,14 +99,7 @@ async function gotoSettings(page, uid, token) {
   // اربط الجلسة المزروعة (reload) ثم انتقل للإعدادات (بعض التهيئة تحوّل للوحة عند الإقلاع).
   await page.reload({ waitUntil: 'domcontentloaded' })
   await page.evaluate(() => { window.location.hash = '#/settings' })
-  // البنية الجديدة تجعل أقسام الإعدادات مطوية. افتح «البيانات» كما يفعل المستخدم
-  // بدل افتراض أن زر الاستيراد ظاهر مباشرةً في الصفحة.
-  const dataGroup = page.locator('[data-testid="settings-group-data"]')
-  await dataGroup.waitFor({ state: 'visible', timeout: 15000 })
-  if (!(await dataGroup.evaluate((node) => (node instanceof HTMLDetailsElement ? node.open : false)))) {
-    await dataGroup.locator('summary').click()
-  }
-  // زر الاستيراد مرئي بعد فتح القسم؛ حقل الملفّ نفسه مخفي عمدًا فننتظره «مرفقًا» فقط.
+  // مجموعة البيانات قسم ظاهر لا لوحة مطوية؛ انتظر عقد الاستيراد الحي مباشرةً.
   await page.waitForSelector('[data-testid="settings-data-import"]', { state: 'visible', timeout: 15000 })
   await page.waitForSelector('[data-testid="settings-data-file"]', { state: 'attached', timeout: 15000 })
 }
@@ -194,9 +187,16 @@ async function run() {
     await page.setInputFiles('[data-testid="settings-data-file"]', validPath)
     await page.waitForSelector('[data-testid="settings-import-preview"]', { timeout: 8000 })
     check('النسخة الصحيحة فتحت معاينة', await page.locator('[data-testid="settings-import-preview"]').isVisible())
+    check('انتقل التركيز إلى معاينة الاستيراد', await page.locator('[data-testid="settings-import-preview"]').evaluate((node) => document.activeElement === node))
+    await page.locator('[data-testid="settings-import-cancel"]').click()
+    await page.waitForSelector('[data-testid="settings-data-import"]', { state: 'visible', timeout: 8000 })
+    check('عاد التركيز إلى زر الاستيراد بعد الإلغاء', await page.locator('[data-testid="settings-data-import"]').evaluate((node) => document.activeElement === node))
+    await page.setInputFiles('[data-testid="settings-data-file"]', validPath)
+    await page.waitForSelector('[data-testid="settings-import-preview"]', { timeout: 8000 })
     await page.locator('[data-testid="settings-import-confirm"]').click()
     await page.waitForSelector('[data-testid="settings-import-success"]', { timeout: 8000 })
     check('عُرضت «تمّ الاستيراد» بعد التطبيق الفعلي', await page.locator('[data-testid="settings-import-success"]').isVisible())
+    check('انتقل التركيز إلى حالة نجاح الاستيراد', await page.locator('[data-testid="settings-import-success"]').evaluate((node) => document.activeElement === node))
     const restored = await page.evaluate((k) => JSON.parse(localStorage.getItem(k) || 'null'), K_STEP_GOAL)
     check('استُعيدت القيمة الأصلية (8000) بعد الاستيراد', restored === 8000)
 
