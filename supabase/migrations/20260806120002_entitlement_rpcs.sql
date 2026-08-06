@@ -108,6 +108,15 @@ begin
   -- التجربة للحساب **المُوثَّق** فقط — بريد غير مؤكَّد = مزرعة تجارب.
   if conf is null then raise exception 'email_not_verified' using errcode = '28000'; end if;
 
+  -- الإلغاء لاصق: لا مسار خدمة ذاتية يرفعه.
+  -- كانت الدوال الثلاث تُصفّر `revoked_at` في الـupsert، فكان بوسع مُلغىً أن
+  -- يستعيد وصوله ببدء تجربة أو استرداد كود أو مطالبة بشراء — تصعيد صلاحية
+  -- كامل. الرفع بيد الإدارة وحدها (`admin_revoke` هو من وضعه).
+  if exists (select 1 from public.entitlements e
+             where e.user_id = uid and e.revoked_at is not null) then
+    raise exception 'access_revoked' using errcode = '28000';
+  end if;
+
   -- ترتيب الفحصين مقصود: **ضمان الهوية الدائم أولًا**، ثم حالة الحساب.
   -- لو سبق فحصُ الحساب لابتلع السببَ الحقيقي: مستخدم استنفد تجربته يحمل منحة
   -- تجربة برتبة ١، فكان يُرفَض بـ`trial_not_applicable` — رسالة تصف عرَضًا لا
@@ -164,12 +173,25 @@ begin
   select u.email into em from auth.users u where u.id = uid;
   if em is null then raise exception 'unknown user' using errcode = 'P0002'; end if;
 
+  -- الإلغاء لاصق: لا مسار خدمة ذاتية يرفعه.
+  -- كانت الدوال الثلاث تُصفّر `revoked_at` في الـupsert، فكان بوسع مُلغىً أن
+  -- يستعيد وصوله ببدء تجربة أو استرداد كود أو مطالبة بشراء — تصعيد صلاحية
+  -- كامل. الرفع بيد الإدارة وحدها (`admin_revoke` هو من وضعه).
+  if exists (select 1 from public.entitlements e
+             where e.user_id = uid and e.revoked_at is not null) then
+    raise exception 'access_revoked' using errcode = '28000';
+  end if;
+
   ver := private.active_pepper_version();
   h   := private.hash_identity(em, ver);
 
   -- قفل صفّ الكود: مستردّان متزامنان يتسلسلان هنا، والقراءة بعد القفل حديثة.
-  select * into c from public.access_codes
-   where code_hash = private.hash_identity(upper(btrim(p_code)), ver)
+  -- البحث عبر **كل** إصدارات الملح: كود أُنشئ تحت ملح قديم يبقى قابلًا
+  -- للاسترداد بعد الدوران. البحث بالإصدار النشط وحده كان يُعطّل كل كود قائم
+  -- لحظة أول دوران — بصمت، وبلا أي رسالة تدلّ على السبب.
+  select * into c from public.access_codes ac
+   where ac.code_hash in (select ih.email_hash
+                          from private.identity_hashes(upper(btrim(p_code))) ih)
    for update;
 
   -- رسالة واحدة لكل حالات الرفض: لا تفرّق «غير موجود» عن «معطّل» عن «منتهٍ».
@@ -201,6 +223,11 @@ begin
   new_expiry := now() + make_interval(days => c.duration_days);
 
   select * into cur from public.entitlements where user_id = uid;
+  -- كود أقصر لا يقصّ منحة سارية أطول: المستخدم لا يُعاقَب على استرداد إضافي.
+  if found and cur.revoked_at is null and cur.expires_at is not null
+     and cur.expires_at > new_expiry then
+    new_expiry := cur.expires_at;
+  end if;
   -- Premium قائمة ⇒ تُسجَّل الاستردادات ولا تُخفَّض المنحة (أسبقية Premium).
   if found and cur.revoked_at is null and private.grant_rank(cur.entitlement_type) > 2 then
     return 'premiumActive';
@@ -233,6 +260,15 @@ begin
   if uid is null then raise exception 'not authenticated' using errcode = '28000'; end if;
   select u.email into em from auth.users u where u.id = uid;
   if em is null then raise exception 'unknown user' using errcode = 'P0002'; end if;
+
+  -- الإلغاء لاصق: لا مسار خدمة ذاتية يرفعه.
+  -- كانت الدوال الثلاث تُصفّر `revoked_at` في الـupsert، فكان بوسع مُلغىً أن
+  -- يستعيد وصوله ببدء تجربة أو استرداد كود أو مطالبة بشراء — تصعيد صلاحية
+  -- كامل. الرفع بيد الإدارة وحدها (`admin_revoke` هو من وضعه).
+  if exists (select 1 from public.entitlements e
+             where e.user_id = uid and e.revoked_at is not null) then
+    raise exception 'access_revoked' using errcode = '28000';
+  end if;
 
   -- شراء مسجَّل تحت أي إصدار ملح ⇒ Premium. هذا ما يجعل الشراء ينجو من حذف
   -- الحساب: purchase_ledger بلا user_id فلم يمسّه delete_own_account().
