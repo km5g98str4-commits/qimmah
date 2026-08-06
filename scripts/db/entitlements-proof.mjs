@@ -167,6 +167,28 @@ await mustFail('العميل لا ينادي دالة الإدارة', () =>
 await mustFail('العميل لا ينادي دالة البصمة الداخلية', () =>
   q(`select private.hash_identity('a@example.com',1)`), 'permission denied')
 
+// TRUNCATE **لا تحرسها RLS** — صلاحية جدول لا صفّ. سحب insert/update/delete
+// وحدها كان يترك للعميل محو منح كل المستخدمين بأمر واحد (أُثبت عمليًا).
+for (const t of ['entitlements', 'access_code_redemptions', 'access_codes',
+                 'trial_ledger', 'purchase_ledger', 'code_redemption_ledger']) {
+  await mustFail(`العميل لا يستطيع TRUNCATE على ${t}`,
+    () => db.exec(`truncate public.${t}`), 'permission denied')
+}
+// وصلاحيات `authenticated` على الجدولين المقروءين = SELECT وحدها، لا أكثر.
+await asRole(null)
+const grants = await q(`select table_name, string_agg(distinct privilege_type, ',' order by privilege_type) pr
+                        from information_schema.role_table_grants
+                        where table_schema='public' and grantee='authenticated'
+                          and table_name in ('entitlements','access_code_redemptions')
+                        group by table_name order by table_name`)
+check('authenticated يملك SELECT فقط على الجدولين المقروءين',
+  grants.rows.length === 2 && grants.rows.every((r) => r.pr === 'SELECT'),
+  grants.rows.map((r) => `${r.table_name}=${r.pr}`).join(' '))
+const anyGrant = await q(`select count(*)::int n from information_schema.role_table_grants
+                          where table_schema='public' and grantee in ('anon','authenticated')
+                            and table_name in ('access_codes','trial_ledger','purchase_ledger','code_redemption_ledger')`)
+check('لا صلاحية إطلاقًا على الأكواد والسجلّات لأي دور عميل', anyGrant.rows[0].n === 0, `${anyGrant.rows[0].n}`)
+
 await asRole('anon')
 await mustFail('anon لا يقرأ المنح', () => q(`select * from public.entitlements`), 'permission denied')
 await mustFail('anon لا ينادي my_entitlement', () => q(`select * from public.my_entitlement()`), 'permission denied')

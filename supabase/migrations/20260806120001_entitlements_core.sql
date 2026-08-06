@@ -301,9 +301,12 @@ revoke all on public.access_codes            from anon, authenticated;
 revoke all on public.trial_ledger            from anon, authenticated;
 revoke all on public.purchase_ledger         from anon, authenticated;
 revoke all on public.code_redemption_ledger  from anon, authenticated;
-revoke insert, update, delete on public.entitlements            from anon, authenticated;
-revoke insert, update, delete on public.access_code_redemptions from anon, authenticated;
-revoke all on public.entitlements            from anon;
-revoke all on public.access_code_redemptions from anon;
+-- ⚠️ `revoke all` ثم منح `select` وحده — **لا** سحب `insert, update, delete` فقط.
+-- السحب الانتقائي يترك **TRUNCATE** بيد `authenticated`، و**RLS لا يحرس TRUNCATE
+-- إطلاقًا**: هي صلاحية جدول لا صفّ. فكان بوسع أي مستخدم مسجَّل تنفيذ
+-- `truncate public.entitlements` ومحو منح **كل** المستخدمين — أُثبت عمليًا قبل
+-- الإصلاح. يحرسه الآن فحص TRUNCATE في `test:entitlements`.
+revoke all on public.entitlements            from anon, authenticated;
+revoke all on public.access_code_redemptions from anon, authenticated;
 grant select on public.entitlements            to authenticated;
 grant select on public.access_code_redemptions to authenticated;
