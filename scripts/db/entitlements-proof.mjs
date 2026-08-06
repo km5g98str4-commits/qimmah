@@ -310,6 +310,53 @@ await asRole('authenticated', B)
 const revoked = await q(`select state from public.my_entitlement()`)
 check('الإلغاء يعلو حتى على Premium', revoked.rows[0].state === 'revoked')
 
+// ── ٨.٥) مراجعة الكود: أربعة عيوب حقيقية، لكلٍّ فحصه ──────────────────────
+
+// (أ) الإلغاء لاصق — كانت المسارات الثلاثة تُصفّر revoked_at فتُعيد الوصول ذاتيًا.
+await asRole('service_role')
+const R1 = await mkUser('revoked@example.com')
+await asRole(null)
+await q(`insert into public.entitlements (user_id,email,entitlement_type,source,activated_at,expires_at,no_expiry,revoked_at,revoked_reason)
+         values ($1,'revoked@example.com','trial','trial',now(),now()+interval '72 hours',false,now(),'اختبار')`, [R1])
+await asRole('authenticated', R1)
+await mustFail('مُلغىً لا يبدأ تجربة ليرفع الإلغاء', () => q(`select public.start_trial()`), 'access_revoked')
+await mustFail('مُلغىً لا يستردّ كودًا ليرفع الإلغاء', () => q(`select public.redeem_access_code('AFTER-PREM')`), 'access_revoked')
+await mustFail('مُلغىً لا يطالب بشراء ليرفع الإلغاء', () => q(`select public.claim_pending_grants()`), 'access_revoked')
+const stillRevoked = await q(`select state from public.my_entitlement()`)
+check('الحالة بقيت revoked بعد المحاولات الثلاث', stillRevoked.rows[0].state === 'revoked')
+
+// (ب) دوران الملح لا يُعطّل كودًا قائمًا — الكود أُنشئ تحت الإصدار ١.
+await asRole(null)
+await db.exec(`insert into private.identity_pepper (version, pepper)
+               values (3, 'pepper-v3-aaaabbbbccccddddeeeeffff00001111')`)
+const V3 = await mkUser('rotate@example.com')
+await asRole('authenticated', V3)
+const afterRotate = await q(`select public.redeem_access_code('AFTER-PREM') as s`)
+check('كود أُنشئ قبل دوران الملح يبقى قابلًا للاسترداد', afterRotate.rows[0].s === 'specialAccessActive')
+await asRole(null)
+await db.exec(`update private.identity_pepper set retired_at = now() where version = 3`)
+
+// (ج) كود أقصر لا يقصّ منحة سارية أطول.
+await asRole('service_role')
+await q(`select public.admin_create_access_code('LONG-30','founder','منحة طويلة',30,5)`)
+await q(`select public.admin_create_access_code('SHORT-1','founder','منحة قصيرة',1,5)`)
+const S1 = await mkUser('shorten@example.com')
+await asRole('authenticated', S1)
+await q(`select public.redeem_access_code('LONG-30')`)
+const longExp = (await q(`select expires_at from public.my_entitlement()`)).rows[0].expires_at
+await q(`select public.redeem_access_code('SHORT-1')`)
+const afterShort = (await q(`select expires_at, state from public.my_entitlement()`)).rows[0]
+check('كود ليوم واحد لا يقصّ منحة ٣٠ يومًا سارية',
+  new Date(afterShort.expires_at).getTime() === new Date(longExp).getTime() &&
+  afterShort.state === 'specialAccessActive')
+
+// (د) لا فهرس مكرّر على user_id (قيد unique يكفي).
+await asRole(null)
+const idx = await q(`select count(*)::int n from pg_indexes
+                     where schemaname='public' and tablename='entitlements'
+                       and indexdef ilike '%(user_id)%'`)
+check('فهرس واحد فقط على entitlements.user_id', idx.rows[0].n === 1, `${idx.rows[0].n}`)
+
 // ── ٩) حذف الحساب — أخطر بند ──────────────────────────────────────────────
 await asRole('service_role')
 await q(`update public.entitlements set revoked_at=null, revoked_reason=null where user_id=$1`, [B])

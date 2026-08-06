@@ -185,7 +185,8 @@ create table if not exists public.entitlements (
   constraint entitlements_timed_shape
     check (entitlement_type not in ('trial','special') or expires_at is not null)
 );
-create index if not exists entitlements_user_idx on public.entitlements (user_id);
+-- لا فهرس يدوي على user_id: قيد `unique` أعلاه يُنشئ فهرسه بنفسه، والثاني
+-- تكرار يكلّف كتابةً بلا مكسب قراءة.
 
 -- ٢-ج) استرداد لكل مستخدم — **فيه user_id عمدًا**: يُمحى مع الحساب (PDPL).
 --      حدّ الاستخدام لا يعتمد عليه، بل على السجلّ الدائم في ٢-و.
