@@ -83,6 +83,16 @@ EvidenceSpec { metric, minValidObservations, minSpanDays, minConfidence,
 - `RuleSetManifest {perDomainVersions, contentHash}` — canonical hash per NUMERIC-CONTRACT §3. Adding/removing/editing any rule changes the hash; every output embeds it.
 - A rule behavioral change without a version bump is a gate failure (manifest test pins version↔behavior via fixtures).
 
+## 7a. Rule completeness law ([CTO-QAE-003])
+
+> Every rule must ship with **Positive Proof + Negative Proof + Bypass Attempt**. A rule without all three is **incomplete** and cannot enter a rule pack.
+
+- **Positive Proof:** an input where the rule fires and produces its intended outcome.
+- **Negative Proof:** an input where the rule must NOT fire, failing with a **named** reason (a `TypeError`-style incidental failure does not count — charter §4.2).
+- **Bypass Attempt:** a crafted input/composition that tries to defeat the rule's intent (smuggled composite, forged type, precondition edge) and is rejected **by name**.
+
+The (future) rule linter cross-references each ruleId against its three proof cases; the Phase-2 pipeline proof suite applies this law to the pipeline's own structural rules.
+
 ## 8. Authoring checklist (enforced by review + linter)
 
 1. RuleId, version, domain, class assigned; action singular.

@@ -24,7 +24,14 @@ Delivered: the Docs/ set · Contracts/ drafts · Fixtures/spec/ (34 scenarios, l
 
 1. Oracle Harness → 2. Canonical Domain Types → 3. SafetyPolicy → 4. Decision Pipeline → 5. Question Engine → 6. Training → 7. Nutrition → 8. Recovery → 9. Steps → 10. Weekly Trends → 11. Adaptation Engine → 12. Integration.
 
-**Authorized now (Phase 1):** Oracle Harness + Canonical Domain Types + SafetyPolicy foundation — nothing beyond those three until the next architecture checkpoint. The golden law applies from here forward: 100 % golden compatibility before any optimization.
+**Phase 1: ✅ APPROVED by [CTO-QAE-003].** The golden law applies from here forward: 100 % golden compatibility before any optimization.
+
+## Architecture Lock ([CTO-QAE-003])
+
+Locked as of Phase 1 approval: **Contracts · Canonical Types · Oracle Harness · SafetyPolicy · Integer Canonicalization · Rule Manifest · Reason Codes.**
+Any future change goes through **Migration, never direct edit**: a versioned change record stating what changes, why, the golden impact (proven by re-running the harness before/after), and the compatibility path. Golden-neutral *additive* extensions (new pure functions, new codes) are migrations too — recorded with a re-verified byte-identical golden run.
+
+**Authorized now (Phase 2, [CTO-QAE-003]): Decision Pipeline Foundation ONLY** — evidence ingestion · candidate rule generation · safety evaluation · conflict resolution · change budget · proposal generation · decision provenance · explainability layers. **Forbidden in this phase:** any nutrition, training, adaptation, question, or recovery domain logic — the pipeline is domain-agnostic and rules are declarative data. Exit criteria (all mandatory): 100 % determinism · zero hidden state · zero mutable globals · zero side effects · every proposal replayable · every decision explainable · every rejection reason coded · every rule individually testable · fixed composite evaluation order · complete decision provenance.
 
 **Language note (Phase 1 reality):** the harness must execute the legacy TypeScript oracle, and this environment has no Swift toolchain, so Phase-1 canonical types and SafetyPolicy foundation are strict-TypeScript **contract/validation infrastructure inside `QimmahAdaptiveEngine/`** — never imported by the app (no second authority), consumed only by the harness and QAE tests. The Pure Swift runtime remains the final target; these components define and exercise the exact goldens the Swift port must reproduce.
 

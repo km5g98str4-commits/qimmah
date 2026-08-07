@@ -24,6 +24,10 @@ No performance work, refactor-for-speed, or algorithmic substitution is reviewab
 
 Every fixture carries a `determinism` envelope — `{seed, timezone, clock, locale, ruleManifest, engineVersion}` — so replay is perfectly deterministic. `seed` exists for replay-format completeness (the domain has no randomness; it must be ignored), and `locale` is recorded precisely so tests can prove the output does **not** vary with it.
 
+## 1c. Golden expansion policy ([CTO-QAE-003])
+
+The target is **100 % Decision Surface Coverage, not scenario count**. Goldens grow only when they pin an uncovered decision surface (a rule outcome, a resolver branch, a boundary, a tier interaction); 40 goldens covering every surface beat 400 redundant ones. Each new golden names the surface it adds in `COVERAGE.json`; a golden that adds no new surface is rejected in review. Surface inventory = the rule outcomes × resolver stages enumerated by the manifest — machine-checkable once the rule linter lands.
+
 ## 2. Golden fixtures as the portability contract
 
 - Fixtures are language-neutral JSON (canonical integers only; fixture linter rejects floats).

@@ -33,6 +33,28 @@ export function civilFromDays(daysSinceEpoch: number): CivilDate {
 const pad2 = (n: number): string => (n < 10 ? `0${n}` : String(n))
 const pad4 = (n: number): string => String(n).padStart(4, '0')
 
+/**
+ * Inverse of civilFromDays (Hinnant days-from-civil). Additive migration under the
+ * [CTO-QAE-003] architecture lock — golden-neutral, verified by harness re-run.
+ */
+export function daysFromCivil(year: number, month: number, day: number): number {
+  assertSafeInt(year, 'daysFromCivil.year')
+  const y = month <= 2 ? year - 1 : year
+  const era = floorDiv(y, 400)
+  const yoe = y - era * 400
+  const mp = month > 2 ? month - 3 : month + 9
+  const doy = floorDiv(153 * mp + 2, 5) + day - 1
+  const doe = yoe * 365 + floorDiv(yoe, 4) - floorDiv(yoe, 100) + doy
+  return era * 146_097 + doe - 719_468
+}
+
+/** Parse canonical YYYY-MM-DD to days-since-epoch. Rejects malformed input by name. */
+export function localDateToDays(date: string): number {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date)
+  if (!m) throw new Error(`QAE-TIME-VIOLATION: malformed local date ${date}`)
+  return daysFromCivil(Number(m[1]), Number(m[2]), Number(m[3]))
+}
+
 /** Canonical YYYY-MM-DD from a host-captured instant. Pure arithmetic — no Date/Calendar. */
 export function localDate(epochMs: number, tzOffsetMinutes: number): string {
   assertSafeInt(epochMs, 'localDate.epochMs')

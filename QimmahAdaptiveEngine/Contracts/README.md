@@ -1,7 +1,12 @@
-# QAE Contracts (Draft)
+# QAE Contracts
 
-Language-neutral contract drafts for the Qimmah Adaptive Engine. Authorized by [CTO-QAE-001] §17.
-**Status: DRAFT — not frozen.** Freezing is a Phase-1 gate after UNRESOLVED decisions close.
+Language-neutral contracts for the Qimmah Adaptive Engine. Authorized by [CTO-QAE-001] §17.
+**Status: LOCKED by [CTO-QAE-003].** Changes go through Migration, never direct edit (see `Docs/IMPLEMENTATION-ROADMAP.md` §Architecture Lock). Migration log:
+
+| Migration | Authorized by | Change | Golden impact |
+|---|---|---|---|
+| proposal.schema v0.2.0 | [CTO-QAE-003] (provenance mandate) | `AdaptationProposal` gains required `provenance` object (origin, pipelineStage, engineVersion, ruleManifest, oracleVersion, timestamp, seed) | none — additive; harness re-run verified byte-identical goldens |
+| reason-codes v0.1.1 | [CTO-QAE-003] Phase 2 | pipeline codes added (`noCandidateFired`, `preconditionNotMet`, `conflictResolvedByPriority`) | none — additive |
 
 ## Conventions
 

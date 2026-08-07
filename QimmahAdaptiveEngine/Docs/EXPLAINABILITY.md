@@ -13,6 +13,18 @@ Every decision the engine makes — including the decision to change nothing —
 - Ordering for display: safety codes first (by tier CRITICAL→LOW), then the proposal's own priority-class order, then supporting/positive codes. This ordering is part of the contract (deterministic).
 - One code = one meaning forever. A code's semantics never change; superseded meanings get new codes and the old one is deprecated in the registry (never deleted — stored proposals reference it).
 
+## 2a. The three reason layers ([CTO-QAE-003] — never mixed)
+
+Every decision-affecting event materializes in exactly three forms, derived from one structured record:
+
+| Layer | Form | Example (calorie floor clamp) |
+|---|---|---|
+| **DeveloperReason** | stable SCREAMING_SNAKE token derived from the reason code, for logs/greps | `CALORIES_FLOOR_POLICY_TRIGGERED` |
+| **AuditReason** | deterministic structured sentence generated from the record's fields (rule id + original + adjusted), English, machine-composed | `Rule QAE-SAF-005 clamped calorieTargetKcal from 1040 to 1500.` |
+| **UserReason** | the ReasonCode itself, handed to the host, which maps it to Arabic/English copy in the app i18n layer | host renders e.g. «رفعنا السعرات للحد الأدنى الآمن» |
+
+Rules of separation: the engine never emits user copy (UserReason is a code, not a sentence) · audit sentences are generated from structured fields, never hand-written per call site · developer tokens are derived mechanically from codes (one code → one token, forever) · **no layer ever appears in another layer's surface**.
+
 ## 3. The three audiences
 
 | Audience | Surface | Content | What is withheld |

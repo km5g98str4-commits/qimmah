@@ -73,15 +73,32 @@
       "additionalProperties": false
     },
 
+    "DecisionProvenance": {
+      "type": "object",
+      "description": "[CTO-QAE-003] migration v0.2.0 — full reconstructability (Docs/DECISION_PROVENANCE.md). No field optional.",
+      "required": ["origin", "pipelineStage", "engineVersion", "ruleManifest", "oracleVersion", "timestamp", "seed"],
+      "properties": {
+        "origin": { "$ref": "core.schema.json#/$defs/RuleId" },
+        "pipelineStage": { "enum": ["resolved", "budgeted", "safetyScreened"] },
+        "engineVersion": { "type": "string" },
+        "ruleManifest": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "oracleVersion": { "type": "string" },
+        "timestamp": { "type": "integer", "description": "epochMs from the REQUEST's Now — never a system clock" },
+        "seed": { "type": "integer" }
+      },
+      "additionalProperties": false
+    },
+
     "AdaptationProposal": {
       "allOf": [{ "$ref": "#/$defs/CandidateProposal" }],
       "type": "object",
-      "required": ["proposalId", "requiresApproval", "safetyScreen", "manifest"],
+      "required": ["proposalId", "requiresApproval", "safetyScreen", "manifest", "provenance"],
       "properties": {
         "proposalId": { "type": "string" },
         "requiresApproval": { "type": "boolean", "description": "all plan-affecting proposals require approval (locked product decision); false only for requestMoreData/informational" },
         "safetyScreen": { "$ref": "#/$defs/SafetyVerdict" },
-        "manifest": { "$ref": "core.schema.json#/$defs/RuleSetManifest" }
+        "manifest": { "$ref": "core.schema.json#/$defs/RuleSetManifest" },
+        "provenance": { "$ref": "#/$defs/DecisionProvenance" }
       }
     },
 

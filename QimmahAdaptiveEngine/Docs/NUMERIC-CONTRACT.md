@@ -52,6 +52,14 @@
 - `localDate(epochMs, tzOffsetMinutes)` is pure arithmetic: `floorDiv(epochMs + tzOffsetMinutes*60000, 86400000)` → civil date via a fixed proleptic-Gregorian conversion (specified, shared, and golden-tested in both languages). DST correctness is the host's problem at capture time — the offset stored with the observation is authoritative.
 - Review windows arrive as explicit `ReviewPeriod {startDate, endDate}` (inclusive local dates), computed by the host. Domain policy states *eligibility* (e.g., minimum days of data), never derives week boundaries itself.
 
+## 4a. The float lock ([CTO-QAE-003] — formalized)
+
+> Inside the engine: **No float. Ever.**
+>
+> Floats are permitted in exactly one direction: `Legacy Adapter → Canonical Integer → QAE`. The reverse direction does not exist: no QAE value is ever converted back to a float, and no float ever enters a rule, a resolver, a proposal, or a golden.
+
+The boundary is crossed once, in the oracle/host adapter, with explicit per-field scaling. The canonical serializer rejects non-integers **by name** (`QAE-CANONICAL-VIOLATION`), so a float that sneaks past review still cannot reach a golden or a provenance hash.
+
 ## 5. Prohibitions
 
 - No `float`/`Double` in any contract field or rule threshold.
