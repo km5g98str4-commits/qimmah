@@ -1,28 +1,96 @@
 {
   "scenarioId": "S24",
   "title": "Calories consistently exceeded on a cut — honest support, optional target raise",
-  "tags": ["weeklyReview", "adherence", "nutrition"],
+  "tags": [
+    "weeklyReview",
+    "adherence",
+    "nutrition"
+  ],
+  "determinism": {
+    "seed": 0,
+    "timezone": {
+      "tzOffsetMinutes": 180
+    },
+    "clock": {
+      "epochMs": 1785542400000
+    },
+    "locale": "ar-SA",
+    "ruleManifest": "pending-freeze",
+    "engineVersion": "0.1.0"
+  },
   "requestKind": "weeklyReview",
   "input": {
-    "profile": { "sex": "female", "ageYears": 27, "heightMm": 1650, "massGrams": 70000, "goalType": "cut", "experienceClass": "beginner", "daysPerWeek": 3, "sessionMinutes": 45, "environment": "gym", "healthDataAccepted": true },
+    "profile": {
+      "sex": "female",
+      "ageYears": 27,
+      "heightMm": 1650,
+      "massGrams": 70000,
+      "goalType": "cut",
+      "experienceClass": "beginner",
+      "daysPerWeek": 3,
+      "sessionMinutes": 45,
+      "environment": "gym",
+      "healthDataAccepted": true
+    },
     "observations": {
-      "calories": { "adherenceBp": 12500, "summary": "logged intake ~25% above target on 12 of 14 logged days" },
-      "weight": { "validCount": 6, "spanDays": 14, "summary": "slowly rising" },
-      "training": { "completionBp": 9000 }
+      "calories": {
+        "adherenceBp": 12500,
+        "summary": "logged intake ~25% above target on 12 of 14 logged days"
+      },
+      "weight": {
+        "validCount": 6,
+        "spanDays": 14,
+        "summary": "slowly rising"
+      },
+      "training": {
+        "completionBp": 9000
+      }
     },
     "adaptationHistory": []
   },
   "expected": {
-    "classification": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "calorieTargetConsistentlyExceeded with high logging confidence (the user IS logging — that adherence-to-logging is itself honored)" } ] },
-    "initialPlan": { "label": "NOT_APPLICABLE", "expectations": [ { "assert": "review scenario" } ] },
+    "classification": {
+      "label": "PRODUCT_POLICY_APPROVED",
+      "expectations": [
+        {
+          "assert": "calorieTargetConsistentlyExceeded with high logging confidence (the user IS logging — that adherence-to-logging is itself honored)"
+        }
+      ]
+    },
+    "initialPlan": {
+      "label": "NOT_APPLICABLE",
+      "expectations": [
+        {
+          "assert": "review scenario"
+        }
+      ]
+    },
     "adaptation": {
       "label": "PRODUCT_POLICY_APPROVED",
       "expectations": [
-        { "assert": "candidates: keepPlan + adherence support; OR changeCalories(POSITIVE — raise target toward sustainable) as an honest optimization proposal; NEVER changeCalories(negative) to 'compensate'" },
-        { "assert": "the raise-toward-sustainable proposal explains that a smaller real deficit beats an imaginary large one" }
+        {
+          "assert": "candidates: keepPlan + adherence support; OR changeCalories(POSITIVE — raise target toward sustainable) as an honest optimization proposal; NEVER changeCalories(negative) to 'compensate'"
+        },
+        {
+          "assert": "the raise-toward-sustainable proposal explains that a smaller real deficit beats an imaginary large one"
+        }
       ]
     },
-    "reasonCodes": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "calorieTargetConsistentlyExceeded; no blame-class codes exist in the registry" } ] },
-    "safety": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "pass" } ] }
+    "reasonCodes": {
+      "label": "PRODUCT_POLICY_APPROVED",
+      "expectations": [
+        {
+          "assert": "calorieTargetConsistentlyExceeded; no blame-class codes exist in the registry"
+        }
+      ]
+    },
+    "safety": {
+      "label": "PRODUCT_POLICY_APPROVED",
+      "expectations": [
+        {
+          "assert": "pass"
+        }
+      ]
+    }
   }
 }

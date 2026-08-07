@@ -1,15 +1,56 @@
 {
   "scenarioId": "S32",
   "title": "Weight UP during a cut with high adherence and rising performance — investigate, don't punish",
-  "tags": ["weeklyReview", "conflict", "dataQuality", "honesty"],
+  "tags": [
+    "weeklyReview",
+    "conflict",
+    "dataQuality",
+    "honesty"
+  ],
+  "determinism": {
+    "seed": 0,
+    "timezone": {
+      "tzOffsetMinutes": 180
+    },
+    "clock": {
+      "epochMs": 1785542400000
+    },
+    "locale": "ar-SA",
+    "ruleManifest": "pending-freeze",
+    "engineVersion": "0.1.0"
+  },
   "requestKind": "weeklyReview",
   "input": {
-    "profile": { "sex": "female", "ageYears": 25, "heightMm": 1680, "massGrams": 63000, "goalType": "cut", "experienceClass": "beginner", "daysPerWeek": 4, "sessionMinutes": 60, "environment": "gym", "trainingStartedWeeksAgo": 3, "healthDataAccepted": true },
+    "profile": {
+      "sex": "female",
+      "ageYears": 25,
+      "heightMm": 1680,
+      "massGrams": 63000,
+      "goalType": "cut",
+      "experienceClass": "beginner",
+      "daysPerWeek": 4,
+      "sessionMinutes": 60,
+      "environment": "gym",
+      "trainingStartedWeeksAgo": 3,
+      "healthDataAccepted": true
+    },
     "observations": {
-      "weight": { "validCount": 6, "spanDays": 14, "deltaGramsPerWeek": 300, "summary": "+300 g/week across the window" },
-      "calories": { "adherenceBp": 9700 },
-      "training": { "completionBp": 10000, "performanceTrend": "rising" },
-      "recovery": { "summary": "good" }
+      "weight": {
+        "validCount": 6,
+        "spanDays": 14,
+        "deltaGramsPerWeek": 300,
+        "summary": "+300 g/week across the window"
+      },
+      "calories": {
+        "adherenceBp": 9700
+      },
+      "training": {
+        "completionBp": 10000,
+        "performanceTrend": "rising"
+      },
+      "recovery": {
+        "summary": "good"
+      }
     },
     "adaptationHistory": []
   },
@@ -17,18 +58,45 @@
     "classification": {
       "label": "PRODUCT_POLICY_APPROVED",
       "expectations": [
-        { "assert": "signature recognized: new-trainee + verified intake + rising performance + modest gain ⇒ plausible water/glycogen/lean shifts, NOT verified fat regain; trend confidence for 'cut failing' is LOW despite good data quality" }
+        {
+          "assert": "signature recognized: new-trainee + verified intake + rising performance + modest gain ⇒ plausible water/glycogen/lean shifts, NOT verified fat regain; trend confidence for 'cut failing' is LOW despite good data quality"
+        }
       ]
     },
-    "initialPlan": { "label": "NOT_APPLICABLE", "expectations": [ { "assert": "review scenario" } ] },
+    "initialPlan": {
+      "label": "NOT_APPLICABLE",
+      "expectations": [
+        {
+          "assert": "review scenario"
+        }
+      ]
+    },
     "adaptation": {
       "label": "PRODUCT_POLICY_APPROVED",
       "expectations": [
-        { "assert": "NO calorie reduction this cycle — the conflicting-signature rule suppresses the rate-based response; emitted: keepPlan + requestMoreData (extend observation window, optional waist measurement)" },
-        { "assert": "if the rising trend persists across the extended window with adherence verified, only then does a calorie/goal-review proposal fire (documented in the fixture's follow-on week)" }
+        {
+          "assert": "NO calorie reduction this cycle — the conflicting-signature rule suppresses the rate-based response; emitted: keepPlan + requestMoreData (extend observation window, optional waist measurement)"
+        },
+        {
+          "assert": "if the rising trend persists across the extended window with adherence verified, only then does a calorie/goal-review proposal fire (documented in the fixture's follow-on week)"
+        }
       ]
     },
-    "reasonCodes": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "honest codes: measured facts stated plainly, inference marked conservative (charter: حاسمة للمُقاس، متحفّظة للمُستنتَج)" } ] },
-    "safety": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "pass" } ] }
+    "reasonCodes": {
+      "label": "PRODUCT_POLICY_APPROVED",
+      "expectations": [
+        {
+          "assert": "honest codes: measured facts stated plainly, inference marked conservative (charter: حاسمة للمُقاس، متحفّظة للمُستنتَج)"
+        }
+      ]
+    },
+    "safety": {
+      "label": "PRODUCT_POLICY_APPROVED",
+      "expectations": [
+        {
+          "assert": "pass"
+        }
+      ]
+    }
   }
 }

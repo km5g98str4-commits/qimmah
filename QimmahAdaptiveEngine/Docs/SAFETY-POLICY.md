@@ -44,6 +44,14 @@ Safety survives by **structure**, not by discipline (charter §4.2: "a gate that
 - SafetyPolicy has its own version stream in the manifest; its rules use the same Rule anatomy (RULE-MODEL) with `priorityClass: safety`.
 - Counter-tests (mandatory): (a) an engine attempting to emit a plan around the policy fails by a named check; (b) a composite bundle carrying non-protective actions is rejected by name; (c) a stale accepted proposal that became unsafe is blocked at checkpoint 3.
 
+## 4a. Immutable safety tiers ([CTO-QAE-002])
+
+Safety rules carry an **immutable** priority tier: `CRITICAL > HIGH > NORMAL > LOW`.
+
+- Conflict resolution always begins with CRITICAL.
+- **Tiers are never configurable by product** — they are fixed in the safety rule pack, versioned with it, and no host/config input can reorder or disable them. The contract type is a closed enum; the (future) rule linter rejects any safety rule without a tier and any code path that reads a tier from configuration.
+- Initial tier assignment: minors policy, unknown-age block, VLCD block → **CRITICAL** · calorie floors, injury exclusions, rate-of-change blocks → **HIGH** · volume caps, adaptation-frequency caps → **NORMAL** · advisory clamps and cautions → **LOW**.
+
 ## 5. Safety domains validated
 
 | Domain | Content | Basis |
@@ -64,7 +72,7 @@ QAE's initial behavioral contract **is** the live Qimmah policy, characterized (
 - App minimum age: 13 (existing `test:age-13` behavior).
 - Ages 13–17: weight-modification goals (cut/bulk) are overridden to maintenance (`effectiveGoalTypeForAge`); restriction note shown; weight-change forecast suppressed; adult BMI classification suppressed; guidance to consult a specialist.
 - Age 18: full goal set restored (boundary fixtures pin both sides).
-- **Characterized defect, escalated not inherited silently:** legacy `isMinorAge(0) === false` — an unset/zero age bypasses the minor guard entirely. QAE treats *unknown age* as a mandatory assessment gap that **blocks** plan finalization (`dataIntegrity` class) rather than defaulting to adult. This is a deliberate, documented deviation from the oracle, flagged for founder confirmation (UNRESOLVED-DECISIONS #U1).
+- **Characterized defect, superseded by founder decision ([CTO-QAE-002] U1 — APPROVED):** legacy `isMinorAge(0) === false` — an unset/zero age bypasses the minor guard entirely. QAE does **not** inherit this: unknown age ⇒ incomplete assessment ⇒ **no final plan generation**. Age is a required assessment field before any final adaptive decision. Enforced at CRITICAL tier (§4a).
 - Any future change to minors policy is a separate explicit product/safety decision — out of QAE's authority.
 
 ## 7. Rejected-safety-recommendation flow (normative sequence)

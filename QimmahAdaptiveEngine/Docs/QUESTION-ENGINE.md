@@ -44,7 +44,7 @@ Behavioral consequences (all characterized in the legacy proofs, carried as fixt
 Stop: complete | cap_reached | exhausted | consent_pending
 ```
 
-Budgets (per experience class): min/max with `hardCap = 20` absolute. Legacy `DEFAULT_BUDGET` (15–17 / 16–18 / 18–20) is the characterized baseline; the unwired `CHARTER_TREE_BUDGET` variant is noted in the legacy map as a pending product choice (UNRESOLVED #U5). Most users answer only the minimum sufficient set.
+**Budgets — decided ([CTO-QAE-002] U5):** QAE adopts the CTO numbers. Initial onboarding targets **≈15 adaptive questions** (the `CHARTER_TREE_BUDGET` bands: 11–13 complete-beginner … 15–19 advanced, hardCap 20) — not the larger legacy default, which remains parity-reference only. Beyond onboarding: **adaptive follow-up 1–3 questions · weekly 0–2 · monthly reassessment dynamic**. **Question fatigue is a first-class optimization target**: every question spent is a cost the selection function must justify (infoGain gate, satiety penalty, materiality rule), and fixture metrics track asked-count per path.
 
 Tie-breaks: priority desc → infoGain desc → **questionId ordinal (byte) comparison** — replacing legacy `localeCompare` (defect L-GEN-1) per NUMERIC-CONTRACT §3.
 

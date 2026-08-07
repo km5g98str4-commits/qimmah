@@ -1,22 +1,90 @@
 {
   "scenarioId": "S22",
   "title": "Very low activity baseline (1.8k steps/day) — start where the user is",
-  "tags": ["steps", "initialPlan"],
+  "tags": [
+    "steps",
+    "initialPlan"
+  ],
+  "determinism": {
+    "seed": 0,
+    "timezone": {
+      "tzOffsetMinutes": 180
+    },
+    "clock": {
+      "epochMs": 1785542400000
+    },
+    "locale": "ar-SA",
+    "ruleManifest": "pending-freeze",
+    "engineVersion": "0.1.0"
+  },
   "requestKind": "initialPlan",
   "input": {
-    "profile": { "sex": "female", "ageYears": 45, "heightMm": 1620, "massGrams": 78000, "goalType": "cut", "experienceClass": "complete_beginner", "daysPerWeek": 3, "sessionMinutes": 45, "environment": "home", "equipment": ["bodyweight", "band"], "neatBand": "sedentary", "baselineStepsPerDay": 1800, "baselineStepsConfidence": "moderate", "healthDataAccepted": true }
+    "profile": {
+      "sex": "female",
+      "ageYears": 45,
+      "heightMm": 1620,
+      "massGrams": 78000,
+      "goalType": "cut",
+      "experienceClass": "complete_beginner",
+      "daysPerWeek": 3,
+      "sessionMinutes": 45,
+      "environment": "home",
+      "equipment": [
+        "bodyweight",
+        "band"
+      ],
+      "neatBand": "sedentary",
+      "baselineStepsPerDay": 1800,
+      "baselineStepsConfidence": "moderate",
+      "healthDataAccepted": true
+    }
   },
   "expected": {
-    "classification": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "sedentary baseline far below health-benefit region; largest relative benefit lies in early increments", "registerId": "EVR-006" } ] },
+    "classification": {
+      "label": "PRODUCT_POLICY_APPROVED",
+      "expectations": [
+        {
+          "assert": "sedentary baseline far below health-benefit region; largest relative benefit lies in early increments",
+          "registerId": "EVR-006"
+        }
+      ]
+    },
     "initialPlan": {
       "label": "RESEARCH_REQUIRED",
       "expectations": [
-        { "assert": "initial target = baseline + small labeled increment (magnitude blocked on EVR-007); explicitly NOT 10,000 and NOT a +40% jump — the brief's 3,200→4,500 example is removed as policy ([CTO-QAE-001] §14)", "registerId": "EVR-007" },
-        { "assert": "minimumExposureDays set before any increase is considered" }
+        {
+          "assert": "initial target = baseline + small labeled increment (magnitude blocked on EVR-007); explicitly NOT 10,000 and NOT a +40% jump — the brief's 3,200→4,500 example is removed as policy ([CTO-QAE-001] §14)",
+          "registerId": "EVR-007"
+        },
+        {
+          "assert": "minimumExposureDays set before any increase is considered"
+        }
       ]
     },
-    "adaptation": { "label": "RESEARCH_REQUIRED", "expectations": [ { "assert": "increases only after target consistently met over exposure period ∧ recovery stable ∧ budget/cooldown clear", "registerId": "EVR-007" } ] },
-    "reasonCodes": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "honest 'approximate/starting-point' framing codes for the derived target" } ] },
-    "safety": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "pass" } ] }
+    "adaptation": {
+      "label": "RESEARCH_REQUIRED",
+      "expectations": [
+        {
+          "assert": "increases only after target consistently met over exposure period ∧ recovery stable ∧ budget/cooldown clear",
+          "registerId": "EVR-007"
+        }
+      ]
+    },
+    "reasonCodes": {
+      "label": "PRODUCT_POLICY_APPROVED",
+      "expectations": [
+        {
+          "assert": "honest 'approximate/starting-point' framing codes for the derived target"
+        }
+      ]
+    },
+    "safety": {
+      "label": "PRODUCT_POLICY_APPROVED",
+      "expectations": [
+        {
+          "assert": "pass"
+        }
+      ]
+    }
   }
 }

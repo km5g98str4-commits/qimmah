@@ -4,9 +4,23 @@
   "title": "QAE Scenario Specification Format (DRAFT)",
   "description": "Phase 0.5 scenario SPECIFICATIONS ([CTO-QAE-001] §17). Expected outputs are never invented: each expectation block carries a source label. CHARACTERIZED_EXISTING expectations reference oracle code (file:line) and are goldenPending until the Phase-1 oracle harness machine-generates their values. RESEARCH_REQUIRED/UNRESOLVED blocks document the scenario without executable numbers.",
   "type": "object",
-  "required": ["scenarioId", "title", "tags", "input", "expected"],
+  "required": ["scenarioId", "title", "tags", "input", "expected", "determinism"],
   "properties": {
     "scenarioId": { "type": "string", "pattern": "^S\\d{2}$" },
+    "determinism": {
+      "type": "object",
+      "description": "[CTO-QAE-002] replay envelope. seed exists for replay-format completeness (domain has no randomness; must be ignored); locale is recorded so tests can prove output does NOT vary with it.",
+      "required": ["seed", "timezone", "clock", "locale", "ruleManifest", "engineVersion"],
+      "properties": {
+        "seed": { "type": "integer" },
+        "timezone": { "type": "object", "required": ["tzOffsetMinutes"], "properties": { "tzOffsetMinutes": { "type": "integer", "minimum": -840, "maximum": 840 } }, "additionalProperties": false },
+        "clock": { "type": "object", "required": ["epochMs"], "properties": { "epochMs": { "type": "integer" } }, "additionalProperties": false },
+        "locale": { "type": "string", "description": "recorded, never consumed — output must be locale-invariant" },
+        "ruleManifest": { "type": "string", "description": "manifest contentHash or 'pending-freeze' until Contracts v1 freeze" },
+        "engineVersion": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
     "title": { "type": "string" },
     "tags": { "type": "array", "items": { "type": "string" } },
     "requestKind": { "enum": ["initialPlan", "weeklyReview", "questionPath", "checkAction"] },

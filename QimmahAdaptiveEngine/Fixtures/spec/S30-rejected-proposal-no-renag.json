@@ -1,32 +1,114 @@
 {
   "scenarioId": "S30",
   "title": "User rejects the same proposal twice — the engine does not nag",
-  "tags": ["weeklyReview", "cooldown", "rejection", "normative"],
+  "tags": [
+    "weeklyReview",
+    "cooldown",
+    "rejection",
+    "normative"
+  ],
+  "determinism": {
+    "seed": 0,
+    "timezone": {
+      "tzOffsetMinutes": 180
+    },
+    "clock": {
+      "epochMs": 1785542400000
+    },
+    "locale": "ar-SA",
+    "ruleManifest": "pending-freeze",
+    "engineVersion": "0.1.0"
+  },
   "requestKind": "weeklyReview",
   "input": {
-    "profile": { "sex": "male", "ageYears": 31, "heightMm": 1780, "massGrams": 82000, "goalType": "cut", "experienceClass": "intermediate", "daysPerWeek": 4, "sessionMinutes": 60, "environment": "gym", "healthDataAccepted": true },
+    "profile": {
+      "sex": "male",
+      "ageYears": 31,
+      "heightMm": 1780,
+      "massGrams": 82000,
+      "goalType": "cut",
+      "experienceClass": "intermediate",
+      "daysPerWeek": 4,
+      "sessionMinutes": 60,
+      "environment": "gym",
+      "healthDataAccepted": true
+    },
     "observations": {
-      "weight": { "validCount": 6, "spanDays": 15, "summary": "plateau persists" },
-      "calories": { "adherenceBp": 9400 },
-      "recovery": { "summary": "stable" }
+      "weight": {
+        "validCount": 6,
+        "spanDays": 15,
+        "summary": "plateau persists"
+      },
+      "calories": {
+        "adherenceBp": 9400
+      },
+      "recovery": {
+        "summary": "stable"
+      }
     },
     "adaptationHistory": [
-      { "targetVariable": "calories", "actionKind": "changeCalories", "direction": "decrease", "decidedOn": "2026-07-24", "outcome": "rejected" },
-      { "targetVariable": "calories", "actionKind": "changeCalories", "direction": "decrease", "decidedOn": "2026-07-31", "outcome": "rejected" }
+      {
+        "targetVariable": "calories",
+        "actionKind": "changeCalories",
+        "direction": "decrease",
+        "decidedOn": "2026-07-24",
+        "outcome": "rejected"
+      },
+      {
+        "targetVariable": "calories",
+        "actionKind": "changeCalories",
+        "direction": "decrease",
+        "decidedOn": "2026-07-31",
+        "outcome": "rejected"
+      }
     ]
   },
   "expected": {
-    "classification": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "plateau + high adherence still true — the calorie-cut rule's preconditions hold" } ] },
-    "initialPlan": { "label": "NOT_APPLICABLE", "expectations": [ { "assert": "review scenario" } ] },
+    "classification": {
+      "label": "PRODUCT_POLICY_APPROVED",
+      "expectations": [
+        {
+          "assert": "plateau + high adherence still true — the calorie-cut rule's preconditions hold"
+        }
+      ]
+    },
+    "initialPlan": {
+      "label": "NOT_APPLICABLE",
+      "expectations": [
+        {
+          "assert": "review scenario"
+        }
+      ]
+    },
     "adaptation": {
       "label": "PRODUCT_POLICY_APPROVED",
       "expectations": [
-        { "assert": "NO changeCalories(decrease) proposal emitted — the rejected (variable, direction) pair is in re-proposal cooldown; rejections count like acceptances for cooldowns (DECISION-MODEL §3.4)" },
-        { "assert": "the alternative lever (changeStepTarget increase) MAY be proposed instead — different variable, not in cooldown" },
-        { "assert": "ReasonTrace shows the calorie rule as suppressed with proposalRejectedCooldown" }
+        {
+          "assert": "NO changeCalories(decrease) proposal emitted — the rejected (variable, direction) pair is in re-proposal cooldown; rejections count like acceptances for cooldowns (DECISION-MODEL §3.4)"
+        },
+        {
+          "assert": "the alternative lever (changeStepTarget increase) MAY be proposed instead — different variable, not in cooldown"
+        },
+        {
+          "assert": "ReasonTrace shows the calorie rule as suppressed with proposalRejectedCooldown"
+        }
       ]
     },
-    "reasonCodes": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "proposalRejectedCooldown present in trace; user's autonomy respected without silence about the standing plateau" } ] },
-    "safety": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "pass — an optimization rejection never triggers safety machinery" } ] }
+    "reasonCodes": {
+      "label": "PRODUCT_POLICY_APPROVED",
+      "expectations": [
+        {
+          "assert": "proposalRejectedCooldown present in trace; user's autonomy respected without silence about the standing plateau"
+        }
+      ]
+    },
+    "safety": {
+      "label": "PRODUCT_POLICY_APPROVED",
+      "expectations": [
+        {
+          "assert": "pass — an optimization rejection never triggers safety machinery"
+        }
+      ]
+    }
   }
 }

@@ -1,28 +1,90 @@
 {
   "scenarioId": "S17",
   "title": "Knee injury — metadata contraindication filtering",
-  "tags": ["initialPlan", "injury", "safety"],
+  "tags": [
+    "initialPlan",
+    "injury",
+    "safety"
+  ],
+  "determinism": {
+    "seed": 0,
+    "timezone": {
+      "tzOffsetMinutes": 180
+    },
+    "clock": {
+      "epochMs": 1785542400000
+    },
+    "locale": "ar-SA",
+    "ruleManifest": "pending-freeze",
+    "engineVersion": "0.1.0"
+  },
   "requestKind": "initialPlan",
   "input": {
     "profile": {
-      "sex": "male", "ageYears": 40, "heightMm": 1760, "massGrams": 88000, "goalType": "maintain",
-      "experienceClass": "intermediate", "daysPerWeek": 4, "sessionMinutes": 60, "environment": "gym",
-      "injuryFlags": ["knee"], "healthDataAccepted": true
+      "sex": "male",
+      "ageYears": 40,
+      "heightMm": 1760,
+      "massGrams": 88000,
+      "goalType": "maintain",
+      "experienceClass": "intermediate",
+      "daysPerWeek": 4,
+      "sessionMinutes": 60,
+      "environment": "gym",
+      "injuryFlags": [
+        "knee"
+      ],
+      "healthDataAccepted": true
     }
   },
   "expected": {
-    "classification": { "label": "CHARACTERIZED_EXISTING", "expectations": [ { "assert": "knee flag detected and carried as structured InjuryFlag (superseding free-text regex detection)", "oracleRef": "src/lib/planGenerator.ts:194-205" } ] },
+    "classification": {
+      "label": "CHARACTERIZED_EXISTING",
+      "expectations": [
+        {
+          "assert": "knee flag detected and carried as structured InjuryFlag (superseding free-text regex detection)",
+          "oracleRef": "src/lib/planGenerator.ts:194-205"
+        }
+      ]
+    },
     "initialPlan": {
       "label": "CHARACTERIZED_EXISTING",
       "goldenPending": true,
       "expectations": [
-        { "assert": "PARITY: none of the 13 characterized knee-risky exercise ids appears (barbell-back-squat, front-squat, hack-squat-machine, smith-machine-squat, sissy-squat, belt-squat, leg-press-narrow, bulgarian-split-squat, walking-lunge, reverse-lunge, step-up, leg-extension-machine, wall-sit)", "oracleRef": "src/lib/planGenerator.ts:217-221" },
-        { "assert": "QAE mechanism: exclusion via ExerciseMetadata.contraindications ∋ knee, not id blocklists (L-TRN-3 supersession); legacy blocklists seed the metadata" },
-        { "assert": "lower-body slots still filled with safe alternatives; if the pool exhausts, exercisePoolExhausted is emitted — never a silent underfill (L-TRN-4)" }
+        {
+          "assert": "PARITY: none of the 13 characterized knee-risky exercise ids appears (barbell-back-squat, front-squat, hack-squat-machine, smith-machine-squat, sissy-squat, belt-squat, leg-press-narrow, bulgarian-split-squat, walking-lunge, reverse-lunge, step-up, leg-extension-machine, wall-sit)",
+          "oracleRef": "src/lib/planGenerator.ts:217-221"
+        },
+        {
+          "assert": "QAE mechanism: exclusion via ExerciseMetadata.contraindications ∋ knee, not id blocklists (L-TRN-3 supersession); legacy blocklists seed the metadata"
+        },
+        {
+          "assert": "lower-body slots still filled with safe alternatives; if the pool exhausts, exercisePoolExhausted is emitted — never a silent underfill (L-TRN-4)"
+        }
       ]
     },
-    "adaptation": { "label": "NOT_APPLICABLE", "expectations": [ { "assert": "initial plan scenario" } ] },
-    "reasonCodes": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "injuryExclusionApplied present" } ] },
-    "safety": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "pass with injuryRestriction-class constraints active; pain-driven swaps classed injuryRestriction, not preference" } ] }
+    "adaptation": {
+      "label": "NOT_APPLICABLE",
+      "expectations": [
+        {
+          "assert": "initial plan scenario"
+        }
+      ]
+    },
+    "reasonCodes": {
+      "label": "PRODUCT_POLICY_APPROVED",
+      "expectations": [
+        {
+          "assert": "injuryExclusionApplied present"
+        }
+      ]
+    },
+    "safety": {
+      "label": "PRODUCT_POLICY_APPROVED",
+      "expectations": [
+        {
+          "assert": "pass with injuryRestriction-class constraints active; pain-driven swaps classed injuryRestriction, not preference"
+        }
+      ]
+    }
   }
 }

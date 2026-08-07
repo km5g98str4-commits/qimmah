@@ -1,36 +1,96 @@
 {
   "scenarioId": "S06",
   "title": "Advanced, recomposition intent → maintain goal with recomp-aware interpretation",
-  "tags": ["advanced", "recomp", "maintain", "initialPlan"],
+  "tags": [
+    "advanced",
+    "recomp",
+    "maintain",
+    "initialPlan"
+  ],
+  "determinism": {
+    "seed": 0,
+    "timezone": {
+      "tzOffsetMinutes": 180
+    },
+    "clock": {
+      "epochMs": 1785542400000
+    },
+    "locale": "ar-SA",
+    "ruleManifest": "pending-freeze",
+    "engineVersion": "0.1.0"
+  },
   "requestKind": "initialPlan",
   "input": {
     "profile": {
-      "sex": "male", "ageYears": 33, "heightMm": 1770, "massGrams": 82000,
-      "declaredIntent": "recomp", "goalType": "maintain", "experienceClass": "advanced",
-      "daysPerWeek": 5, "sessionMinutes": 60, "environment": "gym",
-      "neatBand": "moderate", "baselineStepsPerDay": 7500, "healthDataAccepted": true
+      "sex": "male",
+      "ageYears": 33,
+      "heightMm": 1770,
+      "massGrams": 82000,
+      "declaredIntent": "recomp",
+      "goalType": "maintain",
+      "experienceClass": "advanced",
+      "daysPerWeek": 5,
+      "sessionMinutes": 60,
+      "environment": "gym",
+      "neatBand": "moderate",
+      "baselineStepsPerDay": 7500,
+      "healthDataAccepted": true
     }
   },
   "expected": {
     "classification": {
       "label": "CHARACTERIZED_EXISTING",
-      "expectations": [ { "assert": "recomp display-goal folds to goalType=maintain (GOAL_FROM_DISPLAY recomp→maintain)", "oracleRef": "src/lib/personalization/profile.ts:122-129" } ]
+      "expectations": [
+        {
+          "assert": "recomp display-goal folds to goalType=maintain (GOAL_FROM_DISPLAY recomp→maintain)",
+          "oracleRef": "src/lib/personalization/profile.ts:122-129"
+        }
+      ]
     },
     "initialPlan": {
       "label": "CHARACTERIZED_EXISTING",
       "goldenPending": true,
       "expectations": [
-        { "assert": "calories = TDEE (maintain +0)", "oracleRef": "src/lib/calculators.ts:244-248" },
-        { "assert": "maintain scheme: compound 8–12 rest 90s, isolation 12–15 rest 75s", "oracleRef": "src/lib/planGenerator.ts:143-150" },
-        { "assert": "declaredIntent=recomp is retained on the profile so weekly interpretation can expect stable-mass + rising-performance as success", "unresolvedId": "#U8" }
+        {
+          "assert": "calories = TDEE (maintain +0)",
+          "oracleRef": "src/lib/calculators.ts:244-248"
+        },
+        {
+          "assert": "maintain scheme: compound 8–12 rest 90s, isolation 12–15 rest 75s",
+          "oracleRef": "src/lib/planGenerator.ts:143-150"
+        },
+        {
+          "assert": "declaredIntent=recomp is retained on the profile so weekly interpretation can expect stable-mass + rising-performance as success",
+          "unresolvedId": "#U8"
+        }
       ]
     },
     "adaptation": {
       "label": "UNRESOLVED",
-      "expectations": [ { "assert": "recomp success signature (stable weight + performance rising) must map to progressOnTrack, not to plateau — interpretation rule needs product sign-off", "unresolvedId": "#U8" } ]
+      "expectations": [
+        {
+          "assert": "recomp success signature (stable weight + performance rising) must map to progressOnTrack, not to plateau — interpretation approved [CTO-QAE-002] U8 (metadata-only intent field)",
+          "unresolvedId": "#U8"
+        }
+      ]
     },
-    "reasonCodes": { "label": "UNRESOLVED", "expectations": [ { "assert": "progressOnTrack for stable weight when declaredIntent=recomp", "unresolvedId": "#U8" } ] },
-    "safety": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "pass" } ] }
+    "reasonCodes": {
+      "label": "UNRESOLVED",
+      "expectations": [
+        {
+          "assert": "progressOnTrack for stable weight when declaredIntent=recomp",
+          "unresolvedId": "#U8"
+        }
+      ]
+    },
+    "safety": {
+      "label": "PRODUCT_POLICY_APPROVED",
+      "expectations": [
+        {
+          "assert": "pass"
+        }
+      ]
+    }
   },
   "notes": "Legacy folds recomp to maintain and loses the intent. QAE keeps the declared intent for interpretation (#U8) without reopening the locked goal enum."
 }

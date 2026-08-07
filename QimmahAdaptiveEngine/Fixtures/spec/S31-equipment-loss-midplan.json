@@ -1,26 +1,97 @@
 {
   "scenarioId": "S31",
   "title": "Equipment loss mid-plan (gym → home) — bounded substitution cascade",
-  "tags": ["checkAction", "equipment", "replaceExercise"],
+  "tags": [
+    "checkAction",
+    "equipment",
+    "replaceExercise"
+  ],
+  "determinism": {
+    "seed": 0,
+    "timezone": {
+      "tzOffsetMinutes": 180
+    },
+    "clock": {
+      "epochMs": 1785542400000
+    },
+    "locale": "ar-SA",
+    "ruleManifest": "pending-freeze",
+    "engineVersion": "0.1.0"
+  },
   "requestKind": "checkAction",
   "input": {
-    "profile": { "sex": "male", "ageYears": 27, "heightMm": 1800, "massGrams": 85000, "goalType": "bulk", "experienceClass": "intermediate", "daysPerWeek": 4, "sessionMinutes": 60, "environmentChangedTo": "home", "equipment": ["dumbbell", "bench", "bodyweight"], "healthDataAccepted": true },
-    "currentPlan": { "summary": "gym plan with machine/cable/barbell slots" },
+    "profile": {
+      "sex": "male",
+      "ageYears": 27,
+      "heightMm": 1800,
+      "massGrams": 85000,
+      "goalType": "bulk",
+      "experienceClass": "intermediate",
+      "daysPerWeek": 4,
+      "sessionMinutes": 60,
+      "environmentChangedTo": "home",
+      "equipment": [
+        "dumbbell",
+        "bench",
+        "bodyweight"
+      ],
+      "healthDataAccepted": true
+    },
+    "currentPlan": {
+      "summary": "gym plan with machine/cable/barbell slots"
+    },
     "hostEvent": "user changed environment gym→home"
   },
   "expected": {
-    "classification": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "environment change is a profile edit (host) triggering re-validation, not a weekly adaptation" } ] },
-    "initialPlan": { "label": "NOT_APPLICABLE", "expectations": [ { "assert": "checkAction / regeneration scenario" } ] },
+    "classification": {
+      "label": "PRODUCT_POLICY_APPROVED",
+      "expectations": [
+        {
+          "assert": "environment change is a profile edit (host) triggering re-validation, not a weekly adaptation"
+        }
+      ]
+    },
+    "initialPlan": {
+      "label": "NOT_APPLICABLE",
+      "expectations": [
+        {
+          "assert": "checkAction / regeneration scenario"
+        }
+      ]
+    },
     "adaptation": {
       "label": "PRODUCT_POLICY_APPROVED",
       "expectations": [
-        { "assert": "per affected slot: replaceExercise proposals from the slot's substitutionGroup/pattern+muscle within the new equipment set — targets and schedule preserved; NOT a whole new plan personality" },
-        { "assert": "substitutes come from the characterized substitution mechanics (same pattern+muscle, ±1 level, ≤3 candidates)", "oracleRef": "src/lib/personalization/exerciseSelection.ts:201-222" },
-        { "assert": "slots with an empty substitution pool emit exercisePoolExhausted — visibly, never a silent drop" },
-        { "assert": "all replacements bundle as ONE user decision (plan version n+1), not N separate approvals" }
+        {
+          "assert": "per affected slot: replaceExercise proposals from the slot's substitutionGroup/pattern+muscle within the new equipment set — targets and schedule preserved; NOT a whole new plan personality"
+        },
+        {
+          "assert": "substitutes come from the characterized substitution mechanics (same pattern+muscle, ±1 level, ≤3 candidates)",
+          "oracleRef": "src/lib/personalization/exerciseSelection.ts:201-222"
+        },
+        {
+          "assert": "slots with an empty substitution pool emit exercisePoolExhausted — visibly, never a silent drop"
+        },
+        {
+          "assert": "all replacements bundle as ONE user decision (plan version n+1), not N separate approvals"
+        }
       ]
     },
-    "reasonCodes": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "equipment-driven replacement codes; injuryExclusionApplied NOT used (this is availability, not injury)" } ] },
-    "safety": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "checkpoint 3 validates the regenerated plan (equipment feasibility is part of plan validity)" } ] }
+    "reasonCodes": {
+      "label": "PRODUCT_POLICY_APPROVED",
+      "expectations": [
+        {
+          "assert": "equipment-driven replacement codes; injuryExclusionApplied NOT used (this is availability, not injury)"
+        }
+      ]
+    },
+    "safety": {
+      "label": "PRODUCT_POLICY_APPROVED",
+      "expectations": [
+        {
+          "assert": "checkpoint 3 validates the regenerated plan (equipment feasibility is part of plan validity)"
+        }
+      ]
+    }
   }
 }

@@ -14,6 +14,16 @@
 | **Mutation tests** | rule/threshold mutations are caught by some test | hardening wave |
 | **Determinism fuzz** | same request ⇒ identical canonical output across repeats and input permutations | hardening wave |
 
+## 1a. The golden law ([CTO-QAE-002])
+
+> **Every future runtime must pass 100 % golden compatibility before ANY optimization. Correctness precedes performance.**
+
+No performance work, refactor-for-speed, or algorithmic substitution is reviewable until the candidate runtime reproduces every enabled golden byte-for-byte. A runtime at 99 % is not "almost done" — it is not started.
+
+## 1b. Determinism envelope ([CTO-QAE-002])
+
+Every fixture carries a `determinism` envelope — `{seed, timezone, clock, locale, ruleManifest, engineVersion}` — so replay is perfectly deterministic. `seed` exists for replay-format completeness (the domain has no randomness; it must be ignored), and `locale` is recorded precisely so tests can prove the output does **not** vary with it.
+
 ## 2. Golden fixtures as the portability contract
 
 - Fixtures are language-neutral JSON (canonical integers only; fixture linter rejects floats).

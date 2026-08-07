@@ -10,9 +10,23 @@ Existing TypeScript → Characterization → Language-neutral contracts → JSON
 → QAE specification → Future Pure Swift implementation → Parity validation → TS legacy retirement
 ```
 
-## Phase 0.5 — Specification (THIS PHASE, complete on this branch)
+## Phase 0.5 — Specification ✅ APPROVED by [CTO-QAE-002]
 
-Deliverables: the Docs/ set · Contracts/ drafts · Fixtures/spec/ (34 scenarios, labeled) · LEGACY-ENGINE-MAP · EVIDENCE-REGISTER · contradiction review. **Stop condition: no runtime code.**
+Delivered: the Docs/ set · Contracts/ drafts · Fixtures/spec/ (34 scenarios, labeled) · LEGACY-ENGINE-MAP (+ LEGACY_DEFECT_REGISTER) · EVIDENCE-REGISTER · contradiction review. The architecture is now **baseline** — no further redesigns unless a critical architectural defect appears.
+
+## The locked runtime rule ([CTO-QAE-002])
+
+> No runtime may directly mutate a plan. Only:
+> `Evidence → Candidate Rules → Candidate Decisions → Safety → Conflict Resolution → Change Budget → Proposal → User Decision → Applied Plan`
+> No shortcuts. No hidden mutations.
+
+## Locked runtime implementation order ([CTO-QAE-002])
+
+1. Oracle Harness → 2. Canonical Domain Types → 3. SafetyPolicy → 4. Decision Pipeline → 5. Question Engine → 6. Training → 7. Nutrition → 8. Recovery → 9. Steps → 10. Weekly Trends → 11. Adaptation Engine → 12. Integration.
+
+**Authorized now (Phase 1):** Oracle Harness + Canonical Domain Types + SafetyPolicy foundation — nothing beyond those three until the next architecture checkpoint. The golden law applies from here forward: 100 % golden compatibility before any optimization.
+
+**Language note (Phase 1 reality):** the harness must execute the legacy TypeScript oracle, and this environment has no Swift toolchain, so Phase-1 canonical types and SafetyPolicy foundation are strict-TypeScript **contract/validation infrastructure inside `QimmahAdaptiveEngine/`** — never imported by the app (no second authority), consumed only by the harness and QAE tests. The Pure Swift runtime remains the final target; these components define and exercise the exact goldens the Swift port must reproduce.
 
 ## Phase 1 — Contract freeze & oracle harness *(needs approval)*
 

@@ -1,28 +1,89 @@
 {
   "scenarioId": "S29",
   "title": "14-year-old — deep-minor path plus the unknown-age guard",
-  "tags": ["minors", "safety", "initialPlan"],
+  "tags": [
+    "minors",
+    "safety",
+    "initialPlan"
+  ],
+  "determinism": {
+    "seed": 0,
+    "timezone": {
+      "tzOffsetMinutes": 180
+    },
+    "clock": {
+      "epochMs": 1785542400000
+    },
+    "locale": "ar-SA",
+    "ruleManifest": "pending-freeze",
+    "engineVersion": "0.1.0"
+  },
   "requestKind": "initialPlan",
   "input": {
-    "profile": { "sex": "male", "ageYears": 14, "heightMm": 1650, "massGrams": 58000, "requestedGoalType": "bulk", "experienceClass": "complete_beginner", "daysPerWeek": 3, "sessionMinutes": 45, "environment": "gym", "healthDataAccepted": true }
+    "profile": {
+      "sex": "male",
+      "ageYears": 14,
+      "heightMm": 1650,
+      "massGrams": 58000,
+      "requestedGoalType": "bulk",
+      "experienceClass": "complete_beginner",
+      "daysPerWeek": 3,
+      "sessionMinutes": 45,
+      "environment": "gym",
+      "healthDataAccepted": true
+    }
   },
   "expected": {
-    "classification": { "label": "CHARACTERIZED_EXISTING", "expectations": [ { "assert": "age ≥ app minimum 13, < 18 ⇒ minor path; bulk folded to maintain like cut (both weight-modification goals restricted)", "oracleRef": "src/config/profileDomain.ts:38; src/lib/calculators.ts:92-94" } ] },
+    "classification": {
+      "label": "CHARACTERIZED_EXISTING",
+      "expectations": [
+        {
+          "assert": "age ≥ app minimum 13, < 18 ⇒ minor path; bulk folded to maintain like cut (both weight-modification goals restricted)",
+          "oracleRef": "src/config/profileDomain.ts:38; src/lib/calculators.ts:92-94"
+        }
+      ]
+    },
     "initialPlan": {
       "label": "CHARACTERIZED_EXISTING",
       "goldenPending": true,
       "expectations": [
-        { "assert": "maintenance plan; technique-focused, no near-maximal loading patterns; supervised-RT guidance is the evidence basis for keeping training itself available", "registerId": "EVR-008" },
-        { "assert": "minor plan note attached (estimates from adult equations; consult a specialist)", "oracleRef": "src/lib/calculators.ts:274-275,385" }
+        {
+          "assert": "maintenance plan; technique-focused, no near-maximal loading patterns; supervised-RT guidance is the evidence basis for keeping training itself available",
+          "registerId": "EVR-008"
+        },
+        {
+          "assert": "minor plan note attached (estimates from adult equations; consult a specialist)",
+          "oracleRef": "src/lib/calculators.ts:274-275,385"
+        }
       ]
     },
-    "adaptation": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "no calorie-restriction proposal ever constructible; youth sources do not support caloric restriction in minors", "registerId": "EVR-008" } ] },
-    "reasonCodes": { "label": "CHARACTERIZED_EXISTING", "expectations": [ { "assert": "minorGoalRestricted" } ] },
+    "adaptation": {
+      "label": "PRODUCT_POLICY_APPROVED",
+      "expectations": [
+        {
+          "assert": "no calorie-restriction proposal ever constructible; youth sources do not support caloric restriction in minors",
+          "registerId": "EVR-008"
+        }
+      ]
+    },
+    "reasonCodes": {
+      "label": "CHARACTERIZED_EXISTING",
+      "expectations": [
+        {
+          "assert": "minorGoalRestricted"
+        }
+      ]
+    },
     "safety": {
       "label": "PRODUCT_POLICY_APPROVED",
       "expectations": [
-        { "assert": "clamp at checkpoint 1 (goal → maintain, visible)" },
-        { "assert": "GUARD (supersedes L-SAF-1, pending #U1): the same request with ageYears ABSENT must NOT take the adult path — assessment blocks finalization with ageUnknownBlocking", "unresolvedId": "#U1" }
+        {
+          "assert": "clamp at checkpoint 1 (goal → maintain, visible)"
+        },
+        {
+          "assert": "GUARD (supersedes L-SAF-1 — APPROVED [CTO-QAE-002] U1): the same request with ageYears ABSENT must NOT take the adult path — assessment blocks finalization with ageUnknownBlocking",
+          "unresolvedId": "#U1"
+        }
       ]
     }
   }

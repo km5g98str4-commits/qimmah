@@ -1,30 +1,97 @@
 {
   "scenarioId": "S07",
   "title": "Home trainee, dumbbells + bench only",
-  "tags": ["home", "equipment", "initialPlan"],
+  "tags": [
+    "home",
+    "equipment",
+    "initialPlan"
+  ],
+  "determinism": {
+    "seed": 0,
+    "timezone": {
+      "tzOffsetMinutes": 180
+    },
+    "clock": {
+      "epochMs": 1785542400000
+    },
+    "locale": "ar-SA",
+    "ruleManifest": "pending-freeze",
+    "engineVersion": "0.1.0"
+  },
   "requestKind": "initialPlan",
   "input": {
     "profile": {
-      "sex": "female", "ageYears": 26, "heightMm": 1600, "massGrams": 58000, "targetMassGrams": 55000,
-      "goalType": "cut", "experienceClass": "beginner",
-      "daysPerWeek": 3, "sessionMinutes": 45, "environment": "home",
-      "equipment": ["bench", "bodyweight", "dumbbell"],
-      "neatBand": "light", "baselineStepsPerDay": 5000, "healthDataAccepted": true
+      "sex": "female",
+      "ageYears": 26,
+      "heightMm": 1600,
+      "massGrams": 58000,
+      "targetMassGrams": 55000,
+      "goalType": "cut",
+      "experienceClass": "beginner",
+      "daysPerWeek": 3,
+      "sessionMinutes": 45,
+      "environment": "home",
+      "equipment": [
+        "bench",
+        "bodyweight",
+        "dumbbell"
+      ],
+      "neatBand": "light",
+      "baselineStepsPerDay": 5000,
+      "healthDataAccepted": true
     }
   },
   "expected": {
-    "classification": { "label": "CHARACTERIZED_EXISTING", "expectations": [ { "assert": "beginner; home environment" } ] },
+    "classification": {
+      "label": "CHARACTERIZED_EXISTING",
+      "expectations": [
+        {
+          "assert": "beginner; home environment"
+        }
+      ]
+    },
     "initialPlan": {
       "label": "CHARACTERIZED_EXISTING",
       "goldenPending": true,
       "expectations": [
-        { "assert": "every selected exercise's equipment ⊆ {dumbbell, bodyweight, bench} — ALL required pieces owned", "oracleRef": "src/lib/equipmentAccess.ts:30-46" },
-        { "assert": "no machine/cable/smith/barbell exercise appears", "oracleRef": "src/lib/planGenerator.ts:720-728" },
-        { "assert": "full-body ×3; female calorie floor 1200 applies to cut", "oracleRef": "src/lib/calculators.ts:228" }
+        {
+          "assert": "every selected exercise's equipment ⊆ {dumbbell, bodyweight, bench} — ALL required pieces owned",
+          "oracleRef": "src/lib/equipmentAccess.ts:30-46"
+        },
+        {
+          "assert": "no machine/cable/smith/barbell exercise appears",
+          "oracleRef": "src/lib/planGenerator.ts:720-728"
+        },
+        {
+          "assert": "full-body ×3; female calorie floor 1200 applies to cut",
+          "oracleRef": "src/lib/calculators.ts:228"
+        }
       ]
     },
-    "adaptation": { "label": "NOT_APPLICABLE", "expectations": [ { "assert": "initial plan scenario" } ] },
-    "reasonCodes": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "no unavailable-equipment questions were asked to produce this profile (question-path property)" } ] },
-    "safety": { "label": "CHARACTERIZED_EXISTING", "expectations": [ { "assert": "pass; raw cut target vs female low-cal warning threshold (=BMR) checked", "oracleRef": "src/lib/calculators.ts:262-264" } ] }
+    "adaptation": {
+      "label": "NOT_APPLICABLE",
+      "expectations": [
+        {
+          "assert": "initial plan scenario"
+        }
+      ]
+    },
+    "reasonCodes": {
+      "label": "PRODUCT_POLICY_APPROVED",
+      "expectations": [
+        {
+          "assert": "no unavailable-equipment questions were asked to produce this profile (question-path property)"
+        }
+      ]
+    },
+    "safety": {
+      "label": "CHARACTERIZED_EXISTING",
+      "expectations": [
+        {
+          "assert": "pass; raw cut target vs female low-cal warning threshold (=BMR) checked",
+          "oracleRef": "src/lib/calculators.ts:262-264"
+        }
+      ]
+    }
   }
 }

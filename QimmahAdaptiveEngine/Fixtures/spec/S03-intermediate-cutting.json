@@ -1,32 +1,104 @@
 {
   "scenarioId": "S03",
   "title": "Intermediate, cutting, gym, 5 days",
-  "tags": ["intermediate", "cut", "gym", "initialPlan"],
+  "tags": [
+    "intermediate",
+    "cut",
+    "gym",
+    "initialPlan"
+  ],
+  "determinism": {
+    "seed": 0,
+    "timezone": {
+      "tzOffsetMinutes": 180
+    },
+    "clock": {
+      "epochMs": 1785542400000
+    },
+    "locale": "ar-SA",
+    "ruleManifest": "pending-freeze",
+    "engineVersion": "0.1.0"
+  },
   "requestKind": "initialPlan",
   "input": {
     "profile": {
-      "sex": "male", "ageYears": 27, "heightMm": 1750, "massGrams": 78000, "targetMassGrams": 73000,
-      "goalType": "cut", "experienceClass": "intermediate",
-      "daysPerWeek": 5, "sessionMinutes": 60, "environment": "gym",
-      "neatBand": "moderate", "baselineStepsPerDay": 7200, "baselineStepsConfidence": "high",
-      "injuryFlags": [], "healthDataAccepted": true
+      "sex": "male",
+      "ageYears": 27,
+      "heightMm": 1750,
+      "massGrams": 78000,
+      "targetMassGrams": 73000,
+      "goalType": "cut",
+      "experienceClass": "intermediate",
+      "daysPerWeek": 5,
+      "sessionMinutes": 60,
+      "environment": "gym",
+      "neatBand": "moderate",
+      "baselineStepsPerDay": 7200,
+      "baselineStepsConfidence": "high",
+      "injuryFlags": [],
+      "healthDataAccepted": true
     }
   },
   "expected": {
-    "classification": { "label": "CHARACTERIZED_EXISTING", "expectations": [ { "assert": "intermediate band (score ≥55 <75 in oracle signal model)", "oracleRef": "src/lib/personalization/experience.ts:44-50" } ] },
+    "classification": {
+      "label": "CHARACTERIZED_EXISTING",
+      "expectations": [
+        {
+          "assert": "intermediate band (score ≥55 <75 in oracle signal model)",
+          "oracleRef": "src/lib/personalization/experience.ts:44-50"
+        }
+      ]
+    },
     "initialPlan": {
       "label": "CHARACTERIZED_EXISTING",
       "goldenPending": true,
       "expectations": [
-        { "assert": "5 days ⇒ upper/lower ×4 + focus day (arms default when muscleFocus undefined — bug-compatible pending #U2)", "oracleRef": "src/lib/planGenerator.ts:552-588", "unresolvedId": "#U2" },
-        { "assert": "sets 4 compound / 3 isolation; 6 exercises/session (intermediate, 60 min)", "oracleRef": "src/lib/planGenerator.ts:124-134,83-110" },
-        { "assert": "TDEE multiplier = min(1.9, 1.35 + 5×0.025) = 1.475; calories = TDEE − 400", "oracleRef": "src/lib/calculators.ts:110-114,241" },
-        { "assert": "athlete cut-rate band applies: implied rate within 0.5–1 %BW/week", "registerId": "EVR-001" },
-        { "assert": "step target: baseline 7200 already in the health-benefit plateau region; small or no increment", "registerId": "EVR-006" }
+        {
+          "assert": "5 days ⇒ upper/lower ×4 + focus day (arms default when muscleFocus undefined — bug-compatible — APPROVED as documented [CTO-QAE-002] U2)",
+          "oracleRef": "src/lib/planGenerator.ts:552-588",
+          "unresolvedId": "#U2"
+        },
+        {
+          "assert": "sets 4 compound / 3 isolation; 6 exercises/session (intermediate, 60 min)",
+          "oracleRef": "src/lib/planGenerator.ts:124-134,83-110"
+        },
+        {
+          "assert": "TDEE multiplier = min(1.9, 1.35 + 5×0.025) = 1.475; calories = TDEE − 400",
+          "oracleRef": "src/lib/calculators.ts:110-114,241"
+        },
+        {
+          "assert": "athlete cut-rate band applies: implied rate within 0.5–1 %BW/week",
+          "registerId": "EVR-001"
+        },
+        {
+          "assert": "step target: baseline 7200 already in the health-benefit plateau region; small or no increment",
+          "registerId": "EVR-006"
+        }
       ]
     },
-    "adaptation": { "label": "NOT_APPLICABLE", "expectations": [ { "assert": "initial plan scenario" } ] },
-    "reasonCodes": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "no legFrequencyLow: U/L×4 + focus trains legs ≥2×" } ] },
-    "safety": { "label": "CHARACTERIZED_EXISTING", "expectations": [ { "assert": "pass" } ] }
+    "adaptation": {
+      "label": "NOT_APPLICABLE",
+      "expectations": [
+        {
+          "assert": "initial plan scenario"
+        }
+      ]
+    },
+    "reasonCodes": {
+      "label": "PRODUCT_POLICY_APPROVED",
+      "expectations": [
+        {
+          "assert": "no legFrequencyLow: U/L×4 + focus trains legs ≥2×"
+        }
+      ]
+    },
+    "safety": {
+      "label": "CHARACTERIZED_EXISTING",
+      "expectations": [
+        {
+          "assert": "pass"
+        }
+      ]
+    }
   }
 }

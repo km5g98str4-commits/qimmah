@@ -1,38 +1,94 @@
 {
   "scenarioId": "S18",
   "title": "17-year-old requesting a cut — minors policy (characterized live behavior)",
-  "tags": ["minors", "safety", "initialPlan", "characterized"],
+  "tags": [
+    "minors",
+    "safety",
+    "initialPlan",
+    "characterized"
+  ],
+  "determinism": {
+    "seed": 0,
+    "timezone": {
+      "tzOffsetMinutes": 180
+    },
+    "clock": {
+      "epochMs": 1785542400000
+    },
+    "locale": "ar-SA",
+    "ruleManifest": "pending-freeze",
+    "engineVersion": "0.1.0"
+  },
   "requestKind": "initialPlan",
   "input": {
     "profile": {
-      "sex": "male", "ageYears": 17, "heightMm": 1750, "massGrams": 72000, "targetMassGrams": 66000,
-      "requestedGoalType": "cut", "experienceClass": "beginner",
-      "daysPerWeek": 3, "sessionMinutes": 45, "environment": "gym", "healthDataAccepted": true
+      "sex": "male",
+      "ageYears": 17,
+      "heightMm": 1750,
+      "massGrams": 72000,
+      "targetMassGrams": 66000,
+      "requestedGoalType": "cut",
+      "experienceClass": "beginner",
+      "daysPerWeek": 3,
+      "sessionMinutes": 45,
+      "environment": "gym",
+      "healthDataAccepted": true
     }
   },
   "expected": {
     "classification": {
       "label": "CHARACTERIZED_EXISTING",
       "expectations": [
-        { "assert": "effective goal = maintain; weight-modification goals unavailable under 18", "oracleRef": "src/lib/calculators.ts:92-94" },
-        { "assert": "in the question path, restricted goal options are never even VISIBLE; injected restricted answers rejected at the data boundary", "oracleRef": "scripts/personalization-proof.ts:107-141" }
+        {
+          "assert": "effective goal = maintain; weight-modification goals unavailable under 18",
+          "oracleRef": "src/lib/calculators.ts:92-94"
+        },
+        {
+          "assert": "in the question path, restricted goal options are never even VISIBLE; injected restricted answers rejected at the data boundary",
+          "oracleRef": "scripts/personalization-proof.ts:107-141"
+        }
       ]
     },
     "initialPlan": {
       "label": "CHARACTERIZED_EXISTING",
       "goldenPending": true,
       "expectations": [
-        { "assert": "targetCalories == TDEE exactly (no deficit constructible); weekly weight-change forecast suppressed (0); adult BMI classification suppressed", "oracleRef": "src/lib/calculators.ts:328,355,219" },
-        { "assert": "resistance training itself remains appropriate — supervised youth RT is safe and beneficial (technique-focused, no near-maximal loads)", "registerId": "EVR-008" }
+        {
+          "assert": "targetCalories == TDEE exactly (no deficit constructible); weekly weight-change forecast suppressed (0); adult BMI classification suppressed",
+          "oracleRef": "src/lib/calculators.ts:328,355,219"
+        },
+        {
+          "assert": "resistance training itself remains appropriate — supervised youth RT is safe and beneficial (technique-focused, no near-maximal loads)",
+          "registerId": "EVR-008"
+        }
       ]
     },
-    "adaptation": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "future reviews: no calorie-reduction rule can fire for a minor (goal is maintain; safety class blocks the action kind)" } ] },
-    "reasonCodes": { "label": "CHARACTERIZED_EXISTING", "expectations": [ { "assert": "minorGoalRestricted emitted (legacy: MINOR_GOAL_RESTRICTION_NOTE warning + plan note)", "oracleRef": "src/lib/planGenerator.ts:1115,1135" } ] },
+    "adaptation": {
+      "label": "PRODUCT_POLICY_APPROVED",
+      "expectations": [
+        {
+          "assert": "future reviews: no calorie-reduction rule can fire for a minor (goal is maintain; safety class blocks the action kind)"
+        }
+      ]
+    },
+    "reasonCodes": {
+      "label": "CHARACTERIZED_EXISTING",
+      "expectations": [
+        {
+          "assert": "minorGoalRestricted emitted (legacy: MINOR_GOAL_RESTRICTION_NOTE warning + plan note)",
+          "oracleRef": "src/lib/planGenerator.ts:1115,1135"
+        }
+      ]
+    },
     "safety": {
       "label": "CHARACTERIZED_EXISTING",
       "expectations": [
-        { "assert": "checkpoint 1: clamp (goal clamped to maintain, visibly) — not block; the minor still gets a full maintenance plan" },
-        { "assert": "ValidDecisionSpace: blockedActionKinds includes changeCalories(negative beyond maintenance) and goal transitions to cut/bulk" }
+        {
+          "assert": "checkpoint 1: clamp (goal clamped to maintain, visibly) — not block; the minor still gets a full maintenance plan"
+        },
+        {
+          "assert": "ValidDecisionSpace: blockedActionKinds includes changeCalories(negative beyond maintenance) and goal transitions to cut/bulk"
+        }
       ]
     }
   },

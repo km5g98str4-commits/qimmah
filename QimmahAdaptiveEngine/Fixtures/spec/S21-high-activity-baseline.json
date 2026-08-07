@@ -1,22 +1,85 @@
 {
   "scenarioId": "S21",
   "title": "High activity baseline (12k steps/day) — no gratuitous increase",
-  "tags": ["steps", "initialPlan"],
+  "tags": [
+    "steps",
+    "initialPlan"
+  ],
+  "determinism": {
+    "seed": 0,
+    "timezone": {
+      "tzOffsetMinutes": 180
+    },
+    "clock": {
+      "epochMs": 1785542400000
+    },
+    "locale": "ar-SA",
+    "ruleManifest": "pending-freeze",
+    "engineVersion": "0.1.0"
+  },
   "requestKind": "initialPlan",
   "input": {
-    "profile": { "sex": "male", "ageYears": 25, "heightMm": 1780, "massGrams": 75000, "goalType": "cut", "experienceClass": "intermediate", "daysPerWeek": 4, "sessionMinutes": 60, "environment": "gym", "neatBand": "veryActive", "baselineStepsPerDay": 12000, "baselineStepsConfidence": "high", "healthDataAccepted": true }
+    "profile": {
+      "sex": "male",
+      "ageYears": 25,
+      "heightMm": 1780,
+      "massGrams": 75000,
+      "goalType": "cut",
+      "experienceClass": "intermediate",
+      "daysPerWeek": 4,
+      "sessionMinutes": 60,
+      "environment": "gym",
+      "neatBand": "veryActive",
+      "baselineStepsPerDay": 12000,
+      "baselineStepsConfidence": "high",
+      "healthDataAccepted": true
+    }
   },
   "expected": {
-    "classification": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "baseline already above the dose-response plateau region (~8–10k for <60y)", "registerId": "EVR-006" } ] },
+    "classification": {
+      "label": "PRODUCT_POLICY_APPROVED",
+      "expectations": [
+        {
+          "assert": "baseline already above the dose-response plateau region (~8–10k for <60y)",
+          "registerId": "EVR-006"
+        }
+      ]
+    },
     "initialPlan": {
       "label": "PRODUCT_POLICY_APPROVED",
       "expectations": [
-        { "assert": "step target ≈ baseline (maintain), not baseline + increment; steps are not the default fat-loss lever ([CTO-QAE-001] §7)" },
-        { "assert": "TDEE uses very_active NEAT 1.45 + 4×0.025 = 1.55 (characterized)", "oracleRef": "src/lib/calculators.ts:22-33" }
+        {
+          "assert": "step target ≈ baseline (maintain), not baseline + increment; steps are not the default fat-loss lever ([CTO-QAE-001] §7)"
+        },
+        {
+          "assert": "TDEE uses very_active NEAT 1.45 + 4×0.025 = 1.55 (characterized)",
+          "oracleRef": "src/lib/calculators.ts:22-33"
+        }
       ]
     },
-    "adaptation": { "label": "NOT_APPLICABLE", "expectations": [ { "assert": "initial plan scenario" } ] },
-    "reasonCodes": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "none step-related beyond baseline acknowledgment" } ] },
-    "safety": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "pass" } ] }
+    "adaptation": {
+      "label": "NOT_APPLICABLE",
+      "expectations": [
+        {
+          "assert": "initial plan scenario"
+        }
+      ]
+    },
+    "reasonCodes": {
+      "label": "PRODUCT_POLICY_APPROVED",
+      "expectations": [
+        {
+          "assert": "none step-related beyond baseline acknowledgment"
+        }
+      ]
+    },
+    "safety": {
+      "label": "PRODUCT_POLICY_APPROVED",
+      "expectations": [
+        {
+          "assert": "pass"
+        }
+      ]
+    }
   }
 }

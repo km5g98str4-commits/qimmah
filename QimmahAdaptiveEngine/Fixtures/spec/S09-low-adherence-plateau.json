@@ -1,32 +1,108 @@
 {
   "scenarioId": "S09",
   "title": "Plateau with LOW adherence — never punish with a calorie cut",
-  "tags": ["weeklyReview", "adherence", "plateau", "normative"],
+  "tags": [
+    "weeklyReview",
+    "adherence",
+    "plateau",
+    "normative"
+  ],
+  "determinism": {
+    "seed": 0,
+    "timezone": {
+      "tzOffsetMinutes": 180
+    },
+    "clock": {
+      "epochMs": 1785542400000
+    },
+    "locale": "ar-SA",
+    "ruleManifest": "pending-freeze",
+    "engineVersion": "0.1.0"
+  },
   "requestKind": "weeklyReview",
   "input": {
-    "profile": { "sex": "male", "ageYears": 30, "heightMm": 1780, "massGrams": 86000, "goalType": "cut", "experienceClass": "beginner", "daysPerWeek": 4, "sessionMinutes": 60, "environment": "gym", "healthDataAccepted": true },
-    "currentPlan": { "calorieTargetKcal": "oracle cut target", "stepTarget": 5000 },
+    "profile": {
+      "sex": "male",
+      "ageYears": 30,
+      "heightMm": 1780,
+      "massGrams": 86000,
+      "goalType": "cut",
+      "experienceClass": "beginner",
+      "daysPerWeek": 4,
+      "sessionMinutes": 60,
+      "environment": "gym",
+      "healthDataAccepted": true
+    },
+    "currentPlan": {
+      "calorieTargetKcal": "oracle cut target",
+      "stepTarget": 5000
+    },
     "observations": {
-      "weight": { "summary": "5 valid points over 15 days, stable within plateau band", "validCount": 5, "spanDays": 15 },
-      "calories": { "adherenceBp": 5200, "summary": "logged intake far above target on most logged days" },
-      "training": { "completionBp": 4500 },
-      "recovery": { "summary": "stable" }
+      "weight": {
+        "summary": "5 valid points over 15 days, stable within plateau band",
+        "validCount": 5,
+        "spanDays": 15
+      },
+      "calories": {
+        "adherenceBp": 5200,
+        "summary": "logged intake far above target on most logged days"
+      },
+      "training": {
+        "completionBp": 4500
+      },
+      "recovery": {
+        "summary": "stable"
+      }
     },
     "adaptationHistory": []
   },
   "expected": {
-    "classification": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "plateau detected but adherence classified low with confidence ≥ moderate" } ] },
-    "initialPlan": { "label": "NOT_APPLICABLE", "expectations": [ { "assert": "review scenario" } ] },
+    "classification": {
+      "label": "PRODUCT_POLICY_APPROVED",
+      "expectations": [
+        {
+          "assert": "plateau detected but adherence classified low with confidence ≥ moderate"
+        }
+      ]
+    },
+    "initialPlan": {
+      "label": "NOT_APPLICABLE",
+      "expectations": [
+        {
+          "assert": "review scenario"
+        }
+      ]
+    },
     "adaptation": {
       "label": "PRODUCT_POLICY_APPROVED",
       "expectations": [
-        { "assert": "NO changeCalories(negative) proposal exists in the output — structurally, the plateau-cut rule requires adherenceHigh evidence" },
-        { "assert": "emitted: keepPlan with adherence-support codes, and/or optimization proposals that REDUCE burden (e.g. changeTrainingFrequency(-1)) — requiresApproval" },
-        { "assert": "no major budget slot consumed unless a burden-reduction proposal is accepted" }
+        {
+          "assert": "NO changeCalories(negative) proposal exists in the output — structurally, the plateau-cut rule requires adherenceHigh evidence"
+        },
+        {
+          "assert": "emitted: keepPlan with adherence-support codes, and/or optimization proposals that REDUCE burden (e.g. changeTrainingFrequency(-1)) — requiresApproval"
+        },
+        {
+          "assert": "no major budget slot consumed unless a burden-reduction proposal is accepted"
+        }
       ]
     },
-    "reasonCodes": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "weightPlateauConfirmed + adherenceLow present; calorieCut* codes absent" } ] },
-    "safety": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "pass; decision space unchanged" } ] }
+    "reasonCodes": {
+      "label": "PRODUCT_POLICY_APPROVED",
+      "expectations": [
+        {
+          "assert": "weightPlateauConfirmed + adherenceLow present; calorieCut* codes absent"
+        }
+      ]
+    },
+    "safety": {
+      "label": "PRODUCT_POLICY_APPROVED",
+      "expectations": [
+        {
+          "assert": "pass; decision space unchanged"
+        }
+      ]
+    }
   },
   "notes": "Normative brief rule: 'If adherence is poor: DO NOT punish the user by lowering calories.' Counter-test: injecting adherenceHigh=false into the plateau-cut rule's context must yield NotFired(adherenceLow), by name."
 }

@@ -16,6 +16,10 @@
       "enum": ["safety", "minorRestriction", "injuryRestriction", "dataIntegrity", "recovery", "adherence", "goalProgress", "optimization", "preference"]
     },
     "ChangeClass": { "enum": ["major", "minor", "compositeSafetyRecovery"] },
+    "SafetyTier": {
+      "description": "[CTO-QAE-002] Immutable safety priority. Conflict resolution always begins with CRITICAL. Never configurable by product — fixed in the safety rule pack, versioned with it.",
+      "enum": ["CRITICAL", "HIGH", "NORMAL", "LOW"]
+    },
     "ObservationSource": { "enum": ["manual", "healthKit", "derived", "imported"] },
     "TrendDirection": { "enum": ["falling", "stable", "rising", "indeterminate"] },
     "InjuryFlag": { "enum": ["knee", "shoulder", "lowerBack", "wrist", "elbow", "ankle", "neck", "hip", "upperBack", "core"] },

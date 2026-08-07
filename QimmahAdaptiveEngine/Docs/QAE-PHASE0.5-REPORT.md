@@ -1,6 +1,8 @@
 # QAE Phase 0.5 Report — Specification, Contracts, Legacy Map, Fixtures
 
-**Per [CTO-QAE-001] §20.** Stop condition honored: no runtime implementation exists in this tree.
+**Per [CTO-QAE-001] §20.** Stop condition honored at submission: no runtime implementation existed in this tree.
+
+> **DECIDED — [CTO-QAE-002]:** Phase 0.5 approved; architecture is baseline. U1–U9 all decided (U1 unknown-age blocks; U2 as documented; U3 capability-based selection, legacy behavior becomes defect L-TRN-1; U4 as recommended; U5 CTO budget numbers adopted; U6 state-only; U7 resolved by sequencing — RamadanContext disabled until host provides fastingStatus; U8 approved metadata-only; U9 as recommended). The unresolved queue below is retained as the historical record of what was asked.
 
 ## Deliverables
 

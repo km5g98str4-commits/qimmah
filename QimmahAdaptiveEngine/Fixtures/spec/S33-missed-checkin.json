@@ -1,24 +1,85 @@
 {
   "scenarioId": "S33",
   "title": "Check-in entirely missed — no data, no adaptation, no budget",
-  "tags": ["weeklyReview", "dataQuality", "requestMoreData"],
+  "tags": [
+    "weeklyReview",
+    "dataQuality",
+    "requestMoreData"
+  ],
+  "determinism": {
+    "seed": 0,
+    "timezone": {
+      "tzOffsetMinutes": 180
+    },
+    "clock": {
+      "epochMs": 1785542400000
+    },
+    "locale": "ar-SA",
+    "ruleManifest": "pending-freeze",
+    "engineVersion": "0.1.0"
+  },
   "requestKind": "weeklyReview",
   "input": {
-    "profile": { "sex": "male", "ageYears": 35, "heightMm": 1750, "massGrams": 80000, "goalType": "cut", "experienceClass": "intermediate", "daysPerWeek": 4, "sessionMinutes": 60, "environment": "gym", "healthDataAccepted": true },
-    "observations": { "summary": "zero observations of any kind in the review period; last data 11 days before period start" },
+    "profile": {
+      "sex": "male",
+      "ageYears": 35,
+      "heightMm": 1750,
+      "massGrams": 80000,
+      "goalType": "cut",
+      "experienceClass": "intermediate",
+      "daysPerWeek": 4,
+      "sessionMinutes": 60,
+      "environment": "gym",
+      "healthDataAccepted": true
+    },
+    "observations": {
+      "summary": "zero observations of any kind in the review period; last data 11 days before period start"
+    },
     "adaptationHistory": []
   },
   "expected": {
-    "classification": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "all series empty/stale for the period; adherenceConfidence = none" } ] },
-    "initialPlan": { "label": "NOT_APPLICABLE", "expectations": [ { "assert": "review scenario" } ] },
+    "classification": {
+      "label": "PRODUCT_POLICY_APPROVED",
+      "expectations": [
+        {
+          "assert": "all series empty/stale for the period; adherenceConfidence = none"
+        }
+      ]
+    },
+    "initialPlan": {
+      "label": "NOT_APPLICABLE",
+      "expectations": [
+        {
+          "assert": "review scenario"
+        }
+      ]
+    },
     "adaptation": {
       "label": "PRODUCT_POLICY_APPROVED",
       "expectations": [
-        { "assert": "single outcome: requestMoreData with the missing-series gaps; zero plan-changing proposals; zero budget consumed; no cooldowns started" },
-        { "assert": "the current plan remains in force untouched — absence of data is never treated as failure" }
+        {
+          "assert": "single outcome: requestMoreData with the missing-series gaps; zero plan-changing proposals; zero budget consumed; no cooldowns started"
+        },
+        {
+          "assert": "the current plan remains in force untouched — absence of data is never treated as failure"
+        }
       ]
     },
-    "reasonCodes": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "missedCheckIn + insufficientEvidence; no adherenceLow (nothing was measured — unknown ≠ low)" } ] },
-    "safety": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "pass; decision space unchanged" } ] }
+    "reasonCodes": {
+      "label": "PRODUCT_POLICY_APPROVED",
+      "expectations": [
+        {
+          "assert": "missedCheckIn + insufficientEvidence; no adherenceLow (nothing was measured — unknown ≠ low)"
+        }
+      ]
+    },
+    "safety": {
+      "label": "PRODUCT_POLICY_APPROVED",
+      "expectations": [
+        {
+          "assert": "pass; decision space unchanged"
+        }
+      ]
+    }
   }
 }

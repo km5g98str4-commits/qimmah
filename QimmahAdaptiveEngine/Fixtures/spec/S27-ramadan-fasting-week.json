@@ -1,32 +1,116 @@
 {
   "scenarioId": "S27",
   "title": "Ramadan fasting week — context-aware evaluation, no boundary misreads",
-  "tags": ["weeklyReview", "ramadan", "context"],
+  "tags": [
+    "weeklyReview",
+    "ramadan",
+    "context"
+  ],
+  "determinism": {
+    "seed": 0,
+    "timezone": {
+      "tzOffsetMinutes": 180
+    },
+    "clock": {
+      "epochMs": 1785542400000
+    },
+    "locale": "ar-SA",
+    "ruleManifest": "pending-freeze",
+    "engineVersion": "0.1.0"
+  },
   "requestKind": "weeklyReview",
   "input": {
-    "profile": { "sex": "male", "ageYears": 30, "heightMm": 1770, "massGrams": 80000, "goalType": "maintain", "experienceClass": "intermediate", "daysPerWeek": 4, "sessionMinutes": 60, "environment": "gym", "healthDataAccepted": true },
-    "ramadanContext": { "fasting": true, "periodDates": { "startDate": "2026-02-18", "endDate": "2026-03-19" }, "dailyEatingWindow": { "startMinuteOfDay": 1085, "endMinuteOfDay": 300 } },
+    "profile": {
+      "sex": "male",
+      "ageYears": 30,
+      "heightMm": 1770,
+      "massGrams": 80000,
+      "goalType": "maintain",
+      "experienceClass": "intermediate",
+      "daysPerWeek": 4,
+      "sessionMinutes": 60,
+      "environment": "gym",
+      "healthDataAccepted": true
+    },
+    "ramadanContext": {
+      "fasting": true,
+      "periodDates": {
+        "startDate": "2026-02-18",
+        "endDate": "2026-03-19"
+      },
+      "dailyEatingWindow": {
+        "startMinuteOfDay": 1085,
+        "endMinuteOfDay": 300
+      }
+    },
     "observations": {
-      "weight": { "validCount": 5, "spanDays": 12, "summary": "dip in first fasting week — typical boundary fluctuation" },
-      "calories": { "summary": "intake concentrated in eating window; daily totals near target" },
-      "training": { "completionBp": 7500, "summary": "sessions shifted after iftar" },
-      "recovery": { "summary": "sleep fragmented, mild fatigue" }
+      "weight": {
+        "validCount": 5,
+        "spanDays": 12,
+        "summary": "dip in first fasting week — typical boundary fluctuation"
+      },
+      "calories": {
+        "summary": "intake concentrated in eating window; daily totals near target"
+      },
+      "training": {
+        "completionBp": 7500,
+        "summary": "sessions shifted after iftar"
+      },
+      "recovery": {
+        "summary": "sleep fragmented, mild fatigue"
+      }
     },
     "adaptationHistory": []
   },
   "expected": {
-    "classification": { "label": "CHARACTERIZED_EXISTING", "expectations": [ { "assert": "boundary week ⇒ contextBoundaryCrossed; body-mass fluctuations at fasting onset are expected, small, reversible", "registerId": "EVR-011" } ] },
-    "initialPlan": { "label": "NOT_APPLICABLE", "expectations": [ { "assert": "review scenario" } ] },
+    "classification": {
+      "label": "CHARACTERIZED_EXISTING",
+      "expectations": [
+        {
+          "assert": "boundary week ⇒ contextBoundaryCrossed; body-mass fluctuations at fasting onset are expected, small, reversible",
+          "registerId": "EVR-011"
+        }
+      ]
+    },
+    "initialPlan": {
+      "label": "NOT_APPLICABLE",
+      "expectations": [
+        {
+          "assert": "review scenario"
+        }
+      ]
+    },
     "adaptation": {
       "label": "PRODUCT_POLICY_APPROVED",
       "expectations": [
-        { "assert": "NO calorie adaptation from boundary weight noise (comparisons suppressed across the boundary)" },
-        { "assert": "no step-target increase during the period; training-load bias modest-conservative, not blanket reduction (performance effects are small)", "registerId": "EVR-011" },
-        { "assert": "adherence interpreted against the fasting context's expectations — shifted sessions and window-concentrated meals are NOT non-adherence" }
+        {
+          "assert": "NO calorie adaptation from boundary weight noise (comparisons suppressed across the boundary)"
+        },
+        {
+          "assert": "no step-target increase during the period; training-load bias modest-conservative, not blanket reduction (performance effects are small)",
+          "registerId": "EVR-011"
+        },
+        {
+          "assert": "adherence interpreted against the fasting context's expectations — shifted sessions and window-concentrated meals are NOT non-adherence"
+        }
       ]
     },
-    "reasonCodes": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "fastingContextActive + contextBoundaryCrossed; hydrationWindowCompressed available for host copy (no prescriptions)" } ] },
-    "safety": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "pass; engine made zero religious/calendar inferences — context arrived fully host-supplied" } ] }
+    "reasonCodes": {
+      "label": "PRODUCT_POLICY_APPROVED",
+      "expectations": [
+        {
+          "assert": "fastingContextActive + contextBoundaryCrossed; hydrationWindowCompressed available for host copy (no prescriptions)"
+        }
+      ]
+    },
+    "safety": {
+      "label": "PRODUCT_POLICY_APPROVED",
+      "expectations": [
+        {
+          "assert": "pass; engine made zero religious/calendar inferences — context arrived fully host-supplied"
+        }
+      ]
+    }
   },
   "notes": "First-class RamadanContext ([CTO-QAE-001] §7). Sequencing caveat #U7: the live bank currently bans fasting questions ([CTO-76] Gulf-context-assumed); introducing the context feed is a host/product change."
 }

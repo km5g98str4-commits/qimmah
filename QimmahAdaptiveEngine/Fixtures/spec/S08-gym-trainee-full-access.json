@@ -1,29 +1,90 @@
 {
   "scenarioId": "S08",
   "title": "Gym trainee with full access — the machines-only pool question",
-  "tags": ["gym", "equipment", "initialPlan", "legacy-defect"],
+  "tags": [
+    "gym",
+    "equipment",
+    "initialPlan",
+    "legacy-defect"
+  ],
+  "determinism": {
+    "seed": 0,
+    "timezone": {
+      "tzOffsetMinutes": 180
+    },
+    "clock": {
+      "epochMs": 1785542400000
+    },
+    "locale": "ar-SA",
+    "ruleManifest": "pending-freeze",
+    "engineVersion": "0.1.0"
+  },
   "requestKind": "initialPlan",
   "input": {
     "profile": {
-      "sex": "male", "ageYears": 35, "heightMm": 1800, "massGrams": 90000,
-      "goalType": "maintain", "experienceClass": "intermediate",
-      "daysPerWeek": 4, "sessionMinutes": 60, "environment": "gym", "gymAccess": "full",
-      "neatBand": "moderate", "healthDataAccepted": true
+      "sex": "male",
+      "ageYears": 35,
+      "heightMm": 1800,
+      "massGrams": 90000,
+      "goalType": "maintain",
+      "experienceClass": "intermediate",
+      "daysPerWeek": 4,
+      "sessionMinutes": 60,
+      "environment": "gym",
+      "gymAccess": "full",
+      "neatBand": "moderate",
+      "healthDataAccepted": true
     }
   },
   "expected": {
-    "classification": { "label": "CHARACTERIZED_EXISTING", "expectations": [ { "assert": "intermediate; gymAccess resolves to 'full'", "oracleRef": "src/lib/equipmentAccess.ts:10-22" } ] },
+    "classification": {
+      "label": "CHARACTERIZED_EXISTING",
+      "expectations": [
+        {
+          "assert": "intermediate; gymAccess resolves to 'full'",
+          "oracleRef": "src/lib/equipmentAccess.ts:10-22"
+        }
+      ]
+    },
     "initialPlan": {
       "label": "UNRESOLVED",
       "goldenPending": true,
       "expectations": [
-        { "assert": "ORACLE PARITY VALUE: full gym ⇒ pool restricted to the 32-machine catalog; equipment gate bypassed; barbells/dumbbells never selected (defect L-TRN-1)", "oracleRef": "src/lib/planGenerator.ts:713-719", "unresolvedId": "#U3" },
-        { "assert": "QAE TARGET (pending #U3): full gym ⇒ full equipment vocabulary with machine-priority weighting by experience/preference, via metadata selection", "unresolvedId": "#U3" }
+        {
+          "assert": "ORACLE PARITY VALUE (legacy defect per [CTO-QAE-002] U3): full gym ⇒ pool restricted to the 32-machine catalog; equipment gate bypassed; barbells/dumbbells never selected (defect L-TRN-1)",
+          "oracleRef": "src/lib/planGenerator.ts:713-719",
+          "unresolvedId": "#U3"
+        },
+        {
+          "assert": "QAE TARGET (APPROVED [CTO-QAE-002] U3): capability-based selection — MovementPattern → RequiredEquipment → Constraints → Difficulty → Preference → Exercise; never Equipment → Exercise",
+          "unresolvedId": "#U3"
+        }
       ]
     },
-    "adaptation": { "label": "NOT_APPLICABLE", "expectations": [ { "assert": "initial plan scenario" } ] },
-    "reasonCodes": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "none specific" } ] },
-    "safety": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "pass" } ] }
+    "adaptation": {
+      "label": "NOT_APPLICABLE",
+      "expectations": [
+        {
+          "assert": "initial plan scenario"
+        }
+      ]
+    },
+    "reasonCodes": {
+      "label": "PRODUCT_POLICY_APPROVED",
+      "expectations": [
+        {
+          "assert": "none specific"
+        }
+      ]
+    },
+    "safety": {
+      "label": "PRODUCT_POLICY_APPROVED",
+      "expectations": [
+        {
+          "assert": "pass"
+        }
+      ]
+    }
   },
-  "notes": "This fixture intentionally carries BOTH the characterized oracle behavior (for parity testing) and the superseding target behavior. Which one becomes the golden depends on founder decision #U3."
+  "notes": "This fixture intentionally carries BOTH the characterized oracle behavior (for parity testing) and the superseding target behavior. Decided [CTO-QAE-002] U3: the QAE target is normative; the oracle behavior remains as a parity-reference golden only (legacy defect L-TRN-1)."
 }

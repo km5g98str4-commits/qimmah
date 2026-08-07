@@ -1,29 +1,100 @@
 {
   "scenarioId": "S16",
   "title": "Performance decline on a cut with high adherence",
-  "tags": ["weeklyReview", "performance", "recovery"],
+  "tags": [
+    "weeklyReview",
+    "performance",
+    "recovery"
+  ],
+  "determinism": {
+    "seed": 0,
+    "timezone": {
+      "tzOffsetMinutes": 180
+    },
+    "clock": {
+      "epochMs": 1785542400000
+    },
+    "locale": "ar-SA",
+    "ruleManifest": "pending-freeze",
+    "engineVersion": "0.1.0"
+  },
   "requestKind": "weeklyReview",
   "input": {
-    "profile": { "sex": "male", "ageYears": 31, "heightMm": 1790, "massGrams": 85000, "goalType": "cut", "experienceClass": "advanced", "daysPerWeek": 5, "sessionMinutes": 60, "environment": "gym", "healthDataAccepted": true },
+    "profile": {
+      "sex": "male",
+      "ageYears": 31,
+      "heightMm": 1790,
+      "massGrams": 85000,
+      "goalType": "cut",
+      "experienceClass": "advanced",
+      "daysPerWeek": 5,
+      "sessionMinutes": 60,
+      "environment": "gym",
+      "healthDataAccepted": true
+    },
     "observations": {
-      "weight": { "validCount": 6, "spanDays": 14, "summary": "loss within band" },
-      "training": { "completionBp": 9500, "performanceTrend": "falling", "summary": "top-set loads falling across 2+ weeks (exercise-history markers)" },
-      "calories": { "adherenceBp": 9600 },
-      "recovery": { "summary": "fatigue rising mildly" }
+      "weight": {
+        "validCount": 6,
+        "spanDays": 14,
+        "summary": "loss within band"
+      },
+      "training": {
+        "completionBp": 9500,
+        "performanceTrend": "falling",
+        "summary": "top-set loads falling across 2+ weeks (exercise-history markers)"
+      },
+      "calories": {
+        "adherenceBp": 9600
+      },
+      "recovery": {
+        "summary": "fatigue rising mildly"
+      }
     },
     "adaptationHistory": []
   },
   "expected": {
-    "classification": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "performanceDeclining with confidence ≥ moderate (multi-week marker trend, not one bad session)" } ] },
-    "initialPlan": { "label": "NOT_APPLICABLE", "expectations": [ { "assert": "review scenario" } ] },
+    "classification": {
+      "label": "PRODUCT_POLICY_APPROVED",
+      "expectations": [
+        {
+          "assert": "performanceDeclining with confidence ≥ moderate (multi-week marker trend, not one bad session)"
+        }
+      ]
+    },
+    "initialPlan": {
+      "label": "NOT_APPLICABLE",
+      "expectations": [
+        {
+          "assert": "review scenario"
+        }
+      ]
+    },
     "adaptation": {
       "label": "PRODUCT_POLICY_APPROVED",
       "expectations": [
-        { "assert": "candidates: calorie increase / volume reduction / deload composite — recovery-class resolution picks ONE; never 'push harder'" },
-        { "assert": "brief rule honored: progress too rapid or performance/recovery declines ⇒ increase calories or reduce expenditure" }
+        {
+          "assert": "candidates: calorie increase / volume reduction / deload composite — recovery-class resolution picks ONE; never 'push harder'"
+        },
+        {
+          "assert": "brief rule honored: progress too rapid or performance/recovery declines ⇒ increase calories or reduce expenditure"
+        }
       ]
     },
-    "reasonCodes": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "performanceDeclining present; adherenceHigh present (honesty: the user did their part)" } ] },
-    "safety": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "volume increases blocked in decision space while declining" } ] }
+    "reasonCodes": {
+      "label": "PRODUCT_POLICY_APPROVED",
+      "expectations": [
+        {
+          "assert": "performanceDeclining present; adherenceHigh present (honesty: the user did their part)"
+        }
+      ]
+    },
+    "safety": {
+      "label": "PRODUCT_POLICY_APPROVED",
+      "expectations": [
+        {
+          "assert": "volume increases blocked in decision space while declining"
+        }
+      ]
+    }
   }
 }

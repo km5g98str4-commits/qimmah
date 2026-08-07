@@ -14,7 +14,8 @@ RamadanContext {
 }
 ```
 
-- The engine never infers fasting from calendar, locale, or location. The existing product decision stands: the fasting question is permanent, neutrally worded, seasonally activated — all host-side. (Characterized: the live personalization proof *forbids* religious terms in the question bank under the current Gulf-context-assumed decision [CTO-76]; introducing the fasting question is therefore a **host/product change outside QAE** — QAE only defines what it does when the context arrives. Flagged as UNRESOLVED #U7 for sequencing.)
+- The engine never infers fasting from calendar, locale, or location. No engine assumptions, no hidden inference, no religion detection — **host provides context, engine consumes context. Perfect separation.**
+- **Sequencing — decided ([CTO-QAE-002] U7):** the current product asks no fasting questions ([CTO-76] Gulf-context-assumed, proof-enforced). The QAE spec keeps `RamadanContext` as a first-class type, but its rule pack ships **disabled until the product introduces `fastingStatus` or a seasonal schedule** host-side. The contradiction is resolved by sequencing, not by weakening either decision.
 - Absent context = `fasting: false`. No behavior change.
 
 ## 2. Effects when `fasting: true`
