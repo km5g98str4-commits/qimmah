@@ -1,0 +1,205 @@
+{
+  "scenarioId": "S07",
+  "generatedBy": "legacy-ts-oracle",
+  "oracleModules": [
+    "src/lib/calculators.ts",
+    "src/lib/planGenerator.ts"
+  ],
+  "determinism": {
+    "seed": 0,
+    "timezone": {
+      "tzOffsetMinutes": 180
+    },
+    "clock": {
+      "epochMs": 1785542400000
+    },
+    "locale": "ar-SA",
+    "ruleManifest": "pending-freeze",
+    "engineVersion": "0.1.0"
+  },
+  "goldenFor": [
+    "initialPlan"
+  ],
+  "canonical": {
+    "targets": {
+      "bmrKcal": 1289,
+      "tdeeKcal": 1643,
+      "targetKcal": 1243,
+      "maintenanceKcal": 1643,
+      "cuttingKcal": 1243,
+      "bulkingKcal": 1943,
+      "proteinG": 104,
+      "fatG": 37,
+      "carbsG": 124,
+      "waterMl": 2500,
+      "bmiCenti": 2270,
+      "weeklyWeightChangeGrams": -400,
+      "estimatedWeeksToGoal": 9,
+      "effectiveGoalLegacy": "cutting"
+    },
+    "plan": {
+      "suggestedWorkoutTemplateId": "gen-fullbody",
+      "weeklySchedule": [
+        {
+          "day": "السبت",
+          "type": "full"
+        },
+        {
+          "day": "الأحد",
+          "type": "rest"
+        },
+        {
+          "day": "الإثنين",
+          "type": "full"
+        },
+        {
+          "day": "الثلاثاء",
+          "type": "rest"
+        },
+        {
+          "day": "الأربعاء",
+          "type": "full"
+        },
+        {
+          "day": "الخميس",
+          "type": "rest"
+        },
+        {
+          "day": "الجمعة",
+          "type": "rest"
+        }
+      ],
+      "workoutDays": [
+        {
+          "id": "gen-1-full",
+          "exercises": [
+            {
+              "exerciseId": "bodyweight-squat",
+              "sets": 3,
+              "reps": "8–12",
+              "restSec": 90,
+              "optional": false
+            },
+            {
+              "exerciseId": "barbell-bench-press",
+              "sets": 3,
+              "reps": "8–12",
+              "restSec": 90,
+              "optional": false
+            },
+            {
+              "exerciseId": "barbell-row",
+              "sets": 3,
+              "reps": "8–12",
+              "restSec": 90,
+              "optional": false
+            },
+            {
+              "exerciseId": "arnold-press",
+              "sets": 3,
+              "reps": "8–12",
+              "restSec": 90,
+              "optional": false
+            },
+            {
+              "exerciseId": "dumbbell-rdl",
+              "sets": 3,
+              "reps": "8–12",
+              "restSec": 90,
+              "optional": false
+            }
+          ]
+        },
+        {
+          "id": "gen-2-full",
+          "exercises": [
+            {
+              "exerciseId": "bulgarian-split-squat",
+              "sets": 3,
+              "reps": "8–12",
+              "restSec": 90,
+              "optional": false
+            },
+            {
+              "exerciseId": "chest-dip",
+              "sets": 3,
+              "reps": "8–12",
+              "restSec": 90,
+              "optional": false
+            },
+            {
+              "exerciseId": "dumbbell-row",
+              "sets": 3,
+              "reps": "8–12",
+              "restSec": 90,
+              "optional": false
+            },
+            {
+              "exerciseId": "dumbbell-shoulder-press",
+              "sets": 3,
+              "reps": "8–12",
+              "restSec": 90,
+              "optional": false
+            },
+            {
+              "exerciseId": "frog-pump",
+              "sets": 3,
+              "reps": "8–12",
+              "restSec": 90,
+              "optional": false
+            }
+          ]
+        },
+        {
+          "id": "gen-3-full",
+          "exercises": [
+            {
+              "exerciseId": "dumbbell-sumo-squat",
+              "sets": 3,
+              "reps": "8–12",
+              "restSec": 90,
+              "optional": false
+            },
+            {
+              "exerciseId": "decline-barbell-press",
+              "sets": 3,
+              "reps": "8–12",
+              "restSec": 90,
+              "optional": false
+            },
+            {
+              "exerciseId": "chest-supported-row",
+              "sets": 3,
+              "reps": "8–12",
+              "restSec": 90,
+              "optional": false
+            },
+            {
+              "exerciseId": "overhead-press",
+              "sets": 3,
+              "reps": "8–12",
+              "restSec": 90,
+              "optional": false
+            },
+            {
+              "exerciseId": "glute-bridge",
+              "sets": 3,
+              "reps": "8–12",
+              "restSec": 90,
+              "optional": false
+            }
+          ]
+        }
+      ],
+      "warningsAr": [],
+      "commitments": [
+        "cmt-today-workout-0",
+        "cmt-steps-10k-1",
+        "cmt-water-target-2",
+        "cmt-sleep-7h-3",
+        "cmt-protein-target-4"
+      ]
+    }
+  },
+  "contentHash": "37fa61ee55ff3f470411fd06ca26111ea2333334e564d68e81422df412f236ce"
+}

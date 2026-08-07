@@ -1,0 +1,273 @@
+{
+  "scenarioId": "S20",
+  "generatedBy": "legacy-ts-oracle",
+  "oracleModules": [
+    "src/lib/calculators.ts",
+    "src/lib/planGenerator.ts"
+  ],
+  "determinism": {
+    "seed": 0,
+    "timezone": {
+      "tzOffsetMinutes": 180
+    },
+    "clock": {
+      "epochMs": 1785542400000
+    },
+    "locale": "ar-SA",
+    "ruleManifest": "pending-freeze",
+    "engineVersion": "0.1.0"
+  },
+  "goldenFor": [
+    "initialPlan"
+  ],
+  "canonical": {
+    "targets": {
+      "bmrKcal": 1870,
+      "tdeeKcal": 2712,
+      "targetKcal": 2312,
+      "maintenanceKcal": 2712,
+      "cuttingKcal": 2312,
+      "bulkingKcal": 3012,
+      "proteinG": 166,
+      "fatG": 69,
+      "carbsG": 257,
+      "waterMl": 3000,
+      "bmiCenti": 2840,
+      "weeklyWeightChangeGrams": 0,
+      "estimatedWeeksToGoal": 0,
+      "effectiveGoalLegacy": "cutting"
+    },
+    "plan": {
+      "suggestedWorkoutTemplateId": "gen-upper-lower-4",
+      "weeklySchedule": [
+        {
+          "day": "السبت",
+          "type": "full"
+        },
+        {
+          "day": "الأحد",
+          "type": "legs"
+        },
+        {
+          "day": "الإثنين",
+          "type": "rest"
+        },
+        {
+          "day": "الثلاثاء",
+          "type": "full"
+        },
+        {
+          "day": "الأربعاء",
+          "type": "legs"
+        },
+        {
+          "day": "الخميس",
+          "type": "rest"
+        },
+        {
+          "day": "الجمعة",
+          "type": "rest"
+        }
+      ],
+      "workoutDays": [
+        {
+          "id": "gen-1-upper",
+          "exercises": [
+            {
+              "exerciseId": "chest-press-machine",
+              "sets": 3,
+              "reps": "8–12",
+              "restSec": 90,
+              "optional": false
+            },
+            {
+              "exerciseId": "chest-supported-row-machine",
+              "sets": 3,
+              "reps": "8–12",
+              "restSec": 90,
+              "optional": false
+            },
+            {
+              "exerciseId": "shoulder-press-machine",
+              "sets": 3,
+              "reps": "8–12",
+              "restSec": 90,
+              "optional": false
+            },
+            {
+              "exerciseId": "iso-lateral-pulldown",
+              "sets": 3,
+              "reps": "8–12",
+              "restSec": 90,
+              "optional": false
+            },
+            {
+              "exerciseId": "incline-chest-press-machine",
+              "sets": 3,
+              "reps": "8–12",
+              "restSec": 90,
+              "optional": false
+            },
+            {
+              "exerciseId": "triceps-extension-machine",
+              "sets": 3,
+              "reps": "12–15",
+              "restSec": 60,
+              "optional": true
+            }
+          ]
+        },
+        {
+          "id": "gen-2-lower",
+          "exercises": [
+            {
+              "exerciseId": "hack-squat-machine",
+              "sets": 3,
+              "reps": "8–12",
+              "restSec": 90,
+              "optional": false
+            },
+            {
+              "exerciseId": "glute-machine",
+              "sets": 3,
+              "reps": "8–12",
+              "restSec": 90,
+              "optional": false
+            },
+            {
+              "exerciseId": "leg-press-machine",
+              "sets": 3,
+              "reps": "8–12",
+              "restSec": 90,
+              "optional": false
+            },
+            {
+              "exerciseId": "glute-kickback-machine",
+              "sets": 3,
+              "reps": "12–15",
+              "restSec": 60,
+              "optional": false
+            },
+            {
+              "exerciseId": "lying-leg-curl",
+              "sets": 3,
+              "reps": "12–15",
+              "restSec": 60,
+              "optional": false
+            },
+            {
+              "exerciseId": "ab-crunch-machine",
+              "sets": 3,
+              "reps": "12–20",
+              "restSec": 60,
+              "optional": true
+            }
+          ]
+        },
+        {
+          "id": "gen-3-upper",
+          "exercises": [
+            {
+              "exerciseId": "decline-chest-press-machine",
+              "sets": 3,
+              "reps": "8–12",
+              "restSec": 90,
+              "optional": false
+            },
+            {
+              "exerciseId": "iso-lateral-high-row",
+              "sets": 3,
+              "reps": "8–12",
+              "restSec": 90,
+              "optional": false
+            },
+            {
+              "exerciseId": "shoulder-press-machine",
+              "sets": 3,
+              "reps": "8–12",
+              "restSec": 90,
+              "optional": false
+            },
+            {
+              "exerciseId": "lat-pulldown-machine",
+              "sets": 3,
+              "reps": "8–12",
+              "restSec": 90,
+              "optional": false
+            },
+            {
+              "exerciseId": "iso-lateral-chest-press",
+              "sets": 3,
+              "reps": "8–12",
+              "restSec": 90,
+              "optional": false
+            },
+            {
+              "exerciseId": "preacher-curl-machine",
+              "sets": 3,
+              "reps": "12–15",
+              "restSec": 60,
+              "optional": true
+            }
+          ]
+        },
+        {
+          "id": "gen-4-lower",
+          "exercises": [
+            {
+              "exerciseId": "hack-squat-machine",
+              "sets": 3,
+              "reps": "8–12",
+              "restSec": 90,
+              "optional": false
+            },
+            {
+              "exerciseId": "glute-machine",
+              "sets": 3,
+              "reps": "8–12",
+              "restSec": 90,
+              "optional": false
+            },
+            {
+              "exerciseId": "leg-extension-machine",
+              "sets": 3,
+              "reps": "12–15",
+              "restSec": 60,
+              "optional": false
+            },
+            {
+              "exerciseId": "standing-hip-extension-machine",
+              "sets": 3,
+              "reps": "12–15",
+              "restSec": 60,
+              "optional": false
+            },
+            {
+              "exerciseId": "seated-leg-curl",
+              "sets": 3,
+              "reps": "12–15",
+              "restSec": 60,
+              "optional": false
+            },
+            {
+              "exerciseId": "ab-crunch-machine",
+              "sets": 3,
+              "reps": "12–20",
+              "restSec": 60,
+              "optional": true
+            }
+          ]
+        }
+      ],
+      "warningsAr": [],
+      "commitments": [
+        "cmt-today-workout-0",
+        "cmt-steps-10k-1",
+        "cmt-water-target-2",
+        "cmt-sleep-7h-3",
+        "cmt-protein-target-4"
+      ]
+    }
+  },
+  "contentHash": "7c743a675a3750e863df8c7dbfb2d61b916fc71db5400522626cd4a4843269af"
+}

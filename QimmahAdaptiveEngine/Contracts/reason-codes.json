@@ -17,6 +17,7 @@
     { "code": "calorieTargetConsistentlyExceeded", "domain": "checkin", "severity": "notice", "description": "Intake consistently above target; adherence-support path engaged, never punitive." },
     { "code": "minorGoalRestricted", "domain": "safety", "severity": "safety", "description": "Weight-modification goals unavailable under 18; maintenance applied (characterized live policy)." },
     { "code": "ageUnknownBlocking", "domain": "safety", "severity": "safety", "description": "Age unknown; assessment cannot finalize (supersedes legacy L-SAF-1 default-adult)." },
+    { "code": "ageBelowAppMinimum", "domain": "safety", "severity": "safety", "description": "Age below the app minimum (13); no plan issuable (characterized live policy)." },
     { "code": "calorieFloorApplied", "domain": "safety", "severity": "safety", "description": "Calorie target clamped to the safety floor; clamp visible by design." },
     { "code": "vlcdBlocked", "domain": "safety", "severity": "safety", "description": "Requested target in VLCD territory (<800 kcal, EVR-009); not issuable." },
     { "code": "volumeIncreaseBlockedBySafety", "domain": "safety", "severity": "safety", "description": "Volume increase outside the ValidDecisionSpace under recovery decline." },

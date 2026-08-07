@@ -47,7 +47,7 @@
       ]
     },
     "initialPlan": {
-      "label": "UNRESOLVED",
+      "label": "CHARACTERIZED_EXISTING",
       "goldenPending": true,
       "expectations": [
         {

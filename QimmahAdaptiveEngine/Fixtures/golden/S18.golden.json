@@ -1,0 +1,229 @@
+{
+  "scenarioId": "S18",
+  "generatedBy": "legacy-ts-oracle",
+  "oracleModules": [
+    "src/lib/calculators.ts",
+    "src/lib/planGenerator.ts"
+  ],
+  "determinism": {
+    "seed": 0,
+    "timezone": {
+      "tzOffsetMinutes": 180
+    },
+    "clock": {
+      "epochMs": 1785542400000
+    },
+    "locale": "ar-SA",
+    "ruleManifest": "pending-freeze",
+    "engineVersion": "0.1.0"
+  },
+  "goldenFor": [
+    "initialPlan"
+  ],
+  "canonical": {
+    "targets": {
+      "bmrKcal": 1734,
+      "tdeeKcal": 2471,
+      "targetKcal": 2471,
+      "maintenanceKcal": 2471,
+      "cuttingKcal": 2071,
+      "bulkingKcal": 2771,
+      "proteinG": 130,
+      "fatG": 74,
+      "carbsG": 321,
+      "waterMl": 2500,
+      "bmiCenti": 2350,
+      "weeklyWeightChangeGrams": 0,
+      "estimatedWeeksToGoal": 0,
+      "effectiveGoalLegacy": "maintenance"
+    },
+    "plan": {
+      "suggestedWorkoutTemplateId": "gen-fullbody",
+      "weeklySchedule": [
+        {
+          "day": "السبت",
+          "type": "full"
+        },
+        {
+          "day": "الأحد",
+          "type": "rest"
+        },
+        {
+          "day": "الإثنين",
+          "type": "full"
+        },
+        {
+          "day": "الثلاثاء",
+          "type": "rest"
+        },
+        {
+          "day": "الأربعاء",
+          "type": "full"
+        },
+        {
+          "day": "الخميس",
+          "type": "rest"
+        },
+        {
+          "day": "الجمعة",
+          "type": "rest"
+        }
+      ],
+      "workoutDays": [
+        {
+          "id": "gen-1-full",
+          "exercises": [
+            {
+              "exerciseId": "hack-squat-machine",
+              "sets": 3,
+              "reps": "8–12",
+              "restSec": 90,
+              "optional": false
+            },
+            {
+              "exerciseId": "chest-press-machine",
+              "sets": 3,
+              "reps": "8–12",
+              "restSec": 90,
+              "optional": false
+            },
+            {
+              "exerciseId": "chest-supported-row-machine",
+              "sets": 3,
+              "reps": "8–12",
+              "restSec": 90,
+              "optional": false
+            },
+            {
+              "exerciseId": "shoulder-press-machine",
+              "sets": 3,
+              "reps": "8–12",
+              "restSec": 90,
+              "optional": false
+            },
+            {
+              "exerciseId": "glute-machine",
+              "sets": 3,
+              "reps": "8–12",
+              "restSec": 90,
+              "optional": false
+            },
+            {
+              "exerciseId": "ab-crunch-machine",
+              "sets": 3,
+              "reps": "12–20",
+              "restSec": 75,
+              "optional": true
+            }
+          ]
+        },
+        {
+          "id": "gen-2-full",
+          "exercises": [
+            {
+              "exerciseId": "hack-squat-machine",
+              "sets": 3,
+              "reps": "8–12",
+              "restSec": 90,
+              "optional": false
+            },
+            {
+              "exerciseId": "decline-chest-press-machine",
+              "sets": 3,
+              "reps": "8–12",
+              "restSec": 90,
+              "optional": false
+            },
+            {
+              "exerciseId": "iso-lateral-high-row",
+              "sets": 3,
+              "reps": "8–12",
+              "restSec": 90,
+              "optional": false
+            },
+            {
+              "exerciseId": "shoulder-press-machine",
+              "sets": 3,
+              "reps": "8–12",
+              "restSec": 90,
+              "optional": false
+            },
+            {
+              "exerciseId": "glute-machine",
+              "sets": 3,
+              "reps": "8–12",
+              "restSec": 90,
+              "optional": false
+            },
+            {
+              "exerciseId": "ab-crunch-machine",
+              "sets": 3,
+              "reps": "12–20",
+              "restSec": 75,
+              "optional": true
+            }
+          ]
+        },
+        {
+          "id": "gen-3-full",
+          "exercises": [
+            {
+              "exerciseId": "leg-press-machine",
+              "sets": 3,
+              "reps": "8–12",
+              "restSec": 90,
+              "optional": false
+            },
+            {
+              "exerciseId": "incline-chest-press-machine",
+              "sets": 3,
+              "reps": "8–12",
+              "restSec": 90,
+              "optional": false
+            },
+            {
+              "exerciseId": "iso-lateral-pulldown",
+              "sets": 3,
+              "reps": "8–12",
+              "restSec": 90,
+              "optional": false
+            },
+            {
+              "exerciseId": "shoulder-press-machine",
+              "sets": 3,
+              "reps": "8–12",
+              "restSec": 90,
+              "optional": false
+            },
+            {
+              "exerciseId": "glute-machine",
+              "sets": 3,
+              "reps": "8–12",
+              "restSec": 90,
+              "optional": false
+            },
+            {
+              "exerciseId": "ab-crunch-machine",
+              "sets": 3,
+              "reps": "12–20",
+              "restSec": 75,
+              "optional": true
+            }
+          ]
+        }
+      ],
+      "warningsAr": [
+        "أهداف تعديل الوزن متاحة من 18 سنة — ننصح بمراجعة مختص تغذية",
+        "هذه أمثلة وجبات مبدئية وليست خطة كاملة مطابقة للأهداف."
+      ],
+      "commitments": [
+        "cmt-today-workout-0",
+        "cmt-protein-target-1",
+        "cmt-water-target-2",
+        "cmt-sleep-7h-3",
+        "cmt-steps-10k-4"
+      ]
+    }
+  },
+  "contentHash": "b777fa40bd132c5c18ccc0c4656741ba278b896d4c48e05e11bd698750051ba9"
+}

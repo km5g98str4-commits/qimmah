@@ -1,0 +1,27 @@
+# QAE Phase 1 Report — Oracle Harness · Canonical Domain Types · SafetyPolicy Foundation
+
+**Per [CTO-QAE-002].** Scope honored: exactly the three authorized components; nothing beyond. Next architecture checkpoint required before Phase 2 (Decision Pipeline is NOT started).
+
+## What was built
+
+| Component | Location | Notes |
+|---|---|---|
+| Oracle Harness | `Tools/oracle-adapter.ts` + `Tools/run-oracle-harness.mjs` | esbuild-bundles the legacy modules (`@→src`, repo-standard pattern), executes `computeTargets` + `generatePlan` on fixture inputs, canonicalizes at a single float→integer boundary, writes `Fixtures/golden/*.golden.json` + `COVERAGE.json`. Goldens carry the fixture's determinism envelope and a SHA-256 content hash over the canonical serialization. |
+| Canonical Domain Types | `Domain/Shared/{core,numeric,time,canonical}.ts` | Closed enums mirroring the schemas · integer arithmetic with named-error guards (`QAE-NUMERIC-VIOLATION`) · declared rounding (half-away-from-zero, quantize) · `ordinalCompare` (L-GEN-1 supersession) · pure `localDate` via Hinnant civil-from-days (L-OBS-2 supersession) · canonical serializer that rejects floats by name. |
+| SafetyPolicy foundation | `Domain/Safety/safetyPolicy.ts` | Immutable tiers (frozen `CRITICAL>HIGH>NORMAL>LOW`; resolution begins with CRITICAL structurally) · rules QAE-SAF-001…005 (unknown-age block, app-minimum block, minors goal clamp, VLCD block, sex-based calorie floors) · sealed `IssuablePlan` (compile-time brand + runtime WeakSet guard, `assertIssuable` fails forgeries by name) · composite legality (`checkComposite`, protective-only, ≤3 components). |
+| Proof suite | `Tools/qae-proof.ts` + `Tools/run-qae-proof.mjs` | 52 checks, all named-failure counter-attacks included. |
+
+QAE code is **contract/validation infrastructure**: nothing under `src/` imports it, and it is never a second authority over any live decision. No npm scripts were added (`package.json` is coordinator-owned); runners are invoked directly via `node`.
+
+## The six requested metrics
+
+1. **Compatibility percentage:** **100 %** on every decision surface QAE currently implements against the oracle — minors matrix (ages 14/15/17/18/25 × cut/bulk/maintain): **15/15**; plus golden spot-verification of Mifflin/TDEE/target values by independent hand computation (S01: 1828/2376/1976 kcal). **One deliberate, founder-approved incompatibility** ([CTO-QAE-002] U1): unknown age — oracle treats as adult (L-SAF-1), QAE blocks by name (`ageUnknownBlocking`); the proof asserts **both** sides of this divergence explicitly.
+2. **Oracle coverage:** **13 goldens machine-generated** from the legacy oracle — every `initialPlan` scenario with a `CHARACTERIZED_EXISTING` + `goldenPending` block (S01–S03, S05–S08, S17–S20, S28, S29). Oracle modules exercised: `calculators.ts` (BMR/TDEE/calories/macros/water/BMI/forecast/minors) and `planGenerator.ts` (split, schemes, slots, equipment, injuries, schedule, commitments, warnings). Not yet harness-covered (later phases per the locked order): the personalization question engine (Phase 5), recoveryEngine v2 (Phase 8), trend math (Phase 10) — `COVERAGE.json` records this; no silent caps.
+3. **Fixture coverage:** **34/34** scenario specs valid with determinism envelopes; **13/34 have executable goldens**; the remaining 21 need none yet (weeklyReview/checkAction scenarios awaiting Phases 4–11, or policy/research-labeled blocks). Every golden regenerates byte-identically across runs (determinism proof).
+4. **Safety proof:** 52/52 checks green, including the mandated attacks: forged plan (structurally identical, skipped SafetyPolicy) → `QAE-SAFETY-BYPASS` **by name** · budget-bypass "recovery bundle" (calories −300 + steps +3000 + volume +20 %) → `compositeContainsNonProtectiveAction` **by name, all three offenders listed** · CRITICAL preempts HIGH when a candidate violates both (VLCD block wins over floor clamp) · tier order frozen (`Object.isFrozen`) with no configuration surface · all clamps carry original + adjusted + reason codes (nothing silent).
+5. **New contradictions:** none architectural. Two implementation-level findings, both recorded: (a) this container has no Swift toolchain, so Phase-1 components are strict-TS contract infrastructure (documented in IMPLEMENTATION-ROADMAP with the no-second-authority guarantee); (b) the float→canonical-integer boundary predicted in the Phase 0.5 report was confirmed real (legacy emits floats for water/BMI/weekly-change) and is crossed exactly once, in the adapter, with per-field scaling.
+6. **Migration risks:** (i) goldens pin today's oracle — any legacy wave touching `calculators.ts`/`planGenerator.ts` shifts them; mitigation: `COVERAGE.json` hashes make drift loud, and harness re-runs belong in the QAE gate once wired (coordinator decision). (ii) The U1 deviation means integration (Phase 12) must migrate stored zero-age profiles before cutover, or they'd hard-block — flagged for the Phase-12 plan. (iii) `experienceClass → legacy trainingLevel/band` mapping in the adapter is a Phase-1 simplification; Phase 5 replaces it with real classification parity. (iv) Repo gates: typecheck ✓ lint ✓ (max-warnings 0, QAE files swept) build ✓ `test:formula` 159 ✓ `test:minors` 82 ✓ `test:personalization` 222 ✓ — QAE additions disturbed nothing.
+
+## Stop
+
+Phase 1 complete. Halting before Phase 2 (Decision Pipeline) pending the next architecture checkpoint.

@@ -1,0 +1,453 @@
+{
+  "scenarioId": "S05",
+  "generatedBy": "legacy-ts-oracle",
+  "oracleModules": [
+    "src/lib/calculators.ts",
+    "src/lib/planGenerator.ts"
+  ],
+  "determinism": {
+    "seed": 0,
+    "timezone": {
+      "tzOffsetMinutes": 180
+    },
+    "clock": {
+      "epochMs": 1785542400000
+    },
+    "locale": "ar-SA",
+    "ruleManifest": "pending-freeze",
+    "engineVersion": "0.1.0"
+  },
+  "goldenFor": [
+    "initialPlan"
+  ],
+  "canonical": {
+    "targets": {
+      "bmrKcal": 1838,
+      "tdeeKcal": 2757,
+      "targetKcal": 3057,
+      "maintenanceKcal": 2757,
+      "cuttingKcal": 2357,
+      "bulkingKcal": 3057,
+      "proteinG": 151,
+      "fatG": 92,
+      "carbsG": 406,
+      "waterMl": 3000,
+      "bmiCenti": 2540,
+      "weeklyWeightChangeGrams": 300,
+      "estimatedWeeksToGoal": 15,
+      "effectiveGoalLegacy": "bulking"
+    },
+    "plan": {
+      "suggestedWorkoutTemplateId": "gen-ppl-6",
+      "weeklySchedule": [
+        {
+          "day": "السبت",
+          "type": "push"
+        },
+        {
+          "day": "الأحد",
+          "type": "pull"
+        },
+        {
+          "day": "الإثنين",
+          "type": "legs"
+        },
+        {
+          "day": "الثلاثاء",
+          "type": "push"
+        },
+        {
+          "day": "الأربعاء",
+          "type": "pull"
+        },
+        {
+          "day": "الخميس",
+          "type": "legs"
+        },
+        {
+          "day": "الجمعة",
+          "type": "rest"
+        }
+      ],
+      "workoutDays": [
+        {
+          "id": "gen-1-push",
+          "exercises": [
+            {
+              "exerciseId": "chest-press-machine",
+              "sets": 4,
+              "reps": "6–10",
+              "restSec": 120,
+              "optional": false
+            },
+            {
+              "exerciseId": "shoulder-press-machine",
+              "sets": 4,
+              "reps": "6–10",
+              "restSec": 120,
+              "optional": false
+            },
+            {
+              "exerciseId": "incline-chest-press-machine",
+              "sets": 4,
+              "reps": "6–10",
+              "restSec": 120,
+              "optional": false
+            },
+            {
+              "exerciseId": "lateral-raise-machine",
+              "sets": 4,
+              "reps": "10–12",
+              "restSec": 75,
+              "optional": false
+            },
+            {
+              "exerciseId": "assisted-dip-machine",
+              "sets": 4,
+              "reps": "6–10",
+              "restSec": 120,
+              "optional": false
+            },
+            {
+              "exerciseId": "iso-lateral-incline-press",
+              "sets": 4,
+              "reps": "6–10",
+              "restSec": 120,
+              "optional": false
+            },
+            {
+              "exerciseId": "decline-chest-press-machine",
+              "sets": 4,
+              "reps": "6–10",
+              "restSec": 120,
+              "optional": false
+            },
+            {
+              "exerciseId": "triceps-extension-machine",
+              "sets": 4,
+              "reps": "10–12",
+              "restSec": 75,
+              "optional": true
+            }
+          ]
+        },
+        {
+          "id": "gen-2-pull",
+          "exercises": [
+            {
+              "exerciseId": "chest-supported-row-machine",
+              "sets": 4,
+              "reps": "6–10",
+              "restSec": 120,
+              "optional": false
+            },
+            {
+              "exerciseId": "iso-lateral-pulldown",
+              "sets": 4,
+              "reps": "6–10",
+              "restSec": 120,
+              "optional": false
+            },
+            {
+              "exerciseId": "rear-delt-row-machine",
+              "sets": 4,
+              "reps": "6–10",
+              "restSec": 120,
+              "optional": false
+            },
+            {
+              "exerciseId": "lateral-raise-machine",
+              "sets": 4,
+              "reps": "10–12",
+              "restSec": 75,
+              "optional": false
+            },
+            {
+              "exerciseId": "shoulder-press-machine",
+              "sets": 4,
+              "reps": "6–10",
+              "restSec": 120,
+              "optional": false
+            },
+            {
+              "exerciseId": "single-arm-lat-pulldown",
+              "sets": 4,
+              "reps": "6–10",
+              "restSec": 120,
+              "optional": false
+            },
+            {
+              "exerciseId": "wide-grip-iso-lateral-pulldown",
+              "sets": 4,
+              "reps": "6–10",
+              "restSec": 120,
+              "optional": false
+            },
+            {
+              "exerciseId": "preacher-curl-machine",
+              "sets": 4,
+              "reps": "10–12",
+              "restSec": 75,
+              "optional": true
+            }
+          ]
+        },
+        {
+          "id": "gen-3-lower",
+          "exercises": [
+            {
+              "exerciseId": "hack-squat-machine",
+              "sets": 4,
+              "reps": "6–10",
+              "restSec": 120,
+              "optional": false
+            },
+            {
+              "exerciseId": "glute-machine",
+              "sets": 4,
+              "reps": "6–10",
+              "restSec": 120,
+              "optional": false
+            },
+            {
+              "exerciseId": "leg-press-machine",
+              "sets": 4,
+              "reps": "6–10",
+              "restSec": 120,
+              "optional": false
+            },
+            {
+              "exerciseId": "glute-kickback-machine",
+              "sets": 4,
+              "reps": "10–12",
+              "restSec": 75,
+              "optional": false
+            },
+            {
+              "exerciseId": "lying-leg-curl",
+              "sets": 4,
+              "reps": "10–12",
+              "restSec": 75,
+              "optional": false
+            },
+            {
+              "exerciseId": "seated-calf-raise-machine",
+              "sets": 4,
+              "reps": "10–12",
+              "restSec": 75,
+              "optional": false
+            },
+            {
+              "exerciseId": "hip-adductor-machine",
+              "sets": 4,
+              "reps": "10–12",
+              "restSec": 75,
+              "optional": false
+            },
+            {
+              "exerciseId": "ab-crunch-machine",
+              "sets": 4,
+              "reps": "12–20",
+              "restSec": 75,
+              "optional": true
+            }
+          ]
+        },
+        {
+          "id": "gen-4-push",
+          "exercises": [
+            {
+              "exerciseId": "decline-chest-press-machine",
+              "sets": 4,
+              "reps": "6–10",
+              "restSec": 120,
+              "optional": false
+            },
+            {
+              "exerciseId": "shoulder-press-machine",
+              "sets": 4,
+              "reps": "6–10",
+              "restSec": 120,
+              "optional": false
+            },
+            {
+              "exerciseId": "iso-lateral-chest-press",
+              "sets": 4,
+              "reps": "6–10",
+              "restSec": 120,
+              "optional": false
+            },
+            {
+              "exerciseId": "reverse-pec-deck",
+              "sets": 4,
+              "reps": "10–12",
+              "restSec": 75,
+              "optional": false
+            },
+            {
+              "exerciseId": "assisted-dip-machine",
+              "sets": 4,
+              "reps": "6–10",
+              "restSec": 120,
+              "optional": false
+            },
+            {
+              "exerciseId": "chest-press-machine",
+              "sets": 4,
+              "reps": "6–10",
+              "restSec": 120,
+              "optional": false
+            },
+            {
+              "exerciseId": "incline-chest-press-machine",
+              "sets": 4,
+              "reps": "6–10",
+              "restSec": 120,
+              "optional": false
+            },
+            {
+              "exerciseId": "cable-triceps-pushdown",
+              "sets": 4,
+              "reps": "10–12",
+              "restSec": 75,
+              "optional": true
+            }
+          ]
+        },
+        {
+          "id": "gen-5-pull",
+          "exercises": [
+            {
+              "exerciseId": "iso-lateral-high-row",
+              "sets": 4,
+              "reps": "6–10",
+              "restSec": 120,
+              "optional": false
+            },
+            {
+              "exerciseId": "lat-pulldown-machine",
+              "sets": 4,
+              "reps": "6–10",
+              "restSec": 120,
+              "optional": false
+            },
+            {
+              "exerciseId": "seated-row-machine",
+              "sets": 4,
+              "reps": "6–10",
+              "restSec": 120,
+              "optional": false
+            },
+            {
+              "exerciseId": "reverse-pec-deck",
+              "sets": 4,
+              "reps": "10–12",
+              "restSec": 75,
+              "optional": false
+            },
+            {
+              "exerciseId": "t-bar-row-machine",
+              "sets": 4,
+              "reps": "6–10",
+              "restSec": 120,
+              "optional": false
+            },
+            {
+              "exerciseId": "wide-grip-lat-pulldown",
+              "sets": 4,
+              "reps": "6–10",
+              "restSec": 120,
+              "optional": false
+            },
+            {
+              "exerciseId": "chest-supported-row-machine",
+              "sets": 4,
+              "reps": "6–10",
+              "restSec": 120,
+              "optional": false
+            },
+            {
+              "exerciseId": "cable-biceps-curl",
+              "sets": 4,
+              "reps": "10–12",
+              "restSec": 75,
+              "optional": true
+            }
+          ]
+        },
+        {
+          "id": "gen-6-lower",
+          "exercises": [
+            {
+              "exerciseId": "hack-squat-machine",
+              "sets": 4,
+              "reps": "6–10",
+              "restSec": 120,
+              "optional": false
+            },
+            {
+              "exerciseId": "glute-machine",
+              "sets": 4,
+              "reps": "6–10",
+              "restSec": 120,
+              "optional": false
+            },
+            {
+              "exerciseId": "leg-extension-machine",
+              "sets": 4,
+              "reps": "10–12",
+              "restSec": 75,
+              "optional": false
+            },
+            {
+              "exerciseId": "standing-hip-extension-machine",
+              "sets": 4,
+              "reps": "10–12",
+              "restSec": 75,
+              "optional": false
+            },
+            {
+              "exerciseId": "seated-leg-curl",
+              "sets": 4,
+              "reps": "10–12",
+              "restSec": 75,
+              "optional": false
+            },
+            {
+              "exerciseId": "standing-calf-raise-machine",
+              "sets": 4,
+              "reps": "10–12",
+              "restSec": 75,
+              "optional": false
+            },
+            {
+              "exerciseId": "glute-kickback-machine",
+              "sets": 4,
+              "reps": "10–12",
+              "restSec": 75,
+              "optional": false
+            },
+            {
+              "exerciseId": "ab-crunch-machine",
+              "sets": 4,
+              "reps": "12–20",
+              "restSec": 75,
+              "optional": true
+            }
+          ]
+        }
+      ],
+      "warningsAr": [
+        "هذه أمثلة وجبات مبدئية وليست خطة كاملة مطابقة للأهداف."
+      ],
+      "commitments": [
+        "cmt-today-workout-0",
+        "cmt-protein-target-1",
+        "cmt-calories-target-2",
+        "cmt-sleep-7h-3",
+        "cmt-post-workout-meal-4"
+      ]
+    }
+  },
+  "contentHash": "dc75bd4330c6c98a0e1f3580fcd155cb52b252ab03801e57a475f63d00e69e52"
+}

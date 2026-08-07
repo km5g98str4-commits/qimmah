@@ -1,0 +1,95 @@
+{
+  "fixturesTotal": 34,
+  "goldensGenerated": 13,
+  "pendingLaterPhase": [],
+  "noGoldenNeeded": [
+    "S04",
+    "S09",
+    "S10",
+    "S11",
+    "S12",
+    "S13",
+    "S14",
+    "S15",
+    "S16",
+    "S21",
+    "S22",
+    "S23",
+    "S24",
+    "S25",
+    "S26",
+    "S27",
+    "S30",
+    "S31",
+    "S32",
+    "S33",
+    "S34"
+  ],
+  "coverage": [
+    {
+      "scenario": "S01",
+      "status": "golden",
+      "hash": "46211ee62df0"
+    },
+    {
+      "scenario": "S02",
+      "status": "golden",
+      "hash": "5e1881a21220"
+    },
+    {
+      "scenario": "S03",
+      "status": "golden",
+      "hash": "838247d2e8a6"
+    },
+    {
+      "scenario": "S05",
+      "status": "golden",
+      "hash": "dc75bd4330c6"
+    },
+    {
+      "scenario": "S06",
+      "status": "golden",
+      "hash": "fb7032f08afa"
+    },
+    {
+      "scenario": "S07",
+      "status": "golden",
+      "hash": "37fa61ee55ff"
+    },
+    {
+      "scenario": "S08",
+      "status": "golden",
+      "hash": "73abdd5de9ac"
+    },
+    {
+      "scenario": "S17",
+      "status": "golden",
+      "hash": "c298fba286fa"
+    },
+    {
+      "scenario": "S18",
+      "status": "golden",
+      "hash": "b777fa40bd13"
+    },
+    {
+      "scenario": "S19",
+      "status": "golden",
+      "hash": "2bee31cd7a59"
+    },
+    {
+      "scenario": "S20",
+      "status": "golden",
+      "hash": "7c743a675a37"
+    },
+    {
+      "scenario": "S28",
+      "status": "golden",
+      "hash": "58575c3fc054"
+    },
+    {
+      "scenario": "S29",
+      "status": "golden",
+      "hash": "a7f8c9e694e7"
+    }
+  ]
+}
