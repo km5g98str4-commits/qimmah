@@ -1,0 +1,29 @@
+{
+  "scenarioId": "S12",
+  "title": "Incomplete weight data — request data, adapt nothing",
+  "tags": ["weeklyReview", "dataQuality", "requestMoreData"],
+  "requestKind": "weeklyReview",
+  "input": {
+    "profile": { "sex": "male", "ageYears": 32, "heightMm": 1750, "massGrams": 79000, "goalType": "cut", "experienceClass": "beginner", "daysPerWeek": 3, "sessionMinutes": 45, "environment": "gym", "healthDataAccepted": true },
+    "currentPlan": { "calorieTargetKcal": "oracle cut target", "stepTarget": 6000 },
+    "observations": {
+      "weight": { "summary": "2 valid points, 5-day span — below 4-point/14-day thresholds", "validCount": 2, "spanDays": 5 },
+      "calories": { "adherenceBp": 8000 },
+      "training": { "completionBp": 9000 }
+    },
+    "adaptationHistory": []
+  },
+  "expected": {
+    "classification": { "label": "CHARACTERIZED_EXISTING", "expectations": [ { "assert": "weight series confidence low/none — below the characterized 4-point / 14-day-span abstention thresholds", "oracleRef": "src/lib/insights/metrics.ts:112-135" } ] },
+    "initialPlan": { "label": "NOT_APPLICABLE", "expectations": [ { "assert": "review scenario" } ] },
+    "adaptation": {
+      "label": "PRODUCT_POLICY_APPROVED",
+      "expectations": [
+        { "assert": "no weight-evidence-dependent rule fires; each reports InsufficientEvidence with named gaps" },
+        { "assert": "output: requestMoreData(gaps=[bodyMass series]) and/or keepPlan; zero budget consumed" }
+      ]
+    },
+    "reasonCodes": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "insufficientEvidence present; no plateau/rate codes" } ] },
+    "safety": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "pass" } ] }
+  }
+}

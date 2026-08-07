@@ -1,0 +1,35 @@
+{
+  "scenarioId": "S11",
+  "title": "Weight loss too fast on a cut — raise calories / reduce expenditure",
+  "tags": ["weeklyReview", "safety", "rate"],
+  "requestKind": "weeklyReview",
+  "input": {
+    "profile": { "sex": "female", "ageYears": 24, "heightMm": 1630, "massGrams": 60000, "goalType": "cut", "experienceClass": "intermediate", "daysPerWeek": 5, "sessionMinutes": 60, "environment": "gym", "healthDataAccepted": true },
+    "currentPlan": { "calorieTargetKcal": "oracle cut target", "stepTarget": 9000 },
+    "observations": {
+      "weight": { "summary": "7 valid points over 14 days; sustained loss ≈ 900 g/week ≈ 1.5 %BW/week", "validCount": 7, "spanDays": 14, "deltaGramsPerWeek": -900 },
+      "calories": { "adherenceBp": 9800 },
+      "training": { "completionBp": 9000, "performanceTrend": "falling" },
+      "recovery": { "summary": "fatigue rising" }
+    },
+    "adaptationHistory": []
+  },
+  "expected": {
+    "classification": { "label": "CHARACTERIZED_EXISTING", "expectations": [ { "assert": "loss rate 1.5 %BW/week exceeds the athlete band 0.5–1 %/week with performance+recovery decline", "registerId": "EVR-001" } ] },
+    "initialPlan": { "label": "NOT_APPLICABLE", "expectations": [ { "assert": "review scenario" } ] },
+    "adaptation": {
+      "label": "PRODUCT_POLICY_APPROVED",
+      "expectations": [
+        { "assert": "proposal: changeCalories(positive) — increase — OR reduce expenditure (steps/volume hold-or-down); NEVER a further reduction" },
+        { "assert": "priorityClass = safety-or-recovery (outranks goalProgress); single major slot" }
+      ]
+    },
+    "reasonCodes": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "weightLossTooFast + performanceDeclining present" } ] },
+    "safety": {
+      "label": "PRODUCT_POLICY_APPROVED",
+      "expectations": [
+        { "assert": "ValidDecisionSpace: further calorie reductions and step increases blocked while the rate condition holds; reason codes visible" }
+      ]
+    }
+  }
+}

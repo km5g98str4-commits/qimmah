@@ -1,0 +1,29 @@
+{
+  "scenarioId": "S25",
+  "title": "Step target repeatedly exceeded — success, optionally ratchet",
+  "tags": ["weeklyReview", "steps"],
+  "requestKind": "weeklyReview",
+  "input": {
+    "profile": { "sex": "male", "ageYears": 33, "heightMm": 1760, "massGrams": 77000, "goalType": "cut", "experienceClass": "intermediate", "daysPerWeek": 4, "sessionMinutes": 60, "environment": "gym", "healthDataAccepted": true },
+    "currentPlan": { "stepTarget": 6000, "stepTargetSetDaysAgo": 21 },
+    "observations": {
+      "steps": { "avgPerDay": 8200, "targetAdherenceBp": 13600, "coverage": "13 of 14 days", "summary": "target exceeded daily for 3 weeks" },
+      "weight": { "validCount": 6, "spanDays": 14, "summary": "loss within band" },
+      "recovery": { "summary": "stable" }
+    },
+    "adaptationHistory": []
+  },
+  "expected": {
+    "classification": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "stepTargetConsistentlyMet over the full exposure period with device-sourced high confidence" } ] },
+    "initialPlan": { "label": "NOT_APPLICABLE", "expectations": [ { "assert": "review scenario" } ] },
+    "adaptation": {
+      "label": "RESEARCH_REQUIRED",
+      "expectations": [
+        { "assert": "optional optimization proposal: changeStepTarget(positive, increment per EVR-007) aligning target with demonstrated behavior — OR keepPlan with positive codes if the budget went elsewhere; exceeding a target is never a problem to fix", "registerId": "EVR-007" },
+        { "assert": "if weight loss is already at band top, the increase may be withheld (coupled-variable check)" }
+      ]
+    },
+    "reasonCodes": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "stepTargetConsistentlyMet present" } ] },
+    "safety": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "pass" } ] }
+  }
+}

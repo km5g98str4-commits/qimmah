@@ -1,0 +1,31 @@
+{
+  "scenarioId": "S04",
+  "title": "Intermediate, maintenance, stable weeks keep the plan",
+  "tags": ["intermediate", "maintain", "weeklyReview", "keepPlan"],
+  "requestKind": "weeklyReview",
+  "input": {
+    "profile": { "sex": "female", "ageYears": 31, "heightMm": 1650, "massGrams": 62000, "goalType": "maintain", "experienceClass": "intermediate", "daysPerWeek": 4, "sessionMinutes": 60, "environment": "gym", "neatBand": "moderate", "healthDataAccepted": true },
+    "currentPlan": { "calorieTargetKcal": "maintenance per oracle", "stepTarget": 8000 },
+    "observations": {
+      "weight": { "summary": "6 valid points over 14 days, stable within band", "validCount": 6, "spanDays": 14 },
+      "calories": { "adherenceBp": 9600 },
+      "training": { "completionBp": 10000, "performanceTrend": "stable" },
+      "recovery": { "summary": "all markers stable" }
+    },
+    "adaptationHistory": []
+  },
+  "expected": {
+    "classification": { "label": "CHARACTERIZED_EXISTING", "expectations": [ { "assert": "trend direction = stable with confidence ≥ moderate (≥4 points, ≥14-day span per characterized thresholds)", "oracleRef": "src/lib/insights/metrics.ts:15-25" } ] },
+    "initialPlan": { "label": "NOT_APPLICABLE", "expectations": [ { "assert": "review scenario" } ] },
+    "adaptation": {
+      "label": "PRODUCT_POLICY_APPROVED",
+      "expectations": [
+        { "assert": "exactly one proposal: keepPlan — maintenance + on-track ⇒ no drift-by-schedule ever" },
+        { "assert": "no budget consumed; no cooldowns started" }
+      ]
+    },
+    "reasonCodes": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "codes include progressOnTrack" } ] },
+    "safety": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "pass; ValidDecisionSpace unrestricted beyond standing bounds" } ] }
+  },
+  "notes": "The default outcome of a healthy week is keepPlan with positive codes (ADAPTATION-POLICY §1.4)."
+}

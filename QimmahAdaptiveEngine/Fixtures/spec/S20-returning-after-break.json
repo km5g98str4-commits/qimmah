@@ -1,0 +1,34 @@
+{
+  "scenarioId": "S20",
+  "title": "Advanced user returning after 10 months — knowledge ≠ capacity",
+  "tags": ["returningUser", "initialPlan", "experienceModel"],
+  "requestKind": "initialPlan",
+  "input": {
+    "profile": {
+      "sex": "male", "ageYears": 36, "heightMm": 1800, "massGrams": 92000, "goalType": "cut",
+      "experienceEvidence": { "trainedBefore": "years", "totalMonths": "y3_plus", "lastTrained": "m3_12+", "monthsSinceConsistent": 10, "knowsProgression": "yes", "programExperience": "wrote_own" },
+      "daysPerWeek": 4, "sessionMinutes": 60, "environment": "gym", "healthDataAccepted": true
+    }
+  },
+  "expected": {
+    "classification": {
+      "label": "CHARACTERIZED_EXISTING",
+      "expectations": [
+        { "assert": "legacy: classed 'returning' (long layoff ∧ real prior volume)", "oracleRef": "src/lib/personalization/experience.ts:67-73,109" },
+        { "assert": "QAE three-axis: trainingKnowledge=advanced; recentTrainingExposure={none/sporadic, 10 months}; currentWorkCapacity=reduced band, conservative confidence — axes NEVER collapsed ([CTO-QAE-001] §12)" }
+      ]
+    },
+    "initialPlan": {
+      "label": "CHARACTERIZED_EXISTING",
+      "goldenPending": true,
+      "expectations": [
+        { "assert": "PARITY: reduced starting volume (legacy: returning volume class 9 sets vs advanced 16; deload −1 set applied for returning consistency)", "oracleRef": "src/lib/personalization/profile.ts:162-169; src/lib/planGenerator.ts:1123-1129" },
+        { "assert": "advanced terminology and exercise vocabulary retained (knowledge axis); no beginner-jargon suppression" },
+        { "assert": "ramp plan attached: weekly capacity restoration gated on completion + recovery; detraining evidence supports starting well below prior workload", "registerId": "EVR-014" }
+      ]
+    },
+    "adaptation": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "early reviews: ramp increments are cooldown-gated volume changes inside ChangeBudget; early ramp-exit only on sustained evidence" } ] },
+    "reasonCodes": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "returningUserRampActive + regainsComeFaster (reassurance only)", "registerId": "EVR-014" } ] },
+    "safety": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "decision space caps early volume increases regardless of user enthusiasm" } ] }
+  }
+}

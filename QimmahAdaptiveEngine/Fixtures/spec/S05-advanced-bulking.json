@@ -1,0 +1,31 @@
+{
+  "scenarioId": "S05",
+  "title": "Advanced, lean bulking, 6 days PPL, RIR prescriptions",
+  "tags": ["advanced", "bulk", "gym", "initialPlan", "rir"],
+  "requestKind": "initialPlan",
+  "input": {
+    "profile": {
+      "sex": "male", "ageYears": 29, "heightMm": 1820, "massGrams": 84000, "targetMassGrams": 88000,
+      "goalType": "bulk", "experienceClass": "advanced",
+      "daysPerWeek": 6, "sessionMinutes": 75, "environment": "gym",
+      "neatBand": "moderate", "baselineStepsPerDay": 8000, "baselineStepsConfidence": "high",
+      "injuryFlags": [], "healthDataAccepted": true, "rirFamiliarity": "use_it"
+    }
+  },
+  "expected": {
+    "classification": { "label": "CHARACTERIZED_EXISTING", "expectations": [ { "assert": "advanced (score ≥75); progression method rpe_based when advanced + rirFamiliarity='use_it'", "oracleRef": "src/lib/personalization/profile.ts:182-189" } ] },
+    "initialPlan": {
+      "label": "CHARACTERIZED_EXISTING",
+      "goldenPending": true,
+      "expectations": [
+        { "assert": "6 days ⇒ PPL ×2 (gen-ppl-6); sets 4/4 advanced; bulk scheme compound 6–10 rest 120s, isolation 10–12 rest 75s; 75 min ⇒ 7 exercises", "oracleRef": "src/lib/planGenerator.ts:570-597,124-150,100-110" },
+        { "assert": "calories = TDEE + 300; implied gain rate checked against lean-bulk band ~0.25–0.5 %BW/week", "oracleRef": "src/lib/calculators.ts:243", "registerId": "EVR-010" },
+        { "assert": "RIR targets present on slots (advanced band only)", "registerId": "EVR-012" },
+        { "assert": "free-weight priority with machines where advantageous; free-cable exercises allowed (advanced tier)", "oracleRef": "src/lib/planGenerator.ts:176-183" }
+      ]
+    },
+    "adaptation": { "label": "NOT_APPLICABLE", "expectations": [ { "assert": "initial plan scenario" } ] },
+    "reasonCodes": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "no beginner advisory codes" } ] },
+    "safety": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "pass; volume within advanced caps (caps: EVR gap #5 / DECISION-MODEL §3.2)" } ] }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "scenarioId": "S34",
+  "title": "NORMATIVE: plateau + 95% adherence + poor sleep + high fatigue — recovery wins",
+  "tags": ["weeklyReview", "priority", "recovery", "normative", "brief-worked-example"],
+  "requestKind": "weeklyReview",
+  "input": {
+    "profile": { "sex": "male", "ageYears": 29, "heightMm": 1780, "massGrams": 83000, "goalType": "cut", "experienceClass": "intermediate", "daysPerWeek": 5, "sessionMinutes": 60, "environment": "gym", "healthDataAccepted": true },
+    "observations": {
+      "weight": { "validCount": 6, "spanDays": 16, "summary": "verified plateau — stable within band across 3 weeks" },
+      "calories": { "adherenceBp": 9500 },
+      "training": { "completionBp": 9000, "performanceTrend": "falling" },
+      "recovery": { "summary": "sleep quality poor sustained + fatigue rising strongly — ≥2 markers declining, confidence ≥ moderate" }
+    },
+    "adaptationHistory": []
+  },
+  "expected": {
+    "classification": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "BOTH rule families' preconditions hold simultaneously: plateau-cut (goalProgress) AND recovery-decline (recovery)" } ] },
+    "initialPlan": { "label": "NOT_APPLICABLE", "expectations": [ { "assert": "review scenario" } ] },
+    "adaptation": {
+      "label": "PRODUCT_POLICY_APPROVED",
+      "expectations": [
+        { "assert": "the output MUST NOT contain changeCalories(decrease) — recovery class structurally outranks goalProgress (DECISION-MODEL §2)" },
+        { "assert": "emitted: recovery composite (e.g., volume −, progression hold) or keepPlan+recovery codes — one budget slot" },
+        { "assert": "ReasonTrace shows the plateau-cut candidate as suppressed with calorieCutSuppressedByRecovery — the user learns their plateau was seen AND why it wasn't acted on" }
+      ]
+    },
+    "reasonCodes": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "weightPlateauConfirmed + adherenceHigh + recoveryDeclining + calorieCutSuppressedByRecovery all present" } ] },
+    "safety": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "decision space blocks calorie decreases and volume increases while the recovery condition holds" } ] }
+  },
+  "notes": "The brief's own worked example, encoded as the canonical priority-order fixture. This fixture failing means the decision core is wrong."
+}

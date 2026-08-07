@@ -1,0 +1,29 @@
+{
+  "scenarioId": "S26",
+  "title": "Conflicting signals — keepPlan with a full honest trace",
+  "tags": ["weeklyReview", "conflict", "keepPlan"],
+  "requestKind": "weeklyReview",
+  "input": {
+    "profile": { "sex": "male", "ageYears": 30, "heightMm": 1780, "massGrams": 84000, "goalType": "cut", "experienceClass": "intermediate", "daysPerWeek": 4, "sessionMinutes": 60, "environment": "gym", "healthDataAccepted": true },
+    "observations": {
+      "weight": { "validCount": 5, "spanDays": 14, "summary": "slightly down but inside noise band — direction indeterminate" },
+      "calories": { "adherenceBp": 8800 },
+      "training": { "completionBp": 9500, "performanceTrend": "rising" },
+      "recovery": { "summary": "sleep good, but soreness rising — mixed" }
+    },
+    "adaptationHistory": []
+  },
+  "expected": {
+    "classification": { "label": "CHARACTERIZED_EXISTING", "expectations": [ { "assert": "mixed strain/recovered signals ⇒ conflicting=true with capped confidence (characterized recoveryEngine v2 semantics)", "oracleRef": "src/lib/recoveryEngine.ts:234-247" } ] },
+    "initialPlan": { "label": "NOT_APPLICABLE", "expectations": [ { "assert": "review scenario" } ] },
+    "adaptation": {
+      "label": "PRODUCT_POLICY_APPROVED",
+      "expectations": [
+        { "assert": "keepPlan is the emitted decision — conflicting evidence never nets out into a change" },
+        { "assert": "ReasonTrace lists every considered-and-rejected candidate with its blocking reason (explainability totality property)" }
+      ]
+    },
+    "reasonCodes": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "codes reflect the conflict honestly (mixed-signal + insufficient-confidence codes), per 'honesty before reassurance'" } ] },
+    "safety": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "pass" } ] }
+  }
+}

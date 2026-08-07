@@ -1,0 +1,29 @@
+{
+  "scenarioId": "S14",
+  "title": "High fatigue — recovery intervention as one composite",
+  "tags": ["weeklyReview", "recovery", "composite"],
+  "requestKind": "weeklyReview",
+  "input": {
+    "profile": { "sex": "male", "ageYears": 26, "heightMm": 1800, "massGrams": 83000, "goalType": "bulk", "experienceClass": "advanced", "daysPerWeek": 6, "sessionMinutes": 75, "environment": "gym", "healthDataAccepted": true },
+    "currentPlan": { "stepTarget": 8000 },
+    "observations": {
+      "weight": { "validCount": 6, "spanDays": 14, "summary": "on-track gain" },
+      "training": { "completionBp": 8500, "performanceTrend": "falling" },
+      "recovery": { "summary": "fatigue rising strongly, soreness moderate multiple areas, sleep ok — ≥2 strained factors, margin ≥2 per characterized v2 model" }
+    },
+    "adaptationHistory": []
+  },
+  "expected": {
+    "classification": { "label": "CHARACTERIZED_EXISTING", "expectations": [ { "assert": "recovery evaluation ⇒ reduce_volume-class outcome per recoveryEngine v2 margin rules", "oracleRef": "src/lib/recoveryEngine.ts:213-259" } ] },
+    "initialPlan": { "label": "NOT_APPLICABLE", "expectations": [ { "assert": "review scenario" } ] },
+    "adaptation": {
+      "label": "PRODUCT_POLICY_APPROVED",
+      "expectations": [
+        { "assert": "one composite proposal: [changeTrainingVolume(negative ≤ cap), progressionHeld] — ≤3 components, all protective, one budget slot (DECISION-MODEL §3.3)" },
+        { "assert": "no simultaneous calorie cut or step increase anywhere in the output" }
+      ]
+    },
+    "reasonCodes": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "recoveryDeclining + progressionHeld on the composite" } ] },
+    "safety": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "decision space: volume increases blocked while condition holds (volumeIncreaseBlockedBySafety on attempted increase)" } ] }
+  }
+}

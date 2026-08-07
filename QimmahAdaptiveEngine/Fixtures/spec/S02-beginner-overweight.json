@@ -1,0 +1,39 @@
+{
+  "scenarioId": "S02",
+  "title": "Beginner, significantly overweight, cutting, low activity",
+  "tags": ["beginner", "cut", "overweight", "initialPlan", "safety"],
+  "requestKind": "initialPlan",
+  "input": {
+    "profile": {
+      "sex": "male", "ageYears": 38, "heightMm": 1720, "massGrams": 118000, "targetMassGrams": 95000,
+      "goalType": "cut", "experienceClass": "beginner",
+      "daysPerWeek": 3, "sessionMinutes": 45, "environment": "gym",
+      "neatBand": "sedentary", "baselineStepsPerDay": 2600, "baselineStepsConfidence": "moderate",
+      "injuryFlags": [], "healthDataAccepted": true
+    }
+  },
+  "expected": {
+    "classification": { "label": "CHARACTERIZED_EXISTING", "expectations": [ { "assert": "beginner knowledge band; BMI computed ~39.9 with adult label 'clearly above range' band ≥30", "oracleRef": "src/lib/calculators.ts:217-224" } ] },
+    "initialPlan": {
+      "label": "CHARACTERIZED_EXISTING",
+      "goldenPending": true,
+      "expectations": [
+        { "assert": "full-body ×3 split; 45 min ⇒ 4 exercises (beginner 5 −1), but full-body floor raises to 5", "oracleRef": "src/lib/planGenerator.ts:100-114,744" },
+        { "assert": "cut deficit −400 from TDEE; ACSM population note: general-population deficit guidance applies, not athlete %BW bands", "registerId": "EVR-001" },
+        { "assert": "protein = 1.8 g/kg × 118 kg = 212 g under legacy oracle (parity value); flagged L-NUT-1 — high-BW uncapped protein is a documented supersession candidate", "oracleRef": "src/lib/calculators.ts:339" },
+        { "assert": "step target starts near 2600 baseline with a small labeled increment; never 10000", "registerId": "EVR-007" },
+        { "assert": "stability-biased, low-impact exercise selection (stabilityDemand/impact metadata) for high-BMI beginner", "unresolvedId": "#U3" }
+      ]
+    },
+    "adaptation": { "label": "NOT_APPLICABLE", "expectations": [ { "assert": "initial plan scenario" } ] },
+    "reasonCodes": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "no blame/pressure codes exist in the registry by design; codes emitted are neutral (progress/quality codes only)" } ] },
+    "safety": {
+      "label": "CHARACTERIZED_EXISTING",
+      "expectations": [
+        { "assert": "pass; calorie floor check male 1500 — with high mass the raw target is far above floor", "oracleRef": "src/lib/calculators.ts:253-256" },
+        { "assert": "low-calorie warning NOT triggered (raw > 1500)", "oracleRef": "src/lib/calculators.ts:262-264" }
+      ]
+    }
+  },
+  "notes": "Pins the population-tagging discipline from the register: overweight general-population rules, not athlete cut bands."
+}

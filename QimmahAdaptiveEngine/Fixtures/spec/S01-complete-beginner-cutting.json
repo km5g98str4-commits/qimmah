@@ -1,0 +1,49 @@
+{
+  "scenarioId": "S01",
+  "title": "Complete beginner, cutting, gym, 4 days",
+  "tags": ["beginner", "cut", "gym", "initialPlan"],
+  "requestKind": "initialPlan",
+  "input": {
+    "profile": {
+      "sex": "male", "ageYears": 30, "heightMm": 1780, "massGrams": 86000, "targetMassGrams": 80000,
+      "goalType": "cut", "experienceClass": "complete_beginner",
+      "daysPerWeek": 4, "sessionMinutes": 60, "environment": "gym",
+      "neatBand": "light", "baselineStepsPerDay": 4200, "baselineStepsConfidence": "moderate",
+      "injuryFlags": [], "healthDataAccepted": true
+    }
+  },
+  "expected": {
+    "classification": {
+      "label": "CHARACTERIZED_EXISTING",
+      "expectations": [
+        { "assert": "experience.trainingKnowledge == complete_beginner; trainedBefore='never' hard-forces the class regardless of other signals", "oracleRef": "src/lib/personalization/experience.ts:104-107" },
+        { "assert": "currentWorkCapacity.band == beginner" }
+      ]
+    },
+    "initialPlan": {
+      "label": "CHARACTERIZED_EXISTING",
+      "goldenPending": true,
+      "expectations": [
+        { "assert": "BMR via Mifflin-St Jeor male (+5); TDEE = round(bmr × min(1.9, 1.2 + 4×0.025)); calories = TDEE − 400, floored at 1500", "oracleRef": "src/lib/calculators.ts:196,110-114,241,253-256" },
+        { "assert": "macros: protein = round(1.8 × 86 kg); fat = round(0.27 × kcal / 9); carbs = remainder floored at 0", "oracleRef": "src/lib/calculators.ts:339-341" },
+        { "assert": "split = upper/lower ×4 (gen-upper-lower-4)", "oracleRef": "src/lib/planGenerator.ts:570-588" },
+        { "assert": "sets 3 compound / 3 isolation (beginner tier); cut scheme: compound 8–12 reps rest 90s, isolation 12–15 rest 60s", "oracleRef": "src/lib/planGenerator.ts:124-134,143-150" },
+        { "assert": "5 exercises/session (beginner base 5, 60 min delta 0); machine-priority ordering for beginner tier", "oracleRef": "src/lib/planGenerator.ts:83-110,186-188" },
+        { "assert": "no exercise with level 'advanced' in the plan", "oracleRef": "src/lib/planGenerator.ts:160-163" },
+        { "assert": "step target derived from 4200 baseline plus a modest labeled increment — NOT a flat 10000", "registerId": "EVR-007" }
+      ]
+    },
+    "adaptation": { "label": "NOT_APPLICABLE", "expectations": [ { "assert": "initial plan scenario; no review period" } ] },
+    "reasonCodes": {
+      "label": "PRODUCT_POLICY_APPROVED",
+      "expectations": [ { "assert": "plan warnings include conservativeStartApplied only if conservative-start triggers; no jargon-level codes for beginners" } ]
+    },
+    "safety": {
+      "label": "CHARACTERIZED_EXISTING",
+      "expectations": [
+        { "assert": "checkpoint 1 = pass; calories above male floor 1500", "oracleRef": "src/lib/calculators.ts:227" }
+      ]
+    }
+  },
+  "notes": "Baseline happy path. Step-target expectation is the [CTO-QAE-001] §14 supersession of the legacy flat 10k default; increment magnitude blocked on EVR-007."
+}

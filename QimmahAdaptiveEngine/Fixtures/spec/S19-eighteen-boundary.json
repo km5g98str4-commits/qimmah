@@ -1,0 +1,28 @@
+{
+  "scenarioId": "S19",
+  "title": "Exactly 18 — full goal set restored (inclusive boundary)",
+  "tags": ["minors", "boundary", "initialPlan", "characterized"],
+  "requestKind": "initialPlan",
+  "input": {
+    "profile": {
+      "sex": "female", "ageYears": 18, "heightMm": 1640, "massGrams": 60000, "targetMassGrams": 56000,
+      "requestedGoalType": "cut", "experienceClass": "beginner",
+      "daysPerWeek": 3, "sessionMinutes": 45, "environment": "gym", "healthDataAccepted": true
+    }
+  },
+  "expected": {
+    "classification": { "label": "CHARACTERIZED_EXISTING", "expectations": [ { "assert": "isMinor false at exactly 18 (age > 0 && age < 18); full goal options visible at 18 in the question path", "oracleRef": "src/lib/calculators.ts:83-85" } ] },
+    "initialPlan": {
+      "label": "CHARACTERIZED_EXISTING",
+      "goldenPending": true,
+      "expectations": [
+        { "assert": "cut honored: target < maintenance, equals cuttingCalories; weekly change forecast negative", "oracleRef": "scripts/minors-proof.ts:68-73" },
+        { "assert": "female calorie floor 1200 and female low-cal warning threshold (=BMR) apply", "oracleRef": "src/lib/calculators.ts:228,262-264" }
+      ]
+    },
+    "adaptation": { "label": "NOT_APPLICABLE", "expectations": [ { "assert": "initial plan scenario" } ] },
+    "reasonCodes": { "label": "CHARACTERIZED_EXISTING", "expectations": [ { "assert": "no minorGoalRestricted code" } ] },
+    "safety": { "label": "CHARACTERIZED_EXISTING", "expectations": [ { "assert": "pass" } ] }
+  },
+  "notes": "Boundary pair with S18/S29. Also the anchor for the L-SAF-1 supersession: UNKNOWN age must never reach this adult path (see S29 notes / #U1)."
+}

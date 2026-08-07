@@ -1,0 +1,27 @@
+{
+  "scenarioId": "S15",
+  "title": "Poor sleep alone — modest intervention, low confidence honesty",
+  "tags": ["weeklyReview", "recovery", "sleep"],
+  "requestKind": "weeklyReview",
+  "input": {
+    "profile": { "sex": "female", "ageYears": 34, "heightMm": 1660, "massGrams": 66000, "goalType": "cut", "experienceClass": "intermediate", "daysPerWeek": 4, "sessionMinutes": 60, "environment": "gym", "healthDataAccepted": true },
+    "observations": {
+      "weight": { "validCount": 5, "spanDays": 14, "summary": "on-track" },
+      "recovery": { "summary": "sleep quality poor / duration < 6h sustained; all other markers stable" },
+      "training": { "completionBp": 9500, "performanceTrend": "stable" }
+    },
+    "adaptationHistory": []
+  },
+  "expected": {
+    "classification": { "label": "CHARACTERIZED_EXISTING", "expectations": [ { "assert": "single strained factor ⇒ reduce_intensity-class outcome with LOW confidence, per characterized v2 (confidence cap 0.3 low-data → maps to Confidence=low)", "oracleRef": "src/lib/recoveryEngine.ts:147-259", "registerId": "EVR-013" } ] },
+    "initialPlan": { "label": "NOT_APPLICABLE", "expectations": [ { "assert": "review scenario" } ] },
+    "adaptation": {
+      "label": "PRODUCT_POLICY_APPROVED",
+      "expectations": [
+        { "assert": "low-confidence recovery signal ⇒ modest proposal (intensity/progression hold) or keepPlan + sleep-focused codes; NOT a full deload from one factor" }
+      ]
+    },
+    "reasonCodes": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "recovery codes carry the conservative/inferred register (host copy: 'يبدو' tone per charter §6)" } ] },
+    "safety": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "pass" } ] }
+  }
+}

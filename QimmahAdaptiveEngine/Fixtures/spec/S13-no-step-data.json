@@ -1,0 +1,28 @@
+{
+  "scenarioId": "S13",
+  "title": "No step data at all — unknown is not sedentary",
+  "tags": ["weeklyReview", "steps", "dataQuality"],
+  "requestKind": "weeklyReview",
+  "input": {
+    "profile": { "sex": "female", "ageYears": 29, "heightMm": 1680, "massGrams": 64000, "goalType": "maintain", "experienceClass": "intermediate", "daysPerWeek": 4, "sessionMinutes": 60, "environment": "gym", "baselineStepsPerDay": null, "healthDataAccepted": true },
+    "currentPlan": { "stepTarget": 6000 },
+    "observations": {
+      "weight": { "validCount": 5, "spanDays": 14, "summary": "stable" },
+      "steps": { "summary": "zero observations in period", "validCount": 0 }
+    },
+    "adaptationHistory": []
+  },
+  "expected": {
+    "classification": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "steps series confidence = none; missing days are explicit gaps, never zero-filled (DATA-QUALITY §7)" } ] },
+    "initialPlan": { "label": "NOT_APPLICABLE", "expectations": [ { "assert": "review scenario" } ] },
+    "adaptation": {
+      "label": "PRODUCT_POLICY_APPROVED",
+      "expectations": [
+        { "assert": "no step-target change in either direction; step rules report InsufficientEvidence" },
+        { "assert": "requestMoreData includes the steps gap with candidate remedies (connect device / manual logging)" }
+      ]
+    },
+    "reasonCodes": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "insufficientEvidence for steps; other domains evaluated normally" } ] },
+    "safety": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "pass" } ] }
+  }
+}

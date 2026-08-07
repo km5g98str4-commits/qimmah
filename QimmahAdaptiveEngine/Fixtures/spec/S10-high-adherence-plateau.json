@@ -1,0 +1,32 @@
+{
+  "scenarioId": "S10",
+  "title": "Verified plateau with HIGH adherence — one small adaptation, not several",
+  "tags": ["weeklyReview", "plateau", "changeBudget", "normative"],
+  "requestKind": "weeklyReview",
+  "input": {
+    "profile": { "sex": "male", "ageYears": 28, "heightMm": 1760, "massGrams": 80000, "goalType": "cut", "experienceClass": "intermediate", "daysPerWeek": 4, "sessionMinutes": 60, "environment": "gym", "healthDataAccepted": true },
+    "currentPlan": { "calorieTargetKcal": "oracle cut target", "stepTarget": 7000 },
+    "observations": {
+      "weight": { "summary": "6 valid points over 16 days spanning 3 weeks, slope within plateau band", "validCount": 6, "spanDays": 16 },
+      "calories": { "adherenceBp": 9500 },
+      "training": { "completionBp": 9500, "performanceTrend": "stable" },
+      "recovery": { "summary": "all markers stable — recovery OK" }
+    },
+    "adaptationHistory": []
+  },
+  "expected": {
+    "classification": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "verified plateau + adherenceHigh + recovery OK" } ] },
+    "initialPlan": { "label": "NOT_APPLICABLE", "expectations": [ { "assert": "review scenario" } ] },
+    "adaptation": {
+      "label": "RESEARCH_REQUIRED",
+      "expectations": [
+        { "assert": "exactly ONE major proposal survives the budget: small changeCalories(negative, ≤ per-cycle cap) OR small changeStepTarget(positive) — two competing rules, resolver picks deterministically; the loser appears in the ReasonTrace as suppressed/deferred" },
+        { "assert": "deltas within DECISION-MODEL §3.2 caps; calorie delta magnitude blocked on EVR-001 mapping; step increment blocked on EVR-007", "registerId": "EVR-007" },
+        { "assert": "requiresApproval = true; cooldown recorded on the chosen variable when accepted" }
+      ]
+    },
+    "reasonCodes": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "weightPlateauConfirmed + adherenceHigh on the proposal" } ] },
+    "safety": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "pass; screened proposal within decision space" } ] }
+  },
+  "notes": "The core happy-path adaptation. Numeric deltas cannot ship until EVR-007 resolves and the calorie-delta policy is signed."
+}

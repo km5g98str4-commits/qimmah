@@ -1,0 +1,28 @@
+{
+  "scenarioId": "S23",
+  "title": "Repeated missed workouts — shrink the plan to reality, never punish",
+  "tags": ["weeklyReview", "adherence", "training"],
+  "requestKind": "weeklyReview",
+  "input": {
+    "profile": { "sex": "male", "ageYears": 29, "heightMm": 1770, "massGrams": 81000, "goalType": "bulk", "experienceClass": "intermediate", "daysPerWeek": 5, "sessionMinutes": 60, "environment": "gym", "healthDataAccepted": true },
+    "observations": {
+      "training": { "completionBp": 4000, "summary": "2 of 5 sessions completed, 3 weeks running" },
+      "weight": { "validCount": 5, "spanDays": 15, "summary": "flat" },
+      "recovery": { "summary": "stable" }
+    },
+    "adaptationHistory": []
+  },
+  "expected": {
+    "classification": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "sustained low training adherence with confidence ≥ moderate (multi-week, not one bad week)" } ] },
+    "initialPlan": { "label": "NOT_APPLICABLE", "expectations": [ { "assert": "review scenario" } ] },
+    "adaptation": {
+      "label": "PRODUCT_POLICY_APPROVED",
+      "expectations": [
+        { "assert": "proposal: changeTrainingFrequency(-1) (or session-length reduction) — adherence class, requiresApproval, framed as fitting the plan to real life" },
+        { "assert": "no volume-punishment, no calorie change from this signal; frequency 3×/week still supports ≥2× per-muscle coverage", "registerId": "EVR-004" }
+      ]
+    },
+    "reasonCodes": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "adherenceLow present; codes carry no-blame framing by design" } ] },
+    "safety": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "pass" } ] }
+  }
+}

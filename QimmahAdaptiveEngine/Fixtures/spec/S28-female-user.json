@@ -1,0 +1,24 @@
+{
+  "scenarioId": "S28",
+  "title": "Female user — sex-specific BMR path, floors, and warning thresholds",
+  "tags": ["initialPlan", "sex-specific", "characterized"],
+  "requestKind": "initialPlan",
+  "input": {
+    "profile": { "sex": "female", "ageYears": 28, "heightMm": 1600, "massGrams": 54000, "targetMassGrams": 51000, "goalType": "cut", "experienceClass": "beginner", "daysPerWeek": 3, "sessionMinutes": 45, "environment": "gym", "neatBand": "light", "healthDataAccepted": true }
+  },
+  "expected": {
+    "classification": { "label": "CHARACTERIZED_EXISTING", "expectations": [ { "assert": "female Mifflin constant −161", "oracleRef": "src/lib/calculators.ts:197" } ] },
+    "initialPlan": {
+      "label": "CHARACTERIZED_EXISTING",
+      "goldenPending": true,
+      "expectations": [
+        { "assert": "small female + cut: raw TDEE−400 likely near/below floor — floor 1200 applies; clamp VISIBLE (calorieFloorApplied), never silent", "oracleRef": "src/lib/calculators.ts:228,253-256" },
+        { "assert": "low-calorie warning threshold for females = BMR (compared against raw pre-floor value)", "oracleRef": "src/lib/calculators.ts:262-264" },
+        { "assert": "floors are labeled PRODUCT_POLICY convention, not evidence; VLCD territory (<800) never issuable", "registerId": "EVR-009" }
+      ]
+    },
+    "adaptation": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "future plateau cuts blocked when at floor — the step/expenditure lever is the only remaining direction (coupled-variable resolution)" } ] },
+    "reasonCodes": { "label": "PRODUCT_POLICY_APPROVED", "expectations": [ { "assert": "calorieFloorApplied when clamped" } ] },
+    "safety": { "label": "CHARACTERIZED_EXISTING", "expectations": [ { "assert": "clamp verdict with visible reason codes at checkpoint 1 when floor engages" } ] }
+  }
+}
