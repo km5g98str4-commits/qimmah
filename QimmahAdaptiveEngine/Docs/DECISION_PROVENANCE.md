@@ -14,15 +14,19 @@
 
 ```
 DecisionProvenance {
-  origin:        RuleId          # the rule that produced the winning candidate
-  pipelineStage: string          # where the final form was fixed (resolved | budgeted | safetyScreened)
-  engineVersion: string          # QAE_ENGINE_VERSION constant baked into the build
+  origin:                RuleId  # the rule that produced the winning candidate
+  pipelineStage:         string  # where the final form was fixed (resolved | budgeted | safetyScreened)
+  engineVersion:         string  # QAE_ENGINE_VERSION constant baked into the build
+  decisionSchemaVersion: string  # [CTO-QAE-004] — the Proposal SHAPE's own version; may migrate
+                                 #  while the engine stays compatible, and vice versa
   ruleManifest:  contentHash     # SHA-256 of the canonical rule-set manifest
   oracleVersion: string          # host/harness-supplied oracle identity ('none' when no oracle consulted)
   timestamp:     epochMs         # from the REQUEST's Now — never from a system clock
   seed:          integer         # replay-format field; the domain has no randomness and must ignore it
 }
 ```
+
+Minimum mandated set ([CTO-QAE-004]): `engineVersion · decisionSchemaVersion · oracleVersion · manifestHash · seed · timestamp · origin`. `pipelineStage` is carried additionally.
 
 No field is optional. A proposal without complete provenance is unconstructible in the pipeline (the builder requires every field) and rejected by the proof suite.
 

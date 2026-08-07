@@ -75,12 +75,13 @@
 
     "DecisionProvenance": {
       "type": "object",
-      "description": "[CTO-QAE-003] migration v0.2.0 — full reconstructability (Docs/DECISION_PROVENANCE.md). No field optional.",
-      "required": ["origin", "pipelineStage", "engineVersion", "ruleManifest", "oracleVersion", "timestamp", "seed"],
+      "description": "[CTO-QAE-003] migration v0.2.0; [CTO-QAE-004] migration v0.3.0 adds decisionSchemaVersion — full reconstructability (Docs/DECISION_PROVENANCE.md). No field optional.",
+      "required": ["origin", "pipelineStage", "engineVersion", "decisionSchemaVersion", "ruleManifest", "oracleVersion", "timestamp", "seed"],
       "properties": {
         "origin": { "$ref": "core.schema.json#/$defs/RuleId" },
         "pipelineStage": { "enum": ["resolved", "budgeted", "safetyScreened"] },
         "engineVersion": { "type": "string" },
+        "decisionSchemaVersion": { "type": "string", "description": "[CTO-QAE-004] — the Proposal shape's own version, independent of engineVersion" },
         "ruleManifest": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
         "oracleVersion": { "type": "string" },
         "timestamp": { "type": "integer", "description": "epochMs from the REQUEST's Now — never a system clock" },

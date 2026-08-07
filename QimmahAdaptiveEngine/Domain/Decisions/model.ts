@@ -5,7 +5,9 @@
 import type { Confidence, Now, PriorityClass, ReasonCode } from '../Shared/core'
 import type { CompositeComponent } from '../Safety/safetyPolicy'
 
-export const QAE_ENGINE_VERSION = '0.2.0'
+export const QAE_ENGINE_VERSION = '0.3.0'
+/** [CTO-QAE-004] §2: versioned independently of the engine — the Proposal SHAPE can migrate while the engine stays compatible. */
+export const DECISION_SCHEMA_VERSION = '1.0.0'
 
 /** Ordered for conflict resolution; index = rank (lower wins). */
 export const PRIORITY_CLASS_ORDER: readonly PriorityClass[] = Object.freeze([
@@ -96,6 +98,7 @@ export interface DecisionProvenance {
   origin: string
   pipelineStage: 'resolved' | 'budgeted' | 'safetyScreened'
   engineVersion: string
+  decisionSchemaVersion: string
   ruleManifest: string
   oracleVersion: string
   timestamp: number

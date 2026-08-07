@@ -15,6 +15,7 @@ import {
 import { buildManifest } from '../Domain/Decisions/manifest'
 import { developerToken, explainDecision } from '../Domain/Decisions/explain'
 import {
+  DECISION_SCHEMA_VERSION,
   QAE_ENGINE_VERSION,
   type DecisionRequest,
   type RuleDef,
@@ -178,7 +179,8 @@ check('keepPlan carries reasons + full provenance', nothing.proposals[0].reasonC
 for (const p of run1.proposals) {
   const pv = p.provenance
   check(`provenance complete for ${p.ruleId}`,
-    pv.origin === p.ruleId && pv.engineVersion === QAE_ENGINE_VERSION && /^[0-9a-f]{64}$/.test(pv.ruleManifest) &&
+    pv.origin === p.ruleId && pv.engineVersion === QAE_ENGINE_VERSION && pv.decisionSchemaVersion === DECISION_SCHEMA_VERSION &&
+    /^[0-9a-f]{64}$/.test(pv.ruleManifest) &&
     pv.oracleVersion === 'none' && pv.timestamp === baseRequest.now.epochMs && pv.seed === 0 && pv.pipelineStage === 'budgeted')
 }
 check('provenance manifest matches result manifest', run1.proposals.every((p) => p.provenance.ruleManifest === run1.manifest.contentHash))
@@ -205,11 +207,33 @@ const accounted = new Set<string>([
 check('trace totality: every rule accounted for', ALL_RULES.every((r) => accounted.has(r.ruleId)))
 check('every proposal has ≥1 reason code', run1.proposals.every((p) => p.reasonCodes.length >= 1))
 
-// ── 11 · Explainability layers never mix ─────────────────────────────────────
+// ── 11 · Explainability: single source, layers never mix ([CTO-QAE-004] §6) ──
 const ex = explainDecision(run1)
 check('developer tokens SCREAMING_SNAKE', ex.developer.every((t) => /^[A-Z0-9_]+$/.test(t)) && developerToken('calorieFloorApplied') === 'CALORIE_FLOOR_APPLIED')
 check('audit sentences structured + English-templated', ex.audit.every((s) => /^Rule QAE-/.test(s)))
 check('user layer is codes only (no sentences, no Arabic)', ex.user.every((c) => /^[a-z][a-zA-Z0-9]*$/.test(c)))
+check('single source: developer/audit are projections of the same entries', ex.developer.length === ex.developerEntries.length && ex.audit.length === ex.developerEntries.length)
+check('single source: every user code exists in a developer entry', ex.user.every((c) => ex.developerEntries.some((e) => e.code === c && e.event === 'proposed')))
+check('single source: audit embeds the developer token', ex.developerEntries.every((e, i) => e.event === 'insufficientEvidence' || ex.audit[i].includes(e.token)))
+
+// ── 11b · Pipeline invariants I5/I7 ([CTO-QAE-004] / PIPELINE_INVARIANTS.md) ──
+// I5 budget blindness: renaming kinds/variables' NAMES (keeping classes and
+// grouping structure) must not change which classes win the budget.
+const renameAction = (r: RuleDef, kind: string, variable: string): RuleDef => ({ ...r, action: { ...r.action, kind, targetVariable: variable } })
+const renamedRules = [
+  renameAction(R_RECOVERY, 'opaqueA', 'v1'),
+  renameAction(R_PROGRESS, 'opaqueB', 'v2'),
+  renameAction(R_MINOR, 'opaqueC', 'v3'),
+]
+const originalRun = resolve(structuredClone(baseRequest), [R_RECOVERY, { ...R_PROGRESS, action: { ...R_PROGRESS.action, targetVariable: 'v2unique' } }, R_MINOR], PACK_VERSIONS)
+const renamedRun = resolve(structuredClone(baseRequest), renamedRules, PACK_VERSIONS)
+check('I5 budget blindness: kind/variable names do not affect budget outcomes',
+  canonicalSerialize(originalRun.proposals.map((p) => [p.ruleId, p.changeClass])) === canonicalSerialize(renamedRun.proposals.map((p) => [p.ruleId, p.changeClass])))
+// I7 pipeline never mutates the request: byte-identical before and after.
+const pristine = structuredClone(baseRequest)
+const before = canonicalSerialize(pristine)
+resolve(pristine, ALL_RULES, PACK_VERSIONS)
+check('I7 request unmutated (pre/post byte-identical)', canonicalSerialize(pristine) === before)
 
 // ── 12 · Time helpers backing cooldowns ──────────────────────────────────────
 check('localDateToDays inverse of localDate', localDateToDays(localDate(1785542400000, 180)) === Math.floor((1785542400000 + 180 * 60000) / 86400000))

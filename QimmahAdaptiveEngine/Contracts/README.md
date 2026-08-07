@@ -7,6 +7,8 @@ Language-neutral contracts for the Qimmah Adaptive Engine. Authorized by [CTO-QA
 |---|---|---|---|
 | proposal.schema v0.2.0 | [CTO-QAE-003] (provenance mandate) | `AdaptationProposal` gains required `provenance` object (origin, pipelineStage, engineVersion, ruleManifest, oracleVersion, timestamp, seed) | none — additive; harness re-run verified byte-identical goldens |
 | reason-codes v0.1.1 | [CTO-QAE-003] Phase 2 | pipeline codes added (`noCandidateFired`, `preconditionNotMet`, `conflictResolvedByPriority`) | none — additive |
+| proposal.schema v0.3.0 | [CTO-QAE-004] §2 | `DecisionProvenance` gains required `decisionSchemaVersion` (Proposal shape versioned independently of engine) | none — additive; harness re-run verified byte-identical goldens |
+| time.ts (additive) | [CTO-QAE-003] Phase 2 | `daysFromCivil` / `localDateToDays` pure helpers for cooldown day math | none — additive |
 
 ## Conventions
 

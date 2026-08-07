@@ -12,6 +12,7 @@ import { evaluatePredicate } from './predicates'
 import { buildManifest } from './manifest'
 import {
   CONFIDENCE_ORDER,
+  DECISION_SCHEMA_VERSION,
   PRIORITY_CLASS_ORDER,
   QAE_ENGINE_VERSION,
   type DecisionRequest,
@@ -178,6 +179,7 @@ export function resolve(
     origin,
     pipelineStage: 'budgeted',
     engineVersion: QAE_ENGINE_VERSION,
+    decisionSchemaVersion: DECISION_SCHEMA_VERSION,
     ruleManifest: manifest.contentHash,
     oracleVersion: request.oracleVersion,
     timestamp: request.now.epochMs,

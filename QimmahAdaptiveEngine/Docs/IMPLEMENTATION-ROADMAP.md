@@ -28,7 +28,8 @@ Delivered: the Docs/ set · Contracts/ drafts · Fixtures/spec/ (34 scenarios, l
 
 ## Architecture Lock ([CTO-QAE-003])
 
-Locked as of Phase 1 approval: **Contracts · Canonical Types · Oracle Harness · SafetyPolicy · Integer Canonicalization · Rule Manifest · Reason Codes.**
+Locked as of Phase 1 approval ([CTO-QAE-003]): **Contracts · Canonical Types · Oracle Harness · SafetyPolicy · Integer Canonicalization · Rule Manifest · Reason Codes.**
+Locked as of Phase 2 approval ([CTO-QAE-004]): **Decision Pipeline · Proposal Model · Provenance Contract · Explainability Layers · Conflict Resolver · Change Budget · Composite Evaluation Order · Pipeline Trace Model** — bound by `PIPELINE_INVARIANTS.md`; breaches are first-degree bugs.
 Any future change goes through **Migration, never direct edit**: a versioned change record stating what changes, why, the golden impact (proven by re-running the harness before/after), and the compatibility path. Golden-neutral *additive* extensions (new pure functions, new codes) are migrations too — recorded with a re-verified byte-identical golden run.
 
 **Authorized now (Phase 2, [CTO-QAE-003]): Decision Pipeline Foundation ONLY** — evidence ingestion · candidate rule generation · safety evaluation · conflict resolution · change budget · proposal generation · decision provenance · explainability layers. **Forbidden in this phase:** any nutrition, training, adaptation, question, or recovery domain logic — the pipeline is domain-agnostic and rules are declarative data. Exit criteria (all mandatory): 100 % determinism · zero hidden state · zero mutable globals · zero side effects · every proposal replayable · every decision explainable · every rejection reason coded · every rule individually testable · fixed composite evaluation order · complete decision provenance.
