@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qimmah.app/qae/proposal.schema.json",
+  "title": "QAE Proposal, Decision & Safety Types (DRAFT)",
+  "$defs": {
+    "AdaptationAction": {
+      "description": "Closed ADT discriminated by kind. Composites contain only protective components (DECISION-MODEL §3.3).",
+      "oneOf": [
+        { "type": "object", "required": ["kind"], "properties": { "kind": { "const": "keepPlan" } }, "additionalProperties": false },
+        { "type": "object", "required": ["kind", "gaps"], "properties": { "kind": { "const": "requestMoreData" }, "gaps": { "type": "array", "items": { "type": "string" } } }, "additionalProperties": false },
+        { "type": "object", "required": ["kind", "deltaKcal"], "properties": { "kind": { "const": "changeCalories" }, "deltaKcal": { "type": "integer" } }, "additionalProperties": false },
+        { "type": "object", "required": ["kind", "delta"], "properties": { "kind": { "const": "changeStepTarget" }, "delta": { "type": "integer" } }, "additionalProperties": false },
+        { "type": "object", "required": ["kind", "deltaBp"], "properties": { "kind": { "const": "changeTrainingVolume" }, "deltaBp": { "type": "integer" } }, "additionalProperties": false },
+        { "type": "object", "required": ["kind", "delta"], "properties": { "kind": { "const": "changeTrainingFrequency" }, "delta": { "type": "integer", "minimum": -1, "maximum": 1 } }, "additionalProperties": false },
+        { "type": "object", "required": ["kind"], "properties": { "kind": { "const": "scheduleDeload" }, "weeks": { "type": "integer", "minimum": 1, "maximum": 2 } }, "additionalProperties": false },
+        { "type": "object", "required": ["kind", "slotId", "toExerciseId"], "properties": { "kind": { "const": "replaceExercise" }, "slotId": { "type": "string" }, "toExerciseId": { "type": "string" } }, "additionalProperties": false },
+        { "type": "object", "required": ["kind", "method"], "properties": { "kind": { "const": "changeProgressionMethod" }, "method": { "enum": ["repFirst", "doubleProgression", "rpeBased", "loadIncrement"] } }, "additionalProperties": false },
+        { "type": "object", "required": ["kind", "macros"], "properties": { "kind": { "const": "changeMacroDistribution" }, "macros": { "type": "object", "required": ["proteinG", "carbG", "fatG"], "properties": { "proteinG": { "type": "integer" }, "carbG": { "type": "integer" }, "fatG": { "type": "integer" } }, "additionalProperties": false } }, "additionalProperties": false },
+        { "type": "object", "required": ["kind", "toGoal"], "properties": { "kind": { "const": "proposeGoalTransition" }, "toGoal": { "$ref": "core.schema.json#/$defs/GoalType" } }, "additionalProperties": false },
+        { "type": "object", "required": ["kind", "components"], "properties": { "kind": { "const": "composite" }, "components": { "type": "array", "minItems": 1, "maxItems": 3, "items": { "$ref": "#/$defs/AdaptationAction" }, "description": "protective actions only; validated by SafetyPolicy — see counter-test in TESTING-STRATEGY §4" } }, "additionalProperties": false }
+      ]
+    },
+
+    "SafetyImpact": { "enum": ["none", "protective", "restrictive"] },
+
+    "CandidateProposal": {
+      "type": "object",
+      "required": ["ruleId", "action", "targetVariable", "changeClass", "priorityClass", "priorityScore", "reasonCodes", "evidence", "confidence", "safetyImpact"],
+      "properties": {
+        "ruleId": { "$ref": "core.schema.json#/$defs/RuleId" },
+        "action": { "$ref": "#/$defs/AdaptationAction" },
+        "targetVariable": { "$ref": "core.schema.json#/$defs/TargetVariable" },
+        "changeClass": { "$ref": "core.schema.json#/$defs/ChangeClass" },
+        "priorityClass": { "$ref": "core.schema.json#/$defs/PriorityClass" },
+        "priorityScore": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "reasonCodes": { "type": "array", "minItems": 1, "items": { "$ref": "core.schema.json#/$defs/ReasonCode" } },
+        "evidence": { "type": "array", "minItems": 1, "items": { "$ref": "core.schema.json#/$defs/EvidenceRef" } },
+        "confidence": { "$ref": "core.schema.json#/$defs/Confidence" },
+        "safetyImpact": { "$ref": "#/$defs/SafetyImpact" },
+        "cooldownKey": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+
+    "SafetyVerdict": {
+      "oneOf": [
+        { "type": "object", "required": ["kind"], "properties": { "kind": { "const": "pass" } }, "additionalProperties": false },
+        { "type": "object", "required": ["kind", "original", "adjusted", "reasonCodes"], "properties": { "kind": { "const": "clamp" }, "original": { "$ref": "#/$defs/AdaptationAction" }, "adjusted": { "$ref": "#/$defs/AdaptationAction" }, "reasonCodes": { "type": "array", "minItems": 1, "items": { "$ref": "core.schema.json#/$defs/ReasonCode" } } }, "additionalProperties": false, "description": "clamps are always visible — silent flooring is a defect class" },
+        { "type": "object", "required": ["kind", "reasonCodes"], "properties": { "kind": { "const": "block" }, "reasonCodes": { "type": "array", "minItems": 1, "items": { "$ref": "core.schema.json#/$defs/ReasonCode" } }, "safeFallback": { "type": "string", "description": "planVersionId of the safe state that remains in force" } }, "additionalProperties": false }
+      ]
+    },
+
+    "VariableBounds": {
+      "type": "object",
+      "properties": {
+        "min": { "type": "integer" },
+        "max": { "type": "integer" },
+        "maxDeltaPerCycle": { "type": "integer" },
+        "maxIncreasePerCycle": { "type": "integer" },
+        "maxDecreasePerCycle": { "type": "integer" }
+      },
+      "additionalProperties": false
+    },
+    "ValidDecisionSpace": {
+      "type": "object",
+      "description": "[CTO-QAE-001] §4 — safety constraints bound the space; they never silently mutate the plan. Computed every evaluation, embedded in responses so hosts can explain unsafe options before the user tries them.",
+      "required": ["perVariable", "blockedActionKinds", "reasonCodes"],
+      "properties": {
+        "perVariable": { "type": "object", "additionalProperties": { "$ref": "#/$defs/VariableBounds" } },
+        "blockedActionKinds": { "type": "array", "items": { "type": "string" } },
+        "reasonCodes": { "type": "array", "items": { "$ref": "core.schema.json#/$defs/ReasonCode" }, "description": "why each bound is active — always visible" }
+      },
+      "additionalProperties": false
+    },
+
+    "AdaptationProposal": {
+      "allOf": [{ "$ref": "#/$defs/CandidateProposal" }],
+      "type": "object",
+      "required": ["proposalId", "requiresApproval", "safetyScreen", "manifest"],
+      "properties": {
+        "proposalId": { "type": "string" },
+        "requiresApproval": { "type": "boolean", "description": "all plan-affecting proposals require approval (locked product decision); false only for requestMoreData/informational" },
+        "safetyScreen": { "$ref": "#/$defs/SafetyVerdict" },
+        "manifest": { "$ref": "core.schema.json#/$defs/RuleSetManifest" }
+      }
+    },
+
+    "AdaptationHistoryEntry": {
+      "type": "object",
+      "required": ["proposalId", "targetVariable", "actionKind", "decidedOn", "outcome"],
+      "properties": {
+        "proposalId": { "type": "string" },
+        "targetVariable": { "$ref": "core.schema.json#/$defs/TargetVariable" },
+        "actionKind": { "type": "string" },
+        "direction": { "enum": ["increase", "decrease", "neutral"] },
+        "decidedOn": { "$ref": "core.schema.json#/$defs/LocalDate" },
+        "outcome": { "enum": ["accepted", "rejected", "expired"] },
+        "appliedPlanVersionId": { "type": "string" }
+      },
+      "additionalProperties": false,
+      "description": "Both accepted and rejected entries drive cooldowns — the engine does not re-nag (fixture S30)."
+    }
+  }
+}

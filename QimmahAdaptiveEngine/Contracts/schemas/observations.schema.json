@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qimmah.app/qae/observations.schema.json",
+  "title": "QAE Observation & Data Quality Types (DRAFT)",
+  "$defs": {
+    "ObservationKind": {
+      "enum": ["bodyMass", "steps", "sleepMinutes", "soreness", "fatigue", "hunger", "sessionCompletion", "performanceMarker", "calorieIntake"]
+    },
+    "RawObservation": {
+      "type": "object",
+      "description": "Host-captured. Only DataQuality may consume this type; rules read QualityAssessedSeries.",
+      "required": ["id", "kind", "value", "epochMs", "tzOffsetMinutes", "source"],
+      "properties": {
+        "id": { "type": "string" },
+        "kind": { "$ref": "#/$defs/ObservationKind" },
+        "value": { "type": "integer", "description": "canonical unit per kind: bodyMass=grams, steps=count, sleepMinutes=min, soreness/fatigue/hunger=closed 0-3 scale, sessionCompletion=bp of planned sets, performanceMarker=see meta, calorieIntake=kcal" },
+        "epochMs": { "type": "integer", "minimum": 0 },
+        "tzOffsetMinutes": { "type": "integer", "minimum": -840, "maximum": 840 },
+        "source": { "$ref": "core.schema.json#/$defs/ObservationSource" },
+        "meta": { "type": "object", "additionalProperties": true }
+      },
+      "additionalProperties": false
+    },
+    "QualityFlag": { "enum": ["outlier", "duplicate", "stale", "impossible", "sourceConflict", "gapAdjacent"] },
+    "AssessedPoint": {
+      "type": "object",
+      "required": ["localDate", "value", "sourceConfidence", "flags"],
+      "properties": {
+        "localDate": { "$ref": "core.schema.json#/$defs/LocalDate" },
+        "value": { "type": "integer" },
+        "sourceConfidence": { "$ref": "core.schema.json#/$defs/Confidence" },
+        "flags": { "type": "array", "items": { "$ref": "#/$defs/QualityFlag" } },
+        "trendWeightBp": { "type": "integer", "minimum": 0, "maximum": 10000, "description": "weight applied in trend fitting; outliers down-weighted, never deleted" }
+      },
+      "additionalProperties": false
+    },
+    "QualityAssessedSeries": {
+      "type": "object",
+      "required": ["kind", "points", "validCount", "spanDays", "coverageBp", "seriesConfidence"],
+      "properties": {
+        "kind": { "$ref": "#/$defs/ObservationKind" },
+        "points": { "type": "array", "items": { "$ref": "#/$defs/AssessedPoint" }, "description": "ordered by localDate asc" },
+        "validCount": { "type": "integer", "minimum": 0 },
+        "spanDays": { "type": "integer", "minimum": 0 },
+        "coverageBp": { "type": "integer", "minimum": 0, "maximum": 10000 },
+        "seriesConfidence": { "$ref": "core.schema.json#/$defs/Confidence" },
+        "sourceContainsHealth": { "type": "boolean", "description": "hosts must not sync series containing health-sourced points (characterized invariant)" }
+      },
+      "additionalProperties": false
+    },
+    "DataQualityReport": {
+      "type": "object",
+      "required": ["exclusions", "conflicts"],
+      "properties": {
+        "exclusions": {
+          "type": "array",
+          "description": "Every excluded/down-weighted observation, visible. Silent dropping is a defect class. Ordered by observationId.",
+          "items": {
+            "type": "object",
+            "required": ["observationId", "flag", "reasonCode"],
+            "properties": {
+              "observationId": { "type": "string" },
+              "flag": { "$ref": "#/$defs/QualityFlag" },
+              "reasonCode": { "$ref": "core.schema.json#/$defs/ReasonCode" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "conflicts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["localDate", "kind", "winnerObservationId", "loserObservationIds"],
+            "properties": {
+              "localDate": { "$ref": "core.schema.json#/$defs/LocalDate" },
+              "kind": { "$ref": "#/$defs/ObservationKind" },
+              "winnerObservationId": { "type": "string" },
+              "loserObservationIds": { "type": "array", "items": { "type": "string" } }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "TrendReport": {
+      "type": "object",
+      "required": ["period", "adherenceConfidence"],
+      "properties": {
+        "period": { "$ref": "core.schema.json#/$defs/ReviewPeriod" },
+        "weight": {
+          "type": "object",
+          "required": ["avgGrams", "deltaGramsPerWeek", "direction", "validCount", "confidence"],
+          "properties": {
+            "avgGrams": { "type": "integer" },
+            "deltaGramsPerWeek": { "type": "integer" },
+            "direction": { "$ref": "core.schema.json#/$defs/TrendDirection" },
+            "validCount": { "type": "integer" },
+            "confidence": { "$ref": "core.schema.json#/$defs/Confidence" }
+          },
+          "additionalProperties": false
+        },
+        "steps": {
+          "type": "object",
+          "required": ["avgPerDay", "targetAdherenceBp", "confidence"],
+          "properties": {
+            "avgPerDay": { "type": "integer" },
+            "targetAdherenceBp": { "type": "integer" },
+            "confidence": { "$ref": "core.schema.json#/$defs/Confidence" }
+          },
+          "additionalProperties": false
+        },
+        "calories": {
+          "type": "object",
+          "required": ["adherenceBp", "confidence"],
+          "properties": {
+            "adherenceBp": { "type": "integer" },
+            "confidence": { "$ref": "core.schema.json#/$defs/Confidence" }
+          },
+          "additionalProperties": false
+        },
+        "training": {
+          "type": "object",
+          "required": ["completionBp", "performanceTrend", "confidence"],
+          "properties": {
+            "completionBp": { "type": "integer" },
+            "performanceTrend": { "$ref": "core.schema.json#/$defs/TrendDirection" },
+            "confidence": { "$ref": "core.schema.json#/$defs/Confidence" }
+          },
+          "additionalProperties": false
+        },
+        "recovery": {
+          "type": "object",
+          "required": ["confidence"],
+          "properties": {
+            "sleepTrend": { "$ref": "core.schema.json#/$defs/TrendDirection" },
+            "sorenessTrend": { "$ref": "core.schema.json#/$defs/TrendDirection" },
+            "fatigueTrend": { "$ref": "core.schema.json#/$defs/TrendDirection" },
+            "hungerTrend": { "$ref": "core.schema.json#/$defs/TrendDirection" },
+            "confidence": { "$ref": "core.schema.json#/$defs/Confidence" }
+          },
+          "additionalProperties": false
+        },
+        "contextBoundaryCrossed": { "type": "boolean", "description": "true when a Ramadan/goal-phase boundary falls inside or adjacent to the period; cross-boundary comparisons are suppressed" },
+        "comparisons": { "type": "array", "maxItems": 4, "items": { "type": "object" }, "description": "previous-period summaries, newest first" },
+        "adherenceConfidence": { "$ref": "core.schema.json#/$defs/Confidence", "description": "is the data itself trustworthy" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

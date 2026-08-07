@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qimmah.app/qae/core.schema.json",
+  "title": "QAE Core Types (DRAFT)",
+  "description": "Shared enums and value objects. All quantities canonical integers per Docs/NUMERIC-CONTRACT.md.",
+  "$defs": {
+    "Sex": { "enum": ["male", "female", "unspecified"] },
+    "GoalType": { "enum": ["cut", "bulk", "maintain"] },
+    "GoalPhase": { "enum": ["active", "deloadWeek", "dietBreak", "transitionPending", "completed", "aborted"] },
+    "ExperienceBand": { "enum": ["beginner", "intermediate", "advanced"] },
+    "ExperienceClass": { "enum": ["complete_beginner", "beginner", "early_intermediate", "intermediate", "advanced", "returning"] },
+    "Environment": { "enum": ["gym", "home", "machinesOnly"] },
+    "Confidence": { "enum": ["none", "low", "moderate", "high"] },
+    "PriorityClass": {
+      "description": "Closed, ordered. Conflict resolution compares class before score: safety > minorRestriction > injuryRestriction > dataIntegrity > recovery > adherence > goalProgress > optimization > preference.",
+      "enum": ["safety", "minorRestriction", "injuryRestriction", "dataIntegrity", "recovery", "adherence", "goalProgress", "optimization", "preference"]
+    },
+    "ChangeClass": { "enum": ["major", "minor", "compositeSafetyRecovery"] },
+    "ObservationSource": { "enum": ["manual", "healthKit", "derived", "imported"] },
+    "TrendDirection": { "enum": ["falling", "stable", "rising", "indeterminate"] },
+    "InjuryFlag": { "enum": ["knee", "shoulder", "lowerBack", "wrist", "elbow", "ankle", "neck", "hip", "upperBack", "core"] },
+    "MovementPattern": { "enum": ["squat", "hinge", "lungeSplit", "horizontalPush", "verticalPush", "horizontalPull", "verticalPull", "carry", "core", "isolation"] },
+    "Muscle": { "enum": ["chest", "back", "shoulders", "biceps", "triceps", "quads", "hamstrings", "glutes", "calves", "core", "forearms"] },
+    "TargetVariable": { "enum": ["calories", "macros", "stepTarget", "trainingVolume", "trainingFrequency", "progressionMethod", "exerciseSlot", "goal", "deload"] },
+
+    "LocalDate": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$", "description": "Derived arithmetically from epochMs+tzOffsetMinutes (NUMERIC-CONTRACT §4); never from a Calendar API." },
+    "Now": {
+      "type": "object",
+      "required": ["epochMs", "tzOffsetMinutes"],
+      "properties": {
+        "epochMs": { "type": "integer", "minimum": 0 },
+        "tzOffsetMinutes": { "type": "integer", "minimum": -840, "maximum": 840 }
+      },
+      "additionalProperties": false
+    },
+    "ReviewPeriod": {
+      "type": "object",
+      "required": ["startDate", "endDate"],
+      "properties": {
+        "startDate": { "$ref": "#/$defs/LocalDate" },
+        "endDate": { "$ref": "#/$defs/LocalDate" }
+      },
+      "additionalProperties": false,
+      "description": "Inclusive local dates, host-computed. The domain never derives week boundaries."
+    },
+
+    "SemVer": { "type": "string", "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$" },
+    "RuleId": { "type": "string", "pattern": "^QAE-[A-Z]{2,3}-\\d{3}$" },
+    "ReasonCode": { "type": "string", "pattern": "^[a-z][a-zA-Z0-9]*$", "description": "Must exist in Contracts/reason-codes.json. Never a UI string." },
+    "RuleSetManifest": {
+      "type": "object",
+      "required": ["perDomainVersions", "contentHash"],
+      "properties": {
+        "perDomainVersions": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/SemVer" },
+          "description": "domain → semver of its rule pack"
+        },
+        "contentHash": { "type": "string", "pattern": "^[0-9a-f]{64}$", "description": "SHA-256 over canonical JSON serialization (NUMERIC-CONTRACT §3), lowercase hex." }
+      },
+      "additionalProperties": false
+    },
+
+    "EvidenceRef": {
+      "type": "object",
+      "required": ["metric", "observedValue"],
+      "properties": {
+        "metric": { "type": "string" },
+        "window": { "$ref": "#/$defs/ReviewPeriod" },
+        "observedValue": { "type": "integer" },
+        "thresholdValue": { "type": "integer" },
+        "registerId": { "type": "string", "pattern": "^EVR-\\d{3}$", "description": "EVIDENCE-REGISTER entry backing the threshold." }
+      },
+      "additionalProperties": false
+    },
+    "ReasonTrace": {
+      "type": "object",
+      "required": ["fired", "suppressed", "notFired", "insufficientEvidence"],
+      "properties": {
+        "fired": { "type": "array", "items": { "$ref": "#/$defs/RuleId" }, "description": "ordered by (priorityClass, priorityScore desc, ruleId)" },
+        "suppressed": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["ruleId", "suppressedBy", "reasonCodes"],
+            "properties": {
+              "ruleId": { "$ref": "#/$defs/RuleId" },
+              "suppressedBy": { "$ref": "#/$defs/RuleId" },
+              "reasonCodes": { "type": "array", "items": { "$ref": "#/$defs/ReasonCode" } }
+            },
+            "additionalProperties": false
+          }
+        },
+        "notFired": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["ruleId", "reasonCodes"],
+            "properties": {
+              "ruleId": { "$ref": "#/$defs/RuleId" },
+              "reasonCodes": { "type": "array", "items": { "$ref": "#/$defs/ReasonCode" } }
+            },
+            "additionalProperties": false
+          }
+        },
+        "insufficientEvidence": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["ruleId", "gaps"],
+            "properties": {
+              "ruleId": { "$ref": "#/$defs/RuleId" },
+              "gaps": { "type": "array", "items": { "type": "string" } }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

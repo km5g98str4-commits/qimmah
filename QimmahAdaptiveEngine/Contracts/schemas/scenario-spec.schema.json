@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qimmah.app/qae/scenario-spec.schema.json",
+  "title": "QAE Scenario Specification Format (DRAFT)",
+  "description": "Phase 0.5 scenario SPECIFICATIONS ([CTO-QAE-001] §17). Expected outputs are never invented: each expectation block carries a source label. CHARACTERIZED_EXISTING expectations reference oracle code (file:line) and are goldenPending until the Phase-1 oracle harness machine-generates their values. RESEARCH_REQUIRED/UNRESOLVED blocks document the scenario without executable numbers.",
+  "type": "object",
+  "required": ["scenarioId", "title", "tags", "input", "expected"],
+  "properties": {
+    "scenarioId": { "type": "string", "pattern": "^S\\d{2}$" },
+    "title": { "type": "string" },
+    "tags": { "type": "array", "items": { "type": "string" } },
+    "requestKind": { "enum": ["initialPlan", "weeklyReview", "questionPath", "checkAction"] },
+    "input": {
+      "type": "object",
+      "description": "Structured scenario input. Canonical units (NUMERIC-CONTRACT). For weeklyReview scenarios, observation summaries describe the series the Phase-1 harness will expand into RawObservation arrays.",
+      "additionalProperties": true
+    },
+    "expected": {
+      "type": "object",
+      "required": ["classification", "initialPlan", "adaptation", "reasonCodes", "safety"],
+      "properties": {
+        "classification": { "$ref": "#/$defs/ExpectationBlock" },
+        "initialPlan": { "$ref": "#/$defs/ExpectationBlock" },
+        "adaptation": { "$ref": "#/$defs/ExpectationBlock" },
+        "reasonCodes": { "$ref": "#/$defs/ExpectationBlock" },
+        "safety": { "$ref": "#/$defs/ExpectationBlock" }
+      },
+      "additionalProperties": false
+    },
+    "notes": { "type": "string" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "ExpectationBlock": {
+      "type": "object",
+      "required": ["label", "expectations"],
+      "properties": {
+        "label": { "enum": ["CHARACTERIZED_EXISTING", "PRODUCT_POLICY_APPROVED", "RESEARCH_REQUIRED", "UNRESOLVED", "NOT_APPLICABLE"] },
+        "goldenPending": { "type": "boolean", "description": "true ⇒ numeric goldens to be machine-generated from the oracle in Phase 1; assertions here are the binding contract of WHAT gets pinned" },
+        "expectations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["assert"],
+            "properties": {
+              "assert": { "type": "string", "description": "precise, testable assertion" },
+              "oracleRef": { "type": "string", "description": "file:line in the legacy oracle backing a CHARACTERIZED_EXISTING assertion" },
+              "registerId": { "type": "string", "pattern": "^EVR-\\d{3}$" },
+              "unresolvedId": { "type": "string", "pattern": "^#U\\d+$" }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

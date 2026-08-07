@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qimmah.app/qae/plan.schema.json",
+  "title": "QAE Plan & Exercise Metadata Types (DRAFT)",
+  "$defs": {
+    "ExerciseMetadata": {
+      "type": "object",
+      "description": "[CTO-QAE-001] §8 — canonical schema only; library population and media/source/licensing decisions are untouched. Selection happens through metadata + policy, never hard-coded exercise-name branches.",
+      "required": ["stableExerciseId", "movementPattern", "primaryMuscles", "secondaryMuscles", "equipment", "stabilityDemand", "technicalDifficulty", "fatigueCost", "experienceSuitability", "contraindications", "laterality", "progressionCompatibility", "substitutionGroup", "setupComplexity"],
+      "properties": {
+        "stableExerciseId": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+        "movementPattern": { "$ref": "core.schema.json#/$defs/MovementPattern" },
+        "primaryMuscles": { "type": "array", "minItems": 1, "items": { "$ref": "core.schema.json#/$defs/Muscle" } },
+        "secondaryMuscles": { "type": "array", "items": { "$ref": "core.schema.json#/$defs/Muscle" } },
+        "equipment": { "type": "array", "items": { "type": "string" }, "description": "closed vocabulary (barbell, dumbbell, machine, cable, smith, rope, bodyweight, band, bench, ez-bar, plate, kettlebell); ALL listed pieces required" },
+        "stabilityDemand": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "technicalDifficulty": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "fatigueCost": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "experienceSuitability": {
+          "type": "object",
+          "required": ["minBand"],
+          "properties": {
+            "minBand": { "$ref": "core.schema.json#/$defs/ExperienceBand" },
+            "preferredBands": { "type": "array", "items": { "$ref": "core.schema.json#/$defs/ExperienceBand" } }
+          },
+          "additionalProperties": false
+        },
+        "contraindications": { "type": "array", "items": { "$ref": "core.schema.json#/$defs/InjuryFlag" }, "description": "supersedes legacy INJURY_RISKY_IDS blocklists (legacy map L-TRN-3); a new exercise declares its own risks" },
+        "impact": { "type": "boolean", "description": "high-impact flag; supersedes legacy English-name regex (L-QST-6)" },
+        "overhead": { "type": "boolean" },
+        "laterality": { "enum": ["unilateral", "bilateral"] },
+        "progressionCompatibility": { "type": "array", "items": { "enum": ["loadIncrement", "repProgression", "tempoProgression", "densityProgression"] } },
+        "substitutionGroup": { "type": "string" },
+        "setupComplexity": { "type": "integer", "minimum": 1, "maximum": 5 }
+      },
+      "additionalProperties": false
+    },
+
+    "ExerciseSlot": {
+      "type": "object",
+      "required": ["slotId", "movementPattern", "primaryMuscles", "selectedExerciseId", "sets", "repRange", "restSeconds"],
+      "properties": {
+        "slotId": { "type": "string" },
+        "movementPattern": { "$ref": "core.schema.json#/$defs/MovementPattern" },
+        "primaryMuscles": { "type": "array", "items": { "$ref": "core.schema.json#/$defs/Muscle" } },
+        "selectedExerciseId": { "type": "string" },
+        "sets": { "type": "integer", "minimum": 1, "maximum": 10 },
+        "repRange": {
+          "type": "object",
+          "required": ["min", "max"],
+          "properties": { "min": { "type": "integer", "minimum": 1 }, "max": { "type": "integer", "maximum": 100 } },
+          "additionalProperties": false
+        },
+        "restSeconds": { "type": "integer", "minimum": 0, "maximum": 600 },
+        "rirTarget": { "type": "integer", "minimum": 0, "maximum": 5, "description": "advanced-band feature (EVR-012: novice RIR is noisy)" },
+        "optional": { "type": "boolean" },
+        "alternatives": { "type": "array", "maxItems": 3, "items": { "type": "string" }, "description": "ranked substitute exercise ids" }
+      },
+      "additionalProperties": false
+    },
+
+    "TrainingPlan": {
+      "type": "object",
+      "required": ["frequencyPerWeek", "split", "days", "progressionMethod", "volumeIndexBp"],
+      "properties": {
+        "frequencyPerWeek": { "type": "integer", "minimum": 1, "maximum": 7 },
+        "split": { "enum": ["fullBody", "upperLower", "pushPullLegs", "arnold", "broSplit", "custom"] },
+        "days": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["dayIndex", "dayType", "slots"],
+            "properties": {
+              "dayIndex": { "type": "integer", "minimum": 0, "maximum": 6 },
+              "dayType": { "enum": ["full", "upper", "lower", "push", "pull", "arms", "core", "rest"] },
+              "slots": { "type": "array", "items": { "$ref": "#/$defs/ExerciseSlot" } }
+            },
+            "additionalProperties": false
+          }
+        },
+        "progressionMethod": { "enum": ["repFirst", "doubleProgression", "rpeBased", "loadIncrement"] },
+        "volumeIndexBp": { "type": "integer", "description": "current volume vs plan reference, basis points (10000 = reference)" }
+      },
+      "additionalProperties": false
+    },
+    "NutritionPlan": {
+      "type": "object",
+      "required": ["calorieTargetKcal", "macros"],
+      "properties": {
+        "calorieTargetKcal": { "type": "integer", "minimum": 800, "description": "SafetyPolicy floors apply upstream; <800 (VLCD, EVR-009) is never issuable" },
+        "macros": {
+          "type": "object",
+          "required": ["proteinG", "carbG", "fatG"],
+          "properties": {
+            "proteinG": { "type": "integer", "minimum": 0 },
+            "carbG": { "type": "integer", "minimum": 0 },
+            "fatG": { "type": "integer", "minimum": 0 }
+          },
+          "additionalProperties": false
+        },
+        "mealDistributionRef": { "type": "string", "description": "host-side meal templating reference; QAE owns targets, not menus" }
+      },
+      "additionalProperties": false
+    },
+    "StepPlan": {
+      "type": "object",
+      "required": ["dailyTarget", "minimumExposureDays"],
+      "properties": {
+        "dailyTarget": { "type": "integer", "minimum": 1000, "maximum": 100000 },
+        "minimumExposureDays": { "type": "integer", "minimum": 1, "description": "days on this target before an increase is considered ([CTO-QAE-001] §14)" }
+      },
+      "additionalProperties": false
+    },
+
+    "Plan": {
+      "type": "object",
+      "required": ["planVersionId", "createdByManifest", "training", "nutrition", "steps", "goalRef"],
+      "properties": {
+        "planVersionId": { "type": "string" },
+        "basedOnVersionId": { "type": "string", "description": "absent only for version 1; reversibility is structural" },
+        "appliedProposalId": { "type": "string" },
+        "createdByManifest": { "$ref": "core.schema.json#/$defs/RuleSetManifest" },
+        "training": { "$ref": "#/$defs/TrainingPlan" },
+        "nutrition": { "$ref": "#/$defs/NutritionPlan" },
+        "steps": { "$ref": "#/$defs/StepPlan" },
+        "goalRef": {
+          "type": "object",
+          "required": ["goalType", "phase"],
+          "properties": {
+            "goalType": { "$ref": "core.schema.json#/$defs/GoalType" },
+            "phase": { "$ref": "core.schema.json#/$defs/GoalPhase" }
+          },
+          "additionalProperties": false
+        },
+        "warnings": { "type": "array", "items": { "$ref": "core.schema.json#/$defs/ReasonCode" }, "description": "legacy Arabic warning strings become reason codes; hosts map to copy" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

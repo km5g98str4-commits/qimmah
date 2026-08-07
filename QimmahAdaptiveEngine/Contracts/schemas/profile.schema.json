@@ -1,0 +1,240 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qimmah.app/qae/profile.schema.json",
+  "title": "QAE Profile Types (DRAFT)",
+  "$defs": {
+    "ExperienceModel": {
+      "type": "object",
+      "description": "[CTO-QAE-001] §12 — three axes, never collapsed. Rules must name the axis they read.",
+      "required": ["trainingKnowledge", "recentTrainingExposure", "currentWorkCapacity"],
+      "properties": {
+        "trainingKnowledge": { "$ref": "core.schema.json#/$defs/ExperienceClass" },
+        "recentTrainingExposure": {
+          "type": "object",
+          "required": ["band", "monthsSinceConsistent"],
+          "properties": {
+            "band": { "enum": ["none", "sporadic", "consistent"] },
+            "monthsSinceConsistent": { "type": "integer", "minimum": 0 }
+          },
+          "additionalProperties": false
+        },
+        "currentWorkCapacity": {
+          "type": "object",
+          "required": ["band", "confidence"],
+          "properties": {
+            "band": { "$ref": "core.schema.json#/$defs/ExperienceBand" },
+            "confidence": { "$ref": "core.schema.json#/$defs/Confidence" }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "AthleteProfile": {
+      "type": "object",
+      "description": "Finalized only when AssessmentCompleteness gates pass. Until then use PartialAthleteState.",
+      "required": ["identity", "body", "goal", "experience", "logistics", "activity", "limitations", "consents", "meta"],
+      "properties": {
+        "identity": {
+          "type": "object",
+          "required": ["sex", "ageYears"],
+          "properties": {
+            "sex": { "$ref": "core.schema.json#/$defs/Sex" },
+            "ageYears": { "type": "integer", "minimum": 13, "maximum": 100, "description": "Host computes from DOB + now. Unknown age is a blocking gap (SAFETY-POLICY §6) — it never defaults." }
+          },
+          "additionalProperties": false
+        },
+        "body": {
+          "type": "object",
+          "required": ["heightMm", "massGrams"],
+          "properties": {
+            "heightMm": { "type": "integer", "minimum": 1000, "maximum": 2500 },
+            "massGrams": { "type": "integer", "minimum": 25000, "maximum": 350000 },
+            "targetMassGrams": { "type": "integer", "minimum": 25000, "maximum": 350000 }
+          },
+          "additionalProperties": false
+        },
+        "goal": {
+          "type": "object",
+          "required": ["goalType", "phase"],
+          "properties": {
+            "goalType": { "$ref": "core.schema.json#/$defs/GoalType" },
+            "phase": { "$ref": "core.schema.json#/$defs/GoalPhase" }
+          },
+          "additionalProperties": false
+        },
+        "experience": { "$ref": "#/$defs/ExperienceModel" },
+        "logistics": {
+          "type": "object",
+          "required": ["daysPerWeek", "sessionMinutes", "environment", "equipment"],
+          "properties": {
+            "daysPerWeek": { "type": "integer", "minimum": 1, "maximum": 7 },
+            "sessionMinutes": { "type": "integer", "minimum": 15, "maximum": 240 },
+            "environment": { "$ref": "core.schema.json#/$defs/Environment" },
+            "equipment": { "type": "array", "items": { "type": "string" }, "description": "closed vocabulary; ordered lexically" }
+          },
+          "additionalProperties": false
+        },
+        "activity": {
+          "type": "object",
+          "required": ["neatBand"],
+          "properties": {
+            "neatBand": { "enum": ["sedentary", "light", "moderate", "active", "veryActive"] },
+            "baselineStepsPerDay": { "type": "integer", "minimum": 0, "maximum": 200000 },
+            "baselineStepsConfidence": { "$ref": "core.schema.json#/$defs/Confidence" }
+          },
+          "additionalProperties": false
+        },
+        "nutritionPrefs": {
+          "type": "object",
+          "properties": {
+            "dietPattern": { "type": "string" },
+            "mealsPerDay": { "type": "integer", "minimum": 1, "maximum": 8 },
+            "exclusions": { "type": "array", "items": { "type": "string" } }
+          },
+          "additionalProperties": false
+        },
+        "limitations": {
+          "type": "object",
+          "required": ["injuryFlags", "medicalFlags"],
+          "properties": {
+            "injuryFlags": { "type": "array", "items": { "$ref": "core.schema.json#/$defs/InjuryFlag" } },
+            "medicalFlags": { "type": "array", "items": { "type": "string" }, "description": "screening flags routing to safety reason codes only — never diagnosis" },
+            "needsClearance": { "type": "boolean" }
+          },
+          "additionalProperties": false
+        },
+        "recoveryBaseline": {
+          "type": "object",
+          "properties": {
+            "sleepBand": { "enum": ["short", "adequate", "long", "unknown"] }
+          },
+          "additionalProperties": false
+        },
+        "preferences": {
+          "type": "object",
+          "properties": {
+            "equipmentPreference": { "enum": ["machines", "freeWeights", "mixed", "bodyweight"] },
+            "dislikedExerciseIds": { "type": "array", "items": { "type": "string" } }
+          },
+          "additionalProperties": false
+        },
+        "consents": {
+          "type": "object",
+          "required": ["healthDataAccepted"],
+          "properties": { "healthDataAccepted": { "type": "boolean" } },
+          "additionalProperties": true,
+          "description": "Consumed as booleans; semantics owned by host."
+        },
+        "returningUser": {
+          "type": "object",
+          "required": ["detected"],
+          "properties": {
+            "detected": { "type": "boolean" },
+            "rampWeekIndex": { "type": "integer", "minimum": 0 }
+          },
+          "additionalProperties": false
+        },
+        "meta": {
+          "type": "object",
+          "required": ["schemaVersion", "assessedAt", "manifest"],
+          "properties": {
+            "schemaVersion": { "type": "integer" },
+            "assessedAt": { "$ref": "core.schema.json#/$defs/Now" },
+            "manifest": { "$ref": "core.schema.json#/$defs/RuleSetManifest" }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "KnownField": {
+      "type": "object",
+      "required": ["value", "source", "confidence"],
+      "properties": {
+        "value": {},
+        "source": { "enum": ["questionnaire", "observation", "derived", "migrated"] },
+        "confidence": { "$ref": "core.schema.json#/$defs/Confidence" },
+        "observedAt": { "$ref": "core.schema.json#/$defs/Now" }
+      },
+      "additionalProperties": false
+    },
+    "EvidenceGap": {
+      "type": "object",
+      "required": ["fieldPath", "blocks", "materiality"],
+      "properties": {
+        "fieldPath": { "type": "string" },
+        "blocks": { "type": "array", "items": { "enum": ["training", "nutrition", "steps", "safety", "adaptation"] } },
+        "materiality": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "candidateQuestionIds": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": false
+    },
+    "AssessmentCompleteness": {
+      "type": "object",
+      "required": ["perDomain", "mandatoryMissing", "safetyHolds"],
+      "properties": {
+        "perDomain": {
+          "type": "object",
+          "properties": {
+            "training": { "$ref": "core.schema.json#/$defs/Confidence" },
+            "nutrition": { "$ref": "core.schema.json#/$defs/Confidence" },
+            "steps": { "$ref": "core.schema.json#/$defs/Confidence" },
+            "safety": { "$ref": "core.schema.json#/$defs/Confidence" },
+            "recovery": { "$ref": "core.schema.json#/$defs/Confidence" }
+          },
+          "additionalProperties": false
+        },
+        "mandatoryMissing": { "type": "array", "items": { "type": "string" }, "description": "empty ⇒ finalization allowed (subject to safetyHolds)" },
+        "safetyHolds": { "type": "array", "items": { "$ref": "core.schema.json#/$defs/ReasonCode" } }
+      },
+      "additionalProperties": false
+    },
+    "PartialAthleteState": {
+      "type": "object",
+      "required": ["knowns", "gaps", "completeness"],
+      "properties": {
+        "knowns": { "type": "object", "additionalProperties": { "$ref": "#/$defs/KnownField" } },
+        "derived": { "type": "object", "additionalProperties": { "$ref": "#/$defs/KnownField" } },
+        "gaps": { "type": "array", "items": { "$ref": "#/$defs/EvidenceGap" }, "description": "ordered by materiality desc, then fieldPath" },
+        "completeness": { "$ref": "#/$defs/AssessmentCompleteness" }
+      },
+      "additionalProperties": false
+    },
+
+    "RamadanContext": {
+      "type": "object",
+      "required": ["fasting"],
+      "properties": {
+        "fasting": { "type": "boolean" },
+        "periodDates": { "$ref": "core.schema.json#/$defs/ReviewPeriod" },
+        "dailyEatingWindow": {
+          "type": "object",
+          "required": ["startMinuteOfDay", "endMinuteOfDay"],
+          "properties": {
+            "startMinuteOfDay": { "type": "integer", "minimum": 0, "maximum": 1439 },
+            "endMinuteOfDay": { "type": "integer", "minimum": 0, "maximum": 1439 }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false,
+      "description": "Host-supplied facts only. The engine computes nothing religious; absent ⇒ fasting:false."
+    },
+    "GoalLifecycleState": {
+      "type": "object",
+      "required": ["goalType", "phase", "phaseStartDate", "goalStartDate"],
+      "properties": {
+        "goalType": { "$ref": "core.schema.json#/$defs/GoalType" },
+        "phase": { "$ref": "core.schema.json#/$defs/GoalPhase" },
+        "phaseStartDate": { "$ref": "core.schema.json#/$defs/LocalDate" },
+        "goalStartDate": { "$ref": "core.schema.json#/$defs/LocalDate" },
+        "startMassGrams": { "type": "integer" },
+        "targetMassGrams": { "type": "integer" }
+      },
+      "additionalProperties": false
+    }
+  }
+}
