@@ -182,6 +182,32 @@ console.log('\n🔒 المرحلة ب — بعد التحصين (السلسلة 
   const invWrong = INVISIBLE_TABLES.filter((t) => shape(t) !== '')
   check('الأكواد والسجلّات: لا صلاحية إطلاقًا', invWrong.length === 0, invWrong.join(', '))
 
+  // ── ٤.٥) الوراثة الافتراضية مقطوعة للجداول **وللدوال** ────────────────
+  // منبع الثغرة كان المنح بالوراثة. قطعه للجداول وحدها يترك النصف الآخر:
+  // دالة `security definer` تُضاف لاحقًا بلا revoke تصير مكشوفة لـanon.
+  await asRole(db, null)
+  await db.exec(`create table public.future_tbl (id int);
+                 create function public.future_fn() returns int language sql as 'select 1';`)
+  const newTbl = await db.query(`select count(*)::int n from information_schema.role_table_grants
+                                 where table_schema='public' and table_name='future_tbl'
+                                   and grantee in ('anon','authenticated')`)
+  check('جدول جديد لا يُمنح لأدوار العميل بالوراثة', newTbl.rows[0].n === 0, `${newTbl.rows[0].n}`)
+  const newFn = await db.query(`select count(*)::int n from information_schema.role_routine_grants
+                                where routine_schema='public' and routine_name='future_fn'
+                                  and grantee in ('anon','authenticated')`)
+  check('دالة جديدة لا تُمنح لأدوار العميل بالوراثة', newFn.rows[0].n === 0, `${newFn.rows[0].n}`)
+  await db.exec(`drop function public.future_fn(); drop table public.future_tbl;`)
+
+  // والدوال المخصّصة للعميل ما زالت مكشوفة صراحةً (fail-closed لا fail-broken)
+  const rpcOpen = await db.query(`select count(*)::int n from information_schema.role_routine_grants
+                                  where routine_schema='public' and grantee='authenticated'
+                                    and routine_name in ('my_entitlement','start_trial','redeem_access_code','claim_pending_grants')`)
+  check('دوال العميل الأربع ما زالت مكشوفة صراحةً', rpcOpen.rows[0].n >= 4, `${rpcOpen.rows[0].n}`)
+  const adminOpen = await db.query(`select count(*)::int n from information_schema.role_routine_grants
+                                    where routine_schema='public' and grantee in ('anon','authenticated')
+                                      and routine_name like 'admin\\_%'`)
+  check('دوال الإدارة غير مكشوفة لأي دور عميل', adminOpen.rows[0].n === 0, `${adminOpen.rows[0].n}`)
+
   // ── ٥) service_role يبقى قادرًا على الإدارة ────────────────────────────
   const svcMissing = tables.filter((t) => !(matrix[t.table_name]?.service_role ?? []).includes('SELECT')).map((t) => t.table_name)
   check('service_role يحتفظ بصلاحياته الإدارية', svcMissing.length === 0, svcMissing.join(', '))
