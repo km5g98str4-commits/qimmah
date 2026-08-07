@@ -133,7 +133,8 @@
     "test:analytics": "node scripts/run-analytics-proof.mjs",
     "test:cto72-polish": "node scripts/run-cto72-polish-proof.mjs",
     "test:plan-changes": "node scripts/run-plan-changes-proof.mjs",
-    "test:entitlements": "node scripts/db/entitlements-proof.mjs"
+    "test:entitlements": "node scripts/db/entitlements-proof.mjs",
+    "test:privileges": "node scripts/db/privileges-proof.mjs"
   },
   "dependencies": {
     "@capacitor/app": "^8.1.0",
