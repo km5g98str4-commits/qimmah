@@ -15,7 +15,14 @@ export const product = {
 
   // روابط داخلية (يمكن ضبطها عبر .env)
   contactUrl: import.meta.env.VITE_CONTACT_URL ?? '#goal',
-  checkoutUrl: import.meta.env.VITE_CHECKOUT_URL ?? '#goal',
+  /**
+   * وجهة شراء «قِمّة Premium» — **متجر سلة**. مصدر واحد لا يُكرَّر في أي مكوّن:
+   * تغيير القناة تعديل سطر هنا لا مطاردة روابط. كان الافتراض `'#goal'` (منفذ
+   * ميت لا يقرؤه شيء) فصار وجهة حقيقية.
+   * الشراء يتمّ عند سلة بالكامل — لا دفع داخل التطبيق ولا مزوّد دفع ثالث.
+   * **السعر لا يُكتب هنا ولا في أي مكوّن** (الميثاق §0.1): سلة هي من تعرضه.
+   */
+  checkoutUrl: import.meta.env.VITE_CHECKOUT_URL ?? 'https://salla.sa/Qimmahsa',
 
   // تسميات عامة
   ctaLabel: 'افتح خطتي',
