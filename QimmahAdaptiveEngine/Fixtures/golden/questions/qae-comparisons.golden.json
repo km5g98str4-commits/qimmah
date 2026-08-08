@@ -1,0 +1,334 @@
+[
+  {
+    "pairId": "A-beginner-vs-advanced",
+    "personas": [
+      "beginner-gym",
+      "advanced-gym"
+    ],
+    "commonQuestions": [
+      "s-health-consent",
+      "b-age",
+      "b-sex",
+      "b-height",
+      "b-weight",
+      "x-trained-before",
+      "g-primary",
+      "e-place",
+      "a-days",
+      "a-session-minutes",
+      "l-has-injury",
+      "s-screen-gate",
+      "p-style"
+    ],
+    "onlyIn": {
+      "beginner-gym": [
+        "e-gym-type",
+        "g-fatloss-focus",
+        "x-confidence"
+      ],
+      "advanced-gym": [
+        "x-last-trained",
+        "x-total-duration",
+        "x-consistency"
+      ]
+    },
+    "whyTheyDiffer": {
+      "beginner-gym": [
+        {
+          "questionId": "e-gym-type",
+          "evidenceResponsible": [
+            "place"
+          ]
+        },
+        {
+          "questionId": "g-fatloss-focus",
+          "evidenceResponsible": [
+            "age",
+            "primaryGoalDisplay"
+          ]
+        },
+        {
+          "questionId": "x-confidence",
+          "evidenceResponsible": []
+        }
+      ],
+      "advanced-gym": [
+        {
+          "questionId": "x-last-trained",
+          "evidenceResponsible": [
+            "trainedBefore"
+          ]
+        },
+        {
+          "questionId": "x-total-duration",
+          "evidenceResponsible": [
+            "trainedBefore"
+          ]
+        },
+        {
+          "questionId": "x-consistency",
+          "evidenceResponsible": [
+            "trainedBefore"
+          ]
+        }
+      ],
+      "note": "evidenceResponsible lists the eligibility/skip predicate paths gating each differing question; empty = ordering/budget-driven difference (satiety, priority, budget class)"
+    },
+    "differenceCount": 6
+  },
+  {
+    "pairId": "B-home-vs-gym",
+    "personas": [
+      "home-dumbbells",
+      "gym-full"
+    ],
+    "commonQuestions": [
+      "s-health-consent",
+      "b-age",
+      "b-sex",
+      "b-height",
+      "b-weight",
+      "x-trained-before",
+      "g-primary",
+      "e-place",
+      "a-days",
+      "a-session-minutes",
+      "l-has-injury",
+      "s-screen-gate",
+      "p-style",
+      "x-last-trained"
+    ],
+    "onlyIn": {
+      "home-dumbbells": [
+        "e-equipment-list",
+        "s-pregnancy"
+      ],
+      "gym-full": [
+        "x-total-duration",
+        "x-consistency"
+      ]
+    },
+    "whyTheyDiffer": {
+      "home-dumbbells": [
+        {
+          "questionId": "e-equipment-list",
+          "evidenceResponsible": [
+            "place"
+          ]
+        },
+        {
+          "questionId": "s-pregnancy",
+          "evidenceResponsible": [
+            "age",
+            "sex"
+          ]
+        }
+      ],
+      "gym-full": [
+        {
+          "questionId": "x-total-duration",
+          "evidenceResponsible": [
+            "trainedBefore"
+          ]
+        },
+        {
+          "questionId": "x-consistency",
+          "evidenceResponsible": [
+            "trainedBefore"
+          ]
+        }
+      ],
+      "note": "evidenceResponsible lists the eligibility/skip predicate paths gating each differing question; empty = ordering/budget-driven difference (satiety, priority, budget class)"
+    },
+    "differenceCount": 4
+  },
+  {
+    "pairId": "C-injury-vs-none",
+    "personas": [
+      "injury-knee",
+      "beginner-gym"
+    ],
+    "commonQuestions": [
+      "s-health-consent",
+      "b-age",
+      "b-sex",
+      "b-height",
+      "b-weight",
+      "x-trained-before",
+      "g-primary",
+      "e-place",
+      "a-days",
+      "a-session-minutes",
+      "l-has-injury",
+      "s-screen-gate",
+      "p-style"
+    ],
+    "onlyIn": {
+      "injury-knee": [
+        "l-pain-level",
+        "l-current-areas",
+        "l-pain-on-movement"
+      ],
+      "beginner-gym": [
+        "e-gym-type",
+        "g-fatloss-focus",
+        "x-confidence"
+      ]
+    },
+    "whyTheyDiffer": {
+      "injury-knee": [
+        {
+          "questionId": "l-pain-level",
+          "evidenceResponsible": [
+            "hasInjury"
+          ]
+        },
+        {
+          "questionId": "l-current-areas",
+          "evidenceResponsible": [
+            "hasInjury"
+          ]
+        },
+        {
+          "questionId": "l-pain-on-movement",
+          "evidenceResponsible": [
+            "hasInjury"
+          ]
+        }
+      ],
+      "beginner-gym": [
+        {
+          "questionId": "e-gym-type",
+          "evidenceResponsible": [
+            "place"
+          ]
+        },
+        {
+          "questionId": "g-fatloss-focus",
+          "evidenceResponsible": [
+            "age",
+            "primaryGoalDisplay"
+          ]
+        },
+        {
+          "questionId": "x-confidence",
+          "evidenceResponsible": []
+        }
+      ],
+      "note": "evidenceResponsible lists the eligibility/skip predicate paths gating each differing question; empty = ordering/budget-driven difference (satiety, priority, budget class)"
+    },
+    "differenceCount": 6
+  },
+  {
+    "pairId": "D-minor-vs-adult",
+    "personas": [
+      "minor-16",
+      "beginner-gym"
+    ],
+    "commonQuestions": [
+      "s-health-consent",
+      "b-age",
+      "b-sex",
+      "b-height",
+      "b-weight",
+      "x-trained-before",
+      "g-primary",
+      "e-place",
+      "a-days",
+      "a-session-minutes",
+      "l-has-injury",
+      "s-screen-gate",
+      "p-style"
+    ],
+    "onlyIn": {
+      "minor-16": [
+        "x-last-trained",
+        "x-total-duration",
+        "x-consistency"
+      ],
+      "beginner-gym": [
+        "e-gym-type",
+        "g-fatloss-focus",
+        "x-confidence"
+      ]
+    },
+    "whyTheyDiffer": {
+      "minor-16": [
+        {
+          "questionId": "x-last-trained",
+          "evidenceResponsible": [
+            "trainedBefore"
+          ]
+        },
+        {
+          "questionId": "x-total-duration",
+          "evidenceResponsible": [
+            "trainedBefore"
+          ]
+        },
+        {
+          "questionId": "x-consistency",
+          "evidenceResponsible": [
+            "trainedBefore"
+          ]
+        }
+      ],
+      "beginner-gym": [
+        {
+          "questionId": "e-gym-type",
+          "evidenceResponsible": [
+            "place"
+          ]
+        },
+        {
+          "questionId": "g-fatloss-focus",
+          "evidenceResponsible": [
+            "age",
+            "primaryGoalDisplay"
+          ]
+        },
+        {
+          "questionId": "x-confidence",
+          "evidenceResponsible": []
+        }
+      ],
+      "note": "evidenceResponsible lists the eligibility/skip predicate paths gating each differing question; empty = ordering/budget-driven difference (satiety, priority, budget class)"
+    },
+    "differenceCount": 6
+  },
+  {
+    "pairId": "E-returning-vs-active-advanced",
+    "personas": [
+      "returning-advanced",
+      "advanced-gym"
+    ],
+    "commonQuestions": [
+      "s-health-consent",
+      "b-age",
+      "b-sex",
+      "b-height",
+      "b-weight",
+      "x-trained-before",
+      "g-primary",
+      "e-place",
+      "a-days",
+      "a-session-minutes",
+      "l-has-injury",
+      "s-screen-gate",
+      "p-style",
+      "x-last-trained",
+      "x-total-duration",
+      "x-consistency"
+    ],
+    "onlyIn": {
+      "returning-advanced": [],
+      "advanced-gym": []
+    },
+    "whyTheyDiffer": {
+      "returning-advanced": [],
+      "advanced-gym": [],
+      "note": "evidenceResponsible lists the eligibility/skip predicate paths gating each differing question; empty = ordering/budget-driven difference (satiety, priority, budget class)"
+    },
+    "differenceCount": 0
+  }
+]

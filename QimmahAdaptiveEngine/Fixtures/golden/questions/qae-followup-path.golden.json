@@ -1,0 +1,262 @@
+{
+  "persona": "followup-path",
+  "determinism": {
+    "seed": 0,
+    "clock": {
+      "epochMs": 1785542400000
+    },
+    "timezone": {
+      "tzOffsetMinutes": 180
+    },
+    "locale": "ar-SA",
+    "engineVersion": "0.3.0",
+    "questionSchemaVersion": "1.0.0",
+    "ruleManifest": "question-content(no-decision-rules)",
+    "bankManifestHash": "91bd85b4b99f010d5fb0487389fa6b2785f482de0605d1230dac907c0fc63602"
+  },
+  "injectedAnswers": [],
+  "steps": [
+    {
+      "step": 0,
+      "selectedId": "s-health-consent",
+      "stage": "gate",
+      "offBudget": true,
+      "budgetOverrideReason": null,
+      "answer": true,
+      "answerSource": "persona",
+      "rejected": null,
+      "newEvidencePaths": [
+        "healthConsent"
+      ]
+    },
+    {
+      "step": 1,
+      "selectedId": "b-age",
+      "stage": "required",
+      "offBudget": false,
+      "budgetOverrideReason": null,
+      "answer": 45,
+      "answerSource": "persona",
+      "rejected": null,
+      "newEvidencePaths": [
+        "age"
+      ]
+    },
+    {
+      "step": 2,
+      "selectedId": "b-sex",
+      "stage": "required",
+      "offBudget": false,
+      "budgetOverrideReason": null,
+      "answer": "male",
+      "answerSource": "persona",
+      "rejected": null,
+      "newEvidencePaths": [
+        "sex"
+      ]
+    },
+    {
+      "step": 3,
+      "selectedId": "b-height",
+      "stage": "required",
+      "offBudget": false,
+      "budgetOverrideReason": null,
+      "answer": 174,
+      "answerSource": "persona",
+      "rejected": null,
+      "newEvidencePaths": [
+        "heightCm"
+      ]
+    },
+    {
+      "step": 4,
+      "selectedId": "b-weight",
+      "stage": "required",
+      "offBudget": false,
+      "budgetOverrideReason": null,
+      "answer": 90,
+      "answerSource": "persona",
+      "rejected": null,
+      "newEvidencePaths": [
+        "weightKg"
+      ]
+    },
+    {
+      "step": 5,
+      "selectedId": "x-trained-before",
+      "stage": "required",
+      "offBudget": false,
+      "budgetOverrideReason": null,
+      "answer": "months",
+      "answerSource": "persona",
+      "rejected": null,
+      "newEvidencePaths": [
+        "trainedBefore"
+      ]
+    },
+    {
+      "step": 6,
+      "selectedId": "g-primary",
+      "stage": "required",
+      "offBudget": false,
+      "budgetOverrideReason": null,
+      "answer": "fat_loss",
+      "answerSource": "persona",
+      "rejected": null,
+      "newEvidencePaths": [
+        "primaryGoalDisplay"
+      ]
+    },
+    {
+      "step": 7,
+      "selectedId": "e-place",
+      "stage": "required",
+      "offBudget": false,
+      "budgetOverrideReason": null,
+      "answer": "gym",
+      "answerSource": "persona",
+      "rejected": null,
+      "newEvidencePaths": [
+        "place"
+      ]
+    },
+    {
+      "step": 8,
+      "selectedId": "a-days",
+      "stage": "required",
+      "offBudget": false,
+      "budgetOverrideReason": null,
+      "answer": "3",
+      "answerSource": "persona",
+      "rejected": null,
+      "newEvidencePaths": [
+        "daysPerWeek"
+      ]
+    },
+    {
+      "step": 9,
+      "selectedId": "a-session-minutes",
+      "stage": "required",
+      "offBudget": false,
+      "budgetOverrideReason": null,
+      "answer": "45",
+      "answerSource": "persona",
+      "rejected": null,
+      "newEvidencePaths": [
+        "sessionMinutes"
+      ]
+    },
+    {
+      "step": 10,
+      "selectedId": "l-has-injury",
+      "stage": "required",
+      "offBudget": false,
+      "budgetOverrideReason": null,
+      "answer": "current",
+      "answerSource": "persona",
+      "rejected": null,
+      "newEvidencePaths": [
+        "hasInjury"
+      ]
+    },
+    {
+      "step": 11,
+      "selectedId": "s-screen-gate",
+      "stage": "required",
+      "offBudget": false,
+      "budgetOverrideReason": null,
+      "answer": false,
+      "answerSource": "default",
+      "rejected": null,
+      "newEvidencePaths": [
+        "screenGate"
+      ]
+    },
+    {
+      "step": 12,
+      "selectedId": "p-style",
+      "stage": "required",
+      "offBudget": false,
+      "budgetOverrideReason": null,
+      "answer": "machines",
+      "answerSource": "persona",
+      "rejected": null,
+      "newEvidencePaths": [
+        "trainingStyle"
+      ]
+    },
+    {
+      "step": 13,
+      "selectedId": "l-pain-level",
+      "stage": "safetyFollowUp",
+      "offBudget": true,
+      "budgetOverrideReason": null,
+      "answer": 6,
+      "answerSource": "persona",
+      "rejected": null,
+      "newEvidencePaths": [
+        "painLevel"
+      ]
+    },
+    {
+      "step": 14,
+      "selectedId": "c-confirm-injury-load",
+      "stage": "conflictClarify",
+      "offBudget": true,
+      "budgetOverrideReason": null,
+      "answer": false,
+      "answerSource": "default",
+      "rejected": null,
+      "newEvidencePaths": [
+        "confirmInjuryLoad"
+      ]
+    },
+    {
+      "step": 15,
+      "selectedId": "l-current-areas",
+      "stage": "scored",
+      "offBudget": false,
+      "budgetOverrideReason": null,
+      "answer": [
+        "shoulder"
+      ],
+      "answerSource": "persona",
+      "rejected": null,
+      "newEvidencePaths": [
+        "currentInjuryAreas.shoulder",
+        "currentInjuryAreas.count"
+      ]
+    },
+    {
+      "step": 16,
+      "selectedId": "l-pain-on-movement",
+      "stage": "scored",
+      "offBudget": false,
+      "budgetOverrideReason": null,
+      "answer": [
+        "none"
+      ],
+      "answerSource": "default",
+      "rejected": null,
+      "newEvidencePaths": [
+        "painOnMovement.none",
+        "painOnMovement.count"
+      ]
+    }
+  ],
+  "stopReason": "complete",
+  "metrics": {
+    "askedCounted": 16,
+    "skipped": 0,
+    "clarifications": 1,
+    "budgetOverrides": 0,
+    "bankSize": 153,
+    "touched": 17,
+    "bankAvoidedBp": 8889
+  },
+  "completeness": {
+    "complete": true,
+    "mandatoryMissing": []
+  },
+  "finalExperienceClass": "intermediate"
+}

@@ -1,0 +1,7248 @@
+{
+  "total": 193,
+  "conflicts": [
+    {
+      "id": "level",
+      "flag": "conflict_level",
+      "clarify": "c-level-mismatch"
+    },
+    {
+      "id": "equipment",
+      "flag": "conflict_equipment",
+      "clarify": "c-equipment-mismatch"
+    },
+    {
+      "id": "days_split",
+      "flag": "conflict_days_split",
+      "clarify": "c-days-split-mismatch"
+    },
+    {
+      "id": "limitation",
+      "flag": "conflict_limitation",
+      "clarify": "c-limitation-mismatch"
+    },
+    {
+      "id": "progression",
+      "flag": "conflict_progression",
+      "clarify": "c-progression-mismatch"
+    },
+    {
+      "id": "goal_pace",
+      "flag": "conflict_goal_pace",
+      "clarify": "c-goal-pace-mismatch"
+    },
+    {
+      "id": "time_volume",
+      "flag": "conflict_time_volume",
+      "clarify": "c-time-volume-mismatch"
+    },
+    {
+      "id": "cardio",
+      "flag": "conflict_cardio",
+      "clarify": "c-cardio-mismatch"
+    }
+  ],
+  "questions": [
+    {
+      "id": "s-health-consent",
+      "key": "healthConsent",
+      "category": "safety",
+      "answer": "boolean",
+      "affects": [
+        "safetyFlags"
+      ],
+      "safety": "screen",
+      "priority": 100,
+      "required": true,
+      "skippable": false,
+      "infoGain": 10,
+      "analyticsKey": "s-health-consent",
+      "since": 1
+    },
+    {
+      "id": "b-age",
+      "key": "age",
+      "category": "basics",
+      "answer": "number",
+      "range": {
+        "min": 13,
+        "max": 100,
+        "unit": "year"
+      },
+      "affects": [
+        "age",
+        "primaryGoal",
+        "safetyFlags",
+        "intensity"
+      ],
+      "safety": "restrict",
+      "priority": 98,
+      "required": true,
+      "skippable": false,
+      "infoGain": 10,
+      "followUps": [
+        {
+          "when": {
+            "field": "answers.age",
+            "op": "gte",
+            "value": 55
+          },
+          "ask": [
+            "s-older-adult"
+          ]
+        }
+      ],
+      "analyticsKey": "b-age",
+      "since": 1
+    },
+    {
+      "id": "b-sex",
+      "key": "sex",
+      "category": "basics",
+      "answer": "single",
+      "options": [
+        {
+          "value": "male"
+        },
+        {
+          "value": "female"
+        }
+      ],
+      "affects": [
+        "sex"
+      ],
+      "priority": 96,
+      "required": true,
+      "skippable": false,
+      "infoGain": 8,
+      "followUps": [
+        {
+          "when": {
+            "all": [
+              {
+                "field": "answers.sex",
+                "op": "eq",
+                "value": "female"
+              },
+              {
+                "field": "answers.age",
+                "op": "gte",
+                "value": 16
+              }
+            ]
+          },
+          "ask": [
+            "s-pregnancy"
+          ]
+        }
+      ],
+      "safety": "none",
+      "analyticsKey": "b-sex",
+      "since": 1
+    },
+    {
+      "id": "b-height",
+      "key": "heightCm",
+      "category": "basics",
+      "answer": "number",
+      "range": {
+        "min": 120,
+        "max": 230,
+        "unit": "cm"
+      },
+      "affects": [
+        "heightCm"
+      ],
+      "priority": 95,
+      "required": true,
+      "skippable": false,
+      "infoGain": 7,
+      "safety": "none",
+      "analyticsKey": "b-height",
+      "since": 1
+    },
+    {
+      "id": "b-weight",
+      "key": "weightKg",
+      "category": "basics",
+      "answer": "number",
+      "range": {
+        "min": 30,
+        "max": 250,
+        "unit": "kg"
+      },
+      "affects": [
+        "weightKg",
+        "safetyFlags"
+      ],
+      "safety": "screen",
+      "priority": 95,
+      "required": true,
+      "skippable": false,
+      "infoGain": 7,
+      "analyticsKey": "b-weight",
+      "since": 1
+    },
+    {
+      "id": "b-units",
+      "key": "units",
+      "category": "basics",
+      "answer": "single",
+      "options": [
+        {
+          "value": "metric"
+        },
+        {
+          "value": "imperial"
+        }
+      ],
+      "affects": [
+        "units"
+      ],
+      "priority": 40,
+      "infoGain": 2,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "b-units",
+      "since": 1
+    },
+    {
+      "id": "b-weight-trend",
+      "key": "weightTrend",
+      "category": "basics",
+      "answer": "single",
+      "options": [
+        {
+          "value": "rising"
+        },
+        {
+          "value": "stable"
+        },
+        {
+          "value": "falling"
+        },
+        {
+          "value": "unknown"
+        }
+      ],
+      "affects": [
+        "primaryGoal",
+        "planConstraints"
+      ],
+      "priority": 62,
+      "infoGain": 6,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "b-weight-trend",
+      "since": 1
+    },
+    {
+      "id": "b-target-weight",
+      "key": "targetWeightKg",
+      "category": "basics",
+      "answer": "number",
+      "range": {
+        "min": 30,
+        "max": 250,
+        "unit": "kg"
+      },
+      "eligible": {
+        "all": [
+          {
+            "field": "answers.primaryGoal",
+            "op": "in",
+            "value": [
+              "cut",
+              "bulk"
+            ]
+          },
+          {
+            "field": "answers.age",
+            "op": "gte",
+            "value": 18
+          }
+        ]
+      },
+      "affects": [
+        "planConstraints"
+      ],
+      "priority": 60,
+      "infoGain": 5,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "b-target-weight",
+      "since": 1
+    },
+    {
+      "id": "b-pace",
+      "key": "changePace",
+      "category": "basics",
+      "answer": "single",
+      "options": [
+        {
+          "value": "gentle"
+        },
+        {
+          "value": "steady"
+        },
+        {
+          "value": "aggressive"
+        }
+      ],
+      "eligible": {
+        "all": [
+          {
+            "field": "answers.targetWeightKg",
+            "op": "answered"
+          },
+          {
+            "field": "answers.age",
+            "op": "gte",
+            "value": 18
+          }
+        ]
+      },
+      "affects": [
+        "planConstraints",
+        "cardio"
+      ],
+      "priority": 55,
+      "infoGain": 5,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "b-pace",
+      "since": 1
+    },
+    {
+      "id": "b-body-shape",
+      "key": "bodyShape",
+      "category": "basics",
+      "answer": "single",
+      "options": [
+        {
+          "value": "lean"
+        },
+        {
+          "value": "average"
+        },
+        {
+          "value": "soft"
+        },
+        {
+          "value": "large"
+        },
+        {
+          "value": "skip"
+        }
+      ],
+      "affects": [
+        "planConstraints",
+        "cardio"
+      ],
+      "priority": 42,
+      "infoGain": 4,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "b-body-shape",
+      "since": 1
+    },
+    {
+      "id": "x-trained-before",
+      "key": "trainedBefore",
+      "category": "experience",
+      "answer": "single",
+      "options": [
+        {
+          "value": "never"
+        },
+        {
+          "value": "tried"
+        },
+        {
+          "value": "months"
+        },
+        {
+          "value": "years"
+        }
+      ],
+      "affects": [
+        "experience",
+        "trainingStatus"
+      ],
+      "priority": 94,
+      "required": true,
+      "skippable": false,
+      "infoGain": 10,
+      "followUps": [
+        {
+          "when": {
+            "field": "answers.trainedBefore",
+            "op": "ne",
+            "value": "never"
+          },
+          "ask": [
+            "x-total-duration",
+            "x-last-trained",
+            "x-consistency"
+          ]
+        },
+        {
+          "when": {
+            "field": "answers.trainedBefore",
+            "op": "eq",
+            "value": "never"
+          },
+          "ask": [
+            "x-confidence",
+            "x-guidance-pref"
+          ]
+        }
+      ],
+      "safety": "none",
+      "analyticsKey": "x-trained-before",
+      "since": 1
+    },
+    {
+      "id": "x-total-duration",
+      "key": "totalMonths",
+      "category": "experience",
+      "answer": "single",
+      "options": [
+        {
+          "value": "lt3"
+        },
+        {
+          "value": "m3_6"
+        },
+        {
+          "value": "m6_12"
+        },
+        {
+          "value": "y1_3"
+        },
+        {
+          "value": "y3_plus"
+        }
+      ],
+      "eligible": {
+        "field": "answers.trainedBefore",
+        "op": "ne",
+        "value": "never"
+      },
+      "affects": [
+        "experience"
+      ],
+      "priority": 88,
+      "infoGain": 8,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "x-total-duration",
+      "since": 1
+    },
+    {
+      "id": "x-last-trained",
+      "key": "lastTrained",
+      "category": "experience",
+      "answer": "single",
+      "options": [
+        {
+          "value": "now"
+        },
+        {
+          "value": "w2"
+        },
+        {
+          "value": "m1_3"
+        },
+        {
+          "value": "m3_12"
+        },
+        {
+          "value": "y1_plus"
+        }
+      ],
+      "eligible": {
+        "field": "answers.trainedBefore",
+        "op": "ne",
+        "value": "never"
+      },
+      "affects": [
+        "experience",
+        "trainingStatus",
+        "volume"
+      ],
+      "priority": 88,
+      "infoGain": 9,
+      "followUps": [
+        {
+          "when": {
+            "field": "answers.lastTrained",
+            "op": "in",
+            "value": [
+              "m3_12",
+              "y1_plus"
+            ]
+          },
+          "ask": [
+            "x-return-reason",
+            "x-return-ramp"
+          ]
+        }
+      ],
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "x-last-trained",
+      "since": 1
+    },
+    {
+      "id": "x-consistency",
+      "key": "consistency",
+      "category": "experience",
+      "answer": "single",
+      "options": [
+        {
+          "value": "rare"
+        },
+        {
+          "value": "on_off"
+        },
+        {
+          "value": "mostly"
+        },
+        {
+          "value": "steady"
+        }
+      ],
+      "eligible": {
+        "field": "answers.trainedBefore",
+        "op": "ne",
+        "value": "never"
+      },
+      "affects": [
+        "experience",
+        "trainingStatus",
+        "daysPerWeek"
+      ],
+      "priority": 86,
+      "infoGain": 9,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "x-consistency",
+      "since": 1
+    },
+    {
+      "id": "x-exercise-familiarity",
+      "key": "exerciseFamiliarity",
+      "category": "experience",
+      "answer": "single",
+      "options": [
+        {
+          "value": "none"
+        },
+        {
+          "value": "few"
+        },
+        {
+          "value": "most"
+        },
+        {
+          "value": "all"
+        }
+      ],
+      "affects": [
+        "experience",
+        "planConstraints"
+      ],
+      "priority": 80,
+      "infoGain": 8,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "x-exercise-familiarity",
+      "since": 1
+    },
+    {
+      "id": "x-program-experience",
+      "key": "programExperience",
+      "category": "experience",
+      "answer": "single",
+      "options": [
+        {
+          "value": "never"
+        },
+        {
+          "value": "app_only"
+        },
+        {
+          "value": "followed"
+        },
+        {
+          "value": "wrote_own"
+        }
+      ],
+      "eligible": {
+        "field": "answers.trainedBefore",
+        "op": "ne",
+        "value": "never"
+      },
+      "affects": [
+        "experience",
+        "controlLevel"
+      ],
+      "priority": 78,
+      "infoGain": 8,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "x-program-experience",
+      "since": 1
+    },
+    {
+      "id": "x-tracking",
+      "key": "tracksSets",
+      "category": "experience",
+      "answer": "single",
+      "options": [
+        {
+          "value": "never"
+        },
+        {
+          "value": "sometimes"
+        },
+        {
+          "value": "always"
+        }
+      ],
+      "eligible": {
+        "field": "answers.trainedBefore",
+        "op": "ne",
+        "value": "never"
+      },
+      "affects": [
+        "experience",
+        "progression"
+      ],
+      "priority": 72,
+      "infoGain": 7,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "x-tracking",
+      "since": 1
+    },
+    {
+      "id": "x-progression-understanding",
+      "key": "knowsProgression",
+      "category": "experience",
+      "answer": "single",
+      "options": [
+        {
+          "value": "no"
+        },
+        {
+          "value": "vaguely"
+        },
+        {
+          "value": "yes"
+        }
+      ],
+      "eligible": {
+        "field": "answers.trainedBefore",
+        "op": "ne",
+        "value": "never"
+      },
+      "affects": [
+        "experience",
+        "progression"
+      ],
+      "priority": 70,
+      "infoGain": 7,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "x-progression-understanding",
+      "since": 1
+    },
+    {
+      "id": "x-confidence",
+      "key": "gymConfidence",
+      "category": "experience",
+      "answer": "slider",
+      "range": {
+        "min": 1,
+        "max": 5,
+        "step": 1
+      },
+      "affects": [
+        "experience",
+        "controlLevel",
+        "planConstraints"
+      ],
+      "priority": 66,
+      "infoGain": 6,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "x-confidence",
+      "since": 1
+    },
+    {
+      "id": "x-coached",
+      "key": "hadCoach",
+      "category": "experience",
+      "answer": "single",
+      "options": [
+        {
+          "value": "never"
+        },
+        {
+          "value": "past"
+        },
+        {
+          "value": "now"
+        }
+      ],
+      "eligible": {
+        "field": "answers.totalMonths",
+        "op": "in",
+        "value": [
+          "y1_3",
+          "y3_plus"
+        ]
+      },
+      "affects": [
+        "experience"
+      ],
+      "priority": 46,
+      "infoGain": 4,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "x-coached",
+      "since": 1
+    },
+    {
+      "id": "x-guidance-pref",
+      "key": "guidancePref",
+      "category": "experience",
+      "answer": "single",
+      "options": [
+        {
+          "value": "hand_hold"
+        },
+        {
+          "value": "balanced"
+        },
+        {
+          "value": "minimal"
+        }
+      ],
+      "affects": [
+        "controlLevel",
+        "planConstraints"
+      ],
+      "priority": 58,
+      "infoGain": 6,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "x-guidance-pref",
+      "since": 1
+    },
+    {
+      "id": "x-return-reason",
+      "key": "returnReason",
+      "category": "experience",
+      "answer": "single",
+      "options": [
+        {
+          "value": "injury"
+        },
+        {
+          "value": "time"
+        },
+        {
+          "value": "motivation"
+        },
+        {
+          "value": "life"
+        },
+        {
+          "value": "other"
+        }
+      ],
+      "eligible": {
+        "field": "answers.lastTrained",
+        "op": "in",
+        "value": [
+          "m3_12",
+          "y1_plus"
+        ]
+      },
+      "affects": [
+        "trainingStatus",
+        "volume",
+        "planConstraints"
+      ],
+      "priority": 64,
+      "infoGain": 7,
+      "followUps": [
+        {
+          "when": {
+            "field": "answers.returnReason",
+            "op": "eq",
+            "value": "injury"
+          },
+          "ask": [
+            "l-has-injury"
+          ]
+        }
+      ],
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "x-return-reason",
+      "since": 1
+    },
+    {
+      "id": "x-return-ramp",
+      "key": "returnRamp",
+      "category": "experience",
+      "answer": "single",
+      "options": [
+        {
+          "value": "easy"
+        },
+        {
+          "value": "normal"
+        },
+        {
+          "value": "straight"
+        }
+      ],
+      "eligible": {
+        "field": "answers.lastTrained",
+        "op": "in",
+        "value": [
+          "m3_12",
+          "y1_plus"
+        ]
+      },
+      "affects": [
+        "volume",
+        "intensity",
+        "planConstraints"
+      ],
+      "priority": 60,
+      "infoGain": 6,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "x-return-ramp",
+      "since": 1
+    },
+    {
+      "id": "x-prev-results",
+      "key": "prevResults",
+      "category": "experience",
+      "answer": "single",
+      "options": [
+        {
+          "value": "good"
+        },
+        {
+          "value": "mixed"
+        },
+        {
+          "value": "none"
+        },
+        {
+          "value": "never_ran"
+        }
+      ],
+      "eligible": {
+        "field": "answers.programExperience",
+        "op": "in",
+        "value": [
+          "followed",
+          "wrote_own"
+        ]
+      },
+      "affects": [
+        "split",
+        "volume",
+        "progression"
+      ],
+      "priority": 54,
+      "infoGain": 6,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "x-prev-results",
+      "since": 1
+    },
+    {
+      "id": "x-selfrated-level",
+      "key": "selfLevel",
+      "category": "experience",
+      "answer": "single",
+      "options": [
+        {
+          "value": "beginner"
+        },
+        {
+          "value": "intermediate"
+        },
+        {
+          "value": "advanced"
+        }
+      ],
+      "affects": [
+        "experience",
+        "experienceConfidence"
+      ],
+      "priority": 76,
+      "infoGain": 7,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "x-selfrated-level",
+      "since": 1
+    },
+    {
+      "id": "x-technique-check",
+      "key": "techniqueCheck",
+      "category": "experience",
+      "answer": "single",
+      "options": [
+        {
+          "value": "no_idea"
+        },
+        {
+          "value": "basic"
+        },
+        {
+          "value": "confident"
+        }
+      ],
+      "eligible": {
+        "field": "answers.equipmentList",
+        "op": "has",
+        "value": "barbell"
+      },
+      "affects": [
+        "experience",
+        "planConstraints"
+      ],
+      "priority": 44,
+      "infoGain": 5,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "x-technique-check",
+      "since": 1
+    },
+    {
+      "id": "x-warmup-habit",
+      "key": "warmupHabit",
+      "category": "experience",
+      "answer": "single",
+      "options": [
+        {
+          "value": "never"
+        },
+        {
+          "value": "sometimes"
+        },
+        {
+          "value": "always"
+        }
+      ],
+      "eligible": {
+        "field": "answers.trainedBefore",
+        "op": "ne",
+        "value": "never"
+      },
+      "affects": [
+        "planConstraints"
+      ],
+      "priority": 32,
+      "infoGain": 3,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "x-warmup-habit",
+      "since": 1
+    },
+    {
+      "id": "x-failure-familiarity",
+      "key": "failureFamiliarity",
+      "category": "experience",
+      "answer": "single",
+      "options": [
+        {
+          "value": "no"
+        },
+        {
+          "value": "sometimes"
+        },
+        {
+          "value": "yes"
+        }
+      ],
+      "eligible": {
+        "field": "answers.selfLevel",
+        "op": "in",
+        "value": [
+          "intermediate",
+          "advanced"
+        ]
+      },
+      "affects": [
+        "intensity",
+        "progression"
+      ],
+      "priority": 40,
+      "infoGain": 5,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "x-failure-familiarity",
+      "since": 1
+    },
+    {
+      "id": "x-strength-marker",
+      "key": "strengthMarker",
+      "category": "experience",
+      "answer": "single",
+      "options": [
+        {
+          "value": "unknown"
+        },
+        {
+          "value": "bodyweight_under"
+        },
+        {
+          "value": "bodyweight_around"
+        },
+        {
+          "value": "bodyweight_over"
+        }
+      ],
+      "eligible": {
+        "all": [
+          {
+            "field": "answers.selfLevel",
+            "op": "eq",
+            "value": "advanced"
+          },
+          {
+            "field": "answers.age",
+            "op": "lt",
+            "value": 60
+          }
+        ]
+      },
+      "affects": [
+        "experience",
+        "volume"
+      ],
+      "priority": 36,
+      "infoGain": 5,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "x-strength-marker",
+      "since": 1
+    },
+    {
+      "id": "x-session-tolerance",
+      "key": "sessionTolerance",
+      "category": "experience",
+      "answer": "single",
+      "options": [
+        {
+          "value": "short"
+        },
+        {
+          "value": "medium"
+        },
+        {
+          "value": "long"
+        }
+      ],
+      "eligible": {
+        "field": "answers.trainedBefore",
+        "op": "ne",
+        "value": "never"
+      },
+      "affects": [
+        "volume",
+        "planConstraints"
+      ],
+      "priority": 38,
+      "infoGain": 4,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "x-session-tolerance",
+      "since": 1
+    },
+    {
+      "id": "x-other-sport-history",
+      "key": "otherSportHistory",
+      "category": "experience",
+      "answer": "single",
+      "options": [
+        {
+          "value": "none"
+        },
+        {
+          "value": "recreational"
+        },
+        {
+          "value": "competitive"
+        }
+      ],
+      "affects": [
+        "experience",
+        "planConstraints"
+      ],
+      "priority": 30,
+      "infoGain": 4,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "x-other-sport-history",
+      "since": 1
+    },
+    {
+      "id": "g-primary",
+      "key": "primaryGoalDisplay",
+      "category": "goals",
+      "answer": "single",
+      "options": [
+        {
+          "value": "fat_loss",
+          "when": {
+            "field": "answers.age",
+            "op": "gte",
+            "value": 18
+          },
+          "sets": {
+            "goalKey": "cut"
+          }
+        },
+        {
+          "value": "muscle_gain",
+          "when": {
+            "field": "answers.age",
+            "op": "gte",
+            "value": 18
+          },
+          "sets": {
+            "goalKey": "bulk"
+          }
+        },
+        {
+          "value": "general_health",
+          "sets": {
+            "goalKey": "maintain"
+          }
+        },
+        {
+          "value": "get_fitter",
+          "sets": {
+            "goalKey": "maintain"
+          }
+        },
+        {
+          "value": "recomp",
+          "when": {
+            "all": [
+              {
+                "field": "answers.age",
+                "op": "gte",
+                "value": 18
+              },
+              {
+                "field": "derived.experienceClass",
+                "op": "in",
+                "value": [
+                  "early_intermediate",
+                  "intermediate",
+                  "advanced",
+                  "returning"
+                ]
+              }
+            ]
+          },
+          "sets": {
+            "goalKey": "maintain"
+          }
+        },
+        {
+          "value": "strength",
+          "when": {
+            "all": [
+              {
+                "field": "answers.age",
+                "op": "gte",
+                "value": 18
+              },
+              {
+                "field": "derived.experienceClass",
+                "op": "in",
+                "value": [
+                  "early_intermediate",
+                  "intermediate",
+                  "advanced",
+                  "returning"
+                ]
+              }
+            ]
+          },
+          "sets": {
+            "goalKey": "bulk"
+          }
+        }
+      ],
+      "affects": [
+        "primaryGoal",
+        "planConstraints",
+        "volume",
+        "cardio"
+      ],
+      "priority": 92,
+      "required": true,
+      "skippable": false,
+      "infoGain": 10,
+      "followUps": [
+        {
+          "when": {
+            "field": "answers.primaryGoalDisplay",
+            "op": "in",
+            "value": [
+              "fat_loss"
+            ]
+          },
+          "ask": [
+            "g-fatloss-focus",
+            "b-target-weight",
+            "g-cardio-willing"
+          ]
+        },
+        {
+          "when": {
+            "field": "answers.primaryGoalDisplay",
+            "op": "in",
+            "value": [
+              "muscle_gain",
+              "strength"
+            ]
+          },
+          "ask": [
+            "g-gain-focus",
+            "b-target-weight"
+          ]
+        },
+        {
+          "when": {
+            "field": "answers.primaryGoalDisplay",
+            "op": "eq",
+            "value": "recomp"
+          },
+          "ask": [
+            "g-recomp-bias"
+          ]
+        },
+        {
+          "when": {
+            "field": "answers.primaryGoalDisplay",
+            "op": "in",
+            "value": [
+              "general_health",
+              "get_fitter"
+            ]
+          },
+          "ask": [
+            "g-health-driver"
+          ]
+        }
+      ],
+      "safety": "none",
+      "analyticsKey": "g-primary",
+      "since": 1
+    },
+    {
+      "id": "g-secondary",
+      "key": "secondaryGoalDisplay",
+      "category": "goals",
+      "answer": "single",
+      "options": [
+        {
+          "value": "none"
+        },
+        {
+          "value": "fat_loss"
+        },
+        {
+          "value": "muscle_gain"
+        },
+        {
+          "value": "strength"
+        },
+        {
+          "value": "endurance"
+        },
+        {
+          "value": "mobility"
+        },
+        {
+          "value": "posture"
+        }
+      ],
+      "eligible": {
+        "field": "answers.primaryGoalDisplay",
+        "op": "answered"
+      },
+      "affects": [
+        "secondaryGoal",
+        "planConstraints"
+      ],
+      "priority": 58,
+      "infoGain": 6,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "g-secondary",
+      "since": 1
+    },
+    {
+      "id": "g-fatloss-focus",
+      "key": "fatLossFocus",
+      "category": "goals",
+      "answer": "single",
+      "options": [
+        {
+          "value": "keep_muscle"
+        },
+        {
+          "value": "fastest"
+        },
+        {
+          "value": "sustainable"
+        }
+      ],
+      "eligible": {
+        "all": [
+          {
+            "field": "answers.primaryGoalDisplay",
+            "op": "eq",
+            "value": "fat_loss"
+          },
+          {
+            "field": "answers.age",
+            "op": "gte",
+            "value": 18
+          }
+        ]
+      },
+      "affects": [
+        "volume",
+        "cardio",
+        "planConstraints"
+      ],
+      "priority": 66,
+      "infoGain": 7,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "g-fatloss-focus",
+      "since": 1
+    },
+    {
+      "id": "g-gain-focus",
+      "key": "gainFocus",
+      "category": "goals",
+      "answer": "single",
+      "options": [
+        {
+          "value": "size"
+        },
+        {
+          "value": "strength"
+        },
+        {
+          "value": "both"
+        }
+      ],
+      "eligible": {
+        "all": [
+          {
+            "field": "answers.primaryGoalDisplay",
+            "op": "in",
+            "value": [
+              "muscle_gain",
+              "strength"
+            ]
+          },
+          {
+            "field": "answers.age",
+            "op": "gte",
+            "value": 18
+          }
+        ]
+      },
+      "affects": [
+        "volume",
+        "intensity",
+        "planConstraints"
+      ],
+      "priority": 66,
+      "infoGain": 7,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "g-gain-focus",
+      "since": 1
+    },
+    {
+      "id": "g-recomp-bias",
+      "key": "recompBias",
+      "category": "goals",
+      "answer": "single",
+      "options": [
+        {
+          "value": "lean_first"
+        },
+        {
+          "value": "balanced"
+        },
+        {
+          "value": "muscle_first"
+        }
+      ],
+      "eligible": {
+        "field": "answers.primaryGoalDisplay",
+        "op": "eq",
+        "value": "recomp"
+      },
+      "affects": [
+        "volume",
+        "cardio",
+        "planConstraints"
+      ],
+      "priority": 60,
+      "infoGain": 6,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "g-recomp-bias",
+      "since": 1
+    },
+    {
+      "id": "g-health-driver",
+      "key": "healthDriver",
+      "category": "goals",
+      "answer": "multi",
+      "options": [
+        {
+          "value": "energy"
+        },
+        {
+          "value": "sleep"
+        },
+        {
+          "value": "mood"
+        },
+        {
+          "value": "blood_markers"
+        },
+        {
+          "value": "mobility"
+        },
+        {
+          "value": "daily_ease"
+        }
+      ],
+      "select": {
+        "min": 1,
+        "max": 3
+      },
+      "eligible": {
+        "field": "answers.primaryGoalDisplay",
+        "op": "in",
+        "value": [
+          "general_health",
+          "get_fitter"
+        ]
+      },
+      "affects": [
+        "planConstraints",
+        "cardio"
+      ],
+      "priority": 56,
+      "infoGain": 5,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "g-health-driver",
+      "since": 1
+    },
+    {
+      "id": "g-cardio-willing",
+      "key": "cardioWilling",
+      "category": "goals",
+      "answer": "single",
+      "options": [
+        {
+          "value": "no"
+        },
+        {
+          "value": "little"
+        },
+        {
+          "value": "yes"
+        },
+        {
+          "value": "love_it"
+        }
+      ],
+      "affects": [
+        "cardio",
+        "planConstraints"
+      ],
+      "priority": 62,
+      "infoGain": 6,
+      "followUps": [
+        {
+          "when": {
+            "field": "answers.cardioWilling",
+            "op": "in",
+            "value": [
+              "yes",
+              "love_it"
+            ]
+          },
+          "ask": [
+            "p-cardio-type"
+          ]
+        }
+      ],
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "g-cardio-willing",
+      "since": 1
+    },
+    {
+      "id": "g-horizon",
+      "key": "goalHorizon",
+      "category": "goals",
+      "answer": "single",
+      "options": [
+        {
+          "value": "m1"
+        },
+        {
+          "value": "m3"
+        },
+        {
+          "value": "m6"
+        },
+        {
+          "value": "ongoing"
+        }
+      ],
+      "affects": [
+        "planConstraints",
+        "progression"
+      ],
+      "priority": 50,
+      "infoGain": 5,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "g-horizon",
+      "since": 1
+    },
+    {
+      "id": "g-event",
+      "key": "hasEvent",
+      "category": "goals",
+      "answer": "boolean",
+      "eligible": {
+        "field": "answers.goalHorizon",
+        "op": "in",
+        "value": [
+          "m1",
+          "m3"
+        ]
+      },
+      "affects": [
+        "planConstraints"
+      ],
+      "priority": 34,
+      "infoGain": 4,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "g-event",
+      "since": 1
+    },
+    {
+      "id": "g-muscle-priority",
+      "key": "musclePriority",
+      "category": "goals",
+      "answer": "multi",
+      "options": [
+        {
+          "value": "chest"
+        },
+        {
+          "value": "back"
+        },
+        {
+          "value": "shoulders"
+        },
+        {
+          "value": "arms"
+        },
+        {
+          "value": "legs"
+        },
+        {
+          "value": "glutes"
+        },
+        {
+          "value": "core"
+        },
+        {
+          "value": "balanced"
+        }
+      ],
+      "select": {
+        "min": 1,
+        "max": 3
+      },
+      "eligible": {
+        "field": "derived.experienceClass",
+        "op": "in",
+        "value": [
+          "early_intermediate",
+          "intermediate",
+          "advanced",
+          "returning"
+        ]
+      },
+      "affects": [
+        "musclePriorities",
+        "planConstraints"
+      ],
+      "priority": 54,
+      "infoGain": 7,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "g-muscle-priority",
+      "since": 1
+    },
+    {
+      "id": "g-weak-point",
+      "key": "weakPoint",
+      "category": "goals",
+      "answer": "single",
+      "options": [
+        {
+          "value": "none"
+        },
+        {
+          "value": "chest"
+        },
+        {
+          "value": "back"
+        },
+        {
+          "value": "shoulders"
+        },
+        {
+          "value": "arms"
+        },
+        {
+          "value": "legs"
+        },
+        {
+          "value": "glutes"
+        },
+        {
+          "value": "core"
+        }
+      ],
+      "eligible": {
+        "field": "derived.experienceClass",
+        "op": "in",
+        "value": [
+          "intermediate",
+          "advanced"
+        ]
+      },
+      "affects": [
+        "musclePriorities",
+        "volume"
+      ],
+      "priority": 44,
+      "infoGain": 6,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "g-weak-point",
+      "since": 1
+    },
+    {
+      "id": "g-posture-concern",
+      "key": "postureConcern",
+      "category": "goals",
+      "answer": "boolean",
+      "affects": [
+        "musclePriorities",
+        "planConstraints"
+      ],
+      "priority": 30,
+      "infoGain": 4,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "g-posture-concern",
+      "since": 1
+    },
+    {
+      "id": "g-mobility-goal",
+      "key": "mobilityGoal",
+      "category": "goals",
+      "answer": "single",
+      "options": [
+        {
+          "value": "no"
+        },
+        {
+          "value": "some"
+        },
+        {
+          "value": "priority"
+        }
+      ],
+      "affects": [
+        "planConstraints",
+        "trainingStyle"
+      ],
+      "priority": 32,
+      "infoGain": 4,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "g-mobility-goal",
+      "since": 1
+    },
+    {
+      "id": "g-performance-sport",
+      "key": "performanceSport",
+      "category": "goals",
+      "answer": "single",
+      "options": [
+        {
+          "value": "none"
+        },
+        {
+          "value": "football"
+        },
+        {
+          "value": "running"
+        },
+        {
+          "value": "combat"
+        },
+        {
+          "value": "padel"
+        },
+        {
+          "value": "swimming"
+        },
+        {
+          "value": "other"
+        }
+      ],
+      "eligible": {
+        "field": "answers.otherSportHistory",
+        "op": "ne",
+        "value": "none"
+      },
+      "affects": [
+        "planConstraints",
+        "cardio",
+        "musclePriorities"
+      ],
+      "priority": 38,
+      "infoGain": 5,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "g-performance-sport",
+      "since": 1
+    },
+    {
+      "id": "g-endurance-target",
+      "key": "enduranceTarget",
+      "category": "goals",
+      "answer": "single",
+      "options": [
+        {
+          "value": "none"
+        },
+        {
+          "value": "walk_longer"
+        },
+        {
+          "value": "run_5k"
+        },
+        {
+          "value": "run_10k"
+        },
+        {
+          "value": "stairs"
+        }
+      ],
+      "eligible": {
+        "any": [
+          {
+            "field": "answers.secondaryGoalDisplay",
+            "op": "eq",
+            "value": "endurance"
+          },
+          {
+            "field": "answers.cardioWilling",
+            "op": "in",
+            "value": [
+              "yes",
+              "love_it"
+            ]
+          }
+        ]
+      },
+      "affects": [
+        "cardio",
+        "planConstraints"
+      ],
+      "priority": 36,
+      "infoGain": 5,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "g-endurance-target",
+      "since": 1
+    },
+    {
+      "id": "g-motivation-driver",
+      "key": "motivationDriver",
+      "category": "goals",
+      "answer": "single",
+      "options": [
+        {
+          "value": "look"
+        },
+        {
+          "value": "health"
+        },
+        {
+          "value": "strength"
+        },
+        {
+          "value": "habit"
+        },
+        {
+          "value": "competition"
+        }
+      ],
+      "affects": [
+        "planConstraints",
+        "progression"
+      ],
+      "priority": 28,
+      "infoGain": 4,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "g-motivation-driver",
+      "since": 1
+    },
+    {
+      "id": "g-past-obstacle",
+      "key": "pastObstacle",
+      "category": "goals",
+      "answer": "single",
+      "options": [
+        {
+          "value": "time"
+        },
+        {
+          "value": "motivation"
+        },
+        {
+          "value": "injury"
+        },
+        {
+          "value": "confusion"
+        },
+        {
+          "value": "travel"
+        },
+        {
+          "value": "none"
+        }
+      ],
+      "eligible": {
+        "field": "answers.trainedBefore",
+        "op": "ne",
+        "value": "never"
+      },
+      "affects": [
+        "planConstraints",
+        "daysPerWeek"
+      ],
+      "priority": 48,
+      "infoGain": 6,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "g-past-obstacle",
+      "since": 1
+    },
+    {
+      "id": "g-success-metric",
+      "key": "successMetric",
+      "category": "goals",
+      "answer": "single",
+      "options": [
+        {
+          "value": "scale"
+        },
+        {
+          "value": "mirror"
+        },
+        {
+          "value": "measurements"
+        },
+        {
+          "value": "lifts"
+        },
+        {
+          "value": "how_i_feel"
+        }
+      ],
+      "affects": [
+        "planConstraints",
+        "progression"
+      ],
+      "priority": 40,
+      "infoGain": 5,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "g-success-metric",
+      "since": 1
+    },
+    {
+      "id": "g-plan-adherence-style",
+      "key": "adherenceStyle",
+      "category": "goals",
+      "answer": "single",
+      "options": [
+        {
+          "value": "strict"
+        },
+        {
+          "value": "flexible"
+        },
+        {
+          "value": "minimal"
+        }
+      ],
+      "affects": [
+        "planConstraints",
+        "controlLevel"
+      ],
+      "priority": 42,
+      "infoGain": 5,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "g-plan-adherence-style",
+      "since": 1
+    },
+    {
+      "id": "g-body-focus-balance",
+      "key": "upperLowerBalance",
+      "category": "goals",
+      "answer": "single",
+      "options": [
+        {
+          "value": "upper"
+        },
+        {
+          "value": "balanced"
+        },
+        {
+          "value": "lower"
+        }
+      ],
+      "eligible": {
+        "field": "derived.experienceClass",
+        "op": "in",
+        "value": [
+          "early_intermediate",
+          "intermediate",
+          "advanced",
+          "returning"
+        ]
+      },
+      "affects": [
+        "musclePriorities",
+        "split"
+      ],
+      "priority": 46,
+      "infoGain": 6,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "g-body-focus-balance",
+      "since": 1
+    },
+    {
+      "id": "g-plateau",
+      "key": "hitPlateau",
+      "category": "goals",
+      "answer": "boolean",
+      "eligible": {
+        "field": "derived.experienceClass",
+        "op": "in",
+        "value": [
+          "intermediate",
+          "advanced"
+        ]
+      },
+      "affects": [
+        "progression",
+        "volume"
+      ],
+      "priority": 40,
+      "infoGain": 5,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "g-plateau",
+      "since": 1
+    },
+    {
+      "id": "g-nutrition-interest",
+      "key": "nutritionInterest",
+      "category": "goals",
+      "answer": "single",
+      "options": [
+        {
+          "value": "numbers_only"
+        },
+        {
+          "value": "meal_ideas"
+        },
+        {
+          "value": "both"
+        },
+        {
+          "value": "skip"
+        }
+      ],
+      "affects": [
+        "planConstraints"
+      ],
+      "priority": 44,
+      "infoGain": 5,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "g-nutrition-interest",
+      "since": 1
+    },
+    {
+      "id": "a-days",
+      "key": "daysPerWeek",
+      "category": "availability",
+      "answer": "single",
+      "options": [
+        {
+          "value": "2"
+        },
+        {
+          "value": "3"
+        },
+        {
+          "value": "4"
+        },
+        {
+          "value": "5"
+        },
+        {
+          "value": "6"
+        }
+      ],
+      "affects": [
+        "daysPerWeek",
+        "split",
+        "planConstraints"
+      ],
+      "priority": 90,
+      "required": true,
+      "skippable": false,
+      "infoGain": 10,
+      "followUps": [
+        {
+          "when": {
+            "field": "answers.daysPerWeek",
+            "op": "gte",
+            "value": 4
+          },
+          "ask": [
+            "a-preferred-days"
+          ]
+        }
+      ],
+      "safety": "none",
+      "analyticsKey": "a-days",
+      "since": 1
+    },
+    {
+      "id": "a-session-minutes",
+      "key": "sessionMinutes",
+      "category": "availability",
+      "answer": "single",
+      "options": [
+        {
+          "value": "20"
+        },
+        {
+          "value": "30"
+        },
+        {
+          "value": "45"
+        },
+        {
+          "value": "60"
+        },
+        {
+          "value": "75"
+        },
+        {
+          "value": "90"
+        }
+      ],
+      "affects": [
+        "sessionMinutes",
+        "volume",
+        "planConstraints"
+      ],
+      "priority": 89,
+      "required": true,
+      "skippable": false,
+      "infoGain": 9,
+      "safety": "none",
+      "analyticsKey": "a-session-minutes",
+      "since": 1
+    },
+    {
+      "id": "a-preferred-days",
+      "key": "availableDays",
+      "category": "availability",
+      "answer": "weekdays",
+      "affects": [
+        "availableDays",
+        "planConstraints"
+      ],
+      "priority": 52,
+      "infoGain": 5,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "a-preferred-days",
+      "since": 1
+    },
+    {
+      "id": "a-time-of-day",
+      "key": "timeOfDay",
+      "category": "availability",
+      "answer": "single",
+      "options": [
+        {
+          "value": "early"
+        },
+        {
+          "value": "morning"
+        },
+        {
+          "value": "afternoon"
+        },
+        {
+          "value": "evening"
+        },
+        {
+          "value": "late"
+        },
+        {
+          "value": "varies"
+        }
+      ],
+      "affects": [
+        "planConstraints"
+      ],
+      "priority": 46,
+      "infoGain": 4,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "a-time-of-day",
+      "since": 1
+    },
+    {
+      "id": "a-schedule-flex",
+      "key": "scheduleFlex",
+      "category": "availability",
+      "answer": "single",
+      "options": [
+        {
+          "value": "fixed"
+        },
+        {
+          "value": "somewhat"
+        },
+        {
+          "value": "flexible"
+        }
+      ],
+      "affects": [
+        "planConstraints",
+        "split"
+      ],
+      "priority": 44,
+      "infoGain": 5,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "a-schedule-flex",
+      "since": 1
+    },
+    {
+      "id": "a-travel",
+      "key": "travelFrequency",
+      "category": "availability",
+      "answer": "single",
+      "options": [
+        {
+          "value": "never"
+        },
+        {
+          "value": "rare"
+        },
+        {
+          "value": "monthly"
+        },
+        {
+          "value": "weekly"
+        }
+      ],
+      "affects": [
+        "planConstraints",
+        "equipment"
+      ],
+      "priority": 38,
+      "infoGain": 5,
+      "followUps": [
+        {
+          "when": {
+            "field": "answers.travelFrequency",
+            "op": "in",
+            "value": [
+              "monthly",
+              "weekly"
+            ]
+          },
+          "ask": [
+            "e-travel-fallback"
+          ]
+        }
+      ],
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "a-travel",
+      "since": 1
+    },
+    {
+      "id": "a-commute",
+      "key": "gymCommute",
+      "category": "availability",
+      "answer": "single",
+      "options": [
+        {
+          "value": "at_home"
+        },
+        {
+          "value": "under10"
+        },
+        {
+          "value": "under30"
+        },
+        {
+          "value": "over30"
+        }
+      ],
+      "eligible": {
+        "field": "answers.place",
+        "op": "in",
+        "value": [
+          "gym",
+          "mixed"
+        ]
+      },
+      "affects": [
+        "daysPerWeek",
+        "planConstraints"
+      ],
+      "priority": 36,
+      "infoGain": 4,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "a-commute",
+      "since": 1
+    },
+    {
+      "id": "a-busy-season",
+      "key": "busySeason",
+      "category": "availability",
+      "answer": "boolean",
+      "affects": [
+        "planConstraints"
+      ],
+      "priority": 24,
+      "infoGain": 3,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "a-busy-season",
+      "since": 1
+    },
+    {
+      "id": "a-min-session",
+      "key": "minSessionMinutes",
+      "category": "availability",
+      "answer": "single",
+      "options": [
+        {
+          "value": "10"
+        },
+        {
+          "value": "15"
+        },
+        {
+          "value": "20"
+        },
+        {
+          "value": "30"
+        }
+      ],
+      "eligible": {
+        "field": "answers.scheduleFlex",
+        "op": "in",
+        "value": [
+          "fixed",
+          "somewhat"
+        ]
+      },
+      "affects": [
+        "planConstraints"
+      ],
+      "priority": 30,
+      "infoGain": 4,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "a-min-session",
+      "since": 1
+    },
+    {
+      "id": "a-weekend-different",
+      "key": "weekendDifferent",
+      "category": "availability",
+      "answer": "boolean",
+      "affects": [
+        "availableDays",
+        "planConstraints"
+      ],
+      "priority": 26,
+      "infoGain": 3,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "a-weekend-different",
+      "since": 1
+    },
+    {
+      "id": "a-can-add-day",
+      "key": "canAddDay",
+      "category": "availability",
+      "answer": "boolean",
+      "eligible": {
+        "field": "answers.daysPerWeek",
+        "op": "in",
+        "value": [
+          "2",
+          "3"
+        ]
+      },
+      "affects": [
+        "daysPerWeek",
+        "split"
+      ],
+      "priority": 42,
+      "infoGain": 5,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "a-can-add-day",
+      "since": 1
+    },
+    {
+      "id": "a-rest-day-pref",
+      "key": "restDayPref",
+      "category": "availability",
+      "answer": "single",
+      "options": [
+        {
+          "value": "spread"
+        },
+        {
+          "value": "block"
+        },
+        {
+          "value": "no_pref"
+        }
+      ],
+      "eligible": {
+        "field": "answers.daysPerWeek",
+        "op": "gte",
+        "value": 4
+      },
+      "affects": [
+        "split",
+        "planConstraints"
+      ],
+      "priority": 34,
+      "infoGain": 4,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "a-rest-day-pref",
+      "since": 1
+    },
+    {
+      "id": "a-heat-sensitivity",
+      "key": "heatSensitivity",
+      "category": "availability",
+      "answer": "single",
+      "options": [
+        {
+          "value": "fine"
+        },
+        {
+          "value": "some"
+        },
+        {
+          "value": "avoid"
+        }
+      ],
+      "eligible": {
+        "field": "answers.place",
+        "op": "eq",
+        "value": "outdoor"
+      },
+      "affects": [
+        "planConstraints",
+        "cardio"
+      ],
+      "priority": 32,
+      "infoGain": 4,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "a-heat-sensitivity",
+      "since": 1
+    },
+    {
+      "id": "e-place",
+      "key": "place",
+      "category": "equipment",
+      "answer": "single",
+      "options": [
+        {
+          "value": "gym"
+        },
+        {
+          "value": "home"
+        },
+        {
+          "value": "outdoor"
+        },
+        {
+          "value": "mixed"
+        }
+      ],
+      "affects": [
+        "place",
+        "equipment",
+        "planConstraints"
+      ],
+      "priority": 91,
+      "required": true,
+      "skippable": false,
+      "infoGain": 10,
+      "followUps": [
+        {
+          "when": {
+            "field": "answers.place",
+            "op": "in",
+            "value": [
+              "home",
+              "outdoor",
+              "mixed"
+            ]
+          },
+          "ask": [
+            "e-equipment-list",
+            "e-space"
+          ]
+        },
+        {
+          "when": {
+            "field": "answers.place",
+            "op": "eq",
+            "value": "gym"
+          },
+          "ask": [
+            "e-gym-type",
+            "e-crowded"
+          ]
+        }
+      ],
+      "safety": "none",
+      "analyticsKey": "e-place",
+      "since": 1
+    },
+    {
+      "id": "e-equipment-list",
+      "key": "equipmentList",
+      "category": "equipment",
+      "answer": "equipment",
+      "options": [
+        {
+          "value": "machine"
+        },
+        {
+          "value": "bodyweight"
+        },
+        {
+          "value": "dumbbell"
+        },
+        {
+          "value": "cable"
+        },
+        {
+          "value": "barbell"
+        },
+        {
+          "value": "bench"
+        },
+        {
+          "value": "ez-bar"
+        },
+        {
+          "value": "band"
+        },
+        {
+          "value": "smith"
+        },
+        {
+          "value": "rope"
+        },
+        {
+          "value": "plate"
+        },
+        {
+          "value": "kettlebell"
+        }
+      ],
+      "select": {
+        "min": 1
+      },
+      "eligible": {
+        "field": "answers.place",
+        "op": "in",
+        "value": [
+          "home",
+          "outdoor",
+          "mixed"
+        ]
+      },
+      "affects": [
+        "equipment",
+        "trainingStyle",
+        "planConstraints"
+      ],
+      "priority": 87,
+      "required": true,
+      "skippable": false,
+      "infoGain": 10,
+      "followUps": [
+        {
+          "when": {
+            "field": "answers.equipmentList",
+            "op": "has",
+            "value": "dumbbell"
+          },
+          "ask": [
+            "e-dumbbell-kind",
+            "e-dumbbell-max"
+          ]
+        },
+        {
+          "when": {
+            "field": "answers.equipmentList",
+            "op": "has",
+            "value": "barbell"
+          },
+          "ask": [
+            "e-plate-max",
+            "e-rack"
+          ]
+        },
+        {
+          "when": {
+            "field": "answers.equipmentList",
+            "op": "hasNone",
+            "value": [
+              "dumbbell",
+              "barbell",
+              "machine",
+              "cable"
+            ]
+          },
+          "ask": [
+            "e-bodyweight-only-confirm"
+          ]
+        }
+      ],
+      "safety": "none",
+      "analyticsKey": "e-equipment-list",
+      "since": 1
+    },
+    {
+      "id": "e-gym-type",
+      "key": "gymType",
+      "category": "equipment",
+      "answer": "single",
+      "options": [
+        {
+          "value": "full"
+        },
+        {
+          "value": "machines_only"
+        },
+        {
+          "value": "hotel"
+        },
+        {
+          "value": "ladies"
+        },
+        {
+          "value": "crossfit"
+        }
+      ],
+      "eligible": {
+        "field": "answers.place",
+        "op": "in",
+        "value": [
+          "gym",
+          "mixed"
+        ]
+      },
+      "affects": [
+        "equipment",
+        "trainingStyle",
+        "planConstraints"
+      ],
+      "priority": 68,
+      "infoGain": 7,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "e-gym-type",
+      "since": 1
+    },
+    {
+      "id": "e-crowded",
+      "key": "gymCrowded",
+      "category": "equipment",
+      "answer": "single",
+      "options": [
+        {
+          "value": "never"
+        },
+        {
+          "value": "sometimes"
+        },
+        {
+          "value": "always"
+        }
+      ],
+      "eligible": {
+        "field": "answers.place",
+        "op": "in",
+        "value": [
+          "gym",
+          "mixed"
+        ]
+      },
+      "affects": [
+        "planConstraints"
+      ],
+      "priority": 34,
+      "infoGain": 4,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "e-crowded",
+      "since": 1
+    },
+    {
+      "id": "e-dumbbell-kind",
+      "key": "dumbbellKind",
+      "category": "equipment",
+      "answer": "single",
+      "options": [
+        {
+          "value": "fixed_pair"
+        },
+        {
+          "value": "adjustable"
+        },
+        {
+          "value": "set"
+        }
+      ],
+      "eligible": {
+        "field": "answers.equipmentList",
+        "op": "has",
+        "value": "dumbbell"
+      },
+      "affects": [
+        "equipment",
+        "progression",
+        "planConstraints"
+      ],
+      "priority": 56,
+      "infoGain": 6,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "e-dumbbell-kind",
+      "since": 1
+    },
+    {
+      "id": "e-dumbbell-max",
+      "key": "dumbbellMaxKg",
+      "category": "equipment",
+      "answer": "number",
+      "range": {
+        "min": 2,
+        "max": 60,
+        "unit": "kg"
+      },
+      "eligible": {
+        "field": "answers.equipmentList",
+        "op": "has",
+        "value": "dumbbell"
+      },
+      "affects": [
+        "equipment",
+        "progression",
+        "planConstraints"
+      ],
+      "priority": 54,
+      "infoGain": 6,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "e-dumbbell-max",
+      "since": 1
+    },
+    {
+      "id": "e-plate-max",
+      "key": "plateMaxKg",
+      "category": "equipment",
+      "answer": "number",
+      "range": {
+        "min": 20,
+        "max": 300,
+        "unit": "kg"
+      },
+      "eligible": {
+        "field": "answers.equipmentList",
+        "op": "has",
+        "value": "barbell"
+      },
+      "affects": [
+        "equipment",
+        "progression"
+      ],
+      "priority": 48,
+      "infoGain": 5,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "e-plate-max",
+      "since": 1
+    },
+    {
+      "id": "e-rack",
+      "key": "hasRack",
+      "category": "equipment",
+      "answer": "single",
+      "options": [
+        {
+          "value": "none"
+        },
+        {
+          "value": "stands"
+        },
+        {
+          "value": "full_rack"
+        }
+      ],
+      "eligible": {
+        "field": "answers.equipmentList",
+        "op": "has",
+        "value": "barbell"
+      },
+      "affects": [
+        "equipment",
+        "safetyFlags",
+        "planConstraints"
+      ],
+      "safety": "restrict",
+      "priority": 58,
+      "infoGain": 7,
+      "required": false,
+      "skippable": true,
+      "analyticsKey": "e-rack",
+      "since": 1
+    },
+    {
+      "id": "e-bench-kind",
+      "key": "benchKind",
+      "category": "equipment",
+      "answer": "single",
+      "options": [
+        {
+          "value": "none"
+        },
+        {
+          "value": "flat"
+        },
+        {
+          "value": "adjustable"
+        }
+      ],
+      "eligible": {
+        "all": [
+          {
+            "field": "answers.place",
+            "op": "in",
+            "value": [
+              "home",
+              "outdoor",
+              "mixed"
+            ]
+          },
+          {
+            "field": "answers.equipmentList",
+            "op": "has",
+            "value": "bench"
+          }
+        ]
+      },
+      "affects": [
+        "equipment",
+        "planConstraints"
+      ],
+      "priority": 44,
+      "infoGain": 5,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "e-bench-kind",
+      "since": 1
+    },
+    {
+      "id": "e-bodyweight-only-confirm",
+      "key": "bodyweightOnly",
+      "category": "equipment",
+      "answer": "boolean",
+      "eligible": {
+        "field": "answers.equipmentList",
+        "op": "hasNone",
+        "value": [
+          "dumbbell",
+          "barbell",
+          "machine",
+          "cable"
+        ]
+      },
+      "affects": [
+        "equipment",
+        "trainingStyle",
+        "planConstraints"
+      ],
+      "priority": 62,
+      "infoGain": 7,
+      "followUps": [
+        {
+          "when": {
+            "field": "answers.bodyweightOnly",
+            "op": "eq",
+            "value": true
+          },
+          "ask": [
+            "e-pullup-bar"
+          ]
+        }
+      ],
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "e-bodyweight-only-confirm",
+      "since": 1
+    },
+    {
+      "id": "e-pullup-bar",
+      "key": "hasPullupBar",
+      "category": "equipment",
+      "answer": "boolean",
+      "eligible": {
+        "any": [
+          {
+            "field": "answers.bodyweightOnly",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "all": [
+              {
+                "field": "answers.place",
+                "op": "in",
+                "value": [
+                  "home",
+                  "outdoor",
+                  "mixed"
+                ]
+              },
+              {
+                "field": "answers.equipmentList",
+                "op": "hasNone",
+                "value": [
+                  "machine",
+                  "cable"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "affects": [
+        "equipment",
+        "planConstraints"
+      ],
+      "priority": 52,
+      "infoGain": 6,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "e-pullup-bar",
+      "since": 1
+    },
+    {
+      "id": "e-space",
+      "key": "trainingSpace",
+      "category": "equipment",
+      "answer": "single",
+      "options": [
+        {
+          "value": "tiny"
+        },
+        {
+          "value": "room"
+        },
+        {
+          "value": "garage"
+        },
+        {
+          "value": "outdoor"
+        }
+      ],
+      "eligible": {
+        "field": "answers.place",
+        "op": "in",
+        "value": [
+          "home",
+          "outdoor",
+          "mixed"
+        ]
+      },
+      "affects": [
+        "equipment",
+        "planConstraints"
+      ],
+      "priority": 46,
+      "infoGain": 5,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "e-space",
+      "since": 1
+    },
+    {
+      "id": "e-noise-limit",
+      "key": "noiseLimit",
+      "category": "equipment",
+      "answer": "boolean",
+      "eligible": {
+        "field": "answers.trainingSpace",
+        "op": "in",
+        "value": [
+          "tiny",
+          "room"
+        ]
+      },
+      "affects": [
+        "safetyFlags",
+        "planConstraints"
+      ],
+      "priority": 30,
+      "infoGain": 4,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "e-noise-limit",
+      "since": 1
+    },
+    {
+      "id": "e-cardio-machines",
+      "key": "cardioMachines",
+      "category": "equipment",
+      "answer": "multi",
+      "options": [
+        {
+          "value": "none"
+        },
+        {
+          "value": "treadmill"
+        },
+        {
+          "value": "bike"
+        },
+        {
+          "value": "elliptical"
+        },
+        {
+          "value": "rower"
+        },
+        {
+          "value": "stairs"
+        }
+      ],
+      "affects": [
+        "cardio",
+        "planConstraints"
+      ],
+      "priority": 40,
+      "infoGain": 5,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "e-cardio-machines",
+      "since": 1
+    },
+    {
+      "id": "e-bands-only-detail",
+      "key": "bandStrength",
+      "category": "equipment",
+      "answer": "single",
+      "options": [
+        {
+          "value": "light"
+        },
+        {
+          "value": "mixed"
+        },
+        {
+          "value": "heavy"
+        }
+      ],
+      "eligible": {
+        "all": [
+          {
+            "field": "answers.equipmentList",
+            "op": "has",
+            "value": "band"
+          },
+          {
+            "field": "answers.equipmentList",
+            "op": "hasNone",
+            "value": [
+              "barbell",
+              "machine"
+            ]
+          }
+        ]
+      },
+      "affects": [
+        "equipment",
+        "progression"
+      ],
+      "priority": 32,
+      "infoGain": 4,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "e-bands-only-detail",
+      "since": 1
+    },
+    {
+      "id": "e-travel-fallback",
+      "key": "travelFallback",
+      "category": "equipment",
+      "answer": "single",
+      "options": [
+        {
+          "value": "hotel_gym"
+        },
+        {
+          "value": "bodyweight"
+        },
+        {
+          "value": "bands"
+        },
+        {
+          "value": "skip_training"
+        }
+      ],
+      "eligible": {
+        "field": "answers.travelFrequency",
+        "op": "in",
+        "value": [
+          "monthly",
+          "weekly"
+        ]
+      },
+      "affects": [
+        "equipment",
+        "planConstraints"
+      ],
+      "priority": 34,
+      "infoGain": 4,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "e-travel-fallback",
+      "since": 1
+    },
+    {
+      "id": "e-machine-access",
+      "key": "machineAccess",
+      "category": "equipment",
+      "answer": "single",
+      "options": [
+        {
+          "value": "none"
+        },
+        {
+          "value": "few"
+        },
+        {
+          "value": "most"
+        },
+        {
+          "value": "all"
+        }
+      ],
+      "eligible": {
+        "all": [
+          {
+            "field": "answers.place",
+            "op": "in",
+            "value": [
+              "gym",
+              "mixed"
+            ]
+          },
+          {
+            "field": "answers.gymType",
+            "op": "ne",
+            "value": "full"
+          }
+        ]
+      },
+      "affects": [
+        "equipment",
+        "trainingStyle"
+      ],
+      "priority": 42,
+      "infoGain": 5,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "e-machine-access",
+      "since": 1
+    },
+    {
+      "id": "e-spotter",
+      "key": "hasSpotter",
+      "category": "equipment",
+      "answer": "boolean",
+      "eligible": {
+        "all": [
+          {
+            "field": "answers.equipmentList",
+            "op": "has",
+            "value": "barbell"
+          },
+          {
+            "not": {
+              "field": "answers.hasRack",
+              "op": "eq",
+              "value": "full_rack"
+            }
+          }
+        ]
+      },
+      "affects": [
+        "safetyFlags",
+        "planConstraints"
+      ],
+      "safety": "restrict",
+      "priority": 44,
+      "infoGain": 5,
+      "required": false,
+      "skippable": true,
+      "analyticsKey": "e-spotter",
+      "since": 1
+    },
+    {
+      "id": "e-equipment-confidence",
+      "key": "equipmentConfidence",
+      "category": "equipment",
+      "answer": "single",
+      "options": [
+        {
+          "value": "lost"
+        },
+        {
+          "value": "basics"
+        },
+        {
+          "value": "confident"
+        }
+      ],
+      "eligible": {
+        "all": [
+          {
+            "field": "answers.place",
+            "op": "in",
+            "value": [
+              "gym",
+              "mixed"
+            ]
+          },
+          {
+            "field": "answers.selfLevel",
+            "op": "answered"
+          }
+        ]
+      },
+      "affects": [
+        "experience",
+        "planConstraints"
+      ],
+      "priority": 36,
+      "infoGain": 5,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "e-equipment-confidence",
+      "since": 1
+    },
+    {
+      "id": "e-weather-dependency",
+      "key": "weatherDependency",
+      "category": "equipment",
+      "answer": "boolean",
+      "eligible": {
+        "field": "answers.equipmentList",
+        "op": "hasAny",
+        "value": [
+          "bodyweight"
+        ]
+      },
+      "affects": [
+        "planConstraints"
+      ],
+      "priority": 20,
+      "infoGain": 3,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "e-weather-dependency",
+      "since": 1
+    },
+    {
+      "id": "s-screen-gate",
+      "key": "screenGate",
+      "category": "safety",
+      "answer": "boolean",
+      "affects": [
+        "safetyFlags"
+      ],
+      "safety": "screen",
+      "priority": 84,
+      "required": true,
+      "skippable": false,
+      "infoGain": 9,
+      "followUps": [
+        {
+          "when": {
+            "field": "answers.screenGate",
+            "op": "eq",
+            "value": true
+          },
+          "ask": [
+            "s-chest-pain",
+            "s-fainting",
+            "s-doctor-restriction",
+            "s-recent-surgery"
+          ]
+        }
+      ],
+      "analyticsKey": "s-screen-gate",
+      "since": 1
+    },
+    {
+      "id": "s-chest-pain",
+      "key": "chestPain",
+      "category": "safety",
+      "answer": "boolean",
+      "eligible": {
+        "field": "answers.screenGate",
+        "op": "eq",
+        "value": true
+      },
+      "affects": [
+        "safetyFlags",
+        "intensity",
+        "cardio"
+      ],
+      "safety": "clear",
+      "priority": 83,
+      "skippable": false,
+      "infoGain": 9,
+      "required": false,
+      "analyticsKey": "s-chest-pain",
+      "since": 1
+    },
+    {
+      "id": "s-fainting",
+      "key": "fainting",
+      "category": "safety",
+      "answer": "boolean",
+      "eligible": {
+        "field": "answers.screenGate",
+        "op": "eq",
+        "value": true
+      },
+      "affects": [
+        "safetyFlags",
+        "intensity"
+      ],
+      "safety": "clear",
+      "priority": 83,
+      "skippable": false,
+      "infoGain": 8,
+      "required": false,
+      "analyticsKey": "s-fainting",
+      "since": 1
+    },
+    {
+      "id": "s-doctor-restriction",
+      "key": "doctorRestriction",
+      "category": "safety",
+      "answer": "boolean",
+      "eligible": {
+        "field": "answers.screenGate",
+        "op": "eq",
+        "value": true
+      },
+      "affects": [
+        "safetyFlags",
+        "planConstraints"
+      ],
+      "safety": "clear",
+      "priority": 83,
+      "skippable": false,
+      "infoGain": 9,
+      "followUps": [
+        {
+          "when": {
+            "field": "answers.doctorRestriction",
+            "op": "eq",
+            "value": true
+          },
+          "ask": [
+            "s-restriction-area"
+          ]
+        }
+      ],
+      "required": false,
+      "analyticsKey": "s-doctor-restriction",
+      "since": 1
+    },
+    {
+      "id": "s-restriction-area",
+      "key": "restrictionAreas",
+      "category": "safety",
+      "answer": "bodyAreas",
+      "options": [
+        {
+          "value": "neck"
+        },
+        {
+          "value": "shoulder"
+        },
+        {
+          "value": "elbow"
+        },
+        {
+          "value": "wrist"
+        },
+        {
+          "value": "upper_back"
+        },
+        {
+          "value": "lower_back"
+        },
+        {
+          "value": "hip"
+        },
+        {
+          "value": "knee"
+        },
+        {
+          "value": "ankle"
+        },
+        {
+          "value": "core"
+        }
+      ],
+      "eligible": {
+        "field": "answers.doctorRestriction",
+        "op": "eq",
+        "value": true
+      },
+      "affects": [
+        "safetyFlags",
+        "limitations"
+      ],
+      "safety": "restrict",
+      "priority": 82,
+      "infoGain": 9,
+      "required": false,
+      "skippable": true,
+      "analyticsKey": "s-restriction-area",
+      "since": 1
+    },
+    {
+      "id": "s-recent-surgery",
+      "key": "recentSurgery",
+      "category": "safety",
+      "answer": "boolean",
+      "eligible": {
+        "field": "answers.screenGate",
+        "op": "eq",
+        "value": true
+      },
+      "affects": [
+        "safetyFlags",
+        "volume",
+        "intensity"
+      ],
+      "safety": "clear",
+      "priority": 83,
+      "skippable": false,
+      "infoGain": 9,
+      "followUps": [
+        {
+          "when": {
+            "field": "answers.recentSurgery",
+            "op": "eq",
+            "value": true
+          },
+          "ask": [
+            "s-surgery-when",
+            "s-surgery-area"
+          ]
+        }
+      ],
+      "required": false,
+      "analyticsKey": "s-recent-surgery",
+      "since": 1
+    },
+    {
+      "id": "s-surgery-when",
+      "key": "surgeryWhen",
+      "category": "safety",
+      "answer": "single",
+      "options": [
+        {
+          "value": "under6w"
+        },
+        {
+          "value": "w6_12"
+        },
+        {
+          "value": "m3_6"
+        },
+        {
+          "value": "over6m"
+        }
+      ],
+      "eligible": {
+        "field": "answers.recentSurgery",
+        "op": "eq",
+        "value": true
+      },
+      "affects": [
+        "safetyFlags",
+        "volume"
+      ],
+      "safety": "clear",
+      "priority": 82,
+      "infoGain": 8,
+      "required": false,
+      "skippable": true,
+      "analyticsKey": "s-surgery-when",
+      "since": 1
+    },
+    {
+      "id": "s-surgery-area",
+      "key": "surgeryAreas",
+      "category": "safety",
+      "answer": "bodyAreas",
+      "options": [
+        {
+          "value": "neck"
+        },
+        {
+          "value": "shoulder"
+        },
+        {
+          "value": "elbow"
+        },
+        {
+          "value": "wrist"
+        },
+        {
+          "value": "upper_back"
+        },
+        {
+          "value": "lower_back"
+        },
+        {
+          "value": "hip"
+        },
+        {
+          "value": "knee"
+        },
+        {
+          "value": "ankle"
+        },
+        {
+          "value": "core"
+        }
+      ],
+      "eligible": {
+        "field": "answers.recentSurgery",
+        "op": "eq",
+        "value": true
+      },
+      "affects": [
+        "safetyFlags",
+        "limitations"
+      ],
+      "safety": "restrict",
+      "priority": 82,
+      "infoGain": 8,
+      "required": false,
+      "skippable": true,
+      "analyticsKey": "s-surgery-area",
+      "since": 1
+    },
+    {
+      "id": "s-pregnancy",
+      "key": "pregnancyStatus",
+      "category": "safety",
+      "answer": "single",
+      "options": [
+        {
+          "value": "no"
+        },
+        {
+          "value": "pregnant"
+        },
+        {
+          "value": "postpartum"
+        },
+        {
+          "value": "prefer_not"
+        }
+      ],
+      "eligible": {
+        "all": [
+          {
+            "field": "answers.sex",
+            "op": "eq",
+            "value": "female"
+          },
+          {
+            "field": "answers.age",
+            "op": "gte",
+            "value": 16
+          }
+        ]
+      },
+      "affects": [
+        "safetyFlags",
+        "intensity",
+        "planConstraints"
+      ],
+      "safety": "clear",
+      "priority": 80,
+      "infoGain": 8,
+      "required": false,
+      "skippable": true,
+      "analyticsKey": "s-pregnancy",
+      "since": 1
+    },
+    {
+      "id": "s-older-adult",
+      "key": "olderAdultCare",
+      "category": "safety",
+      "answer": "multi",
+      "options": [
+        {
+          "value": "none"
+        },
+        {
+          "value": "balance"
+        },
+        {
+          "value": "joints"
+        },
+        {
+          "value": "blood_pressure"
+        },
+        {
+          "value": "bone_density"
+        }
+      ],
+      "eligible": {
+        "field": "answers.age",
+        "op": "gte",
+        "value": 55
+      },
+      "affects": [
+        "safetyFlags",
+        "planConstraints",
+        "intensity"
+      ],
+      "safety": "restrict",
+      "priority": 74,
+      "infoGain": 7,
+      "required": false,
+      "skippable": true,
+      "analyticsKey": "s-older-adult",
+      "since": 1
+    },
+    {
+      "id": "s-breathing",
+      "key": "breathingIssue",
+      "category": "safety",
+      "answer": "boolean",
+      "eligible": {
+        "field": "answers.screenGate",
+        "op": "eq",
+        "value": true
+      },
+      "affects": [
+        "safetyFlags",
+        "cardio"
+      ],
+      "safety": "restrict",
+      "priority": 72,
+      "infoGain": 6,
+      "required": false,
+      "skippable": true,
+      "analyticsKey": "s-breathing",
+      "since": 1
+    },
+    {
+      "id": "s-dizziness-on-effort",
+      "key": "dizzinessOnEffort",
+      "category": "safety",
+      "answer": "boolean",
+      "eligible": {
+        "any": [
+          {
+            "field": "answers.chestPain",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "field": "answers.fainting",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "field": "answers.doctorRestriction",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "field": "answers.recentSurgery",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "field": "answers.pregnancyStatus",
+            "op": "in",
+            "value": [
+              "pregnant",
+              "postpartum"
+            ]
+          }
+        ]
+      },
+      "affects": [
+        "safetyFlags",
+        "intensity"
+      ],
+      "safety": "clear",
+      "priority": 70,
+      "infoGain": 6,
+      "required": false,
+      "skippable": true,
+      "analyticsKey": "s-dizziness-on-effort",
+      "since": 1
+    },
+    {
+      "id": "s-clearance-ack",
+      "key": "clearanceAck",
+      "category": "safety",
+      "answer": "boolean",
+      "eligible": {
+        "any": [
+          {
+            "field": "answers.chestPain",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "field": "answers.fainting",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "field": "answers.doctorRestriction",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "field": "answers.recentSurgery",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "field": "answers.pregnancyStatus",
+            "op": "in",
+            "value": [
+              "pregnant",
+              "postpartum"
+            ]
+          }
+        ]
+      },
+      "affects": [
+        "safetyFlags"
+      ],
+      "safety": "clear",
+      "priority": 79,
+      "skippable": false,
+      "infoGain": 7,
+      "required": false,
+      "analyticsKey": "s-clearance-ack",
+      "since": 1
+    },
+    {
+      "id": "l-has-injury",
+      "key": "hasInjury",
+      "category": "limitations",
+      "answer": "single",
+      "options": [
+        {
+          "value": "none"
+        },
+        {
+          "value": "past"
+        },
+        {
+          "value": "current"
+        }
+      ],
+      "affects": [
+        "limitations",
+        "safetyFlags"
+      ],
+      "safety": "screen",
+      "priority": 85,
+      "required": true,
+      "skippable": false,
+      "infoGain": 9,
+      "followUps": [
+        {
+          "when": {
+            "field": "answers.hasInjury",
+            "op": "eq",
+            "value": "current"
+          },
+          "ask": [
+            "l-current-areas",
+            "l-pain-on-movement",
+            "l-pain-level"
+          ]
+        },
+        {
+          "when": {
+            "field": "answers.hasInjury",
+            "op": "eq",
+            "value": "past"
+          },
+          "ask": [
+            "l-past-areas",
+            "l-past-recovered"
+          ]
+        }
+      ],
+      "analyticsKey": "l-has-injury",
+      "since": 1
+    },
+    {
+      "id": "l-current-areas",
+      "key": "currentInjuryAreas",
+      "category": "limitations",
+      "answer": "bodyAreas",
+      "options": [
+        {
+          "value": "neck"
+        },
+        {
+          "value": "shoulder"
+        },
+        {
+          "value": "elbow"
+        },
+        {
+          "value": "wrist"
+        },
+        {
+          "value": "upper_back"
+        },
+        {
+          "value": "lower_back"
+        },
+        {
+          "value": "hip"
+        },
+        {
+          "value": "knee"
+        },
+        {
+          "value": "ankle"
+        },
+        {
+          "value": "core"
+        }
+      ],
+      "select": {
+        "min": 1
+      },
+      "eligible": {
+        "field": "answers.hasInjury",
+        "op": "eq",
+        "value": "current"
+      },
+      "affects": [
+        "limitations",
+        "safetyFlags",
+        "excludedExercises"
+      ],
+      "safety": "restrict",
+      "priority": 84,
+      "skippable": false,
+      "infoGain": 10,
+      "followUps": [
+        {
+          "when": {
+            "field": "answers.currentInjuryAreas",
+            "op": "has",
+            "value": "shoulder"
+          },
+          "ask": [
+            "l-shoulder-overhead"
+          ]
+        },
+        {
+          "when": {
+            "field": "answers.currentInjuryAreas",
+            "op": "has",
+            "value": "knee"
+          },
+          "ask": [
+            "l-knee-depth"
+          ]
+        },
+        {
+          "when": {
+            "field": "answers.currentInjuryAreas",
+            "op": "has",
+            "value": "lower_back"
+          },
+          "ask": [
+            "l-back-hinge"
+          ]
+        },
+        {
+          "when": {
+            "field": "answers.currentInjuryAreas",
+            "op": "has",
+            "value": "wrist"
+          },
+          "ask": [
+            "l-wrist-grip"
+          ]
+        }
+      ],
+      "required": false,
+      "analyticsKey": "l-current-areas",
+      "since": 1
+    },
+    {
+      "id": "l-past-areas",
+      "key": "pastInjuryAreas",
+      "category": "limitations",
+      "answer": "bodyAreas",
+      "options": [
+        {
+          "value": "neck"
+        },
+        {
+          "value": "shoulder"
+        },
+        {
+          "value": "elbow"
+        },
+        {
+          "value": "wrist"
+        },
+        {
+          "value": "upper_back"
+        },
+        {
+          "value": "lower_back"
+        },
+        {
+          "value": "hip"
+        },
+        {
+          "value": "knee"
+        },
+        {
+          "value": "ankle"
+        },
+        {
+          "value": "core"
+        }
+      ],
+      "eligible": {
+        "field": "answers.hasInjury",
+        "op": "eq",
+        "value": "past"
+      },
+      "affects": [
+        "limitations",
+        "planConstraints"
+      ],
+      "safety": "restrict",
+      "priority": 64,
+      "infoGain": 7,
+      "required": false,
+      "skippable": true,
+      "analyticsKey": "l-past-areas",
+      "since": 1
+    },
+    {
+      "id": "l-past-recovered",
+      "key": "pastRecovered",
+      "category": "limitations",
+      "answer": "single",
+      "options": [
+        {
+          "value": "fully"
+        },
+        {
+          "value": "mostly"
+        },
+        {
+          "value": "flares"
+        }
+      ],
+      "eligible": {
+        "field": "answers.hasInjury",
+        "op": "eq",
+        "value": "past"
+      },
+      "affects": [
+        "limitations",
+        "safetyFlags"
+      ],
+      "safety": "restrict",
+      "priority": 62,
+      "infoGain": 7,
+      "required": false,
+      "skippable": true,
+      "analyticsKey": "l-past-recovered",
+      "since": 1
+    },
+    {
+      "id": "l-pain-on-movement",
+      "key": "painOnMovement",
+      "category": "limitations",
+      "answer": "multi",
+      "options": [
+        {
+          "value": "none"
+        },
+        {
+          "value": "push"
+        },
+        {
+          "value": "pull"
+        },
+        {
+          "value": "squat"
+        },
+        {
+          "value": "hinge"
+        },
+        {
+          "value": "overhead"
+        },
+        {
+          "value": "twist"
+        },
+        {
+          "value": "impact"
+        }
+      ],
+      "eligible": {
+        "field": "answers.hasInjury",
+        "op": "eq",
+        "value": "current"
+      },
+      "affects": [
+        "safetyFlags",
+        "excludedExercises",
+        "planConstraints"
+      ],
+      "safety": "restrict",
+      "priority": 82,
+      "infoGain": 10,
+      "required": false,
+      "skippable": true,
+      "analyticsKey": "l-pain-on-movement",
+      "since": 1
+    },
+    {
+      "id": "l-pain-level",
+      "key": "painLevel",
+      "category": "limitations",
+      "answer": "slider",
+      "range": {
+        "min": 0,
+        "max": 10,
+        "step": 1
+      },
+      "eligible": {
+        "field": "answers.hasInjury",
+        "op": "eq",
+        "value": "current"
+      },
+      "affects": [
+        "safetyFlags",
+        "intensity",
+        "volume"
+      ],
+      "safety": "clear",
+      "priority": 80,
+      "infoGain": 8,
+      "required": false,
+      "skippable": true,
+      "analyticsKey": "l-pain-level",
+      "since": 1
+    },
+    {
+      "id": "l-shoulder-overhead",
+      "key": "shoulderOverhead",
+      "category": "limitations",
+      "answer": "single",
+      "options": [
+        {
+          "value": "fine"
+        },
+        {
+          "value": "uncomfortable"
+        },
+        {
+          "value": "cannot"
+        }
+      ],
+      "eligible": {
+        "field": "answers.currentInjuryAreas",
+        "op": "hasAny",
+        "value": [
+          "shoulder"
+        ]
+      },
+      "affects": [
+        "safetyFlags",
+        "excludedExercises"
+      ],
+      "safety": "restrict",
+      "priority": 76,
+      "infoGain": 8,
+      "required": false,
+      "skippable": true,
+      "analyticsKey": "l-shoulder-overhead",
+      "since": 1
+    },
+    {
+      "id": "l-knee-depth",
+      "key": "kneeDepth",
+      "category": "limitations",
+      "answer": "single",
+      "options": [
+        {
+          "value": "full"
+        },
+        {
+          "value": "partial"
+        },
+        {
+          "value": "minimal"
+        }
+      ],
+      "eligible": {
+        "field": "answers.currentInjuryAreas",
+        "op": "hasAny",
+        "value": [
+          "knee"
+        ]
+      },
+      "affects": [
+        "safetyFlags",
+        "excludedExercises",
+        "planConstraints"
+      ],
+      "safety": "restrict",
+      "priority": 76,
+      "infoGain": 8,
+      "required": false,
+      "skippable": true,
+      "analyticsKey": "l-knee-depth",
+      "since": 1
+    },
+    {
+      "id": "l-back-hinge",
+      "key": "backHinge",
+      "category": "limitations",
+      "answer": "single",
+      "options": [
+        {
+          "value": "fine"
+        },
+        {
+          "value": "light_only"
+        },
+        {
+          "value": "avoid"
+        }
+      ],
+      "eligible": {
+        "field": "answers.currentInjuryAreas",
+        "op": "hasAny",
+        "value": [
+          "lower_back"
+        ]
+      },
+      "affects": [
+        "safetyFlags",
+        "excludedExercises"
+      ],
+      "safety": "restrict",
+      "priority": 76,
+      "infoGain": 8,
+      "required": false,
+      "skippable": true,
+      "analyticsKey": "l-back-hinge",
+      "since": 1
+    },
+    {
+      "id": "l-wrist-grip",
+      "key": "wristGrip",
+      "category": "limitations",
+      "answer": "single",
+      "options": [
+        {
+          "value": "fine"
+        },
+        {
+          "value": "straps_needed"
+        },
+        {
+          "value": "limited"
+        }
+      ],
+      "eligible": {
+        "field": "answers.currentInjuryAreas",
+        "op": "hasAny",
+        "value": [
+          "wrist"
+        ]
+      },
+      "affects": [
+        "safetyFlags",
+        "excludedExercises"
+      ],
+      "safety": "restrict",
+      "priority": 66,
+      "infoGain": 6,
+      "required": false,
+      "skippable": true,
+      "analyticsKey": "l-wrist-grip",
+      "since": 1
+    },
+    {
+      "id": "l-balance",
+      "key": "balanceIssue",
+      "category": "limitations",
+      "answer": "single",
+      "options": [
+        {
+          "value": "none"
+        },
+        {
+          "value": "some"
+        },
+        {
+          "value": "significant"
+        }
+      ],
+      "eligible": {
+        "any": [
+          {
+            "field": "answers.age",
+            "op": "gte",
+            "value": 55
+          },
+          {
+            "field": "answers.hasInjury",
+            "op": "eq",
+            "value": "current"
+          }
+        ]
+      },
+      "affects": [
+        "safetyFlags",
+        "excludedExercises",
+        "planConstraints"
+      ],
+      "safety": "restrict",
+      "priority": 60,
+      "infoGain": 7,
+      "required": false,
+      "skippable": true,
+      "analyticsKey": "l-balance",
+      "since": 1
+    },
+    {
+      "id": "l-rom-limits",
+      "key": "romLimits",
+      "category": "limitations",
+      "answer": "bodyAreas",
+      "options": [
+        {
+          "value": "neck"
+        },
+        {
+          "value": "shoulder"
+        },
+        {
+          "value": "elbow"
+        },
+        {
+          "value": "wrist"
+        },
+        {
+          "value": "upper_back"
+        },
+        {
+          "value": "lower_back"
+        },
+        {
+          "value": "hip"
+        },
+        {
+          "value": "knee"
+        },
+        {
+          "value": "ankle"
+        },
+        {
+          "value": "core"
+        }
+      ],
+      "eligible": {
+        "field": "answers.hasInjury",
+        "op": "in",
+        "value": [
+          "past",
+          "current"
+        ]
+      },
+      "affects": [
+        "limitations",
+        "planConstraints"
+      ],
+      "safety": "restrict",
+      "priority": 54,
+      "infoGain": 6,
+      "required": false,
+      "skippable": true,
+      "analyticsKey": "l-rom-limits",
+      "since": 1
+    },
+    {
+      "id": "l-joint-sensitivity",
+      "key": "jointSensitivity",
+      "category": "limitations",
+      "answer": "multi",
+      "options": [
+        {
+          "value": "none"
+        },
+        {
+          "value": "shoulder"
+        },
+        {
+          "value": "elbow"
+        },
+        {
+          "value": "wrist"
+        },
+        {
+          "value": "hip"
+        },
+        {
+          "value": "knee"
+        },
+        {
+          "value": "ankle"
+        }
+      ],
+      "affects": [
+        "limitations",
+        "planConstraints",
+        "excludedExercises"
+      ],
+      "safety": "restrict",
+      "priority": 52,
+      "infoGain": 6,
+      "required": false,
+      "skippable": true,
+      "analyticsKey": "l-joint-sensitivity",
+      "since": 1
+    },
+    {
+      "id": "l-impact-tolerance",
+      "key": "impactTolerance",
+      "category": "limitations",
+      "answer": "single",
+      "options": [
+        {
+          "value": "fine"
+        },
+        {
+          "value": "limited"
+        },
+        {
+          "value": "none"
+        }
+      ],
+      "affects": [
+        "safetyFlags",
+        "cardio",
+        "excludedExercises"
+      ],
+      "safety": "restrict",
+      "priority": 56,
+      "infoGain": 6,
+      "required": false,
+      "skippable": true,
+      "analyticsKey": "l-impact-tolerance",
+      "since": 1
+    },
+    {
+      "id": "l-medication-effect",
+      "key": "medicationEffect",
+      "category": "limitations",
+      "answer": "single",
+      "options": [
+        {
+          "value": "none"
+        },
+        {
+          "value": "some"
+        },
+        {
+          "value": "prefer_not"
+        }
+      ],
+      "eligible": {
+        "field": "answers.screenGate",
+        "op": "eq",
+        "value": true
+      },
+      "affects": [
+        "safetyFlags",
+        "intensity"
+      ],
+      "safety": "restrict",
+      "priority": 50,
+      "infoGain": 5,
+      "required": false,
+      "skippable": true,
+      "analyticsKey": "l-medication-effect",
+      "since": 1
+    },
+    {
+      "id": "l-notes",
+      "key": "limitationNotes",
+      "category": "limitations",
+      "answer": "text",
+      "eligible": {
+        "field": "answers.hasInjury",
+        "op": "in",
+        "value": [
+          "past",
+          "current"
+        ]
+      },
+      "affects": [
+        "limitations"
+      ],
+      "priority": 18,
+      "infoGain": 2,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "l-notes",
+      "since": 1
+    },
+    {
+      "id": "l-cannot-perform",
+      "key": "cannotPerform",
+      "category": "limitations",
+      "answer": "exercises",
+      "eligible": {
+        "field": "answers.hasInjury",
+        "op": "in",
+        "value": [
+          "past",
+          "current"
+        ]
+      },
+      "affects": [
+        "excludedExercises",
+        "planConstraints"
+      ],
+      "safety": "restrict",
+      "priority": 58,
+      "infoGain": 7,
+      "required": false,
+      "skippable": true,
+      "analyticsKey": "l-cannot-perform",
+      "since": 1
+    },
+    {
+      "id": "l-standing-tolerance",
+      "key": "standingTolerance",
+      "category": "limitations",
+      "answer": "single",
+      "options": [
+        {
+          "value": "fine"
+        },
+        {
+          "value": "limited"
+        },
+        {
+          "value": "seated_only"
+        }
+      ],
+      "eligible": {
+        "any": [
+          {
+            "field": "answers.age",
+            "op": "gte",
+            "value": 60
+          },
+          {
+            "field": "answers.balanceIssue",
+            "op": "eq",
+            "value": "significant"
+          }
+        ]
+      },
+      "affects": [
+        "safetyFlags",
+        "excludedExercises",
+        "planConstraints"
+      ],
+      "safety": "restrict",
+      "priority": 48,
+      "infoGain": 6,
+      "required": false,
+      "skippable": true,
+      "analyticsKey": "l-standing-tolerance",
+      "since": 1
+    },
+    {
+      "id": "l-breath-holding",
+      "key": "breathHoldingRisk",
+      "category": "limitations",
+      "answer": "boolean",
+      "eligible": {
+        "any": [
+          {
+            "field": "answers.age",
+            "op": "gte",
+            "value": 55
+          },
+          {
+            "field": "answers.doctorRestriction",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "affects": [
+        "safetyFlags",
+        "intensity"
+      ],
+      "safety": "restrict",
+      "priority": 46,
+      "infoGain": 5,
+      "required": false,
+      "skippable": true,
+      "analyticsKey": "l-breath-holding",
+      "since": 1
+    },
+    {
+      "id": "p-style",
+      "key": "trainingStyle",
+      "category": "preferences",
+      "answer": "single",
+      "options": [
+        {
+          "value": "machines"
+        },
+        {
+          "value": "free_weights"
+        },
+        {
+          "value": "mixed"
+        },
+        {
+          "value": "bodyweight"
+        }
+      ],
+      "affects": [
+        "trainingStyle",
+        "planConstraints"
+      ],
+      "priority": 74,
+      "required": true,
+      "skippable": false,
+      "infoGain": 8,
+      "safety": "none",
+      "analyticsKey": "p-style",
+      "since": 1
+    },
+    {
+      "id": "p-compound-bias",
+      "key": "compoundBias",
+      "category": "preferences",
+      "answer": "single",
+      "options": [
+        {
+          "value": "compound"
+        },
+        {
+          "value": "balanced"
+        },
+        {
+          "value": "isolation"
+        }
+      ],
+      "eligible": {
+        "field": "derived.experienceClass",
+        "op": "ne",
+        "value": "complete_beginner"
+      },
+      "affects": [
+        "planConstraints",
+        "volume"
+      ],
+      "priority": 50,
+      "infoGain": 6,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "p-compound-bias",
+      "since": 1
+    },
+    {
+      "id": "p-disliked",
+      "key": "dislikedExercises",
+      "category": "preferences",
+      "answer": "exercises",
+      "affects": [
+        "excludedExercises",
+        "planConstraints"
+      ],
+      "priority": 72,
+      "infoGain": 7,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "p-disliked",
+      "since": 1
+    },
+    {
+      "id": "p-preferred",
+      "key": "preferredExercises",
+      "category": "preferences",
+      "answer": "exercises",
+      "eligible": {
+        "field": "derived.experienceClass",
+        "op": "ne",
+        "value": "complete_beginner"
+      },
+      "affects": [
+        "preferredExercises",
+        "planConstraints"
+      ],
+      "priority": 48,
+      "infoGain": 6,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "p-preferred",
+      "since": 1
+    },
+    {
+      "id": "p-variety",
+      "key": "varietyPref",
+      "category": "preferences",
+      "answer": "single",
+      "options": [
+        {
+          "value": "same"
+        },
+        {
+          "value": "some"
+        },
+        {
+          "value": "lots"
+        }
+      ],
+      "affects": [
+        "planConstraints",
+        "progression"
+      ],
+      "priority": 44,
+      "infoGain": 5,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "p-variety",
+      "since": 1
+    },
+    {
+      "id": "p-cardio-type",
+      "key": "cardioType",
+      "category": "preferences",
+      "answer": "multi",
+      "options": [
+        {
+          "value": "walk"
+        },
+        {
+          "value": "run"
+        },
+        {
+          "value": "bike"
+        },
+        {
+          "value": "row"
+        },
+        {
+          "value": "swim"
+        },
+        {
+          "value": "stairs"
+        },
+        {
+          "value": "sport"
+        },
+        {
+          "value": "hiit"
+        }
+      ],
+      "eligible": {
+        "field": "answers.cardioWilling",
+        "op": "in",
+        "value": [
+          "little",
+          "yes",
+          "love_it"
+        ]
+      },
+      "affects": [
+        "cardio",
+        "planConstraints"
+      ],
+      "priority": 46,
+      "infoGain": 6,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "p-cardio-type",
+      "since": 1
+    },
+    {
+      "id": "p-cardio-timing",
+      "key": "cardioTiming",
+      "category": "preferences",
+      "answer": "single",
+      "options": [
+        {
+          "value": "after_lifting"
+        },
+        {
+          "value": "separate_day"
+        },
+        {
+          "value": "before"
+        },
+        {
+          "value": "no_pref"
+        }
+      ],
+      "eligible": {
+        "field": "answers.cardioWilling",
+        "op": "in",
+        "value": [
+          "yes",
+          "love_it"
+        ]
+      },
+      "affects": [
+        "cardio",
+        "planConstraints",
+        "split"
+      ],
+      "priority": 38,
+      "infoGain": 5,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "p-cardio-timing",
+      "since": 1
+    },
+    {
+      "id": "p-superset-tolerance",
+      "key": "supersetTolerance",
+      "category": "preferences",
+      "answer": "single",
+      "options": [
+        {
+          "value": "no"
+        },
+        {
+          "value": "ok"
+        },
+        {
+          "value": "prefer"
+        }
+      ],
+      "eligible": {
+        "field": "answers.sessionMinutes",
+        "op": "in",
+        "value": [
+          "20",
+          "30",
+          "45"
+        ]
+      },
+      "affects": [
+        "planConstraints"
+      ],
+      "priority": 40,
+      "infoGain": 5,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "p-superset-tolerance",
+      "since": 1
+    },
+    {
+      "id": "p-rest-preference",
+      "key": "restPreference",
+      "category": "preferences",
+      "answer": "single",
+      "options": [
+        {
+          "value": "short"
+        },
+        {
+          "value": "moderate"
+        },
+        {
+          "value": "long"
+        },
+        {
+          "value": "auto"
+        }
+      ],
+      "eligible": {
+        "field": "derived.experienceClass",
+        "op": "ne",
+        "value": "complete_beginner"
+      },
+      "affects": [
+        "planConstraints"
+      ],
+      "priority": 36,
+      "infoGain": 5,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "p-rest-preference",
+      "since": 1
+    },
+    {
+      "id": "p-music-cue-pref",
+      "key": "coachingDensity",
+      "category": "preferences",
+      "answer": "single",
+      "options": [
+        {
+          "value": "minimal"
+        },
+        {
+          "value": "normal"
+        },
+        {
+          "value": "detailed"
+        }
+      ],
+      "affects": [
+        "controlLevel",
+        "planConstraints"
+      ],
+      "priority": 30,
+      "infoGain": 4,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "p-music-cue-pref",
+      "since": 1
+    },
+    {
+      "id": "p-solo-or-partner",
+      "key": "trainsWith",
+      "category": "preferences",
+      "answer": "single",
+      "options": [
+        {
+          "value": "solo"
+        },
+        {
+          "value": "partner"
+        },
+        {
+          "value": "group"
+        }
+      ],
+      "affects": [
+        "planConstraints"
+      ],
+      "priority": 22,
+      "infoGain": 3,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "p-solo-or-partner",
+      "since": 1
+    },
+    {
+      "id": "p-mirror-avoid",
+      "key": "crowdComfort",
+      "category": "preferences",
+      "answer": "single",
+      "options": [
+        {
+          "value": "fine"
+        },
+        {
+          "value": "prefer_quiet"
+        },
+        {
+          "value": "avoid_busy"
+        }
+      ],
+      "eligible": {
+        "field": "answers.place",
+        "op": "in",
+        "value": [
+          "gym",
+          "mixed"
+        ]
+      },
+      "affects": [
+        "planConstraints",
+        "trainingStyle"
+      ],
+      "priority": 26,
+      "infoGain": 4,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "p-mirror-avoid",
+      "since": 1
+    },
+    {
+      "id": "p-machine-vs-free-reason",
+      "key": "styleReason",
+      "category": "preferences",
+      "answer": "single",
+      "options": [
+        {
+          "value": "safety"
+        },
+        {
+          "value": "simplicity"
+        },
+        {
+          "value": "results"
+        },
+        {
+          "value": "enjoyment"
+        }
+      ],
+      "eligible": {
+        "field": "answers.trainingStyle",
+        "op": "in",
+        "value": [
+          "machines",
+          "free_weights"
+        ]
+      },
+      "affects": [
+        "planConstraints",
+        "controlLevel"
+      ],
+      "priority": 28,
+      "infoGain": 4,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "p-machine-vs-free-reason",
+      "since": 1
+    },
+    {
+      "id": "p-session-structure",
+      "key": "sessionStructure",
+      "category": "preferences",
+      "answer": "single",
+      "options": [
+        {
+          "value": "fixed_order"
+        },
+        {
+          "value": "flexible_order"
+        }
+      ],
+      "eligible": {
+        "field": "derived.experienceClass",
+        "op": "ne",
+        "value": "complete_beginner"
+      },
+      "affects": [
+        "planConstraints"
+      ],
+      "priority": 24,
+      "infoGain": 3,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "p-session-structure",
+      "since": 1
+    },
+    {
+      "id": "p-substitution-openness",
+      "key": "substitutionOpenness",
+      "category": "preferences",
+      "answer": "single",
+      "options": [
+        {
+          "value": "never"
+        },
+        {
+          "value": "when_busy"
+        },
+        {
+          "value": "always_ok"
+        }
+      ],
+      "affects": [
+        "planConstraints"
+      ],
+      "priority": 34,
+      "infoGain": 5,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "p-substitution-openness",
+      "since": 1
+    },
+    {
+      "id": "p-warmup-time",
+      "key": "warmupTime",
+      "category": "preferences",
+      "answer": "single",
+      "options": [
+        {
+          "value": "none"
+        },
+        {
+          "value": "short"
+        },
+        {
+          "value": "full"
+        }
+      ],
+      "affects": [
+        "planConstraints",
+        "sessionMinutes"
+      ],
+      "priority": 32,
+      "infoGain": 4,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "p-warmup-time",
+      "since": 1
+    },
+    {
+      "id": "p-stretch-time",
+      "key": "stretchTime",
+      "category": "preferences",
+      "answer": "single",
+      "options": [
+        {
+          "value": "none"
+        },
+        {
+          "value": "short"
+        },
+        {
+          "value": "full"
+        }
+      ],
+      "eligible": {
+        "field": "answers.mobilityGoal",
+        "op": "ne",
+        "value": "no"
+      },
+      "affects": [
+        "planConstraints"
+      ],
+      "priority": 22,
+      "infoGain": 3,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "p-stretch-time",
+      "since": 1
+    },
+    {
+      "id": "p-exercise-complexity",
+      "key": "complexityAppetite",
+      "category": "preferences",
+      "answer": "single",
+      "options": [
+        {
+          "value": "simple"
+        },
+        {
+          "value": "moderate"
+        },
+        {
+          "value": "technical"
+        }
+      ],
+      "affects": [
+        "planConstraints",
+        "trainingStyle"
+      ],
+      "priority": 42,
+      "infoGain": 6,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "p-exercise-complexity",
+      "since": 1
+    },
+    {
+      "id": "p-unilateral",
+      "key": "unilateralOpenness",
+      "category": "preferences",
+      "answer": "single",
+      "options": [
+        {
+          "value": "avoid"
+        },
+        {
+          "value": "ok"
+        },
+        {
+          "value": "prefer"
+        }
+      ],
+      "eligible": {
+        "any": [
+          {
+            "field": "answers.balanceIssue",
+            "op": "eq",
+            "value": "none"
+          },
+          {
+            "field": "answers.hasInjury",
+            "op": "ne",
+            "value": "current"
+          }
+        ]
+      },
+      "affects": [
+        "planConstraints"
+      ],
+      "priority": 20,
+      "infoGain": 3,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "p-unilateral",
+      "since": 1
+    },
+    {
+      "id": "p-home-noise-style",
+      "key": "quietStyle",
+      "category": "preferences",
+      "answer": "boolean",
+      "eligible": {
+        "field": "answers.noiseLimit",
+        "op": "eq",
+        "value": true
+      },
+      "affects": [
+        "excludedExercises",
+        "planConstraints"
+      ],
+      "priority": 28,
+      "infoGain": 4,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "p-home-noise-style",
+      "since": 1
+    },
+    {
+      "id": "r-sleep-hours",
+      "key": "sleepHours",
+      "category": "recovery",
+      "answer": "single",
+      "options": [
+        {
+          "value": "lt5"
+        },
+        {
+          "value": "h5_6"
+        },
+        {
+          "value": "h6_7"
+        },
+        {
+          "value": "h7_8"
+        },
+        {
+          "value": "gt8"
+        }
+      ],
+      "affects": [
+        "recovery",
+        "volume",
+        "planConstraints"
+      ],
+      "priority": 68,
+      "infoGain": 8,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "r-sleep-hours",
+      "since": 1
+    },
+    {
+      "id": "r-sleep-quality",
+      "key": "sleepQuality",
+      "category": "recovery",
+      "answer": "single",
+      "options": [
+        {
+          "value": "poor"
+        },
+        {
+          "value": "fair"
+        },
+        {
+          "value": "good"
+        }
+      ],
+      "eligible": {
+        "field": "answers.sleepHours",
+        "op": "in",
+        "value": [
+          "lt5",
+          "h5_6",
+          "h6_7"
+        ]
+      },
+      "affects": [
+        "recovery",
+        "volume"
+      ],
+      "priority": 54,
+      "infoGain": 6,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "r-sleep-quality",
+      "since": 1
+    },
+    {
+      "id": "r-stress",
+      "key": "stressLevel",
+      "category": "recovery",
+      "answer": "single",
+      "options": [
+        {
+          "value": "low"
+        },
+        {
+          "value": "moderate"
+        },
+        {
+          "value": "high"
+        }
+      ],
+      "affects": [
+        "recovery",
+        "volume",
+        "intensity"
+      ],
+      "priority": 60,
+      "infoGain": 7,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "r-stress",
+      "since": 1
+    },
+    {
+      "id": "r-work-type",
+      "key": "workType",
+      "category": "recovery",
+      "answer": "single",
+      "options": [
+        {
+          "value": "desk"
+        },
+        {
+          "value": "mixed"
+        },
+        {
+          "value": "standing"
+        },
+        {
+          "value": "physical"
+        },
+        {
+          "value": "shift"
+        }
+      ],
+      "affects": [
+        "recovery",
+        "planConstraints",
+        "cardio"
+      ],
+      "priority": 58,
+      "infoGain": 7,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "r-work-type",
+      "since": 1
+    },
+    {
+      "id": "r-daily-steps",
+      "key": "dailySteps",
+      "category": "recovery",
+      "answer": "single",
+      "options": [
+        {
+          "value": "lt3k"
+        },
+        {
+          "value": "k3_6"
+        },
+        {
+          "value": "k6_10"
+        },
+        {
+          "value": "gt10k"
+        },
+        {
+          "value": "unknown"
+        }
+      ],
+      "affects": [
+        "cardio",
+        "recovery",
+        "planConstraints"
+      ],
+      "priority": 56,
+      "infoGain": 7,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "r-daily-steps",
+      "since": 1
+    },
+    {
+      "id": "r-soreness-history",
+      "key": "sorenessHistory",
+      "category": "recovery",
+      "answer": "single",
+      "options": [
+        {
+          "value": "rare"
+        },
+        {
+          "value": "normal"
+        },
+        {
+          "value": "lingering"
+        }
+      ],
+      "eligible": {
+        "field": "answers.trainedBefore",
+        "op": "ne",
+        "value": "never"
+      },
+      "affects": [
+        "recovery",
+        "volume"
+      ],
+      "priority": 48,
+      "infoGain": 6,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "r-soreness-history",
+      "since": 1
+    },
+    {
+      "id": "r-fatigue-after-session",
+      "key": "fatigueAfter",
+      "category": "recovery",
+      "answer": "single",
+      "options": [
+        {
+          "value": "energised"
+        },
+        {
+          "value": "normal"
+        },
+        {
+          "value": "wiped"
+        }
+      ],
+      "eligible": {
+        "field": "answers.trainedBefore",
+        "op": "ne",
+        "value": "never"
+      },
+      "affects": [
+        "recovery",
+        "volume",
+        "intensity"
+      ],
+      "priority": 46,
+      "infoGain": 6,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "r-fatigue-after-session",
+      "since": 1
+    },
+    {
+      "id": "r-other-sport-now",
+      "key": "otherSportNow",
+      "category": "recovery",
+      "answer": "single",
+      "options": [
+        {
+          "value": "none"
+        },
+        {
+          "value": "light"
+        },
+        {
+          "value": "regular"
+        },
+        {
+          "value": "competitive"
+        }
+      ],
+      "affects": [
+        "recovery",
+        "volume",
+        "cardio",
+        "planConstraints"
+      ],
+      "priority": 52,
+      "infoGain": 7,
+      "followUps": [
+        {
+          "when": {
+            "field": "answers.otherSportNow",
+            "op": "in",
+            "value": [
+              "regular",
+              "competitive"
+            ]
+          },
+          "ask": [
+            "r-sport-days"
+          ]
+        }
+      ],
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "r-other-sport-now",
+      "since": 1
+    },
+    {
+      "id": "r-sport-days",
+      "key": "sportDaysPerWeek",
+      "category": "recovery",
+      "answer": "single",
+      "options": [
+        {
+          "value": "1"
+        },
+        {
+          "value": "2"
+        },
+        {
+          "value": "3"
+        },
+        {
+          "value": "4plus"
+        }
+      ],
+      "eligible": {
+        "field": "answers.otherSportNow",
+        "op": "in",
+        "value": [
+          "regular",
+          "competitive"
+        ]
+      },
+      "affects": [
+        "volume",
+        "daysPerWeek",
+        "planConstraints"
+      ],
+      "priority": 50,
+      "infoGain": 7,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "r-sport-days",
+      "since": 1
+    },
+    {
+      "id": "r-hydration",
+      "key": "hydrationHabit",
+      "category": "recovery",
+      "answer": "single",
+      "options": [
+        {
+          "value": "low"
+        },
+        {
+          "value": "ok"
+        },
+        {
+          "value": "good"
+        }
+      ],
+      "affects": [
+        "planConstraints"
+      ],
+      "priority": 20,
+      "infoGain": 3,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "r-hydration",
+      "since": 1
+    },
+    {
+      "id": "r-meals-per-day",
+      "key": "mealsPerDay",
+      "category": "recovery",
+      "answer": "single",
+      "options": [
+        {
+          "value": "1_2"
+        },
+        {
+          "value": "3"
+        },
+        {
+          "value": "4"
+        },
+        {
+          "value": "5plus"
+        }
+      ],
+      "eligible": {
+        "field": "answers.nutritionInterest",
+        "op": "ne",
+        "value": "skip"
+      },
+      "affects": [
+        "planConstraints"
+      ],
+      "priority": 34,
+      "infoGain": 4,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "r-meals-per-day",
+      "since": 1
+    },
+    {
+      "id": "r-appetite",
+      "key": "appetite",
+      "category": "recovery",
+      "answer": "single",
+      "options": [
+        {
+          "value": "low"
+        },
+        {
+          "value": "normal"
+        },
+        {
+          "value": "high"
+        }
+      ],
+      "eligible": {
+        "field": "answers.nutritionInterest",
+        "op": "ne",
+        "value": "skip"
+      },
+      "affects": [
+        "planConstraints"
+      ],
+      "priority": 26,
+      "infoGain": 4,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "r-appetite",
+      "since": 1
+    },
+    {
+      "id": "r-caffeine",
+      "key": "caffeineTiming",
+      "category": "recovery",
+      "answer": "single",
+      "options": [
+        {
+          "value": "none"
+        },
+        {
+          "value": "morning"
+        },
+        {
+          "value": "all_day"
+        },
+        {
+          "value": "late"
+        }
+      ],
+      "eligible": {
+        "field": "answers.sleepQuality",
+        "op": "in",
+        "value": [
+          "poor",
+          "fair"
+        ]
+      },
+      "affects": [
+        "recovery"
+      ],
+      "priority": 18,
+      "infoGain": 3,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "r-caffeine",
+      "since": 1
+    },
+    {
+      "id": "r-recovery-selfrating",
+      "key": "recoverySelfRating",
+      "category": "recovery",
+      "answer": "slider",
+      "range": {
+        "min": 1,
+        "max": 5,
+        "step": 1
+      },
+      "affects": [
+        "recovery",
+        "volume"
+      ],
+      "priority": 44,
+      "infoGain": 6,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "r-recovery-selfrating",
+      "since": 1
+    },
+    {
+      "id": "r-deload-history",
+      "key": "deloadHistory",
+      "category": "recovery",
+      "answer": "single",
+      "options": [
+        {
+          "value": "never"
+        },
+        {
+          "value": "sometimes"
+        },
+        {
+          "value": "planned"
+        }
+      ],
+      "eligible": {
+        "field": "derived.experienceClass",
+        "op": "in",
+        "value": [
+          "intermediate",
+          "advanced"
+        ]
+      },
+      "affects": [
+        "progression",
+        "volume"
+      ],
+      "priority": 32,
+      "infoGain": 5,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "r-deload-history",
+      "since": 1
+    },
+    {
+      "id": "r-injury-prone",
+      "key": "injuryProne",
+      "category": "recovery",
+      "answer": "boolean",
+      "eligible": {
+        "all": [
+          {
+            "field": "answers.age",
+            "op": "gte",
+            "value": 30
+          },
+          {
+            "field": "answers.trainedBefore",
+            "op": "ne",
+            "value": "never"
+          }
+        ]
+      },
+      "affects": [
+        "recovery",
+        "volume",
+        "safetyFlags"
+      ],
+      "safety": "restrict",
+      "priority": 40,
+      "infoGain": 5,
+      "required": false,
+      "skippable": true,
+      "analyticsKey": "r-injury-prone",
+      "since": 1
+    },
+    {
+      "id": "r-sitting-hours",
+      "key": "sittingHours",
+      "category": "recovery",
+      "answer": "single",
+      "options": [
+        {
+          "value": "lt4"
+        },
+        {
+          "value": "h4_8"
+        },
+        {
+          "value": "gt8"
+        }
+      ],
+      "eligible": {
+        "field": "answers.workType",
+        "op": "has",
+        "value": "desk"
+      },
+      "affects": [
+        "musclePriorities",
+        "planConstraints"
+      ],
+      "priority": 24,
+      "infoGain": 4,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "r-sitting-hours",
+      "since": 1
+    },
+    {
+      "id": "v-control-level",
+      "key": "controlLevel",
+      "category": "advanced",
+      "answer": "single",
+      "options": [
+        {
+          "value": "guided"
+        },
+        {
+          "value": "balanced"
+        },
+        {
+          "value": "full_control"
+        }
+      ],
+      "levels": [
+        "early_intermediate",
+        "intermediate",
+        "advanced",
+        "returning"
+      ],
+      "affects": [
+        "controlLevel",
+        "planConstraints"
+      ],
+      "priority": 70,
+      "infoGain": 8,
+      "followUps": [
+        {
+          "when": {
+            "field": "answers.controlLevel",
+            "op": "eq",
+            "value": "full_control"
+          },
+          "ask": [
+            "v-split-choice",
+            "v-volume-pref",
+            "v-progression-style"
+          ]
+        }
+      ],
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "v-control-level",
+      "since": 1
+    },
+    {
+      "id": "v-split-choice",
+      "key": "splitChoice",
+      "category": "advanced",
+      "answer": "single",
+      "options": [
+        {
+          "value": "auto"
+        },
+        {
+          "value": "full_body"
+        },
+        {
+          "value": "upper_lower"
+        },
+        {
+          "value": "push_pull_legs"
+        },
+        {
+          "value": "bro_split"
+        }
+      ],
+      "levels": [
+        "early_intermediate",
+        "intermediate",
+        "advanced",
+        "returning"
+      ],
+      "eligible": {
+        "field": "answers.controlLevel",
+        "op": "in",
+        "value": [
+          "balanced",
+          "full_control"
+        ]
+      },
+      "affects": [
+        "split",
+        "planConstraints"
+      ],
+      "priority": 66,
+      "infoGain": 8,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "v-split-choice",
+      "since": 1
+    },
+    {
+      "id": "v-volume-pref",
+      "key": "volumePref",
+      "category": "advanced",
+      "answer": "single",
+      "options": [
+        {
+          "value": "low"
+        },
+        {
+          "value": "moderate"
+        },
+        {
+          "value": "high"
+        }
+      ],
+      "levels": [
+        "intermediate",
+        "advanced"
+      ],
+      "affects": [
+        "volume",
+        "planConstraints"
+      ],
+      "priority": 62,
+      "infoGain": 8,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "v-volume-pref",
+      "since": 1
+    },
+    {
+      "id": "v-intensity-pref",
+      "key": "intensityPref",
+      "category": "advanced",
+      "answer": "single",
+      "options": [
+        {
+          "value": "conservative"
+        },
+        {
+          "value": "moderate"
+        },
+        {
+          "value": "hard"
+        }
+      ],
+      "levels": [
+        "intermediate",
+        "advanced"
+      ],
+      "affects": [
+        "intensity",
+        "planConstraints"
+      ],
+      "priority": 60,
+      "infoGain": 7,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "v-intensity-pref",
+      "since": 1
+    },
+    {
+      "id": "v-rir-familiarity",
+      "key": "rirFamiliarity",
+      "category": "advanced",
+      "answer": "single",
+      "options": [
+        {
+          "value": "no"
+        },
+        {
+          "value": "heard"
+        },
+        {
+          "value": "use_it"
+        }
+      ],
+      "levels": [
+        "intermediate",
+        "advanced"
+      ],
+      "affects": [
+        "intensity",
+        "progression"
+      ],
+      "priority": 58,
+      "infoGain": 7,
+      "followUps": [
+        {
+          "when": {
+            "field": "answers.rirFamiliarity",
+            "op": "eq",
+            "value": "use_it"
+          },
+          "ask": [
+            "v-target-rir"
+          ]
+        }
+      ],
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "v-rir-familiarity",
+      "since": 1
+    },
+    {
+      "id": "v-target-rir",
+      "key": "targetRir",
+      "category": "advanced",
+      "answer": "slider",
+      "range": {
+        "min": 0,
+        "max": 4,
+        "step": 1
+      },
+      "levels": [
+        "intermediate",
+        "advanced"
+      ],
+      "eligible": {
+        "field": "answers.rirFamiliarity",
+        "op": "eq",
+        "value": "use_it"
+      },
+      "affects": [
+        "intensity"
+      ],
+      "priority": 52,
+      "infoGain": 6,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "v-target-rir",
+      "since": 1
+    },
+    {
+      "id": "v-progression-style",
+      "key": "progressionStyle",
+      "category": "advanced",
+      "answer": "single",
+      "options": [
+        {
+          "value": "auto"
+        },
+        {
+          "value": "double_progression"
+        },
+        {
+          "value": "linear_load"
+        },
+        {
+          "value": "rep_first"
+        },
+        {
+          "value": "rpe_based"
+        }
+      ],
+      "levels": [
+        "intermediate",
+        "advanced"
+      ],
+      "affects": [
+        "progression",
+        "planConstraints"
+      ],
+      "priority": 60,
+      "infoGain": 8,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "v-progression-style",
+      "since": 1
+    },
+    {
+      "id": "v-deload-pref",
+      "key": "deloadPref",
+      "category": "advanced",
+      "answer": "single",
+      "options": [
+        {
+          "value": "auto"
+        },
+        {
+          "value": "every4"
+        },
+        {
+          "value": "every6"
+        },
+        {
+          "value": "by_feel"
+        },
+        {
+          "value": "none"
+        }
+      ],
+      "levels": [
+        "intermediate",
+        "advanced"
+      ],
+      "affects": [
+        "progression",
+        "volume"
+      ],
+      "priority": 48,
+      "infoGain": 6,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "v-deload-pref",
+      "since": 1
+    },
+    {
+      "id": "v-block-length",
+      "key": "blockLength",
+      "category": "advanced",
+      "answer": "single",
+      "options": [
+        {
+          "value": "4"
+        },
+        {
+          "value": "6"
+        },
+        {
+          "value": "8"
+        },
+        {
+          "value": "12"
+        }
+      ],
+      "levels": [
+        "intermediate",
+        "advanced"
+      ],
+      "affects": [
+        "progression",
+        "planConstraints"
+      ],
+      "priority": 44,
+      "infoGain": 5,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "v-block-length",
+      "since": 1
+    },
+    {
+      "id": "v-strength-hypertrophy-bias",
+      "key": "strengthHypertrophyBias",
+      "category": "advanced",
+      "answer": "single",
+      "options": [
+        {
+          "value": "strength"
+        },
+        {
+          "value": "balanced"
+        },
+        {
+          "value": "hypertrophy"
+        }
+      ],
+      "levels": [
+        "intermediate",
+        "advanced"
+      ],
+      "affects": [
+        "intensity",
+        "volume",
+        "planConstraints"
+      ],
+      "priority": 56,
+      "infoGain": 8,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "v-strength-hypertrophy-bias",
+      "since": 1
+    },
+    {
+      "id": "v-exercise-rotation",
+      "key": "exerciseRotation",
+      "category": "advanced",
+      "answer": "single",
+      "options": [
+        {
+          "value": "fixed"
+        },
+        {
+          "value": "per_block"
+        },
+        {
+          "value": "frequent"
+        }
+      ],
+      "levels": [
+        "intermediate",
+        "advanced"
+      ],
+      "affects": [
+        "planConstraints",
+        "progression"
+      ],
+      "priority": 42,
+      "infoGain": 5,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "v-exercise-rotation",
+      "since": 1
+    },
+    {
+      "id": "v-specialisation",
+      "key": "specialisation",
+      "category": "advanced",
+      "answer": "single",
+      "options": [
+        {
+          "value": "none"
+        },
+        {
+          "value": "chest"
+        },
+        {
+          "value": "back"
+        },
+        {
+          "value": "shoulders"
+        },
+        {
+          "value": "arms"
+        },
+        {
+          "value": "legs"
+        },
+        {
+          "value": "glutes"
+        }
+      ],
+      "levels": [
+        "intermediate",
+        "advanced"
+      ],
+      "affects": [
+        "musclePriorities",
+        "volume"
+      ],
+      "priority": 50,
+      "infoGain": 7,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "v-specialisation",
+      "since": 1
+    },
+    {
+      "id": "v-frequency-per-muscle",
+      "key": "frequencyPerMuscle",
+      "category": "advanced",
+      "answer": "single",
+      "options": [
+        {
+          "value": "1"
+        },
+        {
+          "value": "2"
+        },
+        {
+          "value": "3"
+        }
+      ],
+      "levels": [
+        "intermediate",
+        "advanced"
+      ],
+      "affects": [
+        "split",
+        "volume",
+        "planConstraints"
+      ],
+      "priority": 46,
+      "infoGain": 7,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "v-frequency-per-muscle",
+      "since": 1
+    },
+    {
+      "id": "v-main-lift-focus",
+      "key": "mainLiftFocus",
+      "category": "advanced",
+      "answer": "multi",
+      "options": [
+        {
+          "value": "squat"
+        },
+        {
+          "value": "bench"
+        },
+        {
+          "value": "deadlift"
+        },
+        {
+          "value": "overhead"
+        },
+        {
+          "value": "pullup"
+        },
+        {
+          "value": "none"
+        }
+      ],
+      "levels": [
+        "intermediate",
+        "advanced"
+      ],
+      "eligible": {
+        "field": "answers.strengthHypertrophyBias",
+        "op": "in",
+        "value": [
+          "strength",
+          "balanced"
+        ]
+      },
+      "affects": [
+        "musclePriorities",
+        "planConstraints"
+      ],
+      "priority": 44,
+      "infoGain": 6,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "v-main-lift-focus",
+      "since": 1
+    },
+    {
+      "id": "v-tempo-control",
+      "key": "tempoControl",
+      "category": "advanced",
+      "answer": "single",
+      "options": [
+        {
+          "value": "no"
+        },
+        {
+          "value": "sometimes"
+        },
+        {
+          "value": "yes"
+        }
+      ],
+      "levels": [
+        "intermediate",
+        "advanced"
+      ],
+      "affects": [
+        "planConstraints",
+        "intensity"
+      ],
+      "priority": 30,
+      "infoGain": 4,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "v-tempo-control",
+      "since": 1
+    },
+    {
+      "id": "v-set-to-failure",
+      "key": "setToFailure",
+      "category": "advanced",
+      "answer": "single",
+      "options": [
+        {
+          "value": "never"
+        },
+        {
+          "value": "last_set"
+        },
+        {
+          "value": "often"
+        }
+      ],
+      "levels": [
+        "intermediate",
+        "advanced"
+      ],
+      "affects": [
+        "intensity",
+        "volume",
+        "recovery"
+      ],
+      "priority": 40,
+      "infoGain": 6,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "v-set-to-failure",
+      "since": 1
+    },
+    {
+      "id": "v-accessory-appetite",
+      "key": "accessoryAppetite",
+      "category": "advanced",
+      "answer": "single",
+      "options": [
+        {
+          "value": "minimal"
+        },
+        {
+          "value": "balanced"
+        },
+        {
+          "value": "lots"
+        }
+      ],
+      "levels": [
+        "intermediate",
+        "advanced"
+      ],
+      "affects": [
+        "volume",
+        "planConstraints"
+      ],
+      "priority": 38,
+      "infoGain": 5,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "v-accessory-appetite",
+      "since": 1
+    },
+    {
+      "id": "v-weekly-set-target",
+      "key": "weeklySetTarget",
+      "category": "advanced",
+      "answer": "single",
+      "options": [
+        {
+          "value": "8"
+        },
+        {
+          "value": "12"
+        },
+        {
+          "value": "16"
+        },
+        {
+          "value": "20"
+        }
+      ],
+      "levels": [
+        "intermediate",
+        "advanced"
+      ],
+      "eligible": {
+        "field": "answers.controlLevel",
+        "op": "eq",
+        "value": "full_control"
+      },
+      "affects": [
+        "volume",
+        "planConstraints"
+      ],
+      "priority": 42,
+      "infoGain": 7,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "v-weekly-set-target",
+      "since": 1
+    },
+    {
+      "id": "v-cardio-interference",
+      "key": "cardioInterferenceCare",
+      "category": "advanced",
+      "answer": "boolean",
+      "levels": [
+        "intermediate",
+        "advanced"
+      ],
+      "eligible": {
+        "field": "answers.cardioWilling",
+        "op": "in",
+        "value": [
+          "yes",
+          "love_it"
+        ]
+      },
+      "affects": [
+        "cardio",
+        "planConstraints"
+      ],
+      "priority": 34,
+      "infoGain": 5,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "v-cardio-interference",
+      "since": 1
+    },
+    {
+      "id": "v-autoregulation",
+      "key": "autoregulation",
+      "category": "advanced",
+      "answer": "single",
+      "options": [
+        {
+          "value": "no"
+        },
+        {
+          "value": "light"
+        },
+        {
+          "value": "full"
+        }
+      ],
+      "levels": [
+        "intermediate",
+        "advanced"
+      ],
+      "eligible": {
+        "field": "answers.rirFamiliarity",
+        "op": "ne",
+        "value": "no"
+      },
+      "affects": [
+        "progression",
+        "intensity"
+      ],
+      "priority": 36,
+      "infoGain": 6,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "v-autoregulation",
+      "since": 1
+    },
+    {
+      "id": "v-warmup-sets",
+      "key": "warmupSets",
+      "category": "advanced",
+      "answer": "single",
+      "options": [
+        {
+          "value": "auto"
+        },
+        {
+          "value": "minimal"
+        },
+        {
+          "value": "full_ramp"
+        }
+      ],
+      "levels": [
+        "intermediate",
+        "advanced"
+      ],
+      "affects": [
+        "planConstraints"
+      ],
+      "priority": 26,
+      "infoGain": 4,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "v-warmup-sets",
+      "since": 1
+    },
+    {
+      "id": "v-training-age-honest",
+      "key": "trainingAgeHonest",
+      "category": "advanced",
+      "answer": "single",
+      "options": [
+        {
+          "value": "lt1"
+        },
+        {
+          "value": "y1_2"
+        },
+        {
+          "value": "y2_5"
+        },
+        {
+          "value": "gt5"
+        }
+      ],
+      "levels": [
+        "early_intermediate",
+        "intermediate",
+        "advanced",
+        "returning"
+      ],
+      "eligible": {
+        "all": [
+          {
+            "field": "answers.age",
+            "op": "gte",
+            "value": 18
+          },
+          {
+            "field": "answers.trainedBefore",
+            "op": "ne",
+            "value": "never"
+          }
+        ]
+      },
+      "affects": [
+        "experience",
+        "experienceConfidence",
+        "volume"
+      ],
+      "priority": 54,
+      "infoGain": 8,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "v-training-age-honest",
+      "since": 1
+    },
+    {
+      "id": "v-plan-edit-appetite",
+      "key": "planEditAppetite",
+      "category": "advanced",
+      "answer": "single",
+      "options": [
+        {
+          "value": "never"
+        },
+        {
+          "value": "sometimes"
+        },
+        {
+          "value": "often"
+        }
+      ],
+      "levels": [
+        "early_intermediate",
+        "intermediate",
+        "advanced",
+        "returning"
+      ],
+      "affects": [
+        "controlLevel",
+        "planConstraints"
+      ],
+      "priority": 32,
+      "infoGain": 4,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "v-plan-edit-appetite",
+      "since": 1
+    },
+    {
+      "id": "v-metric-tracking",
+      "key": "metricTracking",
+      "category": "advanced",
+      "answer": "multi",
+      "options": [
+        {
+          "value": "weight"
+        },
+        {
+          "value": "measurements"
+        },
+        {
+          "value": "photos"
+        },
+        {
+          "value": "lifts"
+        },
+        {
+          "value": "steps"
+        },
+        {
+          "value": "none"
+        }
+      ],
+      "levels": [
+        "early_intermediate",
+        "intermediate",
+        "advanced",
+        "returning"
+      ],
+      "affects": [
+        "progression",
+        "planConstraints"
+      ],
+      "priority": 28,
+      "infoGain": 4,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "v-metric-tracking",
+      "since": 1
+    },
+    {
+      "id": "c-level-mismatch",
+      "key": "clarifyLevel",
+      "category": "clarify",
+      "answer": "single",
+      "options": [
+        {
+          "value": "im_newer"
+        },
+        {
+          "value": "im_experienced"
+        },
+        {
+          "value": "in_between"
+        }
+      ],
+      "eligible": {
+        "field": "derived.conflict_level",
+        "op": "eq",
+        "value": true
+      },
+      "affects": [
+        "experience",
+        "experienceConfidence"
+      ],
+      "priority": 99,
+      "skippable": false,
+      "infoGain": 9,
+      "required": false,
+      "safety": "none",
+      "analyticsKey": "c-level-mismatch",
+      "since": 1
+    },
+    {
+      "id": "c-equipment-mismatch",
+      "key": "clarifyEquipment",
+      "category": "clarify",
+      "answer": "single",
+      "options": [
+        {
+          "value": "have_access"
+        },
+        {
+          "value": "no_access"
+        },
+        {
+          "value": "sometimes"
+        }
+      ],
+      "eligible": {
+        "field": "derived.conflict_equipment",
+        "op": "eq",
+        "value": true
+      },
+      "affects": [
+        "equipment",
+        "place",
+        "trainingStyle"
+      ],
+      "priority": 99,
+      "skippable": false,
+      "infoGain": 9,
+      "required": false,
+      "safety": "none",
+      "analyticsKey": "c-equipment-mismatch",
+      "since": 1
+    },
+    {
+      "id": "c-days-split-mismatch",
+      "key": "clarifyDaysSplit",
+      "category": "clarify",
+      "answer": "single",
+      "options": [
+        {
+          "value": "keep_days"
+        },
+        {
+          "value": "more_days"
+        },
+        {
+          "value": "change_split"
+        }
+      ],
+      "eligible": {
+        "field": "derived.conflict_days_split",
+        "op": "eq",
+        "value": true
+      },
+      "affects": [
+        "daysPerWeek",
+        "split"
+      ],
+      "priority": 99,
+      "skippable": false,
+      "infoGain": 9,
+      "required": false,
+      "safety": "none",
+      "analyticsKey": "c-days-split-mismatch",
+      "since": 1
+    },
+    {
+      "id": "c-limitation-mismatch",
+      "key": "clarifyLimitation",
+      "category": "clarify",
+      "answer": "single",
+      "options": [
+        {
+          "value": "keep_limit"
+        },
+        {
+          "value": "limit_eased"
+        },
+        {
+          "value": "drop_exercise"
+        }
+      ],
+      "eligible": {
+        "field": "derived.conflict_limitation",
+        "op": "eq",
+        "value": true
+      },
+      "affects": [
+        "limitations",
+        "excludedExercises",
+        "safetyFlags"
+      ],
+      "safety": "restrict",
+      "priority": 99,
+      "skippable": false,
+      "infoGain": 10,
+      "required": false,
+      "analyticsKey": "c-limitation-mismatch",
+      "since": 1
+    },
+    {
+      "id": "c-goal-pace-mismatch",
+      "key": "clarifyGoalPace",
+      "category": "clarify",
+      "answer": "single",
+      "options": [
+        {
+          "value": "slower_pace"
+        },
+        {
+          "value": "more_days"
+        },
+        {
+          "value": "keep_both"
+        }
+      ],
+      "eligible": {
+        "field": "derived.conflict_goal_pace",
+        "op": "eq",
+        "value": true
+      },
+      "affects": [
+        "planConstraints",
+        "daysPerWeek"
+      ],
+      "priority": 99,
+      "skippable": false,
+      "infoGain": 8,
+      "required": false,
+      "safety": "none",
+      "analyticsKey": "c-goal-pace-mismatch",
+      "since": 1
+    },
+    {
+      "id": "c-progression-mismatch",
+      "key": "clarifyProgression",
+      "category": "clarify",
+      "answer": "single",
+      "options": [
+        {
+          "value": "explain_it"
+        },
+        {
+          "value": "i_know_it"
+        },
+        {
+          "value": "pick_for_me"
+        }
+      ],
+      "eligible": {
+        "field": "derived.conflict_progression",
+        "op": "eq",
+        "value": true
+      },
+      "affects": [
+        "progression",
+        "experience",
+        "controlLevel"
+      ],
+      "priority": 99,
+      "skippable": false,
+      "infoGain": 8,
+      "required": false,
+      "safety": "none",
+      "analyticsKey": "c-progression-mismatch",
+      "since": 1
+    },
+    {
+      "id": "c-time-volume-mismatch",
+      "key": "clarifyTimeVolume",
+      "category": "clarify",
+      "answer": "single",
+      "options": [
+        {
+          "value": "shorter_sessions"
+        },
+        {
+          "value": "fewer_exercises"
+        },
+        {
+          "value": "longer_sessions"
+        }
+      ],
+      "eligible": {
+        "field": "derived.conflict_time_volume",
+        "op": "eq",
+        "value": true
+      },
+      "affects": [
+        "sessionMinutes",
+        "volume",
+        "planConstraints"
+      ],
+      "priority": 99,
+      "skippable": false,
+      "infoGain": 8,
+      "required": false,
+      "safety": "none",
+      "analyticsKey": "c-time-volume-mismatch",
+      "since": 1
+    },
+    {
+      "id": "c-cardio-mismatch",
+      "key": "clarifyCardio",
+      "category": "clarify",
+      "answer": "single",
+      "options": [
+        {
+          "value": "drop_cardio"
+        },
+        {
+          "value": "keep_cardio"
+        },
+        {
+          "value": "short_cardio"
+        }
+      ],
+      "eligible": {
+        "field": "derived.conflict_cardio",
+        "op": "eq",
+        "value": true
+      },
+      "affects": [
+        "cardio",
+        "planConstraints"
+      ],
+      "priority": 99,
+      "skippable": false,
+      "infoGain": 7,
+      "required": false,
+      "safety": "none",
+      "analyticsKey": "c-cardio-mismatch",
+      "since": 1
+    },
+    {
+      "id": "c-fill-equipment",
+      "key": "fillEquipment",
+      "category": "clarify",
+      "answer": "single",
+      "options": [
+        {
+          "value": "gym_full"
+        },
+        {
+          "value": "dumbbells_only"
+        },
+        {
+          "value": "bands_only"
+        },
+        {
+          "value": "bodyweight_only"
+        }
+      ],
+      "eligible": {
+        "all": [
+          {
+            "field": "answers.place",
+            "op": "in",
+            "value": [
+              "home",
+              "outdoor",
+              "mixed"
+            ]
+          },
+          {
+            "field": "answers.equipmentList",
+            "op": "hasNone",
+            "value": [
+              "machine",
+              "dumbbell",
+              "barbell",
+              "cable",
+              "band",
+              "bodyweight"
+            ]
+          }
+        ]
+      },
+      "affects": [
+        "equipment",
+        "trainingStyle"
+      ],
+      "priority": 97,
+      "skippable": false,
+      "infoGain": 9,
+      "required": false,
+      "safety": "none",
+      "analyticsKey": "c-fill-equipment",
+      "since": 1
+    },
+    {
+      "id": "c-fill-goal-minor",
+      "key": "fillGoalMinor",
+      "category": "clarify",
+      "answer": "single",
+      "options": [
+        {
+          "value": "get_fitter"
+        },
+        {
+          "value": "general_health"
+        }
+      ],
+      "eligible": {
+        "all": [
+          {
+            "field": "answers.age",
+            "op": "lt",
+            "value": 18
+          },
+          {
+            "field": "answers.age",
+            "op": "ne",
+            "value": null
+          }
+        ]
+      },
+      "affects": [
+        "primaryGoal"
+      ],
+      "priority": 93,
+      "skippable": false,
+      "infoGain": 8,
+      "required": false,
+      "safety": "none",
+      "analyticsKey": "c-fill-goal-minor",
+      "since": 1
+    },
+    {
+      "id": "c-confirm-high-frequency",
+      "key": "confirmHighFrequency",
+      "category": "clarify",
+      "answer": "boolean",
+      "eligible": {
+        "all": [
+          {
+            "field": "answers.daysPerWeek",
+            "op": "in",
+            "value": [
+              "5",
+              "6"
+            ]
+          },
+          {
+            "any": [
+              {
+                "field": "derived.experienceClass",
+                "op": "eq",
+                "value": "complete_beginner"
+              },
+              {
+                "field": "derived.experienceClass",
+                "op": "eq",
+                "value": "beginner"
+              }
+            ]
+          }
+        ]
+      },
+      "affects": [
+        "daysPerWeek",
+        "planConstraints"
+      ],
+      "priority": 96,
+      "infoGain": 8,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "c-confirm-high-frequency",
+      "since": 1
+    },
+    {
+      "id": "c-confirm-injury-load",
+      "key": "confirmInjuryLoad",
+      "category": "clarify",
+      "answer": "boolean",
+      "eligible": {
+        "all": [
+          {
+            "field": "answers.hasInjury",
+            "op": "eq",
+            "value": "current"
+          },
+          {
+            "field": "answers.painLevel",
+            "op": "gte",
+            "value": 6
+          }
+        ]
+      },
+      "affects": [
+        "safetyFlags",
+        "intensity",
+        "volume"
+      ],
+      "safety": "clear",
+      "priority": 98,
+      "skippable": false,
+      "infoGain": 10,
+      "required": false,
+      "analyticsKey": "c-confirm-injury-load",
+      "since": 1
+    },
+    {
+      "id": "c-confirm-bodyweight-goal",
+      "key": "confirmBodyweightGoal",
+      "category": "clarify",
+      "answer": "single",
+      "options": [
+        {
+          "value": "ok_bodyweight"
+        },
+        {
+          "value": "will_get_gear"
+        },
+        {
+          "value": "change_goal"
+        }
+      ],
+      "eligible": {
+        "all": [
+          {
+            "field": "answers.bodyweightOnly",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "field": "answers.primaryGoalDisplay",
+            "op": "in",
+            "value": [
+              "muscle_gain",
+              "strength"
+            ]
+          }
+        ]
+      },
+      "affects": [
+        "equipment",
+        "primaryGoal",
+        "planConstraints"
+      ],
+      "priority": 95,
+      "infoGain": 8,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "c-confirm-bodyweight-goal",
+      "since": 1
+    },
+    {
+      "id": "c-confirm-short-session",
+      "key": "confirmShortSession",
+      "category": "clarify",
+      "answer": "single",
+      "options": [
+        {
+          "value": "keep_short"
+        },
+        {
+          "value": "add_time"
+        },
+        {
+          "value": "fewer_days_longer"
+        }
+      ],
+      "eligible": {
+        "all": [
+          {
+            "field": "answers.sessionMinutes",
+            "op": "eq",
+            "value": "20"
+          },
+          {
+            "field": "answers.musclePriority",
+            "op": "has",
+            "value": "balanced"
+          }
+        ]
+      },
+      "affects": [
+        "sessionMinutes",
+        "planConstraints",
+        "split"
+      ],
+      "priority": 90,
+      "infoGain": 7,
+      "required": false,
+      "skippable": true,
+      "safety": "none",
+      "analyticsKey": "c-confirm-short-session",
+      "since": 1
+    }
+  ]
+}

@@ -22,6 +22,10 @@ export function evaluatePredicate(pred: Predicate, facts: Readonly<Record<string
       return pred.path in facts && pred.values.includes(facts[pred.path])
     case 'nin':
       return pred.path in facts && !pred.values.includes(facts[pred.path])
+    case 'exists':
+      return pred.path in facts
+    case 'notExists':
+      return !(pred.path in facts)
     case 'gt':
     case 'gte':
     case 'lt':

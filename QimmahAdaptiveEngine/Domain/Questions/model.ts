@@ -12,8 +12,10 @@ export type QuestionSafety = 'none' | 'screen' | 'restrict' | 'clear'
 export interface QuestionDef {
   id: string
   key: string
+  /** host copy reference — Arabic/English strings NEVER live in domain content ([CTO-QAE-005] §11) */
+  copyKey?: string
   category: string
-  answerType: 'number' | 'single' | 'boolean' | 'multi'
+  answerType: 'number' | 'single' | 'boolean' | 'multi' | 'text' | 'openList'
   options?: readonly string[]
   range?: { min: number; max: number }
   eligible?: Predicate
@@ -97,4 +99,6 @@ export interface Selection {
   question: QuestionDef | null
   stopReason: StopReason | null
   offBudget: boolean
+  /** [CTO-QAE-005] §8: safety clarification exceeding the soft budget is recorded, never hidden. */
+  budgetOverrideReason?: 'safetyEvidenceRequired'
 }

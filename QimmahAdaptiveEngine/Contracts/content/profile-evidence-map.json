@@ -1,0 +1,25 @@
+{
+  "$comment": "[CTO-QAE-005] §4 — the real Question Evidence → PartialAthleteProfile → AssessmentCompleteness binding. Keys are the characterized legacy answer keys (evidence fact paths). Unknown age remains BLOCKING (U1): age is mandatory; there is no adult default.",
+  "requirementLevels": {
+    "REQUIRED_FOR_ANY_PLAN": ["age", "sex", "heightCm", "weightKg", "primaryGoalDisplay", "daysPerWeek", "sessionMinutes", "place"],
+    "REQUIRED_FOR_SAFE_PLAN": ["healthConsent", "hasInjury"],
+    "REQUIRED_FOR_TRAINING": ["trainedBefore", "trainingStyle"],
+    "REQUIRED_FOR_NUTRITION": ["primaryGoalDisplay", "weightKg", "heightCm", "age", "sex"],
+    "OPTIONAL_PERSONALIZATION": ["consistency", "totalMonths", "selfLevel", "programExperience", "knowsProgression", "tracksSets", "exerciseFamiliarity", "trainingAgeHonest", "gymConfidence", "equipmentList", "sleepHours", "stressLevel", "cardioWilling", "mealsPerDay", "appetite", "dailySteps", "changePace", "volumePref", "musclePriority", "dislikedExercises", "preferredExercises", "splitChoice", "progressionStyle", "targetRir"],
+    "FOLLOWUP_ONLY": ["painLevel", "currentInjuryAreas", "pastInjuryAreas", "pastRecovered", "surgeryAreas", "surgeryWhen", "shoulderOverhead", "backHinge", "kneeDepth", "impactTolerance", "standingTolerance", "chestPain", "fainting", "doctorRestriction", "dizzinessOnEffort", "pregnancyStatus", "dumbbellMaxKg", "lastTrained"]
+  },
+  "completenessSpec": {
+    "perDomain": {
+      "anyPlan": ["age", "sex", "heightCm", "weightKg", "primaryGoalDisplay", "daysPerWeek", "sessionMinutes", "place"],
+      "safePlan": ["healthConsent", "hasInjury"],
+      "training": ["trainedBefore", "trainingStyle"],
+      "nutrition": ["primaryGoalDisplay", "weightKg", "heightCm", "age", "sex"]
+    },
+    "mandatory": ["healthConsent", "age", "sex", "heightCm", "weightKg", "trainedBefore", "primaryGoalDisplay", "daysPerWeek", "sessionMinutes", "place", "trainingStyle", "hasInjury"]
+  },
+  "notes": [
+    "mandatory mirrors the characterized legacy REQUIRED_KEYS (migration.ts:129) — 12 keys; finalization is blocked while any is missing.",
+    "age carries no default anywhere; ProfileClassification derives no isMinor fact when age is unknown, so age-gated content cannot unlock (U1 supersession of L-SAF-1).",
+    "FOLLOWUP_ONLY keys become mandatory-conditional when their trigger fires (e.g. hasInjury=yes ⇒ currentInjuryAreas expected before safety completeness reaches high)."
+  ]
+}

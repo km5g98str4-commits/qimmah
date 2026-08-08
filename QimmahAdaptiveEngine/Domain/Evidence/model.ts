@@ -30,7 +30,8 @@ export function factsFromEvidence(items: readonly EvidenceItem[]): Record<string
 export type AnswerValue = number | string | boolean | readonly string[]
 
 export interface AnswerNormalizationSpec {
-  answerType: 'number' | 'single' | 'boolean' | 'multi'
+  /** text/openList added by [CTO-QAE-005] migration (legacy free-text & open-list answers). */
+  answerType: 'number' | 'single' | 'boolean' | 'multi' | 'text' | 'openList'
   key: string
   options?: readonly string[]
   range?: { min: number; max: number }
@@ -82,6 +83,27 @@ export function normalizeAnswer(spec: AnswerNormalizationSpec, value: AnswerValu
         ok: true,
         evidence: [
           ...unique.map((opt) => stamp(`${spec.key}.${opt}`, true)),
+          stamp(`${spec.key}.count`, unique.length),
+        ],
+      }
+    }
+    case 'text': {
+      // Free text: stored verbatim as a string fact. Never parsed for meaning
+      // in the domain (the legacy free-text injury regex is a named defect).
+      if (typeof value !== 'string') return { ok: false, error: 'type_mismatch' }
+      return { ok: true, evidence: [stamp(spec.key, value)] }
+    }
+    case 'openList': {
+      // Open-vocabulary list (e.g. disliked exercise ids): per-item facts +
+      // count, sorted/deduped — same shape as multi, no declared options.
+      if (!Array.isArray(value)) return { ok: false, error: 'type_mismatch' }
+      const items = [...(value as readonly string[])]
+      if (items.some((v) => typeof v !== 'string')) return { ok: false, error: 'type_mismatch' }
+      const unique = [...new Set(items)].sort()
+      return {
+        ok: true,
+        evidence: [
+          ...unique.map((item) => stamp(`${spec.key}.${item}`, true)),
           stamp(`${spec.key}.count`, unique.length),
         ],
       }

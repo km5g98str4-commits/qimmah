@@ -1,0 +1,94 @@
+{
+  "$comment": "[CTO-QAE-005] QAE bank config. Conflicts are hand-transcribed from the characterized legacy CONFLICTS (contradictions.ts — legacy detect functions are not serializable; each transcription is validated by the contradictory-persona journey golden). Budgets are the founder numbers (§8). Multi-answer conditions reference the `key.option` boolean-fact shape of QAE normalization.",
+  "gateQuestionId": "s-health-consent",
+  "budgets": { "*": { "min": 13, "max": 16, "hardCap": 20 } },
+  "scoring": { "queueBonus": 15, "satietyPenaltyPerAnswered": 6, "exemptCategories": ["basics", "safety", "limitations", "clarify"], "minInfoGainPastMin": 5 },
+  "conflicts": [
+    {
+      "id": "level",
+      "clarifyQuestionId": "c-level-mismatch",
+      "detect": { "op": "any", "children": [
+        { "op": "all", "children": [
+          { "op": "eq", "path": "selfLevel", "value": "beginner" },
+          { "op": "any", "children": [
+            { "op": "eq", "path": "programExperience", "value": "wrote_own" },
+            { "op": "all", "children": [ { "op": "eq", "path": "knowsProgression", "value": "yes" }, { "op": "eq", "path": "tracksSets", "value": "always" } ] }
+          ] }
+        ] },
+        { "op": "all", "children": [
+          { "op": "eq", "path": "selfLevel", "value": "advanced" },
+          { "op": "any", "children": [ { "op": "in", "path": "trainedBefore", "values": ["never", "tried"] }, { "op": "eq", "path": "totalMonths", "value": "lt3" } ] }
+        ] }
+      ] }
+    },
+    {
+      "id": "equipment",
+      "clarifyQuestionId": "c-equipment-mismatch",
+      "detect": { "op": "any", "children": [
+        { "op": "all", "children": [
+          { "op": "eq", "path": "trainingStyle", "value": "machines" },
+          { "op": "any", "children": [
+            { "op": "eq", "path": "bodyweightOnly", "value": true },
+            { "op": "all", "children": [ { "op": "nin", "path": "place", "values": ["gym", "mixed"] }, { "op": "not", "child": { "op": "eq", "path": "equipmentList.machine", "value": true } } ] }
+          ] }
+        ] },
+        { "op": "all", "children": [ { "op": "eq", "path": "place", "value": "gym" }, { "op": "eq", "path": "bodyweightOnly", "value": true } ] }
+      ] }
+    },
+    {
+      "id": "days_split",
+      "clarifyQuestionId": "c-days-split-mismatch",
+      "detect": { "op": "any", "children": [
+        { "op": "all", "children": [ { "op": "in", "path": "daysPerWeek", "values": ["1", "2", "3"] }, { "op": "in", "path": "splitChoice", "values": ["bro_split", "push_pull_legs"] } ] },
+        { "op": "all", "children": [ { "op": "in", "path": "daysPerWeek", "values": ["1", "2"] }, { "op": "eq", "path": "frequencyPerMuscle", "value": "3" } ] }
+      ] }
+    },
+    {
+      "id": "limitation",
+      "clarifyQuestionId": "c-limitation-mismatch",
+      "detect": { "op": "any", "children": [
+        { "op": "all", "children": [ { "op": "eq", "path": "shoulderOverhead", "value": "cannot" }, { "op": "eq", "path": "mainLiftFocus.overhead", "value": true } ] },
+        { "op": "all", "children": [ { "op": "eq", "path": "backHinge", "value": "avoid" }, { "op": "eq", "path": "mainLiftFocus.deadlift", "value": true } ] },
+        { "op": "all", "children": [ { "op": "eq", "path": "kneeDepth", "value": "minimal" }, { "op": "eq", "path": "mainLiftFocus.squat", "value": true } ] },
+        { "op": "all", "children": [ { "op": "eq", "path": "impactTolerance", "value": "none" }, { "op": "eq", "path": "cardioType.run", "value": true } ] },
+        { "op": "all", "children": [ { "op": "eq", "path": "standingTolerance", "value": "seated_only" }, { "op": "eq", "path": "cardioType.walk", "value": true } ] }
+      ] }
+    },
+    {
+      "id": "progression",
+      "clarifyQuestionId": "c-progression-mismatch",
+      "detect": { "op": "all", "children": [
+        { "op": "any", "children": [ { "op": "eq", "path": "trainedBefore", "value": "never" }, { "op": "eq", "path": "knowsProgression", "value": "no" } ] },
+        { "op": "exists", "path": "progressionStyle" },
+        { "op": "ne", "path": "progressionStyle", "value": "auto" }
+      ] }
+    },
+    {
+      "id": "goal_pace",
+      "clarifyQuestionId": "c-goal-pace-mismatch",
+      "detect": { "op": "all", "children": [
+        { "op": "eq", "path": "changePace", "value": "aggressive" },
+        { "op": "any", "children": [ { "op": "eq", "path": "daysPerWeek", "value": "2" }, { "op": "eq", "path": "sessionMinutes", "value": "20" } ] }
+      ] }
+    },
+    {
+      "id": "time_volume",
+      "clarifyQuestionId": "c-time-volume-mismatch",
+      "detect": { "op": "all", "children": [
+        { "op": "in", "path": "sessionMinutes", "values": ["20", "30"] },
+        { "op": "any", "children": [ { "op": "eq", "path": "volumePref", "value": "high" }, { "op": "eq", "path": "accessoryAppetite", "value": "lots" }, { "op": "eq", "path": "weeklySetTarget", "value": "20" } ] }
+      ] }
+    },
+    {
+      "id": "cardio",
+      "clarifyQuestionId": "c-cardio-mismatch",
+      "detect": { "op": "all", "children": [
+        { "op": "eq", "path": "cardioWilling", "value": "no" },
+        { "op": "any", "children": [
+          { "op": "all", "children": [ { "op": "exists", "path": "enduranceTarget" }, { "op": "ne", "path": "enduranceTarget", "value": "none" } ] },
+          { "op": "gt", "path": "cardioType.count", "value": 0 }
+        ] }
+      ] }
+    }
+  ]
+}

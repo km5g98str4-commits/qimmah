@@ -1,0 +1,282 @@
+{
+  "$comment": "[CTO-QAE-005] §1 shared oracle/journey personas. Overrides are keyed by question KEY; unlisted answers fall back to the adapters' deterministic default (first option / range.min / false / [firstOption] for multi). Values are legacy option values (characterized).",
+  "personas": [
+    {
+      "name": "beginner-gym",
+      "overrides": {
+        "healthConsent": true,
+        "age": 30,
+        "sex": "male",
+        "heightCm": 178,
+        "weightKg": 86,
+        "trainedBefore": "never",
+        "primaryGoalDisplay": "fat_loss",
+        "daysPerWeek": "3",
+        "sessionMinutes": "45",
+        "place": "gym",
+        "trainingStyle": "machines",
+        "hasInjury": "none"
+      }
+    },
+    {
+      "name": "intermediate-gym",
+      "overrides": {
+        "healthConsent": true,
+        "age": 27,
+        "sex": "male",
+        "heightCm": 176,
+        "weightKg": 78,
+        "trainedBefore": "years",
+        "totalMonths": "y1_3",
+        "selfLevel": "intermediate",
+        "consistency": "mostly",
+        "programExperience": "followed",
+        "knowsProgression": "vaguely",
+        "tracksSets": "sometimes",
+        "exerciseFamiliarity": "most",
+        "primaryGoalDisplay": "muscle_gain",
+        "daysPerWeek": "4",
+        "sessionMinutes": "60",
+        "place": "gym",
+        "trainingStyle": "mixed",
+        "hasInjury": "none",
+        "lastTrained": "now"
+      }
+    },
+    {
+      "name": "advanced-gym",
+      "overrides": {
+        "healthConsent": true,
+        "age": 29,
+        "sex": "male",
+        "heightCm": 182,
+        "weightKg": 84,
+        "trainedBefore": "years",
+        "totalMonths": "y3_plus",
+        "selfLevel": "advanced",
+        "consistency": "steady",
+        "programExperience": "wrote_own",
+        "knowsProgression": "yes",
+        "tracksSets": "always",
+        "exerciseFamiliarity": "all",
+        "trainingAgeHonest": "y2_5",
+        "gymConfidence": 5,
+        "primaryGoalDisplay": "muscle_gain",
+        "daysPerWeek": "5",
+        "sessionMinutes": "75",
+        "place": "gym",
+        "trainingStyle": "free_weights",
+        "hasInjury": "none",
+        "lastTrained": "now"
+      }
+    },
+    {
+      "name": "home-dumbbells",
+      "overrides": {
+        "healthConsent": true,
+        "age": 26,
+        "sex": "female",
+        "heightCm": 163,
+        "weightKg": 60,
+        "trainedBefore": "months",
+        "totalMonths": "m3_6",
+        "selfLevel": "beginner",
+        "primaryGoalDisplay": "fat_loss",
+        "daysPerWeek": "3",
+        "sessionMinutes": "45",
+        "place": "home",
+        "trainingStyle": "mixed",
+        "equipmentList": [
+          "dumbbell",
+          "bench",
+          "bodyweight"
+        ],
+        "hasInjury": "none"
+      }
+    },
+    {
+      "name": "gym-full",
+      "overrides": {
+        "healthConsent": true,
+        "age": 31,
+        "sex": "male",
+        "heightCm": 179,
+        "weightKg": 82,
+        "trainedBefore": "months",
+        "totalMonths": "m6_12",
+        "selfLevel": "intermediate",
+        "consistency": "mostly",
+        "primaryGoalDisplay": "muscle_gain",
+        "daysPerWeek": "4",
+        "sessionMinutes": "60",
+        "place": "gym",
+        "trainingStyle": "mixed",
+        "hasInjury": "none"
+      }
+    },
+    {
+      "name": "minor-16",
+      "overrides": {
+        "healthConsent": true,
+        "age": 16,
+        "sex": "male",
+        "heightCm": 170,
+        "weightKg": 62,
+        "trainedBefore": "tried",
+        "primaryGoalDisplay": "general_health",
+        "daysPerWeek": "3",
+        "sessionMinutes": "45",
+        "place": "gym",
+        "trainingStyle": "machines",
+        "hasInjury": "none"
+      }
+    },
+    {
+      "name": "injury-knee",
+      "overrides": {
+        "healthConsent": true,
+        "age": 38,
+        "sex": "male",
+        "heightCm": 175,
+        "weightKg": 88,
+        "trainedBefore": "months",
+        "totalMonths": "m6_12",
+        "primaryGoalDisplay": "fat_loss",
+        "daysPerWeek": "3",
+        "sessionMinutes": "45",
+        "place": "gym",
+        "trainingStyle": "machines",
+        "hasInjury": "current",
+        "currentInjuryAreas": [
+          "knee"
+        ],
+        "painLevel": 3,
+        "kneeDepth": "minimal"
+      }
+    },
+    {
+      "name": "high-confidence",
+      "overrides": {
+        "healthConsent": true,
+        "age": 33,
+        "sex": "male",
+        "heightCm": 180,
+        "weightKg": 85,
+        "trainedBefore": "years",
+        "totalMonths": "y3_plus",
+        "selfLevel": "advanced",
+        "consistency": "steady",
+        "programExperience": "wrote_own",
+        "knowsProgression": "yes",
+        "tracksSets": "always",
+        "exerciseFamiliarity": "all",
+        "trainingAgeHonest": "gt5",
+        "gymConfidence": 5,
+        "primaryGoalDisplay": "recomp",
+        "daysPerWeek": "5",
+        "sessionMinutes": "60",
+        "place": "gym",
+        "trainingStyle": "free_weights",
+        "hasInjury": "none",
+        "sleepHours": "h7_8",
+        "stressLevel": "low",
+        "cardioWilling": "yes",
+        "lastTrained": "now"
+      }
+    },
+    {
+      "name": "low-confidence",
+      "overrides": {
+        "healthConsent": true,
+        "age": 24,
+        "sex": "female",
+        "heightCm": 160,
+        "weightKg": 55,
+        "trainedBefore": "tried",
+        "selfLevel": "beginner",
+        "knowsProgression": "no",
+        "gymConfidence": 1,
+        "primaryGoalDisplay": "get_fitter",
+        "daysPerWeek": "3",
+        "sessionMinutes": "45",
+        "place": "gym",
+        "trainingStyle": "machines",
+        "hasInjury": "none"
+      }
+    },
+    {
+      "name": "contradictory",
+      "overrides": {
+        "healthConsent": true,
+        "age": 28,
+        "sex": "male",
+        "heightCm": 177,
+        "weightKg": 80,
+        "trainedBefore": "tried",
+        "selfLevel": "advanced",
+        "totalMonths": "lt3",
+        "primaryGoalDisplay": "muscle_gain",
+        "daysPerWeek": "4",
+        "sessionMinutes": "60",
+        "place": "gym",
+        "trainingStyle": "mixed",
+        "hasInjury": "none"
+      },
+      "inject": [
+        {
+          "afterAsked": 12,
+          "questionId": "x-selfrated-level",
+          "value": "advanced",
+          "note": "user volunteers self-level (legacy proof pattern) — fires the level conflict"
+        }
+      ]
+    },
+    {
+      "name": "followup-path",
+      "overrides": {
+        "healthConsent": true,
+        "age": 45,
+        "sex": "male",
+        "heightCm": 174,
+        "weightKg": 90,
+        "trainedBefore": "months",
+        "primaryGoalDisplay": "fat_loss",
+        "daysPerWeek": "3",
+        "sessionMinutes": "45",
+        "place": "gym",
+        "trainingStyle": "machines",
+        "hasInjury": "current",
+        "currentInjuryAreas": [
+          "shoulder"
+        ],
+        "painLevel": 6,
+        "shoulderOverhead": "cannot"
+      }
+    },
+    {
+      "name": "returning-advanced",
+      "overrides": {
+        "healthConsent": true,
+        "age": 36,
+        "sex": "male",
+        "heightCm": 180,
+        "weightKg": 92,
+        "trainedBefore": "years",
+        "totalMonths": "y3_plus",
+        "lastTrained": "m3_12",
+        "selfLevel": "advanced",
+        "consistency": "on_off",
+        "programExperience": "wrote_own",
+        "knowsProgression": "yes",
+        "tracksSets": "always",
+        "exerciseFamiliarity": "all",
+        "primaryGoalDisplay": "fat_loss",
+        "daysPerWeek": "4",
+        "sessionMinutes": "60",
+        "place": "gym",
+        "trainingStyle": "free_weights",
+        "hasInjury": "none"
+      }
+    }
+  ]
+}

@@ -9,6 +9,9 @@ Language-neutral contracts for the Qimmah Adaptive Engine. Authorized by [CTO-QA
 | reason-codes v0.1.1 | [CTO-QAE-003] Phase 2 | pipeline codes added (`noCandidateFired`, `preconditionNotMet`, `conflictResolvedByPriority`) | none — additive |
 | proposal.schema v0.3.0 | [CTO-QAE-004] §2 | `DecisionProvenance` gains required `decisionSchemaVersion` (Proposal shape versioned independently of engine) | none — additive; harness re-run verified byte-identical goldens |
 | time.ts (additive) | [CTO-QAE-003] Phase 2 | `daysFromCivil` / `localDateToDays` pure helpers for cooldown day math | none — additive |
+| predicates (additive) | [CTO-QAE-005] Phase 4 | `exists`/`notExists` ops (legacy answered/unanswered conditions) | none — additive; plan goldens byte-identical |
+| normalization (additive) | [CTO-QAE-005] Phase 4 | `text`/`openList` answer types; `copyKey` on QuestionDef; `Selection.budgetOverrideReason` | none — additive |
+| content contracts v1 | [CTO-QAE-005] Phase 4 | `Contracts/content/`: question-bank.qae.json (153 active, bankManifestHash), question-inventory.json (193), bank-config.qae.json, profile-evidence-map.json, personas.json | new surface — journey goldens are its conformance suite |
 
 ## Conventions
 

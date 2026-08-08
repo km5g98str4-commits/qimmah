@@ -1,0 +1,158 @@
+{
+  "metricRows": [
+    {
+      "persona": "beginner-gym",
+      "asked": 16,
+      "clarifications": 0,
+      "skipped": 0,
+      "bankAvoidedBp": 8954,
+      "stop": "complete",
+      "complete": true,
+      "mandatoryMissing": [],
+      "experienceClass": "complete_beginner"
+    },
+    {
+      "persona": "intermediate-gym",
+      "asked": 16,
+      "clarifications": 0,
+      "skipped": 0,
+      "bankAvoidedBp": 8954,
+      "stop": "complete",
+      "complete": true,
+      "mandatoryMissing": [],
+      "experienceClass": "advanced"
+    },
+    {
+      "persona": "advanced-gym",
+      "asked": 16,
+      "clarifications": 0,
+      "skipped": 0,
+      "bankAvoidedBp": 8954,
+      "stop": "complete",
+      "complete": true,
+      "mandatoryMissing": [],
+      "experienceClass": "advanced"
+    },
+    {
+      "persona": "home-dumbbells",
+      "asked": 16,
+      "clarifications": 0,
+      "skipped": 0,
+      "bankAvoidedBp": 8954,
+      "stop": "complete",
+      "complete": true,
+      "mandatoryMissing": [],
+      "experienceClass": "intermediate"
+    },
+    {
+      "persona": "gym-full",
+      "asked": 16,
+      "clarifications": 0,
+      "skipped": 0,
+      "bankAvoidedBp": 8954,
+      "stop": "complete",
+      "complete": true,
+      "mandatoryMissing": [],
+      "experienceClass": "intermediate"
+    },
+    {
+      "persona": "minor-16",
+      "asked": 16,
+      "clarifications": 0,
+      "skipped": 0,
+      "bankAvoidedBp": 8954,
+      "stop": "complete",
+      "complete": true,
+      "mandatoryMissing": [],
+      "experienceClass": "complete_beginner"
+    },
+    {
+      "persona": "injury-knee",
+      "asked": 16,
+      "clarifications": 0,
+      "skipped": 0,
+      "bankAvoidedBp": 8954,
+      "stop": "complete",
+      "complete": true,
+      "mandatoryMissing": [],
+      "experienceClass": "intermediate"
+    },
+    {
+      "persona": "high-confidence",
+      "asked": 16,
+      "clarifications": 0,
+      "skipped": 0,
+      "bankAvoidedBp": 8954,
+      "stop": "complete",
+      "complete": true,
+      "mandatoryMissing": [],
+      "experienceClass": "advanced"
+    },
+    {
+      "persona": "low-confidence",
+      "asked": 16,
+      "clarifications": 0,
+      "skipped": 0,
+      "bankAvoidedBp": 8954,
+      "stop": "complete",
+      "complete": true,
+      "mandatoryMissing": [],
+      "experienceClass": "beginner"
+    },
+    {
+      "persona": "contradictory",
+      "asked": 16,
+      "clarifications": 1,
+      "skipped": 0,
+      "bankAvoidedBp": 8889,
+      "stop": "complete",
+      "complete": true,
+      "mandatoryMissing": [],
+      "experienceClass": "beginner"
+    },
+    {
+      "persona": "followup-path",
+      "asked": 16,
+      "clarifications": 1,
+      "skipped": 0,
+      "bankAvoidedBp": 8889,
+      "stop": "complete",
+      "complete": true,
+      "mandatoryMissing": [],
+      "experienceClass": "intermediate"
+    },
+    {
+      "persona": "returning-advanced",
+      "asked": 16,
+      "clarifications": 0,
+      "skipped": 0,
+      "bankAvoidedBp": 8954,
+      "stop": "complete",
+      "complete": true,
+      "mandatoryMissing": [],
+      "experienceClass": "returning"
+    }
+  ],
+  "comparisons": [
+    {
+      "pairId": "A-beginner-vs-advanced",
+      "differenceCount": 6
+    },
+    {
+      "pairId": "B-home-vs-gym",
+      "differenceCount": 4
+    },
+    {
+      "pairId": "C-injury-vs-none",
+      "differenceCount": 6
+    },
+    {
+      "pairId": "D-minor-vs-adult",
+      "differenceCount": 6
+    },
+    {
+      "pairId": "E-returning-vs-active-advanced",
+      "differenceCount": 0
+    }
+  ]
+}

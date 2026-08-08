@@ -74,6 +74,9 @@ export type Predicate =
   | { op: 'eq' | 'ne'; path: string; value: FactValue }
   | { op: 'in' | 'nin'; path: string; values: readonly FactValue[] }
   | { op: 'gt' | 'gte' | 'lt' | 'lte'; path: string; value: number }
+  // [CTO-QAE-005] additive migration: presence ops needed by the legacy bank's
+  // answered/unanswered conditions. exists = the fact path is known.
+  | { op: 'exists' | 'notExists'; path: string }
 
 export interface RuleDef {
   ruleId: string

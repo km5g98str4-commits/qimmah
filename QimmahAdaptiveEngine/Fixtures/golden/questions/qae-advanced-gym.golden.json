@@ -1,0 +1,243 @@
+{
+  "persona": "advanced-gym",
+  "determinism": {
+    "seed": 0,
+    "clock": {
+      "epochMs": 1785542400000
+    },
+    "timezone": {
+      "tzOffsetMinutes": 180
+    },
+    "locale": "ar-SA",
+    "engineVersion": "0.3.0",
+    "questionSchemaVersion": "1.0.0",
+    "ruleManifest": "question-content(no-decision-rules)",
+    "bankManifestHash": "91bd85b4b99f010d5fb0487389fa6b2785f482de0605d1230dac907c0fc63602"
+  },
+  "injectedAnswers": [],
+  "steps": [
+    {
+      "step": 0,
+      "selectedId": "s-health-consent",
+      "stage": "gate",
+      "offBudget": true,
+      "budgetOverrideReason": null,
+      "answer": true,
+      "answerSource": "persona",
+      "rejected": null,
+      "newEvidencePaths": [
+        "healthConsent"
+      ]
+    },
+    {
+      "step": 1,
+      "selectedId": "b-age",
+      "stage": "required",
+      "offBudget": false,
+      "budgetOverrideReason": null,
+      "answer": 29,
+      "answerSource": "persona",
+      "rejected": null,
+      "newEvidencePaths": [
+        "age"
+      ]
+    },
+    {
+      "step": 2,
+      "selectedId": "b-sex",
+      "stage": "required",
+      "offBudget": false,
+      "budgetOverrideReason": null,
+      "answer": "male",
+      "answerSource": "persona",
+      "rejected": null,
+      "newEvidencePaths": [
+        "sex"
+      ]
+    },
+    {
+      "step": 3,
+      "selectedId": "b-height",
+      "stage": "required",
+      "offBudget": false,
+      "budgetOverrideReason": null,
+      "answer": 182,
+      "answerSource": "persona",
+      "rejected": null,
+      "newEvidencePaths": [
+        "heightCm"
+      ]
+    },
+    {
+      "step": 4,
+      "selectedId": "b-weight",
+      "stage": "required",
+      "offBudget": false,
+      "budgetOverrideReason": null,
+      "answer": 84,
+      "answerSource": "persona",
+      "rejected": null,
+      "newEvidencePaths": [
+        "weightKg"
+      ]
+    },
+    {
+      "step": 5,
+      "selectedId": "x-trained-before",
+      "stage": "required",
+      "offBudget": false,
+      "budgetOverrideReason": null,
+      "answer": "years",
+      "answerSource": "persona",
+      "rejected": null,
+      "newEvidencePaths": [
+        "trainedBefore"
+      ]
+    },
+    {
+      "step": 6,
+      "selectedId": "g-primary",
+      "stage": "required",
+      "offBudget": false,
+      "budgetOverrideReason": null,
+      "answer": "muscle_gain",
+      "answerSource": "persona",
+      "rejected": null,
+      "newEvidencePaths": [
+        "primaryGoalDisplay"
+      ]
+    },
+    {
+      "step": 7,
+      "selectedId": "e-place",
+      "stage": "required",
+      "offBudget": false,
+      "budgetOverrideReason": null,
+      "answer": "gym",
+      "answerSource": "persona",
+      "rejected": null,
+      "newEvidencePaths": [
+        "place"
+      ]
+    },
+    {
+      "step": 8,
+      "selectedId": "a-days",
+      "stage": "required",
+      "offBudget": false,
+      "budgetOverrideReason": null,
+      "answer": "5",
+      "answerSource": "persona",
+      "rejected": null,
+      "newEvidencePaths": [
+        "daysPerWeek"
+      ]
+    },
+    {
+      "step": 9,
+      "selectedId": "a-session-minutes",
+      "stage": "required",
+      "offBudget": false,
+      "budgetOverrideReason": null,
+      "answer": "75",
+      "answerSource": "persona",
+      "rejected": null,
+      "newEvidencePaths": [
+        "sessionMinutes"
+      ]
+    },
+    {
+      "step": 10,
+      "selectedId": "l-has-injury",
+      "stage": "required",
+      "offBudget": false,
+      "budgetOverrideReason": null,
+      "answer": "none",
+      "answerSource": "persona",
+      "rejected": null,
+      "newEvidencePaths": [
+        "hasInjury"
+      ]
+    },
+    {
+      "step": 11,
+      "selectedId": "s-screen-gate",
+      "stage": "required",
+      "offBudget": false,
+      "budgetOverrideReason": null,
+      "answer": false,
+      "answerSource": "default",
+      "rejected": null,
+      "newEvidencePaths": [
+        "screenGate"
+      ]
+    },
+    {
+      "step": 12,
+      "selectedId": "p-style",
+      "stage": "required",
+      "offBudget": false,
+      "budgetOverrideReason": null,
+      "answer": "free_weights",
+      "answerSource": "persona",
+      "rejected": null,
+      "newEvidencePaths": [
+        "trainingStyle"
+      ]
+    },
+    {
+      "step": 13,
+      "selectedId": "x-last-trained",
+      "stage": "scored",
+      "offBudget": false,
+      "budgetOverrideReason": null,
+      "answer": "now",
+      "answerSource": "persona",
+      "rejected": null,
+      "newEvidencePaths": [
+        "lastTrained"
+      ]
+    },
+    {
+      "step": 14,
+      "selectedId": "x-total-duration",
+      "stage": "scored",
+      "offBudget": false,
+      "budgetOverrideReason": null,
+      "answer": "y3_plus",
+      "answerSource": "persona",
+      "rejected": null,
+      "newEvidencePaths": [
+        "totalMonths"
+      ]
+    },
+    {
+      "step": 15,
+      "selectedId": "x-consistency",
+      "stage": "scored",
+      "offBudget": false,
+      "budgetOverrideReason": null,
+      "answer": "steady",
+      "answerSource": "persona",
+      "rejected": null,
+      "newEvidencePaths": [
+        "consistency"
+      ]
+    }
+  ],
+  "stopReason": "complete",
+  "metrics": {
+    "askedCounted": 16,
+    "skipped": 0,
+    "clarifications": 0,
+    "budgetOverrides": 0,
+    "bankSize": 153,
+    "touched": 16,
+    "bankAvoidedBp": 8954
+  },
+  "completeness": {
+    "complete": true,
+    "mandatoryMissing": []
+  },
+  "finalExperienceClass": "advanced"
+}

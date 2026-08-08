@@ -76,8 +76,16 @@ export function selectNext(
   if (asked >= budget.hardCap) return { question: null, stopReason: 'cap_reached', offBudget: false }
 
   // Stage 2.5 — open safety follow-ups: off-budget relative to the soft max.
+  // Exceeding the soft budget for safety evidence is recorded explicitly.
   const safetyClear = ready.filter((q) => q.safety === 'clear').sort(byRank)
-  if (safetyClear.length > 0) return { question: safetyClear[0], stopReason: null, offBudget: true }
+  if (safetyClear.length > 0) {
+    return {
+      question: safetyClear[0],
+      stopReason: null,
+      offBudget: true,
+      ...(asked >= budget.max ? { budgetOverrideReason: 'safetyEvidenceRequired' as const } : {}),
+    }
+  }
 
   if (asked >= budget.max) return { question: null, stopReason: 'complete', offBudget: false }
 
