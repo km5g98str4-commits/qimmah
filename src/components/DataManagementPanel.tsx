@@ -14,6 +14,7 @@ import {
   portabilityErrorText,
   type ImportPreview,
 } from '@/lib/portability'
+import { STORE_BY_ID, storeLabel } from '@/lib/portability/registry'
 
 /**
  * لوحة «البيانات» المحصّنة لصفحة الإعدادات (#/settings) — قِمّة (PDPL R-1).
@@ -139,7 +140,9 @@ export function DataManagementPanel({
             .filter((l) => l.count > 0)
             .map((l) => (
               <li key={l.id} className="flex items-center justify-between py-2 text-sm">
-                <span className="font-bold text-ink-900">{l.labelAr}</span>
+                <span data-testid={`settings-import-preview-label-${l.id}`} className="font-bold text-ink-900">
+                  {STORE_BY_ID[l.id] ? storeLabel(STORE_BY_ID[l.id], lang) : l.labelAr}
+                </span>
                 <span className="font-black tabular-nums text-ink-500">{numerals(l.count)}</span>
               </li>
             ))}
