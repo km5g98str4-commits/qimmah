@@ -16,6 +16,7 @@ import { workoutCounts } from '@/lib/progressStats'
 import { workoutStreak } from '@/lib/streaks'
 import { loadSessions } from '@/lib/workoutSessions'
 import { loadAchievementState } from '@/features/achievements/engine'
+import { product } from '@/config/product'
 
 /**
  * [CTO-65] البند ٥ — أُزيلت خريطة المصطلحات الثابتة.
@@ -57,7 +58,7 @@ export interface ProfileV2Model {
   body: { weightKg: number | null; targetKg: number | null }
   privacy: { usageEventsLocalOnly: boolean; healthSharingAvailable: boolean; dataExportAvailable: boolean; deleteAccountAvailable: boolean }
   settings: { language: string; units: string; numerals: string; appearance: string; remindersAvailable: boolean }
-  subscription: { showQuietLine: boolean; text: string; cta: string; enabled: boolean }
+  subscription: { showQuietLine: boolean; name: string; text: string; cta: string; enabled: boolean; url: string }
 }
 
 function initialsOf(name: string | null, ar: boolean): string {
@@ -208,10 +209,16 @@ export function buildProfileV2Model(customization: Customization, auth: AuthSumm
     },
     subscription: {
       showQuietLine: true,
-      // §06 quiet line — one calm line, honest framing, no fake scarcity.
-      text: ar ? 'قِمّة+ · خطط وتحليلات أعمق' : 'Qimmah+ · deeper plans & insights',
-      cta: ar ? 'اعرف المزيد' : 'Learn more',
-      enabled: false, // no real subscription — informational only
+      // الاسم المعروض والنصّ محكومان بالميثاق §0.1 — الصيغة المعتمدة وحدها،
+      // و«مدى الحياة»/«lifetime» ممنوعة في كل سطح يراه المستخدم.
+      name: ar ? 'قِمّة Premium' : 'Qimmah Premium',
+      text: ar ? 'يشمل تحديثات قِمّة — بلا اشتراك شهري' : 'Includes Qimmah updates — no monthly subscription',
+      // لا لغة اشتراك في نداء الفعل، لأن المنتج نفسه ليس اشتراكًا.
+      cta: ar ? 'احصل على Premium' : 'Get Premium',
+      // صار المسار حقيقيًا: الشراء عند سلة. الادّعاء صحيح الآن بعد أن كان
+      // `enabled: false` صدقًا حين لم يكن هناك مسار شراء أصلًا.
+      enabled: true,
+      url: product.checkoutUrl,
     },
   }
 }
