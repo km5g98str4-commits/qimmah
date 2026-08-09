@@ -6,13 +6,18 @@ import { tmpdir } from 'node:os'
 import { basename, dirname, join, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const scriptPath = fileURLToPath(import.meta.url)
+const here = dirname(scriptPath)
 const root = resolve(here, '..')
 const fixtureDir = resolve(root, 'tests/fixtures/plan-engine/v1')
 const casesDir = resolve(fixtureDir, 'cases')
 const manifestPath = resolve(fixtureDir, 'manifest.json')
 const sourceCommit = 'dd79a60f193b1163ab1ec549a35458e0d2aab1de'
 const schemaVersion = 'qimmah-plan-engine-golden/v1'
+const controlledEnvironmentProfiles = [
+  { name: 'UTC / C', env: { TZ: 'UTC', LANG: 'C', LC_ALL: 'C' } },
+  { name: 'Asia/Riyadh / ar_SA', env: { TZ: 'Asia/Riyadh', LANG: 'ar_SA.UTF-8', LC_ALL: 'ar_SA.UTF-8' } },
+]
 
 const base = {
   name: 'plan-golden-fixture',
@@ -164,7 +169,7 @@ function packageLockSha256() {
   return createHash('sha256').update(readFileSync(resolve(root, 'package-lock.json'))).digest('hex')
 }
 
-function environmentSnapshot() {
+function generationProvenance() {
   const resolved = new Intl.DateTimeFormat().resolvedOptions()
   return {
     TZ: process.env.TZ ?? 'unset',
@@ -242,26 +247,54 @@ function runPlan(engine, input, now = 0) {
   return freezeDate(now, () => canonicalize(engine(input)))
 }
 
-function withEnvironment(env, fn) {
-  const previous = { TZ: process.env.TZ, LANG: process.env.LANG, LC_ALL: process.env.LC_ALL }
-  Object.assign(process.env, env)
-  try { return fn() } finally {
-    for (const key of Object.keys(previous)) {
-      if (previous[key] === undefined) delete process.env[key]
-      else process.env[key] = previous[key]
-    }
+function controlledOutputs(engine, cases) {
+  return cases.map((item) => {
+    const first = canonicalJson(runPlan(engine, item.input, 0))
+    const repeated = canonicalJson(runPlan(engine, item.input, 0))
+    const second = canonicalJson(runPlan(engine, item.input, 4102444800000))
+    if (first !== repeated) fail(`NONDETERMINISM: ${item.fixtureId} is not byte-stable`)
+    if (first !== second) fail(`NONDETERMINISM: ${item.fixtureId} changes with current time`)
+    const output = JSON.parse(first)
+    assertFinite(output)
+    const invariantIssues = derivedInvariants(item.input, output)
+    if (invariantIssues.length) fail(`${item.fixtureId} mismatch [derivedInvariants]: ${invariantIssues.join('; ')}`)
+    mutationProof(output)
+    return { fixtureId: item.fixtureId, output }
+  })
+}
+
+function runControlledEnvironment(profile) {
+  try {
+    const stdout = execFileSync(process.execPath, [scriptPath, '--controlled-environment'], {
+      cwd: root,
+      encoding: 'utf8',
+      env: { ...process.env, ...profile.env },
+      stdio: ['ignore', 'pipe', 'pipe'],
+    })
+    const outputs = JSON.parse(stdout)
+    if (!Array.isArray(outputs)) fail(`Controlled environment ${profile.name} returned an invalid payload`)
+    return outputs
+  } catch (error) {
+    const detail = error?.stderr?.toString().trim() || error?.message || String(error)
+    fail(`Controlled environment ${profile.name} failed: ${detail}`)
   }
 }
 
-function assertDeterministic(engine, cases) {
-  for (const item of cases) {
-    const first = canonicalJson(runPlan(engine, item.input, 0))
-    const second = canonicalJson(runPlan(engine, item.input, 4102444800000))
-    if (first !== second) fail(`NONDETERMINISM: ${item.fixtureId} changes with current time`)
-    const envA = withEnvironment({ TZ: 'UTC', LANG: 'C', LC_ALL: 'C' }, () => canonicalJson(runPlan(engine, item.input, 0)))
-    const envB = withEnvironment({ TZ: 'Asia/Riyadh', LANG: 'ar_SA.UTF-8', LC_ALL: 'ar_SA.UTF-8' }, () => canonicalJson(runPlan(engine, item.input, 0)))
-    if (envA !== envB) fail(`NONDETERMINISM: ${item.fixtureId} changes with TZ/LANG/LC_ALL`)
+function assertControlledEnvironmentDeterminism() {
+  const referenceProfile = controlledEnvironmentProfiles[0]
+  const reference = runControlledEnvironment(referenceProfile)
+  for (const profile of controlledEnvironmentProfiles.slice(1)) {
+    const candidate = runControlledEnvironment(profile)
+    if (canonicalJson(reference) === canonicalJson(candidate)) continue
+    for (let index = 0; index < reference.length; index += 1) {
+      const baseline = reference[index]
+      const observed = candidate[index]
+      const diff = firstDifference(baseline, observed)
+      if (diff) fail(`NONDETERMINISM: ${baseline?.fixtureId ?? `case-${index}`} changes between ${referenceProfile.name} and ${profile.name} at ${diff.path}`)
+    }
+    fail(`NONDETERMINISM: controlled outputs differ between ${referenceProfile.name} and ${profile.name}`)
   }
+  return new Map(reference.map(({ fixtureId, output }) => [fixtureId, output]))
 }
 
 const SAFETY_COPY_PATHS = new Set([
@@ -416,6 +449,40 @@ function classifierRegressionProof() {
   if (!warningLengthDiff || warningLengthDiff.class !== 'safetyCopy') fail('Classifier regression: warning array-length diff was not safetyCopy')
 }
 
+function assertManifestIntegrity(recorded, generated) {
+  if (!recorded.environment || typeof recorded.environment !== 'object') fail('Golden manifest is missing generation provenance')
+  const recordedFixtureContract = {
+    schemaVersion: recorded.schemaVersion,
+    sourceCommit: recorded.sourceCommit,
+    cases: recorded.cases,
+  }
+  const generatedFixtureContract = {
+    schemaVersion: generated.schemaVersion,
+    sourceCommit: generated.sourceCommit,
+    cases: generated.cases,
+  }
+  const diff = firstDifference(recordedFixtureContract, generatedFixtureContract)
+  if (diff) fail(`Fixture manifest mismatch at ${diff.path}`)
+}
+
+function assertManifestTamperingIsRejected(recorded, generated) {
+  const cases = [
+    ['expected output hash', (copy) => { copy.cases[0].expectedSha256 = '0'.repeat(64) }, 'expectedSha256'],
+    ['input hash', (copy) => { copy.cases[0].inputSha256 = '0'.repeat(64) }, 'inputSha256'],
+  ]
+  for (const [name, tamper, expectedPath] of cases) {
+    const corrupted = structuredClone(recorded)
+    tamper(corrupted)
+    try {
+      assertManifestIntegrity(corrupted, generated)
+    } catch (error) {
+      if (!String(error?.message ?? error).includes(expectedPath)) fail(`Regression proof did not name the ${name} mismatch`)
+      continue
+    }
+    fail(`Regression proof did not reject a mutated ${name}`)
+  }
+}
+
 async function main() {
   const args = new Set(process.argv.slice(2))
   const update = args.has('--update')
@@ -423,13 +490,15 @@ async function main() {
   const explicitCheck = args.has('--check')
   const mutationOnly = args.has('--mutation-only')
   const probeOnly = args.has('--probe-only')
-  const check = explicitCheck || (!update && !probeOnly && !mutationOnly)
+  const controlledEnvironment = args.has('--controlled-environment')
+  const check = explicitCheck || (!update && !probeOnly && !mutationOnly && !controlledEnvironment)
   if (update && !confirmWrite) fail('Refusing to write: --update requires --confirm-write')
   if (confirmWrite && !update) fail('--confirm-write is only valid with --update')
-  if (explicitCheck && (update || probeOnly || mutationOnly)) fail('--check cannot be combined with another mode')
+  if (explicitCheck && (update || probeOnly || mutationOnly || controlledEnvironment)) fail('--check cannot be combined with another mode')
   if (probeOnly && (update || confirmWrite || mutationOnly)) fail('--probe-only cannot be combined with another mode')
   if (mutationOnly && (update || confirmWrite)) fail('--mutation-only cannot be combined with write flags')
-  if (process.argv.slice(2).some((arg) => !['--check', '--update', '--confirm-write', '--probe-only', '--mutation-only'].includes(arg))) fail('Unknown argument')
+  if (controlledEnvironment && (update || confirmWrite || mutationOnly || probeOnly)) fail('--controlled-environment cannot be combined with another mode')
+  if (process.argv.slice(2).some((arg) => !['--check', '--update', '--confirm-write', '--probe-only', '--mutation-only', '--controlled-environment'].includes(arg))) fail('Unknown argument')
 
   classifierRegressionProof()
 
@@ -441,34 +510,33 @@ async function main() {
     return
   }
 
-  const env = environmentSnapshot()
-  const engine = await loadEngine()
-  assertDeterministic(engine, cases)
+  if (controlledEnvironment) {
+    const engine = await loadEngine()
+    process.stdout.write(canonicalJson(controlledOutputs(engine, cases)))
+    return
+  }
+
+  const outputs = assertControlledEnvironmentDeterminism()
   if (probeOnly) {
-    console.log(`Determinism probe passed for ${cases.length} cases`)
+    console.log(`Determinism probe passed for ${cases.length} cases across controlled timezone/locale profiles`)
     return
   }
 
   if (check && !existsSync(manifestPath)) fail('Golden manifest is missing; use --update --confirm-write to create it')
   const generated = []
   for (const item of cases) {
-    const first = runPlan(engine, item.input, 0)
-    const second = runPlan(engine, item.input, 0)
-    const firstBytes = canonicalJson(first)
-    const secondBytes = canonicalJson(second)
-    if (firstBytes !== secondBytes) fail(`NONDETERMINISM: ${item.fixtureId} is not byte-stable`)
-    assertFinite(first)
-    const invariantIssues = derivedInvariants(item.input, first)
-    if (invariantIssues.length) fail(`${item.fixtureId} mismatch [derivedInvariants]: ${invariantIssues.join('; ')}`)
-    mutationProof(first)
-    const payload = casePayload(item, first)
-    generated.push({ payload, inputSha256: sha256(item.input), expectedSha256: sha256(first), canonicalFixtureSha256: sha256(payload) })
+    const output = outputs.get(item.fixtureId)
+    if (!output) fail(`Controlled environment did not return ${item.fixtureId}`)
+    const payload = casePayload(item, output)
+    generated.push({ payload, inputSha256: sha256(item.input), expectedSha256: sha256(output), canonicalFixtureSha256: sha256(payload) })
   }
 
   const manifest = {
     schemaVersion,
     sourceCommit,
-    environment: env,
+    // Generation provenance is retained for audit, but validation below never
+    // treats a different host timezone or locale as fixture drift.
+    environment: generationProvenance(),
     cases: generated.map(({ payload, inputSha256, expectedSha256, canonicalFixtureSha256 }) => ({
       fixtureId: payload.fixtureId,
       file: `cases/${payload.fixtureId}.json`,
@@ -497,7 +565,8 @@ async function main() {
   }
 
   const recorded = JSON.parse(readFileSync(manifestPath, 'utf8'))
-  if (canonicalJson(recorded) !== canonicalJson(manifest)) fail('Manifest metadata or hashes differ from generated output')
+  assertManifestIntegrity(recorded, manifest)
+  assertManifestTamperingIsRejected(recorded, manifest)
   for (const { payload } of generated) {
     const file = join(casesDir, `${payload.fixtureId}.json`)
     const actual = JSON.parse(readFileSync(file, 'utf8'))
