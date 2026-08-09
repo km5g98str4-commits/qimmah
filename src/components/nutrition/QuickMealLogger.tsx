@@ -8,6 +8,7 @@ import { getStrings } from '@/config/strings'
 import { nutritionScreenStrings } from '@/i18n/dict/nutritionScreen'
 import type { Lang } from '@/lib/appPreferences'
 import { trackLocal } from '@/lib/tracking'
+import { cn } from '@/lib/cn'
 
 // يُحمَّل عند الحاجة فقط — مكتبة مسح الباركود ثقيلة ولا يلزم تحميلها إلا عند فتح الماسح.
 const ScanFoodPanel = lazy(() => import('@/features/barcode/ScanFoodPanel').then((m) => ({ default: m.ScanFoodPanel })))
@@ -45,6 +46,13 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
   const [sizeId, setSizeId] = useState<string | null>(null)
   /** الكمية بالغرام (الإدخال الأساسي) — تبدأ من غرامات الحصة المرجعية للعنصر. */
   const [grams, setGrams] = useState('')
+  /**
+   * [CTO-009/WP-4] وحدة الإدخال المعروضة. **الغرام يبقى وحدة الحساب الوحيدة**:
+   * الحصة مدخل عرضٍ يُحوَّل إلى غرام قبل أي حساب ماكروز، فلا يوجد مساران
+   * للحقيقة ولا تقريب فوق تقريب.
+   */
+  const [unit, setUnit] = useState<'g' | 'serv'>('g')
+  const [servingsInput, setServingsInput] = useState('')
 
   // إضافة سريعة / طعام مخصّص
   const [cName, setCName] = useState('')
@@ -89,7 +97,12 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
     ? activeSize.servingGrams
     : (selected?.servingGrams && selected.servingGrams > 0 ? selected.servingGrams : 100)
   // الكمية الحالية بالغرام والعامل النسبي مقابل الحصة المرجعية.
-  const gramsNum = parseSafeNumber(grams, { min: 1, max: 3000, fallback: baseGrams })
+  // [CTO-009/WP-4] مدخل الحصة **يمرّ من هنا** ويتحوّل إلى غرام قبل أي حساب:
+  // نقطة تحويل واحدة ⇒ الماكروز والتسمية والتخزين كلها تقرأ الرقم نفسه.
+  const gramsNum =
+    unit === 'serv'
+      ? Math.min(3000, Math.max(1, Math.round(parseSafeNumber(servingsInput, { min: 0.25, max: 20, fallback: 1 }) * baseGrams)))
+      : parseSafeNumber(grams, { min: 1, max: 3000, fallback: baseGrams })
   const factor = gramsNum / baseGrams
 
   // اختيار عنصر من النتائج: يضبط الحجم الافتراضي (وسط إن وُجد) والغرامات المطابقة له.
@@ -301,19 +314,57 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
                     <span>{t.perPortion} (<bdi>{baseServingLabel}</bdi>): <span className="font-bold text-ink-600">{baseCal} {t.calories} · {baseProt}{t.gramsUnit} {t.protein}</span></span>
                     <span>{t.per100g}: <span className="font-bold text-ink-600">{round(baseCal * 100 / baseGrams)} {t.calories} · {round(baseProt * 100 / baseGrams)}{t.gramsUnit} {t.protein}</span></span>
                   </div>
-                  <div className="mt-3 flex items-center gap-2">
-                    <label className="text-xs text-ink-500">{t.gramsAmount}</label>
-                    <input
-                      type="number"
-                      inputMode="numeric"
-                      min="1"
-                      max="3000"
-                      step="10"
-                      value={grams}
-                      onChange={(e) => setGrams(sanitizeNumericInput(e.target.value, { max: 3000 }))}
-                      className="w-24 rounded-lg border border-line bg-page px-2 py-1.5 text-sm text-ink-900 outline-none focus:border-primary-c"
-                    />
-                    <span className="text-xs text-ink-400">{t.gramsUnit}</span>
+                  {/* [CTO-009/WP-4] الكمية: غرام **أو** حصة.
+                      الغرام يبقى وحدة الحساب الوحيدة داخليًا — الحصة تُحوَّل إليه
+                      عند الإدخال (`حصص × غرامات الحصة`) ولا تُخزَّن كمسار حساب
+                      ثانٍ. فلا سلطتان على الماكروز، ولا تقريب مركّب.
+                      ولا تُخترع حصة حين لا توجد: كل الأصناف (٥٥٩) تحمل
+                      `servingGrams`، وإن غاب يومًا يسقط الخيار من تلقائه. */}
+                  <div className="mt-3 space-y-2">
+                    <div className="inline-flex rounded-xl border border-line bg-surface p-0.5" role="group" aria-label={t.gramsAmount}>
+                      {(['g', 'serv'] as const).map((u) => (
+                        <button
+                          key={u}
+                          type="button"
+                          aria-pressed={unit === u}
+                          onClick={() => setUnit(u)}
+                          className={cn(
+                            'min-h-[36px] rounded-lg px-3 text-[11px] font-bold transition-colors',
+                            unit === u ? 'bg-primary text-white' : 'text-ink-700 hover:bg-beige',
+                          )}
+                        >
+                          {u === 'g' ? d.unitGrams : d.unitServings}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <label htmlFor="qml-amount" className="text-xs text-ink-500">{t.gramsAmount}</label>
+                      <input
+                        id="qml-amount"
+                        type="number"
+                        inputMode="decimal"
+                        min={unit === 'g' ? 1 : 0.25}
+                        max={unit === 'g' ? 3000 : 20}
+                        step={unit === 'g' ? 10 : 0.25}
+                        value={unit === 'g' ? grams : servingsInput}
+                        onChange={(e) =>
+                          unit === 'g'
+                            ? setGrams(sanitizeNumericInput(e.target.value, { max: 3000 }))
+                            : setServingsInput(sanitizeNumericInput(e.target.value, { max: 20 }))
+                        }
+                        className="w-24 rounded-lg border border-line bg-page px-2 py-1.5 text-sm text-ink-900 outline-none focus:border-primary-c"
+                      />
+                      <span className="text-xs text-ink-400">{unit === 'g' ? t.gramsUnit : d.servingsUnit}</span>
+                    </div>
+                    {/* المكافئ معروض دائمًا — المستخدم يرى ما سيُسجَّل فعلًا لا ما كتبه. */}
+                    <p className="text-[11px] text-ink-400">
+                      {d.equalsApprox}{' '}
+                      <span className="font-bold text-ink-600">
+                        {unit === 'g'
+                          ? `${round(gramsNum / baseGrams * 100) / 100} ${d.servingsUnit}`
+                          : `${gramsNum}${t.gramsUnit}`}
+                      </span>
+                    </p>
                   </div>
                   <div className="mt-3 flex flex-wrap gap-3 text-xs text-ink-500">
                     <Stat label={t.calories} value={round(baseCal * factor)} />
