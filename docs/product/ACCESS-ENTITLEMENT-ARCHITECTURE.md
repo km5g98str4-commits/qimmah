@@ -1,8 +1,23 @@
 # قِمّة — Access, Trials & Activation: Verified Report + Approved Architecture
 
-**Revision 2** — 2026-08-06. Incorporates the founder decision record of the same day.
-**Status:** architecture APPROVED in principle · **NO CODE WRITTEN** · implementation not started and not authorized.
-**Ground truth:** `main` @ `dd79a60`. Every claim is **verified** (command run, path + line cited), or explicitly marked **inference** / **assumption** (§10 of the charter).
+**Revision 3** — 2026-08-09. Revision 2 (2026-08-06) incorporated the founder decision record; this revision reconciles the document with the **implementation that has since landed** on `claude/access-entitlements`.
+**Ground truth:** the migrations and proof suites on `claude/access-entitlements` (base `main` @ `dd79a60`). Where this document and the migrations disagree, **the migrations win** — §7 marks the superseded parts explicitly.
+
+## Status — implemented · tested · proposed · deferred
+
+| Layer | Status | Where |
+|---|---|---|
+| P2 schema (tables, RLS, privileges, pepper) | ✅ **Implemented** | `supabase/migrations/20260806120001_entitlements_core.sql` · `…120003_table_privileges_hardening.sql` |
+| P2 RPCs (trial, redeem, claim, admin) | ✅ **Implemented** | `…20260806120002_entitlement_rpcs.sql` |
+| Durable revocation contract (`revocation_ledger`, `admin_unrevoke`) | ✅ **Implemented** | `…20260809120001_revocation_ledger.sql` |
+| Post-deletion recovery: Premium **and** eligible code grants | ✅ **Implemented** | `…20260809120002_code_grant_recovery.sql` |
+| Executable proofs on real Postgres | ✅ **Tested** — `test:entitlements` (120 checks) + `test:privileges` (37), both in `test:gate` | `scripts/db/entitlements-proof.mjs` · `scripts/db/privileges-proof.mjs` |
+| Staging apply of the migrations | ⏳ **Not done** — founder-gated (live-DB migration) | — |
+| Privacy disclosure UI (§11.1) | 📋 **Deferred to P2b** — proposal written, no UI yet | [`P2B-PRIVACY-DISCLOSURE-PROPOSAL.md`](./P2B-PRIVACY-DISCLOSURE-PROPOSAL.md) |
+| P3–P7 (config, provider, gate, UI, admin scripts, Salla) | 📋 **Proposed only** — nothing started | §13 |
+| Per-IP / per-request rate limiting | ⛔ **Explicit external blocker** — outside PostgreSQL's reach; see §11.2 | — |
+
+Historical-report sections (§1–§3, §12) remain as verified on 2026-08-06 against `main` @ `dd79a60` and are not re-verified here.
 
 ---
 
@@ -10,7 +25,7 @@
 
 1. **الإصدار الحالي:** `main` @ `dd79a60`؛ آخر التزام وظيفي `0d7d84f` الموسوم `v1.0-rc`.
 2. **مكتبة التمارين:** موجودة وصحّية (١٨١ تمرينًا · ٤٠ جهازًا · ١٢١ بوسائط حقيقية). الذي فُقد وسائطها المتحرّكة — **٦١ GIF** حُذفت في `bf07512` لأنها من WorkoutX بعلامة مائية. **قرار مؤسس: لا تُستعاد.**
-3. **لا يوجد نظام اشتراك/تفعيل/تجربة في المستودع إطلاقًا.**
+3. ~~لا يوجد نظام اشتراك/تفعيل/تجربة في المستودع إطلاقًا~~ — **كان صحيحًا يوم كتابته (٦ أغسطس) وتجاوزه الواقع**: طبقة قاعدة البيانات كاملة (مخطّط + دوال + إثباتات منفَّذة) هبطت على `claude/access-entitlements`. ما لم يُبنَ بعد: أي واجهة أو بوابة أو مسار سلة (P3–P7).
 4. **محرّك التخصيص التكيّفي (١٩٣ سؤالًا) لا يصل المستخدم** — **قرار مؤسس: لا يُفعَّل في هذا البرنامج.** الحيّ هو `OnboardingV2` ويبقى كما هو.
 5. **فرع `Qimmah-App` غير المدموج: انتهى الخطر.** التحقّق أثبت أن **٢٤ ملفًا من ٣٥ مطابقة حرفيًا** لـ`main`، والباقي `main` **متقدّم عليه**. لا عمل فريد باقٍ ولا تعارض — §12.
 6. **قرارات المؤسس مقفلة** — §4. والتسمية للمستخدم **«قِمّة Premium»** بنصّ معتمد واحد — §4.5.
@@ -302,7 +317,20 @@ export type ProductId = typeof ACCESS_CONFIG.premium.id
 
 ---
 
-# 7. Database / schema proposal *(deliverable 6 of the original brief)*
+# 7. Database / schema — proposal (superseded) and as-implemented deltas
+
+> ⚠️ **The SQL sketches below are the pre-implementation proposal, kept for history.**
+> The source of truth is the migrations themselves. Where they diverge from this
+> section, the implementation is deliberate and the deltas are:
+>
+> | Proposed here | Actually implemented | Why |
+> |---|---|---|
+> | `entitlements.status` cached column, "refreshed on write, reconciled nightly by `pg_cron`" | **No `status` column and no cron at all.** State is derived on every read by `private.derive_state(...)` + DB `now()` | A stored "trialActive" becomes a lie the moment 72h pass — the cache was the §5 honesty violation this section itself warned about, so it was dropped rather than reconciled |
+> | `private.app_secrets` key-value table | **`private.identity_pepper`** — versioned rows (`version`, `pepper`, `retired_at`) with `hash_version` stamped on every durable row | Pepper rotation without invalidating old fingerprints; retiring never deletes a secret |
+> | `pgcrypto` `digest()` (assumption 3) | Core `sha256()` + `convert_to()` — **no pgcrypto dependency** | One less extension to exist on staging |
+> | Ledgers with `email_hash` only | Ledgers also carry `hash_version`, `retention_policy`, `retain_until` metadata (**no deletion automation in P2** — the values are read, not executed) | Retention is a stated fact, not an unbounded silence |
+> | Revocation = `revoked_at` on the user row only | **`revocation_ledger`** — durable, no `user_id`, survives `delete_own_account()`; lift via `admin_unrevoke` is a mark (`lifted_at`), never a delete | The user-row flag alone meant revoke → delete account → re-register → full access back |
+> | Recovery = purchases only | `claim_pending_grants()` restores Premium **and eligible code grants** (original expiry, never extended; disabled codes and expired grants excluded) | `code_redemption_ledger` proves the right it was already used to deny |
 
 ## 7.1 ⚠️ Hard constraint discovered in the code
 
@@ -410,13 +438,13 @@ Copy the exact four-policy shape from `20260726120003_p14_rls_policies.sql` (`to
 
 RLS `enable` (not `force`), matching the existing migration's documented reasoning so `SECURITY DEFINER` RPCs keep working.
 
-### Why `status` is a cache and the RPC is truth
+### Why `status` does not exist *(implemented — the cached-mirror idea below it is dead)*
 
-A stored `trialActive` becomes a **lie** the moment the clock passes `expires_at` — a charter §5 violation ("صدق المعروض"). Therefore:
+A stored `trialActive` becomes a **lie** the moment the clock passes `expires_at` — a charter §5 violation ("صدق المعروض"). The implemented resolution went further than revision 2 proposed:
 
-- `public.my_entitlement()` **computes** the effective state from `no_expiry`, `expires_at`, `revoked` and `now()` on every read.
-- `entitlements.status` is a mirror for admin queries only, refreshed on write and reconciled nightly by `pg_cron`.
-- **The client renders only what the RPC returns.** The cached column is never read by the app.
+- `public.my_entitlement()` **computes** the effective state from the grant fields + DB `now()` on every read. This is the only read path.
+- ~~`entitlements.status` is a mirror for admin queries only, refreshed on write and reconciled nightly by `pg_cron`~~ — **rejected during implementation**: there is no `status` column, no cron, and no scheduled job anywhere in P2 (`test:entitlements` asserts both structurally). Admin queries derive state the same way the RPC does.
+- **The client renders only what the RPC returns.**
 
 ## 7.3 State machine *(deliverable 5 of the original brief)*
 
@@ -434,8 +462,8 @@ A stored `trialActive` becomes a **lie** the moment the clock passes `expires_at
 | `trialExpired` | purchase / code | `premiumActive` / `specialAccessActive` |
 | `specialAccessActive` | `now() > expires_at` | `noAccess` |
 | `specialAccessActive` | purchase claimed | `premiumActive` |
-| any | admin revoke | `revoked` |
-| `revoked` | admin restore | prior grant re-evaluated |
+| any | `admin_revoke()` — also writes the durable `revocation_ledger` | `revoked` (survives account deletion + re-registration) |
+| `revoked` | `admin_unrevoke()` — the only lift path; marks, never deletes | prior grant re-evaluated via `claim_pending_grants()` |
 
 **Invariants enforced in SQL, never in the client:**
 
@@ -452,8 +480,8 @@ A stored `trialActive` becomes a **lie** the moment the clock passes `expires_at
 | `my_entitlement()` | `authenticated` | Effective state for `auth.uid()`. The only read path. |
 | `start_trial()` | `authenticated` | Requires `auth.users.email_confirmed_at is not null`. Rejects if `trial_ledger` already holds the email hash. Inserts trial + ledger atomically. |
 | `redeem_access_code(p_code text)` | `authenticated` | Normalize → hash with pepper → `select … for update` → check `enabled`, `now()` within `[starts_at, expires_at]`, `redemption_count < max_redemptions` → increment → write redemption + ledger + entitlement. One transaction. |
-| `claim_pending_grants()` | `authenticated` | On sign-in/verify: match `purchase_ledger` + `code_redemption_ledger` by email hash and materialize the entitlement. **This is what makes buy-before-signup and post-deletion recovery work.** |
-| `admin_grant_premium(...)` · `admin_revoke(...)` · `admin_create_code(...)` | **`service_role` only** — revoked from `anon` and `authenticated` | Terminal/CI use only. Unreachable from any browser. |
+| `claim_pending_grants()` | `authenticated` | On sign-in/verify: Premium from `purchase_ledger` first; else the best **eligible** code grant from `code_redemption_ledger` (ledger row exists · original window `redeemed_at + duration_days` still open · code still `enabled` · identity not revoked). Restores the **original** expiry — deletion is never an extension. Code exhaustion does not strip the owner's grant (the ledger row *is* the consumed slot); trials are deliberately not restored. **This is what makes buy-before-signup and post-deletion recovery work.** |
+| `admin_grant_premium(...)` · `admin_revoke(...)` · `admin_unrevoke(...)` · `admin_create_access_code(...)` | **`service_role` only** — revoked from `anon` and `authenticated` | Terminal/CI use only. Unreachable from any browser. `admin_revoke` writes the durable `revocation_ledger` (works even for a user with no entitlement row); `admin_unrevoke` is the only lift path and marks rather than deletes. |
 
 Errors are generic (`invalid_code`, `code_exhausted`, `trial_already_used`) and mapped to bilingual copy through the existing `localizedAuthError` pattern — **no oracle** distinguishing "doesn't exist" from "disabled".
 
@@ -539,8 +567,8 @@ export interface EntitlementProvider {
 | 1 | Client grants itself access | No write policies; every write through `SECURITY DEFINER` RPC | **Closed** |
 | 2 | Trial reuse via logout / reinstall / cleared storage | State is server-side, keyed on `auth.uid()` | **Closed** |
 | 3 | Trial reuse via delete-account → re-register | `trial_ledger` has **no `user_id`**, so `delete_own_account()` cannot wipe it | **Closed** |
-| 4 | Trial farming with many fresh emails | Email verification required + per-IP rate limit + disposable-domain blocklist | ⚠️ **Open by nature.** Not fully closable without ID/payment verification. Accept and monitor. |
-| 5 | Code brute-force | Codes ≥10 chars over a 32-symbol alphabet, per-user attempt rate limit, generic errors | Low |
+| 4 | Trial farming with many fresh emails | Email verification required + disposable-domain blocklist; per-IP rate limit is **not implementable in SQL** — §11.2 | ⚠️ **Open by nature.** Not fully closable without ID/payment verification. Accept and monitor. |
+| 5 | Code brute-force | Codes ≥10 chars over a 32-symbol alphabet + generic errors (implemented); request throttling is **an external blocker** — §11.2 | Low, bounded by entropy until §11.2 lands |
 | 6 | Code sharing beyond the limit | `max_redemptions` enforced under `for update`; ledger survives deletion | **Closed** |
 | 7 | Code enumeration via error messages | Single generic `invalid_code` for not-found / disabled / out-of-window | **Closed** |
 | 8 | Admin secret in the bundle | `service_role` never `VITE_*`; admin RPCs revoked from `authenticated` | **Closed** |
@@ -550,6 +578,27 @@ export interface EntitlementProvider {
 | 12 | Cross-account leakage | Existing four-policy RLS + `reconcileAccountScope()` locally | **Closed** |
 | 13 | Paying customer locked out offline | Cached `premiumActive` honored offline indefinitely — §9 | **Closed** |
 | 14 | Retained `email_hash` after account deletion | Peppered hash, no plaintext, narrow purpose | ⚠️ **Requires the disclosure below** |
+| 15 | Revoke → delete account → re-register → access back | **Closed** — `revocation_ledger` (no `user_id`) survives deletion; every self-service path checks it across all pepper versions; lift is `admin_unrevoke` only | **Closed** (proven in `test:entitlements` §9.6) |
+| 16 | Deleted account replays a special code | **Closed** — `code_redemption_ledger` blocks re-redemption; recovery restores only the original grant, never a fresh slot | **Closed** |
+
+## 11.2 Rate limiting — explicit external blocker, not a SQL feature
+
+**What P2 cannot do and does not pretend to do:** per-IP or per-request throttling of
+`redeem_access_code()` / `start_trial()` calls. A `SECURITY DEFINER` function sees
+`auth.uid()` and nothing else — no client IP, no request metadata — and a
+counter table written from inside the function would throttle only *authenticated,
+well-behaved* callers while doing nothing about the layer where floods actually
+arrive (PostgREST/HTTP). Building that counter anyway would be a fake limiter
+that documents a protection which does not exist.
+
+**Where the real control lives (any of, when authorized):** Supabase API gateway
+rate limits / Cloudflare rules in front of the Supabase URL / a future Edge
+Function wrapper (P7 territory). Until one of those is configured, the standing
+mitigations are code entropy (≥10 chars, 32-symbol alphabet), authenticated-only
+redemption, and the single generic `invalid_code` error.
+
+**Status: open external blocker.** Owned by infrastructure, not by this schema;
+closing it requires a founder-authorized infra change, not another migration.
 
 ## 11.1 Required privacy disclosure — retained peppered email hashes
 
@@ -575,7 +624,7 @@ export interface EntitlementProvider {
 > email, and is never used for contact, marketing, or tracking.** Legal basis: contract
 > performance and fraud prevention.
 
-**Ships in the same package as the ledger tables (§13-P2), not later.** Charter §6-3: the legal block is a second, visually separated register — it announces itself rather than blending into the screen's voice.
+~~Ships in the same package as the ledger tables (§13-P2), not later.~~ **Reality: P2 landed as database + proofs only, so the disclosure did not ship with it.** It is now the subject of its own package — **P2b**, specified in [`P2B-PRIVACY-DISCLOSURE-PROPOSAL.md`](./P2B-PRIVACY-DISCLOSURE-PROPOSAL.md) — and must land **before any user-facing access UI (P5) ships**, since P5 is the moment a user can create the retained fingerprints knowingly. The disclosure must now also cover `revocation_ledger` (§11-15). Charter §6-3 still governs: the legal block is a second, visually separated register — it announces itself rather than blending into the screen's voice.
 
 > **Note, not blocking:** whether a peppered hash counts as personal data under PDPL is a lawyer's call, not mine. The disclosure above is written to be correct either way — if it *is* personal data, retention is disclosed with a stated basis; if it isn't, nothing is lost by saying so.
 
@@ -636,13 +685,14 @@ package.json        added=10  absent-from-main=1
 
 # 13. Updated implementation package order *(deliverable 4)*
 
-Sized per charter §3 — small, independently reviewable, independently revertible. **Each is its own `[CTO-n]` wave with the full local gate + CI read (§4.0) before landing.** Nothing below has been started.
+Sized per charter §3 — small, independently reviewable, independently revertible. **Each is its own `[CTO-n]` wave with the full local gate + CI read (§4.0) before landing.** Status column reflects reality as of revision 3.
 
 | # | Package | Scope | Files | Gate |
 |---|---|---|---|---|
 | **P0** | **Charter amendment** *(founder-gated, no product code)* | The 4 edits in §5, `AGENTS.md` + `CLAUDE.md` together per §1.5; plus the `product.ts:2` template-language cleanup | `AGENTS.md`, `CLAUDE.md`, `.claude/rules/product.md`, `src/config/product.ts` | `test:no-template-language` |
 | **P1** | **Archive the fork ref** *(founder-gated)* | §12.2 — tag, then drop | none (refs only) | — |
-| **P2** | **Schema + RLS + RPCs + privacy disclosure** | §7 tables and functions; §11.1 disclosure ships **in this package** | `supabase/migrations/2026…_entitlements_core.sql`, `…_entitlement_rpcs.sql`; `src/views/PrivacyView.tsx`; `src/i18n/dict/`; extend `scripts/db/run-schema-rls-proof.mjs` + `scripts/db/verify-rls.ts` | `test:db-schema` extended; `db:verify` proves two-account isolation on staging |
+| **P2** | **Schema + RLS + RPCs** — ✅ **LANDED** on `claude/access-entitlements` (database + proofs only; the disclosure moved to P2b) | §7 as-implemented: 4 migrations (`20260806120001/2/3`, `20260809120001/2`) — tables, pepper, RPCs, privilege hardening, durable revocation, code-grant recovery | `supabase/migrations/…`; `scripts/db/entitlements-proof.mjs`; `scripts/db/privileges-proof.mjs`; `scripts/db/lib/supabase-sandbox.mjs` | `test:entitlements` (120) + `test:privileges` (37), wired into `test:gate`. **Staging apply still founder-gated.** |
+| **P2b** | **Privacy disclosure** *(specified, not started)* | §11.1 text + revocation-ledger coverage; must precede P5 | See [`P2B-PRIVACY-DISCLOSURE-PROPOSAL.md`](./P2B-PRIVACY-DISCLOSURE-PROPOSAL.md) for the exact file list | Per proposal |
 | **P3** | **Config + provider interface** *(no UI)* | §6 and §10 | **new** `src/config/access.ts`, `src/lib/entitlement/{types,provider,supabaseProvider,manualProvider,context}.ts`; register the cache key in `src/lib/userDataKeys.ts` | **new** `test:entitlement` in `test:gate`, including a §4.2 counter-assertion that a forged client state grants nothing, and the §6-5 no-price-literal check |
 | **P4** | **The gate itself** ⚠️ highest risk | §4.7 — rework `guardRoute` so a completed guest reaches preview only | `src/App.tsx`, `src/lib/appRoutes.ts` | **new** `test:access-gate` proving every gated route is unreachable without an entitlement **and** that the free tier still works with none |
 | **P5** | **Offer / trial / code-entry UI** | The three access paths, bilingual, RTL, AA | **new** `src/views/AccessView.tsx`, `src/components/access/*`, `src/i18n/dict/access.ts` | **new** `test:premium-copy` (§4.5) + `test:no-template-language` stays green |
@@ -657,7 +707,7 @@ Sized per charter §3 — small, independently reviewable, independently reverti
 
 1. `main` is the only frontier — verified against `design/v21-promotion` and the `Qimmah-App` fork; **not** re-verified against all remaining branches.
 2. Cloudflare Pages currently serves `main`; the live page returned no `BUILD_LABEL` in fetched HTML, so the exact deployed commit is **unconfirmed** (the label is likely rendered after JS boot).
-3. Supabase has `pgcrypto` available (standard) for `digest()`.
+3. ~~Supabase has `pgcrypto` available for `digest()`~~ — **moot**: the implementation uses core `sha256()`; no pgcrypto dependency exists.
 4. Trial = exactly 72h from activation — **confirmed by the founder**, not assumed.
 5. §12's subsumption proof is **line-level, not behavior-level** — see the honest limit noted there.
-6. **Nothing has been implemented and no gate has been run for this proposal** — there is no code to gate yet.
+6. ~~Nothing has been implemented and no gate has been run~~ — **superseded (revision 3)**: the P2 database layer is implemented and gated (`test:entitlements` + `test:privileges` inside `test:gate`); everything client-side (P3+) remains proposal-only.
