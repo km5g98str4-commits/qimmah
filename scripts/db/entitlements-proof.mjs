@@ -26,6 +26,8 @@ const mig = (f) => readFileSync(join(root, 'supabase/migrations', f), 'utf8')
 const CORE = '20260806120001_entitlements_core.sql'
 const RPCS = '20260806120002_entitlement_rpcs.sql'
 const DEL = '20260713120007_delete_own_account.sql'
+const REVK = '20260809120001_revocation_ledger.sql'
+const RECV = '20260809120002_code_grant_recovery.sql'
 
 const results = []
 function check(name, pass, detail = '') {
@@ -89,6 +91,8 @@ try {
   await db.exec(mig(DEL)) // الدالة القائمة — تُختبر ضدّ الجداول الجديدة لاحقًا
   await db.exec(mig(CORE))
   await db.exec(mig(RPCS))
+  await db.exec(mig(REVK))
+  await db.exec(mig(RECV))
 } catch (e) {
   created = false
   console.error('\n  المهاجرة فشلت:', e.message, '\n')
@@ -100,7 +104,7 @@ if (!check('إنشاء المخطّط من قاعدة نظيفة', created)) {
 
 // idempotency: إعادة التشغيل لا تكسر
 let rerun = true
-try { await db.exec(mig(CORE)); await db.exec(mig(RPCS)) } catch (e) { rerun = false; console.error('   ', e.message) }
+try { await db.exec(mig(CORE)); await db.exec(mig(RPCS)); await db.exec(mig(REVK)); await db.exec(mig(RECV)) } catch (e) { rerun = false; console.error('   ', e.message) }
 check('الهجرة idempotent (تشغيل ثانٍ)', rerun)
 
 // ── ٢) الملح المُرقَّم ─────────────────────────────────────────────────────
@@ -162,6 +166,7 @@ await mustFail('العميل لا يُدرِج منحة لنفسه', () =>
 await mustFail('العميل لا يقرأ جدول الأكواد', () => q(`select * from public.access_codes`), 'permission denied')
 await mustFail('العميل لا يقرأ سجلّ التجربة', () => q(`select * from public.trial_ledger`), 'permission denied')
 await mustFail('العميل لا يقرأ سجلّ الشراء', () => q(`select * from public.purchase_ledger`), 'permission denied')
+await mustFail('العميل لا يقرأ سجلّ الحظر', () => q(`select * from public.revocation_ledger`), 'permission denied')
 await mustFail('العميل لا ينادي دالة الإدارة', () =>
   q(`select public.admin_revoke($1,'x')`, [A]), 'permission denied')
 await mustFail('العميل لا ينادي دالة البصمة الداخلية', () =>
@@ -170,7 +175,7 @@ await mustFail('العميل لا ينادي دالة البصمة الداخل�
 // TRUNCATE **لا تحرسها RLS** — صلاحية جدول لا صفّ. سحب insert/update/delete
 // وحدها كان يترك للعميل محو منح كل المستخدمين بأمر واحد (أُثبت عمليًا).
 for (const t of ['entitlements', 'access_code_redemptions', 'access_codes',
-                 'trial_ledger', 'purchase_ledger', 'code_redemption_ledger']) {
+                 'trial_ledger', 'purchase_ledger', 'code_redemption_ledger', 'revocation_ledger']) {
   await mustFail(`العميل لا يستطيع TRUNCATE على ${t}`,
     () => db.exec(`truncate public.${t}`), 'permission denied')
 }
@@ -186,7 +191,7 @@ check('authenticated يملك SELECT فقط على الجدولين المقرو
   grants.rows.map((r) => `${r.table_name}=${r.pr}`).join(' '))
 const anyGrant = await q(`select count(*)::int n from information_schema.role_table_grants
                           where table_schema='public' and grantee in ('anon','authenticated')
-                            and table_name in ('access_codes','trial_ledger','purchase_ledger','code_redemption_ledger')`)
+                            and table_name in ('access_codes','trial_ledger','purchase_ledger','code_redemption_ledger','revocation_ledger')`)
 check('لا صلاحية إطلاقًا على الأكواد والسجلّات لأي دور عميل', anyGrant.rows[0].n === 0, `${anyGrant.rows[0].n}`)
 
 await asRole('anon')
@@ -380,8 +385,20 @@ const idx = await q(`select count(*)::int n from pg_indexes
 check('فهرس واحد فقط على entitlements.user_id', idx.rows[0].n === 1, `${idx.rows[0].n}`)
 
 // ── ٩) حذف الحساب — أخطر بند ──────────────────────────────────────────────
+// رفع حظر §٨ يمرّ عبر العقد الرسمي لا بتعديل مباشر: admin_revoke صار يكتب
+// سجلًّا دائمًا، والتصفير اليدوي لصفّ المستخدم وحده لم يعد يرفع شيئًا.
 await asRole('service_role')
-await q(`update public.entitlements set revoked_at=null, revoked_reason=null where user_id=$1`, [B])
+const unrev = await q(`select public.admin_unrevoke($1,'اختبار: رفع حظر §٨') as s`, [B])
+check('admin_unrevoke يرفع الحظر عبر العقد الرسمي', unrev.rows[0].s === 'unrevoked')
+await asRole(null)
+const liftShape = await q(`select count(*)::int total,
+                                  count(*) filter (where lifted_at is null)::int active,
+                                  count(*) filter (where lifted_at is not null and lifted_by is not null and lifted_reason is not null)::int lifted
+                           from public.revocation_ledger`)
+check('الرفع وسمٌ لا حذف: الصفّ باقٍ ومكتمل النسب',
+  liftShape.rows[0].total >= 1 && liftShape.rows[0].active === 0 &&
+  liftShape.rows[0].lifted === liftShape.rows[0].total,
+  `total=${liftShape.rows[0].total} active=${liftShape.rows[0].active}`)
 await asRole('authenticated', B)
 const beforeDel = {
   ent: (await q(`select count(*)::int n from public.entitlements`)).rows[0].n,
@@ -425,29 +442,215 @@ await asRole('authenticated', C2)
 await mustFail('حدّ الكود ينجو من حذف الحساب',
   () => q(`select public.redeem_access_code('INFLU-2026')`), 'invalid_code')
 
-// ── ١٠) سلامة search_path و SECURITY DEFINER ──────────────────────────────
+// ── ٩.٥) استرجاع منح الأكواد — code_redemption_ledger بالاتجاهين ──────────
+// السجلّ الذي يمنع الاسترداد الثاني هو نفسه الذي يثبت الحقّ. سياسة الأهلية
+// الكاملة في رأس 20260809120002 — هنا تُثبَت بالتشغيل بندًا بندًا.
+
+// (أ) الحالة الأساسية: حذف ← إعادة تسجيل ← استرجاع المنحة **الأصلية** بلا تمديد.
+// S1 يحمل LONG-30 (انتهاؤها الأصلي محفوظ في longExp أعلاه).
+await asRole('authenticated', S1)
+await q(`select public.delete_own_account()`)
+const S2 = await mkUser('shorten@example.com')
+await asRole('authenticated', S2)
+const recov = await q(`select public.claim_pending_grants() as s`)
+check('منحة كود سارية تُسترجَع بعد الحذف وإعادة التسجيل', recov.rows[0].s === 'specialAccessActive')
+const recovRow = await q(`select expires_at, activated_at, state from public.my_entitlement()`)
+check('الاسترجاع يعيد الانتهاء الأصلي — حذف الحساب ليس زرّ تمديد',
+  new Date(recovRow.rows[0].expires_at).getTime() === new Date(longExp).getTime(),
+  `المسترجَع=${recovRow.rows[0].expires_at}`)
+const recovRed = await q(`select count(*)::int n from public.access_code_redemptions`)
+check('صفّ الاسترداد المنسوب يعود مع المنحة (رؤية المستخدم)', recovRed.rows[0].n >= 1)
+
+// (ب) الاستنفاد لا يُسقط الاسترجاع: صفّ السجلّ *هو* الحصّة المستهلَكة.
+// ONE-SHOT بحدّ ١: استرداده بعينه يستنفده — فلو أسقط الاستنفادُ الاسترجاعَ
+// لصار كل كود فردي (الافتراضي) غير قابل للاسترجاع أبدًا.
+await asRole('service_role')
+await q(`select public.admin_create_access_code('ONE-SHOT','founder','فحص الاستنفاد',30,1)`)
+const X1 = await mkUser('exhaust@example.com')
+await asRole('authenticated', X1)
+await q(`select public.redeem_access_code('ONE-SHOT')`)
+await q(`select public.delete_own_account()`)
+const X2 = await mkUser('exhaust@example.com')
+await asRole('authenticated', X2)
+const exhClaim = await q(`select public.claim_pending_grants() as s`)
+check('كود مستنفَد: منحة صاحب الحصّة تُسترجَع (الحصّة استُهلكت أصلًا)',
+  exhClaim.rows[0].s === 'specialAccessActive')
 await asRole(null)
-const fns = await q(`
-  select n.nspname||'.'||p.proname as fn, p.prosecdef,
+const exhCount = await q(`select redemption_count, max_redemptions from public.access_codes
+                          where code_hash = private.hash_identity('ONE-SHOT',1)`)
+check('الاسترجاع لا يستهلك حصّة جديدة ولا يلمس العدّاد',
+  exhCount.rows[0].redemption_count === 1 && exhCount.rows[0].max_redemptions === 1)
+// ومحاولة استرداد *جديدة* لهوية أخرى على المستنفَد تبقى مرفوضة كما كانت.
+const X3 = await mkUser('exhaust-other@example.com')
+await asRole('authenticated', X3)
+await mustFail('استرداد جديد على كود مستنفَد يبقى مرفوضًا',
+  () => q(`select public.redeem_access_code('ONE-SHOT')`), 'invalid_code')
+
+// (ج) منحة منتهية لا تُسترجَع — تُشيَّخ بيد المالك كما شُيّخ كود EXPIRED-1.
+await asRole('service_role')
+await q(`select public.admin_create_access_code('EXP-REC','founder','فحص انتهاء المنحة',2,5)`)
+const E1 = await mkUser('exp-rec@example.com')
+await asRole('authenticated', E1)
+await q(`select public.redeem_access_code('EXP-REC')`)
+await q(`select public.delete_own_account()`)
+await asRole(null)
+await q(`update public.code_redemption_ledger set redeemed_at = now() - interval '3 days'
+         where code_id = (select id from public.access_codes
+                          where code_hash = private.hash_identity('EXP-REC',1))`)
+const E2 = await mkUser('exp-rec@example.com')
+await asRole('authenticated', E2)
+const expClaim = await q(`select public.claim_pending_grants() as s`)
+check('منحة كود منتهية لا تُسترجَع', expClaim.rows[0].s === 'noAccess')
+
+// (د) كود عطّلته الإدارة = إبطال — منحته لا تُسترجَع (مفتاح طوارئ الكود المسرَّب).
+await asRole('service_role')
+await q(`select public.admin_create_access_code('DIS-REC','founder','فحص الإبطال الإداري',30,5)`)
+const I1 = await mkUser('dis-rec@example.com')
+await asRole('authenticated', I1)
+await q(`select public.redeem_access_code('DIS-REC')`)
+await q(`select public.delete_own_account()`)
+await asRole(null)
+await q(`update public.access_codes set enabled=false
+         where code_hash = private.hash_identity('DIS-REC',1)`)
+const I2 = await mkUser('dis-rec@example.com')
+await asRole('authenticated', I2)
+const disClaim = await q(`select public.claim_pending_grants() as s`)
+check('كود مُبطَل إداريًا لا تُسترجَع منحته', disClaim.rows[0].s === 'noAccess')
+
+// (هـ) الأسبقية: هوية تحمل شراءً واسترداد كود معًا ⇒ Premium لا special.
+await asRole('authenticated', B2)
+await q(`select public.redeem_access_code('LONG-30')`) // تُسجَّل ولا تُخفَّض (أُثبت أعلاه)
+await q(`select public.delete_own_account()`)
+const B3 = await mkUser('b@example.com')
+await asRole('authenticated', B3)
+const both = await q(`select public.claim_pending_grants() as s`)
+check('عند اجتماع شراء وكود: الاسترجاع يقدّم Premium', both.rows[0].s === 'premiumActive')
+
+// (و) الاستدعاء المتكرّر لحساب حيّ لا يمدّد ولا يقصّ — idempotent.
+await asRole('authenticated', S2)
+const before9 = (await q(`select expires_at from public.my_entitlement()`)).rows[0].expires_at
+const again = await q(`select public.claim_pending_grants() as s`)
+const after9 = (await q(`select expires_at from public.my_entitlement()`)).rows[0].expires_at
+check('استدعاء الاسترجاع مكرّرًا لا يغيّر منحة قائمة',
+  again.rows[0].s === 'specialAccessActive' &&
+  new Date(before9).getTime() === new Date(after9).getTime())
+
+// (ز) التجربة لا تُسترجَع — قرار معلَن لا سهو: الحذف يُنهي ما تبقّى منها.
+await asRole('authenticated', A2)
+const trialClaim = await q(`select public.claim_pending_grants() as s`)
+check('التجربة لا تُسترجَع بعد الحذف (قرار معلَن)', trialClaim.rows[0].s === 'noAccess')
+
+// ── ٩.٦) عقد الإلغاء الدائم — الحظر ينجو من حذف الحساب ────────────────────
+// الثغرة المسدودة: إلغاء ← حذف ← إعادة تسجيل ← claim كانت تعيد Premium كاملة.
+
+const RV = await mkUser('rv@example.com')
+await asRole('service_role')
+await q(`select public.admin_grant_premium('rv@example.com','manual','ORD-RV',1999,null)`)
+await q(`select public.admin_revoke($1,'سوء استخدام — فحص العقد') as s`, [RV])
+await asRole(null)
+const rvLedger = await q(`select count(*)::int n from public.revocation_ledger r
+                          where r.lifted_at is null
+                            and r.email_hash in (select email_hash from private.identity_hashes('rv@example.com'))`)
+check('admin_revoke يكتب السجلّ الدائم', rvLedger.rows[0].n === 1)
+
+await asRole('authenticated', RV)
+const rvState = await q(`select state from public.my_entitlement()`)
+check('المحظور يرى revoked', rvState.rows[0].state === 'revoked')
+// الحقّ في المحو (PDPL) لا يعلّقه الحظر — الحذف يبقى متاحًا.
+await q(`select public.delete_own_account()`)
+await asRole(null)
+const rvGone = await q(`select count(*)::int n from auth.users where id=$1`, [RV])
+const rvKept = await q(`select count(*)::int n from public.revocation_ledger r
+                        where r.lifted_at is null
+                          and r.email_hash in (select email_hash from private.identity_hashes('rv@example.com'))`)
+check('المحظور يظلّ قادرًا على حذف حسابه (حقّ المحو)', rvGone.rows[0].n === 0)
+check('سجلّ الحظر ينجو من حذف الحساب', rvKept.rows[0].n === 1)
+
+// إعادة التسجيل بنفس البريد: كل مسارات الخدمة الذاتية مقفلة، والحالة صادقة.
+const RV2 = await mkUser('rv@example.com')
+await asRole('authenticated', RV2)
+await mustFail('إعادة التسجيل بعد الحظر: المطالبة بالشراء مقفلة',
+  () => q(`select public.claim_pending_grants()`), 'access_revoked')
+await mustFail('إعادة التسجيل بعد الحظر: التجربة مقفلة',
+  () => q(`select public.start_trial()`), 'access_revoked')
+await mustFail('إعادة التسجيل بعد الحظر: استرداد الأكواد مقفل',
+  () => q(`select public.redeem_access_code('LONG-30')`), 'access_revoked')
+const rv2State = await q(`select state from public.my_entitlement()`)
+check('الهوية المحظورة تُعرَض revoked حتى بلا صفّ منحة (لا noAccess مضلِّلة)',
+  rv2State.rows[0].state === 'revoked')
+
+// الرفع إداري حصرًا — وبعده يعود الاسترجاع للعمل.
+await mustFail('العميل لا ينادي admin_unrevoke',
+  () => q(`select public.admin_unrevoke($1,'x')`, [RV2]), 'permission denied')
+await asRole('service_role')
+const rvLift = await q(`select public.admin_unrevoke($1,'قرار مراجعة') as s`, [RV2])
+check('admin_unrevoke يرفع حظر هوية مُعاد تسجيلها', rvLift.rows[0].s === 'unrevoked')
+await asRole('authenticated', RV2)
+const rvBack = await q(`select public.claim_pending_grants() as s`)
+check('بعد الرفع: Premium تُسترجَع من سجلّ الشراء', rvBack.rows[0].s === 'premiumActive')
+
+// مستخدم بلا صفّ منحة يبقى قابلًا للحظر (كان no_entitlement يمنعه أصلًا).
+const NE = await mkUser('noent@example.com')
+await asRole('service_role')
+const neRv = await q(`select public.admin_revoke($1,'حظر وقائي') as s`, [NE])
+check('الحظر يعمل على مستخدم بلا منحة', neRv.rows[0].s === 'revoked')
+await asRole('authenticated', NE)
+const neState = await q(`select state from public.my_entitlement()`)
+check('المحظور بلا منحة يرى revoked', neState.rows[0].state === 'revoked')
+// ورفع حظر عمّن لم يُحظر خطأ مسمّى لا نجاح صامت — في الحالتين:
+await asRole('service_role')
+await mustFail('رفع حظر عن غير محظور (بلا صفّ منحة) يُرفض باسمه',
+  () => q(`select public.admin_unrevoke($1,'x')`, [D]), 'not_revoked')
+// S2 يحمل منحة كود نشطة وغير محظور — كان التحديث غير المشروط يطابق صفّه.
+await mustFail('رفع حظر عن غير محظور (بصفّ منحة نشط) يُرفض باسمه أيضًا',
+  () => q(`select public.admin_unrevoke($1,'x')`, [S2]), 'not_revoked')
+
+// ── ١٠) سلامة search_path و SECURITY DEFINER ──────────────────────────────
+// الفحص السابق كان يقبل أي `search_path=` غير فارغ — فكانت دالة تحمل
+// `set search_path = public` (وهي عين الثغرة) تمرّ. المطلوب الآن حرفيًا:
+// `search_path=""` في proconfig، أي `set search_path = ''` — لا سواه.
+//
+// والتغطية بالتعداد الآلي لا بقائمة أسماء: القائمة اليدوية تشيخ — دالة
+// secdef جديدة تُضاف بلا search_path ما كانت لتدخل الفحص أصلًا.
+await asRole(null)
+const listSecdef = async () => (await q(`
+  select n.nspname||'.'||p.proname as fn,
          coalesce(array_to_string(p.proconfig, ','), '') as cfg
   from pg_proc p join pg_namespace n on n.oid = p.pronamespace
-  where n.nspname in ('public','private')
-    and p.proname in ('my_entitlement','start_trial','redeem_access_code','claim_pending_grants',
-                      'admin_create_access_code','admin_grant_premium','admin_revoke',
-                      'hash_identity','identity_hashes','active_pepper_version','derive_state','grant_rank',
-                      'entitlements_touch_updated_at')`)
-const bad = fns.rows.filter((r) => !r.prosecdef || !r.cfg.includes('search_path='))
-check(`كل دوال الوصول security definer + search_path=''`, bad.length === 0,
-  bad.length ? bad.map((b) => b.fn).join(', ') : `${fns.rows.length} دالة`)
-const empty = fns.rows.filter((r) => r.cfg.includes('search_path=') && !/search_path=("")|(search_path=$)|search_path=,|search_path=""/.test(r.cfg + ','))
-check('search_path مُفرَّغ لا موروث', empty.length === 0 || fns.rows.every((r) => /search_path=/.test(r.cfg)))
+  where n.nspname in ('public','private') and p.prosecdef
+  order by 1`)).rows
+/** المخالف: secdef بلا search_path إطلاقًا، أو بمسار غير `''` حرفيًا. */
+const unsafeSecdef = (rows) => rows.filter((r) => !/(^|,)search_path=""(,|$)/.test(r.cfg))
+
+const secdefAll = await listSecdef()
+check(`كل دوال SECURITY DEFINER (${secdefAll.length}) تحمل search_path='' حرفيًا — لا يكفي أنه غير موروث`,
+  secdefAll.length >= 13 && unsafeSecdef(secdefAll).length === 0,
+  unsafeSecdef(secdefAll).map((r) => `${r.fn}[${r.cfg || 'بلا search_path'}]`).join(' ') || `${secdefAll.length} دالة`)
+
+// التأكيد المضادّ (§4.2): تُزرع دالة secdef بمسار غير مفرَّغ — عين الثغرة —
+// ويجب أن يلتقطها **نفس الكاشف** باسمها. ثم دالة بلا search_path إطلاقًا.
+// كاشف لا يسقط على العلّة المزروعة ليس كاشفًا.
+await db.exec(`create function public.planted_unsafe_secdef() returns int
+               language sql security definer set search_path = public as 'select 1';`)
+const withPlant = unsafeSecdef(await listSecdef())
+check('انتهاك مزروع (search_path=public) يُسقط الفحص باسم الدالة',
+  withPlant.length === 1 && withPlant[0].fn === 'public.planted_unsafe_secdef',
+  withPlant.map((r) => r.fn).join(' '))
+await db.exec(`create function public.planted_inherit_secdef() returns int
+               language sql security definer as 'select 1';`)
+const withPlant2 = unsafeSecdef(await listSecdef())
+check('انتهاك مزروع (secdef بلا search_path) يُلتقط أيضًا',
+  withPlant2.some((r) => r.fn === 'public.planted_inherit_secdef'))
+await db.exec(`drop function public.planted_unsafe_secdef();
+               drop function public.planted_inherit_secdef();`)
+check('بعد إزالة الزرع يعود الفحص نظيفًا', unsafeSecdef(await listSecdef()).length === 0)
 
 // ── ١١) ضمانات بنيوية على المخطّط ─────────────────────────────────────────
 const noStatus = await q(`select count(*)::int n from information_schema.columns
                           where table_schema='public' and table_name='entitlements' and column_name='status'`)
 check('لا عمود status في المخطّط (الحالة تُشتقّ)', noStatus.rows[0].n === 0)
 
-const durable = ['trial_ledger', 'purchase_ledger', 'code_redemption_ledger']
+const durable = ['trial_ledger', 'purchase_ledger', 'code_redemption_ledger', 'revocation_ledger']
 const withUid = await q(`select table_name from information_schema.columns
                          where table_schema='public' and column_name='user_id'
                            and table_name = any($1)`, [durable])
@@ -472,13 +675,18 @@ check('احتفاظ سجلّ التجربة موسوم ٢٤ شهرًا',
 const pret = await q(`select retention_policy, retain_until from public.purchase_ledger limit 1`)
 check('احتفاظ سجلّ الشراء مربوط بالعقد (retain_until NULL عمدًا)',
   pret.rows[0].retention_policy === 'contract_premium_recovery' && pret.rows[0].retain_until === null)
+const rret = await q(`select count(*)::int total,
+                             count(*) filter (where retention_policy='anti_abuse_ban' and retain_until is null)::int ok
+                      from public.revocation_ledger`)
+check('احتفاظ سجلّ الحظر: حتى الرفع الإداري لا بمؤقّت',
+  rret.rows[0].total >= 1 && rret.rows[0].ok === rret.rows[0].total)
 
 // الفحص يقرأ **الكود بلا تعليقات**: النسخة الأولى منه رسبت على نفسها لأن نصّ
 // الهجرة يشرح «لا delete from في هذا الملف» — فطابَق الشرحُ النمطَ. تعليق لا
 // يُنفَّذ، فلا يجوز أن يُسقط فحصًا ولا أن يُرضيه.
 const stripSql = (t) => t.replace(/--[^\n]*/g, '')
 const DESTRUCTIVE = /(delete\s+from|truncate|drop\s+table|pg_cron|cron\.schedule)/i
-const noAuto = !DESTRUCTIVE.test(stripSql(mig(CORE)) + stripSql(mig(RPCS)))
+const noAuto = !DESTRUCTIVE.test(stripSql(mig(CORE)) + stripSql(mig(RPCS)) + stripSql(mig(REVK)) + stripSql(mig(RECV)))
 check('لا أتمتة حذف في P2 (لا delete/truncate/cron)', noAuto)
 // تأكيد مضادّ: الكاشف يفشل فعلًا على انتهاك مزروع — وإلا فالفحص زينة.
 check('كاشف الأتمتة يلتقط انتهاكًا مزروعًا',
@@ -487,7 +695,7 @@ check('كاشف الأتمتة يلتقط انتهاكًا مزروعًا',
 const writePolicies = await q(`select policyname, cmd from pg_policies
                                where schemaname='public'
                                  and tablename in ('entitlements','access_codes','access_code_redemptions',
-                                                   'trial_ledger','purchase_ledger','code_redemption_ledger')
+                                                   'trial_ledger','purchase_ledger','code_redemption_ledger','revocation_ledger')
                                  and cmd <> 'SELECT'`)
 check('لا سياسة كتابة على أي جدول وصول', writePolicies.rows.length === 0,
   writePolicies.rows.map((r) => r.policyname).join(', '))
@@ -495,10 +703,10 @@ check('لا سياسة كتابة على أي جدول وصول', writePolicies.
 const rlsOff = await q(`select relname from pg_class c join pg_namespace n on n.oid=c.relnamespace
                         where n.nspname='public' and c.relrowsecurity = false
                           and relname in ('entitlements','access_codes','access_code_redemptions',
-                                          'trial_ledger','purchase_ledger','code_redemption_ledger')`)
+                                          'trial_ledger','purchase_ledger','code_redemption_ledger','revocation_ledger')`)
 check('RLS مفعّل على كل جداول الوصول', rlsOff.rows.length === 0, rlsOff.rows.map((r) => r.relname).join(', '))
 
-const banned = /مدى الحياة|lifetime/i.test(mig(CORE) + mig(RPCS))
+const banned = /مدى الحياة|lifetime/i.test(mig(CORE) + mig(RPCS) + mig(REVK) + mig(RECV))
 check('لا مصطلح محظور في المخطّط', !banned)
 
 // ── الخلاصة ───────────────────────────────────────────────────────────────

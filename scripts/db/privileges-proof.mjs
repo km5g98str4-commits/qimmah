@@ -39,7 +39,7 @@ const SYNC_TABLES = [
 /** جداول الوصول: قراءة المالك فقط، ولا كتابة عميل إطلاقًا (كل كتابة عبر RPC). */
 const READ_ONLY_TABLES = ['entitlements', 'access_code_redemptions']
 /** جداول لا يراها عميل إطلاقًا. */
-const INVISIBLE_TABLES = ['access_codes', 'trial_ledger', 'purchase_ledger', 'code_redemption_ledger']
+const INVISIBLE_TABLES = ['access_codes', 'trial_ledger', 'purchase_ledger', 'code_redemption_ledger', 'revocation_ledger']
 
 async function mustFail(name, fn, expect) {
   try {
@@ -261,6 +261,22 @@ console.log('\n🔒 المرحلة ب — بعد التحصين (السلسلة 
   await asRole(db, 'authenticated', B)
   const bState = await db.query(`select state from public.my_entitlement()`)
   check('المنحة الإدارية تصل المستخدم', bState.rows[0].state === 'premiumActive')
+
+  // ── ٧.٥) search_path='' حرفيًا على **السلسلة الكاملة** ─────────────────
+  // نفس كاشف test:entitlements الصارم، مطبَّقًا هنا على كل هجرات المستودع
+  // مجتمعةً: أي دالة SECURITY DEFINER — من أي هجرة، قديمة أو قادمة — بلا
+  // `set search_path = ''` حرفيًا تُسقط السلسلة بأكملها.
+  await asRole(db, null)
+  const secdef = await db.query(`
+    select n.nspname||'.'||p.proname as fn,
+           coalesce(array_to_string(p.proconfig, ','), '') as cfg
+    from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+    where n.nspname in ('public','private') and p.prosecdef
+    order by 1`)
+  const laxFns = secdef.rows.filter((r) => !/(^|,)search_path=""(,|$)/.test(r.cfg))
+  check(`السلسلة كاملة: كل دوال SECURITY DEFINER (${secdef.rows.length}) بمسار مفرَّغ حرفيًا`,
+    secdef.rows.length > 0 && laxFns.length === 0,
+    laxFns.map((r) => `${r.fn}[${r.cfg || 'بلا search_path'}]`).join(' ') || `${secdef.rows.length} دالة`)
 
   // ── ٨) delete_own_account ما زال يعمل بعد سحب الصلاحيات ────────────────
   await asRole(db, 'authenticated', B)
