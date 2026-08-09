@@ -1,0 +1,1256 @@
+{
+  "candidateSelection": {
+    "excluded": [
+      {
+        "id": "ab-crunch-machine",
+        "reason": "environment"
+      },
+      {
+        "id": "ab-wheel-rollout",
+        "reason": "level_cap"
+      },
+      {
+        "id": "arnold-press",
+        "reason": "environment"
+      },
+      {
+        "id": "assault-bike",
+        "reason": "environment"
+      },
+      {
+        "id": "assisted-dip-machine",
+        "reason": "environment"
+      },
+      {
+        "id": "banded-lateral-walk",
+        "reason": "equipment"
+      },
+      {
+        "id": "barbell-back-squat",
+        "reason": "environment"
+      },
+      {
+        "id": "barbell-bench-press",
+        "reason": "environment"
+      },
+      {
+        "id": "barbell-curl",
+        "reason": "environment"
+      },
+      {
+        "id": "barbell-row",
+        "reason": "environment"
+      },
+      {
+        "id": "barbell-shrug",
+        "reason": "environment"
+      },
+      {
+        "id": "battle-ropes",
+        "reason": "environment"
+      },
+      {
+        "id": "belt-squat",
+        "reason": "environment"
+      },
+      {
+        "id": "bench-dip",
+        "reason": "equipment"
+      },
+      {
+        "id": "bulgarian-split-squat",
+        "reason": "equipment"
+      },
+      {
+        "id": "burpees",
+        "reason": "level_cap"
+      },
+      {
+        "id": "cable-biceps-curl",
+        "reason": "environment"
+      },
+      {
+        "id": "cable-crossover",
+        "reason": "environment"
+      },
+      {
+        "id": "cable-hammer-curl",
+        "reason": "environment"
+      },
+      {
+        "id": "cable-hip-adduction",
+        "reason": "environment"
+      },
+      {
+        "id": "cable-kickback",
+        "reason": "environment"
+      },
+      {
+        "id": "cable-lateral-raise",
+        "reason": "environment"
+      },
+      {
+        "id": "cable-overhead-extension",
+        "reason": "environment"
+      },
+      {
+        "id": "cable-pull-through",
+        "reason": "environment"
+      },
+      {
+        "id": "cable-rear-delt-fly",
+        "reason": "environment"
+      },
+      {
+        "id": "cable-shoulder-press",
+        "reason": "environment"
+      },
+      {
+        "id": "cable-triceps-pushdown",
+        "reason": "environment"
+      },
+      {
+        "id": "cable-woodchop",
+        "reason": "environment"
+      },
+      {
+        "id": "chest-dip",
+        "reason": "level_cap"
+      },
+      {
+        "id": "chest-press-machine",
+        "reason": "environment"
+      },
+      {
+        "id": "chest-supported-row",
+        "reason": "environment"
+      },
+      {
+        "id": "chest-supported-row-machine",
+        "reason": "environment"
+      },
+      {
+        "id": "chin-up",
+        "reason": "level_cap"
+      },
+      {
+        "id": "close-grip-bench-press",
+        "reason": "environment"
+      },
+      {
+        "id": "close-grip-pulldown",
+        "reason": "environment"
+      },
+      {
+        "id": "concentration-curl",
+        "reason": "equipment"
+      },
+      {
+        "id": "deadlift",
+        "reason": "environment"
+      },
+      {
+        "id": "decline-barbell-press",
+        "reason": "environment"
+      },
+      {
+        "id": "decline-chest-press-machine",
+        "reason": "environment"
+      },
+      {
+        "id": "decline-dumbbell-press",
+        "reason": "environment"
+      },
+      {
+        "id": "diamond-push-up",
+        "reason": "level_cap"
+      },
+      {
+        "id": "donkey-calf-raise",
+        "reason": "environment"
+      },
+      {
+        "id": "dumbbell-bench-press",
+        "reason": "environment"
+      },
+      {
+        "id": "dumbbell-curl",
+        "reason": "equipment"
+      },
+      {
+        "id": "dumbbell-fly",
+        "reason": "environment"
+      },
+      {
+        "id": "dumbbell-kickback",
+        "reason": "equipment"
+      },
+      {
+        "id": "dumbbell-rdl",
+        "reason": "equipment"
+      },
+      {
+        "id": "dumbbell-row",
+        "reason": "environment"
+      },
+      {
+        "id": "dumbbell-shoulder-press",
+        "reason": "environment"
+      },
+      {
+        "id": "dumbbell-shrug",
+        "reason": "environment"
+      },
+      {
+        "id": "dumbbell-sumo-squat",
+        "reason": "equipment"
+      },
+      {
+        "id": "elliptical",
+        "reason": "environment"
+      },
+      {
+        "id": "ez-bar-curl",
+        "reason": "environment"
+      },
+      {
+        "id": "face-pull",
+        "reason": "environment"
+      },
+      {
+        "id": "front-raise",
+        "reason": "equipment"
+      },
+      {
+        "id": "front-squat",
+        "reason": "environment"
+      },
+      {
+        "id": "glute-ham-raise",
+        "reason": "environment"
+      },
+      {
+        "id": "glute-kickback-machine",
+        "reason": "environment"
+      },
+      {
+        "id": "glute-machine",
+        "reason": "environment"
+      },
+      {
+        "id": "goblet-squat",
+        "reason": "equipment"
+      },
+      {
+        "id": "good-morning",
+        "reason": "environment"
+      },
+      {
+        "id": "hack-squat-machine",
+        "reason": "environment"
+      },
+      {
+        "id": "hammer-curl",
+        "reason": "equipment"
+      },
+      {
+        "id": "hanging-leg-raise",
+        "reason": "environment"
+      },
+      {
+        "id": "hip-abduction-machine",
+        "reason": "environment"
+      },
+      {
+        "id": "hip-adductor-machine",
+        "reason": "environment"
+      },
+      {
+        "id": "hip-thrust",
+        "reason": "environment"
+      },
+      {
+        "id": "hollow-hold",
+        "reason": "level_cap"
+      },
+      {
+        "id": "incline-barbell-press",
+        "reason": "environment"
+      },
+      {
+        "id": "incline-cable-fly",
+        "reason": "environment"
+      },
+      {
+        "id": "incline-chest-press-machine",
+        "reason": "environment"
+      },
+      {
+        "id": "incline-dumbbell-curl",
+        "reason": "environment"
+      },
+      {
+        "id": "incline-dumbbell-press",
+        "reason": "environment"
+      },
+      {
+        "id": "incline-treadmill-walk",
+        "reason": "environment"
+      },
+      {
+        "id": "iso-lateral-chest-press",
+        "reason": "environment"
+      },
+      {
+        "id": "iso-lateral-high-row",
+        "reason": "environment"
+      },
+      {
+        "id": "iso-lateral-incline-press",
+        "reason": "environment"
+      },
+      {
+        "id": "iso-lateral-pulldown",
+        "reason": "environment"
+      },
+      {
+        "id": "jm-press",
+        "reason": "environment"
+      },
+      {
+        "id": "kettlebell-swing",
+        "reason": "equipment"
+      },
+      {
+        "id": "landmine-press",
+        "reason": "environment"
+      },
+      {
+        "id": "lat-pulldown-machine",
+        "reason": "environment"
+      },
+      {
+        "id": "lateral-raise",
+        "reason": "equipment"
+      },
+      {
+        "id": "lateral-raise-machine",
+        "reason": "environment"
+      },
+      {
+        "id": "leg-extension-machine",
+        "reason": "environment"
+      },
+      {
+        "id": "leg-press-calf-raise",
+        "reason": "environment"
+      },
+      {
+        "id": "leg-press-machine",
+        "reason": "environment"
+      },
+      {
+        "id": "leg-press-narrow",
+        "reason": "environment"
+      },
+      {
+        "id": "low-cable-fly",
+        "reason": "environment"
+      },
+      {
+        "id": "lying-leg-curl",
+        "reason": "environment"
+      },
+      {
+        "id": "machine-curl",
+        "reason": "environment"
+      },
+      {
+        "id": "machine-fly",
+        "reason": "environment"
+      },
+      {
+        "id": "machine-rdl",
+        "reason": "environment"
+      },
+      {
+        "id": "meadows-row",
+        "reason": "environment"
+      },
+      {
+        "id": "neutral-grip-pulldown",
+        "reason": "environment"
+      },
+      {
+        "id": "nordic-curl",
+        "reason": "level_cap"
+      },
+      {
+        "id": "overhead-press",
+        "reason": "environment"
+      },
+      {
+        "id": "overhead-triceps-extension",
+        "reason": "equipment"
+      },
+      {
+        "id": "pallof-press",
+        "reason": "equipment"
+      },
+      {
+        "id": "pec-deck-machine",
+        "reason": "environment"
+      },
+      {
+        "id": "pendlay-row",
+        "reason": "environment"
+      },
+      {
+        "id": "pike-push-up",
+        "reason": "level_cap"
+      },
+      {
+        "id": "preacher-curl-machine",
+        "reason": "environment"
+      },
+      {
+        "id": "pull-up",
+        "reason": "level_cap"
+      },
+      {
+        "id": "push-press",
+        "reason": "environment"
+      },
+      {
+        "id": "rack-pull",
+        "reason": "environment"
+      },
+      {
+        "id": "rear-delt-fly",
+        "reason": "equipment"
+      },
+      {
+        "id": "rear-delt-row-machine",
+        "reason": "environment"
+      },
+      {
+        "id": "reverse-curl",
+        "reason": "environment"
+      },
+      {
+        "id": "reverse-lunge",
+        "reason": "equipment"
+      },
+      {
+        "id": "reverse-pec-deck",
+        "reason": "environment"
+      },
+      {
+        "id": "romanian-deadlift",
+        "reason": "environment"
+      },
+      {
+        "id": "rope-pushdown",
+        "reason": "environment"
+      },
+      {
+        "id": "rowing-machine",
+        "reason": "environment"
+      },
+      {
+        "id": "seated-cable-row",
+        "reason": "environment"
+      },
+      {
+        "id": "seated-calf-raise-machine",
+        "reason": "environment"
+      },
+      {
+        "id": "seated-dumbbell-press",
+        "reason": "environment"
+      },
+      {
+        "id": "seated-lateral-raise",
+        "reason": "environment"
+      },
+      {
+        "id": "seated-leg-curl",
+        "reason": "environment"
+      },
+      {
+        "id": "seated-row-machine",
+        "reason": "environment"
+      },
+      {
+        "id": "shoulder-dislocates",
+        "reason": "equipment"
+      },
+      {
+        "id": "shoulder-press-machine",
+        "reason": "environment"
+      },
+      {
+        "id": "single-arm-cable-row",
+        "reason": "environment"
+      },
+      {
+        "id": "single-arm-lat-pulldown",
+        "reason": "environment"
+      },
+      {
+        "id": "single-arm-pushdown",
+        "reason": "environment"
+      },
+      {
+        "id": "single-leg-calf-raise",
+        "reason": "equipment"
+      },
+      {
+        "id": "single-leg-hip-thrust",
+        "reason": "level_cap"
+      },
+      {
+        "id": "single-leg-rdl",
+        "reason": "equipment"
+      },
+      {
+        "id": "sissy-squat",
+        "reason": "level_cap"
+      },
+      {
+        "id": "skull-crusher",
+        "reason": "environment"
+      },
+      {
+        "id": "smith-machine-bench",
+        "reason": "environment"
+      },
+      {
+        "id": "smith-machine-squat",
+        "reason": "environment"
+      },
+      {
+        "id": "spider-curl",
+        "reason": "environment"
+      },
+      {
+        "id": "stairmaster",
+        "reason": "environment"
+      },
+      {
+        "id": "standing-calf-raise-machine",
+        "reason": "environment"
+      },
+      {
+        "id": "standing-hip-extension-machine",
+        "reason": "environment"
+      },
+      {
+        "id": "standing-leg-curl",
+        "reason": "environment"
+      },
+      {
+        "id": "stationary-bike",
+        "reason": "environment"
+      },
+      {
+        "id": "step-up",
+        "reason": "equipment"
+      },
+      {
+        "id": "stiff-leg-deadlift",
+        "reason": "environment"
+      },
+      {
+        "id": "straight-arm-pulldown",
+        "reason": "environment"
+      },
+      {
+        "id": "sumo-deadlift",
+        "reason": "environment"
+      },
+      {
+        "id": "svend-press",
+        "reason": "environment"
+      },
+      {
+        "id": "t-bar-row-machine",
+        "reason": "environment"
+      },
+      {
+        "id": "toes-to-bar",
+        "reason": "environment"
+      },
+      {
+        "id": "treadmill-run",
+        "reason": "environment"
+      },
+      {
+        "id": "triceps-extension-machine",
+        "reason": "environment"
+      },
+      {
+        "id": "upright-row",
+        "reason": "environment"
+      },
+      {
+        "id": "walking-lunge",
+        "reason": "equipment"
+      },
+      {
+        "id": "wide-grip-iso-lateral-pulldown",
+        "reason": "environment"
+      },
+      {
+        "id": "wide-grip-lat-pulldown",
+        "reason": "environment"
+      }
+    ],
+    "ranked": [
+      {
+        "id": "inverted-row",
+        "parts": {
+          "goal": 2,
+          "level": 2,
+          "pattern": 3,
+          "preference": 0,
+          "priority": 0,
+          "quality": 1,
+          "style": 3
+        },
+        "score": 11
+      },
+      {
+        "id": "knee-push-up",
+        "parts": {
+          "goal": 2,
+          "level": 2,
+          "pattern": 3,
+          "preference": 0,
+          "priority": 0,
+          "quality": 1,
+          "style": 3
+        },
+        "score": 11
+      },
+      {
+        "id": "bodyweight-squat",
+        "parts": {
+          "goal": 2,
+          "level": 2,
+          "pattern": 3,
+          "preference": 0,
+          "priority": 0,
+          "quality": 0,
+          "style": 3
+        },
+        "score": 10
+      },
+      {
+        "id": "frog-pump",
+        "parts": {
+          "goal": 2,
+          "level": 2,
+          "pattern": 3,
+          "preference": 0,
+          "priority": 0,
+          "quality": 0,
+          "style": 3
+        },
+        "score": 10
+      },
+      {
+        "id": "glute-bridge",
+        "parts": {
+          "goal": 2,
+          "level": 2,
+          "pattern": 3,
+          "preference": 0,
+          "priority": 0,
+          "quality": 0,
+          "style": 3
+        },
+        "score": 10
+      },
+      {
+        "id": "incline-push-up",
+        "parts": {
+          "goal": 2,
+          "level": 2,
+          "pattern": 3,
+          "preference": 0,
+          "priority": 0,
+          "quality": 0,
+          "style": 3
+        },
+        "score": 10
+      },
+      {
+        "id": "push-up",
+        "parts": {
+          "goal": 2,
+          "level": 2,
+          "pattern": 3,
+          "preference": 0,
+          "priority": 0,
+          "quality": 0,
+          "style": 3
+        },
+        "score": 10
+      },
+      {
+        "id": "wall-sit",
+        "parts": {
+          "goal": 2,
+          "level": 2,
+          "pattern": 3,
+          "preference": 0,
+          "priority": 0,
+          "quality": 0,
+          "style": 3
+        },
+        "score": 10
+      },
+      {
+        "id": "bicycle-crunch",
+        "parts": {
+          "goal": 2,
+          "level": 2,
+          "pattern": 0,
+          "preference": 0,
+          "priority": 0,
+          "quality": 0,
+          "style": 3
+        },
+        "score": 7
+      },
+      {
+        "id": "crunch",
+        "parts": {
+          "goal": 2,
+          "level": 2,
+          "pattern": 0,
+          "preference": 0,
+          "priority": 0,
+          "quality": 0,
+          "style": 3
+        },
+        "score": 7
+      },
+      {
+        "id": "dead-bug",
+        "parts": {
+          "goal": 2,
+          "level": 2,
+          "pattern": 0,
+          "preference": 0,
+          "priority": 0,
+          "quality": 0,
+          "style": 3
+        },
+        "score": 7
+      },
+      {
+        "id": "flutter-kicks",
+        "parts": {
+          "goal": 2,
+          "level": 2,
+          "pattern": 0,
+          "preference": 0,
+          "priority": 0,
+          "quality": 0,
+          "style": 3
+        },
+        "score": 7
+      },
+      {
+        "id": "leg-raise",
+        "parts": {
+          "goal": 2,
+          "level": 2,
+          "pattern": 0,
+          "preference": 0,
+          "priority": 0,
+          "quality": 0,
+          "style": 3
+        },
+        "score": 7
+      },
+      {
+        "id": "mountain-climber",
+        "parts": {
+          "goal": 2,
+          "level": 2,
+          "pattern": 0,
+          "preference": 0,
+          "priority": 0,
+          "quality": 0,
+          "style": 3
+        },
+        "score": 7
+      },
+      {
+        "id": "plank",
+        "parts": {
+          "goal": 2,
+          "level": 2,
+          "pattern": 0,
+          "preference": 0,
+          "priority": 0,
+          "quality": 0,
+          "style": 3
+        },
+        "score": 7
+      },
+      {
+        "id": "russian-twist",
+        "parts": {
+          "goal": 2,
+          "level": 2,
+          "pattern": 0,
+          "preference": 0,
+          "priority": 0,
+          "quality": 0,
+          "style": 3
+        },
+        "score": 7
+      },
+      {
+        "id": "side-plank",
+        "parts": {
+          "goal": 2,
+          "level": 2,
+          "pattern": 0,
+          "preference": 0,
+          "priority": 0,
+          "quality": 0,
+          "style": 3
+        },
+        "score": 7
+      },
+      {
+        "id": "ankle-mobility",
+        "parts": {
+          "goal": 1,
+          "level": 2,
+          "pattern": 0,
+          "preference": 0,
+          "priority": 0,
+          "quality": 0,
+          "style": 3
+        },
+        "score": 6
+      },
+      {
+        "id": "arm-circles",
+        "parts": {
+          "goal": 1,
+          "level": 2,
+          "pattern": 0,
+          "preference": 0,
+          "priority": 0,
+          "quality": 0,
+          "style": 3
+        },
+        "score": 6
+      },
+      {
+        "id": "cat-cow",
+        "parts": {
+          "goal": 1,
+          "level": 2,
+          "pattern": 0,
+          "preference": 0,
+          "priority": 0,
+          "quality": 0,
+          "style": 3
+        },
+        "score": 6
+      },
+      {
+        "id": "child-pose",
+        "parts": {
+          "goal": 1,
+          "level": 2,
+          "pattern": 0,
+          "preference": 0,
+          "priority": 0,
+          "quality": 0,
+          "style": 3
+        },
+        "score": 6
+      },
+      {
+        "id": "hamstring-stretch",
+        "parts": {
+          "goal": 1,
+          "level": 2,
+          "pattern": 0,
+          "preference": 0,
+          "priority": 0,
+          "quality": 0,
+          "style": 3
+        },
+        "score": 6
+      },
+      {
+        "id": "hip-flexor-stretch",
+        "parts": {
+          "goal": 1,
+          "level": 2,
+          "pattern": 0,
+          "preference": 0,
+          "priority": 0,
+          "quality": 0,
+          "style": 3
+        },
+        "score": 6
+      },
+      {
+        "id": "leg-swings",
+        "parts": {
+          "goal": 1,
+          "level": 2,
+          "pattern": 0,
+          "preference": 0,
+          "priority": 0,
+          "quality": 0,
+          "style": 3
+        },
+        "score": 6
+      },
+      {
+        "id": "thoracic-rotation",
+        "parts": {
+          "goal": 1,
+          "level": 2,
+          "pattern": 0,
+          "preference": 0,
+          "priority": 0,
+          "quality": 0,
+          "style": 3
+        },
+        "score": 6
+      },
+      {
+        "id": "world-greatest-stretch",
+        "parts": {
+          "goal": 1,
+          "level": 2,
+          "pattern": 0,
+          "preference": 0,
+          "priority": 0,
+          "quality": 0,
+          "style": 3
+        },
+        "score": 6
+      },
+      {
+        "id": "bodyweight-calf-raise",
+        "parts": {
+          "goal": 0,
+          "level": 2,
+          "pattern": 0,
+          "preference": 0,
+          "priority": 0,
+          "quality": 0,
+          "style": 3
+        },
+        "score": 5
+      },
+      {
+        "id": "high-knees",
+        "parts": {
+          "goal": 0,
+          "level": 2,
+          "pattern": 0,
+          "preference": 0,
+          "priority": 0,
+          "quality": 0,
+          "style": 3
+        },
+        "score": 5
+      },
+      {
+        "id": "jump-rope",
+        "parts": {
+          "goal": 0,
+          "level": 2,
+          "pattern": 0,
+          "preference": 0,
+          "priority": 0,
+          "quality": 0,
+          "style": 3
+        },
+        "score": 5
+      },
+      {
+        "id": "outdoor-walk",
+        "parts": {
+          "goal": 0,
+          "level": 2,
+          "pattern": 0,
+          "preference": 0,
+          "priority": 0,
+          "quality": 0,
+          "style": 3
+        },
+        "score": 5
+      }
+    ],
+    "rankedCount": 30,
+    "substitutions": {
+      "ankle-mobility": [
+        "bodyweight-calf-raise"
+      ],
+      "arm-circles": [],
+      "bicycle-crunch": [
+        "plank",
+        "side-plank",
+        "crunch"
+      ],
+      "bodyweight-calf-raise": [],
+      "bodyweight-squat": [
+        "wall-sit"
+      ],
+      "cat-cow": [
+        "thoracic-rotation",
+        "child-pose"
+      ],
+      "child-pose": [
+        "cat-cow",
+        "thoracic-rotation"
+      ],
+      "crunch": [
+        "plank",
+        "side-plank",
+        "russian-twist"
+      ],
+      "dead-bug": [
+        "plank",
+        "side-plank",
+        "crunch"
+      ],
+      "flutter-kicks": [
+        "plank",
+        "side-plank",
+        "crunch"
+      ],
+      "frog-pump": [
+        "glute-bridge"
+      ],
+      "glute-bridge": [
+        "frog-pump"
+      ],
+      "hamstring-stretch": [
+        "world-greatest-stretch",
+        "leg-swings"
+      ],
+      "high-knees": [
+        "jump-rope",
+        "outdoor-walk"
+      ],
+      "hip-flexor-stretch": [],
+      "incline-push-up": [
+        "push-up",
+        "knee-push-up"
+      ],
+      "inverted-row": [],
+      "jump-rope": [
+        "high-knees",
+        "outdoor-walk"
+      ],
+      "knee-push-up": [
+        "incline-push-up",
+        "push-up"
+      ],
+      "leg-raise": [
+        "plank",
+        "side-plank",
+        "crunch"
+      ],
+      "leg-swings": [
+        "world-greatest-stretch",
+        "hamstring-stretch"
+      ],
+      "mountain-climber": [
+        "plank",
+        "side-plank",
+        "crunch"
+      ],
+      "outdoor-walk": [
+        "jump-rope",
+        "high-knees"
+      ],
+      "plank": [
+        "side-plank",
+        "crunch",
+        "russian-twist"
+      ],
+      "push-up": [
+        "incline-push-up",
+        "knee-push-up"
+      ],
+      "russian-twist": [
+        "plank",
+        "side-plank",
+        "crunch"
+      ],
+      "side-plank": [
+        "plank",
+        "crunch",
+        "russian-twist"
+      ],
+      "thoracic-rotation": [
+        "cat-cow",
+        "child-pose"
+      ],
+      "wall-sit": [
+        "bodyweight-squat"
+      ],
+      "world-greatest-stretch": [
+        "leg-swings",
+        "hamstring-stretch"
+      ]
+    }
+  },
+  "oracle": "training-selection",
+  "oracleVersion": "1.0.0",
+  "profileEvidence": {
+    "personalization": {
+      "daysPerWeek": 3,
+      "equipment": [
+        "bodyweight"
+      ],
+      "excludedExercises": [],
+      "excludedMuscles": [],
+      "excludedPatterns": [],
+      "experience": "complete_beginner",
+      "limitations": [],
+      "maxExerciseLevel": "beginner",
+      "musclePriorities": [],
+      "needsClearance": false,
+      "noImpact": false,
+      "noOverhead": false,
+      "place": "home",
+      "preferredExercises": [],
+      "primaryGoal": "maintain",
+      "requiredPatterns": [
+        "hinge",
+        "pull",
+        "push",
+        "squat"
+      ],
+      "sessionMinutes": 30,
+      "trainingStatus": "never",
+      "trainingStyle": "bodyweight"
+    },
+    "shipping": {
+      "equipment": null,
+      "experienceBand": "lt1m",
+      "goalType": "maintenance",
+      "gymAccess": "bodyweight",
+      "injuries": "",
+      "muscleFocus": null,
+      "trainingDays": 3,
+      "trainingLevel": "beginner",
+      "workoutDuration": 30
+    }
+  },
+  "scenario": "beginner-bodyweight",
+  "shippingPlan": {
+    "days": [
+      {
+        "exercises": [
+          {
+            "exerciseId": "bodyweight-squat",
+            "optional": false,
+            "order": 0
+          },
+          {
+            "exerciseId": "chest-dip",
+            "optional": false,
+            "order": 1
+          },
+          {
+            "exerciseId": "chin-up",
+            "optional": false,
+            "order": 2
+          },
+          {
+            "exerciseId": "pike-push-up",
+            "optional": false,
+            "order": 3
+          },
+          {
+            "exerciseId": "frog-pump",
+            "optional": false,
+            "order": 4
+          }
+        ],
+        "id": "gen-1-full"
+      },
+      {
+        "exercises": [
+          {
+            "exerciseId": "bodyweight-squat",
+            "optional": false,
+            "order": 0
+          },
+          {
+            "exerciseId": "incline-push-up",
+            "optional": false,
+            "order": 1
+          },
+          {
+            "exerciseId": "inverted-row",
+            "optional": false,
+            "order": 2
+          },
+          {
+            "exerciseId": "pike-push-up",
+            "optional": false,
+            "order": 3
+          },
+          {
+            "exerciseId": "glute-bridge",
+            "optional": false,
+            "order": 4
+          }
+        ],
+        "id": "gen-2-full"
+      },
+      {
+        "exercises": [
+          {
+            "exerciseId": "wall-sit",
+            "optional": false,
+            "order": 0
+          },
+          {
+            "exerciseId": "knee-push-up",
+            "optional": false,
+            "order": 1
+          },
+          {
+            "exerciseId": "chin-up",
+            "optional": false,
+            "order": 2
+          },
+          {
+            "exerciseId": "pike-push-up",
+            "optional": false,
+            "order": 3
+          },
+          {
+            "exerciseId": "single-leg-hip-thrust",
+            "optional": false,
+            "order": 4
+          }
+        ],
+        "id": "gen-3-full"
+      }
+    ],
+    "templateId": "gen-fullbody"
+  }
+}
