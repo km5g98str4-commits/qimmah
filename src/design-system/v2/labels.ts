@@ -205,6 +205,10 @@ export interface V2OnboardingCopy {
   prefs: readonly { value: string; label: string; icon: string }[]
   injuries: readonly { value: string; label: string }[]
   ready: { eyebrow: string; title: string; subtitle: string; enter: string; previewNote: string }
+  /** [CTO-009/WP-2] شاشة الترحيب قبل أول سؤال. */
+  welcome: { eyebrow: string; title: string; subtitle: string; start: string; timeNote: string }
+  /** [CTO-009/WP-2] تسليم ما بعد الخطة: معاينة موجزة ← Premium ← حساب. */
+  handoff: { eyebrow: string; title: string; subtitle: string; premiumCta: string; enterFree: string; accountNote: string }
   /** Full-screen plan-assembly loading state (shown while the plan is generated). */
   building: { title: string; subtitle: string }
   /** Visible plan-generation failure + retry (never a silent drop into the app). */
@@ -259,6 +263,21 @@ export const V2_ONBOARDING: Record<'ar' | 'en', V2OnboardingCopy> = {
       { value: 'elbow', label: 'المرفق' },
       { value: 'ankle', label: 'الكاحل' },
     ],
+    welcome: {
+      eyebrow: 'أهلًا',
+      title: 'خلّنا نبني خطتك',
+      subtitle: 'أسئلة سريعة عن جسمك وهدفك ووقتك — وتطلع بخطة تمرين وتغذية تخصّك.',
+      start: 'يلا نبدأ',
+      timeNote: 'دقيقتان تقريبًا · تقدر تغيّر أي جواب بعدين',
+    },
+    handoff: {
+      eyebrow: 'خطتك',
+      title: 'جاهزة ومحفوظة',
+      subtitle: 'خطتك انبنت وانحفظت على هذا الجهاز. تقدر تدخل وتشوفها الحين.',
+      premiumCta: 'احصل على Premium',
+      enterFree: 'ادخل وشوف خطتي',
+      accountNote: 'إنشاء حساب يخلّي خطتك تنتقل معك لأي جهاز.',
+    },
     ready: {
       eyebrow: 'جاهز',
       title: 'خطتك جاهزة',
@@ -332,6 +351,21 @@ export const V2_ONBOARDING: Record<'ar' | 'en', V2OnboardingCopy> = {
       { value: 'elbow', label: 'Elbow' },
       { value: 'ankle', label: 'Ankle' },
     ],
+    welcome: {
+      eyebrow: 'Welcome',
+      title: "Let's build your plan",
+      subtitle: 'A few quick questions about your body, goal and time — then you get a training and nutrition plan of your own.',
+      start: 'Get started',
+      timeNote: 'About two minutes · you can change any answer later',
+    },
+    handoff: {
+      eyebrow: 'Your plan',
+      title: 'Ready and saved',
+      subtitle: 'Your plan is built and saved on this device. You can open it now.',
+      premiumCta: 'Get Premium',
+      enterFree: 'Open my plan',
+      accountNote: 'Creating an account carries your plan to any device.',
+    },
     ready: {
       eyebrow: 'Ready',
       title: 'Your plan is ready',
