@@ -197,7 +197,7 @@ export function StepCounterCard({ className, lang }: { className?: string; lang:
             key={q}
             type="button"
             onClick={() => applySteps(steps + q)}
-            className="flex items-center justify-center gap-1 rounded-xl bg-primary-soft py-2 text-xs font-black text-primary-c hover:brightness-95"
+            className="flex min-h-[44px] items-center justify-center gap-1 rounded-xl bg-primary-soft text-xs font-black text-primary-c hover:brightness-95"
           >
             <Icon name="Plus" className="h-3.5 w-3.5" />
             {q.toLocaleString('en-US')}

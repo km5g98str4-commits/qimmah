@@ -30,7 +30,7 @@ export function ContactView({ lang, onBack }: ContactViewProps) {
             <p className="text-xs font-bold text-ink-500">{t.contact.emailLabel}</p>
             <a
               href={mailto}
-              className="mt-1 inline-flex items-center gap-2 text-base font-extrabold text-primary-c transition-colors hover:opacity-80"
+              className="mt-1 inline-flex min-h-[44px] items-center gap-2 text-base font-extrabold text-primary-c transition-colors hover:opacity-80"
               dir="ltr"
             >
               {email}

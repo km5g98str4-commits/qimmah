@@ -84,7 +84,8 @@ export function FirstWinCard({ lang, suggestion, done, doneKind, onPick }: First
               key={alt}
               type="button"
               onClick={() => onPick(alt)}
-              className="v2-pressable rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-bold text-ink-700 transition-colors hover:border-primary/50 hover:text-ink-900"
+              // [CTO-82] ≥44بكسل: كانت ٣٠.
+              className="v2-pressable inline-flex min-h-[44px] items-center rounded-full border border-line bg-surface px-3.5 text-xs font-bold text-ink-700 transition-colors hover:border-primary/50 hover:text-ink-900"
             >
               {t.win[alt].label}
             </button>

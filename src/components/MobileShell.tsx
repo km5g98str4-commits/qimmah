@@ -42,6 +42,28 @@ export function MobileShell({ lang, tab, badge: _badge, onNavigate, onOpenSettin
   const online = useOnlineStatus()
   const lg = ar ? 'ar' : 'en'
   const [quickLogOpen, setQuickLogOpen] = useState(false)
+
+  // [CTO-82] إعادة التركيز بعد إغلاق لوح التسجيل — **بأثر على الحالة لا داخل
+  // نداء الإغلاق**.
+  //
+  // كان الاسترجاع داخل `onClose` وحده، فسقط في حالتين مقيستين: (١) الاختيار
+  // (`onSelect`) يغلق اللوح ولا يعيد التركيز إطلاقًا، (٢) وحتى مسار `onClose`
+  // كان `requestAnimationFrame` واحدًا يسبق فكّ تركيب اللوح، فيضيع التركيز
+  // ويستقرّ على `body`. مقيس: `document.activeElement` = BODY بعد الإغلاق
+  // بالزرّ وبمفتاح Escape معًا.
+  //
+  // الأثر يراقب انتقال الحالة نفسه، فيغطّي كل مسارات الإغلاق بلا استثناء،
+  // وإطارَان يضمنان أن اللوح فُكّ فعلًا قبل طلب التركيز.
+  const wasQuickLogOpen = useRef(false)
+  useEffect(() => {
+    const justClosed = wasQuickLogOpen.current && !quickLogOpen
+    wasQuickLogOpen.current = quickLogOpen
+    // التركيز يُطلَب **مباشرةً** لا داخل `requestAnimationFrame`: الأثر يعمل بعد
+    // أن يثبّت React إزالة اللوح من الـDOM، فالزرّ حاضر وقابل للتركيز الآن.
+    // وrAF يُخنَق أو يتوقّف تمامًا حين تكون اللسان في الخلفية، فيضيع الاسترجاع
+    // بلا أثر — وهو ما كان يحدث في القياس.
+    if (justClosed) quickLogTriggerRef.current?.focus()
+  }, [quickLogOpen])
   const [keyboardOpen, setKeyboardOpen] = useState(false)
   const scrollerRef = useRef<HTMLElement>(null)
   const previousTabRef = useRef<MainTab>(tab)
@@ -268,10 +290,7 @@ export function MobileShell({ lang, tab, badge: _badge, onNavigate, onOpenSettin
         <QuickLogSheet
           lang={lang}
           routineLabel={routineQuickLabel}
-          onClose={() => {
-            setQuickLogOpen(false)
-            window.requestAnimationFrame(() => quickLogTriggerRef.current?.focus())
-          }}
+          onClose={() => setQuickLogOpen(false)}
           onSelect={(target) => {
             void playHaptic('selection')
             setQuickLogOpen(false)
