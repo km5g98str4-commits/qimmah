@@ -9,7 +9,7 @@ Adopt **two repositories immediately after a controlled, history-preserving spli
 - `qimmah-app` owns the iPhone product, the temporary React/Capacitor legacy reference, native iOS work, Supabase schema/sync, app contracts, and all active product development.
 - `qimmah-web` owns the public marketing, privacy, terms, support, AASA, and website deployment surfaces.
 
-The split source is `km5g98str4-commits/qimmah`, branch `codex/qimmah-execution`, commit `ed640f0b96a46ce976eb89f2c92fc64636d5aed2`; the official historical baseline remains `origin/main@dd79a60f193b1163ab1ec549a35458e0d2aab1de`. Detailed file, deployment, backend, Git/worktree, and GitHub evidence is in [QIM-008-repository-boundary-scan.md](evidence/QIM-008-repository-boundary-scan.md).
+The QIM-008 analysis source was `km5g98str4-commits/qimmah`, branch `codex/qimmah-execution`, commit `ed640f0b96a46ce976eb89f2c92fc64636d5aed2`; it is historical evidence only, not an execution source. Any future split must instead start from the reviewed controlled-integration tag `integration/converged-reviewed-2026-08-09`, at the exact commit to which that tag resolves after its final gates and independent reviews. The official historical baseline remains `origin/main@dd79a60f193b1163ab1ec549a35458e0d2aab1de`. Detailed file, deployment, backend, Git/worktree, and GitHub evidence is in [QIM-008-repository-boundary-scan.md](evidence/QIM-008-repository-boundary-scan.md).
 
 ## Target architecture and non-negotiable boundaries
 
@@ -51,7 +51,7 @@ The split source is `km5g98str4-commits/qimmah`, branch `codex/qimmah-execution`
 
 Every numbered operation below is REVIEW-gated. None is authorized by this document alone.
 
-1. **Preserve.** Confirm both existing worktrees are clean; create immutable tag `restructuring/pre-repository-split-ed640f0` at `ed640f0b96a46ce976eb89f2c92fc64636d5aed2`, then create clean branch `split/source-ed640f0` from that tag. Do not reuse `codex/ui-polish`, current PR branches, or a working tree with local changes.
+1. **Preserve.** Confirm the reviewed integration worktree is clean; resolve `integration/converged-reviewed-2026-08-09` to its immutable commit, create a new immutable `restructuring/pre-repository-split-<short-integration-sha>` tag at that exact commit, then create clean branch `split/source-<short-integration-sha>` from it. Do not reuse `codex/ui-polish`, current PR branches, or a working tree with local changes.
 2. **Mirror.** Make a read-only bare mirror of the tag and write a source manifest of path, Git blob ID, and SHA-256 bytes for each selected file. Store the commit/tag identity and filter-repo commit map outside deployment secrets.
 3. **Create private empty destinations.** The founder creates `qimmah-app` and `qimmah-web` with no generated README/license/CI. Add no production deployment, DNS, Cloudflare, or Supabase credential at this point.
 4. **Filter history, do not copy trees.** From disposable clones of the mirror, use `git filter-repo` path filters. `qimmah-web` receives `site/**`, `docs/site/**`, and `docs/legal/**`. `qimmah-app` receives the exact complement of that web allowlist among tracked source paths, except the three explicit expected exclusions below. The routing manifest must assign every tracked source path to exactly one destination or one named expected exclusion, with no overlap. `public/.well-known/**`, `wrangler.toml`, and `scripts/run-site-truth-proof.mjs` are intentionally excluded from both first-extraction allowlists because each has a dedicated cutover decision below.

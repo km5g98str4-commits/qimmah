@@ -1,7 +1,7 @@
 # قِمّة — Access, Trials & Activation: Verified Report + Approved Architecture
 
-**Revision 3** — 2026-08-09. Revision 2 (2026-08-06) incorporated the founder decision record; this revision reconciles the document with the **implementation that has since landed** on `claude/access-entitlements`.
-**Ground truth:** the migrations and proof suites on `claude/access-entitlements` (base `main` @ `dd79a60`). Where this document and the migrations disagree, **the migrations win** — §7 marks the superseded parts explicitly.
+**Revision 4** — 2026-08-09. Revision 3 (2026-08-09) reconciled the founder decision record with Line B; this revision records its controlled integration on `codex/qimmah-integration` after the accepted Golden portability baseline `90999bcb575873713750fa1c1df146a833461eb2`.
+**Ground truth:** the migrations and proof suites in the controlled integration lineage (including immutable Line B `df85c77006b5e132cd78649af39cd550331976c7`, based on `main` @ `dd79a60`). Where this document and the migrations disagree, **the migrations win** — §7 marks the superseded parts explicitly.
 
 ## Status — implemented · tested · proposed · deferred
 
@@ -11,7 +11,7 @@
 | P2 RPCs (trial, redeem, claim, admin) | ✅ **Implemented** | `…20260806120002_entitlement_rpcs.sql` |
 | Durable revocation contract (`revocation_ledger`, `admin_unrevoke`) | ✅ **Implemented** | `…20260809120001_revocation_ledger.sql` |
 | Post-deletion recovery: Premium **and** eligible code grants | ✅ **Implemented** | `…20260809120002_code_grant_recovery.sql` |
-| Executable proofs on real Postgres | ✅ **Tested** — `test:entitlements` (120 checks) + `test:privileges` (37), both in `test:gate` | `scripts/db/entitlements-proof.mjs` · `scripts/db/privileges-proof.mjs` |
+| Executable proofs on real Postgres | ✅ **Tested** — `test:entitlements` (131 checks) + `test:privileges` (38), both in `test:gate` | `scripts/db/entitlements-proof.mjs` · `scripts/db/privileges-proof.mjs` |
 | Staging apply of the migrations | ⏳ **Not done** — founder-gated (live-DB migration) | — |
 | Privacy disclosure UI (§11.1) | 📋 **Deferred to P2b** — proposal written, no UI yet | [`P2B-PRIVACY-DISCLOSURE-PROPOSAL.md`](./P2B-PRIVACY-DISCLOSURE-PROPOSAL.md) |
 | P3–P7 (config, provider, gate, UI, admin scripts, Salla) | 📋 **Proposed only** — nothing started | §13 |
@@ -25,7 +25,7 @@ Historical-report sections (§1–§3, §12) remain as verified on 2026-08-06 ag
 
 1. **الإصدار الحالي:** `main` @ `dd79a60`؛ آخر التزام وظيفي `0d7d84f` الموسوم `v1.0-rc`.
 2. **مكتبة التمارين:** موجودة وصحّية (١٨١ تمرينًا · ٤٠ جهازًا · ١٢١ بوسائط حقيقية). الذي فُقد وسائطها المتحرّكة — **٦١ GIF** حُذفت في `bf07512` لأنها من WorkoutX بعلامة مائية. **قرار مؤسس: لا تُستعاد.**
-3. ~~لا يوجد نظام اشتراك/تفعيل/تجربة في المستودع إطلاقًا~~ — **كان صحيحًا يوم كتابته (٦ أغسطس) وتجاوزه الواقع**: طبقة قاعدة البيانات كاملة (مخطّط + دوال + إثباتات منفَّذة) هبطت على `claude/access-entitlements`. ما لم يُبنَ بعد: أي واجهة أو بوابة أو مسار سلة (P3–P7).
+3. ~~لا يوجد نظام اشتراك/تفعيل/تجربة في المستودع إطلاقًا~~ — **كان صحيحًا يوم كتابته (٦ أغسطس) وتجاوزه الواقع**: طبقة قاعدة البيانات كاملة (مخطّط + دوال + إثباتات منفَّذة) موجودة في خطّ التكامل المراجع. ما لم يُبنَ بعد: أي واجهة أو بوابة أو مسار سلة (P3–P7).
 4. **محرّك التخصيص التكيّفي (١٩٣ سؤالًا) لا يصل المستخدم** — **قرار مؤسس: لا يُفعَّل في هذا البرنامج.** الحيّ هو `OnboardingV2` ويبقى كما هو.
 5. **فرع `Qimmah-App` غير المدموج: انتهى الخطر.** التحقّق أثبت أن **٢٤ ملفًا من ٣٥ مطابقة حرفيًا** لـ`main`، والباقي `main` **متقدّم عليه**. لا عمل فريد باقٍ ولا تعارض — §12.
 6. **قرارات المؤسس مقفلة** — §4. والتسمية للمستخدم **«قِمّة Premium»** بنصّ معتمد واحد — §4.5.
