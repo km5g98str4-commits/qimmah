@@ -508,21 +508,25 @@ export function BodyModel3D({ lang, className }: { lang: Lang; className?: strin
 
   return (
     <div ref={wrapRef} className={cn('card p-5', className)}>
-      {/* العنوان + مبدّل العرض */}
-      <div className="mb-3 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2.5">
-          <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary-soft text-primary-c">
+      {/* [CTO-009/WP-5] العنوان ومبدّل العرض كانا في صفّ واحد: على ٣٢٠بكسل
+          ينكسر «مجسّم عضلاتك» سطرين ويزاحم المبدّل، ويهبط السطر الثانوي
+          («هذا الأسبوع · ذكر · أمامي») على سطرين أيضًا. صارا صفّين — العنوان
+          يأخذ عرضه كاملًا، والمبدّل تحته بمحاذاة النهاية — فلا كسر ولا تزاحم
+          في أي عرض. */}
+      <div className="mb-3 flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 items-center gap-2.5">
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary-c">
             <Icon name="Dumbbell" className="h-5 w-5" />
           </span>
-          <div>
-            <p className="text-sm font-black text-ink-900">{t('مجسّم عضلاتك', 'Your muscle model')}</p>
-            <p className="text-[11px] font-bold text-ink-400">
+          <div className="min-w-0">
+            <p className="truncate text-sm font-black text-ink-900">{t('مجسّم عضلاتك', 'Your muscle model')}</p>
+            <p className="truncate text-[11px] font-bold text-ink-400">
               {t('هذا الأسبوع', 'This week')} · {genderLabel}
               {mode === '3d' ? ` · ${angleLabel}` : ''}
             </p>
           </div>
         </div>
-        <div className="inline-flex rounded-full border border-line bg-page p-1">
+        <div className="inline-flex self-end rounded-full border border-line bg-page p-1 sm:self-auto">
           {(['3d', 'flat'] as const).map((m) => (
             <button
               key={m}
