@@ -1,7 +1,8 @@
-import { Component, type ReactNode } from 'react'
+import { useState, Component, type ReactNode } from 'react'
 import { CustomizationCenter } from '@/sections/CustomizationCenter'
-import { OnboardingV2 } from '@/views/OnboardingV2'
+import { OnboardingV2, PlanHandoffScreen } from '@/views/OnboardingV2'
 import { getLanguage } from '@/lib/appPreferences'
+import { useAuth } from '@/lib/authContext'
 
 interface SetupViewProps {
   onClose: (completed?: boolean) => void
@@ -49,12 +50,31 @@ class SetupErrorBoundary extends Component<{ onEscape: () => void; children: Rea
 
 /** عرض الإعداد — باني الخطة (الجوال) عند أول مرة، ومحرّرات متقدمة عند التعديل. */
 export function SetupView({ onClose, onForceComplete, initialStep, mode = 'onboarding' }: SetupViewProps) {
+  const escape = onForceComplete ?? (() => onClose(true))
+  const { user } = useAuth()
+
+  // [CTO-009/WP-2] مزلاج التسليم — **يعيش هنا لا داخل `OnboardingV2`**.
+  //
+  // السبب بنيوي: `markCompleted` يقلب `isOnboardingComplete`، فيعيد App اشتقاق
+  // `mode='advanced'` ويُفكّ تركيب `OnboardingV2` في نفس اللحظة. أي حالة تسليم
+  // داخله تموت قبل أن تُرسَم — وهو ما حدث فعلًا: الضغط على «الدخول للوحة» كان
+  // يقفز مباشرةً إلى محرّر «تعديل خطتي».
+  //
+  // `SetupView` تبقى مركّبة عبر تبديل الوضع، فالمزلاج فيها ينجو، ويتقدّم على
+  // `mode` حتى لا يسحب المحرّرُ المتقدّم البساطَ من تحت التسليم.
+  const [finished, setFinished] = useState(false)
+
+  if (finished) {
+    return <PlanHandoffScreen lang={getLanguage()} signedIn={user !== null} onEnter={escape} />
+  }
+
   // الإعداد الأولي = باني الخطة الجوال الكامل، محاطًا بمخرج طوارئ لا يحبس المستخدم أبدًا.
   if (mode !== 'advanced') {
-    const escape = onForceComplete ?? (() => onClose(true))
     return (
       <SetupErrorBoundary onEscape={escape}>
-        <OnboardingV2 lang={getLanguage()} onComplete={escape} onExit={() => onClose(false)} />
+        {/* الخطة تُحفظ ويُوسَم الإعداد مكتملًا **قبل** هذا النداء، فالتسليم عرضٌ
+            لا تعليق لعقد الإكمال: إغلاق المتصفّح عنده لا يفقد شيئًا. */}
+        <OnboardingV2 lang={getLanguage()} onComplete={() => setFinished(true)} onExit={() => onClose(false)} />
       </SetupErrorBoundary>
     )
   }
