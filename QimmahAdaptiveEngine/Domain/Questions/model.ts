@@ -18,6 +18,8 @@ export interface QuestionDef {
   answerType: 'number' | 'single' | 'boolean' | 'multi' | 'text' | 'openList'
   options?: readonly string[]
   range?: { min: number; max: number }
+  /** [CTO-QAE-006] §5: selection-count constraints (legacy select semantics preserved). */
+  select?: { min?: number; max?: number }
   eligible?: Predicate
   skipIf?: Predicate
   followUps?: ReadonlyArray<{ when: Predicate; ask: readonly string[] }>

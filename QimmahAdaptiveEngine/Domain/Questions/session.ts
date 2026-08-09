@@ -29,7 +29,7 @@ export function evidenceFor(bank: readonly QuestionDef[], state: QuestionSession
     const answer = state.answers[q.id]
     if (answer === undefined) continue
     const normalized = normalizeAnswer(
-      { answerType: q.answerType, key: q.key, options: q.options, range: q.range },
+      { answerType: q.answerType, key: q.key, options: q.options, range: q.range, select: q.select },
       answer,
       now,
     )
@@ -58,7 +58,7 @@ export function applyAnswer(
   const q = bank.find((b) => b.id === questionId)
   if (!q) return { ok: false, error: 'unknown_question', state }
 
-  const normalized = normalizeAnswer({ answerType: q.answerType, key: q.key, options: q.options, range: q.range }, value, now)
+  const normalized = normalizeAnswer({ answerType: q.answerType, key: q.key, options: q.options, range: q.range, select: q.select }, value, now)
   if (!normalized.ok) return { ok: false, error: normalized.error, state }
 
   const answers = { ...state.answers, [q.id]: value }

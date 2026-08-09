@@ -35,11 +35,13 @@ export interface AnswerNormalizationSpec {
   key: string
   options?: readonly string[]
   range?: { min: number; max: number }
+  /** [CTO-QAE-006] §5: legacy selection-count constraints — no silent widening of accepted input. */
+  select?: { min?: number; max?: number }
 }
 
 export type NormalizationResult =
   | { ok: true; evidence: EvidenceItem[] }
-  | { ok: false; error: 'out_of_range' | 'option_not_available' | 'type_mismatch' }
+  | { ok: false; error: 'out_of_range' | 'option_not_available' | 'type_mismatch' | 'too_few' | 'too_many' }
 
 /**
  * Deterministic answer → evidence normalization. Numbers must be safe integers
@@ -79,6 +81,8 @@ export function normalizeAnswer(spec: AnswerNormalizationSpec, value: AnswerValu
         return { ok: false, error: 'option_not_available' }
       }
       const unique = [...new Set(selected)].sort()
+      if (spec.select?.min !== undefined && unique.length < spec.select.min) return { ok: false, error: 'too_few' }
+      if (spec.select?.max !== undefined && unique.length > spec.select.max) return { ok: false, error: 'too_many' }
       return {
         ok: true,
         evidence: [

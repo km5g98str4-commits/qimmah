@@ -289,6 +289,7 @@ for (const def of QUESTION_BANK) {
     answerType: tm.answerType,
     ...(finalOptions ? { options: finalOptions } : {}),
     ...(def.range ? { range: def.range } : {}),
+    ...(def.select ? { select: def.select } : {}),
     ...(eligible ? { eligible } : {}),
     ...(convertCondition(def.skipIf) ? { skipIf: convertCondition(def.skipIf) } : {}),
     ...(def.followUps && def.followUps.length > 0
