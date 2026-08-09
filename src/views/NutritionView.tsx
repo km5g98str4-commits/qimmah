@@ -71,18 +71,28 @@ export function NutritionView({ lang }: NutritionViewProps) {
 
       <div className="space-y-0">
         {/* معادلة السعرات */}
+        {/* [WP-4B] «المتبقّي» بطل الكتلة لا خانة رابعة بحجم جيرانها.
+            كانت الخانات الأربع بنفس الوزن (`text-lg` لكلٍّ)، فالعين تمسح أربعة
+            أرقام لتستنتج الرقم الوحيد الذي جاءت لأجله. صار المتبقّي رقمًا كبيرًا
+            مستقلًّا، والمعادلة تحته سطرًا مساندًا يشرح من أين جاء. */}
         <div className="card p-5">
           <p className="text-xs font-bold text-ink-500">{t.equationNote}</p>
-          <div className="mt-3 flex items-end justify-between gap-2">
+
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="text-4xl font-black leading-none text-primary-c">{remaining}</span>
+            <span className="text-sm font-bold text-ink-500">{t.remaining}</span>
+          </div>
+
+          <ProgressBar current={eaten} target={targetCalories || 1} color="bg-orange-500" className="mt-3.5" />
+
+          {/* المعادلة المساندة — أرقام أصغر ولون ثانوي، فلا تنافس البطل. */}
+          <div className="mt-3.5 flex items-end justify-between gap-1 border-t border-line pt-3">
             <EqCell label={t.needCals} value={targetCalories} />
             <Op symbol={d.opMinus} />
             <EqCell label={t.foodCals} value={eaten} />
             <Op symbol={d.opPlus} />
             <EqCell label={t.exerciseCals} value={exerciseCals} />
-            <Op symbol={d.opEquals} />
-            <EqCell label={t.remaining} value={remaining} highlight />
           </div>
-          <ProgressBar current={eaten} target={targetCalories || 1} color="bg-orange-500" className="mt-4" />
         </div>
 
         {/* ملخّص الماكروز + الماء — حلقات واضحة */}
@@ -141,10 +151,31 @@ function Op({ symbol }: { symbol: string }) {
   return <span className="pb-5 text-base font-black text-ink-300">{symbol}</span>
 }
 
-function EqCell({ label, value, highlight }: { label: string; value: number; highlight?: boolean }) {
+/**
+ * [WP-4B] كمية الصنف المسجَّل — **الغرام هو السلطة الحسابية**، والحصة مكافئ
+ * معروض بجانبه لا بديل عنه.
+ *
+ * ولا تُختلق حصة أبدًا: `LoggedFood` لا يخزّن `servingGrams`، فلا يُشتقّ حجم
+ * الحصة قسمةً. تُعرض الحصة **فقط** حين سُجِّلت فعلًا مع الجرامات — وهو ما يفعله
+ * `QuickMealLogger` حين يكون للصنف حصة معروفة (يكتب `grams` و`servings` معًا).
+ * صنف بلا حصة معروفة يظهر بجراماته وحدها، وصنف قديم بلا جرامات يظهر بحصصه
+ * وحدها. لا سطر ثالث يخمّن.
+ */
+function quantityLabel(e: LoggedFood, d: { gramsUnit: string; servingsUnit: string }): string {
+  const g = typeof e.grams === 'number' && e.grams > 0 ? e.grams : null
+  const s = typeof e.servings === 'number' && e.servings > 0 ? e.servings : null
+  if (g !== null && s !== null) return `${g}${d.gramsUnit} · ${round2(s)} ${d.servingsUnit}`
+  if (g !== null) return `${g}${d.gramsUnit}`
+  if (s !== null) return `${round2(s)} ${d.servingsUnit}`
+  return ''
+}
+const round2 = (n: number) => Math.round(n * 100) / 100
+
+/** خانة مساندة في المعادلة — وزن ثانوي عمدًا: البطل هو «المتبقّي» فوقها. */
+function EqCell({ label, value }: { label: string; value: number }) {
   return (
     <div className="min-w-0 flex-1 text-center">
-      <p className={`text-lg font-black ${highlight ? 'text-primary-c' : 'text-ink-900'}`}>{value}</p>
+      <p className="text-sm font-bold text-ink-700">{value}</p>
       <p className="truncate text-[10px] text-ink-400">{label}</p>
     </div>
   )
@@ -153,14 +184,19 @@ function EqCell({ label, value, highlight }: { label: string; value: number; hig
 function MacroCard({ label, eaten, target, unit, color }: { label: string; eaten: number; target: number; unit: string; color: string }) {
   const pct = target > 0 ? Math.min(1, eaten / target) : 0
   return (
-    <div className="card flex items-center gap-3 p-4">
-      <Ring pct={pct} color={color} />
-      <div className="min-w-0">
-        <p className="truncate text-xs text-ink-500">{label}</p>
-        <p className="mt-0.5 text-sm font-black text-ink-900">
-          {eaten}<span className="text-[11px] font-bold text-ink-400"> / {target}{unit}</span>
-        </p>
+    // [WP-4B] البطاقة كانت `flex` أفقيًا: الحلقة ٤٠بكسل + نصّ بجانبها داخل عمود
+    // من عمودين على ٣٧٥بكسل ⇒ النصّ يُقصّ («بروتين» و«١٢٠ / ١٥٠غ» يتزاحمان).
+    // العمودي يعطي كل سطر عرض البطاقة كاملًا، فلا قصّ في العربية ولا الإنجليزية.
+    <div className="card flex flex-col items-start gap-2.5 p-4">
+      <div className="flex w-full items-center justify-between gap-2">
+        <p className="min-w-0 truncate text-xs font-bold text-ink-500">{label}</p>
+        <Ring pct={pct} color={color} />
       </div>
+      <p className="min-w-0 text-base font-black leading-none text-ink-900">
+        {eaten}
+        {/* الهدف لا يُقصّ: `whitespace-nowrap` يمنع كسر «/ ١٥٠غ» على سطرين. */}
+        <span className="whitespace-nowrap text-[11px] font-bold text-ink-400"> / {target}{unit}</span>
+      </p>
     </div>
   )
 }
@@ -210,32 +246,43 @@ function MealCard({
 
   return (
     <div className="card overflow-hidden">
-      <div className="flex items-center justify-between gap-2 border-b border-line p-4">
-        <div className="flex items-center gap-2.5">
-          <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary-soft text-primary-c">
-            <Icon name={slot.icon} className="h-4 w-4" />
+      {/* [WP-4B] الترويسة تتنفّس (p-4 ⇐ p-4.5/py-5) واسم الوجبة يكبر: هو عنوان
+          القسم لا سطر جانبي. و«أضف» كان `btn-primary` — لوحًا برتقاليًا مصمتًا
+          يسحب العين من اسم الوجبة وسعراتها في كل بطاقة، أي أن الإجراء الثانوي
+          كان أثقل بصريًا من المعلومة الأساسية. صار محايدًا بحدّ، ويبقى هدف
+          اللمس ≥44بكسل. */}
+      <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-4">
+        <div className="flex min-w-0 items-center gap-3">
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-primary-soft text-primary-c">
+            <Icon name={slot.icon} className="h-5 w-5" />
           </span>
-          <div>
-            <p className="text-sm font-bold text-ink-900">{lang === 'en' ? slot.en : slot.ar}</p>
-            <p className="text-[11px] text-ink-400">{cals} {d.caloriesUnit} · {prot}{d.gramsUnit} {d.caloriesDotProteinG}</p>
+          <div className="min-w-0">
+            <p className="truncate text-base font-black leading-tight text-ink-900">{lang === 'en' ? slot.en : slot.ar}</p>
+            <p className="mt-1 truncate text-[11px] text-ink-400">{cals} {d.caloriesUnit} · {prot}{d.gramsUnit} {d.caloriesDotProteinG}</p>
           </div>
         </div>
-        <div className="flex items-center gap-1">
-          {/* أزرار نائبة: نسخ/مفضّلة — مخفيّة خلف علم حتى تعمل الميزة */}
-          <button type="button" onClick={() => setAdding((v) => !v)} className="btn-primary px-3 py-1.5 text-xs">
-            <Icon name="Plus" className="h-3.5 w-3.5" />
-            {t.addShort}
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => setAdding((v) => !v)}
+          aria-expanded={adding}
+          className="flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-xl border border-line bg-surface px-3 text-xs font-bold text-ink-700 transition-colors hover:bg-beige"
+        >
+          <Icon name="Plus" className="h-3.5 w-3.5" />
+          {t.addShort}
+        </button>
       </div>
 
       {items.length > 0 && (
         <ul className="divide-y divide-line">
           {items.map((e) => (
-            <li key={e.id} className="flex items-center gap-3 px-4 py-2.5">
+            <li key={e.id} className="flex items-center gap-3 px-4 py-3">
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-sm text-ink-900">{e.label}</span>
-                <span className="block text-[11px] text-ink-400">{e.calories} {d.caloriesUnit} · {e.protein}{d.gramsUnit}</span>
+                <span className="block truncate text-sm font-bold text-ink-900">{e.label}</span>
+                <span className="block text-[11px] text-ink-400">
+                  {quantityLabel(e, d)}
+                  {quantityLabel(e, d) && ' · '}
+                  {e.calories} {d.caloriesUnit} · {e.protein}{d.gramsUnit}
+                </span>
               </span>
               <button type="button" onClick={() => onRemove(e.id)} aria-label={t.removeEntry} className="grid h-11 w-11 shrink-0 place-items-center rounded-lg text-ink-400 hover:bg-beige hover:text-danger">
                 <Icon name="Trash2" className="h-4 w-4" />
