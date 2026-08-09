@@ -77,7 +77,30 @@ check('InstallBanner لا يرندر أصليًا', banner.includes('if (isNativ
 check('InstallPrompt لا يرندر أصليًا', prompt.includes('if (isNativePlatform() || standalone'))
 check('التبويبات تستخدم قاموس v2 المركزي', shell.includes('V2_TAB_LABELS.today') && shell.includes('V2_TAB_LABELS.progress'))
 check('تسميات §03 الخمس موجودة', ['اليوم', 'التمارين', 'تسجيل', 'التغذية', 'التقدّم'].every((s) => labels.includes(s)))
-check('قِمّة+ سطر هادئ واحد', (profileV2.match(/Qimmah\+ — ONE quiet line/g) ?? []).length === 1)
+// [CTO-009/WP-3] حلّ محلّ فحص «قِمّة+ سطر هادئ واحد».
+// ذاك الفحص كان يحرس قرار منتج سابق: سطر إعلامي بلا مسار شراء. وقد نسخه
+// المؤسس صراحةً — Premium صار بوّابة وصول حقيقية (§0.1) والشراء يتمّ عند سلة.
+// فالفحص لا يُحذف بل **يُوجَّه للقرار الجديد**: سطح واحد لا اثنان، بوجهة واحدة
+// مصدرها الإعدادات، وبالنصّ المعتمد وحده، وبلا سعر مكتوب في المكوّن.
+{
+  const productCfg = read('src/config/product.ts')
+  const model = read('src/lib/profileV2Model.ts')
+  const surfaces = (profileV2.match(/model\.subscription\.url/g) ?? []).length
+  check('سطح Premium واحد لا أكثر', surfaces === 1, `${surfaces}`)
+  check('الوجهة من مصدر واحد لا نصّ مكتوب في المكوّن',
+    model.includes('url: product.checkoutUrl') && !/salla\.sa/i.test(profileV2))
+  check('مصدر الوجهة هو سلة', /checkoutUrl:.*salla\.sa\/Qimmahsa/.test(productCfg))
+  check('الرابط الخارجي محمي بـnoopener', /rel="noopener noreferrer"/.test(profileV2))
+  check('لا دفع داخل التطبيق ولا مزوّد ثالث',
+    !/stripe|revenuecat|applepay|in-app purchase/i.test(profileV2 + model + productCfg))
+  // النصّ المعتمد وحده (§0.1) — والممنوع يُفحص في المكوّن والنموذج معًا.
+  check('النصّ المعتمد لـPremium حاضر', model.includes('يشمل تحديثات قِمّة — بلا اشتراك شهري'))
+  const userFacing = model.replace(/\/\/[^\n]*/g, '') + profileV2.replace(/\{\/\*[\s\S]*?\*\/\}/g, '')
+  check('لا «مدى الحياة» ولا lifetime في سطح المستخدم',
+    !/مدى الحياة|lifetime|كل التحديثات الحالية/i.test(userFacing))
+  // §0.1: السعر يُقرأ من مصدره الوحيد — وسلة هي من تعرضه اليوم.
+  check('لا رقم سعر مكتوب في سطح Premium', !/\b19[.,]99\b|\b1999\b|\b26\b\s*(ر\.?س|SAR)/.test(userFacing))
+}
 check('شاشات الدخول العامة تستخدم viewport داخليًا بدل تمرير صفحة ويب', ['LoginView', 'ResetPasswordView', 'VerifyEmailView', 'NotFoundView'].every((name) => { const source = read(`src/views/${name}.tsx`); return source.includes('h-[100dvh]') && source.includes('app-scroll') && !source.includes('min-h-screen') }))
 
 // ─────────────────────────────────────────────────────────────────────────────
