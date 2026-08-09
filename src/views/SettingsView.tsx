@@ -342,6 +342,40 @@ export function SettingsView({
             </button>
           </div>
         </SettingsGroup>
+
+        {/* 9) الدعم — [CTO-009/WP-6]
+            كان الدعم يُبلَغ من موضعين فقط: رابط ٣٢بكسل في الفوتر، ونافذة حذف
+            الحساب. أي أن من يبحث عن مساعدة في «الإعدادات» لا يجد شيئًا.
+            هنا صفّ صريح بالبريد نفسه، بهدف لمس ≥44بكسل، والبريد مكتوب ظاهرًا
+            لمن يفضّل النسخ على فتح تطبيق بريد. */}
+        <SettingsGroup icon="Mail" title={t.contact.title}>
+          <div className="flex flex-col gap-3">
+            <p className="text-xs leading-relaxed text-ink-500">{t.contact.intro}</p>
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-sm text-ink-700">{t.contact.emailLabel}</span>
+              <span dir="ltr" className="select-all rounded-lg bg-beige px-2.5 py-1 font-mono text-xs font-bold text-ink-700">
+                {t.contact.emailValue}
+              </span>
+            </div>
+            <a
+              href={`mailto:${t.contact.emailValue}`}
+              data-testid="settings-support-email"
+              className="btn-ghost min-h-[44px] justify-start px-4 text-sm"
+            >
+              <Icon name="Mail" className="h-4 w-4" />
+              {t.contact.emailCta}
+            </a>
+            <button
+              type="button"
+              onClick={() => setHashRoute('contact')}
+              data-testid="settings-support-page"
+              className="btn-ghost min-h-[44px] justify-start px-4 text-sm"
+            >
+              <Icon name="MessageCircle" className="h-4 w-4" />
+              {t.contact.reportCta}
+            </button>
+          </div>
+        </SettingsGroup>
       </main>
 
       {deleteOpen && (
