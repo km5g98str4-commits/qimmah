@@ -278,6 +278,19 @@ console.log('\n🔒 المرحلة ب — بعد التحصين (السلسلة 
     secdef.rows.length > 0 && laxFns.length === 0,
     laxFns.map((r) => `${r.fn}[${r.cfg || 'بلا search_path'}]`).join(' ') || `${secdef.rows.length} دالة`)
 
+  // وPUBLIC — الدور الذي يشمل الجميع — لا ينفّذ أي دالة في public/private
+  // على السلسلة كاملة (بما فيها دوال امتداد pgcrypto التي كنستها هجرة
+  // 20260809120003). proacl الفارغ = افتراضي مدمج مكشوف، فيُفكّ بـacldefault.
+  const pubExec = await db.query(`
+    select n.nspname||'.'||p.proname as fn
+    from pg_proc p
+    join pg_namespace n on n.oid = p.pronamespace,
+    lateral aclexplode(coalesce(p.proacl, acldefault('f', p.proowner))) a
+    where n.nspname in ('public','private')
+      and a.grantee = 0 and a.privilege_type = 'EXECUTE'`)
+  check('السلسلة كاملة: لا EXECUTE عبر PUBLIC على أي دالة',
+    pubExec.rows.length === 0, pubExec.rows.map((r) => r.fn).join(' '))
+
   // ── ٨) delete_own_account ما زال يعمل بعد سحب الصلاحيات ────────────────
   await asRole(db, 'authenticated', B)
   await db.query(`select public.delete_own_account()`)

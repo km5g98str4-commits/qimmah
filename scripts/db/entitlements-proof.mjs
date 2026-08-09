@@ -28,6 +28,7 @@ const RPCS = '20260806120002_entitlement_rpcs.sql'
 const DEL = '20260713120007_delete_own_account.sql'
 const REVK = '20260809120001_revocation_ledger.sql'
 const RECV = '20260809120002_code_grant_recovery.sql'
+const PUBX = '20260809120003_public_execute_hardening.sql'
 
 const results = []
 function check(name, pass, detail = '') {
@@ -93,6 +94,7 @@ try {
   await db.exec(mig(RPCS))
   await db.exec(mig(REVK))
   await db.exec(mig(RECV))
+  await db.exec(mig(PUBX))
 } catch (e) {
   created = false
   console.error('\n  المهاجرة فشلت:', e.message, '\n')
@@ -104,7 +106,7 @@ if (!check('إنشاء المخطّط من قاعدة نظيفة', created)) {
 
 // idempotency: إعادة التشغيل لا تكسر
 let rerun = true
-try { await db.exec(mig(CORE)); await db.exec(mig(RPCS)); await db.exec(mig(REVK)); await db.exec(mig(RECV)) } catch (e) { rerun = false; console.error('   ', e.message) }
+try { await db.exec(mig(CORE)); await db.exec(mig(RPCS)); await db.exec(mig(REVK)); await db.exec(mig(RECV)); await db.exec(mig(PUBX)) } catch (e) { rerun = false; console.error('   ', e.message) }
 check('الهجرة idempotent (تشغيل ثانٍ)', rerun)
 
 // ── ٢) الملح المُرقَّم ─────────────────────────────────────────────────────
@@ -645,6 +647,69 @@ await db.exec(`drop function public.planted_unsafe_secdef();
                drop function public.planted_inherit_secdef();`)
 check('بعد إزالة الزرع يعود الفحص نظيفًا', unsafeSecdef(await listSecdef()).length === 0)
 
+// ── ١٠.٥) EXECUTE عبر PUBLIC — الدور الثالث المنسي ────────────────────────
+// PUBLIC يشمل كل الأدوار، وPostgres يمنحه EXECUTE على كل دالة جديدة بافتراض
+// مدمج. `revoke from anon, authenticated` وحده لا يغلق شيئًا ما دام PUBLIC
+// مفتوحًا. proacl الفارغ = الافتراضي المدمج، فيُفكّ بـacldefault لا يُعدّ نظيفًا.
+await asRole(null)
+const publicExecutable = async () => (await q(`
+  select n.nspname||'.'||p.proname as fn
+  from pg_proc p
+  join pg_namespace n on n.oid = p.pronamespace,
+  lateral aclexplode(coalesce(p.proacl, acldefault('f', p.proowner))) a
+  where n.nspname in ('public','private')
+    and a.grantee = 0 and a.privilege_type = 'EXECUTE'
+  order by 1`)).rows.map((r) => r.fn)
+
+const pubExposed = await publicExecutable()
+check('لا دالة في public/private قابلة للتنفيذ عبر PUBLIC', pubExposed.length === 0, pubExposed.join(' '))
+
+// القادم لا يرث: دالة تُنشأ بعد الهجرة تولد مغلقة أمام PUBLIC.
+await db.exec(`create function public.future_pub_probe() returns int language sql as 'select 1';`)
+const futureLeak = (await publicExecutable()).filter((f) => f === 'public.future_pub_probe')
+check('دالة جديدة لا ترث EXECUTE عبر PUBLIC (الافتراضي المدمج مقطوع)', futureLeak.length === 0)
+await db.exec(`drop function public.future_pub_probe();`)
+
+// مسبار عدم الفراغ: دور جديد لا يملك إلا usage على المخطّط. لو كان منعه من
+// دوال الإدارة سببه نقص صلاحية أخرى — لا سحب EXECUTE — لفشل استدعاء المسبار
+// المكشوف عمدًا أيضًا. نجاحه هو ما يجعل «permission denied» أدناه ذا معنى.
+await db.exec(`create role pub_probe_role; grant usage on schema public to pub_probe_role;
+               create function public.pub_open_probe() returns int language sql as 'select 42';
+               grant execute on function public.pub_open_probe() to public;`)
+await asRole('pub_probe_role')
+const probeOpen = await q(`select public.pub_open_probe() as v`)
+check('المسبار المكشوف عمدًا يعمل عبر PUBLIC (الفحوص التالية ليست فراغًا)', probeOpen.rows[0].v === 42)
+await mustFail('دور عارٍ لا ينفّذ دالة إدارة عبر PUBLIC',
+  () => q(`select public.admin_revoke('00000000-0000-0000-0000-000000000000'::uuid,'x')`), 'permission denied')
+await mustFail('دور عارٍ لا ينفّذ دالة خدمة ذاتية عبر PUBLIC',
+  () => q(`select public.start_trial()`), 'permission denied')
+await mustFail('دور عارٍ لا ينفّذ دالة البصمة الخاصّة عبر PUBLIC',
+  () => q(`select private.hash_identity('a@example.com',1)`), 'permission denied')
+// يُسقَط المسبار قبل مرحلة الزرع كي يعود الكاشف لقائمة فارغة تمامًا —
+// فالتقاط الزرع أدناه يطالب بأن يكون **هو وحده** الظاهر.
+await asRole(null)
+await db.exec(`drop function public.pub_open_probe();`)
+
+// التأكيد المضادّ (§4.2): تُعاد منحة PUBLIC على دالة إدارة — عين الثغرة —
+// فيلتقطها الكاشف **باسمها**، ويصل الدور العاري إلى جسد الدالة فعليًا
+// (الخطأ يصير من داخلها لا من بوّابة الصلاحيات). ثم يُسحب الزرع ويعود النظيف.
+await db.exec(`grant execute on function public.admin_revoke(uuid,text) to public;`)
+const planted = await publicExecutable()
+check('زرع PUBLIC EXECUTE على دالة إدارة يُسقط الفحص باسمها',
+  planted.length === 1 && planted[0] === 'public.admin_revoke', planted.join(' '))
+await asRole('pub_probe_role')
+await mustFail('الزرع يفتح جسد الدالة فعليًا لدور عارٍ (تصعيد حقيقي لا شكلي)',
+  () => q(`select public.admin_revoke('00000000-0000-0000-0000-000000000000'::uuid,'x')`), 'no_such_user')
+await asRole(null)
+await db.exec(`revoke all on function public.admin_revoke(uuid,text) from public;`)
+check('بعد سحب الزرع يعود فحص PUBLIC نظيفًا', (await publicExecutable()).length === 0)
+await asRole('pub_probe_role')
+await mustFail('وبعد السحب يعود الدور العاري ممنوعًا',
+  () => q(`select public.admin_revoke('00000000-0000-0000-0000-000000000000'::uuid,'x')`), 'permission denied')
+await asRole(null)
+// المنح المعلّقة بالدور (usage على المخطّط) تبعية تمنع حذفه — تُنزع أولًا.
+await db.exec(`drop owned by pub_probe_role; drop role pub_probe_role;`)
+
 // ── ١١) ضمانات بنيوية على المخطّط ─────────────────────────────────────────
 const noStatus = await q(`select count(*)::int n from information_schema.columns
                           where table_schema='public' and table_name='entitlements' and column_name='status'`)
@@ -686,7 +751,7 @@ check('احتفاظ سجلّ الحظر: حتى الرفع الإداري لا �
 // يُنفَّذ، فلا يجوز أن يُسقط فحصًا ولا أن يُرضيه.
 const stripSql = (t) => t.replace(/--[^\n]*/g, '')
 const DESTRUCTIVE = /(delete\s+from|truncate|drop\s+table|pg_cron|cron\.schedule)/i
-const noAuto = !DESTRUCTIVE.test(stripSql(mig(CORE)) + stripSql(mig(RPCS)) + stripSql(mig(REVK)) + stripSql(mig(RECV)))
+const noAuto = !DESTRUCTIVE.test(stripSql(mig(CORE)) + stripSql(mig(RPCS)) + stripSql(mig(REVK)) + stripSql(mig(RECV)) + stripSql(mig(PUBX)))
 check('لا أتمتة حذف في P2 (لا delete/truncate/cron)', noAuto)
 // تأكيد مضادّ: الكاشف يفشل فعلًا على انتهاك مزروع — وإلا فالفحص زينة.
 check('كاشف الأتمتة يلتقط انتهاكًا مزروعًا',
@@ -706,7 +771,7 @@ const rlsOff = await q(`select relname from pg_class c join pg_namespace n on n.
                                           'trial_ledger','purchase_ledger','code_redemption_ledger','revocation_ledger')`)
 check('RLS مفعّل على كل جداول الوصول', rlsOff.rows.length === 0, rlsOff.rows.map((r) => r.relname).join(', '))
 
-const banned = /مدى الحياة|lifetime/i.test(mig(CORE) + mig(RPCS) + mig(REVK) + mig(RECV))
+const banned = /مدى الحياة|lifetime/i.test(mig(CORE) + mig(RPCS) + mig(REVK) + mig(RECV) + mig(PUBX))
 check('لا مصطلح محظور في المخطّط', !banned)
 
 // ── الخلاصة ───────────────────────────────────────────────────────────────
