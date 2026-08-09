@@ -35,7 +35,7 @@ export function AppNav({ current, lang, badge, onNavigate }: AppNavProps) {
     <header className="sticky top-0 z-40 glass border-b border-line" style={{ paddingTop: 'var(--safe-top)' }}>
       <div className="container-page flex h-16 items-center justify-between gap-3">
         <button type="button" onClick={() => onNavigate('dashboard')} className="flex items-center gap-2.5">
-          <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-white shadow-glow">
+          <span className="grid h-11 w-11 place-items-center rounded-xl bg-primary text-white shadow-glow">
             <Icon name="Dumbbell" className="h-5 w-5" strokeWidth={2.5} />
           </span>
           <span className="text-lg font-extrabold text-ink-900">{t.brand}</span>
@@ -50,7 +50,9 @@ export function AppNav({ current, lang, badge, onNavigate }: AppNavProps) {
                 onClick={() => onNavigate(tab.id)}
                 aria-label={tab.label}
                 className={cn(
-                  'flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition-colors sm:text-sm',
+                  // [CTO-009/WP-7] ≥44بكسل: كان `py-1.5` يعطي ٢٨بكسل — أصغر من
+                  // الحدّ الموصى به للمس، وهذه أزرار تنقّل رئيسية تُضغط كثيرًا.
+                  'flex min-h-[44px] items-center gap-1.5 rounded-full px-3 text-xs font-bold transition-colors sm:text-sm',
                   current === tab.id
                     ? 'bg-primary text-white'
                     : 'text-ink-500 hover:bg-beige hover:text-ink-900',

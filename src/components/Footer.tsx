@@ -33,10 +33,14 @@ export function Footer() {
             © {product.year} {brandName}. {d.footerRights}
             <span className="ms-2 text-ink-400" title={d.buildIdTitle}>{BUILD_LABEL}</span>
           </p>
-          <div className="flex items-center gap-4">
-            <a href="#/privacy" className="text-ink-500 transition-colors hover:text-brand-300">{d.privacy}</a>
-            <a href="#/terms" className="text-ink-500 transition-colors hover:text-brand-300">{d.terms}</a>
-            <a href="#/contact" className="text-ink-500 transition-colors hover:text-brand-300">{d.contact}</a>
+          {/* [CTO-009/WP-7] روابط الفوتر القانونية كانت ١٦بكسل ارتفاعًا (نصّ عارٍ
+              بلا حشو) — أصغر أهداف اللمس في التطبيق كلّه، وهي روابط امتثال
+              تُفتح على الجوال. `inline-flex` + `min-h-[44px]` يرفعها للحدّ بلا
+              تغيير حجم الخطّ ولا معنى النصّ. */}
+          <div className="flex flex-wrap items-center gap-x-4">
+            <a href="#/privacy" className="inline-flex min-h-[44px] items-center text-ink-500 transition-colors hover:text-brand-300">{d.privacy}</a>
+            <a href="#/terms" className="inline-flex min-h-[44px] items-center text-ink-500 transition-colors hover:text-brand-300">{d.terms}</a>
+            <a href="#/contact" className="inline-flex min-h-[44px] items-center text-ink-500 transition-colors hover:text-brand-300">{d.contact}</a>
             <p className="flex items-center gap-1.5">
               {d.footerNote}
               <Icon name="Sparkles" className="h-3.5 w-3.5 text-gold-400" />
