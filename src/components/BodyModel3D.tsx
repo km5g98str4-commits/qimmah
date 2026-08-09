@@ -537,7 +537,8 @@ export function BodyModel3D({ lang, className }: { lang: Lang; className?: strin
               }}
               aria-pressed={mode === m}
               className={cn(
-                'rounded-full px-3 py-1 text-[11px] font-bold transition-colors',
+                // [CTO-82] ≥44بكسل: كانت ٢٥ — أصغر هدف لمس في الشاشة.
+                'inline-flex min-h-[44px] items-center rounded-full px-3.5 text-[11px] font-bold transition-colors',
                 mode === m ? 'bg-primary text-white' : 'text-ink-500 hover:text-ink-900',
               )}
             >
@@ -588,7 +589,7 @@ export function BodyModel3D({ lang, className }: { lang: Lang; className?: strin
                 key={p.key}
                 type="button"
                 onClick={() => goTo(p.yaw)}
-                className="min-h-[32px] rounded-full border border-line bg-page px-3 py-1 text-[11px] font-bold text-ink-500 transition-colors hover:text-ink-900"
+                className="inline-flex min-h-[44px] items-center rounded-full border border-line bg-page px-3.5 text-[11px] font-bold text-ink-500 transition-colors hover:text-ink-900"
               >
                 {p[lang]}
               </button>

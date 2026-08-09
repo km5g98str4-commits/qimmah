@@ -215,7 +215,7 @@ export function SettingsView({
               <button
                 type="button"
                 onClick={() => setDeleteOpen(true)}
-                className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-danger/40 px-4 py-2.5 text-sm font-bold text-danger transition-colors hover:bg-danger/10"
+                className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-danger/40 px-4 py-3 text-sm font-bold text-danger transition-colors hover:bg-danger/10"
               >
                 <Icon name="Trash2" className="h-4 w-4" />
                 {t.auth.deleteAccount}

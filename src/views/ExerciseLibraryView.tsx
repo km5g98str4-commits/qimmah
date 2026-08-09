@@ -375,7 +375,8 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
       type="button"
       onClick={onClick}
       className={cn(
-        'shrink-0 rounded-full border px-3 py-1.5 text-xs font-bold transition-colors',
+        // [CTO-82] ≥44بكسل: كانت ٣٠ — وهي ٢١ رقاقة فلتر تُضغط كثيرًا.
+        'inline-flex min-h-[44px] shrink-0 items-center rounded-full border px-3.5 text-xs font-bold transition-colors',
         active ? 'border-primary-soft bg-primary text-white' : 'border-line bg-surface text-ink-700 hover:bg-beige',
       )}
     >

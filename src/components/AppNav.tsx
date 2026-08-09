@@ -33,15 +33,18 @@ export function AppNav({ current, lang, badge, onNavigate }: AppNavProps) {
 
   return (
     <header className="sticky top-0 z-40 glass border-b border-line" style={{ paddingTop: 'var(--safe-top)' }}>
-      <div className="container-page flex h-16 items-center justify-between gap-3">
-        <button type="button" onClick={() => onNavigate('dashboard')} className="flex items-center gap-2.5">
+      <div className="container-page flex h-16 items-center justify-between gap-2 sm:gap-3">
+        {/* [CTO-82] `min-w-0` على الطرفين: بدونها لا ينكمش أي منهما، فيتجاوز
+            الصفُّ العرضَ. ظهر بالإنجليزية على ٣٢٠بكسل — «Guest» أعرض من «ضيف»
+            بـ١٦بكسل، فانزاح الصفّ خارج الشاشة بينما العربية تمرّ. */}
+        <button type="button" onClick={() => onNavigate('dashboard')} className="flex min-w-0 items-center gap-2.5">
           <span className="grid h-11 w-11 place-items-center rounded-xl bg-primary text-white shadow-glow">
             <Icon name="Dumbbell" className="h-5 w-5" strokeWidth={2.5} />
           </span>
-          <span className="text-lg font-extrabold text-ink-900">{t.brand}</span>
+          <span className="truncate text-lg font-extrabold text-ink-900">{t.brand}</span>
         </button>
 
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 shrink-0 items-center gap-2">
           <nav className="flex items-center gap-1 rounded-full border border-line bg-surface p-1">
             {tabs.map((tab) => (
               <button
@@ -67,7 +70,7 @@ export function AppNav({ current, lang, badge, onNavigate }: AppNavProps) {
           {/* شارة الحالة */}
           <span
             className={cn(
-              'inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-black',
+              'inline-flex max-w-[6.5rem] shrink items-center gap-1.5 truncate rounded-full px-2.5 py-1.5 text-[11px] font-black sm:max-w-none sm:px-3',
               badgeClass,
             )}
           >
