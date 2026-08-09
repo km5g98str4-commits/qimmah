@@ -288,8 +288,8 @@
       "legacyPriority": 60,
       "required": false,
       "levels": null,
-      "disposition": "PRODUCT_DECISION_REQUIRED",
-      "dispositionReason": "L-QST-7: dead eligibility path (answers.primaryGoal never provided; goalKey lives in derived) — question unreachable in legacy production; fix needs product sign-off"
+      "disposition": "PRESERVE_WITH_MAPPING",
+      "dispositionReason": "L-QST-7 revival per [CTO-QAE-007] §1: dead answers.primaryGoal leaf remapped to primaryGoalDisplay ∈ {fat_loss, muscle_gain, strength}; age≥18 gate kept; not required"
     },
     {
       "stableQuestionId": "b-pace",
@@ -835,8 +835,8 @@
       "legacyPriority": 64,
       "required": false,
       "levels": null,
-      "disposition": "PRESERVE",
-      "dispositionReason": "characterized behavior carried over"
+      "disposition": "PRESERVE_WITH_MAPPING",
+      "dispositionReason": "Policy B per [CTO-QAE-007] §2: required-when-eligible for returning users (legacy required=false, starved in every recorded journey); eligibility gate unchanged"
     },
     {
       "stableQuestionId": "x-return-ramp",
@@ -872,8 +872,8 @@
       "legacyPriority": 60,
       "required": false,
       "levels": null,
-      "disposition": "PRESERVE",
-      "dispositionReason": "characterized behavior carried over"
+      "disposition": "PRESERVE_WITH_MAPPING",
+      "dispositionReason": "Policy B per [CTO-QAE-007] §2: required-when-eligible for returning users (legacy required=false, starved in every recorded journey); eligibility gate unchanged"
     },
     {
       "stableQuestionId": "x-prev-results",

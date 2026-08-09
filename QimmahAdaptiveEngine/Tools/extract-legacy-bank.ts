@@ -67,6 +67,20 @@ function stripConflictFlagLeaves(pred: Predicate | undefined): Predicate | undef
   return pred
 }
 
+function mapLeaves(pred: Predicate, fn: (leaf: Predicate) => Predicate): Predicate {
+  if (pred.op === 'all' || pred.op === 'any') {
+    return { op: pred.op, children: pred.children.map((c) => mapLeaves(c, fn)) }
+  }
+  if (pred.op === 'not') return { op: 'not', child: mapLeaves(pred.child, fn) }
+  return fn(pred)
+}
+
+// [CTO-QAE-007] §2 — Policy B: the returning-user follow-ups become required-
+// when-eligible. Their eligibility already gates on lastTrained ∈ {m3_12,
+// y1_plus}, so ONLY returning journeys change (≤2 of the 16-question budget);
+// non-returning journeys never see them in the required stage.
+const POLICY_B_REQUIRED = new Set(['x-return-reason', 'x-return-ramp'])
+
 function conditionFields(cond: LegacyCondition | undefined, into: Set<string>): void {
   if (!cond) return
   if ('all' in cond) cond.all.forEach((c) => conditionFields(c, into))
@@ -227,12 +241,16 @@ for (const def of QUESTION_BANK) {
   let disposition = 'PRESERVE'
   let reason = 'characterized behavior carried over'
   if (def.id === 'b-target-weight') {
-    // Discovered during conversion (L-QST-7): eligibility references
-    // answers.primaryGoal, which NO question provides (the goal key is written
-    // to derived.goalKey by g-primary option sets) — permanently ineligible in
-    // production. Reviving it (map to derived.goalKey) is a product decision.
-    disposition = 'PRODUCT_DECISION_REQUIRED'
-    reason = 'L-QST-7: dead eligibility path (answers.primaryGoal never provided; goalKey lives in derived) — question unreachable in legacy production; fix needs product sign-off'
+    // L-QST-7 revival APPROVED by [CTO-QAE-007] §1 as a narrow REVIEW change:
+    // the dead `answers.primaryGoal` leaf (nothing writes that key) is mapped to
+    // the display key actually provided by g-primary, keeping the legacy intent —
+    // weight-affecting goals only (cut/bulk ≡ fat_loss/muscle_gain/strength via
+    // GOAL_FROM_DISPLAY) ∧ age ≥ 18. NOT globally required (stays optional).
+    disposition = 'PRESERVE_WITH_MAPPING'
+    reason = 'L-QST-7 revival per [CTO-QAE-007] §1: dead answers.primaryGoal leaf remapped to primaryGoalDisplay ∈ {fat_loss, muscle_gain, strength}; age≥18 gate kept; not required'
+  } else if (POLICY_B_REQUIRED.has(def.id)) {
+    disposition = 'PRESERVE_WITH_MAPPING'
+    reason = 'Policy B per [CTO-QAE-007] §2: required-when-eligible for returning users (legacy required=false, starved in every recorded journey); eligibility gate unchanged'
   } else if (def.category === 'clarify' && !conflictClarifyIds.has(def.id) && !followUpTargets.has(def.id) && def.safety !== 'clear' && !def.required) {
     disposition = 'PRODUCT_DECISION_REQUIRED'
     reason = 'unreachable clarify (legacy L-QST-3); founder U4 policy: make reachable or delete at bank freeze — per-question fate needs product'
@@ -276,7 +294,16 @@ for (const def of QUESTION_BANK) {
   const levelGate: Predicate | undefined = def.levels
     ? { op: 'in', path: 'derived.experienceClass', values: [...def.levels] }
     : undefined
-  const baseEligible = stripConflictFlagLeaves(convertCondition(def.eligible))
+  let converted = convertCondition(def.eligible)
+  if (def.id === 'b-target-weight' && converted) {
+    // [CTO-QAE-007] §1 leaf remap (L-QST-7): the internal goal keys cut/bulk
+    // correspond to display values fat_loss/muscle_gain/strength.
+    converted = mapLeaves(converted, (leaf) =>
+      leaf.op === 'in' && leaf.path === 'primaryGoal'
+        ? { op: 'in', path: 'primaryGoalDisplay', values: ['fat_loss', 'muscle_gain', 'strength'] }
+        : leaf)
+  }
+  const baseEligible = stripConflictFlagLeaves(converted)
   const eligible = levelGate && baseEligible
     ? ({ op: 'all', children: [baseEligible, levelGate] } as Predicate)
     : (levelGate ?? baseEligible)
@@ -298,7 +325,7 @@ for (const def of QUESTION_BANK) {
     provides,
     safety: def.safety,
     priority: def.priority,
-    required: def.required,
+    required: def.required || POLICY_B_REQUIRED.has(def.id),
     skippable: def.skippable,
     infoGain: def.infoGain,
     sinceBankVersion: def.since,

@@ -316,19 +316,49 @@
       "l-has-injury",
       "s-screen-gate",
       "p-style",
-      "x-last-trained",
-      "x-total-duration",
-      "x-consistency"
+      "x-last-trained"
     ],
     "onlyIn": {
-      "returning-advanced": [],
-      "advanced-gym": []
+      "returning-advanced": [
+        "x-return-reason",
+        "x-return-ramp"
+      ],
+      "advanced-gym": [
+        "x-total-duration",
+        "x-consistency"
+      ]
     },
     "whyTheyDiffer": {
-      "returning-advanced": [],
-      "advanced-gym": [],
+      "returning-advanced": [
+        {
+          "questionId": "x-return-reason",
+          "evidenceResponsible": [
+            "lastTrained"
+          ]
+        },
+        {
+          "questionId": "x-return-ramp",
+          "evidenceResponsible": [
+            "lastTrained"
+          ]
+        }
+      ],
+      "advanced-gym": [
+        {
+          "questionId": "x-total-duration",
+          "evidenceResponsible": [
+            "trainedBefore"
+          ]
+        },
+        {
+          "questionId": "x-consistency",
+          "evidenceResponsible": [
+            "trainedBefore"
+          ]
+        }
+      ],
       "note": "evidenceResponsible lists the eligibility/skip predicate paths gating each differing question; empty = ordering/budget-driven difference (satiety, priority, budget class)"
     },
-    "differenceCount": 0
+    "differenceCount": 4
   }
 ]

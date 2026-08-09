@@ -178,6 +178,46 @@
       "sinceBankVersion": 1
     },
     {
+      "id": "b-target-weight",
+      "key": "targetWeightKg",
+      "copyKey": "b-target-weight",
+      "category": "basics",
+      "answerType": "number",
+      "range": {
+        "min": 30,
+        "max": 250,
+        "unit": "kg"
+      },
+      "eligible": {
+        "op": "all",
+        "children": [
+          {
+            "op": "in",
+            "path": "primaryGoalDisplay",
+            "values": [
+              "fat_loss",
+              "muscle_gain",
+              "strength"
+            ]
+          },
+          {
+            "op": "gte",
+            "path": "age",
+            "value": 18
+          }
+        ]
+      },
+      "provides": [
+        "targetWeightKg"
+      ],
+      "safety": "none",
+      "priority": 60,
+      "required": false,
+      "skippable": true,
+      "infoGain": 5,
+      "sinceBankVersion": 1
+    },
+    {
       "id": "b-pace",
       "key": "changePace",
       "copyKey": "b-pace",
@@ -539,7 +579,7 @@
       ],
       "safety": "none",
       "priority": 64,
-      "required": false,
+      "required": true,
       "skippable": true,
       "infoGain": 7,
       "sinceBankVersion": 1
@@ -568,7 +608,7 @@
       ],
       "safety": "none",
       "priority": 60,
-      "required": false,
+      "required": true,
       "skippable": true,
       "infoGain": 6,
       "sinceBankVersion": 1
@@ -640,6 +680,7 @@
           },
           "ask": [
             "g-fatloss-focus",
+            "b-target-weight",
             "g-cardio-willing"
           ]
         },
@@ -653,7 +694,8 @@
             ]
           },
           "ask": [
-            "g-gain-focus"
+            "g-gain-focus",
+            "b-target-weight"
           ]
         },
         {
@@ -4795,5 +4837,5 @@
       "sinceBankVersion": 1
     }
   ],
-  "bankManifestHash": "463c8798f1fd2ba402c49b814129f5a2cfc3696cbe6c24684532373724d7b171"
+  "bankManifestHash": "3c1efa43f18caa6c36ed24ad0374d88c6f2aa87d156e4106fdaca7717e6b7f5b"
 }

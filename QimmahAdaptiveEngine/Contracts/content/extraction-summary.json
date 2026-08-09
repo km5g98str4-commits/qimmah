@@ -1,12 +1,12 @@
 {
   "totalLegacyQuestions": 193,
-  "qaeActiveBank": 153,
-  "bankManifestHash": "463c8798f1fd2ba402c49b814129f5a2cfc3696cbe6c24684532373724d7b171",
+  "qaeActiveBank": 154,
+  "bankManifestHash": "3c1efa43f18caa6c36ed24ad0374d88c6f2aa87d156e4106fdaca7717e6b7f5b",
   "dispositionCounts": {
-    "PRESERVE": 138,
-    "PRODUCT_DECISION_REQUIRED": 6,
+    "PRESERVE": 136,
+    "PRESERVE_WITH_MAPPING": 18,
     "REMOVE_NON_MATERIAL": 34,
-    "PRESERVE_WITH_MAPPING": 15
+    "PRODUCT_DECISION_REQUIRED": 5
   },
   "nonMaterialFlagged": [
     "b-body-shape",
@@ -45,7 +45,6 @@
     "v-cardio-interference"
   ],
   "productDecisionRequired": [
-    "b-target-weight",
     "c-fill-equipment",
     "c-fill-goal-minor",
     "c-confirm-high-frequency",

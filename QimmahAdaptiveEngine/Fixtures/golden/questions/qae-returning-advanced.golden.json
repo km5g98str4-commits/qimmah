@@ -12,7 +12,7 @@
     "engineVersion": "0.3.0",
     "questionSchemaVersion": "1.0.0",
     "ruleManifest": "question-content(no-decision-rules)",
-    "bankManifestHash": "463c8798f1fd2ba402c49b814129f5a2cfc3696cbe6c24684532373724d7b171"
+    "bankManifestHash": "3c1efa43f18caa6c36ed24ad0374d88c6f2aa87d156e4106fdaca7717e6b7f5b"
   },
   "injectedAnswers": [],
   "steps": [
@@ -200,28 +200,28 @@
     },
     {
       "step": 14,
-      "selectedId": "x-total-duration",
-      "stage": "scored",
+      "selectedId": "x-return-reason",
+      "stage": "required",
       "offBudget": false,
       "budgetOverrideReason": null,
-      "answer": "y3_plus",
-      "answerSource": "persona",
+      "answer": "injury",
+      "answerSource": "default",
       "rejected": null,
       "newEvidencePaths": [
-        "totalMonths"
+        "returnReason"
       ]
     },
     {
       "step": 15,
-      "selectedId": "x-consistency",
-      "stage": "scored",
+      "selectedId": "x-return-ramp",
+      "stage": "required",
       "offBudget": false,
       "budgetOverrideReason": null,
-      "answer": "on_off",
-      "answerSource": "persona",
+      "answer": "easy",
+      "answerSource": "default",
       "rejected": null,
       "newEvidencePaths": [
-        "consistency"
+        "returnRamp"
       ]
     }
   ],
@@ -231,13 +231,13 @@
     "skipped": 0,
     "clarifications": 0,
     "budgetOverrides": 0,
-    "bankSize": 153,
+    "bankSize": 154,
     "touched": 16,
-    "bankAvoidedBp": 8954
+    "bankAvoidedBp": 8961
   },
   "completeness": {
     "complete": true,
     "mandatoryMissing": []
   },
-  "finalExperienceClass": "returning"
+  "finalExperienceClass": "advanced"
 }
