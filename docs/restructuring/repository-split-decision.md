@@ -64,7 +64,7 @@ Every numbered operation below is REVIEW-gated. None is authorized by this docum
 
 The first executable wave is **repository preparation and filtered extraction only**:
 
-- input: tag and clean branch from `ed640f0…`;
+- input: the reviewed `integration/converged-reviewed-2026-08-09` tag and a clean branch from its exact resolved commit;
 - output: two private repositories with filtered history and no production remote/deploy cutover;
 - web selection: `site/**`, `docs/site/**`, `docs/legal/**`;
 - app selection: the exact tracked-source complement of the web allowlist, excluding the three named cutover files; this includes application, iOS, backend, contracts, tests, product documentation, CI, and the legacy runtime;

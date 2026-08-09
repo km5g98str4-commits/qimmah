@@ -685,13 +685,13 @@ package.json        added=10  absent-from-main=1
 
 # 13. Updated implementation package order *(deliverable 4)*
 
-Sized per charter §3 — small, independently reviewable, independently revertible. **Each is its own `[CTO-n]` wave with the full local gate + CI read (§4.0) before landing.** Status column reflects reality as of revision 3.
+Sized per charter §3 — small, independently reviewable, independently revertible. **Each is its own `[CTO-n]` wave with the full local gate + CI read (§4.0) before landing.** Status column reflects reality as of revision 4.
 
 | # | Package | Scope | Files | Gate |
 |---|---|---|---|---|
 | **P0** | **Charter amendment** *(founder-gated, no product code)* | The 4 edits in §5, `AGENTS.md` + `CLAUDE.md` together per §1.5; plus the `product.ts:2` template-language cleanup | `AGENTS.md`, `CLAUDE.md`, `.claude/rules/product.md`, `src/config/product.ts` | `test:no-template-language` |
 | **P1** | **Archive the fork ref** *(founder-gated)* | §12.2 — tag, then drop | none (refs only) | — |
-| **P2** | **Schema + RLS + RPCs** — ✅ **LANDED** on `claude/access-entitlements` (database + proofs only; the disclosure moved to P2b) | §7 as-implemented: 4 migrations (`20260806120001/2/3`, `20260809120001/2`) — tables, pepper, RPCs, privilege hardening, durable revocation, code-grant recovery | `supabase/migrations/…`; `scripts/db/entitlements-proof.mjs`; `scripts/db/privileges-proof.mjs`; `scripts/db/lib/supabase-sandbox.mjs` | `test:entitlements` (120) + `test:privileges` (37), wired into `test:gate`. **Staging apply still founder-gated.** |
+| **P2** | **Schema + RLS + RPCs** — ✅ **integrated and tested** on `codex/qimmah-integration` (database + proofs only; the disclosure moved to P2b) | §7 as-implemented: 6 migrations (`20260806120001/2/3`, `20260809120001/2/3`) — tables, pepper, RPCs, table-privilege and PUBLIC-EXECUTE hardening, durable revocation, code-grant recovery | `supabase/migrations/…`; `scripts/db/entitlements-proof.mjs`; `scripts/db/privileges-proof.mjs`; `scripts/db/lib/supabase-sandbox.mjs` | `test:entitlements` (131) + `test:privileges` (38), wired into `test:gate`. **Staging apply still founder-gated.** |
 | **P2b** | **Privacy disclosure** *(specified, not started)* | §11.1 text + revocation-ledger coverage; must precede P5 | See [`P2B-PRIVACY-DISCLOSURE-PROPOSAL.md`](./P2B-PRIVACY-DISCLOSURE-PROPOSAL.md) for the exact file list | Per proposal |
 | **P3** | **Config + provider interface** *(no UI)* | §6 and §10 | **new** `src/config/access.ts`, `src/lib/entitlement/{types,provider,supabaseProvider,manualProvider,context}.ts`; register the cache key in `src/lib/userDataKeys.ts` | **new** `test:entitlement` in `test:gate`, including a §4.2 counter-assertion that a forged client state grants nothing, and the §6-5 no-price-literal check |
 | **P4** | **The gate itself** ⚠️ highest risk | §4.7 — rework `guardRoute` so a completed guest reaches preview only | `src/App.tsx`, `src/lib/appRoutes.ts` | **new** `test:access-gate` proving every gated route is unreachable without an entitlement **and** that the free tier still works with none |
