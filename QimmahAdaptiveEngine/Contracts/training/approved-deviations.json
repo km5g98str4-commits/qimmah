@@ -1,0 +1,46 @@
+{
+  "schemaVersion": "1.0.0",
+  "description": "Every intentional behavioral difference between QAE training selection and the characterized legacy selectors ([CTO-QAE-007] §G). PARITY mode reproduces legacy; anything else appears here with its approval. No hidden improvements.",
+  "deviations": [
+    {
+      "id": "D1-tie-break-ordinal",
+      "legacyOutput": "score ties ordered by String.prototype.localeCompare (host-locale ICU collation; hyphen treatment locale-dependent)",
+      "qaeOutput": "score ties ordered by ordinal (code-unit) exerciseId comparison",
+      "reason": "candidate order must never depend on locale; localeCompare is a characterized legacy determinism defect (registered L-TRN-1)",
+      "approvalReference": "[CTO-QAE-007] §F — 'Candidate order must never depend on … locale … Final tie-break: stable exerciseId'",
+      "affectedFixtures": "all 17 training goldens potentially; the parity proof compares score-buckets as sets and reports any observed sequence difference per fixture"
+    },
+    {
+      "id": "D2-substitution-ordering",
+      "legacyOutput": "substitutionsFor returns declared alternatives in authoring order, then same-shape matches in catalog REGISTRATION order, capped at 3",
+      "qaeOutput": "declaredSubstitutes stored sorted by exerciseId; same-shape family expressed as substitutionGroup (pattern:coarseMuscle); no registration-order dependence",
+      "reason": "registration order is banned as an ordering source; Wave 1 freezes the data representation — picker-level substitution selection is Wave 2",
+      "approvalReference": "[CTO-QAE-007] §F — 'Candidate order must never depend on: array registration order'",
+      "affectedFixtures": "candidateSelection.substitutions in all 17 goldens (characterized legacy output preserved in goldens; QAE does not reproduce the ordering)"
+    },
+    {
+      "id": "D3-staged-pipeline",
+      "legacyOutput": "two parallel legacy selectors: hardExclude/suitability/rank (personalization) and pool-filter + slot picking with machine-first alphabetical sort (shipping planGenerator)",
+      "qaeOutput": "single declarative staged order: MovementPattern → RequiredEquipment → Safety → Difficulty → Stability → FatigueCost → preference/history scoring → deterministic rank, with stability and fatigue ceilings that have no legacy equivalent",
+      "reason": "the approved architecture mandates one explainable order; safety and suitability outrank preference structurally",
+      "approvalReference": "[CTO-QAE-007] §E (declarative order specified verbatim)",
+      "affectedFixtures": "APPROVED_DEVIATION-mode results only; PARITY mode is unaffected and remains golden-comparable"
+    },
+    {
+      "id": "D4-impact-tag-per-id",
+      "legacyOutput": "impact detection via English-name regex at selection time (legacy defect L-QST-6: /bike|row|elliptical|swim|walk/i over nameEn)",
+      "qaeOutput": "the regex RESULT characterized once per exerciseId into metadata.contraindications ('impact' tag); selection reads the tag, never a name",
+      "reason": "no localized-name dependence in selection; result-identical for today's catalog (proof asserts set equality)",
+      "approvalReference": "[CTO-QAE-007] §F ('no translated exercise name') + LEGACY_DEFECT_REGISTER L-QST-6",
+      "affectedFixtures": "none today (identical result set); future catalog additions get the tag at extraction, not at runtime"
+    },
+    {
+      "id": "D5-machine-dominant-not-machine-only",
+      "legacyOutput": "shipping generator 'machines-only' pools for full/small gym (primaryMachineIdSet hard filter) alongside beginner machine-first candidate sort",
+      "qaeOutput": "beginner machine-DOMINANT ranking preference (machinePolicy score part); machines are never a hard pool restriction in QAE-native mode",
+      "reason": "directive names the policy explicitly: 'Beginner = machine-dominant policy, NOT machine-only absolute rule'",
+      "approvalReference": "[CTO-QAE-007] §E (Important block)",
+      "affectedFixtures": "APPROVED_DEVIATION-mode candidate sets for gym scenarios include non-machine candidates that the legacy machines-only pool excluded; PARITY mode reproduces the legacy personalization selector, which never had the machines-only pool"
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qimmah.app/qae/training/training-capability.schema.json",
+  "title": "TrainingCapabilityProfile",
+  "description": "The Training Engine's entire view of the athlete ([CTO-QAE-007] §D). Derived from AthleteProfile ONLY — zero question ids, zero UI strings. Beginner = machine-dominant policy (ranking), never machine-only; safety outranks preference.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion", "experienceBand", "planningClass", "returningStatus", "trainingDaysPerWeek",
+    "sessionDurationMinutes", "environment", "equipmentCapabilities", "injuryConstraints",
+    "unmappedConstraintAreas", "stabilityCeiling", "exerciseComplexityCeiling", "fatigueCeiling",
+    "preferredTrainingStyle", "machineDominantPolicy", "progressionCapability",
+    "recoveryCapacityClass", "needsClearance"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "experienceBand": { "enum": ["beginner", "intermediate", "advanced"] },
+    "planningClass": { "enum": ["complete_beginner", "beginner", "early_intermediate", "intermediate", "advanced", "returning"] },
+    "returningStatus": { "enum": ["active", "returning", "neverTrained", "unknown"] },
+    "trainingDaysPerWeek": { "type": ["integer", "null"] },
+    "sessionDurationMinutes": { "type": ["integer", "null"] },
+    "environment": { "type": ["string", "null"] },
+    "equipmentCapabilities": { "type": "object", "additionalProperties": { "type": "boolean" } },
+    "injuryConstraints": { "type": "array", "items": { "enum": ["knee", "shoulder", "lower_back", "wrist", "elbow", "ankle", "overhead", "impact"] } },
+    "unmappedConstraintAreas": { "type": "array", "items": { "type": "string" }, "description": "Reported areas without exclusion-tag vocabulary — carried visibly, never silently dropped." },
+    "stabilityCeiling": { "enum": [1, 2, 3] },
+    "exerciseComplexityCeiling": { "enum": [1, 2, 3] },
+    "fatigueCeiling": { "enum": [1, 2, 3] },
+    "preferredTrainingStyle": { "type": ["string", "null"] },
+    "machineDominantPolicy": { "type": "boolean" },
+    "progressionCapability": { "type": "array", "items": { "enum": ["linear", "double", "rep", "timed"] }, "minItems": 1 },
+    "recoveryCapacityClass": { "enum": ["normal", "limited", "unknown"] },
+    "needsClearance": { "type": "boolean" }
+  }
+}

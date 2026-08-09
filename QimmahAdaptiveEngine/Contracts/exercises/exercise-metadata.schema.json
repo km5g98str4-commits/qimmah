@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qimmah.app/qae/exercises/exercise-metadata.schema.json",
+  "title": "ExerciseMetadata",
+  "description": "Canonical, UI-string-free exercise metadata ([CTO-QAE-007] §B). exerciseId is the stable name-independent identity (canonical slug; display names live in host dictionaries and NEVER appear here). All numeric scales are closed integer enums.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "exerciseId", "primaryMuscles", "secondaryMuscles", "primaryMuscleCoarse", "movementPattern",
+    "equipmentRequired", "equipmentAlternatives", "technicalDifficulty", "stabilityDemand",
+    "fatigueCost", "axialLoad", "jointStress", "laterality", "mechanics", "support", "loadMedium",
+    "suitableExperienceBands", "contraindications", "substitutionGroup", "declaredSubstitutes",
+    "progressionCompatibility", "minimumEquipmentCapability", "legacyEnvironment",
+    "metadataConfidence", "provenance"
+  ],
+  "properties": {
+    "exerciseId": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "description": "Stable canonical slug (P12 catalog identity). Name-independent: renaming or retranslating an exercise never changes it; legacy ids resolve through the catalog alias map."
+    },
+    "primaryMuscles": { "type": "array", "items": { "type": "string" }, "description": "Detailed muscle ids (sorted)." },
+    "secondaryMuscles": { "type": "array", "items": { "type": "string" } },
+    "primaryMuscleCoarse": { "type": "string", "description": "Coarse muscle group (slot vocabulary: chest/back/shoulders/quads/…)." },
+    "movementPattern": { "enum": ["push", "pull", "squat", "hinge", "lunge", "isolation", "core", "cardio", "mobility"] },
+    "equipmentRequired": { "type": "array", "items": { "type": "string" }, "description": "Every listed tool is required (characterized legacy rule: ALL, not ANY)." },
+    "equipmentAlternatives": {
+      "type": "array",
+      "items": { "type": "array", "items": { "type": "string" } },
+      "description": "Alternative complete equipment sets that also satisfy the exercise. Empty = no legacy representation (documented; population is future enrichment, not inference)."
+    },
+    "technicalDifficulty": { "enum": [1, 2, 3], "description": "1=beginner 2=intermediate 3=advanced (characterized from legacy level)." },
+    "stabilityDemand": { "enum": [1, 2, 3], "description": "1=guided machine · 2=supported/simple · 3=free compound unsupported or unilateral (derived rule)." },
+    "fatigueCost": { "enum": [1, 2, 3], "description": "3=high-axial compound · 2=compound · 1=isolation/core/mobility (derived rule)." },
+    "axialLoad": { "enum": ["none", "moderate", "high"] },
+    "jointStress": { "type": "array", "items": { "enum": ["knee", "shoulder", "lower_back", "wrist", "elbow", "ankle"] }, "description": "Characterized from legacy INJURY_RISKY_IDS (blocklist migration)." },
+    "laterality": { "enum": ["bilateral", "unilateral"] },
+    "mechanics": { "enum": ["compound", "isolation"], "description": "compound iff pattern ∈ {squat,hinge,push,pull,lunge} (characterized COMPOUND_PATTERNS)." },
+    "support": { "enum": ["supported", "unsupported"] },
+    "loadMedium": { "enum": ["machine", "freeWeight", "cable", "bodyweight", "band"] },
+    "suitableExperienceBands": { "type": "array", "items": { "enum": ["beginner", "intermediate", "advanced"] }, "minItems": 1 },
+    "contraindications": {
+      "type": "array",
+      "items": { "enum": ["knee", "shoulder", "lower_back", "wrist", "elbow", "ankle", "overhead", "impact"] },
+      "description": "Exclusion tags: jointStress areas + overhead/impact flags. Evidence tags for metadata filtering — never diagnosis."
+    },
+    "substitutionGroup": { "type": "string", "description": "pattern:coarseMuscle — same-shape substitution family (characterized)." },
+    "declaredSubstitutes": { "type": "array", "items": { "type": "string" }, "description": "Curated substitute exercise ids (canonicalized, sorted — ordering is an APPROVED_DEVIATION vs legacy registration order)." },
+    "progressionCompatibility": { "type": "array", "items": { "enum": ["linear", "double", "rep", "timed"] }, "minItems": 1 },
+    "minimumEquipmentCapability": { "type": "array", "items": { "type": "string" }, "description": "Capability keys that must ALL be present. Empty = bodyweight-only (always available)." },
+    "legacyEnvironment": { "enum": ["gym", "home", "both"], "description": "Characterized legacy environment tag — kept for PARITY replication of environmentAllows." },
+    "metadataConfidence": { "enum": ["characterized", "derived", "assigned"] },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["characterized", "derived"],
+      "properties": {
+        "characterized": { "type": "string" },
+        "derived": { "type": "string" }
+      }
+    }
+  }
+}
