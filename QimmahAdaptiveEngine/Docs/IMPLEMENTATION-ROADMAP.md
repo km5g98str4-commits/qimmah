@@ -24,7 +24,7 @@ Delivered: the Docs/ set · Contracts/ drafts · Fixtures/spec/ (34 scenarios, l
 
 1. Oracle Harness → 2. Canonical Domain Types → 3. SafetyPolicy → 4. Decision Pipeline → 5. Question Engine → 6. Training → 7. Nutrition → 8. Recovery → 9. Steps → 10. Weekly Trends → 11. Adaptation Engine → 12. Integration.
 
-**Phase 1: ✅ APPROVED by [CTO-QAE-003]. Phase 2: ✅ ACCEPTED by [CTO-QAE-004]. Phase 3: ✅ APPROVED by [CTO-QAE-005] (Evidence & Question foundation locked). Phase 4 (real personalization content) delivered per [CTO-QAE-005] — see QAE-PHASE4-REPORT.md.** The golden law applies from here forward: 100 % golden compatibility before any optimization.
+**Phase 1: ✅ APPROVED by [CTO-QAE-003]. Phase 2: ✅ ACCEPTED by [CTO-QAE-004]. Phase 3: ✅ APPROVED by [CTO-QAE-005] (Evidence & Question foundation locked). Phase 4 (real personalization content) delivered per [CTO-QAE-005] — see QAE-PHASE4-REPORT.md. Phase 4.5 (AthleteProfile contract freeze v1.0.0 — the single normalization boundary; downstream engines never read question ids) delivered per [CTO-QAE-006] — see QAE-PHASE4.5-REPORT.md and QAE-ATHLETE-PROFILE-CONTRACT.md.** The golden law applies from here forward: 100 % golden compatibility before any optimization.
 
 ## Architecture Lock ([CTO-QAE-003])
 

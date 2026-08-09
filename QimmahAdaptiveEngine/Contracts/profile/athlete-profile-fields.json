@@ -1,0 +1,437 @@
+{
+  "schemaVersion": "1.0.0",
+  "description": "AthleteProfile field registry ([CTO-QAE-006] §2). Audit metadata for the frozen contract in Domain/Profile/model.ts: per-field sources (evidence keys — NEVER question ids), normalization rule, type, required status, default behavior, confidence behavior, and downstream consumers. Downstream engines read AthleteProfile fields only; this registry is documentation and proof input, not an engine surface.",
+  "sourceConvention": "sources[] are normalized evidence keys emitted by the question engine (Domain/Evidence). The question-id → evidence-key mapping lives in Contracts/content/question-bank.qae.json; downstream engines never see it.",
+  "fields": [
+    {
+      "field": "schemaVersion",
+      "type": "string (semver)",
+      "required": false,
+      "sources": [],
+      "normalizationRule": "constant ATHLETE_PROFILE_SCHEMA_VERSION — structural, not derived from evidence",
+      "default": "1.0.0",
+      "confidenceBehavior": "n/a",
+      "consumers": ["TrainingEngine", "NutritionEngine", "StepsEngine", "RecoveryEngine", "TrendsEngine", "AdaptationEngine", "SafetyPolicy"]
+    },
+    {
+      "field": "status",
+      "type": "'complete' | 'incomplete'",
+      "required": false,
+      "sources": [],
+      "normalizationRule": "complete iff dataQuality.missingEvidence is empty — incomplete profiles are never consumed for a plan",
+      "default": "incomplete",
+      "confidenceBehavior": "n/a — completeness is binary, mirrored numerically in dataQuality.confidenceCenti",
+      "consumers": ["TrainingEngine", "NutritionEngine", "StepsEngine", "RecoveryEngine", "AdaptationEngine", "SafetyPolicy"]
+    },
+    {
+      "field": "identity.ageYears",
+      "type": "integer | null",
+      "required": true,
+      "sources": ["age"],
+      "normalizationRule": "integer years, range-validated at normalization; null = unknown = BLOCKING (U1) — never defaults to adult (legacy 'age 0 = adult' is dead)",
+      "default": "null (blocks plan generation)",
+      "confidenceBehavior": "declared value — no confidence discount; unknown blocks instead of degrading",
+      "consumers": ["SafetyPolicy", "NutritionEngine", "TrainingEngine"]
+    },
+    {
+      "field": "identity.sex",
+      "type": "'male' | 'female' | 'unspecified' | null",
+      "required": true,
+      "sources": ["sex"],
+      "normalizationRule": "declared option verbatim",
+      "default": "null (mandatory — listed in missingEvidence when absent)",
+      "confidenceBehavior": "declared value — taken at face value",
+      "consumers": ["NutritionEngine", "SafetyPolicy"]
+    },
+    {
+      "field": "body.heightMm",
+      "type": "integer | null",
+      "required": true,
+      "sources": ["heightCm"],
+      "normalizationRule": "cm×10 → mm, integer-canonical (no floats past the boundary)",
+      "default": "null (mandatory)",
+      "confidenceBehavior": "measured self-report — treated as measured",
+      "consumers": ["NutritionEngine", "TrendsEngine"]
+    },
+    {
+      "field": "body.currentWeightGrams",
+      "type": "integer | null",
+      "required": true,
+      "sources": ["weightKg"],
+      "normalizationRule": "kg×1000 → grams, integer-canonical",
+      "default": "null (mandatory)",
+      "confidenceBehavior": "measured self-report — treated as measured",
+      "consumers": ["NutritionEngine", "TrendsEngine", "AdaptationEngine"]
+    },
+    {
+      "field": "body.targetWeightGrams",
+      "type": "integer | null",
+      "required": false,
+      "sources": ["targetWeightKg"],
+      "normalizationRule": "kg×1000 → grams when collected; forced null for minors; non-integer input never enters the profile",
+      "default": "null — meaning is carried by body.weightTargetStatus, never assumed",
+      "confidenceBehavior": "declared aspiration — pacing derives from effectiveGoal when absent",
+      "consumers": ["NutritionEngine", "TrendsEngine"]
+    },
+    {
+      "field": "body.weightTargetStatus",
+      "type": "'collected' | 'notCollected' | 'notApplicableMinor'",
+      "required": true,
+      "sources": ["targetWeightKg", "age"],
+      "normalizationRule": "L-QST-7 contract fix: presence is a STATUS, never an assumption — notCollected is the current production reality (provider question dead on the impossible answers.primaryGoal path); minors → notApplicableMinor",
+      "default": "notCollected",
+      "confidenceBehavior": "n/a — status field",
+      "consumers": ["NutritionEngine", "TrendsEngine", "Explainability"]
+    },
+    {
+      "field": "goal.primaryGoal",
+      "type": "'cut' | 'bulk' | 'maintain' | null",
+      "required": true,
+      "sources": ["primaryGoalDisplay"],
+      "normalizationRule": "characterized GOAL_FROM_DISPLAY mapping (fat_loss→cut, muscle_gain/strength→bulk, recomp/general_health/get_fitter→maintain)",
+      "default": "null (mandatory)",
+      "confidenceBehavior": "declared choice",
+      "consumers": ["Explainability", "TrendsEngine"]
+    },
+    {
+      "field": "goal.secondaryGoal",
+      "type": "string | null",
+      "required": false,
+      "sources": ["secondaryGoal"],
+      "normalizationRule": "declared option verbatim",
+      "default": "null — no secondary emphasis",
+      "confidenceBehavior": "declared choice",
+      "consumers": ["TrainingEngine"]
+    },
+    {
+      "field": "goal.effectiveGoal",
+      "type": "'cut' | 'bulk' | 'maintain' | null",
+      "required": true,
+      "sources": ["primaryGoalDisplay", "age"],
+      "normalizationRule": "primaryGoal with minors folded to maintain (characterized live policy; SafetyPolicy re-enforces at CRITICAL) — the ONE goal downstream engines read",
+      "default": "null while primaryGoal or age unknown",
+      "confidenceBehavior": "derived — deterministic fold, no confidence discount",
+      "consumers": ["TrainingEngine", "NutritionEngine", "StepsEngine", "AdaptationEngine"]
+    },
+    {
+      "field": "goal.minorGoalRestrictions",
+      "type": "boolean",
+      "required": true,
+      "sources": ["age"],
+      "normalizationRule": "true iff 13 ≤ age < 18; unknown age blocks instead of restricting",
+      "default": "false (only meaningful alongside known age)",
+      "confidenceBehavior": "derived from declared age",
+      "consumers": ["SafetyPolicy", "NutritionEngine", "Explainability"]
+    },
+    {
+      "field": "training.experienceLevel",
+      "type": "'complete_beginner' | 'beginner' | 'early_intermediate' | 'intermediate' | 'advanced' | 'returning'",
+      "required": true,
+      "sources": ["consistency", "lastTrained", "totalMonths", "trainedBefore"],
+      "normalizationRule": "planning classification (separate from the four-axis band); returning recognized before banding",
+      "default": "complete_beginner (evidence-free floor — conservative)",
+      "confidenceBehavior": "inferred — engines treat as approximate and prefer the four-axis band",
+      "consumers": ["TrainingEngine", "AdaptationEngine"]
+    },
+    {
+      "field": "training.experienceBand",
+      "type": "{trainingKnowledge, recentTrainingExposure, currentWorkCapacity, consistencyHistory}",
+      "required": true,
+      "sources": ["consistency", "exerciseFamiliarity", "gymConfidence", "knowsProgression", "lastTrained", "programExperience", "selfLevel", "totalMonths", "tracksSets", "trainedBefore", "trainingAgeHonest"],
+      "normalizationRule": "four-axis classification, integer-canonical (EXPERIENCE-MODEL.md); never a single collapsed level",
+      "default": "all axes at conservative floor when evidence absent",
+      "confidenceBehavior": "inferred bands — currentWorkCapacity.conservative marks reduced trust after layoff",
+      "consumers": ["TrainingEngine", "AdaptationEngine", "RecoveryEngine"]
+    },
+    {
+      "field": "training.returningStatus",
+      "type": "'active' | 'returning' | 'neverTrained' | 'unknown'",
+      "required": true,
+      "sources": ["lastTrained", "totalMonths", "trainedBefore"],
+      "normalizationRule": "returning iff long layoff ∧ real history (characterized); neverTrained iff trainedBefore=never",
+      "default": "unknown when trainedBefore absent",
+      "confidenceBehavior": "inferred — drives conservative ramp, never punishes",
+      "consumers": ["TrainingEngine", "AdaptationEngine", "Explainability"]
+    },
+    {
+      "field": "training.consistency",
+      "type": "string | null",
+      "required": false,
+      "sources": ["consistency"],
+      "normalizationRule": "declared bucket verbatim (question skipped for never-trained users)",
+      "default": "null — never-trained or unasked",
+      "confidenceBehavior": "reported history — low confidence until observed logs exist",
+      "consumers": ["AdaptationEngine", "TrendsEngine"]
+    },
+    {
+      "field": "training.availableDaysPerWeek",
+      "type": "integer | null",
+      "required": true,
+      "sources": ["daysPerWeek"],
+      "normalizationRule": "integer days 1–7, range-validated at normalization",
+      "default": "null (mandatory)",
+      "confidenceBehavior": "declared availability — a constraint, not a promise; AdaptationEngine reconciles with observed",
+      "consumers": ["TrainingEngine", "StepsEngine", "RecoveryEngine"]
+    },
+    {
+      "field": "training.sessionDurationMinutes",
+      "type": "integer | null",
+      "required": true,
+      "sources": ["sessionMinutes"],
+      "normalizationRule": "integer minutes, range-validated at normalization",
+      "default": "null (mandatory)",
+      "confidenceBehavior": "declared availability — same treatment as availableDaysPerWeek",
+      "consumers": ["TrainingEngine"]
+    },
+    {
+      "field": "training.environment",
+      "type": "string | null",
+      "required": true,
+      "sources": ["place"],
+      "normalizationRule": "declared option verbatim",
+      "default": "null (mandatory)",
+      "confidenceBehavior": "declared fact",
+      "consumers": ["TrainingEngine"]
+    },
+    {
+      "field": "training.equipmentCapabilities",
+      "type": "Record<string, boolean>",
+      "required": true,
+      "sources": ["equipmentList", "place"],
+      "normalizationRule": "capability derivation — full gym ⇒ ALL capabilities (U3: never machines-only); home from inventory facts",
+      "default": "{} — no capabilities derivable yet",
+      "confidenceBehavior": "derived capabilities — additive only, absence of evidence never removes bodyweight",
+      "consumers": ["TrainingEngine"]
+    },
+    {
+      "field": "training.movementCompetency",
+      "type": "{overhead, hinge, squatDepth, impact, standing}: string | null each",
+      "required": false,
+      "sources": ["backHinge", "impactTolerance", "kneeDepth", "shoulderOverhead", "standingTolerance"],
+      "normalizationRule": "declared tolerance buckets verbatim from injury follow-ups — evidence for exercise filtering, never diagnosis",
+      "default": "null per movement — unasked (no injury path) means no restriction evidence",
+      "confidenceBehavior": "reported tolerance — SafetyPolicy treats null as unknown, not as cleared",
+      "consumers": ["TrainingEngine", "SafetyPolicy"]
+    },
+    {
+      "field": "training.trainingHistory",
+      "type": "{trainedBefore, totalMonthsBucket, lastTrainedBucket, tenureMonths}",
+      "required": false,
+      "sources": ["lastTrained", "totalMonths", "trainedBefore"],
+      "normalizationRule": "declared buckets verbatim + integer tenureMonths from the consistency-history axis",
+      "default": "nulls / tenureMonths 0",
+      "confidenceBehavior": "reported history — low confidence, superseded by observed logs post-launch",
+      "consumers": ["AdaptationEngine", "TrendsEngine"]
+    },
+    {
+      "field": "training.preferredTrainingStyle",
+      "type": "string | null",
+      "required": true,
+      "sources": ["trainingStyle"],
+      "normalizationRule": "declared option verbatim — a preference signal, never a capability restriction (U3)",
+      "default": "null (mandatory)",
+      "confidenceBehavior": "declared preference",
+      "consumers": ["TrainingEngine"]
+    },
+    {
+      "field": "safety.injuryAreas",
+      "type": "string[]",
+      "required": false,
+      "sources": ["currentInjuryAreas"],
+      "normalizationRule": "sorted multi-select area tags (select.min 1 enforced upstream when the question is asked)",
+      "default": "[] — no current injury reported",
+      "confidenceBehavior": "reported evidence, never diagnosis",
+      "consumers": ["SafetyPolicy", "TrainingEngine"]
+    },
+    {
+      "field": "safety.pastInjuryAreas",
+      "type": "string[]",
+      "required": false,
+      "sources": ["pastInjuryAreas"],
+      "normalizationRule": "sorted multi-select area tags",
+      "default": "[]",
+      "confidenceBehavior": "reported evidence",
+      "consumers": ["SafetyPolicy", "TrainingEngine"]
+    },
+    {
+      "field": "safety.painOnMovement",
+      "type": "string[]",
+      "required": false,
+      "sources": ["painOnMovement"],
+      "normalizationRule": "sorted multi-select movement tags",
+      "default": "[]",
+      "confidenceBehavior": "reported evidence",
+      "consumers": ["SafetyPolicy", "TrainingEngine"]
+    },
+    {
+      "field": "safety.reportedPainLevel",
+      "type": "integer 0–10 | null",
+      "required": false,
+      "sources": ["painLevel"],
+      "normalizationRule": "user-described severity category on the approved 0–10 scale — reported, never diagnosed",
+      "default": "null — unasked",
+      "confidenceBehavior": "reported severity; ≥6 raises the highPain safety flag",
+      "consumers": ["SafetyPolicy", "RecoveryEngine"]
+    },
+    {
+      "field": "safety.contraindications",
+      "type": "string[]",
+      "required": true,
+      "sources": ["currentInjuryAreas", "painOnMovement"],
+      "normalizationRule": "sorted union of reported areas + reported problem movements — tags for metadata filtering only",
+      "default": "[]",
+      "confidenceBehavior": "reported evidence — filtering is conservative, tags never expire silently",
+      "consumers": ["SafetyPolicy", "TrainingEngine"]
+    },
+    {
+      "field": "safety.safetyFlags",
+      "type": "string[]",
+      "required": true,
+      "sources": ["chestPain", "dizzinessOnEffort", "doctorRestriction", "fainting", "painLevel", "recentSurgery"],
+      "normalizationRule": "screen answers verbatim; highPain iff painLevel≥6 (characterized threshold)",
+      "default": "[]",
+      "confidenceBehavior": "reported evidence — any flag is honored, never argued down",
+      "consumers": ["SafetyPolicy", "RecoveryEngine", "Explainability"]
+    },
+    {
+      "field": "safety.needsClearance",
+      "type": "boolean",
+      "required": true,
+      "sources": ["chestPain", "dizzinessOnEffort", "doctorRestriction", "fainting", "painLevel", "pregnancyStatus", "recentSurgery"],
+      "normalizationRule": "true iff any safety flag or pregnant/postpartum — gates SafetyPolicy, never silently cleared",
+      "default": "false",
+      "confidenceBehavior": "derived gate — one-way (evidence can raise it; only explicit clearance lowers it)",
+      "consumers": ["SafetyPolicy", "TrainingEngine"]
+    },
+    {
+      "field": "safety.pregnancyContext",
+      "type": "'pregnant' | 'postpartum' | 'none' | 'notApplicable' | 'unknown'",
+      "required": true,
+      "sources": ["pregnancyStatus", "sex"],
+      "normalizationRule": "reported status; male ⇒ notApplicable; unasked ⇒ unknown (never assumed none)",
+      "default": "unknown",
+      "confidenceBehavior": "reported status — unknown is honest, not a silent none",
+      "consumers": ["SafetyPolicy", "NutritionEngine"]
+    },
+    {
+      "field": "lifestyle.baselineStepsBucket",
+      "type": "string | null",
+      "required": false,
+      "sources": ["dailySteps"],
+      "normalizationRule": "declared bucket verbatim — the questionnaire yields buckets, never invented numbers",
+      "default": "null — unknown ≠ sedentary",
+      "confidenceBehavior": "low when reported, none when absent",
+      "consumers": ["StepsEngine"]
+    },
+    {
+      "field": "lifestyle.baselineStepsPerDay",
+      "type": "integer | null",
+      "required": false,
+      "sources": [],
+      "normalizationRule": "structurally present; populated from OBSERVED device data post-launch only — never derived from a bucket",
+      "default": "null",
+      "confidenceBehavior": "none until observed data exists",
+      "consumers": ["StepsEngine", "TrendsEngine"]
+    },
+    {
+      "field": "lifestyle.baselineStepsConfidence",
+      "type": "'none' | 'low' | 'medium' | 'high'",
+      "required": false,
+      "sources": ["dailySteps"],
+      "normalizationRule": "low iff a bucket was reported, none otherwise; medium/high reserved for observed data",
+      "default": "none",
+      "confidenceBehavior": "is itself the confidence carrier for the steps baseline",
+      "consumers": ["StepsEngine"]
+    },
+    {
+      "field": "lifestyle.activityContext",
+      "type": "{sittingBucket: string | null}",
+      "required": false,
+      "sources": ["sittingHours"],
+      "normalizationRule": "declared bucket verbatim",
+      "default": "null — unasked",
+      "confidenceBehavior": "reported estimate — approximate by nature",
+      "consumers": ["StepsEngine", "NutritionEngine"]
+    },
+    {
+      "field": "lifestyle.sleepBand",
+      "type": "string | null",
+      "required": false,
+      "sources": ["sleepHours"],
+      "normalizationRule": "declared bucket verbatim",
+      "default": "null — unasked",
+      "confidenceBehavior": "reported estimate",
+      "consumers": ["RecoveryEngine"]
+    },
+    {
+      "field": "lifestyle.stressLevel",
+      "type": "string | null",
+      "required": false,
+      "sources": ["stressLevel"],
+      "normalizationRule": "declared bucket verbatim",
+      "default": "null — unasked",
+      "confidenceBehavior": "reported estimate",
+      "consumers": ["RecoveryEngine"]
+    },
+    {
+      "field": "lifestyle.fastingContext",
+      "type": "{provided: boolean}",
+      "required": false,
+      "sources": [],
+      "normalizationRule": "Ramadan seam: host-provided only, never inferred from calendar or locale ([CTO-QAE-005] §10)",
+      "default": "{provided: false}",
+      "confidenceBehavior": "n/a until host provides",
+      "consumers": ["NutritionEngine", "StepsEngine"]
+    },
+    {
+      "field": "adherence.reported",
+      "type": "{value: string | null, confidence}",
+      "required": false,
+      "sources": ["planAdherenceStyle"],
+      "normalizationRule": "declared style verbatim with confidence low; none when unasked",
+      "default": "{value: null, confidence: 'none'}",
+      "confidenceBehavior": "reported self-assessment — always low, never treated as measured",
+      "consumers": ["AdaptationEngine"]
+    },
+    {
+      "field": "adherence.observed",
+      "type": "{value: string | null, confidence}",
+      "required": false,
+      "sources": [],
+      "normalizationRule": "structurally present now; populated by DataQuality from real logs post-launch — reported and observed are carried side by side, conflicts recorded not reconciled",
+      "default": "{value: null, confidence: 'none'}",
+      "confidenceBehavior": "none until real logs exist; observed outranks reported once present",
+      "consumers": ["AdaptationEngine", "TrendsEngine"]
+    },
+    {
+      "field": "dataQuality.missingEvidence",
+      "type": "string[] (evidence keys)",
+      "required": true,
+      "sources": ["age", "daysPerWeek", "hasInjury", "healthConsent", "heightCm", "place", "primaryGoalDisplay", "sessionMinutes", "sex", "trainedBefore", "trainingStyle", "weightKg"],
+      "normalizationRule": "mandatory evidence keys absent from facts; non-empty ⇒ profile incomplete ⇒ no plan",
+      "default": "all 12 mandatory keys (empty profile)",
+      "confidenceBehavior": "is itself the completeness signal",
+      "consumers": ["SafetyPolicy", "Explainability", "AdaptationEngine"]
+    },
+    {
+      "field": "dataQuality.contradictions",
+      "type": "string[] (conflict ids + cross-check names)",
+      "required": true,
+      "sources": ["*"],
+      "normalizationRule": "unresolved bank conflicts + profile-level cross-checks (e.g. painEvidenceWithoutInjuryReport); recorded, never silently reconciled",
+      "default": "[]",
+      "confidenceBehavior": "each contradiction lowers trust in its fields for consumers; data is kept, not dropped",
+      "consumers": ["SafetyPolicy", "AdaptationEngine", "Explainability"]
+    },
+    {
+      "field": "dataQuality.confidenceCenti",
+      "type": "integer 0–10000",
+      "required": true,
+      "sources": ["age", "daysPerWeek", "hasInjury", "healthConsent", "heightCm", "place", "primaryGoalDisplay", "sessionMinutes", "sex", "trainedBefore", "trainingStyle", "weightKg"],
+      "normalizationRule": "answered-mandatory share ×10000, integer-canonical (centi-percent)",
+      "default": "0",
+      "confidenceBehavior": "aggregate completeness score — never a substitute for per-field confidence",
+      "consumers": ["Explainability", "AdaptationEngine"]
+    }
+  ]
+}

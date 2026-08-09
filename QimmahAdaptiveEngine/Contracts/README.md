@@ -12,6 +12,8 @@ Language-neutral contracts for the Qimmah Adaptive Engine. Authorized by [CTO-QA
 | predicates (additive) | [CTO-QAE-005] Phase 4 | `exists`/`notExists` ops (legacy answered/unanswered conditions) | none — additive; plan goldens byte-identical |
 | normalization (additive) | [CTO-QAE-005] Phase 4 | `text`/`openList` answer types; `copyKey` on QuestionDef; `Selection.budgetOverrideReason` | none — additive |
 | content contracts v1 | [CTO-QAE-005] Phase 4 | `Contracts/content/`: question-bank.qae.json (153 active, bankManifestHash), question-inventory.json (193), bank-config.qae.json, profile-evidence-map.json, personas.json | new surface — journey goldens are its conformance suite |
+| select normalization | [CTO-QAE-006] §5 | `AnswerNormalizationSpec.select` (min/max) enforced by name (`too_few`/`too_many`); converter carries legacy constraints (4 active questions) — closes a silent widening | plan goldens byte-identical; 12 question goldens change `bankManifestHash` only (bank now carries `select`), every journey step byte-identical |
+| profile contract v1.0.0 | [CTO-QAE-006] | `Contracts/profile/athlete-profile-fields.json` + `Domain/Profile/` (AthleteProfile, buildAthleteProfile) — the single normalization boundary; downstream engines never read question ids (proved) | none — new surface; qae-profile-proof (79 checks) is its conformance suite |
 
 ## Conventions
 
