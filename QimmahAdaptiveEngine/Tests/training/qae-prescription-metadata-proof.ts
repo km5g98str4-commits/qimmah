@@ -4,6 +4,7 @@
 // the catalog, so 17/17 parity is structurally undisturbable; the parity suites
 // re-run unchanged in qae:all and assert that independently.
 
+import { createHash } from 'node:crypto'
 import { readdirSync, readFileSync } from 'node:fs'
 import { resolve as resolvePath } from 'node:path'
 import { canonicalSerialize } from '../../Domain/Shared/canonical'
@@ -213,6 +214,73 @@ console.log(`pendingCorrection by field: ${JSON.stringify(byField)}`)
   check('§8 curation does not mutate catalog values (parity structurally safe)', before === after)
   const rec: CurationRecord | undefined = curation.records[0]
   check('§8 pendingCorrection is recorded, never applied', rec !== undefined && typeof rec.pendingCorrection === 'boolean')
+}
+
+// ═══ [CTO-QAE-016] §11 — post-promotion counter-assertions ════════════════
+{
+  // 1. All corrections are APPLIED: the catalog now agrees with review.
+  const stillPending = curation.records.filter((r) => r.pendingCorrection)
+  check(
+    'W6 all reviewed corrections are applied (pendingCorrection == 0)',
+    stillPending.length === 0,
+    stillPending.slice(0, 3).map((r) => `${r.exerciseId}/${r.field}`).join(', '),
+  )
+
+  // 2. Reintroducing an old value fails BY NAME — not by exception.
+  const probe = curation.records[0]
+  const revertedValue = probe.field === 'axialLoad' ? (probe.value === 'high' ? 'none' : 'high') : ((probe.value as number) === 1 ? 3 : 1)
+  const revertedCatalog: ExerciseCatalog = {
+    ...catalog,
+    exercises: catalog.exercises.map((e) => (e.exerciseId === probe.exerciseId ? { ...e, [probe.field]: revertedValue } : e)),
+  }
+  const afterRevert = buildCurationSet(revertedCatalog, [...goldenIds])
+  const reopened = afterRevert.records.filter((r) => r.pendingCorrection)
+  check(
+    'W6 MUTATION: reintroducing an old corrected value reopens pendingCorrection by name',
+    reopened.length === 1 && reopened[0].exerciseId === probe.exerciseId && reopened[0].field === probe.field,
+    `${reopened.length} reopened`,
+  )
+
+  // 3. No duplicate authority survives promotion: catalog value == reviewed value.
+  let mismatched = 0
+  for (const r of curation.records) if (r.value !== r.catalogValue) mismatched++
+  check('W6 single source of truth: catalog value == reviewed value for every record', mismatched === 0, String(mismatched))
+
+  // 4. The catalog manifest hash must MATCH its content.
+  //    Promotion changed 77 field values while the stored hash stayed identical —
+  //    a stale provenance label embedded in every plan. This guard makes that
+  //    class of silent drift fail by name rather than ride along unnoticed.
+  const canonicalBody = (v: unknown): string => {
+    const sort = (x: unknown): unknown => {
+      if (Array.isArray(x)) return x.map(sort)
+      if (x !== null && typeof x === 'object') {
+        const o = x as Record<string, unknown>
+        return Object.fromEntries(Object.keys(o).sort().map((k) => [k, sort(o[k])]))
+      }
+      return x
+    }
+    return JSON.stringify(sort(v), null, 2) + '\n'
+  }
+  const raw = readJson<Record<string, unknown>>('Contracts/exercises/exercise-catalog.qae.json')
+  const body = {
+    schemaVersion: raw['schemaVersion'],
+    source: raw['source'],
+    exerciseCount: raw['exerciseCount'],
+    aliases: raw['aliases'],
+    primaryMachineIds: raw['primaryMachineIds'],
+    exercises: raw['exercises'],
+  }
+  const recomputed = createHash('sha256').update(canonicalBody(body)).digest('hex')
+  check('W6 catalogManifestHash matches catalog content (no stale provenance)', recomputed === raw['catalogManifestHash'], `${String(raw['catalogManifestHash']).slice(0, 12)} vs ${recomputed.slice(0, 12)}`)
+
+  // 5. Counter-assertion for the guard itself: a mutated body must NOT hash the same.
+  const mutated = { ...body, exerciseCount: (body.exerciseCount as number) + 1 }
+  check('W6 hash guard counter-assertion: a changed body yields a different hash', createHash('sha256').update(canonicalBody(mutated)).digest('hex') !== recomputed)
+
+  // 6. The 76 uncurated exercises remain blocked from prescription use.
+  const uncurated = catalog.exercises.filter((e) => !cohort.includes(e.exerciseId))
+  const leaked = uncurated.filter((e) => readPrescriptionMetadata(curation, e.exerciseId, 'fatigueCost').ok)
+  check('W6 uncurated exercises remain blocked from prescription metadata', leaked.length === 0, `${leaked.length} leaked of ${uncurated.length}`)
 }
 
 console.log(`qae-prescription-metadata-proof: ${passed} passed, ${failed} failed`)

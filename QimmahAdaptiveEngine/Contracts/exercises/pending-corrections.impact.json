@@ -1,0 +1,1675 @@
+{
+  "schemaVersion": "1.0.0",
+  "$comment": "[CTO-QAE-016] §1 impact matrix — produced BEFORE any catalog value changed.",
+  "total": 77,
+  "byImpactClass": {
+    "A_NO_CURRENT_BEHAVIOR_IMPACT": 46,
+    "CE_ELIGIBILITY_AND_SUBSTITUTION": 21,
+    "C_ELIGIBILITY_AFFECTING": 10
+  },
+  "byField": {
+    "axialLoad": 46,
+    "stabilityDemand": 21,
+    "fatigueCost": 10
+  },
+  "corrections": [
+    {
+      "exerciseId": "arnold-press",
+      "field": "axialLoad",
+      "oldValue": "none",
+      "reviewedValue": "moderate",
+      "confidence": "CHARACTERIZED",
+      "rationale": "standing press loads the spine but under a bounded load ceiling",
+      "criteria": [
+        "A1.standingPressModerate"
+      ],
+      "affectedGoldenFixtures": [
+        "advanced-limited-equipment",
+        "beginner-home"
+      ],
+      "consumedBy": {
+        "selection": null,
+        "eligibility": false,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "A_NO_CURRENT_BEHAVIOR_IMPACT"
+    },
+    {
+      "exerciseId": "arnold-press",
+      "field": "stabilityDemand",
+      "oldValue": 3,
+      "reviewedValue": 2,
+      "confidence": "CHARACTERIZED",
+      "rationale": "free path, bilateral, planted base",
+      "criteria": [
+        "S2.freeBilateralBracedBase"
+      ],
+      "affectedGoldenFixtures": [
+        "advanced-limited-equipment",
+        "beginner-home"
+      ],
+      "consumedBy": {
+        "selection": "selectCandidates (QAE-native) stability ceiling FILTER",
+        "eligibility": true,
+        "assembly": false,
+        "substitution": true
+      },
+      "impactClass": "CE_ELIGIBILITY_AND_SUBSTITUTION"
+    },
+    {
+      "exerciseId": "assisted-dip-machine",
+      "field": "axialLoad",
+      "oldValue": "none",
+      "reviewedValue": "moderate",
+      "confidence": "CHARACTERIZED",
+      "rationale": "spine is loaded but the path is supported or machine-guided",
+      "criteria": [
+        "A1.supportedOrGuided"
+      ],
+      "affectedGoldenFixtures": [
+        "advanced-full-gym",
+        "five-day",
+        "long-session",
+        "six-day"
+      ],
+      "consumedBy": {
+        "selection": null,
+        "eligibility": false,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "A_NO_CURRENT_BEHAVIOR_IMPACT"
+    },
+    {
+      "exerciseId": "barbell-back-squat",
+      "field": "stabilityDemand",
+      "oldValue": 3,
+      "reviewedValue": 2,
+      "confidence": "CHARACTERIZED",
+      "rationale": "free path, bilateral, planted base",
+      "criteria": [
+        "S2.freeBilateralBracedBase"
+      ],
+      "affectedGoldenFixtures": [
+        "advanced-limited-equipment"
+      ],
+      "consumedBy": {
+        "selection": "selectCandidates (QAE-native) stability ceiling FILTER",
+        "eligibility": true,
+        "assembly": false,
+        "substitution": true
+      },
+      "impactClass": "CE_ELIGIBILITY_AND_SUBSTITUTION"
+    },
+    {
+      "exerciseId": "barbell-row",
+      "field": "stabilityDemand",
+      "oldValue": 3,
+      "reviewedValue": 2,
+      "confidence": "CHARACTERIZED",
+      "rationale": "free path, bilateral, planted base",
+      "criteria": [
+        "S2.freeBilateralBracedBase"
+      ],
+      "affectedGoldenFixtures": [
+        "advanced-limited-equipment",
+        "beginner-home"
+      ],
+      "consumedBy": {
+        "selection": "selectCandidates (QAE-native) stability ceiling FILTER",
+        "eligibility": true,
+        "assembly": false,
+        "substitution": true
+      },
+      "impactClass": "CE_ELIGIBILITY_AND_SUBSTITUTION"
+    },
+    {
+      "exerciseId": "belt-squat",
+      "field": "axialLoad",
+      "oldValue": "none",
+      "reviewedValue": "moderate",
+      "confidence": "CHARACTERIZED",
+      "rationale": "spine is loaded but the path is supported or machine-guided",
+      "criteria": [
+        "A1.supportedOrGuided"
+      ],
+      "affectedGoldenFixtures": [],
+      "consumedBy": {
+        "selection": null,
+        "eligibility": false,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "A_NO_CURRENT_BEHAVIOR_IMPACT"
+    },
+    {
+      "exerciseId": "bench-dip",
+      "field": "axialLoad",
+      "oldValue": "none",
+      "reviewedValue": "moderate",
+      "confidence": "CHARACTERIZED",
+      "rationale": "spine is loaded but the path is supported or machine-guided",
+      "criteria": [
+        "A1.supportedOrGuided"
+      ],
+      "affectedGoldenFixtures": [],
+      "consumedBy": {
+        "selection": null,
+        "eligibility": false,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "A_NO_CURRENT_BEHAVIOR_IMPACT"
+    },
+    {
+      "exerciseId": "bodyweight-squat",
+      "field": "axialLoad",
+      "oldValue": "none",
+      "reviewedValue": "high",
+      "confidence": "CHARACTERIZED",
+      "rationale": "substantial external load through an unsupported spine",
+      "criteria": [
+        "A2.unsupportedLoadedSpine"
+      ],
+      "affectedGoldenFixtures": [
+        "advanced-limited-equipment",
+        "beginner-bodyweight",
+        "beginner-home"
+      ],
+      "consumedBy": {
+        "selection": null,
+        "eligibility": false,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "A_NO_CURRENT_BEHAVIOR_IMPACT"
+    },
+    {
+      "exerciseId": "bulgarian-split-squat",
+      "field": "axialLoad",
+      "oldValue": "none",
+      "reviewedValue": "high",
+      "confidence": "CHARACTERIZED",
+      "rationale": "substantial external load through an unsupported spine",
+      "criteria": [
+        "A2.unsupportedLoadedSpine"
+      ],
+      "affectedGoldenFixtures": [
+        "advanced-limited-equipment",
+        "beginner-home"
+      ],
+      "consumedBy": {
+        "selection": null,
+        "eligibility": false,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "A_NO_CURRENT_BEHAVIOR_IMPACT"
+    },
+    {
+      "exerciseId": "bulgarian-split-squat",
+      "field": "fatigueCost",
+      "oldValue": 2,
+      "reviewedValue": 3,
+      "confidence": "CHARACTERIZED",
+      "rationale": "multi-joint with a high load ceiling and >=2 heavy markers (stability/axial/technical)",
+      "criteria": [
+        "F3.multiJointHighLoadCeiling"
+      ],
+      "affectedGoldenFixtures": [
+        "advanced-limited-equipment",
+        "beginner-home"
+      ],
+      "consumedBy": {
+        "selection": "selectCandidates (QAE-native) fatigue ceiling FILTER",
+        "eligibility": true,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "C_ELIGIBILITY_AFFECTING"
+    },
+    {
+      "exerciseId": "cable-pull-through",
+      "field": "axialLoad",
+      "oldValue": "none",
+      "reviewedValue": "high",
+      "confidence": "CHARACTERIZED",
+      "rationale": "substantial external load through an unsupported spine",
+      "criteria": [
+        "A2.unsupportedLoadedSpine"
+      ],
+      "affectedGoldenFixtures": [],
+      "consumedBy": {
+        "selection": null,
+        "eligibility": false,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "A_NO_CURRENT_BEHAVIOR_IMPACT"
+    },
+    {
+      "exerciseId": "cable-shoulder-press",
+      "field": "axialLoad",
+      "oldValue": "none",
+      "reviewedValue": "moderate",
+      "confidence": "CHARACTERIZED",
+      "rationale": "standing press loads the spine but under a bounded load ceiling",
+      "criteria": [
+        "A1.standingPressModerate"
+      ],
+      "affectedGoldenFixtures": [],
+      "consumedBy": {
+        "selection": null,
+        "eligibility": false,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "A_NO_CURRENT_BEHAVIOR_IMPACT"
+    },
+    {
+      "exerciseId": "chest-dip",
+      "field": "axialLoad",
+      "oldValue": "none",
+      "reviewedValue": "moderate",
+      "confidence": "CHARACTERIZED",
+      "rationale": "standing press loads the spine but under a bounded load ceiling",
+      "criteria": [
+        "A1.standingPressModerate"
+      ],
+      "affectedGoldenFixtures": [
+        "advanced-limited-equipment",
+        "beginner-bodyweight",
+        "beginner-home"
+      ],
+      "consumedBy": {
+        "selection": null,
+        "eligibility": false,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "A_NO_CURRENT_BEHAVIOR_IMPACT"
+    },
+    {
+      "exerciseId": "chest-press-machine",
+      "field": "axialLoad",
+      "oldValue": "none",
+      "reviewedValue": "moderate",
+      "confidence": "CHARACTERIZED",
+      "rationale": "spine is loaded but the path is supported or machine-guided",
+      "criteria": [
+        "A1.supportedOrGuided"
+      ],
+      "affectedGoldenFixtures": [
+        "advanced-full-gym",
+        "back-restriction",
+        "beginner-full-gym",
+        "five-day",
+        "four-day",
+        "intermediate-full-gym",
+        "knee-restriction",
+        "long-session",
+        "multiple-restrictions",
+        "returning-advanced",
+        "short-session",
+        "shoulder-restriction",
+        "six-day",
+        "three-day"
+      ],
+      "consumedBy": {
+        "selection": null,
+        "eligibility": false,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "A_NO_CURRENT_BEHAVIOR_IMPACT"
+    },
+    {
+      "exerciseId": "close-grip-bench-press",
+      "field": "axialLoad",
+      "oldValue": "none",
+      "reviewedValue": "moderate",
+      "confidence": "CHARACTERIZED",
+      "rationale": "spine is loaded but the path is supported or machine-guided",
+      "criteria": [
+        "A1.supportedOrGuided"
+      ],
+      "affectedGoldenFixtures": [],
+      "consumedBy": {
+        "selection": null,
+        "eligibility": false,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "A_NO_CURRENT_BEHAVIOR_IMPACT"
+    },
+    {
+      "exerciseId": "deadlift",
+      "field": "stabilityDemand",
+      "oldValue": 3,
+      "reviewedValue": 2,
+      "confidence": "CHARACTERIZED",
+      "rationale": "free path, bilateral, planted base",
+      "criteria": [
+        "S2.freeBilateralBracedBase"
+      ],
+      "affectedGoldenFixtures": [],
+      "consumedBy": {
+        "selection": "selectCandidates (QAE-native) stability ceiling FILTER",
+        "eligibility": true,
+        "assembly": false,
+        "substitution": true
+      },
+      "impactClass": "CE_ELIGIBILITY_AND_SUBSTITUTION"
+    },
+    {
+      "exerciseId": "decline-barbell-press",
+      "field": "axialLoad",
+      "oldValue": "none",
+      "reviewedValue": "moderate",
+      "confidence": "CHARACTERIZED",
+      "rationale": "spine is loaded but the path is supported or machine-guided",
+      "criteria": [
+        "A1.supportedOrGuided"
+      ],
+      "affectedGoldenFixtures": [
+        "advanced-limited-equipment",
+        "beginner-home"
+      ],
+      "consumedBy": {
+        "selection": null,
+        "eligibility": false,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "A_NO_CURRENT_BEHAVIOR_IMPACT"
+    },
+    {
+      "exerciseId": "decline-chest-press-machine",
+      "field": "axialLoad",
+      "oldValue": "none",
+      "reviewedValue": "moderate",
+      "confidence": "CHARACTERIZED",
+      "rationale": "spine is loaded but the path is supported or machine-guided",
+      "criteria": [
+        "A1.supportedOrGuided"
+      ],
+      "affectedGoldenFixtures": [
+        "advanced-full-gym",
+        "back-restriction",
+        "beginner-full-gym",
+        "five-day",
+        "four-day",
+        "intermediate-full-gym",
+        "knee-restriction",
+        "long-session",
+        "multiple-restrictions",
+        "returning-advanced",
+        "short-session",
+        "shoulder-restriction",
+        "six-day",
+        "three-day"
+      ],
+      "consumedBy": {
+        "selection": null,
+        "eligibility": false,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "A_NO_CURRENT_BEHAVIOR_IMPACT"
+    },
+    {
+      "exerciseId": "decline-dumbbell-press",
+      "field": "axialLoad",
+      "oldValue": "none",
+      "reviewedValue": "moderate",
+      "confidence": "CHARACTERIZED",
+      "rationale": "spine is loaded but the path is supported or machine-guided",
+      "criteria": [
+        "A1.supportedOrGuided"
+      ],
+      "affectedGoldenFixtures": [
+        "advanced-limited-equipment"
+      ],
+      "consumedBy": {
+        "selection": null,
+        "eligibility": false,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "A_NO_CURRENT_BEHAVIOR_IMPACT"
+    },
+    {
+      "exerciseId": "diamond-push-up",
+      "field": "axialLoad",
+      "oldValue": "none",
+      "reviewedValue": "moderate",
+      "confidence": "CHARACTERIZED",
+      "rationale": "standing press loads the spine but under a bounded load ceiling",
+      "criteria": [
+        "A1.standingPressModerate"
+      ],
+      "affectedGoldenFixtures": [],
+      "consumedBy": {
+        "selection": null,
+        "eligibility": false,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "A_NO_CURRENT_BEHAVIOR_IMPACT"
+    },
+    {
+      "exerciseId": "dumbbell-bench-press",
+      "field": "axialLoad",
+      "oldValue": "none",
+      "reviewedValue": "moderate",
+      "confidence": "CHARACTERIZED",
+      "rationale": "spine is loaded but the path is supported or machine-guided",
+      "criteria": [
+        "A1.supportedOrGuided"
+      ],
+      "affectedGoldenFixtures": [],
+      "consumedBy": {
+        "selection": null,
+        "eligibility": false,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "A_NO_CURRENT_BEHAVIOR_IMPACT"
+    },
+    {
+      "exerciseId": "dumbbell-rdl",
+      "field": "axialLoad",
+      "oldValue": "none",
+      "reviewedValue": "high",
+      "confidence": "CHARACTERIZED",
+      "rationale": "substantial external load through an unsupported spine",
+      "criteria": [
+        "A2.unsupportedLoadedSpine"
+      ],
+      "affectedGoldenFixtures": [
+        "advanced-limited-equipment",
+        "beginner-home"
+      ],
+      "consumedBy": {
+        "selection": null,
+        "eligibility": false,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "A_NO_CURRENT_BEHAVIOR_IMPACT"
+    },
+    {
+      "exerciseId": "dumbbell-rdl",
+      "field": "stabilityDemand",
+      "oldValue": 3,
+      "reviewedValue": 2,
+      "confidence": "CHARACTERIZED",
+      "rationale": "free path, bilateral, planted base",
+      "criteria": [
+        "S2.freeBilateralBracedBase"
+      ],
+      "affectedGoldenFixtures": [
+        "advanced-limited-equipment",
+        "beginner-home"
+      ],
+      "consumedBy": {
+        "selection": "selectCandidates (QAE-native) stability ceiling FILTER",
+        "eligibility": true,
+        "assembly": false,
+        "substitution": true
+      },
+      "impactClass": "CE_ELIGIBILITY_AND_SUBSTITUTION"
+    },
+    {
+      "exerciseId": "dumbbell-shoulder-press",
+      "field": "axialLoad",
+      "oldValue": "none",
+      "reviewedValue": "moderate",
+      "confidence": "CHARACTERIZED",
+      "rationale": "standing press loads the spine but under a bounded load ceiling",
+      "criteria": [
+        "A1.standingPressModerate"
+      ],
+      "affectedGoldenFixtures": [
+        "advanced-limited-equipment",
+        "beginner-home"
+      ],
+      "consumedBy": {
+        "selection": null,
+        "eligibility": false,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "A_NO_CURRENT_BEHAVIOR_IMPACT"
+    },
+    {
+      "exerciseId": "dumbbell-shoulder-press",
+      "field": "stabilityDemand",
+      "oldValue": 3,
+      "reviewedValue": 2,
+      "confidence": "CHARACTERIZED",
+      "rationale": "free path, bilateral, planted base",
+      "criteria": [
+        "S2.freeBilateralBracedBase"
+      ],
+      "affectedGoldenFixtures": [
+        "advanced-limited-equipment",
+        "beginner-home"
+      ],
+      "consumedBy": {
+        "selection": "selectCandidates (QAE-native) stability ceiling FILTER",
+        "eligibility": true,
+        "assembly": false,
+        "substitution": true
+      },
+      "impactClass": "CE_ELIGIBILITY_AND_SUBSTITUTION"
+    },
+    {
+      "exerciseId": "dumbbell-sumo-squat",
+      "field": "axialLoad",
+      "oldValue": "none",
+      "reviewedValue": "high",
+      "confidence": "CHARACTERIZED",
+      "rationale": "substantial external load through an unsupported spine",
+      "criteria": [
+        "A2.unsupportedLoadedSpine"
+      ],
+      "affectedGoldenFixtures": [
+        "advanced-limited-equipment",
+        "beginner-home"
+      ],
+      "consumedBy": {
+        "selection": null,
+        "eligibility": false,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "A_NO_CURRENT_BEHAVIOR_IMPACT"
+    },
+    {
+      "exerciseId": "dumbbell-sumo-squat",
+      "field": "stabilityDemand",
+      "oldValue": 3,
+      "reviewedValue": 2,
+      "confidence": "CHARACTERIZED",
+      "rationale": "free path, bilateral, planted base",
+      "criteria": [
+        "S2.freeBilateralBracedBase"
+      ],
+      "affectedGoldenFixtures": [
+        "advanced-limited-equipment",
+        "beginner-home"
+      ],
+      "consumedBy": {
+        "selection": "selectCandidates (QAE-native) stability ceiling FILTER",
+        "eligibility": true,
+        "assembly": false,
+        "substitution": true
+      },
+      "impactClass": "CE_ELIGIBILITY_AND_SUBSTITUTION"
+    },
+    {
+      "exerciseId": "frog-pump",
+      "field": "axialLoad",
+      "oldValue": "none",
+      "reviewedValue": "high",
+      "confidence": "CHARACTERIZED",
+      "rationale": "substantial external load through an unsupported spine",
+      "criteria": [
+        "A2.unsupportedLoadedSpine"
+      ],
+      "affectedGoldenFixtures": [
+        "advanced-limited-equipment",
+        "beginner-bodyweight",
+        "beginner-home"
+      ],
+      "consumedBy": {
+        "selection": null,
+        "eligibility": false,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "A_NO_CURRENT_BEHAVIOR_IMPACT"
+    },
+    {
+      "exerciseId": "front-squat",
+      "field": "stabilityDemand",
+      "oldValue": 3,
+      "reviewedValue": 2,
+      "confidence": "CHARACTERIZED",
+      "rationale": "free path, bilateral, planted base",
+      "criteria": [
+        "S2.freeBilateralBracedBase"
+      ],
+      "affectedGoldenFixtures": [],
+      "consumedBy": {
+        "selection": "selectCandidates (QAE-native) stability ceiling FILTER",
+        "eligibility": true,
+        "assembly": false,
+        "substitution": true
+      },
+      "impactClass": "CE_ELIGIBILITY_AND_SUBSTITUTION"
+    },
+    {
+      "exerciseId": "glute-bridge",
+      "field": "axialLoad",
+      "oldValue": "none",
+      "reviewedValue": "high",
+      "confidence": "CHARACTERIZED",
+      "rationale": "substantial external load through an unsupported spine",
+      "criteria": [
+        "A2.unsupportedLoadedSpine"
+      ],
+      "affectedGoldenFixtures": [
+        "beginner-bodyweight",
+        "beginner-home"
+      ],
+      "consumedBy": {
+        "selection": null,
+        "eligibility": false,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "A_NO_CURRENT_BEHAVIOR_IMPACT"
+    },
+    {
+      "exerciseId": "glute-machine",
+      "field": "axialLoad",
+      "oldValue": "none",
+      "reviewedValue": "moderate",
+      "confidence": "CHARACTERIZED",
+      "rationale": "spine is loaded but the path is supported or machine-guided",
+      "criteria": [
+        "A1.supportedOrGuided"
+      ],
+      "affectedGoldenFixtures": [
+        "advanced-full-gym",
+        "back-restriction",
+        "beginner-full-gym",
+        "five-day",
+        "four-day",
+        "intermediate-full-gym",
+        "knee-restriction",
+        "long-session",
+        "multiple-restrictions",
+        "returning-advanced",
+        "short-session",
+        "shoulder-restriction",
+        "six-day",
+        "three-day"
+      ],
+      "consumedBy": {
+        "selection": null,
+        "eligibility": false,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "A_NO_CURRENT_BEHAVIOR_IMPACT"
+    },
+    {
+      "exerciseId": "goblet-squat",
+      "field": "axialLoad",
+      "oldValue": "none",
+      "reviewedValue": "high",
+      "confidence": "CHARACTERIZED",
+      "rationale": "substantial external load through an unsupported spine",
+      "criteria": [
+        "A2.unsupportedLoadedSpine"
+      ],
+      "affectedGoldenFixtures": [],
+      "consumedBy": {
+        "selection": null,
+        "eligibility": false,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "A_NO_CURRENT_BEHAVIOR_IMPACT"
+    },
+    {
+      "exerciseId": "goblet-squat",
+      "field": "stabilityDemand",
+      "oldValue": 3,
+      "reviewedValue": 2,
+      "confidence": "CHARACTERIZED",
+      "rationale": "free path, bilateral, planted base",
+      "criteria": [
+        "S2.freeBilateralBracedBase"
+      ],
+      "affectedGoldenFixtures": [],
+      "consumedBy": {
+        "selection": "selectCandidates (QAE-native) stability ceiling FILTER",
+        "eligibility": true,
+        "assembly": false,
+        "substitution": true
+      },
+      "impactClass": "CE_ELIGIBILITY_AND_SUBSTITUTION"
+    },
+    {
+      "exerciseId": "good-morning",
+      "field": "stabilityDemand",
+      "oldValue": 3,
+      "reviewedValue": 2,
+      "confidence": "CHARACTERIZED",
+      "rationale": "free path, bilateral, planted base",
+      "criteria": [
+        "S2.freeBilateralBracedBase"
+      ],
+      "affectedGoldenFixtures": [],
+      "consumedBy": {
+        "selection": "selectCandidates (QAE-native) stability ceiling FILTER",
+        "eligibility": true,
+        "assembly": false,
+        "substitution": true
+      },
+      "impactClass": "CE_ELIGIBILITY_AND_SUBSTITUTION"
+    },
+    {
+      "exerciseId": "hack-squat-machine",
+      "field": "axialLoad",
+      "oldValue": "none",
+      "reviewedValue": "moderate",
+      "confidence": "CHARACTERIZED",
+      "rationale": "spine is loaded but the path is supported or machine-guided",
+      "criteria": [
+        "A1.supportedOrGuided"
+      ],
+      "affectedGoldenFixtures": [
+        "advanced-full-gym",
+        "back-restriction",
+        "beginner-full-gym",
+        "five-day",
+        "four-day",
+        "intermediate-full-gym",
+        "long-session",
+        "returning-advanced",
+        "short-session",
+        "shoulder-restriction",
+        "six-day",
+        "three-day"
+      ],
+      "consumedBy": {
+        "selection": null,
+        "eligibility": false,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "A_NO_CURRENT_BEHAVIOR_IMPACT"
+    },
+    {
+      "exerciseId": "hip-thrust",
+      "field": "axialLoad",
+      "oldValue": "high",
+      "reviewedValue": "moderate",
+      "confidence": "CHARACTERIZED",
+      "rationale": "spine is loaded but the path is supported or machine-guided",
+      "criteria": [
+        "A1.supportedOrGuided"
+      ],
+      "affectedGoldenFixtures": [
+        "advanced-limited-equipment"
+      ],
+      "consumedBy": {
+        "selection": null,
+        "eligibility": false,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "A_NO_CURRENT_BEHAVIOR_IMPACT"
+    },
+    {
+      "exerciseId": "hip-thrust",
+      "field": "fatigueCost",
+      "oldValue": 3,
+      "reviewedValue": 2,
+      "confidence": "CHARACTERIZED",
+      "rationale": "compound with a bounded loading ceiling, or supported/guided",
+      "criteria": [
+        "F2.compoundBoundedCeiling"
+      ],
+      "affectedGoldenFixtures": [
+        "advanced-limited-equipment"
+      ],
+      "consumedBy": {
+        "selection": "selectCandidates (QAE-native) fatigue ceiling FILTER",
+        "eligibility": true,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "C_ELIGIBILITY_AFFECTING"
+    },
+    {
+      "exerciseId": "incline-chest-press-machine",
+      "field": "axialLoad",
+      "oldValue": "none",
+      "reviewedValue": "moderate",
+      "confidence": "CHARACTERIZED",
+      "rationale": "spine is loaded but the path is supported or machine-guided",
+      "criteria": [
+        "A1.supportedOrGuided"
+      ],
+      "affectedGoldenFixtures": [
+        "advanced-full-gym",
+        "back-restriction",
+        "beginner-full-gym",
+        "five-day",
+        "four-day",
+        "intermediate-full-gym",
+        "knee-restriction",
+        "long-session",
+        "multiple-restrictions",
+        "returning-advanced",
+        "short-session",
+        "shoulder-restriction",
+        "six-day",
+        "three-day"
+      ],
+      "consumedBy": {
+        "selection": null,
+        "eligibility": false,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "A_NO_CURRENT_BEHAVIOR_IMPACT"
+    },
+    {
+      "exerciseId": "incline-dumbbell-press",
+      "field": "axialLoad",
+      "oldValue": "none",
+      "reviewedValue": "moderate",
+      "confidence": "CHARACTERIZED",
+      "rationale": "spine is loaded but the path is supported or machine-guided",
+      "criteria": [
+        "A1.supportedOrGuided"
+      ],
+      "affectedGoldenFixtures": [],
+      "consumedBy": {
+        "selection": null,
+        "eligibility": false,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "A_NO_CURRENT_BEHAVIOR_IMPACT"
+    },
+    {
+      "exerciseId": "incline-push-up",
+      "field": "axialLoad",
+      "oldValue": "none",
+      "reviewedValue": "moderate",
+      "confidence": "CHARACTERIZED",
+      "rationale": "standing press loads the spine but under a bounded load ceiling",
+      "criteria": [
+        "A1.standingPressModerate"
+      ],
+      "affectedGoldenFixtures": [
+        "beginner-bodyweight"
+      ],
+      "consumedBy": {
+        "selection": null,
+        "eligibility": false,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "A_NO_CURRENT_BEHAVIOR_IMPACT"
+    },
+    {
+      "exerciseId": "iso-lateral-chest-press",
+      "field": "axialLoad",
+      "oldValue": "none",
+      "reviewedValue": "moderate",
+      "confidence": "CHARACTERIZED",
+      "rationale": "spine is loaded but the path is supported or machine-guided",
+      "criteria": [
+        "A1.supportedOrGuided"
+      ],
+      "affectedGoldenFixtures": [
+        "advanced-full-gym",
+        "back-restriction",
+        "five-day",
+        "four-day",
+        "intermediate-full-gym",
+        "knee-restriction",
+        "long-session",
+        "returning-advanced",
+        "shoulder-restriction",
+        "six-day"
+      ],
+      "consumedBy": {
+        "selection": null,
+        "eligibility": false,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "A_NO_CURRENT_BEHAVIOR_IMPACT"
+    },
+    {
+      "exerciseId": "iso-lateral-incline-press",
+      "field": "axialLoad",
+      "oldValue": "none",
+      "reviewedValue": "moderate",
+      "confidence": "CHARACTERIZED",
+      "rationale": "spine is loaded but the path is supported or machine-guided",
+      "criteria": [
+        "A1.supportedOrGuided"
+      ],
+      "affectedGoldenFixtures": [
+        "long-session",
+        "six-day"
+      ],
+      "consumedBy": {
+        "selection": null,
+        "eligibility": false,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "A_NO_CURRENT_BEHAVIOR_IMPACT"
+    },
+    {
+      "exerciseId": "jm-press",
+      "field": "axialLoad",
+      "oldValue": "none",
+      "reviewedValue": "moderate",
+      "confidence": "CHARACTERIZED",
+      "rationale": "spine is loaded but the path is supported or machine-guided",
+      "criteria": [
+        "A1.supportedOrGuided"
+      ],
+      "affectedGoldenFixtures": [],
+      "consumedBy": {
+        "selection": null,
+        "eligibility": false,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "A_NO_CURRENT_BEHAVIOR_IMPACT"
+    },
+    {
+      "exerciseId": "kettlebell-swing",
+      "field": "axialLoad",
+      "oldValue": "none",
+      "reviewedValue": "high",
+      "confidence": "CHARACTERIZED",
+      "rationale": "substantial external load through an unsupported spine",
+      "criteria": [
+        "A2.unsupportedLoadedSpine"
+      ],
+      "affectedGoldenFixtures": [],
+      "consumedBy": {
+        "selection": null,
+        "eligibility": false,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "A_NO_CURRENT_BEHAVIOR_IMPACT"
+    },
+    {
+      "exerciseId": "kettlebell-swing",
+      "field": "stabilityDemand",
+      "oldValue": 3,
+      "reviewedValue": 2,
+      "confidence": "CHARACTERIZED",
+      "rationale": "free path, bilateral, planted base",
+      "criteria": [
+        "S2.freeBilateralBracedBase"
+      ],
+      "affectedGoldenFixtures": [],
+      "consumedBy": {
+        "selection": "selectCandidates (QAE-native) stability ceiling FILTER",
+        "eligibility": true,
+        "assembly": false,
+        "substitution": true
+      },
+      "impactClass": "CE_ELIGIBILITY_AND_SUBSTITUTION"
+    },
+    {
+      "exerciseId": "knee-push-up",
+      "field": "axialLoad",
+      "oldValue": "none",
+      "reviewedValue": "moderate",
+      "confidence": "CHARACTERIZED",
+      "rationale": "standing press loads the spine but under a bounded load ceiling",
+      "criteria": [
+        "A1.standingPressModerate"
+      ],
+      "affectedGoldenFixtures": [
+        "beginner-bodyweight"
+      ],
+      "consumedBy": {
+        "selection": null,
+        "eligibility": false,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "A_NO_CURRENT_BEHAVIOR_IMPACT"
+    },
+    {
+      "exerciseId": "landmine-press",
+      "field": "stabilityDemand",
+      "oldValue": 3,
+      "reviewedValue": 2,
+      "confidence": "CHARACTERIZED",
+      "rationale": "free path, bilateral, planted base",
+      "criteria": [
+        "S2.freeBilateralBracedBase"
+      ],
+      "affectedGoldenFixtures": [],
+      "consumedBy": {
+        "selection": "selectCandidates (QAE-native) stability ceiling FILTER",
+        "eligibility": true,
+        "assembly": false,
+        "substitution": true
+      },
+      "impactClass": "CE_ELIGIBILITY_AND_SUBSTITUTION"
+    },
+    {
+      "exerciseId": "leg-press-machine",
+      "field": "axialLoad",
+      "oldValue": "none",
+      "reviewedValue": "moderate",
+      "confidence": "CHARACTERIZED",
+      "rationale": "spine is loaded but the path is supported or machine-guided",
+      "criteria": [
+        "A1.supportedOrGuided"
+      ],
+      "affectedGoldenFixtures": [
+        "advanced-full-gym",
+        "back-restriction",
+        "beginner-full-gym",
+        "five-day",
+        "four-day",
+        "intermediate-full-gym",
+        "knee-restriction",
+        "long-session",
+        "multiple-restrictions",
+        "returning-advanced",
+        "short-session",
+        "shoulder-restriction",
+        "six-day",
+        "three-day"
+      ],
+      "consumedBy": {
+        "selection": null,
+        "eligibility": false,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "A_NO_CURRENT_BEHAVIOR_IMPACT"
+    },
+    {
+      "exerciseId": "leg-press-narrow",
+      "field": "axialLoad",
+      "oldValue": "none",
+      "reviewedValue": "moderate",
+      "confidence": "CHARACTERIZED",
+      "rationale": "spine is loaded but the path is supported or machine-guided",
+      "criteria": [
+        "A1.supportedOrGuided"
+      ],
+      "affectedGoldenFixtures": [],
+      "consumedBy": {
+        "selection": null,
+        "eligibility": false,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "A_NO_CURRENT_BEHAVIOR_IMPACT"
+    },
+    {
+      "exerciseId": "machine-rdl",
+      "field": "axialLoad",
+      "oldValue": "none",
+      "reviewedValue": "moderate",
+      "confidence": "CHARACTERIZED",
+      "rationale": "spine is loaded but the path is supported or machine-guided",
+      "criteria": [
+        "A1.supportedOrGuided"
+      ],
+      "affectedGoldenFixtures": [],
+      "consumedBy": {
+        "selection": null,
+        "eligibility": false,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "A_NO_CURRENT_BEHAVIOR_IMPACT"
+    },
+    {
+      "exerciseId": "meadows-row",
+      "field": "stabilityDemand",
+      "oldValue": 3,
+      "reviewedValue": 2,
+      "confidence": "CHARACTERIZED",
+      "rationale": "free path, bilateral, planted base",
+      "criteria": [
+        "S2.freeBilateralBracedBase"
+      ],
+      "affectedGoldenFixtures": [],
+      "consumedBy": {
+        "selection": "selectCandidates (QAE-native) stability ceiling FILTER",
+        "eligibility": true,
+        "assembly": false,
+        "substitution": true
+      },
+      "impactClass": "CE_ELIGIBILITY_AND_SUBSTITUTION"
+    },
+    {
+      "exerciseId": "overhead-press",
+      "field": "stabilityDemand",
+      "oldValue": 3,
+      "reviewedValue": 2,
+      "confidence": "CHARACTERIZED",
+      "rationale": "free path, bilateral, planted base",
+      "criteria": [
+        "S2.freeBilateralBracedBase"
+      ],
+      "affectedGoldenFixtures": [
+        "beginner-home"
+      ],
+      "consumedBy": {
+        "selection": "selectCandidates (QAE-native) stability ceiling FILTER",
+        "eligibility": true,
+        "assembly": false,
+        "substitution": true
+      },
+      "impactClass": "CE_ELIGIBILITY_AND_SUBSTITUTION"
+    },
+    {
+      "exerciseId": "pendlay-row",
+      "field": "stabilityDemand",
+      "oldValue": 3,
+      "reviewedValue": 2,
+      "confidence": "CHARACTERIZED",
+      "rationale": "free path, bilateral, planted base",
+      "criteria": [
+        "S2.freeBilateralBracedBase"
+      ],
+      "affectedGoldenFixtures": [],
+      "consumedBy": {
+        "selection": "selectCandidates (QAE-native) stability ceiling FILTER",
+        "eligibility": true,
+        "assembly": false,
+        "substitution": true
+      },
+      "impactClass": "CE_ELIGIBILITY_AND_SUBSTITUTION"
+    },
+    {
+      "exerciseId": "pike-push-up",
+      "field": "axialLoad",
+      "oldValue": "none",
+      "reviewedValue": "moderate",
+      "confidence": "CHARACTERIZED",
+      "rationale": "standing press loads the spine but under a bounded load ceiling",
+      "criteria": [
+        "A1.standingPressModerate"
+      ],
+      "affectedGoldenFixtures": [
+        "beginner-bodyweight"
+      ],
+      "consumedBy": {
+        "selection": null,
+        "eligibility": false,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "A_NO_CURRENT_BEHAVIOR_IMPACT"
+    },
+    {
+      "exerciseId": "push-press",
+      "field": "stabilityDemand",
+      "oldValue": 3,
+      "reviewedValue": 2,
+      "confidence": "CHARACTERIZED",
+      "rationale": "free path, bilateral, planted base",
+      "criteria": [
+        "S2.freeBilateralBracedBase"
+      ],
+      "affectedGoldenFixtures": [],
+      "consumedBy": {
+        "selection": "selectCandidates (QAE-native) stability ceiling FILTER",
+        "eligibility": true,
+        "assembly": false,
+        "substitution": true
+      },
+      "impactClass": "CE_ELIGIBILITY_AND_SUBSTITUTION"
+    },
+    {
+      "exerciseId": "push-up",
+      "field": "axialLoad",
+      "oldValue": "none",
+      "reviewedValue": "moderate",
+      "confidence": "CHARACTERIZED",
+      "rationale": "standing press loads the spine but under a bounded load ceiling",
+      "criteria": [
+        "A1.standingPressModerate"
+      ],
+      "affectedGoldenFixtures": [],
+      "consumedBy": {
+        "selection": null,
+        "eligibility": false,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "A_NO_CURRENT_BEHAVIOR_IMPACT"
+    },
+    {
+      "exerciseId": "rack-pull",
+      "field": "fatigueCost",
+      "oldValue": 3,
+      "reviewedValue": 2,
+      "confidence": "CHARACTERIZED",
+      "rationale": "compound with a bounded loading ceiling, or supported/guided",
+      "criteria": [
+        "F2.compoundBoundedCeiling"
+      ],
+      "affectedGoldenFixtures": [],
+      "consumedBy": {
+        "selection": "selectCandidates (QAE-native) fatigue ceiling FILTER",
+        "eligibility": true,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "C_ELIGIBILITY_AFFECTING"
+    },
+    {
+      "exerciseId": "rack-pull",
+      "field": "stabilityDemand",
+      "oldValue": 3,
+      "reviewedValue": 2,
+      "confidence": "CHARACTERIZED",
+      "rationale": "free path, bilateral, planted base",
+      "criteria": [
+        "S2.freeBilateralBracedBase"
+      ],
+      "affectedGoldenFixtures": [],
+      "consumedBy": {
+        "selection": "selectCandidates (QAE-native) stability ceiling FILTER",
+        "eligibility": true,
+        "assembly": false,
+        "substitution": true
+      },
+      "impactClass": "CE_ELIGIBILITY_AND_SUBSTITUTION"
+    },
+    {
+      "exerciseId": "reverse-lunge",
+      "field": "axialLoad",
+      "oldValue": "none",
+      "reviewedValue": "high",
+      "confidence": "CHARACTERIZED",
+      "rationale": "substantial external load through an unsupported spine",
+      "criteria": [
+        "A2.unsupportedLoadedSpine"
+      ],
+      "affectedGoldenFixtures": [],
+      "consumedBy": {
+        "selection": null,
+        "eligibility": false,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "A_NO_CURRENT_BEHAVIOR_IMPACT"
+    },
+    {
+      "exerciseId": "reverse-lunge",
+      "field": "fatigueCost",
+      "oldValue": 2,
+      "reviewedValue": 3,
+      "confidence": "CHARACTERIZED",
+      "rationale": "multi-joint with a high load ceiling and >=2 heavy markers (stability/axial/technical)",
+      "criteria": [
+        "F3.multiJointHighLoadCeiling"
+      ],
+      "affectedGoldenFixtures": [],
+      "consumedBy": {
+        "selection": "selectCandidates (QAE-native) fatigue ceiling FILTER",
+        "eligibility": true,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "C_ELIGIBILITY_AFFECTING"
+    },
+    {
+      "exerciseId": "romanian-deadlift",
+      "field": "fatigueCost",
+      "oldValue": 3,
+      "reviewedValue": 2,
+      "confidence": "CHARACTERIZED",
+      "rationale": "compound with a bounded loading ceiling, or supported/guided",
+      "criteria": [
+        "F2.compoundBoundedCeiling"
+      ],
+      "affectedGoldenFixtures": [],
+      "consumedBy": {
+        "selection": "selectCandidates (QAE-native) fatigue ceiling FILTER",
+        "eligibility": true,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "C_ELIGIBILITY_AFFECTING"
+    },
+    {
+      "exerciseId": "romanian-deadlift",
+      "field": "stabilityDemand",
+      "oldValue": 3,
+      "reviewedValue": 2,
+      "confidence": "CHARACTERIZED",
+      "rationale": "free path, bilateral, planted base",
+      "criteria": [
+        "S2.freeBilateralBracedBase"
+      ],
+      "affectedGoldenFixtures": [],
+      "consumedBy": {
+        "selection": "selectCandidates (QAE-native) stability ceiling FILTER",
+        "eligibility": true,
+        "assembly": false,
+        "substitution": true
+      },
+      "impactClass": "CE_ELIGIBILITY_AND_SUBSTITUTION"
+    },
+    {
+      "exerciseId": "seated-dumbbell-press",
+      "field": "axialLoad",
+      "oldValue": "none",
+      "reviewedValue": "moderate",
+      "confidence": "CHARACTERIZED",
+      "rationale": "spine is loaded but the path is supported or machine-guided",
+      "criteria": [
+        "A1.supportedOrGuided"
+      ],
+      "affectedGoldenFixtures": [],
+      "consumedBy": {
+        "selection": null,
+        "eligibility": false,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "A_NO_CURRENT_BEHAVIOR_IMPACT"
+    },
+    {
+      "exerciseId": "shoulder-press-machine",
+      "field": "axialLoad",
+      "oldValue": "none",
+      "reviewedValue": "moderate",
+      "confidence": "CHARACTERIZED",
+      "rationale": "spine is loaded but the path is supported or machine-guided",
+      "criteria": [
+        "A1.supportedOrGuided"
+      ],
+      "affectedGoldenFixtures": [
+        "advanced-full-gym",
+        "back-restriction",
+        "beginner-full-gym",
+        "five-day",
+        "four-day",
+        "intermediate-full-gym",
+        "knee-restriction",
+        "long-session",
+        "multiple-restrictions",
+        "returning-advanced",
+        "short-session",
+        "shoulder-restriction",
+        "six-day",
+        "three-day"
+      ],
+      "consumedBy": {
+        "selection": null,
+        "eligibility": false,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "A_NO_CURRENT_BEHAVIOR_IMPACT"
+    },
+    {
+      "exerciseId": "single-leg-hip-thrust",
+      "field": "axialLoad",
+      "oldValue": "none",
+      "reviewedValue": "high",
+      "confidence": "CHARACTERIZED",
+      "rationale": "substantial external load through an unsupported spine",
+      "criteria": [
+        "A2.unsupportedLoadedSpine"
+      ],
+      "affectedGoldenFixtures": [
+        "beginner-bodyweight"
+      ],
+      "consumedBy": {
+        "selection": null,
+        "eligibility": false,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "A_NO_CURRENT_BEHAVIOR_IMPACT"
+    },
+    {
+      "exerciseId": "single-leg-hip-thrust",
+      "field": "fatigueCost",
+      "oldValue": 2,
+      "reviewedValue": 3,
+      "confidence": "CHARACTERIZED",
+      "rationale": "multi-joint with a high load ceiling and >=2 heavy markers (stability/axial/technical)",
+      "criteria": [
+        "F3.multiJointHighLoadCeiling"
+      ],
+      "affectedGoldenFixtures": [
+        "beginner-bodyweight"
+      ],
+      "consumedBy": {
+        "selection": "selectCandidates (QAE-native) fatigue ceiling FILTER",
+        "eligibility": true,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "C_ELIGIBILITY_AFFECTING"
+    },
+    {
+      "exerciseId": "single-leg-rdl",
+      "field": "axialLoad",
+      "oldValue": "none",
+      "reviewedValue": "high",
+      "confidence": "CHARACTERIZED",
+      "rationale": "substantial external load through an unsupported spine",
+      "criteria": [
+        "A2.unsupportedLoadedSpine"
+      ],
+      "affectedGoldenFixtures": [],
+      "consumedBy": {
+        "selection": null,
+        "eligibility": false,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "A_NO_CURRENT_BEHAVIOR_IMPACT"
+    },
+    {
+      "exerciseId": "single-leg-rdl",
+      "field": "fatigueCost",
+      "oldValue": 2,
+      "reviewedValue": 3,
+      "confidence": "CHARACTERIZED",
+      "rationale": "multi-joint with a high load ceiling and >=2 heavy markers (stability/axial/technical)",
+      "criteria": [
+        "F3.multiJointHighLoadCeiling"
+      ],
+      "affectedGoldenFixtures": [],
+      "consumedBy": {
+        "selection": "selectCandidates (QAE-native) fatigue ceiling FILTER",
+        "eligibility": true,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "C_ELIGIBILITY_AFFECTING"
+    },
+    {
+      "exerciseId": "step-up",
+      "field": "axialLoad",
+      "oldValue": "none",
+      "reviewedValue": "high",
+      "confidence": "CHARACTERIZED",
+      "rationale": "substantial external load through an unsupported spine",
+      "criteria": [
+        "A2.unsupportedLoadedSpine"
+      ],
+      "affectedGoldenFixtures": [],
+      "consumedBy": {
+        "selection": null,
+        "eligibility": false,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "A_NO_CURRENT_BEHAVIOR_IMPACT"
+    },
+    {
+      "exerciseId": "step-up",
+      "field": "fatigueCost",
+      "oldValue": 2,
+      "reviewedValue": 3,
+      "confidence": "CHARACTERIZED",
+      "rationale": "multi-joint with a high load ceiling and >=2 heavy markers (stability/axial/technical)",
+      "criteria": [
+        "F3.multiJointHighLoadCeiling"
+      ],
+      "affectedGoldenFixtures": [],
+      "consumedBy": {
+        "selection": "selectCandidates (QAE-native) fatigue ceiling FILTER",
+        "eligibility": true,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "C_ELIGIBILITY_AFFECTING"
+    },
+    {
+      "exerciseId": "stiff-leg-deadlift",
+      "field": "fatigueCost",
+      "oldValue": 3,
+      "reviewedValue": 2,
+      "confidence": "CHARACTERIZED",
+      "rationale": "compound with a bounded loading ceiling, or supported/guided",
+      "criteria": [
+        "F2.compoundBoundedCeiling"
+      ],
+      "affectedGoldenFixtures": [],
+      "consumedBy": {
+        "selection": "selectCandidates (QAE-native) fatigue ceiling FILTER",
+        "eligibility": true,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "C_ELIGIBILITY_AFFECTING"
+    },
+    {
+      "exerciseId": "stiff-leg-deadlift",
+      "field": "stabilityDemand",
+      "oldValue": 3,
+      "reviewedValue": 2,
+      "confidence": "CHARACTERIZED",
+      "rationale": "free path, bilateral, planted base",
+      "criteria": [
+        "S2.freeBilateralBracedBase"
+      ],
+      "affectedGoldenFixtures": [],
+      "consumedBy": {
+        "selection": "selectCandidates (QAE-native) stability ceiling FILTER",
+        "eligibility": true,
+        "assembly": false,
+        "substitution": true
+      },
+      "impactClass": "CE_ELIGIBILITY_AND_SUBSTITUTION"
+    },
+    {
+      "exerciseId": "sumo-deadlift",
+      "field": "stabilityDemand",
+      "oldValue": 3,
+      "reviewedValue": 2,
+      "confidence": "CHARACTERIZED",
+      "rationale": "free path, bilateral, planted base",
+      "criteria": [
+        "S2.freeBilateralBracedBase"
+      ],
+      "affectedGoldenFixtures": [],
+      "consumedBy": {
+        "selection": "selectCandidates (QAE-native) stability ceiling FILTER",
+        "eligibility": true,
+        "assembly": false,
+        "substitution": true
+      },
+      "impactClass": "CE_ELIGIBILITY_AND_SUBSTITUTION"
+    },
+    {
+      "exerciseId": "upright-row",
+      "field": "stabilityDemand",
+      "oldValue": 3,
+      "reviewedValue": 2,
+      "confidence": "CHARACTERIZED",
+      "rationale": "free path, bilateral, planted base",
+      "criteria": [
+        "S2.freeBilateralBracedBase"
+      ],
+      "affectedGoldenFixtures": [],
+      "consumedBy": {
+        "selection": "selectCandidates (QAE-native) stability ceiling FILTER",
+        "eligibility": true,
+        "assembly": false,
+        "substitution": true
+      },
+      "impactClass": "CE_ELIGIBILITY_AND_SUBSTITUTION"
+    },
+    {
+      "exerciseId": "walking-lunge",
+      "field": "axialLoad",
+      "oldValue": "none",
+      "reviewedValue": "high",
+      "confidence": "CHARACTERIZED",
+      "rationale": "substantial external load through an unsupported spine",
+      "criteria": [
+        "A2.unsupportedLoadedSpine"
+      ],
+      "affectedGoldenFixtures": [],
+      "consumedBy": {
+        "selection": null,
+        "eligibility": false,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "A_NO_CURRENT_BEHAVIOR_IMPACT"
+    },
+    {
+      "exerciseId": "walking-lunge",
+      "field": "fatigueCost",
+      "oldValue": 2,
+      "reviewedValue": 3,
+      "confidence": "CHARACTERIZED",
+      "rationale": "multi-joint with a high load ceiling and >=2 heavy markers (stability/axial/technical)",
+      "criteria": [
+        "F3.multiJointHighLoadCeiling"
+      ],
+      "affectedGoldenFixtures": [],
+      "consumedBy": {
+        "selection": "selectCandidates (QAE-native) fatigue ceiling FILTER",
+        "eligibility": true,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "C_ELIGIBILITY_AFFECTING"
+    },
+    {
+      "exerciseId": "wall-sit",
+      "field": "axialLoad",
+      "oldValue": "none",
+      "reviewedValue": "high",
+      "confidence": "CHARACTERIZED",
+      "rationale": "substantial external load through an unsupported spine",
+      "criteria": [
+        "A2.unsupportedLoadedSpine"
+      ],
+      "affectedGoldenFixtures": [
+        "beginner-bodyweight"
+      ],
+      "consumedBy": {
+        "selection": null,
+        "eligibility": false,
+        "assembly": false,
+        "substitution": false
+      },
+      "impactClass": "A_NO_CURRENT_BEHAVIOR_IMPACT"
+    }
+  ]
+}

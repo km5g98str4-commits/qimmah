@@ -26,7 +26,7 @@
     "triceps-pushdown": "cable-triceps-pushdown",
     "wide-grip-pulldown": "wide-grip-lat-pulldown"
   },
-  "catalogManifestHash": "589fe3b916ccffd35b9eb52e854f57df4239890c18111ca14e8acefa18c9499c",
+  "catalogManifestHash": "f64814e06ff64177079dfb7cd3da057bcc8956eb28dc135f7a846dcfcbc57fe1",
   "exerciseCount": 181,
   "exercises": [
     {
@@ -60,6 +60,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -106,6 +107,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -148,6 +150,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -189,6 +192,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -203,7 +207,7 @@
       "technicalDifficulty": 1
     },
     {
-      "axialLoad": "none",
+      "axialLoad": "moderate",
       "contraindications": [
         "overhead",
         "shoulder"
@@ -238,10 +242,11 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
-      "stabilityDemand": 3,
+      "stabilityDemand": 2,
       "substitutionGroup": "push:shoulders",
       "suitableExperienceBands": [
         "beginner",
@@ -278,6 +283,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -292,7 +298,7 @@
       "technicalDifficulty": 1
     },
     {
-      "axialLoad": "none",
+      "axialLoad": "moderate",
       "contraindications": [
         "elbow"
       ],
@@ -328,6 +334,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -372,6 +379,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -420,6 +428,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -427,7 +436,7 @@
         "hamstrings",
         "lower_back"
       ],
-      "stabilityDemand": 3,
+      "stabilityDemand": 2,
       "substitutionGroup": "squat:quads",
       "suitableExperienceBands": [
         "intermediate",
@@ -472,6 +481,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -522,6 +532,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -574,6 +585,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -582,7 +594,7 @@
         "lower_back",
         "rear_delts"
       ],
-      "stabilityDemand": 3,
+      "stabilityDemand": 2,
       "substitutionGroup": "pull:back",
       "suitableExperienceBands": [
         "beginner",
@@ -626,6 +638,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -668,6 +681,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -682,7 +696,7 @@
       "technicalDifficulty": 2
     },
     {
-      "axialLoad": "none",
+      "axialLoad": "moderate",
       "contraindications": [
         "knee"
       ],
@@ -714,6 +728,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -728,7 +743,7 @@
       "technicalDifficulty": 2
     },
     {
-      "axialLoad": "none",
+      "axialLoad": "moderate",
       "contraindications": [
         "elbow",
         "wrist"
@@ -763,6 +778,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -806,6 +822,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -850,6 +867,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -864,7 +882,7 @@
       "technicalDifficulty": 1
     },
     {
-      "axialLoad": "none",
+      "axialLoad": "high",
       "contraindications": [],
       "declaredSubstitutes": [],
       "equipmentAlternatives": [],
@@ -891,6 +909,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -907,7 +926,7 @@
       "technicalDifficulty": 1
     },
     {
-      "axialLoad": "none",
+      "axialLoad": "high",
       "contraindications": [
         "ankle",
         "knee"
@@ -918,7 +937,7 @@
         "dumbbell"
       ],
       "exerciseId": "bulgarian-split-squat",
-      "fatigueCost": 2,
+      "fatigueCost": 3,
       "jointStress": [
         "ankle",
         "knee"
@@ -943,6 +962,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -990,6 +1010,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -1041,6 +1062,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -1086,6 +1108,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -1134,6 +1157,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -1179,6 +1203,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -1221,6 +1246,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -1265,6 +1291,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -1313,6 +1340,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -1327,7 +1355,7 @@
       "technicalDifficulty": 1
     },
     {
-      "axialLoad": "none",
+      "axialLoad": "high",
       "contraindications": [],
       "declaredSubstitutes": [],
       "equipmentAlternatives": [],
@@ -1356,6 +1384,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -1401,6 +1430,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -1415,7 +1445,7 @@
       "technicalDifficulty": 2
     },
     {
-      "axialLoad": "none",
+      "axialLoad": "moderate",
       "contraindications": [
         "overhead"
       ],
@@ -1449,6 +1479,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -1496,6 +1527,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -1538,6 +1570,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -1579,6 +1612,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -1593,7 +1627,7 @@
       "technicalDifficulty": 1
     },
     {
-      "axialLoad": "none",
+      "axialLoad": "moderate",
       "contraindications": [
         "elbow",
         "wrist"
@@ -1628,6 +1662,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -1642,7 +1677,7 @@
       "technicalDifficulty": 2
     },
     {
-      "axialLoad": "none",
+      "axialLoad": "moderate",
       "contraindications": [],
       "declaredSubstitutes": [
         "cable-crossover",
@@ -1674,6 +1709,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -1725,6 +1761,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -1771,6 +1808,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -1815,6 +1853,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -1860,6 +1899,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -1876,7 +1916,7 @@
       "technicalDifficulty": 2
     },
     {
-      "axialLoad": "none",
+      "axialLoad": "moderate",
       "contraindications": [
         "elbow",
         "wrist"
@@ -1914,6 +1954,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -1959,6 +2000,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -2005,6 +2047,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -2045,6 +2088,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -2085,6 +2129,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -2136,6 +2181,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -2145,7 +2191,7 @@
         "traps",
         "upper_back"
       ],
-      "stabilityDemand": 3,
+      "stabilityDemand": 2,
       "substitutionGroup": "hinge:back",
       "suitableExperienceBands": [
         "intermediate",
@@ -2155,7 +2201,7 @@
       "technicalDifficulty": 3
     },
     {
-      "axialLoad": "none",
+      "axialLoad": "moderate",
       "contraindications": [],
       "declaredSubstitutes": [],
       "equipmentAlternatives": [],
@@ -2186,6 +2232,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -2200,7 +2247,7 @@
       "technicalDifficulty": 2
     },
     {
-      "axialLoad": "none",
+      "axialLoad": "moderate",
       "contraindications": [],
       "declaredSubstitutes": [
         "cable-crossover",
@@ -2232,6 +2279,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -2248,7 +2296,7 @@
       "technicalDifficulty": 1
     },
     {
-      "axialLoad": "none",
+      "axialLoad": "moderate",
       "contraindications": [],
       "declaredSubstitutes": [],
       "equipmentAlternatives": [],
@@ -2279,6 +2327,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -2293,7 +2342,7 @@
       "technicalDifficulty": 1
     },
     {
-      "axialLoad": "none",
+      "axialLoad": "moderate",
       "contraindications": [
         "elbow",
         "wrist"
@@ -2325,6 +2374,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -2371,6 +2421,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -2385,7 +2436,7 @@
       "technicalDifficulty": 1
     },
     {
-      "axialLoad": "none",
+      "axialLoad": "moderate",
       "contraindications": [
         "overhead"
       ],
@@ -2420,6 +2471,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -2468,6 +2520,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -2514,6 +2567,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -2562,6 +2616,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -2576,7 +2631,7 @@
       "technicalDifficulty": 1
     },
     {
-      "axialLoad": "none",
+      "axialLoad": "high",
       "contraindications": [
         "lower_back"
       ],
@@ -2610,12 +2665,13 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
         "lower_back"
       ],
-      "stabilityDemand": 3,
+      "stabilityDemand": 2,
       "substitutionGroup": "hinge:hamstrings",
       "suitableExperienceBands": [
         "beginner",
@@ -2658,6 +2714,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -2675,7 +2732,7 @@
       "technicalDifficulty": 1
     },
     {
-      "axialLoad": "none",
+      "axialLoad": "moderate",
       "contraindications": [
         "overhead"
       ],
@@ -2708,12 +2765,13 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
         "traps"
       ],
-      "stabilityDemand": 3,
+      "stabilityDemand": 2,
       "substitutionGroup": "push:shoulders",
       "suitableExperienceBands": [
         "beginner",
@@ -2756,6 +2814,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -2772,7 +2831,7 @@
       "technicalDifficulty": 1
     },
     {
-      "axialLoad": "none",
+      "axialLoad": "high",
       "contraindications": [],
       "declaredSubstitutes": [
         "bodyweight-squat",
@@ -2805,12 +2864,13 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
         "hamstrings"
       ],
-      "stabilityDemand": 3,
+      "stabilityDemand": 2,
       "substitutionGroup": "squat:quads",
       "suitableExperienceBands": [
         "beginner",
@@ -2847,6 +2907,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -2898,6 +2959,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -2940,6 +3002,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -2983,6 +3046,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -2997,7 +3061,7 @@
       "technicalDifficulty": 1
     },
     {
-      "axialLoad": "none",
+      "axialLoad": "high",
       "contraindications": [],
       "declaredSubstitutes": [],
       "equipmentAlternatives": [],
@@ -3023,6 +3087,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -3065,6 +3130,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -3116,6 +3182,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -3123,7 +3190,7 @@
         "glutes",
         "lower_back"
       ],
-      "stabilityDemand": 3,
+      "stabilityDemand": 2,
       "substitutionGroup": "squat:quads",
       "suitableExperienceBands": [
         "intermediate",
@@ -3133,7 +3200,7 @@
       "technicalDifficulty": 3
     },
     {
-      "axialLoad": "none",
+      "axialLoad": "high",
       "contraindications": [],
       "declaredSubstitutes": [],
       "equipmentAlternatives": [],
@@ -3159,6 +3226,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -3203,6 +3271,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -3247,6 +3316,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -3263,7 +3333,7 @@
       "technicalDifficulty": 1
     },
     {
-      "axialLoad": "none",
+      "axialLoad": "moderate",
       "contraindications": [],
       "declaredSubstitutes": [
         "cable-pull-through",
@@ -3294,6 +3364,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -3310,7 +3381,7 @@
       "technicalDifficulty": 1
     },
     {
-      "axialLoad": "none",
+      "axialLoad": "high",
       "contraindications": [],
       "declaredSubstitutes": [],
       "equipmentAlternatives": [],
@@ -3340,12 +3411,13 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
         "abs"
       ],
-      "stabilityDemand": 3,
+      "stabilityDemand": 2,
       "substitutionGroup": "squat:quads",
       "suitableExperienceBands": [
         "beginner",
@@ -3390,12 +3462,13 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
         "glutes"
       ],
-      "stabilityDemand": 3,
+      "stabilityDemand": 2,
       "substitutionGroup": "hinge:hamstrings",
       "suitableExperienceBands": [
         "intermediate",
@@ -3405,7 +3478,7 @@
       "technicalDifficulty": 3
     },
     {
-      "axialLoad": "none",
+      "axialLoad": "moderate",
       "contraindications": [
         "knee"
       ],
@@ -3440,6 +3513,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -3489,6 +3563,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -3529,6 +3604,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -3573,6 +3649,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -3618,6 +3695,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -3660,6 +3738,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -3705,6 +3784,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -3745,6 +3825,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -3759,7 +3840,7 @@
       "technicalDifficulty": 1
     },
     {
-      "axialLoad": "high",
+      "axialLoad": "moderate",
       "contraindications": [],
       "declaredSubstitutes": [],
       "equipmentAlternatives": [],
@@ -3768,7 +3849,7 @@
         "bench"
       ],
       "exerciseId": "hip-thrust",
-      "fatigueCost": 3,
+      "fatigueCost": 2,
       "jointStress": [],
       "laterality": "bilateral",
       "legacyEnvironment": "gym",
@@ -3790,6 +3871,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -3832,6 +3914,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -3881,6 +3964,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -3925,6 +4009,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -3939,7 +4024,7 @@
       "technicalDifficulty": 2
     },
     {
-      "axialLoad": "none",
+      "axialLoad": "moderate",
       "contraindications": [
         "overhead"
       ],
@@ -3973,6 +4058,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -4023,6 +4109,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -4037,7 +4124,7 @@
       "technicalDifficulty": 2
     },
     {
-      "axialLoad": "none",
+      "axialLoad": "moderate",
       "contraindications": [
         "overhead"
       ],
@@ -4072,6 +4159,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -4088,7 +4176,7 @@
       "technicalDifficulty": 1
     },
     {
-      "axialLoad": "none",
+      "axialLoad": "moderate",
       "contraindications": [
         "wrist"
       ],
@@ -4118,6 +4206,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -4161,6 +4250,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -4209,6 +4299,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -4223,7 +4314,7 @@
       "technicalDifficulty": 1
     },
     {
-      "axialLoad": "none",
+      "axialLoad": "moderate",
       "contraindications": [],
       "declaredSubstitutes": [
         "cable-crossover",
@@ -4255,6 +4346,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -4303,6 +4395,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -4320,7 +4413,7 @@
       "technicalDifficulty": 1
     },
     {
-      "axialLoad": "none",
+      "axialLoad": "moderate",
       "contraindications": [
         "overhead"
       ],
@@ -4354,6 +4447,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -4401,6 +4495,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -4418,7 +4513,7 @@
       "technicalDifficulty": 1
     },
     {
-      "axialLoad": "none",
+      "axialLoad": "moderate",
       "contraindications": [
         "elbow",
         "wrist"
@@ -4455,6 +4550,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -4497,6 +4593,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -4511,7 +4608,7 @@
       "technicalDifficulty": 1
     },
     {
-      "axialLoad": "none",
+      "axialLoad": "high",
       "contraindications": [
         "wrist"
       ],
@@ -4545,6 +4642,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -4552,7 +4650,7 @@
         "lower_back",
         "quads"
       ],
-      "stabilityDemand": 3,
+      "stabilityDemand": 2,
       "substitutionGroup": "hinge:glutes",
       "suitableExperienceBands": [
         "beginner",
@@ -4563,7 +4661,7 @@
       "technicalDifficulty": 2
     },
     {
-      "axialLoad": "none",
+      "axialLoad": "moderate",
       "contraindications": [
         "wrist"
       ],
@@ -4596,6 +4694,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -4642,10 +4741,11 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
-      "stabilityDemand": 3,
+      "stabilityDemand": 2,
       "substitutionGroup": "push:shoulders",
       "suitableExperienceBands": [
         "beginner",
@@ -4687,6 +4787,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -4732,6 +4833,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -4779,6 +4881,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -4830,6 +4933,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -4872,6 +4976,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -4886,7 +4991,7 @@
       "technicalDifficulty": 1
     },
     {
-      "axialLoad": "none",
+      "axialLoad": "moderate",
       "contraindications": [],
       "declaredSubstitutes": [
         "bodyweight-squat",
@@ -4918,6 +5023,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -4934,7 +5040,7 @@
       "technicalDifficulty": 1
     },
     {
-      "axialLoad": "none",
+      "axialLoad": "moderate",
       "contraindications": [
         "knee"
       ],
@@ -4966,6 +5072,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -5006,6 +5113,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -5046,6 +5154,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -5088,6 +5197,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -5133,6 +5243,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -5184,6 +5295,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -5229,6 +5341,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -5243,7 +5356,7 @@
       "technicalDifficulty": 1
     },
     {
-      "axialLoad": "none",
+      "axialLoad": "moderate",
       "contraindications": [],
       "declaredSubstitutes": [
         "dumbbell-rdl",
@@ -5275,6 +5388,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -5325,10 +5439,11 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
-      "stabilityDemand": 3,
+      "stabilityDemand": 2,
       "substitutionGroup": "pull:back",
       "suitableExperienceBands": [
         "intermediate",
@@ -5370,6 +5485,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -5415,6 +5531,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -5455,6 +5572,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -5492,6 +5610,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -5542,13 +5661,14 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
         "traps",
         "upper_back"
       ],
-      "stabilityDemand": 3,
+      "stabilityDemand": 2,
       "substitutionGroup": "push:shoulders",
       "suitableExperienceBands": [
         "beginner",
@@ -5591,6 +5711,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -5635,6 +5756,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -5677,6 +5799,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -5727,10 +5850,11 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
-      "stabilityDemand": 3,
+      "stabilityDemand": 2,
       "substitutionGroup": "pull:back",
       "suitableExperienceBands": [
         "intermediate",
@@ -5740,7 +5864,7 @@
       "technicalDifficulty": 3
     },
     {
-      "axialLoad": "none",
+      "axialLoad": "moderate",
       "contraindications": [
         "overhead"
       ],
@@ -5771,6 +5895,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -5811,6 +5936,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -5865,6 +5991,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -5911,6 +6038,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -5963,10 +6091,11 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
-      "stabilityDemand": 3,
+      "stabilityDemand": 2,
       "substitutionGroup": "push:shoulders",
       "suitableExperienceBands": [
         "intermediate",
@@ -5976,7 +6105,7 @@
       "technicalDifficulty": 3
     },
     {
-      "axialLoad": "none",
+      "axialLoad": "moderate",
       "contraindications": [
         "wrist"
       ],
@@ -6007,6 +6136,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -6034,7 +6164,7 @@
         "barbell"
       ],
       "exerciseId": "rack-pull",
-      "fatigueCost": 3,
+      "fatigueCost": 2,
       "jointStress": [
         "wrist"
       ],
@@ -6058,10 +6188,11 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
-      "stabilityDemand": 3,
+      "stabilityDemand": 2,
       "substitutionGroup": "hinge:back",
       "suitableExperienceBands": [
         "beginner",
@@ -6100,6 +6231,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -6148,6 +6280,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -6198,6 +6331,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -6212,7 +6346,7 @@
       "technicalDifficulty": 1
     },
     {
-      "axialLoad": "none",
+      "axialLoad": "high",
       "contraindications": [
         "ankle",
         "knee"
@@ -6226,7 +6360,7 @@
         "dumbbell"
       ],
       "exerciseId": "reverse-lunge",
-      "fatigueCost": 2,
+      "fatigueCost": 3,
       "jointStress": [
         "ankle",
         "knee"
@@ -6250,6 +6384,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -6295,6 +6430,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -6321,7 +6457,7 @@
         "barbell"
       ],
       "exerciseId": "romanian-deadlift",
-      "fatigueCost": 3,
+      "fatigueCost": 2,
       "jointStress": [
         "lower_back"
       ],
@@ -6345,12 +6481,13 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
         "lower_back"
       ],
-      "stabilityDemand": 3,
+      "stabilityDemand": 2,
       "substitutionGroup": "hinge:hamstrings",
       "suitableExperienceBands": [
         "beginner",
@@ -6389,6 +6526,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -6429,6 +6567,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -6469,6 +6608,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -6514,6 +6654,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -6562,6 +6703,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -6576,7 +6718,7 @@
       "technicalDifficulty": 1
     },
     {
-      "axialLoad": "none",
+      "axialLoad": "moderate",
       "contraindications": [
         "overhead"
       ],
@@ -6613,6 +6755,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -6658,6 +6801,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -6703,6 +6847,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -6751,6 +6896,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -6796,6 +6942,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -6810,7 +6957,7 @@
       "technicalDifficulty": 1
     },
     {
-      "axialLoad": "none",
+      "axialLoad": "moderate",
       "contraindications": [
         "overhead"
       ],
@@ -6844,6 +6991,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -6886,6 +7034,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -6931,6 +7080,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -6976,6 +7126,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -7020,6 +7171,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -7067,6 +7219,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -7081,7 +7234,7 @@
       "technicalDifficulty": 1
     },
     {
-      "axialLoad": "none",
+      "axialLoad": "high",
       "contraindications": [],
       "declaredSubstitutes": [],
       "equipmentAlternatives": [],
@@ -7089,7 +7242,7 @@
         "bodyweight"
       ],
       "exerciseId": "single-leg-hip-thrust",
-      "fatigueCost": 2,
+      "fatigueCost": 3,
       "jointStress": [],
       "laterality": "unilateral",
       "legacyEnvironment": "home",
@@ -7107,6 +7260,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -7121,7 +7275,7 @@
       "technicalDifficulty": 2
     },
     {
-      "axialLoad": "none",
+      "axialLoad": "high",
       "contraindications": [
         "lower_back"
       ],
@@ -7131,7 +7285,7 @@
         "dumbbell"
       ],
       "exerciseId": "single-leg-rdl",
-      "fatigueCost": 2,
+      "fatigueCost": 3,
       "jointStress": [
         "lower_back"
       ],
@@ -7154,6 +7308,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -7201,6 +7356,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -7251,6 +7407,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -7298,6 +7455,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -7345,6 +7503,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -7397,6 +7556,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -7439,6 +7599,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -7488,6 +7649,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -7533,6 +7695,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -7580,6 +7743,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -7622,6 +7786,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -7636,7 +7801,7 @@
       "technicalDifficulty": 1
     },
     {
-      "axialLoad": "none",
+      "axialLoad": "high",
       "contraindications": [
         "ankle",
         "knee"
@@ -7648,7 +7813,7 @@
         "dumbbell"
       ],
       "exerciseId": "step-up",
-      "fatigueCost": 2,
+      "fatigueCost": 3,
       "jointStress": [
         "ankle",
         "knee"
@@ -7673,6 +7838,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -7702,7 +7868,7 @@
         "barbell"
       ],
       "exerciseId": "stiff-leg-deadlift",
-      "fatigueCost": 3,
+      "fatigueCost": 2,
       "jointStress": [
         "lower_back"
       ],
@@ -7725,10 +7891,11 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
-      "stabilityDemand": 3,
+      "stabilityDemand": 2,
       "substitutionGroup": "hinge:hamstrings",
       "suitableExperienceBands": [
         "beginner",
@@ -7767,6 +7934,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -7819,6 +7987,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -7826,7 +7995,7 @@
         "lower_back",
         "traps"
       ],
-      "stabilityDemand": 3,
+      "stabilityDemand": 2,
       "substitutionGroup": "hinge:glutes",
       "suitableExperienceBands": [
         "intermediate",
@@ -7864,6 +8033,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -7916,6 +8086,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -7960,6 +8131,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -8007,6 +8179,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -8048,6 +8221,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -8093,6 +8267,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -8141,10 +8316,11 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
-      "stabilityDemand": 3,
+      "stabilityDemand": 2,
       "substitutionGroup": "pull:shoulders",
       "suitableExperienceBands": [
         "beginner",
@@ -8155,7 +8331,7 @@
       "technicalDifficulty": 2
     },
     {
-      "axialLoad": "none",
+      "axialLoad": "high",
       "contraindications": [
         "ankle",
         "knee"
@@ -8166,7 +8342,7 @@
         "dumbbell"
       ],
       "exerciseId": "walking-lunge",
-      "fatigueCost": 2,
+      "fatigueCost": 3,
       "jointStress": [
         "ankle",
         "knee"
@@ -8191,6 +8367,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -8207,7 +8384,7 @@
       "technicalDifficulty": 1
     },
     {
-      "axialLoad": "none",
+      "axialLoad": "high",
       "contraindications": [
         "knee"
       ],
@@ -8237,6 +8414,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -8282,6 +8460,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -8329,6 +8508,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [
@@ -8372,6 +8552,7 @@
       ],
       "provenance": {
         "characterized": "exerciseId/muscles/pattern/equipment/difficulty/bands/environment/substitutes verbatim from src/data/exercises.ts; jointStress+contraindications from planGenerator INJURY_RISKY_IDS + exerciseSelection isOverhead/isImpact (result per id — name-independent)",
+        "curated": "[CTO-QAE-016] stabilityDemand/fatigueCost/axialLoad promoted to criteria-based characterization where a curation record exists (Docs/QAE-PRESCRIPTION-METADATA-SCALES.md §1-§3); values outside the cohort remain as originally derived.",
         "derived": "stabilityDemand/fatigueCost/axialLoad/laterality/support/loadMedium/progressionCompatibility by the named deterministic rules in extract-legacy-catalog.ts; equipmentAlternatives empty (no legacy representation)"
       },
       "secondaryMuscles": [],
@@ -8386,6 +8567,12 @@
       "technicalDifficulty": 1
     }
   ],
+  "fieldConfidence": {
+    "$comment": "[CTO-QAE-016] Per-field confidence. stabilityDemand/fatigueCost/axialLoad were promoted from derived heuristics to criteria-based characterization for the curated cohort; every other field keeps its original catalog provenance. Curated ids are exactly prescription-metadata.curation.json records with reviewStatus=curated.",
+    "axialLoad": "CHARACTERIZED_FOR_CURATED_COHORT",
+    "fatigueCost": "CHARACTERIZED_FOR_CURATED_COHORT",
+    "stabilityDemand": "CHARACTERIZED_FOR_CURATED_COHORT"
+  },
   "primaryMachineIds": [
     "assisted-dip-machine",
     "chest-press-machine",
