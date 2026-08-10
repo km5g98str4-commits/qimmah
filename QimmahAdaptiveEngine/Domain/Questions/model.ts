@@ -45,10 +45,35 @@ export interface FlowBudget {
   hardCap: number
 }
 
+/**
+ * [CTO-QAE-011] Policy B2 — explicit selection tiers.
+ *
+ * Wave 1 finding F2: `required` bypassed `priority` entirely, so the two
+ * conditionally-required returning follow-ups (priority 64/60) were served
+ * ahead of classification evidence (88/88/86) and — being category
+ * `experience` — added 2x satietyPenalty that buried the remainder in the
+ * scored stage. The returning persona lost `totalMonths` and `consistency`
+ * and `finalExperienceClass` regressed `returning` -> `advanced`.
+ *
+ * `classificationCritical` ids are PROMOTED into the mandatory pool so the
+ * scored stage's satiety penalty can never bury protected evidence. Ordering
+ * inside the pool stays `byRank` — no tier reshuffle is introduced, so any
+ * journey whose asked-set is unchanged stays byte-identical.
+ *
+ * Absent config => byte-identical pre-B2 behaviour (counter-assertion 1).
+ */
+export interface SelectionTiers {
+  safetyRequired: readonly string[]
+  classificationCritical: readonly string[]
+  conditionallyRequired: readonly string[]
+}
+
 export interface BankConfig {
   /** answered-true fact path gating everything (e.g. a consent analog); optional */
   gateQuestionId?: string
   conflicts: readonly ConflictDef[]
+  /** [CTO-QAE-011] Policy B2; omitted => pre-B2 behaviour, unchanged. */
+  selectionTiers?: SelectionTiers
   /** budget selected by an opaque class fact; fallback key '*' */
   budgets: Readonly<Record<string, FlowBudget>>
   budgetClassFactPath?: string

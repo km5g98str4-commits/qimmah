@@ -7,7 +7,13 @@
 import { evaluatePredicate } from '../Decisions/predicates'
 import { ordinalCompare } from '../Shared/numeric'
 import type { FactMap } from '../Evidence/model'
-import type { BankConfig, FlowBudget, QuestionDef, QuestionSessionState, Selection } from './model'
+import type {
+  BankConfig,
+  FlowBudget,
+  QuestionDef,
+  QuestionSessionState,
+  Selection,
+} from './model'
 
 const wasTouched = (state: QuestionSessionState, id: string): boolean =>
   state.history.some((h) => h.questionId === id && (h.answered || h.skipped))
@@ -69,7 +75,36 @@ export function selectNext(
   const asked = countedAsked(state, bank)
 
   // Stage 2 — mandatory incomplete, up to hardCap.
-  const required = ready.filter((q) => q.required).sort(byRank)
+  // [CTO-QAE-011] Policy B2 (Wave 1 finding F2): classification-critical
+  // evidence is PROMOTED into the mandatory pool so the scored stage's satiety
+  // penalty can never bury it.
+  //
+  // Promotion is ARMED ONLY while a conditionally-required follow-up is
+  // eligible — i.e. `lastTrained` already says detrained, the exact condition
+  // gating x-return-*. Consequences, both load-bearing:
+  //   • Non-returning journeys never arm it, so they are byte-identical
+  //     (counter-assertion 6) and their budget stays 16 — no hidden global
+  //     increase. Arming unconditionally was measured to push home-dumbbells to
+  //     18 and to displace l-current-areas / l-pain-on-movement on injury-knee,
+  //     because the mandatory stage runs to hardCap rather than max.
+  //   • It resolves the chicken-and-egg: `returning` needs totalMonths, but
+  //     totalMonths needs protecting before `returning` is known. `lastTrained`
+  //     alone arms it, and collecting totalMonths then flips
+  //     derived.experienceClass to `returning`, which is what raises max to 18.
+  // Ordering stays byRank — no tier reshuffle.
+  const tiers = config.selectionTiers
+  const b2Armed =
+    tiers !== undefined && ready.some((q) => tiers.conditionallyRequired.includes(q.id))
+  // Promoted (not bank-`required`) evidence is bounded by `max`, not `hardCap`:
+  // promotion is a QAE policy addition, so it honours the policy budget and can
+  // never silently grow the journey the way genuinely-required questions may.
+  const required = ready
+    .filter(
+      (q) =>
+        q.required ||
+        (b2Armed && asked < budget.max && tiers.classificationCritical.includes(q.id)),
+    )
+    .sort(byRank)
   if (required.length > 0 && asked < budget.hardCap) {
     return { question: required[0], stopReason: null, offBudget: false }
   }

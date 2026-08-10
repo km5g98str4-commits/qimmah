@@ -316,17 +316,16 @@
       "l-has-injury",
       "s-screen-gate",
       "p-style",
-      "x-last-trained"
+      "x-last-trained",
+      "x-total-duration",
+      "x-consistency"
     ],
     "onlyIn": {
       "returning-advanced": [
         "x-return-reason",
         "x-return-ramp"
       ],
-      "advanced-gym": [
-        "x-total-duration",
-        "x-consistency"
-      ]
+      "advanced-gym": []
     },
     "whyTheyDiffer": {
       "returning-advanced": [
@@ -343,22 +342,9 @@
           ]
         }
       ],
-      "advanced-gym": [
-        {
-          "questionId": "x-total-duration",
-          "evidenceResponsible": [
-            "trainedBefore"
-          ]
-        },
-        {
-          "questionId": "x-consistency",
-          "evidenceResponsible": [
-            "trainedBefore"
-          ]
-        }
-      ],
+      "advanced-gym": [],
       "note": "evidenceResponsible lists the eligibility/skip predicate paths gating each differing question; empty = ordering/budget-driven difference (satiety, priority, budget class)"
     },
-    "differenceCount": 4
+    "differenceCount": 2
   }
 ]

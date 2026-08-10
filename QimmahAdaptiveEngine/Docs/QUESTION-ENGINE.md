@@ -48,6 +48,43 @@ Stop: complete | cap_reached | exhausted | consent_pending
 
 Tie-breaks: priority desc → infoGain desc → **questionId ordinal (byte) comparison** — replacing legacy `localeCompare` (defect L-GEN-1) per NUMERIC-CONTRACT §3.
 
+### 4.1 Budget policy — including the returning exception ([CTO-QAE-011])
+
+**PRODUCT POLICY. Not scientific evidence.** No literature sets these numbers; they are
+founder decisions recorded so they can be revised deliberately rather than drifting.
+
+| Class | Target | Normal max | Hard cap |
+|---|---|---|---|
+| Default (all non-returning) | **≈15** | **16** | 20 |
+| `derived.experienceClass = returning` | ≈15 | **18** | 20 |
+
+**Why returning users may consume up to 18.** The returning classification needs four
+pieces of evidence (`x-trained-before`, `x-last-trained`, `x-total-duration`,
+`x-consistency` — the inputs `classify.ts` actually reads at lines 105–108), *and* the two
+returning follow-ups (`x-return-reason`, `x-return-ramp`), *and* every mandatory input of
+the frozen AthleteProfile contract. For the `returning-advanced` persona that is **18
+questions against a normal max of 16**, and every one of the 16 baseline questions is
+either safety-required or mandatory for profile completeness — there is nothing to yield.
+
+Wave 1 finding F2 was the visible symptom: the two follow-ups (priority 64/60) were served
+ahead of classification evidence (88/88/86) and buried the rest under the satiety penalty,
+so `finalExperienceClass` regressed `returning` → `advanced`. Displacing lower-value
+questions instead produced `complete: false` with `mandatoryMissing:
+["sessionMinutes","trainingStyle"]`, which makes `deriveTrainingCapabilityProfile` throw
+`QAE-TRAINING-INCOMPLETE-PROFILE` — trading a classification regression for a total
+capability failure.
+
+**This is a scoped per-class exception, not a global increase.** It uses the pre-existing
+`budgetClassFactPath` + `budgets` mechanism; the global default stays 16, `hardCap` stays
+20 for every class, no profile field became optional, no question was added to the bank,
+and `consistency` remains protected. Non-returning journeys are byte-identical — Policy B2
+promotion is armed *only* while a returning follow-up is eligible.
+
+Guarded by `Tests/questions/qae-returning-budget-proof.ts` (58 assertions), including the
+counter-assertions that removing the tiers reproduces F2, that removing the budget entry
+makes the journey overrun its declared max, and that every non-returning persona still
+stops at 16.
+
 ## 5. Contract shape
 
 ```

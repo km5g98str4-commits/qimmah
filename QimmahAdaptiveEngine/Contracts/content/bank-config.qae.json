@@ -1,7 +1,18 @@
 {
   "$comment": "[CTO-QAE-005] QAE bank config. Conflicts are hand-transcribed from the characterized legacy CONFLICTS (contradictions.ts — legacy detect functions are not serializable; each transcription is validated by the contradictory-persona journey golden). Budgets are the founder numbers (§8). Multi-answer conditions reference the `key.option` boolean-fact shape of QAE normalization.",
   "gateQuestionId": "s-health-consent",
-  "budgets": { "*": { "min": 13, "max": 16, "hardCap": 20 } },
+  "$commentReturningBudget": "[CTO-QAE-011] PRODUCT POLICY, not evidence. Default adaptive journey target stays ~15 and the global normal maximum stays 16. Returning users may consume up to 18 because the returning classification (x-last-trained + x-total-duration + x-consistency + x-trained-before) plus the ramp/reason follow-ups cannot coexist with the complete frozen AthleteProfile contract inside 16 slots — proven arithmetically in QAE-PHASE5-WAVE2-REPORT.md §1. Scoped per-class exception via the pre-existing budgetClassFactPath mechanism; NOT a global increase. hardCap stays 20 for every class.",
+  "budgetClassFactPath": "derived.experienceClass",
+  "budgets": {
+    "*": { "min": 13, "max": 16, "hardCap": 20 },
+    "returning": { "min": 13, "max": 18, "hardCap": 20 }
+  },
+  "$commentSelectionTiers": "[CTO-QAE-011] Policy B2. Wave 1 finding F2: `required` bypassed `priority`, so x-return-reason (64) / x-return-ramp (60) were served ahead of classification evidence (88/88/86); being category `experience` they also added 2x satietyPenalty which buried the remainder in the scored stage. classificationCritical is exactly the evidence classify.ts consumes for the four protected determinations: returningStatus (lastTrained + totalMonths, classify.ts:106-108), total training duration (totalMonths), consistency (consistency), current experience classification (trainedBefore hard rule, classify.ts:105). These ids are PROMOTED into the mandatory pool so the satiety penalty can never bury them; ordering stays byRank, so no tier reshuffle is introduced. Bank unchanged: no question added, removed, or reworded.",
+  "selectionTiers": {
+    "safetyRequired": ["s-health-consent", "b-age", "b-weight", "l-has-injury", "s-screen-gate"],
+    "classificationCritical": ["x-trained-before", "x-last-trained", "x-total-duration", "x-consistency"],
+    "conditionallyRequired": ["x-return-reason", "x-return-ramp"]
+  },
   "scoring": { "queueBonus": 15, "satietyPenaltyPerAnswered": 6, "exemptCategories": ["basics", "safety", "limitations", "clarify"], "minInfoGainPastMin": 5 },
   "conflicts": [
     {

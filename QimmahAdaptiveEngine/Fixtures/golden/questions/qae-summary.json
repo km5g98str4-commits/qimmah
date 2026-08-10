@@ -123,14 +123,14 @@
     },
     {
       "persona": "returning-advanced",
-      "asked": 16,
+      "asked": 18,
       "clarifications": 0,
       "skipped": 0,
-      "bankAvoidedBp": 8961,
+      "bankAvoidedBp": 8831,
       "stop": "complete",
       "complete": true,
       "mandatoryMissing": [],
-      "experienceClass": "advanced"
+      "experienceClass": "returning"
     }
   ],
   "comparisons": [
@@ -152,7 +152,7 @@
     },
     {
       "pairId": "E-returning-vs-active-advanced",
-      "differenceCount": 4
+      "differenceCount": 2
     }
   ]
 }
