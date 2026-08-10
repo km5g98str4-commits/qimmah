@@ -687,6 +687,70 @@ const byName = parseSallaEvent(sallaPayload({ productId: 'X' }))
 check('الاسم المعروض لا يدخل معرّفات المنتج (قابل للتغيير من لوحة التاجر)',
   !byName.event.productIds.includes('Qimmah Premium'), byName.event.productIds.join(','))
 
+// ── [CTO-BACKEND-003] §9 — بوّابة ربط المنتج، بالحالات السالبة ─────────────
+console.log('\n— [BACKEND-003] بوّابة المنتج: أربع حالات لا تمنح')
+
+// أ) منتج سلة مختلف تمامًا
+await makeUser(db, 'g-other@example.com')
+let g = sallaPayload({ orderId: 'ORD-G-OTHER', productId: 'PROD-TSHIRT',
+  email: 'g-other@example.com', createdAt: '2026-08-14T01:00:00Z' })
+res = await simulateWebhook(db, {
+  headers: await signedHeaders(g), rawBody: g,
+  env: { ...ENV, SALLA_EXPECTED_PRODUCT_IDS: 'PROD-PREMIUM' },
+})
+check('أ) منتج آخر ⇒ لا منحة', res.reason === 'product_mismatch' && res.outcome !== 'processed',
+  `${res.outcome}/${res.reason}`)
+
+// ب) **نفس الاسم المعروض، معرّف مختلف** — الحالة التي يسقط فيها من يوثّق بالاسم.
+//    منتج اسمه «Qimmah Premium» حرفيًا لكن معرّفه مقلَّد.
+await makeUser(db, 'g-clone@example.com')
+g = sallaPayload({ orderId: 'ORD-G-CLONE', productId: 'PROD-IMPOSTOR',
+  email: 'g-clone@example.com', createdAt: '2026-08-14T02:00:00Z' })
+check('  (الحمولة تحمل الاسم المعروض «Qimmah Premium» فعلًا)', g.includes('Qimmah Premium'))
+res = await simulateWebhook(db, {
+  headers: await signedHeaders(g), rawBody: g,
+  env: { ...ENV, SALLA_EXPECTED_PRODUCT_IDS: 'PROD-PREMIUM' },
+})
+check('ب) نفس الاسم بمعرّف مختلف ⇒ لا منحة',
+  res.reason === 'product_mismatch' && res.outcome !== 'processed', `${res.outcome}/${res.reason}`)
+check('   ولا منحة للمقلِّد',
+  (await q(`select count(*)::int n from public.entitlements e join auth.users u on u.id=e.user_id
+            where u.email='g-clone@example.com'`)).rows[0].n === 0)
+
+// ج) المبلغ صحيح تمامًا والمنتج خطأ — المال وحده ليس سندًا
+await makeUser(db, 'g-amt@example.com')
+g = sallaPayload({ orderId: 'ORD-G-AMT', productId: 'PROD-TSHIRT', amount: 19.99,
+  email: 'g-amt@example.com', createdAt: '2026-08-14T03:00:00Z' })
+res = await simulateWebhook(db, {
+  headers: await signedHeaders(g), rawBody: g,
+  env: { ...ENV, SALLA_EXPECTED_PRODUCT_IDS: 'PROD-PREMIUM' },
+})
+check('ج) مبلغ مطابق ومنتج خطأ ⇒ لا منحة (الدفع ليس تفويضًا)',
+  res.reason === 'product_mismatch' && res.outcome !== 'processed', `${res.outcome}/${res.reason}`)
+
+// د) المنتج صحيح والشريحة غير مقبولة
+await makeUser(db, 'g-status@example.com')
+g = sallaPayload({ orderId: 'ORD-G-STATUS', productId: 'PROD-PREMIUM', slug: 'under_review',
+  email: 'g-status@example.com', createdAt: '2026-08-14T04:00:00Z' })
+res = await simulateWebhook(db, {
+  headers: await signedHeaders(g), rawBody: g,
+  env: { ...ENV, SALLA_EXPECTED_PRODUCT_IDS: 'PROD-PREMIUM' },
+})
+check('د) منتج صحيح بشريحة غير مقبولة ⇒ لا منحة',
+  res.reason === 'unpaid_or_incomplete' && res.outcome !== 'processed', `${res.outcome}/${res.reason}`)
+
+// والموجب المقابل: نفس الطلب بالمنتج والشريحة الصحيحين يمرّ — كي لا تكون
+// السوالب الأربعة نجاحًا مجّانيًا لبوّابة ترفض كل شيء (§4.2).
+await makeUser(db, 'g-ok@example.com')
+g = sallaPayload({ orderId: 'ORD-G-OK', productId: 'PROD-PREMIUM', slug: 'completed',
+  email: 'g-ok@example.com', createdAt: '2026-08-14T05:00:00Z' })
+res = await simulateWebhook(db, {
+  headers: await signedHeaders(g), rawBody: g,
+  env: { ...ENV, SALLA_EXPECTED_PRODUCT_IDS: 'PROD-PREMIUM' },
+})
+check('والموجب: منتج وشريحة صحيحان ⇒ منحة (البوّابة ليست رافضة لكل شيء)',
+  res.outcome === 'processed', res.outcome)
+
 // ── الطبقة ④: مضاهاة `index.ts` — المحاكاة لا تحرس نفسها ───────────────────
 console.log('\n— مضاهاة الطرفية الحقيقية')
 const idx = readFileSync(join(FN_DIR, 'index.ts'), 'utf8')
