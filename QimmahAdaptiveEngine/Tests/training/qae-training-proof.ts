@@ -321,9 +321,18 @@ for (const file of goldenFiles) {
 console.log(`parity: D1 (tie-break) sequence differences observed in ${d1SequenceDifferences}/17 fixtures`)
 
 // ── §H·15 approved-deviation structure ──────────────────────────────────────
+// [CTO-QAE-013] The approval check asserts the SHAPE of a numbered CTO
+// reference, not one specific wave number. Pinning it to [CTO-QAE-007] made a
+// later wave's deviation (D6) fail a structural test for the wrong reason —
+// the entry was fully formed and properly approved. Requiring the numbered
+// pattern keeps the guarantee (no deviation without a traceable approval)
+// while admitting deviations approved by any numbered directive.
 check('every deviation carries legacy output + QAE output + reason + approval + fixtures',
-  deviations.deviations.every((d) => d.legacyOutput.length > 0 && d.qaeOutput.length > 0 && d.reason.length > 0 && d.approvalReference.includes('[CTO-QAE-007]') && d.affectedFixtures.length > 0))
-check('deviation register covers D1–D5', ['D1', 'D2', 'D3', 'D4', 'D5'].every((p) => deviations.deviations.some((d) => d.id.startsWith(p))))
+  deviations.deviations.every((d) => d.legacyOutput.length > 0 && d.qaeOutput.length > 0 && d.reason.length > 0 && /\[CTO-QAE-\d+\]/.test(d.approvalReference) && d.affectedFixtures.length > 0))
+check('deviation register covers D1–D6', ['D1', 'D2', 'D3', 'D4', 'D5', 'D6'].every((p) => deviations.deviations.some((d) => d.id.startsWith(p))))
+// Counter-assertion: an unapproved-looking reference must still fail the shape.
+check('deviation approval shape rejects an unnumbered reference',
+  !/\[CTO-QAE-\d+\]/.test('approved verbally'))
 // Every qae-* ruleId the pipeline can emit is covered by a deviation entry (D3).
 check('QAE-only stages are covered by the deviation register', deviations.deviations.some((d) => d.id === 'D3-staged-pipeline'))
 

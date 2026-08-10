@@ -41,6 +41,14 @@
       "reason": "directive names the policy explicitly: 'Beginner = machine-dominant policy, NOT machine-only absolute rule'",
       "approvalReference": "[CTO-QAE-007] §E (Important block)",
       "affectedFixtures": "APPROVED_DEVIATION-mode candidate sets for gym scenarios include non-machine candidates that the legacy machines-only pool excluded; PARITY mode reproduces the legacy personalization selector, which never had the machines-only pool"
+    },
+    {
+      "id": "D6-assembly-ordinal-rank",
+      "legacyOutput": "buildMuscleRankMap (planGenerator.ts:437) and sortCandidates (:414) order by String.prototype.localeCompare; the per-muscle rank map feeds partitionOrder, so under a different host ICU locale the A/B allocation — and therefore the assembled day content — can shift",
+      "qaeOutput": "Domain/Training/assembly.ts orders by ordinal (code-unit) exerciseId in both buildMuscleRankMap and sortCandidates, and iterates muscle groups in ordinal key order so the rank map is independent of catalog registration order",
+      "reason": "legacy defect L-TRN-2, same class as L-TRN-1/D1 but load-bearing for day assembly rather than candidate ranking. LATENT DEFECT CORRECTION, NOT A PARITY DIFFERENCE: on the current 181-exercise catalog every exerciseId is ASCII and ordinal collation agrees with the host locale, so all 17 goldens reproduce byte-identically (17/17). The deviation is registered because the DEFECT is real and would surface on a non-ASCII id or a differently-collating host; no parity difference is fabricated.",
+      "approvalReference": "[CTO-QAE-013] §3 — if ordinal ordering produces identical current outputs, record L-TRN-2 as a latent approved defect correction and do not fabricate a parity difference",
+      "affectedFixtures": "none observed — 17/17 assembled-day parity holds. Guarded by qae-assembly-proof: the D6 probe asserts ordinal and tr-TR collation genuinely differ on a probe set, so the equivalence is demonstrated to be catalog-specific rather than assumed universal."
     }
   ]
 }

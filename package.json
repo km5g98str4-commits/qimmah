@@ -143,7 +143,8 @@
     "qae:oracle:training": "node QimmahAdaptiveEngine/Tools/run-training-oracle.mjs",
     "qae:oracle:question": "node QimmahAdaptiveEngine/Tools/run-question-oracle.mjs",
     "qae:journeys": "node QimmahAdaptiveEngine/Tools/run-qae-journeys.mjs",
-    "qae:all": "node QimmahAdaptiveEngine/Tools/run-qae-proof.mjs && node QimmahAdaptiveEngine/Tools/run-qae-question-proof.mjs && node QimmahAdaptiveEngine/Tools/run-qae-profile-proof.mjs && node QimmahAdaptiveEngine/Tools/run-qae-decision-proof.mjs && node QimmahAdaptiveEngine/Tools/run-qae-content-proof.mjs && node QimmahAdaptiveEngine/Tools/run-qae-training-proof.mjs && node QimmahAdaptiveEngine/Tools/run-qae-returning-budget-proof.mjs && node QimmahAdaptiveEngine/Tools/run-qae-assembly-characterization-proof.mjs && node QimmahAdaptiveEngine/Tools/run-training-oracle.mjs"
+    "qae:all": "node QimmahAdaptiveEngine/Tools/run-qae-proof.mjs && node QimmahAdaptiveEngine/Tools/run-qae-question-proof.mjs && node QimmahAdaptiveEngine/Tools/run-qae-profile-proof.mjs && node QimmahAdaptiveEngine/Tools/run-qae-decision-proof.mjs && node QimmahAdaptiveEngine/Tools/run-qae-content-proof.mjs && node QimmahAdaptiveEngine/Tools/run-qae-training-proof.mjs && node QimmahAdaptiveEngine/Tools/run-qae-returning-budget-proof.mjs && node QimmahAdaptiveEngine/Tools/run-qae-assembly-characterization-proof.mjs && node QimmahAdaptiveEngine/Tools/run-training-oracle.mjs && node QimmahAdaptiveEngine/Tools/run-qae-assembly-proof.mjs",
+    "qae:assembly": "node QimmahAdaptiveEngine/Tools/run-qae-assembly-proof.mjs"
   },
   "dependencies": {
     "@capacitor/app": "^8.1.0",
