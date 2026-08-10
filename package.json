@@ -131,7 +131,19 @@
     "test:saved-meals": "node scripts/run-saved-meals-proof.mjs",
     "test:analytics": "node scripts/run-analytics-proof.mjs",
     "test:cto72-polish": "node scripts/run-cto72-polish-proof.mjs",
-    "test:plan-changes": "node scripts/run-plan-changes-proof.mjs"
+    "test:plan-changes": "node scripts/run-plan-changes-proof.mjs",
+    "qae:proof": "node QimmahAdaptiveEngine/Tools/run-qae-proof.mjs",
+    "qae:question": "node QimmahAdaptiveEngine/Tools/run-qae-question-proof.mjs",
+    "qae:profile": "node QimmahAdaptiveEngine/Tools/run-qae-profile-proof.mjs",
+    "qae:decision": "node QimmahAdaptiveEngine/Tools/run-qae-decision-proof.mjs",
+    "qae:content": "node QimmahAdaptiveEngine/Tools/run-qae-content-proof.mjs",
+    "qae:training": "node QimmahAdaptiveEngine/Tools/run-qae-training-proof.mjs",
+    "qae:returning-budget": "node QimmahAdaptiveEngine/Tools/run-qae-returning-budget-proof.mjs",
+    "qae:assembly-characterization": "node QimmahAdaptiveEngine/Tools/run-qae-assembly-characterization-proof.mjs",
+    "qae:oracle:training": "node QimmahAdaptiveEngine/Tools/run-training-oracle.mjs",
+    "qae:oracle:question": "node QimmahAdaptiveEngine/Tools/run-question-oracle.mjs",
+    "qae:journeys": "node QimmahAdaptiveEngine/Tools/run-qae-journeys.mjs",
+    "qae:all": "node QimmahAdaptiveEngine/Tools/run-qae-proof.mjs && node QimmahAdaptiveEngine/Tools/run-qae-question-proof.mjs && node QimmahAdaptiveEngine/Tools/run-qae-profile-proof.mjs && node QimmahAdaptiveEngine/Tools/run-qae-decision-proof.mjs && node QimmahAdaptiveEngine/Tools/run-qae-content-proof.mjs && node QimmahAdaptiveEngine/Tools/run-qae-training-proof.mjs && node QimmahAdaptiveEngine/Tools/run-qae-returning-budget-proof.mjs && node QimmahAdaptiveEngine/Tools/run-qae-assembly-characterization-proof.mjs && node QimmahAdaptiveEngine/Tools/run-training-oracle.mjs"
   },
   "dependencies": {
     "@capacitor/app": "^8.1.0",
