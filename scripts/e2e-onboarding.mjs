@@ -38,6 +38,7 @@ try {
   // عَلَم تطوير (ليس مفتاح بيانات) — نتحقّق أنه ما زال مقروءًا في المكوّن.
   const FORCE_FAIL = assertDevFlag('qimmah:onboarding:force-fail', 'src/views/OnboardingV2.tsx')
 
+  let welcomeSeen = false
   await waitForServer()
   browser = await chromium.launch()
   const consoleErrors = []
@@ -46,6 +47,15 @@ try {
     p.on('console', (m) => m.type() === 'error' && consoleErrors.push(m.text()))
     p.on('pageerror', (e) => consoleErrors.push(String(e)))
     await p.goto(BASE, { waitUntil: 'networkidle' })
+    // [CTO-85] شاشة الترحيب تسبق أول سؤال منذ [CTO-009/WP-2]. الحصّاد كان يبدأ
+    // من حقول الجسد مباشرةً، فصار ينتظر «التالي» على شاشة لا تحمله ويسقط
+    // بمهلة ٣٠ ثانية. نعبرها **بعد التأكّد من وجودها** — لا نتخطّاها بصمت،
+    // فبقاؤها جزء من التدفّق المعتمد.
+    const start = p.getByRole('button', { name: t.welcome.start, exact: true })
+    if (await start.isVisible().catch(() => false)) {
+      welcomeSeen = true
+      await start.click()
+    }
     return p
   }
   const fillBodyAndConsent = async (p) => {
@@ -58,6 +68,7 @@ try {
 
   // The live order is body + consent → intent/level → goal → training → equipment.
   const advancedPage = await makePage()
+  check('شاشة الترحيب تسبق أول سؤال', welcomeSeen)
   check('RTL root', await advancedPage.evaluate(() => document.documentElement.dir === 'rtl'))
   check('320px has no horizontal overflow', await advancedPage.evaluate(() => document.documentElement.scrollWidth <= innerWidth))
   const advancedNext = advancedPage.getByRole('button', { name: t.next })
