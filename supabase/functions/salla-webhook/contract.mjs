@@ -25,11 +25,53 @@
 //    بعد مطابقة حمولة حقيقية على staging — لا باجتهاد هنا.
 // ============================================================================
 
-/** أحداث سلة التي نقبلها أصلًا. ما عداها يُسجَّل `ignored` ولا يُمنح. */
-export const SUPPORTED_EVENTS = ['order.payment.updated', 'order.status.updated']
+// ─────────────────────────────────────────────────────────────────────────────
+// [CTO-86] تصحيحان أوجبهما فحص مصادر سلة الرسمية — والأول كان سيفسد المفتاح.
+//
+// ① **`order.payment.updated` ليس حدث دفع مكتمل.** وصفه في مستودع سلة الرسمي
+//    (`SallaApp/webhook-actions-js` · `express-starter-kit`) حرفيًا:
+//    *"A payment method has been updated"* — أي **تغيّرت وسيلة الدفع**. قبوله
+//    كمرشّح للمنح خلط بين «غيّر البطاقة» و«وصل المال». حُذف من القائمة.
+//
+// ② **`order.status.updated` حمولته شكل آخر**، وهنا كان الخطر:
+//
+//      { "id": 198290473,          ← معرّف **تغيّر الحالة**، لا معرّف الطلب
+//        "status": "تم التنفيذ",    ← **نصّ** هنا، لا كائن فيه slug
+//        "order": { "id": 629263027, "status": { "slug": "completed" },
+//                   "amounts": {…}, "customer": {…} } }
+//
+//    القارئ السابق كان يأخذ `data.id` معرّفًا للطلب — أي **معرّف تغيّر الحالة**.
+//    وهو يختلف مع كل انتقال حالة للطلب الواحد، فكان:
+//      • مفتاح التكرار `(provider, provider_order_id)` يتبدّل مع كل انتقال ⇒
+//        الطلب الواحد يُمنح مرارًا تحت «طلبات» مختلفة،
+//      • وحارس ربط الهوية **لا يشتغل أصلًا** لأنه لا يجد الطلب السابق.
+//    أي أن أثمن ثابت في الموجة الماضية كان يُلتفّ عليه من حيث لا يُقصد.
+//
+//    (لم يُستغَلّ فعليًا: `data.status` نصٌّ لا كائن، فكانت الشريحة تخرج فارغة
+//    والحدث يسقط `unpaid_or_incomplete`. فشلٌ مغلق بالصدفة لا بالتصميم —
+//    وأول من «يصلح» قراءة الشريحة كان سيفتح الثقب على مصراعيه.)
+//
+// المصدر: `SallaApp/salla-partners-agent-kit` →
+//   `.agents/skills/salla-app-functions-design/references/event-contexts.md`
+// ─────────────────────────────────────────────────────────────────────────────
 
-/** الافتراض الأضيق. يوسّعه `SALLA_PAID_STATUS_SLUGS` بقرار معلَن. */
-export const DEFAULT_PAID_SLUGS = ['completed']
+/**
+ * أحداث سلة التي نقبلها أصلًا. ما عداها يُسجَّل `ignored` ولا يُمنح.
+ * `order.payment.updated` **ليس منها** — انظر أعلاه.
+ */
+export const SUPPORTED_EVENTS = ['order.status.updated']
+
+/**
+ * ⛔ **لا افتراض.** الشرائح التي تعني «وصل المال» **غير موثَّقة** لدى سلة:
+ * التوثيق يسرد `payment_pending` · `under_review` · `in_progress` · `completed`
+ * ولا يصرّح أيّها يضمن الدفع. و[CTO-86] نصّ على ألّا تُعتمد `['completed']`
+ * حقيقةً إنتاجية قبل حمولة حقيقية.
+ *
+ * فالقائمة **إعداد إلزامي بلا افتراضي**: تُضبط بعد مطابقة حمولة سلة على
+ * staging، وحتى تُضبط **لا تقلع الطرفية أصلًا**. صفرُ منحٍ خير من منحة مبنيّة
+ * على تخمين.
+ */
+export const DEFAULT_PAID_SLUGS = []
 
 export const DEFAULT_CURRENCY = 'SAR'
 
@@ -121,18 +163,34 @@ export function parseSallaEvent(rawBody) {
   if (!isObj(body.data)) return { ok: false, reason: 'missing_data' }
 
   const d = body.data
-  // معرّف الطلب: `data.id` هو المستقرّ. `reference_id` رقم عرض للتاجر ولا
-  // يصلح مفتاحًا — قد يتكرّر عبر المتاجر.
-  const orderId = d.id === undefined || d.id === null ? '' : String(d.id).trim()
+
+  // **كائن الطلب لا مظروف الحدث.** في `order.status.updated` يكون الطلب
+  // متداخلًا تحت `data.order`، و`data.id` معرّف تغيُّر الحالة لا الطلب.
+  // استخراج الطلب أولًا ثم القراءة منه وحده هو ما يمنع ربط المفتاح بالمعرّف
+  // الخطأ — انظر التصحيح ② في ترويسة الملف.
+  const order = isObj(d.order) ? d.order : d
+  const nested = isObj(d.order)
+
+  // معرّف الطلب: `order.id` المستقرّ. `reference_id` رقم عرض للتاجر ولا يصلح
+  // مفتاحًا — قد يتكرّر عبر المتاجر.
+  const orderId = order.id === undefined || order.id === null ? '' : String(order.id).trim()
   if (!orderId) return { ok: false, reason: 'missing_order_id' }
 
-  const statusSlug = isObj(d.status) && typeof d.status.slug === 'string'
-    ? d.status.slug.trim().toLowerCase() : ''
+  // الشريحة تُقرأ من **كائن الطلب** حصرًا. `data.status` في حدث تغيّر الحالة
+  // نصٌّ معروض بالعربية («تم التنفيذ») لا معرّفًا آليًا — قراءته خلط بين
+  // نصّ للعرض ومفتاح للقرار.
+  const statusSlug = isObj(order.status) && typeof order.status.slug === 'string'
+    ? order.status.slug.trim().toLowerCase() : ''
 
-  const customer = isObj(d.customer) ? d.customer : {}
+  // إشارة دفع موثَّقة على كائن الطلب. تُقرأ **حين توجد** فقط: غيابها لا يعني
+  // شيئًا، ووجودها `true` يعني الدفع معلّق ⇒ لا منحة مهما قالت الشريحة.
+  const pendingPayment = typeof order.is_pending_payment === 'boolean'
+    ? order.is_pending_payment : null
+
+  const customer = isObj(order.customer) ? order.customer : {}
   const email = typeof customer.email === 'string' ? customer.email.trim().toLowerCase() : ''
 
-  const total = isObj(d.amounts) && isObj(d.amounts.total) ? d.amounts.total : null
+  const total = isObj(order.amounts) && isObj(order.amounts.total) ? order.amounts.total : null
   // المبلغ يصل عشريًا (19.99) فيُحوَّل إلى أصغر وحدة (1999) — والتقريب
   // `Math.round` لا `Math.trunc`: 19.99 قد تصل 19.989999 بحساب عائم.
   const amountMinor = total && total.amount !== undefined && total.amount !== null
@@ -140,17 +198,29 @@ export function parseSallaEvent(rawBody) {
     ? Math.round(Number(total.amount) * 100) : null
   const currency = total && typeof total.currency === 'string'
     ? total.currency.trim().toUpperCase()
-    : (typeof d.currency === 'string' ? d.currency.trim().toUpperCase() : '')
+    : (typeof order.currency === 'string' ? order.currency.trim().toUpperCase() : '')
 
-  const items = Array.isArray(d.items) ? d.items : []
-  const productIds = items
-    .map((it) => (isObj(it) && isObj(it.product) ? it.product.id : (isObj(it) ? it.product_id : null)))
-    .filter((v) => v !== undefined && v !== null)
-    .map((v) => String(v).trim())
+  // ربط المنتج: `items[].product.id` هو المعرّف المستقرّ، و`items[].sku` بديل
+  // يعتمده التاجر. يُجمع الاثنان ويُطابَق أيّهما — والاسم المعروض **لا يدخل**:
+  // قابل للتغيير من لوحة التاجر فلا يصلح سند صلاحية.
+  const items = Array.isArray(order.items) ? order.items : []
+  const productIds = items.flatMap((it) => {
+    if (!isObj(it)) return []
+    const out = []
+    if (isObj(it.product) && it.product.id !== undefined && it.product.id !== null) {
+      out.push(String(it.product.id).trim())
+    }
+    if (it.product_id !== undefined && it.product_id !== null) out.push(String(it.product_id).trim())
+    if (typeof it.sku === 'string' && it.sku.trim()) out.push(it.sku.trim())
+    return out
+  }).filter(Boolean)
 
   return {
     ok: true,
-    event: { eventName, orderId, statusSlug, email, amountMinor, currency, productIds },
+    event: {
+      eventName, orderId, statusSlug, email, amountMinor, currency, productIds,
+      pendingPayment, nestedShape: nested,
+    },
   }
 }
 
@@ -168,6 +238,10 @@ export function decideGrant(event, policy) {
   if (!SUPPORTED_EVENTS.includes(event.eventName)) {
     return { grant: false, reason: 'unsupported_event' }
   }
+  // إشارة موثَّقة تسبق الشريحة: طلب معلَّق الدفع لا يُمنح ولو حملت شريحته
+  // اسمًا مطمئنًا. الغياب لا يُفسَّر — الفحص يعمل حين توجد الإشارة فقط.
+  if (event.pendingPayment === true) return { grant: false, reason: 'payment_pending' }
+
   const paid = policy.paidSlugs.includes(event.statusSlug)
   if (!paid) return { grant: false, reason: 'unpaid_or_incomplete' }
 
@@ -219,15 +293,24 @@ export function readPolicy(env) {
     expectedAmountMinor = Number(raw)
   }
 
+  // [CTO-86]: إلزامي بلا افتراضي. سلة لا توثّق أي شريحة تعني «وصل المال»،
+  // فالقيمة تُقرَّر بمطابقة حمولة حقيقية وتُعلَن هنا — لا تُورَّث بالسكوت.
   const slugsRaw = g('SALLA_PAID_STATUS_SLUGS')
   const paidSlugs = slugsRaw
     ? slugsRaw.split(',').map((s) => s.trim().toLowerCase()).filter(Boolean)
     : [...DEFAULT_PAID_SLUGS]
-  if (paidSlugs.length === 0) return { ok: false, reason: 'SALLA_PAID_STATUS_SLUGS resolved empty' }
+  if (paidSlugs.length === 0) {
+    return { ok: false, reason: 'SALLA_PAID_STATUS_SLUGS required — no default; confirm against a real Salla payload first' }
+  }
 
+  // [CTO-86] §9: ربط المنتج **إلزامي**. «أي طلب ناجح في سلة» ليس سند صلاحية
+  // لـPremium — المتجر يبيع غيرها. الغياب خطأ تهيئة لا تساهل.
   const productsRaw = g('SALLA_EXPECTED_PRODUCT_IDS')
   const expectedProductIds = productsRaw
     ? productsRaw.split(',').map((s) => s.trim()).filter(Boolean) : []
+  if (expectedProductIds.length === 0) {
+    return { ok: false, reason: 'SALLA_EXPECTED_PRODUCT_IDS required — Premium must bind to an approved product identifier' }
+  }
 
   const expectedCurrency = (g('SALLA_EXPECTED_CURRENCY') || DEFAULT_CURRENCY).toUpperCase()
 

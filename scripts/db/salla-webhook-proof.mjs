@@ -59,28 +59,70 @@ const ENV = {
   SALLA_EXPECTED_PRODUCT_IDS: 'PROD-PREMIUM',
 }
 
-/** حمولة سلة بالحقول الموثَّقة رسميًا — لا حقل مخترع. */
+/**
+ * حمولة `order.status.updated` **بالشكل الرسمي**، منقولة من مرجع سلة:
+ *   SallaApp/salla-partners-agent-kit →
+ *   .agents/skills/salla-app-functions-design/references/event-contexts.md
+ *
+ * وبنيتها هي بيت الداء الذي أصلحه [CTO-86]:
+ *   data.id      = معرّف **تغيّر الحالة** (يتبدّل مع كل انتقال)
+ *   data.status  = **نصّ** معروض بالعربية، لا كائن فيه slug
+ *   data.order   = كائن الطلب الحقيقي، ومنه وحده تُقرأ كل الحقول
+ *
+ * `statusChangeId` مختلف عمدًا عن `orderId` في كل استدعاء: أي قارئ يخلط
+ * بينهما يسقط فورًا في الفحوص أدناه.
+ */
 function sallaPayload({
-  event = 'order.payment.updated', orderId = 'ORD-1001', slug = 'completed',
+  event = 'order.status.updated', orderId = 'ORD-1001', slug = 'completed',
   email = 'buyer@example.com', amount = 19.99, currency = 'SAR',
   productId = 'PROD-PREMIUM', createdAt = '2026-08-11T10:00:00Z',
+  statusChangeId = 'STATUSCHANGE-9999', pendingPayment = false,
 } = {}) {
+  const order = {
+    id: orderId,
+    reference_id: 55501,
+    status: { id: 566146469, name: 'تم التنفيذ', slug, customized: null },
+    payment_method: 'credit_card',
+    currency,
+    amounts: {
+      sub_total: { amount, currency },
+      shipping_cost: { amount: 0, currency },
+      total: { amount, currency },
+    },
+    items: [{ id: 9, name: 'Qimmah Premium', sku: 'SKU-PREM',
+      product: { id: productId, name: 'Qimmah Premium' }, quantity: 1 }],
+    customer: { id: 77, first_name: 'B', last_name: 'X', email, mobile: 5000000, country: 'SA' },
+    is_pending_payment: pendingPayment,
+  }
   return JSON.stringify({
     event,
-    merchant: 123456,
+    merchant: 472944967,
     created_at: createdAt,
     data: {
-      id: orderId,
-      reference_id: 55501,
-      status: { id: 1, name: 'Completed', slug, customized: false },
-      payment_method: 'credit_card',
-      currency,
-      amounts: {
-        sub_total: { amount, currency },
-        total: { amount, currency },
-      },
-      items: [{ id: 9, product: { id: productId, name: 'Qimmah Premium' }, quantity: 1 }],
-      customer: { id: 77, first_name: 'B', last_name: 'X', email, mobile: '5x' },
+      id: statusChangeId,
+      status: 'تم التنفيذ',
+      customized: null,
+      note: '',
+      created_at: { date: createdAt, timezone_type: 3, timezone: 'Asia/Riyadh' },
+      order,
+    },
+  })
+}
+
+/** الشكل المسطّح (`order.created`) — الطلب مباشرةً تحت `data`. للمقارنة. */
+function flatOrderPayload({ event = 'order.created', orderId = 'ORD-FLAT', slug = 'completed',
+  email = 'buyer@example.com', amount = 19.99, currency = 'SAR', productId = 'PROD-PREMIUM',
+  createdAt = '2026-08-11T10:00:00Z', pendingPayment = false } = {}) {
+  return JSON.stringify({
+    event, merchant: 472944967, created_at: createdAt,
+    data: {
+      id: orderId, reference_id: 41027662,
+      status: { id: 566146469, name: '…', slug, customized: null },
+      payment_method: 'bank', currency,
+      amounts: { sub_total: { amount, currency }, total: { amount, currency } },
+      items: [{ id: 9, sku: 'SKU-PREM', product: { id: productId, name: 'Qimmah Premium' }, quantity: 1 }],
+      customer: { id: 77, first_name: 'B', last_name: 'X', email },
+      is_pending_payment: pendingPayment,
     },
   })
 }
@@ -462,9 +504,7 @@ check('بصمة نفس الجسم ثابتة',
 
 // قائمة الأحداث والشرائح ليست مفتوحة
 check('قائمة الأحداث المدعومة محصورة ولا تشمل الاسترجاع',
-  SUPPORTED_EVENTS.length === 2 && !SUPPORTED_EVENTS.includes('order.refund.created'))
-check('الافتراض الأضيق للشرائح المدفوعة (completed وحدها)',
-  DEFAULT_PAID_SLUGS.length === 1 && DEFAULT_PAID_SLUGS[0] === 'completed')
+  SUPPORTED_EVENTS.length === 1 && !SUPPORTED_EVENTS.includes('order.refund.created'))
 check('شريحة مجهولة لا تُعتبر مدفوعة',
   decideGrant({ eventName: 'order.payment.updated', statusSlug: 'brand_new_slug', email: 'a@b.c',
     amountMinor: 1999, currency: 'SAR', productIds: ['PROD-PREMIUM'] },
@@ -548,6 +588,104 @@ vb = sallaPayload({ orderId: 'ORD-PLANT-BAN2', email: 'planted-ban@example.com',
 await simulateWebhook(db, { headers: await signedHeaders(vb), rawBody: vb })
 check('وبعد الاستعادة لا يرفع الشراء الحظر',
   (await q(`select revoked_at from public.entitlements where user_id=$1`, [pv])).rows[0].revoked_at !== null)
+
+// ── [CTO-86] عقد سلة الرسمي — التصحيحان وحُرّاسهما ──────────────────────────
+console.log('\n— [CTO-86] عقد الأحداث والحمولة')
+
+// ① `order.payment.updated` = «تغيّرت وسيلة الدفع»، لا «وصل المال».
+check('order.payment.updated لم يعد حدثًا مقبولًا',
+  !SUPPORTED_EVENTS.includes('order.payment.updated'), SUPPORTED_EVENTS.join(','))
+await makeUser(db, 'methodchange@example.com')
+let pm = sallaPayload({ event: 'order.payment.updated', orderId: 'ORD-PMUPD',
+  email: 'methodchange@example.com', createdAt: '2026-08-13T01:00:00Z' })
+res = await simulateWebhook(db, { headers: await signedHeaders(pm), rawBody: pm })
+check('تغيّر وسيلة الدفع لا يمنح شيئًا',
+  res.reason === 'unsupported_event' && res.outcome !== 'processed', `${res.outcome}/${res.reason}`)
+check('ولا يترك صفّ شراء',
+  (await q(`select count(*)::int n from public.purchase_ledger where provider_order_id='ORD-PMUPD'`))
+    .rows[0].n === 0)
+
+// ② المفتاح يُربط بمعرّف **الطلب** لا بمعرّف تغيّر الحالة.
+console.log('  · ربط المفتاح بمعرّف الطلب لا بتغيّر الحالة')
+await makeUser(db, 'nested@example.com')
+const nestedA = sallaPayload({ orderId: 'ORD-NEST', statusChangeId: 'SC-AAA',
+  email: 'nested@example.com', createdAt: '2026-08-13T02:00:00Z' })
+res = await simulateWebhook(db, { headers: await signedHeaders(nestedA), rawBody: nestedA })
+check('حدث تغيّر الحالة المتداخل يُعالَج', res.outcome === 'processed', res.outcome)
+const nestedLed = await q(`select provider_order_id, amount_minor from public.purchase_ledger
+                           where provider_order_id in ('ORD-NEST','SC-AAA')`)
+check('السجلّ حمل معرّف الطلب (ORD-NEST) لا معرّف تغيّر الحالة (SC-AAA)',
+  nestedLed.rows.length === 1 && nestedLed.rows[0].provider_order_id === 'ORD-NEST',
+  nestedLed.rows.map((r) => r.provider_order_id).join(','))
+check('والمبلغ قُرئ من data.order.amounts لا من المظروف', nestedLed.rows[0].amount_minor === 1999)
+
+// الاختبار الحاسم: **نفس الطلب، انتقال حالة ثانٍ** — معرّف تغيّر مختلف.
+// بالقراءة القديمة كان يبدو طلبًا جديدًا ⇒ منحة ثانية وحارس الهوية أعمى.
+await makeUser(db, 'nestthief@example.com')
+const nestedB = sallaPayload({ orderId: 'ORD-NEST', statusChangeId: 'SC-BBB',
+  email: 'nestthief@example.com', createdAt: '2026-08-13T03:00:00Z' })
+res = await simulateWebhook(db, { headers: await signedHeaders(nestedB), rawBody: nestedB })
+check('انتقال حالة ثانٍ لنفس الطلب ببريد آخر ⇒ rejected (الحارس يرى الطلب)',
+  res.outcome === 'rejected', res.outcome)
+check('ولا منحة للثاني',
+  (await q(`select count(*)::int n from public.entitlements e join auth.users u on u.id=e.user_id
+            where u.email='nestthief@example.com'`)).rows[0].n === 0)
+check('ولا صفّ شراء ثانٍ للطلب نفسه',
+  (await q(`select count(*)::int n from public.purchase_ledger where provider_order_id='ORD-NEST'`))
+    .rows[0].n === 1)
+
+// النصّ العربي المعروض في `data.status` لا يتسرّب إلى قرار الشريحة.
+const parsedNested = parseSallaEvent(nestedA)
+check('data.status النصّي («تم التنفيذ») لا يُقرأ شريحةً',
+  parsedNested.ok && parsedNested.event.statusSlug === 'completed', parsedNested.event?.statusSlug)
+check('والقارئ يعلن أنه رأى الشكل المتداخل', parsedNested.event.nestedShape === true)
+
+// الشكل المسطّح ما زال يُقرأ صحيحًا (لم يُكسر بإصلاح المتداخل).
+const parsedFlat = parseSallaEvent(flatOrderPayload({ orderId: 'ORD-FLAT2' }))
+check('الشكل المسطّح يُقرأ صحيحًا أيضًا',
+  parsedFlat.ok && parsedFlat.event.orderId === 'ORD-FLAT2'
+  && parsedFlat.event.statusSlug === 'completed' && parsedFlat.event.amountMinor === 1999)
+check('والمسطّح يُعلَن غير متداخل', parsedFlat.event.nestedShape === false)
+
+// ③ `is_pending_payment` — إشارة موثَّقة تسبق الشريحة.
+console.log('  · إشارة is_pending_payment')
+await makeUser(db, 'pendflag@example.com')
+const pend2 = sallaPayload({ orderId: 'ORD-PENDFLAG', slug: 'completed', pendingPayment: true,
+  email: 'pendflag@example.com', createdAt: '2026-08-13T04:00:00Z' })
+res = await simulateWebhook(db, { headers: await signedHeaders(pend2), rawBody: pend2 })
+check('is_pending_payment=true يمنع المنحة ولو كانت الشريحة completed',
+  res.reason === 'payment_pending' && res.outcome !== 'processed', `${res.outcome}/${res.reason}`)
+check('ولا منحة',
+  (await q(`select count(*)::int n from public.entitlements e join auth.users u on u.id=e.user_id
+            where u.email='pendflag@example.com'`)).rows[0].n === 0)
+
+// ④ السياسة صارت إلزامية — لا شرائح مفترضة ولا منتج مفتوح.
+console.log('  · السياسة الإلزامية')
+check('لا شريحة مدفوعة افتراضية إطلاقًا', DEFAULT_PAID_SLUGS.length === 0)
+const noSlugs = { ...ENV }; delete noSlugs.SALLA_PAID_STATUS_SLUGS
+check('غياب SALLA_PAID_STATUS_SLUGS ⇒ الطرفية لا تقلع', readPolicy(noSlugs).ok === false,
+  readPolicy(noSlugs).reason?.slice(0, 70))
+const noProd = { ...ENV }; delete noProd.SALLA_EXPECTED_PRODUCT_IDS
+check('غياب SALLA_EXPECTED_PRODUCT_IDS ⇒ الطرفية لا تقلع', readPolicy(noProd).ok === false,
+  readPolicy(noProd).reason?.slice(0, 70))
+res = await simulateWebhook(db, {
+  headers: await signedHeaders(nestedA), rawBody: nestedA, env: noProd,
+})
+check('وبلا ربط منتج لا يمرّ أي حدث', res.outcome === 'misconfigured', res.outcome)
+
+// ⑤ ربط المنتج يقبل SKU كما يقبل معرّف المنتج، ولا يقبل الاسم المعروض.
+console.log('  · هوية منتج Premium')
+await makeUser(db, 'skubuyer@example.com')
+const bySku = sallaPayload({ orderId: 'ORD-SKU', productId: 'SOME-OTHER-ID',
+  email: 'skubuyer@example.com', createdAt: '2026-08-13T05:00:00Z' })
+res = await simulateWebhook(db, {
+  headers: await signedHeaders(bySku), rawBody: bySku,
+  env: { ...ENV, SALLA_EXPECTED_PRODUCT_IDS: 'SKU-PREM' },
+})
+check('المطابقة بالـSKU تعمل', res.outcome === 'processed', res.outcome)
+const byName = parseSallaEvent(sallaPayload({ productId: 'X' }))
+check('الاسم المعروض لا يدخل معرّفات المنتج (قابل للتغيير من لوحة التاجر)',
+  !byName.event.productIds.includes('Qimmah Premium'), byName.event.productIds.join(','))
 
 // ── الطبقة ④: مضاهاة `index.ts` — المحاكاة لا تحرس نفسها ───────────────────
 console.log('\n— مضاهاة الطرفية الحقيقية')
