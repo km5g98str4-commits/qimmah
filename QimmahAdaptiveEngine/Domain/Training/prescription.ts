@@ -36,7 +36,8 @@ export type PrescriptionReasonCode =
   | 'prescription.machineRestInterval'
   | 'prescription.metadataInsufficient'
   | 'prescription.perExerciseCeilingApplied'
-  | 'prescription.sessionCeilingApplied'
+  | 'prescription.sessionHardMaxReached'
+  | 'prescription.slotUnprescribableAtHardMax'
   | 'prescription.sessionBelowMinimumWork'
   | 'prescription.minorPolicyConservative'
 
@@ -62,6 +63,8 @@ export interface PrescribedDay {
   kind: string
   slots: readonly PrescribedSlot[]
   totalWorkingSets: number
+  /** [CTO-QAE-019] §2: true when the HARD_MAX left a slot unprescribable. */
+  constrained: boolean
   reasonCodes: readonly PrescriptionReasonCode[]
 }
 
@@ -137,7 +140,8 @@ export function prescribeInitialPlan(input: PrescribeInput): PrescriptionResult 
   const days: PrescribedDay[] = input.days.map((day) => {
     const dayCodes = new Set<PrescriptionReasonCode>()
     let running = 0
-    const sessionCeiling = policy('sets.sessionWorkingSetCeiling')
+    const hardMax = policy('sets.sessionWorkingSetHardMax')
+    let constrained = false
 
     const slots: PrescribedSlot[] = day.exercises.map((slot) => {
       const codes = new Set<PrescriptionReasonCode>()
@@ -170,15 +174,22 @@ export function prescribeInitialPlan(input: PrescribeInput): PrescriptionResult 
         codes.add('prescription.perExerciseCeilingApplied')
       }
       if (sets < 1) sets = 1
-      if (running + sets > sessionCeiling) {
-        // The ceiling clamps down to an irreducible floor of ONE working set:
-        // prescription may not remove a slot that assembly placed, so a day with
-        // more slots than the ceiling allows lands at slotCount, not below. The
-        // overshoot is always flagged — never silent. The session invariant is
-        // therefore `total <= max(ceiling, slotCount)`.
-        sets = Math.max(1, sessionCeiling - running)
-        codes.add('prescription.sessionCeilingApplied')
-        dayCodes.add('prescription.sessionCeilingApplied')
+      // [CTO-QAE-019] §2 — HARD_MAX (option A). totalWorkingSets may NEVER
+      // exceed the configured maximum. Wave 8 called 24 a "ceiling" while
+      // permitting exceedance via a one-set floor; that name was a lie about the
+      // contract. The clamp is now absolute: a slot that cannot receive even one
+      // set within the budget is prescribed ZERO sets and the day is returned as
+      // an explicit CONSTRAINED result. Nothing is padded and nothing overflows.
+      const remaining = hardMax - running
+      if (sets > remaining) {
+        sets = remaining > 0 ? remaining : 0
+        codes.add('prescription.sessionHardMaxReached')
+        dayCodes.add('prescription.sessionHardMaxReached')
+      }
+      if (sets === 0) {
+        constrained = true
+        codes.add('prescription.slotUnprescribableAtHardMax')
+        dayCodes.add('prescription.slotUnprescribableAtHardMax')
       }
       running += sets
 
@@ -230,7 +241,7 @@ export function prescribeInitialPlan(input: PrescribeInput): PrescriptionResult 
       planCodes.add('prescription.sessionBelowMinimumWork')
     }
 
-    return { dayId: day.dayId, kind: day.kind, slots, totalWorkingSets, reasonCodes: [...dayCodes].sort() }
+    return { dayId: day.dayId, kind: day.kind, slots, totalWorkingSets, constrained, reasonCodes: [...dayCodes].sort() }
   })
 
   return { days, policyVersion: PRESCRIPTION_POLICY_VERSION, reasonCodes: [...planCodes].sort() }

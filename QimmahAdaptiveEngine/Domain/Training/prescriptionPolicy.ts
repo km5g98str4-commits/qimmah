@@ -10,11 +10,21 @@
 //   ASSUMPTION        — a working value with neither; must be few and visible
 //
 // SOURCES (checked 2026-08-10):
-//   [E-ACSM09] ACSM Position Stand, "Progression Models in Resistance Training
-//     for Healthy Adults", Med Sci Sports Exerc 2009. PMID 19204579.
-//     Novice: 8-12 RM loads, 1-3 sets per exercise, 2-3 d/wk.
-//     Intermediate/advanced: 1-12 RM periodized, eventual emphasis 1-6 RM.
-//     Advanced heavy work: 3-5 min inter-set rest.
+//   [E-ACSM26] ACSM Position Stand, "Resistance Training Prescription for Muscle
+//     Function, Hypertrophy, and Physical Performance in Healthy Adults: An
+//     Overview of Reviews", Med Sci Sports Exerc 2026. Synthesis of 137
+//     systematic reviews. SUPERSEDES the 2009 stand ([CTO-QAE-019] §1).
+//     Establishes: strength ~80% 1RM for 2-3 sets per exercise; hypertrophy
+//     ~10 sets per muscle group per WEEK; power 30-70% 1RM; all major muscle
+//     groups at least twice weekly.
+//     Deliberately does NOT prescribe: rep ranges, rest intervals,
+//     proximity-to-failure/RIR targets, or novice/intermediate/advanced
+//     differentiation. Its stated levers are load relative to capacity, weekly
+//     set volume, full range of motion, and sufficient per-set effort.
+//   [E-ACSM09] ACSM Position Stand 2009, PMID 19204579 — HISTORICAL/SUPPORTING
+//     ONLY since [CTO-QAE-019]. Novice 8-12 RM, 1-3 sets/exercise; advanced
+//     heavy work 3-5 min rest. Retained for provenance; superseded where 2026
+//     is silent or differs.
 //   [E-REST24] Longland et al. / Frontiers Sports Act Living 2024,
 //     "Give it a rest": Bayesian meta-analysis — small hypertrophy benefit
 //     above 60 s; no appreciable further benefit beyond ~90 s. Strength
@@ -52,7 +62,8 @@ export type PrescriptionPolicyKey =
   | 'sets.advanced.compound'
   | 'sets.advanced.isolation'
   | 'sets.returningReduction'
-  | 'sets.sessionWorkingSetCeiling'
+  | 'sets.sessionWorkingSetHardMax'
+  | 'sets.weeklySetsPerMuscleTarget'
   | 'sets.sessionMinimumWorkingSets'
   | 'sets.perExerciseCeiling'
   // ── rep ranges ──────────────────────────────────────────────────────────
@@ -97,26 +108,27 @@ const E = (
 export const PRESCRIPTION_POLICY: readonly PolicyEntry[] = [
   // Sets. ACSM: novice 1-3 sets per exercise. Qimmah picks inside that range;
   // the range is evidence, the pick is policy.
-  E('sets.beginner.compound', 3, 'VERIFIED_EVIDENCE', 'E-ACSM09', 'ACSM novice guidance is 1-3 sets per exercise; 3 is the top of the published novice range'),
+  E('sets.beginner.compound', 3, 'PRODUCT_POLICY', 'none', 'REVISED [CTO-QAE-019]: ACSM 2026 gives 2-3 sets/exercise but NO experience differentiation, so the per-tier split is Qimmah policy. The 2-3 band itself remains evidenced (E-ACSM26); assigning it by tier is not'),
   E('sets.beginner.isolation', 2, 'PRODUCT_POLICY', 'none', 'inside the ACSM 1-3 novice band; isolation carries less systemic cost so it takes the lower end'),
-  E('sets.novice.compound', 3, 'VERIFIED_EVIDENCE', 'E-ACSM09', 'same published novice band'),
+  E('sets.novice.compound', 3, 'PRODUCT_POLICY', 'none', 'REVISED [CTO-QAE-019]: same reasoning as sets.beginner.compound'),
   E('sets.novice.isolation', 2, 'PRODUCT_POLICY', 'none', 'inside the novice band'),
   E('sets.intermediate.compound', 4, 'PRODUCT_POLICY', 'none', 'ACSM permits higher volume for intermediates but prescribes no single set count for a first plan'),
   E('sets.intermediate.isolation', 3, 'PRODUCT_POLICY', 'none', 'one below the compound allocation'),
   E('sets.advanced.compound', 4, 'PRODUCT_POLICY', 'none', 'first-plan conservatism: advanced athletes are NOT started at their ceiling, because this wave has no progression to walk it back'),
   E('sets.advanced.isolation', 3, 'PRODUCT_POLICY', 'none', 'one below the compound allocation'),
   E('sets.returningReduction', 1, 'PRODUCT_POLICY', 'none', 'returning athletes lose one working set per exercise; capacity conservatism can only lower'),
-  E('sets.sessionWorkingSetCeiling', 24, 'PRODUCT_POLICY', 'none', 'blunt guard so no session can silently balloon; not a scientific per-session limit'),
+  E('sets.sessionWorkingSetHardMax', 30, 'PRODUCT_POLICY', 'none', '[CTO-QAE-019] §2 HARD_MAX: total working sets may NEVER exceed this. Raised from the old soft 24 so it can be enforced absolutely rather than exceeded by the one-set floor. Not a scientific per-session limit'),
+  E('sets.weeklySetsPerMuscleTarget', 10, 'VERIFIED_EVIDENCE', 'E-ACSM26', 'ACSM 2026: hypertrophy guidance is ~10 sets per muscle group per week. Recorded now for Wave 10; no rule consumes it in this wave'),
   E('sets.sessionMinimumWorkingSets', 6, 'PRODUCT_POLICY', 'none', 'below this a session is not meaningful work; reported, never padded'),
   E('sets.perExerciseCeiling', 5, 'PRODUCT_POLICY', 'none', 'no single exercise may consume an unreasonable share of the session'),
 
   // Rep ranges. ACSM novice loading = 8-12 RM. Ranges, never magic single reps.
-  E('reps.compound.min', 6, 'VERIFIED_EVIDENCE', 'E-ACSM09', 'inside the ACSM 1-12 RM band for intermediate/advanced; 6 is the conservative floor for a first plan'),
-  E('reps.compound.max', 10, 'VERIFIED_EVIDENCE', 'E-ACSM09', 'inside the ACSM 8-12 RM novice band'),
+  E('reps.compound.min', 6, 'PRODUCT_POLICY', 'none', 'DOWNGRADED [CTO-QAE-019]: ACSM 2026 prescribes NO rep ranges. The 2009 8-12 RM band is superseded, so every rep bound is now Qimmah policy'),
+  E('reps.compound.max', 10, 'PRODUCT_POLICY', 'none', 'DOWNGRADED [CTO-QAE-019]: ACSM 2026 prescribes no rep ranges'),
   E('reps.isolation.min', 10, 'PRODUCT_POLICY', 'none', 'isolation biased higher than compound; ACSM does not separate by mechanics'),
   E('reps.isolation.max', 15, 'PRODUCT_POLICY', 'none', 'upper end conventional for isolation; not established by the cited sources'),
-  E('reps.machine.min', 8, 'VERIFIED_EVIDENCE', 'E-ACSM09', 'ACSM novice 8-12 RM — machines are the beginner-dominant class'),
-  E('reps.machine.max', 12, 'VERIFIED_EVIDENCE', 'E-ACSM09', 'ACSM novice 8-12 RM upper bound'),
+  E('reps.machine.min', 8, 'PRODUCT_POLICY', 'none', 'DOWNGRADED [CTO-QAE-019]: ACSM 2026 prescribes no rep ranges'),
+  E('reps.machine.max', 12, 'PRODUCT_POLICY', 'none', 'DOWNGRADED [CTO-QAE-019]: ACSM 2026 prescribes no rep ranges'),
   E('reps.bodyweight.min', 8, 'PRODUCT_POLICY', 'none', 'bodyweight load is fixed, so the range is wider and higher'),
   E('reps.bodyweight.max', 15, 'PRODUCT_POLICY', 'none', 'same reasoning'),
 
@@ -126,18 +138,18 @@ export const PRESCRIPTION_POLICY: readonly PolicyEntry[] = [
   E('rir.beginner', 3, 'VERIFIED_EVIDENCE', 'E-RIR', 'novices underpredict reps to failure by ~4-5, so a nominal 3 RIR is genuinely well short of failure — the conservative direction'),
   E('rir.novice', 3, 'VERIFIED_EVIDENCE', 'E-RIR', 'same accuracy finding'),
   E('rir.intermediate', 2, 'PRODUCT_POLICY', 'none', 'experienced lifters underpredict by ~1-2; 2 keeps a real buffer without prescribing failure'),
-  E('rir.advanced', 2, 'PRODUCT_POLICY', 'none', 'first-plan conservatism; advanced athletes are not started at 0-1 RIR'),
+  E('rir.advanced', 2, 'PRODUCT_POLICY', 'none', 'first-plan conservatism; advanced athletes are not started at 0-1 RIR. ACSM 2026 explicitly omits training to absolute failure from its must-do levers, which supports the direction without establishing the number'),
   E('rir.returningAdditional', 1, 'PRODUCT_POLICY', 'none', 'returning athletes get one additional rep in reserve'),
   E('rir.minimumAllowed', 1, 'PRODUCT_POLICY', 'none', 'hard floor: this wave never prescribes training to failure (0 RIR)'),
 
   // Rest. Meta-analytic: >60 s helps, no appreciable gain past ~90 s for
   // hypertrophy; strength modestly favours longer. ACSM: 3-5 min for advanced
   // heavy work — deliberately NOT applied, since this is a first plan.
-  E('rest.compound.seconds', 150, 'VERIFIED_EVIDENCE', 'E-ACSM09', 'strength modestly favours longer rest; 150 s sits below the ACSM 3-5 min heavy-work band, appropriate for a first plan'),
+  E('rest.compound.seconds', 150, 'PRODUCT_POLICY', 'none', 'DOWNGRADED [CTO-QAE-019]: ACSM 2026 gives no rest guidance. E-REST24 evidences the >60s / ~90s hypertrophy findings but not a 150 s compound value, so this point is policy'),
   E('rest.isolation.seconds', 90, 'VERIFIED_EVIDENCE', 'E-REST24', 'no appreciable hypertrophy benefit beyond ~90 s'),
   E('rest.machine.seconds', 90, 'VERIFIED_EVIDENCE', 'E-REST24', 'same 90 s finding; machines are typically the lower-systemic-cost class'),
   E('rest.minSeconds', 60, 'VERIFIED_EVIDENCE', 'E-REST24', 'below 60 s measurably costs hypertrophy'),
-  E('rest.maxSeconds', 300, 'VERIFIED_EVIDENCE', 'E-ACSM09', 'ACSM upper bound for advanced heavy work'),
+  E('rest.maxSeconds', 300, 'PRODUCT_POLICY', 'none', 'DOWNGRADED [CTO-QAE-019]: derived from the superseded 2009 3-5 min band; retained as a bound, no longer claimed as current evidence'),
 ]
 
 const INDEX: ReadonlyMap<PrescriptionPolicyKey, PolicyEntry> = new Map(

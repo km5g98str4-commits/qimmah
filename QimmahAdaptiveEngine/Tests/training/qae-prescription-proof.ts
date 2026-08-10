@@ -117,7 +117,10 @@ for (const f of FIXTURES) {
   check(`${f.name}: policy version stamped`, r.policyVersion.length > 0)
   for (const d of r.days) {
     for (const s of d.slots) {
-      check(`${f.name}/${s.exerciseId}: sets is a positive integer`, Number.isSafeInteger(s.sets) && s.sets > 0, String(s.sets))
+      // HARD_MAX may legitimately yield 0 sets — that is the CONSTRAINED result,
+      // and it must be flagged rather than silently produced.
+      check(`${f.name}/${s.exerciseId}: sets is a non-negative integer`, Number.isSafeInteger(s.sets) && s.sets >= 0, String(s.sets))
+      if (s.sets === 0) check(`${f.name}/${s.exerciseId}: zero sets is flagged unprescribable`, s.prescriptionReasonCodes.includes('prescription.slotUnprescribableAtHardMax'))
       check(`${f.name}/${s.exerciseId}: repRange min <= max`, s.repRange.min <= s.repRange.max, `${s.repRange.min}-${s.repRange.max}`)
       check(`${f.name}/${s.exerciseId}: rep bounds are integers`, Number.isSafeInteger(s.repRange.min) && Number.isSafeInteger(s.repRange.max))
       check(`${f.name}/${s.exerciseId}: restSeconds within policy bounds`, s.restSeconds >= policy('rest.minSeconds') && s.restSeconds <= policy('rest.maxSeconds'), String(s.restSeconds))
@@ -125,15 +128,12 @@ for (const f of FIXTURES) {
       check(`${f.name}/${s.exerciseId}: has reason codes`, s.prescriptionReasonCodes.length > 0)
       check(`${f.name}/${s.exerciseId}: sets <= per-exercise ceiling`, s.sets <= policy('sets.perExerciseCeiling'))
     }
-    // Irreducible floor: prescription may not delete a slot assembly placed, so
-    // once the ceiling is reached the remaining slots take exactly ONE working
-    // set each. The exact bound is therefore ceiling + (slots at the floor), and
-    // any overshoot must be FLAGGED — never silent.
-    const ceiling = policy('sets.sessionWorkingSetCeiling')
-    const floorSlots = d.slots.filter((s) => s.sets === 1).length
-    check(`${f.name}/${d.dayId}: session working sets <= ceiling + floorSlots`, d.totalWorkingSets <= ceiling + floorSlots, `${d.totalWorkingSets} > ${ceiling}+${floorSlots}`)
-    if (d.totalWorkingSets > policy('sets.sessionWorkingSetCeiling')) {
-      check(`${f.name}/${d.dayId}: ceiling overshoot is flagged, never silent`, d.reasonCodes.includes('prescription.sessionCeilingApplied'))
+    // [CTO-QAE-019] §2 HARD_MAX: absolute, no exceedance permitted.
+    const hardMax = policy('sets.sessionWorkingSetHardMax')
+    check(`${f.name}/${d.dayId}: HARD_MAX is absolute`, d.totalWorkingSets <= hardMax, `${d.totalWorkingSets} > ${hardMax}`)
+    if (d.constrained) check(`${f.name}/${d.dayId}: constrained day is flagged`, d.reasonCodes.includes('prescription.slotUnprescribableAtHardMax'))
+    if (d.totalWorkingSets === hardMax) {
+      check(`${f.name}/${d.dayId}: reaching HARD_MAX is flagged, never silent`, d.reasonCodes.includes('prescription.sessionHardMaxReached'))
     }
   }
   // Assembly must be untouched: same ids, same order, same optional flags.
