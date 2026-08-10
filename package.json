@@ -143,9 +143,11 @@
     "qae:oracle:training": "node QimmahAdaptiveEngine/Tools/run-training-oracle.mjs",
     "qae:oracle:question": "node QimmahAdaptiveEngine/Tools/run-question-oracle.mjs",
     "qae:journeys": "node QimmahAdaptiveEngine/Tools/run-qae-journeys.mjs",
-    "qae:all": "node QimmahAdaptiveEngine/Tools/run-qae-proof.mjs && node QimmahAdaptiveEngine/Tools/run-qae-question-proof.mjs && node QimmahAdaptiveEngine/Tools/run-qae-profile-proof.mjs && node QimmahAdaptiveEngine/Tools/run-qae-decision-proof.mjs && node QimmahAdaptiveEngine/Tools/run-qae-content-proof.mjs && node QimmahAdaptiveEngine/Tools/run-qae-training-proof.mjs && node QimmahAdaptiveEngine/Tools/run-qae-returning-budget-proof.mjs && node QimmahAdaptiveEngine/Tools/run-qae-assembly-characterization-proof.mjs && node QimmahAdaptiveEngine/Tools/run-training-oracle.mjs && node QimmahAdaptiveEngine/Tools/run-qae-assembly-proof.mjs && node QimmahAdaptiveEngine/Tools/run-qae-plan-wiring-proof.mjs",
+    "qae:all": "node QimmahAdaptiveEngine/Tools/run-qae-proof.mjs && node QimmahAdaptiveEngine/Tools/run-qae-question-proof.mjs && node QimmahAdaptiveEngine/Tools/run-qae-profile-proof.mjs && node QimmahAdaptiveEngine/Tools/run-qae-decision-proof.mjs && node QimmahAdaptiveEngine/Tools/run-qae-content-proof.mjs && node QimmahAdaptiveEngine/Tools/run-qae-training-proof.mjs && node QimmahAdaptiveEngine/Tools/run-qae-returning-budget-proof.mjs && node QimmahAdaptiveEngine/Tools/run-qae-assembly-characterization-proof.mjs && node QimmahAdaptiveEngine/Tools/run-training-oracle.mjs && node QimmahAdaptiveEngine/Tools/run-qae-assembly-proof.mjs && node QimmahAdaptiveEngine/Tools/run-qae-plan-wiring-proof.mjs && node QimmahAdaptiveEngine/Tools/run-qae-prescription-metadata-proof.mjs",
     "qae:assembly": "node QimmahAdaptiveEngine/Tools/run-qae-assembly-proof.mjs",
-    "qae:plan-wiring": "node QimmahAdaptiveEngine/Tools/run-qae-plan-wiring-proof.mjs"
+    "qae:plan-wiring": "node QimmahAdaptiveEngine/Tools/run-qae-plan-wiring-proof.mjs",
+    "qae:prescription-metadata": "node QimmahAdaptiveEngine/Tools/run-qae-prescription-metadata-proof.mjs",
+    "qae:emit-prescription-metadata": "node QimmahAdaptiveEngine/Tools/run-emit-prescription-metadata.mjs"
   },
   "dependencies": {
     "@capacitor/app": "^8.1.0",
