@@ -69,9 +69,17 @@ jobs:
 
       - name: Upload dist artifact
         if: success()
+        # [CTO-87] الرفع **دليل بناء لا شرط إطلاق**: لا خطوة تُنزّله
+        # (`download-artifact` غير موجود في المستودع)، ولا وظيفة نشر تعتمد عليه —
+        # النشر يجري عبر تكامل Cloudflare Pages مع Git لا عبر هذا الأرتيفكت.
+        # وحين تمتلئ حصّة تخزين الحساب يفشل الرفع فيُحمِّر البوابة كلّها رغم نجاح
+        # كل فحوص الجودة قبله — أحمر بنية تحتية يُقنّع أي أحمر كودي قادم (§4.0).
+        # `continue-on-error` يفكّ هذا التقنيع **دون المساس بأي فحص**: الخطوات
+        # الثمانية قبله تبقى إلزامية كما هي، ولم يُحذف الرفع بل صار غير حاجب.
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: dist-${{ github.sha }}
           path: dist
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 3
