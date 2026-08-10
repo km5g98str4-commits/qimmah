@@ -35,7 +35,7 @@ export function NotFoundView({ lang, onHome, onBack }: NotFoundViewProps) {
             <button
               type="button"
               onClick={onBack}
-              className="inline-flex items-center gap-1.5 text-sm font-bold text-ink-500 transition-colors hover:text-ink-900"
+              className="inline-flex min-h-[44px] items-center gap-1.5 text-sm font-bold text-ink-500 transition-colors hover:text-ink-900"
             >
               <Icon name="ChevronLeft" className="h-4 w-4 rtl:rotate-180" />
               {t.notFound.back}

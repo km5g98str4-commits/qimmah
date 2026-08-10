@@ -6,6 +6,7 @@ import type { Lang } from '@/lib/appPreferences'
 import { V2_GOAL_MODEL, V2_ONBOARDING, type V2GoalValue } from '@/design-system/v2/labels'
 import { useCustomization } from '@/lib/customizationContext'
 import { useAuth } from '@/lib/authContext'
+import { product } from '@/config/product'
 import { buildOnboardingProfile } from '@/lib/planBuilderAnswers'
 import { buildCustomizationFromOnboarding, saveOnboardingProfile } from '@/lib/onboardingProfile'
 import { markCompleted } from '@/lib/onboarding'
@@ -95,6 +96,9 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
   // 0 الأساسيات · 1 النية والمستوى · 2 الهدف · 3 التدريب · 4 المعدّات · 5 جاهز.
   const [step, setStep] = useState(initialDraft.step)
   const [status, setStatus] = useState<FinalizeStatus>('idle')
+  // [CTO-009/WP-2] الترحيب يسبق أول سؤال — **لمن يبدأ من الصفر فقط**. من يعود
+  // إلى مسودّة محفوظة يُستأنف من حيث وقف، فلا يُعاد ترحيبه كأنه زائر جديد.
+  const [showWelcome, setShowWelcome] = useState(initialDraft.step === 0)
 
   // بيانات الجسم — تُحفظ نصًّا أثناء الكتابة (حالات وسيطة كـ«١» أو «» مسموحة)
   // وتُحوَّل إلى أرقام عند التحقق والحفظ. هكذا لا يُمحى ما يكتبه المستخدم.
@@ -243,6 +247,11 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
         setStatus((s) => finalizeReduce(s, 'fail'))
       }
     })()
+  }
+
+  // [CTO-009/WP-2] الترحيب — قبل أول سؤال، ولمن يبدأ من الصفر وحده.
+  if (showWelcome) {
+    return <WelcomeScreen lang={lang} t={t} onStart={() => setShowWelcome(false)} onExit={onExit} />
   }
 
   // Ready screen (+ async overlays). Building/error overlay ON TOP so the CTA
@@ -841,6 +850,83 @@ function ErrorScreen({ lang, t, onRetry, onDismiss }: { lang: Lang; t: T; onRetr
         <button type="button" onClick={onDismiss} className="w-full rounded-2xl border border-line bg-surface py-3 text-sm font-bold text-ink-700">
           {t.back}
         </button>
+      </div>
+    </div>
+  )
+}
+
+/** [CTO-009/WP-2] الترحيب — يشرح الرحلة وكلفتها الزمنية قبل أول سؤال. */
+function WelcomeScreen({ lang, t, onStart, onExit }: { lang: Lang; t: T; onStart: () => void; onExit: () => void }) {
+  const w = t.welcome
+  return (
+    <div dir={lang === 'en' ? 'ltr' : 'rtl'} className="v2-surface-light fixed inset-0 z-50 flex flex-col overflow-hidden bg-page text-ink-900">
+      <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+        <div className="v2-glow-ember absolute start-1/2 top-[12%] h-[40%] w-[80%] -translate-x-1/2 rounded-full blur-[2px]" />
+      </div>
+      <div className="app-container v2-screen-enter relative z-10 flex flex-1 flex-col px-6" style={{ paddingTop: 'max(1rem, var(--safe-top))', paddingBottom: 'max(1.75rem, var(--safe-bottom))' }}>
+        <div className="flex justify-end pt-1">
+          <button type="button" onClick={onExit} aria-label={t.back} className="grid h-11 w-11 place-items-center rounded-full text-ink-500 hover:bg-beige">
+            <Icon name="X" className="h-5 w-5" />
+          </button>
+        </div>
+        <div className="flex flex-1 flex-col justify-center">
+          <span className="eyebrow">{w.eyebrow}</span>
+          <h1 className="mt-3 text-3xl font-black leading-tight text-ink-900">{w.title}</h1>
+          <p className="mt-3 text-base leading-relaxed text-ink-500">{w.subtitle}</p>
+          <p className="mt-5 flex items-center gap-2 text-xs font-bold text-ink-400">
+            <Icon name="Clock" className="h-4 w-4" />
+            {w.timeNote}
+          </p>
+        </div>
+        <button type="button" onClick={onStart} className="btn-primary min-h-[52px] w-full text-base">
+          {w.start}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * [CTO-009/WP-2] التسليم بعد بناء الخطة.
+ *
+ * الخطة **محفوظة قبل هذه الشاشة** (`markCompleted` تمّ)، فلا شيء يُفقد بإغلاق
+ * المتصفّح هنا. الشاشة تعرض ملخّصًا ثم مسارين: Premium عند سلة (شراء خارج
+ * التطبيق — الميثاق §0.1) أو الدخول للخطة مباشرةً.
+ *
+ * ولا تُولَّد كلمة مرور ولا يُطلَب حساب إجباري: سطر واحد يشرح ما يضيفه الحساب،
+ * ومن لا يريده يدخل بخطته المحلّية كما هو الحال اليوم.
+ */
+export function PlanHandoffScreen({ lang, signedIn, onEnter }: { lang: Lang; signedIn: boolean; onEnter: () => void }) {
+  const t = V2_ONBOARDING[lang] ?? V2_ONBOARDING.ar
+  const h = t.handoff
+  return (
+    <div dir={lang === 'en' ? 'ltr' : 'rtl'} className="v2-surface-light fixed inset-0 z-50 flex flex-col overflow-y-auto bg-page text-ink-900">
+      <div className="app-container v2-screen-enter relative z-10 flex flex-1 flex-col px-6" style={{ paddingTop: 'max(1.5rem, var(--safe-top))', paddingBottom: 'max(1.75rem, var(--safe-bottom))' }}>
+        <div className="flex flex-1 flex-col justify-center py-6">
+          <span className="eyebrow">{h.eyebrow}</span>
+          <h1 className="mt-3 text-3xl font-black leading-tight text-ink-900">{h.title}</h1>
+          <p className="mt-3 text-base leading-relaxed text-ink-500">{h.subtitle}</p>
+
+          {/* لا تُكرَّر معاينة الخطة هنا: شاشة «جاهز» عرضتها قبل ثانية بنفس
+              الأرقام. تكرارها يطيل الطريق ويخلق مصدرين لنفس المعلومة. */}
+          <p className="mt-6 text-xs leading-relaxed text-ink-400">{t.ready.previewNote}</p>
+        </div>
+
+        <div className="space-y-3">
+          <a
+            href={product.checkoutUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-primary flex min-h-[52px] w-full items-center justify-center gap-2 text-base"
+          >
+            {h.premiumCta}
+            <Icon name="ExternalLink" className="h-4 w-4" />
+          </a>
+          <button type="button" onClick={onEnter} className="btn-ghost min-h-[52px] w-full text-base">
+            {h.enterFree}
+          </button>
+          {!signedIn && <p className="pt-1 text-center text-xs leading-relaxed text-ink-400">{h.accountNote}</p>}
+        </div>
       </div>
     </div>
   )

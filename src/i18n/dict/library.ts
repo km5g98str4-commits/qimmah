@@ -18,6 +18,8 @@ export interface LibraryStrings {
   all: string
   resultsSuffix: string // "{n} نتيجة · مرتّبة أبجديًا"
   noResults: string // ExerciseLibraryView empty state
+  clearFilters: string // زرّ مسح كل الفلاتر النشطة
+  loadingLibrary: string // حالة تحميل المكتبة
   // machine catalog
   machineHint: string // "الأجهزة الموجّهة... اختر جهازًا..." (before count)
   machineHintSuffix: string // "{n} جهازًا."
@@ -117,6 +119,8 @@ const ar: LibraryStrings = {
   all: 'الكل',
   resultsSuffix: 'نتيجة · مرتّبة أبجديًا',
   noResults: 'ما فيه نتائج مطابقة — جرّب كلمة ثانية أو فلتر مختلف.',
+  clearFilters: 'امسح الفلاتر',
+  loadingLibrary: 'نجهّز المكتبة…',
   machineHint: 'الأجهزة الموجّهة أسهل وآمنة أكثر للبداية — اختر جهاز وشوف الشرح والعضلة المستهدفة.',
   machineHintSuffix: 'جهاز.',
   muscleAll: 'الكل',
@@ -203,6 +207,8 @@ const en: LibraryStrings = {
   all: 'All',
   resultsSuffix: 'results · sorted alphabetically',
   noResults: 'No matching results — try a different word or filter.',
+  clearFilters: 'Clear filters',
+  loadingLibrary: 'Loading the library…',
   machineHint: 'Guided machines are easier and safer to start with — pick one to see the guidance and target muscle.',
   machineHintSuffix: 'machines.',
   muscleAll: 'All',

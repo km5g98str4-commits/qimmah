@@ -3,6 +3,11 @@ import type { Lang } from '@/lib/appPreferences'
 export interface NutritionScreenStrings {
   // units
   gramsUnit: string
+  /** [CTO-009/WP-4] وحدة الإدخال: غرام أو حصة */
+  unitGrams: string
+  unitServings: string
+  servingsUnit: string
+  equalsApprox: string
   mlUnit: string
   litersUnit: string
   caloriesUnit: string
@@ -60,6 +65,10 @@ export interface NutritionScreenStrings {
 
 const ar: NutritionScreenStrings = {
   gramsUnit: 'غ',
+  unitGrams: 'غرام',
+  unitServings: 'حصة',
+  servingsUnit: 'حصة',
+  equalsApprox: '≈',
   mlUnit: 'مل',
   litersUnit: 'لتر',
   caloriesUnit: 'سعرة',
@@ -112,6 +121,10 @@ const ar: NutritionScreenStrings = {
 
 const en: NutritionScreenStrings = {
   gramsUnit: 'g',
+  unitGrams: 'Grams',
+  unitServings: 'Servings',
+  servingsUnit: 'serving(s)',
+  equalsApprox: '≈',
   mlUnit: 'ml',
   litersUnit: 'L',
   caloriesUnit: 'cal',

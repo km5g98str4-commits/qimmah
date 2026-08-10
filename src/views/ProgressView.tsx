@@ -188,12 +188,16 @@ function ReminderCard({ lang }: { lang: Lang }) {
       </div>
 
       <div className="mt-4 flex items-center justify-between gap-3">
-        <label className="text-sm text-ink-700" htmlFor="reminder-enabled">{t.reminderEnabled}</label>
+        <label id="reminder-enabled-label" className="text-sm text-ink-700" htmlFor="reminder-enabled">{t.reminderEnabled}</label>
+        {/* [CTO-82] `<label for>` لا يمنح اسمًا لـ`<button>`: اسم الزرّ يُشتقّ من
+            محتواه (HTML-AAM)، وهذا الزرّ فارغ — مقبض بصري فقط. فكان بلا اسم
+            متاح رغم النصّ المرئي بجانبه. `aria-labelledby` يربطهما فعلًا. */}
         <button
           id="reminder-enabled"
           type="button"
           role="switch"
           aria-checked={prefs.trainingEnabled}
+          aria-labelledby="reminder-enabled-label"
           onClick={() => update({ trainingEnabled: !prefs.trainingEnabled })}
           className={`relative h-6 w-11 rounded-full transition-colors ${prefs.trainingEnabled ? 'bg-primary' : 'bg-line'}`}
         >

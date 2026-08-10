@@ -62,7 +62,11 @@ check('header brand button ≥44 tall', shell.includes('min-h-[44px] items-cente
 check('language toggle (compact) ≥44 tall', read('src/i18n/LanguageToggle.tsx').includes('min-h-[44px]'))
 check('close-workout button 44×44', workout.includes('h-11 w-11 place-items-center rounded-xl'))
 check('plate + warmup buttons use expanded hit-area', (workout.match(/before:-inset/g) ?? []).length >= 2)
-check('profile «learn» link ≥44 tall', read('src/views/ProfileV2.tsx').includes('inline-flex min-h-[44px] items-center'))
+// [CTO-009/WP-3] كان يحرس زرّ «اعرف المزيد» النصّي، وقد استُبدل بنداء Premium
+// الذي يفتح سلة. **الضمان لم يتغيّر** — هدف لمس ≥44بكسل — والفحص وُجّه للعنصر
+// الذي حلّ محلّه بدل أن يُحذف: الرابط الخارجي نفسه، لا أي عنصر آخر في الشاشة.
+check('profile Premium CTA ≥44 tall', /min-h-\[44px\][^"]*"\s*\n?\s*>\s*\n?\s*\{model\.subscription\.cta\}/.test(read('src/views/ProfileV2.tsx'))
+  || /href=\{model\.subscription\.url\}[\s\S]{0,400}?min-h-\[44px\]/.test(read('src/views/ProfileV2.tsx')))
 
 // ── A: return hero is an honest single path (no separate-session promise) ──
 const model = read('src/lib/todayV2Model.ts')

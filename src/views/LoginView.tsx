@@ -317,7 +317,7 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login', onMo
                   <button
                     type="button"
                     onClick={() => switchMode('forgot')}
-                    className="text-xs font-bold text-ink-500 transition-colors hover:text-primary-c"
+                    className="inline-flex min-h-[44px] items-center text-xs font-bold text-ink-500 transition-colors hover:text-primary-c"
                   >
                     {t.auth.forgotLink}
                   </button>
@@ -354,7 +354,7 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login', onMo
                 <button
                   type="button"
                   onClick={() => switchMode(isSignup ? 'login' : 'signup')}
-                  className="font-black text-primary-c transition-colors hover:underline"
+                  className="inline-flex min-h-[44px] items-center font-black text-primary-c transition-colors hover:underline"
                 >
                   {isSignup ? t.auth.switchToLogin : t.auth.switchToSignup}
                 </button>

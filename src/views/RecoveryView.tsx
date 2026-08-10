@@ -53,7 +53,7 @@ export function RecoveryView({ lang, onBack, onNavigate }: RecoveryViewProps) {
     <div dir={ar ? 'rtl' : 'ltr'} className="app-scroll v2-surface-light h-[100dvh] overflow-y-auto overscroll-y-contain bg-page px-4 text-ink-900" style={{ paddingTop: 'max(0.75rem, var(--safe-top))', paddingBottom: 'max(1.5rem, var(--safe-bottom))' }}>
       <div className="v2-screen-enter mx-auto w-full max-w-md space-y-5">
         <div className="flex items-center justify-between">
-          <button type="button" onClick={onBack} aria-label={t('رجوع', 'Back')} className="grid h-10 w-10 place-items-center rounded-xl border border-line bg-surface"><Icon name="ChevronRight" className="h-5 w-5 rtl:rotate-0 ltr:rotate-180" /></button>
+          <button type="button" onClick={onBack} aria-label={t('رجوع', 'Back')} className="grid h-11 w-11 place-items-center rounded-xl border border-line bg-surface"><Icon name="ChevronRight" className="h-5 w-5 rtl:rotate-0 ltr:rotate-180" /></button>
           <h1 className="text-lg font-black">{t('التعافي', 'Recovery')}</h1>
         </div>
 
@@ -137,7 +137,7 @@ function ResultScreen({ lang, entry, onBack, onExit, onNavigate }: { lang: Lang;
     <div dir={ar ? 'rtl' : 'ltr'} className="app-scroll v2-surface-light h-[100dvh] overflow-y-auto overscroll-y-contain bg-page px-4 text-ink-900" style={{ paddingTop: 'max(0.75rem, var(--safe-top))', paddingBottom: 'max(1.5rem, var(--safe-bottom))' }}>
       <div className="v2-screen-enter mx-auto w-full max-w-md space-y-5">
         <div className="flex items-center justify-between">
-          <button type="button" onClick={onBack} aria-label={t('رجوع', 'Back')} className="grid h-10 w-10 place-items-center rounded-xl border border-line bg-surface"><Icon name="ChevronRight" className="h-5 w-5 rtl:rotate-0 ltr:rotate-180" /></button>
+          <button type="button" onClick={onBack} aria-label={t('رجوع', 'Back')} className="grid h-11 w-11 place-items-center rounded-xl border border-line bg-surface"><Icon name="ChevronRight" className="h-5 w-5 rtl:rotate-0 ltr:rotate-180" /></button>
           <h1 className="text-lg font-black">{t('توصية التعافي', 'Recovery suggestion')}</h1>
         </div>
 
@@ -218,7 +218,8 @@ function Segmented<T extends string>({ value, options, onChange, lang }: { value
             role="radio"
             aria-checked={active}
             onClick={() => onChange(o.v)}
-            className={cn('press rounded-xl border px-2 py-2 text-xs font-bold transition-colors', active ? 'text-white' : 'border-line bg-page text-ink-500')}
+            // [CTO-82] ≥44بكسل: كانت ٣٤.
+            className={cn('press inline-flex min-h-[44px] items-center justify-center rounded-xl border px-2 text-xs font-bold transition-colors', active ? 'text-white' : 'border-line bg-page text-ink-500')}
             style={active ? { background: TEAL, borderColor: TEAL } : undefined}
           >
             {ar ? o.ar : o.en}

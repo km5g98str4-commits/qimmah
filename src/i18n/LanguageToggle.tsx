@@ -49,7 +49,8 @@ export function LanguageToggle({ variant = 'segmented', className }: LanguageTog
             onClick={() => setLang(code)}
             aria-pressed={active}
             className={cn(
-              'rounded-lg px-4 py-1.5 text-sm font-black transition-colors',
+              // [CTO-009/WP-7] ≥44بكسل: كان `py-1.5` يعطي ٣٢بكسل.
+              'min-h-[44px] rounded-lg px-4 text-sm font-black transition-colors',
               active ? 'bg-primary text-white shadow-glow' : 'text-ink-500 hover:text-ink-900',
             )}
           >
