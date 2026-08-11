@@ -1,6 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import { Icon } from '@/components/Icon'
+import { PlanPreview } from '@/components/plan/PlanPreview'
+import { PlanWhyPanel } from '@/components/plan/PlanWhyPanel'
+import type { GeneratedPlan } from '@/lib/planGenerator'
+import type { PlanRationale } from '@/lib/planRationale'
+import type { GoalType } from '@/types/profile'
 import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
 import { V2_GOAL_MODEL, V2_ONBOARDING, type V2GoalValue } from '@/design-system/v2/labels'
@@ -8,7 +13,7 @@ import { useCustomization } from '@/lib/customizationContext'
 import { useAuth } from '@/lib/authContext'
 import { product } from '@/config/product'
 import { buildOnboardingProfile } from '@/lib/planBuilderAnswers'
-import { buildCustomizationFromOnboarding, saveOnboardingProfile } from '@/lib/onboardingProfile'
+import { buildPlanArtifactsFromOnboarding, saveOnboardingProfile } from '@/lib/onboardingProfile'
 import { markCompleted } from '@/lib/onboarding'
 import { persistOnboardingToProfile } from '@/lib/onboardingSync'
 import { trackLocal, SETUP_STEP_NAMES } from '@/lib/tracking'
@@ -44,6 +49,8 @@ interface OnboardingV2Props {
   onComplete: () => void
   /** Exit from the first step (back to Start). */
   onExit: () => void
+  /** يسلّم مخرجات التوليد المحفوظة لشاشة التسليم (حزمة ٣). */
+  onPlanReady?: (artifacts: { plan: GeneratedPlan; goalType: GoalType; rationale: PlanRationale }) => void
 }
 
 const GOAL_ICON: Record<V2GoalValue, string> = { cut: 'Flame', maintain: 'ShieldCheck', bulk: 'TrendingUp' }
@@ -87,7 +94,7 @@ const toAr = (n: number, lang: Lang) => (lang === 'en' ? String(n) : String(n).r
  * labelled fieldset. Choices map to the existing `Answers` model
  * (onboardingV2Adapter) and run the SAME local generation pipeline v1 uses.
  */
-export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
+export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: OnboardingV2Props) {
   const t = V2_ONBOARDING[lang] ?? V2_ONBOARDING.ar
   const { customization, applyCustomization } = useCustomization()
   const auth = useAuth()
@@ -230,8 +237,10 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
         const built0 = toAnswersFromV2({ age: ageNum, gender, heightCm: heightNum, weightKg: weightNum, intent, level, trainingYears: yearsNum, goal, days, duration, place: place as V2Place | null, pref: pref as V2Pref | null, injuries: hasInjury ? injuries : [], healthDataConsent })
         const op = buildOnboardingProfile(built0)
         saveOnboardingProfile(op)
-        const built = await buildCustomizationFromOnboarding(op, customization)
-        applyCustomization(built)
+        const artifacts = await buildPlanArtifactsFromOnboarding(op, customization)
+        applyCustomization(artifacts.customization)
+        // نفس التوليد الذي حُفظ يُسلَّم للتسليم — لا توليد ثانٍ للعرض.
+        onPlanReady?.({ plan: artifacts.generated, goalType: artifacts.profile.goalType, rationale: artifacts.rationale })
         markCompleted(userId)
         // [CTO-68] الحدث ٣ — إكمال الإعداد. **بعد** بناء الخطة وحفظها ووسمها مكتملة،
         // لا عند ضغط الزر: الفشل يرمي قبل هذا السطر فلا يُسجَّل إكمال لم يحدث.
@@ -887,42 +896,90 @@ function WelcomeScreen({ lang, t, onStart, onExit }: { lang: Lang; t: T; onStart
 }
 
 /**
- * [CTO-009/WP-2] التسليم بعد بناء الخطة.
+ * [QIM-WEB-FOUNDER-UX-004/حزمة ٣] التسليم — كشف قيمة لا إشعار حفظ.
  *
- * الخطة **محفوظة قبل هذه الشاشة** (`markCompleted` تمّ)، فلا شيء يُفقد بإغلاق
- * المتصفّح هنا. الشاشة تعرض ملخّصًا ثم مسارين: Premium عند سلة (شراء خارج
- * التطبيق — الميثاق §0.1) أو الدخول للخطة مباشرةً.
+ * الشاشة السابقة قالت «جاهزة ومحفوظة» وانتهت: أعلنت **حدثًا تقنيًا** بينما
+ * اللحظة هي أغلى نقطة في القمع — المستخدم أجاب للتوّ ثلاثة عشر سؤالًا ولم يرَ
+ * مقابلها شيئًا. هنا يرى خطته الحقيقية قبل أن يُطلب منه قرار.
  *
- * ولا تُولَّد كلمة مرور ولا يُطلَب حساب إجباري: سطر واحد يشرح ما يضيفه الحساب،
- * ومن لا يريده يدخل بخطته المحلّية كما هو الحال اليوم.
+ * **كل رقم هنا مقيس من مخرجات المحرّك** ويصل عبر `plan`/`rationale` من التوليد
+ * **نفسه** الذي حُفظ (`buildPlanArtifactsFromOnboarding`) — لا توليد ثانٍ للعرض،
+ * فلا ينحرف ما يراه عمّا يجده. وحين تغيب مخرجات التوليد (مسودّة قديمة، أو فشل
+ * التقاطها) تُعرض الشاشة **بلا أرقام** بدل اختراعها: الصدق قبل الطمأنينة (§6).
+ *
+ * ولا تدّعي الشاشة أن الخطة محجوبة: المستخدم **يراها**، وPremium يفتح
+ * **استخدامها** (تسجيل التمرين والأكل والقياسات) — نصّ المؤسس §4.
  */
-export function PlanHandoffScreen({ lang, signedIn, onEnter }: { lang: Lang; signedIn: boolean; onEnter: () => void }) {
+export function PlanHandoffScreen({
+  lang, signedIn, onEnter, plan, goalType, rationale,
+}: {
+  lang: Lang
+  signedIn: boolean
+  onEnter: () => void
+  /** مخرجات التوليد المحفوظة — غيابها يعني عرضًا بلا أرقام لا أرقامًا مخترعة. */
+  plan?: GeneratedPlan
+  goalType?: GoalType
+  rationale?: PlanRationale
+}) {
   const t = V2_ONBOARDING[lang] ?? V2_ONBOARDING.ar
   const h = t.handoff
   return (
-    <div dir={lang === 'en' ? 'ltr' : 'rtl'} className="v2-surface-light fixed inset-0 z-50 flex flex-col overflow-y-auto bg-page text-ink-900">
-      <div className="app-container v2-screen-enter relative z-10 flex flex-1 flex-col px-6" style={{ paddingTop: 'max(1.5rem, var(--safe-top))', paddingBottom: 'max(1.75rem, var(--safe-bottom))' }}>
-        <div className="flex flex-1 flex-col justify-center py-6">
-          <span className="eyebrow">{h.eyebrow}</span>
-          <h1 className="mt-3 text-3xl font-black leading-tight text-ink-900">{h.title}</h1>
-          <p className="mt-3 text-base leading-relaxed text-ink-500">{h.subtitle}</p>
+    <div dir={lang === 'en' ? 'ltr' : 'rtl'} className="v2-surface-light fixed inset-0 z-50 overflow-y-auto bg-page text-ink-900">
+      <div
+        className="app-container v2-screen-enter relative z-10 flex min-h-full flex-col px-5"
+        style={{ paddingTop: 'max(1.5rem, var(--safe-top))', paddingBottom: 'max(1.75rem, var(--safe-bottom))' }}
+        data-testid="plan-handoff"
+      >
+        <header className="pt-2 text-center">
+          <span className="v2-earned-moment v2-bg-green mx-auto grid h-14 w-14 place-items-center rounded-2xl text-white">
+            <Icon name="Check" className="h-7 w-7" strokeWidth={3} />
+          </span>
+          <p className="v2-text-green mt-4 text-xs font-black uppercase tracking-widest">{h.eyebrow}</p>
+          <h1 className="mt-1.5 text-[1.9rem] font-black leading-tight tracking-tight text-ink-900">{h.title}</h1>
+          <p className="mt-2 text-sm leading-relaxed text-ink-500">{h.subtitle}</p>
+        </header>
 
-          {/* لا تُكرَّر معاينة الخطة هنا: شاشة «جاهز» عرضتها قبل ثانية بنفس
-              الأرقام. تكرارها يطيل الطريق ويخلق مصدرين لنفس المعلومة. */}
-          <p className="mt-6 text-xs leading-relaxed text-ink-400">{t.ready.previewNote}</p>
-        </div>
+        {/* معاينة الخطة و«لماذا هذه خطتك» — مكوّنان قائمان مغطّيان بإثباتيهما
+            (`test:e-plan-preview` و`test:e-plan-why`)، لا نسخة ثانية منهما.
+            كانا يتيمين بلا مضيف؛ وهذه الشاشة مضيفهما الطبيعي. */}
+        {plan && goalType && (
+          <div className="mt-6">
+            <PlanPreview lang={lang} plan={plan} goalType={goalType} />
+          </div>
+        )}
+        {rationale && (
+          <div className="mt-4">
+            <PlanWhyPanel lang={lang} rationale={rationale} />
+          </div>
+        )}
 
-        <div className="space-y-3">
+        <section className="mt-5 rounded-2xl border border-line bg-surface p-4" data-testid="handoff-benefits">
+          <h2 className="text-sm font-black text-ink-900">{h.benefitsTitle}</h2>
+          <ul className="mt-3 space-y-2.5">
+            {h.benefits.map((b) => (
+              <li key={b} className="flex items-start gap-2.5 text-[0.83rem] leading-relaxed text-ink-700">
+                <Icon name="Check" className="v2-text-green mt-0.5 h-4 w-4 shrink-0" strokeWidth={3} />
+                <span>{b}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        {/* الفصل الصريح: يراها الآن، ويستخدمها بـPremium. لا ادّعاء حجب. */}
+        <p className="mt-4 text-center text-[0.78rem] leading-relaxed text-ink-500">{h.previewVsUse}</p>
+
+        <div className="mt-5 space-y-2.5">
           <a
             href={product.checkoutUrl}
             target="_blank"
             rel="noopener noreferrer"
+            data-testid="handoff-premium-cta"
             className="btn-primary flex min-h-[52px] w-full items-center justify-center gap-2 text-base"
           >
             {h.premiumCta}
             <Icon name="ExternalLink" className="h-4 w-4" />
           </a>
-          <button type="button" onClick={onEnter} className="btn-ghost min-h-[52px] w-full text-base">
+          <button type="button" onClick={onEnter} data-testid="handoff-preview-cta" className="btn-ghost min-h-[52px] w-full text-base">
             {h.enterFree}
           </button>
           {!signedIn && <p className="pt-1 text-center text-xs leading-relaxed text-ink-400">{h.accountNote}</p>}

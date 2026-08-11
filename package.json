@@ -138,6 +138,7 @@
     "test:build-convergence": "node scripts/build-convergence-proof.mjs",
     "test:bottom-overlay": "node scripts/run-bottom-overlay-proof.mjs",
     "test:access-gate": "node scripts/run-access-gate-proof.mjs",
+    "test:e2e:plan-handoff": "npm run build && node scripts/e2e/plan-handoff.mjs",
     "test:e2e:preview-gate": "VITE_ENTITLEMENT_MODE=mock npm run build && node scripts/e2e/preview-gate.mjs",
     "test:e2e:install-overlap": "npm run build && node scripts/e2e/install-overlap.mjs"
   },

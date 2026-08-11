@@ -1,6 +1,12 @@
 import { useState, Component, type ReactNode } from 'react'
 import { CustomizationCenter } from '@/sections/CustomizationCenter'
 import { OnboardingV2, PlanHandoffScreen } from '@/views/OnboardingV2'
+import type { GeneratedPlan } from '@/lib/planGenerator'
+import type { PlanRationale } from '@/lib/planRationale'
+import type { GoalType } from '@/types/profile'
+
+/** مخرجات التوليد المحفوظة التي تعرضها شاشة التسليم. */
+interface PlanArtifacts { plan: GeneratedPlan; goalType: GoalType; rationale: PlanRationale }
 import { getLanguage } from '@/lib/appPreferences'
 import { useAuth } from '@/lib/authContext'
 
@@ -63,9 +69,24 @@ export function SetupView({ onClose, onForceComplete, initialStep, mode = 'onboa
   // `SetupView` تبقى مركّبة عبر تبديل الوضع، فالمزلاج فيها ينجو، ويتقدّم على
   // `mode` حتى لا يسحب المحرّرُ المتقدّم البساطَ من تحت التسليم.
   const [finished, setFinished] = useState(false)
+  /**
+   * [QIM-WEB-FOUNDER-UX-004/حزمة ٣] مخرجات التوليد تعيش هنا لا في `OnboardingV2`:
+   * المزلاج نفسه ولنفس السبب — `markCompleted` يفكّ تركيب المعالج، فأي حالة فيه
+   * تموت قبل أن تُرسَم. وغيابها يعني تسليمًا بلا أرقام، لا تسليمًا بأرقام مخترعة.
+   */
+  const [artifacts, setArtifacts] = useState<PlanArtifacts | null>(null)
 
   if (finished) {
-    return <PlanHandoffScreen lang={getLanguage()} signedIn={user !== null} onEnter={escape} />
+    return (
+      <PlanHandoffScreen
+        lang={getLanguage()}
+        signedIn={user !== null}
+        onEnter={escape}
+        plan={artifacts?.plan}
+        goalType={artifacts?.goalType}
+        rationale={artifacts?.rationale}
+      />
+    )
   }
 
   // الإعداد الأولي = باني الخطة الجوال الكامل، محاطًا بمخرج طوارئ لا يحبس المستخدم أبدًا.
@@ -74,7 +95,12 @@ export function SetupView({ onClose, onForceComplete, initialStep, mode = 'onboa
       <SetupErrorBoundary onEscape={escape}>
         {/* الخطة تُحفظ ويُوسَم الإعداد مكتملًا **قبل** هذا النداء، فالتسليم عرضٌ
             لا تعليق لعقد الإكمال: إغلاق المتصفّح عنده لا يفقد شيئًا. */}
-        <OnboardingV2 lang={getLanguage()} onComplete={() => setFinished(true)} onExit={() => onClose(false)} />
+        <OnboardingV2
+          lang={getLanguage()}
+          onComplete={() => setFinished(true)}
+          onExit={() => onClose(false)}
+          onPlanReady={setArtifacts}
+        />
       </SetupErrorBoundary>
     )
   }

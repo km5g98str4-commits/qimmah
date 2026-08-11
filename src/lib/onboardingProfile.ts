@@ -34,6 +34,8 @@ import {
 import { deriveActivityLevel, deriveTargetWeight, levelFromExperience } from '@/lib/planDerive'
 import { experienceToBand, goalChoices, gymTypeToAccess } from '@/data/planBuilder'
 import type { Customization } from '@/lib/customization'
+import type { GeneratedPlan } from '@/lib/planGenerator'
+import type { PlanRationale } from '@/lib/planRationale'
 import { hasSavedCustomization, loadCustomization } from '@/lib/customization'
 import { loadOnboarding } from '@/lib/onboarding'
 import { enqueueSyncOperation } from '@/lib/syncQueue'
@@ -303,6 +305,43 @@ export function nutritionTargetsFromOnboarding(op: OnboardingProfile, base: Prof
 }
 
 /**
+ * [QIM-WEB-FOUNDER-UX-003/حزمة ٣] مخرجات التوليد كاملة من **تشغيل واحد**.
+ *
+ * شاشة التسليم تعرض حقائق الخطة (التقسيمة · الأيام · السعرات · الماكروز · أول
+ * يوم · «لماذا هذه خطتك»)، وهذه الحقائق **يجب أن تكون نفسها المحفوظة** لا نسخة
+ * مُعاد توليدها. توليد ثانٍ للعرض يفتح باب انحراف صامت بين ما يراه المستخدم على
+ * شاشة الوعد وما يجده في التطبيق — وهو أسوأ من عدم العرض أصلًا (الميثاق §5:
+ * لا واجهة تَعِد بما لا يحدث).
+ *
+ * فالتوليد هنا مرّة واحدة، ويُسلَّم `customization` للحفظ و`generated`/`rationale`
+ * للعرض. و`buildCustomizationFromOnboarding` تبقى كما هي للمستدعين القائمين.
+ */
+export interface OnboardingPlanArtifacts {
+  customization: Customization
+  generated: GeneratedPlan
+  rationale: PlanRationale
+  profile: Profile
+}
+
+export async function buildPlanArtifactsFromOnboarding(
+  op: OnboardingProfile,
+  current: Customization,
+): Promise<OnboardingPlanArtifacts> {
+  const profile = toLegacyProfile(op, current.profile)
+  const [{ generatePlan }, { buildPlanRationale }] = await Promise.all([
+    import('@/lib/planGenerator'),
+    import('@/lib/planRationale'),
+  ])
+  const g = generatePlan(profile)
+  return {
+    customization: assembleCustomization(op, current, g, profile),
+    generated: g,
+    rationale: buildPlanRationale(profile, g),
+    profile,
+  }
+}
+
+/**
  * يبني التخصيص الكامل من مصدر الحقيقة — يشغّل المولّد الحالي.
  * لا تمارين/وجبات مكتوبة يدويًا، ولا بيانات وهمية مزروعة.
  */
@@ -312,7 +351,16 @@ export async function buildCustomizationFromOnboarding(
 ): Promise<Customization> {
   const profile = toLegacyProfile(op, current.profile)
   const { generatePlan } = await import('@/lib/planGenerator')
-  const g = generatePlan(profile)
+  return assembleCustomization(op, current, generatePlan(profile), profile)
+}
+
+/** التجميع المشترك — مصدر واحد لشكل التخصيص، يستهلكه المساران أعلاه. */
+function assembleCustomization(
+  op: OnboardingProfile,
+  current: Customization,
+  g: GeneratedPlan,
+  profile: Profile,
+): Customization {
   const goalLabel = goalChoices.find((x) => x.value === op.goal.type)?.label
   return {
     ...current,
