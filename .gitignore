@@ -43,3 +43,7 @@ scripts/.p12-catalog-cache.json
 
 # local auth-e2e runtime workdir (Supabase config copy)
 scripts/e2e-auth/.workdir/
+
+# مجلّدا محاكاة النشرة (scripts/deploy-cutover-simulation.mjs) — مؤقّتان
+.cutover-a/
+.cutover-b/

@@ -64,9 +64,28 @@ picked up); `/assets/*` → `immutable` 1y (content-hashed → safe + fast).
   payment off), `Strict-Transport-Security` (2y, includeSubDomains).
 - **Cache-Control:** the cutover safety net described in §1.
 
-`public/_redirects` (unchanged, already correct): `/*  /index.html  200` — SPA fallback. The app is
-**hash-routed**, so all routes resolve through `/`; real files (`/assets`, `/sw.js`, icons) are
-served before the catch-all.
+`public/_redirects` — **corrected in [QIM-WEB-HOTFIX-002] after a P0 production outage.**
+
+It previously read `/*  /index.html  200` with the note "real files are served before the catch-all".
+That note was true but **incomplete, and the gap was the outage**: real files are served first, yet
+*missing* files still fall through to the catch-all. So a content-hashed chunk deleted by a newer
+deployment returned **`HTTP 200` + the body of `index.html`** instead of `404`. Measured live:
+`GET /assets/does-not-exist-12345.js` → `200` + HTML. The browser requests that URL as
+`type="module"`, and `X-Content-Type-Options: nosniff` (§ above) forbids sniffing — so it fails with
+a MIME error, surfacing to the user as the `RouteErrorBoundary` card «صار خلل بسيط» after a long
+wait. The old service worker then cached that HTML under the JS URL, making the failure sticky.
+
+The catch-all is therefore replaced by an **explicit allowlist** of the app's routes (mirroring
+`ROUTES` in `src/lib/appRoutes.ts`), plus `public/404.html`. **Both are required:** without a
+top-level `404.html`, Pages assumes a single-page app and serves `/` for every unmatched path —
+re-creating the same bug (`pages/configuration/serving-pages`). Note also that Pages' `_redirects`
+supports redirects (301/302/303/307/308) and 200-rewrites **only** — a `404` status is explicitly
+unsupported (`pages/configuration/redirects`), which is why the fix is an allowlist rather than a
+`/assets/* … 404` rule.
+
+The app root `/` is unaffected: it resolves via directory-index to `index.html`, independently of
+`_redirects`. Guarded by `npm run test:asset-integrity` (in `test:gate`) and the two-build
+`npm run test:deploy-cutover` simulation.
 
 > If an analytics endpoint (`VITE_ANALYTICS_ENDPOINT`) is ever configured for the web build, add its
 > origin to `connect-src`. It is off by default, so CSP omits it today.

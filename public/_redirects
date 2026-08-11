@@ -1,4 +1,55 @@
-# Cloudflare Pages SPA fallback — every path serves index.html (app handles state in-memory)
+# ═════════════════════════════════════════════════════════════════════════════
+# Cloudflare Pages — توجيه قِمّة
+#
+# ⚠️ ممنوع إعادة قاعدة شاملة «/*  /index.html  200». [QIM-WEB-HOTFIX-002]
+#
+# التطبيق موجَّه بالـhash كاملًا (`src/lib/appRoutes.ts`)، فالقاعدة الشاملة لم تكن
+# تخدم مسارًا حقيقيًا — وكانت **تبتلع طلبات الأصول المفقودة**: أي حزمة مُهشّمة
+# حذفتها نشرة جديدة تعود «HTTP 200 + جسم index.html». والمتصفّح يطلبها
+# `type="module"`، ومع `X-Content-Type-Options: nosniff` في `_headers` لا يستنشق
+# النوع — فيفشل بخطأ MIME وتظهر بطاقة «صار خلل بسيط» بعد انتظار طويل.
+# قيس على الإنتاج: `/assets/does-not-exist-12345.js` ⇒ 200 + HTML.
+#
+# البديل: **قائمة سماح صريحة** بمسارات التطبيق، وما عداها يسقط على `404.html`
+# بحالة 404 صادقة.
+#
+# ولا يكفي حذف القاعدة الشاملة وحدها: Pages يفترض SPA ويعيد «/» لكل مسار غير
+# مطابق **ما لم يوجد `404.html` في الجذر** (سلوك موثَّق في
+# pages/configuration/serving-pages). فـ`public/404.html` و**غياب** القاعدة
+# الشاملة شرطان متلازمان — يعملان معًا أو لا يعمل أيّهما.
+#
+# ورموز الحالة هنا محكومة بالمنصّة: `_redirects` في Pages يدعم إعادة التوجيه
+# (301/302/303/307/308) وإعادة الكتابة بـ200 **فقط** — و«404» غير مدعوم صراحةً
+# (pages/configuration/redirects). فلا محاولة لكتابة قاعدة 404 هنا.
+#
+# الحارس: `scripts/asset-integrity-proof.mjs` يقارن هذه القائمة بـ`ROUTES` في
+# `src/lib/appRoutes.ts` فلا تشيخ إحداهما دون الأخرى، ويسقط إن عادت قاعدة شاملة.
+# ═════════════════════════════════════════════════════════════════════════════
+
+# اختصارات قديمة للصفحات القانونية.
 /legal/terms.html      /#/terms     302
 /legal/privacy.html    /#/privacy   302
-/*    /index.html   200
+
+# مسارات التطبيق (روابط عميقة بالمسار) — مطابقة لـROUTES في src/lib/appRoutes.ts.
+# إعادة كتابة بـ200 إلى القشرة: نفس سلوك القاعدة الشاملة السابقة لهذه المسارات
+# بالضبط، فلا تغيّر في تجربة المستخدم — التغيير الوحيد أن ما **ليس** مسارًا
+# ولا ملفًا صار يفشل بصدق بدل أن يتنكّر في هيئة صفحة.
+/start           /index.html  200
+/login           /index.html  200
+/setup           /index.html  200
+/dashboard       /index.html  200
+/workout         /index.html  200
+/exercises       /index.html  200
+/nutrition       /index.html  200
+/progress        /index.html  200
+/steps           /index.html  200
+/profile         /index.html  200
+/calc            /index.html  200
+/recovery        /index.html  200
+/settings        /index.html  200
+/privacy         /index.html  200
+/terms           /index.html  200
+/contact         /index.html  200
+/reset           /index.html  200
+/productReview   /index.html  200
+/stats           /index.html  200
