@@ -35,6 +35,13 @@ const REVK = '20260809120001_revocation_ledger.sql'
 const RECV = '20260809120002_code_grant_recovery.sql'
 const PUBX = '20260809120003_public_execute_hardening.sql'
 const FIX = '20260809120004_entitlement_security_remediation.sql'
+// [CTO-SALLA-002] طبقة سلة تعيد تعريف `admin_grant_premium` **بنفس ثوابت** FIX
+// (توسعةً بأعمدة أثر). فبيئة الـcounter-proof «القديمة» يجب أن تستبعد الاثنتين:
+// استبعاد FIX وحدها يترك طبقة سلة تعيد التحصين، فتنجح البيئة «القديمة» في
+// الفحوص التي يُفترض أن تسقط فيها — ويتحوّل الإثبات المضادّ إلى ضجيج يخفي
+// نفسه. أي هجرة تحصين قادمة تُضاف هنا كذلك.
+const SALLA_INGEST = '20260812120001_salla_webhook_ingest.sql'
+const HARDENING_LINEAGE = [FIX, SALLA_INGEST]
 
 const results = []
 function check(name, pass, detail = '') {
@@ -59,7 +66,7 @@ async function mustFail(name, fn, expect) {
  * proves the exact pre-remediation behavior rather than a mocked substitute.
  */
 async function runLegacyCounterProofs() {
-  const { db: legacy, failed } = await createSandbox({ exclude: [FIX] })
+  const { db: legacy, failed } = await createSandbox({ exclude: HARDENING_LINEAGE })
   const ready = check(
     '⚔️ بيئة counter-proof القديمة تُبنى بلا هجرة الإصلاح فقط',
     failed.length === 0,
