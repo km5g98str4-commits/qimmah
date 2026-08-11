@@ -6,7 +6,6 @@ import { AppLoading } from '@/components/AppLoading'
 import { VerifyEmailView } from '@/views/VerifyEmailView'
 import { RouteErrorBoundary } from '@/components/ErrorBoundary'
 import { DashboardSkeleton, ProgressSkeleton, TabSkeleton } from '@/components/ViewSkeletons'
-import { InstallPrompt } from '@/components/InstallPrompt'
 
 // باقي الشاشات مُقسّمة إلى حِزم عند الطلب (code-splitting) لتقليل حزمة الدخول الأولى.
 // تُبنى عبر مصنع لأنّ React.lazy يخزّن فشل الاستيراد نهائيًا — زرّ «أعد المحاولة» في
@@ -354,7 +353,6 @@ export default function App() {
             }}
           />
         </Suspense>
-        <InstallPrompt lang={LANG} />
       </RouteErrorBoundary>
     )
   }
@@ -529,8 +527,26 @@ export default function App() {
         <div id="main-content" tabIndex={-1} className="outline-none">
           <Suspense fallback={<AppLoading />}>{content}</Suspense>
         </div>
-        {/* دعوة تثبيت التطبيق (P12) — شريط سفلي قابل للإغلاق، لا يظهر مثبّتًا أو بعد الإغلاق. */}
-        <InstallPrompt lang={LANG} />
+        {/*
+          [QIM-WEB-FOUNDER-UX-003/حزمة ١] لا شريط تثبيت **ثابتًا** فوق جذر التطبيق.
+
+          كان هنا `<InstallPrompt/>` بـ`fixed inset-x-0 bottom-0 z-[60]` وارتفاع
+          مقيس ١٧٢بكسل على شاشة ٣٩٠×٧٨٠. وشريط التنقّل السفلي في القشرة `z-50`
+          **داخل** التدفّق. فالنتيجة المقيسة: `elementFromPoint` في مركز كل عنصر
+          من عناصر التنقّل الخمسة — وفي مركز «كمّل كضيف» على الهبوط، و«ادخل وشوف
+          خطتي» على التسليم — كان يعيد الشريط لا الزرّ. أي أن **قاع التطبيق كله
+          كان غير قابل للنقر** على أندرويد/كروم حيث يُطلق `beforeinstallprompt`.
+          وهذا هو مصدر «يشتغل مرة وما يشتغل مرة»: النقر البرمجي يتجاوز اختبار
+          الإصابة، والإصبع لا يتجاوزه.
+
+          ولم تُحذف وظيفة: دعوة التثبيت **منفَّذة مرّتين** في هذا المستودع، وهذه
+          هي النسخة الخاطئة. النسخة الصحيحة `InstallBanner` تُرسم في مسار القشرة
+          (`MobileShell`) فلا يمكنها بنيويًا أن تعلو شيئًا، ودليل آيفون الدائم في
+          الإعدادات (`InstallGuideSection`) لم يُمَس. ملف `InstallPrompt.tsx`
+          يبقى كما هو — حذفه يخصّ موجة تنظيف الكود الميت المستقلّة (قرار المؤسس ١).
+
+          يحرس هذا: `test:bottom-overlay` (بنيوي) و`test:e2e:install-overlap` (متصفّح).
+        */}
       </RouteErrorBoundary>
     </>
   )
