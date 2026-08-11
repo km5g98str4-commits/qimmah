@@ -33,6 +33,32 @@ const buildCommit = (() => {
 // فيفشل عامل الخدمة بصمت ويظهر عطل «غير متصل» لا علاقة له بسلوك الإنتاج الحقيقي.
 // الإصلاح: نلتقط outDir المُحلَّل فعليًا عبر configResolved (يعكس أي --outDir أو تخصيصًا
 // آخر) بدل افتراض 'dist' دائمًا.
+// هوية البناء داخل index.html نفسه — [QIM-WEB-RELEASE-001] البند ٢.
+//
+// `BUILD_LABEL` كان يعيش داخل حزمة JS فقط (الفوتر + console)، فقراءته تتطلّب
+// **تشغيل التطبيق**. وحين يكون السؤال «أي نسخة يرى هذا الجهاز؟» فالتطبيق قد يكون
+// هو نفسه العاجز عن الإقلاع، أو الجهاز بعيدًا لا متصفّح فيه تحت اليد. فنضع الهوية
+// في وسوم meta: تُقرأ بطلب واحد بلا تنفيذ أي سكربت، وتحمل الهاش ووقت البناء
+// وإصدار عامل الخدمة معًا — فيُحسم فورًا خلافُ «بناء مختلف» عن «حالة محلية مختلفة».
+//
+// تُحقن في index.html وحده (لا داخل الأصول المُهشّمة)، فلا تُغيّر هاشات الحِزم،
+// وindex.html مضبوط على `no-cache` في `_headers` فتصل القراءة طازجة دائمًا.
+function buildIdentityPlugin() {
+  const buildTime = new Date().toISOString()
+  return {
+    name: 'qimmah-build-identity',
+    apply: 'build' as const,
+    transformIndexHtml() {
+      return [
+        { tag: 'meta', attrs: { name: 'qimmah-build', content: `v${pkgVersion}·${buildCommit}` }, injectTo: 'head' as const },
+        { tag: 'meta', attrs: { name: 'qimmah-commit', content: buildCommit }, injectTo: 'head' as const },
+        { tag: 'meta', attrs: { name: 'qimmah-build-time', content: buildTime }, injectTo: 'head' as const },
+        { tag: 'meta', attrs: { name: 'qimmah-sw-version', content: `qimmah-${buildCommit}` }, injectTo: 'head' as const },
+      ]
+    },
+  }
+}
+
 function swVersionPlugin() {
   let outDir = path.resolve(__dirname, 'dist')
   return {
@@ -63,7 +89,7 @@ function swVersionPlugin() {
 // https://vitejs.dev/config/
 export default defineConfig(() => {
   return {
-    plugins: [react(), swVersionPlugin()],
+    plugins: [react(), buildIdentityPlugin(), swVersionPlugin()],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),
