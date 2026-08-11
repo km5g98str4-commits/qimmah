@@ -10,6 +10,7 @@
 import { defaultAnswers, type Answers } from './planBuilderAnswers'
 import { resolveExperienceLevel, type V2Intent, type V2Level } from './onboardingV2Flow'
 import type { Environment, NutritionStyle } from '@/types/onboarding'
+import type { LastTrainedBucket, TotalMonthsBucket, TrainedBefore, TrainingConsistency } from '@/types/profile'
 import type { V2GoalValue } from '@/design-system/v2/labels'
 
 export type V2Place = 'gym' | 'home' | 'machines'
@@ -33,6 +34,15 @@ export interface V2OnboardingChoices {
   intent?: V2Intent | null
   level?: V2Level | null
   trainingYears?: number | null
+  /**
+   * تاريخ التدريب — الخطوة الثالثة (٢). `null`/غياب = «لم يُسأل»، وتمرّ كذلك
+   * إلى `Answers` بلا استبدال بافتراضي. الثلاثة الأخيرة `null` دائمًا لمن اختار
+   * `'never'` — وذلك غياب **صحيح** لا ناقص.
+   */
+  trainedBefore?: TrainedBefore | null
+  totalMonths?: TotalMonthsBucket | null
+  lastTrained?: LastTrainedBucket | null
+  consistency?: TrainingConsistency | null
 }
 
 /**
@@ -95,6 +105,15 @@ export function toAnswersFromV2(choices: V2OnboardingChoices): Answers {
     environment: choices.place ? PLACE_TO_ENV[choices.place] : undefined,
     injuries: [...choices.injuries],
     healthDataConsent: choices.healthDataConsent,
+    // تاريخ التدريب — **يُنقل ولا يُستكمل**. `null` تصير `undefined` (غياب
+    // صريح)، ولا تُستبدل بقيمة من `defaultAnswers` كما يفعل ما فوقها: افتراضٌ
+    // هنا يخترع تاريخًا لم يقله المستخدم، وهو ما يمنعه §5 من الميثاق.
+    trainingHistory: {
+      trainedBefore: choices.trainedBefore ?? undefined,
+      totalMonths: choices.totalMonths ?? undefined,
+      lastTrained: choices.lastTrained ?? undefined,
+      consistency: choices.consistency ?? undefined,
+    },
     targetWeightKg,
     targetTouched: true,
   }

@@ -16,6 +16,7 @@ import { AGE_RANGE, HEIGHT_RANGE, WEIGHT_RANGE } from '@/config/profileDomain'
 import { loadDraft, saveDraft } from '@/lib/onboarding'
 import type { V2GoalValue } from '@/design-system/v2/labels'
 import type { ExperienceLevel } from '@/types/onboarding'
+import type { LastTrainedBucket, TotalMonthsBucket, TrainedBefore, TrainingConsistency } from '@/types/profile'
 import type { V2Place, V2Pref } from '@/lib/onboardingV2Adapter'
 
 /** Allowed answer sets for the training step (mirrored by the view's segmented controls). */
@@ -32,6 +33,41 @@ export type V2Intent = 'plan' | 'meals' | 'numbers'
 /** المستوى المُعلن — يقود صياغة الأهداف وكثافة الجلسة. */
 export type V2Level = 'beginner' | 'intermediate' | 'advanced'
 
+/**
+ * ═══ تاريخ التدريب — أربعة أسئلة، بمفردات المحرّك نفسها ═══ [CTO-QAE-022] M1a
+ *
+ * القيم **هي حرفيًا** قيم بنك الأسئلة (`personalization/bank/core.ts`) التي
+ * يستهلكها `classifyExperience`. لا ترجمة بينهما، فلا خسارة في الترجمة ولا
+ * جدول مقابلة يشيخ: ما يُكتب هنا هو ما يقرؤه المحرّك.
+ *
+ * **و«ما تمرّنت» حالة صريحة لا فراغ.** `'never'` قيمة أولى في القائمة، ويترتّب
+ * عليها أن الثلاثة الباقية **لا تُسأل أصلًا** — لا تُملأ بصفر ولا بافتراضي.
+ */
+/* المصدر الوحيد للمفردات هو `types/profile` — هذه أسماء محلّية له لا نسخة ثانية. */
+export type V2TrainedBefore = TrainedBefore
+export type V2TotalMonths = TotalMonthsBucket
+export type V2LastTrained = LastTrainedBucket
+export type V2TrainingConsistency = TrainingConsistency
+
+export const TRAINED_BEFORE_VALUES = ['never', 'tried', 'months', 'years'] as const
+export const TOTAL_MONTHS_VALUES = ['lt3', 'm3_6', 'm6_12', 'y1_3', 'y3_plus'] as const
+export const LAST_TRAINED_VALUES = ['now', 'w2', 'm1_3', 'm3_12', 'y1_plus'] as const
+export const CONSISTENCY_VALUES = ['rare', 'on_off', 'mostly', 'steady'] as const
+
+/**
+ * هل تُسأل أسئلة التاريخ الثلاثة (المدّة · آخر تمرين · الانتظام)؟
+ *
+ * **القاعدة، ولماذا هي قاعدة لا اختيار واجهة:** الثلاثة `eligible: ne(trainedBefore,'never')`
+ * في البنك نفسه (`bank/core.ts:165,176,188`)، و`classifyExperience` يتجاوز أي
+ * جواب لها عند `trainedBefore === 'never'` بأذرع صريحة:
+ * `exposureBand='none'` (سطر ١١٢) · `consistencyBand='none'` (سطر ١١٥) ·
+ * `tenureMonths=0` (لأن `totalMonths` غائب). فسؤالٌ **جوابه مُهمَل بالبرهان**
+ * احتكاكٌ بلا مكسب معلوماتي — ولذلك لا يُسأل «الانتظام» لمن لم يتمرّن قط.
+ */
+export function historyFollowUpsApply(trainedBefore: V2TrainedBefore | null): boolean {
+  return trainedBefore !== null && trainedBefore !== 'never'
+}
+
 /** سنوات التدريب — اختيارية، وتُسأل لغير المبتدئ فقط. */
 export const TRAINING_YEARS_RANGE = { min: 0, max: 60 } as const
 
@@ -46,8 +82,19 @@ export { AGE_RANGE, HEIGHT_RANGE, WEIGHT_RANGE } from '@/config/profileDomain'
 /** الجنس — يقود معادلة BMR (Mifflin-St Jeor) ولا يُستخدم لغير ذلك. */
 export type V2Gender = 'male' | 'female'
 
-/** Version stamp for the persisted v2 draft — a shape change bumps this and old drafts are ignored. */
-export const DRAFT_VERSION = 5
+/**
+ * Version stamp for the persisted v2 draft.
+ *
+ * ⚠️ **v5 لا تُهمَل — تُقرأ وتُرقَّى.** كان التعليق السابق يقول «old drafts are
+ * ignored»، وهو سلوك مقبول حين تتغيّر البنية جذريًا. لكن [CTO-QAE-022] يضيف
+ * حقولًا **إضافية** فقط: مسودّة v5 صالحة بالكامل، ينقصها أربعة أجوبة لم تكن
+ * تُسأل. إهمالها يعني إعادة إعداد قسرية على مستخدم لم يخطئ — انظر
+ * `READABLE_DRAFT_VERSIONS` و`migrateDraft` أدناه.
+ */
+export const DRAFT_VERSION = 6
+
+/** النسخ التي يقبلها المُحمِّل. v5 تُرقَّى بحقول تاريخ **فارغة** لا مُخترَعة. */
+const READABLE_DRAFT_VERSIONS: readonly number[] = [5, DRAFT_VERSION]
 
 /** Full resumable state of the v2 onboarding flow. */
 export interface OnboardingV2Draft {
@@ -62,6 +109,14 @@ export interface OnboardingV2Draft {
   level: V2Level | null
   /** سنوات التدريب — اختيارية (null = لم تُذكر)؛ تُصفَّر عند اختيار «مبتدئ». */
   trainingYears: number | null
+  /**
+   * تاريخ التدريب — `null` تعني **لم يُجَب**، لا «صفر» ولا «لا شيء».
+   * والثلاثة الأخيرة تبقى `null` أبدًا لمن اختار `'never'` (انظر `historyFollowUpsApply`).
+   */
+  trainedBefore: V2TrainedBefore | null
+  totalMonths: V2TotalMonths | null
+  lastTrained: V2LastTrained | null
+  consistency: V2TrainingConsistency | null
   goal: V2GoalValue | null
   days: number
   duration: number
@@ -92,6 +147,10 @@ export function initialDraftV2(userId?: string | null): OnboardingV2Draft {
     intent: null,
     level: null,
     trainingYears: null,
+    trainedBefore: null,
+    totalMonths: null,
+    lastTrained: null,
+    consistency: null,
     goal: null,
     days: 4,
     duration: 45,
@@ -103,13 +162,28 @@ export function initialDraftV2(userId?: string | null): OnboardingV2Draft {
   }
 }
 
-/** Persisted envelope (version + fields) — the shape actually written to storage. */
-interface PersistedDraft extends OnboardingV2Draft {
+/**
+ * Persisted envelope (version + fields) — the shape actually written to storage.
+ *
+ * حقول التاريخ **اختيارية في النوع المقروء** لأن مسودّة v5 لا تحملها. تُطبَّع إلى
+ * `null` عند التحميل (`migrateDraft`) — و`null` هنا تعني «لم يُسأل» بصدق، وهي
+ * بالضبط ما يجعل ملف QAE ناقصًا بدل أن يبدو مكتملًا بقيمة مصنوعة.
+ */
+interface PersistedDraft extends Omit<OnboardingV2Draft, 'trainedBefore' | 'totalMonths' | 'lastTrained' | 'consistency'> {
   v: number
+  trainedBefore?: V2TrainedBefore | null
+  totalMonths?: V2TotalMonths | null
+  lastTrained?: V2LastTrained | null
+  consistency?: V2TrainingConsistency | null
+}
+
+/** عضوية في مجموعة قيم معلومة، أو `null`/غياب. أي قيمة أخرى تُسقط المسودّة كلها. */
+function optMember<T extends string>(value: unknown, allowed: readonly T[]): boolean {
+  return value === null || value === undefined || (typeof value === 'string' && (allowed as readonly string[]).includes(value))
 }
 
 /** Which step-specific validation message to surface, or null when the step is complete. */
-export type StepValidation = 'body' | 'ageBelowMin' | 'intentLevel' | 'goal' | 'healthConsent' | 'training' | 'equipment' | null
+export type StepValidation = 'body' | 'ageBelowMin' | 'intentLevel' | 'trainingHistory' | 'goal' | 'healthConsent' | 'training' | 'equipment' | null
 
 /** Async plan-assembly status driving the loading / error / done screens. */
 export type FinalizeStatus = 'idle' | 'building' | 'error' | 'done'
@@ -143,6 +217,10 @@ type Validatable = Pick<
   | 'intent'
   | 'level'
   | 'trainingYears'
+  | 'trainedBefore'
+  | 'totalMonths'
+  | 'lastTrained'
+  | 'consistency'
   | 'goal'
   | 'days'
   | 'duration'
@@ -151,15 +229,29 @@ type Validatable = Pick<
   | 'healthDataConsent'
 >
 
+/** موضع خطوة تاريخ التدريب في التدفّق — مصدر واحد يقرأه المُهاجِر والواجهة. */
+export const HISTORY_STEP = 2
+
 /** آخر خطوة قبل شاشة «خطتك جاهزة». */
-export const LAST_INPUT_STEP = 4
+export const LAST_INPUT_STEP = 5
 
 /**
  * Validate one step. Returns the step's message key when incomplete, else null.
  *
  * ═══ ترتيب الخطوات — قرار واعٍ لا وراثة بالسكوت ═══
- * 0 الأساسيات (موافقة + جسد) · 1 النية والمستوى · 2 الهدف · 3 التدريب ·
- * 4 المعدّات · 5 جاهز.
+ * 0 الأساسيات (موافقة + جسد) · 1 النية والمستوى · **2 تاريخ التدريب** ·
+ * 3 الهدف · 4 التدريب · 5 المعدّات · 6 جاهز.
+ *
+ * ═══ لماذا التاريخ في الموضع ٢ تحديدًا — [CTO-QAE-022] M1a ═══
+ * لأنه **النصف الموضوعي من السؤال الذي سُئل للتوّ**. الخطوة ١ تسأل المستخدم أن
+ * يصنّف نفسه («مبتدئ/متوسط/متقدّم») — وهو تقدير ذاتي. والخطوة ٢ تسأل الوقائع
+ * التي تُصحّحه: هل تمرّنت؟ كم؟ متى آخر مرّة؟ وكم انتظمت؟ فصلُهما بشاشات الهدف
+ * والتدريب والمعدّات يجعل المستخدم يعلن مستواه ثم يُسأل بعد ثلاث شاشات «هل
+ * تمرّنت من قبل؟» — تسلسل مفكّك.
+ *
+ * ولم يُدمَج التاريخ **داخل** الخطوة ١: الخطوة ١ تحمل النية (٣ خيارات) والمستوى
+ * (٣) والسنوات، وإضافة أربعة أسئلة أخرى إليها تحوّلها إلى استبيان — وهو ما يمنعه
+ * الأمر صراحةً. شاشة مستقلّة قصيرة (**سؤال واحد لمن لم يتمرّن قط**) أرخص.
  *
  * التوتّر الموثّق (§8): بلوبرنت البحث يريد **النية أولًا** لأسباب تفاعل، وحاجز
  * القاصرين يريد **العمر قبل الأهداف المقيَّدة** (التنشيف/التضخيم ممنوعان دون
@@ -197,9 +289,15 @@ export function validateStep(step: number, d: Validatable): StepValidation {
     if (d.trainingYears !== null && !inRange(d.trainingYears, TRAINING_YEARS_RANGE)) return 'intentLevel'
     return d.intent && d.level ? null : 'intentLevel'
   }
-  if (step === 2) return d.goal ? null : 'goal'
-  if (step === 3) return DAYS.includes(d.days as (typeof DAYS)[number]) && DURATIONS.includes(d.duration as (typeof DURATIONS)[number]) ? null : 'training'
-  if (step === 4) return d.place && d.pref ? null : 'equipment'
+  if (step === HISTORY_STEP) {
+    // «ما تمرّنت من قبل» جوابٌ **كامل** بذاته: يمرّ وحده، ولا يُطلب معه شيء.
+    if (d.trainedBefore === null) return 'trainingHistory'
+    if (!historyFollowUpsApply(d.trainedBefore)) return null
+    return d.totalMonths && d.lastTrained && d.consistency ? null : 'trainingHistory'
+  }
+  if (step === 3) return d.goal ? null : 'goal'
+  if (step === 4) return DAYS.includes(d.days as (typeof DAYS)[number]) && DURATIONS.includes(d.duration as (typeof DURATIONS)[number]) ? null : 'training'
+  if (step === 5) return d.place && d.pref ? null : 'equipment'
   return null
 }
 
@@ -244,8 +342,12 @@ export function canAdvance(step: number, d: Validatable): boolean {
 function isPersistedDraft(value: unknown): value is PersistedDraft {
   if (!value || typeof value !== 'object') return false
   const d = value as Partial<PersistedDraft>
-  if (d.v !== DRAFT_VERSION) return false
+  if (typeof d.v !== 'number' || !READABLE_DRAFT_VERSIONS.includes(d.v)) return false
   if (!Number.isInteger(d.step) || (d.step as number) < 0 || (d.step as number) > LAST_INPUT_STEP) return false
+  if (!optMember(d.trainedBefore, TRAINED_BEFORE_VALUES)) return false
+  if (!optMember(d.totalMonths, TOTAL_MONTHS_VALUES)) return false
+  if (!optMember(d.lastTrained, LAST_TRAINED_VALUES)) return false
+  if (!optMember(d.consistency, CONSISTENCY_VALUES)) return false
   if (d.goal !== null && d.goal !== 'cut' && d.goal !== 'maintain' && d.goal !== 'bulk') return false
   if (d.intent !== null && d.intent !== 'plan' && d.intent !== 'meals' && d.intent !== 'numbers') return false
   if (d.level !== null && d.level !== 'beginner' && d.level !== 'intermediate' && d.level !== 'advanced') return false
@@ -272,9 +374,41 @@ export function saveDraftV2(draft: OnboardingV2Draft, userId?: string | null): v
 export function loadDraftV2(userId?: string | null): OnboardingV2Draft | undefined {
   const raw = loadDraft<unknown>(userId)
   if (!isPersistedDraft(raw)) return undefined
-  const { v: _v, ...draft } = raw
-  void _v
-  return draft
+  return migrateDraft(raw)
+}
+
+/**
+ * ترقية مسودّة مقروءة إلى شكل النسخة الحالية.
+ *
+ * **v5 → v6 — قرار المؤشّر، وهو الجزء غير البديهي:** أُدرجت خطوة في الموضع ٢،
+ * فمؤشّرات v5 من ٢ فما فوق تشير الآن إلى شاشة أخرى (٢ كان «الهدف» وصار
+ * «التاريخ»). الخيارات ثلاثة، وواحد فقط أمين:
+ *   • إبقاء المؤشّر كما هو ⇒ المستخدم يعود إلى **شاشة غير التي غادرها**.
+ *   • إزاحته للأمام (٢→٣ · ٣→٤ · ٤→٥) ⇒ يعود لشاشته الصحيحة، لكنه **يتخطّى
+ *     خطوة التاريخ إلى الأبد** فينهي الإعداد بملف QAE ناقص بلا أن يُسأل.
+ *   • **المُختار:** تثبيته عند `HISTORY_STEP` لمن كان عندها أو بعدها.
+ *
+ * الثالث ليس إعادة إعداد قسرية: **ولا جواب واحد يُفقَد** (الهدف والأيام والمكان
+ * كلها محفوظة وتُعرض مملوءة)، والمستخدم يجيب سؤالًا واحدًا جديدًا ثم يمرّ على
+ * شاشاته الجاهزة بضغطات «التالي». من كان في الخطوة ٠ أو ١ لا يتأثّر أصلًا.
+ */
+function migrateDraft(raw: PersistedDraft): OnboardingV2Draft {
+  // `v` وحدها تُنزع؛ الباقي يُنشر أولًا **عمدًا**. إعادة إسناد مفتاح موجود بعد
+  // النشر تُبقيه في موضعه الأصلي، فمسودّة بالنسخة الحالية تعود **مطابقة بايتًا
+  // ببايت** لا مجرّد مكافئة بالقيم. لو نُزعت الحقول الأربعة في التفكيك لأُعيدت
+  // في الذيل، فيتغيّر ترتيب المفاتيح بلا تغيّر قيمة — وهو فرقٌ يُسقط مقارنات
+  // الجولة في الإثباتات القائمة بلا عيب حقيقي.
+  const { v, ...rest } = raw
+  const legacy = v === 5
+  return {
+    ...rest,
+    step: legacy ? Math.min(rest.step, HISTORY_STEP) : rest.step,
+    // لا اختراع: الغياب يصير `null` = «لم يُجَب»، لا قيمة افتراضية.
+    trainedBefore: rest.trainedBefore ?? null,
+    totalMonths: rest.totalMonths ?? null,
+    lastTrained: rest.lastTrained ?? null,
+    consistency: rest.consistency ?? null,
+  }
 }
 
 /** Drop the draft (on successful finish) — resume must not reopen a completed setup. */

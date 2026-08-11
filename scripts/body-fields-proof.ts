@@ -45,7 +45,7 @@ check('خطوة فارغة تُرجع رسالة body', validateStep(0, empty) =
 check('لا يمكن التقدّم من خطوة الجسد الفارغة', !canAdvance(0, empty))
 check('المسودّة الجديدة تبدأ بلا بيانات جسم', initialDraftV2(null).age === null)
 check('الخطوة الأولى رقمها 0', validateStep(0, { ...base, ...body }) === null)
-check('آخر خطوة إدخال هي 4 (المعدّات)', LAST_INPUT_STEP === 4)
+check('آخر خطوة إدخال هي 5 (المعدّات)', LAST_INPUT_STEP === 5)
 
 console.log('\n═══ 2) الحدود تمنع القيم الشاذّة ولا تُقصي أحدًا ═══')
 check('عمر 12 مرفوض', !inRange(12, AGE_RANGE))

@@ -46,6 +46,35 @@ export type SchedulingStyle = 'fixed' | 'flexible'
 /** أدوات متاحة في البيت/النادي الصغير. */
 export type Equipment = 'dumbbell' | 'barbell' | 'bench' | 'machine' | 'cable' | 'bands'
 
+/**
+ * ═══ تاريخ التدريب — أدلّة الخبرة الصريحة ═══ [CTO-QAE-022] M1a
+ *
+ * المفردات **هي مفردات المحرّك حرفيًا** (`personalization/bank/core.ts`):
+ * `trainedBefore` · `totalMonths` · `lastTrained` · `consistency`. تُكتب كما
+ * يقرؤها `classifyExperience` فلا جدول ترجمة بينهما.
+ *
+ * ⚠️ **لماذا كل حقل اختياري، ولماذا `undefined` ليست عيبًا:**
+ * ملايين المستخدمين الحاليين أنهوا الإعداد قبل وجود هذه الأسئلة. غيابها عندهم
+ * **واقعة صادقة** — «لم يُسأل» — وتُقرأ كذلك في طبقة QAE فيخرج ملفهم ناقصًا
+ * باسم الحقل الناقص. البديل (حشو قيمة افتراضية) يجعل الملف يبدو مكتملًا وهو
+ * مبنيّ على جواب لم يقله أحد، وهذا بالضبط ما يمنعه §5 من الميثاق.
+ *
+ * وتمييز ثالث لا يُخلط: `trainedBefore: 'never'` **دليل حاضر** يقول «ما تمرّن»،
+ * وهو ليس `undefined` التي تقول «لا نعرف». الأول يكفي لتصنيف كامل، والثاني لا.
+ */
+export type TrainedBefore = 'never' | 'tried' | 'months' | 'years'
+export type TotalMonthsBucket = 'lt3' | 'm3_6' | 'm6_12' | 'y1_3' | 'y3_plus'
+export type LastTrainedBucket = 'now' | 'w2' | 'm1_3' | 'm3_12' | 'y1_plus'
+export type TrainingConsistency = 'rare' | 'on_off' | 'mostly' | 'steady'
+
+export interface TrainingHistoryEvidence {
+  trainedBefore?: TrainedBefore
+  /** لا يُجمع إطلاقًا عند `trainedBefore === 'never'` — وغيابه هناك صحيح لا ناقص. */
+  totalMonths?: TotalMonthsBucket
+  lastTrained?: LastTrainedBucket
+  consistency?: TrainingConsistency
+}
+
 /** بيانات الجسم/الملف الشخصي التي تُبنى عليها الحسابات. */
 export interface Profile {
   name: string
@@ -85,6 +114,11 @@ export interface Profile {
   experienceBand?: ExperienceBand
   /** مستوى الخبرة الدلالي (إعداد v2) — مصدر الحقيقة للإجابة. */
   experienceLevel?: ExperienceLevel
+  /**
+   * أدلّة تاريخ التدريب الصريحة (إعداد v2، خطوة ٢). غيابها = «لم يُسأل».
+   * تُستهلك في طبقة QAE التشخيصية فقط اليوم؛ `generatePlan` الحيّ لا يقرؤها.
+   */
+  trainingHistory?: TrainingHistoryEvidence
   gymAccess?: GymAccess
   /** نوع مكان التمرين الدلالي (إعداد v2). */
   gymType?: GymType

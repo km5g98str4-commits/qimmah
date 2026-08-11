@@ -25,6 +25,7 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '..')
 const ENTRY = `
 export { V2_ONBOARDING, V2_GOAL_MODEL } from '@/design-system/v2/labels'
 export { onboardingIntentStrings } from '@/i18n/dict/onboardingIntent'
+export { trainingHistoryStrings } from '@/i18n/dict/trainingHistory'
 export { policyCopy } from '@/data/policyCopy'
 export { DATA_KEYS } from '@/lib/userDataKeys'
 `
@@ -82,6 +83,8 @@ export async function loadAppCopy() {
     goals: mod.V2_GOAL_MODEL,
     /** صياغة النية والمستوى والأهداف التابعة للمستوى. */
     intent: mod.onboardingIntentStrings.ar,
+    /** نصوص خطوة تاريخ التدريب (العربية) — [CTO-QAE-022] M1a. */
+    history: mod.trainingHistoryStrings.ar,
     /** نصوص السياسة (إقرار البيانات الصحية). */
     policy: mod.policyCopy.ar,
     /** سجلّ مفاتيح التخزين كاملًا. */

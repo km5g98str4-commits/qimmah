@@ -2,7 +2,7 @@
 // هذا الكائن هو مصدر الحقيقة الوحيد: كل خطة/هدف/تقسيمة/التزام يُشتق منه.
 // كل الحقول اختيارية ما لم يكن لها قيمة افتراضية آمنة — لا بيانات وهمية.
 
-import type { ExperienceLevel } from '@/types/profile'
+import type { ExperienceLevel, TrainingHistoryEvidence } from '@/types/profile'
 
 export type { ExperienceLevel }
 
@@ -81,6 +81,11 @@ export interface OnbTrainingPreferences {
   splitMode?: SplitMode
   /** يُملأ فقط عند splitMode=advanced. */
   advancedSplit?: AdvancedSplit
+  /**
+   * أدلّة تاريخ التدريب الصريحة (إعداد v2، خطوة ٢) — [CTO-QAE-022] M1a.
+   * الغياب = «لم يُسأل»، وهو حال كل ملف أُنشئ قبل هذه الموجة.
+   */
+  trainingHistory?: TrainingHistoryEvidence
 }
 
 /** ملف النشاط اليومي خارج التمرين. */

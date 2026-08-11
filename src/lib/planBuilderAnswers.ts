@@ -17,6 +17,7 @@ import type {
   WellnessTrackingMode,
 } from '@/types/onboarding'
 import { HEALTH_CONSENT_POLICY_VERSION, ONBOARDING_SCHEMA_VERSION } from '@/types/onboarding'
+import type { TrainingHistoryEvidence } from '@/types/profile'
 import type { GoalValue } from '@/data/planBuilder'
 
 export interface Answers {
@@ -33,6 +34,15 @@ export interface Answers {
   // trainingPreferences
   experienceLevel?: ExperienceLevel
   consistency?: OnbConsistency
+  /**
+   * أدلّة تاريخ التدريب (إعداد v2، خطوة ٢) — [CTO-QAE-022] M1a.
+   *
+   * ⚠️ **ليست `consistency` أعلاه.** ذاك حقل قديم بمفردات أخرى
+   * (`new|on_and_off|consistent|returning`) لا يجمعه تدفّق v2 أصلًا. هذا حقل
+   * منفصل بمفردات المحرّك، ولا يُترجم أحدهما إلى الآخر: مقابلةٌ مخترَعة بين
+   * مفردتين تبدو دقيقة وهي تخمين.
+   */
+  trainingHistory?: TrainingHistoryEvidence
   environment?: Environment
   trainingDays: number
   daysTouched: boolean
@@ -107,6 +117,10 @@ export function buildOnboardingProfile(a: Answers): OnboardingProfile {
       // المبتدئ لا يختار التقسيمة — تبقى «تلقائي» دائمًا (P2.6: تثبيت الإجابة لا الـ UI فقط).
       splitMode: beginner ? 'auto' : a.splitMode,
       advancedSplit: !beginner && a.splitMode === 'advanced' ? a.advancedSplit : undefined,
+      // تاريخ التدريب يُنقل كما هو. **ولا يُطبَّق عليه منطق `beginner` أعلاه**:
+      // ذاك يستبدل جواب المستخدم بقيمة مشتقّة من حقل آخر، وهو مقبول لتفضيل
+      // تقسيمة، ممنوع على دليل واقعة.
+      trainingHistory: a.trainingHistory,
     },
     activityProfile: {
       neat: a.neat,

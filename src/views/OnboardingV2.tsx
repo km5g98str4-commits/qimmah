@@ -18,14 +18,17 @@ import { profileChoiceStrings } from '@/i18n/dict/profileChoices'
 import { bodyStepStrings } from '@/i18n/dict/bodyStep'
 import { goalWordingFor, onboardingIntentStrings } from '@/i18n/dict/onboardingIntent'
 import { setupWhyLines } from '@/i18n/dict/setupWhy'
+import { trainingHistoryStrings, type HistoryOption } from '@/i18n/dict/trainingHistory'
 import {
   AGE_RANGE,
   DAYS,
   DURATIONS,
+  HISTORY_STEP,
   LAST_INPUT_STEP,
   canAdvance,
   clearDraftV2,
   finalizeReduce,
+  historyFollowUpsApply,
   initialDraftV2,
   saveDraftV2,
   validateStep,
@@ -34,7 +37,11 @@ import {
   type StepValidation,
   type V2Gender,
   type V2Intent,
+  type V2LastTrained,
   type V2Level,
+  type V2TotalMonths,
+  type V2TrainedBefore,
+  type V2TrainingConsistency,
 } from '@/lib/onboardingV2Flow'
 
 interface OnboardingV2Props {
@@ -48,8 +55,8 @@ interface OnboardingV2Props {
 const GOAL_ICON: Record<V2GoalValue, string> = { cut: 'Flame', maintain: 'ShieldCheck', bulk: 'TrendingUp' }
 
 // Stable ids linking each step's region to its heading (aria-labelledby).
-// الترتيب: الأساسيات · النية والمستوى · الهدف · التدريب · المعدّات.
-const TITLE_ID = ['onb-title-body', 'onb-title-intent', 'onb-title-goal', 'onb-title-training', 'onb-title-equipment'] as const
+// الترتيب: الأساسيات · النية والمستوى · تاريخ التدريب · الهدف · التدريب · المعدّات.
+const TITLE_ID = ['onb-title-body', 'onb-title-intent', 'onb-title-history', 'onb-title-goal', 'onb-title-training', 'onb-title-equipment'] as const
 
 /**
  * Suggested split label from weekly days — a real split descriptor (NOT
@@ -109,6 +116,13 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
   const [level, setLevel] = useState<V2Level | null>(initialDraft.level)
   const [yearsText, setYearsText] = useState(initialDraft.trainingYears == null ? '' : String(initialDraft.trainingYears))
 
+  // تاريخ التدريب — الخطوة ٢. الثلاثة الأخيرة تُصفَّر عند اختيار «ما تمرّنت»
+  // (انظر `onTrainedBefore` أدناه) فلا تبقى قيمة مخفيّة تصل إلى الملف.
+  const [trainedBefore, setTrainedBefore] = useState<V2TrainedBefore | null>(initialDraft.trainedBefore)
+  const [totalMonths, setTotalMonths] = useState<V2TotalMonths | null>(initialDraft.totalMonths)
+  const [lastTrained, setLastTrained] = useState<V2LastTrained | null>(initialDraft.lastTrained)
+  const [trainingConsistency, setTrainingConsistency] = useState<V2TrainingConsistency | null>(initialDraft.consistency)
+
   const [goal, setGoal] = useState<V2GoalValue | null>(initialDraft.goal)
   const [days, setDays] = useState(initialDraft.days)
   const [duration, setDuration] = useState(initialDraft.duration)
@@ -134,6 +148,7 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
   const intentT = onboardingIntentStrings[lang] ?? onboardingIntentStrings.ar
   // ن٢: نصوص خطوة الأساسيات تلزم الفوتر أيضًا — رسالة «تحت الحدّ» تُعرض هناك.
   const bodyT = bodyStepStrings[lang] ?? bodyStepStrings.ar
+  const historyT = trainingHistoryStrings[lang] ?? trainingHistoryStrings.ar
   // صياغة الأهداف تتبع المستوى المُعلن — نفس القيم المخزّنة، لغة مختلفة.
   const goalWording = useMemo(() => goalWordingFor(lang, level), [lang, level])
   // [CTO-72] البند ٢ — سطر «ليش نسأل» للخطوات الخمس من مصدر واحد، بترتيب التدفّق.
@@ -144,6 +159,7 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
   const answers = {
     age: ageNum, gender, heightCm: heightNum, weightKg: weightNum,
     intent, level, trainingYears: yearsNum,
+    trainedBefore, totalMonths, lastTrained, consistency: trainingConsistency,
     goal, days, duration, place: place as V2Place | null, pref: pref as V2Pref | null, healthDataConsent,
   }
 
@@ -179,16 +195,16 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
   // Never while the plan is being built or after a successful finish.
   useEffect(() => {
     if (status === 'building' || status === 'done') return
-    const draft: OnboardingV2Draft = { step, age: ageNum, gender, heightCm: heightNum, weightKg: weightNum, intent, level, trainingYears: yearsNum, goal, days, duration, place: place as V2Place | null, pref: pref as V2Pref | null, hasInjury, injuries, healthDataConsent }
+    const draft: OnboardingV2Draft = { step, age: ageNum, gender, heightCm: heightNum, weightKg: weightNum, intent, level, trainingYears: yearsNum, trainedBefore, totalMonths, lastTrained, consistency: trainingConsistency, goal, days, duration, place: place as V2Place | null, pref: pref as V2Pref | null, hasInjury, injuries, healthDataConsent }
     saveDraftV2(draft, userId)
-  }, [step, ageNum, gender, heightNum, weightNum, intent, level, yearsNum, goal, days, duration, place, pref, hasInjury, injuries, healthDataConsent, status, userId])
+  }, [step, ageNum, gender, heightNum, weightNum, intent, level, yearsNum, trainedBefore, totalMonths, lastTrained, trainingConsistency, goal, days, duration, place, pref, hasInjury, injuries, healthDataConsent, status, userId])
 
   // Auto-dismiss a shown validation message once the step becomes complete.
   useEffect(() => {
     if (validation && canAdvance(step, answers)) setValidation(null)
     // answers is derived each render; the primitive fields are the real deps.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [validation, step, intent, level, yearsNum, goal, days, duration, place, pref, healthDataConsent])
+  }, [validation, step, intent, level, yearsNum, trainedBefore, totalMonths, lastTrained, trainingConsistency, goal, days, duration, place, pref, healthDataConsent])
 
   const next = () => {
     const v = validateStep(step, answers)
@@ -207,6 +223,24 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
   const toggleInjury = (v: string) =>
     setInjuries((list) => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v]))
 
+  /**
+   * اختيار «ما تمرّنت من قبل» **يمحو** أجوبة المتابعة الثلاثة.
+   *
+   * وهذا ليس تنظيفًا تجميليًا: لولاه لبقيت قيم أجاب عنها المستخدم قبل أن يغيّر
+   * رأيه محفوظةً في المسودّة ومارّةً إلى الملف، فيصل المحرّك ملفٌّ يقول «ما
+   * تمرّن قط» ومعه «تمرّن ٣ سنوات» — تناقضٌ مصدره إدخال شبح لا المستخدم. نفس
+   * علّة `onLevel` حين يمحو السنوات عند اختيار «مبتدئ».
+   */
+  const onTrainedBefore = (v: V2TrainedBefore) => {
+    setTrainedBefore(v)
+    if (!historyFollowUpsApply(v)) {
+      setTotalMonths(null)
+      setLastTrained(null)
+      setTrainingConsistency(null)
+    }
+    setValidation(null)
+  }
+
   // Real completion: map v2 choices → Answers, then run v1's local generation
   // pipeline. Visible failure: on any throw we surface the error screen with a
   // retry and DO NOT enter the app. On success we clear the draft and enter.
@@ -223,7 +257,7 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
           if (mode === 'hang') await new Promise(() => {})
           if (mode === 'error') throw new Error('forced onboarding failure (dev preview)')
         }
-        const built0 = toAnswersFromV2({ age: ageNum, gender, heightCm: heightNum, weightKg: weightNum, intent, level, trainingYears: yearsNum, goal, days, duration, place: place as V2Place | null, pref: pref as V2Pref | null, injuries: hasInjury ? injuries : [], healthDataConsent })
+        const built0 = toAnswersFromV2({ age: ageNum, gender, heightCm: heightNum, weightKg: weightNum, intent, level, trainingYears: yearsNum, trainedBefore, totalMonths, lastTrained, consistency: trainingConsistency, goal, days, duration, place: place as V2Place | null, pref: pref as V2Pref | null, injuries: hasInjury ? injuries : [], healthDataConsent })
         const op = buildOnboardingProfile(built0)
         saveOnboardingProfile(op)
         const built = await buildCustomizationFromOnboarding(op, customization)
@@ -330,12 +364,27 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
               onYears={(v) => { setYearsText(v); setValidation(null) }}
             />
           )}
-          {step === 2 && <GoalStep lang={lang} t={t} titleId={stepTitleId} why={whyLines[2]} goal={goal} wording={goalWording} isMinor={minor} onPick={(g) => { if (minor && (g === 'cut' || g === 'bulk')) return; setGoal(g); setValidation(null) }} />}
-          {step === 3 && (
-            <TrainingStep t={t} titleId={stepTitleId} why={whyLines[3]} lang={lang} days={days} duration={duration} onDays={setDays} onDuration={setDuration} goalLabel={goalLabel} split={splitFor(days, lang)} />
+          {step === HISTORY_STEP && (
+            <TrainingHistoryStep
+              lang={lang}
+              titleId={stepTitleId}
+              why={whyLines[HISTORY_STEP]}
+              trainedBefore={trainedBefore}
+              totalMonths={totalMonths}
+              lastTrained={lastTrained}
+              consistency={trainingConsistency}
+              onTrainedBefore={onTrainedBefore}
+              onTotalMonths={(v) => { setTotalMonths(v); setValidation(null) }}
+              onLastTrained={(v) => { setLastTrained(v); setValidation(null) }}
+              onConsistency={(v) => { setTrainingConsistency(v); setValidation(null) }}
+            />
           )}
+          {step === 3 && <GoalStep lang={lang} t={t} titleId={stepTitleId} why={whyLines[3]} goal={goal} wording={goalWording} isMinor={minor} onPick={(g) => { if (minor && (g === 'cut' || g === 'bulk')) return; setGoal(g); setValidation(null) }} />}
           {step === 4 && (
-            <EquipmentStep t={t} titleId={stepTitleId} why={whyLines[4]} place={place} pref={pref} hasInjury={hasInjury} injuries={injuries} onPlace={(v) => { setPlace(v); setValidation(null) }} onPref={(v) => { setPref(v); setValidation(null) }} onToggleInjury={() => setHasInjury((v) => !v)} onInjury={toggleInjury} />
+            <TrainingStep t={t} titleId={stepTitleId} why={whyLines[4]} lang={lang} days={days} duration={duration} onDays={setDays} onDuration={setDuration} goalLabel={goalLabel} split={splitFor(days, lang)} />
+          )}
+          {step === 5 && (
+            <EquipmentStep t={t} titleId={stepTitleId} why={whyLines[5]} place={place} pref={pref} hasInjury={hasInjury} injuries={injuries} onPlace={(v) => { setPlace(v); setValidation(null) }} onPref={(v) => { setPref(v); setValidation(null) }} onToggleInjury={() => setHasInjury((v) => !v)} onInjury={toggleInjury} />
           )}
         </div>
       </main>
@@ -353,9 +402,11 @@ export function OnboardingV2({ lang, onComplete, onExit }: OnboardingV2Props) {
                   ? policyCopy[lang].healthConsentRequired
                   : validation === 'intentLevel'
                     ? intentT.validation
-                    : validation === 'ageBelowMin'
-                      ? bodyT.ageBelowMin
-                      : t.validation[validation]}
+                    : validation === 'trainingHistory'
+                      ? historyT.validation
+                      : validation === 'ageBelowMin'
+                        ? bodyT.ageBelowMin
+                        : t.validation[validation]}
               </span>
             </p>
           )}
@@ -592,6 +643,106 @@ function IntentStep({
           <NumField id="v2-training-years" label={s.yearsLabel} unit={s.yearsUnit} placeholder={s.yearsPlaceholder} value={years} onChange={onYears} />
           <p className="mt-2 text-[0.78rem] leading-snug text-ink-500">{s.yearsNote}</p>
         </div>
+      )}
+    </section>
+  )
+}
+
+/**
+ * صفّ اختيار نصّي مضغوط — تسمية + تلميح اختياري، بلا أيقونة.
+ *
+ * لماذا لا `ChoiceRow`؟ ذاك يحمل أيقونة ٤٠×٤٠ ووصفًا، ومناسب لثلاثة خيارات
+ * تُقرأ متأنّيةً (النية · المستوى). هنا حتى خمسة خيارات في المجموعة الواحدة،
+ * وأيقونةٌ لكل «٣ إلى ٦ شهور» ضجيج لا معنى له. هدف اللمس يبقى ≥٤٤بكسل،
+ * والاختيار يُدلّ عليه بشارة صح لا باللون وحده (WCAG 1.4.1).
+ */
+function HistoryRow<V extends string>({ option, selected, onSelect }: { option: HistoryOption<V>; selected: boolean; onSelect: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      aria-pressed={selected}
+      className={cn(
+        'v2-pressable relative flex min-h-[44px] w-full items-center gap-3 overflow-hidden rounded-xl border px-3.5 py-2.5 text-start',
+        selected ? 'v2-choice-selected' : 'border-line bg-surface hover:border-ink-400/40',
+      )}
+    >
+      <span className={cn('absolute inset-y-0 start-0 w-1 transition-colors', selected ? 'v2-choice-accent' : 'bg-transparent')} />
+      <span className="min-w-0 flex-1">
+        <span className="block text-[0.9rem] font-bold text-ink-900">{option.label}</span>
+        {option.hint && <span className="mt-0.5 block text-[0.75rem] leading-snug text-ink-500">{option.hint}</span>}
+      </span>
+      <span className={cn('grid h-5 w-5 shrink-0 place-items-center rounded-full border-2 transition-colors', selected ? 'v2-choice-icon-selected border-[color:var(--v2-blue)]' : 'border-line text-transparent')}>
+        <Icon name="Check" className="h-3 w-3" strokeWidth={3} />
+      </span>
+    </button>
+  )
+}
+
+/** مجموعة اختيار واحدة داخل خطوة التاريخ — سؤال + خياراته. */
+function HistoryGroup<V extends string>({
+  legend, question, options, value, onSelect,
+}: {
+  legend: string; question: string
+  options: readonly HistoryOption<V>[]; value: V | null; onSelect: (v: V) => void
+}) {
+  return (
+    <Group legend={legend} className="block">
+      <p className="mt-7 mb-3 text-sm font-bold text-ink-700">{question}</p>
+      <div className="space-y-2">
+        {options.map((o) => (
+          <HistoryRow key={o.value} option={o} selected={value === o.value} onSelect={() => onSelect(o.value)} />
+        ))}
+      </div>
+    </Group>
+  )
+}
+
+/**
+ * الخطوة الثالثة (٢) — تاريخ التدريب. [CTO-QAE-022] M1a.
+ *
+ * أربعة أسئلة **بشرط**: الأول دائمًا، والثلاثة الباقية لمن تمرّن فقط. فمن لم
+ * يتمرّن قط يرى **سؤالًا واحدًا** ثم يمضي — لا شاشة أسئلة يتخطّاها بجواب فارغ.
+ *
+ * ولا يُعرض للأخير أي سؤال «مخفّف» بديل: الشاشة تقول له إن جوابه كافٍ
+ * (`neverNote`) بدل أن تتركه يظنّ أنه تخطّى شيئًا.
+ */
+function TrainingHistoryStep({
+  lang, titleId, why,
+  trainedBefore, totalMonths, lastTrained, consistency,
+  onTrainedBefore, onTotalMonths, onLastTrained, onConsistency,
+}: {
+  lang: Lang; titleId: string; why: string
+  trainedBefore: V2TrainedBefore | null
+  totalMonths: V2TotalMonths | null
+  lastTrained: V2LastTrained | null
+  consistency: V2TrainingConsistency | null
+  onTrainedBefore: (v: V2TrainedBefore) => void
+  onTotalMonths: (v: V2TotalMonths) => void
+  onLastTrained: (v: V2LastTrained) => void
+  onConsistency: (v: V2TrainingConsistency) => void
+}) {
+  const s = trainingHistoryStrings[lang] ?? trainingHistoryStrings.ar
+  const showFollowUps = historyFollowUpsApply(trainedBefore)
+  return (
+    <section aria-labelledby={titleId}>
+      <StepTitle id={titleId} title={s.title} why={why} />
+
+      <HistoryGroup legend={s.legends.trainedBefore} question={s.trainedBeforeQ} options={s.trainedBefore} value={trainedBefore} onSelect={onTrainedBefore} />
+
+      {showFollowUps && (
+        <>
+          <HistoryGroup legend={s.legends.totalMonths} question={s.totalMonthsQ} options={s.totalMonths} value={totalMonths} onSelect={onTotalMonths} />
+          <HistoryGroup legend={s.legends.lastTrained} question={s.lastTrainedQ} options={s.lastTrained} value={lastTrained} onSelect={onLastTrained} />
+          <HistoryGroup legend={s.legends.consistency} question={s.consistencyQ} options={s.consistency} value={consistency} onSelect={onConsistency} />
+        </>
+      )}
+
+      {trainedBefore === 'never' && (
+        <p className="mt-5 flex items-start gap-2 rounded-2xl border border-line bg-beige p-3 text-[0.8rem] font-bold leading-snug text-ink-700">
+          <Icon name="Info" className="mt-0.5 h-4 w-4 shrink-0 text-ink-500" />
+          {s.neverNote}
+        </p>
       )}
     </section>
   )

@@ -21,6 +21,12 @@ import type { ExerciseCatalog } from '@qae/Domain/Catalog/model'
 import { assembleDays, deriveTargetCount, type ExpTier } from '@qae/Domain/Training/assembly'
 import { generateSplit } from '@qae/Domain/Training/split'
 import { buildEligiblePool, isMachinesOnly, type GymAccess } from '@qae/Domain/Training/plan'
+import { classifyExperience, deriveReturningStatus } from '@qae/Domain/ProfileClassification/classify'
+import type { FactValue } from '@qae/Domain/Evidence/model'
+import {
+  evaluateTrainingCompleteness,
+  type TrainingCompletenessResult,
+} from '@qae/Domain/Training/completeness'
 
 export const SHADOW_VERSION = '1.0.0'
 
@@ -97,11 +103,23 @@ export type AthleteProfileField =
   | 'safety.contraindications'
 
 export interface AthleteProfileAttempt {
+  /**
+   * GLOBAL completeness — unchanged and deliberately still unreachable.
+   * `movementCompetency` has no onboarding question, so no live profile is
+   * globally complete. M1a does NOT weaken this; it adds the narrower Training
+   * verdict below instead ([CTO-QAE-021] §5 said global must not be relaxed).
+   */
   status: 'complete' | 'incomplete'
   /** fields mapped from explicit live evidence */
   mapped: readonly AthleteProfileField[]
   /** fields the live app genuinely cannot supply — each named, with a reason */
   missing: ReadonlyArray<{ field: AthleteProfileField; reason: string }>
+  /**
+   * Training-specific verdict ([CTO-QAE-021] completeness contract, wired in
+   * M1a). `missingRequired` names every absent field — a Training profile is
+   * never "incomplete" without saying which evidence is missing.
+   */
+  trainingCompleteness: TrainingCompletenessResult
   /** the subset QAE's Training path can actually run on, when derivable */
   training?: {
     tier: ExpTier
@@ -162,6 +180,27 @@ function injuryAreasFromProfile(p: Profile): { areas: string[]; recognised: bool
   return { areas: [...areas], recognised: areas.length > 0 }
 }
 
+/**
+ * Live `Profile.trainingHistory` → the QAE fact map `classifyExperience` reads.
+ *
+ * This is a KEY-FOR-KEY move, not a translation: onboarding stores exactly the
+ * bank's own vocabulary (`never|tried|months|years`, `lt3…y3_plus`, `now…y1_plus`,
+ * `rare|on_off|mostly|steady`), so nothing is mapped, bucketed, or guessed here.
+ *
+ * An absent answer is an ABSENT KEY, never a null or a sentinel: `scoreOf`
+ * distinguishes the two by `raw in s.map`, and a key holding `null` would count
+ * toward `weightTotal10` as an unanswered signal in some paths while a missing
+ * key does not exist at all. Absent is the honest encoding of "not asked".
+ */
+export function historyFacts(h: Profile['trainingHistory']): Record<string, FactValue> {
+  const facts: Record<string, FactValue> = {}
+  if (h?.trainedBefore !== undefined) facts['trainedBefore'] = h.trainedBefore
+  if (h?.totalMonths !== undefined) facts['totalMonths'] = h.totalMonths
+  if (h?.lastTrained !== undefined) facts['lastTrained'] = h.lastTrained
+  if (h?.consistency !== undefined) facts['consistency'] = h.consistency
+  return facts
+}
+
 export function buildAthleteProfileAttempt(p: Profile): AthleteProfileAttempt {
   const mapped: AthleteProfileField[] = []
   const missing: Array<{ field: AthleteProfileField; reason: string }> = []
@@ -187,42 +226,86 @@ export function buildAthleteProfileAttempt(p: Profile): AthleteProfileAttempt {
   const tier = tierFromTrainingLevel(p.trainingLevel)
   push('training.experienceBand.trainingKnowledge', tier !== null, 'Profile.trainingLevel is absent/unrecognised')
 
-  // ── Fields the live app CANNOT supply. Named individually, never inferred. ──
-  missing.push({
-    field: 'training.experienceBand.recentTrainingExposure',
-    reason: 'no onboarding question records when the user last trained; trainingLevel is a self-rating, not exposure evidence',
-  })
-  missing.push({
-    field: 'training.experienceBand.currentWorkCapacity',
-    reason: 'requires exposure + consistency evidence, neither of which onboarding collects',
-  })
-  missing.push({
-    field: 'training.experienceBand.consistencyHistory',
-    reason: 'no onboarding question records training consistency (rare/on-off/mostly/steady)',
-  })
-  missing.push({
-    field: 'training.returningStatus',
-    reason: 'requires lastTrained + totalMonths; onboarding collects neither. Inferring it from trainingLevel would be a weak proxy',
-  })
-  missing.push({
-    field: 'training.consistency',
-    reason: 'not collected by OnboardingV2',
-  })
+  // ── Training history ([CTO-QAE-022] M1a) ────────────────────────────────────
+  //
+  // The four onboarding answers, read verbatim. `undefined` means the question
+  // was never put to this user (every profile created before M1a) — reported as
+  // missing by name, NEVER back-filled.
+  const h = p.trainingHistory
+  const hist = historyFacts(h)
+
+  push(
+    'training.trainingHistory.trainedBefore',
+    h?.trainedBefore !== undefined,
+    'OnboardingV2 did not ask it for this profile (pre-M1a). trainingLevel is a self-rating and does not distinguish never-trained from detrained',
+  )
+
+  // ── The never-trained asymmetry, and why it is not a special case ───────────
+  //
+  // `trainedBefore === 'never'` makes the three follow-ups INAPPLICABLE, not
+  // absent: the athlete has no total duration and no last session because there
+  // were none. Reporting them "missing" would be false — it would claim the app
+  // failed to collect something that does not exist — and it would also make a
+  // fully-answered never-trained athlete look under-evidenced forever.
+  //
+  // So for these three, "answered" means: a value is present, OR the athlete
+  // said 'never'. `neverTrained` below is the single predicate carrying that.
+  const neverTrained = h?.trainedBefore === 'never'
+  const historyAsked = h?.trainedBefore !== undefined
+
+  push(
+    'training.trainingHistory.totalMonthsBucket',
+    neverTrained || h?.totalMonths !== undefined,
+    historyAsked ? 'trained before, but total-duration answer is absent from the stored profile' : 'not collected for this profile (pre-M1a)',
+  )
+  push(
+    'training.trainingHistory.lastTrainedBucket',
+    neverTrained || h?.lastTrained !== undefined,
+    historyAsked ? 'trained before, but last-trained answer is absent from the stored profile' : 'not collected for this profile (pre-M1a)',
+  )
+  push(
+    'training.consistency',
+    neverTrained || h?.consistency !== undefined,
+    historyAsked ? 'trained before, but consistency answer is absent from the stored profile' : 'not collected for this profile (pre-M1a)',
+  )
+
+  // ── Derived experience axes ─────────────────────────────────────────────────
+  //
+  // Derived by the DOMAIN classifier from the facts above — not restated here.
+  // Each axis is released only when its own evidence is present; a partially
+  // answered history yields partial axes, not a confident guess.
+  const exp = classifyExperience(hist)
+  const returning = deriveReturningStatus(hist, exp)
+
+  push(
+    'training.returningStatus',
+    returning !== 'unknown',
+    'requires trainedBefore (plus lastTrained + totalMonths to separate returning from active); absent for this profile. Inferring it from trainingLevel would be a weak proxy',
+  )
+  push(
+    'training.experienceBand.recentTrainingExposure',
+    neverTrained || h?.lastTrained !== undefined,
+    'requires lastTrained; trainingLevel is a self-rating, not exposure evidence',
+  )
+  push(
+    'training.experienceBand.consistencyHistory',
+    neverTrained || h?.consistency !== undefined,
+    'requires the consistency answer (rare/on_off/mostly/steady)',
+  )
+  // Capacity = knowledge stepped down by exposure (classify.ts:118-122). It
+  // therefore needs BOTH a knowledge signal and an exposure signal; with either
+  // one missing the step-down is unanchored, so nothing is released.
+  push(
+    'training.experienceBand.currentWorkCapacity',
+    tier !== null && (neverTrained || h?.lastTrained !== undefined),
+    'requires a knowledge signal (trainingLevel) AND exposure evidence (lastTrained); capacity is knowledge stepped down by exposure and cannot be derived from either alone',
+  )
+
+  // Still genuinely uncollectable — the one field M1a deliberately does NOT add
+  // a question for. Proven optional for Training in completeness.ts.
   missing.push({
     field: 'training.movementCompetency',
-    reason: 'no onboarding question covers overhead/hinge/squat-depth/impact/standing tolerance',
-  })
-  missing.push({
-    field: 'training.trainingHistory.trainedBefore',
-    reason: 'not collected; trainingLevel does not distinguish never-trained from detrained',
-  })
-  missing.push({
-    field: 'training.trainingHistory.totalMonthsBucket',
-    reason: 'not collected by OnboardingV2',
-  })
-  missing.push({
-    field: 'training.trainingHistory.lastTrainedBucket',
-    reason: 'not collected by OnboardingV2',
+    reason: 'no onboarding question covers overhead/hinge/squat-depth/impact/standing tolerance; PROVEN optional for the Training path (completeness.ts) so its absence blocks nothing',
   })
 
   const injury = injuryAreasFromProfile(p)
@@ -237,10 +320,14 @@ export function buildAthleteProfileAttempt(p: Profile): AthleteProfileAttempt {
     'derived from safety.injuryAreas, which is unavailable for this profile',
   )
 
-  // A profile is COMPLETE only if nothing is missing. Given the fields above,
-  // no live profile can currently be complete — that is the honest result, and
-  // it is exactly what M1 has to fix.
+  // GLOBAL status: complete only if NOTHING is missing. `movementCompetency`
+  // is always missing, so this stays 'incomplete' by design — see the field doc.
   const status: AthleteProfileAttempt['status'] = missing.length === 0 ? 'complete' : 'incomplete'
+
+  // TRAINING status: the narrower contract, answered from the same mapped set.
+  // `safety.contraindications` is not in either Training list, so it is passed
+  // through as-is and simply never consulted.
+  const trainingCompleteness = evaluateTrainingCompleteness(new Set<string>(mapped))
 
   const trainingRunnable =
     tier !== null && access !== null && Number.isFinite(days) && days >= 1 && Number.isFinite(minutes) && minutes > 0
@@ -249,6 +336,7 @@ export function buildAthleteProfileAttempt(p: Profile): AthleteProfileAttempt {
     status,
     mapped,
     missing,
+    trainingCompleteness,
     ...(trainingRunnable
       ? {
           training: {
@@ -281,6 +369,14 @@ export interface ShadowComparison {
   detail: string
   /** never persisted; diagnostic only */
   missingProfileFields: readonly string[]
+  /**
+   * Training-contract verdict for this profile ([CTO-QAE-022] M1a). Diagnostic
+   * only — it gates NOTHING. The live plan is produced and delivered whatever
+   * this says; see the fail-open proofs.
+   */
+  trainingComplete: boolean
+  /** named Training-required fields still absent — never a bare count */
+  missingTrainingRequired: readonly string[]
 }
 
 interface BlocklistRule {
@@ -310,24 +406,34 @@ const BLOCKLISTS = {
  * caught and reported as `qaeFailed`, so a shadow defect can never reach a user.
  */
 export function runShadowComparison(profile: Profile, livePlan: WorkoutPlan): ShadowComparison {
-  const base = {
+  const preAttempt = {
     shadowVersion: SHADOW_VERSION,
     liveDayCount: livePlan.days.length,
     qaeDayCount: 0,
+    // If the adapter itself throws we know nothing about this profile — so we
+    // claim nothing. `false` here is "not established", never "verified absent".
+    trainingComplete: false,
+    missingTrainingRequired: [] as readonly string[],
   }
   let attempt: AthleteProfileAttempt
   try {
     attempt = buildAthleteProfileAttempt(profile)
   } catch (err) {
-    return { ...base, classification: 'qaeFailed', detail: `profileAdapter threw: ${String(err)}`, missingProfileFields: [] }
+    return { ...preAttempt, classification: 'qaeFailed', detail: `profileAdapter threw: ${String(err)}`, missingProfileFields: [] }
   }
   const missingProfileFields = attempt.missing.map((m) => m.field)
+  const base = {
+    ...preAttempt,
+    trainingComplete: attempt.trainingCompleteness.completeForTraining,
+    missingTrainingRequired: attempt.trainingCompleteness.missingRequired,
+  }
 
   if (attempt.training === undefined) {
     return {
       ...base,
       classification: 'qaeIncompleteProfile',
-      detail: `insufficient evidence for the Training path (${missingProfileFields.length} fields unavailable)`,
+      // Named, not counted: a bare number tells a reader nothing actionable.
+      detail: `insufficient evidence for the Training path (missing: ${attempt.trainingCompleteness.missingRequired.join(', ') || missingProfileFields.join(', ')})`,
       missingProfileFields,
     }
   }

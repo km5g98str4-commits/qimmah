@@ -284,6 +284,9 @@ export function toLegacyProfile(op: OnboardingProfile, base: Profile = defaultPr
     consistency,
     experienceBand: band,
     experienceLevel,
+    // تاريخ التدريب — يعبر كما هو. `undefined` تبقى `undefined` (ملف قديم لم
+    // يُسأل)، ولا تُملأ من `base`: لا يوجد افتراضي صادق لواقعة.
+    trainingHistory: tp.trainingHistory,
     gymAccess,
     gymType,
     equipment: [],
@@ -424,6 +427,10 @@ export function migrateFromCustomization(c: Customization): OnboardingProfile {
       daysPerWeek: p.trainingDays,
       sessionDurationMin: p.workoutDuration,
       splitMode: 'auto',
+      // يُقرأ من الملف القديم إن وُجد فيه؛ وإلا يبقى غائبًا. **ولا يُشتقّ من
+      // `p.trainingLevel`**: المستوى تقدير ذاتي، والتاريخ واقعة — واشتقاق
+      // الثانية من الأولى هو بالضبط الوكيل الضعيف الذي تمنعه هذه الموجة.
+      trainingHistory: p.trainingHistory,
     },
     activityProfile: {
       neat: p.activityLevel ? ACTIVITY_TO_NEAT[p.activityLevel] : undefined,

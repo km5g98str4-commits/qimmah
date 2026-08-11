@@ -32,7 +32,8 @@ async function waitForServer() {
 let browser
 try {
   // القواميس المركزية — نفس المصدر الذي يرسم منه المكوّن.
-  const { onboarding: t, policy, intent } = await loadAppCopy()
+  const { onboarding: t, policy, intent, history } = await loadAppCopy()
+  const historyOpt = (group, value) => history[group].find((o) => o.value === value).label
   const gymPlace = labelOf(t.places, 'gym')
   const mixedPref = labelOf(t.prefs, 'mixed')
   // عَلَم تطوير (ليس مفتاح بيانات) — نتحقّق أنه ما زال مقروءًا في المكوّن.
@@ -70,6 +71,20 @@ try {
   await advancedPage.getByRole('button', { name: new RegExp(intent.intents[0].label) }).click()
   await advancedPage.getByRole('button', { name: new RegExp(intent.levels.find((x) => x.value === 'advanced').label) }).click()
   await advancedNext.click()
+  // ── خطوة تاريخ التدريب — المسار «تمرّن من قبل» (٤ أجوبة) ──────────────────
+  check('history step rendered', await advancedPage.getByRole('heading', { name: history.title }).isVisible())
+  check('history Next starts blocked', await advancedNext.getAttribute('aria-disabled') === 'true')
+  // قبل الجواب الأول لا تظهر أسئلة المتابعة إطلاقًا.
+  check('follow-ups hidden before answering', !(await advancedPage.getByText(history.totalMonthsQ).isVisible()))
+  await advancedPage.getByRole('button', { name: new RegExp(escapeRegExp(historyOpt('trainedBefore', 'years'))) }).click()
+  check('follow-ups appear for a trained user', await advancedPage.getByText(history.totalMonthsQ).isVisible())
+  check('history Next still blocked with follow-ups unanswered', await advancedNext.getAttribute('aria-disabled') === 'true')
+  await advancedPage.getByRole('button', { name: new RegExp(escapeRegExp(historyOpt('totalMonths', 'y1_3'))) }).click()
+  await advancedPage.getByRole('button', { name: new RegExp(escapeRegExp(historyOpt('lastTrained', 'y1_plus'))) }).click()
+  await advancedPage.getByRole('button', { name: new RegExp(escapeRegExp(historyOpt('consistency', 'mostly'))) }).click()
+  check('history Next unlocks once all four are answered', await advancedNext.getAttribute('aria-disabled') === 'false')
+  check('no horizontal overflow on the history step', await advancedPage.evaluate(() => document.documentElement.scrollWidth <= innerWidth))
+  await advancedNext.click()
   const advancedCut = intent.goalWording.advanced.cut.label
   check('advanced goal uses level-specific wording', advancedCut.startsWith('تنشيف') && await advancedPage.getByRole('button', { name: new RegExp(escapeRegExp(advancedCut)) }).isVisible())
   await advancedPage.close()
@@ -80,6 +95,13 @@ try {
   await next.click()
   await page.getByRole('button', { name: new RegExp(intent.intents[0].label) }).click()
   await page.getByRole('button', { name: new RegExp(intent.levels.find((x) => x.value === 'beginner').label) }).click()
+  await next.click()
+  // ── خطوة تاريخ التدريب — المسار «ما تمرّنت قط» (جواب واحد يكفي) ───────────
+  check('history step rendered (beginner path)', await page.getByRole('heading', { name: history.title }).isVisible())
+  await page.getByRole('button', { name: new RegExp(escapeRegExp(historyOpt('trainedBefore', 'never'))) }).click()
+  check('never-trained sees NO follow-up questions', !(await page.getByText(history.totalMonthsQ).isVisible()))
+  check('never-trained is told the answer is enough', await page.getByText(history.neverNote).isVisible())
+  check('never-trained unlocks Next with one answer', await next.getAttribute('aria-disabled') === 'false')
   await next.click()
   const beginnerCut = intent.goalWording.beginner.cut.label
   check('beginner goal uses level-specific wording', beginnerCut === 'خسارة دهون' && await page.getByRole('button', { name: new RegExp(escapeRegExp(beginnerCut)) }).isVisible())

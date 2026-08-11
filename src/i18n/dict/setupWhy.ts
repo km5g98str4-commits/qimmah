@@ -24,9 +24,10 @@ import type { Lang } from '@/lib/appPreferences'
 import { V2_ONBOARDING } from '@/design-system/v2/labels'
 import { bodyStepStrings } from './bodyStep'
 import { onboardingIntentStrings } from './onboardingIntent'
+import { trainingHistoryStrings } from './trainingHistory'
 
-/** خمسة أسطر بالضبط — بترتيب خطوات `OnboardingV2` (0..4). */
-export type SetupWhyLines = readonly [string, string, string, string, string]
+/** ستة أسطر بالضبط — بترتيب خطوات `OnboardingV2` (0..5). */
+export type SetupWhyLines = readonly [string, string, string, string, string, string]
 
 /**
  * السطر الوحيد الذي لا مصدر له: خطوة الهدف كانت بلا أي سياق.
@@ -49,11 +50,13 @@ export function setupWhyLines(lang: Lang): SetupWhyLines {
     bodyStepStrings[lang].whyNote,
     // ١ النية والمستوى
     intent.subtitle,
-    // ٢ الهدف — الفجوة الوحيدة، وتُملأ هنا.
+    // ٢ تاريخ التدريب — يقرأ من قاموسه، ولا يُنسخ هنا.
+    trainingHistoryStrings[lang].why,
+    // ٣ الهدف — الفجوة الوحيدة، وتُملأ هنا.
     goalWhy[lang],
-    // ٣ التدريب
+    // ٤ التدريب
     t.training.subtitle,
-    // ٤ المعدّات
+    // ٥ المعدّات
     t.equipment.subtitle,
   ]
 }

@@ -27,13 +27,18 @@ function check(label: string, cond: boolean): void {
 }
 
 function draft(over: Partial<OnboardingV2Draft> = {}): OnboardingV2Draft {
-  return { step: 2, age: null, gender: null, heightCm: null, weightKg: null, intent: 'meals', level: 'intermediate', trainingYears: null, goal: 'cut', days: 4, duration: 45, place: 'gym', pref: 'mixed', hasInjury: true, injuries: ['knee'], healthDataConsent: true, ...over }
+  return { step: 2, age: null, gender: null, heightCm: null, weightKg: null, intent: 'meals', level: 'intermediate', trainingYears: null, trainedBefore: 'years', totalMonths: 'y1_3', lastTrained: 'now', consistency: 'steady', goal: 'cut', days: 4, duration: 45, place: 'gym', pref: 'mixed', hasInjury: true, injuries: ['knee'], healthDataConsent: true, ...over }
 }
 
-/** حالة تحقّق كاملة — الأرقام أُزيحت بعد إدراج خطوة «النية والمستوى» (1). */
+/**
+ * حالة تحقّق كاملة — الأرقام أُزيحت مرّتين: بعد إدراج «النية والمستوى» (1)،
+ * ثم بعد إدراج «تاريخ التدريب» (2) في [CTO-QAE-022] M1a. فالهدف ٣ والتدريب ٤
+ * والمعدّات ٥.
+ */
 const V = (over: Partial<OnboardingV2Draft> = {}) => ({
   age: 30, gender: 'male' as const, heightCm: 180, weightKg: 90,
   intent: 'meals' as const, level: 'intermediate' as const, trainingYears: null,
+  trainedBefore: 'years' as const, totalMonths: 'y1_3' as const, lastTrained: 'now' as const, consistency: 'steady' as const,
   goal: 'cut' as const, days: 4, duration: 45,
   place: null, pref: null, healthDataConsent: true,
   ...over,
@@ -49,18 +54,23 @@ console.log('\n① تحقّق الخطوات (رسالة خاصة بكل خطو�
   check('خطوة النية بلا نية → «intentLevel»', validateStep(1, V({ intent: null })) === 'intentLevel')
   check('خطوة النية بلا مستوى → «intentLevel»', validateStep(1, V({ level: null })) === 'intentLevel')
   check('النية والمستوى معًا → صالحة', validateStep(1, V()) === null)
-  // Step 2 — goal required.
-  check('خطوة الهدف بلا هدف → «goal»', validateStep(2, V({ goal: null })) === 'goal')
-  check('خطوة الهدف مع الموافقة → صالحة', validateStep(2, V({ goal: 'bulk' })) === null)
-  check('canAdvance(2) يتبع الهدف', canAdvance(2, V()) === true)
-  // Step 3 — training defaults are always valid; an off-set value is caught.
-  check('خطوة التدريب بالقيم الافتراضية → صالحة', validateStep(3, V()) === null)
-  check('خطوة التدريب بقيمة أيام خارج المجموعة → «training»', validateStep(3, V({ days: 7 })) === 'training')
-  // Step 4 — place + pref required.
-  check('خطوة المعدات بلا مكان → «equipment»', validateStep(4, V({ pref: 'mixed' })) === 'equipment')
-  check('خطوة المعدات بلا تفضيل → «equipment»', validateStep(4, V({ place: 'gym' })) === 'equipment')
-  check('خطوة المعدات بمكان وتفضيل → صالحة', validateStep(4, V({ place: 'gym', pref: 'mixed' })) === null)
-  check('canAdvance(4) ناقص → false', canAdvance(4, V({ place: 'gym' })) === false)
+  // Step 2 — training history ([CTO-QAE-022] M1a).
+  check('خطوة التاريخ بلا جواب → «trainingHistory»', validateStep(2, V({ trainedBefore: null })) === 'trainingHistory')
+  check('«ما تمرّنت» وحدها تُكمل الخطوة', validateStep(2, V({ trainedBefore: 'never', totalMonths: null, lastTrained: null, consistency: null })) === null)
+  check('«تمرّنت» بلا متابعات → «trainingHistory»', validateStep(2, V({ trainedBefore: 'years', totalMonths: null, lastTrained: null, consistency: null })) === 'trainingHistory')
+  check('canAdvance(2) يتبع التاريخ', canAdvance(2, V()) === true)
+  // Step 3 — goal required.
+  check('خطوة الهدف بلا هدف → «goal»', validateStep(3, V({ goal: null })) === 'goal')
+  check('خطوة الهدف مع الموافقة → صالحة', validateStep(3, V({ goal: 'bulk' })) === null)
+  check('canAdvance(3) يتبع الهدف', canAdvance(3, V()) === true)
+  // Step 4 — training defaults are always valid; an off-set value is caught.
+  check('خطوة التدريب بالقيم الافتراضية → صالحة', validateStep(4, V()) === null)
+  check('خطوة التدريب بقيمة أيام خارج المجموعة → «training»', validateStep(4, V({ days: 7 })) === 'training')
+  // Step 5 — place + pref required.
+  check('خطوة المعدات بلا مكان → «equipment»', validateStep(5, V({ pref: 'mixed' })) === 'equipment')
+  check('خطوة المعدات بلا تفضيل → «equipment»', validateStep(5, V({ place: 'gym' })) === 'equipment')
+  check('خطوة المعدات بمكان وتفضيل → صالحة', validateStep(5, V({ place: 'gym', pref: 'mixed' })) === null)
+  check('canAdvance(5) ناقص → false', canAdvance(5, V({ place: 'gym' })) === false)
 }
 
 console.log('\n② مسار إعادة المحاولة (آلة حالة الإنهاء)')
@@ -123,6 +133,12 @@ console.log('\n⑤ افتراضيات أول تشغيل')
     intent: null,
     level: null,
     trainingYears: null,
+    // تاريخ التدريب يبدأ **فارغًا** — لا «never» مفترضة ولا دلو افتراضي.
+    // هذا السطر هو ما يمنع حشوًا صامتًا يجعل كل مستخدم جديد يبدو مصنَّفًا.
+    trainedBefore: null,
+    totalMonths: null,
+    lastTrained: null,
+    consistency: null,
     goal: null,
     days: 4,
     duration: 45,

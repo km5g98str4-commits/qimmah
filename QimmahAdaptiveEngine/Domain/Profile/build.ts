@@ -5,7 +5,7 @@
 // canonical profile.
 
 import { evaluatePredicate } from '../Decisions/predicates'
-import { classifyExperience, deriveCapabilities } from '../ProfileClassification/classify'
+import { classifyExperience, deriveCapabilities, deriveReturningStatus } from '../ProfileClassification/classify'
 import type { FactMap, FactValue } from '../Evidence/model'
 import type { ConflictDef } from '../Questions/model'
 import { ordinalCompare } from '../Shared/numeric'
@@ -89,11 +89,9 @@ export function buildAthleteProfile(
   // ── Training ────────────────────────────────────────────────────────────────
   const exp = classifyExperience(facts)
   const trainedBefore = str(facts, 'trainedBefore')
-  const returningStatus: ReturningStatus =
-    trainedBefore === null ? 'unknown'
-    : trainedBefore === 'never' ? 'neverTrained'
-    : exp.planningClassification === 'returning' ? 'returning'
-    : 'active'
+  // Single source for the rule — shared with the host shadow adapter so the two
+  // can never disagree about who is "returning" ([CTO-QAE-022] M1a).
+  const returningStatus: ReturningStatus = deriveReturningStatus(facts, exp)
   note('training.experienceBand', ['consistency', 'exerciseFamiliarity', 'gymConfidence', 'knowsProgression', 'lastTrained', 'programExperience', 'selfLevel', 'totalMonths', 'tracksSets', 'trainedBefore', 'trainingAgeHonest'],
     'four-axis classification, integer-canonical (EXPERIENCE-MODEL.md); never a single collapsed level')
   note('training.returningStatus', ['lastTrained', 'totalMonths', 'trainedBefore'], 'returning iff long layoff ∧ real history (characterized)')

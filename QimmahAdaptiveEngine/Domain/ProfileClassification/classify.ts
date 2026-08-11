@@ -11,6 +11,7 @@
 
 import { divRoundHalfAwayFromZero, clampInt } from '../Shared/numeric'
 import type { FactValue } from '../Evidence/model'
+import type { ReturningStatus } from '../Profile/model'
 
 export type FactMapIn = Readonly<Record<string, FactValue>>
 
@@ -132,6 +133,36 @@ export function classifyExperience(facts: FactMapIn): ExperienceModel {
     scoreCenti: overall.scoreCenti,
     confidenceCenti,
   }
+}
+
+/**
+ * ── Returning status ────────────────────────────────────────────────────────
+ *
+ * Extracted from `buildAthleteProfile` in [CTO-QAE-022] M1a so the host shadow
+ * adapter derives it from the SAME rule instead of restating it. A second copy
+ * of this ladder in the host is exactly how "never trained" would eventually
+ * drift into "returning" on one side only.
+ *
+ * The order of the arms is the contract, and each arm is load-bearing:
+ *   1. no `trainedBefore` evidence at all      -> 'unknown'      (absence ≠ never)
+ *   2. `trainedBefore === 'never'`             -> 'neverTrained' (a POSITIVE state)
+ *   3. planning classification says returning  -> 'returning'
+ *   4. otherwise                               -> 'active'
+ *
+ * Arm 2 sits BEFORE arm 3 deliberately, and it is the second of two independent
+ * guarantees that a never-trained athlete can never be labelled returning — the
+ * first being `classifyExperience`, where `trainedBefore === 'never'` pins
+ * `planning` to 'complete_beginner' and the returning promotion is gated on
+ * `planning !== 'complete_beginner'`. Either guard alone is sufficient; both are
+ * kept because this is a safety-relevant misclassification (a returning athlete
+ * gets a conservative ramp that a true beginner must not be assumed to need,
+ * and vice versa).
+ */
+export function deriveReturningStatus(facts: FactMapIn, exp: ExperienceModel): ReturningStatus {
+  const trainedBefore = typeof facts['trainedBefore'] === 'string' ? (facts['trainedBefore'] as string) : null
+  if (trainedBefore === null) return 'unknown'
+  if (trainedBefore === 'never') return 'neverTrained'
+  return exp.planningClassification === 'returning' ? 'returning' : 'active'
 }
 
 // ── Equipment capabilities ([CTO-QAE-005] §6): NEVER "full gym = machines only" ─
