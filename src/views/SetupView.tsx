@@ -14,6 +14,8 @@ interface SetupViewProps {
   onClose: (completed?: boolean) => void
   /** مخرج طوارئ: يُعلّم الإعداد مكتملًا ويدخل اللوحة فورًا (زرّ التخطّي الدائم + حاجز الأخطاء). */
   onForceComplete?: () => void
+  /** الدخول من شاشة التسليم — كالمخرج لكن بلا إشعار نجاح مكرّر (حزمة ٤). */
+  onEnterFromHandoff?: () => void
   initialStep?: number
   mode?: 'onboarding' | 'advanced'
 }
@@ -55,8 +57,9 @@ class SetupErrorBoundary extends Component<{ onEscape: () => void; children: Rea
 }
 
 /** عرض الإعداد — باني الخطة (الجوال) عند أول مرة، ومحرّرات متقدمة عند التعديل. */
-export function SetupView({ onClose, onForceComplete, initialStep, mode = 'onboarding' }: SetupViewProps) {
+export function SetupView({ onClose, onForceComplete, onEnterFromHandoff, initialStep, mode = 'onboarding' }: SetupViewProps) {
   const escape = onForceComplete ?? (() => onClose(true))
+  const enterFromHandoff = onEnterFromHandoff ?? escape
   const { user } = useAuth()
 
   // [CTO-009/WP-2] مزلاج التسليم — **يعيش هنا لا داخل `OnboardingV2`**.
@@ -81,7 +84,7 @@ export function SetupView({ onClose, onForceComplete, initialStep, mode = 'onboa
       <PlanHandoffScreen
         lang={getLanguage()}
         signedIn={user !== null}
-        onEnter={escape}
+        onEnter={enterFromHandoff}
         plan={artifacts?.plan}
         goalType={artifacts?.goalType}
         rationale={artifacts?.rationale}

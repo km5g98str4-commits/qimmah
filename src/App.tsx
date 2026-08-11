@@ -314,6 +314,25 @@ export default function App() {
     setShowSuccess(true)
   }, [uid])
 
+  /**
+   * [QIM-WEB-FOUNDER-UX-004/حزمة ٤] الدخول من شاشة التسليم — **بلا إشعار نجاح**.
+   *
+   * سببان، وكلاهما مقيس:
+   *   • تكرار: التسليم عرض للتوّ «جهزنا خطتك» بخطته وأرقامها. إشعارٌ يقول
+   *     «تم تجهيز خطتك» بعده مباشرةً يعيد الخبر نفسه في اللحظة نفسها.
+   *   • تداخل: الإشعار بطاقة عائمة ٦ ثوانٍ. رفعناها في الحزمة ١ فوق شريط
+   *     التنقّل، لكنها تبقى فوق **المحتوى**؛ وقِيس أنها تبتلع نقر «أضف» في
+   *     التغذية خلال تلك الثواني — وهو بالضبط شكل العطل الذي وصفه المؤسس:
+   *     «يشتغل مرة وما يشتغل مرة». نافذة ستّ ثوانٍ تُنتج تقطّعًا لا يُفسَّر.
+   *
+   * مخرج الطوارئ (`skipOnboarding`) يبقى بإشعاره: هناك لم يرَ المستخدم تسليمًا
+   * أصلًا، فالإشعار خبره الوحيد.
+   */
+  const enterFromHandoff = useCallback(() => {
+    markCompleted(uid)
+    setView(guardRoute('dashboard', uid))
+  }, [uid])
+
   // تنقّل عام — يمرّ عبر الحراسة حتى لا تُفتح لوحة بلا إعداد.
   const navigate = (v: AppRoute) => {
     if (v === 'setup') openSetup()
@@ -415,7 +434,15 @@ export default function App() {
     // النمط يُشتقّ من حالة الحساب وقت العرض: مكتمل → محرّرات متقدّمة (تعديل الخطة)؛
     // غير مكتمل → معالج الإعداد الأولي (وزنه/هدفه هو).
     const onboarded = isOnboardingComplete(uid)
-    content = <V.SetupView onClose={closeSetup} onForceComplete={skipOnboarding} initialStep={0} mode={onboarded ? 'advanced' : 'onboarding'} />
+    content = (
+      <V.SetupView
+        onClose={closeSetup}
+        onForceComplete={skipOnboarding}
+        onEnterFromHandoff={enterFromHandoff}
+        initialStep={0}
+        mode={onboarded ? 'advanced' : 'onboarding'}
+      />
+    )
   } else if (view === 'settings') {
     content = (
       <V.SettingsView

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Icon } from '@/components/Icon'
 import { ProgressBar } from '@/components/ProgressBar'
 import { QuickMealLogger } from '@/components/nutrition/QuickMealLogger'
@@ -45,6 +45,36 @@ export function NutritionView({ lang }: NutritionViewProps) {
   const d = nutritionScreenStrings[lang]
   const { state, totals, addWater, removeLog } = useNutritionToday()
   const np = customization.nutritionPlan
+
+  /**
+   * [QIM-WEB-FOUNDER-UX-004/حزمة ٤] استهلاك نيّة التسجيل السريع — **في المسار الحيّ**.
+   *
+   * العطل البنيوي: `App.tsx` يكتب `qimmah:quick-log-intent` ويُطلق
+   * `qimmah:quick-log`، والمستمع الوحيد كان في `NutritionV2` **غير المركَّب**.
+   * فالضغط على «سجّل وجبة» في «اليوم» ينقل إلى التغذية ولا يفتح شيئًا، وتبقى
+   * النيّة عالقة في `sessionStorage` بلا مستهلك — أحد أوضح مصادر «ضغطت وما صار شي».
+   *
+   * ثلاث ضمانات: نيّة واحدة = فتحة واحدة · تُمسح **قبل** الفتح فلا يعيدها
+   * التحديث إلى الأبد · وقيمة غير معروفة تُمسح وتُتجاهَل بلا رمي.
+   */
+  const [autoOpen, setAutoOpen] = useState<MealSlot | null>(null)
+  useEffect(() => {
+    const consume = (raw: string | null) => {
+      if (raw === null) return
+      // المسح أولًا: أي خروج بعده (قيمة مجهولة، أو حجب Premium) لا يترك نيّة معلّقة.
+      try { window.sessionStorage.removeItem('qimmah:quick-log-intent') } catch { /* تخزين غير متاح */ }
+      if (raw !== 'meal' && raw !== 'water') return
+      if (raw === 'meal') setAutoOpen('breakfast')
+    }
+    try { consume(window.sessionStorage.getItem('qimmah:quick-log-intent')) } catch { /* تخزين غير متاح */ }
+    const onEvent = (e: Event) => {
+      const detail = (e as CustomEvent<string>).detail
+      try { window.sessionStorage.removeItem('qimmah:quick-log-intent') } catch { /* تخزين غير متاح */ }
+      if (detail === 'meal') setAutoOpen('breakfast')
+    }
+    window.addEventListener('qimmah:quick-log', onEvent)
+    return () => window.removeEventListener('qimmah:quick-log', onEvent)
+  }, [])
 
   const targetCalories = np.targetCalories || customization.targets.targetCalories || customization.targets.maintenanceCalories || 2000
   const targetProtein = np.targetProtein || customization.targets.proteinGrams || 120
@@ -96,8 +126,21 @@ export function NutritionView({ lang }: NutritionViewProps) {
           </div>
         </div>
 
-        {/* ملخّص الماكروز + الماء — حلقات واضحة */}
-        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {/*
+          [QIM-WEB-FOUNDER-UX-004/حزمة ٤] عمودان دائمًا — **لا `sm:grid-cols-4`.**
+
+          العطل مقيس: الشبكة كانت تتحوّل إلى أربعة أعمدة عند عرض **النافذة**
+          ≥640بكسل، بينما الحاوية مقفولة على `app-container` = `max-w-md`
+          (448بكسل). فالبطاقة تصير ≈95بكسل، ويبقى للوسم ١٣بكسل مقابل نصّ
+          ٣٠بكسل ⇒ «بروتين» تُقصّ إلى حرف واحد. قِيس عند ٨٩٤ و١٢٨٠ (وهو ما
+          أبلغ عنه QA بـ«حتى ~894px»)، ولم يظهر عند ٣٢٠ إطلاقًا.
+
+          السبب أن نقطة التوقّف تسأل عن **النافذة** والحاوية لا تتبع النافذة.
+          فأُزيلت النقطة بدل مطاردتها بأرقام: عمودان يعطيان كل وسم عرضًا كافيًا
+          عند كل عرض ممكن للحاوية، والأربع بطاقات تصير ٢×٢ — تخطيط يتبع المساحة
+          المتاحة فعلًا لأنه لا يسأل عن غيرها.
+        */}
+        <div className="mt-4 grid grid-cols-2 gap-3">
           <MacroCard label={t.protein} eaten={round(totals.protein)} target={targetProtein} unit={d.gramsUnit} color="#22c55e" />
           <MacroCard label={t.carbs} eaten={round(totals.carbs)} target={targetCarbs} unit={d.gramsUnit} color="#0ea5e9" />
           <MacroCard label={t.fat} eaten={round(totals.fat)} target={targetFat} unit={d.gramsUnit} color="#e0941f" />
@@ -123,6 +166,8 @@ export function NutritionView({ lang }: NutritionViewProps) {
                 key={slot.id}
                 lang={lang}
                 slot={slot}
+                autoOpen={autoOpen === slot.id || (autoOpen === 'breakfast' && slot.id === mealSlots[0].id)}
+                onAutoOpenHandled={() => setAutoOpen(null)}
                 items={state.log.filter((e) => slotForEntry(e.meal, mealSlots) === slot.id)}
                 targetCalories={targetCalories}
                 targetProtein={targetProtein}
@@ -231,6 +276,8 @@ function MealCard({
   targetCalories,
   targetProtein,
   onRemove,
+  autoOpen = false,
+  onAutoOpenHandled,
 }: {
   lang: Lang
   slot: { id: MealSlot; ar: string; en: string; icon: string }
@@ -238,6 +285,9 @@ function MealCard({
   targetCalories: number
   targetProtein: number
   onRemove: (id: string) => void
+  /** نيّة «سجّل وجبة» القادمة من «اليوم» — تُفتح مرّة واحدة ثم تُستهلك. */
+  autoOpen?: boolean
+  onAutoOpenHandled?: () => void
 }) {
   const t = getStrings(lang).nutrition
   const d = nutritionScreenStrings[lang]
@@ -246,6 +296,19 @@ function MealCard({
   // نصّ المؤسس: «يضغط أضف ← يظهر له Premium gate»، لا أن نطرده من التغذية.
   const { guard } = useAccess()
   const toggleAdding = guard('nutrition.addFood', () => setAdding((v) => !v))
+  /**
+   * النيّة تمرّ من **نفس الحارس** الذي يمرّ منه الزرّ: مستخدم المعاينة يرى بوّابة
+   * Premium لا لوحة تسجيل، فلا يفتح مسار الطفرة من باب خلفي. والاستهلاك يقع
+   * مرّة واحدة مهما تكرّر الرسم.
+   */
+  const openFromIntent = guard('nutrition.addFood', () => setAdding(true))
+  useEffect(() => {
+    if (!autoOpen) return
+    onAutoOpenHandled?.()
+    openFromIntent()
+    // مرّة واحدة لكل نيّة — التبعيات المستقرّة مقصودة.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoOpen])
   const cals = items.reduce((a, e) => a + e.calories, 0)
   const prot = items.reduce((a, e) => a + e.protein, 0)
 
