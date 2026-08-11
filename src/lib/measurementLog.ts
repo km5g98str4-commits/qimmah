@@ -1,6 +1,7 @@
 import type { MeasurementLog } from '@/types/progress'
 import { getMeasurementLogs, saveMeasurementLog as saveMeasurementLogHistory, setMeasurementLogs } from './historyStore'
 import { getDayStamp } from './today'
+import { assertPaid } from '@/lib/access/guard'
 
 export function loadLogs(): MeasurementLog[] {
   // historyStore is the canonical source hydrated by syncService. Reading the
@@ -14,6 +15,12 @@ export function saveLogs(logs: MeasurementLog[]): void {
 
 /** يضيف سجلًّا جديدًا (الأحدث أولًا) ويعيد القائمة المحدّثة. */
 export function addLog(log: MeasurementLog): MeasurementLog[] {
+  // [QIM-WEB-FOUNDER-UX-003/حزمة ٢] تسجيل الوزن/القياسات فعل مدفوع.
+  // **ولم يُحرَس `saveLogs`/`setMeasurementLogs` عمدًا**: ذاك مسار استعادة نسخة
+  // المستخدم الاحتياطية وبيانات المزامنة — حجبُه يمنع مالك البيانات من استرجاع
+  // ما يملكه أصلًا، وهو عقاب لا حماية. الحدّ هنا: **الإنشاء الجديد** مدفوع،
+  // واسترجاع القديم حقّ.
+  assertPaid('progress.logMeasurement')
   return saveMeasurementLogHistory(log).slice(0, 200)
 }
 

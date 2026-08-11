@@ -19,6 +19,7 @@ import { runMigration } from '@/lib/dataOwnership'
 // الكاتب الواحد نفسه، فالترحيل اليومي لا يفقد تفصيل الأمس بعد الآن.
 // (دورة استيراد محسوبة: nutritionHistory يستدعي دوالنا داخل دوالّه فقط — آمنة.)
 import { recordLedgerDay } from '@/lib/nutritionHistory'
+import { assertPaid } from '@/lib/access/guard'
 
 export const NUTRITION_V2_KEY = 'qimmah:nutrition:v2'
 export type MealSlot = 'breakfast' | 'lunch' | 'dinner' | 'snack'
@@ -209,23 +210,30 @@ function persist(day: DayLog): DayLog {
 
 /** يحذف صنفًا من سجل اليوم — مصدر واحد، مع إشعار المشتركين. */
 export function removeFoodFromDay(id: string): DayLog {
+  // [QIM-WEB-FOUNDER-UX-003/حزمة ٢] الدفاع الثاني في طبقة الكتابة — الكاتب
+  // الواحد هو الموضع الصحيح للحارس: كل مسارات الواجهة تمرّ من هنا، فلا يحتاج
+  // كل زرّ أن يتذكّر الفحص، ولا ينفع تجاوزه باستدعاء المعالج يدويًا (§25).
+  assertPaid('nutrition.removeFood')
   const day = loadNutritionDay()
   return persist({ ...day, date: getDayStamp(), foods: day.foods.filter((f) => f.id !== id) })
 }
 
 export function addFoodToDay(food: LoggedFood): DayLog {
+  assertPaid('nutrition.addFood')
   const day = loadNutritionDay()
   return persist({ ...day, date: getDayStamp(), foods: [...day.foods, food] })
 }
 
 /** (P7) يستبدل صنفًا بمعرّفه في سجل اليوم (تعديل كمية/ماكروز) — نفس مسار الكاتب الواحد. */
 export function updateFoodInDay(food: LoggedFood): DayLog {
+  assertPaid('nutrition.addFood')
   const day = loadNutritionDay()
   return persist({ ...day, date: getDayStamp(), foods: day.foods.map((f) => (f.id === food.id ? food : f)) })
 }
 
 /** يضيف ماءً (مل) لليوم الحالي — يُثبّت التاريخ ويُراكم على المسجّل سابقًا. */
 export function addWaterToDay(ml: number): DayLog {
+  assertPaid('nutrition.water')
   const day = loadNutritionDay()
   return persist({ ...day, date: getDayStamp(), waterMl: Math.max(0, day.waterMl + Math.round(ml)) })
 }

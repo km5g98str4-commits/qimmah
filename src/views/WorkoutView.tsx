@@ -32,6 +32,7 @@ import { weeklyAdherenceStreak } from '@/lib/streaks'
 import { getExercise } from '@/data/exercises'
 import type { WorkoutSession } from '@/lib/workoutSessions'
 import type { PlanDay } from '@/types/workout'
+import { useAccess } from '@/lib/access/useAccess'
 
 interface FinishSummary {
   session: WorkoutSession
@@ -49,6 +50,7 @@ interface WorkoutViewProps {
 export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
   const { customization } = useCustomization()
   const auth = useAuth()
+  const { guard: guardPaid } = useAccess()
   const userId = auth.user?.id ?? null
   const autoPlan = customization.workoutPlan
 
@@ -110,7 +112,10 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
     return { ...day, exercises: day.exercises.slice(0, keep) }
   }
 
-  const startDay = (rawDay: PlanDay) => {
+  // [QIM-WEB-FOUNDER-UX-003/حزمة ٢] الطبقة الأولى — تجربة نظيفة: بوّابة Premium
+  // بدل استثناء. الطبقة الثانية (`assertPaid` داخل `saveActiveWorkout`) هي التي
+  // تصمد أمام الالتفاف؛ هذه تجعل الرفض مفهومًا لا مخيفًا.
+  const startDay = guardPaid('workout.start', (rawDay: PlanDay) => {
     const day = applyEasyIfActive(rawDay)
     setResumeFrom(undefined)
     // [CTO-68] الحدث ١٠ — بدء تمرين، لحظة دخول وضع الجلسة.
@@ -118,7 +123,7 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
     // [CTO-70] البند ١ — بدء التمرين هو «الإحماء القصير» المقترح كأول انتصار.
     completeFirstWin('warmup')
     setActiveDay(day)
-  }
+  })
 
   /** يوم الجلسة المعلّقة كما هو في الخطة الحالية — القرار على المعرّف لا على الاسم. */
   const resumeDay = pendingResume ? plan.days.find((dd) => dd.id === pendingResume.dayId) : undefined
@@ -164,11 +169,11 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
     setGuard({ kind: 'discard', sets })
   }
 
-  const startEmpty = () => {
+  const startEmpty = guardPaid('workout.startEmpty', () => {
     // تمرين فارغ = بدء جلسة أيضًا (بلا تمارين من الخطة).
     trackLocal('workout_session_started', { exercises: 0 })
     setActiveDay({ id: `empty-${Date.now()}`, nameAr: d.emptyWorkoutNameAr, nameEn: d.emptyWorkoutNameEn, exercises: [] })
-  }
+  })
 
   /**
    * الخروج من وضع الجلسة بلا إنهاء — [CTO-68] الحدث ١٢ بموضع القطع «session».
@@ -458,13 +463,13 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
           <CustomPlanBuilder
             lang={lang}
             initialPlan={builderOpen === 'edit' ? customRec?.plan : undefined}
-            onSave={(p) => {
+            onSave={guardPaid('plan.saveEdit', (p) => {
               saveCustomPlan(userId, p)
               refreshCustom()
               setBuilderOpen(null)
               setSavedToast(true)
               window.setTimeout(() => setSavedToast(false), 2200)
-            }}
+            })}
             onCancel={() => setBuilderOpen(null)}
           />
         </div>

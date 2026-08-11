@@ -12,6 +12,7 @@ import { getDayStamp } from './today'
 import { useIsDemo } from './demoMode'
 import { getNutritionLog, saveNutritionLog } from './historyStore'
 import { completeFirstWin } from './firstWin'
+import { assertPaid } from '@/lib/access/guard'
 import {
   addFoodToDay,
   addWaterToDay,
@@ -176,6 +177,10 @@ export function useNutritionToday() {
         notify()
         return
       }
+      // [QIM-WEB-FOUNDER-UX-003/حزمة ٢] حارس هنا لا في `saveNutritionLog`:
+      // ذاك كاتب تاريخ **مشترك** مع الاستيراد والمزامنة، وحجبه يمنع المستخدم من
+      // استعادة بياناته. الحدّ نفسه المطبَّق على القياسات.
+      assertPaid('nutrition.toggleMeal')
       const date = getDayStamp()
       const doneMeals = { ...(getNutritionLog(date)?.doneMeals ?? {}) }
       doneMeals[mealId] = !doneMeals[mealId]

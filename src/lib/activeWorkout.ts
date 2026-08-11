@@ -11,6 +11,7 @@
 //     فقط ولا يُبنى عليها منطق (الصياغة قد تتغيّر أو تُترجَم).
 
 import { ownerKey } from '@/features/customPlan'
+import { assertPaid } from '@/lib/access/guard'
 
 export const ACTIVE_WORKOUT_KEY = 'qimmah:activeWorkout:v1'
 
@@ -145,6 +146,11 @@ export function saveActiveWorkout(
   userId: string | null | undefined,
   value: Omit<ActiveWorkout, 'version' | 'updatedAt'>,
 ): void {
+  // [QIM-WEB-FOUNDER-UX-003/حزمة ٢] الدفاع الثاني — في **طبقة الكتابة** لا في
+  // الواجهة. حراسة الزرّ وحدها تسقط أمام استدعاء المعالج يدويًا أو مسار hash
+  // مباشر (مطلب المؤسس §25). هنا لا تُكتب جلسة تمرين بلا استحقاق مهما كان
+  // الطريق. والرمي مقصود: الابتلاع الصامت يعرض نجاحًا لم يقع (الميثاق §5).
+  assertPaid('workout.logSet')
   const reg = loadRegistry()
   reg[ownerKey(userId)] = { ...value, version: VERSION, updatedAt: new Date().toISOString() }
   saveRegistry(reg)

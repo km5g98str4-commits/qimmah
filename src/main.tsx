@@ -6,6 +6,7 @@ import { SplashScreen } from './components/SplashScreen'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { CustomizationProvider } from './lib/customizationContext'
 import { AuthProvider } from './lib/authContext'
+import { EntitlementProvider } from './lib/access/provider'
 import { LanguageProvider } from './i18n'
 import { registerStepBridge } from './lib/stepCounter'
 import { initTheme } from './lib/appPreferences'
@@ -67,10 +68,14 @@ createRoot(root).render(
     <ErrorBoundary>
       <LanguageProvider>
         <AuthProvider>
-          <CustomizationProvider>
-            <App />
-            <SplashScreen />
-          </CustomizationProvider>
+          {/* الاستحقاق فوق التخصيص: بوّابة Premium تُقرأ من كل شاشة، وطبقة
+              المخازن تقرأ مخزنه العادي حتى خارج شجرة React. */}
+          <EntitlementProvider>
+            <CustomizationProvider>
+              <App />
+              <SplashScreen />
+            </CustomizationProvider>
+          </EntitlementProvider>
         </AuthProvider>
       </LanguageProvider>
     </ErrorBoundary>

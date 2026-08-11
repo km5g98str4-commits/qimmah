@@ -9,6 +9,7 @@ import { nutritionScreenStrings } from '@/i18n/dict/nutritionScreen'
 import type { Lang } from '@/lib/appPreferences'
 import { trackLocal } from '@/lib/tracking'
 import { cn } from '@/lib/cn'
+import { useAccess } from '@/lib/access/useAccess'
 
 // يُحمَّل عند الحاجة فقط — مكتبة مسح الباركود ثقيلة ولا يلزم تحميلها إلا عند فتح الماسح.
 const ScanFoodPanel = lazy(() => import('@/features/barcode/ScanFoodPanel').then((m) => ({ default: m.ScanFoodPanel })))
@@ -35,7 +36,9 @@ function round(n: number): number {
 export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMeal, embedded = false, onLogged }: QuickMealLoggerProps) {
   const t = getStrings(lang).nutrition
   const d = nutritionScreenStrings[lang]
-  const { state, totals, addLog, removeLog } = useNutritionToday()
+  const { state, totals, addLog, removeLog: rawRemoveLog } = useNutritionToday()
+  const { guard } = useAccess()
+  const removeLog = guard('nutrition.removeFood', rawRemoveLog)
 
   const [open, setOpen] = useState(embedded)
   const [tab, setTab] = useState<Tab>('search')
@@ -120,7 +123,7 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
     setGrams(String(s.servingGrams))
   }
 
-  const addSelected = () => {
+  const addSelected = guard('nutrition.addFood', () => {
     if (!selected) return
     const name = lang === 'en' ? selected.nameEn : selected.nameAr
     const sizeLabel = activeSize ? ` (${lang === 'en' ? activeSize.labelEn : activeSize.labelAr})` : ''
@@ -141,14 +144,14 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
     setQuery('')
     setGrams('')
     onLogged?.()
-  }
+  })
 
   // سعرات/بروتين الإضافة الحالية (محصورة ضمن الحدود — لا قيم سالبة أو مستحيلة)
   const cal = parseSafeNumber(cCal, { min: 0, max: NUM_LIMITS.quickCalories.max })
   const prot = parseSafeNumber(cProt, { min: 0, max: NUM_LIMITS.quickProtein.max })
   const canAddCustom = cal > 0 || prot > 0
 
-  const addCustom = () => {
+  const addCustom = guard('nutrition.quickAdd', () => {
     if (!canAddCustom) return
     addLog({
       label: cName.trim() || d.quickAddLabel,
@@ -168,7 +171,7 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
     setCCarb('')
     setCFat('')
     onLogged?.()
-  }
+  })
 
   return (
     <div className={embedded ? '' : 'card p-5'}>

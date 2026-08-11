@@ -8,6 +8,7 @@ import { inRange, NUM_LIMITS, NUM_MESSAGES, sanitizeNumericInput } from '@/lib/v
 import { getStrings } from '@/config/strings'
 import { nutritionScreenStrings } from '@/i18n/dict/nutritionScreen'
 import type { Lang } from '@/lib/appPreferences'
+import { useAccess } from '@/lib/access/useAccess'
 
 interface NutritionViewProps {
   lang: Lang
@@ -241,6 +242,10 @@ function MealCard({
   const t = getStrings(lang).nutrition
   const d = nutritionScreenStrings[lang]
   const [adding, setAdding] = useState(false)
+  // [QIM-WEB-FOUNDER-UX-003/حزمة ٢] «أضف» نفسه يقود إلى البوّابة في المعاينة —
+  // نصّ المؤسس: «يضغط أضف ← يظهر له Premium gate»، لا أن نطرده من التغذية.
+  const { guard } = useAccess()
+  const toggleAdding = guard('nutrition.addFood', () => setAdding((v) => !v))
   const cals = items.reduce((a, e) => a + e.calories, 0)
   const prot = items.reduce((a, e) => a + e.protein, 0)
 
@@ -263,7 +268,7 @@ function MealCard({
         </div>
         <button
           type="button"
-          onClick={() => setAdding((v) => !v)}
+          onClick={toggleAdding}
           aria-expanded={adding}
           className="flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-xl border border-line bg-surface px-3 text-xs font-bold text-ink-700 transition-colors hover:bg-beige"
         >
@@ -310,9 +315,11 @@ function MealCard({
 
 
 /** لوحة الماء — +250/+500 + إدخال كمية مخصّصة (50–3000 مل). */
-function WaterPanel({ lang, waterMl, targetMl, onAdd }: { lang: Lang; waterMl: number; targetMl: number; onAdd: (ml: number) => void }) {
+function WaterPanel({ lang, waterMl, targetMl, onAdd: rawAdd }: { lang: Lang; waterMl: number; targetMl: number; onAdd: (ml: number) => void }) {
   const t = getStrings(lang).nutrition
   const d = nutritionScreenStrings[lang]
+  const { guard } = useAccess()
+  const onAdd = guard('nutrition.water', rawAdd)
   const [ml, setMl] = useState('')
   const { min, max } = NUM_LIMITS.waterMl
   const amount = Number(ml)

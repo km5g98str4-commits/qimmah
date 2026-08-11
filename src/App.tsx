@@ -6,6 +6,7 @@ import { AppLoading } from '@/components/AppLoading'
 import { VerifyEmailView } from '@/views/VerifyEmailView'
 import { RouteErrorBoundary } from '@/components/ErrorBoundary'
 import { DashboardSkeleton, ProgressSkeleton, TabSkeleton } from '@/components/ViewSkeletons'
+import { PremiumGate } from '@/components/PremiumGate'
 
 // باقي الشاشات مُقسّمة إلى حِزم عند الطلب (code-splitting) لتقليل حزمة الدخول الأولى.
 // تُبنى عبر مصنع لأنّ React.lazy يخزّن فشل الاستيراد نهائيًا — زرّ «أعد المحاولة» في
@@ -547,6 +548,9 @@ export default function App() {
 
           يحرس هذا: `test:bottom-overlay` (بنيوي) و`test:e2e:install-overlap` (متصفّح).
         */}
+        {/* بوّابة Premium — نداء واحد لكل فعل محجوب، من أي شاشة. تُرسم هنا مرّة
+            واحدة فلا يبني كل سطح نافذته الخاصّة فتتفرّق الرسالة. */}
+        <PremiumGate lang={LANG} />
       </RouteErrorBoundary>
     </>
   )

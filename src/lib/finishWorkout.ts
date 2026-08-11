@@ -7,6 +7,7 @@ import { classifyFinishedSession } from './workoutSessionEngine'
 import { detectSessionPRs, loadHistory, recordExercise, saveHistory, topCompletedWeight } from './exerciseHistory'
 import { getWorkoutSessions } from './historyStore'
 import { getStorageFailure, isStorageWritable, type WriteResult } from './safeStorage'
+import { assertPaid } from '@/lib/access/guard'
 
 /** رقم قياسي محقّق في الجلسة. */
 export interface SessionPR {
@@ -81,6 +82,10 @@ export interface FinishCommitResult {
  * `persistFinishedSession` تبقى كما هي (توافق رجعي كامل لمستدعيها الحاليين).
  */
 export function commitFinishedSession(session: WorkoutSession): FinishCommitResult {
+  // [QIM-WEB-FOUNDER-UX-003/حزمة ٢] الحارس **قبل** الـtry لا داخله: الكتلة أدناه
+  // تلتقط كل رمي وتترجمه إلى «فشل حفظ». فلو وُضع الحارس داخلها لظهر المنع
+  // للمستخدم رسالةَ تخزين معطوب — كذبٌ عن سبب حقيقي. الرفض يصعد باسمه.
+  assertPaid('workout.finish')
   const failureBefore = getStorageFailure()
   let prs: SessionPR[] = []
   let threw = false
