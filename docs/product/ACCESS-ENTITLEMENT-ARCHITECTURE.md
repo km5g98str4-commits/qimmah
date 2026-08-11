@@ -9,9 +9,9 @@
 |---|---|---|
 | P2 schema (tables, RLS, privileges, pepper) | ✅ **Implemented** | `supabase/migrations/20260806120001_entitlements_core.sql` · `…120003_table_privileges_hardening.sql` |
 | P2 RPCs (trial, redeem, claim, admin) | ✅ **Implemented** | `…20260806120002_entitlement_rpcs.sql` |
-| Durable revocation contract (`revocation_ledger`, `admin_unrevoke`) | ✅ **Implemented** | `…20260809120001_revocation_ledger.sql` |
-| Post-deletion recovery: Premium **and** eligible code grants | ✅ **Implemented** | `…20260809120002_code_grant_recovery.sql` |
-| Executable proofs on real Postgres | ✅ **Tested** — `test:entitlements` (131 checks) + `test:privileges` (38), both in `test:gate` | `scripts/db/entitlements-proof.mjs` · `scripts/db/privileges-proof.mjs` |
+| Durable revocation contract (`revocation_ledger`, `admin_unrevoke`) | ✅ **Implemented** — active ledger outranks every grant | `…20260809120001_revocation_ledger.sql` · `…120004_entitlement_security_remediation.sql` |
+| Post-deletion recovery: Premium **and** eligible code grants | ✅ **Implemented** — recovery retains the original provider | `…20260809120002_code_grant_recovery.sql` · `…120004_entitlement_security_remediation.sql` |
+| Executable proofs on real Postgres | ✅ **Tested** — `test:entitlements` (157 checks) + `test:privileges` (38), both in `test:gate` | `scripts/db/entitlements-proof.mjs` · `scripts/db/privileges-proof.mjs` |
 | Staging apply of the migrations | ⏳ **Not done** — founder-gated (live-DB migration) | — |
 | Privacy disclosure UI (§11.1) | 📋 **Deferred to P2b** — proposal written, no UI yet | [`P2B-PRIVACY-DISCLOSURE-PROPOSAL.md`](./P2B-PRIVACY-DISCLOSURE-PROPOSAL.md) |
 | P3–P7 (config, provider, gate, UI, admin scripts, Salla) | 📋 **Proposed only** — nothing started | §13 |
@@ -331,6 +331,8 @@ export type ProductId = typeof ACCESS_CONFIG.premium.id
 > | Ledgers with `email_hash` only | Ledgers also carry `hash_version`, `retention_policy`, `retain_until` metadata (**no deletion automation in P2** — the values are read, not executed) | Retention is a stated fact, not an unbounded silence |
 > | Revocation = `revoked_at` on the user row only | **`revocation_ledger`** — durable, no `user_id`, survives `delete_own_account()`; lift via `admin_unrevoke` is a mark (`lifted_at`), never a delete | The user-row flag alone meant revoke → delete account → re-register → full access back |
 > | Recovery = purchases only | `claim_pending_grants()` restores Premium **and eligible code grants** (original expiry, never extended; disabled codes and expired grants excluded) | `code_redemption_ledger` proves the right it was already used to deny |
+> | Provider/order replay could overwrite a purchase | A canonical `(provider, btrim(provider_order_id))` belongs to exactly one identity, compared with the purchase row's stamped `hash_version`; same-identity replay stays idempotent across pepper rotation and preserves both purchase and materialized-grant records, while a different identity fails `purchase_identity_mismatch` | A webhook/order replay must neither create a second grant nor silently rewrite money, timestamps, or provenance |
+> | Recovery labeled every purchase `salla` | `admin_grant_premium()` and `claim_pending_grants()` retain the durable `provider` as entitlement `source` | Manual grants must remain `manual`; Salla is never inferred |
 
 ## 7.1 ⚠️ Hard constraint discovered in the code
 
@@ -468,7 +470,7 @@ A stored `trialActive` becomes a **lie** the moment the clock passes `expires_at
 **Invariants enforced in SQL, never in the client:**
 
 1. `premiumActive` is terminal except for `revoked`.
-2. Precedence when several grants coexist: `revoked` > `premium` > `special` > `trial`.
+2. Precedence when several grants coexist: an active durable revocation ledger > `premium` > `special` > `trial`. No grant, recovery, code, or account re-registration may lift it; only `admin_unrevoke()` may do so.
 3. `trialActive → trialExpired` is **time-derived**, never a stored fact that can go stale.
 4. `start_trial()` is idempotent-by-refusal — a second call always fails, whatever local state claims.
 5. Trial length is **72 hours from `activated_at`**, not three calendar days.
@@ -479,9 +481,9 @@ A stored `trialActive` becomes a **lie** the moment the clock passes `expires_at
 |---|---|---|
 | `my_entitlement()` | `authenticated` | Effective state for `auth.uid()`. The only read path. |
 | `start_trial()` | `authenticated` | Requires `auth.users.email_confirmed_at is not null`. Rejects if `trial_ledger` already holds the email hash. Inserts trial + ledger atomically. |
-| `redeem_access_code(p_code text)` | `authenticated` | Normalize → hash with pepper → `select … for update` → check `enabled`, `now()` within `[starts_at, expires_at]`, `redemption_count < max_redemptions` → increment → write redemption + ledger + entitlement. One transaction. |
-| `claim_pending_grants()` | `authenticated` | On sign-in/verify: Premium from `purchase_ledger` first; else the best **eligible** code grant from `code_redemption_ledger` (ledger row exists · original window `redeemed_at + duration_days` still open · code still `enabled` · identity not revoked). Restores the **original** expiry — deletion is never an extension. Code exhaustion does not strip the owner's grant (the ledger row *is* the consumed slot); trials are deliberately not restored. **This is what makes buy-before-signup and post-deletion recovery work.** |
-| `admin_grant_premium(...)` · `admin_revoke(...)` · `admin_unrevoke(...)` · `admin_create_access_code(...)` | **`service_role` only** — revoked from `anon` and `authenticated` | Terminal/CI use only. Unreachable from any browser. `admin_revoke` writes the durable `revocation_ledger` (works even for a user with no entitlement row); `admin_unrevoke` is the only lift path and marks rather than deletes. |
+| `redeem_access_code(p_code text)` | `authenticated` | The same canonical contract as creation: `upper(btrim(code))`, at least 10 characters, and exactly `[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]` (24 ASCII letters without I/O + digits 2–9 = 32 symbols); then hash with pepper → `select … for update` → check `enabled`, `now()` within `[starts_at, expires_at]`, `redemption_count < max_redemptions` → increment → write redemption + ledger + entitlement. One transaction. |
+| `claim_pending_grants()` | `authenticated` | On sign-in/verify: Premium from `purchase_ledger` first, preserving its recorded `provider`; else the best **eligible** code grant from `code_redemption_ledger` (ledger row exists · original window `redeemed_at + duration_days` still open · code still `enabled` · identity not revoked). Restores the **original** expiry — deletion is never an extension. Code exhaustion does not strip the owner's grant (the ledger row *is* the consumed slot); trials are deliberately not restored. **This is what makes buy-before-signup and post-deletion recovery work.** |
+| `admin_grant_premium(...)` · `admin_revoke(...)` · `admin_unrevoke(...)` · `admin_create_access_code(...)` | **`service_role` only** — revoked from `anon` and `authenticated` | Terminal/CI use only. Unreachable from any browser. A provider/order replay is idempotent only for its original identity and never rewrites its immutable purchase data; another identity fails explicitly. `admin_revoke` writes the durable `revocation_ledger` (works even for a user with no entitlement row); even a later administrative grant remains effectively revoked. `admin_unrevoke` is the only lift path and marks rather than deletes. |
 
 Errors are generic (`invalid_code`, `code_exhausted`, `trial_already_used`) and mapped to bilingual copy through the existing `localizedAuthError` pattern — **no oracle** distinguishing "doesn't exist" from "disabled".
 
@@ -568,7 +570,7 @@ export interface EntitlementProvider {
 | 2 | Trial reuse via logout / reinstall / cleared storage | State is server-side, keyed on `auth.uid()` | **Closed** |
 | 3 | Trial reuse via delete-account → re-register | `trial_ledger` has **no `user_id`**, so `delete_own_account()` cannot wipe it | **Closed** |
 | 4 | Trial farming with many fresh emails | Email verification required + disposable-domain blocklist; per-IP rate limit is **not implementable in SQL** — §11.2 | ⚠️ **Open by nature.** Not fully closable without ID/payment verification. Accept and monitor. |
-| 5 | Code brute-force | Codes ≥10 chars over a 32-symbol alphabet + generic errors (implemented); request throttling is **an external blocker** — §11.2 | Low, bounded by entropy until §11.2 lands |
+| 5 | Code brute-force | Server-enforced codes ≥10 chars over `[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]` + generic redemption errors (implemented); request throttling is **an external blocker** — §11.2 | Low, bounded by entropy until §11.2 lands |
 | 6 | Code sharing beyond the limit | `max_redemptions` enforced under `for update`; ledger survives deletion | **Closed** |
 | 7 | Code enumeration via error messages | Single generic `invalid_code` for not-found / disabled / out-of-window | **Closed** |
 | 8 | Admin secret in the bundle | `service_role` never `VITE_*`; admin RPCs revoked from `authenticated` | **Closed** |
@@ -578,7 +580,7 @@ export interface EntitlementProvider {
 | 12 | Cross-account leakage | Existing four-policy RLS + `reconcileAccountScope()` locally | **Closed** |
 | 13 | Paying customer locked out offline | Cached `premiumActive` honored offline indefinitely — §9 | **Closed** |
 | 14 | Retained `email_hash` after account deletion | Peppered hash, no plaintext, narrow purpose | ⚠️ **Requires the disclosure below** |
-| 15 | Revoke → delete account → re-register → access back | **Closed** — `revocation_ledger` (no `user_id`) survives deletion; every self-service path checks it across all pepper versions; lift is `admin_unrevoke` only | **Closed** (proven in `test:entitlements` §9.6) |
+| 15 | Revoke → delete account → re-register → access back | **Closed** — `revocation_ledger` (no `user_id`) survives deletion; every self-service path **and later administrative grant** remains effectively revoked across all pepper versions; lift is `admin_unrevoke` only | **Closed** (proven in `test:entitlements` §9.6) |
 | 16 | Deleted account replays a special code | **Closed** — `code_redemption_ledger` blocks re-redemption; recovery restores only the original grant, never a fresh slot | **Closed** |
 
 ## 11.2 Rate limiting — explicit external blocker, not a SQL feature
@@ -691,7 +693,7 @@ Sized per charter §3 — small, independently reviewable, independently reverti
 |---|---|---|---|---|
 | **P0** | **Charter amendment** *(founder-gated, no product code)* | The 4 edits in §5, `AGENTS.md` + `CLAUDE.md` together per §1.5; plus the `product.ts:2` template-language cleanup | `AGENTS.md`, `CLAUDE.md`, `.claude/rules/product.md`, `src/config/product.ts` | `test:no-template-language` |
 | **P1** | **Archive the fork ref** *(founder-gated)* | §12.2 — tag, then drop | none (refs only) | — |
-| **P2** | **Schema + RLS + RPCs** — ✅ **integrated and tested** on `codex/qimmah-integration` (database + proofs only; the disclosure moved to P2b) | §7 as-implemented: 6 migrations (`20260806120001/2/3`, `20260809120001/2/3`) — tables, pepper, RPCs, table-privilege and PUBLIC-EXECUTE hardening, durable revocation, code-grant recovery | `supabase/migrations/…`; `scripts/db/entitlements-proof.mjs`; `scripts/db/privileges-proof.mjs`; `scripts/db/lib/supabase-sandbox.mjs` | `test:entitlements` (131) + `test:privileges` (38), wired into `test:gate`. **Staging apply still founder-gated.** |
+| **P2** | **Schema + RLS + RPCs** — ✅ **integrated and tested** on `codex/qimmah-integration` (database + proofs only; the disclosure moved to P2b) | §7 as-implemented: 7 migrations (`20260806120001/2/3`, `20260809120001/2/3/4`) — tables, pepper, RPCs, table-privilege and PUBLIC-EXECUTE hardening, durable revocation, code-grant recovery, replay identity binding, canonical code contract, and provider provenance | `supabase/migrations/…`; `scripts/db/entitlements-proof.mjs`; `scripts/db/privileges-proof.mjs`; `scripts/db/lib/supabase-sandbox.mjs` | `test:entitlements` (157) + `test:privileges` (38), wired into `test:gate`. **Staging apply still founder-gated.** |
 | **P2b** | **Privacy disclosure** *(specified, not started)* | §11.1 text + revocation-ledger coverage; must precede P5 | See [`P2B-PRIVACY-DISCLOSURE-PROPOSAL.md`](./P2B-PRIVACY-DISCLOSURE-PROPOSAL.md) for the exact file list | Per proposal |
 | **P3** | **Config + provider interface** *(no UI)* | §6 and §10 | **new** `src/config/access.ts`, `src/lib/entitlement/{types,provider,supabaseProvider,manualProvider,context}.ts`; register the cache key in `src/lib/userDataKeys.ts` | **new** `test:entitlement` in `test:gate`, including a §4.2 counter-assertion that a forged client state grants nothing, and the §6-5 no-price-literal check |
 | **P4** | **The gate itself** ⚠️ highest risk | §4.7 — rework `guardRoute` so a completed guest reaches preview only | `src/App.tsx`, `src/lib/appRoutes.ts` | **new** `test:access-gate` proving every gated route is unreachable without an entitlement **and** that the free tier still works with none |

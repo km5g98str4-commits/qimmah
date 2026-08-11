@@ -19,6 +19,11 @@ import { PGlite } from '@electric-sql/pglite'
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, resolve, join } from 'node:path'
+import {
+  createSandbox,
+  asRole as sandboxAsRole,
+  makeUser as sandboxMakeUser,
+} from './lib/supabase-sandbox.mjs'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const mig = (f) => readFileSync(join(root, 'supabase/migrations', f), 'utf8')
@@ -29,6 +34,7 @@ const DEL = '20260713120007_delete_own_account.sql'
 const REVK = '20260809120001_revocation_ledger.sql'
 const RECV = '20260809120002_code_grant_recovery.sql'
 const PUBX = '20260809120003_public_execute_hardening.sql'
+const FIX = '20260809120004_entitlement_security_remediation.sql'
 
 const results = []
 function check(name, pass, detail = '') {
@@ -47,6 +53,115 @@ async function mustFail(name, fn, expect) {
   }
 }
 
+/**
+ * Red side of the four security regressions.  This uses the same repository
+ * migrations and PGlite harness while excluding only FIX, so each assertion
+ * proves the exact pre-remediation behavior rather than a mocked substitute.
+ */
+async function runLegacyCounterProofs() {
+  const { db: legacy, failed } = await createSandbox({ exclude: [FIX] })
+  const ready = check(
+    '⚔️ بيئة counter-proof القديمة تُبنى بلا هجرة الإصلاح فقط',
+    failed.length === 0,
+    failed.map((f) => `${f.file}: ${f.message}`).join(' | '),
+  )
+  if (!ready) {
+    await legacy.close()
+    throw new Error('legacy_counterproof_setup_failed')
+  }
+
+  const lq = (sql, params) => legacy.query(sql, params)
+  try {
+    await legacy.exec(`insert into private.identity_pepper (version, pepper)
+                       values (1, 'legacy-counter-proof-0123456789abcdef')`)
+
+    // A — the old order replay reaches Bob instead of raising the named error.
+    await sandboxMakeUser(legacy, 'legacy-alice@example.com')
+    const legacyBob = await sandboxMakeUser(legacy, 'legacy-bob@example.com')
+    await sandboxAsRole(legacy, 'service_role')
+    await lq(`select public.admin_grant_premium(
+      'legacy-alice@example.com','salla','LEGACY-ORDER-123',1999,'{"receipt":"original"}'::jsonb)`)
+    await sandboxAsRole(legacy, null)
+    const purchaseBefore = await lq(`select email_hash, amount_minor, currency, raw
+                                       from public.purchase_ledger
+                                      where provider='salla' and provider_order_id='LEGACY-ORDER-123'`)
+    let replayError = ''
+    await sandboxAsRole(legacy, 'service_role')
+    try {
+      await lq(`select public.admin_grant_premium(
+        'legacy-bob@example.com','salla','LEGACY-ORDER-123',999,'{"receipt":"replay"}'::jsonb)`)
+    } catch (error) {
+      replayError = String(error.message || error)
+    }
+    await sandboxAsRole(legacy, null)
+    const purchaseAfter = await lq(`select email_hash, amount_minor, currency, raw
+                                      from public.purchase_ledger
+                                     where provider='salla' and provider_order_id='LEGACY-ORDER-123'`)
+    const legacyBobGrant = await lq(`select entitlement_type from public.entitlements where user_id=$1`, [legacyBob])
+    check(
+      '⚔️ counter-proof A: القديم يُسقط purchase_identity_mismatch بمنح Bob',
+      replayError === '' && legacyBobGrant.rows[0]?.entitlement_type === 'premium' &&
+        JSON.stringify(purchaseAfter.rows[0]) === JSON.stringify(purchaseBefore.rows[0]),
+      replayError,
+    )
+
+    // B — the ledger remains active, yet the old admin path clears row revocation.
+    const legacyRevoked = await sandboxMakeUser(legacy, 'legacy-revoked@example.com')
+    await sandboxAsRole(legacy, 'service_role')
+    await lq(`select public.admin_grant_premium(
+      'legacy-revoked@example.com','manual','LEGACY-RV-1',1999,null)`)
+    await lq(`select public.admin_revoke($1,'counter-proof')`, [legacyRevoked])
+    const legacyGrantAfterRevoke = await lq(`select public.admin_grant_premium(
+      'legacy-revoked@example.com','manual','LEGACY-RV-2',1999,null) as state`)
+    await sandboxAsRole(legacy, 'authenticated', legacyRevoked)
+    const legacyEffective = await lq(`select state from public.my_entitlement()`)
+    await sandboxAsRole(legacy, null)
+    const activeLegacyRevocation = await lq(`select count(*)::int n
+      from public.revocation_ledger
+      where lifted_at is null
+        and email_hash in (select email_hash from private.identity_hashes('legacy-revoked@example.com'))`)
+    check(
+      '⚔️ counter-proof B: القديم يُسقط durable-revocation assertion تحديدًا',
+      legacyGrantAfterRevoke.rows[0]?.state === 'premiumActive' &&
+        legacyEffective.rows[0]?.state === 'premiumActive' && activeLegacyRevocation.rows[0]?.n === 1,
+    )
+
+    // C — SHORT-1 is accepted by the old server-side creator.
+    await sandboxAsRole(legacy, 'service_role')
+    let legacyShortId = null
+    let shortError = ''
+    try {
+      legacyShortId = (await lq(`select public.admin_create_access_code(
+        'SHORT-1','counter-proof','old entropy contract') as id`)).rows[0]?.id
+    } catch (error) {
+      shortError = String(error.message || error)
+    }
+    await sandboxAsRole(legacy, null)
+    const legacyShortCount = await lq(`select count(*)::int n from public.access_codes where id=$1`, [legacyShortId])
+    check(
+      '⚔️ counter-proof C: القديم يُسقط SHORT-1 rejection assertion تحديدًا',
+      shortError === '' && legacyShortId != null && legacyShortCount.rows[0]?.n === 1,
+      shortError,
+    )
+
+    // D — an explicitly manual durable purchase is falsely surfaced as Salla.
+    const legacyManual = await sandboxMakeUser(legacy, 'legacy-manual@example.com')
+    await sandboxAsRole(legacy, 'service_role')
+    await lq(`select public.admin_grant_premium(
+      'legacy-manual@example.com','manual','LEGACY-MANUAL-1',null,null)`)
+    await sandboxAsRole(legacy, null)
+    const legacyProvenance = await lq(`select e.source, p.provider
+      from public.entitlements e cross join public.purchase_ledger p
+      where e.user_id=$1 and p.provider_order_id='LEGACY-MANUAL-1'`, [legacyManual])
+    check(
+      '⚔️ counter-proof D: القديم يُسقط manual-source assertion تحديدًا',
+      legacyProvenance.rows[0]?.provider === 'manual' && legacyProvenance.rows[0]?.source === 'salla',
+    )
+  } finally {
+    await legacy.close()
+  }
+}
+
 process.on('uncaughtException', (e) => {
   console.error(`\n⛔ توقّف الإثبات باستثناء غير متوقّع:\n   ${String(e.message || e).split('\n')[0]}`)
   if (e.query) console.error(`   عند: ${String(e.query).trim().split('\n')[0]}`)
@@ -62,6 +177,8 @@ const asRole = async (role, uid) => {
 const q = (sql, params) => db.query(sql, params)
 
 console.log('\n🔐 إثبات نظام الوصول — Postgres منفَّذ (PGlite)\n')
+
+await runLegacyCounterProofs()
 
 // ── ٠) بيئة شبيهة بـSupabase: الأدوار + auth.uid() من الـGUC ────────────────
 await db.exec(`
@@ -95,6 +212,7 @@ try {
   await db.exec(mig(REVK))
   await db.exec(mig(RECV))
   await db.exec(mig(PUBX))
+  await db.exec(mig(FIX))
 } catch (e) {
   created = false
   console.error('\n  المهاجرة فشلت:', e.message, '\n')
@@ -106,7 +224,7 @@ if (!check('إنشاء المخطّط من قاعدة نظيفة', created)) {
 
 // idempotency: إعادة التشغيل لا تكسر
 let rerun = true
-try { await db.exec(mig(CORE)); await db.exec(mig(RPCS)); await db.exec(mig(REVK)); await db.exec(mig(RECV)); await db.exec(mig(PUBX)) } catch (e) { rerun = false; console.error('   ', e.message) }
+try { await db.exec(mig(CORE)); await db.exec(mig(RPCS)); await db.exec(mig(REVK)); await db.exec(mig(RECV)); await db.exec(mig(PUBX)); await db.exec(mig(FIX)) } catch (e) { rerun = false; console.error('   ', e.message) }
 check('الهجرة idempotent (تشغيل ثانٍ)', rerun)
 
 // ── ٢) الملح المُرقَّم ─────────────────────────────────────────────────────
@@ -241,14 +359,43 @@ check('A يرى trialActive عبر الدالة المعتمدة', aMine.rows[0]
 
 // ── ٧) الأكواد: الحدّ والانتهاء والتزامن ──────────────────────────────────
 await asRole('service_role')
+await mustFail('⚔️ SHORT-1 المزروع يُرفض عند الإنشاء (لا عودة للقبول القديم)',
+  () => q(`select public.admin_create_access_code('SHORT-1','founder','اختبار التفاف')`),
+  'invalid_access_code')
+await mustFail('٩ رموز تُرفض عند الإنشاء',
+  () => q(`select public.admin_create_access_code('A2B3C4D5E','founder','حد أدنى')`),
+  'invalid_access_code')
+await mustFail('رمز خارج أبجدية الـ32 يُرفض عند الإنشاء',
+  () => q(`select public.admin_create_access_code('A2B3C4D5E-','founder','رمز محظور')`),
+  'invalid_access_code')
+await mustFail('فراغ داخلي لا يُفسَّر كتطبيع ويُرفض باسمه',
+  () => q(`select public.admin_create_access_code('A2B3 C4D5E6','founder','فراغ داخلي')`),
+  'invalid_access_code')
+await mustFail('Unicode lookalike يُرفض عند الإنشاء',
+  () => q(`select public.admin_create_access_code('A2B3C4D5Ｅ6','founder','محاكاة Unicode')`),
+  'invalid_access_code')
+await mustFail('Unicode long-s لا يلتفّ عبر upper() عند الإنشاء',
+  () => q(`select public.admin_create_access_code('A2B3C4D5ſ6','founder','محاكاة case-fold')`),
+  'invalid_access_code')
+await asRole('authenticated', A)
+await mustFail('Unicode long-s يُرفض برسالة الاسترداد العامة',
+  () => q(`select public.redeem_access_code('A2B3C4D5ſ6')`), 'invalid_code')
+await asRole('service_role')
+const trimmed = await q(`select public.admin_create_access_code('  a2b3c4d5e6  ','founder','تطبيع صريح') as id`)
+await asRole(null)
+const trimmedHash = await q(`select count(*)::int n from public.access_codes
+                              where id=$1 and code_hash=private.hash_identity('A2B3C4D5E6',1)`, [trimmed.rows[0].id])
+check('رمز صالح من 10 أحرف يُقبل؛ الفراغ الطرفي والحالة يُطبَّعان بعقد واحد',
+  trimmedHash.rows[0].n === 1)
+await asRole('service_role')
 const code = await q(`select public.admin_create_access_code(
-  'INFLU-2026','founder','حملة مؤثّر تجريبية',14,2,'influencer-x',null) as id`)
+  'Q7M2K9R4TX','founder','حملة مؤثّر تجريبية',14,2,'influencer-x',null) as id`)
 const codeId = code.rows[0].id
-await q(`select public.admin_create_access_code('DEFAULT-DUR','founder','فحص الافتراضي') as id`)
+await q(`select public.admin_create_access_code('D3F4U7LT9Q','founder','فحص الافتراضي') as id`)
 await asRole(null)
 const dflt = await q(`select duration_days from public.access_codes where id=$1`, [codeId])
 const ddur = await q(`select duration_days from public.access_codes
-                      where code_hash = private.hash_identity('DEFAULT-DUR',1)`)
+                      where code_hash = private.hash_identity('D3F4U7LT9Q',1)`)
 check('مدّة الكود الافتراضية ١٤ يومًا', ddur.rows[0].duration_days === 14)
 check('الكود المُنشأ يحمل مدّته المطلوبة', dflt.rows[0].duration_days === 14)
 
@@ -258,49 +405,52 @@ check('أثر إداري مسجَّل (created_by/reason/at)',
   audit.rows[0].created_by === 'founder' && audit.rows[0].created_reason.length > 0 && audit.rows[0].ts)
 
 await asRole('authenticated', B)
-const r1 = await q(`select public.redeem_access_code('influ-2026') as s`)
+const r1 = await q(`select public.redeem_access_code('q7m2k9r4tx') as s`)
 check('استرداد كود ينجح (وغير حسّاس لحالة الأحرف)', r1.rows[0].s === 'specialAccessActive')
 await mustFail('نفس الهوية لا تستردّ نفس الكود مرّتين',
-  () => q(`select public.redeem_access_code('INFLU-2026')`), 'code_already_redeemed')
+  () => q(`select public.redeem_access_code('Q7M2K9R4TX')`), 'code_already_redeemed')
 
 // المستخدم الثالث يستهلك الحصّة الثانية، والرابع يُرفض
 const C = await mkUser('c@example.com')
 const D = await mkUser('d@example.com')
 await asRole('authenticated', C)
-const r2 = await q(`select public.redeem_access_code('INFLU-2026') as s`)
+const r2 = await q(`select public.redeem_access_code('Q7M2K9R4TX') as s`)
 check('الاسترداد الثاني ضمن الحدّ ينجح', r2.rows[0].s === 'specialAccessActive')
 await asRole('authenticated', D)
 await mustFail('الاسترداد الثالث يتجاوز الحدّ فيُرفض',
-  () => q(`select public.redeem_access_code('INFLU-2026')`), 'invalid_code')
+  () => q(`select public.redeem_access_code('Q7M2K9R4TX')`), 'invalid_code')
 
 // شبكة الأمان البنيوية: حتى الكتابة المباشرة لا تتجاوز الحدّ
 await asRole(null)
 await mustFail('القيد البنيوي يرفض تجاوز الحدّ حتى بكتابة مباشرة',
   () => q(`update public.access_codes set redemption_count = max_redemptions + 1 where id=$1`, [codeId]),
   'access_codes_within_limit')
-check('قفل الصفّ `for update` موجود في مسار الاسترداد', /for update/i.test(mig(RPCS)))
+const effectiveRedeem = await q(`select pg_get_functiondef(
+  'public.redeem_access_code(text)'::regprocedure) as definition`)
+check('قفل الصفّ `for update` موجود في دالة الاسترداد الفعّالة',
+  /for update/i.test(effectiveRedeem.rows[0].definition))
 
 // كود معطّل ومنتهٍ
 await asRole('service_role')
-await q(`select public.admin_create_access_code('DISABLED-1','founder','فحص التعطيل')`)
+await q(`select public.admin_create_access_code('D5S4BL3D9Q','founder','فحص التعطيل')`)
 await asRole(null)
-await q(`update public.access_codes set enabled=false where code_hash = private.hash_identity('DISABLED-1',1)`)
+await q(`update public.access_codes set enabled=false where code_hash = private.hash_identity('D5S4BL3D9Q',1)`)
 await asRole('authenticated', D)
-await mustFail('كود معطّل يُرفض برسالة عامّة', () => q(`select public.redeem_access_code('DISABLED-1')`), 'invalid_code')
+await mustFail('كود معطّل يُرفض برسالة عامّة', () => q(`select public.redeem_access_code('D5S4BL3D9Q')`), 'invalid_code')
 // كود منتهٍ: يُنشأ صحيحًا ثم **يُشيَّخ**. القيد `access_codes_window` يمنع ولادة
 // كود ميت (expires_at <= starts_at) — وهو حارس مقصود ضدّ خطأ إداري، فالانتهاء
 // في الإنتاج يأتي بمرور الوقت لا بالإنشاء.
 await asRole('service_role')
-await q(`select public.admin_create_access_code('EXPIRED-1','founder','فحص الانتهاء',14,1,null, now() + interval '1 day')`)
+await q(`select public.admin_create_access_code('E7P4R3D9QX','founder','فحص الانتهاء',14,1,null, now() + interval '1 day')`)
 await asRole(null)
 await mustFail('القيد يرفض كودًا يُولَد منتهيًا',
   () => q(`update public.access_codes set expires_at = starts_at - interval '1 day'
-           where code_hash = private.hash_identity('EXPIRED-1',1)`), 'access_codes_window')
+           where code_hash = private.hash_identity('E7P4R3D9QX',1)`), 'access_codes_window')
 await q(`update public.access_codes
             set starts_at = now() - interval '10 days', expires_at = now() - interval '1 day'
-          where code_hash = private.hash_identity('EXPIRED-1',1)`)
+          where code_hash = private.hash_identity('E7P4R3D9QX',1)`)
 await asRole('authenticated', D)
-await mustFail('كود خارج نافذته يُرفض بنفس الرسالة', () => q(`select public.redeem_access_code('EXPIRED-1')`), 'invalid_code')
+await mustFail('كود خارج نافذته يُرفض بنفس الرسالة', () => q(`select public.redeem_access_code('E7P4R3D9QX')`), 'invalid_code')
 await mustFail('كود غير موجود يُرفض بنفس الرسالة (لا تعداد)', () => q(`select public.redeem_access_code('NOPE-404')`), 'invalid_code')
 
 // انتهاء صلاحية الكود الممنوح
@@ -318,6 +468,78 @@ await asRole(null)
 const dup = await q(`select count(*)::int as n from public.purchase_ledger where provider_order_id='ORD-1'`)
 check('تكرار حدث المزوّد idempotent (صفّ واحد)', dup.rows[0].n === 1 && g2.rows[0].s === 'premiumActive')
 
+// طلب مزوّد واحد مربوط بهوية شراء واحدة: إعادة الإرسال لنفس الهوية لا تغيّر
+// سجلّ الشراء، وإرساله لهوية أخرى يفشل باسمه ولا يخلق منحة ثانية.
+const PA = await mkUser('alice-order@example.com')
+const PB = await mkUser('bob-order@example.com')
+await asRole('service_role')
+await q(`select public.admin_grant_premium('alice-order@example.com','salla','ORDER-123',1999,
+                                             '{"receipt":"original"}'::jsonb)`)
+await asRole(null)
+const beforeReplay = await q(`select id, email_hash, hash_version, amount_minor, currency, granted_at, raw
+                               from public.purchase_ledger
+                              where provider='salla' and provider_order_id='ORDER-123'`)
+const aliceBeforeReplay = await q(`select id, entitlement_type, source, activated_at, updated_at
+                                     from public.entitlements where user_id=$1`, [PA])
+await asRole('service_role')
+const sameReplay = await q(`select public.admin_grant_premium('alice-order@example.com','salla','ORDER-123',999,
+                                                                '{"receipt":"replay"}'::jsonb) as s`)
+
+// Same identity remains the same identity after pepper rotation; the purchase
+// row's stamped hash_version is the comparison authority, not today's version.
+await asRole(null)
+await db.exec(`insert into private.identity_pepper (version, pepper)
+               values (4, 'pepper-v4-0123456789abcdef0123456789abcdef')`)
+await asRole('service_role')
+const rotatedReplay = await q(`select public.admin_grant_premium(
+  'alice-order@example.com','salla','ORDER-123',1,'{"receipt":"rotated-replay"}'::jsonb) as s`)
+await asRole(null)
+await db.exec(`update private.identity_pepper set retired_at=now() where version=4`)
+await asRole('service_role')
+await mustFail('⚔️ نفس ORDER-123 لهوية أخرى يُرفض باسم واضح',
+  () => q(`select public.admin_grant_premium('bob-order@example.com','salla','ORDER-123',1999,null)`),
+  'purchase_identity_mismatch')
+await mustFail('⚔️ فراغات ORDER-123 لا تخلق طلبًا ثانيًا لهوية أخرى',
+  () => q(`select public.admin_grant_premium('bob-order@example.com','salla','  ORDER-123  ',1999,null)`),
+  'purchase_identity_mismatch')
+await asRole(null)
+const afterReplay = await q(`select id, email_hash, hash_version, amount_minor, currency, granted_at, raw
+                              from public.purchase_ledger
+                             where provider='salla' and provider_order_id='ORDER-123'`)
+const aliceAfterReplay = await q(`select id, entitlement_type, source, activated_at, updated_at
+                                    from public.entitlements where user_id=$1`, [PA])
+const bobGrant = await q(`select count(*)::int n from public.entitlements where user_id=$1`, [PB])
+const aliceGrants = await q(`select count(*)::int n from public.entitlements where user_id=$1`, [PA])
+check('نفس الطلب ونفس الهوية idempotent بلا شراء أو منحة مكرّرة',
+  sameReplay.rows[0].s === 'premiumActive' && aliceGrants.rows[0].n === 1)
+check('نفس الهوية تبقى idempotent عبر دوران pepper', rotatedReplay.rows[0].s === 'premiumActive')
+check('إعادة التشغيل لا تغيّر هوية/مبلغ/عملة/حمولة الشراء الدائم',
+  JSON.stringify(afterReplay.rows[0]) === JSON.stringify(beforeReplay.rows[0]))
+check('إعادة التشغيل لا تعيد تأريخ أو تبديل منحة Premium القائمة',
+  JSON.stringify(aliceAfterReplay.rows[0]) === JSON.stringify(aliceBeforeReplay.rows[0]))
+check('إعادة تشغيل الطلب المرفوضة لا تمنح Bob شيئًا', bobGrant.rows[0].n === 0)
+
+// المصدر ليس تسمية عرض: manual وSalla يُحفظان ويُستعادان كما وقعا.
+const PM = await mkUser('manual-order@example.com')
+await asRole('service_role')
+await q(`select public.admin_grant_premium('manual-order@example.com','manual','MANUAL-123',null,null)`)
+await asRole(null)
+const manualSource = await q(`select source from public.entitlements where user_id=$1`, [PM])
+const sallaSource = await q(`select source from public.entitlements where user_id=$1`, [B])
+check('المنحة اليدوية تحفظ المصدر manual', manualSource.rows[0].source === 'manual')
+check('منحة Salla تحفظ المصدر salla', sallaSource.rows[0].source === 'salla')
+
+// حذف الحساب لا يبرّر اختلاق Salla: الاسترجاع يحمل مصدر الشراء الأصلي.
+await asRole('authenticated', PM)
+await q(`select public.delete_own_account()`)
+const PM2 = await mkUser('manual-order@example.com')
+await asRole('authenticated', PM2)
+const manualClaim = await q(`select public.claim_pending_grants() as s`)
+const manualRecovered = await q(`select state, source from public.my_entitlement()`)
+check('استرجاع الشراء اليدوي يبقى manual',
+  manualClaim.rows[0].s === 'premiumActive' &&
+  manualRecovered.rows[0].state === 'premiumActive' && manualRecovered.rows[0].source === 'manual')
+
 await asRole('authenticated', B)
 const bState = await q(`select state, no_expiry, expires_at from public.my_entitlement()`)
 check('B صار premiumActive بلا تاريخ انتهاء',
@@ -325,9 +547,9 @@ check('B صار premiumActive بلا تاريخ انتهاء',
 
 // كود لاحق لا يخفض Premium
 await asRole('service_role')
-await q(`select public.admin_create_access_code('AFTER-PREM','founder','أسبقية Premium',7,5)`)
+await q(`select public.admin_create_access_code('AFT3RPR3M9','founder','أسبقية Premium',7,5)`)
 await asRole('authenticated', B)
-const afterCode = await q(`select public.redeem_access_code('AFTER-PREM') as s`)
+const afterCode = await q(`select public.redeem_access_code('AFT3RPR3M9') as s`)
 check('كود بعد Premium لا يخفض المنحة', afterCode.rows[0].s === 'premiumActive')
 const stillPrem = await q(`select state from public.my_entitlement()`)
 check('الحالة بقيت premiumActive بعد الاسترداد', stillPrem.rows[0].state === 'premiumActive')
@@ -349,7 +571,7 @@ await q(`insert into public.entitlements (user_id,email,entitlement_type,source,
          values ($1,'revoked@example.com','trial','trial',now(),now()+interval '72 hours',false,now(),'اختبار')`, [R1])
 await asRole('authenticated', R1)
 await mustFail('مُلغىً لا يبدأ تجربة ليرفع الإلغاء', () => q(`select public.start_trial()`), 'access_revoked')
-await mustFail('مُلغىً لا يستردّ كودًا ليرفع الإلغاء', () => q(`select public.redeem_access_code('AFTER-PREM')`), 'access_revoked')
+await mustFail('مُلغىً لا يستردّ كودًا ليرفع الإلغاء', () => q(`select public.redeem_access_code('AFT3RPR3M9')`), 'access_revoked')
 await mustFail('مُلغىً لا يطالب بشراء ليرفع الإلغاء', () => q(`select public.claim_pending_grants()`), 'access_revoked')
 const stillRevoked = await q(`select state from public.my_entitlement()`)
 check('الحالة بقيت revoked بعد المحاولات الثلاث', stillRevoked.rows[0].state === 'revoked')
@@ -360,20 +582,20 @@ await db.exec(`insert into private.identity_pepper (version, pepper)
                values (3, 'pepper-v3-aaaabbbbccccddddeeeeffff00001111')`)
 const V3 = await mkUser('rotate@example.com')
 await asRole('authenticated', V3)
-const afterRotate = await q(`select public.redeem_access_code('AFTER-PREM') as s`)
+const afterRotate = await q(`select public.redeem_access_code('AFT3RPR3M9') as s`)
 check('كود أُنشئ قبل دوران الملح يبقى قابلًا للاسترداد', afterRotate.rows[0].s === 'specialAccessActive')
 await asRole(null)
 await db.exec(`update private.identity_pepper set retired_at = now() where version = 3`)
 
 // (ج) كود أقصر لا يقصّ منحة سارية أطول.
 await asRole('service_role')
-await q(`select public.admin_create_access_code('LONG-30','founder','منحة طويلة',30,5)`)
-await q(`select public.admin_create_access_code('SHORT-1','founder','منحة قصيرة',1,5)`)
+await q(`select public.admin_create_access_code('L8NG3R3D9Q','founder','منحة طويلة',30,5)`)
+await q(`select public.admin_create_access_code('M2N7V4L8QX','founder','منحة قصيرة',1,5)`)
 const S1 = await mkUser('shorten@example.com')
 await asRole('authenticated', S1)
-await q(`select public.redeem_access_code('LONG-30')`)
+await q(`select public.redeem_access_code('L8NG3R3D9Q')`)
 const longExp = (await q(`select expires_at from public.my_entitlement()`)).rows[0].expires_at
-await q(`select public.redeem_access_code('SHORT-1')`)
+await q(`select public.redeem_access_code('M2N7V4L8QX')`)
 const afterShort = (await q(`select expires_at, state from public.my_entitlement()`)).rows[0]
 check('كود ليوم واحد لا يقصّ منحة ٣٠ يومًا سارية',
   new Date(afterShort.expires_at).getTime() === new Date(longExp).getTime() &&
@@ -426,7 +648,10 @@ check('سجلّ حدود الأكواد ينجو من حذف الحساب', afte
 const B2 = await mkUser('b@example.com')
 await asRole('authenticated', B2)
 const reclaim = await q(`select public.claim_pending_grants() as s`)
-check('Premium يُسترجَع بعد الحذف وإعادة التسجيل', reclaim.rows[0].s === 'premiumActive')
+const reclaimedSalla = await q(`select state, source from public.my_entitlement()`)
+check('Premium Salla يُسترجَع بعد الحذف بمصدره الأصلي',
+  reclaim.rows[0].s === 'premiumActive' && reclaimedSalla.rows[0].state === 'premiumActive' &&
+    reclaimedSalla.rows[0].source === 'salla')
 
 const A_del = A
 await asRole('authenticated', A_del)
@@ -442,7 +667,7 @@ await q(`select public.delete_own_account()`)
 const C2 = await mkUser('c@example.com')
 await asRole('authenticated', C2)
 await mustFail('حدّ الكود ينجو من حذف الحساب',
-  () => q(`select public.redeem_access_code('INFLU-2026')`), 'invalid_code')
+  () => q(`select public.redeem_access_code('Q7M2K9R4TX')`), 'invalid_code')
 
 // ── ٩.٥) استرجاع منح الأكواد — code_redemption_ledger بالاتجاهين ──────────
 // السجلّ الذي يمنع الاسترداد الثاني هو نفسه الذي يثبت الحقّ. سياسة الأهلية
@@ -467,10 +692,10 @@ check('صفّ الاسترداد المنسوب يعود مع المنحة (رؤ
 // ONE-SHOT بحدّ ١: استرداده بعينه يستنفده — فلو أسقط الاستنفادُ الاسترجاعَ
 // لصار كل كود فردي (الافتراضي) غير قابل للاسترجاع أبدًا.
 await asRole('service_role')
-await q(`select public.admin_create_access_code('ONE-SHOT','founder','فحص الاستنفاد',30,1)`)
+await q(`select public.admin_create_access_code('W8N3S2T9QX','founder','فحص الاستنفاد',30,1)`)
 const X1 = await mkUser('exhaust@example.com')
 await asRole('authenticated', X1)
-await q(`select public.redeem_access_code('ONE-SHOT')`)
+await q(`select public.redeem_access_code('W8N3S2T9QX')`)
 await q(`select public.delete_own_account()`)
 const X2 = await mkUser('exhaust@example.com')
 await asRole('authenticated', X2)
@@ -479,26 +704,26 @@ check('كود مستنفَد: منحة صاحب الحصّة تُسترجَع (�
   exhClaim.rows[0].s === 'specialAccessActive')
 await asRole(null)
 const exhCount = await q(`select redemption_count, max_redemptions from public.access_codes
-                          where code_hash = private.hash_identity('ONE-SHOT',1)`)
+                          where code_hash = private.hash_identity('W8N3S2T9QX',1)`)
 check('الاسترجاع لا يستهلك حصّة جديدة ولا يلمس العدّاد',
   exhCount.rows[0].redemption_count === 1 && exhCount.rows[0].max_redemptions === 1)
 // ومحاولة استرداد *جديدة* لهوية أخرى على المستنفَد تبقى مرفوضة كما كانت.
 const X3 = await mkUser('exhaust-other@example.com')
 await asRole('authenticated', X3)
 await mustFail('استرداد جديد على كود مستنفَد يبقى مرفوضًا',
-  () => q(`select public.redeem_access_code('ONE-SHOT')`), 'invalid_code')
+  () => q(`select public.redeem_access_code('W8N3S2T9QX')`), 'invalid_code')
 
 // (ج) منحة منتهية لا تُسترجَع — تُشيَّخ بيد المالك كما شُيّخ كود EXPIRED-1.
 await asRole('service_role')
-await q(`select public.admin_create_access_code('EXP-REC','founder','فحص انتهاء المنحة',2,5)`)
+await q(`select public.admin_create_access_code('E7PR3C9QX2','founder','فحص انتهاء المنحة',2,5)`)
 const E1 = await mkUser('exp-rec@example.com')
 await asRole('authenticated', E1)
-await q(`select public.redeem_access_code('EXP-REC')`)
+await q(`select public.redeem_access_code('E7PR3C9QX2')`)
 await q(`select public.delete_own_account()`)
 await asRole(null)
 await q(`update public.code_redemption_ledger set redeemed_at = now() - interval '3 days'
          where code_id = (select id from public.access_codes
-                          where code_hash = private.hash_identity('EXP-REC',1))`)
+                          where code_hash = private.hash_identity('E7PR3C9QX2',1))`)
 const E2 = await mkUser('exp-rec@example.com')
 await asRole('authenticated', E2)
 const expClaim = await q(`select public.claim_pending_grants() as s`)
@@ -506,14 +731,14 @@ check('منحة كود منتهية لا تُسترجَع', expClaim.rows[0].s =
 
 // (د) كود عطّلته الإدارة = إبطال — منحته لا تُسترجَع (مفتاح طوارئ الكود المسرَّب).
 await asRole('service_role')
-await q(`select public.admin_create_access_code('DIS-REC','founder','فحص الإبطال الإداري',30,5)`)
+await q(`select public.admin_create_access_code('D5R3C9QX2A','founder','فحص الإبطال الإداري',30,5)`)
 const I1 = await mkUser('dis-rec@example.com')
 await asRole('authenticated', I1)
-await q(`select public.redeem_access_code('DIS-REC')`)
+await q(`select public.redeem_access_code('D5R3C9QX2A')`)
 await q(`select public.delete_own_account()`)
 await asRole(null)
 await q(`update public.access_codes set enabled=false
-         where code_hash = private.hash_identity('DIS-REC',1)`)
+         where code_hash = private.hash_identity('D5R3C9QX2A',1)`)
 const I2 = await mkUser('dis-rec@example.com')
 await asRole('authenticated', I2)
 const disClaim = await q(`select public.claim_pending_grants() as s`)
@@ -521,7 +746,7 @@ check('كود مُبطَل إداريًا لا تُسترجَع منحته', dis
 
 // (هـ) الأسبقية: هوية تحمل شراءً واسترداد كود معًا ⇒ Premium لا special.
 await asRole('authenticated', B2)
-await q(`select public.redeem_access_code('LONG-30')`) // تُسجَّل ولا تُخفَّض (أُثبت أعلاه)
+await q(`select public.redeem_access_code('L8NG3R3D9Q')`) // تُسجَّل ولا تُخفَّض (أُثبت أعلاه)
 await q(`select public.delete_own_account()`)
 const B3 = await mkUser('b@example.com')
 await asRole('authenticated', B3)
@@ -549,6 +774,9 @@ const RV = await mkUser('rv@example.com')
 await asRole('service_role')
 await q(`select public.admin_grant_premium('rv@example.com','manual','ORD-RV',1999,null)`)
 await q(`select public.admin_revoke($1,'سوء استخدام — فحص العقد') as s`, [RV])
+const rvGrantAfterRevoke = await q(`select public.admin_grant_premium(
+  'rv@example.com','manual','ORD-RV-AFTER',1999,null) as s`)
+check('منحة إدارية بعد الحظر تُسجَّل لكن لا ترفع الوصول', rvGrantAfterRevoke.rows[0].s === 'revoked')
 await asRole(null)
 const rvLedger = await q(`select count(*)::int n from public.revocation_ledger r
                           where r.lifted_at is null
@@ -576,10 +804,19 @@ await mustFail('إعادة التسجيل بعد الحظر: المطالبة ب
 await mustFail('إعادة التسجيل بعد الحظر: التجربة مقفلة',
   () => q(`select public.start_trial()`), 'access_revoked')
 await mustFail('إعادة التسجيل بعد الحظر: استرداد الأكواد مقفل',
-  () => q(`select public.redeem_access_code('LONG-30')`), 'access_revoked')
+  () => q(`select public.redeem_access_code('L8NG3R3D9Q')`), 'access_revoked')
 const rv2State = await q(`select state from public.my_entitlement()`)
 check('الهوية المحظورة تُعرَض revoked حتى بلا صفّ منحة (لا noAccess مضلِّلة)',
   rv2State.rows[0].state === 'revoked')
+
+// حتى منحة خدمة جديدة بعد إعادة التسجيل لا تتجاوز سجلّ الإلغاء الدائم.
+await asRole('service_role')
+const rvGrantAfterReregistration = await q(`select public.admin_grant_premium(
+  'rv@example.com','manual','ORD-RV-REREG',1999,null) as s`)
+check('منحة بعد الحذف وإعادة التسجيل تبقى revoked', rvGrantAfterReregistration.rows[0].s === 'revoked')
+await asRole('authenticated', RV2)
+const rvAfterReregistrationGrant = await q(`select state from public.my_entitlement()`)
+check('الحالة تظل revoked بعد المنحة اللاحقة', rvAfterReregistrationGrant.rows[0].state === 'revoked')
 
 // الرفع إداري حصرًا — وبعده يعود الاسترجاع للعمل.
 await mustFail('العميل لا ينادي admin_unrevoke',
@@ -589,7 +826,9 @@ const rvLift = await q(`select public.admin_unrevoke($1,'قرار مراجعة')
 check('admin_unrevoke يرفع حظر هوية مُعاد تسجيلها', rvLift.rows[0].s === 'unrevoked')
 await asRole('authenticated', RV2)
 const rvBack = await q(`select public.claim_pending_grants() as s`)
-check('بعد الرفع: Premium تُسترجَع من سجلّ الشراء', rvBack.rows[0].s === 'premiumActive')
+const rvRestoredState = await q(`select state from public.my_entitlement()`)
+check('admin_unrevoke وحده يعيد Premium من سجلّ الشراء',
+  rvBack.rows[0].s === 'premiumActive' && rvRestoredState.rows[0].state === 'premiumActive')
 
 // مستخدم بلا صفّ منحة يبقى قابلًا للحظر (كان no_entitlement يمنعه أصلًا).
 const NE = await mkUser('noent@example.com')
@@ -751,7 +990,7 @@ check('احتفاظ سجلّ الحظر: حتى الرفع الإداري لا �
 // يُنفَّذ، فلا يجوز أن يُسقط فحصًا ولا أن يُرضيه.
 const stripSql = (t) => t.replace(/--[^\n]*/g, '')
 const DESTRUCTIVE = /(delete\s+from|truncate|drop\s+table|pg_cron|cron\.schedule)/i
-const noAuto = !DESTRUCTIVE.test(stripSql(mig(CORE)) + stripSql(mig(RPCS)) + stripSql(mig(REVK)) + stripSql(mig(RECV)) + stripSql(mig(PUBX)))
+const noAuto = !DESTRUCTIVE.test(stripSql(mig(CORE)) + stripSql(mig(RPCS)) + stripSql(mig(REVK)) + stripSql(mig(RECV)) + stripSql(mig(PUBX)) + stripSql(mig(FIX)))
 check('لا أتمتة حذف في P2 (لا delete/truncate/cron)', noAuto)
 // تأكيد مضادّ: الكاشف يفشل فعلًا على انتهاك مزروع — وإلا فالفحص زينة.
 check('كاشف الأتمتة يلتقط انتهاكًا مزروعًا',
@@ -771,7 +1010,7 @@ const rlsOff = await q(`select relname from pg_class c join pg_namespace n on n.
                                           'trial_ledger','purchase_ledger','code_redemption_ledger','revocation_ledger')`)
 check('RLS مفعّل على كل جداول الوصول', rlsOff.rows.length === 0, rlsOff.rows.map((r) => r.relname).join(', '))
 
-const banned = /مدى الحياة|lifetime/i.test(mig(CORE) + mig(RPCS) + mig(REVK) + mig(RECV) + mig(PUBX))
+const banned = /مدى الحياة|lifetime/i.test(mig(CORE) + mig(RPCS) + mig(REVK) + mig(RECV) + mig(PUBX) + mig(FIX))
 check('لا مصطلح محظور في المخطّط', !banned)
 
 // ── الخلاصة ───────────────────────────────────────────────────────────────
