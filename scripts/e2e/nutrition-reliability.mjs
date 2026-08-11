@@ -47,6 +47,21 @@ const tap = (page, re) => page.evaluate((s) => {
   return true
 }, re.source)
 
+/**
+ * يفتح نيّة «سجّل وجبة» من **ورقة التسجيل السريع** في شريط التنقّل.
+ *
+ * ⚠️ ولا يستعمل بطاقة «اليوم» عمدًا: نصّها يتبع الساعة (`suggestFirstWin`)
+ * فيصير «سجّل وجبة» صباحًا و«سجّل عشاك» مساءً. أول نسخة من هذا الإثبات علّقت
+ * على ذلك النصّ فسقطت حين تغيّرت الساعة — وهو **حظّ توقيت** لا اختبار.
+ * ورقة التسجيل ثابتة النصّ («وش بتسجّل؟» ← «وجبة») فهي المدخل المعتمد هنا.
+ */
+async function openMealIntent(page) {
+  const opened = await tap(page, /^تسجيل$/)
+  if (!opened) return false
+  await settle(page, 900)
+  return tap(page, /^وجبة$/)
+}
+
 let browser
 async function fresh(w = 390) {
   const ctx = await browser.newContext({ viewport: { width: w, height: 780 }, locale: 'ar-SA' })
@@ -106,7 +121,7 @@ try {
     ['نقر تبويب التغذية من اليوم', async (p) => { await p.evaluate(() => { location.hash = '/dashboard' }); await settle(p, 1800); await tap(p, /التغذية/) }],
     ['مسار hash مباشر', async (p) => { await p.evaluate(() => { location.hash = '/dashboard' }); await settle(p, 1400); await p.evaluate(() => { location.hash = '/nutrition' }) }],
     ['بعد إعادة تحميل على التغذية', async (p) => { await p.evaluate(() => { location.hash = '/nutrition' }); await settle(p, 1600); await p.reload({ waitUntil: 'networkidle' }) }],
-    ['نيّة تسجيل معلّقة', async (p) => { await p.evaluate(() => { location.hash = '/dashboard' }); await settle(p, 1800); await tap(p, /سجّل وجبة/) }],
+    ['نيّة تسجيل معلّقة', async (p) => { await p.evaluate(() => { location.hash = '/dashboard' }); await settle(p, 1800); await openMealIntent(p) }],
     ['نيّة بائتة مزروعة', async (p) => { await p.evaluate((k) => { sessionStorage.setItem(k, 'meal') }, INTENT_KEY); await p.evaluate(() => { location.hash = '/nutrition' }) }],
     ['نيّة بقيمة مجهولة', async (p) => { await p.evaluate((k) => { sessionStorage.setItem(k, '{{bogus}}') }, INTENT_KEY); await p.evaluate(() => { location.hash = '/nutrition' }) }],
     ['تنقّل متكرّر اليوم↔التغذية', async (p) => { for (let i = 0; i < 6; i++) { await p.evaluate(() => { location.hash = '/dashboard' }); await settle(p, 500); await p.evaluate(() => { location.hash = '/nutrition' }); await settle(p, 500) } }],
@@ -133,14 +148,14 @@ try {
     await onboardToPreview(page)
     await page.evaluate(() => { location.hash = '/dashboard' })
     await settle(page, 2000)
-    const clicked = await tap(page, /سجّل وجبة/)
+    const clicked = await openMealIntent(page)
     await settle(page, 2600)
     const after = await page.evaluate((k) => ({
       hash: location.hash,
       intent: sessionStorage.getItem(k),
       gate: !!document.querySelector('[data-testid="premium-gate"]'),
     }), INTENT_KEY)
-    check('«سجّل وجبة» موجود على اليوم', clicked)
+    check('ورقة التسجيل السريع تفتح نيّة «وجبة»', clicked)
     check('النيّة تنقل إلى التغذية', after.hash.includes('nutrition'), after.hash)
     check('النيّة تُمسح بعد الاستهلاك (لا تبقى عالقة)', after.intent === null, String(after.intent))
     // معاينة: النيّة تقود إلى البوّابة لا إلى لوحة التسجيل — لا باب خلفي للطفرة.

@@ -81,7 +81,7 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
   const auth = useAuth()
   const ar = lang !== 'en'
   const copy = V2_TODAY[ar ? 'ar' : 'en']
-  const model = useMemo(() => buildTodayV2Model(customization, lang), [customization, lang])
+  const model = useMemo(() => buildTodayV2Model(customization, lang, auth.user?.id ?? null), [customization, lang, auth.user?.id])
   const nutrition = useMemo(() => buildNutritionV2Model(customization, lang), [customization, lang])
   const todayWeightLogged = loadLogs().some(
     (log) => log.date === getDayStamp() && log.values.weightKg !== undefined && log.values.weightKg !== '',

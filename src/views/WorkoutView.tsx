@@ -6,7 +6,8 @@ import type { Lang } from '@/lib/appPreferences'
 import type { AppRoute } from '@/lib/appRoutes'
 import { useAuth } from '@/lib/authContext'
 import { useCustomization } from '@/lib/customizationContext'
-import { todayPlanDay, planExerciseName } from '@/lib/workoutPlan'
+import { planExerciseName } from '@/lib/workoutPlan'
+import { currentWorkout, nextWorkout } from '@/lib/workoutDaySource'
 import { clearActiveWorkout, completedSetCount, loadActiveWorkout, type ActiveWorkout } from '@/lib/activeWorkout'
 import { SessionGuardDialog, type SessionGuardKind } from '@/components/SessionGuardDialog'
 import { planTitle } from '@/lib/planGenerator'
@@ -62,7 +63,15 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
   const source: PlanSource = customRec?.source ?? 'auto'
   const hasCustom = !!customRec && customRec.plan.days.length > 0
   const plan = source === 'custom' && hasCustom ? customRec.plan : autoPlan
-  const planDay = todayPlanDay(plan)
+  /**
+   * [QIM-WEB-FOUNDER-UX-005/حزمة ٥] كان هنا `todayPlanDay(plan)` — التدوير
+   * الأعمى الموسوم `@deprecated` في مصدره (`getDay() % days.length`)، ولا يعرف
+   * الجدول الأسبوعي ولا أيام الراحة. و«اليوم» يقرأ الجدول الحقيقي. فالشاشتان
+   * تتصادفان بالتاريخ وتفترقان به — وهو سبب تقطّع البلاغ.
+   * الآن كلتاهما تسأل `currentWorkout`؛ ويوم الراحة يُعاد بصدق فلا يُعرض تمرينًا.
+   */
+  const scheduled = currentWorkout(userId, customization)
+  const planDay = scheduled?.type === 'training' ? scheduled.day : undefined
 
   const cp = customPlanStrings[lang]
   const [builderOpen, setBuilderOpen] = useState<null | 'create' | 'edit'>(null)
@@ -238,13 +247,19 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
       const name = lang === 'en' ? pr.nameEn || pr.nameAr : pr.nameAr || pr.nameEn
       return `${name || pr.exerciseId} · ${pr.weight} ${tw.volumeUnit}`
     })
-    // تسمية تمرين الغد (اليوم التالي في الخطة) — لمسة تحفيزية.
-    const nextDayLabel = plan.days.length
-      ? (() => {
-          const next = plan.days[(new Date().getDay() + 1) % plan.days.length]
-          return next ? (lang === 'en' ? next.nameEn : next.nameAr) : undefined
-        })()
-      : undefined
+    /**
+     * [QIM-WEB-FOUNDER-UX-005/حزمة ٥] تمرينك القادم — من **نفس** مصدر «اليوم».
+     *
+     * كان هنا تدوير أعمى ثالث: `plan.days[(getDay() + 1) % days.length]`. أي أن
+     * شاشة الإنهاء تَعِد بيوم لا علاقة له بما سيعرضه «اليوم» غدًا — والوعد
+     * المكسور هنا أسوأ من غيره لأنه يقع في لحظة إنجاز.
+     *
+     * `nextWorkout` يتقدّم يومًا بيوم عبر الجدول الحقيقي، فيتخطّى الراحات
+     * ويحترم التجاوزات. والثابت المطلوب يصير قابلًا للإثبات:
+     *   Completion.next == Today.current في اليوم التالي.
+     */
+    const upcoming = nextWorkout(userId, customization)
+    const nextDayLabel = upcoming ? (lang === 'en' ? upcoming.day.day.nameEn : upcoming.day.day.nameAr) : undefined
     setActiveDay(null)
     setSummary({ session, prs: prLabels, streakWeeks: weekly.streakWeeks, nextDayLabel })
   }

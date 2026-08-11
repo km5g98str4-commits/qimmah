@@ -12,7 +12,7 @@ import type { Customization } from '@/lib/customization'
 import type { Lang } from '@/lib/appPreferences'
 import type { CalorieGoal } from '@/types/profile'
 import type { AppRoute } from '@/lib/appRoutes'
-import { scheduledDayFor } from '@/lib/workoutCalendar'
+import { currentWorkout } from '@/lib/workoutDaySource'
 import { getSteps, loadStepGoal } from '@/lib/stepCounter'
 import { getNutritionLog, getWorkoutSessions } from '@/lib/historyStore'
 import { todaysCompletion } from '@/lib/workoutSessionEngine'
@@ -111,7 +111,7 @@ function partOfDay(ar: boolean, d = new Date()): string {
   return ar ? 'مساءً' : 'Evening'
 }
 
-export function buildTodayV2Model(customization: Customization, lang: Lang): TodayV2Model {
+export function buildTodayV2Model(customization: Customization, lang: Lang, userId: string | null = null): TodayV2Model {
   const ar = lang !== 'en'
   const t = (a: string, e: string) => (ar ? a : e)
   const now = new Date()
@@ -125,7 +125,11 @@ export function buildTodayV2Model(customization: Customization, lang: Lang): Tod
 
   // ── Workout (real: weekly schedule → plan day | honest rest; legacy rotation
   //    only as the documented fallback when no schedule is configured) ──
-  const resolved = scheduledDayFor(customization.workoutPlan, now)
+  // [QIM-WEB-FOUNDER-UX-005/حزمة ٥] المصدر الواحد. كان هنا `scheduledDayFor`
+  // على `customization.workoutPlan` مباشرةً — أي **الخطة المولَّدة دائمًا**،
+  // بينما تبويب التمرين يعتمد الجدول المخصّص حين يختاره المستخدم. فمن بنى
+  // جدولًا مخصّصًا كان يرى خطّتين في شاشتين. الآن كلاهما يسأل `currentWorkout`.
+  const resolved = currentWorkout(userId, customization, now)
   const restDay = resolved?.type === 'rest'
   const day = resolved?.type === 'training' ? resolved.day : undefined
   const exerciseCount = day?.exercises.length ?? 0
