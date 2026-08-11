@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import { Icon } from '@/components/Icon'
 import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
@@ -50,10 +50,15 @@ export function DataManagementPanel({
   const importButtonRef = useRef<HTMLButtonElement>(null)
   const previewRef = useRef<HTMLElement>(null)
   const successRef = useRef<HTMLElement>(null)
+  const restoreImportFocusRef = useRef(false)
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (phase === 'preview' && preview) previewRef.current?.focus()
     if (phase === 'done') successRef.current?.focus()
+    if (phase === 'idle' && restoreImportFocusRef.current) {
+      restoreImportFocusRef.current = false
+      importButtonRef.current?.focus()
+    }
   }, [phase, preview])
 
   const onExport = async () => {
@@ -118,9 +123,9 @@ export function DataManagementPanel({
   }
 
   const onCancel = () => {
+    restoreImportFocusRef.current = true
     setPreview(null)
     setPhase('idle')
-    window.requestAnimationFrame(() => importButtonRef.current?.focus())
   }
 
   const onUndo = () => {
@@ -132,7 +137,19 @@ export function DataManagementPanel({
   // — معاينة الاستيراد: عدّ لكل متجر + تأكيد صريح (لا تطبيق قبل الضغط) —
   if (phase === 'preview' && preview) {
     return (
-      <section ref={previewRef} tabIndex={-1} aria-labelledby="settings-import-preview-title" data-testid="settings-import-preview" className="rounded-xl border border-line bg-surface p-4">
+      <section
+        ref={previewRef}
+        tabIndex={-1}
+        aria-labelledby="settings-import-preview-title"
+        data-testid="settings-import-preview"
+        onKeyDown={(event) => {
+          if (event.key === 'Escape') {
+            event.preventDefault()
+            onCancel()
+          }
+        }}
+        className="rounded-xl border border-line bg-surface p-4"
+      >
         <h3 id="settings-import-preview-title" className="text-sm font-black text-ink-900">{t.settings.importPreviewTitle}</h3>
         <p className="mt-1 text-xs leading-relaxed text-ink-500">{t.settings.importPreviewNote}</p>
         <ul className="mt-3 divide-y divide-line">

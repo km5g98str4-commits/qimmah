@@ -192,6 +192,16 @@ async function run() {
     await page.locator('[data-testid="settings-import-cancel"]').click()
     await page.waitForSelector('[data-testid="settings-data-import"]', { state: 'visible', timeout: 8000 })
     check('عاد التركيز إلى زر الاستيراد بعد الإلغاء', await page.locator('[data-testid="settings-data-import"]').evaluate((node) => document.activeElement === node))
+    const [fileChooser] = await Promise.all([
+      page.waitForEvent('filechooser'),
+      page.locator('[data-testid="settings-data-import"]').press('Enter'),
+    ])
+    check('زر الاستيراد يبقى متاحًا من لوحة المفاتيح', Boolean(fileChooser))
+    await page.setInputFiles('[data-testid="settings-data-file"]', validPath)
+    await page.waitForSelector('[data-testid="settings-import-preview"]', { timeout: 8000 })
+    await page.locator('[data-testid="settings-import-preview"]').press('Escape')
+    await page.waitForSelector('[data-testid="settings-data-import"]', { state: 'visible', timeout: 8000 })
+    check('Escape يعيد التركيز إلى زر الاستيراد', await page.locator('[data-testid="settings-data-import"]').evaluate((node) => document.activeElement === node))
     await page.getByRole('button', { name: 'English', exact: true }).click()
     await page.waitForFunction(() => document.documentElement.lang === 'en')
     await page.setInputFiles('[data-testid="settings-data-file"]', validPath)
@@ -202,6 +212,7 @@ async function run() {
     await page.waitForSelector('[data-testid="settings-import-success"]', { timeout: 8000 })
     check('عُرضت «تمّ الاستيراد» بعد التطبيق الفعلي', await page.locator('[data-testid="settings-import-success"]').isVisible())
     check('انتقل التركيز إلى حالة نجاح الاستيراد', await page.locator('[data-testid="settings-import-success"]').evaluate((node) => document.activeElement === node))
+    check('نجاح الاستيراد لا يترك التركيز على body', await page.evaluate(() => document.activeElement !== document.body))
     const restored = await page.evaluate((k) => JSON.parse(localStorage.getItem(k) || 'null'), K_STEP_GOAL)
     check('استُعيدت القيمة الأصلية (8000) بعد الاستيراد', restored === 8000)
 
