@@ -2,7 +2,7 @@
 // هذا الكائن هو مصدر الحقيقة الوحيد: كل خطة/هدف/تقسيمة/التزام يُشتق منه.
 // كل الحقول اختيارية ما لم يكن لها قيمة افتراضية آمنة — لا بيانات وهمية.
 
-import type { ExperienceLevel, TrainingHistoryEvidence } from '@/types/profile'
+import type { ExperienceLevel, TrainingHistoryEvidence, TrainingStylePref } from '@/types/profile'
 
 export type { ExperienceLevel }
 
@@ -86,6 +86,11 @@ export interface OnbTrainingPreferences {
    * الغياب = «لم يُسأل»، وهو حال كل ملف أُنشئ قبل هذه الموجة.
    */
   trainingHistory?: TrainingHistoryEvidence
+  /**
+   * تفضيل المعدّات (أجهزة/حرة/مزيج) — [CTO-QAE-023] M1b.
+   * كان يُسأل ويُرمى؛ صار يُحفظ لأن المحرّك يعدّه دليلًا إلزاميًا.
+   */
+  trainingStyle?: TrainingStylePref
 }
 
 /** ملف النشاط اليومي خارج التمرين. */

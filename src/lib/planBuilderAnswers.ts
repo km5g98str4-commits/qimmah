@@ -17,7 +17,7 @@ import type {
   WellnessTrackingMode,
 } from '@/types/onboarding'
 import { HEALTH_CONSENT_POLICY_VERSION, ONBOARDING_SCHEMA_VERSION } from '@/types/onboarding'
-import type { TrainingHistoryEvidence } from '@/types/profile'
+import type { TrainingHistoryEvidence, TrainingStylePref } from '@/types/profile'
 import type { GoalValue } from '@/data/planBuilder'
 
 export interface Answers {
@@ -43,6 +43,8 @@ export interface Answers {
    * مفردتين تبدو دقيقة وهي تخمين.
    */
   trainingHistory?: TrainingHistoryEvidence
+  /** تفضيل المعدّات — [CTO-QAE-023] M1b؛ كان يُجمع في الواجهة ولا يُحفظ. */
+  trainingStyle?: TrainingStylePref
   environment?: Environment
   trainingDays: number
   daysTouched: boolean
@@ -121,6 +123,7 @@ export function buildOnboardingProfile(a: Answers): OnboardingProfile {
       // ذاك يستبدل جواب المستخدم بقيمة مشتقّة من حقل آخر، وهو مقبول لتفضيل
       // تقسيمة، ممنوع على دليل واقعة.
       trainingHistory: a.trainingHistory,
+      trainingStyle: a.trainingStyle,
     },
     activityProfile: {
       neat: a.neat,

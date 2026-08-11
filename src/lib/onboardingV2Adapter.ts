@@ -75,8 +75,12 @@ const PLACE_TO_ENV: Record<V2Place, Environment> = {
  * مستخدمي التطبيق**. القيم المُجابة تحلّ محلّها؛ وما لم يُجَب بعد يسقط على
  * الافتراضي كما كان (توافق رجعي مع مسودّات قديمة).
  *
- * NOTE (documented gap): `choices.pref` (machines/free/mixed) has no field in
- * `Answers`, so it is NOT persisted. We do not invent a backend field.
+ * ⚠️ **الفجوة الموثّقة أُغلقت في [CTO-QAE-023] M1b.** كان هنا سطر يقول إن
+ * `choices.pref` بلا حقل في `Answers` فلا يُحفظ — وكان وصفًا صادقًا لحالة
+ * سيّئة: سؤالٌ **إلزامي** (`validateStep(5)` يحجب بدونه) يُجاب ثم يُرمى. وهو
+ * أحد مفتاحَي `MANDATORY_KEYS` اللذين كانا يمنعان كل ملف من بلوغ
+ * `status: 'complete'`، فلا يعمل مسار التدريب في المحرّك لأي مستخدم.
+ * صار يُحفظ في `trainingStyle` — **بلا سؤال جديد ولا تغيير في الواجهة**.
  */
 export function toAnswersFromV2(choices: V2OnboardingChoices): Answers {
   const weightKg = choices.weightKg ?? defaultAnswers.weightKg
@@ -114,6 +118,8 @@ export function toAnswersFromV2(choices: V2OnboardingChoices): Answers {
       lastTrained: choices.lastTrained ?? undefined,
       consistency: choices.consistency ?? undefined,
     },
+    // تفضيل المعدّات — يُنقل الآن بدل أن يُرمى. القيم هي قيم الواجهة نفسها.
+    trainingStyle: choices.pref ?? undefined,
     targetWeightKg,
     targetTouched: true,
   }

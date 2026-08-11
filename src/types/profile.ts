@@ -67,6 +67,18 @@ export type TotalMonthsBucket = 'lt3' | 'm3_6' | 'm6_12' | 'y1_3' | 'y3_plus'
 export type LastTrainedBucket = 'now' | 'w2' | 'm1_3' | 'm3_12' | 'y1_plus'
 export type TrainingConsistency = 'rare' | 'on_off' | 'mostly' | 'steady'
 
+/**
+ * تفضيل نوع المعدّات — يُسأل في خطوة المعدّات ويُطلب للتقدّم (`validateStep(5)`).
+ *
+ * ⚠️ **كان يُجمع ثم يُرمى.** وثّق `onboardingV2Adapter` ذلك صراحةً: «NO existing
+ * `Answers` field; collected for UX only». فالمستخدم يُجبَر على الإجابة ثم لا
+ * يصل جوابه إلى أي مستهلك — وهو أحد مفتاحَي `MANDATORY_KEYS` اللذين كانا يمنعان
+ * أي ملف من بلوغ `status: 'complete'` في المحرّك ([CTO-QAE-023] M1b §1).
+ *
+ * **إشارة تفضيل لا قيد قدرة** (U3): لا يُصفّي التمارين، بل يُنقل كما هو.
+ */
+export type TrainingStylePref = 'machines' | 'free' | 'mixed'
+
 export interface TrainingHistoryEvidence {
   trainedBefore?: TrainedBefore
   /** لا يُجمع إطلاقًا عند `trainedBefore === 'never'` — وغيابه هناك صحيح لا ناقص. */
@@ -119,6 +131,20 @@ export interface Profile {
    * تُستهلك في طبقة QAE التشخيصية فقط اليوم؛ `generatePlan` الحيّ لا يقرؤها.
    */
   trainingHistory?: TrainingHistoryEvidence
+  /**
+   * تفضيل المعدّات المُعلَن في الإعداد. غيابه = ملف أُنشئ قبل [CTO-QAE-023].
+   * لا يقرؤه `generatePlan` الحيّ — يخدم طبقة QAE التشخيصية وحدها اليوم.
+   */
+  trainingStyle?: TrainingStylePref
+  /**
+   * هل أقرّ المستخدم بمعالجة بياناته الصحية في الإعداد؟
+   *
+   * منقول من `OnboardingProfile.consents.healthData.accepted`. **ليس بوّابة
+   * إذن ثانية** — الحاجز الفعلي يبقى في تدفّق الإعداد و`syncConsent`؛ هذه نسخة
+   * قراءة يحتاجها المحرّك دليلًا إلزاميًا (`MANDATORY_KEYS`). غيابه = «لم يُسجَّل
+   * على هذا الملف»، ولا يُقرأ أبدًا على أنه موافقة.
+   */
+  healthDataConsent?: boolean
   gymAccess?: GymAccess
   /** نوع مكان التمرين الدلالي (إعداد v2). */
   gymType?: GymType

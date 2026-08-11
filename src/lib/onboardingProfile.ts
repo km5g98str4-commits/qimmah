@@ -287,6 +287,10 @@ export function toLegacyProfile(op: OnboardingProfile, base: Profile = defaultPr
     // تاريخ التدريب — يعبر كما هو. `undefined` تبقى `undefined` (ملف قديم لم
     // يُسأل)، ولا تُملأ من `base`: لا يوجد افتراضي صادق لواقعة.
     trainingHistory: tp.trainingHistory,
+    trainingStyle: tp.trainingStyle,
+    // نسخة قراءة من سجلّ الموافقات. **لا تُقلَب إلى `true` بالغياب أبدًا**:
+    // `accepted` غير الموجودة تعني «لم تُسجَّل»، والموافقة لا تُفترض (§9).
+    healthDataConsent: op.consents?.healthData?.accepted === true ? true : undefined,
     gymAccess,
     gymType,
     equipment: [],
@@ -431,6 +435,7 @@ export function migrateFromCustomization(c: Customization): OnboardingProfile {
       // `p.trainingLevel`**: المستوى تقدير ذاتي، والتاريخ واقعة — واشتقاق
       // الثانية من الأولى هو بالضبط الوكيل الضعيف الذي تمنعه هذه الموجة.
       trainingHistory: p.trainingHistory,
+      trainingStyle: p.trainingStyle,
     },
     activityProfile: {
       neat: p.activityLevel ? ACTIVITY_TO_NEAT[p.activityLevel] : undefined,
