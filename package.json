@@ -150,7 +150,8 @@
     "qae:emit-prescription-metadata": "node QimmahAdaptiveEngine/Tools/run-emit-prescription-metadata.mjs",
     "qae:binding-ceiling": "node QimmahAdaptiveEngine/Tools/run-qae-binding-ceiling-proof.mjs",
     "qae:prescription": "node QimmahAdaptiveEngine/Tools/run-qae-prescription-proof.mjs",
-    "qae:performance": "node QimmahAdaptiveEngine/Tools/run-qae-performance-proof.mjs"
+    "qae:performance": "node QimmahAdaptiveEngine/Tools/run-qae-performance-proof.mjs",
+    "qae:shadow": "node scripts/run-qae-shadow-proof.mjs"
   },
   "dependencies": {
     "@capacitor/app": "^8.1.0",

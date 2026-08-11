@@ -45,7 +45,14 @@ export function viewOf(bank: readonly QuestionDef[], state: QuestionSessionState
 
 export type AnswerResult =
   | { ok: true; state: QuestionSessionState; emitted: EvidenceItem[] }
-  | { ok: false; error: 'unknown_question' | 'out_of_range' | 'option_not_available' | 'type_mismatch'; state: QuestionSessionState }
+  // [CTO-QAE-020] `too_few`/`too_many` come from normalizeAnswer's select
+  // bounds and were missing here. The QAE-only tsconfig did not surface it;
+  // the app's stricter build did. Widened rather than cast away.
+  | {
+      ok: false
+      error: 'unknown_question' | 'out_of_range' | 'option_not_available' | 'type_mismatch' | 'too_few' | 'too_many'
+      state: QuestionSessionState
+    }
 
 export function applyAnswer(
   bank: readonly QuestionDef[],

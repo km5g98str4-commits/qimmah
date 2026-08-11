@@ -8,7 +8,7 @@
 // No UI strings, no question ids.
 
 import { ordinalCompare } from '../Shared/numeric'
-import type { Instant } from '../Shared/core'
+import type { Now } from '../Shared/core'
 import type { ProgressionKind } from '../Catalog/model'
 
 export const PERFORMANCE_SCHEMA_VERSION = '1.0.0'
@@ -148,8 +148,8 @@ export interface CompletedSession {
   planVersionId: string
   sessionId: string
   dayId: string
-  startedAt: Instant
-  completedAt?: Instant
+  startedAt: Now
+  completedAt?: Now
   exercises: readonly CompletedExercise[]
 }
 

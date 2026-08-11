@@ -2,7 +2,7 @@
 // No progression decision is made or asserted anywhere in this suite.
 
 import { canonicalSerialize } from '../../Domain/Shared/canonical'
-import type { Instant } from '../../Domain/Shared/core'
+import type { Now } from '../../Domain/Shared/core'
 import {
   toPerformanceEvidence,
   validateLoad,
@@ -25,7 +25,7 @@ const check = (name: string, ok: boolean, detail = ''): void => {
   }
 }
 
-const AT = 1785542400000 as Instant
+const AT: Now = { epochMs: 1785542400000, tzOffsetMinutes: 180 }
 const kg = (n: number): Load => ({ kind: 'externalGrams', grams: n * 1000 })
 
 const set = (over: Partial<CompletedSet> & Pick<CompletedSet, 'setIndex'>): CompletedSet => ({

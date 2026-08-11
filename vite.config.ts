@@ -67,6 +67,7 @@ export default defineConfig(() => {
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),
+        '@qae': path.resolve(__dirname, './QimmahAdaptiveEngine'),
       },
     },
     define: {
