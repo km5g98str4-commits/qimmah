@@ -130,6 +130,34 @@ check(
   missingRoutes.join(', '),
 )
 
+// التطابق **في الاتجاهين**: لا قاعدة يتيمة تشير إلى مسار لم يعد موجودًا في
+// ROUTES. الاتجاه الأول وحده يترك قواعد ميتة تتراكم بلا أن يلاحظها أحد.
+const rewriteRules = rules.filter((r) => r.status === 200 && r.to === '/index.html')
+const orphanRules = rewriteRules
+  .map((r) => r.from.replace(/^\//, ''))
+  .filter((name) => !declaredRoutes.includes(name))
+check(
+  'ولا قاعدة يتيمة في _redirects بلا مسار مقابل في ROUTES (تطابق ١:١)',
+  orphanRules.length === 0,
+  orphanRules.join(', '),
+)
+check(
+  'عدد القواعد = عدد المسارات بالضبط',
+  rewriteRules.length === declaredRoutes.length,
+  `قواعد ${rewriteRules.length} · مسارات ${declaredRoutes.length}`,
+)
+
+// محاكاة التفاف: مسار جديد يُضاف إلى ROUTES وينسى صاحبه قاعدته.
+{
+  const withNewRoute = [...declaredRoutes, 'brandNewScreen']
+  const wouldMiss = withNewRoute.filter((r) => serve(`/${r}`, world).body !== '/index.html')
+  check(
+    'مسار جديد بلا قاعدة يسقط الفحص باسم واضح — الحارس يعمل استباقيًا',
+    wouldMiss.length === 1 && wouldMiss[0] === 'brandNewScreen',
+    wouldMiss.join(', '),
+  )
+}
+
 // ─────────── الطبقة ٣أ: محاكاة الالتفاف على التوجيه (§4.2) ───────────
 
 console.log('\n▸ الطبقة ٣أ — محاكاة التفاف: إعادة القاعدة الشاملة')

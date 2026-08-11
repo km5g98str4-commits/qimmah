@@ -14,6 +14,7 @@ import { initNativeShell } from './lib/nativeShell'
 import { initDeepLinkRecovery } from './lib/deepLinkRecovery'
 import { captureMonitoringError, initMonitoring } from './lib/monitoring'
 import { refreshHealthKitStepsIfEnabled } from './lib/healthKit'
+import { registerServiceWorkerWithUpdates } from './lib/swUpdate'
 // وحدة PWA: تلتقط حدث beforeinstallprompt مبكرًا (يُطلق مرّة واحدة فقط) لعرض زر التثبيت لاحقًا.
 import './lib/pwa'
 // خطوط مُستضافة ذاتيًا (Tajawal) — بلا CDN وقت التشغيل، مهم للنسخة الأصلية/دون اتصال.
@@ -51,12 +52,11 @@ if (typeof window !== 'undefined') {
 // داخل Capacitor (iOS/Android) الأصول تُخدَّم محليًا من الحزمة الأصلية، وتشغيل Service
 // Worker داخل الـ WebView قد يتعارض مع كاش القشرة ودورة تحديث الأصول، فنُبقيه للويب
 // ونُعطّله على المنصّات الأصلية.
-if (import.meta.env.PROD && !Capacitor.isNativePlatform() && 'serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {
-      // فشل التسجيل لا يجب أن يكسر التطبيق — يبقى يعمل أونلاين طبيعيًا.
-    })
-  })
+// والتسجيل يمرّ عبر `registerServiceWorkerWithUpdates` لا عبر `register` المجرّدة:
+// التسجيل وحده كان يترك التبويب على بناء قديم إلى أجل غير مسمّى بعد كل نشر
+// ([QIM-WEB-RELEASE-001] البند ٨) — والوحدة تضيف تقاربًا حتميًا مرّة واحدة.
+if (import.meta.env.PROD && !Capacitor.isNativePlatform()) {
+  registerServiceWorkerWithUpdates()
 }
 
 const root = document.getElementById('root')

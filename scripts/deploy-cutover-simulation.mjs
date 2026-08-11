@@ -255,7 +255,57 @@ console.log('\n▸ محاكاة التفاف — نفس النشرة بتهيئ�
   )
 }
 
-for (const dir of [OUT_A, OUT_B]) rmSync(dir, { recursive: true, force: true })
+// ─────────── الحلقة الثانية: B → C (المطلوب في البند ٣) ───────────
+//
+// نشرة واحدة ناجحة لا تثبت تقاربًا مستدامًا: قد يكون الانتقال الأول نجح لأن
+// الكاش كان فارغًا. فنكرّر على نشرة ثالثة بعميل خرج للتوّ من B.
+
+console.log('\n▸ الحلقة الثانية — نشرة C بعد B')
+
+const OUT_C = resolve(root, '.cutover-c')
+if (existsSync(OUT_C)) rmSync(OUT_C, { recursive: true, force: true })
+buildInto(OUT_C, 'ccccccc')
+
+const filesC = listFiles(OUT_C)
+const entriesC = entryAssets(OUT_C)
+const staleFromB = entriesB.find((b) => !filesC.has(b))
+
+check('C أنتج حزمة دخول مختلفة عن B', Boolean(staleFromB), `B: ${entriesB.join(', ')} | C: ${entriesC.join(', ')}`)
+
+if (staleFromB) {
+  const worldC = {
+    files: filesC,
+    rules: parseRedirects(readFileSync(resolve(OUT_C, '_redirects'), 'utf-8')),
+    has404: filesC.has('/404.html'),
+  }
+  const staleB = serve(staleFromB, worldC)
+  check('حزمة B القديمة على نشرة C ⇒ 404 لا HTML', staleB.status === 404, `الحالة ${staleB.status}`)
+
+  const sw = loadSW(async (req) => toResponse(serve(new URL(req.url).pathname, worldC), OUT_C))
+  const res = await requestThroughSW(sw, `https://x.test${staleFromB}`, { destination: 'script' })
+  check('عامل الخدمة يمرّر فشل B→C بصدق', res.status === 404)
+  const runtime = [...sw.stores.entries()].find(([k]) => k.includes('runtime'))
+  check('لا تسميم في الانتقال B→C', !runtime || runtime[1].size === 0)
+
+  const nav = await requestThroughSW(sw, 'https://x.test/', { mode: 'navigate', destination: 'document' })
+  const body = await nav.text()
+  check(
+    'التحديث يصل قشرة C وتشير إلى حِزم C',
+    nav.status === 200 && entriesC.every((e) => body.includes(e)) && !body.includes(staleFromB),
+  )
+
+  // هوية البناء تفرّق النشرات الثلاث بلا لبس.
+  const idOf = (dir) =>
+    readFileSync(resolve(dir, 'index.html'), 'utf-8').match(/name="qimmah-commit" content="([^"]*)"/)?.[1]
+  const ids = [idOf(OUT_A), idOf(OUT_B), idOf(OUT_C)]
+  check(
+    'هوية البناء في HTML تميّز النشرات الثلاث (aaaaaaa · bbbbbbb · ccccccc)',
+    new Set(ids).size === 3,
+    ids.join(' · '),
+  )
+}
+
+for (const dir of [OUT_A, OUT_B, OUT_C]) rmSync(dir, { recursive: true, force: true })
 
 console.log(`\n${'─'.repeat(60)}`)
 console.log(`محاكاة النشرة: ${pass} ناجح · ${fail} فاشل`)
