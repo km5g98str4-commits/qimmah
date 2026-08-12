@@ -185,8 +185,24 @@ export default function App() {
   const didInitialAuthRoute = useRef(false)
   const [showSuccess, setShowSuccess] = useState(false)
   const dismissSuccess = useCallback(() => setShowSuccess(false), [])
-  // وضع شاشة الحساب (تسجيل دخول/إنشاء حساب) — يُحدَّد من زرّ شاشة البداية.
-  const [loginMode, setLoginMode] = useState<'login' | 'signup'>('login')
+  /**
+   * [QIM-WEB-FOUNDER-UX-006/حزمة ٦] وضع شاشة الحساب **يُشتقّ من المسار**.
+   * كان `useState` هنا وفي `LoginView` معًا، فالعنوان لا يتحرّك مع التبديل.
+   */
+  const authMode: 'login' | 'signup' | 'forgot' =
+    view === 'signup' ? 'signup' : view === 'forgot' ? 'forgot' : 'login'
+  const goAuth = useCallback((mode: 'login' | 'signup' | 'forgot') => {
+    setView(mode === 'signup' ? 'signup' : mode === 'forgot' ? 'forgot' : 'login')
+  }, [])
+
+  /**
+   * وجهة الضيف من شاشة البداية/الحساب.
+   * الضيف **المكتمل** يدخل معاينته على «اليوم»؛ ومحرّر الخطة لا يُفتح إلا بفعل
+   * «تعديل خطتي» صريح. كان كلاهما يُرسَل إلى `setup` فيهبط العائد على المحرّر.
+   */
+  const enterAsGuest = useCallback(() => {
+    setView(isOnboardingComplete(null) ? guardRoute('dashboard', null) : 'setup')
+  }, [])
 
   // آخر مسار غير قانوني (للرجوع الآمن من الخصوصية/الشروط دون الاعتماد على history.back
   // الذي قد يقذف المستخدم خارج التطبيق عند فتح الصفحة مباشرةً/التحديث).
@@ -285,7 +301,7 @@ export default function App() {
     const signedInId = await currentUserId()
     if (!signedInId) {
       // لا حساب → يعود لشاشة الحساب (لا دخول بلا تسجيل).
-      setView('login')
+      goAuth('login')
       return
     }
     // مسجّل دخول — القرار لكل حساب: السجلّ المحلي، وإلا الملف السحابي.
@@ -296,7 +312,7 @@ export default function App() {
     if (!onboarded) onboarded = await hydrateOnboardingFromProfile(signedInId)
     if (onboarded) setView('dashboard')
     else openSetup()
-  }, [openSetup])
+  }, [openSetup, goAuth])
 
   const closeSetup = (completed?: boolean) => {
     const done = completed || isOnboardingComplete(uid)
@@ -368,8 +384,7 @@ export default function App() {
             lang={LANG}
             onDone={() => {
               auth.endRecovery()
-              setLoginMode('login')
-              setView('login')
+              goAuth('login')
             }}
           />
         </Suspense>
@@ -380,7 +395,7 @@ export default function App() {
   // ——— بوّابة تأكيد البريد (P0، دفاع عميق): حساب مسجّل ببريد لم يُؤكَّد بعد لا يُمنح وصولًا
   //     كاملًا — يُحوَّل لشاشة التأكيد. الضيف/غير المسجّل بالبريد يمرّ (emailVerified=true). ———
   if (!auth.emailVerified) {
-    return <VerifyEmailView lang={LANG} onSignedOut={() => setView('login')} />
+    return <VerifyEmailView lang={LANG} onSignedOut={() => goAuth('login')} />
   }
 
   // ——— بناء عنصر الشاشة الحالية ثم لفّه بحدّ Suspense (أسفل المزوّدات حتى تبقى حالتها
@@ -393,17 +408,17 @@ export default function App() {
         lang={LANG}
         // [CTO-68] الحدث ٤ — توزيع الشاشة الأولى. يُلتقط عند **الاختيار** لا عند
         // العرض، فالتوزيع يقيس ما فعله القادم الجديد لا ما رآه.
-        onLogin={() => { trackLocal('entry_choice_made', { choice: 'login' }); setLoginMode('login'); setView('login') }}
-        onSignup={() => { trackLocal('entry_choice_made', { choice: 'signup' }); setLoginMode('signup'); setView('login') }}
-        onGuest={() => { trackLocal('entry_choice_made', { choice: 'guest' }); setView('setup') }}
+        onLogin={() => { trackLocal('entry_choice_made', { choice: 'login' }); goAuth('login') }}
+        onSignup={() => { trackLocal('entry_choice_made', { choice: 'signup' }); goAuth('signup') }}
+        onGuest={() => { trackLocal('entry_choice_made', { choice: 'guest' }); enterAsGuest() }}
       />
     )
-  } else if (view === 'login') {
+  } else if (view === 'login' || view === 'signup' || view === 'forgot') {
     content = (
       <V.LoginView
         lang={LANG}
-        initialMode={loginMode}
-        onModeChange={setLoginMode}
+        mode={authMode}
+        onModeChange={goAuth}
         onSuccess={enterApp}
         onBack={() => setView('start')}
       />
@@ -425,8 +440,8 @@ export default function App() {
     content = (
       <AccountRequiredView
         lang={LANG}
-        onLogin={() => { setLoginMode('login'); setView('login') }}
-        onGuest={() => setView('setup')}
+        onLogin={() => goAuth('login')}
+        onGuest={enterAsGuest}
         onBack={() => setView('start')}
       />
     )
@@ -449,7 +464,7 @@ export default function App() {
         lang={LANG}
         onNavigate={navigate}
         onEditPlan={openSetup}
-        onLogin={() => setView('login')}
+        onLogin={() => goAuth('login')}
         onOpenPrivacy={() => setView('privacy')}
         onOpenTerms={() => setView('terms')}
         onOpenProductReview={() => setView('productReview')}

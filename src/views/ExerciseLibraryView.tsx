@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { resourceIdFromHash, setExerciseHash } from '@/lib/appRoutes'
 import type { ReactNode } from 'react'
 import { Icon } from '@/components/Icon'
 import { ExerciseDetail } from '@/components/ExerciseDetail'
@@ -55,7 +56,30 @@ export function ExerciseLibraryView({ lang }: ExerciseLibraryViewProps) {
   const [q, setQ] = useState('')
   const [muscle, setMuscle] = useState<Muscle | 'all'>('all')
   const [equip, setEquip] = useState<string>('all')
-  const [openId, setOpenId] = useState<string | null>(null)
+  /**
+   * [QIM-WEB-FOUNDER-UX-006/حزمة ٦] تفصيل التمرين **حالة مسار** لا حالة مكوّن.
+   *
+   * كان `useState` هنا، فلا يُدفع مدخل تاريخ عند الفتح. والنتيجة المقيسة: «رجوع»
+   * لا يجد ما يعود إليه داخل المكتبة فيقفز إلى ما قبلها (اليوم/الإعدادات)،
+   * والتحديث يفقد التمرين المفتوح، ولا رابط يمكن مشاركته.
+   * الآن `#/exercises/<id>` — والمكتبة تتبع الـhash لا العكس.
+   */
+  const [openId, setOpenId] = useState<string | null>(() => resourceIdFromHash())
+  useEffect(() => {
+    const sync = () => setOpenId(resourceIdFromHash())
+    window.addEventListener('hashchange', sync)
+    return () => window.removeEventListener('hashchange', sync)
+  }, [])
+  /**
+   * معرّف مجهول (رابط عميق قديم أو مكتوب يدويًا) **يفشل بأمان إلى المكتبة**.
+   *
+   * والاستبدال هنا لا `history.back()`: الرابط العميق المباشر لا تاريخ قبله
+   * داخل التطبيق، فالرجوع يخرج المستخدم من قِمّة كلها. `setExerciseHash(null)`
+   * يهبط به على المكتبة أيًّا كان طريق وصوله.
+   */
+  useEffect(() => {
+    if (openId && !getExercise(openId)) setExerciseHash(null)
+  }, [openId])
   // وضع العرض: كل التمارين (الافتراضي — السلوك القديم) أو كتالوج الأجهزة للمبتدئين.
   const [view, setView] = useState<'all' | 'machines'>('all')
 
@@ -201,7 +225,7 @@ export function ExerciseLibraryView({ lang }: ExerciseLibraryViewProps) {
               <li key={e.id}>
                 <button
                   type="button"
-                  onClick={() => setOpenId(e.id)}
+                  onClick={() => setExerciseHash(e.id)}
                   className="group flex h-full w-full flex-col overflow-hidden rounded-3xl border border-line bg-surface text-start shadow-card transition hover:-translate-y-0.5 hover:shadow-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 >
                   <ExerciseCardMedia exerciseId={e.id} />
@@ -236,7 +260,15 @@ export function ExerciseLibraryView({ lang }: ExerciseLibraryViewProps) {
       {view === 'machines' && <MachineCatalogBrowser onOpen={setOpenId} d={d} lang={lang} />}
       </div>
 
-      {openId && <ExerciseDetail lang={lang} exerciseId={openId} onClose={() => setOpenId(null)} />}
+      {openId && (
+        <ExerciseDetail
+          lang={lang}
+          exerciseId={openId}
+          /* الإغلاق **رجوع تاريخي** لا مسح حالة: فيتطابق زرّ الإغلاق مع زرّ
+             رجوع المتصفّح بدل أن يتركا تاريخين مختلفين. */
+          onClose={() => window.history.back()}
+        />
+      )}
     </div>
   )
 }

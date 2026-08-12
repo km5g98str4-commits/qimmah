@@ -139,6 +139,7 @@
     "test:bottom-overlay": "node scripts/run-bottom-overlay-proof.mjs",
     "test:workout-day-source": "node scripts/run-workout-day-source-proof.mjs",
     "test:access-gate": "node scripts/run-access-gate-proof.mjs",
+    "test:e2e:navigation": "npm run build && node scripts/e2e/navigation-history.mjs",
     "test:e2e:nutrition": "npm run build && node scripts/e2e/nutrition-reliability.mjs",
     "test:e2e:plan-handoff": "npm run build && node scripts/e2e/plan-handoff.mjs",
     "test:e2e:preview-gate": "VITE_ENTITLEMENT_MODE=mock npm run build && node scripts/e2e/preview-gate.mjs",

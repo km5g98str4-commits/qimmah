@@ -45,6 +45,11 @@ async function waitForServer(ms = 30000) {
 const hitTest = (page, selectorFn) => page.evaluate((src) => {
   const targets = new Function('return ' + src)()()
   return targets.map((el) => {
+    // [حزمة ٦] التمرير قبل القياس. شاشة التسليم بعد الحزمة ٣ صارت صفحة قابلة
+    // للتمرير، فبعض أزرارها تحت الطيّة. و`elementFromPoint` خارج المنفذ يعيد
+    // `null` — وهو **ليس تغطية**: العنصر غير مغطّى بل غير معروض بعد. قياسٌ بلا
+    // تمرير يتّهم بريئًا. المستخدم يمرّر ثم ينقر، والفحص يفعل مثله.
+    el.scrollIntoView({ block: 'center', behavior: 'instant' })
     const r = el.getBoundingClientRect()
     const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2)
     return {
@@ -129,13 +134,13 @@ try {
     await driveToHandoff(page, ar)
     const handoff = await hitTest(page, () => [...document.querySelectorAll('button,a')].filter((b) => {
       const t = (b.textContent || '').trim()
-      return /شوف خطتي|Open my plan|احصل على Premium|Get Premium/.test(t)
+      return /استعرض قِمّة أولًا|Explore Qimmah|احصل على قِمّة Premium|Get Qimmah Premium/.test(t)
     }))
     check(`تسليم ${w}/${lang}: وُجد زرّا التسليم`, handoff.length >= 1)
     for (const t of handoff) check(`تسليم ${w}/${lang}: «${t.label}» قابل للنقر`, t.reachable, `ابتلعه: ${t.swallowedBy}`)
 
     // (٣) شريط التنقّل السفلي — التبويبات الخمسة على كل شاشة رئيسية.
-    await tap(page, ar ? /شوف خطتي/ : /Open my plan/i)
+    await tap(page, ar ? /استعرض قِمّة أولًا/ : /Explore Qimmah/i)
     await settle(page, 2500)
     for (const route of ['dashboard', 'nutrition', 'workout', 'progress']) {
       await page.evaluate((h) => { window.location.hash = '/' + h }, route)

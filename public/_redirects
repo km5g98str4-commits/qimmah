@@ -36,6 +36,8 @@
 # ولا ملفًا صار يفشل بصدق بدل أن يتنكّر في هيئة صفحة.
 /start           /index.html  200
 /login           /index.html  200
+/signup          /index.html  200
+/forgot          /index.html  200
 /setup           /index.html  200
 /dashboard       /index.html  200
 /workout         /index.html  200
