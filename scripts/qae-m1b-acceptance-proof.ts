@@ -37,7 +37,15 @@ import {
 import { ONBOARDING_KEY } from '@/lib/onboarding'
 import catalogJson from '@qae/Contracts/exercises/exercise-catalog.qae.json'
 import type { ExerciseCatalog } from '@qae/Domain/Catalog/model'
-import { buildTrainingPlan } from '@qae/Domain/Training/plan'
+import { buildTrainingPlan, tierFromCapability } from '@qae/Domain/Training/plan'
+import { deriveTrainingCapabilityProfile } from '@qae/Domain/Training/capability'
+import { prescribeInitialPlan } from '@qae/Domain/Training/prescription'
+import {
+  PRESCRIPTION_FRONTIER_IDS,
+  buildCurationSet,
+  curationCohort,
+  readPrescriptionMetadata,
+} from '@qae/Domain/Training/prescriptionMetadata'
 import { exercises as liveExercises } from '@/data/exercises'
 
 const catalog = catalogJson as unknown as ExerciseCatalog
@@ -519,10 +527,119 @@ console.log('\n⑧ الكتالوج وحدود الوصفة')
   console.log(`  plans fully prescription-ready: ${fullyReady}`)
   console.log(`  plans containing uncurated exercises: ${withUncurated}`)
   console.log(`  uncurated exercise ids (${uncuratedIds.size}): ${[...uncuratedIds].sort().join(', ') || '—'}`)
+
+  // ═══ [CTO-QAE-024] §4 — the readiness TARGET, asserted not just printed ════
+  // M1b reported 0/27 and left it as a finding. This turns the finding into a
+  // gate: if a future catalog change pulls a new uncurated exercise into a real
+  // plan, this fails by name instead of quietly re-introducing beginner-tier
+  // set counts for advanced athletes.
+  const planned = rows.filter((r) => r.cmp.prescription !== null)
+  check('FRONTIER: every real-chain plan is FULLY prescription-ready', fullyReady === planned.length, `${fullyReady}/${planned.length}`)
+  check('FRONTIER: no uncurated exercise appears in any real-chain plan', uncuratedIds.size === 0, [...uncuratedIds].sort().join(','))
+  check('FRONTIER: no plan emits metadataInsufficient',
+    rows.every((r) => !(r.cmp.prescription?.reasonCodes ?? []).includes('prescription.metadataInsufficient')),
+    rows.filter((r) => (r.cmp.prescription?.reasonCodes ?? []).includes('prescription.metadataInsufficient')).map((r) => r.persona.id).join(','))
+  check('FRONTIER: no plan emits notCurated', rows.every((r) => !(r.cmp.prescription?.reasonCodes ?? []).some((c) => c.includes('notCurated'))))
   check('every prescribed slot has positive sets', rows.every((r) => (r.cmp.prescription?.slots ?? []).every((s) => s.sets > 0)))
   check('every prescribed slot has a sane rep range', rows.every((r) => (r.cmp.prescription?.slots ?? []).every((s) => s.repMin > 0 && s.repMax >= s.repMin)))
   check('every prescribed slot has non-negative RIR', rows.every((r) => (r.cmp.prescription?.slots ?? []).every((s) => s.targetRir >= 0)))
   check('every prescribed slot has positive rest', rows.every((r) => (r.cmp.prescription?.slots ?? []).every((s) => s.restSeconds > 0)))
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+console.log('\n⑧ب حدود التنقيح — [CTO-QAE-024]')
+{
+  const cohort = curationCohort(catalog, [])
+  const curation = buildCurationSet(catalog, [])
+
+  console.log(`  cohort ${cohort.length}/${catalog.exercises.length} · records ${curation.records.length} · uncurated ${catalog.exercises.length - cohort.length}`)
+
+  // 1. The ten, and ONLY the ten, were added to the frontier.
+  check('FRONTIER: the declared list is exactly 10 ids', PRESCRIPTION_FRONTIER_IDS.length === 10, String(PRESCRIPTION_FRONTIER_IDS.length))
+  check('FRONTIER: no duplicate ids in the declared list', new Set(PRESCRIPTION_FRONTIER_IDS).size === 10)
+  for (const id of PRESCRIPTION_FRONTIER_IDS) {
+    check(`FRONTIER: ${id} exists in the shipping catalog`, catalog.exercises.some((e) => e.exerciseId === id))
+    check(`FRONTIER: ${id} is in the curated cohort`, cohort.includes(id))
+    for (const field of ['stabilityDemand', 'fatigueCost', 'axialLoad'] as const) {
+      const g = readPrescriptionMetadata(curation, id, field, 'CHARACTERIZED')
+      check(`FRONTIER: ${id}/${field} served at CHARACTERIZED`, g.ok, JSON.stringify(g))
+      const rec = curation.records.find((r) => r.exerciseId === id && r.field === field)
+      check(`FRONTIER: ${id}/${field} carries full provenance`,
+        rec !== undefined && rec.reviewStatus === 'curated' && rec.method.length > 0 &&
+        rec.rationale.length > 10 && rec.criteria.length > 0,
+        JSON.stringify(rec))
+      check(`FRONTIER: ${id}/${field} is CHARACTERIZED, not VERIFIED_EVIDENCE`,
+        rec?.confidence === 'CHARACTERIZED', String(rec?.confidence))
+    }
+  }
+
+  // 2. VERIFIED_EVIDENCE must remain unclaimed — no external source was consulted.
+  check('FRONTIER: no record anywhere claims VERIFIED_EVIDENCE',
+    !curation.records.some((r) => r.confidence === 'VERIFIED_EVIDENCE'),
+    curation.records.filter((r) => r.confidence === 'VERIFIED_EVIDENCE').map((r) => r.exerciseId).join(','))
+
+  // 3. THE GATE MUST STILL BITE. Curating ten must not quietly curate the rest;
+  //    if it did, every remaining exercise would start serving DERIVED catalog
+  //    values under a CHARACTERIZED label — the exact failure this layer exists
+  //    to prevent.
+  const stillUncurated = catalog.exercises.filter((e) => !cohort.includes(e.exerciseId))
+  check('GATE STILL BITES: exercises outside the frontier remain uncurated', stillUncurated.length > 0, String(stillUncurated.length))
+  const leaked = stillUncurated.filter((e) => readPrescriptionMetadata(curation, e.exerciseId, 'fatigueCost').ok)
+  check('GATE STILL BITES: no uncurated exercise is served metadata', leaked.length === 0, leaked.map((e) => e.exerciseId).join(','))
+
+  // The probe id is resolved DEFENSIVELY on purpose. Widening the cohort to the
+  // whole catalog is the cheapest way to fake "27/27 ready", and the first draft
+  // of this block indexed `stillUncurated[0]` directly — so that attack killed
+  // the proof with a TypeError instead of failing a named check. An unnamed
+  // crash is not a proof of anything; it reads as "the harness broke".
+  const probe = stillUncurated[0]?.exerciseId ?? null
+  check('GATE STILL BITES: an uncurated probe id exists to test with', probe !== null,
+    'cohort covers the entire catalog — the confidence gate can no longer refuse anything')
+  if (probe !== null) {
+    const r = readPrescriptionMetadata(curation, probe, 'fatigueCost')
+    check('GATE STILL BITES: an uncurated read names notCurated', !r.ok && r.reason === 'notCurated', `${probe}: ${JSON.stringify(r)}`)
+  }
+
+  // 4. Curation records the REVIEW beside the catalog value and applies neither
+  //    silently. Zero pending corrections here means review and catalog agree —
+  //    so this package cannot have moved a value that selection reads.
+  const frontierRecords = curation.records.filter((r) => PRESCRIPTION_FRONTIER_IDS.includes(r.exerciseId))
+  check('FRONTIER: 30 records for 10 ids × 3 fields', frontierRecords.length === 30, String(frontierRecords.length))
+  check('FRONTIER: zero pending corrections (review agrees with the catalog)',
+    frontierRecords.every((r) => !r.pendingCorrection),
+    frontierRecords.filter((r) => r.pendingCorrection).map((r) => `${r.exerciseId}/${r.field}`).join(','))
+
+  // 5. ═══ §3: CURATION IS STRUCTURALLY INERT ═══════════════════════════════
+  //
+  // Asserted, not assumed. `buildTrainingPlan` takes no curation argument at
+  // all, so selection CANNOT see it — but a future refactor could thread it in
+  // and nobody would notice. This runs the real wired path against a curation
+  // set stripped to nothing and requires byte-identical day/exercise/order
+  // output, so the day that changes, this fails.
+  const emptyCuration = { ...curation, records: [] }
+  for (const r of rows.filter((x) => ['A', 'F', 'I', 'O', 'Z2'].includes(x.persona.id))) {
+    const real = buildRealAthleteProfile(r.profile).profile
+    if (real.status !== 'complete') continue
+    const access = (r.profile.gymAccess ?? 'full') as 'full' | 'small' | 'home' | 'bodyweight'
+    const plan = buildTrainingPlan(real, { catalog, access, blocklists: TRAINING_BLOCKLISTS })
+    check(`INERT: ${r.persona.id} plan builds`, plan.ok)
+    if (!plan.ok) continue
+    const shape = JSON.stringify(plan.training.days.map((d) => [d.dayId, d.exercises.map((e) => e.exerciseId)]))
+
+    const rxFull = prescribeInitialPlan({ catalog, capability: deriveTrainingCapabilityProfile(real), tier: tierFromCapability(deriveTrainingCapabilityProfile(real)), curation, days: plan.training.days, isMinor: false })
+    const rxNone = prescribeInitialPlan({ catalog, capability: deriveTrainingCapabilityProfile(real), tier: tierFromCapability(deriveTrainingCapabilityProfile(real)), curation: emptyCuration, days: plan.training.days, isMinor: false })
+
+    const shapeOf = (rx: typeof rxFull): string => JSON.stringify(rx.days.map((d) => [d.dayId, d.slots.map((s) => [s.exerciseId, s.order, s.optional])]))
+    check(`INERT: ${r.persona.id} exercise selection/order identical with and without curation`, shapeOf(rxFull) === shapeOf(rxNone))
+    check(`INERT: ${r.persona.id} the assembled plan itself is unchanged`, shape === JSON.stringify(plan.training.days.map((d) => [d.dayId, d.exercises.map((e) => e.exerciseId)])))
+
+    // And the counter-assertion: stripping curation MUST change something, or
+    // this whole package changed nothing and the "inert" claim is vacuous.
+    check(`INERT-COUNTER: ${r.persona.id} stripping curation DOES change prescription`,
+      JSON.stringify(rxFull.days.map((d) => d.totalWorkingSets)) !== JSON.stringify(rxNone.days.map((d) => d.totalWorkingSets)) ||
+        rxNone.days.some((d) => d.slots.some((s) => s.prescriptionReasonCodes.includes('prescription.metadataInsufficient'))),
+      `full=${JSON.stringify(rxFull.days.map((d) => d.totalWorkingSets))} none=${JSON.stringify(rxNone.days.map((d) => d.totalWorkingSets))}`)
+  }
 }
 
 // ════════════════════════════════════════════════════════════════════════════

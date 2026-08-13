@@ -137,13 +137,54 @@ export function curateFatigue(
 // ── Cohort ─────────────────────────────────────────────────────────────────
 
 /**
- * Cohort = major compounds ∪ approved machine core ∪ every id in the 17 goldens.
+ * ── The real-chain prescription frontier ([CTO-QAE-024] §1) ─────────────────
+ *
+ * NOT a rule — a MEASUREMENT. The other two cohort sources are rules ("every
+ * compound", "the approved machine core"); this list is the exact set of
+ * exercises that M1b observed reaching a prescribed slot across 27 real
+ * onboarding personas while sitting outside those rules.
+ *
+ * WHY IT HAD TO BE CLOSED. An uncurated slot is not merely unlabelled. In
+ * `prescribeInitialPlan` a failed metadata read forces `effectiveTier` to
+ * 'beginner' for that slot (prescription.ts:155-160) and emits
+ * `metadataInsufficient`. Because at least one of these ten appeared in EVERY
+ * one of the 27 plans, **0 of 27 were fully prescription-ready** and advanced
+ * athletes were being handed beginner set counts on those slots — the
+ * conservative fallback working exactly as designed, on a gap nobody had closed.
+ *
+ * WHY IT IS AN EXPLICIT LIST rather than a widened rule. Widening the rule (say,
+ * "all isolation exercises") would curate ~76 exercises the product has never
+ * shown anyone, claiming review that never happened. Enumeration keeps the
+ * claim exactly as large as the evidence: these ten were measured, reviewed and
+ * are used. The rest stay honestly `notCurated` and keep refusing service.
+ *
+ * Values are NOT hand-written here. Each id is scored by the same frozen
+ * criteria (`curateStability` / `curateAxial` / `curateFatigue`) that scored the
+ * rest of the cohort — no second scale, no per-id override.
+ */
+export const PRESCRIPTION_FRONTIER_IDS: readonly string[] = [
+  'ab-crunch-machine',
+  'banded-lateral-walk',
+  'bodyweight-calf-raise',
+  'cable-biceps-curl',
+  'cable-triceps-pushdown',
+  'front-raise',
+  'nordic-curl',
+  'preacher-curl-machine',
+  'single-leg-calf-raise',
+  'triceps-extension-machine',
+]
+
+/**
+ * Cohort = major compounds ∪ approved machine core ∪ the measured real-chain
+ * frontier ∪ every id in the 17 goldens.
  * `goldenIds` is supplied by the caller so the domain never reads fixtures.
  */
 export function curationCohort(catalog: ExerciseCatalog, goldenIds: readonly string[]): string[] {
   const ids = new Set<string>()
   for (const ex of catalog.exercises) if (ex.mechanics === 'compound') ids.add(ex.exerciseId)
   for (const id of catalog.primaryMachineIds) ids.add(id)
+  for (const id of PRESCRIPTION_FRONTIER_IDS) ids.add(id)
   for (const id of goldenIds) ids.add(id)
   return [...ids].filter((id) => catalog.exercises.some((e) => e.exerciseId === id)).sort(ordinalCompare)
 }
