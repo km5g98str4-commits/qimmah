@@ -1,6 +1,6 @@
 # Qimmah Web Sovereign — execution state
 
-Updated: 2026-08-13 (Layer 1 / PKG-1 verified)
+Updated: 2026-08-13 (Layer 2 / PKG-2 verified)
 
 ## Provenance
 
@@ -28,30 +28,41 @@ git status --short --branch (before PKG-0 edits)    → clean
 
 ## Current package
 
-- Package completed: `PKG-0` at `f78676e` and pushed to `origin/codex/qimmah-web-sovereign-001`.
-- Package verified for checkpoint: Layer 1 survival/access convergence.
-- Reused source: immutable commit `71129f9c310f750cc24d1ed1fcf1a8d013f439b1`, applied without its original commit and reviewed hunk-by-hunk inside this branch.
-- Additional corrections made during independent review: a lazy `AppLoading` was removed from a `Suspense` fallback; deferred native imports now catch/report rejected chunks; the setup-only false-completion boundary was replaced by the canonical route boundary; the canonical boundary gained focus transfer, support email, and a non-sensitive error reference.
+- Packages completed and pushed: `PKG-0` at `f78676e`; `PKG-1` at `8b29ca3`. `PKG-2` is fully verified and awaiting its checkpoint commit.
+- Package verified for checkpoint: Layer 2 meaningful first-user funnel.
+- The live funnel now has exactly 18 stable question ids over seven input screens, with no filler and one proved consumer per answer. Training history is stored raw and classified through the existing canonical classifiers; QAE remains untouched.
+- Draft schema advanced additively from v5 to v6. v5 drafts resume deterministically with original answers preserved and new facts unset; malformed/unknown drafts remain rejected.
+- Adversarial correction: changing a previously adult profile to a minor immediately clears a stale `cut`/`bulk` goal, including its visual pressed state. The browser journey and unit counter-proof both cover it.
 - No dependency, backend, Supabase, QAE, canonical dataset, service-worker, deployment, or Salla authority file changed.
-- Next action: commit and push `[PKG-1][green]`, then begin Layer 2 from that remote checkpoint.
+- Next action: commit and push `[PKG-2][green]`, then begin Layer 3 from that remote checkpoint.
 
-### PKG-1 evidence so far
+### PKG-2 evidence
 
 | Evidence | Result |
 | --- | --- |
-| `npm run test:access-gate` | PASS — 72/72 including all live mutation guards and named bypass simulations |
-| `npm run test:activation-ui` | PASS — 13/13 including modal semantics and fail-closed production activation |
-| `npm run test:error-boundary` | PASS — 14/14 including no third primitive, no false completion, one exact support address, references, and counter-proofs |
-| `npm run test:progress-v2` | PASS — 11/11 |
-| `npm run test:recovery` | PASS — 15/15 |
+| `npm run test:onboarding-questions` | PASS — 97/97: exact registry, one UI binding each, canonical vocabulary, consumer matrix, never semantics and bypass attacks |
+| `npm run test:onboarding-intent` | PASS — 70/70, including minor age downgrade clearing restricted goals |
+| `npm run test:onboarding-async` | PASS — 40/40, including v5→v6 migration, owner isolation, malformed/unknown drafts and retry |
+| `npm run test:body-fields` | PASS — 37/37 |
+| `npm run test:plan-number` | PASS — 16/16 |
+| `npm run test:cto72-polish` | PASS — 59/59 |
+| `npm run test:onboarding-e2e-contract` | PASS — 8/8 |
+| `npm run test:e2e:onboarding` | PASS — 20/20 |
+| `node scripts/onboarding-matrix-e2e.mjs /tmp/qimmah-pkg2-matrix` | PASS — 36/36 goal × place × NEAT combinations, 36 zero-console checks, fail/retry and four-history resume (`/tmp/qimmah-pkg2-matrix/onboarding-matrix-e2e.json`) |
+| `npm run test:e2e:navigation` | PASS — 95/95 |
+| `npm run test:e2e:plan-handoff` | PASS — 98/98 |
 | `npm run typecheck` | PASS |
 | `npm run lint` | PASS |
-| `npm run build` | PASS — 2,552 modules |
+| `npm run build` | PASS — 2,556 modules |
 | `npm run test:e2e:preview-gate` | PASS — 34/34, Preview plus activated mock personality; no unhandled page error |
 | `npm run test:e2e:install-overlap` | PASS — 200/200 across 320/360/375/390/430 and ar/en |
 | `npm run test:e2e:nutrition` | PASS — 91/91 across crash, quick-log, real pointer and macro matrices |
-| Fresh full `npm run test:gate` attempt 1 | NAMED FAIL at `test:no-template-language`: legitimate reload copy was hard-bound to legacy `config/strings.ts` after canonical copy moved to its dict |
-| Fresh full `npm run test:gate` after proof repair | PASS — exit 0 through `test:workout-day-source` 19/19 |
+| Historical journey — newcomer | PASS — 30 checks / 18 selected capture points; correct Premium browsing boundaries |
+| Historical journey — minor | PASS — 26 checks / 10 selected capture points; adult→minor stale-goal attack included |
+| Historical journey — advanced | PASS — 8 checks / 18 selected capture points; raw history retained and derived plan differs from beginner |
+| Fresh full `npm run test:gate` attempt 1 | NAMED FAIL at `test:training-focus-gap`: required explicit adapter comment had drifted during the rewrite |
+| Focused repair `npm run test:training-focus-gap` | PASS — 6/6; explicit no-`Answers`-field/balanced-default contract restored, no logic change |
+| Fresh full `npm run test:gate` after repair | PASS — exit 0 through final `test:workout-day-source` 19/19 |
 
 ## Baseline gates
 
@@ -73,7 +84,7 @@ Rule: discover canonical → route to it → isolate legacy. No third implementa
 | --- | --- | --- | --- |
 | Routes/history | `src/lib/appRoutes.ts`; composition in `src/App.tsx` | every public/auth/app hash route | `view` state inside `App` mirrors the hash; old auth-internal mode was already removed |
 | First-run/onboarding UI | `src/views/OnboardingV2.tsx` + pure state in `src/lib/onboardingV2Flow.ts` | `src/views/SetupView.tsx` | adaptive bank under `src/lib/personalization/**` is implemented/tested but not the live UI; `CustomizationCenter` is post-onboarding editing |
-| Onboarding persistence | `src/lib/onboarding.ts` envelope + `onboardingV2Flow` v5 draft guard | live onboarding/resume | legacy/current completed profile in `src/lib/onboardingProfile.ts` is a separate generated source |
+| Onboarding persistence | `src/lib/onboarding.ts` envelope + `onboardingV2Flow` v6 draft guard with additive v5 migration | live onboarding/resume | legacy/current completed profile in `src/lib/onboardingProfile.ts` is a separate generated source |
 | Profile used by plan | `OnboardingProfile` built by `src/lib/planBuilderAnswers.ts`; bridged by `src/lib/onboardingProfile.ts` | calculators, plan generator, customization | adaptive `PersonalizationProfile` is local/read-only to this program until deliberately routed |
 | Plan generation | `src/lib/planGenerator.ts` and `src/lib/planRationale.ts` | onboarding handoff, customization, Today/Workout | no rewrite; QAE prescription logic is a hard no-touch zone |
 | Premium/access | `src/lib/access/paidActions.ts`, `guard.ts`, `entitlementStore.ts`, `provider.tsx` | mutation handlers and writers | UI-only checks are insufficient; query/localStorage/Salla return are not authority |
@@ -81,7 +92,7 @@ Rule: discover canonical → route to it → isolate legacy. No third implementa
 | Current workout/day | `src/lib/workoutDaySource.ts` | `TodayV2`, `WorkoutView` | prior rotating/index logic is retained only as named fallback when no schedule exists |
 | Workout persistence | `src/lib/activeWorkout.ts`, `finishWorkout.ts`, `historyStore.ts` | `WorkoutView` | legacy `activeSession.ts` is retired/dead per data registry |
 | Nutrition display/persistence | `src/views/NutritionView.tsx`; `src/lib/nutritionV2Model.ts`; owner-scoped history in `nutritionHistory.ts` | Nutrition tab, Quick Log | `NutritionV2.tsx` is not the live route wrapper; do not fork a third flow |
-| Measurements/progress | data: `measurementLog.ts`/`historyStore.ts`; current experience: `ProgressV2.tsx` | Progress, calculator | live wrapper still renders older `ProgressView` at baseline; this is BUG-002 |
+| Measurements/progress | data: `measurementLog.ts`/`historyStore.ts`; current experience: `ProgressV2.tsx` | Progress, calculator | `ProgressView` is now the thin stable route wrapper; the duplicate older surface is isolated |
 | Exercises | `ExerciseLibraryView.tsx`; catalog `src/data/exercises.ts`; labels/media helpers | workout/library/deep link | canonical dataset is read-only |
 | Auth | `authContext.tsx`, `LoginView.tsx`, route-owned `login/signup/forgot` | `App.tsx` | no local secrets; Supabase config/semantics are no-touch |
 | Language | `src/i18n/LanguageContext.tsx`; persisted device preference in `appPreferences.ts` | all routes | hardcoded bilingual helpers remain historical debt and are not a new pattern |
@@ -117,31 +128,40 @@ Central enum (`PAID_ACTIONS`) currently has 13 actions:
 - Legacy keys are explicitly classified `retire`; no broad deletion is permitted.
 - Dirty-state proof obligations remain: old onboarding draft, completed guest, invalid/truncated JSON, array-for-object, missing/unknown versions, stale conditionals, quota failure.
 
-## Onboarding question inventory (baseline)
+## Onboarding question inventory (Layer 2 final)
 
-The live V2 UI visibly collects 14 candidate answers:
+The live V2 UI collects exactly 18 meaningful answers over seven input screens. The stable ids and proved consumers are:
 
-1. age
-2. sex
-3. height
-4. weight
-5. intent
-6. declared level
-7. training years (conditional)
-8. goal
-9. days/week
-10. session duration
-11. place
-12. equipment preference
-13. current-injury yes/no
-14. injury areas (conditional)
+| # | Stable id | Answer | Proved consumer/effect |
+| ---: | --- | --- | --- |
+| 1 | `body.age` | age | minor eligibility and goal restriction |
+| 2 | `body.sex` | sex | BMR calculation |
+| 3 | `body.height` | height | BMR calculation |
+| 4 | `body.weight` | weight | BMR, calories and target weight |
+| 5 | `intent.primary` | intent | nutrition display style |
+| 6 | `experience.declared` | declared level | canonical experience resolution |
+| 7 | `history.trained_before` | trained before | new/returning point of departure |
+| 8 | `history.total_months` | total months | canonical experience band |
+| 9 | `history.last_trained` | last trained | conservative first-week/deload behavior |
+| 10 | `history.consistency` | consistency | conservative first-week/deload behavior |
+| 11 | `goal.primary` | goal | calorie direction and target weight |
+| 12 | `training.days` | days/week | generated schedule count |
+| 13 | `training.duration` | session duration | session volume |
+| 14 | `training.place` | place | exercise/environment selection |
+| 15 | `activity.neat` | daily activity | TDEE |
+| 16 | `nutrition.diet_pattern` | diet pattern | generated meal filtering |
+| 17 | `limitations.has_injury` | current injury yes/no | injury-area presentation branch |
+| 18 | `limitations.injury_areas` | injury areas | exercise exclusion/substitution |
 
-Current consumer verdict:
+Consumer verdict and exclusions:
 
-- 13 have a safety, calculation, routing, presentation, or generation consumer.
-- `equipment preference` is explicitly marked “collected for UX only” and discarded by `onboardingV2Adapter`; it does **not** qualify under the 18-question contract.
-- Canonical repository vocabulary for the required training-history concepts exists on an advanced read-only QAE line: `trainedBefore`, `totalMonths`, `lastTrained`, `consistency`. That line also states the live generator does not yet consume them. QAE files remain read-only; frontend adoption must prove a real non-QAE consumer or the questions cannot be counted.
-- Baseline truth: 13 proven meaningful questions, not 18. Final N remains unresolved pending Layer 2 implementation and counter-proofs; no filler will be added.
+- `ONBOARDING_QUESTION_IDS` is the exact 18-item registry; the UI binds each id exactly once via `data-question-id`.
+- `trainingYears` was removed from the visible flow because it duplicates canonical `totalMonths`; it remains read-only input to v5 migration only.
+- equipment preference was removed because its adapter explicitly discarded it and no approved consumer exists.
+- health-data consent remains a safety/legal gateway inside basics, but is not counted as a personalization question.
+- raw `declaredLevel` plus the four canonical history facts persist in `OnboardingProfile.trainingPreferences.history`; existing `classifyExperience` and `classifyTrainingStatus` derive generator inputs.
+- `never` is a complete answer: follow-ups are absent, returning status is false, stale values are cleared, and trained→never→trained does not resurrect them.
+- No QAE file or prescription logic changed.
 
 ## Premium / Salla / activation truth
 
@@ -176,18 +196,18 @@ Status here means evidence at this checkpoint, not remembered intent.
 | 10 | Numbers row dead | active discovery pending |
 | 11 | Arabic/Western numeral inconsistency | active visual discovery pending |
 | 12 | Measurements route/promise | PASS — live route converged to ProgressV2; Preview measurement attack 0 writes |
-| 13 | auth route/state | named navigation E2E pending |
-| 14 | onboarding reload resume | named navigation/onboarding E2E pending |
-| 15 | returning guest route | named navigation E2E pending |
-| 16 | exercise detail Back | named navigation E2E pending |
-| 17 | exercise deep-link | named navigation E2E pending |
-| 18 | deterministic 404 | named navigation E2E pending |
-| 19 | whitespace-only signup name | named navigation E2E pending |
+| 13 | auth route/state | PASS — `test:e2e:navigation` 95/95 |
+| 14 | onboarding reload resume | PASS — onboarding matrix history resume plus `test:e2e:onboarding` |
+| 15 | returning guest route | PASS — `test:e2e:navigation` 95/95 |
+| 16 | exercise detail Back | PASS — `test:e2e:navigation` 95/95 |
+| 17 | exercise deep-link | PASS — `test:e2e:navigation` 95/95 |
+| 18 | deterministic 404 | PASS — `test:e2e:navigation` 95/95 |
+| 19 | whitespace-only signup name | PASS — `test:e2e:navigation` 95/95 |
 | 20 | sub-44px touch targets | PARTIAL PASS — bottom/nav 200/200 and Premium close/input corrected; full-site audit remains Layer 4 |
 | 21 | silent persistence failure | `test:storage-honesty` green for covered writers; broader UI proof pending |
 | 22 | malformed storage recovery | multiple unit proofs green; browser dirty pass pending |
-| 23 | never-trained semantics | not collected by live V2 baseline; OPEN Layer 2 |
-| 24 | minor/age eligibility | `test:age-13`, `test:minors`, `test:policy` green |
+| 23 | never-trained semantics | PASS — 97-case question proof plus newcomer/minor browser journeys |
+| 24 | minor/age eligibility | PASS — restricted goal clears immediately after adult→minor change; unit and browser counter-proof green |
 | 25 | Preview direct/back/refresh/dispatch | PASS for paid-action matrix — `test:e2e:preview-gate` 34/34; broader navigation remains Layer 3 |
 | 26 | Salla id 1181109938 / reject 1084925309 | EXTERNALLY_BLOCKED: only store root found |
 | 27 | no production Premium hook | source proof green; final built bundle counter-proof pending |
@@ -199,7 +219,7 @@ Status here means evidence at this checkpoint, not remembered intent.
 
 - P0: 0 confirmed.
 - P1: 0 internal open; BUG-001, BUG-002 and BUG-004 are resolved and fully gated.
-- P2: 2 open (BUG-003, BUG-006); BUG-005 is resolved and fully gated.
+- P2: 1 open (BUG-003); BUG-005, BUG-006 and BUG-007 are resolved and fully gated.
 - P3: 0.
 - External blockers: product-specific Salla URL not present; live activation backend unavailable; WebKit availability not tested yet.
 
@@ -228,5 +248,7 @@ Status here means evidence at this checkpoint, not remembered intent.
 | Central paid-action enum/writer guards | `test:access-gate` 42/42 at baseline |
 | Salla current truth | repository search + `src/config/product.ts` |
 | Storage registry | `src/lib/userDataKeys.ts`; `test:data-safety`, `test:canonical` in full gate |
-| Onboarding baseline shape | `onboardingV2Flow.ts`, adapter consumer trace, full onboarding-focused unit proofs |
+| Exact 18-question funnel | `ONBOARDING_QUESTION_IDS`; `test:onboarding-questions` 97/97; 36-case browser matrix |
+| Draft migration and never semantics | `test:onboarding-async` 40/40; `test:onboarding-intent` 70/70; newcomer/minor journeys |
+| Navigation and handoff after the seven-screen flow | `test:e2e:navigation` 95/95; `test:e2e:plan-handoff` 98/98 |
 | Production artifact built | baseline `npm run build`; final artifact proof still pending |

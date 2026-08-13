@@ -14,6 +14,7 @@
 
 import { spawn } from 'node:child_process'
 import { chromium } from 'playwright'
+import { answerHistory, finishInputSteps } from './lib/onboarding-driver.mjs'
 
 const PORT = 5323
 const EXTERNAL = process.env.PREVIEW_URL || ''
@@ -97,13 +98,9 @@ async function onboardToPreview(page) {
   await next(); await page.waitForSelector('#onb-title-intent', { timeout: 20000 })
   const rows = page.locator('button[aria-pressed]')
   await rows.nth(1).click({ force: true }); await rows.nth(3).click({ force: true })
-  await next(); await page.waitForSelector('#onb-title-goal', { timeout: 20000 })
+  await answerHistory(page, next)
   await page.locator('button[aria-pressed]').first().click({ force: true })
-  await next(); await page.waitForSelector('#onb-title-training', { timeout: 20000 })
-  await next(); await page.waitForSelector('#onb-title-equipment', { timeout: 20000 })
-  const tiles = page.locator('button[aria-pressed]')
-  await tiles.nth(0).click({ force: true }); await tiles.nth(3).click({ force: true })
-  await next(); await settle(page, 1600)
+  await finishInputSteps(page, next); await settle(page, 1600)
   await tap(page, /الدخول للوحة/)
   await page.waitForSelector('[data-testid="plan-handoff"]', { timeout: 25000 })
   await tap(page, /استعرض قِمّة أولًا/)
@@ -230,13 +227,9 @@ try {
       await next(); await page.waitForSelector('#onb-title-intent', { timeout: 20000 })
       const rows = page.locator('button[aria-pressed]')
       await rows.nth(1).click({ force: true }); await rows.nth(3).click({ force: true })
-      await next(); await page.waitForSelector('#onb-title-goal', { timeout: 20000 })
+      await answerHistory(page, next)
       await page.locator('button[aria-pressed]').first().click({ force: true })
-      await next(); await page.waitForSelector('#onb-title-training', { timeout: 20000 })
-      await next(); await page.waitForSelector('#onb-title-equipment', { timeout: 20000 })
-      const tiles = page.locator('button[aria-pressed]')
-      await tiles.nth(0).click({ force: true }); await tiles.nth(3).click({ force: true })
-      await next(); await settle(page, 1600)
+      await finishInputSteps(page, next); await settle(page, 1600)
       await tap(page, lang === 'ar' ? /الدخول للوحة/ : /Enter|Open/i)
       await page.waitForSelector('[data-testid="plan-handoff"]', { timeout: 25000 })
       await tap(page, lang === 'ar' ? /استعرض قِمّة أولًا/ : /Explore Qimmah/i)

@@ -1,6 +1,6 @@
 # Qimmah Web Sovereign — autonomous founder decisions
 
-Updated: 2026-08-13 (Layer 1 / PKG-1 verified)
+Updated: 2026-08-13 (Layer 2 / PKG-2 verified)
 
 ## Decision 001 — Use the exact Founder checkpoint
 
@@ -40,14 +40,14 @@ Updated: 2026-08-13 (Layer 1 / PKG-1 verified)
 - Evidence: focused source proofs green; three real-browser suites green; fresh full gate green through its final `test:workout-day-source` step.
 - Affected files: `App.tsx`, access/progress/recovery/Premium surfaces, boot imports, and their proof scripts.
 
-## Decision 005 — Do not claim 18 questions from visible controls
+## Decision 005 — Count exactly 18 only after consumer proof
 
-- Decision: baseline count is 13 proven meaningful questions. Equipment preference is rejected from the count until it has a real consumer. The four training-history concepts are candidates, not counted until implemented with real effects and never-trained counter-proofs.
-- Why: “stored/visible” is not a consumer, and truth outranks the numerical target.
-- Alternatives rejected: count health consent as personalization; count discarded preference; add filler; mutate QAE.
-- Risk: final N may remain below 18 if no safe real consumer exists. That will be reported, not hidden.
-- Reversibility: update the count and candidate disposition as Layer 2 evidence lands.
-- Affected files: execution records only.
+- Decision: the final live inventory is exactly 18: age, sex, height, weight, intent, declared level, trained-before, total-months, last-trained, consistency, goal, days, duration, place, NEAT, diet pattern, has-injury and injury areas.
+- Why: each answer now changes an observable safety, calculation, generation or presentation result and is bound once to a stable UI id. This satisfies the target without filler.
+- Alternatives rejected: equipment preference (discarded/no consumer); numeric training years (duplicates canonical total-months buckets); health consent (legal/safety gateway, not personalization); account/auth fields before value; adaptive/QAE bank additions without an approved live consumer or within the hard no-touch zone.
+- Risk: future UI work could accidentally add a nineteenth visible question or disconnect an answer; the exact registry and negative simulations guard both failures.
+- Reversibility: all Layer 2 work is isolated in PKG-2; v5 drafts migrate additively and remain recoverable.
+- Affected files: live onboarding UI/flow/adapter/profile types and their dictionaries/proofs; QAE remains untouched.
 
 ## Tests changed
 
@@ -62,6 +62,17 @@ PKG-1 changes tests only by strengthening named launch contracts. No assertion w
 | `run-error-boundary-proof.mjs` | absent | 14 structural/counter-proof checks | one primitive, no false completion, one support address, support reference | new guard |
 | `run-no-template-language-proof.mjs` | legitimate copy exception hard-bound to `config/strings.ts` | searches the same complete `SURFACES` set used by its forbidden-copy scan | follow canonical dictionary ownership without weakening the phrase assertion | stronger scope |
 
+PKG-2 changes tests to match the new seven-screen flow and strengthens the behavioral contract. No product assertion was removed or weakened.
+
+| Test | Old contract | New contract | Why | Strength |
+| --- | --- | --- | --- | --- |
+| `onboarding-questions-proof.ts` | absent | 97 checks: exact 18 ids, one binding each, bilingual copy, validation, persistence, consumers, never semantics and bypass simulations | make “18 meaningful” mechanically auditable | new guard |
+| onboarding focused unit proofs | five-screen/legacy training-years assumptions | seven screens, canonical history, v5→v6, minor eligibility and real plan effects | cover new state without invented defaults | stronger |
+| shared E2E onboarding driver | repeated per-suite selectors and old final CTA | one seven-screen driver with canonical history and stable handoff CTA | keep all browser suites on the live contract | stronger/shared |
+| onboarding browser matrix | goal × place × discarded equipment | goal × place × NEAT (36 cases), zero-console checks, fail/retry and four-history resume | every matrix axis now has a real consumer | stronger |
+| historical journeys | obsolete five-screen/dashboard assumptions | newcomer, minor and advanced journeys assert Layer-1 Premium/Preview handoff and Layer-2 semantics | preserve user stories across both packages | stronger |
+| minor journey | age starts minor | selects adult-only goal, lowers age, confirms restricted selection is cleared | attack stale conditional state | stronger counter-proof |
+
 ## Decision 006 — Error recovery never means product completion
 
 - Decision: a render failure may retry/reload/contact support, but cannot mark onboarding complete or synthesize a plan.
@@ -70,3 +81,21 @@ PKG-1 changes tests only by strengthening named launch contracts. No assertion w
 - Risk: a deterministic setup render bug may require reload/support instead of entering the dashboard immediately; this is honest and preserves the draft.
 - Reversibility: recovery actions can be expanded inside the same primitive without changing completion semantics.
 - Affected files: `src/components/ErrorBoundary.tsx`, `src/views/SetupView.tsx`, `src/i18n/dict/errorBoundary.ts`, legacy error copy in `src/config/strings.ts`.
+
+## Decision 007 — Canonical history beats a duplicate years field
+
+- Decision: use `trainedBefore`, `totalMonths`, `lastTrained`, and `consistency`; preserve `declaredLevel` as the user's statement; derive generator inputs through existing `classifyExperience`/`classifyTrainingStatus` behavior.
+- Why: this vocabulary already exists in the repository, distinguishes a newcomer from a returning athlete, and supports conservative first-week behavior. A single numeric years field cannot express recency or consistency.
+- Alternatives rejected: keep both years and months; trust declared level alone; fabricate follow-ups for `never`; modify QAE.
+- Risk: declared and derived levels can differ. Both raw facts and the derived plan outcome are intentionally observable and tested.
+- Reversibility: v5 remains readable; new facts are additive in v6; legacy years is only read during migration and is not shown.
+- Affected files: `onboardingV2Flow`, `onboardingV2Adapter`, `planBuilderAnswers`, `onboardingProfile`, onboarding types/UI/dictionaries and proofs.
+
+## Decision 008 — Seven dense screens, conditional facts only
+
+- Decision: organize the 18 questions into body, intent/level, history, goal, schedule, lifestyle and limitations; show history follow-ups only when the user has trained and injury areas only when an injury exists.
+- Why: the contract requires meaningful facts, not 18 forced stops. Grouping related fields keeps the flow reviewable while conditionality prevents invented answers.
+- Alternatives rejected: one screen per answer; hidden defaults; counting conditional follow-ups for users to whom they do not apply.
+- Risk: dense screens need narrow-device and keyboard scrutiny; existing install, onboarding and journey browser suites cover the current implementation, with broader visual/accessibility work remaining in Layer 4.
+- Reversibility: screen grouping is presentation; the stable question ids and persisted facts can survive future regrouping.
+- Affected files: `OnboardingV2.tsx`, flow dictionaries and shared browser driver.

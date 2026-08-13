@@ -1,6 +1,6 @@
 # Qimmah Web Sovereign — bug ledger
 
-Updated: 2026-08-13 (Layer 1 / PKG-1 verified)
+Updated: 2026-08-13 (Layer 2 / PKG-2 verified)
 
 ## BUG-001 — Preview mutation handlers can surface an exception instead of Premium
 
@@ -61,10 +61,22 @@ Updated: 2026-08-13 (Layer 1 / PKG-1 verified)
 - Severity: P2
 - Surface: Onboarding personalization.
 - Reproduction: inventory every visible answer and trace each into a real consumer.
-- Evidence: 14 candidate answers are visible; equipment preference is explicitly discarded, leaving 13 proven meaningful. Required history facts are absent from the live baseline.
+- Evidence: baseline had 14 candidate answers; equipment preference was explicitly discarded, leaving 13 proven meaningful. Required history facts were absent from the live baseline.
 - Root cause: V2 onboarding was intentionally a shorter adapter over defaults; the adaptive bank is not routed to the live UI.
-- Status: OPEN
-- Constraint: no filler and no QAE modification. Final N must be proved consumer-by-consumer.
+- Status: RESOLVED — VERIFIED FOR PKG-2
+- Fix: the live flow now has exactly 18 stable questions across seven screens. It replaces redundant training years and discarded equipment preference with canonical history, NEAT and diet facts, each tied to an observable safety/calculation/generation/presentation consumer. Raw history persists and uses existing canonical classifiers; QAE is untouched.
+- Evidence: `test:onboarding-questions` 97/97, `test:onboarding-intent` 70/70, `test:onboarding-async` 40/40, 36-case browser matrix, and newcomer/minor/advanced journeys.
+
+## BUG-007 — Lowering age can leave a restricted adult goal visually selected
+
+- Severity: P2
+- Surface: Onboarding basics → goal eligibility.
+- Reproduction: choose an adult-only `cut` or `bulk` goal, go back, lower age to a minor, then return to goals.
+- Evidence: the choice was disabled for the new age but the old React state could remain selected, creating a stale pressed value until later normalization.
+- Root cause: eligibility was enforced at completion/presentation, but an age change did not synchronously reconcile the existing goal state.
+- Status: RESOLVED — VERIFIED FOR PKG-2
+- Fix: one canonical `goalAllowedForEligibility` function is used by both an age-change effect and the immediate age input handler; lowering age clears restricted state before advancing.
+- Evidence: `test:onboarding-intent` contains the named negative proof; the minor browser journey performs the adult-cut→minor attack and confirms no selected restricted goal survives.
 
 ## EXTERNAL-001 — Paid Salla product binding cannot be proven
 

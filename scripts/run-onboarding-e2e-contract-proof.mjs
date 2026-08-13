@@ -15,7 +15,9 @@ check('الاختبار يملأ بيانات الجسم قبل النية', sou
 check('الموافقة الصحية جزء من خطوة الأساسيات', source.includes('policy.healthConsent') && source.includes('body validation is visible'))
 check('اختبار المبتدئ يتحقق من «خسارة دهون»', source.includes("beginnerCut === 'خسارة دهون'"))
 check('اختبار المتقدم يتحقق من صياغة «تنشيف»', source.includes("advancedCut.startsWith('تنشيف')"))
-check('الترتيب الكامل ينتهي بالتدريب ثم المعدات', source.indexOf("t.training.title") < source.indexOf("t.equipment.title"))
+check('الترتيب الكامل يمرّ بالتاريخ ثم السياق والقيود', source.includes('answerHistory') && source.includes('finishInputSteps'))
+check('المتدرّب يغطي أسئلة التاريخ الأربعة', source.includes('advancedHistory.historyGroups === 4'))
+check('never يرى سؤال تاريخ واحدًا', source.includes('neverHistory.historyGroups === 1'))
 check('لا رجوع للضغط على هدف قديم قبل الأساسيات', !source.includes('cutGoal') && !source.includes("new RegExp(cutGoal)"))
 
 console.log(`\n✅ عقد onboarding e2e: ${pass} فحوص، 0 فشل.`)

@@ -7,13 +7,14 @@
 // عن أثر الجواب. والباقي بينهما. فالسياق يظهر ويختفي بلا قاعدة.
 //
 // ═══ لماذا مُجمِّع لا قاموس خامس ═══
-// أربعة من الخمسة **موجودة أصلًا** في قواميسها (`bodyStep` · `onboardingIntent`
-// · `V2_ONBOARDING`)، والناقص واحد فقط: خطوة الهدف. فنسخُها كلّها هنا يخلق
+// النصوص **موجودة أصلًا** في قواميس خطواتها (`bodyStep` · `onboardingIntent`
+// · `trainingHistory` · `onboardingLifestyle` · `V2_ONBOARDING`). والناقص
+// الوحيد هو خطوة الهدف؛ فنسخُها كلّها هنا يخلق
 // نسخة ثانية تشيخ وتتناقض. هذا الملف **يجمع ولا ينسخ**: يقرأ من مصادرها، ويضيف
-// السطر المفقود وحده، فيصير للخمسة **موضع واحد تُقرأ فيه جنبًا لجنب**.
+// السطر المفقود وحده، فيصير للسبعة **موضع واحد تُقرأ فيه جنبًا لجنب**.
 //
 // ═══ الضمان البنيوي ═══
-// النوع `SetupWhyLines` صفٌّ (tuple) بطول خمسة بالضبط. فإضافة خطوة سادسة إلى
+// النوع `SetupWhyLines` صفٌّ (tuple) بطول سبعة بالضبط. فإضافة خطوة ثامنة إلى
 // `OnboardingV2` **لا تُترجم** حتى يُضاف سطرها هنا — الاتّساق يحرسه المترجم لا
 // اليقظة. ويرافقه أن `StepTitle.subtitle` صار **إلزاميًا** لا اختياريًا، فلا
 // خطوة تُرسم بعنوان بلا سياق.
@@ -24,9 +25,11 @@ import type { Lang } from '@/lib/appPreferences'
 import { V2_ONBOARDING } from '@/design-system/v2/labels'
 import { bodyStepStrings } from './bodyStep'
 import { onboardingIntentStrings } from './onboardingIntent'
+import { trainingHistoryStrings } from './trainingHistory'
+import { onboardingLifestyleStrings } from './onboardingLifestyle'
 
-/** خمسة أسطر بالضبط — بترتيب خطوات `OnboardingV2` (0..4). */
-export type SetupWhyLines = readonly [string, string, string, string, string]
+/** سبعة أسطر بالضبط — بترتيب خطوات `OnboardingV2` (0..6). */
+export type SetupWhyLines = readonly [string, string, string, string, string, string, string]
 
 /**
  * السطر الوحيد الذي لا مصدر له: خطوة الهدف كانت بلا أي سياق.
@@ -39,7 +42,7 @@ const goalWhy: Record<Lang, string> = {
   en: 'Your goal sets your calories and how your sessions are built.',
 }
 
-/** أسطر «ليش نسأل» للخطوات الخمس، بترتيبها في التدفّق. */
+/** أسطر «ليش نسأل» للخطوات السبع، بترتيبها في التدفّق. */
 export function setupWhyLines(lang: Lang): SetupWhyLines {
   const t = V2_ONBOARDING[lang] ?? V2_ONBOARDING.ar
   const intent = onboardingIntentStrings[lang] ?? onboardingIntentStrings.ar
@@ -49,11 +52,15 @@ export function setupWhyLines(lang: Lang): SetupWhyLines {
     bodyStepStrings[lang].whyNote,
     // ١ النية والمستوى
     intent.subtitle,
-    // ٢ الهدف — الفجوة الوحيدة، وتُملأ هنا.
+    // ٢ التاريخ التدريبي
+    trainingHistoryStrings[lang].why,
+    // ٣ الهدف — الفجوة الوحيدة، وتُملأ هنا.
     goalWhy[lang],
-    // ٣ التدريب
+    // ٤ التدريب
     t.training.subtitle,
-    // ٤ المعدّات
-    t.equipment.subtitle,
+    // ٥ المكان والنشاط والأكل
+    onboardingLifestyleStrings[lang].contextWhy,
+    // ٦ القيود
+    onboardingLifestyleStrings[lang].limitationsWhy,
   ]
 }

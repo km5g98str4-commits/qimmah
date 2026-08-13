@@ -54,7 +54,7 @@ export function defaultOnboardingProfile(): OnboardingProfile {
     activityProfile: {},
     nutritionPreferences: {},
     foodPreferences: { dislikedFoods: [], allergies: [] },
-    limitations: { injuries: [] },
+    limitations: { hasInjury: false, injuries: [] },
     wellnessTracking: { mode: 'none', supplements: [], medications: [] },
     appPreferences: { language: 'ar', reminders: false },
     consents: {
@@ -481,7 +481,7 @@ export function migrateFromCustomization(c: Customization): OnboardingProfile {
       mealsPerDay: p.mealsPerDay,
     },
     foodPreferences: { dietPattern: p.dietPattern ?? 'none', dislikedFoods: dislikes, allergies: [] },
-    limitations: { injuries, notes: p.healthNotes || undefined },
+    limitations: { hasInjury: injuries.length > 0, injuries, notes: p.healthNotes || undefined },
     wellnessTracking: {
       mode: suppIds.length || medIds.length ? 'basic' : 'none',
       supplements: suppIds,

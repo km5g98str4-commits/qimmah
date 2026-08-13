@@ -59,13 +59,7 @@ export interface OnboardingIntentStrings {
   levelQ: string
   levels: readonly LevelOption[]
 
-  /** سنوات التدريب — تظهر لغير المبتدئ فقط، واختيارية. */
-  yearsLabel: string
-  yearsUnit: string
-  yearsPlaceholder: string
-  yearsNote: string
-
-  /** رسالة التحقق حين تنقص النية أو المستوى (أو تخرج السنوات عن نطاقها). */
+  /** رسالة التحقق حين تنقص النية أو المستوى. */
   validation: string
 
   /** تسميات مجموعات الاختيار (sr-only). */
@@ -129,11 +123,6 @@ const ar: OnboardingIntentStrings = {
       icon: 'Trophy',
     },
   ],
-
-  yearsLabel: 'سنوات التمرين (اختياري)',
-  yearsUnit: 'سنة',
-  yearsPlaceholder: 'مثال: ٢',
-  yearsNote: 'تضبط عدد التمارين في الجلسة بدقّة أكبر. اتركها فارغة لو ما تذكرها.',
 
   validation: 'اختر وش تحتاج ومستواك ونكمل.',
 
@@ -215,11 +204,6 @@ const en: OnboardingIntentStrings = {
       icon: 'Trophy',
     },
   ],
-
-  yearsLabel: 'Years of training (optional)',
-  yearsUnit: 'years',
-  yearsPlaceholder: 'e.g. 2',
-  yearsNote: 'It tunes how many exercises fit in a session. Leave it blank if unsure.',
 
   validation: 'Pick what you are looking for and your level to continue.',
 
