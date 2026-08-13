@@ -112,7 +112,12 @@ try {
   await waitForServer()
   browser = await chromium.launch({ executablePath: process.env.PW_CHROMIUM || undefined })
 
-  for (const { w, lang } of [{ w: 320, lang: 'ar' }, { w: 390, lang: 'ar' }, { w: 430, lang: 'ar' }, { w: 390, lang: 'en' }]) {
+  // أحجام الهاتف التي ندعمها فعلًا، في اللغتين — لا تُستنتج الإنجليزية من
+  // العربية ولا العكس، لأن طول النص وRTL يبدّلان مواضع الإصابة.
+  for (const { w, lang } of [
+    { w: 320, lang: 'ar' }, { w: 360, lang: 'ar' }, { w: 375, lang: 'ar' }, { w: 390, lang: 'ar' }, { w: 430, lang: 'ar' },
+    { w: 320, lang: 'en' }, { w: 360, lang: 'en' }, { w: 375, lang: 'en' }, { w: 390, lang: 'en' }, { w: 430, lang: 'en' },
+  ]) {
     const ar = lang === 'ar'
     console.log(`\n=== ${w}px · ${lang} ===`)
     const ctx = await browser.newContext({ viewport: { width: w, height: 780 }, locale: ar ? 'ar-SA' : 'en-US' })
@@ -149,6 +154,8 @@ try {
       check(`تنقّل ${w}/${lang} @${route}: خمسة تبويبات ظاهرة`, nav.length >= 4, `وُجد ${nav.length}`)
       const blocked = nav.filter((t) => !t.reachable)
       check(`تنقّل ${w}/${lang} @${route}: كل التبويبات قابلة للنقر`, blocked.length === 0, blocked.map((b) => `${b.label}←${b.swallowedBy}`).join(' | '))
+      const undersized = nav.filter((t) => t.w < 44 || t.h < 44)
+      check(`تنقّل ${w}/${lang} @${route}: كل تبويب 44×44px أو أكبر`, undersized.length === 0, undersized.map((b) => `${b.label}=${b.w}×${b.h}`).join(' | '))
     }
 
     // (٤) محاكاة الالتفاف — نعيد إنشاء التغطية صناعيًا ونطالب الفحص بأن يسقط

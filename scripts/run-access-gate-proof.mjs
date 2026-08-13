@@ -88,11 +88,25 @@ const UI_ENFORCED = {
   'plan.saveEdit': 'WorkoutView CustomPlanBuilder.onSave',
 }
 
-/** يستخرج جسم دالة مُصدَّرة بحدودها (لا `includes` متفرّقة — الميثاق §4.2). */
+/** يستخرج جسم دالة بحدودها (لا `includes` متفرّقة — الميثاق §4.2). */
 function functionBody(src, name) {
-  const start = src.indexOf(`export function ${name}(`)
+  const start = src.indexOf(`export function ${name}(`) >= 0
+    ? src.indexOf(`export function ${name}(`)
+    : src.indexOf(`function ${name}(`)
   if (start < 0) return null
-  const open = src.indexOf('{', start)
+  const paramsOpen = src.indexOf('(', start)
+  if (paramsOpen < 0) return null
+  let paramsDepth = 0
+  let paramsClose = -1
+  for (let i = paramsOpen; i < src.length; i++) {
+    if (src[i] === '(') paramsDepth += 1
+    else if (src[i] === ')') {
+      paramsDepth -= 1
+      if (paramsDepth === 0) { paramsClose = i; break }
+    }
+  }
+  if (paramsClose < 0) return null
+  const open = src.indexOf('{', paramsClose)
   if (open < 0) return null
   let depth = 0
   for (let i = open; i < src.length; i++) {
@@ -109,6 +123,26 @@ for (const [file, fn, action] of WRITERS) {
   const body = functionBody(stripComments(read(file)), fn)
   check(`${fn} موجودة في ${file}`, body !== null)
   check(`${fn} تستدعي assertPaid('${action}')`, body.includes(`assertPaid('${action}')`))
+}
+
+// الكتّاب يحرسون البيانات مهما كان المستدعي، لكن سطح الفعل الحي يجب أن يفتح
+// بوابة Premium بدل أن يسرّب الاستثناء للمستخدم. هذان السطحان كانا مفقودين.
+const LIVE_ACTION_GUARDS = [
+  ['src/views/RecoveryView.tsx', 'RecoveryView', 'recovery.log', "guard('recovery.log'"],
+  ['src/views/ProgressV2.tsx', 'WeightLogScreen', 'progress.logMeasurement', "guard('progress.logMeasurement'"],
+  ['src/views/WorkoutView.tsx', 'WorkoutView', 'workout.start', "guardPaid('workout.start'"],
+  ['src/views/WorkoutView.tsx', 'WorkoutView', 'workout.startEmpty', "guardPaid('workout.startEmpty'"],
+  ['src/views/WorkoutView.tsx', 'WorkoutView', 'plan.saveEdit', "guardPaid('plan.saveEdit'"],
+  ['src/views/NutritionView.tsx', 'MealCard', 'nutrition.addFood', "guard('nutrition.addFood'"],
+  ['src/views/NutritionView.tsx', 'WaterPanel', 'nutrition.water', "guard('nutrition.water'"],
+  ['src/components/nutrition/QuickMealLogger.tsx', 'QuickMealLogger', 'nutrition.addFood', "guard('nutrition.addFood'"],
+  ['src/components/nutrition/QuickMealLogger.tsx', 'QuickMealLogger', 'nutrition.removeFood', "guard('nutrition.removeFood'"],
+  ['src/components/nutrition/QuickMealLogger.tsx', 'QuickMealLogger', 'nutrition.quickAdd', "guard('nutrition.quickAdd'"],
+]
+for (const [file, fn, action, guardCall] of LIVE_ACTION_GUARDS) {
+  const body = functionBody(stripComments(read(file)), fn)
+  check(`${fn} موجودة في ${file}`, body !== null)
+  check(`${fn} يمرّر ${action} عبر guard الواجهة`, body.includes(guardCall))
 }
 
 // لا فعل معلَن بلا تنفيذ — الفجوة تُكتشف هنا لا في الإنتاج.
@@ -157,6 +191,12 @@ check('لا حارس مسار يمنع التبويبات بسبب الاستح�
   const decoy = `assertPaid('nutrition.addFood')\nexport function addFoodToDay(food) {\n  const day = loadNutritionDay()\n  return persist(day)\n}`
   const body = functionBody(decoy, 'addFoodToDay')
   check('محاكاة الالتفاف: حارس خارج جسم الدالة لا يُرضي الفحص', body !== null && !body.includes('assertPaid'))
+}
+// والحارسان الحيّان لا يكفي أن يظهرا في ملفهما؛ نزع كل واحد من جسم شاشته يُكتشف
+// باسم السطح، لا بخطأ محلّل عام.
+for (const [file, fn, action, guardCall] of LIVE_ACTION_GUARDS) {
+  const attacked = functionBody(stripComments(read(file)), fn)?.split(guardCall).join('')
+  check(`محاكاة الالتفاف: نزع حارس ${fn}/${action} يُكتشف`, attacked !== null && !attacked.includes(guardCall))
 }
 
 console.log(`\n✅ بوّابة الوصول: ${pass} فحوص، 0 فشل.`)

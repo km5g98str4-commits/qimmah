@@ -1,6 +1,6 @@
 # Qimmah Web Sovereign — bug ledger
 
-Updated: 2026-08-13 (Layer 0 / PKG-0)
+Updated: 2026-08-13 (Layer 1 / PKG-1 verified)
 
 ## BUG-001 — Preview mutation handlers can surface an exception instead of Premium
 
@@ -9,8 +9,9 @@ Updated: 2026-08-13 (Layer 0 / PKG-0)
 - Reproduction: complete guest preview, browse to the surface, invoke save while entitlement is `none`.
 - Evidence: writer functions correctly throw `PaidActionDenied`, but the baseline live handlers do not call `useAccess().guard`; the central gate therefore does not open before the writer rejects.
 - Root cause: writer-level policy was added without the corresponding live-handler guard on two later surfaces.
-- Status: OPEN
-- Candidate remediation discovered read-only: descendant commit `71129f9` adds both handler guards and expanded browser attacks. It must be independently reviewed and tested before adoption.
+- Status: RESOLVED — VERIFIED FOR PKG-1
+- Fix: both handlers call the central UI guard before the already-guarded writer.
+- Evidence: `test:access-gate` 72/72; `test:e2e:preview-gate` proves Premium opens and both recovery/measurement stores remain unchanged.
 
 ## BUG-002 — Live Progress route does not expose the current measurement experience
 
@@ -19,8 +20,9 @@ Updated: 2026-08-13 (Layer 0 / PKG-0)
 - Reproduction: open live Progress tab and look for the current weight/body detail and logging route implemented by `ProgressV2`.
 - Evidence: `App.tsx` renders `ProgressView`; baseline `ProgressView` is the older summary/reminder surface while `ProgressV2` owns the maintained measurement flow.
 - Root cause: duplicate UI implementations drifted; the route wrapper was not pointed at the maintained owner.
-- Status: OPEN
-- Candidate remediation: make the stable `ProgressView` module a thin route to `ProgressV2`, retaining direct `steps` and settings notification owners.
+- Status: RESOLVED — VERIFIED FOR PKG-1
+- Fix: the stable `ProgressView` route module is now a thin owner-preserving wrapper over `ProgressV2`; Steps and Recovery remain explicit routes from that screen.
+- Evidence: `test:progress-v2` 11/11 plus the browser measurement entry/save attack.
 
 ## BUG-003 — Three high transitive dependency advisories
 
@@ -39,8 +41,9 @@ Updated: 2026-08-13 (Layer 0 / PKG-0)
 - Reproduction: cause a child render exception; choose the escape action.
 - Evidence: `SetupErrorBoundary` in `src/views/SetupView.tsx` calls `onForceComplete`, whose contract marks onboarding complete and enters the dashboard. It is also a second boundary primitive with hardcoded bilingual copy.
 - Root cause: a historical “never trap the user” escape treats failure as completion rather than retry/recovery.
-- Status: OPEN
-- Required outcome: reuse/extend canonical error handling, preserve the draft, never mark completion without a generated/persisted plan.
+- Status: RESOLVED — VERIFIED FOR PKG-1
+- Fix: remove `SetupErrorBoundary` and the `onForceComplete` path; setup reuses `RouteErrorBoundary`, so retry cannot write completion.
+- Evidence: `test:error-boundary` 13/13 with a named assertion and counter-proof for the no-false-completion contract.
 
 ## BUG-005 — Error recovery lacks a support reference id
 
@@ -49,7 +52,9 @@ Updated: 2026-08-13 (Layer 0 / PKG-0)
 - Reproduction: trigger a render or lazy-import error.
 - Evidence: fallback offers reload/retry, but no non-sensitive reference id and no `qimmah.support@gmail.com`/support route.
 - Root cause: pre-launch fallback predates the support-correlation contract.
-- Status: OPEN
+- Status: RESOLVED — VERIFIED FOR PKG-1
+- Fix: both canonical fallbacks display a client-generated `QW-*` id, log the same id, focus their headings, and provide `qimmah.support@gmail.com` without exposing stack/message/PII.
+- Evidence: `test:error-boundary` 14/14, including the shared Contact address.
 
 ## BUG-006 — First-run question target is not met truthfully
 
@@ -69,6 +74,7 @@ Updated: 2026-08-13 (Layer 0 / PKG-0)
 - Evidence: only `https://salla.sa/Qimmahsa` store root is present; neither product id exists in the frontend contract.
 - Root cause: no verified product-specific public URL was supplied to this baseline.
 - Status: EXTERNALLY_BLOCKED
+
 ## EXTERNAL-002 — Live activation backend is unavailable
 
 - Severity: P1 commercial blocker (does not block Preview).

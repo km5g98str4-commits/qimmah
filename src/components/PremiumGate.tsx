@@ -95,7 +95,7 @@ export function PremiumGate({ lang }: { lang: Lang }) {
             <h2 id="premium-gate-title" className="text-base font-black text-ink-900">{s.gateTitle}</h2>
             <p className="mt-1 text-[0.8rem] font-bold text-ink-500">{actionLabel(blockedAction, s)}</p>
           </div>
-          <button ref={closeRef} type="button" onClick={closeGate} aria-label={s.gateSecondary} className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-ink-400 hover:bg-beige hover:text-ink-700">
+          <button ref={closeRef} type="button" onClick={closeGate} aria-label={s.gateSecondary} className="grid h-11 w-11 shrink-0 place-items-center rounded-lg text-ink-400 hover:bg-beige hover:text-ink-700">
             <Icon name="X" className="h-4 w-4" />
           </button>
         </div>
@@ -134,7 +134,7 @@ export function PremiumGate({ lang }: { lang: Lang }) {
                 placeholder={s.codePlaceholder}
                 autoComplete="off"
                 dir="ltr"
-                className="mt-1.5 w-full rounded-xl border border-line bg-page px-3 py-2.5 text-sm font-bold text-ink-900 outline-none focus:border-primary-c"
+                className="mt-1.5 min-h-11 w-full rounded-xl border border-line bg-page px-3 py-2.5 text-base font-bold text-ink-900 outline-none focus:border-primary-c"
               />
               <button
                 type="button"

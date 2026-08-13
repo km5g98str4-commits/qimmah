@@ -8,13 +8,11 @@ import { CustomizationProvider } from './lib/customizationContext'
 import { AuthProvider } from './lib/authContext'
 import { EntitlementProvider } from './lib/access/provider'
 import { LanguageProvider } from './i18n'
-import { registerStepBridge } from './lib/stepCounter'
 import { initTheme } from './lib/appPreferences'
 import { initTrackingDevViewer } from './lib/tracking'
 import { initNativeShell } from './lib/nativeShell'
 import { initDeepLinkRecovery } from './lib/deepLinkRecovery'
 import { captureMonitoringError, initMonitoring } from './lib/monitoring'
-import { refreshHealthKitStepsIfEnabled } from './lib/healthKit'
 import { registerServiceWorkerWithUpdates } from './lib/swUpdate'
 // وحدة PWA: تلتقط حدث beforeinstallprompt مبكرًا (يُطلق مرّة واحدة فقط) لعرض زر التثبيت لاحقًا.
 import './lib/pwa'
@@ -28,10 +26,15 @@ import './design-system/tokens.css'
 // المظهر (شاشة 66): طبّق الثيم المختار قبل الرسم الأول وواكب النظام إن كان «النظام».
 initTheme()
 
-// سيم الخطوات: يستقبل إجماليات HealthKit من plugin iOS المحلي داخل المتجر نفسه.
-registerStepBridge()
-// Refreshes only after a prior explicit opt-in; never requests HealthKit permission on launch.
-void refreshHealthKitStepsIfEnabled()
+// جسر الخطوات وتحديث HealthKit لا يرسمان شيئًا ولا يحتاجهما زائر الويب عند أول بكسل.
+// نطلبهما فور بدء التطبيق لكن خارج مسار الإقلاع؛ يبقى جسر iOS جاهزًا قبل أول تفاعل،
+// فيما لا تدخل وحدات التاريخ/الصحة في حزمة البداية العامة.
+void import('./lib/stepCounter')
+  .then(({ registerStepBridge }) => registerStepBridge())
+  .catch((error: unknown) => captureMonitoringError(error, 'promise'))
+void import('./lib/healthKit')
+  .then(({ refreshHealthKitStepsIfEnabled }) => refreshHealthKitStepsIfEnabled())
+  .catch((error: unknown) => captureMonitoringError(error, 'promise'))
 
 // [CTO-68] البند ٥ — عارض أحداث التتبّع المحلي في وحدة التحكّم. تطوير فقط:
 // جسم الدالة محكوم بـ`import.meta.env.DEV` فيسقط من حزمة الإنتاج، ولا شاشة مستخدم له.

@@ -1,12 +1,8 @@
 import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 // شاشة البداية (الهبوط) تبقى مُحمّلة مباشرةً لأول رسم سريع.
 import { StartView } from '@/views/StartView'
-import { AccountRequiredView } from '@/views/AccountRequiredView'
-import { AppLoading } from '@/components/AppLoading'
-import { VerifyEmailView } from '@/views/VerifyEmailView'
 import { RouteErrorBoundary } from '@/components/ErrorBoundary'
 import { DashboardSkeleton, ProgressSkeleton, TabSkeleton } from '@/components/ViewSkeletons'
-import { PremiumGate } from '@/components/PremiumGate'
 
 // باقي الشاشات مُقسّمة إلى حِزم عند الطلب (code-splitting) لتقليل حزمة الدخول الأولى.
 // تُبنى عبر مصنع لأنّ React.lazy يخزّن فشل الاستيراد نهائيًا — زرّ «أعد المحاولة» في
@@ -14,6 +10,12 @@ import { PremiumGate } from '@/components/PremiumGate'
 function createLazyViews() {
   return {
     LoginView: lazy(() => import('@/views/LoginView').then((m) => ({ default: m.LoginView }))),
+    AccountRequiredView: lazy(() =>
+      import('@/views/AccountRequiredView').then((m) => ({ default: m.AccountRequiredView })),
+    ),
+    VerifyEmailView: lazy(() =>
+      import('@/views/VerifyEmailView').then((m) => ({ default: m.VerifyEmailView })),
+    ),
     ResetPasswordView: lazy(() =>
       import('@/views/ResetPasswordView').then((m) => ({ default: m.ResetPasswordView })),
     ),
@@ -42,7 +44,7 @@ function createLazyViews() {
     RecoveryView: lazy(() => import('@/views/RecoveryView').then((m) => ({ default: m.RecoveryView }))),
   }
 }
-import { MobileShell, type MainTab, type QuickLogTarget } from '@/components/MobileShell'
+import type { MainTab, QuickLogTarget } from '@/components/MobileShell'
 import type { AppBadge } from '@/components/AppNav'
 import { useAuth } from '@/lib/authContext'
 import { adoptGuestOnboarding, isAccountOnboarded, isOnboardingComplete, markCompleted } from '@/lib/onboarding'
@@ -50,12 +52,13 @@ import { reconcileAccountScope } from '@/lib/accountScope'
 import { ensureOnboardingProfile } from '@/lib/onboardingProfile'
 import { currentUserId, hydrateOnboardingFromProfile } from '@/lib/onboardingSync'
 import { useLanguage } from '@/i18n'
+import type { Lang } from '@/lib/appPreferences'
 import { type AppRoute, MAIN_TABS, isUnknownRouteHash, routeFromHash, setHashRoute } from '@/lib/appRoutes'
-import { SuccessToast } from '@/components/SuccessToast'
 import { BUILD_LABEL } from '@/lib/buildInfo'
 import { trackLocal } from '@/lib/tracking'
 import { recordDayOpen } from '@/lib/tracking/signals'
 import { useCustomization } from '@/lib/customizationContext'
+import { useAccess } from '@/lib/access/useAccess'
 import { V2_QUICK_LOG } from '@/design-system/v2/labels'
 
 // Achievement evaluation reads workout + nutrition stores. It is only rendered
@@ -64,6 +67,38 @@ import { V2_QUICK_LOG } from '@/design-system/v2/labels'
 const AchievementToaster = lazy(() =>
   import('@/features/achievements/AchievementToaster').then((m) => ({ default: m.AchievementToaster })),
 )
+
+// قشرة التبويبات لا تفيد صفحة البداية أو تسجيل الدخول أو الإعداد. تحميلها مع
+// أول تبويب رئيسي يبقي رحلة الدخول أخف، مع بقاء نفس القشرة ومكوّناتها بعد ذلك.
+const MobileShell = lazy(() =>
+  import('@/components/MobileShell').then((m) => ({ default: m.MobileShell })),
+)
+
+// لا يُجلب الحوار قبل أن يحاول المستخدم فعلًا مدفوعًا؛ طبقة الوصول تبقى حاضرة
+// وتفشل مغلقة، ثم يُعرض نفس الحوار الموحّد عند أول منع.
+const PremiumGate = lazy(() =>
+  import('@/components/PremiumGate').then((m) => ({ default: m.PremiumGate })),
+)
+const SuccessToast = lazy(() =>
+  import('@/components/SuccessToast').then((m) => ({ default: m.SuccessToast })),
+)
+const AppLoading = lazy(() =>
+  import('@/components/AppLoading').then((m) => ({ default: m.AppLoading })),
+)
+
+function LoadingFallback() {
+  return <div className="h-[100dvh] min-h-0 bg-page" aria-busy="true" />
+}
+
+function PremiumGateLayer({ lang }: { lang: Lang }) {
+  const { blockedAction } = useAccess()
+  if (!blockedAction) return null
+  return (
+    <Suspense fallback={null}>
+      <PremiumGate lang={lang} />
+    </Suspense>
+  )
+}
 
 /**
  * حراسة المسار: التبويبات الرئيسية لا تُفتح أبدًا قبل إكمال إعداد حقيقي **لهذا الحساب**
@@ -322,14 +357,6 @@ export default function App() {
     if (completed) setShowSuccess(true)
   }
 
-  // مخرج طوارئ للإعداد: يُعلّم الحساب/الجهاز مكتمل الإعداد ويدخل اللوحة فورًا. يستخدمه زرّ
-  // «تخطّي» الدائم في المعالج وحاجز الأخطاء — فلا يُحبَس مستخدم أبدًا حتى لو تعطّلت خطوة.
-  const skipOnboarding = useCallback(() => {
-    markCompleted(uid)
-    setView(guardRoute('dashboard', uid))
-    setShowSuccess(true)
-  }, [uid])
-
   /**
    * [QIM-WEB-FOUNDER-UX-004/حزمة ٤] الدخول من شاشة التسليم — **بلا إشعار نجاح**.
    *
@@ -341,8 +368,8 @@ export default function App() {
    *     التغذية خلال تلك الثواني — وهو بالضبط شكل العطل الذي وصفه المؤسس:
    *     «يشتغل مرة وما يشتغل مرة». نافذة ستّ ثوانٍ تُنتج تقطّعًا لا يُفسَّر.
    *
-   * مخرج الطوارئ (`skipOnboarding`) يبقى بإشعاره: هناك لم يرَ المستخدم تسليمًا
-   * أصلًا، فالإشعار خبره الوحيد.
+   * لا يوسَم الإعداد مكتملًا من مسار خطأ: الحاجز الموحّد يعيد المحاولة ويحفظ
+   * المسودة، فلا تتحول مشكلة عرض إلى خطة مكتملة كذبًا.
    */
   const enterFromHandoff = useCallback(() => {
     markCompleted(uid)
@@ -369,7 +396,11 @@ export default function App() {
   // ——— بوابة الإقلاع: أثناء استعادة جلسة المصادقة نعرض حالة تحميل قصيرة (لا شاشة دخول)
   //     حتى لا يُطالَب مستخدم لديه جلسة صالحة بتسجيل الدخول من جديد. ———
   if (auth.loading) {
-    return <AppLoading />
+    return (
+      <Suspense fallback={<LoadingFallback />}>
+        <AppLoading />
+      </Suspense>
+    )
   }
 
   // ——— بوّابة الاستعادة (فوق كل البوّابات): جلسة استعادة كلمة المرور يجب أن تهبط دائمًا على
@@ -379,7 +410,7 @@ export default function App() {
   if (view === 'reset' || auth.recoveryActive) {
     return (
       <RouteErrorBoundary onRetry={retryLazyViews}>
-        <Suspense fallback={<AppLoading />}>
+        <Suspense fallback={<LoadingFallback />}>
           <V.ResetPasswordView
             lang={LANG}
             onDone={() => {
@@ -395,7 +426,11 @@ export default function App() {
   // ——— بوّابة تأكيد البريد (P0، دفاع عميق): حساب مسجّل ببريد لم يُؤكَّد بعد لا يُمنح وصولًا
   //     كاملًا — يُحوَّل لشاشة التأكيد. الضيف/غير المسجّل بالبريد يمرّ (emailVerified=true). ———
   if (!auth.emailVerified) {
-    return <VerifyEmailView lang={LANG} onSignedOut={() => goAuth('login')} />
+    return (
+      <Suspense fallback={<LoadingFallback />}>
+        <V.VerifyEmailView lang={LANG} onSignedOut={() => goAuth('login')} />
+      </Suspense>
+    )
   }
 
   // ——— بناء عنصر الشاشة الحالية ثم لفّه بحدّ Suspense (أسفل المزوّدات حتى تبقى حالتها
@@ -438,7 +473,7 @@ export default function App() {
     content = <V.NotFoundView lang={LANG} onHome={goHome} onBack={() => window.history.back()} />
   } else if (view === 'accountRequired') {
     content = (
-      <AccountRequiredView
+      <V.AccountRequiredView
         lang={LANG}
         onLogin={() => goAuth('login')}
         onGuest={enterAsGuest}
@@ -452,7 +487,6 @@ export default function App() {
     content = (
       <V.SetupView
         onClose={closeSetup}
-        onForceComplete={skipOnboarding}
         onEnterFromHandoff={enterFromHandoff}
         initialStep={0}
         mode={onboarded ? 'advanced' : 'onboarding'}
@@ -495,15 +529,16 @@ export default function App() {
     // ——— التبويبات الرئيسية داخل قشرة الجوال ———
     content = (
       <>
-        <MobileShell
-          lang={LANG}
-          tab={(view === 'exercises' ? 'workout' : view === 'stats' ? 'dashboard' : view) as MainTab}
-          badge={badge}
-          onNavigate={navigate}
-          onOpenSettings={() => setView('settings')}
-          onQuickLog={openQuickLog}
-          routineQuickLabel={routineQuickLabel}
-        >
+          <Suspense fallback={<TabSkeleton />}>
+            <MobileShell
+              lang={LANG}
+              tab={(view === 'exercises' ? 'workout' : view === 'stats' ? 'dashboard' : view) as MainTab}
+              badge={badge}
+              onNavigate={navigate}
+              onOpenSettings={() => setView('settings')}
+              onQuickLog={openQuickLog}
+              routineQuickLabel={routineQuickLabel}
+            >
           {/* الرئيسية والتقدّم: fallback هيكلي لكل مسار (بدل AppLoading العام) — البيانات
               محلية متزامنة فلا يظهر الهيكل إلا أثناء تحميل حزمة الشاشة عند الطلب. */}
           {view === 'dashboard' && (
@@ -541,9 +576,14 @@ export default function App() {
               <V.MyStatsView lang={LANG} />
             </Suspense>
           )}
-        </MobileShell>
+            </MobileShell>
+          </Suspense>
 
-        {showSuccess && <SuccessToast onClose={dismissSuccess} />}
+        {showSuccess && (
+          <Suspense fallback={null}>
+            <SuccessToast onClose={dismissSuccess} />
+          </Suspense>
+        )}
 
         {/* احتفالات الأوسمة والأرقام القياسية — فوق كل الشاشات الرئيسية */}
         <Suspense fallback={null}>
@@ -568,7 +608,7 @@ export default function App() {
       </a>
       <RouteErrorBoundary onRetry={retryLazyViews}>
         <div id="main-content" tabIndex={-1} className="outline-none">
-          <Suspense fallback={<AppLoading />}>{content}</Suspense>
+          <Suspense fallback={<LoadingFallback />}>{content}</Suspense>
         </div>
         {/*
           [QIM-WEB-FOUNDER-UX-003/حزمة ١] لا شريط تثبيت **ثابتًا** فوق جذر التطبيق.
@@ -592,7 +632,7 @@ export default function App() {
         */}
         {/* بوّابة Premium — نداء واحد لكل فعل محجوب، من أي شاشة. تُرسم هنا مرّة
             واحدة فلا يبني كل سطح نافذته الخاصّة فتتفرّق الرسالة. */}
-        <PremiumGate lang={LANG} />
+        <PremiumGateLayer lang={LANG} />
       </RouteErrorBoundary>
     </>
   )

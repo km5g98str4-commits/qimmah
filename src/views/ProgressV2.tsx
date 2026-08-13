@@ -6,6 +6,7 @@ import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
 import type { AppRoute } from '@/lib/appRoutes'
 import { useCustomization } from '@/lib/customizationContext'
+import { useAccess } from '@/lib/access/useAccess'
 import { addLog } from '@/lib/measurementLog'
 import { getDayStamp } from '@/lib/today'
 import { useAppScrollReset } from '@/lib/useAppScrollReset'
@@ -205,6 +206,7 @@ export function ProgressV2({ lang, onNavigate }: ProgressV2Props) {
 function WeightLogScreen({ lang, current, onBack, onSaved }: { lang: Lang; current: WeightDetail; onBack: () => void; onSaved: () => void }) {
   const ar = lang !== 'en'
   const t = (a: string, e: string) => (ar ? a : e)
+  const { guard } = useAccess()
   const [weight, setWeight] = useState(current.currentKg ? String(current.currentKg) : '')
   const [waist, setWaist] = useState(current.waistCm ? String(current.waistCm) : '')
   const [bodyFat, setBodyFat] = useState(current.bodyFatPct ? String(current.bodyFatPct) : '')
@@ -228,13 +230,15 @@ function WeightLogScreen({ lang, current, onBack, onSaved }: { lang: Lang; curre
       return
     }
 
-    const values: Record<string, string | number> = { weightKg }
-    if (waistCm !== null) values.waistCm = waistCm
-    if (bodyFatPercent !== null) values.bodyFatPercent = bodyFatPercent
-    const id = typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `measurement-${Date.now()}`
-    addLog({ id, date: getDayStamp(), values })
-    setError(null)
-    onSaved()
+    guard('progress.logMeasurement', () => {
+      const values: Record<string, string | number> = { weightKg }
+      if (waistCm !== null) values.waistCm = waistCm
+      if (bodyFatPercent !== null) values.bodyFatPercent = bodyFatPercent
+      const id = typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `measurement-${Date.now()}`
+      addLog({ id, date: getDayStamp(), values })
+      setError(null)
+      onSaved()
+    })()
   }
 
   return (

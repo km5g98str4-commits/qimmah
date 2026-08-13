@@ -1,6 +1,6 @@
 # Qimmah Web Sovereign — autonomous founder decisions
 
-Updated: 2026-08-13 (Layer 0 / PKG-0)
+Updated: 2026-08-13 (Layer 1 / PKG-1 verified)
 
 ## Decision 001 — Use the exact Founder checkpoint
 
@@ -31,12 +31,14 @@ Updated: 2026-08-13 (Layer 0 / PKG-0)
 
 ## Decision 004 — Reuse reviewed existing work only by immutable commit, inside this branch
 
-- Decision: treat `71129f9c310f750cc24d1ed1fcf1a8d013f439b1` as a candidate implementation source for Layer 1, not as authority. Adopt it only after diff review and fresh focused/full gates in this isolated worktree.
+- Decision: adopt the useful hunks from `71129f9c310f750cc24d1ed1fcf1a8d013f439b1` without preserving its commit, then own the result as a separately verified package.
 - Why: it is the only branch advanced from the exact baseline and directly addresses discovered Preview/Measurements defects. Rebuilding the same patch would violate the project’s verify-before-build rule.
 - Alternatives rejected: modifying its existing worktree; merging its moving branch name; blindly trusting its commit message.
 - Risk: it includes performance/lazy-loading and route-convergence changes beyond the two guard fixes; each hunk must retain a named DoD connection.
 - Reversibility: one cherry-pick/revertable package commit on this execution branch.
-- Affected files: none yet.
+- Review corrections: replaced a lazy component used as its own Suspense fallback; caught deferred native-import failures; extended the canonical ErrorBoundary; removed setup false completion.
+- Evidence: focused source proofs green; three real-browser suites green; fresh full gate green through its final `test:workout-day-source` step.
+- Affected files: `App.tsx`, access/progress/recovery/Premium surfaces, boot imports, and their proof scripts.
 
 ## Decision 005 — Do not claim 18 questions from visible controls
 
@@ -49,8 +51,22 @@ Updated: 2026-08-13 (Layer 0 / PKG-0)
 
 ## Tests changed
 
-No pre-existing test was modified in PKG-0.
+PKG-1 changes tests only by strengthening named launch contracts. No assertion was removed or weakened.
 
 | Test | Old contract | New contract | Why | Strength |
 | --- | --- | --- | --- | --- |
-| — | — | — | — | — |
+| `run-access-gate-proof.mjs` | writer guards and policy | also bind every live mutation handler to its central guard; attack each removal | closes exception-vs-dialog gaps | stronger |
+| `e2e/preview-gate.mjs` | basic workout/nutrition Preview | 34-case Preview/activated matrix, tampering, focus/Escape, recovery, measurements, zero-write checks | prove policy in a real browser | stronger |
+| `e2e/install-overlap.mjs` | selected widths | 320/360/375/390/430 in ar/en plus ≥44px nav and attack | cover narrow devices and touch targets | stronger |
+| `run-activation-ui-proof.mjs` | absent | 13 structural/counter-proof checks | keep activation honest and accessible | new guard |
+| `run-error-boundary-proof.mjs` | absent | 14 structural/counter-proof checks | one primitive, no false completion, one support address, support reference | new guard |
+| `run-no-template-language-proof.mjs` | legitimate copy exception hard-bound to `config/strings.ts` | searches the same complete `SURFACES` set used by its forbidden-copy scan | follow canonical dictionary ownership without weakening the phrase assertion | stronger scope |
+
+## Decision 006 — Error recovery never means product completion
+
+- Decision: a render failure may retry/reload/contact support, but cannot mark onboarding complete or synthesize a plan.
+- Why: completion is a data fact established only after the generated plan and profile persist successfully.
+- Alternatives rejected: “escape to dashboard” by writing completion; a third setup-specific boundary; displaying raw stack/message.
+- Risk: a deterministic setup render bug may require reload/support instead of entering the dashboard immediately; this is honest and preserves the draft.
+- Reversibility: recovery actions can be expanded inside the same primitive without changing completion semantics.
+- Affected files: `src/components/ErrorBoundary.tsx`, `src/views/SetupView.tsx`, `src/i18n/dict/errorBoundary.ts`, legacy error copy in `src/config/strings.ts`.

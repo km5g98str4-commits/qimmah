@@ -1,6 +1,6 @@
 # Qimmah Web Sovereign — execution state
 
-Updated: 2026-08-13 (Layer 0 / PKG-0)
+Updated: 2026-08-13 (Layer 1 / PKG-1 verified)
 
 ## Provenance
 
@@ -28,10 +28,30 @@ git status --short --branch (before PKG-0 edits)    → clean
 
 ## Current package
 
-- Package completed: Layer 0 reconnaissance and resumability foundation.
-- Scope planned: baseline/provenance; canonical owners; routes; paid mutations; tests; historical targets; storage keys; question vocabulary; Premium/Salla boundary; ErrorBoundary inventory.
-- Scope actually changed: the three required execution records and screenshot directory only. No product behavior, dependency, backend, Supabase, QAE, canonical dataset, service-worker, or deployment file changed.
-- Next action: independently review and adopt the already-discovered one-commit descendant `71129f9` only where it satisfies Layer 1; then run its focused proofs before accepting it as `[PKG-1]` work.
+- Package completed: `PKG-0` at `f78676e` and pushed to `origin/codex/qimmah-web-sovereign-001`.
+- Package verified for checkpoint: Layer 1 survival/access convergence.
+- Reused source: immutable commit `71129f9c310f750cc24d1ed1fcf1a8d013f439b1`, applied without its original commit and reviewed hunk-by-hunk inside this branch.
+- Additional corrections made during independent review: a lazy `AppLoading` was removed from a `Suspense` fallback; deferred native imports now catch/report rejected chunks; the setup-only false-completion boundary was replaced by the canonical route boundary; the canonical boundary gained focus transfer, support email, and a non-sensitive error reference.
+- No dependency, backend, Supabase, QAE, canonical dataset, service-worker, deployment, or Salla authority file changed.
+- Next action: commit and push `[PKG-1][green]`, then begin Layer 2 from that remote checkpoint.
+
+### PKG-1 evidence so far
+
+| Evidence | Result |
+| --- | --- |
+| `npm run test:access-gate` | PASS — 72/72 including all live mutation guards and named bypass simulations |
+| `npm run test:activation-ui` | PASS — 13/13 including modal semantics and fail-closed production activation |
+| `npm run test:error-boundary` | PASS — 14/14 including no third primitive, no false completion, one exact support address, references, and counter-proofs |
+| `npm run test:progress-v2` | PASS — 11/11 |
+| `npm run test:recovery` | PASS — 15/15 |
+| `npm run typecheck` | PASS |
+| `npm run lint` | PASS |
+| `npm run build` | PASS — 2,552 modules |
+| `npm run test:e2e:preview-gate` | PASS — 34/34, Preview plus activated mock personality; no unhandled page error |
+| `npm run test:e2e:install-overlap` | PASS — 200/200 across 320/360/375/390/430 and ar/en |
+| `npm run test:e2e:nutrition` | PASS — 91/91 across crash, quick-log, real pointer and macro matrices |
+| Fresh full `npm run test:gate` attempt 1 | NAMED FAIL at `test:no-template-language`: legitimate reload copy was hard-bound to legacy `config/strings.ts` after canonical copy moved to its dict |
+| Fresh full `npm run test:gate` after proof repair | PASS — exit 0 through `test:workout-day-source` 19/19 |
 
 ## Baseline gates
 
@@ -66,7 +86,7 @@ Rule: discover canonical → route to it → isolate legacy. No third implementa
 | Auth | `authContext.tsx`, `LoginView.tsx`, route-owned `login/signup/forgot` | `App.tsx` | no local secrets; Supabase config/semantics are no-touch |
 | Language | `src/i18n/LanguageContext.tsx`; persisted device preference in `appPreferences.ts` | all routes | hardcoded bilingual helpers remain historical debt and are not a new pattern |
 | Number presentation | presentation helpers (`formatNumber`/screen dictionaries where present) | progress/nutrition/workout | stored numeric data must remain numeric |
-| Error handling | `src/components/ErrorBoundary.tsx` (`ErrorBoundary`, `RouteErrorBoundary`) | `main.tsx`, route shell | `SetupErrorBoundary` in `SetupView.tsx` is a second primitive and unsafe escape; BUG-004 |
+| Error handling | `src/components/ErrorBoundary.tsx` (`ErrorBoundary`, `RouteErrorBoundary`) + `src/i18n/dict/errorBoundary.ts` | `main.tsx`, route shell, setup | setup reuses the canonical route primitive; prior duplicate strings in `config/strings.ts` are isolated/removed |
 | Local data registry | `src/lib/userDataKeys.ts` | account wipe, portability, sync allowlists | raw key literals not registered here require investigation |
 
 ## Route inventory
@@ -86,7 +106,7 @@ Central enum (`PAID_ACTIONS`) currently has 13 actions:
 
 `workout.start`, `workout.startEmpty`, `workout.logSet`, `workout.finish`, `nutrition.addFood`, `nutrition.removeFood`, `nutrition.quickAdd`, `nutrition.water`, `nutrition.toggleMeal`, `progress.logWeight`, `progress.logMeasurement`, `plan.saveEdit`, `recovery.log`.
 
-Baseline proof `test:access-gate` verifies writer-level guards, but Layer 0 found two live handlers that can reach a guarded writer without the presentational `guard`, causing an exception instead of the one coherent Premium surface: Recovery submit and ProgressV2 measurement save. Tracked as BUG-001 and covered by descendant candidate `71129f9` pending independent adoption.
+`test:access-gate` now verifies writer-level guards plus every live action guard. Recovery submit and ProgressV2 measurement save open the one coherent Premium surface before the writer, and the browser attack proves they leave storage untouched in Preview.
 
 ## Storage/schema inventory
 
@@ -133,10 +153,10 @@ Current consumer verdict:
 
 ## Error-boundary inventory
 
-- App primitive: `ErrorBoundary` with reload.
-- Route primitive: `RouteErrorBoundary` with retry/re-import.
-- Additional setup-specific class: `SetupErrorBoundary`, whose escape force-completes setup. It also carries hardcoded bilingual copy. This conflicts with the contract’s one-primitive direction and can convert a rendering failure into false completion. Tracked as BUG-004.
-- Missing desired launch diagnostics: non-sensitive reference id and support route/email on the recoverable screen. Tracked as BUG-005.
+- App primitive: `ErrorBoundary` with reload, focus transfer, exact support email, and a client-generated non-sensitive `QW-*` reference.
+- Route primitive: `RouteErrorBoundary` with retry/re-import, the same diagnostics contract, and stale-reference reset.
+- Setup reuses `RouteErrorBoundary`; it cannot mark onboarding complete after a render failure.
+- Console evidence includes the same reference id shown to the user; the UI exposes neither stack/message nor user data.
 
 ## Historical acceptance registry
 
@@ -144,18 +164,18 @@ Status here means evidence at this checkpoint, not remembered intent.
 
 | # | Target | Layer-0 evidence status |
 | ---: | --- | --- |
-| 1 | Nutrition mobile crash/ejection | Named `test:e2e:nutrition`; browser rerun pending |
-| 2 | Preview could log food | writer proof green; browser attack rerun pending |
-| 3 | Preview could start/log/finish workout | writer proof green; browser attack rerun pending |
+| 1 | Nutrition mobile crash/ejection | PASS — `test:e2e:nutrition` 91/91 |
+| 2 | Preview could log food | PASS — browser attack opens Premium and storage remains unchanged |
+| 3 | Preview could start/log/finish workout | PASS — browser attack rejects planted session and writes none |
 | 4 | install banner covered handoff CTA | `test:bottom-overlay` green; real hit-test pending |
 | 5 | Today/Workout mismatch | `test:workout-day-source` 19/19 green |
-| 6 | Breakfast Add pointer miss | named nutrition E2E pending |
-| 7 | macro clipping | named nutrition responsive E2E pending |
+| 6 | Breakfast Add pointer miss | PASS — real pointer at 320/390 and ≥44px |
+| 7 | macro clipping | PASS — ar/en at 320/390/640/768/894/1280, no clipping/overflow |
 | 8 | Language row dead | runtime/settings E2E pending |
 | 9 | Units row dead | active discovery pending |
 | 10 | Numbers row dead | active discovery pending |
 | 11 | Arabic/Western numeral inconsistency | active visual discovery pending |
-| 12 | Measurements route/promise | STILL BROKEN at baseline; BUG-002 |
+| 12 | Measurements route/promise | PASS — live route converged to ProgressV2; Preview measurement attack 0 writes |
 | 13 | auth route/state | named navigation E2E pending |
 | 14 | onboarding reload resume | named navigation/onboarding E2E pending |
 | 15 | returning guest route | named navigation E2E pending |
@@ -163,23 +183,23 @@ Status here means evidence at this checkpoint, not remembered intent.
 | 17 | exercise deep-link | named navigation E2E pending |
 | 18 | deterministic 404 | named navigation E2E pending |
 | 19 | whitespace-only signup name | named navigation E2E pending |
-| 20 | sub-44px touch targets | matrix pending; Premium close is known 36px at baseline |
+| 20 | sub-44px touch targets | PARTIAL PASS — bottom/nav 200/200 and Premium close/input corrected; full-site audit remains Layer 4 |
 | 21 | silent persistence failure | `test:storage-honesty` green for covered writers; broader UI proof pending |
 | 22 | malformed storage recovery | multiple unit proofs green; browser dirty pass pending |
 | 23 | never-trained semantics | not collected by live V2 baseline; OPEN Layer 2 |
 | 24 | minor/age eligibility | `test:age-13`, `test:minors`, `test:policy` green |
-| 25 | Preview direct/back/refresh/dispatch | baseline suite is partial; expanded attack pending |
+| 25 | Preview direct/back/refresh/dispatch | PASS for paid-action matrix — `test:e2e:preview-gate` 34/34; broader navigation remains Layer 3 |
 | 26 | Salla id 1181109938 / reject 1084925309 | EXTERNALLY_BLOCKED: only store root found |
 | 27 | no production Premium hook | source proof green; final built bundle counter-proof pending |
-| 28 | install overlap real hit test | named E2E pending |
+| 28 | install overlap real hit test | PASS — 200/200 with named synthetic regression attacks |
 | 29 | old guest/draft preserved | unit coverage partial; dirty browser pass pending |
 | 30 | no localhost/dev endpoint in production | final artifact scan pending |
 
 ## Current severity counts
 
 - P0: 0 confirmed.
-- P1: 3 open (BUG-001, BUG-002, BUG-004).
-- P2: 3 open (BUG-003, BUG-005, BUG-006).
+- P1: 0 internal open; BUG-001, BUG-002 and BUG-004 are resolved and fully gated.
+- P2: 2 open (BUG-003, BUG-006); BUG-005 is resolved and fully gated.
 - P3: 0.
 - External blockers: product-specific Salla URL not present; live activation backend unavailable; WebKit availability not tested yet.
 

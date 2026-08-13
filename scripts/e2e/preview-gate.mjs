@@ -41,13 +41,15 @@ async function waitForServer(ms = 30000) {
 }
 
 const settle = (page, ms = 1800) => page.waitForTimeout(ms)
-const tap = (page, re) => page.evaluate((s) => {
-  const rx = new RegExp(s)
-  const el = [...document.querySelectorAll('button,a')].find((b) => rx.test((b.textContent || '').trim()))
-  if (!el) return false
-  el.click()
-  return true
-}, re.source)
+const tap = async (page, re) => {
+  const target = page.locator('button, a').filter({ hasText: re }).first()
+  await target.click({ timeout: 10000 })
+}
+const dismissGate = async (page) => {
+  const gate = page.locator('[data-testid="premium-gate"]')
+  await gate.locator('[data-testid="premium-gate-dismiss"]').click({ timeout: 10000 })
+  await gate.waitFor({ state: 'hidden', timeout: 10000 })
+}
 
 /**
  * لقطة الحالة المدفوعة المخزّنة — الحكم الحقيقي على «هل وقع الفعل؟».
@@ -69,6 +71,24 @@ const paidState = (page) => page.evaluate((key) => {
     keyPresent: raw !== null,
   }
 }, NUTRITION_KEY)
+
+/** حالة التعافي المدفوعة — منفصلة عن مفاتيح التغذية حتى لا يمرّ الفحص بلا قياس. */
+const recoveryState = (page) => page.evaluate(() => {
+  try {
+    return window.localStorage.getItem('qimmah:recovery-log:v1:guest') || ''
+  } catch {
+    return ''
+  }
+})
+
+/** سجل القياسات القانوني؛ الحماية تقاس بالكتابة لا باختفاء الزر. */
+const measurementState = (page) => page.evaluate(() => {
+  try {
+    return window.localStorage.getItem('qimmah:history:measurementLogs:v1') || ''
+  } catch {
+    return ''
+  }
+})
 
 async function onboard(page) {
   await page.goto(URL, { waitUntil: 'networkidle' })
@@ -93,8 +113,10 @@ async function onboard(page) {
   const tiles = page.locator('button[aria-pressed]')
   await tiles.nth(0).click({ force: true }); await tiles.nth(3).click({ force: true })
   await next(); await settle(page, 1600)
-  await tap(page, /الدخول للوحة/); await settle(page, 2200)
-  await tap(page, /شوف خطتي/); await settle(page, 2400)
+  await tap(page, /الدخول للوحة/)
+  await page.waitForSelector('[data-testid="plan-handoff"]', { timeout: 25000 })
+  await tap(page, /استعرض قِمّة أولًا/)
+  await settle(page, 2600)
 }
 
 const preview = startPreview()
@@ -114,7 +136,8 @@ try {
   // (أ) التصفّح مفتوح — الحجب على الفعل لا على الصفحة.
   for (const route of ['dashboard', 'workout', 'exercises', 'nutrition', 'progress', 'profile']) {
     await page.evaluate((h) => { window.location.hash = '/' + h }, route)
-    await settle(page, 1600)
+    // لا نكتفي بتأخير قصير: التحميل الكسول للمسارات جزء من السلوك الذي نثبته.
+    await settle(page, 2800)
     const state = await page.evaluate(() => ({
       hash: location.hash,
       notFound: /الصفحة غير موجودة|Not found/i.test(document.body.innerText),
@@ -135,8 +158,21 @@ try {
   check('معاينة: لا جلسة تمرين مكتوبة', afterStart.activeWorkout === before.activeWorkout && !afterStart.activeWorkout)
   const gateCta = await page.locator('[data-testid="premium-gate-cta"]').getAttribute('href').catch(() => null)
   check('معاينة: نداء البوّابة يشير إلى وجهة الشراء', !!gateCta && /salla|checkout/i.test(gateCta), String(gateCta))
-  await tap(page, /أكمل التصفّح/)
-  await settle(page, 800)
+  const focusStartsInGate = await page.evaluate(() => {
+    const gate = document.querySelector('[data-testid="premium-gate"]')
+    return !!(gate && document.activeElement && gate.contains(document.activeElement))
+  })
+  check('المعاينة: عند الفتح ينتقل التركيز إلى حوار Premium', focusStartsInGate)
+  await page.keyboard.press('Shift+Tab')
+  const focusWrapsInGate = await page.evaluate(() => {
+    const gate = document.querySelector('[data-testid="premium-gate"]')
+    return !!(gate && document.activeElement && gate.contains(document.activeElement))
+  })
+  check('المعاينة: تركيز لوحة المفاتيح يبقى داخل الحوار', focusWrapsInGate)
+  await page.keyboard.press('Escape')
+  await page.locator('[data-testid="premium-gate"]').waitFor({ state: 'hidden', timeout: 10000 })
+  check('المعاينة: Escape يغلق الحوار', !(await page.locator('[data-testid="premium-gate"]').isVisible().catch(() => false)))
+  await settle(page, 400)
 
   // (ج) الالتفاف المباشر — استدعاء الكاتب من الـconsole (مطلب المؤسس §25).
   //     هذا ما يفرّق «إخفاء زرّ» عن «حماية حدّ الفعل».
@@ -144,6 +180,9 @@ try {
     const out = {}
     try {
       window.localStorage.setItem('qimmah:activeWorkout:v1', JSON.stringify({ hacked: true }))
+      window.localStorage.setItem('qimmah:premium', 'active')
+      window.localStorage.setItem('premium', 'true')
+      window.history.replaceState(null, '', `${window.location.pathname}?premium=active${window.location.hash}`)
       out.rawWrite = 'succeeded'
     } catch { out.rawWrite = 'blocked' }
     return out
@@ -156,6 +195,11 @@ try {
   await settle(page, 2000)
   const resumed = await page.evaluate(() => /استئناف|Resume/i.test(document.body.innerText))
   check('معاينة: حمولة جلسة مزروعة لا تُستأنف', !resumed, `rawWrite=${bypass.rawWrite}`)
+  await tap(page, /ابدأ تمرين اليوم|ابدأ تمرين/)
+  await settle(page, 900)
+  const tamperGate = await page.locator('[data-testid="premium-gate"]').isVisible().catch(() => false)
+  check('معاينة: اشتراك مزروع في localStorage والعنوان لا يفتح Premium', tamperGate)
+  await dismissGate(page)
 
   // (د) التغذية — تُتصفَّح، ولا تُسجَّل.
   await page.evaluate(() => { window.location.hash = '/nutrition' })
@@ -165,15 +209,57 @@ try {
   await settle(page, 1400)
   const nutGate = await page.locator('[data-testid="premium-gate"]').isVisible().catch(() => false)
   check('معاينة: «أضف» في التغذية يفتح البوّابة', nutGate)
-  await tap(page, /أكمل التصفّح/); await settle(page, 700)
+  await dismissGate(page); await settle(page, 400)
   await tap(page, /\+250/)
   await settle(page, 1200)
+  const waterGate = await page.locator('[data-testid="premium-gate"]').isVisible().catch(() => false)
   const nutAfter = await paidState(page)
+  check('معاينة: تسجيل الماء يفتح البوّابة', waterGate)
   check('معاينة: لا صنف طعام يُسجَّل', nutAfter.foods === nutBefore.foods && nutAfter.foods === 0)
   check('معاينة: لا ماء يُسجَّل', nutAfter.waterMl === nutBefore.waterMl)
+  await dismissGate(page); await settle(page, 400)
+
+  // (هـ) التعافي فعل مدفوع أيضًا: لا يكفي أن يرمي الكاتب المحروس استثناءً.
+  // يجب أن يوصل المعالج الحي إلى نفس بوابة Premium، من دون كتابة سجل.
+  await page.evaluate(() => { window.location.hash = '/recovery' })
+  await settle(page, 1800)
+  const recoveryBefore = await recoveryState(page)
+  await tap(page, /اعرض توصيتي/)
+  await settle(page, 1000)
+  const recoveryGate = await page.locator('[data-testid="premium-gate"]').isVisible().catch(() => false)
+  const recoveryAfter = await recoveryState(page)
+  check('معاينة: تسجيل التعافي يفتح بوابة Premium', recoveryGate)
+  check('معاينة: لا سجل تعافٍ يُكتب', recoveryAfter === recoveryBefore)
+  await dismissGate(page)
+  await settle(page, 400)
+
+  // (و) «سجّل قياساتك» يجب أن يصل إلى سطح حيّ، لا بطاقة إحصاءات صامتة.
+  // ثم الحفظ نفسه يبقى محجوبًا في المعاينة عند المعالج والكاتب معًا.
+  await page.evaluate(() => { window.location.hash = '/progress' })
+  await settle(page, 1800)
+  const measurementSurface = await page.getByRole('button', { name: /الوزن والجسم/ }).isVisible().catch(() => false)
+  check('معاينة: التقدّم يوفّر مدخل قياسات حيًا', measurementSurface)
+  if (measurementSurface) {
+    await page.getByRole('button', { name: /الوزن والجسم/ }).click()
+    await settle(page, 700)
+    await tap(page, /تسجيل وزن اليوم/)
+    await page.waitForSelector('#v2-weight', { timeout: 5000 })
+    await page.fill('#v2-weight', '82')
+    const measurementBefore = await measurementState(page)
+    await tap(page, /احفظ القياسات/)
+    await settle(page, 1000)
+    const measurementGate = await page.locator('[data-testid="premium-gate"]').isVisible().catch(() => false)
+    const measurementAfter = await measurementState(page)
+    check('معاينة: حفظ القياسات يفتح بوابة Premium', measurementGate)
+    check('معاينة: لا قياس يُكتب', measurementAfter === measurementBefore)
+    await dismissGate(page)
+    await settle(page, 400)
+  }
 
   // ═══════════════ شخصية ٢: مُفعَّل بكود ═══════════════
   console.log('\n=== شخصية: مُفعَّل بكود تفعيل (وضع التقليد) ===')
+  await page.evaluate(() => { window.location.hash = '/nutrition' })
+  await settle(page, 2400)
   await tap(page, /^أضف$/)
   await settle(page, 1200)
   await tap(page, /عندك كود تفعيل/)
@@ -184,6 +270,7 @@ try {
     ['NOPE-NOPE-NOPE', 'invalid'],
     ['QIMMAH-TEST-USED', 'already_used'],
     ['QIMMAH-TEST-EXPIRED', 'expired'],
+    ['QIMMAH-TEST-OFFLINE', 'offline'],
   ]) {
     await page.fill('[data-testid="activation-code-input"]', code)
     await page.locator('[data-testid="activation-code-submit"]').click({ force: true })
@@ -207,8 +294,8 @@ try {
   await settle(page, 1500)
   const okMsg = await page.locator('[data-testid="activation-code-message"]').innerText().catch(() => '')
   check('كود صالح ⇒ رسالة نجاح', /تمّ التفعيل|activated/i.test(okMsg), okMsg)
-  await tap(page, /أكمل التصفّح/)
-  await settle(page, 1000)
+  await dismissGate(page)
+  await settle(page, 600)
 
   // الآن الأفعال تعمل — نفس الشاشات، نتيجة مختلفة.
   await page.evaluate(() => { window.location.hash = '/nutrition' })
