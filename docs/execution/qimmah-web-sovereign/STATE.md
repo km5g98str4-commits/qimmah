@@ -1,6 +1,6 @@
 # Qimmah Web Sovereign — execution state
 
-Updated: 2026-08-14 (Layer 3 Exercises/detail / PKG-6 verified)
+Updated: 2026-08-14 (Layer 3 Settings/numbers/units / PKG-7 verified)
 
 ## Provenance
 
@@ -28,14 +28,29 @@ git status --short --branch (before PKG-0 edits)    → clean
 
 ## Current package
 
-- Packages completed and pushed: `PKG-0` at `f78676e`; `PKG-1` at `8b29ca3`; `PKG-2` at `28c725e4e4869d454d6b007cc11a92222a059ac1`; `PKG-3` at `678a38d01d2206ff02b245281d621fc37ed19658`; `PKG-4` at `df5e55bebc31149484c3d06a9f59348b1697f9e1`; `PKG-5` at `7478507b7c46ee9b6018b1ef67c31ca40fbed6d2`.
-- Package verified for checkpoint: Layer 3 Exercises/detail (`PKG-6`).
-- The canonical catalog remains exactly 181 records and unchanged. One pure consumer owns Arabic/English search, muscle/equipment combinations, empty results and locale sorting.
-- All exercise and machine cards now open `#/exercises/:exerciseId`; Back/Forward/refresh and unknown-id replacement share the same route owner.
-- Exercise detail is a labelled modal with Escape, trapped/restored focus, scroll restoration, 44px controls and a direct-link Back action that stays inside Qimmah.
-- The real browser exercised every §28 point plus Machines, 320px English/LTR, touch sizes and zero page errors; the unchanged historical navigation suite remains 96/96.
+- Packages completed and pushed: `PKG-0` at `f78676e`; `PKG-1` at `8b29ca3`; `PKG-2` at `28c725e4e4869d454d6b007cc11a92222a059ac1`; `PKG-3` at `678a38d01d2206ff02b245281d621fc37ed19658`; `PKG-4` at `df5e55bebc31149484c3d06a9f59348b1697f9e1`; `PKG-5` at `7478507b7c46ee9b6018b1ef67c31ca40fbed6d2`; `PKG-6` at `f49ae011450b9a0097e65b277d36bc7348ebd51f`.
+- Package verified for checkpoint: Layer 3 Settings/numbers/units (`PKG-7`).
+- `#/settings` once again routes import/export through the existing hardened `DataManagementPanel`; the reintroduced `FileReader` + raw `JSON.parse` importer is removed.
+- Language is live and persisted across reload with synchronized `document.lang` and `dir`. Units are an explicitly non-interactive metric-only capability statement; no imperial support is fabricated.
+- `formatNumber` is the single presentation-boundary policy for Layer-3 critical surfaces: Arabic-Indic digits in Arabic and Latin digits in English. Stored numeric values stay numeric and unchanged.
+- The real browser proved the Settings policy at 320px plus the 34-vector import attack. Nutrition 106/106, Workout 31/31 and Progress 25/25 stayed green after numeral convergence.
 - No dependency, backend, Supabase, QAE, canonical dataset, service-worker, deployment, or Salla authority file changed.
-- Next action: commit/push `[PKG-6][green]`, then continue Layer 3 with Settings.
+- Next action: commit/push `[PKG-7][green]`, then continue Layer 3 with Profile.
+
+### PKG-7 Settings/numbers/units evidence
+
+| Evidence | Result |
+| --- | --- |
+| `npm run test:settings-preferences` | PASS — 17/17: locale policy, stored-value immutability, secure panel binding, metric truth, import-undo touch targets, five critical consumers and two named bypass attacks |
+| `npm run test:e2e:settings-security` | PASS — 34/34 hostile/valid import, atomic restore, A/B isolation and zero token/PII leakage |
+| `npm run test:e2e:settings` | PASS — 14/14 at 320px: AR/RTL, EN/LTR, persisted reload, metric/no-fake control, numeral samples, data disclosure and zero browser errors |
+| `npm run test:e2e:nutrition` | PASS — 106/106 after numeral convergence |
+| `npm run test:e2e:workout` | PASS — 31/31 after numeral convergence |
+| `npm run test:e2e:progress` attempt 1 | NAMED TEST-EXPECTATION FAIL — 23/25 because two assertions still required Latin `81.5` in Arabic UI after the deliberate policy change |
+| Strengthened `npm run test:e2e:progress` | PASS — 25/25; now requires Arabic `٨١٫٥`, rejects Latin `81.5`, and proves reload retention |
+| Fresh `npm ci` + `npm run typecheck` + `npm run lint` | PASS — deterministic install, typecheck exit 0, lint exit 0 with zero warnings |
+| `npm run build` | PASS — production mode, 2,563 modules |
+| Full `npm run test:gate` | PASS — includes `test:settings-preferences` 17/17 and exits 0 through final `test:workout-day-source` 19/19 |
 
 ### PKG-6 Exercises/detail evidence
 
@@ -153,7 +168,8 @@ Rule: discover canonical → route to it → isolate legacy. No third implementa
 | Exercises | `ExerciseLibraryView.tsx`; `ExerciseDetail.tsx`; pure filter in `src/lib/exerciseLibrary.ts`; catalog `src/data/exercises.ts`; labels/media helpers | workout/library/`#/exercises/:exerciseId` | canonical dataset is read-only; Machines and full catalog share one route owner |
 | Auth | `authContext.tsx`, `LoginView.tsx`, route-owned `login/signup/forgot` | `App.tsx` | no local secrets; Supabase config/semantics are no-touch |
 | Language | `src/i18n/LanguageContext.tsx`; persisted device preference in `appPreferences.ts` | all routes | hardcoded bilingual helpers remain historical debt and are not a new pattern |
-| Number presentation | presentation helpers (`formatNumber`/screen dictionaries where present) | progress/nutrition/workout | stored numeric data must remain numeric |
+| Number presentation | `src/lib/numberFormat.ts` | Settings sample/import preview and Layer-3 Nutrition/Today/Workout/Progress/Measurements surfaces | locale policy is presentation-only; stored numeric data remains numeric |
+| Settings data transfer | `src/components/DataManagementPanel.tsx` over `src/lib/portability` | `#/settings` | raw `FileReader` + manual `JSON.parse` importer is prohibited and guarded |
 | Error handling | `src/components/ErrorBoundary.tsx` (`ErrorBoundary`, `RouteErrorBoundary`) + `src/i18n/dict/errorBoundary.ts` | `main.tsx`, route shell, setup | setup reuses the canonical route primitive; prior duplicate strings in `config/strings.ts` are isolated/removed |
 | Local data registry | `src/lib/userDataKeys.ts` | account wipe, portability, sync allowlists | raw key literals not registered here require investigation |
 
@@ -248,10 +264,10 @@ Status here means evidence at this checkpoint, not remembered intent.
 | 5 | Today/Workout mismatch | PASS — `test:workout-day-source` 19/19 plus live-browser name, completion-next and Today-transition agreement |
 | 6 | Breakfast Add pointer miss | PASS — real pointer at 320/390 and ≥44px |
 | 7 | macro clipping | PASS — ar/en at 320/390/640/768/894/1280, no clipping/overflow |
-| 8 | Language row dead | runtime/settings E2E pending |
-| 9 | Units row dead | active discovery pending |
-| 10 | Numbers row dead | active discovery pending |
-| 11 | Arabic/Western numeral inconsistency | active visual discovery pending |
+| 8 | Language row dead | PASS — live AR/EN switch synchronizes `lang`/`dir`, persists, and survives reload in `test:e2e:settings` 14/14 |
+| 9 | Units row dead | PASS — truthful metric-only information row; no interactive styling and no fake imperial support |
+| 10 | Numbers row dead | PASS — explicit locale-derived numeral policy and live sample; not presented as a control |
+| 11 | Arabic/Western numeral inconsistency | PASS for Layer-3 critical surfaces — one `formatNumber` boundary, structural guard 17/17, and Arabic-only measurement browser assertion |
 | 12 | Measurements route/promise | PASS — real `#/measurements` route with empty/history/add/edit/delete, Profile/Progress entries and 25-case browser proof |
 | 13 | auth route/state | PASS — `test:e2e:navigation` 96/96 |
 | 14 | onboarding reload resume | PASS — onboarding matrix history resume plus `test:e2e:onboarding` |
@@ -275,8 +291,8 @@ Status here means evidence at this checkpoint, not remembered intent.
 ## Current severity counts
 
 - P0: 0 confirmed.
-- P1: 0 internal open; BUG-001, BUG-002, BUG-004 and BUG-008–BUG-012 are resolved and fully gated.
-- P2: 1 open (BUG-003); BUG-005–BUG-007 and BUG-013 are resolved and fully gated.
+- P1: 0 internal open; BUG-001, BUG-002, BUG-004, BUG-008–BUG-012 and BUG-018 are resolved and fully gated.
+- P2: 1 open (BUG-003); BUG-005–BUG-007, BUG-013 and BUG-019 are resolved and fully gated.
 - P3: 0.
 - External blockers: product-specific Salla URL not present; live activation backend unavailable; WebKit availability not tested yet.
 

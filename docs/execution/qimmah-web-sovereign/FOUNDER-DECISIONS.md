@@ -1,6 +1,6 @@
 # Qimmah Web Sovereign — autonomous founder decisions
 
-Updated: 2026-08-14 (Layer 3 Exercises/detail / PKG-6 verified)
+Updated: 2026-08-14 (Layer 3 Settings/numbers/units / PKG-7 verified)
 
 ## Decision 001 — Use the exact Founder checkpoint
 
@@ -106,6 +106,15 @@ PKG-6 completes the existing Exercise Library/detail contract without changing c
 | `e2e/exercise-library-reliability.mjs` | absent | 32 browser checks covering all §28 acceptance points plus keyboard, 320px and LTR | prove the complete maintained surface | new guard |
 | `e2e/navigation-history.mjs` | 96 checks | unchanged 96 assertions; rerun after the new route-safe close behavior | prove no history regression without weakening the baseline | unchanged, reverified |
 
+PKG-7 restores the existing hardened Settings data path and makes capabilities/presentation explicit. No assertion was removed or weakened.
+
+| Test | Old contract | New contract | Why | Strength |
+| --- | --- | --- | --- | --- |
+| `settings-preferences-proof.ts` | absent | 17 runtime/structural checks plus two named bypass attacks | guard the canonical panel, metric truth, touch targets and one numeral policy | new guard inside `test:gate` |
+| `e2e/settings-reliability.mjs` | absent | 14 browser checks at 320px for AR/EN, lang/dir, reload, metric/no-fake rows, number samples and errors | prove the Settings contract rather than infer it from source | new guard |
+| `e2e/settings-import-security.mjs` | existing 34-vector contract but disconnected from live UI | unchanged 34 assertions now execute against the restored live panel | re-establish reviewed import security | unchanged, reverified |
+| `e2e/progress-reliability.mjs` | Arabic UI expected Latin `81.5` | requires Arabic `٨١٫٥`, rejects Latin form, repeats after reload | encode the deliberate numeral policy | stronger |
+
 ## Decision 006 — Error recovery never means product completion
 
 - Decision: a render failure may retry/reload/contact support, but cannot mark onboarding complete or synthesize a plan.
@@ -168,3 +177,12 @@ PKG-6 completes the existing Exercise Library/detail contract without changing c
 - Risk: native/browser Back from a directly entered external deep link retains ordinary browser semantics; the in-product back action deliberately remains inside Qimmah. A later router migration must preserve the same push/replace distinction.
 - Reversibility: PKG-6 changes route presentation and test seams only; no user data or canonical catalog migration exists.
 - Affected files: `ExerciseLibraryView`, `ExerciseDetail`, `appRoutes`, the existing library dictionary, pure filter consumer and focused/browser proofs.
+
+## Decision 013 — Settings exposes only real preferences; numbers follow language at presentation
+
+- Decision: Language remains the only preference control. Units are metric-only and Numbers follow the selected language; both appear as factual non-interactive rows. Arabic uses Arabic-Indic digits and English uses Latin digits through one `formatNumber` boundary. Settings import/export remains owned exclusively by `DataManagementPanel`/portability.
+- Why: the product has no imperial conversion capability or independent numeral preference. Making either row clickable would create dead UI or fake support. Locale-derived digits resolve the documented `٢٥`/`25` conflict without altering numeric storage.
+- Alternatives rejected: build fake imperial support; add a numerals preference with incomplete consumers; choose Latin digits for Arabic despite the existing Arabic content system; keep per-screen formatters; preserve the manual Settings JSON importer.
+- Risk: older untouched surfaces can still contain hardcoded numerals inside translated prose; those are dictionary content, not stored numeric values. The shared helper is now mandatory for dynamic Layer-3 presentation and expands as later layers touch remaining surfaces.
+- Reversibility: the policy is a small presentation helper and informational dictionary; no schema or stored value changes. The portability reconnection removes a duplicate unsafe path without data migration.
+- Affected files: Settings/DataManagementPanel, number formatting, Layer-3 Nutrition/Today/Workout/Progress displays, dedicated dictionary and focused/browser proofs.

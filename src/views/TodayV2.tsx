@@ -29,6 +29,7 @@ import type { NotificationPrefs } from '@/lib/notifications/types'
 import { requestNotificationPermission, reconcileNotificationSchedule } from '@/lib/notifications/engine'
 import { hasEventToday, journeyDayIndex } from '@/lib/tracking/signals'
 import { useAchievementsEngine } from '@/features/achievements/useAchievements'
+import { formatNumber } from '@/lib/numberFormat'
 
 interface TodayV2Props {
   lang: Lang
@@ -329,10 +330,10 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
             <Icon name="Flame" className="h-4 w-4 shrink-0" style={{ color: MACRO_TONE.calories }} />
             <span className="shrink-0 text-sm font-bold text-ink-500">{copy.macroStripLead}</span>
             <span className="flex flex-1 items-center gap-3 whitespace-nowrap">
-              <MacroChip label={copy.macroCaloriesLabel} consumed={nutrition.calories.consumed} target={nutrition.calories.target} color={MACRO_TONE.calories} />
-              <MacroChip label={copy.macroCarbs} consumed={nutrition.macros.carbs.consumed} target={nutrition.macros.carbs.target} color={MACRO_TONE.carbs} />
-              <MacroChip label={copy.macroProtein} consumed={nutrition.macros.protein.consumed} target={nutrition.macros.protein.target} color={MACRO_TONE.protein} />
-              <MacroChip label={copy.macroFat} consumed={nutrition.macros.fat.consumed} target={nutrition.macros.fat.target} color={MACRO_TONE.fat} />
+              <MacroChip lang={lang} label={copy.macroCaloriesLabel} consumed={nutrition.calories.consumed} target={nutrition.calories.target} color={MACRO_TONE.calories} />
+              <MacroChip lang={lang} label={copy.macroCarbs} consumed={nutrition.macros.carbs.consumed} target={nutrition.macros.carbs.target} color={MACRO_TONE.carbs} />
+              <MacroChip lang={lang} label={copy.macroProtein} consumed={nutrition.macros.protein.consumed} target={nutrition.macros.protein.target} color={MACRO_TONE.protein} />
+              <MacroChip lang={lang} label={copy.macroFat} consumed={nutrition.macros.fat.consumed} target={nutrition.macros.fat.target} color={MACRO_TONE.fat} />
             </span>
             <Icon name={ar ? 'ChevronLeft' : 'ChevronRight'} className="h-4 w-4 shrink-0 text-ink-400" />
           </button>
@@ -513,14 +514,14 @@ function ActionCard({ action, lang, hero, eyebrow }: { action: TodayAction; lang
  * وبلا هدف مضبوط تعرض «—» لا رقمًا مخترَعًا (§5: الصدق قبل الطمأنينة) — نفس
  * عقد `MacroRing` التي حلّت محلّها، بمساحة صفٍّ واحد بدل ثلث الطية.
  */
-function MacroChip({ label, consumed, target, color }: { label: string; consumed: number; target: number; color: string }) {
+function MacroChip({ lang, label, consumed, target, color }: { lang: Lang; label: string; consumed: number; target: number; color: string }) {
   const hasTarget = target > 0
   const remaining = Math.max(0, Math.round(target - consumed))
   return (
     <span className="flex items-baseline gap-1">
       <span className="text-sm font-bold text-ink-500">{label}</span>
       <span dir="ltr" className="text-base font-black tabular-nums" style={{ color }}>
-        {hasTarget ? remaining.toLocaleString('en-US') : '—'}
+        {hasTarget ? formatNumber(remaining, lang) : '—'}
       </span>
     </span>
   )

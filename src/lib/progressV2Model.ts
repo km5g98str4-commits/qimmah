@@ -17,6 +17,7 @@ import { loadHistory } from '@/lib/exerciseHistory'
 import { recentVolumes } from '@/lib/progressStats'
 import { getExercise } from '@/data/exercises'
 import { getDayStamp } from '@/lib/today'
+import { formatNumber } from '@/lib/numberFormat'
 
 const DAY_MS = 86_400_000
 const WINDOW_DAYS = 14
@@ -138,6 +139,7 @@ function topWeightInSession(exercises: { exerciseId: string; sets?: { weightKg?:
 export function buildProgressV2Model(customization: Customization, lang: Lang): ProgressV2Model {
   const ar = lang !== 'en'
   const t = (a: string, e: string) => (ar ? a : e)
+  const fmt = (value: number) => formatNumber(round1(value), lang, { maximumFractionDigits: 1 })
   const now = stampMs(getDayStamp()) + DAY_MS - 1 // end of today (local)
   const windowStart = now - WINDOW_DAYS * DAY_MS
   const goal = customization.profile.goal ?? null
@@ -159,6 +161,7 @@ export function buildProgressV2Model(customization: Customization, lang: Lang): 
   const waistChangeCm =
     waistSeries.length >= 2 ? round1(waistSeries[waistSeries.length - 1].value - waistSeries[waistSeries.length - 2].value) : null
   const waistAge = latestWaist ? daysAgo(latestWaist.date, now) : null
+  const waistAgeText = waistAge === null ? '' : fmt(waistAge)
   const waistStale = waistAge !== null && waistAge > WAIST_STALE_DAYS
   const waistMissing = latestWaist === null
   const stale: StaleNudge = {
@@ -166,7 +169,7 @@ export function buildProgressV2Model(customization: Customization, lang: Lang): 
     text: waistMissing ? t('ما فيه قياس خصر لسا', 'No waist measurement yet') : t('قياس الخصر قديم — يحتاج قياس جديد', 'Waist reading is old — needs a fresh one'),
     detailText: waistMissing
       ? t('سجّل قياس الخصر عشان تكون القراءة أدق', 'Log a waist measurement for a sharper read')
-      : t(`آخر قياس للخصر قبل ${waistAge} ${ar ? 'أيام' : 'days'} — يحتاج قياس جديد`, `Last waist measurement ${waistAge} days ago — needs a fresh one`),
+      : t(`آخر قياس للخصر قبل ${waistAgeText} أيام — يحتاج قياس جديد`, `Last waist measurement ${waistAgeText} days ago — needs a fresh one`),
     actionLabel: t('قِس', 'Measure'),
     destination: 'progress',
   }
@@ -277,7 +280,7 @@ export function buildProgressV2Model(customization: Customization, lang: Lang): 
   }
   // Strength
   if (improvedCount > 0) {
-    summary.push({ key: 'strength', icon: 'TrendingUp', text: t('القوة تحسّنت في', 'Strength improved in'), value: t(`${fmt(improvedCount)} تمارين`, `${improvedCount} lifts`), tag: t('تقدّم', 'Progress'), tone: 'good' })
+    summary.push({ key: 'strength', icon: 'TrendingUp', text: t('القوة تحسّنت في', 'Strength improved in'), value: t(`${fmt(improvedCount)} تمارين`, `${fmt(improvedCount)} lifts`), tag: t('تقدّم', 'Progress'), tone: 'good' })
   } else if (strength.hasData) {
     summary.push({ key: 'strength', icon: 'Minus', text: t('القوة ثابتة', 'Strength steady'), value: '', tag: t('واصل', 'Keep on'), tone: 'neutral' })
   } else {
@@ -315,7 +318,7 @@ export function buildProgressV2Model(customization: Customization, lang: Lang): 
   return {
     goal,
     goalLabel: goal ? GOAL_AR[goal] : null,
-    period: { label: t('ملخّص آخر 14 يوم', 'Last 14 days') },
+    period: { label: t(`ملخّص آخر ${fmt(WINDOW_DAYS)} يوم`, `Last ${fmt(WINDOW_DAYS)} days`) },
     headline,
     summary,
     stale,
@@ -324,9 +327,4 @@ export function buildProgressV2Model(customization: Customization, lang: Lang): 
     strength,
     disclaimer: t('قراءة تقريبية — تصير أدق كل ما سجّلت أكثر.', 'An estimated read — sharper the more you log.'),
   }
-}
-
-// Metrics use WESTERN digits to match the PDF §05 exactly (0.8 كجم · 78% · 14 يوم).
-function fmt(n: number): string {
-  return Number.isInteger(n) ? String(n) : String(round1(n))
 }

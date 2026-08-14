@@ -3,6 +3,7 @@ import { Icon } from '@/components/Icon'
 import { ExerciseMedia } from '@/components/ExerciseMedia'
 import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
+import { formatNumber } from '@/lib/numberFormat'
 import { applyTheme } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
 import type { AppRoute } from '@/lib/appRoutes'
@@ -140,7 +141,7 @@ const parseReps = (reps: string): number => {
   const m = reps.match(/\d+/)
   return m ? Number(m[0]) : 10
 }
-const toAr = (n: number, lang: Lang) => (lang === 'en' ? String(n) : String(n).replace(/\d/g, (x) => '٠١٢٣٤٥٦٧٨٩'[Number(x)]))
+const toAr = (n: number, lang: Lang) => formatNumber(n, lang, { maximumFractionDigits: 2 })
 const fmtTime = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
 
 /**
@@ -682,7 +683,7 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
             )}
             <h1 className="mt-1 text-2xl font-black leading-tight">{ar ? ex.nameAr : ex.nameEn}</h1>
             <p className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-sm font-bold" style={{ color: FOCUS.inkMuted }}>
-              <span>{CATEGORY_LABEL[ex.category][ar ? 'ar' : 'en']} · {ex.sets}×{ex.reps}</span>
+              <span>{CATEGORY_LABEL[ex.category][ar ? 'ar' : 'en']} · {toAr(ex.sets, lang)}×{ex.reps.replace(/\d+/g, (value) => toAr(Number(value), lang))}</span>
               {active.subs?.[ex.id] && (
                 <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[0.7rem] font-black" style={{ background: 'color-mix(in srgb, var(--c-primary) 16%, transparent)', color: FOCUS.blue }}>
                   <Icon name="Repeat" className="h-3 w-3" />{t('مُستبدَل', 'Swapped')}
@@ -820,11 +821,11 @@ function RecoveryDecisionSheet({
         <p className="mt-2 text-sm leading-relaxed text-ink-500">
           {prompt.kind === 'abandoned'
             ? t(
-                `بدأ قبل ${ageHours.toLocaleString('ar-SA')} ساعة وفيه ${prompt.completedSets.toLocaleString('ar-SA')} مجموعات مسجّلة. اختر حفظ العمل الفعلي أو تجاهله.`,
+                `بدأ قبل ${toAr(ageHours, lang)} ساعة وفيه ${toAr(prompt.completedSets, lang)} مجموعات مسجّلة. اختر حفظ العمل الفعلي أو تجاهله.`,
                 `It started ${ageHours} hours ago and contains ${prompt.completedSets} logged sets. Save the recorded work or discard it.`,
               )
             : t(
-                `عندك ${prompt.completedSets.toLocaleString('ar-SA')} مجموعات من الخطة السابقة. لن نحذفها بدون قرارك.`,
+                `عندك ${toAr(prompt.completedSets, lang)} مجموعات من الخطة السابقة. لن نحذفها بدون قرارك.`,
                 `You have ${prompt.completedSets} sets from the previous plan. We will not delete them without your choice.`,
               )}
         </p>
@@ -1087,7 +1088,7 @@ function PlanScreen({ model, lang, onExercise, onStart }: { model: ReturnType<ty
                     </span>
                     <span className="min-w-0 flex-1">
                       <span className="block text-sm font-bold">{ar ? ex.nameAr : ex.nameEn}</span>
-                      <span className="block text-xs text-ink-500">{ex.sets}×{ex.reps}{ex.equipment[0] ? ` · ${equipmentLabel(ex.equipment[0], lang)}` : ''}</span>
+                      <span className="block text-xs text-ink-500">{toAr(ex.sets, lang)}×{ex.reps.replace(/\d+/g, (value) => toAr(Number(value), lang))}{ex.equipment[0] ? ` · ${equipmentLabel(ex.equipment[0], lang)}` : ''}</span>
                     </span>
                     <Icon name="ChevronLeft" className="h-4 w-4 shrink-0 text-ink-400 rtl:rotate-0 ltr:rotate-180" />
                   </button>
@@ -1115,12 +1116,12 @@ function DetailScreen({ ex, idx, total, lang, swapped, onReplace, onStart, onBac
         <div className="mt-3 flex flex-wrap gap-2 text-xs font-bold text-ink-500">
           {ex.muscles.map((m) => <Chip key={m} icon="Target" text={m} />)}
           {ex.equipment[0] && <Chip icon="Dumbbell" text={ex.equipment[0]} />}
-          <Chip icon="Repeat" text={`${ex.sets}×${ex.reps}`} />
+          <Chip icon="Repeat" text={`${toAr(ex.sets, lang)}×${ex.reps.replace(/\d+/g, (value) => toAr(Number(value), lang))}`} />
         </div>
 
         <div className="mt-5 grid grid-cols-2 gap-3">
           <Stat label={ar ? 'آخر أداء' : 'Last time'} value={ex.lastPerformance ?? (ar ? 'لا يوجد بعد' : 'None yet')} muted={!ex.lastPerformance} />
-          <Stat label={ar ? 'هدف اليوم' : 'Target today'} value={ex.targetWeightKg ? `${ex.targetWeightKg} ${ar ? 'كجم' : 'kg'}` : (ar ? 'حسب إحساسك' : 'By feel')} muted={!ex.targetWeightKg} />
+          <Stat label={ar ? 'هدف اليوم' : 'Target today'} value={ex.targetWeightKg ? `${toAr(ex.targetWeightKg, lang)} ${ar ? 'كجم' : 'kg'}` : (ar ? 'حسب إحساسك' : 'By feel')} muted={!ex.targetWeightKg} />
         </div>
 
         <p className="mt-6 mb-2 text-sm font-black text-ink-700">{ar ? 'إشارات سريعة' : 'Quick cues'}</p>

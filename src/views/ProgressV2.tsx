@@ -28,6 +28,7 @@ import type { MeasurementLog } from '@/types/progress'
 // Strength system (this feature) — e1RM series + dated PR log for the detail.
 import { getExercise } from '@/data/exercises'
 import { e1rmSeries, currentBests, prHistory, type StrengthPR } from '@/lib/strength'
+import { formatNumber } from '@/lib/numberFormat'
 
 // محرّك المجسّم ثقيل — يبقى خارج حزمة الشاشة حتى تُفتح فعلًا.
 const BodyModel3D = lazy(() => import('@/components/BodyModel3D').then((mod) => ({ default: mod.BodyModel3D })))
@@ -59,6 +60,7 @@ export function ProgressV2({ lang, onNavigate }: ProgressV2Props) {
   const { customization } = useCustomization()
   const ar = lang !== 'en'
   const t = (a: string, e: string) => (ar ? a : e)
+  const num = (value: number) => formatNumber(value, lang, { maximumFractionDigits: 1 })
   const [, setRevision] = useState(0)
   // The model reads the local-first stores; rebuilding on render makes a saved
   // measurement visible immediately without introducing a second UI cache.
@@ -130,7 +132,7 @@ export function ProgressV2({ lang, onNavigate }: ProgressV2Props) {
         <section className="card p-5">
           <div className="flex items-center justify-between">
             <span className="text-base font-black text-ink-900">{model.momentum.label}</span>
-            <span className="text-[11px] font-bold text-ink-400">{model.momentum.hasData ? t(`آخر ${model.momentum.weeks} جلسات`, `Last ${model.momentum.weeks} sessions`) : t('لا بيانات بعد', 'No data yet')}</span>
+            <span className="text-[11px] font-bold text-ink-400">{model.momentum.hasData ? t(`آخر ${num(model.momentum.weeks)} جلسات`, `Last ${num(model.momentum.weeks)} sessions`) : t('لا بيانات بعد', 'No data yet')}</span>
           </div>
           {model.momentum.hasData
             ? <MomentumArea values={model.momentum.series.map((p) => p.value)} lang={lang} />
@@ -149,15 +151,15 @@ export function ProgressV2({ lang, onNavigate }: ProgressV2Props) {
           <Tile
             icon="TrendingDown"
             title={t('الوزن والجسم', 'Weight & body')}
-            main={model.weight.currentKg ? `${model.weight.currentKg} ${t('كجم', 'kg')}` : t('غير مسجّل', 'Not logged')}
-            sub={model.weight.targetKg ? t(`الهدف ${model.weight.targetKg}`, `Target ${model.weight.targetKg}`) : t('سجّل وزنك', 'Log weight')}
+            main={model.weight.currentKg ? `${num(model.weight.currentKg)} ${t('كجم', 'kg')}` : t('غير مسجّل', 'Not logged')}
+            sub={model.weight.targetKg ? t(`الهدف ${num(model.weight.targetKg)}`, `Target ${num(model.weight.targetKg)}`) : t('سجّل وزنك', 'Log weight')}
             onClick={() => setScreen('weight')}
           />
           <Tile
             icon="Dumbbell"
             title={t('القوة', 'Strength')}
-            main={model.strength.hasData ? t(`${model.strength.lifts.length} تمارين`, `${model.strength.lifts.length} lifts`) : t('لا بيانات', 'No data')}
-            sub={model.strength.improvedCount > 0 ? t(`تحسّن ${model.strength.improvedCount}`, `${model.strength.improvedCount} up`) : t('أكمل تمرينين', 'Do two workouts')}
+            main={model.strength.hasData ? t(`${num(model.strength.lifts.length)} تمارين`, `${num(model.strength.lifts.length)} lifts`) : t('لا بيانات', 'No data')}
+            sub={model.strength.improvedCount > 0 ? t(`تحسّن ${num(model.strength.improvedCount)}`, `${num(model.strength.improvedCount)} up`) : t('أكمل تمرينين', 'Do two workouts')}
             onClick={() => setScreen('strength')}
           />
         </section>
@@ -252,6 +254,7 @@ export function MeasurementsV2({ lang, onBack }: MeasurementsV2Props) {
   const { guard } = useAccess()
   const d = measurementsScreenStrings[lang]
   const ar = lang !== 'en'
+  const num = (value: number) => formatNumber(value, lang, { maximumFractionDigits: 1 })
   const [editor, setEditor] = useState<MeasurementLog | 'new' | null>(null)
   const [deleteCandidate, setDeleteCandidate] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -343,15 +346,15 @@ export function MeasurementsV2({ lang, onBack }: MeasurementsV2Props) {
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <time dateTime={log.date} className="text-xs font-bold text-ink-500">{measurementDate(log.date, lang)}</time>
-                      {weight !== null && <p className="mt-1 font-mono text-2xl font-black tabular-nums">{weight} <span className="font-sans text-xs text-ink-400">{d.kg}</span></p>}
+                      {weight !== null && <p className="mt-1 font-mono text-2xl font-black tabular-nums">{num(weight)} <span className="font-sans text-xs text-ink-400">{d.kg}</span></p>}
                     </div>
                     {log.source === 'health' && <span className="rounded-full bg-beige px-2.5 py-1 text-[11px] font-bold text-ink-500">{d.healthSource}</span>}
                   </div>
 
                   {(waist !== null || bodyFat !== null) && (
                     <dl className="mt-3 grid grid-cols-2 gap-2">
-                      {waist !== null && <div className="rounded-xl bg-page p-3"><dt className="text-[11px] font-bold text-ink-500">{d.waist}</dt><dd className="mt-0.5 font-mono text-sm font-black tabular-nums">{waist} <span className="font-sans text-[10px] text-ink-400">{d.cm}</span></dd></div>}
-                      {bodyFat !== null && <div className="rounded-xl bg-page p-3"><dt className="text-[11px] font-bold text-ink-500">{d.bodyFat} · {d.estimated}</dt><dd className="mt-0.5 font-mono text-sm font-black tabular-nums">~{bodyFat}%</dd></div>}
+                      {waist !== null && <div className="rounded-xl bg-page p-3"><dt className="text-[11px] font-bold text-ink-500">{d.waist}</dt><dd className="mt-0.5 font-mono text-sm font-black tabular-nums">{num(waist)} <span className="font-sans text-[10px] text-ink-400">{d.cm}</span></dd></div>}
+                      {bodyFat !== null && <div className="rounded-xl bg-page p-3"><dt className="text-[11px] font-bold text-ink-500">{d.bodyFat} · {d.estimated}</dt><dd className="mt-0.5 font-mono text-sm font-black tabular-nums">~{num(bodyFat)}%</dd></div>}
                     </dl>
                   )}
 
@@ -530,6 +533,7 @@ function NeedsData({ text }: { text: string }) {
 function WeightDetailScreen({ model, lang, onBack, onLog, onExplain, stale }: { model: WeightDetail; lang: Lang; onBack: () => void; onLog: () => void; onExplain: () => void; stale: string | null }) {
   const ar = lang !== 'en'
   const t = (a: string, e: string) => (ar ? a : e)
+  const num = (value: number) => formatNumber(value, lang, { maximumFractionDigits: 1 })
   const calcCopy = eCalcStrings[lang]
   const down = model.changeKg !== null && model.changeKg < 0
   const up = model.changeKg !== null && model.changeKg > 0
@@ -543,15 +547,15 @@ function WeightDetailScreen({ model, lang, onBack, onLog, onExplain, stale }: { 
 
         {/* current + change */}
         <div className="mt-5 flex items-end justify-between">
-          <p className="font-mono text-4xl font-black tabular-nums">{model.currentKg ?? '—'}<span className="ms-1 font-sans text-sm font-bold text-ink-400">{t('كجم', 'kg')}</span></p>
+          <p className="font-mono text-4xl font-black tabular-nums">{model.currentKg === null ? '—' : num(model.currentKg)}<span className="ms-1 font-sans text-sm font-bold text-ink-400">{t('كجم', 'kg')}</span></p>
           <div className="text-end text-sm font-bold">
             {model.changeKg !== null && (
               <span className="inline-flex items-center gap-1" style={{ color: down ? SUCCESS_TEXT : up ? DATA_TEXT : undefined }}>
                 <Icon name={down ? 'TrendingDown' : up ? 'TrendingUp' : 'Minus'} className="h-4 w-4" />
-                <span className="font-mono tabular-nums">{Math.abs(model.changeKg)}</span>
+                <span className="font-mono tabular-nums">{num(Math.abs(model.changeKg))}</span>
               </span>
             )}
-            {model.targetKg && <span className="ms-2 text-ink-500">{t(`الهدف ${model.targetKg}`, `Target ${model.targetKg}`)}</span>}
+            {model.targetKg && <span className="ms-2 text-ink-500">{t(`الهدف ${num(model.targetKg)}`, `Target ${num(model.targetKg)}`)}</span>}
           </div>
         </div>
 
@@ -562,7 +566,7 @@ function WeightDetailScreen({ model, lang, onBack, onLog, onExplain, stale }: { 
             : <NeedsData text={t('سجّل وزنك مرتين على الأقل لرسم الاتجاه.', 'Log your weight at least twice to draw the trend.')} />}
           <div className="mt-2 flex items-center justify-between text-[0.7rem] font-bold text-ink-400">
             <span>{t('الآن', 'Now')}</span>
-            {model.band && <span style={{ color: SUCCESS_TEXT }}>{t(`نطاق الهدف ${model.band[0]}–${model.band[1]}`, `Goal band ${model.band[0]}–${model.band[1]}`)}</span>}
+            {model.band && <span style={{ color: SUCCESS_TEXT }}>{t(`نطاق الهدف ${num(model.band[0])}–${num(model.band[1])}`, `Goal band ${num(model.band[0])}–${num(model.band[1])}`)}</span>}
           </div>
         </div>
 
@@ -570,11 +574,11 @@ function WeightDetailScreen({ model, lang, onBack, onLog, onExplain, stale }: { 
         <div className="mt-3 grid grid-cols-2 gap-3">
           <div className="rounded-2xl border border-line bg-surface p-4">
             <p className="text-xs font-bold text-ink-500">{t('الخصر', 'Waist')}</p>
-            <p className="mt-1 font-mono text-2xl font-black tabular-nums">{model.waistCm ?? '—'}<span className="ms-1 font-sans text-xs font-bold text-ink-400">{t('سم', 'cm')}</span></p>
+            <p className="mt-1 font-mono text-2xl font-black tabular-nums">{model.waistCm === null ? '—' : num(model.waistCm)}<span className="ms-1 font-sans text-xs font-bold text-ink-400">{t('سم', 'cm')}</span></p>
             {model.waistChangeCm !== null && (
               <p className="mt-0.5 inline-flex items-center gap-1 text-xs font-bold" style={{ color: model.waistChangeCm < 0 ? SUCCESS_TEXT : model.waistChangeCm > 0 ? DATA_TEXT : undefined }}>
                 <Icon name={model.waistChangeCm < 0 ? 'TrendingDown' : model.waistChangeCm > 0 ? 'TrendingUp' : 'Minus'} className="h-3.5 w-3.5" />
-                <span className="tabular-nums">{Math.abs(model.waistChangeCm)} {t('سم', 'cm')}</span>
+                <span className="tabular-nums">{num(Math.abs(model.waistChangeCm))} {t('سم', 'cm')}</span>
               </p>
             )}
           </div>
@@ -582,7 +586,7 @@ function WeightDetailScreen({ model, lang, onBack, onLog, onExplain, stale }: { 
             <p className="text-xs font-bold text-ink-500">{t('نسبة الدهون', 'Body fat')}</p>
             {model.bodyFatPct !== null ? (
               <>
-                <p className="mt-1 font-mono text-2xl font-black tabular-nums">~{model.bodyFatPct}<span className="ms-0.5 text-xs font-bold">%</span></p>
+                <p className="mt-1 font-mono text-2xl font-black tabular-nums">~{num(model.bodyFatPct)}<span className="ms-0.5 text-xs font-bold">%</span></p>
                 <p className="mt-0.5 text-xs font-bold" style={{ color: ESTIMATE }}>{t('تقديري', 'Estimated')}</p>
               </>
             ) : (
@@ -656,12 +660,13 @@ function StrengthDetailScreen({ strength, lang, onBack, onTrain }: { strength: i
 function LiftRow({ lift, lang }: { lift: LiftLadder; lang: Lang }) {
   const ar = lang !== 'en'
   const t = (a: string, e: string) => (ar ? a : e)
+  const num = (value: number) => formatNumber(value, lang, { maximumFractionDigits: 1 })
   const positive = lift.status === 'pr' || lift.status === 'up'
   const statusColor = positive ? SUCCESS_TEXT : 'var(--c-ink-500)'
   const statusLabel = lift.status === 'pr'
     ? t('رقم قياسي', 'PR')
     : lift.status === 'up'
-      ? `↑ ${lift.deltaKg ?? ''}`
+      ? `↑ ${lift.deltaKg === null ? '' : num(lift.deltaKg)}`
       : t('ثابت', 'Steady')
   const bests = currentBests(lift.exerciseId)
   const series = e1rmSeries(lift.exerciseId).map((p) => p.e1rm)
@@ -670,12 +675,12 @@ function LiftRow({ lift, lang }: { lift: LiftLadder; lang: Lang }) {
       <div className="flex items-center justify-between">
         <p className="text-sm font-black"><bdi>{lift.name}</bdi></p>
         <p className="font-mono text-xs font-bold tabular-nums text-ink-500">
-          {lift.bestKg} {t('كجم', 'kg')} · <span style={{ color: statusColor }}>{statusLabel}</span>
+          {num(lift.bestKg)} {t('كجم', 'kg')} · <span style={{ color: statusColor }}>{statusLabel}</span>
         </p>
       </div>
       {/* per-lift ladder — the leading rung is coloured by trend, the rest are
           empty rungs (matches PDF §05: one bold block + outlined slots). */}
-      <div className="mt-3 flex gap-1.5" role="img" aria-label={`${lift.name} · ${lift.bestKg} ${t('كجم', 'kg')} · ${statusLabel}`}>
+      <div className="mt-3 flex gap-1.5" role="img" aria-label={`${lift.name} · ${num(lift.bestKg)} ${t('كجم', 'kg')} · ${statusLabel}`}>
         {Array.from({ length: 6 }, (_, i) => (
           <span key={i} className="h-8 flex-1 rounded-md border" style={{ background: i === 0 ? statusColor : 'transparent', borderColor: i === 0 ? statusColor : 'rgb(var(--c-line))' }} />
         ))}
@@ -686,7 +691,7 @@ function LiftRow({ lift, lang }: { lift: LiftLadder; lang: Lang }) {
           <E1rmSparkline values={series} />
           {bests.e1RM != null && (
             <span className="shrink-0 font-mono text-[0.7rem] font-bold tabular-nums" style={{ color: ESTIMATE }}>
-              e1RM ~{bests.e1RM} {t('كجم · تقديري', 'kg · est.')}
+              e1RM ~{num(bests.e1RM)} {t('كجم · تقديري', 'kg · est.')}
             </span>
           )}
         </div>
@@ -730,7 +735,7 @@ function PRLog({ exerciseIds, lang }: { exerciseIds: string[]; lang: Lang }) {
           return (
             <div key={i} className="flex items-center justify-between rounded-xl border border-line bg-surface px-3 py-2 text-xs">
               <span className="min-w-0 font-bold"><bdi>{ar ? e?.nameAr ?? pr.exerciseId : e?.nameEn ?? pr.exerciseId}</bdi> · <span className="text-ink-500">{pr.kind}</span></span>
-              <span className="shrink-0 font-mono font-black tabular-nums" style={{ color: SUCCESS_TEXT }}>{pr.valueKg} {t('كجم', 'kg')} <span className="font-normal text-ink-400">· {pr.date}</span></span>
+              <span className="shrink-0 font-mono font-black tabular-nums" style={{ color: SUCCESS_TEXT }}>{formatNumber(pr.valueKg, lang, { maximumFractionDigits: 1 })} {t('كجم', 'kg')} <span className="font-normal text-ink-400">· {pr.date}</span></span>
             </div>
           )
         })}

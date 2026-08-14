@@ -1,6 +1,6 @@
 # Qimmah Web Sovereign — bug ledger
 
-Updated: 2026-08-14 (Layer 3 Exercises/detail / PKG-6 verified)
+Updated: 2026-08-14 (Layer 3 Settings/numbers/units / PKG-7 verified)
 
 ## BUG-001 — Preview mutation handlers can surface an exception instead of Premium
 
@@ -186,6 +186,28 @@ Updated: 2026-08-14 (Layer 3 Exercises/detail / PKG-6 verified)
 - Status: RESOLVED — VERIFIED FOR PKG-6
 - Fix: labelled modal dialog, 44px back action, Escape/focus trap/focus return/body-scroll restoration, route-safe direct-link close, and history replacement for unknown ids.
 - Evidence: `test:e2e:exercises` covers keyboard, direct URL, Back/Forward/refresh/unknown id, English/LTR and 320px with zero page errors; static bypass simulations are named.
+
+## BUG-018 — Settings reintroduced an unvalidated manual JSON importer
+
+- Severity: P1
+- Surface: `#/settings` data import/export.
+- Reproduction: import a legacy v2, unsupported version, prototype-polluting, unknown-store or cross-owner JSON file through the visible Settings import control.
+- Evidence: the live page had its own `FileReader` + `JSON.parse` path even though the reviewed `DataManagementPanel` and portability pipeline still existed. The release browser contract expected the hardened panel but it was disconnected.
+- Root cause: a later visual reorganization copied the old importer back instead of retaining the canonical portability owner.
+- Status: RESOLVED — VERIFIED FOR PKG-7
+- Fix: reconnect `DataManagementPanel`, remove the manual parser and expose the data group as an accessible disclosure.
+- Evidence: `test:e2e:settings-security` 34/34; every hostile file is rejected before write, valid restore is atomic, A/B data stays isolated and no token/PII reaches console or export names.
+
+## BUG-019 — Settings capabilities and numeral presentation are ambiguous/inconsistent
+
+- Severity: P2
+- Surface: Settings plus critical Layer-3 number displays.
+- Reproduction: open Settings in Arabic, inspect language/units/numbers, then compare Nutrition/Today/Progress values such as Latin `81.5` with Arabic copy/digits on the same preference.
+- Evidence: Language worked but had no complete runtime contract; Units/Numbers were absent from Settings while Profile represented them like peer rows; Nutrition/Today forced `en-US`, and Progress explicitly documented Western digits in Arabic.
+- Root cause: screens independently formatted numbers and historical capability rows had no single truthful owner.
+- Status: RESOLVED — VERIFIED FOR PKG-7
+- Fix: keep language as the only real control; render metric units and locale-derived numeral policy as non-interactive facts; centralize dynamic Layer-3 display formatting without changing stored numbers.
+- Evidence: `test:settings-preferences` 17/17, `test:e2e:settings` 14/14, Progress browser 25/25 with Arabic-only digit assertion, plus Nutrition 106/106 and Workout 31/31.
 
 ## EXTERNAL-001 — Paid Salla product binding cannot be proven
 

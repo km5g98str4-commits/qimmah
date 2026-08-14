@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { Icon } from '@/components/Icon'
 import type { Lang } from '@/lib/appPreferences'
+import { formatNumber } from '@/lib/numberFormat'
 import { getStrings } from '@/config/strings'
 import {
   buildExportBundle,
@@ -117,8 +118,6 @@ export function DataManagementPanel({
     if (undoImport(uid)) window.location.reload()
   }
 
-  const numerals = (n: number) => (lang === 'ar' ? n.toLocaleString('ar-EG') : n.toLocaleString('en-US'))
-
   // — معاينة الاستيراد: عدّ لكل متجر + تأكيد صريح (لا تطبيق قبل الضغط) —
   if (phase === 'preview' && preview) {
     return (
@@ -131,7 +130,7 @@ export function DataManagementPanel({
             .map((l) => (
               <li key={l.id} className="flex items-center justify-between py-2 text-sm">
                 <span className="font-bold text-ink-900">{l.labelAr}</span>
-                <span className="font-black tabular-nums text-ink-500">{numerals(l.count)}</span>
+                <span className="font-black tabular-nums text-ink-500">{formatNumber(l.count, lang)}</span>
               </li>
             ))}
         </ul>
@@ -236,7 +235,7 @@ export function DataManagementPanel({
           type="button"
           data-testid="settings-import-undo"
           onClick={onUndo}
-          className="inline-flex items-center gap-1.5 self-start rounded-xl border border-line px-4 py-2 text-xs font-bold text-ink-700 transition-colors hover:bg-beige"
+          className="inline-flex min-h-[44px] items-center gap-1.5 self-start rounded-xl border border-line px-4 py-2 text-xs font-bold text-ink-700 transition-colors hover:bg-beige"
         >
           <Icon name="RotateCcw" className="h-4 w-4" />
           {t.settings.importUndoLast}
