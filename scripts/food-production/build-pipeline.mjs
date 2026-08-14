@@ -120,8 +120,20 @@ writeFileSync(resolve(ROOT, 'data/food-production/manifests/build-manifest.json'
 writeFileSync(resolve(ROOT, 'data/food-production/manifests/build-manifest.sha256'), sha256(manifestRaw) + '\n')
 
 mkdirSync(REJECT_DIR, { recursive: true })
-writeFileSync(resolve(REJECT_DIR, 'conflicts.json'), JSON.stringify(conflicts.slice(0, 5000), null, 2) + '\n')
-writeFileSync(resolve(REJECT_DIR, 'review-queue.json'), JSON.stringify(reviewQueue.slice(0, 5000), null, 2) + '\n')
+/**
+ * تُكتب **عيّنة** لا القائمة كاملة: العدد الكامل معلن في `_total` وفي البيان، والقوائم
+ * الكاملة تُولَّد بإعادة التشغيل. التزام آلاف الصفوف في git ينتفخ بلا فائدة للمراجعة —
+ * والعدد هو المعلومة، لا كل صفّ منه.
+ */
+const SAMPLE = 200
+const writeSample = (file, rows, note) => writeFileSync(resolve(REJECT_DIR, file), JSON.stringify({
+  _note: note,
+  _total: rows.length,
+  _sample_size: Math.min(SAMPLE, rows.length),
+  sample: rows.slice(0, SAMPLE),
+}, null, 2) + '\n')
+writeSample('conflicts.json', conflicts, 'تعارضات مرفوعة لا مدموجة — العدد الكامل في _total، والقائمة كاملةً تُولَّد بإعادة تشغيل الخطّ.')
+writeSample('review-queue.json', reviewQueue, 'مرشّحون ضبابيون لمراجعة بشرية — لا يُدمجون آليًا أبدًا.')
 mkdirSync(REPORT_DIR, { recursive: true })
 writeFileSync(resolve(REPORT_DIR, 'build-summary.json'), JSON.stringify({
   accepted: accepted.length, by_market: byMarket, by_source: bySource,
