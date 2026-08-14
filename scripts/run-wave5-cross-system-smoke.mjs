@@ -63,7 +63,7 @@ try {
   await open('profile')
   await page.getByRole('button', { name: 'الإعدادات والخصوصية', exact: true }).click()
   await page.getByRole('button', { name: /^التذكيرات/ }).click()
-  await page.getByRole('heading', { name: 'التذكيرات', level: 1 }).waitFor()
+  await page.getByRole('heading', { name: 'التذكيرات', level: 2 }).waitFor()
   check(await page.getByRole('switch', { name: /تفعيل التذكيرات/ }).count() === 1, 'notifications: semantic master switch renders')
   await screenshot(page, '01-notifications')
 

@@ -167,7 +167,7 @@ try {
   await page.getByRole('heading', { name: 'القياسات', exact: true }).waitFor()
   check('Progress يملك مدخلًا مباشرًا للقياسات', (await page.url()).includes('#/measurements'))
   await page.evaluate(() => { location.hash = '/profile' })
-  await page.getByRole('heading', { name: 'حسابي', exact: true }).waitFor()
+  await page.getByRole('heading', { name: 'ملفك', exact: true, level: 1 }).waitFor()
   await page.getByRole('button', { name: 'القياسات', exact: true }).click()
   await page.getByRole('heading', { name: 'القياسات', exact: true }).waitFor()
   check('Profile يملك مدخلًا مباشرًا بلا وعد صور زائف', (await page.url()).includes('#/measurements'))
