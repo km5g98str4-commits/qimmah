@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { Icon } from './Icon'
 import { LineChart } from './LineChart'
@@ -13,6 +13,7 @@ import { getCue } from '@/lib/coaching'
 import { exerciseStats } from '@/lib/exerciseStats'
 import { getRecord } from '@/lib/exerciseHistory'
 import { ExerciseMedia } from './ExerciseMedia'
+import { equipmentLabel } from '@/lib/exerciseLabels'
 
 type DetailTab = 'about' | 'history' | 'charts' | 'records'
 
@@ -36,28 +37,83 @@ export function ExerciseDetail({ lang, exerciseId, onClose, onAddToPlan }: Exerc
   const d = libraryStrings[lang]
   const ex = getExercise(exerciseId)
   const [tab, setTab] = useState<DetailTab>('about')
+  const titleId = useId()
+  const dialogRef = useRef<HTMLDivElement>(null)
+  const closeButtonRef = useRef<HTMLButtonElement>(null)
   const stats = useMemo(() => exerciseStats(exerciseId), [exerciseId])
   const rec = useMemo(() => getRecord(exerciseId), [exerciseId])
+
+  useEffect(() => {
+    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    const previousOverflow = document.body.style.overflow
+    const frame = window.requestAnimationFrame(() => closeButtonRef.current?.focus())
+    document.body.style.overflow = 'hidden'
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        onClose()
+        return
+      }
+      if (event.key !== 'Tab' || !dialogRef.current) return
+
+      const focusable = [...dialogRef.current.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      )].filter((node) => !node.hasAttribute('hidden'))
+      if (focusable.length === 0) {
+        event.preventDefault()
+        dialogRef.current.focus()
+        return
+      }
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault()
+        last.focus()
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault()
+        first.focus()
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      window.cancelAnimationFrame(frame)
+      document.removeEventListener('keydown', handleKeyDown)
+      document.body.style.overflow = previousOverflow
+      previousFocus?.focus()
+    }
+  }, [onClose])
 
   if (!ex) return null
 
   return (
     <div className="fixed inset-0 z-[60] flex items-end justify-center bg-ink-900/50 p-0 sm:items-center sm:p-6">
-      <div className="flex max-h-[92vh] w-full max-w-xl flex-col rounded-t-3xl bg-page shadow-card sm:rounded-3xl">
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        tabIndex={-1}
+        data-testid="exercise-detail"
+        data-exercise-id={exerciseId}
+        className="flex max-h-[92vh] w-full max-w-xl flex-col rounded-t-3xl bg-page shadow-card sm:rounded-3xl"
+      >
         {/* رأس بطاقة مع صورة بديلة داكنة فاخرة */}
         <div className="relative shrink-0 overflow-hidden rounded-t-3xl">
           <ExerciseHero ex={ex} lang={lang} />
           <button
+            ref={closeButtonRef}
             type="button"
             onClick={onClose}
-            aria-label={d.close}
-            className="absolute end-3 top-3 grid h-9 w-9 place-items-center rounded-full bg-ink-900/40 text-white backdrop-blur hover:bg-ink-900/60"
+            aria-label={d.backToLibrary}
+            className="absolute end-3 top-3 grid h-11 w-11 place-items-center rounded-full bg-ink-900/40 text-white backdrop-blur hover:bg-ink-900/60"
           >
-            <Icon name="X" className="h-5 w-5" />
+            <Icon name={lang === 'en' ? 'ArrowLeft' : 'ArrowRight'} className="h-5 w-5" />
           </button>
           <div className="absolute inset-x-0 bottom-0 p-4">
             {/* الاسم العربي أساسي، الإنجليزي سطر ثانوي أصغر (موحّد عبر الواجهة) */}
-            <h2 className="text-xl font-black text-white drop-shadow">
+            <h2 id={titleId} className="text-xl font-black text-white drop-shadow">
               {exerciseName(ex, lang)}
             </h2>
             {lang !== 'en' && ex.nameEn && ex.nameEn !== ex.nameAr && (
@@ -65,20 +121,25 @@ export function ExerciseDetail({ lang, exerciseId, onClose, onAddToPlan }: Exerc
             )}
             <p className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px] font-bold text-white/80">
               <span className="rounded-full bg-white/15 px-2 py-0.5 backdrop-blur">{muscleLabel(ex.primaryMuscle, lang)}</span>
-              <span>{ex.equipment.join(' · ')} · {levelLabel(ex.level, d)}</span>
+              <span>{ex.equipment.map((item) => equipmentLabel(item, lang)).join(' · ')} · {levelLabel(ex.level, d)}</span>
             </p>
           </div>
         </div>
 
         {/* تبويبات */}
-        <div className="flex shrink-0 gap-1 border-b border-line bg-surface px-2 pt-2">
+        <div role="tablist" aria-label={d.detailSections} className="flex shrink-0 gap-1 border-b border-line bg-surface px-2 pt-2">
           {TABS.map((tb) => (
             <button
               key={tb.id}
+              id={`exercise-tab-${tb.id}`}
               type="button"
+              role="tab"
+              aria-selected={tab === tb.id}
+              aria-controls={`exercise-panel-${tb.id}`}
+              tabIndex={tab === tb.id ? 0 : -1}
               onClick={() => setTab(tb.id)}
               className={cn(
-                'flex flex-1 items-center justify-center gap-1.5 rounded-t-xl px-2 py-2.5 text-xs font-bold transition-colors',
+                'flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-t-xl px-2 py-2.5 text-xs font-bold transition-colors',
                 tab === tb.id ? 'bg-page text-primary-c' : 'text-ink-500 hover:text-ink-900',
               )}
             >
@@ -89,7 +150,13 @@ export function ExerciseDetail({ lang, exerciseId, onClose, onAddToPlan }: Exerc
         </div>
 
         {/* المحتوى */}
-        <div className="app-scroll flex-1 overflow-y-auto p-4">
+        <div
+          id={`exercise-panel-${tab}`}
+          role="tabpanel"
+          aria-labelledby={`exercise-tab-${tab}`}
+          tabIndex={0}
+          className="app-scroll flex-1 overflow-y-auto p-4"
+        >
           {tab === 'about' && <AboutTab ex={ex} d={d} lang={lang} onAddToPlan={onAddToPlan} />}
           {tab === 'history' && <HistoryTab stats={stats} d={d} lastWeight={rec?.lastWeight} bestWeight={rec?.bestWeight} lastReps={rec?.lastReps} />}
           {tab === 'charts' && <ChartsTab stats={stats} d={d} />}
@@ -127,7 +194,7 @@ function AboutTab({ ex, d, lang, onAddToPlan }: { ex: NonNullable<ReturnType<typ
       </Block>
 
       {/* كيف تؤديه — إرشاد قِمّة المكتوب لكل تمرين (عربي)؛ للإنجليزية يبقى الإرشاد العام. */}
-      <Block title={lang !== 'en' ? 'كيف تؤديه' : d.howToPerform} icon="CheckCircle2">
+      <Block title={d.howToPerform} icon="CheckCircle2">
         {howTo.length > 0 ? <ol className="space-y-1.5">
           {howTo.map((h, i) => (
             <li key={i} className="flex gap-2 text-sm leading-relaxed text-ink-700">
@@ -157,13 +224,13 @@ function AboutTab({ ex, d, lang, onAddToPlan }: { ex: NonNullable<ReturnType<typ
       {/* أزرار — زر يوتيوب فقط عند توفّر رابط (لا فيديو مُضمّن ولا صور خارجية) */}
       <div className="flex flex-wrap gap-2">
         {ex.videoUrl && (
-          <a href={ex.videoUrl} target="_blank" rel="noopener noreferrer" className="btn-ghost px-4 py-2.5 text-sm">
+          <a href={ex.videoUrl} target="_blank" rel="noopener noreferrer" className="btn-ghost min-h-[44px] px-4 py-2.5 text-sm">
             <Icon name="Play" className="h-4 w-4" />
             {d.watchOnYouTube}
           </a>
         )}
         {onAddToPlan && (
-          <button type="button" onClick={() => onAddToPlan(ex.id)} className="btn-primary px-4 py-2.5 text-sm">
+          <button type="button" onClick={() => onAddToPlan(ex.id)} className="btn-primary min-h-[44px] px-4 py-2.5 text-sm">
             <Icon name="Plus" className="h-4 w-4" />
             {d.addToMyPlan}
           </button>

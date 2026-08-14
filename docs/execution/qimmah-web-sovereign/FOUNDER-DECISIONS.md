@@ -1,6 +1,6 @@
 # Qimmah Web Sovereign — autonomous founder decisions
 
-Updated: 2026-08-14 (Layer 3 Progress/Measurements / PKG-5 verified)
+Updated: 2026-08-14 (Layer 3 Exercises/detail / PKG-6 verified)
 
 ## Decision 001 — Use the exact Founder checkpoint
 
@@ -98,6 +98,14 @@ PKG-5 completes the existing Progress/Measurements contract without creating a n
 | `e2e/preview-gate.mjs` | six browsable routes | adds explicit `#/measurements` Preview browse assertion | keep browse-vs-mutate policy complete | stronger |
 | `e2e/navigation-history.mjs` | 95 checks | 96 checks including the Measurements deep route | prevent route/promise regression | stronger |
 
+PKG-6 completes the existing Exercise Library/detail contract without changing canonical exercise data. No assertion was removed or weakened.
+
+| Test | Old contract | New contract | Why | Strength |
+| --- | --- | --- | --- | --- |
+| `exercise-library-proof.ts` | absent | 16 behavioral/structural checks for 181 records, AR/EN search, combined filters, machine references, route modes, modal structure and two named bypass attacks | keep the catalog and route seam mechanically guarded inside `test:gate` | new guard |
+| `e2e/exercise-library-reliability.mjs` | absent | 32 browser checks covering all §28 acceptance points plus keyboard, 320px and LTR | prove the complete maintained surface | new guard |
+| `e2e/navigation-history.mjs` | 96 checks | unchanged 96 assertions; rerun after the new route-safe close behavior | prove no history regression without weakening the baseline | unchanged, reverified |
+
 ## Decision 006 — Error recovery never means product completion
 
 - Decision: a render failure may retry/reload/contact support, but cannot mark onboarding complete or synthesize a plan.
@@ -151,3 +159,12 @@ PKG-5 completes the existing Progress/Measurements contract without creating a n
 - Risk: Health-imported rows are intentionally read-only here and remain owned by the Apple Health disconnect flow. A future photo feature needs its own approved model instead of reviving the removed promise.
 - Reversibility: PKG-5 adds one route/adapter and checked result APIs without migrating stored records; it is one revertable package.
 - Affected files: routes/App, `ProgressV2`/Profile adapters, measurement/history writers, bilingual measurement dictionary, and focused/browser proofs.
+
+## Decision 012 — Exercise detail has one route owner; the catalog remains immutable
+
+- Decision: keep the existing 181-record exercise catalog, media and guidance corpora unchanged. Extract only the view filter into a pure consumer, and route both the full catalog and Machines through `#/exercises/:exerciseId`. Use history push for a library-opened detail and replacement for an invalid id or direct-link UI return.
+- Why: the feature already existed and the defect was ownership drift, not missing data. Rebuilding or editing the catalog would violate verify-before-build and the contract's canonical-data prohibition.
+- Alternatives rejected: a second detail component; local `openId` for Machines; always calling `history.back()`; pushing the unknown id back into history; duplicating search/filter logic in the proof.
+- Risk: native/browser Back from a directly entered external deep link retains ordinary browser semantics; the in-product back action deliberately remains inside Qimmah. A later router migration must preserve the same push/replace distinction.
+- Reversibility: PKG-6 changes route presentation and test seams only; no user data or canonical catalog migration exists.
+- Affected files: `ExerciseLibraryView`, `ExerciseDetail`, `appRoutes`, the existing library dictionary, pure filter consumer and focused/browser proofs.

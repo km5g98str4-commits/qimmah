@@ -1,6 +1,6 @@
 # Qimmah Web Sovereign — execution state
 
-Updated: 2026-08-14 (Layer 3 Progress/Measurements / PKG-5 verified)
+Updated: 2026-08-14 (Layer 3 Exercises/detail / PKG-6 verified)
 
 ## Provenance
 
@@ -28,15 +28,27 @@ git status --short --branch (before PKG-0 edits)    → clean
 
 ## Current package
 
-- Packages completed and pushed: `PKG-0` at `f78676e`; `PKG-1` at `8b29ca3`; `PKG-2` at `28c725e4e4869d454d6b007cc11a92222a059ac1`; `PKG-3` at `678a38d01d2206ff02b245281d621fc37ed19658`; `PKG-4` at `df5e55bebc31149484c3d06a9f59348b1697f9e1`.
-- Package verified for checkpoint: Layer 3 Progress and Measurements (`PKG-5`).
-- `#/measurements` is now a real refreshable route inside the Progress tab shell, with direct entries from Progress and Profile and an explicit Back to Progress action.
-- One canonical `measurementLog`/`historyStore` flow owns empty, history, add, edit and delete. No backend shape or duplicate cache was added.
-- Measurement add/edit/delete are Premium mutations at both UI and writer layers; restore/sync remains available as a data-ownership right.
-- Local measurement writes return and consume `WriteResult`; quota failure keeps the form and byte-identical history instead of showing success.
-- The real browser exercised direct route/reload, Preview/Premium add-edit-delete, validation, quota retry, Profile/Progress entries, focus return, Arabic/English, RTL/LTR and 320px touch/overflow.
+- Packages completed and pushed: `PKG-0` at `f78676e`; `PKG-1` at `8b29ca3`; `PKG-2` at `28c725e4e4869d454d6b007cc11a92222a059ac1`; `PKG-3` at `678a38d01d2206ff02b245281d621fc37ed19658`; `PKG-4` at `df5e55bebc31149484c3d06a9f59348b1697f9e1`; `PKG-5` at `7478507b7c46ee9b6018b1ef67c31ca40fbed6d2`.
+- Package verified for checkpoint: Layer 3 Exercises/detail (`PKG-6`).
+- The canonical catalog remains exactly 181 records and unchanged. One pure consumer owns Arabic/English search, muscle/equipment combinations, empty results and locale sorting.
+- All exercise and machine cards now open `#/exercises/:exerciseId`; Back/Forward/refresh and unknown-id replacement share the same route owner.
+- Exercise detail is a labelled modal with Escape, trapped/restored focus, scroll restoration, 44px controls and a direct-link Back action that stays inside Qimmah.
+- The real browser exercised every §28 point plus Machines, 320px English/LTR, touch sizes and zero page errors; the unchanged historical navigation suite remains 96/96.
 - No dependency, backend, Supabase, QAE, canonical dataset, service-worker, deployment, or Salla authority file changed.
-- Next action: commit/push `[PKG-5][green]`, then continue Layer 3 with Exercises/detail from that remote checkpoint.
+- Next action: commit/push `[PKG-6][green]`, then continue Layer 3 with Settings.
+
+### PKG-6 Exercises/detail evidence
+
+| Evidence | Result |
+| --- | --- |
+| `npm run test:exercise-library` | PASS — 16/16 including 181 records, AR/EN search, filter combinations, machine integrity, route modes and named bypass attacks |
+| `npm run test:catalog` | PASS — 274/274 shipped local media files |
+| `npm run test:guidance-honesty` | PASS — 4/4 |
+| `npm run test:e2e:exercises` | PASS — 32/32 live-browser assertions; all §28 cases, Machines, modal keyboard lifecycle, 320px/LTR, zero page errors |
+| `npm run test:e2e:navigation` | PASS — unchanged 96/96 after route push/replace and direct-link close changes |
+| Fresh `npm ci` + `npm run typecheck` + `npm run lint` | PASS — deterministic install, typecheck exit 0, lint exit 0 with zero warnings |
+| `npm run build` | PASS — production mode, 2,560 modules |
+| Full `npm run test:gate` | PASS — includes `test:exercise-library` 16/16 and exits 0 through final `test:workout-day-source` 19/19 |
 
 ### PKG-5 Progress/Measurements evidence
 
@@ -138,7 +150,7 @@ Rule: discover canonical → route to it → isolate legacy. No third implementa
 | Workout persistence | `src/lib/activeWorkout.ts`, `finishWorkout.ts`, `historyStore.ts` | `WorkoutView` | legacy `activeSession.ts` is retired/dead per data registry |
 | Nutrition display/persistence | `src/views/NutritionView.tsx`; `src/lib/nutritionV2Model.ts`; owner-scoped history in `nutritionHistory.ts` | Nutrition tab, Quick Log | `NutritionV2.tsx` is not the live route wrapper; do not fork a third flow |
 | Measurements/progress | data: `measurementLog.ts`/`historyStore.ts`; current experiences: `ProgressV2.tsx` and its exported `MeasurementsV2` | `#/progress`, `#/measurements`, Profile, calculator | `ProgressView` remains the thin stable adapter for both exports; no third store or backend schema |
-| Exercises | `ExerciseLibraryView.tsx`; catalog `src/data/exercises.ts`; labels/media helpers | workout/library/deep link | canonical dataset is read-only |
+| Exercises | `ExerciseLibraryView.tsx`; `ExerciseDetail.tsx`; pure filter in `src/lib/exerciseLibrary.ts`; catalog `src/data/exercises.ts`; labels/media helpers | workout/library/`#/exercises/:exerciseId` | canonical dataset is read-only; Machines and full catalog share one route owner |
 | Auth | `authContext.tsx`, `LoginView.tsx`, route-owned `login/signup/forgot` | `App.tsx` | no local secrets; Supabase config/semantics are no-touch |
 | Language | `src/i18n/LanguageContext.tsx`; persisted device preference in `appPreferences.ts` | all routes | hardcoded bilingual helpers remain historical debt and are not a new pattern |
 | Number presentation | presentation helpers (`formatNumber`/screen dictionaries where present) | progress/nutrition/workout | stored numeric data must remain numeric |
@@ -149,7 +161,7 @@ Rule: discover canonical → route to it → isolate legacy. No third implementa
 
 Public/auth/product routes declared by `ROUTES`:
 
-`start`, `login`, `signup`, `forgot`, `setup`, `dashboard`, `workout`, `exercises`, `nutrition`, `progress`, `steps`, `profile`, `calc`, `recovery`, `settings`, `privacy`, `terms`, `contact`, `reset`, `productReview`, `stats`.
+`start`, `login`, `signup`, `forgot`, `setup`, `dashboard`, `workout`, `exercises`, `nutrition`, `progress`, `measurements`, `steps`, `profile`, `calc`, `recovery`, `settings`, `privacy`, `terms`, `contact`, `reset`, `productReview`, `stats`.
 
 - `notfound` and `accountRequired` are internal only.
 - `#/exercises/:exerciseId` uses `resourceIdFromHash`; refresh preserves the id.
@@ -244,8 +256,8 @@ Status here means evidence at this checkpoint, not remembered intent.
 | 13 | auth route/state | PASS — `test:e2e:navigation` 96/96 |
 | 14 | onboarding reload resume | PASS — onboarding matrix history resume plus `test:e2e:onboarding` |
 | 15 | returning guest route | PASS — `test:e2e:navigation` 96/96 |
-| 16 | exercise detail Back | PASS — `test:e2e:navigation` 96/96 |
-| 17 | exercise deep-link | PASS — `test:e2e:navigation` 96/96 |
+| 16 | exercise detail Back | PASS — route-safe direct-link action plus `test:e2e:exercises` 32/32 and historical navigation 96/96 |
+| 17 | exercise deep-link | PASS — full catalog + Machines, refresh/Back/Forward/unknown-id in `test:e2e:exercises` 32/32 |
 | 18 | deterministic 404 | PASS — `test:e2e:navigation` 96/96 |
 | 19 | whitespace-only signup name | PASS — `test:e2e:navigation` 96/96 |
 | 20 | sub-44px touch targets | PARTIAL PASS — bottom/nav 200/200 and Premium close/input corrected; full-site audit remains Layer 4 |

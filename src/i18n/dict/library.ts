@@ -53,6 +53,8 @@ export interface LibraryStrings {
   tabCharts: string
   tabRecords: string
   close: string
+  backToLibrary: string
+  detailSections: string
   // level labels
   levelBeginner: string
   levelIntermediate: string
@@ -150,6 +152,8 @@ const ar: LibraryStrings = {
   tabCharts: 'الرسوم',
   tabRecords: 'الأرقام',
   close: 'إغلاق',
+  backToLibrary: 'الرجوع لمكتبة التمارين',
+  detailSections: 'أقسام تفاصيل التمرين',
   levelBeginner: 'مبتدئ',
   levelIntermediate: 'متوسط',
   levelAdvanced: 'متقدّم',
@@ -238,6 +242,8 @@ const en: LibraryStrings = {
   tabCharts: 'Charts',
   tabRecords: 'Records',
   close: 'Close',
+  backToLibrary: 'Back to exercise library',
+  detailSections: 'Exercise detail sections',
   levelBeginner: 'Beginner',
   levelIntermediate: 'Intermediate',
   levelAdvanced: 'Advanced',

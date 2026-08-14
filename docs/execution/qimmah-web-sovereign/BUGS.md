@@ -1,6 +1,6 @@
 # Qimmah Web Sovereign — bug ledger
 
-Updated: 2026-08-14 (Layer 3 Progress/Measurements / PKG-5 verified)
+Updated: 2026-08-14 (Layer 3 Exercises/detail / PKG-6 verified)
 
 ## BUG-001 — Preview mutation handlers can surface an exception instead of Premium
 
@@ -164,6 +164,28 @@ Updated: 2026-08-14 (Layer 3 Progress/Measurements / PKG-5 verified)
 - Status: RESOLVED — VERIFIED FOR PKG-5
 - Fix: checked measurement commits write locally first, enqueue sync only after `ok`, and return `WriteResult`; add/update/delete share the central Premium action at UI and writer layers. Failed forms and byte-identical history remain visible for retry.
 - Evidence: `test:measurement-reliability` 11/11, `test:access-gate` 84/84, and the live quota/Preview attacks in `test:e2e:progress` 25/25.
+
+## BUG-016 — Machine catalog detail bypasses the exercise deep-link contract
+
+- Severity: P2
+- Surface: Exercise Library → Machines → exercise detail.
+- Reproduction: open `#/exercises`, switch to Machines, and choose any machine.
+- Evidence: the main catalog called `setExerciseHash`, but `MachineCatalogBrowser` received the component-local `setOpenId`; the detail appeared without changing `#/exercises`, so refresh/share/Back could not represent the selected machine.
+- Root cause: two library entry paths used different owners for the same detail state.
+- Status: RESOLVED — VERIFIED FOR PKG-6
+- Fix: every catalog entry calls one `openExercise` route owner; a named counter-proof fails if Machines is rewired to local state.
+- Evidence: `test:exercise-library` 16/16; `test:e2e:exercises` 32/32 proves the machine id in the URL; existing navigation history remains 96/96.
+
+## BUG-017 — Exercise detail lacks a complete modal and direct-link exit contract
+
+- Severity: P2 accessibility/navigation
+- Surface: `#/exercises/:exerciseId` detail sheet.
+- Reproduction: open a detail with keyboard or load its URL directly, then press Escape/Tab/the close action; also enter an unknown id and use browser history.
+- Evidence: baseline sheet had no dialog semantics, focus entry/trap/return, Escape handling, or scroll lock; its 36px close target always used `history.back()`. A direct link could therefore leave Qimmah, while an unknown-id redirect pushed another history entry.
+- Root cause: route state had been added after the original local sheet, but the sheet lifecycle and replace-vs-push semantics were not completed.
+- Status: RESOLVED — VERIFIED FOR PKG-6
+- Fix: labelled modal dialog, 44px back action, Escape/focus trap/focus return/body-scroll restoration, route-safe direct-link close, and history replacement for unknown ids.
+- Evidence: `test:e2e:exercises` covers keyboard, direct URL, Back/Forward/refresh/unknown id, English/LTR and 320px with zero page errors; static bypass simulations are named.
 
 ## EXTERNAL-001 — Paid Salla product binding cannot be proven
 

@@ -111,14 +111,20 @@ export function resourceIdFromHash(): string | null {
 }
 
 /**
- * يضبط `#/exercises/<id>` أو يعود إلى `#/exercises` — **بدفع مدخل تاريخ**.
- * الدفع هو بيت القصيد: بدونه لا يملك «رجوع» ما يعود إليه، فيقفز إلى ما قبل
- * المكتبة (اليوم/الإعدادات) — وهو العطل المُبلَغ عنه بالضبط.
+ * يضبط `#/exercises/<id>` أو يعود إلى `#/exercises`.
+ * الفتح يدفع مدخل تاريخ افتراضيًا كي يعمل الرجوع من التفصيل إلى المكتبة.
+ * الاستبدال مخصّص للمعرّف المجهول أو رابط عميق مباشر، فلا نصنع حلقة تاريخ
+ * تعيد المستخدم إلى معرّف غير صالح أو تخرجه من التطبيق عبر زر الواجهة.
  */
-export function setExerciseHash(exerciseId: string | null): void {
+export function setExerciseHash(exerciseId: string | null, mode: 'push' | 'replace' = 'push'): void {
   if (typeof window === 'undefined') return
   const target = exerciseId ? `#/exercises/${encodeURIComponent(exerciseId)}` : '#/exercises'
-  if (window.location.hash !== target) window.location.hash = target.slice(1)
+  if (window.location.hash === target) return
+  if (mode === 'replace') {
+    window.location.replace(target)
+    return
+  }
+  window.location.hash = target.slice(1)
 }
 
 /** يضبط hash المسار (يُطلق hashchange). */
