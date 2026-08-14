@@ -414,7 +414,37 @@ check('لا إشارة للوحة في App.tsx', !read('src/App.tsx').includes('
 check('لا مسار admin في appRoutes.ts', !read('src/lib/appRoutes.ts').includes("'admin'"))
 
 // ═══════════════ ١٩) العدّ في الوثيقة يطابق السجلّ ═══════════════
-// الوثيقة تعلن ٦ متاحًا (٤ وضع منصّة + إشارتا اهتمام)، والسجلّ يحمل الأربعة.
+// ⚠️ ربط عددي صريح: جدول §10 في الوثيقة يُقرأ ويُقارَن بالسجلّ. بدونه كان
+// الجدول ينحرف بصمت — **وقد انحرف فعلًا** أول مرّة (أعلن ٦/٢٢/١٣ والسجلّ
+// ٤/١٦/٨) لأنه كُتب قبل أن يستقرّ السجلّ. الوثيقة التي تكذب على نفسها في
+// عددها لا يُوثق بها في مضمونها.
+const AR_DIGITS = '٠١٢٣٤٥٦٧٨٩'
+const toWestern = (t: string) => t.replace(/[٠-٩]/g, (d) => String(AR_DIGITS.indexOf(d)))
+// النطاق محصور بجدول §10 وحده: البحث في الوثيقة كلّها كان يلتقط **سُلّم
+// الدرجات في §2** — وهو جدول تعريفات بلا أعداد — فيقرأ منه نصًّا لا رقمًا.
+const summary = doc.slice(doc.indexOf('## ١٠. الخلاصة الصادقة'))
+const docRow = (label: string): number | null => {
+  const line = summary.split('\n').find((l) => l.includes(label) && l.trim().startsWith('|'))
+  if (!line) return null
+  const cells = line.split('|').map((c) => c.trim())
+  const num = toWestern(cells[2] ?? '').match(/\d+/)
+  return num ? Number(num[0]) : null
+}
+const endpointGap = METRIC_REGISTRY.filter((m) => m.backendGap === 'endpoint-missing').length
+const systemGap = METRIC_REGISTRY.filter((m) => m.backendGap === 'source-system-missing').length
+check(`الوثيقة تعلن ${counts.AVAILABLE_NOW} متاحًا كما السجلّ`, docRow('`AVAILABLE_NOW`') === counts.AVAILABLE_NOW)
+check(`الوثيقة تعلن ${endpointGap} endpoint-missing كما السجلّ`, docRow('endpoint-missing') === endpointGap)
+check(`الوثيقة تعلن ${systemGap} source-system-missing كما السجلّ`, docRow('source-system-missing') === systemGap)
+check(
+  `الوثيقة تعلن ${counts.IMPOSSIBLE_WITHOUT_CONSENT_CHANGE} متحيّزًا كما السجلّ`,
+  docRow('`IMPOSSIBLE_WITHOUT_CONSENT_CHANGE`') === counts.IMPOSSIBLE_WITHOUT_CONSENT_CHANGE,
+)
+// المجموع مكتوب بالأرقام العربية في الوثيقة — يُحوَّل قبل المقارنة.
+const toArabic = (n: number) => String(n).replace(/\d/g, (d) => AR_DIGITS[Number(d)])
+check(
+  `الوثيقة تعلن مجموع السجلّ (${METRIC_REGISTRY.length})`,
+  summary.includes(`${toArabic(METRIC_REGISTRY.length)} مقياسًا`),
+)
 check('السجلّ يحمل أربعة مقاييس متاحة', counts.AVAILABLE_NOW === 4)
 check('الوثيقة تعلن الخلاصة الصادقة', doc.includes('لا مقياس مستخدم واحد متاح اليوم'))
 check('الوثيقة تعلن EXTERNALLY_BLOCKED', doc.includes('EXTERNALLY_BLOCKED'))

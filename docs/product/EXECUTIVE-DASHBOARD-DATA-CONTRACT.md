@@ -366,11 +366,19 @@
 
 ## ١٠. الخلاصة الصادقة
 
+**سجلّ المقاييس — ٢٨ مقياسًا** (`src/admin/contract/metrics.ts`؛ الأرقام مربوطة بالسجلّ
+ويحرس التطابق `test:admin-dashboard`):
+
 | الدرجة | العدد |
 |---|---|
-| `AVAILABLE_NOW` | **٦** — أربع إشارات وضع منصّة + إشارتا اهتمام |
-| `NEEDS_BACKEND` | **٢٢** — منها ٨ `endpoint-missing` و١٤ `source-system-missing` |
-| `IMPOSSIBLE_WITHOUT_CONSENT_CHANGE` | **١٣** |
+| `AVAILABLE_NOW` | **٤** — وضع المنصّة كاملًا، ولا واحد منها يقرأ صفّ مستخدم |
+| `NEEDS_BACKEND / endpoint-missing` | **٩** — الحسابات الستّة + نشاط الدخول الثلاثة |
+| `NEEDS_BACKEND / source-system-missing` | **٧** — الاستحقاق والتفعيل كاملًا |
+| `IMPOSSIBLE_WITHOUT_CONSENT_CHANGE` | **٨** — نشاط المنتج الستّة + إكمال التخصيص اثنان |
+
+**وطابور الاهتمام — ١٠ بنود**، منها **إشارتان تعملان اليوم** (`attn.syncPipelineDown` ·
+`attn.entitlementSourceMissing`) وواحدة مشروطة (`attn.backendUnconfigured`)، والسبعة
+الباقية **معروضة بوصفها غير قابلة للكشف** لا مخفيّة.
 
 > **لا مقياس مستخدم واحد متاح اليوم.** ما بُني في هذه الحارة هو **الواجهة والعقد المطبوع
 > وحالات اللاإتاحة الصادقة**، جاهزة لتُوصَل حين توجد المصادر. والتوصيل نفسه

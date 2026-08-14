@@ -142,6 +142,23 @@ const ATTACKS = [
     file: 'src/admin/contract/source.ts',
     patch: (s) => s.replace('export const WIRING_STATE', 'export const supabaseAdmin = null\nexport const WIRING_STATE'),
   },
+  {
+    // انحراف عدد الوثيقة عن السجلّ — وقد حدث فعلًا قبل ربطهما.
+    name: 'عدد في §10 يخالف السجلّ',
+    file: 'docs/product/EXECUTIVE-DASHBOARD-DATA-CONTRACT.md',
+    patch: (s) => s.replace('| `AVAILABLE_NOW` | **٤** —', '| `AVAILABLE_NOW` | **٦** —'),
+  },
+  {
+    name: 'حذف بند من السجلّ بلا تحديث الوثيقة',
+    file: 'src/admin/contract/metrics.ts',
+    patch: (s) =>
+      s.replace(
+        `  {
+    id: 'users.verified',`,
+        `  {
+    id: 'users.verifiedRENAMED',`,
+      ),
+  },
 ]
 
 const { spawnSync } = await import('node:child_process')
