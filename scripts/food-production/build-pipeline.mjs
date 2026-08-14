@@ -9,7 +9,7 @@ import { resolve } from 'node:path'
 import { loadShared, ROOT } from './lib/loadTs.mjs'
 import { dedupe } from './lib/dedupe.mjs'
 import {
-  writeShards, writeHotSet, chooseShardCount, stableStringify, sha256,
+  writeShards, writeHotSet, chooseShardCount, stableStringify, sha256, fitHotSetToBudget,
   SHARD_TARGET_GZIP_BYTES, HOT_SET_BUDGET_GZIP_BYTES,
 } from './lib/shard.mjs'
 
@@ -67,7 +67,14 @@ const hotRank = (a, b) => {
 const gulfRest = accepted
   .filter((r) => !curatedGtins.has(r.gtin) && (r.market === 'SA' || r.market === 'GCC'))
   .sort(hotRank)
-const hotSet = [...curated, ...gulfRest].slice(0, Math.max(curated.length, HOT_MAX))
+const indexTokenizer = norm.tokenizeWithPrefixes
+const hotCandidates = [...curated, ...gulfRest]
+/**
+ * الميزانية تحكم العدد. `--hot-max` سقف أعلى لا هدف، والقصّ الفعلي يتحدّد بالقياس
+ * كي لا يتجاوز الملفّ المضمّن في الحزمة ميزانيته المعلنة أبدًا.
+ */
+const fitted = fitHotSetToBudget(hotCandidates.slice(0, HOT_MAX), indexTokenizer, norm.NORMALIZATION_VERSION, '1.0.0')
+const hotSet = hotCandidates.slice(0, Math.max(1, fitted))
 
 // ── الكتابة ──
 mkdirSync(OUT_DIR, { recursive: true })
@@ -77,7 +84,6 @@ const shardCount = chooseShardCount(accepted)
  * الكلفة **مقيسة لا مفترضة**: على ١٥٠٠ سجلًا حقيقيًا ارتفع الفهرس من ٢٣٫٦ إلى ٣٩٫٦
  * كيلوبايت مضغوطًا (+٦٨٪ للفهرس ≈ +٦٫٥٪ للإجمالي) — ثمن مقبول مقابل إلغاء المسح.
  */
-const indexTokenizer = norm.tokenizeWithPrefixes
 const shardResult = writeShards({
   records: accepted,
   outDir: resolve(OUT_DIR, 'shards'),
@@ -163,6 +169,23 @@ writeFileSync(resolve(REPORT_DIR, 'build-summary.json'), JSON.stringify({
   with_sodium: accepted.filter((r) => r.sodium_mg !== null).length,
   with_fiber: accepted.filter((r) => r.fiber_g !== null).length,
   with_ingredients: accepted.filter((r) => r.ingredients !== null).length,
+  // تغطية العربية **مقسّمة بالسوق**: الرقم الإجمالي يخفي الحقيقة لأن الذيل العالمي
+  // أوروبي بالكامل. القرار يُتّخذ على تغطية الخليج لا على المتوسّط الممزوج.
+  gulf: (() => {
+    const g = accepted.filter((r) => r.market === 'SA' || r.market === 'GCC')
+    const off = g.filter((r) => r.source === 'openfoodfacts')
+    const cur = g.filter((r) => r.source === 'qimmah_curated')
+    return {
+      total: g.length,
+      arabic: g.filter((r) => r.name_ar).length,
+      off_total: off.length,
+      off_arabic: off.filter((r) => r.name_ar).length,
+      curated_total: cur.length,
+      curated_arabic: cur.filter((r) => r.name_ar).length,
+    }
+  })(),
+  global_arabic: accepted.filter((r) => r.market === 'GLOBAL' && r.name_ar).length,
+  global_total: accepted.filter((r) => r.market === 'GLOBAL').length,
   quality_flags: flagCounts,
   confidence_buckets: accepted.reduce((a, r) => {
     const b = r.confidence >= 0.8 ? 'high_0.8+' : r.confidence >= 0.6 ? 'mid_0.6-0.8' : r.confidence >= 0.4 ? 'low_0.4-0.6' : 'very_low_<0.4'

@@ -1,38 +1,38 @@
 {
-  "rows_read": 2444359,
+  "rows_read": 4535569,
   "gtin_rejected": {
-    "checksum": 81022,
-    "length": 31461,
-    "placeholder": 499,
-    "restricted-circulation": 448106,
-    "non-digits": 5,
-    "not-a-trade-item": 4
+    "checksum": 88934,
+    "length": 70709,
+    "placeholder": 510,
+    "restricted-circulation": 448156,
+    "non-digits": 9,
+    "not-a-trade-item": 4820
   },
   "quality_rejected": {
-    "missing_energy": 959818,
-    "missing_macros": 949328,
-    "no_name": 113824,
-    "energy_density_impossible": 1210,
-    "macro_sum_exceeds_mass": 953,
-    "sodium_out_of_range": 319,
-    "negative_value": 91
+    "missing_energy": 1742584,
+    "missing_macros": 1724958,
+    "no_name": 283686,
+    "energy_density_impossible": 3185,
+    "macro_sum_exceeds_mass": 1822,
+    "sodium_out_of_range": 912,
+    "negative_value": 155
   },
-  "accepted_sa": 292,
-  "accepted_gcc": 426,
-  "accepted_global_considered": 804831,
+  "accepted_sa": 2341,
+  "accepted_gcc": 2568,
+  "accepted_global_considered": 1881137,
   "flags": {
-    "no_arabic_name": 805493,
-    "no_brand": 225342,
-    "fiber_exceeds_carbs": 13021,
-    "macro_energy_mismatch": 21991,
-    "sugar_exceeds_carbs": 588,
-    "saturated_exceeds_fat": 357,
-    "serving_size_implausible": 46,
-    "no_english_name": 55,
-    "serving_basis_suspect": 30
+    "no_arabic_name": 1885456,
+    "no_brand": 503042,
+    "fiber_exceeds_carbs": 34699,
+    "macro_energy_mismatch": 59071,
+    "sugar_exceeds_carbs": 1462,
+    "saturated_exceeds_fat": 773,
+    "serving_size_implausible": 85,
+    "no_english_name": 588,
+    "serving_basis_suspect": 65
   },
-  "truncated_input": true,
-  "elapsed_s": 57,
-  "written": 55718,
+  "truncated_input": false,
+  "elapsed_s": 119,
+  "written": 59909,
   "global_shipped": 55000
 }

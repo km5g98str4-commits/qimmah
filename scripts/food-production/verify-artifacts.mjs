@@ -56,6 +56,8 @@ if (existsSync(hotPath)) {
   const hot = JSON.parse(readFileSync(hotPath, 'utf8'))
   if (hot.count !== m.hot_set.count) fail('عدد الطقم الساخن لا يطابق البيان')
   if (!/ODbL/.test(hot.licence ?? '')) fail('إشعار الترخيص مفقود من الطقم الساخن')
+  // الميزانية قيد مُعلَن لا رقم زينة: الطقم يُضمَّن في الحزمة، وتجاوزه يضخّمها بلا إعلان.
+  if (!m.hot_set.within_budget) fail(`الطقم الساخن تجاوز ميزانيته: ${m.hot_set.bytes_gzip} > ${m.hot_set.budget_bytes_gzip} بايت`)
 } else fail('الطقم الساخن مفقود')
 
 console.log('════════ تحقّق مخرجات خطّ الإنتاج ════════')

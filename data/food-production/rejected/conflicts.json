@@ -1,8 +1,78 @@
 {
   "_note": "تعارضات مرفوعة لا مدموجة — العدد الكامل في _total، والقائمة كاملةً تُولَّد بإعادة تشغيل الخطّ.",
-  "_total": 3019,
+  "_total": 3123,
   "_sample_size": 200,
   "sample": [
+    {
+      "gtin": "06281007047654",
+      "reason": "nutrition_divergence",
+      "a": {
+        "source": "qimmah_curated",
+        "id": "PKG-001:6281007047654",
+        "kcal": 256.67
+      },
+      "b": {
+        "source": "openfoodfacts",
+        "id": "6281007047654",
+        "kcal": 256.67
+      }
+    },
+    {
+      "gtin": "06281014110020",
+      "reason": "nutrition_divergence",
+      "a": {
+        "source": "qimmah_curated",
+        "id": "PKG-001:6281014110020",
+        "kcal": 562
+      },
+      "b": {
+        "source": "openfoodfacts",
+        "id": "6281014110020",
+        "kcal": 205
+      }
+    },
+    {
+      "gtin": "06281014300018",
+      "reason": "nutrition_divergence",
+      "a": {
+        "source": "qimmah_curated",
+        "id": "PKG-001:6281014300018",
+        "kcal": 130
+      },
+      "b": {
+        "source": "openfoodfacts",
+        "id": "6281014300018",
+        "kcal": 101.54
+      }
+    },
+    {
+      "gtin": "06281018154846",
+      "reason": "nutrition_divergence",
+      "a": {
+        "source": "qimmah_curated",
+        "id": "PKG-001:6281018154846",
+        "kcal": 87
+      },
+      "b": {
+        "source": "openfoodfacts",
+        "id": "6281018154846",
+        "kcal": 73
+      }
+    },
+    {
+      "gtin": "06281057005918",
+      "reason": "nutrition_divergence",
+      "a": {
+        "source": "qimmah_curated",
+        "id": "PKG-001:6281057005918",
+        "kcal": 120
+      },
+      "b": {
+        "source": "openfoodfacts",
+        "id": "6281057005918",
+        "kcal": 104
+      }
+    },
     {
       "reason": "same_key_distinct_gtin",
       "key": "sainsbury s|icing sugar|5g",
@@ -833,6 +903,222 @@
     },
     {
       "reason": "same_key_distinct_gtin",
+      "key": "freeway|cola zero sugar|500ml",
+      "gtins": [
+        "00000020442941",
+        "00000042194422"
+      ],
+      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
+    },
+    {
+      "reason": "same_key_distinct_gtin",
+      "key": "freeway|cola|330ml",
+      "gtins": [
+        "00000020514747",
+        "00000042270379"
+      ],
+      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
+    },
+    {
+      "reason": "same_key_distinct_gtin",
+      "key": "thomy|sauce hollandaise|100ml",
+      "gtins": [
+        "00000040056265",
+        "00000042353430"
+      ],
+      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
+    },
+    {
+      "reason": "same_key_distinct_gtin",
+      "key": "kong strong|kong strong wild power|500ml",
+      "gtins": [
+        "00000042368922",
+        "00000042391753"
+      ],
+      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
+    },
+    {
+      "reason": "same_key_distinct_gtin",
+      "key": "envia|l onctueux et lit de framboise|150g",
+      "gtins": [
+        "00000020046880",
+        "00000045416880"
+      ],
+      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
+    },
+    {
+      "reason": "same_key_distinct_gtin",
+      "key": "nestle|smarties|19g",
+      "gtins": [
+        "00000040345512",
+        "00000050249466"
+      ],
+      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
+    },
+    {
+      "reason": "same_key_distinct_gtin",
+      "key": "ferrero|kinder surprise|20g",
+      "gtins": [
+        "00000054088207",
+        "00000054088221"
+      ],
+      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
+    },
+    {
+      "reason": "same_key_distinct_gtin",
+      "key": "coca cola|original taste|250ml",
+      "gtins": [
+        "00000054490086",
+        "00000054491472"
+      ],
+      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
+    },
+    {
+      "reason": "same_key_distinct_gtin",
+      "key": "cadbury|fudge|22g",
+      "gtins": [
+        "00000057030609",
+        "00000057038902"
+      ],
+      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
+    },
+    {
+      "reason": "same_key_distinct_gtin",
+      "key": "ferrero|nutella|15g",
+      "gtins": [
+        "00000005574315",
+        "00000059032823"
+      ],
+      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
+    },
+    {
+      "reason": "same_key_distinct_gtin",
+      "key": "bonafont|bonafont kids|300ml",
+      "gtins": [
+        "00000075061678",
+        "00000075063375"
+      ],
+      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
+    },
+    {
+      "reason": "same_key_distinct_gtin",
+      "key": "toblerone|toblerone|25g",
+      "gtins": [
+        "00000076145513",
+        "00000076145568"
+      ],
+      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
+    },
+    {
+      "reason": "same_key_distinct_gtin",
+      "key": "arcor|turron mani|25g",
+      "gtins": [
+        "00000077940131",
+        "00000077965295"
+      ],
+      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
+    },
+    {
+      "reason": "same_key_distinct_gtin",
+      "key": "nutella|nutella|15g",
+      "gtins": [
+        "00000040084053",
+        "00000080050865"
+      ],
+      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
+    },
+    {
+      "reason": "same_key_distinct_gtin",
+      "key": "ferrero|nutella|15g",
+      "gtins": [
+        "00000005574315",
+        "00000080051428"
+      ],
+      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
+    },
+    {
+      "reason": "same_key_distinct_gtin",
+      "key": "ferrero|nutella|15g",
+      "gtins": [
+        "00000005574315",
+        "00000080052036"
+      ],
+      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
+    },
+    {
+      "reason": "same_key_distinct_gtin",
+      "key": "ferrero|nutella|15g",
+      "gtins": [
+        "00000005574315",
+        "00000080177173"
+      ],
+      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
+    },
+    {
+      "reason": "same_key_distinct_gtin",
+      "key": "ferrero|nutella|15g",
+      "gtins": [
+        "00000005574315",
+        "00000080761006"
+      ],
+      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
+    },
+    {
+      "reason": "same_key_distinct_gtin",
+      "key": "fruittella|good for you|30g",
+      "gtins": [
+        "00000080892489",
+        "00000080948056"
+      ],
+      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
+    },
+    {
+      "reason": "same_key_distinct_gtin",
+      "key": "penotti|duo penotti|15g",
+      "gtins": [
+        "00000087172300",
+        "00000087172355"
+      ],
+      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
+    },
+    {
+      "reason": "same_key_distinct_gtin",
+      "key": "sanissimo|salmas clasicas|18g",
+      "gtins": [
+        "00000011602255",
+        "00000089912294"
+      ],
+      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
+    },
+    {
+      "reason": "same_key_distinct_gtin",
+      "key": "|rauch amazing apple nectar|",
+      "gtins": [
+        "00000090020049",
+        "00000090020186"
+      ],
+      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
+    },
+    {
+      "reason": "same_key_distinct_gtin",
+      "key": "|red bull curuba elderflower flavor energy drink|",
+      "gtins": [
+        "00000090474064",
+        "00000090474811"
+      ],
+      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
+    },
+    {
+      "reason": "same_key_distinct_gtin",
+      "key": "red bull|energy drink|250ml",
+      "gtins": [
+        "00000090486876",
+        "00000090493027"
+      ],
+      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
+    },
+    {
+      "reason": "same_key_distinct_gtin",
       "key": "trader joe s|gluten free multigrain bread|36g",
       "gtins": [
         "00000000621465",
@@ -882,6 +1168,15 @@
       "gtins": [
         "00008346500086",
         "00008346957569"
+      ],
+      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
+    },
+    {
+      "reason": "same_key_distinct_gtin",
+      "key": "nutella|hazelnut spread with cocoa|15g",
+      "gtins": [
+        "00000080051671",
+        "00009800000869"
       ],
       "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
     },
@@ -1530,276 +1825,6 @@
       "gtins": [
         "00011150602808",
         "00011150981545"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "roundy s|roundy s|85g",
-      "gtins": [
-        "00011150602808",
-        "00011150981552"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "botan|calrose rice|45g",
-      "gtins": [
-        "00011152034706",
-        "00011152144092"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "spartan|original lowfat yogurt|170g",
-      "gtins": [
-        "00011213515021",
-        "00011213515083"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "yami|yami|170g",
-      "gtins": [
-        "00011384016334",
-        "00011384016341"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "yami|yami|170g",
-      "gtins": [
-        "00011384016334",
-        "00011384016358"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "yami|lactose free made with milk|170g",
-      "gtins": [
-        "00011384160044",
-        "00011384160051"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "zoi|zoi|170g",
-      "gtins": [
-        "00011384206445",
-        "00011384206490"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "zoi|zoi|170g",
-      "gtins": [
-        "00011384206445",
-        "00011384206513"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "|7up zero sugar|",
-      "gtins": [
-        "00012000022760",
-        "00012000022869"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "mountain dew|mountain dew|",
-      "gtins": [
-        "00012000002977",
-        "00012000045271"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "mountain dew|mountain dew|100ml",
-      "gtins": [
-        "00012000051692",
-        "00012000052590"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "pepsi|pepsi|",
-      "gtins": [
-        "00012000004070",
-        "00012000057212"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "|7up|",
-      "gtins": [
-        "00012000051845",
-        "00012000057496"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "|mirinda orange|",
-      "gtins": [
-        "00012000005459",
-        "00012000057519"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "|7up zero sugar|",
-      "gtins": [
-        "00012000022760",
-        "00012000060090"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "|7up|",
-      "gtins": [
-        "00012000051845",
-        "00012000108402"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "|mirinda orange|",
-      "gtins": [
-        "00012000005459",
-        "00012000802805"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "|mirinda orange|",
-      "gtins": [
-        "00012000005459",
-        "00012000802850"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "|mirinda citrus|",
-      "gtins": [
-        "00012000804670",
-        "00012000804717"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "wholesome|organic blue agave|30ml",
-      "gtins": [
-        "00012511472313",
-        "00012511474416"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "kadoya|roasted sesame oil|15ml",
-      "gtins": [
-        "00012822009079",
-        "00012822009239"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "heinz|tomato ketchup|17g",
-      "gtins": [
-        "00000001312102",
-        "00013000006057"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "heinz|tomato ketchup|17g",
-      "gtins": [
-        "00000001312102",
-        "00013000006408"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "heinz homestyle|beef gravy|60g",
-      "gtins": [
-        "00013000797702",
-        "00013000798006"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "la brea bakery|la brea bakery|96g",
-      "gtins": [
-        "00013087209426",
-        "00013087209440"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "ore ida|crispy tater tots|86g",
-      "gtins": [
-        "00013120000829",
-        "00013120012037"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "ore ida|extra crispy fast food fries|84g",
-      "gtins": [
-        "00013120012594",
-        "00013120014178"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "ore ida|crispy hash brown patties|64g",
-      "gtins": [
-        "00013120000768",
-        "00013120046865"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "ore ida|crispy tater tots|86g",
-      "gtins": [
-        "00013120000829",
-        "00013120085666"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "martha white|blueberry muffin mix|66g",
-      "gtins": [
-        "00013300000311",
-        "00013300547014"
       ],
       "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
     }

@@ -21,12 +21,21 @@ export function normalizedKey(rec, normalizeProductKey) {
   return `${brand}|${name}|${size}`
 }
 
-/** أيّ السجلّين أجدر بالبقاء: الثقة ثم رتبة المصدر ثم أحدث تحديث. */
+/**
+ * أيّ السجلّين أجدر بالبقاء: **رتبة المصدر أولًا**، ثم الثقة، ثم أحدث تحديث.
+ *
+ * ═══ لماذا المصدر قبل الثقة ═══
+ * كان الترتيب معكوسًا (الثقة أولًا)، فخسرت **ستة** سجلات منسَّقة يدويًا — مُتحقَّق منها
+ * بمصدرين مستقلّين وتحمل أسماء عربية — أمام سجلات OFF عامّة صادف أن درجة اكتمالها أعلى.
+ * وهذا خطأ في الاتجاه: `confidence` مقياس **اكتمال حقول** لا مقياس **صدق**، والسجل
+ * المُتحقَّق منه بشريًا أوثق من سجل مكتمل الحقول مجهول المراجعة.
+ * أثره المقيس: تنسيق قِمّة عاد من ٤٩ إلى ٥٥ سجلًا، وكلّها بأسماء عربية.
+ */
 function better(a, b) {
-  if (a.confidence !== b.confidence) return a.confidence > b.confidence ? a : b
   const ra = SOURCE_RANK[a.source] ?? 0
   const rb = SOURCE_RANK[b.source] ?? 0
   if (ra !== rb) return ra > rb ? a : b
+  if (a.confidence !== b.confidence) return a.confidence > b.confidence ? a : b
   const ta = Date.parse(a.source_updated_at ?? '') || 0
   const tb = Date.parse(b.source_updated_at ?? '') || 0
   return tb > ta ? b : a

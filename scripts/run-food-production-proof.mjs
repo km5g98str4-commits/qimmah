@@ -15,7 +15,7 @@ import { loadShared, loadTsModule, ROOT } from './food-production/lib/loadTs.mjs
 import * as N from './food-production/lib/normalize.mjs'
 import { checkNutrition, BLOCKING_FLAGS, scoreConfidence } from './food-production/lib/sanity.mjs'
 import { dedupe } from './food-production/lib/dedupe.mjs'
-import { fnv1a, mix32, assignShard, stableStringify, buildSearchIndex, writeShards, writeHotSet } from './food-production/lib/shard.mjs'
+import { fnv1a, mix32, assignShard, stableStringify, buildSearchIndex, writeShards, writeHotSet, fitHotSetToBudget } from './food-production/lib/shard.mjs'
 
 const checks = []
 const ok = (label, pass, detail = '') => checks.push({ label, pass: !!pass, detail: String(detail) })
@@ -192,7 +192,14 @@ counter('الثقة تنخفض فعلًا بالأعلام اللينة', scoreC
 const mk = (gtin, over = {}) => ({ ...base, gtin, product_id: `openfoodfacts:${gtin}`, source: 'openfoodfacts', source_record_id: gtin, source_updated_at: '2026-01-01T00:00:00Z', confidence: 0.8, quality_flags: [], serving_unit: 'g', ...over })
 const dupSame = dedupe([mk('06281007034043'), mk('06281007034043', { confidence: 0.9 })], norm.normalizeProductKey)
 ok('التكرار: GTIN متطابق يُدمج في سجل واحد', dupSame.accepted.length === 1, `${dupSame.accepted.length}`)
-ok('التكرار: الأعلى ثقةً هو الباقي', dupSame.accepted[0].confidence === 0.9)
+ok('التكرار: الأعلى ثقةً هو الباقي داخل المصدر الواحد', dupSame.accepted[0].confidence === 0.9)
+// رتبة المصدر قبل الثقة: سجل منسَّق يدويًا لا يخسر أمام سجل OFF أكمل حقولًا.
+const curatedVsOff = dedupe([
+  { ...mk('06281007034043'), source: 'openfoodfacts', confidence: 0.95 },
+  { ...mk('06281007034043'), source: 'qimmah_curated', confidence: 0.60, name_ar: 'حليب المراعي' },
+], norm.normalizeProductKey)
+ok('التكرار: المصدر المنسَّق يفوز رغم ثقة أقلّ (الثقة اكتمالٌ لا صدق)', curatedVsOff.accepted[0].source === 'qimmah_curated', curatedVsOff.accepted[0].source)
+counter('لو سبقت الثقةُ المصدرَ لضاع السجل المُتحقَّق منه بشريًا', curatedVsOff.accepted[0].name_ar === 'حليب المراعي')
 const conflicting = dedupe([mk('06281007034043', { energy_kcal: 200 }), mk('06281007034043', { energy_kcal: 400 })], norm.normalizeProductKey)
 ok('التكرار: تعارض غذائي على نفس الـGTIN يُرفَع لا يُبتلع', conflicting.conflicts.some((c) => c.reason === 'nutrition_divergence'), JSON.stringify(conflicting.conflicts.map((c) => c.reason)))
 // ⛔ القاعدة القاطعة
@@ -277,6 +284,16 @@ try {
 
   const hot = writeHotSet({ records: recs, outDir: tmp, tokenize: norm.tokenize, normalizationVersion: norm.NORMALIZATION_VERSION, schemaVersion: '1.0.0' })
   ok('الطقم الساخن: ضمن الميزانية المعلنة', hot.within_budget, `${(hot.bytes_gzip / 1024).toFixed(1)}KB ≤ ${(hot.budget_bytes_gzip / 1024).toFixed(0)}KB`)
+  // الميزانية تحكم العدد: نطلب أكثر ممّا يتّسع، فيجب أن يُقصّ لا أن يتجاوز.
+  // العدد كبير عمدًا كي **يقع القصّ فعلًا**: تأكيدٌ يمرّ بلا أن يُشغّل القاعدة التي
+  // يزعم فحصها هو مرورٌ غير مستحقّ (§4.2)، فيُشدّ حتى يُجبر الحدّ على العمل.
+  const many = Array.from({ length: 6000 }, (_, i) => mk(String(60000000000000 + i).slice(0, 14), { name_ar: 'صنف تجريبي طويل الاسم رقم ' + i, name_en: 'Sample product with a long name number ' + i }))
+  const fitted = fitHotSetToBudget(many, norm.tokenizeWithPrefixes, norm.NORMALIZATION_VERSION, '1.0.0')
+  ok('الطقم الساخن: العدد يُشتق من الميزانية لا العكس', fitted > 0 && fitted < many.length, `اتّسع ${fitted}/${many.length}`)
+  counter('القصّ وقع فعلًا — لم يتّسع الكلّ (وإلا فالفحص لم يُشغّل القاعدة)', fitted < many.length)
+  const fittedHot = writeHotSet({ records: many.slice(0, fitted), outDir: tmp, tokenize: norm.tokenizeWithPrefixes, normalizationVersion: norm.NORMALIZATION_VERSION, schemaVersion: '1.0.0' })
+  ok('الطقم الساخن: المقيس بعد القصّ داخل الميزانية فعلًا', fittedHot.within_budget, `${(fittedHot.bytes_gzip / 1024).toFixed(1)}KB`)
+  counter('القصّ ليس تصفيرًا — يبقى محتوى حقيقي', fitted >= 50)
   ok('الطقم الساخن: يحمل إشعار الترخيص', /ODbL/.test(JSON.parse(readFileSync(resolve(tmp, 'hot-set.json'), 'utf8')).licence))
 } finally {
   rmSync(tmp, { recursive: true, force: true })

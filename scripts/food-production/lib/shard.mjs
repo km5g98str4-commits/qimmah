@@ -184,6 +184,48 @@ export function writeShards({ records, outDir, shardCount, tokenize, normalizati
   }
 }
 
+/**
+ * يبني حمولة الطقم الساخن لعدد معيّن من السجلات (بلا كتابة) — لقياس الحجم قبل الالتزام به.
+ * الترتيب داخل الملفّ بالـGTIN دائمًا، لكن **الاختيار** يتبع ترتيب `records` الوارد
+ * (الأهمّ أولًا)، فالقصّ يُسقط الأقلّ أهمّية لا عشوائيًّا.
+ */
+function buildHotPayload(records, tokenize, normalizationVersion, schemaVersion) {
+  const sorted = [...records].sort((a, b) => (a.gtin < b.gtin ? -1 : 1))
+  const byGtin = {}
+  for (const rec of sorted) byGtin[rec.gtin] = rec
+  return {
+    schema_version: schemaVersion,
+    normalization_version: normalizationVersion,
+    set: 'hot',
+    count: sorted.length,
+    budget_bytes_gzip: HOT_SET_BUDGET_GZIP_BYTES,
+    licence: 'ODbL 1.0 — contains information from Open Food Facts, made available under the Open Database License. Qimmah-curated records are Qimmah-owned.',
+    tokens: buildSearchIndex(sorted, tokenize),
+    order: sorted.map((r) => r.gtin),
+    records: byGtin,
+  }
+}
+
+/**
+ * أكبر عدد سجلات يتّسع داخل ميزانية الطقم الساخن المضغوطة.
+ * **الميزانية تحكم العدد، لا العكس.** العدد الثابت كان يتجاوز الميزانية بمجرّد أن
+ * تتحسّن البيانات (وقع فعلًا: ١٢٠٫٣ ك.ب مقابل سقف ١٢٠) — ورفع السقف عندها كان سيكون
+ * تدليسًا على قيد أُعلن. فالحلّ أن يُقصّ الذيل الأقلّ أهمّية حتى يتّسع.
+ */
+export function fitHotSetToBudget(records, tokenize, normalizationVersion, schemaVersion) {
+  let lo = 0
+  let hi = records.length
+  let best = 0
+  while (lo <= hi) {
+    const mid = (lo + hi) >> 1
+    if (mid === 0) { lo = 1; continue }
+    const payload = buildHotPayload(records.slice(0, mid), tokenize, normalizationVersion, schemaVersion)
+    const size = gzipSync(Buffer.from(stableStringify(payload)), { level: 9 }).length
+    if (size <= HOT_SET_BUDGET_GZIP_BYTES) { best = mid; lo = mid + 1 } else { hi = mid - 1 }
+  }
+  return best
+}
+
 /** يكتب الطقم الساخن (ملف واحد صغير) ويعيد قياسه مقابل الميزانية المعلنة. */
 export function writeHotSet({ records, outDir, tokenize, normalizationVersion, schemaVersion }) {
   mkdirSync(outDir, { recursive: true })

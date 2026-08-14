@@ -1,34 +1,44 @@
 {
-  "accepted": 55773,
+  "accepted": 59941,
   "by_market": {
-    "GCC": 441,
-    "SA": 332,
+    "GCC": 2577,
+    "SA": 2364,
     "GLOBAL": 55000
   },
   "by_source": {
     "qimmah_curated": 55,
-    "openfoodfacts": 55718
+    "openfoodfacts": 59886
   },
-  "arabic_names": 67,
-  "english_names": 55761,
-  "with_serving": 55480,
-  "complete_macros": 55767,
-  "with_sodium": 55554,
-  "with_fiber": 55519,
-  "with_ingredients": 55219,
+  "arabic_names": 333,
+  "english_names": 59664,
+  "with_serving": 57560,
+  "complete_macros": 59898,
+  "with_sodium": 58425,
+  "with_fiber": 57924,
+  "with_ingredients": 56093,
+  "gulf": {
+    "total": 4941,
+    "arabic": 298,
+    "off_total": 4886,
+    "off_arabic": 243,
+    "curated_total": 55,
+    "curated_arabic": 55
+  },
+  "global_arabic": 35,
+  "global_total": 55000,
   "quality_flags": {
-    "no_arabic_name": 55706,
-    "macro_energy_mismatch": 21,
-    "sugar_exceeds_carbs": 6,
-    "fiber_exceeds_carbs": 10,
-    "no_brand": 137,
-    "no_english_name": 12,
-    "saturated_exceeds_fat": 3
+    "no_arabic_name": 59608,
+    "macro_energy_mismatch": 154,
+    "sugar_exceeds_carbs": 22,
+    "fiber_exceeds_carbs": 61,
+    "no_english_name": 277,
+    "no_brand": 1613,
+    "saturated_exceeds_fat": 9
   },
   "confidence_buckets": {
-    "mid_0.6-0.8": 217,
-    "high_0.8+": 55391,
-    "low_0.4-0.6": 68,
-    "very_low_<0.4": 97
+    "mid_0.6-0.8": 1601,
+    "high_0.8+": 56823,
+    "low_0.4-0.6": 842,
+    "very_low_<0.4": 675
   }
 }
