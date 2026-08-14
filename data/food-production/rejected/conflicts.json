@@ -1,6 +1,6 @@
 {
   "_note": "تعارضات مرفوعة لا مدموجة — العدد الكامل في _total، والقائمة كاملةً تُولَّد بإعادة تشغيل الخطّ.",
-  "_total": 3001,
+  "_total": 3019,
   "_sample_size": 200,
   "sample": [
     {
@@ -275,6 +275,15 @@
     },
     {
       "reason": "same_key_distinct_gtin",
+      "key": "sainsbury s|lighter creme fraiche|30ml",
+      "gtins": [
+        "00000001594591",
+        "00000001594607"
+      ],
+      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
+    },
+    {
+      "reason": "same_key_distinct_gtin",
       "key": "sainsbury s|real mayo|15ml",
       "gtins": [
         "00000001219135",
@@ -392,7 +401,7 @@
     },
     {
       "reason": "same_key_distinct_gtin",
-      "key": "alesto|erdnüsse|30g",
+      "key": "alesto|erdnusse|30g",
       "gtins": [
         "00000020005672",
         "00000020104207"
@@ -423,6 +432,15 @@
       "gtins": [
         "00000020183073",
         "00000020187415"
+      ],
+      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
+    },
+    {
+      "reason": "same_key_distinct_gtin",
+      "key": "envia|lait demi ecreme|250ml",
+      "gtins": [
+        "00000020021979",
+        "00000020339906"
       ],
       "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
     },
@@ -473,7 +491,7 @@
     },
     {
       "reason": "same_key_distinct_gtin",
-      "key": "green grocer s|légumes vapeur|160g",
+      "key": "green grocer s|legumes vapeur|160g",
       "gtins": [
         "00000020436582",
         "00000020436599"
@@ -491,7 +509,7 @@
     },
     {
       "reason": "same_key_distinct_gtin",
-      "key": "fin carré|crusti choc|25g",
+      "key": "fin carre|crusti choc|25g",
       "gtins": [
         "00000020090067",
         "00000020488703"
@@ -626,7 +644,7 @@
     },
     {
       "reason": "same_key_distinct_gtin",
-      "key": "finest bakery|reggeliző keksz|50g",
+      "key": "finest bakery|reggelizo keksz|50g",
       "gtins": [
         "00000024230124",
         "00000024230131"
@@ -635,7 +653,7 @@
     },
     {
       "reason": "same_key_distinct_gtin",
-      "key": "almtaler|bierkäse|31g",
+      "key": "almtaler|bierkase|31g",
       "gtins": [
         "00000022071040",
         "00000024627528"
@@ -689,7 +707,16 @@
     },
     {
       "reason": "same_key_distinct_gtin",
-      "key": "bäckerkrönung|laugen brioche rolls|67g",
+      "key": "les printanieres|veloute de legumes|250ml",
+      "gtins": [
+        "00000026021508",
+        "00000026070612"
+      ],
+      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
+    },
+    {
+      "reason": "same_key_distinct_gtin",
+      "key": "backerkronung|laugen brioche rolls|67g",
       "gtins": [
         "00000026433820",
         "00000026445984"
@@ -734,7 +761,7 @@
     },
     {
       "reason": "same_key_distinct_gtin",
-      "key": "bäckerkrönung|milchbrötchen|40g",
+      "key": "backerkronung|milchbrotchen|40g",
       "gtins": [
         "00000026267449",
         "00000027958025"
@@ -743,7 +770,7 @@
     },
     {
       "reason": "same_key_distinct_gtin",
-      "key": "penny|frischkäse leicht|20g",
+      "key": "penny|frischkase leicht|20g",
       "gtins": [
         "00000027041031",
         "00000028275503"
@@ -797,7 +824,7 @@
     },
     {
       "reason": "same_key_distinct_gtin",
-      "key": "nestlé|kitkat|42g",
+      "key": "nestle|kitkat|42g",
       "gtins": [
         "00000040052410",
         "00000040345116"
@@ -815,7 +842,7 @@
     },
     {
       "reason": "same_key_distinct_gtin",
-      "key": "nestlé|goodnes protein|140g",
+      "key": "nestle|goodnes protein|140g",
       "gtins": [
         "00000003926994",
         "00005561285477"
@@ -1773,33 +1800,6 @@
       "gtins": [
         "00013300000311",
         "00013300547014"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "sweet baby ray s|barbecue sauce|36g",
-      "gtins": [
-        "00013409352311",
-        "00013409451328"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "sweet baby ray s|honey barbecue sauce|37g",
-      "gtins": [
-        "00013409341155",
-        "00013409451335"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "sweet baby ray s|hickory brown sugar barbecue sauce|36g",
-      "gtins": [
-        "00013409351758",
-        "00013409515372"
       ],
       "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
     }

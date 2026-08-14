@@ -73,20 +73,54 @@ ok('المخطّط: أعلام الجودة متطابقة بين TS وJSON Sche
 
 // ═══════════ ٢) التطبيع: تنفيذ واحد لا اثنان ═══════════
 ok('التطبيع: النسخة مختومة', /^\d+\.\d+\.\d+$/.test(norm.NORMALIZATION_VERSION), norm.NORMALIZATION_VERSION)
-const foldSamples = [
-  'كَبْسَةٌ', 'الأرزّ', 'مُطَبَّق', 'شاورما', 'حليب المراعي', 'مِلْحٌ', 'تمــر', 'إفطار', 'آيس كريم',
+ok('التطبيع: النسخة رُفعت لتبنّي مواصفة المنسّق (§٣)', norm.NORMALIZATION_VERSION !== '1.0.0', norm.NORMALIZATION_VERSION)
+
+// ── التوافق مع `normalizeSearch` القائمة: اتفاق مشروط لا تطابق مطلق ──
+// المواصفة §٣٫١ تضيف قواعد ليست في التنفيذ القديم (الياء/الكاف/الجاف الفارسية ·
+// U+0653–U+0655 · NFD اللاتيني). فالتأكيد ليس «متطابقان» — بل: **يتّفقان على كل نصّ
+// خالٍ من هذه الأحرف بعينها**، ويفترقان عليها **افتراقًا مقصودًا مسمّى**. هكذا يبقى
+// التباعد موثّقًا لا صامتًا، ويصير توحيدهما لاحقًا (DEPENDENCIES D-3) آمنًا.
+const SPEC_ADDED = /[یکگٕٓٔ]|[\u0300-\u036f]/
+const commonSamples = [
+  'كَبْسَةٌ', 'الأرزّ', 'مُطَبَّق', 'شاورما', 'حليب المراعي', 'مِلْحٌ', 'تمــر', 'إفطار',
   'ماء', 'عصير برتقال', 'ة', 'ى', 'ؤ', 'ئ', 'ء', 'Chicken Breast', 'MiXeD CaSe', '  فراغ  زائد  ',
+  'قهوه', 'قهوة', 'ارز', 'مكرونه',
 ]
-const foldMismatches = foldSamples.filter((s) => norm.foldArabic(s) !== foodItems.normalizeSearch(s))
-ok('التطبيع: `foldArabic` ≡ `normalizeSearch` القائمة في foodItems (لا ازدواج صامت)', foldMismatches.length === 0, foldMismatches.length ? `اختلف في: ${foldMismatches.join(' · ')}` : `${foldSamples.length} عيّنة متطابقة`)
-counter('لو تباعد التنفيذان لسقط هذا التأكيد بالاسم', norm.foldArabic('كبسة') === foodItems.normalizeSearch('كبسة'))
-ok('التطبيع: التاء المربوطة تُطوى (كبسة ≡ كبسه)', norm.foldArabic('كبسة') === norm.foldArabic('كبسه'))
-ok('التطبيع: الهمزات تُطوى (أرز ≡ ارز)', norm.foldArabic('أرز') === norm.foldArabic('ارز'))
-ok('التطبيع: التطويل يُحذف (تمــر ≡ تمر)', norm.foldArabic('تمــر') === norm.foldArabic('تمر'))
-ok('التطبيع: التشكيل يُحذف', norm.foldArabic('مِلْحٌ') === norm.foldArabic('ملح'))
+const drift = commonSamples.filter((x) => !SPEC_ADDED.test(x) && norm.foldArabic(x) !== foodItems.normalizeSearch(x))
+ok('التطبيع: يتّفق مع `normalizeSearch` على كل نصّ خارج إضافات المواصفة', drift.length === 0, drift.length ? `تباعد: ${drift.join(' · ')}` : `${commonSamples.length} عيّنة`)
+const divergent = [['چای', 'الياء الفارسية'], ['کباب', 'الكاف الفارسية'], ['گلاب', 'الجاف الفارسية'], ['Café', 'NFD اللاتيني']]
+for (const [word, why] of divergent) {
+  ok(`التطبيع: يفترق عن القديم عمدًا عند ${why} («${word}»)`, norm.foldArabic(word) !== foodItems.normalizeSearch(word), `${norm.foldArabic(word)} ≠ ${foodItems.normalizeSearch(word)}`)
+}
+
+// ── قواعد §٣٫١ — تأكيد موجب لكل قاعدة (المواصفة §٨) ──
+const foldPairs = [
+  ['التشكيل', 'مِلْحٌ', 'ملح'], ['التطويل', 'تمــر', 'تمر'], ['الألف', 'أرز', 'ارز'],
+  ['التاء المربوطة', 'قهوة', 'قهوه'], ['الألف المقصورة', 'مصطفى', 'مصطفي'],
+  ['الياء الفارسية', 'چای', 'چاي'], ['الكاف الفارسية', 'کباب', 'كباب'],
+  ['الجاف الفارسية', 'گلاب', 'كلاب'], ['الهمزة المحمولة', 'مؤمن', 'مومن'],
+  ['اللاتيني بـNFD', 'Café', 'cafe'], ['المدّة U+0653', 'مَٓاء', 'ماء'],
+]
+for (const [label, a, b] of foldPairs) {
+  ok(`الطيّ §٣٫١: ${label} — «${a}» ≡ «${b}»`, norm.foldArabic(a) === norm.foldArabic(b), `${norm.foldArabic(a)} vs ${norm.foldArabic(b)}`)
+}
+// ── التأكيد المضادّ الإلزامي (المواصفة §٨): كلمتان بفرق حرف واحد لا تتكافآن ──
+const nearPairs = [['حليب', 'حليم'], ['ملح', 'ملحق'], ['تمر', 'ثمر'], ['كبسة', 'كبدة'], ['عدس', 'عدش']]
+for (const [a, b] of nearPairs) {
+  counter(`الطيّ لا يوحّد «${a}» و«${b}» (فرق حرف واحد)`, norm.foldArabic(a) !== norm.foldArabic(b))
+}
 ok('التطبيع: الأرقام العربية تُطوى (٣٠ ⇒ 30)', norm.foldArabicDigits('٣٠') === '30' && norm.foldArabicDigits('۳۰') === '30')
-counter('الطيّ لا يوحّد كلمتين مختلفتين حقًّا (ملح ≠ ملحق)', norm.foldArabic('ملح') !== norm.foldArabic('ملحق'))
-counter('الطيّ لا يمحو التمييز بين حليب وحليم', norm.foldArabic('حليب') !== norm.foldArabic('حليم'))
+
+// ── §٣٫٤ أداة التعريف: إضافة لا استبدال ──
+const alTokens = norm.tokenize('العلم')
+ok('§٣٫٤: «ال» تولّد رمزًا إضافيًا ويُفهرس الشكلان معًا', alTokens.includes('العلم') && alTokens.includes('علم'), JSON.stringify(alTokens))
+counter('§٣٫٤: الحذف ليس مدمّرًا — الشكل الكامل باقٍ فلا يختلط «العلم» بـ«علم»', norm.tokenize('العلم').includes('العلم'))
+counter('§٣٫٤: كلمة قصيرة تبدأ بـ«ال» لا تُبتر (الف تبقى كما هي)', !norm.tokenize('الف').includes('ف'))
+
+// ── §٤ بادئات البحث أثناء الكتابة ──
+const pfx = norm.tokenizeWithPrefixes('حليب')
+ok('§٤: تُولَّد بادئات ٣–٨ محارف للبحث أثناء الكتابة', pfx.includes('حلي') && pfx.includes('حليب'), JSON.stringify(pfx))
+counter('§٤: البادئات لا تنزل تحت 3 محارف (وإلا انفجر الفهرس)', !pfx.some((t) => t.length < 3))
 
 // ═══════════ ٣) GTIN ═══════════
 const gtinPass = ['6281007034043', '5449000000996', '3017620422003', '4006381333931', '6291100030101']

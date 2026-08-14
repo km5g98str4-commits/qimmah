@@ -1,6 +1,6 @@
 {
   "_note": "مرشّحون ضبابيون لمراجعة بشرية — لا يُدمجون آليًا أبدًا.",
-  "_total": 5132,
+  "_total": 5160,
   "_sample_size": 200,
   "sample": [
     {
@@ -70,7 +70,7 @@
     },
     {
       "reason": "fuzzy_same_name_distinct_gtin",
-      "normalized_name": "céleri rémoulade",
+      "normalized_name": "celeri remoulade",
       "count": 2,
       "gtins": [
         "00000000013406",
@@ -91,7 +91,7 @@
     },
     {
       "reason": "fuzzy_same_name_distinct_gtin",
-      "normalized_name": "baguette niçois",
+      "normalized_name": "baguette nicois",
       "count": 2,
       "gtins": [
         "00000000014502",
@@ -172,7 +172,7 @@
     },
     {
       "reason": "fuzzy_same_name_distinct_gtin",
-      "normalized_name": "lasagnes à la bolognaise",
+      "normalized_name": "lasagnes a la bolognaise",
       "count": 4,
       "gtins": [
         "00000000020633",
@@ -2246,6 +2246,18 @@
     },
     {
       "reason": "fuzzy_same_name_distinct_gtin",
+      "normalized_name": "sliced jalapenos",
+      "count": 4,
+      "gtins": [
+        "00000000306690",
+        "00036800168763",
+        "00070038591481",
+        "00076397002125"
+      ],
+      "note": "Queued for human review. NEVER auto-merged."
+    },
+    {
+      "reason": "fuzzy_same_name_distinct_gtin",
       "normalized_name": "crispy onions",
       "count": 2,
       "gtins": [
@@ -2598,16 +2610,6 @@
       "gtins": [
         "00000000344784",
         "00000025225334"
-      ],
-      "note": "Queued for human review. NEVER auto-merged."
-    },
-    {
-      "reason": "fuzzy_same_name_distinct_gtin",
-      "normalized_name": "luxury hot cross buns",
-      "count": 2,
-      "gtins": [
-        "00000000345033",
-        "00000020511319"
       ],
       "note": "Queued for human review. NEVER auto-merged."
     }

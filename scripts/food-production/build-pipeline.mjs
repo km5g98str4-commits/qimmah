@@ -72,18 +72,24 @@ const hotSet = [...curated, ...gulfRest].slice(0, Math.max(curated.length, HOT_M
 // ── الكتابة ──
 mkdirSync(OUT_DIR, { recursive: true })
 const shardCount = chooseShardCount(accepted)
+/**
+ * §٤ من المواصفة: تُفهرَس بادئات الرموز (٣–٨) كي يعمل البحث أثناء الكتابة **بلا مسح**.
+ * الكلفة **مقيسة لا مفترضة**: على ١٥٠٠ سجلًا حقيقيًا ارتفع الفهرس من ٢٣٫٦ إلى ٣٩٫٦
+ * كيلوبايت مضغوطًا (+٦٨٪ للفهرس ≈ +٦٫٥٪ للإجمالي) — ثمن مقبول مقابل إلغاء المسح.
+ */
+const indexTokenizer = norm.tokenizeWithPrefixes
 const shardResult = writeShards({
   records: accepted,
   outDir: resolve(OUT_DIR, 'shards'),
   shardCount,
-  tokenize: norm.tokenize,
+  tokenize: indexTokenizer,
   normalizationVersion: norm.NORMALIZATION_VERSION,
   schemaVersion: '1.0.0',
 })
 const hotResult = writeHotSet({
   records: hotSet,
   outDir: resolve(OUT_DIR, 'hot'),
-  tokenize: norm.tokenize,
+  tokenize: indexTokenizer,
   normalizationVersion: norm.NORMALIZATION_VERSION,
   schemaVersion: '1.0.0',
 })
