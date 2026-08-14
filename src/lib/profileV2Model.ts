@@ -57,7 +57,6 @@ export interface ProfileV2Model {
   commitment: { weeks: CommitmentWeek[]; hasData: boolean }
   body: { weightKg: number | null; targetKg: number | null }
   privacy: { usageEventsLocalOnly: boolean; healthSharingAvailable: boolean; dataExportAvailable: boolean; deleteAccountAvailable: boolean }
-  settings: { language: string; units: string; numerals: string; appearance: string; remindersAvailable: boolean }
   subscription: { showQuietLine: boolean; name: string; text: string; cta: string; enabled: boolean; url: string }
 }
 
@@ -195,17 +194,9 @@ export function buildProfileV2Model(customization: Customization, auth: AuthSumm
       usageEventsLocalOnly: true,
       healthSharingAvailable: false, // no HealthKit integration yet — honest
       dataExportAvailable: true,
-      // [CTO-65] البند ١: التعليق السابق ادّعى «routes to the existing safe Settings
-      // flow» ولم يكن لذلك المسار وجود — الزرّ يحوّل إلى الإعدادات وليس فيها حذف.
-      // صار الادّعاء صحيحًا: صفّ الحذف + نافذة التأكيد المكتوب في SettingsView.
-      deleteAccountAvailable: true, // routes to the delete-account row in SettingsView
-    },
-    settings: {
-      language: ar ? 'العربية' : 'English',
-      units: ar ? 'كجم · سم' : 'kg · cm',
-      numerals: ar ? '١٢٣٤' : '1234',
-      appearance: ar ? 'داكن' : 'Dark',
-      remindersAvailable: true,
+      // حذف الحساب يخصّ حسابًا مسجّلًا فقط. الضيف يملك حذف بيانات الجهاز من
+      // Settings، فلا نخلط القابليتين في حقيقة واحدة أو نعرض وعد حسابٍ غير موجود.
+      deleteAccountAvailable: auth.signedIn,
     },
     subscription: {
       showQuietLine: true,
