@@ -83,6 +83,7 @@ blocked-storage class fixed in PKG-9 (see BUG-024).
 - `NEXT_REQUIRED_ACTION`: review the staged PKG-8 diff against PKG-7, re-stage this recovery record, commit `[PKG-8][green]`, push only `codex/qimmah-web-sovereign-001`, verify the remote SHA, then continue Layer 3 Navigation/404/Quick Log.
 - Recovery precheck: cwd/repository root `/private/tmp/qimmah-web-sovereign-001`; Git metadata `/Users/ziyad/Documents/Qimmah 2/.git/worktrees/qimmah-web-sovereign-001`; branch/upstream `codex/qimmah-web-sovereign-001` / `origin/codex/qimmah-web-sovereign-001`; remote `origin`; no process was running from this worktree. Other Qimmah dev servers and worktrees were observed and left untouched.
 
+- **`PKG-9` at `9f88e43bf6c79c228337d83d30d58467db3a04d8`** — pushed to `codex/qimmah-web-sovereign-001` (fast-forward `e8f3bb6..9f88e43`) and to `claude/web-sovereign-final-recovery-o8alub`; both remote heads verified identical.
 - Packages completed and pushed: `PKG-0` at `f78676e`; `PKG-1` at `8b29ca3`; `PKG-2` at `28c725e4e4869d454d6b007cc11a92222a059ac1`; `PKG-3` at `678a38d01d2206ff02b245281d621fc37ed19658`; `PKG-4` at `df5e55bebc31149484c3d06a9f59348b1697f9e1`; `PKG-5` at `7478507b7c46ee9b6018b1ef67c31ca40fbed6d2`; `PKG-6` at `f49ae011450b9a0097e65b277d36bc7348ebd51f`; `PKG-7` at `1bcf7a99c657558f982154696b907efbd3d78ac5`.
 - Package verified for checkpoint: Layer 3 Profile (`PKG-8`).
 - Profile now routes both of its data entries through the canonical hardened `DataManagementPanel`; its second portability UI and duplicate Settings facts are removed.
@@ -91,6 +92,39 @@ blocked-storage class fixed in PKG-9 (see BUG-024).
 - Dynamic Profile values use the same `formatNumber` presentation boundary established in PKG-7. The browser proved account/guest, AR/EN, RTL/LTR, 320px, contextual Back, data ownership and zero console/page errors.
 - No dependency, backend, Supabase, QAE, canonical dataset, service-worker, deployment, or Salla authority file changed.
 - Next action: commit/push `[PKG-8][green]`, then continue Layer 3 with Navigation/404/Quick Log.
+
+### FINAL GATE — executed from the final HEAD `9f88e43`
+
+Run after the last implementation change, from a clean tree, beginning with a fresh `npm ci`.
+Every step's exit code was recorded; nothing was skipped.
+
+| Step | Exit | Result |
+| --- | --- | --- |
+| `npm ci` | 0 | deterministic install from lockfile |
+| `npm run typecheck` | 0 | — |
+| `npm run lint` | 0 | zero warnings (`--max-warnings 0`) |
+| `npm run build` | 0 | production build |
+| `npm run test:gate` | 0 | full repository gate, through final `test:workout-day-source` 19/19, including new `test:quick-log` 27/27 |
+| `npm run test:bundle-safety` | 0 | 9/9 on the built artifact |
+| `npm run test:e2e:onboarding` | 0 | 20/20 |
+| `npm run test:e2e:navigation` | 0 | 96/96 |
+| `npm run test:e2e:profile` | 0 | 27/27 |
+| `npm run test:e2e:settings` | 0 | 14/14 |
+| `npm run test:e2e:settings-security` | 0 | 34/34 |
+| `npm run test:e2e:nutrition` | 0 | 106/106 |
+| `npm run test:e2e:workout` | 0 | 31/31 |
+| `npm run test:e2e:progress` | 0 | 25/25 |
+| `npm run test:e2e:exercises` | 0 | 32/32 |
+| `npm run test:e2e:preview-gate` | 0 | 35/35 |
+| `npm run test:e2e:install-overlap` | 0 | 200/200 across 320/360/375/390/430 in ar/en |
+| `npm run test:e2e:plan-handoff` | 0 | 98/98 |
+| `npm run test:e2e:dirty-state` | 0 | 47/47 |
+| `npm run test:e2e:auth:preflight` | 0 | 19/19 offline checks |
+
+**765 real-browser assertions across 13 suites, all on Chromium 141.** Not run, and why:
+`test:e2e:auth` needs a Docker daemon (unavailable here) — its own preflight reports the blocker,
+and its README states the full run "cannot be run in this environment … the OWNER runs it locally".
+`test:e2e:journey`, `test:chaos` and the historical journey scripts were not part of this gate.
 
 ### PKG-9 Navigation / Quick Log / dirty-state / production-artifact evidence
 
@@ -395,6 +429,66 @@ Status here means evidence at this checkpoint, not remembered intent.
 | 28 | install overlap real hit test | PASS — 200/200 with named synthetic regression attacks |
 | 29 | old guest/draft preserved | PASS — `test:e2e:dirty-state` covers an existing completed guest, a v5 draft and a legacy guest with missing fields; each boots without crash and the genuine completed guest still enters the app |
 | 30 | no localhost/dev endpoint in production | PASS with one **declared, guarded** exemption — no Qimmah-owned dev endpoint and no Vite dev client in the artifact. `@supabase/auth-js` carries a dead default `http://localhost:9999`; the exemption is named, justified by proof that `createClient` always receives an explicit url, and guarded by three owned-endpoint injections that still fail |
+
+## Release judgments at `9f88e43`
+
+Four independent judgments. None rests on "the build is green" — a green build proves the code
+compiles and the written tests pass, not that the product works for a user.
+
+### A — FREE PREVIEW: **GO**
+
+- Browse-vs-mutate policy proven in a real browser: `test:e2e:preview-gate` 35/35 covers direct
+  navigation, Back/refresh, query tampering and dispatch; every paid mutation opens the Premium
+  surface and storage is verified unchanged afterwards.
+- Authority cannot be forged client-side: `test:bundle-safety` 9/9 proves the production artifact
+  contains no mock activation code and no mock entitlement key — and proves the scanner is sighted
+  by finding both in a mock build.
+- The product is usable and survives abuse: onboarding 20/20, plan handoff 98/98, navigation 96/96
+  (incl. deterministic 404), nutrition 106/106, workout 31/31, progress 25/25, exercises 32/32.
+- Reliability and layout floors: `dirty-state` 47/47 over eleven corrupt/legacy storage states plus
+  a blocked-write boot; `install-overlap` 200/200 across 320–430px in Arabic and English.
+
+### B — AUTHENTICATED FREE: **NO-GO**
+
+- Not for a known defect — for an unexecuted layer. Every client-side auth contract is green
+  (password policy, signup completion, account-required, delete-account binding, reset/recovery,
+  guest↔account isolation, `settings-security` 34/34, auth routes 96/96, preflight 19/19).
+- The server side was never run. `qa-reports/QA-SESSION-2-room-B.md:386` states that
+  `delete_own_account` was never proven deployed on the production Supabase project, and
+  `test:e2e:auth` cannot execute without a Docker daemon (EXTERNAL-003).
+- Account deletion is an App Store compliance obligation. Shipping accounts while the deletion path
+  is unverified means a real user can request deletion and receive a failure.
+- **This is one execution away, not one feature away.** See EXTERNAL-003 for the exact unblock.
+
+### C — PAID / PREMIUM: **NO-GO**
+
+- Doubly blocked, and C requires B.
+- EXTERNAL-001: no product-specific Salla URL exists in the contract — only the store root
+  `https://salla.sa/Qimmahsa`. No URL will be guessed.
+- EXTERNAL-002: production `redeemActivationCode` returns `offline`; there is no reviewed activation
+  backend on this baseline. The app therefore **cannot grant Premium to anyone** today — which is
+  the honest state, not a defect, but it is not a shippable paid funnel.
+
+### D — RELEASE CANDIDATE: **NO-GO**
+
+Not because the code is failing — it is not — but because two of the three surfaces cannot be
+honestly declared, and one platform was never tested.
+
+Exact actions required before production:
+
+1. **Run the live auth harness.** `npm run test:e2e:auth` on a machine with Docker, and confirm
+   `delete_own_account` is deployed on the production Supabase project. Clears EXTERNAL-003 → B.
+2. **Verify on Safari/WebKit.** No WebKit exists in this container, so *every* browser result here
+   is Chromium-only. This is not a formality for Qimmah: the audience is Saudi/Gulf mobile, where
+   iOS Safari dominates, and PKG-9 fixed a **Safari-shaped** defect (blocked storage, BUG-024) whose
+   fix could only be proven at unit level. Re-run the critical journeys on real iOS Safari.
+3. **Supply a product-specific Salla URL** and a reviewed activation/entitlement backend. Clears
+   EXTERNAL-001/002 → C.
+4. **Decide BUG-003** (three high transitive advisories in the build/dev chain) in an authorized
+   dependency wave. No runtime importer was found; it does not block A.
+
+If the founder chooses to ship **Preview only**, A stands on its own evidence and items 1 and 3 do
+not apply to it — but item 2 does.
 
 ## Current severity counts
 

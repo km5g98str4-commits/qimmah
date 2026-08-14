@@ -373,6 +373,31 @@ Updated: 2026-08-14 (Layer 3 Profile / PKG-8 recovery-reviewed and verified)
   is now returned to setup, while the genuine completed guest still enters the app (the positive
   control that keeps this from degrading into “reject everything”).
 
+## EXTERNAL-003 — The live account lifecycle has never been proven against a real server
+
+- Severity: P1 blocker for **authenticated free** (does not block Preview).
+- Surface: signup, email verification, password reset, duplicate email, and account deletion.
+- Evidence: the repository's own QA record already says it plainly —
+  `qa-reports/QA-SESSION-2-room-B.md:386`: the delete-account UI, flow and both result branches were
+  proven with a mocked session and local interception, but **it was never proven that
+  `delete_own_account` is deployed on the production Supabase project**, "so it remains possible
+  that a real user lands on the failure path rather than the success path". `CTO-65-CONTINUATION.md`
+  records the same contract as blocked by Docker and deliberately outside `test:gate`.
+- This run: `test:e2e:auth:preflight` PASS 19/19, and it reports the blocker itself — `docker
+  daemon: متوقّف/غير متاح`. The harness README states the full run "cannot be run in this
+  environment … the OWNER runs it locally". So the gap is confirmed, not merely inherited.
+- What *is* proven client-side: password policy, signup completion, account-required gating,
+  delete-account UI binding, reset/recovery routing, guest↔account isolation and ownership sealing
+  (all inside `test:gate`), auth routes and refresh (`navigation` 96/96), account-vs-guest truth
+  (`profile` 27/27) and import/export security (`settings-security` 34/34).
+- Why it still blocks: account deletion is an App Store compliance obligation, not a nicety. Every
+  layer above the server is green, which is exactly why the remaining risk is concentrated in the
+  one layer that was never executed.
+- Status: EXTERNALLY_BLOCKED
+- Unblock: one run of `npm run test:e2e:auth` on a machine with a Docker daemon, plus confirmation
+  that `delete_own_account` is deployed on the production project. This is an execution step, not
+  development work.
+
 ## EXTERNAL-001 — Paid Salla product binding cannot be proven
 
 - Severity: P1 commercial blocker (does not block Preview).
