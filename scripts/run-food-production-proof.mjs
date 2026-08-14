@@ -15,7 +15,7 @@ import { loadShared, loadTsModule, ROOT } from './food-production/lib/loadTs.mjs
 import * as N from './food-production/lib/normalize.mjs'
 import { checkNutrition, BLOCKING_FLAGS, scoreConfidence } from './food-production/lib/sanity.mjs'
 import { dedupe } from './food-production/lib/dedupe.mjs'
-import { fnv1a, assignShard, stableStringify, buildSearchIndex, writeShards, writeHotSet } from './food-production/lib/shard.mjs'
+import { fnv1a, mix32, assignShard, stableStringify, buildSearchIndex, writeShards, writeHotSet } from './food-production/lib/shard.mjs'
 
 const checks = []
 const ok = (label, pass, detail = '') => checks.push({ label, pass: !!pass, detail: String(detail) })
@@ -173,6 +173,37 @@ ok('التوجيه: FNV-1a ثابت عبر الاستدعاءات', fnv1a('06281
 ok('التوجيه: الشريحة تُحسب من الـGTIN بلا جدول توجيه', typeof assignShard('06281007034043', 64) === 'number' && assignShard('06281007034043', 64) < 64)
 ok('التوجيه: نفس الـGTIN ⇒ نفس الشريحة دائمًا', assignShard('06281007034043', 64) === assignShard('06281007034043', 64))
 ok('الحتمية: stableStringify يرتّب المفاتيح', stableStringify({ b: 1, a: 2 }) === '{"a":2,"b":1}')
+
+// ── انحياز التجزئة: عطب مقيس لا احتمال نظري ──
+// خانة تحقّق GTIN تفرض أن يكون مجموع الخانات زوجيًا، فتخرج كل بصمات FNV-1a **فردية**،
+// و`% N` لأي N زوجي يترك نصف الشرائح فارغًا أبدًا. التأكيدات التالية تحرس الإصلاح.
+const sampleGtins = []
+for (let i = 0; i < 4000; i++) {
+  // جسم EAN-13 من 12 خانة، وأوزان خانة التحقّق 1/3 من اليسار.
+  const body = String(628000000000 + i * 7).slice(0, 12)
+  let sum = 0
+  for (let d = 0; d < 12; d++) sum += Number(body[d]) * (d % 2 === 0 ? 1 : 3)
+  sampleGtins.push(body + String((10 - (sum % 10)) % 10))
+}
+const validSample = sampleGtins.filter((g) => G.classifyGtin(g).ok)
+ok('التجزئة: العيّنة الاصطناعية GTINات صالحة فعلًا (وإلا فالقياس على أكواد وهمية)', validSample.length === sampleGtins.length, `${validSample.length}/${sampleGtins.length}`)
+const rawOdd = sampleGtins.filter((g) => fnv1a(G.classifyGtin(g).gtin14) % 2 === 1).length
+counter('العطب حقيقي: FNV-1a الخام يعطي بصمات فردية كلّها على GTINات صالحة', rawOdd === sampleGtins.length, `${rawOdd}/${sampleGtins.length}`)
+const mixedOdd = sampleGtins.filter((g) => mix32(fnv1a(G.classifyGtin(g).gtin14)) % 2 === 1).length
+ok('التجزئة: الخلط النهائي يوازن البتّة الدنيا (لا انحياز زوجي/فردي)', mixedOdd > sampleGtins.length * 0.4 && mixedOdd < sampleGtins.length * 0.6, `${mixedOdd}/${sampleGtins.length}`)
+for (const N of [30, 32, 64]) {
+  const buckets = new Array(N).fill(0)
+  for (const g of sampleGtins) buckets[assignShard(G.classifyGtin(g).gtin14, N)]++
+  const empty = buckets.filter((x) => x === 0).length
+  const spread = Math.max(...buckets) / Math.max(1, Math.min(...buckets))
+  ok(`التجزئة: لا شريحة فارغة عند N=${N}`, empty === 0, `فارغة=${empty}`)
+  ok(`التجزئة: التوزيع متّزن عند N=${N} (أقصى/أدنى < 2)`, spread < 2, `${spread.toFixed(2)}×`)
+}
+counter('لو عاد التوجيه إلى fnv1a الخام لبقي نصف الشرائح فارغًا', (() => {
+  const N = 32; const b = new Array(N).fill(0)
+  for (const g of sampleGtins) b[fnv1a(G.classifyGtin(g).gtin14) % N]++
+  return b.filter((x) => x === 0).length >= N / 2 // العطب قائم بلا الخلط — والإصلاح هو ما يزيله
+})())
 
 const tmp = mkdtempSync(join(tmpdir(), 'qimmah-proof-'))
 try {

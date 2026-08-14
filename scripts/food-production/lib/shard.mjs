@@ -32,9 +32,35 @@ export function fnv1a(str) {
   return h >>> 0
 }
 
+/**
+ * خلط نهائي (MurmurHash3 finalizer) — **ليس تجميلًا، بل إصلاح عطب مقيس**.
+ *
+ * ═══ العطب ═══
+ * خانة تحقّق GTIN تجعل المجموع الموزون ≡ 0 (مod 10)، وبما أن 3 ≡ 1 (مod 2) فإن
+ * **مجموع خانات أي GTIN صالح زوجي دائمًا** — أي أن عدد خاناته الفردية زوجي دائمًا.
+ * وفي FNV-1a تكون البتّة الدنيا للناتج = 1 ^ (زوجية عدد المحارف الفردية)، فتخرج
+ * **كل** بصمات الـGTIN فردية بلا استثناء. ومع `% N` لأي N زوجي، تُصيب الأرقام
+ * الفردية نصف الجيوب فقط ⇒ **نصف الشرائح تبقى فارغة أبدًا**، والنصف الآخر بضعف حجمه.
+ *
+ * ═══ القياس ═══
+ * على 40,000 سجلًا حقيقيًا: `N=30 ⇒ 15/30` شريحة مأهولة · `N=64 ⇒ 32/64`.
+ * وبعد الخلط: كل الشرائح مأهولة وفروقها ضمن المعقول.
+ *
+ * الخلط ينثر البتّات العليا على الدنيا فيكسر هذا الارتباط. ويحرسه تأكيد توزيع
+ * في `run-food-production-proof.mjs` يسقط باسمه إن عاد الانحياز.
+ */
+export function mix32(h) {
+  h ^= h >>> 16
+  h = Math.imul(h, 0x85ebca6b) >>> 0
+  h ^= h >>> 13
+  h = Math.imul(h, 0xc2b2ae35) >>> 0
+  h ^= h >>> 16
+  return h >>> 0
+}
+
 /** الشريحة المسؤولة عن GTIN معيّن. الدالة نفسها تُنفَّذ وقت التشغيل. */
 export function assignShard(gtin14, shardCount) {
-  return fnv1a(gtin14) % shardCount
+  return mix32(fnv1a(gtin14)) % shardCount
 }
 
 export const shardName = (i, shardCount) =>
@@ -74,7 +100,7 @@ export function buildSearchIndex(records, tokenize) {
 }
 
 /** يختار عدد الشرائح بحيث يقارب الحجم المضغوط منتصف الميزانية. */
-export function chooseShardCount(records, bytesPerRecordGzipEstimate = 190) {
+export function chooseShardCount(records, bytesPerRecordGzipEstimate = 245) {
   const target = (SHARD_TARGET_GZIP_BYTES.min + SHARD_TARGET_GZIP_BYTES.max) / 2
   const perShard = Math.max(1, Math.floor(target / bytesPerRecordGzipEstimate))
   return Math.max(1, Math.ceil(records.length / perShard))

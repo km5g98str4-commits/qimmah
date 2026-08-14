@@ -19,6 +19,7 @@
     "sugar_exceeds_carbs": 1,
     "macro_energy_mismatch": 1
   },
+  "truncated_input": false,
   "elapsed_s": 0,
   "written": 8,
   "global_shipped": 4

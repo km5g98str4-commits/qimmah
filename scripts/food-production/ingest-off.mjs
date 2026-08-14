@@ -128,7 +128,13 @@ const rl = createInterface({
   crlfDelay: Infinity,
 })
 
+// تحمّل ملفّ ناقص: نسخة التصدير قد تكون قيد التنزيل. الانقطاع يُسجَّل بصدق
+// (`truncated_input`) ويُستكمل ما قُرئ — لا انهيار، ولا ادّعاء أن الملفّ كامل.
+// ملاحظة تنفيذية: مستمع `error` على المجرى **لا يكفي** — مُكرِّر `for await` يرفض
+// الوعد بنفسه، فاللقط يجب أن يكون حول الحلقة لا على المجرى.
+let truncated = false
 let header = null
+try {
 for await (const line of rl) {
   if (header === null) { header = line.split('\t'); continue }
   stats.rows_read++
@@ -148,6 +154,11 @@ for await (const line of rl) {
   else if (rec.market === 'GCC') { stats.accepted_gcc++; gulfRecords.push(rec) }
   else { stats.accepted_global_considered++; globalPool.push(rec); prunePool() }
 }
+} catch (err) {
+  if (/unexpected end of file|premature|Z_BUF_ERROR|Z_DATA_ERROR/i.test(String(err?.message ?? err))) {
+    truncated = true
+  } else throw err
+}
 
 globalPool.sort(rank)
 globalPool = globalPool.slice(0, GLOBAL_LIMIT)
@@ -158,6 +169,7 @@ const out = createWriteStream(OUT)
 for (const rec of all) out.write(JSON.stringify(rec) + '\n')
 await new Promise((res) => out.end(res))
 
+stats.truncated_input = truncated
 stats.elapsed_s = Math.round((Date.now() - started) / 1000)
 stats.written = all.length
 stats.global_shipped = globalPool.length
@@ -170,3 +182,4 @@ console.log(`✓ Gulf  (GCC)    : ${stats.accepted_gcc.toLocaleString()}`)
 console.log(`✓ global passed  : ${stats.accepted_global_considered.toLocaleString()} → shipped ${stats.global_shipped.toLocaleString()}`)
 console.log(`✓ written        : ${all.length.toLocaleString()} → ${OUT}`)
 console.log(`  elapsed ${stats.elapsed_s}s`)
+if (truncated) console.log('⚠️  المدخل ناقص (التنزيل لم يكتمل) — الأرقام أعلاه تخصّ ما قُرئ فعلًا لا الملفّ كاملًا.')
