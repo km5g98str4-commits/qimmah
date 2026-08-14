@@ -15,7 +15,7 @@ import { loadShared, loadTsModule, ROOT } from './food-production/lib/loadTs.mjs
 import * as N from './food-production/lib/normalize.mjs'
 import { checkNutrition, BLOCKING_FLAGS, scoreConfidence } from './food-production/lib/sanity.mjs'
 import { dedupe } from './food-production/lib/dedupe.mjs'
-import { fnv1a, mix32, assignShard, stableStringify, buildSearchIndex, writeShards, writeHotSet, fitHotSetToBudget } from './food-production/lib/shard.mjs'
+import { fnv1a, mix32, assignShard, stableStringify, buildSearchIndex, writeShards, writeHotSet, fitHotSetToBudget, ROUTING_METHOD_DESCRIPTION } from './food-production/lib/shard.mjs'
 
 const checks = []
 const ok = (label, pass, detail = '') => checks.push({ label, pass: !!pass, detail: String(detail) })
@@ -211,6 +211,11 @@ counter('الدمج الضبابي لا يقع تلقائيًا — يذهب ل�
 
 // ═══════════ ٧) الشرائح والفهرسة والبحث بالباركود ═══════════
 ok('التوجيه: FNV-1a ثابت عبر الاستدعاءات', fnv1a('06281007034043') === fnv1a('06281007034043'))
+// وصف التوجيه **عقد لوقت التشغيل**: عليه يُعاد تنفيذ الدالة في المتصفح. وصفٌ يغفل
+// الخلط النهائي يعني بحثًا يقصد شريحةً غير التي كُتب فيها السجل. يُفحص من **المصدر**
+// لا من بيانٍ مُولَّد — كي لا تسقط البوابة على أرتيفكت بائت بدل انحدار حقيقي.
+ok('العقد: وصف التوجيه يذكر الخلط النهائي صراحةً', /mix32/.test(ROUTING_METHOD_DESCRIPTION) && /finalizer/i.test(ROUTING_METHOD_DESCRIPTION))
+counter('الوصف يشرح **لماذا** الخلط إلزامي لا أنه تجميل', /check digit|even digit sum/i.test(ROUTING_METHOD_DESCRIPTION))
 ok('التوجيه: الشريحة تُحسب من الـGTIN بلا جدول توجيه', typeof assignShard('06281007034043', 64) === 'number' && assignShard('06281007034043', 64) < 64)
 ok('التوجيه: نفس الـGTIN ⇒ نفس الشريحة دائمًا', assignShard('06281007034043', 64) === assignShard('06281007034043', 64))
 ok('الحتمية: stableStringify يرتّب المفاتيح', stableStringify({ b: 1, a: 2 }) === '{"a":2,"b":1}')

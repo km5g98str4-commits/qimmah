@@ -15,6 +15,17 @@ import { writeFileSync, mkdirSync } from 'node:fs'
 import { resolve, join } from 'node:path'
 
 /** ميزانية الشريحة المضغوطة — هدف المنسّق: 200–500 كيلوبايت. */
+/**
+ * وصف التوجيه — **عقد لوقت التشغيل** يُعاد تنفيذه في المتصفح حرفيًا.
+ * مصدره هنا لا في سكربت البناء، كي يفحصه الإثبات بلا اعتماد على أرتيفكت مُولَّد
+ * (اعتمادٌ كهذا يجعل البوابة تسقط على بيانٍ بائت لا على انحدار حقيقي).
+ */
+export const ROUTING_METHOD_DESCRIPTION =
+  'shard = (mix32(fnv1a(gtin14)) mod shard_count), where mix32 is the MurmurHash3 32-bit finalizer. ' +
+  'The finalizer is REQUIRED, not cosmetic: every valid GTIN has an even digit sum (a consequence of the ' +
+  'mod-10 check digit), which makes every raw FNV-1a hash odd and leaves half the shards permanently empty. ' +
+  'Runtime must reimplement this exactly — see scripts/food-production/lib/shard.mjs.'
+
 export const SHARD_TARGET_GZIP_BYTES = { min: 200 * 1024, max: 500 * 1024 }
 /** ميزانية الطقم الساخن المجمَّع في الحزمة — مذكورة صراحةً لتُقاس لا لتُفترض. */
 export const HOT_SET_BUDGET_GZIP_BYTES = 120 * 1024

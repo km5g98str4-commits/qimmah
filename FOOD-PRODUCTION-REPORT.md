@@ -3,7 +3,7 @@
 > **يُولَّد آليًا** بـ`node scripts/food-production/write-report.mjs` من البيان والتقارير
 > الفعلية. **لا رقم فيه مكتوب بيد** — فلا ينحرف عن الواقع ولا يتقادم بصمت.
 >
-> تاريخ البناء: `2026-08-14T13:24:43.230Z` · نسخة التطبيع: `1.1.0` · نسخة المخطّط: `1.0.0`
+> تاريخ البناء: `2026-08-14T13:29:18.030Z` · نسخة التطبيع: `1.1.0` · نسخة المخطّط: `1.0.0`
 
 ---
 
@@ -193,7 +193,7 @@ timeout) قبل أي استجابة HTTP، فلا يمكن حتى قراءة `ro
 
 ### لماذا هذا الشكل
 
-- **البحث بالباركود مفتاح مباشر:** `FNV-1a 32-bit over the canonical GTIN-14, modulo shard_count` ⇒ شريحة واحدة ⇒ مفتاح O(1).
+- **البحث بالباركود مفتاح مباشر:** `shard = (mix32(fnv1a(gtin14)) mod shard_count), where mix32 is the MurmurHash3 32-bit finalizer. The finalizer is REQUIRED, not cosmetic: every valid GTIN has an even digit sum (a consequence of the mod-10 check digit), which makes every raw FNV-1a hash odd and leaves half the shards permanently empty. Runtime must reimplement this exactly — see scripts/food-production/lib/shard.mjs.` ⇒ شريحة واحدة ⇒ مفتاح O(1).
   لا مسح، ولا جدول توجيه يُقرأ أولًا.
 - **فهرس رمز←مواضع لكل شريحة** يُحمَّل عند الحاجة — الواجهة لا تمسح صفوفًا أبدًا.
 - **الطقم الساخن** ملف واحد صغير يعمل بلا شبكة، منفصل عن الذيل الطويل.

@@ -10,7 +10,7 @@ import { loadShared, ROOT } from './lib/loadTs.mjs'
 import { dedupe } from './lib/dedupe.mjs'
 import {
   writeShards, writeHotSet, chooseShardCount, stableStringify, sha256, fitHotSetToBudget,
-  SHARD_TARGET_GZIP_BYTES, HOT_SET_BUDGET_GZIP_BYTES,
+  SHARD_TARGET_GZIP_BYTES, HOT_SET_BUDGET_GZIP_BYTES, ROUTING_METHOD_DESCRIPTION,
 } from './lib/shard.mjs'
 
 const args = process.argv.slice(2)
@@ -116,7 +116,7 @@ const manifest = {
     obligations: ['attribution', 'share-alike on public distribution of derived database', 'keep-open'],
   },
   routing: {
-    method: 'FNV-1a 32-bit over the canonical GTIN-14, modulo shard_count',
+    method: ROUTING_METHOD_DESCRIPTION,
     barcode_lookup: 'O(1): compute shard from GTIN-14, fetch that shard only, index the records object by GTIN-14. No scan, no routing table.',
     shard_count: shardCount,
   },

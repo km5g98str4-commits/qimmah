@@ -1,6 +1,6 @@
 {
   "manifest_version": "1.0.0",
-  "built_at": "2026-08-14T13:24:43.230Z",
+  "built_at": "2026-08-14T13:29:18.030Z",
   "normalization_version": "1.1.0",
   "schema_version": "1.0.0",
   "licence": {
@@ -12,7 +12,7 @@
     ]
   },
   "routing": {
-    "method": "FNV-1a 32-bit over the canonical GTIN-14, modulo shard_count",
+    "method": "shard = (mix32(fnv1a(gtin14)) mod shard_count), where mix32 is the MurmurHash3 32-bit finalizer. The finalizer is REQUIRED, not cosmetic: every valid GTIN has an even digit sum (a consequence of the mod-10 check digit), which makes every raw FNV-1a hash odd and leaves half the shards permanently empty. Runtime must reimplement this exactly — see scripts/food-production/lib/shard.mjs.",
     "barcode_lookup": "O(1): compute shard from GTIN-14, fetch that shard only, index the records object by GTIN-14. No scan, no routing table.",
     "shard_count": 41
   },
