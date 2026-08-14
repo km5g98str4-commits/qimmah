@@ -107,6 +107,28 @@ async function onboardToPreview(page) {
   await settle(page, 2600)
 }
 
+async function activateFromOpenGate(page) {
+  const gate = page.locator('[data-testid="premium-gate"]')
+  await gate.locator('[data-testid="premium-gate-have-code"]').click({ timeout: 10000 })
+  await gate.locator('[data-testid="activation-code-input"]').fill('QIMMAH-TEST-OK')
+  await gate.locator('[data-testid="activation-code-submit"]').click({ force: true })
+  await gate.locator('[data-testid="activation-code-message"]').filter({ hasText: /تمّ التفعيل|activated/i }).waitFor({ timeout: 10000 })
+  await gate.locator('[data-testid="premium-gate-dismiss"]').click({ timeout: 10000 })
+  await gate.waitFor({ state: 'hidden', timeout: 10000 })
+}
+
+const nutritionFoods = (page) => page.evaluate(() => {
+  try {
+    const day = JSON.parse(localStorage.getItem('qimmah:nutrition:v2') || '{}')
+    return Array.isArray(day.foods) ? day.foods : []
+  } catch {
+    return []
+  }
+})
+
+const mealCard = (page, name) => page.getByText(name, { exact: true })
+  .locator('xpath=ancestor::div[contains(concat(" ", normalize-space(@class), " "), " card ")][1]')
+
 const preview = startPreview()
 try {
   await waitForServer()
@@ -194,7 +216,7 @@ try {
       }
       return out
     })
-    check(`@${w}: أزرار «أضف» موجودة`, hits.length > 0, String(hits.length))
+    check(`@${w}: أزرار «أضف» موجودة`, hits.length >= 4, String(hits.length))
     const blocked = hits.filter((x) => !x.reachable)
     check(`@${w}: كل أزرار «أضف» تستقبل النقر الحقيقي`, blocked.length === 0, blocked.map((b) => b.hit).join(' | '))
     check(`@${w}: هدف لمس «أضف» ≥44بكسل`, hits.every((x) => x.h >= 44), hits.map((x) => x.h).join(','))
@@ -207,7 +229,97 @@ try {
     await page.ctx.close()
   }
 
-  // ═══ ٤) وسوم الماكروز — بلا قصّ عند أي عرض، بالعربية والإنجليزية ═══
+  // ═══ ٤) المسار المدفوع الحيّ — بحث/كمية/إضافة/تعديل/فشل/حذف/إعادة تحميل ═══
+  console.log('\n=== التغذية المدفوعة — دورة حياة القيد ===')
+  {
+    const page = await fresh(390)
+    await onboardToPreview(page)
+    await page.evaluate(() => { location.hash = '/nutrition' })
+    await settle(page, 2200)
+
+    for (const name of ['الفطور', 'الغداء', 'العشاء', 'سناك']) {
+      const card = mealCard(page, name)
+      check(`صف الوجبة «${name}» ظاهر وله زر أضف حيّ`, await card.getByRole('button', { name: 'أضف', exact: true }).isVisible().catch(() => false))
+    }
+
+    const breakfast = mealCard(page, 'الفطور')
+    await breakfast.getByRole('button', { name: 'أضف', exact: true }).click()
+    await activateFromOpenGate(page)
+
+    // الفعل المحجوب لا يُعاد سرًا بعد التفعيل؛ المستخدم يختاره ثانيةً بوضوح.
+    await breakfast.getByRole('button', { name: 'أضف', exact: true }).click()
+    const search = breakfast.getByPlaceholder('ابحث عن أكل…')
+    await search.fill('صدر دجاج')
+    await breakfast.locator('button:not([aria-label])').filter({ hasText: /صدر دجاج مشوي/ }).first().click()
+    check('نتيجة البحث العربية تفتح تفاصيل العنصر والكمية', await breakfast.locator('#qml-amount').isVisible().catch(() => false))
+    await breakfast.locator('#qml-amount').fill('180')
+    await breakfast.getByRole('button', { name: 'أضف للسجل', exact: true }).click()
+    await settle(page, 900)
+
+    let foods = await nutritionFoods(page)
+    const gramsEntry = foods[0]
+    check('إضافة 180غ تحفظ الوجبة والمصدر والكمية والوحدة في المتجر القانوني', foods.length === 1 && gramsEntry.meal === 'breakfast' && gramsEntry.foodId === 'chicken-breast-grilled' && gramsEntry.grams === 180 && gramsEntry.servings === 1.2 && gramsEntry.unit === 'g', JSON.stringify(gramsEntry))
+
+    await page.reload({ waitUntil: 'networkidle' })
+    await settle(page, 1800)
+    check('إعادة تحميل التغذية تبقي القيد والكمية ظاهرين', await page.getByText(/180غ · 1.2 حصة/).isVisible().catch(() => false))
+
+    const breakfastReloaded = mealCard(page, 'الفطور')
+    await breakfastReloaded.getByRole('button', { name: 'أضف', exact: true }).click()
+    await breakfastReloaded.getByPlaceholder('ابحث عن أكل…').fill('صدر دجاج')
+    await breakfastReloaded.locator('button:not([aria-label])').filter({ hasText: /صدر دجاج مشوي/ }).first().click()
+    await breakfastReloaded.getByRole('button', { name: 'حصة', exact: true }).click()
+    await breakfastReloaded.locator('#qml-amount').fill('1.5')
+    await breakfastReloaded.getByRole('button', { name: 'أضف للسجل', exact: true }).click()
+    await settle(page, 900)
+
+    foods = await nutritionFoods(page)
+    const servingEntry = foods[1]
+    check('إضافة 1.5 حصة تحفظ الحصص و225غ ووحدة الإدخال معًا', foods.length === 2 && servingEntry.servings === 1.5 && servingEntry.grams === 225 && servingEntry.unit === 'serving' && servingEntry.calories === 372, JSON.stringify(servingEntry))
+
+    await page.locator('button[aria-label^="عدّل الكمية"]').last().click()
+    const editInput = page.locator('input[type="number"][max="20"]')
+    await editInput.fill('2')
+    await page.getByRole('button', { name: 'احفظ التعديل', exact: true }).click()
+    await settle(page, 700)
+    foods = await nutritionFoods(page)
+    check('تعديل الحصة يعيد حساب الجرامات والماكروز نسبةً إلى أساس معروف', foods[1].servings === 2 && foods[1].grams === 300 && foods[1].calories === 496 && foods[1].protein === 92, JSON.stringify(foods[1]))
+
+    await page.locator('button[aria-label^="عدّل الكمية"]').last().click()
+    await page.locator('input[type="number"][max="20"]').fill('3')
+    const beforeFailedEdit = JSON.stringify(await nutritionFoods(page))
+    await page.evaluate(() => {
+      window.__qimmahOriginalStorageSetItem = Storage.prototype.setItem
+      Storage.prototype.setItem = function (key, value) {
+        if (key === 'qimmah:nutrition:v2') throw new DOMException('quota', 'QuotaExceededError')
+        return window.__qimmahOriginalStorageSetItem.call(this, key, value)
+      }
+    })
+    await page.getByRole('button', { name: 'احفظ التعديل', exact: true }).click()
+    await settle(page, 700)
+    const afterFailedEdit = JSON.stringify(await nutritionFoods(page))
+    check('فشل التخزين يعرض رسالة صادقة ويبقي مدخل 3 حصص', await page.getByRole('alert').filter({ hasText: /ما قدرنا نحفظ التغيير/ }).isVisible().catch(() => false) && await page.locator('input[type="number"][max="20"]').inputValue() === '3')
+    check('فشل التخزين لا يغيّر القيد المحفوظ', afterFailedEdit === beforeFailedEdit, `${beforeFailedEdit} → ${afterFailedEdit}`)
+    await page.evaluate(() => {
+      Storage.prototype.setItem = window.__qimmahOriginalStorageSetItem
+      delete window.__qimmahOriginalStorageSetItem
+    })
+    await page.getByRole('button', { name: 'إلغاء', exact: true }).click()
+
+    const removeButtons = page.locator('button[aria-label^="حذف:"]')
+    await removeButtons.first().click()
+    await settle(page, 500)
+    check('حذف قيد واحد ينقص المتجر ولا يزيل القيد الآخر', (await nutritionFoods(page)).length === 1)
+    await page.locator('button[aria-label^="حذف:"]').first().click()
+    await settle(page, 500)
+    check('حذف آخر قيد يعيد الحالة الفارغة بصدق', (await nutritionFoods(page)).length === 0 && await page.getByText('ابدأ — سجّل أول وجبة', { exact: true }).isVisible().catch(() => false))
+
+    const e = await errorState(page)
+    check('الدورة المدفوعة كاملة بلا ErrorBoundary أو rejection', !e.routeCard && !e.copy && e.rejections === 0 && page.diag.pageerror.length === 0, JSON.stringify(e))
+    await page.ctx.close()
+  }
+
+  // ═══ ٥) وسوم الماكروز — بلا قصّ عند أي عرض، بالعربية والإنجليزية ═══
   console.log('\n=== وسوم الماكروز ===')
   for (const w of [320, 390, 640, 768, 894, 1280]) {
     for (const lang of ['ar', 'en']) {
@@ -259,6 +371,19 @@ try {
       const expected = lang === 'ar' ? ['بروتين', 'كارب', 'دهون', 'ماء'] : ['Protein', 'Carbs', 'Fat', 'Water']
       check(`@${w}/${lang}: الكلمات كاملة لا مبتورة`, expected.every((e) => res.labels.some((l) => l.t === e)), res.labels.map((l) => l.t).join(','))
       check(`@${w}/${lang}: بلا فيض أفقي`, !res.overflow)
+
+      // وصول البحث/تفاصيل العنصر بالإنجليزية داخل شخصية مفعّلة. نعيد استخدام
+      // سياق 390 بدل Onboarding إضافي كامل، ثم نغلقه بلا طفرة.
+      if (w === 390 && lang === 'en') {
+        await page.evaluate(() => { sessionStorage.setItem('qimmah:entitlement-mock:v1', 'active') })
+        await page.reload({ waitUntil: 'networkidle' })
+        await settle(page, 1400)
+        const breakfast = mealCard(page, 'Breakfast')
+        await breakfast.getByRole('button', { name: 'Add', exact: true }).click()
+        await breakfast.getByPlaceholder('Search food…').fill('grilled')
+        await breakfast.getByText('Grilled chicken breast', { exact: true }).click()
+        check('@390/en: search opens the English item and quantity controls', await breakfast.getByText('Grilled chicken breast', { exact: true }).isVisible().catch(() => false) && await breakfast.locator('#qml-amount').isVisible().catch(() => false))
+      }
       await ctx.close()
     }
   }

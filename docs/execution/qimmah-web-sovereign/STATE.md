@@ -1,6 +1,6 @@
 # Qimmah Web Sovereign — execution state
 
-Updated: 2026-08-13 (Layer 2 / PKG-2 verified)
+Updated: 2026-08-13 (Layer 3 Nutrition / PKG-3 verified)
 
 ## Provenance
 
@@ -28,13 +28,26 @@ git status --short --branch (before PKG-0 edits)    → clean
 
 ## Current package
 
-- Packages completed and pushed: `PKG-0` at `f78676e`; `PKG-1` at `8b29ca3`. `PKG-2` is fully verified and awaiting its checkpoint commit.
-- Package verified for checkpoint: Layer 2 meaningful first-user funnel.
-- The live funnel now has exactly 18 stable question ids over seven input screens, with no filler and one proved consumer per answer. Training history is stored raw and classified through the existing canonical classifiers; QAE remains untouched.
-- Draft schema advanced additively from v5 to v6. v5 drafts resume deterministically with original answers preserved and new facts unset; malformed/unknown drafts remain rejected.
-- Adversarial correction: changing a previously adult profile to a minor immediately clears a stale `cut`/`bulk` goal, including its visual pressed state. The browser journey and unit counter-proof both cover it.
+- Packages completed and pushed: `PKG-0` at `f78676e`; `PKG-1` at `8b29ca3`; `PKG-2` at `28c725e4e4869d454d6b007cc11a92222a059ac1`.
+- Package verified for checkpoint: Layer 3 live Nutrition (`PKG-3`).
+- The live writer now preserves `foodId`, grams, servings and original unit end-to-end. Known quantities can be edited proportionally; legacy entries with no quantity remain explicitly unknown and are not given an invented serving.
+- The primary `qimmah:nutrition:v2` write must succeed before cache, mirrors, listeners or first-win state advance. Quota/blocked storage leaves the stored record and user input unchanged and displays bilingual recovery copy.
+- All four meal rows were exercised through Arabic search, grams, fractional servings, reload, edit and delete. English search/item opening and Preview browse-without-mutation were exercised in the same current build.
 - No dependency, backend, Supabase, QAE, canonical dataset, service-worker, deployment, or Salla authority file changed.
-- Next action: commit and push `[PKG-2][green]`, then begin Layer 3 from that remote checkpoint.
+- Next action: commit/push `[PKG-3][green]`, then continue Layer 3 with Today/Workout from that remote checkpoint.
+
+### PKG-3 Nutrition evidence
+
+| Evidence | Result |
+| --- | --- |
+| `npm run test:nutrition-live` | PASS — 13/13: quantity/source round-trip, fractional inputs, quota/security failures, stable cache/listeners, no invented legacy quantity |
+| `npm run test:nutrition-history` | PASS — 61/61 |
+| `npm run test:access-gate` | PASS — 77/77, including live MealCard/QuickMealLogger add/remove guards, visible save-failure feedback, and bypass attacks |
+| `npm run typecheck` | PASS |
+| `npm run lint` | PASS |
+| `npm run test:e2e:preview-gate` | PASS — build 2,556 modules; Preview/activated matrix 34/34 |
+| `npm run test:e2e:nutrition` | PASS — 106/106 on its required mock-entitlement build: 18 crash scenarios, quick intent, real pointer, four meal rows, paid lifecycle, hostile storage, ar/en and 320–1280px |
+| Fresh `npm ci` + typecheck + lint + production build + full `npm run test:gate` | PASS — first sandbox attempt named `listen EPERM` at `test:media-rights`; authorized complete rerun passed through final `test:workout-day-source` 19/19 |
 
 ### PKG-2 evidence
 
@@ -184,7 +197,7 @@ Status here means evidence at this checkpoint, not remembered intent.
 
 | # | Target | Layer-0 evidence status |
 | ---: | --- | --- |
-| 1 | Nutrition mobile crash/ejection | PASS — `test:e2e:nutrition` 91/91 |
+| 1 | Nutrition mobile crash/ejection | PASS — current `test:e2e:nutrition` contract 106/106 |
 | 2 | Preview could log food | PASS — browser attack opens Premium and storage remains unchanged |
 | 3 | Preview could start/log/finish workout | PASS — browser attack rejects planted session and writes none |
 | 4 | install banner covered handoff CTA | `test:bottom-overlay` green; real hit-test pending |
@@ -204,7 +217,7 @@ Status here means evidence at this checkpoint, not remembered intent.
 | 18 | deterministic 404 | PASS — `test:e2e:navigation` 95/95 |
 | 19 | whitespace-only signup name | PASS — `test:e2e:navigation` 95/95 |
 | 20 | sub-44px touch targets | PARTIAL PASS — bottom/nav 200/200 and Premium close/input corrected; full-site audit remains Layer 4 |
-| 21 | silent persistence failure | `test:storage-honesty` green for covered writers; broader UI proof pending |
+| 21 | silent persistence failure | PASS for live Nutrition — quota/security unit proof plus browser input/store preservation; other surfaces remain governed by their named proofs |
 | 22 | malformed storage recovery | multiple unit proofs green; browser dirty pass pending |
 | 23 | never-trained semantics | PASS — 97-case question proof plus newcomer/minor browser journeys |
 | 24 | minor/age eligibility | PASS — restricted goal clears immediately after adult→minor change; unit and browser counter-proof green |
@@ -218,7 +231,7 @@ Status here means evidence at this checkpoint, not remembered intent.
 ## Current severity counts
 
 - P0: 0 confirmed.
-- P1: 0 internal open; BUG-001, BUG-002 and BUG-004 are resolved and fully gated.
+- P1: 0 internal open; BUG-001, BUG-002, BUG-004 and BUG-008–BUG-011 are resolved and fully gated.
 - P2: 1 open (BUG-003); BUG-005, BUG-006 and BUG-007 are resolved and fully gated.
 - P3: 0.
 - External blockers: product-specific Salla URL not present; live activation backend unavailable; WebKit availability not tested yet.

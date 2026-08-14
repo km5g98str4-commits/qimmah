@@ -134,6 +134,7 @@ const LIVE_ACTION_GUARDS = [
   ['src/views/WorkoutView.tsx', 'WorkoutView', 'workout.startEmpty', "guardPaid('workout.startEmpty'"],
   ['src/views/WorkoutView.tsx', 'WorkoutView', 'plan.saveEdit', "guardPaid('plan.saveEdit'"],
   ['src/views/NutritionView.tsx', 'MealCard', 'nutrition.addFood', "guard('nutrition.addFood'"],
+  ['src/views/NutritionView.tsx', 'MealCard', 'nutrition.removeFood', "guard('nutrition.removeFood'"],
   ['src/views/NutritionView.tsx', 'WaterPanel', 'nutrition.water', "guard('nutrition.water'"],
   ['src/components/nutrition/QuickMealLogger.tsx', 'QuickMealLogger', 'nutrition.addFood', "guard('nutrition.addFood'"],
   ['src/components/nutrition/QuickMealLogger.tsx', 'QuickMealLogger', 'nutrition.removeFood', "guard('nutrition.removeFood'"],
@@ -143,6 +144,20 @@ for (const [file, fn, action, guardCall] of LIVE_ACTION_GUARDS) {
   const body = functionBody(stripComments(read(file)), fn)
   check(`${fn} موجودة في ${file}`, body !== null)
   check(`${fn} يمرّر ${action} عبر guard الواجهة`, body.includes(guardCall))
+}
+
+// خطأ حذف السجل في وضع الماكروز قد يقع واللوحة مغلقة؛ رسالة الحفظ يجب أن تعيش
+// خارج شرط `open` حتى لا يتحول الفشل الصادق في الطبقة إلى فشل صامت في الواجهة.
+{
+  const body = functionBody(stripComments(read('src/components/nutrition/QuickMealLogger.tsx')), 'QuickMealLogger')
+  const exposesFailureOutsideOpen = (value) => {
+    const alertAt = value?.indexOf('{saveError && <p role="alert"') ?? -1
+    const openPanelAt = value?.indexOf('{open && (') ?? -1
+    return alertAt >= 0 && openPanelAt >= 0 && alertAt < openPanelAt
+  }
+  check('QuickMealLogger يعرض فشل التخزين حتى واللوحة مغلقة', exposesFailureOutsideOpen(body))
+  const attacked = '{open && (<div>{saveError && <p role="alert">failed</p>}</div>)}'
+  check('محاكاة الالتفاف: حبس رسالة الفشل داخل اللوحة المغلقة يُكتشف', !exposesFailureOutsideOpen(attacked))
 }
 
 // لا فعل معلَن بلا تنفيذ — الفجوة تُكتشف هنا لا في الإنتاج.

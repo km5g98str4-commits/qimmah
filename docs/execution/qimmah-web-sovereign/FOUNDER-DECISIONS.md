@@ -1,6 +1,6 @@
 # Qimmah Web Sovereign — autonomous founder decisions
 
-Updated: 2026-08-13 (Layer 2 / PKG-2 verified)
+Updated: 2026-08-13 (Layer 3 Nutrition / PKG-3 verified)
 
 ## Decision 001 — Use the exact Founder checkpoint
 
@@ -73,6 +73,14 @@ PKG-2 changes tests to match the new seven-screen flow and strengthens the behav
 | historical journeys | obsolete five-screen/dashboard assumptions | newcomer, minor and advanced journeys assert Layer-1 Premium/Preview handoff and Layer-2 semantics | preserve user stories across both packages | stronger |
 | minor journey | age starts minor | selects adult-only goal, lowers age, confirms restricted selection is cleared | attack stale conditional state | stronger counter-proof |
 
+PKG-3 changes tests only by extending the live Nutrition contract. No assertion was removed or weakened.
+
+| Test | Old contract | New contract | Why | Strength |
+| --- | --- | --- | --- | --- |
+| `run-nutrition-live-proof.mjs` | absent | 13 runtime checks for round-trip quantity/provenance, fractional input and adversarial storage | prevent fake success and quantity loss | new guard |
+| `run-access-gate-proof.mjs` | MealCard add plus other live guards | also MealCard remove and a named removal attack | keep Preview failure on the coherent Premium surface | stronger |
+| `e2e/nutrition-reliability.mjs` | 91 crash/pointer/macro checks | 106 checks including all meal rows, paid add/reload/edit/delete, quota preservation and English item opening | prove the maintained route end-to-end | stronger |
+
 ## Decision 006 — Error recovery never means product completion
 
 - Decision: a render failure may retry/reload/contact support, but cannot mark onboarding complete or synthesize a plan.
@@ -99,3 +107,12 @@ PKG-2 changes tests to match the new seven-screen flow and strengthens the behav
 - Risk: dense screens need narrow-device and keyboard scrutiny; existing install, onboarding and journey browser suites cover the current implementation, with broader visual/accessibility work remaining in Layer 4.
 - Reversibility: screen grouping is presentation; the stable question ids and persisted facts can survive future regrouping.
 - Affected files: `OnboardingV2.tsx`, flow dictionaries and shared browser driver.
+
+## Decision 009 — Nutrition success follows the primary write, and unknown quantity stays unknown
+
+- Decision: the `qimmah:nutrition:v2` write is the commit point. Cache, mirrors, listeners, first-win state and input clearing occur only after it succeeds. Quantity editing is offered only for entries with an actual gram/serving basis.
+- Why: a success screen or cleared form after quota failure is data loss; assigning one serving to a legacy row invents a fact and makes proportional editing dishonest.
+- Alternatives rejected: silent best-effort primary writes; optimistic cache update with later reconciliation; defaulting unknown rows to one serving; a duplicate Nutrition editor/history store.
+- Risk: a secondary best-effort mirror can still fail after the canonical day write, but the user-visible day record is durable and no primary failure is represented as success.
+- Reversibility: PKG-3 is one isolated package; the adapter fields and inline editor can be reverted without schema migration because all additions are optional.
+- Affected files: live Nutrition view/logger, `nutritionTracking`, `nutritionV2Model`, bilingual Nutrition dictionary and focused proofs.

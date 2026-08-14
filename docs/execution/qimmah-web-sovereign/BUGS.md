@@ -1,6 +1,6 @@
 # Qimmah Web Sovereign — bug ledger
 
-Updated: 2026-08-13 (Layer 2 / PKG-2 verified)
+Updated: 2026-08-13 (Layer 3 Nutrition / PKG-3 verified)
 
 ## BUG-001 — Preview mutation handlers can surface an exception instead of Premium
 
@@ -77,6 +77,49 @@ Updated: 2026-08-13 (Layer 2 / PKG-2 verified)
 - Status: RESOLVED — VERIFIED FOR PKG-2
 - Fix: one canonical `goalAllowedForEligibility` function is used by both an age-change effect and the immediate age input handler; lowering age clears restricted state before advancing.
 - Evidence: `test:onboarding-intent` contains the named negative proof; the minor browser journey performs the adult-cut→minor attack and confirms no selected restricted goal survives.
+
+## BUG-008 — Live nutrition adapter drops quantity and catalog provenance
+
+- Severity: P1
+- Surface: Nutrition meal search → add → reload/edit.
+- Reproduction: add a catalog food with a non-default gram amount, then inspect `qimmah:nutrition:v2` or reload the live row.
+- Evidence: `QuickMealLogger` calculated grams/servings, but `nutritionTracking.addLog` rebuilt the canonical record without `foodId`, `grams`, `servings` or `unit`.
+- Root cause: the compatibility adapter preserved macros but not the later quantity/provenance fields.
+- Status: RESOLVED — VERIFIED FOR PKG-3
+- Fix: one explicit bidirectional adapter preserves all known fields; live rows expose a proportional edit only when a real quantity basis exists. Old quantity-less records remain unknown.
+- Evidence: `test:nutrition-live` 13/13 and browser add/reload/edit assertions in the 106-case Nutrition suite.
+
+## BUG-009 — Nutrition primary persistence can report success after a failed write
+
+- Severity: P1
+- Surface: add, edit, delete and water logging under quota/blocked storage.
+- Reproduction: make `Storage.setItem('qimmah:nutrition:v2', …)` throw, then invoke a live mutation.
+- Evidence: baseline `persist` swallowed the exception and still updated cache, mirrors, listeners and caller success state.
+- Root cause: raw `localStorage.setItem` was wrapped in a silent catch instead of the canonical `safeStorage` result contract.
+- Status: RESOLVED — VERIFIED FOR PKG-3
+- Fix: `persist` uses `writeJson`, throws a named `NutritionStorageError`, and advances secondary state only after `ok`; UI adapters return `false`, preserve input, and show bilingual recovery copy.
+- Evidence: quota and `SecurityError` counter-proofs plus the real-browser failed-edit attack; stored bytes and cache remain unchanged.
+
+## BUG-010 — Live Nutrition delete can bypass the coherent Preview surface
+
+- Severity: P1
+- Surface: populated Nutrition MealCard in Preview/entitlement-race states.
+- Reproduction: invoke delete while entitlement is not active.
+- Evidence: the writer correctly rejects, but the baseline live MealCard called the remove callback without `guard('nutrition.removeFood')`.
+- Root cause: the earlier access proof covered QuickMealLogger remove, not the maintained MealCard surface.
+- Status: RESOLVED — VERIFIED FOR PKG-3
+- Fix: MealCard remove and edit pass through the central UI guard; writer guards remain the second defense.
+- Evidence: `test:access-gate` 77/77 includes named removal and hidden-error-feedback attacks; Preview matrix remains 34/34.
+
+## BUG-011 — Fractional servings are inflated by removing the decimal point
+
+- Severity: P1
+- Surface: add/edit quantity in servings.
+- Reproduction: enter `1.5` servings; baseline sanitizer stores `15`, producing 2,250g and 3,720 calories for a 150g/248-calorie serving.
+- Root cause: serving inputs used `sanitizeNumericInput` with its integer default even though their step is `0.25`.
+- Status: RESOLVED — VERIFIED FOR PKG-3
+- Fix: both serving add and edit explicitly allow one decimal point; grams remain integer-bounded.
+- Evidence: direct 0.25/1.5 counter-proof and browser assertion that 1.5 servings persists as 225g/372 calories.
 
 ## EXTERNAL-001 — Paid Salla product binding cannot be proven
 

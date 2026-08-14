@@ -43,7 +43,7 @@ export function NutritionView({ lang }: NutritionViewProps) {
   const { customization } = useCustomization()
   const t = getStrings(lang).nutrition
   const d = nutritionScreenStrings[lang]
-  const { state, totals, addWater, removeLog } = useNutritionToday()
+  const { state, totals, addWater, removeLog, updateLogQuantity } = useNutritionToday()
   const np = customization.nutritionPlan
 
   /**
@@ -172,6 +172,7 @@ export function NutritionView({ lang }: NutritionViewProps) {
                 targetCalories={targetCalories}
                 targetProtein={targetProtein}
                 onRemove={removeLog}
+                onUpdateQuantity={updateLogQuantity}
               />
             ))}
           </div>
@@ -276,6 +277,7 @@ function MealCard({
   targetCalories,
   targetProtein,
   onRemove,
+  onUpdateQuantity,
   autoOpen = false,
   onAutoOpenHandled,
 }: {
@@ -284,7 +286,8 @@ function MealCard({
   items: LoggedFood[]
   targetCalories: number
   targetProtein: number
-  onRemove: (id: string) => void
+  onRemove: (id: string) => boolean
+  onUpdateQuantity: (id: string, value: number, unit: 'g' | 'serving') => boolean
   /** نيّة «سجّل وجبة» القادمة من «اليوم» — تُفتح مرّة واحدة ثم تُستهلك. */
   autoOpen?: boolean
   onAutoOpenHandled?: () => void
@@ -296,6 +299,28 @@ function MealCard({
   // نصّ المؤسس: «يضغط أضف ← يظهر له Premium gate»، لا أن نطرده من التغذية.
   const { guard } = useAccess()
   const toggleAdding = guard('nutrition.addFood', () => setAdding((v) => !v))
+  const [editing, setEditing] = useState<{ id: string; value: string; unit: 'g' | 'serving' } | null>(null)
+  const [saveError, setSaveError] = useState(false)
+  const remove = guard('nutrition.removeFood', (id: string) => {
+    if (onRemove(id)) {
+      if (editing?.id === id) setEditing(null)
+      setSaveError(false)
+    } else {
+      setSaveError(true)
+    }
+  })
+  const saveQuantity = guard('nutrition.addFood', () => {
+    if (!editing) return
+    const value = Number(editing.value)
+    const max = editing.unit === 'g' ? 3000 : 20
+    if (!Number.isFinite(value) || value <= 0 || value > max) return
+    if (onUpdateQuantity(editing.id, value, editing.unit)) {
+      setEditing(null)
+      setSaveError(false)
+    } else {
+      setSaveError(true)
+    }
+  })
   /**
    * النيّة تمرّ من **نفس الحارس** الذي يمرّ منه الزرّ: مستخدم المعاينة يرى بوّابة
    * Premium لا لوحة تسجيل، فلا يفتح مسار الطفرة من باب خلفي. والاستهلاك يقع
@@ -343,22 +368,70 @@ function MealCard({
       {items.length > 0 && (
         <ul className="divide-y divide-line">
           {items.map((e) => (
-            <li key={e.id} className="flex items-center gap-3 px-4 py-3">
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-sm font-bold text-ink-900">{e.label}</span>
-                <span className="block text-[11px] text-ink-400">
-                  {quantityLabel(e, d)}
-                  {quantityLabel(e, d) && ' · '}
-                  {e.calories} {d.caloriesUnit} · {e.protein}{d.gramsUnit}
+            <li key={e.id} className="px-4 py-3">
+              <div className="flex items-center gap-2">
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-bold text-ink-900">{e.label}</span>
+                  <span className="block text-[11px] text-ink-400">
+                    {quantityLabel(e, d)}
+                    {quantityLabel(e, d) && ' · '}
+                    {e.calories} {d.caloriesUnit} · {e.protein}{d.gramsUnit}
+                  </span>
                 </span>
-              </span>
-              <button type="button" onClick={() => onRemove(e.id)} aria-label={t.removeEntry} className="grid h-11 w-11 shrink-0 place-items-center rounded-lg text-ink-400 hover:bg-beige hover:text-danger">
-                <Icon name="Trash2" className="h-4 w-4" />
-              </button>
+                {((e.unit === 'g' && e.grams) || (e.unit === 'serving' && e.servings)) && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const unit = e.unit ?? 'g'
+                      setEditing({ id: e.id, unit, value: String(unit === 'g' ? e.grams : e.servings) })
+                      setSaveError(false)
+                    }}
+                    aria-label={`${d.editEntry}: ${e.label}`}
+                    className="grid h-11 w-11 shrink-0 place-items-center rounded-lg text-ink-400 hover:bg-beige hover:text-ink-900"
+                  >
+                    <Icon name="Pencil" className="h-4 w-4" />
+                  </button>
+                )}
+                <button type="button" onClick={() => remove(e.id)} aria-label={`${t.removeEntry}: ${e.label}`} className="grid h-11 w-11 shrink-0 place-items-center rounded-lg text-ink-400 hover:bg-beige hover:text-danger">
+                  <Icon name="Trash2" className="h-4 w-4" />
+                </button>
+              </div>
+              {editing?.id === e.id && (
+                <div className="mt-3 rounded-xl border border-line bg-page p-3">
+                  <label className="text-xs font-bold text-ink-700">
+                    {d.quantity} ({editing.unit === 'g' ? d.gramsUnit : d.servingsUnit})
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      min={editing.unit === 'g' ? 1 : 0.25}
+                      max={editing.unit === 'g' ? 3000 : 20}
+                      step={editing.unit === 'g' ? 1 : 0.25}
+                      value={editing.value}
+                      onChange={(event) => setEditing({
+                        ...editing,
+                        value: sanitizeNumericInput(event.target.value, {
+                          max: editing.unit === 'g' ? 3000 : 20,
+                          decimal: editing.unit === 'serving',
+                        }),
+                      })}
+                      className="mt-1 block min-h-[44px] w-full rounded-lg border border-line bg-surface px-3 text-sm text-ink-900 outline-none focus:border-primary-c"
+                    />
+                  </label>
+                  {editing.value !== '' && (!Number.isFinite(Number(editing.value)) || Number(editing.value) <= 0) && (
+                    <p className="mt-1.5 text-xs font-bold text-danger">{d.invalidQuantity}</p>
+                  )}
+                  <div className="mt-3 flex gap-2">
+                    <button type="button" onClick={saveQuantity} disabled={!Number.isFinite(Number(editing.value)) || Number(editing.value) <= 0} className="btn-primary min-h-[44px] flex-1 text-xs disabled:cursor-not-allowed disabled:opacity-40">{d.saveEdit}</button>
+                    <button type="button" onClick={() => { setEditing(null); setSaveError(false) }} className="btn-ghost min-h-[44px] flex-1 text-xs">{d.cancelEdit}</button>
+                  </div>
+                </div>
+              )}
             </li>
           ))}
         </ul>
       )}
+
+      {saveError && <p role="alert" className="v2-error-panel mx-4 mt-3 rounded-xl border px-3 py-2 text-xs font-bold text-ink-900">{d.saveFailed}</p>}
 
       {adding && (
         <div className="border-t border-line p-4">
@@ -378,19 +451,29 @@ function MealCard({
 
 
 /** لوحة الماء — +250/+500 + إدخال كمية مخصّصة (50–3000 مل). */
-function WaterPanel({ lang, waterMl, targetMl, onAdd: rawAdd }: { lang: Lang; waterMl: number; targetMl: number; onAdd: (ml: number) => void }) {
+function WaterPanel({ lang, waterMl, targetMl, onAdd: rawAdd }: { lang: Lang; waterMl: number; targetMl: number; onAdd: (ml: number) => boolean }) {
   const t = getStrings(lang).nutrition
   const d = nutritionScreenStrings[lang]
   const { guard } = useAccess()
-  const onAdd = guard('nutrition.water', rawAdd)
   const [ml, setMl] = useState('')
+  const [saveError, setSaveError] = useState(false)
+  const onAdd = guard('nutrition.water', (amountMl: number, onSaved?: () => void) => {
+    if (rawAdd(amountMl)) {
+      setSaveError(false)
+      onSaved?.()
+      return
+    }
+    setSaveError(true)
+  })
   const { min, max } = NUM_LIMITS.waterMl
   const amount = Number(ml)
   const valid = inRange(amount, min, max)
   const submit = () => {
     if (!valid) return
-    onAdd(Math.round(amount))
-    setMl('')
+    onAdd(Math.round(amount), () => setMl(''))
+  }
+  const addPreset = (amountMl: number) => {
+    onAdd(amountMl)
   }
 
   return (
@@ -404,8 +487,8 @@ function WaterPanel({ lang, waterMl, targetMl, onAdd: rawAdd }: { lang: Lang; wa
       </div>
       <ProgressBar current={waterMl} target={targetMl || 1} color="bg-primary" className="mt-3 h-1.5" />
       <div className="mt-3 flex flex-wrap gap-2">
-        <button type="button" onClick={() => onAdd(250)} className="btn-ghost px-3 py-2 text-xs">{t.addWater250}</button>
-        <button type="button" onClick={() => onAdd(500)} className="btn-ghost px-3 py-2 text-xs">{t.addWater500}</button>
+        <button type="button" onClick={() => addPreset(250)} className="btn-ghost min-h-[44px] px-3 py-2 text-xs">{t.addWater250}</button>
+        <button type="button" onClick={() => addPreset(500)} className="btn-ghost min-h-[44px] px-3 py-2 text-xs">{t.addWater500}</button>
       </div>
       <div className="mt-2 flex items-center gap-2">
         <input
@@ -417,11 +500,12 @@ function WaterPanel({ lang, waterMl, targetMl, onAdd: rawAdd }: { lang: Lang; wa
           onChange={(e) => setMl(sanitizeNumericInput(e.target.value, { max }))}
           onKeyDown={(e) => { if (e.key === 'Enter') submit() }}
           placeholder={t.customWaterPlaceholder}
-          className="w-40 rounded-lg border border-line bg-page px-3 py-2 text-xs text-ink-900 outline-none focus:border-primary-c"
+          className="min-h-[44px] w-40 rounded-lg border border-line bg-page px-3 py-2 text-xs text-ink-900 outline-none focus:border-primary-c"
         />
-        <button type="button" onClick={submit} disabled={!valid} className="btn-primary px-3 py-2 text-xs disabled:cursor-not-allowed disabled:opacity-40">{t.customWaterAdd}</button>
+        <button type="button" onClick={submit} disabled={!valid} className="btn-primary min-h-[44px] px-3 py-2 text-xs disabled:cursor-not-allowed disabled:opacity-40">{t.customWaterAdd}</button>
       </div>
       {ml !== '' && !valid && <p className="mt-1.5 text-[11px] font-bold text-danger">{NUM_MESSAGES.waterMl}</p>}
+      {saveError && <p role="alert" className="v2-error-panel mt-2 rounded-xl border px-3 py-2 text-xs font-bold text-ink-900">{d.saveFailed}</p>}
     </div>
   )
 }
