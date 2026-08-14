@@ -51,3 +51,6 @@ scripts/e2e-auth/.workdir/
 
 # release-convergence build artifacts (scripts/release) — transient
 dist-release/
+
+# per-run release-convergence evidence snapshots (latest.json is tracked)
+docs/execution/qimmah-postweb/release/evidence/run-*.json
