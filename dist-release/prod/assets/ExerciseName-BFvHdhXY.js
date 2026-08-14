@@ -1,0 +1,1 @@
+import{j as r}from"./vendor-react-DBoTRrZA.js";import{e as t}from"./index-CH-vRA1Z.js";function d({nameAr:s,nameEn:i,lang:n,className:a,secondaryClassName:c}){const{primary:m,secondary:e}=t(s,i,n);return r.jsxs(r.Fragment,{children:[r.jsx("p",{className:a,children:r.jsx("bdi",{children:m})}),e?r.jsx("p",{className:c,children:r.jsx("bdi",{children:e})}):null]})}export{d as E};

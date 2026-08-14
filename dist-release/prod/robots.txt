@@ -1,0 +1,5 @@
+# قِمّة — يسمح بأرشفة كامل الموقع
+User-agent: *
+Allow: /
+
+Sitemap: https://qimmah.app/sitemap.xml

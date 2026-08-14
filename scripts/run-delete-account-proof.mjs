@@ -29,6 +29,7 @@ const settings = read('src/views/SettingsView.tsx')
 const dialog = read('src/components/DeleteAccountDialog.tsx')
 const strings = read('src/config/strings.ts')
 const profileModel = read('src/lib/profileV2Model.ts')
+const profile = read('src/views/ProfileV2.tsx')
 
 console.log('\nإثبات واجهة حذف الحساب (App Store 5.1.1(v))')
 
@@ -107,11 +108,13 @@ check(
 )
 check('سبب الخادم يُعرض للمستخدم ولا يُبتلع', /setFailReason\(result\.error\)/.test(dialog))
 
-// ─────────── ٥) الادّعاء في النموذج صار صحيحًا ───────────
+// ─────────── ٥) حقيقة الشخصية مربوطة بمسار Settings القانوني ───────────
 check(
-  'profileV2Model لم يعد يحيل إلى مسار إعدادات غير موجود',
-  profileModel.includes('routes to the delete-account row in SettingsView') &&
-    !profileModel.includes('routes to the existing safe Settings flow'),
+  'Profile يعرض حذف الحساب للمسجّل فقط ويحيله إلى Settings القانونية',
+  /deleteAccountAvailable:\s*auth\.signedIn/.test(profileModel) &&
+    /model\.user\.signedIn \? t\('حذف الحساب نهائيًا'/.test(profile) &&
+    /onManageAccount=\{\(\) => openCanonicalSettings\('privacy'\)\}/.test(profile) &&
+    /onNavigate\('settings'\)/.test(profile),
 )
 
 // ─────────── §4.2 محاكاة التفاف — يجب أن تسقط بفحص مسمّى ───────────

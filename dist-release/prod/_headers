@@ -1,0 +1,54 @@
+# Cloudflare Pages — response headers for Qimmah (قِمّة) web production.
+# Cloudflare applies EVERY matching block; later same-name headers override earlier.
+# CSP is fitted to the app's real network needs, verified locally with zero violations
+# (Supabase auth+sync, Open Food Facts barcode, GitHub-raw exercise images, self).
+# Cache-Control is the v1→v2 cutover safety net: the SW script and HTML must always
+# revalidate so a new deploy is picked up; content-hashed /assets are immutable.
+# See docs/deploy/WEB-CUTOVER.md for the full story.
+
+/*
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; frame-src 'none'; form-action 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://raw.githubusercontent.com https://*.openfoodfacts.org; font-src 'self'; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://world.openfoodfacts.org; worker-src 'self' blob:; manifest-src 'self'; media-src 'self' blob:; upgrade-insecure-requests
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: DENY
+  Cross-Origin-Opener-Policy: same-origin
+  Permissions-Policy: camera=(self), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()
+  Strict-Transport-Security: max-age=63072000; includeSubDomains
+
+# ── Cutover safety: always revalidate the shell so a new deploy is never held hostage ──
+# The SW script: never trust a cached copy — this guarantees the new commit-hash SW
+# installs promptly, purges old-version caches, and takes over (skipWaiting/claim).
+/sw.js
+  Cache-Control: no-cache
+  Service-Worker-Allowed: /
+
+# The HTML entry: navigations are network-first in the SW, but the HTTP layer must not
+# pin a stale index.html either — always revalidate so it points at the newest /assets.
+/
+  Cache-Control: no-cache
+/index.html
+  Cache-Control: no-cache
+
+# Manifest: tiny, revalidate so PWA metadata updates on cutover.
+/manifest.webmanifest
+  Cache-Control: no-cache
+
+# ── Content-hashed build assets: safe to cache forever (filename changes with content) ──
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# ── Static, non-hashed assets: cache a week with revalidation (SW also does SWR) ──
+/exercise-images/*
+  Cache-Control: public, max-age=604800
+/exercise-gifs/*
+  Cache-Control: public, max-age=604800
+/exercise-machine-images/*
+  Cache-Control: public, max-age=604800
+/icon-*.png
+  Cache-Control: public, max-age=604800
+/apple-touch-icon.png
+  Cache-Control: public, max-age=604800
+/favicon.svg
+  Cache-Control: public, max-age=604800
+/og-image.png
+  Cache-Control: public, max-age=604800

@@ -56,6 +56,7 @@ import { useLanguage } from '@/i18n'
 import type { Lang } from '@/lib/appPreferences'
 import { type AppRoute, MAIN_TABS, isUnknownRouteHash, routeFromHash, setHashRoute } from '@/lib/appRoutes'
 import { BUILD_LABEL } from '@/lib/buildInfo'
+import { requestQuickLogIntent } from '@/lib/quickLogIntent'
 import { trackLocal } from '@/lib/tracking'
 import { recordDayOpen } from '@/lib/tracking/signals'
 import { useCustomization } from '@/lib/customizationContext'
@@ -384,14 +385,27 @@ export default function App() {
     else setView(guardRoute(v, uid))
   }
 
+  /**
+   * التسجيل السريع — النيّة تُكتب **بعد** حسم المقصد لا قبله.
+   *
+   * كان المسار يكتب النيّة ثم ينادي `navigate`. وحين يحوّل الحارس الوجهة
+   * (ضيف بلا حساب ⇒ `accountRequired`، أو إعداد ناقص ⇒ `setup`) تبقى النيّة
+   * في التخزين بلا مستهلك، فتخطف **زيارة لاحقة مشروعة**: يفتح المستخدم
+   * «التغذية» بعد يوم فتنفتح عليه فطوره من نيّة قديمة لا يذكرها.
+   *
+   * والكتابة نفسها تمرّ الآن بالمالك المحروس: التخزين المحجوب كان يرمي داخل
+   * معالج النقر فيموت زرّ التسجيل السريع كلّه.
+   */
   const openQuickLog = (target: QuickLogTarget) => {
-    window.sessionStorage.setItem('qimmah:quick-log-intent', target)
-    if (target === 'routine') {
-      navigate('profile')
-      window.setTimeout(() => window.dispatchEvent(new CustomEvent('qimmah:quick-log', { detail: target })), 0)
+    const intended: AppRoute = target === 'routine' ? 'profile' : 'nutrition'
+    const destination = guardRoute(intended, uid)
+    if (destination !== intended) {
+      // الحارس حوّل الوجهة — لا نيّة تُكتب، فلا نيّة تعلق.
+      setView(destination)
       return
     }
-    navigate('nutrition')
+    requestQuickLogIntent(target)
+    navigate(intended)
     window.setTimeout(() => window.dispatchEvent(new CustomEvent('qimmah:quick-log', { detail: target })), 0)
   }
 

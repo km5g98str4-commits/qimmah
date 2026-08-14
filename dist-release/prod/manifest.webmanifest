@@ -1,0 +1,45 @@
+{
+  "name": "قِمّة — مرشدك الهادئ نحو صحة أفضل",
+  "short_name": "قِمّة",
+  "description": "رفيقك العربي للياقة والصحة — خطة تمارين واضحة، تسجيل وجبات بسيط، ومتابعة تقدّم صادقة.",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "/",
+  "id": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#101216",
+  "theme_color": "#F0512A",
+  "categories": [
+    "health",
+    "fitness",
+    "lifestyle"
+  ],
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

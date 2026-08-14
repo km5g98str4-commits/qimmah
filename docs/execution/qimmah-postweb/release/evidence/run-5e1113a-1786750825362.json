@@ -1,0 +1,413 @@
+{
+  "contract": "QIMMAH-SOVEREIGN-PHASE-II-001",
+  "agent": "AGENT-A",
+  "head": "5e1113ae4116cf10811f27e4a635a27cb4b61fc0",
+  "headSubject": "merge(web): reconcile Release Convergence onto the final Web head d83add2",
+  "ranAt": "2026-08-14T23:40:25.362Z",
+  "provisional": true,
+  "provisionalReason": "Web Sovereign run had not landed its final HEAD when this pass executed.",
+  "builds": {
+    "prod": {
+      "mode": "prod",
+      "outDir": "dist-release/prod",
+      "absDir": "/home/user/qimmah/dist-release/prod",
+      "ms": 13092
+    }
+  },
+  "engines": [
+    {
+      "name": "chromium",
+      "version": "141.0.7390.37"
+    }
+  ],
+  "validationDowngrades": [
+    {
+      "code": "VALIDATION_DOWNGRADE = WEBKIT_UNAVAILABLE",
+      "reason": "Error: browserType.launch: Executable doesn't exist at /opt/pw-browsers/webkit-2311/pw_run.sh"
+    }
+  ],
+  "totals": {
+    "pass": 45,
+    "fail": 5,
+    "blocked": 4
+  },
+  "suites": [
+    {
+      "suite": "static-bundle-safety",
+      "pass": 21,
+      "fail": 1,
+      "blocked": 1,
+      "failures": [
+        {
+          "section": "the purchase binding that the commercial funnel depends on",
+          "label": "the shipped destination is a PRODUCT URL, not just the store root",
+          "evidence": "shipped: https://salla.sa/Qimmahsa"
+        }
+      ],
+      "checks": [
+        {
+          "section": "the test-entitlement seam must not exist in a production build",
+          "label": "no mock activation code string ships",
+          "ok": true,
+          "evidence": ""
+        },
+        {
+          "section": "the test-entitlement seam must not exist in a production build",
+          "label": "no entitlement-mock storage key ships",
+          "ok": true,
+          "evidence": ""
+        },
+        {
+          "section": "the test-entitlement seam must not exist in a production build",
+          "label": "no VITE_ENTITLEMENT_MODE reference ships",
+          "ok": true,
+          "evidence": ""
+        },
+        {
+          "section": "the test-entitlement seam must not exist in a production build",
+          "label": "counter-proof for the seam scan",
+          "ok": null,
+          "blocked": true,
+          "evidence": "dist-release/mock was not built in this pass"
+        },
+        {
+          "section": "no development or localhost endpoint ships",
+          "label": "no first-party localhost/loopback URL ships",
+          "ok": true,
+          "evidence": "found: [http://localhost:9999] · excluded vendor default: http://localhost:9999 (gotrue-js)"
+        },
+        {
+          "section": "no development or localhost endpoint ships",
+          "label": "counter-proof: the loopback scan does detect URLs (it found the known vendor default)",
+          "ok": true,
+          "evidence": "scan located 1 loopback literal(s) — the pattern is live, not vacuous"
+        },
+        {
+          "section": "no development or localhost endpoint ships",
+          "label": "no staging/tunnel/dev host ships",
+          "ok": true,
+          "evidence": ""
+        },
+        {
+          "section": "no development or localhost endpoint ships",
+          "label": "no source map ships",
+          "ok": true,
+          "evidence": ""
+        },
+        {
+          "section": "no development or localhost endpoint ships",
+          "label": "no shipped file points at an external source map",
+          "ok": true,
+          "evidence": ""
+        },
+        {
+          "section": "no secret material ships",
+          "label": "no Supabase service_role key ships",
+          "ok": true,
+          "evidence": ""
+        },
+        {
+          "section": "no secret material ships",
+          "label": "no PEM private key ships",
+          "ok": true,
+          "evidence": ""
+        },
+        {
+          "section": "no secret material ships",
+          "label": "no live secret key ships",
+          "ok": true,
+          "evidence": ""
+        },
+        {
+          "section": "no secret material ships",
+          "label": "no GitHub token ships",
+          "ok": true,
+          "evidence": ""
+        },
+        {
+          "section": "no secret material ships",
+          "label": "no AWS access key id ships",
+          "ok": true,
+          "evidence": ""
+        },
+        {
+          "section": "the purchase binding that the commercial funnel depends on",
+          "label": "a Salla purchase destination ships at all",
+          "ok": true,
+          "evidence": "https://salla.sa/Qimmahsa"
+        },
+        {
+          "section": "the purchase binding that the commercial funnel depends on",
+          "label": "the shipped destination is a PRODUCT URL, not just the store root",
+          "ok": false,
+          "evidence": "shipped: https://salla.sa/Qimmahsa"
+        },
+        {
+          "section": "the purchase binding that the commercial funnel depends on",
+          "label": "no second, conflicting checkout destination ships",
+          "ok": true,
+          "evidence": "https://salla.sa/Qimmahsa"
+        },
+        {
+          "section": "forbidden Premium promises must not ship",
+          "label": "«مدى الحياة» does not ship",
+          "ok": true,
+          "evidence": ""
+        },
+        {
+          "section": "forbidden Premium promises must not ship",
+          "label": "\"lifetime\" does not ship",
+          "ok": true,
+          "evidence": ""
+        },
+        {
+          "section": "forbidden Premium promises must not ship",
+          "label": "«كل التحديثات الحالية والمستقبلية» does not ship",
+          "ok": true,
+          "evidence": ""
+        },
+        {
+          "section": "shipped shell integrity",
+          "label": "index.html carries a verifiable build identity",
+          "ok": true,
+          "evidence": "<meta name=\"qimmah-build\" content=\"v1.0.0·5e1113a\"> <meta name=\"qimmah-commit\" content=\"5e1113a\"> <meta name=\"qimmah-build-time\" content=\"2026-08-14T23:40:11.667Z\"> <meta name=\"qimmah-sw-version\" content=\"qimmah-5e1113a\">"
+        },
+        {
+          "section": "shipped shell integrity",
+          "label": "the service worker has its build placeholders substituted",
+          "ok": true,
+          "evidence": "sw.js present"
+        },
+        {
+          "section": "shipped shell integrity",
+          "label": "the artifact ships an offline/404 fallback",
+          "ok": true,
+          "evidence": ""
+        }
+      ],
+      "id": "static-bundle",
+      "engine": "static"
+    },
+    {
+      "suite": "static-regression-ledger",
+      "pass": 24,
+      "fail": 4,
+      "blocked": 3,
+      "failures": [
+        {
+          "section": "every RESOLVED historical defect keeps its fix",
+          "label": "BUG-019 — Settings capabilities and numeral presentation were inconsistent",
+          "evidence": "live owners WITHOUT the central formatter: [src/views/NutritionView.tsx, src/views/WorkoutView.tsx]"
+        },
+        {
+          "section": "local data-key registry integrity — every LIVE key is registered",
+          "label": "every live storage key this harness observed is registered",
+          "evidence": "MISSING from userDataKeys.ts: qimmah:activeWorkout:v1 (written by src/lib/activeWorkout.ts (ACTIVE_WORKOUT_KEY))"
+        },
+        {
+          "section": "local data-key registry integrity — every LIVE key is registered",
+          "label": "the registered active-session key is the one the app actually writes",
+          "evidence": "registered ':active-workout:v2' (owner WorkoutV2, no importer)=true; registered live ':activeWorkout:v1'=false"
+        },
+        {
+          "section": "the ledger file and this suite stay in sync",
+          "label": "no documented defect is left unwatched by this suite",
+          "evidence": "unwatched=[BUG-020, BUG-021, BUG-022, BUG-023, BUG-024, BUG-025, BUG-026, BUG-027, BUG-028] documented=28 watched=19"
+        }
+      ],
+      "checks": [
+        {
+          "section": "every RESOLVED historical defect keeps its fix",
+          "label": "BUG-001 — Preview mutation handlers surfaced an exception instead of Premium",
+          "ok": true,
+          "evidence": "RecoveryView guard=true ProgressV2 guard=true"
+        },
+        {
+          "section": "every RESOLVED historical defect keeps its fix",
+          "label": "BUG-002 — Live Progress route did not expose the maintained measurement experience",
+          "ok": true,
+          "evidence": "ProgressView delegates to ProgressV2: true"
+        },
+        {
+          "section": "every RESOLVED historical defect keeps its fix",
+          "label": "BUG-003 — Three high transitive dependency advisories [tracked OPEN]",
+          "ok": true,
+          "evidence": "tracked OPEN in the ledger; dependency upgrades are outside this contract"
+        },
+        {
+          "section": "every RESOLVED historical defect keeps its fix",
+          "label": "BUG-004 — Setup ErrorBoundary could falsely complete a crashed onboarding",
+          "ok": true,
+          "evidence": "SetupErrorBoundary present=false onForceComplete present=false"
+        },
+        {
+          "section": "every RESOLVED historical defect keeps its fix",
+          "label": "BUG-005 — Error recovery lacked a support reference id",
+          "ok": true,
+          "evidence": "reference id=true support address present=true"
+        },
+        {
+          "section": "every RESOLVED historical defect keeps its fix",
+          "label": "BUG-006 — First-run question target was not met truthfully",
+          "ok": true,
+          "evidence": "distinct question ids bound in the live UI: 18 (body.age, body.height, body.weight, body.sex…)"
+        },
+        {
+          "section": "every RESOLVED historical defect keeps its fix",
+          "label": "BUG-007 — Lowering age could leave a restricted adult goal selected",
+          "ok": true,
+          "evidence": "single eligibility function referenced: true"
+        },
+        {
+          "section": "every RESOLVED historical defect keeps its fix",
+          "label": "BUG-008 — Live nutrition adapter dropped quantity and catalog provenance",
+          "ok": true,
+          "evidence": "foodId/grams/servings preserved in the adapter: true"
+        },
+        {
+          "section": "every RESOLVED historical defect keeps its fix",
+          "label": "BUG-009 — Nutrition persistence could report success after a failed write",
+          "ok": true,
+          "evidence": "checked write=true named error=true"
+        },
+        {
+          "section": "every RESOLVED historical defect keeps its fix",
+          "label": "BUG-010 — Live Nutrition delete could bypass the coherent Preview surface",
+          "ok": true,
+          "evidence": "live MealCard remove passes the central guard: true"
+        },
+        {
+          "section": "every RESOLVED historical defect keeps its fix",
+          "label": "BUG-011 — Fractional servings were inflated by removing the decimal point",
+          "ok": true,
+          "evidence": "serving inputs declare decimal handling: true"
+        },
+        {
+          "section": "every RESOLVED historical defect keeps its fix",
+          "label": "BUG-012 — Workout could clear its resumable snapshot before durable completion",
+          "ok": true,
+          "evidence": "only WorkoutView clears=true rollback wired=true"
+        },
+        {
+          "section": "every RESOLVED historical defect keeps its fix",
+          "label": "BUG-013 — Workout completion “Back to Today” did not navigate to Today",
+          "ok": true,
+          "evidence": "summary exit routes through the canonical navigator: true"
+        },
+        {
+          "section": "every RESOLVED historical defect keeps its fix",
+          "label": "BUG-014 — Measurements promise had no reachable route or usable history",
+          "ok": true,
+          "evidence": "#/measurements is a declared route: true"
+        },
+        {
+          "section": "every RESOLVED historical defect keeps its fix",
+          "label": "BUG-015 — Measurement save/delete could report success or bypass Premium",
+          "ok": true,
+          "evidence": "writer guards=3 returns WriteResult=true"
+        },
+        {
+          "section": "every RESOLVED historical defect keeps its fix",
+          "label": "BUG-016 — Machine catalog detail bypassed the exercise deep-link contract",
+          "ok": true,
+          "evidence": "routeOwner=true openId assignments=[\"resourceIdFromHash(\"] mirrorOnly=true everyCatalogUsesOwner=true"
+        },
+        {
+          "section": "every RESOLVED historical defect keeps its fix",
+          "label": "BUG-017 — Exercise detail lacked a complete modal and direct-link exit contract",
+          "ok": true,
+          "evidence": "dialog=true escape=true aria-modal=true"
+        },
+        {
+          "section": "every RESOLVED historical defect keeps its fix",
+          "label": "BUG-018 — Settings reintroduced an unvalidated manual JSON importer",
+          "ok": true,
+          "evidence": "hardened panel=true manual FileReader removed=true"
+        },
+        {
+          "section": "every RESOLVED historical defect keeps its fix",
+          "label": "BUG-019 — Settings capabilities and numeral presentation were inconsistent",
+          "ok": false,
+          "evidence": "live owners WITHOUT the central formatter: [src/views/NutritionView.tsx, src/views/WorkoutView.tsx]"
+        },
+        {
+          "section": "local data-key registry integrity — every LIVE key is registered",
+          "label": "every live storage key this harness observed is registered",
+          "ok": false,
+          "evidence": "MISSING from userDataKeys.ts: qimmah:activeWorkout:v1 (written by src/lib/activeWorkout.ts (ACTIVE_WORKOUT_KEY))"
+        },
+        {
+          "section": "local data-key registry integrity — every LIVE key is registered",
+          "label": "counter-proof: the registry scan really parsed entries",
+          "ok": true,
+          "evidence": "parsed 65 registered keys"
+        },
+        {
+          "section": "local data-key registry integrity — every LIVE key is registered",
+          "label": "the registered active-session key is the one the app actually writes",
+          "ok": false,
+          "evidence": "registered ':active-workout:v2' (owner WorkoutV2, no importer)=true; registered live ':activeWorkout:v1'=false"
+        },
+        {
+          "section": "the ledger file and this suite stay in sync",
+          "label": "the upstream defect ledger is present",
+          "ok": true,
+          "evidence": "docs/execution/qimmah-web-sovereign/BUGS.md"
+        },
+        {
+          "section": "the ledger file and this suite stay in sync",
+          "label": "no documented defect is left unwatched by this suite",
+          "ok": false,
+          "evidence": "unwatched=[BUG-020, BUG-021, BUG-022, BUG-023, BUG-024, BUG-025, BUG-026, BUG-027, BUG-028] documented=28 watched=19"
+        },
+        {
+          "section": "the ledger file and this suite stay in sync",
+          "label": "EXTERNAL-003 — The live account lifecycle has never been proven against a real server",
+          "ok": null,
+          "blocked": true,
+          "evidence": "declared EXTERNALLY_BLOCKED upstream; re-verified as still unprovable in this environment"
+        },
+        {
+          "section": "the ledger file and this suite stay in sync",
+          "label": "EXTERNAL-001 — Paid Salla product binding cannot be proven",
+          "ok": null,
+          "blocked": true,
+          "evidence": "declared EXTERNALLY_BLOCKED upstream; re-verified as still unprovable in this environment"
+        },
+        {
+          "section": "the ledger file and this suite stay in sync",
+          "label": "EXTERNAL-002 — Live activation backend is unavailable",
+          "ok": null,
+          "blocked": true,
+          "evidence": "declared EXTERNALLY_BLOCKED upstream; re-verified as still unprovable in this environment"
+        },
+        {
+          "section": "counter-proof — the ledger assertions are not vacuous",
+          "label": "the environment-error filter lets EVERY genuine page error through",
+          "ok": true,
+          "evidence": "filtered out: none"
+        },
+        {
+          "section": "counter-proof — the ledger assertions are not vacuous",
+          "label": "the environment-error filter DOES suppress the exact WebKit sw.js artefact it names",
+          "ok": true,
+          "evidence": "patterns=2"
+        },
+        {
+          "section": "counter-proof — the ledger assertions are not vacuous",
+          "label": "the console filter lets EVERY genuine console error through",
+          "ok": true,
+          "evidence": "benign patterns=3"
+        },
+        {
+          "section": "counter-proof — the ledger assertions are not vacuous",
+          "label": "every non-informational entry reads a real source file",
+          "ok": true,
+          "evidence": "entries=19 vacuous=0"
+        }
+      ],
+      "id": "static-ledger",
+      "engine": "static"
+    }
+  ]
+}

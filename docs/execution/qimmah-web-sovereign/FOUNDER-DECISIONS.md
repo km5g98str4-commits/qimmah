@@ -1,6 +1,6 @@
 # Qimmah Web Sovereign — autonomous founder decisions
 
-Updated: 2026-08-14 (Layer 3 Settings/numbers/units / PKG-7 verified)
+Updated: 2026-08-14 (Layer 3 Profile / PKG-8 recovery-reviewed and verified)
 
 ## Decision 001 — Use the exact Founder checkpoint
 
@@ -115,6 +115,59 @@ PKG-7 restores the existing hardened Settings data path and makes capabilities/p
 | `e2e/settings-import-security.mjs` | existing 34-vector contract but disconnected from live UI | unchanged 34 assertions now execute against the restored live panel | re-establish reviewed import security | unchanged, reverified |
 | `e2e/progress-reliability.mjs` | Arabic UI expected Latin `81.5` | requires Arabic `٨١٫٥`, rejects Latin form, repeats after reload | encode the deliberate numeral policy | stronger |
 
+PKG-8 converges Profile on existing route, data and account owners. No assertion was removed or weakened.
+
+| Test | Old contract | New contract | Why | Strength |
+| --- | --- | --- | --- | --- |
+| `profile-reliability-proof.ts` | absent | 22 structural/runtime checks plus four named bypass attacks | guard canonical data ownership, personality truth across Privacy/internal Settings, contextual Back, headings, numerals and touch targets inside `test:gate` | new guard |
+| `e2e/profile-reliability.mjs` | absent | 27 browser checks for account/guest (including no guest account actions), AR/EN, 320px, contexts/routes/a11y and zero browser errors; runner requires its own child-ready signal and rejects a foreign 200 server | prove the complete maintained Profile surface without port-collision false evidence | new guard with adversarial startup proof |
+| `e2e/progress-reliability.mjs` | expected the removed duplicate Arabic Profile heading | requires the single canonical route `h1` «ملفك» | preserve the existing Profile→Measurements check after heading convergence | stronger precision |
+| `run-delete-account-proof.mjs` | required a historical comment string in `profileV2Model` | checks the signed-in capability, conditional UI copy and live Profile→Settings binding together | retain the App Store deletion guard after guest/account truth separation | stronger behavior binding |
+| momentum/cross-system smoke locators | treated the internal reminder heading as another `h1` | require its correct `h2` level beneath the route heading | keep historical journeys aligned with one-page-one-`h1` semantics | stronger accessibility |
+
+## Decision 015 — Quick Log gets one guarded owner, and «ماء» focuses rather than writes
+
+- Decision: move the `qimmah:quick-log-intent` key behind a single canonical owner
+  (`src/lib/quickLogIntent.ts`) built on the existing `setupFocus.ts` pattern; resolve the route
+  guard **before** writing an intent; scope consumption so each screen takes only the values it
+  owns; and make the water intent scroll to and focus the water panel instead of logging water.
+- Why: the three defects were one structural fault seen from three sides — a key with three owners
+  and no single guarding discipline. The repository already had the answer in `setupFocus.ts`, so
+  this routes to an existing pattern rather than inventing a mechanism (verify-before-build).
+- Alternatives rejected: adding a `try/catch` at each of the three call sites (leaves three owners
+  and the next consumer repeats the bug); auto-adding a default water amount on intent (invents
+  user data **and** bypasses the `nutrition.water` paid gate); consuming any intent found (lets one
+  screen swallow another's); keeping the write-then-navigate order and clearing stale intents on a
+  timer (guesswork instead of asking the guard).
+- Risk: the focus jump is a visible movement the user did not explicitly scroll to. It is bound to
+  an intent the user just expressed one tap earlier, and it is one-shot — `onFocusHandled` clears
+  it, so it cannot repeat on re-render.
+- Reversibility: one package. The new module is additive; the three consumers are three small
+  call-site changes; no stored shape, schema or key name changed.
+- Affected files: `src/lib/quickLogIntent.ts` (new), `src/App.tsx`, `src/views/ProfileV2.tsx`,
+  `src/views/NutritionView.tsx`, `scripts/quick-log-reliability-proof.ts` and its runner.
+- Known remaining copy of the old pattern: `src/views/NutritionV2.tsx` still holds unguarded raw
+  access. It is **not the live route** (canonical map: “`NutritionV2.tsx` is not the live route
+  wrapper”), so it was deliberately left untouched rather than widening this package into dead code.
+  Recorded here so it is a decision, not an oversight.
+
+## Decision 016 — The production artifact is proven by a two-build counter-proof
+
+- Decision: prove acceptance items 27 and 30 against the **built** artifact, and prove them with two
+  builds — production must lack the test seam, and a mock build must **contain** it.
+- Why: a scanner that greps for a string can pass because the string is absent everywhere, including
+  from the scanner's own reach. Absence is only evidence once the same scanner has been shown to
+  detect presence. This is the charter's “مرور غير مستحقّ ليس نجاحًا” (§4.2) applied to a bundle scan.
+- Alternatives rejected: trusting the source-level `mockEnabled()` argument (it is a build-time
+  decision, so only the build can settle it); scanning `dist/` as it happens to exist (previous
+  steps leave mock builds there — the artifact under test must be built by the proof itself).
+- Risk: the proof runs two Vite builds, so it is too slow for `test:gate`'s 100+ node proofs. It is
+  registered as `test:bundle-safety` and run in the final gate, matching the existing precedent that
+  build-dependent proofs (`test:e2e:*`) sit outside `test:gate`. This placement is a declared
+  exclusion, not a silent one (§4).
+- Reversibility: a proof script and one package.json entry; no product code involved.
+- Affected files: `scripts/production-bundle-safety-proof.mjs`, `package.json`.
+
 ## Decision 006 — Error recovery never means product completion
 
 - Decision: a render failure may retry/reload/contact support, but cannot mark onboarding complete or synthesize a plan.
@@ -186,3 +239,12 @@ PKG-7 restores the existing hardened Settings data path and makes capabilities/p
 - Risk: older untouched surfaces can still contain hardcoded numerals inside translated prose; those are dictionary content, not stored numeric values. The shared helper is now mandatory for dynamic Layer-3 presentation and expands as later layers touch remaining surfaces.
 - Reversibility: the policy is a small presentation helper and informational dictionary; no schema or stored value changes. The portability reconnection removes a duplicate unsafe path without data migration.
 - Affected files: Settings/DataManagementPanel, number formatting, Layer-3 Nutrition/Today/Workout/Progress displays, dedicated dictionary and focused/browser proofs.
+
+## Decision 014 — Profile composes canonical owners and preserves its local return context
+
+- Decision: keep `ProfileView` → `ProfileV2` as the live Profile owner, but compose the canonical `DataManagementPanel` and canonical `#/settings` route for security-sensitive data/account/preferences work. Distinguish signed-in account deletion from guest device-data management. `MobileShell` owns the route `h1`; Profile internal screens are subordinate headings.
+- Why: Profile is a summary and launch surface, not a second Settings or portability implementation. Personality-specific truth and a marker on the current Profile history entry preserve user intent without creating another persistent product model or storage key.
+- Alternatives rejected: maintain two import/export state machines; expose dead language/units/numeral rows inside Profile; promise account deletion to guests; always return from Settings to Profile home; keep visually duplicated `h1` headings.
+- Risk: the return marker is intentionally bound to that browser-history entry and clears after one restoration; a new independent Profile visit does not restore an old sub-screen. This is UI context, not user data.
+- Reversibility: no data schema changes. The package removes duplicated code, adds dictionary copy and test seams, and can be reverted as one checkpoint.
+- Affected files: `ProfileV2`, `profileV2Model`, Profile dictionary, reminder/native controls and focused/browser proofs.

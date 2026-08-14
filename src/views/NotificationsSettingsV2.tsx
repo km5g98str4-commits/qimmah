@@ -130,9 +130,11 @@ export function NotificationsSettingsV2({ lang, onBack }: Props) {
             aria-label={t('تفعيل التذكيرات', 'Enable reminders')}
             disabled={!native || busy || auth.recoveryActive}
             onClick={() => void onToggleMaster()}
-            className={cn('relative h-6 w-11 shrink-0 rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-40', masterActive ? 'bg-primary' : 'bg-line')}
+            className="grid h-11 w-11 shrink-0 place-items-center disabled:cursor-not-allowed disabled:opacity-40"
           >
-            <span className={cn('absolute top-0.5 h-5 w-5 rounded-full bg-white transition-all', masterActive ? 'start-0.5' : 'end-0.5')} />
+            <span aria-hidden="true" className={cn('relative block h-6 w-11 rounded-full transition-colors', masterActive ? 'bg-primary' : 'bg-line')}>
+              <span className={cn('absolute top-0.5 h-5 w-5 rounded-full bg-white transition-all', masterActive ? 'start-0.5' : 'end-0.5')} />
+            </span>
           </button>
         </div>
 
@@ -315,18 +317,17 @@ function ToggleSwitch({ id, checked, disabled, onChange, label }: { id: string; 
       aria-label={label}
       disabled={disabled}
       onClick={() => onChange(!checked)}
-      className={cn(
-        'relative h-6 w-11 shrink-0 rounded-full transition-colors disabled:cursor-not-allowed',
-        disabled ? 'bg-line' : checked ? 'v2-bg-blue-soft' : 'bg-line',
-      )}
+      className="grid h-11 w-11 shrink-0 place-items-center disabled:cursor-not-allowed"
     >
-      <span
-        className={cn(
-          'absolute top-0.5 h-5 w-5 rounded-full transition-all',
-          checked ? 'start-0.5' : 'end-0.5',
-          disabled ? 'bg-ink-400' : checked ? 'v2-text-blue bg-current' : 'bg-white',
-        )}
-      />
+      <span aria-hidden="true" className={cn('relative block h-6 w-11 rounded-full transition-colors', disabled ? 'bg-line' : checked ? 'v2-bg-blue-soft' : 'bg-line')}>
+        <span
+          className={cn(
+            'absolute top-0.5 h-5 w-5 rounded-full transition-all',
+            checked ? 'start-0.5' : 'end-0.5',
+            disabled ? 'bg-ink-400' : checked ? 'v2-text-blue bg-current' : 'bg-white',
+          )}
+        />
+      </span>
     </button>
   )
 }
@@ -385,8 +386,8 @@ function SubScreen({ title, onBack, lang, children }: { title: string; onBack: (
     <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light bg-page px-4 pb-6 pt-3 text-ink-900">
       <div className="v2-screen-enter mx-auto w-full max-w-md">
         <div className="flex items-center gap-3">
-          <button type="button" onClick={onBack} aria-label={ar ? 'رجوع' : 'Back'} className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-line bg-surface"><Icon name="ChevronRight" className="h-5 w-5 rtl:rotate-0 ltr:rotate-180" /></button>
-          <h1 className="text-xl font-black">{title}</h1>
+          <button type="button" onClick={onBack} aria-label={ar ? 'رجوع' : 'Back'} className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-line bg-surface"><Icon name="ChevronRight" className="h-5 w-5 rtl:rotate-0 ltr:rotate-180" /></button>
+          <h2 className="text-xl font-black">{title}</h2>
         </div>
         <div className="mt-4 space-y-5">{children}</div>
       </div>
