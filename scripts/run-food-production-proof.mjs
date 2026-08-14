@@ -340,6 +340,12 @@ ok('الحتمية: تشغيلان بنفس SOURCE_DATE_EPOCH ينتجان ال�
 counter('الحتمية ليست فراغًا — المخرج غير فارغ فعلًا', bytes1.length > 0)
 
 // ═══════════ ٩) الحقوق والخصوصية ═══════════
+// كل سجل يحمل حقول المخطّط **بالضبط** — لا ناقص ولا زائد. هذا يقفل تسرّب أي حقل
+// عابر (مثل `_scans` المستعمل لترتيب الشعبية) إلى المخرجات المشحونة.
+const expectedFields = JSON.stringify([...schemaTs.PRODUCT_FIELDS].sort())
+const shapeViolations = fxRecords.filter((r) => JSON.stringify(Object.keys(r).sort()) !== expectedFields)
+ok('الشكل: كل سجل يحمل حقول المخطّط بالضبط — لا حقل عابر يتسرّب', shapeViolations.length === 0, `${shapeViolations.length} مخالفًا`)
+counter('لا حقل يبدأ بشرطة سفلية في أي سجل (الحقول العابرة لا تُشحن)', !fxRecords.some((r) => Object.keys(r).some((k) => k.startsWith('_'))))
 ok('الحقوق: `image_url` فارغ في كل سجل (صور OFF غير نظيفة الحقوق)', fxRecords.every((r) => r.image_url === null))
 counter('حارس الصور فعّال — لا رابط صورة يتسرّب', !fxRecords.some((r) => typeof r.image_url === 'string'))
 ok('الحقوق: كل سجل يحمل مصدره ورابطه ووقت تحديثه', fxRecords.every((r) => r.source && r.source_record_id && r.source_url))

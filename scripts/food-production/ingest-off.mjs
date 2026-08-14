@@ -52,8 +52,22 @@ const bump = (obj, key) => { obj[key] = (obj[key] ?? 0) + 1 }
 const gulfRecords = []
 let globalPool = []
 
-/** ترتيب حتمي: الثقة تنازليًا، ثم GTIN تصاعديًا لقطع التعادل. */
-const rank = (a, b) => (b.confidence - a.confidence) || (a.gtin < b.gtin ? -1 : a.gtin > b.gtin ? 1 : 0)
+/**
+ * ترتيب الذيل العالمي — **الشعبية أولًا ثم الثقة**، وGTIN لقطع التعادل (حتمية).
+ *
+ * ═══ لماذا الشعبية ═══
+ * هذه قاعدة **ماسح باركود**: قيمتها أن تجد ما يمسحه الناس فعلًا. والترتيب بالثقة وحدها
+ * (وهي درجة اكتمال حقول) كان يُدخل سجلات مكتملة لا يمسحها أحد، **ويُخرج كوكاكولا
+ * ونوتيلا** — تحقّقتُ من ذلك ببحث فعلي في الشرائح المُنتَجة قبل هذا التغيير.
+ * `unique_scans_n` من OFF عدّاد مسح حقيقي (مملوء في ~٢٠٪ من الصفوف)، وهو الإشارة
+ * الصحيحة هنا. السعودية والخليج **خارج هذا الترتيب أصلًا** لأنهما بلا سقف.
+ *
+ * `_scans` حقل عابر للترتيب فقط — يُحذف قبل الكتابة ولا يدخل المخطّط.
+ */
+const rank = (a, b) =>
+  ((b._scans ?? 0) - (a._scans ?? 0)) ||
+  (b.confidence - a.confidence) ||
+  (a.gtin < b.gtin ? -1 : a.gtin > b.gtin ? 1 : 0)
 
 function prunePool() {
   if (globalPool.length <= GLOBAL_LIMIT * 2) return
@@ -122,6 +136,8 @@ function buildRecord(row) {
 
   rec.quality_flags = flags
   rec.confidence = scoreConfidence(rec, flags)
+  // عدّاد المسح — عابر للترتيب، غير قابل للتعداد كي لا يتسرّب إلى JSON مطلقًا.
+  Object.defineProperty(rec, '_scans', { value: N.num(row.unique_scans_n) ?? 0, enumerable: false })
   for (const f of flags) bump(stats.flags, f)
   return rec
 }
