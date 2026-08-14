@@ -1,9 +1,9 @@
 {
   "contract": "QIMMAH-SOVEREIGN-PHASE-II-001",
   "agent": "AGENT-A",
-  "head": "59dae0f01adf17d7a5aeb29f10fad811e019c2ec",
-  "headSubject": "chore(release): keep only latest.json evidence tracked",
-  "ranAt": "2026-08-14T13:27:35.800Z",
+  "head": "a9bfba041f8420bb97f75d8639384e31ce3eaf1c",
+  "headSubject": "test(release): [PHASE-II/A] harden the harness against its own false positives",
+  "ranAt": "2026-08-14T19:34:13.786Z",
   "provisional": true,
   "provisionalReason": "Web Sovereign run had not landed its final HEAD when this pass executed.",
   "builds": {},
@@ -15,164 +15,455 @@
   ],
   "validationDowngrades": [],
   "totals": {
-    "pass": 24,
-    "fail": 0,
-    "blocked": 0
+    "pass": 62,
+    "fail": 5,
+    "blocked": 1
   },
   "suites": [
     {
-      "suite": "p2-premium-test-state (chromium)",
-      "pass": 24,
-      "fail": 0,
-      "blocked": 0,
-      "failures": [],
+      "suite": "p1-preview-user (chromium)",
+      "pass": 62,
+      "fail": 5,
+      "blocked": 1,
+      "failures": [
+        {
+          "section": "plan-edit boundary — the SECOND live path to the same paid state",
+          "label": "Preview reaching the plan editor opens the Premium surface OR persists nothing",
+          "evidence": "route=#/setup gateOnChange=false gateOnSave=false goal cut → bulk (after reload)"
+        },
+        {
+          "section": "plan-edit boundary — the SECOND live path to the same paid state",
+          "label": "the declared paid action `plan.saveEdit` is enforced on EVERY live path, not one",
+          "evidence": "path-1 (WorkoutView) is guarded; path-2 (#/setup) wrote goal=\"bulk\" with no gate"
+        },
+        {
+          "section": "numeral policy holds across every LIVE numeric surface (Arabic session)",
+          "label": "LIVE Nutrition renders its numbers in the Arabic numeral policy",
+          "evidence": "latin values: [\"1937\",\"1937\",\"0\",\"0\",\"0\",\"148\",\"0\",\"206\"]"
+        },
+        {
+          "section": "numeral policy holds across every LIVE numeric surface (Arabic session)",
+          "label": "LIVE Workout renders its numbers in the Arabic numeral policy",
+          "evidence": "latin values: [\"4\",\"اليوم 1 · علوي\",\"5\",\"30\",\"اليوم 2 · سفلي\",\"5\",\"30\",\"اليوم 3 · علوي\"]"
+        },
+        {
+          "section": "numeral policy holds across every LIVE numeric surface (Arabic session)",
+          "label": "the SAME fact (training days per week) uses ONE numeral system on every live screen",
+          "evidence": "#/profile \"٤ أيام/أسبوع\" → arabic-indic  vs  #/workout \"4 أيام/أسبوع\" → latin"
+        }
+      ],
       "checks": [
         {
-          "section": "forged authority is refused (localStorage · query param · direct store)",
-          "label": "a localStorage «premium» flag + query parameter do NOT grant entitlement",
+          "section": "entry → onboarding → personalized reveal",
+          "label": "landing offers guest entry and reaches the first question",
           "ok": true,
-          "evidence": "gate=true"
+          "evidence": "first field #v2-body-age present"
         },
         {
-          "section": "forged authority is refused (localStorage · query param · direct store)",
-          "label": "the forged authority wrote no session",
+          "section": "entry → onboarding → personalized reveal",
+          "label": "reveal shows a personalized plan (day count + session length present)",
+          "ok": true,
+          "evidence": "len=2669"
+        },
+        {
+          "section": "entry → onboarding → personalized reveal",
+          "label": "reveal offers BOTH a Premium purchase and a free-preview exit",
+          "ok": true,
+          "evidence": "cta=https://salla.sa/Qimmahsa"
+        },
+        {
+          "section": "entry → onboarding → personalized reveal",
+          "label": "Premium CTA opens externally with noopener noreferrer",
+          "ok": true,
+          "evidence": "rel=\"noopener noreferrer\""
+        },
+        {
+          "section": "entry → onboarding → personalized reveal",
+          "label": "reveal copy carries no forbidden Premium promise (lifetime / مدى الحياة)",
+          "ok": true,
+          "evidence": "تمّ\n\nجهزنا خطتك\n\nبنيناها من إجاباتك أنت — أيامك ووقتك ومكان تمرينك وهدفك.\n\nمعاينة خطتك\n\nهذا شكل أسبوعك من إجاباتك. راجعه وعدّل اللي ما يناسبك قبل ما تحفظه.\n\nتنش"
+        },
+        {
+          "section": "entry → onboarding → personalized reveal",
+          "label": "declining Premium lands inside the app (Preview), not a dead end",
+          "ok": true,
+          "evidence": "#/dashboard"
+        },
+        {
+          "section": "Preview browses every surface (block the action, not the page)",
+          "label": "#/dashboard is browsable in Preview",
+          "ok": true,
+          "evidence": "hash=#/dashboard len=436 notFound=false"
+        },
+        {
+          "section": "Preview browses every surface (block the action, not the page)",
+          "label": "#/workout is browsable in Preview",
+          "ok": true,
+          "evidence": "hash=#/workout len=441 notFound=false"
+        },
+        {
+          "section": "Preview browses every surface (block the action, not the page)",
+          "label": "#/exercises is browsable in Preview",
+          "ok": true,
+          "evidence": "hash=#/exercises len=9355 notFound=false"
+        },
+        {
+          "section": "Preview browses every surface (block the action, not the page)",
+          "label": "#/nutrition is browsable in Preview",
+          "ok": true,
+          "evidence": "hash=#/nutrition len=572 notFound=false"
+        },
+        {
+          "section": "Preview browses every surface (block the action, not the page)",
+          "label": "#/progress is browsable in Preview",
+          "ok": true,
+          "evidence": "hash=#/progress len=896 notFound=false"
+        },
+        {
+          "section": "Preview browses every surface (block the action, not the page)",
+          "label": "#/measurements is browsable in Preview",
+          "ok": true,
+          "evidence": "hash=#/measurements len=312 notFound=false"
+        },
+        {
+          "section": "Preview browses every surface (block the action, not the page)",
+          "label": "#/profile is browsable in Preview",
+          "ok": true,
+          "evidence": "hash=#/profile len=425 notFound=false"
+        },
+        {
+          "section": "Preview browses every surface (block the action, not the page)",
+          "label": "#/stats is browsable in Preview",
+          "ok": true,
+          "evidence": "hash=#/stats len=517 notFound=false"
+        },
+        {
+          "section": "Preview browses every surface (block the action, not the page)",
+          "label": "#/steps is browsable in Preview",
+          "ok": true,
+          "evidence": "hash=#/steps len=278 notFound=false"
+        },
+        {
+          "section": "Preview browses every surface (block the action, not the page)",
+          "label": "#/recovery is browsable in Preview",
+          "ok": true,
+          "evidence": "hash=#/recovery len=313 notFound=false"
+        },
+        {
+          "section": "Preview browses every surface (block the action, not the page)",
+          "label": "#/settings is browsable in Preview",
+          "ok": true,
+          "evidence": "hash=#/settings len=1996 notFound=false"
+        },
+        {
+          "section": "Preview browses every surface (block the action, not the page)",
+          "label": "#/calc is browsable in Preview",
+          "ok": true,
+          "evidence": "hash=#/calc len=2869 notFound=false"
+        },
+        {
+          "section": "Preview browses every surface (block the action, not the page)",
+          "label": "#/privacy is browsable in Preview",
+          "ok": true,
+          "evidence": "hash=#/privacy len=887 notFound=false"
+        },
+        {
+          "section": "Preview browses every surface (block the action, not the page)",
+          "label": "#/terms is browsable in Preview",
+          "ok": true,
+          "evidence": "hash=#/terms len=716 notFound=false"
+        },
+        {
+          "section": "Preview browses every surface (block the action, not the page)",
+          "label": "#/contact is browsable in Preview",
+          "ok": true,
+          "evidence": "hash=#/contact len=182 notFound=false"
+        },
+        {
+          "section": "Preview browses every surface (block the action, not the page)",
+          "label": "exercise detail is reachable in Preview and owns the URL",
+          "ok": true,
+          "evidence": "{\"hash\":\"#/exercises/plank\",\"dialog\":true}"
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "workout.start — affordance reachable",
+          "ok": true,
+          "evidence": "#/workout plan day card «اليوم 1»"
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "workout.start — Premium surface opens",
+          "ok": true,
+          "evidence": "#/workout plan day card «اليوم 1»"
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "workout.start — no paid state written",
           "ok": true,
           "evidence": "changed=[]"
         },
         {
-          "section": "forged authority is refused (localStorage · query param · direct store)",
-          "label": "the entitlement mock store is NOT read from localStorage",
-          "ok": true,
-          "evidence": "local=active session=null"
-        },
-        {
-          "section": "activation-code outcomes (sanctioned mock codes)",
-          "label": "code «QIMMAH-TEST-USED» produces a visible, non-empty outcome",
-          "ok": true,
-          "evidence": "هذا الكود مستخدم من قبل."
-        },
-        {
-          "section": "activation-code outcomes (sanctioned mock codes)",
-          "label": "code «QIMMAH-TEST-EXPIRED» produces a visible, non-empty outcome",
-          "ok": true,
-          "evidence": "هذا الكود منتهي."
-        },
-        {
-          "section": "activation-code outcomes (sanctioned mock codes)",
-          "label": "code «QIMMAH-TEST-OFFLINE» produces a visible, non-empty outcome",
-          "ok": true,
-          "evidence": "ما قدرنا نتحقّق الحين. تأكّد من النت وجرّب بعد شوي."
-        },
-        {
-          "section": "activation-code outcomes (sanctioned mock codes)",
-          "label": "code «AAAA-BBBB-CCCC» produces a visible, non-empty outcome",
-          "ok": true,
-          "evidence": "الكود ما ضبط. تأكّد منه وجرّب مرة ثانية."
-        },
-        {
-          "section": "activation-code outcomes (sanctioned mock codes)",
-          "label": "code «ZZZZ-YYYY-XXXX» produces a visible, non-empty outcome",
-          "ok": true,
-          "evidence": "الكود ما ضبط. تأكّد منه وجرّب مرة ثانية."
-        },
-        {
-          "section": "activation-code outcomes (sanctioned mock codes)",
-          "label": "no oracle: two different unknown codes give the SAME generic message",
-          "ok": true,
-          "evidence": "الكود ما ضبط. تأكّد منه وجرّب مرة ثانية. | الكود ما ضبط. تأكّد منه وجرّب مرة ثانية."
-        },
-        {
-          "section": "activation-code outcomes (sanctioned mock codes)",
-          "label": "distinct real outcomes are distinguished (used ≠ expired ≠ unknown)",
-          "ok": true,
-          "evidence": "هذا الكود مستخدم من قبل. | هذا الكود منتهي. | ما قدرنا نتحقّق الحين. تأكّد من النت وجرّب بعد شوي. | الكود ما ضبط. تأكّد منه وجرّب مرة ثانية. | الكود ما ضبط. تأكّد منه وجرّب مرة ثانية."
-        },
-        {
-          "section": "activation-code outcomes (sanctioned mock codes)",
-          "label": "failed codes grant nothing",
-          "ok": true,
-          "evidence": "keys=10"
-        },
-        {
-          "section": "activated: every legitimate mutation now succeeds and persists",
-          "label": "valid code reports success",
-          "ok": true,
-          "evidence": "تمّ التفعيل — كل شي مفتوح لك الحين."
-        },
-        {
-          "section": "activated: every legitimate mutation now succeeds and persists",
-          "label": "nutrition.water — no Premium gate for an entitled user",
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "workout.start — no raw exception surfaces",
           "ok": true,
           "evidence": ""
         },
         {
-          "section": "activated: every legitimate mutation now succeeds and persists",
-          "label": "nutrition.water — the write actually landed",
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "workout.startEmpty — affordance reachable",
           "ok": true,
-          "evidence": "changed=[qimmah:firstWin:v1:guest, qimmah:history:nutritionLogs:v1, qimmah:history:waterLogs:v1, qimmah:migrations:v1, qimmah:nutrition:v2, qimmah:nutritionHistory:v1, qimmah:tracking:events:v1:guest]"
+          "evidence": "#/workout «ابدأ تمرين فارغ»"
         },
         {
-          "section": "activated: every legitimate mutation now succeeds and persists",
-          "label": "workout.start — no Premium gate for an entitled user",
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "workout.startEmpty — Premium surface opens",
           "ok": true,
-          "evidence": ""
+          "evidence": "#/workout «ابدأ تمرين فارغ»"
         },
         {
-          "section": "activated: every legitimate mutation now succeeds and persists",
-          "label": "workout.start — the write actually landed",
-          "ok": true,
-          "evidence": "changed=[qimmah:activeWorkout:v1, qimmah:tracking:events:v1:guest]"
-        },
-        {
-          "section": "activated: in-session set logging and durable finish",
-          "label": "workout.logSet writes into the active session",
-          "ok": true,
-          "evidence": "changed=[qimmah:activeWorkout:v1]"
-        },
-        {
-          "section": "activated: in-session set logging and durable finish",
-          "label": "workout.finish never loses the session (durable history OR an intact resumable snapshot)",
-          "ok": true,
-          "evidence": "history=false stillActive=[qimmah:activeWorkout:v1] keysBefore=16"
-        },
-        {
-          "section": "the test seam cannot exist in a production build (live proof)",
-          "label": "in production the same valid TEST code does NOT activate",
-          "ok": true,
-          "evidence": "message=\"ما قدرنا نتحقّق الحين. تأكّد من النت وجرّب بعد شوي.\" gate=true"
-        },
-        {
-          "section": "the test seam cannot exist in a production build (live proof)",
-          "label": "in production the test code grants no write",
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "workout.startEmpty — no paid state written",
           "ok": true,
           "evidence": "changed=[]"
         },
         {
-          "section": "the test seam cannot exist in a production build (live proof)",
-          "label": "production reports the honest offline state rather than a fake failure or success",
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "workout.startEmpty — no raw exception surfaces",
           "ok": true,
-          "evidence": "ما قدرنا نتحقّق الحين. تأكّد من النت وجرّب بعد شوي."
+          "evidence": ""
         },
         {
-          "section": "page health",
-          "label": "no raw exception surfaced during the entitled journey",
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "nutrition.addFood — affordance reachable",
           "ok": true,
-          "evidence": "تخطَّ إلى المحتوى الرئيسي\nتخطَّ إلى المحتوى\nتمرين\nتمرين\nبدء سريع\nابدأ تمرين فارغ\nسجّل مجموعاتك بدون جدول مسبق\nخطتي\nأنشئ جدول مخصّص\n\nعلوي / سفلي\n\nجدول تلقائي\n\n4 "
+          "evidence": "#/nutrition «أضف»"
         },
         {
-          "section": "page health",
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "nutrition.addFood — Premium surface opens",
+          "ok": true,
+          "evidence": "#/nutrition «أضف»"
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "nutrition.addFood — no paid state written",
+          "ok": true,
+          "evidence": "changed=[]"
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "nutrition.addFood — no raw exception surfaces",
+          "ok": true,
+          "evidence": ""
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "nutrition.water — affordance reachable",
+          "ok": true,
+          "evidence": "#/nutrition «+250 مل»"
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "nutrition.water — Premium surface opens",
+          "ok": true,
+          "evidence": "#/nutrition «+250 مل»"
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "nutrition.water — no paid state written",
+          "ok": true,
+          "evidence": "changed=[]"
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "nutrition.water — no raw exception surfaces",
+          "ok": true,
+          "evidence": ""
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "recovery.log — affordance reachable",
+          "ok": true,
+          "evidence": "#/recovery «اعرض توصيتي»"
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "recovery.log — Premium surface opens",
+          "ok": true,
+          "evidence": "#/recovery «اعرض توصيتي»"
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "recovery.log — no paid state written",
+          "ok": true,
+          "evidence": "changed=[]"
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "recovery.log — no raw exception surfaces",
+          "ok": true,
+          "evidence": ""
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "progress.logMeasurement — affordance reachable",
+          "ok": true,
+          "evidence": "#/measurements «أضف قياسًا» → save"
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "progress.logMeasurement — Premium surface opens",
+          "ok": true,
+          "evidence": "#/measurements «أضف قياسًا» → save"
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "progress.logMeasurement — no paid state written",
+          "ok": true,
+          "evidence": "changed=[]"
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "progress.logMeasurement — no raw exception surfaces",
+          "ok": true,
+          "evidence": ""
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "progress.logWeight — affordance reachable",
+          "ok": true,
+          "evidence": "#/progress «الوزن والجسم» → «تسجيل وزن اليوم» → save"
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "progress.logWeight — Premium surface opens",
+          "ok": true,
+          "evidence": "#/progress «الوزن والجسم» → «تسجيل وزن اليوم» → save"
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "progress.logWeight — no paid state written",
+          "ok": true,
+          "evidence": "changed=[]"
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "progress.logWeight — no raw exception surfaces",
+          "ok": true,
+          "evidence": ""
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "nutrition.quickAdd — affordance reachable",
+          "ok": true,
+          "evidence": "dashboard quick-log «سجّل وجبة»"
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "nutrition.quickAdd — Premium surface opens",
+          "ok": true,
+          "evidence": "dashboard quick-log «سجّل وجبة»"
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "nutrition.quickAdd — no paid state written",
+          "ok": true,
+          "evidence": "changed=[]"
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "nutrition.quickAdd — no raw exception surfaces",
+          "ok": true,
+          "evidence": ""
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "plan.saveEdit (path 1 — Workout custom plan builder) live save",
+          "ok": null,
+          "blocked": true,
+          "evidence": "the builder’s «حفظ الجدول» stays disabled until a complete schedule exists; the guard on this path is proved statically by test:access-gate (WorkoutView CustomPlanBuilder.onSave)"
+        },
+        {
+          "section": "plan-edit boundary — the SECOND live path to the same paid state",
+          "label": "Preview reaching the plan editor opens the Premium surface OR persists nothing",
+          "ok": false,
+          "evidence": "route=#/setup gateOnChange=false gateOnSave=false goal cut → bulk (after reload)"
+        },
+        {
+          "section": "plan-edit boundary — the SECOND live path to the same paid state",
+          "label": "the declared paid action `plan.saveEdit` is enforced on EVERY live path, not one",
+          "ok": false,
+          "evidence": "path-1 (WorkoutView) is guarded; path-2 (#/setup) wrote goal=\"bulk\" with no gate"
+        },
+        {
+          "section": "paid actions with no Preview-reachable affordance — classified, not skipped",
+          "label": "workout.logSet / workout.finish are unreachable because no session was ever written",
+          "ok": true,
+          "evidence": "watched=[qimmah:activeWorkout:v1, qimmah:active-workout:v2] present=[none]"
+        },
+        {
+          "section": "paid actions with no Preview-reachable affordance — classified, not skipped",
+          "label": "the watched session key set includes the LIVE writer key, not only the registered one",
+          "ok": true,
+          "evidence": "qimmah:activeWorkout:v1, qimmah:active-workout:v2"
+        },
+        {
+          "section": "paid actions with no Preview-reachable affordance — classified, not skipped",
+          "label": "nutrition.removeFood / toggleMeal are unreachable because Preview logged zero rows",
+          "ok": true,
+          "evidence": "rows=0"
+        },
+        {
+          "section": "paid actions with no Preview-reachable affordance — classified, not skipped",
+          "label": "every PAID_ACTION is classified (exercised or reasoned) — none silently skipped",
+          "ok": true,
+          "evidence": "all 13 classified"
+        },
+        {
+          "section": "counter-proof — the tracking-key exclusion is not a blanket pass",
+          "label": "a real paid-state write WOULD be detected by the same diff",
+          "ok": true,
+          "evidence": "detected=[qimmah:nutrition:v2]"
+        },
+        {
+          "section": "numeral policy holds across every LIVE numeric surface (Arabic session)",
+          "label": "LIVE Nutrition renders its numbers in the Arabic numeral policy",
+          "ok": false,
+          "evidence": "latin values: [\"1937\",\"1937\",\"0\",\"0\",\"0\",\"148\",\"0\",\"206\"]"
+        },
+        {
+          "section": "numeral policy holds across every LIVE numeric surface (Arabic session)",
+          "label": "LIVE Workout renders its numbers in the Arabic numeral policy",
+          "ok": false,
+          "evidence": "latin values: [\"4\",\"اليوم 1 · علوي\",\"5\",\"30\",\"اليوم 2 · سفلي\",\"5\",\"30\",\"اليوم 3 · علوي\"]"
+        },
+        {
+          "section": "numeral policy holds across every LIVE numeric surface (Arabic session)",
+          "label": "LIVE Progress renders its numbers in the Arabic numeral policy",
+          "ok": true,
+          "evidence": "latin values: []"
+        },
+        {
+          "section": "numeral policy holds across every LIVE numeric surface (Arabic session)",
+          "label": "the SAME fact (training days per week) uses ONE numeral system on every live screen",
+          "ok": false,
+          "evidence": "#/profile \"٤ أيام/أسبوع\" → arabic-indic  vs  #/workout \"4 أيام/أسبوع\" → latin"
+        },
+        {
+          "section": "page health across the whole journey",
           "label": "zero unhandled page errors",
           "ok": true,
           "evidence": ""
         },
         {
-          "section": "page health",
+          "section": "page health across the whole journey",
           "label": "zero non-benign console errors",
           "ok": true,
           "evidence": ""
         }
       ],
-      "id": "p2-premium-test-state",
+      "id": "p1-preview-user",
       "engine": "chromium"
     }
   ]

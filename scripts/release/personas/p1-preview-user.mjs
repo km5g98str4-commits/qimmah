@@ -100,7 +100,18 @@ export async function run({ browser, url, engine }) {
       await open()
       const before = await storageSnapshot(page)
       const errsBefore = pageErrors.length
-      await fire()
+      // An affordance that cannot be found must NOT kill the suite. p1 covers ~20
+      // preview-gate assertions; one missing button previously threw and zeroed
+      // them all, which reads as "untested" but tallies as a single failure.
+      // Charter §4.2: it fails BY NAME, and the remaining attempts still run.
+      try {
+        await fire()
+      } catch (err) {
+        rec.check(`${action} — affordance reachable`, false, `${label} — ${String(err).split('\n')[0]}`)
+        classified.set(action, 'AFFORDANCE_NOT_FOUND')
+        return
+      }
+      rec.check(`${action} — affordance reachable`, true, label)
       await settle(page, 1400)
       const gate = await gateVisible(page)
       const after = await storageSnapshot(page)
@@ -172,7 +183,10 @@ export async function run({ browser, url, engine }) {
     await attempt('nutrition.quickAdd', 'dashboard quick-log «سجّل وجبة»',
       async () => {
         await goRoute(page, 'dashboard', 2400)
-        await tap(page, /سجّل وجبة/)
+        // firstWin.ts:107-110 — primary/alternative flip at EVENING_HOUR (21):
+        // day → meal «سجّل وجبة», evening → dinner «سجّل عشاك». Matching one only
+        // made this suite fail after 21:00 and pass before it.
+        await tap(page, /سجّل وجبة|سجّل عشاك/)
         await settle(page, 1200)
       },
       async () => {
