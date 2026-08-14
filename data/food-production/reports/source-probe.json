@@ -1,0 +1,103 @@
+{
+  "probed_at": "2026-08-14T11:44:18.484Z",
+  "user_agent": "Qimmah-DataPipeline/1.0 (+https://qimmah.app; contact via repository owner)",
+  "timeout_ms": 20000,
+  "note": "Evidence of what was ACTUALLY reachable from the build machine. Unreachable sources are recorded as EXTERNALLY_BLOCKED with the transport error, never silently dropped.",
+  "results": [
+    {
+      "source_id": "openfoodfacts",
+      "label": "Open Food Facts — robots.txt",
+      "url": "https://world.openfoodfacts.org/robots.txt",
+      "method": "GET",
+      "reachable": true,
+      "http_status": 200,
+      "content_length": null,
+      "content_type": "text/plain",
+      "last_modified": "Wed, 25 Mar 2026 09:27:39 GMT",
+      "elapsed_ms": 4855,
+      "body_head": "User-agent: *\nDisallow: /api\nDisallow: /cgi\nDisallow: /facets\n\nUser-agent: Googlebot\nDisallow: /api\nDisallow: /cgi\nAllow: /cgi/product_image.pl\nAllow: /cgi/opensearch.pl\n\nUser-agent: Bingbot\nDisallow: /api\nDisallow: /cgi\nDisallow: /facets\nAllow: /cgi/product_image.pl\nAllow: /cgi/opensearch.pl\n\nUser-agent: meta-externalagent/1.1\nDisallow: /\n\nUser-agent: meta-webindexer\nDisallow: /\n\nUser-agent: Applebot\nDisallow: /\n\nUser-agent: SEOkicks-Robot\nDisallow: /\n\nUser-agent: DotBot\nUser-agent: dotbot\nDisallow: /\n\n# http://www.searchmetrics.com\nUser-agent: SearchmetricsBot\nDisallow: /\n\n# http://www.majestic12.co.uk/projects/dsearch/mj12bot.php\nUser-agent: MJ12bot\nDisallow: /\n\n# http://www.domaintools.com/webmasters/surveybot.php\nUser-agent: SurveyBot\nDisallow: /\n\n# http://www.seodiver.com/bot\nUser-agent: SEOdiver\nDisallow: /\n\n# http://openlinkprofiler.org/bot\nUser-agent: spbot\nDisallow: /\n\n# http://www.wotbox.com/bot/\nUser-agent: wotbox\nDisallow: /\n\nUser-agent: Cliqzbot/3.0\nDisallow: /\n\nUser-agent: Cliqzbot\nDisallow: /\n\nUser-agent: SeekportBot\nDisallow: /\n\nUser-agent: Seekport Bot\nDisallow: /\n\nUser-agent: Seekport\nDisallow: /\n\nUser-agent: Paracrawl\nDisallow: /\n\nUser-agent: Scrapy/1.5.0\nDisall"
+    },
+    {
+      "source_id": "openfoodfacts",
+      "label": "Open Food Facts — bulk CSV export (the permitted bulk path)",
+      "url": "https://static.openfoodfacts.org/data/en.openfoodfacts.org.products.csv.gz",
+      "method": "HEAD",
+      "reachable": true,
+      "http_status": 200,
+      "content_length": "1275171186",
+      "content_type": "application/gzip",
+      "last_modified": "Fri, 14 Aug 2026 11:43:00 GMT",
+      "elapsed_ms": 9068
+    },
+    {
+      "source_id": "openfoodfacts",
+      "label": "Open Food Facts — bulk JSONL export",
+      "url": "https://static.openfoodfacts.org/data/openfoodfacts-products.jsonl.gz",
+      "method": "HEAD",
+      "reachable": true,
+      "http_status": 200,
+      "content_length": "12672091473",
+      "content_type": "application/gzip",
+      "last_modified": "Fri, 14 Aug 2026 06:20:58 GMT",
+      "elapsed_ms": 658
+    },
+    {
+      "source_id": "usda_fdc",
+      "label": "USDA FoodData Central — robots.txt",
+      "url": "https://fdc.nal.usda.gov/robots.txt",
+      "method": "GET",
+      "reachable": true,
+      "http_status": 200,
+      "content_length": "24",
+      "content_type": "text/plain",
+      "last_modified": "Mon, 20 Jul 2026 20:31:15 GMT",
+      "elapsed_ms": 2388,
+      "body_head": "User-agent: *\nDisallow:\n"
+    },
+    {
+      "source_id": "usda_fdc",
+      "label": "USDA FoodData Central — branded foods bulk JSON",
+      "url": "https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_branded_food_json_2025-04-24.zip",
+      "method": "HEAD",
+      "reachable": true,
+      "http_status": 200,
+      "content_length": "203489469",
+      "content_type": "application/zip",
+      "last_modified": "Wed, 14 May 2025 21:07:21 GMT",
+      "elapsed_ms": 4622
+    },
+    {
+      "source_id": "sfda",
+      "label": "Saudi Food & Drug Authority — site root",
+      "url": "https://www.sfda.gov.sa/",
+      "method": "GET",
+      "reachable": false,
+      "error": "ECONNRESET",
+      "elapsed_ms": 17160,
+      "verdict": "EXTERNALLY_BLOCKED"
+    },
+    {
+      "source_id": "saudi_open_data",
+      "label": "Saudi Open Data portal — robots.txt",
+      "url": "https://open.data.gov.sa/robots.txt",
+      "method": "GET",
+      "reachable": false,
+      "error": "UND_ERR_CONNECT_TIMEOUT",
+      "elapsed_ms": 10368,
+      "verdict": "EXTERNALLY_BLOCKED"
+    },
+    {
+      "source_id": "almarai",
+      "label": "Almarai (manufacturer) — robots.txt",
+      "url": "https://www.almarai.com/robots.txt",
+      "method": "GET",
+      "reachable": true,
+      "http_status": 200,
+      "content_length": null,
+      "content_type": "text/plain",
+      "last_modified": "Wed, 05 Aug 2026 16:22:14 GMT",
+      "elapsed_ms": 1726,
+      "body_head": "User-agent: *\nAllow: /\nSitemap: https://www.almarai.com/sitemap.xml\nSitemap: https://www.almarai.com/images_sitemap.xml"
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+[
+  {
+    "reason": "same_key_distinct_gtin",
+    "key": "|croissant pur beurre|",
+    "gtins": [
+      "00000137008535",
+      "00000200024936"
+    ],
+    "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
+  },
+  {
+    "reason": "same_key_distinct_gtin",
+    "key": "|4 beignets à la pomme|",
+    "gtins": [
+      "00000183013125",
+      "00000792009847"
+    ],
+    "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
+  },
+  {
+    "reason": "same_key_distinct_gtin",
+    "key": "|pâtes de bleuets|",
+    "gtins": [
+      "00000901881203",
+      "00000901881227"
+    ],
+    "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
+  },
+  {
+    "reason": "same_key_distinct_gtin",
+    "key": "|pâtes de bleuets|",
+    "gtins": [
+      "00000901881203",
+      "00000901881234"
+    ],
+    "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
+  },
+  {
+    "reason": "same_key_distinct_gtin",
+    "key": "fuelhub|chicken katsu curry with jasmine rice edamame|485g",
+    "gtins": [
+      "00000968101276",
+      "00000968112005"
+    ],
+    "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
+  },
+  {
+    "reason": "same_key_distinct_gtin",
+    "key": "|perfect cream|",
+    "gtins": [
+      "00000979237599",
+      "00000983789886"
+    ],
+    "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
+  },
+  {
+    "reason": "same_key_distinct_gtin",
+    "key": "|granule de framboise|",
+    "gtins": [
+      "00001630001061",
+      "00001630001078"
+    ],
+    "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
+  }
+]

@@ -1,0 +1,32 @@
+{
+  "accepted": 907,
+  "by_market": {
+    "GCC": 17,
+    "SA": 40,
+    "GLOBAL": 850
+  },
+  "by_source": {
+    "qimmah_curated": 55,
+    "openfoodfacts": 852
+  },
+  "arabic_names": 55,
+  "english_names": 907,
+  "with_serving": 307,
+  "complete_macros": 892,
+  "with_sodium": 718,
+  "with_fiber": 489,
+  "with_ingredients": 152,
+  "quality_flags": {
+    "no_arabic_name": 852,
+    "no_brand": 397,
+    "macro_energy_mismatch": 38,
+    "fiber_exceeds_carbs": 23,
+    "sugar_exceeds_carbs": 1
+  },
+  "confidence_buckets": {
+    "mid_0.6-0.8": 296,
+    "high_0.8+": 264,
+    "low_0.4-0.6": 323,
+    "very_low_<0.4": 24
+  }
+}

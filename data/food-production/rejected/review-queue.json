@@ -1,0 +1,153 @@
+[
+  {
+    "reason": "fuzzy_same_name_distinct_gtin",
+    "normalized_name": "baguette niçois",
+    "count": 2,
+    "gtins": [
+      "00000000014502",
+      "00000000015509"
+    ],
+    "note": "Queued for human review. NEVER auto-merged."
+  },
+  {
+    "reason": "fuzzy_same_name_distinct_gtin",
+    "normalized_name": "crunchy peanut butter",
+    "count": 2,
+    "gtins": [
+      "00000000014892",
+      "00000530280811"
+    ],
+    "note": "Queued for human review. NEVER auto-merged."
+  },
+  {
+    "reason": "fuzzy_same_name_distinct_gtin",
+    "normalized_name": "croissant pur beurre",
+    "count": 2,
+    "gtins": [
+      "00000137008535",
+      "00000200024936"
+    ],
+    "note": "Queued for human review. NEVER auto-merged."
+  },
+  {
+    "reason": "fuzzy_same_name_distinct_gtin",
+    "normalized_name": "sweet sour chicken with jasmine rice",
+    "count": 2,
+    "gtins": [
+      "00000153294967",
+      "00001532949676"
+    ],
+    "note": "Queued for human review. NEVER auto-merged."
+  },
+  {
+    "reason": "fuzzy_same_name_distinct_gtin",
+    "normalized_name": "4 beignets à la pomme",
+    "count": 2,
+    "gtins": [
+      "00000183013125",
+      "00000792009847"
+    ],
+    "note": "Queued for human review. NEVER auto-merged."
+  },
+  {
+    "reason": "fuzzy_same_name_distinct_gtin",
+    "normalized_name": "bakers best",
+    "count": 2,
+    "gtins": [
+      "00000236555909",
+      "00000236598784"
+    ],
+    "note": "Queued for human review. NEVER auto-merged."
+  },
+  {
+    "reason": "fuzzy_same_name_distinct_gtin",
+    "normalized_name": "pain complet",
+    "count": 2,
+    "gtins": [
+      "00000675006567",
+      "00000675008530"
+    ],
+    "note": "Queued for human review. NEVER auto-merged."
+  },
+  {
+    "reason": "fuzzy_same_name_distinct_gtin",
+    "normalized_name": "pâtes de bleuets",
+    "count": 3,
+    "gtins": [
+      "00000901881203",
+      "00000901881227",
+      "00000901881234"
+    ],
+    "note": "Queued for human review. NEVER auto-merged."
+  },
+  {
+    "reason": "fuzzy_same_name_distinct_gtin",
+    "normalized_name": "chicken katsu curry with jasmine rice edamame",
+    "count": 2,
+    "gtins": [
+      "00000968101276",
+      "00000968112005"
+    ],
+    "note": "Queued for human review. NEVER auto-merged."
+  },
+  {
+    "reason": "fuzzy_same_name_distinct_gtin",
+    "normalized_name": "perfect cream",
+    "count": 2,
+    "gtins": [
+      "00000979237599",
+      "00000983789886"
+    ],
+    "note": "Queued for human review. NEVER auto-merged."
+  },
+  {
+    "reason": "fuzzy_same_name_distinct_gtin",
+    "normalized_name": "spicy chicken arrabbiata with pasta spinach",
+    "count": 2,
+    "gtins": [
+      "00001324990008",
+      "00001324990084"
+    ],
+    "note": "Queued for human review. NEVER auto-merged."
+  },
+  {
+    "reason": "fuzzy_same_name_distinct_gtin",
+    "normalized_name": "peri chicken with roasted butternut squash",
+    "count": 2,
+    "gtins": [
+      "00001487848192",
+      "00001487848482"
+    ],
+    "note": "Queued for human review. NEVER auto-merged."
+  },
+  {
+    "reason": "fuzzy_same_name_distinct_gtin",
+    "normalized_name": "sweet chilli chicken burrito",
+    "count": 2,
+    "gtins": [
+      "00001523737084",
+      "00001523737374"
+    ],
+    "note": "Queued for human review. NEVER auto-merged."
+  },
+  {
+    "reason": "fuzzy_same_name_distinct_gtin",
+    "normalized_name": "greek chicken",
+    "count": 2,
+    "gtins": [
+      "00001533624084",
+      "00001533624374"
+    ],
+    "note": "Queued for human review. NEVER auto-merged."
+  },
+  {
+    "reason": "fuzzy_same_name_distinct_gtin",
+    "normalized_name": "granule de framboise",
+    "count": 2,
+    "gtins": [
+      "00001630001061",
+      "00001630001078"
+    ],
+    "note": "Queued for human review. NEVER auto-merged."
+  }
+]

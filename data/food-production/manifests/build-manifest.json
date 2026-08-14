@@ -1,0 +1,90 @@
+{
+  "manifest_version": "1.0.0",
+  "built_at": "2026-08-14T11:54:03.053Z",
+  "normalization_version": "1.0.0",
+  "schema_version": "1.0.0",
+  "licence": {
+    "notice": "Contains information from Open Food Facts (https://world.openfoodfacts.org), made available under the Open Database License (ODbL) v1.0.",
+    "obligations": [
+      "attribution",
+      "share-alike on public distribution of derived database",
+      "keep-open"
+    ]
+  },
+  "routing": {
+    "method": "FNV-1a 32-bit over the canonical GTIN-14, modulo shard_count",
+    "barcode_lookup": "O(1): compute shard from GTIN-14, fetch that shard only, index the records object by GTIN-14. No scan, no routing table.",
+    "shard_count": 1
+  },
+  "totals": {
+    "accepted": 907,
+    "by_market": {
+      "GCC": 17,
+      "SA": 40,
+      "GLOBAL": 850
+    },
+    "by_source": {
+      "qimmah_curated": 55,
+      "openfoodfacts": 852
+    },
+    "unique_gtin": 907,
+    "duplicates_removed": 0,
+    "conflicts": 7,
+    "review_queue": 15
+  },
+  "budgets": {
+    "shard_target_gzip_bytes": {
+      "min": 204800,
+      "max": 512000
+    },
+    "hot_set_budget_gzip_bytes": 122880
+  },
+  "hot_set": {
+    "count": 57,
+    "bytes_raw": 61203,
+    "bytes_gzip": 8741,
+    "sha256": "a2fbbc1662bbc54ca29a31f370b5efbc42843212a36b7f4468be8c5e7f4526eb",
+    "budget_bytes_gzip": 122880,
+    "within_budget": true
+  },
+  "shards": [
+    {
+      "shard": "shard-0",
+      "count": 907,
+      "bytes_raw": 906759,
+      "bytes_gzip": 105199,
+      "sha256": "765e1dd0b8bc7c37e586dea158db4c3fc24674c5a87c85271fcded04caea5349",
+      "sha256_gzip": "f1d28743ff0f9f226b93e176a04084b804500ad8e89018ecc189efee1d8a5fdf",
+      "index_bytes_raw": 56905,
+      "index_bytes_gzip": 21495,
+      "index_sha256": "0d00cfa502d9207d49a6b4efe452e314cac37d39eb95037ec49a7e9f17cdc10c",
+      "index_tokens": 1858,
+      "within_budget": false
+    }
+  ],
+  "shard_totals": {
+    "shard_count": 1,
+    "records": 907,
+    "bytes_raw": 906759,
+    "bytes_gzip": 105199,
+    "index_bytes_gzip": 21495,
+    "bytes_gzip_all": 126694
+  },
+  "quality_flags": {
+    "no_arabic_name": 852,
+    "no_brand": 397,
+    "macro_energy_mismatch": 38,
+    "fiber_exceeds_carbs": 23,
+    "sugar_exceeds_carbs": 1
+  },
+  "dedupe": {
+    "input": 907,
+    "merged_by_gtin": 0,
+    "merged_by_source_id": 0,
+    "merged_by_normalized_key": 0,
+    "duplicates_removed": 0,
+    "output": 907,
+    "conflicts": 7,
+    "review_queue": 15
+  }
+}

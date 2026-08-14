@@ -48,3 +48,6 @@ scripts/e2e-auth/.workdir/
 .cutover-a/
 .cutover-b/
 .cutover-c/
+
+# خطّ إنتاج بيانات الأطعمة — تنزيلات ومخرجات وسيطة ضخمة (لا تُلتزم)
+.food-cache/
