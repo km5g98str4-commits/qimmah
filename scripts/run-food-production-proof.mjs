@@ -306,6 +306,22 @@ const rerun = spawnSync(process.execPath, [resolve(ROOT, 'scripts/food-productio
 const prodStatsAfter = existsSync(prodStats) ? readFileSync(prodStats, 'utf8') : null
 ok('العزل: تشغيل العيّنة لا يدهس تقرير إحصاء الإنتاج', rerun.status === 0 && prodStatsBefore === prodStatsAfter, prodStatsBefore === prodStatsAfter ? 'سليم' : 'دُهس!')
 
+// ── الحتمية من طرف إلى طرف: نفس المدخل ⇒ نفس البايتات ──
+// الادّعاء في التقرير و`accepted/README.md` أن الخطّ قابل لإعادة الإنتاج بايتًا ببايت
+// متى ثُبّت `SOURCE_DATE_EPOCH`. هذا برهانه لا إعادة صياغته.
+const envFixed = { ...process.env, SOURCE_DATE_EPOCH: '1786000000' }
+const d1 = join(mkdtempSync(join(tmpdir(), 'qimmah-d1-')), 'a.jsonl')
+const d2 = join(mkdtempSync(join(tmpdir(), 'qimmah-d2-')), 'b.jsonl')
+const runDet = (out) => spawnSync(process.execPath, [
+  resolve(ROOT, 'scripts/food-production/ingest-off.mjs'), '--input', fixture, '--out', out, '--stats', `${out}.stats.json`,
+], { encoding: 'utf8', env: envFixed })
+const r1 = runDet(d1)
+const r2 = runDet(d2)
+const bytes1 = existsSync(d1) ? readFileSync(d1) : Buffer.alloc(0)
+const bytes2 = existsSync(d2) ? readFileSync(d2) : Buffer.alloc(0)
+ok('الحتمية: تشغيلان بنفس SOURCE_DATE_EPOCH ينتجان البايتات نفسها', r1.status === 0 && r2.status === 0 && bytes1.length > 0 && bytes1.equals(bytes2), `${bytes1.length}B vs ${bytes2.length}B`)
+counter('الحتمية ليست فراغًا — المخرج غير فارغ فعلًا', bytes1.length > 0)
+
 // ═══════════ ٩) الحقوق والخصوصية ═══════════
 ok('الحقوق: `image_url` فارغ في كل سجل (صور OFF غير نظيفة الحقوق)', fxRecords.every((r) => r.image_url === null))
 counter('حارس الصور فعّال — لا رابط صورة يتسرّب', !fxRecords.some((r) => typeof r.image_url === 'string'))
