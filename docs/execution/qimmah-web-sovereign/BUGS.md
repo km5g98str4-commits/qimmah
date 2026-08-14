@@ -253,6 +253,126 @@ Updated: 2026-08-14 (Layer 3 Profile / PKG-8 recovery-reviewed and verified)
 - Fix: listen to the owned child's stdout/stderr and require its explicit local ready line before polling; reject on child error or early exit. The runner also binds and tests the explicit `127.0.0.1` host.
 - Evidence: a live foreign-server counter-proof now fails by the named `profile reliability preview exited before ready` error even though the foreign URL returns 200; the clean owned-preview rerun passes 27/27.
 
+## BUG-024 — The Quick Log path throws when storage is blocked
+
+- Severity: P1 reliability
+- Surface: the raised «تسجيل» action in `MobileShell`; `#/profile` mount.
+- Reproduction: block cookies/storage (Safari private browsing is the real-world case), then press
+  Quick Log, or open `#/profile` with any pending intent.
+- Evidence: `src/App.tsx:388` called `window.sessionStorage.setItem(…)` and
+  `src/views/ProfileV2.tsx:84/86` called `getItem`/`removeItem` with **no guard**. When storage is
+  blocked, reading the `window.sessionStorage` *property itself* throws `SecurityError` — not just
+  its methods. The write threw inside the click handler, so the centre action of the tab bar died;
+  the read threw during the Profile mount effect, so the whole `#/profile` route fell to the error
+  boundary.
+- Root cause: three live consumers each owned the same key with their own guarding discipline. This
+  was a **deviation from an existing repository pattern**, not a missing one — `setupFocus.ts`,
+  `entitlementSource.ts`, `CustomizationCenter.tsx` and `NutritionView.tsx` all already wrapped
+  every `sessionStorage` access in `try/catch`. The Quick Log path was the only unguarded one left.
+- Status: RESOLVED — VERIFIED FOR PKG-9
+- Fix: one canonical owner, `src/lib/quickLogIntent.ts`, modelled directly on the existing
+  `setupFocus.ts`. Every access is guarded; all three live consumers route through it and no longer
+  name the key or touch storage themselves.
+- Evidence: `test:quick-log` 27/27, including live runtime proof that write, read and clear all
+  survive **both** failure shapes — a throwing `sessionStorage` property and throwing storage
+  methods — and that a blocked read returns `null` rather than an invented value.
+- Residual risk, stated plainly: the *proof* of this fix is a unit-level runtime proof. The browser
+  that actually exhibits the bug is Safari/WebKit, which **cannot be launched in this container**.
+  Chromium cannot reproduce the original failure, so no browser evidence for this class exists here.
+
+## BUG-025 — Quick Log «ماء» is a declared action with no consumer
+
+- Severity: P2 product truth / dead control
+- Surface: Quick Log sheet → «ماء».
+- Reproduction: open the Quick Log sheet and choose «ماء».
+- Evidence: `NutritionView` consumed the intent with `if (raw !== 'meal' && raw !== 'water') return`
+  and then acted only `if (raw === 'meal')`. The `'water'` branch therefore cleared the intent and
+  did nothing. The user landed on Nutrition with the water panel below the fold and no indication
+  anything had been requested — while the neighbouring «وجبة» opened its logger directly. One of the
+  sheet's three advertised actions was inert.
+- Root cause: the intent vocabulary grew to three values while only one had an implemented effect.
+- Status: RESOLVED — VERIFIED FOR PKG-9
+- Fix: the water intent scrolls the water panel into view and moves focus to its first real action.
+  Deliberately **not** an automatic write: `nutrition.water` is a paid action, so logging water on
+  the user's behalf would both invent data and route around the Premium gate. Focus, not mutation.
+- Evidence: `test:quick-log` 27/27 binds the intent to the panel and asserts the focus path adds
+  nothing by itself; a named bypass simulation fails when the water effect is dropped.
+
+## BUG-026 — A redirected Quick Log leaves an intent that hijacks a later visit
+
+- Severity: P2 navigation correctness
+- Surface: Quick Log pressed by a guest without an account, or before onboarding completes.
+- Reproduction: press Quick Log while `guardRoute` redirects to `accountRequired`/`setup`, abandon
+  the flow, then open Nutrition or Profile normally at any later point in the session.
+- Evidence: `openQuickLog` wrote the intent **before** calling `navigate`. When the guard sent the
+  user elsewhere, the intent stayed in `sessionStorage` with no consumer mounted — and the next
+  legitimate visit to Nutrition or Profile consumed it, opening the breakfast logger or the routine
+  screen unprompted.
+- Root cause: intent was written on the assumption the navigation would land, without asking the
+  route guard first.
+- Status: RESOLVED — VERIFIED FOR PKG-9
+- Fix: `openQuickLog` resolves `guardRoute` first and writes nothing when the destination differs;
+  the user is simply sent where the guard requires. Consumption is additionally scoped —
+  `takeQuickLogIntent(accepted)` consumes only the values its screen owns — so Nutrition can no
+  longer swallow Profile's intent, or the reverse. An unrecognised value is always cleared so no
+  garbage can persist.
+- Evidence: `test:quick-log` 27/27, including runtime proof that a `routine` intent survives an
+  attempted Nutrition consume and is still delivered to Profile; `test:e2e:navigation` 96/96
+  unchanged.
+
+## BUG-027 — The Profile browser proof prints success and then hangs forever
+
+- Severity: P2 test integrity / CI hazard
+- Surface: `npm run test:e2e:profile` teardown.
+- Reproduction: run the suite to completion and watch the process. Observed live in this recovery:
+  the runner printed `✅ profile-reliability — 27 passed, 0 failed` and then sat idle. `ps` showed it
+  alive 2m43s later with its log unchanged since the summary line; the batch behind it never started.
+- Evidence: sending `SIGTERM` to the orphaned `vite preview` on port 5328 caused the runner to exit
+  **immediately** — the decisive test, since it isolates the holder of the event loop.
+- Root cause: two correct decisions combining into a defect. `spawn('npx', …)` makes the real `vite`
+  a **grandchild**, so `preview.kill()` signals only the `npx` wrapper. The BUG-023 hardening then
+  required piped stdio to prove *our own* child reached ready — and those pipes stay attached to the
+  surviving grandchild, so Node's event loop never drains. `navigation-history.mjs` uses
+  `stdio: 'ignore'` and is unaffected, which is why only the newest suite hangs.
+- Why it matters beyond tidiness: the suite reports success on stdout and then never returns an exit
+  code. In CI that is a job that burns its full timeout and is reported as a **timeout**, not as the
+  pass it actually was — a green result destroyed by its own teardown, and every step queued behind
+  it silently skipped.
+- Status: RESOLVED — VERIFIED FOR PKG-9
+- Fix: spawn the preview `detached: true` so it owns a process group, kill the **group**
+  (`process.kill(-pid)`) with the single-process kill retained as fallback, and destroy the pipes.
+  No assertion, timeout or selector was touched — the 27 checks are byte-identical.
+- Evidence: `EXIT_profile=0` with 27/27 after the fix, and the suite now terminates on its own.
+- Note: the same pattern was copied into the new `dirty-state-recovery.mjs` while it was being
+  written; it carries the same fix rather than the same defect.
+
+## BUG-028 — A corrupt onboarding flag is read as a completed setup
+
+- Severity: P1 data truth
+- Surface: boot from `qimmah:onboarding:v1`; guest entry from the start screen.
+- Reproduction: set `qimmah:onboarding:v1` to `{"completed":"yes-please"}`, load the app, and press
+  «كمّل كضيف». The user lands on `#/dashboard`.
+- Evidence: found by the new `test:e2e:dirty-state` suite, not by review — the seed
+  `completed-not-boolean` reached `#/dashboard` while the four other corrupt shapes were correctly
+  refused. `loadOnboarding` coerced with `completed: !!parsed.completed`, and `!!"yes-please"` is
+  `true`.
+- Root cause: a truthiness coercion standing in for a contract check. The other corrupt shapes only
+  failed by accident of `JSON.parse` — an array, string or `null` has no `.completed` property, so
+  the same lenient `!!` happened to yield `false`. The rejection was luck, not policy.
+- Why P1: this is the failure mode that does **not** announce itself. There is no crash and no error
+  boundary — the user is placed on a dashboard for an onboarding that never happened, with no
+  profile behind the plan it renders. A crash is visible; a false completion is not.
+- Status: RESOLVED — VERIFIED FOR PKG-9
+- Fix: `completed: state.completed === true`, plus an explicit shape guard that treats a non-object
+  envelope (array, string, `null`) as absent rather than relying on a thrown property access.
+- No legacy cost, verified rather than assumed: this key has only ever been written as a boolean
+  (`markCompleted` writes `true`, `resetOnboarding` writes `false`), and the repository's own legacy
+  path in `syncService.ts:591` already compares with `=== true`. Strictness follows an existing
+  precedent instead of introducing a new one.
+- Evidence: `test:e2e:dirty-state` 47/47 — the same seed that reached `#/dashboard` before the fix
+  is now returned to setup, while the genuine completed guest still enters the app (the positive
+  control that keeps this from degrading into “reject everything”).
+
 ## EXTERNAL-001 — Paid Salla product binding cannot be proven
 
 - Severity: P1 commercial blocker (does not block Preview).

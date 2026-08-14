@@ -22,9 +22,14 @@ function check(label, condition, detail = '') {
   else { fail += 1; failures.push(label); console.log(`  ✗ FAIL: ${label}${detail ? ` — ${detail}` : ''}`) }
 }
 
+// `detached` مقصود: `npx` يولّد `vite` حفيدًا، و`preview.kill()` يقتل الغلاف
+// وحده. ومع stdio مُنبَّبًا (وهو ثمن إثبات جهوزية طفلنا في BUG-023) تبقى
+// الأنابيب مفتوحة على الحفيد الحيّ فلا يخرج Node أبدًا — نجاح يُطبع ثم تعليق
+// إلى ما لا نهاية. المجموعة الخاصة تجعل القتل يصل الحفيد فعلًا.
 const preview = EXTERNAL ? null : spawn('npx', ['vite', 'preview', '--host', '127.0.0.1', '--port', String(PORT), '--strictPort'], {
   stdio: ['ignore', 'pipe', 'pipe'],
   env: process.env,
+  detached: true,
 })
 
 const previewReady = preview ? new Promise((resolve, reject) => {
@@ -192,7 +197,13 @@ try {
   await guestContext.close()
 } finally {
   await browser?.close().catch(() => {})
-  preview?.kill('SIGTERM')
+  if (preview) {
+    // قتل المجموعة كاملة (الغلاف + حفيد vite)، ثم إغلاق الأنابيب حتى لا تُبقي
+    // حلقة أحداث Node حيّة بعد انتهاء الإثبات.
+    try { process.kill(-preview.pid, 'SIGTERM') } catch { preview.kill('SIGTERM') }
+    preview.stdout?.destroy()
+    preview.stderr?.destroy()
+  }
 }
 
 console.log(`\n${fail === 0 ? '✅' : '❌'} profile-reliability — ${pass} passed, ${fail} failed`)

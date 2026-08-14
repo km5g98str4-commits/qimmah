@@ -125,6 +125,49 @@ PKG-8 converges Profile on existing route, data and account owners. No assertion
 | `run-delete-account-proof.mjs` | required a historical comment string in `profileV2Model` | checks the signed-in capability, conditional UI copy and live Profile→Settings binding together | retain the App Store deletion guard after guest/account truth separation | stronger behavior binding |
 | momentum/cross-system smoke locators | treated the internal reminder heading as another `h1` | require its correct `h2` level beneath the route heading | keep historical journeys aligned with one-page-one-`h1` semantics | stronger accessibility |
 
+## Decision 015 — Quick Log gets one guarded owner, and «ماء» focuses rather than writes
+
+- Decision: move the `qimmah:quick-log-intent` key behind a single canonical owner
+  (`src/lib/quickLogIntent.ts`) built on the existing `setupFocus.ts` pattern; resolve the route
+  guard **before** writing an intent; scope consumption so each screen takes only the values it
+  owns; and make the water intent scroll to and focus the water panel instead of logging water.
+- Why: the three defects were one structural fault seen from three sides — a key with three owners
+  and no single guarding discipline. The repository already had the answer in `setupFocus.ts`, so
+  this routes to an existing pattern rather than inventing a mechanism (verify-before-build).
+- Alternatives rejected: adding a `try/catch` at each of the three call sites (leaves three owners
+  and the next consumer repeats the bug); auto-adding a default water amount on intent (invents
+  user data **and** bypasses the `nutrition.water` paid gate); consuming any intent found (lets one
+  screen swallow another's); keeping the write-then-navigate order and clearing stale intents on a
+  timer (guesswork instead of asking the guard).
+- Risk: the focus jump is a visible movement the user did not explicitly scroll to. It is bound to
+  an intent the user just expressed one tap earlier, and it is one-shot — `onFocusHandled` clears
+  it, so it cannot repeat on re-render.
+- Reversibility: one package. The new module is additive; the three consumers are three small
+  call-site changes; no stored shape, schema or key name changed.
+- Affected files: `src/lib/quickLogIntent.ts` (new), `src/App.tsx`, `src/views/ProfileV2.tsx`,
+  `src/views/NutritionView.tsx`, `scripts/quick-log-reliability-proof.ts` and its runner.
+- Known remaining copy of the old pattern: `src/views/NutritionV2.tsx` still holds unguarded raw
+  access. It is **not the live route** (canonical map: “`NutritionV2.tsx` is not the live route
+  wrapper”), so it was deliberately left untouched rather than widening this package into dead code.
+  Recorded here so it is a decision, not an oversight.
+
+## Decision 016 — The production artifact is proven by a two-build counter-proof
+
+- Decision: prove acceptance items 27 and 30 against the **built** artifact, and prove them with two
+  builds — production must lack the test seam, and a mock build must **contain** it.
+- Why: a scanner that greps for a string can pass because the string is absent everywhere, including
+  from the scanner's own reach. Absence is only evidence once the same scanner has been shown to
+  detect presence. This is the charter's “مرور غير مستحقّ ليس نجاحًا” (§4.2) applied to a bundle scan.
+- Alternatives rejected: trusting the source-level `mockEnabled()` argument (it is a build-time
+  decision, so only the build can settle it); scanning `dist/` as it happens to exist (previous
+  steps leave mock builds there — the artifact under test must be built by the proof itself).
+- Risk: the proof runs two Vite builds, so it is too slow for `test:gate`'s 100+ node proofs. It is
+  registered as `test:bundle-safety` and run in the final gate, matching the existing precedent that
+  build-dependent proofs (`test:e2e:*`) sit outside `test:gate`. This placement is a declared
+  exclusion, not a silent one (§4).
+- Reversibility: a proof script and one package.json entry; no product code involved.
+- Affected files: `scripts/production-bundle-safety-proof.mjs`, `package.json`.
+
 ## Decision 006 — Error recovery never means product completion
 
 - Decision: a render failure may retry/reload/contact support, but cannot mark onboarding complete or synthesize a plan.
