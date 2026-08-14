@@ -20,6 +20,7 @@ import { commitFinishedSession } from '@/lib/finishWorkout'
 import { buildV2WorkoutSession } from '@/lib/workoutV2Persist'
 import { getWorkoutSessions, setWorkoutSessions } from '@/lib/historyStore'
 import { snapshotWorkoutStorage, restoreWorkoutStorage } from '@/lib/workoutFinishUndo'
+import { ACTIVE_WORKOUT_KEY, clearActiveWorkout, loadActiveWorkout, saveActiveWorkout } from '@/lib/activeWorkout'
 import type { WorkoutV2Model } from '@/lib/workoutV2Model'
 
 // [QIM-WEB-FOUNDER-UX-003/حزمة ٢] هذا الإثبات يمارس **كتّاب حالة مدفوعة**
@@ -75,6 +76,33 @@ check('the failure sentinel records the rejected key', getStorageFailure()?.key 
 check('isStorageWritable() reports storage as NOT writable', isStorageWritable() === false)
 fault.__setQuota(false)
 check('isStorageWritable() recovers once the fault clears', isStorageWritable() === true)
+
+// ── (1b) The maintained active-workout writer reports failure and preserves last-good ──
+console.log('\n(1b) live active-workout writes are honest')
+const activeDraft = (weight: string) => ({
+  dayId: 'live-day',
+  dayNameAr: 'تمرين حي',
+  dayNameEn: 'Live workout',
+  startedAt: new Date().toISOString(),
+  current: 0,
+  exercises: {
+    'slot-1': {
+      sets: [{ setNumber: 1, targetReps: '8', actualReps: '8', weightKg: weight, completed: true }],
+      painNote: '',
+      notes: '',
+    },
+  },
+  swap: {},
+})
+clearActiveWorkout(null)
+check('healthy active snapshot reports ok', saveActiveWorkout(null, activeDraft('80')) === 'ok')
+check('healthy active snapshot round-trips', loadActiveWorkout(null)?.exercises['slot-1']?.sets[0]?.weightKg === '80')
+const lastGoodActive = readRaw(ACTIVE_WORKOUT_KEY)
+fault.__setQuota(true)
+check('quota-rejected active snapshot reports quota', saveActiveWorkout(null, activeDraft('90')) === 'quota')
+check('quota-rejected active snapshot does not overwrite last-good', readRaw(ACTIVE_WORKOUT_KEY) === lastGoodActive)
+fault.__setQuota(false)
+check('active snapshot clears only after a successful write', clearActiveWorkout(null) === 'ok' && loadActiveWorkout(null) === undefined)
 
 // ── (2) Finishing a workout while storage is full: no false success ──
 console.log('\n(2) finish path under a full storage')
@@ -146,13 +174,20 @@ check('a stored null degrades to the fallback', readJson('qimmah:null:v1', 'fall
 // مهما حدث: تخزين ممتلئ ⇒ تختفي الجلسة ويُعرض «أحسنت». فحص بنيوي مقترن يمنع عودته.
 console.log('\n(5) the live v1 workout screen reports save failures honestly')
 const liveWorkout = readFileSync(resolve(ROOT, 'src/views/WorkoutView.tsx'), 'utf8')
+const liveWorkoutMode = readFileSync(resolve(ROOT, 'src/components/WorkoutMode.tsx'), 'utf8')
 check('WorkoutView commits through the verified path', liveWorkout.includes('commitFinishedSession(session)'))
 check('WorkoutView no longer uses the fire-and-forget persist', !liveWorkout.includes('persistFinishedSession('))
 const commitAt = liveWorkout.indexOf('const commit = commitFinishedSession(session)')
 const bailAt = liveWorkout.indexOf('setSaveError(commit.failure ?? \'error\')')
 const summaryAt = liveWorkout.indexOf('setSummary({ session')
-check('it bails on failure BEFORE showing any summary', commitAt > 0 && bailAt > commitAt && summaryAt > bailAt)
+const snapshotAt = liveWorkout.indexOf('const snapshot = snapshotWorkoutStorage()')
+const restoreAt = liveWorkout.indexOf('restoreWorkoutStorage(snapshot)', commitAt)
+const clearAt = liveWorkout.indexOf('const clearResult = clearActiveWorkout(userId)', commitAt)
+check('the live finish snapshots BEFORE the canonical commit', snapshotAt > 0 && snapshotAt < commitAt)
+check('it restores and bails on failure BEFORE clearing or showing a summary', restoreAt > commitAt && bailAt > restoreAt && clearAt > bailAt && summaryAt > clearAt)
 check('the failure surfaces an honest message, not a silent drop', liveWorkout.includes('d.saveFailedTitle') && liveWorkout.includes('role="alert"'))
+check('the failure explicitly says the open workout was kept', liveWorkout.includes('d.saveFailedKept'))
+check('the dismiss action is labelled as Back, not a fake retry', liveWorkout.includes('d.saveBackToWorkout'))
 // الفحص مقصور على **كتلة `finish` نفسها**: `setActiveDay(null)` يظهر أيضًا في
 // `closeWithoutFinishing` المعرَّفة قبلها، فالمقارنة على الملف كلّه تكذب.
 const finishBlock = (() => {
@@ -162,10 +197,18 @@ const finishBlock = (() => {
   return end < 0 ? liveWorkout.slice(start) : liveWorkout.slice(start, end)
 })()
 check('the finish block was extracted with its own bounds', finishBlock.length > 200 && finishBlock.includes('commitFinishedSession'))
-check('and the active session is NOT cleared on failure (work survives)', finishBlock.indexOf('setSaveError(commit.failure') < finishBlock.indexOf('setActiveDay(null)'))
+check('and the active session is cleared only after commit success', finishBlock.indexOf('setSaveError(commit.failure') < finishBlock.indexOf('clearActiveWorkout(userId)'))
+check('a failed active-snapshot cleanup rolls the completed write back too', finishBlock.includes("if (clearResult !== 'ok')") && finishBlock.indexOf('restoreWorkoutStorage(snapshot)', finishBlock.indexOf('clearResult')) > finishBlock.indexOf('clearResult'))
+const modeFinishStart = liveWorkoutMode.indexOf('const doFinish = () => {')
+const modeFinishEnd = liveWorkoutMode.indexOf('\n  }', liveWorkoutMode.indexOf('onFinish(session)', modeFinishStart))
+const modeFinishBlock = modeFinishStart < 0 ? '' : liveWorkoutMode.slice(modeFinishStart, modeFinishEnd < 0 ? undefined : modeFinishEnd)
+check('WorkoutMode hands the session to its owner without clearing the durable snapshot first', modeFinishBlock.includes('onFinish(session)') && !modeFinishBlock.includes('clearActiveWorkout'))
+check('active set success waits for WriteResult before showing the saved flash', liveWorkoutMode.includes("onSaveError?.(result === 'ok' ? null : result)") && liveWorkoutMode.includes("if (result === 'ok') flash()"))
 // تأكيد مضادّ: لو أُزيل الخروج المبكر لسقط الفحص — نحاكيه ونتأكّد أنه يُكشف.
 const smuggled = finishBlock.replace(/if \(!commit\.ok\)[\s\S]*?\}\n/, '')
 check('a smuggled removal of the early bail is caught by name', !/setSaveError\(commit\.failure/.test(smuggled))
+const prematureChildClear = modeFinishBlock.replace('onFinish(session)', 'clearActiveWorkout(userId)\n    onFinish(session)')
+check('a smuggled child clear before the writer is caught by name', prematureChildClear.includes('clearActiveWorkout') && !modeFinishBlock.includes('clearActiveWorkout'))
 
 console.log(`\nStorage-honesty proof: ${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)

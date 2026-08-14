@@ -1,6 +1,6 @@
 # Qimmah Web Sovereign — bug ledger
 
-Updated: 2026-08-13 (Layer 3 Nutrition / PKG-3 verified)
+Updated: 2026-08-14 (Layer 3 Today/Workout / PKG-4 verified)
 
 ## BUG-001 — Preview mutation handlers can surface an exception instead of Premium
 
@@ -120,6 +120,28 @@ Updated: 2026-08-13 (Layer 3 Nutrition / PKG-3 verified)
 - Status: RESOLVED — VERIFIED FOR PKG-3
 - Fix: both serving add and edit explicitly allow one decimal point; grams remain integer-bounded.
 - Evidence: direct 0.25/1.5 counter-proof and browser assertion that 1.5 servings persists as 225g/372 calories.
+
+## BUG-012 — Workout can clear its resumable snapshot before durable completion succeeds
+
+- Severity: P1
+- Surface: live Workout set logging and finish under quota/blocked storage.
+- Reproduction: finish a progressed session while the finished-history writer rejects; reload after the failure.
+- Evidence: the child `WorkoutMode` cleared `activeWorkout` before its parent called the verified finished-session commit. The active registry writer also swallowed raw `localStorage` failures, so a completed set could flash as saved without becoming durable.
+- Root cause: active-session ownership and finished-session ownership crossed component boundaries without one checked commit order.
+- Status: RESOLVED — VERIFIED FOR PKG-4
+- Fix: active writes return `WriteResult`; saved feedback waits for `ok`; only `WorkoutView` clears after durable history success. Any history or cleanup failure restores the exact pre-confirm snapshot and leaves the live inputs open.
+- Evidence: `test:storage-honesty` 44/44 with named smuggling attacks; `test:e2e:workout` 31/31 includes active quota, byte-identical finish rollback, retry, reload/resume and completed-session persistence.
+
+## BUG-013 — Workout completion “Back to Today” does not navigate to Today
+
+- Severity: P2
+- Surface: live Workout summary.
+- Reproduction: finish a session and press «ارجع لليوم».
+- Evidence: the baseline handler only cleared local summary state, revealing the Workout tab underneath.
+- Root cause: the summary callback omitted the canonical route transition.
+- Status: RESOLVED — VERIFIED FOR PKG-4
+- Fix: clear the summary and navigate through the existing `onNavigate('dashboard')` route owner.
+- Evidence: the live browser confirms the dashboard hash, correct ended-early partial state, full-session “كفو” state, and persistence after reload.
 
 ## EXTERNAL-001 — Paid Salla product binding cannot be proven
 

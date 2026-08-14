@@ -23,6 +23,7 @@ import {
 import { getStrings } from '@/config/strings'
 import { workoutScreenStrings } from '@/i18n/dict/workoutScreen'
 import { commitFinishedSession } from '@/lib/finishWorkout'
+import { restoreWorkoutStorage, snapshotWorkoutStorage } from '@/lib/workoutFinishUndo'
 import type { WriteResult } from '@/lib/safeStorage'
 import { trackLocal } from '@/lib/tracking'
 import { completeFirstWin } from '@/lib/firstWin'
@@ -226,9 +227,20 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
    * والجلسة **تبقى قائمة** فلا يضيع عمل المستخدم ويستطيع إعادة المحاولة.
    */
   const finish = (session: WorkoutSession) => {
+    const snapshot = snapshotWorkoutStorage()
     const commit = commitFinishedSession(session)
     if (!commit.ok) {
+      restoreWorkoutStorage(snapshot)
       setSaveError(commit.failure ?? 'error')
+      return
+    }
+    // لا تُمسح لقطة الاستئناف في الطفل قبل الكاتب. نجاح السجلّ ثم فشل تنظيف
+    // اللقطة يُعادان معًا إلى ما قبل التأكيد، كي لا نعرض ملخّصًا ونترك تمرينًا
+    // معلّقًا يظهر مجددًا بعد reload.
+    const clearResult = clearActiveWorkout(userId)
+    if (clearResult !== 'ok') {
+      restoreWorkoutStorage(snapshot)
+      setSaveError(clearResult)
       return
     }
     setSaveError(null)
@@ -503,7 +515,7 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
       {/* وضع التمرين — فوق الشريط السفلي */}
       {activeDay && (
         <div className="fixed inset-0 z-[60]">
-          <WorkoutMode lang={lang} day={activeDay} userId={userId} resume={resumeFrom} onClose={requestClose} onFinish={finish} />
+          <WorkoutMode lang={lang} day={activeDay} userId={userId} resume={resumeFrom} onClose={requestClose} onFinish={finish} onSaveError={setSaveError} />
           {/* [CTO-71] البند ٢ — فشل الحفظ يُقال صراحةً فوق الجلسة القائمة.
               لا شاشة ملخّص ولا «أحسنت»: العمل لم يُحفَظ، والجلسة باقية للمحاولة. */}
           {saveError && (
@@ -513,8 +525,9 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
                 <p className="mt-1 text-sm leading-relaxed text-ink-500">
                   {saveError === 'quota' ? d.saveFailedQuota : saveError === 'unavailable' ? d.saveFailedBlocked : d.saveFailedGeneric}
                 </p>
-                <button type="button" onClick={() => setSaveError(null)} className="btn-ghost mt-3 w-full py-2.5 text-xs">
-                  {d.saveRetry}
+                <p className="mt-2 text-xs font-bold leading-relaxed text-ink-700">{d.saveFailedKept}</p>
+                <button type="button" onClick={() => setSaveError(null)} className="btn-ghost mt-3 min-h-[44px] w-full py-2.5 text-xs">
+                  {d.saveBackToWorkout}
                 </button>
               </div>
             </div>
@@ -531,7 +544,10 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
             prs={summary.prs}
             streakWeeks={summary.streakWeeks}
             nextDayLabel={summary.nextDayLabel}
-            onBackToToday={() => setSummary(null)}
+            onBackToToday={() => {
+              setSummary(null)
+              onNavigate('dashboard')
+            }}
             onViewProgress={() => {
               setSummary(null)
               onNavigate('progress')

@@ -12,6 +12,7 @@
 
 import { ownerKey } from '@/features/customPlan'
 import { assertPaid } from '@/lib/access/guard'
+import { writeJson, type WriteResult } from '@/lib/safeStorage'
 
 export const ACTIVE_WORKOUT_KEY = 'qimmah:activeWorkout:v1'
 
@@ -66,13 +67,8 @@ function loadRegistry(): Registry {
   }
 }
 
-function saveRegistry(reg: Registry): void {
-  if (typeof window === 'undefined') return
-  try {
-    window.localStorage.setItem(ACTIVE_WORKOUT_KEY, JSON.stringify(reg))
-  } catch {
-    /* تجاهل أخطاء التخزين (وضع خاص/ممتلئ) — الجلسة الجارية ليست بيانات حرجة */
-  }
+function saveRegistry(reg: Registry): WriteResult {
+  return writeJson(ACTIVE_WORKOUT_KEY, reg)
 }
 
 function isSet(v: unknown): v is ActiveSetLog {
@@ -145,7 +141,7 @@ export function hasActiveWorkout(userId: string | null | undefined): boolean {
 export function saveActiveWorkout(
   userId: string | null | undefined,
   value: Omit<ActiveWorkout, 'version' | 'updatedAt'>,
-): void {
+): WriteResult {
   // [QIM-WEB-FOUNDER-UX-003/حزمة ٢] الدفاع الثاني — في **طبقة الكتابة** لا في
   // الواجهة. حراسة الزرّ وحدها تسقط أمام استدعاء المعالج يدويًا أو مسار hash
   // مباشر (مطلب المؤسس §25). هنا لا تُكتب جلسة تمرين بلا استحقاق مهما كان
@@ -153,7 +149,7 @@ export function saveActiveWorkout(
   assertPaid('workout.logSet')
   const reg = loadRegistry()
   reg[ownerKey(userId)] = { ...value, version: VERSION, updatedAt: new Date().toISOString() }
-  saveRegistry(reg)
+  return saveRegistry(reg)
 }
 
 /**
@@ -176,11 +172,12 @@ export function completedSetCount(active: ActiveWorkout | undefined | null): num
 }
 
 /** يمسح الجلسة الجارية لهذه الهوية (عند الإنهاء أو التجاهل). */
-export function clearActiveWorkout(userId: string | null | undefined): void {
+export function clearActiveWorkout(userId: string | null | undefined): WriteResult {
   const reg = loadRegistry()
   const key = ownerKey(userId)
   if (key in reg) {
     delete reg[key]
-    saveRegistry(reg)
+    return saveRegistry(reg)
   }
+  return 'ok'
 }

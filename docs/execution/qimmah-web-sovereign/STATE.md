@@ -1,6 +1,6 @@
 # Qimmah Web Sovereign — execution state
 
-Updated: 2026-08-13 (Layer 3 Nutrition / PKG-3 verified)
+Updated: 2026-08-14 (Layer 3 Today/Workout / PKG-4 verified)
 
 ## Provenance
 
@@ -28,13 +28,27 @@ git status --short --branch (before PKG-0 edits)    → clean
 
 ## Current package
 
-- Packages completed and pushed: `PKG-0` at `f78676e`; `PKG-1` at `8b29ca3`; `PKG-2` at `28c725e4e4869d454d6b007cc11a92222a059ac1`.
-- Package verified for checkpoint: Layer 3 live Nutrition (`PKG-3`).
-- The live writer now preserves `foodId`, grams, servings and original unit end-to-end. Known quantities can be edited proportionally; legacy entries with no quantity remain explicitly unknown and are not given an invented serving.
-- The primary `qimmah:nutrition:v2` write must succeed before cache, mirrors, listeners or first-win state advance. Quota/blocked storage leaves the stored record and user input unchanged and displays bilingual recovery copy.
-- All four meal rows were exercised through Arabic search, grams, fractional servings, reload, edit and delete. English search/item opening and Preview browse-without-mutation were exercised in the same current build.
+- Packages completed and pushed: `PKG-0` at `f78676e`; `PKG-1` at `8b29ca3`; `PKG-2` at `28c725e4e4869d454d6b007cc11a92222a059ac1`; `PKG-3` at `678a38d01d2206ff02b245281d621fc37ed19658`.
+- Package verified for checkpoint: Layer 3 Today/Workout consistency and live workout completion (`PKG-4`).
+- Today, Workout and completion-next already converge on `workoutDaySource`; the 14-day 3/4/5/6-day-plan matrix remains green.
+- Active-set persistence now returns and consumes `WriteResult`. A rejected snapshot never flashes “saved” or overwrites the last-good durable session.
+- Workout completion is one rollback boundary: preserve the active snapshot until the finished-session commit succeeds; if history or active cleanup fails, restore the exact pre-confirm state and show honest recovery copy.
+- The real browser exercised Preview denial, activation, weight/reps, quota, timer +30/skip, reload/resume, guarded Back, ended-early, a second fully completed session, next workout, Today transition and reload persistence.
 - No dependency, backend, Supabase, QAE, canonical dataset, service-worker, deployment, or Salla authority file changed.
-- Next action: commit/push `[PKG-3][green]`, then continue Layer 3 with Today/Workout from that remote checkpoint.
+- Next action: commit/push `[PKG-4][green]`, then continue Layer 3 with Progress and Measurements from that remote checkpoint.
+
+### PKG-4 Today/Workout evidence
+
+| Evidence | Result |
+| --- | --- |
+| `npm run test:storage-honesty` | PASS — 44/44, including active-snapshot quota, last-good preservation, finish rollback, child-clear and false-saved attacks |
+| `npm run test:workout-day-source` | PASS — 19/19 across 3/4/5/6-day plans over 14 days and next-workout agreement |
+| `npm run test:today-v2` | PASS — 48/48, including ended-early partial truth |
+| `npm run test:e2e:workout` | PASS — mock-entitlement build plus 31/31 live-browser assertions; no page error |
+| `npm run typecheck` | PASS |
+| `npm run lint` | PASS |
+| `npm run build` | PASS — production mode, 2,557 modules |
+| Fresh `npm ci` + full `npm run test:gate` | PASS — exit 0 through final `test:workout-day-source` 19/19 |
 
 ### PKG-3 Nutrition evidence
 
@@ -199,9 +213,9 @@ Status here means evidence at this checkpoint, not remembered intent.
 | ---: | --- | --- |
 | 1 | Nutrition mobile crash/ejection | PASS — current `test:e2e:nutrition` contract 106/106 |
 | 2 | Preview could log food | PASS — browser attack opens Premium and storage remains unchanged |
-| 3 | Preview could start/log/finish workout | PASS — browser attack rejects planted session and writes none |
+| 3 | Preview could start/log/finish workout | PASS — access matrix plus live Workout E2E: gate opens, no active snapshot is created, activation then permits the same action |
 | 4 | install banner covered handoff CTA | `test:bottom-overlay` green; real hit-test pending |
-| 5 | Today/Workout mismatch | `test:workout-day-source` 19/19 green |
+| 5 | Today/Workout mismatch | PASS — `test:workout-day-source` 19/19 plus live-browser name, completion-next and Today-transition agreement |
 | 6 | Breakfast Add pointer miss | PASS — real pointer at 320/390 and ≥44px |
 | 7 | macro clipping | PASS — ar/en at 320/390/640/768/894/1280, no clipping/overflow |
 | 8 | Language row dead | runtime/settings E2E pending |
@@ -217,7 +231,7 @@ Status here means evidence at this checkpoint, not remembered intent.
 | 18 | deterministic 404 | PASS — `test:e2e:navigation` 95/95 |
 | 19 | whitespace-only signup name | PASS — `test:e2e:navigation` 95/95 |
 | 20 | sub-44px touch targets | PARTIAL PASS — bottom/nav 200/200 and Premium close/input corrected; full-site audit remains Layer 4 |
-| 21 | silent persistence failure | PASS for live Nutrition — quota/security unit proof plus browser input/store preservation; other surfaces remain governed by their named proofs |
+| 21 | silent persistence failure | PASS for live Nutrition and Workout — quota/security proofs plus browser input/store/snapshot preservation; remaining surfaces keep their named proofs |
 | 22 | malformed storage recovery | multiple unit proofs green; browser dirty pass pending |
 | 23 | never-trained semantics | PASS — 97-case question proof plus newcomer/minor browser journeys |
 | 24 | minor/age eligibility | PASS — restricted goal clears immediately after adult→minor change; unit and browser counter-proof green |
@@ -231,8 +245,8 @@ Status here means evidence at this checkpoint, not remembered intent.
 ## Current severity counts
 
 - P0: 0 confirmed.
-- P1: 0 internal open; BUG-001, BUG-002, BUG-004 and BUG-008–BUG-011 are resolved and fully gated.
-- P2: 1 open (BUG-003); BUG-005, BUG-006 and BUG-007 are resolved and fully gated.
+- P1: 0 internal open; BUG-001, BUG-002, BUG-004 and BUG-008–BUG-012 are resolved and fully gated.
+- P2: 1 open (BUG-003); BUG-005–BUG-007 and BUG-013 are resolved and fully gated.
 - P3: 0.
 - External blockers: product-specific Salla URL not present; live activation backend unavailable; WebKit availability not tested yet.
 

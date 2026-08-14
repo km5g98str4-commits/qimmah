@@ -1,6 +1,6 @@
 # Qimmah Web Sovereign — autonomous founder decisions
 
-Updated: 2026-08-13 (Layer 3 Nutrition / PKG-3 verified)
+Updated: 2026-08-14 (Layer 3 Today/Workout / PKG-4 verified)
 
 ## Decision 001 — Use the exact Founder checkpoint
 
@@ -81,6 +81,13 @@ PKG-3 changes tests only by extending the live Nutrition contract. No assertion 
 | `run-access-gate-proof.mjs` | MealCard add plus other live guards | also MealCard remove and a named removal attack | keep Preview failure on the coherent Premium surface | stronger |
 | `e2e/nutrition-reliability.mjs` | 91 crash/pointer/macro checks | 106 checks including all meal rows, paid add/reload/edit/delete, quota preservation and English item opening | prove the maintained route end-to-end | stronger |
 
+PKG-4 strengthens the Workout truth contract. No assertion was removed or weakened.
+
+| Test | Old contract | New contract | Why | Strength |
+| --- | --- | --- | --- | --- |
+| `storage-honesty-proof.ts` | finished-history quota and static parent checks | 44 runtime/structural checks including active quota, last-good bytes, commit order and two bypass attacks | prevent false saved state or lost resume data | stronger |
+| `e2e/workout-reliability.mjs` | absent | 31 real-browser checks from Preview through two finish classifications and Today reload | prove the maintained live route end-to-end | new guard |
+
 ## Decision 006 — Error recovery never means product completion
 
 - Decision: a render failure may retry/reload/contact support, but cannot mark onboarding complete or synthesize a plan.
@@ -116,3 +123,12 @@ PKG-3 changes tests only by extending the live Nutrition contract. No assertion 
 - Risk: a secondary best-effort mirror can still fail after the canonical day write, but the user-visible day record is durable and no primary failure is represented as success.
 - Reversibility: PKG-3 is one isolated package; the adapter fields and inline editor can be reverted without schema migration because all additions are optional.
 - Affected files: live Nutrition view/logger, `nutritionTracking`, `nutritionV2Model`, bilingual Nutrition dictionary and focused proofs.
+
+## Decision 010 — The resumable workout survives until completion is fully committed
+
+- Decision: the parent finish owner keeps the durable active snapshot until the finished session lands and active cleanup succeeds; the child never clears it. Any failure restores the whole pre-confirm Qimmah snapshot.
+- Why: clearing first turns a recoverable storage fault into lost user work. Treating history success and active cleanup independently can also create a duplicate resume prompt after a success summary.
+- Alternatives rejected: optimistic child clear; a fake retry button that only dismisses; best-effort active writes; showing success after only the in-memory state changes.
+- Risk: a cleanup failure rolls back an otherwise-written completion and asks the user to try again. That is deliberately conservative and preserves a single truthful state.
+- Reversibility: PKG-4 is isolated; no stored shape changes, only checked return values and ordering.
+- Affected files: `activeWorkout`, `WorkoutMode`, `WorkoutView`, bilingual Workout dictionary and their focused proofs.

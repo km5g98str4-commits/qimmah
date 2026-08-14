@@ -146,6 +146,7 @@
     "test:error-boundary": "node scripts/run-error-boundary-proof.mjs",
     "test:e2e:navigation": "npm run build && node scripts/e2e/navigation-history.mjs",
     "test:e2e:nutrition": "VITE_ENTITLEMENT_MODE=mock npm run build && node scripts/e2e/nutrition-reliability.mjs",
+    "test:e2e:workout": "VITE_ENTITLEMENT_MODE=mock npm run build && node scripts/e2e/workout-reliability.mjs",
     "test:e2e:plan-handoff": "npm run build && node scripts/e2e/plan-handoff.mjs",
     "test:e2e:preview-gate": "VITE_ENTITLEMENT_MODE=mock npm run build && node scripts/e2e/preview-gate.mjs",
     "test:e2e:install-overlap": "npm run build && node scripts/e2e/install-overlap.mjs"
