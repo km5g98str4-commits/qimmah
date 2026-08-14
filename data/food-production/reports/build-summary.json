@@ -1,34 +1,34 @@
 {
-  "accepted": 55719,
+  "accepted": 55773,
   "by_market": {
-    "GCC": 410,
-    "SA": 309,
+    "GCC": 441,
+    "SA": 332,
     "GLOBAL": 55000
   },
   "by_source": {
     "qimmah_curated": 55,
-    "openfoodfacts": 55664
+    "openfoodfacts": 55718
   },
-  "arabic_names": 66,
-  "english_names": 55708,
-  "with_serving": 55453,
-  "complete_macros": 55713,
-  "with_sodium": 55514,
-  "with_fiber": 55486,
-  "with_ingredients": 55199,
+  "arabic_names": 67,
+  "english_names": 55761,
+  "with_serving": 55480,
+  "complete_macros": 55767,
+  "with_sodium": 55554,
+  "with_fiber": 55519,
+  "with_ingredients": 55219,
   "quality_flags": {
-    "no_arabic_name": 55653,
-    "macro_energy_mismatch": 17,
+    "no_arabic_name": 55706,
+    "macro_energy_mismatch": 21,
     "sugar_exceeds_carbs": 6,
     "fiber_exceeds_carbs": 10,
-    "no_brand": 127,
-    "no_english_name": 11,
+    "no_brand": 137,
+    "no_english_name": 12,
     "saturated_exceeds_fat": 3
   },
   "confidence_buckets": {
-    "mid_0.6-0.8": 201,
-    "high_0.8+": 55366,
-    "low_0.4-0.6": 63,
-    "very_low_<0.4": 89
+    "mid_0.6-0.8": 217,
+    "high_0.8+": 55391,
+    "low_0.4-0.6": 68,
+    "very_low_<0.4": 97
   }
 }

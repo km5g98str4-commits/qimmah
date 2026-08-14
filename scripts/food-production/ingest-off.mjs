@@ -20,7 +20,16 @@ import { checkNutrition, BLOCKING_FLAGS, scoreConfidence } from './lib/sanity.mj
 const args = process.argv.slice(2)
 const argOf = (flag, dflt) => { const i = args.indexOf(flag); return i >= 0 ? args[i + 1] : dflt }
 const INPUT = resolve(argOf('--input', resolve(ROOT, '.food-cache/off-products.csv.gz')))
-const OUT = resolve(argOf('--out', resolve(ROOT, '.food-cache/off-accepted.jsonl')))
+const DEFAULT_OUT = resolve(ROOT, '.food-cache/off-accepted.jsonl')
+const OUT = resolve(argOf('--out', DEFAULT_OUT))
+/**
+ * مسار تقرير الإحصاءات. **يتبع مسار المخرَج لا يكون ثابتًا** — وإلا لدهس أي تشغيل
+ * على عيّنة مرجعية (كالذي يجريه الإثبات) إحصاءَ التشغيل الحقيقي، فيقرأ التقرير
+ * أرقام العيّنة ويعلنها أرقام الإنتاج. عطبٌ وقع فعلًا وأُصلح هنا.
+ */
+const STATS_OUT = resolve(argOf('--stats', OUT === DEFAULT_OUT
+  ? resolve(ROOT, 'data/food-production/reports/off-ingest-stats.json')
+  : `${OUT}.stats.json`))
 const GLOBAL_LIMIT = Number(argOf('--limit', process.env.OFF_GLOBAL_LIMIT ?? 55000))
 const PROGRESS_EVERY = 250000
 
@@ -173,8 +182,8 @@ stats.truncated_input = truncated
 stats.elapsed_s = Math.round((Date.now() - started) / 1000)
 stats.written = all.length
 stats.global_shipped = globalPool.length
-mkdirSync(resolve(ROOT, 'data/food-production/reports'), { recursive: true })
-writeFileSync(resolve(ROOT, 'data/food-production/reports/off-ingest-stats.json'), JSON.stringify(stats, null, 2) + '\n')
+mkdirSync(dirname(STATS_OUT), { recursive: true })
+writeFileSync(STATS_OUT, JSON.stringify(stats, null, 2) + '\n')
 
 console.log(`\n✓ rows read      : ${stats.rows_read.toLocaleString()}`)
 console.log(`✓ Saudi (SA)     : ${stats.accepted_sa.toLocaleString()}`)

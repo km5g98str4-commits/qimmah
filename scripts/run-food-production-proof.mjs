@@ -265,6 +265,12 @@ for (const [label, code] of [['السالب', '04006381333931'], ['متجاوز 
   ok(`العيّنة: ${label} مرفوض ولم يدخل المخرجات`, !fxRecords.some((r) => r.gtin === code))
 }
 counter('العيّنة تحوي حالات رفض فعلًا (وإلا فالإثبات فارغ)', fxRecords.length < 15)
+// تشغيل الإثبات على العيّنة يجب ألّا يدهس إحصاء الإنتاج — وقع فعلًا فأُصلح، وهذا حارسه.
+const prodStats = resolve(ROOT, 'data/food-production/reports/off-ingest-stats.json')
+const prodStatsBefore = existsSync(prodStats) ? readFileSync(prodStats, 'utf8') : null
+const rerun = spawnSync(process.execPath, [resolve(ROOT, 'scripts/food-production/ingest-off.mjs'), '--input', fixture, '--out', tmpOut], { encoding: 'utf8' })
+const prodStatsAfter = existsSync(prodStats) ? readFileSync(prodStats, 'utf8') : null
+ok('العزل: تشغيل العيّنة لا يدهس تقرير إحصاء الإنتاج', rerun.status === 0 && prodStatsBefore === prodStatsAfter, prodStatsBefore === prodStatsAfter ? 'سليم' : 'دُهس!')
 
 // ═══════════ ٩) الحقوق والخصوصية ═══════════
 ok('الحقوق: `image_url` فارغ في كل سجل (صور OFF غير نظيفة الحقوق)', fxRecords.every((r) => r.image_url === null))
