@@ -1,6 +1,6 @@
 # Qimmah Web Sovereign — bug ledger
 
-Updated: 2026-08-14 (Layer 3 Settings/numbers/units / PKG-7 verified)
+Updated: 2026-08-14 (Layer 3 Profile / PKG-8 recovery-reviewed and verified)
 
 ## BUG-001 — Preview mutation handlers can surface an exception instead of Premium
 
@@ -208,6 +208,50 @@ Updated: 2026-08-14 (Layer 3 Settings/numbers/units / PKG-7 verified)
 - Status: RESOLVED — VERIFIED FOR PKG-7
 - Fix: keep language as the only real control; render metric units and locale-derived numeral policy as non-interactive facts; centralize dynamic Layer-3 display formatting without changing stored numbers.
 - Evidence: `test:settings-preferences` 17/17, `test:e2e:settings` 14/14, Progress browser 25/25 with Arabic-only digit assertion, plus Nutrition 106/106 and Workout 31/31.
+
+## BUG-020 — Profile forks the hardened data-transfer owner
+
+- Severity: P1 security/data integrity
+- Surface: Profile → Settings/Privacy → My data.
+- Reproduction: compare import/export from `#/settings` with either Profile data entry, then feed a hostile or cross-owner bundle to the implementations.
+- Evidence: Profile carried a second complete portability UI and state machine instead of rendering the reviewed `DataManagementPanel`. This duplicated security-sensitive import/export behavior and allowed future validation/undo/account-isolation drift.
+- Root cause: Profile copied the portability workflow rather than composing its canonical UI owner.
+- Status: RESOLVED — VERIFIED FOR PKG-8
+- Fix: remove the duplicate workflow and imports; both Profile contexts render `DataManagementPanel` with the same `uid` and recovery state as Settings.
+- Evidence: `test:profile-reliability` 22/22 binds Profile to the canonical owner and attacks reintroduction; the existing Settings hostile-import contract remains unchanged.
+
+## BUG-021 — Profile conflates account deletion with guest device-data management
+
+- Severity: P2 product truth/navigation
+- Surface: Profile privacy/account rows for signed-in and guest users.
+- Reproduction: browse Profile as a guest, open Privacy, and follow «حذف الحساب نهائيًا»; or leave Privacy for canonical Settings and press browser Back.
+- Evidence: `deleteAccountAvailable` was always true, so guests saw an account-deletion promise despite having no account. Canonical Settings return also always reset Profile to home, losing whether the user came from Privacy or internal Settings.
+- Root cause: a single unconditional capability flag and route transition represented two different personalities and discarded the originating internal state.
+- Status: RESOLVED — VERIFIED FOR PKG-8
+- Fix: account deletion and the internal logout/delete rows are available only when signed in; guests see device-data management without any account action. A marker on the Profile browser-history entry restores `privacy` or `settings` after canonical Settings Back without creating another storage key.
+- Evidence: `test:e2e:profile` 27/27 proves both personalities, absence of guest account rows, and both return contexts in a real browser; three named static bypass attacks guard the two false-promise paths and wrong return.
+
+## BUG-022 — Profile descendants duplicate the route heading and expose sub-44px controls
+
+- Severity: P2 accessibility
+- Surface: Profile, reminder settings and native preference controls.
+- Reproduction: inspect heading hierarchy and switch/back bounding boxes at 320px.
+- Evidence: `MobileShell` and Profile both rendered `h1`; internal Profile/reminder screens also emitted `h1` beneath the route shell. Back buttons measured 36/40px and switch hit areas 24px high.
+- Root cause: internal panels treated themselves as standalone pages and styled the visual switch track as the interactive target.
+- Status: RESOLVED — VERIFIED FOR PKG-8
+- Fix: leave the sole `h1` to `MobileShell`, use `h2` for internal screens, and wrap visual switch tracks in 44×44 semantic buttons; raise back targets to 44×44.
+- Evidence: the first strict browser run intentionally failed on the duplicate heading; the final recovery-reviewed run passes 27/27 and the structural proof checks every touched target.
+
+## BUG-023 — Profile browser proof could accept a foreign process on its fixed port
+
+- Severity: P2 test integrity
+- Surface: `test:e2e:profile` preview startup.
+- Reproduction: bind an unrelated HTTP 200 server to port 5328, then start the Profile journey; the first implementation ignored child output/exit and polled the URL directly.
+- Evidence: a stale or parallel server could satisfy `fetch(URL).ok` after Vite `--strictPort` exited, recreating the port-collision false-evidence class observed on 5325.
+- Root cause: the new runner did not prove that its own spawned Vite child reached the ready state.
+- Status: RESOLVED — VERIFIED FOR PKG-8
+- Fix: listen to the owned child's stdout/stderr and require its explicit local ready line before polling; reject on child error or early exit. The runner also binds and tests the explicit `127.0.0.1` host.
+- Evidence: a live foreign-server counter-proof now fails by the named `profile reliability preview exited before ready` error even though the foreign URL returns 200; the clean owned-preview rerun passes 27/27.
 
 ## EXTERNAL-001 — Paid Salla product binding cannot be proven
 

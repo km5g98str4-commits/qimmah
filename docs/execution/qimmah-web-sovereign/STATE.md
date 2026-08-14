@@ -1,6 +1,6 @@
 # Qimmah Web Sovereign — execution state
 
-Updated: 2026-08-14 (Layer 3 Settings/numbers/units / PKG-7 verified)
+Updated: 2026-08-14 (Layer 3 Profile / PKG-8 recovery-reviewed and verified)
 
 ## Provenance
 
@@ -28,14 +28,41 @@ git status --short --branch (before PKG-0 edits)    → clean
 
 ## Current package
 
-- Packages completed and pushed: `PKG-0` at `f78676e`; `PKG-1` at `8b29ca3`; `PKG-2` at `28c725e4e4869d454d6b007cc11a92222a059ac1`; `PKG-3` at `678a38d01d2206ff02b245281d621fc37ed19658`; `PKG-4` at `df5e55bebc31149484c3d06a9f59348b1697f9e1`; `PKG-5` at `7478507b7c46ee9b6018b1ef67c31ca40fbed6d2`; `PKG-6` at `f49ae011450b9a0097e65b277d36bc7348ebd51f`.
-- Package verified for checkpoint: Layer 3 Settings/numbers/units (`PKG-7`).
-- `#/settings` once again routes import/export through the existing hardened `DataManagementPanel`; the reintroduced `FileReader` + raw `JSON.parse` importer is removed.
-- Language is live and persisted across reload with synchronized `document.lang` and `dir`. Units are an explicitly non-interactive metric-only capability statement; no imperial support is fabricated.
-- `formatNumber` is the single presentation-boundary policy for Layer-3 critical surfaces: Arabic-Indic digits in Arabic and Latin digits in English. Stored numeric values stay numeric and unchanged.
-- The real browser proved the Settings policy at 320px plus the 34-vector import attack. Nutrition 106/106, Workout 31/31 and Progress 25/25 stayed green after numeral convergence.
+### Recovery checkpoint (2026-08-14)
+
+- `LAST_CONFIRMED_GREEN`: **PKG-8 Profile WIP** — at recovery, the staged tree had passed its focused Profile proof (21/21), Profile browser journey (26/26), sequential Progress (25/25), Navigation (96/96), fresh install/static/build checks, and the complete repository gate through `test:workout-day-source` (19/19). This was verified work, but it was not yet a commit when the previous Goal usage limit interrupted the run. Recovery review then exposed one remaining guest-only account row; its named red-first proof failed, the product was corrected, and the focused evidence is now 22/22 static plus 27/27 browser.
+- `LAST_COMMITTED_GREEN`: **PKG-7** at `1bcf7a99c657558f982154696b907efbd3d78ac5`.
+- `LAST_PUSHED_GREEN`: **PKG-7** at `1bcf7a99c657558f982154696b907efbd3d78ac5`; `git ls-remote --heads origin codex/qimmah-web-sovereign-001` matched that SHA exactly during recovery.
+- `CURRENT_WIP`: the 16-file staged PKG-8 Profile package (canonical data ownership, guest/account truth, history-scoped Settings return, heading/touch/numeral convergence and its strengthened proofs). No untracked file or unstaged product edit was found before this recovery note.
+- `NEXT_REQUIRED_ACTION`: review the staged PKG-8 diff against PKG-7, re-stage this recovery record, commit `[PKG-8][green]`, push only `codex/qimmah-web-sovereign-001`, verify the remote SHA, then continue Layer 3 Navigation/404/Quick Log.
+- Recovery precheck: cwd/repository root `/private/tmp/qimmah-web-sovereign-001`; Git metadata `/Users/ziyad/Documents/Qimmah 2/.git/worktrees/qimmah-web-sovereign-001`; branch/upstream `codex/qimmah-web-sovereign-001` / `origin/codex/qimmah-web-sovereign-001`; remote `origin`; no process was running from this worktree. Other Qimmah dev servers and worktrees were observed and left untouched.
+
+- Packages completed and pushed: `PKG-0` at `f78676e`; `PKG-1` at `8b29ca3`; `PKG-2` at `28c725e4e4869d454d6b007cc11a92222a059ac1`; `PKG-3` at `678a38d01d2206ff02b245281d621fc37ed19658`; `PKG-4` at `df5e55bebc31149484c3d06a9f59348b1697f9e1`; `PKG-5` at `7478507b7c46ee9b6018b1ef67c31ca40fbed6d2`; `PKG-6` at `f49ae011450b9a0097e65b277d36bc7348ebd51f`; `PKG-7` at `1bcf7a99c657558f982154696b907efbd3d78ac5`.
+- Package verified for checkpoint: Layer 3 Profile (`PKG-8`).
+- Profile now routes both of its data entries through the canonical hardened `DataManagementPanel`; its second portability UI and duplicate Settings facts are removed.
+- Account truth is conditional: signed-in users can reach account deletion, while guests are offered device-data management without a false account promise.
+- Leaving Profile for canonical Settings preserves and restores the originating internal context (`settings` or `privacy`) on the Profile history entry, without adding a data-store key. Profile and its exposed reminder/native controls now have one route-owned `h1` and 44px targets.
+- Dynamic Profile values use the same `formatNumber` presentation boundary established in PKG-7. The browser proved account/guest, AR/EN, RTL/LTR, 320px, contextual Back, data ownership and zero console/page errors.
 - No dependency, backend, Supabase, QAE, canonical dataset, service-worker, deployment, or Salla authority file changed.
-- Next action: commit/push `[PKG-7][green]`, then continue Layer 3 with Profile.
+- Next action: commit/push `[PKG-8][green]`, then continue Layer 3 with Navigation/404/Quick Log.
+
+### PKG-8 Profile evidence
+
+| Evidence | Result |
+| --- | --- |
+| `npm run test:profile-reliability` | PASS — 22/22: account/device truth across Privacy and internal Settings, one data owner, history-scoped contextual return, centralized numerals, heading ownership, 44px targets and four named bypass attacks |
+| `npm run test:e2e:profile` attempt 1 | NAMED PRODUCT FAIL — strict English locator found two `h1` headings; Profile duplicated the route heading owned by `MobileShell` |
+| Strengthened `npm run test:e2e:profile` | PASS — 27/27 for signed-in and guest personalities, including absence of guest-only account actions, AR/EN, RTL/LTR, 320px, data/settings/measurements routes, Back context, touch size, no overflow and zero browser errors |
+| Standards + spec review against PKG-7 | FOUND/FIXED — both reviewers independently found the remaining guest-only logout/delete row; a named red-first proof failed, the Account group was made signed-in-only, and both reviewers reported no other actionable product finding |
+| Foreign-server collision attack on port 5328 | EXPECTED NAMED FAIL — with an unrelated 200 server owning the port, the runner rejected `profile reliability preview exited before ready` instead of accepting the foreign artifact; after removing the attack server, the owned preview passed 27/27 |
+| Full `npm run test:gate` attempt 1 | NAMED STALE-PROOF FAIL at `test:delete-account` after 19 passes: it required a removed historical comment instead of checking the live conditional Profile→Settings binding |
+| Parallel Progress + Navigation regression attempt | NAMED TEST-INFRA FAIL — both legacy scripts bind fixed port 5325; one process killed the shared preview while the other was still running |
+| Sequential `npm run test:e2e:progress` | PASS — 25/25 after updating the canonical Profile route-heading expectation |
+| Sequential `npm run test:e2e:navigation` | PASS — 96/96, including `#/profile`, route refresh/history and deterministic 404 |
+| `npm run typecheck` + `npm run lint` | PASS — exit 0, zero warnings |
+| Fresh `npm ci` + `npm run typecheck` + `npm run lint` | PASS — deterministic 361-package install; typecheck exit 0; lint exit 0 with zero warnings |
+| Production `npm run build` | PASS — 2,564 modules |
+| Final `npm run lint` + strengthened full `npm run test:gate` | PASS — lint exit 0; gate includes Profile 22/22 and deletion binding 28/28, then exits 0 through final `test:workout-day-source` 19/19 |
 
 ### PKG-7 Settings/numbers/units evidence
 
@@ -170,6 +197,7 @@ Rule: discover canonical → route to it → isolate legacy. No third implementa
 | Language | `src/i18n/LanguageContext.tsx`; persisted device preference in `appPreferences.ts` | all routes | hardcoded bilingual helpers remain historical debt and are not a new pattern |
 | Number presentation | `src/lib/numberFormat.ts` | Settings sample/import preview and Layer-3 Nutrition/Today/Workout/Progress/Measurements surfaces | locale policy is presentation-only; stored numeric data remains numeric |
 | Settings data transfer | `src/components/DataManagementPanel.tsx` over `src/lib/portability` | `#/settings` | raw `FileReader` + manual `JSON.parse` importer is prohibited and guarded |
+| Profile shell/data/account truth | `ProfileView.tsx` adapter → `ProfileV2.tsx`; data operations remain owned by `DataManagementPanel` | `#/profile`, internal privacy/settings/reminders/data screens | no second portability UI; canonical `#/settings` owns language/account/device controls |
 | Error handling | `src/components/ErrorBoundary.tsx` (`ErrorBoundary`, `RouteErrorBoundary`) + `src/i18n/dict/errorBoundary.ts` | `main.tsx`, route shell, setup | setup reuses the canonical route primitive; prior duplicate strings in `config/strings.ts` are isolated/removed |
 | Local data registry | `src/lib/userDataKeys.ts` | account wipe, portability, sync allowlists | raw key literals not registered here require investigation |
 
@@ -276,7 +304,7 @@ Status here means evidence at this checkpoint, not remembered intent.
 | 17 | exercise deep-link | PASS — full catalog + Machines, refresh/Back/Forward/unknown-id in `test:e2e:exercises` 32/32 |
 | 18 | deterministic 404 | PASS — `test:e2e:navigation` 96/96 |
 | 19 | whitespace-only signup name | PASS — `test:e2e:navigation` 96/96 |
-| 20 | sub-44px touch targets | PARTIAL PASS — bottom/nav 200/200 and Premium close/input corrected; full-site audit remains Layer 4 |
+| 20 | sub-44px touch targets | PARTIAL PASS — bottom/nav 200/200, Premium close/input, and Profile/reminders/native switches corrected; full-site audit remains Layer 4 |
 | 21 | silent persistence failure | PASS for live Nutrition, Workout and Measurements — quota/security proofs plus browser input/store/snapshot preservation |
 | 22 | malformed storage recovery | multiple unit proofs green; browser dirty pass pending |
 | 23 | never-trained semantics | PASS — 97-case question proof plus newcomer/minor browser journeys |
@@ -291,8 +319,8 @@ Status here means evidence at this checkpoint, not remembered intent.
 ## Current severity counts
 
 - P0: 0 confirmed.
-- P1: 0 internal open; BUG-001, BUG-002, BUG-004, BUG-008–BUG-012 and BUG-018 are resolved and fully gated.
-- P2: 1 open (BUG-003); BUG-005–BUG-007, BUG-013 and BUG-019 are resolved and fully gated.
+- P1: 0 internal open; BUG-001, BUG-002, BUG-004, BUG-008–BUG-012, BUG-018 and BUG-020 are resolved and fully gated.
+- P2: 1 open (BUG-003); BUG-005–BUG-007, BUG-013, BUG-019, BUG-021 and BUG-022 are resolved and fully gated.
 - P3: 0.
 - External blockers: product-specific Salla URL not present; live activation backend unavailable; WebKit availability not tested yet.
 
