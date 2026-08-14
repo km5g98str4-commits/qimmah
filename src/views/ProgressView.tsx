@@ -1,4 +1,4 @@
-import { ProgressV2 } from '@/views/ProgressV2'
+import { MeasurementsV2, ProgressV2 } from '@/views/ProgressV2'
 import type { Lang } from '@/lib/appPreferences'
 import type { AppRoute } from '@/lib/appRoutes'
 
@@ -14,4 +14,9 @@ interface ProgressViewProps {
  */
 export function ProgressView(props: ProgressViewProps) {
   return <ProgressV2 {...props} />
+}
+
+/** Stable route adapter for the canonical measurement history inside Progress. */
+export function MeasurementsView({ lang, onNavigate }: ProgressViewProps) {
+  return <MeasurementsV2 lang={lang} onBack={() => onNavigate?.('progress')} />
 }

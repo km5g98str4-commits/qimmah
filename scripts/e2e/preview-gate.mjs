@@ -131,7 +131,7 @@ try {
   console.log('\n=== شخصية: معاينة الضيف (بلا استحقاق) ===')
 
   // (أ) التصفّح مفتوح — الحجب على الفعل لا على الصفحة.
-  for (const route of ['dashboard', 'workout', 'exercises', 'nutrition', 'progress', 'profile']) {
+  for (const route of ['dashboard', 'workout', 'exercises', 'nutrition', 'progress', 'measurements', 'profile']) {
     await page.evaluate((h) => { window.location.hash = '/' + h }, route)
     // لا نكتفي بتأخير قصير: التحميل الكسول للمسارات جزء من السلوك الذي نثبته.
     await settle(page, 2800)

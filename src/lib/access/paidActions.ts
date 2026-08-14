@@ -62,6 +62,7 @@ export const ALWAYS_BROWSABLE = [
   'exercises',
   'nutrition',
   'progress',
+  'measurements',
   'profile',
   'stats',
   'steps',

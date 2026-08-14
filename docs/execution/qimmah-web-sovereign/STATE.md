@@ -1,6 +1,6 @@
 # Qimmah Web Sovereign — execution state
 
-Updated: 2026-08-14 (Layer 3 Today/Workout / PKG-4 verified)
+Updated: 2026-08-14 (Layer 3 Progress/Measurements / PKG-5 verified)
 
 ## Provenance
 
@@ -28,14 +28,32 @@ git status --short --branch (before PKG-0 edits)    → clean
 
 ## Current package
 
-- Packages completed and pushed: `PKG-0` at `f78676e`; `PKG-1` at `8b29ca3`; `PKG-2` at `28c725e4e4869d454d6b007cc11a92222a059ac1`; `PKG-3` at `678a38d01d2206ff02b245281d621fc37ed19658`.
-- Package verified for checkpoint: Layer 3 Today/Workout consistency and live workout completion (`PKG-4`).
-- Today, Workout and completion-next already converge on `workoutDaySource`; the 14-day 3/4/5/6-day-plan matrix remains green.
-- Active-set persistence now returns and consumes `WriteResult`. A rejected snapshot never flashes “saved” or overwrites the last-good durable session.
-- Workout completion is one rollback boundary: preserve the active snapshot until the finished-session commit succeeds; if history or active cleanup fails, restore the exact pre-confirm state and show honest recovery copy.
-- The real browser exercised Preview denial, activation, weight/reps, quota, timer +30/skip, reload/resume, guarded Back, ended-early, a second fully completed session, next workout, Today transition and reload persistence.
+- Packages completed and pushed: `PKG-0` at `f78676e`; `PKG-1` at `8b29ca3`; `PKG-2` at `28c725e4e4869d454d6b007cc11a92222a059ac1`; `PKG-3` at `678a38d01d2206ff02b245281d621fc37ed19658`; `PKG-4` at `df5e55bebc31149484c3d06a9f59348b1697f9e1`.
+- Package verified for checkpoint: Layer 3 Progress and Measurements (`PKG-5`).
+- `#/measurements` is now a real refreshable route inside the Progress tab shell, with direct entries from Progress and Profile and an explicit Back to Progress action.
+- One canonical `measurementLog`/`historyStore` flow owns empty, history, add, edit and delete. No backend shape or duplicate cache was added.
+- Measurement add/edit/delete are Premium mutations at both UI and writer layers; restore/sync remains available as a data-ownership right.
+- Local measurement writes return and consume `WriteResult`; quota failure keeps the form and byte-identical history instead of showing success.
+- The real browser exercised direct route/reload, Preview/Premium add-edit-delete, validation, quota retry, Profile/Progress entries, focus return, Arabic/English, RTL/LTR and 320px touch/overflow.
 - No dependency, backend, Supabase, QAE, canonical dataset, service-worker, deployment, or Salla authority file changed.
-- Next action: commit/push `[PKG-4][green]`, then continue Layer 3 with Progress and Measurements from that remote checkpoint.
+- Next action: commit/push `[PKG-5][green]`, then continue Layer 3 with Exercises/detail from that remote checkpoint.
+
+### PKG-5 Progress/Measurements evidence
+
+| Evidence | Result |
+| --- | --- |
+| `npm run test:measurement-reliability` | PASS — 11/11: checked add/edit/delete, quota preservation, writer denial, restore right and Health-source isolation |
+| `npm run test:progress-v2` | PASS — 11 canonical Progress checks + 11 measurement-reliability checks |
+| `npm run test:access-gate` | PASS — 84/84, including measurement add/edit/delete writers and both live UI owners |
+| `npm run test:e2e:progress` | PASS — 25/25 live-browser assertions; no page error; 320px English/LTR pass |
+| `npm run test:e2e:preview-gate` | PASS — 35/35; `#/measurements` is explicitly browsable and mutations remain denied |
+| `npm run test:e2e:navigation` | PASS — 96/96 including `#/measurements` deep route |
+| `npm run test:canonical` | PASS — 16/16 |
+| `npm run test:sync-coverage` | PASS — 56/56 including measurement LWW/tombstones and HealthKit exclusion |
+| `npm run test:asset-integrity` | PASS — 35/35; route and Pages rewrite lists remain 1:1 |
+| Fresh `npm ci` + `npm run typecheck` + `npm run lint` | PASS — deterministic install, typecheck exit 0, lint exit 0 with zero warnings |
+| `npm run build` | PASS — production mode, 2,558 modules |
+| Full `npm run test:gate` | PASS — exit 0 through final `test:workout-day-source` 19/19 |
 
 ### PKG-4 Today/Workout evidence
 
@@ -119,7 +137,7 @@ Rule: discover canonical → route to it → isolate legacy. No third implementa
 | Current workout/day | `src/lib/workoutDaySource.ts` | `TodayV2`, `WorkoutView` | prior rotating/index logic is retained only as named fallback when no schedule exists |
 | Workout persistence | `src/lib/activeWorkout.ts`, `finishWorkout.ts`, `historyStore.ts` | `WorkoutView` | legacy `activeSession.ts` is retired/dead per data registry |
 | Nutrition display/persistence | `src/views/NutritionView.tsx`; `src/lib/nutritionV2Model.ts`; owner-scoped history in `nutritionHistory.ts` | Nutrition tab, Quick Log | `NutritionV2.tsx` is not the live route wrapper; do not fork a third flow |
-| Measurements/progress | data: `measurementLog.ts`/`historyStore.ts`; current experience: `ProgressV2.tsx` | Progress, calculator | `ProgressView` is now the thin stable route wrapper; the duplicate older surface is isolated |
+| Measurements/progress | data: `measurementLog.ts`/`historyStore.ts`; current experiences: `ProgressV2.tsx` and its exported `MeasurementsV2` | `#/progress`, `#/measurements`, Profile, calculator | `ProgressView` remains the thin stable adapter for both exports; no third store or backend schema |
 | Exercises | `ExerciseLibraryView.tsx`; catalog `src/data/exercises.ts`; labels/media helpers | workout/library/deep link | canonical dataset is read-only |
 | Auth | `authContext.tsx`, `LoginView.tsx`, route-owned `login/signup/forgot` | `App.tsx` | no local secrets; Supabase config/semantics are no-touch |
 | Language | `src/i18n/LanguageContext.tsx`; persisted device preference in `appPreferences.ts` | all routes | hardcoded bilingual helpers remain historical debt and are not a new pattern |
@@ -222,20 +240,20 @@ Status here means evidence at this checkpoint, not remembered intent.
 | 9 | Units row dead | active discovery pending |
 | 10 | Numbers row dead | active discovery pending |
 | 11 | Arabic/Western numeral inconsistency | active visual discovery pending |
-| 12 | Measurements route/promise | PASS — live route converged to ProgressV2; Preview measurement attack 0 writes |
-| 13 | auth route/state | PASS — `test:e2e:navigation` 95/95 |
+| 12 | Measurements route/promise | PASS — real `#/measurements` route with empty/history/add/edit/delete, Profile/Progress entries and 25-case browser proof |
+| 13 | auth route/state | PASS — `test:e2e:navigation` 96/96 |
 | 14 | onboarding reload resume | PASS — onboarding matrix history resume plus `test:e2e:onboarding` |
-| 15 | returning guest route | PASS — `test:e2e:navigation` 95/95 |
-| 16 | exercise detail Back | PASS — `test:e2e:navigation` 95/95 |
-| 17 | exercise deep-link | PASS — `test:e2e:navigation` 95/95 |
-| 18 | deterministic 404 | PASS — `test:e2e:navigation` 95/95 |
-| 19 | whitespace-only signup name | PASS — `test:e2e:navigation` 95/95 |
+| 15 | returning guest route | PASS — `test:e2e:navigation` 96/96 |
+| 16 | exercise detail Back | PASS — `test:e2e:navigation` 96/96 |
+| 17 | exercise deep-link | PASS — `test:e2e:navigation` 96/96 |
+| 18 | deterministic 404 | PASS — `test:e2e:navigation` 96/96 |
+| 19 | whitespace-only signup name | PASS — `test:e2e:navigation` 96/96 |
 | 20 | sub-44px touch targets | PARTIAL PASS — bottom/nav 200/200 and Premium close/input corrected; full-site audit remains Layer 4 |
-| 21 | silent persistence failure | PASS for live Nutrition and Workout — quota/security proofs plus browser input/store/snapshot preservation; remaining surfaces keep their named proofs |
+| 21 | silent persistence failure | PASS for live Nutrition, Workout and Measurements — quota/security proofs plus browser input/store/snapshot preservation |
 | 22 | malformed storage recovery | multiple unit proofs green; browser dirty pass pending |
 | 23 | never-trained semantics | PASS — 97-case question proof plus newcomer/minor browser journeys |
 | 24 | minor/age eligibility | PASS — restricted goal clears immediately after adult→minor change; unit and browser counter-proof green |
-| 25 | Preview direct/back/refresh/dispatch | PASS for paid-action matrix — `test:e2e:preview-gate` 34/34; broader navigation remains Layer 3 |
+| 25 | Preview direct/back/refresh/dispatch | PASS for paid-action matrix — `test:e2e:preview-gate` 35/35 and Progress/Measurements 25/25 |
 | 26 | Salla id 1181109938 / reject 1084925309 | EXTERNALLY_BLOCKED: only store root found |
 | 27 | no production Premium hook | source proof green; final built bundle counter-proof pending |
 | 28 | install overlap real hit test | PASS — 200/200 with named synthetic regression attacks |

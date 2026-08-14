@@ -17,6 +17,8 @@ export type AppRoute =
   | 'exercises'
   | 'nutrition'
   | 'progress'
+  // سجل القياسات المستقل — مدخله من التقدّم والملف الشخصي.
+  | 'measurements'
   // صفحة الخطوات المستقلة — مدخلها من التقدّم، وليست تبويبًا رئيسيًا.
   | 'steps'
   | 'profile'
@@ -49,6 +51,7 @@ const ROUTES: AppRoute[] = [
   'exercises',
   'nutrition',
   'progress',
+  'measurements',
   'steps',
   'profile',
   'calc',

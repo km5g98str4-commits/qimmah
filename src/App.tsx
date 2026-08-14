@@ -27,6 +27,7 @@ function createLazyViews() {
     ),
     NutritionView: lazy(() => import('@/views/NutritionView').then((m) => ({ default: m.NutritionView }))),
     ProgressView: lazy(() => import('@/views/ProgressView').then((m) => ({ default: m.ProgressView }))),
+    MeasurementsView: lazy(() => import('@/views/ProgressView').then((m) => ({ default: m.MeasurementsView }))),
     StepsView: lazy(() => import('@/views/StepsView').then((m) => ({ default: m.StepsView }))),
     ProfileView: lazy(() => import('@/views/ProfileView').then((m) => ({ default: m.ProfileView }))),
     CalcExplainerView: lazy(() =>
@@ -113,13 +114,14 @@ function guardRoute(route: AppRoute, userId: string | null): AppRoute {
     route === 'stats' ||
     route === 'recovery' ||
     route === 'steps' ||
+    route === 'measurements' ||
     route === 'settings' ||
     route === 'calc'
   const guestReady = !userId && isOnboardingComplete(null)
   // الإعداد هو باب الضيف نفسه؛ لا نعيده للبداية قبل أن يأخذ فرصته في بناء بياناته.
   if (route !== 'setup' && needsAccount && !userId && !guestReady) return 'accountRequired'
   // بعد الحساب: التبويبات تتطلّب إعدادًا مكتملًا وإلا معالج الإعداد (الأسئلة).
-  if (MAIN_TABS.includes(route) || route === 'exercises' || route === 'stats' || route === 'recovery' || route === 'steps') {
+  if (MAIN_TABS.includes(route) || route === 'exercises' || route === 'stats' || route === 'recovery' || route === 'steps' || route === 'measurements') {
     if (!isOnboardingComplete(userId)) return 'setup'
   }
   return route
@@ -532,7 +534,7 @@ export default function App() {
           <Suspense fallback={<TabSkeleton />}>
             <MobileShell
               lang={LANG}
-              tab={(view === 'exercises' ? 'workout' : view === 'stats' ? 'dashboard' : view) as MainTab}
+              tab={(view === 'exercises' ? 'workout' : view === 'stats' ? 'dashboard' : view === 'measurements' ? 'progress' : view) as MainTab}
               badge={badge}
               onNavigate={navigate}
               onOpenSettings={() => setView('settings')}
@@ -564,6 +566,11 @@ export default function App() {
           {view === 'progress' && (
             <Suspense fallback={<ProgressSkeleton />}>
               <V.ProgressView lang={LANG} onNavigate={navigate} />
+            </Suspense>
+          )}
+          {view === 'measurements' && (
+            <Suspense fallback={<ProgressSkeleton />}>
+              <V.MeasurementsView lang={LANG} onNavigate={navigate} />
             </Suspense>
           )}
           {view === 'profile' && (

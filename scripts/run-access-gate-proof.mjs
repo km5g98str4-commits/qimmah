@@ -64,6 +64,8 @@ const WRITERS = [
   ['src/lib/nutritionV2Model.ts', 'updateFoodInDay', 'nutrition.addFood'],
   ['src/lib/nutritionV2Model.ts', 'addWaterToDay', 'nutrition.water'],
   ['src/lib/measurementLog.ts', 'addLog', 'progress.logMeasurement'],
+  ['src/lib/measurementLog.ts', 'updateLog', 'progress.logMeasurement'],
+  ['src/lib/measurementLog.ts', 'deleteLog', 'progress.logMeasurement'],
   ['src/lib/finishWorkout.ts', 'commitFinishedSession', 'workout.finish'],
   ['src/lib/recovery.ts', 'saveRecoveryEntry', 'recovery.log'],
   ['src/lib/recoveryEngine.ts', 'saveRecoveryEngineEntry', 'recovery.log'],
@@ -130,6 +132,7 @@ for (const [file, fn, action] of WRITERS) {
 const LIVE_ACTION_GUARDS = [
   ['src/views/RecoveryView.tsx', 'RecoveryView', 'recovery.log', "guard('recovery.log'"],
   ['src/views/ProgressV2.tsx', 'WeightLogScreen', 'progress.logMeasurement', "guard('progress.logMeasurement'"],
+  ['src/views/ProgressV2.tsx', 'MeasurementsV2', 'progress.logMeasurement', "guard('progress.logMeasurement'"],
   ['src/views/WorkoutView.tsx', 'WorkoutView', 'workout.start', "guardPaid('workout.start'"],
   ['src/views/WorkoutView.tsx', 'WorkoutView', 'workout.startEmpty', "guardPaid('workout.startEmpty'"],
   ['src/views/WorkoutView.tsx', 'WorkoutView', 'plan.saveEdit', "guardPaid('plan.saveEdit'"],

@@ -1,6 +1,6 @@
 # Qimmah Web Sovereign — autonomous founder decisions
 
-Updated: 2026-08-14 (Layer 3 Today/Workout / PKG-4 verified)
+Updated: 2026-08-14 (Layer 3 Progress/Measurements / PKG-5 verified)
 
 ## Decision 001 — Use the exact Founder checkpoint
 
@@ -88,6 +88,16 @@ PKG-4 strengthens the Workout truth contract. No assertion was removed or weaken
 | `storage-honesty-proof.ts` | finished-history quota and static parent checks | 44 runtime/structural checks including active quota, last-good bytes, commit order and two bypass attacks | prevent false saved state or lost resume data | stronger |
 | `e2e/workout-reliability.mjs` | absent | 31 real-browser checks from Preview through two finish classifications and Today reload | prove the maintained live route end-to-end | new guard |
 
+PKG-5 completes the existing Progress/Measurements contract without creating a new data model. No assertion was removed or weakened.
+
+| Test | Old contract | New contract | Why | Strength |
+| --- | --- | --- | --- | --- |
+| `measurement-reliability-proof.ts` | absent | 11 runtime checks for checked add/edit/delete, quota, direct Preview denial, restore and Health isolation | prevent fake success and deletion bypass | new guard |
+| `run-access-gate-proof.mjs` | measurement add only | add, edit and delete writers plus both live UI owners | enumerate every paid mutation | stronger |
+| `e2e/progress-reliability.mjs` | absent | 25 browser checks across route/history/validation/Preview/Premium/quota/a11y/mobile | prove the complete maintained surface | new guard |
+| `e2e/preview-gate.mjs` | six browsable routes | adds explicit `#/measurements` Preview browse assertion | keep browse-vs-mutate policy complete | stronger |
+| `e2e/navigation-history.mjs` | 95 checks | 96 checks including the Measurements deep route | prevent route/promise regression | stronger |
+
 ## Decision 006 — Error recovery never means product completion
 
 - Decision: a render failure may retry/reload/contact support, but cannot mark onboarding complete or synthesize a plan.
@@ -132,3 +142,12 @@ PKG-4 strengthens the Workout truth contract. No assertion was removed or weaken
 - Risk: a cleanup failure rolls back an otherwise-written completion and asks the user to try again. That is deliberately conservative and preserves a single truthful state.
 - Reversibility: PKG-4 is isolated; no stored shape changes, only checked return values and ordering.
 - Affected files: `activeWorkout`, `WorkoutMode`, `WorkoutView`, bilingual Workout dictionary and their focused proofs.
+
+## Decision 011 — Measurements is a route over the existing canonical store
+
+- Decision: expose `#/measurements` through the existing `ProgressV2` module and `measurementLog`/`historyStore`; do not create a third Progress implementation or any backend schema. Use the existing `progress.logMeasurement` action for add, edit and delete because they are the same paid measurement mutation boundary.
+- Why: the local model already supports stable ids, full-list replacement, LWW timestamps and tombstones. The missing capability was route/UI/checked-result ownership, not storage shape.
+- Alternatives rejected: another measurements store; a fake history from profile values; promising photos; backend/Supabase changes; UI-only Premium checks; blocking restore/sync behind Premium.
+- Risk: Health-imported rows are intentionally read-only here and remain owned by the Apple Health disconnect flow. A future photo feature needs its own approved model instead of reviving the removed promise.
+- Reversibility: PKG-5 adds one route/adapter and checked result APIs without migrating stored records; it is one revertable package.
+- Affected files: routes/App, `ProgressV2`/Profile adapters, measurement/history writers, bilingual measurement dictionary, and focused/browser proofs.

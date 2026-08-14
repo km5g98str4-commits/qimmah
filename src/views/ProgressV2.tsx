@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState, type FormEvent } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState, type FormEvent } from 'react'
 import { Icon } from '@/components/Icon'
 import { ScreenHeader } from '@/components/ScreenHeader'
 import { StateBlock } from '@/components/StateBlock'
@@ -7,7 +7,7 @@ import type { Lang } from '@/lib/appPreferences'
 import type { AppRoute } from '@/lib/appRoutes'
 import { useCustomization } from '@/lib/customizationContext'
 import { useAccess } from '@/lib/access/useAccess'
-import { addLog } from '@/lib/measurementLog'
+import { addLog, deleteLog, loadLogs, updateLog } from '@/lib/measurementLog'
 import { getDayStamp } from '@/lib/today'
 import { useAppScrollReset } from '@/lib/useAppScrollReset'
 import { inRange, LIMITS, sanitizeNumericInput } from '@/lib/validation'
@@ -23,6 +23,8 @@ import { buildWeeklyInsights } from '@/lib/insights'
 import { InsightCardsView } from '@/lib/insights/InsightCardsView'
 import { insightCopy } from '@/data/insightCopy'
 import { eCalcStrings } from '@/i18n/dict/eCalc'
+import { measurementsScreenStrings } from '@/i18n/dict/measurementsScreen'
+import type { MeasurementLog } from '@/types/progress'
 // Strength system (this feature) — e1RM series + dated PR log for the detail.
 import { getExercise } from '@/data/exercises'
 import { e1rmSeries, currentBests, prHistory, type StrengthPR } from '@/lib/strength'
@@ -162,6 +164,22 @@ export function ProgressV2({ lang, onNavigate }: ProgressV2Props) {
 
         <button
           type="button"
+          onClick={() => go('measurements')}
+          data-testid="progress-measurements-entry"
+          className="card flex min-h-[64px] w-full items-center gap-3 p-4 text-start transition-colors hover:border-primary-soft"
+        >
+          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary-c">
+            <Icon name="Scale" className="h-5 w-5" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-sm font-black text-ink-900">{measurementsScreenStrings[lang].progressEntryTitle}</span>
+            <span className="mt-0.5 block text-xs leading-relaxed text-ink-500">{measurementsScreenStrings[lang].progressEntryBody}</span>
+          </span>
+          <Icon name="ChevronLeft" className="h-4 w-4 shrink-0 text-ink-400 rtl:rotate-0 ltr:rotate-180" />
+        </button>
+
+        <button
+          type="button"
           onClick={() => go('calc')}
           data-testid="progress-calc-link"
           className="card flex w-full items-center gap-3 p-5 text-start transition-colors hover:border-primary-soft"
@@ -201,16 +219,182 @@ export function ProgressV2({ lang, onNavigate }: ProgressV2Props) {
   )
 }
 
-// ── Real measurement logging ─────────────────────────────────────────────────
+// ── Real measurement history + logging ───────────────────────────────────────
 
-function WeightLogScreen({ lang, current, onBack, onSaved }: { lang: Lang; current: WeightDetail; onBack: () => void; onSaved: () => void }) {
-  const ar = lang !== 'en'
-  const t = (a: string, e: string) => (ar ? a : e)
+interface MeasurementsV2Props {
+  lang: Lang
+  onBack: () => void
+}
+
+function numericValue(log: MeasurementLog, key: string): number | null {
+  const raw = log.values[key]
+  if (raw === undefined || raw === '') return null
+  const value = Number(raw)
+  return Number.isFinite(value) ? value : null
+}
+
+function measurementDate(stamp: string, lang: Lang): string {
+  const date = new Date(`${stamp}T00:00:00`)
+  if (Number.isNaN(date.getTime())) return stamp
+  return new Intl.DateTimeFormat(lang === 'en' ? 'en' : 'ar', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  }).format(date)
+}
+
+/**
+ * Canonical Measurements route. It reads and mutates the same historyStore used
+ * by Progress and sync; no duplicate cache or backend shape is introduced.
+ */
+export function MeasurementsV2({ lang, onBack }: MeasurementsV2Props) {
+  const { customization } = useCustomization()
   const { guard } = useAccess()
-  const [weight, setWeight] = useState(current.currentKg ? String(current.currentKg) : '')
-  const [waist, setWaist] = useState(current.waistCm ? String(current.waistCm) : '')
-  const [bodyFat, setBodyFat] = useState(current.bodyFatPct ? String(current.bodyFatPct) : '')
+  const d = measurementsScreenStrings[lang]
+  const ar = lang !== 'en'
+  const [editor, setEditor] = useState<MeasurementLog | 'new' | null>(null)
+  const [deleteCandidate, setDeleteCandidate] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [, setRevision] = useState(0)
+  const cancelDeleteRef = useRef<HTMLButtonElement>(null)
+  const logs = loadLogs().slice().sort((a, b) => {
+    if (a.date !== b.date) return a.date < b.date ? 1 : -1
+    return (b.updatedAt ?? '').localeCompare(a.updatedAt ?? '')
+  })
+  const current = buildProgressV2Model(customization, lang).weight
+
+  useAppScrollReset(editor ? 'editor' : 'history')
+  useEffect(() => {
+    if (deleteCandidate) cancelDeleteRef.current?.focus()
+  }, [deleteCandidate])
+
+  if (editor) {
+    return (
+      <WeightLogScreen
+        lang={lang}
+        current={current}
+        editing={editor === 'new' ? undefined : editor}
+        onBack={() => setEditor(null)}
+        onSaved={() => {
+          setRevision((value) => value + 1)
+          setEditor(null)
+          setError(null)
+        }}
+      />
+    )
+  }
+
+  const confirmDelete = guard('progress.logMeasurement', () => {
+    if (!deleteCandidate) return
+    const outcome = deleteLog(deleteCandidate)
+    if (outcome.result !== 'ok') {
+      setError(outcome.result === 'error' ? d.unavailableRecord : d.storageError)
+      return
+    }
+    setDeleteCandidate(null)
+    setError(null)
+    setRevision((value) => value + 1)
+  })
+
+  return (
+    <div dir={ar ? 'rtl' : 'ltr'} className="overflow-x-hidden px-4 py-4 text-ink-900" data-testid="measurements-view">
+      <div className="flex items-center justify-between gap-3">
+        <button type="button" onClick={onBack} aria-label={d.backToProgress} className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-line bg-surface">
+          <Icon name="ChevronRight" className="h-5 w-5 rtl:rotate-0 ltr:rotate-180" />
+        </button>
+        <h1 className="text-lg font-black">{d.title}</h1>
+      </div>
+
+      <p className="mt-4 text-sm leading-relaxed text-ink-500">{d.intro}</p>
+      <button type="button" onClick={() => setEditor('new')} className="btn-primary mt-4 min-h-[48px] w-full justify-center text-base" data-testid="measurements-add">
+        <Icon name="Plus" className="h-5 w-5" />
+        {d.add}
+      </button>
+
+      {error && (
+        <p role="alert" data-testid="measurements-error" className="mt-4 flex items-start gap-2 rounded-xl border border-danger/40 bg-danger/[0.06] p-3 text-sm font-bold leading-relaxed text-danger">
+          <Icon name="AlertCircle" className="mt-0.5 h-4 w-4 shrink-0" />
+          <span>{error}</span>
+        </p>
+      )}
+
+      <section className="mt-5" aria-labelledby="measurement-history-title">
+        <h2 id="measurement-history-title" className="text-base font-black">{d.historyTitle}</h2>
+        {logs.length === 0 ? (
+          <StateBlock
+            variant="empty"
+            icon="Scale"
+            title={d.emptyTitle}
+            body={d.emptyBody}
+            className="mt-3"
+            testId="measurements-empty"
+            actions={[{ label: d.add, onClick: () => setEditor('new'), primary: true }]}
+          />
+        ) : (
+          <ul className="mt-3 space-y-3" data-testid="measurements-history">
+            {logs.map((log) => {
+              const weight = numericValue(log, 'weightKg')
+              const waist = numericValue(log, 'waistCm')
+              const bodyFat = numericValue(log, 'bodyFatPercent')
+              const editable = log.source !== 'health' && weight !== null
+              const confirming = deleteCandidate === log.id
+              return (
+                <li key={log.id} className="card p-4" data-testid={`measurement-row-${log.id}`}>
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <time dateTime={log.date} className="text-xs font-bold text-ink-500">{measurementDate(log.date, lang)}</time>
+                      {weight !== null && <p className="mt-1 font-mono text-2xl font-black tabular-nums">{weight} <span className="font-sans text-xs text-ink-400">{d.kg}</span></p>}
+                    </div>
+                    {log.source === 'health' && <span className="rounded-full bg-beige px-2.5 py-1 text-[11px] font-bold text-ink-500">{d.healthSource}</span>}
+                  </div>
+
+                  {(waist !== null || bodyFat !== null) && (
+                    <dl className="mt-3 grid grid-cols-2 gap-2">
+                      {waist !== null && <div className="rounded-xl bg-page p-3"><dt className="text-[11px] font-bold text-ink-500">{d.waist}</dt><dd className="mt-0.5 font-mono text-sm font-black tabular-nums">{waist} <span className="font-sans text-[10px] text-ink-400">{d.cm}</span></dd></div>}
+                      {bodyFat !== null && <div className="rounded-xl bg-page p-3"><dt className="text-[11px] font-bold text-ink-500">{d.bodyFat} · {d.estimated}</dt><dd className="mt-0.5 font-mono text-sm font-black tabular-nums">~{bodyFat}%</dd></div>}
+                    </dl>
+                  )}
+
+                  {editable && !confirming && (
+                    <div className="mt-3 grid grid-cols-2 gap-2 border-t border-line pt-3">
+                      <button type="button" onClick={() => { setError(null); setEditor(log) }} className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-line text-sm font-bold text-ink-700">
+                        <Icon name="Edit3" className="h-4 w-4" />{d.edit}
+                      </button>
+                      <button type="button" onClick={() => { setError(null); setDeleteCandidate(log.id) }} className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-danger/40 text-sm font-bold text-danger">
+                        <Icon name="Trash2" className="h-4 w-4" />{d.delete}
+                      </button>
+                    </div>
+                  )}
+
+                  {confirming && (
+                    <section className="mt-3 rounded-xl border border-danger/40 bg-danger/[0.06] p-3" aria-labelledby={`delete-measurement-${log.id}`} data-testid="measurement-delete-confirm">
+                      <h3 id={`delete-measurement-${log.id}`} className="text-sm font-black text-ink-900">{d.deleteQuestion}</h3>
+                      <p className="mt-1 text-xs leading-relaxed text-ink-500">{d.deleteBody}</p>
+                      <div className="mt-3 grid grid-cols-2 gap-2">
+                        <button ref={cancelDeleteRef} type="button" onClick={() => setDeleteCandidate(null)} className="min-h-[44px] rounded-xl border border-line bg-surface text-sm font-bold text-ink-700">{d.cancel}</button>
+                        <button type="button" onClick={confirmDelete} className="min-h-[44px] rounded-xl border border-danger/40 bg-surface text-sm font-bold text-danger">{d.confirmDelete}</button>
+                      </div>
+                    </section>
+                  )}
+                </li>
+              )
+            })}
+          </ul>
+        )}
+      </section>
+    </div>
+  )
+}
+
+function WeightLogScreen({ lang, current, editing, onBack, onSaved }: { lang: Lang; current: WeightDetail; editing?: MeasurementLog; onBack: () => void; onSaved: () => void }) {
+  const ar = lang !== 'en'
+  const d = measurementsScreenStrings[lang]
+  const { guard } = useAccess()
+  const [weight, setWeight] = useState(editing ? String(editing.values.weightKg ?? '') : current.currentKg ? String(current.currentKg) : '')
+  const [waist, setWaist] = useState(editing ? String(editing.values.waistCm ?? '') : current.waistCm ? String(current.waistCm) : '')
+  const [bodyFat, setBodyFat] = useState(editing ? String(editing.values.bodyFatPercent ?? '') : current.bodyFatPct ? String(current.bodyFatPct) : '')
+  const [error, setError] = useState<string | null>(null)
+  const [errorField, setErrorField] = useState<'weight' | 'waist' | 'bodyFat' | null>(null)
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -218,15 +402,18 @@ function WeightLogScreen({ lang, current, onBack, onSaved }: { lang: Lang; curre
     const waistCm = waist === '' ? null : Number(waist)
     const bodyFatPercent = bodyFat === '' ? null : Number(bodyFat)
     if (!inRange(weightKg, LIMITS.weightKg.min, LIMITS.weightKg.max)) {
-      setError(t('أدخل وزنًا بين 15 و250 كجم.', 'Enter a weight between 15 and 250 kg.'))
+      setError(d.weightRange)
+      setErrorField('weight')
       return
     }
     if (waistCm !== null && !inRange(waistCm, 30, 250)) {
-      setError(t('أدخل محيط خصر بين 30 و250 سم.', 'Enter a waist measurement between 30 and 250 cm.'))
+      setError(d.waistRange)
+      setErrorField('waist')
       return
     }
     if (bodyFatPercent !== null && !inRange(bodyFatPercent, 2, 70)) {
-      setError(t('أدخل نسبة دهون بين 2% و70%.', 'Enter body fat between 2% and 70%.'))
+      setError(d.bodyFatRange)
+      setErrorField('bodyFat')
       return
     }
 
@@ -234,9 +421,17 @@ function WeightLogScreen({ lang, current, onBack, onSaved }: { lang: Lang; curre
       const values: Record<string, string | number> = { weightKg }
       if (waistCm !== null) values.waistCm = waistCm
       if (bodyFatPercent !== null) values.bodyFatPercent = bodyFatPercent
-      const id = typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `measurement-${Date.now()}`
-      addLog({ id, date: getDayStamp(), values })
+      const id = editing?.id ?? (typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `measurement-${Date.now()}`)
+      const outcome = editing
+        ? updateLog({ ...editing, values })
+        : addLog({ id, date: getDayStamp(), values })
+      if (outcome.result !== 'ok') {
+        setError(outcome.result === 'error' ? d.unavailableRecord : d.storageError)
+        setErrorField(null)
+        return
+      }
       setError(null)
+      setErrorField(null)
       onSaved()
     })()
   }
@@ -245,18 +440,18 @@ function WeightLogScreen({ lang, current, onBack, onSaved }: { lang: Lang; curre
     <div dir={ar ? 'rtl' : 'ltr'} className="overflow-x-hidden px-4 py-4 text-ink-900">
       <div>
         <div className="flex items-center justify-between">
-          <button type="button" onClick={onBack} aria-label={t('رجوع', 'Back')} className="grid h-11 w-11 place-items-center rounded-xl border border-line bg-surface">
+          <button type="button" onClick={onBack} aria-label={d.back} className="grid h-11 w-11 place-items-center rounded-xl border border-line bg-surface">
             <Icon name="ChevronRight" className="h-5 w-5 rtl:rotate-0 ltr:rotate-180" />
           </button>
-          <h1 className="text-lg font-black">{t('تسجيل قياسات اليوم', 'Log today’s measurements')}</h1>
+          <h1 className="text-lg font-black">{editing ? d.editTitle : d.addTitle}</h1>
         </div>
 
         <form onSubmit={submit} className="mt-5 rounded-2xl border border-line bg-surface p-5 shadow-card" noValidate>
-          <p className="text-sm leading-relaxed text-ink-500">{t('سجّل وزنك، وأضف الخصر أو نسبة الدهون إن قستها اليوم.', 'Log your weight, and add waist or body fat if measured today.')}</p>
+          <p className="text-sm leading-relaxed text-ink-500">{d.formIntro}</p>
           <div className="mt-5 space-y-4">
-            <MeasurementField id="v2-weight" label={t('الوزن', 'Weight')} unit={t('كجم', 'kg')} value={weight} required error={!!error && !inRange(Number(weight), LIMITS.weightKg.min, LIMITS.weightKg.max)} onChange={(value) => setWeight(sanitizeNumericInput(value, { max: LIMITS.weightKg.max, decimal: true }))} />
-            <MeasurementField id="v2-waist" label={t('محيط الخصر', 'Waist')} unit={t('سم', 'cm')} value={waist} onChange={(value) => setWaist(sanitizeNumericInput(value, { max: 250, decimal: true }))} />
-            <MeasurementField id="v2-body-fat" label={t('نسبة الدهون · تقديري', 'Body fat · estimated')} unit="%" value={bodyFat} onChange={(value) => setBodyFat(sanitizeNumericInput(value, { max: 70, decimal: true }))} />
+            <MeasurementField id="v2-weight" label={d.weight} unit={d.kg} value={weight} required error={errorField === 'weight'} onChange={(value) => setWeight(sanitizeNumericInput(value, { max: LIMITS.weightKg.max, decimal: true }))} />
+            <MeasurementField id="v2-waist" label={d.waist} unit={d.cm} value={waist} error={errorField === 'waist'} onChange={(value) => setWaist(sanitizeNumericInput(value, { max: 250, decimal: true }))} />
+            <MeasurementField id="v2-body-fat" label={`${d.bodyFat} · ${d.estimated}`} unit="%" value={bodyFat} error={errorField === 'bodyFat'} onChange={(value) => setBodyFat(sanitizeNumericInput(value, { max: 70, decimal: true }))} />
           </div>
 
           {error && (
@@ -266,9 +461,9 @@ function WeightLogScreen({ lang, current, onBack, onSaved }: { lang: Lang; curre
             </p>
           )}
 
-          <button type="submit" className="btn-primary mt-5 w-full py-4 text-[1.1875rem]">{t('احفظ القياسات', 'Save measurements')}</button>
+          <button type="submit" className="btn-primary mt-5 w-full py-4 text-[1.1875rem]">{editing ? d.update : d.save}</button>
         </form>
-        <p className="mt-3 px-2 text-center text-[0.7rem] leading-relaxed text-ink-400">{t('تُحفظ القياسات في حسابك عند تفعيل المزامنة.', 'Measurements sync to your account when cloud sync is enabled.')}</p>
+        <p className="mt-3 px-2 text-center text-[0.7rem] leading-relaxed text-ink-400">{d.syncNote}</p>
       </div>
     </div>
   )

@@ -1,6 +1,6 @@
 # Qimmah Web Sovereign — bug ledger
 
-Updated: 2026-08-14 (Layer 3 Today/Workout / PKG-4 verified)
+Updated: 2026-08-14 (Layer 3 Progress/Measurements / PKG-5 verified)
 
 ## BUG-001 — Preview mutation handlers can surface an exception instead of Premium
 
@@ -142,6 +142,28 @@ Updated: 2026-08-14 (Layer 3 Today/Workout / PKG-4 verified)
 - Status: RESOLVED — VERIFIED FOR PKG-4
 - Fix: clear the summary and navigate through the existing `onNavigate('dashboard')` route owner.
 - Evidence: the live browser confirms the dashboard hash, correct ended-early partial state, full-session “كفو” state, and persistence after reload.
+
+## BUG-014 — Measurements promise has no reachable route or usable history
+
+- Severity: P1
+- Surface: Progress, Profile, deep navigation.
+- Reproduction: follow the Profile row «القياسات والصور» or the weight card, then refresh/back or try to review/edit an older entry.
+- Evidence: baseline `AppRoute` had no `measurements`; Profile navigated to generic Progress and promised photos that do not exist; Progress exposed add-only internal state with no history/edit/delete surface.
+- Root cause: the maintained measurement writer existed, but route ownership stopped at an internal `ProgressV2` screen and never completed the product surface.
+- Status: RESOLVED — VERIFIED FOR PKG-5
+- Fix: add the real `#/measurements` route, render the canonical store history, route Profile and Progress entries to it, remove the false photo promise, and provide empty/add/edit/delete/back states without adding a backend schema.
+- Evidence: `test:e2e:progress` 25/25, `test:e2e:navigation` 96/96, `test:e2e:preview-gate` 35/35, and asset-integrity route parity 35/35.
+
+## BUG-015 — Measurement save/delete can report success or bypass Premium
+
+- Severity: P1
+- Surface: measurement add, edit and delete under Preview or blocked/quota storage.
+- Reproduction: force the canonical measurement key write to throw, or call `deleteLog` while entitlement is `none`.
+- Evidence: baseline `historyStore.saveMeasurementLog` ignored its safe-write result and returned the proposed list; the UI always called `onSaved`. `deleteLog` had neither writer guard nor checked result.
+- Root cause: the safe-storage primitive existed, but the measurement adapter erased its result and queued sync before proving the local commit.
+- Status: RESOLVED — VERIFIED FOR PKG-5
+- Fix: checked measurement commits write locally first, enqueue sync only after `ok`, and return `WriteResult`; add/update/delete share the central Premium action at UI and writer layers. Failed forms and byte-identical history remain visible for retry.
+- Evidence: `test:measurement-reliability` 11/11, `test:access-gate` 84/84, and the live quota/Preview attacks in `test:e2e:progress` 25/25.
 
 ## EXTERNAL-001 — Paid Salla product binding cannot be proven
 

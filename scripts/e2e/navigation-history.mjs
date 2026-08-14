@@ -272,7 +272,7 @@ try {
   {
     const page = await fresh()
     await onboardToPreview(page)
-    const ROUTES = ['dashboard', 'workout', 'exercises', 'nutrition', 'progress', 'profile', 'settings', 'privacy', 'terms', 'contact', 'calc', 'stats', 'steps', 'recovery', 'login', 'signup', 'forgot']
+    const ROUTES = ['dashboard', 'workout', 'exercises', 'nutrition', 'progress', 'measurements', 'profile', 'settings', 'privacy', 'terms', 'contact', 'calc', 'stats', 'steps', 'recovery', 'login', 'signup', 'forgot']
     for (const r of ROUTES) {
       await page.evaluate((h) => { window.location.hash = '/' + h }, r)
       await settle(page, 1400)

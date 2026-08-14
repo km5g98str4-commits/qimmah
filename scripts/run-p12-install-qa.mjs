@@ -185,7 +185,7 @@ async function main() {
       page.on('pageerror', (e) => pageErrors.push(String(e)))
 
       const routes = [
-        'dashboard', 'workout', 'nutrition', 'progress', 'profile',
+        'dashboard', 'workout', 'nutrition', 'progress', 'measurements', 'profile',
         'settings', 'privacy', 'terms', 'contact', 'calc', 'demo', 'login',
       ]
       await seedAndLoad(page, { lang: 'ar', onboarded: true }, '#/dashboard')

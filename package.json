@@ -30,7 +30,8 @@
     "proof:p10qa": "node scripts/run-p10-integration-qa.mjs",
     "test:active-session": "node scripts/run-active-session-proof.mjs",
     "test:today-v2": "node scripts/run-today-v2-model-proof.mjs",
-    "test:progress-v2": "node scripts/run-progress-v2-proof.mjs",
+    "test:progress-v2": "node scripts/run-progress-v2-proof.mjs && node scripts/run-measurement-reliability-proof.mjs",
+    "test:measurement-reliability": "node scripts/run-measurement-reliability-proof.mjs",
     "test:body3d": "node scripts/run-body3d-proof.mjs",
     "test:data-portability": "node scripts/run-data-portability-proof.mjs",
     "test:portability": "node scripts/run-portability-proof.mjs",
@@ -147,6 +148,7 @@
     "test:e2e:navigation": "npm run build && node scripts/e2e/navigation-history.mjs",
     "test:e2e:nutrition": "VITE_ENTITLEMENT_MODE=mock npm run build && node scripts/e2e/nutrition-reliability.mjs",
     "test:e2e:workout": "VITE_ENTITLEMENT_MODE=mock npm run build && node scripts/e2e/workout-reliability.mjs",
+    "test:e2e:progress": "VITE_ENTITLEMENT_MODE=mock npm run build && node scripts/e2e/progress-reliability.mjs",
     "test:e2e:plan-handoff": "npm run build && node scripts/e2e/plan-handoff.mjs",
     "test:e2e:preview-gate": "VITE_ENTITLEMENT_MODE=mock npm run build && node scripts/e2e/preview-gate.mjs",
     "test:e2e:install-overlap": "npm run build && node scripts/e2e/install-overlap.mjs"

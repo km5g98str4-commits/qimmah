@@ -139,7 +139,7 @@ export function ProfileV2({ lang, onNavigate }: ProfileV2Props) {
 
         {/* روابط */}
         <section className="space-y-3">
-          <Row icon="LayoutGrid" label={t('القياسات والصور', 'Measurements & photos')} onClick={() => onNavigate('progress')} />
+          <Row icon="Scale" label={t('القياسات', 'Measurements')} onClick={() => onNavigate('measurements')} />
           <Row icon="Pill" label={t('الأدوية والمكمّلات', 'Supplements & meds')} onClick={() => setScreen('routine')} />
           <Row icon="Settings" label={t('الإعدادات والخصوصية', 'Settings & privacy')} onClick={() => setScreen('settings')} />
         </section>
