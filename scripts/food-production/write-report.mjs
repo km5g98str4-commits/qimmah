@@ -224,7 +224,32 @@ node scripts/food-production/write-report.mjs       # هذا التقرير
 
 ---
 
-## ٨. الإثبات
+## ٨. المطلوب من المنسّق في \`package.json\`
+
+\`package.json\` محجور على المنسّق (§1.4/٢) — لم يُلمس. الأسطر المطلوبة بنصّها:
+
+\`\`\`json
+"test:food-production": "node scripts/run-food-production-proof.mjs",
+"food:probe":   "node scripts/food-production/probe-sources.mjs",
+"food:ingest":  "node scripts/food-production/ingest-curated.mjs && node scripts/food-production/ingest-off.mjs",
+"food:build":   "node scripts/food-production/build-pipeline.mjs",
+"food:verify":  "node scripts/food-production/verify-artifacts.mjs",
+"food:report":  "node scripts/food-production/write-report.mjs"
+\`\`\`
+
+وفي \`test:gate\` يُضاف **\`test:food-production\` وحده** (بعد \`test:food-db\`):
+
+\`\`\`
+… && npm run test:food-db && npm run test:food-production && npm run test:saudi-foods && …
+\`\`\`
+
+> **لا يُضاف غيره إلى البوابة.** \`food:*\` تحتاج تنزيلًا خارجيًا (١٫٢ غيغابايت) وتستغرق
+> دقائق — لا موضع لها في بوابة تعمل عند كل تغيير. أما \`test:food-production\` فبلا شبكة
+> ومن عيّنات مرجعية في المستودع، وزمنه ثوانٍ.
+
+---
+
+## ٩. الإثبات
 
 \`node scripts/run-food-production-proof.mjs\` — بلا شبكة، من عيّنات مرجعية في المستودع.
 كل قاعدة لها تأكيد مسمّى ويقابله **تأكيد مضادّ** يسقط بالاسم إن أُزيلت القاعدة (§4.2).
