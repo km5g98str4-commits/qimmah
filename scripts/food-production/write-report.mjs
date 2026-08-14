@@ -25,6 +25,21 @@ const T = m.totals, S = m.shard_totals
 const sizes = m.shards.map((s) => s.bytes_gzip).sort((a, b) => a - b)
 const accepted = T.accepted
 
+// فجوة التسمية العربية في مجموعة الخليج — تُقاس من الطقم الساخن الفعلي.
+const hotFile = resolve(ROOT, 'data/food-production/accepted/hot/hot-set.json')
+let hotAr = { total: 0, arabic: 0, curated: 0, curatedArabic: 0, offArabic: 0, off: 0 }
+if (existsSync(hotFile)) {
+  const recs = Object.values(JSON.parse(readFileSync(hotFile, 'utf8')).records)
+  hotAr = {
+    total: recs.length,
+    arabic: recs.filter((r) => r.name_ar).length,
+    curated: recs.filter((r) => r.source === 'qimmah_curated').length,
+    curatedArabic: recs.filter((r) => r.source === 'qimmah_curated' && r.name_ar).length,
+    off: recs.filter((r) => r.source === 'openfoodfacts').length,
+    offArabic: recs.filter((r) => r.source === 'openfoodfacts' && r.name_ar).length,
+  }
+}
+
 const dumpPath = resolve(ROOT, '.food-cache/off-products.csv.gz')
 const dumpBytes = existsSync(dumpPath) ? statSync(dumpPath).size : 0
 const DUMP_FULL = 1275171186
@@ -157,7 +172,24 @@ ${flagTable}
 > السجل المشكوك فيه **يُوسَم ويبقى**، ولا تُعدَّل قيمة مصدر لتمرّ من فحص. الأعلام
 > الحاجبة وحدها تمنع القبول؛ اللينة تُنقص الثقة وتبقى مرئية.
 
-**تغطية العربية هي الفجوة الحقيقية:** ${pct(summary.arabic_names, accepted)}% فقط.
+### 🔎 أهمّ نتيجة في هذا التقرير: العربية لا تأتي من OFF
+
+قياسًا على الطقم الساخن (السعودية والخليج حصرًا، ${n(hotAr.total)} سجلًا):
+
+| المصدر | سجلات | منها باسم عربي |
+|---|---|---|
+| \`qimmah_curated\` (PKG-001) | ${n(hotAr.curated)} | **${n(hotAr.curatedArabic)}** |
+| \`openfoodfacts\` | ${n(hotAr.off)} | **${n(hotAr.offArabic)}** |
+
+مساهمو Open Food Facts في الخليج **يكتبون بالإنجليزية تقريبًا دائمًا**. فبيانات قِمّة
+المنسَّقة — رغم صغرها — تقدّم **${pct(hotAr.curatedArabic, Math.max(1, hotAr.arabic))}٪ من كل الأسماء العربية**
+في مجموعة الخليج كلّها.
+
+**الأثر على القرار:** زيادة الاستيعاب من OFF **لن تسدّ فجوة العربية** — ترفع العدد
+لا التغطية اللغوية. سدّها عملُ **تنسيق محتوى** (توسيع PKG-001) لا عمل هندسة بيانات.
+وهذا فرق يغيّر أين تُصرَف الجهود.
+
+**تغطية العربية إجمالًا:** ${pct(summary.arabic_names, accepted)}% فقط.
 مساهمو OFF يكتبون بلغة السوق، والذيل العالمي أوروبي في غالبه. ولهذا **الطقم الساخن**
 منفصل: نواته ${n(curStats.accepted ?? 0)} سجلًا منسَّقًا داخليًا بتغطية عربية **١٠٠٪**.
 

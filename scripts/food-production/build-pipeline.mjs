@@ -51,9 +51,22 @@ console.log(`  after dedupe: ${accepted.length.toLocaleString()} (removed ${dedu
 const rank = (a, b) => (b.confidence - a.confidence) || (a.gtin < b.gtin ? -1 : 1)
 const curated = accepted.filter((r) => r.source === 'qimmah_curated')
 const curatedGtins = new Set(curated.map((r) => r.gtin))
+/**
+ * ترتيب الطقم الساخن — **الاسم العربي قبل الثقة الخام**.
+ * هذا الملفّ هو ما يعمل بلا شبكة للمستخدم السعودي، فسجلٌّ بلا اسم عربي فيه أقلّ نفعًا
+ * من سجلٍّ بعربية أضعف ثقةً بقليل: الأول لا يُعثر عليه بالبحث العربي أصلًا.
+ * الترتيب: السعودية قبل الخليج ← ثم وجود اسم عربي ← ثم الثقة ← ثم الـGTIN (قطع تعادل).
+ */
+const hotRank = (a, b) => {
+  if (a.market !== b.market) return a.market === 'SA' ? -1 : 1
+  const aAr = a.name_ar ? 0 : 1
+  const bAr = b.name_ar ? 0 : 1
+  if (aAr !== bAr) return aAr - bAr
+  return rank(a, b)
+}
 const gulfRest = accepted
   .filter((r) => !curatedGtins.has(r.gtin) && (r.market === 'SA' || r.market === 'GCC'))
-  .sort((a, b) => (a.market === b.market ? rank(a, b) : a.market === 'SA' ? -1 : 1))
+  .sort(hotRank)
 const hotSet = [...curated, ...gulfRest].slice(0, Math.max(curated.length, HOT_MAX))
 
 // ── الكتابة ──
