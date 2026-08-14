@@ -7,7 +7,7 @@
 
 import {
   createRecorder, settle, goRoute, bodyText, storageSnapshot,
-  RAW_EXCEPTION_RE, collectErrors,
+  RAW_EXCEPTION_RE, collectErrors, realPageErrors,
 } from '../lib/harness.mjs'
 import { contextWithState } from '../lib/drive.mjs'
 
@@ -42,7 +42,7 @@ export async function run({ browser, url, engine, seed }) {
         rec.check(`${c.hash} → ${c.why}`, ok, `hash=${state.hash} len=${state.text.length} notFound=${notFound}`)
         rec.check(`${c.hash} shows no raw exception`, !RAW_EXCEPTION_RE.test(state.text), state.text.slice(0, 140))
       }
-      rec.check('invalid routing produced zero unhandled page errors', pageErrors.length === 0, pageErrors.slice(0, 3).join(' || '))
+      rec.check('invalid routing produced zero unhandled page errors', realPageErrors(pageErrors).length === 0, realPageErrors(pageErrors).slice(0, 3).join(' || '))
 
       rec.section('the 404 offers a way back rather than trapping the user')
       await page.goto(`${url}/#/definitely-not-a-route`, { waitUntil: 'domcontentloaded' })
@@ -57,15 +57,32 @@ export async function run({ browser, url, engine, seed }) {
 
   // ── 2. offline / failed asset delivery ─────────────────────────────────
   {
-    const { ctx, page } = await contextWithState(browser, url, seed.seed)
+    // `serviceWorkers: 'block'` is REQUIRED here, not a convenience: with a
+    // service worker installed, the chunk request is served by the worker and
+    // never reaches `page.route`, so the injected failure silently does nothing
+    // and the assertion below would measure an app that never failed. Blocking
+    // the worker is what makes this vector real.
+    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: 'ar-SA', serviceWorkers: 'block' })
+    const page = await ctx.newPage()
+    await page.goto(url, { waitUntil: 'domcontentloaded' })
+    await page.evaluate((pairs) => {
+      window.localStorage.clear()
+      for (const [k, v] of pairs) window.localStorage.setItem(k, v)
+    }, Object.entries(seed.seed))
+    await page.goto(url, { waitUntil: 'domcontentloaded' })
+    await settle(page, 2800)
     const { pageErrors } = collectErrors(page)
     try {
       rec.section('a lazy route chunk that never arrives must not blank the app')
       const before = await storageSnapshot(page)
-      // Fail only the not-yet-loaded route chunks; the shell stays alive, which is
+      // Fail only the not-yet-loaded route chunk; the shell stays alive, which is
       // exactly the real-world case this app's RouteErrorBoundary exists for.
-      await page.route('**/assets/ExerciseLibraryView-*.js', (r) => r.abort('failed'))
-      await goRoute(page, 'exercises', 4000)
+      let aborted = 0
+      await page.route('**/assets/ExerciseLibraryView-*.js', (r) => { aborted += 1; return r.abort('failed') })
+      await goRoute(page, 'exercises', 5000)
+      // Counter-proof (§4.2): if nothing was actually aborted, everything below
+      // is measuring a healthy app and must NOT be reported as a pass.
+      rec.check('the failure injection actually fired (the chunk request was aborted)', aborted > 0, `aborted=${aborted}`)
       const state = await page.evaluate(() => ({
         text: (document.body.innerText || '').trim(),
         children: document.getElementById('root')?.childElementCount ?? 0,
@@ -86,9 +103,9 @@ export async function run({ browser, url, engine, seed }) {
       const after = await storageSnapshot(page)
       const lost = Object.keys(before).filter((k) => !(k in after))
       rec.check('a delivery failure destroyed no stored data', lost.length === 0, `lost=[${lost.join(', ')}]`)
-      rec.check('recoverable failure produced no unhandled page error escape',
-        pageErrors.every((e) => /Failed to fetch dynamically imported|ChunkLoadError|import|NetworkError|Load failed/i.test(e)),
-        pageErrors.slice(0, 3).join(' || '))
+      rec.check('the only page errors are the injected import failure itself',
+        realPageErrors(pageErrors).every((e) => /Failed to fetch dynamically imported|ChunkLoadError|import|NetworkError|Load failed/i.test(e)),
+        realPageErrors(pageErrors).slice(0, 3).join(' || '))
     } finally {
       await ctx.close()
     }
@@ -115,9 +132,9 @@ export async function run({ browser, url, engine, seed }) {
       await goRoute(page, 'dashboard', 2600)
       const back = await bodyText(page)
       rec.check('coming back online restores normal navigation', back.trim().length > 60, `len=${back.trim().length}`)
-      rec.check('offline session produced no unhandled page error',
-        pageErrors.filter((e) => !/Failed to fetch|NetworkError|Load failed|dynamically imported/i.test(e)).length === 0,
-        pageErrors.slice(0, 3).join(' || '))
+      rec.check('offline session produced no unhandled page error beyond the network loss itself',
+        realPageErrors(pageErrors).filter((e) => !/Failed to fetch|NetworkError|Load failed|dynamically imported/i.test(e)).length === 0,
+        realPageErrors(pageErrors).slice(0, 3).join(' || '))
     } finally {
       await ctx.close()
     }

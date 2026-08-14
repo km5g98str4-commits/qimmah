@@ -10,9 +10,9 @@
 
 import {
   createRecorder, settle, tap, tapIfPresent, gateVisible, dismissGate, goRoute,
-  storageSnapshot, storageDiff, bodyText, RAW_EXCEPTION_RE, collectErrors, realConsoleErrors,
+  storageSnapshot, storageDiff, bodyText, RAW_EXCEPTION_RE, collectErrors, realConsoleErrors, realPageErrors,
 } from '../lib/harness.mjs'
-import { enterAsGuest, completeOnboarding, reachPlanHandoff, declinePremiumIntoPreview } from '../lib/drive.mjs'
+import { enterAsGuest, completeOnboarding, reachPlanHandoff, declinePremiumIntoPreview, isActiveSessionKey, ACTIVE_SESSION_KEYS } from '../lib/drive.mjs'
 
 /** Every action in `PAID_ACTIONS`. Each must end this suite classified, never silent. */
 const PAID_ACTIONS = [
@@ -246,8 +246,14 @@ export async function run({ browser, url, engine }) {
     // was ever created during the entire matrix.
     const finalKeys = Object.keys(await storageSnapshot(page))
     rec.check('workout.logSet / workout.finish are unreachable because no session was ever written',
-      !finalKeys.some((k) => k.startsWith('qimmah:active-workout')),
-      `keys=${finalKeys.join(', ')}`)
+      !finalKeys.some(isActiveSessionKey),
+      `watched=[${ACTIVE_SESSION_KEYS.join(', ')}] present=[${finalKeys.filter(isActiveSessionKey).join(', ') || 'none'}]`)
+    // Counter-proof (§4.2): the key this assertion watches must be the one the
+    // app REALLY writes. p2 proves an entitled user creates `qimmah:activeWorkout:v1`;
+    // watching only the registered-but-unused `:active-workout:v2` would make the
+    // assertion above pass no matter what Preview did.
+    rec.check('the watched session key set includes the LIVE writer key, not only the registered one',
+      ACTIVE_SESSION_KEYS.includes('qimmah:activeWorkout:v1'), ACTIVE_SESSION_KEYS.join(', '))
     classified.set('workout.logSet', 'UNREACHABLE_NO_SESSION')
     classified.set('workout.finish', 'UNREACHABLE_NO_SESSION')
 
@@ -335,7 +341,7 @@ export async function run({ browser, url, engine }) {
 
     // ── 6. page health ────────────────────────────────────────────────────
     rec.section('page health across the whole journey')
-    rec.check('zero unhandled page errors', pageErrors.length === 0, pageErrors.slice(0, 3).join(' || '))
+    rec.check('zero unhandled page errors', realPageErrors(pageErrors).length === 0, realPageErrors(pageErrors).slice(0, 3).join(' || '))
     const realErrs = realConsoleErrors(consoleErrors)
     rec.check('zero non-benign console errors', realErrs.length === 0, realErrs.slice(0, 3).join(' || '))
   } finally {

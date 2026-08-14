@@ -7,7 +7,7 @@
 
 import {
   createRecorder, settle, goRoute, storageSnapshot, storageDiff, bodyText,
-  RAW_EXCEPTION_RE, collectErrors, realConsoleErrors,
+  RAW_EXCEPTION_RE, collectErrors, realConsoleErrors, realPageErrors,
 } from '../lib/harness.mjs'
 import { contextWithState } from '../lib/drive.mjs'
 
@@ -81,7 +81,7 @@ export async function run({ browser, url, engine, seed }) {
     rec.section('page health')
     const txt = await bodyText(page)
     rec.check('no raw exception surfaced', !RAW_EXCEPTION_RE.test(txt), txt.slice(0, 160))
-    rec.check('zero unhandled page errors', pageErrors.length === 0, pageErrors.slice(0, 3).join(' || '))
+    rec.check('zero unhandled page errors', realPageErrors(pageErrors).length === 0, realPageErrors(pageErrors).slice(0, 3).join(' || '))
     const realErrs = realConsoleErrors(consoleErrors)
     rec.check('zero non-benign console errors', realErrs.length === 0, realErrs.slice(0, 3).join(' || '))
   } finally {

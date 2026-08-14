@@ -52,7 +52,9 @@ const SUITES = [
   { id: 'static-bundle', artifact: 'prod', kind: 'static', mod: './static/bundle-safety.mjs' },
   { id: 'static-ledger', artifact: 'prod', kind: 'static', mod: './static/regression-ledger.mjs' },
   { id: 'p1-preview-user', artifact: 'prod', kind: 'browser', mod: './personas/p1-preview-user.mjs' },
-  { id: 'p2-premium-test-state', artifact: 'mock', kind: 'browser', mod: './personas/p2-premium-test-state.mjs' },
+  // p2 compares the mock build against the production build in the same pass, so
+  // it needs BOTH artifacts served even when run alone via --only=p2.
+  { id: 'p2-premium-test-state', artifact: 'mock', kind: 'browser', mod: './personas/p2-premium-test-state.mjs', alsoNeeds: ['prod'] },
   { id: 'p3-returning-guest', artifact: 'prod', kind: 'browser', mod: './personas/p3-returning-guest.mjs', needsSeed: true },
   { id: 'p4-interrupted-onboarding', artifact: 'prod', kind: 'browser', mod: './personas/p4-interrupted-onboarding.mjs' },
   { id: 'p5-dirty-state', artifact: 'prod', kind: 'browser', mod: './personas/p5-dirty-state.mjs', needsSeed: true },
@@ -62,7 +64,7 @@ const SUITES = [
 ]
 
 const active = SUITES.filter((s) => wanted(s.id))
-const needArtifacts = [...new Set(active.map((s) => s.artifact))]
+const needArtifacts = [...new Set(active.flatMap((s) => [s.artifact, ...(s.alsoNeeds || [])]))]
 
 // ── build ──────────────────────────────────────────────────────────────────
 const builds = {}

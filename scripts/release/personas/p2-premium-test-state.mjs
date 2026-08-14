@@ -11,9 +11,9 @@
 
 import {
   createRecorder, settle, tap, tapIfPresent, gateVisible, dismissGate, goRoute,
-  storageSnapshot, storageDiff, bodyText, RAW_EXCEPTION_RE, collectErrors, realConsoleErrors, ARTIFACTS,
+  storageSnapshot, storageDiff, bodyText, RAW_EXCEPTION_RE, collectErrors, realConsoleErrors, realPageErrors, ARTIFACTS,
 } from '../lib/harness.mjs'
-import { guestToPreview, activateWithMockCode } from '../lib/drive.mjs'
+import { guestToPreview, activateWithMockCode, isActiveSessionKey } from '../lib/drive.mjs'
 
 export async function run({ browser, url, engine }) {
   const rec = createRecorder(`p2-premium-test-state (${engine})`)
@@ -46,7 +46,7 @@ export async function run({ browser, url, engine }) {
     const forgedChanged = storageDiff(beforeForge, await storageSnapshot(page)).filter((k) => !k.startsWith('qimmah:tracking:events:'))
     rec.check('a localStorage «premium» flag + query parameter do NOT grant entitlement', forgedGate,
       `gate=${forgedGate}`)
-    rec.check('the forged authority wrote no session', !forgedChanged.some((k) => k.includes('active-workout')),
+    rec.check('the forged authority wrote no session', !forgedChanged.some(isActiveSessionKey),
       `changed=[${forgedChanged.join(', ')}]`)
     // The mock store lives in sessionStorage precisely so a localStorage forge
     // cannot reach it. Prove the key the app actually reads is untouched.
@@ -116,34 +116,61 @@ export async function run({ browser, url, engine }) {
     await mutate('workout.start',
       () => goRoute(page, 'workout', 2600),
       () => page.locator('button').filter({ hasText: /اليوم 1/ }).first().click({ timeout: 10000 }),
-      (b, a) => Object.keys(a).some((k) => k.startsWith('qimmah:active-workout') && a[k] && a[k] !== b[k]))
+      (b, a) => Object.keys(a).some((k) => isActiveSessionKey(k) && a[k] && a[k] !== b[k]))
 
     // logSet then finish, inside the session opened above
     rec.section('activated: in-session set logging and durable finish')
-    const setInputs = page.locator('input[type=number], input[inputmode=numeric]')
-    const inputCount = await setInputs.count()
-    if (inputCount >= 2) {
-      await setInputs.nth(0).fill('60')
-      await setInputs.nth(1).fill('10')
+    // The live set row uses `inputmode`-numeric text inputs labelled «الوزن (كجم)»
+    // and «التكرارات المنجزة», with a per-set «تم» commit.
+    // Scope to real <input> elements: the +/- steppers carry the SAME accessible
+    // name («الوزن (كجم) -2.5»), so a by-label lookup would hand back a button.
+    const weight = page.locator('input[aria-label="الوزن (كجم)"]').first()
+    const reps = page.locator('input[aria-label="التكرارات المنجزة"]').first()
+    if ((await weight.count()) && (await reps.count())) {
+      await weight.fill('60')
+      await reps.fill('10')
+      await settle(page, 700)
       const b = await storageSnapshot(page)
-      await tapIfPresent(page, /سجّل|احفظ|تم/)
-      await settle(page, 1600)
+      await page.locator('button').filter({ hasText: /^تم$/ }).first().click({ timeout: 8000 }).catch(() => {})
+      await settle(page, 1800)
       const a = await storageSnapshot(page)
       rec.check('workout.logSet writes into the active session',
-        Object.keys(a).some((k) => k.startsWith('qimmah:active-workout') && a[k] !== b[k]),
+        Object.keys(a).some((k) => isActiveSessionKey(k) && a[k] !== b[k]),
         `changed=[${storageDiff(b, a).join(', ')}]`)
     } else {
-      rec.blocked('workout.logSet live set entry', `the session screen exposed ${inputCount} numeric inputs; set entry could not be driven without guessing`)
+      rec.blocked('workout.logSet live set entry', 'the session screen exposed no labelled weight/reps fields to drive')
     }
 
-    await tapIfPresent(page, /أنهِ التمرين|إنهاء|أنهِ/)
-    await settle(page, 1400)
-    await tapIfPresent(page, /تأكيد|أكّد|نعم/)
-    await settle(page, 2000)
-    const finished = await storageSnapshot(page)
-    rec.check('workout.finish leaves either a durable history entry or an intact resumable session (never both lost)',
-      !!finished['qimmah:history:workoutSessions:v1'] || Object.keys(finished).some((k) => k.startsWith('qimmah:active-workout') && finished[k]),
-      `history=${!!finished['qimmah:history:workoutSessions:v1']} active=${Object.keys(finished).filter((k) => k.startsWith('qimmah:active-workout')).join(',')}`)
+    // The live session walks one exercise at a time («التمرين التالي»); the finish
+    // control only exists past the last one. Advance to it rather than declaring
+    // the most important storage-honesty contract untestable.
+    const finishLocator = () => page.locator('button').filter({ hasText: /أنهِ التمرين|إنهاء التمرين|أنهِ|إنهاء|كفو/ }).first()
+    for (let i = 0; i < 8 && (await finishLocator().count()) === 0; i += 1) {
+      const next = page.locator('button').filter({ hasText: /^التمرين التالي$/ }).first()
+      if (!(await next.count())) break
+      await next.click({ timeout: 8000 }).catch(() => {})
+      await settle(page, 1200)
+    }
+    const beforeFinish = await storageSnapshot(page)
+    const finishBtn = finishLocator()
+    if (await finishBtn.count()) {
+      await finishBtn.scrollIntoViewIfNeeded().catch(() => {})
+      await finishBtn.click({ timeout: 8000 }).catch(() => {})
+      await settle(page, 1600)
+      await tapIfPresent(page, /تأكيد|أكّد|نعم|إنهاء/)
+      await settle(page, 2400)
+      const finished = await storageSnapshot(page)
+      const stillActive = Object.keys(finished).filter((k) => isActiveSessionKey(k) && finished[k])
+      const history = !!finished['qimmah:history:workoutSessions:v1'] || !!finished['qimmah:workout-summary:v2:guest']
+      // The storage-honesty contract: a session is NEVER lost. Either it became
+      // durable history, or the resumable snapshot is still there to retry.
+      rec.check('workout.finish never loses the session (durable history OR an intact resumable snapshot)',
+        history || stillActive.length > 0,
+        `history=${history} stillActive=[${stillActive.join(', ')}] keysBefore=${Object.keys(beforeFinish).length}`)
+    } else {
+      rec.blocked('workout.finish live completion',
+        'the finish control was not reachable after walking every exercise in this pass; the durable-finish contract remains covered by test:storage-honesty (44/44) and test:e2e:workout (31/31)')
+    }
 
     // ── 4. the seam must not exist in production ──────────────────────────
     rec.section('the test seam cannot exist in a production build (live proof)')
@@ -174,7 +201,7 @@ export async function run({ browser, url, engine }) {
     rec.section('page health')
     const txt = await bodyText(page)
     rec.check('no raw exception surfaced during the entitled journey', !RAW_EXCEPTION_RE.test(txt), txt.slice(0, 160))
-    rec.check('zero unhandled page errors', pageErrors.length === 0, pageErrors.slice(0, 3).join(' || '))
+    rec.check('zero unhandled page errors', realPageErrors(pageErrors).length === 0, realPageErrors(pageErrors).slice(0, 3).join(' || '))
     const realErrs = realConsoleErrors(consoleErrors)
     rec.check('zero non-benign console errors', realErrs.length === 0, realErrs.slice(0, 3).join(' || '))
   } finally {

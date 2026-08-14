@@ -13,7 +13,16 @@ export const PREFS_KEY = 'qimmah:prefs:v1'
 export const ONBOARDING_KEY = 'qimmah:onboarding:v1'
 export const NUTRITION_KEY = 'qimmah:nutrition:v2'
 export const MEASUREMENTS_KEY = 'qimmah:history:measurementLogs:v1'
-export const ACTIVE_WORKOUT_KEY = 'qimmah:active-workout:v2'
+/**
+ * BOTH spellings, deliberately.
+ *   • `qimmah:activeWorkout:v1`  — what the LIVE writer uses (`src/lib/activeWorkout.ts:17`)
+ *   • `qimmah:active-workout:v2` — what `userDataKeys.ts` registers, owner `WorkoutV2` (no importer)
+ * Checking only the registered one would make every "no session was written"
+ * assertion pass vacuously, because the app never writes that key.
+ */
+export const ACTIVE_SESSION_KEYS = ['qimmah:activeWorkout:v1', 'qimmah:active-workout:v2']
+export const isActiveSessionKey = (k) => k.startsWith('qimmah:activeWorkout') || k.startsWith('qimmah:active-workout')
+export const ACTIVE_WORKOUT_KEY = 'qimmah:activeWorkout:v1'
 export const RECOVERY_KEY = 'qimmah:recovery-log:v1:guest'
 
 /** Seeds the device language BEFORE first paint so the app boots in that locale. */
@@ -129,13 +138,31 @@ export async function guestToPreview(page, url, opts = {}) {
   await declinePremiumIntoPreview(page)
 }
 
+/**
+ * The setup screens' back control lives in the HEADER with `aria-label="رجوع"`,
+ * not in the footer — at step 1 the footer holds only «التالي», so clicking the
+ * first footer button moves FORWARD. Binding to the labelled control is both
+ * correct and the a11y contract.
+ */
+export async function stepBack(page) {
+  const back = page.locator('button[aria-label="رجوع"], button[aria-label="Back"]').first()
+  if (!(await back.count())) return false
+  await back.click({ force: true })
+  await settle(page, 1000)
+  return true
+}
+
 /** Redeems the sanctioned mock activation code through the real Premium gate UI. */
 export async function activateWithMockCode(page, code = 'QIMMAH-TEST-OK') {
   const gate = page.locator('[data-testid="premium-gate"]')
   if (!(await gate.isVisible().catch(() => false))) throw new Error('activateWithMockCode: Premium gate is not open')
-  // copy-bound: the code disclosure toggle has no testid.
-  await tap(page, /عندك كود تفعيل|activation code/i)
-  await settle(page, 500)
+  // copy-bound: the code disclosure toggle has no testid. Open it ONLY when the
+  // form is not already showing — a second tap would hunt a control that the
+  // open disclosure has already replaced and stall the whole suite.
+  if (!(await page.locator('[data-testid="activation-code-input"]').count())) {
+    await tap(page, /عندك كود تفعيل|activation code/i)
+    await settle(page, 500)
+  }
   await page.fill('[data-testid="activation-code-input"]', code)
   await page.locator('[data-testid="activation-code-submit"]').click({ force: true })
   await settle(page, 1600)

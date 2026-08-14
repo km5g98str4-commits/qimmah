@@ -11,7 +11,7 @@
 
 import {
   createRecorder, settle, goRoute, storageSnapshot, bodyText,
-  RAW_EXCEPTION_RE, collectErrors,
+  RAW_EXCEPTION_RE, collectErrors, realPageErrors,
 } from '../lib/harness.mjs'
 
 const VECTORS = [
@@ -92,7 +92,7 @@ export async function run({ browser, url, engine, seed }) {
         `children=${rendered.rootChildren} len=${rendered.text.length}`)
       rec.check(`${v.id}: no raw exception text reaches the user`,
         !RAW_EXCEPTION_RE.test(rendered.text), rendered.text.slice(0, 180))
-      rec.check(`${v.id}: no unhandled page error`, pageErrors.length === 0, pageErrors.slice(0, 2).join(' || '))
+      rec.check(`${v.id}: no unhandled page error`, realPageErrors(pageErrors).length === 0, realPageErrors(pageErrors).slice(0, 2).join(' || '))
 
       // walk the main surfaces — a corrupt store often only bites on its own screen
       for (const route of ['dashboard', 'workout', 'nutrition', 'progress', 'profile']) {
@@ -118,7 +118,7 @@ export async function run({ browser, url, engine, seed }) {
       }
 
       rec.check(`${v.id}: zero unhandled page errors after the surface walk`,
-        pageErrors.length === 0, pageErrors.slice(0, 2).join(' || '))
+        realPageErrors(pageErrors).length === 0, realPageErrors(pageErrors).slice(0, 2).join(' || '))
     } catch (e) {
       rec.check(`${v.id}: vector completed without a driver failure`, false, String(e).split('\n')[0])
     } finally {
@@ -173,7 +173,7 @@ export async function run({ browser, url, engine, seed }) {
       rec.check('no raw storage exception reaches the user during a blocked mutation',
         !RAW_EXCEPTION_RE.test(txt), txt.slice(0, 180))
       rec.check('zero unhandled page errors under a fully blocked disk',
-        pageErrors.length === 0, pageErrors.slice(0, 3).join(' || '))
+        realPageErrors(pageErrors).length === 0, realPageErrors(pageErrors).slice(0, 3).join(' || '))
     } catch (e) {
       rec.check('quota vector completed without a driver failure', false, String(e).split('\n')[0])
     } finally {

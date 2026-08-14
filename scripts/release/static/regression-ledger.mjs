@@ -13,7 +13,7 @@
 
 import { readFileSync, existsSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { createRecorder, ROOT } from '../lib/harness.mjs'
+import { createRecorder, ROOT, realPageErrors, realConsoleErrors, ENVIRONMENT_PAGE_ERRORS, BENIGN_CONSOLE } from '../lib/harness.mjs'
 
 const src = (p) => (existsSync(resolve(ROOT, p)) ? readFileSync(resolve(ROOT, p), 'utf8') : '')
 
@@ -223,6 +223,38 @@ export async function run() {
     else rec.check(label, ok, evidence)
   }
 
+  rec.section('local data-key registry integrity — every LIVE key is registered')
+  // `src/lib/userDataKeys.ts` declares itself the single source of truth for
+  // classifying every localStorage key, and `unscopedUserKeys()` (derived from it)
+  // feeds `src/lib/dataOwnership.ts`. A live key that is missing from it is
+  // outside that machinery, and a registered key whose owner is a view with no
+  // importer is a registration pointing at code the user never runs.
+  const registry = src('src/lib/userDataKeys.ts')
+  const registered = new Set([...registry.matchAll(/key: '([^']+)'/g)].map((m) => m[1]))
+  const LIVE_KEYS = [
+    { key: 'qimmah:activeWorkout:v1', owner: 'src/lib/activeWorkout.ts (ACTIVE_WORKOUT_KEY)' },
+    { key: 'qimmah:nutrition:v2', owner: 'src/lib/nutritionV2Model.ts' },
+    { key: 'qimmah:onboarding:v1', owner: 'src/lib/onboarding.ts' },
+    { key: 'qimmah:customization:v1', owner: 'customization' },
+    { key: 'qimmah:history:measurementLogs:v1', owner: 'src/lib/historyStore.ts' },
+  ]
+  const unregistered = LIVE_KEYS.filter((k) => !registered.has(k.key))
+  rec.check('every live storage key this harness observed is registered',
+    unregistered.length === 0,
+    unregistered.length
+      ? `MISSING from userDataKeys.ts: ${unregistered.map((k) => `${k.key} (written by ${k.owner})`).join('; ')}`
+      : `all ${LIVE_KEYS.length} live keys registered`)
+  // Counter-proof: the scan must actually be reading the registry.
+  rec.check('counter-proof: the registry scan really parsed entries',
+    registered.size > 30, `parsed ${registered.size} registered keys`)
+  // And the specific inversion: the registered active-session key belongs to a
+  // view with no importer, while the live writer's key is absent.
+  const deadOwnerRegistered = registered.has('qimmah:active-workout:v2')
+  const liveKeyRegistered = registered.has('qimmah:activeWorkout:v1')
+  rec.check('the registered active-session key is the one the app actually writes',
+    liveKeyRegistered,
+    `registered ':active-workout:v2' (owner WorkoutV2, no importer)=${deadOwnerRegistered}; registered live ':activeWorkout:v1'=${liveKeyRegistered}`)
+
   rec.section('the ledger file and this suite stay in sync')
   const ledgerPath = 'docs/execution/qimmah-web-sovereign/BUGS.md'
   const doc = src(ledgerPath)
@@ -247,6 +279,23 @@ export async function run() {
       return false
     } catch { return false }
   })
+  // §4.2: the harness's own exclusion lists must not have become blanket passes.
+  const realErrorSamples = [
+    'Error: Cannot read properties of undefined (reading \'foo\')',
+    'TypeError: x is not a function',
+    'PaidActionDenied: workout.start',
+    'QuotaExceededError: the disk is full',
+  ]
+  rec.check('the environment-error filter lets EVERY genuine page error through',
+    realPageErrors(realErrorSamples).length === realErrorSamples.length,
+    `filtered out: ${realErrorSamples.filter((e) => !realPageErrors(realErrorSamples).includes(e)).join(' | ') || 'none'}`)
+  rec.check('the environment-error filter DOES suppress the exact WebKit sw.js artefact it names',
+    realPageErrors(['Cannot load http://localhost:5411/sw.js due to access control checks.']).length === 0,
+    `patterns=${ENVIRONMENT_PAGE_ERRORS.length}`)
+  rec.check('the console filter lets EVERY genuine console error through',
+    realConsoleErrors(realErrorSamples).length === realErrorSamples.length,
+    `benign patterns=${BENIGN_CONSOLE.length}`)
+
   rec.check('every non-informational entry reads a real source file',
     LEDGER.filter((e) => !e.informational).every((e) => {
       const [, evidence] = e.assert()

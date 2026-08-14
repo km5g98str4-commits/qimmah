@@ -8,9 +8,9 @@
 
 import {
   createRecorder, settle, tap, goRoute, bodyText, RAW_EXCEPTION_RE,
-  collectErrors, realConsoleErrors,
+  collectErrors, realConsoleErrors, realPageErrors,
 } from '../lib/harness.mjs'
-import { enterAsGuest, fillBody } from '../lib/drive.mjs'
+import { enterAsGuest, fillBody, stepBack } from '../lib/drive.mjs'
 
 const group = (page, id) => page.locator(`[data-question-id="${id}"]`)
 const footerNext = (page) => page.locator('footer button').last()
@@ -38,6 +38,7 @@ export async function run({ browser, url, engine }) {
 
     await page.reload({ waitUntil: 'domcontentloaded' })
     await settle(page, 3200)
+    const draftAfter = await page.evaluate(() => window.localStorage.getItem('qimmah:onboarding:v1'))
     const resumed = await page.evaluate(() => ({
       hash: location.hash,
       onIntent: !!document.querySelector('#onb-title-intent'),
@@ -45,24 +46,28 @@ export async function run({ browser, url, engine }) {
       age: document.querySelector('#v2-body-age')?.value ?? null,
       completed: (() => { try { return !!JSON.parse(window.localStorage.getItem('qimmah:onboarding:v1') || '{}').completed } catch { return false } })(),
     }))
-    // Resuming ON the intent step is exact resume; resuming on the body step with
-    // the SAME answers is an acceptable one-step-back resume. Silently completing
-    // setup, or losing the answers, is not.
     rec.check('the interrupted setup is NOT silently marked complete', !resumed.completed, JSON.stringify(resumed))
-    rec.check('the flow resumes inside setup rather than restarting the app',
-      resumed.onIntent || resumed.onBody, JSON.stringify(resumed))
+    // The contract is EXACT resume: the user comes back to the step they left,
+    // not to the start and not one step off.
+    rec.check('the flow resumes at the EXACT step the user left (intent)',
+      resumed.onIntent && !resumed.onBody, JSON.stringify(resumed))
+    rec.check('the persisted draft still carries the typed body answers',
+      /"age":31/.test(String(draftAfter)) && /"heightCm":181/.test(String(draftAfter)) && /"weightKg":88/.test(String(draftAfter)),
+      String(draftAfter).slice(0, 200))
 
-    // walk back to the body step and prove the typed values survived
+    // Walk back with the REAL back control (header, aria-label «رجوع») and prove
+    // the values are re-rendered, not merely stored.
     for (let i = 0; i < 3 && !(await page.locator('#v2-body-age').count()); i += 1) {
-      await page.locator('footer button').first().click({ force: true }).catch(() => {})
-      await settle(page, 900)
+      if (!(await stepBack(page))) break
     }
+    rec.check('the basics step is reachable again through the labelled back control',
+      (await page.locator('#v2-body-age').count()) > 0)
     const body = await page.evaluate(() => ({
       age: document.querySelector('#v2-body-age')?.value ?? '',
       height: document.querySelector('#v2-body-height')?.value ?? '',
       weight: document.querySelector('#v2-body-weight')?.value ?? '',
     }))
-    rec.check('the typed body answers survived the interruption exactly',
+    rec.check('the typed body answers are re-rendered exactly as entered',
       body.age === '31' && body.height === '181' && body.weight === '88', JSON.stringify(body))
 
     rec.section('Back and Forward inside setup do not corrupt the flow')
@@ -71,12 +76,19 @@ export async function run({ browser, url, engine }) {
     await page.goForward(); await settle(page, 1800)
     const afterFwd = await page.evaluate(() => ({
       hash: location.hash,
-      stillSetup: !!document.querySelector('#v2-body-age') || !!document.querySelector('[id^="onb-title-"]'),
+      // Forward may land on the setup WELCOME screen rather than a question step —
+      // that is still inside setup, so the contract is the route plus the state,
+      // not the presence of one particular field.
+      inSetup: /setup/.test(location.hash),
       completed: (() => { try { return !!JSON.parse(window.localStorage.getItem('qimmah:onboarding:v1') || '{}').completed } catch { return false } })(),
+      draft: window.localStorage.getItem('qimmah:onboarding:v1') || '',
+      text: (document.body.innerText || '').trim().length,
     }))
     rec.check('browser Back inside setup does not crash or blank the app', afterBack.text.trim().length > 0, JSON.stringify(afterBack))
-    rec.check('browser Forward returns to setup, not a completed dashboard',
-      afterFwd.stillSetup && !afterFwd.completed, JSON.stringify(afterFwd))
+    rec.check('browser Forward returns into setup, not a completed dashboard',
+      afterFwd.inSetup && !afterFwd.completed && afterFwd.text > 40, JSON.stringify({ ...afterFwd, draft: undefined }))
+    rec.check('Back/Forward did not discard the saved answers',
+      /"age":31/.test(afterFwd.draft) && /"weightKg":88/.test(afterFwd.draft), afterFwd.draft.slice(0, 160))
 
     // ── 2. BUG-007 live re-run: lowering age clears a restricted goal ─────
     rec.section('conditional answers clear correctly (BUG-007 live re-run)')
@@ -102,12 +114,12 @@ export async function run({ browser, url, engine }) {
         [...document.querySelectorAll('button[aria-pressed="true"]')].map((b) => b.innerText.trim().split('\n')[0]))
       rec.check('an adult goal is selected before the attack', pressedAdult.length > 0, pressedAdult.join(', '))
 
-      // go back to basics and lower the age below the adult threshold
-      for (let i = 0; i < 4 && !(await p2.locator('#v2-body-age').count()); i += 1) {
-        await p2.locator('footer button').first().click({ force: true }).catch(() => {})
-        await settle(p2, 900)
+      // go back to basics through the labelled back control and lower the age
+      for (let i = 0; i < 5 && !(await p2.locator('#v2-body-age').count()); i += 1) {
+        if (!(await stepBack(p2))) break
       }
-      rec.check('the basics step is reachable again via Back', (await p2.locator('#v2-body-age').count()) > 0)
+      rec.check('the basics step is reachable again via the back control', (await p2.locator('#v2-body-age').count()) > 0)
+      if (!(await p2.locator('#v2-body-age').count())) throw new Error('BUG-007 attack: could not return to the basics step')
       await p2.fill('#v2-body-age', '15')
       await settle(p2, 900)
 
@@ -127,13 +139,13 @@ export async function run({ browser, url, engine }) {
       const minorNote = onGoal ? await p2.evaluate(() => (document.body.innerText || '')) : ''
       rec.check('the minor restriction is communicated on the goal step',
         !onGoal || /١٨|18|قاصر|بالغ|أقل من/.test(minorNote), minorNote.slice(0, 140))
-      rec.check('the attack produced no unhandled page error', errs2.pageErrors.length === 0, errs2.pageErrors.slice(0, 2).join(' || '))
+      rec.check('the attack produced no unhandled page error', realPageErrors(errs2.pageErrors).length === 0, realPageErrors(errs2.pageErrors).slice(0, 2).join(' || '))
     } finally {
       await ctx2.close()
     }
 
     rec.section('page health')
-    rec.check('zero unhandled page errors (interruption journey)', pageErrors.length === 0, pageErrors.slice(0, 3).join(' || '))
+    rec.check('zero unhandled page errors (interruption journey)', realPageErrors(pageErrors).length === 0, realPageErrors(pageErrors).slice(0, 3).join(' || '))
     const realErrs = realConsoleErrors(consoleErrors)
     rec.check('zero non-benign console errors', realErrs.length === 0, realErrs.slice(0, 3).join(' || '))
   } catch (e) {

@@ -8,7 +8,7 @@
 // When this runs on WebKit it IS the iPhone-engine evidence; on Chromium it is
 // the layout matrix. The engine is recorded in the suite name either way.
 
-import { createRecorder, settle, goRoute, WIDTHS, collectErrors } from '../lib/harness.mjs'
+import { createRecorder, settle, goRoute, WIDTHS, collectErrors, realPageErrors } from '../lib/harness.mjs'
 import { PREFS_KEY } from '../lib/drive.mjs'
 
 const SURFACES = ['dashboard', 'workout', 'nutrition', 'progress', 'measurements', 'profile', 'settings']
@@ -18,22 +18,37 @@ export async function run({ browser, url, engine, seed }) {
 
   for (const lang of ['ar', 'en']) {
     for (const vp of WIDTHS) {
+      // `isMobile` is deliberately NOT set: WebKit rejects it on some hosts, and
+      // the defects this matrix hunts are width-driven layout failures, which
+      // reproduce from the viewport alone.
       const ctx = await browser.newContext({
         viewport: { width: vp.w, height: vp.h },
         locale: lang === 'en' ? 'en-US' : 'ar-SA',
-        isMobile: vp.w < 768 ? undefined : undefined,
       })
       const page = await ctx.newPage()
       const { pageErrors } = collectErrors(page)
       try {
-        await page.goto(url, { waitUntil: 'domcontentloaded' })
+        // WebKit aborts an in-flight navigation with "Frame load interrupted" if
+        // a second `goto` starts before the first commits. `waitUntil: 'commit'`
+        // plus an explicit settle is stable on both engines and still gives the
+        // app a full cold boot at this viewport.
+        const load = async () => {
+          for (let attempt = 0; attempt < 3; attempt += 1) {
+            try { await page.goto(url, { waitUntil: 'commit' }); return } catch (err) {
+              if (attempt === 2) throw err
+              await settle(page, 600)
+            }
+          }
+        }
+        await load()
+        await settle(page, 1200)
         await page.evaluate(({ pairs, key, language }) => {
           window.localStorage.clear()
           for (const [k, v] of pairs) window.localStorage.setItem(k, v)
           window.localStorage.setItem(key, JSON.stringify({ language, hapticsEnabled: true, theme: 'system' }))
         }, { pairs: Object.entries(seed.seed), key: PREFS_KEY, language: lang })
-        await page.goto(url, { waitUntil: 'domcontentloaded' })
-        await settle(page, 2800)
+        await load()
+        await settle(page, 3000)
 
         rec.section(`${vp.w}px (${vp.name}) · ${lang}`)
         const overflowing = []
@@ -102,7 +117,8 @@ export async function run({ browser, url, engine, seed }) {
             gate.small.length === 0, JSON.stringify(gate.small))
         }
 
-        rec.check(`${vp.w}px/${lang}: zero unhandled page errors`, pageErrors.length === 0, pageErrors.slice(0, 2).join(' || '))
+        rec.check(`${vp.w}px/${lang}: zero unhandled page errors`,
+          realPageErrors(pageErrors).length === 0, realPageErrors(pageErrors).slice(0, 2).join(' || '))
       } catch (e) {
         rec.check(`${vp.w}px/${lang}: matrix cell completed`, false, String(e).split('\n')[0])
       } finally {

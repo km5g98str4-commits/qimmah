@@ -11,7 +11,7 @@
 
 import {
   createRecorder, settle, goRoute, bodyText, RAW_EXCEPTION_RE,
-  collectErrors, realConsoleErrors,
+  collectErrors, realConsoleErrors, realPageErrors,
 } from '../lib/harness.mjs'
 import { PREFS_KEY } from '../lib/drive.mjs'
 
@@ -37,9 +37,13 @@ export async function run({ browser, url, engine }) {
     try {
       rec.section(`[${lang}] each auth screen is a real, directly-loadable route`)
       for (const route of AUTH_ROUTES) {
-        // load it DIRECTLY, cold — the route must own the screen, not a parent's state
+        // Load it DIRECTLY and COLD. `page.goto` to a URL that differs only in
+        // its fragment does NOT reload the document — it just moves the hash, so
+        // the app would still be running with whatever state it booted with.
+        // Navigating away first forces a genuine cold load of the route.
+        await page.goto('about:blank')
         await page.goto(`${url}/#/${route}`, { waitUntil: 'domcontentloaded' })
-        await settle(page, 3000)
+        await settle(page, 3200)
         const state = await page.evaluate(() => ({
           hash: location.hash,
           dir: document.documentElement.dir,
@@ -58,7 +62,8 @@ export async function run({ browser, url, engine }) {
       }
 
       rec.section(`[${lang}] refresh · Back · Forward across the auth routes`)
-      await page.goto(`${url}/#/login`, { waitUntil: 'domcontentloaded' }); await settle(page, 2600)
+      await page.goto('about:blank')
+      await page.goto(`${url}/#/login`, { waitUntil: 'domcontentloaded' }); await settle(page, 3000)
       await goRoute(page, 'signup', 2400)
       await goRoute(page, 'forgot', 2400)
       await page.reload({ waitUntil: 'domcontentloaded' }); await settle(page, 2800)
@@ -75,7 +80,8 @@ export async function run({ browser, url, engine }) {
       rec.check(`[${lang}] Forward returns to signup`, fwd.includes('signup'), fwd)
 
       rec.section(`[${lang}] invalid input is refused honestly, with no crash`)
-      await page.goto(`${url}/#/login`, { waitUntil: 'domcontentloaded' }); await settle(page, 2800)
+      await page.goto('about:blank')
+      await page.goto(`${url}/#/login`, { waitUntil: 'domcontentloaded' }); await settle(page, 3000)
       const email = page.locator('input[type=email]').first()
       const password = page.locator('input[type=password]').first()
       if (await email.count()) {
@@ -85,8 +91,15 @@ export async function run({ browser, url, engine }) {
         await settle(page, 1600)
         const t = await bodyText(page)
         rec.check(`[${lang}] an invalid email is refused without a raw exception`, !RAW_EXCEPTION_RE.test(t), t.slice(0, 160))
-        rec.check(`[${lang}] the user is told something went wrong (visible feedback)`,
-          /غير صالح|صحيح|خطأ|مطلوب|invalid|required|check/i.test(t), t.slice(0, 200))
+        // The app's real copy is conversational («البريد ناقص شيء — لازم يكون فيه
+        // @ واسم نطاق» / "That email doesn't look right"), so the assertion is
+        // that a field-level correction is SHOWN, not that a specific word is.
+        const feedback = await page.evaluate(() => {
+          const ids = [...document.querySelectorAll('[id$="-error"], [role="alert"], [aria-live]')]
+          return ids.map((e) => e.innerText.trim()).filter(Boolean).join(' | ')
+        })
+        rec.check(`[${lang}] the user is told what is wrong, in a field-level message`,
+          feedback.length > 0 && /@/.test(feedback + t), `feedback="${feedback}"`)
         rec.check(`[${lang}] a failed submit leaves the user on the auth route`,
           (await page.evaluate(() => location.hash)).includes('login'))
         const stored = await page.evaluate(() => Object.keys(window.localStorage).filter((k) => k.includes('supabase') || k.includes('auth')))
@@ -96,7 +109,8 @@ export async function run({ browser, url, engine }) {
       }
 
       rec.section(`[${lang}] keyboard reachability`)
-      await page.goto(`${url}/#/login`, { waitUntil: 'domcontentloaded' }); await settle(page, 2800)
+      await page.goto('about:blank')
+      await page.goto(`${url}/#/login`, { waitUntil: 'domcontentloaded' }); await settle(page, 3000)
       const tabbed = []
       for (let i = 0; i < 12; i += 1) {
         await page.keyboard.press('Tab')
@@ -110,7 +124,7 @@ export async function run({ browser, url, engine }) {
       rec.check(`[${lang}] focus never falls off the document`, !tabbed.includes('none'), tabbed.join(' → '))
 
       rec.section(`[${lang}] page health`)
-      rec.check(`[${lang}] zero unhandled page errors across auth`, pageErrors.length === 0, pageErrors.slice(0, 3).join(' || '))
+      rec.check(`[${lang}] zero unhandled page errors across auth`, realPageErrors(pageErrors).length === 0, realPageErrors(pageErrors).slice(0, 3).join(' || '))
       const realErrs = realConsoleErrors(consoleErrors)
       rec.check(`[${lang}] zero non-benign console errors across auth`, realErrs.length === 0, realErrs.slice(0, 3).join(' || '))
     } catch (e) {

@@ -237,4 +237,22 @@ export const BENIGN_CONSOLE = [
   /Download the React DevTools/i,
 ]
 
+/**
+ * Page errors that are ENVIRONMENT artefacts of running a production artifact
+ * over plain http on localhost, not product defects. Named, not blanket:
+ *  • WebKit refuses to register a service worker from a non-secure origin, so it
+ *    raises "Cannot load http://…/sw.js due to access control checks". On the
+ *    real https origin the same registration succeeds. `main.tsx` already
+ *    tolerates a failed registration.
+ *  • A deliberately aborted lazy chunk surfaces as a dynamic-import failure —
+ *    that IS the condition under test, and the assertion is about what the USER
+ *    is shown, not about the absence of the injected failure.
+ */
+export const ENVIRONMENT_PAGE_ERRORS = [
+  /Cannot load http:\/\/[^\s]*sw\.js due to access control checks/i,
+  /Failed to register a ServiceWorker/i,
+]
+
+export const realPageErrors = (errors) => errors.filter((e) => !ENVIRONMENT_PAGE_ERRORS.some((re) => re.test(e)))
+
 export const realConsoleErrors = (errors) => errors.filter((e) => !BENIGN_CONSOLE.some((re) => re.test(e)))
