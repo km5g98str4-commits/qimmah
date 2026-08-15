@@ -13,6 +13,7 @@ import { filterExerciseLibrary } from '@/lib/exerciseLibrary'
 import { muscleLabel } from '@/lib/muscles'
 import { getExerciseMedia } from '@/data/exerciseMedia'
 import { getExerciseGif } from '@/data/exerciseGifs'
+import { approvedImageFor, productionEntryFor } from '@/lib/exerciseProductionMedia'
 import { machineCatalog } from '@/data/machineCatalog'
 import type { Muscle } from '@/types/workout'
 
@@ -349,8 +350,20 @@ function MachineCatalogBrowser({ onOpen, d, lang }: { onOpen: (id: string) => vo
  *     يتظاهر بأنه شرح.
  */
 function ExerciseCardMedia({ exerciseId }: { exerciseId: string }) {
-  const media = getExerciseMedia(exerciseId)
-  const src = getExerciseGif(exerciseId) || media?.gifUrl || media?.img0
+  // ── [FINAL-CONVERGENCE] البطاقة تتبع نفس سلطة الوسائط التي يتبعها التفصيل ──
+  // كانت البطاقة تقرأ الطبقات القديمة (`exerciseGifs` / `exerciseMedia`) بينما
+  // التفصيل يقرأ المانيفست الإنتاجي. فمثلًا `chest-press-machine` **معلَن
+  // MISSING** في المانيفست (ضمن `PRODUCTION_IMAGE_GAP_IDS`) ومع ذلك كان له
+  // مدخل في `exerciseMedia.ts` — فيرى المستخدم على البطاقة صورةً لم توقّع
+  // عليها بوابة الحقوق. وهذا نصّ ما يمنعه عقد الوسائط: NEEDS_REVIEW/MISSING
+  // تعني حالة فارغة صادقة، لا صورة قديمة تُملأ بها الفجوة.
+  //
+  // المعتمد أولًا؛ والطبقات القديمة تبقى بديلًا **فقط** لمن لا مدخل له في
+  // المانيفست إطلاقًا، فلا تُسحب صورة صحيحة من تمرين خارج الجرد.
+  const approved = approvedImageFor(exerciseId)
+  const legacyMedia = getExerciseMedia(exerciseId)
+  const legacy = getExerciseGif(exerciseId) || legacyMedia?.gifUrl || legacyMedia?.img0
+  const src = approved?.start || (productionEntryFor(exerciseId) ? undefined : legacy)
   const [state, setState] = useState<'loading' | 'ready' | 'failed'>(src ? 'loading' : 'failed')
 
   if (!src || state === 'failed') {
