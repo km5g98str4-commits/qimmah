@@ -57,20 +57,28 @@ for (let i = 0; i < RECORDS; i++) {
   if (hot.length < 599 && rec.market !== 'GLOBAL') hot.push(rec)
 }
 
-const shardJson = new Map()
-const indexJson = new Map()
-for (const [name, recs] of shardRecords) {
-  shardJson.set(name, JSON.stringify(recs))
-  const postings = {}
+/** أغلفة مطابقة لما يكتبه خطّ الإنتاج فعلًا — لا شكل مخترع للاختبار. */
+const tokensOf = (recs) => {
+  const t = {}
   recs.forEach((r, i) => {
     for (const tok of `${r.name_ar} ${r.name_en} ${r.brand_ar}`.toLowerCase().split(' ')) {
       if (tok.length < 2) continue
-      ;(postings[tok] ||= []).push(i)
+      ;(t[tok] ||= []).push(i)
     }
   })
-  indexJson.set(name, JSON.stringify({ postings }))
+  return t
 }
-const hotJson = JSON.stringify(hot)
+const shardJson = new Map()
+const indexJson = new Map()
+for (const [name, recs] of shardRecords) {
+  const byGtin = {}
+  for (const r of recs) byGtin[r.gtin] = r
+  shardJson.set(name, JSON.stringify({ shard: name, count: recs.length, licence: 'ODbL 1.0', records: byGtin }))
+  indexJson.set(name, JSON.stringify({ shard: name, order: recs.map((r) => r.gtin), tokens: tokensOf(recs) }))
+}
+const hotByGtin = {}
+for (const r of hot) hotByGtin[r.gtin] = r
+const hotJson = JSON.stringify({ count: hot.length, licence: 'ODbL 1.0', order: hot.map((r) => r.gtin), records: hotByGtin, tokens: tokensOf(hot) })
 const manifestJson = JSON.stringify({
   shard_count: SHARD_COUNT,
   shards: [...shardRecords.keys()].map((s) => ({ shard: s, count: shardRecords.get(s).length, sha256: '' })),

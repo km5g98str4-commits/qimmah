@@ -25,7 +25,7 @@ import { normalizeProductKey } from '@/lib/text/foodNormalize'
 import { classifyGtin } from '../gtin'
 import { createIdbCache, createMemoryCache, type BlobCache } from './idbCache'
 import { classifyMatch, rankHits, type RankedHit } from './rank'
-import type { CatalogManifest, CatalogProduct, CatalogStats, ShardIndex } from './types'
+import type { CatalogManifest, CatalogProduct, CatalogStats, HotSetPayload, ShardIndex, ShardPayload } from './types'
 
 export interface CatalogDeps {
   /** جالب النصّ — يُحقن في الاختبار فلا يحتاج الإثبات شبكة. */
@@ -38,13 +38,13 @@ export interface CatalogDeps {
 const DEFAULT_BASE = '/food'
 
 interface LoadedShard {
-  records: CatalogProduct[]
   byGtin: Map<string, CatalogProduct>
+  count: number
 }
 
 export class Catalog {
   private manifest: CatalogManifest | null = null
-  private hot: CatalogProduct[] = []
+  private hot: HotSetPayload | null = null
   private hotByGtin = new Map<string, CatalogProduct>()
   private shards = new Map<string, LoadedShard>()
   private indexes = new Map<string, ShardIndex>()
@@ -81,19 +81,19 @@ export class Catalog {
   /** يهيّئ البيان والطقم الساخن. **لا يلمس أي شريحة.** */
   async init(): Promise<void> {
     this.manifest = this.parse<CatalogManifest>(await this.load('manifest.json'))
-    const hot = this.parse<CatalogProduct[]>(await this.load('hot-set.json'))
-    if (hot) {
+    const hot = this.parse<HotSetPayload>(await this.load('hot-set.json'))
+    if (hot?.records && hot.order) {
       this.hot = hot
-      this.hotByGtin = new Map(hot.map((p) => [p.gtin, p]))
+      this.hotByGtin = new Map(Object.entries(hot.records))
       this.stats.hotSetLoaded = true
-      this.stats.hotSetCount = hot.length
+      this.stats.hotSetCount = hot.order.length
     }
     this.recount()
   }
 
   private recount(): void {
-    let n = this.hot.length
-    for (const s of this.shards.values()) n += s.records.length
+    let n = this.hotByGtin.size
+    for (const s of this.shards.values()) n += s.count
     this.stats.recordsInMemory = n
   }
 
@@ -102,9 +102,9 @@ export class Catalog {
     const name = shardName(assignShard(gtin14, this.manifest.shard_count), this.manifest.shard_count)
     const already = this.shards.get(name)
     if (already) return already
-    const records = this.parse<CatalogProduct[]>(await this.load(`shards/${name}.json`))
-    if (!records) return null
-    const loaded: LoadedShard = { records, byGtin: new Map(records.map((r) => [r.gtin, r])) }
+    const payload = this.parse<ShardPayload>(await this.load(`shards/${name}.json`))
+    if (!payload?.records) return null
+    const loaded: LoadedShard = { byGtin: new Map(Object.entries(payload.records)), count: payload.count }
     this.shards.set(name, loaded)
     this.stats.shardsFetched.push(name)
     this.recount()
@@ -136,13 +136,30 @@ export class Catalog {
     return idx
   }
 
+  /** مطابقة سجل واحد — نفس التطبيع الذي بُني به الفهرس. */
+  private tierFor(p: CatalogProduct, q: string) {
+    return classifyMatch(p, q, {
+      name: normalizeProductKey(`${p.name_ar ?? ''} ${p.name_en ?? ''}`),
+      brand: normalizeProductKey(`${p.brand_ar ?? ''} ${p.brand_en ?? ''}`),
+    })
+  }
+
+  /**
+   * مرشّحو الطقم الساخن **من الفهرس لا بمسح خطّي**.
+   * ٥٩٩ سجلًا صغيرة، لكن المسح الخطّي مع كل ضغطة مفتاح عادة سيّئة تكبر مع البيانات.
+   */
   private hotHits(q: string): RankedHit[] {
+    if (!this.hot) return []
+    const positions = new Set<number>()
+    for (const [token, pos] of Object.entries(this.hot.tokens)) {
+      if (token.startsWith(q)) for (const i of pos) positions.add(i)
+    }
     const hits: RankedHit[] = []
-    for (const p of this.hot) {
-      const tier = classifyMatch(p, q, {
-        name: normalizeProductKey(`${p.name_ar ?? ''} ${p.name_en ?? ''}`),
-        brand: normalizeProductKey(`${p.brand_ar ?? ''} ${p.brand_en ?? ''}`),
-      })
+    for (const i of positions) {
+      const gtin = this.hot.order[i]
+      const p = gtin ? this.hotByGtin.get(gtin) : undefined
+      if (!p) continue
+      const tier = this.tierFor(p, q)
       if (tier) hits.push({ product: p, tier })
     }
     return hits
@@ -161,19 +178,17 @@ export class Catalog {
       const idx = await this.indexFor(name)
       if (!idx) continue
       const positions = new Set<number>()
-      for (const [token, pos] of Object.entries(idx.postings)) {
+      for (const [token, pos] of Object.entries(idx.tokens)) {
         if (token.startsWith(q)) for (const i of pos) positions.add(i)
       }
       if (positions.size === 0) continue
       const shard = this.shards.get(name)
       if (!shard) continue
       for (const i of positions) {
-        const p = shard.records[i]
+        const gtin = idx.order[i]
+        const p = gtin ? shard.byGtin.get(gtin) : undefined
         if (!p) continue
-        const tier = classifyMatch(p, q, {
-          name: normalizeProductKey(`${p.name_ar ?? ''} ${p.name_en ?? ''}`),
-          brand: normalizeProductKey(`${p.brand_ar ?? ''} ${p.brand_en ?? ''}`),
-        })
+        const tier = this.tierFor(p, q)
         if (tier) hits.push({ product: p, tier })
       }
     }

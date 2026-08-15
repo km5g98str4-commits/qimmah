@@ -2,6 +2,8 @@ import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { Icon } from '@/components/Icon'
 import { ProgressBar } from '@/components/ProgressBar'
 import { searchFood, type FoodItem, type FoodSize } from '@/data/foodItems'
+import { catalogProductToFoodItem, getAppCatalog, isOffDerived } from '@/lib/food/catalog/appCatalog'
+import { dataAttributionStrings } from '@/i18n/dict/dataAttribution'
 import { useNutritionToday, type MealSlot } from '@/lib/nutritionTracking'
 import { NUM_LIMITS, parseSafeNumber, sanitizeNumericInput } from '@/lib/validation'
 import { getStrings } from '@/config/strings'
@@ -68,7 +70,37 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
   const [cCarb, setCCarb] = useState('')
   const [cFat, setCFat] = useState('')
 
-  const results = useMemo(() => searchFood(query).slice(0, 10), [query])
+  // الأصناف المحلية المنسَّقة — **تبقى أولًا وبلا تغيير**. الكتالوج إضافة لا بديل.
+  const localResults = useMemo(() => searchFood(query).slice(0, 10), [query])
+
+  /**
+   * نتائج الكتالوج الكبير — تُضاف تحت المحلية.
+   *
+   * مؤجَّلة ٢٥٠ ملّي وغير متزامنة: البحث المحلي يظهر فورًا كما كان، والكتالوج
+   * يلحق. وبلا التأجيل يتحوّل كل حرف إلى استعلام، وهو ما تمنعه هذه الحزمة أصلًا.
+   */
+  const [catalogResults, setCatalogResults] = useState<FoodItem[]>([])
+  useEffect(() => {
+    const q = query.trim()
+    if (q.length < 2) { setCatalogResults([]); return }
+    let alive = true
+    const timer = setTimeout(async () => {
+      const cat = await getAppCatalog()
+      if (!cat || !alive) return
+      const hits = await cat.search(q, { limit: 8 })
+      if (!alive) return
+      // لا تكرار: صنف محلي بنفس الاسم يبقى صاحب الأولوية.
+      const localNames = new Set(localResults.map((r) => r.nameAr))
+      setCatalogResults(
+        hits.map((h) => catalogProductToFoodItem(h, lang)).filter((f) => !localNames.has(f.nameAr)),
+      )
+    }, 250)
+    return () => { alive = false; clearTimeout(timer) }
+  }, [query, localResults, lang])
+
+  const results = useMemo(() => [...localResults, ...catalogResults], [localResults, catalogResults])
+  /** النسب يظهر **فقط** حين تظهر نتائج مشتقّة من OFF — لا على الأصناف المحلية. */
+  const showsOffResults = useMemo(() => results.some((r) => isOffDerived(r.id)), [results])
 
   // [CTO-68] الحدث ٨ — بحث طعام بلا نتيجة، بنصّ الاستعلام: فجوة مباشرة في قاعدة الطعام.
   //
@@ -302,6 +334,18 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
                       </button>
                     </li>
                   ))}
+                  {/*
+                    نسب ODbL — يظهر **فقط** حين تتضمّن النتائج سجلًا مشتقًّا من OFF.
+                    إظهاره دائمًا كان سينسب أصناف قِمّة المنسَّقة إلى مصدر لم تأتِ منه.
+                  */}
+                  {showsOffResults && (
+                    <li
+                      data-testid="off-attribution-search"
+                      className="border-t border-line px-3 py-2 text-[10px] leading-relaxed text-ink-400"
+                    >
+                      {dataAttributionStrings[lang].packagedFood}
+                    </li>
+                  )}
                 </ul>
               )}
 

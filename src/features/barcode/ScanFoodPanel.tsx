@@ -4,6 +4,7 @@ import type { Lang } from '@/lib/appPreferences'
 import { nutritionScreenStrings, type NutritionScreenStrings } from '@/i18n/dict/nutritionScreen'
 import type { FoodItem } from '@/data/foodItems'
 import { lookupBarcode } from './openFoodFacts'
+import { catalogProductToFoodItem, getAppCatalog } from '@/lib/food/catalog/appCatalog'
 import { BarcodeCamera, type CameraFailure } from './BarcodeCamera'
 
 interface ScanFoodPanelProps {
@@ -71,6 +72,17 @@ export function ScanFoodPanel({ lang, onResolved, onManualFallback, onClose }: S
     lastBarcodeRef.current = barcode
     setStatus('looking-up')
     try {
+      /**
+       * الكتالوج المشحون أولًا — **مسار GTIN مباشر بلا مسح ولا شبكة**.
+       * التوجيه الحسابي يحدّد شريحة واحدة ثم مفتاحًا مباشرًا، فيُحسم المسح
+       * الشائع فورًا وبلا اتصال. الشبكة تبقى احتياطًا لما ليس في الكتالوج.
+       */
+      const catalog = await getAppCatalog()
+      const local = catalog ? await catalog.lookupByGtin(barcode) : null
+      if (local) {
+        onResolved(catalogProductToFoodItem(local, lang))
+        return
+      }
       const result = await lookupBarcode(barcode)
       // نتيجة المسح — الحالة فقط (found/not-found/network-error)، بلا قيمة الباركود أو المنتج.
       if (result.status !== 'found') {

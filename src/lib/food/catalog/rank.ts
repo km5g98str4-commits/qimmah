@@ -57,17 +57,35 @@ export function rankHits(hits: RankedHit[]): CatalogProduct[] {
 }
 
 /** يحدّد رتبة المطابقة لسجل مقابل استعلام مطبَّع. */
+/**
+ * §٣٫٤ — أداة التعريف «ال» **إضافة لا استبدال**.
+ *
+ * الحذف المدمّر يخلط «العلم» بـ«علم». والمقارنة بالشكل الخام وحدها تفشل في
+ * الاتجاه الآخر: «الكبسه» لا تطابق سجلًا اسمه «كبسة» رغم أن الفهرس يحمل
+ * الشكلين. فنجرّب الشكلين ونأخذ أقواهما — بلا حذف يخسر التمييز.
+ */
+function withoutAl(token: string): string | null {
+  return token.length > 4 && token.startsWith('ال') ? token.slice(2) : null
+}
+
+function tierFor(product: CatalogProduct, q: string, f: { name: string; brand: string }): MatchTier | null {
+  if (!q) return null
+  if (product.gtin === q) return 'gtin-exact'
+  if (f.name === q) return 'name-exact'
+  if (f.name.startsWith(q)) return 'name-prefix'
+  if (product.gtin.startsWith(q)) return 'code-prefix'
+  if (f.name.includes(q)) return 'contains'
+  if (f.brand.includes(q)) return 'brand'
+  return null
+}
+
 export function classifyMatch(
   product: CatalogProduct,
   normalizedQuery: string,
   normalizedFields: { name: string; brand: string },
 ): MatchTier | null {
-  if (!normalizedQuery) return null
-  if (product.gtin === normalizedQuery) return 'gtin-exact'
-  if (normalizedFields.name === normalizedQuery) return 'name-exact'
-  if (normalizedFields.name.startsWith(normalizedQuery)) return 'name-prefix'
-  if (product.gtin.startsWith(normalizedQuery)) return 'code-prefix'
-  if (normalizedFields.name.includes(normalizedQuery)) return 'contains'
-  if (normalizedFields.brand.includes(normalizedQuery)) return 'brand'
-  return null
+  const direct = tierFor(product, normalizedQuery, normalizedFields)
+  if (direct) return direct
+  const bare = withoutAl(normalizedQuery)
+  return bare ? tierFor(product, bare, normalizedFields) : null
 }

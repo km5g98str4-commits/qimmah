@@ -167,7 +167,9 @@
     "food:build": "node scripts/food-production/build-pipeline.mjs",
     "food:verify": "node scripts/food-production/verify-artifacts.mjs",
     "food:report": "node scripts/food-production/write-report.mjs",
-    "test:food-catalog": "node scripts/run-food-catalog-proof.mjs"
+    "test:food-catalog": "node scripts/run-food-catalog-proof.mjs",
+    "food:emit": "node scripts/food-production/emit-static-assets.mjs",
+    "test:e2e:food-catalog": "VITE_ENTITLEMENT_MODE=mock npm run build && node scripts/e2e/food-catalog-live.mjs"
   },
   "dependencies": {
     "@capacitor/app": "^8.1.0",
