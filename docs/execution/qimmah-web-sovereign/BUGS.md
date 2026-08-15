@@ -415,3 +415,75 @@ Updated: 2026-08-14 (Layer 3 Profile / PKG-8 recovery-reviewed and verified)
 - Evidence: `src/lib/access/entitlementSource.ts` returns `offline` unless the build-only mock seam is enabled.
 - Root cause: webhook/code verification/entitlement backend is outside authorized Web scope and not present as a reviewed contract.
 - Status: EXTERNALLY_BLOCKED
+
+---
+
+# مضاف في تدقيق الإصدار النهائي — 2026-08-15
+
+> المصدر: [`docs/audit/QIM-WEB-FINAL-RELEASE-AUDIT-2026-08-15.md`](../../audit/QIM-WEB-FINAL-RELEASE-AUDIT-2026-08-15.md).
+> كل بند أدناه من **تشغيل فعلي** من الرأس `d83add2` بعد `npm ci` نظيف — لا نقلًا عن تقرير.
+
+## BUG-029 — استعادة البؤرة بعد إغلاق تفصيل التمرين تفشل على WebKit وحده
+
+- Severity: P2 (وصولية) — **داخل مساحة المعاينة المجانية**.
+- Surface: مكتبة التمارين ← تفصيل تمرين ← إغلاق.
+- Reproduction: `E2E_ENGINE=webkit npm run test:e2e:exercises`.
+- Evidence: 31/32 على WebKit 26.5 — الفاشل «إغلاق التفصيل يعيد التركيز إلى بطاقة الفتح».
+  ونفس الطقم **32/32 على Chromium**، فهو فرق محرّك لا فرق منتج عامّ.
+- Root cause: غير مُشخَّص — لم يُبلَغ سببه الجذري في هذا التدقيق.
+- Status: OPEN
+- لماذا يهمّ: الميثاق §9 يوجب «إدارة تركيز في النوافذ»، والجمهور المستهدَف iOS Safari.
+
+## BUG-030 — جولة التصدير→الاستيراد لا تُطلق حدث تنزيل على WebKit
+
+- Severity: P2 — في السطح **المُصادَق** لا المعاينة.
+- Surface: `#/settings` ← تصدير بياناتي.
+- Reproduction: `E2E_ENGINE=webkit npm run test:e2e:settings-security`.
+- Evidence: 26/34 ثم `waitForEvent('download')` يتجاوز ٣٠ث. ونفس الطقم **34/34 على Chromium**.
+  الـ٢٦ تأكيدًا الأمنية السابقة (رفض النسخ التالفة · `__proto__` · متجر مجهول · حقن حساب آخر) **خضراء على WebKit**.
+- تضييق مقيس — ما استُبعد بالقياس لا بالتخمين:
+  - **ليس** فرع المشاركة الأصلية: `navigator.share`/`canShare` في WebKit المُشغَّل = `undefined`.
+  - **وليس** آلية التنزيل: `Blob` + `<a download>` في WebKit **يُطلق حدث التنزيل سليمًا**.
+  - فالعطل محصور بين نقرة زرّ التصدير وانطلاق التنزيل داخل التطبيق.
+- Root cause: غير مُشخَّص.
+- Status: OPEN
+
+## BUG-031 — سجلّ المفاتيح ينسب مفتاح الجلسة الجارية إلى شاشة يتيمة ويُغفل الحيّة
+
+- Severity: P3 (دقّة سجلّ وحوكمة) — **ليست سلامة بيانات**.
+- Surface: `src/lib/userDataKeys.ts`.
+- Evidence: السطر 73 ينسب `qimmah:active-workout:v2` إلى `WorkoutV2` — وهي **شاشة بلا مستورد**؛
+  بينما المفتاح الحيّ `qimmah:activeWorkout:v1` (`src/lib/activeWorkout.ts:17`، يكتبه `WorkoutMode`
+  المركَّب داخل `WorkoutView`) **غير مسجَّل إطلاقًا**.
+- **حدّ الأثر — مقيس لا مفترض:** `wipeUserData` (`src/lib/accountScope.ts:54`) يمسح **بمسح بادئة**
+  لا بقائمة ثابتة، فكل `qimmah:*` خارج قائمة السماح العامّة يُحذف. المفتاح الحيّ **يُمسح فعلًا**
+  عند تبديل الحساب. الأثر الباقي: السجلّ يصف ميتًا ويُغفل حيًّا، والجلسة الجارية خارج التصدير/النقل.
+- Status: OPEN
+- أثر ملموس التُقط: فحص بقاء الجلسة في `appstore-screenshot-factory.mjs` كان يقرأ مفتاح الشاشة
+  اليتيمة فيعود `false` دائمًا — أحد أربعة أعطال أسقطت `test:e2e:journey`.
+
+## BUG-032 — شاشتان يتيمتان يفحصهما ١٣ سكربت إثبات، واحد منها فقط يُعلن اليُتم
+
+- Severity: P3 (طمأنينة بوابة).
+- Surface: `src/views/NutritionV2.tsx` · `src/views/WorkoutV2.tsx` — **بلا مستورد**.
+- Evidence: المستودع يعرف ذلك بنفسه — `src/views/NutritionView.tsx:54` («`NutritionV2` **غير المركَّب**»)
+  و`src/components/WorkoutMode.tsx:202` («`WorkoutV2` **اليتيم**»). و١٣ سكربتًا تفحص نصّهما المصدري،
+  عشرة منها داخل `test:gate`؛ و`run-saudi-foods-proof.mjs:282` **وحده** يُعلن اليُتم في تعليقه.
+- ليس ادّعاءً بغياب التغطية: الشاشات الحيّة مغطّاة بأطقم متصفّح مستقلّة (nutrition 106 · workout 31).
+- Status: OPEN — **حذفها قرار مالك** بموجب §11/٩ من الميثاق (PR واحد مجمَّع بالعناقيد + `grep` موثّق للمراجع الديناميكية).
+
+## PRE-EXISTING-001 — `test:chaos` و`test:e2e:journey` حمراوان على الجذع نفسه
+
+- Severity: يُحدَّد بقرار مؤسس.
+- Evidence: شُغِّلا في worktree مستقلّ على `main` (`cc60adf`):
+  - `test:chaos` ⇒ **١٣ من ٥٧ — مطابق تمامًا** للرأس المدقَّق.
+  - `test:e2e:journey` ⇒ فشل بنفس الشاشة ونفس الخطأ.
+- وسلسلة السيادة **لم تمسّ** `scripts/resilience` ولا مكتبات المزامنة ولا طابور العمليات.
+- **الحكم: سابقان للسيادة، لا Regression من عمل Codex.** و`STATE.md:127` يُعلن أن الاثنين خارج تلك البوابة.
+- `test:e2e:journey`: **ما زال أحمر.** أُصلحت أربعة أعطال في متجوّله (§٢-٢ من التقرير) فصار يقطع
+  ست شاشات بعد أن كان يقف على الأولى، ثم يقف عند «يومك وأكلك». العلّة بنيوية: المتجوّل يمشي
+  بمطابقة النصّ بينما تدفّق الإعداد كبر إلى ١٨ سؤالًا؛ والإصلاح الجذري نقله إلى
+  `scripts/e2e/lib/onboarding-driver.mjs` (يربط بـ`data-question-id` لا بالنصّ) — إعادة هيكلة أدوات مقصودة.
+- ولأن `test:release-gate` يضمّ `e2e: journey`، فهو **أحمر** تبعًا له.
+- `test:chaos`: **لم يُمسّ عمدًا** — أعطاله كلها في طابور المزامنة (**ملك حارة G**)، خلف علم
+  `VITE_SYNC_ENABLED` المطفأ، وأمر التدقيق يمنع صراحةً Supabase/SQL/RLS. يحتاج توجيهًا لحارته أو عزلًا صريحًا.

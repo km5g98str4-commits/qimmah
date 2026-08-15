@@ -76,8 +76,17 @@ function seedMockSession(uid) {
   return session
 }
 
-const CONFIRM_RE = /التالي|Next|إنهاء|إكمال|ابدأ الآن|اعتمد خطي|اعتمد|الدخول للوحة|Approve|Confirm|Enter/
-const NAV_EXCLUDE_RE = /التالي|رجوع|تخطّي|Next|Back|Skip|اعتمد|Approve|Confirm/
+// أزرار «تقدّم للأمام» في تدفّق الإعداد.
+//
+// «يلا نبدأ» / «Get started» هما زرّ **شاشة الترحيب** التي تسبق أول سؤال
+// (`V2_ONBOARDING[lang].welcome.start` في `src/design-system/v2/labels.ts`).
+// وغيابهما عن هذا النمط كان يوقف المتجوّل على الشاشة الأولى: ثماني محاولات
+// كلّها «no action (transient screen?)» ثم `reviewer journey did not save a
+// workout session` — فتحمرّ `test:e2e:journey` ومعها `test:release-gate`.
+// وهو **عطل أداة لا عطل منتج**: إثبات الإعداد المخصّص (`test:e2e:onboarding`)
+// يمرّ ٢٠/٢٠ ويؤكّد صراحةً أن «شاشة الترحيب تسبق أول سؤال».
+const CONFIRM_RE = /التالي|Next|إنهاء|إكمال|ابدأ الآن|يلا نبدأ|Get started|اعتمد خطي|اعتمد|الدخول للوحة|Approve|Confirm|Enter/
+const NAV_EXCLUDE_RE = /التالي|رجوع|تخطّي|Next|Back|Skip|يلا نبدأ|Get started|اعتمد|Approve|Confirm/
 
 /**
  * يتقدّم في معالج الإعداد: قد تحوي الخطوة أكثر من مجموعة خيارات (مثل مكان التمرين +
@@ -89,6 +98,17 @@ async function completeOnboarding(page, maxSteps = 8) {
     await page.waitForTimeout(350)
     if (/مسار اليوم/.test(await page.locator('body').innerText().catch(() => ''))) break
     const heading = await page.locator('h1, h2').first().innerText().catch(() => '')
+
+    // خطوة الأساسيات («نبدأ بأساسياتك») لا تُجتاز بالنقر: العمر والطول والوزن
+    // حقول نصّية، والجنس اختيار. والمتجوّل العام لا يكتب — فكان يقف هنا ثماني
+    // محاولات ثم يفشل. نفس عقد `fillBodyAndConsent` في `scripts/e2e-onboarding.mjs`
+    // (نفس الأسماء المتاحة، لا محدّدات جديدة). قيم fixture للقطات فقط.
+    for (const [re, value] of [[/العمر|Age/, '24'], [/الطول|Height/, '175'], [/الوزن|Weight/, '78']]) {
+      const field = page.getByRole('textbox', { name: re }).first()
+      if (await field.isVisible().catch(() => false)) await field.fill(value).catch(() => {})
+    }
+    const sex = page.getByRole('button', { name: /^(ذكر|Male)$/ }).first()
+    if (await sex.isVisible().catch(() => false)) await sex.click().catch(() => {})
 
     // v2 goal step has two independent requirements: select a goal and accept
     // health-data processing. Satisfy them explicitly before generic traversal.
@@ -139,8 +159,13 @@ async function logOneWorkout(page, { onMidSession, maxSets = 40 } = {}) {
     await cancelSheet.click({ timeout: 2000 }).catch(() => {})
     await page.waitForTimeout(200)
   }
+  // «ابدأ تمرين اليوم» (`strings.ts:startToday`) هو المدخل الفعلي على شاشة
+  // التمرين الحيّة، و«ابدأ التمرين» (`labels.ts:workoutCta`) مدخل بطاقة اليوم.
+  // كان النمط يطلب «ابدأ التمرين» بأل التعريف فلا يطابق الأول إطلاقًا.
   const startSession = page.getByRole('button', { name: /ابدأ الجلسة|Start session/ }).first()
-  const startExercise = page.getByRole('button', { name: /ابدأ التمرين|Start exercise/ }).first()
+  const startExercise = page
+    .getByRole('button', { name: /ابدأ تمرين اليوم|ابدأ التمرين|Start today'?s workout|Start exercise/ })
+    .first()
   const started = await startSession.isVisible().catch(() => false)
     ? await startSession.click({ timeout: 3000 }).then(() => true).catch(() => false)
     : await startExercise.isVisible().catch(() => false)
@@ -310,17 +335,34 @@ try {
       // next unfinished set in the already-created owner-scoped snapshot, then reload a
       // fresh document. The assertion below still exercises the production validator,
       // owner key, restore path, and rendered UI rather than merely inspecting storage.
+      // ⚠️ المفتاح المفحوص هنا هو **مفتاح الشاشة الحيّة**: `qimmah:activeWorkout:v1`
+      // (`src/lib/activeWorkout.ts`, يكتبه `WorkoutMode` المركَّب داخل `WorkoutView`).
+      // كان الفحص يقرأ `qimmah:active-workout:v2:<owner>` — وهو مفتاح
+      // `src/views/WorkoutV2.tsx`، **شاشة يتيمة بلا مستورد**؛ فكان يعود `false`
+      // دائمًا ويُسقط الرحلة بـ«could not seed the next set». سجلّ المفاتيح
+      // (`src/lib/userDataKeys.ts:73`) ما زال ينسب المفتاح إلى تلك الشاشة اليتيمة
+      // ولا يسجّل المفتاح الحيّ إطلاقًا — بندٌ مرفوع في تقرير التدقيق.
+      //
+      // الشكل الحيّ: سجلّ مفهرس بـ ownerKey (`userId ?? 'guest'`) ← جلسة واحدة،
+      // و`exercises[planItemId].sets[]` عناصرها `{ weightKg, completed, … }`.
+      // وبذرة خاطئة لا تُنتج نجاحًا زائفًا: التأكيد بعدها يقرأ الواجهة المرسومة
+      // بعد إعادة تحميل، فإن لم يُستعَد «99» فعلًا بقي الفحص أحمر.
       const persisted = await page.evaluate(() => {
-        const key = Object.keys(localStorage).find((candidate) => candidate.startsWith('qimmah:active-workout:v2:'))
-        if (!key) return false
-        const snapshot = JSON.parse(localStorage.getItem(key) || 'null')
-        const exerciseId = Object.keys(snapshot?.rows || {})[snapshot.exIndex]
-        const sets = exerciseId ? snapshot?.rows?.[exerciseId] : null
-        const nextSet = Array.isArray(sets) ? sets[snapshot.setIndex] : null
-        if (!nextSet) return false
-        nextSet.weight = 99
-        localStorage.setItem(key, JSON.stringify(snapshot))
-        return true
+        const raw = localStorage.getItem('qimmah:activeWorkout:v1')
+        if (!raw) return false
+        const registry = JSON.parse(raw)
+        const owner = Object.keys(registry || {})[0]
+        const session = owner ? registry[owner] : null
+        if (!session || !session.exercises) return false
+        for (const state of Object.values(session.exercises)) {
+          const next = (state?.sets || []).find((s) => s && !s.completed)
+          if (next) {
+            next.weightKg = '99'
+            localStorage.setItem('qimmah:activeWorkout:v1', JSON.stringify(registry))
+            return true
+          }
+        }
+        return false
       })
       if (!persisted) throw new Error('active-session persistence probe could not seed the next set')
       // Simulate kill/resume: a fresh document must restore the owner-scoped snapshot,

@@ -1,6 +1,6 @@
 import { spawn, spawnSync } from 'node:child_process'
 import { mkdirSync } from 'node:fs'
-import { chromium } from 'playwright'
+import { chromium } from './lib/engine.mjs'
 
 const PORT = 5301
 const BASE = `http://127.0.0.1:${PORT}`
