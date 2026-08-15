@@ -76,9 +76,22 @@ UI after a full reload, so the only possible direction is an earned red→green.
 
 | pattern | result |
 |---|---|
-| `force: true` clicks | **0** in the personas and release harness |
+| `force: true` clicks | **3 — all declared and legitimate** (see below) |
 | `.skip` / `.only` / `xit` / `xdescribe` | **0** |
 | removed/commented expectations | **0** |
 | timeout inflation | **none** — all values unchanged |
 | production success mocked | **no** — `VITE_ENTITLEMENT_MODE=mock` is a **declared, separate artifact** (`dist-release/mock`), and p2 compares it against the real `prod` build in the same pass |
 | stale artifact reused as proof | **closed this wave** — see §3 |
+
+### Declared `force: true` usages — audited, not waived
+
+A first pass of this document claimed zero. That was wrong; the sweep found three. Each was then read in
+context, because "force-click" is only a cheat when it **suppresses** an assertion:
+
+| site | why force | verdict |
+|---|---|---|
+| `scripts/e2e/journeys/minor.mjs:158` | **the force IS the attack** — «محاولة الالتفاف ١ — النقر المباشر على هدف محجوب»: it force-clicks a *disabled* minor-restricted goal to prove the second guard inside `onPick` holds behind `disabled`. The very next assertion is that the goal did **not** become pressed. | legitimate — removing force would delete the attack |
+| `scripts/release/personas/p7-failure-conditions.mjs:160` | submits hostile activation codes (`''`, `'   '`, `<script>`, 300×`A`, `QIMMAH-TEST-OK`) where the submit control is disabled for empty input. The assertions are that the gate never surfaces a raw exception and that a **production** build grants nothing for **any** code. | legitimate — the attack requires reaching submit |
+| `scripts/release/personas/p4-interrupted-onboarding.mjs:128` | a *drive* step advancing the footer to return to the goals screen during the BUG-007 age-lowering attack; guarded by `.catch(() => {})` and followed by a hard `#onb-title-goal` presence check plus the real `aria-pressed` assertion. | legitimate — drive, not judgement |
+
+None of the three stands in place of an assertion; in two of them the force is the exploit being defended against.
