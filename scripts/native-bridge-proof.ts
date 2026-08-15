@@ -11,6 +11,15 @@ import { getSteps, getStepSource, setSteps } from '@/lib/stepCounter'
 import { latestWeightImport, loadLogs } from '@/lib/measurementLog'
 import { shouldPlayHaptic } from '@/lib/nativeFeedback'
 
+// [QIM-WEB-FOUNDER-UX-003/حزمة ٢] هذا الإثبات يمارس **كتّاب حالة مدفوعة**
+// (تمرين/تغذية/قياسات). بعد بوّابة الوصول صار الافتراض منعًا، فيلزم أن يعلن
+// الإثبات شخصيته: مستخدم مُفعَّل. هذا **ليس إضعافًا للبوّابة** — موضوع الإثبات
+// سلوك التخزين لا الاستحقاق، وحارس الاستحقاق نفسه يحرسه `test:access-gate`
+// و`test:e2e:preview-gate` بشخصيتَي معاينة ومُفعَّل.
+import { setEntitlement } from '@/lib/access/entitlementStore'
+setEntitlement({ status: 'active', source: 'mock' })
+
+
 const authorizedPlugin = {
   async isAvailable() { return { available: true } },
   async requestAuthorization() { return { permission: 'authorized' as const } },

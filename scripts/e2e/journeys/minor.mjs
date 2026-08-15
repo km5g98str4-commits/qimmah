@@ -28,6 +28,7 @@ const LANG = 'ar'
 const VIEWPORT = VIEWPORTS.large
 const MINOR_AGE = '15'
 const ADULT_AGE = '28'
+const group = (page, id) => page.locator(`[data-question-id="${id}"]`)
 
 const app = await startApp(PORT)
 let browser
@@ -64,6 +65,9 @@ try {
   await page.waitForTimeout(600)
   await page.getByRole('button', { name: /ابدأ|Start/ }).first().click().catch(() => {})
   await page.waitForTimeout(700)
+  const onboardingStart = page.getByRole('button', { name: t.welcome.start, exact: true })
+  if (await onboardingStart.isVisible().catch(() => false)) await onboardingStart.click()
+  await page.waitForSelector('#v2-body-age')
 
   const next = page.getByRole('button', { name: t.next }).first()
 
@@ -105,6 +109,11 @@ try {
   await page.getByRole('button', { name: new RegExp(intent.intents[0].label) }).first().click()
   await page.getByRole('button', { name: new RegExp(intent.levels.find((l) => l.value === 'beginner').label) }).first().click()
   await page.waitForTimeout(250)
+  await next.click()
+  await page.waitForTimeout(500)
+
+  // القاصر جديد على التمرين في هذه الرحلة؛ المسار لا يختلق تاريخًا سابقًا.
+  await group(page, 'history.trained_before').getByRole('button').nth(0).click()
   await next.click()
   await page.waitForTimeout(500)
 
@@ -161,9 +170,11 @@ try {
   console.log('\n▸ محاولة الالتفاف ٢ — اختيار الهدف ببلوغ ثم خفض العمر')
   // ارجع إلى خطوة الجسد وارفع العمر.
   const back = page.getByRole('button', { name: /رجوع|Back/ }).first()
-  await back.click().catch(() => {}); await page.waitForTimeout(300)
+  await back.click().catch(() => {}); await page.waitForTimeout(250)
+  await back.click().catch(() => {}); await page.waitForTimeout(250)
   await back.click().catch(() => {}); await page.waitForTimeout(400)
   await fillBody(ADULT_AGE)
+  await next.click(); await page.waitForTimeout(400)
   await next.click(); await page.waitForTimeout(400)
   await next.click(); await page.waitForTimeout(500)
 
@@ -178,10 +189,12 @@ try {
   await visit('goal-adult-cut', `بعمر ${ADULT_AGE} — «${wording.cut.label}» مختار`, `At ${ADULT_AGE} — restricted goal selected`)
 
   // الآن اخفض العمر إلى ١٥ وعُد.
-  await back.click().catch(() => {}); await page.waitForTimeout(300)
+  await back.click().catch(() => {}); await page.waitForTimeout(250)
+  await back.click().catch(() => {}); await page.waitForTimeout(250)
   await back.click().catch(() => {}); await page.waitForTimeout(400)
   await fillBody(MINOR_AGE)
   await visit('age-lowered-to-15', 'خفض العمر إلى ١٥ بعد اختيار هدف مقيَّد', 'Age lowered to 15 after picking a restricted goal')
+  await next.click(); await page.waitForTimeout(400)
   await next.click(); await page.waitForTimeout(400)
   await next.click(); await page.waitForTimeout(600)
 
@@ -193,20 +206,8 @@ try {
   rec.check('تنويه القاصر عاد للظهور', bypassText.includes(choices.minorGoalNote))
 
   // الالتفاف الحقيقي: هل بقي الاختيار المقيَّد قائمًا على قاصر؟
-  const stillSelected = cutAfter?.pressed === 'true'
-  if (stillSelected) {
-    rec.finding(
-      'اختيار مقيَّد ينجو من خفض العمر — القاصر يبقى على هدف تنشيف مختار',
-      `اختير «${wording.cut.label}» بعمر ${ADULT_AGE}، ثم خُفض العمر إلى ${MINOR_AGE}: الزرّ عاد ` +
-        `disabled وظهر التنويه، لكن aria-pressed بقي "true" — أي أن الحالة المخزَّنة ما زالت هدفًا مقيَّدًا ` +
-        'على مستخدم قاصر. الحاجز يمنع **الاختيار الجديد** ولا يُبطل **اختيارًا سابقًا** عند تغيّر العمر. ' +
-        'الأثر محدود بالعرض لأن effectiveGoalTypeForAge (src/lib/calculators.ts) يفرض المحافظة عند الحساب — ' +
-        'لكن شاشةً تُظهر «تنشيف» مختارًا لابن ١٥ بند امتثال بصري قائم.',
-      'متوسط',
-    )
-  } else {
-    rec.check('الاختيار المقيَّد أُبطل تلقائيًا عند خفض العمر', true, 'الحاجز يُبطل السابق لا يمنع الجديد فقط')
-  }
+  rec.check('الاختيار المقيَّد أُبطل تلقائيًا عند خفض العمر', cutAfter?.pressed !== 'true',
+    'الحاجز يُبطل السابق لا يمنع الجديد فقط')
 
   // ───────────────── ٥) الإكمال بالمحافظة ─────────────────
   console.log('\n▸ الإكمال بالمحافظة')
@@ -216,10 +217,13 @@ try {
     (await goalStates()).find((s) => s.text.includes(wording.maintain.label))?.pressed === 'true')
   await next.click(); await page.waitForTimeout(400)
   await next.click(); await page.waitForTimeout(400)
-  await page.getByRole('button', { name: t.places.find((p) => p.value === 'gym').label, exact: true }).first().click().catch(() => {})
-  await page.getByRole('button', { name: t.prefs.find((p) => p.value === 'mixed').label, exact: true }).first().click().catch(() => {})
+  await group(page, 'training.place').getByRole('button').nth(0).click()
+  await group(page, 'activity.neat').getByRole('button').nth(1).click()
+  await group(page, 'nutrition.diet_pattern').getByRole('button').nth(0).click()
+  await next.click(); await page.waitForTimeout(400)
+  await group(page, 'limitations.has_injury').getByRole('button').nth(1).click()
   await page.waitForTimeout(300)
-  await page.getByRole('button', { name: t.equipment.cta }).first().click().catch(() => {})
+  await page.locator('footer button').last().click().catch(() => {})
   await page.waitForTimeout(1400)
 
   const planText = await visit('plan-minor', 'خطة القاصر — على المحافظة', "The minor's plan — on maintenance")
@@ -232,6 +236,8 @@ try {
 
   // ───────────────── ٦) الحساب نفسه ─────────────────
   await page.getByRole('button', { name: t.ready.enter }).first().click().catch(() => {})
+  await page.waitForSelector('[data-testid="plan-handoff"]')
+  await page.getByRole('button', { name: t.handoff.enterFree, exact: true }).click()
   await page.waitForTimeout(1000)
   const stored = await page.evaluate(() => localStorage.getItem('qimmah:customization:v1') || '')
   let goalType = ''
@@ -257,13 +263,12 @@ try {
     'شاشة التمارين ترى خطة القاصر (لا «أكمل إعداد خطتك»)',
     !workoutText.includes('أكمل إعداد خطتك'),
   )
-  const startSession = page.getByRole('button', { name: /ابدأ الجلسة|ابدأ التمرين/ }).first()
-  rec.check(
-    'جلسة القاصر تبدأ من شاشة التمارين',
-    await startSession.click({ timeout: 5000 }).then(() => true).catch(() => false),
-  )
-  await page.waitForTimeout(700)
-  await visit('workout-minor-active', 'جلسة القاصر نشطة', "Minor's session active")
+  const startSession = page.getByRole('button', { name: /ابدأ تمرين فارغ/ }).first()
+  rec.check('فعل بدء التمرين ظاهر للقاصر في المعاينة', await startSession.isVisible().catch(() => false))
+  await startSession.click()
+  await page.waitForSelector('[data-testid="premium-gate"]')
+  await visit('workout-minor-premium-gate', 'بدء تمرين القاصر من المعاينة — بوابة Premium', "Minor preview workout — Premium gate")
+  rec.check('المعاينة لا تبدأ جلسة مدفوعة للقاصر بصمت', await page.locator('[data-testid="premium-gate"]').isVisible())
 
   const realErrors = errors.filter((e) => !(/401/.test(e) && /Failed to load resource/.test(e)))
   rec.check('لا أخطاء طرف عميل (عدا 401 الجلسة المزروعة — استثناء معلَن)', realErrors.length === 0,

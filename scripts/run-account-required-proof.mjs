@@ -20,6 +20,9 @@ check('الحارس يحوّل الزائر إلى حالة حساب مطلوب�
 check('الحالة الجديدة ليست مسار 404 عامًا', routes.includes("| 'accountRequired'") && view.includes('t.accountRequired.title') && !view.includes('t.notFound.title'))
 check('الحالة تعرض تسجيل الدخول والضيف', view.includes('onLogin') && view.includes('onGuest') && view.includes('t.accountRequired.login') && view.includes('t.accountRequired.guest'))
 check('النص يشرح الحساب والضيف بالعربية والإنجليزية', strings.includes("title: 'هالمسار يحتاج حساب'") && strings.includes("title: 'This path needs an account'"))
-check('زر الضيف يعيد استخدام الإعداد المحلي', app.includes("onGuest={() => setView('setup')}") && view.includes('onGuest'))
+// [QIM-WEB-FOUNDER-UX-006/حزمة ٦] نفس المقصد بوجهة مشروطة: شاشة «الحساب مطلوب»
+// تعيد استخدام **مسار الضيف الواحد** (`enterAsGuest`) لا وجهة مكتوبة مرّتين —
+// فالضيف المكتمل يهبط على «اليوم» والجديد على الإعداد، من موضع قرار واحد.
+check('زر الضيف يعيد استخدام مسار الضيف الواحد', app.includes('onGuest={enterAsGuest}') && view.includes('onGuest'))
 
 console.log(`\n✅ حالة الحساب المطلوبة: ${pass} فحوص، 0 فشل.`)

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Icon } from '@/components/Icon'
 import { ProgressBar } from '@/components/ProgressBar'
 import { QuickMealLogger } from '@/components/nutrition/QuickMealLogger'
@@ -8,6 +8,9 @@ import { inRange, NUM_LIMITS, NUM_MESSAGES, sanitizeNumericInput } from '@/lib/v
 import { getStrings } from '@/config/strings'
 import { nutritionScreenStrings } from '@/i18n/dict/nutritionScreen'
 import type { Lang } from '@/lib/appPreferences'
+import { useAccess } from '@/lib/access/useAccess'
+import { formatNumber } from '@/lib/numberFormat'
+import { clearQuickLogIntent, takeQuickLogIntent, type QuickLogIntent } from '@/lib/quickLogIntent'
 
 interface NutritionViewProps {
   lang: Lang
@@ -42,8 +45,46 @@ export function NutritionView({ lang }: NutritionViewProps) {
   const { customization } = useCustomization()
   const t = getStrings(lang).nutrition
   const d = nutritionScreenStrings[lang]
-  const { state, totals, addWater, removeLog } = useNutritionToday()
+  const { state, totals, addWater, removeLog, updateLogQuantity } = useNutritionToday()
   const np = customization.nutritionPlan
+
+  /**
+   * [QIM-WEB-FOUNDER-UX-004/حزمة ٤] استهلاك نيّة التسجيل السريع — **في المسار الحيّ**.
+   *
+   * العطل البنيوي: `App.tsx` يكتب `qimmah:quick-log-intent` ويُطلق
+   * `qimmah:quick-log`، والمستمع الوحيد كان في `NutritionV2` **غير المركَّب**.
+   * فالضغط على «سجّل وجبة» في «اليوم» ينقل إلى التغذية ولا يفتح شيئًا، وتبقى
+   * النيّة عالقة في `sessionStorage` بلا مستهلك — أحد أوضح مصادر «ضغطت وما صار شي».
+   *
+   * ثلاث ضمانات: نيّة واحدة = فتحة واحدة · تُمسح **قبل** الفتح فلا يعيدها
+   * التحديث إلى الأبد · وقيمة غير معروفة تُمسح وتُتجاهَل بلا رمي.
+   */
+  const [autoOpen, setAutoOpen] = useState<MealSlot | null>(null)
+  /**
+   * «ماء» كانت نيّة معلَنة بلا مستهلك: الورقة تعرض ثلاثة أزرار، فيضغط المستخدم
+   * «ماء» فتُمسح نيّته ويهبط على التغذية **ولا يحدث شيء** — ولوحة الماء أسفل
+   * الشاشة لا تُرى بلا تمرير. زرٌّ يعلن فعلًا ولا يفعله هو تعريف الزرّ الميت.
+   *
+   * والعلاج تركيز لا كتابة: نأخذه إلى لوحة الماء ونضع التركيز على أول إجراء
+   * فيها. لا نضيف ماءً نيابةً عنه — `nutrition.water` فعل مدفوع، وإضافته تلقائيًا
+   * تكتب بيانات لم يطلبها وتلتفّ على بوّابة Premium معًا.
+   */
+  const [focusWater, setFocusWater] = useState(false)
+  useEffect(() => {
+    const apply = (intent: QuickLogIntent | null) => {
+      if (intent === 'meal') setAutoOpen('breakfast')
+      else if (intent === 'water') setFocusWater(true)
+    }
+    apply(takeQuickLogIntent(['meal', 'water']))
+    const onEvent = (e: Event) => {
+      const detail = (e as CustomEvent<string>).detail
+      clearQuickLogIntent()
+      if (detail === 'meal') setAutoOpen('breakfast')
+      else if (detail === 'water') setFocusWater(true)
+    }
+    window.addEventListener('qimmah:quick-log', onEvent)
+    return () => window.removeEventListener('qimmah:quick-log', onEvent)
+  }, [])
 
   const targetCalories = np.targetCalories || customization.targets.targetCalories || customization.targets.maintenanceCalories || 2000
   const targetProtein = np.targetProtein || customization.targets.proteinGrams || 120
@@ -87,20 +128,33 @@ export function NutritionView({ lang }: NutritionViewProps) {
 
           {/* المعادلة المساندة — أرقام أصغر ولون ثانوي، فلا تنافس البطل. */}
           <div className="mt-3.5 flex items-end justify-between gap-1 border-t border-line pt-3">
-            <EqCell label={t.needCals} value={targetCalories} />
+            <EqCell label={t.needCals} value={targetCalories} lang={lang} />
             <Op symbol={d.opMinus} />
-            <EqCell label={t.foodCals} value={eaten} />
+            <EqCell label={t.foodCals} value={eaten} lang={lang} />
             <Op symbol={d.opPlus} />
-            <EqCell label={t.exerciseCals} value={exerciseCals} />
+            <EqCell label={t.exerciseCals} value={exerciseCals} lang={lang} />
           </div>
         </div>
 
-        {/* ملخّص الماكروز + الماء — حلقات واضحة */}
-        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <MacroCard label={t.protein} eaten={round(totals.protein)} target={targetProtein} unit={d.gramsUnit} color="#22c55e" />
-          <MacroCard label={t.carbs} eaten={round(totals.carbs)} target={targetCarbs} unit={d.gramsUnit} color="#0ea5e9" />
-          <MacroCard label={t.fat} eaten={round(totals.fat)} target={targetFat} unit={d.gramsUnit} color="#e0941f" />
-          <MacroCard label={t.water} eaten={state.waterMl} target={targetWaterMl} unit={d.mlUnit} color="#F26A21" />
+        {/*
+          [QIM-WEB-FOUNDER-UX-004/حزمة ٤] عمودان دائمًا — **لا `sm:grid-cols-4`.**
+
+          العطل مقيس: الشبكة كانت تتحوّل إلى أربعة أعمدة عند عرض **النافذة**
+          ≥640بكسل، بينما الحاوية مقفولة على `app-container` = `max-w-md`
+          (448بكسل). فالبطاقة تصير ≈95بكسل، ويبقى للوسم ١٣بكسل مقابل نصّ
+          ٣٠بكسل ⇒ «بروتين» تُقصّ إلى حرف واحد. قِيس عند ٨٩٤ و١٢٨٠ (وهو ما
+          أبلغ عنه QA بـ«حتى ~894px»)، ولم يظهر عند ٣٢٠ إطلاقًا.
+
+          السبب أن نقطة التوقّف تسأل عن **النافذة** والحاوية لا تتبع النافذة.
+          فأُزيلت النقطة بدل مطاردتها بأرقام: عمودان يعطيان كل وسم عرضًا كافيًا
+          عند كل عرض ممكن للحاوية، والأربع بطاقات تصير ٢×٢ — تخطيط يتبع المساحة
+          المتاحة فعلًا لأنه لا يسأل عن غيرها.
+        */}
+        <div className="mt-4 grid grid-cols-2 gap-3">
+          <MacroCard label={t.protein} eaten={round(totals.protein)} target={targetProtein} unit={d.gramsUnit} color="#22c55e" lang={lang} />
+          <MacroCard label={t.carbs} eaten={round(totals.carbs)} target={targetCarbs} unit={d.gramsUnit} color="#0ea5e9" lang={lang} />
+          <MacroCard label={t.fat} eaten={round(totals.fat)} target={targetFat} unit={d.gramsUnit} color="#e0941f" lang={lang} />
+          <MacroCard label={t.water} eaten={state.waterMl} target={targetWaterMl} unit={d.mlUnit} color="#F26A21" lang={lang} />
         </div>
 
         {/* حالة فارغة — تحفيز لتسجيل أول وجبة */}
@@ -122,10 +176,13 @@ export function NutritionView({ lang }: NutritionViewProps) {
                 key={slot.id}
                 lang={lang}
                 slot={slot}
+                autoOpen={autoOpen === slot.id || (autoOpen === 'breakfast' && slot.id === mealSlots[0].id)}
+                onAutoOpenHandled={() => setAutoOpen(null)}
                 items={state.log.filter((e) => slotForEntry(e.meal, mealSlots) === slot.id)}
                 targetCalories={targetCalories}
                 targetProtein={targetProtein}
                 onRemove={removeLog}
+                onUpdateQuantity={updateLogQuantity}
               />
             ))}
           </div>
@@ -136,7 +193,7 @@ export function NutritionView({ lang }: NutritionViewProps) {
         )}
 
         {/* الماء */}
-        <WaterPanel lang={lang} waterMl={state.waterMl} targetMl={targetWaterMl} onAdd={addWater} />
+        <WaterPanel lang={lang} waterMl={state.waterMl} targetMl={targetWaterMl} onAdd={addWater} focusRequested={focusWater} onFocusHandled={() => setFocusWater(false)} />
 
         <p className="mt-6 flex items-start gap-2 text-[11px] text-ink-400">
           <Icon name="Info" className="mt-0.5 h-3.5 w-3.5 shrink-0" />
@@ -172,16 +229,16 @@ function quantityLabel(e: LoggedFood, d: { gramsUnit: string; servingsUnit: stri
 const round2 = (n: number) => Math.round(n * 100) / 100
 
 /** خانة مساندة في المعادلة — وزن ثانوي عمدًا: البطل هو «المتبقّي» فوقها. */
-function EqCell({ label, value }: { label: string; value: number }) {
+function EqCell({ label, value, lang }: { label: string; value: number; lang: Lang }) {
   return (
     <div className="min-w-0 flex-1 text-center">
-      <p className="text-sm font-bold text-ink-700">{value}</p>
+      <p className="text-sm font-bold text-ink-700">{formatNumber(value, lang)}</p>
       <p className="truncate text-[10px] text-ink-400">{label}</p>
     </div>
   )
 }
 
-function MacroCard({ label, eaten, target, unit, color }: { label: string; eaten: number; target: number; unit: string; color: string }) {
+function MacroCard({ label, eaten, target, unit, color, lang }: { label: string; eaten: number; target: number; unit: string; color: string; lang: Lang }) {
   const pct = target > 0 ? Math.min(1, eaten / target) : 0
   return (
     // [WP-4B] البطاقة كانت `flex` أفقيًا: الحلقة ٤٠بكسل + نصّ بجانبها داخل عمود
@@ -193,9 +250,9 @@ function MacroCard({ label, eaten, target, unit, color }: { label: string; eaten
         <Ring pct={pct} color={color} />
       </div>
       <p className="min-w-0 text-base font-black leading-none text-ink-900">
-        {eaten}
+        {formatNumber(eaten, lang)}
         {/* الهدف لا يُقصّ: `whitespace-nowrap` يمنع كسر «/ ١٥٠غ» على سطرين. */}
-        <span className="whitespace-nowrap text-[11px] font-bold text-ink-400"> / {target}{unit}</span>
+        <span className="whitespace-nowrap text-[11px] font-bold text-ink-400"> / {formatNumber(target, lang)}{unit}</span>
       </p>
     </div>
   )
@@ -230,17 +287,63 @@ function MealCard({
   targetCalories,
   targetProtein,
   onRemove,
+  onUpdateQuantity,
+  autoOpen = false,
+  onAutoOpenHandled,
 }: {
   lang: Lang
   slot: { id: MealSlot; ar: string; en: string; icon: string }
   items: LoggedFood[]
   targetCalories: number
   targetProtein: number
-  onRemove: (id: string) => void
+  onRemove: (id: string) => boolean
+  onUpdateQuantity: (id: string, value: number, unit: 'g' | 'serving') => boolean
+  /** نيّة «سجّل وجبة» القادمة من «اليوم» — تُفتح مرّة واحدة ثم تُستهلك. */
+  autoOpen?: boolean
+  onAutoOpenHandled?: () => void
 }) {
   const t = getStrings(lang).nutrition
   const d = nutritionScreenStrings[lang]
   const [adding, setAdding] = useState(false)
+  // [QIM-WEB-FOUNDER-UX-003/حزمة ٢] «أضف» نفسه يقود إلى البوّابة في المعاينة —
+  // نصّ المؤسس: «يضغط أضف ← يظهر له Premium gate»، لا أن نطرده من التغذية.
+  const { guard } = useAccess()
+  const toggleAdding = guard('nutrition.addFood', () => setAdding((v) => !v))
+  const [editing, setEditing] = useState<{ id: string; value: string; unit: 'g' | 'serving' } | null>(null)
+  const [saveError, setSaveError] = useState(false)
+  const remove = guard('nutrition.removeFood', (id: string) => {
+    if (onRemove(id)) {
+      if (editing?.id === id) setEditing(null)
+      setSaveError(false)
+    } else {
+      setSaveError(true)
+    }
+  })
+  const saveQuantity = guard('nutrition.addFood', () => {
+    if (!editing) return
+    const value = Number(editing.value)
+    const max = editing.unit === 'g' ? 3000 : 20
+    if (!Number.isFinite(value) || value <= 0 || value > max) return
+    if (onUpdateQuantity(editing.id, value, editing.unit)) {
+      setEditing(null)
+      setSaveError(false)
+    } else {
+      setSaveError(true)
+    }
+  })
+  /**
+   * النيّة تمرّ من **نفس الحارس** الذي يمرّ منه الزرّ: مستخدم المعاينة يرى بوّابة
+   * Premium لا لوحة تسجيل، فلا يفتح مسار الطفرة من باب خلفي. والاستهلاك يقع
+   * مرّة واحدة مهما تكرّر الرسم.
+   */
+  const openFromIntent = guard('nutrition.addFood', () => setAdding(true))
+  useEffect(() => {
+    if (!autoOpen) return
+    onAutoOpenHandled?.()
+    openFromIntent()
+    // مرّة واحدة لكل نيّة — التبعيات المستقرّة مقصودة.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoOpen])
   const cals = items.reduce((a, e) => a + e.calories, 0)
   const prot = items.reduce((a, e) => a + e.protein, 0)
 
@@ -263,7 +366,7 @@ function MealCard({
         </div>
         <button
           type="button"
-          onClick={() => setAdding((v) => !v)}
+          onClick={toggleAdding}
           aria-expanded={adding}
           className="flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-xl border border-line bg-surface px-3 text-xs font-bold text-ink-700 transition-colors hover:bg-beige"
         >
@@ -275,22 +378,70 @@ function MealCard({
       {items.length > 0 && (
         <ul className="divide-y divide-line">
           {items.map((e) => (
-            <li key={e.id} className="flex items-center gap-3 px-4 py-3">
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-sm font-bold text-ink-900">{e.label}</span>
-                <span className="block text-[11px] text-ink-400">
-                  {quantityLabel(e, d)}
-                  {quantityLabel(e, d) && ' · '}
-                  {e.calories} {d.caloriesUnit} · {e.protein}{d.gramsUnit}
+            <li key={e.id} className="px-4 py-3">
+              <div className="flex items-center gap-2">
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-bold text-ink-900">{e.label}</span>
+                  <span className="block text-[11px] text-ink-400">
+                    {quantityLabel(e, d)}
+                    {quantityLabel(e, d) && ' · '}
+                    {e.calories} {d.caloriesUnit} · {e.protein}{d.gramsUnit}
+                  </span>
                 </span>
-              </span>
-              <button type="button" onClick={() => onRemove(e.id)} aria-label={t.removeEntry} className="grid h-11 w-11 shrink-0 place-items-center rounded-lg text-ink-400 hover:bg-beige hover:text-danger">
-                <Icon name="Trash2" className="h-4 w-4" />
-              </button>
+                {((e.unit === 'g' && e.grams) || (e.unit === 'serving' && e.servings)) && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const unit = e.unit ?? 'g'
+                      setEditing({ id: e.id, unit, value: String(unit === 'g' ? e.grams : e.servings) })
+                      setSaveError(false)
+                    }}
+                    aria-label={`${d.editEntry}: ${e.label}`}
+                    className="grid h-11 w-11 shrink-0 place-items-center rounded-lg text-ink-400 hover:bg-beige hover:text-ink-900"
+                  >
+                    <Icon name="Pencil" className="h-4 w-4" />
+                  </button>
+                )}
+                <button type="button" onClick={() => remove(e.id)} aria-label={`${t.removeEntry}: ${e.label}`} className="grid h-11 w-11 shrink-0 place-items-center rounded-lg text-ink-400 hover:bg-beige hover:text-danger">
+                  <Icon name="Trash2" className="h-4 w-4" />
+                </button>
+              </div>
+              {editing?.id === e.id && (
+                <div className="mt-3 rounded-xl border border-line bg-page p-3">
+                  <label className="text-xs font-bold text-ink-700">
+                    {d.quantity} ({editing.unit === 'g' ? d.gramsUnit : d.servingsUnit})
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      min={editing.unit === 'g' ? 1 : 0.25}
+                      max={editing.unit === 'g' ? 3000 : 20}
+                      step={editing.unit === 'g' ? 1 : 0.25}
+                      value={editing.value}
+                      onChange={(event) => setEditing({
+                        ...editing,
+                        value: sanitizeNumericInput(event.target.value, {
+                          max: editing.unit === 'g' ? 3000 : 20,
+                          decimal: editing.unit === 'serving',
+                        }),
+                      })}
+                      className="mt-1 block min-h-[44px] w-full rounded-lg border border-line bg-surface px-3 text-sm text-ink-900 outline-none focus:border-primary-c"
+                    />
+                  </label>
+                  {editing.value !== '' && (!Number.isFinite(Number(editing.value)) || Number(editing.value) <= 0) && (
+                    <p className="mt-1.5 text-xs font-bold text-danger">{d.invalidQuantity}</p>
+                  )}
+                  <div className="mt-3 flex gap-2">
+                    <button type="button" onClick={saveQuantity} disabled={!Number.isFinite(Number(editing.value)) || Number(editing.value) <= 0} className="btn-primary min-h-[44px] flex-1 text-xs disabled:cursor-not-allowed disabled:opacity-40">{d.saveEdit}</button>
+                    <button type="button" onClick={() => { setEditing(null); setSaveError(false) }} className="btn-ghost min-h-[44px] flex-1 text-xs">{d.cancelEdit}</button>
+                  </div>
+                </div>
+              )}
             </li>
           ))}
         </ul>
       )}
+
+      {saveError && <p role="alert" className="v2-error-panel mx-4 mt-3 rounded-xl border px-3 py-2 text-xs font-bold text-ink-900">{d.saveFailed}</p>}
 
       {adding && (
         <div className="border-t border-line p-4">
@@ -310,17 +461,37 @@ function MealCard({
 
 
 /** لوحة الماء — +250/+500 + إدخال كمية مخصّصة (50–3000 مل). */
-function WaterPanel({ lang, waterMl, targetMl, onAdd }: { lang: Lang; waterMl: number; targetMl: number; onAdd: (ml: number) => void }) {
+function WaterPanel({ lang, waterMl, targetMl, onAdd: rawAdd, focusRequested = false, onFocusHandled }: { lang: Lang; waterMl: number; targetMl: number; onAdd: (ml: number) => boolean; focusRequested?: boolean; onFocusHandled?: () => void }) {
   const t = getStrings(lang).nutrition
   const d = nutritionScreenStrings[lang]
+  const { guard } = useAccess()
   const [ml, setMl] = useState('')
+  const [saveError, setSaveError] = useState(false)
+  // وصول نيّة «ماء»: تُظهر اللوحة وتضع التركيز على أوّل إجراء — بلا كتابة.
+  const presetRef = useRef<HTMLButtonElement>(null)
+  useEffect(() => {
+    if (!focusRequested) return
+    presetRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+    presetRef.current?.focus({ preventScroll: true })
+    onFocusHandled?.()
+  }, [focusRequested, onFocusHandled])
+  const onAdd = guard('nutrition.water', (amountMl: number, onSaved?: () => void) => {
+    if (rawAdd(amountMl)) {
+      setSaveError(false)
+      onSaved?.()
+      return
+    }
+    setSaveError(true)
+  })
   const { min, max } = NUM_LIMITS.waterMl
   const amount = Number(ml)
   const valid = inRange(amount, min, max)
   const submit = () => {
     if (!valid) return
-    onAdd(Math.round(amount))
-    setMl('')
+    onAdd(Math.round(amount), () => setMl(''))
+  }
+  const addPreset = (amountMl: number) => {
+    onAdd(amountMl)
   }
 
   return (
@@ -330,12 +501,12 @@ function WaterPanel({ lang, waterMl, targetMl, onAdd }: { lang: Lang; waterMl: n
           <Icon name="Droplets" className="h-4 w-4 text-primary-c" />
           {t.water}
         </span>
-        <span className="text-sm font-black text-primary-c">{(waterMl / 1000).toFixed(2)} / {(targetMl / 1000).toFixed(1)} {d.litersUnit}</span>
+        <span className="text-sm font-black text-primary-c">{formatNumber(Number((waterMl / 1000).toFixed(2)), lang)} / {formatNumber(Number((targetMl / 1000).toFixed(1)), lang)} {d.litersUnit}</span>
       </div>
       <ProgressBar current={waterMl} target={targetMl || 1} color="bg-primary" className="mt-3 h-1.5" />
       <div className="mt-3 flex flex-wrap gap-2">
-        <button type="button" onClick={() => onAdd(250)} className="btn-ghost px-3 py-2 text-xs">{t.addWater250}</button>
-        <button type="button" onClick={() => onAdd(500)} className="btn-ghost px-3 py-2 text-xs">{t.addWater500}</button>
+        <button ref={presetRef} type="button" onClick={() => addPreset(250)} className="btn-ghost min-h-[44px] px-3 py-2 text-xs">{t.addWater250}</button>
+        <button type="button" onClick={() => addPreset(500)} className="btn-ghost min-h-[44px] px-3 py-2 text-xs">{t.addWater500}</button>
       </div>
       <div className="mt-2 flex items-center gap-2">
         <input
@@ -347,11 +518,12 @@ function WaterPanel({ lang, waterMl, targetMl, onAdd }: { lang: Lang; waterMl: n
           onChange={(e) => setMl(sanitizeNumericInput(e.target.value, { max }))}
           onKeyDown={(e) => { if (e.key === 'Enter') submit() }}
           placeholder={t.customWaterPlaceholder}
-          className="w-40 rounded-lg border border-line bg-page px-3 py-2 text-xs text-ink-900 outline-none focus:border-primary-c"
+          className="min-h-[44px] w-40 rounded-lg border border-line bg-page px-3 py-2 text-xs text-ink-900 outline-none focus:border-primary-c"
         />
-        <button type="button" onClick={submit} disabled={!valid} className="btn-primary px-3 py-2 text-xs disabled:cursor-not-allowed disabled:opacity-40">{t.customWaterAdd}</button>
+        <button type="button" onClick={submit} disabled={!valid} className="btn-primary min-h-[44px] px-3 py-2 text-xs disabled:cursor-not-allowed disabled:opacity-40">{t.customWaterAdd}</button>
       </div>
       {ml !== '' && !valid && <p className="mt-1.5 text-[11px] font-bold text-danger">{NUM_MESSAGES.waterMl}</p>}
+      {saveError && <p role="alert" className="v2-error-panel mt-2 rounded-xl border px-3 py-2 text-xs font-bold text-ink-900">{d.saveFailed}</p>}
     </div>
   )
 }

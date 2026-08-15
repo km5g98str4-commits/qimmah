@@ -21,9 +21,10 @@ interface LoginViewProps {
   onSuccess: () => void
   onBack: () => void
   /** الوضع الابتدائي عند الفتح — تسجيل دخول أو إنشاء حساب. */
-  initialMode?: Mode
+  /** [حزمة ٦] الوضع يملكه المسار لا المكوّن — مُتحكَّم به بالكامل. */
+  mode?: Mode
   /** يحفظ وضع الحساب خارج الشاشة حتى لا يضيع عند فتح الشروط أو الخصوصية. */
-  onModeChange?: (mode: 'login' | 'signup') => void
+  onModeChange?: (mode: Mode) => void
 }
 
 type Mode = 'login' | 'signup' | 'forgot'
@@ -33,12 +34,20 @@ type Mode = 'login' | 'signup' | 'forgot'
  * تجيب: أين أنا؟ (العنوان) · ماذا أفعل؟ (النموذج + إجراء أساسي واحد) · لماذا أثق؟ (نبرة هادئة صادقة).
  * منطق المصادقة والأحداث لم يتغيّر؛ التعديل بصري + إضافة وضع الاستعادة فقط.
  */
-export function LoginView({ lang, onSuccess, onBack, initialMode = 'login', onModeChange }: LoginViewProps) {
+export function LoginView({ lang, onSuccess, onBack, mode = 'login', onModeChange }: LoginViewProps) {
   const t = getStrings(lang)
   const d = miscStrings[lang]
   const af = authFlowStrings[lang]
   const auth = useAuth()
-  const [mode, setMode] = useState<Mode>(initialMode)
+  /**
+   * [QIM-WEB-FOUNDER-UX-006/حزمة ٦] لا حالة وضع محلّية.
+   *
+   * كان الوضع `useState` هنا، فترتّب عليه ثلاثة أعطال مقيسة: العنوان يبقى
+   * `#/login` بعد التبديل إلى إنشاء الحساب · التحديث يعيد المستخدم إلى وضع
+   * آخر · و«رجوع» يقفز فوق شاشة الحساب كلها (الـhash يُفرَّغ). الآن المسار هو
+   * مصدر الوضع، والتبديل تنقّلٌ حقيقي يدفع مدخل تاريخ.
+   */
+  const setMode = (next: Mode) => onModeChange?.(next)
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   // [CTO-65] البند ٧ — الرسالة تُعرض عند مغادرة الحقل لا مع أول حرف.
@@ -69,7 +78,6 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login', onMo
 
   const switchMode = (next: Mode) => {
     setMode(next)
-    if (next !== 'forgot') onModeChange?.(next)
     setMsg(null)
     setNotice(null)
     if (next !== 'signup') setEligible12(false)
@@ -102,7 +110,10 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login', onMo
         return
       }
       if (isSignup) {
-        const r = await auth.signUp(email, password, name)
+        // [QIM-WEB-FOUNDER-UX-006/حزمة ٦] الاسم يُقصّ **قبل التخزين** لا عند
+        // الفحص وحده. كان الشرط يفحص `name.trim()` بينما المُرسَل هو النصّ الخام،
+        // فاسم مثل « زياد » يُحفظ بفراغاته ثم يظهر مزاحًا في كل ترحيب.
+        const r = await auth.signUp(email, password, name.trim())
         if (!r.ok) {
           setMsg(r.error ?? d.createFailed)
         } else if (r.ambiguousExistingAccount) {
@@ -110,12 +121,10 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login', onMo
           // رسالة صادقة في الحالتين + طريق الدخول جاهز، ولا حدث «نجاح تسجيل» لم يثبت.
           setNotice(af.emailMaybeRegistered)
           setMode('login')
-          onModeChange?.('login')
         } else if (r.needsConfirmation) {
           // تأكيد البريد مطلوب — نعرض تنبيهًا واضحًا ونعيد المستخدم لوضع الدخول.
           setNotice(d.accountCreatedConfirm)
           setMode('login')
-          onModeChange?.('login')
         } else {
           onSuccess()
         }

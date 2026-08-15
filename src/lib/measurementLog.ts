@@ -1,6 +1,13 @@
 import type { MeasurementLog } from '@/types/progress'
-import { getMeasurementLogs, saveMeasurementLog as saveMeasurementLogHistory, setMeasurementLogs } from './historyStore'
+import {
+  getMeasurementLogs,
+  saveMeasurementLogChecked,
+  setMeasurementLogs,
+  setMeasurementLogsChecked,
+  type MeasurementWriteResult,
+} from './historyStore'
 import { getDayStamp } from './today'
+import { assertPaid } from '@/lib/access/guard'
 
 export function loadLogs(): MeasurementLog[] {
   // historyStore is the canonical source hydrated by syncService. Reading the
@@ -13,14 +20,34 @@ export function saveLogs(logs: MeasurementLog[]): void {
 }
 
 /** يضيف سجلًّا جديدًا (الأحدث أولًا) ويعيد القائمة المحدّثة. */
-export function addLog(log: MeasurementLog): MeasurementLog[] {
-  return saveMeasurementLogHistory(log).slice(0, 200)
+export function addLog(log: MeasurementLog): MeasurementWriteResult {
+  // [QIM-WEB-FOUNDER-UX-003/حزمة ٢] تسجيل الوزن/القياسات فعل مدفوع.
+  // **ولم يُحرَس `saveLogs`/`setMeasurementLogs` عمدًا**: ذاك مسار استعادة نسخة
+  // المستخدم الاحتياطية وبيانات المزامنة — حجبُه يمنع مالك البيانات من استرجاع
+  // ما يملكه أصلًا، وهو عقاب لا حماية. الحدّ هنا: **الإنشاء الجديد** مدفوع،
+  // واسترجاع القديم حقّ.
+  assertPaid('progress.logMeasurement')
+  return saveMeasurementLogChecked({ ...log, source: log.source ?? 'manual' })
 }
 
-export function deleteLog(id: string): MeasurementLog[] {
+/** تعديل سجل يدوي قائم — فعل منتج مدفوع مثل الإنشاء، بالكاتب والحارس المرئي. */
+export function updateLog(log: MeasurementLog): MeasurementWriteResult {
+  assertPaid('progress.logMeasurement')
+  const existing = loadLogs().find((item) => item.id === log.id)
+  if (!existing || existing.source === 'health') {
+    return { result: 'error', logs: loadLogs() }
+  }
+  return saveMeasurementLogChecked({ ...existing, ...log, source: 'manual', updatedAt: new Date().toISOString() })
+}
+
+/** حذف سجل يدوي قائم؛ الاستيراد الصحي يُزال فقط عبر مسار فصل Apple Health. */
+export function deleteLog(id: string): MeasurementWriteResult {
+  assertPaid('progress.logMeasurement')
+  const current = loadLogs()
+  const target = current.find((item) => item.id === id)
+  if (!target || target.source === 'health') return { result: 'error', logs: current }
   const next = loadLogs().filter((l) => l.id !== id)
-  saveLogs(next)
-  return next
+  return setMeasurementLogsChecked(next)
 }
 
 export function latestLog(logs: MeasurementLog[]): MeasurementLog | undefined {

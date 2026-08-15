@@ -15,8 +15,24 @@
 import { AGE_RANGE, HEIGHT_RANGE, WEIGHT_RANGE } from '@/config/profileDomain'
 import { loadDraft, saveDraft } from '@/lib/onboarding'
 import type { V2GoalValue } from '@/design-system/v2/labels'
-import type { ExperienceLevel } from '@/types/onboarding'
-import type { V2Place, V2Pref } from '@/lib/onboardingV2Adapter'
+import type {
+  DietPattern,
+  ExperienceLevel,
+  LastTrainedBucket,
+  NeatLevel,
+  TotalMonthsBucket,
+  TrainedBefore,
+  TrainingConsistency,
+} from '@/types/onboarding'
+import type { V2Place } from '@/lib/onboardingV2Adapter'
+import { classifyExperience, classifyTrainingStatus } from '@/lib/personalization/experience'
+import {
+  ALGO_VERSION,
+  BANK_VERSION,
+  STATE_VERSION,
+  type AnswerValue,
+  type PersonalizationState,
+} from '@/lib/personalization/types'
 
 /** Allowed answer sets for the training step (mirrored by the view's segmented controls). */
 export const DAYS = [3, 4, 5, 6] as const
@@ -32,8 +48,26 @@ export type V2Intent = 'plan' | 'meals' | 'numbers'
 /** المستوى المُعلن — يقود صياغة الأهداف وكثافة الجلسة. */
 export type V2Level = 'beginner' | 'intermediate' | 'advanced'
 
-/** سنوات التدريب — اختيارية، وتُسأل لغير المبتدئ فقط. */
-export const TRAINING_YEARS_RANGE = { min: 0, max: 60 } as const
+/** مفردات بنك التخصيص (`personalization/bank/core.ts`) — يحرس التطابق إثبات الحزمة. */
+export const TRAINED_BEFORE_VALUES = ['never', 'tried', 'months', 'years'] as const
+export const TOTAL_MONTHS_VALUES = ['lt3', 'm3_6', 'm6_12', 'y1_3', 'y3_plus'] as const
+export const LAST_TRAINED_VALUES = ['now', 'w2', 'm1_3', 'm3_12', 'y1_plus'] as const
+export const TRAINING_CONSISTENCY_VALUES = ['rare', 'on_off', 'mostly', 'steady'] as const
+export const NEAT_VALUES = ['sedentary', 'light', 'moderate', 'high'] as const
+export const DIET_PATTERN_VALUES = ['none', 'vegetarian', 'vegan', 'pescatarian', 'low_carb', 'keto'] as const
+
+export function historyFollowUpsApply(trainedBefore: TrainedBefore | null): boolean {
+  return trainedBefore !== null && trainedBefore !== 'never'
+}
+
+export function injuryAreasApply(hasInjury: boolean | null): boolean {
+  return hasInjury === true
+}
+
+/** يبطل هدف تعديل الوزن فور تحوّل صاحبه إلى قاصر؛ لا يترك اختيارًا محجوبًا مضغوطًا. */
+export function goalAllowedForEligibility(goal: V2GoalValue | null, minor: boolean): V2GoalValue | null {
+  return minor && (goal === 'cut' || goal === 'bulk') ? null : goal
+}
 
 /**
  * حدود بيانات الجسم — **مصدرها الوحيد `config/profileDomain`** منذ [CTO-65]
@@ -46,8 +80,9 @@ export { AGE_RANGE, HEIGHT_RANGE, WEIGHT_RANGE } from '@/config/profileDomain'
 /** الجنس — يقود معادلة BMR (Mifflin-St Jeor) ولا يُستخدم لغير ذلك. */
 export type V2Gender = 'male' | 'female'
 
-/** Version stamp for the persisted v2 draft — a shape change bumps this and old drafts are ignored. */
-export const DRAFT_VERSION = 5
+/** Version stamp for the persisted v2 draft — supported predecessors migrate explicitly. */
+export const DRAFT_VERSION = 6
+const READABLE_DRAFT_VERSIONS = [5, DRAFT_VERSION] as const
 
 /** Full resumable state of the v2 onboarding flow. */
 export interface OnboardingV2Draft {
@@ -60,14 +95,17 @@ export interface OnboardingV2Draft {
   /** النية والمستوى — null قبل الإجابة؛ لا افتراضي صامت لأنهما يغيّران المخرجات. */
   intent: V2Intent | null
   level: V2Level | null
-  /** سنوات التدريب — اختيارية (null = لم تُذكر)؛ تُصفَّر عند اختيار «مبتدئ». */
-  trainingYears: number | null
+  trainedBefore: TrainedBefore | null
+  totalMonths: TotalMonthsBucket | null
+  lastTrained: LastTrainedBucket | null
+  consistency: TrainingConsistency | null
   goal: V2GoalValue | null
   days: number
   duration: number
   place: V2Place | null
-  pref: V2Pref | null
-  hasInjury: boolean
+  neat: NeatLevel | null
+  dietPattern: DietPattern | null
+  hasInjury: boolean | null
   injuries: string[]
   healthDataConsent: boolean
 }
@@ -91,25 +129,32 @@ export function initialDraftV2(userId?: string | null): OnboardingV2Draft {
     weightKg: null,
     intent: null,
     level: null,
-    trainingYears: null,
+    trainedBefore: null,
+    totalMonths: null,
+    lastTrained: null,
+    consistency: null,
     goal: null,
     days: 4,
     duration: 45,
     place: null,
-    pref: null,
-    hasInjury: false,
+    neat: null,
+    dietPattern: null,
+    hasInjury: null,
     injuries: [],
     healthDataConsent: false,
   }
 }
 
 /** Persisted envelope (version + fields) — the shape actually written to storage. */
-interface PersistedDraft extends OnboardingV2Draft {
+interface PersistedDraft extends Partial<OnboardingV2Draft> {
   v: number
+  /** حقلا v5 المتقاعدان؛ يُقرآن للهجرة ولا ينتقلان إلى الحالة الحالية. */
+  trainingYears?: number | null
+  pref?: string | null
 }
 
 /** Which step-specific validation message to surface, or null when the step is complete. */
-export type StepValidation = 'body' | 'ageBelowMin' | 'intentLevel' | 'goal' | 'healthConsent' | 'training' | 'equipment' | null
+export type StepValidation = 'body' | 'ageBelowMin' | 'intentLevel' | 'trainingHistory' | 'goal' | 'healthConsent' | 'training' | 'lifestyle' | 'limitations' | null
 
 /** Async plan-assembly status driving the loading / error / done screens. */
 export type FinalizeStatus = 'idle' | 'building' | 'error' | 'done'
@@ -142,24 +187,41 @@ type Validatable = Pick<
   | 'weightKg'
   | 'intent'
   | 'level'
-  | 'trainingYears'
+  | 'trainedBefore'
+  | 'totalMonths'
+  | 'lastTrained'
+  | 'consistency'
   | 'goal'
   | 'days'
   | 'duration'
   | 'place'
-  | 'pref'
+  | 'neat'
+  | 'dietPattern'
+  | 'hasInjury'
+  | 'injuries'
   | 'healthDataConsent'
 >
 
-/** آخر خطوة قبل شاشة «خطتك جاهزة». */
-export const LAST_INPUT_STEP = 4
+export const HISTORY_STEP = 2
+export const LAST_INPUT_STEP = 6
+
+/** سجلّ الأسئلة الثابت — الموافقة الصحية بوابة، وليست ضمن أسئلة التخصيص الـ18. */
+export const ONBOARDING_QUESTION_IDS = [
+  'body.age', 'body.sex', 'body.height', 'body.weight',
+  'intent.primary', 'experience.declared',
+  'history.trained_before', 'history.total_months', 'history.last_trained', 'history.consistency',
+  'goal.primary', 'training.days', 'training.duration', 'training.place',
+  'activity.neat', 'nutrition.diet_pattern',
+  'limitations.has_injury', 'limitations.injury_areas',
+] as const
+export type OnboardingQuestionId = (typeof ONBOARDING_QUESTION_IDS)[number]
 
 /**
  * Validate one step. Returns the step's message key when incomplete, else null.
  *
  * ═══ ترتيب الخطوات — قرار واعٍ لا وراثة بالسكوت ═══
- * 0 الأساسيات (موافقة + جسد) · 1 النية والمستوى · 2 الهدف · 3 التدريب ·
- * 4 المعدّات · 5 جاهز.
+ * 0 الأساسيات · 1 النية والمستوى · 2 تاريخ التدريب · 3 الهدف · 4 الجدول ·
+ * 5 المكان/النشاط/الأكل · 6 القيود · 7 جاهز.
  *
  * التوتّر الموثّق (§8): بلوبرنت البحث يريد **النية أولًا** لأسباب تفاعل، وحاجز
  * القاصرين يريد **العمر قبل الأهداف المقيَّدة** (التنشيف/التضخيم ممنوعان دون
@@ -192,30 +254,81 @@ export function validateStep(step: number, d: Validatable): StepValidation {
     return ok ? null : 'body'
   }
   if (step === 1) {
-    // السنوات اختيارية: null تمرّ، وقيمة مكتوبة خارج النطاق (أو نص غير رقمي)
-    // تُحجب بدل أن تُبتلع بصمت.
-    if (d.trainingYears !== null && !inRange(d.trainingYears, TRAINING_YEARS_RANGE)) return 'intentLevel'
     return d.intent && d.level ? null : 'intentLevel'
   }
-  if (step === 2) return d.goal ? null : 'goal'
-  if (step === 3) return DAYS.includes(d.days as (typeof DAYS)[number]) && DURATIONS.includes(d.duration as (typeof DURATIONS)[number]) ? null : 'training'
-  if (step === 4) return d.place && d.pref ? null : 'equipment'
+  if (step === HISTORY_STEP) {
+    if (d.trainedBefore === null) return 'trainingHistory'
+    if (!historyFollowUpsApply(d.trainedBefore)) return null
+    return d.totalMonths && d.lastTrained && d.consistency ? null : 'trainingHistory'
+  }
+  if (step === 3) return d.goal ? null : 'goal'
+  if (step === 4) return DAYS.includes(d.days as (typeof DAYS)[number]) && DURATIONS.includes(d.duration as (typeof DURATIONS)[number]) ? null : 'training'
+  if (step === 5) return d.place && d.neat && d.dietPattern ? null : 'lifestyle'
+  if (step === 6) {
+    if (d.hasInjury === null) return 'limitations'
+    return injuryAreasApply(d.hasInjury) && d.injuries.length === 0 ? 'limitations' : null
+  }
   return null
 }
 
 /**
- * المستوى المُعلن + سنوات التدريب ⇒ مستوى الخبرة الذي يفهمه المولّد.
- *
- * ليست تسمية شكلية: `ExperienceLevel` يمرّ إلى `experienceToBand` ثم إلى محرّك
- * التقسيمة، فيتغيّر **عدد التمارين في الجلسة**، وتُثبَّت التقسيمة على «تلقائي»
- * للمبتدئ. والسنوات تُصحّح تقدير المستخدم لنفسه: من يقول «متوسط» وعنده أقل من
- * سنة أقرب إلى «مستجد» — فالسؤال له أثر حقيقي لا تجميلي.
+ * المستوى المُعلن + الوقائع الأربع ⇒ خبرة المولّد، عبر المصنّف المعتمد نفسه.
+ * لا ننسخ أوزان التصنيف هنا؛ نمرّر مفردات البنك إلى `classifyExperience`.
  */
-export function resolveExperienceLevel(level: V2Level | null, years: number | null): ExperienceLevel | undefined {
-  if (level === 'beginner') return 'beginner'
-  if (level === 'advanced') return 'advanced'
-  if (level === 'intermediate') return years !== null && years < 1 ? 'novice' : 'intermediate'
-  return undefined
+export function resolveExperienceLevel(
+  level: V2Level | null,
+  trainedBefore: TrainedBefore | null,
+  totalMonths: TotalMonthsBucket | null,
+  lastTrained: LastTrainedBucket | null,
+  consistency: TrainingConsistency | null,
+): ExperienceLevel | undefined {
+  if (!level || !trainedBefore) return undefined
+  const verdict = classifyExperience(historyState({
+    selfLevel: level,
+    trainedBefore,
+    ...(trainedBefore === 'never' ? {} : { totalMonths, lastTrained, consistency }),
+  }))
+  if (verdict.klass === 'complete_beginner') return 'beginner'
+  if (verdict.klass === 'beginner' || verdict.klass === 'early_intermediate') return 'novice'
+  if (verdict.klass === 'advanced') return 'advanced'
+  if (verdict.klass === 'returning') return verdict.score >= 55 ? 'intermediate' : 'novice'
+  return 'intermediate'
+}
+
+/** حالة البداية المشتقة التي يستهلكها المولّد: never لا يمكن أن تصبح returning. */
+export function resolveTrainingConsistency(
+  trainedBefore: TrainedBefore | null,
+  totalMonths: TotalMonthsBucket | null,
+  lastTrained: LastTrainedBucket | null,
+  consistency: TrainingConsistency | null,
+) {
+  if (!trainedBefore) return undefined
+  const status = classifyTrainingStatus(historyState({
+    trainedBefore,
+    ...(trainedBefore === 'never' ? {} : { totalMonths, lastTrained, consistency }),
+  }))
+  if (status === 'never') return 'new' as const
+  if (status === 'detrained') return 'returning' as const
+  if (status === 'inconsistent') return 'on_and_off' as const
+  return 'consistent' as const
+}
+
+function historyState(answers: Record<string, AnswerValue>): PersonalizationState {
+  return {
+    stateVersion: STATE_VERSION,
+    bankVersion: BANK_VERSION,
+    algoVersion: ALGO_VERSION,
+    userId: null,
+    lang: 'ar',
+    answers,
+    derived: {},
+    history: [],
+    queue: [],
+    clarifications: [],
+    startedAt: 0,
+    updatedAt: 0,
+    completedAt: null,
+  }
 }
 
 /**
@@ -240,28 +353,48 @@ export function canAdvance(step: number, d: Validatable): boolean {
 
 // ————————————————————— Draft persistence (owner-scoped, hostile-input safe) —————————————————————
 
-/** Strict guard: is this an untrusted value a usable v2 draft of the CURRENT version? */
+function optMember<T extends string>(value: unknown, allowed: readonly T[]): boolean {
+  return value === null || (typeof value === 'string' && (allowed as readonly string[]).includes(value))
+}
+
+function nullableNumber(value: unknown): boolean {
+  return value === null || (typeof value === 'number' && Number.isFinite(value))
+}
+
+/** Strict guard for an untrusted current or additively migratable v5 draft. */
 function isPersistedDraft(value: unknown): value is PersistedDraft {
   if (!value || typeof value !== 'object') return false
   const d = value as Partial<PersistedDraft>
-  if (d.v !== DRAFT_VERSION) return false
-  if (!Number.isInteger(d.step) || (d.step as number) < 0 || (d.step as number) > LAST_INPUT_STEP) return false
+  if (typeof d.v !== 'number' || !(READABLE_DRAFT_VERSIONS as readonly number[]).includes(d.v)) return false
+  const maxStep = d.v === 5 ? 4 : LAST_INPUT_STEP
+  if (!Number.isInteger(d.step) || (d.step as number) < 0 || (d.step as number) > maxStep) return false
+  if (![d.age, d.heightCm, d.weightKg].every(nullableNumber)) return false
+  if (d.gender !== null && d.gender !== 'male' && d.gender !== 'female') return false
   if (d.goal !== null && d.goal !== 'cut' && d.goal !== 'maintain' && d.goal !== 'bulk') return false
   if (d.intent !== null && d.intent !== 'plan' && d.intent !== 'meals' && d.intent !== 'numbers') return false
   if (d.level !== null && d.level !== 'beginner' && d.level !== 'intermediate' && d.level !== 'advanced') return false
-  if (d.trainingYears !== null && typeof d.trainingYears !== 'number') return false
   if (typeof d.days !== 'number' || typeof d.duration !== 'number') return false
-  if (d.place !== null && typeof d.place !== 'string') return false
-  if (d.pref !== null && typeof d.pref !== 'string') return false
-  if (typeof d.hasInjury !== 'boolean') return false
+  if (d.place !== null && d.place !== 'gym' && d.place !== 'home' && d.place !== 'machines') return false
   if (typeof d.healthDataConsent !== 'boolean') return false
   if (!Array.isArray(d.injuries) || !d.injuries.every((x) => typeof x === 'string')) return false
+  if (d.v === 5) {
+    if (d.trainingYears !== null && typeof d.trainingYears !== 'number') return false
+    if (d.pref !== null && typeof d.pref !== 'string') return false
+    return typeof d.hasInjury === 'boolean'
+  }
+  if (!optMember(d.trainedBefore, TRAINED_BEFORE_VALUES)) return false
+  if (!optMember(d.totalMonths, TOTAL_MONTHS_VALUES)) return false
+  if (!optMember(d.lastTrained, LAST_TRAINED_VALUES)) return false
+  if (!optMember(d.consistency, TRAINING_CONSISTENCY_VALUES)) return false
+  if (!optMember(d.neat, NEAT_VALUES)) return false
+  if (!optMember(d.dietPattern, DIET_PATTERN_VALUES)) return false
+  if (d.hasInjury !== null && typeof d.hasInjury !== 'boolean') return false
   return true
 }
 
 /** Persist the current draft for the current owner (account id, or null/undefined guest). */
 export function saveDraftV2(draft: OnboardingV2Draft, userId?: string | null): void {
-  const payload: PersistedDraft = { v: DRAFT_VERSION, ...draft }
+  const payload: PersistedDraft = { v: DRAFT_VERSION, ...normalizeDraft(draft) }
   saveDraft(payload, userId)
 }
 
@@ -272,9 +405,46 @@ export function saveDraftV2(draft: OnboardingV2Draft, userId?: string | null): v
 export function loadDraftV2(userId?: string | null): OnboardingV2Draft | undefined {
   const raw = loadDraft<unknown>(userId)
   if (!isPersistedDraft(raw)) return undefined
-  const { v: _v, ...draft } = raw
-  void _v
-  return draft
+  return migrateDraft(raw)
+}
+
+function migrateDraft(raw: PersistedDraft): OnboardingV2Draft {
+  const legacy = raw.v === 5
+  return normalizeDraft({
+    step: legacy ? Math.min(raw.step as number, HISTORY_STEP) : raw.step as number,
+    age: raw.age ?? null,
+    gender: raw.gender ?? null,
+    heightCm: raw.heightCm ?? null,
+    weightKg: raw.weightKg ?? null,
+    intent: raw.intent ?? null,
+    level: raw.level ?? null,
+    trainedBefore: legacy ? null : raw.trainedBefore ?? null,
+    totalMonths: legacy ? null : raw.totalMonths ?? null,
+    lastTrained: legacy ? null : raw.lastTrained ?? null,
+    consistency: legacy ? null : raw.consistency ?? null,
+    goal: raw.goal ?? null,
+    days: raw.days as number,
+    duration: raw.duration as number,
+    place: raw.place ?? null,
+    neat: legacy ? null : raw.neat ?? null,
+    dietPattern: legacy ? null : raw.dietPattern ?? null,
+    // v5=false كان افتراضيًا لا جوابًا صريحًا؛ true وحدها معلومة يمكن حفظها.
+    hasInjury: legacy ? (raw.hasInjury === true ? true : null) : raw.hasInjury ?? null,
+    injuries: raw.injuries as string[],
+    healthDataConsent: raw.healthDataConsent as boolean,
+  })
+}
+
+/** يمحو الأجوبة الشرطية الخفية عند الحفظ والتحميل، لا في الواجهة وحدها. */
+export function normalizeDraft(draft: OnboardingV2Draft): OnboardingV2Draft {
+  const never = draft.trainedBefore === 'never'
+  return {
+    ...draft,
+    totalMonths: never ? null : draft.totalMonths,
+    lastTrained: never ? null : draft.lastTrained,
+    consistency: never ? null : draft.consistency,
+    injuries: injuryAreasApply(draft.hasInjury) ? [...draft.injuries] : [],
+  }
 }
 
 /** Drop the draft (on successful finish) — resume must not reopen a completed setup. */

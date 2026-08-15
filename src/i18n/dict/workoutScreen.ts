@@ -86,6 +86,7 @@ export interface WorkoutScreenStrings {
   saveFailedKept: string
   /** زر إعادة محاولة الحفظ. */
   saveRetry: string
+  saveBackToWorkout: string
 }
 
 const ar: WorkoutScreenStrings = {
@@ -139,6 +140,7 @@ const ar: WorkoutScreenStrings = {
   saveFailedGeneric: 'حدث خطأ أثناء الحفظ ولم يُسجَّل شيء.',
   saveFailedKept: 'تمرينك ما زال مفتوحًا كما هو — لم تفقد أي مجموعة.',
   saveRetry: 'أعد محاولة الحفظ',
+  saveBackToWorkout: 'رجوع للتمرين',
   resumeTitle: 'عندك تمرين لم ينتهِ',
   resumeBody: 'توقّفت في {day}. تكمّل من مكانك أو تبدأ من جديد؟',
   resumeAction: 'أكمل تمريني',
@@ -200,6 +202,7 @@ const en: WorkoutScreenStrings = {
   saveFailedGeneric: 'Something went wrong while saving — nothing was recorded.',
   saveFailedKept: 'Your workout is still open exactly as it was — no set was lost.',
   saveRetry: 'Try saving again',
+  saveBackToWorkout: 'Back to workout',
 }
 
 export const workoutScreenStrings: Record<Lang, WorkoutScreenStrings> = { ar, en }

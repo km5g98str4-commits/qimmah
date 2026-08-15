@@ -10,6 +10,7 @@ import { spawn } from 'node:child_process'
 import { chromium } from 'playwright'
 import { setTimeout as sleep } from 'node:timers/promises'
 import { loadAppCopy, labelOf, assertDevFlag } from './e2e/lib/app-copy.mjs'
+import { answerHistory, finishInputSteps } from './e2e/lib/onboarding-driver.mjs'
 
 const PORT = 4319
 const BASE = `http://127.0.0.1:${PORT}/scripts/momentum-shot/?surface=onboarding`
@@ -33,8 +34,7 @@ let browser
 try {
   // القواميس المركزية — نفس المصدر الذي يرسم منه المكوّن.
   const { onboarding: t, policy, intent } = await loadAppCopy()
-  const gymPlace = labelOf(t.places, 'gym')
-  const mixedPref = labelOf(t.prefs, 'mixed')
+  labelOf(t.places, 'gym') // fail fast if canonical place copy disappears
   // عَلَم تطوير (ليس مفتاح بيانات) — نتحقّق أنه ما زال مقروءًا في المكوّن.
   const FORCE_FAIL = assertDevFlag('qimmah:onboarding:force-fail', 'src/views/OnboardingV2.tsx')
 
@@ -66,7 +66,7 @@ try {
     await p.getByRole('checkbox', { name: new RegExp(policy.healthConsent) }).check()
   }
 
-  // The live order is body + consent → intent/level → goal → training → equipment.
+  // Live order: body → intent → history → goal → schedule → lifestyle → limitations.
   const advancedPage = await makePage()
   check('شاشة الترحيب تسبق أول سؤال', welcomeSeen)
   check('RTL root', await advancedPage.evaluate(() => document.documentElement.dir === 'rtl'))
@@ -80,10 +80,38 @@ try {
   await advancedNext.click()
   await advancedPage.getByRole('button', { name: new RegExp(intent.intents[0].label) }).click()
   await advancedPage.getByRole('button', { name: new RegExp(intent.levels.find((x) => x.value === 'advanced').label) }).click()
-  await advancedNext.click()
+  const advancedHistory = await answerHistory(advancedPage, () => advancedNext.click(), { trained: true })
+  check('trained history shows all four meaningful questions', advancedHistory.historyGroups === 4)
   const advancedCut = intent.goalWording.advanced.cut.label
   check('advanced goal uses level-specific wording', advancedCut.startsWith('تنشيف') && await advancedPage.getByRole('button', { name: new RegExp(escapeRegExp(advancedCut)) }).isVisible())
   await advancedPage.close()
+
+  // Draft/resume + stale conditional clearing in the real browser.
+  const resumePage = await makePage()
+  const resumeNext = resumePage.getByRole('button', { name: t.next })
+  await fillBodyAndConsent(resumePage)
+  await resumeNext.click()
+  await resumePage.getByRole('button', { name: new RegExp(intent.intents[0].label) }).click()
+  await resumePage.getByRole('button', { name: new RegExp(intent.levels.find((x) => x.value === 'intermediate').label) }).click()
+  await resumeNext.click()
+  await resumePage.locator('[data-question-id="history.trained_before"] button').nth(2).click()
+  await resumePage.locator('[data-question-id="history.total_months"] button').nth(1).click()
+  await resumePage.locator('[data-question-id="history.last_trained"] button').nth(0).click()
+  await resumePage.locator('[data-question-id="history.consistency"] button').nth(2).click()
+  await resumePage.waitForTimeout(150)
+  await resumePage.reload({ waitUntil: 'networkidle' })
+  await resumePage.waitForSelector('#onb-title-history')
+  check('mid-onboarding reload resumes the same step', await resumePage.locator('[data-question-id^="history."]').count() === 4)
+  check('reload preserves four answered history facts', await resumePage.locator('[data-question-id^="history."] button[aria-pressed="true"]').count() === 4)
+  await resumePage.locator('[data-question-id="history.trained_before"] button').nth(0).click()
+  check('switching to never hides all three follow-ups', await resumePage.locator('[data-question-id^="history."]').count() === 1)
+  await resumePage.locator('[data-question-id="history.trained_before"] button').nth(3).click()
+  check('switching back does not resurrect skipped answers', await resumePage.locator('[data-question-id^="history."] button[aria-pressed="true"]').count() === 1)
+  await resumePage.getByRole('button', { name: t.back }).click()
+  check('Back returns to intent without losing it', await resumePage.getByRole('heading', { name: intent.title }).isVisible())
+  await resumeNext.click()
+  check('Forward returns to history', await resumePage.locator('#onb-title-history').isVisible())
+  await resumePage.close()
 
   const page = await makePage()
   const next = page.getByRole('button', { name: t.next })
@@ -91,17 +119,12 @@ try {
   await next.click()
   await page.getByRole('button', { name: new RegExp(intent.intents[0].label) }).click()
   await page.getByRole('button', { name: new RegExp(intent.levels.find((x) => x.value === 'beginner').label) }).click()
-  await next.click()
+  const neverHistory = await answerHistory(page, () => next.click())
+  check('never-trained sees one history question only', neverHistory.historyGroups === 1)
   const beginnerCut = intent.goalWording.beginner.cut.label
   check('beginner goal uses level-specific wording', beginnerCut === 'خسارة دهون' && await page.getByRole('button', { name: new RegExp(escapeRegExp(beginnerCut)) }).isVisible())
   await page.getByRole('button', { name: new RegExp(escapeRegExp(beginnerCut)) }).click()
-  await next.click()
-  check('training step rendered', await page.getByRole('heading', { name: t.training.title }).isVisible())
-  await next.click()
-  check('equipment step exact dialect copy', await page.getByRole('heading', { name: t.equipment.title }).isVisible())
-  await page.getByRole('button', { name: gymPlace, exact: true }).click()
-  await page.getByRole('button', { name: mixedPref, exact: true }).click()
-  await page.getByRole('button', { name: t.equipment.cta }).click()
+  await finishInputSteps(page, () => next.click())
   check('summary rendered', await page.getByRole('heading', { name: t.ready.title }).isVisible())
 
   await page.evaluate((k) => localStorage.setItem(k, '1'), FORCE_FAIL)

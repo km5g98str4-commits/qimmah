@@ -4,6 +4,7 @@ import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
 import type { AppRoute } from '@/lib/appRoutes'
 import { useAuth } from '@/lib/authContext'
+import { useAccess } from '@/lib/access/useAccess'
 import {
   loadRecoveryLog, saveRecoveryEntry, todaysRecovery,
   type RecoveryInput, type RecoveryRec, type Sleep, type Soreness, type Energy, type RecoveryEntry,
@@ -31,6 +32,7 @@ export function RecoveryView({ lang, onBack, onNavigate }: RecoveryViewProps) {
   const ar = lang !== 'en'
   const t = (a: string, e: string) => (ar ? a : e)
   const userId = useAuth().user?.id ?? null
+  const { guard } = useAccess()
 
   const existing = useMemo(() => todaysRecovery(userId), [userId])
   const [screen, setScreen] = useState<Screen>('checkin')
@@ -39,11 +41,11 @@ export function RecoveryView({ lang, onBack, onNavigate }: RecoveryViewProps) {
   // Small local read; re-runs on each render so a fresh save shows up on return.
   const log = loadRecoveryLog(userId)
 
-  const submit = () => {
+  const submit = guard('recovery.log', () => {
     const entry = saveRecoveryEntry(userId, input)
     setResult(entry)
     setScreen('result')
-  }
+  })
 
   if (screen === 'result' && result) {
     return <ResultScreen lang={lang} entry={result} onBack={() => setScreen('checkin')} onExit={onBack} onNavigate={onNavigate} />

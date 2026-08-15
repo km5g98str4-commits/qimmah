@@ -1,8 +1,9 @@
-import { useRef, useState, type ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { AppNav, type AppView } from '@/components/AppNav'
 import { Footer } from '@/components/Footer'
 import { Icon } from '@/components/Icon'
 import { DeleteAccountDialog } from '@/components/DeleteAccountDialog'
+import { DataManagementPanel } from '@/components/DataManagementPanel'
 import { setHashRoute } from '@/lib/appRoutes'
 import { DeviceSettings } from '@/components/DeviceSettings'
 import type { Lang } from '@/lib/appPreferences'
@@ -13,23 +14,12 @@ import { isIOSSafari } from '@/lib/installState'
 import { LanguageToggle } from '@/i18n'
 import { useAuth } from '@/lib/authContext'
 import { useCustomization } from '@/lib/customizationContext'
-import { type Customization, getDefaultCustomization } from '@/lib/customization'
-import { exportHistory, importHistory, type HistorySnapshot } from '@/lib/historyStore'
-import { loadPreferences, savePreferences, type AppPreferences } from '@/lib/appPreferences'
 import { resetQimmah } from '@/lib/resetQimmah'
 import { generatePlan } from '@/lib/planGenerator'
 import { markPendingSync } from '@/lib/syncService'
 import { BUILD_LABEL } from '@/lib/buildInfo'
-
-const EXPORT_VERSION = 2
-
-interface QimmahExport {
-  version: number
-  exportedAt: string
-  customization: Customization
-  history: HistorySnapshot
-  preferences: AppPreferences
-}
+import { settingsPreferencesStrings } from '@/i18n/dict/settingsPreferences'
+import { formatNumber } from '@/lib/numberFormat'
 
 /**
  * يترجم حالة المزامنة الحقيقية إلى جملة صادقة للمستخدم.
@@ -72,56 +62,11 @@ export function SettingsView({
   const t = getStrings(lang)
   const auth = useAuth()
   const { customization, applyCustomization } = useCustomization()
-  const fileRef = useRef<HTMLInputElement>(null)
+  const preferencesCopy = settingsPreferencesStrings[lang]
   // [CTO-65] البند ١ — نافذة حذف الحساب بتأكيد مكتوب.
   const [deleteOpen, setDeleteOpen] = useState(false)
 
   const badge: 'guest' | 'account' = auth.user ? 'account' : 'guest'
-
-  // — البيانات: تصدير —
-  const onExport = () => {
-    const payload: QimmahExport = {
-      version: EXPORT_VERSION,
-      exportedAt: new Date().toISOString(),
-      customization,
-      history: exportHistory(),
-      preferences: loadPreferences(),
-    }
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `qimmah-backup-${new Date().toISOString().slice(0, 10)}.json`
-    a.click()
-    URL.revokeObjectURL(url)
-  }
-
-  // — البيانات: استيراد —
-  const onImport = (file: File) => {
-    const reader = new FileReader()
-    reader.onload = () => {
-      try {
-        const parsed = JSON.parse(String(reader.result)) as Partial<QimmahExport> & Partial<Customization>
-        if (!window.confirm(t.settings.importConfirm)) return
-        const base = getDefaultCustomization()
-        const cust = (parsed.customization ?? (parsed as Partial<Customization>)) as Partial<Customization>
-        applyCustomization({
-          ...base,
-          ...cust,
-          identity: { ...base.identity, ...(cust.identity ?? {}) },
-          profile: { ...base.profile, ...(cust.profile ?? {}) },
-          targets: { ...base.targets, ...(cust.targets ?? {}) },
-        })
-        if (parsed.history) importHistory(parsed.history)
-        if (parsed.preferences) savePreferences({ ...loadPreferences(), ...parsed.preferences })
-        markPendingSync()
-        window.alert(t.settings.importSuccess)
-      } catch {
-        window.alert(t.settings.importError)
-      }
-    }
-    reader.readAsText(file)
-  }
 
   // — البيانات: إعادة ضبط —
   const onReset = () => {
@@ -226,35 +171,17 @@ export function SettingsView({
         </SettingsGroup>
 
         {/* 2) البيانات */}
-        <SettingsGroup icon="Database" title={t.settings.groupData}>
-          <div className="flex flex-wrap gap-2">
-            <button type="button" onClick={onExport} className="btn-ghost px-4 py-2.5 text-sm">
-              <Icon name="TrendingDown" className="h-4 w-4" />
-              {t.settings.export}
-            </button>
-            <button type="button" onClick={() => fileRef.current?.click()} className="btn-ghost px-4 py-2.5 text-sm">
-              <Icon name="TrendingUp" className="h-4 w-4" />
-              {t.settings.import}
-            </button>
+        <SettingsGroup icon="Database" title={t.settings.groupData} testId="settings-group-data" collapsible>
+          <DataManagementPanel lang={lang} uid={auth.user?.id ?? null} recoveryActive={auth.recoveryActive} />
+          <div className="mt-3 border-t border-line pt-3">
             <button
               type="button"
               onClick={onReset}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-danger/40 px-4 py-2.5 text-sm font-bold text-danger transition-colors hover:bg-danger/10"
+              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-xl border border-danger/40 px-4 py-2.5 text-sm font-bold text-danger transition-colors hover:bg-danger/10"
             >
               <Icon name="RotateCcw" className="h-4 w-4" />
               {t.settings.reset}
             </button>
-            <input
-              ref={fileRef}
-              type="file"
-              accept="application/json,.json"
-              className="hidden"
-              onChange={(e) => {
-                const f = e.target.files?.[0]
-                if (f) onImport(f)
-                e.target.value = ''
-              }}
-            />
           </div>
         </SettingsGroup>
 
@@ -319,10 +246,36 @@ export function SettingsView({
         )}
 
         {/* 7) اللغة — تبديل حيّ عربي/English (يبدّل النص والاتجاه فورًا). */}
-        <SettingsGroup icon="Globe" title={t.settings.groupLanguage}>
+        <SettingsGroup icon="Globe" title={preferencesCopy.groupTitle}>
           <div className="flex flex-col gap-3">
             <LanguageToggle />
             <p className="text-xs leading-relaxed text-ink-500">{t.settings.languageHint}</p>
+            <div className="border-t border-line pt-3" data-testid="settings-units-policy">
+              <div className="flex items-start gap-3">
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-beige text-primary-c">
+                  <Icon name="Ruler" className="h-4 w-4" />
+                </span>
+                <div>
+                  <p className="text-sm font-bold text-ink-900">{preferencesCopy.unitsTitle}</p>
+                  <p className="text-sm font-black text-ink-700">{preferencesCopy.unitsValue}</p>
+                  <p className="mt-0.5 text-xs leading-relaxed text-ink-500">{preferencesCopy.unitsNote}</p>
+                </div>
+              </div>
+            </div>
+            <div className="border-t border-line pt-3" data-testid="settings-numbers-policy">
+              <div className="flex items-start gap-3">
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-beige text-primary-c">
+                  <Icon name="Calculator" className="h-4 w-4" />
+                </span>
+                <div>
+                  <p className="text-sm font-bold text-ink-900">{preferencesCopy.numbersTitle}</p>
+                  <p dir="ltr" data-testid="settings-numbers-sample" className="text-sm font-black tabular-nums text-ink-700">
+                    {formatNumber(1234, lang)}
+                  </p>
+                  <p className="mt-0.5 text-xs leading-relaxed text-ink-500">{preferencesCopy.numbersNote}</p>
+                </div>
+              </div>
+            </div>
           </div>
         </SettingsGroup>
 
@@ -398,13 +351,30 @@ function SettingsGroup({
   icon,
   title,
   testId,
+  collapsible = false,
   children,
 }: {
   icon: string
   title: string
   testId?: string
+  collapsible?: boolean
   children: ReactNode
 }) {
+  if (collapsible) {
+    return (
+      <details className="group overflow-hidden rounded-2xl border border-line bg-surface shadow-card" data-testid={testId}>
+        <summary className="flex min-h-[68px] cursor-pointer list-none items-center gap-2.5 px-6 py-4 [&::-webkit-details-marker]:hidden">
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary-c">
+            <Icon name={icon} className="h-4.5 w-4.5" />
+          </span>
+          <span className="min-w-0 flex-1 text-base font-black text-ink-900">{title}</span>
+          <Icon name="ChevronDown" className="h-4 w-4 shrink-0 text-ink-400 transition-transform group-open:rotate-180" />
+        </summary>
+        <div className="border-t border-line px-6 py-5">{children}</div>
+      </details>
+    )
+  }
+
   return (
     <section className="card p-6" data-testid={testId}>
       <div className="mb-4 flex items-center gap-2.5">

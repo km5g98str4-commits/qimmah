@@ -4,6 +4,10 @@
 import type { Lang } from '@/lib/appPreferences'
 
 export interface ProfileScreenStrings {
+  summaryAria: string
+  settingsPreferencesNote: string
+  deviceDataTitle: string
+  deviceDataNote: string
   // ProfileData — ترويسة القسم
   sectionEyebrow: string
   sectionTitle: string
@@ -40,6 +44,10 @@ export interface ProfileScreenStrings {
 }
 
 const ar: ProfileScreenStrings = {
+  summaryAria: 'ملخّص ملفك التدريبي',
+  settingsPreferencesNote: 'غيّر اللغة وشوف سياسة الوحدات والأرقام من إعدادات قِمّة.',
+  deviceDataTitle: 'إدارة بيانات هذا الجهاز',
+  deviceDataNote: 'التصدير والاستيراد وإعادة الضبط متاحة من الإعدادات.',
   sectionEyebrow: 'بياناتك الأساسية',
   sectionTitle: 'وضعك الحالي بالأرقام',
   sectionDescription: 'العمر، الطول، الوزن، والوزن الهدف — الأساس اللي تنبني عليه خطتك.',
@@ -73,6 +81,10 @@ const ar: ProfileScreenStrings = {
 }
 
 const en: ProfileScreenStrings = {
+  summaryAria: 'Training profile summary',
+  settingsPreferencesNote: 'Change language and review unit and numeral policy in Qimmah Settings.',
+  deviceDataTitle: 'Manage this device’s data',
+  deviceDataNote: 'Export, import, and reset are available in Settings.',
   sectionEyebrow: 'Your core data',
   sectionTitle: 'Your current stats',
   sectionDescription: 'Age, height, weight, and target weight — what your plan is built on.',

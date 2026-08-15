@@ -27,7 +27,25 @@ console.log('\n① بوابة أهلية 12+ على سطح الحساب المش
 check('زر التسجيل محجوب بلا موافقة', /pw\.valid && eligible12/.test(login))
 check('حارس الإرسال يعيد التحقق قبل signUp', login.indexOf('if (isSignup && !eligible12)') < login.indexOf('auth.signUp('))
 check('روابط الشروط والخصوصية داخلية ولا تفتح صفحة ويب منفصلة', login.includes('POLICY_LINKS.terms') && login.includes('POLICY_LINKS.privacy') && policy.includes("terms: '#/terms'") && policy.includes("privacy: '#/privacy'") && !login.includes('target="_blank"'))
-check('وضع إنشاء الحساب محفوظ عند فتح شاشة قانونية والرجوع', login.includes("onModeChange?.(next)") && read('src/App.tsx').includes('onModeChange={setLoginMode}'))
+// [QIM-WEB-FOUNDER-UX-006/حزمة ٦] **المقصد نفسه، والضمانة أقوى.**
+//
+// كان هذا الفحص يتحقّق من الآليّة القديمة: حالة وضع محلّية في `LoginView` تُرفَع
+// إلى `App` عبر `onModeChange={setLoginMode}`. تلك الآليّة كانت تحفظ الوضع عبر
+// الشاشات القانونية **لكنها تفقده عند التحديث**، ولا تحرّك العنوان، ويقفز
+// «رجوع» فوق شاشة الحساب كلها.
+//
+// الآن الوضع يملكه **المسار**: `#/signup` و`#/forgot` مساران مُعلَنان، فيبقى
+// الوضع عبر الشاشات القانونية *وعبر التحديث والرجوع والرابط المباشر* — وهو
+// شرط أوسع لا أضيق. فالفحص صار يحرس الملكية الجديدة بدل الآليّة المهجورة.
+const appSrc = read('src/App.tsx')
+const routesSrc = read('src/lib/appRoutes.ts')
+check(
+  'وضع إنشاء الحساب يملكه المسار (يبقى عبر القانونية والتحديث والرجوع)',
+  routesSrc.includes("'signup'") && routesSrc.includes("'forgot'")
+    && appSrc.includes("view === 'login' || view === 'signup' || view === 'forgot'")
+    && appSrc.includes('mode={authMode}')
+    && !login.includes('useState<Mode>'),
+)
 check('روابط HTML القانونية القديمة تحوّل للشاشات الداخلية ولا تُشحن كمسودات', publicRedirects.includes('/legal/terms.html      /#/terms') && publicRedirects.includes('/legal/privacy.html    /#/privacy') && !existsSync(resolve(root, 'public/legal/terms.html')) && !existsSync(resolve(root, 'public/legal/privacy.html')))
 
 console.log('\n② موافقة البيانات الصحية محفوظة وليست افتراضًا')

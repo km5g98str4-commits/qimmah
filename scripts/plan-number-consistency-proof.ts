@@ -33,9 +33,10 @@ const check = (label: string, ok: boolean) => {
 const op = buildOnboardingProfile(
   toAnswersFromV2({
     age: 28, gender: 'male', heightCm: 178, weightKg: 82,
-    intent: 'plan', level: 'intermediate', trainingYears: 3,
-    goal: 'cut', days: 4, duration: 60, place: 'gym', pref: 'mixed',
-    injuries: [], healthDataConsent: true,
+    intent: 'plan', level: 'intermediate',
+    trainedBefore: 'years', totalMonths: 'y1_3', lastTrained: 'now', consistency: 'steady',
+    goal: 'cut', days: 4, duration: 60, place: 'gym', neat: 'moderate', dietPattern: 'none',
+    hasInjury: false, injuries: [], healthDataConsent: true,
   }),
 )
 saveOnboardingProfile(op)

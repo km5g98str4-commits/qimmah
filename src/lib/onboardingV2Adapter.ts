@@ -2,26 +2,41 @@
 // `Answers` model. Pure and type-safe so the v2 flow reuses the exact same
 // downstream plan-generation/persistence as v1 without duplicating any logic.
 //
-// The v2 flow still asks fewer questions than v1; whatever it does not ask falls
-// back to `defaultAnswers` and generation stays safe with them. What it DOES ask
-// now: body basics (age/sex/height/weight), النية (⇒ nutrition style), and
-// المستوى + سنوات التدريب (⇒ ExperienceLevel).
+// The v2 flow asks only approved, consumed questions; whatever it does not ask
+// falls back to `defaultAnswers` and generation stays safe with them. There is
+// NO existing `Answers` field for a user-selected muscle/training focus, so this
+// adapter deliberately keeps the generator's honest balanced default.
 
 import { defaultAnswers, type Answers } from './planBuilderAnswers'
-import { resolveExperienceLevel, type V2Intent, type V2Level } from './onboardingV2Flow'
-import type { Environment, NutritionStyle } from '@/types/onboarding'
+import {
+  historyFollowUpsApply,
+  resolveExperienceLevel,
+  resolveTrainingConsistency,
+  type V2Intent,
+  type V2Level,
+} from './onboardingV2Flow'
+import type {
+  DietPattern,
+  Environment,
+  LastTrainedBucket,
+  NeatLevel,
+  NutritionStyle,
+  TotalMonthsBucket,
+  TrainedBefore,
+  TrainingConsistency,
+} from '@/types/onboarding'
 import type { V2GoalValue } from '@/design-system/v2/labels'
 
 export type V2Place = 'gym' | 'home' | 'machines'
-export type V2Pref = 'machines' | 'free' | 'mixed'
 
 export interface V2OnboardingChoices {
   goal: V2GoalValue | null
   days: number
   duration: number
   place: V2Place | null
-  /** Equipment preference — NO existing `Answers` field; collected for UX only. */
-  pref: V2Pref | null
+  neat: NeatLevel | null
+  dietPattern: DietPattern | null
+  hasInjury: boolean
   injuries: string[]
   healthDataConsent: boolean
   /** بيانات الجسم — تُجمع في الخطوة الأولى؛ null يعني «لم تُجَب بعد». */
@@ -32,7 +47,10 @@ export interface V2OnboardingChoices {
   /** النية والمستوى — الخطوة الثانية؛ null يعني «لم تُجَب بعد» (مسودّة قديمة). */
   intent?: V2Intent | null
   level?: V2Level | null
-  trainingYears?: number | null
+  trainedBefore?: TrainedBefore | null
+  totalMonths?: TotalMonthsBucket | null
+  lastTrained?: LastTrainedBucket | null
+  consistency?: TrainingConsistency | null
 }
 
 /**
@@ -65,8 +83,8 @@ const PLACE_TO_ENV: Record<V2Place, Environment> = {
  * مستخدمي التطبيق**. القيم المُجابة تحلّ محلّها؛ وما لم يُجَب بعد يسقط على
  * الافتراضي كما كان (توافق رجعي مع مسودّات قديمة).
  *
- * NOTE (documented gap): `choices.pref` (machines/free/mixed) has no field in
- * `Answers`, so it is NOT persisted. We do not invent a backend field.
+ * حقائق التاريخ تبقى خامًا داخل مصدر الحقيقة، ومشتقاتها وحدها تذهب للمولّد.
+ * never حالة كاملة: لا أشهر ولا انقطاع ولا انتظام مصطنع.
  */
 export function toAnswersFromV2(choices: V2OnboardingChoices): Answers {
   const weightKg = choices.weightKg ?? defaultAnswers.weightKg
@@ -76,6 +94,11 @@ export function toAnswersFromV2(choices: V2OnboardingChoices): Answers {
       : choices.goal === 'bulk'
         ? Math.round(weightKg * 1.1)
         : weightKg
+  const trainedBefore = choices.trainedBefore ?? null
+  const followUps = historyFollowUpsApply(trainedBefore)
+  const totalMonths = followUps ? choices.totalMonths ?? null : null
+  const lastTrained = followUps ? choices.lastTrained ?? null : null
+  const historyConsistency = followUps ? choices.consistency ?? null : null
 
   return {
     ...defaultAnswers,
@@ -83,9 +106,21 @@ export function toAnswersFromV2(choices: V2OnboardingChoices): Answers {
     sex: choices.gender ?? defaultAnswers.sex,
     heightCm: choices.heightCm ?? defaultAnswers.heightCm,
     weightKg,
-    // المستوى + السنوات ⇒ خبرة المولّد (نطاق الخبرة ⇒ عدد تمارين الجلسة،
-    // وتثبيت التقسيمة على «تلقائي» للمبتدئ). undefined = مسودّة قديمة بلا مستوى.
-    experienceLevel: resolveExperienceLevel(choices.level ?? null, choices.trainingYears ?? null),
+    experienceLevel: resolveExperienceLevel(
+      choices.level ?? null,
+      trainedBefore,
+      totalMonths,
+      lastTrained,
+      historyConsistency,
+    ),
+    consistency: resolveTrainingConsistency(trainedBefore, totalMonths, lastTrained, historyConsistency),
+    trainingHistory: trainedBefore && choices.level ? {
+      declaredLevel: choices.level,
+      trainedBefore,
+      ...(followUps && totalMonths ? { totalMonths } : {}),
+      ...(followUps && lastTrained ? { lastTrained } : {}),
+      ...(followUps && historyConsistency ? { consistency: historyConsistency } : {}),
+    } : undefined,
     // النية ⇒ أسلوب التغذية؛ بلا نية يبقى الافتراضي كما كان (توافق رجعي).
     nutritionStyle: choices.intent ? INTENT_TO_NUTRITION[choices.intent] : defaultAnswers.nutritionStyle,
     goalValue: choices.goal ?? undefined,
@@ -93,6 +128,9 @@ export function toAnswersFromV2(choices: V2OnboardingChoices): Answers {
     daysTouched: true,
     sessionDurationMin: choices.duration,
     environment: choices.place ? PLACE_TO_ENV[choices.place] : undefined,
+    neat: choices.neat ?? defaultAnswers.neat,
+    dietPattern: choices.dietPattern ?? defaultAnswers.dietPattern,
+    hasInjury: choices.hasInjury,
     injuries: [...choices.injuries],
     healthDataConsent: choices.healthDataConsent,
     targetWeightKg,

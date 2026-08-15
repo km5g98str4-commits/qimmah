@@ -18,7 +18,8 @@ import { exerciseGuidance } from '@/lib/exerciseGuidance'
 import { muscleLabel } from '@/lib/muscles'
 import { getDayStamp } from '@/lib/today'
 import type { Difficulty, SetLog, WorkoutSession } from '@/lib/workoutSessions'
-import { clearActiveWorkout, saveActiveWorkout, type ActiveWorkout } from '@/lib/activeWorkout'
+import { saveActiveWorkout, type ActiveWorkout } from '@/lib/activeWorkout'
+import type { WriteResult } from '@/lib/safeStorage'
 
 interface WorkoutModeProps {
   lang: Lang
@@ -31,6 +32,8 @@ interface WorkoutModeProps {
   userId?: string | null
   /** جلسة جارية تُستأنف بدل البدء من الصفر (ح-١). */
   resume?: ActiveWorkout
+  /** فشل/تعافي كتابة اللقطة الجارية — تعرضه الشاشة المالكة فوق وضع الجلسة. */
+  onSaveError?: (result: WriteResult | null) => void
 }
 
 interface ExState {
@@ -79,7 +82,7 @@ function repsInvalid(v: string): boolean {
 }
 
 /** وضع التمرين النشط — شاشة كاملة، تمرين واحد في كل خطوة، تسجيل سريع. */
-export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, userId = null, resume }: WorkoutModeProps) {
+export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, userId = null, resume, onSaveError }: WorkoutModeProps) {
   const t = getStrings(lang).workout
   const d = workoutScreenStrings[lang]
   // (P10.1) أسهم التنقّل تتبع اتجاه اللغة: «التالي» مع اتجاه القراءة و«السابق/الرجوع» عكسه.
@@ -105,6 +108,8 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
   const [savedFlash, setSavedFlash] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const flashTimer = useRef<number | null>(null)
+  /** لا نعلن «حُفظت الجولة» إلا بعد نتيجة التخزين الفعلية للّقطة الجديدة. */
+  const flashAfterPersist = useRef(false)
 
   const effExId = (peId: string, exerciseId: string) => swap[peId] ?? exerciseId
 
@@ -141,7 +146,7 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
   useEffect(() => {
     // «تمرين فارغ» (بلا عناصر خطة) لا جلسة له تُستأنف.
     if (day.exercises.length === 0) return
-    saveActiveWorkout(userId, {
+    const result = saveActiveWorkout(userId, {
       dayId: day.id,
       dayNameAr: day.nameAr,
       dayNameEn: day.nameEn,
@@ -165,7 +170,13 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
       ),
       swap,
     })
-  }, [userId, day.id, day.nameAr, day.nameEn, day.exercises.length, startedAt, current, state, swap])
+    onSaveError?.(result === 'ok' ? null : result)
+    if (flashAfterPersist.current) {
+      flashAfterPersist.current = false
+      if (result === 'ok') flash()
+      else setSavedFlash(false)
+    }
+  }, [userId, day.id, day.nameAr, day.nameEn, day.exercises.length, startedAt, current, state, swap, onSaveError])
 
   // مؤقّت الراحة
   const [timer, setTimer] = useState<{ left: number; running: boolean }>({ left: 0, running: false })
@@ -265,9 +276,9 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
     // امنع اعتماد جولة بقيم خارج النطاق
     if (!set.completed && (weightInvalid(set.weightKg) || repsInvalid(set.actualReps))) return
     const willComplete = !set.completed
+    flashAfterPersist.current = willComplete
     setSet(idx, { completed: willComplete })
     if (willComplete) {
-      flash()
       startRest(pe.restSec)
     }
   }
@@ -365,7 +376,6 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
         }
       }),
     }
-    clearActiveWorkout(userId)
     onFinish(session)
   }
 
@@ -826,7 +836,7 @@ function Stepper({ label, value, placeholder, step, mode, invalid, onChange, onS
           تسمية الحقل ليست زخرفًا: بلا قراءتها لا يُعرف أيّ رقم يُدخَل. رُفعت إلى ١٤px. */}
       <p className="mb-1 text-center text-sm font-bold text-ink-500">{label}</p>
       <div className="flex items-stretch gap-1.5">
-        <button type="button" onClick={() => onStep(-step)} aria-label="-" className="grid h-11 w-11 shrink-0 place-items-center rounded-lg border border-line bg-surface text-ink-700 active:scale-95">
+        <button type="button" onClick={() => onStep(-step)} aria-label={`${label} -${step}`} className="grid h-11 w-11 shrink-0 place-items-center rounded-lg border border-line bg-surface text-ink-700 active:scale-95">
           <Icon name="Minus" className="h-4 w-4" />
         </button>
         <input
@@ -835,12 +845,13 @@ function Stepper({ label, value, placeholder, step, mode, invalid, onChange, onS
             invalid ? 'border-danger focus:border-danger' : 'border-line focus:border-brand-500/50',
           )}
           inputMode={mode}
+          aria-label={label}
           aria-invalid={invalid}
           value={value}
           placeholder={placeholder}
           onChange={(e) => onChange(e.target.value)}
         />
-        <button type="button" onClick={() => onStep(step)} aria-label="+" className="grid h-11 w-11 shrink-0 place-items-center rounded-lg border border-line bg-surface text-ink-700 active:scale-95">
+        <button type="button" onClick={() => onStep(step)} aria-label={`${label} +${step}`} className="grid h-11 w-11 shrink-0 place-items-center rounded-lg border border-line bg-surface text-ink-700 active:scale-95">
           <Icon name="Plus" className="h-4 w-4" />
         </button>
       </div>

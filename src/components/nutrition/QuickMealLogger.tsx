@@ -9,6 +9,7 @@ import { nutritionScreenStrings } from '@/i18n/dict/nutritionScreen'
 import type { Lang } from '@/lib/appPreferences'
 import { trackLocal } from '@/lib/tracking'
 import { cn } from '@/lib/cn'
+import { useAccess } from '@/lib/access/useAccess'
 
 // يُحمَّل عند الحاجة فقط — مكتبة مسح الباركود ثقيلة ولا يلزم تحميلها إلا عند فتح الماسح.
 const ScanFoodPanel = lazy(() => import('@/features/barcode/ScanFoodPanel').then((m) => ({ default: m.ScanFoodPanel })))
@@ -35,7 +36,8 @@ function round(n: number): number {
 export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMeal, embedded = false, onLogged }: QuickMealLoggerProps) {
   const t = getStrings(lang).nutrition
   const d = nutritionScreenStrings[lang]
-  const { state, totals, addLog, removeLog } = useNutritionToday()
+  const { state, totals, addLog, removeLog: rawRemoveLog } = useNutritionToday()
+  const { guard } = useAccess()
 
   const [open, setOpen] = useState(embedded)
   const [tab, setTab] = useState<Tab>('search')
@@ -53,6 +55,11 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
    */
   const [unit, setUnit] = useState<'g' | 'serv'>('g')
   const [servingsInput, setServingsInput] = useState('')
+  const [saveError, setSaveError] = useState(false)
+  const removeLog = guard('nutrition.removeFood', (id: string) => {
+    if (rawRemoveLog(id)) setSaveError(false)
+    else setSaveError(true)
+  })
 
   // إضافة سريعة / طعام مخصّص
   const [cName, setCName] = useState('')
@@ -120,39 +127,47 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
     setGrams(String(s.servingGrams))
   }
 
-  const addSelected = () => {
+  const addSelected = guard('nutrition.addFood', () => {
     if (!selected) return
     const name = lang === 'en' ? selected.nameEn : selected.nameAr
     const sizeLabel = activeSize ? ` (${lang === 'en' ? activeSize.labelEn : activeSize.labelAr})` : ''
-    addLog({
-      label: `${name}${sizeLabel} · ${gramsNum}${t.gramsUnit}`,
+    const saved = addLog({
+      label: `${name}${sizeLabel}`,
       servings: factor,
       grams: gramsNum,
+      foodId: selected.id,
+      unit: unit === 'serv' ? 'serving' : 'g',
       calories: round(baseCal * factor),
       protein: round(baseProt * factor),
       carbs: round(baseCarb * factor),
       fat: round(baseFat * factor),
       meal: defaultMeal,
     })
+    if (!saved) {
+      setSaveError(true)
+      return
+    }
     // [CTO-68] الحدث ٩ — تسجيل وجبة، بعد الإضافة الفعلية لسجلّ اليوم.
     trackLocal('meal_entry_logged', { slot: defaultMeal ?? 'unspecified' })
     setSelected(null)
     setSizeId(null)
     setQuery('')
     setGrams('')
+    setSaveError(false)
     onLogged?.()
-  }
+  })
 
   // سعرات/بروتين الإضافة الحالية (محصورة ضمن الحدود — لا قيم سالبة أو مستحيلة)
   const cal = parseSafeNumber(cCal, { min: 0, max: NUM_LIMITS.quickCalories.max })
   const prot = parseSafeNumber(cProt, { min: 0, max: NUM_LIMITS.quickProtein.max })
   const canAddCustom = cal > 0 || prot > 0
 
-  const addCustom = () => {
+  const addCustom = guard('nutrition.quickAdd', () => {
     if (!canAddCustom) return
-    addLog({
+    const saved = addLog({
       label: cName.trim() || d.quickAddLabel,
       servings: 1,
+      unit: 'serving',
       calories: round(cal),
       protein: round(prot),
       carbs: round(parseSafeNumber(cCarb, { min: 0, max: NUM_LIMITS.quickMacro.max })),
@@ -160,6 +175,10 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
       meal: defaultMeal,
       note: cName.trim() || undefined,
     })
+    if (!saved) {
+      setSaveError(true)
+      return
+    }
     // نفس الحدث ٩ — الإضافة السريعة/المخصّصة تسجيل وجبة أيضًا، ولو بلا عنصر من القاعدة.
     trackLocal('meal_entry_logged', { slot: defaultMeal ?? 'unspecified' })
     setCName('')
@@ -167,8 +186,9 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
     setCProt('')
     setCCarb('')
     setCFat('')
+    setSaveError(false)
     onLogged?.()
-  }
+  })
 
   return (
     <div className={embedded ? '' : 'card p-5'}>
@@ -203,7 +223,7 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
             <button
               type="button"
               onClick={() => { setOpen((v) => !v); setTab('search') }}
-              className="btn-primary px-4 py-2 text-xs"
+              className="btn-primary min-h-[44px] px-4 py-2 text-xs"
             >
               <Icon name="Utensils" className="h-4 w-4" />
               {t.logMeal}
@@ -211,7 +231,7 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
             <button
               type="button"
               onClick={() => { setOpen(true); setTab('custom') }}
-              className="btn-ghost px-4 py-2 text-xs"
+              className="btn-ghost min-h-[44px] px-4 py-2 text-xs"
             >
               <Icon name="Plus" className="h-4 w-4" />
               {t.quickAdd}
@@ -219,6 +239,8 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
           </div>
         </>
       )}
+
+      {saveError && <p role="alert" className="v2-error-panel mt-3 rounded-xl border px-3 py-2 text-xs font-bold text-ink-900">{d.saveFailed}</p>}
 
       {open && (
         <div className="mt-4 rounded-xl border border-line bg-page p-4">
@@ -235,16 +257,17 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
                   <Icon name="Search" className="pointer-events-none absolute top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400 ms-3" />
                   <input
                     type="text"
+                    aria-label={t.searchFood}
                     value={query}
                     onChange={(e) => { setQuery(e.target.value); setSelected(null); setSizeId(null) }}
                     placeholder={t.searchFood}
-                    className="w-full rounded-lg border border-line bg-surface py-2 ps-9 pe-3 text-sm text-ink-900 outline-none focus:border-primary-c"
+                    className="min-h-[44px] w-full rounded-lg border border-line bg-surface py-2 ps-9 pe-3 text-sm text-ink-900 outline-none focus:border-primary-c"
                   />
                 </div>
                 <button
                   type="button"
                   onClick={() => setScanOpen(true)}
-                  className="btn-ghost shrink-0 px-3 py-2 text-xs"
+                  className="btn-ghost min-h-[44px] shrink-0 px-3 py-2 text-xs"
                 >
                   <Icon name="Camera" className="h-4 w-4" />
                   {d.scanBarcode}
@@ -261,7 +284,7 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
                       <button
                         type="button"
                         onClick={() => selectItem(f)}
-                        className="flex w-full items-center justify-between gap-3 p-3 text-start hover:bg-beige"
+                        className="flex min-h-[44px] w-full items-center justify-between gap-3 p-3 text-start hover:bg-beige"
                       >
                         <span className="min-w-0">
                           <span className="flex items-center gap-1.5">
@@ -297,7 +320,7 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
                             key={s.id}
                             type="button"
                             onClick={() => pickSize(s)}
-                            className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-colors ${
+                            className={`min-h-[44px] rounded-lg px-3 py-1.5 text-xs font-bold transition-colors ${
                               sizeId === s.id ? 'bg-primary text-white' : 'bg-beige text-ink-600 hover:text-ink-900'
                             }`}
                           >
@@ -329,7 +352,7 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
                           aria-pressed={unit === u}
                           onClick={() => setUnit(u)}
                           className={cn(
-                            'min-h-[36px] rounded-lg px-3 text-[11px] font-bold transition-colors',
+                            'min-h-[44px] rounded-lg px-3 text-[11px] font-bold transition-colors',
                             unit === u ? 'bg-primary text-white' : 'text-ink-700 hover:bg-beige',
                           )}
                         >
@@ -350,9 +373,9 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
                         onChange={(e) =>
                           unit === 'g'
                             ? setGrams(sanitizeNumericInput(e.target.value, { max: 3000 }))
-                            : setServingsInput(sanitizeNumericInput(e.target.value, { max: 20 }))
+                            : setServingsInput(sanitizeNumericInput(e.target.value, { max: 20, decimal: true }))
                         }
-                        className="w-24 rounded-lg border border-line bg-page px-2 py-1.5 text-sm text-ink-900 outline-none focus:border-primary-c"
+                        className="min-h-[44px] w-24 rounded-lg border border-line bg-page px-2 py-1.5 text-sm text-ink-900 outline-none focus:border-primary-c"
                       />
                       <span className="text-xs text-ink-400">{unit === 'g' ? t.gramsUnit : d.servingsUnit}</span>
                     </div>
@@ -372,7 +395,7 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
                     <Stat label={t.carbs} value={`${round(baseCarb * factor)}${t.gramsUnit}`} />
                     <Stat label={t.fat} value={`${round(baseFat * factor)}${t.gramsUnit}`} />
                   </div>
-                  <button type="button" onClick={addSelected} className="btn-primary mt-3 w-full justify-center py-2 text-xs">
+                  <button type="button" onClick={addSelected} className="btn-primary mt-3 min-h-[44px] w-full justify-center py-2 text-xs">
                     <Icon name="Plus" className="h-4 w-4" />
                     {t.addToLog}
                   </button>
@@ -382,20 +405,21 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
           ) : (
             <div className="grid grid-cols-2 gap-3">
               <div className="col-span-2">
-                <label className="text-xs text-ink-500">{t.foodName} — {t.optional}</label>
+                <label htmlFor="qml-custom-name" className="text-xs text-ink-500">{t.foodName} — {t.optional}</label>
                 <input
+                  id="qml-custom-name"
                   type="text"
                   value={cName}
                   onChange={(e) => setCName(e.target.value)}
                   placeholder={d.foodNameExample}
-                  className="mt-1 w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink-900 outline-none focus:border-primary-c"
+                  className="mt-1 min-h-[44px] w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink-900 outline-none focus:border-primary-c"
                 />
               </div>
               <Field label={`${t.calories} (0–${NUM_LIMITS.quickCalories.max})`} value={cCal} onChange={setCCal} max={NUM_LIMITS.quickCalories.max} placeholder="0" />
               <Field label={`${t.protein} (${t.gramsUnit})`} value={cProt} onChange={setCProt} max={NUM_LIMITS.quickProtein.max} placeholder="0" />
               <Field label={`${t.carbs} (${t.gramsUnit}) — ${t.optional}`} value={cCarb} onChange={setCCarb} max={NUM_LIMITS.quickMacro.max} placeholder="0" />
               <Field label={`${t.fat} (${t.gramsUnit}) — ${t.optional}`} value={cFat} onChange={setCFat} max={NUM_LIMITS.quickMacro.max} placeholder="0" />
-              <button type="button" onClick={addCustom} disabled={!canAddCustom} className="btn-primary col-span-2 justify-center py-2 text-xs disabled:cursor-not-allowed disabled:opacity-40">
+              <button type="button" onClick={addCustom} disabled={!canAddCustom} className="btn-primary col-span-2 min-h-[44px] justify-center py-2 text-xs disabled:cursor-not-allowed disabled:opacity-40">
                 <Icon name="Plus" className="h-4 w-4" />
                 {t.addToLog}
               </button>
@@ -426,8 +450,8 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
                     <button
                       type="button"
                       onClick={() => removeLog(e.id)}
-                      aria-label={t.removeEntry}
-                      className="shrink-0 rounded-lg p-1.5 text-ink-400 hover:bg-beige hover:text-danger"
+                      aria-label={`${t.removeEntry}: ${e.label}`}
+                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-ink-400 hover:bg-beige hover:text-danger"
                     >
                       <Icon name="Trash2" className="h-4 w-4" />
                     </button>
@@ -470,7 +494,7 @@ function TabBtn({ active, onClick, label }: { active: boolean; onClick: () => vo
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-colors ${
+      className={`min-h-[44px] rounded-lg px-3 py-1.5 text-xs font-bold transition-colors ${
         active ? 'bg-primary text-white' : 'bg-beige text-ink-500 hover:text-ink-900'
       }`}
     >
@@ -481,8 +505,8 @@ function TabBtn({ active, onClick, label }: { active: boolean; onClick: () => vo
 
 function Field({ label, value, onChange, placeholder, max }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; max?: number }) {
   return (
-    <div>
-      <label className="text-xs text-ink-500">{label}</label>
+    <label className="block text-xs text-ink-500">
+      {label}
       <input
         type="number"
         inputMode="numeric"
@@ -491,9 +515,9 @@ function Field({ label, value, onChange, placeholder, max }: { label: string; va
         value={value}
         onChange={(e) => onChange(sanitizeNumericInput(e.target.value, { max }))}
         placeholder={placeholder}
-        className="mt-1 w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink-900 outline-none focus:border-primary-c"
+        className="mt-1 min-h-[44px] w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink-900 outline-none focus:border-primary-c"
       />
-    </div>
+    </label>
   )
 }
 

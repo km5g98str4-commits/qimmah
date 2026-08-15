@@ -192,15 +192,6 @@ export interface ShellStrings {
     guest: string
     back: string
   }
-  errorBoundary: {
-    title: string
-    body: string
-    reload: string
-    // بطاقة خطأ الشاشات (حدّ أخطاء المسارات) — إعادة محاولة بلا تحديث كامل للصفحة.
-    routeTitle: string
-    routeBody: string
-    retry: string
-  }
   contact: {
     title: string
     intro: string
@@ -679,19 +670,11 @@ const ar: ShellStrings = {
     guest: 'كمّل كضيف',
     back: 'رجوع للبداية',
   },
-  errorBoundary: {
-    title: 'صار خلل بسيط',
-    body: 'واجهنا مشكلة غير متوقعة في هذي الشاشة. جرّب تحدّث الصفحة وبيرجع كل شي مكانه — بياناتك محفوظة على جهازك.',
-    reload: 'حدّث الصفحة',
-    routeTitle: 'صار خطأ غير متوقّع',
-    routeBody: 'ما قدرنا نحمّل هذي الشاشة — يمكن النت ضعيف. بياناتك محفوظة على جهازك.',
-    retry: 'جرّب مرة ثانية',
-  },
   contact: {
     title: 'تواصل معنا',
     intro: 'عندك ملاحظة أو سؤال أو واجهت مشكلة؟ يسعدنا نسمع منك ونرد عليك بأقرب وقت.',
     emailLabel: 'البريد للدعم',
-    emailValue: 'qimmahsupport@gmail.com',
+    emailValue: 'qimmah.support@gmail.com',
     emailCta: 'راسلنا عبر البريد',
     reportCta: 'أبلغ عن مشكلة',
     reportSubject: 'الإبلاغ عن مشكلة في قِمّة',
@@ -1161,19 +1144,11 @@ const en: ShellStrings = {
     guest: 'Continue as guest',
     back: 'Back to start',
   },
-  errorBoundary: {
-    title: 'Something went wrong',
-    body: 'We hit an unexpected problem on this screen. Try reloading the page and it should be back to normal — your data is saved on your device.',
-    reload: 'Reload page',
-    routeTitle: 'Something went wrong',
-    routeBody: 'This screen failed to load — your connection may be weak. Your data is saved on your device.',
-    retry: 'Try again',
-  },
   contact: {
     title: 'Contact us',
     intro: 'Have feedback, a question, or hit a problem? We’d love to hear from you and will reply as soon as we can.',
     emailLabel: 'Support email',
-    emailValue: 'qimmahsupport@gmail.com',
+    emailValue: 'qimmah.support@gmail.com',
     emailCta: 'Email us',
     reportCta: 'Report a problem',
     reportSubject: 'Reporting a problem in Qimmah',

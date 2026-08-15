@@ -11,6 +11,7 @@ import type {
   NeatLevel,
   NutritionStyle as OnbNutritionStyle,
   OnbConsistency,
+  OnbTrainingHistory,
   OnboardingProfile,
   Sex,
   SplitMode,
@@ -33,6 +34,7 @@ export interface Answers {
   // trainingPreferences
   experienceLevel?: ExperienceLevel
   consistency?: OnbConsistency
+  trainingHistory?: OnbTrainingHistory
   environment?: Environment
   trainingDays: number
   daysTouched: boolean
@@ -53,6 +55,7 @@ export interface Answers {
   allergies: string[]
   // limitations + wellness (optional)
   injuries: string[]
+  hasInjury: boolean
   wellnessMode: WellnessTrackingMode
   healthDataConsent: boolean
 }
@@ -78,6 +81,7 @@ export const defaultAnswers: Answers = {
   dietPattern: 'none',
   allergies: [],
   injuries: [],
+  hasInjury: false,
   wellnessMode: 'none',
   healthDataConsent: false,
 }
@@ -100,7 +104,8 @@ export function buildOnboardingProfile(a: Answers): OnboardingProfile {
     goal: { type: a.goalValue },
     trainingPreferences: {
       experience: a.experienceLevel,
-      consistency: beginner ? 'new' : a.consistency,
+      consistency: a.consistency ?? (beginner ? 'new' : undefined),
+      history: a.trainingHistory,
       environment: a.environment,
       daysPerWeek: a.trainingDays,
       sessionDurationMin: a.sessionDurationMin,
@@ -120,7 +125,7 @@ export function buildOnboardingProfile(a: Answers): OnboardingProfile {
       appetiteTiming: a.nutritionStyle === 'meal_suggestions' ? a.appetiteTiming : undefined,
     },
     foodPreferences: { dietPattern: a.dietPattern, dislikedFoods: [], allergies: a.allergies },
-    limitations: { injuries: a.injuries },
+    limitations: { hasInjury: a.hasInjury, injuries: a.injuries },
     wellnessTracking: { mode: a.wellnessMode, supplements: [], medications: [] },
     appPreferences: { language: 'ar', reminders: false },
     consents: {

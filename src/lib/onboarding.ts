@@ -28,13 +28,26 @@ export function loadOnboarding(): OnboardingState {
   try {
     const raw = window.localStorage.getItem(ONBOARDING_KEY)
     if (!raw) return { ...DEFAULT }
-    const parsed = JSON.parse(raw) as Partial<OnboardingState>
+    const parsed = JSON.parse(raw) as unknown
+    // شكل غير كائن (مصفوفة · نصّ · null) ليس ظرفًا صالحًا — يُعامَل كغياب.
+    if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) return { ...DEFAULT }
+    const state = parsed as Partial<OnboardingState>
     return {
-      completed: !!parsed.completed,
-      completedAt: parsed.completedAt,
-      lastStep: parsed.lastStep,
-      draft: parsed.draft,
-      owner: typeof parsed.owner === 'string' ? parsed.owner : undefined,
+      /**
+       * **`=== true` لا `!!`.** الإكمال إعلان لا إيحاء.
+       *
+       * `!!` كان يقرأ أي قيمة صادقة إكمالًا، فقيمة تالفة مثل
+       * `{"completed":"yes-please"}` تفتح اللوحة لمستخدم بلا ملف ولا خطة —
+       * وهو **دخول صامت على بيانات غير موجودة**، أخطر من الانهيار لأنه لا
+       * يُرى. ولا ثمن للتشدّد: لم يكتب هذا المفتاح قط إلا `true` أو `false`
+       * (`markCompleted` و`resetOnboarding`)، والمسار القديم في
+       * `syncService` يستعمل `=== true` أصلًا — فهذا التزام بسابقة قائمة.
+       */
+      completed: state.completed === true,
+      completedAt: state.completedAt,
+      lastStep: state.lastStep,
+      draft: state.draft,
+      owner: typeof state.owner === 'string' ? state.owner : undefined,
     }
   } catch {
     return { ...DEFAULT }

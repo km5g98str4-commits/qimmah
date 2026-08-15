@@ -162,10 +162,10 @@ console.log('\n② البند ٢ — سياق «ليش نسأل» فوق كل خ
 const onboarding = read('src/views/OnboardingV2.tsx')
 const whyDict = read('src/i18n/dict/setupWhy.ts')
 
-// أ) الضمان البنيوي: الصفّ خمسة بالضبط، فخطوة سادسة بلا سطر **لا تُترجم**.
+// أ) الضمان البنيوي: الصفّ سبعة بالضبط، فخطوة ثامنة بلا سطر **لا تُترجم**.
 check(
-  '`SetupWhyLines` صفٌّ بطول خمسة بالضبط (المترجم يحرس الاكتمال)',
-  /export type SetupWhyLines = readonly \[string, string, string, string, string\]/.test(whyDict),
+  '`SetupWhyLines` صفٌّ بطول سبعة بالضبط (المترجم يحرس الاكتمال)',
+  /export type SetupWhyLines = readonly \[string, string, string, string, string, string, string\]/.test(whyDict),
 )
 check(
   '`StepTitle.why` إلزامي لا اختياري (لا خطوة بعنوان بلا سياق)',
@@ -177,25 +177,27 @@ check(
     && !/\{why && </.test(onboarding),
 )
 
-// ب) المُجمِّع يقرأ من مصادر الأربعة القائمة ولا ينسخها (نسخة ثانية تشيخ).
+// ب) المُجمِّع يقرأ من مصادر الخطوات القائمة ولا ينسخها (نسخة ثانية تشيخ).
 const SOURCES = [
   ['خطوة ٠ الأساسيات', 'bodyStepStrings[lang].whyNote'],
   ['خطوة ١ النية والمستوى', 'intent.subtitle'],
-  ['خطوة ٣ التدريب', 't.training.subtitle'],
-  ['خطوة ٤ المعدّات', 't.equipment.subtitle'],
+  ['خطوة ٢ التاريخ', 'trainingHistoryStrings[lang].why'],
+  ['خطوة ٤ التدريب', 't.training.subtitle'],
+  ['خطوة ٥ السياق', 'onboardingLifestyleStrings[lang].contextWhy'],
+  ['خطوة ٦ القيود', 'onboardingLifestyleStrings[lang].limitationsWhy'],
 ]
 SOURCES.forEach(([name, expr]) =>
   check(`المُجمِّع يقرأ ${name} من قاموسه لا بنسخة`, whyDict.includes(expr)),
 )
-check('خطوة ٢ الهدف — السطر المفقود يُضاف هنا (بالعربية والإنجليزية)', /const goalWhy: Record<Lang, string> = \{[\s\S]*?ar: '[^']+',[\s\S]*?en: '[^']+',/.test(whyDict))
+check('خطوة ٣ الهدف — السطر المفقود يُضاف هنا (بالعربية والإنجليزية)', /const goalWhy: Record<Lang, string> = \{[\s\S]*?ar: '[^']+',[\s\S]*?en: '[^']+',/.test(whyDict))
 
-// ج) الخطوات الخمس تُغذَّى بالفهرس الصحيح — لا خطوة تأخذ سطر جارتها.
-for (let i = 0; i <= 4; i += 1) {
+// ج) الخطوات السبع تُغذَّى بالفهرس الصحيح — لا خطوة تأخذ سطر جارتها.
+for (let i = 0; i <= 6; i += 1) {
   check(`الخطوة ${i} تمرّر \`whyLines[${i}]\``, onboarding.includes(`why={whyLines[${i}]}`))
 }
 check(
-  'خمسة تمريرات لا أقل (كل خطوة لها سطرها)',
-  (onboarding.match(/why=\{whyLines\[\d\]\}/g) || []).length === 5,
+  'سبعة تمريرات لا أقل (كل خطوة لها سطرها)',
+  (onboarding.match(/why=\{whyLines\[\d\]\}/g) || []).length === 7,
 )
 
 // د) الازدواج المُزال: لم يعد لخطوة الأساسيات سطران شارحان.

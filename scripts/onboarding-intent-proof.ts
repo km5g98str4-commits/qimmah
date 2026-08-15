@@ -8,8 +8,8 @@
 
 import {
   LAST_INPUT_STEP,
-  TRAINING_YEARS_RANGE,
   canAdvance,
+  goalAllowedForEligibility,
   initialDraftV2,
   resolveExperienceLevel,
   validateStep,
@@ -38,10 +38,12 @@ const INTENTS: readonly V2Intent[] = ['plan', 'meals', 'numbers']
 const body = { age: 30, gender: 'male' as const, heightCm: 180, weightKg: 90 }
 const base = {
   ...body,
-  intent: 'meals' as V2Intent | null, level: 'intermediate' as V2Level | null, trainingYears: null as number | null,
+  intent: 'meals' as V2Intent | null, level: 'intermediate' as V2Level | null,
+  trainedBefore: 'months' as const, totalMonths: 'm3_6' as const,
+  lastTrained: 'now' as const, consistency: 'mostly' as const,
   goal: 'cut' as const, days: 4, duration: 45,
-  place: 'gym' as const, pref: 'mixed' as const,
-  injuries: [] as string[], healthDataConsent: true,
+  place: 'gym' as const, neat: 'moderate' as const, dietPattern: 'none' as const,
+  hasInjury: false, injuries: [] as string[], healthDataConsent: true,
 }
 
 // ————————————————————————————————————————————————————————————————
@@ -52,16 +54,11 @@ check('بلا الاثنين تُحجب', validateStep(1, { ...base, intent: nul
 check('بالاثنين تمرّ', validateStep(1, base) === null)
 check('canAdvance(1) يتبع الكتلة', !canAdvance(1, { ...base, intent: null }) && canAdvance(1, base))
 check('المسودّة الجديدة تبدأ بلا نية ولا مستوى (لا افتراضي صامت)', initialDraftV2(null).intent === null && initialDraftV2(null).level === null)
-check('السنوات تبدأ null', initialDraftV2(null).trainingYears === null)
-check('عدد خطوات الإدخال صار خمسًا (0..4)', LAST_INPUT_STEP === 4)
-check('الهدف انتقل إلى 2 والتدريب 3 والمعدّات 4', validateStep(2, { ...base, goal: null }) === 'goal' && validateStep(3, { ...base, days: 7 }) === 'training' && validateStep(4, { ...base, place: null }) === 'equipment')
+check('التاريخ يبدأ بلا قيم مصنوعة', initialDraftV2(null).trainedBefore === null && initialDraftV2(null).totalMonths === null)
+check('عدد خطوات الإدخال سبع (0..6)', LAST_INPUT_STEP === 6)
+check('التاريخ 2 والهدف 3 والجدول 4 والسياق 5 والقيود 6', validateStep(2, { ...base, trainedBefore: null }) === 'trainingHistory' && validateStep(3, { ...base, goal: null }) === 'goal' && validateStep(4, { ...base, days: 7 }) === 'training' && validateStep(5, { ...base, place: null }) === 'lifestyle' && validateStep(6, { ...base, hasInjury: null }) === 'limitations')
 
-console.log('\n═══ 2) السنوات اختيارية لكن لا تُبتلع بصمت ═══')
-check('السنوات فارغة (null) تمرّ', validateStep(1, { ...base, trainingYears: null }) === null)
-check('سنوات صالحة تمرّ', validateStep(1, { ...base, trainingYears: 3 }) === null)
-check('سنوات سالبة تُحجب', validateStep(1, { ...base, trainingYears: -1 }) === 'intentLevel')
-check('سنوات خارج الحدّ الأعلى تُحجب', validateStep(1, { ...base, trainingYears: TRAINING_YEARS_RANGE.max + 1 }) === 'intentLevel')
-check('نصّ غير رقمي (NaN) يُحجب', validateStep(1, { ...base, trainingYears: Number('س') }) === 'intentLevel')
+console.log('\n═══ 2) التصنيف الذاتي إشارة لا حكم وحيد ═══')
 
 // ————————————————————————————————————————————————————————————————
 console.log('\n═══ 3) المستوى يغيّر المخرجات فعلًا (لا سؤال بلا أثر) ═══')
@@ -70,10 +67,10 @@ const pBeg = profFor({ level: 'beginner' })
 const pInt = profFor({ level: 'intermediate' })
 const pAdv = profFor({ level: 'advanced' })
 console.log(`     مبتدئ: band=${pBeg.experienceBand} level=${pBeg.trainingLevel} | متوسط: band=${pInt.experienceBand} | متقدّم: band=${pAdv.experienceBand}`)
-check('كل مستوى يُنتج نطاق خبرة مختلفًا', new Set([pBeg.experienceBand, pInt.experienceBand, pAdv.experienceBand]).size === 3)
-check('المبتدئ يُخزَّن انتظامه «new» تلقائيًا', buildOnboardingProfile(toAnswersFromV2({ ...base, level: 'beginner' })).trainingPreferences.consistency === 'new')
+check('التقييم المعلن يمكن أن يغيّر نطاق الخبرة مع ثبات الوقائع', pBeg.experienceBand !== pInt.experienceBand)
+check('never وحدها تُخزَّن انتظامها new', buildOnboardingProfile(toAnswersFromV2({ ...base, trainedBefore: 'never', totalMonths: null, lastTrained: null, consistency: null })).trainingPreferences.consistency === 'new')
 check('المبتدئ تقسيمته مثبَّتة على «تلقائي»', buildOnboardingProfile(toAnswersFromV2({ ...base, level: 'beginner' })).trainingPreferences.splitMode === 'auto')
-check('المستوى يصل إلى مصدر الحقيقة', buildOnboardingProfile(toAnswersFromV2({ ...base, level: 'advanced' })).trainingPreferences.experience === 'advanced')
+check('المستوى الخام يصل إلى مصدر الحقيقة ولو صحّحته الوقائع', buildOnboardingProfile(toAnswersFromV2({ ...base, level: 'advanced' })).trainingPreferences.history?.declaredLevel === 'advanced')
 
 // الحسم: خطة مولّدة فعلًا تختلف كثافتها بالمستوى (نفس الجسد ونفس الأيام والمدة).
 const exCount = (p: typeof pBeg) =>
@@ -83,14 +80,11 @@ console.log(`     تمارين الأسبوع — مبتدئ: ${nBeg} | متوس
 check('الخطة المولّدة تختلف كثافتها بين المبتدئ والمتقدّم', nBeg !== nAdv)
 check('كل الخطط غير فارغة', nBeg > 0 && nInt > 0 && nAdv > 0)
 
-console.log('\n═══ 4) السنوات تصحّح تقدير المستخدم لنفسه ═══')
-check('«متوسط» + أقل من سنة ⇒ مستجد', resolveExperienceLevel('intermediate', 0) === 'novice')
-check('«متوسط» + سنة أو أكثر ⇒ متوسط', resolveExperienceLevel('intermediate', 2) === 'intermediate')
-check('«متوسط» بلا سنوات ⇒ متوسط', resolveExperienceLevel('intermediate', null) === 'intermediate')
-check('«مبتدئ» لا تُغيّره السنوات', resolveExperienceLevel('beginner', 9) === 'beginner')
-check('«متقدّم» لا تُغيّره السنوات', resolveExperienceLevel('advanced', 0) === 'advanced')
-check('بلا مستوى ⇒ undefined (توافق رجعي مع مسودّة قديمة)', resolveExperienceLevel(null, null) === undefined)
-check('السنوات تغيّر النطاق فعلًا', profFor({ level: 'intermediate', trainingYears: 0 }).experienceBand !== profFor({ level: 'intermediate', trainingYears: 5 }).experienceBand)
+console.log('\n═══ 4) التاريخ يصحّح تقدير المستخدم لنفسه ═══')
+check('never تقطع أي ادعاء متقدّم إلى مبتدئ', resolveExperienceLevel('advanced', 'never', null, null, null) === 'beginner')
+check('وقائع سنوات منتظمة تسمح بمتقدّم', resolveExperienceLevel('advanced', 'years', 'y3_plus', 'now', 'steady') === 'advanced')
+check('بلا تاريخ ⇒ undefined بدل افتراض', resolveExperienceLevel('advanced', null, null, null, null) === undefined)
+check('المدة تغيّر النطاق فعلًا', profFor({ totalMonths: 'lt3' }).experienceBand !== profFor({ totalMonths: 'y3_plus' }).experienceBand)
 
 console.log('\n═══ 5) النية تغيّر المخرجات فعلًا ═══')
 const styles = INTENTS.map((i) => buildOnboardingProfile(toAnswersFromV2({ ...base, intent: i })).nutritionPreferences.style)
@@ -129,7 +123,7 @@ for (const lang of ['ar', 'en'] as const) {
   // مسار المبتدئ كاملًا: نصوص الكتلة + صياغة أهدافه + رسالة التحقق.
   const s = onboardingIntentStrings[lang]
   const beginnerPath = flat([
-    s.title, s.subtitle, s.intentQ, s.levelQ, s.validation, s.yearsLabel, s.yearsNote,
+    s.title, s.subtitle, s.intentQ, s.levelQ, s.validation,
     ...s.intents.map((o) => `${o.label} ${o.desc}`),
     ...s.levels.map((o) => `${o.label} ${o.desc}`),
     begText,
@@ -151,7 +145,7 @@ console.log('\n═══ 8) حاجز القاصرين لم يُمسّ ═══'
 check('الأساسيات (بما فيها العمر) ما زالت الخطوة 0', validateStep(0, { ...base, age: null, gender: null, heightCm: null, weightKg: null }) === 'body')
 check('الموافقة الصحية ما زالت تسبق كل جمع', validateStep(0, { ...base, age: null, gender: null, heightCm: null, weightKg: null, healthDataConsent: false }) === 'healthConsent')
 // الحاجز يعمل لأن العمر **لا يمكن تخطّيه**: لا تقدّم من 0 ولا من 1 بلا جسد
-// مكتمل، فخطوة الهدف (2) لا تُعرض أبدًا وعمر المستخدم مجهول.
+// مكتمل، فخطوة الهدف (3) لا تُعرض أبدًا وعمر المستخدم مجهول.
 check('لا تقدّم من الأساسيات بلا عمر', !canAdvance(0, { ...base, age: null, gender: null, heightCm: null, weightKg: null }))
 check('كتلة النية لم تفتح طريقًا يتجاوز الأساسيات', !canAdvance(0, { ...base, age: null, gender: null, heightCm: null, weightKg: null, intent: 'plan', level: 'advanced' }))
 check('عمر 15 = قاصر · 18 = بالغ', isMinorAge(15) && !isMinorAge(18))
@@ -162,6 +156,10 @@ for (const l of LEVELS) {
 }
 check('البالغ التنشيف يمرّ عاديًا', toLegacyProfile(buildOnboardingProfile(toAnswersFromV2({ ...base, age: 30, goal: 'cut' }))).goalType === 'cutting')
 check('القاصر بمستوى متقدّم لا يفتح التضخيم', toLegacyProfile(buildOnboardingProfile(toAnswersFromV2({ ...base, age: 15, goal: 'bulk', level: 'advanced' }))).goalType === 'maintenance')
+check('خفض العمر يبطل cut/bulk المخزّن ولا يترك زرًا محجوبًا مختارًا',
+  goalAllowedForEligibility('cut', true) === null && goalAllowedForEligibility('bulk', true) === null)
+check('المحافظة للقاصر وأهداف البالغ لا تُمس',
+  goalAllowedForEligibility('maintain', true) === 'maintain' && goalAllowedForEligibility('cut', false) === 'cut')
 
 console.log('\n═══ 9) النصوص بالعربية والإنجليزية (§6) ═══')
 for (const lang of ['ar', 'en'] as const) {
@@ -176,7 +174,6 @@ for (const lang of ['ar', 'en'] as const) {
 check('العربية ليست نسخة من الإنجليزية', onboardingIntentStrings.ar.title !== onboardingIntentStrings.en.title)
 const arAll = [
   onboardingIntentStrings.ar.title, onboardingIntentStrings.ar.subtitle, onboardingIntentStrings.ar.validation,
-  onboardingIntentStrings.ar.yearsNote,
   ...onboardingIntentStrings.ar.intents.map((o) => `${o.label} ${o.desc}`),
   ...onboardingIntentStrings.ar.levels.map((o) => `${o.label} ${o.desc}`),
   ...LEVELS.flatMap((l) => GOALS.map((g) => `${goalWordingFor('ar', l)[g].label} ${goalWordingFor('ar', l)[g].desc}`)),

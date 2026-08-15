@@ -89,6 +89,35 @@ export function MobileShell({ lang, tab, badge: _badge, onNavigate, onOpenSettin
     }
   }, [immersive])
 
+  /**
+   * [QIM-WEB-FOUNDER-UX-003/حزمة ١] القشرة تُعلن **ارتفاع شريط التنقّل الحقيقي**
+   * في `--qimmah-nav-h`، فتستطيع الأسطح العائمة أن ترتفع فوقه بدل أن تجلس عليه.
+   *
+   * لماذا مقيسًا لا رقمًا مكتوبًا: الارتفاع يتغيّر بمنطقة الأمان (iPhone بشريط
+   * منزلي)، وبتكبير خط النظام، وزرّ «تسجيل» المرفوع (`-mt-5`). أي رقم ثابت يصير
+   * كذبًا على جهاز ما — والكذب هنا يعني بطاقة تجلس على تبويب.
+   *
+   * الصفر حين يختفي الشريط (لوحة مفاتيح/انغماس) وحين تُفكَّك القشرة: الأسطح
+   * العامّة (الهبوط/الدخول) لا شريط تحتها فلا ترث إزاحة لا معنى لها.
+   */
+  useEffect(() => {
+    const root = document.documentElement
+    const nav = navRef.current
+    const publish = () => {
+      const hidden = !nav || nav.hidden
+      root.style.setProperty('--qimmah-nav-h', `${hidden ? 0 : nav.offsetHeight}px`)
+    }
+    publish()
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(publish) : null
+    if (nav && ro) ro.observe(nav)
+    window.addEventListener('resize', publish)
+    return () => {
+      ro?.disconnect()
+      window.removeEventListener('resize', publish)
+      root.style.removeProperty('--qimmah-nav-h')
+    }
+  }, [keyboardOpen, immersive])
+
   // The app shell owns the viewport while mounted; public/auth surfaces keep
   // their normal document scrolling when the shell unmounts.
   useEffect(() => {

@@ -21,6 +21,9 @@ const ENTRY = `
 export { V2_ONBOARDING, V2_GOAL_MODEL, V2_TAB_LABELS } from '@/design-system/v2/labels'
 export { onboardingIntentStrings, goalWordingFor } from '@/i18n/dict/onboardingIntent'
 export { bodyStepStrings } from '@/i18n/dict/bodyStep'
+export { trainingHistoryStrings } from '@/i18n/dict/trainingHistory'
+export { onboardingLifestyleStrings } from '@/i18n/dict/onboardingLifestyle'
+export { neatChoices, dietPatternChoices } from '@/data/planBuilder'
 export { profileChoiceStrings } from '@/i18n/dict/profileChoices'
 export { policyCopy } from '@/data/policyCopy'
 export { DATA_KEYS } from '@/lib/userDataKeys'
@@ -58,6 +61,11 @@ export async function loadJourneyCopy() {
     goalWording: (lang, level) => mod.goalWordingFor(lang, level),
     /** نصوص خطوة الجسد. */
     body: (lang) => mod.bodyStepStrings[lang],
+    /** تاريخ التدريب والسياق اليومي — من نفس قواميس الواجهة. */
+    history: (lang) => mod.trainingHistoryStrings[lang],
+    lifestyle: (lang) => mod.onboardingLifestyleStrings[lang],
+    neatChoices: mod.neatChoices,
+    dietPatternChoices: mod.dietPatternChoices,
     /** تسميات الشريط السفلي — مصدر الحقيقة الذي تحرسه بوابة السياسة. */
     tab: (key, lang) => mod.V2_TAB_LABELS[key][lang],
     /** خيارات الملف — منها تنويه القاصر. */

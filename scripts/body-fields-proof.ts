@@ -32,10 +32,12 @@ function check(name: string, ok: boolean) {
 // النية والمستوى أُضيفا في موجة «النية والمستوى» كخطوة 1؛ يُملآن هنا كي تبقى
 // فحوص هذه الموجة مركّزة على بيانات الجسم وحدها.
 const base = {
-  intent: 'meals' as const, level: 'intermediate' as const, trainingYears: null,
+  intent: 'meals' as const, level: 'intermediate' as const,
+  trainedBefore: 'months' as const, totalMonths: 'm6_12' as const,
+  lastTrained: 'now' as const, consistency: 'mostly' as const,
   goal: 'cut' as const, days: 4, duration: 45,
-  place: 'gym' as const, pref: 'mixed' as const,
-  injuries: [] as string[], healthDataConsent: true,
+  place: 'gym' as const, neat: 'moderate' as const, dietPattern: 'none' as const,
+  hasInjury: false, injuries: [] as string[], healthDataConsent: true,
 }
 const body = { age: 30, gender: 'male' as const, heightCm: 180, weightKg: 90 }
 
@@ -45,7 +47,7 @@ check('خطوة فارغة تُرجع رسالة body', validateStep(0, empty) =
 check('لا يمكن التقدّم من خطوة الجسد الفارغة', !canAdvance(0, empty))
 check('المسودّة الجديدة تبدأ بلا بيانات جسم', initialDraftV2(null).age === null)
 check('الخطوة الأولى رقمها 0', validateStep(0, { ...base, ...body }) === null)
-check('آخر خطوة إدخال هي 4 (المعدّات)', LAST_INPUT_STEP === 4)
+check('آخر خطوة إدخال هي 6 (القيود)', LAST_INPUT_STEP === 6)
 
 console.log('\n═══ 2) الحدود تمنع القيم الشاذّة ولا تُقصي أحدًا ═══')
 check('عمر 12 مرفوض', !inRange(12, AGE_RANGE))

@@ -208,7 +208,14 @@ export interface V2OnboardingCopy {
   /** [CTO-009/WP-2] شاشة الترحيب قبل أول سؤال. */
   welcome: { eyebrow: string; title: string; subtitle: string; start: string; timeNote: string }
   /** [CTO-009/WP-2] تسليم ما بعد الخطة: معاينة موجزة ← Premium ← حساب. */
-  handoff: { eyebrow: string; title: string; subtitle: string; premiumCta: string; enterFree: string; accountNote: string }
+  handoff: {
+    eyebrow: string; title: string; subtitle: string; premiumCta: string; enterFree: string; accountNote: string
+    /** [QIM-WEB-FOUNDER-UX-004/حزمة ٣] كشف القيمة: ما الذي يفتحه Premium وما يبقى مفتوحًا. */
+    benefitsTitle: string
+    benefits: readonly string[]
+    /** سطر يفصل «الرؤية» عن «الاستخدام» — بلا ادّعاء أن الخطة محجوبة. */
+    previewVsUse: string
+  }
   /** Full-screen plan-assembly loading state (shown while the plan is generated). */
   building: { title: string; subtitle: string }
   /** Visible plan-generation failure + retry (never a silent drop into the app). */
@@ -271,12 +278,19 @@ export const V2_ONBOARDING: Record<'ar' | 'en', V2OnboardingCopy> = {
       timeNote: 'دقيقتان تقريبًا · تقدر تغيّر أي جواب بعدين',
     },
     handoff: {
-      eyebrow: 'خطتك',
-      title: 'جاهزة ومحفوظة',
-      subtitle: 'خطتك انبنت وانحفظت على هذا الجهاز. تقدر تدخل وتشوفها الحين.',
-      premiumCta: 'احصل على Premium',
-      enterFree: 'ادخل وشوف خطتي',
+      eyebrow: 'تمّ',
+      title: 'جهزنا خطتك',
+      subtitle: 'بنيناها من إجاباتك أنت — أيامك ووقتك ومكان تمرينك وهدفك.',
+      premiumCta: 'احصل على قِمّة Premium',
+      enterFree: 'استعرض قِمّة أولًا',
       accountNote: 'إنشاء حساب يخلّي خطتك تنتقل معك لأي جهاز.',
+      benefitsTitle: 'وش يفتح لك Premium؟',
+      benefits: [
+        'تسجّل تمرينك مجموعة مجموعة، ويحفظ أوزانك وتكراراتك.',
+        'تسجّل أكلك ومياهك، وتشوف سعراتك وبروتينك يتحدّثون معك.',
+        'تسجّل وزنك وقياساتك، وتتابع تقدّمك بالأرقام لا بالإحساس.',
+      ],
+      previewVsUse: 'خطتك قدّامك تقدر تتصفّحها كاملة الحين. Premium يفتح تسجيل تمرينك وأكلك وقياساتك.',
     },
     ready: {
       eyebrow: 'جاهز',
@@ -359,12 +373,19 @@ export const V2_ONBOARDING: Record<'ar' | 'en', V2OnboardingCopy> = {
       timeNote: 'About two minutes · you can change any answer later',
     },
     handoff: {
-      eyebrow: 'Your plan',
-      title: 'Ready and saved',
-      subtitle: 'Your plan is built and saved on this device. You can open it now.',
-      premiumCta: 'Get Premium',
-      enterFree: 'Open my plan',
+      eyebrow: 'Done',
+      title: 'Your plan is ready',
+      subtitle: 'We built it from your own answers — your days, your time, where you train, and your goal.',
+      premiumCta: 'Get Qimmah Premium',
+      enterFree: 'Explore Qimmah first',
       accountNote: 'Creating an account carries your plan to any device.',
+      benefitsTitle: 'What does Premium open up?',
+      benefits: [
+        'Log your workout set by set, and keep every weight and rep.',
+        'Log your food and water, and watch your calories and protein move with you.',
+        'Log your weight and measurements, and follow real numbers instead of a feeling.',
+      ],
+      previewVsUse: 'Your plan is right here and you can browse all of it now. Premium opens logging your training, food and measurements.',
     },
     ready: {
       eyebrow: 'Ready',

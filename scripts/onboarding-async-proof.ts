@@ -3,7 +3,6 @@
 // المُشغّل) بلا متصفح — منطق خالص من onboardingV2Flow.
 
 import {
-  canAdvance,
   clearDraftV2,
   finalizeReduce,
   initialDraftV2,
@@ -27,15 +26,23 @@ function check(label: string, cond: boolean): void {
 }
 
 function draft(over: Partial<OnboardingV2Draft> = {}): OnboardingV2Draft {
-  return { step: 2, age: null, gender: null, heightCm: null, weightKg: null, intent: 'meals', level: 'intermediate', trainingYears: null, goal: 'cut', days: 4, duration: 45, place: 'gym', pref: 'mixed', hasInjury: true, injuries: ['knee'], healthDataConsent: true, ...over }
+  return {
+    step: 2, age: null, gender: null, heightCm: null, weightKg: null,
+    intent: 'meals', level: 'intermediate',
+    trainedBefore: 'months', totalMonths: 'm6_12', lastTrained: 'now', consistency: 'mostly',
+    goal: 'cut', days: 4, duration: 45, place: 'gym', neat: 'moderate', dietPattern: 'none',
+    hasInjury: true, injuries: ['knee'], healthDataConsent: true, ...over,
+  }
 }
 
 /** حالة تحقّق كاملة — الأرقام أُزيحت بعد إدراج خطوة «النية والمستوى» (1). */
 const V = (over: Partial<OnboardingV2Draft> = {}) => ({
   age: 30, gender: 'male' as const, heightCm: 180, weightKg: 90,
-  intent: 'meals' as const, level: 'intermediate' as const, trainingYears: null,
+  intent: 'meals' as const, level: 'intermediate' as const,
+  trainedBefore: 'months' as const, totalMonths: 'm6_12' as const,
+  lastTrained: 'now' as const, consistency: 'mostly' as const,
   goal: 'cut' as const, days: 4, duration: 45,
-  place: null, pref: null, healthDataConsent: true,
+  place: null, neat: null, dietPattern: null, hasInjury: null, injuries: [] as string[], healthDataConsent: true,
   ...over,
 })
 
@@ -49,18 +56,16 @@ console.log('\n① تحقّق الخطوات (رسالة خاصة بكل خطو�
   check('خطوة النية بلا نية → «intentLevel»', validateStep(1, V({ intent: null })) === 'intentLevel')
   check('خطوة النية بلا مستوى → «intentLevel»', validateStep(1, V({ level: null })) === 'intentLevel')
   check('النية والمستوى معًا → صالحة', validateStep(1, V()) === null)
-  // Step 2 — goal required.
-  check('خطوة الهدف بلا هدف → «goal»', validateStep(2, V({ goal: null })) === 'goal')
-  check('خطوة الهدف مع الموافقة → صالحة', validateStep(2, V({ goal: 'bulk' })) === null)
-  check('canAdvance(2) يتبع الهدف', canAdvance(2, V()) === true)
-  // Step 3 — training defaults are always valid; an off-set value is caught.
-  check('خطوة التدريب بالقيم الافتراضية → صالحة', validateStep(3, V()) === null)
-  check('خطوة التدريب بقيمة أيام خارج المجموعة → «training»', validateStep(3, V({ days: 7 })) === 'training')
-  // Step 4 — place + pref required.
-  check('خطوة المعدات بلا مكان → «equipment»', validateStep(4, V({ pref: 'mixed' })) === 'equipment')
-  check('خطوة المعدات بلا تفضيل → «equipment»', validateStep(4, V({ place: 'gym' })) === 'equipment')
-  check('خطوة المعدات بمكان وتفضيل → صالحة', validateStep(4, V({ place: 'gym', pref: 'mixed' })) === null)
-  check('canAdvance(4) ناقص → false', canAdvance(4, V({ place: 'gym' })) === false)
+  check('خطوة التاريخ بلا جواب → trainingHistory', validateStep(2, V({ trainedBefore: null })) === 'trainingHistory')
+  check('never جواب كامل وحده', validateStep(2, V({ trainedBefore: 'never', totalMonths: null, lastTrained: null, consistency: null })) === null)
+  check('التاريخ لغير never يتطلب المتابعات', validateStep(2, V({ totalMonths: null })) === 'trainingHistory')
+  check('خطوة الهدف بلا هدف → goal', validateStep(3, V({ goal: null })) === 'goal')
+  check('خطوة الجدول ترفض أيامًا شاذة', validateStep(4, V({ days: 7 })) === 'training')
+  check('خطوة السياق تتطلب المكان والنشاط والأكل', validateStep(5, V({ place: 'gym', neat: null, dietPattern: 'none' })) === 'lifestyle')
+  check('خطوة السياق مكتملة', validateStep(5, V({ place: 'gym', neat: 'moderate', dietPattern: 'none' })) === null)
+  check('خطوة القيود تتطلب جوابًا صريحًا', validateStep(6, V({ hasInjury: null })) === 'limitations')
+  check('الإصابة تتطلب منطقة', validateStep(6, V({ hasInjury: true, injuries: [] })) === 'limitations')
+  check('لا إصابة جواب صالح', validateStep(6, V({ hasInjury: false })) === null)
 }
 
 console.log('\n② مسار إعادة المحاولة (آلة حالة الإنهاء)')
@@ -91,15 +96,29 @@ console.log('\n③ جولة المسودة (مربوطة بالمالك، آمن
   check('الضيف يرى مسودته', JSON.stringify(loadDraftV2(null)) === JSON.stringify(g))
   check('حساب مسجّل لا يرى مسودة الضيف', loadDraftV2('userA') === undefined)
 
-  // Hostile input — wrong version / malformed → ignored.
+  // v5 migration is additive: old answers survive, new facts stay unanswered.
+  const legacy = {
+    v: 5, step: 4, age: 30, gender: 'male', heightCm: 180, weightKg: 90,
+    intent: 'meals', level: 'intermediate', trainingYears: 2,
+    goal: 'maintain', days: 4, duration: 45, place: 'gym', pref: 'mixed',
+    hasInjury: true, injuries: ['knee'], healthDataConsent: true,
+  }
+  globalThis.localStorage.setItem('qimmah:onboarding:v1', JSON.stringify({ owner: 'userA', draft: legacy }))
+  const migrated = loadDraftV2('userA')
+  check('v5 تُرقّى ولا تُحذف', migrated !== undefined)
+  check('v5 المتقدمة تعود إلى خطوة التاريخ الجديدة', migrated?.step === 2)
+  check('أجوبة v5 الأصلية تبقى', migrated?.goal === 'maintain' && migrated.place === 'gym' && migrated.injuries[0] === 'knee')
+  check('لا تاريخ ولا نشاط ولا نمط أكل مصنوع في الهجرة', migrated?.trainedBefore === null && migrated.neat === null && migrated.dietPattern === null)
+
+  // Hostile input — unsupported version / malformed → ignored.
   globalThis.localStorage.setItem('qimmah:onboarding:v1', JSON.stringify({ owner: 'userA', draft: { v: 1, step: 1, goal: 'cut', days: 4, duration: 45, place: 'gym', pref: 'mixed', hasInjury: false, injuries: [] } }))
-  check('مسودة بإصدار قديم → تُتجاهَل', loadDraftV2('userA') === undefined)
-  globalThis.localStorage.setItem('qimmah:onboarding:v1', JSON.stringify({ owner: 'userA', draft: { v: 2, step: 99, goal: 'nope', days: 'x' } }))
+  check('مسودة بإصدار غير مدعوم → تُتجاهَل', loadDraftV2('userA') === undefined)
+  globalThis.localStorage.setItem('qimmah:onboarding:v1', JSON.stringify({ owner: 'userA', draft: { ...draft(), v: 6, step: 99, goal: 'nope', days: 'x' } }))
   check('مسودة مشوّهة → تُتجاهَل', loadDraftV2('userA') === undefined)
   // نية/مستوى مزيّفان في التخزين → تُرفض المسودة كلها (إدخال غير موثوق).
-  globalThis.localStorage.setItem('qimmah:onboarding:v1', JSON.stringify({ owner: 'userA', draft: { ...draft(), v: 5, intent: 'hack' } }))
+  globalThis.localStorage.setItem('qimmah:onboarding:v1', JSON.stringify({ owner: 'userA', draft: { ...legacy, intent: 'hack' } }))
   check('نية غير معروفة → تُتجاهَل المسودة', loadDraftV2('userA') === undefined)
-  globalThis.localStorage.setItem('qimmah:onboarding:v1', JSON.stringify({ owner: 'userA', draft: { ...draft(), v: 5, level: 'elite' } }))
+  globalThis.localStorage.setItem('qimmah:onboarding:v1', JSON.stringify({ owner: 'userA', draft: { ...legacy, level: 'elite' } }))
   check('مستوى غير معروف → تُتجاهَل المسودة', loadDraftV2('userA') === undefined)
 }
 
@@ -122,13 +141,17 @@ console.log('\n⑤ افتراضيات أول تشغيل')
     weightKg: null,
     intent: null,
     level: null,
-    trainingYears: null,
+    trainedBefore: null,
+    totalMonths: null,
+    lastTrained: null,
+    consistency: null,
     goal: null,
     days: 4,
     duration: 45,
     place: null,
-    pref: null,
-    hasInjury: false,
+    neat: null,
+    dietPattern: null,
+    hasInjury: null,
     injuries: [],
     healthDataConsent: false,
   }))

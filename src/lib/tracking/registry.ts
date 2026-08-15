@@ -49,8 +49,8 @@ export type TrackedEventName = (typeof TRACKED_EVENTS)[number]
  */
 export type FirstWinKind = 'warmup' | 'meal' | 'water' | 'dinner'
 
-/** أسماء خطوات الإعداد — مطابقة لترتيب `OnboardingV2` (0..4 مدخلات + 5 جاهز). */
-export const SETUP_STEP_NAMES = ['body', 'intent', 'goal', 'training', 'equipment', 'ready'] as const
+/** أسماء خطوات الإعداد — مطابقة لترتيب `OnboardingV2` (0..6 مدخلات + 7 جاهز). */
+export const SETUP_STEP_NAMES = ['body', 'intent', 'history', 'goal', 'training', 'lifestyle', 'limitations', 'ready'] as const
 export type SetupStepName = (typeof SETUP_STEP_NAMES)[number]
 
 /**

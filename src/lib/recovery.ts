@@ -18,6 +18,7 @@
 // the owner-scoped log store lives at the bottom and is a thin localStorage wrapper.
 
 import { getDayStamp } from './today'
+import { assertPaid } from '@/lib/access/guard'
 
 export type Sleep = 'poor' | 'ok' | 'good'
 export type Soreness = 'none' | 'mild' | 'moderate' | 'severe'
@@ -98,6 +99,8 @@ export function loadRecoveryLog(ownerId: string | null): RecoveryEntry[] {
 
 /** Save today's check-in (replacing any earlier entry for the same day). */
 export function saveRecoveryEntry(ownerId: string | null, input: RecoveryInput): RecoveryEntry {
+  // [QIM-WEB-FOUNDER-UX-003/حزمة ٢] تسجيل التعافي فعل منتج مدفوع.
+  assertPaid('recovery.log')
   const entry: RecoveryEntry = { ...input, date: getDayStamp(), rec: recommendRecovery(input) }
   const log = loadRecoveryLog(ownerId).filter((e) => e.date !== entry.date)
   const next = [entry, ...log].slice(0, 180)

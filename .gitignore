@@ -48,3 +48,10 @@ scripts/e2e-auth/.workdir/
 .cutover-a/
 .cutover-b/
 .cutover-c/
+
+# release-convergence build artifacts (scripts/release) — transient
+dist-release/
+
+# per-run release-convergence evidence snapshots (latest.json is tracked)
+docs/execution/qimmah-postweb/release/evidence/run-*.json
+.cslock-graph/

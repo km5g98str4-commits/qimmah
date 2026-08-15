@@ -21,6 +21,22 @@ export type OnbGoalType = 'bulk' | 'cut' | 'maintain'
 /** الانتظام (إعداد) — «new» تُخزَّن تلقائيًا للمبتدئ ولا يُسأل عنها. */
 export type OnbConsistency = 'new' | 'on_and_off' | 'consistent' | 'returning'
 
+/** مفردات تاريخ التدريب المعتمدة — مطابقة لبنك التخصيص من دون ربط الواجهة به. */
+export type TrainedBefore = 'never' | 'tried' | 'months' | 'years'
+export type TotalMonthsBucket = 'lt3' | 'm3_6' | 'm6_12' | 'y1_3' | 'y3_plus'
+export type LastTrainedBucket = 'now' | 'w2' | 'm1_3' | 'm3_12' | 'y1_plus'
+export type TrainingConsistency = 'rare' | 'on_off' | 'mostly' | 'steady'
+export type DeclaredTrainingLevel = 'beginner' | 'intermediate' | 'advanced'
+
+/** حقائق خام محفوظة؛ حالة never لا تحمل أجوبة متابعة مصنوعة. */
+export interface OnbTrainingHistory {
+  declaredLevel: DeclaredTrainingLevel
+  trainedBefore: TrainedBefore
+  totalMonths?: TotalMonthsBucket
+  lastTrained?: LastTrainedBucket
+  consistency?: TrainingConsistency
+}
+
 /** بيئة التمرين — تُخزَّن صراحةً (المنزل/وزن الجسم واضحان للمولّد). */
 export type Environment = 'commercial_gym' | 'small_gym' | 'home_gym' | 'bodyweight'
 
@@ -72,8 +88,10 @@ export interface OnbGoal {
 /** تفضيلات التمرين. */
 export interface OnbTrainingPreferences {
   experience?: ExperienceLevel
-  /** يظهر فقط لغير المبتدئ؛ المبتدئ = «new». */
+  /** مشتق من الوقائع؛ never وحدها = «new». */
   consistency?: OnbConsistency
+  /** الوقائع الأصلية تبقى قابلة للتفسير والتدقيق، لا نحتفظ بالمشتقات وحدها. */
+  history?: OnbTrainingHistory
   environment?: Environment
   /** أيام التمرين بالأسبوع (3–6). */
   daysPerWeek?: number
@@ -112,6 +130,8 @@ export interface OnbFoodPreferences {
 
 /** القيود/الإصابات — اختيارية، بلا نصائح طبية. */
 export interface OnbLimitations {
+  /** الجواب الصريح لسؤال وجود إصابة؛ يقود إظهار سؤال المناطق. */
+  hasInjury?: boolean
   /** مفاصل/مناطق فيها إصابة أو حساسية حركية. */
   injuries: string[]
   notes?: string

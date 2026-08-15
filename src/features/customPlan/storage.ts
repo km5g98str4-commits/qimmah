@@ -63,6 +63,15 @@ export function hasCustomPlan(userId: string | null | undefined): boolean {
 
 /** يحفظ الجدول المخصّص للمالك الحالي ويعتمده مصدرًا للجدول. */
 export function saveCustomPlan(userId: string | null | undefined, plan: WorkoutPlan): CustomPlanRecord {
+  // [QIM-WEB-FOUNDER-UX-003/حزمة ٢] **لا حارس هنا — وهذا قرار لا سهو.**
+  //
+  // كان الحارس هنا فأسقط `test:sync` عند «إعادة رفع aux بعد الدمج»: هذه الدالة
+  // هي أيضًا مسار **استعادة السحابة** (`syncStores.ts` عند تهجير الخطة من
+  // الخادم). حجبها يمنع المستخدم من استرجاع خطته التي يملكها أصلًا — عقاب لا
+  // حماية، ونفس الحدّ المطبَّق على `measurementLog.saveLogs`.
+  //
+  // الفعل المدفوع هو **تأليف** خطة مخصّصة لا استعادتها، فالحارس عند مدخل
+  // التأليف (`WorkoutView` → `CustomPlanBuilder.onSave`) ويحرسه `test:access-gate`.
   const reg = loadRegistry()
   const rec: CustomPlanRecord = { plan, source: 'custom', updatedAt: new Date().toISOString() }
   reg[ownerKey(userId)] = rec
