@@ -230,14 +230,38 @@ const LEDGER = [
         ['nutrition meal-row calories/protein', 'src/views/NutritionView.tsx', />\{cals\} \{d\.caloriesUnit\}/],
         ['workout days-per-week', 'src/views/WorkoutView.tsx', />\{plan\.days\.length\} \{d\.daysPerWeek\}</],
         ['workout per-day exercises/minutes', 'src/views/WorkoutView.tsx', />\{pd\.exercises\.length\} \{d\.exercisesUnit\}/],
-        ['arabic day label built with Latin index', 'src/lib/workoutDayLabel.ts', /`اليوم \$\{index \+ 1\}/],
+
         ['today plan subtitle duration', 'src/lib/todayV2Model.ts', /\$\{durationMin\} دقيقة/],
         ['arabic task count', 'src/design-system/v2/labels.ts', /`\$\{count\} \$\{count === 1 \? 'مهمة'/],
       ]
       const regressed = REGRESSIONS.filter(([, file, re]) => re.test(src(file))).map(([what]) => what)
 
-      const ok = missing.length === 0 && regressed.length === 0
-      return [ok, `live owners WITHOUT the central formatter: [${missing.join(', ')}] · bare render sites BACK: [${regressed.join(', ')}] · rendered-output truth: p1 numeral section`]
+      // ── [FINAL-CONVERGENCE] اسم اليوم: المخزون لاتيني، والتحويل عند العرض ────
+      // كان هنا نمط يعدّ «اليوم ${index + 1}» في `workoutDayLabel.ts` ارتدادًا.
+      // وذلك الملفّ **ليس موضع عرض**: مخرجه يُخزَّن في الخطة
+      // (`planGenerator.ts:757` → `customization`)، فتحويله عند التوليد يخالف
+      // PKG-7، ويخلط المخزون القديم بالجديد، و**يُفرِغ** إثبات سياسة الأرقام
+      // الذي يشترط مُدخَلًا لاتينيًّا كي لا يكون فحصه تحصيل حاصل.
+      //
+      // فالعقد الصحيح — وهذا ما يُؤكَّد بدلًا منه — أن **مالكَي العرض** يمرّران
+      // اسم اليوم عبر الحدّ المركزي. وهو أقوى: يحرس ما يراه المستخدم فعلًا،
+      // ويصلح الخطط القديمة المخزَّنة لاتينيًّا أيضًا لا الجديدة وحدها.
+      // ⚠️ يُفحص **موضع النداء** لا ورود الرمز: أول صياغة لهذا الفحص اكتفت بوجود
+      // `formatNumeralsIn` في الملفّ، فبقيت خضراء بعد نزع الحدّ فعليًّا — لأن سطر
+      // الاستيراد وحده يُرضيها. وهو بعينه عيب «فحص الورود» الذي كُتب هذا المدخل
+      // لإصلاحه. اكتُشف بمهاجمة الفحص لا بمراجعته (§4.2).
+      const DAY_LABEL_DISPLAY_OWNERS = [
+        ['workout tab', 'src/views/WorkoutView.tsx', /formatNumeralsIn\(\s*lang === 'en' \? planDay\.nameEn : planDay\.nameAr/],
+        ['dashboard/today', 'src/lib/todayV2Model.ts', /formatNumeralsIn\(\s*ar \? day\.nameAr : day\.nameEn/],
+      ]
+      const unboundedDayLabel = DAY_LABEL_DISPLAY_OWNERS
+        .filter(([, file, re]) => !re.test(src(file)))
+        .map(([what]) => what)
+      // وحدّ التخزين يبقى لاتينيًّا صراحةً — لو تحوّل، فُقد المُدخَل الذي يحرسه الإثبات.
+      const storageStaysLatin = /`اليوم \$\{index \+ 1\}/.test(src('src/lib/workoutDayLabel.ts'))
+
+      const ok = missing.length === 0 && regressed.length === 0 && unboundedDayLabel.length === 0 && storageStaysLatin
+      return [ok, `live owners WITHOUT the central formatter: [${missing.join(', ')}] · bare render sites BACK: [${regressed.join(', ')}] · day-label display owners WITHOUT formatNumeralsIn: [${unboundedDayLabel.join(', ')}] · stored day label stays Latin (PKG-7): ${storageStaysLatin} · rendered-output truth: p1 numeral section`]
     },
   },
 
@@ -339,6 +363,41 @@ const LEDGER = [
   // البوابة كشفت إغفالها فورًا: السجلّ صار ٣٢ عطلًا موثّقًا و٢٨ مرصودًا. وهذا
   // بالضبط ما بُني له فحص «لا عطل موثّق بلا رصد» — فالإغفال ظهر في نفس الموجة
   // التي أدخلت السجلّ، لا بعد أسبوع.
+  {
+    id: 'BUG-033', title: 'Cancelling the share sheet reported a success that never happened',
+    liveCoverage: 'test:e2e:settings-security under E2E_ENGINE=webkit (35/35)',
+    assert: () => {
+      const s = src('src/lib/portability/exporter.ts')
+      const cancelled = /'cancelled'/.test(s)
+      return [cancelled, `AbortError maps to 'cancelled' (not 'share'): ${cancelled}`]
+    },
+  },
+  {
+    id: 'BUG-034', title: 'E2E races Chromium masked and WebKit exposed',
+    liveCoverage: 'test:e2e:profile + test:e2e:settings-security on both engines',
+    assert: () => {
+      const s = src('scripts/e2e/profile-reliability.mjs')
+      // البذر ثم إقلاع وثيقة واحد على الهاش — لا كتابة هاش داخل الوثيقة ثم إعادة تحميل.
+      const singleBoot = /about:blank/.test(s)
+      return [singleBoot, `seed → about:blank → single boot on the hash: ${singleBoot}`]
+    },
+  },
+  {
+    id: 'BUG-035', title: 'Touch-target assertion failed on a floating-point representation error',
+    liveCoverage: 'test:e2e:profile (44px targets)',
+    assert: () => {
+      const s = src('scripts/e2e/profile-reliability.mjs')
+      const tolerant = /meetsTouchTarget/.test(s)
+      return [tolerant, `named tolerance helper present: ${tolerant}`]
+    },
+  },
+  {
+    id: 'BUG-036', title: 'WebKit page crash under host memory pressure — environment, not code', status: 'OPEN',
+    liveCoverage: 'none — an operating rule, not a product invariant',
+    // بيئة تشغيل لا كود: «Page crashed» ليست فشل تأكيد ولا تُنسب للمنتج.
+    assert: () => [true, 'environment-only; documented operating rule, no code invariant to assert'],
+    informational: true,
+  },
   {
     id: 'BUG-029', title: 'Focus is not restored after closing exercise detail on WebKit only', status: 'OPEN',
     liveCoverage: 'test:e2e:exercises under E2E_ENGINE=webkit (31/32 WebKit · 32/32 Chromium)',
