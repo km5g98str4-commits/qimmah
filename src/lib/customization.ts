@@ -10,6 +10,7 @@ import type { Profile, Targets } from '@/types/profile'
 import { computeTargets, defaultProfile, isMinorAge, profileHash } from './calculators'
 import { enqueueSyncOperation } from './syncQueue'
 import { isOnboardingComplete } from './onboarding'
+import { getLastUser } from './accountScope'
 import { assertPaid } from '@/lib/access/guard'
 import type { WorkoutPlan } from '@/types/workout'
 import { generatePlanFromTemplate } from './workoutPlan'
@@ -352,9 +353,19 @@ const PLAN_IDENTITY_FIELDS = [
  * «هل هذا تحوير لخطة قائمة؟» — مسند واحد يستهلكه الكاتب **والمعالج** معًا.
  * وجود مسندين متقاربين هو ما أنتج الاستثناء الخام: المعالج فحص اكتمال ملف
  * الإعداد، والكاتب فحص علم الجهاز — فلم يفتح الأول البوّابة ورمى الثاني.
+ *
+ * ── [FINAL-CONVERGENCE] المالك يُقرأ، ولا يُفترض ضيفًا ──────────────────────
+ * كان النداء `isOnboardingComplete(null)` — و`null` تعني حرفيًا **علم الجهاز**.
+ * و`markCompleted(userId)` لا يمسّ علم الجهاز عمدًا للمسجَّل (كي لا «يتسرّب»
+ * الإكمال لحساب جديد لاحقًا). فالنتيجة أن المسند كان يعود `false` لكل
+ * **مستخدم مسجَّل** أكمل إعداده وهو داخل حسابه — أي أن حارس `plan.saveEdit`
+ * كان ميتًا على الشريحة المدفوعة بالضبط، وحيًّا على الضيف وحده.
+ *
+ * `getLastUser()` هو قارئ المالك خارج React (نفس ما يستهلكه `dataPortability`):
+ * نصّ = حساب فيُقرأ سجلّ الحسابات · `null`/`undefined` = ضيف فيُقرأ علم الجهاز.
  */
 export function isExistingPlanEdit(): boolean {
-  return hasSavedCustomization() && isOnboardingComplete(null)
+  return hasSavedCustomization() && isOnboardingComplete(getLastUser() ?? null)
 }
 
 export function saveCustomization(value: Customization): void {
