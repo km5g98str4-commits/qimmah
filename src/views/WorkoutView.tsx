@@ -314,7 +314,7 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
                 </span>
                 <span className="min-w-0">
                   <span className="block text-sm font-black">{d.startTodayWorkout}</span>
-                  <span dir="auto" className="block truncate text-xs text-white/85">{lang === 'en' ? planDay.nameEn : planDay.nameAr} · {planDay.exercises.length} {d.exercisesUnit}</span>
+                  <span dir="auto" className="block truncate text-xs text-white/85">{lang === 'en' ? planDay.nameEn : planDay.nameAr} · {formatNumber(planDay.exercises.length, lang)} {d.exercisesUnit}</span>
                 </span>
               </button>
             )}
@@ -424,7 +424,7 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
                       {source === 'custom' ? cp.customPlanBadge : cp.autoPlanBadge}
                     </span>
                   </div>
-                  <p className="text-xs text-ink-400">{plan.days.length} {d.daysPerWeek}</p>
+                  <p className="text-xs text-ink-400">{formatNumber(plan.days.length, lang)} {d.daysPerWeek}</p>
                 </div>
                 <button
                   type="button"
@@ -468,7 +468,7 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
                   >
                     <span className="min-w-0">
                       <span dir="auto" className="block truncate text-sm font-bold text-ink-900">{lang === 'en' ? pd.nameEn : pd.nameAr}</span>
-                      <span className="block text-[11px] text-ink-400">{pd.exercises.length} {d.exercisesUnit} · ~{estDayMinutes(pd)} {d.minShort}</span>
+                      <span className="block text-[11px] text-ink-400">{formatNumber(pd.exercises.length, lang)} {d.exercisesUnit} · ~{formatNumber(estDayMinutes(pd), lang)} {d.minShort}</span>
                     </span>
                     <Icon name="ChevronLeft" className="h-4 w-4 shrink-0 text-ink-400" />
                   </button>

@@ -10,6 +10,9 @@
 // Each vector runs in its own fresh context so one failure cannot mask another.
 
 import {
+
+// [REL-001] numeral-agnostic: the Arabic UI renders Arabic-Indic digits per the
+// one numeral policy. Pinning a digit form makes a CORRECT product change fail here.
   createRecorder, settle, goRoute, storageSnapshot, bodyText,
   RAW_EXCEPTION_RE, collectErrors, realPageErrors,
 } from '../lib/harness.mjs'
@@ -164,7 +167,7 @@ export async function run({ browser, url, engine, seed }) {
 
       const before = await storageSnapshot(page)
       await goRoute(page, 'workout', 2600)
-      await page.locator('button').filter({ hasText: /اليوم 1/ }).first().click({ timeout: 8000 }).catch(() => {})
+      await page.locator('button').filter({ hasText: /اليوم\s*[1١]/ }).first().click({ timeout: 8000 }).catch(() => {})
       await settle(page, 1600)
       const after = await storageSnapshot(page)
       const destroyed = Object.keys(before).filter((k) => !(k in after))

@@ -12,15 +12,15 @@
 > **Every number in §0.1 below is from that re-run. Nothing is carried over.**
 > Re-run command is unchanged: `node scripts/release/run-release-convergence.mjs`.
 
-## 0.1 Results on the integrated head `03cda8f`
+## 0.1 Results after `[QIM-PHASE-II-RELEASE-FIX-001]`
 
-Run `2026-08-15T01:19:05Z` · evidence [`evidence/latest.json`](./evidence/latest.json).
+Run on the release-fix head. Evidence [`evidence/latest.json`](./evidence/latest.json).
 
 | Suite | Engine | pass | fail | externally blocked |
 |---|---|---:|---:|---:|
 | `static-bundle-safety` | static | 22 | **1** | 0 |
 | `static-regression-ledger` | static | 37 | 0 | 3 |
-| `p1-preview-user` | chromium | 62 | **5** | 1 |
+| `p1-preview-user` | chromium | **67** | **0** | 1 |
 | `p2-premium-test-state` | chromium | 24 | 0 | 0 |
 | `p3-returning-guest` | chromium | 15 | 0 | 0 |
 | `p4-interrupted-onboarding` | chromium | 16 | 0 | 0 |
@@ -28,31 +28,53 @@ Run `2026-08-15T01:19:05Z` · evidence [`evidence/latest.json`](./evidence/lates
 | `p6-auth` | chromium | 50 | 0 | 1 |
 | `p7-failure-conditions` | chromium | 27 | 0 | 0 |
 | `p8-responsive-matrix` | chromium | 140 | 0 | 0 |
-| **TOTAL** | | **445** | **6** | **5** |
+| **TOTAL** | | **450** | **1** | **5** |
+
+**Movement:** p1 `62 pass / 5 fail` → **`67 pass / 0 fail`**. Total `445/6` → **`450/1`**.
+
+**The one remaining failure is REL-003, and it is red by instruction:** the shipped
+destination is the Salla store root, not a product URL. `EXTERNALLY_BLOCKED /
+COMMERCIAL BLOCKER` until a real product URL exists. It was not touched, not
+reclassified, and not greened.
+
+### REL-002 — CLOSED
+
+`plan.saveEdit` was guarded on `WorkoutView` only. Three live paths persisted a plan:
+`CustomizationCenter.saveDraft`, `CustomizationCenter.saveAndClose`, and
+`SettingsView.regenerateFromProfile` (which calls `generatePlan` and writes a whole
+new plan). All three now pass through the **same** authority — `useAccess().guard`
+for the UI (the canonical Premium surface, no new modal) and a new
+`applyPlanEdit` in `customizationContext` that calls `assertPaid('plan.saveEdit')`
+**before** touching React state or storage.
+
+First-run onboarding is deliberately **not** guarded: `SetupView` renders
+`OnboardingV2` when `mode !== 'advanced'` and `CustomizationCenter` only for editing,
+so creating the first plan stays free. The minor-goal safety downgrade is likewise
+left on the unguarded `applyCustomization`.
+
+### REL-001 — CLOSED
+
+Fixed at the display boundary only; no stored numeric value changed. Sites were found
+by walking the rendered DOM, not by reading source: the Nutrition hero `{remaining}`,
+the eight meal-row calorie/protein lines, the Arabic water presets, Workout
+days-per-week, per-day exercises/minutes, the resume-card count, `workoutDayNameAr`,
+the Today plan subtitle duration, the Arabic task count, and the dashboard date
+(whose own comment already specified «١١ يوليو» while `Intl` was resolving Latin).
+
+Verified by re-walking every text node under `main`: `#/nutrition`, `#/workout`,
+`#/progress`, `#/dashboard`, `#/profile` → **0 Latin digits** in an Arabic session,
+and English → Latin digits with **0 Arabic-Indic leaks**.
+
+**The static watcher that lied has been fixed too.** BUG-019's ledger entry asked only
+whether `formatNumber` *appeared* in each live file, which is why it went green at
+`22e9a4c` while the browser was still Latin. It now also fails if any of seven **named
+bare render sites** returns. Counter-proof: restoring the Nutrition hero to `{remaining}`
+makes it fail by name while reporting `live owners WITHOUT the central formatter: []`
+— i.e. the old check would still have passed.
 
 ⚠️ **`VALIDATION_DOWNGRADE = WEBKIT_UNAVAILABLE`** — no WebKit build exists in this
-container (`/opt/pw-browsers/webkit-2311/pw_run.sh` absent, downloads disabled), so
-**every browser number above is Chromium 141.0.7390.37 only**. The earlier WebKit
-columns in this file were measured on `1bcf7a9` and **do not describe this head**.
-
-**The 6 failures are 3 defects, none unexplained:**
-
-1. **REL-003 (1 failure) — deliberate, must stay red.** The shipped destination is
-   the Salla store root, not a product URL. `EXTERNALLY_BLOCKED / COMMERCIAL BLOCKER`
-   until a real product URL exists. Reclassifying it green is forbidden.
-2. **REL-002 (2 failures) — P1, still open.** `plan.saveEdit` is guarded on
-   `WorkoutView` but **not** on `#/setup`: a Preview user changed goal `cut → bulk`
-   and it **survived a reload**, with no gate on change and none on save.
-3. **REL-001 (3 failures) — P2, partially fixed, still open on the live surfaces.**
-   `22e9a4c` applied `formatNumber` to the live `NutritionView`/`WorkoutView` and
-   the static ledger went green — but the **browser** shows Latin digits still
-   reaching Arabic sessions (Nutrition `1937`; Workout `اليوم 1 · علوي`, `5`, `30`),
-   and the same fact disagrees across screens (`#/profile` `٤ أيام/أسبوع`
-   arabic-indic vs `#/workout` `4 أيام/أسبوع` latin).
-   **Merge fidelity was verified**: both live files are byte-identical to lane head
-   `8bc53b2`, so the fix was **not lost in the merge — it is incomplete**.
-   *Lesson recorded:* the lane re-ran only the static suites after that fix. Presence
-   of `formatNumber` in a file is not proof that every rendered number uses it.
+container. Every number above is Chromium 141.0.7390.37.
+**`WEBKIT_FINAL_INTEGRATED_HEAD = PENDING`.**
 
 **Contract:** `[QIMMAH-SOVEREIGN-PHASE-II-001]` · AGENT-A (Release Convergence / adversarial QA)
 **Branch:** `codex/qimmah-release-convergence-001`
@@ -304,7 +326,7 @@ in any test that trusts it.
 
 ## 2. THE FOUR VERDICTS
 
-### 2.1 `GO_FOUNDER_DEVICE_QA` — **PROVISIONAL GO**
+### 2.1 `GO_FOUNDER_DEVICE_QA` — **GO** (re-pronounced after the release fix)
 
 **The founder can pick this build up and use it.** Nothing crashes, nothing eats
 data, and every surface renders.
@@ -328,7 +350,7 @@ reachable in three taps.
 
 ---
 
-### 2.2 `GO_PREVIEW_FREE_USERS` — **PROVISIONAL GO, CONDITIONAL**
+### 2.2 `GO_PREVIEW_FREE_USERS` — **GO** (REL-002 closed; see §0.1)
 
 **The Preview boundary holds where it matters most, with one named hole.**
 
@@ -374,8 +396,8 @@ What **is** proven, and is a genuine asset for the day the backend exists:
 Three independent reasons, any one sufficient:
 
 1. ~~**The baseline is not the tip.**~~ ✅ **Closed** — this pass measured `03cda8f`, which contains the final Web Sovereign head `d83add2` and all five lanes. Layer 3 Profile landed in `PKG-8`; only Layer 4 and Layer 6 remain.
-2. **Two open defects** — REL-001 (P2) and REL-002 (P1) — and REL-002 in particular is a paid-boundary inconsistency, which is the class this whole programme exists to prevent shipping.
-3. **Open defects** REL-001, REL-002, REL-004 all remain unresolved.
+2. ~~**Two open defects** — REL-001 and REL-002.~~ ✅ **Closed** in `[QIM-PHASE-II-RELEASE-FIX-001]` and re-proved in the browser (p1 67/0). REL-004 closed earlier in `1412648`.
+3. **WebKit is unproven on this head.** `WEBKIT_FINAL_INTEGRATED_HEAD = PENDING` — no WebKit build exists in this container, and the audience is iOS-Safari-heavy. No stale WebKit result from `1bcf7a9` is being reused as a final-head result.
 4. **The charter's landing gate was not completed in this pass** and is outside this contract's scope:
    - `npm run typecheck` ✅ exit 0 · `npm run lint` ✅ exit 0 (both run here)
    - `npm run build` ✅ (both artifacts built)
@@ -393,18 +415,18 @@ a founder-signed `[CTO-n]`.
 
 | Verdict | Result | Gating item |
 |---|---|---|
-| `GO_FOUNDER_DEVICE_QA` | **GO** | on the integrated head; carry REL-001/REL-002 into the session knowingly |
-| `GO_PREVIEW_FREE_USERS` | **NO-GO** | REL-002 is a *proven* paid-boundary breach on `#/setup`, not a theoretical one |
+| `GO_FOUNDER_DEVICE_QA` | **GO** | REL-001 and REL-002 both closed; nothing carried into the session |
+| `GO_PREVIEW_FREE_USERS` | **GO** | REL-002 closed and re-proved in the browser; p1 67/0; boundary holds at all 11 widths |
 | `GO_AUTHENTICATED_FREE` | **NO-GO** | EXTERNAL-003 — live account lifecycle never proven against a real server |
 | `GO_PAID_COMMERCIAL_FUNNEL` | **NO-GO** | EXTERNAL-001 (product binding) + EXTERNAL-002 (no backend) |
-| `GO_MERGE_MAIN` | **NO-GO** | REL-002 open · WebKit unproven on this head · founder-only authority (charter §1.1) |
+| `GO_MERGE_MAIN` | **NO-GO** | REL-001/REL-002 closed — but WebKit unproven on this head (`WEBKIT_FINAL_INTEGRATED_HEAD = PENDING`), CI not read, and the merge button is the founder's alone (charter §1.1) |
 
 ### Open defects at `03cda8f` (the integrated head)
 
 | id | severity | title |
 |---|---|---|
-| REL-001 | P2 | **still open** — partially fixed in `22e9a4c`; the browser still shows Latin digits on live Nutrition/Workout in Arabic |
-| REL-002 | P1 | `plan.saveEdit` enforced on one live path, open on the customization-centre path |
+| ~~REL-001~~ | P2 | ✅ **CLOSED** — 0 Latin digits across five live routes in Arabic; ledger watcher strengthened + counter-proved |
+| ~~REL-002~~ | P1 | ✅ **CLOSED** — all three persisted-plan paths route through `plan.saveEdit`; p1 plan-edit boundary green |
 | REL-003 | P1 commercial (externally blocked) | shipped Premium destination is the Salla store root, not the product |
 | ~~REL-004~~ | P3 | ✅ **CLOSED** in `1412648` — the live `qimmah:activeWorkout:v1` is registered; ledger 37/0 |
 

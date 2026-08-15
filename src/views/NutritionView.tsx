@@ -120,7 +120,7 @@ export function NutritionView({ lang }: NutritionViewProps) {
           <p className="text-xs font-bold text-ink-500">{t.equationNote}</p>
 
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-4xl font-black leading-none text-primary-c">{remaining}</span>
+            <span className="text-4xl font-black leading-none text-primary-c">{formatNumber(remaining, lang)}</span>
             <span className="text-sm font-bold text-ink-500">{t.remaining}</span>
           </div>
 
@@ -361,7 +361,7 @@ function MealCard({
           </span>
           <div className="min-w-0">
             <p className="truncate text-base font-black leading-tight text-ink-900">{lang === 'en' ? slot.en : slot.ar}</p>
-            <p className="mt-1 truncate text-[11px] text-ink-400">{cals} {d.caloriesUnit} · {prot}{d.gramsUnit} {d.caloriesDotProteinG}</p>
+            <p className="mt-1 truncate text-[11px] text-ink-400">{formatNumber(cals, lang)} {d.caloriesUnit} · {formatNumber(prot, lang)}{d.gramsUnit} {d.caloriesDotProteinG}</p>
           </div>
         </div>
         <button

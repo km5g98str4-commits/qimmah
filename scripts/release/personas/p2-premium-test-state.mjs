@@ -15,6 +15,9 @@ import {
 } from '../lib/harness.mjs'
 import { guestToPreview, activateWithMockCode, isActiveSessionKey } from '../lib/drive.mjs'
 
+// [REL-001] numeral-agnostic: the Arabic UI renders Arabic-Indic digits per the
+// one numeral policy. Pinning a digit form makes a CORRECT product change fail here.
+
 export async function run({ browser, url, engine }) {
   const rec = createRecorder(`p2-premium-test-state (${engine})`)
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: 'ar-SA' })
@@ -40,7 +43,7 @@ export async function run({ browser, url, engine }) {
     await settle(page, 3000)
     await goRoute(page, 'workout', 2600)
     const beforeForge = await storageSnapshot(page)
-    await page.locator('button').filter({ hasText: /اليوم 1/ }).first().click({ timeout: 10000 }).catch(() => {})
+    await page.locator('button').filter({ hasText: /اليوم\s*[1١]/ }).first().click({ timeout: 10000 }).catch(() => {})
     await settle(page, 1600)
     const forgedGate = await gateVisible(page)
     const forgedChanged = storageDiff(beforeForge, await storageSnapshot(page)).filter((k) => !k.startsWith('qimmah:tracking:events:'))
@@ -107,7 +110,7 @@ export async function run({ browser, url, engine }) {
 
     await mutate('nutrition.water',
       () => goRoute(page, 'nutrition', 2600),
-      () => tap(page, /\+250/),
+      () => tap(page, /\+\s*(?:250|٢٥٠)/),
       (b, a) => {
         const ml = (s) => { try { return JSON.parse(s || '{}').waterMl || 0 } catch { return 0 } }
         return ml(a['qimmah:nutrition:v2']) > ml(b['qimmah:nutrition:v2'])
@@ -115,7 +118,7 @@ export async function run({ browser, url, engine }) {
 
     await mutate('workout.start',
       () => goRoute(page, 'workout', 2600),
-      () => page.locator('button').filter({ hasText: /اليوم 1/ }).first().click({ timeout: 10000 }),
+      () => page.locator('button').filter({ hasText: /اليوم\s*[1١]/ }).first().click({ timeout: 10000 }),
       (b, a) => Object.keys(a).some((k) => isActiveSessionKey(k) && a[k] && a[k] !== b[k]))
 
     // logSet then finish, inside the session opened above
@@ -186,7 +189,7 @@ export async function run({ browser, url, engine }) {
       const prodBefore = await storageSnapshot(prodPage)
       await dismissGate(prodPage)
       await goRoute(prodPage, 'nutrition', 2400)
-      await tap(prodPage, /\+250/)
+      await tap(prodPage, /\+\s*(?:250|٢٥٠)/)
       await settle(prodPage, 1400)
       const prodGate = await gateVisible(prodPage)
       const prodChanged = storageDiff(prodBefore, await storageSnapshot(prodPage)).filter((k) => !k.startsWith('qimmah:tracking:events:'))

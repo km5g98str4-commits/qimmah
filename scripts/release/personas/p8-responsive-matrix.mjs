@@ -11,6 +11,9 @@
 import { createRecorder, settle, goRoute, WIDTHS, collectErrors, realPageErrors } from '../lib/harness.mjs'
 import { PREFS_KEY } from '../lib/drive.mjs'
 
+// [REL-001] numeral-agnostic: the Arabic UI renders Arabic-Indic digits per the
+// one numeral policy. Pinning a digit form makes a CORRECT product change fail here.
+
 const SURFACES = ['dashboard', 'workout', 'nutrition', 'progress', 'measurements', 'profile', 'settings']
 
 export async function run({ browser, url, engine, seed }) {
@@ -90,7 +93,7 @@ export async function run({ browser, url, engine, seed }) {
 
         // Premium dialog must fit and stay operable at this width.
         await goRoute(page, 'workout', 2400)
-        await page.locator('button').filter({ hasText: /اليوم 1|Day 1/ }).first().click({ timeout: 8000 }).catch(() => {})
+        await page.locator('button').filter({ hasText: /اليوم\s*[1١]|Day\s*1/ }).first().click({ timeout: 8000 }).catch(() => {})
         await settle(page, 1400)
         const gate = await page.evaluate(() => {
           const g = document.querySelector('[data-testid="premium-gate"]')

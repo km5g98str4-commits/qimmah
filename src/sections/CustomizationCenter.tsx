@@ -6,6 +6,7 @@ import { type Customization, getDefaultCustomization } from '@/lib/customization
 import { useCustomization } from '@/lib/customizationContext'
 import { markCompleted, restartOnboarding, setLastStep } from '@/lib/onboarding'
 import { useAuth } from '@/lib/authContext'
+import { useAccess } from '@/lib/access/useAccess'
 import type { WizardCtx } from '@/components/customizer/stepProps'
 import { PreviewSummary } from '@/components/customizer/PreviewSummary'
 import { StepWelcome } from '@/components/customizer/steps/StepWelcome'
@@ -70,7 +71,8 @@ const advancedReviewStep: StepDef = { titleKey: 'ccReview', Component: StepRevie
 export function CustomizationCenter({ onBack, initialStep = 0, mode = 'onboarding' }: CustomizationCenterProps) {
   const lang = useLang()
   const d = onboardingStrings[lang]
-  const { customization, applyCustomization, resetCustomization } = useCustomization()
+  const { customization, applyPlanEdit, resetCustomization } = useCustomization()
+  const { guard: guardPaid } = useAccess()
   const auth = useAuth()
   // المالك الحالي — الإكمال/إعادة التشغيل يُنسبان للحساب لا للجهاز.
   const userId = auth.user?.id ?? null
@@ -221,21 +223,32 @@ export function CustomizationCenter({ onBack, initialStep = 0, mode = 'onboardin
     onRestartOnboarding,
   }
 
-  const saveDraft = () => {
-    applyCustomization(data)
+  /**
+   * [REL-002] مسارا الحفظ في «تعديل خطتي» — **كلاهما فعل مدفوع واحد**.
+   *
+   * كان `saveDraft` و`saveAndClose` يكتبان الخطة مباشرةً، فيغيّر مستخدم المعاينة
+   * هدفه من «تنشيف» إلى «تضخيم» **ويبقى التغيير بعد التحديث**. الزرّ الظاهر لم يكن
+   * العطل — العطل أن **الكتابة نفسها** لم تكن تمرّ بسلطة. ولذلك لا يكفي لفّ زرّ
+   * واحد: كل مسار يُنتج خطة محفوظة يمرّ من `plan.saveEdit` ولا استثناء.
+   *
+   * الحارس هنا واجهة (يفتح بوّابة Premium القانونية بدل التنفيذ)، و`applyPlanEdit`
+   * هو الحماية (يرمي قبل الحالة والتخزين). ولا بوّابة جديدة ولا تنفيذ ثانٍ للحجب.
+   */
+  const saveDraft = guardPaid('plan.saveEdit', () => {
+    applyPlanEdit(data)
     setLastStep(step)
     setSaved(true)
-  }
-  const saveAndClose = () => {
+  })
+  const saveAndClose = guardPaid('plan.saveEdit', () => {
     // لا يكتمل الإعداد والحقول المطلوبة ناقصة — انتقل لأول خطوة ناقصة لإصلاحها.
     if (!allValid) {
       setStep(firstInvalidIndex)
       return
     }
-    applyCustomization(data)
+    applyPlanEdit(data)
     markCompleted(userId, step)
     onBack(true)
-  }
+  })
   const next = () => {
     if (!stepValid) return
     setStep((s) => Math.min(steps.length - 1, s + 1))

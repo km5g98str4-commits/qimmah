@@ -11,6 +11,9 @@ import {
 } from '../lib/harness.mjs'
 import { contextWithState } from '../lib/drive.mjs'
 
+// [REL-001] numeral-agnostic: the Arabic UI renders Arabic-Indic digits per the
+// one numeral policy. Pinning a digit form makes a CORRECT product change fail here.
+
 export async function run({ browser, url, engine, seed }) {
   const rec = createRecorder(`p3-returning-guest (${engine})`)
   const { ctx, page } = await contextWithState(browser, url, seed.seed)
@@ -71,7 +74,7 @@ export async function run({ browser, url, engine, seed }) {
     rec.section('a returning guest is still a Preview user')
     await goRoute(page, 'workout', 2600)
     const beforeAttempt = await storageSnapshot(page)
-    await page.locator('button').filter({ hasText: /اليوم 1/ }).first().click({ timeout: 10000 }).catch(() => {})
+    await page.locator('button').filter({ hasText: /اليوم\s*[1١]/ }).first().click({ timeout: 10000 }).catch(() => {})
     await settle(page, 1600)
     const gate = await page.locator('[data-testid="premium-gate"]').isVisible().catch(() => false)
     const changed = storageDiff(beforeAttempt, await storageSnapshot(page)).filter((k) => !k.startsWith('qimmah:tracking:events:'))

@@ -133,9 +133,13 @@ export async function run({ browser, url, engine }) {
     // NOTE: the dashboard «ابدأ التمرين» CTA is NAVIGATION to #/workout, not a
     // mutation — verified separately below. The real `workout.start` affordance
     // is a plan day card on the Workout screen.
-    await attempt('workout.start', '#/workout plan day card «اليوم 1»',
+    // [REL-001] numeral-agnostic on purpose. The Arabic UI now renders «اليوم ١»
+    // (Arabic-Indic) per the one numeral policy; pinning either digit form would
+    // make this locator fail the next time the policy is applied correctly, and a
+    // locator that breaks on a CORRECT change is a trap, not a guard.
+    await attempt('workout.start', '#/workout plan day card «اليوم ١/1»',
       () => goRoute(page, 'workout', 2600),
-      () => page.locator('button').filter({ hasText: /اليوم 1/ }).first().click({ timeout: 10000 }))
+      () => page.locator('button').filter({ hasText: /اليوم\s*[1١]/ }).first().click({ timeout: 10000 }))
 
     await attempt('workout.startEmpty', '#/workout «ابدأ تمرين فارغ»',
       () => goRoute(page, 'workout', 2400),
@@ -145,9 +149,9 @@ export async function run({ browser, url, engine }) {
       () => goRoute(page, 'nutrition', 2600),
       () => tap(page, /^أضف$/))
 
-    await attempt('nutrition.water', '#/nutrition «+250 مل»',
+    await attempt('nutrition.water', '#/nutrition «+٢٥٠/250 مل»',
       () => goRoute(page, 'nutrition', 2400),
-      () => tap(page, /\+250/))
+      () => tap(page, /\+\s*(?:250|٢٥٠)/))
 
     await attempt('recovery.log', '#/recovery «اعرض توصيتي»',
       () => goRoute(page, 'recovery', 2400),

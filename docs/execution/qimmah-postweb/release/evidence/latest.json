@@ -1,9 +1,9 @@
 {
   "contract": "QIMMAH-SOVEREIGN-PHASE-II-001",
   "agent": "AGENT-A",
-  "head": "03cda8f4a62f2de908571b1c120c021310f928c2",
-  "headSubject": "Merge remote-tracking branch 'origin/codex/qimmah-postweb-convergence-001' into claude/codex-web-sovereign-trace-j9kzwz",
-  "ranAt": "2026-08-15T01:19:05.349Z",
+  "head": "1614d41967eb8d65ce5d1cbaaeb925d020902dbe",
+  "headSubject": "docs(convergence): [QIM-PHASE-II-CONVERGENCE-CLEANUP-001] evidence refresh on the integrated head",
+  "ranAt": "2026-08-15T02:31:19.467Z",
   "provisional": true,
   "provisionalReason": "Web Sovereign run had not landed its final HEAD when this pass executed.",
   "builds": {
@@ -11,13 +11,13 @@
       "mode": "prod",
       "outDir": "dist-release/prod",
       "absDir": "/home/user/qimmah/dist-release/prod",
-      "ms": 12050
+      "ms": 12715
     },
     "mock": {
       "mode": "mock",
       "outDir": "dist-release/mock",
       "absDir": "/home/user/qimmah/dist-release/mock",
-      "ms": 11991
+      "ms": 12624
     }
   },
   "engines": [
@@ -33,8 +33,8 @@
     }
   ],
   "totals": {
-    "pass": 445,
-    "fail": 6,
+    "pass": 450,
+    "fail": 1,
     "blocked": 5
   },
   "suites": [
@@ -175,7 +175,7 @@
           "section": "shipped shell integrity",
           "label": "index.html carries a verifiable build identity",
           "ok": true,
-          "evidence": "<meta name=\"qimmah-build\" content=\"v1.0.0·03cda8f\"> <meta name=\"qimmah-commit\" content=\"03cda8f\"> <meta name=\"qimmah-build-time\" content=\"2026-08-15T01:00:37.492Z\"> <meta name=\"qimmah-sw-version\" content=\"qimmah-03cda8f\">"
+          "evidence": "<meta name=\"qimmah-build\" content=\"v1.0.0·1614d41\"> <meta name=\"qimmah-commit\" content=\"1614d41\"> <meta name=\"qimmah-build-time\" content=\"2026-08-15T02:12:50.032Z\"> <meta name=\"qimmah-sw-version\" content=\"qimmah-1614d41\">"
         },
         {
           "section": "shipped shell integrity",
@@ -312,7 +312,7 @@
           "section": "every RESOLVED historical defect keeps its fix",
           "label": "BUG-019 — Settings capabilities and numeral presentation were inconsistent",
           "ok": true,
-          "evidence": "live owners WITHOUT the central formatter: []"
+          "evidence": "live owners WITHOUT the central formatter: [] · bare render sites BACK: [] · rendered-output truth: p1 numeral section"
         },
         {
           "section": "every RESOLVED historical defect keeps its fix",
@@ -449,36 +449,10 @@
     },
     {
       "suite": "p1-preview-user (chromium)",
-      "pass": 62,
-      "fail": 5,
+      "pass": 67,
+      "fail": 0,
       "blocked": 1,
-      "failures": [
-        {
-          "section": "plan-edit boundary — the SECOND live path to the same paid state",
-          "label": "Preview reaching the plan editor opens the Premium surface OR persists nothing",
-          "evidence": "route=#/setup gateOnChange=false gateOnSave=false goal cut → bulk (after reload)"
-        },
-        {
-          "section": "plan-edit boundary — the SECOND live path to the same paid state",
-          "label": "the declared paid action `plan.saveEdit` is enforced on EVERY live path, not one",
-          "evidence": "path-1 (WorkoutView) is guarded; path-2 (#/setup) wrote goal=\"bulk\" with no gate"
-        },
-        {
-          "section": "numeral policy holds across every LIVE numeric surface (Arabic session)",
-          "label": "LIVE Nutrition renders its numbers in the Arabic numeral policy",
-          "evidence": "latin values: [\"1937\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\"]"
-        },
-        {
-          "section": "numeral policy holds across every LIVE numeric surface (Arabic session)",
-          "label": "LIVE Workout renders its numbers in the Arabic numeral policy",
-          "evidence": "latin values: [\"اليوم 1 · علوي\",\"5\",\"4\",\"اليوم 1 · علوي\",\"اليوم 1 · علوي\",\"5\",\"30\",\"اليوم 2 · سفلي\"]"
-        },
-        {
-          "section": "numeral policy holds across every LIVE numeric surface (Arabic session)",
-          "label": "the SAME fact (training days per week) uses ONE numeral system on every live screen",
-          "evidence": "#/profile \"٤ أيام/أسبوع\" → arabic-indic  vs  #/workout \"4 أيام/أسبوع\" → latin"
-        }
-      ],
+      "failures": [],
       "checks": [
         {
           "section": "entry → onboarding → personalized reveal",
@@ -538,7 +512,7 @@
           "section": "Preview browses every surface (block the action, not the page)",
           "label": "#/nutrition is browsable in Preview",
           "ok": true,
-          "evidence": "hash=#/nutrition len=569 notFound=false"
+          "evidence": "hash=#/nutrition len=570 notFound=false"
         },
         {
           "section": "Preview browses every surface (block the action, not the page)",
@@ -616,13 +590,13 @@
           "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
           "label": "workout.start — affordance reachable",
           "ok": true,
-          "evidence": "#/workout plan day card «اليوم 1»"
+          "evidence": "#/workout plan day card «اليوم ١/1»"
         },
         {
           "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
           "label": "workout.start — Premium surface opens",
           "ok": true,
-          "evidence": "#/workout plan day card «اليوم 1»"
+          "evidence": "#/workout plan day card «اليوم ١/1»"
         },
         {
           "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
@@ -688,13 +662,13 @@
           "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
           "label": "nutrition.water — affordance reachable",
           "ok": true,
-          "evidence": "#/nutrition «+250 مل»"
+          "evidence": "#/nutrition «+٢٥٠/250 مل»"
         },
         {
           "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
           "label": "nutrition.water — Premium surface opens",
           "ok": true,
-          "evidence": "#/nutrition «+250 مل»"
+          "evidence": "#/nutrition «+٢٥٠/250 مل»"
         },
         {
           "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
@@ -814,14 +788,14 @@
         {
           "section": "plan-edit boundary — the SECOND live path to the same paid state",
           "label": "Preview reaching the plan editor opens the Premium surface OR persists nothing",
-          "ok": false,
-          "evidence": "route=#/setup gateOnChange=false gateOnSave=false goal cut → bulk (after reload)"
+          "ok": true,
+          "evidence": "route=#/setup gateOnChange=false gateOnSave=true goal cut → cut (after reload)"
         },
         {
           "section": "plan-edit boundary — the SECOND live path to the same paid state",
           "label": "the declared paid action `plan.saveEdit` is enforced on EVERY live path, not one",
-          "ok": false,
-          "evidence": "path-1 (WorkoutView) is guarded; path-2 (#/setup) wrote goal=\"bulk\" with no gate"
+          "ok": true,
+          "evidence": "path-1 (WorkoutView) is guarded; path-2 (#/setup) wrote goal=\"cut\" with no gate"
         },
         {
           "section": "paid actions with no Preview-reachable affordance — classified, not skipped",
@@ -856,14 +830,14 @@
         {
           "section": "numeral policy holds across every LIVE numeric surface (Arabic session)",
           "label": "LIVE Nutrition renders its numbers in the Arabic numeral policy",
-          "ok": false,
-          "evidence": "latin values: [\"1937\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\"]"
+          "ok": true,
+          "evidence": "latin values: []"
         },
         {
           "section": "numeral policy holds across every LIVE numeric surface (Arabic session)",
           "label": "LIVE Workout renders its numbers in the Arabic numeral policy",
-          "ok": false,
-          "evidence": "latin values: [\"اليوم 1 · علوي\",\"5\",\"4\",\"اليوم 1 · علوي\",\"اليوم 1 · علوي\",\"5\",\"30\",\"اليوم 2 · سفلي\"]"
+          "ok": true,
+          "evidence": "latin values: []"
         },
         {
           "section": "numeral policy holds across every LIVE numeric surface (Arabic session)",
@@ -874,8 +848,8 @@
         {
           "section": "numeral policy holds across every LIVE numeric surface (Arabic session)",
           "label": "the SAME fact (training days per week) uses ONE numeral system on every live screen",
-          "ok": false,
-          "evidence": "#/profile \"٤ أيام/أسبوع\" → arabic-indic  vs  #/workout \"4 أيام/أسبوع\" → latin"
+          "ok": true,
+          "evidence": "#/profile \"٤ أيام/أسبوع\" → arabic-indic  vs  #/workout \"٤ أيام/أسبوع\" → arabic-indic"
         },
         {
           "section": "page health across the whole journey",
@@ -1030,7 +1004,7 @@
           "section": "page health",
           "label": "no raw exception surfaced during the entitled journey",
           "ok": true,
-          "evidence": "تخطَّ إلى المحتوى الرئيسي\nتخطَّ إلى المحتوى\nتمرين\nتمرين\nبدء سريع\nابدأ تمرين اليوم\nاليوم 1 · علوي · 5 تمارين\nابدأ تمرين فارغ\nسجّل مجموعاتك بدون جدول مسبق\nخطتي\nأن"
+          "evidence": "تخطَّ إلى المحتوى الرئيسي\nتخطَّ إلى المحتوى\nتمرين\nتمرين\nبدء سريع\nابدأ تمرين اليوم\nاليوم ١ · علوي · ٥ تمارين\nابدأ تمرين فارغ\nسجّل مجموعاتك بدون جدول مسبق\nخطتي\nأن"
         },
         {
           "section": "page health",
@@ -1083,13 +1057,13 @@
           "section": "the plan itself is retained, not regenerated blank",
           "label": "the workout screen lists the generated plan days",
           "ok": true,
-          "evidence": "تمرين\nتمرين\nبدء سريع\nابدأ تمرين اليوم\nاليوم 1 · علوي · 5 تمارين\nابدأ تمرين فارغ\nسجّل مجموعاتك بدون جدول مسبق\nخطتي\nأنشئ ج"
+          "evidence": "تمرين\nتمرين\nبدء سريع\nابدأ تمرين اليوم\nاليوم ١ · علوي · ٥ تمارين\nابدأ تمرين فارغ\nسجّل مجموعاتك بدون جدول مسبق\nخطتي\nأنشئ ج"
         },
         {
           "section": "refresh · Back · Forward all preserve state",
           "label": "refresh keeps the same plan",
           "ok": true,
-          "evidence": "تمرين\nتمرين\nبدء سريع\nابدأ تمرين اليوم\nاليوم 1 · علوي · 5 تما vs تمرين\nتمرين\nبدء سريع\nابدأ تمرين اليوم\nاليوم 1 · علوي · 5 تما"
+          "evidence": "تمرين\nتمرين\nبدء سريع\nابدأ تمرين اليوم\nاليوم ١ · علوي · ٥ تما vs تمرين\nتمرين\nبدء سريع\nابدأ تمرين اليوم\nاليوم ١ · علوي · ٥ تما"
         },
         {
           "section": "refresh · Back · Forward all preserve state",
@@ -1131,7 +1105,7 @@
           "section": "page health",
           "label": "no raw exception surfaced",
           "ok": true,
-          "evidence": "تخطَّ إلى المحتوى الرئيسي\nتخطَّ إلى المحتوى\nالتمارين\nتمرين\nتمرين\nبدء سريع\nابدأ تمرين اليوم\nاليوم 1 · علوي · 5 تمارين\nابدأ تمرين فارغ\nسجّل مجموعاتك بدون جدول مسب"
+          "evidence": "تخطَّ إلى المحتوى الرئيسي\nتخطَّ إلى المحتوى\nالتمارين\nتمرين\nتمرين\nبدء سريع\nابدأ تمرين اليوم\nاليوم ١ · علوي · ٥ تمارين\nابدأ تمرين فارغ\nسجّل مجموعاتك بدون جدول مسب"
         },
         {
           "section": "page health",
@@ -1423,7 +1397,7 @@
           "section": "primitive-where-object-expected — a scalar in a structured slot must be rejected at the boundary",
           "label": "primitive-where-object-expected: unrelated user data (qimmah:onboarding:v1) was NOT destroyed",
           "ok": true,
-          "evidence": "value={\"completed\":true,\"completedAt\":\"2026-08-15T01:04:38.767Z\"}"
+          "evidence": "value={\"completed\":true,\"completedAt\":\"2026-08-15T02:16:52.528Z\"}"
         },
         {
           "section": "primitive-where-object-expected — a scalar in a structured slot must be rejected at the boundary",
@@ -1459,7 +1433,7 @@
           "section": "stale-active-workout — a foreign/stale session payload must not be resumed as if it were the user’s",
           "label": "stale-active-workout: unrelated user data (qimmah:onboarding:v1) was NOT destroyed",
           "ok": true,
-          "evidence": "value={\"completed\":true,\"completedAt\":\"2026-08-15T01:04:38.767Z\"}"
+          "evidence": "value={\"completed\":true,\"completedAt\":\"2026-08-15T02:16:52.528Z\"}"
         },
         {
           "section": "stale-active-workout — a foreign/stale session payload must not be resumed as if it were the user’s",
@@ -1495,7 +1469,7 @@
           "section": "empty-string-values — empty values are a real disk outcome and must read as absent, not as data",
           "label": "empty-string-values: unrelated user data (qimmah:onboarding:v1) was NOT destroyed",
           "ok": true,
-          "evidence": "value={\"completed\":true,\"completedAt\":\"2026-08-15T01:04:38.767Z\"}"
+          "evidence": "value={\"completed\":true,\"completedAt\":\"2026-08-15T02:16:52.528Z\"}"
         },
         {
           "section": "empty-string-values — empty values are a real disk outcome and must read as absent, not as data",
@@ -1531,7 +1505,7 @@
           "section": "prototype-pollution-payload — untrusted stored JSON must not be able to reach Object.prototype",
           "label": "prototype-pollution-payload: unrelated user data (qimmah:onboarding:v1) was NOT destroyed",
           "ok": true,
-          "evidence": "value={\"completed\":true,\"completedAt\":\"2026-08-15T01:04:38.767Z\"}"
+          "evidence": "value={\"completed\":true,\"completedAt\":\"2026-08-15T02:16:52.528Z\"}"
         },
         {
           "section": "prototype-pollution-payload — untrusted stored JSON must not be able to reach Object.prototype",
@@ -1567,7 +1541,7 @@
           "section": "storage quota failure — a refused write must never look like a success",
           "label": "no raw storage exception reaches the user during a blocked mutation",
           "ok": true,
-          "evidence": "تخطَّ إلى المحتوى الرئيسي\nتخطَّ إلى المحتوى\nالتمارين\nتمرين\nتمرين\nبدء سريع\nابدأ تمرين اليوم\nاليوم 1 · علوي · 5 تمارين\nابدأ تمرين فارغ\nسجّل مجموعاتك بدون جدول مسبق\nخطتي\nأنشئ جدول مخص"
+          "evidence": "تخطَّ إلى المحتوى الرئيسي\nتخطَّ إلى المحتوى\nالتمارين\nتمرين\nتمرين\nبدء سريع\nابدأ تمرين اليوم\nاليوم ١ · علوي · ٥ تمارين\nابدأ تمرين فارغ\nسجّل مجموعاتك بدون جدول مسبق\nخطتي\nأنشئ جدول مخص"
         },
         {
           "section": "storage quota failure — a refused write must never look like a success",
@@ -1962,7 +1936,7 @@
           "section": "invalid routes and deep links resolve honestly",
           "label": "#/dashboard?injected=<script>alert(1)</script> shows no raw exception",
           "ok": true,
-          "evidence": "تخطَّ إلى المحتوى الرئيسي\nتخطَّ إلى المحتوى\nقِمّة\nهلا فيكالسبت · 15 أغسطس\nخلّنا نبدأ بشي واحد\nإحماء قصير\nدقيقتين\nسوّه الحين\nأو سوِّ غيره\nسجّ"
+          "evidence": "تخطَّ إلى المحتوى الرئيسي\nتخطَّ إلى المحتوى\nقِمّة\nهلا فيكالسبت · ١٥ أغسطس\nخلّنا نبدأ بشي واحد\nإحماء قصير\nدقيقتين\nسوّه الحين\nأو سوِّ غيره\nسجّ"
         },
         {
           "section": "invalid routes and deep links resolve honestly",
@@ -1992,13 +1966,13 @@
           "section": "a lazy route chunk that never arrives must not blank the app",
           "label": "the user is told something failed rather than shown a blank screen",
           "ok": true,
-          "evidence": "تخطَّ إلى المحتوى الرئيسي\nصار خطأ غير متوقّع\n\nما قدرنا نحمّل هذي الشاشة. جرّب مرة ثانية — بياناتك محفوظة على جهازك.\n\nمرجع الخطأ: QW-MSTOHKOL-E8A870\n\nجرّب مرة ثانية\nراسل الدعم"
+          "evidence": "تخطَّ إلى المحتوى الرئيسي\nصار خطأ غير متوقّع\n\nما قدرنا نحمّل هذي الشاشة. جرّب مرة ثانية — بياناتك محفوظة على جهازك.\n\nمرجع الخطأ: QW-MSTR2GUY-33519F\n\nجرّب مرة ثانية\nراسل الدعم"
         },
         {
           "section": "a lazy route chunk that never arrives must not blank the app",
           "label": "the failure surface exposes no stack trace or raw message",
           "ok": true,
-          "evidence": "تخطَّ إلى المحتوى الرئيسي\nصار خطأ غير متوقّع\n\nما قدرنا نحمّل هذي الشاشة. جرّب مرة ثانية — بياناتك محفوظة على جهازك.\n\nمرجع الخطأ: QW-MSTOHKOL-E8A870\n\nجرّب مرة ثانية\nراسل الدعم"
+          "evidence": "تخطَّ إلى المحتوى الرئيسي\nصار خطأ غير متوقّع\n\nما قدرنا نحمّل هذي الشاشة. جرّب مرة ثانية — بياناتك محفوظة على جهازك.\n\nمرجع الخطأ: QW-MSTR2GUY-33519F\n\nجرّب مرة ثانية\nراسل الدعم"
         },
         {
           "section": "a lazy route chunk that never arrives must not blank the app",
@@ -2010,7 +1984,7 @@
           "section": "a lazy route chunk that never arrives must not blank the app",
           "label": "a support reference id is offered for correlation (BUG-005 contract)",
           "ok": true,
-          "evidence": "تخطَّ إلى المحتوى الرئيسي\nصار خطأ غير متوقّع\n\nما قدرنا نحمّل هذي الشاشة. جرّب مرة ثانية — بياناتك محفوظة على جهازك.\n\nمرجع الخطأ: QW-MSTOHKOL-E8A870\n\nجرّب مرة ثانية\nراسل الدعم"
+          "evidence": "تخطَّ إلى المحتوى الرئيسي\nصار خطأ غير متوقّع\n\nما قدرنا نحمّل هذي الشاشة. جرّب مرة ثانية — بياناتك محفوظة على جهازك.\n\nمرجع الخطأ: QW-MSTR2GUY-33519F\n\nجرّب مرة ثانية\nراسل الدعم"
         },
         {
           "section": "a lazy route chunk that never arrives must not blank the app",
@@ -2052,7 +2026,7 @@
           "section": "invalid activation input in a production build",
           "label": "hostile activation input never crashes the gate",
           "ok": true,
-          "evidence": "تخطَّ إلى المحتوى الرئيسي\nتخطَّ إلى المحتوى\nالتغذية\nالتغذية\n\nاحتياجك − الأكل + التمرين = المتبقّي\n\n1937\nالمتبقّي\n\n١٬٩٣٧\n\nاحتياجك\n\n−\n\n٠\n\nالأكل\n\n+\n\n٠\n\nالتمرين\n\nبر"
+          "evidence": "تخطَّ إلى المحتوى الرئيسي\nتخطَّ إلى المحتوى\nالتغذية\nالتغذية\n\nاحتياجك − الأكل + التمرين = المتبقّي\n\n١٬٩٣٧\nالمتبقّي\n\n١٬٩٣٧\n\nاحتياجك\n\n−\n\n٠\n\nالأكل\n\n+\n\n٠\n\nالتمرين\n\nب"
         },
         {
           "section": "invalid activation input in a production build",
