@@ -2,13 +2,19 @@
 
 **Contract:** `[QIMMAH-SOVEREIGN-PHASE-II-001]` · AGENT-A (Release Convergence).
 **Branch:** `codex/qimmah-release-convergence-001`.
-**Baseline this pass measured:** `1bcf7a9` = `[PKG-7][green]` of `codex/qimmah-web-sovereign-001`.
+**Baseline this pass measured:** ~~`1bcf7a9` = `[PKG-7][green]`~~ → **`03cda8f`**, the Phase II
+convergence head containing the final Web Sovereign head `d83add2` and all five lanes.
 
-> **Why this file exists.** The Web Sovereign run was still producing packages
-> while this harness was being built. PKG-7 (Layer 3 Settings/numbers/units)
-> landed at 14:08 on 2026-08-14; **Layer 3 Profile, Layer 4 and Layer 6 had not
-> landed.** Every verdict in `RELEASE-CONVERGENCE.md` is therefore
-> **PROVISIONAL** — it describes `1bcf7a9`, not the final HEAD.
+> ## ✅ THIS FILE'S PURPOSE IS DISCHARGED
+>
+> It existed because the Web Sovereign run was still producing packages while this
+> harness was being built. **It is not producing any more:** `PKG-8` landed Layer 3
+> Profile, `PKG-9` followed, and `d83add2` declared the final gate. The verdicts in
+> `RELEASE-CONVERGENCE.md` were re-pronounced on `03cda8f` on 2026-08-15 and are
+> **no longer provisional**.
+>
+> Only **Layer 4** (site-wide touch-target audit) and **Layer 6** (performance)
+> remain outstanding in Web Sovereign, and neither blocks this harness.
 
 ---
 
@@ -34,7 +40,7 @@ Nothing else needs editing. Subsets are available via
 
 | # | Item | Why it needs the final HEAD | Exact re-run when it lands |
 |---|---|---|---|
-| D-1 | **Layer 3 Profile surfaces** (`#/profile` and everything it owns) | PKG-7's stated next action is "continue Layer 3 with Profile". Profile is browsed and width-swept here, but its own package has not landed, so its numbers, routes and controls will change. | `node scripts/release/run-release-convergence.mjs --only=p1,p8` |
+| ~~D-1~~ | ~~**Layer 3 Profile surfaces**~~ | ✅ **DISCHARGED** — `PKG-8` (`e8f3bb6`) landed Profile: one data owner, signed-in-only account actions, route-owned `h1`, 44px targets. Re-measured on `03cda8f`: `p1` and `p8` both cover `#/profile`, and `p8` is 140/0. | — |
 | D-2 | **Layer 4 and Layer 6** (not yet begun at this baseline) | Their surfaces do not exist to attack. Whatever paid mutations or routes they add must be re-classified against `PAID_ACTIONS`. | full `node scripts/release/run-release-convergence.mjs` |
 | D-3 | **REL-001 — numeral policy on live Nutrition/Workout** | Reported here as OPEN at `1bcf7a9`. If a later package fixes it, the same assertion flips green with no edit. If it is not fixed, it lands in production. | `--only=p1,static-ledger` (checks `numeral policy` section + `BUG-019`) |
 | D-4 | **REL-002 — `plan.saveEdit` second live path** | Same: OPEN at `1bcf7a9`. The check is written against behaviour, not against the current file layout, so it survives refactors. | `--only=p1` (section `plan-edit boundary`) |

@@ -1,7 +1,7 @@
 # تقرير جاهزية مكتبة التمارين للإنتاج — Qimmah
 
 **التاريخ:** 2026-08-14 · **الفرع:** `codex/qimmah-exercise-production-001`
-**الأساس:** `1bcf7a9` = `[PKG-7][green]` من `codex/qimmah-web-sovereign-001`
+**الأساس التاريخي:** `1bcf7a9` = `[PKG-7][green]` · **الأساس الحالي: `d83add2`** (تصالح `ed224c3`)
 **البرنامج:** `[QIMMAH-SOVEREIGN-PHASE-II-001]` — حارة C/D (جودة البيانات الوصفية + مانيفست الوسائط)
 
 > **كل رقم في هذا التقرير مقيس آليًا**، مصدره `npm run audit:exercise-metadata` وناتجاه

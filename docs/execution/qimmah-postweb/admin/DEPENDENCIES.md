@@ -1,7 +1,8 @@
 # اعتماديات وصل المركز التنفيذي
 
 `[QIMMAH-SOVEREIGN-PHASE-II-001]` · AGENT-E · الفرع `codex/qimmah-executive-dashboard-001`
-السند: `1bcf7a9` (`[PKG-7][green]` من `codex/qimmah-web-sovereign-001`)
+السند التاريخي: `1bcf7a9` (`[PKG-7][green]`) · **الأساس الحالي: `d83add2`** — رأس Web Sovereign النهائي
+**(تصالحت الحارة معه في `1091451`؛ Layer 3/Profile أُنجز في `PKG-8` ولم يعد متبقّيًا.)**
 
 ---
 

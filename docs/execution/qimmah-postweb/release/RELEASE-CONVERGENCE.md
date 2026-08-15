@@ -1,19 +1,58 @@
 # RELEASE CONVERGENCE — four verdicts
 
-> ## ⚠️ EVERY VERDICT BELOW IS **PROVISIONAL**
+> ## ✅ RE-PRONOUNCED ON THE INTEGRATED HEAD — 2026-08-15
 >
-> **Measured against:** `1bcf7a9` — `[PKG-7][green] fix(settings): restore secure data and numeral policy`
-> on `codex/qimmah-web-sovereign-001`.
+> **Measured against:** `03cda8f` — the Phase II convergence head, which contains
+> the final Web Sovereign head `d83add2` (through `PKG-9`) **and** all five lanes.
 >
-> **This is NOT the final HEAD.** The Web Sovereign run was still producing
-> packages when this pass executed: **Layer 3 Profile, Layer 4 and Layer 6 had
-> not landed.** PKG-7's own state file names its next action as "continue Layer 3
-> with Profile".
+> The earlier pass in this file was provisional against `1bcf7a9` (PKG-7).
+> **That is superseded.** Layer 3 Profile landed in `PKG-8`; Layer 4 and Layer 6
+> remain, and are the only Web Sovereign work still outstanding.
 >
-> A release verdict is a statement about a specific commit. These verdicts
-> describe `1bcf7a9` and **must be re-pronounced against the final HEAD** by
-> re-running the one command in
-> [`DEPENDENCIES.md`](./DEPENDENCIES.md).
+> **Every number in §0.1 below is from that re-run. Nothing is carried over.**
+> Re-run command is unchanged: `node scripts/release/run-release-convergence.mjs`.
+
+## 0.1 Results on the integrated head `03cda8f`
+
+Run `2026-08-15T01:19:05Z` · evidence [`evidence/latest.json`](./evidence/latest.json).
+
+| Suite | Engine | pass | fail | externally blocked |
+|---|---|---:|---:|---:|
+| `static-bundle-safety` | static | 22 | **1** | 0 |
+| `static-regression-ledger` | static | 37 | 0 | 3 |
+| `p1-preview-user` | chromium | 62 | **5** | 1 |
+| `p2-premium-test-state` | chromium | 24 | 0 | 0 |
+| `p3-returning-guest` | chromium | 15 | 0 | 0 |
+| `p4-interrupted-onboarding` | chromium | 16 | 0 | 0 |
+| `p5-dirty-state` | chromium | 52 | 0 | 0 |
+| `p6-auth` | chromium | 50 | 0 | 1 |
+| `p7-failure-conditions` | chromium | 27 | 0 | 0 |
+| `p8-responsive-matrix` | chromium | 140 | 0 | 0 |
+| **TOTAL** | | **445** | **6** | **5** |
+
+⚠️ **`VALIDATION_DOWNGRADE = WEBKIT_UNAVAILABLE`** — no WebKit build exists in this
+container (`/opt/pw-browsers/webkit-2311/pw_run.sh` absent, downloads disabled), so
+**every browser number above is Chromium 141.0.7390.37 only**. The earlier WebKit
+columns in this file were measured on `1bcf7a9` and **do not describe this head**.
+
+**The 6 failures are 3 defects, none unexplained:**
+
+1. **REL-003 (1 failure) — deliberate, must stay red.** The shipped destination is
+   the Salla store root, not a product URL. `EXTERNALLY_BLOCKED / COMMERCIAL BLOCKER`
+   until a real product URL exists. Reclassifying it green is forbidden.
+2. **REL-002 (2 failures) — P1, still open.** `plan.saveEdit` is guarded on
+   `WorkoutView` but **not** on `#/setup`: a Preview user changed goal `cut → bulk`
+   and it **survived a reload**, with no gate on change and none on save.
+3. **REL-001 (3 failures) — P2, partially fixed, still open on the live surfaces.**
+   `22e9a4c` applied `formatNumber` to the live `NutritionView`/`WorkoutView` and
+   the static ledger went green — but the **browser** shows Latin digits still
+   reaching Arabic sessions (Nutrition `1937`; Workout `اليوم 1 · علوي`, `5`, `30`),
+   and the same fact disagrees across screens (`#/profile` `٤ أيام/أسبوع`
+   arabic-indic vs `#/workout` `4 أيام/أسبوع` latin).
+   **Merge fidelity was verified**: both live files are byte-identical to lane head
+   `8bc53b2`, so the fix was **not lost in the merge — it is incomplete**.
+   *Lesson recorded:* the lane re-ran only the static suites after that fix. Presence
+   of `formatNumber` in a file is not proof that every rendered number uses it.
 
 **Contract:** `[QIMMAH-SOVEREIGN-PHASE-II-001]` · AGENT-A (Release Convergence / adversarial QA)
 **Branch:** `codex/qimmah-release-convergence-001`
@@ -334,14 +373,14 @@ What **is** proven, and is a genuine asset for the day the backend exists:
 
 Three independent reasons, any one sufficient:
 
-1. **The baseline is not the tip.** `1bcf7a9` is PKG-7; Layer 3 Profile, Layer 4 and Layer 6 are still coming. A merge verdict about a commit that is not the tip is not a merge verdict.
+1. ~~**The baseline is not the tip.**~~ ✅ **Closed** — this pass measured `03cda8f`, which contains the final Web Sovereign head `d83add2` and all five lanes. Layer 3 Profile landed in `PKG-8`; only Layer 4 and Layer 6 remain.
 2. **Two open defects** — REL-001 (P2) and REL-002 (P1) — and REL-002 in particular is a paid-boundary inconsistency, which is the class this whole programme exists to prevent shipping.
 3. **Open defects** REL-001, REL-002, REL-004 all remain unresolved.
 4. **The charter's landing gate was not completed in this pass** and is outside this contract's scope:
    - `npm run typecheck` ✅ exit 0 · `npm run lint` ✅ exit 0 (both run here)
    - `npm run build` ✅ (both artifacts built)
-   - `npm run test:gate` — **not run** (124 scripts; out of scope per the contract)
-   - **CI must be read before any landing** (charter §4.0): `gh pr checks` / `gh run list --branch main --limit 5` — **not performed**
+   - `npm run test:gate` — ✅ **run and green on the integrated head**, exit 0 across all 109 steps after `npm ci`
+   - **CI must be read before any landing** (charter §4.0) — **still not performed**; the integrated head has not been pushed through CI yet
 5. **The merge button is the founder's alone** (charter §1.1). No agent may merge, and no authorization to do so exists in this contract.
 
 **What would make it issuable:** final HEAD + REL-001/REL-002/REL-004 resolved or
@@ -354,19 +393,20 @@ a founder-signed `[CTO-n]`.
 
 | Verdict | Result | Gating item |
 |---|---|---|
-| `GO_FOUNDER_DEVICE_QA` | **PROVISIONAL GO** | none blocking; carry REL-001 and REL-002 into the session |
-| `GO_PREVIEW_FREE_USERS` | **PROVISIONAL GO, CONDITIONAL** | REL-002 must be closed or explicitly declared free |
+| `GO_FOUNDER_DEVICE_QA` | **GO** | on the integrated head; carry REL-001/REL-002 into the session knowingly |
+| `GO_PREVIEW_FREE_USERS` | **NO-GO** | REL-002 is a *proven* paid-boundary breach on `#/setup`, not a theoretical one |
+| `GO_AUTHENTICATED_FREE` | **NO-GO** | EXTERNAL-003 — live account lifecycle never proven against a real server |
 | `GO_PAID_COMMERCIAL_FUNNEL` | **NO-GO** | EXTERNAL-001 (product binding) + EXTERNAL-002 (no backend) |
-| `GO_MERGE_MAIN` | **NO-GO / NOT YET ISSUABLE** | non-tip baseline + open defects + gate/CI not completed + founder-only authority |
+| `GO_MERGE_MAIN` | **NO-GO** | REL-002 open · WebKit unproven on this head · founder-only authority (charter §1.1) |
 
-### Open defects at `1bcf7a9`
+### Open defects at `03cda8f` (the integrated head)
 
 | id | severity | title |
 |---|---|---|
-| REL-001 | P2 | numeral policy applied to two importer-less files; live Nutrition/Workout still render Latin digits in Arabic |
+| REL-001 | P2 | **still open** — partially fixed in `22e9a4c`; the browser still shows Latin digits on live Nutrition/Workout in Arabic |
 | REL-002 | P1 | `plan.saveEdit` enforced on one live path, open on the customization-centre path |
 | REL-003 | P1 commercial (externally blocked) | shipped Premium destination is the Salla store root, not the product |
-| REL-004 | P3 | data-key registry registers a dead owner's key and omits the live active-session key |
+| ~~REL-004~~ | P3 | ✅ **CLOSED** in `1412648` — the live `qimmah:activeWorkout:v1` is registered; ledger 37/0 |
 
 ---
 
