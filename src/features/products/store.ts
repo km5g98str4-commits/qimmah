@@ -1,5 +1,6 @@
 // مخزن المنتجات الداخلي — localStorage، مفتوح بالباركود، مع دمج (dedup) وسجل تدقيق.
 
+import { readJson, writeJson, type WriteResult } from '@/lib/safeStorage'
 import type {
   AuditAction,
   AuditEntry,
@@ -22,42 +23,31 @@ function nowIso(): string {
   return new Date().toISOString()
 }
 
+/**
+ * [D-1/٣] التخزين المفحوص — لا `localStorage` خام.
+ *
+ * كان المخزن يكتب خامًا ويبتلع الفشل بتعليق «غير حرج»، بينما `upsertProduct`
+ * يعيد منتجًا كأن الحفظ نجح. وهي بعينها صورة BUG-009 التي أُغلقت في التغذية
+ * وBUG-012 في التمرين: **شاشةُ نجاحٍ فوق كتابةٍ لم تحدث**.
+ *
+ * المرور بـ`writeJson` لا يغيّر توقيع أي مُصدَّر، لكنه يُدخل الفشل في قناة
+ * الإبلاغ المركزية (`recordFailure` → `getStorageFailure`/`onStorageFailure`)
+ * التي يعرضها التطبيق أصلًا — فيتوقّف الفشل عن كونه غير مرئي.
+ */
 function readDb(): ProductDb {
-  if (typeof window === 'undefined') return {}
-  try {
-    const raw = window.localStorage.getItem(DB_KEY)
-    return raw ? (JSON.parse(raw) as ProductDb) : {}
-  } catch {
-    return {}
-  }
+  return readJson<ProductDb>(DB_KEY, {})
 }
 
-function writeDb(db: ProductDb): void {
-  if (typeof window === 'undefined') return
-  try {
-    window.localStorage.setItem(DB_KEY, JSON.stringify(db))
-  } catch {
-    /* تجاهل — التخزين قد يكون ممتلئًا، ليس حرجًا */
-  }
+function writeDb(db: ProductDb): WriteResult {
+  return writeJson(DB_KEY, db)
 }
 
 function readAuditLog(): AuditEntry[] {
-  if (typeof window === 'undefined') return []
-  try {
-    const raw = window.localStorage.getItem(AUDIT_KEY)
-    return raw ? (JSON.parse(raw) as AuditEntry[]) : []
-  } catch {
-    return []
-  }
+  return readJson<AuditEntry[]>(AUDIT_KEY, [])
 }
 
-function writeAuditLog(entries: AuditEntry[]): void {
-  if (typeof window === 'undefined') return
-  try {
-    window.localStorage.setItem(AUDIT_KEY, JSON.stringify(entries))
-  } catch {
-    /* تجاهل — غير حرج */
-  }
+function writeAuditLog(entries: AuditEntry[]): WriteResult {
+  return writeJson(AUDIT_KEY, entries)
 }
 
 function appendAudit(entry: AuditEntry): void {
