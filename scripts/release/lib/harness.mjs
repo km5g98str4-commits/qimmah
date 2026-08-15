@@ -13,8 +13,8 @@
 //   • No `|| true`, no soft-fail, no inflated timeouts. A suite that cannot run
 //     is reported as BLOCKED with a named reason, never as a pass.
 
-import { spawn, spawnSync } from 'node:child_process'
-import { mkdirSync, rmSync, existsSync } from 'node:fs'
+import { spawn, spawnSync, execSync } from 'node:child_process'
+import { mkdirSync, rmSync, existsSync, writeFileSync, readFileSync, statSync, readdirSync } from 'node:fs'
 import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -93,7 +93,67 @@ export function buildArtifact(mode) {
   })
   if (run.status !== 0) throw new Error(`vite build failed for artifact "${mode}" (exit ${run.status})`)
   if (!existsSync(resolve(abs, 'index.html'))) throw new Error(`artifact "${mode}" produced no index.html`)
-  return { mode, outDir: spec.outDir, absDir: abs, ms: Date.now() - t0 }
+  // ── [FINAL-CONVERGENCE §15] بصمة الأرتيفكت ───────────────────────────────
+  // تُكتب مع كل بناء كي يستطيع `--skip-build` أن يثبت أن ما يعيد استعماله
+  // بُني من **هذا** الرأس. بلا هذه البصمة كان يُعاد استعمال dist مبني على SHA
+  // أقدم، ثم يُختم التقرير بالرأس الحالي — أي دليل بائت يُقدَّم دليلًا جاريًا.
+  const stamp = { mode, head: headSha(), builtAt: new Date().toISOString(), sourceFingerprint: sourceFingerprint() }
+  writeFileSync(resolve(abs, ARTIFACT_STAMP), JSON.stringify(stamp, null, 2))
+  return { mode, outDir: spec.outDir, absDir: abs, ms: Date.now() - t0, ...stamp }
+}
+
+/** اسم ملف البصمة داخل كل أرتيفكت. */
+export const ARTIFACT_STAMP = '.qimmah-build-stamp.json'
+
+/** رأس git الحالي — 'unknown' حين لا يكون المستودع متاحًا. */
+export function headSha() {
+  try { return execSync('git rev-parse HEAD', { cwd: ROOT }).toString().trim() } catch { return 'unknown' }
+}
+
+/**
+ * بصمة المصدر: أحدث زمن تعديل عبر `src/`، `public/`، `index.html` وملفات البناء.
+ * تكشف تعديلًا غير ملتزَم بعد البناء — وهو ما لا يكشفه هاش الرأس وحده.
+ */
+export function sourceFingerprint() {
+  const roots = ['src', 'public', 'index.html', 'vite.config.ts', 'package.json', 'tailwind.config.js']
+  let newest = 0
+  const walk = (rel) => {
+    const abs = resolve(ROOT, rel)
+    if (!existsSync(abs)) return
+    const st = statSync(abs)
+    if (st.isDirectory()) { for (const e of readdirSync(abs)) walk(`${rel}/${e}`); return }
+    if (st.mtimeMs > newest) newest = st.mtimeMs
+  }
+  for (const r of roots) walk(r)
+  return Math.round(newest)
+}
+
+/**
+ * يتحقّق أن أرتيفكتًا موجودًا على القرص يصلح دليلًا **للرأس الحالي**.
+ * يرمي بفحص مسمّى عند: غياب البصمة · اختلاف الرأس · مصدر أحدث من البناء.
+ * هذا هو ثمن `--skip-build`: إعادة استعمال مسموحة، وادّعاء بائت ممنوع.
+ */
+export function verifyArtifact(mode) {
+  const spec = ARTIFACTS[mode]
+  if (!spec) throw new Error(`unknown artifact mode: ${mode}`)
+  const abs = resolve(ROOT, spec.outDir)
+  const stampPath = resolve(abs, ARTIFACT_STAMP)
+  if (!existsSync(resolve(abs, 'index.html'))) {
+    throw new Error(`STALE_ARTIFACT_REFUSED: artifact "${mode}" is not built — cannot honour --skip-build`)
+  }
+  if (!existsSync(stampPath)) {
+    throw new Error(`STALE_ARTIFACT_REFUSED: artifact "${mode}" has no ${ARTIFACT_STAMP} — it predates fingerprinting and cannot be certified for this HEAD`)
+  }
+  const stamp = JSON.parse(readFileSync(stampPath, 'utf8'))
+  const head = headSha()
+  if (stamp.head !== head) {
+    throw new Error(`STALE_ARTIFACT_REFUSED: artifact "${mode}" was built at ${String(stamp.head).slice(0, 9)} but HEAD is ${head.slice(0, 9)} — evidence from an older SHA is invalid`)
+  }
+  const src = sourceFingerprint()
+  if (src > Number(stamp.sourceFingerprint || 0)) {
+    throw new Error(`STALE_ARTIFACT_REFUSED: source changed after artifact "${mode}" was built (source ${src} > build ${stamp.sourceFingerprint}) — rebuild before reusing`)
+  }
+  return { mode, outDir: spec.outDir, absDir: abs, reused: true, ...stamp }
 }
 
 /** Serves a built artifact with `vite preview` — the shipped bytes, not the dev server. */

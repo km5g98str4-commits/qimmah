@@ -22,7 +22,7 @@ import { execSync } from 'node:child_process'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import * as playwright from 'playwright'
-import { ROOT, buildArtifact, serveArtifact, waitForServer, engineAvailable } from './lib/harness.mjs'
+import { ROOT, buildArtifact, verifyArtifact, serveArtifact, waitForServer, engineAvailable } from './lib/harness.mjs'
 import { captureGuestSeed } from './lib/drive.mjs'
 
 const args = process.argv.slice(2)
@@ -74,7 +74,15 @@ if (!has('skip-build')) {
     builds[mode] = buildArtifact(mode)
   }
 } else {
-  console.log('\n▶ --skip-build: reusing existing dist-release/ artifacts')
+  // ── [FINAL-CONVERGENCE §15] إعادة الاستعمال تُثبَت، لا تُفترض ──────────────
+  // كان `--skip-build` يعيد استعمال dist-release/ بلا أي تحقّق، ثم يختم
+  // التقرير بالرأس الحالي — فنتيجة مبنيّة على SHA أقدم تُقدَّم دليلًا جاريًا.
+  // الآن يرفض بفحص مسمّى (STALE_ARTIFACT_REFUSED) عند أي عدم تطابق.
+  console.log('\n▶ --skip-build: verifying existing dist-release/ artifacts against HEAD …')
+  for (const mode of needArtifacts) {
+    builds[mode] = verifyArtifact(mode)
+    console.log(`  ✓ "${mode}" built at ${String(builds[mode].head).slice(0, 9)} — matches HEAD`)
+  }
 }
 
 // ── serve ──────────────────────────────────────────────────────────────────
@@ -160,8 +168,15 @@ const record = {
   head: HEAD,
   headSubject: HEAD_SUBJECT,
   ranAt: new Date().toISOString(),
-  provisional: true,
-  provisionalReason: 'Web Sovereign run had not landed its final HEAD when this pass executed.',
+  // الحكم «مبدئي» يُحسب ولا يُثبَّت: مبدئي فقط حين نقص محرّك أو أُقصيت أطقم.
+  provisional: downgrades.length > 0 || only.length > 0,
+  provisionalReason:
+    downgrades.length > 0
+      ? `validation downgraded: ${downgrades.map((d) => d.code).join(', ')}`
+      : only.length > 0
+        ? `partial run — only=${only.join(',')}`
+        : null,
+  artifactsReused: has('skip-build'),
   builds,
   engines,
   validationDowngrades: downgrades,
