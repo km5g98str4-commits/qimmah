@@ -55,14 +55,35 @@ try {
   page.on('console', (message) => { if (message.type() === 'error') diagnostics.push(`console: ${message.text()}`) })
   await page.goto(URL, { waitUntil: 'domcontentloaded' })
   const seeded = seed()
+  // **الزرع لا يغيّر المسار، والتنقّل يقع بعد إعادة التحميل لا قبلها.**
+  //
+  // كان `location.hash = '#/settings'` يجري هنا فيبدأ استيراد قطعة مسار الإعدادات
+  // (lazy)، ثم يقطعه `reload()` بعده مباشرةً. وWebKit يُظهر الاستيراد المقطوع
+  // خطأً حقيقيًا — `TypeError: Importing a module script failed` — يلتقطه
+  // `RouteErrorBoundary` فيُسجَّل في console، فيسقط تأكيد «لا أخطاء صفحة أو console».
+  // Chromium يبتلع الاستيراد المُجهَض بلا خطأ، فبقي السباق مخفيًا حتى شُغِّل WebKit.
+  // (قِيس: نفس الأمر مرّ ثم سقط بلا أي تغيير كود — سباق لا انحدار.)
   await page.evaluate(({ seeded, keys }) => {
     localStorage.setItem(keys.auth, JSON.stringify(seeded.auth))
     localStorage.setItem(keys.accounts, JSON.stringify({ [seeded.uid]: { completedAt: '2026-01-01T00:00:00.000Z' } }))
     localStorage.setItem(keys.prefs, JSON.stringify({ language: 'ar' }))
-    location.hash = '#/settings'
   }, { seeded, keys: { auth: K_AUTH, accounts: K_ACCOUNTS, prefs: K_PREFS } })
-  await page.reload({ waitUntil: 'networkidle' })
-  await page.locator('[data-testid="settings-numbers-policy"]').waitFor()
+  // ولا نُسابق إعادة تحميل التطبيق نفسه: زرع جلسة حسابٍ مختلف يجعل `App.tsx:176`
+  // يفرض `window.location.reload()` بعد مسح بقايا الحساب السابق. فنتقارب على شرط
+  // الجاهزية بدل التنافس على تنقّل. (طريقة الوصول لا ما يُفحَص — لا تأكيد يتغيّر.)
+  const policy = page.locator('[data-testid="settings-numbers-policy"]')
+  let ready = false
+  for (let attempt = 0; attempt < 5 && !ready; attempt += 1) {
+    try {
+      await page.goto(`${URL}/#/settings`, { waitUntil: 'domcontentloaded' })
+      await policy.waitFor({ timeout: 8000 })
+      await page.waitForLoadState('networkidle').catch(() => {})
+      ready = true
+    } catch (error) {
+      if (attempt === 4) throw error
+      await page.waitForTimeout(400)
+    }
+  }
 
   console.log('\n=== العربية: تنفيذ حيّ وسياسة صادقة ===')
   check('المسار المباشر بقي #/settings', await page.evaluate(() => location.hash) === '#/settings')

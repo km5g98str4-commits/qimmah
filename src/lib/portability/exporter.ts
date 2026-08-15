@@ -63,7 +63,12 @@ export function exportFilename(now: Date = new Date()): string {
   return `qimmah-data-${now.getFullYear()}-${p(now.getMonth() + 1)}-${p(now.getDate())}.json`
 }
 
-export type DeliveryMethod = 'share' | 'download' | 'unavailable'
+/**
+ * `cancelled` = أغلق المستخدم ورقة المشاركة بنفسه. ليست نجاحًا ولا فشلًا، ولذلك
+ * لا تُخلط بـ`share`: كانت تُعاد `share` عند الإلغاء فتظهر «تمت مشاركة نسخة بياناتك»
+ * لمستخدم **لم يشارك شيئًا** — طمأنينة كاذبة يمنعها الميثاق §6 (الصدق قبل الطمأنينة).
+ */
+export type DeliveryMethod = 'share' | 'download' | 'cancelled' | 'unavailable'
 
 /**
  * يسلّم الحزمة محلّيًا: يفضّل ورقة المشاركة الأصلية (Web Share API مع ملفّ) حين تتاح
@@ -101,8 +106,9 @@ export async function deliverBundle(
           await nav.share({ files: [file], title: exportShareTitle(lang) })
           return 'share'
         } catch (err) {
-          // إلغاء المستخدم (AbortError) ليس فشلًا — لا نُكمل للتنزيل كي لا نُكرّر.
-          if (err && typeof err === 'object' && (err as { name?: string }).name === 'AbortError') return 'share'
+          // إلغاء المستخدم (AbortError) ليس فشلًا — لا نُكمل للتنزيل كي لا نُكرّر،
+          // ولا ندّعي مشاركةً لم تقع.
+          if (err && typeof err === 'object' && (err as { name?: string }).name === 'AbortError') return 'cancelled'
           // خطأ حقيقي في المشاركة → نُكمل لمسار التنزيل.
         }
       }

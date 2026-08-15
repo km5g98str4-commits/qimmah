@@ -96,13 +96,33 @@ async function gotoSettings(page, uid, token) {
       await page.waitForTimeout(150)
     }
   }
-  // اربط الجلسة المزروعة (reload) ثم انتقل للإعدادات (بعض التهيئة تحوّل للوحة عند الإقلاع).
-  await page.reload({ waitUntil: 'domcontentloaded' })
-  await page.evaluate(() => { window.location.hash = '#/settings' })
+  // **لا نُسابق إعادة تحميل التطبيق نفسه — نتقارب على شرط الجاهزية.**
+  //
+  // زرعُ جلسةٍ لحسابٍ مختلف يجعل `reconcileAccountScope` يمسح بقايا الحساب السابق،
+  // و`App.tsx:176` يفرض عندها `window.location.reload()`. فكان `page.reload()` هنا
+  // يتنافس مع إعادة تحميل التطبيق المشروعة، فتُلغى إحداهما: WebKit يسمّيها
+  // `Frame load interrupted`، وChromium يبتلعها بصمت — فبقي السباق مخفيًا حتى
+  // شُغِّلت الأطقم على WebKit. **تنافس تنقّلين لا عطل منتج**، وقد ثبت بأن نفس الأمر
+  // بلا تغيير كود يمرّ مرّةً ويسقط أخرى.
+  //
+  // ولذلك: تنقّل صريح واحد إلى الإعدادات، ثم **انتظار الشرط الحقيقي** (ظهور قسم
+  // البيانات)، وإعادة المحاولة إن قطع التطبيق تنقّلنا. لا تأكيد يتغيّر — هذه طريقة
+  // الوصول إلى الشاشة لا ما يُفحَص عليها.
+  const dataGroup = page.locator('[data-testid="settings-group-data"]')
+  let ready = false
+  for (let attempt = 0; attempt < 5 && !ready; attempt += 1) {
+    try {
+      await page.goto(`${URL}/#/settings`, { waitUntil: 'domcontentloaded' })
+      await dataGroup.waitFor({ state: 'visible', timeout: 8000 })
+      await page.waitForLoadState('networkidle').catch(() => {})
+      ready = true
+    } catch (error) {
+      if (attempt === 4) throw error
+      await page.waitForTimeout(400)
+    }
+  }
   // البنية الجديدة تجعل أقسام الإعدادات مطوية. افتح «البيانات» كما يفعل المستخدم
   // بدل افتراض أن زر الاستيراد ظاهر مباشرةً في الصفحة.
-  const dataGroup = page.locator('[data-testid="settings-group-data"]')
-  await dataGroup.waitFor({ state: 'visible', timeout: 15000 })
   if (!(await dataGroup.evaluate((node) => (node instanceof HTMLDetailsElement ? node.open : false)))) {
     await dataGroup.locator('summary').click()
   }
@@ -180,6 +200,43 @@ async function run() {
     console.log('\n=== user A: تصدير حقيقي ثم استيراده يجب أن ينجح ===')
     // ازرع متجرًا بسيطًا (هدف الخطوات) كي تحمل النسخة محتوى قابلًا للمعاينة.
     await page.evaluate((k) => localStorage.setItem(k, JSON.stringify(8000)), K_STEP_GOAL)
+
+    // [BUG-030] مسارا التسليم ليسا واحدًا، والمحرّك هو من يختار.
+    //
+    // `deliverBundle` يفضّل **ورقة المشاركة الأصلية** حين تتوفّر مشاركة الملفّات، ويسقط
+    // إلى تنزيل Blob حين لا تتوفّر. وWebKit/Safari **يوفّرها على أصل حقيقي** (قِيس:
+    // `navigator.share` و`canShare` دالّتان على الصفحة المخدومة، لا على `about:blank`)،
+    // بينما Chromium بلا رأس لا يوفّرها. فكان هذا الطقم يفترض التنزيل دائمًا ويتعلّق
+    // ٣٠ ثانية على WebKit — **عمى أداة عن سلوك صحيح**، لا عطل منتج.
+    //
+    // فنُثبت الفرعين معًا بدل إسقاط أحدهما: أولًا أن المشاركة الأصلية تُسلَّم وتُبلَّغ
+    // بصدق حيث تتوفّر، ثم نُحيّدها لنُلزم مسار التنزيل — لأن تأكيدات العزل أدناه تقرأ
+    // **الملفّ المُصدَّر نفسه**، ولا بديل عنه.
+    const canShareFiles = await page.evaluate(() => {
+      try {
+        return !!navigator.canShare && navigator.canShare({ files: [new File(['{}'], 'a.json', { type: 'application/json' })] })
+      } catch { return false }
+    })
+    if (canShareFiles) {
+      await page.locator('[data-testid="settings-data-export"]').click()
+      await page.waitForSelector('[data-testid="settings-export-note"]', { timeout: 8000 })
+      const sharedOk = await page.locator('[data-testid="settings-export-note"]').isVisible()
+      const noError = !(await page.locator('[data-testid="settings-import-error"]').isVisible().catch(() => false))
+      check('مشاركة أصلية متاحة ⇒ التصدير يُسلَّم عبرها ويُبلَّغ نجاحًا بلا خطأ', sharedOk && noError)
+    }
+
+    /**
+     * يُحيّد مشاركة الملفّات في الوثيقة الحالية فيَلزم `deliverBundle` مسار التنزيل.
+     * ليس إضعافًا: يحاكي متصفّحًا بلا Web Share (وهو واقع Chromium وFirefox)، ويُبقي
+     * كل تأكيدات الملفّ المُصدَّر أدناه كما هي. ويُعاد استدعاؤه بعد كل تنقّل لأن
+     * التحييد يعيش في وثيقة واحدة.
+     */
+    const forceDownloadDelivery = (p) => p.evaluate(() => {
+      try { Object.defineProperty(navigator, 'canShare', { configurable: true, value: undefined }) } catch { /* غير قابل للتهيئة */ }
+      try { Object.defineProperty(navigator, 'share', { configurable: true, value: undefined }) } catch { /* غير قابل للتهيئة */ }
+    })
+
+    await forceDownloadDelivery(page)
     const [download] = await Promise.all([
       page.waitForEvent('download'),
       page.locator('[data-testid="settings-data-export"]').click(),
@@ -215,6 +272,8 @@ async function run() {
     const bStepGoal = await page.evaluate((k) => localStorage.getItem(k), K_STEP_GOAL)
     check('B لا يملك هدف خطوات A (صفر بقايا)', bStepGoal === null)
     // تصدير B الحقيقي يجب أن يخلو من قيمة A (8000) — إثبات العزل عبر الواجهة.
+    // `gotoSettings` أعادت التحميل، فالتحييد ماتَ مع الوثيقة السابقة ويُعاد هنا.
+    await forceDownloadDelivery(page)
     const [dlB] = await Promise.all([
       page.waitForEvent('download'),
       page.locator('[data-testid="settings-data-export"]').click(),

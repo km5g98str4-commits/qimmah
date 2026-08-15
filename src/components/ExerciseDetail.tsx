@@ -46,7 +46,13 @@ export function ExerciseDetail({ lang, exerciseId, onClose, onAddToPlan }: Exerc
   const rec = useMemo(() => getRecord(exerciseId), [exerciseId])
 
   useEffect(() => {
-    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    // [BUG-029] لا يلتقط هذا الحوار «ما كان مركَّزًا» ولا يستعيده.
+    //
+    // **Safari لا يمنح الزرّ بؤرةً عند النقر**، بل يُسندها إلى أقرب سلف قابل للتركيز
+    // (`<main tabIndex={-1}>` في `MobileShell`)، فالملتقَط كان `<main>` لا `body`.
+    // والأهمّ: التنظيف يجري قبل إزالة الحوار، والمحرّك يُعيد الإسناد عند الإزالة —
+    // فأي استعادة من هنا مدهوسة بالتعريف. المالك هو `ExerciseLibraryView` (انظر
+    // تعليقها)، ويستعيدها بعد الإزالة في `useLayoutEffect`.
     const previousOverflow = document.body.style.overflow
     const frame = window.requestAnimationFrame(() => closeButtonRef.current?.focus())
     document.body.style.overflow = 'hidden'
@@ -83,7 +89,10 @@ export function ExerciseDetail({ lang, exerciseId, onClose, onAddToPlan }: Exerc
       window.cancelAnimationFrame(frame)
       document.removeEventListener('keydown', handleKeyDown)
       document.body.style.overflow = previousOverflow
-      previousFocus?.focus()
+      // **استعادة البؤرة ليست من شأن الحوار** — انظر `ExerciseLibraryView`.
+      // هذا التنظيف يجري **قبل** إزالة الحوار من DOM، وWebKit يُسند البؤرة عند
+      // الإزالة إلى أقرب سلف قابل للتركيز فيدهس أي `focus()` هنا. فالمالك هو
+      // الشاشة التي تملك المُشغِّل، وتستعيدها في `useLayoutEffect` بعد الإزالة.
     }
   }, [onClose])
 

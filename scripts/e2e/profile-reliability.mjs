@@ -67,6 +67,40 @@ function authSeed() {
   }
 }
 
+/**
+ * [BUG-034] الوصول إلى «ملفك»: إقلاع وثيقة كامل **والهاش موجود فيه من البداية**.
+ *
+ * ثلاثة قيود، كسرتُ كلًّا منها وأنا أُصلح الآخر — فتُذكر جميعًا:
+ *   ١. **لا نُسابق إعادة تحميل التطبيق.** زرعُ جلسةِ حسابٍ مختلف يجعل
+ *      `reconcileAccountScope` يمسح البقايا ثم يفرض `App.tsx:176` إعادة تحميل،
+ *      فيتنافس معها `reload()` ⇒ `Frame load interrupted` على WebKit.
+ *   ٢. **ولا بدّ من إقلاع وثيقة بعد الزرع.** الانتقال من `URL` إلى `URL#/profile`
+ *      تنقّلٌ داخل نفس الوثيقة، فلا يُعاد الإقلاع ولا تُقرأ الجلسة. النتيجة المقيسة:
+ *      سقط `هدف مفتاح التذكيرات 44px` على Chromium — قياسٌ على شاشة لم تُقلع بحالتها.
+ *   ٣. **ولا يُكتب الهاش داخل الوثيقة ثم يُعاد تحميلها.** كتابة الهاش تبدأ استيراد
+ *      قطعة المسار (lazy)، ثم يقطعه `reload()` ⇒ على WebKit خطأ حقيقي
+ *      `TypeError: Importing a module script failed` يلتقطه `RouteErrorBoundary`
+ *      فيسقط تأكيد «بلا أخطاء console»، وأحيانًا لا يظهر العنوان أصلًا.
+ *
+ * والصيغة التي ترضي الثلاثة: نزرع، ثم نمرّ بـ`about:blank` (التخزين يبقى — نفس الأصل)،
+ * ثم **إقلاع واحد على `URL#/profile`** — فالهاش حاضر لحظة الإقلاع، ولا استيراد سابق
+ * يُقطَع، ولا إعادة تحميل تُسابَق. و`networkidle` لأن التأكيدات تقيس أبعادًا.
+ * طريقةُ وصولٍ لا تأكيد: لا شيء يُفحَص تغيّر.
+ */
+async function bootProfile(page) {
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    try {
+      await page.goto('about:blank')
+      await page.goto(`${URL}/#/profile`, { waitUntil: 'networkidle' })
+      await page.getByRole('heading', { level: 1 }).first().waitFor({ state: 'visible', timeout: 8000 })
+      return
+    } catch (error) {
+      if (attempt === 4) throw error
+      await page.waitForTimeout(400)
+    }
+  }
+}
+
 async function seedAccount(page, language = 'ar') {
   const seeded = authSeed()
   await page.goto(URL, { waitUntil: 'domcontentloaded' })
@@ -74,9 +108,8 @@ async function seedAccount(page, language = 'ar') {
     localStorage.setItem(keys.auth, JSON.stringify(seeded.auth))
     localStorage.setItem(keys.accounts, JSON.stringify({ [seeded.uid]: { completedAt: '2026-01-01T00:00:00.000Z' } }))
     localStorage.setItem(keys.prefs, JSON.stringify({ language }))
-    location.hash = '#/profile'
   }, { seeded, language, keys: { auth: K_AUTH, accounts: K_ACCOUNTS, prefs: K_PREFS } })
-  await page.reload({ waitUntil: 'networkidle' })
+  await bootProfile(page)
 }
 
 async function seedGuest(page) {
@@ -84,12 +117,22 @@ async function seedGuest(page) {
   await page.evaluate((keys) => {
     localStorage.setItem(keys.onboarding, JSON.stringify({ completed: true, completedAt: '2026-01-01T00:00:00.000Z' }))
     localStorage.setItem(keys.prefs, JSON.stringify({ language: 'ar' }))
-    location.hash = '#/profile'
   }, { onboarding: K_ONBOARDING, prefs: K_PREFS })
-  await page.reload({ waitUntil: 'networkidle' })
+  await bootProfile(page)
 }
 
 const height = (locator) => locator.evaluate((node) => node.getBoundingClientRect().height)
+
+/**
+ * هدف اللمس ٤٤بكسل — بتسامح جزء البكسل.
+ *
+ * `getBoundingClientRect()` يعيد أرقامًا عائمة، فعنصر مصمَّم على ٤٤ بالضبط قِيس
+ * **43.99999237060547** فسقط `>= 44`. ليس عطل منتج ولا فرق محرّك: خطأ تمثيل عائم.
+ * والتسامح **جزء من مئة البكسل** — أصغر من أي بكسل جهاز، فلا يُمرّر هدفًا أقصر
+ * فعلًا (٤٣٫٩ يبقى ساقطًا). ونفس نمط `scrollWidth <= clientWidth + 1` المتّبع هنا.
+ */
+const TOUCH_TARGET_MIN = 44 - 0.01
+const meetsTouchTarget = (value) => value >= TOUCH_TARGET_MIN
 let browser
 try {
   await waitForServer()
@@ -116,9 +159,9 @@ try {
   await accountPage.getByRole('button', { name: 'الإعدادات والخصوصية', exact: true }).click()
   await accountPage.getByRole('heading', { name: 'الإعدادات والخصوصية', exact: true }).waitFor()
   const profileBack = accountPage.getByRole('button', { name: 'رجوع', exact: true })
-  check('زر الرجوع في شاشة Profile الفرعية 44px', await height(profileBack) >= 44)
+  check('زر الرجوع في شاشة Profile الفرعية 44px', meetsTouchTarget(await height(profileBack)))
   const switchHeights = await accountPage.getByRole('switch').evaluateAll((nodes) => nodes.map((node) => node.getBoundingClientRect().height))
-  check('كل مفاتيح السمة/الصحة الظاهرة أهدافها 44px', switchHeights.length >= 2 && switchHeights.every((value) => value >= 44), JSON.stringify(switchHeights))
+  check('كل مفاتيح السمة/الصحة الظاهرة أهدافها 44px', switchHeights.length >= 2 && switchHeights.every(meetsTouchTarget), JSON.stringify(switchHeights))
 
   await accountPage.locator('[data-testid="profile-canonical-settings"]').click()
   await accountPage.getByRole('heading', { name: 'الإعدادات', exact: true }).waitFor()
@@ -154,7 +197,9 @@ try {
   await accountPage.getByRole('heading', { name: 'التذكيرات', exact: true }).waitFor()
   const reminderSwitch = accountPage.getByRole('switch', { name: 'تفعيل التذكيرات', exact: true })
   check('مفتاح التذكيرات دلالي وصادق ومعطّل على الويب', await reminderSwitch.isDisabled())
-  check('هدف مفتاح التذكيرات 44px', await height(reminderSwitch) >= 44)
+  // عند الفشل: اطبع الارتفاع المقيس. هدف اللمس رقم، و«false» عارية لا تُشخَّص.
+  const reminderHeight = await height(reminderSwitch)
+  check('هدف مفتاح التذكيرات 44px', meetsTouchTarget(reminderHeight), `height=${reminderHeight}`)
   await accountPage.getByRole('button', { name: 'رجوع', exact: true }).click()
   await accountPage.getByRole('button', { name: 'رجوع', exact: true }).click()
   await accountPage.getByRole('button', { name: 'القياسات', exact: true }).click()

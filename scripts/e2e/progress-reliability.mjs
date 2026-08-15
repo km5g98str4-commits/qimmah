@@ -5,7 +5,11 @@ import { spawn } from 'node:child_process'
 import { chromium } from './lib/engine.mjs'
 import { answerHistory, finishInputSteps } from './lib/onboarding-driver.mjs'
 
-const PORT = 5325
+// 5329 لا 5325: كان هذا الطقم يتقاسم 5325 مع `navigation-history.mjs`. وما دام كلٌّ
+// يبني `dist/` ثم يخدمه، فبقاء خادم أحدهما لحظةً إضافية يجعل الآخر يتصل بـ**بناء
+// قديم** بدل بنائه هو — فيقرأ سلوكًا ليس سلوك الكود الحالي. سببٌ صامت لسقوط
+// متقطّع لا يدلّ على المنتج. (لُوحظ فعليًا في تشغيل المصفوفة الكاملة.)
+const PORT = 5329
 const EXTERNAL = process.env.PREVIEW_URL || ''
 const URL = EXTERNAL || `http://localhost:${PORT}`
 const MEASUREMENTS_KEY = 'qimmah:history:measurementLogs:v1'

@@ -128,7 +128,18 @@ try {
   await page.keyboard.press('Escape')
   await dialog.waitFor({ state: 'hidden' })
   check('Escape يرجع إلى المكتبة', (await currentHash(page)) === '#/exercises')
-  check('إغلاق التفصيل يعيد التركيز إلى بطاقة الفتح', await page.locator(`[data-exercise-id="${openedId}"]`).first().evaluate((node) => document.activeElement === node))
+  // عند الفشل: قُل **أين** ذهبت البؤرة بدل «false» عارية. استعادة البؤرة تختلف بين
+  // المحرّكات (Safari لا يُركّز الزرّ عند النقر)، وتشخيصها بلا هذا السطر تخمين.
+  check(
+    'إغلاق التفصيل يعيد التركيز إلى بطاقة الفتح',
+    await page.locator(`[data-exercise-id="${openedId}"]`).first().evaluate((node) => document.activeElement === node),
+    await page.evaluate((id) => {
+      const a = document.activeElement
+      return `activeElement=${a?.tagName ?? 'null'}` +
+        ` exId=${a?.getAttribute?.('data-exercise-id') ?? '-'}` +
+        ` cardInDom=${!!document.querySelector(`[data-exercise-id="${id}"]`)}`
+    }, openedId),
+  )
 
   await page.locator(`[data-testid="exercise-card"][data-exercise-id="${openedId}"]`).click()
   const detailHash = await currentHash(page)

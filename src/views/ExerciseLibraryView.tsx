@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { resourceIdFromHash, setExerciseHash } from '@/lib/appRoutes'
 import type { ReactNode } from 'react'
 import { Icon } from '@/components/Icon'
@@ -66,6 +66,28 @@ export function ExerciseLibraryView({ lang }: ExerciseLibraryViewProps) {
    */
   useEffect(() => {
     if (openId && !getExercise(openId)) setExerciseHash(null, 'replace')
+  }, [openId])
+  /**
+   * [BUG-029] استعادة البؤرة بعد إغلاق التفصيل — **هنا لا داخل الحوار**.
+   *
+   * الحوار لا يستطيع استعادتها بنفسه: تنظيف `useEffect` يجري **قبل** إزالته من DOM،
+   * وWebKit عند الإزالة يُسند البؤرة إلى أقرب سلف قابل للتركيز (`<main tabIndex={-1}>`)
+   * فيدهس أي `focus()` سبقه. وتأجيلها بإطار (`requestAnimationFrame`) داهن السباق ولم
+   * يُنهِه: تحت حِمل حقيقي لم يكن الإطار قد جرى بعدُ لحظةَ الفحص، فقِيست البؤرة `BODY`.
+   *
+   * ومالك المُشغِّل هو هذه الشاشة لا الحوار. و`useLayoutEffect` يجري **بعد** تثبيت
+   * تغييرات DOM مباشرةً — أي بعد إزالة الحوار وبعد إسناد المحرّك — فتكون استعادتنا
+   * الأخيرة **حتمًا، بلا اعتماد على توقيت إطار**.
+   *
+   * والرابط العميق يستفيد أيضًا: لا مُشغِّل هناك أصلًا، وكانت البؤرة تضيع.
+   */
+  const lastOpenedRef = useRef<string | null>(null)
+  useLayoutEffect(() => {
+    if (openId) { lastOpenedRef.current = openId; return }
+    const justClosed = lastOpenedRef.current
+    if (!justClosed) return
+    lastOpenedRef.current = null
+    document.querySelector<HTMLElement>(`[data-exercise-id="${justClosed}"]`)?.focus()
   }, [openId])
   const openExercise = useCallback((exerciseId: string) => {
     openedFromLibrary.current = true
