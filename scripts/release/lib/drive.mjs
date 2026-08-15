@@ -224,7 +224,16 @@ export async function contextWithState(browser, url, state, { width = 390, heigh
     window.localStorage.clear()
     for (const [k, v] of pairs) window.localStorage.setItem(k, v)
   }, Object.entries(state))
-  await page.goto(url, { waitUntil: 'domcontentloaded' })
+  // ── [FINAL-CONVERGENCE] `commit` لا `domcontentloaded` بعد البذر ──────────
+  // بعد بذر حالة ضيف مكتملة، يوجّه التطبيق نفسه إلى مسار هاش أعمق أثناء
+  // التحميل. وWebKit يعدّ ذلك **مقاطعةً للملاحة** فيرمي `Frame load
+  // interrupted`، فيسقط الطقم كلّه قبل أن يبدأ (p3 على WebKit: 0 ناجح · خطأ
+  // طقم) — بينما Chromium يبتلعها. مقيس لا مخمَّن: بنفس البذرة يمرّ `commit`
+  // ويسقط `load`.
+  //
+  // ولا يُضعِف هذا شيئًا: `commit` يغيّر **متى يعود `goto`** لا ما يُفحص —
+  // فالانتظار الفعلي يبقى في `settle()` أدناه، وكل تأكيد بعده يقرأ DOM المرسوم.
+  await page.goto(url, { waitUntil: 'commit' })
   await settle(page, 2600)
   return { ctx, page }
 }
