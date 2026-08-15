@@ -180,7 +180,8 @@
     "test:admin-access-denial": "node scripts/run-admin-access-denial-proof.mjs",
     "test:admin-dashboard": "node scripts/run-admin-dashboard-proof.mjs",
     "test:admin-render": "node scripts/run-admin-render-proof.mjs",
-    "test:admin-secret-leak": "node scripts/run-admin-secret-leak-proof.mjs"
+    "test:admin-secret-leak": "node scripts/run-admin-secret-leak-proof.mjs",
+    "test:e2e:exercise-detail": "npm run build && node scripts/e2e/exercise-detail-live.mjs"
   },
   "dependencies": {
     "@capacitor/app": "^8.1.0",
