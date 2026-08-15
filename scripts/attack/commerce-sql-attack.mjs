@@ -386,12 +386,17 @@ console.log('\n⑤ الاسترجاع والشراء — إعادة الطلب �
   await asRole(db, 'authenticated', impostor)
   const stolen = await errorOf(() => q(`select public.claim_pending_grants()`))
   const impostorState = stolen === null ? (await q(`select state from public.my_entitlement()`)).rows[0].state : 'refused'
-  finding('F-2 [P1]', 'حساب ببريد **غير مؤكَّد** يطالب بشراء ذلك البريد وينال Premium — بينما start_trial تشترط التأكيد',
-    stolen === null && impostorState === 'premiumActive', stolen ?? impostorState)
+  // 🛡️ أُغلقت في [OVERNIGHT-5] بالهجرة 20260816120001. الشاهد **مقلوب عمدًا**:
+  // كان يثبت وقوع العطل، وصار يحرس بقاءه مغلقًا. عودة الثغرة تُسقطه بالاسم.
+  check('🛡️ F-2 [P1] بريد غير مؤكَّد لا ينال شراء ذلك العنوان — يُرفض بـemail_not_verified',
+    stolen !== null && /email_not_verified/.test(String(stolen)), stolen ?? impostorState)
+  check('ولم يُمنَح شيء فعلًا — لا استحقاق خلف الرفض',
+    (await q(`select count(*)::int n from public.entitlements where user_id = '${impostor}'`)).rows[0].n === 0)
   const trialGuard = (await (async () => { await asRole(db, null); return q(`select pg_get_functiondef(p.oid) d from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and p.proname='start_trial'`) })()).rows[0].d
   check('والتناظر مكسور بنيويًا: start_trial تفحص email_confirmed_at', /email_confirmed_at/.test(trialGuard))
   const claimDef = (await q(`select pg_get_functiondef(p.oid) d from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and p.proname='claim_pending_grants'`)).rows[0].d
-  finding('F-2b [P1]', 'claim_pending_grants لا تذكر email_confirmed_at إطلاقًا', !/email_confirmed_at/.test(claimDef))
+  check('🛡️ F-2b [P1] claim_pending_grants صارت تفحص email_confirmed_at — التناظر مع start_trial مُصلَح',
+    /email_confirmed_at/.test(claimDef))
   const redeemDef = (await q(`select pg_get_functiondef(p.oid) d from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and p.proname='redeem_access_code'`)).rows[0].d
   finding('F-2c [P2]', 'ولا redeem_access_code كذلك', !/email_confirmed_at/.test(redeemDef))
 }
@@ -404,16 +409,20 @@ console.log('\n⑥ استيعاب سلة — الذرّية وأثر الخطأ 
   await makeUser(db, 'paidcustomer@example.com')
   // حقن عطل: أوّل إدراج في purchase_ledger يرفع خطأ **عابرًا** (40001) — تمامًا
   // كتصادم تسلسل أو جمود تحت الحمل. لا تُعدَّل أي هجرة: العطل يُركَّب في الصندوق.
+  // العدّاد **تسلسل** لا جدول: `nextval` لا يتراجع مع التراجع.
+  //
+  // وهذا ليس تفصيلًا في الحصّاد بل نتيجة مباشرة للإصلاح: العدّاد الجدولي كان
+  // يعمل حين **يُبتلع** الاستثناء (البصمة تُحرق فلا تصل المحاولة التالية إلى
+  // المُحفِّز أصلًا). وبعد أن صار العابر يُرفَع، يتراجع تحديثُ الجدول مع
+  // التراجع فيبقى العطل أبديًا — أي أنه لم يعد «عابرًا» فلا يختبر ما نريد.
+  // التسلسل يجعل العطل عابرًا حقًّا، فيُختبَر مسار العودة لا مسار اليأس.
   await db.exec(`
-    create table if not exists public.__fault_once (n int not null);
-    delete from public.__fault_once; insert into public.__fault_once values (0);
+    drop sequence if exists public.__fault_seq;
+    create sequence public.__fault_seq;
     create or replace function public.__fault_trg() returns trigger
       language plpgsql as $fn$
-      declare c int;
       begin
-        select n into c from public.__fault_once;
-        if c = 0 then
-          update public.__fault_once set n = 1;
+        if nextval('public.__fault_seq') = 1 then
           raise exception 'could not serialize access due to concurrent update' using errcode = '40001';
         end if;
         return new;
@@ -423,21 +432,25 @@ console.log('\n⑥ استيعاب سلة — الذرّية وأثر الخطأ 
       for each row execute function public.__fault_trg();
   `)
   await asRole(db, 'service_role')
-  const d1 = await q(`select public.salla_ingest_event('FP-TRANSIENT','order.status.updated','ORD-T1',
+  const ingest = () => q(`select public.salla_ingest_event('FP-TRANSIENT','order.status.updated','ORD-T1',
                        'paidcustomer@example.com',1999,'SAR','completed',true,'paid_order') as s`)
-  const d2 = await q(`select public.salla_ingest_event('FP-TRANSIENT','order.status.updated','ORD-T1',
-                       'paidcustomer@example.com',1999,'SAR','completed',true,'paid_order') as s`)
-  const d3 = await q(`select public.salla_ingest_event('FP-TRANSIENT','order.status.updated','ORD-T1',
-                       'paidcustomer@example.com',1999,'SAR','completed',true,'paid_order') as s`)
+  // 🛡️ أُغلقت في [OVERNIGHT-5]. الشاهد **مقلوب**: كان يثبت ضياع الشراء، وصار
+  // يحرس أن العابر **يُرفَع** فلا يُحرق له بصمة.
+  const transientErr = await errorOf(ingest)
+  check('🛡️ F-1 [P1] العطل العابر (40001) يُرفَع ولا يُبتلع — فالدالّة الطرفية تعيد 5xx وسلة تعيد المحاولة',
+    transientErr !== null && /serialize/i.test(String(transientErr)), String(transientErr))
+  await asRole(db, null)
+  const burned = (await q(`select count(*)::int n from public.salla_webhook_events where event_fingerprint='FP-TRANSIENT'`)).rows[0].n
+  check('★ ولم تُحرق البصمة: لا سطر تدقيق للنتيجة غير النهائية', burned === 0)
+  // والمحاولة التالية — بعد زوال العطل — تنجح وتُسجّل الشراء. هذا هو مسار
+  // العودة الذي لم يكن موجودًا: المال لم يعد يضيع.
+  await asRole(db, 'service_role')
+  const retry = await ingest()
   await asRole(db, null)
   const led = (await q(`select count(*)::int n from public.purchase_ledger where provider_order_id='ORD-T1'`)).rows[0].n
-  finding('F-1 [P1]',
-    `عطل قاعدة **عابر** أثناء المنح يحرق بصمة عدم التكرار: التسليم١=${d1.rows[0].s} ثم إعادتا سلة=${d2.rows[0].s}/${d3.rows[0].s} وسجلّ الشراء=${led} ⇒ شراء مدفوع يضيع بلا مسار عودة`,
-    d1.rows[0].s === 'rejected' && d2.rows[0].s === 'duplicate' && d3.rows[0].s === 'duplicate' && led === 0)
-  const audit = (await q(`select classification, reason from public.salla_webhook_events where event_fingerprint='FP-TRANSIENT'`)).rows[0]
-  check(`والسطر مصنَّف "${audit.classification}" بسبب "${String(audit.reason).slice(0, 42)}…" — مرئي للإدارة على الأقل`,
-    audit.classification === 'rejected')
-  await db.exec(`drop trigger if exists fault_once on public.purchase_ledger;`)
+  check('★ إعادة سلة بعد زوال العطل تنجح — الشراء يصل صاحبه',
+    retry.rows[0].s === 'processed' && led === 1, `retry=${retry.rows[0].s} ledger=${led}`)
+  await db.exec(`drop trigger if exists fault_once on public.purchase_ledger; drop sequence if exists public.__fault_seq;`)
 
   // وبلا عطل: المسار السليم ذرّي ولا يمنح مرّتين
   await asRole(db, null)

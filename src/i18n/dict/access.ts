@@ -28,6 +28,13 @@ export interface AccessStrings {
   /** كود التفعيل (§D). */
   haveCode: string
   codeTitle: string
+  /**
+   * [OVERNIGHT-5] كان النصّ «اكتب الكود اللي وصلك **بعد الشراء**» — ووعدٌ لا
+   * يمكن الوفاء به: `redeem_access_code` تكتب `entitlement_type = 'special'`
+   * بمدّة منتهية **دائمًا**، فالكود عاجز بنيويًا عن منح Premium الدائم. ومسار
+   * الشراء لا يصدر كودًا أصلًا (سجلّ الشراء ← رابط دعوة ← `claim_pending_grants`).
+   * فالكود وسيلة **وصول مؤقّت** — حملة أو دعوة — لا إيصال شراء.
+   */
   codeBody: string
   codeLabel: string
   codePlaceholder: string
@@ -58,7 +65,7 @@ export const accessStrings: Record<Lang, AccessStrings> = {
     },
     haveCode: 'عندك كود تفعيل؟',
     codeTitle: 'كود التفعيل',
-    codeBody: 'اكتب الكود اللي وصلك بعد الشراء.',
+    codeBody: 'اكتب كود الوصول اللي وصلك من حملة أو دعوة. الشراء من سلة يفتح حسابك بنفسه — ما يحتاج كود.',
     codeLabel: 'كود التفعيل',
     codePlaceholder: 'مثال: QIMMAH-XXXX-XXXX',
     codeSubmit: 'فعّل',
@@ -85,7 +92,7 @@ export const accessStrings: Record<Lang, AccessStrings> = {
     },
     haveCode: 'Have an activation code?',
     codeTitle: 'Activation code',
-    codeBody: 'Enter the code you got after your purchase.',
+    codeBody: 'Enter an access code from a campaign or invite. A Salla purchase unlocks your account on its own — no code needed.',
     codeLabel: 'Activation code',
     codePlaceholder: 'e.g. QIMMAH-XXXX-XXXX',
     codeSubmit: 'Activate',

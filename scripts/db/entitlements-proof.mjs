@@ -35,13 +35,34 @@ const REVK = '20260809120001_revocation_ledger.sql'
 const RECV = '20260809120002_code_grant_recovery.sql'
 const PUBX = '20260809120003_public_execute_hardening.sql'
 const FIX = '20260809120004_entitlement_security_remediation.sql'
+// كشفه حارس النطاق أدناه: كان مُغفَلًا هو الآخر، ولم يشتكِ أحد لأن القائمة يدويّة.
+const PRIV = '20260806120003_table_privileges_hardening.sql'
 // [CTO-SALLA-002] طبقة سلة تعيد تعريف `admin_grant_premium` **بنفس ثوابت** FIX
 // (توسعةً بأعمدة أثر). فبيئة الـcounter-proof «القديمة» يجب أن تستبعد الاثنتين:
 // استبعاد FIX وحدها يترك طبقة سلة تعيد التحصين، فتنجح البيئة «القديمة» في
 // الفحوص التي يُفترض أن تسقط فيها — ويتحوّل الإثبات المضادّ إلى ضجيج يخفي
 // نفسه. أي هجرة تحصين قادمة تُضاف هنا كذلك.
 const SALLA_INGEST = '20260812120001_salla_webhook_ingest.sql'
-const HARDENING_LINEAGE = [FIX, SALLA_INGEST]
+const INTEGRITY = '20260816120001_commerce_integrity_fixes.sql'
+const HARDENING_LINEAGE = [FIX, SALLA_INGEST, INTEGRITY]
+
+/**
+ * [OVERNIGHT-5] السلسلة **المطبَّقة فعلًا** في هذا الإثبات — بالترتيب.
+ *
+ * كانت السلسلة سبع هجرات مكتوبة يدويًّا **تُغفل `SALLA_INGEST`**، وهي الهجرة
+ * التي تعيد تعريف `admin_grant_premium` — أي أن الإثبات كان يصادق على مخطّط
+ * **لا وجود له في أي بيئة**. والقائمة اليدوية لا تشتكي حين تشيخ، فأُلحق بها
+ * حارس أدناه يقارنها بمجلّد الهجرات نفسه.
+ */
+const APPLIED_CHAIN = [DEL, CORE, RPCS, REVK, RECV, PUBX, FIX, SALLA_INGEST, INTEGRITY]
+
+/**
+ * استثناءات **معلَنة** — والمعلَن مسموح، والصامت هو الممنوع (الميثاق §٤).
+ * كلٌّ بسببه، ويُطبع في المخرجات فلا يمرّ أحدها بلا قارئ.
+ */
+const DECLARED_EXCLUSIONS = new Map([
+  [PRIV, 'يشترط جداول الأساس (public.profiles) ولا يبنيها هذا الصندوق — يغطّيه test:privileges بصندوق كامل'],
+])
 
 const results = []
 function check(name, pass, detail = '') {
@@ -213,13 +234,7 @@ check('قاعدة بيانات حقيقية', /PostgreSQL/.test(ver.rows[0].v), 
 // ── ١) إنشاء المخطّط من قاعدة نظيفة ────────────────────────────────────────
 let created = true
 try {
-  await db.exec(mig(DEL)) // الدالة القائمة — تُختبر ضدّ الجداول الجديدة لاحقًا
-  await db.exec(mig(CORE))
-  await db.exec(mig(RPCS))
-  await db.exec(mig(REVK))
-  await db.exec(mig(RECV))
-  await db.exec(mig(PUBX))
-  await db.exec(mig(FIX))
+  for (const m of APPLIED_CHAIN) await db.exec(mig(m))
 } catch (e) {
   created = false
   console.error('\n  المهاجرة فشلت:', e.message, '\n')
@@ -231,8 +246,37 @@ if (!check('إنشاء المخطّط من قاعدة نظيفة', created)) {
 
 // idempotency: إعادة التشغيل لا تكسر
 let rerun = true
-try { await db.exec(mig(CORE)); await db.exec(mig(RPCS)); await db.exec(mig(REVK)); await db.exec(mig(RECV)); await db.exec(mig(PUBX)); await db.exec(mig(FIX)) } catch (e) { rerun = false; console.error('   ', e.message) }
+try { for (const m of APPLIED_CHAIN.filter((x) => x !== DEL)) await db.exec(mig(m)) } catch (e) { rerun = false; console.error('   ', e.message) }
 check('الهجرة idempotent (تشغيل ثانٍ)', rerun)
+
+// ── ١-ب) حارس النطاق: لا هجرة تجارة تُغفَل بصمت ────────────────────────────
+// الاستثناء يُحرَس (الميثاق §4.2): قائمة مكتوبة يدويًّا **تصير قاعدة** بالنسيان،
+// وهو ما حدث فعلًا مع `SALLA_INGEST`. فيقارن الحارس القائمةَ بالمجلّد نفسه.
+{
+  const { readdirSync } = await import('node:fs')
+  const dir = new URL('../../supabase/migrations/', import.meta.url)
+  const commerce = readdirSync(dir)
+    .filter((f) => f.endsWith('.sql'))
+    .filter((f) => /entitlement|revocation|code_grant|public_execute|salla|integrity|privileges/.test(f))
+    .sort()
+  const missing = commerce.filter((f) => !APPLIED_CHAIN.includes(f) && !DECLARED_EXCLUSIONS.has(f))
+  check('★ كل هجرات التجارة مطبَّقة أو مستثناة **بإعلان** — لا واحدة مُغفَلة بصمت',
+    missing.length === 0, missing.join(', ') || `${APPLIED_CHAIN.length - 1} مطبَّقة · ${DECLARED_EXCLUSIONS.size} مستثناة بإعلان`)
+  for (const [file, why] of DECLARED_EXCLUSIONS) {
+    check(`استثناء معلَن: ${file}`, commerce.includes(file), why)
+  }
+  // ولو أُسقطت أيّ واحدة لسقط الفحص أعلاه — يُهاجَم بحذف كلٍّ منها بدورها.
+  const applied = commerce.filter((f) => !DECLARED_EXCLUSIONS.has(f))
+  const everyOmissionCaught = applied.every((victim) => {
+    const crippled = APPLIED_CHAIN.filter((x) => x !== victim)
+    return applied.filter((f) => !crippled.includes(f) && !DECLARED_EXCLUSIONS.has(f)).length > 0
+  })
+  check('ولو حُذفت أيّ هجرة مطبَّقة لسقط الفحص أعلاه — بمحاكاة حذف كلٍّ منها بدورها',
+    everyOmissionCaught && applied.length > 0, `${applied.length} هجرة مهاجَمة`)
+  // ولا يكفي أن يكون الاستثناء معلَنًا: لو صار الإعلان غطاءً لكل شيء لسقط هذا.
+  check('والاستثناءات أقلّية معلَنة لا قاعدة',
+    DECLARED_EXCLUSIONS.size < applied.length)
+}
 
 // ── ٢) الملح المُرقَّم ─────────────────────────────────────────────────────
 await db.exec(`insert into private.identity_pepper (version, pepper)
