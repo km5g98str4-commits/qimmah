@@ -1,446 +1,574 @@
 {
   "contract": "QIMMAH-SOVEREIGN-PHASE-II-001",
   "agent": "AGENT-A",
-  "head": "22e9a4cccb5fd89e586096bc26ddcb2efa3c4d5d",
-  "headSubject": "fix(release): [PHASE-II/A] close BUG-019 on the LIVE routes and extend the ledger watch to 28",
-  "ranAt": "2026-08-15T00:16:03.986Z",
+  "head": "4b570c9d50733b3e8fe90f9f319d84a888aead88",
+  "headSubject": "fix(release): [CONV-7] حصّاد p1 كان يموت بزرّ مفقود ويخفي عشرين تأكيدًا",
+  "ranAt": "2026-08-15T01:05:22.357Z",
   "provisional": true,
   "provisionalReason": "Web Sovereign run had not landed its final HEAD when this pass executed.",
   "builds": {
     "prod": {
       "mode": "prod",
       "outDir": "dist-release/prod",
-      "absDir": "/home/user/qimmah/dist-release/prod",
-      "ms": 9489
+      "absDir": "/Users/ziyad/qimmah-pw-release/dist-release/prod",
+      "ms": 5207
     }
   },
   "engines": [
     {
       "name": "chromium",
-      "version": "141.0.7390.37"
+      "version": "149.0.7827.55"
     }
   ],
-  "validationDowngrades": [
-    {
-      "code": "VALIDATION_DOWNGRADE = WEBKIT_UNAVAILABLE",
-      "reason": "Error: browserType.launch: Executable doesn't exist at /opt/pw-browsers/webkit-2311/pw_run.sh"
-    }
-  ],
+  "validationDowngrades": [],
   "totals": {
-    "pass": 58,
-    "fail": 1,
-    "blocked": 4
+    "pass": 80,
+    "fail": 3,
+    "blocked": 1
   },
   "suites": [
     {
-      "suite": "static-bundle-safety",
-      "pass": 21,
-      "fail": 1,
+      "suite": "p1-preview-user (chromium)",
+      "pass": 64,
+      "fail": 3,
       "blocked": 1,
       "failures": [
         {
-          "section": "the purchase binding that the commercial funnel depends on",
-          "label": "the shipped destination is a PRODUCT URL, not just the store root",
-          "evidence": "shipped: https://salla.sa/Qimmahsa"
+          "section": "numeral policy holds across every LIVE numeric surface (Arabic session)",
+          "label": "LIVE Nutrition renders its numbers in the Arabic numeral policy",
+          "evidence": "latin values: [\"1937\",\"1937\",\"0\",\"0\",\"0\",\"148\",\"0\",\"206\"]"
+        },
+        {
+          "section": "numeral policy holds across every LIVE numeric surface (Arabic session)",
+          "label": "LIVE Workout renders its numbers in the Arabic numeral policy",
+          "evidence": "latin values: [\"اليوم 1 · علوي\",\"5\",\"4\",\"اليوم 1 · علوي\",\"اليوم 1 · علوي\",\"5\",\"30\",\"اليوم 2 · سفلي\"]"
+        },
+        {
+          "section": "numeral policy holds across every LIVE numeric surface (Arabic session)",
+          "label": "the SAME fact (training days per week) uses ONE numeral system on every live screen",
+          "evidence": "#/profile \"٤ أيام/أسبوع\" → arabic-indic  vs  #/workout \"4 أيام/أسبوع\" → latin"
         }
       ],
       "checks": [
         {
-          "section": "the test-entitlement seam must not exist in a production build",
-          "label": "no mock activation code string ships",
+          "section": "entry → onboarding → personalized reveal",
+          "label": "landing offers guest entry and reaches the first question",
+          "ok": true,
+          "evidence": "first field #v2-body-age present"
+        },
+        {
+          "section": "entry → onboarding → personalized reveal",
+          "label": "reveal shows a personalized plan (day count + session length present)",
+          "ok": true,
+          "evidence": "len=2669"
+        },
+        {
+          "section": "entry → onboarding → personalized reveal",
+          "label": "reveal offers BOTH a Premium purchase and a free-preview exit",
+          "ok": true,
+          "evidence": "cta=https://salla.sa/Qimmahsa"
+        },
+        {
+          "section": "entry → onboarding → personalized reveal",
+          "label": "Premium CTA opens externally with noopener noreferrer",
+          "ok": true,
+          "evidence": "rel=\"noopener noreferrer\""
+        },
+        {
+          "section": "entry → onboarding → personalized reveal",
+          "label": "reveal copy carries no forbidden Premium promise (lifetime / مدى الحياة)",
+          "ok": true,
+          "evidence": "تمّ\n\nجهزنا خطتك\n\nبنيناها من إجاباتك أنت — أيامك ووقتك ومكان تمرينك وهدفك.\n\nمعاينة خطتك\n\nهذا شكل أسبوعك من إجاباتك. راجعه وعدّل اللي ما يناسبك قبل ما تحفظه.\n\nتنش"
+        },
+        {
+          "section": "entry → onboarding → personalized reveal",
+          "label": "declining Premium lands inside the app (Preview), not a dead end",
+          "ok": true,
+          "evidence": "#/dashboard"
+        },
+        {
+          "section": "Preview browses every surface (block the action, not the page)",
+          "label": "#/dashboard is browsable in Preview",
+          "ok": true,
+          "evidence": "hash=#/dashboard len=401 notFound=false"
+        },
+        {
+          "section": "Preview browses every surface (block the action, not the page)",
+          "label": "#/workout is browsable in Preview",
+          "ok": true,
+          "evidence": "hash=#/workout len=586 notFound=false"
+        },
+        {
+          "section": "Preview browses every surface (block the action, not the page)",
+          "label": "#/exercises is browsable in Preview",
+          "ok": true,
+          "evidence": "hash=#/exercises len=9355 notFound=false"
+        },
+        {
+          "section": "Preview browses every surface (block the action, not the page)",
+          "label": "#/nutrition is browsable in Preview",
+          "ok": true,
+          "evidence": "hash=#/nutrition len=572 notFound=false"
+        },
+        {
+          "section": "Preview browses every surface (block the action, not the page)",
+          "label": "#/progress is browsable in Preview",
+          "ok": true,
+          "evidence": "hash=#/progress len=896 notFound=false"
+        },
+        {
+          "section": "Preview browses every surface (block the action, not the page)",
+          "label": "#/measurements is browsable in Preview",
+          "ok": true,
+          "evidence": "hash=#/measurements len=312 notFound=false"
+        },
+        {
+          "section": "Preview browses every surface (block the action, not the page)",
+          "label": "#/profile is browsable in Preview",
+          "ok": true,
+          "evidence": "hash=#/profile len=425 notFound=false"
+        },
+        {
+          "section": "Preview browses every surface (block the action, not the page)",
+          "label": "#/stats is browsable in Preview",
+          "ok": true,
+          "evidence": "hash=#/stats len=517 notFound=false"
+        },
+        {
+          "section": "Preview browses every surface (block the action, not the page)",
+          "label": "#/steps is browsable in Preview",
+          "ok": true,
+          "evidence": "hash=#/steps len=278 notFound=false"
+        },
+        {
+          "section": "Preview browses every surface (block the action, not the page)",
+          "label": "#/recovery is browsable in Preview",
+          "ok": true,
+          "evidence": "hash=#/recovery len=313 notFound=false"
+        },
+        {
+          "section": "Preview browses every surface (block the action, not the page)",
+          "label": "#/settings is browsable in Preview",
+          "ok": true,
+          "evidence": "hash=#/settings len=1996 notFound=false"
+        },
+        {
+          "section": "Preview browses every surface (block the action, not the page)",
+          "label": "#/calc is browsable in Preview",
+          "ok": true,
+          "evidence": "hash=#/calc len=2869 notFound=false"
+        },
+        {
+          "section": "Preview browses every surface (block the action, not the page)",
+          "label": "#/privacy is browsable in Preview",
+          "ok": true,
+          "evidence": "hash=#/privacy len=887 notFound=false"
+        },
+        {
+          "section": "Preview browses every surface (block the action, not the page)",
+          "label": "#/terms is browsable in Preview",
+          "ok": true,
+          "evidence": "hash=#/terms len=716 notFound=false"
+        },
+        {
+          "section": "Preview browses every surface (block the action, not the page)",
+          "label": "#/contact is browsable in Preview",
+          "ok": true,
+          "evidence": "hash=#/contact len=182 notFound=false"
+        },
+        {
+          "section": "Preview browses every surface (block the action, not the page)",
+          "label": "exercise detail is reachable in Preview and owns the URL",
+          "ok": true,
+          "evidence": "{\"hash\":\"#/exercises/plank\",\"dialog\":true}"
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "workout.start — affordance reachable",
+          "ok": true,
+          "evidence": "#/workout plan day card «اليوم 1»"
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "workout.start — Premium surface opens",
+          "ok": true,
+          "evidence": "#/workout plan day card «اليوم 1»"
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "workout.start — no paid state written",
+          "ok": true,
+          "evidence": "changed=[]"
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "workout.start — no raw exception surfaces",
           "ok": true,
           "evidence": ""
         },
         {
-          "section": "the test-entitlement seam must not exist in a production build",
-          "label": "no entitlement-mock storage key ships",
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "workout.startEmpty — affordance reachable",
+          "ok": true,
+          "evidence": "#/workout «ابدأ تمرين فارغ»"
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "workout.startEmpty — Premium surface opens",
+          "ok": true,
+          "evidence": "#/workout «ابدأ تمرين فارغ»"
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "workout.startEmpty — no paid state written",
+          "ok": true,
+          "evidence": "changed=[]"
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "workout.startEmpty — no raw exception surfaces",
           "ok": true,
           "evidence": ""
         },
         {
-          "section": "the test-entitlement seam must not exist in a production build",
-          "label": "no VITE_ENTITLEMENT_MODE reference ships",
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "nutrition.addFood — affordance reachable",
+          "ok": true,
+          "evidence": "#/nutrition «أضف»"
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "nutrition.addFood — Premium surface opens",
+          "ok": true,
+          "evidence": "#/nutrition «أضف»"
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "nutrition.addFood — no paid state written",
+          "ok": true,
+          "evidence": "changed=[]"
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "nutrition.addFood — no raw exception surfaces",
           "ok": true,
           "evidence": ""
         },
         {
-          "section": "the test-entitlement seam must not exist in a production build",
-          "label": "counter-proof for the seam scan",
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "nutrition.water — affordance reachable",
+          "ok": true,
+          "evidence": "#/nutrition «+250 مل»"
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "nutrition.water — Premium surface opens",
+          "ok": true,
+          "evidence": "#/nutrition «+250 مل»"
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "nutrition.water — no paid state written",
+          "ok": true,
+          "evidence": "changed=[]"
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "nutrition.water — no raw exception surfaces",
+          "ok": true,
+          "evidence": ""
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "recovery.log — affordance reachable",
+          "ok": true,
+          "evidence": "#/recovery «اعرض توصيتي»"
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "recovery.log — Premium surface opens",
+          "ok": true,
+          "evidence": "#/recovery «اعرض توصيتي»"
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "recovery.log — no paid state written",
+          "ok": true,
+          "evidence": "changed=[]"
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "recovery.log — no raw exception surfaces",
+          "ok": true,
+          "evidence": ""
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "progress.logMeasurement — affordance reachable",
+          "ok": true,
+          "evidence": "#/measurements «أضف قياسًا» → save"
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "progress.logMeasurement — Premium surface opens",
+          "ok": true,
+          "evidence": "#/measurements «أضف قياسًا» → save"
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "progress.logMeasurement — no paid state written",
+          "ok": true,
+          "evidence": "changed=[]"
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "progress.logMeasurement — no raw exception surfaces",
+          "ok": true,
+          "evidence": ""
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "progress.logWeight — affordance reachable",
+          "ok": true,
+          "evidence": "#/progress «الوزن والجسم» → «تسجيل وزن اليوم» → save"
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "progress.logWeight — Premium surface opens",
+          "ok": true,
+          "evidence": "#/progress «الوزن والجسم» → «تسجيل وزن اليوم» → save"
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "progress.logWeight — no paid state written",
+          "ok": true,
+          "evidence": "changed=[]"
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "progress.logWeight — no raw exception surfaces",
+          "ok": true,
+          "evidence": ""
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "nutrition.quickAdd — affordance reachable",
+          "ok": true,
+          "evidence": "dashboard quick-log «سجّل وجبة»"
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "nutrition.quickAdd — Premium surface opens",
+          "ok": true,
+          "evidence": "dashboard quick-log «سجّل وجبة»"
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "nutrition.quickAdd — no paid state written",
+          "ok": true,
+          "evidence": "changed=[]"
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "nutrition.quickAdd — no raw exception surfaces",
+          "ok": true,
+          "evidence": ""
+        },
+        {
+          "section": "every paid mutation is refused honestly (gate opens · zero writes · no raw exception)",
+          "label": "plan.saveEdit (path 1 — Workout custom plan builder) live save",
           "ok": null,
           "blocked": true,
-          "evidence": "dist-release/mock was not built in this pass"
+          "evidence": "the builder’s «حفظ الجدول» stays disabled until a complete schedule exists; the guard on this path is proved statically by test:access-gate (WorkoutView CustomPlanBuilder.onSave)"
         },
         {
-          "section": "no development or localhost endpoint ships",
-          "label": "no first-party localhost/loopback URL ships",
+          "section": "plan-edit boundary — the SECOND live path to the same paid state",
+          "label": "Preview reaching the plan editor opens the Premium surface OR persists nothing",
           "ok": true,
-          "evidence": "found: [http://localhost:9999] · excluded vendor default: http://localhost:9999 (gotrue-js)"
+          "evidence": "route=#/setup gateOnChange=false gateOnSave=true goal cut → cut (after reload)"
         },
         {
-          "section": "no development or localhost endpoint ships",
-          "label": "counter-proof: the loopback scan does detect URLs (it found the known vendor default)",
+          "section": "plan-edit boundary — the SECOND live path to the same paid state",
+          "label": "the declared paid action `plan.saveEdit` is enforced on EVERY live path, not one",
           "ok": true,
-          "evidence": "scan located 1 loopback literal(s) — the pattern is live, not vacuous"
+          "evidence": "path-1 (WorkoutView) is guarded; path-2 (#/setup) wrote goal=\"cut\" with no gate"
         },
         {
-          "section": "no development or localhost endpoint ships",
-          "label": "no staging/tunnel/dev host ships",
+          "section": "paid actions with no Preview-reachable affordance — classified, not skipped",
+          "label": "workout.logSet / workout.finish are unreachable because no session was ever written",
           "ok": true,
-          "evidence": ""
+          "evidence": "watched=[qimmah:activeWorkout:v1, qimmah:active-workout:v2] present=[none]"
         },
         {
-          "section": "no development or localhost endpoint ships",
-          "label": "no source map ships",
+          "section": "paid actions with no Preview-reachable affordance — classified, not skipped",
+          "label": "the watched session key set includes the LIVE writer key, not only the registered one",
           "ok": true,
-          "evidence": ""
+          "evidence": "qimmah:activeWorkout:v1, qimmah:active-workout:v2"
         },
         {
-          "section": "no development or localhost endpoint ships",
-          "label": "no shipped file points at an external source map",
+          "section": "paid actions with no Preview-reachable affordance — classified, not skipped",
+          "label": "nutrition.removeFood / toggleMeal are unreachable because Preview logged zero rows",
           "ok": true,
-          "evidence": ""
+          "evidence": "rows=0"
         },
         {
-          "section": "no secret material ships",
-          "label": "no Supabase service_role key ships",
+          "section": "paid actions with no Preview-reachable affordance — classified, not skipped",
+          "label": "every PAID_ACTION is classified (exercised or reasoned) — none silently skipped",
           "ok": true,
-          "evidence": ""
+          "evidence": "all 13 classified"
         },
         {
-          "section": "no secret material ships",
-          "label": "no PEM private key ships",
+          "section": "counter-proof — the tracking-key exclusion is not a blanket pass",
+          "label": "a real paid-state write WOULD be detected by the same diff",
           "ok": true,
-          "evidence": ""
+          "evidence": "detected=[qimmah:nutrition:v2]"
         },
         {
-          "section": "no secret material ships",
-          "label": "no live secret key ships",
-          "ok": true,
-          "evidence": ""
-        },
-        {
-          "section": "no secret material ships",
-          "label": "no GitHub token ships",
-          "ok": true,
-          "evidence": ""
-        },
-        {
-          "section": "no secret material ships",
-          "label": "no AWS access key id ships",
-          "ok": true,
-          "evidence": ""
-        },
-        {
-          "section": "the purchase binding that the commercial funnel depends on",
-          "label": "a Salla purchase destination ships at all",
-          "ok": true,
-          "evidence": "https://salla.sa/Qimmahsa"
-        },
-        {
-          "section": "the purchase binding that the commercial funnel depends on",
-          "label": "the shipped destination is a PRODUCT URL, not just the store root",
+          "section": "numeral policy holds across every LIVE numeric surface (Arabic session)",
+          "label": "LIVE Nutrition renders its numbers in the Arabic numeral policy",
           "ok": false,
-          "evidence": "shipped: https://salla.sa/Qimmahsa"
+          "evidence": "latin values: [\"1937\",\"1937\",\"0\",\"0\",\"0\",\"148\",\"0\",\"206\"]"
         },
         {
-          "section": "the purchase binding that the commercial funnel depends on",
-          "label": "no second, conflicting checkout destination ships",
+          "section": "numeral policy holds across every LIVE numeric surface (Arabic session)",
+          "label": "LIVE Workout renders its numbers in the Arabic numeral policy",
+          "ok": false,
+          "evidence": "latin values: [\"اليوم 1 · علوي\",\"5\",\"4\",\"اليوم 1 · علوي\",\"اليوم 1 · علوي\",\"5\",\"30\",\"اليوم 2 · سفلي\"]"
+        },
+        {
+          "section": "numeral policy holds across every LIVE numeric surface (Arabic session)",
+          "label": "LIVE Progress renders its numbers in the Arabic numeral policy",
           "ok": true,
-          "evidence": "https://salla.sa/Qimmahsa"
+          "evidence": "latin values: []"
         },
         {
-          "section": "forbidden Premium promises must not ship",
-          "label": "«مدى الحياة» does not ship",
+          "section": "numeral policy holds across every LIVE numeric surface (Arabic session)",
+          "label": "the SAME fact (training days per week) uses ONE numeral system on every live screen",
+          "ok": false,
+          "evidence": "#/profile \"٤ أيام/أسبوع\" → arabic-indic  vs  #/workout \"4 أيام/أسبوع\" → latin"
+        },
+        {
+          "section": "page health across the whole journey",
+          "label": "zero unhandled page errors",
           "ok": true,
           "evidence": ""
         },
         {
-          "section": "forbidden Premium promises must not ship",
-          "label": "\"lifetime\" does not ship",
-          "ok": true,
-          "evidence": ""
-        },
-        {
-          "section": "forbidden Premium promises must not ship",
-          "label": "«كل التحديثات الحالية والمستقبلية» does not ship",
-          "ok": true,
-          "evidence": ""
-        },
-        {
-          "section": "shipped shell integrity",
-          "label": "index.html carries a verifiable build identity",
-          "ok": true,
-          "evidence": "<meta name=\"qimmah-build\" content=\"v1.0.0·22e9a4c\"> <meta name=\"qimmah-commit\" content=\"22e9a4c\"> <meta name=\"qimmah-build-time\" content=\"2026-08-15T00:15:54.627Z\"> <meta name=\"qimmah-sw-version\" content=\"qimmah-22e9a4c\">"
-        },
-        {
-          "section": "shipped shell integrity",
-          "label": "the service worker has its build placeholders substituted",
-          "ok": true,
-          "evidence": "sw.js present"
-        },
-        {
-          "section": "shipped shell integrity",
-          "label": "the artifact ships an offline/404 fallback",
+          "section": "page health across the whole journey",
+          "label": "zero non-benign console errors",
           "ok": true,
           "evidence": ""
         }
       ],
-      "id": "static-bundle",
-      "engine": "static"
+      "id": "p1-preview-user",
+      "engine": "chromium"
     },
     {
-      "suite": "static-regression-ledger",
-      "pass": 37,
+      "suite": "p4-interrupted-onboarding (chromium)",
+      "pass": 16,
       "fail": 0,
-      "blocked": 3,
+      "blocked": 0,
       "failures": [],
       "checks": [
         {
-          "section": "every RESOLVED historical defect keeps its fix",
-          "label": "BUG-001 — Preview mutation handlers surfaced an exception instead of Premium",
+          "section": "partial answers survive an interruption",
+          "label": "a draft is persisted mid-flow",
           "ok": true,
-          "evidence": "RecoveryView guard=true ProgressV2 guard=true"
+          "evidence": "{\"completed\":false,\"draft\":{\"v\":6,\"step\":1,\"age\":31,\"gender\":\"male\",\"heightCm\":181,\"weightKg\":88,\"intent\":\"meals\",\"level"
         },
         {
-          "section": "every RESOLVED historical defect keeps its fix",
-          "label": "BUG-002 — Live Progress route did not expose the maintained measurement experience",
+          "section": "partial answers survive an interruption",
+          "label": "the interrupted setup is NOT silently marked complete",
           "ok": true,
-          "evidence": "ProgressView delegates to ProgressV2: true"
+          "evidence": "{\"hash\":\"#/setup\",\"onIntent\":true,\"onBody\":false,\"age\":null,\"completed\":false}"
         },
         {
-          "section": "every RESOLVED historical defect keeps its fix",
-          "label": "BUG-003 — Three high transitive dependency advisories [tracked OPEN]",
+          "section": "partial answers survive an interruption",
+          "label": "the flow resumes at the EXACT step the user left (intent)",
           "ok": true,
-          "evidence": "tracked OPEN in the ledger; dependency upgrades are outside this contract"
+          "evidence": "{\"hash\":\"#/setup\",\"onIntent\":true,\"onBody\":false,\"age\":null,\"completed\":false}"
         },
         {
-          "section": "every RESOLVED historical defect keeps its fix",
-          "label": "BUG-004 — Setup ErrorBoundary could falsely complete a crashed onboarding",
+          "section": "partial answers survive an interruption",
+          "label": "the persisted draft still carries the typed body answers",
           "ok": true,
-          "evidence": "SetupErrorBoundary present=false onForceComplete present=false"
+          "evidence": "{\"completed\":false,\"draft\":{\"v\":6,\"step\":1,\"age\":31,\"gender\":\"male\",\"heightCm\":181,\"weightKg\":88,\"intent\":\"meals\",\"level\":\"beginner\",\"trainedBefore\":null,\"totalMonths\":null,\"lastTrained\":null,\"consist"
         },
         {
-          "section": "every RESOLVED historical defect keeps its fix",
-          "label": "BUG-005 — Error recovery lacked a support reference id",
+          "section": "partial answers survive an interruption",
+          "label": "the basics step is reachable again through the labelled back control",
           "ok": true,
-          "evidence": "reference id=true support address present=true"
+          "evidence": ""
         },
         {
-          "section": "every RESOLVED historical defect keeps its fix",
-          "label": "BUG-006 — First-run question target was not met truthfully",
+          "section": "partial answers survive an interruption",
+          "label": "the typed body answers are re-rendered exactly as entered",
           "ok": true,
-          "evidence": "distinct question ids bound in the live UI: 18 (body.age, body.height, body.weight, body.sex…)"
+          "evidence": "{\"age\":\"31\",\"height\":\"181\",\"weight\":\"88\"}"
         },
         {
-          "section": "every RESOLVED historical defect keeps its fix",
-          "label": "BUG-007 — Lowering age could leave a restricted adult goal selected",
+          "section": "Back and Forward inside setup do not corrupt the flow",
+          "label": "browser Back inside setup does not crash or blank the app",
           "ok": true,
-          "evidence": "single eligibility function referenced: true"
+          "evidence": "{\"hash\":\"#/start\",\"text\":\"تخطَّ إلى المحتوى الرئيسي\\nEN\\nقِمّة\\nدرّب بوضوح.\\nتقدّم بثقة.\\n\\nتمرينك وتغذيتك وتقدم\"}"
         },
         {
-          "section": "every RESOLVED historical defect keeps its fix",
-          "label": "BUG-008 — Live nutrition adapter dropped quantity and catalog provenance",
+          "section": "Back and Forward inside setup do not corrupt the flow",
+          "label": "browser Forward returns into setup, not a completed dashboard",
           "ok": true,
-          "evidence": "foodId/grams/servings preserved in the adapter: true"
+          "evidence": "{\"hash\":\"#/setup\",\"inSetup\":true,\"completed\":false,\"text\":167}"
         },
         {
-          "section": "every RESOLVED historical defect keeps its fix",
-          "label": "BUG-009 — Nutrition persistence could report success after a failed write",
+          "section": "Back and Forward inside setup do not corrupt the flow",
+          "label": "Back/Forward did not discard the saved answers",
           "ok": true,
-          "evidence": "checked write=true named error=true"
+          "evidence": "{\"completed\":false,\"draft\":{\"v\":6,\"step\":0,\"age\":31,\"gender\":\"male\",\"heightCm\":181,\"weightKg\":88,\"intent\":\"meals\",\"level\":\"beginner\",\"trainedBefore\":null,\"total"
         },
         {
-          "section": "every RESOLVED historical defect keeps its fix",
-          "label": "BUG-010 — Live Nutrition delete could bypass the coherent Preview surface",
+          "section": "conditional answers clear correctly (BUG-007 live re-run)",
+          "label": "an adult goal is selected before the attack",
           "ok": true,
-          "evidence": "live MealCard remove passes the central guard: true"
+          "evidence": "خسارة دهون"
         },
         {
-          "section": "every RESOLVED historical defect keeps its fix",
-          "label": "BUG-011 — Fractional servings were inflated by removing the decimal point",
+          "section": "conditional answers clear correctly (BUG-007 live re-run)",
+          "label": "the basics step is reachable again via the back control",
           "ok": true,
-          "evidence": "serving inputs declare decimal handling: true"
+          "evidence": ""
         },
         {
-          "section": "every RESOLVED historical defect keeps its fix",
-          "label": "BUG-012 — Workout could clear its resumable snapshot before durable completion",
+          "section": "conditional answers clear correctly (BUG-007 live re-run)",
+          "label": "lowering age to a minor leaves NO disabled goal still selected",
           "ok": true,
-          "evidence": "only WorkoutView clears=true rollback wired=true"
+          "evidence": "[]"
         },
         {
-          "section": "every RESOLVED historical defect keeps its fix",
-          "label": "BUG-013 — Workout completion “Back to Today” did not navigate to Today",
+          "section": "conditional answers clear correctly (BUG-007 live re-run)",
+          "label": "the minor restriction is communicated on the goal step",
           "ok": true,
-          "evidence": "summary exit routes through the canonical navigator: true"
+          "evidence": "تخطَّ إلى المحتوى الرئيسي\nالخطوة ٤ من ٧\nوش هدفك الحين؟\n\nهدفك يحدّد سعراتك وشكل تمرينك.\n\nاختيار الهدف\nخسارة دهون\nتنزل دهونك بهدوء وتحافظ على "
         },
         {
-          "section": "every RESOLVED historical defect keeps its fix",
-          "label": "BUG-014 — Measurements promise had no reachable route or usable history",
+          "section": "conditional answers clear correctly (BUG-007 live re-run)",
+          "label": "the attack produced no unhandled page error",
           "ok": true,
-          "evidence": "#/measurements is a declared route: true"
+          "evidence": ""
         },
         {
-          "section": "every RESOLVED historical defect keeps its fix",
-          "label": "BUG-015 — Measurement save/delete could report success or bypass Premium",
+          "section": "page health",
+          "label": "zero unhandled page errors (interruption journey)",
           "ok": true,
-          "evidence": "writer guards=3 returns WriteResult=true"
+          "evidence": ""
         },
         {
-          "section": "every RESOLVED historical defect keeps its fix",
-          "label": "BUG-016 — Machine catalog detail bypassed the exercise deep-link contract",
+          "section": "page health",
+          "label": "zero non-benign console errors",
           "ok": true,
-          "evidence": "routeOwner=true openId assignments=[\"resourceIdFromHash(\"] mirrorOnly=true everyCatalogUsesOwner=true"
-        },
-        {
-          "section": "every RESOLVED historical defect keeps its fix",
-          "label": "BUG-017 — Exercise detail lacked a complete modal and direct-link exit contract",
-          "ok": true,
-          "evidence": "dialog=true escape=true aria-modal=true"
-        },
-        {
-          "section": "every RESOLVED historical defect keeps its fix",
-          "label": "BUG-018 — Settings reintroduced an unvalidated manual JSON importer",
-          "ok": true,
-          "evidence": "hardened panel=true manual FileReader removed=true"
-        },
-        {
-          "section": "every RESOLVED historical defect keeps its fix",
-          "label": "BUG-019 — Settings capabilities and numeral presentation were inconsistent",
-          "ok": true,
-          "evidence": "live owners WITHOUT the central formatter: []"
-        },
-        {
-          "section": "every RESOLVED historical defect keeps its fix",
-          "label": "BUG-020 — Profile forked the hardened data-transfer owner",
-          "ok": true,
-          "evidence": "canonical panel=true second portability UI removed=true"
-        },
-        {
-          "section": "every RESOLVED historical defect keeps its fix",
-          "label": "BUG-021 — Profile conflated account deletion with guest device-data management",
-          "ok": true,
-          "evidence": "deletion copy conditional=true account rows gated=true"
-        },
-        {
-          "section": "every RESOLVED historical defect keeps its fix",
-          "label": "BUG-022 — Profile descendants duplicated the route heading and exposed sub-44px controls",
-          "ok": true,
-          "evidence": "profile h1 removed=true reminders h1 removed=true 44px targets=true"
-        },
-        {
-          "section": "every RESOLVED historical defect keeps its fix",
-          "label": "BUG-023 — The Profile browser proof could accept a foreign process on its fixed port",
-          "ok": true,
-          "evidence": "child-ready gate present=true named rejection=true"
-        },
-        {
-          "section": "every RESOLVED historical defect keeps its fix",
-          "label": "BUG-024 — The Quick Log path threw when storage is blocked",
-          "ok": true,
-          "evidence": "consumers touching raw storage: [] canonical owner=true"
-        },
-        {
-          "section": "every RESOLVED historical defect keeps its fix",
-          "label": "BUG-025 — Quick Log «ماء» was a declared action with no consumer",
-          "ok": true,
-          "evidence": "water intent has an effect=true panel receives focus request=true"
-        },
-        {
-          "section": "every RESOLVED historical defect keeps its fix",
-          "label": "BUG-026 — A redirected Quick Log left an intent that hijacked a later visit",
-          "ok": true,
-          "evidence": "guard consulted first=true redirect writes nothing=true"
-        },
-        {
-          "section": "every RESOLVED historical defect keeps its fix",
-          "label": "BUG-027 — The Profile browser proof printed success and then hung forever",
-          "ok": true,
-          "evidence": "own process group=true group kill=true"
-        },
-        {
-          "section": "every RESOLVED historical defect keeps its fix",
-          "label": "BUG-028 — A corrupt onboarding flag was read as a completed setup",
-          "ok": true,
-          "evidence": "strict equality=true shape guard=true truthiness coercion returned=false"
-        },
-        {
-          "section": "local data-key registry integrity — every LIVE key is registered",
-          "label": "every live storage key this harness observed is registered",
-          "ok": true,
-          "evidence": "all 5 live keys registered"
-        },
-        {
-          "section": "local data-key registry integrity — every LIVE key is registered",
-          "label": "counter-proof: the registry scan really parsed entries",
-          "ok": true,
-          "evidence": "parsed 66 registered keys"
-        },
-        {
-          "section": "local data-key registry integrity — every LIVE key is registered",
-          "label": "the registered active-session key is the one the app actually writes",
-          "ok": true,
-          "evidence": "registered ':active-workout:v2' (owner WorkoutV2, no importer)=true; registered live ':activeWorkout:v1'=true"
-        },
-        {
-          "section": "the ledger file and this suite stay in sync",
-          "label": "the upstream defect ledger is present",
-          "ok": true,
-          "evidence": "docs/execution/qimmah-web-sovereign/BUGS.md"
-        },
-        {
-          "section": "the ledger file and this suite stay in sync",
-          "label": "no documented defect is left unwatched by this suite",
-          "ok": true,
-          "evidence": "unwatched=[] documented=28 watched=28"
-        },
-        {
-          "section": "the ledger file and this suite stay in sync",
-          "label": "EXTERNAL-003 — The live account lifecycle has never been proven against a real server",
-          "ok": null,
-          "blocked": true,
-          "evidence": "declared EXTERNALLY_BLOCKED upstream; re-verified as still unprovable in this environment"
-        },
-        {
-          "section": "the ledger file and this suite stay in sync",
-          "label": "EXTERNAL-001 — Paid Salla product binding cannot be proven",
-          "ok": null,
-          "blocked": true,
-          "evidence": "declared EXTERNALLY_BLOCKED upstream; re-verified as still unprovable in this environment"
-        },
-        {
-          "section": "the ledger file and this suite stay in sync",
-          "label": "EXTERNAL-002 — Live activation backend is unavailable",
-          "ok": null,
-          "blocked": true,
-          "evidence": "declared EXTERNALLY_BLOCKED upstream; re-verified as still unprovable in this environment"
-        },
-        {
-          "section": "counter-proof — the ledger assertions are not vacuous",
-          "label": "the environment-error filter lets EVERY genuine page error through",
-          "ok": true,
-          "evidence": "filtered out: none"
-        },
-        {
-          "section": "counter-proof — the ledger assertions are not vacuous",
-          "label": "the environment-error filter DOES suppress the exact WebKit sw.js artefact it names",
-          "ok": true,
-          "evidence": "patterns=2"
-        },
-        {
-          "section": "counter-proof — the ledger assertions are not vacuous",
-          "label": "the console filter lets EVERY genuine console error through",
-          "ok": true,
-          "evidence": "benign patterns=3"
-        },
-        {
-          "section": "counter-proof — the ledger assertions are not vacuous",
-          "label": "every non-informational entry reads a real source file",
-          "ok": true,
-          "evidence": "entries=28 vacuous=0"
+          "evidence": ""
         }
       ],
-      "id": "static-ledger",
-      "engine": "static"
+      "id": "p4-interrupted-onboarding",
+      "engine": "chromium"
     }
   ]
 }
