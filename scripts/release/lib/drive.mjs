@@ -48,6 +48,25 @@ export async function seedStorage(ctx, url, entries) {
   await page.close()
 }
 
+/**
+ * Digit-agnostic copy matchers — a THIRD binding rule, narrower than "copy-bound".
+ *
+ * The app renders Arabic-Indic digits in an Arabic session and Latin digits in
+ * an English one. A locator that hard-codes ONE numeral system stops finding its
+ * affordance the day the numeral policy is actually applied — which is exactly
+ * what happened when BUG-019 was closed on the live views: `/اليوم 1/` and
+ * `/\+250/` went dark against «اليوم ١» and «+٢٥٠ مل», and two paid-action
+ * probes reported a product defect that did not exist.
+ *
+ * Locators FIND; assertions JUDGE. The numeral system itself is judged — exactly,
+ * with no tolerance for either system leaking — by the p1 `numeral policy`
+ * checks. Widening a locator here can therefore hide nothing: remove the
+ * boundary and those checks fail on the rendered text regardless of what these
+ * regexes accept.
+ */
+export const PLAN_DAY_1 = /(?:اليوم|Day)\s*[1\u0661]/
+export const WATER_PRESET_250 = /\+\s*[2\u0662][5\u0665][0\u0660]/
+
 const group = (page, id) => page.locator(`[data-question-id="${id}"]`)
 const footerNext = (page) => page.locator('footer button').last()
 

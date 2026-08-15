@@ -3,7 +3,7 @@ import { Icon } from '@/components/Icon'
 import { WorkoutMode } from '@/components/WorkoutMode'
 import { WorkoutSummary } from '@/components/WorkoutSummary'
 import type { Lang } from '@/lib/appPreferences'
-import { formatNumber } from '@/lib/numberFormat'
+import { formatNumber, formatNumeralsIn } from '@/lib/numberFormat'
 import type { AppRoute } from '@/lib/appRoutes'
 import { useAuth } from '@/lib/authContext'
 import { useCustomization } from '@/lib/customizationContext'
@@ -272,7 +272,7 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
      *   Completion.next == Today.current في اليوم التالي.
      */
     const upcoming = nextWorkout(userId, customization)
-    const nextDayLabel = upcoming ? (lang === 'en' ? upcoming.day.day.nameEn : upcoming.day.day.nameAr) : undefined
+    const nextDayLabel = upcoming ? formatNumeralsIn(lang === 'en' ? upcoming.day.day.nameEn : upcoming.day.day.nameAr, lang) : undefined
     setActiveDay(null)
     setSummary({ session, prs: prLabels, streakWeeks: weekly.streakWeeks, nextDayLabel })
   }
@@ -314,7 +314,7 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
                 </span>
                 <span className="min-w-0">
                   <span className="block text-sm font-black">{d.startTodayWorkout}</span>
-                  <span dir="auto" className="block truncate text-xs text-white/85">{lang === 'en' ? planDay.nameEn : planDay.nameAr} · {planDay.exercises.length} {d.exercisesUnit}</span>
+                  <span dir="auto" className="block truncate text-xs text-white/85">{formatNumeralsIn(lang === 'en' ? planDay.nameEn : planDay.nameAr, lang)} · {formatNumber(planDay.exercises.length, lang)} {d.exercisesUnit}</span>
                 </span>
               </button>
             )}
@@ -344,7 +344,7 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-black text-ink-900">{d.resumeTitle}</p>
                 <p dir="auto" className="mt-0.5 text-xs leading-relaxed text-ink-500">
-                  {d.resumeBody.replace('{day}', lang === 'en' ? resumeDay.nameEn : resumeDay.nameAr)}
+                  {formatNumeralsIn(d.resumeBody.replace('{day}', lang === 'en' ? resumeDay.nameEn : resumeDay.nameAr), lang)}
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   <button type="button" onClick={resumeWorkout} className="btn-primary px-4 py-2.5 text-xs">
@@ -424,7 +424,7 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
                       {source === 'custom' ? cp.customPlanBadge : cp.autoPlanBadge}
                     </span>
                   </div>
-                  <p className="text-xs text-ink-400">{plan.days.length} {d.daysPerWeek}</p>
+                  <p className="text-xs text-ink-400">{formatNumber(plan.days.length, lang)} {d.daysPerWeek}</p>
                 </div>
                 <button
                   type="button"
@@ -442,7 +442,7 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
                   <div className="flex items-center justify-between gap-3">
                     <div className="min-w-0">
                       <p className="text-[11px] font-bold text-primary-c">{d.todayWorkout}</p>
-                      <p dir="auto" className="truncate text-sm font-bold text-ink-900">{lang === 'en' ? planDay.nameEn : planDay.nameAr}</p>
+                      <p dir="auto" className="truncate text-sm font-bold text-ink-900">{formatNumeralsIn(lang === 'en' ? planDay.nameEn : planDay.nameAr, lang)}</p>
                       <p className="mt-0.5 truncate text-[11px] text-ink-400">
                         {planDay.exercises.slice(0, 4).map((pe) => planExerciseName(pe, lang)).join(' · ') || d.noExercises}
                       </p>
@@ -467,8 +467,8 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
                     className="flex items-center justify-between gap-2 rounded-xl border border-line bg-surface p-3 text-start hover:bg-beige"
                   >
                     <span className="min-w-0">
-                      <span dir="auto" className="block truncate text-sm font-bold text-ink-900">{lang === 'en' ? pd.nameEn : pd.nameAr}</span>
-                      <span className="block text-[11px] text-ink-400">{pd.exercises.length} {d.exercisesUnit} · ~{estDayMinutes(pd)} {d.minShort}</span>
+                      <span dir="auto" className="block truncate text-sm font-bold text-ink-900">{formatNumeralsIn(lang === 'en' ? pd.nameEn : pd.nameAr, lang)}</span>
+                      <span className="block text-[11px] text-ink-400">{formatNumber(pd.exercises.length, lang)} {d.exercisesUnit} · ~{formatNumber(estDayMinutes(pd), lang)} {d.minShort}</span>
                     </span>
                     <Icon name="ChevronLeft" className="h-4 w-4 shrink-0 text-ink-400" />
                   </button>
