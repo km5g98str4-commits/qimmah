@@ -8,6 +8,8 @@
 // **اختبار طفرات**: يُفسد الحارس عمدًا ويتأكّد أن هذه البطارية **تسقط** —
 // فبوابة لم تُهاجَم ليست بوابة (الميثاق §4.2).
 
+import { existsSync, readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import {
   CLOSED_DECISION,
   canRead,
@@ -15,6 +17,7 @@ import {
   resolveAdminRole,
   adminRoleProvisioning,
   ADMIN_ROLE_CLAIM,
+  ROLE_PROVISIONING_MIGRATION,
   type RoleClaimSource,
 } from '@/admin/auth/adminRole'
 
@@ -102,7 +105,36 @@ check('غير المسؤول لا يقرأ شيئًا حتى بالتعمّق', 
 check('الحالة المغلقة لا تقرأ شيئًا', !canRead(CLOSED_DECISION, 'founder'))
 
 // ═══ ٦) حالة التزويد معلَنة ═══
-check('الدور غير مُزوَّد اليوم ومعلَن كذلك', adminRoleProvisioning() === 'not-provisioned')
+// ═══ حالة التزويد **مشتقّة من الجلسة** ═══
+// كانت الدالة ثابتًا يعيد `'not-provisioned'` في كل مسار — أي أنها تكذب على
+// المؤسس المزوَّد. الفحص الآن يغطّي **كل** الحالات الخمس، فلا يمكن أن تعود
+// ثابتًا وتمرّ: قيمة واحدة لا تُرضي خمسة تأكيدات متناقضة.
+check('بلا جلسة ⇒ no-session', adminRoleProvisioning(resolveAdminRole(null)) === 'no-session')
+check(
+  'مسجّل بلا ادّعاء ⇒ claim-absent',
+  adminRoleProvisioning(resolveAdminRole({ app_metadata: { provider: 'email' } })) === 'claim-absent',
+)
+check(
+  'ادّعاء مزوّر ⇒ claim-rejected',
+  adminRoleProvisioning(resolveAdminRole({ user_metadata: { [ADMIN_ROLE_CLAIM]: 'founder' } })) === 'claim-rejected',
+)
+check(
+  'دور غير معروف ⇒ claim-rejected',
+  adminRoleProvisioning(resolveAdminRole({ app_metadata: { [ADMIN_ROLE_CLAIM]: 'admin' } })) === 'claim-rejected',
+)
+check('القرار المغلق ⇒ unresolved', adminRoleProvisioning(CLOSED_DECISION) === 'unresolved')
+check(
+  'تصريح خادم صحيح ⇒ claim-present',
+  adminRoleProvisioning(resolveAdminRole({ app_metadata: { [ADMIN_ROLE_CLAIM]: 'founder' } })) === 'claim-present',
+)
+// والهجرة التي **تُصدر** الدور موجودة فعلًا وتعرّف الدالة — لا إشارة إلى ملفّ وهمي.
+check('هجرة التزويد موجودة', existsSync(resolve(process.cwd(), 'supabase/migrations', ROLE_PROVISIONING_MIGRATION)))
+check(
+  'هجرة التزويد تعرّف admin_set_role',
+  readFileSync(resolve(process.cwd(), 'supabase/migrations', ROLE_PROVISIONING_MIGRATION), 'utf8').includes(
+    'function public.admin_set_role',
+  ),
+)
 
 // ═══ ٧) تأكيد مضادّ: لا مصدر دور خارج تصريح الخادم ═══
 // لو تسرّب مصدر من التخزين أو العنوان لصار المنع قابلًا للالتفاف من المتصفّح.

@@ -49,7 +49,10 @@ console.log('محاكاة الالتفاف — حقن ما يجب أن يُكش�
  * حقيقي: تُنسخ الشجرة إلى مجلّد مؤقّت، ويُصاب ملف واحد، ثم يُشغَّل الإثبات
  * **بجذر المجلّد المصاب** في عملية فرعية.
  */
-const SRC_DIRS = ['src', 'docs', 'scripts']
+// `supabase/` مُدرَج بعد [OVERNIGHT-ADMIN]: صار الإثبات يقرأ الهجرات ليكشف
+// «جدول مفقود» بائتًا. وبدونه كان يسقط بـENOENT — **سقوط غير مسمّى**، وهو ما
+// يمنعه §4.2 صراحةً: يبدو نجاحًا للمهاجم ويخفي أن الفحص لم يُنفَّذ أصلًا.
+const SRC_DIRS = ['src', 'docs', 'scripts', 'supabase']
 
 function makeInfectedTree(name) {
   const dir = join(work, `tree-${name}`)
@@ -144,9 +147,41 @@ const ATTACKS = [
   },
   {
     // انحراف عدد الوثيقة عن السجلّ — وقد حدث فعلًا قبل ربطهما.
-    name: 'عدد في §10 يخالف السجلّ',
-    file: 'docs/product/EXECUTIVE-DASHBOARD-DATA-CONTRACT.md',
+    // الهدف انتقل إلى **ملحق التسليم**: هو الوثيقة التي تُصان مع الكود بعد
+    // [OVERNIGHT-ADMIN]، وإليها انتقل الرباط العددي.
+    name: 'عدد في عدّاد الملحق يخالف السجلّ',
+    file: 'docs/execution/qimmah-sovereign-overnight/ADMIN-DELIVERY.md',
     patch: (s) => s.replace('| `AVAILABLE_NOW` | **٤** —', '| `AVAILABLE_NOW` | **٦** —'),
+  },
+  {
+    // ⚠️ **الالتفاف الذي حدث فعلًا**: قائمة «جداول مفقودة» بقيت تذكر جدولًا
+    // هبط. لا يكشفه مترجم ولا مراجعة سريعة — يكشفه فقط أن تُقرأ الهجرات.
+    name: 'إعادة جدول موجود إلى قائمة «المفقود»',
+    file: 'src/admin/contract/metrics.ts',
+    patch: (s) => s.replace('export const MISSING_SOURCE_TABLES = [] as const', "export const MISSING_SOURCE_TABLES = ['entitlements'] as const"),
+  },
+  {
+    name: 'تحويل الغياب إلى صفر في طبقة قراءة الخادم',
+    file: 'src/admin/contract/liveSource.ts',
+    patch: (s) =>
+      s.replace(
+        "  if (typeof raw === 'number' && Number.isFinite(raw)) return ready(raw, asOf)\n  return fallback",
+        "  if (typeof raw === 'number' && Number.isFinite(raw)) return ready(raw, asOf)\n  return ready((raw as number) ?? 0, asOf)",
+      ),
+  },
+  {
+    name: 'نداء الخادم قبل حسم الدور',
+    file: 'src/admin/contract/liveSource.ts',
+    patch: (s) =>
+      s.replace(
+        "  if (!isAdmin(decision)) return { snapshot: base, live: 'not-founder' }\n\n  const client = await getSupabase()",
+        "  const client = await getSupabase()\n  if (!isAdmin(decision)) return { snapshot: base, live: 'not-founder' }\n",
+      ),
+  },
+  {
+    name: 'حذف إعلان الانحراف من الملحق',
+    file: 'docs/execution/qimmah-sovereign-overnight/ADMIN-DELIVERY.md',
+    patch: (s) => s.replace('انحراف معلَن مع وثيقة العقد', 'ملاحظات متفرّقة'),
   },
   {
     name: 'حذف بند من السجلّ بلا تحديث الوثيقة',

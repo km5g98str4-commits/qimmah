@@ -20,9 +20,23 @@ import type { MetricDefinition } from './types'
 
 /**
  * أسماء الجداول غير الموجودة — تُذكر بوصفها **مطلوبة** لا قائمة.
- * وجودها كثوابت مسمّاة يمنع أن يقرأها قارئ لاحقًا فيظنّها جداول حيّة.
+ *
+ * ⚠️ **صُحِّحت في [OVERNIGHT-ADMIN].** كانت تعدّ `entitlements` و`activation_codes`
+ * و`activation_redemptions` مفقودةً، وقد **هبطت خلفية التجارة على هذا الفرع**
+ * فصار الثلاثة موجودةً باسمَي `entitlements` و`access_codes`
+ * و`access_code_redemptions`. قائمة «مفقود» بائتة أسوأ من غيابها: تُبقي مقاييس
+ * حيّةً موسومةً «لا نظام مصدر» فلا يبحث أحد عن الوصل.
+ *
+ * ولذلك لا تُصان هذه القائمة بالنية: `test:admin-db` يفتح
+ * `supabase/migrations/**` ويُسقط البوابة **باسمها** إن حمل الاسم المذكور هنا
+ * `create table` في أي هجرة.
  */
-export const MISSING_SOURCE_TABLES = ['entitlements', 'activation_codes', 'activation_redemptions'] as const
+export const MISSING_SOURCE_TABLES = [] as const
+
+/** الدالة التي تخدم أرقام اللوحة. اسمها هنا مربوط بالهجرة عبر `test:admin-db`. */
+export const DASHBOARD_RPC = 'founder_executive_snapshot'
+/** دالة صفحة الجدول. */
+export const USER_PAGE_RPC = 'founder_user_page'
 
 export const METRIC_REGISTRY: readonly MetricDefinition[] = [
   // ─────────────────────────────────────────────────────────────────────
@@ -98,7 +112,7 @@ export const METRIC_REGISTRY: readonly MetricDefinition[] = [
     owner: 'backend',
     availability: 'NEEDS_BACKEND',
     backendGap: 'endpoint-missing',
-    unavailableReasonKey: 'reason.noAdminRead',
+    unavailableReasonKey: 'reason.migrationPending',
   },
   {
     id: 'users.newToday',
@@ -112,7 +126,7 @@ export const METRIC_REGISTRY: readonly MetricDefinition[] = [
     owner: 'backend',
     availability: 'NEEDS_BACKEND',
     backendGap: 'endpoint-missing',
-    unavailableReasonKey: 'reason.noAdminRead',
+    unavailableReasonKey: 'reason.migrationPending',
   },
   {
     id: 'users.new7d',
@@ -126,7 +140,7 @@ export const METRIC_REGISTRY: readonly MetricDefinition[] = [
     owner: 'backend',
     availability: 'NEEDS_BACKEND',
     backendGap: 'endpoint-missing',
-    unavailableReasonKey: 'reason.noAdminRead',
+    unavailableReasonKey: 'reason.migrationPending',
   },
   {
     id: 'users.new30d',
@@ -140,7 +154,7 @@ export const METRIC_REGISTRY: readonly MetricDefinition[] = [
     owner: 'backend',
     availability: 'NEEDS_BACKEND',
     backendGap: 'endpoint-missing',
-    unavailableReasonKey: 'reason.noAdminRead',
+    unavailableReasonKey: 'reason.migrationPending',
   },
   {
     id: 'users.verified',
@@ -154,7 +168,7 @@ export const METRIC_REGISTRY: readonly MetricDefinition[] = [
     owner: 'backend',
     availability: 'NEEDS_BACKEND',
     backendGap: 'endpoint-missing',
-    unavailableReasonKey: 'reason.authSchemaClosed',
+    unavailableReasonKey: 'reason.migrationPending',
   },
   {
     id: 'users.growthSeries',
@@ -168,7 +182,7 @@ export const METRIC_REGISTRY: readonly MetricDefinition[] = [
     owner: 'backend',
     availability: 'NEEDS_BACKEND',
     backendGap: 'endpoint-missing',
-    unavailableReasonKey: 'reason.noAdminRead',
+    unavailableReasonKey: 'reason.migrationPending',
   },
 
   // ─────────────────────────────────────────────────────────────────────
@@ -186,7 +200,7 @@ export const METRIC_REGISTRY: readonly MetricDefinition[] = [
     owner: 'backend',
     availability: 'NEEDS_BACKEND',
     backendGap: 'endpoint-missing',
-    unavailableReasonKey: 'reason.authSchemaClosed',
+    unavailableReasonKey: 'reason.migrationPending',
   },
   {
     id: 'activity.signedIn30d',
@@ -200,7 +214,7 @@ export const METRIC_REGISTRY: readonly MetricDefinition[] = [
     owner: 'backend',
     availability: 'NEEDS_BACKEND',
     backendGap: 'endpoint-missing',
-    unavailableReasonKey: 'reason.authSchemaClosed',
+    unavailableReasonKey: 'reason.migrationPending',
   },
   {
     id: 'activity.dormant30d',
@@ -214,7 +228,7 @@ export const METRIC_REGISTRY: readonly MetricDefinition[] = [
     owner: 'backend',
     availability: 'NEEDS_BACKEND',
     backendGap: 'endpoint-missing',
-    unavailableReasonKey: 'reason.authSchemaClosed',
+    unavailableReasonKey: 'reason.migrationPending',
   },
   {
     id: 'activity.productActive7d',
@@ -296,77 +310,92 @@ export const METRIC_REGISTRY: readonly MetricDefinition[] = [
   },
 
   // ─────────────────────────────────────────────────────────────────────
-  // الاستحقاق والتفعيل — **لا جدول ولا صفّ ولا عمود**. `source-system-missing`.
+  // الاستحقاق والتفعيل — الجداول **هبطت** مع خلفية التجارة، والناقص صار مسار
+  // القراءة وحده: `endpoint-missing` لا `source-system-missing`.
   // ─────────────────────────────────────────────────────────────────────
   {
     id: 'entitlement.premiumActive',
     labelKey: 'entitlement.premiumActive',
     group: 'entitlement',
-    source: 'entitlements (جدول غير موجود)',
+    source: 'public.entitlements → founder_executive_snapshot()',
     aggregation: 'count',
     privacyClass: 'account',
     requiredRole: 'founder',
     refresh: '5m',
     owner: 'backend',
     availability: 'NEEDS_BACKEND',
-    backendGap: 'source-system-missing',
-    unavailableReasonKey: 'reason.noEntitlementSystem',
+    backendGap: 'endpoint-missing',
+    unavailableReasonKey: 'reason.migrationPending',
   },
   {
     id: 'entitlement.trialActive',
     labelKey: 'entitlement.trialActive',
     group: 'entitlement',
-    source: 'entitlements (جدول غير موجود)',
+    source: 'public.entitlements → founder_executive_snapshot()',
     aggregation: 'count',
     privacyClass: 'account',
     requiredRole: 'founder',
     refresh: '5m',
     owner: 'backend',
     availability: 'NEEDS_BACKEND',
-    backendGap: 'source-system-missing',
-    unavailableReasonKey: 'reason.noEntitlementSystem',
+    backendGap: 'endpoint-missing',
+    unavailableReasonKey: 'reason.migrationPending',
+  },
+  {
+    id: 'entitlement.trialExpired',
+    labelKey: 'entitlement.trialExpired',
+    group: 'entitlement',
+    source: 'public.entitlements → founder_executive_snapshot()',
+    aggregation: 'count',
+    privacyClass: 'account',
+    requiredRole: 'founder',
+    refresh: '5m',
+    owner: 'backend',
+    availability: 'NEEDS_BACKEND',
+    backendGap: 'endpoint-missing',
+    unavailableReasonKey: 'reason.migrationPending',
   },
   {
     id: 'entitlement.previewOnly',
     labelKey: 'entitlement.previewOnly',
     group: 'entitlement',
-    source: 'مشتق: users.total − المستحقّون',
+    source: 'مشتق في الخادم: profiles − المنح الفعّالة',
     aggregation: 'count',
     privacyClass: 'aggregate',
     requiredRole: 'founder',
     refresh: '5m',
     owner: 'backend',
     availability: 'NEEDS_BACKEND',
-    backendGap: 'source-system-missing',
-    unavailableReasonKey: 'reason.noEntitlementSystem',
+    backendGap: 'endpoint-missing',
+    unavailableReasonKey: 'reason.migrationPending',
   },
   {
     id: 'entitlement.activationRedeemed',
     labelKey: 'entitlement.activationRedeemed',
     group: 'entitlement',
-    source: 'activation_redemptions (جدول غير موجود)',
+    source: 'public.code_redemption_ledger → founder_executive_snapshot()',
     aggregation: 'count',
     privacyClass: 'account',
     requiredRole: 'founder',
     refresh: '5m',
     owner: 'backend',
     availability: 'NEEDS_BACKEND',
-    backendGap: 'source-system-missing',
-    unavailableReasonKey: 'reason.noEntitlementSystem',
+    backendGap: 'endpoint-missing',
+    unavailableReasonKey: 'reason.migrationPending',
   },
   {
     id: 'entitlement.activationPending',
     labelKey: 'entitlement.activationPending',
     group: 'entitlement',
-    source: 'activation_codes (جدول غير موجود)',
+    source: 'public.access_codes → founder_executive_snapshot()',
     aggregation: 'count',
     privacyClass: 'aggregate',
     requiredRole: 'founder',
     refresh: '5m',
     owner: 'backend',
     availability: 'NEEDS_BACKEND',
-    backendGap: 'source-system-missing',
-    unavailableReasonKey: 'reason.noEntitlementSystem',
+    backendGap: 'endpoint-missing',
+    unavailableReasonKey: 'reason.migrationPending',
   },
   {
     id: 'entitlement.activationFailed24h',
@@ -386,15 +415,168 @@ export const METRIC_REGISTRY: readonly MetricDefinition[] = [
     id: 'entitlement.conversionOfAccounts',
     labelKey: 'entitlement.conversionOfAccounts',
     group: 'entitlement',
-    source: 'مشتق: premiumActive ÷ users.total',
+    source: 'مشتق: premiumActive ÷ profiles.count',
     aggregation: 'ratio',
     privacyClass: 'aggregate',
     requiredRole: 'founder',
     refresh: '5m',
     owner: 'backend',
     availability: 'NEEDS_BACKEND',
+    backendGap: 'endpoint-missing',
+    unavailableReasonKey: 'reason.migrationPending',
+  },
+
+  // ─────────────────────────────────────────────────────────────────────
+  // التجارة — أوامر سلة والأكواد. المصادر **موجودة على هذا الفرع**، والناقص
+  // مسار القراءة وحده. الاستثناء الوحيد `commerce.redemptionFailures24h`:
+  // لا سجلّ له أصلًا، وبناؤه قرار أمني لا مهمّة توصيل.
+  // ─────────────────────────────────────────────────────────────────────
+  {
+    id: 'commerce.ordersSeen',
+    labelKey: 'commerce.ordersSeen',
+    group: 'commerce',
+    source: 'public.salla_webhook_events → count(distinct provider_order_id)',
+    aggregation: 'count-distinct',
+    privacyClass: 'aggregate',
+    requiredRole: 'founder',
+    refresh: '5m',
+    owner: 'backend',
+    availability: 'NEEDS_BACKEND',
+    backendGap: 'endpoint-missing',
+    unavailableReasonKey: 'reason.migrationPending',
+  },
+  {
+    id: 'commerce.ordersPaid',
+    labelKey: 'commerce.ordersPaid',
+    group: 'commerce',
+    source: 'public.purchase_ledger → count(*)',
+    aggregation: 'count',
+    privacyClass: 'aggregate',
+    requiredRole: 'founder',
+    refresh: '5m',
+    owner: 'backend',
+    availability: 'NEEDS_BACKEND',
+    backendGap: 'endpoint-missing',
+    unavailableReasonKey: 'reason.migrationPending',
+  },
+  {
+    id: 'commerce.ordersFailed',
+    labelKey: 'commerce.ordersFailed',
+    group: 'commerce',
+    source: "public.salla_webhook_events.classification in ('failed','rejected')",
+    aggregation: 'count',
+    privacyClass: 'aggregate',
+    requiredRole: 'founder',
+    refresh: '5m',
+    owner: 'backend',
+    availability: 'NEEDS_BACKEND',
+    backendGap: 'endpoint-missing',
+    unavailableReasonKey: 'reason.migrationPending',
+  },
+  {
+    id: 'commerce.codesIssued',
+    labelKey: 'commerce.codesIssued',
+    group: 'commerce',
+    source: 'public.access_codes → count(*)',
+    aggregation: 'count',
+    privacyClass: 'aggregate',
+    requiredRole: 'founder',
+    refresh: '5m',
+    owner: 'backend',
+    availability: 'NEEDS_BACKEND',
+    backendGap: 'endpoint-missing',
+    unavailableReasonKey: 'reason.migrationPending',
+  },
+  {
+    id: 'commerce.codesRedeemed',
+    labelKey: 'commerce.codesRedeemed',
+    group: 'commerce',
+    source: 'public.code_redemption_ledger → count(*)',
+    aggregation: 'count',
+    privacyClass: 'aggregate',
+    requiredRole: 'founder',
+    refresh: '5m',
+    owner: 'backend',
+    availability: 'NEEDS_BACKEND',
+    backendGap: 'endpoint-missing',
+    unavailableReasonKey: 'reason.migrationPending',
+  },
+  {
+    id: 'commerce.codesUnused',
+    labelKey: 'commerce.codesUnused',
+    group: 'commerce',
+    source: 'public.access_codes: enabled · redemption_count = 0 · غير منتهٍ',
+    aggregation: 'count',
+    privacyClass: 'aggregate',
+    requiredRole: 'founder',
+    refresh: '5m',
+    owner: 'backend',
+    availability: 'NEEDS_BACKEND',
+    backendGap: 'endpoint-missing',
+    unavailableReasonKey: 'reason.migrationPending',
+  },
+  {
+    // ⚠️ **لا مصدر — ولا يُبنى بلا قرار.** سجلّ يحمل الأكواد المُدخَلة المرفوضة
+    // يصير قاموس تخمين؛ والمقبول عدّاد مجمّع بالنافذة بلا الكود نفسه.
+    id: 'commerce.redemptionFailures24h',
+    labelKey: 'commerce.redemptionFailures24h',
+    group: 'commerce',
+    source: 'سجلّ محاولات استرداد مرفوضة — غير موجود',
+    aggregation: 'count',
+    privacyClass: 'aggregate',
+    requiredRole: 'founder',
+    refresh: '1m',
+    owner: 'backend',
+    availability: 'NEEDS_BACKEND',
     backendGap: 'source-system-missing',
-    unavailableReasonKey: 'reason.noEntitlementSystem',
+    unavailableReasonKey: 'reason.noAuditLog',
+  },
+  {
+    id: 'commerce.revokedActive',
+    labelKey: 'commerce.revokedActive',
+    group: 'commerce',
+    source: 'public.revocation_ledger where lifted_at is null',
+    aggregation: 'count',
+    privacyClass: 'aggregate',
+    requiredRole: 'founder',
+    refresh: '5m',
+    owner: 'backend',
+    availability: 'NEEDS_BACKEND',
+    backendGap: 'endpoint-missing',
+    unavailableReasonKey: 'reason.migrationPending',
+  },
+
+  // ─────────────────────────────────────────────────────────────────────
+  // الأخطاء — **لا مسار واحد يوصلها**. الكتلة معلَنة كي يبقى العمى مرئيًا:
+  // قسمٌ محذوف يُقرأ «لا أخطاء»، وقسمٌ يقول «غير متاح» يُقرأ «لا نقيس».
+  // ─────────────────────────────────────────────────────────────────────
+  {
+    id: 'errors.clientErrors24h',
+    labelKey: 'errors.clientErrors24h',
+    group: 'errors',
+    source: 'مسار أخطاء العميل — غير موجود',
+    aggregation: 'count',
+    privacyClass: 'aggregate',
+    requiredRole: 'founder',
+    refresh: '1m',
+    owner: 'backend',
+    availability: 'NEEDS_BACKEND',
+    backendGap: 'source-system-missing',
+    unavailableReasonKey: 'reason.noErrorPipeline',
+  },
+  {
+    id: 'errors.rpcFailures24h',
+    labelKey: 'errors.rpcFailures24h',
+    group: 'errors',
+    source: 'عدّاد فشل نداءات RPC — غير موجود',
+    aggregation: 'count',
+    privacyClass: 'aggregate',
+    requiredRole: 'founder',
+    refresh: '1m',
+    owner: 'backend',
+    availability: 'NEEDS_BACKEND',
+    backendGap: 'source-system-missing',
+    unavailableReasonKey: 'reason.noErrorPipeline',
   },
 
   // ─────────────────────────────────────────────────────────────────────

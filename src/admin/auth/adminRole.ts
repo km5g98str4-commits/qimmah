@@ -127,12 +127,53 @@ export function canRead(
 }
 
 /**
- * حالة تصريح الدور في هذا البناء.
+ * حالة تزويد الدور — **مشتقّة من القرار، لا ثابتة**.
  *
- * لا يوجد اليوم في `supabase/migrations/` أي مصدر يصدر `qimmah_role`، ولا دور
- * `admin` في أي سياسة. فالجواب الصادق ثابت: **لم يُزوَّد بعد**. تعرضه اللوحة
- * صراحةً كي لا يظنّ المؤسس أن الحجب عطل.
+ * ═══ لماذا تغيّرت ═══
+ * كانت الدالة تعيد `'not-provisioned'` **حرفيًا في كل مسار**، فتقول للمؤسس
+ * الذي زُوّد فعلًا إن الدور «لم يُزوَّد بعد» — أي أنها تكذب بالضبط في اللحظة
+ * التي بُنيت لتصدق فيها. وثابتٌ يصف العالم يصير خاطئًا في اليوم الذي يتغيّر
+ * فيه العالم، ولا يعترض عليه مترجم ولا اختبار.
+ *
+ * الآن الجواب **يُقرأ من الجلسة نفسها** عبر القرار المحسوم: لا ثابت، ولا
+ * علم بيئة، ولا نداء شبكة — ولذلك لا يمكن أن يشيخ.
+ *
+ * والتمييز بين `claim-absent` و`claim-rejected` مقصود: الأولى الحالة الطبيعية
+ * لكل مستخدم عادي، والثانية **محاولة**. طيّهما في «غير مزوَّد» يخفي الفرق بين
+ * «لم يُمنح» و«حاول أن يمنح نفسه».
  */
-export function adminRoleProvisioning(): 'not-provisioned' {
-  return 'not-provisioned'
+export type RoleProvisioningState =
+  /** لا جلسة أصلًا. */
+  | 'no-session'
+  /** جلسة صحيحة بلا ادّعاء دور — الحالة الغالبة. */
+  | 'claim-absent'
+  /** ادّعاء وُجد ورُفض: مصدر يكتبه المستخدم، أو قيمة خارج القائمة البيضاء. */
+  | 'claim-rejected'
+  /** لم يُحسم بعد. */
+  | 'unresolved'
+  /** الخادم أصدر الدور وهذه الجلسة تحمله. */
+  | 'claim-present'
+
+export function adminRoleProvisioning(decision: AdminRoleDecision): RoleProvisioningState {
+  if (decision.role === 'founder') return 'claim-present'
+  switch (decision.reason) {
+    case 'no-session':
+      return 'no-session'
+    case 'no-role-claim':
+      return 'claim-absent'
+    case 'forged-claim':
+    case 'unknown-role':
+      return 'claim-rejected'
+    default:
+      return 'unresolved'
+  }
 }
+
+/**
+ * اسم ملفّ الهجرة التي **تُصدر** الدور.
+ *
+ * وجوده هنا ليس توثيقًا بل **رباط**: يتحقّق `test:admin-db` أن الملف موجود فعلًا
+ * وأنه يعرّف `admin_set_role`. فلو حُذفت الهجرة أو أُعيدت تسميتها سقطت البوابة
+ * باسمها، بدل أن تبقى الواجهة تشير إلى مسار تزويد لم يعد موجودًا.
+ */
+export const ROLE_PROVISIONING_MIGRATION = '20260816120001_founder_role_provisioning.sql'

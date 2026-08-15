@@ -47,7 +47,7 @@ export type RefreshCadence = 'on-load' | '1m' | '5m' | '1h' | 'on-demand'
 export type MetricOwner = 'client' | 'backend' | 'product-decision'
 
 /** المجموعة التي ينتمي إليها المقياس في الواجهة. */
-export type MetricGroup = 'platform' | 'users' | 'activity' | 'entitlement' | 'onboarding'
+export type MetricGroup = 'platform' | 'users' | 'activity' | 'entitlement' | 'onboarding' | 'commerce' | 'errors'
 
 /**
  * تعريف مقياس واحد — البند الكامل من الوثيقة. يُقرأ في وقت التشغيل لبناء بطاقة
@@ -188,12 +188,39 @@ export interface ActivitySnapshot {
 export interface EntitlementSnapshot {
   readonly premiumActive: MetricValue<number>
   readonly trialActive: MetricValue<number>
+  /** انتهت تجربته ولم يشترِ — رقم تحوّل لا رقم عطل. */
+  readonly trialExpired: MetricValue<number>
   readonly previewOnly: MetricValue<number>
   readonly activationRedeemed: MetricValue<number>
   readonly activationPending: MetricValue<number>
   readonly activationFailed24h: MetricValue<number>
   readonly conversionOfAccounts: MetricValue<number>
   readonly activationFunnel: readonly FunnelStage[]
+}
+
+/**
+ * التجارة — الأوامر والأكواد.
+ *
+ * `redemptionFailures24h` **بلا مصدر عمدًا**: لا يوجد سجلّ لمحاولات الاسترداد
+ * المرفوضة، وبناؤه قرار أمني قائم بذاته (سجلّ يحمل الأكواد المُدخَلة يصير
+ * قاموسًا للتخمين). فيبقى الحقل معلَنًا في العقد وغير متاح في الواجهة — أوضح
+ * من حذفه، لأن غيابه من القائمة يقرأه القارئ «لا يحدث» لا «لا نقيس».
+ */
+export interface CommerceSnapshot {
+  readonly ordersSeen: MetricValue<number>
+  readonly ordersPaid: MetricValue<number>
+  readonly ordersFailed: MetricValue<number>
+  readonly codesIssued: MetricValue<number>
+  readonly codesRedeemed: MetricValue<number>
+  readonly codesUnused: MetricValue<number>
+  readonly redemptionFailures24h: MetricValue<number>
+  readonly revokedActive: MetricValue<number>
+}
+
+/** الأخطاء — لا مصدر واحد منها اليوم؛ الكتلة موجودة كي يبقى العمى مُعلَنًا. */
+export interface ErrorsSnapshot {
+  readonly clientErrors24h: MetricValue<number>
+  readonly rpcFailures24h: MetricValue<number>
 }
 
 /** إكمال التخصيص — متحيّز البسط، انظر §5.5 من الوثيقة. */
@@ -217,6 +244,8 @@ export interface ExecutiveSnapshot {
   readonly users: UsersSnapshot
   readonly activity: ActivitySnapshot
   readonly entitlement: EntitlementSnapshot
+  readonly commerce: CommerceSnapshot
+  readonly errors: ErrorsSnapshot
   readonly onboarding: OnboardingSnapshot
   readonly attention: readonly AttentionItem[]
   readonly users_page: MetricValue<AdminUserPage>

@@ -18,6 +18,8 @@ import { UserDetailPanel } from '@/admin/ui/UserDetail'
 import { resolveAdminRole, ADMIN_ROLE_CLAIM, CLOSED_DECISION } from '@/admin/auth/adminRole'
 import { FIXTURE_SCENARIOS, fixtureFor, largeUserSet, userDetailFixture, type FixtureScenario } from '@/admin/contract/fixtures'
 import { ready } from '@/admin/contract/types'
+import { METRIC_REGISTRY } from '@/admin/contract/metrics'
+import { adminStrings } from '@/i18n/dict/admin'
 import type { Lang } from '@/lib/appPreferences'
 
 let pass = 0
@@ -108,7 +110,21 @@ const unavailableCards = cards.filter((c) => c.startsWith('"' + c.slice(1, c.ind
 check(`بطاقات الغياب موجودة فعلًا للفحص (${unavailableCards.length} بطاقة)`, unavailableCards.length >= 15)
 check('لا بطاقة غياب تحمل صفرًا', unavailableCards.every((c) => !/>\s*0\s*</.test(c.slice(0, 1200))))
 // والسبب معروض مع الغياب لا مخفيًّا خلف تلميح.
-check('سبب اللاإتاحة معروض نصًّا', todayHtml.includes('ما فيه مسار قراءة للمسؤول'))
+//
+// ⚠️ كان الفحص يبحث عن **جملة واحدة بعينها**، فيمرّ ما دام سببٌ واحد معروضًا
+// ولو اختفت البقيّة — وقد كسره تصحيحُ نصٍّ واحد في [OVERNIGHT-ADMIN]. الآن
+// يُشتقّ الشرط من السجلّ: **كل** سبب لاإتاحة مستعمَل يجب أن يظهر نصّه في
+// اللقطة، فإضافة مقياس بسبب جديد لا تمرّ بلا أن يُعرض سببه.
+const shownReasonKeys = [
+  ...new Set(
+    METRIC_REGISTRY.filter((m) => m.availability !== 'AVAILABLE_NOW').map((m) => m.unavailableReasonKey),
+  ),
+]
+const missingReasons = shownReasonKeys.filter((k) => {
+  const text = adminStrings.ar.reasons[k] ?? ''
+  return !text || !todayHtml.includes(text.slice(0, 40))
+})
+check(`كل سبب لاإتاحة معروض نصًّا (${shownReasonKeys.length} أسباب)`, missingReasons.length === 0)
 check('مالك التمكين معروض', todayHtml.includes('Backend'))
 
 // والصفر الحقيقي **يُطبع صفرًا** — الفحص أعلاه لا يمنع الصفر المقيس.

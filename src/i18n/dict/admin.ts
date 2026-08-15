@@ -35,6 +35,27 @@ export interface AdminStrings {
     /** شريط علوي دائم يعلن حالة التوصيل — لا يُخفى ولا يُطوى. */
     wiringBanner: string
   }
+  /**
+   * نصّ شريط القراءة الحيّة لكل حالة.
+   * مفاتيحها = `LiveReadState`، فأي حالة تُضاف في الكود بلا نصّ **لا تُترجم**.
+   */
+  live: {
+    'no-backend': string
+    'not-founder': string
+    'rpc-missing': string
+    'denied-by-server': string
+    failed: string
+    live: string
+  }
+  /** عناوين أقسام النظرة العامّة. */
+  sections: {
+    growth: string
+    entitlement: string
+    commerce: string
+    funnel: string
+    errors: string
+    product: string
+  }
   denied: {
     title: string
     body: string
@@ -43,7 +64,12 @@ export interface AdminStrings {
     reasonUnknownRole: string
     reasonForgedClaim: string
     reasonNotResolved: string
+    /** ملاحظة التزويد لكل حالة — `provisioningNote` هي حالة «لا ادّعاء». */
     provisioningNote: string
+    provisioningNoSession: string
+    provisioningRejected: string
+    provisioningUnresolved: string
+    provisioningPresent: string
   }
   availability: {
     AVAILABLE_NOW: string
@@ -163,6 +189,17 @@ const arLabels: Record<string, string> = {
   'activity.activeSeries': 'اتجاه الاستخدام',
   'activity.retentionCohorts': 'البقاء حسب أسبوع التسجيل',
   'entitlement.premiumActive': 'مشتركو Premium',
+  'entitlement.trialExpired': 'انتهت تجربتهم بلا شراء',
+  'commerce.ordersSeen': 'أوامر وصلتنا من سلة',
+  'commerce.ordersPaid': 'أوامر مدفوعة ومُنِحت',
+  'commerce.ordersFailed': 'أوامر فشلت أو رُفضت',
+  'commerce.codesIssued': 'أكواد أنشأناها',
+  'commerce.codesRedeemed': 'أكواد استُخدمت',
+  'commerce.codesUnused': 'أكواد فعّالة ما استُخدمت',
+  'commerce.redemptionFailures24h': 'محاولات كود مرفوضة — ٢٤ ساعة',
+  'commerce.revokedActive': 'حسابات موقوفة الآن',
+  'errors.clientErrors24h': 'أخطاء التطبيق — ٢٤ ساعة',
+  'errors.rpcFailures24h': 'فشل نداءات الخادم — ٢٤ ساعة',
   'entitlement.trialActive': 'داخل التجربة الآن',
   'entitlement.previewOnly': 'على المعاينة فقط',
   'entitlement.activationRedeemed': 'أكواد مستبدَلة',
@@ -194,6 +231,17 @@ const enLabels: Record<string, string> = {
   'activity.activeSeries': 'Usage trend',
   'activity.retentionCohorts': 'Retention by signup week',
   'entitlement.premiumActive': 'Premium subscribers',
+  'entitlement.trialExpired': 'Trial ended without buying',
+  'commerce.ordersSeen': 'Orders received from Salla',
+  'commerce.ordersPaid': 'Orders paid and granted',
+  'commerce.ordersFailed': 'Orders failed or rejected',
+  'commerce.codesIssued': 'Codes we created',
+  'commerce.codesRedeemed': 'Codes redeemed',
+  'commerce.codesUnused': 'Live codes never used',
+  'commerce.redemptionFailures24h': 'Rejected code attempts — 24h',
+  'commerce.revokedActive': 'Accounts revoked right now',
+  'errors.clientErrors24h': 'App errors — 24h',
+  'errors.rpcFailures24h': 'Server call failures — 24h',
   'entitlement.trialActive': 'In trial right now',
   'entitlement.previewOnly': 'Preview only',
   'entitlement.activationRedeemed': 'Codes redeemed',
@@ -206,6 +254,10 @@ const enLabels: Record<string, string> = {
 
 const arReasons: Record<string, string> = {
   'reason.none': '',
+  'reason.migrationPending':
+    'المصدر موجود والدالة اللي تقرأه مكتوبة في المستودع — بس ما انطبقت على القاعدة بعد. أول ما تنطبق الهجرة يطلع الرقم هنا بدون أي تغيير في الكود. المالك: Backend.',
+  'reason.noErrorPipeline':
+    'ما فيه مسار يوصل أخطاء التطبيق للخادم أصلًا. القسم يبقى ظاهر عشان ما يُقرأ فراغه «ما فيه أخطاء». المالك: Backend.',
   'reason.noAdminRead':
     'ما فيه مسار قراءة للمسؤول. سياسات قاعدة البيانات تعطي كل حساب صفوفه هو بس — ولا فيه دور مسؤول أصلًا. المالك: Backend.',
   'reason.authSchemaClosed':
@@ -222,6 +274,10 @@ const arReasons: Record<string, string> = {
 
 const enReasons: Record<string, string> = {
   'reason.none': '',
+  'reason.migrationPending':
+    'The source exists and the function that reads it is written in the repo — it just has not been applied to the database yet. The moment the migration lands, the number appears here with no code change. Owner: Backend.',
+  'reason.noErrorPipeline':
+    'There is no path carrying app errors to the server at all. The section stays visible so its emptiness is not read as "no errors". Owner: Backend.',
   'reason.noAdminRead':
     'No admin read path exists. Database policies give every account only its own rows, and there is no admin role at all. Owner: Backend.',
   'reason.authSchemaClosed':
@@ -380,6 +436,23 @@ export const adminStrings: Record<Lang, AdminStrings> = {
       wiringBanner:
         'ما فيه ولا رقم مستخدم متاح اليوم. الواجهة والعقد جاهزين، والتوصيل موقوف على Backend — كل بطاقة تحت تقول لك السبب.',
     },
+    live: {
+      'no-backend': 'الخادم مو مضبوط في هذا البناء، فما فيه من وين نجيب الأرقام.',
+      'not-founder': 'ما انطلب ولا رقم — الدور ما انحسم مؤسسًا.',
+      'rpc-missing':
+        'الأرقام موصولة في الكود، بس دالة القراءة ما انطبقت على القاعدة بعد. أول ما تنطبق الهجرة تضوي الشاشة بدون تغيير كود.',
+      'denied-by-server': 'القاعدة رفضت الطلب: جلستك ما تحمل دور المؤسس على الخادم.',
+      failed: 'ما وصلنا رد صالح من الخادم. الأرقام تحت تبقى «غير متاح» — ما نعرضها أصفارًا.',
+      live: 'الأرقام تحت جاية من الخادم الآن.',
+    },
+    sections: {
+      growth: 'نمو الحسابات',
+      entitlement: 'الاستحقاق',
+      commerce: 'الطلبات والأكواد',
+      funnel: 'القمع',
+      errors: 'الأخطاء',
+      product: 'استخدام المنتج',
+    },
     denied: {
       title: 'هذي الشاشة للمؤسس',
       body: 'تسجيل الدخول وحده ما يكفي — لازم دور مسؤول صريح من الخادم.',
@@ -388,7 +461,13 @@ export const adminStrings: Record<Lang, AdminStrings> = {
       reasonUnknownRole: 'الدور في الجلسة مو معروف.',
       reasonForgedClaim: 'الدور جاي من مصدر يكتبه المستخدم نفسه — مرفوض.',
       reasonNotResolved: 'ما انحسم الدور بعد.',
-      provisioningNote: 'ملاحظة: ما فيه اليوم أي جهة تُصدر هذا الدور، فالمنع متوقّع مو عطل.',
+      provisioningNote:
+        'ملاحظة: حسابك ما يحمل الدور. المنح يصير من الخادم بمفتاح مميّز عبر admin_set_role — ما فيه طريقة تمنح نفسك، وهذا مقصود.',
+      provisioningNoSession: 'ملاحظة: ما فيه جلسة أصلًا. سجّل دخول أولًا، والدور ينحسم بعدها من الخادم.',
+      provisioningRejected:
+        'ملاحظة: وصلنا ادّعاء دور من مصدر ما يصلح — إمّا يكتبه المستخدم بنفسه أو قيمته مو معروفة. انرفض بالاسم وانرصد.',
+      provisioningUnresolved: 'ملاحظة: الدور ما انحسم بعد. الحالة الابتدائية منع، مو سماح مؤقّت.',
+      provisioningPresent: 'ملاحظة: حسابك يحمل الدور فعلًا — لو وصلت هنا فالمشكلة في مكان ثاني.',
     },
     availability: {
       AVAILABLE_NOW: 'متاح الآن',
@@ -494,6 +573,23 @@ export const adminStrings: Record<Lang, AdminStrings> = {
       wiringBanner:
         'Not a single user metric is available today. The surface and the contract are ready; wiring is blocked on Backend — every card below tells you why.',
     },
+    live: {
+      'no-backend': 'The backend is not configured in this build, so there is nowhere to read numbers from.',
+      'not-founder': 'Nothing was requested — the role was not resolved as founder.',
+      'rpc-missing':
+        'The numbers are wired in code, but the read function has not been applied to the database yet. The moment the migration lands, this screen lights up with no code change.',
+      'denied-by-server': 'The database refused the request: your session does not carry the founder role on the server.',
+      failed: 'No valid response came back. The numbers below stay "unavailable" — they are never shown as zeros.',
+      live: 'The numbers below are coming from the server right now.',
+    },
+    sections: {
+      growth: 'Account growth',
+      entitlement: 'Entitlement',
+      commerce: 'Orders and codes',
+      funnel: 'Funnel',
+      errors: 'Errors',
+      product: 'Product usage',
+    },
     denied: {
       title: 'This screen is founder-only',
       body: 'Being signed in is not enough — it needs an explicit admin role issued by the server.',
@@ -502,7 +598,13 @@ export const adminStrings: Record<Lang, AdminStrings> = {
       reasonUnknownRole: 'The role on this session is not recognised.',
       reasonForgedClaim: 'The role came from a source the user can write. Rejected.',
       reasonNotResolved: 'Role not resolved yet.',
-      provisioningNote: 'Note: nothing issues this role today, so the denial is expected — not a fault.',
+      provisioningNote:
+        'Note: your account does not carry the role. It is granted server-side with a privileged key through admin_set_role — there is no way to grant it to yourself, and that is deliberate.',
+      provisioningNoSession: 'Note: there is no session at all. Sign in first; the role is resolved server-side after that.',
+      provisioningRejected:
+        'Note: a role claim arrived from a source that does not count — either one the user writes themselves, or a value that is not recognised. It was rejected by name and recorded.',
+      provisioningUnresolved: 'Note: the role is not resolved yet. The initial state is denial, not temporary access.',
+      provisioningPresent: 'Note: your account does carry the role — if you landed here, the problem is elsewhere.',
     },
     availability: {
       AVAILABLE_NOW: 'Available now',
