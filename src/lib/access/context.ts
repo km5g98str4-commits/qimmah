@@ -10,6 +10,7 @@ import { createContext } from 'react'
 import type { EntitlementSnapshot } from './entitlementStore'
 import type { PaidAction } from './paidActions'
 import type { RedeemOutcome } from './entitlementSource'
+import type { TrialOutcome } from './entitlementBackend'
 
 export interface AccessContextValue {
   entitlement: EntitlementSnapshot
@@ -28,6 +29,8 @@ export interface AccessContextValue {
   closeGate: () => void
   redeem: (code: string) => Promise<RedeemOutcome>
   refresh: () => Promise<void>
+  /** يبدأ تجربة ٧٢ ساعة عبر الخادم. الغياب ⇒ `offline` لا نجاح متفائل. */
+  beginTrial: () => Promise<TrialOutcome>
 }
 
 export const AccessContext = createContext<AccessContextValue | null>(null)
@@ -44,4 +47,5 @@ export const CLOSED_ACCESS: AccessContextValue = {
   closeGate: () => {},
   redeem: async () => 'offline',
   refresh: async () => {},
+  beginTrial: async () => 'offline',
 }

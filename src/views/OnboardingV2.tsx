@@ -58,9 +58,14 @@ import {
   type V2Intent,
   type V2Level,
 } from '@/lib/onboardingV2Flow'
-import { useAccess } from '@/lib/access/useAccess'
 import { isExistingPlanEdit } from '@/lib/customization'
 import { PaidActionDenied } from '@/lib/access/guard'
+import type { TrialOutcome } from '@/lib/access/entitlementBackend'
+import { SynthesisScreen } from '@/views/reveal/SynthesisScreen'
+import { RevealJourney } from '@/views/reveal/RevealJourney'
+import { revealStrings } from '@/i18n/dict/reveal'
+import { deriveTargetWeight } from '@/lib/planDerive'
+import { useAccess } from '@/lib/access/useAccess'
 
 interface OnboardingV2Props {
   lang: Lang
@@ -372,7 +377,9 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
           busy={status === 'building'}
           onEnter={finalize}
         />
-        {status === 'building' && <BuildingScreen lang={lang} t={t} />}
+        {/* [OVERNIGHT-4] القصّة تتبع العمل ولا تقوده — `done` تأتي من الحالة
+            الحقيقية، فلا يمشي عدّاد بلا عمل خلفه (§6.1). */}
+        {status === 'building' && <SynthesisScreen lang={lang} done={false} />}
         {status === 'error' && <ErrorScreen lang={lang} t={t} onRetry={finalize} onDismiss={() => setStatus('idle')} />}
       </>
     )
@@ -1072,24 +1079,6 @@ function LimitationsStep({
 }
 
 /** Full-screen plan-assembly loading state (a bare button spinner is forbidden). */
-function BuildingScreen({ lang, t }: { lang: Lang; t: T }) {
-  return (
-    <div
-      dir={lang === 'en' ? 'ltr' : 'rtl'}
-      role="status"
-      aria-live="polite"
-      aria-busy="true"
-      className="v2-surface-dark fixed inset-0 z-[60] flex flex-col items-center justify-center gap-5 bg-page px-6 text-center text-ink-900"
-    >
-      <span className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-primary/25 border-t-primary" aria-hidden="true" />
-      <div>
-        <h1 className="text-2xl font-black tracking-tight">{t.building.title}</h1>
-        <p className="mt-2 text-sm text-ink-500">{t.building.subtitle}</p>
-      </div>
-    </div>
-  )
-}
-
 /** Visible plan-generation failure with retry — never a silent drop into the app. */
 function ErrorScreen({ lang, t, onRetry, onDismiss }: { lang: Lang; t: T; onRetry: () => void; onDismiss: () => void }) {
   return (
@@ -1161,7 +1150,7 @@ function WelcomeScreen({ lang, t, onStart, onExit }: { lang: Lang; t: T; onStart
  * **استخدامها** (تسجيل التمرين والأكل والقياسات) — نصّ المؤسس §4.
  */
 export function PlanHandoffScreen({
-  lang, signedIn, onEnter, plan, goalType, rationale,
+  lang, signedIn, onEnter, plan, goalType, rationale, displayName, currentWeightKg,
 }: {
   lang: Lang
   signedIn: boolean
@@ -1170,9 +1159,36 @@ export function PlanHandoffScreen({
   plan?: GeneratedPlan
   goalType?: GoalType
   rationale?: PlanRationale
+  /** اسم المستخدم إن عرفناه من حسابه. غيابه ⇒ تحيّة بلا اسم، لا اسم مخترع. */
+  displayName?: string | null
+  /** الوزن كما أدخله المستخدم — مقاس، وأساس رسم المسار. */
+  currentWeightKg?: number | null
 }) {
   const t = V2_ONBOARDING[lang] ?? V2_ONBOARDING.ar
   const h = t.handoff
+  const rv = revealStrings[lang] ?? revealStrings.ar
+  const { beginTrial } = useAccess()
+  const [trialState, setTrialState] = useState<'idle' | 'working' | TrialOutcome>('idle')
+
+  // الوزن المستهدف **مشتقّ** من الهدف لا مُدخَل — الإعداد لا يسأل عنه.
+  const target = typeof currentWeightKg === 'number' && goalType
+    ? deriveTargetWeight(currentWeightKg, goalType)
+    : null
+
+  const onTrial = async () => {
+    if (trialState === 'working') return
+    setTrialState('working')
+    setTrialState(await beginTrial())
+  }
+
+  const trialMessage =
+    trialState === 'working' ? rv.cta.trialStarting
+    : trialState === 'started' ? rv.cta.trialStarted
+    : trialState === 'not_authenticated' ? rv.cta.trialNeedsAccount
+    : trialState === 'email_not_verified' ? rv.cta.trialNeedsVerifiedEmail
+    : trialState === 'already_claimed' ? rv.cta.trialAlreadyUsed
+    : trialState === 'offline' || trialState === 'revoked' ? rv.cta.trialOffline
+    : null
   return (
     <div dir={lang === 'en' ? 'ltr' : 'rtl'} className="v2-surface-light fixed inset-0 z-50 overflow-y-auto bg-page text-ink-900">
       <div
@@ -1184,16 +1200,30 @@ export function PlanHandoffScreen({
           <span className="v2-earned-moment v2-bg-green mx-auto grid h-14 w-14 place-items-center rounded-2xl text-white">
             <Icon name="Check" className="h-7 w-7" strokeWidth={3} />
           </span>
-          <p className="v2-text-green mt-4 text-xs font-black uppercase tracking-widest">{h.eyebrow}</p>
-          <h1 className="mt-1.5 text-[1.9rem] font-black leading-tight tracking-tight text-ink-900">{h.title}</h1>
-          <p className="mt-2 text-sm leading-relaxed text-ink-500">{h.subtitle}</p>
+          <p className="v2-text-green mt-4 text-xs font-black uppercase tracking-widest">{rv.hero.eyebrow}</p>
+          <h1 className="mt-1.5 text-[1.9rem] font-black leading-tight tracking-tight text-ink-900" data-testid="reveal-hero-title">
+            {displayName ? rv.hero.titleNamed(displayName) : rv.hero.titleAnonymous}
+          </h1>
+          <p className="mt-2 text-sm leading-relaxed text-ink-500">{rv.hero.subtitle}</p>
         </header>
 
         {/* معاينة الخطة و«لماذا هذه خطتك» — مكوّنان قائمان مغطّيان بإثباتيهما
             (`test:e-plan-preview` و`test:e-plan-why`)، لا نسخة ثانية منهما.
             كانا يتيمين بلا مضيف؛ وهذه الشاشة مضيفهما الطبيعي. */}
-        {plan && goalType && (
+        {/* [OVERNIGHT-4] المسار — نقطتان وخطّ، كلاهما من رقم حقيقي (§6.3). */}
+        {typeof currentWeightKg === 'number' && target !== null && goalType && (
           <div className="mt-6">
+            <RevealJourney
+              lang={lang}
+              currentWeightKg={currentWeightKg}
+              targetWeightKg={target}
+              goalType={goalType}
+              targets={plan?.targets}
+            />
+          </div>
+        )}
+        {plan && goalType && (
+          <div className="mt-4">
             <PlanPreview lang={lang} plan={plan} goalType={goalType} />
           </div>
         )}
@@ -1218,7 +1248,11 @@ export function PlanHandoffScreen({
         {/* الفصل الصريح: يراها الآن، ويستخدمها بـPremium. لا ادّعاء حجب. */}
         <p className="mt-4 text-center text-[0.78rem] leading-relaxed text-ink-500">{h.previewVsUse}</p>
 
-        <div className="mt-5 space-y-2.5">
+        {/* [OVERNIGHT-4] ثلاثة نداءات بترتيب صريح (§6.6):
+            Premium أساسي بارز · التجربة ثانوية أقلّ بروزًا · المعاينة ثالثة
+            هادئة **ومقروءة**. لا نمط مظلم: المعاينة لا تُخفى ولا يُخفَّض
+            تباينها حتى لا تُقرأ — تبقى زرًّا كامل العرض بهدف لمس ٥٢بكسل. */}
+        <div className="mt-5 space-y-2.5" data-testid="reveal-cta-group">
           <a
             href={product.checkoutUrl}
             target="_blank"
@@ -1226,12 +1260,35 @@ export function PlanHandoffScreen({
             data-testid="handoff-premium-cta"
             className="btn-primary flex min-h-[52px] w-full items-center justify-center gap-2 text-base"
           >
-            {h.premiumCta}
+            {rv.cta.premiumCta}
             <Icon name="ExternalLink" className="h-4 w-4" />
           </a>
-          <button type="button" onClick={onEnter} data-testid="handoff-preview-cta" className="btn-ghost min-h-[52px] w-full text-base">
-            {h.enterFree}
+          {/* الصيغة المعتمدة وحدها (§0.1) — ولا «مدى الحياة» ولا «lifetime». */}
+          <p className="text-center text-[0.72rem] font-medium text-ink-500" data-testid="reveal-premium-note">
+            {rv.cta.premiumNote}
+          </p>
+
+          <button
+            type="button"
+            onClick={() => void onTrial()}
+            disabled={trialState === 'working'}
+            aria-busy={trialState === 'working'}
+            data-testid="handoff-trial-cta"
+            className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl border border-primary/45 bg-surface text-base font-bold text-primary-c transition-colors hover:bg-primary-soft disabled:opacity-60"
+          >
+            {rv.cta.trialCta}
           </button>
+          <p className="text-center text-[0.72rem] text-ink-400">{rv.cta.trialNote}</p>
+          {trialMessage && (
+            <p role="status" aria-live="polite" data-testid="reveal-trial-status" className="text-center text-[0.78rem] font-bold text-ink-700">
+              {trialMessage}
+            </p>
+          )}
+
+          <button type="button" onClick={onEnter} data-testid="handoff-preview-cta" className="btn-ghost min-h-[52px] w-full text-base">
+            {rv.cta.previewCta}
+          </button>
+          <p className="text-center text-[0.72rem] text-ink-400">{rv.cta.previewNote}</p>
           {!signedIn && <p className="pt-1 text-center text-xs leading-relaxed text-ink-400">{h.accountNote}</p>}
         </div>
       </div>

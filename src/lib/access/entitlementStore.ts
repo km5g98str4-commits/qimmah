@@ -10,6 +10,7 @@
 // المصدر الوحيد للكتابة هو `EntitlementProvider`؛ وما عداه يقرأ.
 
 import type { EntitlementStatus } from './paidActions'
+import type { EntitlementDetail } from './entitlementBackend'
 
 /** من أين جاءت الحقيقة — يُعرض في التقارير ولا يُخفى. */
 export type EntitlementSource = 'mock' | 'backend' | 'none'
@@ -19,6 +20,14 @@ export interface EntitlementSnapshot {
   source: EntitlementSource
   /** آخر سبب رفض من الخادم (عام دائمًا — لا يكشف وجود الأكواد). */
   lastError?: string
+  /**
+   * [OVERNIGHT-3] تفصيل الخادم — **للعرض الصادق وحده**.
+   *
+   * القرار يبقى في `status` لا هنا: هذا الحقل يجيب «كم بقي من التجربة؟» و«هل
+   * هذا Premium أم تجربة؟» فلا تُعرض العبارة نفسها لحالتين مختلفتين. اختياري
+   * لأن وضع التقليد ووضع «لا مصدر» لا يملكان تفصيلًا يقولانه.
+   */
+  detail?: EntitlementDetail | null
 }
 
 /**
@@ -37,7 +46,12 @@ export function getEntitlement(): EntitlementSnapshot {
 
 /** يُستدعى من المزوّد وحده. */
 export function setEntitlement(next: EntitlementSnapshot): void {
-  if (next.status === current.status && next.source === current.source && next.lastError === current.lastError) return
+  if (
+    next.status === current.status &&
+    next.source === current.source &&
+    next.lastError === current.lastError &&
+    next.detail === current.detail
+  ) return
   current = next
   for (const fn of listeners) fn(current)
 }
