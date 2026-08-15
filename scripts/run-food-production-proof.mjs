@@ -362,5 +362,17 @@ ok('المصادر: لا مصدر يُزحف عليه خلافًا لـrobots', 
 const secretish = fxRecords.filter((r) => JSON.stringify(r).match(/api[_-]?key|secret|password|token|bearer /i))
 ok('الخصوصية: لا أسرار ولا مفاتيح في المخرجات', secretish.length === 0, `${secretish.length}`)
 
+// ═══════════ [D-1/٣] صدق التخزين في مخزن المنتجات ═══════════
+// المخزن كان يكتب خامًا ويبتلع الفشل، بينما `upsertProduct` يعيد منتجًا كأن
+// الحفظ نجح — صورة BUG-009 نفسها. الحارس يمنع عودتها.
+const storeSrc = readFileSync(resolve(ROOT, 'src/features/products/store.ts'), 'utf8')
+const storeCode = storeSrc.replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' ')).replace(/\/\/[^\n]*/g, '')
+ok('التخزين: لا `localStorage` خام في مخزن المنتجات', !/window\.localStorage/.test(storeCode))
+ok('التخزين: الكتابة تمرّ بـ`writeJson` المفحوص', /writeJson\(/.test(storeCode))
+ok('التخزين: القراءة تمرّ بـ`readJson` الذي لا يرمي', /readJson</.test(storeCode))
+ok('التخزين: كاتبا القاعدة والتدقيق يعيدان `WriteResult` لا `void`', /function writeDb\([^)]*\): WriteResult/.test(storeCode) && /function writeAuditLog\([^)]*\): WriteResult/.test(storeCode))
+counter('حارس التخزين فعّال — عودة الكتابة الخام تُكشف', /window\.localStorage/.test('window.localStorage.setItem(K, v)'))
+counter('حارس التخزين لا يُخدع بذكرٍ في تعليق', !/window\.localStorage/.test('/* window.localStorage */'.replace(/\/\*[\s\S]*?\*\//g, ' ')))
+
 // ═══════════ التقرير ═══════════
 report()
