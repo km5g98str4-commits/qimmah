@@ -42,6 +42,24 @@ This is the only change that *looks* like a loosening, so it was verified direct
   in-source and guarded by the paired same-fact check, which `#/calc` cannot satisfy by accident.
 - **No timeout inflation:** `10000` stayed `10000`, `8000` stayed `8000`.
 
+## 2b. `contextWithState` post-seed navigation (`6116ed4`)
+
+| file | change | class |
+|---|---|---|
+| `scripts/release/lib/drive.mjs` | post-seed `goto(url, {waitUntil:'domcontentloaded'})` → `{waitUntil:'commit'}` | **STRONGER** |
+
+STRONGER because it converts a **suite that could not run at all** on WebKit into 15 passing assertions.
+After seeding a completed-guest state the app redirects itself to a deeper hash route during load; WebKit
+counts that as a navigation interruption and throws `Frame load interrupted`, so `p3-returning-guest` died at
+`0 pass · SUITE ERROR` while Chromium swallowed it and passed 15/15.
+
+Diagnosed by measurement, not guesswork — same seed, same server: `commit` passes, `load` fails with the exact
+error. (The first hypothesis — a duplicated `goto` to the same URL — **was wrong**; `reload()` failed identically.
+That wrong turn is recorded here rather than hidden, because the measured refutation is what produced the fix.)
+
+**It weakens nothing:** `commit` changes *when `goto` returns*, not what is asserted. The real wait remains
+`settle(page, 2600)`, and every assertion after it reads the rendered DOM. Chromium result is unchanged (15/15).
+
 ## 3. Harness hardened by the coordinator (`32528e5`)
 
 | file | change | class |

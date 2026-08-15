@@ -116,6 +116,7 @@ Resolution is **semantic union**, pre-computed and provable:
 | FINAL-009 | **حارس `plan.saveEdit` ميت على كل مسجَّل** | مراجعة مستقلّة — أدلّة الحارة لم تكشفه لأن p1 تعمل ضيفًا فقط |
 | FINAL-010 | باني الجدول يعرض «تم الحفظ» بعد كتابة فاشلة | مراجعة مستقلّة — خرق §5 |
 | FINAL-012 | بطاقة المكتبة تعرض وسيطًا غير معتمد | مراجعة مستقلّة — سلطتا وسائط على شاشتين |
+| FINAL-014 | `p3` على WebKit يسقط بـ0 ناجح قبل أن يبدأ | مصفوفة الشخصيات — والسبب مقاطعة ملاحة لا عطل منتج |
 
 **FINAL-009 هو أخطرها:** المسند نادى `isOnboardingComplete(null)` — و`null` = علم
 الجهاز — بينما `markCompleted(userId)` لا يمسّ علم الجهاز عمدًا للمسجَّل. فكان
@@ -128,3 +129,30 @@ Resolution is **semantic union**, pre-computed and provable:
 `npm ci` ⇒ 0 · `typecheck` ⇒ 0 · `lint` ⇒ 0 · `build` ⇒ 0 · `test:gate` ⇒ **0**
 **٤٦٥٢ ✓ · ٠ ✗ · ٠ طقم أحمر** · ١١٣ خطوة بوابة · ١٨٢ سكربتًا.
 (للمقارنة: `d83add2` كان ٤٠٩١ ✓ بـ١٠٣ خطوات.)
+
+
+## مصفوفة الشخصيات على الرأس النهائي — ١٣ طقمًا، محرّكان
+
+| الطقم | Chromium | WebKit |
+|---|---|---|
+| static-bundle-safety | 22 ✓ · **1 ✗** | — |
+| static-regression-ledger | 41 ✓ · 0 ✗ · 3 محجوب | — |
+| p1 preview-user | 67 ✓ · 1 محجوب | **67 ✓** |
+| p2 premium-test-state | 24 ✓ | — |
+| p3 returning-guest | 15 ✓ | **15 ✓** (كان خطأ طقم) |
+| p4 interrupted-onboarding | 16 ✓ | — |
+| p5 dirty-state | 52 ✓ | — |
+| p6 auth | 50 ✓ · 1 محجوب | — |
+| p7 failure-conditions | 27 ✓ | — |
+| p8 responsive-matrix | 140 ✓ | **140 ✓** |
+| **المجموع** | **٦٧٦ ناجحًا · ١ فاشلًا · ٦ محجوبًا خارجيًا** | |
+
+**الفشل الوحيد** هو رابط سلة (جذر متجر لا صفحة منتج) — عائق خارجي مسمّى، ومتغيّر
+نشر (`VITE_CHECKOUT_URL`) لا عيب كود.
+
+**ولا تخفيض تحقّق واحد:** WebKit 26.5 وChromium 149 كلاهما أقلع فعلًا
+(`validationDowngrades: []`). فأدلّة WebKit **جارية لا مُنزَّلة الرتبة**.
+
+**وسجلّ الأدلّة صار صادقًا بذاته:** `head: 6116ed4` = الرأس بالضبط ·
+`builds: {prod: 6116ed4, mock: 6116ed4}` (بصمة FINAL-005 تعمل) ·
+`provisional: false` محسوبًا لا مثبَّتًا · `artifactsReused: false`.
