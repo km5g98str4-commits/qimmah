@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import { Icon } from '@/components/Icon'
 import type { Lang } from '@/lib/appPreferences'
 import { formatNumber } from '@/lib/numberFormat'
@@ -15,6 +15,7 @@ import {
   portabilityErrorText,
   type ImportPreview,
 } from '@/lib/portability'
+import { STORE_BY_ID, storeLabel } from '@/lib/portability/registry'
 
 /**
  * لوحة «البيانات» المحصّنة لصفحة الإعدادات (#/settings) — قِمّة (PDPL R-1).
@@ -47,6 +48,19 @@ export function DataManagementPanel({
   const [note, setNote] = useState<string | null>(null)
   const [undoable, setUndoable] = useState(() => hasUndo(uid))
   const fileRef = useRef<HTMLInputElement>(null)
+  const importButtonRef = useRef<HTMLButtonElement>(null)
+  const previewRef = useRef<HTMLElement>(null)
+  const successRef = useRef<HTMLElement>(null)
+  const restoreImportFocusRef = useRef(false)
+
+  useLayoutEffect(() => {
+    if (phase === 'preview' && preview) previewRef.current?.focus()
+    if (phase === 'done') successRef.current?.focus()
+    if (phase === 'idle' && restoreImportFocusRef.current) {
+      restoreImportFocusRef.current = false
+      importButtonRef.current?.focus()
+    }
+  }, [phase, preview])
 
   const onExport = async () => {
     setBusy(true)
@@ -113,6 +127,7 @@ export function DataManagementPanel({
   }
 
   const onCancel = () => {
+    restoreImportFocusRef.current = true
     setPreview(null)
     setPhase('idle')
   }
@@ -124,15 +139,29 @@ export function DataManagementPanel({
   // — معاينة الاستيراد: عدّ لكل متجر + تأكيد صريح (لا تطبيق قبل الضغط) —
   if (phase === 'preview' && preview) {
     return (
-      <section data-testid="settings-import-preview" className="rounded-xl border border-line bg-surface p-4">
-        <h3 className="text-sm font-black text-ink-900">{t.settings.importPreviewTitle}</h3>
+      <section
+        ref={previewRef}
+        tabIndex={-1}
+        aria-labelledby="settings-import-preview-title"
+        data-testid="settings-import-preview"
+        onKeyDown={(event) => {
+          if (event.key === 'Escape') {
+            event.preventDefault()
+            onCancel()
+          }
+        }}
+        className="rounded-xl border border-line bg-surface p-4"
+      >
+        <h3 id="settings-import-preview-title" className="text-sm font-black text-ink-900">{t.settings.importPreviewTitle}</h3>
         <p className="mt-1 text-xs leading-relaxed text-ink-500">{t.settings.importPreviewNote}</p>
         <ul className="mt-3 divide-y divide-line">
           {preview.lines
             .filter((l) => l.count > 0)
             .map((l) => (
               <li key={l.id} className="flex items-center justify-between py-2 text-sm">
-                <span className="font-bold text-ink-900">{l.labelAr}</span>
+                <span data-testid={`settings-import-preview-label-${l.id}`} className="font-bold text-ink-900">
+                  {STORE_BY_ID[l.id] ? storeLabel(STORE_BY_ID[l.id], lang) : l.labelAr}
+                </span>
                 <span className="font-black tabular-nums text-ink-500">{formatNumber(l.count, lang)}</span>
               </li>
             ))}
@@ -158,7 +187,7 @@ export function DataManagementPanel({
             <Icon name="CheckCircle2" className="h-4 w-4" />
             {t.settings.importConfirmBtn}
           </button>
-          <button type="button" onClick={onCancel} className="btn-ghost px-4 py-2.5 text-sm">
+          <button type="button" data-testid="settings-import-cancel" onClick={onCancel} className="btn-ghost px-4 py-2.5 text-sm">
             {t.settings.importCancel}
           </button>
         </div>
@@ -169,11 +198,11 @@ export function DataManagementPanel({
   // — تمّ الاستيراد فعليًّا (بعد تطبيق ذرّي ناجح فقط) —
   if (phase === 'done') {
     return (
-      <section data-testid="settings-import-success" role="status" className="rounded-xl border border-line bg-surface p-4 text-center">
+      <section ref={successRef} tabIndex={-1} aria-labelledby="settings-import-success-title" data-testid="settings-import-success" role="status" className="rounded-xl border border-line bg-surface p-4 text-center">
         <span className="mx-auto grid h-11 w-11 place-items-center rounded-2xl bg-primary-soft text-primary-c">
           <Icon name="CheckCircle2" className="h-5.5 w-5.5" />
         </span>
-        <h3 className="mt-2 text-sm font-black text-ink-900">{t.settings.importDoneTitle}</h3>
+        <h3 id="settings-import-success-title" className="mt-2 text-sm font-black text-ink-900">{t.settings.importDoneTitle}</h3>
         <p className="mt-1 text-xs text-ink-500">{t.settings.importDoneNote}</p>
         <div className="mt-4 flex flex-wrap justify-center gap-2">
           <button type="button" onClick={() => window.location.reload()} className="btn-primary px-4 py-2.5 text-sm">
@@ -215,6 +244,7 @@ export function DataManagementPanel({
           {t.settings.export}
         </button>
         <button
+          ref={importButtonRef}
           type="button"
           data-testid="settings-data-import"
           onClick={() => fileRef.current?.click()}
@@ -230,6 +260,7 @@ export function DataManagementPanel({
           type="file"
           accept="application/json,.json"
           className="hidden"
+          aria-hidden="true"
           onChange={(e) => onPickFile(e.target.files?.[0])}
         />
       </div>

@@ -230,6 +230,50 @@ async function main() {
     record('post-deletion: deleted user can no longer authenticate', !!reAuth.error, reAuth.error ? 'identity removed' : 'LEAK: still authenticates')
   }
 
+  // ── ⑦ Entitlements (P2) — the LIVE twin of test:entitlements ──────────────
+  // test:entitlements executes the same guarantees on an in-process Postgres.
+  // This section is what proves a real Supabase project is configured the same
+  // way: same migrations, same roles, same grants. A simulated proof cannot
+  // replace the empirical one and does not claim to.
+  console.log('\n⑦ entitlements: no client writes, own-row reads only')
+  const ENTITLEMENT_TABLES = [
+    'entitlements',
+    'access_codes',
+    'access_code_redemptions',
+    'trial_ledger',
+    'purchase_ledger',
+    'code_redemption_ledger',
+  ]
+  for (const t of ENTITLEMENT_TABLES) {
+    // No client may write to ANY of them — there is no write policy at all.
+    const ins = await B.client.from(t).insert({ user_id: B.id } as Record<string, unknown>)
+    record(`${t}: client INSERT rejected`, !!ins.error, ins.error ? 'rejected' : 'LEAK: insert allowed')
+  }
+  // Codes and durable ledgers are entirely invisible to a signed-in client.
+  for (const t of ['access_codes', 'trial_ledger', 'purchase_ledger', 'code_redemption_ledger']) {
+    const sel = await B.client.from(t).select('*')
+    const hidden = !!sel.error || (sel.data?.length ?? 0) === 0
+    record(`${t}: invisible to authenticated client`, hidden, sel.error ? 'denied' : `${sel.data?.length ?? 0} rows`)
+  }
+  // The approved read path works and returns exactly one derived state.
+  const mine = await B.client.rpc('my_entitlement')
+  record('my_entitlement() callable by authenticated', !mine.error, mine.error?.message ?? '')
+  const rows = (mine.data ?? []) as { state: string; server_time: string }[]
+  record('my_entitlement() returns exactly one state', rows.length === 1, `${rows.length} rows`)
+  record(
+    'my_entitlement() state is a known value',
+    rows.length === 1 &&
+      ['noAccess', 'trialActive', 'trialExpired', 'premiumActive', 'specialAccessActive', 'revoked'].includes(rows[0].state),
+    rows[0]?.state ?? '',
+  )
+  // Server time, not client time, decides. Proven by the RPC reporting its own clock.
+  record('my_entitlement() reports database time', rows.length === 1 && !!rows[0].server_time)
+  // Admin surface must be unreachable with an anon/authenticated JWT.
+  const adminAttempt = await B.client.rpc('admin_revoke', { p_user_id: B.id, p_reason: 'probe' })
+  record('admin_revoke() denied to authenticated', !!adminAttempt.error, adminAttempt.error ? 'denied' : 'LEAK: admin reachable')
+  const anonRpc = await anonClient.rpc('my_entitlement')
+  record('my_entitlement() denied to anon', !!anonRpc.error, anonRpc.error ? 'denied' : 'LEAK: anon reachable')
+
   // Cleanup: remove test user B too.
   await B.client.rpc('delete_own_account')
 

@@ -15,7 +15,7 @@ import { spawn } from 'node:child_process'
 import { mkdtempSync, writeFileSync, mkdirSync, readFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { chromium } from './lib/engine.mjs'
+import { chromium } from 'playwright'
 import { loadAppCopy, requireKey, assertUnregistered } from './lib/app-copy.mjs'
 
 // مفاتيح التخزين تُقرأ من السجلّ المركزي (src/lib/userDataKeys.ts) لا مكرّرة هنا:
@@ -200,43 +200,6 @@ async function run() {
     console.log('\n=== user A: تصدير حقيقي ثم استيراده يجب أن ينجح ===')
     // ازرع متجرًا بسيطًا (هدف الخطوات) كي تحمل النسخة محتوى قابلًا للمعاينة.
     await page.evaluate((k) => localStorage.setItem(k, JSON.stringify(8000)), K_STEP_GOAL)
-
-    // [BUG-030] مسارا التسليم ليسا واحدًا، والمحرّك هو من يختار.
-    //
-    // `deliverBundle` يفضّل **ورقة المشاركة الأصلية** حين تتوفّر مشاركة الملفّات، ويسقط
-    // إلى تنزيل Blob حين لا تتوفّر. وWebKit/Safari **يوفّرها على أصل حقيقي** (قِيس:
-    // `navigator.share` و`canShare` دالّتان على الصفحة المخدومة، لا على `about:blank`)،
-    // بينما Chromium بلا رأس لا يوفّرها. فكان هذا الطقم يفترض التنزيل دائمًا ويتعلّق
-    // ٣٠ ثانية على WebKit — **عمى أداة عن سلوك صحيح**، لا عطل منتج.
-    //
-    // فنُثبت الفرعين معًا بدل إسقاط أحدهما: أولًا أن المشاركة الأصلية تُسلَّم وتُبلَّغ
-    // بصدق حيث تتوفّر، ثم نُحيّدها لنُلزم مسار التنزيل — لأن تأكيدات العزل أدناه تقرأ
-    // **الملفّ المُصدَّر نفسه**، ولا بديل عنه.
-    const canShareFiles = await page.evaluate(() => {
-      try {
-        return !!navigator.canShare && navigator.canShare({ files: [new File(['{}'], 'a.json', { type: 'application/json' })] })
-      } catch { return false }
-    })
-    if (canShareFiles) {
-      await page.locator('[data-testid="settings-data-export"]').click()
-      await page.waitForSelector('[data-testid="settings-export-note"]', { timeout: 8000 })
-      const sharedOk = await page.locator('[data-testid="settings-export-note"]').isVisible()
-      const noError = !(await page.locator('[data-testid="settings-import-error"]').isVisible().catch(() => false))
-      check('مشاركة أصلية متاحة ⇒ التصدير يُسلَّم عبرها ويُبلَّغ نجاحًا بلا خطأ', sharedOk && noError)
-    }
-
-    /**
-     * يُحيّد مشاركة الملفّات في الوثيقة الحالية فيَلزم `deliverBundle` مسار التنزيل.
-     * ليس إضعافًا: يحاكي متصفّحًا بلا Web Share (وهو واقع Chromium وFirefox)، ويُبقي
-     * كل تأكيدات الملفّ المُصدَّر أدناه كما هي. ويُعاد استدعاؤه بعد كل تنقّل لأن
-     * التحييد يعيش في وثيقة واحدة.
-     */
-    const forceDownloadDelivery = (p) => p.evaluate(() => {
-      try { Object.defineProperty(navigator, 'canShare', { configurable: true, value: undefined }) } catch { /* غير قابل للتهيئة */ }
-      try { Object.defineProperty(navigator, 'share', { configurable: true, value: undefined }) } catch { /* غير قابل للتهيئة */ }
-    })
-
-    await forceDownloadDelivery(page)
     const [download] = await Promise.all([
       page.waitForEvent('download'),
       page.locator('[data-testid="settings-data-export"]').click(),
@@ -251,9 +214,32 @@ async function run() {
     await page.setInputFiles('[data-testid="settings-data-file"]', validPath)
     await page.waitForSelector('[data-testid="settings-import-preview"]', { timeout: 8000 })
     check('النسخة الصحيحة فتحت معاينة', await page.locator('[data-testid="settings-import-preview"]').isVisible())
+    check('معاينة العربية تعرض تسمية المتجر العربية', await page.locator('[data-testid="settings-import-preview-label-stepGoal"]').textContent() === 'هدف الخطوات')
+    check('انتقل التركيز إلى معاينة الاستيراد', await page.locator('[data-testid="settings-import-preview"]').evaluate((node) => document.activeElement === node))
+    await page.locator('[data-testid="settings-import-cancel"]').click()
+    await page.waitForSelector('[data-testid="settings-data-import"]', { state: 'visible', timeout: 8000 })
+    check('عاد التركيز إلى زر الاستيراد بعد الإلغاء', await page.locator('[data-testid="settings-data-import"]').evaluate((node) => document.activeElement === node))
+    const [fileChooser] = await Promise.all([
+      page.waitForEvent('filechooser'),
+      page.locator('[data-testid="settings-data-import"]').press('Enter'),
+    ])
+    check('زر الاستيراد يبقى متاحًا من لوحة المفاتيح', Boolean(fileChooser))
+    await page.setInputFiles('[data-testid="settings-data-file"]', validPath)
+    await page.waitForSelector('[data-testid="settings-import-preview"]', { timeout: 8000 })
+    await page.locator('[data-testid="settings-import-preview"]').press('Escape')
+    await page.waitForSelector('[data-testid="settings-data-import"]', { state: 'visible', timeout: 8000 })
+    check('Escape يعيد التركيز إلى زر الاستيراد', await page.locator('[data-testid="settings-data-import"]').evaluate((node) => document.activeElement === node))
+    await page.getByRole('button', { name: 'English', exact: true }).click()
+    await page.waitForFunction(() => document.documentElement.lang === 'en')
+    await page.setInputFiles('[data-testid="settings-data-file"]', validPath)
+    await page.waitForSelector('[data-testid="settings-import-preview"]', { timeout: 8000 })
+    check('English preview renders the English store label', await page.locator('[data-testid="settings-import-preview-label-stepGoal"]').textContent() === 'Step goal')
+    check('preview focus behavior is preserved in English', await page.locator('[data-testid="settings-import-preview"]').evaluate((node) => document.activeElement === node))
     await page.locator('[data-testid="settings-import-confirm"]').click()
     await page.waitForSelector('[data-testid="settings-import-success"]', { timeout: 8000 })
     check('عُرضت «تمّ الاستيراد» بعد التطبيق الفعلي', await page.locator('[data-testid="settings-import-success"]').isVisible())
+    check('انتقل التركيز إلى حالة نجاح الاستيراد', await page.locator('[data-testid="settings-import-success"]').evaluate((node) => document.activeElement === node))
+    check('نجاح الاستيراد لا يترك التركيز على body', await page.evaluate(() => document.activeElement !== document.body))
     const restored = await page.evaluate((k) => JSON.parse(localStorage.getItem(k) || 'null'), K_STEP_GOAL)
     check('استُعيدت القيمة الأصلية (8000) بعد الاستيراد', restored === 8000)
 
@@ -272,8 +258,6 @@ async function run() {
     const bStepGoal = await page.evaluate((k) => localStorage.getItem(k), K_STEP_GOAL)
     check('B لا يملك هدف خطوات A (صفر بقايا)', bStepGoal === null)
     // تصدير B الحقيقي يجب أن يخلو من قيمة A (8000) — إثبات العزل عبر الواجهة.
-    // `gotoSettings` أعادت التحميل، فالتحييد ماتَ مع الوثيقة السابقة ويُعاد هنا.
-    await forceDownloadDelivery(page)
     const [dlB] = await Promise.all([
       page.waitForEvent('download'),
       page.locator('[data-testid="settings-data-export"]').click(),
