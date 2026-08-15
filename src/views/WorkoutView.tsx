@@ -492,7 +492,15 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
             lang={lang}
             initialPlan={builderOpen === 'edit' ? customRec?.plan : undefined}
             onSave={guardPaid('plan.saveEdit', (p) => {
-              saveCustomPlan(userId, p)
+              // [FINAL-CONVERGENCE] لا إشعار نجاح قبل تأكيد الكتابة (ميثاق §5).
+              // كان الحفظ يُغلق الباني ويعرض «تم الحفظ» حتى بعد كتابة فاشلة،
+              // فتضيع الخطة والمستخدم يقرأ نجاحًا. الآن: فشل ⇒ الباني يبقى
+              // مفتوحًا بخطته كما هي، ورسالة صادقة تسمّي السبب.
+              const { write } = saveCustomPlan(userId, p)
+              if (write !== 'ok') {
+                setSaveError(write)
+                return
+              }
               refreshCustom()
               setBuilderOpen(null)
               setSavedToast(true)
@@ -500,6 +508,20 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
             })}
             onCancel={() => setBuilderOpen(null)}
           />
+          {saveError && (
+            <div role="alert" className="pointer-events-none absolute inset-x-0 bottom-0 z-[66] p-4" style={{ paddingBottom: 'max(1rem, var(--safe-bottom))' }}>
+              <div className="pointer-events-auto mx-auto max-w-md rounded-2xl border border-line bg-surface p-4 shadow-card">
+                <p className="text-sm font-black text-ink-900">{d.saveFailedTitle}</p>
+                <p className="mt-1 text-sm leading-relaxed text-ink-500">
+                  {saveError === 'quota' ? d.saveFailedQuota : saveError === 'unavailable' ? d.saveFailedBlocked : d.saveFailedGeneric}
+                </p>
+                <p className="mt-2 text-xs font-bold leading-relaxed text-ink-700">{d.customPlanKeptOnFailure}</p>
+                <button type="button" onClick={() => setSaveError(null)} className="btn-ghost mt-3 min-h-[44px] w-full py-2.5 text-xs">
+                  {d.saveBackToWorkout}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
