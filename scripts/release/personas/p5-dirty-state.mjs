@@ -13,6 +13,7 @@ import {
   createRecorder, settle, goRoute, storageSnapshot, bodyText,
   RAW_EXCEPTION_RE, collectErrors, realPageErrors,
 } from '../lib/harness.mjs'
+import { PLAN_DAY_1 } from '../lib/drive.mjs'
 
 const VECTORS = [
   {
@@ -164,7 +165,7 @@ export async function run({ browser, url, engine, seed }) {
 
       const before = await storageSnapshot(page)
       await goRoute(page, 'workout', 2600)
-      await page.locator('button').filter({ hasText: /اليوم 1/ }).first().click({ timeout: 8000 }).catch(() => {})
+      await page.locator('button').filter({ hasText: PLAN_DAY_1 }).first().click({ timeout: 8000 }).catch(() => {})
       await settle(page, 1600)
       const after = await storageSnapshot(page)
       const destroyed = Object.keys(before).filter((k) => !(k in after))

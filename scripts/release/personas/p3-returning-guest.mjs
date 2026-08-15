@@ -9,7 +9,7 @@ import {
   createRecorder, settle, goRoute, storageSnapshot, storageDiff, bodyText,
   RAW_EXCEPTION_RE, collectErrors, realConsoleErrors, realPageErrors,
 } from '../lib/harness.mjs'
-import { contextWithState } from '../lib/drive.mjs'
+import { contextWithState, PLAN_DAY_1 } from '../lib/drive.mjs'
 
 export async function run({ browser, url, engine, seed }) {
   const rec = createRecorder(`p3-returning-guest (${engine})`)
@@ -71,7 +71,7 @@ export async function run({ browser, url, engine, seed }) {
     rec.section('a returning guest is still a Preview user')
     await goRoute(page, 'workout', 2600)
     const beforeAttempt = await storageSnapshot(page)
-    await page.locator('button').filter({ hasText: /اليوم 1/ }).first().click({ timeout: 10000 }).catch(() => {})
+    await page.locator('button').filter({ hasText: PLAN_DAY_1 }).first().click({ timeout: 10000 }).catch(() => {})
     await settle(page, 1600)
     const gate = await page.locator('[data-testid="premium-gate"]').isVisible().catch(() => false)
     const changed = storageDiff(beforeAttempt, await storageSnapshot(page)).filter((k) => !k.startsWith('qimmah:tracking:events:'))

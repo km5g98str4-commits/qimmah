@@ -9,7 +9,7 @@
 // the layout matrix. The engine is recorded in the suite name either way.
 
 import { createRecorder, settle, goRoute, WIDTHS, collectErrors, realPageErrors } from '../lib/harness.mjs'
-import { PREFS_KEY } from '../lib/drive.mjs'
+import { PREFS_KEY, PLAN_DAY_1 } from '../lib/drive.mjs'
 
 const SURFACES = ['dashboard', 'workout', 'nutrition', 'progress', 'measurements', 'profile', 'settings']
 
@@ -90,7 +90,7 @@ export async function run({ browser, url, engine, seed }) {
 
         // Premium dialog must fit and stay operable at this width.
         await goRoute(page, 'workout', 2400)
-        await page.locator('button').filter({ hasText: /اليوم 1|Day 1/ }).first().click({ timeout: 8000 }).catch(() => {})
+        await page.locator('button').filter({ hasText: PLAN_DAY_1 }).first().click({ timeout: 8000 }).catch(() => {})
         await settle(page, 1400)
         const gate = await page.evaluate(() => {
           const g = document.querySelector('[data-testid="premium-gate"]')

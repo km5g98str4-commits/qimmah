@@ -9,7 +9,7 @@ import { getStrings } from '@/config/strings'
 import { nutritionScreenStrings } from '@/i18n/dict/nutritionScreen'
 import type { Lang } from '@/lib/appPreferences'
 import { useAccess } from '@/lib/access/useAccess'
-import { formatNumber } from '@/lib/numberFormat'
+import { formatNumber, formatNumeralsIn } from '@/lib/numberFormat'
 import { clearQuickLogIntent, takeQuickLogIntent, type QuickLogIntent } from '@/lib/quickLogIntent'
 
 interface NutritionViewProps {
@@ -120,7 +120,7 @@ export function NutritionView({ lang }: NutritionViewProps) {
           <p className="text-xs font-bold text-ink-500">{t.equationNote}</p>
 
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-4xl font-black leading-none text-primary-c">{remaining}</span>
+            <span className="text-4xl font-black leading-none text-primary-c">{formatNumber(remaining, lang)}</span>
             <span className="text-sm font-bold text-ink-500">{t.remaining}</span>
           </div>
 
@@ -218,12 +218,12 @@ function Op({ symbol }: { symbol: string }) {
  * صنف بلا حصة معروفة يظهر بجراماته وحدها، وصنف قديم بلا جرامات يظهر بحصصه
  * وحدها. لا سطر ثالث يخمّن.
  */
-function quantityLabel(e: LoggedFood, d: { gramsUnit: string; servingsUnit: string }): string {
+function quantityLabel(e: LoggedFood, d: { gramsUnit: string; servingsUnit: string }, lang: Lang): string {
   const g = typeof e.grams === 'number' && e.grams > 0 ? e.grams : null
   const s = typeof e.servings === 'number' && e.servings > 0 ? e.servings : null
-  if (g !== null && s !== null) return `${g}${d.gramsUnit} · ${round2(s)} ${d.servingsUnit}`
-  if (g !== null) return `${g}${d.gramsUnit}`
-  if (s !== null) return `${round2(s)} ${d.servingsUnit}`
+  if (g !== null && s !== null) return `${formatNumber(g, lang)}${d.gramsUnit} · ${formatNumber(round2(s), lang)} ${d.servingsUnit}`
+  if (g !== null) return `${formatNumber(g, lang)}${d.gramsUnit}`
+  if (s !== null) return `${formatNumber(round2(s), lang)} ${d.servingsUnit}`
   return ''
 }
 const round2 = (n: number) => Math.round(n * 100) / 100
@@ -361,7 +361,7 @@ function MealCard({
           </span>
           <div className="min-w-0">
             <p className="truncate text-base font-black leading-tight text-ink-900">{lang === 'en' ? slot.en : slot.ar}</p>
-            <p className="mt-1 truncate text-[11px] text-ink-400">{cals} {d.caloriesUnit} · {prot}{d.gramsUnit} {d.caloriesDotProteinG}</p>
+            <p className="mt-1 truncate text-[11px] text-ink-400">{formatNumber(cals, lang)} {d.caloriesUnit} · {formatNumber(prot, lang)}{d.gramsUnit} {d.caloriesDotProteinG}</p>
           </div>
         </div>
         <button
@@ -383,9 +383,9 @@ function MealCard({
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-sm font-bold text-ink-900">{e.label}</span>
                   <span className="block text-[11px] text-ink-400">
-                    {quantityLabel(e, d)}
-                    {quantityLabel(e, d) && ' · '}
-                    {e.calories} {d.caloriesUnit} · {e.protein}{d.gramsUnit}
+                    {quantityLabel(e, d, lang)}
+                    {quantityLabel(e, d, lang) && ' · '}
+                    {formatNumber(e.calories, lang)} {d.caloriesUnit} · {formatNumber(e.protein, lang)}{d.gramsUnit}
                   </span>
                 </span>
                 {((e.unit === 'g' && e.grams) || (e.unit === 'serving' && e.servings)) && (
@@ -505,8 +505,8 @@ function WaterPanel({ lang, waterMl, targetMl, onAdd: rawAdd, focusRequested = f
       </div>
       <ProgressBar current={waterMl} target={targetMl || 1} color="bg-primary" className="mt-3 h-1.5" />
       <div className="mt-3 flex flex-wrap gap-2">
-        <button ref={presetRef} type="button" onClick={() => addPreset(250)} className="btn-ghost min-h-[44px] px-3 py-2 text-xs">{t.addWater250}</button>
-        <button type="button" onClick={() => addPreset(500)} className="btn-ghost min-h-[44px] px-3 py-2 text-xs">{t.addWater500}</button>
+        <button ref={presetRef} type="button" onClick={() => addPreset(250)} className="btn-ghost min-h-[44px] px-3 py-2 text-xs">{formatNumeralsIn(t.addWater250, lang)}</button>
+        <button type="button" onClick={() => addPreset(500)} className="btn-ghost min-h-[44px] px-3 py-2 text-xs">{formatNumeralsIn(t.addWater500, lang)}</button>
       </div>
       <div className="mt-2 flex items-center gap-2">
         <input
@@ -517,7 +517,7 @@ function WaterPanel({ lang, waterMl, targetMl, onAdd: rawAdd, focusRequested = f
           value={ml}
           onChange={(e) => setMl(sanitizeNumericInput(e.target.value, { max }))}
           onKeyDown={(e) => { if (e.key === 'Enter') submit() }}
-          placeholder={t.customWaterPlaceholder}
+          placeholder={formatNumeralsIn(t.customWaterPlaceholder, lang)}
           className="min-h-[44px] w-40 rounded-lg border border-line bg-page px-3 py-2 text-xs text-ink-900 outline-none focus:border-primary-c"
         />
         <button type="button" onClick={submit} disabled={!valid} className="btn-primary min-h-[44px] px-3 py-2 text-xs disabled:cursor-not-allowed disabled:opacity-40">{t.customWaterAdd}</button>

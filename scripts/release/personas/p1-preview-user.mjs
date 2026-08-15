@@ -12,7 +12,7 @@ import {
   createRecorder, settle, tap, tapIfPresent, gateVisible, dismissGate, goRoute,
   storageSnapshot, storageDiff, bodyText, RAW_EXCEPTION_RE, collectErrors, realConsoleErrors, realPageErrors,
 } from '../lib/harness.mjs'
-import { enterAsGuest, completeOnboarding, reachPlanHandoff, declinePremiumIntoPreview, isActiveSessionKey, ACTIVE_SESSION_KEYS } from '../lib/drive.mjs'
+import { enterAsGuest, completeOnboarding, reachPlanHandoff, declinePremiumIntoPreview, isActiveSessionKey, ACTIVE_SESSION_KEYS, PLAN_DAY_1, WATER_PRESET_250 } from '../lib/drive.mjs'
 
 /** Every action in `PAID_ACTIONS`. Each must end this suite classified, never silent. */
 const PAID_ACTIONS = [
@@ -133,9 +133,9 @@ export async function run({ browser, url, engine }) {
     // NOTE: the dashboard «ابدأ التمرين» CTA is NAVIGATION to #/workout, not a
     // mutation — verified separately below. The real `workout.start` affordance
     // is a plan day card on the Workout screen.
-    await attempt('workout.start', '#/workout plan day card «اليوم 1»',
+    await attempt('workout.start', '#/workout plan day card «اليوم ١»',
       () => goRoute(page, 'workout', 2600),
-      () => page.locator('button').filter({ hasText: /اليوم 1/ }).first().click({ timeout: 10000 }))
+      () => page.locator('button').filter({ hasText: PLAN_DAY_1 }).first().click({ timeout: 10000 }))
 
     await attempt('workout.startEmpty', '#/workout «ابدأ تمرين فارغ»',
       () => goRoute(page, 'workout', 2400),
@@ -145,9 +145,9 @@ export async function run({ browser, url, engine }) {
       () => goRoute(page, 'nutrition', 2600),
       () => tap(page, /^أضف$/))
 
-    await attempt('nutrition.water', '#/nutrition «+250 مل»',
+    await attempt('nutrition.water', '#/nutrition «+٢٥٠ مل»',
       () => goRoute(page, 'nutrition', 2400),
-      () => tap(page, /\+250/))
+      () => tap(page, WATER_PRESET_250))
 
     await attempt('recovery.log', '#/recovery «اعرض توصيتي»',
       () => goRoute(page, 'recovery', 2400),
