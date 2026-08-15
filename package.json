@@ -165,7 +165,8 @@
     "build:exercise-video-registry": "node scripts/exercise/build-video-registry.mjs",
     "build:exercise-production-manifest": "node scripts/exercise/run-build-exercise-production-manifest.mjs",
     "verify:exercise-video": "node scripts/exercise/verify-video-registry.mjs",
-    "test:exercise-production": "node scripts/exercise/run-exercise-production-proof.mjs"
+    "test:exercise-production": "node scripts/exercise/run-exercise-production-proof.mjs",
+    "test:e2e:exercise-detail": "npm run build && node scripts/e2e/exercise-detail-live.mjs"
   },
   "dependencies": {
     "@capacitor/app": "^8.1.0",

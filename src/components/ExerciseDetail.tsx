@@ -14,6 +14,8 @@ import { exerciseStats } from '@/lib/exerciseStats'
 import { getRecord } from '@/lib/exerciseHistory'
 import { ExerciseMedia } from './ExerciseMedia'
 import { equipmentLabel } from '@/lib/exerciseLabels'
+import { approvedVideoFor, videoEmbedUrl } from '@/lib/exerciseProductionMedia'
+import { exerciseVideoStrings } from '@/i18n/dict/exerciseVideo'
 
 type DetailTab = 'about' | 'history' | 'charts' | 'records'
 
@@ -174,13 +176,19 @@ function ExerciseHero({ ex, lang }: { ex: NonNullable<ReturnType<typeof getExerc
 
 function AboutTab({ ex, d, lang, onAddToPlan }: { ex: NonNullable<ReturnType<typeof getExercise>>; d: LibraryStrings; lang: Lang; onAddToPlan?: (id: string) => void }) {
   const g = guidanceFor(ex, lang)
-  const cue = getCue(ex.id)
-  const howTo = lang !== 'en' ? cue.steps : g.howTo
+  /**
+   * الإرشاد بلغة الواجهة — `getCue` كان يُستدعى بلا لغة فيعيد العربية دائمًا.
+   * فالإرشاد الإنجليزي المؤلَّف لكل ١٨١ تمرينًا كان مبنيًّا ولا يصل مستخدمًا
+   * إنجليزيًا أبدًا: عمل موجود خلف سطر لا يمرّره.
+   */
+  const cue = getCue(ex.id, lang)
+  const howTo = cue.steps.length ? cue.steps : g.howTo
   const tips = g.tips
-  const mistakes = lang !== 'en' ? cue.mistakes : g.mistakes
-  const safety = lang !== 'en' ? cue.safety : g.safety
+  const mistakes = cue.mistakes.length ? cue.mistakes : g.mistakes
+  const safety = cue.safety.length ? cue.safety : g.safety
   return (
     <div className="space-y-5">
+      <VideoBlock exerciseId={ex.id} lang={lang} />
       {/* العضلات المستهدفة — رقائق بلغة الواجهة الحالية (قاموس العضلات المشترك) */}
       <Block title={d.targetMuscles} icon="Target">
         <p className="mb-2 text-[11px] font-bold text-ink-500">{d.primary}</p>
@@ -409,4 +417,53 @@ function EmptyHint({ text }: { text: string }) {
 
 function levelLabel(level: string, d: LibraryStrings): string {
   return level === 'beginner' ? d.levelBeginner : level === 'advanced' ? d.levelAdvanced : d.levelIntermediate
+}
+
+/**
+ * مرجع فيديو «كيف يُؤدّى» — **مرجع لا وسيط مُستضاف**.
+ *
+ * ثلاثة قيود بنيوية لا تجميلية:
+ *   • **APPROVED وحدها تصل المستخدم.** `approvedVideoFor` يعيد `null` لأي حالة
+ *     أخرى، فـNEEDS_REVIEW لا يُعرض — الفجوة تبقى فارغة بصدق ولا تُملأ بمرجع مشكوك.
+ *   • **لا تحميل قبل النقر.** الإطار لا يُركَّب إلا بعد ضغط المستخدم، فلا اتصال
+ *     بـYouTube ولا كعكات لمن لم يطلب المشاهدة.
+ *   • **لا تشغيل تلقائي.** `videoEmbedUrl` تبني العنوان بلا `autoplay` وعلى نطاق
+ *     `youtube-nocookie`. ولا يُنزَّل أي فيديو ولا يُعاد استضافته.
+ */
+function VideoBlock({ exerciseId, lang }: { exerciseId: string; lang: Lang }) {
+  const [playing, setPlaying] = useState(false)
+  const ref = approvedVideoFor(exerciseId)
+  const v = exerciseVideoStrings[lang]
+  if (!ref) return null
+  const embed = playing ? videoEmbedUrl(exerciseId) : null
+  return (
+    <Block title={v.watchHowTo} icon="Video">
+      {embed ? (
+        <div className="overflow-hidden rounded-2xl border border-line" style={{ aspectRatio: '16 / 9' }}>
+          <iframe
+            src={embed}
+            title={v.watchHowTo}
+            loading="lazy"
+            referrerPolicy="strict-origin-when-cross-origin"
+            allow="accelerometer; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            className="h-full w-full"
+          />
+        </div>
+      ) : (
+        <button
+          type="button"
+          data-testid="exercise-video-play"
+          onClick={() => setPlaying(true)}
+          className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-2xl border border-line bg-beige px-4 py-3 text-sm font-bold text-ink-900"
+        >
+          <Icon name="Play" className="h-4 w-4" />
+          {v.watchHowTo}
+        </button>
+      )}
+      <p className="mt-2 text-[11px] text-ink-400">
+        {v.channelLabel}: <bdi>{ref.channel}</bdi>
+      </p>
+    </Block>
+  )
 }
