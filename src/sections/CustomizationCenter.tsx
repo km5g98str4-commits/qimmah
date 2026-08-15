@@ -22,6 +22,8 @@ import { StepReview } from '@/components/customizer/steps/StepReview'
 import { isProfileValid } from '@/lib/validation'
 import { useLang } from '@/i18n'
 import { onboardingStrings, type OnboardingStrings } from '@/i18n/dict/onboarding'
+import { useAccess } from '@/lib/access/useAccess'
+import { isExistingPlanEdit } from '@/lib/customization'
 
 interface CustomizationCenterProps {
   /** يُستدعى عند الإغلاق؛ completed=true عند «حفظ وإغلاق» لعرض تأكيد النجاح. */
@@ -71,6 +73,7 @@ export function CustomizationCenter({ onBack, initialStep = 0, mode = 'onboardin
   const lang = useLang()
   const d = onboardingStrings[lang]
   const { customization, applyCustomization, resetCustomization } = useCustomization()
+  const { guard: guardPaid, can: canPaid } = useAccess()
   const auth = useAuth()
   // المالك الحالي — الإكمال/إعادة التشغيل يُنسبان للحساب لا للجهاز.
   const userId = auth.user?.id ?? null
@@ -221,12 +224,24 @@ export function CustomizationCenter({ onBack, initialStep = 0, mode = 'onboardin
     onRestartOnboarding,
   }
 
-  const saveDraft = () => {
+  // ── [PHASE-II] هذا هو محرّر الخطة الحيّ («الإعدادات → تعديل خطتي») ────────
+  // كلا مساريه يكتبان التخصيص، فيمرّان على حارس `saveCustomization`. بلا هذا
+  // الحارس هنا يرفض الكاتب بحقّ لكن الاستثناء يصل الصفحة خامًا — درس BUG-001:
+  // المعالج يفتح البوّابة **قبل** الكاتب، والكاتب يبقى شبكة الأمان الأخيرة.
+  const guardPlanEdit = (run: () => void) => () => {
+    if (isExistingPlanEdit() && !canPaid('plan.saveEdit')) {
+      guardPaid('plan.saveEdit', () => {})()
+      return
+    }
+    run()
+  }
+
+  const saveDraft = guardPlanEdit(() => {
     applyCustomization(data)
     setLastStep(step)
     setSaved(true)
-  }
-  const saveAndClose = () => {
+  })
+  const saveAndClose = guardPlanEdit(() => {
     // لا يكتمل الإعداد والحقول المطلوبة ناقصة — انتقل لأول خطوة ناقصة لإصلاحها.
     if (!allValid) {
       setStep(firstInvalidIndex)
@@ -235,7 +250,7 @@ export function CustomizationCenter({ onBack, initialStep = 0, mode = 'onboardin
     applyCustomization(data)
     markCompleted(userId, step)
     onBack(true)
-  }
+  })
   const next = () => {
     if (!stepValid) return
     setStep((s) => Math.min(steps.length - 1, s + 1))

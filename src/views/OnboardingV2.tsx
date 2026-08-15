@@ -58,6 +58,8 @@ import {
   type V2Intent,
   type V2Level,
 } from '@/lib/onboardingV2Flow'
+import { useAccess } from '@/lib/access/useAccess'
+import { isExistingPlanEdit } from '@/lib/customization'
 
 interface OnboardingV2Props {
   lang: Lang
@@ -122,6 +124,9 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
   const { customization, applyCustomization } = useCustomization()
   const auth = useAuth()
   const userId = auth.user?.id ?? null
+  // الطبقة الثانية فوق حارس الكاتب: تفتح Premium بدل أن تُظهر استثناءً خامًا
+  // (درس BUG-001 — الكاتب يرفض بحقّ، لكن المعالج يجب أن يفتح البوّابة أولًا).
+  const { guard: guardPaid, can: canPaid } = useAccess()
   const [initialDraft] = useState(() => initialDraftV2(userId))
   // 0 الأساسيات · 1 النية · 2 التاريخ · 3 الهدف · 4 الجدول · 5 السياق · 6 القيود · 7 جاهز.
   const [step, setStep] = useState(initialDraft.step)
@@ -298,6 +303,16 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
           healthDataConsent,
         })
         const op = buildOnboardingProfile(built0)
+        // تحوير خطة قائمة = `plan.saveEdit` مدفوع. أوّل إكمال يمرّ حرًّا.
+        // يُفحص **قبل** أي كتابة: saveOnboardingProfile وapplyCustomization
+        // وmarkCompleted وpersistOnboardingToProfile كلها بعد هذا السطر.
+        if (isExistingPlanEdit() && !canPaid('plan.saveEdit')) {
+          guardPaid('plan.saveEdit', () => {})()
+          // 'reset' → idle: البوّابة مفتوحة والشاشة تعود قابلة للتفاعل،
+          // ولا تُعرَض شاشة خطأ — المنع ليس عطلًا.
+          setStatus((st) => finalizeReduce(st, 'reset'))
+          return
+        }
         saveOnboardingProfile(op)
         const artifacts = await buildPlanArtifactsFromOnboarding(op, customization)
         applyCustomization(artifacts.customization)

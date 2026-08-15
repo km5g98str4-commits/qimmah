@@ -9,6 +9,8 @@ import type { RoutineDay, SupplementItem } from '@/types'
 import type { Profile, Targets } from '@/types/profile'
 import { computeTargets, defaultProfile, isMinorAge, profileHash } from './calculators'
 import { enqueueSyncOperation } from './syncQueue'
+import { isOnboardingComplete } from './onboarding'
+import { assertPaid } from '@/lib/access/guard'
 import type { WorkoutPlan } from '@/types/workout'
 import { generatePlanFromTemplate } from './workoutPlan'
 import { normalizePlanDayNames } from './planDayNames'
@@ -337,8 +339,40 @@ function withFreshTargets(c: Customization): Customization {
   }
 }
 
+/**
+ * حقول تعريف الخطة: تغييرها فوق خطة قائمة **يُنتج حالة مدفوعة**، وهو تعريف
+ * `plan.saveEdit` في `access/paidActions.ts`. وما عداها (ألوان، وحدات، إعدادات
+ * حساب) يبقى حرًّا — فالحارس أدناه لا يقفل الإعدادات، يقفل تحوير الخطة.
+ */
+const PLAN_IDENTITY_FIELDS = [
+  'goal', 'goalType', 'trainingDays', 'workoutDuration', 'workoutEnvironment', 'trainingLevel',
+] as const
+
+/**
+ * «هل هذا تحوير لخطة قائمة؟» — مسند واحد يستهلكه الكاتب **والمعالج** معًا.
+ * وجود مسندين متقاربين هو ما أنتج الاستثناء الخام: المعالج فحص اكتمال ملف
+ * الإعداد، والكاتب فحص علم الجهاز — فلم يفتح الأول البوّابة ورمى الثاني.
+ */
+export function isExistingPlanEdit(): boolean {
+  return hasSavedCustomization() && isOnboardingComplete(null)
+}
+
 export function saveCustomization(value: Customization): void {
   if (typeof window === 'undefined') return
+  // ── [PHASE-II] حدّ التحوير الثاني ────────────────────────────────────────
+  // هذا هو الكاتب الفعلي لـ`qimmah:customization:v1`. مسار «الإعدادات → تعديل
+  // خطتي» يصل إليه **دون** المرور بـ`saveOnboardingProfile`، فحراسة ذاك وحده
+  // تركت هذا الباب مفتوحًا: معاينة غيّرت الهدف cut → bulk وثبت بعد إعادة التحميل.
+  //
+  // شرطان معًا حتى لا يُقفل القمع المجاني:
+  //   • تخصيص محفوظ موجود أصلًا، و
+  //   • الإعداد مكتمل على هذا الجهاز — أي أن هناك خطة قائمة تُحوَّر لا تُنشأ.
+  // أوّل إكمال يمرّ حرًّا (ميثاق §0.1)، وتغيير لون أو وحدة يمرّ حرًّا دائمًا.
+  if (isExistingPlanEdit()) {
+    const prev = loadCustomization()
+    const planChanged = PLAN_IDENTITY_FIELDS.some((f) => prev.profile?.[f] !== value.profile?.[f])
+    if (planChanged) assertPaid('plan.saveEdit')
+  }
   const stamped: Customization = { ...value, settingsUpdatedAt: new Date().toISOString() }
   safeWriteJson(STORAGE_KEY, stamped)
   // مزامنة إعدادات الحساب (P12): شريحة الحساب فقط تركب صف profiles (data.settings)

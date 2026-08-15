@@ -39,6 +39,7 @@ import type { PlanRationale } from '@/lib/planRationale'
 import { hasSavedCustomization, loadCustomization } from '@/lib/customization'
 import { loadOnboarding } from '@/lib/onboarding'
 import { enqueueSyncOperation } from '@/lib/syncQueue'
+import { assertPaid } from '@/lib/access/guard'
 
 export const ONBOARDING_PROFILE_KEY = 'qimmah:onboarding:profile:v1'
 
@@ -138,6 +139,22 @@ export function enqueueOnboardingProfileUpsert(value: OnboardingProfile): void {
 
 export function saveOnboardingProfile(value: OnboardingProfile): void {
   if (typeof window === 'undefined') return
+  // ── [PHASE-II] حدّ التحوير، لا حدّ الزرّ ──────────────────────────────────
+  // أوّل إكمال **مجاني** (ميثاق §0.1: التخصيص وتوليد الخطة ومعاينتها مجانية
+  // للجميع بلا حساب ولا دفع) — وهذه بوّابة القمع الأولى فلا تُغلق أبدًا.
+  //
+  // أمّا الكتابة فوق ملف **مكتمل** فهي `plan.saveEdit`، وهو فعل معلَن مدفوعًا
+  // في `access/paidActions.ts`. كان يُحرَس على مسار واحد (`WorkoutView`) ويُترك
+  // مفتوحًا على `#/setup` — فتغيّر الهدف من cut إلى bulk وثبت بعد إعادة التحميل.
+  //
+  // الحارس هنا في **الكاتب** لا في المعالج: أي مسار حفظ بديل، حاضر أو قادم،
+  // يمرّ من هنا حتمًا. حراسة الزرّ وحده تترك الباب الثاني مفتوحًا.
+  //
+  // ولا يُحرَس الوارد من المزامنة: له كاتبه المنفصل `saveOnboardingProfileFromSync`
+  // لأنه ترطيب لا تحوير من المستخدم. ولا تُحرَس هجرة `ensureOnboardingProfile`
+  // لأنها لا تعمل إلا حين لا يوجد ملف أصلًا (`existing` = null أدناه).
+  const existing = loadOnboardingProfile()
+  if (existing?._meta?.completed === true) assertPaid('plan.saveEdit')
   try {
     // ختم LWW عند كل حفظ محلي — دليل الأحدثية لدمج profiles.data.onboarding.
     const stamped: OnboardingProfile = { ...value, _meta: { ...value._meta, updatedAt: new Date().toISOString() } }
