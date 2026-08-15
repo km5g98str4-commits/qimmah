@@ -10,7 +10,7 @@
 // ليس الانهيار بل الدخول الصامت إلى لوحة بخطة غير موجودة.
 
 import { spawn } from 'node:child_process'
-import { chromium } from 'playwright'
+import { chromium } from './lib/engine.mjs'
 import { loadAppCopy, requireKey } from './lib/app-copy.mjs'
 
 const { dataKeys } = await loadAppCopy()

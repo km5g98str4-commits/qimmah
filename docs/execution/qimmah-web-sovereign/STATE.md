@@ -531,3 +531,55 @@ not apply to it — but item 2 does.
 | Draft migration and never semantics | `test:onboarding-async` 40/40; `test:onboarding-intent` 70/70; newcomer/minor journeys |
 | Navigation and handoff after the seven-screen flow | `test:e2e:navigation` 95/95; `test:e2e:plan-handoff` 98/98 |
 | Production artifact built | baseline `npm run build`; final artifact proof still pending |
+
+---
+
+# تحديث تدقيق الإصدار النهائي — 2026-08-15
+
+> المصدر: [`docs/audit/QIM-WEB-FINAL-RELEASE-AUDIT-2026-08-15.md`](../../audit/QIM-WEB-FINAL-RELEASE-AUDIT-2026-08-15.md).
+> **ما يلي يُعدِّل ثلاثة مواضع في هذه الوثيقة أعلاه** (السطور 69 · 74 · 481 · 500) — لا يُلغيها بل يُقيّدها ببيئتها.
+
+## WebKit: من «متعذّر» إلى **منفَّذ ١١ من ١٣**
+
+قول هذه الوثيقة إن «لا WebKit في هذه الحاوية، فكل نتيجة متصفّح هنا Chromium حصرًا»
+**صحيح لتلك الحاوية**. وهو **غير صحيح لجهاز المؤسس**: ذاكرة Playwright المحلّية تحمل
+`webkit-2311`، و**WebKit 26.5 يُقلع فعلًا**.
+
+أُضيف `scripts/e2e/lib/engine.mjs` (اختيار المحرّك عبر `E2E_ENGINE`، افتراضه `chromium`)
+وأُعيد توجيه ١٤ سكربت E2E إليه بسطر الاستيراد وحده.
+
+```bash
+E2E_ENGINE=webkit npm run test:e2e:navigation
+```
+
+| الطقم | Chromium | WebKit 26.5 |
+|---|---|---|
+| onboarding · navigation · preview-gate · dirty-state | 20 · 96 · 35 · 47 | **مطابق تمامًا** |
+| install-overlap · nutrition · workout · progress | 200 · 106 · 31 · 25 | **مطابق تمامًا** |
+| profile · settings · plan-handoff | 27 · 14 · 98 | **مطابق تمامًا** |
+| exercises | 32/32 | ❌ **31/32** — `BUG-029` |
+| settings-security | 34/34 | ❌ **26/34** — `BUG-030` |
+| **المجموع** | **765/765** | **756/765** |
+
+**ما يعنيه هذا للحاجز رقم ٢ في «الإجراءات المطلوبة قبل الإنتاج»:**
+لم يعد «Safari لم يُختبر إطلاقًا» — بل **عطلان مسمّيان قابلان لإعادة الإنتاج بأمر واحد**.
+وعلى الأخصّ: `dirty-state` **47/47 على WebKit** — أي أن إصلاح `BUG-024` (التخزين المحجوب،
+وهو عطل **على شكل Safari** لم يكن يُثبَت إلا على مستوى الوحدة) صار مُثبتًا على محرّك Safari الحقيقي.
+
+**وما يبقى قائمًا بلا تغيير:** WebKit في Playwright **ليس** iOS Safari على جهاز حقيقي.
+تمريرة على جهاز iOS فعلي تبقى مطلوبة — لكنها الآن تبدأ من أرضية مقيسة لا من فراغ.
+
+## حمراوان خارج البوابة — مُسمّيان الآن
+
+السطر 127 من هذه الوثيقة يعلن أن `test:e2e:journey` و`test:chaos` خارج تلك البوابة. شُغِّلا في هذا التدقيق:
+
+- كلاهما **أحمر عند الرأس** `d83add2`.
+- وكلاهما **أحمر بالتطابق على `main` (`cc60adf`)** — `test:chaos` بنفس الـ١٣ من ٥٧ بالضبط.
+- **الحكم: سابقان للسيادة، لا Regression من عمل Codex.** وسلسلة السيادة لم تمسّ `scripts/resilience`
+  ولا مكتبات المزامنة ولا طابور العمليات.
+- التفصيل وحدود ما أُصلح وما تُرك عمدًا: `PRE-EXISTING-001` في `BUGS.md`.
+
+## البوابات عند الرأس بعد `npm ci` نظيف — أُعيد تنفيذها كاملة
+
+`typecheck` · `lint` · `build` · `test:gate` ⇒ **أربعتها `exit 0`** (١٠٣ سكربت · ٤٠٩١ ✓ · ٠ ✗)،
+وأُعيدت **بعد** تغييرات هذا التدقيق فبقيت خضراء.

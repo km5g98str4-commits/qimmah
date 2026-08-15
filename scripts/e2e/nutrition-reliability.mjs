@@ -13,7 +13,7 @@
 // التشغيل: npm run test:e2e:nutrition
 
 import { spawn } from 'node:child_process'
-import { chromium } from 'playwright'
+import { chromium } from './lib/engine.mjs'
 import { answerHistory, finishInputSteps } from './lib/onboarding-driver.mjs'
 
 const PORT = 5323

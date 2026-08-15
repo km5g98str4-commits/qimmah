@@ -3,7 +3,7 @@
 // يبني وضع الاستحقاق التقليدي للاختبار فقط؛ بناء الإنتاج لا يملك هذا المصدر.
 
 import { spawn } from 'node:child_process'
-import { chromium } from 'playwright'
+import { chromium } from './lib/engine.mjs'
 import { answerHistory, finishInputSteps } from './lib/onboarding-driver.mjs'
 
 const PORT = 5324

@@ -7,7 +7,7 @@
 // مكرّرة هنا: تغيير نصّ في المصدر يجب أن يُحدّث الاختبار تلقائيًا، لا أن يكسره.
 
 import { spawn } from 'node:child_process'
-import { chromium } from 'playwright'
+import { chromium } from './e2e/lib/engine.mjs'
 import { setTimeout as sleep } from 'node:timers/promises'
 import { loadAppCopy, labelOf, assertDevFlag } from './e2e/lib/app-copy.mjs'
 import { answerHistory, finishInputSteps } from './e2e/lib/onboarding-driver.mjs'
