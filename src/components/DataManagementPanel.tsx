@@ -55,6 +55,9 @@ export function DataManagementPanel({
     try {
       const method = await deliverBundle(buildExportBundle(uid))
       if (method === 'unavailable') throw new PortabilityError(t.settings.exportFailed)
+      // إلغاء ورقة المشاركة حدثٌ محايد: لا رسالة نجاح ولا رسالة خطأ — فالمستخدم
+      // يعرف أنه ألغى، وادّعاء المشاركة هنا كذبٌ صغير على من لم يشارك.
+      if (method === 'cancelled') return
       setNote(method === 'download' ? t.settings.exportDownloaded : t.settings.exportShared)
     } catch {
       // لا نسرّب تفاصيل داخلية للمستخدم؛ رسالة عربية عامّة، ولا PII في أي مسار.

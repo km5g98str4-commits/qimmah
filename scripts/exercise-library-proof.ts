@@ -66,7 +66,14 @@ function assertSurface(view: string, detail: string): void {
   assert.match(detail, /role="dialog"/, 'dialog-role: تفصيل التمرين حوار معلن')
   assert.match(detail, /aria-modal="true"/, 'dialog-modal: تفصيل التمرين modal')
   assert.match(detail, /handleKeyDown[\s\S]*event\.key === 'Escape'/, 'dialog-escape: زر Escape يغلق الحوار')
-  assert.match(detail, /previousFocus\?\.focus\(\)/, 'dialog-focus-return: التركيز يعود إلى بطاقة الفتح')
+  // [BUG-029] كان هذا الفحص يطلب `previousFocus?.focus()` حرفيًا — أي أنه يحرس
+  // **تنفيذًا** ثبت أنه معطوب على WebKit، لا **العقد**. والعقد الصحيح:
+  // الاستعادة تجري في **مالك المُشغِّل** (`ExerciseLibraryView`) داخل `useLayoutEffect`
+  // أي **بعد** إزالة الحوار من DOM وبعد إسناد المحرّك للبؤرة — بلا اعتماد على توقيت
+  // إطار. وتأجيلها بـ`requestAnimationFrame` جُرِّب وسقط تحت حِمل (قِيست `BODY`).
+  assert.match(view, /useLayoutEffect\(\(\) => \{[\s\S]*?data-exercise-id="\$\{justClosed\}"[\s\S]*?\}, \[openId\]\)/, 'focus-return-owner: المكتبة تستعيد البؤرة إلى البطاقة بعد الإغلاق')
+  assert.doesNotMatch(detail, /previousFocus/, 'focus-return-single-owner: الحوار لا يستعيد البؤرة بنفسه (مالك واحد)')
+  assert.doesNotMatch(detail, /requestAnimationFrame\(restore\)/, 'focus-return-not-deferred: لا استعادة معلّقة على إطار')
   assert.match(detail, /<Block title=\{d\.howToPerform\}/, 'instructions-dictionary: عنوان التعليمات من القاموس')
 }
 
@@ -79,5 +86,23 @@ assert.throws(
 check('محاكاة التفاف فتح الأجهزة محليًا تسقط بفحص مسمّى', true)
 assert.throws(() => assertSurface(viewSource, detailSource.replace('aria-modal="true"', '')), /dialog-modal/)
 check('محاكاة نزع aria-modal تسقط بفحص مسمّى', true)
+
+// [BUG-029] كل شدّ بوابة يُهاجَم (§4.2). والمحاكاتان أدناه **ارتدادان وقعا فعلًا**
+// أثناء الإصلاح، لا افتراضان: أُعيدت الاستعادة إلى الحوار، ثم عُلِّقت على إطار.
+assert.throws(
+  () => assertSurface(viewSource.replace('useLayoutEffect(() =>', 'useEffect(() =>'), detailSource),
+  /focus-return-owner/,
+)
+check('محاكاة نقل الاستعادة خارج useLayoutEffect تسقط بفحص مسمّى', true)
+assert.throws(
+  () => assertSurface(viewSource, `${detailSource}\nconst previousFocus = document.activeElement`),
+  /focus-return-single-owner/,
+)
+check('محاكاة استعادة ثانية داخل الحوار تسقط بفحص مسمّى', true)
+assert.throws(
+  () => assertSurface(viewSource, `${detailSource}\nwindow.requestAnimationFrame(restore)`),
+  /focus-return-not-deferred/,
+)
+check('محاكاة تعليق الاستعادة على إطار تسقط بفحص مسمّى', true)
 
 console.log(`\n✅ مكتبة التمارين: ${passed} فحوص، 0 فشل.`)
