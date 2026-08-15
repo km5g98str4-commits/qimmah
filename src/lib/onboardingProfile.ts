@@ -137,6 +137,21 @@ export function enqueueOnboardingProfileUpsert(value: OnboardingProfile): void {
   })
 }
 
+/**
+ * **سلطة واحدة** لسؤال «هل على هذا الجهاز ملفّ إعداد مكتمل؟».
+ *
+ * كان السؤال يُطرح بصيغتين مختلفتين: الكاتب هنا يقرأ `_meta.completed`، والواجهة
+ * تقرأ `isExistingPlanEdit()` (تخصيص محفوظ **و** إعداد مكتمل). فحين تصدُق الأولى
+ * وتكذب الثانية — ملفّ مكتمل بلا تخصيص محفوظ، كما يحدث بعد استيراد نسخة أو
+ * ترطيب مزامنة جزئي — تمرّ الواجهة الكتابةَ فيرميها الكاتب، ويرى المستخدم
+ * «ما قدرنا نجهّز الخطة» بزرّ إعادة لا ينجح أبدًا.
+ *
+ * فالسؤال الآن دالّة واحدة يستهلكها الطرفان، ولا يمكن لأحدهما أن يشيخ وحده.
+ */
+export function hasCompletedOnboardingProfile(): boolean {
+  return loadOnboardingProfile()?._meta?.completed === true
+}
+
 export function saveOnboardingProfile(value: OnboardingProfile): void {
   if (typeof window === 'undefined') return
   // ── [PHASE-II] حدّ التحوير، لا حدّ الزرّ ──────────────────────────────────
@@ -153,8 +168,7 @@ export function saveOnboardingProfile(value: OnboardingProfile): void {
   // ولا يُحرَس الوارد من المزامنة: له كاتبه المنفصل `saveOnboardingProfileFromSync`
   // لأنه ترطيب لا تحوير من المستخدم. ولا تُحرَس هجرة `ensureOnboardingProfile`
   // لأنها لا تعمل إلا حين لا يوجد ملف أصلًا (`existing` = null أدناه).
-  const existing = loadOnboardingProfile()
-  if (existing?._meta?.completed === true) assertPaid('plan.saveEdit')
+  if (hasCompletedOnboardingProfile()) assertPaid('plan.saveEdit')
   try {
     // ختم LWW عند كل حفظ محلي — دليل الأحدثية لدمج profiles.data.onboarding.
     const stamped: OnboardingProfile = { ...value, _meta: { ...value._meta, updatedAt: new Date().toISOString() } }

@@ -13,7 +13,7 @@ import { useCustomization } from '@/lib/customizationContext'
 import { useAuth } from '@/lib/authContext'
 import { product } from '@/config/product'
 import { buildOnboardingProfile } from '@/lib/planBuilderAnswers'
-import { buildPlanArtifactsFromOnboarding, saveOnboardingProfile } from '@/lib/onboardingProfile'
+import { buildPlanArtifactsFromOnboarding, hasCompletedOnboardingProfile, saveOnboardingProfile } from '@/lib/onboardingProfile'
 import { markCompleted } from '@/lib/onboarding'
 import { persistOnboardingToProfile } from '@/lib/onboardingSync'
 import { trackLocal, SETUP_STEP_NAMES } from '@/lib/tracking'
@@ -60,6 +60,7 @@ import {
 } from '@/lib/onboardingV2Flow'
 import { useAccess } from '@/lib/access/useAccess'
 import { isExistingPlanEdit } from '@/lib/customization'
+import { PaidActionDenied } from '@/lib/access/guard'
 
 interface OnboardingV2Props {
   lang: Lang
@@ -306,7 +307,11 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
         // تحوير خطة قائمة = `plan.saveEdit` مدفوع. أوّل إكمال يمرّ حرًّا.
         // يُفحص **قبل** أي كتابة: saveOnboardingProfile وapplyCustomization
         // وmarkCompleted وpersistOnboardingToProfile كلها بعد هذا السطر.
-        if (isExistingPlanEdit() && !canPaid('plan.saveEdit')) {
+        // بوّابتان في الأسفل تحرسان `plan.saveEdit` بسؤالين مختلفين:
+        // `saveCustomization` يسأل `isExistingPlanEdit()`، و`saveOnboardingProfile`
+        // يسأل `hasCompletedOnboardingProfile()`. فالفحص هنا يجمعهما — أي شرط
+        // يرمي في الأسفل يجب أن يُلتقط هنا أوّلًا، وإلّا صار المنعُ «عطلًا».
+        if ((isExistingPlanEdit() || hasCompletedOnboardingProfile()) && !canPaid('plan.saveEdit')) {
           guardPaid('plan.saveEdit', () => {})()
           // 'reset' → idle: البوّابة مفتوحة والشاشة تعود قابلة للتفاعل،
           // ولا تُعرَض شاشة خطأ — المنع ليس عطلًا.
@@ -328,7 +333,16 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
         clearDraftV2(userId) // discard the resumable draft — setup is complete
         setStatus((s) => finalizeReduce(s, 'ok'))
         onComplete()
-      } catch {
+      } catch (error) {
+        // المنع ليس عطلًا. لو أفلت فعل مدفوع من الفحص أعلاه — لأن كاتبًا جديدًا
+        // أضاف حارسًا لا تعرفه الواجهة — فالمخرج بوّابة Premium لا شاشة الخطأ:
+        // «ما قدرنا نجهّز الخطة» تكذب على المستخدم، وزرّ الإعادة معها لا ينجح
+        // أبدًا لأن السبب ليس عطلًا عابرًا (الميثاق §٥: الصدق قبل الطمأنينة).
+        if (error instanceof PaidActionDenied) {
+          guardPaid(error.action, () => {})()
+          setStatus((st) => finalizeReduce(st, 'reset'))
+          return
+        }
         // Visible failure — surface retry, keep the user in setup (draft intact).
         setStatus((s) => finalizeReduce(s, 'fail'))
       }
