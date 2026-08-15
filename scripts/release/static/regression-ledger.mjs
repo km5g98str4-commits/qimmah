@@ -305,6 +305,59 @@ const LEDGER = [
       return [strict && shaped && !coercion, `strict equality=${strict} shape guard=${shaped} truthiness coercion returned=${coercion}`]
     },
   },
+  // ── [FINAL-CONVERGENCE] BUG-029..032 وصلت مع تدقيق الحارة B (863e540) ──────
+  // البوابة كشفت إغفالها فورًا: السجلّ صار ٣٢ عطلًا موثّقًا و٢٨ مرصودًا. وهذا
+  // بالضبط ما بُني له فحص «لا عطل موثّق بلا رصد» — فالإغفال ظهر في نفس الموجة
+  // التي أدخلت السجلّ، لا بعد أسبوع.
+  {
+    id: 'BUG-029', title: 'Focus is not restored after closing exercise detail on WebKit only', status: 'OPEN',
+    liveCoverage: 'test:e2e:exercises under E2E_ENGINE=webkit (31/32 WebKit · 32/32 Chromium)',
+    // مفتوح وغير مُشخَّص. المرصود هنا أن **سبيل إعادة إنتاجه مبنيّ**: بذرة
+    // المحرّك موجودة، فالعطل قابل للتشغيل بأمر واحد لا بادّعاء.
+    assert: () => {
+      const seam = src('scripts/e2e/lib/engine.mjs')
+      const selectable = /E2E_ENGINE/.test(seam) && /webkit/.test(seam)
+      return [selectable, `WebKit reproduction seam present=${selectable}`]
+    },
+    informational: true,
+  },
+  {
+    id: 'BUG-030', title: 'Authenticated export fires no download event on WebKit', status: 'OPEN',
+    liveCoverage: 'test:e2e:settings-security under E2E_ENGINE=webkit (26/34 then timeout · 34/34 Chromium)',
+    // الـ٢٦ تأكيدًا الأمنية قبل نقطة التوقّف **خضراء على WebKit** — أي أن
+    // حراسة الاستيراد ليست هي المكسور، بل إطلاق التنزيل وحده.
+    assert: () => {
+      const seam = src('scripts/e2e/lib/engine.mjs')
+      const selectable = /E2E_ENGINE/.test(seam) && /webkit/.test(seam)
+      return [selectable, `WebKit reproduction seam present=${selectable}`]
+    },
+    informational: true,
+  },
+  {
+    id: 'BUG-031', title: 'The key registry named an orphan screen and omitted the live session key',
+    liveCoverage: 'static-regression-ledger key-registry scan (above) + test:e2e:workout',
+    // رُصد **ورُدّ** على هذا الرأس: المفتاح الحيّ مسجَّل الآن. الفحص أدناه
+    // ينقلب أحمر لحظة عودة الانحراف — فهو حارس لا توثيق.
+    assert: () => {
+      const s = src('src/lib/userDataKeys.ts')
+      const live = /qimmah:activeWorkout:v1/.test(s)
+      const orphanOnly = live === false && /qimmah:active-workout:v2/.test(s)
+      return [live && !orphanOnly, `live ':activeWorkout:v1' registered=${live}`]
+    },
+  },
+  {
+    id: 'BUG-032', title: 'Two orphan screens are read by proof scripts; only one declares the orphanhood', status: 'OPEN',
+    liveCoverage: 'test:canonical-surface (declares the live owner of every doubled surface)',
+    // الحذف قرار مالك (§11/٩). المرصود أن الإعلان قائم: سجلّ الأسطح القانونية
+    // يسمّي التوأمين غير الموجَّهين صراحةً، فلا يظنّهما قارئ حيّين.
+    assert: () => {
+      const s = src('scripts/canonical-surfaces.mjs')
+      const nut = /NutritionV2\.tsx/.test(s)
+      const wk = /WorkoutV2\.tsx/.test(s)
+      return [nut && wk, `twins declared in the canonical-surface registry: NutritionV2=${nut} WorkoutV2=${wk}`]
+    },
+    informational: true,
+  },
 ]
 
 export async function run() {
