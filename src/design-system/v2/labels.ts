@@ -1,3 +1,4 @@
+import { formatNumber } from '@/lib/numberFormat'
 // Qimmah Design v2.1 — approved copy baseline (Founder Refinement Pass).
 //
 // SLICE 0 — SEAM ONLY. These are the *canonical* v2.1 strings, frozen here so a
@@ -58,7 +59,7 @@ export const V2_QUICK_LOG = {
 export const V2_TODAY = {
   ar: {
     remainingTitle: 'وش باقي لك اليوم؟',
-    remainingCount: (count: number) => `${count} ${count === 1 ? 'مهمة' : 'مهام'}`,
+    remainingCount: (count: number) => `${formatNumber(count, 'ar')} ${count === 1 ? 'مهمة' : 'مهام'}`,
     completedTitle: 'تم اليوم',
     allDoneTitle: 'كملت أساسيات يومك',
     allDoneBody: 'راجع تقدّمك أو ارجع لأي مهمة وقت ما تحتاج.',

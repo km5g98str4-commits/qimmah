@@ -11,6 +11,9 @@
 import { createRecorder, settle, goRoute, WIDTHS, collectErrors, realPageErrors } from '../lib/harness.mjs'
 import { PREFS_KEY, PLAN_DAY_1 } from '../lib/drive.mjs'
 
+// [REL-001] numeral-agnostic: the Arabic UI renders Arabic-Indic digits per the
+// one numeral policy. Pinning a digit form makes a CORRECT product change fail here.
+
 const SURFACES = ['dashboard', 'workout', 'nutrition', 'progress', 'measurements', 'profile', 'settings']
 
 export async function run({ browser, url, engine, seed }) {

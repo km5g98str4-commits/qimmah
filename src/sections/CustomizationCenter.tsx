@@ -2,10 +2,11 @@ import { useEffect, useMemo, useState } from 'react'
 import { Icon } from '@/components/Icon'
 import { SETUP_FOCUS_KEY } from '@/lib/setupFocus'
 import { cn } from '@/lib/cn'
-import { type Customization, getDefaultCustomization } from '@/lib/customization'
+import { type Customization, getDefaultCustomization, isExistingPlanEdit } from '@/lib/customization'
 import { useCustomization } from '@/lib/customizationContext'
 import { markCompleted, restartOnboarding, setLastStep } from '@/lib/onboarding'
 import { useAuth } from '@/lib/authContext'
+import { useAccess } from '@/lib/access/useAccess'
 import type { WizardCtx } from '@/components/customizer/stepProps'
 import { PreviewSummary } from '@/components/customizer/PreviewSummary'
 import { StepWelcome } from '@/components/customizer/steps/StepWelcome'
@@ -22,8 +23,6 @@ import { StepReview } from '@/components/customizer/steps/StepReview'
 import { isProfileValid } from '@/lib/validation'
 import { useLang } from '@/i18n'
 import { onboardingStrings, type OnboardingStrings } from '@/i18n/dict/onboarding'
-import { useAccess } from '@/lib/access/useAccess'
-import { isExistingPlanEdit } from '@/lib/customization'
 
 interface CustomizationCenterProps {
   /** يُستدعى عند الإغلاق؛ completed=true عند «حفظ وإغلاق» لعرض تأكيد النجاح. */
@@ -72,8 +71,8 @@ const advancedReviewStep: StepDef = { titleKey: 'ccReview', Component: StepRevie
 export function CustomizationCenter({ onBack, initialStep = 0, mode = 'onboarding' }: CustomizationCenterProps) {
   const lang = useLang()
   const d = onboardingStrings[lang]
-  const { customization, applyCustomization, resetCustomization } = useCustomization()
-  const { guard: guardPaid, can: canPaid } = useAccess()
+  const { customization, applyCustomization, applyPlanEdit, resetCustomization } = useCustomization()
+  const { guard: guardPaid } = useAccess()
   const auth = useAuth()
   // المالك الحالي — الإكمال/إعادة التشغيل يُنسبان للحساب لا للجهاز.
   const userId = auth.user?.id ?? null
@@ -224,20 +223,39 @@ export function CustomizationCenter({ onBack, initialStep = 0, mode = 'onboardin
     onRestartOnboarding,
   }
 
-  // ── [PHASE-II] هذا هو محرّر الخطة الحيّ («الإعدادات → تعديل خطتي») ────────
-  // كلا مساريه يكتبان التخصيص، فيمرّان على حارس `saveCustomization`. بلا هذا
-  // الحارس هنا يرفض الكاتب بحقّ لكن الاستثناء يصل الصفحة خامًا — درس BUG-001:
-  // المعالج يفتح البوّابة **قبل** الكاتب، والكاتب يبقى شبكة الأمان الأخيرة.
+  /**
+   * [REL-002] مسارا الحفظ في «تعديل خطتي» — **كلاهما فعل مدفوع واحد**.
+   *
+   * كان `saveDraft` و`saveAndClose` يكتبان الخطة مباشرةً، فيغيّر مستخدم المعاينة
+   * هدفه من «تنشيف» إلى «تضخيم» **ويبقى التغيير بعد التحديث**. الزرّ الظاهر لم يكن
+   * العطل — العطل أن **الكتابة نفسها** لم تكن تمرّ بسلطة. ولذلك لا يكفي لفّ زرّ
+   * واحد: كل مسار يُنتج خطة محفوظة يمرّ من `plan.saveEdit` ولا استثناء.
+   *
+   * الحارس هنا واجهة (يفتح بوّابة Premium القانونية بدل التنفيذ)، و`applyPlanEdit`
+   * هو الحماية (يرمي قبل الحالة والتخزين). ولا بوّابة جديدة ولا تنفيذ ثانٍ للحجب.
+   */
+  // ── [FINAL-CONVERGENCE] ثلاث طبقات، وحدٌّ واحد يفصل المجّاني عن المدفوع ──────
+  //  ① المعالج هنا يفتح بوّابة Premium بدل التنفيذ — إقناع لا حماية.
+  //  ② `applyPlanEdit` يرمي **قبل** `setCustomization` — فلا تُعرض خطة لم تُحفَظ
+  //     (ميثاق §5). وهذا ما كان ينقص: `applyCustomization` يحدّث الحالة ثم يكتب.
+  //  ③ `saveCustomization` يبقى الكاتب الحارس — شبكة الأمان الأخيرة، لا تُنزع.
+  //
+  // والحدّ **واحد** يستهلكه المعالج والكاتب معًا: `isExistingPlanEdit()`. إنشاء
+  // أول خطة يمرّ حرًّا (ميثاق §0.1)، وتحوير خطة قائمة فعل مدفوع. ولا يُعتمد على
+  // كون هذه الشاشة «للتعديل فقط» بحكم التوجيه: `mode` الافتراضي هنا ما زال
+  // `'onboarding'` وما زالت تنادي `markCompleted` — فلو أُعيد توجيه أوّل تشغيل
+  // إليها يومًا، لوجب أن يمرّ حرًّا لا أن يُرمى عليه استثناء.
+  const commitPlan = (next: Customization) => {
+    if (isExistingPlanEdit()) applyPlanEdit(next)
+    else applyCustomization(next)
+  }
   const guardPlanEdit = (run: () => void) => () => {
-    if (isExistingPlanEdit() && !canPaid('plan.saveEdit')) {
-      guardPaid('plan.saveEdit', () => {})()
-      return
-    }
-    run()
+    if (!isExistingPlanEdit()) { run(); return }
+    guardPaid('plan.saveEdit', run)()
   }
 
   const saveDraft = guardPlanEdit(() => {
-    applyCustomization(data)
+    commitPlan(data)
     setLastStep(step)
     setSaved(true)
   })
@@ -247,7 +265,7 @@ export function CustomizationCenter({ onBack, initialStep = 0, mode = 'onboardin
       setStep(firstInvalidIndex)
       return
     }
-    applyCustomization(data)
+    commitPlan(data)
     markCompleted(userId, step)
     onBack(true)
   })

@@ -200,6 +200,22 @@ const LEDGER = [
       // The fix's own claim is that `formatNumber` is the single presentation
       // boundary for Layer-3 critical surfaces. That claim is only true if the
       // LIVE owners use it — checking a screen with no importer proves nothing.
+      // [REL-001] THIS ASSERTION USED TO BE A MENTION-CHECK, AND IT LIED.
+      //
+      // It asked only whether `formatNumber` APPEARS in each live owner. It went
+      // green at 22e9a4c while an Arabic user still saw `1937` as the largest
+      // number on the Nutrition screen, `اليوم 1 · علوي` on Workout, and
+      // `4 أيام/أسبوع` next to `٤ أيام/أسبوع` on another screen. One formatted
+      // call anywhere in a 500-line file satisfied it.
+      //
+      // A static suite cannot read rendered output, so a mention-check is the
+      // most this file can honestly do — and the most is not enough. Two changes:
+      //
+      //   1) the pass now requires the KNOWN BARE RENDER SITES to be gone. Each
+      //      pattern below is a literal that WAS shipping Latin digits into an
+      //      Arabic session; its presence is a proven regression, not a guess.
+      //   2) the user-visible truth is `liveCoverage` — p1 walks every text node
+      //      under `main` and fails on any `[0-9]`. That is the real gate.
       const liveOwners = {
         'src/views/TodayV2.tsx': 'dashboard',
         'src/views/ProgressV2.tsx': 'progress + measurements',
@@ -207,7 +223,21 @@ const LEDGER = [
         'src/views/WorkoutView.tsx': 'workout tab (live route)',
       }
       const missing = Object.keys(liveOwners).filter((p) => !/formatNumber/.test(src(p)))
-      return [missing.length === 0, `live owners WITHOUT the central formatter: [${missing.join(', ')}]`]
+
+      // Bare render sites, each one an observed REL-001 failure before the fix.
+      const REGRESSIONS = [
+        ['nutrition hero “remaining”', 'src/views/NutritionView.tsx', />\{remaining\}</],
+        ['nutrition meal-row calories/protein', 'src/views/NutritionView.tsx', />\{cals\} \{d\.caloriesUnit\}/],
+        ['workout days-per-week', 'src/views/WorkoutView.tsx', />\{plan\.days\.length\} \{d\.daysPerWeek\}</],
+        ['workout per-day exercises/minutes', 'src/views/WorkoutView.tsx', />\{pd\.exercises\.length\} \{d\.exercisesUnit\}/],
+        ['arabic day label built with Latin index', 'src/lib/workoutDayLabel.ts', /`اليوم \$\{index \+ 1\}/],
+        ['today plan subtitle duration', 'src/lib/todayV2Model.ts', /\$\{durationMin\} دقيقة/],
+        ['arabic task count', 'src/design-system/v2/labels.ts', /`\$\{count\} \$\{count === 1 \? 'مهمة'/],
+      ]
+      const regressed = REGRESSIONS.filter(([, file, re]) => re.test(src(file))).map(([what]) => what)
+
+      const ok = missing.length === 0 && regressed.length === 0
+      return [ok, `live owners WITHOUT the central formatter: [${missing.join(', ')}] · bare render sites BACK: [${regressed.join(', ')}] · rendered-output truth: p1 numeral section`]
     },
   },
 

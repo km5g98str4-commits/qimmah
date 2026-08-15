@@ -11,6 +11,9 @@ import {
 } from '../lib/harness.mjs'
 import { contextWithState, PLAN_DAY_1 } from '../lib/drive.mjs'
 
+// [REL-001] numeral-agnostic: the Arabic UI renders Arabic-Indic digits per the
+// one numeral policy. Pinning a digit form makes a CORRECT product change fail here.
+
 export async function run({ browser, url, engine, seed }) {
   const rec = createRecorder(`p3-returning-guest (${engine})`)
   const { ctx, page } = await contextWithState(browser, url, seed.seed)

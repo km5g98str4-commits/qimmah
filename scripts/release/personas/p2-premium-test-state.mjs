@@ -15,6 +15,9 @@ import {
 } from '../lib/harness.mjs'
 import { guestToPreview, activateWithMockCode, isActiveSessionKey, PLAN_DAY_1, WATER_PRESET_250 } from '../lib/drive.mjs'
 
+// [REL-001] numeral-agnostic: the Arabic UI renders Arabic-Indic digits per the
+// one numeral policy. Pinning a digit form makes a CORRECT product change fail here.
+
 export async function run({ browser, url, engine }) {
   const rec = createRecorder(`p2-premium-test-state (${engine})`)
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: 'ar-SA' })

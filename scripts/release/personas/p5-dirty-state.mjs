@@ -10,6 +10,9 @@
 // Each vector runs in its own fresh context so one failure cannot mask another.
 
 import {
+
+// [REL-001] numeral-agnostic: the Arabic UI renders Arabic-Indic digits per the
+// one numeral policy. Pinning a digit form makes a CORRECT product change fail here.
   createRecorder, settle, goRoute, storageSnapshot, bodyText,
   RAW_EXCEPTION_RE, collectErrors, realPageErrors,
 } from '../lib/harness.mjs'

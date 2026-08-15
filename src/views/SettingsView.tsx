@@ -20,6 +20,7 @@ import { markPendingSync } from '@/lib/syncService'
 import { BUILD_LABEL } from '@/lib/buildInfo'
 import { settingsPreferencesStrings } from '@/i18n/dict/settingsPreferences'
 import { formatNumber } from '@/lib/numberFormat'
+import { useAccess } from '@/lib/access/useAccess'
 
 /**
  * يترجم حالة المزامنة الحقيقية إلى جملة صادقة للمستخدم.
@@ -61,7 +62,8 @@ export function SettingsView({
 }: SettingsViewProps) {
   const t = getStrings(lang)
   const auth = useAuth()
-  const { customization, applyCustomization } = useCustomization()
+  const { customization, applyPlanEdit } = useCustomization()
+  const { guard: guardPaid } = useAccess()
   const preferencesCopy = settingsPreferencesStrings[lang]
   // [CTO-65] البند ١ — نافذة حذف الحساب بتأكيد مكتوب.
   const [deleteOpen, setDeleteOpen] = useState(false)
@@ -74,9 +76,15 @@ export function SettingsView({
   }
 
   // — خطتي: إعادة توليد —
-  const regenerateFromProfile = () => {
+  /**
+   * [REL-002] **مسار الحفظ الثالث** — وهو أوضحها أثرًا: يستدعي `generatePlan`
+   * ويكتب خطة كاملة جديدة (أهداف · تمرين · تغذية · التزام · قياسات). العقد يسمّيه
+   * حرفيًا: «حفظ إعدادات تنتج خطة جديدة». فلا يكفي حراسة محرّر «تعديل خطتي» وحده
+   * ويُترك زرٌّ يُنتج خطة كاملة بلا سلطة.
+   */
+  const regenerateFromProfile = guardPaid('plan.saveEdit', () => {
     const g = generatePlan(customization.profile)
-    applyCustomization({
+    applyPlanEdit({
       ...customization,
       targets: g.targets,
       workoutPlan: g.workoutPlan,
@@ -86,7 +94,7 @@ export function SettingsView({
       measurementPlan: g.measurementPlan,
     })
     markPendingSync()
-  }
+  })
 
   const onRegenerate = () => {
     if (!window.confirm(t.settings.regenerateConfirm)) return

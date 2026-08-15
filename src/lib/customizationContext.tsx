@@ -7,11 +7,31 @@ import {
   saveCustomization,
   clearCustomization,
 } from './customization'
+import { assertPaid } from '@/lib/access/guard'
 
 interface CustomizationContextValue {
   customization: Customization
-  /** يطبّق نسخة جديدة كاملة ويحفظها في localStorage (يُستدعى عند الحفظ من المركز). */
+  /**
+   * يطبّق نسخة جديدة كاملة ويحفظها في localStorage.
+   *
+   * **غير محروس عمدًا** — يخدم الكتابات التي ليست «تعديل خطة»: إكمال الإعداد
+   * الأول (إنشاء الخطة، وهو مجّاني ويجب أن يبقى)، وتنويه القاصر (فعل سلامة
+   * يخفّض ولا يمنح). أي كتابة **تُعدّل خطة قائمة** تستعمل `applyPlanEdit`.
+   */
   applyCustomization: (next: Customization) => void
+  /**
+   * [REL-002] تعديل خطة قائمة — **فعل مدفوع** (`plan.saveEdit`).
+   *
+   * الطبقة الثانية من حارس `access/guard.ts`: الواجهة تلفّ معالجاتها بـ
+   * `useAccess().guard` فتفتح بوّابة Premium بدل التنفيذ — وهذا **إقناع**.
+   * وهذه الدالّة هي **الحماية**: ترمي `PaidActionDenied` قبل أن تلمس الحالة أو
+   * التخزين، فلا تُكتب خطة مدفوعة ولو نودي المعالج من الـconsole أو من مسار
+   * حفظٍ ثالث يُضاف غدًا ونُسيت لفّته.
+   *
+   * الترتيب مقصود: **الفحص قبل `setCustomization`** — لأن تحديث الحالة ثم فشل
+   * الكتابة يعرض على المستخدم خطة لم تُحفَظ (الميثاق §5: لا شاشة نجاح قبل تأكيد الكتابة).
+   */
+  applyPlanEdit: (next: Customization) => void
   /** يمسح المحفوظ ويعيد القيم الافتراضية من config/data. */
   resetCustomization: () => void
 }
@@ -40,14 +60,21 @@ export function CustomizationProvider({ children }: { children: ReactNode }) {
     saveCustomization(next)
   }, [])
 
+  // [REL-002] الفحص أولًا — قبل الحالة وقبل التخزين. يرمي عند المنع.
+  const applyPlanEdit = useCallback((next: Customization) => {
+    assertPaid('plan.saveEdit')
+    setCustomization(next)
+    saveCustomization(next)
+  }, [])
+
   const resetCustomization = useCallback(() => {
     clearCustomization()
     setCustomization(getDefaultCustomization())
   }, [])
 
   const value = useMemo(
-    () => ({ customization, applyCustomization, resetCustomization }),
-    [customization, applyCustomization, resetCustomization],
+    () => ({ customization, applyCustomization, applyPlanEdit, resetCustomization }),
+    [customization, applyCustomization, applyPlanEdit, resetCustomization],
   )
 
   return <CustomizationContext.Provider value={value}>{children}</CustomizationContext.Provider>
@@ -69,6 +96,8 @@ export function StaticCustomizationProvider({
     () => ({
       customization,
       applyCustomization: () => {},
+      // وضع العرض لا يحفظ شيئًا أصلًا — والتعديل المدفوع كذلك، بلا استثناء.
+      applyPlanEdit: () => {},
       resetCustomization: () => {},
     }),
     [customization],

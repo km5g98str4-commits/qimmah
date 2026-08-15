@@ -18,6 +18,7 @@ import { getNutritionLog, getWorkoutSessions } from '@/lib/historyStore'
 import { todaysCompletion } from '@/lib/workoutSessionEngine'
 import { getDayStamp, weekdayName } from '@/lib/today'
 import { loadOnboardingProfile } from '@/lib/onboardingProfile'
+import { formatNumber, formatNumeralsIn } from '@/lib/numberFormat'
 
 export type TodayState = 'normal' | 'newUser' | 'afterWorkout' | 'returnAfterBreak'
 export type PillarKey = 'train' | 'nutrition' | 'move' | 'recover'
@@ -133,7 +134,11 @@ export function buildTodayV2Model(customization: Customization, lang: Lang, user
   const restDay = resolved?.type === 'rest'
   const day = resolved?.type === 'training' ? resolved.day : undefined
   const exerciseCount = day?.exercises.length ?? 0
-  const workoutName = day ? (ar ? day.nameAr : day.nameEn) : ''
+  // ── [FINAL-CONVERGENCE · REL-001-FOLLOWUP] حدّ العرض لسطح اللوحة/اليوم ──────
+  // اسم اليوم **مخزَّن** برقم لاتيني (PKG-7)، وهذه الشاشة كانت تعرضه كما هو —
+  // فيقف «اليوم 1 · علوي» على اللوحة بجوار «اليوم ١ · علوي» على التمرين: نفس
+  // الحقيقة بنظامين على شاشتين متجاورتين. التحويل هنا يصلح القديم والجديد معًا.
+  const workoutName = day ? formatNumeralsIn(ar ? day.nameAr : day.nameEn, lang) : ''
   const workoutAvailable = onboarded && exerciseCount > 0
   const durationMin = customization.profile.workoutDuration > 0 ? customization.profile.workoutDuration : estimateDurationMin(exerciseCount)
   // (P5) الاكتمال الصادق بدل «أي finishedAt»: جلسة completed فقط تُكمل اليوم؛
@@ -201,7 +206,10 @@ export function buildTodayV2Model(customization: Customization, lang: Lang, user
       try {
         // `ar` (not `ar-SA`) keeps the Gregorian calendar to match the approved
         // v2.1 mockups («١١ يوليو»), consistent with the Gregorian weekday above.
-        return new Intl.DateTimeFormat(ar ? 'ar' : 'en-US', { day: 'numeric', month: 'long' }).format(now)
+        // [REL-001] `-u-nu-arab` makes the DIGITS match those mockups too: plain
+        // `ar` resolved to Latin here («15 أغسطس»), so the date was the one Arabic
+        // string on the dashboard still numbered in Latin — beside «اليوم ١».
+        return new Intl.DateTimeFormat(ar ? 'ar-u-nu-arab' : 'en-US', { day: 'numeric', month: 'long' }).format(now)
       } catch {
         return ''
       }
@@ -326,7 +334,7 @@ function buildHero(a: {
         eyebrow: t('أول خطوة معنا', 'Your first step with us'),
         eyebrowDone: false,
         title: t('ابدأ تمرينك الأول', 'Start your first workout'),
-        subtitle: t(`خطتك جاهزة · ${workoutName} · ${durationMin} دقيقة`, `Your plan is ready · ${workoutName} · ${durationMin} min`),
+        subtitle: t(`خطتك جاهزة · ${workoutName} · ${formatNumber(durationMin, 'ar')} دقيقة`, `Your plan is ready · ${workoutName} · ${durationMin} min`),
         ctaLabel: t('ابدأ التمرين', 'Start workout'),
         ctaTone: 'ember',
         destination: 'workout',
@@ -349,7 +357,7 @@ function buildHero(a: {
       eyebrow: t('خطوتك الجاية · الحين', 'Your next step · now'),
       eyebrowDone: false,
       title: t(withPrefix(workoutName), workoutName),
-      subtitle: t(`${exerciseCount} تمارين · ${durationMin} دقيقة · جاهز لك`, `${exerciseCount} exercises · ${durationMin} min · ready for you`),
+      subtitle: t(`${formatNumber(exerciseCount, 'ar')} تمارين · ${formatNumber(durationMin, 'ar')} دقيقة · جاهز لك`, `${exerciseCount} exercises · ${durationMin} min · ready for you`),
       ctaLabel: t('ابدأ التمرين', 'Start workout'),
       ctaTone: 'ember',
       destination: 'workout',
