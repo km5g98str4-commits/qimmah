@@ -9,6 +9,7 @@
 //   • البحث النصّي عبر **فهرس رمز←مواضع** لكل شريحة، يُحمَّل عند الحاجة لا دائمًا.
 //   • «الطقم الساخن» ملف صغير منفصل يعمل بلا شبكة.
 
+import { loadTsModule } from './loadTs.mjs'
 import { createHash } from 'node:crypto'
 import { gzipSync } from 'node:zlib'
 import { writeFileSync, mkdirSync } from 'node:fs'
@@ -20,62 +21,23 @@ import { resolve, join } from 'node:path'
  * مصدره هنا لا في سكربت البناء، كي يفحصه الإثبات بلا اعتماد على أرتيفكت مُولَّد
  * (اعتمادٌ كهذا يجعل البوابة تسقط على بيانٍ بائت لا على انحدار حقيقي).
  */
-export const ROUTING_METHOD_DESCRIPTION =
-  'shard = (mix32(fnv1a(gtin14)) mod shard_count), where mix32 is the MurmurHash3 32-bit finalizer. ' +
-  'The finalizer is REQUIRED, not cosmetic: every valid GTIN has an even digit sum (a consequence of the ' +
-  'mod-10 check digit), which makes every raw FNV-1a hash odd and leaves half the shards permanently empty. ' +
-  'Runtime must reimplement this exactly — see scripts/food-production/lib/shard.mjs.'
-
-export const SHARD_TARGET_GZIP_BYTES = { min: 200 * 1024, max: 500 * 1024 }
-/** ميزانية الطقم الساخن المجمَّع في الحزمة — مذكورة صراحةً لتُقاس لا لتُفترض. */
-export const HOT_SET_BUDGET_GZIP_BYTES = 120 * 1024
-
 /**
- * تجزئة FNV-1a 32-بت — **ثابتة عبر اللغات والمنصّات**، فوقت التشغيل يحسب نفس
- * الشريحة التي حسبها خطّ الإنتاج بلا أي جدول توجيه.
+ * التوجيه يُستورَد ولا يُعاد تنفيذه (D-1/٢).
+ *
+ * المصدر الوحيد هو `src/lib/food/shardRouting.ts` — يستهلكه وقت التشغيل مباشرةً
+ * ويستهلكه خطّ الإنتاج من هنا. تباعُد نسختين كان يعني بحثًا في شريحة غير التي
+ * بُني فيها الفهرس: فشل صامت لا يكشفه اختبار طرفٍ واحد.
  */
-export function fnv1a(str) {
-  let h = 0x811c9dc5
-  for (let i = 0; i < str.length; i++) {
-    h ^= str.charCodeAt(i)
-    h = Math.imul(h, 0x01000193) >>> 0
-  }
-  return h >>> 0
-}
-
-/**
- * خلط نهائي (MurmurHash3 finalizer) — **ليس تجميلًا، بل إصلاح عطب مقيس**.
- *
- * ═══ العطب ═══
- * خانة تحقّق GTIN تجعل المجموع الموزون ≡ 0 (مod 10)، وبما أن 3 ≡ 1 (مod 2) فإن
- * **مجموع خانات أي GTIN صالح زوجي دائمًا** — أي أن عدد خاناته الفردية زوجي دائمًا.
- * وفي FNV-1a تكون البتّة الدنيا للناتج = 1 ^ (زوجية عدد المحارف الفردية)، فتخرج
- * **كل** بصمات الـGTIN فردية بلا استثناء. ومع `% N` لأي N زوجي، تُصيب الأرقام
- * الفردية نصف الجيوب فقط ⇒ **نصف الشرائح تبقى فارغة أبدًا**، والنصف الآخر بضعف حجمه.
- *
- * ═══ القياس ═══
- * على 40,000 سجلًا حقيقيًا: `N=30 ⇒ 15/30` شريحة مأهولة · `N=64 ⇒ 32/64`.
- * وبعد الخلط: كل الشرائح مأهولة وفروقها ضمن المعقول.
- *
- * الخلط ينثر البتّات العليا على الدنيا فيكسر هذا الارتباط. ويحرسه تأكيد توزيع
- * في `run-food-production-proof.mjs` يسقط باسمه إن عاد الانحياز.
- */
-export function mix32(h) {
-  h ^= h >>> 16
-  h = Math.imul(h, 0x85ebca6b) >>> 0
-  h ^= h >>> 13
-  h = Math.imul(h, 0xc2b2ae35) >>> 0
-  h ^= h >>> 16
-  return h >>> 0
-}
-
-/** الشريحة المسؤولة عن GTIN معيّن. الدالة نفسها تُنفَّذ وقت التشغيل. */
-export function assignShard(gtin14, shardCount) {
-  return mix32(fnv1a(gtin14)) % shardCount
-}
-
-export const shardName = (i, shardCount) =>
-  `shard-${String(i).padStart(String(shardCount - 1).length, '0')}`
+const routing = await loadTsModule('src/lib/food/shardRouting.ts')
+export const {
+  ROUTING_METHOD_DESCRIPTION,
+  SHARD_TARGET_GZIP_BYTES,
+  HOT_SET_BUDGET_GZIP_BYTES,
+  fnv1a,
+  mix32,
+  assignShard,
+  shardName,
+} = routing
 
 /** JSON حتمي: مفاتيح مرتّبة دائمًا ⇒ نفس المدخل ينتج نفس البايتات. */
 export function stableStringify(value) {
