@@ -1,3 +1,17 @@
+/**
+ * ⛔ CANONICAL-SURFACE-LOCK — هذا الملف **غير موجَّه** ولا يُشحن للمستخدم.
+ *
+ * المالك الحيّ لسطح التمرين هو `src/views/WorkoutView.tsx`
+ * (`App.tsx` → `V.WorkoutView`). هذا التوأم **خارج رسم الوحدات** بالكامل.
+ *
+ * تحذير مقيس: سجلّ مفاتيح البيانات وثّق مفتاح هذا التوأم
+ * (`qimmah:active-workout:v2`) بدل مفتاح المسار الحيّ
+ * (`qimmah:activeWorkout:v1`)، فبقي مفتاح حيّ خارج الحجر عند تبديل الحساب —
+ * تسرّب بيانات بين حسابين على الجهاز نفسه.
+ *
+ * لا تُصلح عطلًا هنا، ولا تستشهد بهذا الملف بوصفه سلوك الإنتاج.
+ * الملف باقٍ عمدًا: حذفه يحتاج إثبات تكافؤ وغياب مستهلكين.
+ */
 import { useEffect, useMemo, useState } from 'react'
 import { Icon } from '@/components/Icon'
 import { ExerciseMedia } from '@/components/ExerciseMedia'

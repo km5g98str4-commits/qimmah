@@ -1,9 +1,9 @@
 {
   "contract": "QIMMAH-SOVEREIGN-PHASE-II-001",
   "agent": "AGENT-A",
-  "head": "14126488d7973cdcb39c3252ca8dffd9f88f6970",
-  "headSubject": "chore(release): wire the lane's four scripts and fix the cross-account leak its harness found",
-  "ranAt": "2026-08-15T00:03:58.566Z",
+  "head": "22e9a4cccb5fd89e586096bc26ddcb2efa3c4d5d",
+  "headSubject": "fix(release): [PHASE-II/A] close BUG-019 on the LIVE routes and extend the ledger watch to 28",
+  "ranAt": "2026-08-15T00:16:03.986Z",
   "provisional": true,
   "provisionalReason": "Web Sovereign run had not landed its final HEAD when this pass executed.",
   "builds": {
@@ -11,7 +11,7 @@
       "mode": "prod",
       "outDir": "dist-release/prod",
       "absDir": "/home/user/qimmah/dist-release/prod",
-      "ms": 18166
+      "ms": 9489
     }
   },
   "engines": [
@@ -170,7 +170,7 @@
           "section": "shipped shell integrity",
           "label": "index.html carries a verifiable build identity",
           "ok": true,
-          "evidence": "<meta name=\"qimmah-build\" content=\"v1.0.0·1412648\"> <meta name=\"qimmah-commit\" content=\"1412648\"> <meta name=\"qimmah-build-time\" content=\"2026-08-15T00:03:41.908Z\"> <meta name=\"qimmah-sw-version\" content=\"qimmah-1412648\">"
+          "evidence": "<meta name=\"qimmah-build\" content=\"v1.0.0·22e9a4c\"> <meta name=\"qimmah-commit\" content=\"22e9a4c\"> <meta name=\"qimmah-build-time\" content=\"2026-08-15T00:15:54.627Z\"> <meta name=\"qimmah-sw-version\" content=\"qimmah-22e9a4c\">"
         },
         {
           "section": "shipped shell integrity",

@@ -54,3 +54,4 @@ dist-release/
 
 # per-run release-convergence evidence snapshots (latest.json is tracked)
 docs/execution/qimmah-postweb/release/evidence/run-*.json
+.cslock-graph/

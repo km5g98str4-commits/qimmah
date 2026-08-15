@@ -1,3 +1,16 @@
+/**
+ * ⛔ CANONICAL-SURFACE-LOCK — هذا الملف **غير موجَّه** ولا يُشحن للمستخدم.
+ *
+ * المالك الحيّ لسطح التغذية هو `src/views/NutritionView.tsx`
+ * (`App.tsx` → `V.NutritionView`). هذا التوأم **خارج رسم الوحدات** بالكامل —
+ * مثبتًا من البناء لا من الاسم (`npm run test:canonical-surface`).
+ *
+ * لا تُصلح عطلًا هنا. إصلاحٌ يهبط في هذا الملف لا يصل أحدًا: هكذا بقي BUG-019
+ * «محلولًا» بينما رأى المستخدم العربي أرقامًا لاتينية على الشاشة الحقيقية.
+ * الحارس يفشل إن حمل هذا الملف معالجةً لا يحملها مالكه الحيّ.
+ *
+ * الملف باقٍ عمدًا: حذفه يحتاج إثبات تكافؤ وغياب مستهلكين — قرار مستقلّ.
+ */
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { Icon } from '@/components/Icon'
 import { AllergyNotice } from '@/components/AllergyNotice'
