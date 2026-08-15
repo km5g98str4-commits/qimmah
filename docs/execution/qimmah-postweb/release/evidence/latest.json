@@ -1,9 +1,9 @@
 {
   "contract": "QIMMAH-SOVEREIGN-PHASE-II-001",
   "agent": "AGENT-A",
-  "head": "5e1113ae4116cf10811f27e4a635a27cb4b61fc0",
-  "headSubject": "merge(web): reconcile Release Convergence onto the final Web head d83add2",
-  "ranAt": "2026-08-14T23:43:20.308Z",
+  "head": "14126488d7973cdcb39c3252ca8dffd9f88f6970",
+  "headSubject": "chore(release): wire the lane's four scripts and fix the cross-account leak its harness found",
+  "ranAt": "2026-08-15T00:03:58.566Z",
   "provisional": true,
   "provisionalReason": "Web Sovereign run had not landed its final HEAD when this pass executed.",
   "builds": {
@@ -11,7 +11,7 @@
       "mode": "prod",
       "outDir": "dist-release/prod",
       "absDir": "/home/user/qimmah/dist-release/prod",
-      "ms": 10740
+      "ms": 18166
     }
   },
   "engines": [
@@ -27,8 +27,8 @@
     }
   ],
   "totals": {
-    "pass": 47,
-    "fail": 3,
+    "pass": 58,
+    "fail": 1,
     "blocked": 4
   },
   "suites": [
@@ -170,7 +170,7 @@
           "section": "shipped shell integrity",
           "label": "index.html carries a verifiable build identity",
           "ok": true,
-          "evidence": "<meta name=\"qimmah-build\" content=\"v1.0.0·5e1113a\"> <meta name=\"qimmah-commit\" content=\"5e1113a\"> <meta name=\"qimmah-build-time\" content=\"2026-08-14T23:43:09.678Z\"> <meta name=\"qimmah-sw-version\" content=\"qimmah-5e1113a\">"
+          "evidence": "<meta name=\"qimmah-build\" content=\"v1.0.0·1412648\"> <meta name=\"qimmah-commit\" content=\"1412648\"> <meta name=\"qimmah-build-time\" content=\"2026-08-15T00:03:41.908Z\"> <meta name=\"qimmah-sw-version\" content=\"qimmah-1412648\">"
         },
         {
           "section": "shipped shell integrity",
@@ -190,21 +190,10 @@
     },
     {
       "suite": "static-regression-ledger",
-      "pass": 26,
-      "fail": 2,
+      "pass": 37,
+      "fail": 0,
       "blocked": 3,
-      "failures": [
-        {
-          "section": "every RESOLVED historical defect keeps its fix",
-          "label": "BUG-019 — Settings capabilities and numeral presentation were inconsistent",
-          "evidence": "live owners WITHOUT the central formatter: [src/views/NutritionView.tsx, src/views/WorkoutView.tsx]"
-        },
-        {
-          "section": "the ledger file and this suite stay in sync",
-          "label": "no documented defect is left unwatched by this suite",
-          "evidence": "unwatched=[BUG-020, BUG-021, BUG-022, BUG-023, BUG-024, BUG-025, BUG-026, BUG-027, BUG-028] documented=28 watched=19"
-        }
-      ],
+      "failures": [],
       "checks": [
         {
           "section": "every RESOLVED historical defect keeps its fix",
@@ -317,8 +306,62 @@
         {
           "section": "every RESOLVED historical defect keeps its fix",
           "label": "BUG-019 — Settings capabilities and numeral presentation were inconsistent",
-          "ok": false,
-          "evidence": "live owners WITHOUT the central formatter: [src/views/NutritionView.tsx, src/views/WorkoutView.tsx]"
+          "ok": true,
+          "evidence": "live owners WITHOUT the central formatter: []"
+        },
+        {
+          "section": "every RESOLVED historical defect keeps its fix",
+          "label": "BUG-020 — Profile forked the hardened data-transfer owner",
+          "ok": true,
+          "evidence": "canonical panel=true second portability UI removed=true"
+        },
+        {
+          "section": "every RESOLVED historical defect keeps its fix",
+          "label": "BUG-021 — Profile conflated account deletion with guest device-data management",
+          "ok": true,
+          "evidence": "deletion copy conditional=true account rows gated=true"
+        },
+        {
+          "section": "every RESOLVED historical defect keeps its fix",
+          "label": "BUG-022 — Profile descendants duplicated the route heading and exposed sub-44px controls",
+          "ok": true,
+          "evidence": "profile h1 removed=true reminders h1 removed=true 44px targets=true"
+        },
+        {
+          "section": "every RESOLVED historical defect keeps its fix",
+          "label": "BUG-023 — The Profile browser proof could accept a foreign process on its fixed port",
+          "ok": true,
+          "evidence": "child-ready gate present=true named rejection=true"
+        },
+        {
+          "section": "every RESOLVED historical defect keeps its fix",
+          "label": "BUG-024 — The Quick Log path threw when storage is blocked",
+          "ok": true,
+          "evidence": "consumers touching raw storage: [] canonical owner=true"
+        },
+        {
+          "section": "every RESOLVED historical defect keeps its fix",
+          "label": "BUG-025 — Quick Log «ماء» was a declared action with no consumer",
+          "ok": true,
+          "evidence": "water intent has an effect=true panel receives focus request=true"
+        },
+        {
+          "section": "every RESOLVED historical defect keeps its fix",
+          "label": "BUG-026 — A redirected Quick Log left an intent that hijacked a later visit",
+          "ok": true,
+          "evidence": "guard consulted first=true redirect writes nothing=true"
+        },
+        {
+          "section": "every RESOLVED historical defect keeps its fix",
+          "label": "BUG-027 — The Profile browser proof printed success and then hung forever",
+          "ok": true,
+          "evidence": "own process group=true group kill=true"
+        },
+        {
+          "section": "every RESOLVED historical defect keeps its fix",
+          "label": "BUG-028 — A corrupt onboarding flag was read as a completed setup",
+          "ok": true,
+          "evidence": "strict equality=true shape guard=true truthiness coercion returned=false"
         },
         {
           "section": "local data-key registry integrity — every LIVE key is registered",
@@ -347,8 +390,8 @@
         {
           "section": "the ledger file and this suite stay in sync",
           "label": "no documented defect is left unwatched by this suite",
-          "ok": false,
-          "evidence": "unwatched=[BUG-020, BUG-021, BUG-022, BUG-023, BUG-024, BUG-025, BUG-026, BUG-027, BUG-028] documented=28 watched=19"
+          "ok": true,
+          "evidence": "unwatched=[] documented=28 watched=28"
         },
         {
           "section": "the ledger file and this suite stay in sync",
@@ -393,7 +436,7 @@
           "section": "counter-proof — the ledger assertions are not vacuous",
           "label": "every non-informational entry reads a real source file",
           "ok": true,
-          "evidence": "entries=19 vacuous=0"
+          "evidence": "entries=28 vacuous=0"
         }
       ],
       "id": "static-ledger",

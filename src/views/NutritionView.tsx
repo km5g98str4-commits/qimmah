@@ -9,6 +9,7 @@ import { getStrings } from '@/config/strings'
 import { nutritionScreenStrings } from '@/i18n/dict/nutritionScreen'
 import type { Lang } from '@/lib/appPreferences'
 import { useAccess } from '@/lib/access/useAccess'
+import { formatNumber } from '@/lib/numberFormat'
 import { clearQuickLogIntent, takeQuickLogIntent, type QuickLogIntent } from '@/lib/quickLogIntent'
 
 interface NutritionViewProps {
@@ -127,11 +128,11 @@ export function NutritionView({ lang }: NutritionViewProps) {
 
           {/* المعادلة المساندة — أرقام أصغر ولون ثانوي، فلا تنافس البطل. */}
           <div className="mt-3.5 flex items-end justify-between gap-1 border-t border-line pt-3">
-            <EqCell label={t.needCals} value={targetCalories} />
+            <EqCell label={t.needCals} value={targetCalories} lang={lang} />
             <Op symbol={d.opMinus} />
-            <EqCell label={t.foodCals} value={eaten} />
+            <EqCell label={t.foodCals} value={eaten} lang={lang} />
             <Op symbol={d.opPlus} />
-            <EqCell label={t.exerciseCals} value={exerciseCals} />
+            <EqCell label={t.exerciseCals} value={exerciseCals} lang={lang} />
           </div>
         </div>
 
@@ -150,10 +151,10 @@ export function NutritionView({ lang }: NutritionViewProps) {
           المتاحة فعلًا لأنه لا يسأل عن غيرها.
         */}
         <div className="mt-4 grid grid-cols-2 gap-3">
-          <MacroCard label={t.protein} eaten={round(totals.protein)} target={targetProtein} unit={d.gramsUnit} color="#22c55e" />
-          <MacroCard label={t.carbs} eaten={round(totals.carbs)} target={targetCarbs} unit={d.gramsUnit} color="#0ea5e9" />
-          <MacroCard label={t.fat} eaten={round(totals.fat)} target={targetFat} unit={d.gramsUnit} color="#e0941f" />
-          <MacroCard label={t.water} eaten={state.waterMl} target={targetWaterMl} unit={d.mlUnit} color="#F26A21" />
+          <MacroCard label={t.protein} eaten={round(totals.protein)} target={targetProtein} unit={d.gramsUnit} color="#22c55e" lang={lang} />
+          <MacroCard label={t.carbs} eaten={round(totals.carbs)} target={targetCarbs} unit={d.gramsUnit} color="#0ea5e9" lang={lang} />
+          <MacroCard label={t.fat} eaten={round(totals.fat)} target={targetFat} unit={d.gramsUnit} color="#e0941f" lang={lang} />
+          <MacroCard label={t.water} eaten={state.waterMl} target={targetWaterMl} unit={d.mlUnit} color="#F26A21" lang={lang} />
         </div>
 
         {/* حالة فارغة — تحفيز لتسجيل أول وجبة */}
@@ -228,16 +229,16 @@ function quantityLabel(e: LoggedFood, d: { gramsUnit: string; servingsUnit: stri
 const round2 = (n: number) => Math.round(n * 100) / 100
 
 /** خانة مساندة في المعادلة — وزن ثانوي عمدًا: البطل هو «المتبقّي» فوقها. */
-function EqCell({ label, value }: { label: string; value: number }) {
+function EqCell({ label, value, lang }: { label: string; value: number; lang: Lang }) {
   return (
     <div className="min-w-0 flex-1 text-center">
-      <p className="text-sm font-bold text-ink-700">{value}</p>
+      <p className="text-sm font-bold text-ink-700">{formatNumber(value, lang)}</p>
       <p className="truncate text-[10px] text-ink-400">{label}</p>
     </div>
   )
 }
 
-function MacroCard({ label, eaten, target, unit, color }: { label: string; eaten: number; target: number; unit: string; color: string }) {
+function MacroCard({ label, eaten, target, unit, color, lang }: { label: string; eaten: number; target: number; unit: string; color: string; lang: Lang }) {
   const pct = target > 0 ? Math.min(1, eaten / target) : 0
   return (
     // [WP-4B] البطاقة كانت `flex` أفقيًا: الحلقة ٤٠بكسل + نصّ بجانبها داخل عمود
@@ -249,9 +250,9 @@ function MacroCard({ label, eaten, target, unit, color }: { label: string; eaten
         <Ring pct={pct} color={color} />
       </div>
       <p className="min-w-0 text-base font-black leading-none text-ink-900">
-        {eaten}
+        {formatNumber(eaten, lang)}
         {/* الهدف لا يُقصّ: `whitespace-nowrap` يمنع كسر «/ ١٥٠غ» على سطرين. */}
-        <span className="whitespace-nowrap text-[11px] font-bold text-ink-400"> / {target}{unit}</span>
+        <span className="whitespace-nowrap text-[11px] font-bold text-ink-400"> / {formatNumber(target, lang)}{unit}</span>
       </p>
     </div>
   )
@@ -500,7 +501,7 @@ function WaterPanel({ lang, waterMl, targetMl, onAdd: rawAdd, focusRequested = f
           <Icon name="Droplets" className="h-4 w-4 text-primary-c" />
           {t.water}
         </span>
-        <span className="text-sm font-black text-primary-c">{(waterMl / 1000).toFixed(2)} / {(targetMl / 1000).toFixed(1)} {d.litersUnit}</span>
+        <span className="text-sm font-black text-primary-c">{formatNumber(Number((waterMl / 1000).toFixed(2)), lang)} / {formatNumber(Number((targetMl / 1000).toFixed(1)), lang)} {d.litersUnit}</span>
       </div>
       <ProgressBar current={waterMl} target={targetMl || 1} color="bg-primary" className="mt-3 h-1.5" />
       <div className="mt-3 flex flex-wrap gap-2">

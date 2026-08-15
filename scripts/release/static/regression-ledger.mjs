@@ -210,6 +210,101 @@ const LEDGER = [
       return [missing.length === 0, `live owners WITHOUT the central formatter: [${missing.join(', ')}]`]
     },
   },
+
+  // ── PKG-8 · Profile convergence ─────────────────────────────────────────────
+  {
+    id: 'BUG-020', title: 'Profile forked the hardened data-transfer owner',
+    liveCoverage: 'existing test:e2e:profile (27) + test:profile-reliability (22)',
+    assert: () => {
+      const s = src('src/views/ProfileV2.tsx')
+      const ok = /<DataManagementPanel/.test(s) && !/new FileReader\(/.test(s) && !/buildExportBundle|parseImportFile/.test(s)
+      return [ok, `canonical panel=${/<DataManagementPanel/.test(s)} second portability UI removed=${!/buildExportBundle|parseImportFile/.test(s)}`]
+    },
+  },
+  {
+    id: 'BUG-021', title: 'Profile conflated account deletion with guest device-data management',
+    liveCoverage: 'existing test:e2e:profile (guest + signed-in personalities)',
+    assert: () => {
+      const s = src('src/views/ProfileV2.tsx')
+      // The guest must never be offered an account action. Both the description and
+      // the internal row are conditioned on a real session.
+      const ok = /model\.user\.signedIn \? t\('حذف الحساب نهائيًا'/.test(s) && /\{model\.user\.signedIn && \(/.test(s)
+      return [ok, `deletion copy conditional=${/model\.user\.signedIn \? t\('حذف الحساب/.test(s)} account rows gated=${/\{model\.user\.signedIn && \(/.test(s)}`]
+    },
+  },
+  {
+    id: 'BUG-022', title: 'Profile descendants duplicated the route heading and exposed sub-44px controls',
+    liveCoverage: 'existing test:e2e:profile (heading + bounding boxes at 320px)',
+    assert: () => {
+      const profile = src('src/views/ProfileV2.tsx')
+      const notifications = src('src/views/NotificationsSettingsV2.tsx')
+      const ok = !/<h1\b/.test(profile) && !/<h1\b/.test(notifications) && /h-11 w-11/.test(profile)
+      return [ok, `profile h1 removed=${!/<h1\b/.test(profile)} reminders h1 removed=${!/<h1\b/.test(notifications)} 44px targets=${/h-11 w-11/.test(profile)}`]
+    },
+  },
+  {
+    id: 'BUG-023', title: 'The Profile browser proof could accept a foreign process on its fixed port',
+    liveCoverage: 'the runner proves its OWN child reached ready before polling',
+    assert: () => {
+      const s = src('scripts/e2e/profile-reliability.mjs')
+      const ok = /preview exited before ready/.test(s) && /previewReady/.test(s)
+      return [ok, `child-ready gate present=${/previewReady/.test(s)} named rejection=${/preview exited before ready/.test(s)}`]
+    },
+  },
+
+  // ── PKG-9 · Quick Log, dirty-state and artifact safety ──────────────────────
+  {
+    id: 'BUG-024', title: 'The Quick Log path threw when storage is blocked',
+    liveCoverage: 'test:quick-log runtime proof (blocked property AND throwing methods)',
+    assert: () => {
+      // The defect was raw sessionStorage in the live consumers. The fix is a single
+      // guarded owner — so the regression is any consumer touching storage directly again.
+      const app = src('src/App.tsx'), profile = src('src/views/ProfileV2.tsx'), nutrition = src('src/views/NutritionView.tsx')
+      const raw = [['App.tsx', app], ['ProfileV2.tsx', profile], ['NutritionView.tsx', nutrition]]
+        .filter(([, s]) => /window\.sessionStorage/.test(s)).map(([n]) => n)
+      const owned = /export function requestQuickLogIntent/.test(src('src/lib/quickLogIntent.ts'))
+      return [raw.length === 0 && owned, `consumers touching raw storage: [${raw.join(', ')}] canonical owner=${owned}`]
+    },
+  },
+  {
+    id: 'BUG-025', title: 'Quick Log «ماء» was a declared action with no consumer',
+    liveCoverage: 'test:quick-log binds the water intent to the water panel',
+    assert: () => {
+      const s = src('src/views/NutritionView.tsx')
+      const ok = /'water'[\s\S]{0,400}?setFocusWater\(true\)/.test(s) && /focusRequested=\{focusWater\}/.test(s)
+      return [ok, `water intent has an effect=${/setFocusWater\(true\)/.test(s)} panel receives focus request=${/focusRequested=\{focusWater\}/.test(s)}`]
+    },
+  },
+  {
+    id: 'BUG-026', title: 'A redirected Quick Log left an intent that hijacked a later visit',
+    liveCoverage: 'test:quick-log — destination resolved before the intent is written',
+    assert: () => {
+      const s = src('src/App.tsx')
+      const ok = /const destination = guardRoute\(/.test(s) && /if \(destination !== /.test(s)
+      return [ok, `guard consulted first=${/const destination = guardRoute\(/.test(s)} redirect writes nothing=${/if \(destination !== /.test(s)}`]
+    },
+  },
+  {
+    id: 'BUG-027', title: 'The Profile browser proof printed success and then hung forever',
+    liveCoverage: 'the suite terminates on its own (exit code observed, not just stdout)',
+    assert: () => {
+      const s = src('scripts/e2e/profile-reliability.mjs')
+      const ok = /detached: true/.test(s) && /process\.kill\(-preview\.pid/.test(s)
+      return [ok, `own process group=${/detached: true/.test(s)} group kill=${/process\.kill\(-preview\.pid/.test(s)}`]
+    },
+  },
+  {
+    id: 'BUG-028', title: 'A corrupt onboarding flag was read as a completed setup',
+    liveCoverage: 'existing test:e2e:dirty-state (11 seeded states, judged at the guest door)',
+    assert: () => {
+      const s = src('src/lib/onboarding.ts')
+      // `!!` is the defect; `=== true` plus a shape guard is the fix.
+      const strict = /completed: state\.completed === true/.test(s)
+      const shaped = /typeof parsed !== 'object' \|\| Array\.isArray\(parsed\)/.test(s)
+      const coercion = /completed: !!/.test(s)
+      return [strict && shaped && !coercion, `strict equality=${strict} shape guard=${shaped} truthiness coercion returned=${coercion}`]
+    },
+  },
 ]
 
 export async function run() {

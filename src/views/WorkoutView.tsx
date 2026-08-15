@@ -3,6 +3,7 @@ import { Icon } from '@/components/Icon'
 import { WorkoutMode } from '@/components/WorkoutMode'
 import { WorkoutSummary } from '@/components/WorkoutSummary'
 import type { Lang } from '@/lib/appPreferences'
+import { formatNumber } from '@/lib/numberFormat'
 import type { AppRoute } from '@/lib/appRoutes'
 import { useAuth } from '@/lib/authContext'
 import { useCustomization } from '@/lib/customizationContext'
@@ -257,7 +258,7 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
     const weekly = weeklyAdherenceStreak(daysPerWeek)
     const prLabels = prs.map((pr) => {
       const name = lang === 'en' ? pr.nameEn || pr.nameAr : pr.nameAr || pr.nameEn
-      return `${name || pr.exerciseId} · ${pr.weight} ${tw.volumeUnit}`
+      return `${name || pr.exerciseId} · ${formatNumber(pr.weight, lang)} ${tw.volumeUnit}`
     })
     /**
      * [QIM-WEB-FOUNDER-UX-005/حزمة ٥] تمرينك القادم — من **نفس** مصدر «اليوم».
