@@ -42,6 +42,19 @@ async function waitForServer(ms = 30000) {
 }
 
 const settle = (page, ms = 1800) => page.waitForTimeout(ms)
+/**
+ * مُمسِك زرّ الماء **بوسمه لا بنصّه**.
+ *
+ * كان `/\+250/` — أي رقم لاتيني. و`NutritionView` تمرّر نصّ الزرّ عبر
+ * `formatNumeralsIn` (سياسة الأرقام الواحدة)، فيصير «+٢٥٠ مل» في الجلسة
+ * العربية التي يشغّلها هذا الإثبات. النتيجة: انتهاء مهلة على زرّ **موجود
+ * وسليم**، وفحصان حقيقيان («تسجيل الماء يفتح البوّابة» و«مُفعَّل: تسجيل الماء
+ * يعمل») لا يُنفَّذان أصلًا — حدُّ استحقاق بلا قياس.
+ *
+ * العقد السلوكي لم يتغيّر؛ المُمسِك وحده بار. والوسم لا يتأثّر بلغة ولا بتحرير.
+ */
+const WATER_PRESET_250 = '[data-testid="water-preset-250"]'
+
 const tap = async (page, re) => {
   const target = page.locator('button, a').filter({ hasText: re }).first()
   await target.click({ timeout: 10000 })
@@ -207,7 +220,7 @@ try {
   const nutGate = await page.locator('[data-testid="premium-gate"]').isVisible().catch(() => false)
   check('معاينة: «أضف» في التغذية يفتح البوّابة', nutGate)
   await dismissGate(page); await settle(page, 400)
-  await tap(page, /\+250/)
+  await page.locator(WATER_PRESET_250).first().click({ timeout: 10000 })
   await settle(page, 1200)
   const waterGate = await page.locator('[data-testid="premium-gate"]').isVisible().catch(() => false)
   const nutAfter = await paidState(page)
@@ -298,7 +311,7 @@ try {
   await page.evaluate(() => { window.location.hash = '/nutrition' })
   await settle(page, 1800)
   const paidBefore = await paidState(page)
-  await tap(page, /\+250/)
+  await page.locator(WATER_PRESET_250).first().click({ timeout: 10000 })
   await settle(page, 1200)
   const paidAfter = await paidState(page)
   check('مُفعَّل: تسجيل الماء يعمل', paidAfter.waterMl > paidBefore.waterMl, `${paidBefore.waterMl} → ${paidAfter.waterMl}`)

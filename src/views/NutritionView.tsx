@@ -505,8 +505,11 @@ function WaterPanel({ lang, waterMl, targetMl, onAdd: rawAdd, focusRequested = f
       </div>
       <ProgressBar current={waterMl} target={targetMl || 1} color="bg-primary" className="mt-3 h-1.5" />
       <div className="mt-3 flex flex-wrap gap-2">
-        <button ref={presetRef} type="button" onClick={() => addPreset(250)} className="btn-ghost min-h-[44px] px-3 py-2 text-xs">{formatNumeralsIn(t.addWater250, lang)}</button>
-        <button type="button" onClick={() => addPreset(500)} className="btn-ghost min-h-[44px] px-3 py-2 text-xs">{formatNumeralsIn(t.addWater500, lang)}</button>
+        {/* الوسم للقيادة الآلية: نصّ الزرّ يمرّ بـ`formatNumeralsIn` فيصير «+٢٥٠ مل»
+            في العربية، وأي إثبات يمسكه برقم لاتيني يبور عند أول جلسة عربية —
+            وهو ما وقع فعلًا في `preview-gate`. الوسم عقدٌ لا يتغيّر بالتحرير ولا باللغة. */}
+        <button ref={presetRef} data-testid="water-preset-250" type="button" onClick={() => addPreset(250)} className="btn-ghost min-h-[44px] px-3 py-2 text-xs">{formatNumeralsIn(t.addWater250, lang)}</button>
+        <button data-testid="water-preset-500" type="button" onClick={() => addPreset(500)} className="btn-ghost min-h-[44px] px-3 py-2 text-xs">{formatNumeralsIn(t.addWater500, lang)}</button>
       </div>
       <div className="mt-2 flex items-center gap-2">
         <input
