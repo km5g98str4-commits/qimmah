@@ -29,8 +29,26 @@ if (!SUPPORTED.includes(NAME)) {
 /** اسم المحرّك الفعّال — تطبعه السكربتات في ترويسة نتائجها. */
 export const engineName = NAME
 
+/**
+ * مسار ثنائي Chromium من البيئة حين لا يحدّده المستدعي.
+ *
+ * ═══ الفجوة التي يسدّها ═══
+ * حاويات التنفيذ تحمل غالبًا Chromium **مثبَّتًا مسبقًا** بنسخة بناء تخالف النسخة
+ * التي تطلبها حزمة playwright الحالية، فيفشل `launch()` الافتراضي بـ«Executable
+ * doesn't exist at …/chromium_headless_shell-<build>» ولو كان في الجهاز متصفّح
+ * صالح تمامًا. ولذلك تعلّم بعضُ السكربتات قراءة `PW_CHROMIUM` بيده — **وبعضها
+ * لا**. فكانت النتيجة أن نصف الأطقم يعمل في نفس الحاوية ونصفَها «معطّل بيئيًّا»،
+ * والفرق سطرٌ في كل ملف لا عيبٌ في الطقم.
+ *
+ * الموضع الصحيح للعلاج هو هنا — نقطة الإطلاق الوحيدة المشتركة — لا في كل ملف.
+ * والقيمة الصريحة من المستدعي تبقى مقدَّمة دائمًا، فلا يغيّر هذا سلوك من يحدّدها.
+ */
 function sanitize(opts = {}) {
-  if (NAME === 'chromium') return opts
+  if (NAME === 'chromium') {
+    return opts.executablePath || !process.env.PW_CHROMIUM
+      ? opts
+      : { ...opts, executablePath: process.env.PW_CHROMIUM }
+  }
   const o = { ...opts }
   delete o.args
   delete o.executablePath
