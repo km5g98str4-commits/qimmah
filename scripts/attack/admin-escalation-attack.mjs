@@ -144,7 +144,30 @@ const srcSource = readFileSync(resolve(root, 'src/admin/contract/source.ts'), 'u
 check('مصدر اللوحة معلَن EXTERNALLY_BLOCKED', /WIRING_STATE:\s*WiringState\s*=\s*'EXTERNALLY_BLOCKED'/.test(srcSource))
 check('ولا ينادي أي RPC أو جدول', !/\.rpc\(|\.from\(|service_role/.test(srcSource))
 check('فحتى مؤسس مُصرَّح لا يقرأ صفّ غيره اليوم', /gapOf\(/.test(srcSource) && !/select\s+\*/i.test(srcSource))
-check('واللوحة تعلن أن الدور غير مُزوَّد بدل ادّعاء عطل', adminRoleProvisioning() === 'not-provisioned')
+// [OVERNIGHT-6] تكامل بين حارتين: حارة اللوحة جعلت `adminRoleProvisioning`
+// **تشتقّ** حالتها من قرار الدور بدل ثابت مكتوب — وهو تحسين، لكنه غيّر التوقيع.
+// وكان هذا النداء بلا وسيط فيسقط بـ`TypeError` **مجهول الاسم**، وهو ما يمنعه
+// الميثاق §4.2 صراحةً: السقوط غير المسمّى ليس إثباتًا. فيُمرَّر قرار حقيقي،
+// وتُفحص الحالات الأربع لا حالة واحدة.
+check('التوقيع يقبل قرارًا (وإلا لسقط الإثبات بخطأ مجهول لا بفحص)',
+  typeof adminRoleProvisioning === 'function' && adminRoleProvisioning.length === 1)
+for (const [reason, expected] of [
+  ['no-session', 'no-session'],
+  ['no-role-claim', 'claim-absent'],
+  ['forged-claim', 'claim-rejected'],
+  ['unknown-role', 'claim-rejected'],
+]) {
+  check(`اللوحة تعلن «${expected}» عند «${reason}» — إعلان لا ادّعاء عطل`,
+    adminRoleProvisioning({ role: 'denied', reason }) === expected,
+    adminRoleProvisioning({ role: 'denied', reason }))
+}
+check('ومؤسس مُصرَّح يُعلَن claim-present',
+  adminRoleProvisioning({ role: 'founder', reason: 'granted' }) === 'claim-present')
+// ولا تُخلط الحالات: انتحال مرفوض ≠ غياب مطالبة. لو تساويا لضاع الفرق الذي
+// يُبنى عليه قرار «هذا هجوم» مقابل «هذا مستخدم عادي».
+check('★ والانتحال لا يُقرأ كغياب مطالبة',
+  adminRoleProvisioning({ role: 'denied', reason: 'forged-claim' })
+    !== adminRoleProvisioning({ role: 'denied', reason: 'no-role-claim' }))
 const guardSrc = readFileSync(resolve(root, 'src/admin/auth/adminRole.ts'), 'utf8')
   .replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/^[ \t]*\/\/.*$/gm, ' ')
 for (const bad of ['localStorage', 'sessionStorage', 'document.cookie', 'window.location', 'URLSearchParams', 'import.meta.env', 'fetch(']) {
