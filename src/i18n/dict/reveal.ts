@@ -103,7 +103,7 @@ const ar: RevealStrings = {
     eyebrow: 'خطتك',
     titleNamed: (name) => `يا ${name}، هذي نقطة البداية.`,
     titleAnonymous: 'هذي نقطة البداية.',
-    subtitle: 'كل رقم تحت مبني على إجاباتك أنت — ما فيه شي عام.',
+    subtitle: 'الأرقام تحت مبنيّة على إجاباتك — وبعضها يبدأ من قواعد عامة نضبّطها معك.',
   },
   journey: {
     title: 'مسارك',
@@ -160,7 +160,7 @@ const en: RevealStrings = {
     eyebrow: 'Your plan',
     titleNamed: (name) => `${name}, this is your starting point.`,
     titleAnonymous: 'This is your starting point.',
-    subtitle: 'Every number below comes from your own answers — nothing generic.',
+    subtitle: 'The numbers below build on your answers — some start from general rules we tune with you.',
   },
   journey: {
     title: 'Your path',

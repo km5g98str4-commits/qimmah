@@ -12,10 +12,23 @@ import {
 } from '@/lib/calculators'
 import type { ActivityLevel, Gender, GoalType } from '@/types/profile'
 
+/**
+ * درجات اليقين — [WAVE-B].
+ *
+ * كانت ثلاثًا، فابتلع `qimmah_practical_estimate` **أربعة صفوف ليست تقديرًا من
+ * قِمّة**: قراران هما سياسة منتج (العجز/الفائض · سقف الماء) وقاعدتان لهما مرجع
+ * منشور (٣٥ مل/كجم · ٧٧٠٠ سعرة/كجم). والنتيجة أن الشاشة تقول «لم نجد له مرجعًا
+ * منشورًا» عن ثابتٍ يستشهد `calculators.ts` بمرجعه بالاسم ورقم PMID.
+ *
+ * فصارت خمسًا: ما هو **بحث** يُنسب لبحثه، وما هو **قاعدة** يُسمّى قاعدة، وما هو
+ * **قرارنا** يُعلن قرارًا. والتقدير يبقى للتقدير وحده.
+ */
 export const E_CALC_CERTAINTY_KEYS = [
   'published_equation',
+  'published_rule',
   'established_range_choice',
   'qimmah_practical_estimate',
+  'product_policy',
 ] as const
 
 export type ECalcCertaintyKey = (typeof E_CALC_CERTAINTY_KEYS)[number]
@@ -239,6 +252,12 @@ export interface ECalcStrings {
   sourcesTitle: string
   sourcesIntro: string
   certaintyLabels: Record<ECalcCertaintyKey, string>
+  /**
+   * شرح كل درجة — **مرئي لا مخفيّ**. كان القيد يعيش في `title=` وحده والشارة
+   * تُبتر عند الشرطة، فيصل المستخدمَ الاسمُ عاريًا بلا قيده. و`title` لا يُقرأ
+   * على اللمس أصلًا — أي أن أصدق نصف الجملة كان محجوبًا عن أغلب المستخدمين.
+   */
+  certaintyNotes: Record<ECalcCertaintyKey, string>
   sourceRows: readonly ECalcSourceRow[]
 
   disclaimerTitle: string
@@ -670,11 +689,18 @@ function buildArabicStrings(
     sourcesTitle: 'من أين جاء كل رقم؟',
     sourcesIntro: 'نميّز بين ثلاث درجات، ونضع كل رقم في درجته بلا تجميل:',
     certaintyLabels: {
-      published_equation: 'معادلة منشورة — من بحث علمي منشور ومراجَع.',
-      established_range_choice:
-        'اختيار داخل نطاق معتمد — الرقم من عندنا، والنطاق الذي يقع فيه معتمد علميًا.',
-      qimmah_practical_estimate:
-        'تقدير عملي من قِمّة — لم نجد له مرجعًا منشورًا بهذه الصيغة، ونقوله صراحة.',
+      published_equation: 'معادلة منشورة',
+      published_rule: 'قاعدة معروفة',
+      established_range_choice: 'اختيار داخل نطاق معتمد',
+      qimmah_practical_estimate: 'تقدير من قِمّة',
+      product_policy: 'قرار من قِمّة',
+    },
+    certaintyNotes: {
+      published_equation: 'من بحث علمي منشور ومراجَع.',
+      published_rule: 'قاعدة لها مرجع منشور، لكنها تقريبية — والجسم يتكيّف معها.',
+      established_range_choice: 'الرقم من عندنا، والنطاق اللي يقع فيه معتمد علميًا.',
+      qimmah_practical_estimate: 'ما لقينا له مرجعًا منشورًا بهذي الصيغة، ونقولها صريحة.',
+      product_policy: 'قرار منّا لا نتيجة بحث — اخترناه عشان سلامتك ووضوح خطتك.',
     },
     sourceRows: [
       {
@@ -721,25 +747,25 @@ function buildArabicStrings(
       },
       {
         id: 'calorie_adjustment',
-        certainty: 'qimmah_practical_estimate',
+        certainty: 'product_policy',
         label: `العجز ${n(formula.cutDeficit)} / الفائض ${n(formula.bulkSurplus)}`,
         source: 'سياسة منتج',
       },
       {
         id: 'water_weight_rule',
-        certainty: 'qimmah_practical_estimate',
+        certainty: 'published_rule',
         label: `الماء ${n(waterMlPerKg)} مل/كجم`,
-        source: 'قاعدة سريرية شائعة',
+        source: 'قاعدة سريرية شائعة (٣٠–٣٥ مل/كجم)',
       },
       {
         id: 'weight_change_rate',
-        certainty: 'qimmah_practical_estimate',
+        certainty: 'published_rule',
         label: `معدّل التغيّر ${n(formula.kcalPerKg)}`,
-        source: 'قاعدة ثابتة قديمة، والجسم يتكيّف',
+        source: 'Wishnofsky (1958) — قاعدة ثابتة قديمة، والجسم يتكيّف',
       },
       {
         id: 'water_ceiling',
-        certainty: 'qimmah_practical_estimate',
+        certainty: 'product_policy',
         label: `سقف الماء ${n(formula.waterMaxLiters)} لترات`,
         source: 'حدّ أمان للمنتج',
       },
@@ -978,11 +1004,18 @@ function buildEnglishStrings(
     sourcesTitle: 'Where each number comes from',
     sourcesIntro: 'We distinguish three levels and place each number in its own, without dressing it up:',
     certaintyLabels: {
-      published_equation: 'Published equation — from peer-reviewed published research.',
-      established_range_choice:
-        'A choice within an established range — the figure is ours, the range it sits in is scientifically established.',
-      qimmah_practical_estimate:
-        'A practical Qimmah estimate — we found no published reference for this exact form, and we say so plainly.',
+      published_equation: 'Published equation',
+      published_rule: 'Well-known rule',
+      established_range_choice: 'A choice within an established range',
+      qimmah_practical_estimate: 'A Qimmah estimate',
+      product_policy: 'A Qimmah decision',
+    },
+    certaintyNotes: {
+      published_equation: 'From peer-reviewed published research.',
+      published_rule: 'It has a published reference, but it is approximate — and the body adapts to it.',
+      established_range_choice: 'The figure is ours; the range it sits in is scientifically established.',
+      qimmah_practical_estimate: 'We found no published reference for this exact form, and we say so plainly.',
+      product_policy: 'Our decision, not a research finding — chosen for your safety and a clear plan.',
     },
     sourceRows: [
       {
@@ -1029,25 +1062,25 @@ function buildEnglishStrings(
       },
       {
         id: 'calorie_adjustment',
-        certainty: 'qimmah_practical_estimate',
+        certainty: 'product_policy',
         label: `${n(formula.cutDeficit)} deficit / ${n(formula.bulkSurplus)} surplus`,
         source: 'Product policy',
       },
       {
         id: 'water_weight_rule',
-        certainty: 'qimmah_practical_estimate',
+        certainty: 'published_rule',
         label: `${n(waterMlPerKg)} mL/kg water rule`,
-        source: 'Common clinical rule of thumb',
+        source: 'Common clinical rule of thumb (30–35 ml/kg)',
       },
       {
         id: 'weight_change_rate',
-        certainty: 'qimmah_practical_estimate',
+        certainty: 'published_rule',
         label: `${n(formula.kcalPerKg)} weight-change rule`,
-        source: 'An old fixed rule; the body adapts',
+        source: 'Wishnofsky (1958) — an old fixed rule; the body adapts',
       },
       {
         id: 'water_ceiling',
-        certainty: 'qimmah_practical_estimate',
+        certainty: 'product_policy',
         label: `${n(formula.waterMaxLiters)} L water ceiling`,
         source: 'Product safety limit',
       },

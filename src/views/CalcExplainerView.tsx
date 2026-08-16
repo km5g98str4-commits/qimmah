@@ -3,6 +3,7 @@ import { Icon } from '@/components/Icon'
 import { StandaloneAppScreen } from '@/components/StandaloneAppScreen'
 import { StateBlock } from '@/components/StateBlock'
 import { eCalcStrings, type ECalcInputId, type ECalcStrings } from '@/i18n/dict/eCalc'
+import type { ECalcCertaintyKey } from '@/i18n/dict/eCalc'
 import {
   FAT_CALORIE_RATIO,
   KCAL_PER_KG,
@@ -254,6 +255,8 @@ function CalcFilled({ data, lang, d }: { data: CalcExplainerData; lang: Lang; d:
                 <CertaintyBadge certainty={row.certainty} label={d.certaintyLabels[row.certainty]} />
               </div>
               <p className="mt-1 text-xs text-ink-500">{row.source}</p>
+              {/* شرح الدرجة — مرئي لكل مستخدم، لا محجوبًا خلف `title`. */}
+              <p className="mt-1 text-[0.7rem] leading-relaxed text-ink-400">{d.certaintyNotes[row.certainty]}</p>
             </div>
           ))}
         </div>
@@ -352,21 +355,27 @@ function MetricBlock({ title, result, unit, children }: { title: string; result:
   )
 }
 
-function CertaintyBadge({
-  certainty,
-  label,
-}: {
-  certainty: 'published_equation' | 'established_range_choice' | 'qimmah_practical_estimate'
-  label: string
-}) {
-  const tone = {
+/**
+ * شارة درجة اليقين — [WAVE-B] **بلا بتر وبلا قيد مخفيّ**.
+ *
+ * كانت تعرض `label.split('—')[0]`: الاسم وحده، والقيد بعد الشرطة يعيش في
+ * `title=` — سمة لا تظهر على اللمس أصلًا. فيصل مستخدمَ الجوال «تقدير عملي من
+ * قِمّة» عاريةً، وتُحجب عنه «لم نجد له مرجعًا منشورًا» وهي أصدق نصفَي الجملة.
+ *
+ * الآن: الاسم في الشارة، والشرح **سطرٌ مرئي** بجانب مصدر الصفّ. لا شيء يُبتر،
+ * ولا شيء يعتمد على تحويم فأرة لا وجود له على الهاتف.
+ */
+function CertaintyBadge({ certainty, label }: { certainty: ECalcCertaintyKey; label: string }) {
+  const tone: Record<ECalcCertaintyKey, string> = {
     published_equation: 'bg-emerald-50 text-emerald-800',
+    published_rule: 'bg-teal-50 text-teal-800',
     established_range_choice: 'bg-blue-50 text-blue-800',
     qimmah_practical_estimate: 'bg-amber-50 text-amber-900',
-  }[certainty]
+    product_policy: 'bg-violet-50 text-violet-900',
+  }
   return (
-    <span title={label} className={`max-w-[55%] shrink-0 rounded-full px-2 py-1 text-center text-[0.6rem] font-black leading-tight ${tone}`}>
-      {label.split('—')[0]}
+    <span className={`max-w-[55%] shrink-0 rounded-full px-2 py-1 text-center text-[0.6rem] font-black leading-tight ${tone[certainty]}`}>
+      {label}
     </span>
   )
 }

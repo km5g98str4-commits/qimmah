@@ -206,7 +206,8 @@
     "test:admin-db": "node scripts/run-admin-db-proof.mjs",
     "test:admin-mount": "node scripts/run-admin-mount-proof.mjs",
     "test:entry-flow": "node scripts/run-entry-flow-proof.mjs",
-    "test:e2e:entry-flow": "npm run build && node scripts/e2e/entry-flow.mjs"
+    "test:e2e:entry-flow": "npm run build && node scripts/e2e/entry-flow.mjs",
+    "test:e2e:certainty": "npm run build && node scripts/e2e/certainty-labels.mjs"
   },
   "dependencies": {
     "@capacitor/app": "^8.1.0",
