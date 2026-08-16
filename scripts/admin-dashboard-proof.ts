@@ -13,7 +13,7 @@
 
 import { readFileSync, readdirSync } from 'node:fs'
 import { resolve, join } from 'node:path'
-import { METRIC_REGISTRY, availabilityCounts } from '@/admin/contract/metrics'
+import { METRIC_REGISTRY, MISSING_SOURCE_TABLES, availabilityCounts } from '@/admin/contract/metrics'
 import { metricValue, ready, unavailable } from '@/admin/contract/types'
 import type { AdminUserRow } from '@/admin/contract/types'
 import {
@@ -55,14 +55,30 @@ console.log('\nإثبات المركز التنفيذي')
 // ═══════════════ ١) العقد: الكود والوثيقة يقولان الشيء نفسه ═══════════════
 const DOC = 'docs/product/EXECUTIVE-DASHBOARD-DATA-CONTRACT.md'
 const doc = read(DOC)
+/**
+ * ملحق التسليم — **الوثيقة الثانية الملزِمة**.
+ *
+ * ═══ لماذا صار الرباط وثيقتين ═══
+ * وثيقة العقد ملك حارة أخرى ولا تُمَسّ في هذه الموجة (§1.4)، والسجلّ نما فيها
+ * بأربعة عشر بندًا. والخياران كانا: **إسقاط الرباط** — فيموت العقد بصمت — أو
+ * **توسيعه** ليقبل توثيقًا في أيّ من الوثيقتين المسمّاتين. اخترنا الثاني:
+ * الشرط باقٍ («لا مقياس بلا بند مكتوب») والمكان صار اثنين معلومَين، والانحراف
+ * بين الوثيقتين **مُعلَن** في §5 من الملحق لا مسكوت عنه.
+ * ومقياس غير مذكور في **أيّهما** ما زال يُسقط البوابة باسمه.
+ */
+const DELIVERY = 'docs/execution/qimmah-sovereign-overnight/ADMIN-DELIVERY.md'
+const delivery = read(DELIVERY)
 
 check('وثيقة عقد البيانات موجودة وغير فارغة', doc.length > 4000)
+check('ملحق التسليم موجود وغير فارغ', delivery.length > 3000)
 check('سجلّ المقاييس غير فارغ', METRIC_REGISTRY.length >= 25)
 
-// كل مقياس في السجلّ **مذكور في الوثيقة بمعرّفه**. الانحراف بين الاثنين هو
-// الطريقة المعتادة لموت أي عقد مكتوب.
-const missingInDoc = METRIC_REGISTRY.filter((m) => !doc.includes(m.id)).map((m) => m.id)
-check(`كل مقياس في السجلّ مذكور في الوثيقة (${METRIC_REGISTRY.length})`, missingInDoc.length === 0)
+// كل مقياس في السجلّ **مذكور بمعرّفه** في إحدى الوثيقتين. الانحراف بين الكود
+// والمكتوب هو الطريقة المعتادة لموت أي عقد.
+const missingInDoc = METRIC_REGISTRY.filter((m) => !doc.includes(m.id) && !delivery.includes(m.id)).map((m) => m.id)
+check(`كل مقياس في السجلّ موثَّق (${METRIC_REGISTRY.length})`, missingInDoc.length === 0)
+// وملحق التسليم يعلن الانحراف صراحةً — استثناءٌ صامت يهدم القاعدة (§4.2).
+check('الملحق يعلن انحرافه عن وثيقة العقد', delivery.includes('انحراف معلَن مع وثيقة العقد'))
 
 // وكل مقياس يحمل الحقول العشرة كاملة — لا بند ناقص يمرّ.
 const incomplete = METRIC_REGISTRY.filter(
@@ -106,12 +122,44 @@ check(
   counts.AVAILABLE_NOW === 4 && counts.NEEDS_BACKEND > 0 && counts.IMPOSSIBLE_WITHOUT_CONSENT_CHANGE > 0,
 )
 
-// الاستحقاق كله بلا نظام مصدر — لا واحد منه `endpoint-missing`.
-const entitlementMetrics = METRIC_REGISTRY.filter((m) => m.group === 'entitlement')
-check(
-  `كل مقاييس الاستحقاق source-system-missing (${entitlementMetrics.length})`,
-  entitlementMetrics.every((m) => m.backendGap === 'source-system-missing'),
+// ═══ حارس البيات: «لا نظام مصدر» ادّعاء يشيخ ═══
+// كان هنا فحص يفرض أن **كل** مقاييس الاستحقاق `source-system-missing`. وهبطت
+// خلفية التجارة فصارت الجداول موجودة، فتحوّل الفحص من حارسٍ إلى **قفلٍ على
+// الكذب**: يمنع تصحيح الوصف بعد أن تغيّر العالم.
+// البديل أقوى لا أضعف — يُقرأ العالم بدل أن يُفترَض:
+//   ① كل اسم في `MISSING_SOURCE_TABLES` يجب ألّا يكون له `create table` في أي
+//      هجرة. قائمة «مفقود» تحمل جدولًا موجودًا تُسقط البوابة باسمها.
+//   ② ولا مقياس `source-system-missing` يذكر في مصدره جدولًا **موجودًا فعلًا**.
+const MIGRATIONS = 'supabase/migrations'
+const migrationText = readdirSync(resolve(ROOT, MIGRATIONS))
+  .filter((f) => f.endsWith('.sql'))
+  .map((f) => read(join(MIGRATIONS, f)))
+  .join('\n')
+/** أسماء جداول public التي تُنشئها الهجرات فعلًا. */
+const liveTables = new Set(
+  [...migrationText.matchAll(/create table if not exists public\.([a-z_]+)/g)].map((m) => m[1]),
 )
+check(`الهجرات تُنشئ جداول public فعلًا (${liveTables.size})`, liveTables.size >= 10)
+
+const staleMissing = (MISSING_SOURCE_TABLES as readonly string[]).filter((t) => liveTables.has(t))
+check(
+  `قائمة «الجداول المفقودة» لا تحمل جدولًا موجودًا (${MISSING_SOURCE_TABLES.length} اسمًا)`,
+  staleMissing.length === 0,
+)
+
+const wronglySystemMissing = METRIC_REGISTRY.filter(
+  (m) => m.backendGap === 'source-system-missing' && [...liveTables].some((t) => m.source.includes(`public.${t}`)),
+).map((m) => m.id)
+check(
+  'لا مقياس «لا نظام مصدر» يذكر جدولًا موجودًا',
+  wronglySystemMissing.length === 0,
+)
+// وبالمقابل: كل مقياس استحقاق يذكر جدولًا حيًّا يجب أن يكون `endpoint-missing`.
+const entitlementMetrics = METRIC_REGISTRY.filter((m) => m.group === 'entitlement')
+const entWrongGap = entitlementMetrics.filter(
+  (m) => [...liveTables].some((t) => m.source.includes(`public.${t}`)) && m.backendGap !== 'endpoint-missing',
+).map((m) => m.id)
+check(`مقاييس الاستحقاق ذات الجدول الحيّ endpoint-missing (${entitlementMetrics.length})`, entWrongGap.length === 0)
 
 // ═══════════════ ٣) الغياب لا يصير صفرًا ═══════════════
 check('قراءة الغائب تعيد null لا صفرًا', metricValue(unavailable<number>('NEEDS_BACKEND')) === null)
@@ -130,6 +178,28 @@ for (const f of uiFiles) {
   if (/\?\?\s*0\b/.test(code) || /\|\|\s*0\b/.test(code)) zeroFallback.push(f)
 }
 check(`لا مكوّن يستبدل الغياب بصفر (${uiFiles.length} ملفات)`, zeroFallback.length === 0)
+
+// ⚠️ **والطبقة التي تُترجم رد الخادم أخطر من الواجهة**: هناك تُكتب `?? 0`
+// طبيعيًّا («الحقل قد يغيب»)، فيتحوّل الغياب إلى رقم قبل أن يصل أي مكوّن.
+// فالمسح يشمل `contract/` كلّه لا `ui/` وحده.
+const contractDir = 'src/admin/contract'
+const contractFiles = readdirSync(resolve(ROOT, contractDir)).filter((f) => f.endsWith('.ts'))
+const contractZero = contractFiles.filter((f) => {
+  const code = stripComments(read(join(contractDir, f)))
+  return /\?\?\s*0\b/.test(code) || /\|\|\s*0\b/.test(code)
+})
+check(`لا طبقة عقد تستبدل الغياب بصفر (${contractFiles.length} ملفات)`, contractZero.length === 0)
+
+// والقارئ الحيّ **ملفّ واحد** يملك نداء الشبكة — لا نداء متفرّق بلا حارس.
+const supabaseCallers = contractFiles.filter((f) => stripComments(read(join(contractDir, f))).includes('getSupabase('))
+check(
+  `نداء الخادم محصور في liveSource.ts وحده (${supabaseCallers.join(', ') || 'لا شيء'})`,
+  supabaseCallers.length === 1 && supabaseCallers[0] === 'liveSource.ts',
+)
+// وهو يبدأ **دائمًا** من لقطة الغياب: الأساس غياب، والحضور إضافة.
+const liveCode = stripComments(read(join(contractDir, 'liveSource.ts')))
+check('القارئ الحيّ يبني فوق لقطة الغياب', liveCode.includes('loadExecutiveSnapshot()'))
+check('القارئ الحيّ يفحص الدور قبل أي نداء', liveCode.indexOf('isAdmin(decision)') < liveCode.indexOf('getSupabase('))
 
 // وكل حالة من الأربع مُعالَجة في بطاقة المقياس — لا حالة تسقط في الفراغ.
 const cardCode = read('src/admin/ui/MetricCard.tsx')
@@ -160,6 +230,11 @@ const todayValues = [
   today.activity.workoutsCompleted7d,
   today.entitlement.premiumActive,
   today.onboarding.completionRate,
+  today.commerce.ordersPaid,
+  today.commerce.codesIssued,
+  today.commerce.redemptionFailures24h,
+  today.errors.clientErrors24h,
+  today.errors.rpcFailures24h,
 ]
 check(
   `لقطة اليوم: كل مقياس غير متاح (${todayValues.length} مفحوصًا)`,
@@ -346,6 +421,7 @@ const adminFiles = [
   ...uiFiles.map((f) => join(uiDir, f)),
   'src/admin/contract/types.ts',
   'src/admin/contract/source.ts',
+  'src/admin/contract/liveSource.ts',
   'src/admin/model/filters.ts',
 ]
 const leaks: string[] = []
@@ -391,7 +467,7 @@ check('شاشة المنع لا تذكر أي مقياس', !read('src/admin/ui/A
 
 // ═══════════════ ١٦) لا سجلّ طرفية بحمولة حسّاسة ═══════════════
 const consoleUsers: string[] = []
-for (const f of [...uiFiles.map((x) => join(uiDir, x)), 'src/admin/contract/source.ts', 'src/admin/auth/adminRole.ts', 'src/admin/model/filters.ts', 'src/admin/model/attention.ts']) {
+for (const f of [...uiFiles.map((x) => join(uiDir, x)), 'src/admin/contract/source.ts', 'src/admin/contract/liveSource.ts', 'src/admin/auth/adminRole.ts', 'src/admin/model/filters.ts', 'src/admin/model/attention.ts']) {
   if (/console\.(log|info|warn|error|debug)/.test(stripComments(read(f)))) consoleUsers.push(f)
 }
 check('لا سجلّ طرفية في كود اللوحة إطلاقًا', consoleUsers.length === 0)
@@ -409,9 +485,27 @@ check(`لا مفتاح مميّز في كود اللوحة (${PRIVILEGED.length}
 const deps = read('docs/execution/qimmah-postweb/admin/DEPENDENCIES.md')
 check('وثيقة اعتماديات الوصل موجودة', deps.length > 500)
 check('الوثيقة تسمّي خطوة الوصل بالملف', deps.includes('appRoutes.ts') && deps.includes('App.tsx'))
-// والوحدة **غير موصولة فعلًا** — القول والفعل متطابقان.
-check('لا إشارة للوحة في App.tsx', !read('src/App.tsx').includes('admin'))
-check('لا مسار admin في appRoutes.ts', !read('src/lib/appRoutes.ts').includes("'admin'"))
+// ═══ الوصل: فرعان مسمّيان، لا فحص واحد يشيخ ═══
+// كان الفحص يفرض **الانفصال** («لا إشارة للوحة في App.tsx»). وهو صحيح ما دامت
+// الوحدة غير موصولة، لكنه ينقلب إلى **مانع للوصل الصحيح** في اليوم الذي تُطبَّق
+// فيه الرقعة: يصير الفحص يحرس بقاء اللوحة مطفأة. فصار الفحص فرعين:
+//   • غير موصولة ⇒ يجب أن تكون خطوة الوصل موثّقة بالملفّين (كما كان).
+//   • موصولة ⇒ يجب أن يكون الاستيراد **كسولًا من `@/admin`**، وأن يكون
+//     `'admin'` مسارًا مُعلَنًا، وأن **لا** يكون تبويبًا رئيسيًا.
+// كلا الفرعين يسقط باسمه، ولا يوجد فرع ثالث متساهل.
+const appCode = read('src/App.tsx')
+const routesCode = read('src/lib/appRoutes.ts')
+const wired = appCode.includes('AdminRoute')
+if (!wired) {
+  check('غير موصولة: لا مسار admin في appRoutes.ts', !routesCode.includes("'admin'"))
+  check('غير موصولة: خطوة الوصل موثّقة بالملفّين', deps.includes('appRoutes.ts') && deps.includes('App.tsx'))
+  check('غير موصولة: الملحق يحمل الرقعة الجاهزة', delivery.includes('AdminRoute: lazy(') && delivery.includes("view === 'admin'"))
+} else {
+  check('موصولة: الاستيراد كسول من @/admin', /lazy\(\s*\(\)\s*=>\s*import\('@\/admin'\)/.test(appCode))
+  check('موصولة: المسار مُعلَن في appRoutes.ts', routesCode.includes("'admin',"))
+  check('موصولة: اللوحة ليست تبويبًا رئيسيًا', !/MAIN_TABS[^=]*=[^\]]*'admin'/.test(routesCode))
+  check('موصولة: الموجّه لا يعيد بناء حارس ثانٍ', !appCode.includes('resolveAdminRole'))
+}
 
 // ═══════════════ ١٩) العدّ في الوثيقة يطابق السجلّ ═══════════════
 // ⚠️ ربط عددي صريح: جدول §10 في الوثيقة يُقرأ ويُقارَن بالسجلّ. بدونه كان
@@ -422,7 +516,12 @@ const AR_DIGITS = '٠١٢٣٤٥٦٧٨٩'
 const toWestern = (t: string) => t.replace(/[٠-٩]/g, (d) => String(AR_DIGITS.indexOf(d)))
 // النطاق محصور بجدول §10 وحده: البحث في الوثيقة كلّها كان يلتقط **سُلّم
 // الدرجات في §2** — وهو جدول تعريفات بلا أعداد — فيقرأ منه نصًّا لا رقمًا.
-const summary = doc.slice(doc.indexOf('## ١٠. الخلاصة الصادقة'))
+// ⚠️ **العدّاد يُقرأ من الملحق لا من وثيقة العقد.** وثيقة العقد ملك حارة أخرى
+// ولم تُحدَّث مع نموّ السجلّ (§5 من الملحق يعلن الانحراف بالضبط). فربط العدّ
+// بها كان سيعني أحد أمرين: تعديل ملفّ لا نملكه، أو إسقاط الرباط. الثالث هو
+// نقل الرباط إلى الوثيقة التي **تُصان مع الكود**، وإبقاء الانحراف مُعلَنًا.
+const summary = delivery.slice(delivery.indexOf('## ٤. عدّاد السجلّ'))
+check('الملحق يحمل قسم العدّاد', summary.length > 100)
 const docRow = (label: string): number | null => {
   const line = summary.split('\n').find((l) => l.includes(label) && l.trim().startsWith('|'))
   if (!line) return null
@@ -446,7 +545,7 @@ check(
   summary.includes(`${toArabic(METRIC_REGISTRY.length)} مقياسًا`),
 )
 check('السجلّ يحمل أربعة مقاييس متاحة', counts.AVAILABLE_NOW === 4)
-check('الوثيقة تعلن الخلاصة الصادقة', doc.includes('لا مقياس مستخدم واحد متاح اليوم'))
+check('وثيقة العقد تبقى مرجع المعنى', doc.includes('لا مقياس مستخدم واحد متاح اليوم'))
 check('الوثيقة تعلن EXTERNALLY_BLOCKED', doc.includes('EXTERNALLY_BLOCKED'))
 
 console.log(`\n✅ ${pass} فحصًا — عقد اللوحة متماسك وصادق\n`)

@@ -22,7 +22,9 @@ import type {
   AdminUserDetail,
   AdminUserRow,
   AttentionItem,
+  CommerceSnapshot,
   EntitlementSnapshot,
+  ErrorsSnapshot,
   ExecutiveSnapshot,
   FunnelStage,
   MetricValue,
@@ -98,6 +100,7 @@ const activationFunnelReady: readonly FunnelStage[] = [
 export const entitlementReadyFixture: EntitlementSnapshot = {
   premiumActive: ready(188, FIXTURE_AS_OF),
   trialActive: ready(24, FIXTURE_AS_OF),
+  trialExpired: ready(61, FIXTURE_AS_OF),
   previewOnly: ready(1_072, FIXTURE_AS_OF),
   activationRedeemed: ready(213, FIXTURE_AS_OF),
   activationPending: ready(287, FIXTURE_AS_OF),
@@ -115,6 +118,41 @@ export const onboardingReadyFixture: OnboardingSnapshot = {
     { id: 'started', labelKey: 'funnel.started', count: unavailable('IMPOSSIBLE_WITHOUT_CONSENT_CHANGE') },
     { id: 'completed', labelKey: 'funnel.completed', count: unavailable('IMPOSSIBLE_WITHOUT_CONSENT_CHANGE') },
   ],
+}
+
+/**
+ * التجارة الجاهزة — **بمقياس واحد غائب دائمًا**: محاولات الكود المرفوضة بلا
+ * سجلّ. تجهيزةٌ تملؤه برقم تجعل المصمّم يرسم شاشة لن توجد.
+ */
+export const commerceReadyFixture: CommerceSnapshot = {
+  ordersSeen: ready(241, FIXTURE_AS_OF),
+  ordersPaid: ready(188, FIXTURE_AS_OF),
+  ordersFailed: ready(9, FIXTURE_AS_OF),
+  codesIssued: ready(500, FIXTURE_AS_OF),
+  codesRedeemed: ready(213, FIXTURE_AS_OF),
+  codesUnused: ready(287, FIXTURE_AS_OF),
+  redemptionFailures24h: unavailable('NEEDS_BACKEND'),
+  revokedActive: ready(3, FIXTURE_AS_OF),
+}
+
+/** الأخطاء — غائبة في **كل** تجهيزة بلا استثناء: لا مسار لها أصلًا. */
+export const errorsGapFixture: ErrorsSnapshot = {
+  clientErrors24h: unavailable('NEEDS_BACKEND'),
+  rpcFailures24h: unavailable('NEEDS_BACKEND'),
+}
+
+function allCommerce(v: <T>() => MetricValue<T>): CommerceSnapshot {
+  return {
+    ordersSeen: v(),
+    ordersPaid: v(),
+    ordersFailed: v(),
+    codesIssued: v(),
+    codesRedeemed: v(),
+    codesUnused: v(),
+    // يبقى غائبًا حتى في تجهيزة «فارغ»: صفرٌ هنا يدّعي قياسًا لا يوجد.
+    redemptionFailures24h: unavailable('NEEDS_BACKEND'),
+    revokedActive: v(),
+  }
 }
 
 // ───────────────────────── حالات فارغ / تحميل / خطأ ─────────────────────────
@@ -138,6 +176,7 @@ function allEntitlement(v: <T>() => MetricValue<T>): EntitlementSnapshot {
   return {
     premiumActive: v(),
     trialActive: v(),
+    trialExpired: v(),
     previewOnly: v(),
     activationRedeemed: v(),
     activationPending: v(),
@@ -165,6 +204,12 @@ function allOnboarding(v: <T>() => MetricValue<T>): OnboardingSnapshot {
 const loadingV = <T,>(): MetricValue<T> => ({ state: 'loading' })
 const errorV = <T,>(): MetricValue<T> => ({ state: 'error', code: 'fixture.error' })
 const gapV = <T,>(): MetricValue<T> => unavailable<T>('NEEDS_BACKEND')
+/**
+ * صفر **مقيس** — للحالة «أجاب الخادم ولم يجد شيئًا».
+ * موجود كي تفرّق التجهيزات بين هذا الصفر و«لا نعرف»؛ وهما في الشاشة شيئان
+ * مختلفان تمامًا، فيجب أن يكونا مختلفين في التجهيزة أيضًا.
+ */
+const readyZero = <T,>(): MetricValue<T> => ready(0 as unknown as T, FIXTURE_AS_OF)
 
 // ───────────────────────────── جدول المستخدمين ─────────────────────────────
 
@@ -231,6 +276,8 @@ export const snapshotReady: ExecutiveSnapshot = {
   users: usersReadyFixture,
   activity: activityReadyFixture,
   entitlement: entitlementReadyFixture,
+  commerce: commerceReadyFixture,
+  errors: errorsGapFixture,
   onboarding: onboardingReadyFixture,
   attention: attentionFixture,
   users_page: ready({ rows: smallUserSet, total: 1_284, page: 1, pageSize: 25 }, FIXTURE_AS_OF),
@@ -249,6 +296,8 @@ export const snapshotEmpty: ExecutiveSnapshot = {
   },
   activity: allActivity(gapV),
   entitlement: allEntitlement(gapV),
+  commerce: allCommerce(readyZero),
+  errors: errorsGapFixture,
   onboarding: allOnboarding(gapV),
   attention: attentionFixture,
   users_page: ready({ rows: [], total: 0, page: 1, pageSize: 25 }, FIXTURE_AS_OF),
@@ -259,6 +308,8 @@ export const snapshotLoading: ExecutiveSnapshot = {
   users: allUsers(loadingV),
   activity: allActivity(loadingV),
   entitlement: allEntitlement(loadingV),
+  commerce: allCommerce(loadingV),
+  errors: errorsGapFixture,
   onboarding: allOnboarding(loadingV),
   attention: attentionFixture,
   users_page: { state: 'loading' },
@@ -283,6 +334,8 @@ export const snapshotPartial: ExecutiveSnapshot = {
     activeSeries: unavailable('IMPOSSIBLE_WITHOUT_CONSENT_CHANGE'),
   },
   entitlement: allEntitlement(errorV),
+  commerce: allCommerce(errorV),
+  errors: errorsGapFixture,
   onboarding: allOnboarding(gapV),
   attention: attentionFixture,
   users_page: ready({ rows: smallUserSet, total: 1_284, page: 1, pageSize: 25 }, FIXTURE_AS_OF),
@@ -293,6 +346,8 @@ export const snapshotError: ExecutiveSnapshot = {
   users: allUsers(errorV),
   activity: allActivity(errorV),
   entitlement: allEntitlement(errorV),
+  commerce: allCommerce(errorV),
+  errors: errorsGapFixture,
   onboarding: allOnboarding(errorV),
   attention: attentionFixture,
   users_page: { state: 'error', code: 'fixture.error' },
@@ -313,6 +368,8 @@ export const snapshotToday: ExecutiveSnapshot = {
     activeSeries: unavailable('IMPOSSIBLE_WITHOUT_CONSENT_CHANGE'),
   },
   entitlement: allEntitlement(gapV),
+  commerce: allCommerce(gapV),
+  errors: errorsGapFixture,
   onboarding: allOnboarding(gapV),
   attention: attentionFixture,
   users_page: unavailable('NEEDS_BACKEND'),

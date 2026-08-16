@@ -14,7 +14,7 @@
 import { Icon } from '@/components/Icon'
 import { adminStrings } from '@/i18n/dict/admin'
 import { useLang } from '@/i18n'
-import type { AdminRoleDecision, DenialReason } from '../auth/adminRole'
+import type { AdminRoleDecision, DenialReason, RoleProvisioningState } from '../auth/adminRole'
 import { adminRoleProvisioning } from '../auth/adminRole'
 
 const REASON_KEY: Record<DenialReason, keyof (typeof adminStrings)['ar']['denied']> = {
@@ -25,10 +25,19 @@ const REASON_KEY: Record<DenialReason, keyof (typeof adminStrings)['ar']['denied
   'not-resolved': 'reasonNotResolved',
 }
 
+const PROVISIONING_KEY: Record<RoleProvisioningState, keyof (typeof adminStrings)['ar']['denied']> = {
+  'no-session': 'provisioningNoSession',
+  'claim-absent': 'provisioningNote',
+  'claim-rejected': 'provisioningRejected',
+  unresolved: 'provisioningUnresolved',
+  'claim-present': 'provisioningPresent',
+}
+
 export function AdminDenied({ decision }: { decision: AdminRoleDecision }) {
   const lang = useLang()
   const t = adminStrings[lang]
   const reason = decision.reason ? t.denied[REASON_KEY[decision.reason]] : t.denied.reasonNotResolved
+  const provisioning = adminRoleProvisioning(decision)
 
   return (
     <main className="container-page section" data-admin-denied="true">
@@ -39,9 +48,12 @@ export function AdminDenied({ decision }: { decision: AdminRoleDecision }) {
 
         <p className="mt-4 rounded-xl border border-line bg-beige p-3 text-sm font-bold text-ink-700">{reason}</p>
 
-        {adminRoleProvisioning() === 'not-provisioned' ? (
-          <p className="mt-3 text-xs leading-relaxed text-ink-400">{t.denied.provisioningNote}</p>
-        ) : null}
+        {/*
+          ملاحظة التزويد **مشتقّة من الجلسة** لا ثابتة: من لم يُمنح الدور يقرأ
+          كيف يُمنح، ومن حاول انتحاله يقرأ أن المحاولة رُصدت باسمها. ثابتٌ واحد
+          لكل الحالات كان يقول للجميع الشيء نفسه ويصدق مع بعضهم فقط.
+        */}
+        <p className="mt-3 text-xs leading-relaxed text-ink-400">{t.denied[PROVISIONING_KEY[provisioning]]}</p>
       </div>
     </main>
   )

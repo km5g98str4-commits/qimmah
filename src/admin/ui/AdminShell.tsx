@@ -22,10 +22,12 @@ import { useState } from 'react'
 import { Icon } from '@/components/Icon'
 import { cn } from '@/lib/cn'
 import { adminStrings } from '@/i18n/dict/admin'
+import type { AdminStrings } from '@/i18n/dict/admin'
 import { useLang } from '@/i18n'
 import type { AdminRoleDecision } from '../auth/adminRole'
 import { isAdmin } from '../auth/adminRole'
 import type { AdminUserDetail, ExecutiveSnapshot, PlatformPosture } from '../contract/types'
+import type { LiveReadState } from '../contract/liveSource'
 import { buildAttentionQueue, detectedCount } from '../model/attention'
 import { AdminDenied } from './AdminDenied'
 import { AttentionPanel } from './AttentionPanel'
@@ -85,9 +87,14 @@ interface AdminShellProps {
   onOpenUser?: (userId: string) => void
   onCloseUser?: () => void
   onRefresh?: () => void
+  /**
+   * حالة القراءة الحيّة. **بلا قيمة ⇒ `'not-founder'`** — الافتراض الأقلّ ادّعاءً:
+   * مكوّن يُرسَم بلا إخبار عن مصدره لا يجوز أن يقول «حيّ».
+   */
+  live?: LiveReadState
 }
 
-export function AdminShell({ decision, snapshot, detail, onOpenUser, onCloseUser, onRefresh }: AdminShellProps) {
+export function AdminShell({ decision, snapshot, detail, onOpenUser, onCloseUser, onRefresh, live = 'not-founder' }: AdminShellProps) {
   const lang = useLang()
   const t = adminStrings[lang]
   const [tab, setTab] = useState<Tab>('overview')
@@ -127,9 +134,25 @@ export function AdminShell({ decision, snapshot, detail, onOpenUser, onCloseUser
         شريط حالة التوصيل — **دائم ولا يُطوى**. من يفتح الشاشة يقرأ في أول سطر
         لماذا هي فارغة، بدل أن يستنتج من فراغها أن المنتج بلا مستخدمين.
       */}
-      <p className="mt-4 flex items-start gap-2 rounded-xl border border-warning/40 bg-warning/[0.07] p-3 text-xs leading-relaxed text-ink-700">
-        <Icon name="Info" className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
-        {t.shell.wiringBanner}
+      {/*
+        شريط حالة القراءة — **يتبع الحقيقة لا نصًّا ثابتًا**. كان سطرًا واحدًا
+        يقول «لا رقم متاح»؛ وهو يصير كذبًا في اللحظة التي تصل فيها الأرقام.
+        الآن لكل حالة قراءة نصّها، و«حيّ» وحدها تختفي فيها النبرة التحذيرية.
+      */}
+      <p
+        data-live-state={live}
+        className={cn(
+          'mt-4 flex items-start gap-2 rounded-xl border p-3 text-xs leading-relaxed',
+          live === 'live'
+            ? 'border-success/40 bg-success/[0.07] text-ink-700'
+            : 'border-warning/40 bg-warning/[0.07] text-ink-700',
+        )}
+      >
+        <Icon
+          name={live === 'live' ? 'CheckCircle2' : 'Info'}
+          className={cn('mt-0.5 h-4 w-4 shrink-0', live === 'live' ? 'text-success' : 'text-warning')}
+        />
+        {t.live[live]}
       </p>
 
       <div className="mt-4">
@@ -165,37 +188,79 @@ export function AdminShell({ decision, snapshot, detail, onOpenUser, onCloseUser
         <div className="mt-4 flex flex-col gap-4">
           <AttentionPanel items={attention} />
 
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {/*
+            ═══ الأرقام الخمسة ═══
+            خمسة لا عشرون: الشريط العلوي يجيب «كيف حال المنتج؟» في نظرة واحدة،
+            وكل ما عداه ينزل إلى قسمه المسمّى. عشرون بطاقةً متساوية الوزن ليست
+            ملخّصًا بل قائمة، والقائمة تُقرأ ولا تُلتقط.
+          */}
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
             <MetricCard metricId="users.total" value={snapshot.users.total} emphasis />
             <MetricCard metricId="users.newToday" value={snapshot.users.newToday} emphasis />
             <MetricCard metricId="entitlement.premiumActive" value={snapshot.entitlement.premiumActive} emphasis />
+            <MetricCard metricId="commerce.ordersPaid" value={snapshot.commerce.ordersPaid} emphasis />
             <MetricCard
               metricId="entitlement.conversionOfAccounts"
               value={snapshot.entitlement.conversionOfAccounts}
               format={(v) => (typeof v === 'number' ? `${(v * 100).toFixed(1)}%` : String(v))}
               emphasis
             />
+          </div>
+
+          <Section id="growth" icon="TrendingUp">
             <MetricCard metricId="users.new7d" value={snapshot.users.new7d} />
             <MetricCard metricId="users.new30d" value={snapshot.users.new30d} />
             <MetricCard metricId="users.verified" value={snapshot.users.verified} />
-            <MetricCard metricId="entitlement.previewOnly" value={snapshot.entitlement.previewOnly} />
             <MetricCard metricId="activity.signedIn7d" value={snapshot.activity.signedIn7d} />
             <MetricCard metricId="activity.signedIn30d" value={snapshot.activity.signedIn30d} />
             <MetricCard metricId="activity.dormant30d" value={snapshot.activity.dormant30d} />
-            <MetricCard metricId="activity.productActive7d" value={snapshot.activity.productActive7d} />
-            <MetricCard metricId="activity.workoutsCompleted7d" value={snapshot.activity.workoutsCompleted7d} />
-            <MetricCard metricId="activity.nutritionLogged7d" value={snapshot.activity.nutritionLogged7d} />
-            <MetricCard metricId="activity.measurementsLogged30d" value={snapshot.activity.measurementsLogged30d} />
+          </Section>
+
+          <Section id="entitlement" icon="Wallet">
+            <MetricCard metricId="entitlement.previewOnly" value={snapshot.entitlement.previewOnly} />
+            <MetricCard metricId="entitlement.trialActive" value={snapshot.entitlement.trialActive} />
+            <MetricCard metricId="entitlement.trialExpired" value={snapshot.entitlement.trialExpired} />
+            <MetricCard metricId="entitlement.premiumActive" value={snapshot.entitlement.premiumActive} />
+            <MetricCard metricId="commerce.revokedActive" value={snapshot.commerce.revokedActive} />
+          </Section>
+
+          <Section id="commerce" icon="Diamond">
+            <MetricCard metricId="commerce.ordersSeen" value={snapshot.commerce.ordersSeen} />
+            <MetricCard metricId="commerce.ordersPaid" value={snapshot.commerce.ordersPaid} />
+            <MetricCard metricId="commerce.ordersFailed" value={snapshot.commerce.ordersFailed} />
+            <MetricCard metricId="commerce.codesIssued" value={snapshot.commerce.codesIssued} />
+            <MetricCard metricId="commerce.codesRedeemed" value={snapshot.commerce.codesRedeemed} />
+            <MetricCard metricId="commerce.codesUnused" value={snapshot.commerce.codesUnused} />
+            <MetricCard metricId="commerce.redemptionFailures24h" value={snapshot.commerce.redemptionFailures24h} />
+          </Section>
+
+          <Section id="funnel" icon="SlidersHorizontal">
+            <MetricCard metricId="entitlement.activationPending" value={snapshot.entitlement.activationPending} />
+            <MetricCard metricId="entitlement.activationRedeemed" value={snapshot.entitlement.activationRedeemed} />
+            <MetricCard metricId="entitlement.activationFailed24h" value={snapshot.entitlement.activationFailed24h} />
             <MetricCard
               metricId="onboarding.completionRate"
               value={snapshot.onboarding.completionRate}
               format={(v) => (typeof v === 'number' ? `${(v * 100).toFixed(0)}%` : String(v))}
             />
-            <MetricCard metricId="entitlement.activationRedeemed" value={snapshot.entitlement.activationRedeemed} />
-            <MetricCard metricId="entitlement.activationPending" value={snapshot.entitlement.activationPending} />
-            <MetricCard metricId="entitlement.activationFailed24h" value={snapshot.entitlement.activationFailed24h} />
             <MetricCard metricId="onboarding.stuckCount" value={snapshot.onboarding.stuckCount} />
-          </div>
+          </Section>
+
+          {/*
+            قسم الأخطاء **يبقى معروضًا وهو فارغ**. حذفه حين لا مصدر له يجعل
+            الشاشة تُقرأ «لا أخطاء»؛ وبقاؤه بـ«غير متاح» يقول الحقيقة: لا نقيس.
+          */}
+          <Section id="errors" icon="AlertCircle">
+            <MetricCard metricId="errors.clientErrors24h" value={snapshot.errors.clientErrors24h} />
+            <MetricCard metricId="errors.rpcFailures24h" value={snapshot.errors.rpcFailures24h} />
+          </Section>
+
+          <Section id="product" icon="Activity">
+            <MetricCard metricId="activity.productActive7d" value={snapshot.activity.productActive7d} />
+            <MetricCard metricId="activity.workoutsCompleted7d" value={snapshot.activity.workoutsCompleted7d} />
+            <MetricCard metricId="activity.nutritionLogged7d" value={snapshot.activity.nutritionLogged7d} />
+            <MetricCard metricId="activity.measurementsLogged30d" value={snapshot.activity.measurementsLogged30d} />
+          </Section>
 
           <RoadmapPanel />
         </div>
@@ -236,6 +301,28 @@ export function AdminShell({ decision, snapshot, detail, onOpenUser, onCloseUser
         </div>
       ) : null}
     </main>
+  )
+}
+
+/**
+ * قسم مُعنوَن.
+ *
+ * العنوان **يُشتقّ من المعرّف** لا يُمرَّر نصًّا: تمريره كان يسمح بقسم يحمل
+ * عنوان قسم آخر بلا أن يعترض شيء. والمعرّف يُطبع في `data-section` فيصير
+ * وجود القسم قابلًا للفحص بنيويًا لا بمطابقة نصّ قد يظهر صدفةً في مكان آخر.
+ * وشبكته تنهار إلى عمود واحد عند ٣٢٠بكسل.
+ */
+function Section({ id, icon, children }: { id: keyof AdminStrings['sections']; icon: string; children: React.ReactNode }) {
+  const lang = useLang()
+  const t = adminStrings[lang]
+  return (
+    <section className="text-start" data-section={id}>
+      <h2 className="mb-2 flex items-center gap-2 text-sm font-extrabold text-ink-700">
+        <Icon name={icon} className="h-4 w-4 text-ink-500" />
+        {t.sections[id]}
+      </h2>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{children}</div>
+    </section>
   )
 }
 

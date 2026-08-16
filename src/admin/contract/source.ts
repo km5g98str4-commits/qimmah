@@ -28,7 +28,9 @@ import { isSupabaseConfigured } from '@/lib/supabaseClient'
 import { METRIC_REGISTRY } from './metrics'
 import type {
   ActivitySnapshot,
+  CommerceSnapshot,
   EntitlementSnapshot,
+  ErrorsSnapshot,
   ExecutiveSnapshot,
   MetricAvailability,
   MetricValue,
@@ -37,6 +39,16 @@ import type {
   UsersSnapshot,
 } from './types'
 import { unavailable } from './types'
+
+/**
+ * ⚠️ **حدّ هذا الملف بعد [OVERNIGHT-ADMIN]:** بقي هو **بانِي لقطة الغياب**،
+ * وصار فوقه `liveSource.ts` يحاول القراءة الحقيقية عبر
+ * `founder_executive_snapshot()`. و`WIRING_STATE` أدناه ما زال صادقًا اليوم:
+ * الهجرتان اللتان تُنشئان الدور والدالة **لم تُطبَّقا على أي قاعدة**
+ * (APPLY_PENDING)، فلا مسار قراءة مُصرَّح قائم — والحجب من **خارج** المستودع
+ * بالضبط كما يقول الاسم. يُقلَب إلى `'LIVE'` في الموجة التي تلي التطبيق، ويحرس
+ * الربط `test:admin-db`.
+ */
 
 /** حالة التوصيل الحيّ — معلَنة في النوع كي تُقرأ في الواجهة والتقارير. */
 export type WiringState = 'EXTERNALLY_BLOCKED' | 'LIVE'
@@ -97,6 +109,7 @@ function entitlementGap(): EntitlementSnapshot {
   return {
     premiumActive: gapOf('entitlement.premiumActive'),
     trialActive: gapOf('entitlement.trialActive'),
+    trialExpired: gapOf('entitlement.trialExpired'),
     previewOnly: gapOf('entitlement.previewOnly'),
     activationRedeemed: gapOf('entitlement.activationRedeemed'),
     activationPending: gapOf('entitlement.activationPending'),
@@ -107,6 +120,31 @@ function entitlementGap(): EntitlementSnapshot {
       { id: 'redeemed', labelKey: 'funnel.redeemed', count: gapOf('entitlement.activationRedeemed') },
       { id: 'active', labelKey: 'funnel.active', count: gapOf('entitlement.premiumActive') },
     ],
+  }
+}
+
+/**
+ * كتلة التجارة غائبة بدرجتها. `redemptionFailures24h` أشدّها: لا مصدر أصلًا،
+ * فلا يرفعها تطبيق الهجرة.
+ */
+function commerceGap(): CommerceSnapshot {
+  return {
+    ordersSeen: gapOf('commerce.ordersSeen'),
+    ordersPaid: gapOf('commerce.ordersPaid'),
+    ordersFailed: gapOf('commerce.ordersFailed'),
+    codesIssued: gapOf('commerce.codesIssued'),
+    codesRedeemed: gapOf('commerce.codesRedeemed'),
+    codesUnused: gapOf('commerce.codesUnused'),
+    redemptionFailures24h: gapOf('commerce.redemptionFailures24h'),
+    revokedActive: gapOf('commerce.revokedActive'),
+  }
+}
+
+/** الأخطاء — بلا مسار، فالكتلة غائبة بالكامل ولا تُحذف من الشاشة. */
+function errorsGap(): ErrorsSnapshot {
+  return {
+    clientErrors24h: gapOf('errors.clientErrors24h'),
+    rpcFailures24h: gapOf('errors.rpcFailures24h'),
   }
 }
 
@@ -135,6 +173,8 @@ export async function loadExecutiveSnapshot(): Promise<ExecutiveSnapshot> {
     users: usersGap(),
     activity: activityGap(),
     entitlement: entitlementGap(),
+    commerce: commerceGap(),
+    errors: errorsGap(),
     onboarding: onboardingGap(),
     attention: [],
     users_page: gapOf('users.total'),

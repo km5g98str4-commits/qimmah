@@ -13,6 +13,14 @@
  * سطر الاستيراد نفسه.
  */
 
+/**
+ * ═══ نقطة التركيب ═══
+ * `AdminRoute` هو **الشيء الوحيد** الذي يُركَّب على `#/admin`. يحسم الدور بنفسه
+ * ويرسم شاشة المنع لكل من ليس مؤسسًا، فالموجّه لا يحتاج أن يعرف شيئًا عن
+ * الصلاحية — ولا يستطيع أن ينساه.
+ */
+export { AdminRoute } from './ui/AdminRoute'
+
 export { AdminShell } from './ui/AdminShell'
 export { AdminDenied } from './ui/AdminDenied'
 export { UserTable } from './ui/UserTable'
@@ -21,13 +29,23 @@ export { AttentionPanel } from './ui/AttentionPanel'
 export { MetricCard, AvailabilityChip } from './ui/MetricCard'
 export { TrendChart, FunnelChart } from './ui/Charts'
 
-export { resolveAdminRole, isAdmin, canRead, adminRoleProvisioning, CLOSED_DECISION, ADMIN_ROLE_CLAIM } from './auth/adminRole'
-export type { AdminRole, AdminRoleDecision, DenialReason, RoleClaimSource } from './auth/adminRole'
+export {
+  resolveAdminRole,
+  isAdmin,
+  canRead,
+  adminRoleProvisioning,
+  CLOSED_DECISION,
+  ADMIN_ROLE_CLAIM,
+  ROLE_PROVISIONING_MIGRATION,
+} from './auth/adminRole'
+export type { AdminRole, AdminRoleDecision, DenialReason, RoleClaimSource, RoleProvisioningState } from './auth/adminRole'
 
 export { loadExecutiveSnapshot, readPlatformPosture, WIRING_STATE } from './contract/source'
 export type { WiringState } from './contract/source'
+export { loadLiveExecutiveSnapshot, loadLiveUserPage } from './contract/liveSource'
+export type { LiveReadState, LiveSnapshotResult, LiveUserPageResult } from './contract/liveSource'
 
-export { METRIC_REGISTRY, findMetric, metricsInGroup, availabilityCounts } from './contract/metrics'
+export { METRIC_REGISTRY, findMetric, metricsInGroup, availabilityCounts, DASHBOARD_RPC, USER_PAGE_RPC } from './contract/metrics'
 export { buildAttentionQueue, detectedCount, blindCount } from './model/attention'
 export { runQuery, USER_FILTERS, isFilterApplicable, virtualWindow, DEFAULT_QUERY } from './model/filters'
 
