@@ -183,6 +183,20 @@ function generationProvenance() {
   }
 }
 
+
+/**
+ * بصمة مصدر المحرّك — **محتوى لا طوبولوجيا**.
+ *
+ * [OVERNIGHT-2] استبدلتُ مقارنةَ `origin/main` بـsha حرفيّ بمقارنةِ سلفٍ في
+ * التاريخ. وسقط ذلك في CI: السحب هناك `fetch-depth: 1` — **بلا تاريخ أصلًا** —
+ * فلا `merge-base` ولا `diff` مقابل التزام قديم يعمل. والحقيقة أن كليهما كان
+ * يقيس **الطوبولوجيا** بينما الضمان المقصود عن **المحتوى**: هل تغيّر مصدر
+ * المحرّك منذ توليد الذهبيات؟
+ *
+ * فصار القياس بصمةً للملفّات الأربعة تُسجَّل في البيان نفسه. لا حاجة لتاريخ
+ * ولا لشبكة، وتعمل في سحب ضحل كما في مستنسَخ كامل — وهي **أضيق** من سابقتها:
+ * تغيير حرف واحد في المحرّك يُسقطها، ولو بقي التزام القاعدة كما هو.
+ */
 const CORE_ENGINE_PATHS = [
   'src/lib/planGenerator.ts',
   'src/lib/calculators.ts',
@@ -190,29 +204,33 @@ const CORE_ENGINE_PATHS = [
   'src/types/profile.ts',
 ]
 
-/**
- * [OVERNIGHT-2] كان هذا الحارس يقارن `origin/main` بـsha حرفي (dd79a60)، فسقط
- * لحظة تقدّم main إلى cc60adf — **والمحرّك لم يتغيّر بحرف واحد**. أي أنه كان
- * يقيس مرجعًا متحرّكًا بثابت، لا يقيس ما يدّعي حراسته.
- *
- * والضمان المقصود واحد: **الذهبيات وُلدت من مصدر محرّك لم يتغيّر بعدها**. فيُقاس
- * الآن مقابل `sourceCommit` نفسه — الالتزام الذي وُلدت منه، المسجَّل في البيان —
- * لا مقابل رأس فرع يتحرّك. وهذا أضيق لا أوسع: لو تحرّك main بتغيير في المحرّك
- * لسقط الفحص كما يجب، ولو لم يتحرّك المحرّك لم يسقط لسبب لا علاقة له بالخطط.
- */
-function assertOfficialBaseline() {
-  // ① الالتزام المرجعي جزء من تاريخنا فعلًا — لا sha أجنبي ولا مختلَق.
-  try {
-    execFileSync('git', ['merge-base', '--is-ancestor', sourceCommit, 'HEAD'], { cwd: root })
-  } catch {
-    fail(`Golden baseline ${sourceCommit} is not an ancestor of HEAD; regenerate the fixtures.`)
+function coreEngineFingerprint() {
+  const h = createHash('sha256')
+  for (const rel of CORE_ENGINE_PATHS) {
+    h.update(rel, 'utf8')
+    h.update('\0', 'utf8')
+    h.update(readFileSync(resolve(root, rel)))
+    h.update('\0', 'utf8')
   }
-  // ② مصدر المحرّك لم يتغيّر منذ ذلك الالتزام — وهذا هو الضمان الحقيقي.
-  const diff = execFileSync('git', ['diff', '--name-only', sourceCommit, 'HEAD', '--', ...CORE_ENGINE_PATHS], { cwd: root, encoding: 'utf8' }).trim()
-  if (diff) fail(`Core plan-engine source changed since golden baseline ${sourceCommit}; regenerate the fixtures:\n${diff}`)
-  // ③ ولا فروق غير مودعة في نفس الملفّات — الشجرة العاملة تُقاس كما تُقاس السجلّات.
-  const dirty = execFileSync('git', ['diff', '--name-only', 'HEAD', '--', ...CORE_ENGINE_PATHS], { cwd: root, encoding: 'utf8' }).trim()
-  if (dirty) fail(`Uncommitted core plan-engine changes; regenerate the fixtures:\n${dirty}`)
+  return h.digest('hex')
+}
+
+function assertOfficialBaseline(recorded) {
+  // في وضع التوليد لا شيء نقارنه بعد — البصمة تُكتب مع البيان.
+  if (!recorded) return
+  const expected = recorded.coreEngineSha256
+  if (typeof expected !== 'string' || expected.length !== 64) {
+    fail('Golden manifest is missing coreEngineSha256; regenerate with --update --confirm-write')
+  }
+  const actual = coreEngineFingerprint()
+  if (actual !== expected) {
+    fail(
+      `Core plan-engine source changed since the goldens were generated.\n`
+      + `  expected ${expected}\n  actual   ${actual}\n`
+      + `  files: ${CORE_ENGINE_PATHS.join(', ')}\n`
+      + `  If the change is intended, regenerate: npm run test:plan-golden -- --update --confirm-write`,
+    )
+  }
 }
 
 async function loadEngine() {
@@ -521,7 +539,10 @@ async function main() {
 
   classifierRegressionProof()
 
-  assertOfficialBaseline()
+  // البصمة تُقارَن بالمسجَّل، فتُقرأ بعد التأكّد من وجود البيان.
+  assertOfficialBaseline(
+    check && existsSync(manifestPath) ? JSON.parse(readFileSync(manifestPath, 'utf8')) : null,
+  )
   const cases = readCases()
   if (mutationOnly) {
     for (const item of cases) mutationProof(item.expected)
@@ -551,6 +572,7 @@ async function main() {
   }
 
   const manifest = {
+    coreEngineSha256: coreEngineFingerprint(),
     schemaVersion,
     sourceCommit,
     // Generation provenance is retained for audit, but validation below never
