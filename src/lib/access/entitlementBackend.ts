@@ -76,6 +76,30 @@ export interface BackendEntitlement {
 
 const DENIED: BackendEntitlement = { status: 'none', detail: null }
 
+/**
+ * مهلة قصوى لأي نداء استحقاق.
+ *
+ * بلا مهلة، شبكةٌ صامتة (لا مرفوضة) تُبقي الوعد معلّقًا **إلى الأبد**، فتبقى
+ * الحالة `loading` — وهي مغلقة فلا خطر أمني، لكن الشاشة لا تستقرّ ولا يعرف
+ * المستخدم لماذا. والصمت أسوأ من الرفض: الرفض يُعرَض ويُعاد منه.
+ *
+ * ثمان ثوانٍ: أطول من أي رحلة سليمة، وأقصر من صبر إنسان ينظر إلى زرّ معطّل.
+ */
+const CALL_TIMEOUT_MS = 8000
+
+/** يقصّ أي وعد عند المهلة بقيمة احتياطية **مغلقة** — لا يرمي ولا يفتح. */
+async function withTimeout<T>(promise: PromiseLike<T>, fallback: T): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<T>((resolve) => { timer = setTimeout(() => resolve(fallback), CALL_TIMEOUT_MS) }),
+    ])
+  } finally {
+    if (timer !== undefined) clearTimeout(timer)
+  }
+}
+
 function perfNow(): number {
   try {
     return typeof performance !== 'undefined' && typeof performance.now === 'function' ? performance.now() : 0
@@ -118,11 +142,13 @@ export async function fetchEntitlement(): Promise<BackendEntitlement> {
   if (!supabase) return { ...DENIED, error: 'backend_unavailable' }
 
   // بلا جلسة لا استحقاق. الدالّة نفسها ترفض `auth.uid() is null`، ونوفّر رحلة.
-  const { data: sessionData } = await supabase.auth.getSession()
-  if (!sessionData?.session) return { ...DENIED, error: 'not_authenticated' }
+  const sessionResult = await withTimeout(supabase.auth.getSession(), null)
+  if (!sessionResult?.data?.session) return { ...DENIED, error: 'not_authenticated' }
 
   const receivedAtPerfMs = perfNow()
-  const { data, error } = await supabase.rpc('my_entitlement')
+  const rpcResult = await withTimeout(supabase.rpc('my_entitlement'), null)
+  if (!rpcResult) return { ...DENIED, error: 'backend_timeout' }
+  const { data, error } = rpcResult
   if (error) return { ...DENIED, error: 'backend_error' }
 
   const row = Array.isArray(data) ? data[0] : data
@@ -182,10 +208,12 @@ export async function redeemCodeOnServer(code: string): Promise<RedeemServerOutc
   if (!isSupabaseConfigured()) return 'offline'
   const supabase = await getSupabase()
   if (!supabase) return 'offline'
-  const { data: sessionData } = await supabase.auth.getSession()
-  if (!sessionData?.session) return 'not_authenticated'
+  const sessionResult = await withTimeout(supabase.auth.getSession(), null)
+  if (!sessionResult?.data?.session) return 'not_authenticated'
 
-  const { data, error } = await supabase.rpc('redeem_access_code', { p_code: code })
+  const rpcResult = await withTimeout(supabase.rpc('redeem_access_code', { p_code: code }), null)
+  if (!rpcResult) return 'offline'
+  const { data, error } = rpcResult
   if (error) return redeemOutcomeFor(error.message ?? '', String((error as { code?: string }).code ?? ''))
   // النجاح لا يُعلَن من هنا: المستدعي يُعيد القراءة من `fetchEntitlement`.
   return typeof data === 'string' && statusForServerState(data) === 'active' ? 'success' : 'invalid'
@@ -204,10 +232,12 @@ export async function startTrialOnServer(): Promise<TrialOutcome> {
   if (!isSupabaseConfigured()) return 'offline'
   const supabase = await getSupabase()
   if (!supabase) return 'offline'
-  const { data: sessionData } = await supabase.auth.getSession()
-  if (!sessionData?.session) return 'not_authenticated'
+  const sessionResult = await withTimeout(supabase.auth.getSession(), null)
+  if (!sessionResult?.data?.session) return 'not_authenticated'
 
-  const { data, error } = await supabase.rpc('start_trial')
+  const rpcResult = await withTimeout(supabase.rpc('start_trial'), null)
+  if (!rpcResult) return 'offline'
+  const { data, error } = rpcResult
   if (error) {
     const text = `${error.message ?? ''}`.toLowerCase()
     if (text.includes('email_not_verified')) return 'email_not_verified'
@@ -227,9 +257,11 @@ export async function claimPendingGrantsOnServer(): Promise<boolean> {
   if (!isSupabaseConfigured()) return false
   const supabase = await getSupabase()
   if (!supabase) return false
-  const { data: sessionData } = await supabase.auth.getSession()
-  if (!sessionData?.session) return false
-  const { data, error } = await supabase.rpc('claim_pending_grants')
+  const sessionResult = await withTimeout(supabase.auth.getSession(), null)
+  if (!sessionResult?.data?.session) return false
+  const rpcResult = await withTimeout(supabase.rpc('claim_pending_grants'), null)
+  if (!rpcResult) return false
+  const { data, error } = rpcResult
   if (error) return false
   return typeof data === 'string' && statusForServerState(data) === 'active'
 }

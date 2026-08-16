@@ -178,7 +178,39 @@ for (const [file, fn, action, guardCall] of LIVE_ACTION_GUARDS) {
 // ——— ٥) حدود التقليد معلنة، ولا استحقاق من العميل ———
 const src = stripComments(source)
 check('وضع التقليد قرار وقت بناء عبر VITE_ENTITLEMENT_MODE', src.includes("import.meta.env.VITE_ENTITLEMENT_MODE === 'mock'"))
-check('بلا وضع تقليد: لا استحقاق إطلاقًا', /if \(!mockEnabled\(\)\) return \{ status: 'none', source: 'none' \}/.test(src))
+// [OVERNIGHT-5] **العقد تغيّر، فالفحص يُوجَّه إليه ولا يُحذف.**
+//
+// كان الفحص يشترط `if (!mockEnabled()) return none` حرفيًّا — وكان صادقًا حين
+// لم يكن ثمّة خادم. لكنه كان يحرس **عجزًا** لا ضمانًا: بناء الإنتاج لا يستطيع
+// منح Premium لأحد، فمن يدفع في سلة لا يفتح التطبيق أبدًا.
+//
+// العقد الجديد أضيق لا أوسع: بلا خادم مضبوط ⇒ `none` كما كان؛ ومع خادم ⇒
+// تُسأل قاعدة البيانات، **وكل فشل يعود `none`**. الضمان المحفوظ هو نفسه:
+// لا يوجد مسار يمنح استحقاقًا من جهة العميل.
+check('بلا خادم مضبوط: لا استحقاق إطلاقًا (العجز الافتراضي محفوظ)',
+  /if \(!backendAvailable\(\)\) return \{ status: 'none', source: 'none'/.test(src))
+check('وضع التقليد يسبق كل شيء ويبقى قرار وقت بناء',
+  /if \(mockEnabled\(\)\) return \{ status: readMockActive\(\) \? 'active' : 'none', source: 'mock' \}/.test(src))
+check('★ ومع خادم مضبوط: الحقيقة من `fetchEntitlement` لا من العميل',
+  /const result = await fetchEntitlement\(\)/.test(src))
+// والحارس الحقيقي: **لا مسار عميل يمنح `active`**. تُستخرَج كل عودة في الملفّ
+// وتُفحص — أي `status: 'active'` لا يأتي من الخادم أو من وضع التقليد يُسقط هذا.
+{
+  const activeReturns = [...src.matchAll(/status:\s*(?:'active'|readMockActive\(\)[^,]*)/g)].map((m) => m[0])
+  check('★ كل مسار يعطي active مصدره الخادم أو وضع التقليد — لا ثالث',
+    activeReturns.length === 1 && /readMockActive/.test(activeReturns[0]),
+    `${activeReturns.length}: ${activeReturns.join(' | ')}`)
+  const backendSrc = stripComments(read('src/lib/access/entitlementBackend.ts'))
+  check('وجسر الخادم لا يقرأ العنوان ولا التخزين المحلّي',
+    !/location\.(search|hash|href)/.test(backendSrc) && !backendSrc.includes('localStorage'))
+  check('وكل فشل في جسر الخادم يعود `DENIED` لا تفاؤلًا',
+    (backendSrc.match(/return \{ \.\.\.DENIED/g) ?? []).length >= 6)
+  check('والحالة المجهولة من الخادم تُمنع صراحةً',
+    /SERVER_ENTITLEMENT_STATES\.includes\(serverState\)/.test(backendSrc))
+  // محاكاة الالتفاف: حالة خادم مخترَعة يجب ألّا تكون في جدول الفعّالة.
+  check('ولو أضاف الخادم حالة جديدة لما فُتحت تلقائيًا',
+    !/ACTIVE_STATES[\s\S]{0,200}trialExpired/.test(backendSrc) && !/ACTIVE_STATES[\s\S]{0,200}revoked/.test(backendSrc))
+}
 check('لا يُقرأ العنوان (لا window.location) كمصدر استحقاق', !/location\.(search|hash|href)/.test(src))
 check('لا localStorage كمصدر استحقاق (sessionStorage في وضع التقليد فقط)', !src.includes('localStorage'))
 check('استبدال الكود يُعيد الحسم من المصدر لا من ردّ الواجهة', stripComments(read('src/lib/access/provider.tsx')).includes("if (outcome === 'success') await refresh()"))

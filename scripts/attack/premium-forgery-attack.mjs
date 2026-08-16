@@ -70,16 +70,25 @@ function installHostileBrowser() {
   return win
 }
 
+// [OVERNIGHT-5] الهجوم **معزول عن الشبكة**.
+//
+// بعد وصول عقد الخادم صار المسار الإنتاجي ينادي Supabase فعلًا. وإثبات أمنيّ
+// يخرج إلى الشبكة يصير رهينةً لها: يبطئ، ويتذبذب، ويسقط لأسباب لا علاقة لها
+// بما يفحصه. فيُقطع الاتصال عند الجذر — `fetch` يرفض فورًا — ونفحص أن الرفض
+// **يُغلق ولا يفتح**. وهذا أقوى: يثبت السلوك تحت شبكة معادية لا شبكة سليمة.
+globalThis.fetch = () => Promise.reject(new Error('network blocked by attack harness'))
+
 const ENV_PROD = { MODE: 'production', DEV: false, PROD: true }
 const ENV_MOCK = { MODE: 'production', DEV: false, PROD: true, VITE_ENTITLEMENT_MODE: 'mock' }
 
-async function bundle(entry, name, env) {
+async function bundle(entry, name, env, external = []) {
   const out = await build({
     entryPoints: [entry],
     bundle: true,
     format: 'esm',
     platform: 'node',
     write: false,
+    external,
     alias: { '@': resolve(root, 'src') },
     define: { 'import.meta.env': JSON.stringify(env) },
     logLevel: 'silent',
@@ -131,14 +140,36 @@ poisonEverything(win)
 // ════════════════════ ① بناء الإنتاج — كل ناقل يُرفَض ════════════════════
 console.log('\n① بناء الإنتاج (بلا VITE_ENTITLEMENT_MODE)')
 const prod = await bundleAccessLayer('prod-access', ENV_PROD)
-const sourceOnly = await bundle(resolve(root, 'src/lib/access/entitlementSource.ts'), 'prod-source-only', ENV_PROD)
+// [OVERNIGHT-5] حزمة **كودنا وحده**: عميل Supabase خارجيّ.
+//
+// وليس هذا تخفيفًا. عقد الخادم أدخل `@supabase/supabase-js` في الرسم البياني،
+// وهو يقرأ `window.location.href` عمدًا (`detectSessionInUrl`) لالتقاط رمز
+// المصادقة من روابط الدعوة — وهي الآلية التي يقوم عليها مسار التفعيل نفسه.
+// فمسحُ الحزمة كاملةً صار يقيس **سلوك المكتبة** لا سلوكنا، ويخلط قراءةَ رمز
+// مصادقة يتحقّق منه الخادم بمنحِ استحقاق من العنوان — وهما ليسا الشيء نفسه.
+// الضمان المقصود يبقى محفوظًا ويُفحص أدناه: **استحقاقنا لا يُشتقّ من العنوان.**
+const sourceOnly = await bundle(resolve(root, 'src/lib/access/entitlementSource.ts'), 'prod-source-only', ENV_PROD, ['@supabase/supabase-js'])
 const prodGuard = prod, prodStore = prod, prodPolicy = prod, prodCtx = prod
 
 check('وضع التقليد مطفأ في بناء الإنتاج', prod.mod.mockEnabled() === false)
 
 const r1 = await prod.mod.resolveEntitlement()
 check(`localStorage مسمومة بـ${FORGED_KEYS.length} مفتاحًا ⇒ ما زال ${r1.status}`, r1.status === 'none')
-check('sessionStorage مسمومة بمفتاح التقليد نفسه ⇒ ما زال none', r1.status === 'none' && r1.source === 'none')
+// [OVERNIGHT-5] كان الشرط يضيف `r1.source === 'none'`. وبعد وصول عقد الخادم
+// صار المصدر `'backend'` — **لأننا سألنا خادمًا فعلًا ورفض**، وهو أصدق لا أضعف.
+// والضمان الذي يحمله اسم الفحص محفوظ حرفيًّا: تسميم مفتاح التقليد لا يمنح شيئًا.
+// فنفحص ما يدّعيه الاسم: الحالة `none`، **والمفتاح المسموم لم يُقرأ**.
+check('sessionStorage مسمومة بمفتاح التقليد نفسه ⇒ ما زال none',
+  r1.status === 'none' && r1.source !== 'mock')
+check('والمصدر معلَن بصدق لا مموّه', r1.source === 'backend' || r1.source === 'none')
+// ولو كان الفحص أعلاه تحصيل حاصل لما فرّق بين البناءين: في بناء التقليد **يُقرأ**
+// نفس المفتاح المسموم ويُمنح. الفرق هو الدليل على أن الفحص يقيس شيئًا.
+{
+  const mockBuild = await bundleAccessLayer('mock-probe', ENV_MOCK)
+  const rm = await mockBuild.mod.resolveEntitlement()
+  check('★ وفي بناء التقليد يُقرأ المفتاح نفسه ويُمنح — فالفحص أعلاه ليس تحصيل حاصل',
+    rm.status === 'active' && rm.source === 'mock', `${rm.status}/${rm.source}`)
+}
 check('الكوكيز لا تمنح شيئًا', globalThis.document.cookie.includes('premium=active') && r1.status === 'none')
 check('معطى العنوان (?premium=1) لا يمنح شيئًا', win.location.search.includes('premium=1') && r1.status === 'none')
 check('جزء العنوان (#premiumActive) لا يمنح شيئًا', win.location.hash === '#premiumActive' && r1.status === 'none')
@@ -149,17 +180,42 @@ const r2 = await prod.mod.resolveEntitlement()
 check('postMessage من أصل معادٍ لا يغيّر شيئًا', r2.status === 'none')
 
 // أكواد التقليد نفسها من بناء الإنتاج
+// [OVERNIGHT-5] كان الشرط `out === 'offline'` — وهو ما كان **الرفض الوحيد**
+// الممكن قبل وصول عقد الخادم. صارت الرفوض عدّة، وكلّها صادقة؛ والمهمّ أن
+// أيًّا منها **ليس نجاحًا**، وأن أثرها صفر. فنفحص ذلك لا الصيغة بعينها.
+const HONEST_REFUSALS = ['offline', 'invalid', 'already_used', 'expired', 'revoked', 'not_authenticated']
 for (const code of ['QIMMAH-TEST-OK', 'qimmah-test-ok', '  QIMMAH-TEST-OK  ']) {
   const out = await prod.mod.redeemActivationCode(code)
-  check(`كود التقليد «${code.trim()}» في الإنتاج ⇒ ${out} (لا success)`, out === 'offline')
+  check(`كود التقليد «${code.trim()}» في الإنتاج ⇒ ${out} (لا success)`,
+    out !== 'success' && HONEST_REFUSALS.includes(out))
 }
+// ولو صار أيّ رفض «نجاحًا» لسقط ما سبق — الجدول لا يحوي success بحال.
+check('وجدول الرفوض لا يحوي success بحال', !HONEST_REFUSALS.includes('success'))
 const afterRedeem = await prod.mod.resolveEntitlement()
 check('محاولة الاستبدال لم تترك أثرًا يمنح', afterRedeem.status === 'none')
 
 // المصدر لا يقرأ العنوان ولا localStorage أصلًا — يُثبت على **الحزمة** لا المصدر
 check('حزمة المصدر لا تحمل أي قراءة location', !/location\s*\.\s*(search|hash|href)/.test(sourceOnly.text))
-check('حزمة المصدر لا تحمل أي قراءة localStorage', !/localStorage/.test(sourceOnly.text))
-check('حزمة المصدر لا تحمل أي قراءة document.cookie', !/document\s*\.\s*cookie/.test(sourceOnly.text))
+// وحدّ المكتبة معلَن لا مبتلَع: المكتبة **تقرأ** العنوان، ونحن لا نشتقّ منه
+// استحقاقًا. الرمز الذي تلتقطه جلسةٌ يتحقّق منها الخادم، والاستحقاق يأتي بعدها
+// من `my_entitlement()` وحده — فلا يمنح عنوانٌ شيئًا مهما حُشي.
+{
+  const withSdk = await bundle(resolve(root, 'src/lib/access/entitlementSource.ts'), 'prod-with-sdk', ENV_PROD)
+  const sdkReads = (withSdk.text.match(/location\s*\.\s*(search|hash|href)/g) ?? []).length
+  check('★ كل قراءات العنوان مصدرها المكتبة لا كودنا', sdkReads > 0 && !/location\s*\.\s*(search|hash|href)/.test(sourceOnly.text), `${sdkReads} في المكتبة · 0 عندنا`)
+  check('واستحقاقنا يأتي من نداء الخادم لا من العنوان',
+    /my_entitlement/.test(withSdk.text) && !/premiumActive[\s\S]{0,120}location/.test(sourceOnly.text))
+}
+// التعليقات تُنزع قبل المسح: بقاؤها يجعل الفحص يسقط على **كلمة في شرح** لا على
+// قراءة فعلية — وهو إنذار كاذب يُطبِّع تجاهل الفحص، وذلك أخطر من غيابه.
+const codeOnly = sourceOnly.text.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/[^\n]*/g, '$1')
+check('حزمة المصدر لا تحمل أي قراءة localStorage', !/localStorage/.test(codeOnly))
+check('حزمة المصدر لا تحمل أي قراءة document.cookie', !/document\s*\.\s*cookie/.test(codeOnly))
+// ولو كانت قراءة حقيقية لا تعليقًا لسقط الفحص — يُهاجَم بزرع الاثنين.
+check('★ ونزعُ التعليقات لا يعمي الفحص: قراءة مزروعة تُكتشف',
+  /localStorage/.test(`${codeOnly}\nconst x = localStorage.getItem('qimmah:premium')`.replace(/\/\*[\s\S]*?\*\//g, '')))
+check('★ بينما تعليق مزروع لا يُسقطه',
+  !/localStorage/.test(`${codeOnly}\n// نقرأ localStorage هنا يومًا ما`.replace(/(^|[^:])\/\/[^\n]*/g, '$1')))
 
 // ② سياسة الأفعال: كل فعل × كل حالة غير active
 console.log('\n② جدول السياسة — الافتراض منع')
@@ -222,3 +278,8 @@ check('وكود التقليد ينجح في بناء التقليد وحده', 
 check('فرفض الإنتاج نتيجة مستحقّة لا عمى ماسح', true)
 
 console.log(`\n✅ تزوير Premium: ${passed} فحصًا، 0 اختراق في بناء الإنتاج.\n`)
+// خروج صريح: عميل Supabase يشغّل مؤقّت تجديد الجلسة (`autoRefreshToken`)، وهو
+// مقبض حيّ يُبقي Node قائمًا **بعد** انتهاء كل الفحوص. فبلا هذا السطر يعلّق
+// الإثبات ناجحًا إلى الأبد — وتعليقٌ بلا سبب معلَن يُقرأ فشلًا في البوّابة.
+// و`check` يرمي عند أي سقوط، فالوصول إلى هنا يعني نجاح الكلّ.
+process.exit(0)

@@ -73,6 +73,8 @@ export function PremiumGate({ lang }: { lang: Lang }) {
         : state === 'already_used' ? s.codeAlreadyUsed
           : state === 'expired' ? s.codeExpired
             : state === 'offline' ? s.codeOffline
+            : state === 'revoked' ? s.codeRevoked
+            : state === 'not_authenticated' ? s.codeNeedsAccount
               : state === 'invalid' ? s.codeInvalid
                 : ''
 

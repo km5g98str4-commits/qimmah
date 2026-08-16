@@ -25,12 +25,25 @@ check('رابط الشراء الخارجي مؤمّن ويمر من مصدر ا
 check('حقل التفعيل معلّم ورسالة النتيجة قابلة للقراءة', gate.includes('htmlFor="activation-code"') && gate.includes('role="status"') && gate.includes('data-testid="activation-code-message"'))
 check('لا تعتمد واجهة التفعيل على alert أو confirm', !/\b(alert|confirm)\s*\(/.test(gate))
 
-for (const outcome of ['success', 'invalid', 'already_used', 'expired', 'offline']) {
-  check(`حالة ${outcome} لها مسار واجهة ونص عربي وإنجليزي`, gate.includes(`state === '${outcome}'`) && strings.includes(`code${outcome === 'already_used' ? 'AlreadyUsed' : outcome[0].toUpperCase() + outcome.slice(1)}`))
+// [OVERNIGHT-5] القائمة تشمل حالتَي الخادم الجديدتين: إضافة نتيجة بلا مسار
+// واجهة ونصّ يعني رسالةً فارغة أمام المستخدم — وهو فشل صامت.
+for (const outcome of ['success', 'invalid', 'already_used', 'expired', 'offline', 'revoked', 'not_authenticated']) {
+  const key = { already_used: 'AlreadyUsed', not_authenticated: 'NeedsAccount' }[outcome] ?? outcome[0].toUpperCase() + outcome.slice(1)
+  check(`حالة ${outcome} لها مسار واجهة ونص عربي وإنجليزي`, gate.includes(`state === '${outcome}'`) && strings.includes(`code${key}`))
 }
 
-check('التفعيل في الإنتاج صادق: لا نجاح بلا مصدر خلفي', source.includes("if (!mockEnabled()) return 'offline'"))
-check('وضع التقليد وحده يستطيع حفظ نتيجة التفعيل', source.includes("if (!mockEnabled()) return 'offline'") && source.includes("window.sessionStorage.setItem(MOCK_KEY, 'active')"))
+// [OVERNIGHT-5] **العقد تغيّر فالفحص يُوجَّه إليه.** كان يشترط
+// `if (!mockEnabled()) return 'offline'` حرفيًّا — وهو ما كان صادقًا حين لا خادم.
+// الضمان المحفوظ نفسه: **لا نجاح بلا مصدر خلفي**؛ وقد صار المصدر موجودًا.
+check('التفعيل في الإنتاج صادق: لا نجاح بلا مصدر خلفي',
+  source.includes("if (!backendAvailable()) return 'offline'"))
+check('والنجاح لا يُقرَّر محلّيًا بل يأتي من الخادم',
+  source.includes('await redeemCodeOnServer(normalized)'))
+check('وضع التقليد وحده يستطيع حفظ نتيجة التفعيل محلّيًا',
+  source.includes("window.sessionStorage.setItem(MOCK_KEY, 'active')") && source.includes('if (mockEnabled())'))
+// محاكاة الالتفاف: لو أعاد المسار الإنتاجي 'success' بلا نداء خادم لسقط الفحص.
+check('ولو مُنح النجاح بلا نداء خادم لسقط الفحص أعلاه',
+  !/return 'success'(?![\s\S]{0,200}redeemCodeOnServer)/.test(source.split('normalizeActivationCode')[0] || source))
 
 // محاكاة التفاف: وجود عبارات منفصلة لا يكفي؛ إزالة aria-modal من الحوار يجب أن
 // تصبح قابلة للاكتشاف باسم الخاصية نفسها.

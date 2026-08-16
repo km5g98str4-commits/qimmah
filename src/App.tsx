@@ -43,6 +43,9 @@ function createLazyViews() {
       : null,
     MyStatsView: lazy(() => import('@/views/MyStatsView').then((m) => ({ default: m.MyStatsView }))),
     RecoveryView: lazy(() => import('@/views/RecoveryView').then((m) => ({ default: m.RecoveryView }))),
+    // المركز التنفيذي — حزمة مستقلّة لا تدخل حزمة الإقلاع. الحارس داخل المكوّن
+    // نفسه، فجلب الحزمة **لا يمنح شيئًا**: من ليس مؤسسًا يرى شاشة المنع.
+    AdminRoute: lazy(() => import('@/admin').then((m) => ({ default: m.AdminRoute }))),
   }
 }
 import type { MainTab, QuickLogTarget } from '@/components/MobileShell'
@@ -529,6 +532,11 @@ export default function App() {
     ) : (
       <V.NotFoundView lang={LANG} onHome={() => setView('dashboard')} onBack={() => setView('dashboard')} />
     )
+  } else if (view === 'admin') {
+    // لا حراسة مسار هنا عمدًا: `AdminRoute` يحسم الدور بنفسه من `app_metadata`،
+    // ويرسم شاشة المنع لكل من ليس مؤسسًا. وتحويل الضيف إلى «أنشئ حسابًا» كذبة:
+    // الحساب لا يمنح الدور.
+    content = <V.AdminRoute />
   } else if (view === 'calc') {
     content = (
       <V.CalcExplainerView

@@ -46,6 +46,9 @@ export interface AccessStrings {
   codeAlreadyUsed: string
   codeExpired: string
   codeOffline: string
+  /** [OVERNIGHT-5] حالتان من الخادم لم تكونا موجودتين قبل وصول العقد. */
+  codeRevoked: string
+  codeNeedsAccount: string
 }
 
 export const accessStrings: Record<Lang, AccessStrings> = {
@@ -75,6 +78,8 @@ export const accessStrings: Record<Lang, AccessStrings> = {
     codeAlreadyUsed: 'هذا الكود مستخدم من قبل.',
     codeExpired: 'هذا الكود منتهي.',
     codeOffline: 'ما قدرنا نتحقّق الحين. تأكّد من النت وجرّب بعد شوي.',
+    codeRevoked: 'وصولك موقوف حاليًا. راسل الدعم وبنساعدك.',
+    codeNeedsAccount: 'سجّل دخولك أول عشان نربط الكود بحسابك.',
   },
   en: {
     gateTitle: 'This step comes with Qimmah Premium',
@@ -102,5 +107,7 @@ export const accessStrings: Record<Lang, AccessStrings> = {
     codeAlreadyUsed: 'This code has already been used.',
     codeExpired: 'This code has expired.',
     codeOffline: "We couldn't check right now. Check your connection and try again shortly.",
+    codeRevoked: 'Your access is currently suspended. Contact support and we will help.',
+    codeNeedsAccount: 'Sign in first so we can link the code to your account.',
   },
 }

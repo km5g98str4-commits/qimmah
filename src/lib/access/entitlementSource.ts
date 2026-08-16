@@ -96,10 +96,13 @@ export async function resolveEntitlement(): Promise<{
  * يحدث. الصدق قبل الطمأنينة (الميثاق §6).
  */
 export async function redeemActivationCode(code: string): Promise<RedeemOutcome> {
+  // أكواد التقليد تُطابَق بصيغتها المكتوبة (تشمل الشرطات) — التطبيع الموجَّه
+  // للخادم يُطبَّق على **مسار الخادم وحده**، لأنه جزء من عقده لا من العرض.
+  const mockKey = code.trim().toUpperCase()
   const normalized = normalizeActivationCode(code)
   if (!normalized) return 'invalid'
   if (mockEnabled()) {
-    const outcome = MOCK_CODES[normalized] ?? 'invalid'
+    const outcome = MOCK_CODES[mockKey] ?? 'invalid'
     if (outcome === 'success') {
       try {
         window.sessionStorage.setItem(MOCK_KEY, 'active')
@@ -125,11 +128,15 @@ export async function redeemActivationCode(code: string): Promise<RedeemOutcome>
 }
 
 /**
- * تطبيع الكود قبل الإرسال — مُتسامح مع اللصق، صارم في المحتوى.
+ * تطبيع الكود **قبل إرساله للخادم** — مُتسامح مع اللصق، صارم في المحتوى.
  *
- * يقبل ما يلصقه الناس فعلًا من رسالة بريد: مسافات وشرطات وأسطر جديدة وحروفًا
- * صغيرة وأرقامًا عربية-هندية. ويرفض ما عدا ذلك بدل «تنظيفه» بصمت — فالتحويل
- * الصامت قد يصنع كودًا صالحًا من كود خاطئ.
+ * أبجدية الخادم (`private.normalize_access_code`) هي
+ * `A-H J-N P-Z 2-9` — بلا حروف تلتبس (I/O/l) وبلا فواصل إطلاقًا، ويرفض أي
+ * كود يحمل شرطة أو مسافة. والناس يلصقون ما وصلهم في البريد كما هو: بشرطات
+ * وأسطر جديدة وحروف صغيرة وربّما أرقام عربية-هندية.
+ *
+ * فالفواصل تُنزع **هنا وحدها**، ثم يُترك الحكم للخادم. ولا يُصحَّح حرف ولا
+ * يُستبدل رمز: التحويل الصامت قد يصنع كودًا صالحًا من كود خاطئ.
  */
 export function normalizeActivationCode(raw: string): string {
   const arabicDigits = '٠١٢٣٤٥٦٧٨٩'
