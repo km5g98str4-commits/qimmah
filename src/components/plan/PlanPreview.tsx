@@ -3,6 +3,7 @@ import type { GoalType } from '@/types/profile'
 import type { GeneratedPlan } from '@/lib/planGenerator'
 import { ePlanStrings, fillTemplate } from '@/i18n/dict/ePlan'
 import { getExercise } from '@/data/exercises'
+import { formatNumeralsIn } from '@/lib/numberFormat'
 
 /**
  * معاينة الخطة (حارة E · المرحلة الثانية — الموجة ٢) — **مكوّن عرضي بحت.**
@@ -37,6 +38,15 @@ export function PlanPreview({
 }) {
   const s = ePlanStrings[lang]
   const num = (n: number) => (lang === 'ar' ? n.toLocaleString('ar-EG') : n.toLocaleString('en-US'))
+  /**
+   * اسم يوم الخطة **مُخزَّن** بأرقام لاتينية عمدًا («اليوم 1 · علوي») — انظر
+   * `workoutDayLabel.workoutDayNameAr`: تحويله عند التوليد يخلط المخزون ويُفرِغ
+   * حارس سياسة الأرقام. فالتحويل عند حدّ العرض، وهو **مفقود هنا**: كانت شاشة
+   * الكشف تعرض «اليوم 1 · علوي» بجوار «٧٥ كجم» و«٥ تمارين» — نفس الشاشة
+   * بنظامَي أرقام. (رُصد بمراجعة لقطة الكشف، لا بفحص كود.)
+   */
+  const dayName = (day: { nameAr: string; nameEn: string }) =>
+    lang === 'en' ? day.nameEn : formatNumeralsIn(day.nameAr, lang)
   const days = plan.workoutPlan.days
   const firstDay = days[0]
   const splitTitle = s.splitTitles[plan.suggestedWorkoutTemplateId] ?? plan.suggestedWorkoutTemplateId
@@ -79,7 +89,7 @@ export function PlanPreview({
               key={day.id}
               className="flex items-baseline justify-between gap-3 text-sm text-ink-700"
             >
-              <span className="text-start">{lang === 'en' ? day.nameEn : day.nameAr}</span>
+              <span className="text-start">{dayName(day)}</span>
               <span className="shrink-0 text-end text-ink-500">
                 {fillTemplate(s.exercisesValue, { n: num(day.exercises.length) })}
               </span>
@@ -92,7 +102,7 @@ export function PlanPreview({
         <>
           <h3 className="mt-5 text-sm font-medium text-ink-900">{s.firstDayHeading}</h3>
           <p className="mt-1 text-sm font-semibold text-ink-700">
-            {lang === 'en' ? firstDay.nameEn : firstDay.nameAr}
+            {dayName(firstDay)}
           </p>
           <ol className="mt-2 space-y-2" data-testid="plan-preview-first-day">
             {firstDay.exercises.map((plannedExercise) => {

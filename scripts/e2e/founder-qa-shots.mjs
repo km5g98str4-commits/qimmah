@@ -120,7 +120,13 @@ try {
     await settle(page, 2000)
     await shoot(page, '02-first-question-ar-390', errs)
 
+    // الترحيب خطوة **داخل** الإعداد لا بوّابة حساب — تُعبَر كما يعبرها المستخدم.
+    await tap(page, /نبدأ/)
+    await settle(page, 1400)
     await driveQuestions(page)
+    await tap(page, /الدخول للوحة/)
+    await page.waitForSelector('[data-testid="plan-handoff"]', { timeout: 25_000 })
+    await settle(page, 900)
     await shoot(page, '03-reveal-ar-390', errs)
 
     // المعاينة تدخل التطبيق بلا حساب — هي الطريق الذي سيمشيه المؤسس.
