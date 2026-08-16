@@ -2,18 +2,23 @@ import { useEffect, useMemo, useState } from 'react'
 import type { QuickLogTarget } from '@/components/MobileShell'
 import { Icon } from '@/components/Icon'
 import { MinorGoalNotice } from '@/components/MinorGoalNotice'
-import { V2_TODAY } from '@/design-system/v2/labels'
 import type { Lang } from '@/lib/appPreferences'
 import type { AppRoute } from '@/lib/appRoutes'
 import { useCustomization } from '@/lib/customizationContext'
-import { buildWeeklyInsights } from '@/lib/insights'
-import { InsightCardsView } from '@/lib/insights/InsightCardsView'
 import { loadLogs } from '@/lib/measurementLog'
-import { buildNutritionV2Model } from '@/lib/nutritionV2Model'
+import { formatNumeralsIn } from '@/lib/numberFormat'
 import { getDayStamp } from '@/lib/today'
-import { buildTodayV2Model } from '@/lib/todayV2Model'
+import { buildTodayV2Model, type TodayCard } from '@/lib/todayV2Model'
+import { buildWeeklyPulse } from '@/lib/weeklyPulse'
+import { useNutritionToday } from '@/lib/nutritionTracking'
 import { playHaptic } from '@/lib/nativeFeedback'
 import { trackLocal } from '@/lib/tracking'
+import { todayHomeStrings } from '@/i18n/dict/todayHome'
+import { DailyRingsCard } from '@/components/today/DailyRingsCard'
+import { NextActionCard } from '@/components/today/NextActionCard'
+import { QuickActions } from '@/components/today/QuickActions'
+import { WaterCard } from '@/components/today/WaterCard'
+import { WeeklyPulseCard } from '@/components/today/WeeklyPulseCard'
 import { FirstWinCard } from '@/components/today/FirstWinCard'
 import { NotifyAskSheet } from '@/components/today/NotifyAskSheet'
 import { MissedDayCard } from '@/components/today/MissedDayCard'
@@ -29,7 +34,6 @@ import type { NotificationPrefs } from '@/lib/notifications/types'
 import { requestNotificationPermission, reconcileNotificationSchedule } from '@/lib/notifications/engine'
 import { hasEventToday, journeyDayIndex } from '@/lib/tracking/signals'
 import { useAchievementsEngine } from '@/features/achievements/useAchievements'
-import { formatNumber } from '@/lib/numberFormat'
 
 interface TodayV2Props {
   lang: Lang
@@ -37,41 +41,30 @@ interface TodayV2Props {
   onQuickLog?: (target: QuickLogTarget) => void
 }
 
-type ActionKey = 'workout' | 'meal' | 'water' | 'progress'
-
-interface TodayAction {
-  key: ActionKey
-  title: string
-  body: string
-  cta: string
-  icon: string
-  tone: 'ember' | 'green' | 'blue' | 'violet'
-  done: boolean
-  onClick: () => void
-}
-
-const ACTION_TONE: Record<TodayAction['tone'], string> = {
-  ember: 'var(--v2-pillar-train)',
-  green: 'var(--v2-green-text)',
-  blue: 'var(--v2-pillar-move)',
-  violet: 'var(--v2-pillar-recover)',
-}
+const DAY_MS = 86_400_000
 
 /**
- * ألوان حلقات الماكروز — سعرات أزرق · كارب كهرماني · بروتين أخضر · دهون بنفسجي.
- * الدهون لا نظير لها في التوكنز (`--v2-pillar-recover` فيروزي = لون التعافي)،
- * فلها لون مسمّى هنا حتى لا تتكرّر دلالة الفيروزي على سطحين مختلفين.
- */
-const MACRO_TONE = {
-  calories: 'var(--v2-pillar-move)',
-  carbs: '#e0941f',
-  protein: 'var(--v2-green-text)',
-  fat: '#8b8fd6',
-} as const
-
-/**
- * الصفحة الرئيسية هي مركز تنفيذ سريع: أربع مهام مفهومة، مرتبة حسب ما بقي فعلًا.
- * المهمة المنجزة لا تختفي؛ تنكمش تحت «تم اليوم» حتى يظل الوصول إليها مباشرًا.
+ * الرئيسية — [QIMMAH-TODAY-SOVEREIGN-REDESIGN-001].
+ *
+ * ═══ الترتيب يجيب أسئلة، لا يرصّ بطاقات ═══
+ *   ① وين أنا اليوم؟   → الترويسة (تحية + تاريخ + صورة)
+ *   ② وش يهمّني الحين؟ → «باقي لك اليوم» (حلقات السعرات والماكروز)
+ *   ③ وش أسوي بعده؟    → بطاقة الإجراء التالي (مصدرها `model.hero` وحده)
+ *   ④ كيف ماشي معي؟   → الماء · نبض الأسبوع
+ *   ⑤ وش غير ذلك؟     → فعلان سريعان + رؤية واحدة إن وُجدت
+ *
+ * ═══ لماذا الحلقات عادت بعد أن حُذفت في [CTO-73] ═══
+ * الحذف كان لسبب **مقيس** لا ذوقي: البطاقات كانت تحجز ثلث الطية. قرار المؤسس
+ * أعادها، والواجب حلّ المشكلة لا استنساخها — فالحلقة الكبيرة تشارك صفَّها مع
+ * العنوان والنسبة بدل أن تُوسَّط، والصغيرة صفٌّ واحد. التفصيل في `DailyRingsCard`.
+ *
+ * ═══ مصادر البيانات الحيّة (لا طبقة بيانات مُفرَّعة) ═══
+ *   • الحالة/البطل/التمرين → `buildTodayV2Model` (الجدول · الجلسات · الخطة)
+ *   • السعرات والماكروز والماء → `useNutritionToday()` — **نفس** هوك شاشة التغذية
+ *     الحيّة، مشترك في الكاتب الواحد. ولذلك يتحرّك المؤشّر لحظة إضافة كوب ماء،
+ *     وهو ما كان يستحيل مع `useMemo` على `customization` وحدها.
+ *   • نبض الأسبوع → `buildWeeklyPulse` (الجدول + الجلسات المكتملة)
+ *   • الوزن → `loadMeasurementLogs`
  */
 export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
   const { customization } = useCustomization()
@@ -81,12 +74,48 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
   useAchievementsEngine()
   const auth = useAuth()
   const ar = lang !== 'en'
-  const copy = V2_TODAY[ar ? 'ar' : 'en']
-  const model = useMemo(() => buildTodayV2Model(customization, lang, auth.user?.id ?? null), [customization, lang, auth.user?.id])
-  const nutrition = useMemo(() => buildNutritionV2Model(customization, lang), [customization, lang])
-  const todayWeightLogged = loadLogs().some(
-    (log) => log.date === getDayStamp() && log.values.weightKg !== undefined && log.values.weightKg !== '',
+  const d = todayHomeStrings[lang]
+  const uid = auth.user?.id ?? null
+  const model = useMemo(() => buildTodayV2Model(customization, lang, uid), [customization, lang, uid])
+
+  // مصدر التغذية **التفاعلي**: أي كتابة (من هنا أو من شاشة التغذية أو من تبويب
+  // آخر) تُبطل اللقطة وتُعيد الرسم. الأهداف تُقرأ من الخطة مباشرةً — نفس السطر
+  // الذي يقرأه `buildNutritionV2Model`، لا اشتقاق ثانٍ.
+  const { state: dayLog, totals, addWater } = useNutritionToday()
+  const plan = customization.nutritionPlan
+  const calories = { consumed: totals.calories, target: plan?.targetCalories ?? 0 }
+  const protein = { consumed: totals.protein, target: plan?.targetProtein ?? 0 }
+  const carbs = { consumed: totals.carbs, target: plan?.targetCarbs ?? 0 }
+  const fat = { consumed: totals.fat, target: plan?.targetFat ?? 0 }
+  const waterTargetMl = Math.round((plan?.targetWaterLiters ?? 0) * 1000)
+  const hasMeal = dayLog.log.length > 0
+
+  const pulse = useMemo(
+    () => buildWeeklyPulse(uid, customization, new Date()),
+    // تُعاد القراءة حين تتغيّر الخطة أو يُنجَز تمرين (تنقلب `model.state`).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [customization, uid, model.state],
   )
+
+  // آخر وزن مسجَّل — عدد أيام حقيقي، أو `null` فيُقال «ما فيه قياس» صراحةً.
+  const weightLogs = useMemo(
+    () =>
+      loadLogs()
+        .filter((log) => log.values.weightKg !== undefined && log.values.weightKg !== '')
+        .map((log) => log.date)
+        .sort(),
+    [],
+  )
+  const lastWeightStamp = weightLogs.at(-1) ?? null
+  const todayStamp = getDayStamp()
+  const daysSinceWeight =
+    lastWeightStamp === null
+      ? null
+      : Math.round(
+          (Date.parse(`${todayStamp}T00:00:00`) - Date.parse(`${lastWeightStamp}T00:00:00`)) / DAY_MS,
+        )
+  const todayWeightLogged = daysSinceWeight === 0
+
   // [CTO-68] الحدث ١٣ — عودة بعد يوم فائت: أول عرض لحالة «العودة بعد انقطاع».
   // مرّة واحدة في اليوم لا مرّة في كل تركيب: الشاشة تُركَّب مع كل رجوع لتبويب اليوم،
   // والمقصود عودةُ المستخدم لا عددُ زياراته للتبويب. المخزن نفسه هو دفتر منع التكرار.
@@ -97,12 +126,12 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
   }, [model.state, model.daysSinceLastWorkout])
 
   // [CTO-70] البند ١ — أول انتصار. يُعرض للقادم الجديد حتى يُنجزه، ثم يبقى معلَّمًا
-  // «تم» بقية اليوم. `nutrition`/`model` في التبعيات لأن الإنجاز يقع في سطح آخر
+  // «تم» بقية اليوم. الاعتماديات على أرقام اليوم لأن الإنجاز يقع في سطح آخر
   // (تسجيل ماء/وجبة/بدء تمرين) فتُعاد القراءة عند أول عودة للوحة.
   const firstWin = useMemo(
     () => loadFirstWin(),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [nutrition.calories.consumed, nutrition.water.consumedMl, model.state],
+    [totals.calories, dayLog.waterMl, model.state],
   )
   const firstWinSuggestion = useMemo(() => suggestFirstWin(), [])
   // البطاقة ترحيبية لا دائمة: تُعرض للقادم الجديد ما دام لم يُنجز، وتبقى معلَّمة «تم»
@@ -112,7 +141,6 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
 
   // [CTO-70] البند ٢ — سطح إذن الإشعارات: مرّة واحدة، **بعد** أول انتصار.
   // الترتيب مقصود: نطلب الإذن بعد أن يرى المستخدم قيمة، لا قبلها.
-  const uid = auth.user?.id ?? null
   const [askOpen, setAskOpen] = useState(() => shouldAskNotify(loadFirstWin().completed))
   const [askPrefs] = useState<NotificationPrefs>(() => (uid ? loadNotificationPrefs(uid) : DEFAULT_NOTIFICATION_PREFS))
   useEffect(() => {
@@ -156,119 +184,84 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
     // الحدث يُطلق عند **الوصول للشاشة** لا عند حساب شرطها.
     if (weekOpen) trackLocal('day7_summary_reached', { dayIndex: journeyDayIndex() ?? 8 })
   }, [weekOpen])
-  /**
-   * آخر وزن مسجَّل — أو `null` فيُقال ذلك صراحةً بدل رقم مخترع.
-   * يُحسب عند فتح الشاشة وحدها (قراءة واحدة رخيصة)، فلا حاجة لتذكيره.
-   */
-  const lastWeight = weekOpen
-    ? (loadLogs()
-        .filter((l) => l.values.weightKg !== undefined && l.values.weightKg !== '')
-        .sort((a, b) => a.date.localeCompare(b.date))
-        .at(-1)?.values.weightKg ?? null)
-    : null
-  const lastWeightText = lastWeight === null ? null : String(lastWeight)
+  const lastWeightText = (() => {
+    if (!weekOpen || lastWeightStamp === null) return null
+    const value = loadLogs().find((log) => log.date === lastWeightStamp)?.values.weightKg
+    return value === undefined || value === '' ? null : String(value)
+  })()
 
   const trainPillar = model.pillars.find((pillar) => pillar.key === 'train')
-  const workoutDone = trainPillar?.state === 'done'
-  const mealDone = nutrition.calories.target > 0 && nutrition.calories.consumed >= nutrition.calories.target
-  const waterDone = nutrition.water.targetMl > 0 && nutrition.water.consumedMl >= nutrition.water.targetMl
-  const hasMeal = nutrition.meals.some((meal) => meal.logged)
 
   /**
    * [CTO-72] البند ١ — اللوحة تفتح بحالة فارغة ذكية.
    *
-   * ما كان يحدث: القادم الجديد يدخل اللوحة فيستقبله **صفٌّ من الأصفار** — أربع
-   * حلقات ماكرو تعرض `0`/`0`/`0`/`0` بحجمها الكامل، وسطر `0/2,207 كالوري`
-   * فوقها، وبطاقة «نبض أسبوعك» بحجم بطاقة ممتلئة لتقول «نحتاج بيانات أكثر»،
-   * وبطاقتا مهمّة تعيدان الرقم نفسه صفرًا («٠ من ٢٬٢٠٧ سعرة» · «٠ من ٣ لتر»).
-   * فأول انطباع عن التطبيق **لوحة قياس معطّلة**، لا دعوة للبدء.
-   *
-   * `hasTodaySignal` يسأل سؤالًا واحدًا: **هل يوجد شيء يُعرض أصلًا اليوم؟**
-   * وهو مشتقّ من نفس المصادر التي تُغذّي البطاقات — لا علم منفصل يشيخ.
-   *
-   * والقيد `model.state === 'newUser'` مقصود: `newUser` تعني «لا تاريخ إطلاقًا»
-   * (`!onboarded || !hasHistory` في `todayV2Model`). صاحبُ تاريخٍ يفتح صباح يوم
-   * جديد **يريد** رؤية حلقاته صفرًا — تلك أرقام يومه لا فراغ. فالإخفاء للقادم
-   * الجديد وحده، ويزول عند **أول** تسجيل: كوب ماء واحد يُعيد اللوحة كاملة.
+   * القادم الجديد بلا أي تسجيل لا يرى حلقات أصفار (لوحة قياس معطّلة)، بل بطاقة
+   * إعداد تقول ما الذي سيحدث. `hasTodaySignal` مشتقّ من نفس المصادر التي تُغذّي
+   * البطاقات — لا علم منفصل يشيخ — ويزول عند **أول** تسجيل: كوب ماء واحد يُعيد
+   * اللوحة كاملة. والقيد `newUser` مقصود: صاحب تاريخ يفتح صباح يوم جديد **يريد**
+   * رؤية حلقاته صفرًا؛ تلك أرقام يومه لا فراغ.
    */
   const hasTodaySignal =
-    nutrition.calories.consumed > 0 ||
-    nutrition.water.consumedMl > 0 ||
+    totals.calories > 0 ||
+    dayLog.waterMl > 0 ||
     hasMeal ||
     todayWeightLogged ||
     trainPillar?.state === 'done' ||
     trainPillar?.state === 'active'
   const blankSlate = model.state === 'newUser' && !hasTodaySignal
+  // بلا أهداف محسوبة لا حلقات: «—» في أربع حلقات ليست معلومة (§5).
+  const hasAnyTarget = calories.target > 0 || protein.target > 0 || carbs.target > 0 || fat.target > 0
+  const showRings = !blankSlate && hasAnyTarget
 
   const quick = (target: QuickLogTarget, fallback: AppRoute) => {
     if (onQuickLog) onQuickLog(target)
     else onNavigate(fallback)
   }
+  const openCard = (card: TodayCard) => {
+    void playHaptic('selection')
+    if (card.destination === 'nutrition') quick('meal', 'nutrition')
+    else if (card.destination) onNavigate(card.destination)
+  }
 
-  const actions: TodayAction[] = [
-    {
-      key: 'workout',
-      title: copy.workout,
-      body: model.hero.destination === 'workout' ? model.hero.subtitle : copy.workoutFallback,
-      cta: trainPillar?.state === 'active' ? copy.workoutContinue : copy.workoutCta,
-      icon: 'Dumbbell',
-      tone: 'ember',
-      done: workoutDone,
-      onClick: () => onNavigate('workout'),
-    },
-    {
-      key: 'meal',
-      title: hasMeal ? copy.meal : copy.firstMeal,
-      // البند ١: قبل أول تسجيل نقول ما الذي سيحدث، لا «٠ من ٢٬٢٠٧».
-      body: nutrition.calories.target > 0 && !blankSlate
-        ? copy.calories(nutrition.calories.consumed, nutrition.calories.target)
-        : copy.mealFallback,
-      cta: copy.mealCta,
-      icon: 'Utensils',
-      tone: 'green',
-      done: mealDone,
-      onClick: () => quick('meal', 'nutrition'),
-    },
-    {
-      key: 'water',
-      title: copy.water,
-      body: nutrition.water.targetMl > 0 && !blankSlate
-        ? copy.waterAmount(nutrition.water.consumedMl, nutrition.water.targetMl)
-        : copy.waterFallback,
-      cta: copy.waterCta,
-      icon: 'Droplets',
-      tone: 'blue',
-      done: waterDone,
-      onClick: () => quick('water', 'nutrition'),
-    },
-    {
-      key: 'progress',
-      title: copy.progress,
-      body: copy.progressBody,
-      cta: copy.progressCta,
-      icon: 'TrendingUp',
-      tone: 'violet',
-      done: todayWeightLogged,
-      onClick: () => onNavigate('progress'),
-    },
-  ]
+  /**
+   * حدّ التوطين (القرار المعتمد C) — النموذج يؤلّف جمله بأرقام لاتينية، والتحويل
+   * هنا عند العرض. بلا هذا يعرض سطر «باقي 35g بروتين» أرقامًا لاتينية بينما حلقة
+   * البروتين فوقه تعرض «٣٥»: نفس الحقيقة بنظامين، وهو عين BUG-019.
+   */
+  const loc = (text: string) => formatNumeralsIn(text, lang)
 
-  const pending = actions.filter((action) => !action.done)
-  const completed = actions.filter((action) => action.done)
-  const insights = buildWeeklyInsights(ar ? 'ar' : 'en')
+  /**
+   * صفّ واحد داخل بطاقة النبض — تذكير/تنبيه حقيقي من النموذج، أو لا شيء.
+   *
+   * ويُستبعَد ما نبرته `nutrition` حين تُعرض الحلقات: أوّل تنبيه في اليوم العادي
+   * هو «باقي ٣٥غ بروتين»، وهو **نفس الرقم** الظاهر في حلقة البروتين على بعد
+   * شاشة واحدة. تكرارُه لا يضيف معلومة؛ يستهلك صفًّا ويضعف ثقة القارئ بالبقيّة.
+   */
+  const pulseNudge = blankSlate
+    ? null
+    : (model.cards.find((card) => !(showRings && card.tone === 'nutrition')) ?? null)
 
-  // [CTO-73] التصادم — زرّ «تسجيل» المرفوع كان يغطّي آخر صفّ مهمّة
-  // (elementFromPoint في مركزه يعيد «تسجيل»). `pb-28` تُخلّصه.
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light bg-page px-4 pb-36 pt-4 text-ink-900">
-      <div className="v2-screen-enter mx-auto w-full max-w-md space-y-5">
-        {/* [CTO-73] الشاشة ٢ — التحية والتاريخ سطر واحد. كانا سطرين مستقلّين،
-            والتاريخ **سياقٌ للتحية** لا خبرٌ ثانٍ يستحقّ صفًّا خاصًّا به. */}
-        <header>
-          <h2 className="text-2xl font-black tracking-tight">
-            {model.greeting}
-            <span className="ms-2 align-middle text-sm font-bold text-ink-500">{model.dateLabel}</span>
-          </h2>
+    <div data-today-root dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light bg-page px-4 pb-36 pt-4 text-ink-900">
+      <div className="v2-screen-enter mx-auto w-full max-w-md space-y-4">
+        {/* ① وين أنا اليوم؟ — التاريخ سياقٌ صغير فوق التحية، والصورة مدخل للملف. */}
+        <header className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-sm font-bold text-ink-500">{loc(model.dateLabel)}</p>
+            {/* `h2` لا `h1`: القشرة (`MobileShell`) تملك `h1` الصفحة، وعنوانان من
+                المستوى الأول على شاشة واحدة يكسران شجرة العناوين لقارئ الشاشة. */}
+            <h2 className="mt-0.5 truncate text-3xl font-black leading-tight tracking-tight">{loc(model.greeting)}</h2>
+          </div>
+          {model.avatarInitial && (
+            <button
+              type="button"
+              onClick={() => { void playHaptic('selection'); onNavigate('profile') }}
+              aria-label={ar ? 'حسابي' : 'My account'}
+              className="v2-pressable grid h-11 w-11 shrink-0 place-items-center rounded-full border border-line bg-surface text-lg font-black text-ink-700"
+            >
+              {model.avatarInitial}
+            </button>
+          )}
         </header>
 
         <MinorGoalNotice lang={lang} />
@@ -308,106 +301,95 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
           />
         )}
 
-        {/* ماكروز اليوم — حلّت محلّ البطاقة البارزة. تلك كانت `bg-ink-900`، وهو
-            لون ينقلب فاتحًا في السمة الداكنة فيظهر مربعًا أبيض يضرب الخلفية.
-            والمحتوى هنا أنفع: أرقام اليوم مباشرةً بدل تكرار زرّ التمرين.
-
-            [CTO-72] البند ١ — لكنها **أرقام**، والقادم الجديد بلا أرقام. تظهر
-            عند أول تسجيل لا قبله: بطاقة أصفار ليست معلومة، هي ضجيج بحجم بطاقة. */}
-        {/* [CTO-73] الشاشة ٢ — الماكروز **سطر مضغوط لا أربع بطاقات حلقات**.
-            الحلقات كانت تحجز ثلث الطية لتقول أربعة أرقام؛ والسطر يقولها كلّها
-            في صفّ واحد قابل للنقر إلى التغذية. لا معلومة نقصت — الحلقات كاملةً
-            في شاشة التغذية، وهذا سطرُ حالةٍ لا لوحةُ قياس.
-
-            [CTO-72] البند ١ ساري كما هو: بلا أي تسجيل لا يُعرض السطر أصلًا. */}
-        {!blankSlate && (
-          <button
-            type="button"
-            onClick={() => { void playHaptic('selection'); onNavigate('nutrition') }}
-            aria-label={`${copy.macrosTitle} — ${copy.macrosLink}`}
-            className="v2-pressable flex min-h-[44px] w-full items-center gap-2 overflow-x-auto rounded-2xl border border-line bg-surface px-3.5 py-2.5 text-start"
-          >
-            <Icon name="Flame" className="h-4 w-4 shrink-0" style={{ color: MACRO_TONE.calories }} />
-            <span className="shrink-0 text-sm font-bold text-ink-500">{copy.macroStripLead}</span>
-            <span className="flex flex-1 items-center gap-3 whitespace-nowrap">
-              <MacroChip lang={lang} label={copy.macroCaloriesLabel} consumed={nutrition.calories.consumed} target={nutrition.calories.target} color={MACRO_TONE.calories} />
-              <MacroChip lang={lang} label={copy.macroCarbs} consumed={nutrition.macros.carbs.consumed} target={nutrition.macros.carbs.target} color={MACRO_TONE.carbs} />
-              <MacroChip lang={lang} label={copy.macroProtein} consumed={nutrition.macros.protein.consumed} target={nutrition.macros.protein.target} color={MACRO_TONE.protein} />
-              <MacroChip lang={lang} label={copy.macroFat} consumed={nutrition.macros.fat.consumed} target={nutrition.macros.fat.target} color={MACRO_TONE.fat} />
-            </span>
-            <Icon name={ar ? 'ChevronLeft' : 'ChevronRight'} className="h-4 w-4 shrink-0 text-ink-400" />
-          </button>
-        )}
-
-        {/* ═══ [CTO-73] الشاشة ٢ — «وين أنا اليوم؟» ═══
-            كانت أربع مهامّ **متساوية** في مربّعات كبيرة بعمودين، فلا شيء يقول
-            «ابدأ من هنا»؛ والشاشة تعرض قائمة لا إجابة.
-
-            الآن: **البطاقة الأولى هي الإجراء التالي** — أبرزُ ما في الشاشة —
-            والبقيّة صفوف مضغوطة تحتها. لا مهمّة حُذفت؛ تغيّر **وزنها البصري**
-            بحسب دورها. والعنوان صار `sr-only`: الصفوف تقول نفسها، وعنوانٌ فوق
-            قائمة بديهية يزاحمها ولا يشرحها (لقارئ الشاشة يبقى كما هو). */}
-        <section aria-labelledby="today-remaining-title">
-          <h2 id="today-remaining-title" className="sr-only">
-            {copy.remainingTitle} — {copy.remainingCount(pending.length)}
-          </h2>
-
-          {pending.length > 0 ? (
-            <div className="space-y-2.5">
-              <ActionCard action={pending[0]} lang={lang} hero eyebrow={copy.heroEyebrow} />
-              {pending.slice(1).map((action) => (
-                <ActionCard key={action.key} action={action} lang={lang} />
+        {/* ② وش يهمّني الحين؟ — الحلقات لصاحب الأرقام، وبطاقة إعداد للقادم الجديد. */}
+        {!showRings ? (
+          <section aria-labelledby="today-setup-title" className="rounded-3xl border border-line bg-surface p-4 shadow-card">
+            <h2 id="today-setup-title" className="text-lg font-black">{d.noTargetsTitle}</h2>
+            <p className="mt-1 text-base leading-relaxed text-ink-500">{d.noTargetsBody}</p>
+            <ul className="mt-3 space-y-2">
+              {model.cards.map((card) => (
+                <li key={card.label}>
+                  <button
+                    type="button"
+                    onClick={() => openCard(card)}
+                    className="v2-pressable flex min-h-[3.25rem] w-full items-center gap-3 rounded-2xl border border-line bg-page px-3.5 py-2.5 text-start"
+                  >
+                    <Icon name={card.icon} className="h-4 w-4 shrink-0 text-ink-500" />
+                    <span className="min-w-0 flex-1 text-base font-bold leading-snug">{loc(card.label)}</span>
+                    <Icon name={ar ? 'ChevronLeft' : 'ChevronRight'} className="h-4 w-4 shrink-0 text-[color:var(--c-primary)]" />
+                  </button>
+                </li>
               ))}
-            </div>
-          ) : (
-            <div className="rounded-3xl border border-line bg-surface p-5 shadow-card">
-              <span className="grid h-11 w-11 place-items-center rounded-2xl bg-primary-soft text-[color:var(--v2-green-text)]">
-                <Icon name="Check" className="h-5 w-5" strokeWidth={3} />
-              </span>
-              <h3 className="mt-4 text-lg font-black">{copy.allDoneTitle}</h3>
-              <p className="mt-1 text-base leading-relaxed text-ink-500">{copy.allDoneBody}</p>
-            </div>
-          )}
-        </section>
-
-        {completed.length > 0 && (
-          <section aria-labelledby="today-completed-title">
-            <h2 id="today-completed-title" className="mb-2 text-base font-black text-ink-700">{copy.completedTitle}</h2>
-            <div className="space-y-2">
-              {completed.map((action) => (
-                <button
-                  key={action.key}
-                  type="button"
-                  onClick={() => { void playHaptic('selection'); action.onClick() }}
-                  className="v2-pressable flex min-h-[3.5rem] w-full items-center gap-3 rounded-2xl border border-line bg-surface px-3.5 py-2.5 text-start"
-                >
-                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-primary-soft text-[color:var(--v2-green-text)]">
-                    <Icon name="Check" className="h-4 w-4" strokeWidth={3} />
-                  </span>
-                  <span className="min-w-0 flex-1 text-base font-black">{action.title}</span>
-                  <span className="text-sm font-bold text-[color:var(--v2-green-text)]">{copy.completed}</span>
-                  <Icon name={ar ? 'ChevronLeft' : 'ChevronRight'} className="h-4 w-4 text-ink-400" />
-                </button>
-              ))}
-            </div>
+            </ul>
           </section>
-        )}
-
-        {/* [CTO-72] البند ١ — «نبض أسبوعك» بلا أسبوع ليس نبضًا: بطاقة بحجم
-            البطاقة الممتلئة تقول «نحتاج بيانات أكثر». تظهر عند وجود ما يُقرأ. */}
-        {!blankSlate && (
-          <InsightCardsView
-            cards={insights.cards}
-            lang={ar ? 'ar' : 'en'}
-            onNavigate={onNavigate}
-            title={copy.weeklyTitle}
-            max={1}
+        ) : (
+          <DailyRingsCard
+            lang={lang}
+            calories={calories}
+            protein={protein}
+            carbs={carbs}
+            fat={fat}
+            onOpen={() => onNavigate('nutrition')}
           />
         )}
 
-        {model.trustNote && (
-          <p className="px-2 text-center text-sm leading-relaxed text-ink-400">{model.trustNote}</p>
-        )}
+        {/* ③ وش أسوي بعده؟ — البطاقة تصيّر `model.hero` ولا تستنتج شيئًا. */}
+        <NextActionCard
+          lang={lang}
+          hero={model.hero}
+          training={model.training}
+          durationMin={model.durationMin}
+          restDay={model.restDay}
+          onNavigate={() => {
+            if (model.hero.destination === 'nutrition') quick('meal', 'nutrition')
+            else if (model.hero.destination) onNavigate(model.hero.destination)
+          }}
+        />
+
+        {/* ④ كيف ماشي معي؟ */}
+        <WaterCard lang={lang} consumedMl={dayLog.waterMl} targetMl={waterTargetMl} onAdd={addWater} />
+
+        <QuickActions
+          lang={lang}
+          daysSinceWeight={daysSinceWeight}
+          onLogMeal={() => quick('meal', 'nutrition')}
+          onLogWeight={() => onNavigate('progress')}
+        />
+
+        <WeeklyPulseCard lang={lang} pulse={pulse}>
+          {pulseNudge && (
+            <button
+              type="button"
+              onClick={() => openCard(pulseNudge)}
+              className="v2-pressable mt-3 flex min-h-[44px] w-full items-center gap-2 border-t border-line pt-3 text-start"
+            >
+              <Icon name={pulseNudge.icon} className="h-4 w-4 shrink-0 text-ink-400" />
+              <span className="min-w-0 flex-1 text-sm font-bold leading-snug text-ink-700">{loc(pulseNudge.label)}</span>
+              <Icon name={ar ? 'ChevronLeft' : 'ChevronRight'} className="h-4 w-4 shrink-0 text-[color:var(--c-primary)]" />
+            </button>
+          )}
+        </WeeklyPulseCard>
+
+        {/* ⑤ «رؤى الأسبوع» (`InsightCardsView`) **لا تُعرض هنا بعد الآن.**
+            كانت تجيب نفس سؤال بطاقة النبض بعبارة أقسى («التزامك ٠٪ — أقل من
+            خطتك») فيقول سطران متجاوران الحقيقة نفسها، وأحدهما بنبرة لوم (§6).
+            الميزة **حيّة كما هي** في شاشة التقدّم (`ProgressV2:118`) — وهي موضعها
+            الطبيعي: النبض «كيف أسبوعي؟» والرؤى «وش لاحظنا عبر الوقت؟». */}
+
+        {/* سطر الثقة — التقدير يُسمّى تقديرًا، والتفصيل خلف مدخل حقيقي لا سمة مخفيّة. */}
+        <div className="px-1 pb-1 text-center">
+          {model.trustNote && <p className="text-sm leading-relaxed text-ink-400">{loc(model.trustNote)}</p>}
+          {hasAnyTarget && (
+            <p className="mt-1 text-[11px] leading-relaxed text-ink-400">{d.estimateNote}</p>
+          )}
+          <button
+            type="button"
+            onClick={() => { void playHaptic('selection'); onNavigate('calc') }}
+            className="v2-pressable mt-1.5 inline-flex min-h-[44px] items-center gap-1 text-sm font-bold text-[color:var(--v2-blue-text)] underline underline-offset-4"
+          >
+            {d.howWeCalculate}
+          </button>
+        </div>
       </div>
 
       {/* [CTO-70] البند ٥ — ملخّص اليوم السابع فوق كل شيء: شاشة واحدة كاملة. */}
@@ -433,96 +415,5 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
         />
       )}
     </div>
-  )
-}
-
-/**
- * بطاقة مهمّة — [CTO-73] الشاشة ٢.
- *
- * صيغتان لدورين مختلفين، لا حجمان لذوق:
- *   • `hero` — **الإجراء التالي**. بطاقة بارزة بلمحة لون وعنوان كبير: هي إجابة
- *     الشاشة عن «وين أنا اليوم؟»، فتأخذ وزنها البصري.
- *   • الافتراضي — صفٌّ مضغوط للمهامّ الباقية: أيقونة · عنوان · حالة · سهم.
- *     المهمّة نفسها والفعل نفسه؛ ما تغيّر هو **ادّعاؤها للانتباه**.
- */
-function ActionCard({ action, lang, hero, eyebrow }: { action: TodayAction; lang: Lang; hero?: boolean; eyebrow?: string }) {
-  const ar = lang !== 'en'
-  const color = ACTION_TONE[action.tone]
-  const chevron = ar ? 'ChevronLeft' : 'ChevronRight'
-
-  if (!hero) {
-    return (
-      <button
-        type="button"
-        onClick={() => { void playHaptic('selection'); action.onClick() }}
-        className="v2-pressable flex min-h-[3.75rem] w-full items-center gap-3 rounded-2xl border border-line bg-surface px-3.5 py-3 text-start text-ink-900"
-      >
-        <span
-          className="grid h-10 w-10 shrink-0 place-items-center rounded-xl"
-          style={{ backgroundColor: `color-mix(in srgb, ${color} 14%, transparent)`, color }}
-        >
-          <Icon name={action.icon} className="h-5 w-5" strokeWidth={2.5} />
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="block text-base font-black leading-tight">{action.title}</span>
-          <span className="mt-0.5 block truncate text-sm text-ink-500">{action.body}</span>
-        </span>
-        <Icon name={chevron} className="h-4 w-4 shrink-0 text-ink-400" />
-      </button>
-    )
-  }
-
-  return (
-    <button
-      type="button"
-      onClick={() => { void playHaptic('selection'); action.onClick() }}
-      className="v2-pressable relative flex w-full flex-col overflow-hidden rounded-3xl border bg-surface p-4 text-start text-ink-900 shadow-card"
-      style={{ borderColor: `color-mix(in srgb, ${color} 32%, rgb(var(--c-line)))` }}
-    >
-      <span
-        className="pointer-events-none absolute -end-8 -top-10 h-28 w-28 rounded-full opacity-20"
-        style={{ backgroundColor: color }}
-        aria-hidden="true"
-      />
-      <span className="relative flex items-center gap-2">
-        <span
-          className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl"
-          style={{ backgroundColor: `color-mix(in srgb, ${color} 14%, transparent)`, color }}
-        >
-          <Icon name={action.icon} className="h-5 w-5" strokeWidth={2.5} />
-        </span>
-        {/* [CTO-73] AA — لون اللمحة كان لون النغمة (3.5:1 عند 14px). اللمحة
-            **تسمية** لا لهجة؛ فأخذت لون النصّ الثانوي، وبقي لون النغمة للفعل. */}
-        {eyebrow && (
-          <span className="text-sm font-black uppercase tracking-widest text-ink-700">{eyebrow}</span>
-        )}
-      </span>
-      <span className="relative mt-3 block text-xl font-black leading-tight">{action.title}</span>
-      <span className="relative mt-1 block text-base leading-relaxed text-ink-500">{action.body}</span>
-      <span className="relative mt-3 flex items-center gap-1 text-base font-black" style={{ color }}>
-        {action.cta}
-        <Icon name={chevron} className="h-4 w-4" />
-      </span>
-    </button>
-  )
-}
-
-/**
- * رقاقة ماكرو واحدة داخل السطر المضغوط — [CTO-73] الشاشة ٢.
- *
- * تقول **المتبقّي** لأنه الرقم الذي يُتصرَّف به («باقي لك اليوم»)، لا المستهلَك.
- * وبلا هدف مضبوط تعرض «—» لا رقمًا مخترَعًا (§5: الصدق قبل الطمأنينة) — نفس
- * عقد `MacroRing` التي حلّت محلّها، بمساحة صفٍّ واحد بدل ثلث الطية.
- */
-function MacroChip({ lang, label, consumed, target, color }: { lang: Lang; label: string; consumed: number; target: number; color: string }) {
-  const hasTarget = target > 0
-  const remaining = Math.max(0, Math.round(target - consumed))
-  return (
-    <span className="flex items-baseline gap-1">
-      <span className="text-sm font-bold text-ink-500">{label}</span>
-      <span dir="ltr" className="text-base font-black tabular-nums" style={{ color }}>
-        {hasTarget ? formatNumber(remaining, lang) : '—'}
-      </span>
-    </span>
   )
 }

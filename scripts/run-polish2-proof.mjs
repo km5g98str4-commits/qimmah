@@ -24,9 +24,41 @@ const tokens = read('src/design-system/tokens.css')
 const greenText = tokens.match(/--v2-green-text:\s*(#[0-9a-fA-F]{6})/)[1]
 const ratio = contrast(greenText, '#ffffff')
 check(`--v2-green-text ${greenText} ≥ 4.5:1 on white (is ${ratio.toFixed(2)})`, ratio >= 4.5)
-const today = read('src/views/TodayV2.tsx')
-check('progress label uses the AA green-text token', today.includes("text-[color:var(--v2-green-text)]"))
-check('food/completion actions use the AA green-text token', today.includes("green: 'var(--v2-green-text)'"))
+/**
+ * سطح «اليوم» صار **عدّة ملفات** بعد إعادة التصميم، فالحراسة تتبع السطح لا الملف.
+ *
+ * كان الفحصان يقرآن `TodayV2.tsx` وحده. وحين انتقل النصّ الأخضر الصغير (نسبة
+ * النبض · سطر «خلّصت التمرين» · «كمّلت هدف مويتك») إلى مكوّناته، أنذر الحارس
+ * كذبًا على سطح **ملتزم بالسياسة بالكامل** — ولو عُولج بحذف الفحص لصار الالتزام
+ * بلا حارس. والصياغة الجديدة أقوى لا أضعف: تشترط استعمال الرمز المطابق لـAA،
+ * **وتمنع** إسناد `--v2-green` الخام إلى نصّ في أيّ من ملفات السطح.
+ */
+const TODAY_SURFACE = [
+  'src/views/TodayV2.tsx',
+  'src/components/today/DailyRingsCard.tsx',
+  'src/components/today/NextActionCard.tsx',
+  'src/components/today/WaterCard.tsx',
+  'src/components/today/WeeklyPulseCard.tsx',
+].map((p) => ({ path: p, src: read(p) }))
+check(
+  'سطح اليوم يستعمل رمز الأخضر المطابق لـAA للنصّ الصغير',
+  TODAY_SURFACE.some((f) => f.src.includes('text-[color:var(--v2-green-text)]')),
+)
+const rawGreenText = TODAY_SURFACE.filter((f) => f.src.includes('text-[color:var(--v2-green)]'))
+check(
+  `ولا ملفّ في السطح يُسند الأخضر الخام إلى نصّ (المخالفون: ${rawGreenText.length})`,
+  rawGreenText.length === 0,
+)
+// التأكيد المضادّ (§4.2): الأخضر الخام دون AA فعلًا، فالمنع ليس تحصيل حاصل.
+const rawGreen = tokens.match(/--v2-green:\s*(#[0-9a-fA-F]{6})/)[1]
+check(
+  `التفاف: الأخضر الخام ${rawGreen} على الأبيض ${contrast(rawGreen, '#ffffff').toFixed(2)} — دون AA للنصّ الصغير`,
+  contrast(rawGreen, '#ffffff') < 4.5,
+)
+check(
+  'ودسّ الأخضر الخام في نصّ يُسقط الفحص أعلاه',
+  [{ src: 'className="text-[color:var(--v2-green)]"' }].filter((f) => f.src.includes('text-[color:var(--v2-green)]')).length === 1,
+)
 
 // ── D-2 [CTO-67] البند ٥: النصّ الأزرق الصغير يمرّ AA في **الثيمين** ──
 // «نبض أسبوعك» (`v2-text-blue` · 12px/900) كان يبقى على قيمة الفاتح في الثيم

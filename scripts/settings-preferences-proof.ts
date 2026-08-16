@@ -38,15 +38,34 @@ const undoClasses = [...panel.matchAll(/data-testid="settings-import-undo"[\s\S]
 check('كل أزرار التراجع عن الاستيراد تحقق هدف لمس 44px', undoClasses.length === 2 && undoClasses.every((classes) => classes.includes('btn-ghost') || classes.includes('min-h-[44px]')))
 
 console.log('\n③ أسطح Layer 3 الحرجة تتبع السياسة نفسها')
+/**
+ * الفحص **مقترن**: استيراد من الوحدة المركزية **و** استعمال أحد منسّقيها.
+ *
+ * كان `source.includes('formatNumber')` وحده — وهو يُرضى من تعليق يذكر الاسم،
+ * ويسقط كذبًا على ملفٍ يستعمل `formatNumeralsIn` (المنسّق المركزي الثاني، لتحويل
+ * الأرقام داخل جملة مؤلَّفة) ولا يذكر الأول. وقع كلا الأمرين فعلًا: تفكيك
+ * الرئيسية إلى مكوّنات نقل `formatNumber` إلى أبنائها وأبقى `formatNumeralsIn`
+ * في الأب، فأنذر الحارس كذبًا على سطح **ملتزم بالسياسة تمامًا**.
+ *
+ * والقائمة امتدّت لتشمل مكوّنات الرئيسية الجديدة: السطح صار عدّة ملفات، وحراسة
+ * الأب وحده تترك الأرقام المعروضة فعلًا بلا حارس.
+ */
+const CENTRAL_IMPORT = /from '@\/lib\/numberFormat'/
+const CENTRAL_USE = /\bformatNumber\(|\bformatNumeralsIn\(/
 for (const path of [
   'src/views/NutritionV2.tsx',
   'src/views/TodayV2.tsx',
   'src/views/WorkoutV2.tsx',
   'src/views/ProgressV2.tsx',
   'src/lib/progressV2Model.ts',
+  'src/components/today/DailyRingsCard.tsx',
+  'src/components/today/NextActionCard.tsx',
+  'src/components/today/WaterCard.tsx',
+  'src/components/today/WeeklyPulseCard.tsx',
+  'src/components/today/QuickActions.tsx',
 ]) {
   const source = readFileSync(path, 'utf8')
-  check(`${path} يستعمل منسّق العرض المركزي`, source.includes('formatNumber'))
+  check(`${path} يستعمل منسّق العرض المركزي`, CENTRAL_IMPORT.test(source) && CENTRAL_USE.test(source))
 }
 check('التغذية لا تفرض أرقام en-US داخل العربية', !readFileSync('src/views/NutritionV2.tsx', 'utf8').includes("toLocaleString('en-US')"))
 check('Today لا يفرض أرقام en-US داخل العربية', !readFileSync('src/views/TodayV2.tsx', 'utf8').includes("toLocaleString('en-US')"))
@@ -62,5 +81,19 @@ assert.throws(
   /units-truth/,
 )
 check('التفاف إخفاء صدق الوحدات يسقط بفحص مسمّى', true)
+
+// الحارس المشدود أعلاه يُهاجَم هو الآخر (§4.2): ملفٌ يستبدل الوحدة المركزية
+// بمنسّق محلي يجب أن يسقط، وذِكرُ الاسم في تعليق وحده يجب ألّا يُرضيه.
+const ringsSource = readFileSync('src/components/today/DailyRingsCard.tsx', 'utf8')
+const localFormatter = ringsSource.replace(/from '@\/lib\/numberFormat'/, "from '@/lib/localFormat'")
+check(
+  'استبدال الوحدة المركزية بمنسّق محلي يسقط الفحص',
+  !(CENTRAL_IMPORT.test(localFormatter) && CENTRAL_USE.test(localFormatter)),
+)
+const commentOnly = '// formatNumber formatNumeralsIn — mentioned only in a comment\n'
+check(
+  'ذِكر الاسم في تعليق وحده لا يُرضي الفحص',
+  !(CENTRAL_IMPORT.test(commentOnly) && CENTRAL_USE.test(commentOnly)),
+)
 
 console.log(`\n✅ الإعدادات/الأرقام/الوحدات: ${passed} فحوص، 0 فشل.`)

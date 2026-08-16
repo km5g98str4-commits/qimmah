@@ -84,6 +84,29 @@ export interface TodayV2Model {
    * فيبني عليها البديل المخفّف **من نفس الرقم المعروض** لا من رقم ثانٍ يخالفه.
    */
   durationMin: number
+  /**
+   * أرقام تمرين اليوم **مفصولة** — [QIMMAH-TODAY-SOVEREIGN-REDESIGN-001].
+   *
+   * `hero.subtitle` يخبز الثلاثة في جملة واحدة («٦ تمارين · ٤٥ دقيقة · جاهز لك»)،
+   * وبطاقة الإجراء التالي تعرضها **صفَّ مقاييس** بعناوين مستقلّة. الخيار الوحيد
+   * البديل كان إعادة حسابها في الواجهة — أي جوابان لسؤال واحد، وهو بالضبط العطل
+   * الذي أنشأ `workoutDaySource`. فكُشفت من **نفس القراءة** التي بنت البطل.
+   *
+   * كلّها مقيسة من الخطة الحيّة: لا «مستوى» ولا «تركيز» مخترع (المرجع البصري
+   * يعرض وسم «علوي» ولا نظير له في نموذج البيانات، فلم يُنسخ).
+   */
+  training: {
+    available: boolean
+    /** اسم يوم الخطة مترجَمًا، أو '' حين لا تمرين اليوم. */
+    name: string
+    exerciseCount: number
+    /** مجموع المجموعات المستهدفة لليوم — 0 حين لا تمرين. */
+    setCount: number
+    /** نسبة المجموعات المنجزة من جلسة **منتهية مبكرًا**؛ 0 حين لا تقدّم جزئي. */
+    percent: number
+    completedSets: number
+    totalSets: number
+  }
 }
 
 const GOAL_LABEL_AR: Record<CalorieGoal, string> = { cut: 'تنشيف', maintain: 'محافظة', bulk: 'تضخيم' }
@@ -260,7 +283,21 @@ export function buildTodayV2Model(customization: Customization, lang: Lang, user
     else if (!loggedMeal && nutritionTarget) trustNote = t('ما فيه وجبات مسجّلة اليوم لسا.', 'No meals logged yet today.')
   }
 
-  return { state, greeting, dateLabel, avatarInitial, goalLabel, hero, pillars, progressLabel, completedCount, totalCount, cards, trustNote, restDay, daysSinceLastWorkout: daysSinceWorkout, durationMin }
+  // المجموعات المستهدفة لليوم — من نفس `day` الذي أعطى `exerciseCount`.
+  const setCount = day?.exercises.reduce((sum, ex) => sum + (Number.isFinite(ex.sets) ? ex.sets : 0), 0) ?? 0
+  const training: TodayV2Model['training'] = {
+    available: workoutAvailable,
+    name: workoutName,
+    exerciseCount,
+    setCount,
+    // الجلسة المنتهية لا تُعلَن «تقدّمًا جزئيًا»: اليوم مكتمل، والبطاقة تنتقل
+    // إلى ما بعد التمرين. الصفر هنا يعني «لا شريط تقدّم» لا «صفر إنجاز».
+    percent: !finished && partialTrain ? partialTrain.percent : 0,
+    completedSets: !finished && partialTrain ? partialTrain.completedSets : 0,
+    totalSets: !finished && partialTrain ? partialTrain.totalSets : setCount,
+  }
+
+  return { state, greeting, dateLabel, avatarInitial, goalLabel, hero, pillars, progressLabel, completedCount, totalCount, cards, trustNote, restDay, daysSinceLastWorkout: daysSinceWorkout, durationMin, training }
 }
 
 // ── Hero builders ────────────────────────────────────────────────────────────
@@ -287,7 +324,7 @@ function buildHero(a: {
         eyebrow: doneLine,
         eyebrowDone: true,
         title: t('سجّل أكلك بعد التمرين', 'Log your post-workout meal'),
-        subtitle: t(`بروتين الحين يسرّع التعافي · باقي ${proteinRemaining}g`, `Protein now speeds recovery · ${proteinRemaining}g left`),
+        subtitle: t(`بروتين الحين يسرّع التعافي · باقي ${proteinRemaining}غ`, `Protein now speeds recovery · ${proteinRemaining}g left`),
         ctaLabel: t('سجّل أكلك', 'Log your food'),
         ctaTone: 'green',
         destination: 'nutrition',
@@ -361,7 +398,7 @@ function buildHero(a: {
       eyebrow: t('خطوتك الجاية · الحين', 'Your next step · now'),
       eyebrowDone: false,
       title: t('سجّل وجبتك الجاية', 'Log your next meal'),
-      subtitle: proteinRemaining !== null && proteinRemaining > 0 ? t(`باقي ${proteinRemaining}g بروتين لهدف اليوم`, `${proteinRemaining}g protein left today`) : t('يوم راحة — أكلك يصنع الفرق.', 'Rest day — food makes the difference.'),
+      subtitle: proteinRemaining !== null && proteinRemaining > 0 ? t(`باقي ${proteinRemaining}غ بروتين لهدف اليوم`, `${proteinRemaining}g protein left today`) : t('يوم راحة — أكلك يصنع الفرق.', 'Rest day — food makes the difference.'),
       ctaLabel: t('سجّل أكلك', 'Log your food'),
       ctaTone: 'ember',
       destination: 'nutrition',
@@ -401,7 +438,7 @@ function buildNormalNudges(a: {
   const { t, proteinRemaining, loggedMeal, movementAvailable, stepsRemaining, nutritionTarget } = a
   const cards: TodayCard[] = []
   if (proteinRemaining !== null && proteinRemaining > 0) {
-    cards.push({ label: t(`باقي ${proteinRemaining}g بروتين لهدف اليوم`, `${proteinRemaining}g protein left for today’s goal`), hint: null, actionLabel: t('أضف', 'Add'), icon: 'Flame', tone: 'nutrition', destination: 'nutrition' })
+    cards.push({ label: t(`باقي ${proteinRemaining}غ بروتين لهدف اليوم`, `${proteinRemaining}g protein left for today’s goal`), hint: null, actionLabel: t('أضف', 'Add'), icon: 'Flame', tone: 'nutrition', destination: 'nutrition' })
   } else if (nutritionTarget && !loggedMeal) {
     cards.push({ label: t('سجّل أول وجبة عشان نضبط سعراتك', 'Log your first meal to set your calories'), hint: null, actionLabel: t('سجّل', 'Log'), icon: 'Utensils', tone: 'nutrition', destination: 'nutrition' })
   }
