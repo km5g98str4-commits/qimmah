@@ -134,11 +134,22 @@ try {
 
     // (٢) التسليم — الشاشة التي أبلغ عنها المؤسس صراحةً.
     await driveToHandoff(page, ar)
-    const handoff = await hitTest(page, () => [...document.querySelectorAll('button,a')].filter((b) => {
-      const t = (b.textContent || '').trim()
-      return /استعرض قِمّة أولًا|Explore Qimmah|احصل على قِمّة Premium|Get Qimmah Premium/.test(t)
-    }))
-    check(`تسليم ${w}/${lang}: وُجد زرّا التسليم`, handoff.length >= 1)
+    /**
+     * أزرار التسليم **بوسومها لا بنصّها**.
+     *
+     * كان المُرشِّح نصًّا: «استعرض قِمّة أولًا | احصل على قِمّة Premium». و`8f5d966`
+     * (الكشف يصير تجربة) أعاد كتابة نداءات الشاشة إلى «ابدأ مع قِمّة Premium»
+     * و«الدخول بوضع المعاينة» — فلم يعد المُرشِّح يجد شيئًا، و**اختبار الإصابة
+     * الحقيقي لم يُجرَ على أي زرّ**: عشرة مواضع (٥ مقاسات × لغتين) تعلن الفشل
+     * على المُرشِّح بينما السؤال الأصلي — «هل يغطّي شيءٌ أزرارَ التسليم؟» — بلا
+     * جواب. وهذا سطح أبلغ عنه المؤسس صراحةً، فبقاؤه بلا قياس هو الخسارة.
+     *
+     * الوسوم مستقرّة ويستعملها `entry-flow` نفسه، ولا تتغيّر بتحرير النصّ ولا باللغة.
+     */
+    const handoff = await hitTest(page, () => [
+      ...document.querySelectorAll('[data-testid="handoff-premium-cta"], [data-testid="handoff-trial-cta"], [data-testid="handoff-preview-cta"]'),
+    ])
+    check(`تسليم ${w}/${lang}: وُجدت أزرار التسليم لتُفحص`, handoff.length >= 1)
     for (const t of handoff) check(`تسليم ${w}/${lang}: «${t.label}» قابل للنقر`, t.reachable, `ابتلعه: ${t.swallowedBy}`)
 
     // (٣) شريط التنقّل السفلي — التبويبات الخمسة على كل شاشة رئيسية.
