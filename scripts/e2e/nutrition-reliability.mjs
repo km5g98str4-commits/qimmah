@@ -262,7 +262,22 @@ try {
 
     await page.reload({ waitUntil: 'networkidle' })
     await settle(page, 1800)
-    check('إعادة تحميل التغذية تبقي القيد والكمية ظاهرين', await page.getByText(/180غ · 1.2 حصة/).isVisible().catch(() => false))
+    /**
+     * الكمية تُعرض عبر `formatNumber(…, 'ar')` (سياسة الأرقام الواحدة)، فالسطر
+     * المرسوم «١٨٠غ · ١٫٢ حصة» بأرقام عربية وفاصلة عشرية عربية (U+066B) — لا
+     * «180غ · 1.2 حصة». الترقّب هنا **يُشتقّ بنفس المحلّية** لا يُكتب بيد:
+     * كتابته بأرقام عربية حرفيًّا يعيد نفس هشاشة النصّ المكتوب، واشتقاقه يجعل
+     * الفحص يتبع السياسة أينما ذهبت.
+     *
+     * وهو **أشدّ** من الترقّب البائت: يثبت البقاء بعد التحميل **وصحّة التوطين**
+     * في تأكيد واحد؛ لو عادت الأرقام لاتينية لسقط باسمه.
+     */
+    const arNum = (n) => new Intl.NumberFormat('ar-SA-u-nu-arab').format(n)
+    const expectedQty = `${arNum(180)}غ · ${arNum(1.2)} حصة`
+    check(
+      `إعادة تحميل التغذية تبقي القيد والكمية ظاهرين («${expectedQty}»)`,
+      await page.getByText(expectedQty, { exact: false }).first().isVisible().catch(() => false),
+    )
 
     const breakfastReloaded = mealCard(page, 'الفطور')
     await breakfastReloaded.getByRole('button', { name: 'أضف', exact: true }).click()
