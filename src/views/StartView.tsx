@@ -4,7 +4,7 @@ import { StartViewV2 } from '@/views/StartViewV2'
 interface StartViewProps {
   lang: Lang
   onLogin: () => void
-  onSignup: () => void
+  /** يبدأ الأسئلة مباشرةً — بلا حساب (النداء الأساسي، [WAVE-A]). */
   onGuest: () => void
 }
 

@@ -83,7 +83,7 @@ const tap = (page, re) => page.evaluate((s) => {
 
 /** يقود المعالج كاملًا حتى شاشة التسليم (النقر البرمجي مقصود هنا: نقيس التغطية لا ندخل عبرها). */
 async function driveToHandoff(page, ar) {
-  await tap(page, ar ? /كضيف/ : /as guest/i)
+  await page.locator('[data-testid="welcome-start-cta"]').click({ force: true })
   await settle(page, 1200)
   await tap(page, ar ? /نبدأ/ : /Get started/i)
   await page.waitForSelector('#v2-body-age', { timeout: 25000 })
@@ -142,7 +142,7 @@ try {
     for (const t of handoff) check(`تسليم ${w}/${lang}: «${t.label}» قابل للنقر`, t.reachable, `ابتلعه: ${t.swallowedBy}`)
 
     // (٣) شريط التنقّل السفلي — التبويبات الخمسة على كل شاشة رئيسية.
-    await tap(page, ar ? /استعرض قِمّة أولًا/ : /Explore Qimmah/i)
+    await page.locator('[data-testid="handoff-preview-cta"]').click({ force: true })
     await settle(page, 2500)
     for (const route of ['dashboard', 'nutrition', 'workout', 'progress']) {
       await page.evaluate((h) => { window.location.hash = '/' + h }, route)

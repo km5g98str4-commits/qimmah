@@ -1150,11 +1150,19 @@ function WelcomeScreen({ lang, t, onStart, onExit }: { lang: Lang; t: T; onStart
  * **استخدامها** (تسجيل التمرين والأكل والقياسات) — نصّ المؤسس §4.
  */
 export function PlanHandoffScreen({
-  lang, signedIn, onEnter, plan, goalType, rationale, displayName, currentWeightKg,
+  lang, signedIn, onEnter, onCreateAccount, plan, goalType, rationale, displayName, currentWeightKg,
 }: {
   lang: Lang
   signedIn: boolean
   onEnter: () => void
+  /**
+   * [WAVE-A] الطريق إلى إنشاء الحساب — يُستدعى **عند الحاجة فقط**.
+   *
+   * ثلاثة النداءات ليست سواءً في متطلّب الحساب: المعاينة محلية فلا تطلبه (§0.1)،
+   * والتجربة وPremium يمرّان بسلطة الخادم فيلزمهما. فحين ترجع `beginTrial`
+   * بـ`not_authenticated` يصير الطريق فعلًا لا خبرًا.
+   */
+  onCreateAccount?: () => void
   /** مخرجات التوليد المحفوظة — غيابها يعني عرضًا بلا أرقام لا أرقامًا مخترعة. */
   plan?: GeneratedPlan
   goalType?: GoalType
@@ -1177,6 +1185,13 @@ export function PlanHandoffScreen({
 
   const onTrial = async () => {
     if (trialState === 'working') return
+    // [WAVE-A] لا نسأل الخادم عمّا نعرفه هنا.
+    //
+    // التجربة تحتاج حسابًا موثَّقًا. والضيف بلا حساب — وهذه حقيقة محلّية مؤكّدة
+    // (`signedIn`) لا تحتاج رحلة شبكة لتُكتشف. وكان النداء يُرسَل على أي حال،
+    // فيرجع `offline` حين لا يكون هناك خادم — رسالة «تأكّد من اتصالك» لمشكلة
+    // ليست اتصالًا. نُبلغه بالسبب الصادق فورًا، ونفتح له الطريق.
+    if (!signedIn) { setTrialState('not_authenticated'); return }
     setTrialState('working')
     setTrialState(await beginTrial())
   }
@@ -1283,6 +1298,18 @@ export function PlanHandoffScreen({
             <p role="status" aria-live="polite" data-testid="reveal-trial-status" className="text-center text-[0.78rem] font-bold text-ink-700">
               {trialMessage}
             </p>
+          )}
+          {/* [WAVE-A] اللحظة الصحيحة لطلب الحساب: بعد أن رأى خطته، وعند اختياره
+              مسارًا يلزمه حساب — لا قبل أن يرى شيئًا. */}
+          {trialState === 'not_authenticated' && !signedIn && onCreateAccount && (
+            <button
+              type="button"
+              onClick={onCreateAccount}
+              data-testid="reveal-create-account-cta"
+              className="flex min-h-[52px] w-full items-center justify-center rounded-2xl border border-primary/45 bg-surface text-base font-bold text-primary-c transition-colors hover:bg-primary-soft"
+            >
+              {rv.cta.createAccountCta}
+            </button>
           )}
 
           <button type="button" onClick={onEnter} data-testid="handoff-preview-cta" className="btn-ghost min-h-[52px] w-full text-base">

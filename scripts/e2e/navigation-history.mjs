@@ -68,7 +68,7 @@ async function onboardToPreview(page, ar = true) {
   await page.goto(URL, { waitUntil: 'networkidle' })
   await settle(page, 2600)
   if (!ar) { await tap(page, /^EN$/); await settle(page, 1400) }
-  await tap(page, ar ? /كضيف/ : /as guest/i); await settle(page, 1200)
+  await page.locator('[data-testid="welcome-start-cta"]').click({ force: true }); await settle(page, 1200)
   await tap(page, ar ? /نبدأ/ : /Get started/i)
   await page.waitForSelector('#v2-body-age', { timeout: 25000 })
   await page.locator('input[type=checkbox]').first().check({ force: true })
@@ -84,7 +84,7 @@ async function onboardToPreview(page, ar = true) {
   await settle(page, 1600)
   await tap(page, ar ? /الدخول للوحة/ : /Enter|Open/i)
   await page.waitForSelector('[data-testid="plan-handoff"]', { timeout: 25000 })
-  await tap(page, ar ? /استعرض قِمّة أولًا/ : /Explore Qimmah/i)
+  await page.locator('[data-testid="handoff-preview-cta"]').click({ force: true })
   await settle(page, 2400)
 }
 
@@ -179,7 +179,8 @@ try {
     await onboardToPreview(page)
     await page.goto(URL, { waitUntil: 'networkidle' })
     await settle(page, 2800)
-    const clicked = await tap(page, /كضيف/)
+    const clicked = await page.locator('[data-testid="welcome-start-cta"]').count() > 0
+    if (clicked) await page.locator('[data-testid="welcome-start-cta"]').click({ force: true })
     await settle(page, 2600)
     const landed = await hash(page)
     check('ضيف مكتمل: «كمّل كضيف» موجود', clicked)
@@ -191,7 +192,7 @@ try {
     const page = await fresh()
     await page.goto(URL, { waitUntil: 'networkidle' })
     await settle(page, 2600)
-    await tap(page, /كضيف/)
+    await page.locator('[data-testid="welcome-start-cta"]').click({ force: true })
     await settle(page, 2200)
     check('ضيف جديد ⇒ الأسئلة (setup)', (await hash(page)).includes('setup'), await hash(page))
     await page.ctx.close()
@@ -239,7 +240,7 @@ try {
   {
     const page = await fresh()
     await page.goto(URL, { waitUntil: 'networkidle' }); await settle(page, 2600)
-    await tap(page, /كضيف/); await settle(page, 1200)
+    await page.locator('[data-testid="welcome-start-cta"]').click({ force: true }); await settle(page, 1200)
     await tap(page, /نبدأ/)
     await page.waitForSelector('#v2-body-age', { timeout: 25000 })
     await page.locator('input[type=checkbox]').first().check({ force: true })

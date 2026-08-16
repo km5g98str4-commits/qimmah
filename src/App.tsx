@@ -139,7 +139,9 @@ function initialRoute(userId: string | null): AppRoute {
   if (isUnknownRouteHash()) {
     return 'notfound'
   }
-  // بلا حساب → شاشة الحساب (تسجيل دخول/إنشاء حساب). بحساب → اللوحة أو الأسئلة.
+  // [WAVE-A] بلا حساب → شاشة **الهبوط** (`start`)، ونداؤها الأساسي يبدأ الأسئلة
+  // مباشرةً بلا حساب. الشاشة نفسها لم تتغيّر موضعًا — تغيّر ما يفعله زرّها الأول.
+  // وهي تبقى مطلوبة للعائد الذي فقد جلسته: منها وحدها يصل إلى تسجيل الدخول.
   if (!userId) return 'start'
   return isOnboardingComplete(userId) ? 'dashboard' : 'setup'
 }
@@ -346,7 +348,8 @@ export default function App() {
       return
     }
     // مسجّل دخول — القرار لكل حساب: السجلّ المحلي، وإلا الملف السحابي.
-    // الأسئلة (الإعداد) تبدأ الآن فقط بعد الحساب.
+    // [WAVE-A] نُقض «الأسئلة تبدأ فقط بعد الحساب»: الأسئلة تسبق الحساب الآن،
+    // وهذا المسار خاصّ بمن **سجّل فعلًا** — فيُسأل هل أكمل إعداده أم لا.
     let onboarded = isAccountOnboarded(signedInId)
     // من أكمل إعداده كضيف ثم أنشأ حسابًا لحفظ تقدّمه يدخل على خطته، لا على معالج جديد.
     if (!onboarded) onboarded = adoptGuestOnboarding(signedInId)
@@ -463,7 +466,6 @@ export default function App() {
         // [CTO-68] الحدث ٤ — توزيع الشاشة الأولى. يُلتقط عند **الاختيار** لا عند
         // العرض، فالتوزيع يقيس ما فعله القادم الجديد لا ما رآه.
         onLogin={() => { trackLocal('entry_choice_made', { choice: 'login' }); goAuth('login') }}
-        onSignup={() => { trackLocal('entry_choice_made', { choice: 'signup' }); goAuth('signup') }}
         onGuest={() => { trackLocal('entry_choice_made', { choice: 'guest' }); enterAsGuest() }}
       />
     )
@@ -507,6 +509,8 @@ export default function App() {
       <V.SetupView
         onClose={closeSetup}
         onEnterFromHandoff={enterFromHandoff}
+        // [WAVE-A] من شاشة الكشف إلى إنشاء الحساب — مسار حقيقي لا رسالة.
+        onCreateAccount={() => { trackLocal('entry_choice_made', { choice: 'signup' }); goAuth('signup') }}
         initialStep={0}
         mode={onboarded ? 'advanced' : 'onboarding'}
       />

@@ -69,7 +69,7 @@ async function driveToHandoff(page, ar) {
   await page.goto(URL, { waitUntil: 'networkidle' })
   await settle(page, 2600)
   if (!ar) { await tap(page, /^EN$/); await settle(page, 1400) }
-  await tap(page, ar ? /كضيف/ : /as guest/i)
+  await page.locator('[data-testid="welcome-start-cta"]').click({ force: true })
   await settle(page, 1200)
   await tap(page, ar ? /نبدأ/ : /Get started/i)
   await page.waitForSelector('#v2-body-age', { timeout: 25000 })
@@ -137,7 +137,11 @@ try {
     check(`${tag}: مقتطف أول يوم تدريب معروض`, structure.firstDay)
     check(`${tag}: الماكروز/السعرات معروضة`, structure.macros)
     check(`${tag}: ٢–٤ نقاط قيمة`, structure.benefits >= 2 && structure.benefits <= 4, String(structure.benefits))
-    check(`${tag}: عنوان «جهزنا خطتك»`, ar ? /جهزنا خطتك/.test(structure.title) : /plan is ready/i.test(structure.title), structure.title)
+    // [WAVE-A] توكيد بائت صُحِّح — **العطل كان في القياس لا في المنتج**.
+    // `8f5d966` [OVERNIGHT-3/4] حوّل التسليم إلى شاشة كشف، فصار العنوان «هذي
+    // نقطة البداية» بدل «جهزنا خطتك». والعنوان الجديد هو المطلوب دستوريًا
+    // (نبرة الكشف: بداية رحلة لا إشعار حفظ)، فيتبعه التوكيد ولا يشدّه للخلف.
+    check(`${tag}: عنوان الكشف يفتح رحلة لا يُعلن حفظًا`, ar ? /نقطة البداية/.test(structure.title) : /starting point/i.test(structure.title), structure.title)
 
     // (٢) الحقائق المعروضة = الخطة المحفوظة. جوهر هذا الإثبات.
     const match = await page.evaluate((key) => {

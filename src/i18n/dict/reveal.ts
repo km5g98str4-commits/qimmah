@@ -76,6 +76,14 @@ export interface RevealStrings {
     trialAlreadyUsed: string
     trialOffline: string
     trialStarted: string
+    /**
+     * [WAVE-A] نداء إنشاء الحساب — يظهر **عند الحاجة فقط**.
+     *
+     * التجربة وPremium يحتاجان حسابًا (سلطة الخادم). كانت الحالة تُبلَّغ نصًّا
+     * («سجّل دخولك أول») بلا أي طريق إليه — رسالة تصف بابًا ولا تفتحه.
+     * أما المعاينة فتبقى بلا حساب (§0.1)، فلا يُعرض هذا النداء لأجلها.
+     */
+    createAccountCta: string
   }
 }
 
@@ -127,11 +135,12 @@ const ar: RevealStrings = {
     previewCta: 'الدخول بوضع المعاينة',
     previewNote: 'تتصفّح كل شي وتشوف خطتك. التسجيل يحتاج Premium.',
     trialStarting: 'نجهّز تجربتك…',
-    trialNeedsAccount: 'سجّل دخولك أول عشان نبدأ تجربتك.',
+    trialNeedsAccount: 'التجربة تحتاج حساب موثَّق. أنشئ حسابك أو سجّل دخولك.',
     trialNeedsVerifiedEmail: 'أكّد بريدك أول، وبعدها تبدأ تجربتك.',
     trialAlreadyUsed: 'تجربتك استُخدمت من قبل على هذا الحساب.',
     trialOffline: 'ما قدرنا نوصل للخادم. تأكّد من اتصالك وجرّب مرة ثانية.',
     trialStarted: 'تجربتك بدأت — ٧٢ ساعة كاملة.',
+    createAccountCta: 'أنشئ حسابك',
   },
 }
 
@@ -183,11 +192,12 @@ const en: RevealStrings = {
     previewCta: 'Continue in preview mode',
     previewNote: 'Browse everything and see your plan. Logging needs Premium.',
     trialStarting: 'Starting your trial…',
-    trialNeedsAccount: 'Sign in first so we can start your trial.',
+    trialNeedsAccount: 'The trial needs a verified account. Create one or sign in.',
     trialNeedsVerifiedEmail: 'Confirm your email first, then your trial can start.',
     trialAlreadyUsed: 'This account has already used its trial.',
     trialOffline: "We couldn't reach the server. Check your connection and try again.",
     trialStarted: 'Your trial has started — a full 72 hours.',
+    createAccountCta: 'Create your account',
   },
 }
 

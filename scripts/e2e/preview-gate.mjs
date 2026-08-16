@@ -94,7 +94,7 @@ const measurementState = (page) => page.evaluate(() => {
 async function onboard(page) {
   await page.goto(URL, { waitUntil: 'networkidle' })
   await settle(page, 2600)
-  await tap(page, /كضيف/)
+  await page.locator('[data-testid="welcome-start-cta"]').click({ force: true })
   await settle(page, 1200)
   await tap(page, /نبدأ/)
   await page.waitForSelector('#v2-body-age', { timeout: 25000 })
@@ -112,7 +112,7 @@ async function onboard(page) {
   await finishInputSteps(page, next); await settle(page, 1600)
   await tap(page, /الدخول للوحة/)
   await page.waitForSelector('[data-testid="plan-handoff"]', { timeout: 25000 })
-  await tap(page, /استعرض قِمّة أولًا/)
+  await page.locator('[data-testid="handoff-preview-cta"]').click({ force: true })
   await settle(page, 2600)
 }
 

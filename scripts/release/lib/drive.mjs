@@ -75,7 +75,7 @@ export async function enterAsGuest(page, url, { lang = 'ar' } = {}) {
   await page.goto(url, { waitUntil: 'domcontentloaded' })
   await settle(page, 2400)
   // copy-bound: StartViewV2 exposes no testid for its three entry choices.
-  await tap(page, lang === 'en' ? /Continue as guest|guest/i : /كضيف/)
+  await page.locator('[data-testid="welcome-start-cta"]').click({ force: true })
   await settle(page, 1000)
   // copy-bound: welcome screen CTA.
   await tap(page, lang === 'en' ? /Let'?s start|Start/i : /نبدأ/)

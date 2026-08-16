@@ -18,7 +18,11 @@ const onboarding = read('src/lib/onboarding.ts')
 
 console.log('\nإثبات مدخل الضيف المحلي')
 check('قاموس الضيف موجود بالعربية والإنجليزية', strings.includes("continueGuest: 'كمّل كضيف'") && strings.includes("continueGuest: 'Continue as guest'"))
-check('زر الضيف مربوط بواجهة البداية', start.includes('onGuest: () => void') && start.includes('onClick={onGuest}') && start.includes('getStrings(lang).start.continueGuest'))
+// [WAVE-A] شُدَّ العقد ولم يُضعَّف: كان يكفي **وجود** زرّ ضيف ثانوي بجانب نداء
+// إنشاء حساب أساسي. صار المطلوب أن يكون مسار الضيف/الأسئلة هو **الأساسي نفسه**،
+// وأن يختفي نداء إنشاء الحساب من شاشة الهبوط بالكامل. الفحص البنيوي المقترن
+// يعيش في `run-entry-flow-proof.mjs`؛ وهنا نحرس بقاء العقد وملاحظته للمستخدم.
+check('زر الضيف مربوط بواجهة البداية', start.includes('onGuest: () => void') && start.includes('onClick={onGuest}') && start.includes('getStrings(lang).start.guestNote'))
 check('المحوّل يمرّر عقد الضيف', adapter.includes('onGuest: () => void') && adapter.includes('<StartViewV2 {...props} />'))
 // [QIM-WEB-FOUNDER-UX-006/حزمة ٦] الوجهة صارت **مشروطة بحالة الضيف**، والفحص
 // يتبعها بدل أن يتشبّث بسطر حرفي:

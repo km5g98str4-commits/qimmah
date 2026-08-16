@@ -6,7 +6,7 @@ import { getStrings } from '@/config/strings'
 interface StartViewV2Props {
   lang: Lang
   onLogin: () => void
-  onSignup: () => void
+  /** يبدأ الأسئلة مباشرةً — بلا حساب. النداء الأساسي للشاشة. */
   onGuest: () => void
 }
 
@@ -18,10 +18,19 @@ interface StartViewV2Props {
  * headline-led hero anchored to the top, an ember glow sitting *behind* the
  * headline, a large faint Ascent motif giving the lower area athletic depth,
  * and the action group anchored in the thumb zone. Copy is the approved warm-
- * MSA set (V2_WELCOME). Functional routes are unchanged — `onSignup` is the
- * primary path, `onLogin` the secondary, exactly as the v1 screen wired them.
+ * MSA set (V2_WELCOME).
+ *
+ * [WAVE-A] النداء الأساسي يبدأ **الأسئلة**، لا إنشاء الحساب.
+ *
+ * كان `c.primary` («ابدأ الآن») موصولًا بمسار التسجيل: الزرّ يَعِد بالبدء ويسلّم
+ * نموذج حساب. فالزائر الجديد يُجبَر على الحساب قبل أن يرى سؤالًا واحدًا — وهو
+ * عكس المسار المعتمد (هبوط ← ١٨ سؤالًا ← كشف ← حساب ← Premium/تجربة/معاينة)
+ * ومخالف لـ§0.1: التخصيص وتوليد الخطة ومعاينتها مجانية **بلا حساب**.
+ *
+ * وإنشاء الحساب لم يُفقَد: `LoginView` تبدّل بين دخول وتسجيل عبر `onModeChange`،
+ * فمن أراده يصله من النداء الثانوي. الغائب هو **الإجبار** لا القدرة.
  */
-export function StartViewV2({ lang, onLogin, onSignup, onGuest }: StartViewV2Props) {
+export function StartViewV2({ lang, onLogin, onGuest }: StartViewV2Props) {
   const c = V2_WELCOME[lang] ?? V2_WELCOME.ar
 
   return (
@@ -68,20 +77,20 @@ export function StartViewV2({ lang, onLogin, onSignup, onGuest }: StartViewV2Pro
         {/* Bottom — calm trust line, then one ember primary + calm secondary. */}
         <div className="space-y-3">
           <p className="text-center text-xs font-medium text-ink-500">{c.trust}</p>
-          <button type="button" onClick={onSignup} className="btn-primary w-full py-4 text-[1.1875rem] shadow-glow">
-            {c.primary}
-          </button>
           <button
             type="button"
             onClick={onGuest}
-            className="w-full rounded-2xl border border-line/70 bg-surface/70 py-3 text-center text-sm font-bold text-ink-700 transition-colors hover:border-primary/50 hover:text-ink-900"
+            data-testid="welcome-start-cta"
+            className="btn-primary w-full py-4 text-[1.1875rem] shadow-glow"
           >
-            {getStrings(lang).start.continueGuest}
+            {c.primary}
           </button>
+          {/* يقول صراحةً إن البدء بلا حساب — فالوعد مكتوب لا مستنتَج. */}
           <p className="text-center text-xs leading-relaxed text-ink-500">{getStrings(lang).start.guestNote}</p>
           <button
             type="button"
             onClick={onLogin}
+            data-testid="welcome-login-cta"
             className="w-full py-2.5 text-center text-sm font-semibold text-ink-700 transition-colors hover:text-ink-900"
           >
             {c.secondary}

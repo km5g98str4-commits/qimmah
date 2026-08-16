@@ -124,7 +124,7 @@ const shellFor: Record<'today' | 'nutrition' | 'progress' | 'profile', { tab: Ma
 }
 
 export function SurfaceView() {
-  if (surface === 'welcome') return <StartViewV2 lang="ar" onLogin={noop} onSignup={noop} />
+  if (surface === 'welcome') return <StartViewV2 lang="ar" onLogin={noop} onGuest={noop} />
   if (surface === 'onboarding' || surface === 'summary') return <OnboardingV2 lang="ar" onComplete={noop} onExit={noop} />
   // [OVERNIGHT-4] سطح «الكشف» يركّب **المضيف الحقيقي** `SetupView` لا المكوّن
   // وحده. الفرق ليس شكليًّا: `PlanHandoffScreen` لا يُرسَم إلا من مزلاج

@@ -16,6 +16,8 @@ interface SetupViewProps {
   onClose: (completed?: boolean) => void
   /** الدخول من شاشة التسليم — كالمخرج لكن بلا إشعار نجاح مكرّر (حزمة ٤). */
   onEnterFromHandoff?: () => void
+  /** [WAVE-A] الطريق إلى إنشاء الحساب من شاشة التسليم عند لزومه. */
+  onCreateAccount?: () => void
   initialStep?: number
   mode?: 'onboarding' | 'advanced'
 }
@@ -36,7 +38,7 @@ function greetableName(displayName: string | null): string | null {
   return trimmed
 }
 
-export function SetupView({ onClose, onEnterFromHandoff, initialStep, mode = 'onboarding' }: SetupViewProps) {
+export function SetupView({ onClose, onEnterFromHandoff, onCreateAccount, initialStep, mode = 'onboarding' }: SetupViewProps) {
   const enterFromHandoff = onEnterFromHandoff ?? (() => onClose(true))
   const { user, displayName } = useAuth()
 
@@ -63,6 +65,7 @@ export function SetupView({ onClose, onEnterFromHandoff, initialStep, mode = 'on
         lang={getLanguage()}
         signedIn={user !== null}
         onEnter={enterFromHandoff}
+        onCreateAccount={onCreateAccount}
         plan={artifacts?.plan}
         goalType={artifacts?.goalType}
         rationale={artifacts?.rationale}
