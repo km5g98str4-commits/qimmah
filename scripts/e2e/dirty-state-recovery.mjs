@@ -16,8 +16,29 @@ import { loadAppCopy, requireKey } from './lib/app-copy.mjs'
 const { dataKeys } = await loadAppCopy()
 const K_ONBOARDING = requireKey(dataKeys, 'qimmah:onboarding:v1')
 const K_ACCOUNTS = requireKey(dataKeys, 'qimmah:onboarding:accounts:v1')
-/** نصّ زرّ الضيف من مصدر الحقيقة نفسه الذي يعرضه التطبيق. */
-const GUEST_CTA = 'كمّل كضيف'
+
+/**
+ * مدخل الدخول على شاشة البداية — **بوسمه الثابت لا بنصّه**.
+ *
+ * ═══ لماذا تغيّر هذا السطر ═══
+ * كان الإثبات يمسك الزرّ بنصّه («كمّل كضيف»). و[WAVE-A] ألغى ذلك الزرّ عمدًا:
+ * النداء الأساسي على الهبوط صار يبدأ الأسئلة (`onGuest`) بدل أن يسلّم نموذج
+ * حساب، تنفيذًا لـ§0.1 (التخصيص وتوليد الخطة ومعاينتها بلا حساب). فالنصّ بائت
+ * **والعقد حيّ**: المعالِج نفسه (`App.enterAsGuest`) لم يتغيّر حرفًا —
+ *   `setView(isOnboardingComplete(null) ? guardRoute('dashboard', null) : 'setup')`
+ * وهو بالضبط القرار الذي يقيسه هذا الملف.
+ *
+ * ولذلك **لا يُعاد الزرّ القديم لإخضرار الإثبات** (ذلك يعيد عقد UX أُلغي بقرار)،
+ * بل يُعاد توجيه الإثبات إلى المدخل الحيّ. والوسم أمتن من النصّ: نصّ الواجهة
+ * يتغيّر بالتحرير، والوسم عقدٌ للقيادة الآلية.
+ *
+ * ⚠️ **الدرس الأغلى في هذه الواقعة ليس النصّ البائت.** الفحوص السلوكية كانت
+ * متداخلة داخل `if (reachable > 0)`، فحين سقط المُمسِك **لم تُنفَّذ إطلاقًا**:
+ * القاعدة الحاكمة («قيمة تالفة لا تُقرأ إكمالًا صامتًا») بقيت بلا قياس منذ
+ * [WAVE-A] وهي أخطر ما في الملف. التداخل أُزيل أدناه: غياب المدخل صار يُسقط
+ * الفحص السلوكي **باسمه** بدل أن يُسكته.
+ */
+const ENTRY_CTA = '[data-testid="welcome-start-cta"]'
 const PORT = 5331
 const EXTERNAL = process.env.PREVIEW_URL || ''
 const URL = EXTERNAL || `http://127.0.0.1:${PORT}`
@@ -115,32 +136,45 @@ try {
     check(`${c.id}: بلا خطأ صفحة أو console`, pageErrors.length === 0, pageErrors.slice(0, 2).join(' | '))
 
     /**
-     * الحكم يقع عند **باب الضيف** لا عند الإقلاع.
+     * الحكم يقع عند **مدخل الدخول** لا عند الإقلاع.
      *
      * الإقلاع بلا hash يهبط على شاشة البداية دائمًا (`initialRoute`: `if (!userId)
      * return 'start'`) — للمكتمل وللتالف سواء. فالتمييز لا يظهر في hash الإقلاع
-     * أصلًا، بل في وجهة «كمّل كضيف»: العقد المثبت في `test:guest-entry` أن الزرّ
-     * «يوجّه حسب حالة الضيف لا وجهةً واحدة».
+     * أصلًا، بل في وجهة النداء الأساسي: `App.enterAsGuest` يوجّه **حسب حالة
+     * الضيف لا وجهةً واحدة** (نفس عقد `test:guest-entry`).
      *
-     * ولهذا يُدفع كل حالة عبر الزرّ نفسه: المكتمل الحقيقي يدخل التطبيق، والتالف
+     * ولهذا تُدفع كل حالة عبر المدخل نفسه: المكتمل الحقيقي يدخل التطبيق، والتالف
      * يُعاد إلى الإعداد. وهذا أقوى من فحص hash الإقلاع لأنه يفحص القرار الفعلي.
      */
     const corrupt = ['malformed-json', 'wrong-type-array', 'wrong-type-scalar', 'null-literal', 'completed-not-boolean'].includes(c.id)
     if (corrupt || c.id === 'guest-complete') {
-      const guestCta = page.getByRole('button', { name: GUEST_CTA, exact: true })
-      const reachable = await guestCta.count()
-      check(`${c.id}: باب الضيف ظاهر على شاشة البداية`, reachable > 0)
+      const entryCta = page.locator(ENTRY_CTA)
+      const reachable = await entryCta.count()
+      check(`${c.id}: مدخل الدخول ظاهر على شاشة البداية`, reachable > 0)
+
+      // [WAVE-A] العقد نفسه يُقاس هنا مجانًا: المدخل يبدأ الأسئلة ولا يطلب حسابًا.
+      // فلو ارتدّ أحدهم إلى «الحساب أولًا» سقط هذا الإثبات كما يسقط `test:entry-flow`.
+      const authWall = await page.locator('input[type="password"], [data-testid="auth-form"]').count()
+      check(`${c.id}: لا جدار حساب بين الزائر والمدخل`, authWall === 0)
+
+      /**
+       * ⚠️ **بلا تداخل.** كان الفحصان أدناه داخل `if (reachable > 0)`، فحين بار
+       * المُمسِك بعد [WAVE-A] لم يسقطا — **سكتا**. ستّ حالات تالفة مرّت ستّة
+       * أيام بلا قياسٍ للقاعدة الحاكمة، والإثبات يعلن «٦ فشل» عن المُمسِك وحده
+       * فيبدو عطلًا تجميليًّا. الآن: غياب المدخل يُسقط الفحص السلوكي **باسمه**.
+       */
+      let hash = '(المدخل غير موجود — لم يُنقر)'
       if (reachable > 0) {
-        await guestCta.first().click()
+        await entryCta.first().click()
         await page.waitForTimeout(1500)
-        const hash = await page.evaluate(() => window.location.hash)
-        const enteredApp = /#\/(dashboard|workout|nutrition|progress|profile)/.test(hash)
-        if (corrupt) {
-          check(`${c.id}: قيمة تالفة لا تُقرأ إكمالًا صامتًا`, !enteredApp, `hash=${hash}`)
-        } else {
-          // الضبط الموجب — بلا هذا يصير الإثبات «كل شيء يُرفض» فلا يثبت شيئًا.
-          check(`${c.id}: الضيف المكتمل الحقيقي يدخل التطبيق`, enteredApp, `hash=${hash}`)
-        }
+        hash = await page.evaluate(() => window.location.hash)
+      }
+      const enteredApp = /#\/(dashboard|workout|nutrition|progress|profile)/.test(hash)
+      if (corrupt) {
+        check(`${c.id}: قيمة تالفة لا تُقرأ إكمالًا صامتًا`, reachable > 0 && !enteredApp, `hash=${hash}`)
+      } else {
+        // الضبط الموجب — بلا هذا يصير الإثبات «كل شيء يُرفض» فلا يثبت شيئًا.
+        check(`${c.id}: الضيف المكتمل الحقيقي يدخل التطبيق`, reachable > 0 && enteredApp, `hash=${hash}`)
       }
     }
 
