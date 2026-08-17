@@ -176,4 +176,4 @@ export function adminRoleProvisioning(decision: AdminRoleDecision): RoleProvisio
  * وأنه يعرّف `admin_set_role`. فلو حُذفت الهجرة أو أُعيدت تسميتها سقطت البوابة
  * باسمها، بدل أن تبقى الواجهة تشير إلى مسار تزويد لم يعد موجودًا.
  */
-export const ROLE_PROVISIONING_MIGRATION = '20260816120001_founder_role_provisioning.sql'
+export const ROLE_PROVISIONING_MIGRATION = '20260816120002_founder_role_provisioning.sql'
