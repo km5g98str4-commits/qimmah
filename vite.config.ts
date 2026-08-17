@@ -45,6 +45,7 @@ const buildCommit = (() => {
 // وindex.html مضبوط على `no-cache` في `_headers` فتصل القراءة طازجة دائمًا.
 function buildIdentityPlugin() {
   const buildTime = new Date().toISOString()
+  const appEnv = process.env.VITE_APP_ENV === 'founder_preview' ? 'founder_preview' : 'production'
   return {
     name: 'qimmah-build-identity',
     apply: 'build' as const,
@@ -54,6 +55,9 @@ function buildIdentityPlugin() {
         { tag: 'meta', attrs: { name: 'qimmah-commit', content: buildCommit }, injectTo: 'head' as const },
         { tag: 'meta', attrs: { name: 'qimmah-build-time', content: buildTime }, injectTo: 'head' as const },
         { tag: 'meta', attrs: { name: 'qimmah-sw-version', content: `qimmah-${buildCommit}` }, injectTo: 'head' as const },
+        // [FOUNDER-QA-PREVIEW-SAFETY] البيئة تُعلَن في الوسم كما يُعلَن الهاش:
+        // تُقرأ بطلب واحد بلا تنفيذ سكربت، فيُحسم «أهذه معاينة أم إنتاج؟» فورًا.
+        { tag: 'meta', attrs: { name: 'qimmah-env', content: appEnv }, injectTo: 'head' as const },
       ]
     },
   }
