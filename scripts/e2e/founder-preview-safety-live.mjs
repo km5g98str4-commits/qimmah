@@ -299,9 +299,18 @@ try {
     // ── (هـ) أصل البناء مرئي للمراجع بلا أدوات مطوّر ──────────────────────────
     await page.evaluate(() => { window.location.hash = '/settings' })
     await settle(page, 2800)
-    const labelSeen = await page.evaluate(() => /founder_preview/.test(document.body.innerText))
-    check(`${lang}: وسم البناء يعلن «founder_preview» على الشاشة`, labelSeen)
-    if (labelSeen) await shoot(page, `action-${lang}-build-label`, errs)
+    // ═══ الوسم يُقرأ من الشاشة نصًّا لا يُستدَلّ عليه ═══
+    // «فيه كلمة founder_preview في مكان ما» يُرضيه نصّ عابر. المطلوب **الوسم
+    // نفسه**: إصدار · هاش · بيئة. ويُقارَن الهاش برأس Git الجاري، فبناءٌ بائت
+    // يُنشر بوسم قديم يسقط هنا باسمه بدل أن يُقرأ كأنه الرأس.
+    const label = await page.evaluate(() => {
+      const m = document.body.innerText.match(/v\d+\.\d+\.\d+[^\s]*founder_preview/)
+      return m ? m[0] : ''
+    })
+    check(`${lang}: وسم البناء ظاهر على الشاشة («${label || 'غائب'}»)`, label.length > 0)
+    check(`${lang}: ويعلن البيئة founder_preview`, label.includes('founder_preview'))
+    check(`${lang}: ويحمل هاش الرأس الجاري (${headSha})`, label.includes(headSha), label)
+    if (label) await shoot(page, `action-${lang}-build-label`, errs)
 
     // ── (و) التأكيد المضادّ: هل المُراقب حيّ أصلًا؟ ───────────────────────────
     const before = net.prod.length

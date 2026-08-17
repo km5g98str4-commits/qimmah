@@ -201,8 +201,19 @@ Chromium حقيقي، **وكل طلب شبكة مُعترَض ومُحصىً**.
 
 ## ٦ · أمر النشر — **واحد بالضبط، ولا يُنفَّذ إلا بيد المؤسس**
 
-**شرط مسبق (تحقّق واحد):** فرع الإنتاج لمشروع Pages باسم `qimmah` هو `main`.
-(Cloudflare Dashboard → Workers & Pages → `qimmah` → Settings → Branch control.)
+**شرط مسبق — يُقرأ ولا يُفترض** ([QIMMAH-FOUNDER-PREVIEW-DEPLOY-001]):
+
+```bash
+npx wrangler pages deployment list --project-name qimmah
+```
+
+اقرأ **فرع** الصفّ الموسوم `Production`. الأمر أدناه آمن **إن وإن فقط** كان
+`--branch` مختلفًا عنه. (وفي اللوحة: Workers & Pages → `qimmah` → Settings →
+Branch control.)
+
+> **لم يُقرأ هذا من بيئة التنفيذ** — Cloudflare محجوبة بسياسة شبكة المؤسسة
+> (`FOUNDER-QA-FINDINGS.md` §F-1)، فالقراءة تبقى على المؤسس. **ولا يُفترض
+> الجواب.**
 
 ```bash
 npm run build:founder-preview && npx wrangler pages deploy dist --project-name qimmah --branch founder-qa-preview
