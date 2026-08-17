@@ -27,8 +27,8 @@ import { pgcrypto } from '@electric-sql/pglite/contrib/pgcrypto'
 import { createSandbox, asRole, makeUser, migrationFiles, readMigration } from './db/lib/supabase-sandbox.mjs'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-const MIG_ROLE = '20260816120001_founder_role_provisioning.sql'
-const MIG_READ = '20260816120002_founder_dashboard_reads.sql'
+const MIG_ROLE = '20260816120002_founder_role_provisioning.sql'
+const MIG_READ = '20260816120003_founder_dashboard_reads.sql'
 
 let pass = 0
 const results = []

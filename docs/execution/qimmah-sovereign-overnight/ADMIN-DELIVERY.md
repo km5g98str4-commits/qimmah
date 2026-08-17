@@ -17,8 +17,8 @@
 |---|---|---|
 | نقطة تركيب واحدة | `src/admin/ui/AdminRoute.tsx` · تُصدَّر من `src/admin/index.ts` | ✅ |
 | قراءة حيّة عبر RPC | `src/admin/contract/liveSource.ts` | ✅ في الكود · ⏳ تنتظر تطبيق الهجرة |
-| تزويد دور المؤسس | `supabase/migrations/20260816120001_founder_role_provisioning.sql` | ⏳ APPLY_PENDING |
-| قراءات تجميعية محروسة | `supabase/migrations/20260816120002_founder_dashboard_reads.sql` | ⏳ APPLY_PENDING |
+| تزويد دور المؤسس | `supabase/migrations/20260816120002_founder_role_provisioning.sql` | ⏳ APPLY_PENDING |
+| قراءات تجميعية محروسة | `supabase/migrations/20260816120003_founder_dashboard_reads.sql` | ⏳ APPLY_PENDING |
 | `adminRoleProvisioning()` صادقة | `src/admin/auth/adminRole.ts` | ✅ (كانت ثابتًا يكذب) |
 | أقسام التجارة والأخطاء | `src/admin/ui/AdminShell.tsx` | ✅ |
 | إثبات قاعدة بيانات منفَّذ | `scripts/run-admin-db-proof.mjs` | ✅ داخل `test:gate` |
@@ -172,8 +172,8 @@ supabase db push            # أو: تنفيذ الملفّين نصًّا في 
 ```
 
 الملفّان:
-1. `supabase/migrations/20260816120001_founder_role_provisioning.sql`
-2. `supabase/migrations/20260816120002_founder_dashboard_reads.sql`
+1. `supabase/migrations/20260816120002_founder_role_provisioning.sql`
+2. `supabase/migrations/20260816120003_founder_dashboard_reads.sql`
 
 كلاهما `create or replace` بالكامل — **قابلان لإعادة التشغيل بلا أثر جانبي**،
 ولا يحملان `drop` ولا `delete` ولا `truncate` ولا `alter table` واحدة.

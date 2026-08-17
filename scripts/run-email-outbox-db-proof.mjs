@@ -15,7 +15,7 @@ import { NON_QUEUEABLE_TOKENS } from '../supabase/functions/_shared/email/outbox
 import { TEMPLATE_IDS, LANGS } from '../supabase/functions/_shared/email/templates.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-const MIGRATION = join(ROOT, 'supabase/migrations/20260816120001_email_outbox.sql')
+const MIGRATION = join(ROOT, 'supabase/migrations/20260816120004_email_outbox.sql')
 
 const results = []
 function check(name, pass, detail = '') {
@@ -37,7 +37,7 @@ const { db, applied, failed } = await createSandbox()
 const q = (sql, params) => db.query(sql, params)
 check('كل الهجرات تُطبَّق من قاعدة نظيفة', failed.length === 0,
   failed.length ? failed.map((f) => f.file).join(', ') : `${applied.length} هجرة`)
-check('هجرة البريد ضمن المطبَّق', applied.includes('20260816120001_email_outbox.sql'))
+check('هجرة البريد ضمن المطبَّق', applied.includes('20260816120004_email_outbox.sql'))
 
 // ── ١) الحزامان: RLS بصفر سياسات + REVOKE صريح ─────────────────────────────
 console.log('\n— ١) العزل: لا عميل يرى هذا الجدول ولا يمسّه')

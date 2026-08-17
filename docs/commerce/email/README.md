@@ -120,5 +120,5 @@ supabase/functions/qimmah-mailer/
   contract.mjs    التهيئة وقراءة الطلب — منطق خالص.
   index.ts        طرفية Deno: نقلٌ لا يقرّر شيئًا.
   preview.mjs     التمرين الجاف → docs/commerce/email/rendered/
-supabase/migrations/20260816120001_email_outbox.sql
+supabase/migrations/20260816120004_email_outbox.sql
 ```
