@@ -19,12 +19,19 @@
  * بيانات المستخدم (ما أنشأه أو مسحه) تبقى في `features/products/store.ts` خلف
  * `safeStorage` — الطبقة الثالثة من العقد. هذا الملف **للقراءة فقط**: لا يكتب
  * بيانات مستخدم ولا يلمس مفاتيحها.
+ *
+ * ═══ ⚠️ حالة الشرائح اليوم — صدق قبل طمأنينة (§5) ═══
+ * **الشرائح الأربعون لا تُخدَم حاليًا.** `public/food/` يحمل البيان والطقم الساخن
+ * فقط؛ كل طلب `shards/*.json` يعود ٤٠٤ فيصير `null` بلا رمي. فالمشحون فعلًا
+ * **٥٩٩ سجلًا معبّأً** لا ستون ألفًا، والذيل الطويل تبعية رفع لا وعد قائم
+ * (`docs/execution/qimmah-postweb/food/DEPENDENCIES.md` F-2). الكود أدناه صحيح
+ * **حين** تُرفع الشرائح — ولا يدّعي أنها مرفوعة.
  */
 import { assignShard, shardName } from '../shardRouting'
 import { normalizeProductKey } from '@/lib/text/foodNormalize'
 import { classifyGtin } from '../gtin'
 import { createIdbCache, createMemoryCache, type BlobCache } from './idbCache'
-import { classifyMatch, rankHits, type RankedHit } from './rank'
+import { classifyMatch, rankRankedHits, type RankedHit } from './rank'
 import type { CatalogManifest, CatalogProduct, CatalogStats, HotSetPayload, ShardIndex, ShardPayload } from './types'
 
 export interface CatalogDeps {
@@ -37,9 +44,45 @@ export interface CatalogDeps {
 
 const DEFAULT_BASE = '/food'
 
+/**
+ * أقصى عدد حمولات شرائح يجوز لاستعلام نصّي واحد أن يجلبها.
+ * الحمولة أثقل من فهرسها بمراتب، والاستعلام الواحد لا يستحق تنزيل الذيل كلّه.
+ */
+export const DEFAULT_DEEP_PAYLOAD_BUDGET = 2
+
 interface LoadedShard {
   byGtin: Map<string, CatalogProduct>
   count: number
+}
+
+/**
+ * حالة الذيل الطويل كما **يعرفها التطبيق فعلًا** — لا كما يعلنها البيان.
+ *
+ * البيان يعلن ٥٩٬٩٤١ سجلًا في ٤١ شريحة. الشرائح **غير مرفوعة** اليوم، فكل طلب لها
+ * يعود ٤٠٤. الفارق بين الرقمين هو بالضبط ما لا يجوز لأي سطح أن يعد به:
+ *   • `declaredRecords` — ما يقوله البيان. **رقم بناء لا رقم إنتاج.**
+ *   • `searchableRecords` — ما يمكن البحث فيه هذه اللحظة: الطقم الساخن + كل شريحة
+ *     نجح تحميلها. **هذا وحده رقم صادق.**
+ *   • `verdict` — لا يُخمَّن: يبقى `unproven` حتى **تُجرَّب** شريحة أو فهرس فعلًا.
+ *
+ * §5 من الميثاق: حين لا نعرف، نقولها صريحة. «لم نجرّب» ليست «متاح».
+ */
+export interface LongTailAvailability {
+  /** مجموع ما يعلنه البيان في الشرائح — بناءً لا إنتاجًا. */
+  declaredRecords: number
+  /** عدد الشرائح التي يعلنها البيان. */
+  declaredShards: number
+  /** ما يمكن البحث فيه الآن حقًّا: الطقم الساخن + الشرائح المحمَّلة. */
+  searchableRecords: number
+  /** كم محاولة جلب ذيلٍ طويل جرت (حمولة أو فهرس). */
+  attempts: number
+  /** كم منها فشلت (٤٠٤ أو JSON تالف). */
+  failures: number
+  /**
+   * `unproven` لم تُجرَّب بعد · `available` نجحت محاولة واحدة على الأقل ·
+   * `unavailable` جُرِّبت وفشلت كلّها.
+   */
+  verdict: 'unproven' | 'available' | 'unavailable'
 }
 
 export class Catalog {
@@ -48,6 +91,8 @@ export class Catalog {
   private hotByGtin = new Map<string, CatalogProduct>()
   private shards = new Map<string, LoadedShard>()
   private indexes = new Map<string, ShardIndex>()
+  /** محاولات الذيل الطويل ونتائجها — أساس `longTailAvailability`، لا تخمين. */
+  private longTail = { attempts: 0, failures: 0 }
   private stats: CatalogStats = {
     hotSetLoaded: false, hotSetCount: 0, shardsFetched: [], indexesFetched: [],
     networkFetches: 0, cacheHits: 0, cacheKind: 'memory', recordsInMemory: 0,
@@ -97,18 +142,27 @@ export class Catalog {
     this.stats.recordsInMemory = n
   }
 
-  private async shardFor(gtin14: string): Promise<LoadedShard | null> {
-    if (!this.manifest) return null
-    const name = shardName(assignShard(gtin14, this.manifest.shard_count), this.manifest.shard_count)
+  /**
+   * تحميل حمولة شريحة **بالاسم**. كان هذا المسار موجودًا داخل `shardFor(gtin14)`
+   * وحده، فلم يملك البحث النصّي طريقًا إلى أي حمولة — وهو أصل العطل B2.
+   */
+  private async shardByName(name: string): Promise<LoadedShard | null> {
     const already = this.shards.get(name)
     if (already) return already
+    this.longTail.attempts += 1
     const payload = this.parse<ShardPayload>(await this.load(`shards/${name}.json`))
-    if (!payload?.records) return null
+    if (!payload?.records) { this.longTail.failures += 1; return null }
     const loaded: LoadedShard = { byGtin: new Map(Object.entries(payload.records)), count: payload.count }
     this.shards.set(name, loaded)
     this.stats.shardsFetched.push(name)
     this.recount()
     return loaded
+  }
+
+  private async shardFor(gtin14: string): Promise<LoadedShard | null> {
+    if (!this.manifest) return null
+    const name = shardName(assignShard(gtin14, this.manifest.shard_count), this.manifest.shard_count)
+    return this.shardByName(name)
   }
 
   /**
@@ -129,8 +183,9 @@ export class Catalog {
   private async indexFor(name: string): Promise<ShardIndex | null> {
     const already = this.indexes.get(name)
     if (already) return already
+    this.longTail.attempts += 1
     const idx = this.parse<ShardIndex>(await this.load(`shards/${name}.idx.json`))
-    if (!idx) return null
+    if (!idx) { this.longTail.failures += 1; return null }
     this.indexes.set(name, idx)
     this.stats.indexesFetched.push(name)
     return idx
@@ -166,15 +221,32 @@ export class Catalog {
   }
 
   /**
-   * بحث نصّي. الافتراضي **الطقم الساخن وحده** — يغطّي الحالة الشائعة بلا شبكة
-   * وبلا شريحة. توسيع الذيل الطويل خيار صريح (`deepShards`) لا سلوك ضمني، فلا
-   * يتحوّل كل حرف يكتبه المستخدم إلى جلب شبكة.
+   * بحث نصّي **مع رتبة كل مطابقة** — الرتبة هي ما تحتاجه طبقة الاتحاد فوقنا كي
+   * ترتّب المعبّأ مع المنسَّق في قائمة واحدة. `search` أدناه غلاف يسقطها.
+   *
+   * الافتراضي **الطقم الساخن وحده**: يغطّي الحالة الشائعة بلا شبكة وبلا شريحة.
+   * توسيع الذيل الطويل خيار صريح (`deepShards`) لا سلوك ضمني، فلا يتحوّل كل حرف
+   * يكتبه المستخدم إلى جلب شبكة.
+   *
+   * ═══ الحدّان اللذان يبقيان العمق كسولًا ═══
+   * ١. **قائمة المستدعي** — لا يُمسح إلا ما سُمّي في `deepShards`. لا مسح ضمنيًّا
+   *    لأربعين شريحة.
+   * ٢. **ميزانية الحمولات** (`maxShardPayloads`، افتراضها ٢) — الفهرس رخيص
+   *    والحمولة ليست كذلك (~١٫٨ ميغابايت للشريحة خامًا مقابل ~٦٦ كيلوبايت
+   *    للفهرس). فلا تُجلب حمولة **إلا لشريحة أعطى فهرسها مواضع مطابقة فعلًا**،
+   *    وبحدٍّ أعلى معلَن. الفهارس التي لا تطابق لا تكلّف حمولة أصلًا.
    */
-  async search(query: string, opts: { limit?: number; deepShards?: string[] } = {}): Promise<CatalogProduct[]> {
+  async searchRanked(
+    query: string,
+    opts: { limit?: number; deepShards?: string[]; maxShardPayloads?: number } = {},
+  ): Promise<RankedHit[]> {
     const q = normalizeProductKey(query)
     if (!q) return []
     const hits = this.hotHits(q)
+    const budget = opts.maxShardPayloads ?? DEFAULT_DEEP_PAYLOAD_BUDGET
+    let payloadsLoaded = 0
     for (const name of opts.deepShards ?? []) {
+      if (payloadsLoaded >= budget) break
       const idx = await this.indexFor(name)
       if (!idx) continue
       const positions = new Set<number>()
@@ -182,8 +254,16 @@ export class Catalog {
         if (token.startsWith(q)) for (const i of pos) positions.add(i)
       }
       if (positions.size === 0) continue
-      const shard = this.shards.get(name)
+      // ⚠️ B2 — كان هنا `this.shards.get(name)`: قراءةُ خريطةٍ لا يملؤها إلا مسار
+      // الباركود، فكان البحث العميق يجلب الفهرس ثم يخرج صفر اليدين دائمًا.
+      // الحمولة تُطلب الآن فعلًا، وبعد أن أثبت الفهرس أن فيها ما يطابق.
+      //
+      // الميزانية تُحاسِب **الجلب** لا القراءة: شريحة حاضرة في الذاكرة أصلًا
+      // (جلبها مسحُ باركود سابق) لا تكلّف بايتًا، فلا يُعقل أن تستهلك حصّة.
+      const resident = this.shards.has(name)
+      const shard = await this.shardByName(name)
       if (!shard) continue
+      if (!resident) payloadsLoaded += 1
       for (const i of positions) {
         const gtin = idx.order[i]
         const p = gtin ? shard.byGtin.get(gtin) : undefined
@@ -192,11 +272,38 @@ export class Catalog {
         if (tier) hits.push({ product: p, tier })
       }
     }
-    const ranked = rankHits(hits)
+    const ranked = rankRankedHits(hits)
     return typeof opts.limit === 'number' ? ranked.slice(0, opts.limit) : ranked
+  }
+
+  /** نفس البحث بالسجلات المجرّدة — الواجهة القائمة، بلا تغيير في عقدها. */
+  async search(query: string, opts: { limit?: number; deepShards?: string[]; maxShardPayloads?: number } = {}): Promise<CatalogProduct[]> {
+    return (await this.searchRanked(query, opts)).map((h) => h.product)
   }
 
   getStats(): CatalogStats {
     return { ...this.stats, shardsFetched: [...this.stats.shardsFetched], indexesFetched: [...this.stats.indexesFetched] }
+  }
+
+  /**
+   * **ما يجوز للتطبيق أن يعد به الآن.** أي سطح يريد ذكر حجم قاعدة الطعام يقرأ
+   * `searchableRecords` من هنا — لا `declaredRecords`، ولا رقمًا مكتوبًا في نصّ.
+   *
+   * الشرائح غير مرفوعة اليوم، فالفرق بين الرقمين ٥٩٬٩٤١ سجلًا. عرض الرقم المعلَن
+   * على المستخدم يجعل الواجهة تعد بستين ألفًا وتسلّم ٥٩٩ — وهو بالضبط ما يمنعه §5.
+   */
+  longTailAvailability(): LongTailAvailability {
+    const declaredShards = this.manifest?.shards?.length ?? 0
+    const declaredRecords = (this.manifest?.shards ?? []).reduce((a, s) => a + (s.count ?? 0), 0)
+    const { attempts, failures } = this.longTail
+    const verdict = attempts === 0 ? 'unproven' : failures < attempts ? 'available' : 'unavailable'
+    return {
+      declaredRecords,
+      declaredShards,
+      searchableRecords: this.stats.recordsInMemory,
+      attempts,
+      failures,
+      verdict,
+    }
   }
 }

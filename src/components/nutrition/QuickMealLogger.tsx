@@ -1,8 +1,10 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { Icon } from '@/components/Icon'
 import { ProgressBar } from '@/components/ProgressBar'
-import { searchFood, type FoodItem, type FoodSize } from '@/data/foodItems'
-import { catalogProductToFoodItem, getAppCatalog, isOffDerived } from '@/lib/food/catalog/appCatalog'
+import { type FoodItem, type FoodSize } from '@/data/foodItems'
+import { getAppCatalog, isOffDerived } from '@/lib/food/catalog/appCatalog'
+import type { RankedHit } from '@/lib/food/catalog/rank'
+import { mergeUnified, rankCurated, rankPackaged } from '@/lib/food/unifiedSearch'
 import { dataAttributionStrings } from '@/i18n/dict/dataAttribution'
 import { useNutritionToday, type MealSlot } from '@/lib/nutritionTracking'
 import { NUM_LIMITS, parseSafeNumber, sanitizeNumericInput } from '@/lib/validation'
@@ -70,35 +72,44 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
   const [cCarb, setCCarb] = useState('')
   const [cFat, setCFat] = useState('')
 
-  // الأصناف المحلية المنسَّقة — **تبقى أولًا وبلا تغيير**. الكتالوج إضافة لا بديل.
-  const localResults = useMemo(() => searchFood(query).slice(0, 10), [query])
+  /**
+   * المصدر المنسَّق (٦٤١ صنفًا: شاورما · كبسة · مندي · برجر بسلاسلها السعودية) —
+   * **متزامن وفوري** كما كان: لا ينتظر المستخدم شبكة ليرى أكله. الفرق أنه يمرّ
+   * الآن بطبقة الاتحاد، فتُحسب **قوّة** مطابقته على السلّم نفسه الذي يُقاس به
+   * المعبّأ — بدل قصٍّ أعمى عند ١٠ يُسقِط تطابقًا قويًّا بلا مقارنة.
+   */
+  const curatedResults = useMemo(() => rankCurated(query), [query])
 
   /**
-   * نتائج الكتالوج الكبير — تُضاف تحت المحلية.
+   * مرشّحو الكتالوج المعبّأ (الطقم الساخن — سلع باركود).
    *
-   * مؤجَّلة ٢٥٠ ملّي وغير متزامنة: البحث المحلي يظهر فورًا كما كان، والكتالوج
-   * يلحق. وبلا التأجيل يتحوّل كل حرف إلى استعلام، وهو ما تمنعه هذه الحزمة أصلًا.
+   * مؤجَّلون ٢٥٠ ملّي وغير متزامنين: المنسَّق يظهر فورًا والمعبّأ يلحق. وبلا
+   * التأجيل يتحوّل كل حرف إلى استعلام، وهو ما تمنعه هذه الحزمة أصلًا.
+   * تُحفظ **الرتبة** لا السجل المجرّد، لأن الدمج المرتَّب يحتاجها.
+   *
+   * **بلا `deepShards`**: الشرائح غير مرفوعة، ومسحها يعني ٤١ طلبًا يعود كلّها ٤٠٤.
+   * وصلها قرار نشر يسبقه رفعها — انظر `docs/execution/qimmah-sovereign-closure/FOOD-LONGTAIL-PLAN.md`.
    */
-  const [catalogResults, setCatalogResults] = useState<FoodItem[]>([])
+  const [packagedHits, setPackagedHits] = useState<RankedHit[]>([])
   useEffect(() => {
     const q = query.trim()
-    if (q.length < 2) { setCatalogResults([]); return }
+    if (q.length < 2) { setPackagedHits([]); return }
     let alive = true
     const timer = setTimeout(async () => {
       const cat = await getAppCatalog()
       if (!cat || !alive) return
-      const hits = await cat.search(q, { limit: 8 })
-      if (!alive) return
-      // لا تكرار: صنف محلي بنفس الاسم يبقى صاحب الأولوية.
-      const localNames = new Set(localResults.map((r) => r.nameAr))
-      setCatalogResults(
-        hits.map((h) => catalogProductToFoodItem(h, lang)).filter((f) => !localNames.has(f.nameAr)),
-      )
+      const hits = await rankPackaged(cat, q)
+      if (alive) setPackagedHits(hits)
     }, 250)
     return () => { alive = false; clearTimeout(timer) }
-  }, [query, localResults, lang])
+  }, [query])
 
-  const results = useMemo(() => [...localResults, ...catalogResults], [localResults, catalogResults])
+  /** قائمة **واحدة** مرتّبة بقوّة المطابقة — لا لصق مصدرٍ فوق مصدر. */
+  const unified = useMemo(
+    () => mergeUnified(curatedResults, packagedHits, lang),
+    [curatedResults, packagedHits, lang],
+  )
+  const results = useMemo(() => unified.map((r) => r.item), [unified])
   /** النسب يظهر **فقط** حين تظهر نتائج مشتقّة من OFF — لا على الأصناف المحلية. */
   const showsOffResults = useMemo(() => results.some((r) => isOffDerived(r.id)), [results])
 

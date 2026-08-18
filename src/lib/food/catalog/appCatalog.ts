@@ -35,6 +35,24 @@ async function fetchText(url: string): Promise<string | null> {
 }
 
 /**
+ * جذر أصول الكتالوج — `/food` من نفس الأصل افتراضيًا.
+ *
+ * ═══ لماذا قابلًا للضبط ═══
+ * الشرائح الأربعون (٨١٫٤ ميغابايت خامًا) قد تُستضاف خارج Pages — دلو R2 بنطاق
+ * مخصّص مثلًا. حين يحدث ذلك يصير الفرق **قيمة بيئة لا تعديل كود**:
+ *   `VITE_FOOD_CDN_BASE=https://static.example.com/food`
+ *
+ * ⚠️ **شرطان لا يُنسيان** عند تغييرها (كلاهما خارج ملفات هذه الحارة):
+ *   ١. `connect-src` في `public/_headers` يجب أن يسمح بالأصل الجديد، وإلا حجبت
+ *      سياسة المحتوى كل طلب بصمت.
+ *   ٢. الدلو يحتاج CORS يسمح بأصل التطبيق.
+ * التفصيل في `docs/execution/qimmah-sovereign-closure/FOOD-LONGTAIL-PLAN.md`.
+ *
+ * القيمة عامّة بطبيعتها (رابط أصول ساكنة)، فوجودها في `VITE_*` سليم — لا سرّ فيها.
+ */
+const CDN_BASE = (import.meta.env?.VITE_FOOD_CDN_BASE as string | undefined)?.trim()
+
+/**
  * يهيّئ الكتالوج مرّة واحدة. الفشل **ليس حرجًا**: الواجهة تبقى على الأصناف
  * المحلية، وهو تدهور صادق لا شاشة خطأ.
  */
@@ -43,7 +61,7 @@ export async function getAppCatalog(): Promise<Catalog | null> {
   if (initializing) return initializing
   initializing = (async () => {
     try {
-      const cat = await Catalog.create({ fetchText })
+      const cat = await Catalog.create(CDN_BASE ? { fetchText, baseUrl: CDN_BASE } : { fetchText })
       await cat.init()
       instance = cat
       return cat
