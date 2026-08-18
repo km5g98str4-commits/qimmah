@@ -39,10 +39,10 @@ recorded in `07-STATE.md` with the reason.
 QIM-V1-001 ✅ (CI red closed, CI green)  ──►  QIM-V1-005 ✅ (CI cannot mask)
         │
         └──►  QIM-V1-018 ✅ (EN injury warning — safety)
-                  └──►  QIM-V1-002 (one target weight)
+                  └──►  QIM-V1-002 ✅ (one target weight)
                             └──►  QIM-V1-008 (WebKit matrix)  ──►  RC FREEZE
                                             ▲
-   FA-01 (founder: what is Premium?) ──► QIM-V1-010 (truthful claims) ──┘
+   QIM-V1-010 (truthful claims — UNBLOCKED, see DEC-015) ───────────────┘
 
    QIM-V1-004 — closed as unnecessary (PLAN-CHANGE-001); no longer on the path.
 ```
@@ -108,7 +108,7 @@ is answered. Everything else is parallel — nothing else waits on a human.
   silently. Classification: **STRONGER**.
 
 ---
-**QIM-V1-002 — One target-weight authority** · `ENGINE` · S · HIGH
+**QIM-V1-002 — One target-weight authority** · `ENGINE` · S · HIGH · ✅ **DONE**
 - **problem:** the delivery screen shows `planDerive` (`×0.92`/`×1.05`) while the engine builds from
   `onboardingV2Adapter` (`×0.9`/`×1.1`). An 80 kg cutter is shown 74 kg and given a plan for 72 kg.
 - **depends_on:** QIM-V1-018 (same lane, finish before start)
@@ -120,6 +120,10 @@ is answered. Everything else is parallel — nothing else waits on a human.
 - **⚠ do not pick a constant by preference.** `planDerive` is the one already consumed by the
   *stored* profile and the *displayed* screen — two of three. The adapter is the outlier. If the
   founder wants different ratios that is a separate, numbered product decision.
+- **outcome:** the adapter now calls `deriveTargetWeight`; no constant was invented.
+  Guard `test:target-weight-authority` wired into the gate — behavioural (3×9 matrix + stored
+  profile + direction) **and structural** (no weight multiplier may exist in the adapter at all).
+  Red reproduced for real: 4 named failures, exit 1. Classification: **STRONGER**.
 
 ---
 **QIM-V1-003 — Stop asking for consent that gates nothing** · `TRUTH` · S · MEDIUM
@@ -135,7 +139,12 @@ is answered. Everything else is parallel — nothing else waits on a human.
 **QIM-V1-010 — Make every commercial and sync claim true** · `TRUTH` · M · HIGH
 - **problem:** `05-CLAIMS.md` CLM-001…005, CLM-013/014. The Terms of Service say *"No subscription is
   active in this version"* while 13 productive actions are gated and a Salla purchase flow ships.
-- **depends_on:** **FA-01 (founder — blocking)**. Nothing else in the plan waits on a human.
+- **depends_on:** — **NOT blocked any more.** This task was registered as waiting on `FA-01`
+  ("what is Premium?"). The charter had **already** answered it (`AGENTS.md §0.1`) — see **DEC-015**.
+  Every in-repo surface can be corrected now against a decided policy: **19.99 SAR, one-time
+  purchase, no subscription, no permanent second price**, approved sentence
+  «يشمل تحديثات قِمّة — بلا اشتراك شهري». The founder is needed only for the **external Salla
+  storefront** and the 89.99 anchor — neither of which is a file in this repository.
 - **surfaces:** `site/terms.html:84,132` · `site/index.html:134,150` · `site/support.html:65,99` ·
   `docs/appstore/02-description.md:42` · the live Salla storefront (founder)
 - **DoD:** every surface states what the code does: which actions need Premium, what browsing is
@@ -230,8 +239,12 @@ That the ground is not the real frontier. Answered by containment over **all 80 
 branch name — and by running the gate here rather than trusting a report. Residual risk: a branch
 pushed *after* this audit. Mitigated by the SHA check in the session protocol.
 
-**Does the critical path depend on a founder decision?** **Yes — and it is named.** `QIM-V1-010`
-waits on `FA-01`. Everything else is parallel. This is stated up front instead of surfacing at the end.
+**Does the critical path depend on a founder decision?** It did — and re-checking the *decision*
+rather than the *report* removed it. `QIM-V1-010` was recorded as blocked on `FA-01`; the charter
+(`AGENTS.md §0.1`) had already decided the price and the access model, and the backend already
+matches. See **DEC-015**. **Nothing on the critical path now waits on a human.**
+> This is the golden rule applied to a decision instead of to code: an earlier session's state
+> document said "founder must decide", and it had gone stale against the constitution.
 
 **Are we fixing symptoms instead of authorities?** Checked per task. `QIM-V1-002` merges two
 authorities into one rather than syncing two constants. `QIM-V1-001` fixes the harness's *assumption*,

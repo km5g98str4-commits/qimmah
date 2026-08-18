@@ -6,7 +6,7 @@
 
 ```
 LAST UPDATE : 2026-08-18 · session QIM-MASTER (recovery / control-plane)
-HEAD        : e72cd62 + merge of BR-02  (working branch, pushed)
+HEAD        : read it — `git rev-parse --short HEAD` (a literal here goes stale within one commit)
 ```
 
 ---
@@ -44,8 +44,22 @@ production     : main @ cc60adf  — 228 commits behind the ground (this is expe
 - **`QIM-V1-004` CLOSED as unnecessary (`PLAN-CHANGE-001`).** Verification before merging showed
   the ground already holds everything BR-01 claimed, by a better path — and merging would have
   **regressed** the Today surface. See `03-BRANCH-LEDGER.md`.
-- **Control plane created** at `docs/execution/qimmah-master/` — 13 files, one owner per fact,
-  and `CLAUDE.md`/`AGENTS.md` §11 now point at it.
+- **`QIM-V1-002` DONE — one target-weight authority.** The adapter now calls `deriveTargetWeight`
+  instead of carrying its own constants. Locked by `test:target-weight-authority` (behavioural
+  3×9 matrix + stored profile + direction, **plus a structural check that no weight multiplier may
+  exist in the adapter at all**). Red reproduced for real: 4 named failures with concrete numbers.
+  The gate then caught a second thing — `body-fields-proof.ts:68` asserted the literal `81`
+  (= 90 × 0.9, the old constant). It was **rebound to its stated intent** ("derived from the
+  answered weight, not the default") rather than having its number updated, so no copied constant
+  is left to age in two files.
+- **Control plane created** at `docs/execution/qimmah-master/` — 13 files, one owner per fact.
+  `CLAUDE.md`/`AGENTS.md` now point at it **from their first screen**, not only from §11.
+- **`DEC-101` corrected to `DEC-015`.** It was registered as an open founder decision on the
+  strength of an earlier state document; the **charter had already decided it** (`AGENTS.md §0.1`)
+  and the backend already matches. This removed the only human from the critical path.
+- **Cold-start acceptance test run** with a zero-context agent against repository files only. All
+  ten questions answered from the control plane. Its findings were treated as defects and fixed —
+  most importantly the charter pointer, which now sits at the top of the file.
 - **Every branch classified.** 27 fully contained, 8 current-era branches with unique work.
 - **Feature map and claim ledger built** from code, with `path:line` evidence throughout.
 
@@ -55,29 +69,38 @@ production     : main @ cc60adf  — 228 commits behind the ground (this is expe
 
 ## NEXT THREE TASKS
 
-1. **`QIM-V1-002`** — one target-weight authority. `planDerive` (`×0.92`/`×1.05`) drives the
-   delivery screen and the stored profile; `onboardingV2Adapter` (`×0.9`/`×1.1`) drives the engine.
-   An 80 kg cutter is shown 74 kg and given a plan built for 72 kg. `READY`.
+1. **`QIM-V1-010`** — make the free-tier, subscription and sync claims true across `site/terms.html`,
+   `site/index.html`, `site/support.html` and `docs/appstore/02-description.md`. The Terms of Service
+   currently say *"No subscription is active in this version"* while **13 productive actions** are
+   gated (`src/lib/access/paidActions.ts:18-53`). **Now unblocked** (DEC-015) and the highest-harm
+   item in the ledger. Extend `test:site-truth` to cover these claims — it does not today, which is
+   why they survived. `READY`.
 2. **`QIM-V1-003`** — stop collecting health-data consent that gates nothing
    (`onboardingProfile.ts:135-138`), and extend `test:onboarding-questions` to assert **downstream
-   consumption**, which is the blind spot that let it through. `READY`.
-3. **`QIM-V1-010`** — make the commercial and sync claims true. **BLOCKED on `FA-01`** — the
-   founder must first say what Premium is. This is the only task in the plan waiting on a human.
+   consumption**, not just UI binding — the blind spot that let it through. `READY`.
+3. **`QIM-V1-015`** — stamp the orphan surfaces and the five superseded `STATE.md` files. A
+   cold-start audit confirmed the risk is live: `find . -name STATE.md` returns the stale ones first
+   and **none of them says it is superseded**. Also correct `CLAUDE.md §11`'s reference to the
+   `WorkoutV2` save-honesty chain (the live one is in `WorkoutView`). `READY`.
 
 ## BLOCKERS
 
 | blocker | blocks | owner |
 |---|---|---|
-| **DEC-101** — is Premium annual or perpetual? Three surfaces disagree | `QIM-V1-010` — the largest truth gap in the project | **founder** (`FA-01`) |
 | **DEC-103** — 13 migrations unapplied in production | admin surface, real commerce testing | **founder** (`FA-03`) |
 | WebKit not installed in this container | `QIM-V1-008` | founder machine / WebKit runner |
 | Cloudflare unreachable from agent containers (403 / 000 / `fetch failed`, no Pages tools in MCP) | `QIM-V1-006`, `QIM-V1-007`, any deploy | **founder** |
 
+**Nothing on the critical path is blocked.** `QIM-V1-010` was recorded as waiting on `FA-01`
+("what is Premium?"); the charter had already decided it (`AGENTS.md §0.1`) and the backend already
+matches — see **DEC-015**. The founder is still needed for the **external Salla storefront**, which
+is not a file in this repository.
+
 ## FOUNDER DECISIONS REQUIRED
 
-`FA-01` Premium period 🔴 (**on the critical path**) · `FA-02` 82 MB food shards 🟠 ·
+`FA-01` Salla storefront + 89.99 anchor 🟠 (**no longer blocking — see DEC-015**) · `FA-02` 82 MB food shards 🟠 ·
 `FA-03` apply migrations 🟠 · `FA-04` 37 images / 22 videos 🟡 · `FA-05` AI-Coach vs backlog 🟡 ·
-`FA-06` promotion to `main` = launch 🔴 · `FA-07` close 6 stale PRs + tag before any branch delete 🟢 ·
+`FA-06` promotion to `main` = launch 🔴 · `FA-07` close 9 stale PRs + tag before any branch delete 🟢 ·
 `FA-08` confirm V1 = Web-only 🟢 (confirmation, not a blocker).
 
 Full text in `10-FOUNDER-ACTIONS.md`.

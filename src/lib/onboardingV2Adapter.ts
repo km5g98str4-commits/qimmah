@@ -29,7 +29,8 @@ import type {
   TrainingConsistency,
 } from '@/types/onboarding'
 import type { V2GoalValue } from '@/design-system/v2/labels'
-import type { Equipment } from '@/types/profile'
+import { deriveTargetWeight } from './planDerive'
+import type { Equipment, GoalType } from '@/types/profile'
 
 export type V2Place = 'gym' | 'home' | 'machines'
 
@@ -81,10 +82,29 @@ const PLACE_TO_ENV: Record<V2Place, Environment> = {
   machines: 'small_gym', // أجهزة فقط — closest existing (machine-focused, limited)
 }
 
+/** v2 goal → the canonical `GoalType` the derivation authority speaks. */
+const V2_GOAL_TO_TYPE: Record<V2GoalValue, GoalType> = {
+  cut: 'cutting',
+  bulk: 'bulking',
+  maintain: 'maintenance',
+}
+
 /**
- * Convert v2 onboarding choices into a full `Answers` object. Target weight is
- * derived from the goal the same way v1 does (cut ×0.9, bulk ×1.1, maintain =)
- * so calorie direction is sane.
+ * Convert v2 onboarding choices into a full `Answers` object. Target weight comes
+ * from **one authority** — `deriveTargetWeight` in `planDerive`.
+ *
+ * ═══ [QIM-V1-002] لماذا لا يُحسب هنا ═══
+ * كان هذا الموضع يشتقّ الوزن المستهدف بثوابته الخاصّة (تنشيف ×0.9 · تضخيم ×1.1)،
+ * بينما `planDerive.deriveTargetWeight` يشتقّه بثوابت أخرى (×0.92 · ×1.05). ولم
+ * يكن الفرق نظريًّا: هذا المسار يغذّي **المولّد** والملفَّ المخزَّن
+ * (`buildOnboardingProfile` → `bodyMetrics.targetWeightKg`)، بينما شاشة التسليم
+ * التي يقرأها المستخدم ترسم الثاني (`OnboardingV2.tsx:1385`).
+ *
+ * فمن يزن ٨٠ كجم ويريد التنشيف كان **يُعرض له ٧٤** ويُبنى له على **٧٢**. رقمان
+ * لحقيقة واحدة، والمعروض ليس هو المعمول به — وهو ما تمنعه §5 نصًّا.
+ *
+ * والسلطة المختارة ليست تفضيلًا: `planDerive` يستهلكه **مسار العرض ومسار
+ * التخزين** كلاهما (`onboardingProfile.ts:316`)، فهذا الموضع كان الشاذّ من ثلاثة.
  *
  * **بيانات الجسم تأتي من المستخدم الآن.** كان التدفّق لا يسألها إطلاقًا فتسقط
  * كلها على `defaultAnswers` (25 سنة · 170سم · 75كجم) — أي **نفس BMR لكل
@@ -96,12 +116,7 @@ const PLACE_TO_ENV: Record<V2Place, Environment> = {
  */
 export function toAnswersFromV2(choices: V2OnboardingChoices): Answers {
   const weightKg = choices.weightKg ?? defaultAnswers.weightKg
-  const targetWeightKg =
-    choices.goal === 'cut'
-      ? Math.round(weightKg * 0.9)
-      : choices.goal === 'bulk'
-        ? Math.round(weightKg * 1.1)
-        : weightKg
+  const targetWeightKg = deriveTargetWeight(weightKg, choices.goal ? V2_GOAL_TO_TYPE[choices.goal] : 'maintenance')
   const trainedBefore = choices.trainedBefore ?? null
   const followUps = historyFollowUpsApply(trainedBefore)
   const totalMonths = followUps ? choices.totalMonths ?? null : null

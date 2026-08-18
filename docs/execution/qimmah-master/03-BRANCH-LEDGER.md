@@ -122,8 +122,8 @@ with no authority (charter §1). Any doc still calling it the trunk is stale.
 | #46 · #47 | guardrail / settings r2 | `design/v21-promotion` | **WITHDRAW** — `test:e-guardrail` is a live gate step |
 | #7 | `react-body-highlighter` muscle map | `main` | **WITHDRAW** — frozen since July pending a study that never happened; the ground ships its own body model with `test:body3d` in the gate |
 
-All six open PRs target `design/v21-promotion`, a branch that is **320 commits behind the
-ground**. Merging any of them would be a regression. Closing them is founder-owned
+**Nine open PRs are listed above** (#7, #38, #39, #42–#47). Eight of them target
+`design/v21-promotion`, a branch **320 commits behind the ground**; #7 targets `main`. Merging any of them would be a regression. Closing them is founder-owned
 (`10-FOUNDER-ACTIONS.md` **FA-07**) because closing another party's PR is irreversible
 (charter §1.3).
 

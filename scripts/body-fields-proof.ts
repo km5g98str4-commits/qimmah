@@ -16,7 +16,8 @@ import {
   initialDraftV2,
 } from '@/lib/onboardingV2Flow'
 import { toAnswersFromV2 } from '@/lib/onboardingV2Adapter'
-import { buildOnboardingProfile } from '@/lib/planBuilderAnswers'
+import { buildOnboardingProfile, defaultAnswers } from '@/lib/planBuilderAnswers'
+import { deriveTargetWeight } from '@/lib/planDerive'
 import { computeTargets } from '@/lib/calculators'
 import { toLegacyProfile } from '@/lib/onboardingProfile'
 import { isMinorAge } from '@/lib/calculators'
@@ -65,7 +66,15 @@ check('العمر وصل', a.age === 30)
 check('الجنس وصل', a.sex === 'male')
 check('الطول وصل', a.heightCm === 180)
 check('الوزن وصل', a.weightKg === 90)
-check('وزن الهدف مشتقّ من الوزن المُجاب لا الافتراضي', a.targetWeightKg === 81)
+// [QIM-V1-002] كان هذا الفحص يشترط الرقم **٨١** حرفيًّا — أي ٩٠ × ٠٫٩، ثابت
+// المسند القديم. وقصده المُعلَن (وعنوانه) هو «مشتقّ من الوزن المُجاب لا
+// الافتراضي»، لا «يساوي ٨١». فحين صارت للاشتقاق سلطة واحدة (`deriveTargetWeight`،
+// تنشيف ×0.92) سقط الفحص على **رقمه** بينما قصده سليم.
+// الآن يُقاس القصد نفسه، بطرفيه: يساوي ما تعطيه السلطة للوزن المُجاب،
+// و**يخالف** ما تعطيه للوزن الافتراضي. فلا يبقى ثابتٌ منسوخ يشيخ في ملفَّين.
+check('وزن الهدف مشتقّ من الوزن المُجاب', a.targetWeightKg === deriveTargetWeight(90, 'cutting'))
+check('وليس من الوزن الافتراضي',
+  a.targetWeightKg !== deriveTargetWeight(defaultAnswers.weightKg, 'cutting'))
 
 console.log('\n═══ 4) الحسم: مستخدمان مختلفان ⇒ طاقتان مختلفتان ═══')
 const p1 = toLegacyProfile(buildOnboardingProfile(toAnswersFromV2({ ...base, age: 22, gender: 'male', heightCm: 190, weightKg: 95 })))

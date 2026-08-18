@@ -145,13 +145,41 @@ Status: `LOCKED` · `PENDING_FOUNDER` · `SUPERSEDED`
 
 ## PENDING_FOUNDER — execution continues around these; they block only their own tasks
 
-### DEC-101 — Premium period: annual vs no-expiry (**commercial contradiction**)
-- **the conflict, all three sides measured:** the Salla store says **19.99 annually**;
-  a second price says **89.99 annually**; the backend grants **`no_expiry = true`**; and the
-  schema makes an *expiring* Premium **unrepresentable**.
-- **nothing has been touched on any side.** An agent must not pick one.
-- **blocks:** `QIM-V1-010` (commerce copy truth) · **founder action:** `FA-01`
-- **evidence:** `docs/execution/qimmah-sovereign-closure/STATE.md §4.1`
+> **DEC-101 used to head this list. It was wrong** — the charter had already decided it. It is kept
+> below, struck through and re-registered as the LOCKED **DEC-015**, because a corrected decision
+> teaches more than a deleted one. **Nothing on the critical path waits on a human any more.**
+
+### ~~DEC-101~~ → **DEC-015 — Premium is a one-time 19.99 SAR purchase. ALREADY DECIDED.**
+> **This entry was wrong when first written, and the correction matters more than the entry.**
+> It was registered as `PENDING_FOUNDER` ("is Premium annual or perpetual?") on the strength of an
+> earlier session's state document. **The charter had already answered it** — `AGENTS.md §0.1`,
+> which is founder-signed constitution, not an agent's note. Charter §1.5 warns about exactly this:
+> *"القرار قد يكون هو البائت"* — check the document's provenance before its content.
+> Re-registered as **LOCKED**, and `01`'s `PENDING_FOUNDER` list is one item shorter.
+
+- **the decision, from `AGENTS.md §0.1`:**
+  - **19.99 SAR, unified across every channel** (Salla · app · site).
+  - **one-time purchase — no monthly subscription, no renewal.** The only approved user-facing
+    sentence is «يشمل تحديثات قِمّة — بلا اشتراك شهري».
+  - **a permanent second price is forbidden**: «العروض تكون حملات مؤقّتة أو أكوادًا، **لا سعرًا
+    ثانيًا دائمًا**».
+  - banned words on every user surface: «مدى الحياة» · "lifetime" · "all current and future updates".
+  - three gates only: **72-hour trial** (once per verified account) · **Premium** · **access code**
+    (default 14 days).
+- **the code already matches it:** the backend grants `no_expiry = true` with no renewal logic
+  anywhere in `supabase/migrations/` — which is exactly "one-time purchase, no subscription".
+  The schema making an *expiring* Premium unrepresentable is **correct**, not a defect.
+- **so what is actually wrong is one thing, and it is outside the repository:** the live Salla
+  storefront says «19.99 ريال **سنويًا**» and carries a permanent second price of «89.99 سنويًا».
+  Both violate §0.1. **The corrections are already drafted**, string by string, in
+  `docs/product/SALLA-MERCHANT-COPY-CHANGES.md:19-22`.
+- **the only genuinely open question** is narrow and commercial: keep or delete the struck-through
+  **89.99** price anchor (`SALLA-MERCHANT-COPY-CHANGES.md §3`). Keeping it is defensible only if
+  89.99 was or will be a real price.
+- **consequence — this unblocks the critical path:** `QIM-V1-010` no longer waits on a human for
+  anything inside the repository. Every in-repo surface can now be corrected against a decided
+  policy. `FA-01` is narrowed to the external storefront edit and the 89.99 anchor.
+- **reopen condition:** the founder changes the price or the access model in a numbered message.
 
 ### DEC-102 — Commit the 82 MB food long-tail shards, or host them
 - 59,941 records · 41 shards · **82 MB**, generated and fingerprint-verified against the

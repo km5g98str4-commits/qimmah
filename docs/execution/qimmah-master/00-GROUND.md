@@ -68,10 +68,17 @@ Run on `139a7b0`, Node `v22.22.2`, npm `10.9.7`, after `npm ci`:
 | typecheck | `npm run typecheck` | ✅ exit 0 |
 | lint (`--max-warnings 0`) | `npm run lint` | ✅ exit 0 |
 | build | `npm run build` | ✅ exit 0 |
-| deterministic gate (**140 steps**) | `npm run test:gate` | ✅ exit 0 |
+| deterministic gate | `npm run test:gate` | ✅ exit 0 |
 | browser E2E | `npm run test:e2e:onboarding` | ❌ **FAILS** — see below |
 
-`package.json`: **213 scripts**, `test:gate` = **140 steps**, `version = 1.0.0`, `license = UNLICENSED`.
+**Gate size is deliberately not quoted as a number here.** It grows every time a guard is added, so
+a number in prose goes stale within a wave and then contradicts `07-STATE.md`. Read it from source:
+
+```bash
+node -e "const p=require('./package.json');console.log(Object.keys(p.scripts).length,'scripts ·',p.scripts['test:gate'].split('&&').length,'gate steps')"
+```
+
+`version = 1.0.0`, `license = UNLICENSED` (bumping the version is a launch act — `FA-06`).
 
 ### The one red — named, root-caused, owned
 

@@ -63,11 +63,16 @@ enters `toAnswersFromV2` (`OnboardingV2.tsx:341-349`). Consumers verified:
 **F-GAP-01 — health consent is collected and ignored.** `onboardingProfile.ts:135-138`. Consent
 theatre is worse than no question. **BLOCKS_V1** → `QIM-V1-003`.
 
-**F-GAP-02 — two target-weight authorities.** `planDerive.ts:27-28` (`cutting ×0.92`, `bulking ×1.05`)
-drives the **delivery screen** the user reads (`OnboardingV2.tsx:1385,1449`) and the stored profile
-(`onboardingProfile.ts:316`); `onboardingV2Adapter.ts:101-103` (`cut ×0.9`, `bulk ×1.1`) drives the
-**plan the engine builds**. For an 80 kg cutter the screen says 74 kg and the plan is built for 72 kg.
-**BLOCKS_V1** → `QIM-V1-002`.
+**F-GAP-02 — two target-weight authorities. ✅ CLOSED (`QIM-V1-002`).**
+`planDerive.ts:27-28` (`cutting ×0.92`, `bulking ×1.05`) drove the **delivery screen** the user reads
+(`OnboardingV2.tsx:1385,1449`) and the stored profile (`onboardingProfile.ts:316`), while
+`onboardingV2Adapter.ts:101-103` (`cut ×0.9`, `bulk ×1.1`) drove the **plan the engine builds** —
+an 80 kg cutter was shown 74 kg and given a plan built for 72 kg.
+The adapter now calls the single authority. Locked by `test:target-weight-authority` (in the gate):
+a 3×9 matrix asserting adapter == authority == stored profile, a direction check (cut falls, bulk
+rises, maintain holds), **and a structural check that the adapter contains no weight multiplier of
+its own** — so a second derivation that happens to agree today still fails the gate. Red reproduced
+for real: restoring the old constants failed 4 named checks with concrete numbers (`cut/70: 63 vs 64`).
 
 **F-GAP-05 — the food long tail is declared but not served.** `public/food/manifest.json` declares
 `shard_count: 41` / 59,941 records; `public/food/shards/` **does not exist**

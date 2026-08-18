@@ -26,7 +26,7 @@ npm ci
 npm run typecheck        # tsc -b --noEmit
 npm run lint             # eslint --max-warnings 0
 npm run build            # tsc -b && vite build
-npm run test:gate        # 140 deterministic steps, no browser
+npm run test:gate        # every deterministic proof, no browser (count: read it from package.json)
 ```
 
 Browser steps live **outside** the local gate on purpose (a browser in every local gate
