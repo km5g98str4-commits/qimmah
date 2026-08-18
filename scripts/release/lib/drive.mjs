@@ -38,7 +38,10 @@ export async function seedLanguage(ctx, url, lang) {
 /** Seeds arbitrary localStorage entries before the app boots (dirty-state personas). */
 export async function seedStorage(ctx, url, entries) {
   const page = await ctx.newPage()
-  await page.goto(url, { waitUntil: 'domcontentloaded' })
+  // نفس علّة WebKit وعلاجها: التطبيق يحسم مسار الإقلاع ويكتب الهاش أثناء
+  // التحميل، فيُعدّ ذلك مقاطعةً للملاحة. وهذه أوّل ملاحة **قبل** البذر — وكان
+  // العلاج مطبَّقًا على الثانية (بعد البذر) وحدها، فبقي الطقم ساقطًا هنا.
+  await page.goto(url, { waitUntil: 'commit' })
   await page.evaluate((pairs) => {
     for (const [k, v] of pairs) {
       if (v === null) window.localStorage.removeItem(k)
@@ -72,7 +75,17 @@ const footerNext = (page) => page.locator('footer button').last()
 
 /** Start screen → guest entry → welcome → first question screen. */
 export async function enterAsGuest(page, url, { lang = 'ar' } = {}) {
-  await page.goto(url, { waitUntil: 'domcontentloaded' })
+  // ── [SOVEREIGN-002] `commit` لا `domcontentloaded` عند أوّل دخول ──────────
+  // نفس علّة السطر ٢٣٦ وبنفس علاجها المُثبَت: التطبيق يحسم مسار إقلاعه ويكتب
+  // الهاش أثناء التحميل، وWebKit يعدّ ذلك **مقاطعةً للملاحة** فيرمي
+  // `Frame load interrupted`. وكان يسقط التقاطَ بذرة الضيف — فيسقط طقم
+  // `p3-returning-guest` كلّه على WebKit **قبل أن يبدأ** (٠ ناجح · خطأ طقم)،
+  // بينما Chromium يبتلعها. مقيس لا مخمَّن: بنفس الرابط يمرّ `commit` ويسقط
+  // `domcontentloaded`.
+  //
+  // ولا يُضعِف شيئًا: `commit` يغيّر **متى يعود `goto`** لا ما يُفحص — و`settle`
+  // أدناه يبقى هو الانتظار الفعلي، وكل تأكيد بعده يقرأ DOM مرسومًا.
+  await page.goto(url, { waitUntil: 'commit' })
   await settle(page, 2400)
   // copy-bound: StartViewV2 exposes no testid for its three entry choices.
   await page.locator('[data-testid="welcome-start-cta"]').click({ force: true })
