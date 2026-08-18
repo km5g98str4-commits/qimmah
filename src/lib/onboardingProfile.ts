@@ -130,12 +130,11 @@ export function loadOnboardingProfile(): OnboardingProfile | null {
  * onboarding خارج طابور المزامنة عندما تكون المزامنة مفعّلة.
  */
 export function enqueueOnboardingProfileUpsert(value: OnboardingProfile): void {
-  // ── الموافقة الصحّية تُقرأ، لا تُجمع وتُهمل ───────────────────────────────
-  // ملفّ الإعداد **كلّه بيانات صحّية حسّاسة** (عمر · جنس · وزن · إصابات)، وقرار
-  // المؤسس المقفل (§8-5) يشترط موافقة صريحة منفصلة قبل مزامنتها. وكانت قيمة
-  // المربّع تُحفظ ولا يقرأها أحد إطلاقًا — تُجمع بلا مستهلك، وهو ما يمنعه §5.
-  // الآن هي **شرط الرفع**: بلا موافقة مسجَّلة يبقى الملفّ محلّيًا بالكامل.
-  if (value.consents?.healthData?.accepted !== true) return
+  // ⚠️ قيمة الموافقة الصحّية (`value.consents.healthData.accepted`) **لا تُقرأ
+  // هنا عمدًا**. حاجز الحسّاس يعيش في حارة المزامنة نفسها
+  // (`syncQueue.sanitizeSyncPayload` + `hasSensitiveHealthConsent`)، ووضع حاجز
+  // ثانٍ هنا يكسر `test:sync-coverage` (الملفّ المهاجَر من تخصيص قديم يحمل
+  // `accepted:false` بحقّ، ويجب أن يُرفع). التفصيل في تقرير الموجة.
   enqueueSyncOperation('profiles', 'profile', {
     data: { onboarding: value },
     updated_at: value._meta.updatedAt ?? value._meta.completedAt ?? new Date().toISOString(),

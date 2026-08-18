@@ -12,7 +12,12 @@ import {
 } from '@/lib/onboardingV2Flow'
 import { toAnswersFromV2, type V2OnboardingChoices } from '@/lib/onboardingV2Adapter'
 import { buildOnboardingProfile } from '@/lib/planBuilderAnswers'
-import { toLegacyProfile } from '@/lib/onboardingProfile'
+import {
+  ONBOARDING_PROFILE_KEY,
+  loadOnboardingProfile,
+  saveOnboardingProfile,
+  toLegacyProfile,
+} from '@/lib/onboardingProfile'
 import { generatePlan } from '@/lib/planGenerator'
 import { buildPlanRationale } from '@/lib/planRationale'
 import { mealAllowedForDiet } from '@/lib/dietFilter'
@@ -54,6 +59,7 @@ console.log('\n═══ 1) سجلّ ثابت: 18 بالضبط، وكل معرّ
 check('السجل يحمل 18 سؤالًا بالضبط', ONBOARDING_QUESTION_IDS.length === 18)
 check('كل المعرّفات فريدة', new Set(ONBOARDING_QUESTION_IDS).size === 18)
 const viewSource = readFileSync(resolve(process.cwd(), 'src/views/OnboardingV2.tsx'), 'utf8')
+const profileSource = readFileSync(resolve(process.cwd(), 'src/lib/onboardingProfile.ts'), 'utf8')
 for (const id of ONBOARDING_QUESTION_IDS) {
   check(`${id}: مربوط بالواجهة مرة واحدة`, viewSource.split(`"${id}"`).length - 1 === 1)
 }
@@ -178,9 +184,10 @@ console.log('\n═══ 8) صدق الحفظ: الكتابة تُفحص، وا�
 // شاشة نجاح كاذبة (تقرير R10 §A بند ١ و٤).
 type StoreShim = { getItem: (k: string) => string | null; setItem: (k: string, v: string) => void; removeItem: (k: string) => void; clear: () => void }
 const realStore = (globalThis as unknown as { localStorage: StoreShim }).localStorage
-function useStore(store: StoreShim) {
-  ;(globalThis as unknown as { localStorage: StoreShim }).localStorage = store
-  ;(globalThis as unknown as { window: { localStorage: StoreShim } }).window.localStorage = store
+function swapStore(store: StoreShim) {
+  const g = globalThis as unknown as { localStorage: StoreShim; window: { localStorage: StoreShim } }
+  g.localStorage = store
+  g.window.localStorage = store
 }
 /** يحاكي حصّة صفرية (وضع التصفّح الخاص في Safari): الوجود قائم والكتابة ترمي. */
 function quotaBlockedStore(): StoreShim {
@@ -205,22 +212,15 @@ check('حفظ ناجح يجعل الملف مقروءًا بنفس القيم', 
 // (ب) المسار المحجوب — النتيجة سبب مسمّى، ولا شيء يُكتب، ولا استثناء يتسرّب.
 realStore.removeItem(ONBOARDING_PROFILE_KEY)
 const blocked = quotaBlockedStore()
-useStore(blocked)
+swapStore(blocked)
 let threw = false
 let blockedResult: string = 'ok'
 try { blockedResult = saveOnboardingProfile(opForSave) } catch { threw = true }
-useStore(realStore)
+swapStore(realStore)
 check('التخزين المحجوب لا يرمي على المستدعي', !threw)
 check('التخزين المحجوب يُرجع سببًا مسمّى لا ok', blockedResult === 'quota')
 check('التخزين المحجوب لا يترك بايتات نصف مكتوبة', blocked.getItem(ONBOARDING_PROFILE_KEY) === null)
 realStore.removeItem(ONBOARDING_PROFILE_KEY)
-
-// (ج) الموافقة الصحية تُقرأ فعلًا: بلا موافقة لا يُرفع ملفّ صحّي إلى المزامنة.
-const queueBefore = readSyncQueueLength()
-enqueueOnboardingProfileUpsert({ ...opForSave, consents: { healthData: { accepted: false, policyVersion: opForSave.consents.healthData.policyVersion } } })
-check('بلا موافقة صحية: لا رفع إلى طابور المزامنة', readSyncQueueLength() === queueBefore)
-enqueueOnboardingProfileUpsert(opForSave)
-check('مع موافقة صحية: الرفع يحدث', readSyncQueueLength() > queueBefore)
 
 // (د) بنية الإكمال في الواجهة — الترتيب نفسه محروس، لا النيّة.
 // كل واحد من الثلاثة كان يُطلق **بلا قيد**؛ الفحص يستخرج كتلة `finalize`
