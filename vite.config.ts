@@ -4,6 +4,26 @@ import path from 'node:path'
 import { execSync } from 'node:child_process'
 import { readFileSync, writeFileSync } from 'node:fs'
 
+// ═══ [SOVEREIGN-PREVIEW-SAFETY] نشرات الفروع تُبنى معاينةً لا إنتاجًا ═══
+//
+// تكامل Git في Cloudflare Pages يبني **كل دفعة على أي فرع** بنفس أمر البناء.
+// فحتى بعد أن صار `build:founder-preview` ينزع بيانات اعتماد الإنتاج، بقيت
+// نشرة الفرع الآلية تُبنى بـ`npm run build` — أي **بوضع الإنتاج**، بالعنوان
+// والمفتاح مخبوزين. فكان أمان المعاينة يعتمد على أن يتذكّر إنسانٌ استعمال
+// الأمر الصحيح، بينما الآلة تنشر الأمر الخاطئ تلقائيًا عند كل دفعة.
+//
+// العلاج بنيوي لا إجرائي: البيئة تُشتقّ من `CF_PAGES_BRANCH` — الفرع الإنتاجي
+// وحده يُبنى إنتاجًا، وكل ما عداه معاينة. ويبقى `VITE_APP_ENV` الصريح أعلى
+// سلطة (لا يُنقَض تعيينٌ يدوي)، ويبقى البناء المحلّي بلا متغيّرات إنتاجًا كما كان.
+//
+// ملاحظة تنفيذ: نكتب في `process.env` قبل أن يحسم Vite `import.meta.env`،
+// لأن `supabaseClient` يقرأ `import.meta.env.VITE_APP_ENV` حرفيًّا وقت البناء —
+// فبهذا يطوي المُصغِّر الاحتياط ويحذف الاعتماد من أرتيفكت نشرة الفرع نفسها.
+const CF_PRODUCTION_BRANCH = 'main'
+if (!process.env.VITE_APP_ENV && process.env.CF_PAGES_BRANCH && process.env.CF_PAGES_BRANCH !== CF_PRODUCTION_BRANCH) {
+  process.env.VITE_APP_ENV = 'founder_preview'
+}
+
 // نسخة الحزمة + هاش الـ commit وقت البناء — لإظهار معرّف بناء يمكن التحقق منه.
 const pkgVersion = (() => {
   try {
