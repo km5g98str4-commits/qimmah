@@ -39,21 +39,34 @@ function marketBoost(p: CatalogProduct): number {
 }
 
 /**
- * يرتّب النتائج: الرتبة أولًا، ثم السوق، ثم الاسم — والأخير يجعل الترتيب
- * **حتميًا**، فلا يتبدّل ترتيب متساويين بين تشغيلين ويكذب اختبار الاستقرار.
+ * يرتّب النتائج **مع الاحتفاظ برتبة كل مطابقة**: الرتبة أولًا، ثم السوق، ثم
+ * الاسم — والأخير يجعل الترتيب **حتميًا**، فلا يتبدّل ترتيب متساويين بين
+ * تشغيلين ويكذب اختبار الاستقرار.
+ *
+ * الرتبة تُعاد لأن طبقة الاتحاد فوق الكتالوج (`src/lib/food/unifiedSearch.ts`)
+ * تحتاج أن تعرف **قوّة** المطابقة لتقارنها بقوّة مطابقة صنف منسَّق. إسقاطها هنا
+ * كان يجعل الاتحاد يخمّن ما حسبناه أصلًا.
  */
+export function rankRankedHits(hits: RankedHit[]): RankedHit[] {
+  return [...hits].sort((a, b) => {
+    const t = TIER_RANK[a.tier] - TIER_RANK[b.tier]
+    if (t !== 0) return t
+    const m = marketBoost(a.product) - marketBoost(b.product)
+    if (m !== 0) return m
+    return (a.product.name_ar || a.product.name_en || '').localeCompare(
+      b.product.name_ar || b.product.name_en || '',
+    )
+  })
+}
+
+/** نفس الترتيب بالسجلات المجرّدة — الواجهة القائمة. */
 export function rankHits(hits: RankedHit[]): CatalogProduct[] {
-  return [...hits]
-    .sort((a, b) => {
-      const t = TIER_RANK[a.tier] - TIER_RANK[b.tier]
-      if (t !== 0) return t
-      const m = marketBoost(a.product) - marketBoost(b.product)
-      if (m !== 0) return m
-      return (a.product.name_ar || a.product.name_en || '').localeCompare(
-        b.product.name_ar || b.product.name_en || '',
-      )
-    })
-    .map((h) => h.product)
+  return rankRankedHits(hits).map((h) => h.product)
+}
+
+/** الرقم الترتيبي لرتبة — تحتاجه طبقة الاتحاد لتسقط الرتب على سلّم واحد. */
+export function tierRank(tier: MatchTier): number {
+  return TIER_RANK[tier]
 }
 
 /** يحدّد رتبة المطابقة لسجل مقابل استعلام مطبَّع. */
