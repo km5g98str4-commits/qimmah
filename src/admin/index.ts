@@ -40,7 +40,7 @@ export {
 } from './auth/adminRole'
 export type { AdminRole, AdminRoleDecision, DenialReason, RoleClaimSource, RoleProvisioningState } from './auth/adminRole'
 
-export { loadExecutiveSnapshot, readPlatformPosture, WIRING_STATE } from './contract/source'
+export { loadExecutiveSnapshot, readPlatformPosture, buildUserDetailFromRow, WIRING_STATE } from './contract/source'
 export type { WiringState } from './contract/source'
 export { loadLiveExecutiveSnapshot, loadLiveUserPage } from './contract/liveSource'
 export type { LiveReadState, LiveSnapshotResult, LiveUserPageResult } from './contract/liveSource'

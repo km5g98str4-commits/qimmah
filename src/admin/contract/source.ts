@@ -28,6 +28,8 @@ import { isSupabaseConfigured } from '@/lib/supabaseClient'
 import { METRIC_REGISTRY } from './metrics'
 import type {
   ActivitySnapshot,
+  AdminUserDetail,
+  AdminUserRow,
   CommerceSnapshot,
   EntitlementSnapshot,
   ErrorsSnapshot,
@@ -178,5 +180,42 @@ export async function loadExecutiveSnapshot(): Promise<ExecutiveSnapshot> {
     onboarding: onboardingGap(),
     attention: [],
     users_page: gapOf('users.total'),
+  }
+}
+
+/**
+ * تفصيل مستخدم واحد — **مبنيّ من صفّه المحمَّل فعلًا، لا من نداء ثانٍ.**
+ *
+ * ═══ الفجوة التي يسدّها ═══
+ * `UserDetailPanel` مبنيّ ومُصدَّر و`AdminShell` يرسمه عند وجود `detail`،
+ * لكنّ `AdminRoute` لم يكن يمرّر `detail` ولا `onOpenUser` إطلاقًا. فالنقر على
+ * صفّ في جدول المستخدمين **لا يفعل شيئًا**: لوحة مبنيّة كاملة خلف زرٍّ لا سلك له.
+ *
+ * ═══ ولماذا لا نداء جديد ═══
+ * الصفّ نفسه محمَّل أصلًا ضمن `founder_user_page` — فيه المعرّف والاسم والبريد
+ * المُقنَّع وتاريخ الإنشاء وآخر دخول **وحالة الاستحقاق**، وهي عين ما يطلبه الأمر
+ * («حالة استحقاق المستخدم»). فبناء التفصيل منه يجعل الميزة تصل المستخدم اليوم
+ * بلا هجرة ولا دالّة خادم جديدة.
+ *
+ * ═══ وما لا نعرفه يبقى مُعلَنًا لا مُختلقًا ═══
+ * الحقول الأربعة الباقية ليست «ناقصة تقنيًّا» بل **محجوبة بنيويًّا**: قراءة تمارين
+ * المستخدم وتغذيته وقياساته تعني قراءة بياناته الصحّية، وهي خلف موافقة منفصلة
+ * صريحة (قرار المؤسس المقفل §8-٥). فتُعرض بدرجتها المعلَنة
+ * `IMPOSSIBLE_WITHOUT_CONSENT_CHANGE` — وهي **نفس الدرجة** التي تعلنها التجهيزة،
+ * فلا تفترق الشاشة عن العقد. و`supportContext` وحده `NEEDS_BACKEND`.
+ */
+export function buildUserDetailFromRow(row: AdminUserRow): AdminUserDetail {
+  const consentGated = <T,>(): MetricValue<T> => unavailable<T>('IMPOSSIBLE_WITHOUT_CONSENT_CHANGE')
+  return {
+    row,
+    planSummary: consentGated<string | null>(),
+    activity: {
+      workoutsCompleted: consentGated<number>(),
+      nutritionDaysLogged: consentGated<number>(),
+      measurementEvents: consentGated<number>(),
+      lastActivityAt: consentGated<string | null>(),
+    },
+    recentWorkouts: consentGated<readonly { date: string; dayName: string | null }[]>(),
+    supportContext: unavailable<readonly string[]>('NEEDS_BACKEND'),
   }
 }

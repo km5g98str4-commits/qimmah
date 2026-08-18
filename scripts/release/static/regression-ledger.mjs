@@ -498,7 +498,9 @@ export async function run() {
     `benign patterns=${BENIGN_CONSOLE.length}`)
 
   // ══ [SOVEREIGN-003] استثناء حجب الشبكة الخاصّة — يُحرَس بالاتجاهين (§4.2) ══
-  const PNA_ICON = "Access to resource at 'http://localhost:5411/icon-192.png' from origin 'null' has been blocked by CORS policy: The request client is not a secure context and the resource is in more-private address space `loopback`. @ http://localhost:5411/icon-192.png"
+  // الشكل **المرصود حرفيًّا**: الرسالة الواصفة تُنسب إلى `about:blank` (مستند
+  // قفزة العزل)، والمورد المحجوب مذكور داخل نصّها. والعامّة وحدها تحمل وجهته.
+  const PNA_ICON = "Access to resource at 'http://localhost:5411/icon-192.png' from origin 'null' has been blocked by CORS policy: The request client is not a secure context and the resource is in more-private address space `loopback`. @ about:blank"
   const PNA_PAIRED = 'Failed to load resource: net::ERR_FAILED @ http://localhost:5411/icon-192.png'
   rec.check('the console filter DOES suppress the exact loopback private-network block it names',
     realConsoleErrors([PNA_ICON, PNA_PAIRED]).length === 0,

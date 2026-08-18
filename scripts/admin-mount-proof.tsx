@@ -22,6 +22,7 @@ import type { Lang } from '@/lib/appPreferences'
 import { AdminRoute } from '@/admin/ui/AdminRoute'
 import { AdminShell } from '@/admin/ui/AdminShell'
 import { ADMIN_ROLE_CLAIM, resolveAdminRole } from '@/admin/auth/adminRole'
+import { buildUserDetailFromRow } from '@/admin/contract/source'
 import { loadLiveExecutiveSnapshot, loadLiveUserPage } from '@/admin/contract/liveSource'
 import type { MetricValue } from '@/admin/contract/types'
 
@@ -232,6 +233,41 @@ check('قيمة استحقاق مجهولة تصير unknown لا تُخترع',
 setRpc(ok([{ nonsense: true }]))
 const broken = await loadLiveUserPage(FOUNDER)
 check('صفّ مشوّه يُسقط الصفحة كلّها لا نصفها', broken.live === 'failed' && broken.page.state !== 'ready')
+
+// ═══════════════ ٥-ب) تفصيل المستخدم موصول فعلًا ═══════════════
+// [SOVEREIGN-003] `UserDetailPanel` كان مبنيًّا ومُثبَتًا بالرسم من تجهيزة،
+// و`AdminShell` يرسمه عند وجود `detail` — و`AdminRoute` **لا يمرّره إطلاقًا**.
+// أي أن النقر على صفٍّ لا يفعل شيئًا: لوحة كاملة خلف زرٍّ بلا سلك، وإثباتٌ
+// أخضر على سطح لا يبلغه مستخدم. فيُفحص السلك نفسه، لا الرسم وحده.
+{
+  const routeSrc = read('src/admin/ui/AdminRoute.tsx')
+  for (const prop of ['detail={', 'onOpenUser={', 'onCloseUser={']) {
+    check(`AdminRoute يمرّر «${prop.replace('={', '')}» إلى الشاشة`, routeSrc.includes(prop))
+  }
+  check('⚔️ ونزع التمرير كان سيُكتشف',
+    !routeSrc.replace('onOpenUser={', 'xx={').includes('onOpenUser={'))
+
+  // والتفصيل يُبنى من **الصفّ المحمَّل** لا من نداء ثانٍ ولا من تجهيزة.
+  setRpc(ok([ROW]))
+  const livePage = await loadLiveUserPage(FOUNDER)
+  const liveRow = livePage.page.state === 'ready' ? livePage.page.value.rows[0] : null
+  check('صفّ حيّ متاح للبناء', liveRow !== null)
+  const built = buildUserDetailFromRow(liveRow!)
+  check('التفصيل يحمل الصفّ الحقيقي بعينه', built.row.userId === ROW.user_id)
+  check('وحالة الاستحقاق الحقيقية تصل الشاشة', built.row.entitlement === 'premium')
+
+  // وما لا نملك إذنًا لقراءته يبقى **مُعلَنًا لا مُختلقًا**.
+  const gated = [built.planSummary, built.recentWorkouts, built.activity.workoutsCompleted,
+    built.activity.nutritionDaysLogged, built.activity.measurementEvents, built.activity.lastActivityAt]
+  check('حقول البيانات الصحّية كلّها غائبة لا مصفّرة',
+    gated.every((m) => m.state === 'unavailable'))
+  check('وبدرجتها المعلَنة: تحتاج تغيير موافقة (§8-٥)',
+    gated.every((m) => m.state === 'unavailable' && m.availability === 'IMPOSSIBLE_WITHOUT_CONSENT_CHANGE'))
+  check('وسياق الدعم غائب بدرجة «يحتاج خادمًا»',
+    built.supportContext.state === 'unavailable' && built.supportContext.availability === 'NEEDS_BACKEND')
+  check('⚔️ ولا حقل من هذه الستّة يحمل قيمة جاهزة — الاختلاق كان سيُكتشف',
+    !gated.some((m) => m.state === 'ready'))
+}
 
 // ═══════════════ ٦) الشاشة تطبع «غير متاح» لا صفرًا ═══════════════
 setRpc(fail({ code: 'PGRST202', message: 'Could not find the function' }))

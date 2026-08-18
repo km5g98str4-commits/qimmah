@@ -25,9 +25,10 @@ import { useLang } from '@/i18n'
 import { useAuth } from '@/lib/authContext'
 import { CLOSED_DECISION, isAdmin, resolveAdminRole } from '../auth/adminRole'
 import type { AdminRoleDecision } from '../auth/adminRole'
+import { buildUserDetailFromRow } from '../contract/source'
 import { loadLiveExecutiveSnapshot, loadLiveUserPage } from '../contract/liveSource'
 import type { LiveReadState } from '../contract/liveSource'
-import type { ExecutiveSnapshot } from '../contract/types'
+import type { AdminUserDetail, ExecutiveSnapshot } from '../contract/types'
 import { AdminDenied } from './AdminDenied'
 import { AdminShell } from './AdminShell'
 
@@ -86,8 +87,38 @@ export function AdminRoute() {
 
   const refresh = useCallback(() => setNonce((n) => n + 1), [])
 
+  /**
+   * ═══ السلك الذي كان مفقودًا ═══
+   * `UserDetailPanel` مبنيّ، و`AdminShell` يرسمه عند وجود `detail`، وهذا الملفّ
+   * لم يكن يمرّر `detail` ولا `onOpenUser` — فالنقر على صفٍّ في جدول المستخدمين
+   * **لا يفعل شيئًا**. لوحة كاملة خلف زرٍّ بلا سلك.
+   *
+   * ولا نداء جديد: الصفّ محمَّل أصلًا في `users_page`، وفيه ما يطلبه الأمر
+   * («حالة استحقاق المستخدم»). فنختاره بمعرّفه من اللقطة نفسها.
+   */
+  const [openUserId, setOpenUserId] = useState<string | null>(null)
+  const openUser = useCallback((userId: string) => setOpenUserId(userId), [])
+  const closeUser = useCallback(() => setOpenUserId(null), [])
+
   if (!allowed) return <AdminDenied decision={decision} />
   if (!snapshot) return <AdminLoading label={t.states.loading} />
 
-  return <AdminShell decision={decision} snapshot={snapshot} live={live} onRefresh={refresh} />
+  const page = snapshot.users_page
+  const openRow = openUserId && page.state === 'ready'
+    ? page.value.rows.find((r) => r.userId === openUserId) ?? null
+    : null
+  // صفّ اختير ثم اختفى من الصفحة (تحديث بينهما) لا يترك الشاشة فارغة: يُغلق ضمنًا.
+  const detail: AdminUserDetail | null = openRow ? buildUserDetailFromRow(openRow) : null
+
+  return (
+    <AdminShell
+      decision={decision}
+      snapshot={snapshot}
+      live={live}
+      onRefresh={refresh}
+      detail={detail}
+      onOpenUser={openUser}
+      onCloseUser={closeUser}
+    />
+  )
 }

@@ -340,13 +340,20 @@ export const BENIGN_CONSOLE = [
  * فـ٤٠٤ على نفس الأصل لا يُعفى (نصّه مختلف)، ولا يُعفى حجبٌ إلى مضيف غريب
  * (وجهته ليست loopback). ويحرسه تأكيد مضادّ في `static/regression-ledger`.
  */
-const LOOPBACK_TARGET = /@\s*https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:\d+)?\//
+const LOOPBACK = /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:\d+)?\//
 const PRIVATE_NETWORK_BLOCK = /more-private address space|not a secure context and the resource is in/i
+/** وجهة النداء كما يلحقها `collectErrors` بعد «@». */
 const URL_OF = (e) => (e.match(/@\s*(https?:\/\/\S+)/) || [])[1] || ''
+/**
+ * المورد المحجوب **كما تسمّيه الرسالة نفسها**: «Access to resource at '…'».
+ * ولا يكفي `URL_OF` هنا: الرسالة الواصفة تُنسب إلى المستند الذي أطلقها، وهو
+ * `about:blank` بعد قفزة العزل — لا إلى المورد. فالوجهة تُقرأ من النصّ.
+ */
+const BLOCKED_RESOURCE_OF = (e) => (e.match(/Access to resource at '([^']+)'/) || [])[1] || ''
 
-/** الرسالة **الواصفة** للحجب: تحمل سببه بنصّه، ووجهتها loopback. */
+/** الرسالة **الواصفة** للحجب: تحمل سببه بنصّه، والمورد المحجوب على loopback. */
 export const isLoopbackPrivateNetworkBlock = (e) =>
-  LOOPBACK_TARGET.test(e) && PRIVATE_NETWORK_BLOCK.test(e)
+  PRIVATE_NETWORK_BLOCK.test(e) && LOOPBACK.test(BLOCKED_RESOURCE_OF(e))
 
 /**
  * الحجب الواحد يصل كرسالتين لنفس المورد: واصفة بالسبب، وعامّة
@@ -355,7 +362,7 @@ export const isLoopbackPrivateNetworkBlock = (e) =>
  * فـ`ERR_FAILED` إلى أي مورد آخر يبقى خطأً محسوبًا.
  */
 function privateNetworkPairedUrls(errors) {
-  return new Set(errors.filter(isLoopbackPrivateNetworkBlock).map(URL_OF).filter(Boolean))
+  return new Set(errors.filter(isLoopbackPrivateNetworkBlock).map(BLOCKED_RESOURCE_OF).filter(Boolean))
 }
 
 /**
