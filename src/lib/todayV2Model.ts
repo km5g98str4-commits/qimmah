@@ -20,8 +20,28 @@ import { getDayStamp, weekdayName } from '@/lib/today'
 import { estimateDurationMin } from '@/lib/workoutStats'
 import { buildWarmupPlan } from '@/lib/warmupPlan'
 import { loadOnboardingProfile } from '@/lib/onboardingProfile'
+import { todayCoherenceStrings, type TodayCoherenceStrings } from '@/i18n/dict/todayCoherence'
 
 export type TodayState = 'normal' | 'newUser' | 'afterWorkout' | 'returnAfterBreak'
+
+/**
+ * [SOVEREIGN-003] مقطع واحد من سطر التاريخ — **مقاطع لا جملة**.
+ *
+ * كان السطر يُخبَز نصًّا واحدًا: «`${weekday} · ${dayMonth}`». وهذا يضع في سلسلة
+ * واحدة ثلاثة مدًى مختلفة الاتجاه (حروف عربية · فاصل محايد `·` · رقم)، فيصير
+ * ترتيبها المعروض حاصلَ خوارزمية ثنائية الاتجاه على **محارف محايدة بين مدّين
+ * مختلفين** — لا حاصلَ ما كتبناه. النتيجة التي رآها المؤسس: «الاثنين ١٧ · أغسطس»،
+ * أي أن الفاصل هاجر إلى داخل التاريخ.
+ *
+ * العلاج **بنيوي لا نصّي**: لا نعيد ترتيب الكلمات (فذلك يكسر اللغة الأخرى)، بل
+ * نمنع اختلاط المدى أصلًا. كل مقطع يُسلَّم وحده ويُصيَّر داخل `<bdi>` (عزل
+ * ثنائي الاتجاه)، والفاصل يصير **وسمًا** بين المقطعين لا محرفًا داخل نصّهما.
+ * فترتيب المقاطع يتبع اتجاه الفقرة وحده، ولا يبقى للمحايدات ما تتفاوض عليه.
+ */
+export interface TodayDatePart {
+  key: 'weekday' | 'dayMonth' | 'partOfDay'
+  text: string
+}
 export type PillarKey = 'train' | 'nutrition' | 'move' | 'recover'
 /** done = complete (✓) · active = in-progress ring (%) · ready = today's focus, filled + icon · locked = dashed placeholder (no empty ring). */
 export type PillarState = 'done' | 'active' | 'ready' | 'locked'
@@ -59,7 +79,8 @@ export interface TodayCard {
 export interface TodayV2Model {
   state: TodayState
   greeting: string
-  dateLabel: string
+  /** مقاطع سطر التاريخ — تُصيَّر معزولة، ولا تُجمَع نصًّا واحدًا (انظر `TodayDatePart`). */
+  dateParts: TodayDatePart[]
   avatarInitial: string | null
   goalLabel: string | null
   hero: TodayHero
@@ -86,6 +107,18 @@ export interface TodayV2Model {
    * فيبني عليها البديل المخفّف **من نفس الرقم المعروض** لا من رقم ثانٍ يخالفه.
    */
   durationMin: number
+  /**
+   * [SOVEREIGN-003] **مصدر** رقم المدّة — لا الرقم وحده.
+   *
+   * الرقم نفسه كان يُعرض بلا سند: أهو مقيس؟ مقدَّر؟ من إعداد المستخدم؟ ثلاثة
+   * أجوبة مختلفة تسكن نفس الخانة، والواجهة تعرضها كلها بنفس الثقة. وتسمية
+   * الجميع «تقديرًا» كذبٌ من الجهة الأخرى: تفضيل المستخدم رقمٌ **مُدخَل** لا
+   * مُقدَّر. فصار الحقل يقول أيّهما، وتعرض البطاقة الوسم المطابق.
+   *   • `estimated`  — محسوب من تمارين اليوم ومجموعاتها (`estimateDurationMin`).
+   *   • `preference` — تفضيل المستخدم المضبوط، حين تعذّر التقدير.
+   *   • `none`       — لا مدّة (لا تمرين اليوم) ⇒ لا رقم ولا وسم.
+   */
+  durationSource: 'estimated' | 'preference' | 'none'
   /**
    * [SOVEREIGN-TODAY-001] مدّة إحماء اليوم بالدقائق — **من نفس الباني** الذي
    * تعرضه شاشة الإحماء (`buildWarmupPlan`). «اليوم» يَعِد بهذا الرقم بعينه، فلا
@@ -143,6 +176,8 @@ function partOfDay(ar: boolean, d = new Date()): string {
 export function buildTodayV2Model(customization: Customization, lang: Lang, userId: string | null = null): TodayV2Model {
   const ar = lang !== 'en'
   const t = (a: string, e: string) => (ar ? a : e)
+  // نصوص هذه الموجة من قاموس الحارة — لا `t(ar, en)` محلّي جديد (§6).
+  const c = todayCoherenceStrings[ar ? 'ar' : 'en']
   const now = new Date()
 
   const onboarded = loadOnboardingProfile() !== null
@@ -176,6 +211,8 @@ export function buildTodayV2Model(customization: Customization, lang: Lang, user
   const durationMin = estimated > 0
     ? estimated
     : customization.profile.workoutDuration > 0 ? customization.profile.workoutDuration : 0
+  const durationSource: TodayV2Model['durationSource'] =
+    estimated > 0 ? 'estimated' : durationMin > 0 ? 'preference' : 'none'
   // الإحماء يُبنى من تمارين **هذا اليوم** — لا من قائمة عامّة، ولا رقمًا مكتوبًا.
   const warmupMinutes = workoutAvailable ? buildWarmupPlan(day).estMinutes : 0
   // (P5) الاكتمال الصادق بدل «أي finishedAt»: جلسة completed فقط تُكمل اليوم؛
@@ -234,21 +271,39 @@ export function buildTodayV2Model(customization: Customization, lang: Lang, user
   // ── Header: greeting + date line, rewritten by state & time-of-day ──
   const weekday = weekdayName(ar ? 'ar' : 'en', now)
   let greeting: string
-  let dateLabel: string
+  let dateParts: TodayDatePart[]
   if (state === 'afterWorkout') {
     greeting = t('كفو عليك اليوم', 'Well done today')
-    dateLabel = `${weekday} · ${partOfDay(ar, now)}`
+    dateParts = [
+      { key: 'weekday', text: weekday },
+      { key: 'partOfDay', text: partOfDay(ar, now) },
+    ]
   } else {
     const dayMonth = (() => {
       try {
-        // `ar` (not `ar-SA`) keeps the Gregorian calendar to match the approved
-        // v2.1 mockups («١١ يوليو»), consistent with the Gregorian weekday above.
-        return new Intl.DateTimeFormat(ar ? 'ar' : 'en-US', { day: 'numeric', month: 'long' }).format(now)
+        /**
+         * التقويم والأرقام **مثبَّتان صراحةً**، لا متروكَين لحسم ICU:
+         *   • `ca-gregory` — التقويم المفضَّل للعربية في CLDR قد يُحسم
+         *     `islamic-umalqura` على بعض المحرّكات، فيظهر يومٌ هجري تحت اسم يوم
+         *     أسبوع ميلادي. تثبيته بلا كلفة.
+         *   • `nu-latn` — النموذج يؤلّف بأرقام لاتينية والتحويل عند العرض
+         *     (`formatNumeralsIn`)، وهو نفس الحدّ المعتمد في بقيّة هذا الملف.
+         *     بلا التثبيت يخرج الرقم عربيًّا من هنا ولاتينيًّا من هناك.
+         */
+        return new Intl.DateTimeFormat(ar ? 'ar-u-ca-gregory-nu-latn' : 'en-US-u-ca-gregory-nu-latn', {
+          day: 'numeric',
+          month: 'long',
+        }).format(now)
       } catch {
         return ''
       }
     })()
-    dateLabel = dayMonth ? `${weekday} · ${dayMonth}` : weekday
+    dateParts = dayMonth
+      ? [
+          { key: 'weekday', text: weekday },
+          { key: 'dayMonth', text: dayMonth },
+        ]
+      : [{ key: 'weekday', text: weekday }]
     greeting =
       state === 'newUser'
         ? firstName ? t(`هلا ${firstName}`, `Hi ${firstName}`) : t('هلا فيك', 'Welcome')
@@ -290,15 +345,20 @@ export function buildTodayV2Model(customization: Customization, lang: Lang, user
     state === 'newUser'
       ? buildSetupCards(t)
       : state === 'afterWorkout'
-        ? buildAfterWorkoutNudges({ t, recoveryAvailable, proteinRemaining })
+        ? buildAfterWorkoutNudges({ c, recoveryAvailable })
         : state === 'returnAfterBreak'
           ? buildReturnNudges({ t })
-          : buildNormalNudges({ t, proteinRemaining, loggedMeal, movementAvailable, stepsRemaining, nutritionTarget })
+          : buildNormalNudges({ t, c, proteinRemaining, loggedMeal, movementAvailable, stepsRemaining, nutritionTarget })
 
   // ── Trust note (single, honest, only when something is genuinely unknown) ──
   let trustNote: string | null = null
   if (state !== 'newUser') {
-    if (!movementAvailable) trustNote = t('ما نعرض خطوات وهمية — مصدر الحركة مو مربوط.', 'No fake steps — movement source not connected.')
+    /**
+     * [SOVEREIGN-003] «مصدر الحركة مو مربوط» كان يَعِد بربطٍ لا وجود له على
+     * الويب: المتصفّح لا يقرأ HealthKit ولا Google Fit، فالجملة تدفع المستخدم
+     * للبحث عن زرّ ربط غير موجود. الصادق أن يُقال **من أين يجيء الرقم**.
+     */
+    if (!movementAvailable) trustNote = c.noStepsTrust
     else if (!loggedMeal && nutritionTarget) trustNote = t('ما فيه وجبات مسجّلة اليوم لسا.', 'No meals logged yet today.')
   }
 
@@ -316,7 +376,7 @@ export function buildTodayV2Model(customization: Customization, lang: Lang, user
     totalSets: !finished && partialTrain ? partialTrain.totalSets : setCount,
   }
 
-  return { state, greeting, dateLabel, avatarInitial, goalLabel, hero, pillars, progressLabel, completedCount, totalCount, cards, trustNote, restDay, daysSinceLastWorkout: daysSinceWorkout, durationMin, warmupMinutes, training }
+  return { state, greeting, dateParts, avatarInitial, goalLabel, hero, pillars, progressLabel, completedCount, totalCount, cards, trustNote, restDay, daysSinceLastWorkout: daysSinceWorkout, durationMin, durationSource, warmupMinutes, training }
 }
 
 // ── Hero builders ────────────────────────────────────────────────────────────
@@ -448,23 +508,32 @@ function buildSetupCards(t: (ar: string, en: string) => string): TodayCard[] {
 /** Normal-day nudges — 2–3, each a verb + destination, never a dead stat. */
 function buildNormalNudges(a: {
   t: (ar: string, en: string) => string
+  c: TodayCoherenceStrings
   proteinRemaining: number | null
   loggedMeal: boolean
   movementAvailable: boolean
   stepsRemaining: number | null
   nutritionTarget: boolean
 }): TodayCard[] {
-  const { t, proteinRemaining, loggedMeal, movementAvailable, stepsRemaining, nutritionTarget } = a
+  const { t, c, proteinRemaining, loggedMeal, movementAvailable, stepsRemaining, nutritionTarget } = a
   const cards: TodayCard[] = []
   if (proteinRemaining !== null && proteinRemaining > 0) {
     cards.push({ label: t(`باقي ${proteinRemaining}غ بروتين لهدف اليوم`, `${proteinRemaining}g protein left for today’s goal`), hint: null, actionLabel: t('أضف', 'Add'), icon: 'Flame', tone: 'nutrition', destination: 'nutrition' })
   } else if (nutritionTarget && !loggedMeal) {
     cards.push({ label: t('سجّل أول وجبة عشان نضبط سعراتك', 'Log your first meal to set your calories'), hint: null, actionLabel: t('سجّل', 'Log'), icon: 'Utensils', tone: 'nutrition', destination: 'nutrition' })
   }
+  /**
+   * [SOVEREIGN-003] وجهة الحركة صارت `steps` لا `progress`/`settings`.
+   *   • كانت «امشِ ٢٬٠٠٠ خطوة» تهبط على شاشة التقدّم، فيبحث المستخدم عن
+   *     الخطوات وسط بقيّة الشاشة بدل أن يصلها.
+   *   • وكانت «فعّل عدّاد الخطوات» تهبط على الإعدادات — و**لا عدّاد يُفعَّل على
+   *     الويب أصلًا**: المتصفّح لا يقرأ HealthKit. فعلٌ مستحيل بوجهة لا تنفّذه.
+   * البديل الصادق: التسجيل اليدوي على شاشة الخطوات نفسها، وهو ما تفعله الآن.
+   */
   if (movementAvailable && (stepsRemaining ?? 0) > 0) {
-    cards.push({ label: t(`امشِ ${num(stepsRemaining as number)} خطوة وتكمّل هدفك`, `Walk ${num(stepsRemaining as number)} steps to finish your goal`), hint: null, actionLabel: '', icon: 'Activity', tone: 'move', destination: 'progress' })
+    cards.push({ label: t(`امشِ ${num(stepsRemaining as number)} خطوة وتكمّل هدفك`, `Walk ${num(stepsRemaining as number)} steps to finish your goal`), hint: null, actionLabel: c.stepsOpenAction, icon: 'Activity', tone: 'move', destination: 'steps' })
   } else if (!movementAvailable) {
-    cards.push({ label: t('فعّل عدّاد الخطوات وتابع حركتك', 'Turn on the step counter to track movement'), hint: null, actionLabel: t('فعّل', 'Enable'), icon: 'Activity', tone: 'move', destination: 'settings' })
+    cards.push({ label: c.stepsLogLabel, hint: null, actionLabel: c.stepsLogAction, icon: 'Activity', tone: 'move', destination: 'steps' })
   }
   if (cards.length < 2) {
     cards.push({ label: t('سجّل وزنك الحالي · نقطة البداية', 'Log your current weight · your baseline'), hint: null, actionLabel: t('سجّل', 'Log'), icon: 'TrendingUp', tone: 'progress', destination: 'progress' })
@@ -489,12 +558,19 @@ function buildReturnNudges(a: { t: (ar: string, en: string) => string }): TodayC
 }
 
 /** After-workout nudges — recovery + a real look-back, each with a destination. */
-function buildAfterWorkoutNudges(a: { t: (ar: string, en: string) => string; recoveryAvailable: boolean; proteinRemaining: number | null }): TodayCard[] {
-  const { t, recoveryAvailable } = a
+function buildAfterWorkoutNudges(a: { c: TodayCoherenceStrings; recoveryAvailable: boolean }): TodayCard[] {
+  const { c, recoveryAvailable } = a
   const cards: TodayCard[] = []
+  /**
+   * [SOVEREIGN-003] «تذكيرات المساء · مكمّلاتك قبل النوم» كانت تهبط على
+   * `settings` — شاشة لا تعرض مكمّلًا واحدًا ولا تجدول تذكيرًا واحدًا (مجموعاتها
+   * التسع: حساب · بيانات · خطة · خصوصية · تطبيق · أدوات · لغة · عن · دعم).
+   * المكمّلات والأدوية تعيش في `ProfileV2`، والتذكيرات تُجدوَل من شاشته الفرعية.
+   * فالوجهة صارت `profile`، والنصّ يقول أين تجدها بدل أن يَعِد بما لا يُسلَّم.
+   */
   if (recoveryAvailable) {
-    cards.push({ label: t('تذكيرات المساء · مكمّلاتك قبل النوم', 'Evening reminders · supplements before bed'), hint: null, actionLabel: t('عرض', 'View'), icon: 'Moon', tone: 'recover', destination: 'settings' })
+    cards.push({ label: c.recoveryLabel, hint: null, actionLabel: c.recoveryAction, icon: 'Moon', tone: 'recover', destination: 'profile' })
   }
-  cards.push({ label: t('شوف ملخّص تمرين اليوم', 'View today’s workout summary'), hint: null, actionLabel: t('عرض', 'View'), icon: 'Trophy', tone: 'progress', destination: 'progress' })
+  cards.push({ label: c.workoutSummaryLabel, hint: null, actionLabel: c.recoveryAction, icon: 'Trophy', tone: 'progress', destination: 'progress' })
   return cards.slice(0, 3)
 }

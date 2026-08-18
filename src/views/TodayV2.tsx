@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { Fragment, useEffect, useMemo, useState } from 'react'
 import type { QuickLogTarget } from '@/components/MobileShell'
 import { Icon } from '@/components/Icon'
 import { MinorGoalNotice } from '@/components/MinorGoalNotice'
@@ -248,7 +248,31 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
         {/* ① وين أنا اليوم؟ — التاريخ سياقٌ صغير فوق التحية، والصورة مدخل للملف. */}
         <header className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-sm font-bold text-ink-500">{loc(model.dateLabel)}</p>
+            {/*
+              [SOVEREIGN-003] سطر التاريخ **مقاطع معزولة لا جملة واحدة**.
+              كان: `<p>{loc(model.dateLabel)}</p>` — نصّ واحد يحمل حروفًا عربية
+              وفاصلًا محايدًا (`·`) ورقمًا. والمحايد بين مدّين مختلفَي الاتجاه
+              يحسمه المتصفّح بخوارزمية ثنائية الاتجاه، لا نحن — فظهر عند المؤسس
+              «الاثنين ١٧ · أغسطس»: الفاصل هاجر داخل التاريخ.
+              العلاج ليس إعادة ترتيب الكلمات (ذلك يكسر الإنجليزية)، بل **منع
+              اختلاط المدى**: كل مقطع داخل `<bdi>` (عزل ثنائي الاتجاه، أي
+              `unicode-bidi: isolate`) و`dir="auto"` يستنتج اتجاهه من أول محرف
+              قويّ فيه، والفاصل صار **وسمًا** بين المقطعين لا محرفًا في نصّهما.
+              فما بقي للمحايدات ما تتفاوض عليه، وترتيب المقاطع يتبع اتجاه الفقرة
+              وحده — في العربية والإنجليزية معًا.
+            */}
+            <p className="flex flex-wrap items-center gap-x-1.5 text-sm font-bold text-ink-500">
+              {model.dateParts.map((part, index) => (
+                <Fragment key={part.key}>
+                  {index > 0 && (
+                    <span aria-hidden="true" className="text-ink-400">
+                      ·
+                    </span>
+                  )}
+                  <bdi dir="auto">{loc(part.text)}</bdi>
+                </Fragment>
+              ))}
+            </p>
             {/* `h2` لا `h1`: القشرة (`MobileShell`) تملك `h1` الصفحة، وعنوانان من
                 المستوى الأول على شاشة واحدة يكسران شجرة العناوين لقارئ الشاشة. */}
             <h2 className="mt-0.5 truncate text-3xl font-black leading-tight tracking-tight">{loc(model.greeting)}</h2>
@@ -341,6 +365,7 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
           hero={model.hero}
           training={model.training}
           durationMin={model.durationMin}
+          durationSource={model.durationSource}
           restDay={model.restDay}
           onNavigate={() => {
             if (model.hero.destination === 'nutrition') quick('meal', 'nutrition')
