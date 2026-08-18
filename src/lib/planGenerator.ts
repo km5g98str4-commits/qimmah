@@ -38,6 +38,7 @@ import { mealTemplates, getMealTemplate } from '@/data/mealTemplates'
 import { workoutDayNameAr, workoutDayNameEn } from '@/lib/workoutDayLabel'
 import { createPlanMealFromTemplate, planTotals } from '@/lib/nutritionPlan'
 import { createPlanCommitment } from '@/lib/commitmentPlan'
+import { estimateDurationMin } from '@/lib/workoutStats'
 import { templateAllowedForDiet, dietRestrictsSources } from '@/lib/dietFilter'
 import type { DietPattern } from '@/types/onboarding'
 
@@ -299,6 +300,83 @@ const TYPE_MUSCLES: Record<DayType, Muscle[]> = {
   core: ['core'],
 }
 
+// ————— قطبية الحركة (Movement polarity) — [SOVEREIGN-003] D6 —————
+//
+// **الجذر:** `SLOTS.pull` كان يحمل فتحة `{ muscles: ['shoulders'], role: 'isolation' }`
+// **بلا أي قيد نمط**، و`TYPE_MUSCLES` يسند `shoulders` ليومَي الدفع **والسحب** معًا.
+// فالكتف عُومل عضلةً واحدة، والكتالوج يعطي **كل** عزل كتف نفس `movementPattern:
+// 'isolation'` — فلا النمط ولا العضلة يفرّقان. النتيجة المرصودة: «رفرفة أمامي»
+// (`front-raise`) على **يوم السحب** في خطة ٦ أيام.
+//
+// **القاعدة:** الكتف ثلاثة رؤوس لا رأس واحد لهذا الغرض — الأمامية والجانبية
+// حركتهما **دفع** ميكانيكيًا، والخلفية **سحب**. فالقطبية تُشتقّ صراحةً، ويوم
+// الدفع/السحب يقبل قطبيته والمحايد فقط (البطن/الكور محايد بالتعريف).
+//
+// التصنيف **مُستنفَد لا افتراضي**: كل عزل كتف في الكتالوج مذكور بالاسم في إحدى
+// المجموعتين، ويحرس ذلك تأكيدٌ في `run-plan-coherence-proof.mjs` يسقط **بالاسم**
+// حين يدخل الكتالوج عزل كتف غير مصنَّف — فلا يتسرّب واحد جديد بالصمت.
+export type MovementPolarity = 'push' | 'pull' | 'neutral'
+
+/** الدالية الخلفية — حركتها سحب: تُدرَّب يوم السحب لا يوم الدفع. */
+export const POSTERIOR_DELT_IDS: ReadonlySet<string> = new Set([
+  'rear-delt-fly',
+  'cable-rear-delt-fly',
+  'reverse-pec-deck',
+  'face-pull',
+])
+
+/**
+ * الدالية الأمامية والجانبية — حركتها دفع: تُدرَّب يوم الدفع لا يوم السحب.
+ * `upright-row` مصنَّف `pull` في الكتالوج لأن مساره سحبٌ عموديّ، لكن ما يحمله
+ * هو الدالية الجانبية/الأمامية (`jointLoads: shoulder_anterior + abduction`) —
+ * فقطبيته **دفع** بحكم الرأس المُحمَّل لا بحكم اتجاه المسار.
+ */
+export const ANTERIOR_LATERAL_DELT_IDS: ReadonlySet<string> = new Set([
+  'lateral-raise',
+  'cable-lateral-raise',
+  'lateral-raise-machine',
+  'seated-lateral-raise',
+  'front-raise',
+  'upright-row',
+])
+
+/** قطبية تمرين واحد — الكتف بالرأس المُحمَّل، وما عداه بالنمط ثم العضلة. */
+export function movementPolarity(ex: Exercise): MovementPolarity {
+  if (ex.movementPattern === 'mobility' || ex.movementPattern === 'cardio') return 'neutral'
+  if (ex.primaryMuscle === 'shoulders') {
+    if (POSTERIOR_DELT_IDS.has(ex.id)) return 'pull'
+    if (ANTERIOR_LATERAL_DELT_IDS.has(ex.id)) return 'push'
+    if (ex.movementPattern === 'pull') return 'pull'
+    // عزل كتف غير مصنَّف: الافتراض «دفع» **معلَن** لا صامت، ويحرسه تأكيد
+    // الاستنفاد في الإثبات كي لا يبقى افتراضٌ مكان تصنيف.
+    return 'push'
+  }
+  if (ex.movementPattern === 'push') return 'push'
+  if (ex.movementPattern === 'pull') return 'pull'
+  if (ex.primaryMuscle === 'chest' || ex.primaryMuscle === 'triceps') return 'push'
+  if (ex.primaryMuscle === 'back' || ex.primaryMuscle === 'biceps') return 'pull'
+  return 'neutral'
+}
+
+/** القطبية التي يفرضها نوع اليوم — `null` = يوم غير مستقطب (جسم كامل/علوي/…). */
+const DAY_POLARITY: Record<DayType, MovementPolarity | null> = {
+  full: null,
+  upper: null,
+  lower: null,
+  push: 'push',
+  pull: 'pull',
+  arms: null,
+  core: null,
+}
+
+/** هل يُسمح لهذا التمرين بالدخول في يوم من هذا النوع؟ المحايد مسموح دائمًا. */
+export function polarityAllowsDay(type: DayType, ex: Exercise): boolean {
+  const required = DAY_POLARITY[type]
+  if (!required) return true
+  const polarity = movementPolarity(ex)
+  return polarity === required || polarity === 'neutral'
+}
+
 // ————— الإضافات (Accessories) — قرار زياد النهائي P12 —————
 // لا أيام ذراعين/بطن مستقلّة إطلاقًا. الذراعان والبطن تدخل الخطة **إضافة واحدة تُلحَق بنهاية
 // اليوم فقط**، من أجهزة الذراعين/البطن الستة (تبقى غير أساسية — قائمة الـ٣٢ تظل الحوض الوحيد).
@@ -333,6 +411,7 @@ function accessoryCategory(type: DayType, variation: number): 'triceps' | 'bicep
  */
 function pickAccessory(
   cat: 'triceps' | 'biceps' | 'abs',
+  dayType: DayType,
   dayIndex: number,
   used: Set<string>,
   tier: ExpTier,
@@ -344,7 +423,7 @@ function pickAccessory(
     // ستّة معرّفات ثابتة تُلحَق بنهاية اليوم بلا سؤال. كانت غير ضارّة بالمصادفة لا
     // بالتصميم (كلها أجهزة/كيبل). الآن تمرّ على نفس المرشّح الذي يمرّ عليه الحوض.
     if (!ex) return false
-    return cableOk(ex, tier) && injuryOk(ex)
+    return cableOk(ex, tier) && injuryOk(ex) && polarityAllowsDay(dayType, ex)
   })
   for (let k = 0; k < pool.length; k++) {
     const cand = pool[(dayIndex + k) % pool.length]
@@ -400,11 +479,13 @@ function partitionOrder(sorted: Exercise[], variation: number, nVar: number, ran
 }
 
 /** يختار تمرينًا لفتحة معيّنة من المجمع المتاح (تقسيم النسخة أولًا لتنويع A/B، وتجنّب التكرار). */
-function pickForSlot(slot: Slot, pool: Exercise[], used: Set<string>, variation: number, nVar: number, preferMachines: boolean, rank: Map<string, number>): string | undefined {
+function pickForSlot(type: DayType, slot: Slot, pool: Exercise[], used: Set<string>, variation: number, nVar: number, preferMachines: boolean, rank: Map<string, number>): string | undefined {
   let cands = pool.filter(
     (ex) =>
       slot.muscles.includes(ex.primaryMuscle) &&
       (slot.role === 'any' || exerciseRole(ex) === slot.role) &&
+      // [SOVEREIGN-003] D6 — بوّابة القطبية على **كل** موضع اختيار لا على الفتحة وحدها.
+      polarityAllowsDay(type, ex) &&
       !used.has(ex.id),
   )
   if (slot.patterns) {
@@ -432,7 +513,7 @@ function buildDayExercises(
   const ids: string[] = []
   for (const slot of SLOTS[type]) {
     if (ids.length >= target) break
-    const id = pickForSlot(slot, pool, used, variation, nVar, preferMachines, rank)
+    const id = pickForSlot(type, slot, pool, used, variation, nVar, preferMachines, rank)
     if (id) {
       ids.push(id)
       used.add(id)
@@ -443,7 +524,7 @@ function buildDayExercises(
   if (ids.length < target) {
     const extra = partitionOrder(
       sortCandidates(
-        pool.filter((ex) => !used.has(ex.id) && TYPE_MUSCLES[type].includes(ex.primaryMuscle)),
+        pool.filter((ex) => !used.has(ex.id) && TYPE_MUSCLES[type].includes(ex.primaryMuscle) && polarityAllowsDay(type, ex)),
         preferMachines,
       ),
       variation,
@@ -461,12 +542,38 @@ function buildDayExercises(
   // نكمل من بقية أجهزة الكتالوج، مقسومًا على النسخة (تنويع A/B) بترتيب ثابت داخل كل نسخة.
   if (fillFromWholePool && ids.length < target) {
     const extra = partitionOrder(
-      sortCandidates(pool.filter((ex) => !used.has(ex.id)), preferMachines),
+      sortCandidates(pool.filter((ex) => !used.has(ex.id) && polarityAllowsDay(type, ex)), preferMachines),
       variation,
       nVar,
       rank,
     )
     for (const ex of extra) {
+      if (ids.length >= target) break
+      ids.push(ex.id)
+      used.add(ex.id)
+    }
+  }
+  // [SOVEREIGN-003] D6 — **الملاذ الأخير المعلَن: القطبية المعاكسة.**
+  //
+  // ترتيب الأولوية أعلاه (فتحات ⇒ عضلات اليوم ⇒ الحوض كلّه) **كلّه محكوم
+  // بالقطبية**، فلا يدخل يومَ السحبِ دفعٌ ما دام في حوض المستخدم سحبٌ أو محايدٌ
+  // غير مستعمل. وهذه الخطوة تعمل فقط حين **ينفد ذلك كلّه**.
+  //
+  // ومتى ينفد فعلًا؟ في حالة واحدة مرصودة: «أجهزة فقط» مع إصابات تُخرج الدفع
+  // كلّه (كتف+مرفق+رسغ) — يبقى الحوض الآمن ٠ دفع · ٣ سحب · ٧ محايد، فيوم الدفع
+  // لا يبلغ هدفه إلا بجهاز سحب. والبديل عن هذه الخطوة هو **يوم أقصر لمصاب**
+  // مقارنةً بسليمٍ في نفس التهيئة — أي شراء التماسك بإفقار خطة المصاب، وهو ما
+  // يحرسه `injury-safety` صراحةً. فالترتيب مُعلَن ومُثبَت في
+  // `run-plan-coherence-proof.mjs`: لا تظهر قطبية معاكسة **إلا** والحوض
+  // الموافق للقطبية مستنفَد بالكامل، ويسقط التأكيد بالاسم إن ظهرت قبل ذلك.
+  if (fillFromWholePool && ids.length < target) {
+    const lastResort = partitionOrder(
+      sortCandidates(pool.filter((ex) => !used.has(ex.id)), preferMachines),
+      variation,
+      nVar,
+      rank,
+    )
+    for (const ex of lastResort) {
       if (ids.length >= target) break
       ids.push(ex.id)
       used.add(ex.id)
@@ -705,7 +812,7 @@ function generateWorkoutPlan(p: Profile): { plan: WorkoutPlan; specs: DaySpec[] 
     let accId: string | null = null
     if (machinesOnly) {
       const cat = accessoryCategory(spec.type, variation)
-      const acc = cat ? pickAccessory(cat, variation, new Set(ids), tier, injuryOk) : null
+      const acc = cat ? pickAccessory(cat, spec.type, variation, new Set(ids), tier, injuryOk) : null
       if (acc) { ids.push(acc); accId = acc }
     }
     return {
@@ -1056,6 +1163,87 @@ function applyDeload(plan: WorkoutPlan): WorkoutPlan {
   }
 }
 
+// ————— ميزانية مدّة الجلسة — [SOVEREIGN-003] D2 —————
+//
+// **الجذر:** إجابة «كم دقيقة لجلستك؟» كانت تدخل المحرّك من باب واحد فقط:
+// `targetExerciseCount` (عدد التمارين ±٢ حول أساس الخبرة). ولذلك بابان مكسوران:
+//   ١) `FULL_BODY_MIN = 5` يفرض أرضية على يوم الجسم الكامل، فـ٣٠ دقيقة و٤٥ دقيقة
+//      تُنتجان **الخطة نفسها بايتًا** لأشهر تهيئة مبتدئ (٣ أيام/أسبوع). الإجابة
+//      لا تغيّر شيئًا — وهذا هو المرصود.
+//   ٢) المحرّك لم يقس نفسه بنموذج المدّة إطلاقًا، فـ«٣٠ دقيقة» كانت تُولّد جلسةً
+//      تقديرها ٤٣ دقيقة — والشاشة تعرض الرقمين معًا.
+//
+// **العلاج:** المحرّك يُغلق الحلقة على **نفس** `estimateDurationMin` الذي تعرضه
+// الواجهة. الميزانية سقفٌ لا هدف: ما دخل تحتها لا يُمَس، وما تجاوزها يُقلَّص
+// بترتيب معلن — أولًا **ذيل اليوم** (الإضافة ثم العزل، حتى الأرضية التشريحية)،
+// ثم **المجموعات** من الذيل إلى الرأس حتى أرضية مجموعتين (نفس أرضية `applyDeload`).
+//
+// ما لا يفعله عمدًا: لا يمدّ جلسةً أقصر من الميزانية (المدّ يملكه
+// `targetExerciseCount`)، ولا ينزل تحت الأرضية التشريحية ليصل رقمًا، ولا يكذب —
+// إن تعذّر بلوغ السقف بقي التقدير على حقيقته وعرضته الشاشة كما هو.
+
+/** أرضية المجموعات — نفس أرضية `applyDeload`: لا جلسة بمجموعة واحدة. */
+const MIN_SETS_UNDER_BUDGET = 2
+
+/**
+ * **حدّ الميزانية المُعلَن: لا تمسّ فتحة أساسية.**
+ *
+ * عدد التمارين الأساسية يملكه `targetExerciseCount` وحده — وهو **يستجيب**
+ * للإجابة أصلًا (٣٠ دقيقة ⇒ −٢ تمرين، ٩٠ ⇒ +٢). أمّا الميزانية فتعمل على ما
+ * تبقّى: **الإضافة المُلحَقة** (`optional`) ثم **المجموعات**.
+ *
+ * ولماذا هذا الحدّ بالذات: `injury-safety` يقيس أن يوم المصاب لا يفقد فتحة
+ * أساسية مقابل ضابطٍ سليم بنفس التهيئة. وحين جرّبتُ اقتطاع الأساسيات تحت
+ * الميزانية سقط ذلك التأكيد في ٧٨ يومًا — **لا لأنه ضيّق بل لأن الاقتطاع كان
+ * خاطئًا**: حوض المصاب أضيق ⇒ تمارين براحاتٍ أطول ⇒ تجاوز الميزانية أوّلًا
+ * ⇒ فيفقد فتحةً لا يفقدها السليم. فيصير «قصر الجلسة» بابًا خلفيًّا لإفقار خطة
+ * المصاب. الحدّ هنا يغلق الباب من أصله بدل أن يُطفئ الحارس.
+ */
+function trailingOptionalCount(exercises: readonly PlanExercise[]): number {
+  let n = 0
+  for (let i = exercises.length - 1; i >= 0 && exercises[i].optional; i--) n++
+  return n
+}
+
+/** يقلّص يومًا واحدًا حتى يدخل الميزانية — أو يعيده كما هو إن كان داخلها. */
+function fitDayToBudget(day: PlanDay, budgetMin: number): PlanDay {
+  if (!Number.isFinite(budgetMin) || budgetMin <= 0) return day
+  if (estimateDurationMin(day) <= budgetMin) return day
+
+  let exercises = day.exercises.slice()
+
+  // ١) الإضافة المُلحَقة أولًا — غير أساسية بالتعريف، فهي أول ما يسقط.
+  let optional = trailingOptionalCount(exercises)
+  while (optional > 0 && estimateDurationMin({ ...day, exercises }) > budgetMin) {
+    exercises = exercises.slice(0, -1)
+    optional--
+  }
+
+  // ٢) ثم المجموعات، من الذيل إلى الرأس، جولةً جولة حتى أرضية المجموعتين.
+  //    الذيل أولًا كي يبقى الحمل على المركّبات الأولى ما أمكن.
+  let reduced = true
+  while (reduced && estimateDurationMin({ ...day, exercises }) > budgetMin) {
+    reduced = false
+    for (let i = exercises.length - 1; i >= 0; i--) {
+      if (estimateDurationMin({ ...day, exercises }) <= budgetMin) break
+      if (exercises[i].sets > MIN_SETS_UNDER_BUDGET) {
+        exercises = exercises.map((pe, j) => (j === i ? { ...pe, sets: pe.sets - 1 } : pe))
+        reduced = true
+      }
+    }
+  }
+
+  // بلوغ السقف ليس مضمونًا (أرضية المجموعات + الفتحات الأساسية) — وحين يتعذّر
+  // يبقى التقدير على حقيقته وتعرضه الشاشة كما هو. لا تقصير مزيّف ولا رقم مُجمَّل.
+  return { ...day, exercises: exercises.map((pe, i) => ({ ...pe, order: i })) }
+}
+
+/** يطبّق ميزانية الجلسة على الخطة كلّها. */
+export function fitPlanToSessionBudget(plan: WorkoutPlan, budgetMin: number): WorkoutPlan {
+  if (!Number.isFinite(budgetMin) || budgetMin <= 0) return plan
+  return { ...plan, days: plan.days.map((d) => fitDayToBudget(d, budgetMin)) }
+}
+
 /** اسم/وسم الخطة المختصر. */
 export function planLabel(p: Profile, templateId: string): string {
   const days = clamp(p.trainingDays, 1, 7)
@@ -1083,6 +1271,9 @@ export function generatePlan(profile: Profile): GeneratedPlan {
   let workoutPlan = plan
   workoutPlan = applyMuscleFocus(workoutPlan, p.muscleFocus ?? 'balanced')
   if (isConservativeStart) workoutPlan = applyDeload(workoutPlan)
+  // [SOVEREIGN-003] D2 — الميزانية آخر كلمة: تسري بعد التركيز والتخفيف معًا كي
+  // تكون على الأرقام التي ستُعرض فعلًا، لا على أرقام وسيطة تُعدَّل بعدها.
+  workoutPlan = fitPlanToSessionBudget(workoutPlan, p.workoutDuration)
 
   const weeklySchedule = buildScheduleFromSpecs(specs, p.trainingDays, p.preferredDays)
   const { plan: nutritionPlan, warning: nutritionWarning } = generateNutrition(p, targets)

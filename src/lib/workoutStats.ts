@@ -44,9 +44,39 @@ export function weeklyCompleted(sessions = loadSessions()): number {
   return finishedDays(sessions).filter((d) => recent.has(d)).length
 }
 
-/** مدة تقديرية لليوم بالدقائق (زمن مجموعة ~٤٠ث + الراحة). */
+/**
+ * ثوان العمل التقديرية للمجموعة الواحدة — الثابت الوحيد في نموذج المدّة.
+ * مُصدَّر كي يستهلكه الإثبات بدل أن يعيد كتابته (رقم مكرَّر = نموذج ثانٍ).
+ */
+export const WORK_SECONDS_PER_SET = 40
+
+/** الراحة الافتراضية حين لا يحملها العنصر. */
+export const DEFAULT_REST_SECONDS = 60
+
+/**
+ * مدّة الجلسة التقديرية بالثواني — **المصدر الوحيد** لنموذج المدّة.
+ * `estimateDurationMin` أدناه غلافٌ بالدقائق، ومحرّك الخطة يقيس به نفسه
+ * (`fitPlanToSessionBudget` في `planGenerator`) — فما نولّده وما نعرضه رقمٌ واحد.
+ */
+export function estimateDurationSec(day: PlanDay | undefined): number {
+  if (!day) return 0
+  return day.exercises.reduce(
+    (sum, pe) => sum + Math.max(1, pe.sets) * (WORK_SECONDS_PER_SET + (pe.restSec || DEFAULT_REST_SECONDS)),
+    0,
+  )
+}
+
+/**
+ * مدة تقديرية لليوم بالدقائق (زمن مجموعة ~٤٠ث + الراحة).
+ *
+ * [SOVEREIGN-003] D2 — **المصدر الواحد المُعلَن**. كان في المستودع نموذجان
+ * متنافسان لمدّة الجلسة نفسها: هذا، و`Math.max(20, Math.round(total * 9 / 5) * 5)`
+ * في `workoutV2Model` (تسعُ دقائق لكل تمرين، تقريبٌ لأقرب ٥) — فكان تبويب
+ * «التمرين» يقول رقمًا وتبويب «اليوم» يقول غيره لنفس الجلسة. أُزيل الثاني
+ * ووُصل مستهلكوه بهذا، ويحرس الوحدانيةَ تأكيدٌ نصّي في
+ * `run-plan-coherence-proof.mjs` يسقط بالاسم عند ظهور أي حساب مدّة جديد.
+ */
 export function estimateDurationMin(day: PlanDay | undefined): number {
   if (!day) return 0
-  const sec = day.exercises.reduce((sum, pe) => sum + Math.max(1, pe.sets) * (40 + (pe.restSec || 60)), 0)
-  return Math.max(5, Math.round(sec / 60))
+  return Math.max(5, Math.round(estimateDurationSec(day) / 60))
 }
