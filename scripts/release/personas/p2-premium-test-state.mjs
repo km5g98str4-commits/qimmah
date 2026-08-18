@@ -123,9 +123,24 @@ export async function run({ browser, url, engine }) {
         return ml(a['qimmah:nutrition:v2']) > ml(b['qimmah:nutrition:v2'])
       })
 
+    // [SOVEREIGN-TODAY-001] الإحماء صار يقع **قبل** أول مجموعة عمل.
+    //
+    // كان `startDay` يدخل الجلسة الكاملة فورًا، فكانت ضغطة «اليوم ١» وحدها تكتب
+    // مفتاح الجلسة النشطة. والرئيسية كانت تَعِد «إحماء قصير» ثم لا يقع — فأُصلح
+    // الوعد. وهذا التأكيد كان يرسّخ السلوك القديم: يضغط «ابدأ» ثم يطالب بكتابة
+    // لم يعد وقتها قد حان.
+    //
+    // فلم يُخفَّف الشرط — نُقل إلى موضعه الصحيح: تُعبَر شاشة الإحماء أوّلًا، ثم
+    // **يبقى الشرط كما هو حرفيًا**: يجب أن يُكتب مفتاح جلسة نشطة.
     await mutate('workout.start',
       () => goRoute(page, 'workout', 2600),
-      () => page.locator('button').filter({ hasText: PLAN_DAY_1 }).first().click({ timeout: 10000 }),
+      async () => {
+        await page.locator('button').filter({ hasText: PLAN_DAY_1 }).first().click({ timeout: 10000 })
+        // شاشة الإحماء تسبق الجلسة؛ نعبرها بالبدء الصريح لا بالتخطّي — فالتخطّي
+        // مسار آخر يعلن صراحةً أنه «لا يُحتسب إحماءً».
+        const startAfterWarmup = page.locator('button').filter({ hasText: 'ابدأ التمرين' }).first()
+        if (await startAfterWarmup.count()) await startAfterWarmup.click({ timeout: 10000 })
+      },
       (b, a) => Object.keys(a).some((k) => isActiveSessionKey(k) && a[k] && a[k] !== b[k]))
 
     // logSet then finish, inside the session opened above
