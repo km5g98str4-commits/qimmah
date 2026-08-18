@@ -4,8 +4,19 @@
 // النبرة: عامية بيضاء (الميثاق §6). وثابت «لا لوم ولا ضغط ولا تهويل» يحكم كل
 // سطر هنا تحديدًا — هذه شاشة تطلب مالًا، وأسهل ما فيها أن تنزلق إلى الضغط.
 // فالصياغة تصف ما يفتحه الاشتراك، ولا تعاتب من لم يشترك ولا تخوّفه بالفوات.
+//
+// ═══ [SOVEREIGN-COMMERCE-001] لماذا صار هذا الملف بيت رسائل الفشل كلّها ═══
+// كانت سبعة أسباب متمايزة تخرج من نصّ واحد: «ما قدرنا نتحقّق الحين. تأكّد من
+// النت». ومنها **غياب الخادم في بناء المراجعة** (ليس عطلًا أصلًا)، و**نقص
+// `identity_pepper`** (عطل إعداد عندنا)، و**المهلة**. فكان يُلام نتُ المستخدم
+// على عطلٍ عندنا — والمستخدم الذي يُقال له «شبكتك» لا يبلّغ أحدًا.
+//
+// ورسائل التجربة تعيش هنا أيضًا — لا في `reveal.ts` — لأن **مصدر الحالة واحد**
+// (`TrialOutcome` من طبقة الوصول)، فلو تفرّق نصّها على قاموسين لتباعد الوصفان
+// لنفس الحالة. القاعدة: مَن يملك الحالة يملك نصّها.
 
 import type { Lang } from '@/lib/appPreferences'
+import { formatNumber } from '@/lib/numberFormat'
 
 export interface AccessStrings {
   /** عنوان البوّابة — يذكر الفعل الممنوع بلغة المستخدم لا بلغة الكود. */
@@ -37,18 +48,75 @@ export interface AccessStrings {
    */
   codeBody: string
   codeLabel: string
+  /** تلميح دائم تحت الحقل — يشرح ما يُنتظر قبل أي محاولة، لا بعد فشلها. */
+  codeHint: string
   codePlaceholder: string
   codeSubmit: string
   codeChecking: string
   codeSuccess: string
-  /** رسالة عامّة واحدة لكل كود غير مقبول — لا تكشف وجود الأكواد (§D). */
+  /**
+   * رسالة عامّة واحدة لكل كود غير مقبول (§D).
+   *
+   * **مدموجة عمدًا ولا تُفكَّك:** الخادم يرفع `invalid_code` واحدة لخمس حالات
+   * (غير موجود · مُعطَّل · لم تبدأ نافذته · انتهت · استُنفدت مرّاته)، وتفكيكها
+   * يحوّل الحقل إلى **أوراكل** يُسأل عن وجود الأكواد. ولهذا لا يوجد `codeExpired`
+   * — نصٌّ يقول «هذا الكود منتهي» لا يمكن أن يكون صادقًا في الإنتاج.
+   */
   codeInvalid: string
+  /** «ما كتبت كودًا» ليست «كودك خاطئ» — حقيقة محلّية لا حكم على كود. */
+  codeEmpty: string
   codeAlreadyUsed: string
-  codeExpired: string
+  /** لا خادم تفعيل في هذا البناء — ليس عطلًا، ولا علاقة له بشبكة المستخدم. */
+  codeBackendAbsent: string
+  /** نسخة مراجعة المؤسس تحديدًا — تُسمّي نفسها بدل أن تلمّح. */
+  codePreviewNoServer: string
+  /** الطلب تجاوز المهلة — عابر، والإعادة معقولة. */
+  codeTimeout: string
+  /** عطل عندنا (بيبر مفقود · صلاحية · دالّة ناقصة · مجهول) — لا عند المستخدم. */
+  codeServiceError: string
+  /** **مُضيَّقة**: انقطاع شبكة حقيقي وحده. */
   codeOffline: string
   /** [OVERNIGHT-5] حالتان من الخادم لم تكونا موجودتين قبل وصول العقد. */
   codeRevoked: string
   codeNeedsAccount: string
+
+  /**
+   * ═══ التجربة (٧٢ ساعة) — نفس التصنيف ═══
+   * كل رسالة فشل تقول صراحةً **إن التجربة لم تبدأ**: الفشل يُغلق ولا يُترك
+   * غامضًا يظنّ منه المستخدم أن شيئًا بدأ.
+   */
+  trialStarting: string
+  trialStarted: string
+  trialNeedsAccount: string
+  trialNeedsVerifiedEmail: string
+  trialAlreadyUsed: string
+  /** منعٌ إداري **دائم** — كان يُعرض «تأكّد من اتصالك»، فيُعاد المحاولة أبدًا. */
+  trialRevoked: string
+  trialBackendAbsent: string
+  trialPreviewNoServer: string
+  trialTimeout: string
+  trialServiceError: string
+  trialOffline: string
+
+  /**
+   * ═══ مؤشّر الوصول الحالي ═══
+   * لم يكن في التطبيق سطر واحد يقول للمستخدم **ما وضعه الآن**: لا «عندك
+   * Premium»، ولا عدّاد تجربة، ولا إشعار إيقاف. الحالة كانت تُقرأ للقرار
+   * وتُرمى بلا عرض.
+   */
+  statusChecking: string
+  statusPremium: string
+  statusSpecial: string
+  statusTrial: (remaining: string) => string
+  statusTrialEndingSoon: (remaining: string) => string
+  statusTrialExpired: string
+  statusRevoked: string
+  statusPreview: string
+  statusUnknown: string
+  /** صياغة المتبقّي — بأرقام اللغة، ومن ساعة الخادم لا ساعة الجهاز. */
+  remainingHoursMinutes: (hours: number, minutes: number) => string
+  remainingMinutes: (minutes: number) => string
+  remainingLessThanAMinute: string
 }
 
 export const accessStrings: Record<Lang, AccessStrings> = {
@@ -70,16 +138,47 @@ export const accessStrings: Record<Lang, AccessStrings> = {
     codeTitle: 'كود التفعيل',
     codeBody: 'اكتب كود الوصول اللي وصلك من حملة أو دعوة. الشراء من سلة يفتح حسابك بنفسه — ما يحتاج كود.',
     codeLabel: 'كود التفعيل',
+    codeHint: 'اكتب الكود كما وصلك — الشرطات والمسافات ما تفرق.',
     codePlaceholder: 'مثال: QIMMAH-XXXX-XXXX',
     codeSubmit: 'فعّل',
     codeChecking: 'نتحقّق من الكود…',
     codeSuccess: 'تمّ التفعيل — كل شي مفتوح لك الحين.',
     codeInvalid: 'الكود ما ضبط. تأكّد منه وجرّب مرة ثانية.',
+    codeEmpty: 'اكتب كود التفعيل أول.',
     codeAlreadyUsed: 'هذا الكود مستخدم من قبل.',
-    codeExpired: 'هذا الكود منتهي.',
-    codeOffline: 'ما قدرنا نتحقّق الحين. تأكّد من النت وجرّب بعد شوي.',
+    codeBackendAbsent: 'خدمة التفعيل مو موصولة في هذي النسخة، فما نقدر نتحقّق من كودك. يشتغل في النسخة الحيّة.',
+    codePreviewNoServer: 'هذي نسخة مراجعة بلا خادم، فالتفعيل ما يشتغل فيها. كودك ينفع في النسخة الحيّة.',
+    codeTimeout: 'الطلب طوّل وما وصلنا ردّ، وما تفعّل شي. جرّب مرة ثانية.',
+    codeServiceError: 'فيه خلل عندنا — مو عندك — وما تفعّل شي. جرّب بعد شوي، وإذا تكرّر راسلنا.',
+    codeOffline: 'يبدو ما فيه اتصال بالنت. تأكّد من اتصالك وجرّب مرة ثانية.',
     codeRevoked: 'وصولك موقوف حاليًا. راسل الدعم وبنساعدك.',
     codeNeedsAccount: 'سجّل دخولك أول عشان نربط الكود بحسابك.',
+
+    trialStarting: 'نجهّز تجربتك…',
+    trialStarted: 'تجربتك بدأت — ٧٢ ساعة كاملة.',
+    trialNeedsAccount: 'التجربة تحتاج حساب موثَّق. أنشئ حسابك أو سجّل دخولك.',
+    trialNeedsVerifiedEmail: 'أكّد بريدك أول، وبعدها تبدأ تجربتك.',
+    trialAlreadyUsed: 'تجربتك استُخدمت من قبل على هذا الحساب.',
+    trialRevoked: 'وصولك موقوف حاليًا، فما نقدر نبدأ تجربة. راسل الدعم وبنساعدك.',
+    trialBackendAbsent: 'خدمة التجربة مو موصولة في هذي النسخة، وما بدأت تجربتك. تشتغل في النسخة الحيّة.',
+    trialPreviewNoServer: 'هذي نسخة مراجعة بلا خادم، فالتجربة ما تبدأ فيها. تصفّح خطتك كاملة، والتجربة تشتغل في النسخة الحيّة.',
+    trialTimeout: 'الطلب طوّل وما وصلنا ردّ، وما بدأت تجربتك. جرّب مرة ثانية.',
+    trialServiceError: 'فيه خلل عندنا — مو عندك — وما بدأت تجربتك. جرّب بعد شوي.',
+    trialOffline: 'يبدو ما فيه اتصال بالنت، وما بدأت تجربتك. تأكّد من اتصالك وجرّب مرة ثانية.',
+
+    statusChecking: 'نتحقّق من وصولك…',
+    statusPremium: 'قِمّة Premium مفعّل',
+    statusSpecial: 'وصولك مفتوح',
+    statusTrial: (remaining) => `تجربتك شغّالة — باقي ${remaining}`,
+    statusTrialEndingSoon: (remaining) => `تجربتك تقارب تخلص — باقي ${remaining}`,
+    statusTrialExpired: 'انتهت تجربتك. التصفّح مفتوح، والتسجيل يفتح مع Premium.',
+    statusRevoked: 'وصولك موقوف حاليًا. راسل الدعم وبنساعدك.',
+    statusPreview: 'وضع المعاينة — التصفّح مفتوح، والتسجيل يفتح مع Premium.',
+    statusUnknown: 'ما قدرنا نتحقّق من وصولك الحين.',
+    remainingHoursMinutes: (hours, minutes) =>
+      `${formatNumber(hours, 'ar')} ساعة و${formatNumber(minutes, 'ar')} دقيقة`,
+    remainingMinutes: (minutes) => `${formatNumber(minutes, 'ar')} دقيقة`,
+    remainingLessThanAMinute: 'أقل من دقيقة',
   },
   en: {
     gateTitle: 'This step comes with Qimmah Premium',
@@ -99,15 +198,46 @@ export const accessStrings: Record<Lang, AccessStrings> = {
     codeTitle: 'Activation code',
     codeBody: 'Enter an access code from a campaign or invite. A Salla purchase unlocks your account on its own — no code needed.',
     codeLabel: 'Activation code',
+    codeHint: 'Type it exactly as you received it — dashes and spaces are fine.',
     codePlaceholder: 'e.g. QIMMAH-XXXX-XXXX',
     codeSubmit: 'Activate',
     codeChecking: 'Checking your code…',
     codeSuccess: "You're activated — everything is open now.",
     codeInvalid: "That code didn't work. Double-check it and try again.",
+    codeEmpty: 'Type your activation code first.',
     codeAlreadyUsed: 'This code has already been used.',
-    codeExpired: 'This code has expired.',
-    codeOffline: "We couldn't check right now. Check your connection and try again shortly.",
+    codeBackendAbsent: "Activation isn't connected in this build, so we can't check your code. It works in the live version.",
+    codePreviewNoServer: "This is a review build with no server, so activation doesn't run here. Your code works in the live version.",
+    codeTimeout: 'The request took too long and we got no answer — nothing was activated. Give it another try.',
+    codeServiceError: 'Something broke on our side — not yours — and nothing was activated. Try again shortly, and tell us if it keeps happening.',
+    codeOffline: "Looks like there's no internet connection. Check it and try again.",
     codeRevoked: 'Your access is currently suspended. Contact support and we will help.',
     codeNeedsAccount: 'Sign in first so we can link the code to your account.',
+
+    trialStarting: 'Starting your trial…',
+    trialStarted: 'Your trial has started — a full 72 hours.',
+    trialNeedsAccount: 'The trial needs a verified account. Create one or sign in.',
+    trialNeedsVerifiedEmail: 'Confirm your email first, then your trial can start.',
+    trialAlreadyUsed: 'This account has already used its trial.',
+    trialRevoked: "Your access is currently suspended, so a trial can't start. Contact support and we will help.",
+    trialBackendAbsent: "Trials aren't connected in this build, so nothing started. They work in the live version.",
+    trialPreviewNoServer: "This is a review build with no server, so trials don't start here. Browse your whole plan — trials work in the live version.",
+    trialTimeout: 'The request took too long and we got no answer — your trial did not start. Give it another try.',
+    trialServiceError: 'Something broke on our side — not yours — and your trial did not start. Try again shortly.',
+    trialOffline: "Looks like there's no internet connection, so your trial did not start. Check it and try again.",
+
+    statusChecking: 'Checking your access…',
+    statusPremium: 'Qimmah Premium is active',
+    statusSpecial: 'Your access is open',
+    statusTrial: (remaining) => `Trial running — ${remaining} left`,
+    statusTrialEndingSoon: (remaining) => `Trial almost over — ${remaining} left`,
+    statusTrialExpired: 'Your trial has ended. Browsing stays open; logging comes with Premium.',
+    statusRevoked: 'Your access is currently suspended. Contact support and we will help.',
+    statusPreview: 'Preview mode — browsing is open; logging comes with Premium.',
+    statusUnknown: "We couldn't check your access right now.",
+    remainingHoursMinutes: (hours, minutes) =>
+      `${formatNumber(hours, 'en')}h ${formatNumber(minutes, 'en')}m`,
+    remainingMinutes: (minutes) => `${formatNumber(minutes, 'en')}m`,
+    remainingLessThanAMinute: 'less than a minute',
   },
 }
