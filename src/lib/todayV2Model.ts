@@ -56,10 +56,39 @@ export interface TodayCard {
   destination: AppRoute | null
 }
 
+/**
+ * سطر التاريخ **مُفكَّكًا إلى جزأيه** — [R3-UX-BIDI].
+ *
+ * ═══ لماذا لا يُسلَّم نصًّا واحدًا مركَّبًا ═══
+ * الفاصل «·» محرف **محايد الاتجاه** (Bidi class ON). حين يجاور اسم يوم عربي من
+ * جهة ورقمًا من الجهة الأخرى، لا يملك اتجاهًا خاصًّا به: يرثه من جيرانه بقاعدة
+ * حلّ المحايدات (UAX#9 · N1). المخرَج الحالي صحيح — قِسناه في متصفّح حقيقي —
+ * لكنه صحيح **بالحظّ لا بالبناء**: يكفي أن يتغيّر ما حول السطر (لاحقة لاتينية،
+ * تنسيق شهر رقمي، سياق LTR مضمَّن) حتى ينقلب ترتيب «اليوم · التاريخ» بصريًا
+ * دون أن يتغيّر سطر واحد في هذا الملف.
+ *
+ * الجزءان يُسلَّمان منفصلين، فتصفّهما الواجهة في `flex` — والترتيب البصري يصير
+ * ترتيب الـDOM قطعًا، لا نتيجةَ خوارزمية تعمل على النصّ. والجزء الحامل للأرقام
+ * يُغلَّف بـ`<bdi>` فيُعزَل اتجاهيًّا عمّا حوله.
+ *
+ * `dateLabel` يبقى — نصًّا واحدًا للقراءة الصوتية والسجلّات — ويُشتقّ من الجزأين
+ * فلا يفترقان.
+ */
+export interface TodayDateParts {
+  /** اسم اليوم («الاثنين» · "Monday") — قويّ الاتجاه دائمًا، بلا أرقام. */
+  weekday: string
+  /** التفصيل: «17 أغسطس» أو وقت اليوم «مساءً». فارغ حين يتعذّر التنسيق. */
+  detail: string
+}
+
+/** الفاصل المعروض بين جزأي التاريخ — **محايد**، ولذلك لا يُخبَز في أيّهما. */
+export const DATE_PART_SEPARATOR = ' · '
+
 export interface TodayV2Model {
   state: TodayState
   greeting: string
   dateLabel: string
+  dateParts: TodayDateParts
   avatarInitial: string | null
   goalLabel: string | null
   hero: TodayHero
@@ -234,10 +263,10 @@ export function buildTodayV2Model(customization: Customization, lang: Lang, user
   // ── Header: greeting + date line, rewritten by state & time-of-day ──
   const weekday = weekdayName(ar ? 'ar' : 'en', now)
   let greeting: string
-  let dateLabel: string
+  let dateDetail: string
   if (state === 'afterWorkout') {
     greeting = t('كفو عليك اليوم', 'Well done today')
-    dateLabel = `${weekday} · ${partOfDay(ar, now)}`
+    dateDetail = partOfDay(ar, now)
   } else {
     const dayMonth = (() => {
       try {
@@ -248,7 +277,7 @@ export function buildTodayV2Model(customization: Customization, lang: Lang, user
         return ''
       }
     })()
-    dateLabel = dayMonth ? `${weekday} · ${dayMonth}` : weekday
+    dateDetail = dayMonth
     greeting =
       state === 'newUser'
         ? firstName ? t(`هلا ${firstName}`, `Hi ${firstName}`) : t('هلا فيك', 'Welcome')
@@ -256,6 +285,11 @@ export function buildTodayV2Model(customization: Customization, lang: Lang, user
           ? firstName ? t(`حيّاك من جديد يا ${firstName}`, `Great to see you back, ${firstName}`) : t('حيّاك من جديد', 'Great to see you back')
           : t('يومك في قِمّة', 'Your day in Qimmah')
   }
+
+  const dateParts: TodayDateParts = { weekday, detail: dateDetail }
+  // النصّ المركَّب مشتقّ من الجزأين لا مكتوبًا بجانبهما: مصدرٌ واحد فلا يفترق
+  // ما تنطقه قارئة الشاشة عمّا يراه القارئ.
+  const dateLabel = dateParts.detail ? `${dateParts.weekday}${DATE_PART_SEPARATOR}${dateParts.detail}` : dateParts.weekday
 
   // ── Hero: the single top-third decision ──
   const hero = buildHero({ t, state, workoutAvailable, workoutName, exerciseCount, durationMin, finishedName, proteinRemaining, nutritionTarget, loggedMeal })
@@ -316,7 +350,7 @@ export function buildTodayV2Model(customization: Customization, lang: Lang, user
     totalSets: !finished && partialTrain ? partialTrain.totalSets : setCount,
   }
 
-  return { state, greeting, dateLabel, avatarInitial, goalLabel, hero, pillars, progressLabel, completedCount, totalCount, cards, trustNote, restDay, daysSinceLastWorkout: daysSinceWorkout, durationMin, warmupMinutes, training }
+  return { state, greeting, dateLabel, dateParts, avatarInitial, goalLabel, hero, pillars, progressLabel, completedCount, totalCount, cards, trustNote, restDay, daysSinceLastWorkout: daysSinceWorkout, durationMin, warmupMinutes, training }
 }
 
 // ── Hero builders ────────────────────────────────────────────────────────────
