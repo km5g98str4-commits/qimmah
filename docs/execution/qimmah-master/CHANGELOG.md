@@ -45,3 +45,51 @@ exists; retained as the iOS reference).
   asserts the contract in both directions. Test classification: **STRONGER** — the previous code
   could not detect the question disappearing for everyone, and the naive fix ("click it if present")
   would have had the same blind spot.
+
+---
+
+## 2026-08-18 — PLAN-CHANGE-001 · `QIM-V1-004` closed as unnecessary
+
+**MASTER_PLAN_VERSION stays 1.0** — a task was *removed after verification*, not added. No new
+scope, no resequencing of anything else, no new founder dependency.
+
+**Reason.** `QIM-V1-004` was to adopt the four unique commits on
+`codex/qimmah-final-release-convergence-001` (BR-01). The rule "verify before you build" was
+applied to the merge itself, and every value the branch claimed was already on the ground:
+the numeral limit at the display boundary (`workoutDayLabel.ts:39` — which **credits BR-01 by
+name** for the insight while deliberately leaving its implementation behind), the localisation in
+`WorkoutView` and in the Today components, BUG-033..036 in the regression ledger, and REL-001/002
+on the live surfaces.
+
+**And the merge would have been a regression, not a no-op.** BR-01 baked Arabic-Indic numerals
+into `todayV2Model`; the ground localises at the display boundary, which also repairs plans that
+are *already stored* on users' devices. That decision is recorded in
+`docs/execution/qimmah-founder-qa/DEFERRED-ITEMS.md`.
+
+**Measured cost of doing it anyway:** 5 content conflicts predicted by `git merge-tree`, and a
+`package.json` at **182 scripts / 113 gate steps** against the ground's **214 / 141** — the §4.1
+trap, where a careless `--theirs` silently deletes 32 scripts and 28 gate steps.
+
+- tasks removed: `QIM-V1-004`  ·  tasks added: none
+- critical-path impact: **shortened** — the RELEASE lane no longer waits on a merge
+- scope impact: none
+- branch ledger: **BR-01 `ADOPT` → `SUPERSEDED`**
+
+> **The lesson worth keeping:** BR-01's commit messages describe real, valuable fixes — and they
+> were true when written. The branch had already been *harvested*: its knowledge taken, its
+> implementation left behind on purpose. Trusting the commit message instead of the tree would
+> have overwritten better code with older code and called it progress.
+
+## 2026-08-18 — executed after the freeze
+
+- **`QIM-V1-001` DONE.** CI run **423 on `dc031fa` is green — the whole run**, including step 12
+  "Onboarding v2 browser E2E" (red since `7eaed49`) and step 13 "Upload dist artifact".
+  This also settled the open question in `07-STATE.md`: the `favicon.ico` 404 was specific to the
+  agent container, exactly as classified. **The console-error assertion was never relaxed.**
+- **`QIM-V1-018` DONE.** Three missing English warning entries — not one — including the
+  `unrecognized limitation` case, whose silence reads as reassurance. New guard
+  `test:plan-warning-parity` wired into `test:gate` (**141 steps**); its red was reproduced for
+  real (19/1, exit 1, failure named by sentence), and the guard was then attacked and tightened
+  after its first form was found to **pass undeservedly on a missing entry**.
+- **`QIM-V1-005` DONE.** BR-02 merged; verified after merge that exactly two steps are
+  non-gating (perf budget, artifact upload) and all eight quality steps still gate.

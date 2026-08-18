@@ -22,7 +22,7 @@ these **8** are the only ones from the current era (August 2026) — the rest ar
 
 | ID | branch | HEAD | date | uniq | decision | why |
 |---|---|---|---|---|---|---|
-| **BR-01** | `codex/qimmah-final-release-convergence-001` | `df10b88` | 08-16 | **4** | **ADOPT** → `QIM-V1-004` | FINAL-018/019/020: hardens the numeral-policy guard **at the display boundary** (`workoutDayLabel` output is stored, not displayed — the old guard checked the wrong file and could pass while the real limit was removed), lands BUG-033..036 in the ledger, fixes 4 persona harnesses. **106 lines of `src/`.** Real, small, release-grade. |
+| **BR-01** | `codex/qimmah-final-release-convergence-001` | `df10b88` | 08-16 | 4 | **SUPERSEDED** — *reclassified, see `PLAN-CHANGE-001`* | Initially classified ADOPT (`QIM-V1-004`). **Verification before merging showed the ground already carries all of its value, reached by a better path** — see below. |
 | **BR-02** | `ci/artifact-quota-nonblocking` | `9e679c3` | 08-11 | **1** | **ADOPT** → `QIM-V1-005` | 9-line CI change so a GitHub **storage-quota** failure on artifact upload cannot mask the gate result. This exact masking already cost the project 6 days of unread red (charter §4.0). |
 | **BR-03** | `claude/salla-activation` | `7590ce7` | 08-11 | 22 | **REFERENCE** | Its product payload (Salla webhook, entitlement migrations, purchase integrity) **is already on the ground** via `claude/salla-reconciled` — `supabase/functions/salla-webhook/index.ts`, `supabase/migrations/20260812120001_salla_webhook_ingest.sql`. Genuinely unique here: `scripts/staging/*` (staging preflight + contract capture). Not V1: no staging environment exists yet. |
 | **BR-04** | `claude/access-entitlements` | `df85c77` | 08-09 | 17 | **SUPERSEDED** by BR-03 | Strict ancestor subset of `claude/salla-activation` (`df85c77` is that branch's 6th commit). Zero content of its own. |
@@ -30,6 +30,37 @@ these **8** are the only ones from the current era (August 2026) — the rest ar
 | **BR-06** | `claude/qae-architecture-design-fhg2mh` | `3da8162` | 08-09 | 16 | **REFERENCE** (post-launch) | QAE — a **second, parallel training engine** (ExerciseMetadata catalog, capability profile, staged selection, AthleteProfile contract v1.0.0, 131-check proof suite). **200 files / +110,964 lines.** Genuinely valuable and genuinely not V1: adopting a second plan engine during release convergence is the exact move this mission exists to stop. |
 | **BR-07** | `archive/qae-training-wave2-269b2bb` | `269b2bb` | 08-13 | 30 | **REFERENCE** (post-launch) | QAE wave 2 — supersedes BR-06 (contains it). ACSM-2026 reconciliation, prescription foundation (sets/reps/RIR/rest), shadow integration (diagnostic, fail-open), M1a/M1b athlete profile. **257 files / +121,112 lines.** Same verdict, same reason. **This is the single largest body of unadopted work in the repository — it must not be lost.** |
 | **BR-08** | `claude/codex-web-sovereign-trace-j9kzwz` | `6fce502` | 08-15 | 1 | **SUPERSEDED** by BR-01 | `6fce502` is the first of BR-01's four commits. |
+
+### BR-01 — the merge that was measured and then *not* performed
+
+`QIM-V1-004` was a `BLOCKS_V1` task to merge these four commits. Before merging,
+each claimed value was checked against the ground. **All of it was already there:**
+
+| BR-01's value | on the ground? | evidence |
+|---|---|---|
+| numeral limit moved to the **display boundary** | ✅ yes | `src/lib/workoutDayLabel.ts:39` states the rule and **credits this very branch** ("منقول من `codex/qimmah-final-release-convergence-001` — المعرفة وحدها دون بقيّة الالتزام") |
+| `WorkoutView` localises the day name | ✅ yes | `formatNumeralsIn` at `WorkoutView.tsx:300,344,374,472,497` |
+| Today/dashboard localises it too | ✅ yes | `todayV2Model` keeps the value raw **by design**; the boundary is the component — `TodayV2.tsx:232` and `NextActionCard.tsx:51,95,97` |
+| BUG-033..036 in the regression ledger | ✅ yes | all four present in `scripts/release/static/regression-ledger.mjs` (39 entries) |
+| REL-001 / REL-002 closed on live surfaces | ✅ yes | ground commits `2a04064` [FINAL-002], `c534847` [FINAL-006], `9b44a74` [FINAL-017] |
+
+And the cost of merging anyway was measured, not guessed:
+`git merge-tree` predicts **5 content conflicts** (`workoutDayLabel.ts`,
+`customizationContext.tsx`, `CustomizationCenter.tsx`, `SettingsView.tsx`,
+`regression-ledger.mjs`), and BR-01's `package.json` carries **182 scripts / 113 gate
+steps** against the ground's **214 / 141** — the §4.1 trap in its purest form.
+
+**It would also have been a regression.** The ground rejected BR-01's `todayV2Model`
+change deliberately: BR-01 baked numerals into the model, while the ground's decision is
+localisation at the display boundary — the choice that also repairs *already-stored*
+plans. That reasoning is written down in
+`docs/execution/qimmah-founder-qa/DEFERRED-ITEMS.md` ("أرقام مخبوزة داخل `todayV2Model` —
+يخالف القرار المعتمد C").
+
+> **This is the whole point of the golden rule.** A branch whose commit messages describe
+> real, valuable fixes had already been harvested — knowledge taken, implementation left
+> behind. Merging it on the strength of its commit messages would have overwritten better
+> code with older code and called it progress.
 
 ### The QAE decision, stated plainly (BR-06 + BR-07)
 

@@ -36,13 +36,15 @@ recorded in `07-STATE.md` with the reason.
 ## 3. Critical path
 
 ```
-QIM-V1-001 (CI red)  ──►  QIM-V1-005 (CI cannot mask)  ──►  QIM-V1-004 (adopt BR-01)
+QIM-V1-001 ✅ (CI red closed, CI green)  ──►  QIM-V1-005 ✅ (CI cannot mask)
         │
-        └──►  QIM-V1-018 (EN injury warning — safety)
+        └──►  QIM-V1-018 ✅ (EN injury warning — safety)
                   └──►  QIM-V1-002 (one target weight)
                             └──►  QIM-V1-008 (WebKit matrix)  ──►  RC FREEZE
                                             ▲
    FA-01 (founder: what is Premium?) ──► QIM-V1-010 (truthful claims) ──┘
+
+   QIM-V1-004 — closed as unnecessary (PLAN-CHANGE-001); no longer on the path.
 ```
 
 **The critical path runs through a founder decision.** `QIM-V1-010` cannot start until `FA-01`
@@ -84,16 +86,15 @@ is answered. Everything else is parallel — nothing else waits on a human.
   step. `09-RELEASE-RUNBOOK.md §3` states the rule.
 
 ---
-**QIM-V1-004 — Adopt the four convergence commits (BR-01)** · `RELEASE` · S · HIGH
-- **problem:** `codex/qimmah-final-release-convergence-001` holds FINAL-018/019/020 + `6fce502`,
-  106 lines of `src/`, that the ground lacks — including the numeral-policy guard moved to the
-  **display boundary** (DEC-011) and BUG-033..036 entering the ledger.
-- **depends_on:** QIM-V1-001 · **surfaces:** the 15 files in BR-01's diff
-- **DoD:** merged into the working branch with the §4.1 discipline — `merge-tree` predicted first,
-  and after any `package.json` conflict the **script count printed and checked**, never assumed.
-  Full gate green after.
-- **why not just cherry-pick:** the guard it lands replaced a guard that was green while the real
-  limit was removed. Dropping it re-opens a proven blind spot.
+**QIM-V1-004 — ~~Adopt the four convergence commits (BR-01)~~** · `RELEASE` · **CLOSED — NOT NEEDED**
+- **outcome:** the merge was **measured and then correctly not performed**. Every value BR-01
+  claimed is already on the ground, reached by a better path; merging would have cost 5 content
+  conflicts, risked the §4.1 `package.json` trap (182/113 vs 214/141), and **regressed** the
+  Today surface from display-boundary localisation back to baked numerals.
+- **full evidence:** `03-BRANCH-LEDGER.md` → "BR-01 — the merge that was measured and then *not* performed"
+- **plan change:** `PLAN-CHANGE-001`
+- **what this cost:** one verification pass. **What it saved:** a regression shipped under a
+  commit message that described a real improvement.
 
 ---
 **QIM-V1-018 — The English injury warning must not vanish** · `TRUTH` · XS · HIGH · **SAFETY**
@@ -252,7 +253,7 @@ explicit carve-out in `FA-07`.
 branches. All founder-only, all in `10-FOUNDER-ACTIONS.md`, none scheduled for an agent.
 
 **Are we overbuilding V1?** Deliberately not. Admin, AI Coach, the personalization engine, QAE and
-the home redesign are all out. The plan is **12 blocking tasks**, most XS/S.
+the home redesign are all out. The plan is **11 blocking tasks** (12 minus the one closed by PLAN-CHANGE-001), most XS/S.
 
 **Any claim without evidence?** Every row in `04` and `05` carries a `path:line`. What could not be
 traced is in `08-UNKNOWNS.md` with a discovery command, not asserted.

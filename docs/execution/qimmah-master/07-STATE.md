@@ -6,6 +6,7 @@
 
 ```
 LAST UPDATE : 2026-08-18 · session QIM-MASTER (recovery / control-plane)
+HEAD        : e72cd62 + merge of BR-02  (working branch, pushed)
 ```
 
 ---
@@ -23,37 +24,45 @@ production     : main @ cc60adf  — 228 commits behind the ground (this is expe
 
 - **Ground established and proven by containment** over all 80 remote branches — not by branch name.
 - **Gate measured here, not reported:** `npm ci` · `typecheck` · `lint` · `build` ·
-  `test:gate` (140 steps) → all exit 0.
-- **CI red root-caused and fixed — `QIM-V1-001`.** `test:e2e:onboarding` was timing out on
-  `[data-question-id="nutrition.diet_pattern"]`; the product change was correct (DEC-008) and six
-  harnesses were stale. All six now route through one `answerDietPattern` helper that **imports the
-  product's own `dietPatternApplies`**, so harness drift is impossible by construction, and asserts
-  the contract **in both directions**. Local run: the timeout is gone and every prior assertion passes.
-- **Control plane created** at `docs/execution/qimmah-master/` — 12 files, one owner per fact.
-- **Every branch classified.** 8 of 80 carry unique commits; each has exactly one decision.
+  `test:gate` → all exit 0. Now **141 steps** (was 140).
+- **`QIM-V1-001` DONE — CI is green.** Root cause was a stale harness assumption, not a product
+  defect (DEC-008). Six harnesses now share one `answerDietPattern` helper that **imports the
+  product's own `dietPatternApplies`**, so drift is impossible by construction, and asserts the
+  contract in **both** directions. **CI run 423 on `dc031fa`: the whole run green**, including
+  step 12 "Onboarding v2 browser E2E" — red since `7eaed49` — and step 13 artifact upload.
+  The container-only `favicon.ico` 404 was classified INFRASTRUCTURE and CI confirmed it;
+  **the console-error assertion was never relaxed to make it disappear.**
+- **`QIM-V1-018` DONE — a safety claim no longer vanishes in English.** Three entries were
+  missing, not one, including the case that matters most: a user whose injury note we could not
+  parse was told **nothing** in English and left believing the plan accounted for it. New guard
+  `test:plan-warning-parity` is structural (it extracts the emitted strings from the source) and
+  is wired into the gate. Its red was reproduced for real, and the guard was **attacked and
+  tightened** after its first form passed undeservedly on a missing entry.
+- **`QIM-V1-005` DONE.** BR-02 adopted: an artifact/storage-quota failure can no longer mask a
+  real gate result. Verified after merge — exactly two non-gating steps, all eight quality steps
+  still gate.
+- **`QIM-V1-004` CLOSED as unnecessary (`PLAN-CHANGE-001`).** Verification before merging showed
+  the ground already holds everything BR-01 claimed, by a better path — and merging would have
+  **regressed** the Today surface. See `03-BRANCH-LEDGER.md`.
+- **Control plane created** at `docs/execution/qimmah-master/` — 13 files, one owner per fact,
+  and `CLAUDE.md`/`AGENTS.md` §11 now point at it.
+- **Every branch classified.** 27 fully contained, 8 current-era branches with unique work.
 - **Feature map and claim ledger built** from code, with `path:line` evidence throughout.
 
 ## IN_PROGRESS
 
-`QIM-V1-001` — **VERIFYING**. Local E2E no longer fails on the product assertion. One residual
-console-error assertion fails **in this container only**: a browser-initiated `GET /favicon.ico` → 404
-on the dev harness page, which declares no icon (the real `index.html:10-13` declares four).
-**Classified INFRASTRUCTURE, not PRODUCT:** zero files changed under `scripts/momentum-shot/`,
-`public/`, `index.html`, `vite.config.ts` or `src/main.tsx` between the last green CI run
-(418 @ `2b2413d`) and the ground, and that run passed this exact assertion.
-**CI on the pushed branch is the authority.** The assertion was deliberately **not** relaxed —
-weakening a console-error guard to make a local artifact disappear is exactly the move this control
-plane exists to prevent.
+**Nothing.** Every lane is at a clean stopping point — no half-finished task.
 
 ## NEXT THREE TASKS
 
-1. **`QIM-V1-005`** — adopt `ci/artifact-quota-nonblocking` so an artifact-upload/storage-quota
-   failure can never again mask a real gate result. `READY` once `QIM-V1-001` is green in CI.
-2. **`QIM-V1-018`** — the English injury-safety warning currently vanishes into a generic fallback
-   (`planGenerator.ts:1100` emits a key `profileChoices.ts:70` no longer holds). **Safety.** `READY`.
-3. **`QIM-V1-004`** — adopt the four convergence commits from
-   `codex/qimmah-final-release-convergence-001` (numeral guard at the display boundary + BUG-033..036).
-   `READY`.
+1. **`QIM-V1-002`** — one target-weight authority. `planDerive` (`×0.92`/`×1.05`) drives the
+   delivery screen and the stored profile; `onboardingV2Adapter` (`×0.9`/`×1.1`) drives the engine.
+   An 80 kg cutter is shown 74 kg and given a plan built for 72 kg. `READY`.
+2. **`QIM-V1-003`** — stop collecting health-data consent that gates nothing
+   (`onboardingProfile.ts:135-138`), and extend `test:onboarding-questions` to assert **downstream
+   consumption**, which is the blind spot that let it through. `READY`.
+3. **`QIM-V1-010`** — make the commercial and sync claims true. **BLOCKED on `FA-01`** — the
+   founder must first say what Premium is. This is the only task in the plan waiting on a human.
 
 ## BLOCKERS
 
@@ -76,28 +85,27 @@ Full text in `10-FOUNDER-ACTIONS.md`.
 ## LATEST VERIFIED GATE
 
 ```
-commit    : 139a7b0 (+ the QIM-V1-001 harness change)
+commit    : working branch (139a7b0 + QIM-V1-001 + QIM-V1-018 + QIM-V1-005)
 node      : v22.22.2 · npm 10.9.7 · after npm ci
 typecheck : ✅ exit 0
 lint      : ✅ exit 0   (--max-warnings 0)
 build     : ✅ exit 0
-test:gate : ✅ exit 0   (140 steps)
-e2e:onboarding : product assertions ✅ — one container-specific favicon 404 (see IN_PROGRESS)
+test:gate : ✅ exit 0   (141 steps — test:plan-warning-parity added)
+e2e       : ✅ green in CI (run 423, step 12)
 ```
 
 ## CURRENT CI
 
 ```
 workflow : CI (.github/workflows/ci.yml)
-main @ cc60adf          : ❌ RED  — run 339 (same root cause as below, untouched: production pointer)
-ground @ 139a7b0        : ❌ RED  — run 421, job "Quality gate", step 12 "Onboarding v2 browser E2E"
-last green on ground    : run 418 @ 2b2413d
-first red commit        : 7eaed49 (merge carrying 2e3042d)
-classification          : TEST — stale harness, fixed by QIM-V1-001, awaiting CI confirmation
+working branch @ dc031fa : ✅ GREEN — run 423, ALL 13 steps success (2026-08-18T19:09Z)
+ground @ 139a7b0         : ❌ red (run 421) — superseded by the fix on the working branch
+main @ cc60adf           : ❌ red (run 339) — same root cause; untouched by design (production pointer)
 ```
 
-**Every other step of run 421 was green**, including the 140-step gate — the red is the last
-product step only.
+**The first fully green CI on this line since run 418.** `main` stays red until the founder
+promotes a candidate carrying `QIM-V1-001` — that is a promotion decision (`FA-06`), not an
+agent action.
 
 ## PREVIEW / PRODUCTION
 
