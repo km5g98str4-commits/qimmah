@@ -42,8 +42,9 @@ water or weight.** That is a coherent, founder-approved product principle — *"
 - **Status: FALSE** on all four surfaces.
 - **Harm:** a Terms of Service asserting "no subscription is active" while a live Salla purchase
   flow, a paywall and entitlement gating all ship is a liability, not a typo.
-- **Blocked on DEC-101** (the founder must first say what Premium *is*), then fixed by
-  **`QIM-V1-010`** — the highest-priority non-CI task in the plan.
+- **Not blocked.** The policy was already decided by the charter — **DEC-015**: 19.99 SAR,
+  one-time purchase, no subscription, no permanent second price. `QIM-V1-010` can correct every
+  in-repo surface now; only the external Salla storefront needs the founder (`FA-01`).
 
 ### CLM-005 — "cloud sync … only works if you sign in and enable it"
 

@@ -201,7 +201,7 @@ is answered. Everything else is parallel — nothing else waits on a human.
 **QIM-V1-008 — Browser matrix on the release candidate** · `GATE` · S · MEDIUM
 - WebKit evidence (222 ✓ / 0 ✗) was captured on an **earlier** head, before the ENTRY and FOOD merges.
   The audience is iOS-Safari-dominant and a WebKit-only storage bug has shipped here once.
-- **depends_on:** QIM-V1-002, QIM-V1-004 · **DoD:** `E2E_ENGINE=webkit` onboarding + persona matrix
+- **depends_on:** QIM-V1-002 (done) · **DoD:** `E2E_ENGINE=webkit` onboarding + persona matrix
   green on the candidate SHA. **WebKit is not installed in this container** — founder machine or a
   WebKit-capable runner.
 

@@ -49,8 +49,9 @@ agent containers** (`api.cloudflare.com` → 403, `*.pages.dev` → 000, `wrangl
 
 ## UNK-05 — Salla store: what does the live product page actually say? 🟠
 
-DEC-101's three-way contradiction (19.99 annual / 89.99 annual / `no_expiry = true`) is
-measured **from repo documents**, not from the live storefront.
+**DEC-015** settles the policy (19.99, one-time, no permanent second price). What is still
+unmeasured is the **live storefront**: the violating strings are known from repo documents, not
+from the store itself.
 - **why it matters:** the copy the customer actually reads is the claim we are liable for.
 - **resolve:** open the live Salla product page, capture price, period and the refund line verbatim.
 - **who:** founder · **task:** `FA-01`
@@ -93,7 +94,7 @@ split across all 37 is not enumerated anywhere.
 | was unknown | now |
 |---|---|
 | Which branch is the real frontier? | **VERIFIED** — `139a7b0`, by containment over all 80 branches (`00-GROUND.md`) |
-| Is the gate green on the frontier? | **VERIFIED** — `npm ci` · typecheck · lint · build · `test:gate` (140 steps) all exit 0, measured here |
+| Is the gate green on the frontier? | **VERIFIED** — `npm ci` · typecheck · lint · build · `test:gate` all exit 0, measured here |
 | Why is CI red? | **VERIFIED** — `test:e2e:onboarding`, stale harness, first red commit `7eaed49`, reproduced locally |
 | Does `main` hold anything the frontier lacks? | **VERIFIED** — no. 0 ahead, 228 behind |
 | Is any valuable work stranded? | **VERIFIED** — 8 branches carry unique commits; each classified in `03-BRANCH-LEDGER.md` |

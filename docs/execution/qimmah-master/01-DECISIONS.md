@@ -113,7 +113,8 @@ Status: `LOCKED` · `PENDING_FOUNDER` · `SUPERSEDED`
   digits — but its output is *stored* (`planGenerator.ts:757`), not displayed. The guard
   watched the wrong file and stayed green after the real limit was removed.
 - **evidence:** commit `f92f8bc` [FINAL-019] on `codex/qimmah-final-release-convergence-001`
-  (adoption task `QIM-V1-004`); `test:numeral-policy` 69/0.
+  — **already on the ground**, which is why `QIM-V1-004` was closed as unnecessary
+  (`PLAN-CHANGE-001`); `test:numeral-policy` 69/0.
 - **reopen condition:** none.
 
 ### DEC-012 — Age floor is 13, and a minor gate applies to restricted goals
@@ -210,8 +211,7 @@ Status: `LOCKED` · `PENDING_FOUNDER` · `SUPERSEDED`
 ## SUPERSEDED
 
 ### DEC-901 — "The trunk is `design/v21-promotion`" — **SUPERSEDED** by DEC-001
-Already corrected in `CLAUDE.md §1` at [CTO-71]; recorded here so the six open PRs that
-still target that branch are read correctly (`03-BRANCH-LEDGER.md` §D).
+Already corrected in `CLAUDE.md §1` at [CTO-71]; recorded here so the nine open PRs listed in the ledger are read correctly (`03-BRANCH-LEDGER.md` §D).
 
 ### DEC-902 — "`main` is the frontier" — **SUPERSEDED** by DEC-001
 This is the specific belief that restarted the project. `CLAUDE.md §1` is *correct about

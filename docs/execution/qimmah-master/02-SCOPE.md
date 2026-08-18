@@ -29,7 +29,7 @@ V1_DEFINITION = "قِمّة ships as an Arabic-first (RTL) Web/PWA for one athle
 | 9 | **Today → warm-up → session → finish/save** | the daily loop |
 | 10 | **Exercise library + detail with approved media and honest fallback** | no fake 100 % coverage (DEC-104) |
 | 11 | **Auth · trial · Premium entitlement — server-owned** | commercial integrity (DEC-005) |
-| 12 | **Truthful commerce copy** — price, period and behaviour match the backend | blocked on DEC-101 |
+| 12 | **Truthful commerce copy** — price, period and behaviour match the backend | policy decided (DEC-015); in-repo surfaces unblocked |
 | 13 | **Local-first + opt-in sync, health data behind its own consent** | DEC-007 |
 | 14 | **Privacy/Terms/Support reachable; deletion and export honest** | legal + App-Store baseline |
 | 15 | **RTL + full English parity on every shipped surface** | charter §6 |
