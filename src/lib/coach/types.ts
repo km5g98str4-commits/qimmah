@@ -26,8 +26,13 @@
 // ── الأسئلة: طقم ثابت مغلق، لا محادثة مفتوحة ────────────────────────────────
 
 /**
- * الأسئلة الخمسة التي يجيبها المرشد. **مغلق عمدًا**: لا سؤال سادس يُخترع وقت
- * التشغيل، ولا مسار احتياطي ينتج نثرًا واثقًا من لا شيء (§5 من أمر الموجة).
+ * الأسئلة **الستة** التي يجيبها المرشد. **الطقم مغلق عمدًا**: لا سؤال سابع
+ * يُخترع وقت التشغيل، ولا مسار احتياطي ينتج نثرًا واثقًا من لا شيء (§5 من أمر
+ * الموجة). المدخل غير المعروف يُقابَل بقائمة قدرات صادقة لا بتخمين.
+ *
+ * `progressTrend` أُضيف في هذه الموجة إلى الخمسة الأصلية — «كيف تقدّمي؟» —
+ * ومصادره كلها قائمة (`progress.measurements` · `workout.history`)، فلم يحتج
+ * مصدرًا جديدًا ولا كتابةً واحدة.
  */
 export type CoachQuestionId =
   | 'todayPlan'
@@ -35,6 +40,7 @@ export type CoachQuestionId =
   | 'missedYesterday'
   | 'canSubstitute'
   | 'whyCaloriesChanged'
+  | 'progressTrend'
 
 export const COACH_QUESTIONS: readonly CoachQuestionId[] = [
   'todayPlan',
@@ -42,6 +48,7 @@ export const COACH_QUESTIONS: readonly CoachQuestionId[] = [
   'missedYesterday',
   'canSubstitute',
   'whyCaloriesChanged',
+  'progressTrend',
 ] as const
 
 /** مُعرِّف الجواب حين لا يطابق المدخل أي سؤال معروف — قائمة قدرات صادقة لا نثر. */
@@ -188,7 +195,9 @@ export const COACH_LINE_KEYS = [
   'why.trainingDays',
   'why.sessionSize',
   'why.experienceLoad',
+  'why.experienceLoadFallback',
   'why.equipmentPool',
+  'why.equipmentPoolFallback',
   'why.injuryFilterApplied',
   'why.injuryFilterNone',
   'why.volumeTop',
@@ -220,6 +229,22 @@ export const COACH_LINE_KEYS = [
   'cal.noLoggedWeight',
   'cal.unchangedSince',
   'cal.updatedUnknown',
+  // — كيف تقدّمي —
+  'progress.noData',
+  'progress.weightDelta',
+  'progress.weightSingle',
+  'progress.weightUnknown',
+  'progress.weightToTarget',
+  'progress.sessions',
+  'progress.loadRatio',
+  'progress.loadUnknown',
+  'progress.notScale',
+  // — اقتراحات المرشد: **مفصولة بمفاتيحها** لا بنبرتها (انظر `COACH_LINE_KIND`) —
+  'suggest.startSession',
+  'suggest.restDay',
+  'suggest.pickMissedOption',
+  'suggest.logWeight',
+  'suggest.keepLogging',
 ] as const
 
 export type CoachLineKey = (typeof COACH_LINE_KEYS)[number]
@@ -248,7 +273,10 @@ export const COACH_LINE_HEDGED: Readonly<Record<CoachLineKey, boolean>> = {
   'why.trainingDays': false,
   'why.sessionSize': false,
   'why.experienceLoad': false,
+  // مستوى مشتقّ من حقل قديم لا مقروء من حقل الخبرة الدلالي ⇒ لغة متحفّظة (§6/٢).
+  'why.experienceLoadFallback': true,
   'why.equipmentPool': false,
+  'why.equipmentPoolFallback': true,
   'why.injuryFilterApplied': false,
   'why.injuryFilterNone': false,
   'why.volumeTop': false,
@@ -277,6 +305,101 @@ export const COACH_LINE_HEDGED: Readonly<Record<CoachLineKey, boolean>> = {
   'cal.noLoggedWeight': false,
   'cal.unchangedSince': false,
   'cal.updatedUnknown': false,
+  'progress.noData': false,
+  'progress.weightDelta': false,
+  'progress.weightSingle': false,
+  'progress.weightUnknown': false,
+  'progress.weightToTarget': false,
+  'progress.sessions': false,
+  // نسبة الحمل مشتقّة من نافذتين قصيرتين — تُقال «يبدو» لا «هذا حملك».
+  'progress.loadRatio': true,
+  'progress.loadUnknown': false,
+  'progress.notScale': false,
+  'suggest.startSession': false,
+  'suggest.restDay': false,
+  'suggest.pickMissedOption': false,
+  'suggest.logWeight': false,
+  'suggest.keepLogging': false,
+} as const
+
+// ── الفصل بين الحقيقة والاقتراح ─────────────────────────────────────────────
+
+/**
+ * **حقيقة محسوبة ≠ اقتراح مرشد ≠ ملاحظة حدود.** الفصل هنا بنيويّ لا نبريّ: كل
+ * مفتاح يحمل نوعه، فالرسم يضع لكل نوع وسمًا مرئيًا ونصًّا معلنًا
+ * (`CoachStrings.kinds`)، ولا يستطيع سطر اقتراح أن يتنكّر في هيئة رقم خرج من
+ * المحرّك. القاعدة المحميّة: **المرشد لا يغيّر خطة** — يشرح ويقترح، والتنفيذ
+ * يبقى في شاشته صاحبة السلطة (ورقة التمرين). ويحرس ذلك
+ * `findPlanChangeClaims` في `safety.ts`: أي نصّ اقتراح يدّعي أن الخطة **عُدِّلت**
+ * يسقط باسمه.
+ */
+export type CoachLineKind = 'fact' | 'suggestion' | 'note'
+
+export const COACH_LINE_KIND: Readonly<Record<CoachLineKey, CoachLineKind>> = {
+  'capability.intro': 'note',
+  'capability.item': 'note',
+  'capability.noGuessing': 'note',
+  'today.noPlan': 'fact',
+  'today.rest': 'fact',
+  'today.restNext': 'fact',
+  'today.restNoNext': 'fact',
+  'today.training': 'fact',
+  // محرّك التعافي يُنتج **اقتراحًا** لا قياسًا — فيُوسَم اقتراحًا.
+  'today.recovery': 'suggestion',
+  'today.recoveryUnknown': 'fact',
+  'today.caloriesLeft': 'fact',
+  'today.caloriesOver': 'fact',
+  'today.caloriesUnknown': 'fact',
+  'why.noPlan': 'fact',
+  'why.todayDay': 'fact',
+  'why.trainingDays': 'fact',
+  'why.sessionSize': 'fact',
+  'why.experienceLoad': 'fact',
+  'why.experienceLoadFallback': 'fact',
+  'why.equipmentPool': 'fact',
+  'why.equipmentPoolFallback': 'fact',
+  'why.injuryFilterApplied': 'fact',
+  'why.injuryFilterNone': 'fact',
+  'why.volumeTop': 'fact',
+  'why.inactiveAxis': 'note',
+  'missed.noSchedule': 'fact',
+  'missed.none': 'fact',
+  'missed.found': 'fact',
+  'missed.yoursToDecide': 'note',
+  'missed.adherence': 'fact',
+  'missed.next': 'fact',
+  'missed.nextNone': 'fact',
+  'sub.noExercise': 'fact',
+  'sub.intro': 'fact',
+  'sub.option': 'fact',
+  'sub.noneFound': 'fact',
+  'sub.injuryWithheld': 'fact',
+  'sub.useWorkoutSheet': 'suggestion',
+  'sub.notMedical': 'note',
+  'cal.noTarget': 'fact',
+  'cal.current': 'fact',
+  'cal.arithmetic': 'fact',
+  'cal.manual': 'fact',
+  'cal.minorMigrated': 'fact',
+  'cal.staleProfile': 'fact',
+  'cal.weightDrift': 'fact',
+  'cal.noLoggedWeight': 'fact',
+  'cal.unchangedSince': 'fact',
+  'cal.updatedUnknown': 'fact',
+  'progress.noData': 'fact',
+  'progress.weightDelta': 'fact',
+  'progress.weightSingle': 'fact',
+  'progress.weightUnknown': 'fact',
+  'progress.weightToTarget': 'fact',
+  'progress.sessions': 'fact',
+  'progress.loadRatio': 'fact',
+  'progress.loadUnknown': 'fact',
+  'progress.notScale': 'note',
+  'suggest.startSession': 'suggestion',
+  'suggest.restDay': 'suggestion',
+  'suggest.pickMissedOption': 'suggestion',
+  'suggest.logWeight': 'suggestion',
+  'suggest.keepLogging': 'suggestion',
 } as const
 
 const LINE_KEY_SET: ReadonlySet<string> = new Set<string>(COACH_LINE_KEYS)
