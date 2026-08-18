@@ -102,10 +102,15 @@ export interface FirstWinSuggestion {
  *
  * ثابت بلا عشوائية: نفس الوقت يعطي نفس الاقتراح دائمًا، فلا يتبدّل الاقتراح
  * تحت يد المستخدم بين إعادتَي رسم.
+ *
+ * [SOVEREIGN-TODAY-001] `warmupAvailable=false` (يوم راحة أو يوم بلا تمارين)
+ * ⇒ **لا يُقترح إحماء أصلًا**. اقتراح إحماء في يوم لا إحماء فيه وعدٌ لا يمكن
+ * تسليمه، وهو نفس صنف العطل الذي أُغلق في مسار التمرين (§6-٤).
  */
-export function suggestFirstWin(now: Date = new Date()): FirstWinSuggestion {
+export function suggestFirstWin(now: Date = new Date(), warmupAvailable = true): FirstWinSuggestion {
   const partOfDay = partOfDayFor(now)
-  return partOfDay === 'evening'
-    ? { kind: 'water', partOfDay, alternatives: ['dinner'] }
-    : { kind: 'warmup', partOfDay, alternatives: ['meal'] }
+  if (partOfDay === 'evening') return { kind: 'water', partOfDay, alternatives: ['dinner'] }
+  return warmupAvailable
+    ? { kind: 'warmup', partOfDay, alternatives: ['meal'] }
+    : { kind: 'meal', partOfDay, alternatives: ['water'] }
 }
