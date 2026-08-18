@@ -403,7 +403,7 @@ export function LoginView({ lang, onSuccess, onBack, mode = 'login', onModeChang
               data-testid="auth-unavailable-back"
               className="btn-ghost mt-4 min-h-[44px] w-full text-sm"
             >
-              {t.auth.back}
+              {t.auth.disabledAction}
             </button>
           </div>
         )}

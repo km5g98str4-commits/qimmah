@@ -128,16 +128,28 @@ check('`backendAvailable()` كاذبة في المعاينة', preview.backendAv
 check('`getSupabase()` تعيد null (لا عميل يُبنى أصلًا)', (await preview.getSupabase()) === null)
 
 // ③ الهجوم: استدعاء الكاتب **مباشرةً** — تجاوز الواجهة كما يفعل مستخدم متمرّس.
+//
+// [SOVEREIGN-COMMERCE-001] **شُدَّت هذه الفحوص الثلاثة، ولم تُرخَ.**
+// كانت تشترط الرفض بالكلمة `offline` حرفيًّا — أي أنها كانت **تثبّت العيب**:
+// «تأكّد من النت» جوابًا عن بناءٍ لا خادم فيه أصلًا. والخاصيّة التي تحرسها
+// هذه الطبقة ليست نصّ الرفض بل **أن الكاتب يرفض بلا نداء شبكة**، وهي مصونة
+// (⑤ و⑧ أدناه). فصار الشرط أقوى: الرفض `backend_unconfigured` بعينه،
+// و**ليس** `offline` — فبناء المراجعة لا يجوز أن يلوم شبكة المستخدم.
+const REFUSES_HONESTLY = (v) => v === 'backend_unconfigured'
 const trial = await preview.startTrialOnServer()
-check('② بدء تجربة إنتاج مستحيل — الكاتب المباشر يعيد `offline`', trial === 'offline', `عاد: ${trial}`)
+check('② بدء تجربة إنتاج مستحيل — الكاتب المباشر يرفض بـ`backend_unconfigured`', REFUSES_HONESTLY(trial), `عاد: ${trial}`)
+check('   ولا يلوم شبكة المستخدم على غياب خادمٍ في البناء', trial !== 'offline', `عاد: ${trial}`)
 const redeem = await preview.redeemCodeOnServer('QIMMAHTEST2024')
-check('③ استهلاك كود تفعيل إنتاج مستحيل — الكاتب المباشر يعيد `offline`', redeem === 'offline', `عاد: ${redeem}`)
+check('③ استهلاك كود تفعيل إنتاج مستحيل — الكاتب المباشر يرفض بـ`backend_unconfigured`', REFUSES_HONESTLY(redeem), `عاد: ${redeem}`)
+check('   وكذلك لا يلوم الشبكة', redeem !== 'offline', `عاد: ${redeem}`)
 const claim = await preview.claimPendingGrantsOnServer()
 check('منح معلّقة لا تُطالَب', claim === false, `عاد: ${claim}`)
 const ent = await preview.resolveEntitlement()
 check('الاستحقاق `none` بمصدر `none` وسبب معلَن', ent.status === 'none' && ent.source === 'none' && ent.lastError === 'backend_unconfigured', JSON.stringify(ent))
 const redeemUi = await preview.redeemActivationCode('QIMMAH-TEST-CODE')
-check('مسار الواجهة للاستبدال يعيد `offline` أيضًا', redeemUi === 'offline', `عاد: ${redeemUi}`)
+check('مسار الواجهة للاستبدال يرفض بنفس السبب المعلَن', REFUSES_HONESTLY(redeemUi), `عاد: ${redeemUi}`)
+check('   والحقل الفارغ يُردّ محلّيًا بـ`empty` — بلا نداء ولا لوم',
+  (await preview.redeemActivationCode('   ')) === 'empty')
 
 // ⑤ لا نجاح كاذب: لا نتيجة من النتائج أعلاه تعني «تم».
 const SUCCESSY = new Set(['success', 'active', 'started', 'ok', true])

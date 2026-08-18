@@ -78,8 +78,18 @@ export async function run({ browser, url, engine }) {
     rec.check('no oracle: two different unknown codes give the SAME generic message',
       messages['AAAA-BBBB-CCCC'] === messages['ZZZZ-YYYY-XXXX'] && messages['AAAA-BBBB-CCCC'].length > 0,
       `${messages['AAAA-BBBB-CCCC']} | ${messages['ZZZZ-YYYY-XXXX']}`)
-    rec.check('distinct real outcomes are distinguished (used ≠ expired ≠ unknown)',
-      new Set([messages['QIMMAH-TEST-USED'], messages['QIMMAH-TEST-EXPIRED'], messages['AAAA-BBBB-CCCC']]).size === 3,
+    // [SOVEREIGN-COMMERCE-001] The mock now MIRRORS the server instead of
+    // outrunning it. `redeem_access_code` fuses "expired" into `invalid_code`
+    // on purpose so the field is not an oracle on code existence, so a mock
+    // that produced a distinct "expired" message was proving a distinction
+    // production cannot make. Two assertions replace the old one:
+    //   · the deliberate FUSION holds (expired reads as the generic message),
+    //   · and genuinely distinct outcomes are still distinguished.
+    rec.check('the deliberate fusion holds: an expired code is indistinguishable from an unknown one',
+      messages['QIMMAH-TEST-EXPIRED'] === messages['AAAA-BBBB-CCCC'] && messages['AAAA-BBBB-CCCC'].length > 0,
+      `expired=${messages['QIMMAH-TEST-EXPIRED']} | unknown=${messages['AAAA-BBBB-CCCC']}`)
+    rec.check('distinct real outcomes are still distinguished (used ≠ offline ≠ generic)',
+      new Set([messages['QIMMAH-TEST-USED'], messages['QIMMAH-TEST-OFFLINE'], messages['AAAA-BBBB-CCCC']]).size === 3,
       Object.values(messages).join(' | '))
     const stateAfterFailedCodes = await storageSnapshot(page)
     rec.check('failed codes grant nothing', !(await page.evaluate(() => { try { return window.sessionStorage.getItem('qimmah:entitlement-mock:v1') === 'active' } catch { return false } })),

@@ -86,6 +86,11 @@ export interface ShellStrings {
     disabledPreviewBody: string
     /** ما يبقى مفتوحًا بلا حساب — الخطوة التالية لا الطريق المسدود. */
     disabledNext: string
+    /**
+     * نداء الخطوة التالية. **ليس «رجوع»**: زرّ الرأس رجوعٌ أصلًا، وتكرار الكلمة
+     * في بطاقةٍ تحته يقرأ سهوًا لا اختيارًا. هذا يسمّي الوجهة لا الاتجاه.
+     */
+    disabledAction: string
     guestBadge: string
     guestNote: string
     accountNote: string
@@ -554,6 +559,7 @@ const ar: ShellStrings = {
     disabledPreviewTitle: 'هذي نسخة مراجعة — بلا حسابات',
     disabledPreviewBody: 'نسخة المراجعة تشتغل بلا خادم عشان ما تلمس بياناتنا الحيّة، فالحسابات مقفولة فيها. كل شي ثاني تقدر تجرّبه.',
     disabledNext: 'كمّل تصفّحك عادي — خطتك وبياناتك محفوظة على هذا الجهاز.',
+    disabledAction: 'رجوع للتصفّح',
     guestBadge: 'ضيف',
     guestNote: 'بيانات الضيف تنحفظ على هذا الجهاز بس.',
     accountNote: 'أنت مسجّل دخولك، وبياناتك تتزامن مع حسابك السحابي.',
@@ -1031,6 +1037,7 @@ const en: ShellStrings = {
     disabledPreviewTitle: 'This is a review build — no accounts',
     disabledPreviewBody: "The review build runs with no server so it can't touch our live data, which is why accounts are closed here. Everything else is yours to try.",
     disabledNext: 'Keep browsing as you were — your plan and your data are saved on this device.',
+    disabledAction: 'Back to browsing',
     guestBadge: 'Guest',
     guestNote: 'Guest data is stored on this device only.',
     accountNote: 'You are logged in. Your data syncs to your cloud account.',

@@ -279,7 +279,8 @@ try {
   for (const [code, expect] of [
     ['NOPE-NOPE-NOPE', 'invalid'],
     ['QIMMAH-TEST-USED', 'already_used'],
-    ['QIMMAH-TEST-EXPIRED', 'expired'],
+    // [SOVEREIGN-COMMERCE-001] «منتهٍ» مدموجة في `invalid` عمدًا (لا أوراكل).
+    ['QIMMAH-TEST-EXPIRED', 'invalid (مدموجة عمدًا)'],
     ['QIMMAH-TEST-OFFLINE', 'offline'],
   ]) {
     await page.fill('[data-testid="activation-code-input"]', code)

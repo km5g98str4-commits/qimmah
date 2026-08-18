@@ -183,7 +183,11 @@ check('postMessage من أصل معادٍ لا يغيّر شيئًا', r2.status
 // [OVERNIGHT-5] كان الشرط `out === 'offline'` — وهو ما كان **الرفض الوحيد**
 // الممكن قبل وصول عقد الخادم. صارت الرفوض عدّة، وكلّها صادقة؛ والمهمّ أن
 // أيًّا منها **ليس نجاحًا**، وأن أثرها صفر. فنفحص ذلك لا الصيغة بعينها.
-const HONEST_REFUSALS = ['offline', 'invalid', 'already_used', 'expired', 'revoked', 'not_authenticated']
+// [SOVEREIGN-COMMERCE-001] الجدول يتبع العقد: `expired` **أُزيلت** (الخادم يدمج
+// «منتهٍ» في `invalid_code` عمدًا فلا يقولها أبدًا)، وأصناف الفشل الأربعة
+// المتمايزة دخلت. والمهمّ نفسه: لا واحد منها نجاح، وأثرها صفر.
+const HONEST_REFUSALS = ['offline', 'timeout', 'service_error', 'backend_unconfigured',
+  'empty', 'invalid', 'already_used', 'revoked', 'not_authenticated']
 for (const code of ['QIMMAH-TEST-OK', 'qimmah-test-ok', '  QIMMAH-TEST-OK  ']) {
   const out = await prod.mod.redeemActivationCode(code)
   check(`كود التقليد «${code.trim()}» في الإنتاج ⇒ ${out} (لا success)`,
@@ -261,7 +265,21 @@ check('CLOSED_ACCESS.entitlement مغلقة (loading)', CLOSED_ACCESS.entitlemen
 let ranViaGuard = false
 CLOSED_ACCESS.guard('workout.start', () => { ranViaGuard = true })('arg')
 check('CLOSED_ACCESS.guard لا ينفّذ المعالج', ranViaGuard === false)
-check('CLOSED_ACCESS.redeem يعيد offline لا success', (await CLOSED_ACCESS.redeem('QIMMAH-TEST-OK')) === 'offline')
+{
+  // [SOVEREIGN-COMMERCE-001] كان الشرط يثبّت الكلمة `offline` — أي يحرس صيغةً لا
+  // خاصيّة. والخاصيّة هي أن شجرةً بلا مزوّد **ترفض**، وأن رفضها لا يلوم شبكة
+  // المستخدم على خطأٍ برمجي عندنا. فصار الفحص على الاثنتين معًا.
+  const closedRedeem = await CLOSED_ACCESS.redeem('QIMMAH-TEST-OK')
+  check(`CLOSED_ACCESS.redeem يرفض (${closedRedeem}) ولا يمنح`,
+    closedRedeem !== 'success' && HONEST_REFUSALS.includes(closedRedeem))
+  const closedTrial = await CLOSED_ACCESS.beginTrial()
+  check(`CLOSED_ACCESS.beginTrial يرفض (${closedTrial}) ولا يبدأ تجربة`, closedTrial !== 'started')
+  check('ورفضُ الشجرة بلا مزوّد لا يُلبَس انقطاعَ شبكة عند المستخدم',
+    closedRedeem !== 'offline' && closedTrial !== 'offline')
+  // ونيّة التجربة في الشجرة المغلقة لا تدّعي أنها حُفظت.
+  check('CLOSED_ACCESS.recordTrialIntent لا يدّعي حفظًا لم يقع',
+    CLOSED_ACCESS.recordTrialIntent('reveal') !== 'ok' && CLOSED_ACCESS.hasTrialIntent() === false)
+}
 
 // ════════════════ ⑤ العدّاد المضادّ — البناء المُقلَّد يخترق ════════════════
 console.log('\n⑤ العدّاد المضادّ (§4.2) — نفس الهجوم على بناء التقليد')
