@@ -29,6 +29,20 @@ export type MovementPattern =
   | 'cardio'
   | 'mobility'
 export type ExEnvironment = 'gym' | 'home' | 'both'
+// أحمال المفاصل الميكانيكية — مفردات ترشيح الإصابات (تُعلَن على كل تمرين في المكتبة).
+export type JointLoad =
+  | 'overhead'             // تحميل فوق الرأس — رفع/دفع بزاوية تتجاوز مستوى الكتف
+  | 'shoulder_anterior'    // تحميل أمامي مركّز على الدالية الأمامية
+  | 'shoulder_abduction'   // تبعيد بقوس واسع (رفرفة جانبية/أمامية/تفتيح)
+  | 'deep_knee_flexion'    // ثني ركبة عميق تحت حِمل (نمط القرفصاء والطعن)
+  | 'knee_shear'           // حِمل مفتوح السلسلة على الركبة (تمديد الرجل)
+  | 'impact'               // قفز/هبوط/جري — حِمل صدمي
+  | 'spinal_axial'         // تحميل محوري على العمود (بار على الظهر/وقوف تحت حِمل)
+  | 'spinal_hinge'         // ثني/بسط قطني تحت حِمل (رفعة ميتة/صباح الخير)
+  | 'wrist_extension'      // بسط رسغ محمَّل (استناد على الكف/وضعية الرَّف الأمامي)
+  | 'elbow_extension'      // تمديد مرفق ثقيل (ترايسبس معزول)
+  | 'ankle_dorsiflexion'   // ثني كاحل عميق أو حِمل سمانة كامل المدى
+
 // مصدر الفيديو: بحث يوتيوب موثوق، أو فيديو موثوق محدّد، أو مخصّص من المستخدم.
 export type VideoSource = 'official' | 'trusted' | 'custom' | 'youtube_search' | 'trusted_video'
 
@@ -45,6 +59,13 @@ export interface Exercise {
   equipment: string[]
   level: ExLevel
   movementPattern: MovementPattern
+  /**
+   * أحمال المفاصل الميكانيكية لهذا التمرين — أساس ترشيح الإصابات.
+   * `[]` = **مراجَع ولا يحمل أيًّا من الأحمال المقيَّدة** (وليس «غير مصنَّف»).
+   * غياب الحقل يعني «غير مصنَّف» ويُستبعَد افتراضًا عند وجود إصابة مُعلَنة.
+   * هذه ملاءمة تمرين لا تشخيص طبي.
+   */
+  jointLoads: JointLoad[]
   environment: ExEnvironment
   defaultSets: number
   defaultReps: string
