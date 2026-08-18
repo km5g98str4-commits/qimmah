@@ -34,10 +34,20 @@ export interface RevealStrings {
     title: string
     /** «نقطة البداية» — مقاسة، فتُقال حاسمة. */
     current: string
-    /** «مسارك المستهدف» لا «ستصل». */
+    /** «مسارك المستهدف» لا «ستصل» — تسمية الرقم **المشتقّ**. */
     target: string
+    /**
+     * تسمية الرقم الذي **كتبه المستخدم بنفسه**. مقاسٌ لا مُستنتَج، فلا يحمل
+     * وسم «تقريبي» ولا لغة تحفّظ (§6/الثابت ٢).
+     */
+    targetYours: string
     /** وسم صريح على كل رقم مشتقّ. */
     estimateBadge: string
+    /**
+     * رقم المستخدم يعاكس اتجاه هدفه — يُقال صراحةً ولا يُصحَّح صامتًا.
+     * النبرة إخبار لا لوم: رقمه يبقى، والباب مفتوح لتغيير أيّهما شاء.
+     */
+    mismatchNote: string
     /** سطر المدّة التقريبية. الرقم يصل **مُنسَّقًا** — التوطين عند حدّ الرسم لا في القاموس. */
     weeks: (weeks: string) => string
     /** معدّل التغيّر الأسبوعي التقريبي. */
@@ -132,7 +142,9 @@ const ar: RevealStrings = {
     title: 'مسارك',
     current: 'اليوم',
     target: 'مسارك المستهدف',
+    targetYours: 'هدفك',
     estimateBadge: 'تقريبي',
+    mismatchNote: 'الرقم اللي كتبته يمشي بعكس الهدف اللي اخترته، فما نرسم لك مدّة عليه. خلّيناه زي ما كتبته — وتقدر تغيّر الهدف أو الرقم أي وقت.',
     weeks: (weeks) => `على هذا المسار، تقريبًا ${weeks} أسبوعًا`,
     weeklyRate: (kg) => `بمعدّل ${kg} كجم بالأسبوع تقريبًا`,
     steadyTitle: 'هدفك ثبات لا تغيير وزن',
@@ -203,7 +215,9 @@ const en: RevealStrings = {
     title: 'Your path',
     current: 'Today',
     target: 'Your target path',
+    targetYours: 'Your target',
     estimateBadge: 'estimate',
+    mismatchNote: "The number you entered goes the other way from the goal you picked, so we're not drawing a timeline on it. We kept your number as you wrote it — you can change either one anytime.",
     weeks: (weeks) => `On this path, roughly ${weeks} weeks`,
     weeklyRate: (kg) => `About ${kg} kg per week`,
     steadyTitle: 'Your goal is steady, not weight change',
