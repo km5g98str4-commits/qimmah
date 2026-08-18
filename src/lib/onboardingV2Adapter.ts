@@ -28,8 +28,9 @@ import type {
   TrainedBefore,
   TrainingConsistency,
 } from '@/types/onboarding'
+import { resolveTargetWeight } from '@/lib/planDerive'
 import type { V2GoalValue } from '@/design-system/v2/labels'
-import type { Equipment } from '@/types/profile'
+import type { Equipment, GoalType } from '@/types/profile'
 
 export type V2Place = 'gym' | 'home' | 'machines'
 
@@ -52,6 +53,13 @@ export interface V2OnboardingChoices {
   gender?: 'male' | 'female' | null
   heightCm?: number | null
   weightKg?: number | null
+  /**
+   * الوزن المستهدف **كما كتبه المستخدم** — لا مشتقّ.
+   *
+   * `null`/غياب ⇒ لم يكتبه، فيُشتقّ ويُوسم تقديرًا. وأي رقم هنا **يفوز على
+   * الاشتقاق دائمًا** ولا يُستبدل به في أي طبقة لاحقة (§5 · [SOVEREIGN-003]).
+   */
+  targetWeightKg?: number | null
   /** النية والمستوى — الخطوة الثانية؛ null يعني «لم تُجَب بعد» (مسودّة قديمة). */
   intent?: V2Intent | null
   level?: V2Level | null
@@ -74,6 +82,16 @@ const INTENT_TO_NUTRITION: Record<V2Intent, NutritionStyle> = {
   numbers: 'macros_only',
 }
 
+/**
+ * هدف v2 ⇒ `GoalType` — الشكل الذي تفهمه سلطة الوزن المستهدف.
+ * نفس خريطة `GOAL_TO_GOALTYPE` في `onboardingProfile.ts` بلا معامل جديد.
+ */
+const GOAL_TO_GOAL_TYPE: Record<V2GoalValue, GoalType> = {
+  cut: 'cutting',
+  bulk: 'bulking',
+  maintain: 'maintenance',
+}
+
 /** v2 training place → the closest existing `Environment`. */
 const PLACE_TO_ENV: Record<V2Place, Environment> = {
   gym: 'commercial_gym', // نادي — full gym (machines + free weights)
@@ -82,9 +100,17 @@ const PLACE_TO_ENV: Record<V2Place, Environment> = {
 }
 
 /**
- * Convert v2 onboarding choices into a full `Answers` object. Target weight is
- * derived from the goal the same way v1 does (cut ×0.9, bulk ×1.1, maintain =)
- * so calorie direction is sane.
+ * Convert v2 onboarding choices into a full `Answers` object.
+ *
+ * ═══ الوزن المستهدف: سلطة واحدة ═══ [SOVEREIGN-003]
+ * كان هذا المحوّل يحمل **معاملًا ثانيًا** للوزن المستهدف (تنشيف ×0.9 · تضخيم
+ * ×1.1) ينافس `deriveTargetWeight` (×0.92 · ×1.05). فما تعرضه شاشة الكشف
+ * كهدفٍ كان يأتي من المعامل الأول، بينما المدّة المكتوبة تحته تُحسب من الثاني
+ * — رقمان في بطاقة واحدة. المعامل هنا **حُذف**، والاشتقاق كلّه صار نداءً
+ * واحدًا إلى `resolveTargetWeight`.
+ *
+ * و`targetTouched` صار يقول الحقيقة: التدفّق لا يسأل عن وزن مستهدف اليوم،
+ * فالقيمة مشتقّة و`false`. كانت `true` دائمًا — إعلانُ لمسةٍ لم تحدث.
  *
  * **بيانات الجسم تأتي من المستخدم الآن.** كان التدفّق لا يسألها إطلاقًا فتسقط
  * كلها على `defaultAnswers` (25 سنة · 170سم · 75كجم) — أي **نفس BMR لكل
@@ -96,12 +122,11 @@ const PLACE_TO_ENV: Record<V2Place, Environment> = {
  */
 export function toAnswersFromV2(choices: V2OnboardingChoices): Answers {
   const weightKg = choices.weightKg ?? defaultAnswers.weightKg
-  const targetWeightKg =
-    choices.goal === 'cut'
-      ? Math.round(weightKg * 0.9)
-      : choices.goal === 'bulk'
-        ? Math.round(weightKg * 1.1)
-        : weightKg
+  const target = resolveTargetWeight(
+    weightKg,
+    choices.goal ? GOAL_TO_GOAL_TYPE[choices.goal] : 'maintenance',
+    choices.targetWeightKg,
+  )
   const trainedBefore = choices.trainedBefore ?? null
   const followUps = historyFollowUpsApply(trainedBefore)
   const totalMonths = followUps ? choices.totalMonths ?? null : null
@@ -156,7 +181,8 @@ export function toAnswersFromV2(choices: V2OnboardingChoices): Answers {
     hasInjury: choices.hasInjury,
     injuries: [...choices.injuries],
     healthDataConsent: choices.healthDataConsent,
-    targetWeightKg,
-    targetTouched: true,
+    targetWeightKg: target.targetWeightKg,
+    // «لمسه المستخدم» تعني ما تقوله: رقمٌ كتبه بنفسه، لا رقمٌ اشتققناه له.
+    targetTouched: target.source === 'user',
   }
 }
