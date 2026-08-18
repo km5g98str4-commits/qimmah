@@ -98,6 +98,15 @@ export interface RevealStrings {
      * أما المعاينة فتبقى بلا حساب (§0.1)، فلا يُعرض هذا النداء لأجلها.
      */
     createAccountCta: string
+    /**
+     * [SOVEREIGN-ENTRY-001] استئناف تجربة طُلبت **قبل** الحساب.
+     *
+     * الرحلة تعبر تفكيك شاشة التسليم، فالوعد يُقطع هناك ويُوفّى هنا. النبرة
+     * تذكير لا مطالبة: لا ضغط ولا «لا تفوّت» (§6/الثابت ١).
+     */
+    resumeTrialTitle: string
+    resumeTrialCta: string
+    resumeTrialDismiss: string
   }
 }
 
@@ -166,6 +175,9 @@ const ar: RevealStrings = {
     trialOffline: 'ما قدرنا نوصل للخادم. تأكّد من اتصالك وجرّب مرة ثانية.',
     trialStarted: 'تجربتك بدأت — ٧٢ ساعة كاملة.',
     createAccountCta: 'أنشئ حسابك',
+    resumeTrialTitle: 'طلبت تجربة Premium قبل شوي — حسابك جاهز الحين.',
+    resumeTrialCta: 'ابدأ تجربتك',
+    resumeTrialDismiss: 'مو الحين',
   },
 }
 
@@ -234,6 +246,9 @@ const en: RevealStrings = {
     trialOffline: "We couldn't reach the server. Check your connection and try again.",
     trialStarted: 'Your trial has started — a full 72 hours.',
     createAccountCta: 'Create your account',
+    resumeTrialTitle: 'You asked for a Premium trial earlier — your account is ready now.',
+    resumeTrialCta: 'Start your trial',
+    resumeTrialDismiss: 'Not now',
   },
 }
 

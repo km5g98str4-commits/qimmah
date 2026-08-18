@@ -15,6 +15,13 @@ import {
 } from '@/lib/onboardingV2Flow'
 import { toAnswersFromV2, type V2OnboardingChoices } from '@/lib/onboardingV2Adapter'
 import type { Equipment } from '@/types/profile'
+import {
+  PENDING_TRIAL_KEY,
+  PENDING_TRIAL_TTL_MS,
+  clearPendingTrialIntent,
+  hasPendingTrialIntent,
+  markPendingTrialIntent,
+} from '@/lib/entryIntent'
 import { buildOnboardingProfile } from '@/lib/planBuilderAnswers'
 import {
   ONBOARDING_PROFILE_KEY,
@@ -340,6 +347,34 @@ check('حارس التناقض: هدف يخالف اتجاهه لا يُرسم �
 check('وبديله اتجاه معلَن لا صمت', viewSource.includes('data-testid="reveal-direction-only"') && revealStrings.ar.value.directionOnly.length > 0 && revealStrings.en.value.directionOnly.length > 0)
 check('لا وعد نتيجة طبية في نصوص الكشف', !/تضمن|مضمون|guarantee|guaranteed|cure|علاج/i.test(JSON.stringify(revealStrings)))
 check('مراحل التجهيز تتبع العمل ولا تخترعه', readFileSync(resolve(process.cwd(), 'src/views/reveal/SynthesisScreen.tsx'), 'utf8').includes('if (doneRef.current) return'))
+
+console.log('\n═══ 8ز) نيّة التجربة تنجو من تفكيك شاشتها ═══')
+// العطب: الزرّ يعيش على شاشة مشروطة بمزلاج داخل `SetupView`، والطريق الذي
+// يعرضه (إنشاء الحساب) **يفكّ تلك الشاشة** فيموت المزلاج ومعه المدخل.
+realStore.removeItem(PENDING_TRIAL_KEY)
+check('لا نيّة افتراضيًا', !hasPendingTrialIntent())
+check('الكتابة تُرجع نتيجة مفحوصة', markPendingTrialIntent() === 'ok')
+check('والنيّة تُقرأ بعدها', hasPendingTrialIntent())
+check('نيّة أقدم من مدّة الصلاحية تُعامَل كغائبة', !hasPendingTrialIntent(Date.now() + PENDING_TRIAL_TTL_MS + 1000))
+check('والمنتهية تُنظَّف فلا تتكرّر القراءة الفاشلة', realStore.getItem(PENDING_TRIAL_KEY) === null)
+markPendingTrialIntent()
+clearPendingTrialIntent()
+check('الاستهلاك يُسقطها', !hasPendingTrialIntent() && realStore.getItem(PENDING_TRIAL_KEY) === null)
+realStore.setItem(PENDING_TRIAL_KEY, '{"v":99,"at":"soon"}')
+check('بايتات معطوبة لا تُصدَّق', !hasPendingTrialIntent())
+check('وتُنظَّف فورًا', realStore.getItem(PENDING_TRIAL_KEY) === null)
+const blockedIntent = quotaBlockedStore()
+swapStore(blockedIntent)
+const intentBlocked = markPendingTrialIntent()
+swapStore(realStore)
+check('تخزين محجوب يُبلَّغ لا يُبتلع', intentBlocked === 'quota')
+check('زرّ إنشاء الحساب مشروط بنجاح حفظ النيّة', viewSource.includes("trialState === 'not_authenticated' && !signedIn && trialIntentStored && onCreateAccount"))
+check('النيّة تُكتب قبل عرض الطريق لا بعده', viewSource.indexOf('markPendingTrialIntent()') < viewSource.indexOf('reveal-create-account-cta'))
+const resumeSource = readFileSync(resolve(process.cwd(), 'src/views/reveal/PendingTrialResume.tsx'), 'utf8')
+check('سطح الاستئناف يظهر فقط بنيّة سارية وحساب فعليّ', resumeSource.includes('if (!pending || !signedIn) return null'))
+check('والاستئناف يستهلك النيّة مرّة واحدة', resumeSource.includes('clearPendingTrialIntent()') && resumeSource.includes("outcome !== 'offline'"))
+check('وانقطاع الشبكة لا يُسقط النيّة (لا عقاب على عطل ليس منه)', resumeSource.includes("if (outcome !== 'offline') {"))
+check('نصّ الاستئناف بلغتين وبلا ضغط', revealStrings.ar.cta.resumeTrialTitle.length > 0 && revealStrings.en.cta.resumeTrialTitle.length > 0 && !/!/.test(revealStrings.ar.cta.resumeTrialTitle))
 
 console.log('\n═══ 9) محاكاة الالتفاف: العدد/الربط/المفردات لا تمرّ رخوة ═══')
 check('إضافة معرّف زائد كانت ستُكشف', [...ONBOARDING_QUESTION_IDS, 'filler.fake'].length !== 20)

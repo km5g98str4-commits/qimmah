@@ -78,6 +78,7 @@ import { RevealJourney } from '@/views/reveal/RevealJourney'
 import { RevealValue } from '@/views/reveal/RevealValue'
 import { revealStrings } from '@/i18n/dict/reveal'
 import { deriveTargetWeight } from '@/lib/planDerive'
+import { markPendingTrialIntent } from '@/lib/entryIntent'
 import { useAccess } from '@/lib/access/useAccess'
 
 interface OnboardingV2Props {
@@ -1367,6 +1368,12 @@ export function PlanHandoffScreen({
   const rv = revealStrings[lang] ?? revealStrings.ar
   const { beginTrial } = useAccess()
   const [trialState, setTrialState] = useState<'idle' | 'working' | TrialOutcome>('idle')
+  /**
+   * هل نجحت كتابة النيّة؟ يحكم **ظهور** زرّ إنشاء الحساب: بلا نيّة محفوظة
+   * لن يجد المستخدم مدخل التجربة بعد التسجيل، فالزرّ يَعِد بما لا يحدث.
+   * والبديل ليس صمتًا — رسالة `trialNeedsAccount` تبقى ظاهرة تشرح الحاجة.
+   */
+  const [trialIntentStored, setTrialIntentStored] = useState(false)
 
   // الوزن المستهدف **مشتقّ** من الهدف لا مُدخَل — الإعداد لا يسأل عنه.
   //
@@ -1392,6 +1399,13 @@ export function PlanHandoffScreen({
     // (`signedIn`) لا تحتاج رحلة شبكة لتُكتشف. وكان النداء يُرسَل على أي حال،
     // فيرجع `offline` حين لا يكون هناك خادم — رسالة «تأكّد من اتصالك» لمشكلة
     // ليست اتصالًا. نُبلغه بالسبب الصادق فورًا، ونفتح له الطريق.
+    // [SOVEREIGN-ENTRY-001] النيّة تُكتب على القرص **قبل** أن نعرض الطريق:
+    // الطريق نفسه (إنشاء الحساب) يفكّ هذه الشاشة، فما يبقى في ذاكرتها يموت
+    // معها. والكتابة مفحوصة — زرٌّ يَعِد باستئناف لن يحدث أسوأ من لا شيء.
+    //
+    // وهي جملة مستقلّة عن الاختصار أدناه عمدًا: شكل ذلك السطر مثبَّت في
+    // `test:entry-flow` كإثبات على أن الضيف يُبلَّغ بسببه الصادق بلا رحلة شبكة.
+    if (!signedIn) setTrialIntentStored(markPendingTrialIntent() === 'ok')
     if (!signedIn) { setTrialState('not_authenticated'); return }
     setTrialState('working')
     setTrialState(await beginTrial())
@@ -1513,7 +1527,7 @@ export function PlanHandoffScreen({
           )}
           {/* [WAVE-A] اللحظة الصحيحة لطلب الحساب: بعد أن رأى خطته، وعند اختياره
               مسارًا يلزمه حساب — لا قبل أن يرى شيئًا. */}
-          {trialState === 'not_authenticated' && !signedIn && onCreateAccount && (
+          {trialState === 'not_authenticated' && !signedIn && trialIntentStored && onCreateAccount && (
             <button
               type="button"
               onClick={onCreateAccount}
