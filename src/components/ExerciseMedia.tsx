@@ -5,7 +5,7 @@ import { getExerciseMedia } from '@/data/exerciseMedia'
 import { getExerciseGif } from '@/data/exerciseGifs'
 import { getMachineImage } from '@/data/machineImages'
 import { LEGACY_EXERCISE_ID_MAP, canonicalExerciseId, isPlaceholderOnlyMedia, getExercise } from '@/data/exercises'
-import { muscleLabelAr } from '@/data/muscleGroups'
+import { muscleGroupLabel } from '@/data/muscleGroups'
 import { exerciseMediaStrings } from '@/i18n/dict/exerciseMedia'
 import type { Lang } from '@/lib/appPreferences'
 import type { MuscleId } from '@/types/muscles'
@@ -153,7 +153,7 @@ export function ExerciseMedia({
       <div className="flex flex-wrap gap-1.5 border-t border-line bg-surface px-3 py-2">
         {muscles.slice(0, 3).map((m) => (
           <span key={m} className="rounded-full bg-beige px-2 py-0.5 text-[10px] font-bold text-ink-700">
-            {muscleLabelAr(m)}
+            {muscleGroupLabel(m, lang)}
           </span>
         ))}
       </div>
@@ -315,8 +315,12 @@ function FrameLabel({ text, at = 'top' }: { text: string; at?: 'top' | 'bottom' 
 function MediaPending({ lang, compact }: { lang: Lang; compact: boolean }) {
   const s = exerciseMediaStrings[lang]
   return (
+    /* في الوضع المصغّر لا يتّسع الإطار لسطر نصّ، فلو بقي بلا اسم صار **فراغًا صامتًا**
+       للقارئ الصوتي: منطقة `note` بلا محتوى. الاسم يُمرَّر عبر `aria-label` بنفس نصّ
+       القاموس الظاهر في الوضع الكامل — نفس المعنى في القناتين. */
     <div
       role="note"
+      aria-label={compact ? s.pendingTitle : undefined}
       className="relative flex h-full w-full flex-col items-center justify-center gap-1.5 bg-beige px-4 text-center"
     >
       <span className="grid h-9 w-9 place-items-center rounded-xl border border-line bg-surface text-ink-400">

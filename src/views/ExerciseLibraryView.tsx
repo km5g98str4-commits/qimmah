@@ -16,6 +16,7 @@ import { getExerciseMedia } from '@/data/exerciseMedia'
 import { getExerciseGif } from '@/data/exerciseGifs'
 import { approvedImageFor, productionEntryFor } from '@/lib/exerciseProductionMedia'
 import { machineCatalog } from '@/data/machineCatalog'
+import { exerciseMediaStrings } from '@/i18n/dict/exerciseMedia'
 import type { Muscle } from '@/types/workout'
 
 interface ExerciseLibraryViewProps {
@@ -248,7 +249,7 @@ export function ExerciseLibraryView({ lang }: ExerciseLibraryViewProps) {
                   data-testid="exercise-card"
                   className="group flex h-full w-full flex-col overflow-hidden rounded-3xl border border-line bg-surface text-start shadow-card transition hover:-translate-y-0.5 hover:shadow-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 >
-                  <ExerciseCardMedia exerciseId={e.id} />
+                  <ExerciseCardMedia exerciseId={e.id} lang={lang} />
                   <div className="flex flex-1 flex-col gap-2 p-3.5">
                     {/* الاسم العربي أساسي، الإنجليزي سطر ثانوي أصغر (موحّد) */}
                     <ExerciseName
@@ -325,7 +326,7 @@ function MachineCatalogBrowser({ onOpen, d, lang }: { onOpen: (id: string) => vo
                       data-testid="exercise-machine-card"
                       className="group flex h-full w-full flex-col overflow-hidden rounded-3xl border border-line bg-surface text-start shadow-card transition hover:-translate-y-0.5 hover:shadow-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                     >
-                      <ExerciseCardMedia exerciseId={item.exerciseId} />
+                      <ExerciseCardMedia exerciseId={item.exerciseId} lang={lang} />
                       <div className="flex flex-1 flex-col gap-2 p-3.5">
                         <ExerciseName
                           nameAr={ex.nameAr}
@@ -372,7 +373,7 @@ function MachineCatalogBrowser({ onOpen, d, lang }: { onOpen: (id: string) => vo
  *   • بديل بالأيقونة حين لا وسيط (٦٠ تمرينًا من ١٨١ بلا صورة مطابقة) — ولا
  *     يتظاهر بأنه شرح.
  */
-function ExerciseCardMedia({ exerciseId }: { exerciseId: string }) {
+function ExerciseCardMedia({ exerciseId, lang }: { exerciseId: string; lang: Lang }) {
   // ── [FINAL-CONVERGENCE] البطاقة تتبع نفس سلطة الوسائط التي يتبعها التفصيل ──
   // كانت البطاقة تقرأ الطبقات القديمة (`exerciseGifs` / `exerciseMedia`) بينما
   // التفصيل يقرأ المانيفست الإنتاجي. فمثلًا `chest-press-machine` **معلَن
@@ -394,14 +395,20 @@ function ExerciseCardMedia({ exerciseId }: { exerciseId: string }) {
       /* ⚠️ `bg-beige` لا `from-ink-900`: رموز `ink` **تنقلب مع الثيم** — فما كان
          لوحًا داكنًا في الفاتح صار لوحًا أبيض ساطعًا في الداكن، وهو ما كانت
          البطاقة القديمة تفعله بصمت لأن مربّع ٤٨بكسل لا يُلاحَظ. بعرض البطاقة
-         كاملًا ظهر الخطأ فورًا. رمز السطح يتبع الثيم، ورمز الحبر لا يصلح سطحًا. */
+         كاملًا ظهر الخطأ فورًا. رمز السطح يتبع الثيم، ورمز الحبر لا يصلح سطحًا.
+
+         [SOVEREIGN-003] وكان البديل **صامتًا**: دمبل داخل `aria-hidden` بلا حرف
+         واحد. الشاشة التفصيلية تقول «الشرح المرئي قيد الإضافة» صراحةً، والبطاقة
+         تعرض أيقونة عامّة تُقرأ كأنها الحالة الطبيعية — فيظنّ المستخدم أن هذا شكل
+         البطاقة، لا أن الصورة ناقصة. الآن الحالتان تقولان الشيء نفسه بنفس النصّ
+         من نفس القاموس، والنصّ مقروء للقارئ الصوتي لا مخفيّ عنه. */
       <span
-        aria-hidden="true"
         data-testid="exercise-card-media"
         data-media-state="fallback"
-        className="grid aspect-[4/3] w-full place-items-center bg-beige text-ink-400"
+        className="flex aspect-[4/3] w-full flex-col items-center justify-center gap-1.5 bg-beige px-2 text-center"
       >
-        <Icon name="Dumbbell" className="h-7 w-7" />
+        <Icon name="ImageOff" aria-hidden="true" className="h-6 w-6 text-ink-400" />
+        <span className="text-[10px] font-bold leading-snug text-ink-500">{exerciseMediaStrings[lang].pendingTitle}</span>
       </span>
     )
   }
