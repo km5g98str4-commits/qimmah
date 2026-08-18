@@ -1,6 +1,6 @@
 # STATE.md — Qimmah Project State
 
-**Revision:** v0.9.1
+**Revision:** v1.0-rc
 **Status:** PLANNING + VERIFICATION MODE.
 **Purpose:** the single record of what is **VERIFIED** versus what is merely **CLAIMED**.
 
@@ -11,6 +11,32 @@
 No predecessor `STATE.md` exists in this repository (`VERIFY.md` §Provenance). This file
 is new. Everything in it is either evidence gathered under this revision, or explicitly
 labelled as CLAIMED.
+
+---
+
+## 0. COLD-START — read this first
+
+If you are a new session with no prior context, this section is sufficient to continue.
+
+| Fact | Value |
+|---|---|
+| **Production pointer** | `main` @ `cc60adfc0da0f893b101230269d4847d33490429` (CI **red**, artifact step) |
+| **Proposed canonical ground** | `claude/qimmah-recovery-control-plane-hph1jg` @ `dc031fa36929e07c3b00fa025a676ed64327ce59` (CI **green**, run `32174357740`) |
+| **Relationship** | `main` is a **strict ancestor** of the ground — 0 commits behind, +229 ahead |
+| **Ground status** | `CANONICAL_GROUND_REQUIRES_COMPOSITION` — **awaiting founder approval**, not adopted |
+| **Mode** | PLANNING + VERIFICATION. No implementation authorized. |
+| **Plan version** | v1.0-rc — **not frozen** |
+
+**`main` is the production pointer, not the development frontier.** Treating it as the frontier
+is the mistake this exercise exists to end.
+
+**Where the evidence lives:** `docs/control/GOV-002-FINDINGS.md` (full forensics),
+`docs/control/evidence/` (reproducible ledgers and commands), `docs/control/VERIFY.md`
+(check definitions + Tier-1 answers + schema corrections), `docs/control/DECISIONS.md`
+(open founder decisions), `docs/control/PLAN.md` (tasks, cut list, changelog).
+
+**Do not** merge, deploy, apply migrations, delete branches, or start product work without an
+explicit founder instruction naming the action.
 
 ---
 
@@ -64,6 +90,9 @@ the project actually requires it. Actions considered and excluded are listed in 
 | **ACT-006** | **Cloudflare Pages production deployment** — the actual production deploy of the `qimmah` Pages project | Charter §1: any deploy is founder-only, with named authorization each time | REL-002 | At release | ⬜ NOT STARTED |
 | **ACT-007** | **Email provider configuration** — auth email delivery (signup confirm, password reset via `VITE_RESET_REDIRECT_URL`) and a monitored `support@qimmah.app` inbox | Requires provider/domain credentials; also a standing human commitment to read support mail | ACC-001, REL-001 (support destination must actually work) | Before ACC-001 and REL-001 verification | ⬜ NOT STARTED |
 | **ACT-008** | **Final merge to `main`** — promotion of the release commit to the trunk | Charter §1: trunk promotion is founder-only and is the launch act | REL-002 | At release | ⬜ NOT STARTED |
+| **ACT-010** | **Confirm `VITE_ENTITLEMENT_MODE` is absent** in Cloudflare Pages for **both** production and preview | If it were ever `mock`, entitlement becomes client-authoritative on that deployment — Premium grantable from `sessionStorage` | ENT-001, REL-002 | Before any Premium claim is verified | ⬜ NOT STARTED |
+| **ACT-011** | **Read the deployed commit SHA** — `curl -s https://qimmah.app/ \| grep -o 'qimmah-commit[^>]*'` (and the `pages.dev` URL) | External hosts are unreachable from agent containers (proxy denies CONNECT). One command settles PRODUCTION_DEPLOYMENT_IDENTITY. | GOV-002 closure, REL-002 | **Now — cheapest open unknown** | ⬜ NOT STARTED |
+| **ACT-012** | **Approve preservation tags** — `PRESERVE-01` (tag the ground SHA) and `PRESERVE-02` (13 unique-work branches) | Additive, non-destructive; the ground is currently pinned only by a mutable branch ref | Ground promotion | **Before any other GOV-002 follow-up** | ⬜ NOT STARTED |
 | **ACT-009** | **App Store / TestFlight action** — Apple Developer enrollment, signing, App Store Connect records, TestFlight distribution | Apple developer identity and legal entity | IOS-001 | **Only if DEC-014 = B.** `HORIZON-PENDING` while DEC-014 is unanswered. | ⏸ HORIZON-PENDING |
 
 ### 3.1 Considered and excluded — no evidence the project requires them
@@ -72,7 +101,7 @@ Listed so their absence is a recorded finding rather than an oversight.
 
 | Candidate | Why excluded |
 |---|---|
-| Founder / admin role provisioning | **No evidence found.** `grep -rn "is_admin\|role.*admin\|founder" SUPABASE-SCHEMA.sql supabase/` returns nothing. The schema has no admin/role concept. If an admin surface is later introduced, this becomes ACT-010. |
+| ~~Founder / admin role provisioning~~ | **CORRECTED — it IS required.** My v0.9.1 exclusion was measured against `main` only. The proposed ground carries `supabase/migrations/20260816120002_founder_role_provisioning.sql` and a full `src/admin/` surface. Now tracked as **ACT-003** (migration authorization) plus **ACT-004** (Supabase project), since the admin RPCs are unapplied on any database. A lesson recorded rather than quietly patched: *an exclusion is only as good as the ref it was measured against.* |
 | Payment-processor (Stripe/Apple IAP) setup | No processor integration in the tree. Purchase is an **outbound link** to Salla (`src/config/product.ts:25`), and `[CTO-009/WP-3]` records "no in-app payment". Commercial verification is covered by ACT-001. |
 | App-store age-rating / third-party review accounts | Subsumed by ACT-009; not separated while DEC-014 is unanswered. |
 
@@ -264,7 +293,29 @@ name was accepted as evidence.*
 
 ---
 
-### Ground summary
+### GOV-002 ground summary — supersedes the Tier-1 summary below
+
+Full forensics: `docs/control/GOV-002-FINDINGS.md`.
+
+```
+CANONICAL_GROUND_RESULT = CANONICAL_GROUND_REQUIRES_COMPOSITION
+BASE_BRANCH             = claude/qimmah-recovery-control-plane-hph1jg
+BASE_SHA                = dc031fa36929e07c3b00fa025a676ed64327ce59
+MAIN_RELATIONSHIP       = strict ancestor (0 behind, +229 ahead)
+GROUND_CONFIDENCE       = HIGH  (identity)  ·  release-readiness LOW
+```
+
+**Blocking the promotion (all named, none silent):**
+1. `PRESERVE-01` — the ground SHA carries **no tag**; anchored only by a mutable branch ref.
+2. `DEC-014` unanswered · `DEC-013` unrecoverable · **`DEC-015` new** (entitlement posture).
+3. The published Terms say "Core features remain free" while the ground gates **13 core
+   actions** — a material FALSE claim under `QIM-V1-TRUTH-001`.
+4. The ground is **read-only without a live entitlements backend** (`ACT-002/003/004`).
+5. `PRODUCTION_DEPLOYMENT_IDENTITY` is UNKNOWN — one founder command settles it (`ACT-011`).
+
+---
+
+### Tier-1 ground summary (v0.9.1 — retained for history)
 
 | Field | Value |
 |---|---|

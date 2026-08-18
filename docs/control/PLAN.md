@@ -1,6 +1,6 @@
 # PLAN.md — Qimmah V1 Execution Plan
 
-**Revision:** v0.9.1
+**Revision:** v1.0-rc
 **Status:** PLANNING + VERIFICATION MODE — **NOT AUTHORIZED FOR EXECUTION.**
 **Freeze state:** NOT frozen. This is not v1.0.
 
@@ -43,10 +43,26 @@ cases task existence, is provisional until its Tier-2 verification runs.
 | ID | Task | Depends on | Status |
 |---|---|---|---|
 | GOV-001 | Tier-1 ground verification — the nine checks in `VERIFY.md` §3 | — | **EXECUTING (this revision)** |
-| GOV-002 | Branch reality audit — resolve all competing ground candidates; identify unique unmerged work; propose disposition per branch | GOV-001 | **NOT STARTED — explicitly not authorized** |
+| GOV-002 | Branch reality audit — resolve all competing ground candidates; identify unique unmerged work; propose disposition per branch | GOV-001 | ✅ **COMPLETE** — `docs/control/GOV-002-FINDINGS.md` |
 
 **Phase 0 exit criterion:** a canonical ground branch + full SHA is founder-accepted, and
 `GROUND_CONFIDENCE` is HIGH.
+
+**Status:** GOV-002 is complete and proposes
+`claude/qimmah-recovery-control-plane-hph1jg` @ `dc031fa36929e07c3b00fa025a676ed64327ce59`
+as `CANONICAL_GROUND_REQUIRES_COMPOSITION`. **Phase 0 does not exit until `DEC-016` is
+answered and `PRESERVE-01` is executed** — the ground is currently pinned only by a mutable
+branch ref.
+
+| ID | Follow-up task from GOV-002 | Depends on |
+|---|---|---|
+| GOV-005 | Execute the stitch map: `PRESERVE-01`, `PRESERVE-02`, `STITCH-01`, `STITCH-02` | DEC-016, ACT-012 |
+| **SAFE-002** | **Allergy notice reaches a live surface.** `test:allergy-notice` is green in the gate against `src/views/NutritionV2.tsx`, which the app never loads; the live `NutritionView.tsx` has zero allergy references. **Live in production today on both `main` and the ground.** User-safety class — Never-Cut. | GOV-001 |
+| SAFE-003 | Minors gate fails open on unknown age (`calculators.ts:84`; missing age defaults to 24). Make unknown ⇒ restricted. Align import range `[5,120]` with `AGE_RANGE {13,100}`. | GOV-001 |
+| **SYNC-002** | **Sensitive-health consent covers only `profiles`.** `syncFieldPolicy.ts:131` short-circuits every other table while `daily_logs` ships supplements + medications verbatim. **Must land before `VITE_SYNC_ENABLED` is ever true** (charter §8, locked decision 5). | GOV-001 |
+| ENT-002 | Corruption bypasses the paid-edit guard: with a corrupt store `isExistingPlanEdit()` is false, so `assertPaid('plan.saveEdit')` is skipped. `test:plan-edit-guard` has zero corrupt-store coverage. | DEC-015 |
+| GATE-001 | 16 in-gate proofs assert against modules the app never loads; 44 gate exclusions (~37 undeclared); `src/lib/coach/provenance.ts` is a 16-check guard with no runner. Extend `test:canonical-surface` to assert *every* `src/` file is LIVE or in a declared orphan ledger. | GOV-002 |
+| TRUTH-002 | Terms vs entitlement contradiction — first material FALSE claim (feeds `TRUTH-001`) | DEC-015 |
 
 ---
 
@@ -210,6 +226,11 @@ These are not ordered, because none of them is available at any position:
 - **Corruption recovery** — a user must not lose their data irrecoverably
 - **Truthful material product claims** — no material FALSE claim ships
 
+**Named instances of the above, found by GOV-002 — these are the Never-Cut list in the concrete:**
+`SAFE-002` (allergy notice never reaches a user) · `SAFE-003` (minors gate fails open on unknown
+age) · `SYNC-002` (medications sync without the sensitive-health consent) · `ENT-002` (corruption
+bypasses the paid-edit guard) · `TRUTH-002` (Terms contradict the entitlement gate).
+
 > Cutting from this list does not make the date. It makes the failure worse and later.
 
 ---
@@ -272,7 +293,22 @@ No phase was renumbered. No task was deleted. No cycle was hidden.
 - All historical implementation state remains **CLAIMED** until repository verification.
 - Not authorized for execution.
 
-### v0.9.1 — this revision
+### v1.0-rc — GOV-002 executed
+- **GOV-002 complete.** Canonical ground proposed:
+  `claude/qimmah-recovery-control-plane-hph1jg` @ `dc031fa36929e07c3b00fa025a676ed64327ce59`,
+  result `CANONICAL_GROUND_REQUIRES_COMPOSITION`. `main` is a strict ancestor.
+- Candidate universe re-derived by **ancestry and content over all 81 remote heads**. The
+  previous name-based filter had missed the actual winner.
+- 30 capabilities genealogised; 16 historical defects adjudicated on exact SHAs; reachability
+  graph computed; 140-step gate audited; two adversarial lanes run against the conclusion.
+- Tier-1 schema corrections recorded (`VERIFY.md`); **V-CI-03 corrected YES → NO**.
+- New tasks: SAFE-002, SAFE-003, SYNC-002, ENT-002, GATE-001, TRUTH-002, GOV-005.
+- New decisions: DEC-015..DEC-019, all `PENDING_FOUNDER`.
+- New founder actions: ACT-010, ACT-011, ACT-012. ACT exclusion for founder-role provisioning
+  **corrected** — it is required.
+- **Not frozen. Not authorized for execution.**
+
+### v0.9.1
 - **Recorded that the v0.9 control files do not exist in this repository.** No `PLAN.md`,
   `VERIFY.md`, or control `DECISIONS.md` was found in the working tree, in any commit, or
   on any of the 79 remote branches. The v0.9 baseline is therefore itself CLAIMED, and

@@ -1,6 +1,6 @@
 # VERIFY.md — Qimmah Verification Register
 
-**Revision:** v0.9.1
+**Revision:** v1.0-rc
 **Status:** PLANNING + VERIFICATION MODE. Not frozen. No implementation authorized.
 **Scope:** This file defines *how* a claim becomes evidence, and *which* verification
 questions are executed *when*.
@@ -170,6 +170,105 @@ are recorded in `STATE.md` §5, which is the authoritative record.**
 
 **Ground:** `main` @ `cc60adfc0da0f893b101230269d4847d33490429` — **contested**.
 **Confidence: MEDIUM.** Trunk identity HIGH; ground sufficiency LOW (unmerged superset chain).
+
+---
+
+## TIER1_SCHEMA_CHECK — plan-update: TIER1-SCHEMA-CORRECTION
+
+Each Tier-1 ID re-read against its **literal definition** in `VERIFY.md` §3, and the
+previous answer audited for whether it actually answered *that* question.
+
+| ID | Verdict |
+|---|---|
+| V-GROUND-01 | **MATCH** |
+| V-GROUND-02 | **PARTIAL** — answer right, enumeration method wrong |
+| V-GROUND-03 | **PARTIAL** — "real work vs noise" was never adjudicated |
+| V-GROUND-04 | **PARTIAL** — two of three clauses unverified |
+| V-GROUND-05 | **MATCH** |
+| V-GROUND-06 | **MATCH** |
+| V-CI-01 | **MATCH** |
+| V-CI-02 | **MATCH** |
+| V-CI-03 | **PARTIAL** — exclusion set never enumerated |
+
+---
+
+### V-GROUND-01 — MATCH
+- **Literal question:** one unambiguous default/trunk branch + its full HEAD SHA?
+- **Previous answer:** YES — `main` @ `cc60adfc0da0f893b101230269d4847d33490429`
+- **Actually answered it?** MATCH.
+- **Corrected answer:** unchanged (YES).
+- **Evidence:** GitHub repo object `"default_branch":"main"`; `git rev-parse origin/main`.
+
+### V-GROUND-02 — PARTIAL → corrected
+- **Literal question:** do branches exist that *present themselves as the real ground* — names containing final/canonical/release/closure/sovereign/candidate/rc — and are any not reachable from the trunk?
+- **Previous answer:** YES, 14 candidates, none merged.
+- **Actually answered it?** **PARTIAL.** The answer is right and the 14 are real. But the **candidate universe was built by name matching** — which silently contradicts this register's own rule E-4 ("a branch name is not evidence"). Using names as the *filter* grants names exactly the authority E-4 denies them.
+- **What it missed:** `claude/qimmah-recovery-control-plane-hph1jg` @ `dc031fa36929e07c3b00fa025a676ed64327ce59` — matches none of those name patterns, yet is the **actual tip** of the superset chain (+229 over main, contains `139a7b0` plus one commit) and its CI is **green**. The name-based filter missed the winner.
+- **Corrected answer:** **YES** — candidate universe re-derived by **ancestry and content over all 81 remote heads**, not by name. Corrected count: **58 branches carry patch-unique commits**; **22** are fully contained in the candidate.
+- **Evidence:** `git ls-remote --heads origin` (81) → per-branch `git merge-base --is-ancestor` + `git cherry`; ledger at `docs/control/evidence/gov002-branch-ledger.txt`.
+
+### V-GROUND-03 — PARTIAL → corrected
+- **Literal question:** do candidates carry commits not reachable from trunk that **represent real work (not just merge/CI noise)**?
+- **Previous answer:** YES — with the explicit admission "value unassessed".
+- **Actually answered it?** **PARTIAL.** The definition requires distinguishing real work from noise; the previous pass measured **volume only** (commit counts, +26,910 lines) and declined the distinction. Volume is not the question asked.
+- **Corrected answer:** **YES, but far narrower than the raw counts implied.** Adjudicated by patch-id and file-level containment:
+  - Raw `git cherry` over-reports: rebased/squashed/conflict-resolved commits get new patch-ids, so pre-July branches show hundreds of "unique" commits whose content is long absorbed.
+  - **The 82 `public/exercise-gifs/*.gif` on `hotfix/p12-field-fixes-r2` are not lost value — they are watermarked proprietary WorkoutX assets deliberately deleted** for licensing (`src/data/exerciseGifs.ts:1-8`), with `test:media-rights` guarding it inside the gate. Classification: **DANGEROUS_TO_ADOPT**, not UNIQUE_VALUABLE.
+  - Genuinely unique and valuable: the **QAE engine** (232 files, `QimmahAdaptiveEngine/`, absent from main and candidate alike) and a small number of commerce/nutrition commits.
+- **Evidence:** `git cherry`, file-set `comm` against the candidate tree, `git show <sha>:src/data/exerciseGifs.ts`.
+
+### V-GROUND-04 — PARTIAL → corrected
+- **Literal question:** three clauses — (a) tree contains declared build inputs, (b) **lockfile is in sync**, (c) **local checkout identical to the remote ref**.
+- **Previous answer:** YES.
+- **Actually answered it?** **PARTIAL.** Only clause (a) was actually verified.
+  - (b) "lockfile in sync" was answered by reading `name` and `lockfileVersion` — that is a *format* check, not a sync check. Sync is only provable by `npm ci`, which was not run.
+  - (c) was **false at execution time**: `HEAD` was `80cf1554…` (this revision's own docs commit), not `cc60adf`. It was disclosed in a note but the clause was still scored YES.
+- **Corrected answer:** **PARTIAL/YES-with-exceptions.** (a) YES. (b) **UNVERIFIED** — deferred to Tier 3 `V-REL-01`, which runs `npm ci`. (c) YES for the *remote ref* `origin/main`, which is what all verification actually ran against; the working checkout was one docs-only commit ahead.
+- **Evidence:** `git status --porcelain` → 0; `git rev-parse HEAD origin/main` → differing at the time.
+
+### V-GROUND-05 — MATCH
+- **Literal question:** do the four gates exist as runnable scripts, and does every script `test:gate` chains resolve to a file that exists?
+- **Previous answer:** YES — 92-script chain, 0 undefined, 0 dangling.
+- **Actually answered it?** MATCH. The question asks about **dangling invocations** (a chain entry with no file). It does *not* ask about **orphan scripts** (a file no chain invokes) — that is `VERIFY.md` Tier 2 / GOV-002 §7 territory, and is reported there.
+- **Corrected answer:** unchanged (YES) for main. On the candidate the chain is larger and re-measured under GOV-002 §7.
+
+### V-GROUND-06 — MATCH
+- **Literal question:** which branch deploys to production, is it stated in the repository, and does exactly one production hosting configuration exist?
+- **Previous answer:** NO.
+- **Actually answered it?** MATCH.
+- **Corrected answer:** unchanged (**NO**), and re-confirmed on the candidate: `wrangler.toml` **and** `vercel.json` both still present at `dc031fa`, still no deploy workflow.
+
+### V-CI-01 — MATCH
+- **Literal question:** are workflows defined and do they trigger on push/PR to the trunk?
+- **Previous answer:** YES. **MATCH.** Unchanged.
+
+### V-CI-02 — MATCH
+- **Literal question:** conclusion of the latest CI run for the exact trunk HEAD SHA; if red, name workflow/job/step and the first red commit.
+- **Previous answer:** NO (red) — CI · Quality gate · step #13 `Upload dist artifact`; first red `695e649`; last green `dd79a60`.
+- **Actually answered it?** MATCH — all required naming was supplied.
+- **Corrected answer:** unchanged (**NO/red**) for `main`. New adjacent fact, not a correction: the **candidate** `dc031fa` is **green** (run `32174357740`, 2026-08-18T19:09:05Z).
+
+### V-CI-03 — PARTIAL → corrected
+- **Literal question:** does the CI definition contain non-gating / `continue-on-error` / **excluded** steps that would let a real failure pass as green, and are those exclusions **declared**?
+- **Previous answer:** YES (trustworthy).
+- **Actually answered it?** **PARTIAL.** The `continue-on-error` half was properly checked. The **"excluded steps"** half was not: only two named exclusions (`test:safe-storage`, `test:body-model`) were checked, chosen because a document mentioned them. The full set of defined-but-unrun scripts was never enumerated — so "no undeclared exclusion" was asserted over an unmeasured set.
+- **Corrected answer:** see GOV-002 §7. The exclusion set is now enumerated on the candidate, and the corrected verdict is recorded there rather than restated here.
+- **Evidence:** previous pass ran only `grep -n "continue-on-error\|if: always\|if: success"` plus a two-name spot check.
+
+
+### Corrected Tier-1 answers (v1.0-rc)
+
+| ID | v0.9.1 | Corrected | Note |
+|---|---|---|---|
+| V-GROUND-01 | YES | **YES** | unchanged |
+| V-GROUND-02 | YES | **YES** | universe re-derived by ancestry over all 81 heads, not by name |
+| V-GROUND-03 | YES | **YES, narrower** | patch-id over-reports; GIFs are legal risk not lost value |
+| V-GROUND-04 | YES | **YES, partial** | lockfile sync still UNVERIFIED (needs `npm ci` — Tier 3) |
+| V-GROUND-05 | YES | **YES** | 92 steps on `main`, 140 on the ground, 0 dangling on both |
+| V-GROUND-06 | NO | **NO** | re-confirmed on the ground; both hosting configs still present |
+| V-CI-01 | YES | **YES** | unchanged |
+| V-CI-02 | NO (red) | **NO for `main`; YES for the ground** | ground run `32174357740` green — but see V-CI-03 |
+| V-CI-03 | YES | **NO** | **corrected.** 44 gate exclusions, ~37 undeclared; and the artifact step was made non-gating on the ground (declared, `[CTO-87]`), so the two SHAs' "green" are not step-for-step comparable |
 
 ---
 

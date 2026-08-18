@@ -1,6 +1,6 @@
 # DECISIONS.md — Qimmah Founder Decision Register
 
-**Revision:** v0.9.1
+**Revision:** v1.0-rc
 **Status:** PLANNING + VERIFICATION MODE. Not frozen.
 **Authority:** Only the founder moves a decision to `LOCKED`. No agent may self-lock.
 
@@ -133,12 +133,70 @@ Guardrails on the default, so it cannot become a silent decision (Rule D-2):
 
 ---
 
+## DEC-015 — Entitlement posture for V1 *(new — raised by GOV-002)*
+
+| Field | Value |
+|---|---|
+| **ID** | DEC-015 |
+| **Status** | **`PENDING_FOUNDER`** |
+| **Question** | Does Qimmah V1 ship with **core logging gated behind a paid entitlement**, or does it stay **free local-first** with Premium gating only non-core features? |
+| **Raised** | GOV-002, v1.0-rc |
+
+### Why this is a decision and not an implementation detail
+
+The proposed canonical ground gates **13 product actions** behind a server-verified entitlement,
+default-deny, enforced at the **storage layer** (`src/lib/access/paidActions.ts:17-52`, allow
+predicate `:89-92`). The gated set includes `workout.logSet`, `nutrition.addFood`,
+`nutrition.water`, `progress.logWeight`, `progress.logMeasurement`, `recovery.log`.
+
+Three consequences follow, and none is a lane call:
+
+1. **The published Terms become false.** `site/terms.html:84,132` and
+   `docs/legal/terms-of-service.md:46-48,105-107` state «الميزات الأساسية تبقى مجانية» /
+   "Core features remain free" and «لا يوجد اشتراك فعّال في هذه النسخة» / "No subscription is
+   active in this version". On `main` those sentences are true. They become **materially false**
+   the moment the ground ships. No proof guards this — `run-site-truth-proof.mjs:63-64` checks
+   only the age-13 and medical lines.
+2. **It contradicts the project's declared posture.** `.claude/rules/product.md` and charter §0
+   describe Qimmah as **local-first**, with cloud sync optional. Gating local writes inverts that.
+3. **Without a live backend the app is read-only.** `entitlementSource.ts:108` returns `none`
+   when Supabase is unconfigured and the allow predicate grants only on `active`. This is
+   deliberately fail-closed and is **correct security** — but it makes `ACT-002/003/004` hard
+   prerequisites to serving any user.
+
+### Agent position (PROPOSED — no authority)
+
+The entitlement **engineering** is the strongest work in the repository and survived a dedicated
+forgery red-team unbroken: server authority, `revoke all` chosen specifically because selective
+revoke leaves TRUNCATE outside RLS, no client-reachable grant path, deny-on-`loading`.
+**Nothing here recommends discarding it.**
+
+The open question is only **which actions sit behind it**. A defensible V1 keeps free local
+logging (matching the Terms and the local-first posture) and gates genuinely premium surfaces —
+deeper analytics, plan regeneration, advanced library. That preserves the engineering, keeps the
+Terms true without a legal rewrite, and removes the read-only failure mode.
+
+**Whatever is chosen, the Terms and the code must agree before release.** Either narrow the
+gate, or rewrite the Terms and re-verify every commercial claim under `QIM-V1-TRUTH-001`.
+
+### Default if unanswered
+
+**No default.** Shipping either way without an answer publishes a false legal statement or
+discards paid-access integrity. `PLAN.md` rule P-5 applies: blocked, not best-guessed.
+
+---
+
 ## Open decision index
 
 | ID | Subject | Status | Blocks |
 |---|---|---|---|
 | DEC-013 | Unrecoverable — must be restated | `PENDING_FOUNDER` | Unknown (see above) |
 | DEC-014 | V1 product horizon: Web only vs Web + iOS | `PENDING_FOUNDER` | QIM-V1-IOS-001, release scope, ACT-008, ACT-009, TRUTH-001 surface |
+| DEC-015 | Entitlement posture — gated core logging vs free local-first | `PENDING_FOUNDER` | Ground promotion, TRUTH-001, ENT-001, REL-002 |
+| DEC-016 | Ground promotion — adopt `dc031fa` as canonical ground (per GOV-002) | `PENDING_FOUNDER` | Every Phase 1+ task |
+| DEC-017 | Control-plane collision — `docs/control/` (this set) vs `docs/execution/qimmah-master/` (13 files, inside the ground) | `PENDING_FOUNDER` | Governance clarity; two control planes is the same failure mode as two nutrition screens |
+| DEC-018 | QAE engine (232 files, 3.5 MB, never wired) — preserve as reference, or schedule for V2 | `PENDING_FOUNDER` | Branch cleanup scope |
+| DEC-019 | Long-tail food shards — upload the 91 MB artifact, or stop advertising 59,941 records | `PENDING_FOUNDER` | TRUTH-001, hosting |
 
 **DEC-001..DEC-012 are not recorded here.** No repository evidence of them exists. They
 are **not** presumed locked, and **not** presumed absent — they are simply unverified.
@@ -151,4 +209,5 @@ If the founder holds them, they should be restated so they can be entered under 
 | Rev | Change |
 |---|---|
 | v0.9 | Baseline referenced by the founder instruction. Not present in this repository. |
+| v1.0-rc | GOV-002: DEC-015..DEC-019 raised, all `PENDING_FOUNDER`. DEC-013 and DEC-014 unchanged. |
 | v0.9.1 | DEC-013 `LOCKED` → `PENDING_FOUNDER` and its unrecoverability recorded. DEC-014 (V1 horizon) created as `PENDING_FOUNDER` with recommendation, consequences and a guarded default. Rules D-1 and D-2 made binding. |
