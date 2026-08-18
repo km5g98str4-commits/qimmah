@@ -5,7 +5,7 @@ import { PlanPreview } from '@/components/plan/PlanPreview'
 import { PlanWhyPanel } from '@/components/plan/PlanWhyPanel'
 import type { GeneratedPlan } from '@/lib/planGenerator'
 import type { PlanRationale } from '@/lib/planRationale'
-import type { GoalType } from '@/types/profile'
+import type { GoalType, Profile } from '@/types/profile'
 import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
 import { V2_GOAL_MODEL, V2_ONBOARDING, type V2GoalValue } from '@/design-system/v2/labels'
@@ -75,6 +75,7 @@ import { PaidActionDenied } from '@/lib/access/guard'
 import type { TrialOutcome } from '@/lib/access/entitlementBackend'
 import { SynthesisScreen } from '@/views/reveal/SynthesisScreen'
 import { RevealJourney } from '@/views/reveal/RevealJourney'
+import { RevealValue } from '@/views/reveal/RevealValue'
 import { revealStrings } from '@/i18n/dict/reveal'
 import { deriveTargetWeight } from '@/lib/planDerive'
 import { useAccess } from '@/lib/access/useAccess'
@@ -86,7 +87,7 @@ interface OnboardingV2Props {
   /** Exit from the first step (back to Start). */
   onExit: () => void
   /** يسلّم مخرجات التوليد المحفوظة لشاشة التسليم (حزمة ٣). */
-  onPlanReady?: (artifacts: { plan: GeneratedPlan; goalType: GoalType; rationale: PlanRationale }) => void
+  onPlanReady?: (artifacts: { plan: GeneratedPlan; goalType: GoalType; rationale: PlanRationale; profile: Profile }) => void
 }
 
 const GOAL_ICON: Record<V2GoalValue, string> = { cut: 'Flame', maintain: 'ShieldCheck', bulk: 'TrendingUp' }
@@ -404,7 +405,7 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
           return
         }
         // نفس التوليد الذي حُفظ يُسلَّم للتسليم — لا توليد ثانٍ للعرض.
-        onPlanReady?.({ plan: artifacts.generated, goalType: artifacts.profile.goalType, rationale: artifacts.rationale })
+        onPlanReady?.({ plan: artifacts.generated, goalType: artifacts.profile.goalType, rationale: artifacts.rationale, profile: artifacts.profile })
         // [CTO-68] الحدث ٣ — إكمال الإعداد. **بعد** بناء الخطة وحفظها ووسمها مكتملة،
         // لا عند ضغط الزر: الفشل يرمي قبل هذا السطر فلا يُسجَّل إكمال لم يحدث.
         trackLocal('setup_completed', {})
@@ -1335,7 +1336,7 @@ function WelcomeScreen({ lang, t, onStart, onExit }: { lang: Lang; t: T; onStart
  * **استخدامها** (تسجيل التمرين والأكل والقياسات) — نصّ المؤسس §4.
  */
 export function PlanHandoffScreen({
-  lang, signedIn, onEnter, onCreateAccount, plan, goalType, rationale, displayName, currentWeightKg,
+  lang, signedIn, onEnter, onCreateAccount, plan, goalType, rationale, profile, goalLabel, displayName, currentWeightKg,
 }: {
   lang: Lang
   signedIn: boolean
@@ -1352,6 +1353,10 @@ export function PlanHandoffScreen({
   plan?: GeneratedPlan
   goalType?: GoalType
   rationale?: PlanRationale
+  /** الملفّ المولَّد من نفس التشغيل المحفوظ — مصدر صفوف «وش راح تسوي معك قِمّة». */
+  profile?: Profile
+  /** اسم الهدف بصياغة مستواه المُعلن — من مصدر التسمية الموحّد. */
+  goalLabel?: string | null
   /** اسم المستخدم إن عرفناه من حسابه. غيابه ⇒ تحيّة بلا اسم، لا اسم مخترع. */
   displayName?: string | null
   /** الوزن كما أدخله المستخدم — مقاس، وأساس رسم المسار. */
@@ -1364,9 +1369,20 @@ export function PlanHandoffScreen({
   const [trialState, setTrialState] = useState<'idle' | 'working' | TrialOutcome>('idle')
 
   // الوزن المستهدف **مشتقّ** من الهدف لا مُدخَل — الإعداد لا يسأل عنه.
-  const target = typeof currentWeightKg === 'number' && goalType
+  //
+  // ═══ حارس التناقض ═══ رقمٌ يخالف الهدف المعلن أسوأ من غياب الرقم: هدف
+  // تنشيف يُرسم بوزنٍ **أعلى** يقرأ عكس معناه تمامًا. فإن جاء الاشتقاق
+  // مخالفًا للاتجاه المعلن — لأي سبب حاضر أو قادم — نتراجع إلى الاتجاه بلا
+  // رقم بدل أن نرسم كذبة بصرية (§5 · §6-4).
+  const derived = typeof currentWeightKg === 'number' && goalType
     ? deriveTargetWeight(currentWeightKg, goalType)
     : null
+  const targetContradictsGoal =
+    derived !== null && typeof currentWeightKg === 'number' && (
+      (goalType === 'cutting' && derived > currentWeightKg) ||
+      (goalType === 'bulking' && derived < currentWeightKg)
+    )
+  const target = targetContradictsGoal ? null : derived
 
   const onTrial = async () => {
     if (trialState === 'working') return
@@ -1420,6 +1436,17 @@ export function PlanHandoffScreen({
               goalType={goalType}
               targets={plan?.targets}
             />
+          </div>
+        )}
+        {targetContradictsGoal && (
+          <p className="mt-4 flex items-start gap-2 rounded-2xl border border-line bg-beige p-3 text-[0.8rem] leading-relaxed text-ink-700" data-testid="reveal-direction-only">
+            <Icon name="Info" className="mt-0.5 h-4 w-4 shrink-0 text-ink-500" />
+            {rv.value.directionOnly}
+          </p>
+        )}
+        {profile && (
+          <div className="mt-4">
+            <RevealValue lang={lang} profile={profile} plan={plan} goalLabel={goalLabel} />
           </div>
         )}
         {plan && goalType && (

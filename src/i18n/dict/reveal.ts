@@ -58,6 +58,20 @@ export interface RevealStrings {
     protein: (grams: string) => string
     progress: string
     adaptation: string
+    /** الهدف كما اختاره — مقاس (اختيار صريح) فيُقال حاسمًا. */
+    goal: (label: string) => string
+    /** استراتيجية الخطة: التقسيمة التي **يبنيها المحرّك**، لا التي نتمنّاها. */
+    strategy: (split: string) => string
+    /** الأدوات التي أعلنها — سببُ كون التمارين هذه بالضبط. */
+    equipment: (list: string) => string
+    /** اتجاه التغذية حسب نيّته المعلنة — ثلاث حالات لا حالة واحدة. */
+    nutritionStyle: Record<'meal_suggestions' | 'macros_only' | 'simple_guidance', string>
+    /** عنوان «وش نتتبّعه معك» — وعدُ تتبّع لا وعدُ نتيجة. */
+    tracksTitle: string
+    /** وسم على كل سطر مشتقّ داخل هذا القسم. */
+    estimateBadge: string
+    /** يُقال حين يتعذّر رسم هدف وزنٍ يوافق الهدف المعلن — اتجاه لا رقم. */
+    directionOnly: string
   }
   /** ترتيب النداءات الثلاثة. */
   cta: {
@@ -125,6 +139,17 @@ const ar: RevealStrings = {
     protein: (grams) => `${grams} غرام بروتين باليوم`,
     progress: 'وزنك وقياساتك بالأرقام، لا بالإحساس',
     adaptation: 'كل تغيير في خطتك نشرح لك سببه — ولا نغيّر شي بصمت',
+    goal: (label) => `هدفك: ${label}`,
+    strategy: (split) => `تقسيمتك: ${split}`,
+    equipment: (list) => `تمارينك مبنية على: ${list}`,
+    nutritionStyle: {
+      meal_suggestions: 'نقترح لك وجبات تناسب نمط أكلك',
+      macros_only: 'نعطيك أرقامك بس — سعراتك وماكروزك',
+      simple_guidance: 'نعطيك إرشاد مبسّط بلا تعقيد',
+    },
+    tracksTitle: 'وش نتتبّعه معك؟',
+    estimateBadge: 'تقريبي',
+    directionOnly: 'ما عندنا معلومات كافية لرقم دقيق — نعطيك الاتجاه، ونضبّطه معك أول ما تسجّل قياساتك.',
   },
   cta: {
     premiumTitle: 'ابدأ مع قِمّة',
@@ -182,6 +207,17 @@ const en: RevealStrings = {
     protein: (grams) => `${grams} g of protein a day`,
     progress: 'Your weight and measurements in numbers, not feelings',
     adaptation: 'We explain every change to your plan — nothing changes silently',
+    goal: (label) => `Your goal: ${label}`,
+    strategy: (split) => `Your split: ${split}`,
+    equipment: (list) => `Your exercises are built around: ${list}`,
+    nutritionStyle: {
+      meal_suggestions: 'We suggest meals that fit how you eat',
+      macros_only: 'Just your numbers — calories and macros',
+      simple_guidance: 'Simple guidance, nothing complicated',
+    },
+    tracksTitle: 'What we track with you',
+    estimateBadge: 'estimate',
+    directionOnly: "We don't have enough to give an exact number — here's the direction, and we tune it once you log measurements.",
   },
   cta: {
     premiumTitle: 'Start with Qimmah',

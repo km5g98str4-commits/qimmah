@@ -33,6 +33,7 @@ import { onboardingLifestyleStrings } from '@/i18n/dict/onboardingLifestyle'
 import { onboardingEquipmentStrings } from '@/i18n/dict/onboardingEquipment'
 import { dietPatternChoices, neatChoices } from '@/data/planBuilder'
 import { V2_ONBOARDING } from '@/design-system/v2/labels'
+import { revealStrings } from '@/i18n/dict/reveal'
 
 let passed = 0
 const failed: string[] = []
@@ -325,6 +326,20 @@ check('الواجهة تحمل سطر الإفصاح مربوطًا بالفرق
 check('والمستوى المعروض يصير المُبرمَج حين يختلف', viewSource.includes('levelWasAdjusted ? intentT.summaryLevelProgrammed(programmedLevelLabel) : intentT.summaryLevel(levelLabel)'))
 check('نصّ الإفصاح موجود بالنسختين وبلا لوم', /قلت/.test(onboardingIntentStrings.ar.levelAdjustedNote('أ', 'ب')) && onboardingIntentStrings.en.levelAdjustedNote('a', 'b').includes('You picked') && !/[!]/.test(onboardingIntentStrings.ar.levelAdjustedNote('أ', 'ب')))
 check('الواجهة تشتقّ المُبرمَج من المصنّف لا من نسخة ثانية لقواعده', viewSource.includes('v2LevelFromExperience(resolveExperienceLevel('))
+
+console.log('\n═══ 8و) الكشف: كل سطر له مصدر، ولا رقم يناقض هدفه ═══')
+const revealSource = readFileSync(resolve(process.cwd(), 'src/views/reveal/RevealValue.tsx'), 'utf8')
+check('قسم القيمة يستهلك القاموس الذي كان ميّتًا', revealSource.includes('revealStrings') && viewSource.includes('<RevealValue'))
+check('السطور المقاسة والمشتقّة مفصولتان بوسم مرئي', revealSource.includes('data-testid="reveal-value-measured"') && revealSource.includes('data-testid="reveal-value-estimated"') && revealSource.includes('badge={v.estimateBadge}'))
+check('صفّ الأدوات مشروط بوجودها — لا سطر بلا مصدر', revealSource.includes('equipment.length > 0 &&'))
+check('صفّ المكان مشروط بمعرفته', revealSource.includes('{place && <Row'))
+check('السعرات والبروتين مشروطان بمخرَج المحرّك', revealSource.includes('{targets && ('))
+check('التقسيمة المعروضة في الكشف هي نفسها المُقاسة بالمحرّك', revealSource.includes('plannedSplitLabelForDays(profile.trainingDays, splits)'))
+check('اتجاه التغذية ثلاث حالات لا حالة واحدة', Object.keys(revealStrings.ar.value.nutritionStyle).length === 3 && Object.keys(revealStrings.en.value.nutritionStyle).length === 3)
+check('حارس التناقض: هدف يخالف اتجاهه لا يُرسم رقمًا', viewSource.includes('targetContradictsGoal') && viewSource.includes("goalType === 'cutting' && derived > currentWeightKg") && viewSource.includes("goalType === 'bulking' && derived < currentWeightKg"))
+check('وبديله اتجاه معلَن لا صمت', viewSource.includes('data-testid="reveal-direction-only"') && revealStrings.ar.value.directionOnly.length > 0 && revealStrings.en.value.directionOnly.length > 0)
+check('لا وعد نتيجة طبية في نصوص الكشف', !/تضمن|مضمون|guarantee|guaranteed|cure|علاج/i.test(JSON.stringify(revealStrings)))
+check('مراحل التجهيز تتبع العمل ولا تخترعه', readFileSync(resolve(process.cwd(), 'src/views/reveal/SynthesisScreen.tsx'), 'utf8').includes('if (doneRef.current) return'))
 
 console.log('\n═══ 9) محاكاة الالتفاف: العدد/الربط/المفردات لا تمرّ رخوة ═══')
 check('إضافة معرّف زائد كانت ستُكشف', [...ONBOARDING_QUESTION_IDS, 'filler.fake'].length !== 20)
