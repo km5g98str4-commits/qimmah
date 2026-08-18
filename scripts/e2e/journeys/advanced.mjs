@@ -21,6 +21,7 @@ import {
   report, ensureProofRoot, seedSession,
 } from './lib/kit.mjs'
 import { loadJourneyCopy } from './lib/journey-copy.mjs'
+import { answerDietPattern } from '../lib/onboarding-driver.mjs'
 
 const PORT = 5341
 const LANG = 'ar'
@@ -117,7 +118,7 @@ try {
     await next.click(); await page.waitForTimeout(400)
     await group(page, 'training.place').getByRole('button').nth(0).click()
     await group(page, 'activity.neat').getByRole('button').nth(2).click()
-    await group(page, 'nutrition.diet_pattern').getByRole('button').nth(0).click()
+    await answerDietPattern(page, 'plan') // [QIM-V1-001] عقد ثنائي الاتجاه، لا نقر بلا شرط
     await rec.shot(page, `${tag}-5-lifestyle`, `${tag} — المكان والحركة ونمط الأكل`, `${tag} — place, activity and diet`)
     await next.click(); await page.waitForSelector('#onb-title-limitations')
     await group(page, 'limitations.has_injury').getByRole('button').nth(1).click()

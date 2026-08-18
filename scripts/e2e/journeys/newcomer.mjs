@@ -24,6 +24,7 @@ import {
   openPage, screenText, report, ensureProofRoot, seedSession,
 } from './lib/kit.mjs'
 import { loadJourneyCopy, assertTermExistsInSource } from './lib/journey-copy.mjs'
+import { answerDietPattern } from '../lib/onboarding-driver.mjs'
 
 const PORT = 5311
 const LANG = 'ar'
@@ -216,18 +217,22 @@ try {
   await next.click()
   await page.waitForTimeout(400)
 
-  // خطوة ٦ — المكان والحركة ونمط الأكل؛ كلها حقائق لها مستهلك حي.
+  // خطوة ٦ — المكان والحركة؛ ونمط الأكل **حين ينطبق فقط**.
+  // [QIM-V1-001] هذه الرحلة تختار نيّة «خطة» (`intents[0]`)، ومستهلك نمط الأكل
+  // هو مولّد الوجبات وحده — فالسؤال لا يُعرض لها، وغيابه هو السلوك الصحيح.
   await visit('setup-6-lifestyle', 'خطوة ٦ — المكان والحركة ونمط الأكل', 'Step 6 — place, activity and diet')
   var place = t.places.find((p) => p.value === 'gym') ?? t.places[0]
   await group(page, 'training.place').getByRole('button', { name: place.label, exact: true }).click()
   await group(page, 'activity.neat').getByRole('button').nth(1).click()
-  await group(page, 'nutrition.diet_pattern').getByRole('button').nth(0).click()
+  const dietAnswered = await answerDietPattern(page, 'plan')
   await page.waitForTimeout(300)
   rec.check(
-    `المكان «${place.label}» والحركة ونمط الأكل مختارة`,
+    `المكان «${place.label}» والحركة مختارة${dietAnswered ? ' ونمط الأكل' : ' ونمط الأكل غائب بحقّ لنيّة «خطة»'}`,
     await group(page, 'training.place').getByRole('button', { name: place.label, exact: true }).getAttribute('aria-pressed') === 'true' &&
       await group(page, 'activity.neat').getByRole('button').nth(1).getAttribute('aria-pressed') === 'true' &&
-      await group(page, 'nutrition.diet_pattern').getByRole('button').nth(0).getAttribute('aria-pressed') === 'true',
+      (dietAnswered
+        ? await group(page, 'nutrition.diet_pattern').getByRole('button').nth(0).getAttribute('aria-pressed') === 'true'
+        : await group(page, 'nutrition.diet_pattern').count() === 0),
   )
   await next.click()
   await page.waitForTimeout(400)

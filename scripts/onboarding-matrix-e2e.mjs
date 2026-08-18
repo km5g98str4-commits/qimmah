@@ -12,6 +12,7 @@ import { join, resolve } from 'node:path'
 import { tmpdir } from 'node:os'
 import { setTimeout as sleep } from 'node:timers/promises'
 import { assertDevFlag, loadAppCopy } from './e2e/lib/app-copy.mjs'
+import { answerDietPattern } from './e2e/lib/onboarding-driver.mjs'
 
 const EVIDENCE_DIR = resolve(process.argv[2] || process.env.EVIDENCE_DIR || join(tmpdir(), `qimmah-onboarding-matrix-${Date.now()}`))
 mkdirSync(EVIDENCE_DIR, { recursive: true })
@@ -66,7 +67,7 @@ async function runCombo(page, copy, goal, place, neat) {
   await next() // قيم الجدول الافتراضية صالحة ومعلنة في الواجهة.
   await group(page, 'training.place').getByRole('button').nth(PLACES.indexOf(place)).click()
   await group(page, 'activity.neat').getByRole('button').nth(NEAT.indexOf(neat)).click()
-  await group(page, 'nutrition.diet_pattern').getByRole('button').first().click()
+  await answerDietPattern(page, 'plan') // [QIM-V1-001] عقد ثنائي الاتجاه، لا نقر بلا شرط
   await next()
   await group(page, 'limitations.has_injury').getByRole('button').nth(1).click()
   await next()

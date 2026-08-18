@@ -8,6 +8,7 @@
 // up as a driver fix, not a false product defect.
 
 import { settle, tap, tapIfPresent } from './harness.mjs'
+import { answerDietPattern } from '../../e2e/lib/onboarding-driver.mjs'
 
 export const PREFS_KEY = 'qimmah:prefs:v1'
 export const ONBOARDING_KEY = 'qimmah:onboarding:v1'
@@ -137,7 +138,7 @@ export async function completeOnboarding(page, { age = 28, height = 178, weight 
   await page.waitForSelector('#onb-title-lifestyle', { timeout: 20000 })
   await group(page, 'training.place').getByRole('button').nth(0).click({ force: true })
   await group(page, 'activity.neat').getByRole('button').nth(1).click({ force: true })
-  await group(page, 'nutrition.diet_pattern').getByRole('button').nth(0).click({ force: true })
+  await answerDietPattern(page, 'plan') // [QIM-V1-001] عقد ثنائي الاتجاه، لا نقر بلا شرط
 
   await next()
   await page.waitForSelector('#onb-title-limitations', { timeout: 20000 })

@@ -1,0 +1,191 @@
+# 01 — DECISIONS REGISTER (سجلّ القرارات)
+
+> **Canonical owner of one fact only: what has already been decided, and what has not.**
+> A `LOCKED` decision **must not be reopened** by a later agent because it prefers a
+> different architecture. Reopening requires a **new numbered decision** recording who
+> reopened it and why. Preference is not a reopen condition.
+
+Status: `LOCKED` · `PENDING_FOUNDER` · `SUPERSEDED`
+
+---
+
+## LOCKED — do not reopen
+
+### DEC-001 — `main` is the production pointer; the frontier is a different commit
+- **decision:** `main` = what Cloudflare Pages serves. The development frontier is
+  `CANONICAL_GROUND` (`00-GROUND.md`). They are 228 commits apart and that is not a bug.
+- **reason:** Every restart of this project began with an agent reading `CLAUDE.md §1`
+  ("الجذع الحالي: `main`"), treating `main` as the frontier, and rebuilding work that
+  already existed 200 commits ahead.
+- **evidence:** `git rev-list --left-right --count origin/main...origin/codex/qimmah-sovereign-closure-001` → `0  228`
+- **owner:** control plane · **date:** 2026-08-18
+- **reopen condition:** the founder promotes the ground to `main`; then they coincide and
+  this decision is superseded by the promotion, not by an agent.
+
+### DEC-002 — A preview build must never hold production Supabase authority
+- **decision:** In a `founder_preview` build, missing Supabase env means **"configured with
+  nothing"** — the baked production credentials are *absent from the artifact*, so
+  `isSupabaseConfigured()` is false and every dangerous writer fails **closed**.
+  Production behaviour is unchanged: the public URL + `anon` key stay baked in (they are
+  public by design and protected by RLS — charter §9).
+- **reason:** The fallback used to be unconditional, so *absence of configuration* meant
+  *full write access to the production database*. Any review deployment could
+  `redeem_access_code` (irreversible), `start_trial`, `claim_pending_grants`, or
+  `auth.signUp` real users and send real email.
+- **the subtlety that makes it hold:** `import.meta.env.VITE_APP_ENV` is read **inline**,
+  not through an imported helper, so Vite folds the constant and tree-shakes
+  `DEFAULT_SUPABASE_*` out of the preview bundle entirely. *"The credential is not in the
+  artifact"* is strictly stronger than *"it is there and unused"* — and it is checkable:
+  `grep` the preview `dist/assets/*.js` for the project URL and find nothing.
+- **evidence:** `src/lib/supabaseClient.ts:17-50` (verified this session);
+  `vite.config.ts:23-24` auto-sets `founder_preview` for non-production Cloudflare branches;
+  `docs/execution/qimmah-founder-qa/PREVIEW-SAFETY.md` §1–§2;
+  guard `test:branch-preview-safety` (9/9, 3 counter-proofs).
+- **owner:** founder-QA lane · **status:** implemented and guarded
+- **reopen condition:** none. This is a security invariant.
+
+### DEC-003 — Promotion to `main`, any deploy, and any production migration are founder-only
+- **evidence:** `CLAUDE.md §1`, `§1.1`, `QIMMAH-QUALITY-CHARTER.md §7`
+- **note:** pushing commits to a *working branch* is ordinary work; **promotion is not**.
+- **reopen condition:** none.
+
+### DEC-004 — The merge button is founder-only; ambiguity is answered with a question, not an action
+- **evidence:** `CLAUDE.md §1.1`. An authorisation addressed to anyone else is not an
+  authorisation to the agent, even in the same message.
+- **reopen condition:** none.
+
+### DEC-005 — Entitlement is server-owned; the client may never grant Premium
+- **decision:** Trial, activation codes, and Salla grants are decided by Postgres RPCs
+  (`start_trial`, `redeem_access_code`, `claim_pending_grants`, `my_entitlement`).
+  The client renders an answer; it never computes one.
+- **evidence:** `src/lib/access/entitlementBackend.ts:149,214,238,262`;
+  `supabase/functions/salla-webhook/index.ts`; gate steps `test:access-gate`, `test:activation-ui`.
+- **reopen condition:** none. Client-side entitlement is a commercial integrity failure.
+
+### DEC-006 — No silent storage success
+- **decision:** Every write goes through the checked `safeStorage` wrapper and its
+  `WriteResult` is inspected. No success screen and no state clear before the write is
+  confirmed. On failure: restore the snapshot, tell the truth, keep the data.
+- **evidence:** `CLAUDE.md §5`; gate step `test:storage-honesty`.
+- **reopen condition:** none.
+
+### DEC-007 — Local-first; cloud sync is opt-in and health data needs its own consent
+- **decision:** Sync is off unless `VITE_SYNC_ENABLED` is set (`.env.example:39`, empty by
+  default). Sensitive health data syncs **only** behind a separate explicit consent.
+- **evidence:** `.env.example:39`; `CLAUDE.md §8` locked decision 5; gate steps
+  `test:sync-consent`, `test:sync-honesty`, `test:sync-coverage`.
+- **reopen condition:** an explicit founder notice enabling sync (charter §3-5).
+
+### DEC-008 — A question with no consumer is not asked
+- **decision:** `nutrition.diet_pattern` renders **only** when `intent === 'meals'`,
+  because the meal generator is its only consumer.
+- **reason:** Charter §5 — asking a user something that changes nothing is a lie about
+  why you asked.
+- **evidence:** `src/lib/onboardingV2Flow.ts:111`; `src/views/OnboardingV2.tsx:1172`;
+  commit `2e3042d`; guard `scripts/onboarding-questions-proof.ts:477-480`.
+- **⚠ WHY THIS IS REGISTERED:** this correct change is what turned CI red (`QIM-V1-001`).
+  **Do not "fix" the red by making the question unconditional again.** The harness is
+  wrong, not the product.
+- **reopen condition:** a second consumer for diet pattern appears.
+
+### DEC-009 — QAE stays REFERENCE until after launch
+- **decision:** `archive/qae-training-wave2-269b2bb` and `claude/qae-architecture-design-fhg2mh`
+  (~121k lines, a second and more rigorous training engine) are **preserved, not adopted**.
+- **reason:** Adopting a second plan engine during release convergence is precisely the
+  move that has restarted this project. The shipping engine is guarded and green.
+- **evidence:** `03-BRANCH-LEDGER.md` BR-06/BR-07.
+- **reopen condition:** post-launch, by a new numbered decision. Preservation task `QIM-V1-014`.
+
+### DEC-010 — Injury safety is a union, and it fails closed
+- **decision:** Exercise exclusion uses **both** the structured `jointLoads` model (181/181
+  exercises, compiler-enforced) **and** the legacy hand list — union, not replacement.
+  Anything unclassified is **excluded**, not allowed.
+- **reason:** The hand list alone accepted **70 of 181** forbidden exercises; the model
+  alone missed 12 the list catches. Substitution previously replaced `arnold-press` with
+  `dumbbell-shoulder-press` — literally the same mechanics.
+- **evidence:** `test:injury-safety` — 80 checks, 0 failures, 7920 plans across 11 personas × 720 configurations.
+- **reopen condition:** none. Fail-closed is not negotiable.
+
+### DEC-011 — Numeral policy is enforced at the display boundary; storage stays Latin
+- **decision:** Arabic-Indic numerals are produced by `formatNumeralsIn` **at the display
+  call site**; stored values stay Latin.
+- **reason:** The earlier guard asserted that `workoutDayLabel.ts` emits Arabic-Indic
+  digits — but its output is *stored* (`planGenerator.ts:757`), not displayed. The guard
+  watched the wrong file and stayed green after the real limit was removed.
+- **evidence:** commit `f92f8bc` [FINAL-019] on `codex/qimmah-final-release-convergence-001`
+  (adoption task `QIM-V1-004`); `test:numeral-policy` 69/0.
+- **reopen condition:** none.
+
+### DEC-012 — Age floor is 13, and a minor gate applies to restricted goals
+- **evidence:** `CLAUDE.md §1.4`; gate steps `test:age-13`, `test:minors`, `test:e-guardrail`.
+- **note:** `parseSafeNumber('٢٤',{min:13})` used to return **13**, classifying an adult as a
+  minor and locking cutting/bulking goals. Fixed and guarded (`test:numeral-policy`).
+- **reopen condition:** none (App Store compliance).
+
+### DEC-013 — Founder decisions already locked in the charter stay locked
+1. Nutrition **budget** feature is out of V1.
+2. The Ramadan question is permanent, neutrally worded, seasonally activated.
+3. Plan changes are **always a suggestion** in V1 — no silent automatic edit; every change
+   is explained.
+4. The expanded exercise-library source stays **suspended** until the current library is inventoried.
+5. Sensitive health data syncs only behind separate explicit consent.
+- **evidence:** `CLAUDE.md §8`. · **reopen condition:** founder, in a numbered message.
+
+### DEC-014 — V1 ships as the Arabic-first **Web/PWA**; native iOS is deferred
+- **decision:** The launch horizon is the web app on Cloudflare Pages. Capacitor/iOS
+  packaging, TestFlight and App Store submission are **post-launch**.
+- **evidence:** the last two commits on `main` are `QIM-WEB-RELEASE-001/002` (PWA
+  convergence, promotion of an approved *web* build); the founder-QA link is a Pages
+  preview; the open iOS item (`ERR_UNKNOWN` boot failure) is recorded in `CLAUDE.md §11`
+  as debt **outside** the coordinator's scope.
+- **reopen condition:** the founder names a TestFlight date. Listed for confirmation as
+  `FA-08` — it does **not** block execution.
+
+---
+
+## PENDING_FOUNDER — execution continues around these; they block only their own tasks
+
+### DEC-101 — Premium period: annual vs no-expiry (**commercial contradiction**)
+- **the conflict, all three sides measured:** the Salla store says **19.99 annually**;
+  a second price says **89.99 annually**; the backend grants **`no_expiry = true`**; and the
+  schema makes an *expiring* Premium **unrepresentable**.
+- **nothing has been touched on any side.** An agent must not pick one.
+- **blocks:** `QIM-V1-010` (commerce copy truth) · **founder action:** `FA-01`
+- **evidence:** `docs/execution/qimmah-sovereign-closure/STATE.md §4.1`
+
+### DEC-102 — Commit the 82 MB food long-tail shards, or host them
+- 59,941 records · 41 shards · **82 MB**, generated and fingerprint-verified against the
+  committed manifest. Committing them is permanent repository weight; not committing them
+  means the long tail is not served in production.
+- **the proof is honest either way** — the product degrades truthfully.
+- **blocks:** `QIM-V1-011` · **founder action:** `FA-02`
+
+### DEC-103 — Apply the 13 `APPLY_PENDING` migrations to production
+- Without them the executive dashboard is closed **to the founder himself**, and
+  entitlement/webhook tables do not exist in production.
+- **blocks:** `QIM-V1-012`, admin surface · **founder action:** `FA-03`
+
+### DEC-104 — 37 missing exercise images / 22 videos
+- Part rights, part **tone** (`face-pull`, `arnold-press`). The founder's own 588 MB library
+  covers named gaps: **9 approved · 36 awaiting QA · 136 queued**.
+- **blocks:** `QIM-V1-013` · **founder action:** `FA-04`
+
+### DEC-105 — AI Coach contradicts `docs/product/BACKLOG.md:32`
+- The backlog explicitly excludes a smart coach; the founder authorised one in a later
+  mission. A written resolution is needed — the document and the code currently disagree.
+- **current state:** `src/lib/coach/` exists as a logic layer with a 16-check attribution
+  guard, **no UI and no route**. It ships to nobody today, so this blocks nothing in V1.
+- **founder action:** `FA-05`
+
+---
+
+## SUPERSEDED
+
+### DEC-901 — "The trunk is `design/v21-promotion`" — **SUPERSEDED** by DEC-001
+Already corrected in `CLAUDE.md §1` at [CTO-71]; recorded here so the six open PRs that
+still target that branch are read correctly (`03-BRANCH-LEDGER.md` §D).
+
+### DEC-902 — "`main` is the frontier" — **SUPERSEDED** by DEC-001
+This is the specific belief that restarted the project. `CLAUDE.md §1` is *correct about
+governance* (`main` is where releases land) and *misleading about development* (the work
+is 228 commits ahead). Both readings are now reconciled in DEC-001.

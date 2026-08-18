@@ -44,7 +44,7 @@ export { onboardingIntentStrings, goalWordingFor } from '@/i18n/dict/onboardingI
 export { trainingHistoryStrings } from '@/i18n/dict/trainingHistory'
 export { onboardingLifestyleStrings } from '@/i18n/dict/onboardingLifestyle'
 export { neatChoices, dietPatternChoices } from '@/data/planBuilder'
-export { LAST_INPUT_STEP, validateStep, inRange, AGE_RANGE, HEIGHT_RANGE, WEIGHT_RANGE } from '@/lib/onboardingV2Flow'
+export { LAST_INPUT_STEP, validateStep, inRange, AGE_RANGE, HEIGHT_RANGE, WEIGHT_RANGE, dietPatternApplies } from '@/lib/onboardingV2Flow'
 `
 
 /** يحزم نقطة دخول TS مؤقّتة ويُعيد الوحدة المستوردة. */
@@ -133,6 +133,18 @@ export async function loadOnboardingFlow() {
     /** النطاقات الفسيولوجية — بها نتحقّق أن بيانات الاختبار ما زالت مقبولة. */
     ranges: { age: mod.AGE_RANGE, height: mod.HEIGHT_RANGE, weight: mod.WEIGHT_RANGE },
     inRange: mod.inRange,
+    /**
+     * قاعدة عرض «نمط الأكل» — **من المصدر نفسه**، لا نسخة عنها في الحصّاد.
+     *
+     * [QIM-V1-001] السؤال صار مشروطًا بالنية (‏`intent === 'meals'`) لأن مستهلكه
+     * الوحيد مولّد الوجبات، وسؤالٌ بلا أثر لا يُطرح (§5). والحصّادات كانت تنقر
+     * عليه بلا شرط، فسقطت بمهلة ٣٠ ثانية على نيّة «خطة» — والعطل في افتراض
+     * الحصّاد لا في المنتج.
+     *
+     * ولماذا نستوردها بدل أن نكتب `intent === 'meals'` هنا: النسخة تشيخ بصمت.
+     * الاستيراد يجعل انحراف الحصّاد عن المنتج **مستحيلًا بنيويًّا** لا مرصودًا.
+     */
+    dietPatternApplies: mod.dietPatternApplies,
   }
   return cachedFlow
 }
