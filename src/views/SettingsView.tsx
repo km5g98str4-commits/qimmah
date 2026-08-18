@@ -22,6 +22,9 @@ import { markPendingSync } from '@/lib/syncService'
 import { BUILD_LABEL } from '@/lib/buildInfo'
 import { settingsPreferencesStrings } from '@/i18n/dict/settingsPreferences'
 import { formatNumber, getActiveNumeralStyle, subscribeNumeralStyle } from '@/lib/numberFormat'
+import { machineConversionOutcome, regenerateOutcome, type PlanOutcome } from '@/lib/planChanges'
+import { withMachinePreference } from '@/lib/equipmentAccess'
+import { planCoherenceStrings } from '@/i18n/dict/planCoherence'
 
 /**
  * يترجم حالة المزامنة الحقيقية إلى جملة صادقة للمستخدم.
@@ -76,10 +79,16 @@ export function SettingsView({
   }
 
   // — خطتي: إعادة توليد —
-  const regenerateFromProfile = () => {
-    const g = generatePlan(customization.profile)
+  //
+  // [SOVEREIGN-003] D7 — **الرسالة تصف المخرَج لا الزرّ.**
+  // كان الزرّان ينفّذان نفس الاستدعاء ثم يعلنان نجاحًا ثابتًا بلا نظر في النتيجة:
+  // «صارت بنسخة الأجهزة» على خطة **مطابقة بايتًا**. الآن المحرّك يقارن الخطتين
+  // (`@/lib/planChanges`) والقاموس يترجم الرمز — والتطابق يُقال صريحًا مع سببه.
+  const regenerateFromProfile = (profile = customization.profile): PlanOutcome => {
+    const g = generatePlan(profile)
     applyCustomization({
       ...customization,
+      profile,
       targets: g.targets,
       workoutPlan: g.workoutPlan,
       routine: g.weeklySchedule,
@@ -88,20 +97,42 @@ export function SettingsView({
       measurementPlan: g.measurementPlan,
     })
     markPendingSync()
+    return regenerateOutcome(customization.workoutPlan, g.workoutPlan)
+  }
+
+  const coherence = planCoherenceStrings[lang] ?? planCoherenceStrings.ar
+  const announce = (outcome: PlanOutcome) => {
+    const detail = outcome.changed ? ` ${coherence.changedDetail(outcome.changedDays, outcome.changedExercises)}` : ''
+    window.alert(`${coherence.outcome[outcome.code]}${detail}`)
   }
 
   const onRegenerate = () => {
     if (!window.confirm(t.settings.regenerateConfirm)) return
-    regenerateFromProfile()
-    window.alert(t.settings.regenerateSuccess)
+    announce(regenerateFromProfile())
   }
 
   // — خطتي: التحويل لنسخة الأجهزة (P12) — اختياري: يعيد توليد الخطة التلقائية عبر المولّد
   // (أجهزة الكتالوج فقط في النادي). لا يمسّ الجدول المخصّص المحفوظ ولا سجلّ التمارين.
+  //
+  // [SOVEREIGN-003] D7 — النيّة **تُكتب** الآن (`withMachinePreference`) بدل إعادة
+  // توليد من نفس الملف حرفيًا، ثم تُقاس النتيجة من الفرق لا من الضغطة.
   const onSwitchToMachines = () => {
     if (!window.confirm(t.settings.switchMachinesConfirm)) return
-    regenerateFromProfile()
-    window.alert(t.settings.switchMachinesSuccess)
+    const profile = withMachinePreference(customization.profile, true)
+    const before = customization.workoutPlan
+    const g = generatePlan(profile)
+    applyCustomization({
+      ...customization,
+      profile,
+      targets: g.targets,
+      workoutPlan: g.workoutPlan,
+      routine: g.weeklySchedule,
+      nutritionPlan: g.nutritionPlan,
+      commitmentPlan: g.commitmentPlan,
+      measurementPlan: g.measurementPlan,
+    })
+    markPendingSync()
+    announce(machineConversionOutcome(profile, before, g.workoutPlan))
   }
 
   // — الحساب: حالة + خروج —

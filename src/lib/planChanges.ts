@@ -1,5 +1,9 @@
 import type { Customization } from '@/lib/customization'
 import type { Lang } from '@/lib/appPreferences'
+import type { Profile } from '@/types/profile'
+import type { WorkoutPlan } from '@/types/workout'
+import { declaredEquipment } from '@/lib/equipmentAccess'
+import { getExercise } from '@/data/exercises'
 import { targetCaloriesFor } from '@/lib/calculators'
 import { planTitle } from '@/lib/planGenerator'
 import { onboardingStrings } from '@/i18n/dict/onboarding'
@@ -146,4 +150,112 @@ export function buildPlanChanges(saved: Customization, pending: Customization, l
   return rows
     .filter((r) => r.before !== r.after)
     .map((r) => ({ key: r.key, label: r.label, before: r.before, after: r.after, reason: r.reason() }))
+}
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// نتيجة إعادة التوليد والتحويل لنسخة الأجهزة — [SOVEREIGN-003] D7
+// ════════════════════════════════════════════════════════════════════════════
+//
+// **الجذر (سببان متراكبان):**
+//
+// ١) الزرّان «إعادة توليد الخطة» و«التحويل لنسخة الأجهزة» ينفّذان **نفس
+//    الاستدعاء بالضبط** (`regenerateFromProfile()`) ثم يعلنان نجاحًا نصًّا ثابتًا
+//    **بلا أي نظر في المخرَج**:
+//      `regenerateFromProfile(); window.alert('تم — خطتك التلقائية صارت بنسخة الأجهزة.')`
+//
+// ٢) ونيّة «نسخة الأجهزة» تُقرأ في `resolveMachinesOnly` من حقل `preferMachines`
+//    **الذي لم يكن يكتبه أحد**. فالتحويل لم يكن يغيّر مدخلًا واحدًا، والمولّد
+//    حتميّ، فالمخرَج **مطابق بايتًا** — والرسالة تقول «صارت بنسخة الأجهزة».
+//
+// **العلاج على مستويين:** النيّة صارت تُكتب فعلًا (`withMachinePreference` في
+// `equipmentAccess`)، والرسالة صارت تُشتقّ من **الفرق في المخرَج** لا من الزرّ
+// المضغوط. وتطابقُ نتيجةِ مولّدٍ حتميّ لنفس المدخلات **نتيجة صحيحة تُشرح**، لا
+// فشل يُخفى ولا نجاح يُدَّعى. النصوص في `@/i18n/dict/planCoherence`.
+
+/** رموز النتائج — القاموس يترجمها، والمحرّك يختارها من الواقع. */
+export type PlanOutcomeCode =
+  | 'machines_converted'
+  | 'machines_already'
+  | 'machines_unavailable'
+  | 'machines_no_effect'
+  | 'regenerated'
+  | 'regenerated_identical'
+
+export interface PlanOutcome {
+  code: PlanOutcomeCode
+  /** هل تغيّر المخرَج فعلًا؟ الواجهة **لا** تعرض حالة نجاح حين تكون false. */
+  changed: boolean
+  /** عدد أيام الخطة التي اختلف محتواها. */
+  changedDays: number
+  /** عدد الخانات التي اختلف معرّفها أو مجموعاتها أو تكراراتها أو راحتها. */
+  changedExercises: number
+}
+
+/** بصمة خانة واحدة — الهوية والوصفة معًا: تبديل جهاز أو تغيير مجموعات كلاهما فرق. */
+function slotSignature(pe: { exerciseId: string; sets: number; reps: string; restSec: number }): string {
+  return `${pe.exerciseId}|${pe.sets}|${pe.reps}|${pe.restSec}`
+}
+
+/** الفرق البنيوي بين خطتي تمرين — أيامٌ وخاناتٌ اختلفت فعلًا. */
+export function diffWorkoutPlans(before: WorkoutPlan, after: WorkoutPlan): { changedDays: number; changedExercises: number } {
+  let changedDays = 0
+  let changedExercises = 0
+  const dayCount = Math.max(before.days.length, after.days.length)
+  for (let i = 0; i < dayCount; i++) {
+    const a = before.days[i]?.exercises ?? []
+    const b = after.days[i]?.exercises ?? []
+    let dayDelta = 0
+    const slots = Math.max(a.length, b.length)
+    for (let j = 0; j < slots; j++) {
+      const sa = a[j] ? slotSignature(a[j]) : null
+      const sb = b[j] ? slotSignature(b[j]) : null
+      if (sa !== sb) dayDelta++
+    }
+    if (dayDelta > 0) {
+      changedDays++
+      changedExercises += dayDelta
+    }
+  }
+  return { changedDays, changedExercises }
+}
+
+/** هل أدوات هذا الملف تسمح ببناء نسخة أجهزة أصلًا؟ (إعلانٌ بلا `machine` ⇒ لا). */
+export function machineVersionAvailable(p: Profile): boolean {
+  const declared = declaredEquipment(p)
+  return declared ? declared.includes('machine') : true
+}
+
+/** هل كل خانات الخطة أجهزةٌ فعلًا؟ يُقرأ من الكتالوج لا يُستنتج من النيّة. */
+export function planIsAllMachines(plan: WorkoutPlan): boolean {
+  const slots = plan.days.flatMap((d) => d.exercises)
+  if (!slots.length) return false
+  return slots.every((pe) => getExercise(pe.exerciseId)?.equipment.includes('machine') === true)
+}
+
+/**
+ * نتيجة «التحويل لنسخة الأجهزة» — تُحسب من **مقارنة المخرَجين وقراءة الخطة**،
+ * لا من الزرّ. لا تُصدر `machines_converted` إلا وقد اختلف المخرَج فعلًا، ولا
+ * تقول «خطتك أصلًا أجهزة» إلا والخطة أجهزةٌ بالكتالوج.
+ *
+ * `machines_no_effect` هو **الفرع المغلق**: لم يتغيّر شيء، والأدوات تسمح
+ * بالأجهزة، والخطة ليست أجهزة — أي أن النيّة لم تصل المحرّك. لا نلفّق له تعليلًا
+ * ولا ندّعي نجاحًا؛ نقولها كما هي. ويحرسه تأكيدٌ في `run-plan-coherence-proof.mjs`
+ * يسقط بالاسم إن ظهر في مسار سليم.
+ */
+export function machineConversionOutcome(profile: Profile, before: WorkoutPlan, after: WorkoutPlan): PlanOutcome {
+  const { changedDays, changedExercises } = diffWorkoutPlans(before, after)
+  if (changedExercises > 0) return { code: 'machines_converted', changed: true, changedDays, changedExercises }
+  const unchanged = { changed: false as const, changedDays: 0, changedExercises: 0 }
+  if (planIsAllMachines(after)) return { code: 'machines_already', ...unchanged }
+  if (!machineVersionAvailable(profile)) return { code: 'machines_unavailable', ...unchanged }
+  return { code: 'machines_no_effect', ...unchanged }
+}
+
+/** نتيجة «إعادة توليد الخطة» — المولّد حتميّ، فالتطابق نتيجة تُشرح لا نجاح يُدَّعى. */
+export function regenerateOutcome(before: WorkoutPlan, after: WorkoutPlan): PlanOutcome {
+  const { changedDays, changedExercises } = diffWorkoutPlans(before, after)
+  return changedExercises > 0
+    ? { code: 'regenerated', changed: true, changedDays, changedExercises }
+    : { code: 'regenerated_identical', changed: false, changedDays: 0, changedExercises: 0 }
 }

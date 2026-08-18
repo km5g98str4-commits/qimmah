@@ -154,3 +154,26 @@ export function resolveMachinesOnly(p: Profile): boolean {
   }
   return resolveGymAccess(p) === 'small'
 }
+
+
+/**
+ * [SOVEREIGN-003] D7 — **كاتب النيّة**، مقابلًا لقارئها `resolveMachinesOnly`.
+ *
+ * الحقل `preferMachines` ظلّ يُقرأ ولا يُكتب: زرّ «التحويل لنسخة الأجهزة» كان
+ * يعيد التوليد من **نفس الملف بلا أي تعديل**، والمولّد حتميّ، فالمخرَج مطابق
+ * بايتًا — ثم تُعلَن رسالة نجاح. القارئ بلا كاتبٍ = زرٌّ لا يفعل شيئًا ويدّعي.
+ *
+ * الحقل غير مُعلَن في `Profile` بعد (`src/types/profile.ts` خارج هذه الحارة)،
+ * فيُكتب بنيويًا كما يُقرأ. التخزين يدمج الملف بالنشر (`{...base, ...saved}`)
+ * فيبقى الحقل عبر الحفظ والتحميل. وإضافته للنوع مرفوعة في تقرير الحارة.
+ */
+export function withMachinePreference(p: Profile, prefer: boolean): Profile {
+  const next: Profile & { preferMachines?: boolean } = { ...p, preferMachines: prefer }
+  return next
+}
+
+/** قراءة النيّة الصريحة وحدها (بلا اشتقاق من الأدوات/المكان) — للواجهة والإثبات. */
+export function declaredMachinePreference(p: Profile): boolean | undefined {
+  const intent = (p as Profile & { preferMachines?: boolean }).preferMachines
+  return typeof intent === 'boolean' ? intent : undefined
+}

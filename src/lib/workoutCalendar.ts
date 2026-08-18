@@ -257,12 +257,49 @@ function weekOrder(weekStart: WeekStart): number[] {
   return Array.from({ length: 7 }, (_, i) => (weekStart + i) % 7)
 }
 
-/** يبني جدول التخصيصات من أيام أسبوع مختارة: k-th يوم تدريب (بترتيب الأسبوع) → يوم الخطة k mod أيامها. */
-function buildAssignments(trainingWeekdays: readonly number[], planDayCount: number, weekStart: WeekStart): WeekdayAssignment[] {
+/**
+ * أول يوم تدريب (بيوم الأسبوع JS) يقع **في اليوم المعطى أو بعده** — بحثٌ دائري
+ * على سبعة أيام. `null` حين لا يوم تدريب أصلًا. دالّة نقية، مُصدَّرة للإثبات.
+ */
+export function firstTrainingWeekdayOnOrAfter(trainingWeekdays: readonly number[], fromWeekday: number): number | null {
+  const chosen = new Set(trainingWeekdays)
+  if (chosen.size === 0) return null
+  const start = ((Math.trunc(fromWeekday) % 7) + 7) % 7
+  for (let ahead = 0; ahead < 7; ahead++) {
+    const wd = (start + ahead) % 7
+    if (chosen.has(wd)) return wd
+  }
+  return null
+}
+
+/**
+ * يبني جدول التخصيصات من أيام أسبوع مختارة: k-th يوم تدريب → يوم الخطة k mod أيامها.
+ *
+ * [SOVEREIGN-003] D5 — **من أين يبدأ العدّ**.
+ * كان العدّ يبدأ حتمًا من **بداية الأسبوع** (السبت افتراضًا). ولذلك مستخدم جديد
+ * أنهى إعداده يوم **الأربعاء** بخطة أربعة أيام (سبت/أحد/ثلاثاء/أربعاء) كان يجد
+ * أوّل جلسة في حياته **«اليوم ٤»** — لأن الأربعاء رابع أيام التدريب في ترتيب
+ * الأسبوع. أوّل جلسةٍ لمستخدمٍ جديد يجب أن تكون **اليوم ١** من خطته.
+ *
+ * `anchorWeekday` يزيح نقطة البدء: يوم التدريب المرساة يأخذ فهرس الخطة ٠، ويكمل
+ * العدّ دائريًا بترتيب الأسبوع بعده. حين لا مرساة **يبقى السلوك القديم حرفيًا**
+ * (بداية الأسبوع = يوم الخطة ٠) — فالمستخدمون القائمون وجداولهم المحفوظة
+ * لا يتغيّر عندهم شيء، والمرساة تُمرَّر من مسار الميلاد وحده.
+ */
+function buildAssignments(
+  trainingWeekdays: readonly number[],
+  planDayCount: number,
+  weekStart: WeekStart,
+  anchorWeekday?: number | null,
+): WeekdayAssignment[] {
   const chosen = new Set(trainingWeekdays)
   const weekdays: WeekdayAssignment[] = [...REST_WEEK]
+  const order = weekOrder(weekStart)
+  // نقطة البدء في ترتيب الأسبوع: المرساة إن كانت يوم تدريب فعليًا، وإلا الترتيب كما هو.
+  const anchorPos = typeof anchorWeekday === 'number' && chosen.has(anchorWeekday) ? order.indexOf(anchorWeekday) : 0
   let k = 0
-  for (const wd of weekOrder(weekStart)) {
+  for (let i = 0; i < 7; i++) {
+    const wd = order[(anchorPos + i) % 7]
     if (chosen.has(wd)) {
       weekdays[wd] = planDayCount > 0 ? k % planDayCount : 0
       k++
@@ -271,12 +308,27 @@ function buildAssignments(trainingWeekdays: readonly number[], planDayCount: num
   return weekdays
 }
 
+/** خيارات الاقتراح — `startDate` يرسي «اليوم ١» على أوّل يوم تدريب من تاريخ البدء. */
+export interface SuggestScheduleOptions {
+  /** تاريخ ميلاد الجدول (إنشاء الخطة). حين يُمرَّر: أوّل جلسة بعده = يوم الخطة ٠. */
+  startDate?: Date
+}
+
 /** الجدول الافتراضي المقترح لعدد أيام وخطة — يمرّ على الحارس دائمًا (الاقتراحات تحترمه). */
-export function suggestedSchedule(plan: WorkoutPlan, daysPerWeek: number, weekStart: WeekStart = 6): WeeklySchedule {
+export function suggestedSchedule(
+  plan: WorkoutPlan,
+  daysPerWeek: number,
+  weekStart: WeekStart = 6,
+  opts?: SuggestScheduleOptions,
+): WeeklySchedule {
   const d = clamp(Math.round(daysPerWeek) || 1, 1, 7)
+  const trainingWeekdays = suggestedTrainingWeekdays(d, weekStart)
+  const anchor = opts?.startDate
+    ? firstTrainingWeekdayOnOrAfter(trainingWeekdays, opts.startDate.getDay())
+    : null
   return {
     version: 1,
-    weekdays: buildAssignments(suggestedTrainingWeekdays(d, weekStart), plan.days.length, weekStart),
+    weekdays: buildAssignments(trainingWeekdays, plan.days.length, weekStart, anchor),
     split: namedSplitForDays(d),
     daysPerWeek: d,
     weekStart,
@@ -373,7 +425,12 @@ export function saveWeeklySchedule(schedule: WeeklySchedule): SaveScheduleResult
  * يختار أيام الأسبوع الفعلية للتدريب (تعديل المستخدم على الاقتراح) ويحفظ.
  * أيام الخطة تُخصَّص بترتيب الأسبوع (weekStart)؛ يرفض ما يخالف الحارس.
  */
-export function setTrainingWeekdays(plan: WorkoutPlan, trainingWeekdays: readonly number[], weekStart: WeekStart = 6): SaveScheduleResult {
+export function setTrainingWeekdays(
+  plan: WorkoutPlan,
+  trainingWeekdays: readonly number[],
+  weekStart: WeekStart = 6,
+  opts?: SuggestScheduleOptions,
+): SaveScheduleResult {
   const unique = [...new Set(trainingWeekdays)].filter((d) => Number.isInteger(d) && d >= 0 && d <= 6)
   if (unique.length !== trainingWeekdays.length || unique.length === 0) {
     return {
@@ -386,9 +443,12 @@ export function setTrainingWeekdays(plan: WorkoutPlan, trainingWeekdays: readonl
     }
   }
   const existing = loadWeeklySchedule()
+  // المرساة اختيارية هنا أيضًا: من يختار أيامه أوّل مرّة يستحقّ «اليوم ١» في أوّل
+  // جلسة، ومن يعدّل جدولًا قائمًا لا تُزاح خريطته تحت قدميه. القرار للمستدعي.
+  const anchor = opts?.startDate ? firstTrainingWeekdayOnOrAfter(unique, opts.startDate.getDay()) : null
   const schedule: WeeklySchedule = {
     version: 1,
-    weekdays: buildAssignments(unique, plan.days.length, weekStart),
+    weekdays: buildAssignments(unique, plan.days.length, weekStart, anchor),
     split: namedSplitForDays(unique.length),
     daysPerWeek: unique.length,
     weekStart,
@@ -602,7 +662,10 @@ export function ensureCalendarMigrated(): { status: 'done' | 'skipped' | 'rolled
       const c = loadCustomization()
       if (!c.workoutPlan.days.length) return
       const daysPerWeek = clamp(c.profile.trainingDays || c.workoutPlan.days.length, 1, 7)
-      const schedule = suggestedSchedule(c.workoutPlan, daysPerWeek, 6)
+      // [SOVEREIGN-003] D5 — مسار ميلاد الجدول لمستخدم جديد: يُرسى على **اليوم**
+      // كي تكون أوّل جلسة هي «اليوم ١» من خطته، أيًّا كان يوم الأسبوع الذي أنهى
+      // فيه إعداده. بلا هذا كان أربعاءُ الإعداد يعني «اليوم ٤».
+      const schedule = suggestedSchedule(c.workoutPlan, daysPerWeek, 6, { startDate: new Date() })
       writeSchedule({ ...schedule, source: 'migration' })
     },
     verify: () => {

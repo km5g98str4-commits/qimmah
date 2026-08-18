@@ -7,6 +7,7 @@ import type { Customization } from '@/lib/customization'
 import type { Lang } from '@/lib/appPreferences'
 import type { CalorieGoal } from '@/types/profile'
 import { scheduledDayFor } from '@/lib/workoutCalendar'
+import { estimateDurationMin } from '@/lib/workoutStats'
 import { getExercise } from '@/data/exercises'
 import { getCue } from '@/lib/coaching'
 
@@ -123,8 +124,15 @@ export function buildWorkoutV2Model(customization: Customization, lang: Lang): W
     }
   })
 
-  // Source classification: NON-STANDARD Qimmah display heuristic (~9 min/exercise, rounded to 5).
-  const durationMin = total > 0 ? Math.max(20, Math.round((total * 9) / 5) * 5) : 0
+  // [SOVEREIGN-003] D2 — **مصدر المدّة واحد**: `estimateDurationMin` في
+  // `@/lib/workoutStats`. كان هنا نموذجٌ ثانٍ منافس — تقريبٌ عرضيّ بلا صلة
+  // بالوصفة: `Math.max(20, Math.round(total * 9 / 5) * 5)` (تسعُ دقائق لكل
+  // تمرين مهما كانت مجموعاته وراحته، مقرَّبًا لأقرب خمس، بأرضية عشرين).
+  //
+  // فكان تبويب «التمرين» يقول ٤٥ دقيقة لجلسةٍ يقول عنها تبويب «اليوم» ٣٦ —
+  // لأن الأول يعدّ التمارين والثاني يحسب المجموعات والراحة. والأسوأ أن الرقم
+  // هنا **لا يتحرّك** حين يقصّر المستخدم جلسته بتقليل المجموعات: العدّ نفسه.
+  const durationMin = estimateDurationMin(day)
   const muscles = Array.from(new Set(exercises.flatMap((e) => e.muscles))).slice(0, 4)
   const goalWordAr = goal === 'cut' ? 'التنشيف' : goal === 'bulk' ? 'التضخيم' : goal === 'maintain' ? 'المحافظة' : ''
 
