@@ -1,3 +1,23 @@
+> # ⛔ SUPERSEDED — NOT THE CANONICAL CONTROL PLANE
+>
+> **The canonical control plane is [`docs/execution/qimmah-master/`](../execution/qimmah-master/README.md).
+> Start there. This file is retained as an evidence archive only.**
+>
+> Why: two control planes is the same failure mode as two nutrition screens — a future agent
+> reads the wrong owner and acts on stale truth. GOV-003 selected `qimmah-master/` as canonical
+> (more complete, cold-start usable, decision-owning, and it lives with the ground).
+>
+> **What of this file survived, and where it went:**
+> - the verified ground + preservation refs → [`00-GROUND.md`](../execution/qimmah-master/00-GROUND.md)
+> - founder decisions → [`01-DECISIONS.md`](../execution/qimmah-master/01-DECISIONS.md)
+> - founder actions → [`10-FOUNDER-ACTIONS.md`](../execution/qimmah-master/10-FOUNDER-ACTIONS.md)
+> - the GOV-002 forensics remain here, unmoved and still valid, in
+>   [`GOV-002-FINDINGS.md`](./GOV-002-FINDINGS.md) and [`evidence/`](./evidence/).
+>
+> **One correction this file got wrong:** it raised `DEC-015` (entitlement posture) as
+> `PENDING_FOUNDER`. It was already **LOCKED** — by charter §0.1 and
+> `01-DECISIONS.md:153-183`. Do not reopen it from this file.
+
 # PLAN.md — Qimmah V1 Execution Plan
 
 **Revision:** v1.0-rc

@@ -38,7 +38,7 @@ const ACCOUNTS_KEY = 'qimmah:onboarding:accounts:v1'
 const CUSTOMIZATION_KEY = 'qimmah:customization:v1'
 const LAST_USER_KEY = 'qimmah:lastUser:v1'
 
-const { isExistingPlanEdit } = await loadTsModule('src/lib/customization.ts')
+const { isExistingPlanEdit, readCustomization } = await loadTsModule('src/lib/customization.ts')
 const { isOnboardingComplete } = await loadTsModule('src/lib/onboarding.ts')
 
 /** يبني حالة جهاز: مالك · إكمال الجهاز · إكمال الحساب · وجود تخصيص محفوظ. */
@@ -85,6 +85,37 @@ console.log('\n④ محاكاة الالتفاف (§4.2): إعادة المسن�
     `legacy=${legacy} · fixed=${isExistingPlanEdit()}`)
   ok('ولو تساوى المسندان لسقط هذا الإثبات — فهو ليس تحصيل حاصل',
     legacy !== isExistingPlanEdit())
+}
+
+console.log('\n⑤ [GOV-003/BLOCKER-D] التلف ليس بابًا خلفيًا للاستحقاق')
+{
+  // المخزون المعطوب كان يُسقط الحارس كلّه: `state !== 'saved'` ⇒ لا `assertPaid`.
+  // فكان إفساد بايت واحد يفتح تحوير الخطة مجّانًا. الفحوص أدناه تقيس **الشهادة
+  // بخطّة سابقة** لا **القدرة على قراءتها**.
+  const CUSTOMIZATION_KEY_LOCAL = 'qimmah:customization:v1'
+  const seedRaw = (raw) => {
+    seed({ owner: 'user-abc', deviceCompleted: true, accountCompleted: 'user-abc', hasCustomization: false })
+    if (raw !== null) storage.setItem(CUSTOMIZATION_KEY_LOCAL, raw)
+  }
+
+  seedRaw('{not json')
+  ok('★ مخزون معطوب (تحليل) ⇒ الحارس يعمل — التلف لا يمنح تحويرًا مجّانيًا',
+    isExistingPlanEdit() === true, `state=${readCustomization().state}`)
+
+  seedRaw(JSON.stringify([1, 2, 3]))
+  ok('★ مخزون معطوب (شكل) ⇒ الحارس يعمل',
+    isExistingPlanEdit() === true, `state=${readCustomization().state}`)
+
+  seedRaw(null)
+  ok('لا بايتات إطلاقًا ⇒ الحارس لا يعمل — الخطة الأولى مجّانية (§0.1)',
+    isExistingPlanEdit() === false, `state=${readCustomization().state}`)
+
+  // محاكاة الالتفاف: إعادة المسند إلى «saved وحدها» تُسقط الفحصين ★ باسمهما.
+  seedRaw('{not json')
+  const legacyOnlySaved = readCustomization().state === 'saved'
+  ok('محاكاة الالتفاف: مسند «saved وحدها» يعود false على التلف — فالفحص ليس تحصيل حاصل',
+    legacyOnlySaved === false && isExistingPlanEdit() === true,
+    `legacy(saved-only)=${legacyOnlySaved} · fixed=${isExistingPlanEdit()}`)
 }
 
 const failed = checks.filter((c) => !c.pass)

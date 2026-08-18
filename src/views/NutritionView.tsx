@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Icon } from '@/components/Icon'
 import { ProgressBar } from '@/components/ProgressBar'
 import { QuickMealLogger } from '@/components/nutrition/QuickMealLogger'
+import { AllergyNotice } from '@/components/AllergyNotice'
 import { useCustomization } from '@/lib/customizationContext'
 import { MEAL_SLOTS, useNutritionToday, type LoggedFood, type MealSlot } from '@/lib/nutritionTracking'
 import { inRange, NUM_LIMITS, numLimitMessage, sanitizeNumericInput } from '@/lib/validation'
@@ -111,6 +112,18 @@ export function NutritionView({ lang }: NutritionViewProps) {
       </div>
 
       <div className="space-y-0">
+        {/*
+          تحذير الحساسيات — على السطح الحيّ، لا على التوأم.
+
+          العطل المُثبَت: المكوّن كان مركَّبًا في `NutritionV2` وحده — وهو خارج
+          رسم الوحدات (`test:canonical-surface`) — فبقي الإثبات أخضر ولم يرَ
+          التحذيرَ مستخدمٌ واحد. هذا شكل BUG-019 نفسه، والمالك الحيّ هنا.
+
+          يظهر فقط لمن سجّل حساسية (`foodPreferences.allergies`)؛ بلا ذلك
+          يُرجِع المكوّن `null` فلا لافتة بلا سبب ولا فراغ (`mb-4` عليه هو).
+        */}
+        <AllergyNotice lang={lang} className="mb-4" />
+
         {/* معادلة السعرات */}
         {/* [WP-4B] «المتبقّي» بطل الكتلة لا خانة رابعة بحجم جيرانها.
             كانت الخانات الأربع بنفس الوزن (`text-lg` لكلٍّ)، فالعين تمسح أربعة
