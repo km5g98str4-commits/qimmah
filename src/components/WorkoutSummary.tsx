@@ -5,6 +5,7 @@ import { getStrings } from '@/config/strings'
 import type { WorkoutSession } from '@/lib/workoutSessions'
 import { getExercise } from '@/data/exercises'
 import { muscleLabel } from '@/lib/muscles'
+import { foldDigits, formatNumber } from '@/lib/numberFormat'
 
 interface WorkoutSummaryProps {
   lang: Lang
@@ -19,8 +20,10 @@ interface WorkoutSummaryProps {
   onViewProgress: () => void
 }
 
+// ⚠️ `\d` في JS أرقام ASCII حصرًا: وزن مسجَّل بأرقام عربية كان يُقرأ صفرًا،
+// فيظهر حجم التمرين «0» في شاشة الاحتفاء. الطيّ أوّلًا.
 const num = (v?: string): number => {
-  const m = String(v ?? '').match(/-?[\d.]+/)
+  const m = foldDigits(String(v ?? '')).match(/-?[\d.]+/)
   return m ? Number(m[0]) : 0
 }
 
@@ -66,10 +69,10 @@ export function WorkoutSummary({ lang, session, prs, nextDayLabel, streakWeeks, 
 
           {/* الأرقام الرئيسية */}
           <div className="mt-6 grid grid-cols-2 gap-3">
-            <StatCard icon="Clock" value={`${stats.mins}`} label={t.minShort} />
-            <StatCard icon="Dumbbell" value={`${stats.exDone}`} label={t.exercisesDone} />
-            <StatCard icon="Layers" value={`${stats.setsDone}`} label={t.setsDone} />
-            <StatCard icon="TrendingUp" value={`${stats.volume}`} label={`${t.totalVolume} (${t.volumeUnit})`} />
+            <StatCard icon="Clock" value={formatNumber(stats.mins, lang)} label={t.minShort} />
+            <StatCard icon="Dumbbell" value={formatNumber(stats.exDone, lang)} label={t.exercisesDone} />
+            <StatCard icon="Layers" value={formatNumber(stats.setsDone, lang)} label={t.setsDone} />
+            <StatCard icon="TrendingUp" value={formatNumber(stats.volume, lang)} label={`${t.totalVolume} (${t.volumeUnit})`} />
           </div>
 
           {/* سلسلة الالتزام الأسبوعي */}
@@ -77,7 +80,7 @@ export function WorkoutSummary({ lang, session, prs, nextDayLabel, streakWeeks, 
             <span className="flex items-center gap-2 text-sm font-bold text-ink-700">
               <Icon name="Flame" className="h-5 w-5 text-primary-c" />{t.weeklyStreakTitle}
             </span>
-            <span className="text-lg font-black text-primary-c">{streakWeeks} {t.weeksUnit}</span>
+            <span className="text-lg font-black text-primary-c">{formatNumber(streakWeeks, lang)} {t.weeksUnit}</span>
           </div>
 
           {/* الأرقام القياسية */}

@@ -1,6 +1,7 @@
 import { Field, inputClass } from '../Field'
 import { StepHeader } from '../StepHeader'
 import { Icon } from '@/components/Icon'
+import { NumericInput } from '@/components/NumericInput'
 import { cn } from '@/lib/cn'
 import type { WizardCtx } from '../stepProps'
 import type { Profile } from '@/types/profile'
@@ -49,7 +50,6 @@ export function StepBody({ ctx }: { ctx: WizardCtx }) {
     if (minor && isWeightGoal(goalType)) return // حارس دفاعي: الأزرار معطّلة أصلًا
     set({ goalType, goal: calorieGoalFromGoalType(goalType) })
   }
-  const num = (v: string) => Number(v) || 0
   // عند إدخال عمر قاصر بينما الهدف تنشيف/تضخيم: نُثبّت الهدف على المحافظة فورًا (تماسك الاختيار).
   const setAge = (age: number) =>
     isMinorAge(age) && isWeightGoal(p.goalType)
@@ -109,16 +109,47 @@ export function StepBody({ ctx }: { ctx: WizardCtx }) {
           </select>
         </Field>
         <Field label={d.bodyAge} hint={errFor('age') ?? d.bodyAgeHint}>
-          <input type="number" inputMode="numeric" min={LIMITS.age.min} max={LIMITS.age.max} className={cn(inputClass, errFor('age') && 'border-danger')} value={p.age} onChange={(e) => setAge(num(e.target.value))} />
+          <NumericInput
+            lang={ctx.lang}
+            value={p.age}
+            onChange={(v) => setAge(v)}
+            min={LIMITS.age.min}
+            max={LIMITS.age.max}
+            className={cn(inputClass, errFor('age') && 'border-danger')}
+          />
         </Field>
         <Field label={d.bodyHeight} hint={errFor('heightCm') ?? d.bodyHeightHint}>
-          <input type="number" inputMode="decimal" min={LIMITS.heightCm.min} max={LIMITS.heightCm.max} className={cn(inputClass, errFor('heightCm') && 'border-danger')} value={p.heightCm} onChange={(e) => set({ heightCm: num(e.target.value) })} />
+          <NumericInput
+            lang={ctx.lang}
+            value={p.heightCm}
+            onChange={(v) => set({ heightCm: v })}
+            min={LIMITS.heightCm.min}
+            max={LIMITS.heightCm.max}
+            decimal
+            className={cn(inputClass, errFor('heightCm') && 'border-danger')}
+          />
         </Field>
         <Field label={d.bodyWeight} hint={errFor('weightKg') ?? d.bodyWeightHint}>
-          <input type="number" inputMode="decimal" min={LIMITS.weightKg.min} max={LIMITS.weightKg.max} className={cn(inputClass, errFor('weightKg') && 'border-danger')} value={p.weightKg} onChange={(e) => set({ weightKg: num(e.target.value) })} />
+          <NumericInput
+            lang={ctx.lang}
+            value={p.weightKg}
+            onChange={(v) => set({ weightKg: v })}
+            min={LIMITS.weightKg.min}
+            max={LIMITS.weightKg.max}
+            decimal
+            className={cn(inputClass, errFor('weightKg') && 'border-danger')}
+          />
         </Field>
         <Field label={d.bodyTargetWeight} hint={errFor('targetWeightKg') ?? d.bodyTargetWeightHint}>
-          <input type="number" inputMode="decimal" min={LIMITS.targetWeightKg.min} max={LIMITS.targetWeightKg.max} className={cn(inputClass, errFor('targetWeightKg') && 'border-danger')} value={p.targetWeightKg} onChange={(e) => set({ targetWeightKg: num(e.target.value) })} />
+          <NumericInput
+            lang={ctx.lang}
+            value={p.targetWeightKg}
+            onChange={(v) => set({ targetWeightKg: v })}
+            min={LIMITS.targetWeightKg.min}
+            max={LIMITS.targetWeightKg.max}
+            decimal
+            className={cn(inputClass, errFor('targetWeightKg') && 'border-danger')}
+          />
         </Field>
         <Field label={d.bodyActivityLevel}>
           <select className={inputClass} value={p.activityLevel} onChange={(e) => set({ activityLevel: e.target.value as Profile['activityLevel'] })}>
@@ -131,10 +162,24 @@ export function StepBody({ ctx }: { ctx: WizardCtx }) {
           </select>
         </Field>
         <Field label={d.bodyTrainingDays} hint={errFor('trainingDays') ?? d.bodyTrainingDaysHint}>
-          <input type="number" inputMode="numeric" min={LIMITS.trainingDays.min} max={LIMITS.trainingDays.max} className={cn(inputClass, errFor('trainingDays') && 'border-danger')} value={p.trainingDays} onChange={(e) => set({ trainingDays: num(e.target.value) })} />
+          <NumericInput
+            lang={ctx.lang}
+            value={p.trainingDays}
+            onChange={(v) => set({ trainingDays: v })}
+            min={LIMITS.trainingDays.min}
+            max={LIMITS.trainingDays.max}
+            className={cn(inputClass, errFor('trainingDays') && 'border-danger')}
+          />
         </Field>
         <Field label={d.bodyWorkoutDuration} hint={errFor('workoutDuration') ?? d.bodyWorkoutDurationHint}>
-          <input type="number" inputMode="numeric" min={LIMITS.workoutDuration.min} max={LIMITS.workoutDuration.max} className={cn(inputClass, errFor('workoutDuration') && 'border-danger')} value={p.workoutDuration} onChange={(e) => set({ workoutDuration: num(e.target.value) })} />
+          <NumericInput
+            lang={ctx.lang}
+            value={p.workoutDuration}
+            onChange={(v) => set({ workoutDuration: v })}
+            min={LIMITS.workoutDuration.min}
+            max={LIMITS.workoutDuration.max}
+            className={cn(inputClass, errFor('workoutDuration') && 'border-danger')}
+          />
         </Field>
         <Field label={d.bodyWorkoutEnvironment}>
           <select className={inputClass} value={p.workoutEnvironment} onChange={(e) => set({ workoutEnvironment: e.target.value as Profile['workoutEnvironment'] })}>

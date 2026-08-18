@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useState, useSyncExternalStore, type ReactNode } from 'react'
 import { AppNav, type AppView } from '@/components/AppNav'
 import { Footer } from '@/components/Footer'
 import { Icon } from '@/components/Icon'
@@ -7,6 +7,8 @@ import { DataManagementPanel } from '@/components/DataManagementPanel'
 import { setHashRoute } from '@/lib/appRoutes'
 import { DeviceSettings } from '@/components/DeviceSettings'
 import type { Lang } from '@/lib/appPreferences'
+import { getNumeralStyle, setNumeralStyle, type NumeralStyle } from '@/lib/appPreferences'
+import { cn } from '@/lib/cn'
 import { getStrings } from '@/config/strings'
 import { getSyncUiState } from '@/lib/syncService'
 import { installGuideStrings } from '@/i18n/dict/installGuide'
@@ -19,7 +21,7 @@ import { generatePlan } from '@/lib/planGenerator'
 import { markPendingSync } from '@/lib/syncService'
 import { BUILD_LABEL } from '@/lib/buildInfo'
 import { settingsPreferencesStrings } from '@/i18n/dict/settingsPreferences'
-import { formatNumber } from '@/lib/numberFormat'
+import { formatNumber, getActiveNumeralStyle, subscribeNumeralStyle } from '@/lib/numberFormat'
 
 /**
  * يترجم حالة المزامنة الحقيقية إلى جملة صادقة للمستخدم.
@@ -262,20 +264,7 @@ export function SettingsView({
                 </div>
               </div>
             </div>
-            <div className="border-t border-line pt-3" data-testid="settings-numbers-policy">
-              <div className="flex items-start gap-3">
-                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-beige text-primary-c">
-                  <Icon name="Calculator" className="h-4 w-4" />
-                </span>
-                <div>
-                  <p className="text-sm font-bold text-ink-900">{preferencesCopy.numbersTitle}</p>
-                  <p dir="ltr" data-testid="settings-numbers-sample" className="text-sm font-black tabular-nums text-ink-700">
-                    {formatNumber(1234, lang)}
-                  </p>
-                  <p className="mt-0.5 text-xs leading-relaxed text-ink-500">{preferencesCopy.numbersNote}</p>
-                </div>
-              </div>
-            </div>
+            <NumeralStyleControl lang={lang} />
           </div>
         </SettingsGroup>
 
@@ -469,6 +458,69 @@ function PlatformSteps({
           </li>
         ))}
       </ol>
+    </div>
+  )
+}
+
+/**
+ * محوّر شكل الأرقام — «تلقائي · عربية · غربية». مبنيّ على نمط `ThemeControl`
+ * (شاشة ٦٦) لكن نصوصه من القاموس لا من مساعد `t(ar,en)` محلّي (§6).
+ *
+ * كان هذا الموضع كتلة **للقراءة فقط** تعلن أن الأرقام «تتبع اللغة» — أي تُثبّت
+ * السياسة نفسها التي يزيلها المحوّر؛ فاستُبدلت هي ونصّها معًا.
+ *
+ * `useSyncExternalStore` مشترك في مخزن `numberFormat` العالمي: العيّنة الحيّة
+ * تتبدّل باللمسة نفسها، بلا تمرير النمط معاملًا عبر كل بانٍ للنماذج.
+ */
+function NumeralStyleControl({ lang }: { lang: Lang }) {
+  const copy = settingsPreferencesStrings[lang]
+  const style = useSyncExternalStore(subscribeNumeralStyle, getActiveNumeralStyle, getNumeralStyle)
+  const OPTIONS: { value: NumeralStyle; label: string }[] = [
+    { value: 'auto', label: copy.numbersAuto },
+    { value: 'arabic', label: copy.numbersArabic },
+    { value: 'latin', label: copy.numbersLatin },
+  ]
+  return (
+    <div className="border-t border-line pt-3" data-testid="settings-numbers-policy">
+      <div className="flex items-start gap-3">
+        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-beige text-primary-c">
+          <Icon name="Calculator" className="h-4 w-4" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-bold text-ink-900">{copy.numbersTitle}</p>
+          <div
+            role="radiogroup"
+            aria-label={copy.numbersGroupLabel}
+            data-testid="settings-numbers-control"
+            className="mt-2 grid grid-cols-3 gap-2"
+          >
+            {OPTIONS.map((o) => {
+              const active = style === o.value
+              return (
+                <button
+                  key={o.value}
+                  type="button"
+                  role="radio"
+                  aria-checked={active}
+                  data-testid={`settings-numbers-${o.value}`}
+                  onClick={() => setNumeralStyle(o.value)}
+                  className={cn(
+                    'press min-h-[44px] rounded-xl border px-2 py-2 text-xs font-bold transition-colors',
+                    active ? 'border-primary bg-primary-soft text-primary-c' : 'border-line bg-page text-ink-500 hover:text-ink-900',
+                  )}
+                >
+                  {o.label}
+                </button>
+              )
+            })}
+          </div>
+          <p className="mt-2 text-xs text-ink-500">{copy.numbersSampleLabel}</p>
+          <p dir="ltr" data-testid="settings-numbers-sample" className="text-sm font-black tabular-nums text-ink-700">
+            {formatNumber(1234, lang)}
+          </p>
+          <p className="mt-0.5 text-xs leading-relaxed text-ink-500">{copy.numbersNote}</p>
+        </div>
+      </div>
     </div>
   )
 }

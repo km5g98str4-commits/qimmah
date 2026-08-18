@@ -20,6 +20,7 @@ import { getDayStamp } from '@/lib/today'
 import type { Difficulty, SetLog, WorkoutSession } from '@/lib/workoutSessions'
 import { saveActiveWorkout, type ActiveWorkout } from '@/lib/activeWorkout'
 import type { WriteResult } from '@/lib/safeStorage'
+import { foldDigits, formatNumber, formatNumeralsIn } from '@/lib/numberFormat'
 
 interface WorkoutModeProps {
   lang: Lang
@@ -50,20 +51,24 @@ const MAX_REPS = 100
 
 /** أول رقم في نطاق التكرارات (مثال: «8–12» → «8»). */
 function lowerReps(reps: string): string {
-  const m = String(reps).match(/\d+/)
+  const m = foldDigits(String(reps)).match(/\d+/)
   return m ? m[0] : reps
 }
 
+// ⚠️ `\d` في JS أرقام ASCII حصرًا في كل الأوضاع — فكانت هذه الثلاث تعجز عن
+// قراءة «٨٥٫٥» وتعطي NaN فيظهر الحقل «غير صالح» أثناء جلسة تمرين حيّة.
+// الطيّ أولًا يجعل الصيغتين مقروءتين، والمخزَّن يبقى غربيًا قانونيًا.
+
 /** تعديل قيمة رقمية نصية بمقدار، مع قصّها بين صفر والحد الأقصى. */
 function adjust(value: string, delta: number, max: number): string {
-  const m = String(value).match(/-?[\d.]+/)
+  const m = foldDigits(String(value)).match(/-?[\d.]+/)
   const n = m ? Number(m[0]) : 0
   const next = Math.min(max, Math.max(0, Math.round((n + delta) * 100) / 100))
   return `${next}`
 }
 
 const parseVal = (v: string): number => {
-  const m = String(v ?? '').match(/-?[\d.]+/)
+  const m = foldDigits(String(v ?? '')).match(/-?[\d.]+/)
   return m ? Number(m[0]) : NaN
 }
 
@@ -416,7 +421,7 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
           </button>
           <div className="min-w-0 text-center">
             <p dir="auto" className="truncate text-base font-black text-ink-900">{lang === 'en' ? day.nameEn || day.nameAr : day.nameAr || day.nameEn}</p>
-            <p className="text-sm text-ink-500">{current + 1} {t.of} {total}</p>
+            <p className="text-sm text-ink-500">{formatNumber(current + 1, lang)} {t.of} {formatNumber(total, lang)}</p>
           </div>
           <div className="h-11 w-11" />
         </div>
@@ -458,7 +463,7 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
           {/* الهدف سطر داخل الهويّة لا بطاقة مستقلّة — هو وصفُ التمرين لا مهمّة ثانية. */}
           <p className="mt-1.5 flex items-center gap-2 text-base font-bold text-ink-700">
             <Icon name="Target" className="h-4 w-4 shrink-0 text-primary-c" />
-            {t.target}: {pe.sets} {t.setsDone} × {pe.reps}
+            {t.target}: {formatNumber(pe.sets, lang)} {t.setsDone} × {formatNumeralsIn(String(pe.reps), lang)}
           </p>
 
           {/* ٢) السجلّ — سطر واحد. بلا سجلّ: دعوة خفيفة بدل بطاقتَي فراغ
@@ -467,13 +472,13 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
             <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 border-t border-line pt-3">
               {rec?.lastWeight && (
                 <span className="text-base font-bold text-ink-700">
-                  <span className="text-ink-500">{d.historyLast}:</span> {rec.lastWeight} {t.volumeUnit}
-                  {rec.lastReps ? ` × ${rec.lastReps}` : ''}
+                  <span className="text-ink-500">{d.historyLast}:</span> {formatNumeralsIn(String(rec.lastWeight), lang)} {t.volumeUnit}
+                  {rec.lastReps ? ` × ${formatNumeralsIn(String(rec.lastReps), lang)}` : ''}
                 </span>
               )}
               {rec?.bestWeight && (
                 <span className="text-base font-bold text-ink-700">
-                  <span className="text-ink-500">{d.historyBest}:</span> {rec.bestWeight} {t.volumeUnit}
+                  <span className="text-ink-500">{d.historyBest}:</span> {formatNumeralsIn(String(rec.bestWeight), lang)} {t.volumeUnit}
                 </span>
               )}
               {(rec?.lastWeight || rec?.lastReps) && (
@@ -504,8 +509,8 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
                 )}
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-base font-black text-ink-900">{d.setSingular} {st.setNumber}</span>
-                  <span className="text-sm font-bold text-ink-500">{t.target}: {st.targetReps}</span>
+                  <span className="text-base font-black text-ink-900">{d.setSingular} {formatNumber(st.setNumber, lang)}</span>
+                  <span className="text-sm font-bold text-ink-500">{t.target}: {formatNumeralsIn(String(st.targetReps), lang)}</span>
                 </div>
 
                 <div className="mt-3 grid grid-cols-2 gap-3">
@@ -797,7 +802,7 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
             </span>
             <h3 className="mt-4 text-lg font-black text-ink-900">{t.finishTitle}</h3>
             <p className="mt-1 text-sm text-ink-500">{doneCount < total ? t.finishBodyUnfinished : t.finishBodyDone}</p>
-            <p className="mt-3 text-xs font-bold text-ink-700">{t.progress}: {doneCount}/{total}</p>
+            <p className="mt-3 text-xs font-bold text-ink-700">{t.progress}: {formatNumber(doneCount, lang)}/{formatNumber(total, lang)}</p>
             <div className="mt-5 flex flex-col gap-2">
               <button type="button" onClick={doFinish} className="btn-primary w-full py-3 text-base">
                 <Icon name="CheckCircle2" className="h-5 w-5" />{t.confirmFinish}
@@ -844,7 +849,9 @@ function Stepper({ label, value, placeholder, step, mode, invalid, onChange, onS
             'w-full min-w-0 rounded-lg border bg-beige px-1 text-center text-base font-black text-ink-900 focus:outline-none',
             invalid ? 'border-danger focus:border-danger' : 'border-line focus:border-brand-500/50',
           )}
+          type="text"
           inputMode={mode}
+          autoComplete="off"
           aria-label={label}
           aria-invalid={invalid}
           value={value}

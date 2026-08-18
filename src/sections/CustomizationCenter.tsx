@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Icon } from '@/components/Icon'
 import { SETUP_FOCUS_KEY } from '@/lib/setupFocus'
 import { cn } from '@/lib/cn'
+import { formatNumber } from '@/lib/numberFormat'
 import { type Customization, getDefaultCustomization } from '@/lib/customization'
 import { useCustomization } from '@/lib/customizationContext'
 import { markCompleted, restartOnboarding, setLastStep } from '@/lib/onboarding'
@@ -296,9 +297,9 @@ export function CustomizationCenter({ onBack, initialStep = 0, mode = 'onboardin
         <div className="container-page pb-3">
           <div className="flex items-center justify-between text-xs">
             <span className="font-bold text-ink-700">
-              {d.stepPrefix} {step + 1} {d.stepOf} {steps.length}: {d[steps[step].titleKey]}
+              {d.stepPrefix} {formatNumber(step + 1, lang)} {d.stepOf} {formatNumber(steps.length, lang)}: {d[steps[step].titleKey]}
             </span>
-            <span className="font-bold text-primary-c">{progress}%</span>
+            <span className="font-bold text-primary-c">{formatNumber(progress, lang)}%</span>
           </div>
           <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-line">
             <div

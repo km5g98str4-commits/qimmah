@@ -3,6 +3,9 @@
 
 import { isDaytime } from './sunTimes'
 import { safeWriteJson } from '@/lib/safeStorage'
+import { setActiveNumeralStyle, type NumeralStyle } from '@/lib/numberFormat'
+
+export type { NumeralStyle }
 
 export const PREFS_KEY = 'qimmah:prefs:v1'
 
@@ -28,10 +31,16 @@ export interface AppPreferences {
   hapticsEnabled: boolean
   theme: ThemePref
   themeSchedule: ThemeSchedule
+  /**
+   * نظام الأرقام المعروض — محور مستقل عن اللغة. `auto` يتبع اللغة (السلوك
+   * السابق حرفيًا)، فالمفتاح **إضافي بحت**: مدوّنة قديمة بلا الحقل تعطي
+   * الافتراضي ولا تحتاج هجرة ولا رفع نسخة.
+   */
+  numeralStyle: NumeralStyle
 }
 
 const DEFAULT_SCHEDULE: ThemeSchedule = { enabled: false, lat: null, lon: null, cityLabel: null }
-const DEFAULT: AppPreferences = { language: 'ar', hapticsEnabled: true, theme: 'system', themeSchedule: { ...DEFAULT_SCHEDULE } }
+const DEFAULT: AppPreferences = { language: 'ar', hapticsEnabled: true, theme: 'system', themeSchedule: { ...DEFAULT_SCHEDULE }, numeralStyle: 'auto' }
 
 function parseSchedule(raw: unknown): ThemeSchedule {
   if (!raw || typeof raw !== 'object') return { ...DEFAULT_SCHEDULE }
@@ -58,6 +67,7 @@ export function loadPreferences(): AppPreferences {
       hapticsEnabled: parsed.hapticsEnabled !== false,
       theme: parsed.theme === 'light' || parsed.theme === 'dark' ? parsed.theme : 'system',
       themeSchedule: parseSchedule(parsed.themeSchedule),
+      numeralStyle: parsed.numeralStyle === 'arabic' || parsed.numeralStyle === 'latin' ? parsed.numeralStyle : 'auto',
     }
   } catch {
     return { ...DEFAULT }
@@ -80,6 +90,43 @@ export function setLanguage(language: Lang): void {
 export function setHapticsEnabled(hapticsEnabled: boolean): void {
   savePreferences({ ...loadPreferences(), hapticsEnabled })
 }
+
+// ————————————————————————————————————————————————————————————————
+// نظام الأرقام (طلب المؤسس) — «تلقائي · أرقام عربية · أرقام غربية».
+// كان النظام مربوطًا باللغة ربطًا صلبًا، وكثير من المستخدمين في السعودية
+// يريدون واجهة عربية بأرقام غربية.
+// ————————————————————————————————————————————————————————————————
+
+export function getNumeralStyle(): NumeralStyle {
+  return loadPreferences().numeralStyle
+}
+
+/**
+ * يطبّق النمط على حدّ العرض العالمي في `numberFormat` (ويمسح جدول الأرقام).
+ * **لا يحفظ** — نظير `applyLanguage` تمامًا.
+ */
+export function applyNumeralStyle(style: NumeralStyle = getNumeralStyle()): void {
+  setActiveNumeralStyle(style)
+}
+
+/** يحفظ الاختيار ثم يطبّقه فورًا. */
+export function setNumeralStyle(style: NumeralStyle): void {
+  savePreferences({ ...loadPreferences(), numeralStyle: style })
+  applyNumeralStyle(style)
+}
+
+/**
+ * تشغيل مبكّر عند تحميل الوحدة.
+ *
+ * النمط يجب أن يكون فعّالًا **قبل أول `formatNumber`**، وبُناة النماذج
+ * (`src/lib/progressV2Model.ts` وأمثاله) يُنادَون خارج شجرة React فلا ينتظرون
+ * تأثيرًا. وعلى الخادم (`window === undefined`) يعطي `loadPreferences` الافتراضي
+ * `auto` — أي السلوك السابق حرفيًا.
+ */
+export function initNumeralStyle(): void {
+  applyNumeralStyle(loadPreferences().numeralStyle)
+}
+initNumeralStyle()
 
 /** يطبّق اللغة على عنصر الجذر: العربية RTL، الإنجليزية LTR. */
 export function applyLanguage(language: Lang): void {

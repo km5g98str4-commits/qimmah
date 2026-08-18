@@ -17,6 +17,8 @@
  * • `1.1.0` — تبنّي مواصفة المنسّق §٣: الياء الفارسية · الكاف/الجاف الفارسية ·
  *   علامات U+0653–U+0655 · طيّ لاتيني بـNFD · رمز إضافي بلا «ال».
  */
+import { foldDigits } from '@/lib/numberFormat'
+
 export const NORMALIZATION_VERSION = '1.1.0'
 
 /**
@@ -48,23 +50,16 @@ export function foldArabic(text: string): string {
     .trim()
 }
 
-const ARABIC_INDIC_ZERO = 0x0660 // ٠
-const EXTENDED_ARABIC_INDIC_ZERO = 0x06f0 // ۰
-
-/** §٣٫١/٨ — الأرقام العربية الشرقية إلى ASCII. */
+/**
+ * §٣٫١/٨ — الأرقام العربية الشرقية إلى ASCII.
+ *
+ * مفوَّضة إلى `foldDigits` (الطبقة الرقمية القانونية) — نسخة واحدة لا ثلاث.
+ * **بـ`separators:false` عمدًا:** قواعد هذا الطيّ عقد مختوم بـ`NORMALIZATION_VERSION`
+ * ويُبطل توسيعُه الفهارس المبنيّة على القرص؛ فطيّ `٫`/`٬` يبقى قرار حارة الطعام
+ * برفع النسخة، لا أثرًا جانبيًا لموجة الأرقام. السلوك هنا **مطابق حرفيًا** لما كان.
+ */
 export function foldArabicDigits(text: string): string {
-  let out = ''
-  for (const ch of text) {
-    const code = ch.codePointAt(0) ?? 0
-    if (code >= ARABIC_INDIC_ZERO && code <= ARABIC_INDIC_ZERO + 9) {
-      out += String(code - ARABIC_INDIC_ZERO)
-    } else if (code >= EXTENDED_ARABIC_INDIC_ZERO && code <= EXTENDED_ARABIC_INDIC_ZERO + 9) {
-      out += String(code - EXTENDED_ARABIC_INDIC_ZERO)
-    } else {
-      out += ch
-    }
-  }
-  return out
+  return foldDigits(text, { separators: false })
 }
 
 /** §٣٫٣ — مفتاح مطبَّع: طيّ + أرقام + علامات ترقيم فاصلة للكلمات إلى مسافة. */

@@ -2,13 +2,13 @@ import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { StepHeader } from '../StepHeader'
 import { Icon } from '@/components/Icon'
+import { NumericInput } from '@/components/NumericInput'
 import { ExerciseLibraryPicker } from '@/components/ExerciseLibraryPicker'
 import type { WizardCtx } from '../stepProps'
 import type { PlanDay, PlanExercise, WorkoutPlan } from '@/types/workout'
 import { workoutTemplates } from '@/data/workoutTemplates'
 import { createPlanExercise, generatePlanFromTemplate, planExerciseName } from '@/lib/workoutPlan'
 import { analyzeWorkoutBalance } from '@/lib/workoutValidation'
-import { parseSafeNumber } from '@/lib/validation'
 import { onboardingStrings } from '@/i18n/dict/onboarding'
 import { profileChoiceStrings } from '@/i18n/dict/profileChoices'
 
@@ -173,9 +173,9 @@ export function StepWorkoutTemplate({ ctx }: { ctx: WizardCtx }) {
                     </div>
                   </div>
                   <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                    <Labeled label={d.wtSets}><input type="number" inputMode="numeric" min={0} max={20} className={smallInput} value={pe.sets} onChange={(e) => updateExercise(day.id, pe.id, { sets: parseSafeNumber(e.target.value, { min: 0, max: 20 }) })} /></Labeled>
+                    <Labeled label={d.wtSets}><NumericInput lang={ctx.lang} min={0} max={20} className={smallInput} value={pe.sets} onChange={(v) => updateExercise(day.id, pe.id, { sets: v })} /></Labeled>
                     <Labeled label={d.wtReps}><input className={smallInput} value={pe.reps} onChange={(e) => updateExercise(day.id, pe.id, { reps: e.target.value })} /></Labeled>
-                    <Labeled label={d.wtRest}><input type="number" inputMode="numeric" min={0} max={600} className={smallInput} value={pe.restSec} onChange={(e) => updateExercise(day.id, pe.id, { restSec: parseSafeNumber(e.target.value, { min: 0, max: 600 }) })} /></Labeled>
+                    <Labeled label={d.wtRest}><NumericInput lang={ctx.lang} min={0} max={600} className={smallInput} value={pe.restSec} onChange={(v) => updateExercise(day.id, pe.id, { restSec: v })} /></Labeled>
                     <Labeled label={d.wtStartWeight}><input className={smallInput} value={pe.startingWeight ?? ''} onChange={(e) => updateExercise(day.id, pe.id, { startingWeight: e.target.value })} /></Labeled>
                     <div className="col-span-2 sm:col-span-4"><Labeled label={d.wtNotes}><input className={smallInput} value={pe.notes ?? ''} onChange={(e) => updateExercise(day.id, pe.id, { notes: e.target.value })} /></Labeled></div>
                     <div className="col-span-2 sm:col-span-4"><Labeled label={d.wtVideoLink}><input className={smallInput} value={pe.videoUrl ?? ''} onChange={(e) => updateExercise(day.id, pe.id, { videoUrl: e.target.value })} placeholder={d.wtVideoPlaceholder} /></Labeled></div>

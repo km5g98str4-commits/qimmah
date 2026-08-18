@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { formatNumber } from '@/lib/numberFormat'
 import { resourceIdFromHash, setExerciseHash } from '@/lib/appRoutes'
 import type { ReactNode } from 'react'
 import { Icon } from '@/components/Icon'
@@ -130,7 +131,7 @@ export function ExerciseLibraryView({ lang }: ExerciseLibraryViewProps) {
             {d.eyebrow}
           </span>
           <h1 className="mt-3 text-2xl font-black leading-tight text-ink-900 sm:text-3xl">{d.title}</h1>
-          <p data-testid="exercise-library-count" className="mt-1.5 text-sm leading-relaxed text-ink-500">{exercises.length} {d.countSuffix}</p>
+          <p data-testid="exercise-library-count" className="mt-1.5 text-sm leading-relaxed text-ink-500">{formatNumber(exercises.length, lang)} {d.countSuffix}</p>
         </header>
 
         {/* مبدّل العرض — قسمان متساويان بعرض كامل: هدف لمس أكبر ووزن بصري متوازن. */}
@@ -210,7 +211,7 @@ export function ExerciseLibraryView({ lang }: ExerciseLibraryViewProps) {
 
         {/* سطر النتائج — ومعه مخرج واحد يعيد كل شيء، فلا يعلق أحد داخل فلتر. */}
         <div className="mt-4 flex items-center justify-between gap-3">
-          <p className="text-xs font-bold text-ink-400">{filtered.length} {d.resultsSuffix}</p>
+          <p className="text-xs font-bold text-ink-400">{formatNumber(filtered.length, lang)} {d.resultsSuffix}</p>
           {filtersActive && (
             <button
               type="button"
