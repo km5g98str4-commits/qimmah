@@ -27,6 +27,7 @@ export { neatChoices, dietPatternChoices } from '@/data/planBuilder'
 export { profileChoiceStrings } from '@/i18n/dict/profileChoices'
 export { policyCopy } from '@/data/policyCopy'
 export { DATA_KEYS } from '@/lib/userDataKeys'
+export { getStrings } from '@/config/strings'
 `
 
 let cached = null
@@ -73,6 +74,8 @@ export async function loadJourneyCopy() {
     /** نصّ إقرار البيانات الصحية. */
     policy: (lang) => mod.policyCopy[lang],
     dataKeys: mod.DATA_KEYS,
+    /** نصوص `config/strings` — منها سطر «البدء بلا حساب» على الترحيب. */
+    strings: (lang) => mod.getStrings(lang),
   }
   return cached
 }

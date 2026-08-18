@@ -96,19 +96,23 @@ try {
   await visit('welcome', 'شاشة الترحيب — أول ما يراه المستخدم', 'Welcome — the first screen')
 
   // ───────── جدار الحساب: ما يصطدم به المولود الجديد فعلًا ─────────
-  const welcomeButtons = await page.evaluate(() =>
-    [...document.querySelectorAll('button')].map((b) => (b.innerText || '').trim()).filter(Boolean),
+  // ═══ تصحيح بلاغ كاذب ═══
+  // كان هنا فحصٌ يبحث عن زرّ نصّه يحوي «ضيف/Guest»، فلمّا لم يجده رفع بلاغًا
+  // «عالٍ» يقول إن لا مسار ضيف وإن `StartViewV2` يرسم `onSignup` و`onLogin`
+  // فقط. والمقيس أن الاثنين غير صحيحين: النداء **الأساسي** موصول بـ`onGuest`
+  // (‏`App.tsx` → `enterAsGuest()`)، ولا وجود لـ`onSignup` في المكوّن أصلًا.
+  // وبقيّة هذه الرحلة نفسها تُكمل الإعداد بلا حساب فتنقض البلاغ عمليًّا.
+  //
+  // العلاج ربطٌ بالعقد لا بالنصّ: المدخل الضيف هو النداء الأساسي الموسوم،
+  // ومعه سطر يقول صراحةً إن البدء بلا حساب.
+  const guestCta = page.getByTestId('welcome-start-cta')
+  rec.check('المدخل الأساسي من الترحيب موجود وموسوم', await guestCta.isVisible())
+  const welcomeText = await screenText(page)
+  rec.check(
+    'الترحيب يقول صراحةً إن البدء بلا حساب — الوعد مكتوب لا مستنتَج',
+    welcomeText.includes(copy.strings(LANG).start.guestNote),
+    copy.strings(LANG).start.guestNote,
   )
-  const hasGuestPath = welcomeButtons.some((b) => /ضيف|Guest/.test(b))
-  if (!hasGuestPath) {
-    rec.finding(
-      'لا مسار ضيف من شاشة الترحيب — «ابدأ الآن» تقود إلى إنشاء حساب',
-      'أزرار الترحيب: ' + welcomeButtons.join(' · ') + ' — و«ابدأ الآن» تنقل إلى #/login. ' +
-        'ونصّ «كمّل كضيف» موجود في src/config/strings.ts (٤ مداخل عربي+إنجليزي) ولا يشير إليه أي مكوّن: ' +
-        'StartViewV2 يرسم onSignup وonLogin فقط. وعد «محلي افتراضيًا» (الميثاق §9) بلا مدخل في تدفّق v2.',
-      'عالٍ',
-    )
-  }
   // حراسة المسار للزائر — تُفحص بأسماء المسارات **الحقيقية** من src/lib/appRoutes.ts.
   // تصحيح مسجَّل: تشغيل سابق فحص «#/today» و«#/onboarding» وهما ليسا اسمي مسارين
   // أصلًا (الصحيح dashboard وsetup)، فقرأ ٤٠٤ المسار المجهول عطلَ حجب. الاسم
