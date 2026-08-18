@@ -61,6 +61,42 @@ export const UNROUTED_SECTIONS = [
 ]
 
 /**
+ * مكوّنات مبنيّة **خارج رسم الوحدات الحيّ** — [SOVEREIGN-003].
+ *
+ * ليست توائم لمالك حيّ (فلا محلّ لها في `SURFACES`)، وليست أقسامًا قديمة. هي
+ * مكوّنات كاملة لا يستوردها أحد: `grep` للاستيراد الساكن **والديناميكي** أعطى
+ * صفرًا لكلٍّ منها، ورسمُ الوحدات من نقطة الدخول يؤكّده في كل تشغيل.
+ *
+ * **وإعلانها ليس إذنًا بحذفها** (§11-٩ من الميثاق يجدول التنظيف موجةً مستقلّة
+ * بعنقودين ومراجعة واحدة). الغرض أن تُقال بأسمائها بدل أن تُقرأ حيّةً فيُصلَح
+ * فيها عطلٌ لا يراه مستخدم — وهو بالضبط ما وقع في BUG-019.
+ */
+export const UNROUTED_COMPONENTS = [
+  'src/components/FlatMuscleBody.tsx',
+  'src/components/InstallPrompt.tsx',
+  'src/components/MuscleChips.tsx',
+  'src/components/StepCounterCard.tsx',
+  'src/components/SyncConsentGate.tsx',
+  'src/components/coaching/TodayLearnCard.tsx',
+  'src/components/nutrition/CalorieExplainer.tsx',
+  'src/components/customizer/steps/StepBasics.tsx',
+  'src/components/customizer/steps/StepGoal.tsx',
+  'src/components/customizer/steps/StepLook.tsx',
+  'src/components/customizer/steps/StepMeals.tsx',
+  'src/components/customizer/steps/StepMetrics.tsx',
+  'src/components/customizer/steps/StepSchedule.tsx',
+  'src/components/customizer/steps/StepSupplements.tsx',
+  'src/components/customizer/steps/StepWorkouts.tsx',
+  // ── ميتة **بالتعدّي**: لا يستوردها إلا سطحٌ ميت آخر ──────────────────────
+  // لم يكشفها `grep` للاستيراد (لكلٍّ مستورد **قائم**)، وكشفها رسمُ الوحدات من
+  // نقطة الدخول: مستوردوها أنفسهم خارج الرسم. وهذا الفرق هو سبب وجود القفل.
+  'src/components/AllergyNotice.tsx',        // ← NutritionV2 (توأم معلَن)
+  'src/components/Header.tsx',               // ← لا مستورد إطلاقًا
+  'src/components/SectionHeading.tsx',       // ← src/sections/* (أقسام معلَنة)
+  'src/components/customizer/EditableTable.tsx', // ← خطوات المخصّص أعلاه
+]
+
+/**
  * «المعالجات» — سمات يجب ألّا تسبق التوأمَ إلى المالك الحيّ.
  *
  * القاعدة: إن حمل التوأم معالجةً ولم يحملها المالك الحيّ، فالإصلاح هبط على

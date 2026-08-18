@@ -6,11 +6,11 @@
  * ولو بدا قديمًا. أي قائمة يدوية كانت ستشيخ بنفس الطريقة التي أنتجت العطل أصلًا.
  */
 import { build } from 'esbuild'
-import { readFileSync } from 'node:fs'
+import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import assert from 'node:assert/strict'
-import { SURFACES, WRAPPED, UNROUTED_SECTIONS, TREATMENTS } from './canonical-surfaces.mjs'
+import { SURFACES, WRAPPED, UNROUTED_SECTIONS, UNROUTED_COMPONENTS, TREATMENTS } from './canonical-surfaces.mjs'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const read = (p) => readFileSync(resolve(root, p), 'utf8')
@@ -73,6 +73,39 @@ for (const w of WRAPPED) {
 
 console.log('\n④ الأقسام غير الموجَّهة معلَنة لا مكتشَفة لاحقًا')
 for (const p of UNROUTED_SECTIONS) check(`قسم غير موجَّه معلَن: ${p}`, !LIVE.has(p))
+for (const p of UNROUTED_COMPONENTS) check(`مكوّن غير موجَّه معلَن: ${p}`, !LIVE.has(p))
+
+// ═══ [SOVEREIGN-003] الاتجاه الآخر: لا سطح ميت **غير معلَن** ═══
+// إعلان ما نعرفه لا يمنع ميلاد سطحٍ ميت جديد. فالقفل يقلب السؤال: كل مكوّن
+// واجهة خارج الرسم الحيّ **يجب** أن يكون مذكورًا في أحد السجلّات الثلاثة.
+// بدون هذا يبقى القفل سجلًّا تاريخيًّا لا حارسًا.
+{
+  const declared = new Set([
+    ...UNROUTED_SECTIONS,
+    ...UNROUTED_COMPONENTS,
+    ...SURFACES.flatMap((s) => s.twins),
+    ...WRAPPED.map((w) => w.implementation),
+    ...WRAPPED.map((w) => w.wrapper),
+  ])
+  const uiFiles = []
+  ;(function walk(dir) {
+    for (const e of readdirSync(resolve(root, dir))) {
+      const rel = `${dir}/${e}`
+      if (statSync(resolve(root, rel)).isDirectory()) walk(rel)
+      else if (e.endsWith('.tsx')) uiFiles.push(rel)
+    }
+  })('src/views')
+  ;(function walk(dir) {
+    for (const e of readdirSync(resolve(root, dir))) {
+      const rel = `${dir}/${e}`
+      if (statSync(resolve(root, rel)).isDirectory()) walk(rel)
+      else if (e.endsWith('.tsx')) uiFiles.push(rel)
+    }
+  })('src/components')
+  const undeclaredDead = uiFiles.filter((f) => !LIVE.has(f) && !declared.has(f))
+  check(`لا سطح واجهة ميت غير معلَن (${uiFiles.length} ملفًا مفحوصًا)`,
+    undeclaredDead.length === 0, undeclaredDead.join(' · '))
+}
 
 console.log('\n⑤ قاعدة التغطية — لا إصلاح يهبط على توأم دون المالك الحيّ')
 const violations = []
