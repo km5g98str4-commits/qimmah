@@ -283,9 +283,27 @@ console.log('\n═══ 9) التوصيل الحيّ: الشاشة **المرس
 // (معلَنة في `run-analytics-proof.mjs:105`). فحصها وحده يقيس الطبقة الخطأ:
 // بوّابة خضراء على كود لا يصل المستخدم. الشاشة الحيّة هي `NutritionView` عبر
 // `QuickMealLogger`، فتُفحص هنا صراحةً حتى يصل البند ٥ إلى مستخدم حقيقي.
+//
+// ⚠️ **حُدِّث في [SOVEREIGN-FOOD-001].** كان الفحص يطلب استيراد `searchFood` **حرفيًا**
+// داخل المسجّل. وحين صار المسجّل يبلغ نفس البحث عبر طبقة الاتحاد
+// (`src/lib/food/unifiedSearch.ts` — التي وحّدت المنسَّق مع المعبّأ ونقلت «شاورما»
+// من صفر إلى ١٢) سقط الفحص **وهو سليم المقصد**: النصّ تغيّر والسلوك لم يتغيّر.
+//
+// فالحارس يتبع الآن **السلسلة** لا السطر: الشاشة ⇒ المسجّل ⇒ الاتحاد ⇒ قاعدة
+// الأطعمة. أي حلقة تنكسر تُسمّى بعينها، ولا يُرضى الحارس بوجود أجزاء متفرّقة (§4.2).
 const liveLogger = read('src/components/nutrition/QuickMealLogger.tsx')
-check('مسجّل الوجبة الحيّ يستورد searchFood', /import \{[^}]*\bsearchFood\b[^}]*\} from '@\/data\/foodItems'/.test(liveLogger))
-check('ويستدعيه على نصّ بحث المستخدم', /searchFood\(query\)/.test(liveLogger))
-check('والشاشة الحيّة تركّبه فعلًا', /QuickMealLogger/.test(read('src/views/NutritionView.tsx')))
+const unifiedSearch = read('src/lib/food/unifiedSearch.ts')
+check('الحلقة ١: مسجّل الوجبة الحيّ يستورد بحث الأصناف المنسَّقة من طبقة الاتحاد',
+  /import \{[^}]*\brankCurated\b[^}]*\} from '@\/lib\/food\/unifiedSearch'/.test(liveLogger))
+check('الحلقة ٢: ويستدعيه على نصّ بحث المستخدم', /rankCurated\(query\)/.test(liveLogger))
+check('الحلقة ٣: وطبقة الاتحاد تبلغ قاعدة الأطعمة نفسها',
+  /import \{[^}]*\bsearchFoodScored\b[^}]*\} from '@\/data\/foodItems'/.test(unifiedSearch)
+  && /searchFoodScored\(/.test(unifiedSearch))
+check('الحلقة ٤: و`searchFood` القائمة ما زالت غلافًا على نفس السلّم — لا سلّمين',
+  /searchFoodScored\(query\)\.map\(/.test(read('src/data/foodItems.ts')))
+check('الحلقة ٥: والشاشة الحيّة تركّب المسجّل فعلًا', /QuickMealLogger/.test(read('src/views/NutritionView.tsx')))
+// ⚔️ تأكيد مضادّ: الحارس يفحص **الاقتران** لا مجرّد ورود الأسماء — اسمٌ في تعليق لا يرضيه.
+check('⚔️ اسمٌ مذكور بلا استدعاء لا يخدع الحارس',
+  !/rankCurated\(query\)/.test('// rankCurated و searchFoodScored مذكورتان هنا بلا استدعاء'))
 
 console.log(`\n✅ نجحت كل الفحوص — ${pass} فحصًا (${saudi.length} طبقًا سعوديًا · ${foodItems.length} صنفًا في القاعدة).`)
