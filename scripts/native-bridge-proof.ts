@@ -10,6 +10,11 @@ import {
 import { getSteps, getStepSource, setSteps } from '@/lib/stepCounter'
 import { latestWeightImport, loadLogs } from '@/lib/measurementLog'
 import { shouldPlayHaptic } from '@/lib/nativeFeedback'
+import { NATIVE_SETTINGS_COPY } from '@/data/nativeSettings'
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
+
+const SRC = resolve(process.cwd(), 'src')
 
 // [QIM-WEB-FOUNDER-UX-003/حزمة ٢] هذا الإثبات يمارس **كتّاب حالة مدفوعة**
 // (تمرين/تغذية/قياسات). بعد بوّابة الوصول صار الافتراض منعًا، فيلزم أن يعلن
@@ -98,4 +103,41 @@ assert.equal(shouldPlayHaptic(true, false, false), false, 'settings toggle disab
 assert.equal(shouldPlayHaptic(true, true, true), false, 'Reduce Motion disables haptics')
 assert.equal(shouldPlayHaptic(true, true, false), true)
 
-console.log('✅ native bridge proof: per-metric permissions (steps/weight/HR), on-demand only, manual fallback, imported-weight labeling, HR honesty, haptics')
+// ══ [SOVEREIGN-003] لوحة الصحّة على الويب: لا نداء مستحيل ولا نجاح مكذوب ══
+//
+// عطلان من صنف واحد في `NativeSettingsPanel` (تُركَّب على الويب عبر `ProfileV2`):
+//   ١) زرّ «اربط Apple Health» يُعرض على الويب، و`connectHealthKit` يردّ
+//      `unavailable` دائمًا خارج iOS — نداءٌ لا ينجح مهما ضُغط.
+//   ٢) `saveManualSteps` كان يعلن «انحفظت خطواتك» من مخرَج `setSteps`، وهو
+//      يعيد القيمة المطلوبة لا نتيجة الكتابة — فيكذب على قرص مرفوض.
+{
+  const panel = readFileSync(resolve(SRC, 'components/NativeSettingsPanel.tsx'), 'utf8')
+
+  // النداء المستحيل محجوب خلف المنصّة، والبديل الصادق معروض.
+  assert.match(panel, /healthNative \? \(/, 'connect affordance must be gated on the platform')
+  assert.match(panel, /copy\.healthNativeOnly/, 'web must state where Health sync actually works')
+  assert.equal(NATIVE_SETTINGS_COPY.ar.healthNativeOnly.length > 0, true)
+  assert.equal(NATIVE_SETTINGS_COPY.en.healthNativeOnly.length > 0, true)
+
+  // ⚔️ تأكيد مضادّ: نزع البوّابة يُكتشف باسمه، لا بمرور صامت.
+  const ungated = panel.replace('healthNative ? (', 'true ? (')
+  assert.equal(/healthNative \? \(/.test(ungated), false,
+    'the counter-simulation must actually remove the gate, otherwise it proves nothing')
+
+  // النجاح مشروط بقراءة بعد الكتابة — لا بمخرَج الكاتب.
+  assert.match(panel, /const persisted = getSteps\(\)/, 'manual save must read back')
+  assert.match(panel, /ok \? copy\.manualStepsSaved : copy\.manualStepsFailed/,
+    'manual save must be able to announce failure')
+
+  // والآلية نفسها تُقاس سلوكيًّا: قرص مرفوض ⇒ القراءة لا تطابق المطلوب.
+  const before = getSteps()
+  const realSetItem = globalThis.localStorage.setItem
+  globalThis.localStorage.setItem = () => { throw new Error('QuotaExceededError') }
+  const requested = setSteps(before + 4321, undefined, 'manual')
+  globalThis.localStorage.setItem = realSetItem
+  assert.notEqual(getSteps(), requested,
+    'a rejected write must NOT read back as the requested value — otherwise the honest message is unreachable')
+  assert.equal(getSteps(), before, 'and the previous number must survive the rejected write')
+}
+
+console.log('✅ native bridge proof: per-metric permissions (steps/weight/HR), on-demand only, manual fallback, imported-weight labeling, HR honesty, haptics, web-health honesty')

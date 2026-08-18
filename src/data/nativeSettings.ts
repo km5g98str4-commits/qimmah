@@ -45,6 +45,13 @@ export interface NativeSettingsCopy {
   manualStepsLabel: string
   manualStepsSave: string
   manualStepsSaved: string
+  /** فشل حفظ الخطوات — لا رسالة نجاح فوق قرص لم يُكتب (§5). */
+  manualStepsFailed: string
+  /**
+   * الويب لا يصل HealthKit/Google Fit إطلاقًا. فبدل عرض «اربط» لا ينجح أبدًا،
+   * نقول الحقيقة ونُبقي الإدخال اليدوي — وهو المسار العامل هنا فعلًا.
+   */
+  healthNativeOnly: string
   weightManualNote: string
   // haptics
   hapticsTitle: string
@@ -85,6 +92,8 @@ export const NATIVE_SETTINGS_COPY: Record<Lang, NativeSettingsCopy> = {
     manualStepsLabel: 'إدخال خطوات اليوم يدويًا',
     manualStepsSave: 'حفظ',
     manualStepsSaved: 'انحفظت خطواتك يدويًا.',
+    manualStepsFailed: 'ما قدرنا نحفظ خطواتك — رقمك السابق باقٍ كما هو. جرّب مرّة ثانية.',
+    healthNativeOnly: 'ربط Apple Health يشتغل في تطبيق الآيفون بس. هنا تقدر تسجّل خطواتك بنفسك.',
     weightManualNote: 'اكتب وزنك يدويًا من شاشة التقدّم — وهو الخيار الافتراضي.',
     hapticsTitle: 'استجابة لمسية',
     hapticsBody: 'نبضات خفيفة عند حفظ مجموعة، فتح رقم قياسي، وانتهاء الراحة. تتوقف تلقائيًا مع «تقليل الحركة».',
@@ -122,6 +131,8 @@ export const NATIVE_SETTINGS_COPY: Record<Lang, NativeSettingsCopy> = {
     manualStepsLabel: 'Enter today’s steps manually',
     manualStepsSave: 'Save',
     manualStepsSaved: 'Your steps were saved manually.',
+    manualStepsFailed: 'We could not save your steps — your previous number is still there. Give it another try.',
+    healthNativeOnly: 'Apple Health sync works in the iPhone app only. Here you can log your steps yourself.',
     weightManualNote: 'Enter weight manually from the Progress screen — it stays the default.',
     hapticsTitle: 'Haptic feedback',
     hapticsBody: 'Gentle feedback for a logged set, a new PR, and rest completion. Disabled automatically with Reduce Motion.',

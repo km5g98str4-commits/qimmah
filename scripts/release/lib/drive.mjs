@@ -11,6 +11,9 @@ import { settle, tap, tapIfPresent } from './harness.mjs'
 import { answerDietPattern } from '../../e2e/lib/onboarding-driver.mjs'
 import { loadAppCopy } from '../../e2e/lib/app-copy.mjs'
 
+/** النيّة التي يختارها هذا السائق في خطوة النيّة (0=خطة · 1=اقتراحات أكل · 2=أرقام). */
+const ONBOARDING_INTENT_INDEX = 1
+
 export const PREFS_KEY = 'qimmah:prefs:v1'
 export const ONBOARDING_KEY = 'qimmah:onboarding:v1'
 export const NUTRITION_KEY = 'qimmah:nutrition:v2'
@@ -116,8 +119,11 @@ export async function completeOnboarding(page, { age = 28, height = 178, weight 
 
   await next()
   await page.waitForSelector('#onb-title-intent', { timeout: 20000 })
+  // فهرسٌ واحد يحكم الضغط والتوقّع معًا: هذا السائق يختار النيّة **الثانية**
+  // («اقتراحات أكل جاهزة» = `meals`)، وهي النيّة الوحيدة التي تستهلك نمط الأكل.
+  // ولو بقي الرقم مبعثرًا لافترق ما نضغطه عمّا ننتظره — وهو ما وقع فعلًا.
   const intentRows = page.locator('button[aria-pressed]')
-  await intentRows.nth(1).click({ force: true })
+  await intentRows.nth(ONBOARDING_INTENT_INDEX).click({ force: true })
   await intentRows.nth(3).click({ force: true })
 
   await next()
@@ -139,8 +145,7 @@ export async function completeOnboarding(page, { age = 28, height = 178, weight 
   await page.waitForSelector('#onb-title-lifestyle', { timeout: 20000 })
   await group(page, 'training.place').getByRole('button').nth(0).click({ force: true })
   await group(page, 'activity.neat').getByRole('button').nth(1).click({ force: true })
-  // نمط الأكل مشروط بالنيّة؛ هذا السائق يختار أوّل نيّة (`intents[0]`).
-  const diet = await answerDietPattern(page, (await loadAppCopy()).intent.intents[0].value)
+  const diet = await answerDietPattern(page, (await loadAppCopy()).intent.intents[ONBOARDING_INTENT_INDEX].value)
   if (!diet.agrees) {
     throw new Error(`عقد نمط الأكل انكسر: ظهور متوقَّع=${diet.applies} والشاشة أعطت ${diet.rendered}`)
   }
