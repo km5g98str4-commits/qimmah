@@ -1,11 +1,12 @@
 // ط-١ · رحلة المولود الجديد
 //
-// إنسان يفتح قِمّة أول مرّة ويصل إلى وجبة مسجَّلة، بلا أي معرفة سابقة.
+// إنسان يفتح قِمّة أول مرّة، يبني خطته ويعاينها، ثم يرى بوابة Premium الصادقة
+// عند أول فعل كتابة مدفوع — بلا جدار حساب قبل القيمة.
 // الرحلة تشغّل حزمة **الإنتاج** وتوثّق كل شاشة بلقطة متسلسلة.
 //
 // المسار المُثبَت:
-//   الترحيب ← الإعداد كاملًا ← الخطة تظهر ← أول تمرين ← جولة تُسجَّل
-//   ← إنهاء بالتأكيد ← وجبة «كبسة» تُبحث وتُسجَّل
+//   الترحيب ← الإعداد كاملًا ← الخطة تظهر ← Premium/معاينة ← تصفّح الخطة
+//   ← محاولة تسجيل تمرين/وجبة ← بوابة Premium واحدة ومتّسقة
 //
 // والتأكيد السلبي الذي يحمي المبتدئ:
 //   لا «إعادة تركيب (Recomposition)» ولا «RPE» في أي شاشة زارتها الرحلة.
@@ -23,10 +24,12 @@ import {
   openPage, screenText, report, ensureProofRoot, seedSession,
 } from './lib/kit.mjs'
 import { loadJourneyCopy, assertTermExistsInSource } from './lib/journey-copy.mjs'
+import { answerDietPattern } from '../lib/onboarding-driver.mjs'
 
 const PORT = 5311
 const LANG = 'ar'
 const VIEWPORT = VIEWPORTS.large
+const group = (page, id) => page.locator(`[data-question-id="${id}"]`)
 
 // المفردات الممنوعة على المبتدئ — تُقرأ من المصدر لا تُكتب هنا.
 const FORBIDDEN = [
@@ -140,6 +143,11 @@ try {
   const startVisible = await startBtn.isVisible().catch(() => false)
   if (startVisible) await startBtn.click().catch(() => {})
   await page.waitForTimeout(700)
+  // شاشة التطبيق قد تسلّم إلى ترحيب المعالج نفسه؛ كلاهما مقصود، ولا نعامل
+  // ترحيب المعالج كأنه أول سؤال.
+  const onboardingStart = page.getByRole('button', { name: t.welcome.start, exact: true })
+  if (await onboardingStart.isVisible().catch(() => false)) await onboardingStart.click()
+  await page.waitForSelector('#v2-body-age')
 
   // خطوة ٠ — الجسد + الموافقة الصحية (الترتيب الفعلي على الجذع)
   await visit('setup-1-body', 'خطوة ١ — الأساسيات والموافقة الصحية', 'Step 1 — basics and health consent')
@@ -175,13 +183,21 @@ try {
   await page.getByRole('button', { name: new RegExp(planIntent.label) }).first().click()
   await page.getByRole('button', { name: new RegExp(beginnerLevel.label) }).first().click()
   await page.waitForTimeout(250)
-  rec.check('اختيار «مبتدئ» يُخفي حقل سنوات التدريب', !(await page.getByText(intent.yearsLabel).isVisible().catch(() => false)))
+  rec.check('اختيار «مبتدئ» لا يعرض حقل سنوات تدريب رقميًا مكررًا', await page.locator('#v2-training-years').count() === 0)
   await visit('setup-2-intent-picked', `النية «${planIntent.label}» والمستوى «${beginnerLevel.label}»`, `Intent and beginner level picked`)
   await next.click()
   await page.waitForTimeout(400)
 
-  // خطوة ٢ — الهدف بصياغة المبتدئ
-  const goalText = await visit('setup-3-goal', 'خطوة ٣ — الهدف بصياغة المبتدئ', 'Step 3 — goal in beginner wording')
+  // خطوة ٣ — تاريخ التدريب؛ «أول مرة» لا يختلق ثلاثة أجوبة تابعة.
+  await visit('setup-3-history', 'خطوة ٣ — تاريخ التدريب', 'Step 3 — training history')
+  await group(page, 'history.trained_before').getByRole('button').nth(0).click()
+  rec.check('«أول مرة» يخفي أسئلة المدة والانقطاع والانتظام', await page.locator('[data-question-id^="history."]').count() === 1)
+  await visit('setup-3-history-never', 'تاريخ التدريب — أول مرة بلا تاريخ مختلق', 'Training history — first time, no invented history')
+  await next.click()
+  await page.waitForTimeout(400)
+
+  // خطوة ٤ — الهدف بصياغة المبتدئ
+  const goalText = await visit('setup-4-goal', 'خطوة ٤ — الهدف بصياغة المبتدئ', 'Step 4 — goal in beginner wording')
   rec.check(
     `المبتدئ يرى «${beginnerGoals.cut.label}» لا مصطلح الصالة`,
     goalText.includes(beginnerGoals.cut.label),
@@ -196,27 +212,35 @@ try {
   await next.click()
   await page.waitForTimeout(400)
 
-  // خطوة ٣ — التدريب
-  await visit('setup-4-training', 'خطوة ٤ — أيام التمرين ومدّته', 'Step 4 — training days and duration')
+  // خطوة ٥ — الجدول
+  await visit('setup-5-training', 'خطوة ٥ — أيام التمرين ومدّته', 'Step 5 — training days and duration')
   await next.click()
   await page.waitForTimeout(400)
 
-  // خطوة ٤ — المعدّات
-  await visit('setup-5-equipment', 'خطوة ٥ — المكان والمعدّات', 'Step 5 — place and equipment')
-  // مطابقة **تامّة** لا نمطية: تسمية التفضيل «أجهزة» جزء من تسمية المكان
-  // «أجهزة فقط»، فالتعبير النمطي يلتقط زرّ المكان ويترك التفضيل بلا اختيار —
-  // فيبقى الإعداد ناقصًا والرحلة تظنّ أنها تقدّمت. الالتقاطة كانت من اللقطة نفسها.
+  // خطوة ٦ — المكان والحركة؛ ونمط الأكل **حين ينطبق فقط**.
+  // [QIM-V1-001] هذه الرحلة تختار نيّة «خطة» (`intents[0]`)، ومستهلك نمط الأكل
+  // هو مولّد الوجبات وحده — فالسؤال لا يُعرض لها، وغيابه هو السلوك الصحيح.
+  await visit('setup-6-lifestyle', 'خطوة ٦ — المكان والحركة ونمط الأكل', 'Step 6 — place, activity and diet')
   var place = t.places.find((p) => p.value === 'gym') ?? t.places[0]
-  var pref = t.prefs.find((p) => p.value === 'mixed') ?? t.prefs[0]
-  await page.getByRole('button', { name: place.label, exact: true }).first().click().catch(() => {})
-  await page.getByRole('button', { name: pref.label, exact: true }).first().click().catch(() => {})
+  await group(page, 'training.place').getByRole('button', { name: place.label, exact: true }).click()
+  await group(page, 'activity.neat').getByRole('button').nth(1).click()
+  const dietAnswered = await answerDietPattern(page, 'plan')
   await page.waitForTimeout(300)
-  const equipText = await screenText(page)
   rec.check(
-    `المكان «${place.label}» والتفضيل «${pref.label}» كلاهما مُختار`,
-    equipText.includes(place.label) && equipText.includes(pref.label),
+    `المكان «${place.label}» والحركة مختارة${dietAnswered ? ' ونمط الأكل' : ' ونمط الأكل غائب بحقّ لنيّة «خطة»'}`,
+    await group(page, 'training.place').getByRole('button', { name: place.label, exact: true }).getAttribute('aria-pressed') === 'true' &&
+      await group(page, 'activity.neat').getByRole('button').nth(1).getAttribute('aria-pressed') === 'true' &&
+      (dietAnswered
+        ? await group(page, 'nutrition.diet_pattern').getByRole('button').nth(0).getAttribute('aria-pressed') === 'true'
+        : await group(page, 'nutrition.diet_pattern').count() === 0),
   )
-  const buildBtn = page.getByRole('button', { name: t.equipment.cta }).first()
+  await next.click()
+  await page.waitForTimeout(400)
+
+  // خطوة ٧ — القيود والإصابات.
+  await visit('setup-7-limitations', 'خطوة ٧ — القيود والإصابات', 'Step 7 — limitations and injuries')
+  await group(page, 'limitations.has_injury').getByRole('button').nth(1).click()
+  const buildBtn = page.locator('footer button').last()
   rec.check('زرّ بناء الخطة ظاهر في آخر خطوة', await buildBtn.isVisible().catch(() => false))
   await buildBtn.click().catch(() => {})
   await page.waitForTimeout(1200)
@@ -234,7 +258,13 @@ try {
   // وتغيير الهاش وحده لا يغلقها فتبقى الرحلة تصوّر الشاشة نفسها وتظنّها تقدّمت.
   const enterBtn = page.getByRole('button', { name: t.ready.enter }).first()
   const entered = await enterBtn.click({ timeout: 5000 }).then(() => true).catch(() => false)
-  rec.check(`زرّ «${t.ready.enter}» ينقل إلى التطبيق`, entered)
+  rec.check(`زرّ «${t.ready.enter}» يكشف شاشة التسليم`, entered)
+  await page.waitForSelector('[data-testid="plan-handoff"]')
+  const handoffText = await visit('plan-handoff', 'كشف الخطة — Premium أو المعاينة', 'Plan reveal — Premium or preview')
+  rec.check('الكشف يعرض Premium والمعاينة بلا جدار حساب',
+    handoffText.includes(t.handoff.premiumCta) && handoffText.includes(t.handoff.enterFree) &&
+      !/أنشئ حساب|سجّل الدخول/.test(handoffText))
+  await page.getByRole('button', { name: t.handoff.enterFree, exact: true }).click()
   await page.waitForTimeout(900)
   await visit('dashboard', 'لوحة اليوم — بعد اعتماد الخطة', 'Today dashboard — after approving the plan')
 
@@ -261,43 +291,17 @@ try {
   rec.check(`«${workoutNav.label}» وصل إلى شاشة التمارين`, workoutNav.arrived)
   const workoutText = await visit('workout', 'شاشة التمارين بعد اعتماد الخطة', 'Workout tab after approving the plan')
 
-  // هل ترى شاشة التمارين الخطة التي بناها الإعداد قبل قليل؟
-  const setupPrompt = 'أكمل إعداد خطتك'
-  const planInvisible = workoutText.includes(setupPrompt)
-  if (planInvisible) {
-    // دليل من التخزين لا من الشاشة: الخطة **مكتوبة** فعلًا.
-    const stored = await page.evaluate(() => ({
-      calendar: localStorage.getItem('qimmah:workoutCalendar:v1'),
-      customization: (localStorage.getItem('qimmah:customization:v1') || '').length,
-    }))
-    let cal = {}
-    try { cal = JSON.parse(stored.calendar ?? '{}') } catch { /* غير قابل للتحليل */ }
-    rec.finding(
-      'الإعداد يكتب الخطة وشاشة التمارين لا تراها — مسار المولود الجديد ينتهي إلى طريق مسدود',
-      `بعد إعداد كامل واعتماد الخطة، تعرض #/workout «${setupPrompt}» بينما التخزين يحمل الخطة فعلًا: ` +
-        `qimmah:workoutCalendar:v1 = {split:"${cal.split}", daysPerWeek:${cal.daysPerWeek}, source:"${cal.source}"} ` +
-        `ويطابق ملخّص «خطتك جاهزة» المعروض قبل لحظات · qimmah:customization:v1 مكتوب (${stored.customization} حرفًا). ` +
-        'أي أن الحالة محفوظة وشرط «الإعداد مكتمل» في شاشة التمارين لا يقرؤها. ' +
-        'واللوحة تعد المستخدم بـ«تمرين اليوم» فيصل إلى «ابدأ الإعداد» — وعدٌ يخلفه المنتج في أول دقيقة.',
-      'عالٍ',
-    )
-    rec.skip('جولة تُسجَّل وتُنهى بالتأكيد', 'الالتقاطة: شاشة التمارين لا ترى الخطة المبنيّة')
-  } else {
-    const startSession = page.getByRole('button', { name: /ابدأ الجلسة|ابدأ التمرين/ }).first()
-    const sessionStarted = await startSession.click({ timeout: 4000 }).then(() => true).catch(() => false)
-    rec.check('الجلسة تبدأ من شاشة التمارين', sessionStarted)
-    await page.waitForTimeout(600)
-    await visit('workout-active', 'الجلسة نشطة — أول تمرين', 'Session active — first exercise')
-    const weight = page.locator('input[inputmode="decimal"], input[type="number"]').first()
-    if (await weight.isVisible().catch(() => false)) await weight.fill('40')
-    const completeSet = page.getByRole('button', { name: /أنهِ المجموعة/ }).first()
-    rec.check(
-      'جولة تُسجَّل فعليًا',
-      await completeSet.click({ timeout: 4000 }).then(() => true).catch(() => false),
-    )
-    await page.waitForTimeout(500)
-    await visit('workout-set-logged', 'جولة مسجَّلة — ٤٠ كجم', 'A set logged — 40 kg')
-  }
+  rec.check('شاشة التمارين تعرض الخطة المبنيّة لا طلب إعداد جديد',
+    !workoutText.includes('أكمل إعداد خطتك') && workoutText.includes('علوي / سفلي'))
+  const startSession = page.getByRole('button', { name: /ابدأ تمرين فارغ/ }).first()
+  rec.check('فعل بدء التمرين موجود في المعاينة', await startSession.isVisible().catch(() => false))
+  await startSession.click()
+  await page.waitForSelector('[data-testid="premium-gate"]')
+  await visit('workout-premium-gate', 'بدء تمرين من المعاينة — بوابة Premium', 'Starting a workout in preview — Premium gate')
+  rec.check('بدء تمرين مدفوع يفتح بوابة Premium ولا يبدأ جلسة صامتة',
+    await page.locator('[data-testid="premium-gate"]').isVisible() &&
+      await page.locator('input[inputmode="decimal"]').count() === 0)
+  await page.locator('[data-testid="premium-gate-dismiss"]').click()
 
   // ───────────────────────── ٥) وجبة ─────────────────────────
   console.log('\n▸ التغذية')
@@ -305,37 +309,17 @@ try {
   rec.check(`«${nutritionNav.label}» وصل إلى شاشة التغذية`, nutritionNav.arrived)
   await visit('nutrition', 'شاشة التغذية', 'Nutrition screen')
 
-  // شاشة التغذية **ترى** مخرَج الإعداد نفسه الذي لا تراه شاشة التمارين — وهذا
-  // ما يجعل الالتقاطة أعلاه دقيقة: العطل في شاشة واحدة لا في الحفظ.
   const nutritionText = await screenText(page)
-  rec.check(
-    'شاشة التغذية تعكس الهدف المختار في الإعداد',
-    nutritionText.includes(copy.goalWording(LANG, 'intermediate').cut.label) ||
-      nutritionText.includes(beginnerGoals.cut.label),
-    'وسم الهدف ظاهر أعلى الشاشة',
-  )
-  rec.check('هدف السعرات اليومي محسوب ومعروض', /\d{1,2},\d{3}/.test(nutritionText))
-
-  // البحث خلف «أضف وجبة» — لا حقل ظاهر على السطح.
-  const addMeal = page.getByRole('button', { name: /أضف وجبة/ }).first()
-  const sheetOpen = await addMeal.click({ timeout: 5000 }).then(() => true).catch(() => false)
-  rec.check('زرّ «أضف وجبة» يفتح لوحة الإضافة', sheetOpen)
-  await page.waitForTimeout(700)
-  await visit('nutrition-add-sheet', 'لوحة إضافة وجبة', 'Add-a-meal sheet')
-
-  // المُحدِّد بالنائب النصّي لا بالدور: الحقل ليس role=searchbox ولا type=search.
-  // تشغيل سابق تخطّى هذه الخطوة وأعلنها محجوبة، والحقل كان ظاهرًا في اللقطة —
-  // قصور مُحدِّد لا عطل منتج. اللقطة هي التي كشفته.
-  const search = page.getByPlaceholder(/ابحث عن طعام/).first()
-  if (await search.isVisible().catch(() => false)) {
-    await search.fill('كبسة')
-    await page.waitForTimeout(1100)
-    const results = await screenText(page)
-    rec.check('البحث عن «كبسة» يُرجع نتيجة من قاعدة الأطعمة السعودية', results.includes('كبسة'))
-    await visit('nutrition-search-kabsa', 'البحث عن «كبسة» — نتائج القاعدة السعودية', 'Searching "Kabsa" — Saudi food results')
-  } else {
-    rec.skip('البحث عن «كبسة» وتسجيلها', 'لوحة إضافة الوجبة لم تُفتح — حقل البحث غير متاح')
-  }
+  const calorieTarget = nutritionText.match(/\b([1-9]\d{3})\b/)?.[1]
+  rec.check('هدف السعرات اليومي محسوب ومعروض', Number(calorieTarget) >= 1200, calorieTarget ?? 'لا رقم')
+  // نمط الأكل المختار لا ينشئ بطاقات وجبات جاهزة؛ زيادة الماء طفرة تغذية
+  // حقيقية موجودة لكل ملف، ومحروسة بالعقد نفسه.
+  const addNutrition = page.getByRole('button', { name: /250/ }).first()
+  rec.check('فعل زيادة الماء موجود في المعاينة', await addNutrition.isVisible().catch(() => false))
+  await addNutrition.click()
+  await page.waitForSelector('[data-testid="premium-gate"]')
+  await visit('nutrition-premium-gate', 'تسجيل الماء من المعاينة — بوابة Premium', 'Logging water in preview — Premium gate')
+  rec.check('تسجيل التغذية يستخدم بوابة Premium نفسها', await page.locator('[data-testid="premium-gate-cta"]').isVisible())
 
   // ───────────────────────── التأكيد السلبي ─────────────────────────
   console.log('\n▸ حارس مفردات المبتدئ')

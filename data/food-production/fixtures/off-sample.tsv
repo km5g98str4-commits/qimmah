@@ -1,0 +1,16 @@
+code	product_name	brands	brand_owner	manufacturing_places	countries_en	main_category_en	pnns_groups_2	serving_size	quantity	last_modified_datetime	energy-kcal_100g	energy-kj_100g	energy_100g	proteins_100g	carbohydrates_100g	fat_100g	saturated-fat_100g	sugars_100g	fiber_100g	sodium_100g	salt_100g	ingredients_text	allergens_en	calcium_100g
+6281007034043	حليب المراعي طازج, Almarai Fresh Milk	المراعي, Almarai			Saudi Arabia	Milk		كوب 250 مل	1 L	2026-07-30T00:00:00Z	60.8			3.2	4.8	3.2	2	4.8	0	0.0516			en:milk	0.12
+5449000000996	Cola Drink	TestCo			France			330 ml	330 ml			180		0	10.6	0								
+8000500310427	Salted Snack	TestCo			Italy			30 g			500			6	53	29					1.25			
+4006381333931	Negative Protein	TestCo			Germany						200			-5	20	10								
+7622210449283	Impossible Mass	TestCo			Spain						400			60	60	30								
+12345670	Sequential Test	TestCo			France						100			5	10	3								
+2001234567893	In-store Item	TestCo			France						100			5	10	3								
+9780306406157	A Book	Publisher			US						100			5	10	3								
+6281007034044	Bad Checksum	TestCo			Saudi Arabia						100			5	10	3								
+6291100030101	No Energy	TestCo			United Arab Emirates									5	10	3								
+3017620422003	Sugar Over Carbs	TestCo			France						500			6	50	30		60						
+8712100849718	Atwater Mismatch	TestCo			Netherlands						100			20	20	20								
+6271000010014	Kuwait Snack	GulfCo			Kuwait			25 g			450			8	55	22								
+6281007034043	Almarai Milk Duplicate	Almarai			Saudi Arabia			250 ml			95			3.2	4.8	6.5								
+6281007034050	Kuwait Snack	GulfCo			Saudi Arabia			25 g			450			8	55	22								

@@ -23,7 +23,7 @@ if (!CHROME) throw new Error('Chromium not found')
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
 // شاشات نلتقطها. login لا يتطلّب إعدادًا؛ البقية تتطلّب إكمال إعداد (نزرعه في localStorage).
-const ROUTES = ['login', 'dashboard', 'workout', 'nutrition', 'progress', 'profile', 'settings']
+const ROUTES = ['login', 'dashboard', 'workout', 'nutrition', 'progress', 'measurements', 'profile', 'settings']
 // نصوص ثنائية اللغة مقصودة (لا تُعدّ شاردة): أسماء اللغات في المبدّل + الاسم التجاري بالعربية في اللوغو.
 const INTENTIONAL_AR = ['العربية', 'ع', 'قِمّة']
 

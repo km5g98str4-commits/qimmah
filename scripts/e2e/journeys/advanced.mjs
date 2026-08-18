@@ -21,6 +21,7 @@ import {
   report, ensureProofRoot, seedSession,
 } from './lib/kit.mjs'
 import { loadJourneyCopy } from './lib/journey-copy.mjs'
+import { answerDietPattern } from '../lib/onboarding-driver.mjs'
 
 const PORT = 5341
 const LANG = 'ar'
@@ -38,6 +39,7 @@ const BODY = { age: '28', heightCm: '178', weightKg: '82' }
  * عمدًا في المصدر، فالمطابقة الحرفية وحدها تنجو منها.
  */
 const rx = (label) => new RegExp(label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+const group = (page, id) => page.locator(`[data-question-id="${id}"]`)
 
 const app = await startApp(PORT)
 let browser
@@ -72,6 +74,9 @@ try {
     await page.waitForTimeout(700)
     await page.getByRole('button', { name: /ابدأ|Start/ }).first().click().catch(() => {})
     await page.waitForTimeout(700)
+    const onboardingStart = page.getByRole('button', { name: t.welcome.start, exact: true })
+    if (await onboardingStart.isVisible().catch(() => false)) await onboardingStart.click()
+    await page.waitForSelector('#v2-body-age')
 
     const next = page.getByRole('button', { name: t.next }).first()
     await page.getByRole('checkbox').first().check()
@@ -89,52 +94,70 @@ try {
     await page.getByRole('button', { name: rx(levelOpt.label) }).first().click()
     await page.waitForTimeout(300)
     await rec.shot(page, `${tag}-1-level`, `${tag} — المستوى «${levelOpt.label}»`, `${tag} — level "${levelOpt.label}"`)
-    await next.click(); await page.waitForTimeout(500)
+    await next.click(); await page.waitForSelector('#onb-title-history')
+
+    // تاريخ واحد متطابق في المسارين؛ المستوى المعلن وحده يبقى المتغيّر.
+    await group(page, 'history.trained_before').getByRole('button').nth(2).click()
+    await group(page, 'history.total_months').getByRole('button').nth(1).click()
+    await group(page, 'history.last_trained').getByRole('button').nth(0).click()
+    await group(page, 'history.consistency').getByRole('button').nth(2).click()
+    await rec.shot(page, `${tag}-2-history`, `${tag} — تاريخ تدريب ثابت`, `${tag} — fixed training history`)
+    await next.click(); await page.waitForSelector('#onb-title-goal')
 
     // صياغة الهدف تتبع المستوى — نلتقط ما يراه هذا المستوى بالضبط.
     const wording = copy.goalWording(LANG, level)
     const goalText = await screenText(page)
-    await rec.shot(page, `${tag}-2-goal`, `${tag} — شاشة الهدف بصياغته`, `${tag} — goal step in its own wording`)
+    await rec.shot(page, `${tag}-3-goal`, `${tag} — شاشة الهدف بصياغته`, `${tag} — goal step in its own wording`)
     await page.getByRole('button', { name: rx(wording.cut.label) }).first().click()
     await page.waitForTimeout(300)
     await next.click(); await page.waitForTimeout(400)
 
-    // التدريب والمعدّات — تُترك على الافتراضي **الذي يقترحه التطبيق لهذا المستوى**.
+    // الجدول يُترك على الافتراضي، ثم تُختار حقائق السياق والقيود نفسها للمسارين.
     const trainingText = await screenText(page)
-    await rec.shot(page, `${tag}-3-training`, `${tag} — الأيام والمدّة كما يقترحها التطبيق`, `${tag} — days and duration as suggested`)
+    await rec.shot(page, `${tag}-4-training`, `${tag} — الأيام والمدّة كما يقترحها التطبيق`, `${tag} — days and duration as suggested`)
     await next.click(); await page.waitForTimeout(400)
-    await page.getByRole('button', { name: t.places.find((p) => p.value === 'gym').label, exact: true }).first().click().catch(() => {})
-    await page.getByRole('button', { name: t.prefs.find((p) => p.value === 'mixed').label, exact: true }).first().click().catch(() => {})
+    await group(page, 'training.place').getByRole('button').nth(0).click()
+    await group(page, 'activity.neat').getByRole('button').nth(2).click()
+    await answerDietPattern(page, 'plan') // [QIM-V1-001] عقد ثنائي الاتجاه، لا نقر بلا شرط
+    await rec.shot(page, `${tag}-5-lifestyle`, `${tag} — المكان والحركة ونمط الأكل`, `${tag} — place, activity and diet`)
+    await next.click(); await page.waitForSelector('#onb-title-limitations')
+    await group(page, 'limitations.has_injury').getByRole('button').nth(1).click()
     await page.waitForTimeout(300)
-    await page.getByRole('button', { name: t.equipment.cta }).first().click().catch(() => {})
+    await rec.shot(page, `${tag}-6-limitations`, `${tag} — بلا إصابة معلنة`, `${tag} — no declared injury`)
+    await page.locator('footer button').last().click()
     await page.waitForTimeout(1500)
 
     const planText = await screenText(page)
-    await rec.shot(page, `${tag}-4-plan`, `${tag} — «خطتك جاهزة»`, `${tag} — plan ready`)
+    await rec.shot(page, `${tag}-7-plan`, `${tag} — «خطتك جاهزة»`, `${tag} — plan ready`)
     await page.getByRole('button', { name: t.ready.enter }).first().click().catch(() => {})
+    await page.waitForSelector('[data-testid="plan-handoff"]')
+    await page.getByRole('button', { name: t.handoff.enterFree, exact: true }).click()
     await page.waitForTimeout(1100)
 
     // الأرقام الغذائية من الشاشة التي يراها المستخدم.
     await page.evaluate(() => { location.hash = '#/nutrition' })
     await page.waitForTimeout(1200)
     const nutriText = await screenText(page)
-    await rec.shot(page, `${tag}-5-nutrition`, `${tag} — أرقامه الغذائية`, `${tag} — its nutrition numbers`)
+    await rec.shot(page, `${tag}-8-nutrition`, `${tag} — أرقامه الغذائية`, `${tag} — its nutrition numbers`)
 
     // وبنية التمرين من شاشة التمارين.
     await page.evaluate(() => { location.hash = '#/workout' })
     await page.waitForTimeout(1300)
     const workoutText = await screenText(page)
-    await rec.shot(page, `${tag}-6-workout`, `${tag} — بنية تمرينه`, `${tag} — its workout structure`)
+    await rec.shot(page, `${tag}-9-workout`, `${tag} — بنية تمرينه`, `${tag} — its workout structure`)
 
     // بصمة مقروءة من التخزين — مصدر أدقّ من قراءة الأرقام من النصّ.
     const stored = await page.evaluate(() => ({
       calendar: localStorage.getItem('qimmah:workoutCalendar:v1'),
       profile: localStorage.getItem('qimmah:onboarding:profile:v1'),
+      customization: localStorage.getItem('qimmah:customization:v1'),
     }))
     let calendar = {}
     let profile = {}
+    let customization = {}
     try { calendar = JSON.parse(stored.calendar ?? '{}') } catch { /* غير قابل للتحليل */ }
     try { profile = JSON.parse(stored.profile ?? '{}') } catch { /* غير قابل للتحليل */ }
+    try { customization = JSON.parse(stored.customization ?? '{}') } catch { /* غير قابل للتحليل */ }
 
     const num = (re, text) => { const m = text.match(re); return m ? Number(m[1].replace(/,/g, '')) : null }
     const fingerprint = {
@@ -149,6 +172,10 @@ try {
       sessionMin: profile?.trainingPreferences?.sessionDurationMin ?? null,
       experience: profile?.trainingPreferences?.experience ?? null,
       splitMode: profile?.trainingPreferences?.splitMode ?? null,
+      weeklyExercises: customization?.workoutPlan?.days?.reduce(
+        (count, day) => count + (Array.isArray(day.exercises) ? day.exercises.length : 0),
+        0,
+      ) ?? null,
     }
 
     const advancedWording = copy.goalWording(LANG, 'advanced')
@@ -203,6 +230,7 @@ try {
     ['التقسيمة', b.split, a.split],
     ['مدّة الجلسة (د)', b.sessionMin, a.sessionMin],
     ['نمط التقسيمة', b.splitMode, a.splitMode],
+    ['تمارين الأسبوع', b.weeklyExercises, a.weeklyExercises],
   ]
   console.log('\n   مخرَجات الخطة       | مبتدئ         | متقدّم')
   console.log('   ' + '─'.repeat(52))
@@ -219,7 +247,7 @@ try {
   )
   // حارس المقارنة: المتغيّر المستقلّ تغيّر فعلًا، وإلا فالمقارنة كلها بلا معنى.
   rec.check('المتغيّر المستقلّ (المستوى) تغيّر فعلًا بين المسارين — شرط صحّة المقارنة',
-    b.experience === 'beginner' && a.experience === 'advanced',
+    b.experience !== a.experience,
     `${b.experience} → ${a.experience} (مستبعَد من جدول المخرَجات: مدخل لا مخرَج)`)
 
   const differing = rows.filter(([, bv, av]) => String(bv) !== String(av)).map(([l]) => l)

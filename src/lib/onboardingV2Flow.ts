@@ -15,8 +15,26 @@
 import { AGE_RANGE, HEIGHT_RANGE, WEIGHT_RANGE } from '@/config/profileDomain'
 import { loadDraft, saveDraft } from '@/lib/onboarding'
 import type { V2GoalValue } from '@/design-system/v2/labels'
-import type { ExperienceLevel } from '@/types/onboarding'
-import type { V2Place, V2Pref } from '@/lib/onboardingV2Adapter'
+import type {
+  DietPattern,
+  ExperienceLevel,
+  LastTrainedBucket,
+  NeatLevel,
+  TotalMonthsBucket,
+  TrainedBefore,
+  TrainingConsistency,
+} from '@/types/onboarding'
+import type { V2Place } from '@/lib/onboardingV2Adapter'
+import { ALWAYS_AVAILABLE_EQUIPMENT, normalizeEquipment } from '@/lib/onboardingKeys'
+import type { Equipment } from '@/types/profile'
+import { classifyExperience, classifyTrainingStatus } from '@/lib/personalization/experience'
+import {
+  ALGO_VERSION,
+  BANK_VERSION,
+  STATE_VERSION,
+  type AnswerValue,
+  type PersonalizationState,
+} from '@/lib/personalization/types'
 
 /** Allowed answer sets for the training step (mirrored by the view's segmented controls). */
 export const DAYS = [3, 4, 5, 6] as const
@@ -32,8 +50,105 @@ export type V2Intent = 'plan' | 'meals' | 'numbers'
 /** المستوى المُعلن — يقود صياغة الأهداف وكثافة الجلسة. */
 export type V2Level = 'beginner' | 'intermediate' | 'advanced'
 
-/** سنوات التدريب — اختيارية، وتُسأل لغير المبتدئ فقط. */
-export const TRAINING_YEARS_RANGE = { min: 0, max: 60 } as const
+/** مفردات بنك التخصيص (`personalization/bank/core.ts`) — يحرس التطابق إثبات الحزمة. */
+export const TRAINED_BEFORE_VALUES = ['never', 'tried', 'months', 'years'] as const
+export const TOTAL_MONTHS_VALUES = ['lt3', 'm3_6', 'm6_12', 'y1_3', 'y3_plus'] as const
+export const LAST_TRAINED_VALUES = ['now', 'w2', 'm1_3', 'm3_12', 'y1_plus'] as const
+export const TRAINING_CONSISTENCY_VALUES = ['rare', 'on_off', 'mostly', 'steady'] as const
+export const NEAT_VALUES = ['sedentary', 'light', 'moderate', 'high'] as const
+export const DIET_PATTERN_VALUES = ['none', 'vegetarian', 'vegan', 'pescatarian', 'low_carb', 'keto'] as const
+
+export function historyFollowUpsApply(trainedBefore: TrainedBefore | null): boolean {
+  return trainedBefore !== null && trainedBefore !== 'never'
+}
+
+/**
+ * الأدوات المفترضة لكل مكان — **بذرة لا قرار**.
+ *
+ * لا أحد يواجه قائمة فارغة، ولا أحد يُحبس في افتراض: أوّل لمسة من المستخدم
+ * تجعل قائمته هي الحاكمة (`equipmentTouched`). والقيم مشتقّة من مجموعات
+ * `equipmentAccess.ts` نفسها حتى لا يفترق الافتراض عن سلوك المولّد اليوم.
+ */
+export const DEFAULT_EQUIPMENT_FOR_PLACE: Record<V2Place, readonly Equipment[]> = {
+  gym: ['dumbbell', 'barbell', 'bench', 'machine', 'cable', 'smith', 'pullup_bar', 'bodyweight'],
+  home: ['dumbbell', 'bands', 'bodyweight'],
+  machines: ['machine', 'cable', 'smith', 'bodyweight'],
+}
+
+/**
+ * وزن الجسم **لا يُنزع**: لا يملكه أحد ولا يفقده أحد، وقائمة بلا حركة ممكنة
+ * واحدة تُنتج خطة فارغة. يُضاف عند الحدّ لا في الواجهة وحدها، فلا يوجد طريق
+ * يتجاوزه.
+ */
+export function withBodyweight(equipment: readonly Equipment[]): Equipment[] {
+  return normalizeEquipment([...equipment, ALWAYS_AVAILABLE_EQUIPMENT])
+}
+
+/** هل الاختيار وزن جسم صرفًا؟ يجعل فرع `gymAccess='bodyweight'` قابلًا للوصول. */
+export function isBodyweightOnly(equipment: readonly Equipment[]): boolean {
+  const normalized = withBodyweight(equipment)
+  return normalized.length === 1 && normalized[0] === ALWAYS_AVAILABLE_EQUIPMENT
+}
+
+/**
+ * هل لسؤال نمط الأكل أثر أصلًا؟
+ *
+ * ═══ المقيس ═══ مستهلك `dietPattern` الوحيد هو مولّد الوجبات
+ * (`planGenerator.ts:946-997`)، وهو لا يعمل إلّا حين
+ * `nutritionStyle === 'meal_suggestions'` — أي حين تكون النية `meals`. مع
+ * `plan` أو `numbers` تكون `meals: []` وخطة التغذية **متطابقة بايتًا** عبر
+ * الأنماط الستة كلّها.
+ *
+ * فكان السؤال يُطرح للجميع بلا شرط في الخطوة ٥، بينما القرار الذي يُلغيه
+ * اتُّخذ في الخطوة ١. وهذا يكسر §5 مرّتين: سؤال بلا أثر، وواجهة توحي
+ * («نمط أكلك يفلتر اقتراحات الوجبات») بما لا يحدث لثلثَي المستخدمين.
+ *
+ * **القرار: يُعرض حين ينفع فقط.** والبديل — إبقاؤه مع تحذير «هذا لن يغيّر
+ * شيئًا» — سؤالٌ يعتذر عن نفسه؛ وحذفه نهائيًا يخسر إجابة تنفع ثلث المستخدمين
+ * فعلًا. والشرط هنا نظير `historyFollowUpsApply` حرفيًا فلا نمط ثانٍ للأسئلة
+ * الشرطية.
+ */
+export function dietPatternApplies(intent: V2Intent | null): boolean {
+  return intent === 'meals'
+}
+
+/**
+ * اسم التقسيمة **كما يبنيها المحرّك**، لا كما يتمنّاها الملخّص.
+ *
+ * ═══ الكذبة التي يُغلقها هذا ═══
+ * `splitFor()` كان جدولًا مثبَّتًا داخل `OnboardingV2` لم يُصالَح يومًا مع
+ * `splitDays()` في المولّد، ويُعرض في **أغلى نقطتين** في القمع: ملخّص الخطوة ٤
+ * وشاشة «جاهز». المقيس: من أربعة اختيارات للأيام، **اثنان يكذبان** —
+ *   ٣ أيام: يَعِد «دفع · سحب · أرجل»، والمحرّك يبني «جسم كامل ×٣».
+ *   ٥ أيام: يَعِد «لكل عضلة يوم»، والمحرّك يبني «علوي/سفلي + يوم تركيز».
+ *
+ * الخريطة هنا مرآة حرفية لـ`splitDays(days, focus)`
+ * (`planGenerator.ts:570-588`) — و**لا تُصدَّق على كلمتها**: إثبات الحزمة
+ * يولّد الخطة الحقيقية لكل عدد أيام ويقارن أسماء أيامها المولَّدة بهذا الاسم.
+ * فإن تغيّر المحرّك ولم تتبعه الخريطة، سقط الإثبات باسمه.
+ *
+ * ⚠️ **موضع التلاقي:** حارة محرّك الخطة تُصدِّر `plannedSplitLabel(profile)`
+ * من `planGenerator.ts`. حين تهبط، تُستبدل هذه الدالة بنداء واحد إليها ويبقى
+ * الإثبات كما هو — فهو يقيس المخرَج لا المصدر.
+ */
+export function plannedSplitLabelForDays(days: number, splits: {
+  fullBody: string; upperLower: string; upperLowerFocus: string; pushPullLegs: string; custom: string
+}): string {
+  if (days <= 3) return splits.fullBody
+  if (days === 4) return splits.upperLower
+  if (days === 5) return splits.upperLowerFocus
+  if (days === 6) return splits.pushPullLegs
+  return splits.custom
+}
+
+export function injuryAreasApply(hasInjury: boolean | null): boolean {
+  return hasInjury === true
+}
+
+/** يبطل هدف تعديل الوزن فور تحوّل صاحبه إلى قاصر؛ لا يترك اختيارًا محجوبًا مضغوطًا. */
+export function goalAllowedForEligibility(goal: V2GoalValue | null, minor: boolean): V2GoalValue | null {
+  return minor && (goal === 'cut' || goal === 'bulk') ? null : goal
+}
 
 /**
  * حدود بيانات الجسم — **مصدرها الوحيد `config/profileDomain`** منذ [CTO-65]
@@ -46,12 +161,28 @@ export { AGE_RANGE, HEIGHT_RANGE, WEIGHT_RANGE } from '@/config/profileDomain'
 /** الجنس — يقود معادلة BMR (Mifflin-St Jeor) ولا يُستخدم لغير ذلك. */
 export type V2Gender = 'male' | 'female'
 
-/** Version stamp for the persisted v2 draft — a shape change bumps this and old drafts are ignored. */
-export const DRAFT_VERSION = 5
+/** Version stamp for the persisted v2 draft — supported predecessors migrate explicitly. */
+export const DRAFT_VERSION = 7
+const READABLE_DRAFT_VERSIONS = [5, 6, DRAFT_VERSION] as const
+
+/**
+ * حدّ طول الاسم المعروض. ليس تحقّقًا أمنيًا (لا شيء هنا يُنفَّذ) بل حدّ عرض:
+ * التحيّة سطر واحد في الرئيسية وشاشة الكشف، واسم من مئة حرف يكسرهما. القصّ
+ * صامت وغير حاجب — الاسم اختياري، فلا يُردّ المستخدم برسالة خطأ على حقل
+ * يستطيع تخطّيه أصلًا.
+ */
+export const NAME_MAX_LENGTH = 24
+
+/** يقصّ ويشذّب الاسم — نقطة واحدة يمرّ بها الحفظ والتحميل والتحويل معًا. */
+export function normalizeName(raw: unknown): string {
+  return typeof raw === 'string' ? raw.trim().slice(0, NAME_MAX_LENGTH) : ''
+}
 
 /** Full resumable state of the v2 onboarding flow. */
 export interface OnboardingV2Draft {
   step: number
+  /** الاسم المعروض — **اختياري**؛ السلسلة الفارغة تعني «ما كتبه» لا «فشل». */
+  name: string
   /** بيانات الجسم — null قبل الإجابة (لا قيمة افتراضية صامتة). */
   age: number | null
   gender: V2Gender | null
@@ -60,14 +191,28 @@ export interface OnboardingV2Draft {
   /** النية والمستوى — null قبل الإجابة؛ لا افتراضي صامت لأنهما يغيّران المخرجات. */
   intent: V2Intent | null
   level: V2Level | null
-  /** سنوات التدريب — اختيارية (null = لم تُذكر)؛ تُصفَّر عند اختيار «مبتدئ». */
-  trainingYears: number | null
+  trainedBefore: TrainedBefore | null
+  totalMonths: TotalMonthsBucket | null
+  lastTrained: LastTrainedBucket | null
+  consistency: TrainingConsistency | null
   goal: V2GoalValue | null
   days: number
   duration: number
   place: V2Place | null
-  pref: V2Pref | null
-  hasInjury: boolean
+  /**
+   * الأدوات المتاحة فعلًا. **المكان سياق والأداة حاكمة** — انظر قاموس
+   * `onboardingEquipment`. فارغة تعني «لم يُجَب بعد» (مسودّة أقدم).
+   */
+  equipment: Equipment[]
+  /**
+   * هل لمس المستخدم قائمة الأدوات بنفسه؟ يفصل «افتراض من المكان» عن «قرار
+   * المستخدم»: تغيير المكان يعيد البذر ما لم يكن قد قرّر، وقراره **حاكم**
+   * فلا يُدهس باختيار مكانٍ لاحق.
+   */
+  equipmentTouched: boolean
+  neat: NeatLevel | null
+  dietPattern: DietPattern | null
+  hasInjury: boolean | null
   injuries: string[]
   healthDataConsent: boolean
 }
@@ -85,35 +230,51 @@ export function inRange(v: number | null, r: { min: number; max: number }): bool
 export function initialDraftV2(userId?: string | null): OnboardingV2Draft {
   return loadDraftV2(userId) ?? {
     step: 0,
+    name: '',
     age: null,
     gender: null,
     heightCm: null,
     weightKg: null,
     intent: null,
     level: null,
-    trainingYears: null,
+    trainedBefore: null,
+    totalMonths: null,
+    lastTrained: null,
+    consistency: null,
     goal: null,
     days: 4,
     duration: 45,
     place: null,
-    pref: null,
-    hasInjury: false,
+    equipment: [],
+    equipmentTouched: false,
+    neat: null,
+    dietPattern: null,
+    hasInjury: null,
     injuries: [],
     healthDataConsent: false,
   }
 }
 
 /** Persisted envelope (version + fields) — the shape actually written to storage. */
-interface PersistedDraft extends OnboardingV2Draft {
+interface PersistedDraft extends Partial<OnboardingV2Draft> {
   v: number
+  /** حقلا v5 المتقاعدان؛ يُقرآن للهجرة ولا ينتقلان إلى الحالة الحالية. */
+  trainingYears?: number | null
+  pref?: string | null
 }
 
 /** Which step-specific validation message to surface, or null when the step is complete. */
-export type StepValidation = 'body' | 'ageBelowMin' | 'intentLevel' | 'goal' | 'healthConsent' | 'training' | 'equipment' | null
+export type StepValidation = 'body' | 'ageBelowMin' | 'intentLevel' | 'trainingHistory' | 'goal' | 'healthConsent' | 'training' | 'lifestyle' | 'equipment' | 'limitations' | null
 
-/** Async plan-assembly status driving the loading / error / done screens. */
-export type FinalizeStatus = 'idle' | 'building' | 'error' | 'done'
-export type FinalizeAction = 'start' | 'fail' | 'ok' | 'reset'
+/**
+ * Async plan-assembly status driving the loading / error / done screens.
+ *
+ * `'storage'` حالة **مستقلّة عن `'error'`** عمدًا: العطل العابر يُصلحه زرّ
+ * إعادة، أمّا التخزين المحجوب فسببه لا يزول بإعادة المحاولة وحدها — فرسالته
+ * مختلفة (وش صار · وش بقي · وش يسوي)، وهي تؤكّد أن **بياناته لم تضع**.
+ */
+export type FinalizeStatus = 'idle' | 'building' | 'error' | 'storage' | 'done'
+export type FinalizeAction = 'start' | 'fail' | 'storageFail' | 'ok' | 'reset'
 
 /**
  * Finalize state machine. `start` covers both the first attempt (idle → building)
@@ -125,6 +286,8 @@ export function finalizeReduce(status: FinalizeStatus, action: FinalizeAction): 
       return status === 'done' ? status : 'building'
     case 'fail':
       return 'error'
+    case 'storageFail':
+      return 'storage'
     case 'ok':
       return 'done'
     case 'reset':
@@ -142,24 +305,45 @@ type Validatable = Pick<
   | 'weightKg'
   | 'intent'
   | 'level'
-  | 'trainingYears'
+  | 'trainedBefore'
+  | 'totalMonths'
+  | 'lastTrained'
+  | 'consistency'
   | 'goal'
   | 'days'
   | 'duration'
+  | 'intent'
   | 'place'
-  | 'pref'
+  | 'equipment'
+  | 'neat'
+  | 'dietPattern'
+  | 'hasInjury'
+  | 'injuries'
   | 'healthDataConsent'
 >
 
-/** آخر خطوة قبل شاشة «خطتك جاهزة». */
-export const LAST_INPUT_STEP = 4
+export const HISTORY_STEP = 2
+export const LAST_INPUT_STEP = 6
+
+/** سجلّ الأسئلة الثابت — الموافقة الصحية بوابة، وليست ضمن أسئلة التخصيص الـ18. */
+export const ONBOARDING_QUESTION_IDS = [
+  'profile.display_name',
+  'equipment.available',
+  'body.age', 'body.sex', 'body.height', 'body.weight',
+  'intent.primary', 'experience.declared',
+  'history.trained_before', 'history.total_months', 'history.last_trained', 'history.consistency',
+  'goal.primary', 'training.days', 'training.duration', 'training.place',
+  'activity.neat', 'nutrition.diet_pattern',
+  'limitations.has_injury', 'limitations.injury_areas',
+] as const
+export type OnboardingQuestionId = (typeof ONBOARDING_QUESTION_IDS)[number]
 
 /**
  * Validate one step. Returns the step's message key when incomplete, else null.
  *
  * ═══ ترتيب الخطوات — قرار واعٍ لا وراثة بالسكوت ═══
- * 0 الأساسيات (موافقة + جسد) · 1 النية والمستوى · 2 الهدف · 3 التدريب ·
- * 4 المعدّات · 5 جاهز.
+ * 0 الأساسيات · 1 النية والمستوى · 2 تاريخ التدريب · 3 الهدف · 4 الجدول ·
+ * 5 المكان/النشاط/الأكل · 6 القيود · 7 جاهز.
  *
  * التوتّر الموثّق (§8): بلوبرنت البحث يريد **النية أولًا** لأسباب تفاعل، وحاجز
  * القاصرين يريد **العمر قبل الأهداف المقيَّدة** (التنشيف/التضخيم ممنوعان دون
@@ -192,30 +376,89 @@ export function validateStep(step: number, d: Validatable): StepValidation {
     return ok ? null : 'body'
   }
   if (step === 1) {
-    // السنوات اختيارية: null تمرّ، وقيمة مكتوبة خارج النطاق (أو نص غير رقمي)
-    // تُحجب بدل أن تُبتلع بصمت.
-    if (d.trainingYears !== null && !inRange(d.trainingYears, TRAINING_YEARS_RANGE)) return 'intentLevel'
     return d.intent && d.level ? null : 'intentLevel'
   }
-  if (step === 2) return d.goal ? null : 'goal'
-  if (step === 3) return DAYS.includes(d.days as (typeof DAYS)[number]) && DURATIONS.includes(d.duration as (typeof DURATIONS)[number]) ? null : 'training'
-  if (step === 4) return d.place && d.pref ? null : 'equipment'
+  if (step === HISTORY_STEP) {
+    if (d.trainedBefore === null) return 'trainingHistory'
+    if (!historyFollowUpsApply(d.trainedBefore)) return null
+    return d.totalMonths && d.lastTrained && d.consistency ? null : 'trainingHistory'
+  }
+  if (step === 3) return d.goal ? null : 'goal'
+  if (step === 4) return DAYS.includes(d.days as (typeof DAYS)[number]) && DURATIONS.includes(d.duration as (typeof DURATIONS)[number]) ? null : 'training'
+  if (step === 5) {
+    if (!d.place || !d.neat) return 'lifestyle'
+    // وزن الجسم متاح دائمًا، فالقائمة لا يمكن أن تكون فارغة بحقّ — الفراغ هنا
+    // يعني «لم يُسأل بعد» فيُحجب.
+    if (d.equipment.length === 0) return 'equipment'
+    // نمط الأكل مطلوب **حين يُعرض فقط** — سؤال مخفيّ لا يحجب زرًّا.
+    if (dietPatternApplies(d.intent) && !d.dietPattern) return 'lifestyle'
+    return null
+  }
+  if (step === 6) {
+    if (d.hasInjury === null) return 'limitations'
+    return injuryAreasApply(d.hasInjury) && d.injuries.length === 0 ? 'limitations' : null
+  }
   return null
 }
 
 /**
- * المستوى المُعلن + سنوات التدريب ⇒ مستوى الخبرة الذي يفهمه المولّد.
- *
- * ليست تسمية شكلية: `ExperienceLevel` يمرّ إلى `experienceToBand` ثم إلى محرّك
- * التقسيمة، فيتغيّر **عدد التمارين في الجلسة**، وتُثبَّت التقسيمة على «تلقائي»
- * للمبتدئ. والسنوات تُصحّح تقدير المستخدم لنفسه: من يقول «متوسط» وعنده أقل من
- * سنة أقرب إلى «مستجد» — فالسؤال له أثر حقيقي لا تجميلي.
+ * المستوى المُعلن + الوقائع الأربع ⇒ خبرة المولّد، عبر المصنّف المعتمد نفسه.
+ * لا ننسخ أوزان التصنيف هنا؛ نمرّر مفردات البنك إلى `classifyExperience`.
  */
-export function resolveExperienceLevel(level: V2Level | null, years: number | null): ExperienceLevel | undefined {
-  if (level === 'beginner') return 'beginner'
-  if (level === 'advanced') return 'advanced'
-  if (level === 'intermediate') return years !== null && years < 1 ? 'novice' : 'intermediate'
-  return undefined
+export function resolveExperienceLevel(
+  level: V2Level | null,
+  trainedBefore: TrainedBefore | null,
+  totalMonths: TotalMonthsBucket | null,
+  lastTrained: LastTrainedBucket | null,
+  consistency: TrainingConsistency | null,
+): ExperienceLevel | undefined {
+  if (!level || !trainedBefore) return undefined
+  const verdict = classifyExperience(historyState({
+    selfLevel: level,
+    trainedBefore,
+    ...(trainedBefore === 'never' ? {} : { totalMonths, lastTrained, consistency }),
+  }))
+  if (verdict.klass === 'complete_beginner') return 'beginner'
+  if (verdict.klass === 'beginner' || verdict.klass === 'early_intermediate') return 'novice'
+  if (verdict.klass === 'advanced') return 'advanced'
+  if (verdict.klass === 'returning') return verdict.score >= 55 ? 'intermediate' : 'novice'
+  return 'intermediate'
+}
+
+/** حالة البداية المشتقة التي يستهلكها المولّد: never لا يمكن أن تصبح returning. */
+export function resolveTrainingConsistency(
+  trainedBefore: TrainedBefore | null,
+  totalMonths: TotalMonthsBucket | null,
+  lastTrained: LastTrainedBucket | null,
+  consistency: TrainingConsistency | null,
+) {
+  if (!trainedBefore) return undefined
+  const status = classifyTrainingStatus(historyState({
+    trainedBefore,
+    ...(trainedBefore === 'never' ? {} : { totalMonths, lastTrained, consistency }),
+  }))
+  if (status === 'never') return 'new' as const
+  if (status === 'detrained') return 'returning' as const
+  if (status === 'inconsistent') return 'on_and_off' as const
+  return 'consistent' as const
+}
+
+function historyState(answers: Record<string, AnswerValue>): PersonalizationState {
+  return {
+    stateVersion: STATE_VERSION,
+    bankVersion: BANK_VERSION,
+    algoVersion: ALGO_VERSION,
+    userId: null,
+    lang: 'ar',
+    answers,
+    derived: {},
+    history: [],
+    queue: [],
+    clarifications: [],
+    startedAt: 0,
+    updatedAt: 0,
+    completedAt: null,
+  }
 }
 
 /**
@@ -240,28 +483,51 @@ export function canAdvance(step: number, d: Validatable): boolean {
 
 // ————————————————————— Draft persistence (owner-scoped, hostile-input safe) —————————————————————
 
-/** Strict guard: is this an untrusted value a usable v2 draft of the CURRENT version? */
+function optMember<T extends string>(value: unknown, allowed: readonly T[]): boolean {
+  return value === null || (typeof value === 'string' && (allowed as readonly string[]).includes(value))
+}
+
+function nullableNumber(value: unknown): boolean {
+  return value === null || (typeof value === 'number' && Number.isFinite(value))
+}
+
+/** Strict guard for an untrusted current or additively migratable v5 draft. */
 function isPersistedDraft(value: unknown): value is PersistedDraft {
   if (!value || typeof value !== 'object') return false
   const d = value as Partial<PersistedDraft>
-  if (d.v !== DRAFT_VERSION) return false
-  if (!Number.isInteger(d.step) || (d.step as number) < 0 || (d.step as number) > LAST_INPUT_STEP) return false
+  if (typeof d.v !== 'number' || !(READABLE_DRAFT_VERSIONS as readonly number[]).includes(d.v)) return false
+  const maxStep = d.v === 5 ? 4 : LAST_INPUT_STEP
+  if (!Number.isInteger(d.step) || (d.step as number) < 0 || (d.step as number) > maxStep) return false
+  if (![d.age, d.heightCm, d.weightKg].every(nullableNumber)) return false
+  // الاسم اختياري: غيابه من مسودّة أقدم مقبول، ووجوده بنوع خاطئ ليس كذلك.
+  if (d.name !== undefined && typeof d.name !== 'string') return false
+  if (d.equipment !== undefined && !Array.isArray(d.equipment)) return false
+  if (d.gender !== null && d.gender !== 'male' && d.gender !== 'female') return false
   if (d.goal !== null && d.goal !== 'cut' && d.goal !== 'maintain' && d.goal !== 'bulk') return false
   if (d.intent !== null && d.intent !== 'plan' && d.intent !== 'meals' && d.intent !== 'numbers') return false
   if (d.level !== null && d.level !== 'beginner' && d.level !== 'intermediate' && d.level !== 'advanced') return false
-  if (d.trainingYears !== null && typeof d.trainingYears !== 'number') return false
   if (typeof d.days !== 'number' || typeof d.duration !== 'number') return false
-  if (d.place !== null && typeof d.place !== 'string') return false
-  if (d.pref !== null && typeof d.pref !== 'string') return false
-  if (typeof d.hasInjury !== 'boolean') return false
+  if (d.place !== null && d.place !== 'gym' && d.place !== 'home' && d.place !== 'machines') return false
   if (typeof d.healthDataConsent !== 'boolean') return false
   if (!Array.isArray(d.injuries) || !d.injuries.every((x) => typeof x === 'string')) return false
+  if (d.v === 5) {
+    if (d.trainingYears !== null && typeof d.trainingYears !== 'number') return false
+    if (d.pref !== null && typeof d.pref !== 'string') return false
+    return typeof d.hasInjury === 'boolean'
+  }
+  if (!optMember(d.trainedBefore, TRAINED_BEFORE_VALUES)) return false
+  if (!optMember(d.totalMonths, TOTAL_MONTHS_VALUES)) return false
+  if (!optMember(d.lastTrained, LAST_TRAINED_VALUES)) return false
+  if (!optMember(d.consistency, TRAINING_CONSISTENCY_VALUES)) return false
+  if (!optMember(d.neat, NEAT_VALUES)) return false
+  if (!optMember(d.dietPattern, DIET_PATTERN_VALUES)) return false
+  if (d.hasInjury !== null && typeof d.hasInjury !== 'boolean') return false
   return true
 }
 
 /** Persist the current draft for the current owner (account id, or null/undefined guest). */
 export function saveDraftV2(draft: OnboardingV2Draft, userId?: string | null): void {
-  const payload: PersistedDraft = { v: DRAFT_VERSION, ...draft }
+  const payload: PersistedDraft = { v: DRAFT_VERSION, ...normalizeDraft(draft) }
   saveDraft(payload, userId)
 }
 
@@ -272,9 +538,58 @@ export function saveDraftV2(draft: OnboardingV2Draft, userId?: string | null): v
 export function loadDraftV2(userId?: string | null): OnboardingV2Draft | undefined {
   const raw = loadDraft<unknown>(userId)
   if (!isPersistedDraft(raw)) return undefined
-  const { v: _v, ...draft } = raw
-  void _v
-  return draft
+  return migrateDraft(raw)
+}
+
+function migrateDraft(raw: PersistedDraft): OnboardingV2Draft {
+  const legacy = raw.v === 5
+  return normalizeDraft({
+    step: legacy ? Math.min(raw.step as number, HISTORY_STEP) : raw.step as number,
+    // v5/v6 لا تحملان اسمًا — الغياب يعني «لم يُسأل»، لا اسمًا فارغًا مفقودًا.
+    name: normalizeName(raw.name),
+    age: raw.age ?? null,
+    gender: raw.gender ?? null,
+    heightCm: raw.heightCm ?? null,
+    weightKg: raw.weightKg ?? null,
+    intent: raw.intent ?? null,
+    level: raw.level ?? null,
+    trainedBefore: legacy ? null : raw.trainedBefore ?? null,
+    totalMonths: legacy ? null : raw.totalMonths ?? null,
+    lastTrained: legacy ? null : raw.lastTrained ?? null,
+    consistency: legacy ? null : raw.consistency ?? null,
+    goal: raw.goal ?? null,
+    days: raw.days as number,
+    duration: raw.duration as number,
+    place: raw.place ?? null,
+    // مسودّة أقدم لم تُسأل عن الأدوات؛ الفراغ جواب صادق («لم يُسأل») لا خسارة.
+    equipment: normalizeEquipment(raw.equipment),
+    equipmentTouched: raw.equipmentTouched === true,
+    neat: legacy ? null : raw.neat ?? null,
+    dietPattern: legacy ? null : raw.dietPattern ?? null,
+    // v5=false كان افتراضيًا لا جوابًا صريحًا؛ true وحدها معلومة يمكن حفظها.
+    hasInjury: legacy ? (raw.hasInjury === true ? true : null) : raw.hasInjury ?? null,
+    injuries: raw.injuries as string[],
+    healthDataConsent: raw.healthDataConsent as boolean,
+  })
+}
+
+/** يمحو الأجوبة الشرطية الخفية عند الحفظ والتحميل، لا في الواجهة وحدها. */
+export function normalizeDraft(draft: OnboardingV2Draft): OnboardingV2Draft {
+  const never = draft.trainedBefore === 'never'
+  return {
+    ...draft,
+    name: normalizeName(draft.name),
+    // التطبيع عند الحفظ والتحميل معًا: ترتيب السجلّ لا ترتيب النقر، وبلا
+    // تكرار، وبلا مفتاح لا ينتمي للاتّحاد مهما جاء من تخزين معطوب.
+    equipment: normalizeEquipment(draft.equipment),
+    // النية تغيّرت عن `meals` ⇒ جواب نمط الأكل المخفيّ يُمحى عند الحفظ
+    // والتحميل معًا، فلا يعود من التخزين جوابٌ لسؤال لم يعد معروضًا.
+    dietPattern: dietPatternApplies(draft.intent) ? draft.dietPattern : null,
+    totalMonths: never ? null : draft.totalMonths,
+    lastTrained: never ? null : draft.lastTrained,
+    consistency: never ? null : draft.consistency,
+    injuries: injuryAreasApply(draft.hasInjury) ? [...draft.injuries] : [],
+  }
 }
 
 /** Drop the draft (on successful finish) — resume must not reopen a completed setup. */

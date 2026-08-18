@@ -18,7 +18,9 @@ import { exerciseGuidance } from '@/lib/exerciseGuidance'
 import { muscleLabel } from '@/lib/muscles'
 import { getDayStamp } from '@/lib/today'
 import type { Difficulty, SetLog, WorkoutSession } from '@/lib/workoutSessions'
-import { clearActiveWorkout, saveActiveWorkout, type ActiveWorkout } from '@/lib/activeWorkout'
+import { saveActiveWorkout, type ActiveWorkout } from '@/lib/activeWorkout'
+import type { WriteResult } from '@/lib/safeStorage'
+import { foldDigits, formatNumber, formatNumeralsIn } from '@/lib/numberFormat'
 
 interface WorkoutModeProps {
   lang: Lang
@@ -31,6 +33,8 @@ interface WorkoutModeProps {
   userId?: string | null
   /** جلسة جارية تُستأنف بدل البدء من الصفر (ح-١). */
   resume?: ActiveWorkout
+  /** فشل/تعافي كتابة اللقطة الجارية — تعرضه الشاشة المالكة فوق وضع الجلسة. */
+  onSaveError?: (result: WriteResult | null) => void
 }
 
 interface ExState {
@@ -47,20 +51,24 @@ const MAX_REPS = 100
 
 /** أول رقم في نطاق التكرارات (مثال: «8–12» → «8»). */
 function lowerReps(reps: string): string {
-  const m = String(reps).match(/\d+/)
+  const m = foldDigits(String(reps)).match(/\d+/)
   return m ? m[0] : reps
 }
 
+// ⚠️ `\d` في JS أرقام ASCII حصرًا في كل الأوضاع — فكانت هذه الثلاث تعجز عن
+// قراءة «٨٥٫٥» وتعطي NaN فيظهر الحقل «غير صالح» أثناء جلسة تمرين حيّة.
+// الطيّ أولًا يجعل الصيغتين مقروءتين، والمخزَّن يبقى غربيًا قانونيًا.
+
 /** تعديل قيمة رقمية نصية بمقدار، مع قصّها بين صفر والحد الأقصى. */
 function adjust(value: string, delta: number, max: number): string {
-  const m = String(value).match(/-?[\d.]+/)
+  const m = foldDigits(String(value)).match(/-?[\d.]+/)
   const n = m ? Number(m[0]) : 0
   const next = Math.min(max, Math.max(0, Math.round((n + delta) * 100) / 100))
   return `${next}`
 }
 
 const parseVal = (v: string): number => {
-  const m = String(v ?? '').match(/-?[\d.]+/)
+  const m = foldDigits(String(v ?? '')).match(/-?[\d.]+/)
   return m ? Number(m[0]) : NaN
 }
 
@@ -79,7 +87,7 @@ function repsInvalid(v: string): boolean {
 }
 
 /** وضع التمرين النشط — شاشة كاملة، تمرين واحد في كل خطوة، تسجيل سريع. */
-export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, userId = null, resume }: WorkoutModeProps) {
+export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, userId = null, resume, onSaveError }: WorkoutModeProps) {
   const t = getStrings(lang).workout
   const d = workoutScreenStrings[lang]
   // (P10.1) أسهم التنقّل تتبع اتجاه اللغة: «التالي» مع اتجاه القراءة و«السابق/الرجوع» عكسه.
@@ -105,6 +113,8 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
   const [savedFlash, setSavedFlash] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const flashTimer = useRef<number | null>(null)
+  /** لا نعلن «حُفظت الجولة» إلا بعد نتيجة التخزين الفعلية للّقطة الجديدة. */
+  const flashAfterPersist = useRef(false)
 
   const effExId = (peId: string, exerciseId: string) => swap[peId] ?? exerciseId
 
@@ -141,7 +151,7 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
   useEffect(() => {
     // «تمرين فارغ» (بلا عناصر خطة) لا جلسة له تُستأنف.
     if (day.exercises.length === 0) return
-    saveActiveWorkout(userId, {
+    const result = saveActiveWorkout(userId, {
       dayId: day.id,
       dayNameAr: day.nameAr,
       dayNameEn: day.nameEn,
@@ -165,7 +175,13 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
       ),
       swap,
     })
-  }, [userId, day.id, day.nameAr, day.nameEn, day.exercises.length, startedAt, current, state, swap])
+    onSaveError?.(result === 'ok' ? null : result)
+    if (flashAfterPersist.current) {
+      flashAfterPersist.current = false
+      if (result === 'ok') flash()
+      else setSavedFlash(false)
+    }
+  }, [userId, day.id, day.nameAr, day.nameEn, day.exercises.length, startedAt, current, state, swap, onSaveError])
 
   // مؤقّت الراحة
   const [timer, setTimer] = useState<{ left: number; running: boolean }>({ left: 0, running: false })
@@ -218,7 +234,7 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
             <button type="button" onClick={onClose} aria-label={d.close} className="grid h-11 w-11 place-items-center rounded-xl border border-line bg-surface text-ink-700">
               <Icon name="X" className="h-5 w-5" />
             </button>
-            <p dir="auto" className="truncate text-sm font-black text-ink-900">{lang === 'en' ? day.nameEn || day.nameAr : day.nameAr || day.nameEn}</p>
+            <p dir="auto" className="truncate text-sm font-black text-ink-900">{formatNumeralsIn(lang === 'en' ? day.nameEn || day.nameAr : day.nameAr || day.nameEn, lang)}</p>
             <div className="h-11 w-11" />
           </div>
         </header>
@@ -265,9 +281,9 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
     // امنع اعتماد جولة بقيم خارج النطاق
     if (!set.completed && (weightInvalid(set.weightKg) || repsInvalid(set.actualReps))) return
     const willComplete = !set.completed
+    flashAfterPersist.current = willComplete
     setSet(idx, { completed: willComplete })
     if (willComplete) {
-      flash()
       startRest(pe.restSec)
     }
   }
@@ -365,7 +381,6 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
         }
       }),
     }
-    clearActiveWorkout(userId)
     onFinish(session)
   }
 
@@ -405,8 +420,8 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
             <Icon name="X" className="h-5 w-5" />
           </button>
           <div className="min-w-0 text-center">
-            <p dir="auto" className="truncate text-base font-black text-ink-900">{lang === 'en' ? day.nameEn || day.nameAr : day.nameAr || day.nameEn}</p>
-            <p className="text-sm text-ink-500">{current + 1} {t.of} {total}</p>
+            <p dir="auto" className="truncate text-base font-black text-ink-900">{formatNumeralsIn(lang === 'en' ? day.nameEn || day.nameAr : day.nameAr || day.nameEn, lang)}</p>
+            <p className="text-sm text-ink-500">{formatNumber(current + 1, lang)} {t.of} {formatNumber(total, lang)}</p>
           </div>
           <div className="h-11 w-11" />
         </div>
@@ -448,7 +463,7 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
           {/* الهدف سطر داخل الهويّة لا بطاقة مستقلّة — هو وصفُ التمرين لا مهمّة ثانية. */}
           <p className="mt-1.5 flex items-center gap-2 text-base font-bold text-ink-700">
             <Icon name="Target" className="h-4 w-4 shrink-0 text-primary-c" />
-            {t.target}: {pe.sets} {t.setsDone} × {pe.reps}
+            {t.target}: {formatNumber(pe.sets, lang)} {t.setsDone} × {formatNumeralsIn(String(pe.reps), lang)}
           </p>
 
           {/* ٢) السجلّ — سطر واحد. بلا سجلّ: دعوة خفيفة بدل بطاقتَي فراغ
@@ -457,13 +472,13 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
             <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 border-t border-line pt-3">
               {rec?.lastWeight && (
                 <span className="text-base font-bold text-ink-700">
-                  <span className="text-ink-500">{d.historyLast}:</span> {rec.lastWeight} {t.volumeUnit}
-                  {rec.lastReps ? ` × ${rec.lastReps}` : ''}
+                  <span className="text-ink-500">{d.historyLast}:</span> {formatNumeralsIn(String(rec.lastWeight), lang)} {t.volumeUnit}
+                  {rec.lastReps ? ` × ${formatNumeralsIn(String(rec.lastReps), lang)}` : ''}
                 </span>
               )}
               {rec?.bestWeight && (
                 <span className="text-base font-bold text-ink-700">
-                  <span className="text-ink-500">{d.historyBest}:</span> {rec.bestWeight} {t.volumeUnit}
+                  <span className="text-ink-500">{d.historyBest}:</span> {formatNumeralsIn(String(rec.bestWeight), lang)} {t.volumeUnit}
                 </span>
               )}
               {(rec?.lastWeight || rec?.lastReps) && (
@@ -494,8 +509,8 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
                 )}
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-base font-black text-ink-900">{d.setSingular} {st.setNumber}</span>
-                  <span className="text-sm font-bold text-ink-500">{t.target}: {st.targetReps}</span>
+                  <span className="text-base font-black text-ink-900">{d.setSingular} {formatNumber(st.setNumber, lang)}</span>
+                  <span className="text-sm font-bold text-ink-500">{t.target}: {formatNumeralsIn(String(st.targetReps), lang)}</span>
                 </div>
 
                 <div className="mt-3 grid grid-cols-2 gap-3">
@@ -787,7 +802,7 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
             </span>
             <h3 className="mt-4 text-lg font-black text-ink-900">{t.finishTitle}</h3>
             <p className="mt-1 text-sm text-ink-500">{doneCount < total ? t.finishBodyUnfinished : t.finishBodyDone}</p>
-            <p className="mt-3 text-xs font-bold text-ink-700">{t.progress}: {doneCount}/{total}</p>
+            <p className="mt-3 text-xs font-bold text-ink-700">{t.progress}: {formatNumber(doneCount, lang)}/{formatNumber(total, lang)}</p>
             <div className="mt-5 flex flex-col gap-2">
               <button type="button" onClick={doFinish} className="btn-primary w-full py-3 text-base">
                 <Icon name="CheckCircle2" className="h-5 w-5" />{t.confirmFinish}
@@ -826,7 +841,7 @@ function Stepper({ label, value, placeholder, step, mode, invalid, onChange, onS
           تسمية الحقل ليست زخرفًا: بلا قراءتها لا يُعرف أيّ رقم يُدخَل. رُفعت إلى ١٤px. */}
       <p className="mb-1 text-center text-sm font-bold text-ink-500">{label}</p>
       <div className="flex items-stretch gap-1.5">
-        <button type="button" onClick={() => onStep(-step)} aria-label="-" className="grid h-11 w-11 shrink-0 place-items-center rounded-lg border border-line bg-surface text-ink-700 active:scale-95">
+        <button type="button" onClick={() => onStep(-step)} aria-label={`${label} -${step}`} className="grid h-11 w-11 shrink-0 place-items-center rounded-lg border border-line bg-surface text-ink-700 active:scale-95">
           <Icon name="Minus" className="h-4 w-4" />
         </button>
         <input
@@ -834,13 +849,16 @@ function Stepper({ label, value, placeholder, step, mode, invalid, onChange, onS
             'w-full min-w-0 rounded-lg border bg-beige px-1 text-center text-base font-black text-ink-900 focus:outline-none',
             invalid ? 'border-danger focus:border-danger' : 'border-line focus:border-brand-500/50',
           )}
+          type="text"
           inputMode={mode}
+          autoComplete="off"
+          aria-label={label}
           aria-invalid={invalid}
           value={value}
           placeholder={placeholder}
           onChange={(e) => onChange(e.target.value)}
         />
-        <button type="button" onClick={() => onStep(step)} aria-label="+" className="grid h-11 w-11 shrink-0 place-items-center rounded-lg border border-line bg-surface text-ink-700 active:scale-95">
+        <button type="button" onClick={() => onStep(step)} aria-label={`${label} +${step}`} className="grid h-11 w-11 shrink-0 place-items-center rounded-lg border border-line bg-surface text-ink-700 active:scale-95">
           <Icon name="Plus" className="h-4 w-4" />
         </button>
       </div>

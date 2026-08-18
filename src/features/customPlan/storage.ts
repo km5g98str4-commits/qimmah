@@ -6,6 +6,7 @@
 
 import type { WorkoutPlan } from '@/types/workout'
 import { normalizePlanDayNames } from '@/lib/planDayNames'
+import { writeJson, type WriteResult } from '@/lib/safeStorage'
 
 /** مفتاح سجلّ الجداول المخصّصة (لكل حساب، لا لكل جهاز). */
 export const CUSTOM_PLAN_KEY = 'qimmah:customPlan:v1'
@@ -38,13 +39,17 @@ function loadRegistry(): Registry {
   }
 }
 
-function saveRegistry(reg: Registry): void {
-  if (typeof window === 'undefined') return
-  try {
-    window.localStorage.setItem(CUSTOM_PLAN_KEY, JSON.stringify(reg))
-  } catch {
-    /* تجاهل أخطاء التخزين */
-  }
+/**
+ * ── [FINAL-CONVERGENCE] الكتابة تُفحَص، ولا تُبتلع ─────────────────────────
+ * كان هذا `localStorage.setItem` خامًا داخل `catch` صامت («تجاهل أخطاء
+ * التخزين») — وهو بالضبط شكل BUG-009 الذي أُصلح في التغذية وبقي هنا. والأثر
+ * أن باني الجدول المخصّص كان يعرض إشعار «تم الحفظ» ويُغلق نفسه بعد كتابة
+ * فاشلة، فيفقد المستخدم خطته وهو يقرأ نجاحًا. ميثاق §5: لا شاشة نجاح قبل
+ * تأكيد الكتابة.
+ */
+function saveRegistry(reg: Registry): WriteResult {
+  if (typeof window === 'undefined') return 'unavailable'
+  return writeJson(CUSTOM_PLAN_KEY, reg)
 }
 
 /** يقرأ سجلّ الجدول المخصّص للمالك الحالي (أو undefined إن لم يوجد). */
@@ -62,12 +67,24 @@ export function hasCustomPlan(userId: string | null | undefined): boolean {
 }
 
 /** يحفظ الجدول المخصّص للمالك الحالي ويعتمده مصدرًا للجدول. */
-export function saveCustomPlan(userId: string | null | undefined, plan: WorkoutPlan): CustomPlanRecord {
+export function saveCustomPlan(
+  userId: string | null | undefined,
+  plan: WorkoutPlan,
+): { record: CustomPlanRecord; write: WriteResult } {
+  // [QIM-WEB-FOUNDER-UX-003/حزمة ٢] **لا حارس هنا — وهذا قرار لا سهو.**
+  //
+  // كان الحارس هنا فأسقط `test:sync` عند «إعادة رفع aux بعد الدمج»: هذه الدالة
+  // هي أيضًا مسار **استعادة السحابة** (`syncStores.ts` عند تهجير الخطة من
+  // الخادم). حجبها يمنع المستخدم من استرجاع خطته التي يملكها أصلًا — عقاب لا
+  // حماية، ونفس الحدّ المطبَّق على `measurementLog.saveLogs`.
+  //
+  // الفعل المدفوع هو **تأليف** خطة مخصّصة لا استعادتها، فالحارس عند مدخل
+  // التأليف (`WorkoutView` → `CustomPlanBuilder.onSave`) ويحرسه `test:access-gate`.
   const reg = loadRegistry()
   const rec: CustomPlanRecord = { plan, source: 'custom', updatedAt: new Date().toISOString() }
   reg[ownerKey(userId)] = rec
-  saveRegistry(reg)
-  return rec
+  const write = saveRegistry(reg)
+  return { record: rec, write }
 }
 
 /** يمسح الجدول المخصّص للمالك الحالي (يعود التبويب للجدول التلقائي). */

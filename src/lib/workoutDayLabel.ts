@@ -23,7 +23,21 @@ export function splitBaseEn(nameEn: string): string {
   return s || 'Workout'
 }
 
-/** تسمية اليوم النهائية بالعربية حسب موضعه في الخطة (index صفري). */
+/**
+ * تسمية اليوم النهائية بالعربية حسب موضعه في الخطة (index صفري).
+ *
+ * ── الرقم هنا يبقى **لاتينيًّا عمدًا** ──────────────────────────────────────
+ * (منقول من `codex/qimmah-final-release-convergence-001` — المعرفة وحدها دون
+ *  بقيّة الالتزام، فهي متجاوَزة؛ التفصيل في `docs/execution/qimmah-founder-qa/DEFERRED-ITEMS.md`.)
+ *
+ * هذا النصّ **يُخزَّن** داخل الخطة (`planGenerator` → `customization`)، فهو مُدخَل
+ * لا مخرَج. وتحويله عند التوليد يبدو إصلاحًا وهو ضرران:
+ *   ١. يخلط المخزون — خطط قديمة «اليوم 1» وجديدة «اليوم ١» على نفس الجهاز.
+ *   ٢. **ويُفرِغ حارسه**: `run-numeral-policy-proof` يشترط مُدخَلًا لاتينيًّا كي
+ *      يكون له ما يقيسه؛ فبتحويل المصدر تمرّ تأكيدات «بلا رقم لاتيني» **حتى لو
+ *      نُزع حدّ العرض كلّه** — أي يصير الحارس زينة.
+ * التحويل عند حدّ العرض حصرًا (`formatNumeralsIn`) — وهو يصلح المخزون القديم أيضًا.
+ */
 export function workoutDayNameAr(splitNameAr: string, index: number): string {
   return `اليوم ${index + 1} · ${splitBaseAr(splitNameAr)}`
 }

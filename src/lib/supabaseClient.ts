@@ -18,8 +18,38 @@ const DEFAULT_SUPABASE_URL = 'https://ledlypcyrtnzvjvhykwz.supabase.co'
 const DEFAULT_SUPABASE_ANON_KEY =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxlZGx5cGN5cnRuenZqdmh5a3d6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI5MjQ5MTAsImV4cCI6MjA5ODUwMDkxMH0.-wTD9w2vyDLaTjNJI_h_Bhjs2tqZ0bnNJHOUemCiKxo'
 
-const url = import.meta.env.VITE_SUPABASE_URL?.trim() || DEFAULT_SUPABASE_URL
-const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim() || DEFAULT_SUPABASE_ANON_KEY
+const explicitUrl = import.meta.env.VITE_SUPABASE_URL?.trim() || ''
+const explicitAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim() || ''
+/**
+ * الاحتياط المخبوز يسري في الإنتاج وحده — [FOUNDER-QA-PREVIEW-SAFETY].
+ *
+ * كان `|| DEFAULT_…` غير مشروط، فصار **غياب الضبط يعني «استعمل الإنتاج»**.
+ * وكل كاتب خطير يسأل `isSupabaseConfigured()` وحدها، فبناء المعاينة كان يملك
+ * سلطة كتابة كاملة على قاعدة الإنتاج: تجربة حقيقية · استهلاك كود حقيقي ·
+ * إنشاء مستخدم · إرسال بريد.
+ *
+ * الآن: في `founder_preview` بلا ضبط صريح ⇒ لا عنوان ولا مفتاح ⇒
+ * `isSupabaseConfigured()` كاذبة ⇒ كل كاتب يفشل **مغلقًا** بحالته الصادقة
+ * القائمة (`offline` · `none` · وضع الضيف). **سلوك الإنتاج لم يتغيّر حرفًا**:
+ * بلا `VITE_APP_ENV=founder_preview` يبقى الاحتياط كما كان.
+ */
+/**
+ * ⚠️ `import.meta.env.VITE_APP_ENV` يُقرأ **هنا مباشرةً** لا عبر `APP_ENV`
+ * المستورد — والفرق أمني لا أسلوبي.
+ *
+ * Vite يستبدل `import.meta.env.VITE_APP_ENV` بنصّ حرفي وقت البناء، فيصير
+ * الشرط ثابتًا يطويه المُصغِّر، ويُحذف `DEFAULT_SUPABASE_*` من حزمة المعاينة
+ * **بالكامل** (هزّ الأشجار). أما استدعاء دالّة من وحدة أخرى فلا يُطوى، فتبقى
+ * بيانات الاعتماد داخل الحزمة ولا يمنع استعمالها إلا قيمة منطقية وقت التشغيل.
+ *
+ * الفرق: «الاعتماد غير موجود في الأرتيفكت» أقوى من «موجود ولا يُستعمل». وقيس
+ * عليه: `grep` على `dist/assets/*.js` في بناء المعاينة يجب ألّا يجد العنوان.
+ */
+const IS_FOUNDER_PREVIEW = import.meta.env.VITE_APP_ENV === 'founder_preview'
+const url = explicitUrl || (IS_FOUNDER_PREVIEW ? '' : DEFAULT_SUPABASE_URL)
+const anonKey = explicitAnonKey || (IS_FOUNDER_PREVIEW ? '' : DEFAULT_SUPABASE_ANON_KEY)
+// المخرج الصريح محفوظ: تمرير `VITE_SUPABASE_URL`+`ANON_KEY` وقت البناء يتقدّم
+// على كل ما سبق، فمن أراد توجيه المعاينة لمشروع تجريبي فعل ذلك **بإعلان**.
 
 /** هل تمّ ضبط مزامنة Supabase في هذه النسخة؟ */
 export function isSupabaseConfigured(): boolean {

@@ -1,0 +1,607 @@
+
+> qimmah@1.0.0 test:release:convergence
+> node scripts/release/run-release-convergence.mjs --engine=webkit
+
+══════════════════════════════════════════════════════════════════════════════
+  QIMMAH RELEASE CONVERGENCE
+  HEAD      : 35951feb981d73fc503b023b57cd252d5c1bd040
+  subject   : docs(closure): [SOVEREIGN-002] ملكيّة حارات الجولة الثانية وعقودها البينية
+  started   : 2026-08-18T10:27:19.671Z
+══════════════════════════════════════════════════════════════════════════════
+
+▶ building artifact "prod" …
+vite v6.4.3 building for production...
+transforming...
+✓ 2608 modules transformed.
+rendering chunks...
+computing gzip size...
+dist-release/prod/index.html                                                      5.79 kB │ gzip:   2.08 kB
+dist-release/prod/assets/tajawal-arabic-900-normal-MgmkhdPX.woff2                 8.70 kB
+dist-release/prod/assets/tajawal-arabic-400-normal-CyCXRvzh.woff2                 8.93 kB
+dist-release/prod/assets/tajawal-arabic-500-normal-BZ8ojJNu.woff2                 8.94 kB
+dist-release/prod/assets/tajawal-arabic-700-normal-D2-eand5.woff2                 9.02 kB
+dist-release/prod/assets/tajawal-arabic-800-normal-TQp-UTiE.woff2                 9.45 kB
+dist-release/prod/assets/tajawal-latin-500-normal-CoYeBiSI.woff2                  9.90 kB
+dist-release/prod/assets/tajawal-latin-700-normal-BypgxfGb.woff2                 10.00 kB
+dist-release/prod/assets/tajawal-latin-900-normal-DURQZvFY.woff2                 10.22 kB
+dist-release/prod/assets/tajawal-latin-400-normal-BVNSOH3d.woff2                 10.26 kB
+dist-release/prod/assets/readex-pro-arabic-700-normal-EXBdNfUG.woff2             10.36 kB
+dist-release/prod/assets/readex-pro-arabic-600-normal-BHxn1TEo.woff2             10.40 kB
+dist-release/prod/assets/tajawal-latin-800-normal-CmI34b-g.woff2                 10.58 kB
+dist-release/prod/assets/tajawal-arabic-900-normal-CHO_pm7-.woff                 11.84 kB
+dist-release/prod/assets/tajawal-arabic-500-normal-CbVEaYEW.woff                 11.88 kB
+dist-release/prod/assets/tajawal-arabic-400-normal-DCQxawbB.woff                 12.01 kB
+dist-release/prod/assets/tajawal-arabic-700-normal-9L7Zusdl.woff                 12.16 kB
+dist-release/prod/assets/tajawal-arabic-800-normal-Bp_4IW2m.woff                 12.59 kB
+dist-release/prod/assets/readex-pro-arabic-700-normal-CrhlwrkQ.woff              12.79 kB
+dist-release/prod/assets/tajawal-latin-500-normal-DU9v6xgj.woff                  13.02 kB
+dist-release/prod/assets/readex-pro-arabic-600-normal-9mhVJBMn.woff              13.02 kB
+dist-release/prod/assets/tajawal-latin-700-normal-CV3bxpHe.woff                  13.16 kB
+dist-release/prod/assets/tajawal-latin-900-normal-BsVXXeFR.woff                  13.27 kB
+dist-release/prod/assets/tajawal-latin-400-normal-BdYcZznU.woff                  13.46 kB
+dist-release/prod/assets/tajawal-latin-800-normal-Dm5jVIIh.woff                  13.71 kB
+dist-release/prod/assets/readex-pro-latin-700-normal-oqSerPEB.woff2              14.98 kB
+dist-release/prod/assets/readex-pro-latin-600-normal-C3IhmgOg.woff2              15.08 kB
+dist-release/prod/assets/ibm-plex-sans-arabic-latin-400-normal-sbZiljcy.woff     18.29 kB
+dist-release/prod/assets/ibm-plex-sans-arabic-latin-700-normal-C6QlO9CN.woff     18.58 kB
+dist-release/prod/assets/readex-pro-latin-700-normal-L_HvUYJT.woff               18.82 kB
+dist-release/prod/assets/readex-pro-latin-600-normal-CeYg1m9V.woff               18.91 kB
+dist-release/prod/assets/ibm-plex-sans-arabic-latin-400-normal-Bo5KPYvw.woff2    19.16 kB
+dist-release/prod/assets/ibm-plex-sans-arabic-latin-500-normal-BKKTaxl1.woff     19.49 kB
+dist-release/prod/assets/ibm-plex-sans-arabic-latin-700-normal-BzSf6GNr.woff2    19.50 kB
+dist-release/prod/assets/ibm-plex-sans-arabic-latin-600-normal-5MnVa4PS.woff     19.72 kB
+dist-release/prod/assets/ibm-plex-sans-arabic-latin-500-normal-Cd6jVIg7.woff2    20.09 kB
+dist-release/prod/assets/ibm-plex-sans-arabic-latin-600-normal-KrqB56Mw.woff2    20.50 kB
+dist-release/prod/assets/jetbrains-mono-latin-400-normal-V6pRDFza.woff2          21.17 kB
+dist-release/prod/assets/jetbrains-mono-latin-500-normal-BWZEU5yA.woff2          21.83 kB
+dist-release/prod/assets/jetbrains-mono-latin-600-normal-C8RAYTDA.woff2          21.86 kB
+dist-release/prod/assets/jetbrains-mono-latin-400-normal-6-qcROiO.woff           27.50 kB
+dist-release/prod/assets/jetbrains-mono-latin-600-normal-BfsvjouI.woff           28.18 kB
+dist-release/prod/assets/jetbrains-mono-latin-500-normal-CJOVTJB7.woff           28.21 kB
+dist-release/prod/assets/ibm-plex-sans-arabic-arabic-400-normal-CyU-ddYS.woff2   42.85 kB
+dist-release/prod/assets/ibm-plex-sans-arabic-arabic-700-normal-DrtBj6UE.woff2   44.28 kB
+dist-release/prod/assets/ibm-plex-sans-arabic-arabic-500-normal-C4MQITzh.woff2   45.30 kB
+dist-release/prod/assets/ibm-plex-sans-arabic-arabic-600-normal-0pRdybE_.woff2   45.69 kB
+dist-release/prod/assets/ibm-plex-sans-arabic-arabic-400-normal-CZLC1jgY.woff    47.26 kB
+dist-release/prod/assets/ibm-plex-sans-arabic-arabic-700-normal-COV7B1nq.woff    47.43 kB
+dist-release/prod/assets/ibm-plex-sans-arabic-arabic-600-normal-B3qNl98V.woff    49.94 kB
+dist-release/prod/assets/ibm-plex-sans-arabic-arabic-500-normal-XmtXq_5I.woff    50.11 kB
+dist-release/prod/assets/index-04AYqzXM.css                                      90.53 kB │ gzip:  15.92 kB
+dist-release/prod/assets/demoMode-DMuI80oh.js                                     0.13 kB │ gzip:   0.13 kB
+dist-release/prod/assets/workoutSessions-D8y1hKfm.js                              0.19 kB │ gzip:   0.16 kB
+dist-release/prod/assets/web-DQnzHUkM.js                                          0.22 kB │ gzip:   0.18 kB
+dist-release/prod/assets/ExerciseName-C8Qj0C42.js                                 0.38 kB │ gzip:   0.25 kB
+dist-release/prod/assets/index-CqV8ZKFy.js                                        0.40 kB │ gzip:   0.28 kB
+dist-release/prod/assets/passwordPolicy-Bi6tsFTi.js                               0.42 kB │ gzip:   0.29 kB
+dist-release/prod/assets/resetQimmah-tCLYG065.js                                  0.42 kB │ gzip:   0.29 kB
+dist-release/prod/assets/index-B0-rBjzp.js                                        0.42 kB │ gzip:   0.29 kB
+dist-release/prod/assets/numberFormat-Br5gPRjq.js                                 0.43 kB │ gzip:   0.31 kB
+dist-release/prod/assets/AppLoading-5wfdAsJv.js                                   0.47 kB │ gzip:   0.33 kB
+dist-release/prod/assets/index-jOzaOY6e.js                                        0.53 kB │ gzip:   0.31 kB
+dist-release/prod/assets/index-21E5kjeg.js                                        0.55 kB │ gzip:   0.31 kB
+dist-release/prod/assets/progressStats-C4ENH3G1.js                                0.72 kB │ gzip:   0.46 kB
+dist-release/prod/assets/useAchievements-DfQZ76zV.js                              0.75 kB │ gzip:   0.44 kB
+dist-release/prod/assets/index-9cG9B3lO.js                                        0.75 kB │ gzip:   0.45 kB
+dist-release/prod/assets/index-D3TA6K9F.js                                        0.80 kB │ gzip:   0.43 kB
+dist-release/prod/assets/TermsView-DitTw2Nw.js                                    0.81 kB │ gzip:   0.46 kB
+dist-release/prod/assets/PrivacyView-Chmc44FV.js                                  0.81 kB │ gzip:   0.46 kB
+dist-release/prod/assets/custom-error-a-nY_hhY.js                                 0.86 kB │ gzip:   0.48 kB
+dist-release/prod/assets/nativeFeedback-BNRtMxl6.js                               0.87 kB │ gzip:   0.52 kB
+dist-release/prod/assets/today-BYpu3ITE.js                                        0.90 kB │ gzip:   0.57 kB
+dist-release/prod/assets/web-CHrDgsBq.js                                          0.94 kB │ gzip:   0.45 kB
+dist-release/prod/assets/firstWin-Cpgx2h5q.js                                     1.01 kB │ gzip:   0.54 kB
+dist-release/prod/assets/web-C5yrCzAZ.js                                          1.10 kB │ gzip:   0.54 kB
+dist-release/prod/assets/measurementLog-Hu0VgOFQ.js                               1.16 kB │ gzip:   0.60 kB
+dist-release/prod/assets/StandaloneAppScreen-Dehlu-u8.js                          1.21 kB │ gzip:   0.67 kB
+dist-release/prod/assets/streaks-AG88dl7f.js                                      1.25 kB │ gzip:   0.68 kB
+dist-release/prod/assets/validation-CoY7UO4d.js                                   1.33 kB │ gzip:   0.79 kB
+dist-release/prod/assets/policyCopy-Br1Xzt5h.js                                   1.35 kB │ gzip:   0.67 kB
+dist-release/prod/assets/ContactView-BEi5Lr5r.js                                  1.49 kB │ gzip:   0.69 kB
+dist-release/prod/assets/NotFoundView-Bt2PQcs6.js                                 1.60 kB │ gzip:   0.74 kB
+dist-release/prod/assets/SuccessToast-Bf7OlbCT.js                                 1.65 kB │ gzip:   0.89 kB
+dist-release/prod/assets/AccountRequiredView-DWbsUYGf.js                          1.73 kB │ gzip:   0.77 kB
+dist-release/prod/assets/stepCounter-Bq0vfcRR.js                                  1.78 kB │ gzip:   0.81 kB
+dist-release/prod/assets/exerciseHistory-B5R12VIa.js                              1.87 kB │ gzip:   0.91 kB
+dist-release/prod/assets/easySession-pOwtnfch.js                                  2.34 kB │ gzip:   1.14 kB
+dist-release/prod/assets/VerifyEmailView-B77QD4z-.js                              2.42 kB │ gzip:   1.22 kB
+dist-release/prod/assets/StateBlock-DT5qIYci.js                                   2.52 kB │ gzip:   0.97 kB
+dist-release/prod/assets/web-DBEurd-I.js                                          3.55 kB │ gzip:   1.16 kB
+dist-release/prod/assets/nutritionTracking-CsRSjBri.js                            3.81 kB │ gzip:   1.68 kB
+dist-release/prod/assets/muscleCoverage-D2pHev9w.js                               3.86 kB │ gzip:   1.79 kB
+dist-release/prod/assets/planRationale-Bj6o830w.js                                3.90 kB │ gzip:   1.49 kB
+dist-release/prod/assets/workoutCalendar-Cgnq0dCx.js                              4.16 kB │ gzip:   1.70 kB
+dist-release/prod/assets/healthKit-bfkGxuRm.js                                    4.90 kB │ gzip:   1.38 kB
+dist-release/prod/assets/nutritionScreen-BOEqmC5k.js                              5.13 kB │ gzip:   2.07 kB
+dist-release/prod/assets/ResetPasswordView-YHMUAseD.js                            5.17 kB │ gzip:   1.92 kB
+dist-release/prod/assets/AchievementToaster-HnJH5A2Z.js                           5.38 kB │ gzip:   2.29 kB
+dist-release/prod/assets/library-DeSjiajm.js                                      6.25 kB │ gzip:   2.44 kB
+dist-release/prod/assets/historyStore-B7M6AnX2.js                                 6.43 kB │ gzip:   2.02 kB
+dist-release/prod/assets/PremiumGate-CC0ct8Wc.js                                  7.69 kB │ gzip:   3.21 kB
+dist-release/prod/assets/LoginView-BOHcFeSv.js                                    7.88 kB │ gzip:   2.84 kB
+dist-release/prod/assets/machineCatalog-CDVydKQr.js                               9.28 kB │ gzip:   2.04 kB
+dist-release/prod/assets/engine-CJYDvVlz.js                                       9.44 kB │ gzip:   3.32 kB
+dist-release/prod/assets/MobileShell-CRWT3NiY.js                                 10.67 kB │ gzip:   3.96 kB
+dist-release/prod/assets/RecoveryView-CA5f-3WT.js                                11.05 kB │ gzip:   4.04 kB
+dist-release/prod/assets/index-Bi4lxoKc.js                                       11.84 kB │ gzip:   4.87 kB
+dist-release/prod/assets/StepsView-DKVUwrP8.js                                   12.58 kB │ gzip:   4.51 kB
+dist-release/prod/assets/ScanFoodPanel-76858Vns.js                               12.88 kB │ gzip:   5.21 kB
+dist-release/prod/assets/CalcExplainerView-DT9w-09m.js                           13.61 kB │ gzip:   4.02 kB
+dist-release/prod/assets/MyStatsView-BzMD682R.js                                 13.89 kB │ gzip:   4.91 kB
+dist-release/prod/assets/guard-CiPVcwnX.js                                       14.51 kB │ gzip:   3.85 kB
+dist-release/prod/assets/planGenerator-pNKUb_fq.js                               22.75 kB │ gzip:   7.91 kB
+dist-release/prod/assets/SettingsView-C-USFiP4.js                                25.18 kB │ gzip:   6.54 kB
+dist-release/prod/assets/settingsPreferences-9TMgA2rd.js                         28.50 kB │ gzip:   9.90 kB
+dist-release/prod/assets/NutritionView-CqlUhow9.js                               36.45 kB │ gzip:  11.21 kB
+dist-release/prod/assets/eCalc-DXVa5Dul.js                                       40.43 kB │ gzip:  12.78 kB
+dist-release/prod/assets/BodyModel3D-Ck6A7YFN.js                                 42.58 kB │ gzip:  16.32 kB
+dist-release/prod/assets/vendor-icons-Bx6MXh7W.js                                46.69 kB │ gzip:   9.81 kB
+dist-release/prod/assets/DashboardView-Xmhpff-x.js                               49.39 kB │ gzip:  15.66 kB
+dist-release/prod/assets/ExerciseMedia-CDQENOKY.js                               49.70 kB │ gzip:   6.04 kB
+dist-release/prod/assets/ProfileView-B591q3tv.js                                 51.62 kB │ gzip:  15.06 kB
+dist-release/prod/assets/ProgressView-Dlz5zbYH.js                                55.44 kB │ gzip:  17.08 kB
+dist-release/prod/assets/wellnessPlan-BfPUsbvg.js                                70.59 kB │ gzip:  15.76 kB
+dist-release/prod/assets/index-D-m8F6Zh.js                                       80.02 kB │ gzip:  19.74 kB
+dist-release/prod/assets/index-DWgSBTiN.js                                       89.69 kB │ gzip:  30.37 kB
+dist-release/prod/assets/WorkoutView-CO7xSRRy.js                                104.45 kB │ gzip:  27.39 kB
+dist-release/prod/assets/vendor-react-DBoTRrZA.js                               142.79 kB │ gzip:  45.68 kB
+dist-release/prod/assets/feature-nutrition-catalog-D9pLv6e3.js                  189.24 kB │ gzip:  31.40 kB
+dist-release/prod/assets/SetupView-JJzCtfN1.js                                  208.32 kB │ gzip:  52.23 kB
+dist-release/prod/assets/index-Qj1tetv6.js                                      213.46 kB │ gzip:  55.27 kB
+dist-release/prod/assets/index-B9do_8fQ.js                                      285.60 kB │ gzip:  79.86 kB
+dist-release/prod/assets/vendor-zxing-BboT-qY3.js                               443.38 kB │ gzip: 111.54 kB
+dist-release/prod/assets/ExerciseLibraryView-xAXIFXbT.js                        471.38 kB │ gzip:  47.63 kB
+✓ built in 4.73s
+
+▶ building artifact "mock" …
+vite v6.4.3 building for production...
+transforming...
+✓ 2608 modules transformed.
+rendering chunks...
+computing gzip size...
+dist-release/mock/index.html                                                      5.79 kB │ gzip:   2.08 kB
+dist-release/mock/assets/tajawal-arabic-900-normal-MgmkhdPX.woff2                 8.70 kB
+dist-release/mock/assets/tajawal-arabic-400-normal-CyCXRvzh.woff2                 8.93 kB
+dist-release/mock/assets/tajawal-arabic-500-normal-BZ8ojJNu.woff2                 8.94 kB
+dist-release/mock/assets/tajawal-arabic-700-normal-D2-eand5.woff2                 9.02 kB
+dist-release/mock/assets/tajawal-arabic-800-normal-TQp-UTiE.woff2                 9.45 kB
+dist-release/mock/assets/tajawal-latin-500-normal-CoYeBiSI.woff2                  9.90 kB
+dist-release/mock/assets/tajawal-latin-700-normal-BypgxfGb.woff2                 10.00 kB
+dist-release/mock/assets/tajawal-latin-900-normal-DURQZvFY.woff2                 10.22 kB
+dist-release/mock/assets/tajawal-latin-400-normal-BVNSOH3d.woff2                 10.26 kB
+dist-release/mock/assets/readex-pro-arabic-700-normal-EXBdNfUG.woff2             10.36 kB
+dist-release/mock/assets/readex-pro-arabic-600-normal-BHxn1TEo.woff2             10.40 kB
+dist-release/mock/assets/tajawal-latin-800-normal-CmI34b-g.woff2                 10.58 kB
+dist-release/mock/assets/tajawal-arabic-900-normal-CHO_pm7-.woff                 11.84 kB
+dist-release/mock/assets/tajawal-arabic-500-normal-CbVEaYEW.woff                 11.88 kB
+dist-release/mock/assets/tajawal-arabic-400-normal-DCQxawbB.woff                 12.01 kB
+dist-release/mock/assets/tajawal-arabic-700-normal-9L7Zusdl.woff                 12.16 kB
+dist-release/mock/assets/tajawal-arabic-800-normal-Bp_4IW2m.woff                 12.59 kB
+dist-release/mock/assets/readex-pro-arabic-700-normal-CrhlwrkQ.woff              12.79 kB
+dist-release/mock/assets/tajawal-latin-500-normal-DU9v6xgj.woff                  13.02 kB
+dist-release/mock/assets/readex-pro-arabic-600-normal-9mhVJBMn.woff              13.02 kB
+dist-release/mock/assets/tajawal-latin-700-normal-CV3bxpHe.woff                  13.16 kB
+dist-release/mock/assets/tajawal-latin-900-normal-BsVXXeFR.woff                  13.27 kB
+dist-release/mock/assets/tajawal-latin-400-normal-BdYcZznU.woff                  13.46 kB
+dist-release/mock/assets/tajawal-latin-800-normal-Dm5jVIIh.woff                  13.71 kB
+dist-release/mock/assets/readex-pro-latin-700-normal-oqSerPEB.woff2              14.98 kB
+dist-release/mock/assets/readex-pro-latin-600-normal-C3IhmgOg.woff2              15.08 kB
+dist-release/mock/assets/ibm-plex-sans-arabic-latin-400-normal-sbZiljcy.woff     18.29 kB
+dist-release/mock/assets/ibm-plex-sans-arabic-latin-700-normal-C6QlO9CN.woff     18.58 kB
+dist-release/mock/assets/readex-pro-latin-700-normal-L_HvUYJT.woff               18.82 kB
+dist-release/mock/assets/readex-pro-latin-600-normal-CeYg1m9V.woff               18.91 kB
+dist-release/mock/assets/ibm-plex-sans-arabic-latin-400-normal-Bo5KPYvw.woff2    19.16 kB
+dist-release/mock/assets/ibm-plex-sans-arabic-latin-500-normal-BKKTaxl1.woff     19.49 kB
+dist-release/mock/assets/ibm-plex-sans-arabic-latin-700-normal-BzSf6GNr.woff2    19.50 kB
+dist-release/mock/assets/ibm-plex-sans-arabic-latin-600-normal-5MnVa4PS.woff     19.72 kB
+dist-release/mock/assets/ibm-plex-sans-arabic-latin-500-normal-Cd6jVIg7.woff2    20.09 kB
+dist-release/mock/assets/ibm-plex-sans-arabic-latin-600-normal-KrqB56Mw.woff2    20.50 kB
+dist-release/mock/assets/jetbrains-mono-latin-400-normal-V6pRDFza.woff2          21.17 kB
+dist-release/mock/assets/jetbrains-mono-latin-500-normal-BWZEU5yA.woff2          21.83 kB
+dist-release/mock/assets/jetbrains-mono-latin-600-normal-C8RAYTDA.woff2          21.86 kB
+dist-release/mock/assets/jetbrains-mono-latin-400-normal-6-qcROiO.woff           27.50 kB
+dist-release/mock/assets/jetbrains-mono-latin-600-normal-BfsvjouI.woff           28.18 kB
+dist-release/mock/assets/jetbrains-mono-latin-500-normal-CJOVTJB7.woff           28.21 kB
+dist-release/mock/assets/ibm-plex-sans-arabic-arabic-400-normal-CyU-ddYS.woff2   42.85 kB
+dist-release/mock/assets/ibm-plex-sans-arabic-arabic-700-normal-DrtBj6UE.woff2   44.28 kB
+dist-release/mock/assets/ibm-plex-sans-arabic-arabic-500-normal-C4MQITzh.woff2   45.30 kB
+dist-release/mock/assets/ibm-plex-sans-arabic-arabic-600-normal-0pRdybE_.woff2   45.69 kB
+dist-release/mock/assets/ibm-plex-sans-arabic-arabic-400-normal-CZLC1jgY.woff    47.26 kB
+dist-release/mock/assets/ibm-plex-sans-arabic-arabic-700-normal-COV7B1nq.woff    47.43 kB
+dist-release/mock/assets/ibm-plex-sans-arabic-arabic-600-normal-B3qNl98V.woff    49.94 kB
+dist-release/mock/assets/ibm-plex-sans-arabic-arabic-500-normal-XmtXq_5I.woff    50.11 kB
+dist-release/mock/assets/index-04AYqzXM.css                                      90.53 kB │ gzip:  15.92 kB
+dist-release/mock/assets/demoMode-DMuI80oh.js                                     0.13 kB │ gzip:   0.13 kB
+dist-release/mock/assets/workoutSessions-D8y1hKfm.js                              0.19 kB │ gzip:   0.16 kB
+dist-release/mock/assets/web-Cg03Uu5M.js                                          0.22 kB │ gzip:   0.18 kB
+dist-release/mock/assets/ExerciseName-Bxv0T259.js                                 0.38 kB │ gzip:   0.25 kB
+dist-release/mock/assets/index-B0og7mfY.js                                        0.40 kB │ gzip:   0.28 kB
+dist-release/mock/assets/passwordPolicy-Bi6tsFTi.js                               0.42 kB │ gzip:   0.29 kB
+dist-release/mock/assets/resetQimmah-CLR3b2Ga.js                                  0.42 kB │ gzip:   0.29 kB
+dist-release/mock/assets/index-0WJ6SePE.js                                        0.42 kB │ gzip:   0.29 kB
+dist-release/mock/assets/numberFormat-Br5gPRjq.js                                 0.43 kB │ gzip:   0.31 kB
+dist-release/mock/assets/AppLoading-BoyShNQ2.js                                   0.47 kB │ gzip:   0.33 kB
+dist-release/mock/assets/index-DvbxV-n6.js                                        0.53 kB │ gzip:   0.31 kB
+dist-release/mock/assets/index-DwtVnrdV.js                                        0.55 kB │ gzip:   0.31 kB
+dist-release/mock/assets/progressStats-BViUWYqj.js                                0.72 kB │ gzip:   0.46 kB
+dist-release/mock/assets/useAchievements-B-4NzfvP.js                              0.75 kB │ gzip:   0.44 kB
+dist-release/mock/assets/index-Bz3i7jgu.js                                        0.75 kB │ gzip:   0.45 kB
+dist-release/mock/assets/index-DmDUZcxf.js                                        0.80 kB │ gzip:   0.43 kB
+dist-release/mock/assets/TermsView-BVoZYb3F.js                                    0.81 kB │ gzip:   0.47 kB
+dist-release/mock/assets/PrivacyView-D0bnN81H.js                                  0.81 kB │ gzip:   0.47 kB
+dist-release/mock/assets/custom-error-a-nY_hhY.js                                 0.86 kB │ gzip:   0.48 kB
+dist-release/mock/assets/nativeFeedback-BFEeMz_W.js                               0.87 kB │ gzip:   0.52 kB
+dist-release/mock/assets/today-BYpu3ITE.js                                        0.90 kB │ gzip:   0.57 kB
+dist-release/mock/assets/web-Cx2QFZ9z.js                                          0.94 kB │ gzip:   0.45 kB
+dist-release/mock/assets/firstWin-CQHMQzsq.js                                     1.01 kB │ gzip:   0.54 kB
+dist-release/mock/assets/web-BxM5jibA.js                                          1.10 kB │ gzip:   0.53 kB
+dist-release/mock/assets/measurementLog-Hu0VgOFQ.js                               1.16 kB │ gzip:   0.60 kB
+dist-release/mock/assets/StandaloneAppScreen-CAXwS96G.js                          1.21 kB │ gzip:   0.67 kB
+dist-release/mock/assets/streaks-AG88dl7f.js                                      1.25 kB │ gzip:   0.68 kB
+dist-release/mock/assets/validation-CVWQpAa8.js                                   1.33 kB │ gzip:   0.79 kB
+dist-release/mock/assets/policyCopy-Br1Xzt5h.js                                   1.35 kB │ gzip:   0.67 kB
+dist-release/mock/assets/ContactView-BzSZ0TmC.js                                  1.49 kB │ gzip:   0.69 kB
+dist-release/mock/assets/NotFoundView-BAYbX9E3.js                                 1.60 kB │ gzip:   0.74 kB
+dist-release/mock/assets/SuccessToast-CHLQaAGX.js                                 1.65 kB │ gzip:   0.89 kB
+dist-release/mock/assets/AccountRequiredView-BO8VOIEk.js                          1.73 kB │ gzip:   0.77 kB
+dist-release/mock/assets/stepCounter-Bq0vfcRR.js                                  1.78 kB │ gzip:   0.81 kB
+dist-release/mock/assets/exerciseHistory-B5R12VIa.js                              1.87 kB │ gzip:   0.91 kB
+dist-release/mock/assets/easySession-YEq0M06F.js                                  2.34 kB │ gzip:   1.15 kB
+dist-release/mock/assets/VerifyEmailView-T2ZvLWal.js                              2.42 kB │ gzip:   1.22 kB
+dist-release/mock/assets/StateBlock-CDnu8gLj.js                                   2.52 kB │ gzip:   0.98 kB
+dist-release/mock/assets/web-CIYtyePf.js                                          3.55 kB │ gzip:   1.16 kB
+dist-release/mock/assets/nutritionTracking-DjyR_mjt.js                            3.81 kB │ gzip:   1.68 kB
+dist-release/mock/assets/muscleCoverage-BFrB57LE.js                               3.86 kB │ gzip:   1.79 kB
+dist-release/mock/assets/planRationale-N7V5aAIf.js                                3.90 kB │ gzip:   1.49 kB
+dist-release/mock/assets/workoutCalendar-D5U7WEOF.js                              4.16 kB │ gzip:   1.70 kB
+dist-release/mock/assets/healthKit-CSnsge-W.js                                    4.90 kB │ gzip:   1.38 kB
+dist-release/mock/assets/nutritionScreen-BOEqmC5k.js                              5.13 kB │ gzip:   2.07 kB
+dist-release/mock/assets/ResetPasswordView-B6zMlHhO.js                            5.17 kB │ gzip:   1.92 kB
+dist-release/mock/assets/AchievementToaster-BGEhQO8M.js                           5.38 kB │ gzip:   2.29 kB
+dist-release/mock/assets/library-DeSjiajm.js                                      6.25 kB │ gzip:   2.44 kB
+dist-release/mock/assets/historyStore-B7M6AnX2.js                                 6.43 kB │ gzip:   2.02 kB
+dist-release/mock/assets/PremiumGate-Bg9NBYZl.js                                  7.69 kB │ gzip:   3.21 kB
+dist-release/mock/assets/LoginView-C-aIet8l.js                                    7.88 kB │ gzip:   2.84 kB
+dist-release/mock/assets/machineCatalog-Dp86dggx.js                               9.28 kB │ gzip:   2.04 kB
+dist-release/mock/assets/engine-MzfEcG2G.js                                       9.44 kB │ gzip:   3.32 kB
+dist-release/mock/assets/MobileShell-E57x-eJ2.js                                 10.67 kB │ gzip:   3.96 kB
+dist-release/mock/assets/RecoveryView-BT_R09Vp.js                                11.05 kB │ gzip:   4.04 kB
+dist-release/mock/assets/index-D5ToC0FB.js                                       11.84 kB │ gzip:   4.87 kB
+dist-release/mock/assets/StepsView-CEJa8a0z.js                                   12.58 kB │ gzip:   4.51 kB
+dist-release/mock/assets/ScanFoodPanel-DcFDS3A7.js                               12.88 kB │ gzip:   5.21 kB
+dist-release/mock/assets/CalcExplainerView-DgK0wMFL.js                           13.61 kB │ gzip:   4.02 kB
+dist-release/mock/assets/MyStatsView-6lOxs5c3.js                                 13.89 kB │ gzip:   4.92 kB
+dist-release/mock/assets/guard-CiPVcwnX.js                                       14.51 kB │ gzip:   3.85 kB
+dist-release/mock/assets/planGenerator-pxeRrVDN.js                               22.75 kB │ gzip:   7.91 kB
+dist-release/mock/assets/SettingsView-5Z4sAots.js                                25.18 kB │ gzip:   6.54 kB
+dist-release/mock/assets/settingsPreferences-BtgW7XJx.js                         28.53 kB │ gzip:   9.92 kB
+dist-release/mock/assets/NutritionView-PU2ippWP.js                               36.45 kB │ gzip:  11.21 kB
+dist-release/mock/assets/eCalc-CYxlZBGQ.js                                       40.43 kB │ gzip:  12.78 kB
+dist-release/mock/assets/BodyModel3D-BRl7dHYx.js                                 42.58 kB │ gzip:  16.32 kB
+dist-release/mock/assets/vendor-icons-Bx6MXh7W.js                                46.69 kB │ gzip:   9.81 kB
+dist-release/mock/assets/DashboardView-DN6s6T-M.js                               49.39 kB │ gzip:  15.67 kB
+dist-release/mock/assets/ExerciseMedia-Bk3PIt_G.js                               49.70 kB │ gzip:   6.04 kB
+dist-release/mock/assets/ProfileView-CfoWmWsp.js                                 51.62 kB │ gzip:  15.06 kB
+dist-release/mock/assets/ProgressView-D6wVO40i.js                                55.44 kB │ gzip:  17.08 kB
+dist-release/mock/assets/wellnessPlan-kwDKweFi.js                                70.59 kB │ gzip:  15.76 kB
+dist-release/mock/assets/index-DNsKKkwu.js                                       80.02 kB │ gzip:  19.74 kB
+dist-release/mock/assets/index-DWgSBTiN.js                                       89.69 kB │ gzip:  30.37 kB
+dist-release/mock/assets/WorkoutView-BztlEI7_.js                                104.45 kB │ gzip:  27.40 kB
+dist-release/mock/assets/vendor-react-DBoTRrZA.js                               142.79 kB │ gzip:  45.68 kB
+dist-release/mock/assets/feature-nutrition-catalog-D9pLv6e3.js                  189.24 kB │ gzip:  31.40 kB
+dist-release/mock/assets/SetupView-BuZDvV7n.js                                  208.32 kB │ gzip:  52.23 kB
+dist-release/mock/assets/index-Qj1tetv6.js                                      213.46 kB │ gzip:  55.27 kB
+dist-release/mock/assets/index-C9NUKVev.js                                      283.28 kB │ gzip:  79.26 kB
+dist-release/mock/assets/vendor-zxing-BboT-qY3.js                               443.38 kB │ gzip: 111.54 kB
+dist-release/mock/assets/ExerciseLibraryView-BHiM_BkE.js                        471.38 kB │ gzip:  47.63 kB
+✓ built in 4.41s
+▶ serving "prod" at http://localhost:5411
+▶ serving "mock" at http://localhost:5412
+▶ engines: webkit 26.5
+
+──────────────────────────────────────────────────────────────────────────────
+▶ p1-preview-user @ webkit
+
+  ── entry → onboarding → personalized reveal
+    ✓ landing offers guest entry and reaches the first question
+    ✓ reveal shows a personalized plan (day count + session length present)
+    ✓ reveal offers BOTH a Premium purchase and a free-preview exit
+    ✓ Premium CTA opens externally with noopener noreferrer
+    ✓ reveal copy carries no forbidden Premium promise (lifetime / مدى الحياة)
+    ✓ declining Premium lands inside the app (Preview), not a dead end
+
+  ── Preview browses every surface (block the action, not the page)
+    ✓ #/dashboard is browsable in Preview
+    ✓ #/workout is browsable in Preview
+    ✓ #/exercises is browsable in Preview
+    ✓ #/nutrition is browsable in Preview
+    ✓ #/progress is browsable in Preview
+    ✓ #/measurements is browsable in Preview
+    ✓ #/profile is browsable in Preview
+    ✓ #/stats is browsable in Preview
+    ✓ #/steps is browsable in Preview
+    ✓ #/recovery is browsable in Preview
+    ✓ #/settings is browsable in Preview
+    ✓ #/calc is browsable in Preview
+    ✓ #/privacy is browsable in Preview
+    ✓ #/terms is browsable in Preview
+    ✓ #/contact is browsable in Preview
+    ✓ exercise detail is reachable in Preview and owns the URL
+
+  ── every paid mutation is refused honestly (gate opens · zero writes · no raw exception)
+    ✓ workout.start — affordance reachable
+    ✓ workout.start — Premium surface opens
+    ✓ workout.start — no paid state written
+    ✓ workout.start — no raw exception surfaces
+    ✓ workout.startEmpty — affordance reachable
+    ✓ workout.startEmpty — Premium surface opens
+    ✓ workout.startEmpty — no paid state written
+    ✓ workout.startEmpty — no raw exception surfaces
+    ✓ nutrition.addFood — affordance reachable
+    ✓ nutrition.addFood — Premium surface opens
+    ✓ nutrition.addFood — no paid state written
+    ✓ nutrition.addFood — no raw exception surfaces
+    ✓ nutrition.water — affordance reachable
+    ✓ nutrition.water — Premium surface opens
+    ✓ nutrition.water — no paid state written
+    ✓ nutrition.water — no raw exception surfaces
+    ✓ recovery.log — affordance reachable
+    ✓ recovery.log — Premium surface opens
+    ✓ recovery.log — no paid state written
+    ✓ recovery.log — no raw exception surfaces
+    ✓ progress.logMeasurement — affordance reachable
+    ✓ progress.logMeasurement — Premium surface opens
+    ✓ progress.logMeasurement — no paid state written
+    ✓ progress.logMeasurement — no raw exception surfaces
+    ✓ progress.logWeight — affordance reachable
+    ✓ progress.logWeight — Premium surface opens
+    ✓ progress.logWeight — no paid state written
+    ✓ progress.logWeight — no raw exception surfaces
+    ✓ nutrition.quickAdd — affordance reachable
+    ✓ nutrition.quickAdd — Premium surface opens
+    ✓ nutrition.quickAdd — no paid state written
+    ✓ nutrition.quickAdd — no raw exception surfaces
+    ⛔ EXTERNALLY_BLOCKED: plan.saveEdit (path 1 — Workout custom plan builder) live save — the builder’s «حفظ الجدول» stays disabled until a complete schedule exists; the guard on this path is proved statically by test:access-gate (WorkoutView CustomPlanBuilder.onSave)
+
+  ── plan-edit boundary — the SECOND live path to the same paid state
+    ✓ Preview reaching the plan editor opens the Premium surface OR persists nothing
+    ✓ the declared paid action `plan.saveEdit` is enforced on EVERY live path, not one
+
+  ── paid actions with no Preview-reachable affordance — classified, not skipped
+    ✓ workout.logSet / workout.finish are unreachable because no session was ever written
+    ✓ the watched session key set includes the LIVE writer key, not only the registered one
+    ✓ nutrition.removeFood / toggleMeal are unreachable because Preview logged zero rows
+    ✓ every PAID_ACTION is classified (exercised or reasoned) — none silently skipped
+
+  ── counter-proof — the tracking-key exclusion is not a blanket pass
+    ✓ a real paid-state write WOULD be detected by the same diff
+
+  ── numeral policy holds across every LIVE numeric surface (Arabic session)
+    ✓ LIVE Nutrition renders its numbers in the Arabic numeral policy
+    ✓ LIVE Workout renders its numbers in the Arabic numeral policy
+    ✓ LIVE Progress renders its numbers in the Arabic numeral policy
+    ✓ the SAME fact (training days per week) uses ONE numeral system on every live screen
+
+  ── page health across the whole journey
+    ✓ zero unhandled page errors
+    ✓ zero non-benign console errors
+
+──────────────────────────────────────────────────────────────────────────────
+▶ p3-returning-guest @ webkit
+  (capturing the completed-guest seed once …)
+
+  ── reopening lands on the dashboard, not onboarding
+    ✓ no onboarding is re-imposed on a completed guest
+    ✓ the app renders a populated dashboard
+    ✓ the completed-setup flag survived the reopen
+
+  ── the plan itself is retained, not regenerated blank
+    ✓ the profile shows a real programme, not an empty shell
+    ✓ the workout screen lists the generated plan days
+
+  ── refresh · Back · Forward all preserve state
+    ✓ refresh keeps the same plan
+    ✓ Back returns to the previously visited route
+    ✓ Forward returns to the route left behind
+    ✓ browsing destroyed no stored key
+    ✓ browsing mutated no user data
+
+  ── a returning guest is still a Preview user
+    ✓ the returning guest still meets the Premium boundary
+    ✓ the returning guest still writes no paid state
+
+  ── page health
+    ✓ no raw exception surfaced
+    ✓ zero unhandled page errors
+    ✓ zero non-benign console errors
+
+──────────────────────────────────────────────────────────────────────────────
+▶ p8-responsive-matrix @ webkit
+
+  ── 320px (iPhone SE (1st gen) — narrowest supported) · ar
+    ✓ 320px/ar: no surface scrolls horizontally
+    ✓ 320px/ar: every surface renders content
+    ✓ 320px/ar: document direction is rtl
+    ✓ 320px/ar: the bottom bar covers no interactive content
+    ✓ 320px/ar: the Premium dialog fits its viewport
+    ✓ 320px/ar: every Premium dialog control meets the 44px touch target
+    ✓ 320px/ar: zero unhandled page errors
+
+  ── 360px (small Android) · ar
+    ✓ 360px/ar: no surface scrolls horizontally
+    ✓ 360px/ar: every surface renders content
+    ✓ 360px/ar: document direction is rtl
+    ✓ 360px/ar: the bottom bar covers no interactive content
+    ✓ 360px/ar: the Premium dialog fits its viewport
+    ✓ 360px/ar: every Premium dialog control meets the 44px touch target
+    ✓ 360px/ar: zero unhandled page errors
+
+  ── 375px (iPhone SE (2/3)) · ar
+    ✓ 375px/ar: no surface scrolls horizontally
+    ✓ 375px/ar: every surface renders content
+    ✓ 375px/ar: document direction is rtl
+    ✓ 375px/ar: the bottom bar covers no interactive content
+    ✓ 375px/ar: the Premium dialog fits its viewport
+    ✓ 375px/ar: every Premium dialog control meets the 44px touch target
+    ✓ 375px/ar: zero unhandled page errors
+
+  ── 390px (iPhone 12/13/14) · ar
+    ✓ 390px/ar: no surface scrolls horizontally
+    ✓ 390px/ar: every surface renders content
+    ✓ 390px/ar: document direction is rtl
+    ✓ 390px/ar: the bottom bar covers no interactive content
+    ✓ 390px/ar: the Premium dialog fits its viewport
+    ✓ 390px/ar: every Premium dialog control meets the 44px touch target
+    ✓ 390px/ar: zero unhandled page errors
+
+  ── 393px (iPhone 15/16) · ar
+    ✓ 393px/ar: no surface scrolls horizontally
+    ✓ 393px/ar: every surface renders content
+    ✓ 393px/ar: document direction is rtl
+    ✓ 393px/ar: the bottom bar covers no interactive content
+    ✓ 393px/ar: the Premium dialog fits its viewport
+    ✓ 393px/ar: every Premium dialog control meets the 44px touch target
+    ✓ 393px/ar: zero unhandled page errors
+
+  ── 414px (iPhone 11 / XR) · ar
+    ✓ 414px/ar: no surface scrolls horizontally
+    ✓ 414px/ar: every surface renders content
+    ✓ 414px/ar: document direction is rtl
+    ✓ 414px/ar: the bottom bar covers no interactive content
+    ✓ 414px/ar: the Premium dialog fits its viewport
+    ✓ 414px/ar: every Premium dialog control meets the 44px touch target
+    ✓ 414px/ar: zero unhandled page errors
+
+  ── 430px (iPhone Pro Max) · ar
+    ✓ 430px/ar: no surface scrolls horizontally
+    ✓ 430px/ar: every surface renders content
+    ✓ 430px/ar: document direction is rtl
+    ✓ 430px/ar: the bottom bar covers no interactive content
+    ✓ 430px/ar: the Premium dialog fits its viewport
+    ✓ 430px/ar: every Premium dialog control meets the 44px touch target
+    ✓ 430px/ar: zero unhandled page errors
+
+  ── 768px (tablet portrait) · ar
+    ✓ 768px/ar: no surface scrolls horizontally
+    ✓ 768px/ar: every surface renders content
+    ✓ 768px/ar: document direction is rtl
+    ✓ 768px/ar: the bottom bar covers no interactive content
+    ✓ 768px/ar: the Premium dialog fits its viewport
+    ✓ 768px/ar: every Premium dialog control meets the 44px touch target
+    ✓ 768px/ar: zero unhandled page errors
+
+  ── 1024px (tablet landscape) · ar
+    ✓ 1024px/ar: no surface scrolls horizontally
+    ✓ 1024px/ar: every surface renders content
+    ✓ 1024px/ar: document direction is rtl
+    ✓ 1024px/ar: the bottom bar covers no interactive content
+    ✓ 1024px/ar: the Premium dialog fits its viewport
+    ✓ 1024px/ar: every Premium dialog control meets the 44px touch target
+    ✓ 1024px/ar: zero unhandled page errors
+
+  ── 1280px (desktop) · ar
+    ✓ 1280px/ar: no surface scrolls horizontally
+    ✓ 1280px/ar: every surface renders content
+    ✓ 1280px/ar: document direction is rtl
+    ✓ 1280px/ar: the bottom bar covers no interactive content
+    ✓ 1280px/ar: the Premium dialog fits its viewport
+    ✓ 1280px/ar: every Premium dialog control meets the 44px touch target
+    ✓ 1280px/ar: zero unhandled page errors
+
+  ── 320px (iPhone SE (1st gen) — narrowest supported) · en
+    ✓ 320px/en: no surface scrolls horizontally
+    ✓ 320px/en: every surface renders content
+    ✓ 320px/en: document direction is ltr
+    ✓ 320px/en: the bottom bar covers no interactive content
+    ✓ 320px/en: the Premium dialog fits its viewport
+    ✓ 320px/en: every Premium dialog control meets the 44px touch target
+    ✓ 320px/en: zero unhandled page errors
+
+  ── 360px (small Android) · en
+    ✓ 360px/en: no surface scrolls horizontally
+    ✓ 360px/en: every surface renders content
+    ✓ 360px/en: document direction is ltr
+    ✓ 360px/en: the bottom bar covers no interactive content
+    ✓ 360px/en: the Premium dialog fits its viewport
+    ✓ 360px/en: every Premium dialog control meets the 44px touch target
+    ✓ 360px/en: zero unhandled page errors
+
+  ── 375px (iPhone SE (2/3)) · en
+    ✓ 375px/en: no surface scrolls horizontally
+    ✓ 375px/en: every surface renders content
+    ✓ 375px/en: document direction is ltr
+    ✓ 375px/en: the bottom bar covers no interactive content
+    ✓ 375px/en: the Premium dialog fits its viewport
+    ✓ 375px/en: every Premium dialog control meets the 44px touch target
+    ✓ 375px/en: zero unhandled page errors
+
+  ── 390px (iPhone 12/13/14) · en
+    ✓ 390px/en: no surface scrolls horizontally
+    ✓ 390px/en: every surface renders content
+    ✓ 390px/en: document direction is ltr
+    ✓ 390px/en: the bottom bar covers no interactive content
+    ✓ 390px/en: the Premium dialog fits its viewport
+    ✓ 390px/en: every Premium dialog control meets the 44px touch target
+    ✓ 390px/en: zero unhandled page errors
+
+  ── 393px (iPhone 15/16) · en
+    ✓ 393px/en: no surface scrolls horizontally
+    ✓ 393px/en: every surface renders content
+    ✓ 393px/en: document direction is ltr
+    ✓ 393px/en: the bottom bar covers no interactive content
+    ✓ 393px/en: the Premium dialog fits its viewport
+    ✓ 393px/en: every Premium dialog control meets the 44px touch target
+    ✓ 393px/en: zero unhandled page errors
+
+  ── 414px (iPhone 11 / XR) · en
+    ✓ 414px/en: no surface scrolls horizontally
+    ✓ 414px/en: every surface renders content
+    ✓ 414px/en: document direction is ltr
+    ✓ 414px/en: the bottom bar covers no interactive content
+    ✓ 414px/en: the Premium dialog fits its viewport
+    ✓ 414px/en: every Premium dialog control meets the 44px touch target
+    ✓ 414px/en: zero unhandled page errors
+
+  ── 430px (iPhone Pro Max) · en
+    ✓ 430px/en: no surface scrolls horizontally
+    ✓ 430px/en: every surface renders content
+    ✓ 430px/en: document direction is ltr
+    ✓ 430px/en: the bottom bar covers no interactive content
+    ✓ 430px/en: the Premium dialog fits its viewport
+    ✓ 430px/en: every Premium dialog control meets the 44px touch target
+    ✓ 430px/en: zero unhandled page errors
+
+  ── 768px (tablet portrait) · en
+    ✓ 768px/en: no surface scrolls horizontally
+    ✓ 768px/en: every surface renders content
+    ✓ 768px/en: document direction is ltr
+    ✓ 768px/en: the bottom bar covers no interactive content
+    ✓ 768px/en: the Premium dialog fits its viewport
+    ✓ 768px/en: every Premium dialog control meets the 44px touch target
+    ✓ 768px/en: zero unhandled page errors
+
+  ── 1024px (tablet landscape) · en
+    ✓ 1024px/en: no surface scrolls horizontally
+    ✓ 1024px/en: every surface renders content
+    ✓ 1024px/en: document direction is ltr
+    ✓ 1024px/en: the bottom bar covers no interactive content
+    ✓ 1024px/en: the Premium dialog fits its viewport
+    ✓ 1024px/en: every Premium dialog control meets the 44px touch target
+    ✓ 1024px/en: zero unhandled page errors
+
+  ── 1280px (desktop) · en
+    ✓ 1280px/en: no surface scrolls horizontally
+    ✓ 1280px/en: every surface renders content
+    ✓ 1280px/en: document direction is ltr
+    ✓ 1280px/en: the bottom bar covers no interactive content
+    ✓ 1280px/en: the Premium dialog fits its viewport
+    ✓ 1280px/en: every Premium dialog control meets the 44px touch target
+    ✓ 1280px/en: zero unhandled page errors
+
+══════════════════════════════════════════════════════════════════════════════
+✅ p1-preview-user (webkit)                       pass  67 · fail  0 · blocked 1
+✅ p3-returning-guest (webkit)                    pass  15 · fail  0 · blocked 0
+✅ p8-responsive-matrix (webkit)                  pass 140 · fail  0 · blocked 0
+──────────────────────────────────────────────────────────────────────────────
+TOTAL  pass 222 · fail 0 · externally-blocked 1
+evidence → docs/execution/qimmah-postweb/release/evidence/latest.json
+══════════════════════════════════════════════════════════════════════════════

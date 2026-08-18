@@ -1,8 +1,10 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useState, type ReactNode } from 'react'
+import { formatNumber } from '@/lib/numberFormat'
 import { Icon } from '@/components/Icon'
 import { StandaloneAppScreen } from '@/components/StandaloneAppScreen'
 import { StateBlock } from '@/components/StateBlock'
 import { eCalcStrings, type ECalcInputId, type ECalcStrings } from '@/i18n/dict/eCalc'
+import type { ECalcCertaintyKey } from '@/i18n/dict/eCalc'
 import {
   FAT_CALORIE_RATIO,
   KCAL_PER_KG,
@@ -84,11 +86,9 @@ export function CalcExplainerView({ lang, onBack, onEditProfile }: CalcExplainer
 }
 
 function CalcFilled({ data, lang, d }: { data: CalcExplainerData; lang: Lang; d: ECalcStrings }) {
-  const n = useMemo(
-    () => new Intl.NumberFormat(lang === 'ar' ? 'ar-SA-u-nu-arab' : 'en-US', { maximumFractionDigits: 2 }),
-    [lang],
-  )
-  const value = (number: number) => n.format(number)
+  // منسّق العرض المركزي لا نسخة محلية: النسخة المحلية كانت **مصدر حقيقة سادسًا**
+  // يشيخ وحده، ولا يصله تفضيل «شكل الأرقام» فتظهر هذه الشاشة وحدها بنظام مخالف.
+  const value = useCallback((number: number) => formatNumber(number, lang, { maximumFractionDigits: 2 }), [lang])
   const p = data.profile
   const t = data.calculated
   const minor = isMinorAge(p.age)
@@ -153,7 +153,7 @@ function CalcFilled({ data, lang, d }: { data: CalcExplainerData; lang: Lang; d:
       <ExplainerSection icon="Flame" title={d.bmrTitle} result={value(t.bmr)} unit={d.unitKcalPerDay}>
         <Body>{d.bmrWhat}</Body>
         <Formula>
-          {`10×${value(p.weightKg)} + 6.25×${value(p.heightCm)} − 5×${value(p.age)} ${sign} ${value(Math.abs(data.sexConstant))} = ${value(t.bmr)}`}
+          {`${value(10)}×${value(p.weightKg)} + ${value(6.25)}×${value(p.heightCm)} − ${value(5)}×${value(p.age)} ${sign} ${value(Math.abs(data.sexConstant))} = ${value(t.bmr)}`}
         </Formula>
         <Body>{d.bmrSource}</Body>
         <Note>{d.bmrAssume} {d.bmrLimits} {d.bmrWhyNoBodyFat}</Note>
@@ -200,11 +200,11 @@ function CalcFilled({ data, lang, d }: { data: CalcExplainerData; lang: Lang; d:
           <Body>{d.proteinWhy} {d.proteinSource}</Body>
         </MetricBlock>
         <MetricBlock title={d.fatTitle} result={value(t.fatGrams)} unit={d.unitGramPerDay}>
-          <Formula>{`(${value(t.targetCalories)} × ${value(fatPercent)}%) ÷ 9 = ${value(t.fatGrams)}`}</Formula>
+          <Formula>{`(${value(t.targetCalories)} × ${value(fatPercent)}%) ÷ ${value(9)} = ${value(t.fatGrams)}`}</Formula>
           <Body>{d.fatWhy} {d.fatSource}</Body>
         </MetricBlock>
         <MetricBlock title={d.carbsTitle} result={value(t.carbsGrams)} unit={d.unitGramPerDay}>
-          <Formula>{`(${value(t.targetCalories)} − ${value(t.proteinGrams)}×4 − ${value(t.fatGrams)}×9) ÷ 4 = ${value(t.carbsGrams)}`}</Formula>
+          <Formula>{`(${value(t.targetCalories)} − ${value(t.proteinGrams)}×${value(4)} − ${value(t.fatGrams)}×${value(9)}) ÷ ${value(4)} = ${value(t.carbsGrams)}`}</Formula>
           <Body>{d.carbsWhy}</Body>
         </MetricBlock>
         <Note>{d.macrosConversion} {d.macrosLimits}</Note>
@@ -219,7 +219,7 @@ function CalcFilled({ data, lang, d }: { data: CalcExplainerData; lang: Lang; d:
 
       <ExplainerSection icon="TrendingUp" title={d.rateTitle} result={value(expectedRate)} unit={d.unitKgPerWeek}>
         <Body>{d.rateWhat}</Body>
-        <Formula>{`${value(Math.abs(data.calorieAdjustment))} × 7 ÷ ${value(KCAL_PER_KG)} = ${value(Math.abs(expectedRate))}`}</Formula>
+        <Formula>{`${value(Math.abs(data.calorieAdjustment))} × ${value(7)} ÷ ${value(KCAL_PER_KG)} = ${value(Math.abs(expectedRate))}`}</Formula>
         <Body>{d.rateWhyKcalPerKg}</Body>
         <Honesty>{d.rateHonesty}</Honesty>
         <Body>{d.rateWater} {d.rateReal}</Body>
@@ -254,6 +254,8 @@ function CalcFilled({ data, lang, d }: { data: CalcExplainerData; lang: Lang; d:
                 <CertaintyBadge certainty={row.certainty} label={d.certaintyLabels[row.certainty]} />
               </div>
               <p className="mt-1 text-xs text-ink-500">{row.source}</p>
+              {/* شرح الدرجة — مرئي لكل مستخدم، لا محجوبًا خلف `title`. */}
+              <p className="mt-1 text-[0.7rem] leading-relaxed text-ink-400">{d.certaintyNotes[row.certainty]}</p>
             </div>
           ))}
         </div>
@@ -352,21 +354,27 @@ function MetricBlock({ title, result, unit, children }: { title: string; result:
   )
 }
 
-function CertaintyBadge({
-  certainty,
-  label,
-}: {
-  certainty: 'published_equation' | 'established_range_choice' | 'qimmah_practical_estimate'
-  label: string
-}) {
-  const tone = {
+/**
+ * شارة درجة اليقين — [WAVE-B] **بلا بتر وبلا قيد مخفيّ**.
+ *
+ * كانت تعرض `label.split('—')[0]`: الاسم وحده، والقيد بعد الشرطة يعيش في
+ * `title=` — سمة لا تظهر على اللمس أصلًا. فيصل مستخدمَ الجوال «تقدير عملي من
+ * قِمّة» عاريةً، وتُحجب عنه «لم نجد له مرجعًا منشورًا» وهي أصدق نصفَي الجملة.
+ *
+ * الآن: الاسم في الشارة، والشرح **سطرٌ مرئي** بجانب مصدر الصفّ. لا شيء يُبتر،
+ * ولا شيء يعتمد على تحويم فأرة لا وجود له على الهاتف.
+ */
+function CertaintyBadge({ certainty, label }: { certainty: ECalcCertaintyKey; label: string }) {
+  const tone: Record<ECalcCertaintyKey, string> = {
     published_equation: 'bg-emerald-50 text-emerald-800',
+    published_rule: 'bg-teal-50 text-teal-800',
     established_range_choice: 'bg-blue-50 text-blue-800',
     qimmah_practical_estimate: 'bg-amber-50 text-amber-900',
-  }[certainty]
+    product_policy: 'bg-violet-50 text-violet-900',
+  }
   return (
-    <span title={label} className={`max-w-[55%] shrink-0 rounded-full px-2 py-1 text-center text-[0.6rem] font-black leading-tight ${tone}`}>
-      {label.split('—')[0]}
+    <span className={`max-w-[55%] shrink-0 rounded-full px-2 py-1 text-center text-[0.6rem] font-black leading-tight ${tone[certainty]}`}>
+      {label}
     </span>
   )
 }

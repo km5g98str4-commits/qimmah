@@ -5801,14 +5801,35 @@ function canonicalizeForSearch(text: string): string {
   return canonicalizeTransliterations(canonicalizeLoanwords(normalizeSearch(text)))
 }
 
+/** صنف مع **قوّة** مطابقته — الأصغر أقوى. سلّم `searchFood` نفسه، معلَنًا لا مضمَرًا. */
+export interface ScoredFoodItem {
+  item: FoodItem
+  /**
+   * ٠ تطابق عربي · ١ بادئة عربية · ٢ تضمين عربي · ٣ بادئة إنجليزية ·
+   * ٤ تضمين إنجليزي · ٥ كلمة مفتاحية بادئة · ٦ كلمة مفتاحية متضمَّنة.
+   */
+  score: number
+}
+
+/** درجة «بلا استعلام» — أضعف من كل مطابقة حقيقية، فلا تُخلط بها في أي ترتيب. */
+export const NO_QUERY_SCORE = 7
+
 /**
- * بحث في قاعدة الأطعمة — عربي أولًا، يتحمّل الأخطاء الإملائية الشائعة والمرادفات
- * (عبر التطبيع + مقابلات الكلمات الدخيلة + الكلمات المفتاحية اللاتينية). النتائج مرتّبة:
- * تطابق تام → بادئة → تضمين، مع أولوية الاسم العربي ثم الإنجليزي ثم الكلمات المفتاحية.
+ * بحث في قاعدة الأطعمة **مع إعادة قوّة المطابقة** — عربي أولًا، يتحمّل الأخطاء
+ * الإملائية الشائعة والمرادفات (عبر التطبيع + مقابلات الكلمات الدخيلة + الكلمات
+ * المفتاحية اللاتينية). النتائج مرتّبة: تطابق تام → بادئة → تضمين، مع أولوية
+ * الاسم العربي ثم الإنجليزي ثم الكلمات المفتاحية.
+ *
+ * ═══ لماذا تُعاد الدرجة ═══
+ * طبقة اتحاد البحث (`src/lib/food/unifiedSearch.ts`) تحتاج أن تقارن **قوّة** مطابقة
+ * الصنف المنسَّق بقوّة مطابقة سجل معبّأ لترتّبهما في قائمة واحدة. كانت هذه الدرجة
+ * تُحسب هنا ثم **تُسقَط**، فاضطرّ كل مستهلك إلى إعادة حسابها — وأي إعادة حساب
+ * تتباعد عن أصلها بعد موجتين. فالمصدر واحد: تُحسب مرّة وتُعاد.
  */
-export function searchFood(query: string): FoodItem[] {
+export function searchFoodScored(query: string): ScoredFoodItem[] {
   const q = canonicalizeForSearch(query)
-  if (!q) return foodItems
+  // بلا استعلام: القائمة كاملة بترتيبها الأصلي — سلوك `searchFood` القائم حرفيًا.
+  if (!q) return foodItems.map((item) => ({ item, score: NO_QUERY_SCORE }))
 
   const scored: { item: FoodItem; score: number }[] = []
   for (const f of foodItems) {
@@ -5832,5 +5853,13 @@ export function searchFood(query: string): FoodItem[] {
   return scored
     .map((s, i) => ({ ...s, i }))
     .sort((a, b) => (a.score - b.score) || (a.i - b.i))
-    .map((s) => s.item)
+    .map(({ item, score }) => ({ item, score }))
+}
+
+/**
+ * نفس البحث بالأصناف المجرّدة — **الواجهة القائمة بلا تغيير في عقدها**، وهي الآن
+ * غلاف على `searchFoodScored` فلا يوجد سلّمان للترتيب يمكن أن يتباعدا.
+ */
+export function searchFood(query: string): FoodItem[] {
+  return searchFoodScored(query).map((s) => s.item)
 }

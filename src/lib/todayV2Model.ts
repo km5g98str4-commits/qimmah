@@ -12,11 +12,13 @@ import type { Customization } from '@/lib/customization'
 import type { Lang } from '@/lib/appPreferences'
 import type { CalorieGoal } from '@/types/profile'
 import type { AppRoute } from '@/lib/appRoutes'
-import { scheduledDayFor } from '@/lib/workoutCalendar'
+import { currentWorkout } from '@/lib/workoutDaySource'
 import { getSteps, loadStepGoal } from '@/lib/stepCounter'
 import { getNutritionLog, getWorkoutSessions } from '@/lib/historyStore'
 import { todaysCompletion } from '@/lib/workoutSessionEngine'
 import { getDayStamp, weekdayName } from '@/lib/today'
+import { estimateDurationMin } from '@/lib/workoutStats'
+import { buildWarmupPlan } from '@/lib/warmupPlan'
 import { loadOnboardingProfile } from '@/lib/onboardingProfile'
 
 export type TodayState = 'normal' | 'newUser' | 'afterWorkout' | 'returnAfterBreak'
@@ -84,15 +86,42 @@ export interface TodayV2Model {
    * فيبني عليها البديل المخفّف **من نفس الرقم المعروض** لا من رقم ثانٍ يخالفه.
    */
   durationMin: number
+  /**
+   * [SOVEREIGN-TODAY-001] مدّة إحماء اليوم بالدقائق — **من نفس الباني** الذي
+   * تعرضه شاشة الإحماء (`buildWarmupPlan`). «اليوم» يَعِد بهذا الرقم بعينه، فلا
+   * يمكن للوعد أن يفارق التسليم إلا بتغيّرهما معًا. و`0` تعني: لا إحماء اليوم
+   * (راحة أو يوم بلا تمارين) — وحينها لا يُعرَض وعدُ إحماء أصلًا.
+   */
+  warmupMinutes: number
+  /**
+   * أرقام تمرين اليوم **مفصولة** — [QIMMAH-TODAY-SOVEREIGN-REDESIGN-001].
+   *
+   * `hero.subtitle` يخبز الثلاثة في جملة واحدة («٦ تمارين · ٤٥ دقيقة · جاهز لك»)،
+   * وبطاقة الإجراء التالي تعرضها **صفَّ مقاييس** بعناوين مستقلّة. الخيار الوحيد
+   * البديل كان إعادة حسابها في الواجهة — أي جوابان لسؤال واحد، وهو بالضبط العطل
+   * الذي أنشأ `workoutDaySource`. فكُشفت من **نفس القراءة** التي بنت البطل.
+   *
+   * كلّها مقيسة من الخطة الحيّة: لا «مستوى» ولا «تركيز» مخترع (المرجع البصري
+   * يعرض وسم «علوي» ولا نظير له في نموذج البيانات، فلم يُنسخ).
+   */
+  training: {
+    available: boolean
+    /** اسم يوم الخطة مترجَمًا، أو '' حين لا تمرين اليوم. */
+    name: string
+    exerciseCount: number
+    /** مجموع المجموعات المستهدفة لليوم — 0 حين لا تمرين. */
+    setCount: number
+    /** نسبة المجموعات المنجزة من جلسة **منتهية مبكرًا**؛ 0 حين لا تقدّم جزئي. */
+    percent: number
+    completedSets: number
+    totalSets: number
+  }
 }
 
 const GOAL_LABEL_AR: Record<CalorieGoal, string> = { cut: 'تنشيف', maintain: 'محافظة', bulk: 'تضخيم' }
 const GOAL_LABEL_EN: Record<CalorieGoal, string> = { cut: 'Cut', maintain: 'Maintain', bulk: 'Bulk' }
 // Source classification: exact product completion ratio, capped at 100%; not a scientific estimate.
 const pct = (cur: number, target: number) => (target > 0 ? Math.max(0, Math.min(100, Math.round((cur / target) * 100))) : 0)
-/** Honest session-length heuristic (~9 min/exercise incl. rest), rounded to 5. */
-// Source classification: NON-STANDARD Qimmah display heuristic; users can override workoutDuration.
-const estimateDurationMin = (exerciseCount: number) => (exerciseCount > 0 ? Math.max(20, Math.round((exerciseCount * 9) / 5) * 5) : 0)
 const num = (n: number) => n.toLocaleString('en-US')
 
 const DAY_MS = 86_400_000
@@ -111,7 +140,7 @@ function partOfDay(ar: boolean, d = new Date()): string {
   return ar ? 'مساءً' : 'Evening'
 }
 
-export function buildTodayV2Model(customization: Customization, lang: Lang): TodayV2Model {
+export function buildTodayV2Model(customization: Customization, lang: Lang, userId: string | null = null): TodayV2Model {
   const ar = lang !== 'en'
   const t = (a: string, e: string) => (ar ? a : e)
   const now = new Date()
@@ -125,13 +154,30 @@ export function buildTodayV2Model(customization: Customization, lang: Lang): Tod
 
   // ── Workout (real: weekly schedule → plan day | honest rest; legacy rotation
   //    only as the documented fallback when no schedule is configured) ──
-  const resolved = scheduledDayFor(customization.workoutPlan, now)
+  // [QIM-WEB-FOUNDER-UX-005/حزمة ٥] المصدر الواحد. كان هنا `scheduledDayFor`
+  // على `customization.workoutPlan` مباشرةً — أي **الخطة المولَّدة دائمًا**،
+  // بينما تبويب التمرين يعتمد الجدول المخصّص حين يختاره المستخدم. فمن بنى
+  // جدولًا مخصّصًا كان يرى خطّتين في شاشتين. الآن كلاهما يسأل `currentWorkout`.
+  const resolved = currentWorkout(userId, customization, now)
   const restDay = resolved?.type === 'rest'
   const day = resolved?.type === 'training' ? resolved.day : undefined
   const exerciseCount = day?.exercises.length ?? 0
   const workoutName = day ? (ar ? day.nameAr : day.nameEn) : ''
   const workoutAvailable = onboarded && exerciseCount > 0
-  const durationMin = customization.profile.workoutDuration > 0 ? customization.profile.workoutDuration : estimateDurationMin(exerciseCount)
+  /**
+   * [SOVEREIGN-TODAY-001] مصدر المدّة **واحد**: `estimateDurationMin` في
+   * `workoutStats`. كان هنا مقدِّر محلّي ثالث (٩ دقائق/تمرين) يُستعمل فقط حين
+   * لا مدّة مضبوطة، بينما تبويب التمرين يقدّر بالمجموعات والراحة — فيُعلن
+   * «اليوم» ٧٥ دقيقة وتُعلن بطاقة التمرين ٤٠ لنفس الجلسة. الأصدق هو تقدير
+   * **جلسة اليوم نفسها** لا تفضيل المستخدم العام: التفضيل يصف ما يريده أسبوعيًا،
+   * والرقم المعروض يصف ما سيفعله الآن. ويبقى التفضيل مرجّحًا إن تعذّر التقدير.
+   */
+  const estimated = estimateDurationMin(day)
+  const durationMin = estimated > 0
+    ? estimated
+    : customization.profile.workoutDuration > 0 ? customization.profile.workoutDuration : 0
+  // الإحماء يُبنى من تمارين **هذا اليوم** — لا من قائمة عامّة، ولا رقمًا مكتوبًا.
+  const warmupMinutes = workoutAvailable ? buildWarmupPlan(day).estMinutes : 0
   // (P5) الاكتمال الصادق بدل «أي finishedAt»: جلسة completed فقط تُكمل اليوم؛
   // الإنهاء المبكر (ended_early) = جزئي — لا يقلب الحالة إلى afterWorkout، ويظهر
   // كتقدّم حقيقي على عمود التدريب. الجلسات القديمة بلا status تبقى completed.
@@ -256,7 +302,21 @@ export function buildTodayV2Model(customization: Customization, lang: Lang): Tod
     else if (!loggedMeal && nutritionTarget) trustNote = t('ما فيه وجبات مسجّلة اليوم لسا.', 'No meals logged yet today.')
   }
 
-  return { state, greeting, dateLabel, avatarInitial, goalLabel, hero, pillars, progressLabel, completedCount, totalCount, cards, trustNote, restDay, daysSinceLastWorkout: daysSinceWorkout, durationMin }
+  // المجموعات المستهدفة لليوم — من نفس `day` الذي أعطى `exerciseCount`.
+  const setCount = day?.exercises.reduce((sum, ex) => sum + (Number.isFinite(ex.sets) ? ex.sets : 0), 0) ?? 0
+  const training: TodayV2Model['training'] = {
+    available: workoutAvailable,
+    name: workoutName,
+    exerciseCount,
+    setCount,
+    // الجلسة المنتهية لا تُعلَن «تقدّمًا جزئيًا»: اليوم مكتمل، والبطاقة تنتقل
+    // إلى ما بعد التمرين. الصفر هنا يعني «لا شريط تقدّم» لا «صفر إنجاز».
+    percent: !finished && partialTrain ? partialTrain.percent : 0,
+    completedSets: !finished && partialTrain ? partialTrain.completedSets : 0,
+    totalSets: !finished && partialTrain ? partialTrain.totalSets : setCount,
+  }
+
+  return { state, greeting, dateLabel, avatarInitial, goalLabel, hero, pillars, progressLabel, completedCount, totalCount, cards, trustNote, restDay, daysSinceLastWorkout: daysSinceWorkout, durationMin, warmupMinutes, training }
 }
 
 // ── Hero builders ────────────────────────────────────────────────────────────
@@ -283,7 +343,7 @@ function buildHero(a: {
         eyebrow: doneLine,
         eyebrowDone: true,
         title: t('سجّل أكلك بعد التمرين', 'Log your post-workout meal'),
-        subtitle: t(`بروتين الحين يسرّع التعافي · باقي ${proteinRemaining}g`, `Protein now speeds recovery · ${proteinRemaining}g left`),
+        subtitle: t(`بروتين الحين يسرّع التعافي · باقي ${proteinRemaining}غ`, `Protein now speeds recovery · ${proteinRemaining}g left`),
         ctaLabel: t('سجّل أكلك', 'Log your food'),
         ctaTone: 'green',
         destination: 'nutrition',
@@ -357,7 +417,7 @@ function buildHero(a: {
       eyebrow: t('خطوتك الجاية · الحين', 'Your next step · now'),
       eyebrowDone: false,
       title: t('سجّل وجبتك الجاية', 'Log your next meal'),
-      subtitle: proteinRemaining !== null && proteinRemaining > 0 ? t(`باقي ${proteinRemaining}g بروتين لهدف اليوم`, `${proteinRemaining}g protein left today`) : t('يوم راحة — أكلك يصنع الفرق.', 'Rest day — food makes the difference.'),
+      subtitle: proteinRemaining !== null && proteinRemaining > 0 ? t(`باقي ${proteinRemaining}غ بروتين لهدف اليوم`, `${proteinRemaining}g protein left today`) : t('يوم راحة — أكلك يصنع الفرق.', 'Rest day — food makes the difference.'),
       ctaLabel: t('سجّل أكلك', 'Log your food'),
       ctaTone: 'ember',
       destination: 'nutrition',
@@ -397,7 +457,7 @@ function buildNormalNudges(a: {
   const { t, proteinRemaining, loggedMeal, movementAvailable, stepsRemaining, nutritionTarget } = a
   const cards: TodayCard[] = []
   if (proteinRemaining !== null && proteinRemaining > 0) {
-    cards.push({ label: t(`باقي ${proteinRemaining}g بروتين لهدف اليوم`, `${proteinRemaining}g protein left for today’s goal`), hint: null, actionLabel: t('أضف', 'Add'), icon: 'Flame', tone: 'nutrition', destination: 'nutrition' })
+    cards.push({ label: t(`باقي ${proteinRemaining}غ بروتين لهدف اليوم`, `${proteinRemaining}g protein left for today’s goal`), hint: null, actionLabel: t('أضف', 'Add'), icon: 'Flame', tone: 'nutrition', destination: 'nutrition' })
   } else if (nutritionTarget && !loggedMeal) {
     cards.push({ label: t('سجّل أول وجبة عشان نضبط سعراتك', 'Log your first meal to set your calories'), hint: null, actionLabel: t('سجّل', 'Log'), icon: 'Utensils', tone: 'nutrition', destination: 'nutrition' })
   }

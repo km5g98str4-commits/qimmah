@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Icon } from '@/components/Icon'
 import { SETUP_FOCUS_KEY } from '@/lib/setupFocus'
 import { cn } from '@/lib/cn'
+import { formatNumber } from '@/lib/numberFormat'
 import { type Customization, getDefaultCustomization } from '@/lib/customization'
 import { useCustomization } from '@/lib/customizationContext'
 import { markCompleted, restartOnboarding, setLastStep } from '@/lib/onboarding'
@@ -22,6 +23,8 @@ import { StepReview } from '@/components/customizer/steps/StepReview'
 import { isProfileValid } from '@/lib/validation'
 import { useLang } from '@/i18n'
 import { onboardingStrings, type OnboardingStrings } from '@/i18n/dict/onboarding'
+import { useAccess } from '@/lib/access/useAccess'
+import { isExistingPlanEdit } from '@/lib/customization'
 
 interface CustomizationCenterProps {
   /** يُستدعى عند الإغلاق؛ completed=true عند «حفظ وإغلاق» لعرض تأكيد النجاح. */
@@ -71,6 +74,7 @@ export function CustomizationCenter({ onBack, initialStep = 0, mode = 'onboardin
   const lang = useLang()
   const d = onboardingStrings[lang]
   const { customization, applyCustomization, resetCustomization } = useCustomization()
+  const { guard: guardPaid, can: canPaid } = useAccess()
   const auth = useAuth()
   // المالك الحالي — الإكمال/إعادة التشغيل يُنسبان للحساب لا للجهاز.
   const userId = auth.user?.id ?? null
@@ -221,12 +225,24 @@ export function CustomizationCenter({ onBack, initialStep = 0, mode = 'onboardin
     onRestartOnboarding,
   }
 
-  const saveDraft = () => {
+  // ── [PHASE-II] هذا هو محرّر الخطة الحيّ («الإعدادات → تعديل خطتي») ────────
+  // كلا مساريه يكتبان التخصيص، فيمرّان على حارس `saveCustomization`. بلا هذا
+  // الحارس هنا يرفض الكاتب بحقّ لكن الاستثناء يصل الصفحة خامًا — درس BUG-001:
+  // المعالج يفتح البوّابة **قبل** الكاتب، والكاتب يبقى شبكة الأمان الأخيرة.
+  const guardPlanEdit = (run: () => void) => () => {
+    if (isExistingPlanEdit() && !canPaid('plan.saveEdit')) {
+      guardPaid('plan.saveEdit', () => {})()
+      return
+    }
+    run()
+  }
+
+  const saveDraft = guardPlanEdit(() => {
     applyCustomization(data)
     setLastStep(step)
     setSaved(true)
-  }
-  const saveAndClose = () => {
+  })
+  const saveAndClose = guardPlanEdit(() => {
     // لا يكتمل الإعداد والحقول المطلوبة ناقصة — انتقل لأول خطوة ناقصة لإصلاحها.
     if (!allValid) {
       setStep(firstInvalidIndex)
@@ -235,7 +251,7 @@ export function CustomizationCenter({ onBack, initialStep = 0, mode = 'onboardin
     applyCustomization(data)
     markCompleted(userId, step)
     onBack(true)
-  }
+  })
   const next = () => {
     if (!stepValid) return
     setStep((s) => Math.min(steps.length - 1, s + 1))
@@ -281,9 +297,9 @@ export function CustomizationCenter({ onBack, initialStep = 0, mode = 'onboardin
         <div className="container-page pb-3">
           <div className="flex items-center justify-between text-xs">
             <span className="font-bold text-ink-700">
-              {d.stepPrefix} {step + 1} {d.stepOf} {steps.length}: {d[steps[step].titleKey]}
+              {d.stepPrefix} {formatNumber(step + 1, lang)} {d.stepOf} {formatNumber(steps.length, lang)}: {d[steps[step].titleKey]}
             </span>
-            <span className="font-bold text-primary-c">{progress}%</span>
+            <span className="font-bold text-primary-c">{formatNumber(progress, lang)}%</span>
           </div>
           <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-line">
             <div

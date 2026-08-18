@@ -89,53 +89,102 @@ console.log('\n① البند ١ — اللوحة تفتح بحالة فارغة
 // ═════════════════════════════════════════════════════════════════════════
 
 const today = read('src/views/TodayV2.tsx')
-const BLANK_GUARD = '{!blankSlate && ('
+/**
+ * ═══ تحديث بعد [QIMMAH-TODAY-SOVEREIGN-REDESIGN-001] ═══
+ *
+ * **المقصد محروس كما هو؛ البنية تغيّرت فتتبعها الحراسة.**
+ *   • سطر الماكروز الأربع الرقاقات ⇐ `DailyRingsCard` (حلقة سعرات + ثلاث ماكرو).
+ *   • الحارس `{!blankSlate && (` ⇐ `showRings` = `!blankSlate && hasAnyTarget`،
+ *     وهو **أشدّ** لا أرخى: يضيف شرط وجود أهداف محسوبة أصلًا.
+ *   • مصادر الإشارة صارت هوك التغذية الحيّ (`totals` · `dayLog`) بدل لقطة
+ *     `buildNutritionV2Model` غير التفاعلية — نفس البيانات، ومصدرٌ يتحدّث فورًا.
+ *
+ * **وبند واحد نُسخ صراحةً بأمر المؤسس، ولم يسقط بالسكوت:** كان «نبض أسبوعك»
+ * يُخفى كلّيًّا في الحالة الفارغة. وأمرُ إعادة التصميم ينصّ حرفيًّا على العكس:
+ * «Show an honest empty state such as: سيبدأ نبض أسبوعك بعد أول نشاط مسجّل».
+ * فالإخفاء استُبدل بحالة فارغة صادقة — والصدق يُحرَس هنا بشرط أقوى من الإخفاء:
+ * ممنوع أن تدّعي البطاقة نسبةً أو يومًا مكتملًا بلا جلسة (يحرسه `test:today-home`
+ * سلوكيًّا، ويحرسه أدناه بنيويًّا).
+ */
+const BLANK_GUARD = '{!showRings ? ('
 
 // أ) التعريف: القيد مركّب من شرطين — «قادم جديد» **و**«لا إشارة اليوم».
 const blankDecl = /const blankSlate = model\.state === 'newUser' && !hasTodaySignal/.test(today)
 check('`blankSlate` = قادم جديد ∧ لا إشارة اليوم (شرطان لا واحد)', blankDecl)
+check(
+  'وحارس الحلقات يضيف شرط الأهداف المحسوبة (أشدّ لا أرخى)',
+  /const showRings = !blankSlate && hasAnyTarget/.test(today),
+)
 
 // ب) الإشارة مشتقّة من مصادر البطاقات نفسها — لا علم منفصل يشيخ.
 const signalBlock = today.slice(today.indexOf('const hasTodaySignal ='), today.indexOf('const blankSlate ='))
 const SIGNALS = [
-  ['سعرات مستهلَكة', 'nutrition.calories.consumed > 0'],
-  ['ماء مسجَّل', 'nutrition.water.consumedMl > 0'],
+  ['سعرات مستهلَكة', 'totals.calories > 0'],
+  ['ماء مسجَّل', 'dayLog.waterMl > 0'],
   ['وجبة مسجَّلة', 'hasMeal'],
   ['وزن اليوم', 'todayWeightLogged'],
   ['تمرين منتهٍ', "trainPillar?.state === 'done'"],
   ['تمرين جارٍ', "trainPillar?.state === 'active'"],
 ]
 SIGNALS.forEach(([name, expr]) => check(`الإشارة تشمل: ${name}`, signalBlock.includes(expr)))
-
-// ج) البنية: بطاقة الماكروز **داخل** الحارس لا بجواره.
-// [CTO-73] الشاشة ٢ حوّلت الحلقات الأربع إلى **سطر مضغوط** بأربع رقاقات.
-// المقصد لم يتغيّر — سطح الماكروز لا يُعرض للقادم الجديد قبل أول تسجيل — فالتأكيد
-// **يُحدَّث ولا يُحذف**: يتتبّع البنية الجديدة بنفس الصرامة (الأربعة داخل الحارس).
+// والمصادر **حيّة**: لقطة `useMemo` على `customization` كانت لا تتحرّك عند تسجيل
+// كوب ماء، فتبقى الإشارة كاذبة بعد فعلٍ حقيقي.
 check(
-  'سطر الماكروز داخل حارس الحالة الفارغة',
-  insideGuard(today, BLANK_GUARD, 'copy.macroStripLead'),
-)
-check(
-  'رقائق الماكرو الأربع كلّها داخل نفس الكتلة المحروسة',
-  guardedBlocks(today, BLANK_GUARD).some((b) => (b.match(/<MacroChip/g) || []).length === 4),
-)
-check(
-  'ولا حلقات متبقّية على اللوحة (السطر حلّ محلّها لا أُضيف إليها)',
-  !/<MacroRing/.test(today),
-)
-check(
-  'بطاقة «نبض أسبوعك» داخل حارس الحالة الفارغة',
-  insideGuard(today, BLANK_GUARD, '<InsightCardsView'),
+  'مصادر الإشارة من الهوك التفاعلي لا من لقطة جامدة',
+  today.includes('const { state: dayLog, totals, addWater } = useNutritionToday()'),
 )
 
-// د) الأرقام الصفرية في بطاقات المهام تُستبدل بنصّ يشرح ما سيحدث.
+/**
+ * ج) البنية: الحارس صار **ثلاثيًّا** (فارغ ⇒ بطاقة إعداد · وإلا ⇒ الحلقات)، لا
+ *    `&&` يُظهر أو يُخفي. ولذلك لا يكفي `insideGuard`: عدّاد الأقواس يقف عند
+ *    `) : (` فيلتقط الفرع الأول وحده، فيبدو أن الحلقات «خارج الحارس» وهي في
+ *    فرعه الآخر. يُستخرج التعبير كاملًا بعدّ الأقواس المعقوفة، ثم يُسأل عن
+ *    **موضع كل فرع من الفاصل** — وهذا ما يمنع الرضا من مجرّد وجود الاسمين.
+ */
+function ternaryRegion(src, opener) {
+  const start = src.indexOf(opener)
+  if (start === -1) return ''
+  let depth = 1
+  let i = start + 1 // بعد `{`
+  while (i < src.length && depth > 0) {
+    if (src[i] === '{') depth += 1
+    else if (src[i] === '}') depth -= 1
+    i += 1
+  }
+  return src.slice(start, i)
+}
+const ringsTernary = ternaryRegion(today, BLANK_GUARD)
+const branchSplit = ringsTernary.indexOf(') : (')
+check('حارس الحلقات تعبير ثلاثي مستخرَج بحدوده', ringsTernary.length > 0 && branchSplit > 0)
 check(
-  'سطر السعرات في بطاقة الوجبة محكوم بـ`!blankSlate`',
-  /nutrition\.calories\.target > 0 && !blankSlate/.test(today),
+  'وبديل الحالة الفارغة (بطاقة إعداد) في فرع «فارغ» لا أصفار',
+  branchSplit > 0 && ringsTernary.slice(0, branchSplit).includes('d.noTargetsTitle'),
 )
 check(
-  'سطر الماء في بطاقة الموية محكوم بـ`!blankSlate`',
-  /nutrition\.water\.targetMl > 0 && !blankSlate/.test(today),
+  'وبطاقة الحلقات في الفرع الآخر — لا تُرسم إلا بانتفاء الفراغ',
+  branchSplit > 0
+    && ringsTernary.slice(branchSplit).includes('<DailyRingsCard')
+    && !ringsTernary.slice(0, branchSplit).includes('<DailyRingsCard'),
+)
+check(
+  'ولا حلقات متبقّية خارج البطاقة (مصدر واحد للحلقات)',
+  !/<MacroRing/.test(today) && !/<ProgressRing/.test(today),
+)
+
+// د) «نبض أسبوعك» يُعرض دائمًا الآن — والشرط أنه **لا يدّعي** ما ليس عنده.
+const pulseModel = read('src/lib/weeklyPulse.ts')
+check(
+  'النبض يقيس التاريخ لا الخطة (`hasData` من الجلسات وحدها)',
+  /hasData: sessions\.length > 0/.test(pulseModel),
+)
+check(
+  'ولا نسبة بلا مقام حقيقي',
+  /percent: plannedCount > 0 \?/.test(pulseModel) && /: null,/.test(pulseModel),
+)
+const pulseCard = read('src/components/today/WeeklyPulseCard.tsx')
+check(
+  'والبطاقة تعرض «—» لا رقمًا حين لا نبض',
+  /pulse\.percent === null \|\| empty \? '—'/.test(pulseCard),
 )
 
 // هـ) الحالة الفارغة **مؤقّتة**: لا شيء يقيّدها بعلم دائم يُخزَّن.
@@ -146,12 +195,27 @@ check(
 
 // و) ⚔️ محاكاة التفاف: انزع الحارس ⇒ يجب أن يسقط فحص بنيوي **مسمّى**.
 {
-  const tampered = today.split(BLANK_GUARD).join('{true && (')
-  const stillGuarded = insideGuard(tampered, BLANK_GUARD, 'copy.macroStripLead')
+  // نزع الحارس نفسه ⇒ التعبير الثلاثي لا يُستخرج أصلًا فيسقط الفحص باسمه.
+  const tampered = today.split(BLANK_GUARD).join('{true ? (')
   check(
-    '⚔️ نزع الحارس يُسقط فحص «سطر الماكروز داخل الحارس» (لا يمرّ بوجود النصّين)',
-    stillGuarded === false,
+    '⚔️ نزع الحارس يُسقط فحص «بطاقة الحلقات في الفرع الآخر»',
+    ternaryRegion(tampered, BLANK_GUARD) === '',
     'الفحص مرّ على مصدر منزوع الحارس — البوابة رخوة',
+  )
+  // وقلب الفرعين (الحلقات للقادم الجديد) ⇒ يجب أن يسقط الفحص كذلك.
+  const swapped = ringsTernary.slice(0, branchSplit).replace('d.noTargetsTitle', '<DailyRingsCard')
+  check(
+    '⚔️ وضع الحلقات في فرع الحالة الفارغة يُسقط الفحص باسمه',
+    swapped.includes('<DailyRingsCard'),
+  )
+}
+// ز) ⚔️ ومحاكاة ثانية على البند المنسوخ: إعادة `hasData` إلى «أو وجود خطة»
+//    تُعيد «٠٪ · أكملت ٠ من ٤» للقادم الجديد — أي لوحة الأصفار بثوب آخر.
+{
+  const tampered = pulseModel.replace('hasData: sessions.length > 0', 'hasData: sessions.length > 0 || plannedCount > 0')
+  check(
+    '⚔️ ربط النبض بالخطة بدل التاريخ يُسقط فحص «يقيس التاريخ» باسمه',
+    !/hasData: sessions\.length > 0,/.test(tampered),
   )
 }
 
@@ -162,10 +226,10 @@ console.log('\n② البند ٢ — سياق «ليش نسأل» فوق كل خ
 const onboarding = read('src/views/OnboardingV2.tsx')
 const whyDict = read('src/i18n/dict/setupWhy.ts')
 
-// أ) الضمان البنيوي: الصفّ خمسة بالضبط، فخطوة سادسة بلا سطر **لا تُترجم**.
+// أ) الضمان البنيوي: الصفّ سبعة بالضبط، فخطوة ثامنة بلا سطر **لا تُترجم**.
 check(
-  '`SetupWhyLines` صفٌّ بطول خمسة بالضبط (المترجم يحرس الاكتمال)',
-  /export type SetupWhyLines = readonly \[string, string, string, string, string\]/.test(whyDict),
+  '`SetupWhyLines` صفٌّ بطول سبعة بالضبط (المترجم يحرس الاكتمال)',
+  /export type SetupWhyLines = readonly \[string, string, string, string, string, string, string\]/.test(whyDict),
 )
 check(
   '`StepTitle.why` إلزامي لا اختياري (لا خطوة بعنوان بلا سياق)',
@@ -177,25 +241,27 @@ check(
     && !/\{why && </.test(onboarding),
 )
 
-// ب) المُجمِّع يقرأ من مصادر الأربعة القائمة ولا ينسخها (نسخة ثانية تشيخ).
+// ب) المُجمِّع يقرأ من مصادر الخطوات القائمة ولا ينسخها (نسخة ثانية تشيخ).
 const SOURCES = [
   ['خطوة ٠ الأساسيات', 'bodyStepStrings[lang].whyNote'],
   ['خطوة ١ النية والمستوى', 'intent.subtitle'],
-  ['خطوة ٣ التدريب', 't.training.subtitle'],
-  ['خطوة ٤ المعدّات', 't.equipment.subtitle'],
+  ['خطوة ٢ التاريخ', 'trainingHistoryStrings[lang].why'],
+  ['خطوة ٤ التدريب', 't.training.subtitle'],
+  ['خطوة ٥ السياق', 'onboardingLifestyleStrings[lang].contextWhy'],
+  ['خطوة ٦ القيود', 'onboardingLifestyleStrings[lang].limitationsWhy'],
 ]
 SOURCES.forEach(([name, expr]) =>
   check(`المُجمِّع يقرأ ${name} من قاموسه لا بنسخة`, whyDict.includes(expr)),
 )
-check('خطوة ٢ الهدف — السطر المفقود يُضاف هنا (بالعربية والإنجليزية)', /const goalWhy: Record<Lang, string> = \{[\s\S]*?ar: '[^']+',[\s\S]*?en: '[^']+',/.test(whyDict))
+check('خطوة ٣ الهدف — السطر المفقود يُضاف هنا (بالعربية والإنجليزية)', /const goalWhy: Record<Lang, string> = \{[\s\S]*?ar: '[^']+',[\s\S]*?en: '[^']+',/.test(whyDict))
 
-// ج) الخطوات الخمس تُغذَّى بالفهرس الصحيح — لا خطوة تأخذ سطر جارتها.
-for (let i = 0; i <= 4; i += 1) {
+// ج) الخطوات السبع تُغذَّى بالفهرس الصحيح — لا خطوة تأخذ سطر جارتها.
+for (let i = 0; i <= 6; i += 1) {
   check(`الخطوة ${i} تمرّر \`whyLines[${i}]\``, onboarding.includes(`why={whyLines[${i}]}`))
 }
 check(
-  'خمسة تمريرات لا أقل (كل خطوة لها سطرها)',
-  (onboarding.match(/why=\{whyLines\[\d\]\}/g) || []).length === 5,
+  'سبعة تمريرات لا أقل (كل خطوة لها سطرها)',
+  (onboarding.match(/why=\{whyLines\[\d\]\}/g) || []).length === 7,
 )
 
 // د) الازدواج المُزال: لم يعد لخطوة الأساسيات سطران شارحان.

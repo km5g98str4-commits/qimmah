@@ -1,0 +1,98 @@
+{
+  "registry_version": "1.0.0",
+  "compiled_at": "2026-08-14",
+  "compiled_by": "AGENT-B / food production pipeline",
+  "evidence": "data/food-production/reports/source-probe.json — regenerate with: node scripts/food-production/probe-sources.mjs",
+  "rules": [
+    "Licence text is QUOTED from the publisher, never paraphrased into a permission we wish we had.",
+    "robots.txt is obeyed as written. A source whose robots disallows a path is not crawled on that path, whatever the licence says.",
+    "A source that did not respond is recorded EXTERNALLY_BLOCKED with its transport error. It is never silently dropped, and never replaced by invented data."
+  ],
+  "sources": [
+    {
+      "id": "openfoodfacts",
+      "name": "Open Food Facts",
+      "status": "REACHABLE_AND_USED",
+      "role": "primary — global breadth plus real Saudi/Gulf packaged coverage",
+      "access_method": "Official bulk CSV export over HTTPS (static.openfoodfacts.org/data/...), downloaded once and streamed. NOT the per-product API.",
+      "terms_url": "https://world.openfoodfacts.org/terms-of-use",
+      "licence_url": "https://opendatacommons.org/licenses/odbl/1-0/",
+      "licence": "ODbL 1.0 for the database; Database Contents Licence for individual contents; CC-BY-SA for images.",
+      "licence_quote": "The Open Food Facts database is available under the Open Database License.",
+      "licence_quote_source": "https://world.openfoodfacts.org/terms-of-use",
+      "commercial_use_quote": "authorize the use and reproduction of the content for all purposes, including commercial use",
+      "what_the_terms_actually_permit": [
+        "Commercial use IS permitted — the terms say so explicitly.",
+        "ODbL obligations we therefore take on: (1) ATTRIBUTE Open Food Facts wherever the data is surfaced; (2) SHARE-ALIKE — if we publicly distribute a derived database, it must go out under ODbL; (3) KEEP-OPEN — no DRM that blocks the ODbL rights.",
+        "Practical consequence for Qimmah: shipping OFF-derived product data inside the app is a public distribution of a derived database. Attribution must be visible in the UI and the derived shards must carry the ODbL notice. This is an obligation, not an optional nicety."
+      ],
+      "robots_status": "world.openfoodfacts.org/robots.txt disallows /api, /cgi and /facets for User-agent: *. The bulk /data/ export path is NOT disallowed.",
+      "robots_consequence": "Bulk ingest MUST use the /data/ export. Crawling /api/v2/search for bulk would be against robots and is not done. The app's existing per-scan runtime lookup in src/features/barcode/openFoodFacts.ts is a different thing: one user-initiated request per scan, not crawling.",
+      "expected_volume": "~4.2 million product rows in the CSV export; the usable subset (valid GTIN + energy + macros) is far smaller.",
+      "saudi_coverage": "Real but thin relative to Europe. Measured, not assumed — see the report's source breakdown.",
+      "measured": { "bulk_csv_gz_bytes": 1275171186, "bulk_jsonl_gz_bytes": 12672091473, "http_status": 200, "range_requests_supported": true }
+    },
+    {
+      "id": "usda_fdc",
+      "name": "USDA FoodData Central — Branded Foods",
+      "status": "REACHABLE_NOT_INGESTED",
+      "role": "candidate secondary — US-market branded breadth",
+      "access_method": "Official bulk ZIP download over HTTPS.",
+      "terms_url": "https://fdc.nal.usda.gov/data-documentation.html",
+      "licence": "US Government work — public domain (17 U.S.C. §105). No attribution legally required, though it is good practice.",
+      "what_the_terms_actually_permit": [
+        "Unrestricted use including commercial, with no share-alike obligation.",
+        "Because it carries NO copyleft, it does not contaminate our other data the way ODbL does."
+      ],
+      "robots_status": "fdc.nal.usda.gov/robots.txt is 'User-agent: * / Disallow:' — an empty Disallow, i.e. everything is allowed.",
+      "expected_volume": "~2 million branded US food records (194.1 MB compressed JSON).",
+      "saudi_coverage": "Effectively none — US retail market. Adds global breadth only.",
+      "why_not_ingested_in_this_wave": "Saudi-first is the product priority and OFF already supplies the Saudi/Gulf rows. Adding ~2M US records would inflate the long tail without serving the Saudi user, and the ingest adapter is the only missing piece — the pipeline is source-agnostic by design. Recorded as a ready extension, not as a blocker.",
+      "measured": { "bulk_zip_bytes": 203489469, "http_status": 200 }
+    },
+    {
+      "id": "sfda",
+      "name": "Saudi Food & Drug Authority (SFDA)",
+      "status": "EXTERNALLY_BLOCKED",
+      "role": "wanted — authoritative Saudi regulatory/nutrition reference",
+      "access_method": "attempted plain HTTPS GET of the site root",
+      "evidence": "ECONNRESET (connection reset by peer) on https://www.sfda.gov.sa/, https://sfda.gov.sa/ and https://www.sfda.gov.sa/en, with both a pipeline User-Agent and a browser User-Agent.",
+      "interpretation": "The reset happens at transport level before any HTTP response, so we cannot even read robots.txt or the terms. This is most likely geo/edge filtering of this build machine rather than a deliberate ban on us.",
+      "what_we_did_NOT_do": "No attempt to bypass the block — no proxy, no VPN, no spoofed origin. A source we cannot reach lawfully and openly stays unused.",
+      "next_step_when_unblocked": "Read robots.txt and terms FIRST, confirm redistribution rights, then write an adapter. SFDA data may carry reuse conditions that ODbL-derived shards cannot absorb, so it would need its own shard namespace."
+    },
+    {
+      "id": "saudi_open_data",
+      "name": "Saudi Open Data Portal (open.data.gov.sa)",
+      "status": "EXTERNALLY_BLOCKED",
+      "role": "wanted — possible official Saudi food/product datasets",
+      "access_method": "attempted plain HTTPS GET of robots.txt",
+      "evidence": "UND_ERR_CONNECT_TIMEOUT — no TCP response within 20s.",
+      "what_we_did_NOT_do": "No bypass attempted.",
+      "next_step_when_unblocked": "Search the portal catalogue for food/product datasets, read the Saudi Open Data Licence, then decide. Its terms are NOT assumed to be compatible with ODbL redistribution."
+    },
+    {
+      "id": "manufacturer_sites",
+      "name": "Manufacturer public nutrition pages (e.g. Almarai)",
+      "status": "REACHABLE_DELIBERATELY_NOT_SCRAPED",
+      "access_method": "robots.txt read only",
+      "robots_status": "almarai.com/robots.txt is 'User-agent: * / Allow: /' — crawling is not disallowed.",
+      "why_not_ingested": "robots permitting a crawl is NOT a copyright licence. Nutrition tables published on a corporate site carry no grant of redistribution, and scraping them into a shipped database would be republishing someone else's content without permission. Being technically allowed to fetch a page is not being allowed to redistribute it. This needs an explicit licence or a written permission, which is a founder/legal decision, not an agent decision.",
+      "escalation": "Owner decision required before any manufacturer data is ingested."
+    },
+    {
+      "id": "qimmah_curated",
+      "name": "Qimmah's own curated datasets",
+      "status": "OWNED",
+      "role": "the hot set — Saudi/Gulf items that must work offline",
+      "access_method": "in-repo",
+      "assets": [
+        "src/data/foodItems.ts — 411 generic/prepared food items (no GTIN)",
+        "src/data/saudiFoods.ts — 130 Saudi traditional dishes (no GTIN)",
+        "docs/data-factory/packaged/PKG-001-saudi-gulf-packaged.json — 55 Saudi/Gulf PACKAGED products WITH barcodes"
+      ],
+      "licence": "Owned by Qimmah. No third-party redistribution constraint.",
+      "note": "Only PKG-001 carries GTINs, so only PKG-001 enters the barcode-keyed pipeline. The other two are generic foods keyed by name, a different retrieval path, and are left untouched."
+    }
+  ]
+}

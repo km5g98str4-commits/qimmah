@@ -69,7 +69,7 @@ async function openProfileNotifications(page) {
   await openSurface(page, 'profile')
   await page.getByRole('button', { name: 'الإعدادات والخصوصية', exact: true }).click()
   await page.getByRole('button', { name: /^التذكيرات/ }).click()
-  await page.getByRole('heading', { name: 'التذكيرات', level: 1 }).waitFor()
+  await page.getByRole('heading', { name: 'التذكيرات', level: 2 }).waitFor()
 }
 
 function ratio(lighter, darker) {

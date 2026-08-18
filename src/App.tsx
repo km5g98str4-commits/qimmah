@@ -1,12 +1,8 @@
 import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 // شاشة البداية (الهبوط) تبقى مُحمّلة مباشرةً لأول رسم سريع.
 import { StartView } from '@/views/StartView'
-import { AccountRequiredView } from '@/views/AccountRequiredView'
-import { AppLoading } from '@/components/AppLoading'
-import { VerifyEmailView } from '@/views/VerifyEmailView'
 import { RouteErrorBoundary } from '@/components/ErrorBoundary'
 import { DashboardSkeleton, ProgressSkeleton, TabSkeleton } from '@/components/ViewSkeletons'
-import { InstallPrompt } from '@/components/InstallPrompt'
 
 // باقي الشاشات مُقسّمة إلى حِزم عند الطلب (code-splitting) لتقليل حزمة الدخول الأولى.
 // تُبنى عبر مصنع لأنّ React.lazy يخزّن فشل الاستيراد نهائيًا — زرّ «أعد المحاولة» في
@@ -14,6 +10,12 @@ import { InstallPrompt } from '@/components/InstallPrompt'
 function createLazyViews() {
   return {
     LoginView: lazy(() => import('@/views/LoginView').then((m) => ({ default: m.LoginView }))),
+    AccountRequiredView: lazy(() =>
+      import('@/views/AccountRequiredView').then((m) => ({ default: m.AccountRequiredView })),
+    ),
+    VerifyEmailView: lazy(() =>
+      import('@/views/VerifyEmailView').then((m) => ({ default: m.VerifyEmailView })),
+    ),
     ResetPasswordView: lazy(() =>
       import('@/views/ResetPasswordView').then((m) => ({ default: m.ResetPasswordView })),
     ),
@@ -25,6 +27,7 @@ function createLazyViews() {
     ),
     NutritionView: lazy(() => import('@/views/NutritionView').then((m) => ({ default: m.NutritionView }))),
     ProgressView: lazy(() => import('@/views/ProgressView').then((m) => ({ default: m.ProgressView }))),
+    MeasurementsView: lazy(() => import('@/views/ProgressView').then((m) => ({ default: m.MeasurementsView }))),
     StepsView: lazy(() => import('@/views/StepsView').then((m) => ({ default: m.StepsView }))),
     ProfileView: lazy(() => import('@/views/ProfileView').then((m) => ({ default: m.ProfileView }))),
     CalcExplainerView: lazy(() =>
@@ -40,9 +43,12 @@ function createLazyViews() {
       : null,
     MyStatsView: lazy(() => import('@/views/MyStatsView').then((m) => ({ default: m.MyStatsView }))),
     RecoveryView: lazy(() => import('@/views/RecoveryView').then((m) => ({ default: m.RecoveryView }))),
+    // المركز التنفيذي — حزمة مستقلّة لا تدخل حزمة الإقلاع. الحارس داخل المكوّن
+    // نفسه، فجلب الحزمة **لا يمنح شيئًا**: من ليس مؤسسًا يرى شاشة المنع.
+    AdminRoute: lazy(() => import('@/admin').then((m) => ({ default: m.AdminRoute }))),
   }
 }
-import { MobileShell, type MainTab, type QuickLogTarget } from '@/components/MobileShell'
+import type { MainTab, QuickLogTarget } from '@/components/MobileShell'
 import type { AppBadge } from '@/components/AppNav'
 import { useAuth } from '@/lib/authContext'
 import { adoptGuestOnboarding, isAccountOnboarded, isOnboardingComplete, markCompleted } from '@/lib/onboarding'
@@ -50,12 +56,14 @@ import { reconcileAccountScope } from '@/lib/accountScope'
 import { ensureOnboardingProfile } from '@/lib/onboardingProfile'
 import { currentUserId, hydrateOnboardingFromProfile } from '@/lib/onboardingSync'
 import { useLanguage } from '@/i18n'
+import type { Lang } from '@/lib/appPreferences'
 import { type AppRoute, MAIN_TABS, isUnknownRouteHash, routeFromHash, setHashRoute } from '@/lib/appRoutes'
-import { SuccessToast } from '@/components/SuccessToast'
 import { BUILD_LABEL } from '@/lib/buildInfo'
+import { requestQuickLogIntent } from '@/lib/quickLogIntent'
 import { trackLocal } from '@/lib/tracking'
 import { recordDayOpen } from '@/lib/tracking/signals'
 import { useCustomization } from '@/lib/customizationContext'
+import { useAccess } from '@/lib/access/useAccess'
 import { V2_QUICK_LOG } from '@/design-system/v2/labels'
 
 // Achievement evaluation reads workout + nutrition stores. It is only rendered
@@ -64,6 +72,55 @@ import { V2_QUICK_LOG } from '@/design-system/v2/labels'
 const AchievementToaster = lazy(() =>
   import('@/features/achievements/AchievementToaster').then((m) => ({ default: m.AchievementToaster })),
 )
+
+// قشرة التبويبات لا تفيد صفحة البداية أو تسجيل الدخول أو الإعداد. تحميلها مع
+// أول تبويب رئيسي يبقي رحلة الدخول أخف، مع بقاء نفس القشرة ومكوّناتها بعد ذلك.
+const MobileShell = lazy(() =>
+  import('@/components/MobileShell').then((m) => ({ default: m.MobileShell })),
+)
+
+// لا يُجلب الحوار قبل أن يحاول المستخدم فعلًا مدفوعًا؛ طبقة الوصول تبقى حاضرة
+// وتفشل مغلقة، ثم يُعرض نفس الحوار الموحّد عند أول منع.
+const PremiumGate = lazy(() =>
+  import('@/components/PremiumGate').then((m) => ({ default: m.PremiumGate })),
+)
+const SuccessToast = lazy(() =>
+  import('@/components/SuccessToast').then((m) => ({ default: m.SuccessToast })),
+)
+const AppLoading = lazy(() =>
+  import('@/components/AppLoading').then((m) => ({ default: m.AppLoading })),
+)
+
+function LoadingFallback() {
+  return <div className="h-[100dvh] min-h-0 bg-page" aria-busy="true" />
+}
+
+/**
+ * طبقة بوّابة Premium.
+ *
+ * [SOVEREIGN-COMMERCE-001] **البوّابة تُغلق عند تبدّل المسار.** كانت `blockedAction`
+ * تعيش في المزوّد فوق مبدّل المسارات، وطبقةُ البوّابة خارجه، ومستمع `hashchange`
+ * بلا تفكيك — فزرّ الرجوع كان يترك نافذةً حيّة **فوق شاشة أخرى**: المستخدم يرى
+ * حوارًا يطالبه بالدفع مقابل فعلٍ لم يعد على الشاشة التي يقف عليها.
+ *
+ * الإغلاق مشروط بـ**تبدّل** المسار لا بتشغيل الأثر: البوّابة تُفتح فوق مسارها،
+ * فلو أغلقنا عند كل تشغيل لأغلقناها في نفس اللحظة التي فُتحت فيها.
+ */
+function PremiumGateLayer({ lang, route }: { lang: Lang; route: AppRoute }) {
+  const { blockedAction, closeGate } = useAccess()
+  const lastRoute = useRef(route)
+  useEffect(() => {
+    if (lastRoute.current === route) return
+    lastRoute.current = route
+    closeGate()
+  }, [route, closeGate])
+  if (!blockedAction) return null
+  return (
+    <Suspense fallback={null}>
+      <PremiumGate lang={lang} />
+    </Suspense>
+  )
+}
 
 /**
  * حراسة المسار: التبويبات الرئيسية لا تُفتح أبدًا قبل إكمال إعداد حقيقي **لهذا الحساب**
@@ -78,13 +135,14 @@ function guardRoute(route: AppRoute, userId: string | null): AppRoute {
     route === 'stats' ||
     route === 'recovery' ||
     route === 'steps' ||
+    route === 'measurements' ||
     route === 'settings' ||
     route === 'calc'
   const guestReady = !userId && isOnboardingComplete(null)
   // الإعداد هو باب الضيف نفسه؛ لا نعيده للبداية قبل أن يأخذ فرصته في بناء بياناته.
   if (route !== 'setup' && needsAccount && !userId && !guestReady) return 'accountRequired'
   // بعد الحساب: التبويبات تتطلّب إعدادًا مكتملًا وإلا معالج الإعداد (الأسئلة).
-  if (MAIN_TABS.includes(route) || route === 'exercises' || route === 'stats' || route === 'recovery' || route === 'steps') {
+  if (MAIN_TABS.includes(route) || route === 'exercises' || route === 'stats' || route === 'recovery' || route === 'steps' || route === 'measurements') {
     if (!isOnboardingComplete(userId)) return 'setup'
   }
   return route
@@ -98,7 +156,9 @@ function initialRoute(userId: string | null): AppRoute {
   if (isUnknownRouteHash()) {
     return 'notfound'
   }
-  // بلا حساب → شاشة الحساب (تسجيل دخول/إنشاء حساب). بحساب → اللوحة أو الأسئلة.
+  // [WAVE-A] بلا حساب → شاشة **الهبوط** (`start`)، ونداؤها الأساسي يبدأ الأسئلة
+  // مباشرةً بلا حساب. الشاشة نفسها لم تتغيّر موضعًا — تغيّر ما يفعله زرّها الأول.
+  // وهي تبقى مطلوبة للعائد الذي فقد جلسته: منها وحدها يصل إلى تسجيل الدخول.
   if (!userId) return 'start'
   return isOnboardingComplete(userId) ? 'dashboard' : 'setup'
 }
@@ -185,8 +245,24 @@ export default function App() {
   const didInitialAuthRoute = useRef(false)
   const [showSuccess, setShowSuccess] = useState(false)
   const dismissSuccess = useCallback(() => setShowSuccess(false), [])
-  // وضع شاشة الحساب (تسجيل دخول/إنشاء حساب) — يُحدَّد من زرّ شاشة البداية.
-  const [loginMode, setLoginMode] = useState<'login' | 'signup'>('login')
+  /**
+   * [QIM-WEB-FOUNDER-UX-006/حزمة ٦] وضع شاشة الحساب **يُشتقّ من المسار**.
+   * كان `useState` هنا وفي `LoginView` معًا، فالعنوان لا يتحرّك مع التبديل.
+   */
+  const authMode: 'login' | 'signup' | 'forgot' =
+    view === 'signup' ? 'signup' : view === 'forgot' ? 'forgot' : 'login'
+  const goAuth = useCallback((mode: 'login' | 'signup' | 'forgot') => {
+    setView(mode === 'signup' ? 'signup' : mode === 'forgot' ? 'forgot' : 'login')
+  }, [])
+
+  /**
+   * وجهة الضيف من شاشة البداية/الحساب.
+   * الضيف **المكتمل** يدخل معاينته على «اليوم»؛ ومحرّر الخطة لا يُفتح إلا بفعل
+   * «تعديل خطتي» صريح. كان كلاهما يُرسَل إلى `setup` فيهبط العائد على المحرّر.
+   */
+  const enterAsGuest = useCallback(() => {
+    setView(isOnboardingComplete(null) ? guardRoute('dashboard', null) : 'setup')
+  }, [])
 
   // آخر مسار غير قانوني (للرجوع الآمن من الخصوصية/الشروط دون الاعتماد على history.back
   // الذي قد يقذف المستخدم خارج التطبيق عند فتح الصفحة مباشرةً/التحديث).
@@ -285,18 +361,19 @@ export default function App() {
     const signedInId = await currentUserId()
     if (!signedInId) {
       // لا حساب → يعود لشاشة الحساب (لا دخول بلا تسجيل).
-      setView('login')
+      goAuth('login')
       return
     }
     // مسجّل دخول — القرار لكل حساب: السجلّ المحلي، وإلا الملف السحابي.
-    // الأسئلة (الإعداد) تبدأ الآن فقط بعد الحساب.
+    // [WAVE-A] نُقض «الأسئلة تبدأ فقط بعد الحساب»: الأسئلة تسبق الحساب الآن،
+    // وهذا المسار خاصّ بمن **سجّل فعلًا** — فيُسأل هل أكمل إعداده أم لا.
     let onboarded = isAccountOnboarded(signedInId)
     // من أكمل إعداده كضيف ثم أنشأ حسابًا لحفظ تقدّمه يدخل على خطته، لا على معالج جديد.
     if (!onboarded) onboarded = adoptGuestOnboarding(signedInId)
     if (!onboarded) onboarded = await hydrateOnboardingFromProfile(signedInId)
     if (onboarded) setView('dashboard')
     else openSetup()
-  }, [openSetup])
+  }, [openSetup, goAuth])
 
   const closeSetup = (completed?: boolean) => {
     const done = completed || isOnboardingComplete(uid)
@@ -306,12 +383,23 @@ export default function App() {
     if (completed) setShowSuccess(true)
   }
 
-  // مخرج طوارئ للإعداد: يُعلّم الحساب/الجهاز مكتمل الإعداد ويدخل اللوحة فورًا. يستخدمه زرّ
-  // «تخطّي» الدائم في المعالج وحاجز الأخطاء — فلا يُحبَس مستخدم أبدًا حتى لو تعطّلت خطوة.
-  const skipOnboarding = useCallback(() => {
+  /**
+   * [QIM-WEB-FOUNDER-UX-004/حزمة ٤] الدخول من شاشة التسليم — **بلا إشعار نجاح**.
+   *
+   * سببان، وكلاهما مقيس:
+   *   • تكرار: التسليم عرض للتوّ «جهزنا خطتك» بخطته وأرقامها. إشعارٌ يقول
+   *     «تم تجهيز خطتك» بعده مباشرةً يعيد الخبر نفسه في اللحظة نفسها.
+   *   • تداخل: الإشعار بطاقة عائمة ٦ ثوانٍ. رفعناها في الحزمة ١ فوق شريط
+   *     التنقّل، لكنها تبقى فوق **المحتوى**؛ وقِيس أنها تبتلع نقر «أضف» في
+   *     التغذية خلال تلك الثواني — وهو بالضبط شكل العطل الذي وصفه المؤسس:
+   *     «يشتغل مرة وما يشتغل مرة». نافذة ستّ ثوانٍ تُنتج تقطّعًا لا يُفسَّر.
+   *
+   * لا يوسَم الإعداد مكتملًا من مسار خطأ: الحاجز الموحّد يعيد المحاولة ويحفظ
+   * المسودة، فلا تتحول مشكلة عرض إلى خطة مكتملة كذبًا.
+   */
+  const enterFromHandoff = useCallback(() => {
     markCompleted(uid)
     setView(guardRoute('dashboard', uid))
-    setShowSuccess(true)
   }, [uid])
 
   // تنقّل عام — يمرّ عبر الحراسة حتى لا تُفتح لوحة بلا إعداد.
@@ -320,21 +408,38 @@ export default function App() {
     else setView(guardRoute(v, uid))
   }
 
+  /**
+   * التسجيل السريع — النيّة تُكتب **بعد** حسم المقصد لا قبله.
+   *
+   * كان المسار يكتب النيّة ثم ينادي `navigate`. وحين يحوّل الحارس الوجهة
+   * (ضيف بلا حساب ⇒ `accountRequired`، أو إعداد ناقص ⇒ `setup`) تبقى النيّة
+   * في التخزين بلا مستهلك، فتخطف **زيارة لاحقة مشروعة**: يفتح المستخدم
+   * «التغذية» بعد يوم فتنفتح عليه فطوره من نيّة قديمة لا يذكرها.
+   *
+   * والكتابة نفسها تمرّ الآن بالمالك المحروس: التخزين المحجوب كان يرمي داخل
+   * معالج النقر فيموت زرّ التسجيل السريع كلّه.
+   */
   const openQuickLog = (target: QuickLogTarget) => {
-    window.sessionStorage.setItem('qimmah:quick-log-intent', target)
-    if (target === 'routine') {
-      navigate('profile')
-      window.setTimeout(() => window.dispatchEvent(new CustomEvent('qimmah:quick-log', { detail: target })), 0)
+    const intended: AppRoute = target === 'routine' ? 'profile' : 'nutrition'
+    const destination = guardRoute(intended, uid)
+    if (destination !== intended) {
+      // الحارس حوّل الوجهة — لا نيّة تُكتب، فلا نيّة تعلق.
+      setView(destination)
       return
     }
-    navigate('nutrition')
+    requestQuickLogIntent(target)
+    navigate(intended)
     window.setTimeout(() => window.dispatchEvent(new CustomEvent('qimmah:quick-log', { detail: target })), 0)
   }
 
   // ——— بوابة الإقلاع: أثناء استعادة جلسة المصادقة نعرض حالة تحميل قصيرة (لا شاشة دخول)
   //     حتى لا يُطالَب مستخدم لديه جلسة صالحة بتسجيل الدخول من جديد. ———
   if (auth.loading) {
-    return <AppLoading />
+    return (
+      <Suspense fallback={<LoadingFallback />}>
+        <AppLoading />
+      </Suspense>
+    )
   }
 
   // ——— بوّابة الاستعادة (فوق كل البوّابات): جلسة استعادة كلمة المرور يجب أن تهبط دائمًا على
@@ -344,17 +449,15 @@ export default function App() {
   if (view === 'reset' || auth.recoveryActive) {
     return (
       <RouteErrorBoundary onRetry={retryLazyViews}>
-        <Suspense fallback={<AppLoading />}>
+        <Suspense fallback={<LoadingFallback />}>
           <V.ResetPasswordView
             lang={LANG}
             onDone={() => {
               auth.endRecovery()
-              setLoginMode('login')
-              setView('login')
+              goAuth('login')
             }}
           />
         </Suspense>
-        <InstallPrompt lang={LANG} />
       </RouteErrorBoundary>
     )
   }
@@ -362,7 +465,11 @@ export default function App() {
   // ——— بوّابة تأكيد البريد (P0، دفاع عميق): حساب مسجّل ببريد لم يُؤكَّد بعد لا يُمنح وصولًا
   //     كاملًا — يُحوَّل لشاشة التأكيد. الضيف/غير المسجّل بالبريد يمرّ (emailVerified=true). ———
   if (!auth.emailVerified) {
-    return <VerifyEmailView lang={LANG} onSignedOut={() => setView('login')} />
+    return (
+      <Suspense fallback={<LoadingFallback />}>
+        <V.VerifyEmailView lang={LANG} onSignedOut={() => goAuth('login')} />
+      </Suspense>
+    )
   }
 
   // ——— بناء عنصر الشاشة الحالية ثم لفّه بحدّ Suspense (أسفل المزوّدات حتى تبقى حالتها
@@ -375,17 +482,16 @@ export default function App() {
         lang={LANG}
         // [CTO-68] الحدث ٤ — توزيع الشاشة الأولى. يُلتقط عند **الاختيار** لا عند
         // العرض، فالتوزيع يقيس ما فعله القادم الجديد لا ما رآه.
-        onLogin={() => { trackLocal('entry_choice_made', { choice: 'login' }); setLoginMode('login'); setView('login') }}
-        onSignup={() => { trackLocal('entry_choice_made', { choice: 'signup' }); setLoginMode('signup'); setView('login') }}
-        onGuest={() => { trackLocal('entry_choice_made', { choice: 'guest' }); setView('setup') }}
+        onLogin={() => { trackLocal('entry_choice_made', { choice: 'login' }); goAuth('login') }}
+        onGuest={() => { trackLocal('entry_choice_made', { choice: 'guest' }); enterAsGuest() }}
       />
     )
-  } else if (view === 'login') {
+  } else if (view === 'login' || view === 'signup' || view === 'forgot') {
     content = (
       <V.LoginView
         lang={LANG}
-        initialMode={loginMode}
-        onModeChange={setLoginMode}
+        mode={authMode}
+        onModeChange={goAuth}
         onSuccess={enterApp}
         onBack={() => setView('start')}
       />
@@ -405,10 +511,10 @@ export default function App() {
     content = <V.NotFoundView lang={LANG} onHome={goHome} onBack={() => window.history.back()} />
   } else if (view === 'accountRequired') {
     content = (
-      <AccountRequiredView
+      <V.AccountRequiredView
         lang={LANG}
-        onLogin={() => { setLoginMode('login'); setView('login') }}
-        onGuest={() => setView('setup')}
+        onLogin={() => goAuth('login')}
+        onGuest={enterAsGuest}
         onBack={() => setView('start')}
       />
     )
@@ -416,14 +522,23 @@ export default function App() {
     // النمط يُشتقّ من حالة الحساب وقت العرض: مكتمل → محرّرات متقدّمة (تعديل الخطة)؛
     // غير مكتمل → معالج الإعداد الأولي (وزنه/هدفه هو).
     const onboarded = isOnboardingComplete(uid)
-    content = <V.SetupView onClose={closeSetup} onForceComplete={skipOnboarding} initialStep={0} mode={onboarded ? 'advanced' : 'onboarding'} />
+    content = (
+      <V.SetupView
+        onClose={closeSetup}
+        onEnterFromHandoff={enterFromHandoff}
+        // [WAVE-A] من شاشة الكشف إلى إنشاء الحساب — مسار حقيقي لا رسالة.
+        onCreateAccount={() => { trackLocal('entry_choice_made', { choice: 'signup' }); goAuth('signup') }}
+        initialStep={0}
+        mode={onboarded ? 'advanced' : 'onboarding'}
+      />
+    )
   } else if (view === 'settings') {
     content = (
       <V.SettingsView
         lang={LANG}
         onNavigate={navigate}
         onEditPlan={openSetup}
-        onLogin={() => setView('login')}
+        onLogin={() => goAuth('login')}
         onOpenPrivacy={() => setView('privacy')}
         onOpenTerms={() => setView('terms')}
         onOpenProductReview={() => setView('productReview')}
@@ -438,6 +553,11 @@ export default function App() {
     ) : (
       <V.NotFoundView lang={LANG} onHome={() => setView('dashboard')} onBack={() => setView('dashboard')} />
     )
+  } else if (view === 'admin') {
+    // لا حراسة مسار هنا عمدًا: `AdminRoute` يحسم الدور بنفسه من `app_metadata`،
+    // ويرسم شاشة المنع لكل من ليس مؤسسًا. وتحويل الضيف إلى «أنشئ حسابًا» كذبة:
+    // الحساب لا يمنح الدور.
+    content = <V.AdminRoute />
   } else if (view === 'calc') {
     content = (
       <V.CalcExplainerView
@@ -454,15 +574,16 @@ export default function App() {
     // ——— التبويبات الرئيسية داخل قشرة الجوال ———
     content = (
       <>
-        <MobileShell
-          lang={LANG}
-          tab={(view === 'exercises' ? 'workout' : view === 'stats' ? 'dashboard' : view) as MainTab}
-          badge={badge}
-          onNavigate={navigate}
-          onOpenSettings={() => setView('settings')}
-          onQuickLog={openQuickLog}
-          routineQuickLabel={routineQuickLabel}
-        >
+          <Suspense fallback={<TabSkeleton />}>
+            <MobileShell
+              lang={LANG}
+              tab={(view === 'exercises' ? 'workout' : view === 'stats' ? 'dashboard' : view === 'measurements' ? 'progress' : view) as MainTab}
+              badge={badge}
+              onNavigate={navigate}
+              onOpenSettings={() => setView('settings')}
+              onQuickLog={openQuickLog}
+              routineQuickLabel={routineQuickLabel}
+            >
           {/* الرئيسية والتقدّم: fallback هيكلي لكل مسار (بدل AppLoading العام) — البيانات
               محلية متزامنة فلا يظهر الهيكل إلا أثناء تحميل حزمة الشاشة عند الطلب. */}
           {view === 'dashboard' && (
@@ -490,6 +611,11 @@ export default function App() {
               <V.ProgressView lang={LANG} onNavigate={navigate} />
             </Suspense>
           )}
+          {view === 'measurements' && (
+            <Suspense fallback={<ProgressSkeleton />}>
+              <V.MeasurementsView lang={LANG} onNavigate={navigate} />
+            </Suspense>
+          )}
           {view === 'profile' && (
             <Suspense fallback={<TabSkeleton />}>
               <V.ProfileView lang={LANG} onNavigate={navigate} />
@@ -500,9 +626,14 @@ export default function App() {
               <V.MyStatsView lang={LANG} />
             </Suspense>
           )}
-        </MobileShell>
+            </MobileShell>
+          </Suspense>
 
-        {showSuccess && <SuccessToast onClose={dismissSuccess} />}
+        {showSuccess && (
+          <Suspense fallback={null}>
+            <SuccessToast onClose={dismissSuccess} />
+          </Suspense>
+        )}
 
         {/* احتفالات الأوسمة والأرقام القياسية — فوق كل الشاشات الرئيسية */}
         <Suspense fallback={null}>
@@ -527,10 +658,31 @@ export default function App() {
       </a>
       <RouteErrorBoundary onRetry={retryLazyViews}>
         <div id="main-content" tabIndex={-1} className="outline-none">
-          <Suspense fallback={<AppLoading />}>{content}</Suspense>
+          <Suspense fallback={<LoadingFallback />}>{content}</Suspense>
         </div>
-        {/* دعوة تثبيت التطبيق (P12) — شريط سفلي قابل للإغلاق، لا يظهر مثبّتًا أو بعد الإغلاق. */}
-        <InstallPrompt lang={LANG} />
+        {/*
+          [QIM-WEB-FOUNDER-UX-003/حزمة ١] لا شريط تثبيت **ثابتًا** فوق جذر التطبيق.
+
+          كان هنا `<InstallPrompt/>` بـ`fixed inset-x-0 bottom-0 z-[60]` وارتفاع
+          مقيس ١٧٢بكسل على شاشة ٣٩٠×٧٨٠. وشريط التنقّل السفلي في القشرة `z-50`
+          **داخل** التدفّق. فالنتيجة المقيسة: `elementFromPoint` في مركز كل عنصر
+          من عناصر التنقّل الخمسة — وفي مركز «كمّل كضيف» على الهبوط، و«ادخل وشوف
+          خطتي» على التسليم — كان يعيد الشريط لا الزرّ. أي أن **قاع التطبيق كله
+          كان غير قابل للنقر** على أندرويد/كروم حيث يُطلق `beforeinstallprompt`.
+          وهذا هو مصدر «يشتغل مرة وما يشتغل مرة»: النقر البرمجي يتجاوز اختبار
+          الإصابة، والإصبع لا يتجاوزه.
+
+          ولم تُحذف وظيفة: دعوة التثبيت **منفَّذة مرّتين** في هذا المستودع، وهذه
+          هي النسخة الخاطئة. النسخة الصحيحة `InstallBanner` تُرسم في مسار القشرة
+          (`MobileShell`) فلا يمكنها بنيويًا أن تعلو شيئًا، ودليل آيفون الدائم في
+          الإعدادات (`InstallGuideSection`) لم يُمَس. ملف `InstallPrompt.tsx`
+          يبقى كما هو — حذفه يخصّ موجة تنظيف الكود الميت المستقلّة (قرار المؤسس ١).
+
+          يحرس هذا: `test:bottom-overlay` (بنيوي) و`test:e2e:install-overlap` (متصفّح).
+        */}
+        {/* بوّابة Premium — نداء واحد لكل فعل محجوب، من أي شاشة. تُرسم هنا مرّة
+            واحدة فلا يبني كل سطح نافذته الخاصّة فتتفرّق الرسالة. */}
+        <PremiumGateLayer lang={LANG} route={view} />
       </RouteErrorBoundary>
     </>
   )

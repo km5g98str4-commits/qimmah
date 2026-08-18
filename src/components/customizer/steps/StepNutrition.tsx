@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { StepHeader } from '../StepHeader'
 import { Icon } from '@/components/Icon'
+import { NumericInput } from '@/components/NumericInput'
 import { IngredientPicker } from '@/components/IngredientPicker'
 import type { WizardCtx } from '../stepProps'
 import type { MealType, NutritionPlan, PlanMeal } from '@/types/nutrition'
@@ -14,7 +15,8 @@ import {
   mealTypeLabels,
 } from '@/lib/nutritionPlan'
 import { targetCaloriesFor } from '@/lib/calculators'
-import { NUM_LIMITS, parseSafeNumber } from '@/lib/validation'
+import { NUM_LIMITS } from '@/lib/validation'
+import type { Lang } from '@/lib/appPreferences'
 import { onboardingStrings } from '@/i18n/dict/onboarding'
 
 // text-base (16px) لا text-sm: يمنع تكبير iOS التلقائي عند التركيز على الحقول.
@@ -146,11 +148,11 @@ export function StepNutrition({ ctx }: { ctx: WizardCtx }) {
           </button>
         </div>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
-          <Target label={d.nutCalories} value={np.targetCalories} max={NUM_LIMITS.dailyCalories.max} onChange={(v) => setNp({ targetCalories: v })} />
-          <Target label={d.nutProtein} value={np.targetProtein} max={1000} onChange={(v) => setNp({ targetProtein: v })} />
-          <Target label={d.nutCarbs} value={np.targetCarbs} max={2000} onChange={(v) => setNp({ targetCarbs: v })} />
-          <Target label={d.nutFat} value={np.targetFat} max={1000} onChange={(v) => setNp({ targetFat: v })} />
-          <Target label={d.nutWater} value={np.targetWaterLiters} step="0.1" max={15} onChange={(v) => setNp({ targetWaterLiters: v })} />
+          <Target lang={ctx.lang} label={d.nutCalories} value={np.targetCalories} max={NUM_LIMITS.dailyCalories.max} onChange={(v) => setNp({ targetCalories: v })} />
+          <Target lang={ctx.lang} label={d.nutProtein} value={np.targetProtein} max={1000} onChange={(v) => setNp({ targetProtein: v })} />
+          <Target lang={ctx.lang} label={d.nutCarbs} value={np.targetCarbs} max={2000} onChange={(v) => setNp({ targetCarbs: v })} />
+          <Target lang={ctx.lang} label={d.nutFat} value={np.targetFat} max={1000} onChange={(v) => setNp({ targetFat: v })} />
+          <Target lang={ctx.lang} label={d.nutWater} value={np.targetWaterLiters} step="0.1" max={15} onChange={(v) => setNp({ targetWaterLiters: v })} />
         </div>
       </div>
 
@@ -205,7 +207,7 @@ export function StepNutrition({ ctx }: { ctx: WizardCtx }) {
                 return (
                   <li key={`${ig.ingredientId}-${k}`} className="flex items-center gap-2 rounded-lg border border-line bg-page p-2">
                     <span className="min-w-0 flex-1 truncate text-xs text-ink-900">{data ? ingredientDisplayName(data.nameAr, data.nameEn, ctx.lang) : ig.ingredientId}</span>
-                    <input type="number" inputMode="decimal" min={0} max={50} step="0.5" className="w-16 rounded-lg border border-line bg-beige px-2 py-1 text-base text-ink-900 focus:outline-none" value={ig.servings} onChange={(e) => setServings(meal.id, k, parseSafeNumber(e.target.value, { min: 0, max: 50 }))} />
+                    <NumericInput lang={ctx.lang} decimal min={0} max={50} step="0.5" className="w-16 rounded-lg border border-line bg-beige px-2 py-1 text-base text-ink-900 focus:outline-none" value={ig.servings} onChange={(v) => setServings(meal.id, k, v)} />
                     <span className="text-[10px] text-ink-400">{d.nutServing}</span>
                     <button type="button" onClick={() => removeIngredient(meal.id, k)} className="grid h-6 w-6 place-items-center rounded text-rose-500 hover:bg-rose-500/10" aria-label={d.nutDelete}><Icon name="X" className="h-3.5 w-3.5" /></button>
                   </li>
@@ -220,10 +222,10 @@ export function StepNutrition({ ctx }: { ctx: WizardCtx }) {
 
             {/* الماكروز (قابلة للتعديل اليدوي) */}
             <div className="mt-3 grid grid-cols-4 gap-2">
-              <Target label={d.nutMealCalories} value={meal.calories} onChange={(v) => updateMeal(meal.id, { calories: v })} />
-              <Target label={d.nutMealProtein} value={meal.protein} onChange={(v) => updateMeal(meal.id, { protein: v })} />
-              <Target label={d.nutMealCarbs} value={meal.carbs} onChange={(v) => updateMeal(meal.id, { carbs: v })} />
-              <Target label={d.nutMealFat} value={meal.fat} onChange={(v) => updateMeal(meal.id, { fat: v })} />
+              <Target lang={ctx.lang} label={d.nutMealCalories} value={meal.calories} onChange={(v) => updateMeal(meal.id, { calories: v })} />
+              <Target lang={ctx.lang} label={d.nutMealProtein} value={meal.protein} onChange={(v) => updateMeal(meal.id, { protein: v })} />
+              <Target lang={ctx.lang} label={d.nutMealCarbs} value={meal.carbs} onChange={(v) => updateMeal(meal.id, { carbs: v })} />
+              <Target lang={ctx.lang} label={d.nutMealFat} value={meal.fat} onChange={(v) => updateMeal(meal.id, { fat: v })} />
             </div>
 
             <div className="mt-3 flex items-center justify-end gap-1">
@@ -252,11 +254,11 @@ export function StepNutrition({ ctx }: { ctx: WizardCtx }) {
   )
 }
 
-function Target({ label, value, step, max, onChange }: { label: string; value: number; step?: string; max?: number; onChange: (v: number) => void }) {
+function Target({ label, value, step, max, lang, onChange }: { label: string; value: number; step?: string; max?: number; lang: Lang; onChange: (v: number) => void }) {
   return (
     <label className="flex flex-col gap-1">
       <span className="text-[10px] font-medium text-ink-400">{label}</span>
-      <input type="number" inputMode="decimal" min={0} max={max} step={step ?? '1'} className={inputCls} value={value} onChange={(e) => onChange(parseSafeNumber(e.target.value, { min: 0, max: max ?? Number.MAX_SAFE_INTEGER }))} />
+      <NumericInput lang={lang} decimal min={0} max={max} step={step ?? '1'} className={inputCls} value={value} onChange={onChange} />
     </label>
   )
 }

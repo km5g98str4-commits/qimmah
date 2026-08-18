@@ -11,6 +11,7 @@ import type {
   NeatLevel,
   NutritionStyle as OnbNutritionStyle,
   OnbConsistency,
+  OnbTrainingHistory,
   OnboardingProfile,
   Sex,
   SplitMode,
@@ -18,6 +19,7 @@ import type {
 } from '@/types/onboarding'
 import { HEALTH_CONSENT_POLICY_VERSION, ONBOARDING_SCHEMA_VERSION } from '@/types/onboarding'
 import type { GoalValue } from '@/data/planBuilder'
+import type { Equipment } from '@/types/profile'
 
 export interface Answers {
   // profile + bodyMetrics
@@ -33,7 +35,13 @@ export interface Answers {
   // trainingPreferences
   experienceLevel?: ExperienceLevel
   consistency?: OnbConsistency
+  trainingHistory?: OnbTrainingHistory
   environment?: Environment
+  /**
+   * الأدوات المُعلَنة. **فارغة = لم يُسأل** فيعود التوليد لاشتقاق المكان
+   * (سلوك الملفّات القديمة حرفيًا بلا تغيير).
+   */
+  equipment: Equipment[]
   trainingDays: number
   daysTouched: boolean
   sessionDurationMin: number
@@ -53,6 +61,7 @@ export interface Answers {
   allergies: string[]
   // limitations + wellness (optional)
   injuries: string[]
+  hasInjury: boolean
   wellnessMode: WellnessTrackingMode
   healthDataConsent: boolean
 }
@@ -64,6 +73,7 @@ export const defaultAnswers: Answers = {
   weightKg: 75,
   targetWeightKg: 70,
   targetTouched: false,
+  equipment: [],
   trainingDays: 3,
   daysTouched: false,
   sessionDurationMin: 60,
@@ -78,6 +88,7 @@ export const defaultAnswers: Answers = {
   dietPattern: 'none',
   allergies: [],
   injuries: [],
+  hasInjury: false,
   wellnessMode: 'none',
   healthDataConsent: false,
 }
@@ -100,8 +111,16 @@ export function buildOnboardingProfile(a: Answers): OnboardingProfile {
     goal: { type: a.goalValue },
     trainingPreferences: {
       experience: a.experienceLevel,
-      consistency: beginner ? 'new' : a.consistency,
+      consistency: a.consistency ?? (beginner ? 'new' : undefined),
+      history: a.trainingHistory,
       environment: a.environment,
+      // ⚠️ `equipment` يعيش **خارج** `OnbTrainingPreferences` حاليًا: النوع في
+      // `src/types/onboarding.ts` وهو خارج نطاق هذه الحارة. الإدراج بالنشر
+      // (لا بمفتاح صريح) يتجاوز فحص الخصائص الزائدة بلا خداع نوعي، والحقل
+      // ينجو في الجولة عبر التخزين لأن `loadOnboardingProfile` يدمج بالنشر.
+      // والقراءة في `toLegacyProfile` تمرّ بحارس اتّحاد فلا يُصدَّق مدخل معطوب.
+      // المطلوب من المنسّق: إضافة `equipment?: Equipment[]` إلى النوع.
+      ...(a.equipment.length > 0 ? { equipment: [...a.equipment] } : {}),
       daysPerWeek: a.trainingDays,
       sessionDurationMin: a.sessionDurationMin,
       // المبتدئ لا يختار التقسيمة — تبقى «تلقائي» دائمًا (P2.6: تثبيت الإجابة لا الـ UI فقط).
@@ -120,7 +139,7 @@ export function buildOnboardingProfile(a: Answers): OnboardingProfile {
       appetiteTiming: a.nutritionStyle === 'meal_suggestions' ? a.appetiteTiming : undefined,
     },
     foodPreferences: { dietPattern: a.dietPattern, dislikedFoods: [], allergies: a.allergies },
-    limitations: { injuries: a.injuries },
+    limitations: { hasInjury: a.hasInjury, injuries: a.injuries },
     wellnessTracking: { mode: a.wellnessMode, supplements: [], medications: [] },
     appPreferences: { language: 'ar', reminders: false },
     consents: {

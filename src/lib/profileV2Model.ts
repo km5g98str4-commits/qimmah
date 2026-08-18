@@ -17,6 +17,7 @@ import { workoutStreak } from '@/lib/streaks'
 import { loadSessions } from '@/lib/workoutSessions'
 import { loadAchievementState } from '@/features/achievements/engine'
 import { product } from '@/config/product'
+import { firstGreetableName } from '@/lib/displayName'
 
 /**
  * [CTO-65] البند ٥ — أُزيلت خريطة المصطلحات الثابتة.
@@ -57,7 +58,6 @@ export interface ProfileV2Model {
   commitment: { weeks: CommitmentWeek[]; hasData: boolean }
   body: { weightKg: number | null; targetKg: number | null }
   privacy: { usageEventsLocalOnly: boolean; healthSharingAvailable: boolean; dataExportAvailable: boolean; deleteAccountAvailable: boolean }
-  settings: { language: string; units: string; numerals: string; appearance: string; remindersAvailable: boolean }
   subscription: { showQuietLine: boolean; name: string; text: string; cta: string; enabled: boolean; url: string }
 }
 
@@ -161,13 +161,19 @@ export function buildProfileV2Model(customization: Customization, auth: AuthSumm
   const prCount = loadAchievementState().prCount
   const hasData = workoutCount > 0
 
+  const greetedName = firstGreetableName(customization.profile.name, auth.displayName)
   const totalWeeks = goal ? PROGRAM_WEEKS[goal] : PROGRAM_WEEKS.maintain
   const weeks = commitmentWeeks(finishedDates, daysPerWeek, now)
 
   return {
     user: {
-      displayName: auth.displayName || (ar ? 'ضيف قِمّة' : 'Qimmah guest'),
-      initials: initialsOf(auth.displayName, ar),
+      // ⚠️ **لا بريد في موضع اسم.** `auth.displayName` يسقط على البريد حين لا
+      // يوجد اسم، فكان المستخدم المسجَّل الذي لم يكتب اسمًا في التسجيل يرى
+      // `ziyad@example.com` اسمًا معروضًا و«ZI» أحرفًا لصورته الرمزية.
+      // الحارس نفسه الذي تستعمله شاشة الكشف، ومن مصدر واحد.
+      // والاسم الذي كتبه في الإعداد يسبق ما يعرفه حسابه — هو اختاره لنفسه.
+      displayName: greetedName || (ar ? 'ضيف قِمّة' : 'Qimmah guest'),
+      initials: initialsOf(greetedName, ar),
       email: auth.signedIn ? auth.email : null,
       signedIn: auth.signedIn,
     },
@@ -195,17 +201,9 @@ export function buildProfileV2Model(customization: Customization, auth: AuthSumm
       usageEventsLocalOnly: true,
       healthSharingAvailable: false, // no HealthKit integration yet — honest
       dataExportAvailable: true,
-      // [CTO-65] البند ١: التعليق السابق ادّعى «routes to the existing safe Settings
-      // flow» ولم يكن لذلك المسار وجود — الزرّ يحوّل إلى الإعدادات وليس فيها حذف.
-      // صار الادّعاء صحيحًا: صفّ الحذف + نافذة التأكيد المكتوب في SettingsView.
-      deleteAccountAvailable: true, // routes to the delete-account row in SettingsView
-    },
-    settings: {
-      language: ar ? 'العربية' : 'English',
-      units: ar ? 'كجم · سم' : 'kg · cm',
-      numerals: ar ? '١٢٣٤' : '1234',
-      appearance: ar ? 'داكن' : 'Dark',
-      remindersAvailable: true,
+      // حذف الحساب يخصّ حسابًا مسجّلًا فقط. الضيف يملك حذف بيانات الجهاز من
+      // Settings، فلا نخلط القابليتين في حقيقة واحدة أو نعرض وعد حسابٍ غير موجود.
+      deleteAccountAvailable: auth.signedIn,
     },
     subscription: {
       showQuietLine: true,

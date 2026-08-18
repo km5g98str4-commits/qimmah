@@ -48,3 +48,18 @@ scripts/e2e-auth/.workdir/
 .cutover-a/
 .cutover-b/
 .cutover-c/
+
+# release-convergence build artifacts (scripts/release) — transient
+dist-release/
+
+# per-run release-convergence evidence snapshots (latest.json is tracked)
+docs/execution/qimmah-postweb/release/evidence/run-*.json
+.cslock-graph/
+
+# خطّ إنتاج بيانات الأطعمة — تنزيلات ومخرجات وسيطة ضخمة (لا تُلتزم)
+.food-cache/
+
+# شرائح الأطعمة المُنتَجة — ~91 ميغابايت و160 ملفًّا، تُولَّد حتميًا ولا تُلتزم.
+# بصماتها كلّها في data/food-production/manifests/build-manifest.json،
+# وطريقة إعادة إنتاجها في data/food-production/accepted/README.md
+data/food-production/accepted/shards/

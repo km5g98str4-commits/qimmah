@@ -25,6 +25,9 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '..')
 const ENTRY = `
 export { V2_ONBOARDING, V2_GOAL_MODEL } from '@/design-system/v2/labels'
 export { onboardingIntentStrings } from '@/i18n/dict/onboardingIntent'
+export { trainingHistoryStrings } from '@/i18n/dict/trainingHistory'
+export { onboardingLifestyleStrings } from '@/i18n/dict/onboardingLifestyle'
+export { neatChoices, dietPatternChoices } from '@/data/planBuilder'
 export { policyCopy } from '@/data/policyCopy'
 export { DATA_KEYS } from '@/lib/userDataKeys'
 `
@@ -38,7 +41,10 @@ export { DATA_KEYS } from '@/lib/userDataKeys'
 const FLOW_ENTRY = `
 export { bodyStepStrings } from '@/i18n/dict/bodyStep'
 export { onboardingIntentStrings, goalWordingFor } from '@/i18n/dict/onboardingIntent'
-export { LAST_INPUT_STEP, validateStep, inRange, AGE_RANGE, HEIGHT_RANGE, WEIGHT_RANGE } from '@/lib/onboardingV2Flow'
+export { trainingHistoryStrings } from '@/i18n/dict/trainingHistory'
+export { onboardingLifestyleStrings } from '@/i18n/dict/onboardingLifestyle'
+export { neatChoices, dietPatternChoices } from '@/data/planBuilder'
+export { LAST_INPUT_STEP, validateStep, inRange, AGE_RANGE, HEIGHT_RANGE, WEIGHT_RANGE, dietPatternApplies } from '@/lib/onboardingV2Flow'
 `
 
 /** يحزم نقطة دخول TS مؤقّتة ويُعيد الوحدة المستوردة. */
@@ -82,6 +88,10 @@ export async function loadAppCopy() {
     goals: mod.V2_GOAL_MODEL,
     /** صياغة النية والمستوى والأهداف التابعة للمستوى. */
     intent: mod.onboardingIntentStrings.ar,
+    history: mod.trainingHistoryStrings.ar,
+    lifestyle: mod.onboardingLifestyleStrings.ar,
+    neatChoices: mod.neatChoices,
+    dietPatternChoices: mod.dietPatternChoices,
     /** نصوص السياسة (إقرار البيانات الصحية). */
     policy: mod.policyCopy.ar,
     /** سجلّ مفاتيح التخزين كاملًا. */
@@ -110,6 +120,10 @@ export async function loadOnboardingFlow() {
     body: mod.bodyStepStrings.ar,
     /** نصوص خطوة النية والمستوى (العربية). */
     intent: mod.onboardingIntentStrings.ar,
+    history: mod.trainingHistoryStrings.ar,
+    lifestyle: mod.onboardingLifestyleStrings.ar,
+    neatChoices: mod.neatChoices,
+    dietPatternChoices: mod.dietPatternChoices,
     /** صياغة الأهداف الواعية بالمستوى — دالّة لا جدول ثابت. */
     goalWordingFor: mod.goalWordingFor,
     /** آخر خطوة إدخال قبل شاشة «خطتك جاهزة». */
@@ -119,6 +133,18 @@ export async function loadOnboardingFlow() {
     /** النطاقات الفسيولوجية — بها نتحقّق أن بيانات الاختبار ما زالت مقبولة. */
     ranges: { age: mod.AGE_RANGE, height: mod.HEIGHT_RANGE, weight: mod.WEIGHT_RANGE },
     inRange: mod.inRange,
+    /**
+     * قاعدة عرض «نمط الأكل» — **من المصدر نفسه**، لا نسخة عنها في الحصّاد.
+     *
+     * [QIM-V1-001] السؤال صار مشروطًا بالنية (‏`intent === 'meals'`) لأن مستهلكه
+     * الوحيد مولّد الوجبات، وسؤالٌ بلا أثر لا يُطرح (§5). والحصّادات كانت تنقر
+     * عليه بلا شرط، فسقطت بمهلة ٣٠ ثانية على نيّة «خطة» — والعطل في افتراض
+     * الحصّاد لا في المنتج.
+     *
+     * ولماذا نستوردها بدل أن نكتب `intent === 'meals'` هنا: النسخة تشيخ بصمت.
+     * الاستيراد يجعل انحراف الحصّاد عن المنتج **مستحيلًا بنيويًّا** لا مرصودًا.
+     */
+    dietPatternApplies: mod.dietPatternApplies,
   }
   return cachedFlow
 }

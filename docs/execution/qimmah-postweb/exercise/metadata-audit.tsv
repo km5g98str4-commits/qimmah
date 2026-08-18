@@ -1,0 +1,182 @@
+id	nameAr	nameEn	primaryMuscle	primaryDetailed	secondaryDetailed	equipment	movementPattern	level	environment	stepsAr	stepsEn	mistakesAr	mistakesEn	safetyAr	safetyEn	tipsAr	alternatives	imageStatus	hasMachineSvg	imageLicense	videoStatus	videoConfidence
+barbell-bench-press	بنش بريس بار	Barbell Bench Press	chest	chest_mid|triceps|front_delts	chest_upper	barbell|bench	push	intermediate	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+incline-barbell-press	بنش مائل بار	Incline Barbell Press	chest	chest_upper|front_delts|triceps	chest_mid	barbell|bench	push	intermediate	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+dumbbell-bench-press	بنش بريس دمبل	Dumbbell Bench Press	chest	chest_mid|triceps|front_delts	chest_upper	dumbbell|bench	push	beginner	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+incline-dumbbell-press	بنش مائل دمبل	Incline Dumbbell Press	chest	chest_upper|front_delts|triceps	chest_mid	dumbbell|bench	push	beginner	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+chest-press-machine	جهاز ضغط الصدر	Chest Press Machine	chest	chest_mid|triceps	front_delts	machine	push	beginner	gym	5	5	3	3	1	1	3	2	placeholder-only	false		APPROVED	medium
+iso-lateral-chest-press	ضغط صدر أيزو-لاترال	Iso-Lateral Chest Press	chest	chest_mid|triceps	front_delts	machine	push	beginner	gym	5	5	3	3	1	1	3	2	placeholder-only	true		NEEDS_REVIEW	
+incline-chest-press-machine	جهاز ضغط صدر علوي	Incline Chest Press Machine	chest	chest_upper|front_delts	triceps	machine	push	beginner	gym	5	5	3	3	1	1	3	2	placeholder-only	false		NEEDS_REVIEW	
+iso-lateral-incline-press	ضغط علوي أيزو-لاترال	Iso-Lateral Incline Press	chest	chest_upper|front_delts	triceps	machine	push	beginner	gym	5	5	3	3	1	1	3	2	placeholder-only	true		NEEDS_REVIEW	
+pec-deck-machine	جهاز فلاي صدر	Pec Deck Machine	chest	chest_mid	front_delts	machine	isolation	beginner	gym	5	5	3	3	1	1	3	0	stills	true	Unlicense / public-domain dedication	APPROVED	medium
+cable-crossover	تفتيح كيبل	Cable Crossover	chest	chest_mid|chest_lower	front_delts	cable	isolation	intermediate	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+dumbbell-fly	تفتيح دمبل	Dumbbell Fly	chest	chest_mid	front_delts	dumbbell|bench	isolation	beginner	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+push-up	ضغط (تمرين الجسم)	Push-Up	chest	chest_mid|triceps	front_delts|abs	bodyweight	push	beginner	both	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+incline-push-up	ضغط مائل	Incline Push-Up	chest	chest_mid	triceps|front_delts	bodyweight	push	beginner	home	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+deadlift	رفعة ميتة	Deadlift	back	lower_back|glutes|hamstrings	traps|lats|upper_back|quads|forearms	barbell	hinge	advanced	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+barbell-row	تجديف بار	Barbell Row	back	lats|upper_back	biceps|rear_delts|lower_back|forearms	barbell	pull	intermediate	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+dumbbell-row	تجديف دمبل	Dumbbell Row	back	lats|upper_back	biceps|rear_delts	dumbbell|bench	pull	beginner	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+lat-pulldown-machine	جهاز سحب علوي	Lat Pulldown Machine (Seated/Lever)	back	lats	biceps|upper_back	machine	pull	beginner	gym	5	5	3	3	1	1	3	2	stills	false	Unlicense / public-domain dedication	APPROVED	high
+single-arm-lat-pulldown	سحب علوي بذراع واحدة	Single-Arm Lat Pulldown	back	lats	biceps	machine	pull	beginner	gym	5	5	3	3	1	1	3	2	placeholder-only	true		APPROVED	medium
+iso-lateral-pulldown	سحب أيزو-لاترال	Iso-Lateral Pulldown	back	lats	biceps|upper_back	machine	pull	beginner	gym	5	5	3	3	1	1	3	2	placeholder-only	true		APPROVED	high
+iso-lateral-high-row	تجديف عالي أيزو-لاترال	Iso-Lateral High Row	back	lats|upper_back	biceps|rear_delts	machine	pull	beginner	gym	5	5	3	3	1	1	3	2	placeholder-only	true		APPROVED	high
+wide-grip-iso-lateral-pulldown	سحب أيزو-لاترال واسع	Wide-Grip Iso-Lateral Pulldown	back	lats	biceps	machine	pull	beginner	gym	5	5	3	3	1	1	3	2	placeholder-only	true		APPROVED	high
+seated-cable-row	تجديف كيبل جالس	Seated Cable Row	back	upper_back|lats	biceps|rear_delts	cable	pull	beginner	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+seated-row-machine	جهاز تجديف جالس	Seated Row Machine	back	upper_back|lats	biceps	machine	pull	beginner	gym	5	5	3	3	1	1	3	2	stills	false	Unlicense / public-domain dedication	APPROVED	high
+chest-supported-row-machine	تجديف بمسند صدر	Chest-Supported Row Machine	back	upper_back|lats	biceps|rear_delts	machine	pull	beginner	gym	5	5	3	3	1	1	3	2	placeholder-only	true		NEEDS_REVIEW	
+t-bar-row-machine	جهاز تجديف تي-بار	T-Bar Row Machine	back	upper_back|lats	biceps|rear_delts	machine	pull	beginner	gym	5	5	3	3	1	1	3	2	stills	false	Unlicense / public-domain dedication	APPROVED	medium
+rear-delt-row-machine	تجديف كتف خلفي	Rear Delt Row Machine	back	rear_delts|upper_back	biceps	machine	pull	beginner	gym	5	5	3	3	1	1	3	2	placeholder-only	true		APPROVED	medium
+pull-up	عقلة	Pull-Up	back	lats	biceps|upper_back|forearms	bodyweight	pull	advanced	both	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+chin-up	عقلة قبضة عكسية	Chin-Up	back	lats|biceps	upper_back	bodyweight	pull	intermediate	both	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+straight-arm-pulldown	سحب بذراع ممدودة كيبل	Straight-Arm Pulldown	back	lats	triceps	cable	isolation	intermediate	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+dumbbell-shrug	رفرفة الترابيس دمبل	Dumbbell Shrug	back	traps	forearms	dumbbell	isolation	beginner	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+overhead-press	ضغط كتف بار واقف	Overhead Press	shoulders	front_delts|side_delts|triceps	traps|upper_back	barbell	push	intermediate	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+dumbbell-shoulder-press	ضغط كتف دمبل	Dumbbell Shoulder Press	shoulders	front_delts|side_delts|triceps	traps	dumbbell	push	beginner	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+shoulder-press-machine	جهاز ضغط كتف	Shoulder Press Machine	shoulders	front_delts|side_delts	triceps	machine	push	beginner	gym	5	5	3	3	1	1	3	2	placeholder-only	true		APPROVED	medium
+cable-shoulder-press	ضغط كتف كيبل	Cable Shoulder Press	shoulders	front_delts|side_delts	triceps	cable	push	intermediate	gym	5	5	3	3	1	1	3	2	missing	false		APPROVED	medium
+lateral-raise	رفرفة جانبي دمبل	Lateral Raise	shoulders	side_delts	traps	dumbbell	isolation	beginner	both	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+cable-lateral-raise	رفرفة جانبي كيبل	Cable Lateral Raise	shoulders	side_delts	traps	cable	isolation	intermediate	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	medium
+rear-delt-fly	رفرفة خلفي دمبل	Rear Delt Fly	shoulders	rear_delts	upper_back	dumbbell	isolation	beginner	both	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	medium
+reverse-pec-deck	بيك دك عكسي	Reverse Pec Deck	shoulders	rear_delts	upper_back	machine	isolation	beginner	gym	5	5	3	3	1	1	3	2	stills	false	Unlicense / public-domain dedication	APPROVED	medium
+front-raise	رفرفة أمامي دمبل	Front Raise	shoulders	front_delts	side_delts	dumbbell	isolation	beginner	both	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+face-pull	سحب للوجه كيبل	Face Pull	shoulders	rear_delts	traps|upper_back	cable	pull	beginner	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	NEEDS_REVIEW	
+barbell-curl	تمرير بار	Barbell Curl	biceps	biceps	forearms	barbell	isolation	beginner	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+dumbbell-curl	تمرير دمبل	Dumbbell Curl	biceps	biceps	forearms	dumbbell	isolation	beginner	both	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	medium
+hammer-curl	تمرير مطرقة	Hammer Curl	biceps	biceps|forearms		dumbbell	isolation	beginner	both	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+preacher-curl-machine	جهاز مرجحة بايسبس	Preacher Curl Machine	biceps	biceps	forearms	machine	isolation	beginner	gym	5	5	3	3	1	1	3	2	placeholder-only	true		APPROVED	high
+cable-biceps-curl	مرجحة بايسبس كيبل	Cable Biceps Curl	biceps	biceps	forearms	cable	isolation	beginner	gym	5	5	3	3	1	1	3	2	stills	false	Unlicense / public-domain dedication	APPROVED	high
+concentration-curl	تمرير مركّز	Concentration Curl	biceps	biceps		dumbbell	isolation	beginner	both	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+cable-triceps-pushdown	دفع ترايسبس كيبل	Cable Triceps Pushdown	triceps	triceps		cable	isolation	beginner	gym	5	5	3	3	1	1	3	2	stills	false	Unlicense / public-domain dedication	APPROVED	high
+triceps-extension-machine	جهاز مد ترايسبس	Triceps Extension Machine	triceps	triceps		machine	isolation	beginner	gym	5	5	3	3	1	1	3	2	placeholder-only	true		NEEDS_REVIEW	
+rope-pushdown	دفع ترايسبس حبل	Rope Pushdown	triceps	triceps		cable	isolation	beginner	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+overhead-triceps-extension	تمديد ترايسبس علوي دمبل	Overhead Triceps Extension	triceps	triceps		dumbbell	isolation	beginner	both	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+skull-crusher	سكال كراشر	Skull Crusher	triceps	triceps		ez-bar|bench	isolation	intermediate	gym	5	5	2	2	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+close-grip-bench-press	بنش قبضة ضيقة	Close-Grip Bench Press	triceps	triceps|chest_mid	front_delts	barbell|bench	push	intermediate	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+bench-dip	غطس على المقعد	Bench Dip	triceps	triceps	chest_lower|front_delts	bodyweight|bench	push	beginner	home	5	5	2	2	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+barbell-back-squat	سكوات خلفي بار	Barbell Back Squat	quads	quads|glutes	hamstrings|lower_back|abs	barbell	squat	advanced	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+front-squat	سكوات أمامي	Front Squat	quads	quads	glutes|abs|lower_back	barbell	squat	advanced	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+leg-press-machine	جهاز دفع الأرجل	Leg Press Machine	quads	quads|glutes	hamstrings	machine	squat	beginner	gym	5	5	3	3	1	1	3	2	stills	false	Unlicense / public-domain dedication	APPROVED	medium
+sissy-squat	سيسي سكوات	Sissy Squat	quads	quads		bodyweight	isolation	intermediate	both	5	5	3	3	1	1	3	2	stills	false	Unlicense / public-domain dedication	APPROVED	medium
+hack-squat-machine	هاك سكوات جهاز	Hack Squat Machine	quads	quads	glutes	machine	squat	beginner	gym	5	5	3	3	1	1	3	2	placeholder-only	true		APPROVED	medium
+leg-extension-machine	جهاز مد الأرجل	Leg Extension Machine	quads	quads		machine	isolation	beginner	gym	5	5	3	3	1	1	3	2	stills	false	Unlicense / public-domain dedication	APPROVED	high
+goblet-squat	سكوات جوبليت دمبل	Goblet Squat	quads	quads|glutes	abs	dumbbell	squat	beginner	both	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	medium
+bulgarian-split-squat	سكوات بلغاري	Bulgarian Split Squat	quads	quads|glutes	hamstrings	dumbbell	lunge	intermediate	both	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	medium
+walking-lunge	طعنات مشي	Walking Lunge	quads	quads|glutes	hamstrings	dumbbell	lunge	beginner	both	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+smith-machine-squat	سكوات سميث	Smith Machine Squat	quads	quads|glutes	hamstrings	smith	squat	beginner	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	medium
+bodyweight-squat	سكوات وزن الجسم	Bodyweight Squat	quads	quads|glutes	hamstrings	bodyweight	squat	beginner	home	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	medium
+step-up	صعود على منصة	Step-Up	quads	quads|glutes	hamstrings	dumbbell|bodyweight	lunge	beginner	home	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	medium
+romanian-deadlift	رفعة رومانية بار	Romanian Deadlift	hamstrings	hamstrings|glutes	lower_back	barbell	hinge	intermediate	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+dumbbell-rdl	رفعة رومانية دمبل	Dumbbell RDL	hamstrings	hamstrings|glutes	lower_back	dumbbell	hinge	beginner	both	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+lying-leg-curl	ثني أرجل مستلقي	Lying Leg Curl	hamstrings	hamstrings	calves	machine	isolation	beginner	gym	5	5	3	3	1	1	3	2	stills	false	Unlicense / public-domain dedication	APPROVED	medium
+seated-leg-curl	ثني أرجل جالس	Seated Leg Curl	hamstrings	hamstrings	calves	machine	isolation	beginner	gym	5	5	3	3	1	1	3	2	placeholder-only	true		APPROVED	medium
+standing-leg-curl	ثني أرجل واقف	Standing Leg Curl	hamstrings	hamstrings	calves	machine	isolation	beginner	gym	5	5	3	3	1	1	3	2	placeholder-only	true		APPROVED	medium
+good-morning	غود مورننق بار	Good Morning	hamstrings	hamstrings|lower_back	glutes	barbell	hinge	advanced	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+hip-thrust	دفع الورك بار	Hip Thrust	glutes	glutes	hamstrings	barbell|bench	hinge	intermediate	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+glute-bridge	جسر الجلوت	Glute Bridge	glutes	glutes	hamstrings	bodyweight	hinge	beginner	home	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+cable-kickback	رفسة كيبل للجلوت	Cable Kickback	glutes	glutes	hamstrings	cable	isolation	beginner	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	medium
+sumo-deadlift	رفعة ميتة سومو	Sumo Deadlift	glutes	glutes|quads	hamstrings|lower_back|traps	barbell	hinge	advanced	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+cable-pull-through	سحب بين الأرجل كيبل	Cable Pull-Through	glutes	glutes|hamstrings	lower_back	cable	hinge	beginner	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	medium
+standing-calf-raise-machine	رفع بطات واقف	Standing Calf Raise Machine	calves	calves		machine	isolation	beginner	gym	5	5	3	3	1	1	3	2	placeholder-only	true		APPROVED	medium
+seated-calf-raise-machine	رفع بطات جالس	Seated Calf Raise Machine	calves	calves		machine	isolation	beginner	gym	5	5	3	3	1	1	3	2	placeholder-only	true		APPROVED	medium
+bodyweight-calf-raise	رفع السمانة وزن الجسم	Bodyweight Calf Raise	calves	calves		bodyweight	isolation	beginner	home	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	medium
+plank	بلانك	Plank	core	abs	obliques|lower_back	bodyweight	core	beginner	home	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+side-plank	بلانك جانبي	Side Plank	core	obliques	abs	bodyweight	core	beginner	home	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+hanging-leg-raise	رفع الأرجل معلق	Hanging Leg Raise	core	abs	obliques	bodyweight	core	intermediate	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+crunch	كرنش	Crunch	core	abs		bodyweight	core	beginner	home	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+russian-twist	تويست روسي	Russian Twist	core	obliques	abs	bodyweight	core	beginner	home	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+ab-wheel-rollout	عجلة البطن	Ab Wheel Rollout	core	abs	obliques|lower_back	bodyweight	core	advanced	both	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+mountain-climber	تسلق الجبل	Mountain Climber	core	abs	obliques	bodyweight	core	beginner	home	5	5	3	3	1	1	3	0	missing	false		APPROVED	medium
+treadmill-run	جري على السير	Treadmill Run	cardio			machine	cardio	beginner	gym	5	5	3	3	1	1	3	0	missing	false		APPROVED	medium
+stationary-bike	دراجة ثابتة	Stationary Bike	cardio			machine	cardio	beginner	gym	5	5	3	3	1	1	3	0	missing	false		APPROVED	medium
+rowing-machine	جهاز التجديف	Rowing Machine	cardio			machine	cardio	beginner	gym	5	5	3	3	1	1	3	0	missing	false		APPROVED	high
+elliptical	الإليبتيكال	Elliptical	cardio			machine	cardio	beginner	gym	5	5	3	3	1	1	3	0	missing	false		APPROVED	medium
+jump-rope	نط الحبل	Jump Rope	cardio			bodyweight	cardio	beginner	home	5	5	3	3	1	1	3	0	missing	false		APPROVED	high
+kettlebell-swing	أرجحة الكيتل بل	Kettlebell Swing	glutes	glutes|hamstrings	lower_back|quads|abs	kettlebell	hinge	intermediate	both	5	5	2	2	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+decline-barbell-press	بنش منخفض بار	Decline Barbell Press	chest	chest_mid		barbell|bench	push	intermediate	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+decline-dumbbell-press	بنش منخفض دمبل	Decline Dumbbell Press	chest	chest_mid		dumbbell|bench	push	beginner	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	NEEDS_REVIEW	
+smith-machine-bench	بنش سميث	Smith Machine Bench Press	chest	chest_mid		smith|bench	push	beginner	gym	5	5	3	3	1	1	3	2	stills	false	Unlicense / public-domain dedication	APPROVED	high
+low-cable-fly	تفتيح كيبل سفلي	Low Cable Fly	chest	chest_mid		cable	isolation	intermediate	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+incline-cable-fly	تفتيح كيبل مائل	Incline Cable Fly	chest	chest_mid		cable	isolation	intermediate	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	NEEDS_REVIEW	
+chest-dip	غطس الصدر (متوازي)	Chest Dip	chest	chest_mid		bodyweight	push	intermediate	both	5	5	3	3	1	1	3	2	stills	false	Unlicense / public-domain dedication	APPROVED	high
+svend-press	سفيند بريس	Svend Press	chest	chest_mid		plate	isolation	beginner	gym	5	5	2	2	1	1	3	0	stills	false	Unlicense / public-domain dedication	NEEDS_REVIEW	
+machine-fly	تفتيح جهاز	Machine Fly	chest	chest_mid		machine	isolation	beginner	gym	5	5	3	3	1	1	3	2	stills	false	Unlicense / public-domain dedication	NEEDS_REVIEW	
+knee-push-up	ضغط على الركبتين	Knee Push-Up	chest	chest_mid		bodyweight	push	beginner	home	5	5	3	3	1	1	3	2	stills	false	Unlicense / public-domain dedication	NEEDS_REVIEW	
+pendlay-row	تجديف بندلاي	Pendlay Row	back	lats|upper_back		barbell	pull	advanced	gym	5	5	3	3	1	1	3	0	missing	false		APPROVED	high
+chest-supported-row	تجديف بإسناد الصدر	Chest-Supported Row	back	lats|upper_back		dumbbell|bench	pull	beginner	gym	5	5	3	3	1	1	3	2	missing	false		APPROVED	medium
+wide-grip-lat-pulldown	سحب علوي قبضة واسعة	Wide-Grip Lat Pulldown	back	lats	biceps|upper_back	machine	pull	beginner	gym	5	5	3	3	1	1	3	2	stills	false	Unlicense / public-domain dedication	APPROVED	high
+close-grip-pulldown	سحب قبضة ضيقة	Close-Grip Pulldown	back	lats|upper_back		cable	pull	beginner	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	NEEDS_REVIEW	
+single-arm-cable-row	تجديف كيبل بذراع واحدة	Single-Arm Cable Row	back	lats|upper_back		cable	pull	beginner	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	NEEDS_REVIEW	
+inverted-row	تجديف مقلوب (وزن الجسم)	Inverted Row	back	lats|upper_back		bodyweight	pull	beginner	both	5	5	3	3	1	1	3	2	stills	false	Unlicense / public-domain dedication	APPROVED	high
+barbell-shrug	رفرفة الترابيس بار	Barbell Shrug	back	lats|upper_back		barbell	isolation	beginner	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+rack-pull	راك بل (رفعة من الحامل)	Rack Pull	back	lats|upper_back		barbell	hinge	intermediate	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+meadows-row	تجديف ميدوز	Meadows Row	back	lats|upper_back		barbell	pull	advanced	gym	5	5	3	3	1	1	3	0	missing	false		APPROVED	medium
+neutral-grip-pulldown	سحب قبضة محايدة	Neutral-Grip Pulldown	back	lats|upper_back		cable	pull	beginner	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	NEEDS_REVIEW	
+arnold-press	ضغط أرنولد	Arnold Press	shoulders	side_delts|front_delts		dumbbell	push	intermediate	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	NEEDS_REVIEW	
+seated-dumbbell-press	ضغط كتف دمبل جالس	Seated Dumbbell Press	shoulders	side_delts|front_delts		dumbbell|bench	push	beginner	gym	5	5	3	3	1	1	3	2	stills	false	Unlicense / public-domain dedication	APPROVED	medium
+push-press	بوش بريس	Push Press	shoulders	side_delts|front_delts		barbell	push	advanced	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	medium
+upright-row	تجديف عمودي	Upright Row	shoulders	side_delts|front_delts		barbell	pull	intermediate	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	medium
+lateral-raise-machine	جهاز رفرفة جانبية	Lateral Raise Machine	shoulders	side_delts	traps	machine	isolation	beginner	gym	5	5	3	3	1	1	3	2	placeholder-only	true		APPROVED	medium
+seated-lateral-raise	رفرفة جانبي جالس	Seated Lateral Raise	shoulders	side_delts|front_delts		dumbbell|bench	isolation	beginner	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	medium
+cable-rear-delt-fly	رفرفة خلفي كيبل	Cable Rear Delt Fly	shoulders	side_delts|front_delts		cable	isolation	intermediate	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	medium
+landmine-press	ضغط لاندماين	Landmine Press	shoulders	side_delts|front_delts		barbell	push	beginner	gym	5	5	3	3	1	1	3	0	missing	false		APPROVED	medium
+pike-push-up	ضغط بايك	Pike Push-Up	shoulders	side_delts|front_delts		bodyweight	push	intermediate	home	5	5	3	3	1	1	3	1	missing	false		APPROVED	medium
+incline-dumbbell-curl	تمرير دمبل مائل	Incline Dumbbell Curl	biceps	biceps		dumbbell|bench	isolation	intermediate	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	medium
+ez-bar-curl	تمرير بار متعرّج	EZ-Bar Curl	biceps	biceps		ez-bar	isolation	beginner	gym	5	5	2	2	1	1	3	2	stills	false	Unlicense / public-domain dedication	APPROVED	medium
+spider-curl	تمرير سبايدر	Spider Curl	biceps	biceps		dumbbell|bench	isolation	intermediate	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	medium
+cable-hammer-curl	تمرير مطرقة كيبل (حبل)	Cable Hammer Curl	biceps	biceps		cable	isolation	beginner	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+reverse-curl	تمرير عكسي	Reverse Curl	biceps	biceps		ez-bar	isolation	beginner	gym	5	5	2	2	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+machine-curl	تمرير جهاز	Machine Curl	biceps	biceps		machine	isolation	beginner	gym	5	5	3	3	1	1	3	2	stills	false	Unlicense / public-domain dedication	APPROVED	medium
+assisted-dip-machine	جهاز غطس مساعد	Assisted Dip Machine	triceps	chest_lower|triceps	front_delts	machine	push	beginner	gym	5	5	3	3	1	1	3	2	stills	false	Unlicense / public-domain dedication	NEEDS_REVIEW	
+single-arm-pushdown	دفع ترايسبس بذراع واحدة	Single-Arm Pushdown	triceps	triceps		cable	isolation	beginner	gym	5	5	3	3	1	1	3	0	missing	false		NEEDS_REVIEW	
+cable-overhead-extension	تمديد ترايسبس علوي كيبل	Cable Overhead Extension	triceps	triceps		cable	isolation	beginner	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	medium
+dumbbell-kickback	ركلة ترايسبس دمبل	Dumbbell Kickback	triceps	triceps		dumbbell	isolation	beginner	both	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+diamond-push-up	ضغط ماسي	Diamond Push-Up	triceps	triceps		bodyweight	push	intermediate	home	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+jm-press	جي إم بريس	JM Press	triceps	triceps		barbell|bench	push	advanced	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	NEEDS_REVIEW	
+reverse-lunge	طعنة خلفية	Reverse Lunge	quads	quads		dumbbell	lunge	beginner	both	5	5	3	3	1	1	3	2	stills	false	Unlicense / public-domain dedication	APPROVED	medium
+leg-press-narrow	دفع أرجل قبضة ضيقة	Narrow-Stance Leg Press	quads	quads		machine	squat	beginner	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	medium
+belt-squat	سكوات بالحزام	Belt Squat	quads	quads		machine	squat	intermediate	gym	5	5	3	3	1	1	3	0	missing	false		APPROVED	medium
+wall-sit	جلسة الحائط	Wall Sit	quads	quads		bodyweight	squat	beginner	home	5	5	3	3	1	1	3	0	missing	false		APPROVED	medium
+stiff-leg-deadlift	رفعة بأرجل مفرودة	Stiff-Leg Deadlift	hamstrings	hamstrings		barbell	hinge	intermediate	gym	5	5	3	3	1	1	3	2	stills	false	Unlicense / public-domain dedication	APPROVED	medium
+nordic-curl	نوردك كيرل	Nordic Hamstring Curl	hamstrings	hamstrings		bodyweight	isolation	advanced	both	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+single-leg-rdl	رفعة رومانية برجل واحدة	Single-Leg RDL	hamstrings	hamstrings		dumbbell	hinge	intermediate	both	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+glute-ham-raise	رفع الجلوت-هام (GHR)	Glute-Ham Raise	hamstrings	hamstrings		machine	isolation	advanced	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+glute-machine	جهاز الألوية	Glute Machine	glutes	glutes	hamstrings	machine	hinge	beginner	gym	5	5	3	3	1	1	3	2	placeholder-only	true		APPROVED	medium
+single-leg-hip-thrust	دفع الورك برجل واحدة	Single-Leg Hip Thrust	glutes	glutes		bodyweight	hinge	intermediate	home	5	5	3	3	1	1	3	0	missing	false		APPROVED	medium
+hip-abduction-machine	جهاز مباعدة الأرجل	Hip Abduction Machine	glutes	glutes		machine	isolation	beginner	gym	5	5	3	3	1	1	3	0	placeholder-only	true		APPROVED	medium
+banded-lateral-walk	مشي جانبي بالمطاط	Banded Lateral Walk	glutes	glutes		band	isolation	beginner	both	5	5	2	2	1	1	3	0	missing	false		APPROVED	high
+frog-pump	ضخّ الضفدع للجلوت	Frog Pump	glutes	glutes		bodyweight	hinge	beginner	home	5	5	3	3	1	1	3	0	missing	false		APPROVED	high
+leg-press-calf-raise	رفع السمانة على جهاز الدفع	Leg Press Calf Raise	calves	calves		machine	isolation	beginner	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+donkey-calf-raise	رفع السمانة (دونكي)	Donkey Calf Raise	calves	calves		machine	isolation	beginner	gym	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+single-leg-calf-raise	رفع السمانة برجل واحدة	Single-Leg Calf Raise	calves	calves		dumbbell|bodyweight	isolation	beginner	both	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+leg-raise	رفع الأرجل مستلقي	Lying Leg Raise	core	abs		bodyweight	core	beginner	home	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	medium
+bicycle-crunch	كرنش الدراجة	Bicycle Crunch	core	abs		bodyweight	core	beginner	home	5	5	3	3	1	1	3	0	missing	false		APPROVED	medium
+dead-bug	الحشرة الميتة	Dead Bug	core	abs		bodyweight	core	beginner	home	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+hollow-hold	ثبات الجسم المقعّر	Hollow Body Hold	core	abs		bodyweight	core	intermediate	home	5	5	3	3	1	1	3	0	missing	false		APPROVED	high
+cable-woodchop	قطع الخشب كيبل	Cable Woodchop	core	abs		cable	core	intermediate	gym	5	5	3	3	1	1	3	0	missing	false		APPROVED	high
+ab-crunch-machine	جهاز طحن البطن	Ab Crunch Machine	core	abs	obliques	machine	core	beginner	gym	5	5	3	3	1	1	3	1	stills	false	Unlicense / public-domain dedication	APPROVED	high
+toes-to-bar	أصابع للبار	Toes to Bar	core	abs		bodyweight	core	advanced	gym	5	5	3	3	1	1	3	2	missing	false		APPROVED	high
+pallof-press	ضغط بالوف (مقاومة دوران)	Pallof Press	core	abs		cable|band	core	beginner	both	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+flutter-kicks	رفرفة الأرجل	Flutter Kicks	core	abs		bodyweight	core	beginner	home	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+incline-treadmill-walk	مشي مائل على السير	Incline Treadmill Walk	cardio			machine	cardio	beginner	gym	5	5	3	3	1	1	3	0	missing	false		APPROVED	medium
+stairmaster	جهاز الدرج (ستيرماستر)	Stairmaster	cardio			machine	cardio	beginner	gym	5	5	3	3	1	1	3	0	missing	false		APPROVED	medium
+burpees	بيربي	Burpees	cardio			bodyweight	cardio	intermediate	home	5	5	3	3	1	1	3	0	missing	false		APPROVED	high
+high-knees	رفع الركب (جري ثابت)	High Knees	cardio			bodyweight	cardio	beginner	home	5	5	3	3	1	1	3	0	missing	false		APPROVED	medium
+battle-ropes	حبال القتال	Battle Ropes	cardio			rope	cardio	intermediate	gym	5	5	2	2	1	1	3	0	missing	false		APPROVED	medium
+assault-bike	الدراجة الهوائية (أسولت)	Assault Bike	cardio			machine	cardio	beginner	gym	5	5	3	3	1	1	3	0	missing	false		APPROVED	high
+outdoor-walk	مشي خارجي	Outdoor Walk	cardio			bodyweight	cardio	beginner	home	5	5	3	3	1	1	3	0	missing	false		APPROVED	medium
+arm-circles	تدوير الذراعين (إحماء)	Arm Circles	shoulders	side_delts|front_delts		bodyweight	mobility	beginner	both	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	medium
+cat-cow	تمدّد القطة-البقرة	Cat-Cow Stretch	back	lats|upper_back		bodyweight	mobility	beginner	home	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	medium
+hip-flexor-stretch	تمدّد عضلة الورك القابضة	Hip Flexor Stretch	quads	quads		bodyweight	mobility	beginner	both	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	medium
+world-greatest-stretch	أعظم تمدّد (World’s Greatest)	World’s Greatest Stretch	hamstrings	hamstrings		bodyweight	mobility	beginner	both	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	high
+leg-swings	أرجحة الأرجل (إحماء)	Leg Swings	hamstrings	hamstrings		bodyweight	mobility	beginner	both	5	5	3	3	1	1	3	0	missing	false		APPROVED	medium
+shoulder-dislocates	مرونة الكتف بالعصا/المطاط	Shoulder Dislocates	shoulders	side_delts|front_delts		band	mobility	beginner	both	5	5	2	2	1	1	3	0	missing	false		APPROVED	medium
+thoracic-rotation	تدوير الفقرات الصدرية	Thoracic Rotation	back	lats|upper_back		bodyweight	mobility	beginner	home	5	5	3	3	1	1	3	0	missing	false		NEEDS_REVIEW	
+ankle-mobility	مرونة الكاحل	Ankle Mobility Drill	calves	calves		bodyweight	mobility	beginner	both	5	5	3	3	1	1	3	0	missing	false		APPROVED	high
+hamstring-stretch	تمدّد الهامسترنج	Standing Hamstring Stretch	hamstrings	hamstrings		bodyweight	mobility	beginner	both	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	APPROVED	medium
+child-pose	وضعية الطفل (استرخاء)	Child’s Pose	back	lats|upper_back		bodyweight	mobility	beginner	home	5	5	3	3	1	1	3	0	stills	false	Unlicense / public-domain dedication	NEEDS_REVIEW	
+decline-chest-press-machine	جهاز ضغط صدر سفلي	Decline Chest Press Machine	chest	chest_lower|triceps	front_delts	machine	push	beginner	gym	5	5	3	3	1	1	3	2	placeholder-only	true		NEEDS_REVIEW	
+machine-rdl	الرفعة الرومانية بالجهاز	RDL Machine	hamstrings	hamstrings|glutes	lower_back	machine	hinge	beginner	gym	5	5	3	3	1	1	3	2	stills	false	Unlicense / public-domain dedication	NEEDS_REVIEW	
+glute-kickback-machine	جهاز ركل خلفي	Glute Kickback Machine	glutes	glutes	hamstrings	machine	isolation	beginner	gym	5	5	3	3	1	1	3	2	placeholder-only	true		APPROVED	medium
+standing-hip-extension-machine	مد ورك واقف	Standing Hip Extension Machine	glutes	glutes	hamstrings	machine	isolation	beginner	gym	5	5	3	3	1	1	3	2	placeholder-only	true		APPROVED	medium
+hip-adductor-machine	جهاز ضم الفخذ	Hip Adductor Machine	glutes	glutes		machine	isolation	beginner	gym	5	5	3	3	1	1	3	2	placeholder-only	true		APPROVED	medium
+dumbbell-sumo-squat	سكوات سومو دمبل	Dumbbell Sumo Squat	quads	quads|glutes	hamstrings	dumbbell	squat	beginner	both	5	5	3	3	1	1	3	2	missing	false		APPROVED	medium
+cable-hip-adduction	ضم الفخذ كيبل	Cable Hip Adduction	glutes	glutes		cable	isolation	beginner	gym	5	5	3	3	1	1	3	2	missing	false		APPROVED	high

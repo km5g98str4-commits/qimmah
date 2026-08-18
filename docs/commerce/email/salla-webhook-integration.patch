@@ -1,0 +1,63 @@
+Subject: [OVERNIGHT-EMAIL] enqueue the purchase email after a processed Salla grant
+
+هذه الرقعة تلمس ملفًا تملكه حارة أخرى (`supabase/functions/salla-webhook/`)،
+فلم تُطبَّق هنا (الميثاق §1.4). تُطبَّق بـ:
+
+    git apply docs/commerce/email/salla-webhook-integration.patch
+
+الموضع: بعد تثبيت المنحة وتسجيلها، وقبل الردّ — أي خارج ذرّية المنح عمدًا.
+تحقّق قبل التطبيق:  git apply --check docs/commerce/email/salla-webhook-integration.patch
+
+بديل لم يُنفَّذ ويحتاج قرارًا: `create or replace` لـ`salla_ingest_event` في هجرة
+**جديدة** تُدرج البريد داخل نفس المعاملة ⇒ لا فقد ممكن أصلًا. الثمن أن حارةً
+تعيد تعريف دالة حارة أخرى — يُرفع للمنسّق ولا يُفعل اجتهادًا (§1.4/٤).
+
+--- a/supabase/functions/salla-webhook/index.ts
++++ b/supabase/functions/salla-webhook/index.ts
+@@ -106,6 +106,46 @@
+     status: event.statusSlug, reason: decision.reason,
+   }))
+ 
++  // ── إدراج بريد الشراء ─────────────────────────────────────────────────────
++  // **بعد** تثبيت المنحة و**خارج** ذرّيتها عمدًا: المنحة مسار لا يُعاد، والبريد
++  // مسار يفشل ويُعاد. لو دخل الإدراج معاملة المنح لجعل فشلَ بريدٍ يُسقط شراءً
++  // مدفوعًا — وهو أسوأ ما يمكن أن يفعله بريد.
++  //
++  // ولا نداء HTTP للمُرسِل هنا: الطرفية تملك `service_role` أصلًا، فالإدراج نداء
++  // RPC واحد بلا قفزة شبكة في المسار الحرج وبلا سرّ ثانٍ. التسليم يتولّاه
++  // `qimmah-mailer` عند التصريف المجدول.
++  //
++  // ⚠️ دلتا خصوصية معلَنة: `salla_webhook_events` لا تخزّن بريدًا صريحًا عمدًا،
++  //    وهذا الصفّ يخزّنه — لأن الإرسال يحتاج عنوانًا ولا يُشتقّ من بصمة. الحدّ
++  //    أن الصفّ عابر: قيد `email_outbox_sent_is_redacted` يُفرّغه لحظة النجاح.
++  //
++  // ⚠️ حدّ معلَن: فشل الإدراج **لا يُعاد تلقائيًا**. نردّ ٢٠٠ عند `processed`
++  //    فلا تعيد سلة، وإعادتها لن تنفع (الحدث سيُرى `duplicate`). فالفشل يُسجَّل
++  //    `error` باسم الطلب، والاسترداد بمهمّة مطابقة `purchase_ledger` ×
++  //    `email_outbox` — **لم تُبنَ بعد**.
++  if (outcome === 'processed' && event.email) {
++    try {
++      const { error: mailError } = await supabase.rpc('email_outbox_enqueue', {
++        p_idempotency_key: `premium_purchase:salla:${event.orderId}`,
++        p_template_id: 'premium_purchase',
++        p_lang: env.EMAIL_DEFAULT_LANG === 'en' ? 'en' : 'ar',
++        p_carries_secret: false,
++        p_recipient_email: event.email,
++        // لا رابط دعوة هنا: `activationUrl` رمز **مسكوك متأخّرًا** يُنشئه المُرسِل
++        // من Supabase Auth لحظة التسليم. تخزينه هنا تخزينُ بيانات اعتماد،
++        // ويرفضه قيد `email_outbox_payload_clean` أصلًا.
++        p_payload: { orderRef: event.orderId, recipientEmail: event.email },
++      })
++      if (mailError) {
++        console.error('[salla-webhook] mail enqueue failed:',
++          JSON.stringify({ order: event.orderId, message: mailError.message }))
++      }
++    } catch (e) {
++      console.error('[salla-webhook] mail enqueue threw:',
++        JSON.stringify({ order: event.orderId, message: (e as Error).message }))
++    }
++  }
++
+   // رفض دائم يُردّ ٢٠٠ عمدًا: الإعادة ثلاثًا لن تغيّره. (`httpStatusFor`)
+   return json(
+     ['processed', 'duplicate'].includes(outcome) ? outcome

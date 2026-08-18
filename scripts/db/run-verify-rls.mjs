@@ -4,8 +4,7 @@
 import { build } from 'esbuild'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { dirname, resolve, join } from 'node:path'
-import { writeFileSync, mkdtempSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { writeFileSync, mkdtempSync, mkdirSync } from 'node:fs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const root = resolve(__dirname, '../..')
@@ -20,7 +19,14 @@ const result = await build({
   logLevel: 'warning',
 })
 
-const dir = mkdtempSync(join(tmpdir(), 'db-verify-'))
+// الحزمة تُكتب **داخل المستودع** لا في /tmp. السبب: `packages: 'external'`
+// يُبقي `@supabase/supabase-js` استيرادًا وقت التشغيل، وNode يحلّه بالنسبة
+// لموضع الملف — فمن /tmp لا يجد `node_modules` فيسقط الأمر بـ
+// ERR_MODULE_NOT_FOUND قبل أن يقرأ متغيّرًا واحدًا. عطل سابق لهذه الموجة:
+// `npm run db:verify` كان يفشل هكذا دائمًا، بأي بيانات اعتماد.
+const cacheRoot = join(root, 'node_modules', '.cache')
+mkdirSync(cacheRoot, { recursive: true })
+const dir = mkdtempSync(join(cacheRoot, 'db-verify-'))
 const file = join(dir, 'verify.mjs')
 writeFileSync(file, result.outputFiles[0].text)
 await import(pathToFileURL(file).href)

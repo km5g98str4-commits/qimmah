@@ -12,6 +12,14 @@ import { buildNutritionV2Model } from '@/lib/nutritionV2Model'
 import { getDefaultCustomization } from '@/lib/customization'
 import { getDayStamp } from '@/lib/today'
 
+// [QIM-WEB-FOUNDER-UX-003/حزمة ٢] هذا الإثبات يمارس **كتّاب حالة مدفوعة**
+// (تسجيل الماء عبر addTodayWaterMl → addWaterToDay). بعد بوّابة الوصول صار
+// الافتراض منعًا، فيلزم أن يعلن الإثبات شخصيته: مستخدم مُفعَّل. ليس إضعافًا —
+// موضوع الإثبات سلوك الترطيب لا الاستحقاق، والبوّابة يحرسها test:access-gate
+// و test:e2e:preview-gate بشخصيتَي معاينة ومُفعَّل.
+import { setEntitlement } from '@/lib/access/entitlementStore'
+setEntitlement({ status: 'active', source: 'mock' })
+
 const MIN = 60_000
 const start = 1_700_000_000_000
 

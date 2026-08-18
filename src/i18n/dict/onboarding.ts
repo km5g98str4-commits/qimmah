@@ -636,7 +636,7 @@ const ar: OnboardingStrings = {
 
   genTitle: 'خطتك جاهزة',
   genDescription: 'قِمّة جهّزت لك خطة مبدئية من بياناتك وهدفك.',
-  genIntro: 'قِمّة حسبت هذي الأهداف من بياناتك وهدفك. تقدر تعدّلها بعدين من الإعدادات المتقدمة.',
+  genIntro: 'قِمّة قدّرت هذي الأهداف من بياناتك وهدفك — تقدير يبدأ صح ويتحسّن مع تسجيلك. تقدر تعدّلها بعدين من الإعدادات المتقدمة.',
   genDailyTargets: 'أهدافك اليومية',
   genCalories: 'سعرات',
   genProtein: 'بروتين',
@@ -1066,7 +1066,7 @@ const en: OnboardingStrings = {
   genTitle: 'Your plan is ready',
   genDescription: 'Qimmah built you a starter plan from your data and goal.',
   genIntro:
-    'Qimmah calculated these targets based on your data and goal. You can adjust them later in advanced settings.',
+    'Qimmah estimated these targets from your data and goal — a solid start that improves as you log. You can adjust them later in advanced settings.',
   genDailyTargets: 'Your daily targets',
   genCalories: 'Calories',
   genProtein: 'Protein',

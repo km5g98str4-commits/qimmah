@@ -199,7 +199,17 @@ export interface V2OnboardingCopy {
   next: string
   stepOf: (n: number) => string
   goal: { title: string; note: string }
-  training: { title: string; subtitle: string; daysQ: string; durationQ: string; daysUnit: string; summaryTitle: string; perSession: string; suitsGoal: string }
+  training: {
+    title: string; subtitle: string; daysQ: string; durationQ: string; daysUnit: string
+    summaryTitle: string; perSession: string; suitsGoal: string
+    /**
+     * أسماء التقسيمات كما **يبنيها المحرّك فعلًا** (`planGenerator.splitDays`)،
+     * لا كما تمنّاها جدول في الواجهة. الجدول القديم كان يَعِد ٣ أيام بـ«دفع ·
+     * سحب · أرجل» والمحرّك يبني «جسم كامل ×٣»، ويَعِد ٥ أيام بـ«لكل عضلة يوم»
+     * والمحرّك يبني «علوي/سفلي + يوم تركيز» — كذبتان من أربع.
+     */
+    splits: { fullBody: string; upperLower: string; upperLowerFocus: string; pushPullLegs: string; custom: string }
+  }
   equipment: { title: string; subtitle: string; placeQ: string; prefQ: string; injuryQ: string; injuryNote: string; cta: string }
   places: readonly { value: string; label: string; icon: string }[]
   prefs: readonly { value: string; label: string; icon: string }[]
@@ -208,11 +218,23 @@ export interface V2OnboardingCopy {
   /** [CTO-009/WP-2] شاشة الترحيب قبل أول سؤال. */
   welcome: { eyebrow: string; title: string; subtitle: string; start: string; timeNote: string }
   /** [CTO-009/WP-2] تسليم ما بعد الخطة: معاينة موجزة ← Premium ← حساب. */
-  handoff: { eyebrow: string; title: string; subtitle: string; premiumCta: string; enterFree: string; accountNote: string }
+  handoff: {
+    eyebrow: string; title: string; subtitle: string; premiumCta: string; enterFree: string; accountNote: string
+    /** [QIM-WEB-FOUNDER-UX-004/حزمة ٣] كشف القيمة: ما الذي يفتحه Premium وما يبقى مفتوحًا. */
+    benefitsTitle: string
+    benefits: readonly string[]
+    /** سطر يفصل «الرؤية» عن «الاستخدام» — بلا ادّعاء أن الخطة محجوبة. */
+    previewVsUse: string
+  }
   /** Full-screen plan-assembly loading state (shown while the plan is generated). */
   building: { title: string; subtitle: string }
   /** Visible plan-generation failure + retry (never a silent drop into the app). */
   error: { title: string; message: string; retry: string }
+  /**
+   * فشل **الحفظ** لا فشل التوليد — رسالة مستقلّة لأن السبب مختلف والمخرج مختلف.
+   * `kept` هو جوهرها: تطمئنه أن إجاباته باقية، فلا يعيد الإعداد من الصفر.
+   */
+  storage: { title: string; message: string; kept: string; retry: string }
   /** Per-step inline validation messages shown when Next is tapped incomplete. */
   validation: { body: string; goal: string; training: string; equipment: string }
   /** sr-only fieldset legends for each choice group (a11y — not shown visually). */
@@ -235,6 +257,13 @@ export const V2_ONBOARDING: Record<'ar' | 'en', V2OnboardingCopy> = {
       summaryTitle: 'خطتك تتكوّن',
       perSession: 'للجلسة',
       suitsGoal: 'تناسب هدف',
+      splits: {
+        fullBody: 'جسم كامل',
+        upperLower: 'علوي / سفلي',
+        upperLowerFocus: 'علوي / سفلي + يوم تركيز',
+        pushPullLegs: 'دفع · سحب · أرجل ×٢',
+        custom: 'تقسيمة مخصّصة',
+      },
     },
     equipment: {
       title: 'وين وكيف تتمرّن؟',
@@ -271,12 +300,19 @@ export const V2_ONBOARDING: Record<'ar' | 'en', V2OnboardingCopy> = {
       timeNote: 'دقيقتان تقريبًا · تقدر تغيّر أي جواب بعدين',
     },
     handoff: {
-      eyebrow: 'خطتك',
-      title: 'جاهزة ومحفوظة',
-      subtitle: 'خطتك انبنت وانحفظت على هذا الجهاز. تقدر تدخل وتشوفها الحين.',
-      premiumCta: 'احصل على Premium',
-      enterFree: 'ادخل وشوف خطتي',
+      eyebrow: 'تمّ',
+      title: 'جهزنا خطتك',
+      subtitle: 'بنيناها من إجاباتك أنت — أيامك ووقتك ومكان تمرينك وهدفك.',
+      premiumCta: 'احصل على قِمّة Premium',
+      enterFree: 'استعرض قِمّة أولًا',
       accountNote: 'إنشاء حساب يخلّي خطتك تنتقل معك لأي جهاز.',
+      benefitsTitle: 'وش يفتح لك Premium؟',
+      benefits: [
+        'تسجّل تمرينك مجموعة مجموعة، ويحفظ أوزانك وتكراراتك.',
+        'تسجّل أكلك ومياهك، وتشوف سعراتك وبروتينك يتحدّثون معك.',
+        'تسجّل وزنك وقياساتك، وتتابع تقدّمك بالأرقام لا بالإحساس.',
+      ],
+      previewVsUse: 'خطتك قدّامك تقدر تتصفّحها كاملة الحين. Premium يفتح تسجيل تمرينك وأكلك وقياساتك.',
     },
     ready: {
       eyebrow: 'جاهز',
@@ -293,6 +329,12 @@ export const V2_ONBOARDING: Record<'ar' | 'en', V2OnboardingCopy> = {
       title: 'ما قدرنا نجهّز الخطة',
       message: 'صارت مشكلة ونحن نجهّز خطتك. تأكّد من اتصالك وجرّب مرة ثانية.',
       retry: 'جرّب مرة ثانية',
+    },
+    storage: {
+      title: 'ما قدرنا نحفظ خطتك على هذا الجهاز',
+      message: 'يبدو إن التخزين ممتلئ أو محجوب — يصير في وضع التصفّح الخاص أو لما تكون مساحة المتصفّح كاملة.',
+      kept: 'إجاباتك كلها باقية زي ما هي. فرّغ شوي مساحة أو افتح نافذة عادية، وجرّب مرة ثانية.',
+      retry: 'جرّب الحفظ مرة ثانية',
     },
     validation: {
       body: 'أكمل الأربعة بقيم منطقية عشان نكمّل.',
@@ -323,6 +365,13 @@ export const V2_ONBOARDING: Record<'ar' | 'en', V2OnboardingCopy> = {
       summaryTitle: 'Your plan is forming',
       perSession: 'per session',
       suitsGoal: 'suits',
+      splits: {
+        fullBody: 'Full Body',
+        upperLower: 'Upper / Lower',
+        upperLowerFocus: 'Upper / Lower + focus day',
+        pushPullLegs: 'Push · Pull · Legs ×2',
+        custom: 'Custom split',
+      },
     },
     equipment: {
       title: 'Where do you train? And how?',
@@ -359,12 +408,19 @@ export const V2_ONBOARDING: Record<'ar' | 'en', V2OnboardingCopy> = {
       timeNote: 'About two minutes · you can change any answer later',
     },
     handoff: {
-      eyebrow: 'Your plan',
-      title: 'Ready and saved',
-      subtitle: 'Your plan is built and saved on this device. You can open it now.',
-      premiumCta: 'Get Premium',
-      enterFree: 'Open my plan',
+      eyebrow: 'Done',
+      title: 'Your plan is ready',
+      subtitle: 'We built it from your own answers — your days, your time, where you train, and your goal.',
+      premiumCta: 'Get Qimmah Premium',
+      enterFree: 'Explore Qimmah first',
       accountNote: 'Creating an account carries your plan to any device.',
+      benefitsTitle: 'What does Premium open up?',
+      benefits: [
+        'Log your workout set by set, and keep every weight and rep.',
+        'Log your food and water, and watch your calories and protein move with you.',
+        'Log your weight and measurements, and follow real numbers instead of a feeling.',
+      ],
+      previewVsUse: 'Your plan is right here and you can browse all of it now. Premium opens logging your training, food and measurements.',
     },
     ready: {
       eyebrow: 'Ready',
@@ -381,6 +437,12 @@ export const V2_ONBOARDING: Record<'ar' | 'en', V2OnboardingCopy> = {
       title: 'Couldn’t build the plan',
       message: 'Something went wrong while preparing your plan. Check your connection and try again.',
       retry: 'Try again',
+    },
+    storage: {
+      title: "We couldn't save your plan on this device",
+      message: 'Storage looks full or blocked — that happens in private browsing, or when the browser has run out of space.',
+      kept: 'All your answers are still here. Free up a little space or open a normal window, then try again.',
+      retry: 'Try saving again',
     },
     validation: {
       body: 'Fill in all four with sensible values to continue.',

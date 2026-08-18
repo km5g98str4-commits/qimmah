@@ -27,7 +27,25 @@ console.log('\n① بوابة أهلية 12+ على سطح الحساب المش
 check('زر التسجيل محجوب بلا موافقة', /pw\.valid && eligible12/.test(login))
 check('حارس الإرسال يعيد التحقق قبل signUp', login.indexOf('if (isSignup && !eligible12)') < login.indexOf('auth.signUp('))
 check('روابط الشروط والخصوصية داخلية ولا تفتح صفحة ويب منفصلة', login.includes('POLICY_LINKS.terms') && login.includes('POLICY_LINKS.privacy') && policy.includes("terms: '#/terms'") && policy.includes("privacy: '#/privacy'") && !login.includes('target="_blank"'))
-check('وضع إنشاء الحساب محفوظ عند فتح شاشة قانونية والرجوع', login.includes("onModeChange?.(next)") && read('src/App.tsx').includes('onModeChange={setLoginMode}'))
+// [QIM-WEB-FOUNDER-UX-006/حزمة ٦] **المقصد نفسه، والضمانة أقوى.**
+//
+// كان هذا الفحص يتحقّق من الآليّة القديمة: حالة وضع محلّية في `LoginView` تُرفَع
+// إلى `App` عبر `onModeChange={setLoginMode}`. تلك الآليّة كانت تحفظ الوضع عبر
+// الشاشات القانونية **لكنها تفقده عند التحديث**، ولا تحرّك العنوان، ويقفز
+// «رجوع» فوق شاشة الحساب كلها.
+//
+// الآن الوضع يملكه **المسار**: `#/signup` و`#/forgot` مساران مُعلَنان، فيبقى
+// الوضع عبر الشاشات القانونية *وعبر التحديث والرجوع والرابط المباشر* — وهو
+// شرط أوسع لا أضيق. فالفحص صار يحرس الملكية الجديدة بدل الآليّة المهجورة.
+const appSrc = read('src/App.tsx')
+const routesSrc = read('src/lib/appRoutes.ts')
+check(
+  'وضع إنشاء الحساب يملكه المسار (يبقى عبر القانونية والتحديث والرجوع)',
+  routesSrc.includes("'signup'") && routesSrc.includes("'forgot'")
+    && appSrc.includes("view === 'login' || view === 'signup' || view === 'forgot'")
+    && appSrc.includes('mode={authMode}')
+    && !login.includes('useState<Mode>'),
+)
 check('روابط HTML القانونية القديمة تحوّل للشاشات الداخلية ولا تُشحن كمسودات', publicRedirects.includes('/legal/terms.html      /#/terms') && publicRedirects.includes('/legal/privacy.html    /#/privacy') && !existsSync(resolve(root, 'public/legal/terms.html')) && !existsSync(resolve(root, 'public/legal/privacy.html')))
 
 console.log('\n② موافقة البيانات الصحية محفوظة وليست افتراضًا')
@@ -89,7 +107,27 @@ check('تسميات §03 الخمس موجودة', ['اليوم', 'التمار�
   check('سطح Premium واحد لا أكثر', surfaces === 1, `${surfaces}`)
   check('الوجهة من مصدر واحد لا نصّ مكتوب في المكوّن',
     model.includes('url: product.checkoutUrl') && !/salla\.sa/i.test(profileV2))
-  check('مصدر الوجهة هو سلة', /checkoutUrl:.*salla\.sa\/Qimmahsa/.test(productCfg))
+  // [OVERNIGHT-5] كان الفحص سطرًا واحدًا (`/checkoutUrl:.*salla\.sa/`)، فسقط
+  // لحظة صارت القيمة متعدّدة الأسطر — **والوجهة لم تتغيّر عن سلة بحرف**. أي
+  // أنه كان يقيس تنسيقًا لا مقصدًا. فيُستخرَج الآن **القيمة** ويُفحص مضمونها.
+  const checkoutValue = (() => {
+    const at = productCfg.indexOf('checkoutUrl:')
+    if (at < 0) return ''
+    // حتى نهاية التعبير: أوّل سطر ينتهي بفاصلة بعد سلسلة نصّية.
+    const tail = productCfg.slice(at)
+    const end = tail.search(/',\n/)
+    return end < 0 ? tail.slice(0, 400) : tail.slice(0, end + 1)
+  })()
+  check('قيمة الوجهة استُخرجت بحدودها لا بسطرها', checkoutValue.startsWith('checkoutUrl:') && checkoutValue.length > 20)
+  check('مصدر الوجهة هو متجر سلة الحيّ', /salla\.sa\/Qimmahsa/.test(checkoutValue))
+  // وأقوى من السابق: الوجهة **صفحة المنتج** لا جذر المتجر. الجذر كان قصورًا
+  // موثّقًا في أدلّة الإصدار (`ok:false`)، وقد أُغلق برابط قُرئ من DOM المتجر
+  // الحيّ. والارتداد إليه يُسقط هذا الفحص بالاسم.
+  check('والوجهة صفحة المنتج نفسها لا جذر المتجر', /p1181109938/.test(checkoutValue))
+  check('ولا تشير إلى المنتج المجّاني (سلبي معروف)', !/1084925309/.test(checkoutValue))
+  // محاكاة الالتفاف: جذر المتجر وحده يجب أن يسقط فحص المنتج.
+  check('ولو عادت الوجهة جذرًا لسقط الفحص أعلاه — فهو ليس تحصيل حاصل',
+    !/p1181109938/.test("checkoutUrl: 'https://salla.sa/Qimmahsa',"))
   check('الرابط الخارجي محمي بـnoopener', /rel="noopener noreferrer"/.test(profileV2))
   check('لا دفع داخل التطبيق ولا مزوّد ثالث',
     !/stripe|revenuecat|applepay|in-app purchase/i.test(profileV2 + model + productCfg))

@@ -12,13 +12,16 @@ import { getDayStamp } from './today'
 import { useIsDemo } from './demoMode'
 import { getNutritionLog, saveNutritionLog } from './historyStore'
 import { completeFirstWin } from './firstWin'
+import { assertPaid } from '@/lib/access/guard'
 import {
   addFoodToDay,
   addWaterToDay,
   getNutritionDaySnapshot,
   removeFoodFromDay,
+  updateFoodInDay,
   subscribeNutritionDay,
   NUTRITION_V2_KEY,
+  NutritionStorageError,
   type LoggedFood as CanonicalFood,
 } from './nutritionV2Model'
 
@@ -41,9 +44,12 @@ export interface LoggedFood {
   id: string
   label: string
   /** نسبة الكمية المُسجّلة إلى الحصة المرجعية — للتوافق التاريخي. */
-  servings: number
+  servings?: number
   /** الكمية المُسجّلة بالغرام (إن توفرت). */
   grams?: number
+  /** مرجع المكتبة ووحدة الإدخال الأصلية — لإعادة حساب التعديل بصدق. */
+  foodId?: string
+  unit?: 'g' | 'serving'
   calories: number
   protein: number
   carbs: number
@@ -67,12 +73,41 @@ function fromCanonical(f: CanonicalFood): LoggedFood {
   return {
     id: f.id,
     label: f.nameAr,
-    servings: 1,
     calories: f.calories,
     protein: f.protein,
     carbs: f.carbs ?? 0,
     fat: f.fat ?? 0,
     meal: f.meal,
+    grams: f.grams,
+    servings: f.servings,
+    foodId: f.foodId,
+    unit: f.unit,
+  }
+}
+
+function storageWrite(run: () => void): boolean {
+  try {
+    run()
+    return true
+  } catch (error) {
+    if (error instanceof NutritionStorageError) return false
+    throw error
+  }
+}
+
+function toCanonical(item: LoggedFood): CanonicalFood {
+  return {
+    id: item.id,
+    nameAr: item.label,
+    calories: item.calories,
+    protein: item.protein,
+    carbs: item.carbs,
+    fat: item.fat,
+    meal: item.meal ?? 'snack',
+    ...(item.foodId ? { foodId: item.foodId } : {}),
+    ...(item.grams !== undefined ? { grams: item.grams } : {}),
+    ...(item.servings !== undefined ? { servings: item.servings } : {}),
+    ...(item.unit ? { unit: item.unit } : {}),
   }
 }
 
@@ -176,6 +211,10 @@ export function useNutritionToday() {
         notify()
         return
       }
+      // [QIM-WEB-FOUNDER-UX-003/حزمة ٢] حارس هنا لا في `saveNutritionLog`:
+      // ذاك كاتب تاريخ **مشترك** مع الاستيراد والمزامنة، وحجبه يمنع المستخدم من
+      // استعادة بياناته. الحدّ نفسه المطبَّق على القياسات.
+      assertPaid('nutrition.toggleMeal')
       const date = getDayStamp()
       const doneMeals = { ...(getNutritionLog(date)?.doneMeals ?? {}) }
       doneMeals[mealId] = !doneMeals[mealId]
@@ -191,12 +230,14 @@ export function useNutritionToday() {
         const prev = snapshot(true)
         demoCache = { ...prev, waterMl: Math.max(0, prev.waterMl + ml) }
         notify()
-        return
+        return true
       }
-      addWaterToDay(ml) // المصدر القانوني الواحد — يُشعرنا عبر الاشتراك
+      const saved = storageWrite(() => { addWaterToDay(ml) }) // المصدر القانوني الواحد — يُشعرنا عبر الاشتراك
+      if (!saved) return false
       // [CTO-70] البند ١ — أول انتصار: تسجيل ماء حقيقي يُنهي الانتصار الأول.
       // هنا لا في البطاقة: الضغطة نيّة، والإنجاز ما وقع — ويُحتسب من أي سطح.
       if (ml > 0) completeFirstWin('water')
+      return true
     },
     [demo],
   )
@@ -206,9 +247,9 @@ export function useNutritionToday() {
       const prev = snapshot(true)
       demoCache = { ...prev, waterMl: 0 }
       notify()
-      return
+      return true
     }
-    addWaterToDay(-getNutritionDaySnapshot().waterMl)
+    return storageWrite(() => { addWaterToDay(-getNutritionDaySnapshot().waterMl) })
   }, [demo])
 
   /** إضافة عنصر للسجل (سعرات/ماكروز). يُولَّد المعرّف تلقائيًا إن لم يُمرَّر. */
@@ -219,18 +260,13 @@ export function useNutritionToday() {
         const prev = snapshot(true)
         demoCache = { ...prev, log: [...prev.log, item] }
         notify()
+        return true
       } else {
-        addFoodToDay({
-          id: item.id,
-          nameAr: item.label,
-          calories: item.calories,
-          protein: item.protein,
-          carbs: item.carbs,
-          fat: item.fat,
-          meal: item.meal ?? 'snack',
-        })
+        const saved = storageWrite(() => { addFoodToDay(toCanonical(item)) })
+        if (!saved) return false
         // [CTO-70] البند ١ — أول انتصار بتسجيل وجبة (يصير «عشاء» مساءً).
         completeFirstWin('meal')
+        return true
       }
     },
     [demo],
@@ -242,9 +278,39 @@ export function useNutritionToday() {
         const prev = snapshot(true)
         demoCache = { ...prev, log: prev.log.filter((e) => e.id !== id) }
         notify()
-        return
+        return true
       }
-      removeFoodFromDay(id)
+      return storageWrite(() => { removeFoodFromDay(id) })
+    },
+    [demo],
+  )
+
+  /** يعدّل كمية قيد حيّ بالنسبة إلى كميته المحفوظة؛ بلا أساس معروف لا نخترع حسابًا. */
+  const updateLogQuantity = useCallback(
+    (id: string, value: number, unit: 'g' | 'serving') => {
+      if (!Number.isFinite(value) || value <= 0) return false
+      const current = snapshot(demo).log.find((entry) => entry.id === id)
+      if (!current) return false
+      const base = unit === 'g' ? current.grams : current.servings
+      if (typeof base !== 'number' || !Number.isFinite(base) || base <= 0) return false
+      const ratio = value / base
+      const updated: LoggedFood = {
+        ...current,
+        grams: current.grams === undefined ? undefined : Math.round(current.grams * ratio * 10) / 10,
+        servings: current.servings === undefined ? undefined : Math.round(current.servings * ratio * 100) / 100,
+        calories: Math.round(current.calories * ratio),
+        protein: Math.round(current.protein * ratio * 10) / 10,
+        carbs: Math.round(current.carbs * ratio * 10) / 10,
+        fat: Math.round(current.fat * ratio * 10) / 10,
+        unit,
+      }
+      if (demo) {
+        const prev = snapshot(true)
+        demoCache = { ...prev, log: prev.log.map((entry) => (entry.id === id ? updated : entry)) }
+        notify()
+        return true
+      }
+      return storageWrite(() => { updateFoodInDay(toCanonical(updated)) })
     },
     [demo],
   )
@@ -252,5 +318,5 @@ export function useNutritionToday() {
   const isMealDone = useCallback((mealId: string) => !!state.doneMeals[mealId], [state])
   const totals = logTotals(state.log)
 
-  return { state, totals, toggleMeal, addWater, resetWater, addLog, removeLog, isMealDone }
+  return { state, totals, toggleMeal, addWater, resetWater, addLog, removeLog, updateLogQuantity, isMealDone }
 }

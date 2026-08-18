@@ -69,6 +69,19 @@ export const DATA_KEYS: readonly DataKeyDef[] = [
   { key: 'qimmah:reminders:v1', kind: 'user', scoped: false, exported: true, synced: false, owner: 'reminderPrefs', migration: 'owner-suffix' },
   { key: 'qimmah:workoutCalendar:v1', kind: 'user', scoped: false, exported: true, synced: true, owner: 'workoutCalendar', migration: 'owner-suffix', note: 'الجدول الأسبوعي (يوم أسبوع → يوم خطة/راحة) + تجاوزات اليوم الفائت — يُزامَن (P12: workout_schedule، شاهد قبر عند المسح)' },
 
+  /**
+   * جلسة التمرين الجارية على **المسار الحيّ** — `WorkoutView` عبر `activeWorkout.ts`.
+   *
+   * كان السجلّ يعرف التوأم غير الموجَّه وحده (`:active-workout:v2` لـ`WorkoutV2`)،
+   * بينما يكتب المسار الذي يعرضه `App.tsx` مفتاحًا آخر تمامًا. والسجلّ ليس توثيقًا:
+   * `unscopedUserKeys()` يقود **حجر البيانات عند تبديل الحساب** (`dataOwnership.ts`).
+   * فمفتاح حيّ خارجه لا يُحجَر ولا يُكتشف — أي أن جلسة تمرين المستخدم الأول تبقى
+   * على الجهاز وتظهر للمستخدم الثاني. تسرّب عبر الحسابات لا مجرّد سهو تسجيل.
+   *
+   * غير موسوم بالمالك (عالمي) فخطّته `owner-suffix` كبقيّة نظائره.
+   */
+  { key: 'qimmah:activeWorkout:v1', kind: 'user', scoped: false, exported: true, synced: false, owner: 'activeWorkout', migration: 'owner-suffix', note: 'الجلسة الجارية للمسار الحيّ WorkoutView — تُحجَر عند تبديل الحساب' },
+
   // ── بيانات مستخدم موسومة بالمالك اليوم ──
   { key: 'qimmah:active-workout:v2', kind: 'user', scoped: true, exported: true, synced: false, owner: 'WorkoutV2', migration: 'already-scoped' },
   { key: 'qimmah:recovery-log:v1', kind: 'user', scoped: true, exported: true, synced: false, owner: 'recovery', migration: 'already-scoped', note: 'ترشيح مزامنة لاحقًا' },
@@ -118,6 +131,10 @@ export const DATA_KEYS: readonly DataKeyDef[] = [
   { key: 'qimmah:supabase-auth:v1', kind: 'device', scoped: false, exported: false, synced: false, owner: 'supabaseClient', migration: 'keep-global', note: 'رمز الجلسة — لا يُصدَّر أبدًا' },
   { key: 'qimmah:lastUser:v1', kind: 'device', scoped: false, exported: false, synced: false, owner: 'accountScope', migration: 'keep-global' },
   { key: 'qimmah:design-preview', kind: 'device', scoped: false, exported: false, synced: false, owner: 'dev', migration: 'keep-global' },
+  // [SOVEREIGN-COMMERCE-001] نيّة التجربة — **لا تمنح شيئًا**: أقصى أثرها إعادةُ طرح
+  // السؤال على `start_trial` بعد المصادقة، والجواب للخادم وحده. ولذلك `device`
+  // وغير مُصدَّرة وغير مُزامَنة: ليست بيانات مستخدم بل ذاكرة رحلة تنتهي خلال ٢٤ ساعة.
+  { key: 'qimmah:access:trial-intent:v1', kind: 'device', scoped: false, exported: false, synced: false, owner: 'access/trialIntent', migration: 'keep-global', note: 'نيّة عابرة تعبر رحلة المصادقة — لا استحقاق' },
 ] as const
 
 /** مفاتيح بيانات المستخدم العالمية (غير الموسومة) — هدف الحجر/التبنّي والهجرة القادمة. */

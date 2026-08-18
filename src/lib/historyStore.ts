@@ -10,7 +10,7 @@ import type { SessionExercise, SetLog, WorkoutSession } from './workoutSessions'
 import type { ExerciseHistory } from './exerciseHistory'
 import type { MeasurementLog } from '@/types/progress'
 import { enqueueSyncDelete, enqueueSyncOperation } from './syncQueue'
-import { writeJson, writeRaw } from '@/lib/safeStorage'
+import { writeJson, writeRaw, type WriteResult } from '@/lib/safeStorage'
 
 // ختم اليوم المحلي (YYYY-MM-DD) — مكرّر هنا لكسر الاعتماد الدائري مع today.ts.
 function dayStamp(d = new Date()): string {
@@ -112,8 +112,8 @@ function readJSON<T>(key: string, fallback: T): T {
 // كل كتابة دائمة تمرّ من الطبقة الآمنة: لا ترمي (فلا تنكسر أي واجهة)، لكنها
 // تُسجّل الفشل في مؤشّر عالمي بدل ابتلاعه — فيستطيع مسار إنهاء التمرين أن يعرف
 // أن الحفظ لم يحدث ويقول ذلك للمستخدم بدل عرض نجاح زائف.
-function writeJSON(key: string, value: unknown): boolean {
-  return writeJson(key, value) === 'ok'
+function writeJSON(key: string, value: unknown): WriteResult {
+  return writeJson(key, value)
 }
 
 function nowISO(): string {
@@ -293,13 +293,24 @@ export function getMeasurementLogs(): MeasurementLog[] {
   return readJSON<MeasurementLog[]>(HISTORY_KEYS.measurementLogs, [])
 }
 
-export function saveMeasurementLog(log: MeasurementLog): MeasurementLog[] {
+export interface MeasurementWriteResult {
+  result: WriteResult
+  logs: MeasurementLog[]
+}
+
+/**
+ * Checked local-first measurement commit. Sync capture happens only after the
+ * canonical local write succeeds, so a quota failure cannot queue data that the
+ * current device has already told the user it saved.
+ */
+export function saveMeasurementLogChecked(log: MeasurementLog): MeasurementWriteResult {
   ensureMigrated()
-  // طابع LWW: كل حفظ يحمل updatedAt؛ سجل قديم بلا طابع يُكمل كما هو (يسقط لدقّة اليوم عند الحسم).
   const stamped: MeasurementLog = { ...log, updatedAt: log.updatedAt ?? nowISO() }
-  const existing = getMeasurementLogs().filter((l) => l.id !== stamped.id)
+  const existing = getMeasurementLogs().filter((item) => item.id !== stamped.id)
   const next = [stamped, ...existing].slice(0, 1000)
-  writeJSON(HISTORY_KEYS.measurementLogs, next)
+  const result = writeJSON(HISTORY_KEYS.measurementLogs, next)
+  if (result !== 'ok') return { result, logs: getMeasurementLogs() }
+
   // سياسة خصوصية الصحة (P12): القياسات المستوردة من HealthKit (source:'health')
   // لا تُرفع لسحابتنا أبدًا — بياناتها تعيش في Apple Health ومصدر حقيقتها هناك؛
   // اليدوي فقط يُزامَن. deleted_at:null يُحيي صفًا سبق أن حمل شاهد قبر (LWW).
@@ -313,18 +324,31 @@ export function saveMeasurementLog(log: MeasurementLog): MeasurementLog[] {
       deleted_at: null,
     })
   }
-  return next
+  return { result, logs: next }
+}
+
+export function saveMeasurementLog(log: MeasurementLog): MeasurementLog[] {
+  return saveMeasurementLogChecked(log).logs
+}
+
+/** Checked whole-list replacement used by UI delete and trusted restore/sync. */
+export function setMeasurementLogsChecked(logs: MeasurementLog[]): MeasurementWriteResult {
+  ensureMigrated()
+  const previous = getMeasurementLogs()
+  const result = writeJSON(HISTORY_KEYS.measurementLogs, logs)
+  if (result !== 'ok') return { result, logs: previous }
+
+  const retained = new Set(logs.map((log) => log.id))
+  previous.forEach((log) => {
+    // شاهد قبر بطابع (P12) — المستورد من الصحة لم يُرفع أصلًا فلا يُقبَر.
+    if (!retained.has(log.id) && log.source !== 'health') enqueueSyncDelete('measurement_logs', log.id)
+  })
+  return { result, logs }
 }
 
 /** يستبدل كامل قائمة القياسات (لمزامنة/استيراد). */
 export function setMeasurementLogs(logs: MeasurementLog[]): void {
-  ensureMigrated()
-  const retained = new Set(logs.map((log) => log.id))
-  getMeasurementLogs().forEach((log) => {
-    // شاهد قبر بطابع (P12) — المستورد من الصحة لم يُرفع أصلًا فلا يُقبَر.
-    if (!retained.has(log.id) && log.source !== 'health') enqueueSyncDelete('measurement_logs', log.id)
-  })
-  writeJSON(HISTORY_KEYS.measurementLogs, logs)
+  setMeasurementLogsChecked(logs)
 }
 
 // ————————————————————————————————————————————————————————————————

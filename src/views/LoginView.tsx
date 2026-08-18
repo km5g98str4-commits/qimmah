@@ -7,6 +7,7 @@ import { authFlowStrings } from '@/i18n/dict/authFlow'
 import { useAuth } from '@/lib/authContext'
 import { evaluatePassword, PASSWORD_MIN_LENGTH } from '@/lib/passwordPolicy'
 import { POLICY_LINKS, policyCopy } from '@/data/policyCopy'
+import { isFounderPreview } from '@/lib/appEnv'
 
 /**
  * [CTO-65] البند ٧ — صلاحية شكل البريد.
@@ -21,9 +22,10 @@ interface LoginViewProps {
   onSuccess: () => void
   onBack: () => void
   /** الوضع الابتدائي عند الفتح — تسجيل دخول أو إنشاء حساب. */
-  initialMode?: Mode
+  /** [حزمة ٦] الوضع يملكه المسار لا المكوّن — مُتحكَّم به بالكامل. */
+  mode?: Mode
   /** يحفظ وضع الحساب خارج الشاشة حتى لا يضيع عند فتح الشروط أو الخصوصية. */
-  onModeChange?: (mode: 'login' | 'signup') => void
+  onModeChange?: (mode: Mode) => void
 }
 
 type Mode = 'login' | 'signup' | 'forgot'
@@ -33,12 +35,25 @@ type Mode = 'login' | 'signup' | 'forgot'
  * تجيب: أين أنا؟ (العنوان) · ماذا أفعل؟ (النموذج + إجراء أساسي واحد) · لماذا أثق؟ (نبرة هادئة صادقة).
  * منطق المصادقة والأحداث لم يتغيّر؛ التعديل بصري + إضافة وضع الاستعادة فقط.
  */
-export function LoginView({ lang, onSuccess, onBack, initialMode = 'login', onModeChange }: LoginViewProps) {
+export function LoginView({ lang, onSuccess, onBack, mode = 'login', onModeChange }: LoginViewProps) {
   const t = getStrings(lang)
   const d = miscStrings[lang]
   const af = authFlowStrings[lang]
   const auth = useAuth()
-  const [mode, setMode] = useState<Mode>(initialMode)
+  /**
+   * قرار **وقت بناء** لا وقت تشغيل — لا يملك المتصفّح تبديله، فلا يصير
+   * «نسخة مراجعة» ادّعاءً يُلبَس. ولا إشارة ثانية تُخترع: هذه هي القائمة.
+   */
+  const previewBuild = isFounderPreview()
+  /**
+   * [QIM-WEB-FOUNDER-UX-006/حزمة ٦] لا حالة وضع محلّية.
+   *
+   * كان الوضع `useState` هنا، فترتّب عليه ثلاثة أعطال مقيسة: العنوان يبقى
+   * `#/login` بعد التبديل إلى إنشاء الحساب · التحديث يعيد المستخدم إلى وضع
+   * آخر · و«رجوع» يقفز فوق شاشة الحساب كلها (الـhash يُفرَّغ). الآن المسار هو
+   * مصدر الوضع، والتبديل تنقّلٌ حقيقي يدفع مدخل تاريخ.
+   */
+  const setMode = (next: Mode) => onModeChange?.(next)
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   // [CTO-65] البند ٧ — الرسالة تُعرض عند مغادرة الحقل لا مع أول حرف.
@@ -69,7 +84,6 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login', onMo
 
   const switchMode = (next: Mode) => {
     setMode(next)
-    if (next !== 'forgot') onModeChange?.(next)
     setMsg(null)
     setNotice(null)
     if (next !== 'signup') setEligible12(false)
@@ -102,7 +116,10 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login', onMo
         return
       }
       if (isSignup) {
-        const r = await auth.signUp(email, password, name)
+        // [QIM-WEB-FOUNDER-UX-006/حزمة ٦] الاسم يُقصّ **قبل التخزين** لا عند
+        // الفحص وحده. كان الشرط يفحص `name.trim()` بينما المُرسَل هو النصّ الخام،
+        // فاسم مثل « زياد » يُحفظ بفراغاته ثم يظهر مزاحًا في كل ترحيب.
+        const r = await auth.signUp(email, password, name.trim())
         if (!r.ok) {
           setMsg(r.error ?? d.createFailed)
         } else if (r.ambiguousExistingAccount) {
@@ -110,12 +127,10 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login', onMo
           // رسالة صادقة في الحالتين + طريق الدخول جاهز، ولا حدث «نجاح تسجيل» لم يثبت.
           setNotice(af.emailMaybeRegistered)
           setMode('login')
-          onModeChange?.('login')
         } else if (r.needsConfirmation) {
           // تأكيد البريد مطلوب — نعرض تنبيهًا واضحًا ونعيد المستخدم لوضع الدخول.
           setNotice(d.accountCreatedConfirm)
           setMode('login')
-          onModeChange?.('login')
         } else {
           onSuccess()
         }
@@ -362,10 +377,34 @@ export function LoginView({ lang, onSuccess, onBack, initialMode = 'login', onMo
             )}
           </>
         ) : (
-          // — Supabase غير مضبوط —
-          <div className="mt-6 rounded-2xl border border-line bg-surface p-5 text-center">
-            <p className="text-sm font-bold text-ink-900">{t.auth.disabledTitle}</p>
-            <p className="mt-1 text-xs leading-relaxed text-ink-500">{t.auth.disabledBody}</p>
+          /*
+           * — لا خادم حسابات في هذا البناء —
+           *
+           * [SOVEREIGN-COMMERCE-001] كانت البطاقة تقول «كلّم مزوّد الخدمة عشان
+           * يفعّل لك الحساب»: تخاطب القارئ **مشتريَ نشرة** لا مستخدمَ قِمّة
+           * (الميثاق §0.2)، وتردّ على من ضغط «أنشئ حسابًا» بكلامٍ عن **المزامنة
+           * السحابية** — وعدان منفصلان (§0.1) — وتقف عند المنع بلا خطوة تالية،
+           * مع أن البناء **يعرف** أنه نسخة مراجعة.
+           *
+           * الآن: البناء يسمّي نفسه، والنصّ يتكلّم عن الحساب لا عن المزامنة،
+           * ويُختم بما **يبقى شغّالًا** بدل الطريق المسدود.
+           */
+          <div data-testid="auth-unavailable" className="mt-6 rounded-2xl border border-line bg-surface p-5 text-center">
+            <p className="text-sm font-bold text-ink-900">
+              {previewBuild ? t.auth.disabledPreviewTitle : t.auth.disabledTitle}
+            </p>
+            <p className="mt-1 text-xs leading-relaxed text-ink-500">
+              {previewBuild ? t.auth.disabledPreviewBody : t.auth.disabledBody}
+            </p>
+            <p className="mt-3 text-xs leading-relaxed text-ink-700">{t.auth.disabledNext}</p>
+            <button
+              type="button"
+              onClick={onBack}
+              data-testid="auth-unavailable-back"
+              className="btn-ghost mt-4 min-h-[44px] w-full text-sm"
+            >
+              {t.auth.disabledAction}
+            </button>
           </div>
         )}
       </div>

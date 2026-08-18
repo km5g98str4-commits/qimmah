@@ -3,10 +3,12 @@ import { Icon } from '@/components/Icon'
 import { WorkoutMode } from '@/components/WorkoutMode'
 import { WorkoutSummary } from '@/components/WorkoutSummary'
 import type { Lang } from '@/lib/appPreferences'
+import { formatNumber, formatNumeralsIn } from '@/lib/numberFormat'
 import type { AppRoute } from '@/lib/appRoutes'
 import { useAuth } from '@/lib/authContext'
 import { useCustomization } from '@/lib/customizationContext'
-import { todayPlanDay, planExerciseName } from '@/lib/workoutPlan'
+import { planExerciseName } from '@/lib/workoutPlan'
+import { currentWorkout, nextWorkout } from '@/lib/workoutDaySource'
 import { clearActiveWorkout, completedSetCount, loadActiveWorkout, type ActiveWorkout } from '@/lib/activeWorkout'
 import { SessionGuardDialog, type SessionGuardKind } from '@/components/SessionGuardDialog'
 import { planTitle } from '@/lib/planGenerator'
@@ -22,16 +24,21 @@ import {
 import { getStrings } from '@/config/strings'
 import { workoutScreenStrings } from '@/i18n/dict/workoutScreen'
 import { commitFinishedSession } from '@/lib/finishWorkout'
+import { restoreWorkoutStorage, snapshotWorkoutStorage } from '@/lib/workoutFinishUndo'
 import type { WriteResult } from '@/lib/safeStorage'
 import { trackLocal } from '@/lib/tracking'
 import { completeFirstWin } from '@/lib/firstWin'
+import { WarmupScreen } from '@/components/workout/WarmupScreen'
+import { buildWarmupPlan, type WarmupPlan } from '@/lib/warmupPlan'
+import { loadWarmupPref, saveWarmupPref } from '@/lib/strength/warmup'
+import { estimateDurationMin } from '@/lib/workoutStats'
 import { cappedSessionMinutes, easyExerciseCount, easyMinutesFor, isEasyToday } from '@/lib/easySession'
 import { journeyDayIndex } from '@/lib/tracking/signals'
 import { evaluateAchievements, registerWorkoutPRs } from '@/features/achievements/engine'
 import { weeklyAdherenceStreak } from '@/lib/streaks'
-import { getExercise } from '@/data/exercises'
 import type { WorkoutSession } from '@/lib/workoutSessions'
 import type { PlanDay } from '@/types/workout'
+import { useAccess } from '@/lib/access/useAccess'
 
 interface FinishSummary {
   session: WorkoutSession
@@ -49,6 +56,7 @@ interface WorkoutViewProps {
 export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
   const { customization } = useCustomization()
   const auth = useAuth()
+  const { guard: guardPaid } = useAccess()
   const userId = auth.user?.id ?? null
   const autoPlan = customization.workoutPlan
 
@@ -60,7 +68,15 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
   const source: PlanSource = customRec?.source ?? 'auto'
   const hasCustom = !!customRec && customRec.plan.days.length > 0
   const plan = source === 'custom' && hasCustom ? customRec.plan : autoPlan
-  const planDay = todayPlanDay(plan)
+  /**
+   * [QIM-WEB-FOUNDER-UX-005/حزمة ٥] كان هنا `todayPlanDay(plan)` — التدوير
+   * الأعمى الموسوم `@deprecated` في مصدره (`getDay() % days.length`)، ولا يعرف
+   * الجدول الأسبوعي ولا أيام الراحة. و«اليوم» يقرأ الجدول الحقيقي. فالشاشتان
+   * تتصادفان بالتاريخ وتفترقان به — وهو سبب تقطّع البلاغ.
+   * الآن كلتاهما تسأل `currentWorkout`؛ ويوم الراحة يُعاد بصدق فلا يُعرض تمرينًا.
+   */
+  const scheduled = currentWorkout(userId, customization)
+  const planDay = scheduled?.type === 'training' ? scheduled.day : undefined
 
   const cp = customPlanStrings[lang]
   const [builderOpen, setBuilderOpen] = useState<null | 'create' | 'edit'>(null)
@@ -110,15 +126,40 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
     return { ...day, exercises: day.exercises.slice(0, keep) }
   }
 
-  const startDay = (rawDay: PlanDay) => {
-    const day = applyEasyIfActive(rawDay)
+  /**
+   * [SOVEREIGN-TODAY-001] المهمّة ١ — الإحماء مرحلة قبل أول مجموعة عمل.
+   *
+   * كان `startDay` يدخل الجلسة الكاملة فورًا **ويستدعي** `completeFirstWin('warmup')`
+   * في نفس اللحظة: أي أن التطبيق يُعلّم «إحماء دقيقتين» منجزًا لحظة بدء جلسة
+   * ٤٥ دقيقة، بلا خطوة إحماء واحدة في المسار الحيّ. الآن الجلسة تُقرأ
+   * «إحماء ← تمارين ← إنهاء»، والانتصار الأول يُسجَّل عند **إتمام** الإحماء لا
+   * عند نيّة البدء — ومن تخطّاه لا يُحتسب له (النصّ في الشاشة يقولها صراحةً).
+   */
+  const [pendingWarmup, setPendingWarmup] = useState<{ day: PlanDay; plan: WarmupPlan } | null>(null)
+
+  /** الدخول الفعلي لوضع الجلسة — نقطة واحدة يمرّ بها الإحماء والتخطّي معًا. */
+  const beginSession = (day: PlanDay) => {
+    setPendingWarmup(null)
     setResumeFrom(undefined)
     // [CTO-68] الحدث ١٠ — بدء تمرين، لحظة دخول وضع الجلسة.
     trackLocal('workout_session_started', { exercises: day.exercises.length })
-    // [CTO-70] البند ١ — بدء التمرين هو «الإحماء القصير» المقترح كأول انتصار.
-    completeFirstWin('warmup')
     setActiveDay(day)
   }
+
+  // [QIM-WEB-FOUNDER-UX-003/حزمة ٢] الطبقة الأولى — تجربة نظيفة: بوّابة Premium
+  // بدل استثناء. الطبقة الثانية (`assertPaid` داخل `saveActiveWorkout`) هي التي
+  // تصمد أمام الالتفاف؛ هذه تجعل الرفض مفهومًا لا مخيفًا.
+  const startDay = guardPaid('workout.start', (rawDay: PlanDay) => {
+    const day = applyEasyIfActive(rawDay)
+    const warmup = buildWarmupPlan(day)
+    // بلا خطوات إحماء (يوم بلا تمارين) أو بتعطيل صريح من المستخدم ⇒ لا شاشة
+    // فارغة تُعترض الطريق. والوعد في «اليوم» يختفي بنفس الشرط — مصدر واحد.
+    if (warmup.steps.length === 0 || !loadWarmupPref(userId).show) {
+      beginSession(day)
+      return
+    }
+    setPendingWarmup({ day, plan: warmup })
+  })
 
   /** يوم الجلسة المعلّقة كما هو في الخطة الحالية — القرار على المعرّف لا على الاسم. */
   const resumeDay = pendingResume ? plan.days.find((dd) => dd.id === pendingResume.dayId) : undefined
@@ -164,11 +205,11 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
     setGuard({ kind: 'discard', sets })
   }
 
-  const startEmpty = () => {
+  const startEmpty = guardPaid('workout.startEmpty', () => {
     // تمرين فارغ = بدء جلسة أيضًا (بلا تمارين من الخطة).
     trackLocal('workout_session_started', { exercises: 0 })
     setActiveDay({ id: `empty-${Date.now()}`, nameAr: d.emptyWorkoutNameAr, nameEn: d.emptyWorkoutNameEn, exercises: [] })
-  }
+  })
 
   /**
    * الخروج من وضع الجلسة بلا إنهاء — [CTO-68] الحدث ١٢ بموضع القطع «session».
@@ -212,9 +253,20 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
    * والجلسة **تبقى قائمة** فلا يضيع عمل المستخدم ويستطيع إعادة المحاولة.
    */
   const finish = (session: WorkoutSession) => {
+    const snapshot = snapshotWorkoutStorage()
     const commit = commitFinishedSession(session)
     if (!commit.ok) {
+      restoreWorkoutStorage(snapshot)
       setSaveError(commit.failure ?? 'error')
+      return
+    }
+    // لا تُمسح لقطة الاستئناف في الطفل قبل الكاتب. نجاح السجلّ ثم فشل تنظيف
+    // اللقطة يُعادان معًا إلى ما قبل التأكيد، كي لا نعرض ملخّصًا ونترك تمرينًا
+    // معلّقًا يظهر مجددًا بعد reload.
+    const clearResult = clearActiveWorkout(userId)
+    if (clearResult !== 'ok') {
+      restoreWorkoutStorage(snapshot)
+      setSaveError(clearResult)
       return
     }
     setSaveError(null)
@@ -231,15 +283,21 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
     const weekly = weeklyAdherenceStreak(daysPerWeek)
     const prLabels = prs.map((pr) => {
       const name = lang === 'en' ? pr.nameEn || pr.nameAr : pr.nameAr || pr.nameEn
-      return `${name || pr.exerciseId} · ${pr.weight} ${tw.volumeUnit}`
+      return `${name || pr.exerciseId} · ${formatNumber(pr.weight, lang)} ${tw.volumeUnit}`
     })
-    // تسمية تمرين الغد (اليوم التالي في الخطة) — لمسة تحفيزية.
-    const nextDayLabel = plan.days.length
-      ? (() => {
-          const next = plan.days[(new Date().getDay() + 1) % plan.days.length]
-          return next ? (lang === 'en' ? next.nameEn : next.nameAr) : undefined
-        })()
-      : undefined
+    /**
+     * [QIM-WEB-FOUNDER-UX-005/حزمة ٥] تمرينك القادم — من **نفس** مصدر «اليوم».
+     *
+     * كان هنا تدوير أعمى ثالث: `plan.days[(getDay() + 1) % days.length]`. أي أن
+     * شاشة الإنهاء تَعِد بيوم لا علاقة له بما سيعرضه «اليوم» غدًا — والوعد
+     * المكسور هنا أسوأ من غيره لأنه يقع في لحظة إنجاز.
+     *
+     * `nextWorkout` يتقدّم يومًا بيوم عبر الجدول الحقيقي، فيتخطّى الراحات
+     * ويحترم التجاوزات. والثابت المطلوب يصير قابلًا للإثبات:
+     *   Completion.next == Today.current في اليوم التالي.
+     */
+    const upcoming = nextWorkout(userId, customization)
+    const nextDayLabel = upcoming ? formatNumeralsIn(lang === 'en' ? upcoming.day.day.nameEn : upcoming.day.day.nameAr, lang) : undefined
     setActiveDay(null)
     setSummary({ session, prs: prLabels, streakWeeks: weekly.streakWeeks, nextDayLabel })
   }
@@ -254,7 +312,9 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
               <Icon name="Dumbbell" className="h-3.5 w-3.5" />
               {d.workoutEyebrow}
             </span>
-            <h1 className="mt-3 text-2xl font-black text-ink-900 sm:text-3xl">{d.workoutHeading}</h1>
+            {/* [SOVEREIGN-TODAY-001] `h2` لا `h1`: `MobileShell` يصدر `h1` الصفحة،
+                وعنوانان من المستوى الأول على شاشة واحدة يكسران شجرة العناوين. */}
+            <h2 className="mt-3 text-2xl font-black text-ink-900 sm:text-3xl">{d.workoutHeading}</h2>
           </div>
           <button
             type="button"
@@ -281,7 +341,7 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
                 </span>
                 <span className="min-w-0">
                   <span className="block text-sm font-black">{d.startTodayWorkout}</span>
-                  <span dir="auto" className="block truncate text-xs text-white/85">{lang === 'en' ? planDay.nameEn : planDay.nameAr} · {planDay.exercises.length} {d.exercisesUnit}</span>
+                  <span dir="auto" className="block truncate text-xs text-white/85">{formatNumeralsIn(lang === 'en' ? planDay.nameEn : planDay.nameAr, lang)} · {formatNumber(planDay.exercises.length, lang)} {d.exercisesUnit}</span>
                 </span>
               </button>
             )}
@@ -311,7 +371,7 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-black text-ink-900">{d.resumeTitle}</p>
                 <p dir="auto" className="mt-0.5 text-xs leading-relaxed text-ink-500">
-                  {d.resumeBody.replace('{day}', lang === 'en' ? resumeDay.nameEn : resumeDay.nameAr)}
+                  {formatNumeralsIn(d.resumeBody.replace('{day}', lang === 'en' ? resumeDay.nameEn : resumeDay.nameAr), lang)}
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   <button type="button" onClick={resumeWorkout} className="btn-primary px-4 py-2.5 text-xs">
@@ -340,7 +400,7 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
                   role="tab"
                   aria-selected={source === 'auto'}
                   onClick={() => switchSource('auto')}
-                  className={cn('rounded-lg px-3 py-1.5 text-xs font-bold transition-colors', source === 'auto' ? 'bg-primary text-white' : 'text-ink-500 hover:text-ink-900')}
+                  className={cn('tap-target inline-flex items-center justify-center rounded-lg px-3 text-xs font-bold transition-colors', source === 'auto' ? 'bg-primary text-white' : 'text-ink-500 hover:text-ink-900')}
                 >
                   {cp.useAuto}
                 </button>
@@ -349,7 +409,7 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
                   role="tab"
                   aria-selected={source === 'custom'}
                   onClick={() => switchSource('custom')}
-                  className={cn('rounded-lg px-3 py-1.5 text-xs font-bold transition-colors', source === 'custom' ? 'bg-primary text-white' : 'text-ink-500 hover:text-ink-900')}
+                  className={cn('tap-target inline-flex items-center justify-center rounded-lg px-3 text-xs font-bold transition-colors', source === 'custom' ? 'bg-primary text-white' : 'text-ink-500 hover:text-ink-900')}
                 >
                   {cp.useCustom}
                 </button>
@@ -391,7 +451,7 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
                       {source === 'custom' ? cp.customPlanBadge : cp.autoPlanBadge}
                     </span>
                   </div>
-                  <p className="text-xs text-ink-400">{plan.days.length} {d.daysPerWeek}</p>
+                  <p className="text-xs text-ink-400">{formatNumber(plan.days.length, lang)} {d.daysPerWeek}</p>
                 </div>
                 <button
                   type="button"
@@ -409,7 +469,7 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
                   <div className="flex items-center justify-between gap-3">
                     <div className="min-w-0">
                       <p className="text-[11px] font-bold text-primary-c">{d.todayWorkout}</p>
-                      <p dir="auto" className="truncate text-sm font-bold text-ink-900">{lang === 'en' ? planDay.nameEn : planDay.nameAr}</p>
+                      <p dir="auto" className="truncate text-sm font-bold text-ink-900">{formatNumeralsIn(lang === 'en' ? planDay.nameEn : planDay.nameAr, lang)}</p>
                       <p className="mt-0.5 truncate text-[11px] text-ink-400">
                         {planDay.exercises.slice(0, 4).map((pe) => planExerciseName(pe, lang)).join(' · ') || d.noExercises}
                       </p>
@@ -434,10 +494,10 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
                     className="flex items-center justify-between gap-2 rounded-xl border border-line bg-surface p-3 text-start hover:bg-beige"
                   >
                     <span className="min-w-0">
-                      <span dir="auto" className="block truncate text-sm font-bold text-ink-900">{lang === 'en' ? pd.nameEn : pd.nameAr}</span>
-                      <span className="block text-[11px] text-ink-400">{pd.exercises.length} {d.exercisesUnit} · ~{estDayMinutes(pd)} {d.minShort}</span>
+                      <span dir="auto" className="block truncate text-sm font-bold text-ink-900">{formatNumeralsIn(lang === 'en' ? pd.nameEn : pd.nameAr, lang)}</span>
+                      <span className="block text-[11px] text-ink-400">{formatNumber(pd.exercises.length, lang)} {d.exercisesUnit} · ~{formatNumber(estimateDurationMin(pd), lang)} {d.minShort}</span>
                     </span>
-                    <Icon name="ChevronLeft" className="h-4 w-4 shrink-0 text-ink-400" />
+                    <Icon name="ChevronLeft" className="h-4 w-4 shrink-0 text-ink-400 rtl:rotate-0 ltr:rotate-180" />
                   </button>
                 ))}
               </div>
@@ -445,11 +505,11 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
           )}
         </section>
 
-        {/* قوالبي */}
-        <section>
-          <H2 icon="Layers">{d.myTemplates}</H2>
-          <EmptyCard text={d.templatesAutoGenerated} />
-        </section>
+        {/* [SOVEREIGN-TODAY-001] قسم «قوالبي» أُزيل: عنوانٌ يَعِد بميزة، وجسمه
+            يشرح **ميزة أخرى** (توليد الخطة تلقائيًا)، وهو فارغ في كل حالة بلا
+            زرّ واحد. يُعلّم المستخدم أن ميزةً موجودة لا يستطيع بلوغها أبدًا.
+            نظام القوالب الفعلي (`src/features/customPlan/templates.ts`) كامل
+            وبلا واجهة — وصلُه موجة ميزة لا بند تنظيف. */}
       </div>
 
       {/* باني الجدول المخصّص — إنشاء/تعديل، يعتمد الجدول لهذا الحساب عند الحفظ */}
@@ -458,15 +518,37 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
           <CustomPlanBuilder
             lang={lang}
             initialPlan={builderOpen === 'edit' ? customRec?.plan : undefined}
-            onSave={(p) => {
-              saveCustomPlan(userId, p)
+            onSave={guardPaid('plan.saveEdit', (p) => {
+              // [FINAL-CONVERGENCE] لا إشعار نجاح قبل تأكيد الكتابة (ميثاق §5).
+              // كان الحفظ يُغلق الباني ويعرض «تم الحفظ» حتى بعد كتابة فاشلة،
+              // فتضيع الخطة والمستخدم يقرأ نجاحًا. الآن: فشل ⇒ الباني يبقى
+              // مفتوحًا بخطته كما هي، ورسالة صادقة تسمّي السبب.
+              const { write } = saveCustomPlan(userId, p)
+              if (write !== 'ok') {
+                setSaveError(write)
+                return
+              }
               refreshCustom()
               setBuilderOpen(null)
               setSavedToast(true)
               window.setTimeout(() => setSavedToast(false), 2200)
-            }}
+            })}
             onCancel={() => setBuilderOpen(null)}
           />
+          {saveError && (
+            <div role="alert" className="pointer-events-none absolute inset-x-0 bottom-0 z-[66] p-4" style={{ paddingBottom: 'max(1rem, var(--safe-bottom))' }}>
+              <div className="pointer-events-auto mx-auto max-w-md rounded-2xl border border-line bg-surface p-4 shadow-card">
+                <p className="text-sm font-black text-ink-900">{d.saveFailedTitle}</p>
+                <p className="mt-1 text-sm leading-relaxed text-ink-500">
+                  {saveError === 'quota' ? d.saveFailedQuota : saveError === 'unavailable' ? d.saveFailedBlocked : d.saveFailedGeneric}
+                </p>
+                <p className="mt-2 text-xs font-bold leading-relaxed text-ink-700">{d.customPlanKeptOnFailure}</p>
+                <button type="button" onClick={() => setSaveError(null)} className="btn-ghost mt-3 min-h-[44px] w-full py-2.5 text-xs">
+                  {d.saveBackToWorkout}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -480,10 +562,34 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
         </div>
       )}
 
+      {/* [SOVEREIGN-TODAY-001] المهمّة ١ — الإحماء: المرحلة الأولى من الجلسة،
+          فوق الشريط السفلي وتحت وضع الجلسة. تُغلق بالدخول أو بالتخطّي، ولا
+          تُعرض لجلسة مُستأنَفة (تلك بدأت أصلًا فالإحماء ورائها). */}
+      {pendingWarmup && !activeDay && (
+        <div className="fixed inset-0 z-[60]">
+          <WarmupScreen
+            lang={lang}
+            plan={pendingWarmup.plan}
+            dayNameAr={pendingWarmup.day.nameAr}
+            dayNameEn={pendingWarmup.day.nameEn}
+            onStart={() => {
+              // [CTO-70] البند ١ — الآن فقط: الإحماء وقع فعلًا، فيُسجَّل.
+              completeFirstWin('warmup')
+              beginSession(pendingWarmup.day)
+            }}
+            onSkip={() => beginSession(pendingWarmup.day)}
+            onDisable={() => {
+              saveWarmupPref(userId, { show: false })
+              beginSession(pendingWarmup.day)
+            }}
+          />
+        </div>
+      )}
+
       {/* وضع التمرين — فوق الشريط السفلي */}
       {activeDay && (
         <div className="fixed inset-0 z-[60]">
-          <WorkoutMode lang={lang} day={activeDay} userId={userId} resume={resumeFrom} onClose={requestClose} onFinish={finish} />
+          <WorkoutMode lang={lang} day={activeDay} userId={userId} resume={resumeFrom} onClose={requestClose} onFinish={finish} onSaveError={setSaveError} />
           {/* [CTO-71] البند ٢ — فشل الحفظ يُقال صراحةً فوق الجلسة القائمة.
               لا شاشة ملخّص ولا «أحسنت»: العمل لم يُحفَظ، والجلسة باقية للمحاولة. */}
           {saveError && (
@@ -493,8 +599,9 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
                 <p className="mt-1 text-sm leading-relaxed text-ink-500">
                   {saveError === 'quota' ? d.saveFailedQuota : saveError === 'unavailable' ? d.saveFailedBlocked : d.saveFailedGeneric}
                 </p>
-                <button type="button" onClick={() => setSaveError(null)} className="btn-ghost mt-3 w-full py-2.5 text-xs">
-                  {d.saveRetry}
+                <p className="mt-2 text-xs font-bold leading-relaxed text-ink-700">{d.saveFailedKept}</p>
+                <button type="button" onClick={() => setSaveError(null)} className="btn-ghost mt-3 min-h-[44px] w-full py-2.5 text-xs">
+                  {d.saveBackToWorkout}
                 </button>
               </div>
             </div>
@@ -511,7 +618,10 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
             prs={summary.prs}
             streakWeeks={summary.streakWeeks}
             nextDayLabel={summary.nextDayLabel}
-            onBackToToday={() => setSummary(null)}
+            onBackToToday={() => {
+              setSummary(null)
+              onNavigate('dashboard')
+            }}
             onViewProgress={() => {
               setSummary(null)
               onNavigate('progress')
@@ -535,17 +645,6 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
   )
 }
 
-/** تقدير مدة اليوم بالدقائق من المجموعات والراحة. */
-function estDayMinutes(day: PlanDay): number {
-  const sec = day.exercises.reduce((sum, pe) => {
-    const ex = getExercise(pe.exerciseId)
-    const sets = pe.sets || ex?.defaultSets || 3
-    const rest = pe.restSec || ex?.defaultRestSec || 90
-    return sum + sets * (rest + 40)
-  }, 0)
-  return Math.max(5, Math.round(sec / 60 / 5) * 5)
-}
-
 function H2({ icon, children }: { icon: string; children: string }) {
   return (
     <h2 className="mb-3 flex items-center gap-2 text-lg font-black text-ink-900">
@@ -554,13 +653,5 @@ function H2({ icon, children }: { icon: string; children: string }) {
       </span>
       {children}
     </h2>
-  )
-}
-
-function EmptyCard({ text }: { text: string }) {
-  return (
-    <div className="rounded-2xl border border-dashed border-line bg-surface px-6 py-8 text-center">
-      <p className="text-sm text-ink-500">{text}</p>
-    </div>
   )
 }

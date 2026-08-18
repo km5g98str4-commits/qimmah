@@ -20,6 +20,12 @@ export interface NutritionScreenStrings {
   caloriesDotProteinG: string // ...cal · Ng protein
   // quick add fallback / search
   quickAddLabel: string
+  editEntry: string
+  saveEdit: string
+  cancelEdit: string
+  quantity: string
+  invalidQuantity: string
+  saveFailed: string
   noResults: string
   foodNameExample: string
   // ingredient picker
@@ -78,6 +84,12 @@ const ar: NutritionScreenStrings = {
   opEquals: '=',
   caloriesDotProteinG: 'بروتين',
   quickAddLabel: 'إضافة سريعة',
+  editEntry: 'عدّل الكمية',
+  saveEdit: 'احفظ التعديل',
+  cancelEdit: 'إلغاء',
+  quantity: 'الكمية',
+  invalidQuantity: 'اكتب كمية أكبر من صفر وضمن الحد المسموح.',
+  saveFailed: 'ما قدرنا نحفظ التغيير. مدخلاتك باقية—جرّب مرة ثانية.',
   noResults: 'ما فيه نتائج',
   foodNameExample: 'مثال: صحن كبسة بيت',
   ingredientLibraryTitle: 'مكتبة المكونات',
@@ -134,6 +146,12 @@ const en: NutritionScreenStrings = {
   opEquals: '=',
   caloriesDotProteinG: 'protein',
   quickAddLabel: 'Quick add',
+  editEntry: 'Edit quantity',
+  saveEdit: 'Save change',
+  cancelEdit: 'Cancel',
+  quantity: 'Quantity',
+  invalidQuantity: 'Enter an amount above zero and within the allowed limit.',
+  saveFailed: "Couldn't save the change. Your input is still here—try again.",
   noResults: 'No results',
   foodNameExample: 'e.g. Home kabsa plate',
   ingredientLibraryTitle: 'Ingredient library',

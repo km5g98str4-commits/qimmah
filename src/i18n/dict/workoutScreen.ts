@@ -84,8 +84,11 @@ export interface WorkoutScreenStrings {
   saveFailedGeneric: string
   /** طمأنة: التمرين الجاري لم يُفقد. */
   saveFailedKept: string
+  /** بعد فشل حفظ الجدول المخصّص — الخطة لم تضع، الباني ما زال مفتوحًا. */
+  customPlanKeptOnFailure: string
   /** زر إعادة محاولة الحفظ. */
   saveRetry: string
+  saveBackToWorkout: string
 }
 
 const ar: WorkoutScreenStrings = {
@@ -138,7 +141,9 @@ const ar: WorkoutScreenStrings = {
   saveFailedBlocked: 'التخزين محجوب في هذا المتصفّح (تصفّح خاص أو منع حفظ بيانات المواقع). فعّل التخزين ثم أعد المحاولة.',
   saveFailedGeneric: 'حدث خطأ أثناء الحفظ ولم يُسجَّل شيء.',
   saveFailedKept: 'تمرينك ما زال مفتوحًا كما هو — لم تفقد أي مجموعة.',
+  customPlanKeptOnFailure: 'جدولك ما زال مفتوحًا كما هو — ما ضاع شي.',
   saveRetry: 'أعد محاولة الحفظ',
+  saveBackToWorkout: 'رجوع للتمرين',
   resumeTitle: 'عندك تمرين لم ينتهِ',
   resumeBody: 'توقّفت في {day}. تكمّل من مكانك أو تبدأ من جديد؟',
   resumeAction: 'أكمل تمريني',
@@ -199,7 +204,9 @@ const en: WorkoutScreenStrings = {
   saveFailedBlocked: 'Storage is blocked in this browser (private browsing, or site data is turned off). Enable storage, then try again.',
   saveFailedGeneric: 'Something went wrong while saving — nothing was recorded.',
   saveFailedKept: 'Your workout is still open exactly as it was — no set was lost.',
+  customPlanKeptOnFailure: 'Your plan is still open exactly as it was — nothing was lost.',
   saveRetry: 'Try saving again',
+  saveBackToWorkout: 'Back to workout',
 }
 
 export const workoutScreenStrings: Record<Lang, WorkoutScreenStrings> = { ar, en }

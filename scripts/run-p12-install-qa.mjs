@@ -108,64 +108,32 @@ async function main() {
     }
     const browser = await chromium.launch({ executablePath: CHROME, args: ['--no-sandbox'] })
 
-    // ——— (a) Android: زر تثبيت أصلي، إغلاق دائم ———
-    for (const lang of ['ar', 'en']) {
-      const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } })
+    // ——— (أ) العقد الجديد: لا شريط تثبيت **ثابتًا** فوق قاع الشاشة ———
+    // [QIM-WEB-FOUNDER-UX-003/حزمة ١] كانت الأقسام (أ) و(ب) و(ج) هنا تؤكّد
+    // **ظهور** `install-prompt` — شريط `fixed bottom-0 z-[60]`. وقد ثبت بالقياس
+    // أن ذلك الشريط يغطّي شريط التنقّل السفلي كاملًا (التبويبات الخمسة)، وزرّ
+    // «كمّل كضيف» على الهبوط، وزرّ «ادخل وشوف خطتي» على التسليم:
+    // `elementFromPoint` في مركز كلٍّ منها كان يعيد الشريط لا الزرّ.
+    //
+    // فالتأكيدات القديمة كانت تحرس العطل بوصفه سلوكًا صحيحًا. لم تُحذف بل
+    // **قُلبت إلى العقد الصحيح**: الشريط الثابت لا يُركَّب إطلاقًا، ودعوة
+    // التثبيت تعيش في `InstallBanner` داخل مسار القشرة وفي دليل الإعدادات (د).
+    //
+    // الحارسان الحقيقيان: `test:bottom-overlay` (بنيوي، داخل البوابة) و
+    // `test:e2e:install-overlap` (متصفّح، يقيس `elementFromPoint` فعلًا).
+    for (const [label, opts] of [
+      ['android', {}],
+      ['ios', { userAgent: IPHONE_UA }],
+      ['dismissed-flag', { dismissed: true }],
+    ]) {
+      const { dismissed, ...ctxOpts } = opts
+      const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, ...ctxOpts })
       const page = await ctx.newPage()
-      await seedAndLoad(page, { lang })
+      await seedAndLoad(page, { lang: 'ar', dismissed })
       await fireBeforeInstallPrompt(page)
-      const shown = await has(page, '[data-testid="install-prompt"]')
-      const cta = await has(page, '[data-testid="install-prompt-cta"]')
-      const txt = await bodyText(page)
-      check(`(a) android[${lang}]: bottom install prompt appears`, shown)
-      check(`(a) android[${lang}]: native install button present`, cta)
-      check(`(a) android[${lang}]: install button label`, txt.includes(T[lang].installBtn), T[lang].installBtn)
-      await ctx.close()
-    }
-
-    // إغلاق دائم + عدم العودة بعد التحديث (على العربية).
-    {
-      const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } })
-      const page = await ctx.newPage()
-      await seedAndLoad(page, { lang: 'ar' })
-      await fireBeforeInstallPrompt(page)
-      await page.locator('[data-testid="install-prompt-dismiss"]').click()
-      await sleep(200)
-      const goneAfterDismiss = !(await has(page, '[data-testid="install-prompt"]'))
-      const flag = await page.evaluate((k) => localStorage.getItem(k), DISMISS_KEY)
-      check('(a) dismiss hides the prompt', goneAfterDismiss)
-      check('(a) dismiss sets localStorage flag v1', flag === '1', `${DISMISS_KEY}=${flag}`)
-      // إعادة تحميل + إطلاق الحدث ثانيةً → لا يعود الشريط.
-      await page.reload()
-      await sleep(500)
-      await fireBeforeInstallPrompt(page)
-      const stillGone = !(await has(page, '[data-testid="install-prompt"]'))
-      check('(a) prompt does not reappear after reload (flag persists)', stillGone)
-      await ctx.close()
-    }
-
-    // ——— (b) iOS Safari: تلميح «أضف للشاشة الرئيسية» بلا زر أصلي ———
-    for (const lang of ['ar', 'en']) {
-      const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, userAgent: IPHONE_UA })
-      const page = await ctx.newPage()
-      await seedAndLoad(page, { lang })
-      const shown = await has(page, '[data-testid="install-prompt"]')
-      const cta = await has(page, '[data-testid="install-prompt-cta"]')
-      const txt = await bodyText(page)
-      check(`(b) ios[${lang}]: hint prompt appears (no native event)`, shown)
-      check(`(b) ios[${lang}]: NO native install button on iOS`, !cta)
-      check(`(b) ios[${lang}]: shows add-to-home-screen hint`, txt.includes(T[lang].iosHint), T[lang].iosHint)
-      await ctx.close()
-    }
-
-    // ——— (c) علم الإغلاق يُخفي الشريط حتى مع توفّر التثبيت ———
-    {
-      const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } })
-      const page = await ctx.newPage()
-      await seedAndLoad(page, { lang: 'ar', dismissed: true })
-      await fireBeforeInstallPrompt(page)
+      await sleep(300)
       const absent = !(await has(page, '[data-testid="install-prompt"]'))
-      check('(c) dismissed-flag path hides prompt even when installable', absent)
+      check(`(أ) ${label}: لا شريط تثبيت ثابت فوق قاع الشاشة`, absent)
       await ctx.close()
     }
 
@@ -217,7 +185,7 @@ async function main() {
       page.on('pageerror', (e) => pageErrors.push(String(e)))
 
       const routes = [
-        'dashboard', 'workout', 'nutrition', 'progress', 'profile',
+        'dashboard', 'workout', 'nutrition', 'progress', 'measurements', 'profile',
         'settings', 'privacy', 'terms', 'contact', 'calc', 'demo', 'login',
       ]
       await seedAndLoad(page, { lang: 'ar', onboarded: true }, '#/dashboard')

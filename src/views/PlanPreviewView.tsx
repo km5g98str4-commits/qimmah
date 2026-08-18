@@ -1,3 +1,10 @@
+/**
+ * ⛔ CANONICAL-SURFACE-LOCK — هذا الملف **غير موجَّه** ولا يُشحن للمستخدم.
+ *
+ * المُستهلَك فعلًا هو المكوّن `src/components/plan/PlanPreview.tsx`.
+ * هذا الغلاف خارج رسم الوحدات — مثبتًا من البناء (`npm run test:canonical-surface`).
+ * لا تُصلح عطلًا هنا ولا تعتبره سلوك الإنتاج.
+ */
 import { EmptyState } from '@/components/EmptyState'
 import { Skeleton, SkeletonCard } from '@/components/Skeleton'
 import { StandaloneAppScreen } from '@/components/StandaloneAppScreen'

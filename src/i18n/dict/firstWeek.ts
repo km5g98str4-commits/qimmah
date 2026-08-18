@@ -6,6 +6,7 @@
 // وفي حالات الفوات تحديدًا: **لا أحمر ولا رموز حزن ولا streak** (قرار المجلس).
 
 import type { Lang } from '@/lib/appPreferences'
+import { formatNumber } from '@/lib/numberFormat'
 
 export interface FirstWeekStrings {
   // — أول انتصار (ADV-13) —
@@ -15,6 +16,14 @@ export interface FirstWeekStrings {
   firstWinDone: string
   firstWinOther: string
   win: Record<'warmup' | 'meal' | 'water' | 'dinner', { label: string; cta: string; minutes: string }>
+  /**
+   * [SOVEREIGN-TODAY-001] مدّة الإحماء **المحسوبة** لا المكتوبة.
+   *
+   * كان السطر ثابتًا («دقيقتين») بينما التسليم لا يحتوي إحماءً أصلًا. الآن
+   * الرقم يأتي من `buildWarmupPlan` — نفس الباني الذي ترسمه شاشة الإحماء —
+   * فالوعد والتسليم لا يفترقان إلا معًا.
+   */
+  winWarmupMinutes: (minutes: number) => string
 
   // — سطح إذن الإشعارات (ADV-14م · م١) —
   /** المقابل محدّد: الوقت نصّ قابل للنقر لتغييره **قبل** القبول. */
@@ -67,6 +76,8 @@ const AR: FirstWeekStrings = {
     dinner: { label: 'سجّل عشاك', cta: 'سجّله', minutes: 'دقيقة' },
   },
 
+  winWarmupMinutes: (minutes) => `${formatNumber(minutes, 'ar')} دقيقة`,
+
   notifyAskLine: (time) => `نذكّرك بكرة الساعة ${time} بتمرينك — نرسل لك؟`,
   notifyAskChangeTime: 'غيّر الوقت',
   notifyAskYes: 'إي، ذكّرني',
@@ -77,16 +88,17 @@ const AR: FirstWeekStrings = {
   missedTitle: 'يوم عادي. نبدأ من اليوم',
   missedBody: 'ما فات شي. تمرين اليوم في مكانه، وتقدر تبدأ بأخفّ منه.',
   missedEasierCta: 'ابدأ بنسخة أخفّ',
-  missedEasierLine: (fullMin, easyMin) => `بدل ${fullMin} دقيقة، سوِّ ${easyMin} اليوم`,
+  // الأرقام تمرّ بالمنسّق المركزي: جملة عربية بأرقام لاتينية هي عين BUG-019.
+  missedEasierLine: (fullMin, easyMin) => `بدل ${formatNumber(fullMin, 'ar')} دقيقة، سوِّ ${formatNumber(easyMin, 'ar')} اليوم`,
   missedTodayOnly: 'يعدّل جلسة اليوم بس — خطتك ما تتغيّر.',
 
   thursdayHeadsUp: 'الخميس والجمعة فيها عزايم عادة — خلّينا نخفف اليوم ونعوّض السبت.',
 
   weekTitle: 'أسبوعك الأول',
   weekBehaviourHeading: 'وش سويت',
-  weekDaysLine: (days, total) => `التزمت ${days} من ${total}`,
-  weekWorkoutsLine: (n) => `خلّصت ${n} تمارين`,
-  weekMealsLine: (n) => `سجّلت ${n} وجبة`,
+  weekDaysLine: (days, total) => `التزمت ${formatNumber(days, 'ar')} من ${formatNumber(total, 'ar')}`,
+  weekWorkoutsLine: (n) => `خلّصت ${formatNumber(n, 'ar')} تمارين`,
+  weekMealsLine: (n) => `سجّلت ${formatNumber(n, 'ar')} وجبة`,
   weekScaleTitle: 'قبل ما تشوف الميزان',
   weekScaleBody: 'وزنك يطلع وينزل أول أسبوعين طبيعي — الرقم اللي يهم يبان بعد ٣-٤ أسابيع.',
   weekWeightHeading: 'وزنك',
@@ -110,6 +122,8 @@ const EN: FirstWeekStrings = {
     dinner: { label: 'Log your dinner', cta: 'Log it', minutes: '1 min' },
   },
 
+  winWarmupMinutes: (minutes) => `${formatNumber(minutes, 'en')} min`,
+
   notifyAskLine: (time) => `We'll remind you tomorrow at ${time} about your workout — send it?`,
   notifyAskChangeTime: 'Change the time',
   notifyAskYes: 'Yes, remind me',
@@ -120,16 +134,16 @@ const EN: FirstWeekStrings = {
   missedTitle: 'Just a normal day. We start today',
   missedBody: 'Nothing’s lost. Today’s workout is right here, and you can start with a lighter version.',
   missedEasierCta: 'Start a lighter version',
-  missedEasierLine: (fullMin, easyMin) => `Instead of ${fullMin} min, do ${easyMin} today`,
+  missedEasierLine: (fullMin, easyMin) => `Instead of ${formatNumber(fullMin, 'en')} min, do ${formatNumber(easyMin, 'en')} today`,
   missedTodayOnly: 'Changes today’s session only — your plan stays as it is.',
 
   thursdayHeadsUp: 'Thursdays and Fridays usually have gatherings — let’s go lighter today and make it up on Saturday.',
 
   weekTitle: 'Your first week',
   weekBehaviourHeading: 'What you did',
-  weekDaysLine: (days, total) => `You showed up ${days} of ${total} days`,
-  weekWorkoutsLine: (n) => `Finished ${n} workouts`,
-  weekMealsLine: (n) => `Logged ${n} meals`,
+  weekDaysLine: (days, total) => `You showed up ${formatNumber(days, 'en')} of ${formatNumber(total, 'en')} days`,
+  weekWorkoutsLine: (n) => `Finished ${formatNumber(n, 'en')} workouts`,
+  weekMealsLine: (n) => `Logged ${formatNumber(n, 'en')} meals`,
   weekScaleTitle: 'Before you look at the scale',
   weekScaleBody: 'Your weight goes up and down in the first couple of weeks — that’s normal. The number that matters shows up after 3–4 weeks.',
   weekWeightHeading: 'Your weight',

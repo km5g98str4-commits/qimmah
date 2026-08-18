@@ -1,3 +1,16 @@
+/**
+ * ⛔ CANONICAL-SURFACE-LOCK — هذا الملف **غير موجَّه** ولا يُشحن للمستخدم.
+ *
+ * المالك الحيّ لسطح التغذية هو `src/views/NutritionView.tsx`
+ * (`App.tsx` → `V.NutritionView`). هذا التوأم **خارج رسم الوحدات** بالكامل —
+ * مثبتًا من البناء لا من الاسم (`npm run test:canonical-surface`).
+ *
+ * لا تُصلح عطلًا هنا. إصلاحٌ يهبط في هذا الملف لا يصل أحدًا: هكذا بقي BUG-019
+ * «محلولًا» بينما رأى المستخدم العربي أرقامًا لاتينية على الشاشة الحقيقية.
+ * الحارس يفشل إن حمل هذا الملف معالجةً لا يحملها مالكه الحيّ.
+ *
+ * الملف باقٍ عمدًا: حذفه يحتاج إثبات تكافؤ وغياب مستهلكين — قرار مستقلّ.
+ */
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { Icon } from '@/components/Icon'
 import { AllergyNotice } from '@/components/AllergyNotice'
@@ -19,6 +32,7 @@ import {
 } from '@/lib/nutritionV2Model'
 import { copyMealToToday, getDayEntries, getWeeklyNutritionStats } from '@/lib/nutritionHistory'
 import { getDayStamp } from '@/lib/today'
+import { formatNumber } from '@/lib/numberFormat'
 
 // الماسح (ScanFoodPanel → BarcodeCamera → @zxing) يُحمَّل كسولًا: محرّك الباركود
 // الثقيل (~443kB) لا يدخل حزمة شاشة التغذية، ويُجلب فقط عند فتح المستخدم للماسح.
@@ -77,6 +91,7 @@ export function NutritionV2({ lang }: NutritionV2Props) {
   const { customization } = useCustomization()
   const ar = lang !== 'en'
   const t = (a: string, e: string) => (ar ? a : e)
+  const num = (value: number, options?: Intl.NumberFormatOptions) => formatNumber(value, lang, options)
   const [tick, setTick] = useState(0)
   const [screen, setScreen] = useState<'home' | 'add'>('home')
   useAppScrollReset(screen)
@@ -96,7 +111,7 @@ export function NutritionV2({ lang }: NutritionV2Props) {
   const copySavedMeal = (date: string, slot: MealSlot) => {
     const result = copyMealToToday(date, slot)
     if (result.status === 'ok') {
-      setCopyNote(t(`نسخنا ${result.copied} أصناف لليوم.`, `Copied ${result.copied} items to today.`))
+      setCopyNote(t(`نسخنا ${num(result.copied)} أصناف لليوم.`, `Copied ${num(result.copied)} items to today.`))
       bump()
     } else {
       setCopyNote(ar ? result.errors[0]?.messageAr ?? 'ما فيه أصناف للنسخ.' : result.errors[0]?.messageEn ?? 'There are no items to copy.')
@@ -160,8 +175,8 @@ export function NutritionV2({ lang }: NutritionV2Props) {
               <div className="flex items-baseline justify-between text-xs font-bold">
                 <span className="text-ink-500">{t('السعرات', 'Calories')}</span>
                 <span dir="ltr" className="tabular-nums text-ink-700">
-                  {calories.consumed.toLocaleString('en-US')}
-                  <span className="text-ink-400"> / {calories.target.toLocaleString('en-US')} {t('سعرة', 'kcal')}</span>
+                  {num(calories.consumed)}
+                  <span className="text-ink-400"> / {num(calories.target)} {t('سعرة', 'kcal')}</span>
                 </span>
               </div>
               <ProgressBar current={calories.consumed} target={calories.target || 1} color="bg-primary" className="mt-2" />
@@ -184,10 +199,11 @@ export function NutritionV2({ lang }: NutritionV2Props) {
 
         {/* ملخّص الماكروز + الماء — بطاقات حلقات كلاسيكية */}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <MacroCard label={t('بروتين', 'Protein')} consumed={macros.protein.consumed} target={macros.protein.target} unit="g" color={CLR.protein} />
-          <MacroCard label={t('كارب', 'Carbs')} consumed={macros.carbs.consumed} target={macros.carbs.target} unit="g" color={CLR.carbs} />
-          <MacroCard label={t('دهون', 'Fat')} consumed={macros.fat.consumed} target={macros.fat.target} unit="g" color={CLR.fat} />
+          <MacroCard lang={lang} label={t('بروتين', 'Protein')} consumed={macros.protein.consumed} target={macros.protein.target} unit="g" color={CLR.protein} />
+          <MacroCard lang={lang} label={t('كارب', 'Carbs')} consumed={macros.carbs.consumed} target={macros.carbs.target} unit="g" color={CLR.carbs} />
+          <MacroCard lang={lang} label={t('دهون', 'Fat')} consumed={macros.fat.consumed} target={macros.fat.target} unit="g" color={CLR.fat} />
           <MacroCard
+            lang={lang}
             label={t('ماء', 'Water')}
             consumed={water.consumedMl / 1000}
             target={water.targetMl / 1000}
@@ -206,7 +222,7 @@ export function NutritionV2({ lang }: NutritionV2Props) {
                 {t('الماء', 'Water')}
               </span>
               <span dir="ltr" className="text-sm font-black tabular-nums text-primary-c">
-                {(water.consumedMl / 1000).toFixed(2)} / {(water.targetMl / 1000).toFixed(1)} {t('ل', 'L')}
+                {num(water.consumedMl / 1000, { maximumFractionDigits: 2 })} / {num(water.targetMl / 1000, { maximumFractionDigits: 1 })} {t('ل', 'L')}
               </span>
             </div>
             <ProgressBar current={water.consumedMl} target={water.targetMl || 1} color="bg-primary" className="mt-3 h-1.5" />
@@ -240,7 +256,7 @@ export function NutritionV2({ lang }: NutritionV2Props) {
                 <span className="min-w-0 flex-1">
                   <span className="block text-sm font-bold text-ink-900">{ar ? m.nameAr : m.nameEn}</span>
                   <span className="block text-[11px] text-ink-400">
-                    {m.logged ? `${m.calories} ${t('سعرة', 'kcal')} · ${m.proteinGrams}g ${t('بروتين', 'protein')}` : t('لم تُسجّل بعد', 'Not logged yet')}
+                    {m.logged ? `${num(m.calories)} ${t('سعرة', 'kcal')} · ${num(m.proteinGrams)}g ${t('بروتين', 'protein')}` : t('لم تُسجّل بعد', 'Not logged yet')}
                   </span>
                 </span>
                 <span className="shrink-0 text-xs font-black text-primary-c">{t('أضف', 'Add')} ‹</span>
@@ -314,11 +330,12 @@ function NudgeRow({ lang, nudge, onAction }: { lang: Lang; nudge: Nudge; onActio
 /**
  * بطاقة ماكرو كلاسيكية — حلقة SVG محلية (بلا مكتبات) بجانب التسمية والقيمة.
  */
-function MacroCard({ label, consumed, target, unit, color, decimals = 0 }: { label: string; consumed: number; target: number; unit: string; color: string; decimals?: number }) {
+function MacroCard({ lang, label, consumed, target, unit, color, decimals = 0 }: { lang: Lang; label: string; consumed: number; target: number; unit: string; color: string; decimals?: number }) {
   const p = pct(consumed, target)
   const hasTarget = target > 0
-  const consumedText = consumed.toFixed(decimals)
-  const targetText = target.toFixed(decimals)
+  const digits = { minimumFractionDigits: decimals, maximumFractionDigits: decimals }
+  const consumedText = formatNumber(consumed, lang, digits)
+  const targetText = formatNumber(target, lang, digits)
   return (
     <div className="card flex items-center gap-3 p-4">
       <Ring pct={p} color={color} label={`${label}: ${consumedText} / ${hasTarget ? targetText : '—'} ${unit}`} />
@@ -379,13 +396,13 @@ function FoodRow({ f, lang, onLog }: { f: FoodItem; lang: Lang; onLog: (servings
         <span className="min-w-0 flex-1">
           <span className="block text-sm font-bold text-ink-900">{ar ? f.nameAr : f.nameEn}</span>
           <span className="block text-[11px] text-ink-400">
-            ~{cal} {t('سعرة', 'kcal')} · {pro}g {t('بروتين', 'protein')} · {t('تقدير', 'est.')} / {servingText}
+            ~{formatNumber(cal, lang)} {t('سعرة', 'kcal')} · {formatNumber(pro, lang)}g {t('بروتين', 'protein')} · {t('تقدير', 'est.')} / {servingText}
           </span>
         </span>
         <button
           type="button"
           onClick={() => onLog(servings)}
-          aria-label={t(`أضف ${f.nameAr} ×${servings}`, `Add ${f.nameEn} ×${servings}`)}
+          aria-label={t(`أضف ${f.nameAr} ×${formatNumber(servings, lang, { maximumFractionDigits: 1 })}`, `Add ${f.nameEn} ×${formatNumber(servings, lang, { maximumFractionDigits: 1 })}`)}
           className="btn-primary grid h-11 w-11 shrink-0 place-items-center rounded-xl px-0 py-0"
         >
           <Icon name="Plus" className="h-5 w-5" />
@@ -395,7 +412,7 @@ function FoodRow({ f, lang, onLog }: { f: FoodItem; lang: Lang; onLog: (servings
         <span className="text-xs font-bold text-ink-500">{t('عدد الحصص', 'Servings')}</span>
         <div className="flex items-center gap-2">
           <button type="button" onClick={() => step(-0.5)} aria-label={t('أقل', 'Fewer')} className="grid h-9 w-9 place-items-center rounded-lg border border-line text-ink-700 hover:bg-beige"><Icon name="Minus" className="h-4 w-4" /></button>
-          <span className="w-8 text-center text-sm font-black tabular-nums text-ink-900">{servings}</span>
+          <span className="w-8 text-center text-sm font-black tabular-nums text-ink-900">{formatNumber(servings, lang, { maximumFractionDigits: 1 })}</span>
           <button type="button" onClick={() => step(0.5)} aria-label={t('أكثر', 'More')} className="grid h-9 w-9 place-items-center rounded-lg border border-line text-ink-700 hover:bg-beige"><Icon name="Plus" className="h-4 w-4" /></button>
         </div>
       </div>

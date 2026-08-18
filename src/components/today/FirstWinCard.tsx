@@ -26,10 +26,16 @@ interface FirstWinCardProps {
   /** أُنجز بالفعل — تُعرض الحالة «تم» بلا أزرار. */
   done: boolean
   doneKind?: FirstWinKind
+  /**
+   * [SOVEREIGN-TODAY-001] مدّة الإحماء الفعليّة لجلسة اليوم — من `buildWarmupPlan`
+   * عبر النموذج. حين تُمرَّر يُستبدَل بها السطر الثابت، فيصير الوعد **نفس** ما
+   * تُسلّمه شاشة الإحماء بعد ضغطة واحدة.
+   */
+  warmupMinutes?: number
   onPick: (kind: FirstWinKind) => void
 }
 
-export function FirstWinCard({ lang, suggestion, done, doneKind, onPick }: FirstWinCardProps) {
+export function FirstWinCard({ lang, suggestion, done, doneKind, warmupMinutes, onPick }: FirstWinCardProps) {
   const ar = lang !== 'en'
   const t = firstWeekStrings[ar ? 'ar' : 'en']
 
@@ -69,8 +75,16 @@ export function FirstWinCard({ lang, suggestion, done, doneKind, onPick }: First
           <Icon name={WIN_ICON[primary]} className="h-5 w-5 text-primary-c" />
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block truncate text-sm font-black text-ink-900">{t.win[primary].label}</span>
-          <span className="block text-xs font-bold text-ink-500">{t.win[primary].minutes}</span>
+          {/* بلا `truncate`: عند ٣٢٠ يبقى للنصّ ≈٨٨بك بعد الأيقونة والنداء، و«إحماء
+              قصير» يحتاج ≈٩٥ — فكان يُقصّ إلى «إحماء ...» ويُخفي **نوع** الانتصار
+              المقترح، وهو كامل معنى السطر. الالتفاف يُظهره كاملًا ويكبر الصفّ سطرًا
+              واحدًا عند أضيق شاشة وحدها؛ والقصّ يخفي معلومة، والإخفاء أغلى. */}
+          <span className="block text-sm font-black leading-tight text-ink-900">{t.win[primary].label}</span>
+          <span className="block text-xs font-bold text-ink-500">
+            {primary === 'warmup' && warmupMinutes !== undefined && warmupMinutes > 0
+              ? t.winWarmupMinutes(warmupMinutes)
+              : t.win[primary].minutes}
+          </span>
         </span>
         <span className="btn-primary shrink-0 rounded-xl px-3.5 py-2 text-xs">{t.win[primary].cta}</span>
       </button>

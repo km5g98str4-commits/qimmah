@@ -1,0 +1,42 @@
+Subject: We got your order — Qimmah Premium
+
+Qimmah
+
+Thank you — your order is in
+============================
+
+Qimmah Premium is tied to your email. One step and it opens up.
+
+Order: SAMPLE-1029
+Linked email: sample@example.com
+
+Qimmah Premium — Includes Qimmah updates — no monthly subscription
+
+How to open it:
+
+1. Open the activation link below and set a password of your own.
+2. Sign in with the same email listed above.
+3. Qimmah Premium unlocks right away.
+
+Activate your account:
+https://example.com/invite/sample-token
+
+This link is just for you — please don’t share it.
+
+We never send you a password and never ask for one. You choose it yourself.
+
+Already have an account on this same email? Just sign in — it will already be open, no extra step.
+
+---
+
+Something not working? Email us at qimmah.support@gmail.com and mention your order number.
+
+[ Legal note ]
+This is a transactional message about order SAMPLE-1029. It is not marketing.
+Qimmah Premium is a one-time purchase. There is no automatic renewal, no recurring charge, and no payment method stored by us.
+The grant is bound to the email address above. If the account is deleted, it can be restored by creating a new account with the same address.
+Salla issues the purchase invoice. Your data is processed according to the published privacy policy.
+
+--
+
+Qimmah — your personal training and nutrition app. You got this because this address was used with Qimmah.

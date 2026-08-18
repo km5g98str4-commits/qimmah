@@ -86,7 +86,7 @@ console.log('\n③ مُعَدّ + خطوات + وجبة جزئية بلا جلس
   seedMigrated()
   seedOnboarded()
   seedSteps(8000) // 80%
-  seedNutrition(1320, 125) // 60% سعرات · بقي 35g بروتين
+  seedNutrition(1320, 125) // 60% سعرات · بقي ٣٥غ بروتين
   const m = buildTodayV2Model(baseCustomization(), 'ar')
   check('state = normal', m.state === 'normal')
   check('hero → workout', m.hero.destination === 'workout')
@@ -94,7 +94,11 @@ console.log('\n③ مُعَدّ + خطوات + وجبة جزئية بلا جلس
   check('عمود التدريب ready (بطل اليوم)', m.pillars[0].state === 'ready')
   check('عمود التغذية active 60%', m.pillars[1].state === 'active' && m.pillars[1].percent === 60)
   check('عمود الحركة active 80%', m.pillars[2].state === 'active' && m.pillars[2].percent === 80)
-  check('بطاقة بروتين «بقي 35g»', m.cards.some((c) => c.label.includes('35g') && c.destination === 'nutrition'))
+  // الوحدة العربية «غ» لا «g»: «٣٥g» تخلط نصّين ونظامَي كتابة في كلمة واحدة،
+  // وكانت تظهر تحت حلقة بروتين تقول «٣٥» — نفس الحقيقة بشكلين على شاشة واحدة.
+  // الفحص مزدوج عمدًا: يثبت الصيغة الصحيحة **ويمنع عودة** المختلطة.
+  check('بطاقة بروتين «باقي ٣٥غ»', m.cards.some((c) => c.label.includes('35غ') && c.destination === 'nutrition'))
+  check('لا وحدة لاتينية في نصّ عربي', m.cards.every((c) => !/\d+g\b/.test(c.label)))
   check('كل بطاقة لها وجهة (لا إحصاء ميّت)', m.cards.every((c) => c.destination !== null))
 }
 

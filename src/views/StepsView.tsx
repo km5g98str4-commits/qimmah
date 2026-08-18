@@ -5,6 +5,7 @@ import type { Lang } from '@/lib/appPreferences'
 import { eStepsCopy } from '@/i18n/dict/eSteps'
 import { buildStepsPageModel, type StepsPageModel } from '@/lib/eStepsModel'
 import { metricState, refreshHealthKitStepsIfEnabled } from '@/lib/healthKit'
+import { formatNumber, formatNumeralsIn, resolveNumeralSystem } from '@/lib/numberFormat'
 
 interface StepsViewProps {
   lang: Lang
@@ -17,18 +18,35 @@ type StepsScreenState =
   | { status: 'ready'; model: StepsPageModel }
   | { status: 'error'; model: StepsPageModel }
 
+/**
+ * تقويم **ميلادي مثبَّت صراحةً** ونظام أرقام مأخوذ من التفضيل.
+ *
+ * كان السطران يُمرّران `'ar-SA'` عاريًا: التقويم المفضَّل لـ`ar-SA` في CLDR هو
+ * `islamic-umalqura`، وبعض المتصفّحات تحسمه كذلك — فتُرقَّم أيام الأسبوع هجريًا
+ * فوق بيانات ميلادية. `-u-ca-gregory` يقفلها بلا كلفة.
+ */
+function dateLocale(lang: Lang): string {
+  const base = lang === 'ar' ? 'ar-SA' : 'en'
+  return `${base}-u-ca-gregory-nu-${resolveNumeralSystem(lang)}`
+}
+
 function localDate(date: string, lang: Lang): string {
   const value = new Date(`${date}T12:00:00`)
-  return value.toLocaleDateString(lang === 'ar' ? 'ar-SA' : 'en', { day: 'numeric', month: 'short' })
+  return value.toLocaleDateString(dateLocale(lang), { day: 'numeric', month: 'short' })
 }
 
 function localDayNumber(date: string, lang: Lang): string {
   const value = new Date(`${date}T12:00:00`)
-  return value.toLocaleDateString(lang === 'ar' ? 'ar-SA' : 'en', { day: 'numeric' })
+  return value.toLocaleDateString(dateLocale(lang), { day: 'numeric' })
 }
 
+/**
+ * المنسّق المركزي لا `toLocaleString('ar-SA')`: النسخة المحلية كانت مصدر حقيقة
+ * خامسًا لا يصله تفضيل «شكل الأرقام»، ويكفي سقوط لاحقة إقليم واحدة حتى يقلب
+ * `'ar'` وحدها المخرجات إلى اللاتينية.
+ */
 function number(value: number, lang: Lang, maximumFractionDigits = 0): string {
-  return value.toLocaleString(lang === 'ar' ? 'ar-SA' : 'en', { maximumFractionDigits })
+  return formatNumber(value, lang, { maximumFractionDigits })
 }
 
 export function StepsView({ lang, onBack, onOpenSettings }: StepsViewProps) {
@@ -151,8 +169,8 @@ export function StepsView({ lang, onBack, onOpenSettings }: StepsViewProps) {
             </section>
 
             <section className="grid grid-cols-2 gap-3" aria-label={copy.weeklyPattern}>
-              <StatCard icon="CalendarDays" label={copy.week} value={number(model.weekTotal, lang)} />
-              <StatCard icon="BarChart3" label={copy.month} value={number(model.monthTotal, lang)} />
+              <StatCard icon="CalendarDays" label={formatNumeralsIn(copy.week, lang)} value={number(model.weekTotal, lang)} />
+              <StatCard icon="BarChart3" label={formatNumeralsIn(copy.month, lang)} value={number(model.monthTotal, lang)} />
               <StatCard
                 icon="Trophy"
                 label={copy.bestDay}
@@ -178,12 +196,12 @@ export function StepsView({ lang, onBack, onOpenSettings }: StepsViewProps) {
                 </div>
                 <span className="rounded-full border border-[color:var(--v2-amber)] px-2.5 py-1 text-[11px] font-black text-ink-900">{copy.approximate}</span>
               </div>
-              <p className="mt-3 text-xs leading-relaxed text-ink-500">{copy.distanceBasis}</p>
+              <p className="mt-3 text-xs leading-relaxed text-ink-500">{formatNumeralsIn(copy.distanceBasis, lang)}</p>
             </section>
 
             <section className="rounded-2xl border border-line bg-surface p-4 shadow-card">
               <h2 className="text-sm font-black">{copy.weeklyPattern}</h2>
-              <div className="mt-4 flex h-36 items-stretch gap-2" role="img" aria-label={`${copy.week}: ${number(model.weekTotal, lang)}`}>
+              <div className="mt-4 flex h-36 items-stretch gap-2" role="img" aria-label={`${formatNumeralsIn(copy.week, lang)}: ${number(model.weekTotal, lang)}`}>
                 {model.week.map((day) => {
                   const max = Math.max(...model.week.map((item) => item.steps), 1)
                   const height = day.steps > 0 ? Math.max(8, Math.round((day.steps / max) * 100)) : 3

@@ -20,6 +20,20 @@ export interface BodyStepStrings {
    */
   whyNote: string
 
+  /**
+   * الاسم — **اختياري تمامًا** ولا يحجب التقدّم أبدًا.
+   *
+   * كان التدفّق الحيّ لا يسأل عنه في أي موضع، فبقي `profile.name` فارغًا لكل
+   * مستخدم بُني عبر `OnboardingV2`، وبقيت تحيّة الرئيسية «هلا فيك» **بنيويًا**
+   * لا يمكن أن تقول «هلا زياد». الأنبوب كامل من هنا إلى التحيّة؛ ما كان ينقصه
+   * إلّا منبعه.
+   */
+  nameQ: string
+  nameLabel: string
+  namePlaceholder: string
+  /** يقول صراحةً إنه اختياري وقابل للتغيير — لا يُطلب بلهجة إلزام. */
+  nameOptional: string
+
   ageLabel: string
   agePlaceholder: string
   ageUnit: string
@@ -53,6 +67,11 @@ const ar: BodyStepStrings = {
   title: 'نبدأ بأساسياتك',
   whyNote: 'نستخدمها عشان نقدّر سعراتك وماكروزك. تقدر تعدّلها بأي وقت من ملفك.',
 
+  nameQ: 'وش نسمّيك؟',
+  nameLabel: 'الاسم',
+  namePlaceholder: 'اسمك الأول',
+  nameOptional: 'اختياري — تقدر تتخطاه وتضيفه بعدين من ملفك.',
+
   ageLabel: 'العمر',
   agePlaceholder: 'مثال: ٢٤',
   ageUnit: 'سنة',
@@ -78,6 +97,11 @@ const ar: BodyStepStrings = {
 const en: BodyStepStrings = {
   title: "Let's start with your basics",
   whyNote: 'We use these to estimate your calories and macros. You can change them anytime from your profile.',
+
+  nameQ: 'What should we call you?',
+  nameLabel: 'Name',
+  namePlaceholder: 'Your first name',
+  nameOptional: 'Optional — skip it now and add it later from your profile.',
 
   ageLabel: 'Age',
   agePlaceholder: 'e.g. 24',

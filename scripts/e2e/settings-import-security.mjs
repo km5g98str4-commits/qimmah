@@ -96,13 +96,33 @@ async function gotoSettings(page, uid, token) {
       await page.waitForTimeout(150)
     }
   }
-  // اربط الجلسة المزروعة (reload) ثم انتقل للإعدادات (بعض التهيئة تحوّل للوحة عند الإقلاع).
-  await page.reload({ waitUntil: 'domcontentloaded' })
-  await page.evaluate(() => { window.location.hash = '#/settings' })
+  // **لا نُسابق إعادة تحميل التطبيق نفسه — نتقارب على شرط الجاهزية.**
+  //
+  // زرعُ جلسةٍ لحسابٍ مختلف يجعل `reconcileAccountScope` يمسح بقايا الحساب السابق،
+  // و`App.tsx:176` يفرض عندها `window.location.reload()`. فكان `page.reload()` هنا
+  // يتنافس مع إعادة تحميل التطبيق المشروعة، فتُلغى إحداهما: WebKit يسمّيها
+  // `Frame load interrupted`، وChromium يبتلعها بصمت — فبقي السباق مخفيًا حتى
+  // شُغِّلت الأطقم على WebKit. **تنافس تنقّلين لا عطل منتج**، وقد ثبت بأن نفس الأمر
+  // بلا تغيير كود يمرّ مرّةً ويسقط أخرى.
+  //
+  // ولذلك: تنقّل صريح واحد إلى الإعدادات، ثم **انتظار الشرط الحقيقي** (ظهور قسم
+  // البيانات)، وإعادة المحاولة إن قطع التطبيق تنقّلنا. لا تأكيد يتغيّر — هذه طريقة
+  // الوصول إلى الشاشة لا ما يُفحَص عليها.
+  const dataGroup = page.locator('[data-testid="settings-group-data"]')
+  let ready = false
+  for (let attempt = 0; attempt < 5 && !ready; attempt += 1) {
+    try {
+      await page.goto(`${URL}/#/settings`, { waitUntil: 'domcontentloaded' })
+      await dataGroup.waitFor({ state: 'visible', timeout: 8000 })
+      await page.waitForLoadState('networkidle').catch(() => {})
+      ready = true
+    } catch (error) {
+      if (attempt === 4) throw error
+      await page.waitForTimeout(400)
+    }
+  }
   // البنية الجديدة تجعل أقسام الإعدادات مطوية. افتح «البيانات» كما يفعل المستخدم
   // بدل افتراض أن زر الاستيراد ظاهر مباشرةً في الصفحة.
-  const dataGroup = page.locator('[data-testid="settings-group-data"]')
-  await dataGroup.waitFor({ state: 'visible', timeout: 15000 })
   if (!(await dataGroup.evaluate((node) => (node instanceof HTMLDetailsElement ? node.open : false)))) {
     await dataGroup.locator('summary').click()
   }
@@ -194,9 +214,32 @@ async function run() {
     await page.setInputFiles('[data-testid="settings-data-file"]', validPath)
     await page.waitForSelector('[data-testid="settings-import-preview"]', { timeout: 8000 })
     check('النسخة الصحيحة فتحت معاينة', await page.locator('[data-testid="settings-import-preview"]').isVisible())
+    check('معاينة العربية تعرض تسمية المتجر العربية', await page.locator('[data-testid="settings-import-preview-label-stepGoal"]').textContent() === 'هدف الخطوات')
+    check('انتقل التركيز إلى معاينة الاستيراد', await page.locator('[data-testid="settings-import-preview"]').evaluate((node) => document.activeElement === node))
+    await page.locator('[data-testid="settings-import-cancel"]').click()
+    await page.waitForSelector('[data-testid="settings-data-import"]', { state: 'visible', timeout: 8000 })
+    check('عاد التركيز إلى زر الاستيراد بعد الإلغاء', await page.locator('[data-testid="settings-data-import"]').evaluate((node) => document.activeElement === node))
+    const [fileChooser] = await Promise.all([
+      page.waitForEvent('filechooser'),
+      page.locator('[data-testid="settings-data-import"]').press('Enter'),
+    ])
+    check('زر الاستيراد يبقى متاحًا من لوحة المفاتيح', Boolean(fileChooser))
+    await page.setInputFiles('[data-testid="settings-data-file"]', validPath)
+    await page.waitForSelector('[data-testid="settings-import-preview"]', { timeout: 8000 })
+    await page.locator('[data-testid="settings-import-preview"]').press('Escape')
+    await page.waitForSelector('[data-testid="settings-data-import"]', { state: 'visible', timeout: 8000 })
+    check('Escape يعيد التركيز إلى زر الاستيراد', await page.locator('[data-testid="settings-data-import"]').evaluate((node) => document.activeElement === node))
+    await page.getByRole('button', { name: 'English', exact: true }).click()
+    await page.waitForFunction(() => document.documentElement.lang === 'en')
+    await page.setInputFiles('[data-testid="settings-data-file"]', validPath)
+    await page.waitForSelector('[data-testid="settings-import-preview"]', { timeout: 8000 })
+    check('English preview renders the English store label', await page.locator('[data-testid="settings-import-preview-label-stepGoal"]').textContent() === 'Step goal')
+    check('preview focus behavior is preserved in English', await page.locator('[data-testid="settings-import-preview"]').evaluate((node) => document.activeElement === node))
     await page.locator('[data-testid="settings-import-confirm"]').click()
     await page.waitForSelector('[data-testid="settings-import-success"]', { timeout: 8000 })
     check('عُرضت «تمّ الاستيراد» بعد التطبيق الفعلي', await page.locator('[data-testid="settings-import-success"]').isVisible())
+    check('انتقل التركيز إلى حالة نجاح الاستيراد', await page.locator('[data-testid="settings-import-success"]').evaluate((node) => document.activeElement === node))
+    check('نجاح الاستيراد لا يترك التركيز على body', await page.evaluate(() => document.activeElement !== document.body))
     const restored = await page.evaluate((k) => JSON.parse(localStorage.getItem(k) || 'null'), K_STEP_GOAL)
     check('استُعيدت القيمة الأصلية (8000) بعد الاستيراد', restored === 8000)
 

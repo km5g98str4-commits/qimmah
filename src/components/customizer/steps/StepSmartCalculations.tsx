@@ -1,10 +1,12 @@
 import type { ReactNode } from 'react'
 import { StepHeader } from '../StepHeader'
 import { Icon } from '@/components/Icon'
+import { NumericInput } from '@/components/NumericInput'
 import type { WizardCtx } from '../stepProps'
 import type { Targets } from '@/types/profile'
 import { computeTargets, profileHash } from '@/lib/calculators'
-import { NUM_LIMITS, parseSafeNumber } from '@/lib/validation'
+import { NUM_LIMITS } from '@/lib/validation'
+import type { Lang } from '@/lib/appPreferences'
 import { onboardingStrings } from '@/i18n/dict/onboarding'
 
 /** خطوة الحسابات الذكية — أرقام مقدّرة قابلة للتعديل اليدوي. */
@@ -59,31 +61,31 @@ export function StepSmartCalculations({ ctx }: { ctx: WizardCtx }) {
       <div className="grid gap-5 lg:grid-cols-2">
         {/* السعرات */}
         <Card icon="Flame" title={d.smartCaloriesCard}>
-          <NumField label={d.smartBmr} value={t.bmr} unit={d.unitCalories} onChange={(v) => setT({ bmr: v })} />
-          <NumField label={d.smartTdee} value={t.tdee} unit={d.unitCalories} max={NUM_LIMITS.dailyCalories.max} onChange={(v) => setT({ tdee: v })} />
-          <NumField label={d.smartMaintenance} value={t.maintenanceCalories} unit={d.unitCalories} max={NUM_LIMITS.dailyCalories.max} onChange={(v) => setT({ maintenanceCalories: v })} />
-          <NumField label={d.smartCutting} value={t.cuttingCalories} unit={d.unitCalories} max={NUM_LIMITS.dailyCalories.max} onChange={(v) => setT({ cuttingCalories: v })} />
-          <NumField label={d.smartBulking} value={t.bulkingCalories} unit={d.unitCalories} max={NUM_LIMITS.dailyCalories.max} onChange={(v) => setT({ bulkingCalories: v })} />
+          <NumField lang={ctx.lang} label={d.smartBmr} value={t.bmr} unit={d.unitCalories} onChange={(v) => setT({ bmr: v })} />
+          <NumField lang={ctx.lang} label={d.smartTdee} value={t.tdee} unit={d.unitCalories} max={NUM_LIMITS.dailyCalories.max} onChange={(v) => setT({ tdee: v })} />
+          <NumField lang={ctx.lang} label={d.smartMaintenance} value={t.maintenanceCalories} unit={d.unitCalories} max={NUM_LIMITS.dailyCalories.max} onChange={(v) => setT({ maintenanceCalories: v })} />
+          <NumField lang={ctx.lang} label={d.smartCutting} value={t.cuttingCalories} unit={d.unitCalories} max={NUM_LIMITS.dailyCalories.max} onChange={(v) => setT({ cuttingCalories: v })} />
+          <NumField lang={ctx.lang} label={d.smartBulking} value={t.bulkingCalories} unit={d.unitCalories} max={NUM_LIMITS.dailyCalories.max} onChange={(v) => setT({ bulkingCalories: v })} />
         </Card>
 
         {/* الماكروز */}
         <Card icon="Salad" title={d.smartMacros}>
-          <NumField label={d.smartProtein} value={t.proteinGrams} unit={d.unitG} onChange={(v) => setT({ proteinGrams: v })} />
-          <NumField label={d.smartFat} value={t.fatGrams} unit={d.unitG} onChange={(v) => setT({ fatGrams: v })} />
-          <NumField label={d.smartCarbs} value={t.carbsGrams} unit={d.unitG} onChange={(v) => setT({ carbsGrams: v })} />
+          <NumField lang={ctx.lang} label={d.smartProtein} value={t.proteinGrams} unit={d.unitG} onChange={(v) => setT({ proteinGrams: v })} />
+          <NumField lang={ctx.lang} label={d.smartFat} value={t.fatGrams} unit={d.unitG} onChange={(v) => setT({ fatGrams: v })} />
+          <NumField lang={ctx.lang} label={d.smartCarbs} value={t.carbsGrams} unit={d.unitG} onChange={(v) => setT({ carbsGrams: v })} />
         </Card>
 
         {/* الماء */}
         <Card icon="Droplets" title={d.smartWaterCard}>
-          <NumField label={d.smartDailyWater} value={t.waterLiters} unit={d.unitLiter} step="0.1" onChange={(v) => setT({ waterLiters: v })} />
+          <NumField lang={ctx.lang} label={d.smartDailyWater} value={t.waterLiters} unit={d.unitLiter} step="0.1" onChange={(v) => setT({ waterLiters: v })} />
         </Card>
 
         {/* الوزن والهدف */}
         <Card icon="Scale" title={d.smartWeightGoalCard}>
-          <NumField label={d.smartBmi} value={t.bmi} step="0.1" onChange={(v) => setT({ bmi: v })} />
+          <NumField lang={ctx.lang} label={d.smartBmi} value={t.bmi} step="0.1" onChange={(v) => setT({ bmi: v })} />
           <TextField label={d.smartBmiLabel} value={t.bmiLabel} onChange={(v) => setT({ bmiLabel: v })} />
-          <NumField label={d.smartWeeklyChange} value={t.weeklyWeightChangeKg} unit={d.unitKg} step="0.05" onChange={(v) => setT({ weeklyWeightChangeKg: v })} />
-          <NumField label={d.smartWeeksToGoal} value={t.estimatedWeeksToGoal} unit={d.unitWeeks} onChange={(v) => setT({ estimatedWeeksToGoal: v })} />
+          <NumField lang={ctx.lang} label={d.smartWeeklyChange} value={t.weeklyWeightChangeKg} unit={d.unitKg} step="0.05" onChange={(v) => setT({ weeklyWeightChangeKg: v })} />
+          <NumField lang={ctx.lang} label={d.smartWeeksToGoal} value={t.estimatedWeeksToGoal} unit={d.unitWeeks} onChange={(v) => setT({ estimatedWeeksToGoal: v })} />
         </Card>
 
         {/* اقتراح التمرين */}
@@ -130,6 +132,7 @@ function NumField({
   unit,
   step,
   max,
+  lang,
   onChange,
 }: {
   label: string
@@ -137,22 +140,25 @@ function NumField({
   unit?: string
   step?: string
   max?: number
+  lang: Lang
   onChange: (v: number) => void
 }) {
   return (
     <div className="flex items-center justify-between gap-3">
       <span className="text-sm text-ink-700">{label}</span>
       <div className="flex items-center gap-1.5">
-        <input
-          type="number"
-          inputMode="decimal"
-          min={0}
-          max={max}
-          step={step ?? '1'}
-          value={value}
-          onChange={(e) => onChange(parseSafeNumber(e.target.value, { min: 0, max: max ?? Number.MAX_SAFE_INTEGER }))}
-          className={fieldInput}
-        />
+        <div className="flex flex-col">
+          <NumericInput
+            lang={lang}
+            decimal
+            min={0}
+            max={max}
+            step={step ?? '1'}
+            value={value}
+            onChange={onChange}
+            className={fieldInput}
+          />
+        </div>
         {unit && <span className="w-10 text-xs text-ink-400">{unit}</span>}
       </div>
     </div>

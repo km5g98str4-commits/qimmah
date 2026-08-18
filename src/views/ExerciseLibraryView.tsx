@@ -1,4 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { formatNumber } from '@/lib/numberFormat'
+import { resourceIdFromHash, setExerciseHash } from '@/lib/appRoutes'
 import type { ReactNode } from 'react'
 import { Icon } from '@/components/Icon'
 import { ExerciseDetail } from '@/components/ExerciseDetail'
@@ -7,9 +9,12 @@ import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
 import { libraryStrings, type LibraryStrings } from '@/i18n/dict/library'
 import { detailedMuscleLabel, exercises, getExercise } from '@/data/exercises'
+import { equipmentLabel } from '@/lib/exerciseLabels'
+import { filterExerciseLibrary } from '@/lib/exerciseLibrary'
 import { muscleLabel } from '@/lib/muscles'
 import { getExerciseMedia } from '@/data/exerciseMedia'
 import { getExerciseGif } from '@/data/exerciseGifs'
+import { approvedImageFor, productionEntryFor } from '@/lib/exerciseProductionMedia'
 import { machineCatalog } from '@/data/machineCatalog'
 import type { Muscle } from '@/types/workout'
 
@@ -32,30 +37,73 @@ const MUSCLE_FILTERS: { value: Muscle | 'all'; key: keyof LibraryStrings }[] = [
   { value: 'cardio', key: 'muscleCardio' },
 ]
 
-const EQUIP_KEY: Record<string, keyof LibraryStrings> = {
-  barbell: 'equipBarbell',
-  dumbbell: 'equipDumbbell',
-  machine: 'equipMachine',
-  cable: 'equipCable',
-  bodyweight: 'equipBodyweight',
-  bench: 'equipBench',
-  kettlebell: 'equipKettlebell',
-  smith: 'equipSmith',
-  'ez-bar': 'equipEzBar',
-}
-
-function equipLabel(eq: string, d: LibraryStrings): string {
-  const k = EQUIP_KEY[eq]
-  return k ? d[k] : eq
-}
-
 /** عرض مكتبة التمارين — بحث + فلاتر + ترتيب أبجدي + فتح تفاصيل التمرين. */
 export function ExerciseLibraryView({ lang }: ExerciseLibraryViewProps) {
   const d = libraryStrings[lang]
   const [q, setQ] = useState('')
   const [muscle, setMuscle] = useState<Muscle | 'all'>('all')
   const [equip, setEquip] = useState<string>('all')
-  const [openId, setOpenId] = useState<string | null>(null)
+  /**
+   * [QIM-WEB-FOUNDER-UX-006/حزمة ٦] تفصيل التمرين **حالة مسار** لا حالة مكوّن.
+   *
+   * كان `useState` هنا، فلا يُدفع مدخل تاريخ عند الفتح. والنتيجة المقيسة: «رجوع»
+   * لا يجد ما يعود إليه داخل المكتبة فيقفز إلى ما قبلها (اليوم/الإعدادات)،
+   * والتحديث يفقد التمرين المفتوح، ولا رابط يمكن مشاركته.
+   * الآن `#/exercises/<id>` — والمكتبة تتبع الـhash لا العكس.
+   */
+  const [openId, setOpenId] = useState<string | null>(() => resourceIdFromHash())
+  const openedFromLibrary = useRef(false)
+  useEffect(() => {
+    const sync = () => setOpenId(resourceIdFromHash())
+    window.addEventListener('hashchange', sync)
+    return () => window.removeEventListener('hashchange', sync)
+  }, [])
+  /**
+   * معرّف مجهول (رابط عميق قديم أو مكتوب يدويًا) **يفشل بأمان إلى المكتبة**.
+   *
+   * والاستبدال هنا لا `history.back()`: الرابط العميق المباشر لا تاريخ قبله
+   * داخل التطبيق، فالرجوع يخرج المستخدم من قِمّة كلها. `setExerciseHash(null)`
+   * يهبط به على المكتبة أيًّا كان طريق وصوله.
+   */
+  useEffect(() => {
+    if (openId && !getExercise(openId)) setExerciseHash(null, 'replace')
+  }, [openId])
+  /**
+   * [BUG-029] استعادة البؤرة بعد إغلاق التفصيل — **هنا لا داخل الحوار**.
+   *
+   * الحوار لا يستطيع استعادتها بنفسه: تنظيف `useEffect` يجري **قبل** إزالته من DOM،
+   * وWebKit عند الإزالة يُسند البؤرة إلى أقرب سلف قابل للتركيز (`<main tabIndex={-1}>`)
+   * فيدهس أي `focus()` سبقه. وتأجيلها بإطار (`requestAnimationFrame`) داهن السباق ولم
+   * يُنهِه: تحت حِمل حقيقي لم يكن الإطار قد جرى بعدُ لحظةَ الفحص، فقِيست البؤرة `BODY`.
+   *
+   * ومالك المُشغِّل هو هذه الشاشة لا الحوار. و`useLayoutEffect` يجري **بعد** تثبيت
+   * تغييرات DOM مباشرةً — أي بعد إزالة الحوار وبعد إسناد المحرّك — فتكون استعادتنا
+   * الأخيرة **حتمًا، بلا اعتماد على توقيت إطار**.
+   *
+   * والرابط العميق يستفيد أيضًا: لا مُشغِّل هناك أصلًا، وكانت البؤرة تضيع.
+   */
+  const lastOpenedRef = useRef<string | null>(null)
+  useLayoutEffect(() => {
+    if (openId) { lastOpenedRef.current = openId; return }
+    const justClosed = lastOpenedRef.current
+    if (!justClosed) return
+    lastOpenedRef.current = null
+    document.querySelector<HTMLElement>(`[data-exercise-id="${justClosed}"]`)?.focus()
+  }, [openId])
+  const openExercise = useCallback((exerciseId: string) => {
+    openedFromLibrary.current = true
+    setExerciseHash(exerciseId)
+  }, [])
+  const closeExercise = useCallback(() => {
+    if (openedFromLibrary.current) {
+      openedFromLibrary.current = false
+      window.history.back()
+      return
+    }
+    // الرابط العميق المباشر لا يملك مدخل مكتبة قبله؛ نبدّل المدخل الحالي كي
+    // يرجع زر الواجهة للمكتبة ولا يخرج المستخدم من التطبيق.
+    setExerciseHash(null, 'replace')
+  }, [])
   // وضع العرض: كل التمارين (الافتراضي — السلوك القديم) أو كتالوج الأجهزة للمبتدئين.
   const [view, setView] = useState<'all' | 'machines'>('all')
 
@@ -67,23 +115,14 @@ export function ExerciseLibraryView({ lang }: ExerciseLibraryViewProps) {
   }, [])
 
   const filtered = useMemo(() => {
-    const query = q.trim().toLowerCase()
-    return exercises
-      .filter((e) => {
-        if (muscle !== 'all' && e.primaryMuscle !== muscle) return false
-        if (equip !== 'all' && !e.equipment.includes(equip)) return false
-        if (query && !`${e.nameAr} ${e.nameEn}`.toLowerCase().includes(query)) return false
-        return true
-      })
-      // ترتيب أبجدي بحسب لغة الواجهة (الاسم المعروض فعليًا)
-      .sort((a, b) => (lang === 'en' ? a.nameEn.localeCompare(b.nameEn, 'en') : a.nameAr.localeCompare(b.nameAr, 'ar')))
+    return filterExerciseLibrary({ search: q, muscle, equipment: equip, lang })
   }, [q, muscle, equip, lang])
 
   const filtersActive = muscle !== 'all' || equip !== 'all' || q.trim() !== ''
   const clearAll = () => { setQ(''); setMuscle('all'); setEquip('all') }
 
   return (
-    <div className="v2-surface-light bg-page px-4 pb-24 pt-4 text-ink-900">
+    <div data-testid="library-screen" className="v2-surface-light bg-page px-4 pb-24 pt-4 text-ink-900">
       <div className="v2-screen-enter mx-auto w-full max-w-2xl">
         {/* ترويسة — عنوان واحد واضح، والعدّ سطر ثانوي لا بطاقة. */}
         <header>
@@ -92,7 +131,7 @@ export function ExerciseLibraryView({ lang }: ExerciseLibraryViewProps) {
             {d.eyebrow}
           </span>
           <h1 className="mt-3 text-2xl font-black leading-tight text-ink-900 sm:text-3xl">{d.title}</h1>
-          <p className="mt-1.5 text-sm leading-relaxed text-ink-500">{exercises.length} {d.countSuffix}</p>
+          <p data-testid="exercise-library-count" className="mt-1.5 text-sm leading-relaxed text-ink-500">{formatNumber(exercises.length, lang)} {d.countSuffix}</p>
         </header>
 
         {/* مبدّل العرض — قسمان متساويان بعرض كامل: هدف لمس أكبر ووزن بصري متوازن. */}
@@ -101,6 +140,7 @@ export function ExerciseLibraryView({ lang }: ExerciseLibraryViewProps) {
             type="button"
             role="tab"
             aria-selected={view === 'all'}
+            aria-controls="exercise-library-all-panel"
             onClick={() => setView('all')}
             className={cn(
               'min-h-[44px] rounded-xl px-3 text-xs font-bold transition-colors',
@@ -113,6 +153,7 @@ export function ExerciseLibraryView({ lang }: ExerciseLibraryViewProps) {
             type="button"
             role="tab"
             aria-selected={view === 'machines'}
+            aria-controls="exercise-library-machine-panel"
             onClick={() => setView('machines')}
             className={cn(
               'flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl px-3 text-xs font-bold transition-colors',
@@ -125,7 +166,7 @@ export function ExerciseLibraryView({ lang }: ExerciseLibraryViewProps) {
         </div>
 
       {view === 'all' && (
-        <>
+        <div id="exercise-library-all-panel" role="tabpanel">
         {/* البحث يلتصق أعلى الشاشة عند التمرير — القائمة طويلة (١٨١ تمرينًا)،
             والعودة للأعلى لتغيير كلمة البحث كانت أطول رحلة في الصفحة. */}
         <div className="sticky top-0 z-10 -mx-4 mt-5 bg-page/95 px-4 py-2 backdrop-blur-sm">
@@ -137,6 +178,7 @@ export function ExerciseLibraryView({ lang }: ExerciseLibraryViewProps) {
               placeholder={d.searchPlaceholder}
               className="min-h-[44px] w-full bg-transparent text-sm text-ink-900 placeholder:text-ink-400 focus:outline-none"
               aria-label={d.searchAria}
+              data-testid="exercise-library-search"
             />
             {q && (
               <button
@@ -155,13 +197,13 @@ export function ExerciseLibraryView({ lang }: ExerciseLibraryViewProps) {
         <div className="mt-3 space-y-2.5">
           <FilterRow icon="Target" label={d.filterMuscle}>
             {MUSCLE_FILTERS.map((o) => (
-              <Chip key={o.value} active={muscle === o.value} onClick={() => setMuscle(o.value)}>{d[o.key]}</Chip>
+              <Chip key={o.value} active={muscle === o.value} filterKind="muscle" filterValue={o.value} onClick={() => setMuscle(o.value)}>{d[o.key]}</Chip>
             ))}
           </FilterRow>
           <FilterRow icon="SlidersHorizontal" label={d.filterEquipment}>
             {equipList.map((eq) => (
-              <Chip key={eq} active={equip === eq} onClick={() => setEquip(eq)}>
-                {eq === 'all' ? d.all : equipLabel(eq, d)}
+              <Chip key={eq} active={equip === eq} filterKind="equipment" filterValue={eq} onClick={() => setEquip(eq)}>
+                {eq === 'all' ? d.all : equipmentLabel(eq, lang)}
               </Chip>
             ))}
           </FilterRow>
@@ -169,7 +211,7 @@ export function ExerciseLibraryView({ lang }: ExerciseLibraryViewProps) {
 
         {/* سطر النتائج — ومعه مخرج واحد يعيد كل شيء، فلا يعلق أحد داخل فلتر. */}
         <div className="mt-4 flex items-center justify-between gap-3">
-          <p className="text-xs font-bold text-ink-400">{filtered.length} {d.resultsSuffix}</p>
+          <p className="text-xs font-bold text-ink-400">{formatNumber(filtered.length, lang)} {d.resultsSuffix}</p>
           {filtersActive && (
             <button
               type="button"
@@ -201,7 +243,9 @@ export function ExerciseLibraryView({ lang }: ExerciseLibraryViewProps) {
               <li key={e.id}>
                 <button
                   type="button"
-                  onClick={() => setOpenId(e.id)}
+                  onClick={() => openExercise(e.id)}
+                  data-exercise-id={e.id}
+                  data-testid="exercise-card"
                   className="group flex h-full w-full flex-col overflow-hidden rounded-3xl border border-line bg-surface text-start shadow-card transition hover:-translate-y-0.5 hover:shadow-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 >
                   <ExerciseCardMedia exerciseId={e.id} />
@@ -220,7 +264,7 @@ export function ExerciseLibraryView({ lang }: ExerciseLibraryViewProps) {
                       </span>
                       {e.equipment[0] && (
                         <span className="truncate rounded-full bg-beige px-2 py-0.5 text-[10px] font-bold text-ink-500">
-                          {equipLabel(e.equipment[0], d)}
+                          {equipmentLabel(e.equipment[0], lang)}
                         </span>
                       )}
                     </div>
@@ -230,13 +274,21 @@ export function ExerciseLibraryView({ lang }: ExerciseLibraryViewProps) {
             ))}
           </ul>
         )}
-        </>
+        </div>
       )}
 
-      {view === 'machines' && <MachineCatalogBrowser onOpen={setOpenId} d={d} lang={lang} />}
+      {view === 'machines' && <MachineCatalogBrowser onOpen={openExercise} d={d} lang={lang} />}
       </div>
 
-      {openId && <ExerciseDetail lang={lang} exerciseId={openId} onClose={() => setOpenId(null)} />}
+      {openId && (
+        <ExerciseDetail
+          lang={lang}
+          exerciseId={openId}
+          /* من بطاقة المكتبة: رجوع تاريخي. من رابط عميق مباشر: استبدال آمن
+             إلى المكتبة، فلا يخرج زر الواجهة من قِمّة. */
+          onClose={closeExercise}
+        />
+      )}
     </div>
   )
 }
@@ -245,7 +297,7 @@ export function ExerciseLibraryView({ lang }: ExerciseLibraryViewProps) {
 function MachineCatalogBrowser({ onOpen, d, lang }: { onOpen: (id: string) => void; d: LibraryStrings; lang: Lang }) {
   const total = machineCatalog.reduce((n, g) => n + g.items.length, 0)
   return (
-    <div className="mt-5">
+    <div id="exercise-library-machine-panel" role="tabpanel" data-testid="exercise-machine-browser" className="mt-5">
       <p className="mb-3 flex items-start gap-2 rounded-xl border border-primary-soft bg-primary-soft p-3 text-[11px] leading-relaxed text-ink-700">
         <Icon name="Info" className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary-c" />
         {d.machineHint} {total} {d.machineHintSuffix}
@@ -257,8 +309,7 @@ function MachineCatalogBrowser({ onOpen, d, lang }: { onOpen: (id: string) => vo
               <span className="grid h-7 w-7 place-items-center rounded-lg bg-primary-soft text-primary-c">
                 <Icon name="Dumbbell" className="h-4 w-4" />
               </span>
-              {group.titleEn}
-              <span className="text-xs font-bold text-ink-400">· {group.titleAr}</span>
+              {lang === 'en' ? group.titleEn : group.titleAr}
             </h2>
             {/* نفس بطاقة الشبكة في وضع «كل التمارين» — لغة واحدة لا لغتان داخل الشاشة. */}
             <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -270,14 +321,19 @@ function MachineCatalogBrowser({ onOpen, d, lang }: { onOpen: (id: string) => vo
                     <button
                       type="button"
                       onClick={() => onOpen(item.exerciseId)}
+                      data-exercise-id={item.exerciseId}
+                      data-testid="exercise-machine-card"
                       className="group flex h-full w-full flex-col overflow-hidden rounded-3xl border border-line bg-surface text-start shadow-card transition hover:-translate-y-0.5 hover:shadow-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                     >
                       <ExerciseCardMedia exerciseId={item.exerciseId} />
                       <div className="flex flex-1 flex-col gap-2 p-3.5">
-                        <div>
-                          <p className="text-sm font-bold leading-snug text-ink-900">{item.nameEn}</p>
-                          <p className="mt-0.5 truncate text-[11px] leading-snug text-ink-400">{item.nameAr}</p>
-                        </div>
+                        <ExerciseName
+                          nameAr={ex.nameAr}
+                          nameEn={ex.nameEn}
+                          lang={lang}
+                          className="text-sm font-bold leading-snug text-ink-900"
+                          secondaryClassName="mt-0.5 truncate text-[11px] leading-snug text-ink-400"
+                        />
                         <div className="mt-auto flex flex-wrap items-center gap-1.5">
                           {/* العضلة الهدف بلغة الواجهة — بالإنجليزية تُحلّ من قاموس العضلات التفصيلي */}
                           <span className="rounded-full bg-primary-soft px-2 py-0.5 text-[10px] font-bold text-primary-c">
@@ -317,8 +373,20 @@ function MachineCatalogBrowser({ onOpen, d, lang }: { onOpen: (id: string) => vo
  *     يتظاهر بأنه شرح.
  */
 function ExerciseCardMedia({ exerciseId }: { exerciseId: string }) {
-  const media = getExerciseMedia(exerciseId)
-  const src = getExerciseGif(exerciseId) || media?.gifUrl || media?.img0
+  // ── [FINAL-CONVERGENCE] البطاقة تتبع نفس سلطة الوسائط التي يتبعها التفصيل ──
+  // كانت البطاقة تقرأ الطبقات القديمة (`exerciseGifs` / `exerciseMedia`) بينما
+  // التفصيل يقرأ المانيفست الإنتاجي. فمثلًا `chest-press-machine` **معلَن
+  // MISSING** في المانيفست (ضمن `PRODUCTION_IMAGE_GAP_IDS`) ومع ذلك كان له
+  // مدخل في `exerciseMedia.ts` — فيرى المستخدم على البطاقة صورةً لم توقّع
+  // عليها بوابة الحقوق. وهذا نصّ ما يمنعه عقد الوسائط: NEEDS_REVIEW/MISSING
+  // تعني حالة فارغة صادقة، لا صورة قديمة تُملأ بها الفجوة.
+  //
+  // المعتمد أولًا؛ والطبقات القديمة تبقى بديلًا **فقط** لمن لا مدخل له في
+  // المانيفست إطلاقًا، فلا تُسحب صورة صحيحة من تمرين خارج الجرد.
+  const approved = approvedImageFor(exerciseId)
+  const legacyMedia = getExerciseMedia(exerciseId)
+  const legacy = getExerciseGif(exerciseId) || legacyMedia?.gifUrl || legacyMedia?.img0
+  const src = approved?.start || (productionEntryFor(exerciseId) ? undefined : legacy)
   const [state, setState] = useState<'loading' | 'ready' | 'failed'>(src ? 'loading' : 'failed')
 
   if (!src || state === 'failed') {
@@ -329,6 +397,8 @@ function ExerciseCardMedia({ exerciseId }: { exerciseId: string }) {
          كاملًا ظهر الخطأ فورًا. رمز السطح يتبع الثيم، ورمز الحبر لا يصلح سطحًا. */
       <span
         aria-hidden="true"
+        data-testid="exercise-card-media"
+        data-media-state="fallback"
         className="grid aspect-[4/3] w-full place-items-center bg-beige text-ink-400"
       >
         <Icon name="Dumbbell" className="h-7 w-7" />
@@ -336,7 +406,7 @@ function ExerciseCardMedia({ exerciseId }: { exerciseId: string }) {
     )
   }
   return (
-    <span className="relative block aspect-[4/3] w-full overflow-hidden bg-beige">
+    <span data-testid="exercise-card-media" data-media-state={state} className="relative block aspect-[4/3] w-full overflow-hidden bg-beige">
       {state === 'loading' && (
         <span aria-hidden="true" className="absolute inset-0 animate-pulse bg-gradient-to-br from-beige to-line" />
       )}
@@ -359,7 +429,7 @@ function ExerciseCardMedia({ exerciseId }: { exerciseId: string }) {
 
 function FilterRow({ icon, label, children }: { icon: string; label: string; children: ReactNode }) {
   return (
-    <div className="flex items-start gap-2">
+    <div role="group" aria-label={label} className="flex items-start gap-2">
       <span className="mt-1 flex shrink-0 items-center gap-1 text-[11px] font-bold text-ink-400">
         <Icon name={icon} className="h-3.5 w-3.5" />
         {label}
@@ -369,11 +439,26 @@ function FilterRow({ icon, label, children }: { icon: string; label: string; chi
   )
 }
 
-function Chip({ active, onClick, children }: { active: boolean; onClick: () => void; children: ReactNode }) {
+function Chip({
+  active,
+  onClick,
+  filterKind,
+  filterValue,
+  children,
+}: {
+  active: boolean
+  onClick: () => void
+  filterKind: 'muscle' | 'equipment'
+  filterValue: string
+  children: ReactNode
+}) {
   return (
     <button
       type="button"
       onClick={onClick}
+      aria-pressed={active}
+      data-filter-kind={filterKind}
+      data-filter-value={filterValue}
       className={cn(
         // [CTO-82] ≥44بكسل: كانت ٣٠ — وهي ٢١ رقاقة فلتر تُضغط كثيرًا.
         'inline-flex min-h-[44px] shrink-0 items-center rounded-full border px-3.5 text-xs font-bold transition-colors',

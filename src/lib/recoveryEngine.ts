@@ -22,6 +22,7 @@ import type { WorkoutSession } from './workoutSessions'
 import { samplesFor } from './health/store'
 import { dailySeries } from './health/normalize'
 import { RECOVERY_LOG_BASE, type RecoveryEntry as LegacyRecoveryEntry } from './recovery'
+import { assertPaid } from '@/lib/access/guard'
 
 /** إصدار القواعد — يرتفع مع أي تغيير في الأوزان/العتبات، ويُختم في كل تقييم. */
 export const RULES_VERSION = 'v2.0.0'
@@ -380,6 +381,7 @@ function writeEngineLog(ownerId: string | null, entries: RecoveryEngineEntry[]):
 
 /** يقيّم ويحفظ فحص اليوم (يستبدل فحص اليوم نفسه إن وُجد). لا يمسّ الخطة أبدًا. */
 export function saveRecoveryEngineEntry(ownerId: string | null, input: RecoveryEngineInput): RecoveryEngineEntry {
+  assertPaid('recovery.log')
   const evaluation = evaluateRecovery(input)
   const entry: RecoveryEngineEntry = {
     date: getDayStamp(),
