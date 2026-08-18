@@ -396,6 +396,17 @@ function workoutPlanShapeOk(v: unknown): boolean {
  * فحص شكل صارم للتخصيص المقروء. `true` = يمكن الدمج بأمان؛ `false` = تالف.
  * الغياب مقبول (الافتراضي يكمّله)، لكن **الحضور بشكل خاطئ مرفوض**.
  */
+/**
+ * حقول `targets` النصّية بطبعها — مصدر واحد بدل تخمين «ما ينتهي بـLabel».
+ *
+ * [SOVEREIGN-RECOVERY-001] القاعدة الأولى كانت «كل ما لا ينتهي بـ`Label` رقم»،
+ * وهي **ترفض ما يكتبه المنتج نفسه**: `suggestedTrainingSplit` و`notes` نصّان في
+ * `Targets` منذ الأصل. فكان كل ملف مستخدم حقيقي يُقرأ «غير قابل للقراءة» —
+ * أي أن حارس التلف كان سيصنّف **الجميع** تالفين ويعرض عليهم الافتراضي: نفس
+ * العطل الذي جاء ليغلقه، معمَّمًا. التُقط بكتابة الملف بكاتب المنتج ثم قراءته.
+ */
+const TARGET_TEXT_FIELDS = new Set(['suggestedTrainingSplit', 'notes'])
+
 export function isReadableCustomizationShape(v: unknown): v is Partial<Customization> {
   if (!isPlainObject(v)) return false
   if (!profileShapeOk(v.profile)) return false
@@ -409,7 +420,11 @@ export function isReadableCustomizationShape(v: unknown): v is Partial<Customiza
   if (v.targets !== undefined) {
     if (!isPlainObject(v.targets)) return false
     for (const [k, val] of Object.entries(v.targets)) {
-      if (k.endsWith('Label')) continue
+      if (k.endsWith('Label') || TARGET_TEXT_FIELDS.has(k)) {
+        // الحقول النصّية تبقى محروسة كنصوص — لا تُترك بلا نوع.
+        if (val !== undefined && typeof val !== 'string') return false
+        continue
+      }
       if (val !== undefined && (typeof val !== 'number' || !Number.isFinite(val))) return false
     }
   }
