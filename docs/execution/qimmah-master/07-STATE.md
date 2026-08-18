@@ -108,27 +108,34 @@ Full text in `10-FOUNDER-ACTIONS.md`.
 ## LATEST VERIFIED GATE
 
 ```
-commit    : working branch (139a7b0 + QIM-V1-001 + QIM-V1-018 + QIM-V1-005)
+commit    : working branch @ f47ce98 (139a7b0 + 001 + 018 + 005 + 002 + docs)
 node      : v22.22.2 · npm 10.9.7 · after npm ci
 typecheck : ✅ exit 0
 lint      : ✅ exit 0   (--max-warnings 0)
 build     : ✅ exit 0
-test:gate : ✅ exit 0   (141 steps — test:plan-warning-parity added)
-e2e       : ✅ green in CI (run 423, step 12)
+test:gate : ✅ exit 0   (142 steps — plan-warning-parity + target-weight-authority added)
+e2e       : ✅ green in CI (run 427, step 12)
 ```
 
 ## CURRENT CI
 
 ```
 workflow : CI (.github/workflows/ci.yml)
-working branch @ dc031fa : ✅ GREEN — run 423, ALL 13 steps success (2026-08-18T19:09Z)
-ground @ 139a7b0         : ❌ red (run 421) — superseded by the fix on the working branch
-main @ cc60adf           : ❌ red (run 339) — same root cause; untouched by design (production pointer)
+working branch @ f47ce98 : ✅ GREEN — run 427, ALL 13 steps success (2026-08-18T19:38Z)
+             @ 8e83963 : ✅ GREEN — run 424
+             @ dc031fa : ✅ GREEN — run 423   ← the run that closed QIM-V1-001
+             @ 9930142 : cancelled — superseded by the next push
+                          (`concurrency.cancel-in-progress: true`; not a red)
+ground @ 139a7b0        : ❌ red (run 421) — superseded by the fix on this branch
+main   @ cc60adf        : ❌ red (run 339) — same root cause; untouched by design
 ```
 
-**The first fully green CI on this line since run 418.** `main` stays red until the founder
-promotes a candidate carrying `QIM-V1-001` — that is a promotion decision (`FA-06`), not an
-agent action.
+**Verified step by step, not by conclusion alone** (§4.0: red can hide red). Run 427:
+typecheck · lint · build · perf · food-db · **full gate** · Playwright install ·
+**Onboarding v2 browser E2E** · artifact upload — all success.
+
+`main` stays red until the founder promotes a candidate carrying `QIM-V1-001`. That is a
+promotion decision (`FA-06`), not an agent action — merging to `main` **is** the production deploy.
 
 ## PREVIEW / PRODUCTION
 
