@@ -126,16 +126,31 @@ is answered. Everything else is parallel — nothing else waits on a human.
   Red reproduced for real: 4 named failures, exit 1. Classification: **STRONGER**.
 
 ---
-**QIM-V1-003 — Stop asking for consent that gates nothing** · `TRUTH` · S · MEDIUM
-- **problem:** `healthDataConsent` is collected and stored, then deliberately not read
-  (`onboardingProfile.ts:135-138`). The only reader is a **different** store the user cannot reach.
-  Consent theatre on **health data** is worse than not asking.
-- **depends_on:** QIM-V1-002 · **DoD:** either the collected answer becomes the value
-  `hasSensitiveHealthConsent` reads, **or** the question is removed from onboarding. Not both, not
-  neither. Whichever is chosen, `test:onboarding-questions` is extended to assert **downstream
-  consumption**, not only UI binding — the blind spot that let this pass. Classification: **STRONGER**.
+**QIM-V1-003 — ~~Stop asking for consent that gates nothing~~ → the separation is now enforced**
+· `TRUTH` · S · ✅ **DONE, premise corrected (`PLAN-CHANGE-003`)**
+- **the premise was wrong, and the proposed fix was dangerous.** Three measured facts:
+  1. The consent **is** consumed — it blocks step 0 (`onboardingV2Flow.ts:366`), and its record is
+     read by `personalization/migration.ts:75`.
+  2. Its copy is a **processing** consent and says so («معالجة … لإعداد خطتي» / "processing … to
+     prepare my plan"), promising nothing about upload.
+  3. `test:onboarding-questions` **already** asserts downstream consumption for **all 20** registry
+     ids — the "asserts binding, not consumption" note was false and is retracted in `04`.
+- **and option (a) of the old DoD would have broken privacy:** feeding this processing consent into
+  `hasSensitiveHealthConsent` turns "you may compute my plan" into "you may upload my health data".
+  The privacy policy says «الموافقة على المعالجة ليست موافقة على المزامنة»; DEC-007 and charter §8-5
+  require a separate explicit consent. It would also have broken `test:sync-coverage` for a
+  documented, legitimate reason (`onboardingProfile.ts:135-140`).
+- **what was actually delivered:** the separation is no longer a sentence in a policy — it is an
+  invariant. `test:onboarding-questions` §8-ب adds 10 checks: the consent gates step 0, its copy
+  names processing and not upload, the sync lane reads neither `healthDataConsent` nor
+  `consents.healthData`, the sync-consent store is independent of the onboarding profile, plus a
+  guard-for-the-guard and a **wiring counter-proof**. Red reproduced for real: injecting a
+  `consents.healthData` read into `syncQueue.ts` fails by name (`✗ ولا يقرأ سجلّ consents.healthData`,
+  exit 1). Classification: **STRONGER**.
+- **why this guard is worth more than the task it replaced:** the wrong fix looks like a fix. A
+  future session reading the old wording would have wired the consents together believing it was
+  closing a gap. Now that attempt fails the gate.
 
----
 **QIM-V1-010 — Make every commercial and sync claim true** · `TRUTH` · M · HIGH
 - **problem:** `05-CLAIMS.md` CLM-001…005, CLM-013/014. The Terms of Service say *"No subscription is
   active in this version"* while 13 productive actions are gated and a Salla purchase flow ships.

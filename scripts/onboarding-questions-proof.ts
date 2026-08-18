@@ -32,6 +32,7 @@ import {
 import { generatePlan } from '@/lib/planGenerator'
 import { buildPlanRationale } from '@/lib/planRationale'
 import { mealAllowedForDiet } from '@/lib/dietFilter'
+import { policyCopy } from '@/data/policyCopy'
 import { CORE_QUESTIONS } from '@/lib/personalization/bank/core'
 import { bodyStepStrings } from '@/i18n/dict/bodyStep'
 import { onboardingIntentStrings } from '@/i18n/dict/onboardingIntent'
@@ -536,6 +537,62 @@ check('سطح الاستئناف يظهر فقط بنيّة سارية وحسا�
 check('والاستئناف يستهلك النيّة مرّة واحدة', resumeSource.includes('clearPendingTrialIntent()') && resumeSource.includes("outcome !== 'offline'"))
 check('وانقطاع الشبكة لا يُسقط النيّة (لا عقاب على عطل ليس منه)', resumeSource.includes("if (outcome !== 'offline') {"))
 check('نصّ الاستئناف بلغتين وبلا ضغط', revealStrings.ar.cta.resumeTrialTitle.length > 0 && revealStrings.en.cta.resumeTrialTitle.length > 0 && !/!/.test(revealStrings.ar.cta.resumeTrialTitle))
+
+console.log('\n═══ 8-ب) الموافقة على المعالجة ليست موافقة على المزامنة — [QIM-V1-003] ═══')
+//
+// ═══ ما يحرسه هذا القسم، وما لا يحرسه ═══
+// موافقة الإعداد نصّها: «أوافق على **معالجة** بياناتي الصحية **لإعداد خطتي**»
+// (`policyCopy.healthConsent`). وهي **مستهلَكة**: تحجز الخطوة صفر، فلا يتقدّم
+// أحد بلا إقرارها. وسجلّها يُخزَّن في `consents.healthData` أثرًا للمراجعة.
+//
+// وموافقة **رفع** البيانات الصحّية الحسّاسة شيء آخر تمامًا، تعيش في متجر منفصل
+// (`syncConsent.ts`) وتُقرأ في حارة المزامنة وحدها.
+//
+// **والخلط بينهما هو الخطر.** سياسة الخصوصية تنصّ حرفيًّا: «الموافقة على
+// المعالجة ليست موافقة على المزامنة»، والميثاق §8-٥ يوجب موافقة **منفصلة
+// صريحة** للحسّاس (DEC-007). فمن يقرأ «موافقة صحية مخزَّنة» ويصلها بمسار الرفع
+// «إصلاحًا» يكون قد حوّل إقرار معالجة إلى إذن رفع — بلا أن يطلبه المستخدم.
+//
+// ولهذا يُكتب الفحص هنا: لأن الوصل يبدو إصلاحًا لمن يقرأ الكود وحده.
+const flowSrc = readFileSync(resolve(process.cwd(), 'src/lib/onboardingV2Flow.ts'), 'utf8')
+const queueSrc = readFileSync(resolve(process.cwd(), 'src/lib/syncQueue.ts'), 'utf8')
+const consentSrc = readFileSync(resolve(process.cwd(), 'src/lib/syncConsent.ts'), 'utf8')
+
+// ① الموافقة مستهلَكة فعلًا: تحجز الخطوة صفر (سلوك لا نصّ).
+const withoutConsent = { ...valid, healthDataConsent: false }
+check('إقرار المعالجة يحجز الخطوة صفر (فهو مستهلَك لا معلّق)',
+  validateStep(0, withoutConsent as never) === 'healthConsent')
+check('وبإقراره تمرّ الخطوة', validateStep(0, valid as never) === null)
+
+// ② والنصّ يَعِد بالمعالجة وحدها — لا بالرفع.
+check('نصّ الإقرار يقول «معالجة … لإعداد خطتي» ولا يذكر رفعًا',
+  /معالجة/.test(policyCopy.ar.healthConsent) && !/(رفع|مزامنة|السحاب)/.test(policyCopy.ar.healthConsent))
+check('والإنجليزي كذلك',
+  /processing/i.test(policyCopy.en.healthConsent) && !/(upload|sync|cloud)/i.test(policyCopy.en.healthConsent))
+
+// ③ الفصل البنيوي: حارة المزامنة لا تقرأ إقرار الإعداد إطلاقًا.
+check('طابور المزامنة لا يقرأ `healthDataConsent`',
+  !/healthDataConsent/.test(queueSrc))
+check('ولا يقرأ سجلّ `consents.healthData`',
+  !/consents\s*[.?]\s*healthData/.test(queueSrc))
+check('ومتجر موافقة المزامنة مستقلّ عن ملفّ الإعداد',
+  !/onboardingProfile|onboardingV2Flow/.test(consentSrc))
+check('والحسّاس يُقرأ من متجره وحده', /hasSensitiveHealthConsent/.test(queueSrc) && /export function hasSensitiveHealthConsent/.test(consentSrc))
+
+// ④ ⚔️ محاكاة الوصل — الفحص أعلاه يجب أن يرصدها، لا أن يمرّ عليها.
+{
+  const wired = queueSrc.replace(
+    'hasSensitiveHealthConsent(userId)',
+    'profile.consents.healthData.accepted /* wired by a well-meaning wave */',
+  )
+  check('⚔️ وصل إقرار المعالجة بمسار الرفع يُرصد',
+    /consents\s*[.?]\s*healthData/.test(wired) && wired !== queueSrc)
+}
+{
+  // وحارس للحارس: لو فرغ أحد الملفّين لمرّت فحوص الفصل مجّانًا.
+  check('حارس الحارس: الملفّات الثلاثة مقروءة وغير فارغة',
+    flowSrc.length > 2000 && queueSrc.length > 2000 && consentSrc.length > 1000)
+}
 
 console.log('\n═══ 9) محاكاة الالتفاف: العدد/الربط/المفردات لا تمرّ رخوة ═══')
 check('إضافة معرّف زائد كانت ستُكشف', [...ONBOARDING_QUESTION_IDS, 'filler.fake'].length !== 20)

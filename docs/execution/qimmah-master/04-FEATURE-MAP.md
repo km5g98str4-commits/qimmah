@@ -8,7 +8,7 @@ Status: `LIVE` · `PARTIAL` · `DISCONNECTED` · `DEAD` · `MISSING`
 
 | # | capability | surface | authority | status | the break, named |
 |---|---|---|---|---|---|
-| F-01 | Onboarding v2 | `#/setup` → `OnboardingV2` | `onboardingV2Flow` + `onboardingV2Adapter` | **PARTIAL** | 18 of 20 questions reach a consumer; 2 do not (below) |
+| F-01 | Onboarding v2 | `#/setup` → `OnboardingV2` | `onboardingV2Flow` + `onboardingV2Adapter` | **LIVE** | all 20 questions reach a consumer, asserted per-question by `test:onboarding-questions` |
 | F-02 | Plan generation | handoff + `#/workout` | `planGenerator.generatePlan` | **PARTIAL** | two conflicting target-weight authorities (F-GAP-02) |
 | F-03 | Injury filtering + substitution | onboarding → plan → live swap | `src/lib/injurySafety.ts` | **LIVE** | — (union model, fail-closed, `test:injury-safety` 80/0 over 7920 plans) |
 | F-04 | Equipment → exercise pool | onboarding step 5 | `src/lib/equipmentAccess.ts` | **LIVE** | declared `kettlebell` has no profile key (`equipmentAccess.ts:43-45`, declared in-code) |
@@ -41,20 +41,30 @@ enters `toAnswersFromV2` (`OnboardingV2.tsx:341-349`). Consumers verified:
 
 **Two questions asked with no effect — VERIFIED:**
 
-- **`healthDataConsent`** — collected and stored to `consents.healthData`
-  (`planBuilderAnswers.ts:146-150`) and then **deliberately not read**
-  (`onboardingProfile.ts:135-138`). The only reader of health consent is
-  `syncQueue.ts:204` via `hasSensitiveHealthConsent`, which reads a **different** store
-  (`syncConsent.ts:90`) — one the user cannot reach (F-GAP-12). So the app asks for consent
-  to sensitive health data and that answer gates nothing. → **F-GAP-01**
+- ~~**`healthDataConsent`** — asks for consent that gates nothing~~ → **WRONG. Retracted by
+  `PLAN-CHANGE-003`.** The consent is a **processing** consent whose copy says exactly that
+  («أوافق على **معالجة** بياناتي الصحية **لإعداد خطتي**» / "I agree to the **processing** of my
+  health data to prepare my plan", `policyCopy.ts:28,38`), and it **is** consumed: it blocks
+  step 0 (`onboardingV2Flow.ts:366` → `'healthConsent'`), and its record is read by
+  `personalization/migration.ts:75`. `onboardingProfile.ts:135-140` does not ignore it — it
+  declines to add a **second** sensitive-data barrier at the sync-enqueue point, and says why.
+  **And wiring it to `hasSensitiveHealthConsent` — the "fix" the plan proposed — would have been
+  a privacy violation:** the privacy policy states «الموافقة على المعالجة ليست موافقة على
+  المزامنة», and DEC-007 / charter §8-5 require a *separate explicit* consent for sensitive
+  health sync. That separation is now an enforced invariant, not a sentence
+  (`test:onboarding-questions` §8-ب, 10 checks + a wiring counter-proof).
 - **`muscleFocus`** is hard-pinned to `'balanced'` (`onboardingProfile.ts:359`); no question
   feeds `applyMuscleFocus` (`planGenerator.ts:1084`). Already surfaced honestly to the user
   by the plan-rationale "inactive axis" mechanism (`planRationale.ts:159-165`) — so this is
   disclosed, not hidden. **NOT_A_BUG for V1.**
 
-> **The guard's own blind spot:** `test:onboarding-questions` asserts UI binding, copy
-> presence and validation (`scripts/onboarding-questions-proof.ts:78-152`) — it does **not**
-> assert downstream consumption. Both gaps above pass the gate today. Closing that is `QIM-V1-003`.
+> **A correction to this file's own earlier claim.** It said `test:onboarding-questions` asserts
+> only UI binding, copy and validation, and never downstream consumption. **That was wrong.**
+> The proof carries a per-question consumption table — each id with a `decision`, a set of
+> `values`, and an `outcome` function computing the real generated plan/profile signature, so
+> changing an answer must change the product. Measured: **all 20 registry ids have a
+> consumption assertion; zero gaps.** The claim came from an audit pass and was propagated here
+> without being checked against the file. `PLAN-CHANGE-003`.
 
 ---
 

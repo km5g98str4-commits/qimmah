@@ -162,3 +162,55 @@ literal `81` — 90 × 0.9, a *copy* of the old constant. Its number was **not**
 assertion was rebound to its own stated intent ("derived from the answered weight, not the
 default") by comparing against the authority. Classification: **STRONGER**. A test that hardcodes
 a value the code derives is a second authority wearing a test's clothes.
+
+---
+
+## 2026-08-18 — `QIM-V1-010` DONE
+
+Every commercial and sync claim now matches the code. **Eleven files**, not the four the plan
+listed: the sweep found the same sentences in the canonical legal source
+(`docs/legal/terms-of-service.md`), the compliance pack, the TestFlight pack, `PRODUCT.md`, and the
+site-copy source (`docs/site/SITE-COPY-ALIGNMENT.md`) — the spring that had already re-introduced
+this copy once after a page-only fix.
+
+`test:site-truth` grew from 19 checks to **234**, with three structural additions: it scans the
+**source documents** as well as the pages (excluding `docs/execution/`, where the ledger quotes
+defects as evidence — quoting a defect is not committing it); the paid-access contract is extracted
+**by its block boundaries** rather than by scattered `includes`; and the site may carry **no price
+figure at all**, because the price has one source and a second copy goes stale silently.
+
+Red reproduced for real, five injections, each failing by name — including the two that matter:
+moving a required fact **outside** the §8 block while leaving it on the page, and re-introducing the
+lie in a **source document only** while every page stayed correct.
+
+Still open and founder-owned: the live Salla storefront (`FA-01`), outside this repository.
+
+## 2026-08-18 — PLAN-CHANGE-003 · `QIM-V1-003`'s premise was wrong; its proposed fix was unsafe
+
+**MASTER_PLAN_VERSION stays 1.0** — no task added or removed; one task's premise was corrected and
+its deliverable replaced with a stronger one.
+
+The task read "stop asking for consent that gates nothing". Checked against code, all three
+supporting claims failed:
+
+| claim | measured |
+|---|---|
+| the consent gates nothing | it **blocks step 0** (`onboardingV2Flow.ts:366`), and its record is read by `personalization/migration.ts:75` |
+| `onboardingProfile.ts` ignores it | it declines a **second** sensitive-data barrier at the sync-enqueue point, and documents why |
+| `test:onboarding-questions` asserts binding, not consumption | it carries a per-question consumption table; **all 20 ids covered, zero gaps** |
+
+**And option (a) of the DoD would have been a privacy violation.** Feeding a *processing* consent
+(«أوافق على معالجة بياناتي الصحية لإعداد خطتي») into `hasSensitiveHealthConsent` converts it into an
+*upload* permission the user never gave. The privacy policy states «الموافقة على المعالجة ليست
+موافقة على المزامنة»; DEC-007 and charter §8-5 require a separate explicit consent.
+
+Delivered instead: the separation is now **enforced**, not merely written — `test:onboarding-questions`
+§8-ب, 10 checks plus a wiring counter-proof that fails by name when the two consents are joined.
+
+- tasks removed: none · tasks added: none · critical-path impact: none · scope impact: none
+- `04-FEATURE-MAP.md`: F-GAP-01 retracted; F-01 Onboarding v2 **PARTIAL → LIVE**
+
+> **Why this correction matters more than the task did.** The wrong fix *looks* like a fix. A later
+> session reading the old wording would have wired the consents together believing it was closing a
+> gap — and the only thing standing in the way would have been that session's own care. Now the gate
+> stands in the way instead.
