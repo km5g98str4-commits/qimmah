@@ -24,6 +24,8 @@ const ar: PlanCoherenceStrings = {
       'ما تغيّر شي — أدواتك المسجّلة ما فيها أجهزة، فما نقدر نبني لك نسخة أجهزة صادقة. عدّل أدواتك في «تعديل خطتي» وجرّب بعدها.',
     machines_no_effect:
       'ما تغيّر شي — طلب التحويل ما وصّل لخطة مختلفة، وما ندري ليش بالضبط. ما بنقول لك تم وهي ما تمّت. راجع أدواتك في «تعديل خطتي».',
+    save_failed:
+      'ما انحفظت — تخزين المتصفح رفض الكتابة، فخطتك القديمة باقية زي ما هي. فضّي مساحة أو جرّب من نافذة عادية مو خفيّة.',
     regenerated: 'تم — سوّينا لك خطة جديدة من بياناتك الحالية.',
     regenerated_identical:
       'ما تغيّر شي — بياناتك ما تغيّرت، والمولّد يعطي نفس النتيجة لنفس البيانات. خطتك زي ما هي.',
@@ -40,6 +42,8 @@ const en: PlanCoherenceStrings = {
       "Nothing changed — the equipment you listed has no machines, so we can't build an honest machines version. Update your equipment in “Edit my plan” and try again.",
     machines_no_effect:
       "Nothing changed — the switch didn't produce a different plan, and we don't know exactly why. We won't tell you it worked when it didn't. Check your equipment in “Edit my plan”.",
+    save_failed:
+      "Not saved — your browser storage refused the write, so your old plan is still there. Free up space, or try outside a private window.",
     regenerated: 'Done — we built you a new plan from your current data.',
     regenerated_identical:
       'Nothing changed — your data is the same, and the generator gives the same result for the same data. Your plan stays as it is.',

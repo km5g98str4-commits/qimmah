@@ -181,6 +181,13 @@ export type PlanOutcomeCode =
   | 'machines_no_effect'
   | 'regenerated'
   | 'regenerated_identical'
+  /**
+   * الكتابة نفسها لم تهبط على القرص (§5: لا شاشة نجاح قبل تأكيد الكتابة).
+   * `applyCustomization` يعيد `WriteResult` وكان **يُهمَل تمامًا** في الشاشة:
+   * تخزين ممتلئ أو محجوب ⇒ الخطة لا تُحفظ ⇒ ويُعلَن «تم». الرمز هنا يجعل
+   * الفشل يمرّ في نفس القناة التي تمرّ فيها النتيجة، فلا ينجو من الإعلان.
+   */
+  | 'save_failed'
 
 export interface PlanOutcome {
   code: PlanOutcomeCode
@@ -250,6 +257,11 @@ export function machineConversionOutcome(profile: Profile, before: WorkoutPlan, 
   if (planIsAllMachines(after)) return { code: 'machines_already', ...unchanged }
   if (!machineVersionAvailable(profile)) return { code: 'machines_unavailable', ...unchanged }
   return { code: 'machines_no_effect', ...unchanged }
+}
+
+/** نتيجة كتابةٍ لم تهبط — تسبق أي كلام عن المحتوى، فلا محتوى حُفظ أصلًا. */
+export function saveFailedOutcome(): PlanOutcome {
+  return { code: 'save_failed', changed: false, changedDays: 0, changedExercises: 0 }
 }
 
 /** نتيجة «إعادة توليد الخطة» — المولّد حتميّ، فالتطابق نتيجة تُشرح لا نجاح يُدَّعى. */
