@@ -124,7 +124,20 @@ try {
   const beginnerCut = intent.goalWording.beginner.cut.label
   check('beginner goal uses level-specific wording', beginnerCut === 'خسارة دهون' && await page.getByRole('button', { name: new RegExp(escapeRegExp(beginnerCut)) }).isVisible())
   await page.getByRole('button', { name: new RegExp(escapeRegExp(beginnerCut)) }).click()
-  await finishInputSteps(page, () => next.click())
+  // النيّة المختارة أعلاه هي `intents[0]`؛ نمرّرها بقيمتها لا بنصّها كي يفحص
+  // السائق عقد ظهور سؤال نمط الأكل في الاتجاهين.
+  const chosenIntent = intent.intents[0].value
+  const inputSteps = await finishInputSteps(page, () => next.click(), { intent: chosenIntent })
+  check(
+    'diet pattern renders only for the meals intent',
+    inputSteps.dietRendered === inputSteps.dietApplies,
+    `intent=${chosenIntent} applies=${inputSteps.dietApplies} rendered=${inputSteps.dietRendered}`,
+  )
+  check(
+    'the place seeds real equipment (the step cannot advance empty)',
+    inputSteps.seededEquipment > 0 && inputSteps.equipmentSelected > 0,
+    `seeded=${inputSteps.seededEquipment} selected=${inputSteps.equipmentSelected}`,
+  )
   check('summary rendered', await page.getByRole('heading', { name: t.ready.title }).isVisible())
 
   await page.evaluate((k) => localStorage.setItem(k, '1'), FORCE_FAIL)
