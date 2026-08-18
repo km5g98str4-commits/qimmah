@@ -2,6 +2,7 @@ import type { Exercise, MovementPattern, Muscle } from '@/types/workout'
 import type { Lang } from '@/lib/appPreferences'
 import { getExercise } from '@/data/exercises'
 import { muscleLabels } from '@/lib/muscles'
+import { EXERCISE_TECHNIQUE_TIPS } from '@/data/coaching/exerciseTechniqueTips.generated'
 
 // إرشاد التمارين — نقاط تكنيك، أخطاء شائعة، وتنبيهات أمان.
 // إذا كان للتمرين محتوى خاص (techniqueTipsAr/commonMistakesAr/safetyNotesAr) استخدمناه،
@@ -153,6 +154,29 @@ export const MUSCLE_AR: Record<Muscle, string> = {
  */
 export function muscleName(m: Muscle, lang: Lang = 'ar'): string {
   return lang === 'en' ? muscleLabels[m].en : MUSCLE_AR[m]
+}
+
+/**
+ * نصائح تقنية **مؤلَّفة لهذا التمرين** بلغة الواجهة — أو مصفوفة فارغة إن لم يكن له مدخل.
+ *
+ * لماذا دالّة مستقلّة لا تعديلٌ لـ`getTechniqueTips`: `getTechniqueTips`/`guidanceFor` هما
+ * طبقة **الاحتياط العامّ حسب نمط الحركة**، وعقدهما المُثبَّت أن تمرينًا في الكتالوج بلا
+ * إنجليزيّ مؤلَّف لا يتلقّى ترجمة مستنتَجة (يحرسه `npm run test:english-content`). هذه
+ * الدالّة تفتح **مصدرًا مؤلَّفًا** جديدًا فوق تلك الطبقة بدل أن تُرخي عقدها — وهو نفس
+ * الترتيب المتّبع أصلًا للخطوات والأخطاء والسلامة عبر `getCue` في `ExerciseDetail`.
+ *
+ * المصدر: `src/data/coaching/exerciseTechniqueTips.generated.ts` — كل نصيحة زوج
+ * `{ ar, en }` مكتوب بيدٍ في نفس السطر داخل مكتبة الجذاذات، فاللغتان مقترنتان بالبناء.
+ */
+export function authoredTechniqueTips(exerciseId: string, lang: Lang = 'ar'): string[] {
+  const entry = EXERCISE_TECHNIQUE_TIPS[exerciseId]
+  if (!entry) return []
+  return lang === 'en' ? entry.en : entry.ar
+}
+
+/** هل لهذا المعرّف نصائح تقنية مؤلَّفة؟ (لفحوص التغطية) */
+export function hasAuthoredTechniqueTips(exerciseId: string): boolean {
+  return Object.prototype.hasOwnProperty.call(EXERCISE_TECHNIQUE_TIPS, exerciseId)
 }
 
 /** نقاط تكنيك للتمرين — الخاصة به إن وُجدت، وإلا افتراضية حسب نمط الحركة. */

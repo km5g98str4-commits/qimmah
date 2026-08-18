@@ -8,7 +8,7 @@ import { libraryStrings, type LibraryStrings } from '@/i18n/dict/library'
 import { detailedMuscleLabel, exerciseName, getExercise } from '@/data/exercises'
 import { muscleLabel } from '@/lib/muscles'
 import type { MuscleId } from '@/types/muscles'
-import { guidanceFor } from '@/lib/exerciseGuidance'
+import { authoredTechniqueTips, guidanceFor } from '@/lib/exerciseGuidance'
 import { getCue } from '@/lib/coaching'
 import { exerciseStats } from '@/lib/exerciseStats'
 import { getRecord } from '@/lib/exerciseHistory'
@@ -192,7 +192,14 @@ function AboutTab({ ex, d, lang, onAddToPlan }: { ex: NonNullable<ReturnType<typ
    */
   const cue = getCue(ex.id, lang)
   const howTo = cue.steps.length ? cue.steps : g.howTo
-  const tips = g.tips
+  /**
+   * «نصائح تقنية» كانت السطر الوحيد بلا احتياطي مؤلَّف (`const tips = g.tips`)، و`g.tips`
+   * تعيد `[]` لكل تمرينٍ في الكتالوج بالإنجليزية — فكانت الكتلة تعرض «الإرشاد غير متاح»
+   * في ١٨١ من ١٨١ بينما الكتل الثلاث المجاورة مغطّاة عبر `cue`. الآن لها مصدر مؤلَّف
+   * ثنائي اللغة بنفس الترتيب: المؤلَّف أولًا، والعامّ حسب نمط الحركة احتياطًا.
+   */
+  const authoredTips = authoredTechniqueTips(ex.id, lang)
+  const tips = authoredTips.length ? authoredTips : g.tips
   const mistakes = cue.mistakes.length ? cue.mistakes : g.mistakes
   const safety = cue.safety.length ? cue.safety : g.safety
   return (
