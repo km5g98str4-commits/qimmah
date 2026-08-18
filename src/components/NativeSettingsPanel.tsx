@@ -13,6 +13,7 @@ import {
   type HealthPointSample,
 } from '@/lib/healthKit'
 import { getSteps, setSteps } from '@/lib/stepCounter'
+import { parseSafeNumber, sanitizeNumericInput } from '@/lib/validation'
 import { NATIVE_SETTINGS_COPY } from '@/data/nativeSettings'
 import { Icon } from './Icon'
 import { SourceChip, type SourceKind } from './SourceChip'
@@ -116,7 +117,7 @@ export function NativeSettingsPanel({ lang }: { lang: Lang }) {
   }
 
   const saveManualSteps = () => {
-    const saved = setSteps(Number(manualSteps) || 0, undefined, 'manual')
+    const saved = setSteps(parseSafeNumber(manualSteps, { min: 0 }), undefined, 'manual')
     setManualSteps(String(saved || ''))
     setManualStepsMsg(copy.manualStepsSaved)
   }
@@ -197,13 +198,16 @@ export function NativeSettingsPanel({ lang }: { lang: Lang }) {
             <div>
               <label className="mb-1 block text-xs font-bold text-ink-900" htmlFor="manual-steps">{copy.manualStepsLabel}</label>
               <div className="flex gap-2">
+                {/* `type="text"` لا `number`: تعقيم HTML لـ`type=number` يُفرِّغ القيمة
+                    قبل وصولها React، فالأرقام العربية لا تصل أصلًا. */}
                 <input
                   id="manual-steps"
-                  type="number"
+                  type="text"
                   inputMode="numeric"
+                  autoComplete="off"
                   min={0}
                   value={manualSteps}
-                  onChange={(e) => { setManualSteps(e.target.value); setManualStepsMsg('') }}
+                  onChange={(e) => { setManualSteps(sanitizeNumericInput(e.target.value)); setManualStepsMsg('') }}
                   className="input w-full text-start tabular-nums"
                 />
                 <button type="button" onClick={saveManualSteps} className="btn-primary shrink-0 px-4 py-2.5 text-sm">

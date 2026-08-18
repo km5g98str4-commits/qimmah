@@ -14,7 +14,9 @@ import {
   weightRangeCopy,
   type RangeCopy,
 } from '@/config/profileDomain'
-import { foldDigits } from '@/lib/numberFormat'
+import { foldDigits, formatNumber } from '@/lib/numberFormat'
+import type { Lang } from '@/lib/appPreferences'
+import { numLimitStrings } from '@/i18n/dict/numericInput'
 
 // حدود إدخال واقعية + رسائل ودّية — **كلاهما من `config/profileDomain`**.
 //
@@ -82,14 +84,17 @@ export const NUM_LIMITS = {
 
 export type NumLimitKey = keyof typeof NUM_LIMITS
 
-export const NUM_MESSAGES: Record<NumLimitKey, string> = {
-  workoutWeight: 'أدخل وزنًا بين 0 و500 كجم.',
-  reps: 'أدخل تكرارات بين 0 و100.',
-  dailyCalories: 'أدخل سعرات يومية بين 800 و8000.',
-  quickCalories: 'أدخل سعرات بين 0 و3000 للوجبة.',
-  quickProtein: 'أدخل بروتينًا بين 0 و500 غ.',
-  quickMacro: 'أدخل قيمة بين 0 و1000 غ.',
-  waterMl: 'أدخل كمية ماء بين 50 و3000 مل.',
+/**
+ * رسالة الحدّ بلغة الشاشة وبنظام أرقامها.
+ *
+ * كانت `NUM_MESSAGES` سبعة نصوص صلبة **عربية وحدها** بأرقام لاتينية مكتوبة
+ * داخلها — تظهر عربية في واجهة إنجليزية، وتقول «50» في شاشة أرقامها «٥٠»
+ * وتناقض الحدّ الذي تشرحه. الآن النصّ من القاموس والرقم من `NUM_LIMITS` نفسه،
+ * فلا يفترق الاثنان.
+ */
+export function numLimitMessage(key: NumLimitKey, lang: Lang): string {
+  const { min, max } = NUM_LIMITS[key]
+  return numLimitStrings[lang][key](formatNumber(min, lang), formatNumber(max, lang))
 }
 
 /** يحصر رقمًا داخل نطاق، ويعيد min عند NaN/قيمة غير منتهية. */

@@ -20,6 +20,7 @@ import { getDayStamp } from '@/lib/today'
 import type { Difficulty, SetLog, WorkoutSession } from '@/lib/workoutSessions'
 import { saveActiveWorkout, type ActiveWorkout } from '@/lib/activeWorkout'
 import type { WriteResult } from '@/lib/safeStorage'
+import { foldDigits } from '@/lib/numberFormat'
 
 interface WorkoutModeProps {
   lang: Lang
@@ -50,20 +51,24 @@ const MAX_REPS = 100
 
 /** أول رقم في نطاق التكرارات (مثال: «8–12» → «8»). */
 function lowerReps(reps: string): string {
-  const m = String(reps).match(/\d+/)
+  const m = foldDigits(String(reps)).match(/\d+/)
   return m ? m[0] : reps
 }
 
+// ⚠️ `\d` في JS أرقام ASCII حصرًا في كل الأوضاع — فكانت هذه الثلاث تعجز عن
+// قراءة «٨٥٫٥» وتعطي NaN فيظهر الحقل «غير صالح» أثناء جلسة تمرين حيّة.
+// الطيّ أولًا يجعل الصيغتين مقروءتين، والمخزَّن يبقى غربيًا قانونيًا.
+
 /** تعديل قيمة رقمية نصية بمقدار، مع قصّها بين صفر والحد الأقصى. */
 function adjust(value: string, delta: number, max: number): string {
-  const m = String(value).match(/-?[\d.]+/)
+  const m = foldDigits(String(value)).match(/-?[\d.]+/)
   const n = m ? Number(m[0]) : 0
   const next = Math.min(max, Math.max(0, Math.round((n + delta) * 100) / 100))
   return `${next}`
 }
 
 const parseVal = (v: string): number => {
-  const m = String(v ?? '').match(/-?[\d.]+/)
+  const m = foldDigits(String(v ?? '')).match(/-?[\d.]+/)
   return m ? Number(m[0]) : NaN
 }
 
@@ -844,7 +849,9 @@ function Stepper({ label, value, placeholder, step, mode, invalid, onChange, onS
             'w-full min-w-0 rounded-lg border bg-beige px-1 text-center text-base font-black text-ink-900 focus:outline-none',
             invalid ? 'border-danger focus:border-danger' : 'border-line focus:border-brand-500/50',
           )}
+          type="text"
           inputMode={mode}
+          autoComplete="off"
           aria-label={label}
           aria-invalid={invalid}
           value={value}

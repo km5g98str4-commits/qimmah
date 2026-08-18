@@ -4,7 +4,7 @@ import { ProgressBar } from '@/components/ProgressBar'
 import { QuickMealLogger } from '@/components/nutrition/QuickMealLogger'
 import { useCustomization } from '@/lib/customizationContext'
 import { MEAL_SLOTS, useNutritionToday, type LoggedFood, type MealSlot } from '@/lib/nutritionTracking'
-import { inRange, NUM_LIMITS, NUM_MESSAGES, sanitizeNumericInput } from '@/lib/validation'
+import { inRange, NUM_LIMITS, numLimitMessage, sanitizeNumericInput } from '@/lib/validation'
 import { getStrings } from '@/config/strings'
 import { nutritionScreenStrings } from '@/i18n/dict/nutritionScreen'
 import type { Lang } from '@/lib/appPreferences'
@@ -410,9 +410,12 @@ function MealCard({
                 <div className="mt-3 rounded-xl border border-line bg-page p-3">
                   <label className="text-xs font-bold text-ink-700">
                     {d.quantity} ({editing.unit === 'g' ? d.gramsUnit : d.servingsUnit})
+                    {/* `type="text"` لا `number`: تعقيم HTML لـ`type=number` يُفرِّغ القيمة
+                        قبل أن تصل React، فلا يُنقذ الأرقامَ العربية أيُّ طيّ داخل التطبيق. */}
                     <input
-                      type="number"
+                      type="text"
                       inputMode="decimal"
+                      autoComplete="off"
                       min={editing.unit === 'g' ? 1 : 0.25}
                       max={editing.unit === 'g' ? 3000 : 20}
                       step={editing.unit === 'g' ? 1 : 0.25}
@@ -512,20 +515,24 @@ function WaterPanel({ lang, waterMl, targetMl, onAdd: rawAdd, focusRequested = f
         <button data-testid="water-preset-500" type="button" onClick={() => addPreset(500)} className="btn-ghost min-h-[44px] px-3 py-2 text-xs">{formatNumeralsIn(t.addWater500, lang)}</button>
       </div>
       <div className="mt-2 flex items-center gap-2">
+        {/* `type="text"` لا `number` — نفس سبب حقل الكمية أعلاه. */}
         <input
-          type="number"
+          type="text"
           inputMode="numeric"
+          autoComplete="off"
           min={min}
           max={max}
           value={ml}
-          onChange={(e) => setMl(sanitizeNumericInput(e.target.value, { max }))}
+          aria-invalid={ml !== '' && !valid ? true : undefined}
+          aria-describedby={ml !== '' && !valid ? 'custom-water-msg' : undefined}
+          onChange={(e) => setMl(sanitizeNumericInput(e.target.value))}
           onKeyDown={(e) => { if (e.key === 'Enter') submit() }}
           placeholder={formatNumeralsIn(t.customWaterPlaceholder, lang)}
           className="min-h-[44px] w-40 rounded-lg border border-line bg-page px-3 py-2 text-xs text-ink-900 outline-none focus:border-primary-c"
         />
         <button type="button" onClick={submit} disabled={!valid} className="btn-primary min-h-[44px] px-3 py-2 text-xs disabled:cursor-not-allowed disabled:opacity-40">{t.customWaterAdd}</button>
       </div>
-      {ml !== '' && !valid && <p className="mt-1.5 text-[11px] font-bold text-danger">{NUM_MESSAGES.waterMl}</p>}
+      {ml !== '' && !valid && <p id="custom-water-msg" role="alert" className="mt-1.5 text-[11px] font-bold text-danger">{numLimitMessage('waterMl', lang)}</p>}
       {saveError && <p role="alert" className="v2-error-panel mt-2 rounded-xl border px-3 py-2 text-xs font-bold text-ink-900">{d.saveFailed}</p>}
     </div>
   )
