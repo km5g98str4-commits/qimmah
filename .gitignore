@@ -63,3 +63,6 @@ docs/execution/qimmah-postweb/release/evidence/run-*.json
 # بصماتها كلّها في data/food-production/manifests/build-manifest.json،
 # وطريقة إعادة إنتاجها في data/food-production/accepted/README.md
 data/food-production/accepted/shards/
+
+# esbuild scratch bundles produced by proof runners
+scripts/.*.bundle.mjs

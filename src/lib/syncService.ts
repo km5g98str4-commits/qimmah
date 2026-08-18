@@ -42,6 +42,8 @@ import {
   hydrateCoverageFromCloud,
   readAuxBackup,
 } from './syncStores'
+import { hasSensitiveHealthConsent } from './syncConsent'
+import { sanitizeSyncPayload } from './syncFieldPolicy'
 import { buildPendingSet, pendingKey, resolveLww, stampMs, type LwwWinner } from './syncLww'
 import type { WorkoutSession } from './workoutSessions'
 import type { ExerciseHistory } from './exerciseHistory'
@@ -315,9 +317,13 @@ async function flushImpl(now = Date.now()): Promise<SyncStatus> {
           if (TOMBSTONE_TABLES.has(tableValue)) await client.upsert(tableValue, batch.map(tombstoneRow))
           else await client.delete(tableValue, userId, batch.map((op) => op.entityKey))
         } else {
+          // إعادة التنقية عند حدّ التسريب نفسه، لا عند الإدراج وحده: عملية أُدرجت
+          // والموافقة الثانية سارية ثم **سُحبت** قبل الدفع كانت سترفع ما لم يعد
+          // مأذونًا به. نفس مبدأ إعادة فحص المالك قبل كل حدّ تسريب أعلاه.
+          const allowSensitive = hasSensitiveHealthConsent(userId)
           await client.upsert(
             tableValue,
-            batch.map((op) => ({ ...op.payload, user_id: op.userId })),
+            batch.map((op) => ({ ...sanitizeSyncPayload(op.table, op.payload, allowSensitive), user_id: op.userId })),
           )
         }
         removeSyncOperations(userId, ids)
