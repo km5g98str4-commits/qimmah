@@ -153,8 +153,23 @@ NO = undeclared masking exists.
 
 ### Tier-1 answers
 
-> Filled in by execution. Empty until executed under this revision.
-> Recorded in `STATE.md` §2 as the authoritative ground record.
+**Executed 2026-08-18 under revision v0.9.1. Full evidence, commands and interpretations
+are recorded in `STATE.md` §5, which is the authoritative record.**
+
+| ID | Answer | One-line finding |
+|---|---|---|
+| V-GROUND-01 | **YES** | Trunk is `main` @ `cc60adfc0da0f893b101230269d4847d33490429`, confirmed from the GitHub API |
+| V-GROUND-02 | **YES** | 14 candidates, **none merged**; 3 form a chain that strictly contains `main` |
+| V-GROUND-03 | **YES** | +26,910 lines in `src/` unmerged on the chain tip, plus 6 branches outside it |
+| V-GROUND-04 | **YES** | Trunk tree clean, complete, matches remote |
+| V-GROUND-05 | **YES** | 4 gates present; 92-script chain; 0 undefined, 0 dangling |
+| V-GROUND-06 | **NO** | Three conflicting production identities; no deploy pipeline in repo |
+| V-CI-01 | **YES** | `ci.yml` gates every push and PR |
+| V-CI-02 | **NO (red)** | Red 7 days / 3 commits; current red is step #13 artifact upload, steps 1–12 green |
+| V-CI-03 | **YES** | Only declared exclusions; no undeclared masking |
+
+**Ground:** `main` @ `cc60adfc0da0f893b101230269d4847d33490429` — **contested**.
+**Confidence: MEDIUM.** Trunk identity HIGH; ground sufficiency LOW (unmerged superset chain).
 
 ---
 

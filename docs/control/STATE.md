@@ -94,6 +94,195 @@ verification. Their timing is stated per-row above.
 
 ## 5. TIER-1 GROUND VERIFICATION RESULTS
 
-*Executed under revision v0.9.1. Definitions: `VERIFY.md` §3.*
+*Executed under revision v0.9.1 on 2026-08-18. Definitions: `VERIFY.md` §3.*
+*Evidence rules E-1..E-8 applied. No conversation history, no prior report, and no branch
+name was accepted as evidence.*
 
-> Appended by execution.
+**Reference SHAs used throughout:**
+
+| Ref | Full SHA |
+|---|---|
+| `origin/main` (trunk HEAD at verification) | `cc60adfc0da0f893b101230269d4847d33490429` |
+| `codex/qimmah-sovereign-closure-001` (superset chain tip) | `139a7b00d154e1950e5970ed86d2fe6165dba5c6` |
+| `codex/qimmah-canonical-launch-candidate-001` | `740023b913103546f1ece4741ae987a4dcfc9536` |
+| `codex/qimmah-founder-qa-candidate-001` | `bcec642163c275427b29976e9269701271485799` |
+
+---
+
+### V-GROUND-01 — Is there a single, identifiable trunk? → **YES**
+
+- **Branch:** `main`
+- **Full SHA:** `cc60adfc0da0f893b101230269d4847d33490429`
+- **Evidence:** GitHub repository object reports `"default_branch":"main"`. Local
+  `git rev-parse origin/main` → `cc60adfc0da0f893b101230269d4847d33490429`.
+  `AGENTS.md` §1 declares `main` the trunk. `nightly.yml` scopes its drift gate to `main`.
+  Note: `refs/remotes/origin/HEAD` is **not set** in this clone (`fatal: ref ... is not a
+  symbolic ref`) — a local clone artefact, not a repository ambiguity.
+- **Command:** `git rev-parse origin/main` · `mcp github search_repositories repo:km5g98str4-commits/qimmah`
+- **Interpretation:** Trunk identity is unambiguous and confirmed from the GitHub API, not
+  from documentation. This answers *which branch is the trunk* — **not** whether the trunk
+  is the most complete ground. See V-GROUND-02/03.
+
+### V-GROUND-02 — Do competing ground candidates exist? → **YES**
+
+- **Branch:** 14 candidates matched on name (`final|canonical|release|closure|sovereign|candidate|rc`)
+- **Evidence:** **All 14 are NOT ancestors of `origin/main`.** Not one has been merged.
+  Three of them form a strict linear chain that **fully contains `main`** (0 commits behind):
+
+  | Branch | Full SHA | Behind main | Ahead of main |
+  |---|---|---|---|
+  | `codex/qimmah-founder-qa-candidate-001` | `bcec642163c275427b29976e9269701271485799` | 0 | +154 |
+  | `codex/qimmah-canonical-launch-candidate-001` | `740023b913103546f1ece4741ae987a4dcfc9536` | 0 | +156 |
+  | `codex/qimmah-sovereign-closure-001` | `139a7b00d154e1950e5970ed86d2fe6165dba5c6` | 0 | +228 |
+
+  Ancestry verified: founder-qa ⊂ canonical-launch ⊂ sovereign-closure. Confirmed both
+  directions — `sovereign-closure` is **not** an ancestor of `canonical-launch`
+  (72 commits exist in the former and 0 in the reverse), so the chain is linear, not forked.
+- **Command:** `git merge-base --is-ancestor <sha> origin/main` per branch · `git rev-list --count`
+- **Interpretation:** **This is the central ground finding.** `main` is the trunk but it is
+  **not the most advanced line**. A strict superset of it exists, last committed
+  **2026-08-18** — the day of this verification. Per E-4 the word "sovereign"/"canonical"
+  in those names carries no authority; what carries weight is the verified ancestry.
+
+### V-GROUND-03 — Does unique, unmerged work exist that would be lost? → **YES**
+
+- **Branch:** `codex/qimmah-sovereign-closure-001` and six branches outside its chain
+- **Full SHA:** `139a7b00d154e1950e5970ed86d2fe6165dba5c6`
+- **Evidence:** `git diff --stat origin/main...139a7b00 -- src/` →
+  **185 files changed, 26,910 insertions(+), 2,281 deletions(-)** in `src/` alone.
+  Eight of the 14 candidates are contained in this tip. **Six are not**, each carrying work
+  reachable from nowhere else:
+
+  | Branch outside the chain | Full SHA | Commits not in tip |
+  |---|---|---|
+  | `merge/release-rc-into-trunk` | `bdc0cef8a652aa29ec41a9828e65f017c2a25c96` | 541 |
+  | `claude/p14-e2e-release-gate` | `45b583cb97d554afd35f47cb6a0f8e3be6f88a3d` | 527 |
+  | `claude/web-rc-cto009` | `da11034dca8ab9b15ec61bde5bc9af7a76367f45` | 20 |
+  | `fix/qa-hardening-release-readiness` | `3d4360ef1d095d30336519de52b0b2ad18d083ab` | 18 |
+  | `codex/qimmah-final-release-convergence-001` | `df10b88f5b91f4d1674fc75f922f2ac9c29f8def` | 4 |
+  | `claude/codex-web-sovereign-trace-j9kzwz` | `6fce5026be981924e6ffcd737e8bd299d150f6ba` | 1 |
+
+  The two largest (541 / 527) are also **63 commits behind `main`** — stale divergent lines,
+  not simply "ahead".
+- **Command:** `git diff --stat origin/main...<sha> -- src/` · `git rev-list --count <tip>..<sha>`
+- **Interpretation:** Substantial unique work is at risk. Its **value is unassessed** — line
+  counts measure volume, not worth, and none of it has been reviewed here. Disposition is
+  `GOV-002`, which is explicitly not authorized in this step.
+
+### V-GROUND-04 — Is the trunk internally consistent and complete? → **YES**
+
+- **Branch:** `main` · **Full SHA:** `cc60adfc0da0f893b101230269d4847d33490429`
+- **Evidence:** `git status --porcelain` → 0 lines (clean). Build inputs all present:
+  `package.json`, `package-lock.json` (lockfileVersion 3, name matches, 19 runtime deps),
+  `src/`, `.github/workflows/ci.yml`. No stash, no untracked files.
+- **Command:** `git status --porcelain` · `git rev-parse HEAD origin/main` · lockfile/package cross-read
+- **Interpretation:** The trunk tree is clean and complete.
+  **Disclosure:** at the moment of reporting, local `HEAD` is
+  `80cf1554c4163f6d8c7034d7c40838d045f70322`, one commit ahead of `origin/main` — that
+  commit is **this revision's own control-file commit** on
+  `claude/control-files-tier1-verify-yyxg50`. It touches only `docs/control/` and no
+  product code. All verification above was run against `origin/main`, not against `HEAD`.
+
+### V-GROUND-05 — Are the declared quality gates real and wired? → **YES**
+
+- **Branch:** `main` · **Full SHA:** `cc60adfc0da0f893b101230269d4847d33490429`
+- **Evidence:** `typecheck`, `lint`, `build`, `test:gate` all present in `package.json`.
+  `test:gate` chains **92** sub-scripts. Every one resolves: **0 undefined npm scripts**,
+  **0 dangling `scripts/*.mjs` files**.
+- **Command:** Node resolution of the full `test:gate` chain against `package.json` + `fs.existsSync`
+- **Interpretation:** The gate is real and wired, not decorative. **This does not mean it
+  passes** — running it is Tier 3 (`V-REL-01`) and was not executed here.
+
+### V-GROUND-06 — Is there one unambiguous production deployment source? → **NO**
+
+- **Branch:** `main` · **Full SHA:** `cc60adfc0da0f893b101230269d4847d33490429`
+- **Evidence:** **Two hosting configurations coexist at trunk:**
+  - `wrangler.toml` → Cloudflare Pages project `qimmah`, `pages_build_output_dir = "dist"`
+  - `vercel.json` → Vercel config, `buildCommand`/`outputDirectory`/SPA rewrites
+
+  **No deploy workflow exists** in `.github/workflows/` (only `ci.yml`, `nightly.yml`), so
+  the deploy trigger is not repository-verifiable. `AGENTS.md:340-341` claims Cloudflare
+  Pages auto-deploys from `main` at `https://qimmah-8qp.pages.dev` — but per E-3 that is a
+  document claim, not evidence. Independently, `site/*.html` declares canonical
+  `https://qimmah.app/` (5 pages), which matches **neither** config.
+- **Command:** `cat wrangler.toml vercel.json` · `grep -l deploy .github/workflows/*.yml` · `grep -n canonical site/*.html`
+- **Interpretation:** **NO — genuinely ambiguous.** Three different production identities are
+  asserted across the repository (Pages project, Vercel config, `qimmah.app` canonical URLs)
+  and none is confirmed by a deploy pipeline in the repo. This feeds `ACT-005`, `ACT-006`,
+  and `TRUTH-001` (a canonical URL that does not serve the site is a false external claim).
+
+### V-CI-01 — Does a real CI gate exist and does it actually gate? → **YES**
+
+- **Branch:** `main` · **Full SHA:** `cc60adfc0da0f893b101230269d4847d33490429`
+- **Evidence:** `.github/workflows/ci.yml` triggers on `push: branches: ['**']` and
+  `pull_request: branches: ['**']`. Job `Quality gate (typecheck · lint · build · proofs)`
+  runs `npm ci` → typecheck → lint → build → perf → food-db → `test:gate` → Playwright →
+  onboarding E2E. Run history confirms it fires automatically (`event: push`).
+- **Command:** `cat .github/workflows/ci.yml` · `actions_list list_workflow_runs ci.yml`
+- **Interpretation:** CI is live and gating on every branch, not dormant or manual-only.
+
+### V-CI-02 — What is the actual CI status of the ground SHA? → **NO (red)**
+
+- **Branch:** `main` · **Full SHA:** `cc60adfc0da0f893b101230269d4847d33490429`
+- **Evidence:** Run `31478324999`, conclusion **`failure`**, 2026-08-11T09:34:42Z.
+  Named per `AGENTS.md` §4.0:
+
+  | | |
+  |---|---|
+  | **Workflow** | `CI` (`ci.yml`) |
+  | **Job** | `Quality gate (typecheck · lint · build · proofs)` |
+  | **Failing step** | **#13 `Upload dist artifact`** |
+  | **Steps 1–12** | **all `success`** — including typecheck, lint, production build, `test:gate`, and the onboarding E2E |
+  | **First red on main** | `695e649cbfcd4b703b21ca97f2c3c62a5a925a5f`, run `31435389377`, 2026-08-10T21:46 |
+  | **Last green on main** | `dd79a60f193b1163ab1ec549a35458e0d2aab1de`, run `30880399389`, 2026-08-04T05:20 |
+
+  **Two distinct reds in sequence, not one:**
+  1. `695e649` — failed at step **#12 `Onboarding v2 browser E2E`** (a real test failure).
+  2. `b2514ee` — the commit whose message claims to fix that E2E — still `failure`.
+  3. `cc60adf` — E2E now **passes**; the red moved to step **#13 artifact upload**.
+- **Command:** `actions_list list_workflow_runs ci.yml branch=main` · `list_workflow_jobs 31478324999` · `list_workflow_jobs 31435389377`
+- **Interpretation:** **The trunk is red and has been for 7 days across 3 commits.** But the
+  *current* red is an infrastructure step (artifact upload) sitting **after** every quality
+  step passed — consistent with the GitHub storage-quota red already recorded in
+  `AGENTS.md` §4.0. This is the §4.0 masking pattern repeating in reverse: a **false red**
+  now hides the fact that the trunk's actual quality signal is green. Named, not normalised.
+  Fixing it is **not** authorized here.
+
+### V-CI-03 — Is CI trustworthy, or is it masking? → **YES (no undeclared masking)**
+
+- **Branch:** `main` · **Full SHA:** `cc60adfc0da0f893b101230269d4847d33490429`
+- **Evidence:** Exactly one `continue-on-error: true` in `ci.yml` (line 55) — the perf
+  budget — and it is **declared** in an in-file comment and in `AGENTS.md`. `if: success()`
+  on the artifact upload is ordinary gating, not masking. The two proofs excluded from
+  `test:gate` (`test:safe-storage`, `test:body-model`) are **defined and present** in
+  `package.json` and their exclusion is declared in `AGENTS.md` §11 with stated rationale
+  and coverage substitutes.
+- **Command:** `grep -n "continue-on-error\|if: always\|if: success" .github/workflows/*.yml` · script-presence check
+- **Interpretation:** No undeclared exclusion could let a real failure pass as green. CI's
+  *green* is trustworthy. Its *red*, as V-CI-02 shows, currently over-reports — which is the
+  safer direction of error but still costs the trunk a usable signal.
+
+---
+
+### Ground summary
+
+| Field | Value |
+|---|---|
+| **PROPOSED_CANONICAL_GROUND_BRANCH** | `main` — **contested, see below** |
+| **PROPOSED_CANONICAL_GROUND_SHA** | `cc60adfc0da0f893b101230269d4847d33490429` |
+| **GROUND_CONFIDENCE** | **MEDIUM** |
+
+**Why MEDIUM and not HIGH.** Two different questions have two different confidence levels,
+and collapsing them would be the exact false confidence this exercise exists to remove:
+
+- *Which branch is the trunk?* — **HIGH.** `main` is confirmed from the GitHub API, clean,
+  complete, with real wired gates and live CI.
+- *Is the trunk the ground V1 should be built on?* — **LOW.** A strict superset
+  (`codex/qimmah-sovereign-closure-001`, +228 commits, +26,910 lines in `src/`, committed
+  the same day) exists and is unmerged, plus six further branches with unique work.
+
+`main` is proposed as ground because it is the verified trunk, the declared deploy source,
+and the only line whose quality steps are currently green. It is **not** proposed as
+complete. Promoting the superset chain instead would mean adopting ~27,000 unreviewed lines
+whose own CI is red on a **real** E2E failure (step #12, run `32155970912`) — the opposite
+of establishing verified ground. `GOV-002` resolves this, and is not authorized here.
