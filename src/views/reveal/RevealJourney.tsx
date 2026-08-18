@@ -1,22 +1,31 @@
 // رسم المسار — من أين يبدأ، وإلى أين تتّجه الخطة.
-// [OVERNIGHT-4] الحزمة ٤ · §6.3.
+// [OVERNIGHT-4] الحزمة ٤ · §6.3 — و[SOVEREIGN-003] توحيد سلطة الوزن المستهدف.
 //
 // ═══ ما يُعرض هنا وما لا يُعرض ═══
 // كل رقم مصدره واحد من اثنين، ولا ثالث:
-//   • **مقاس**: الوزن الذي أدخله المستخدم بنفسه. يُقال حاسمًا.
-//   • **مشتقّ**: الوزن المستهدف (`deriveTargetWeight`) والمدّة والمعدّل
-//     (`Targets.estimatedWeeksToGoal` · `weeklyWeightChangeKg`). تُقال متحفّظة،
-//     وتحمل وسم «تقريبي» **مرئيًّا** لا في تعليق كود.
+//   • **مقاس**: الوزن الذي أدخله المستخدم بنفسه — وزنه الحالي، **وهدفه إن
+//     كتبه بنفسه**. يُقال حاسمًا بلا وسم تقدير.
+//   • **مشتقّ**: الوزن المستهدف حين لا يكتبه (`resolveTargetWeight`) والمدّة
+//     والمعدّل (`Targets.estimatedWeeksToGoal` · `weeklyWeightChangeKg`).
+//     تُقال متحفّظة، وتحمل وسم «تقريبي» **مرئيًّا** لا في تعليق كود.
 //
-// ولا يُعرض هنا وزنٌ مستهدف أدخله المستخدم — لأنّ الإعداد **لا يسأل عنه**
-// (الأسئلة الثمانية عشر لا تتضمّنه). فاختراع حقل «هدفك» هنا كان سيكون رقمًا
-// بلا مصدر، والميثاق §٥ يمنعه.
+// التمييز بينهما ليس اجتهاد هذه الشاشة: `targetSource` يأتي من السلطة
+// (`src/lib/planDerive.ts`)، والشاشة ترسم ما تُخبَر به. سطحان يجتهدان في نفس
+// السؤال = رقمان.
+//
+// ═══ حارس الاتّساق الحسابي (§4.2 · §5) ═══
+// العطل الذي أغلقه [SOVEREIGN-003]: الهدف المرسوم كان يأتي من معامل، والمدّة
+// المكتوبة تحته من معامل آخر — بطاقة واحدة برقمين. الحارس هنا **لا يثق** بأن
+// `targets` حُسبت من نفس الهدف المعروض: يسأل `isTrajectoryConsistent` أولًا،
+// وإن لم تتّسق **تسقط المدّة والمعدّل** بدل أن يُعرض رقم يكذّب جاره.
 //
 // وحين يكون الهدف ثباتًا (صحة/حفاظ) يتساوى المقاس والمشتقّ، فلا يُرسم خطّ
 // صاعد ولا نازل: رسمُ ميلٍ وهميّ لهدفٍ ليس فيه ميل **كذبة بصرية**.
 
 import type { Lang } from '@/lib/appPreferences'
 import type { GoalType, Targets } from '@/types/profile'
+import type { TargetWeightSource } from '@/lib/planDerive'
+import { isTrajectoryConsistent } from '@/lib/planDerive'
 import { revealStrings } from '@/i18n/dict/reveal'
 import { formatNumber } from '@/lib/numberFormat'
 import { Icon } from '@/components/Icon'
@@ -25,26 +34,57 @@ export interface RevealJourneyProps {
   lang: Lang
   /** الوزن كما أدخله المستخدم — مقاس. */
   currentWeightKg: number
-  /** الوزن المستهدف المشتقّ من الهدف — لا يُدخله المستخدم. */
+  /** الوزن المستهدف كما حسمته السلطة الواحدة. */
   targetWeightKg: number
+  /**
+   * من أين جاء الرقم أعلاه. الافتراض `derived` **متحفّظ عمدًا**: سطح لم يُبلّغنا
+   * بمصدره يُعامَل تقديرًا، فأسوأ ما يحدث وسمُ رقمٍ حقيقي بـ«تقريبي» — لا
+   * ادّعاءُ يقين لرقم مشتقّ.
+   */
+  targetSource?: TargetWeightSource
+  /**
+   * رقم المستخدم يعاكس اتجاه هدفه. نعرض رقمه كما هو (لا تصحيح صامت، §5)،
+   * ونقولها صراحةً، ونمتنع عن المدّة — لأنها تُحسب من اتجاه السعرات الذي
+   * يفرضه الهدف فتخرج عكس رقمه.
+   */
+  targetContradictsGoal?: boolean
   goalType: GoalType
   targets?: Targets
 }
 
-export function RevealJourney({ lang, currentWeightKg, targetWeightKg, goalType, targets }: RevealJourneyProps) {
+export function RevealJourney({
+  lang,
+  currentWeightKg,
+  targetWeightKg,
+  targetSource = 'derived',
+  targetContradictsGoal = false,
+  goalType,
+  targets,
+}: RevealJourneyProps) {
   const t = revealStrings[lang] ?? revealStrings.ar
   const j = t.journey
   const steady = Math.abs(targetWeightKg - currentWeightKg) < 0.5
   const descending = targetWeightKg < currentWeightKg
+  const isEstimate = targetSource === 'derived'
 
-  const weeks = targets?.estimatedWeeksToGoal
-  const rate = targets?.weeklyWeightChangeKg
+  const rawWeeks = targets?.estimatedWeeksToGoal
+  const rawRate = targets?.weeklyWeightChangeKg
+  // المدّة تُعرض **فقط** إذا كانت من نفس أرقام الهدف المعروض. وتناقض الاتجاه
+  // يسقطها قبل الحساب: لا مدّة لمسارٍ نقول عنه إنه يعاكس هدفه.
+  const trajectory =
+    !targetContradictsGoal &&
+    typeof rawWeeks === 'number' &&
+    typeof rawRate === 'number' &&
+    isTrajectoryConsistent(currentWeightKg, targetWeightKg, rawRate, rawWeeks)
+      ? { weeks: rawWeeks, rate: rawRate }
+      : null
 
   return (
     <section
       className="rounded-2xl border border-line bg-surface p-4"
       data-testid="reveal-journey"
       data-goal-type={goalType}
+      data-target-source={targetSource}
       data-shape={steady ? 'steady' : descending ? 'descending' : 'ascending'}
     >
       <h2 className="text-sm font-black text-ink-900">{j.title}</h2>
@@ -72,23 +112,37 @@ export function RevealJourney({ lang, currentWeightKg, targetWeightKg, goalType,
               {/* التدرّج منطقيّ لا اتجاهيّ — ينعكس مع اللغة فلا يشير للخلف. */}
               <span className="absolute inset-x-0 top-1/2 block h-0.5 -translate-y-1/2 rounded-full from-ink-300 to-primary ltr:bg-gradient-to-r rtl:bg-gradient-to-l" />
             </div>
+            {/* التسمية والوسم يتبعان المصدر: رقمٌ كتبه المستخدم يُسمّى «هدفك»
+                بلا «تقريبي»؛ وسمُ رقمه تقديرًا يكذّب مصدره. */}
             <Endpoint
-              label={j.target}
+              label={isEstimate ? j.target : j.targetYours}
               value={formatNumber(Math.round(targetWeightKg), lang)}
               unit={j.unitKg}
               tone="target"
               raised={!descending}
-              estimateBadge={j.estimateBadge}
+              estimateBadge={isEstimate ? j.estimateBadge : undefined}
             />
           </div>
 
-          {(weeks || rate) && (
+          {targetContradictsGoal && (
+            <p
+              className="mt-4 flex items-start gap-2 rounded-xl border border-line bg-page p-3 text-[0.78rem] leading-relaxed text-ink-700"
+              data-testid="reveal-journey-mismatch"
+            >
+              <Icon name="Info" className="mt-0.5 h-3.5 w-3.5 shrink-0 text-ink-500" />
+              <span>{j.mismatchNote}</span>
+            </p>
+          )}
+
+          {trajectory && (
             <ul className="mt-4 space-y-1.5 text-[0.8rem] text-ink-500">
-              {typeof weeks === 'number' && weeks > 0 && (
-                <li data-testid="reveal-journey-weeks">{j.weeks(formatNumber(weeks, lang))}</li>
+              {trajectory.weeks > 0 && (
+                <li data-testid="reveal-journey-weeks">{j.weeks(formatNumber(trajectory.weeks, lang))}</li>
               )}
-              {typeof rate === 'number' && rate !== 0 && (
-                <li data-testid="reveal-journey-rate">{j.weeklyRate(formatNumber(Math.abs(Number(rate.toFixed(2))), lang))}</li>
+              {trajectory.rate !== 0 && (
+                <li data-testid="reveal-journey-rate">
+                  {j.weeklyRate(formatNumber(Math.abs(Number(trajectory.rate.toFixed(2))), lang))}
+                </li>
               )}
             </ul>
           )}
