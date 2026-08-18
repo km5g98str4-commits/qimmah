@@ -5,7 +5,7 @@ import { PlanPreview } from '@/components/plan/PlanPreview'
 import { PlanWhyPanel } from '@/components/plan/PlanWhyPanel'
 import type { GeneratedPlan } from '@/lib/planGenerator'
 import type { PlanRationale } from '@/lib/planRationale'
-import type { GoalType } from '@/types/profile'
+import type { GoalType, Profile } from '@/types/profile'
 import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
 import { V2_GOAL_MODEL, V2_ONBOARDING, type V2GoalValue } from '@/design-system/v2/labels'
@@ -48,6 +48,10 @@ import {
   LAST_INPUT_STEP,
   NAME_MAX_LENGTH,
   canAdvance,
+  dietPatternApplies,
+  plannedSplitLabelForDays,
+  resolveExperienceLevel,
+  v2LevelFromExperience,
   isBodyweightOnly,
   withBodyweight,
   clearDraftV2,
@@ -71,8 +75,10 @@ import { PaidActionDenied } from '@/lib/access/guard'
 import type { TrialOutcome } from '@/lib/access/entitlementBackend'
 import { SynthesisScreen } from '@/views/reveal/SynthesisScreen'
 import { RevealJourney } from '@/views/reveal/RevealJourney'
+import { RevealValue } from '@/views/reveal/RevealValue'
 import { revealStrings } from '@/i18n/dict/reveal'
 import { deriveTargetWeight } from '@/lib/planDerive'
+import { markPendingTrialIntent } from '@/lib/entryIntent'
 import { useAccess } from '@/lib/access/useAccess'
 
 interface OnboardingV2Props {
@@ -82,7 +88,7 @@ interface OnboardingV2Props {
   /** Exit from the first step (back to Start). */
   onExit: () => void
   /** يسلّم مخرجات التوليد المحفوظة لشاشة التسليم (حزمة ٣). */
-  onPlanReady?: (artifacts: { plan: GeneratedPlan; goalType: GoalType; rationale: PlanRationale }) => void
+  onPlanReady?: (artifacts: { plan: GeneratedPlan; goalType: GoalType; rationale: PlanRationale; profile: Profile }) => void
 }
 
 const GOAL_ICON: Record<V2GoalValue, string> = { cut: 'Flame', maintain: 'ShieldCheck', bulk: 'TrendingUp' }
@@ -98,27 +104,6 @@ const TITLE_ID = [
   'onb-title-lifestyle',
   'onb-title-limitations',
 ] as const
-
-/**
- * Suggested split label from weekly days — a real split descriptor (NOT
- * repeating "N-day split", which the summary already states) so the plan feels
- * concrete. Kept short so the summary row stays on one/two lines.
- */
-function splitFor(days: number, lang: Lang): string {
-  const ar = lang !== 'en'
-  switch (days) {
-    case 3:
-      return ar ? 'دفع · سحب · أرجل' : 'Push · Pull · Legs'
-    case 4:
-      return ar ? 'علوي / سفلي' : 'Upper / Lower'
-    case 5:
-      return ar ? 'لكل عضلة يوم' : 'A day per muscle'
-    case 6:
-      return ar ? 'دفع · سحب · أرجل ×٢' : 'Push · Pull · Legs ×2'
-    default:
-      return ar ? 'تقسيمة مخصّصة' : 'Custom split'
-  }
-}
 
 const toAr = (n: number, lang: Lang) => (lang === 'en' ? String(n) : String(n).replace(/\d/g, (x) => '٠١٢٣٤٥٦٧٨٩'[Number(x)]))
 
@@ -218,6 +203,17 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
   const whyLines = useMemo(() => setupWhyLines(lang), [lang])
   const goalLabel = goal ? goalWording[goal].label : ''
   const levelLabel = intentT.levels.find((l) => l.value === level)?.label ?? ''
+  /**
+   * المستوى الذي **سيُبرمَج فعلًا** — من المصنّف نفسه الذي يستهلكه المولّد،
+   * لا من نسخة ثانية من قواعده. حين يختلف عن المُعلن نقولها بجملة واحدة
+   * هادئة بدل أن نتركه يظنّ أن جوابه هو ما نُفِّذ.
+   */
+  const programmedLevel = useMemo(
+    () => v2LevelFromExperience(resolveExperienceLevel(level, trainedBefore, totalMonths, lastTrained, trainingConsistency)),
+    [level, trainedBefore, totalMonths, lastTrained, trainingConsistency],
+  )
+  const programmedLevelLabel = programmedLevel ? intentT.levels.find((l) => l.value === programmedLevel)?.label ?? '' : ''
+  const levelWasAdjusted = Boolean(level && programmedLevel && programmedLevel !== level && levelLabel && programmedLevelLabel)
   const intentLabel = intentT.intents.find((i) => i.value === intent)?.label ?? ''
   const answers = {
     age: ageNum, gender, heightCm: heightNum, weightKg: weightNum,
@@ -410,7 +406,7 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
           return
         }
         // نفس التوليد الذي حُفظ يُسلَّم للتسليم — لا توليد ثانٍ للعرض.
-        onPlanReady?.({ plan: artifacts.generated, goalType: artifacts.profile.goalType, rationale: artifacts.rationale })
+        onPlanReady?.({ plan: artifacts.generated, goalType: artifacts.profile.goalType, rationale: artifacts.rationale, profile: artifacts.profile })
         // [CTO-68] الحدث ٣ — إكمال الإعداد. **بعد** بناء الخطة وحفظها ووسمها مكتملة،
         // لا عند ضغط الزر: الفشل يرمي قبل هذا السطر فلا يُسجَّل إكمال لم يحدث.
         trackLocal('setup_completed', {})
@@ -452,9 +448,10 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
           goalLabel={goalLabel}
           days={days}
           duration={duration}
-          split={splitFor(days, lang)}
+          split={plannedSplitLabelForDays(days, t.training.splits)}
           placeLabel={t.places.find((p) => p.value === place)?.label ?? ''}
-          levelRow={levelLabel ? intentT.summaryLevel(levelLabel) : ''}
+          levelRow={levelLabel ? (levelWasAdjusted ? intentT.summaryLevelProgrammed(programmedLevelLabel) : intentT.summaryLevel(levelLabel)) : ''}
+          levelNote={levelWasAdjusted ? intentT.levelAdjustedNote(levelLabel, programmedLevelLabel) : ''}
           focusRow={intentLabel ? intentT.summaryFocus(intentLabel) : ''}
           busy={status === 'building'}
           onEnter={finalize}
@@ -528,7 +525,12 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
               why={whyLines[1]}
               intent={intent}
               level={level}
-              onIntent={(v) => { setIntent(v); setValidation(null) }}
+              onIntent={(v) => {
+                setIntent(v)
+                // نية جديدة لا تحمل معها جواب نمط أكل لم يعد يُعرض.
+                if (!dietPatternApplies(v)) setDietPattern(null)
+                setValidation(null)
+              }}
               onLevel={(v) => { setLevel(v); setValidation(null) }}
             />
           )}
@@ -549,7 +551,7 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
           )}
           {step === 3 && <GoalStep lang={lang} t={t} titleId={stepTitleId} why={whyLines[3]} goal={goal} wording={goalWording} isMinor={minor} onPick={(g) => { if (minor && (g === 'cut' || g === 'bulk')) return; setGoal(g); setValidation(null) }} />}
           {step === 4 && (
-            <TrainingStep t={t} titleId={stepTitleId} why={whyLines[4]} lang={lang} days={days} duration={duration} onDays={setDays} onDuration={setDuration} goalLabel={goalLabel} split={splitFor(days, lang)} />
+            <TrainingStep t={t} titleId={stepTitleId} why={whyLines[4]} lang={lang} days={days} duration={duration} onDays={setDays} onDuration={setDuration} goalLabel={goalLabel} split={plannedSplitLabelForDays(days, t.training.splits)} />
           )}
           {step === 5 && (
             <LifestyleStep
@@ -559,6 +561,7 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
               why={whyLines[5]}
               place={place}
               equipment={equipment}
+              intent={intent}
               neat={neat}
               dietPattern={dietPattern}
               onPlace={onPlace}
@@ -1102,10 +1105,10 @@ function TileGroup({ options, value, onChange }: { options: readonly { value: st
 }
 
 function LifestyleStep({
-  lang, t, titleId, why, place, equipment, neat, dietPattern, onPlace, onEquipment, onNeat, onDietPattern,
+  lang, t, titleId, why, place, equipment, intent, neat, dietPattern, onPlace, onEquipment, onNeat, onDietPattern,
 }: {
   lang: Lang; t: T; titleId: string; why: string
-  place: string | null; equipment: Equipment[]; neat: NeatLevel | null; dietPattern: DietPattern | null
+  place: string | null; equipment: Equipment[]; intent: V2Intent | null; neat: NeatLevel | null; dietPattern: DietPattern | null
   onPlace: (v: string) => void
   onEquipment: (v: Equipment) => void
   onNeat: (v: NeatLevel) => void; onDietPattern: (v: DietPattern) => void
@@ -1164,7 +1167,11 @@ function LifestyleStep({
       </Group>
 
       <HistoryGroup questionId="activity.neat" legend={s.legends.activity} question={s.activityQ} options={activityOptions} value={neat} onSelect={onNeat} />
-      <HistoryGroup questionId="nutrition.diet_pattern" legend={s.legends.diet} question={s.dietQ} options={dietOptions} value={dietPattern} onSelect={onDietPattern} />
+      {/* نمط الأكل يُعرض حين ينفع فقط: مستهلكه الوحيد مولّد الوجبات، وهو لا
+          يعمل إلّا مع نية «اقتراحات أكل». عرضه لغيرهم سؤالٌ بلا أثر — §5. */}
+      {dietPatternApplies(intent) && (
+        <HistoryGroup questionId="nutrition.diet_pattern" legend={s.legends.diet} question={s.dietQ} options={dietOptions} value={dietPattern} onSelect={onDietPattern} />
+      )}
     </section>
   )
 }
@@ -1330,7 +1337,7 @@ function WelcomeScreen({ lang, t, onStart, onExit }: { lang: Lang; t: T; onStart
  * **استخدامها** (تسجيل التمرين والأكل والقياسات) — نصّ المؤسس §4.
  */
 export function PlanHandoffScreen({
-  lang, signedIn, onEnter, onCreateAccount, plan, goalType, rationale, displayName, currentWeightKg,
+  lang, signedIn, onEnter, onCreateAccount, plan, goalType, rationale, profile, goalLabel, displayName, currentWeightKg,
 }: {
   lang: Lang
   signedIn: boolean
@@ -1347,6 +1354,10 @@ export function PlanHandoffScreen({
   plan?: GeneratedPlan
   goalType?: GoalType
   rationale?: PlanRationale
+  /** الملفّ المولَّد من نفس التشغيل المحفوظ — مصدر صفوف «وش راح تسوي معك قِمّة». */
+  profile?: Profile
+  /** اسم الهدف بصياغة مستواه المُعلن — من مصدر التسمية الموحّد. */
+  goalLabel?: string | null
   /** اسم المستخدم إن عرفناه من حسابه. غيابه ⇒ تحيّة بلا اسم، لا اسم مخترع. */
   displayName?: string | null
   /** الوزن كما أدخله المستخدم — مقاس، وأساس رسم المسار. */
@@ -1357,11 +1368,28 @@ export function PlanHandoffScreen({
   const rv = revealStrings[lang] ?? revealStrings.ar
   const { beginTrial } = useAccess()
   const [trialState, setTrialState] = useState<'idle' | 'working' | TrialOutcome>('idle')
+  /**
+   * هل نجحت كتابة النيّة؟ يحكم **ظهور** زرّ إنشاء الحساب: بلا نيّة محفوظة
+   * لن يجد المستخدم مدخل التجربة بعد التسجيل، فالزرّ يَعِد بما لا يحدث.
+   * والبديل ليس صمتًا — رسالة `trialNeedsAccount` تبقى ظاهرة تشرح الحاجة.
+   */
+  const [trialIntentStored, setTrialIntentStored] = useState(false)
 
   // الوزن المستهدف **مشتقّ** من الهدف لا مُدخَل — الإعداد لا يسأل عنه.
-  const target = typeof currentWeightKg === 'number' && goalType
+  //
+  // ═══ حارس التناقض ═══ رقمٌ يخالف الهدف المعلن أسوأ من غياب الرقم: هدف
+  // تنشيف يُرسم بوزنٍ **أعلى** يقرأ عكس معناه تمامًا. فإن جاء الاشتقاق
+  // مخالفًا للاتجاه المعلن — لأي سبب حاضر أو قادم — نتراجع إلى الاتجاه بلا
+  // رقم بدل أن نرسم كذبة بصرية (§5 · §6-4).
+  const derived = typeof currentWeightKg === 'number' && goalType
     ? deriveTargetWeight(currentWeightKg, goalType)
     : null
+  const targetContradictsGoal =
+    derived !== null && typeof currentWeightKg === 'number' && (
+      (goalType === 'cutting' && derived > currentWeightKg) ||
+      (goalType === 'bulking' && derived < currentWeightKg)
+    )
+  const target = targetContradictsGoal ? null : derived
 
   const onTrial = async () => {
     if (trialState === 'working') return
@@ -1371,6 +1399,13 @@ export function PlanHandoffScreen({
     // (`signedIn`) لا تحتاج رحلة شبكة لتُكتشف. وكان النداء يُرسَل على أي حال،
     // فيرجع `offline` حين لا يكون هناك خادم — رسالة «تأكّد من اتصالك» لمشكلة
     // ليست اتصالًا. نُبلغه بالسبب الصادق فورًا، ونفتح له الطريق.
+    // [SOVEREIGN-ENTRY-001] النيّة تُكتب على القرص **قبل** أن نعرض الطريق:
+    // الطريق نفسه (إنشاء الحساب) يفكّ هذه الشاشة، فما يبقى في ذاكرتها يموت
+    // معها. والكتابة مفحوصة — زرٌّ يَعِد باستئناف لن يحدث أسوأ من لا شيء.
+    //
+    // وهي جملة مستقلّة عن الاختصار أدناه عمدًا: شكل ذلك السطر مثبَّت في
+    // `test:entry-flow` كإثبات على أن الضيف يُبلَّغ بسببه الصادق بلا رحلة شبكة.
+    if (!signedIn) setTrialIntentStored(markPendingTrialIntent() === 'ok')
     if (!signedIn) { setTrialState('not_authenticated'); return }
     setTrialState('working')
     setTrialState(await beginTrial())
@@ -1415,6 +1450,17 @@ export function PlanHandoffScreen({
               goalType={goalType}
               targets={plan?.targets}
             />
+          </div>
+        )}
+        {targetContradictsGoal && (
+          <p className="mt-4 flex items-start gap-2 rounded-2xl border border-line bg-beige p-3 text-[0.8rem] leading-relaxed text-ink-700" data-testid="reveal-direction-only">
+            <Icon name="Info" className="mt-0.5 h-4 w-4 shrink-0 text-ink-500" />
+            {rv.value.directionOnly}
+          </p>
+        )}
+        {profile && (
+          <div className="mt-4">
+            <RevealValue lang={lang} profile={profile} plan={plan} goalLabel={goalLabel} />
           </div>
         )}
         {plan && goalType && (
@@ -1481,7 +1527,7 @@ export function PlanHandoffScreen({
           )}
           {/* [WAVE-A] اللحظة الصحيحة لطلب الحساب: بعد أن رأى خطته، وعند اختياره
               مسارًا يلزمه حساب — لا قبل أن يرى شيئًا. */}
-          {trialState === 'not_authenticated' && !signedIn && onCreateAccount && (
+          {trialState === 'not_authenticated' && !signedIn && trialIntentStored && onCreateAccount && (
             <button
               type="button"
               onClick={onCreateAccount}
@@ -1503,7 +1549,7 @@ export function PlanHandoffScreen({
   )
 }
 
-function ReadyScreen({ lang, t, goalLabel, days, duration, split, placeLabel, levelRow, focusRow, busy, onEnter }: { lang: Lang; t: T; goalLabel: string; days: number; duration: number; split: string; placeLabel: string; levelRow: string; focusRow: string; busy: boolean; onEnter: () => void }) {
+function ReadyScreen({ lang, t, goalLabel, days, duration, split, placeLabel, levelRow, levelNote, focusRow, busy, onEnter }: { lang: Lang; t: T; goalLabel: string; days: number; duration: number; split: string; placeLabel: string; levelRow: string; levelNote: string; focusRow: string; busy: boolean; onEnter: () => void }) {
   return (
     <div dir={lang === 'en' ? 'ltr' : 'rtl'} aria-busy={busy} className="v2-surface-light fixed inset-0 z-50 flex flex-col overflow-hidden bg-page text-ink-900">
       <div className="pointer-events-none absolute inset-0" aria-hidden="true">
@@ -1527,6 +1573,14 @@ function ReadyScreen({ lang, t, goalLabel, days, duration, split, placeLabel, le
             {levelRow && <SummaryRow icon="Trophy" text={levelRow} />}
             {focusRow && <SummaryRow icon="Compass" text={focusRow} />}
           </div>
+
+          {/* الإفصاح — جملة واحدة هادئة، بلا لوم وبلا اعتذار (§6/الثابت ١). */}
+          {levelNote && (
+            <p data-testid="ready-level-adjusted" className="mt-3 flex w-full max-w-sm items-start gap-2 rounded-2xl border border-line bg-beige p-3 text-start text-[0.78rem] leading-snug text-ink-700">
+              <Icon name="Info" className="mt-0.5 h-4 w-4 shrink-0 text-ink-500" />
+              {levelNote}
+            </p>
+          )}
         </div>
 
         <div className="space-y-3">

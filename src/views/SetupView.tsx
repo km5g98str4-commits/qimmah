@@ -4,14 +4,15 @@ import { RouteErrorBoundary } from '@/components/ErrorBoundary'
 import { OnboardingV2, PlanHandoffScreen } from '@/views/OnboardingV2'
 import type { GeneratedPlan } from '@/lib/planGenerator'
 import type { PlanRationale } from '@/lib/planRationale'
-import type { GoalType } from '@/types/profile'
+import type { GoalType, Profile } from '@/types/profile'
 
 /** مخرجات التوليد المحفوظة التي تعرضها شاشة التسليم. */
-interface PlanArtifacts { plan: GeneratedPlan; goalType: GoalType; rationale: PlanRationale }
+interface PlanArtifacts { plan: GeneratedPlan; goalType: GoalType; rationale: PlanRationale; profile: Profile }
 import { getLanguage } from '@/lib/appPreferences'
 import { useAuth } from '@/lib/authContext'
 import { loadOnboardingProfile } from '@/lib/onboardingProfile'
 import { firstGreetableName } from '@/lib/displayName'
+import { declaredGoalTypeLabel } from '@/lib/declaredGoalWording'
 
 interface SetupViewProps {
   onClose: (completed?: boolean) => void
@@ -55,6 +56,10 @@ export function SetupView({ onClose, onEnterFromHandoff, onCreateAccount, initia
         plan={artifacts?.plan}
         goalType={artifacts?.goalType}
         rationale={artifacts?.rationale}
+        /* الملفّ من **نفس** التوليد المحفوظ — لا نسخة ثانية تنحرف عمّا يجده. */
+        profile={artifacts?.profile}
+        /* اسم الهدف من مصدر التسمية الموحّد، بصياغة المستوى المُعلن. */
+        goalLabel={artifacts ? declaredGoalTypeLabel(getLanguage(), artifacts.goalType, '') || null : null}
         /* الاسم الذي كتبه المستخدم في الإعداد **يسبق** ما يعرفه حسابه: هو
            اختاره لنفسه للتوّ. وكلاهما يمرّ بحارس البريد — لا عنوان بريد في
            موضع اسم. */

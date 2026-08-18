@@ -2,16 +2,26 @@ import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import {
   ONBOARDING_QUESTION_IDS,
+  dietPatternApplies,
   historyFollowUpsApply,
+  plannedSplitLabelForDays,
   injuryAreasApply,
   normalizeDraft,
   resolveExperienceLevel,
   resolveTrainingConsistency,
+  v2LevelFromExperience,
   validateStep,
   type OnboardingV2Draft,
 } from '@/lib/onboardingV2Flow'
 import { toAnswersFromV2, type V2OnboardingChoices } from '@/lib/onboardingV2Adapter'
 import type { Equipment } from '@/types/profile'
+import {
+  PENDING_TRIAL_KEY,
+  PENDING_TRIAL_TTL_MS,
+  clearPendingTrialIntent,
+  hasPendingTrialIntent,
+  markPendingTrialIntent,
+} from '@/lib/entryIntent'
 import { buildOnboardingProfile } from '@/lib/planBuilderAnswers'
 import {
   ONBOARDING_PROFILE_KEY,
@@ -30,6 +40,7 @@ import { onboardingLifestyleStrings } from '@/i18n/dict/onboardingLifestyle'
 import { onboardingEquipmentStrings } from '@/i18n/dict/onboardingEquipment'
 import { dietPatternChoices, neatChoices } from '@/data/planBuilder'
 import { V2_ONBOARDING } from '@/design-system/v2/labels'
+import { revealStrings } from '@/i18n/dict/reveal'
 
 let passed = 0
 const failed: string[] = []
@@ -151,47 +162,182 @@ check('الهدف والجدول والمكان محفوظة', op.goal.type === 
 check('النشاط ونمط الأكل محفوظان', op.activityProfile.neat === 'moderate' && op.foodPreferences.dietPattern === 'none')
 check('جواب الإصابة ومناطقها محفوظان', op.limitations.hasInjury === true && op.limitations.injuries.join() === 'knee')
 
-console.log('\n═══ 6) مصفوفة المستهلكين: تغيير الجواب يغيّر نتيجة حقيقية ═══')
-check('age → أهلية القاصر', profileFor({ age: 15, goal: 'cut' }).goalType !== profileFor({ age: 30, goal: 'cut' }).goalType)
-check('sex → BMR', planFor({ gender: 'male' }).targets.bmr !== planFor({ gender: 'female' }).targets.bmr)
-check('height → BMR', planFor({ heightCm: 160 }).targets.bmr !== planFor({ heightCm: 195 }).targets.bmr)
-check('weight → BMR/السعرات', planFor({ weightKg: 60 }).targets.targetCalories !== planFor({ weightKg: 100 }).targets.targetCalories)
-check('intent → طريقة عرض التغذية', profileFor({ intent: 'numbers' }).nutritionDisplayStyle !== profileFor({ intent: 'meals' }).nutritionDisplayStyle)
-check('declared level → نطاق الخبرة', profileFor({ level: 'beginner' }).experienceBand !== profileFor({ level: 'intermediate' }).experienceBand)
-check('trainedBefore → نقطة البداية', resolveExperienceLevel('advanced', 'never', null, null, null) !== resolveExperienceLevel('advanced', 'years', 'y3_plus', 'now', 'steady'))
-check('totalMonths → نطاق الخبرة', profileFor({ totalMonths: 'lt3' }).experienceBand !== profileFor({ totalMonths: 'y3_plus' }).experienceBand)
-check('lastTrained → بداية أسبوع مخففة', firstWeek({ totalMonths: 'm6_12', lastTrained: 'now' }) !== firstWeek({ totalMonths: 'm6_12', lastTrained: 'm3_12' }))
-check('consistency → بداية أسبوع مخففة', firstWeek({ consistency: 'steady' }) !== firstWeek({ consistency: 'on_off' }))
-check('goal → سعرات الهدف', planFor({ goal: 'cut' }).targets.targetCalories !== planFor({ goal: 'bulk' }).targets.targetCalories)
-check('days → عدد أيام الخطة', planFor({ days: 3 }).workoutPlan.days.length !== planFor({ days: 6 }).workoutPlan.days.length)
-check('duration → حجم الجلسات', countExercises({ duration: 30 }) !== countExercises({ duration: 75 }))
-// [SOVEREIGN-002] المكان سياق، والأداة سلطة.
+console.log('\n═══ 6) مصفوفة المستهلكين: كل قيمة تُجرَّب، لا زوج مُواتٍ واحد ═══')
+// ═══════════════════════════════════════════════════════════════════════════
+// §4.2 — لماذا أُعيد بناء هذا القسم
 //
-// كان هذا الفحص يؤكّد أن «نادي» ≠ «منزل» في اختيار التمارين — وهو صحيح في النموذج
-// القديم حيث المكان **يستنتج** العدّة. وبعد أن صارت `profile.equipment` سلطة
-// التوليد، صار السؤال الصحيح مختلفًا: من يملك ناديًا كاملًا في بيته يستحقّ الخطة
-// نفسها في الموضعين، ولا يُحرَم من بارٍ يملكه لأنه أجاب «منزل».
+// كان القسم يمرّ **أخضر بـ٩٧ فحصًا وأربعة عيوب حيّة تحته**، لأن كل تأكيد
+// يقارن **زوجًا واحدًا مُواتيًا**:
+//   • `place` قورن «نادي ↔ منزل» — الزوج الوحيد الذي يختلف. و«نادي ↔ أجهزة»
+//     متطابقان في ٤٨ من ٤٨ تكوينًا، ولم يُلمَسا قطّ.
+//   • `NEAT` قورن «قليل ↔ عالٍ»، و«قليل ≡ خفيف» لم يُلمَس.
+//   • `injury areas` قورن «ركبة ↔ كتف» في النادي — **ومرّ لأن الكتف خامل**،
+//     أي أنه نجح بفضل العيب الذي كان يجب أن يكشفه.
 //
-// فيُثبَت الآن أمران معًا: المكان **يحسم حين لا تُعلَن العدّة** (مسار التوافق مع
-// الملفّات القائمة)، **ولا يحسم حين تُعلَن** — والثاني تأكيد مضادّ يسقط لو عاد
-// المكان يتجاوز ما أعلنه المستخدم أنه يملك.
-const noKit: Partial<V2OnboardingChoices> = { equipment: [] }
-check(
-  'place → اختيار التمارين (حين لا تُعلَن العدّة)',
-  JSON.stringify(planFor({ ...noKit, place: 'gym' }).workoutPlan) !==
-    JSON.stringify(planFor({ ...noKit, place: 'home' }).workoutPlan),
-)
-check(
-  '⟲ وبعدّة مُعلَنة كاملة لا يغيّر المكان الخطة — الأداة سلطة لا المكان',
-  JSON.stringify(planFor({ place: 'gym' }).workoutPlan) ===
-    JSON.stringify(planFor({ place: 'home' }).workoutPlan),
-)
-check('NEAT → TDEE', planFor({ neat: 'sedentary' }).targets.tdee !== planFor({ neat: 'high' }).targets.tdee)
-const unrestrictedMeals = planFor({ dietPattern: 'none' }).nutritionPlan.meals
-const veganMeals = planFor({ dietPattern: 'vegan' }).nutritionPlan.meals
-check('dietPattern → تصفية الوجبات', unrestrictedMeals.some((meal) => !mealAllowedForDiet(meal, 'vegan')) && veganMeals.every((meal) => mealAllowedForDiet(meal, 'vegan')))
-check('hasInjury → إظهار سؤال المناطق', !injuryAreasApply(false) && injuryAreasApply(true))
-check('injury areas → استبعاد حركات', JSON.stringify(planFor({ hasInjury: true, injuries: ['knee'] }).workoutPlan) !== JSON.stringify(planFor({ hasInjury: true, injuries: ['shoulder'] }).workoutPlan))
+// القاعدة الآن: **كل قيمة من كل سؤال تُجرَّب، ويُقاس عدد النتائج المتمايزة.**
+// سؤال كل قيمه تعطي نتيجة واحدة يسقط دائمًا؛ وأي زوج متطابق يسقط **باسمه
+// وباسم قيمتيه** إلّا أن يكون مُعلَنًا أدناه بمالكه ودليله.
+// ═══════════════════════════════════════════════════════════════════════════
+
+interface QuestionMatrix {
+  id: (typeof ONBOARDING_QUESTION_IDS)[number]
+  /** كل قيمة تُجرَّب — لا عيّنة مُواتية. */
+  values: { label: string; over: Partial<V2OnboardingChoices> }[]
+  /** القرار النهائي الذي يجب أن يتغيّر — مسمّى، لا «شيء ما اختلف». */
+  outcome: (over: Partial<V2OnboardingChoices>) => string
+  decision: string
+}
+
+const planSignature = (over: Partial<V2OnboardingChoices>) => JSON.stringify(planFor(over).workoutPlan)
+const vals = <K extends keyof V2OnboardingChoices>(key: K, list: readonly V2OnboardingChoices[K][]) =>
+  list.map((v) => ({ label: String(v), over: { [key]: v } as Partial<V2OnboardingChoices> }))
+
+const MATRIX: QuestionMatrix[] = [
+  { id: 'profile.display_name', decision: 'الاسم في التحيّة',
+    values: [{ label: '(فارغ)', over: { name: '' } }, { label: 'زياد', over: { name: 'زياد' } }, { label: 'سارة', over: { name: 'سارة' } }],
+    outcome: (o) => profileFor(o).name },
+  { id: 'body.age', decision: 'أهلية الهدف (حاجز القاصرين)',
+    values: [{ label: '15', over: { age: 15, goal: 'cut' } }, { label: '30', over: { age: 30, goal: 'cut' } }],
+    outcome: (o) => profileFor(o).goalType },
+  { id: 'body.sex', decision: 'BMR', values: vals('gender', ['male', 'female']),
+    outcome: (o) => String(planFor(o).targets.bmr) },
+  { id: 'body.height', decision: 'BMR', values: vals('heightCm', [160, 175, 195]),
+    outcome: (o) => String(planFor(o).targets.bmr) },
+  { id: 'body.weight', decision: 'السعرات المستهدفة', values: vals('weightKg', [60, 82, 100]),
+    outcome: (o) => String(planFor(o).targets.targetCalories) },
+  { id: 'intent.primary', decision: 'أسلوب عرض التغذية', values: vals('intent', ['plan', 'meals', 'numbers']),
+    outcome: (o) => String(profileFor(o).nutritionDisplayStyle) },
+  { id: 'experience.declared', decision: 'نطاق الخبرة', values: vals('level', ['beginner', 'intermediate', 'advanced']),
+    outcome: (o) => String(profileFor(o).experienceBand) },
+  { id: 'history.trained_before', decision: 'مستوى الخبرة المشتقّ',
+    values: (['never', 'tried', 'months', 'years'] as const).map((v) => ({ label: v, over: { trainedBefore: v, totalMonths: 'y1_3' as const, lastTrained: 'now' as const, consistency: 'mostly' as const } })),
+    outcome: (o) => String(profileFor(o).experienceLevel) },
+  { id: 'history.total_months', decision: 'نطاق الخبرة', values: vals('totalMonths', ['lt3', 'm3_6', 'm6_12', 'y1_3', 'y3_plus']),
+    outcome: (o) => String(profileFor(o).experienceBand) },
+  { id: 'history.last_trained', decision: 'تخفيف أول أسبوع',
+    values: (['now', 'w2', 'm1_3', 'm3_12', 'y1_plus'] as const).map((v) => ({ label: v, over: { totalMonths: 'm6_12' as const, lastTrained: v } })),
+    outcome: (o) => String(firstWeek(o)) },
+  { id: 'history.consistency', decision: 'تخفيف أول أسبوع', values: vals('consistency', ['rare', 'on_off', 'mostly', 'steady']),
+    outcome: (o) => String(firstWeek(o)) },
+  { id: 'goal.primary', decision: 'السعرات المستهدفة', values: vals('goal', ['cut', 'maintain', 'bulk']),
+    outcome: (o) => String(planFor(o).targets.targetCalories) },
+  { id: 'training.days', decision: 'عدد أيام الخطة', values: vals('days', [3, 4, 5, 6]),
+    outcome: (o) => String(planFor(o).workoutPlan.days.length) },
+  { id: 'training.duration', decision: 'حجم الجلسة', values: vals('duration', [30, 45, 60, 75]),
+    outcome: (o) => String(countExercises(o)) },
+  { id: 'training.place', decision: 'اختيار التمارين',
+    values: (['gym', 'home', 'machines'] as const).map((v) => ({ label: v, over: { place: v, equipment: [] } })),
+    outcome: planSignature },
+  { id: 'equipment.available', decision: 'مجموعة الأدوات وبيئة التمرين',
+    values: [
+      { label: 'كامل', over: { place: 'home', equipment: ['dumbbell', 'barbell', 'bench', 'bodyweight'] } },
+      { label: 'مطاط فقط', over: { place: 'home', equipment: ['bands'] } },
+      { label: 'وزن جسم', over: { place: 'home', equipment: ['bodyweight'] } },
+    ],
+    outcome: (o) => `${profileFor(o).gymAccess}|${(profileFor(o).equipment ?? []).join(',')}` },
+  { id: 'activity.neat', decision: 'TDEE', values: vals('neat', ['sedentary', 'light', 'moderate', 'high']),
+    outcome: (o) => String(planFor(o).targets.tdee) },
+  { id: 'nutrition.diet_pattern', decision: 'تصفية الوجبات',
+    values: (['none', 'vegetarian', 'vegan', 'pescatarian', 'low_carb', 'keto'] as const).map((v) => ({ label: v, over: { intent: 'meals' as const, dietPattern: v } })),
+    outcome: (o) => JSON.stringify(planFor(o).nutritionPlan) },
+  { id: 'limitations.has_injury', decision: 'ترشيح الحركات',
+    values: [
+      { label: 'لا', over: { place: 'home', hasInjury: false, injuries: ['knee'] } },
+      { label: 'نعم', over: { place: 'home', hasInjury: true, injuries: ['knee'] } },
+    ],
+    outcome: (o) => `${planSignature(o)}|${(profileFor(o).injuryAreas ?? []).join(',')}` },
+  { id: 'limitations.injury_areas', decision: 'استبعاد الحركات',
+    values: (['knee', 'shoulder', 'lower_back', 'wrist', 'elbow', 'ankle'] as const).map((v) => ({ label: v, over: { place: 'home' as const, hasInjury: true, injuries: [v] } })),
+    outcome: planSignature },
+]
+
+// ═══ جدول الاستثناءات — مُعلَن بمالكه ودليله، ومحروس في الاتّجاهين (§4.2) ═══
+//
+// لا يُخفي شيئًا: كل سطر يُطبَع في المخرجات ويسمّي القيمتين ومالك العيب ودليله.
+// وهو نفسه محروس بتأكيد يثبت أنه **لم يصر قاعدة**: المقيس يجب أن يطابق
+// المُعلَن **حرفيًا**. فاستثناء أُصلح يسقط الإثبات حتى يُحذف من القائمة،
+// وتطابقٌ جديد يسقطه حتى يُسمّى مالكه. القائمة لا تكبر بالسكوت ولا تشيخ به.
+//
+// ولماذا استثناء أصلًا بدل الإسقاط الأحمر؟ لأن **كل سطر هنا يملكه غيري**:
+// `planGenerator` و`calculators` و`personalization/experience` (المجمَّد
+// بالميثاق §8-7) خارج نطاق هذه الحارة. إسقاط الجذع بعيبٍ لا أملك إصلاحه
+// يحوّل الإثبات إلى حاجز، والمطلوب أن يكون **كاشفًا مسمّىً**.
+const FROZEN_CLASSIFIER = 'مصنّف الخبرة — مجمَّد بالميثاق §8-7 (personalization/experience.ts)'
+const ENGINE_LANE = 'حارة محرّك الخطة (planGenerator.ts)'
+const FORMULA_LANE = 'حارة المعادلات (calculators.ts · يحرسها test:formula و CALC_FORMULA_VERSION)'
+const NUTRITION_LANE = 'حارة التغذية (نسبة الماكروز ثابتة: FAT_CALORIE_RATIO/PROTEIN_PER_KG)'
+
+const DECLARED_INERT: { id: string; a: string; b: string; owner: string; why: string }[] = [
+  // ── أُزيل: `training.place` gym ≡ machines ──────────────────────────────
+  // كان مُعلَنًا بمالكه (`planGenerator.ts:713`) ومقيسًا ٠ من ٤٨. أصلحته حارة
+  // المحرّك في [SOVEREIGN-PLAN-001] فصارا يفترقان في ٤٨ من ٤٨ — فأسقط الحارسُ
+  // **استثناءه البائت** باسمه قبل أن يسقط أي شيء آخر، وهو بالضبط ما بُني له:
+  // القائمة لا تكبر بالسكوت ولا تشيخ به.
+  { id: 'activity.neat', a: 'sedentary', b: 'light', owner: FORMULA_LANE,
+    why: 'calculators.ts:22-28 — كلاهما ×1.2، فخياران يُعرضان بوصفين مختلفين ويعطيان الرقم نفسه' },
+  { id: 'nutrition.diet_pattern', a: 'none', b: 'low_carb', owner: NUTRITION_LANE, why: 'نمط نِسَب لا نمط مصادر — والنِسَب ثابتة' },
+  { id: 'nutrition.diet_pattern', a: 'none', b: 'keto', owner: NUTRITION_LANE, why: 'نفس السبب' },
+  { id: 'nutrition.diet_pattern', a: 'low_carb', b: 'keto', owner: NUTRITION_LANE, why: 'نفس السبب' },
+  // ── الخمسة التالية كشفها هذا التشديد لأوّل مرّة؛ الحارس القديم لم يلمسها ──
+  { id: 'experience.declared', a: 'intermediate', b: 'advanced', owner: FROZEN_CLASSIFIER,
+    why: 'وزن `selfLevel` 1.0 من 6.5 — والمخرج المعتمد إفصاحٌ لا تعديل وزن (القسم 8هـ)' },
+  { id: 'history.trained_before', a: 'tried', b: 'months', owner: FROZEN_CLASSIFIER,
+    why: 'مع تاريخ طويل يتقاربان على نفس التصنيف' },
+  { id: 'history.total_months', a: 'm3_6', b: 'm6_12', owner: FROZEN_CLASSIFIER, why: 'الدلاء الخمس تُجمع في نطاقين ضمن هذا السياق' },
+  { id: 'history.total_months', a: 'm3_6', b: 'y1_3', owner: FROZEN_CLASSIFIER, why: 'نفس السبب' },
+  { id: 'history.total_months', a: 'm3_6', b: 'y3_plus', owner: FROZEN_CLASSIFIER, why: 'نفس السبب' },
+  { id: 'history.total_months', a: 'm6_12', b: 'y1_3', owner: FROZEN_CLASSIFIER, why: 'نفس السبب' },
+  { id: 'history.total_months', a: 'm6_12', b: 'y3_plus', owner: FROZEN_CLASSIFIER, why: 'نفس السبب' },
+  { id: 'history.total_months', a: 'y1_3', b: 'y3_plus', owner: FROZEN_CLASSIFIER, why: 'نفس السبب' },
+  { id: 'history.last_trained', a: 'now', b: 'w2', owner: ENGINE_LANE, why: 'قرار «تخفيف أول أسبوع» ثنائيّ، فالدلاء الخمس تسقط على قيمتين' },
+  { id: 'history.last_trained', a: 'm1_3', b: 'now', owner: ENGINE_LANE, why: 'نفس السبب' },
+  { id: 'history.last_trained', a: 'm1_3', b: 'w2', owner: ENGINE_LANE, why: 'نفس السبب' },
+  { id: 'history.last_trained', a: 'm3_12', b: 'y1_plus', owner: ENGINE_LANE, why: 'نفس السبب' },
+  { id: 'history.consistency', a: 'on_off', b: 'rare', owner: ENGINE_LANE, why: 'نفس السبب — قرار ثنائيّ لأربع قيم' },
+  { id: 'history.consistency', a: 'mostly', b: 'steady', owner: ENGINE_LANE, why: 'نفس السبب' },
+]
+const declaredKey = (id: string, a: string, b: string) => `${id}::${[a, b].sort().join('::')}`
+const declaredSet = new Set(DECLARED_INERT.map((d) => declaredKey(d.id, d.a, d.b)))
+const measuredInert = new Set<string>()
+
+for (const q of MATRIX) {
+  const outcomes = q.values.map((v) => ({ label: v.label, sig: q.outcome(v.over) }))
+  const distinct = new Set(outcomes.map((o) => o.sig)).size
+  const undeclared: string[] = []
+  for (let i = 0; i < outcomes.length; i += 1) {
+    for (let j = i + 1; j < outcomes.length; j += 1) {
+      if (outcomes[i].sig !== outcomes[j].sig) continue
+      const key = declaredKey(q.id, outcomes[i].label, outcomes[j].label)
+      measuredInert.add(key)
+      if (!declaredSet.has(key)) undeclared.push(`${outcomes[i].label}≡${outcomes[j].label}`)
+    }
+  }
+  // ① سؤال ميّت بالكامل — كل قيمه تعطي نتيجة واحدة: يسقط دائمًا، بلا استثناء.
+  check(`${q.id}: السؤال حيّ — قيمُه لا تعطي نتيجة واحدة`, distinct > 1)
+  // ② أي تطابق غير مُعلَن يسقط **باسم السؤال وقيمتيه**.
+  check(
+    `${q.id} → ${q.decision}: ${distinct}/${q.values.length} متمايزة${undeclared.length ? ` — تطابق غير مُعلَن: ${undeclared.join(' · ')}` : ''}`,
+    undeclared.length === 0,
+  )
+}
+
+console.log('\n  — استثناءات مُعلَنة (لا صامتة): كلٌّ بمالكه —')
+for (const d of DECLARED_INERT) console.log(`    ⚠ ${d.id}: ${d.a} ≡ ${d.b}\n       مالكه: ${d.owner}\n       ${d.why}`)
+
+// ③ التأكيد المضادّ في الاتّجاهين: المقيس = المُعلَن حرفيًا.
+const staleExceptions = [...declaredSet].filter((k) => !measuredInert.has(k))
+check(`لا استثناء بائت (أُصلح ولم يُحذف): ${staleExceptions.join(' · ') || 'صفر'}`, staleExceptions.length === 0)
+check('كل سؤال في السجلّ له صفّ في المصفوفة — لا سؤال بلا قياس',
+  ONBOARDING_QUESTION_IDS.every((id) => MATRIX.some((q) => q.id === id)) && MATRIX.length === ONBOARDING_QUESTION_IDS.length)
+check('محاكاة الالتفاف: زوج خامل غير مُعلَن ليس في القائمة سلفًا', !declaredSet.has(declaredKey('training.days', '3', '4')))
+check('ولا يمكن إسكات تطابق بإدراج معرّف غير موجود', DECLARED_INERT.every((d) => MATRIX.some((q) => q.id === d.id)))
+// تأكيدان دلاليّان فوق المصفوفة: تطابقُ البصمة يقول «اختلفت»، وهذان يقولان
+// **بمَ** اختلفت — أي أن الترشيح يعني ما يدّعيه لا مجرّد بايتات أخرى.
+check('hasInjury: «لا» تُخفي سؤال المناطق و«نعم» تُظهره', !injuryAreasApply(false) && injuryAreasApply(true))
+const unrestrictedMeals = planFor({ intent: 'meals', dietPattern: 'none' }).nutritionPlan.meals
+const veganMeals = planFor({ intent: 'meals', dietPattern: 'vegan' }).nutritionPlan.meals
+check('dietPattern: التصفية تعني الالتزام فعلًا لا اختلافًا شكليًا',
+  unrestrictedMeals.some((meal) => !mealAllowedForDiet(meal, 'vegan')) && veganMeals.every((meal) => mealAllowedForDiet(meal, 'vegan')))
 
 console.log('\n═══ 7) never: لا تاريخ مصنوع ولا قيم خفية تعود ═══')
 const neverAnswers = toAnswersFromV2({ ...base, level: 'advanced', trainedBefore: 'never', totalMonths: 'y3_plus', lastTrained: 'y1_plus', consistency: 'steady' })
@@ -199,12 +345,14 @@ check('never لا تحمل المدة/الانقطاع/الانتظام الخا
 check('never ليست returning', neverAnswers.consistency === 'new' && resolveTrainingConsistency('never', null, null, null) === 'new')
 check('never تُصنّف مبتدئًا مهما كان الادعاء', neverAnswers.experienceLevel === 'beginner')
 const stale: OnboardingV2Draft = {
-  step: 2, age: 30, gender: 'male', heightCm: 180, weightKg: 82,
+  step: 2, name: '', age: 30, gender: 'male', heightCm: 180, weightKg: 82,
   intent: 'meals', level: 'advanced', trainedBefore: 'never', totalMonths: 'y3_plus',
   lastTrained: 'y1_plus', consistency: 'steady', goal: 'cut', days: 4, duration: 60,
-  place: 'gym', neat: 'moderate', dietPattern: 'none', hasInjury: false,
+  place: 'gym', equipment: ['bodyweight'], equipmentTouched: false,
+  neat: 'moderate', dietPattern: 'none', hasInjury: false,
   injuries: ['knee'], healthDataConsent: true,
 }
+const staleDietDraft: OnboardingV2Draft = { ...stale, intent: 'meals', dietPattern: 'vegan' }
 const cleared = normalizeDraft(stale)
 check('تطبيع never يمحو كل متابعة قديمة', cleared.totalMonths === null && cleared.lastTrained === null && cleared.consistency === null)
 check('trained → never → trained لا يعيد أجوبة قديمة', historyFollowUpsApply('months') && !historyFollowUpsApply('never') && cleared.totalMonths === null && historyFollowUpsApply('years'))
@@ -292,6 +440,102 @@ check('مناطق الإصابة تصل Profile.injuryAreas كمفاتيح', JSO
 check('والنصّ القديم يبقى كما هو (توافق رجعي)', injured.injuries === 'knee، shoulder')
 check('«لا إصابة» تُقرأ فعلًا فتُفرَّغ المناطق', (profileFor({ hasInjury: false, injuries: ['knee'] }).injuryAreas ?? []).length === 0)
 check('مفتاح مخترَع لا يدخل المناطق', (profileFor({ hasInjury: true, injuries: ['knee', 'neck'] }).injuryAreas ?? []).join() === 'knee')
+
+console.log('\n═══ 8ج) الوعد = المُسلَّم: اسم التقسيمة يُقاس بمخرَج المحرّك ═══')
+// §4.2: لا يُصدَّق جدولٌ على كلمته. لكل عدد أيام تُولَّد الخطة **الحقيقية**
+// وتُقارَن أسماء أيامها بالاسم المعروض. جدول `splitFor` القديم كان يسقط هنا
+// عند ٣ أيام و٥ أيام — وهما اثنان من أربعة اختيارات.
+const SPLIT_SHAPE: Record<number, (names: string[]) => boolean> = {
+  3: (n) => n.every((x) => x.includes('جسم كامل')),
+  4: (n) => n.every((x) => x.includes('علوي') || x.includes('سفلي')) && n.some((x) => x.includes('علوي')) && n.some((x) => x.includes('سفلي')),
+  5: (n) => n.slice(0, 4).every((x) => x.includes('علوي') || x.includes('سفلي')) && !/علوي|سفلي/.test(n[4] ?? ''),
+  6: (n) => n.some((x) => x.includes('دفع')) && n.some((x) => x.includes('سحب')) && n.some((x) => x.includes('أرجل')),
+}
+for (const days of [3, 4, 5, 6]) {
+  const dayNames = planFor({ days }).workoutPlan.days.map((d) => d.nameAr)
+  const shown = plannedSplitLabelForDays(days, V2_ONBOARDING.ar.training.splits)
+  const shownEn = plannedSplitLabelForDays(days, V2_ONBOARDING.en.training.splits)
+  check(`${days} أيام: المحرّك يبني ما يصفه الاسم المعروض «${shown}»`, SPLIT_SHAPE[days](dayNames))
+  // الاقتران الحقيقي: كل مصطلح في الاسم المعروض يجب أن يظهر في أسماء الأيام
+  // المولَّدة. بلا هذا يبقى الفحصان متجاورين لا مقترنين — وهو بالضبط الرخاوة
+  // التي يمنعها §4.2 («وجود أجزاء متفرّقة بدل اقترانها»).
+  const claimed = ['دفع', 'سحب', 'أرجل', 'جسم كامل', 'علوي', 'سفلي'].filter((term) => shown.includes(term))
+  const unmet = claimed.filter((term) => !dayNames.some((n) => n.includes(term)))
+  check(`${days} أيام: كل مصطلح في الاسم موجود في الأيام المولَّدة${unmet.length ? ` — وعدٌ بلا مقابل: ${unmet.join(' · ')}` : ''}`, unmet.length === 0)
+  check(`${days} أيام: الاسم غير فارغ وله نسخة إنجليزية متمايزة`, shown.length > 0 && shownEn.length > 0 && shown !== shownEn)
+}
+check('٣ أيام لا تُوصف «دفع · سحب · أرجل» بعد اليوم', !plannedSplitLabelForDays(3, V2_ONBOARDING.ar.training.splits).includes('دفع'))
+check('٥ أيام لا تُوصف «لكل عضلة يوم» بعد اليوم', !plannedSplitLabelForDays(5, V2_ONBOARDING.ar.training.splits).includes('لكل عضلة'))
+check('الواجهة لا تحمل جدول تقسيمات ثانيًا', !viewSource.includes('function splitFor'))
+
+console.log('\n═══ 8د) نمط الأكل: يُسأل حين ينفع فقط ═══')
+// المقيس: مستهلكه الوحيد مولّد الوجبات، ولا يعمل إلّا مع نية «اقتراحات أكل».
+for (const intent of ['plan', 'numbers'] as const) {
+  const patterns = ['none', 'vegan', 'keto'] as const
+  const plans = patterns.map((dietPattern) => JSON.stringify(planFor({ intent, dietPattern }).nutritionPlan))
+  check(`intent=${intent}: نمط الأكل بلا أثر (لذلك لا يُسأل)`, new Set(plans).size === 1)
+  check(`intent=${intent}: السؤال لا يُعرض`, !dietPatternApplies(intent))
+  check(`intent=${intent}: غيابه لا يحجب الخطوة`, validateStep(5, { ...valid, intent, dietPattern: null }) === null)
+}
+check('intent=meals: السؤال يُعرض', dietPatternApplies('meals'))
+check('intent=meals: غيابه يحجب الخطوة', validateStep(5, { ...valid, intent: 'meals', dietPattern: null }) === 'lifestyle')
+check('تبديل النية يمحو جواب نمط الأكل المخفيّ', normalizeDraft({ ...staleDietDraft, intent: 'numbers' }).dietPattern === null)
+check('ويُبقيه حين تبقى النية meals', normalizeDraft({ ...staleDietDraft, intent: 'meals' }).dietPattern === 'vegan')
+
+console.log('\n═══ 8هـ) المستوى المُلغى يُقال، لا يُصحَّح بصمت ═══')
+// المقيس: المُعلن إشارة بوزن ١٫٠ من ٦٫٥، فيُلغيه التاريخ في ٦٠٪ من السياقات.
+// الملفّ الذي يحمل الأوزان مجمَّد بالميثاق §8-7 ⇒ المخرج إفصاح لا تعديل وزن.
+const programmed = (level: 'beginner' | 'intermediate' | 'advanced', tb: 'never' | 'tried' | 'months' | 'years') =>
+  v2LevelFromExperience(resolveExperienceLevel(level, tb, tb === 'never' ? null : 'm6_12', tb === 'never' ? null : 'now', tb === 'never' ? null : 'mostly'))
+check('«مبتدئ» + شهور تمرين ⇒ يُبرمَج غير مبتدئ (حالة تستوجب الإفصاح)', programmed('beginner', 'months') !== 'beginner')
+check('«متقدّم» + أول مرة ⇒ يُخفَّض (حالة تستوجب الإفصاح)', programmed('advanced', 'never') === 'beginner')
+check('«متوسّط» + شهور ⇒ يطابق المُعلن (فلا إفصاح بلا داعٍ)', programmed('intermediate', 'months') === 'intermediate')
+check('الواجهة تحمل سطر الإفصاح مربوطًا بالفرق لا بشكل دائم', viewSource.includes('levelWasAdjusted') && viewSource.includes('intentT.levelAdjustedNote(levelLabel, programmedLevelLabel)'))
+check('والمستوى المعروض يصير المُبرمَج حين يختلف', viewSource.includes('levelWasAdjusted ? intentT.summaryLevelProgrammed(programmedLevelLabel) : intentT.summaryLevel(levelLabel)'))
+check('نصّ الإفصاح موجود بالنسختين وبلا لوم', /قلت/.test(onboardingIntentStrings.ar.levelAdjustedNote('أ', 'ب')) && onboardingIntentStrings.en.levelAdjustedNote('a', 'b').includes('You picked') && !/[!]/.test(onboardingIntentStrings.ar.levelAdjustedNote('أ', 'ب')))
+check('الواجهة تشتقّ المُبرمَج من المصنّف لا من نسخة ثانية لقواعده', viewSource.includes('v2LevelFromExperience(resolveExperienceLevel('))
+
+console.log('\n═══ 8و) الكشف: كل سطر له مصدر، ولا رقم يناقض هدفه ═══')
+const revealSource = readFileSync(resolve(process.cwd(), 'src/views/reveal/RevealValue.tsx'), 'utf8')
+check('قسم القيمة يستهلك القاموس الذي كان ميّتًا', revealSource.includes('revealStrings') && viewSource.includes('<RevealValue'))
+check('السطور المقاسة والمشتقّة مفصولتان بوسم مرئي', revealSource.includes('data-testid="reveal-value-measured"') && revealSource.includes('data-testid="reveal-value-estimated"') && revealSource.includes('badge={v.estimateBadge}'))
+check('صفّ الأدوات مشروط بوجودها — لا سطر بلا مصدر', revealSource.includes('equipment.length > 0 &&'))
+check('صفّ المكان مشروط بمعرفته', revealSource.includes('{place && <Row'))
+check('السعرات والبروتين مشروطان بمخرَج المحرّك', revealSource.includes('{targets && ('))
+check('التقسيمة المعروضة في الكشف هي نفسها المُقاسة بالمحرّك', revealSource.includes('plannedSplitLabelForDays(profile.trainingDays, splits)'))
+check('اتجاه التغذية ثلاث حالات لا حالة واحدة', Object.keys(revealStrings.ar.value.nutritionStyle).length === 3 && Object.keys(revealStrings.en.value.nutritionStyle).length === 3)
+check('حارس التناقض: هدف يخالف اتجاهه لا يُرسم رقمًا', viewSource.includes('targetContradictsGoal') && viewSource.includes("goalType === 'cutting' && derived > currentWeightKg") && viewSource.includes("goalType === 'bulking' && derived < currentWeightKg"))
+check('وبديله اتجاه معلَن لا صمت', viewSource.includes('data-testid="reveal-direction-only"') && revealStrings.ar.value.directionOnly.length > 0 && revealStrings.en.value.directionOnly.length > 0)
+check('لا وعد نتيجة طبية في نصوص الكشف', !/تضمن|مضمون|guarantee|guaranteed|cure|علاج/i.test(JSON.stringify(revealStrings)))
+check('مراحل التجهيز تتبع العمل ولا تخترعه', readFileSync(resolve(process.cwd(), 'src/views/reveal/SynthesisScreen.tsx'), 'utf8').includes('if (doneRef.current) return'))
+
+console.log('\n═══ 8ز) نيّة التجربة تنجو من تفكيك شاشتها ═══')
+// العطب: الزرّ يعيش على شاشة مشروطة بمزلاج داخل `SetupView`، والطريق الذي
+// يعرضه (إنشاء الحساب) **يفكّ تلك الشاشة** فيموت المزلاج ومعه المدخل.
+realStore.removeItem(PENDING_TRIAL_KEY)
+check('لا نيّة افتراضيًا', !hasPendingTrialIntent())
+check('الكتابة تُرجع نتيجة مفحوصة', markPendingTrialIntent() === 'ok')
+check('والنيّة تُقرأ بعدها', hasPendingTrialIntent())
+check('نيّة أقدم من مدّة الصلاحية تُعامَل كغائبة', !hasPendingTrialIntent(Date.now() + PENDING_TRIAL_TTL_MS + 1000))
+check('والمنتهية تُنظَّف فلا تتكرّر القراءة الفاشلة', realStore.getItem(PENDING_TRIAL_KEY) === null)
+markPendingTrialIntent()
+clearPendingTrialIntent()
+check('الاستهلاك يُسقطها', !hasPendingTrialIntent() && realStore.getItem(PENDING_TRIAL_KEY) === null)
+realStore.setItem(PENDING_TRIAL_KEY, '{"v":99,"at":"soon"}')
+check('بايتات معطوبة لا تُصدَّق', !hasPendingTrialIntent())
+check('وتُنظَّف فورًا', realStore.getItem(PENDING_TRIAL_KEY) === null)
+const blockedIntent = quotaBlockedStore()
+swapStore(blockedIntent)
+const intentBlocked = markPendingTrialIntent()
+swapStore(realStore)
+check('تخزين محجوب يُبلَّغ لا يُبتلع', intentBlocked === 'quota')
+check('زرّ إنشاء الحساب مشروط بنجاح حفظ النيّة', viewSource.includes("trialState === 'not_authenticated' && !signedIn && trialIntentStored && onCreateAccount"))
+check('النيّة تُكتب قبل عرض الطريق لا بعده', viewSource.indexOf('markPendingTrialIntent()') < viewSource.indexOf('reveal-create-account-cta'))
+const resumeSource = readFileSync(resolve(process.cwd(), 'src/views/reveal/PendingTrialResume.tsx'), 'utf8')
+check('سطح الاستئناف يظهر فقط بنيّة سارية وحساب فعليّ', resumeSource.includes('if (!pending || !signedIn) return null'))
+check('والاستئناف يستهلك النيّة مرّة واحدة', resumeSource.includes('clearPendingTrialIntent()') && resumeSource.includes("outcome !== 'offline'"))
+check('وانقطاع الشبكة لا يُسقط النيّة (لا عقاب على عطل ليس منه)', resumeSource.includes("if (outcome !== 'offline') {"))
+check('نصّ الاستئناف بلغتين وبلا ضغط', revealStrings.ar.cta.resumeTrialTitle.length > 0 && revealStrings.en.cta.resumeTrialTitle.length > 0 && !/!/.test(revealStrings.ar.cta.resumeTrialTitle))
 
 console.log('\n═══ 9) محاكاة الالتفاف: العدد/الربط/المفردات لا تمرّ رخوة ═══')
 check('إضافة معرّف زائد كانت ستُكشف', [...ONBOARDING_QUESTION_IDS, 'filler.fake'].length !== 20)
