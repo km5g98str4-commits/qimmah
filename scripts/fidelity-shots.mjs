@@ -2,7 +2,7 @@
 // التشغيل: PREVIEW_URL=http://localhost:5206 node scripts/fidelity-shots.mjs
 
 import { mkdirSync } from 'node:fs'
-import { chromium } from 'playwright'
+import { chromium } from './e2e/lib/engine.mjs'
 
 const URL = process.env.PREVIEW_URL || 'http://localhost:5206'
 const OUT = 'docs/audit/v3-fidelity-shots'

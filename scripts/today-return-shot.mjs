@@ -4,7 +4,7 @@
 // التشغيل: PREVIEW_URL=http://localhost:5200 node scripts/today-return-shot.mjs
 
 import { mkdirSync } from 'node:fs'
-import { chromium } from 'playwright'
+import { chromium } from './e2e/lib/engine.mjs'
 
 const URL = process.env.PREVIEW_URL || 'http://localhost:5200'
 const OUT = 'docs/proof/today-return'

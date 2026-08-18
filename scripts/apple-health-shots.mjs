@@ -5,7 +5,7 @@
 // التشغيل: PREVIEW_URL=http://localhost:5199 node scripts/apple-health-shots.mjs
 
 import { mkdirSync } from 'node:fs'
-import { chromium } from 'playwright'
+import { chromium } from './e2e/lib/engine.mjs'
 
 const URL = process.env.PREVIEW_URL || 'http://localhost:5199'
 const OUT = 'docs/proof/apple-health'

@@ -13,7 +13,7 @@
 // عطلًا لا وجود له. تُشغَّل عند أي شكّ في الحراسة قبل رفع أي بلاغ:
 //   node scripts/e2e/journeys/verify-guard.mjs
 
-import { chromium } from 'playwright'
+import { chromium } from '../lib/engine.mjs'
 import { startApp, groundStamp } from './lib/kit.mjs'
 const app = await startApp(5331)
 const b = await chromium.launch()

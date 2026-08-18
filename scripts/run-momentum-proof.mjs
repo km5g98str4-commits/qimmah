@@ -1,4 +1,4 @@
-import { chromium } from 'playwright'
+import { chromium } from './e2e/lib/engine.mjs'
 import { spawn } from 'node:child_process'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { setTimeout as sleep } from 'node:timers/promises'

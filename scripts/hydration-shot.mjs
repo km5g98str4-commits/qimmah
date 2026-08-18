@@ -4,7 +4,7 @@
 // التشغيل: PREVIEW_URL=http://localhost:5201 node scripts/hydration-shot.mjs
 
 import { mkdirSync } from 'node:fs'
-import { chromium } from 'playwright'
+import { chromium } from './e2e/lib/engine.mjs'
 
 const URL = process.env.PREVIEW_URL || 'http://localhost:5201'
 const OUT = 'docs/proof/workout-hydration'

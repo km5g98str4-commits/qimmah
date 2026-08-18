@@ -7,7 +7,7 @@
 //    عن «غير موجود»، وزر إعادة المحاولة يعيد البحث وينجح عند عودة الشبكة (استجابة مزيّفة).
 // يتطلب dist مبنيًا مسبقًا (npm run build) — يشغّل vite preview مثل بقية سكربتات QA.
 /* eslint-env node */
-import { chromium } from 'playwright'
+import { chromium } from './e2e/lib/engine.mjs'
 import { spawn } from 'node:child_process'
 import { setTimeout as sleep } from 'node:timers/promises'
 import { mkdtempSync, writeFileSync, rmSync } from 'node:fs'

@@ -8,7 +8,7 @@
 // المتطلّبات: docker daemon يعمل + صور Supabase قابلة للسحب + supabase CLI + psql.
 
 import { execSync, spawn } from 'node:child_process'
-import { chromium } from 'playwright'
+import { chromium } from '../e2e/lib/engine.mjs'
 import { cpSync, mkdirSync, rmSync, existsSync } from 'node:fs'
 import {
   LOCAL,

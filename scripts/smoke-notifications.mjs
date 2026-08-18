@@ -6,7 +6,7 @@
 // التشغيل:  VITE_DESIGN_V2=true npm run build && node scripts/smoke-notifications.mjs
 
 import { spawn } from 'node:child_process'
-import { chromium } from 'playwright'
+import { chromium } from './e2e/lib/engine.mjs'
 import { mkdirSync } from 'node:fs'
 
 const PORT = 5194

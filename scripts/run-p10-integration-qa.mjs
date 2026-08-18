@@ -3,7 +3,7 @@
 //    and maintain calories == TDEE, protein == round(1.8×weight).
 //  • Regressions: nutrition food-search UI, workout/progress views render,
 //    guest mode, corrupted-localStorage reload does not crash.
-import { chromium } from 'playwright'
+import { chromium } from './e2e/lib/engine.mjs'
 import { spawn } from 'node:child_process'
 import { setTimeout as sleep } from 'node:timers/promises'
 

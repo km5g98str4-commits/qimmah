@@ -2,7 +2,7 @@
 // together against the real v2 surfaces with the canonical reviewer seed.
 import { execFileSync, spawn } from 'node:child_process'
 import { mkdirSync } from 'node:fs'
-import { chromium } from 'playwright'
+import { chromium } from './e2e/lib/engine.mjs'
 
 const PORT = 5315
 const BASE = `http://127.0.0.1:${PORT}/scripts/momentum-shot/`

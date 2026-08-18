@@ -7,7 +7,7 @@
 //       no horizontal overflow at 320x568 and 390x844.
 //   (e) 404 audit: every main route + every settings/footer link resolves — never the NotFound view;
 //       no uncaught page errors.
-import { chromium } from 'playwright'
+import { chromium } from './e2e/lib/engine.mjs'
 import { spawn } from 'node:child_process'
 import { setTimeout as sleep } from 'node:timers/promises'
 

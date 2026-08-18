@@ -10,7 +10,7 @@
 //  (e) هيكل التحميل: تأخير حزمة الرئيسية يُظهر dashboard-skeleton ثم يحلّ المحتوى مكانه.
 //
 // يتطلب dist مبنيًا (يبنيه تلقائيًا إن غاب): node scripts/run-p12-d-polish-qa.mjs
-import { chromium } from 'playwright'
+import { chromium } from './e2e/lib/engine.mjs'
 import { spawn, spawnSync } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { setTimeout as sleep } from 'node:timers/promises'

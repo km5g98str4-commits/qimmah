@@ -11,7 +11,7 @@
 //  (c) fresh profiles matrix (tiers × goals × days × gym access × advanced splits) through the
 //      real regenerate flow → EVERY slot ∈ 32 primaries + accessories (zero cardio), day counts
 //      match target, and same-type days (Upper A/B, Full A/B/C) differ (overlap ≤ 40%).
-import { chromium } from 'playwright'
+import { chromium } from './e2e/lib/engine.mjs'
 import { spawn, execSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 import { setTimeout as sleep } from 'node:timers/promises'
