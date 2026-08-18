@@ -108,6 +108,15 @@ export interface MigrationDef {
   id: string
   /** المفاتيح التي تُلقَط في snapshot قبل أي كتابة (المصادر والأهداف). */
   keys: string[]
+  /**
+   * شرط الجدوى — **يُفحص قبل أي كتابة وقبل ختم الإنجاز**.
+   *
+   * بدونه كانت هجرة «لا شيء لتهاجره» تُختم ناجحة: `run` تعود مبكرًا، `verify`
+   * تصدق على الفراغ، فيُكتب `qimmah:migrations:v1` ويمنع `isMigrationDone`
+   * التشغيل **إلى الأبد**. أي هجرة يعتمد وجود مادّتها على وقت الاستدعاء تُعرّف
+   * `shouldRun`؛ عودتها `false` تعني «ليس الآن» لا «تمّت».
+   */
+  shouldRun?: () => boolean
   /** التنفيذ. يرمي عند الفشل. */
   run: () => void
   /** تحقّق بعد النقل. false ⇒ rollback كامل. */
@@ -134,6 +143,17 @@ export function runMigration(def: MigrationDef): { status: 'done' | 'skipped' | 
   const s = ls()
   if (!s) return { status: 'skipped' }
   if (isMigrationDone(def.id)) return { status: 'skipped' }
+  // «لا مادّة بعد» ≠ «تمّت»: نخرج قبل الـsnapshot وقبل ختم الإنجاز، فتُعاد
+  // المحاولة حين تتوفّر المادّة. (رمي الاستثناء من الشرط يُعامَل «ليس الآن».)
+  if (def.shouldRun) {
+    let ready = false
+    try {
+      ready = def.shouldRun()
+    } catch {
+      ready = false
+    }
+    if (!ready) return { status: 'skipped' }
+  }
 
   const snapKey = SNAPSHOT_PREFIX + def.id
   const snapshot: Record<string, string | null> = {}
