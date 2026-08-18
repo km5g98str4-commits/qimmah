@@ -22,6 +22,7 @@ import {
   fetchEntitlement,
   redeemCodeOnServer,
   startTrialOnServer,
+  type AccessFailure,
   type EntitlementDetail,
   type TrialOutcome,
 } from './entitlementBackend'
@@ -34,15 +35,26 @@ export function mockEnabled(): boolean {
   return import.meta.env.VITE_ENTITLEMENT_MODE === 'mock'
 }
 
-/** نتائج استبدال كود التفعيل — الحالات التي تطلبها واجهة المؤسس (§D). */
+/**
+ * نتائج استبدال كود التفعيل — الحالات التي تطلبها واجهة المؤسس (§D).
+ *
+ * [SOVEREIGN-COMMERCE-001] **`'expired'` أُزيلت**، ولم تُستبدل.
+ * `redeem_access_code` تدمج «منتهٍ» في `invalid_code` **عمدًا** حتى لا يصير
+ * الحقل أوراكل على وجود الأكواد (انظر `classifyRedeemError`). فما دام الخادم
+ * لا يقول «منتهٍ» أبدًا، فإن نصًّا يقول «هذا الكود منتهي» **لا يمكن أن يكون
+ * صادقًا في الإنتاج** — وكان معلّقًا بلا مسار منذ وصول عقد الخادم. حذفناه بدل
+ * تركه سطرًا صادق المظهر ميت المسار.
+ *
+ * وأُضيفت `'empty'`: «ما كتبت كودًا» ليست «كودك خاطئ».
+ */
 export type RedeemOutcome =
   | 'success'
+  | 'empty'
   | 'invalid'
   | 'already_used'
-  | 'expired'
   | 'revoked'
   | 'not_authenticated'
-  | 'offline'
+  | AccessFailure
 
 /**
  * أكواد اختبار وضع التقليد. **موجودة في وضع التقليد وحده**، ولا تُشحن في بناء
@@ -51,12 +63,20 @@ export type RedeemOutcome =
  * ولاحظ الغياب المقصود: لا يوجد كود «يكشف» أن كودًا آخر موجود. كل ما ليس في
  * هذا الجدول يعيد `invalid` **واحدة عامّة** — فلا يصير الحقل أوراكل يُستدلّ به
  * على وجود الأكواد (مطلب المؤسس §D).
+ *
+ * [SOVEREIGN-COMMERCE-001] **التقليد يعكس الخادم ولا يتقدّم عليه.** كان
+ * `QIMMAH-TEST-EXPIRED` يُنتج رسالة «منتهٍ» **لا يستطيع الخادم إنتاجها أبدًا**،
+ * فكان يُثبت لنا في المراجعة تمييزًا لا وجود له في الإنتاج. صار يُنتج نفس
+ * `invalid` المدموجة — فأصبح **إثباتًا للدمج** بدل أن يكون إخفاءً له.
  */
 const MOCK_CODES: Record<string, RedeemOutcome> = {
   'QIMMAH-TEST-OK': 'success',
   'QIMMAH-TEST-USED': 'already_used',
-  'QIMMAH-TEST-EXPIRED': 'expired',
+  // مدموج مع «غير معروف» عمدًا — انظر التعليل أعلاه.
+  'QIMMAH-TEST-EXPIRED': 'invalid',
   'QIMMAH-TEST-OFFLINE': 'offline',
+  'QIMMAH-TEST-TIMEOUT': 'timeout',
+  'QIMMAH-TEST-DOWN': 'service_error',
 }
 
 function readMockActive(): boolean {
@@ -96,10 +116,16 @@ export async function resolveEntitlement(): Promise<{
  * يحدث. الصدق قبل الطمأنينة (الميثاق §6).
  */
 export async function redeemActivationCode(code: string): Promise<RedeemOutcome> {
+  // [SOVEREIGN-COMMERCE-001] الحقل الفارغ يُجاب عنه **هنا** لا بزرّ معطّل.
+  // «ما كتبت شيئًا» حقيقة محلّية مؤكّدة لا تحتاج رحلة شبكة، وليست حكمًا على
+  // كودٍ — فلا تُدمج مع `invalid` التي تعني «جرّبناه ولم يُقبل».
+  if (!code.trim()) return 'empty'
   // أكواد التقليد تُطابَق بصيغتها المكتوبة (تشمل الشرطات) — التطبيع الموجَّه
   // للخادم يُطبَّق على **مسار الخادم وحده**، لأنه جزء من عقده لا من العرض.
   const mockKey = code.trim().toUpperCase()
   const normalized = normalizeActivationCode(code)
+  // مدخل مشوَّه: كلّه فواصل/رموز تُنزع فلا يبقى شيء يُرسَل. رفضٌ محلّي صادق،
+  // ويُعرض بنفس رسالة «الكود ما ضبط» — فلا يُستدلّ من الرسالة على شكل الأكواد.
   if (!normalized) return 'invalid'
   if (mockEnabled()) {
     const outcome = MOCK_CODES[mockKey] ?? 'invalid'
@@ -107,14 +133,14 @@ export async function redeemActivationCode(code: string): Promise<RedeemOutcome>
       try {
         window.sessionStorage.setItem(MOCK_KEY, 'active')
       } catch {
-        return 'offline'
+        return 'service_error'
       }
     }
     return outcome
   }
-  // [OVERNIGHT-3] الاستبدال صار حقيقيًا. `offline` تبقى إجابة صادقة حين لا
-  // يوجد خادم مضبوط — لا ادّعاء فشل ولا ادّعاء نجاح لم يحدث.
-  if (!backendAvailable()) return 'offline'
+  // [SOVEREIGN-COMMERCE-001] غياب الخادم **ليس انقطاع نت**. كان يُقال هنا
+  // `offline` فيُلام نتُ المستخدم على بناءٍ لا خادم فيه أصلًا (نسخة المراجعة).
+  if (!backendAvailable()) return 'backend_unconfigured'
   const outcome = await redeemCodeOnServer(normalized)
   switch (outcome) {
     case 'success': return 'success'
@@ -123,7 +149,12 @@ export async function redeemActivationCode(code: string): Promise<RedeemOutcome>
     // «موقوف» و«غير مسجَّل» ليستا «كودًا خاطئًا» — تُعرضان بنصّهما لا مبتلعتين.
     case 'revoked': return 'revoked'
     case 'not_authenticated': return 'not_authenticated'
-    default: return 'offline'
+    // أصناف الفشل تعبر كما هي — كلٌّ برسالته. والافتراض `service_error` لا
+    // `offline`: المجهول عطلٌ عندنا حتى يثبت أنه شبكة المستخدم.
+    case 'backend_unconfigured': return 'backend_unconfigured'
+    case 'timeout': return 'timeout'
+    case 'offline': return 'offline'
+    default: return 'service_error'
   }
 }
 
@@ -154,10 +185,12 @@ export async function startTrial(): Promise<TrialOutcome> {
       window.sessionStorage.setItem(MOCK_KEY, 'active')
       return 'started'
     } catch {
-      return 'offline'
+      return 'service_error'
     }
   }
-  if (!backendAvailable()) return 'offline'
+  // [SOVEREIGN-COMMERCE-001] نسخة المراجعة بلا خادم ⇒ تُقال بصراحتها، ولا
+  // تُعرض تجربةً «ما قدرنا نوصل للخادم» وكأنها عطلٌ عابر يُعاد منه.
+  if (!backendAvailable()) return 'backend_unconfigured'
   return startTrialOnServer()
 }
 

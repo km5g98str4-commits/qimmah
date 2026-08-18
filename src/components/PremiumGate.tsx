@@ -12,7 +12,7 @@ import { product } from '@/config/product'
 import { accessStrings } from '@/i18n/dict/access'
 import { useAccess } from '@/lib/access/useAccess'
 import type { PaidAction } from '@/lib/access/paidActions'
-import type { RedeemOutcome } from '@/lib/access/entitlementSource'
+import { outcomeTone, redeemMessage, type RedeemUiState } from '@/lib/access/outcomeMessages'
 import type { Lang } from '@/lib/appPreferences'
 
 /** الفعل المحجوب ⇒ اسمه بلغة المستخدم. الكود لا يظهر للمستخدم أبدًا. */
@@ -29,17 +29,35 @@ export function PremiumGate({ lang }: { lang: Lang }) {
   const s = accessStrings[lang] ?? accessStrings.ar
   const [codeOpen, setCodeOpen] = useState(false)
   const [code, setCode] = useState('')
-  const [state, setState] = useState<'idle' | 'checking' | RedeemOutcome>('idle')
+  const [state, setState] = useState<RedeemUiState>('idle')
   const dialogRef = useRef<HTMLDivElement>(null)
   const closeRef = useRef<HTMLButtonElement>(null)
+  /** العنصر الذي كان يملك التركيز قبل الفتح — يُعاد إليه عند الإغلاق. */
+  const returnFocusRef = useRef<HTMLElement | null>(null)
 
   // كل فتح جديد يبدأ نظيفًا — لا تبقى رسالة فشل كود سابق معلّقة على فعل آخر.
+  //
+  // [SOVEREIGN-COMMERCE-001] **والتركيز يُلتقط ثم يُعاد.** كانت النافذة تأخذ
+  // التركيز عند الفتح ولا تعيده عند الإغلاق: تسقط البؤرة على `<body>`، فمن ضغط
+  // «أضف أكل» بلوحة المفاتيح ثم أغلق البوّابة يستأنف التنقّل **من أعلى المستند**
+  // ولا يعرف أين كان (WCAG 2.4.3). الالتقاط قبل `focus()` لا بعده — بعده يكون
+  // العنصر المحفوظ هو زرّ الإغلاق نفسه.
   useEffect(() => {
-    if (blockedAction) {
-      setCodeOpen(false)
-      setCode('')
-      setState('idle')
-      closeRef.current?.focus()
+    if (!blockedAction) return
+    const previouslyFocused = typeof document !== 'undefined'
+      ? (document.activeElement as HTMLElement | null)
+      : null
+    returnFocusRef.current = previouslyFocused
+    setCodeOpen(false)
+    setCode('')
+    setState('idle')
+    closeRef.current?.focus()
+    return () => {
+      const target = returnFocusRef.current
+      returnFocusRef.current = null
+      // لا نُعيد التركيز إلى عنصر غادر الشجرة (إغلاق بسبب تبدّل المسار مثلًا) —
+      // إعادةٌ إلى عنصر منزوع لا تفعل شيئًا، والفحص يجعل النيّة صريحة.
+      if (target && typeof target.focus === 'function' && target.isConnected) target.focus()
     }
   }, [blockedAction])
 
@@ -62,21 +80,23 @@ export function PremiumGate({ lang }: { lang: Lang }) {
 
   if (!blockedAction) return null
 
+  /**
+   * [SOVEREIGN-COMMERCE-001] الحقل الفارغ يُجاب عنه بنصّ لا بزرٍّ باهت.
+   *
+   * كان الزرّ `disabled` عند الفراغ وأثره الوحيد `opacity-40`: نقرةٌ لا تُنتج
+   * حدث DOM أصلًا، ومنطقة `role="status"` لا تُرسَم لأن الرسالة فارغة — فقارئ
+   * الشاشة يسمع «معطّل» بلا سبب، والمبصر يرى زرًّا باهتًا ولا يدري لماذا.
+   * صار الزرّ يعمل دائمًا، والفراغ يعود بـ`empty` ونصّها الخاصّ — وهي **ليست**
+   * `invalid`: «ما كتبت شيئًا» غير «كودك خاطئ».
+   */
   const submitCode = async () => {
+    if (state === 'checking') return
     setState('checking')
     setState(await redeem(code))
   }
 
-  const message =
-    state === 'checking' ? s.codeChecking
-      : state === 'success' ? s.codeSuccess
-        : state === 'already_used' ? s.codeAlreadyUsed
-          : state === 'expired' ? s.codeExpired
-            : state === 'offline' ? s.codeOffline
-            : state === 'revoked' ? s.codeRevoked
-            : state === 'not_authenticated' ? s.codeNeedsAccount
-              : state === 'invalid' ? s.codeInvalid
-                : ''
+  const message = redeemMessage(state, lang)
+  const tone = outcomeTone(state)
 
   return (
     <div dir={lang === 'en' ? 'ltr' : 'rtl'} className="fixed inset-0 z-[85] flex items-end justify-center bg-ink-900/50 px-4 pb-4 backdrop-blur-sm sm:items-center">
@@ -132,31 +152,37 @@ export function PremiumGate({ lang }: { lang: Lang }) {
                 data-testid="activation-code-input"
                 value={code}
                 onChange={(e) => { setCode(e.target.value); if (state !== 'idle') setState('idle') }}
-                onKeyDown={(e) => { if (e.key === 'Enter' && code.trim()) void submitCode() }}
+                // الفراغ يُرسَل عمدًا: الرفض المحلّي يُنتج رسالة، والصمت لا يُنتج شيئًا.
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); void submitCode() } }}
                 placeholder={s.codePlaceholder}
                 autoComplete="off"
                 dir="ltr"
+                aria-describedby="activation-code-hint activation-code-message"
                 className="mt-1.5 min-h-11 w-full rounded-xl border border-line bg-page px-3 py-2.5 text-base font-bold text-ink-900 outline-none focus:border-primary-c"
               />
+              <p id="activation-code-hint" className="mt-1.5 text-[0.7rem] leading-relaxed text-ink-400">{s.codeHint}</p>
               <button
                 type="button"
                 onClick={() => void submitCode()}
-                disabled={!code.trim() || state === 'checking' || state === 'success'}
+                disabled={state === 'checking' || state === 'success'}
                 aria-busy={state === 'checking'}
                 data-testid="activation-code-submit"
                 className="btn-primary mt-2.5 min-h-[44px] w-full justify-center text-sm disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {s.codeSubmit}
               </button>
-              {message && (
-                <p
-                  role="status"
-                  data-testid="activation-code-message"
-                  className={`mt-2.5 text-xs font-bold leading-relaxed ${state === 'success' ? 'v2-text-green' : state === 'checking' ? 'text-ink-500' : 'text-danger'}`}
-                >
-                  {message}
-                </p>
-              )}
+              {/* المنطقة الحيّة **مرسومة دائمًا**: قارئ الشاشة يعلن ما يُدرَج في
+                  منطقة قائمة، ولا يعلن بالضرورة منطقة تُولد ومعها نصّها. وهي
+                  كذلك مرجع `aria-describedby` فلا يشير إلى معرّف غائب. */}
+              <p
+                id="activation-code-message"
+                role="status"
+                aria-live="polite"
+                data-testid="activation-code-message"
+                className={`text-xs font-bold leading-relaxed ${message ? 'mt-2.5' : ''} ${tone === 'success' ? 'v2-text-green' : tone === 'pending' ? 'text-ink-500' : 'text-danger'}`}
+              >
+                {message ?? ''}
+              </p>
             </div>
           )}
 

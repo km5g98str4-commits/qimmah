@@ -96,17 +96,59 @@ export async function run({ artifactDir }) {
   }
 
   rec.section('the purchase binding that the commercial funnel depends on')
+  //
+  // [SOVEREIGN-COMMERCE-001] THE SCAN ALPHABET *IS* THE CHECK.
+  //
+  // This section used to fail with `shipped: https://salla.sa/Qimmahsa/` and was
+  // read as a real commercial gap: the artifact allegedly carried only the store
+  // root. It did not. The artifact has always shipped the full product URL —
+  //
+  //   https://salla.sa/Qimmahsa/%D8%AA%D8%B7%D8%A8%D9%8A%D9%82-%D9%82%D9%85%D8%A9/p1181109938
+  //
+  // — and `src/config/product.ts:44` is its single source. The defect was HERE:
+  // the extraction class `[A-Za-z0-9_\-/?=&.]` has no `%`, so the match stopped
+  // at the first byte of the percent-encoded Arabic slug («تطبيق-قمة») and the
+  // truncated prefix — a bare store root — was then judged as "what ships".
+  //
+  // So the gate was measuring its own alphabet, and no edit to `product.ts`
+  // could ever have cleared it. The lesson is general: an extraction pattern
+  // that is narrower than the data it extracts does not under-report, it
+  // MIS-reports — it manufactures a different value and grades that instead.
+  //
+  // The class below is the URL-legal set (RFC 3986 unreserved + sub-delims +
+  // `%`), which is still bounded: minified sources quote their strings, so the
+  // match cannot run past the closing quote.
+  const SALLA_URL = /https:\/\/salla\.sa\/[A-Za-z0-9%_~!$&'()*+,;=:@?#.\/-]*/g
   const sallaRefs = new Set()
-  for (const { s } of bundle) for (const m of s.matchAll(/https:\/\/salla\.sa\/[A-Za-z0-9_\-/?=&.]*/g)) sallaRefs.add(m[0])
+  for (const { s } of bundle) for (const m of s.matchAll(SALLA_URL)) sallaRefs.add(m[0])
   const urls = [...sallaRefs]
   rec.check('a Salla purchase destination ships at all', urls.length > 0, urls.join(', '))
   // A store ROOT is not a product binding. §0.1 fixes one price on one product;
   // a root URL cannot carry the buyer to that product, so this is reported as a
   // real commercial gap, not a pass.
-  const productBound = urls.some((u) => /\/(p|product)\//i.test(u) || /\d{9,}/.test(u))
+  //
+  // Tightened alongside the alphabet: `\d{9,}` anywhere in the URL was loose
+  // enough that a store root carrying any long number would have passed. The
+  // binding is the product path segment Salla actually issues (`/p<id>`).
+  const isProductUrl = (u) => /\/p\d{6,}(?:[/?#]|$)/.test(u) || /\/product\//i.test(u)
+  const productBound = urls.some(isProductUrl)
   rec.check('the shipped destination is a PRODUCT URL, not just the store root',
     productBound, `shipped: ${urls.join(', ')}`)
   rec.check('no second, conflicting checkout destination ships', urls.length <= 1, urls.join(', '))
+  // ── Counter-proofs (§4.2): a widened alphabet must not turn the check vacuous.
+  const ROOT_ONLY = 'const checkoutUrl="https://salla.sa/Qimmahsa/";'
+  const rootMatches = [...ROOT_ONLY.matchAll(SALLA_URL)].map((m) => m[0])
+  rec.check('counter-proof: a genuinely root-only artifact STILL fails the product-binding check',
+    rootMatches.length === 1 && !rootMatches.some(isProductUrl),
+    `extracted: ${rootMatches.join(', ')} — if this passed, the check would accept any store URL`)
+  const ENCODED = 'a="https://salla.sa/Qimmahsa/%D8%AA%D8%B7%D8%A8%D9%8A%D9%82-%D9%82%D9%85%D8%A9/p1181109938";'
+  const encodedMatch = [...ENCODED.matchAll(SALLA_URL)].map((m) => m[0])
+  rec.check('counter-proof: the alphabet now survives percent-encoding, and the OLD one did not',
+    encodedMatch.length === 1 && isProductUrl(encodedMatch[0])
+    && [...ENCODED.matchAll(/https:\/\/salla\.sa\/[A-Za-z0-9_\-/?=&.]*/g)].every((m) => !isProductUrl(m[0])),
+    `now: ${encodedMatch.join(', ')}`)
+  rec.check('counter-proof: the match still stops at the closing quote (it is bounded, not greedy)',
+    !encodedMatch.some((u) => u.includes('"')), encodedMatch.join(', '))
 
   rec.section('forbidden Premium promises must not ship')
   const forbidden = [

@@ -87,16 +87,78 @@ const DENIED: BackendEntitlement = { status: 'none', detail: null }
  */
 const CALL_TIMEOUT_MS = 8000
 
-/** يقصّ أي وعد عند المهلة بقيمة احتياطية **مغلقة** — لا يرمي ولا يفتح. */
-async function withTimeout<T>(promise: PromiseLike<T>, fallback: T): Promise<T> {
+/**
+ * علامة المهلة — **قيمة مميّزة لا `null`**.
+ *
+ * [SOVEREIGN-COMMERCE-001] كانت المهلة تعيد `null`، و`null` هي أيضًا شكل «ردٌّ
+ * فارغ» وشكل «لا جلسة». فانطوت ثلاث حقائق مختلفة في قيمة واحدة، وخرجت كلها من
+ * الفتحة نفسها: «تأكّد من النت». الرمز يفصلها: من يقارن بـ`TIMED_OUT` يعرف
+ * **أن الطلب طوّل**، ولا يخمّن.
+ */
+export const TIMED_OUT = Symbol('qimmah:access:call-timeout')
+
+/** يقصّ أي وعد عند المهلة بعلامة مميّزة **مغلقة** — لا يرمي ولا يفتح. */
+async function withDeadline<T>(promise: PromiseLike<T>): Promise<T | typeof TIMED_OUT> {
   let timer: ReturnType<typeof setTimeout> | undefined
   try {
     return await Promise.race([
       promise,
-      new Promise<T>((resolve) => { timer = setTimeout(() => resolve(fallback), CALL_TIMEOUT_MS) }),
+      new Promise<typeof TIMED_OUT>((resolve) => { timer = setTimeout(() => resolve(TIMED_OUT), CALL_TIMEOUT_MS) }),
     ])
   } finally {
     if (timer !== undefined) clearTimeout(timer)
+  }
+}
+
+/**
+ * أصناف الفشل الأربعة — **كلٌّ رسالته**، ولا يُلام نتُ المستخدم على عطلٍ عندنا.
+ *
+ * [SOVEREIGN-COMMERCE-001] العطل الذي أنشأ هذا النوع: سبعة أسباب متمايزة كانت
+ * تخرج من الفتحة نفسها «ما قدرنا نتحقّق الحين. تأكّد من النت» — ومنها **غياب
+ * الخادم في بناء المراجعة** (ليس عطلًا أصلًا) و**نقص `identity_pepper`** (عطل
+ * إعداد عندنا). فمن يُبلَّغ أن شبكته معطوبة يعيد المحاولة إلى الأبد على طلبٍ لن
+ * ينجح، ولا يصلنا منه بلاغ لأنه يظنّ المشكلة عنده.
+ *
+ * وكلّها **رفض**: لا عضو هنا يفتح فعلًا مدفوعًا. الفشل يُغلق ويُشرح.
+ */
+export type AccessFailure =
+  /** لا خادم في هذا البناء أصلًا (بناء مراجعة أو ضبط ناقص) — لا عطل. */
+  | 'backend_unconfigured'
+  /** الخادم لم يردّ خلال المهلة — عابر، والإعادة معقولة. */
+  | 'timeout'
+  /** عطل **عندنا**: بيبر مفقود · مستخدم مجهول · صلاحية · دالّة ناقصة · مجهول. */
+  | 'service_error'
+  /** انقطاع شبكة حقيقي — وهذه وحدها تستحق «تأكّد من اتصالك». */
+  | 'offline'
+
+/**
+ * دلائل انقطاع الشبكة كما تنطق بها المتصفّحات — `supabase-js` لا يرمي عند فشل
+ * الشبكة بل يعيد `{ error }` بنصّ المتصفّح، فالتمييز يكون بالنصّ أو بإعلان
+ * الجهاز نفسه (`navigator.onLine === false`).
+ */
+const NETWORK_HINTS = [
+  'failed to fetch',
+  'fetch failed',
+  'networkerror',
+  'network error',
+  'network request failed',
+  'load failed',
+  'err_internet_disconnected',
+  'err_network',
+  'err_name_not_resolved',
+  'econnrefused',
+  'enotfound',
+  'etimedout',
+  'the internet connection appears to be offline',
+] as const
+
+export function looksLikeNetworkFailure(text: string): boolean {
+  const lower = text.toLowerCase()
+  if (NETWORK_HINTS.some((hint) => lower.includes(hint))) return true
+  try {
+    return typeof navigator !== 'undefined' && navigator.onLine === false
+  } catch {
+    return false
   }
 }
 
@@ -142,12 +204,13 @@ export async function fetchEntitlement(): Promise<BackendEntitlement> {
   if (!supabase) return { ...DENIED, error: 'backend_unavailable' }
 
   // بلا جلسة لا استحقاق. الدالّة نفسها ترفض `auth.uid() is null`، ونوفّر رحلة.
-  const sessionResult = await withTimeout(supabase.auth.getSession(), null)
+  const sessionResult = await withDeadline(supabase.auth.getSession())
+  if (sessionResult === TIMED_OUT) return { ...DENIED, error: 'backend_timeout' }
   if (!sessionResult?.data?.session) return { ...DENIED, error: 'not_authenticated' }
 
   const receivedAtPerfMs = perfNow()
-  const rpcResult = await withTimeout(supabase.rpc('my_entitlement'), null)
-  if (!rpcResult) return { ...DENIED, error: 'backend_timeout' }
+  const rpcResult = await withDeadline(supabase.rpc('my_entitlement'))
+  if (rpcResult === TIMED_OUT) return { ...DENIED, error: 'backend_timeout' }
   const { data, error } = rpcResult
   if (error) return { ...DENIED, error: 'backend_error' }
 
@@ -188,33 +251,49 @@ export type RedeemServerOutcome =
   | 'already_used'
   | 'revoked'
   | 'not_authenticated'
-  | 'offline'
+  | AccessFailure
 
 /**
  * ترجمة أخطاء Postgres إلى نتائج معروضة.
- * `invalid_code` **واحدة عامّة** لكل كود غير مقبول — فلا يصير الحقل أوراكل
- * يُستدلّ به على وجود كود من عدمه.
+ *
+ * ═══ ما يبقى مدموجًا **عمدًا** — لا تفكّه ═══
+ * `invalid_code` (`22023`) رسالة **واحدة عامّة** تجمع خمس حالات يرفعها الخادم
+ * من نفس السطر (`20260809120001:245-251`): الكود غير موجود · مُعطَّل · لم تبدأ
+ * نافذته · انتهت نافذته · استُنفدت مرّاته. والدمج هو الحماية نفسها: لو فُصلت
+ * «منتهٍ» عن «غير موجود» لصار الحقل **أوراكل** يُسأل عن وجود الأكواد — يكتب
+ * المهاجم كودًا فيعرف من نصّ الرسالة أنه موجود لكنه انتهى، فيجرّب جواره.
+ * **فصلها يُضعف سلطة الخادم، ولا يُفعل.** ولهذا لا يوجد `codeExpired`.
+ *
+ * ═══ وما فُصل، ولماذا ═══
+ * كل ما عدا ذلك كان يسقط في `offline` — «تأكّد من النت» لعطلٍ ليس في النت.
+ * صار الافتراض `service_error` (عطل عندنا)، و`offline` لا تُقال إلا حين تقولها
+ * الشبكة فعلًا. **الافتراض المجهول عطلٌ عندنا لا عند المستخدم**: من يُلام على
+ * شبكته لا يبلّغنا، ومن يُقال له «الخلل عندنا» يبلّغ.
  */
-function redeemOutcomeFor(message: string, code: string): RedeemServerOutcome {
+export function classifyRedeemError(message: string, code: string): RedeemServerOutcome {
   const text = `${message} ${code}`.toLowerCase()
   if (text.includes('code_already_redeemed') || code === '23505') return 'already_used'
   if (text.includes('access_revoked')) return 'revoked'
-  if (text.includes('not authenticated') || text.includes('28000')) return 'not_authenticated'
+  if (text.includes('not authenticated') || code === '28000') return 'not_authenticated'
   if (text.includes('invalid_code') || code === '22023') return 'invalid'
-  return 'offline'
+  if (looksLikeNetworkFailure(text)) return 'offline'
+  return 'service_error'
 }
 
 export async function redeemCodeOnServer(code: string): Promise<RedeemServerOutcome> {
-  if (!isSupabaseConfigured()) return 'offline'
+  if (!isSupabaseConfigured()) return 'backend_unconfigured'
+  // الضبط موجود والوحدة لم تُحمَّل ⇒ عطلٌ عندنا لا غيابُ خادم: البناء يعِد بخادم
+  // ولا يصل إليه. `service_error` تقولها كما هي.
   const supabase = await getSupabase()
-  if (!supabase) return 'offline'
-  const sessionResult = await withTimeout(supabase.auth.getSession(), null)
+  if (!supabase) return 'service_error'
+  const sessionResult = await withDeadline(supabase.auth.getSession())
+  if (sessionResult === TIMED_OUT) return 'timeout'
   if (!sessionResult?.data?.session) return 'not_authenticated'
 
-  const rpcResult = await withTimeout(supabase.rpc('redeem_access_code', { p_code: code }), null)
-  if (!rpcResult) return 'offline'
+  const rpcResult = await withDeadline(supabase.rpc('redeem_access_code', { p_code: code }))
+  if (rpcResult === TIMED_OUT) return 'timeout'
   const { data, error } = rpcResult
-  if (error) return redeemOutcomeFor(error.message ?? '', String((error as { code?: string }).code ?? ''))
+  if (error) return classifyRedeemError(error.message ?? '', String((error as { code?: string }).code ?? ''))
   // النجاح لا يُعلَن من هنا: المستدعي يُعيد القراءة من `fetchEntitlement`.
   return typeof data === 'string' && statusForServerState(data) === 'active' ? 'success' : 'invalid'
 }
@@ -226,26 +305,37 @@ export type TrialOutcome =
   | 'email_not_verified'
   | 'not_authenticated'
   | 'revoked'
-  | 'offline'
+  | AccessFailure
+
+/**
+ * ترجمة أخطاء `start_trial` — نفس قاعدة الاستبدال.
+ *
+ * [SOVEREIGN-COMMERCE-001] `access_revoked` **منعٌ إداري دائم**، وكانت الواجهة
+ * تعرضه «تأكّد من اتصالك وجرّب مرة ثانية»: يُقال لمن أُوقف حسابه إن شبكته
+ * معطوبة، فيعيد المحاولة أبدًا على بابٍ لن يُفتح بالإعادة. صار له نصّه.
+ */
+export function classifyTrialError(message: string, code: string): TrialOutcome {
+  const text = `${message} ${code}`.toLowerCase()
+  if (text.includes('email_not_verified')) return 'email_not_verified'
+  if (text.includes('access_revoked')) return 'revoked'
+  if (text.includes('trial_already') || text.includes('already')) return 'already_claimed'
+  if (text.includes('not authenticated')) return 'not_authenticated'
+  if (looksLikeNetworkFailure(text)) return 'offline'
+  return 'service_error'
+}
 
 export async function startTrialOnServer(): Promise<TrialOutcome> {
-  if (!isSupabaseConfigured()) return 'offline'
+  if (!isSupabaseConfigured()) return 'backend_unconfigured'
   const supabase = await getSupabase()
-  if (!supabase) return 'offline'
-  const sessionResult = await withTimeout(supabase.auth.getSession(), null)
+  if (!supabase) return 'service_error'
+  const sessionResult = await withDeadline(supabase.auth.getSession())
+  if (sessionResult === TIMED_OUT) return 'timeout'
   if (!sessionResult?.data?.session) return 'not_authenticated'
 
-  const rpcResult = await withTimeout(supabase.rpc('start_trial'), null)
-  if (!rpcResult) return 'offline'
+  const rpcResult = await withDeadline(supabase.rpc('start_trial'))
+  if (rpcResult === TIMED_OUT) return 'timeout'
   const { data, error } = rpcResult
-  if (error) {
-    const text = `${error.message ?? ''}`.toLowerCase()
-    if (text.includes('email_not_verified')) return 'email_not_verified'
-    if (text.includes('access_revoked')) return 'revoked'
-    if (text.includes('trial_already') || text.includes('already')) return 'already_claimed'
-    if (text.includes('not authenticated')) return 'not_authenticated'
-    return 'offline'
-  }
+  if (error) return classifyTrialError(error.message ?? '', String((error as { code?: string }).code ?? ''))
   return typeof data === 'string' && statusForServerState(data) === 'active' ? 'started' : 'already_claimed'
 }
 
@@ -257,10 +347,10 @@ export async function claimPendingGrantsOnServer(): Promise<boolean> {
   if (!isSupabaseConfigured()) return false
   const supabase = await getSupabase()
   if (!supabase) return false
-  const sessionResult = await withTimeout(supabase.auth.getSession(), null)
-  if (!sessionResult?.data?.session) return false
-  const rpcResult = await withTimeout(supabase.rpc('claim_pending_grants'), null)
-  if (!rpcResult) return false
+  const sessionResult = await withDeadline(supabase.auth.getSession())
+  if (sessionResult === TIMED_OUT || !sessionResult?.data?.session) return false
+  const rpcResult = await withDeadline(supabase.rpc('claim_pending_grants'))
+  if (rpcResult === TIMED_OUT) return false
   const { data, error } = rpcResult
   if (error) return false
   return typeof data === 'string' && statusForServerState(data) === 'active'

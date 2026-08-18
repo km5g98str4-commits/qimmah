@@ -131,6 +131,10 @@ export const DATA_KEYS: readonly DataKeyDef[] = [
   { key: 'qimmah:supabase-auth:v1', kind: 'device', scoped: false, exported: false, synced: false, owner: 'supabaseClient', migration: 'keep-global', note: 'رمز الجلسة — لا يُصدَّر أبدًا' },
   { key: 'qimmah:lastUser:v1', kind: 'device', scoped: false, exported: false, synced: false, owner: 'accountScope', migration: 'keep-global' },
   { key: 'qimmah:design-preview', kind: 'device', scoped: false, exported: false, synced: false, owner: 'dev', migration: 'keep-global' },
+  // [SOVEREIGN-COMMERCE-001] نيّة التجربة — **لا تمنح شيئًا**: أقصى أثرها إعادةُ طرح
+  // السؤال على `start_trial` بعد المصادقة، والجواب للخادم وحده. ولذلك `device`
+  // وغير مُصدَّرة وغير مُزامَنة: ليست بيانات مستخدم بل ذاكرة رحلة تنتهي خلال ٢٤ ساعة.
+  { key: 'qimmah:access:trial-intent:v1', kind: 'device', scoped: false, exported: false, synced: false, owner: 'access/trialIntent', migration: 'keep-global', note: 'نيّة عابرة تعبر رحلة المصادقة — لا استحقاق' },
 ] as const
 
 /** مفاتيح بيانات المستخدم العالمية (غير الموسومة) — هدف الحجر/التبنّي والهجرة القادمة. */

@@ -64,8 +64,28 @@ export interface ShellStrings {
     switchToSignup: string
     switchToLogin: string
     savePrompt: string
+    /**
+     * ═══ [SOVEREIGN-COMMERCE-001] جدار «لا حسابات في هذا البناء» ═══
+     *
+     * ثلاثة عيوب أُغلقت هنا:
+     *   ١) **لغة القالب.** كان النصّ «كلّم مزوّد الخدمة عشان يفعّل لك الحساب» —
+     *      يخاطب القارئ بوصفه **مشتري نشرة** لا مستخدمَ قِمّة، وهو السجلّ الذي
+     *      يمنعه الميثاق §0.2. ولا يوجد «مزوّد خدمة» يكلّمه المستخدم أصلًا.
+     *   ٢) **الموضوع الخطأ.** ضغط المستخدم «أنشئ حسابًا»، فرُدَّ عليه بكلامٍ عن
+     *      **المزامنة السحابية** — وهما وعدان منفصلان (§0.1: التخزين غير الوصول).
+     *   ٣) **طريق مسدود.** لا خطوة تالية، مع أن البناء **يعرف** أنه نسخة مراجعة
+     *      (`isFounderPreview()`).
+     *
+     * فصار زوجان: عامّ لأي بناء بلا خادم حسابات، وخاصّ بنسخة المراجعة يسمّي
+     * نفسه. وكلاهما يقول ما **يبقى شغّالًا** بدل أن يقف عند المنع.
+     */
     disabledTitle: string
     disabledBody: string
+    /** نسخة مراجعة المؤسس تحديدًا — تُعرَّف نفسها بدل أن تلمّح. */
+    disabledPreviewTitle: string
+    disabledPreviewBody: string
+    /** ما يبقى مفتوحًا بلا حساب — الخطوة التالية لا الطريق المسدود. */
+    disabledNext: string
     guestBadge: string
     guestNote: string
     accountNote: string
@@ -529,8 +549,11 @@ const ar: ShellStrings = {
     switchToSignup: 'افتح حساب',
     switchToLogin: 'سجّل الدخول',
     savePrompt: 'سجّل عشان تقدّمك ينحفظ',
-    disabledTitle: 'تسجيل الدخول السحابي مو مفعّل حاليًا',
-    disabledBody: 'المزامنة السحابية مو مفعّلة في هذي النسخة. كلّم مزوّد الخدمة عشان يفعّل لك الحساب.',
+    disabledTitle: 'الحسابات ما تشتغل في هذي النسخة',
+    disabledBody: 'هذي النسخة ما فيها خادم حسابات، فما نقدر نفتح لك حساب هنا. الحساب يشتغل في النسخة الحيّة.',
+    disabledPreviewTitle: 'هذي نسخة مراجعة — بلا حسابات',
+    disabledPreviewBody: 'نسخة المراجعة تشتغل بلا خادم عشان ما تلمس بياناتنا الحيّة، فالحسابات مقفولة فيها. كل شي ثاني تقدر تجرّبه.',
+    disabledNext: 'كمّل تصفّحك عادي — خطتك وبياناتك محفوظة على هذا الجهاز.',
     guestBadge: 'ضيف',
     guestNote: 'بيانات الضيف تنحفظ على هذا الجهاز بس.',
     accountNote: 'أنت مسجّل دخولك، وبياناتك تتزامن مع حسابك السحابي.',
@@ -1003,8 +1026,11 @@ const en: ShellStrings = {
     switchToSignup: 'Create one',
     switchToLogin: 'Log in',
     savePrompt: 'Sign up to save your progress',
-    disabledTitle: "Cloud login isn't available right now",
-    disabledBody: "Cloud sync isn't enabled in this build. Contact the provider to enable accounts.",
+    disabledTitle: "Accounts don't work in this build",
+    disabledBody: "This build has no account server, so we can't create an account for you here. Accounts work in the live version.",
+    disabledPreviewTitle: 'This is a review build — no accounts',
+    disabledPreviewBody: "The review build runs with no server so it can't touch our live data, which is why accounts are closed here. Everything else is yours to try.",
+    disabledNext: 'Keep browsing as you were — your plan and your data are saved on this device.',
     guestBadge: 'Guest',
     guestNote: 'Guest data is stored on this device only.',
     accountNote: 'You are logged in. Your data syncs to your cloud account.',
