@@ -24,7 +24,7 @@ import {
   goalTypeLabel,
   MINOR_GOAL_RESTRICTION_NOTE,
 } from '@/lib/calculators'
-import { makeEquipmentGate, resolveGymAccess } from '@/lib/equipmentAccess'
+import { makeExerciseGate, resolveMachinesOnly } from '@/lib/equipmentAccess'
 import {
   detectInjuryRegions,
   hasRecognizedInjury,
@@ -158,8 +158,7 @@ const SCHEMES: Record<GoalType, RepScheme> = {
 /** فلتر الأدوات حسب نوع النادي (gymType). لا نولّد تمارين مستحيلة للبيئة المختارة.
  *  المنطق يعيش في equipmentAccess.ts — مصدر واحد يشاركه محرّك الاستبدال (شاشة ٣١). */
 function makeEquipFilter(p: Profile): (ex: Exercise) => boolean {
-  const gate = makeEquipmentGate(p)
-  return (ex) => gate(ex.equipment)
+  return makeExerciseGate(p)
 }
 
 /** هل التمرين مناسب لمستوى الخبرة؟ المبتدئ/المستجد لا نعطيه تمارين متقدّمة. */
@@ -660,8 +659,8 @@ function generateWorkoutPlan(p: Profile): { plan: WorkoutPlan; specs: DaySpec[] 
   // لا بار/دمبل أساسي إطلاقًا. كيبل الكتالوج (بايسبس/ترايسبس/كرنش) معتمد لكل المستويات لأنه
   // ضمن اختيار المؤسس، فلا يمرّ على cableOk. (جولة 2) لا كارديو يُضاف إطلاقًا — أُزيل addCutCardio.
   // في المنزل/وزن الجسم لا توجد أجهزة — نُبقي السلوك السابق المناسب للأدوات المتاحة.
-  const access = resolveGymAccess(p)
-  const machinesOnly = access === 'full' || access === 'small'
+  // [SOVEREIGN-PLAN-001] النيّة تُقرأ من مصدرها المستقلّ، لا من «النادي كبير أم صغير».
+  const machinesOnly = resolveMachinesOnly(p)
   const pool = machinesOnly
     ? // أجهزة فقط: الحوض حصريًا من قائمة الأساسيات الـ٣٢ (قرار زياد النهائي). لا أجهزة
       // ذراعين/بطن ولا كيبل هنا — الذراعان والبطن يُدرَّبان تبعيًا عبر المركّبات (ضغط الصدر
@@ -693,11 +692,13 @@ function generateWorkoutPlan(p: Profile): { plan: WorkoutPlan; specs: DaySpec[] 
     // (جولة 3) يوم الجسم الكامل لا يقل عن ٥ أساسيات (أرجل+صدر+ظهر+أكتاف+أرجل خلفية) مهما قصُرت
     // الجلسة — كي يلمس كل مجموعة كبرى؛ بقية الأنواع تتبع عدد الجلسة المعتاد.
     const dayTarget = spec.type === 'full' ? Math.max(target, FULL_BODY_MIN) : target
-    // [SOVEREIGN-PLAN-001] حين تُعلَن إصابة يضيق الحوض حتمًا (إصابة كتف تُخرج كل
-    // الدفع الأمامي مثلًا). «آمن» يجب ألّا يُشترى بخطة فارغة — فنسمح بالإكمال من
-    // بقية الحوض **المُرشَّح** كي يبقى اليوم كامل العدد بحركات مسموحة، لا ناقصًا.
-    const fillWide = machinesOnly || injuryRegions.size > 0
-    const ids = buildDayExercises(spec.type, variation, nVar, pool, dayTarget, preferMachines, rank, fillWide)
+    // [SOVEREIGN-PLAN-001] الإكمال من بقيّة الحوض صار **الملاذ الأخير دائمًا** لا
+    // امتيازًا لنسخة الأجهزة. سببه أن الحوض صار يضيق بحقّ لسببين جديدين: إصابة
+    // مُعلَنة تُخرج ميكانيكا كاملة (كتف ⇒ كل الدفع الأمامي)، وأدوات مُعلَنة تُخرج
+    // كل ما يحتاج عدّة (مطاط فقط ⇒ لا بار ولا مقعد). القاعدة الحاكمة: **لا يُشترى
+    // «آمن» ولا «متاح» بخطة ناقصة** — الحوض هنا مُرشَّح أصلًا بالإصابة والأداة
+    // والمستوى، فما يدخل منه مسموح بالتعريف. الفتحات تظلّ الأولوية، والإكمال بعدها.
+    const ids = buildDayExercises(spec.type, variation, nVar, pool, dayTarget, preferMachines, rank, true)
     // إضافة واحدة تُلحَق بنهاية اليوم (أجهزة فقط) — ذراعان/بطن حسب نوع اليوم، غير أساسية.
     // (جولة 2) نُدوّر الإضافة بفهرس النسخة (variation) لا فهرس اليوم المطلق — كي يأخذ يومَا نفس
     // النوع (سفلي أ/ب) إضافتين مختلفتين بدل تكرار نفسها (كان سبب تداخل ٤٥٪ في يوم السفلي).
