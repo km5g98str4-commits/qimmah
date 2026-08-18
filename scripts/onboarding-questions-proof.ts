@@ -2,11 +2,14 @@ import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import {
   ONBOARDING_QUESTION_IDS,
+  dietPatternApplies,
   historyFollowUpsApply,
+  plannedSplitLabelForDays,
   injuryAreasApply,
   normalizeDraft,
   resolveExperienceLevel,
   resolveTrainingConsistency,
+  v2LevelFromExperience,
   validateStep,
   type OnboardingV2Draft,
 } from '@/lib/onboardingV2Flow'
@@ -179,12 +182,14 @@ check('never لا تحمل المدة/الانقطاع/الانتظام الخا
 check('never ليست returning', neverAnswers.consistency === 'new' && resolveTrainingConsistency('never', null, null, null) === 'new')
 check('never تُصنّف مبتدئًا مهما كان الادعاء', neverAnswers.experienceLevel === 'beginner')
 const stale: OnboardingV2Draft = {
-  step: 2, age: 30, gender: 'male', heightCm: 180, weightKg: 82,
+  step: 2, name: '', age: 30, gender: 'male', heightCm: 180, weightKg: 82,
   intent: 'meals', level: 'advanced', trainedBefore: 'never', totalMonths: 'y3_plus',
   lastTrained: 'y1_plus', consistency: 'steady', goal: 'cut', days: 4, duration: 60,
-  place: 'gym', neat: 'moderate', dietPattern: 'none', hasInjury: false,
+  place: 'gym', equipment: ['bodyweight'], equipmentTouched: false,
+  neat: 'moderate', dietPattern: 'none', hasInjury: false,
   injuries: ['knee'], healthDataConsent: true,
 }
+const staleDietDraft: OnboardingV2Draft = { ...stale, intent: 'meals', dietPattern: 'vegan' }
 const cleared = normalizeDraft(stale)
 check('تطبيع never يمحو كل متابعة قديمة', cleared.totalMonths === null && cleared.lastTrained === null && cleared.consistency === null)
 check('trained → never → trained لا يعيد أجوبة قديمة', historyFollowUpsApply('months') && !historyFollowUpsApply('never') && cleared.totalMonths === null && historyFollowUpsApply('years'))
@@ -272,6 +277,54 @@ check('مناطق الإصابة تصل Profile.injuryAreas كمفاتيح', JSO
 check('والنصّ القديم يبقى كما هو (توافق رجعي)', injured.injuries === 'knee، shoulder')
 check('«لا إصابة» تُقرأ فعلًا فتُفرَّغ المناطق', (profileFor({ hasInjury: false, injuries: ['knee'] }).injuryAreas ?? []).length === 0)
 check('مفتاح مخترَع لا يدخل المناطق', (profileFor({ hasInjury: true, injuries: ['knee', 'neck'] }).injuryAreas ?? []).join() === 'knee')
+
+console.log('\n═══ 8ج) الوعد = المُسلَّم: اسم التقسيمة يُقاس بمخرَج المحرّك ═══')
+// §4.2: لا يُصدَّق جدولٌ على كلمته. لكل عدد أيام تُولَّد الخطة **الحقيقية**
+// وتُقارَن أسماء أيامها بالاسم المعروض. جدول `splitFor` القديم كان يسقط هنا
+// عند ٣ أيام و٥ أيام — وهما اثنان من أربعة اختيارات.
+const SPLIT_SHAPE: Record<number, (names: string[]) => boolean> = {
+  3: (n) => n.every((x) => x.includes('جسم كامل')),
+  4: (n) => n.every((x) => x.includes('علوي') || x.includes('سفلي')) && n.some((x) => x.includes('علوي')) && n.some((x) => x.includes('سفلي')),
+  5: (n) => n.slice(0, 4).every((x) => x.includes('علوي') || x.includes('سفلي')) && !/علوي|سفلي/.test(n[4] ?? ''),
+  6: (n) => n.some((x) => x.includes('دفع')) && n.some((x) => x.includes('سحب')) && n.some((x) => x.includes('أرجل')),
+}
+for (const days of [3, 4, 5, 6]) {
+  const dayNames = planFor({ days }).workoutPlan.days.map((d) => d.nameAr)
+  const shown = plannedSplitLabelForDays(days, V2_ONBOARDING.ar.training.splits)
+  const shownEn = plannedSplitLabelForDays(days, V2_ONBOARDING.en.training.splits)
+  check(`${days} أيام: المحرّك يبني ما يصفه الاسم المعروض «${shown}»`, SPLIT_SHAPE[days](dayNames))
+  check(`${days} أيام: الاسم غير فارغ وله نسخة إنجليزية متمايزة`, shown.length > 0 && shownEn.length > 0 && shown !== shownEn)
+}
+check('٣ أيام لا تُوصف «دفع · سحب · أرجل» بعد اليوم', !plannedSplitLabelForDays(3, V2_ONBOARDING.ar.training.splits).includes('دفع'))
+check('٥ أيام لا تُوصف «لكل عضلة يوم» بعد اليوم', !plannedSplitLabelForDays(5, V2_ONBOARDING.ar.training.splits).includes('لكل عضلة'))
+check('الواجهة لا تحمل جدول تقسيمات ثانيًا', !viewSource.includes('function splitFor'))
+
+console.log('\n═══ 8د) نمط الأكل: يُسأل حين ينفع فقط ═══')
+// المقيس: مستهلكه الوحيد مولّد الوجبات، ولا يعمل إلّا مع نية «اقتراحات أكل».
+for (const intent of ['plan', 'numbers'] as const) {
+  const patterns = ['none', 'vegan', 'keto'] as const
+  const plans = patterns.map((dietPattern) => JSON.stringify(planFor({ intent, dietPattern }).nutritionPlan))
+  check(`intent=${intent}: نمط الأكل بلا أثر (لذلك لا يُسأل)`, new Set(plans).size === 1)
+  check(`intent=${intent}: السؤال لا يُعرض`, !dietPatternApplies(intent))
+  check(`intent=${intent}: غيابه لا يحجب الخطوة`, validateStep(5, { ...valid, intent, dietPattern: null }) === null)
+}
+check('intent=meals: السؤال يُعرض', dietPatternApplies('meals'))
+check('intent=meals: غيابه يحجب الخطوة', validateStep(5, { ...valid, intent: 'meals', dietPattern: null }) === 'lifestyle')
+check('تبديل النية يمحو جواب نمط الأكل المخفيّ', normalizeDraft({ ...staleDietDraft, intent: 'numbers' }).dietPattern === null)
+check('ويُبقيه حين تبقى النية meals', normalizeDraft({ ...staleDietDraft, intent: 'meals' }).dietPattern === 'vegan')
+
+console.log('\n═══ 8هـ) المستوى المُلغى يُقال، لا يُصحَّح بصمت ═══')
+// المقيس: المُعلن إشارة بوزن ١٫٠ من ٦٫٥، فيُلغيه التاريخ في ٦٠٪ من السياقات.
+// الملفّ الذي يحمل الأوزان مجمَّد بالميثاق §8-7 ⇒ المخرج إفصاح لا تعديل وزن.
+const programmed = (level: 'beginner' | 'intermediate' | 'advanced', tb: 'never' | 'tried' | 'months' | 'years') =>
+  v2LevelFromExperience(resolveExperienceLevel(level, tb, tb === 'never' ? null : 'm6_12', tb === 'never' ? null : 'now', tb === 'never' ? null : 'mostly'))
+check('«مبتدئ» + شهور تمرين ⇒ يُبرمَج غير مبتدئ (حالة تستوجب الإفصاح)', programmed('beginner', 'months') !== 'beginner')
+check('«متقدّم» + أول مرة ⇒ يُخفَّض (حالة تستوجب الإفصاح)', programmed('advanced', 'never') === 'beginner')
+check('«متوسّط» + شهور ⇒ يطابق المُعلن (فلا إفصاح بلا داعٍ)', programmed('intermediate', 'months') === 'intermediate')
+check('الواجهة تحمل سطر الإفصاح مربوطًا بالفرق لا بشكل دائم', viewSource.includes('levelWasAdjusted') && viewSource.includes('intentT.levelAdjustedNote(levelLabel, programmedLevelLabel)'))
+check('والمستوى المعروض يصير المُبرمَج حين يختلف', viewSource.includes('levelWasAdjusted ? intentT.summaryLevelProgrammed(programmedLevelLabel) : intentT.summaryLevel(levelLabel)'))
+check('نصّ الإفصاح موجود بالنسختين وبلا لوم', /قلت/.test(onboardingIntentStrings.ar.levelAdjustedNote('أ', 'ب')) && onboardingIntentStrings.en.levelAdjustedNote('a', 'b').includes('You picked') && !/[!]/.test(onboardingIntentStrings.ar.levelAdjustedNote('أ', 'ب')))
+check('الواجهة تشتقّ المُبرمَج من المصنّف لا من نسخة ثانية لقواعده', viewSource.includes('v2LevelFromExperience(resolveExperienceLevel('))
 
 console.log('\n═══ 9) محاكاة الالتفاف: العدد/الربط/المفردات لا تمرّ رخوة ═══')
 check('إضافة معرّف زائد كانت ستُكشف', [...ONBOARDING_QUESTION_IDS, 'filler.fake'].length !== 20)

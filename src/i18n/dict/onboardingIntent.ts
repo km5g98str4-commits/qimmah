@@ -70,6 +70,19 @@ export interface OnboardingIntentStrings {
 
   /** أسطر الملخّص في شاشة «خطتك جاهزة». */
   summaryLevel: (label: string) => string
+  /**
+   * ═══ الإفصاح بدل التصحيح ═══
+   * المستوى المُعلن ليس إلّا إشارة واحدة بوزن ١٫٠ من ٦٫٥ داخل
+   * `personalization/experience.ts`، فيُلغيه تاريخُ التدريب في **٦٠٪** من
+   * السياقات المقيسة: من يقول «مبتدئ» وتمرّن شهورًا يُبرمَج «متوسّط»، ومن
+   * يقول «متقدّم» ولم يتمرّن قطّ يُخفَّض إلى «مبتدئ». وكلاهما سياسة محرّك
+   * قد تكون صحيحة — لكن **ألّا يُقال له** خرقٌ لـ§6-4.
+   *
+   * وملفّ الأوزان مجمَّد بالميثاق (§8-7)، فالمخرج هو الإفصاح لا تعديل الوزن:
+   * جملة واحدة هادئة، بلا اعتذار وبلا تلميح أنه أخطأ.
+   */
+  summaryLevelProgrammed: (label: string) => string
+  levelAdjustedNote: (declared: string, programmed: string) => string
   summaryFocus: (label: string) => string
 
   /** عدّاد الخطوات — الأرقام تُمرَّر مُنسَّقة مسبقًا (عربية/لاتينية حسب اللغة). */
@@ -152,6 +165,9 @@ const ar: OnboardingIntentStrings = {
   },
 
   summaryLevel: (label) => `مستواك: ${label}`,
+  summaryLevelProgrammed: (label) => `بدايتك المبرمَجة: ${label}`,
+  levelAdjustedNote: (declared, programmed) =>
+    `قلت «${declared}»، وحسب تاريخ تمرينك بدّينا من «${programmed}». تقدر تعدّله بعدين من ملفك.`,
   summaryFocus: (label) => `تركيزك: ${label}`,
 
   stepOf: (n, total) => `الخطوة ${n} من ${total}`,
@@ -228,6 +244,9 @@ const en: OnboardingIntentStrings = {
   },
 
   summaryLevel: (label) => `Level: ${label}`,
+  summaryLevelProgrammed: (label) => `Programmed start: ${label}`,
+  levelAdjustedNote: (declared, programmed) =>
+    `You picked "${declared}", and from your training history we start you at "${programmed}". You can change it later from your profile.`,
   summaryFocus: (label) => `Focus: ${label}`,
 
   stepOf: (n, total) => `Step ${n} of ${total}`,

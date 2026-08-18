@@ -199,7 +199,17 @@ export interface V2OnboardingCopy {
   next: string
   stepOf: (n: number) => string
   goal: { title: string; note: string }
-  training: { title: string; subtitle: string; daysQ: string; durationQ: string; daysUnit: string; summaryTitle: string; perSession: string; suitsGoal: string }
+  training: {
+    title: string; subtitle: string; daysQ: string; durationQ: string; daysUnit: string
+    summaryTitle: string; perSession: string; suitsGoal: string
+    /**
+     * أسماء التقسيمات كما **يبنيها المحرّك فعلًا** (`planGenerator.splitDays`)،
+     * لا كما تمنّاها جدول في الواجهة. الجدول القديم كان يَعِد ٣ أيام بـ«دفع ·
+     * سحب · أرجل» والمحرّك يبني «جسم كامل ×٣»، ويَعِد ٥ أيام بـ«لكل عضلة يوم»
+     * والمحرّك يبني «علوي/سفلي + يوم تركيز» — كذبتان من أربع.
+     */
+    splits: { fullBody: string; upperLower: string; upperLowerFocus: string; pushPullLegs: string; custom: string }
+  }
   equipment: { title: string; subtitle: string; placeQ: string; prefQ: string; injuryQ: string; injuryNote: string; cta: string }
   places: readonly { value: string; label: string; icon: string }[]
   prefs: readonly { value: string; label: string; icon: string }[]
@@ -247,6 +257,13 @@ export const V2_ONBOARDING: Record<'ar' | 'en', V2OnboardingCopy> = {
       summaryTitle: 'خطتك تتكوّن',
       perSession: 'للجلسة',
       suitsGoal: 'تناسب هدف',
+      splits: {
+        fullBody: 'جسم كامل',
+        upperLower: 'علوي / سفلي',
+        upperLowerFocus: 'علوي / سفلي + يوم تركيز',
+        pushPullLegs: 'دفع · سحب · أرجل ×٢',
+        custom: 'تقسيمة مخصّصة',
+      },
     },
     equipment: {
       title: 'وين وكيف تتمرّن؟',
@@ -348,6 +365,13 @@ export const V2_ONBOARDING: Record<'ar' | 'en', V2OnboardingCopy> = {
       summaryTitle: 'Your plan is forming',
       perSession: 'per session',
       suitsGoal: 'suits',
+      splits: {
+        fullBody: 'Full Body',
+        upperLower: 'Upper / Lower',
+        upperLowerFocus: 'Upper / Lower + focus day',
+        pushPullLegs: 'Push · Pull · Legs ×2',
+        custom: 'Custom split',
+      },
     },
     equipment: {
       title: 'Where do you train? And how?',

@@ -90,6 +90,57 @@ export function isBodyweightOnly(equipment: readonly Equipment[]): boolean {
   return normalized.length === 1 && normalized[0] === ALWAYS_AVAILABLE_EQUIPMENT
 }
 
+/**
+ * هل لسؤال نمط الأكل أثر أصلًا؟
+ *
+ * ═══ المقيس ═══ مستهلك `dietPattern` الوحيد هو مولّد الوجبات
+ * (`planGenerator.ts:946-997`)، وهو لا يعمل إلّا حين
+ * `nutritionStyle === 'meal_suggestions'` — أي حين تكون النية `meals`. مع
+ * `plan` أو `numbers` تكون `meals: []` وخطة التغذية **متطابقة بايتًا** عبر
+ * الأنماط الستة كلّها.
+ *
+ * فكان السؤال يُطرح للجميع بلا شرط في الخطوة ٥، بينما القرار الذي يُلغيه
+ * اتُّخذ في الخطوة ١. وهذا يكسر §5 مرّتين: سؤال بلا أثر، وواجهة توحي
+ * («نمط أكلك يفلتر اقتراحات الوجبات») بما لا يحدث لثلثَي المستخدمين.
+ *
+ * **القرار: يُعرض حين ينفع فقط.** والبديل — إبقاؤه مع تحذير «هذا لن يغيّر
+ * شيئًا» — سؤالٌ يعتذر عن نفسه؛ وحذفه نهائيًا يخسر إجابة تنفع ثلث المستخدمين
+ * فعلًا. والشرط هنا نظير `historyFollowUpsApply` حرفيًا فلا نمط ثانٍ للأسئلة
+ * الشرطية.
+ */
+export function dietPatternApplies(intent: V2Intent | null): boolean {
+  return intent === 'meals'
+}
+
+/**
+ * اسم التقسيمة **كما يبنيها المحرّك**، لا كما يتمنّاها الملخّص.
+ *
+ * ═══ الكذبة التي يُغلقها هذا ═══
+ * `splitFor()` كان جدولًا مثبَّتًا داخل `OnboardingV2` لم يُصالَح يومًا مع
+ * `splitDays()` في المولّد، ويُعرض في **أغلى نقطتين** في القمع: ملخّص الخطوة ٤
+ * وشاشة «جاهز». المقيس: من أربعة اختيارات للأيام، **اثنان يكذبان** —
+ *   ٣ أيام: يَعِد «دفع · سحب · أرجل»، والمحرّك يبني «جسم كامل ×٣».
+ *   ٥ أيام: يَعِد «لكل عضلة يوم»، والمحرّك يبني «علوي/سفلي + يوم تركيز».
+ *
+ * الخريطة هنا مرآة حرفية لـ`splitDays(days, focus)`
+ * (`planGenerator.ts:570-588`) — و**لا تُصدَّق على كلمتها**: إثبات الحزمة
+ * يولّد الخطة الحقيقية لكل عدد أيام ويقارن أسماء أيامها المولَّدة بهذا الاسم.
+ * فإن تغيّر المحرّك ولم تتبعه الخريطة، سقط الإثبات باسمه.
+ *
+ * ⚠️ **موضع التلاقي:** حارة محرّك الخطة تُصدِّر `plannedSplitLabel(profile)`
+ * من `planGenerator.ts`. حين تهبط، تُستبدل هذه الدالة بنداء واحد إليها ويبقى
+ * الإثبات كما هو — فهو يقيس المخرَج لا المصدر.
+ */
+export function plannedSplitLabelForDays(days: number, splits: {
+  fullBody: string; upperLower: string; upperLowerFocus: string; pushPullLegs: string; custom: string
+}): string {
+  if (days <= 3) return splits.fullBody
+  if (days === 4) return splits.upperLower
+  if (days === 5) return splits.upperLowerFocus
+  if (days === 6) return splits.pushPullLegs
+  return splits.custom
+}
+
 export function injuryAreasApply(hasInjury: boolean | null): boolean {
   return hasInjury === true
 }
@@ -261,6 +312,7 @@ type Validatable = Pick<
   | 'goal'
   | 'days'
   | 'duration'
+  | 'intent'
   | 'place'
   | 'equipment'
   | 'neat'
@@ -338,6 +390,8 @@ export function validateStep(step: number, d: Validatable): StepValidation {
     // وزن الجسم متاح دائمًا، فالقائمة لا يمكن أن تكون فارغة بحقّ — الفراغ هنا
     // يعني «لم يُسأل بعد» فيُحجب.
     if (d.equipment.length === 0) return 'equipment'
+    // نمط الأكل مطلوب **حين يُعرض فقط** — سؤال مخفيّ لا يحجب زرًّا.
+    if (dietPatternApplies(d.intent) && !d.dietPattern) return 'lifestyle'
     return null
   }
   if (step === 6) {
@@ -528,6 +582,9 @@ export function normalizeDraft(draft: OnboardingV2Draft): OnboardingV2Draft {
     // التطبيع عند الحفظ والتحميل معًا: ترتيب السجلّ لا ترتيب النقر، وبلا
     // تكرار، وبلا مفتاح لا ينتمي للاتّحاد مهما جاء من تخزين معطوب.
     equipment: normalizeEquipment(draft.equipment),
+    // النية تغيّرت عن `meals` ⇒ جواب نمط الأكل المخفيّ يُمحى عند الحفظ
+    // والتحميل معًا، فلا يعود من التخزين جوابٌ لسؤال لم يعد معروضًا.
+    dietPattern: dietPatternApplies(draft.intent) ? draft.dietPattern : null,
     totalMonths: never ? null : draft.totalMonths,
     lastTrained: never ? null : draft.lastTrained,
     consistency: never ? null : draft.consistency,

@@ -48,6 +48,10 @@ import {
   LAST_INPUT_STEP,
   NAME_MAX_LENGTH,
   canAdvance,
+  dietPatternApplies,
+  plannedSplitLabelForDays,
+  resolveExperienceLevel,
+  v2LevelFromExperience,
   isBodyweightOnly,
   withBodyweight,
   clearDraftV2,
@@ -98,27 +102,6 @@ const TITLE_ID = [
   'onb-title-lifestyle',
   'onb-title-limitations',
 ] as const
-
-/**
- * Suggested split label from weekly days — a real split descriptor (NOT
- * repeating "N-day split", which the summary already states) so the plan feels
- * concrete. Kept short so the summary row stays on one/two lines.
- */
-function splitFor(days: number, lang: Lang): string {
-  const ar = lang !== 'en'
-  switch (days) {
-    case 3:
-      return ar ? 'دفع · سحب · أرجل' : 'Push · Pull · Legs'
-    case 4:
-      return ar ? 'علوي / سفلي' : 'Upper / Lower'
-    case 5:
-      return ar ? 'لكل عضلة يوم' : 'A day per muscle'
-    case 6:
-      return ar ? 'دفع · سحب · أرجل ×٢' : 'Push · Pull · Legs ×2'
-    default:
-      return ar ? 'تقسيمة مخصّصة' : 'Custom split'
-  }
-}
 
 const toAr = (n: number, lang: Lang) => (lang === 'en' ? String(n) : String(n).replace(/\d/g, (x) => '٠١٢٣٤٥٦٧٨٩'[Number(x)]))
 
@@ -218,6 +201,17 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
   const whyLines = useMemo(() => setupWhyLines(lang), [lang])
   const goalLabel = goal ? goalWording[goal].label : ''
   const levelLabel = intentT.levels.find((l) => l.value === level)?.label ?? ''
+  /**
+   * المستوى الذي **سيُبرمَج فعلًا** — من المصنّف نفسه الذي يستهلكه المولّد،
+   * لا من نسخة ثانية من قواعده. حين يختلف عن المُعلن نقولها بجملة واحدة
+   * هادئة بدل أن نتركه يظنّ أن جوابه هو ما نُفِّذ.
+   */
+  const programmedLevel = useMemo(
+    () => v2LevelFromExperience(resolveExperienceLevel(level, trainedBefore, totalMonths, lastTrained, trainingConsistency)),
+    [level, trainedBefore, totalMonths, lastTrained, trainingConsistency],
+  )
+  const programmedLevelLabel = programmedLevel ? intentT.levels.find((l) => l.value === programmedLevel)?.label ?? '' : ''
+  const levelWasAdjusted = Boolean(level && programmedLevel && programmedLevel !== level && levelLabel && programmedLevelLabel)
   const intentLabel = intentT.intents.find((i) => i.value === intent)?.label ?? ''
   const answers = {
     age: ageNum, gender, heightCm: heightNum, weightKg: weightNum,
@@ -452,9 +446,10 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
           goalLabel={goalLabel}
           days={days}
           duration={duration}
-          split={splitFor(days, lang)}
+          split={plannedSplitLabelForDays(days, t.training.splits)}
           placeLabel={t.places.find((p) => p.value === place)?.label ?? ''}
-          levelRow={levelLabel ? intentT.summaryLevel(levelLabel) : ''}
+          levelRow={levelLabel ? (levelWasAdjusted ? intentT.summaryLevelProgrammed(programmedLevelLabel) : intentT.summaryLevel(levelLabel)) : ''}
+          levelNote={levelWasAdjusted ? intentT.levelAdjustedNote(levelLabel, programmedLevelLabel) : ''}
           focusRow={intentLabel ? intentT.summaryFocus(intentLabel) : ''}
           busy={status === 'building'}
           onEnter={finalize}
@@ -528,7 +523,12 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
               why={whyLines[1]}
               intent={intent}
               level={level}
-              onIntent={(v) => { setIntent(v); setValidation(null) }}
+              onIntent={(v) => {
+                setIntent(v)
+                // نية جديدة لا تحمل معها جواب نمط أكل لم يعد يُعرض.
+                if (!dietPatternApplies(v)) setDietPattern(null)
+                setValidation(null)
+              }}
               onLevel={(v) => { setLevel(v); setValidation(null) }}
             />
           )}
@@ -549,7 +549,7 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
           )}
           {step === 3 && <GoalStep lang={lang} t={t} titleId={stepTitleId} why={whyLines[3]} goal={goal} wording={goalWording} isMinor={minor} onPick={(g) => { if (minor && (g === 'cut' || g === 'bulk')) return; setGoal(g); setValidation(null) }} />}
           {step === 4 && (
-            <TrainingStep t={t} titleId={stepTitleId} why={whyLines[4]} lang={lang} days={days} duration={duration} onDays={setDays} onDuration={setDuration} goalLabel={goalLabel} split={splitFor(days, lang)} />
+            <TrainingStep t={t} titleId={stepTitleId} why={whyLines[4]} lang={lang} days={days} duration={duration} onDays={setDays} onDuration={setDuration} goalLabel={goalLabel} split={plannedSplitLabelForDays(days, t.training.splits)} />
           )}
           {step === 5 && (
             <LifestyleStep
@@ -559,6 +559,7 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
               why={whyLines[5]}
               place={place}
               equipment={equipment}
+              intent={intent}
               neat={neat}
               dietPattern={dietPattern}
               onPlace={onPlace}
@@ -1102,10 +1103,10 @@ function TileGroup({ options, value, onChange }: { options: readonly { value: st
 }
 
 function LifestyleStep({
-  lang, t, titleId, why, place, equipment, neat, dietPattern, onPlace, onEquipment, onNeat, onDietPattern,
+  lang, t, titleId, why, place, equipment, intent, neat, dietPattern, onPlace, onEquipment, onNeat, onDietPattern,
 }: {
   lang: Lang; t: T; titleId: string; why: string
-  place: string | null; equipment: Equipment[]; neat: NeatLevel | null; dietPattern: DietPattern | null
+  place: string | null; equipment: Equipment[]; intent: V2Intent | null; neat: NeatLevel | null; dietPattern: DietPattern | null
   onPlace: (v: string) => void
   onEquipment: (v: Equipment) => void
   onNeat: (v: NeatLevel) => void; onDietPattern: (v: DietPattern) => void
@@ -1164,7 +1165,11 @@ function LifestyleStep({
       </Group>
 
       <HistoryGroup questionId="activity.neat" legend={s.legends.activity} question={s.activityQ} options={activityOptions} value={neat} onSelect={onNeat} />
-      <HistoryGroup questionId="nutrition.diet_pattern" legend={s.legends.diet} question={s.dietQ} options={dietOptions} value={dietPattern} onSelect={onDietPattern} />
+      {/* نمط الأكل يُعرض حين ينفع فقط: مستهلكه الوحيد مولّد الوجبات، وهو لا
+          يعمل إلّا مع نية «اقتراحات أكل». عرضه لغيرهم سؤالٌ بلا أثر — §5. */}
+      {dietPatternApplies(intent) && (
+        <HistoryGroup questionId="nutrition.diet_pattern" legend={s.legends.diet} question={s.dietQ} options={dietOptions} value={dietPattern} onSelect={onDietPattern} />
+      )}
     </section>
   )
 }
@@ -1503,7 +1508,7 @@ export function PlanHandoffScreen({
   )
 }
 
-function ReadyScreen({ lang, t, goalLabel, days, duration, split, placeLabel, levelRow, focusRow, busy, onEnter }: { lang: Lang; t: T; goalLabel: string; days: number; duration: number; split: string; placeLabel: string; levelRow: string; focusRow: string; busy: boolean; onEnter: () => void }) {
+function ReadyScreen({ lang, t, goalLabel, days, duration, split, placeLabel, levelRow, levelNote, focusRow, busy, onEnter }: { lang: Lang; t: T; goalLabel: string; days: number; duration: number; split: string; placeLabel: string; levelRow: string; levelNote: string; focusRow: string; busy: boolean; onEnter: () => void }) {
   return (
     <div dir={lang === 'en' ? 'ltr' : 'rtl'} aria-busy={busy} className="v2-surface-light fixed inset-0 z-50 flex flex-col overflow-hidden bg-page text-ink-900">
       <div className="pointer-events-none absolute inset-0" aria-hidden="true">
@@ -1527,6 +1532,14 @@ function ReadyScreen({ lang, t, goalLabel, days, duration, split, placeLabel, le
             {levelRow && <SummaryRow icon="Trophy" text={levelRow} />}
             {focusRow && <SummaryRow icon="Compass" text={focusRow} />}
           </div>
+
+          {/* الإفصاح — جملة واحدة هادئة، بلا لوم وبلا اعتذار (§6/الثابت ١). */}
+          {levelNote && (
+            <p data-testid="ready-level-adjusted" className="mt-3 flex w-full max-w-sm items-start gap-2 rounded-2xl border border-line bg-beige p-3 text-start text-[0.78rem] leading-snug text-ink-700">
+              <Icon name="Info" className="mt-0.5 h-4 w-4 shrink-0 text-ink-500" />
+              {levelNote}
+            </p>
+          )}
         </div>
 
         <div className="space-y-3">
