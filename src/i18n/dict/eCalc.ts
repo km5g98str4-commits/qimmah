@@ -1,4 +1,5 @@
 import type { Lang } from '@/lib/appPreferences'
+import { formatNumber, getActiveNumeralStyle } from '@/lib/numberFormat'
 import {
   ADULT_MIN_AGE,
   BULK_SURPLUS,
@@ -458,16 +459,21 @@ function calculateExamples(
   }
 }
 
-function formatNumber(
+/**
+ * تهيئة رقم لنصوص هذا القاموس — **تفويض للمنسّق المركزي**.
+ *
+ * كان هنا `formatNumber(lang, value, …)` محليًّا **يظلّل الاسم المُصدَّر بترتيب
+ * وسائط مختلف**، ويبني `ar-SA-u-nu-arab`/`en-US` بنفسه. فكان مصدر حقيقة رابعًا
+ * لا يصله تفضيل «شكل الأرقام»، وتظهر شاشة الحاسبة وحدها بنظام يخالف بقيّة
+ * التطبيق.
+ */
+function localeNumber(
   lang: Lang,
   value: number,
   minimumFractionDigits = 0,
   maximumFractionDigits = minimumFractionDigits,
 ): string {
-  return new Intl.NumberFormat(lang === 'ar' ? 'ar-SA-u-nu-arab' : 'en-US', {
-    minimumFractionDigits,
-    maximumFractionDigits,
-  }).format(value)
+  return formatNumber(value, lang, { minimumFractionDigits, maximumFractionDigits })
 }
 
 function buildArabicStrings(
@@ -479,7 +485,7 @@ function buildArabicStrings(
     value: number,
     minimumFractionDigits = 0,
     maximumFractionDigits = minimumFractionDigits,
-  ) => formatNumber('ar', value, minimumFractionDigits, maximumFractionDigits)
+  ) => localeNumber('ar', value, minimumFractionDigits, maximumFractionDigits)
   const fatPercent = formula.fatCalorieRatio * 100
   const waterMlPerKg = formula.waterLitersPerKg * 1000
   const sampleHeightMeters = copy.sampleHeightCm / 100
@@ -794,7 +800,7 @@ function buildEnglishStrings(
     value: number,
     minimumFractionDigits = 0,
     maximumFractionDigits = minimumFractionDigits,
-  ) => formatNumber('en', value, minimumFractionDigits, maximumFractionDigits)
+  ) => localeNumber('en', value, minimumFractionDigits, maximumFractionDigits)
   const fatPercent = formula.fatCalorieRatio * 100
   const waterMlPerKg = formula.waterLitersPerKg * 1000
   const sampleHeightMeters = copy.sampleHeightCm / 100
@@ -1110,7 +1116,27 @@ export function createECalcStrings(
   }
 }
 
-export const eCalcStrings: Record<Lang, ECalcStrings> = createECalcStrings()
+/**
+ * ⚠️ نصوص هذا القاموس **تُخبَز مرّة عند بناء الوحدة**، وأرقامها داخلها.
+ *
+ * فلو بقي التصدير ثابتًا مبنيًّا وقت الاستيراد لتجمّد نظام أرقامه على ما كان
+ * لحظة الإقلاع، ولبقيت شاشة الحاسبة تعرض «١٧٨» بعد أن يختار المستخدم الأرقام
+ * الغربية. الحلّ **مفتاحه النمط الفعّال**: نفس الواجهة `eCalcStrings[lang]`
+ * لكل المستهلكين (لا تغيير عندهم)، وإعادة بناء صامتة عند تبدّل النمط وحده.
+ */
+let builtStrings: { style: string; value: Record<Lang, ECalcStrings> } | null = null
+function currentStrings(): Record<Lang, ECalcStrings> {
+  const style = getActiveNumeralStyle()
+  if (!builtStrings || builtStrings.style !== style) {
+    builtStrings = { style, value: createECalcStrings() }
+  }
+  return builtStrings.value
+}
+
+export const eCalcStrings: Record<Lang, ECalcStrings> = {
+  get ar() { return currentStrings().ar },
+  get en() { return currentStrings().en },
+}
 
 export function eCalcCopy(lang: Lang): ECalcStrings & ECalcDocumentStrings {
   const copy = eCalcStrings[lang]

@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useState, type ReactNode } from 'react'
+import { formatNumber } from '@/lib/numberFormat'
 import { Icon } from '@/components/Icon'
 import { StandaloneAppScreen } from '@/components/StandaloneAppScreen'
 import { StateBlock } from '@/components/StateBlock'
@@ -85,11 +86,9 @@ export function CalcExplainerView({ lang, onBack, onEditProfile }: CalcExplainer
 }
 
 function CalcFilled({ data, lang, d }: { data: CalcExplainerData; lang: Lang; d: ECalcStrings }) {
-  const n = useMemo(
-    () => new Intl.NumberFormat(lang === 'ar' ? 'ar-SA-u-nu-arab' : 'en-US', { maximumFractionDigits: 2 }),
-    [lang],
-  )
-  const value = (number: number) => n.format(number)
+  // منسّق العرض المركزي لا نسخة محلية: النسخة المحلية كانت **مصدر حقيقة سادسًا**
+  // يشيخ وحده، ولا يصله تفضيل «شكل الأرقام» فتظهر هذه الشاشة وحدها بنظام مخالف.
+  const value = useCallback((number: number) => formatNumber(number, lang, { maximumFractionDigits: 2 }), [lang])
   const p = data.profile
   const t = data.calculated
   const minor = isMinorAge(p.age)
@@ -154,7 +153,7 @@ function CalcFilled({ data, lang, d }: { data: CalcExplainerData; lang: Lang; d:
       <ExplainerSection icon="Flame" title={d.bmrTitle} result={value(t.bmr)} unit={d.unitKcalPerDay}>
         <Body>{d.bmrWhat}</Body>
         <Formula>
-          {`10×${value(p.weightKg)} + 6.25×${value(p.heightCm)} − 5×${value(p.age)} ${sign} ${value(Math.abs(data.sexConstant))} = ${value(t.bmr)}`}
+          {`${value(10)}×${value(p.weightKg)} + ${value(6.25)}×${value(p.heightCm)} − ${value(5)}×${value(p.age)} ${sign} ${value(Math.abs(data.sexConstant))} = ${value(t.bmr)}`}
         </Formula>
         <Body>{d.bmrSource}</Body>
         <Note>{d.bmrAssume} {d.bmrLimits} {d.bmrWhyNoBodyFat}</Note>
@@ -201,11 +200,11 @@ function CalcFilled({ data, lang, d }: { data: CalcExplainerData; lang: Lang; d:
           <Body>{d.proteinWhy} {d.proteinSource}</Body>
         </MetricBlock>
         <MetricBlock title={d.fatTitle} result={value(t.fatGrams)} unit={d.unitGramPerDay}>
-          <Formula>{`(${value(t.targetCalories)} × ${value(fatPercent)}%) ÷ 9 = ${value(t.fatGrams)}`}</Formula>
+          <Formula>{`(${value(t.targetCalories)} × ${value(fatPercent)}%) ÷ ${value(9)} = ${value(t.fatGrams)}`}</Formula>
           <Body>{d.fatWhy} {d.fatSource}</Body>
         </MetricBlock>
         <MetricBlock title={d.carbsTitle} result={value(t.carbsGrams)} unit={d.unitGramPerDay}>
-          <Formula>{`(${value(t.targetCalories)} − ${value(t.proteinGrams)}×4 − ${value(t.fatGrams)}×9) ÷ 4 = ${value(t.carbsGrams)}`}</Formula>
+          <Formula>{`(${value(t.targetCalories)} − ${value(t.proteinGrams)}×${value(4)} − ${value(t.fatGrams)}×${value(9)}) ÷ ${value(4)} = ${value(t.carbsGrams)}`}</Formula>
           <Body>{d.carbsWhy}</Body>
         </MetricBlock>
         <Note>{d.macrosConversion} {d.macrosLimits}</Note>
@@ -220,7 +219,7 @@ function CalcFilled({ data, lang, d }: { data: CalcExplainerData; lang: Lang; d:
 
       <ExplainerSection icon="TrendingUp" title={d.rateTitle} result={value(expectedRate)} unit={d.unitKgPerWeek}>
         <Body>{d.rateWhat}</Body>
-        <Formula>{`${value(Math.abs(data.calorieAdjustment))} × 7 ÷ ${value(KCAL_PER_KG)} = ${value(Math.abs(expectedRate))}`}</Formula>
+        <Formula>{`${value(Math.abs(data.calorieAdjustment))} × ${value(7)} ÷ ${value(KCAL_PER_KG)} = ${value(Math.abs(expectedRate))}`}</Formula>
         <Body>{d.rateWhyKcalPerKg}</Body>
         <Honesty>{d.rateHonesty}</Honesty>
         <Body>{d.rateWater} {d.rateReal}</Body>
