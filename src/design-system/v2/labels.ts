@@ -220,6 +220,11 @@ export interface V2OnboardingCopy {
   building: { title: string; subtitle: string }
   /** Visible plan-generation failure + retry (never a silent drop into the app). */
   error: { title: string; message: string; retry: string }
+  /**
+   * فشل **الحفظ** لا فشل التوليد — رسالة مستقلّة لأن السبب مختلف والمخرج مختلف.
+   * `kept` هو جوهرها: تطمئنه أن إجاباته باقية، فلا يعيد الإعداد من الصفر.
+   */
+  storage: { title: string; message: string; kept: string; retry: string }
   /** Per-step inline validation messages shown when Next is tapped incomplete. */
   validation: { body: string; goal: string; training: string; equipment: string }
   /** sr-only fieldset legends for each choice group (a11y — not shown visually). */
@@ -307,6 +312,12 @@ export const V2_ONBOARDING: Record<'ar' | 'en', V2OnboardingCopy> = {
       title: 'ما قدرنا نجهّز الخطة',
       message: 'صارت مشكلة ونحن نجهّز خطتك. تأكّد من اتصالك وجرّب مرة ثانية.',
       retry: 'جرّب مرة ثانية',
+    },
+    storage: {
+      title: 'ما قدرنا نحفظ خطتك على هذا الجهاز',
+      message: 'يبدو إن التخزين ممتلئ أو محجوب — يصير في وضع التصفّح الخاص أو لما تكون مساحة المتصفّح كاملة.',
+      kept: 'إجاباتك كلها باقية زي ما هي. فرّغ شوي مساحة أو افتح نافذة عادية، وجرّب مرة ثانية.',
+      retry: 'جرّب الحفظ مرة ثانية',
     },
     validation: {
       body: 'أكمل الأربعة بقيم منطقية عشان نكمّل.',
@@ -402,6 +413,12 @@ export const V2_ONBOARDING: Record<'ar' | 'en', V2OnboardingCopy> = {
       title: 'Couldn’t build the plan',
       message: 'Something went wrong while preparing your plan. Check your connection and try again.',
       retry: 'Try again',
+    },
+    storage: {
+      title: "We couldn't save your plan on this device",
+      message: 'Storage looks full or blocked — that happens in private browsing, or when the browser has run out of space.',
+      kept: 'All your answers are still here. Free up a little space or open a normal window, then try again.',
+      retry: 'Try saving again',
     },
     validation: {
       body: 'Fill in all four with sensible values to continue.',

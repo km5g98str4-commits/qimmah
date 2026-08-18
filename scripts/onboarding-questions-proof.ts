@@ -171,7 +171,80 @@ check('تطبيع never يمحو كل متابعة قديمة', cleared.totalMon
 check('trained → never → trained لا يعيد أجوبة قديمة', historyFollowUpsApply('months') && !historyFollowUpsApply('never') && cleared.totalMonths === null && historyFollowUpsApply('years'))
 check('لا إصابة تمحو مناطق خفية أيضًا', cleared.injuries.length === 0)
 
-console.log('\n═══ 8) محاكاة الالتفاف: العدد/الربط/المفردات لا تمرّ رخوة ═══')
+console.log('\n═══ 8) صدق الحفظ: الكتابة تُفحص، والفشل يُبلَّغ ولا يُبتلع ═══')
+// ═══ لماذا هنا؟ ═══
+// هذا الإثبات يحرس **مسار الإكمال كاملًا** لا الأسئلة وحدها. وفشل الكتابة عند
+// الإكمال هو أغلى فقدان بيانات في التطبيق: المستخدم أجاب عشرين سؤالًا ثم رأى
+// شاشة نجاح كاذبة (تقرير R10 §A بند ١ و٤).
+type StoreShim = { getItem: (k: string) => string | null; setItem: (k: string, v: string) => void; removeItem: (k: string) => void; clear: () => void }
+const realStore = (globalThis as unknown as { localStorage: StoreShim }).localStorage
+function useStore(store: StoreShim) {
+  ;(globalThis as unknown as { localStorage: StoreShim }).localStorage = store
+  ;(globalThis as unknown as { window: { localStorage: StoreShim } }).window.localStorage = store
+}
+/** يحاكي حصّة صفرية (وضع التصفّح الخاص في Safari): الوجود قائم والكتابة ترمي. */
+function quotaBlockedStore(): StoreShim {
+  const inner = new Map<string, string>()
+  return {
+    getItem: (k) => (inner.has(k) ? (inner.get(k) as string) : null),
+    setItem: () => { const e = new Error('quota'); e.name = 'QuotaExceededError'; throw e },
+    removeItem: (k) => { inner.delete(k) },
+    clear: () => { inner.clear() },
+  }
+}
+
+const opForSave = buildOnboardingProfile(toAnswersFromV2({ ...base }))
+
+// (أ) المسار الناجح — النتيجة `'ok'` والبايتات موجودة فعلًا.
+realStore.removeItem(ONBOARDING_PROFILE_KEY)
+const okResult = saveOnboardingProfile(opForSave)
+check('حفظ ناجح يُرجع ok', okResult === 'ok')
+check('حفظ ناجح يترك البايتات في التخزين فعلًا', realStore.getItem(ONBOARDING_PROFILE_KEY) !== null)
+check('حفظ ناجح يجعل الملف مقروءًا بنفس القيم', loadOnboardingProfile()?.bodyMetrics.currentWeightKg === 82)
+
+// (ب) المسار المحجوب — النتيجة سبب مسمّى، ولا شيء يُكتب، ولا استثناء يتسرّب.
+realStore.removeItem(ONBOARDING_PROFILE_KEY)
+const blocked = quotaBlockedStore()
+useStore(blocked)
+let threw = false
+let blockedResult: string = 'ok'
+try { blockedResult = saveOnboardingProfile(opForSave) } catch { threw = true }
+useStore(realStore)
+check('التخزين المحجوب لا يرمي على المستدعي', !threw)
+check('التخزين المحجوب يُرجع سببًا مسمّى لا ok', blockedResult === 'quota')
+check('التخزين المحجوب لا يترك بايتات نصف مكتوبة', blocked.getItem(ONBOARDING_PROFILE_KEY) === null)
+realStore.removeItem(ONBOARDING_PROFILE_KEY)
+
+// (ج) الموافقة الصحية تُقرأ فعلًا: بلا موافقة لا يُرفع ملفّ صحّي إلى المزامنة.
+const queueBefore = readSyncQueueLength()
+enqueueOnboardingProfileUpsert({ ...opForSave, consents: { healthData: { accepted: false, policyVersion: opForSave.consents.healthData.policyVersion } } })
+check('بلا موافقة صحية: لا رفع إلى طابور المزامنة', readSyncQueueLength() === queueBefore)
+enqueueOnboardingProfileUpsert(opForSave)
+check('مع موافقة صحية: الرفع يحدث', readSyncQueueLength() > queueBefore)
+
+// (د) بنية الإكمال في الواجهة — الترتيب نفسه محروس، لا النيّة.
+// كل واحد من الثلاثة كان يُطلق **بلا قيد**؛ الفحص يستخرج كتلة `finalize`
+// بحدودها ويؤكّد أن كلًّا منها يقع بعد فحص نتيجة كتابة، لا قبله.
+const finalizeBlock = (() => {
+  const start = viewSource.indexOf('const finalize = () => {')
+  const end = viewSource.indexOf('\n  // [CTO-009/WP-2] الترحيب', start)
+  return start >= 0 && end > start ? viewSource.slice(start, end) : ''
+})()
+check('كتلة الإكمال مستخرَجة بحدودها', finalizeBlock.length > 400)
+const idxProfileCheck = finalizeBlock.indexOf("if (profileWrite !== 'ok')")
+const idxMarkCompleted = finalizeBlock.indexOf('markCompleted(userId)')
+const idxClearDraft = finalizeBlock.indexOf('clearDraftV2(userId)')
+const idxOkStatus = finalizeBlock.indexOf("finalizeReduce(s, 'ok')")
+check('نتيجة كتابة الملف تُفحص قبل أي وسم إكمال', idxProfileCheck > 0 && idxProfileCheck < idxMarkCompleted)
+check('مسح المسودة يقع بعد فحص الكتابة لا قبله', idxProfileCheck > 0 && idxProfileCheck < idxClearDraft)
+check('شاشة النجاح تقع بعد فحص الكتابة لا قبله', idxProfileCheck > 0 && idxProfileCheck < idxOkStatus)
+check('فشل التخزين يعيد اللقطة ولا يمسح المسودة', finalizeBlock.includes('applyCustomization(snapshot)') && finalizeBlock.includes("finalizeReduce(st, 'storageFail')"))
+check('كتابة التخصيص تُقاس بمؤشّر الفشل (نمط finishWorkout)', finalizeBlock.includes('const failureBefore = getStorageFailure()') && finalizeBlock.includes('if (getStorageFailure() !== failureBefore)'))
+check('لا كتابة خام إلى localStorage في مسار الإكمال', !finalizeBlock.includes('localStorage.setItem'))
+check('كاتب مصدر الحقيقة لا يبتلع الفشل', !/window\.localStorage\.setItem\(ONBOARDING_PROFILE_KEY/.test(profileSource))
+check('شاشة فشل الحفظ تصرّح ببقاء البيانات', viewSource.includes('t.storage.kept') && V2_ONBOARDING.ar.storage.kept.length > 0 && V2_ONBOARDING.en.storage.kept.length > 0)
+
+console.log('\n═══ 9) محاكاة الالتفاف: العدد/الربط/المفردات لا تمرّ رخوة ═══')
 check('إضافة معرّف تاسع عشر كانت ستُكشف', [...ONBOARDING_QUESTION_IDS, 'filler.fake'].length !== 18)
 check('ربط أسماء متفرقة بلا data-question-id لا يكفي', !viewSource.includes('data-question-name='))
 check('مفردة مختلقة لا تنتمي للبنك', !canonical('totalMonths').includes('about_a_year'))

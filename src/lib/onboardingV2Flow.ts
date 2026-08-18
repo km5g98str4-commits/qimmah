@@ -156,9 +156,15 @@ interface PersistedDraft extends Partial<OnboardingV2Draft> {
 /** Which step-specific validation message to surface, or null when the step is complete. */
 export type StepValidation = 'body' | 'ageBelowMin' | 'intentLevel' | 'trainingHistory' | 'goal' | 'healthConsent' | 'training' | 'lifestyle' | 'limitations' | null
 
-/** Async plan-assembly status driving the loading / error / done screens. */
-export type FinalizeStatus = 'idle' | 'building' | 'error' | 'done'
-export type FinalizeAction = 'start' | 'fail' | 'ok' | 'reset'
+/**
+ * Async plan-assembly status driving the loading / error / done screens.
+ *
+ * `'storage'` حالة **مستقلّة عن `'error'`** عمدًا: العطل العابر يُصلحه زرّ
+ * إعادة، أمّا التخزين المحجوب فسببه لا يزول بإعادة المحاولة وحدها — فرسالته
+ * مختلفة (وش صار · وش بقي · وش يسوي)، وهي تؤكّد أن **بياناته لم تضع**.
+ */
+export type FinalizeStatus = 'idle' | 'building' | 'error' | 'storage' | 'done'
+export type FinalizeAction = 'start' | 'fail' | 'storageFail' | 'ok' | 'reset'
 
 /**
  * Finalize state machine. `start` covers both the first attempt (idle → building)
@@ -170,6 +176,8 @@ export function finalizeReduce(status: FinalizeStatus, action: FinalizeAction): 
       return status === 'done' ? status : 'building'
     case 'fail':
       return 'error'
+    case 'storageFail':
+      return 'storage'
     case 'ok':
       return 'done'
     case 'reset':

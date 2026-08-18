@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { Icon } from '@/components/Icon'
 import { PlanPreview } from '@/components/plan/PlanPreview'
@@ -15,6 +15,7 @@ import { product } from '@/config/product'
 import { buildOnboardingProfile } from '@/lib/planBuilderAnswers'
 import { buildPlanArtifactsFromOnboarding, hasCompletedOnboardingProfile, saveOnboardingProfile } from '@/lib/onboardingProfile'
 import { markCompleted } from '@/lib/onboarding'
+import { getStorageFailure } from '@/lib/safeStorage'
 import { persistOnboardingToProfile } from '@/lib/onboardingSync'
 import { trackLocal, SETUP_STEP_NAMES } from '@/lib/tracking'
 import { POLICY_LINKS, policyCopy } from '@/data/policyCopy'
@@ -134,6 +135,11 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
   // (درس BUG-001 — الكاتب يرفض بحقّ، لكن المعالج يجب أن يفتح البوّابة أولًا).
   const { guard: guardPaid, can: canPaid } = useAccess()
   const [initialDraft] = useState(() => initialDraftV2(userId))
+  /**
+   * هل نجحت كتابة ملفّ الإعداد في هذه الجلسة؟ يفتح إعادةَ المحاولة بعد فشل
+   * تخزينٍ جزئي بلا بوّابة دفع: المستخدم لا يُطالَب بالدفع ليُكمل ما بدأه حرًّا.
+   */
+  const completionWriteRef = useRef(false)
   // 0 الأساسيات · 1 النية · 2 التاريخ · 3 الهدف · 4 الجدول · 5 السياق · 6 القيود · 7 جاهز.
   const [step, setStep] = useState(initialDraft.step)
   const [status, setStatus] = useState<FinalizeStatus>('idle')
@@ -316,19 +322,50 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
         // `saveCustomization` يسأل `isExistingPlanEdit()`، و`saveOnboardingProfile`
         // يسأل `hasCompletedOnboardingProfile()`. فالفحص هنا يجمعهما — أي شرط
         // يرمي في الأسفل يجب أن يُلتقط هنا أوّلًا، وإلّا صار المنعُ «عطلًا».
-        if ((isExistingPlanEdit() || hasCompletedOnboardingProfile()) && !canPaid('plan.saveEdit')) {
+        if (!completionWriteRef.current && (isExistingPlanEdit() || hasCompletedOnboardingProfile()) && !canPaid('plan.saveEdit')) {
           guardPaid('plan.saveEdit', () => {})()
           // 'reset' → idle: البوّابة مفتوحة والشاشة تعود قابلة للتفاعل،
           // ولا تُعرَض شاشة خطأ — المنع ليس عطلًا.
           setStatus((st) => finalizeReduce(st, 'reset'))
           return
         }
-        saveOnboardingProfile(op)
+        // ═══ سلسلة صدق الحفظ (الميثاق §5 · النمط المرجعي: `finishWorkout.ts`) ═══
+        // تأكيد ← كتابة ← **فحص** ← عند الفشل: استرجاع اللقطة + رسالة صادقة +
+        // **بقاء البيانات**. كان كل ما تحت هذا السطر يعمل بلا فحص واحد: شاشة
+        // النجاح و`markCompleted` و`clearDraftV2` تُطلق جميعها بلا قيد بعد
+        // كتابتين غير مفحوصتين. فعلى جهاز محجوب التخزين يكمل المستخدم إعداده،
+        // ويرى خطته الحقيقية **من الذاكرة**، وتُمحى مسودّته القابلة للاستئناف،
+        // ثم تعرض عليه إعادةُ التحميل خطةَ شخصٍ آخر. كل إدخالاته تضيع.
+        const profileWrite = saveOnboardingProfile(op)
+        if (profileWrite !== 'ok') {
+          // لا مسح مسودّة، ولا وسم إكمال، ولا شاشة نجاح. البيانات كلها في مكانها.
+          setStatus((st) => finalizeReduce(st, 'storageFail'))
+          return
+        }
+        // نجحت كتابة مرساة الاسترجاع ⇒ إعادة المحاولة بعدها **ليست تحويرًا
+        // لخطة قائمة** بل إتمامًا لنفس الإكمال. بلا هذا العلم يصير المستخدم
+        // مطالَبًا بالدفع ليتعافى من عطلٍ عندنا (تقرير R10 §A2c).
+        completionWriteRef.current = true
         const artifacts = await buildPlanArtifactsFromOnboarding(op, customization)
+        // اللقطة قبل التطبيق — `applyCustomization` يضع الحالة في الذاكرة أوّلًا
+        // ثم يكتب، وكاتبه لا يُرجع نتيجة. فنقيس الكتابة بمؤشّر الفشل العالمي
+        // (نفس ما يفعله `finishWorkout.ts:89-97` على نفس صنف الكتابة).
+        const snapshot = customization
+        const failureBefore = getStorageFailure()
         applyCustomization(artifacts.customization)
+        if (getStorageFailure() !== failureBefore) {
+          applyCustomization(snapshot) // استرجاع اللقطة: لا خطة معروضة بلا خطة محفوظة
+          setStatus((st) => finalizeReduce(st, 'storageFail'))
+          return
+        }
+        markCompleted(userId)
+        if (getStorageFailure() !== failureBefore) {
+          applyCustomization(snapshot)
+          setStatus((st) => finalizeReduce(st, 'storageFail'))
+          return
+        }
         // نفس التوليد الذي حُفظ يُسلَّم للتسليم — لا توليد ثانٍ للعرض.
         onPlanReady?.({ plan: artifacts.generated, goalType: artifacts.profile.goalType, rationale: artifacts.rationale })
-        markCompleted(userId)
         // [CTO-68] الحدث ٣ — إكمال الإعداد. **بعد** بناء الخطة وحفظها ووسمها مكتملة،
         // لا عند ضغط الزر: الفشل يرمي قبل هذا السطر فلا يُسجَّل إكمال لم يحدث.
         trackLocal('setup_completed', {})
@@ -381,6 +418,7 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
             الحقيقية، فلا يمشي عدّاد بلا عمل خلفه (§6.1). */}
         {status === 'building' && <SynthesisScreen lang={lang} done={false} />}
         {status === 'error' && <ErrorScreen lang={lang} t={t} onRetry={finalize} onDismiss={() => setStatus('idle')} />}
+        {status === 'storage' && <StorageBlockedScreen lang={lang} t={t} onRetry={finalize} onDismiss={() => setStatus('idle')} />}
       </>
     )
   }
@@ -1094,6 +1132,39 @@ function ErrorScreen({ lang, t, onRetry, onDismiss }: { lang: Lang; t: T; onRetr
         <button type="button" onClick={onRetry} className="btn-primary w-full py-4 text-[1.1875rem] shadow-glow">
           <Icon name="RotateCcw" className="h-5 w-5" />
           {t.error.retry}
+        </button>
+        <button type="button" onClick={onDismiss} className="w-full rounded-2xl border border-line bg-surface py-3 text-sm font-bold text-ink-700">
+          {t.back}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * فشل الحفظ — **الصدق قبل الطمأنينة** (الميثاق §6-4).
+ *
+ * ليست نسخة ثانية من `ErrorScreen`: تلك تصف عطلًا عابرًا يُصلحه زرّ إعادة،
+ * وهذه تصف حالة **قائمة في الجهاز** (تخزين ممتلئ أو محجوب) لا تزول بالضغط
+ * وحده. فتسمّي السبب، وتقول للمستخدم ما يفعله، وتؤكّد له الأهمّ: **إجاباته
+ * باقية** — لأن أسوأ ما يفعله فشل الحفظ هو أن يظنّ المستخدم أنه فقد كل شيء
+ * فيعيد الإعداد من الصفر.
+ */
+function StorageBlockedScreen({ lang, t, onRetry, onDismiss }: { lang: Lang; t: T; onRetry: () => void; onDismiss: () => void }) {
+  return (
+    <div dir={lang === 'en' ? 'ltr' : 'rtl'} className="v2-surface-dark fixed inset-0 z-[60] flex flex-col items-center justify-center bg-page px-6 text-center text-ink-900" data-testid="onboarding-storage-blocked">
+      <div role="alert" className="flex flex-col items-center">
+        <span className="v2-error-panel v2-error-icon grid h-16 w-16 place-items-center rounded-2xl border">
+          <Icon name="Database" className="h-8 w-8" strokeWidth={2.25} />
+        </span>
+        <h1 className="mt-5 text-2xl font-black tracking-tight">{t.storage.title}</h1>
+        <p className="mt-2 max-w-xs text-sm leading-relaxed text-ink-500">{t.storage.message}</p>
+        <p className="mt-3 max-w-xs text-sm font-bold leading-relaxed text-ink-700">{t.storage.kept}</p>
+      </div>
+      <div className="mt-7 w-full max-w-xs space-y-2.5">
+        <button type="button" onClick={onRetry} className="btn-primary w-full py-4 text-[1.1875rem] shadow-glow">
+          <Icon name="RotateCcw" className="h-5 w-5" />
+          {t.storage.retry}
         </button>
         <button type="button" onClick={onDismiss} className="w-full rounded-2xl border border-line bg-surface py-3 text-sm font-bold text-ink-700">
           {t.back}
