@@ -95,8 +95,25 @@ function LoadingFallback() {
   return <div className="h-[100dvh] min-h-0 bg-page" aria-busy="true" />
 }
 
-function PremiumGateLayer({ lang }: { lang: Lang }) {
-  const { blockedAction } = useAccess()
+/**
+ * طبقة بوّابة Premium.
+ *
+ * [SOVEREIGN-COMMERCE-001] **البوّابة تُغلق عند تبدّل المسار.** كانت `blockedAction`
+ * تعيش في المزوّد فوق مبدّل المسارات، وطبقةُ البوّابة خارجه، ومستمع `hashchange`
+ * بلا تفكيك — فزرّ الرجوع كان يترك نافذةً حيّة **فوق شاشة أخرى**: المستخدم يرى
+ * حوارًا يطالبه بالدفع مقابل فعلٍ لم يعد على الشاشة التي يقف عليها.
+ *
+ * الإغلاق مشروط بـ**تبدّل** المسار لا بتشغيل الأثر: البوّابة تُفتح فوق مسارها،
+ * فلو أغلقنا عند كل تشغيل لأغلقناها في نفس اللحظة التي فُتحت فيها.
+ */
+function PremiumGateLayer({ lang, route }: { lang: Lang; route: AppRoute }) {
+  const { blockedAction, closeGate } = useAccess()
+  const lastRoute = useRef(route)
+  useEffect(() => {
+    if (lastRoute.current === route) return
+    lastRoute.current = route
+    closeGate()
+  }, [route, closeGate])
   if (!blockedAction) return null
   return (
     <Suspense fallback={null}>
@@ -665,7 +682,7 @@ export default function App() {
         */}
         {/* بوّابة Premium — نداء واحد لكل فعل محجوب، من أي شاشة. تُرسم هنا مرّة
             واحدة فلا يبني كل سطح نافذته الخاصّة فتتفرّق الرسالة. */}
-        <PremiumGateLayer lang={LANG} />
+        <PremiumGateLayer lang={LANG} route={view} />
       </RouteErrorBoundary>
     </>
   )
