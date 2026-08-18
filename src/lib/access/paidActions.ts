@@ -90,3 +90,37 @@ export function isPaidActionAllowed(action: PaidAction, status: EntitlementStatu
   void action // كل الأفعال المدفوعة سواء اليوم؛ التوقيع يسمح بتمييزها لاحقًا بلا تغيير المستدعين.
   return status === 'active'
 }
+
+// ————————————————————————————————————————————————————————————————
+// [SOVEREIGN-RECOVERY-001] نيّة الكتابة — الإصلاح ليس تحويرًا
+// ————————————————————————————————————————————————————————————————
+//
+// الواقعة: تخصيص تالف + ملف إعداد سليم ⇒ `hasSavedCustomization()` تقول «محفوظ»
+// (لأنها كانت تفحص وجود البايتات لا صلاحيتها)، فيرى المستخدم خطة مُختلَقة على
+// أنها خطته، وأي محاولة لإعادة الإعداد تصطدم بـ`assertPaid('plan.saveEdit')`.
+// أي: **يُطالَب بالدفع ليسترجع ما أتلفه تخزيننا**.
+//
+// العلاج ليس إضعاف الحارس بل **تسمية النيّة**: من بدأ الكتابة؟
+//   • `user-edit`   — المستخدم يحوّر خطة قائمة ⇒ يمرّ على الجدول المدفوع كاملًا.
+//   • `system-repair` — التطبيق يعيد بناء ما تعذّرت قراءته ⇒ ليس فعلًا مدفوعًا أصلًا.
+//
+// و«الإصلاح» **لا يُصدَّق على كلمته**: الحارس في `guard.ts` يطلب برهانًا حيًّا
+// أن هناك عطلًا فعلًا، وإلا رمى خطأً مسمّىً. فالنيّة ليست مفتاح تجاوز.
+
+/** من بدأ الكتابة — يحدّد أي بوّابة تنطبق. */
+export type WriteIntent = 'user-edit' | 'system-repair'
+
+/**
+ * أفعال **إصلاح النظام** — معدودة صراحةً بنفس منطق `PAID_ACTIONS`: أي مسار
+ * إصلاح جديد يجب أن يُسمّى هنا قبل أن يمرّ. وهي **ليست** أفعالًا مدفوعة.
+ */
+export const SYSTEM_REPAIR_ACTIONS = ['plan.repairFromOnboarding'] as const
+export type SystemRepairAction = (typeof SYSTEM_REPAIR_ACTIONS)[number]
+
+/**
+ * لا تقاطع بين الجدولين. اسم واحد في الاثنين يعني بابًا يفتح نفسه بنيّته —
+ * ويحرس هذا الشرطَ إثباتُ `test:plan-recovery` (الميثاق §4.2: كل استثناء يُحرَس).
+ */
+export function isSystemRepairAction(name: string): name is SystemRepairAction {
+  return (SYSTEM_REPAIR_ACTIONS as readonly string[]).includes(name)
+}

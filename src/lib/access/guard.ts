@@ -14,7 +14,7 @@
 // الاستهلاك غير المقصود ويجعل الفشل آمنًا. السلطة النهائية عقد الخادم.
 
 import { getEntitlement } from './entitlementStore'
-import { isPaidActionAllowed, type PaidAction } from './paidActions'
+import { isPaidActionAllowed, isSystemRepairAction, type PaidAction, type WriteIntent } from './paidActions'
 
 /** خطأ مسمّى — يسقط الاختبار بالاسم لا بـ`TypeError` عابر (الميثاق §4.2). */
 export class PaidActionDenied extends Error {
@@ -49,3 +49,47 @@ export function runIfPaid(action: PaidAction, run: () => void): boolean {
   run()
   return true
 }
+
+// ————————————————————————————————————————————————————————————————
+// [SOVEREIGN-RECOVERY-001] الحارس حسب النيّة
+// ————————————————————————————————————————————————————————————————
+
+/**
+ * ادّعاء إصلاح بلا عطل. خطأ **مسمّى** لا `TypeError` عابر (الميثاق §4.2):
+ * لو تسلّل مسار يعلن `system-repair` فوق مخزن سليم، سقط باسمه لا بمصادفة.
+ */
+export class RepairIntentRejected extends Error {
+  readonly action: PaidAction
+  constructor(action: PaidAction) {
+    super(`RepairIntentRejected: ${action}`)
+    this.name = 'RepairIntentRejected'
+    this.action = action
+  }
+}
+
+/**
+ * بوّابة الكتابة الواحدة، **مُفرَّقة بالنيّة لا مُضعَّفة**:
+ *
+ *  • `user-edit`     → `assertPaid` كما هو. لم يتغيّر شيء لتحوير حقيقي.
+ *  • `system-repair` → لا استحقاق **بشرط أن يثبت المستدعي وجود العطل**
+ *    عبر `damageProof()`. المستدعي لا يُصدَّق على كلمته: الدالة تُستدعى هنا
+ *    لحظة الفحص، فقراءة المخزن هي الحكَم لا وسيط الاستدعاء.
+ *
+ * لماذا برهان حيّ بدل علَم بسيط: العلَم البسيط يصير مفتاحًا عامًّا — يكفي
+ * أن يمرّره مسارٌ واحد بالخطأ ليسقط الحارس كلّه على كل خطة. البرهان يجعل
+ * التجاوز **مستحيلًا على مخزن سليم** مهما ادّعى المستدعي.
+ */
+export function assertWriteAllowed(
+  action: PaidAction,
+  intent: WriteIntent,
+  damageProof: () => boolean,
+): void {
+  if (intent !== 'system-repair') {
+    assertPaid(action)
+    return
+  }
+  if (!damageProof()) throw new RepairIntentRejected(action)
+}
+
+/** هل هذا الاسم فعل إصلاح نظام (لا فعل مدفوع)؟ إعادة تصدير لمستهلكي الحارس. */
+export { isSystemRepairAction }
