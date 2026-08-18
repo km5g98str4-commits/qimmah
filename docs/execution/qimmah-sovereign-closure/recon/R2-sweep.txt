@@ -1,0 +1,14 @@
+SWEEP over 720 knee+shoulder configurations (place x days x duration x level x goal)
+configurations prescribing >=1 contraindicated movement: 720/720 (100.0%)
+
+movement                        | times prescribed to a knee+shoulder user
+shoulder-press-machine          | 1200
+leg-press-machine               | 1056
+dumbbell-shoulder-press         | 480
+bodyweight-squat                | 384
+dumbbell-sumo-squat             | 240
+chest-dip                       | 240
+front-raise                     | 240
+chin-up                         | 192
+goblet-squat                    | 192
+overhead-triceps-extension      | 48

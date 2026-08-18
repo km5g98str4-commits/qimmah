@@ -1,0 +1,39 @@
+BEST MATCH to founder report: 5 of 5 named movements
+config = {"place":"home","days":5,"duration":75,"level":"never","goal":"cut"}
+Profile.injuries = "knee، shoulder"  gymAccess= home  level= beginner
+matched = dumbbell-shoulder-press, front-raise, overhead-triceps-extension, goblet-squat, bodyweight-squat
+--- gen-1-upper
+    barbell-bench-press             | Barbell Bench Press           | barbell+bench
+    barbell-row                     | Barbell Row                   | barbell
+    dumbbell-shoulder-press         | Dumbbell Shoulder Press       | dumbbell  <<< FOUNDER-REPORTED UNSAFE
+    chest-supported-row             | Chest-Supported Row           | dumbbell+bench
+    decline-barbell-press           | Decline Barbell Press         | barbell+bench
+    front-raise                     | Front Raise                   | dumbbell  <<< FOUNDER-REPORTED UNSAFE
+--- gen-2-lower
+    bodyweight-squat                | Bodyweight Squat              | bodyweight  <<< FOUNDER-REPORTED UNSAFE
+    dumbbell-rdl                    | Dumbbell RDL                  | dumbbell
+    goblet-squat                    | Goblet Squat                  | dumbbell  <<< FOUNDER-REPORTED UNSAFE
+    banded-lateral-walk             | Banded Lateral Walk           | band
+    bodyweight-calf-raise           | Bodyweight Calf Raise         | bodyweight
+    bicycle-crunch                  | Bicycle Crunch                | bodyweight
+--- gen-3-upper
+    chest-dip                       | Chest Dip                     | bodyweight
+    chin-up                         | Chin-Up                       | bodyweight
+    dumbbell-shoulder-press         | Dumbbell Shoulder Press       | dumbbell  <<< FOUNDER-REPORTED UNSAFE
+    barbell-row                     | Barbell Row                   | barbell
+    decline-dumbbell-press          | Decline Dumbbell Press        | dumbbell+bench
+    front-raise                     | Front Raise                   | dumbbell  <<< FOUNDER-REPORTED UNSAFE
+--- gen-4-lower
+    dumbbell-sumo-squat             | Dumbbell Sumo Squat           | dumbbell
+    frog-pump                       | Frog Pump                     | bodyweight
+    bodyweight-squat                | Bodyweight Squat              | bodyweight  <<< FOUNDER-REPORTED UNSAFE
+    hip-thrust                      | Hip Thrust                    | barbell+bench
+    single-leg-calf-raise           | Single-Leg Calf Raise         | dumbbell+bodyweight
+    crunch                          | Crunch                        | bodyweight
+--- gen-5-arms
+    dumbbell-shoulder-press         | Dumbbell Shoulder Press       | dumbbell  <<< FOUNDER-REPORTED UNSAFE
+    front-raise                     | Front Raise                   | dumbbell  <<< FOUNDER-REPORTED UNSAFE
+    barbell-curl                    | Barbell Curl                  | barbell
+    dumbbell-kickback               | Dumbbell Kickback             | dumbbell
+    concentration-curl              | Concentration Curl            | dumbbell
+    overhead-triceps-extension      | Overhead Triceps Extension    | dumbbell  <<< FOUNDER-REPORTED UNSAFE

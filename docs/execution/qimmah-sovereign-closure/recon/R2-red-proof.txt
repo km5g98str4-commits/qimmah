@@ -1,0 +1,239 @@
+
+=== CASE: knee+shoulder @ HOME (founder repro)
+  onboarding injuries[] = ["knee","shoulder"]   (lang=ar)
+  serialized Profile.injuries = "knee، shoulder"
+  gymType=home gymAccess=home env=home level=beginner
+  hasRecognizedInjuryArea() = true
+  --- gen-1-upper (Day 1 · Upper)
+      barbell-bench-press            | Barbell Bench Press          | barbell+bench      | push
+      barbell-row                    | Barbell Row                  | barbell            | pull
+      dumbbell-shoulder-press        | Dumbbell Shoulder Press      | dumbbell           | push  <<< UNSAFE:SHOULDER
+      chest-supported-row            | Chest-Supported Row          | dumbbell+bench     | pull
+      decline-barbell-press          | Decline Barbell Press        | barbell+bench      | push
+  --- gen-2-lower (Day 2 · Lower)
+      bodyweight-squat               | Bodyweight Squat             | bodyweight         | squat  <<< UNSAFE:KNEE
+      dumbbell-rdl                   | Dumbbell RDL                 | dumbbell           | hinge
+      goblet-squat                   | Goblet Squat                 | dumbbell           | squat  <<< UNSAFE:KNEE
+      banded-lateral-walk            | Banded Lateral Walk          | band               | isolation
+      bodyweight-calf-raise          | Bodyweight Calf Raise        | bodyweight         | isolation
+  --- gen-3-upper (Day 3 · Upper)
+      chest-dip                      | Chest Dip                    | bodyweight         | push  <<< UNSAFE:SHOULDER
+      chin-up                        | Chin-Up                      | bodyweight         | pull  <<< UNSAFE:SHOULDER
+      dumbbell-shoulder-press        | Dumbbell Shoulder Press      | dumbbell           | push  <<< UNSAFE:SHOULDER
+      barbell-row                    | Barbell Row                  | barbell            | pull
+      decline-dumbbell-press         | Decline Dumbbell Press       | dumbbell+bench     | push
+  --- gen-4-lower (Day 4 · Lower)
+      dumbbell-sumo-squat            | Dumbbell Sumo Squat          | dumbbell           | squat
+      frog-pump                      | Frog Pump                    | bodyweight         | hinge
+      bodyweight-squat               | Bodyweight Squat             | bodyweight         | squat  <<< UNSAFE:KNEE
+      hip-thrust                     | Hip Thrust                   | barbell+bench      | hinge
+      single-leg-calf-raise          | Single-Leg Calf Raise        | dumbbell+bodyweight | isolation
+  WARNINGS: ["بدأنا بحجم أخفّ هذا الأسبوع لبداية آمنة — زِد تدريجيًا بعدها.","راعينا مناطق الإصابة التي تعرّفنا عليها باستبعاد التمارين المطابقة لقائمة المخاطر واختيار بدائل لنفس العضلات."]
+  >>> UNSAFE COUNT = 7  (RED)
+
+=== CASE: knee+shoulder @ GYM (commercial)
+  onboarding injuries[] = ["knee","shoulder"]   (lang=ar)
+  serialized Profile.injuries = "knee، shoulder"
+  gymType=commercial gymAccess=full env=gym level=beginner
+  hasRecognizedInjuryArea() = true
+  --- gen-1-upper (Day 1 · Upper)
+      chest-press-machine            | Chest Press Machine          | machine            | push
+      chest-supported-row-machine    | Chest-Supported Row Machine  | machine            | pull
+      shoulder-press-machine         | Shoulder Press Machine       | machine            | push  <<< UNSAFE:SHOULDER
+      iso-lateral-pulldown           | Iso-Lateral Pulldown         | machine            | pull
+      incline-chest-press-machine    | Incline Chest Press Machine  | machine            | push
+      triceps-extension-machine      | Triceps Extension Machine    | machine            | isolation
+  --- gen-2-lower (Day 2 · Lower)
+      leg-press-machine              | Leg Press Machine            | machine            | squat  <<< UNSAFE:KNEE
+      glute-machine                  | Glute Machine                | machine            | hinge
+      glute-kickback-machine         | Glute Kickback Machine       | machine            | isolation
+      lying-leg-curl                 | Lying Leg Curl               | machine            | isolation
+      seated-calf-raise-machine      | Seated Calf Raise Machine    | machine            | isolation
+      ab-crunch-machine              | Ab Crunch Machine            | machine            | core
+  --- gen-3-upper (Day 3 · Upper)
+      decline-chest-press-machine    | Decline Chest Press Machine  | machine            | push
+      iso-lateral-high-row           | Iso-Lateral High Row         | machine            | pull
+      shoulder-press-machine         | Shoulder Press Machine       | machine            | push  <<< UNSAFE:SHOULDER
+      lat-pulldown-machine           | Lat Pulldown Machine (Seated/Lever) | machine            | pull
+      iso-lateral-chest-press        | Iso-Lateral Chest Press      | machine            | push
+      preacher-curl-machine          | Preacher Curl Machine        | machine            | isolation
+  --- gen-4-lower (Day 4 · Lower)
+      leg-press-machine              | Leg Press Machine            | machine            | squat  <<< UNSAFE:KNEE
+      glute-machine                  | Glute Machine                | machine            | hinge
+      standing-hip-extension-machine | Standing Hip Extension Machine | machine            | isolation
+      seated-leg-curl                | Seated Leg Curl              | machine            | isolation
+      standing-calf-raise-machine    | Standing Calf Raise Machine  | machine            | isolation
+      ab-crunch-machine              | Ab Crunch Machine            | machine            | core
+  WARNINGS: ["بدأنا بحجم أخفّ هذا الأسبوع لبداية آمنة — زِد تدريجيًا بعدها.","راعينا مناطق الإصابة التي تعرّفنا عليها باستبعاد التمارين المطابقة لقائمة المخاطر واختيار بدائل لنفس العضلات."]
+  >>> UNSAFE COUNT = 4  (RED)
+
+=== CASE: knee+shoulder @ MACHINES-only
+  onboarding injuries[] = ["knee","shoulder"]   (lang=ar)
+  serialized Profile.injuries = "knee، shoulder"
+  gymType=small gymAccess=small env=gym level=beginner
+  hasRecognizedInjuryArea() = true
+  --- gen-1-upper (Day 1 · Upper)
+      chest-press-machine            | Chest Press Machine          | machine            | push
+      chest-supported-row-machine    | Chest-Supported Row Machine  | machine            | pull
+      shoulder-press-machine         | Shoulder Press Machine       | machine            | push  <<< UNSAFE:SHOULDER
+      iso-lateral-pulldown           | Iso-Lateral Pulldown         | machine            | pull
+      incline-chest-press-machine    | Incline Chest Press Machine  | machine            | push
+      triceps-extension-machine      | Triceps Extension Machine    | machine            | isolation
+  --- gen-2-lower (Day 2 · Lower)
+      leg-press-machine              | Leg Press Machine            | machine            | squat  <<< UNSAFE:KNEE
+      glute-machine                  | Glute Machine                | machine            | hinge
+      glute-kickback-machine         | Glute Kickback Machine       | machine            | isolation
+      lying-leg-curl                 | Lying Leg Curl               | machine            | isolation
+      seated-calf-raise-machine      | Seated Calf Raise Machine    | machine            | isolation
+      ab-crunch-machine              | Ab Crunch Machine            | machine            | core
+  --- gen-3-upper (Day 3 · Upper)
+      decline-chest-press-machine    | Decline Chest Press Machine  | machine            | push
+      iso-lateral-high-row           | Iso-Lateral High Row         | machine            | pull
+      shoulder-press-machine         | Shoulder Press Machine       | machine            | push  <<< UNSAFE:SHOULDER
+      lat-pulldown-machine           | Lat Pulldown Machine (Seated/Lever) | machine            | pull
+      iso-lateral-chest-press        | Iso-Lateral Chest Press      | machine            | push
+      preacher-curl-machine          | Preacher Curl Machine        | machine            | isolation
+  --- gen-4-lower (Day 4 · Lower)
+      leg-press-machine              | Leg Press Machine            | machine            | squat  <<< UNSAFE:KNEE
+      glute-machine                  | Glute Machine                | machine            | hinge
+      standing-hip-extension-machine | Standing Hip Extension Machine | machine            | isolation
+      seated-leg-curl                | Seated Leg Curl              | machine            | isolation
+      standing-calf-raise-machine    | Standing Calf Raise Machine  | machine            | isolation
+      ab-crunch-machine              | Ab Crunch Machine            | machine            | core
+  WARNINGS: ["بدأنا بحجم أخفّ هذا الأسبوع لبداية آمنة — زِد تدريجيًا بعدها.","راعينا مناطق الإصابة التي تعرّفنا عليها باستبعاد التمارين المطابقة لقائمة المخاطر واختيار بدائل لنفس العضلات."]
+  >>> UNSAFE COUNT = 4  (RED)
+
+=== CASE: shoulder ONLY @ HOME
+  onboarding injuries[] = ["shoulder"]   (lang=ar)
+  serialized Profile.injuries = "shoulder"
+  gymType=home gymAccess=home env=home level=beginner
+  hasRecognizedInjuryArea() = true
+  --- gen-1-upper (Day 1 · Upper)
+      barbell-bench-press            | Barbell Bench Press          | barbell+bench      | push
+      barbell-row                    | Barbell Row                  | barbell            | pull
+      dumbbell-shoulder-press        | Dumbbell Shoulder Press      | dumbbell           | push  <<< UNSAFE:SHOULDER
+      chest-supported-row            | Chest-Supported Row          | dumbbell+bench     | pull
+      decline-barbell-press          | Decline Barbell Press        | barbell+bench      | push
+  --- gen-2-lower (Day 2 · Lower)
+      bodyweight-squat               | Bodyweight Squat             | bodyweight         | squat
+      dumbbell-rdl                   | Dumbbell RDL                 | dumbbell           | hinge
+      dumbbell-sumo-squat            | Dumbbell Sumo Squat          | dumbbell           | squat
+      banded-lateral-walk            | Banded Lateral Walk          | band               | isolation
+      bodyweight-calf-raise          | Bodyweight Calf Raise        | bodyweight         | isolation
+  --- gen-3-upper (Day 3 · Upper)
+      chest-dip                      | Chest Dip                    | bodyweight         | push  <<< UNSAFE:SHOULDER
+      chin-up                        | Chin-Up                      | bodyweight         | pull  <<< UNSAFE:SHOULDER
+      dumbbell-shoulder-press        | Dumbbell Shoulder Press      | dumbbell           | push  <<< UNSAFE:SHOULDER
+      barbell-row                    | Barbell Row                  | barbell            | pull
+      decline-dumbbell-press         | Decline Dumbbell Press       | dumbbell+bench     | push
+  --- gen-4-lower (Day 4 · Lower)
+      goblet-squat                   | Goblet Squat                 | dumbbell           | squat
+      frog-pump                      | Frog Pump                    | bodyweight         | hinge
+      bulgarian-split-squat          | Bulgarian Split Squat        | dumbbell           | lunge
+      hip-thrust                     | Hip Thrust                   | barbell+bench      | hinge
+      single-leg-calf-raise          | Single-Leg Calf Raise        | dumbbell+bodyweight | isolation
+  WARNINGS: ["بدأنا بحجم أخفّ هذا الأسبوع لبداية آمنة — زِد تدريجيًا بعدها.","راعينا مناطق الإصابة التي تعرّفنا عليها باستبعاد التمارين المطابقة لقائمة المخاطر واختيار بدائل لنفس العضلات."]
+  >>> UNSAFE COUNT = 4  (RED)
+
+=== CASE: knee ONLY @ HOME
+  onboarding injuries[] = ["knee"]   (lang=ar)
+  serialized Profile.injuries = "knee"
+  gymType=home gymAccess=home env=home level=beginner
+  hasRecognizedInjuryArea() = true
+  --- gen-1-upper (Day 1 · Upper)
+      barbell-bench-press            | Barbell Bench Press          | barbell+bench      | push
+      barbell-row                    | Barbell Row                  | barbell            | pull
+      arnold-press                   | Arnold Press                 | dumbbell           | push
+      chest-supported-row            | Chest-Supported Row          | dumbbell+bench     | pull
+      decline-barbell-press          | Decline Barbell Press        | barbell+bench      | push
+  --- gen-2-lower (Day 2 · Lower)
+      bodyweight-squat               | Bodyweight Squat             | bodyweight         | squat  <<< UNSAFE:KNEE
+      dumbbell-rdl                   | Dumbbell RDL                 | dumbbell           | hinge
+      goblet-squat                   | Goblet Squat                 | dumbbell           | squat  <<< UNSAFE:KNEE
+      banded-lateral-walk            | Banded Lateral Walk          | band               | isolation
+      bodyweight-calf-raise          | Bodyweight Calf Raise        | bodyweight         | isolation
+  --- gen-3-upper (Day 3 · Upper)
+      chest-dip                      | Chest Dip                    | bodyweight         | push
+      chin-up                        | Chin-Up                      | bodyweight         | pull
+      dumbbell-shoulder-press        | Dumbbell Shoulder Press      | dumbbell           | push
+      barbell-row                    | Barbell Row                  | barbell            | pull
+      decline-dumbbell-press         | Decline Dumbbell Press       | dumbbell+bench     | push
+  --- gen-4-lower (Day 4 · Lower)
+      dumbbell-sumo-squat            | Dumbbell Sumo Squat          | dumbbell           | squat
+      frog-pump                      | Frog Pump                    | bodyweight         | hinge
+      bodyweight-squat               | Bodyweight Squat             | bodyweight         | squat  <<< UNSAFE:KNEE
+      hip-thrust                     | Hip Thrust                   | barbell+bench      | hinge
+      single-leg-calf-raise          | Single-Leg Calf Raise        | dumbbell+bodyweight | isolation
+  WARNINGS: ["بدأنا بحجم أخفّ هذا الأسبوع لبداية آمنة — زِد تدريجيًا بعدها.","راعينا مناطق الإصابة التي تعرّفنا عليها باستبعاد التمارين المطابقة لقائمة المخاطر واختيار بدائل لنفس العضلات."]
+  >>> UNSAFE COUNT = 3  (RED)
+
+=== CASE: lower_back ONLY @ HOME
+  onboarding injuries[] = ["lower_back"]   (lang=ar)
+  serialized Profile.injuries = "lower_back"
+  gymType=home gymAccess=home env=home level=beginner
+  hasRecognizedInjuryArea() = true
+  --- gen-1-upper (Day 1 · Upper)
+      barbell-bench-press            | Barbell Bench Press          | barbell+bench      | push
+      chin-up                        | Chin-Up                      | bodyweight         | pull
+      arnold-press                   | Arnold Press                 | dumbbell           | push
+      chest-supported-row            | Chest-Supported Row          | dumbbell+bench     | pull
+      decline-barbell-press          | Decline Barbell Press        | barbell+bench      | push
+  --- gen-2-lower (Day 2 · Lower)
+      bodyweight-squat               | Bodyweight Squat             | bodyweight         | squat
+      glute-bridge                   | Glute Bridge                 | bodyweight         | hinge
+      dumbbell-sumo-squat            | Dumbbell Sumo Squat          | dumbbell           | squat
+      banded-lateral-walk            | Banded Lateral Walk          | band               | isolation
+      bodyweight-calf-raise          | Bodyweight Calf Raise        | bodyweight         | isolation
+  --- gen-3-upper (Day 3 · Upper)
+      chest-dip                      | Chest Dip                    | bodyweight         | push
+      chest-supported-row            | Chest-Supported Row          | dumbbell+bench     | pull
+      dumbbell-shoulder-press        | Dumbbell Shoulder Press      | dumbbell           | push
+      dumbbell-row                   | Dumbbell Row                 | dumbbell+bench     | pull
+      decline-dumbbell-press         | Decline Dumbbell Press       | dumbbell+bench     | push
+  --- gen-4-lower (Day 4 · Lower)
+      goblet-squat                   | Goblet Squat                 | dumbbell           | squat
+      frog-pump                      | Frog Pump                    | bodyweight         | hinge
+      bulgarian-split-squat          | Bulgarian Split Squat        | dumbbell           | lunge
+      hip-thrust                     | Hip Thrust                   | barbell+bench      | hinge
+      single-leg-calf-raise          | Single-Leg Calf Raise        | dumbbell+bodyweight | isolation
+  WARNINGS: ["بدأنا بحجم أخفّ هذا الأسبوع لبداية آمنة — زِد تدريجيًا بعدها.","راعينا مناطق الإصابة التي تعرّفنا عليها باستبعاد التمارين المطابقة لقائمة المخاطر واختيار بدائل لنفس العضلات."]
+  >>> UNSAFE COUNT = 0  (clean)
+
+=== CASE: NO injury @ HOME (control)
+  onboarding injuries[] = []   (lang=ar)
+  serialized Profile.injuries = ""
+  gymType=home gymAccess=home env=home level=beginner
+  hasRecognizedInjuryArea() = false
+  --- gen-1-upper (Day 1 · Upper)
+      barbell-bench-press            | Barbell Bench Press          | barbell+bench      | push
+      barbell-row                    | Barbell Row                  | barbell            | pull
+      arnold-press                   | Arnold Press                 | dumbbell           | push
+      chest-supported-row            | Chest-Supported Row          | dumbbell+bench     | pull
+      decline-barbell-press          | Decline Barbell Press        | barbell+bench      | push
+  --- gen-2-lower (Day 2 · Lower)
+      bodyweight-squat               | Bodyweight Squat             | bodyweight         | squat
+      dumbbell-rdl                   | Dumbbell RDL                 | dumbbell           | hinge
+      dumbbell-sumo-squat            | Dumbbell Sumo Squat          | dumbbell           | squat
+      banded-lateral-walk            | Banded Lateral Walk          | band               | isolation
+      bodyweight-calf-raise          | Bodyweight Calf Raise        | bodyweight         | isolation
+  --- gen-3-upper (Day 3 · Upper)
+      chest-dip                      | Chest Dip                    | bodyweight         | push
+      chin-up                        | Chin-Up                      | bodyweight         | pull
+      dumbbell-shoulder-press        | Dumbbell Shoulder Press      | dumbbell           | push
+      barbell-row                    | Barbell Row                  | barbell            | pull
+      decline-dumbbell-press         | Decline Dumbbell Press       | dumbbell+bench     | push
+  --- gen-4-lower (Day 4 · Lower)
+      goblet-squat                   | Goblet Squat                 | dumbbell           | squat
+      frog-pump                      | Frog Pump                    | bodyweight         | hinge
+      bulgarian-split-squat          | Bulgarian Split Squat        | dumbbell           | lunge
+      hip-thrust                     | Hip Thrust                   | barbell+bench      | hinge
+      single-leg-calf-raise          | Single-Leg Calf Raise        | dumbbell+bodyweight | isolation
+  WARNINGS: ["بدأنا بحجم أخفّ هذا الأسبوع لبداية آمنة — زِد تدريجيًا بعدها."]
+  >>> UNSAFE COUNT = 0  (clean)
+
+
+### TOTAL UNSAFE PRESCRIPTIONS ACROSS CASES = 22
+
+### CATALOG: 181 exercises. Exercise fields = id, nameAr, nameEn, primaryMuscle, secondaryMuscles, primaryMusclesDetailed, secondaryMusclesDetailed, equipment, level, movementPattern, environment, defaultSets, defaultReps, defaultRestSec, videoUrl, videoSource, alternatives, notesAr, notesEn, howToEn, techniqueTipsEn, commonMistakesEn, safetyNotesEn, techniqueTipsAr, commonMistakesAr, safetyNotesAr
+### contraindication-ish fields present: NONE
+### movementPattern values = cardio, core, hinge, isolation, lunge, mobility, pull, push, squat
