@@ -137,9 +137,12 @@ export interface AnswerLine {
   unknown?: readonly string[]
   /** إشارة لتمرين حقيقي (فتح صفحته) — معرّفها كذلك مسنَد. */
   ref?: ExerciseRef
-  /** سؤال يُعرَض عنوانه من القاموس (قائمة القدرات) — ليس حالة مستخدم. */
-  question?: CoachQuestionId
 }
+
+// ملحوظة [SOVEREIGN-003]: كان في `AnswerLine` حقل `question` يعرض عنوان سؤال
+// داخل الجواب، ومعه مفتاح `capability.item`. حُذفا عند وصل السطح: أسئلة الطقم
+// **أزرارٌ في الواجهة** تُبنى من `COACH_QUESTIONS` مباشرةً، لا سطورُ جواب. وسطرٌ
+// بلا حقيقة داخل جواب يفتح بابًا لنصّ حرّ بلا سند — وهو بالضبط ما يمنعه الحارس.
 
 // ── المزوّد ─────────────────────────────────────────────────────────────────
 
@@ -169,7 +172,6 @@ export interface CoachAnswer {
 export const COACH_LINE_KEYS = [
   // — قائمة القدرات (مدخل غير معروف) —
   'capability.intro',
-  'capability.item',
   'capability.noGuessing',
   // — اليوم —
   'today.noPlan',
@@ -198,7 +200,10 @@ export const COACH_LINE_KEYS = [
   'missed.none',
   'missed.found',
   'missed.yoursToDecide',
-  'missed.adherence',
+  // ملحوظة [SOVEREIGN-003]: **لا مفتاح التزام هنا.** كان `missed.adherence`
+  // مسجَّلًا، وحُذف عند وصل السطح: نسبة الالتزام لها سلطة قائمة على الجذع
+  // (`src/lib/insights/metrics.ts` بعتباتها وامتناعها)، وسلطتان لرقم واحد
+  // تعنيان رقمين مختلفين في شاشتين (§2 من الميثاق).
   'missed.next',
   'missed.nextNone',
   // — البدائل —
@@ -231,7 +236,6 @@ export type CoachLineKey = (typeof COACH_LINE_KEYS)[number]
  */
 export const COACH_LINE_HEDGED: Readonly<Record<CoachLineKey, boolean>> = {
   'capability.intro': false,
-  'capability.item': false,
   'capability.noGuessing': false,
   'today.noPlan': false,
   'today.rest': false,
@@ -257,7 +261,6 @@ export const COACH_LINE_HEDGED: Readonly<Record<CoachLineKey, boolean>> = {
   'missed.none': false,
   'missed.found': false,
   'missed.yoursToDecide': false,
-  'missed.adherence': false,
   'missed.next': false,
   'missed.nextNone': false,
   'sub.noExercise': false,
@@ -269,11 +272,13 @@ export const COACH_LINE_HEDGED: Readonly<Record<CoachLineKey, boolean>> = {
   'sub.notMedical': false,
   'cal.noTarget': false,
   'cal.current': false,
-  'cal.arithmetic': false,
+  // معادلة الأيض تقدير لا قياس — فالسطر متحفّظ إلزامًا (§6/٢).
+  'cal.arithmetic': true,
   'cal.manual': false,
   'cal.minorMigrated': false,
   'cal.staleProfile': false,
-  'cal.weightDrift': false,
+  // فرق الوزن مُستنتَج بمقارنة مسجَّلٍ بملفٍّ — متحفّظ.
+  'cal.weightDrift': true,
   'cal.noLoggedWeight': false,
   'cal.unchangedSince': false,
   'cal.updatedUnknown': false,
