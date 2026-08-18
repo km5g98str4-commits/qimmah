@@ -42,6 +42,7 @@ import {
   DURATIONS,
   HISTORY_STEP,
   LAST_INPUT_STEP,
+  NAME_MAX_LENGTH,
   canAdvance,
   clearDraftV2,
   finalizeReduce,
@@ -149,6 +150,9 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
 
   // بيانات الجسم — تُحفظ نصًّا أثناء الكتابة (حالات وسيطة كـ«١» أو «» مسموحة)
   // وتُحوَّل إلى أرقام عند التحقق والحفظ. هكذا لا يُمحى ما يكتبه المستخدم.
+  // الاسم — نصّ حرّ اختياري. لا يدخل `validateStep` إطلاقًا: حقل يستطيع
+  // المستخدم تركه فارغًا لا يجوز أن يحجب زرّ «التالي» بأي حال.
+  const [nameText, setNameText] = useState(initialDraft.name)
   const [ageText, setAgeText] = useState(initialDraft.age == null ? '' : String(initialDraft.age))
   const [gender, setGender] = useState<V2Gender | null>(initialDraft.gender)
   const [heightText, setHeightText] = useState(initialDraft.heightCm == null ? '' : String(initialDraft.heightCm))
@@ -244,13 +248,13 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
   useEffect(() => {
     if (status === 'building' || status === 'done') return
     const draft: OnboardingV2Draft = {
-      step, age: ageNum, gender, heightCm: heightNum, weightKg: weightNum,
+      step, name: nameText, age: ageNum, gender, heightCm: heightNum, weightKg: weightNum,
       intent, level, trainedBefore, totalMonths, lastTrained, consistency: trainingConsistency,
       goal, days, duration, place: place as V2Place | null, neat, dietPattern,
       hasInjury, injuries, healthDataConsent,
     }
     saveDraftV2(draft, userId)
-  }, [step, ageNum, gender, heightNum, weightNum, intent, level, trainedBefore, totalMonths, lastTrained, trainingConsistency, goal, days, duration, place, neat, dietPattern, hasInjury, injuries, healthDataConsent, status, userId])
+  }, [step, nameText, ageNum, gender, heightNum, weightNum, intent, level, trainedBefore, totalMonths, lastTrained, trainingConsistency, goal, days, duration, place, neat, dietPattern, hasInjury, injuries, healthDataConsent, status, userId])
 
   // Auto-dismiss a shown validation message once the step becomes complete.
   useEffect(() => {
@@ -307,6 +311,7 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
           if (mode === 'error') throw new Error('forced onboarding failure (dev preview)')
         }
         const built0 = toAnswersFromV2({
+          name: nameText,
           age: ageNum, gender, heightCm: heightNum, weightKg: weightNum,
           intent, level, trainedBefore, totalMonths, lastTrained, consistency: trainingConsistency,
           goal, days, duration, place: place as V2Place | null, neat, dietPattern,
@@ -322,12 +327,20 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
         // `saveCustomization` يسأل `isExistingPlanEdit()`، و`saveOnboardingProfile`
         // يسأل `hasCompletedOnboardingProfile()`. فالفحص هنا يجمعهما — أي شرط
         // يرمي في الأسفل يجب أن يُلتقط هنا أوّلًا، وإلّا صار المنعُ «عطلًا».
-        if (!completionWriteRef.current && (isExistingPlanEdit() || hasCompletedOnboardingProfile()) && !canPaid('plan.saveEdit')) {
-          guardPaid('plan.saveEdit', () => {})()
-          // 'reset' → idle: البوّابة مفتوحة والشاشة تعود قابلة للتفاعل،
-          // ولا تُعرَض شاشة خطأ — المنع ليس عطلًا.
-          setStatus((st) => finalizeReduce(st, 'reset'))
-          return
+        if ((isExistingPlanEdit() || hasCompletedOnboardingProfile()) && !canPaid('plan.saveEdit')) {
+          // [SOVEREIGN-ENTRY-001] استثناء واحد داخل البوّابة لا حولها: إعادة
+          // المحاولة بعد **فشل تخزين جزئي في هذه الجلسة نفسها** ليست تحويرًا
+          // لخطة قائمة، بل إتمامًا لنفس الإكمال المجاني. بلا هذا الاستثناء
+          // يُطالَب المستخدم بالدفع ليتعافى من عطلٍ عندنا (تقرير R10 §A2c).
+          // والشرط ضيّق: مرجع في الذاكرة لا يعيش بعد إعادة التحميل، فلا يفتح
+          // بابًا لتحوير خطة في جلسة جديدة.
+          if (!completionWriteRef.current) {
+            guardPaid('plan.saveEdit', () => {})()
+            // 'reset' → idle: البوّابة مفتوحة والشاشة تعود قابلة للتفاعل،
+            // ولا تُعرَض شاشة خطأ — المنع ليس عطلًا.
+            setStatus((st) => finalizeReduce(st, 'reset'))
+            return
+          }
         }
         // ═══ سلسلة صدق الحفظ (الميثاق §5 · النمط المرجعي: `finishWorkout.ts`) ═══
         // تأكيد ← كتابة ← **فحص** ← عند الفشل: استرجاع اللقطة + رسالة صادقة +
@@ -457,6 +470,8 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
               lang={lang}
               titleId={stepTitleId}
               why={whyLines[0]}
+              name={nameText}
+              onName={setNameText}
               age={ageText}
               gender={gender}
               heightCm={heightText}
@@ -650,10 +665,11 @@ function NumField({
  * لكل مستخدمي التطبيق**. وبلا عمر، حاجز القاصرين لا يُفعَّل أصلًا.
  */
 function BodyStep({
-  lang, titleId, why, age, gender, heightCm, weightKg, healthDataConsent, onAge, onGender, onHeight, onWeight, onConsent,
+  lang, titleId, why, name, age, gender, heightCm, weightKg, healthDataConsent, onName, onAge, onGender, onHeight, onWeight, onConsent,
 }: {
   lang: Lang; titleId: string; why: string
-  age: string; gender: V2Gender | null; heightCm: string; weightKg: string; healthDataConsent: boolean
+  name: string; age: string; gender: V2Gender | null; heightCm: string; weightKg: string; healthDataConsent: boolean
+  onName: (v: string) => void
   onAge: (v: string) => void; onGender: (g: V2Gender) => void; onHeight: (v: string) => void; onWeight: (v: string) => void
   onConsent: (checked: boolean) => void
 }) {
@@ -675,6 +691,28 @@ function BodyStep({
       </div>
 
       <Group legend={s.title} className="mt-5 block space-y-4">
+        {/* الاسم أولًا: سؤال دافئ بلا رقم يفتح الشاشة، ومصرَّح باختياريّته
+            في سطره لا في تلميح مخفي. */}
+        <label htmlFor="v2-body-name" data-question-id="profile.display_name" className="block">
+          <span className="mb-1.5 block text-[0.82rem] font-bold text-ink-700">{s.nameQ}</span>
+          <span className="flex items-center gap-2 rounded-2xl border border-line bg-surface px-4 py-3 focus-within:border-ink-400">
+            <input
+              id="v2-body-name"
+              type="text"
+              autoComplete="given-name"
+              maxLength={NAME_MAX_LENGTH}
+              placeholder={s.namePlaceholder}
+              value={name}
+              onChange={(e) => onName(e.target.value)}
+              aria-label={s.nameLabel}
+              aria-describedby="v2-body-name-optional"
+              // ≥16px يمنع تكبير iOS التلقائي عند التركيز.
+              className="min-w-0 flex-1 bg-transparent text-[1rem] font-bold text-ink-900 outline-none placeholder:font-normal placeholder:text-ink-400"
+            />
+          </span>
+          <span id="v2-body-name-optional" className="mt-1.5 block text-[0.78rem] leading-snug text-ink-500">{s.nameOptional}</span>
+        </label>
+
         <div className="grid grid-cols-2 gap-3">
           <NumField id="v2-body-age" questionId="body.age" label={s.ageLabel} unit={s.ageUnit} placeholder={s.agePlaceholder} value={age} onChange={onAge} />
           <NumField id="v2-body-height" questionId="body.height" label={s.heightLabel} unit={s.heightUnit} placeholder={s.heightPlaceholder} value={heightCm} onChange={onHeight} />

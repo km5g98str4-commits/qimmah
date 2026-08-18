@@ -10,6 +10,7 @@
 import { defaultAnswers, type Answers } from './planBuilderAnswers'
 import {
   historyFollowUpsApply,
+  normalizeName,
   resolveExperienceLevel,
   resolveTrainingConsistency,
   type V2Intent,
@@ -30,6 +31,8 @@ import type { V2GoalValue } from '@/design-system/v2/labels'
 export type V2Place = 'gym' | 'home' | 'machines'
 
 export interface V2OnboardingChoices {
+  /** الاسم المعروض — اختياري؛ غيابه يعني تحيّة بلا اسم، لا اسمًا مخترعًا. */
+  name?: string | null
   goal: V2GoalValue | null
   days: number
   duration: number
@@ -102,6 +105,10 @@ export function toAnswersFromV2(choices: V2OnboardingChoices): Answers {
 
   return {
     ...defaultAnswers,
+    // الاسم يقطع الأنبوب كاملًا من هنا: `Answers.name` → `op.profile.name` →
+    // `profile.name` → `identity.userName` → تحيّة الرئيسية. لا حلقة جديدة،
+    // إنما منبع لأنبوب كان قائمًا بلا مصدر.
+    name: normalizeName(choices.name),
     age: choices.age ?? defaultAnswers.age,
     sex: choices.gender ?? defaultAnswers.sex,
     heightCm: choices.heightCm ?? defaultAnswers.heightCm,

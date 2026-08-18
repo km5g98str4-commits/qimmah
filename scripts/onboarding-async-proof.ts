@@ -27,7 +27,7 @@ function check(label: string, cond: boolean): void {
 
 function draft(over: Partial<OnboardingV2Draft> = {}): OnboardingV2Draft {
   return {
-    step: 2, age: null, gender: null, heightCm: null, weightKg: null,
+    step: 2, name: '', age: null, gender: null, heightCm: null, weightKg: null,
     intent: 'meals', level: 'intermediate',
     trainedBefore: 'months', totalMonths: 'm6_12', lastTrained: 'now', consistency: 'mostly',
     goal: 'cut', days: 4, duration: 45, place: 'gym', neat: 'moderate', dietPattern: 'none',
@@ -135,6 +135,8 @@ console.log('\n⑤ افتراضيات أول تشغيل')
   clearDraftV2('newUser')
   check('بلا مسودة يبدأ من الجسد مع قيم التدريب الآمنة', JSON.stringify(initialDraftV2('newUser')) === JSON.stringify({
     step: 0,
+    // [SOVEREIGN-ENTRY-001] الاسم الاختياري — السلسلة الفارغة تعني «ما كتبه».
+    name: '',
     age: null,
     gender: null,
     heightCm: null,

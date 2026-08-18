@@ -17,6 +17,7 @@ import { workoutStreak } from '@/lib/streaks'
 import { loadSessions } from '@/lib/workoutSessions'
 import { loadAchievementState } from '@/features/achievements/engine'
 import { product } from '@/config/product'
+import { firstGreetableName } from '@/lib/displayName'
 
 /**
  * [CTO-65] البند ٥ — أُزيلت خريطة المصطلحات الثابتة.
@@ -160,13 +161,19 @@ export function buildProfileV2Model(customization: Customization, auth: AuthSumm
   const prCount = loadAchievementState().prCount
   const hasData = workoutCount > 0
 
+  const greetedName = firstGreetableName(customization.profile.name, auth.displayName)
   const totalWeeks = goal ? PROGRAM_WEEKS[goal] : PROGRAM_WEEKS.maintain
   const weeks = commitmentWeeks(finishedDates, daysPerWeek, now)
 
   return {
     user: {
-      displayName: auth.displayName || (ar ? 'ضيف قِمّة' : 'Qimmah guest'),
-      initials: initialsOf(auth.displayName, ar),
+      // ⚠️ **لا بريد في موضع اسم.** `auth.displayName` يسقط على البريد حين لا
+      // يوجد اسم، فكان المستخدم المسجَّل الذي لم يكتب اسمًا في التسجيل يرى
+      // `ziyad@example.com` اسمًا معروضًا و«ZI» أحرفًا لصورته الرمزية.
+      // الحارس نفسه الذي تستعمله شاشة الكشف، ومن مصدر واحد.
+      // والاسم الذي كتبه في الإعداد يسبق ما يعرفه حسابه — هو اختاره لنفسه.
+      displayName: greetedName || (ar ? 'ضيف قِمّة' : 'Qimmah guest'),
+      initials: initialsOf(greetedName, ar),
       email: auth.signedIn ? auth.email : null,
       signedIn: auth.signedIn,
     },

@@ -11,6 +11,7 @@ interface PlanArtifacts { plan: GeneratedPlan; goalType: GoalType; rationale: Pl
 import { getLanguage } from '@/lib/appPreferences'
 import { useAuth } from '@/lib/authContext'
 import { loadOnboardingProfile } from '@/lib/onboardingProfile'
+import { firstGreetableName } from '@/lib/displayName'
 
 interface SetupViewProps {
   onClose: (completed?: boolean) => void
@@ -23,21 +24,6 @@ interface SetupViewProps {
 }
 
 /** عرض الإعداد — باني الخطة (الجوال) عند أول مرة، ومحرّرات متقدمة عند التعديل. */
-/**
- * الاسم المعروض في تحيّة الكشف — **أو لا شيء**.
- *
- * `authContext.displayName` يرجع البريد كبديل حين لا يوجد اسم. وهذا صحيح في
- * الترويسة، وكارثيّ في تحيّة: «يا ziyad@example.com، هذي نقطة البداية» أسوأ من
- * تحيّة بلا اسم. فنقبل الاسم **فقط** إن لم يكن بريدًا، ونسقط إلى الصيغة بلا
- * اسم فيما عدا ذلك — لا نخترع اسمًا ولا نعرض عنوانًا مكانه.
- */
-function greetableName(displayName: string | null): string | null {
-  if (!displayName) return null
-  const trimmed = displayName.trim()
-  if (!trimmed || trimmed.includes('@')) return null
-  return trimmed
-}
-
 export function SetupView({ onClose, onEnterFromHandoff, onCreateAccount, initialStep, mode = 'onboarding' }: SetupViewProps) {
   const enterFromHandoff = onEnterFromHandoff ?? (() => onClose(true))
   const { user, displayName } = useAuth()
@@ -69,7 +55,10 @@ export function SetupView({ onClose, onEnterFromHandoff, onCreateAccount, initia
         plan={artifacts?.plan}
         goalType={artifacts?.goalType}
         rationale={artifacts?.rationale}
-        displayName={greetableName(displayName)}
+        /* الاسم الذي كتبه المستخدم في الإعداد **يسبق** ما يعرفه حسابه: هو
+           اختاره لنفسه للتوّ. وكلاهما يمرّ بحارس البريد — لا عنوان بريد في
+           موضع اسم. */
+        displayName={firstGreetableName(loadOnboardingProfile()?.profile?.name, displayName)}
         /* الوزن يُقرأ من الملفّ المحفوظ لا من حالة عابرة: `saveOnboardingProfile`
            يسبق `onPlanReady`، فالقيمة هنا هي التي حُفظت فعلًا — لا نسخة ثانية
            قد تفترق عنها. وغيابها يعني رسمًا لا يُعرض، لا رقمًا مخترعًا. */

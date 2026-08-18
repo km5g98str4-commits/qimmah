@@ -81,12 +81,27 @@ export { AGE_RANGE, HEIGHT_RANGE, WEIGHT_RANGE } from '@/config/profileDomain'
 export type V2Gender = 'male' | 'female'
 
 /** Version stamp for the persisted v2 draft — supported predecessors migrate explicitly. */
-export const DRAFT_VERSION = 6
-const READABLE_DRAFT_VERSIONS = [5, DRAFT_VERSION] as const
+export const DRAFT_VERSION = 7
+const READABLE_DRAFT_VERSIONS = [5, 6, DRAFT_VERSION] as const
+
+/**
+ * حدّ طول الاسم المعروض. ليس تحقّقًا أمنيًا (لا شيء هنا يُنفَّذ) بل حدّ عرض:
+ * التحيّة سطر واحد في الرئيسية وشاشة الكشف، واسم من مئة حرف يكسرهما. القصّ
+ * صامت وغير حاجب — الاسم اختياري، فلا يُردّ المستخدم برسالة خطأ على حقل
+ * يستطيع تخطّيه أصلًا.
+ */
+export const NAME_MAX_LENGTH = 24
+
+/** يقصّ ويشذّب الاسم — نقطة واحدة يمرّ بها الحفظ والتحميل والتحويل معًا. */
+export function normalizeName(raw: unknown): string {
+  return typeof raw === 'string' ? raw.trim().slice(0, NAME_MAX_LENGTH) : ''
+}
 
 /** Full resumable state of the v2 onboarding flow. */
 export interface OnboardingV2Draft {
   step: number
+  /** الاسم المعروض — **اختياري**؛ السلسلة الفارغة تعني «ما كتبه» لا «فشل». */
+  name: string
   /** بيانات الجسم — null قبل الإجابة (لا قيمة افتراضية صامتة). */
   age: number | null
   gender: V2Gender | null
@@ -123,6 +138,7 @@ export function inRange(v: number | null, r: { min: number; max: number }): bool
 export function initialDraftV2(userId?: string | null): OnboardingV2Draft {
   return loadDraftV2(userId) ?? {
     step: 0,
+    name: '',
     age: null,
     gender: null,
     heightCm: null,
@@ -215,6 +231,7 @@ export const LAST_INPUT_STEP = 6
 
 /** سجلّ الأسئلة الثابت — الموافقة الصحية بوابة، وليست ضمن أسئلة التخصيص الـ18. */
 export const ONBOARDING_QUESTION_IDS = [
+  'profile.display_name',
   'body.age', 'body.sex', 'body.height', 'body.weight',
   'intent.primary', 'experience.declared',
   'history.trained_before', 'history.total_months', 'history.last_trained', 'history.consistency',
@@ -377,6 +394,8 @@ function isPersistedDraft(value: unknown): value is PersistedDraft {
   const maxStep = d.v === 5 ? 4 : LAST_INPUT_STEP
   if (!Number.isInteger(d.step) || (d.step as number) < 0 || (d.step as number) > maxStep) return false
   if (![d.age, d.heightCm, d.weightKg].every(nullableNumber)) return false
+  // الاسم اختياري: غيابه من مسودّة أقدم مقبول، ووجوده بنوع خاطئ ليس كذلك.
+  if (d.name !== undefined && typeof d.name !== 'string') return false
   if (d.gender !== null && d.gender !== 'male' && d.gender !== 'female') return false
   if (d.goal !== null && d.goal !== 'cut' && d.goal !== 'maintain' && d.goal !== 'bulk') return false
   if (d.intent !== null && d.intent !== 'plan' && d.intent !== 'meals' && d.intent !== 'numbers') return false
@@ -420,6 +439,8 @@ function migrateDraft(raw: PersistedDraft): OnboardingV2Draft {
   const legacy = raw.v === 5
   return normalizeDraft({
     step: legacy ? Math.min(raw.step as number, HISTORY_STEP) : raw.step as number,
+    // v5/v6 لا تحملان اسمًا — الغياب يعني «لم يُسأل»، لا اسمًا فارغًا مفقودًا.
+    name: normalizeName(raw.name),
     age: raw.age ?? null,
     gender: raw.gender ?? null,
     heightCm: raw.heightCm ?? null,
@@ -448,6 +469,7 @@ export function normalizeDraft(draft: OnboardingV2Draft): OnboardingV2Draft {
   const never = draft.trainedBefore === 'never'
   return {
     ...draft,
+    name: normalizeName(draft.name),
     totalMonths: never ? null : draft.totalMonths,
     lastTrained: never ? null : draft.lastTrained,
     consistency: never ? null : draft.consistency,

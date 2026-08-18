@@ -56,8 +56,11 @@ const firstWeek = (over: Partial<V2OnboardingChoices> = {}) => {
 }
 
 console.log('\n═══ 1) سجلّ ثابت: 18 بالضبط، وكل معرّف مربوط بالواجهة مرة ═══')
-check('السجل يحمل 18 سؤالًا بالضبط', ONBOARDING_QUESTION_IDS.length === 18)
-check('كل المعرّفات فريدة', new Set(ONBOARDING_QUESTION_IDS).size === 18)
+// ═══ العدد تغيّر بصدق، ولم يُحذف التأكيد ═══
+// ١٨ ← ١٩: أُضيف `profile.display_name` (الاسم الاختياري). التأكيد يبقى رقمًا
+// صريحًا لا `> 0`: سؤال يُضاف بلا قرار يجب أن يسقط البناء.
+check('السجل يحمل 19 سؤالًا بالضبط', ONBOARDING_QUESTION_IDS.length === 19)
+check('كل المعرّفات فريدة', new Set(ONBOARDING_QUESTION_IDS).size === 19)
 const viewSource = readFileSync(resolve(process.cwd(), 'src/views/OnboardingV2.tsx'), 'utf8')
 const profileSource = readFileSync(resolve(process.cwd(), 'src/lib/onboardingProfile.ts'), 'utf8')
 for (const id of ONBOARDING_QUESTION_IDS) {
@@ -81,6 +84,7 @@ const copyById = (lang: 'ar' | 'en'): Record<(typeof ONBOARDING_QUESTION_IDS)[nu
   const lifestyle = onboardingLifestyleStrings[lang]
   const v2 = V2_ONBOARDING[lang]
   return {
+    'profile.display_name': body.nameQ,
     'body.age': body.ageLabel,
     'body.sex': body.genderLabel,
     'body.height': body.heightLabel,
@@ -245,7 +249,7 @@ check('كاتب مصدر الحقيقة لا يبتلع الفشل', !/window\.l
 check('شاشة فشل الحفظ تصرّح ببقاء البيانات', viewSource.includes('t.storage.kept') && V2_ONBOARDING.ar.storage.kept.length > 0 && V2_ONBOARDING.en.storage.kept.length > 0)
 
 console.log('\n═══ 9) محاكاة الالتفاف: العدد/الربط/المفردات لا تمرّ رخوة ═══')
-check('إضافة معرّف تاسع عشر كانت ستُكشف', [...ONBOARDING_QUESTION_IDS, 'filler.fake'].length !== 18)
+check('إضافة معرّف زائد كانت ستُكشف', [...ONBOARDING_QUESTION_IDS, 'filler.fake'].length !== 19)
 check('ربط أسماء متفرقة بلا data-question-id لا يكفي', !viewSource.includes('data-question-name='))
 check('مفردة مختلقة لا تنتمي للبنك', !canonical('totalMonths').includes('about_a_year'))
 
