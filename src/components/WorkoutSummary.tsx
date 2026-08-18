@@ -5,7 +5,7 @@ import { getStrings } from '@/config/strings'
 import type { WorkoutSession } from '@/lib/workoutSessions'
 import { getExercise } from '@/data/exercises'
 import { muscleLabel } from '@/lib/muscles'
-import { formatNumber } from '@/lib/numberFormat'
+import { foldDigits, formatNumber } from '@/lib/numberFormat'
 
 interface WorkoutSummaryProps {
   lang: Lang
@@ -20,8 +20,10 @@ interface WorkoutSummaryProps {
   onViewProgress: () => void
 }
 
+// ⚠️ `\d` في JS أرقام ASCII حصرًا: وزن مسجَّل بأرقام عربية كان يُقرأ صفرًا،
+// فيظهر حجم التمرين «0» في شاشة الاحتفاء. الطيّ أوّلًا.
 const num = (v?: string): number => {
-  const m = String(v ?? '').match(/-?[\d.]+/)
+  const m = foldDigits(String(v ?? '')).match(/-?[\d.]+/)
   return m ? Number(m[0]) : 0
 }
 
