@@ -1,9 +1,9 @@
 {
   "contract": "QIMMAH-SOVEREIGN-PHASE-II-001",
   "agent": "AGENT-A",
-  "head": "c517075c2ca9143ed9845a45f883d3c77dfe19f6",
-  "headSubject": "fix(health): [SOVEREIGN-003] لوحة الصحّة على الويب — لا نداء مستحيل ولا نجاح مكذوب",
-  "ranAt": "2026-08-18T21:58:03.469Z",
+  "head": "2f81d16b9fe475e9d433c5d36d27401f6d4a97e0",
+  "headSubject": "fix(db): [SOVEREIGN-003] دليل الهجرات كان يسرد نصف المخطّط — والنصف الغائب هو ما يفتح اللوحة",
+  "ranAt": "2026-08-18T22:16:42.916Z",
   "provisional": true,
   "provisionalReason": "partial run — only=static",
   "artifactsReused": false,
@@ -12,10 +12,10 @@
       "mode": "prod",
       "outDir": "dist-release/prod",
       "absDir": "/home/user/qimmah/dist-release/prod",
-      "ms": 21161,
-      "head": "c517075c2ca9143ed9845a45f883d3c77dfe19f6",
-      "builtAt": "2026-08-18T21:58:01.562Z",
-      "sourceFingerprint": 1787081154602
+      "ms": 11492,
+      "head": "2f81d16b9fe475e9d433c5d36d27401f6d4a97e0",
+      "builtAt": "2026-08-18T22:16:42.310Z",
+      "sourceFingerprint": 1787091332174
     }
   },
   "engines": [
@@ -180,7 +180,7 @@
           "section": "shipped shell integrity",
           "label": "index.html carries a verifiable build identity",
           "ok": true,
-          "evidence": "<meta name=\"qimmah-build\" content=\"v1.0.0·c517075\"> <meta name=\"qimmah-commit\" content=\"c517075\"> <meta name=\"qimmah-build-time\" content=\"2026-08-18T21:57:44.506Z\"> <meta name=\"qimmah-sw-version\" content=\"qimmah-c517075\"> <meta name=\"qimmah-env\" content=\"production\">"
+          "evidence": "<meta name=\"qimmah-build\" content=\"v1.0.0·2f81d16\"> <meta name=\"qimmah-commit\" content=\"2f81d16\"> <meta name=\"qimmah-build-time\" content=\"2026-08-18T22:16:31.316Z\"> <meta name=\"qimmah-sw-version\" content=\"qimmah-2f81d16\"> <meta name=\"qimmah-env\" content=\"production\">"
         },
         {
           "section": "shipped shell integrity",
