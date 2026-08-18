@@ -7,6 +7,7 @@ import { authFlowStrings } from '@/i18n/dict/authFlow'
 import { useAuth } from '@/lib/authContext'
 import { evaluatePassword, PASSWORD_MIN_LENGTH } from '@/lib/passwordPolicy'
 import { POLICY_LINKS, policyCopy } from '@/data/policyCopy'
+import { isFounderPreview } from '@/lib/appEnv'
 
 /**
  * [CTO-65] البند ٧ — صلاحية شكل البريد.
@@ -39,6 +40,11 @@ export function LoginView({ lang, onSuccess, onBack, mode = 'login', onModeChang
   const d = miscStrings[lang]
   const af = authFlowStrings[lang]
   const auth = useAuth()
+  /**
+   * قرار **وقت بناء** لا وقت تشغيل — لا يملك المتصفّح تبديله، فلا يصير
+   * «نسخة مراجعة» ادّعاءً يُلبَس. ولا إشارة ثانية تُخترع: هذه هي القائمة.
+   */
+  const previewBuild = isFounderPreview()
   /**
    * [QIM-WEB-FOUNDER-UX-006/حزمة ٦] لا حالة وضع محلّية.
    *
@@ -371,10 +377,34 @@ export function LoginView({ lang, onSuccess, onBack, mode = 'login', onModeChang
             )}
           </>
         ) : (
-          // — Supabase غير مضبوط —
-          <div className="mt-6 rounded-2xl border border-line bg-surface p-5 text-center">
-            <p className="text-sm font-bold text-ink-900">{t.auth.disabledTitle}</p>
-            <p className="mt-1 text-xs leading-relaxed text-ink-500">{t.auth.disabledBody}</p>
+          /*
+           * — لا خادم حسابات في هذا البناء —
+           *
+           * [SOVEREIGN-COMMERCE-001] كانت البطاقة تقول «كلّم مزوّد الخدمة عشان
+           * يفعّل لك الحساب»: تخاطب القارئ **مشتريَ نشرة** لا مستخدمَ قِمّة
+           * (الميثاق §0.2)، وتردّ على من ضغط «أنشئ حسابًا» بكلامٍ عن **المزامنة
+           * السحابية** — وعدان منفصلان (§0.1) — وتقف عند المنع بلا خطوة تالية،
+           * مع أن البناء **يعرف** أنه نسخة مراجعة.
+           *
+           * الآن: البناء يسمّي نفسه، والنصّ يتكلّم عن الحساب لا عن المزامنة،
+           * ويُختم بما **يبقى شغّالًا** بدل الطريق المسدود.
+           */
+          <div data-testid="auth-unavailable" className="mt-6 rounded-2xl border border-line bg-surface p-5 text-center">
+            <p className="text-sm font-bold text-ink-900">
+              {previewBuild ? t.auth.disabledPreviewTitle : t.auth.disabledTitle}
+            </p>
+            <p className="mt-1 text-xs leading-relaxed text-ink-500">
+              {previewBuild ? t.auth.disabledPreviewBody : t.auth.disabledBody}
+            </p>
+            <p className="mt-3 text-xs leading-relaxed text-ink-700">{t.auth.disabledNext}</p>
+            <button
+              type="button"
+              onClick={onBack}
+              data-testid="auth-unavailable-back"
+              className="btn-ghost mt-4 min-h-[44px] w-full text-sm"
+            >
+              {t.auth.back}
+            </button>
           </div>
         )}
       </div>
