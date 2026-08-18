@@ -22,7 +22,7 @@ import { markPendingSync } from '@/lib/syncService'
 import { BUILD_LABEL } from '@/lib/buildInfo'
 import { settingsPreferencesStrings } from '@/i18n/dict/settingsPreferences'
 import { formatNumber, getActiveNumeralStyle, subscribeNumeralStyle } from '@/lib/numberFormat'
-import { machineConversionOutcome, regenerateOutcome, type PlanOutcome } from '@/lib/planChanges'
+import { machineConversionOutcome, regenerateOutcome, saveFailedOutcome, type PlanOutcome } from '@/lib/planChanges'
 import { withMachinePreference } from '@/lib/equipmentAccess'
 import { planCoherenceStrings } from '@/i18n/dict/planCoherence'
 
@@ -84,9 +84,11 @@ export function SettingsView({
   // كان الزرّان ينفّذان نفس الاستدعاء ثم يعلنان نجاحًا ثابتًا بلا نظر في النتيجة:
   // «صارت بنسخة الأجهزة» على خطة **مطابقة بايتًا**. الآن المحرّك يقارن الخطتين
   // (`@/lib/planChanges`) والقاموس يترجم الرمز — والتطابق يُقال صريحًا مع سببه.
+  // الكتابة تُفحص قبل أي كلام عن المحتوى (§5): `applyCustomization` يعيد
+  // `WriteResult` وكان يُهمَل هنا — تخزين ممتلئ أو محجوب كان يُعلَن «تم».
   const regenerateFromProfile = (profile = customization.profile): PlanOutcome => {
     const g = generatePlan(profile)
-    applyCustomization({
+    const written = applyCustomization({
       ...customization,
       profile,
       targets: g.targets,
@@ -96,6 +98,7 @@ export function SettingsView({
       commitmentPlan: g.commitmentPlan,
       measurementPlan: g.measurementPlan,
     })
+    if (written !== 'ok') return saveFailedOutcome()
     markPendingSync()
     return regenerateOutcome(customization.workoutPlan, g.workoutPlan)
   }
@@ -121,7 +124,7 @@ export function SettingsView({
     const profile = withMachinePreference(customization.profile, true)
     const before = customization.workoutPlan
     const g = generatePlan(profile)
-    applyCustomization({
+    const written = applyCustomization({
       ...customization,
       profile,
       targets: g.targets,
@@ -131,6 +134,7 @@ export function SettingsView({
       commitmentPlan: g.commitmentPlan,
       measurementPlan: g.measurementPlan,
     })
+    if (written !== 'ok') { announce(saveFailedOutcome()); return }
     markPendingSync()
     announce(machineConversionOutcome(profile, before, g.workoutPlan))
   }

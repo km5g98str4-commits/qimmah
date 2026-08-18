@@ -57,7 +57,7 @@ import {
   scheduledDayFor, suggestedSchedule, suggestedTrainingWeekdays, loadWeeklySchedule,
   firstTrainingWeekdayOnOrAfter, validateSchedule,
 } from '@/lib/workoutCalendar'
-import { machineConversionOutcome, regenerateOutcome, diffWorkoutPlans, planIsAllMachines } from '@/lib/planChanges'
+import { machineConversionOutcome, regenerateOutcome, saveFailedOutcome, diffWorkoutPlans, planIsAllMachines } from '@/lib/planChanges'
 import { withMachinePreference, declaredMachinePreference, resolveMachinesOnly } from '@/lib/equipmentAccess'
 import { planCoherenceStrings } from '@/i18n/dict/planCoherence'
 import { buildWorkoutV2Model } from '@/lib/workoutV2Model'
@@ -69,7 +69,7 @@ globalThis.__engine = {
   WORKOUT_CALENDAR_KEY, ensureCalendarMigrated, resetCalendarMigrationAttemptForTests,
   scheduledDayFor, suggestedSchedule, suggestedTrainingWeekdays, loadWeeklySchedule,
   firstTrainingWeekdayOnOrAfter, validateSchedule,
-  machineConversionOutcome, regenerateOutcome, diffWorkoutPlans, planIsAllMachines,
+  machineConversionOutcome, regenerateOutcome, saveFailedOutcome, diffWorkoutPlans, planIsAllMachines,
   withMachinePreference, declaredMachinePreference, resolveMachinesOnly,
   planCoherenceStrings, buildWorkoutV2Model, getDefaultCustomization, exercises, getExercise,
 }
@@ -488,7 +488,7 @@ const SUCCESS_MARKERS = [/^تم\s*—/, /^Done\s*—/]
   check('وتغيُّر بيانات فعليّ ⇒ regenerated بعدد أيامٍ وخانات', regen2.code === 'regenerated' && regen2.changedExercises > 0)
 
   // (و) النصّ نفسه: لا رسالة «لم يتغيّر» تحمل علامة نجاح — في السجلّين.
-  const silentCodes = ['machines_already', 'machines_unavailable', 'machines_no_effect', 'regenerated_identical']
+  const silentCodes = ['machines_already', 'machines_unavailable', 'machines_no_effect', 'regenerated_identical', 'save_failed']
   const lying = []
   for (const lang of ['ar', 'en']) {
     for (const code of silentCodes) {
@@ -499,7 +499,7 @@ const SUCCESS_MARKERS = [/^تم\s*—/, /^Done\s*—/]
   if (lying.length) console.log(`    نصوص تدّعي: ${lying.join(', ')}`)
   check('نصّ كل نتيجة «لم يتغيّر» خالٍ من علامة النجاح — بالعربية والإنجليزية معًا', lying.length === 0)
   check('وكل رمز نتيجة له نصّ في السجلّين', ['ar', 'en'].every((l) =>
-    ['machines_converted', 'machines_already', 'machines_unavailable', 'machines_no_effect', 'regenerated', 'regenerated_identical']
+    ['machines_converted', 'machines_already', 'machines_unavailable', 'machines_no_effect', 'regenerated', 'regenerated_identical', 'save_failed']
       .every((code) => typeof E.planCoherenceStrings[l].outcome[code] === 'string' && E.planCoherenceStrings[l].outcome[code].length > 0)))
 
   // (ز) الشاشة الوحيدة التي تُعلن: لا تنادي النصّ الثابت القديم.
@@ -508,6 +508,14 @@ const SUCCESS_MARKERS = [/^تم\s*—/, /^Done\s*—/]
     !/t\.settings\.switchMachinesSuccess/.test(settings) && !/t\.settings\.regenerateSuccess/.test(settings))
   check('وصار يشتقّ الرسالة من `machineConversionOutcome`/`regenerateOutcome`',
     /machineConversionOutcome\(/.test(settings) && /regenerateOutcome\(/.test(settings) && /planCoherenceStrings/.test(settings))
+
+  // (ح) §5 — لا شاشة نجاح قبل تأكيد الكتابة: `WriteResult` كان يُهمَل تمامًا.
+  check('نتيجة كتابة فاشلة رمزها save_failed و`changed=false` (لا نجاح فوق قرص لم يُكتب)',
+    E.saveFailedOutcome().code === 'save_failed' && E.saveFailedOutcome().changed === false)
+  check('و`SettingsView` يفحص `WriteResult` قبل أي إعلان، في المسارين معًا',
+    /const written = applyCustomization\(/.test(settings) &&
+    (settings.match(/written !== 'ok'/g) || []).length === 2 &&
+    !/(^|\n)\s*applyCustomization\(\{/.test(settings))
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
