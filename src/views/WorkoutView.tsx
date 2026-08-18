@@ -28,11 +28,14 @@ import { restoreWorkoutStorage, snapshotWorkoutStorage } from '@/lib/workoutFini
 import type { WriteResult } from '@/lib/safeStorage'
 import { trackLocal } from '@/lib/tracking'
 import { completeFirstWin } from '@/lib/firstWin'
+import { WarmupScreen } from '@/components/workout/WarmupScreen'
+import { buildWarmupPlan, type WarmupPlan } from '@/lib/warmupPlan'
+import { loadWarmupPref, saveWarmupPref } from '@/lib/strength/warmup'
+import { estimateDurationMin } from '@/lib/workoutStats'
 import { cappedSessionMinutes, easyExerciseCount, easyMinutesFor, isEasyToday } from '@/lib/easySession'
 import { journeyDayIndex } from '@/lib/tracking/signals'
 import { evaluateAchievements, registerWorkoutPRs } from '@/features/achievements/engine'
 import { weeklyAdherenceStreak } from '@/lib/streaks'
-import { getExercise } from '@/data/exercises'
 import type { WorkoutSession } from '@/lib/workoutSessions'
 import type { PlanDay } from '@/types/workout'
 import { useAccess } from '@/lib/access/useAccess'
@@ -123,17 +126,39 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
     return { ...day, exercises: day.exercises.slice(0, keep) }
   }
 
+  /**
+   * [SOVEREIGN-TODAY-001] المهمّة ١ — الإحماء مرحلة قبل أول مجموعة عمل.
+   *
+   * كان `startDay` يدخل الجلسة الكاملة فورًا **ويستدعي** `completeFirstWin('warmup')`
+   * في نفس اللحظة: أي أن التطبيق يُعلّم «إحماء دقيقتين» منجزًا لحظة بدء جلسة
+   * ٤٥ دقيقة، بلا خطوة إحماء واحدة في المسار الحيّ. الآن الجلسة تُقرأ
+   * «إحماء ← تمارين ← إنهاء»، والانتصار الأول يُسجَّل عند **إتمام** الإحماء لا
+   * عند نيّة البدء — ومن تخطّاه لا يُحتسب له (النصّ في الشاشة يقولها صراحةً).
+   */
+  const [pendingWarmup, setPendingWarmup] = useState<{ day: PlanDay; plan: WarmupPlan } | null>(null)
+
+  /** الدخول الفعلي لوضع الجلسة — نقطة واحدة يمرّ بها الإحماء والتخطّي معًا. */
+  const beginSession = (day: PlanDay) => {
+    setPendingWarmup(null)
+    setResumeFrom(undefined)
+    // [CTO-68] الحدث ١٠ — بدء تمرين، لحظة دخول وضع الجلسة.
+    trackLocal('workout_session_started', { exercises: day.exercises.length })
+    setActiveDay(day)
+  }
+
   // [QIM-WEB-FOUNDER-UX-003/حزمة ٢] الطبقة الأولى — تجربة نظيفة: بوّابة Premium
   // بدل استثناء. الطبقة الثانية (`assertPaid` داخل `saveActiveWorkout`) هي التي
   // تصمد أمام الالتفاف؛ هذه تجعل الرفض مفهومًا لا مخيفًا.
   const startDay = guardPaid('workout.start', (rawDay: PlanDay) => {
     const day = applyEasyIfActive(rawDay)
-    setResumeFrom(undefined)
-    // [CTO-68] الحدث ١٠ — بدء تمرين، لحظة دخول وضع الجلسة.
-    trackLocal('workout_session_started', { exercises: day.exercises.length })
-    // [CTO-70] البند ١ — بدء التمرين هو «الإحماء القصير» المقترح كأول انتصار.
-    completeFirstWin('warmup')
-    setActiveDay(day)
+    const warmup = buildWarmupPlan(day)
+    // بلا خطوات إحماء (يوم بلا تمارين) أو بتعطيل صريح من المستخدم ⇒ لا شاشة
+    // فارغة تُعترض الطريق. والوعد في «اليوم» يختفي بنفس الشرط — مصدر واحد.
+    if (warmup.steps.length === 0 || !loadWarmupPref(userId).show) {
+      beginSession(day)
+      return
+    }
+    setPendingWarmup({ day, plan: warmup })
   })
 
   /** يوم الجلسة المعلّقة كما هو في الخطة الحالية — القرار على المعرّف لا على الاسم. */
@@ -287,7 +312,9 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
               <Icon name="Dumbbell" className="h-3.5 w-3.5" />
               {d.workoutEyebrow}
             </span>
-            <h1 className="mt-3 text-2xl font-black text-ink-900 sm:text-3xl">{d.workoutHeading}</h1>
+            {/* [SOVEREIGN-TODAY-001] `h2` لا `h1`: `MobileShell` يصدر `h1` الصفحة،
+                وعنوانان من المستوى الأول على شاشة واحدة يكسران شجرة العناوين. */}
+            <h2 className="mt-3 text-2xl font-black text-ink-900 sm:text-3xl">{d.workoutHeading}</h2>
           </div>
           <button
             type="button"
@@ -373,7 +400,7 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
                   role="tab"
                   aria-selected={source === 'auto'}
                   onClick={() => switchSource('auto')}
-                  className={cn('rounded-lg px-3 py-1.5 text-xs font-bold transition-colors', source === 'auto' ? 'bg-primary text-white' : 'text-ink-500 hover:text-ink-900')}
+                  className={cn('tap-target inline-flex items-center justify-center rounded-lg px-3 text-xs font-bold transition-colors', source === 'auto' ? 'bg-primary text-white' : 'text-ink-500 hover:text-ink-900')}
                 >
                   {cp.useAuto}
                 </button>
@@ -382,7 +409,7 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
                   role="tab"
                   aria-selected={source === 'custom'}
                   onClick={() => switchSource('custom')}
-                  className={cn('rounded-lg px-3 py-1.5 text-xs font-bold transition-colors', source === 'custom' ? 'bg-primary text-white' : 'text-ink-500 hover:text-ink-900')}
+                  className={cn('tap-target inline-flex items-center justify-center rounded-lg px-3 text-xs font-bold transition-colors', source === 'custom' ? 'bg-primary text-white' : 'text-ink-500 hover:text-ink-900')}
                 >
                   {cp.useCustom}
                 </button>
@@ -468,9 +495,9 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
                   >
                     <span className="min-w-0">
                       <span dir="auto" className="block truncate text-sm font-bold text-ink-900">{formatNumeralsIn(lang === 'en' ? pd.nameEn : pd.nameAr, lang)}</span>
-                      <span className="block text-[11px] text-ink-400">{formatNumber(pd.exercises.length, lang)} {d.exercisesUnit} · ~{formatNumber(estDayMinutes(pd), lang)} {d.minShort}</span>
+                      <span className="block text-[11px] text-ink-400">{formatNumber(pd.exercises.length, lang)} {d.exercisesUnit} · ~{formatNumber(estimateDurationMin(pd), lang)} {d.minShort}</span>
                     </span>
-                    <Icon name="ChevronLeft" className="h-4 w-4 shrink-0 text-ink-400" />
+                    <Icon name="ChevronLeft" className="h-4 w-4 shrink-0 text-ink-400 rtl:rotate-0 ltr:rotate-180" />
                   </button>
                 ))}
               </div>
@@ -478,11 +505,11 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
           )}
         </section>
 
-        {/* قوالبي */}
-        <section>
-          <H2 icon="Layers">{d.myTemplates}</H2>
-          <EmptyCard text={d.templatesAutoGenerated} />
-        </section>
+        {/* [SOVEREIGN-TODAY-001] قسم «قوالبي» أُزيل: عنوانٌ يَعِد بميزة، وجسمه
+            يشرح **ميزة أخرى** (توليد الخطة تلقائيًا)، وهو فارغ في كل حالة بلا
+            زرّ واحد. يُعلّم المستخدم أن ميزةً موجودة لا يستطيع بلوغها أبدًا.
+            نظام القوالب الفعلي (`src/features/customPlan/templates.ts`) كامل
+            وبلا واجهة — وصلُه موجة ميزة لا بند تنظيف. */}
       </div>
 
       {/* باني الجدول المخصّص — إنشاء/تعديل، يعتمد الجدول لهذا الحساب عند الحفظ */}
@@ -532,6 +559,30 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
             <Icon name="CheckCircle2" className="h-4 w-4" />
             {cp.planSavedToast}
           </div>
+        </div>
+      )}
+
+      {/* [SOVEREIGN-TODAY-001] المهمّة ١ — الإحماء: المرحلة الأولى من الجلسة،
+          فوق الشريط السفلي وتحت وضع الجلسة. تُغلق بالدخول أو بالتخطّي، ولا
+          تُعرض لجلسة مُستأنَفة (تلك بدأت أصلًا فالإحماء ورائها). */}
+      {pendingWarmup && !activeDay && (
+        <div className="fixed inset-0 z-[60]">
+          <WarmupScreen
+            lang={lang}
+            plan={pendingWarmup.plan}
+            dayNameAr={pendingWarmup.day.nameAr}
+            dayNameEn={pendingWarmup.day.nameEn}
+            onStart={() => {
+              // [CTO-70] البند ١ — الآن فقط: الإحماء وقع فعلًا، فيُسجَّل.
+              completeFirstWin('warmup')
+              beginSession(pendingWarmup.day)
+            }}
+            onSkip={() => beginSession(pendingWarmup.day)}
+            onDisable={() => {
+              saveWarmupPref(userId, { show: false })
+              beginSession(pendingWarmup.day)
+            }}
+          />
         </div>
       )}
 
@@ -594,17 +645,6 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
   )
 }
 
-/** تقدير مدة اليوم بالدقائق من المجموعات والراحة. */
-function estDayMinutes(day: PlanDay): number {
-  const sec = day.exercises.reduce((sum, pe) => {
-    const ex = getExercise(pe.exerciseId)
-    const sets = pe.sets || ex?.defaultSets || 3
-    const rest = pe.restSec || ex?.defaultRestSec || 90
-    return sum + sets * (rest + 40)
-  }, 0)
-  return Math.max(5, Math.round(sec / 60 / 5) * 5)
-}
-
 function H2({ icon, children }: { icon: string; children: string }) {
   return (
     <h2 className="mb-3 flex items-center gap-2 text-lg font-black text-ink-900">
@@ -613,13 +653,5 @@ function H2({ icon, children }: { icon: string; children: string }) {
       </span>
       {children}
     </h2>
-  )
-}
-
-function EmptyCard({ text }: { text: string }) {
-  return (
-    <div className="rounded-2xl border border-dashed border-line bg-surface px-6 py-8 text-center">
-      <p className="text-sm text-ink-500">{text}</p>
-    </div>
   )
 }

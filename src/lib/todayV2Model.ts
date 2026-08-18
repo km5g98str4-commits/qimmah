@@ -17,6 +17,8 @@ import { getSteps, loadStepGoal } from '@/lib/stepCounter'
 import { getNutritionLog, getWorkoutSessions } from '@/lib/historyStore'
 import { todaysCompletion } from '@/lib/workoutSessionEngine'
 import { getDayStamp, weekdayName } from '@/lib/today'
+import { estimateDurationMin } from '@/lib/workoutStats'
+import { buildWarmupPlan } from '@/lib/warmupPlan'
 import { loadOnboardingProfile } from '@/lib/onboardingProfile'
 
 export type TodayState = 'normal' | 'newUser' | 'afterWorkout' | 'returnAfterBreak'
@@ -85,6 +87,13 @@ export interface TodayV2Model {
    */
   durationMin: number
   /**
+   * [SOVEREIGN-TODAY-001] مدّة إحماء اليوم بالدقائق — **من نفس الباني** الذي
+   * تعرضه شاشة الإحماء (`buildWarmupPlan`). «اليوم» يَعِد بهذا الرقم بعينه، فلا
+   * يمكن للوعد أن يفارق التسليم إلا بتغيّرهما معًا. و`0` تعني: لا إحماء اليوم
+   * (راحة أو يوم بلا تمارين) — وحينها لا يُعرَض وعدُ إحماء أصلًا.
+   */
+  warmupMinutes: number
+  /**
    * أرقام تمرين اليوم **مفصولة** — [QIMMAH-TODAY-SOVEREIGN-REDESIGN-001].
    *
    * `hero.subtitle` يخبز الثلاثة في جملة واحدة («٦ تمارين · ٤٥ دقيقة · جاهز لك»)،
@@ -113,9 +122,6 @@ const GOAL_LABEL_AR: Record<CalorieGoal, string> = { cut: 'تنشيف', maintain
 const GOAL_LABEL_EN: Record<CalorieGoal, string> = { cut: 'Cut', maintain: 'Maintain', bulk: 'Bulk' }
 // Source classification: exact product completion ratio, capped at 100%; not a scientific estimate.
 const pct = (cur: number, target: number) => (target > 0 ? Math.max(0, Math.min(100, Math.round((cur / target) * 100))) : 0)
-/** Honest session-length heuristic (~9 min/exercise incl. rest), rounded to 5. */
-// Source classification: NON-STANDARD Qimmah display heuristic; users can override workoutDuration.
-const estimateDurationMin = (exerciseCount: number) => (exerciseCount > 0 ? Math.max(20, Math.round((exerciseCount * 9) / 5) * 5) : 0)
 const num = (n: number) => n.toLocaleString('en-US')
 
 const DAY_MS = 86_400_000
@@ -158,7 +164,20 @@ export function buildTodayV2Model(customization: Customization, lang: Lang, user
   const exerciseCount = day?.exercises.length ?? 0
   const workoutName = day ? (ar ? day.nameAr : day.nameEn) : ''
   const workoutAvailable = onboarded && exerciseCount > 0
-  const durationMin = customization.profile.workoutDuration > 0 ? customization.profile.workoutDuration : estimateDurationMin(exerciseCount)
+  /**
+   * [SOVEREIGN-TODAY-001] مصدر المدّة **واحد**: `estimateDurationMin` في
+   * `workoutStats`. كان هنا مقدِّر محلّي ثالث (٩ دقائق/تمرين) يُستعمل فقط حين
+   * لا مدّة مضبوطة، بينما تبويب التمرين يقدّر بالمجموعات والراحة — فيُعلن
+   * «اليوم» ٧٥ دقيقة وتُعلن بطاقة التمرين ٤٠ لنفس الجلسة. الأصدق هو تقدير
+   * **جلسة اليوم نفسها** لا تفضيل المستخدم العام: التفضيل يصف ما يريده أسبوعيًا،
+   * والرقم المعروض يصف ما سيفعله الآن. ويبقى التفضيل مرجّحًا إن تعذّر التقدير.
+   */
+  const estimated = estimateDurationMin(day)
+  const durationMin = estimated > 0
+    ? estimated
+    : customization.profile.workoutDuration > 0 ? customization.profile.workoutDuration : 0
+  // الإحماء يُبنى من تمارين **هذا اليوم** — لا من قائمة عامّة، ولا رقمًا مكتوبًا.
+  const warmupMinutes = workoutAvailable ? buildWarmupPlan(day).estMinutes : 0
   // (P5) الاكتمال الصادق بدل «أي finishedAt»: جلسة completed فقط تُكمل اليوم؛
   // الإنهاء المبكر (ended_early) = جزئي — لا يقلب الحالة إلى afterWorkout، ويظهر
   // كتقدّم حقيقي على عمود التدريب. الجلسات القديمة بلا status تبقى completed.
@@ -297,7 +316,7 @@ export function buildTodayV2Model(customization: Customization, lang: Lang, user
     totalSets: !finished && partialTrain ? partialTrain.totalSets : setCount,
   }
 
-  return { state, greeting, dateLabel, avatarInitial, goalLabel, hero, pillars, progressLabel, completedCount, totalCount, cards, trustNote, restDay, daysSinceLastWorkout: daysSinceWorkout, durationMin, training }
+  return { state, greeting, dateLabel, avatarInitial, goalLabel, hero, pillars, progressLabel, completedCount, totalCount, cards, trustNote, restDay, daysSinceLastWorkout: daysSinceWorkout, durationMin, warmupMinutes, training }
 }
 
 // ── Hero builders ────────────────────────────────────────────────────────────

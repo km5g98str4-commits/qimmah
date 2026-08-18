@@ -133,7 +133,8 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [totals.calories, dayLog.waterMl, model.state],
   )
-  const firstWinSuggestion = useMemo(() => suggestFirstWin(), [])
+  // [SOVEREIGN-TODAY-001] الاقتراح يعرف حال اليوم: لا وعدَ بإحماء يوم لا إحماء فيه.
+  const firstWinSuggestion = useMemo(() => suggestFirstWin(new Date(), model.warmupMinutes > 0), [model.warmupMinutes])
   // البطاقة ترحيبية لا دائمة: تُعرض للقادم الجديد ما دام لم يُنجز، وتبقى معلَّمة «تم»
   // بقيّة يوم الإنجاز وحده ثم تختفي. من لديه تاريخ فعلي ليس قادمًا جديدًا فلا تُلاحقه.
   const firstWinDoneToday = firstWin.completed && !!firstWin.at && getDayStamp(new Date(firstWin.at)) === getDayStamp()
@@ -292,6 +293,7 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
             suggestion={firstWinSuggestion}
             done={firstWin.completed}
             doneKind={firstWin.kind}
+            warmupMinutes={model.warmupMinutes}
             onPick={(kind) => {
               // الضغطة توصّل للسطح الحيّ؛ الإنجاز يُسجَّل عند وقوع الفعل هناك.
               if (kind === 'warmup') onNavigate('workout')
