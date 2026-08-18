@@ -141,10 +141,16 @@
 
 **البديل — تُضاف بطاقة:**
 > **عنوان:** بياناتك على جهازك
-> **النص:** قِمّة يشتغل بلا حساب وبلا إنترنت — بياناتك محفوظة على جهازك. والمزامنة السحابية اختيارية تمامًا، ما تشتغل إلا إذا سجّلت دخولك وفعّلتها. وتقدر تصدّر بياناتك أو تحذف حسابك وكل بياناته من داخل التطبيق متى ما بغيت.
+> **النص:** بياناتك تُحفظ على جهازك أولًا، وتقدر تصدّرها أو تحذف حسابك وكل بياناته من داخل التطبيق متى شئت. **والمزامنة بين الأجهزة غير مفعّلة في هذه النسخة** — ما يُرفع من سجلّاتك شي.
 > **الوسم:** الخصوصية
 
-**السبب:** الوعد الوارد في جملة واحدة يُقرأ شعارًا؛ والوارد في بطاقة بمستوى بقية المزايا يُقرأ ميزة. و«يعمل بلا حساب» تحديدًا **حقيقة يجهلها أغلب الزوّار** ويفترضون عكسها.
+**السبب:** الوعد الوارد في جملة واحدة يُقرأ شعارًا؛ والوارد في بطاقة بمستوى بقية المزايا يُقرأ ميزة.
+
+> ⚠️ **صُحِّح في [QIM-V1-010].** كان النصّ المقترح هنا: «قِمّة يشتغل بلا حساب وبلا إنترنت … والمزامنة
+> السحابية اختيارية تمامًا، ما تشتغل إلا إذا سجّلت دخولك وفعّلتها». وكلا نصفيه صار غير صحيح:
+> **التصفّح** بلا حساب صحيح، أما **التسجيل** فخلف وصول مفعّل (‏١٣ فعلًا في `paidActions.ts`)؛
+> والمزامنة **لا يستطيع أي مستخدم تفعيلها** (العَلَم مطفأ، وبوّابة الموافقة غير مركّبة).
+> وهذا الملفّ منبعُ نصوص الموقع — فتصحيح الصفحة وحدها كان يعيد الخطأ في الموجة التالية.
 
 ## ف-٣ · وصف الصفحة (meta description)
 
@@ -279,9 +285,11 @@
 > **Does Qimmah read my Health data?** Only if you connect it yourself. Then it reads — with your permission, read-only — whatever you allow from your activity, measurements, heart, sleep, and nutrition, so it can show your progress without you retyping what your devices already recorded. We never write to Health, never sell your data, and never share it with anyone. You pick the metrics one by one, and disconnecting one wipes what came from it.
 
 **٢) لازم حساب عشان أستخدم قِمّة؟**
-> لا. التطبيق يشتغل كامل بلا حساب، وبياناتك تبقى على جهازك. الحساب يضيف شي واحد بس: المزامنة السحابية الاختيارية بين أجهزتك.
+> تقدر تتصفّح كل الشاشات، وتسوّي خطتك، وتشوف معاينتها — كل هذا بلا حساب وبلا دفع. لكن **تسجيل** تمارينك وأكلك ووزنك يحتاج وصولًا مفعّلًا، والوصول يحتاج حسابًا موثَّقًا: تجربة ٧٢ ساعة، أو قِمّة Premium، أو كود وصول. وبياناتك تبقى على جهازك في كل الأحوال.
 
-> **Do I need an account?** Nope. The app works fully without one, and your data stays on your phone. An account adds exactly one thing: optional cloud sync across your devices.
+> **Do I need an account?** You can browse every screen, build your plan, and preview it with no account and no payment. But **logging** your workouts, food, and weight needs active access, and access needs a verified account: a 72-hour trial, Qimmah Premium, or an access code. Your data stays on your device either way.
+
+> ⚠️ **صُحِّح في [QIM-V1-010]** — نفس السبب أعلاه.
 
 **٣) ليه ما تظهر لي أهداف التنشيف والتضخيم؟**
 > إذا عمرك دون ١٨ سنة، الأهداف تقتصر على المحافظة. وهذا مقصود: ما نقترح عجز ولا فائض حراري على جسم لسّه في مرحلة نمو. وبقية المزايا متاحة لك كاملة.

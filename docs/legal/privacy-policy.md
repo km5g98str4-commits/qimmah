@@ -16,6 +16,7 @@
 ### 1. من نحن ومبدأنا
 قِمّة تطبيق لياقة عربي (تمارين، تغذية، قياسات، تقدّم). **مبدأ التطبيق «المحلي أولًا»:** بياناتك تُحفظ على جهازك
 أولًا، والمزامنة السحابية اختيارية وتعمل فقط عند تسجيل الدخول بحساب. بلا حساب، تبقى بياناتك على جهازك.
+**وفي هذه النسخة المزامنة غير مفعّلة** — فلا يُرفع من سجلّاتك شيء؛ وما يلي يصف المعالجة حين تُفعَّل.
 
 ### 2. ما الذي نجمعه ولماذا
 **أ) بيانات الحساب:** البريد الإلكتروني وكلمة المرور واسم العرض (اختياري) — لتسجيل الدخول والمزامنة. تُدار كلمة
@@ -103,7 +104,9 @@ Supabase. لا ندّعي وجود «قرار كفاية» أو اعتماد ر�
 
 ### 1. Who we are & our principle
 Qimmah is an Arabic-first fitness app (workouts, nutrition, measurements, progress). It is **local-first**:
-your data is stored on your device first; cloud sync is optional and runs only when you sign in. Without an
+your data is stored on your device first; cloud sync is optional and runs only when you sign in.
+**In this version sync is not enabled** — nothing from your logs is uploaded; what follows describes the
+processing that applies once it is. Without an
 account, your data stays on your device.
 
 ### 2. What we collect and why

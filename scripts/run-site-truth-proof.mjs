@@ -48,6 +48,36 @@ const FORBIDDEN = [
     why: 'بريد الدعم المنشور يجب أن يعمل — رسالة مرتدّة على الموقع أو في App Store Connect سبب رفض مباشر. البريد المعتمد: qimmah.support@gmail.com',
   },
   {
+    id: 'ص-٥ · وعد «الأساسيات مجانية»',
+    patterns: [
+      /الأساسيات\s+تبقى\s+مجانية/u,
+      /الميزات\s+الأساسية\s+تبقى\s+مجانية/u,
+      /essentials\s+stay(?:ing)?\s+free/iu,
+      /Core\s+features\s+remain[\s\S]{0,12}free/iu,
+    ],
+    why: 'غير صحيح: ثلاثة عشر فعلًا منتجًا محجوبة خلف استحقاق مُتحقَّق من الخادم — تسجيل المجموعات والطعام والماء والوزن والقياسات وتعديل الخطة والتعافي (src/lib/access/paidActions.ts:18-53). المجاني هو التصفّح والتخصيص وتوليد الخطة ومعاينتها.',
+  },
+  {
+    id: 'ص-٦ · نفي وجود اشتراك/وصول مدفوع',
+    patterns: [/لا\s+يوجد\s+اشتراك\s+فعّال/u, /No\s+subscription\s+is\s+active/iu],
+    why: 'وثيقة قانونية تنفي وجود وصول مدفوع بينما مسار شراء سلة وبوّابة Premium يشحنان فعلًا. هذا أخطر ما في السجلّ.',
+  },
+  {
+    id: 'ص-٧ · «التطبيق يعمل كاملًا بلا حساب»',
+    patterns: [/يعمل\s+التطبيق\s+كاملًا\s+بلا\s+حساب/u, /works\s+fully\s+without\s+(?:one|an\s+account)/iu],
+    why: 'التصفّح بلا حساب صحيح؛ أما التسجيل فيحتاج وصولًا مفعّلًا، والوصول يحتاج حسابًا موثَّقًا. «كاملًا» تجعل النصف كلًّا.',
+  },
+  {
+    id: 'ص-٨ · لفظ ممنوع في وصف Premium (§0.1)',
+    patterns: [/مدى\s+الحياة/u, /\blifetime\b/iu, /كل\s+التحديثات\s+الحالية\s+والمستقبلية/u],
+    why: 'الميثاق §0.1 يمنعها في كل سطح يراه المستخدم: «مدى الحياة» و«lifetime» تقيّدان قانونيًا وتسويقيًا، و«كل التحديثات الحالية والمستقبلية» وعدٌ يُقتبس ضدّنا إن ضاق نطاق Premium.',
+  },
+  {
+    id: 'ص-٩ · رقم سعر منشور على الموقع',
+    patterns: [/\d{1,4}[.,٫]\d{2}\s*(?:ريال|ريالًا|SAR|ر\.?س)/u],
+    why: 'السعر له مصدر واحد هو قناة البيع. ونسخة ثانية منه على الموقع تشيخ بصمت وتصير تصريحًا غير صحيح — وهو بعينه ما وقع في واجهة سلة. الموقع يصف بنية الوصول لا مبلغه.',
+  },
+  {
     id: 'وسم مسوّدة أو موضع غير مملوء',
     patterns: [/\[OWNER-EMAIL\]/u, /\[DATE\]/u, /مسودة للمراجعة القانونية/u],
     why: 'صفحة منشورة لا تحمل وسم «مسوّدة» ولا أقواسًا غير مملوءة.',
@@ -63,6 +93,13 @@ const REQUIRED = [
   { file: 'terms.html', pattern: /الحد\s+الأدنى\s+للعمر:\s*١٣\s+سنة/u, what: 'الحدّ الأدنى ١٣ في الشروط' },
   { file: 'terms.html', pattern: /ليس\s+تشخيصًا/u, what: 'التنويه الطبي' },
   { file: 'index.html', pattern: /على\s+جهازك\s+أولًا/u, what: 'هوية «محلي أولًا» على الصفحة الرئيسية' },
+  // ص-١٠ — المزامنة: العيب لم يكن قولَ «اختيارية» بل **إغفال أنها غير متاحة**.
+  // فالمطلوب حضور التصريح، لا منع الوصف.
+  { file: 'index.html', pattern: /المزامنة\s+بين\s+الأجهزة\s+غير\s+مفعّلة\s+في\s+هذه\s+النسخة/u, what: 'تصريح تعطّل المزامنة (الرئيسية)' },
+  { file: 'support.html', pattern: /المزامنة\s+بين\s+الأجهزة\s+غير\s+مفعّلة\s+في\s+هذه\s+النسخة/u, what: 'تصريح تعطّل المزامنة (الدعم — عربي)' },
+  { file: 'support.html', pattern: /Cross-device\s+sync\s+is\s+not\s+enabled\s+in\s+this\s+version/iu, what: 'تصريح تعطّل المزامنة (الدعم — إنجليزي)' },
+  { file: 'privacy.html', pattern: /في\s+هذه\s+النسخة\s+المزامنة\s+غير\s+مفعّلة/u, what: 'تصريح تعطّل المزامنة (الخصوصية — عربي)' },
+  { file: 'privacy.html', pattern: /In\s+this\s+version\s+sync\s+is\s+not\s+enabled/iu, what: 'تصريح تعطّل المزامنة (الخصوصية — إنجليزي)' },
 ]
 
 const htmlFiles = readdirSync(SITE_DIR).filter((f) => f.endsWith('.html'))
@@ -132,6 +169,130 @@ for (const r of REGISTERS) {
   const text = readFileSync(join(SITE_DIR, r.file), 'utf8')
   if (text.length < 500 || !/موقعك/u.test(text)) {
     failures.push(`${r.file} — التأكيد المضادّ سقط: الصفحة فارغة أو لا تذكر الموقع أصلًا، فحارس السجلّين يمرّ مجّانًا.`)
+  }
+}
+
+// ٥) المنابع — لا الصفحات وحدها.
+//
+// ═══ الدرس الذي يفرض هذا القسم ═══
+// نصوص `site/` ليست أصلًا؛ لها منابع: النصّ القانوني في `docs/legal/`، ووصف
+// المتجر في `docs/appstore/`، ومقترحات نصّ الموقع في `docs/site/`. وحين صُحّحت
+// الصفحة وحدها في موجة سابقة عاد الخطأ من منبعه في الموجة التالية — ولذلك
+// **يُفحص المنبع بنفس القواعد**. (استُثني `docs/execution/` عمدًا: سجلّ
+// التصريحات يقتبس العيوب كأدلّة، واقتباس العيب ليس ارتكابه.)
+const SOURCE_DOCS = [
+  'docs/legal/terms-of-service.md',
+  'docs/legal/privacy-policy.md',
+  'docs/legal/APPSTORE-COMPLIANCE-PACK.md',
+  'docs/appstore/02-description.md',
+  'docs/appstore/STORE-TESTFLIGHT-PACK.md',
+  'docs/site/SITE-COPY-ALIGNMENT.md',
+]
+const SOURCE_RULES = new Set(['ص-٥ · وعد «الأساسيات مجانية»', 'ص-٦ · نفي وجود اشتراك/وصول مدفوع', 'ص-٨ · لفظ ممنوع في وصف Premium (§0.1)'])
+for (const rel of SOURCE_DOCS) {
+  let text
+  try { text = readFileSync(rel, 'utf8') } catch {
+    checks++
+    failures.push(`${rel} — منبع مفقود: الملفّ مُعلَن في هذا الحارس وغير موجود. إمّا يُعاد أو يُحذف من القائمة.`)
+    continue
+  }
+  checks++
+  if (text.length < 200) {
+    failures.push(`${rel} — التأكيد المضادّ سقط: المنبع شبه فارغ، ففحصه يمرّ مجّانًا.`)
+  }
+  for (const rule of FORBIDDEN) {
+    if (!SOURCE_RULES.has(rule.id)) continue
+    for (const pattern of rule.patterns) {
+      checks++
+      const hit = text.match(pattern)
+      if (hit) failures.push(`${rel} — ${rule.id}\n      وُجد: «${hit[0]}»\n      السبب: ${rule.why}`)
+    }
+  }
+}
+
+// ٦) عقد الوصول في الشروط — **كتلة مقترنة بحدودها، لا includes متفرّقة.**
+//
+// ═══ لماذا الاستخراج بالحدود ═══
+// سابقة هذا المستودع: بوابة الموافقة الصحية كانت خمس `includes()` على الملفّ
+// كلّه، فكانت تُرضى من مواضع متفرّقة لا علاقة لبعضها ببعض. فالفحص هنا يستخرج
+// بند «الوصول المدفوع» **من عنوانه إلى العنوان الذي يليه**، ويشترط الحقائق
+// داخله. جملةٌ صحيحة في أسفل الصفحة لا تُرضيه.
+const ACCESS_BLOCKS = [
+  {
+    file: 'terms.html',
+    lang: 'عربي',
+    open: /<h2>٨\)\s*الوصول المدفوع[^<]*<\/h2>/u,
+    close: /<h2>٩\)/u,
+    must: [
+      { p: /التصفّح\s+مجاني\s+بلا\s+حساب\s+وبلا\s+دفع/u, what: 'ما هو مجاني، مسمّى' },
+      { p: /يحتاج\s+وصولًا\s+مفعّلًا\s+تسجيلُ/u, what: 'ما يحتاج وصولًا، مسمّى' },
+      { p: /٧٢\s*ساعة/u, what: 'مدّة التجربة' },
+      { p: /كود\s+وصول/u, what: 'بوّابة كود الوصول' },
+      { p: /شراء\s+واحد\s+لا\s+اشتراكًا\s+متجدّدًا/u, what: 'شراء واحد لا اشتراك' },
+      { p: /بلا\s+اشتراك\s+شهري/u, what: 'الصيغة المعتمدة (§0.1)' },
+    ],
+  },
+  {
+    file: 'terms.html',
+    lang: 'إنجليزي',
+    open: /<h2>8\)\s*Paid access[^<]*<\/h2>/u,
+    close: /<h2>9\)/u,
+    must: [
+      { p: /Browsing\s+is\s+free/iu, what: 'ما هو مجاني، مسمّى' },
+      { p: /Active\s+access\s+is\s+required/iu, what: 'ما يحتاج وصولًا، مسمّى' },
+      { p: /72-hour/iu, what: 'مدّة التجربة' },
+      { p: /access\s+code/iu, what: 'بوّابة كود الوصول' },
+      { p: /one-time\s+purchase,\s*not\s+a\s+recurring\s+subscription/iu, what: 'شراء واحد لا اشتراك' },
+      { p: /no\s+monthly\s+subscription/iu, what: 'الصيغة المعتمدة (§0.1)' },
+    ],
+  },
+]
+/** يستخرج الكتلة بحدودها، ويعيد null إن غاب أحد الحدّين. */
+function extractBlock(text, open, close) {
+  const o = text.match(open)
+  if (!o) return null
+  const rest = text.slice(o.index + o[0].length)
+  const c = rest.match(close)
+  return c ? rest.slice(0, c.index) : null
+}
+for (const b of ACCESS_BLOCKS) {
+  const text = readFileSync(join(SITE_DIR, b.file), 'utf8')
+  checks++
+  const block = extractBlock(text, b.open, b.close)
+  if (block === null) {
+    failures.push(`${b.file} (${b.lang}) — بند «الوصول المدفوع» غير موجود بحدوده. عقد الوصول يجب أن يكون بندًا مستقلًّا يقرأه المستخدم، لا جملًا متناثرة.`)
+    continue
+  }
+  for (const m of b.must) {
+    checks++
+    if (!m.p.test(block)) {
+      failures.push(`${b.file} (${b.lang}) — داخل بند الوصول المدفوع، ينقص: ${m.what}`)
+    }
+  }
+  // تأكيد مضادّ: الكتلة ليست الصفحة كلّها (وإلا لعاد الفحص إلى includes متفرّقة).
+  checks++
+  if (block.length >= text.length * 0.5) {
+    failures.push(`${b.file} (${b.lang}) — الاستخراج ابتلع نصف الصفحة أو أكثر: الحدّ الختامي لم يُطابَق، فالفحص عاد includes على الملفّ كلّه.`)
+  }
+}
+
+// ٧) ⚔️ محاكاة التفاف على فحص الكتلة — يجب أن تسقط بفحص مسمّى (§4.2).
+{
+  checks++
+  const scattered = '<h2>٨) الوصول المدفوع — قِمّة Premium</h2><p>نصّ آخر</p><h2>٩) غيره</h2>' +
+    '<p>التصفّح مجاني بلا حساب وبلا دفع ٧٢ ساعة كود وصول شراء واحد لا اشتراكًا متجدّدًا بلا اشتراك شهري</p>'
+  const blk = extractBlock(scattered, ACCESS_BLOCKS[0].open, ACCESS_BLOCKS[0].close)
+  const satisfied = blk !== null && ACCESS_BLOCKS[0].must.every((m) => m.p.test(blk))
+  if (satisfied) {
+    failures.push('⚔️ الالتفاف نجح: حقائق الوصول متناثرة **خارج** البند أرضت الفحص — فالفحص عاد includes على الملفّ.')
+  }
+}
+{
+  // ولو غاب الحدّ الختامي لصار الاستخراج بلا حدود.
+  checks++
+  const unbounded = '<h2>٨) الوصول المدفوع — قِمّة Premium</h2><p>لا عنوان تاسع بعده</p>'
+  if (extractBlock(unbounded, ACCESS_BLOCKS[0].open, ACCESS_BLOCKS[0].close) !== null) {
+    failures.push('⚔️ الاستخراج قبل كتلة بلا حدّ ختامي — الحدود ليست حدودًا.')
   }
 }
 

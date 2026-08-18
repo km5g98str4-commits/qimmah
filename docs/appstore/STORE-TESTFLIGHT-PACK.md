@@ -71,7 +71,8 @@
 
 قِمّة عربي أول، ومعه الإنجليزي.
 
-قِمّة+ (لاحقًا): خطط وتحليلات أعمق — والأساسيات تبقى مجانية.
+الوصول: التخصيص وتوليد الخطة ومعاينتها مجانية بلا حساب. وتسجيل التمارين والأكل والقياسات
+يحتاج وصولًا مفعّلًا — تجربة ٧٢ ساعة، أو قِمّة Premium بشراء واحد بلا اشتراك شهري، أو كود وصول.
 ```
 
 > **ما تغيّر عن `02-description.md`:** فقرة «حركتك وعافيتك» كانت تقول «سجّل خطواتك اليومية» فقط — وهو وصف ناقص لتطبيق يقرأ ٢٤ مقياسًا من HealthKit؛ الوصف الآن يذكر الربط والقراءة-فقط والموافقة. وأُضيفت فقرة «أرقام صادقة» — تحمل التحفّظ الطبي وقيد القاصرين، ويقرأها المراجع قبل أن يبحث عنها.
@@ -108,7 +109,7 @@ Your day
 The "Today" screen gives you your next step and how your day is going at a glance, plus your to-do list.
 
 Privacy first
-No ads, no tracking. Your data sits on your phone first; cloud sync is optional and only runs if you
+No ads, no tracking. Your data sits on your phone first; cross-device sync is **not enabled in this version**. If you
 sign in. You can export your data, or delete your account and everything in it, right from the app.
 
 Honest numbers
@@ -118,7 +119,9 @@ professional. For users under 18, goals stay on maintenance.
 
 Qimmah is Arabic-first, with English right there too.
 
-Qimmah+ (later): deeper plans and insights — the essentials stay free.
+Access: personalisation, plan generation, and plan preview are free with no account. Logging
+workouts, food, and measurements requires active access — a 72-hour trial, Qimmah Premium as a
+one-time purchase with no monthly subscription, or an access code.
 ```
 
 ## ١-ج · الوصف القصير

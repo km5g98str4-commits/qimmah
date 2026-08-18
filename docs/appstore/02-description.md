@@ -34,12 +34,13 @@
 شاشة «اليوم» تعرض خطوتك التالية ومسار يومك في لمحة، مع قائمة مهامك اليومية.
 
 **خصوصيتك أولًا**
-بلا إعلانات، وبلا تتبّع. بياناتك «محلية أولًا» تُحفظ على جهازك؛ والمزامنة السحابية اختيارية وتعمل فقط
-عند تسجيل الدخول بحساب. يمكنك حذف حسابك وكل بياناتك من داخل التطبيق في أي وقت.
+بلا إعلانات، وبلا تتبّع. بياناتك «محلية أولًا» تُحفظ على جهازك؛ والمزامنة بين الأجهزة **غير مفعّلة
+في هذه النسخة**. يمكنك تصدير بياناتك أو حذف حسابك وكل بياناتك من داخل التطبيق في أي وقت.
 
 قِمّة عربي أولًا، مع دعم الإنجليزية.
 
-قِمّة+ (لاحقًا): خطط وتحليلات أعمق — والأساسيات تبقى مجانية.
+الوصول: التخصيص وتوليد الخطة ومعاينتها مجانية بلا حساب. وتسجيل التمارين والتغذية والقياسات
+يحتاج وصولًا مفعّلًا — تجربة ٧٢ ساعة، أو قِمّة Premium بشراء واحد بلا اشتراك شهري، أو كود وصول.
 
 ---
 
@@ -73,12 +74,15 @@ only — not medical advice). Turn on a local workout reminder on iPhone to stay
 The “Today” screen shows your next step and your day’s track at a glance, with a daily to-do list.
 
 **Privacy first**
-No ads, no tracking. Your data is local-first on your device; cloud sync is optional and only runs
-when you sign in. You can delete your account and all your data from inside the app anytime.
+No ads, no tracking. Your data is local-first on your device; cross-device sync is **not enabled in
+this version**. You can export your data or delete your account and all your data from inside the
+app anytime.
 
 Qimmah is Arabic-first, with English support.
 
-Qimmah+ (later): deeper plans and insights — the essentials stay free.
+Access: personalisation, plan generation, and plan preview are free with no account. Logging
+workouts, nutrition, and measurements requires active access — a 72-hour trial, Qimmah Premium as a
+one-time purchase with no monthly subscription, or an access code.
 
 ---
 
@@ -103,7 +107,15 @@ Qimmah+ (later): deeper plans and insights — the essentials stay free.
 | No ads/tracking, local-first, optional sync | `analytics/providers/noop.ts`, `syncService.ts`; legal pack `docs/legal/app-privacy-labels.md` §A, `privacy-policy.md` §1 | — |
 | In-app account deletion | `authContext.tsx`, RPC `delete_own_account` | — |
 | Arabic-first + English support | `product.ts`, `config/strings.ts` (en) | "with English support", **not** "fully bilingual" |
-| Qimmah+ one line, essentials free | `profileV2Model.ts` (`subscription.enabled:false`) | **no IAP/paywall** implied |
+| Access model: browsing free, logging behind active access | `src/lib/access/paidActions.ts:18-53` (13 paid actions), `ALWAYS_BROWSABLE` (17 routes) | ⚠️ **store-submission framing unresolved** — see note below |
 
-**Deliberately NOT claimed:** background step collection beyond HealthKit's stored totals, Google Fit, any
-subscription/premium tier for purchase, background web notifications, "fully offline install", "fully bilingual".
+**Deliberately NOT claimed:** background step collection beyond HealthKit's stored totals, Google Fit,
+background web notifications, "fully offline install", "fully bilingual".
+
+> ⚠️ **Before any store submission — unresolved, and deliberately left unresolved here.**
+> This description now states the real access model (browsing free, logging behind active access,
+> purchased on the web). A native submission that unlocks the same access **inside the app** raises
+> Apple's in-app-purchase rules, which are a commercial and legal decision, not a copy decision.
+> Native submission is deferred by **DEC-014**; this note exists so the question is answered
+> *before* a submission is prepared, not during review.
+> Authority: `docs/execution/qimmah-master/01-DECISIONS.md` (DEC-014, DEC-015).

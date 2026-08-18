@@ -9,7 +9,31 @@ Status: `TRUE` · `PARTIALLY_TRUE` · `FALSE` · `UNVERIFIED`
 
 ---
 
-## 🔴 THE FALSE CLAIMS — ordered by harm
+## ✅ CLOSED BY `QIM-V1-010` — the false claims, and what they say now
+
+> Corrected on **2026-08-18**. The rows are kept, not deleted: a claim ledger that erases its own
+> defects teaches nothing, and the next reviewer needs to know these were shipped.
+> Locked by `test:site-truth` (**234 checks**), which now scans the **source documents** too —
+> `docs/legal/`, `docs/appstore/`, `docs/site/` — because correcting a page while its spring still
+> holds the old text is how this copy came back once already.
+
+| was | now |
+|---|---|
+| «لا يوجد اشتراك فعّال في هذه النسخة» / "No subscription is active in this version" | §8 renamed **«الوصول المدفوع — قِمّة Premium» / "Paid access"**, naming what is free, what needs access, the three gates, and that Premium is a one-time purchase |
+| «الأساسيات تبقى مجانية» / "the essentials stay free" | «التصفّح مجاني بلا حساب وبلا دفع … ويحتاج وصولًا مفعّلًا تسجيلُ ما ينتجه استعمالك» |
+| «يعمل التطبيق كاملًا بلا حساب» / "works fully without one" | browsing/plan/preview free; **logging** needs active access and a verified account |
+| sync offered as an available feature | «المزامنة بين الأجهزة غير مفعّلة في هذه النسخة» on the landing page, support FAQ and privacy page (both languages) |
+| App Store description promising a free core | access model stated truthfully; **IAP framing flagged as unresolved** before any submission (DEC-014) |
+
+**Corrected in 11 files**, not the 4 the plan listed — the sweep found the same sentences in the
+canonical legal source (`docs/legal/terms-of-service.md`), the compliance pack, the TestFlight pack,
+`PRODUCT.md`, and the site-copy source doc.
+
+**Still open and founder-owned:** the live Salla storefront (`FA-01`) — outside this repository.
+
+---
+
+## 🔴 THE FALSE CLAIMS AS THEY WERE — ordered by harm (record kept)
 
 ### CLM-001 … CLM-004 — "the basics stay completely free" · "no subscription is active in this version"
 
