@@ -108,6 +108,14 @@ export async function fillBody(page, { age = 28, height = 178, weight = 82 } = {
   await page.locator('button[aria-pressed]').first().click({ force: true })
 }
 
+/**
+ * ترتيب خيارات النيّة كما يعرضها المنتج (`i18n/dict/onboardingIntent`):
+ * 0=plan · 1=meals · 2=numbers. تُسمّى هنا مرّة واحدة كي لا يتناثر الرقم.
+ */
+const INTENT_INDEX = { plan: 0, meals: 1, numbers: 2 }
+/** النيّة التي يسلكها هذا المشوار — والحارس يُخبَر بها هي لا بغيرها. */
+const SELECTED_INTENT = 'meals'
+
 /** Body → intent → history → goal → training → lifestyle → limitations → generate. */
 export async function completeOnboarding(page, { age = 28, height = 178, weight = 82, trained = false } = {}) {
   await fillBody(page, { age, height, weight })
@@ -115,9 +123,17 @@ export async function completeOnboarding(page, { age = 28, height = 178, weight 
 
   await next()
   await page.waitForSelector('#onb-title-intent', { timeout: 20000 })
-  const intentRows = page.locator('button[aria-pressed]')
-  await intentRows.nth(1).click({ force: true })
-  await intentRows.nth(3).click({ force: true })
+  // ── [SOVEREIGN-003] النيّة تُقرأ من الشاشة، لا تُفترَض ────────────────────
+  // كان السطر التالي ينقر `nth(1)` من **كل** أزرار `aria-pressed` في الخطوة —
+  // وهي مجموعتان (النيّة والمستوى) — ثم يُخبر حارسَ «نمط الأكل» أن النيّة
+  // «plan». والمنتقى فعلًا هو الخيار الثاني في مجموعة النيّة: **«meals»**.
+  // فكان الحصّاد يكذب على نفسه: المنتج يعرض السؤال بحقّ (لأن النيّة meals)،
+  // والحارس يطالب بغيابه (لأنه ظنّها plan) — فيسقط الطقم على **كلا** المحرّكين
+  // بخطأ يقرأ كأنه عيب منتج وليس كذلك.
+  // العلاج: نُسمّي النيّة مرّة واحدة ونمرّرها إلى الحارس — مصدر واحد لا افتراض.
+  const intentGroup = group(page, 'intent.primary')
+  await intentGroup.getByRole('button').nth(INTENT_INDEX[SELECTED_INTENT]).click({ force: true })
+  await group(page, 'experience.declared').getByRole('button').nth(1).click({ force: true })
 
   await next()
   await page.waitForSelector('#onb-title-history', { timeout: 20000 })
@@ -138,7 +154,7 @@ export async function completeOnboarding(page, { age = 28, height = 178, weight 
   await page.waitForSelector('#onb-title-lifestyle', { timeout: 20000 })
   await group(page, 'training.place').getByRole('button').nth(0).click({ force: true })
   await group(page, 'activity.neat').getByRole('button').nth(1).click({ force: true })
-  await answerDietPattern(page, 'plan') // [QIM-V1-001] عقد ثنائي الاتجاه، لا نقر بلا شرط
+  await answerDietPattern(page, SELECTED_INTENT) // [QIM-V1-001] عقد ثنائي الاتجاه — والنيّة هي المُختارة فعلًا
 
   await next()
   await page.waitForSelector('#onb-title-limitations', { timeout: 20000 })
@@ -233,7 +249,16 @@ export async function captureGuestSeed(browser, url) {
 export async function contextWithState(browser, url, state, { width = 390, height = 844, locale = 'ar-SA', engineCtxOpts = {} } = {}) {
   const ctx = await browser.newContext({ viewport: { width, height }, locale, ...engineCtxOpts })
   const page = await ctx.newPage()
-  await page.goto(url, { waitUntil: 'domcontentloaded' })
+  // ── [SOVEREIGN-003] `commit` **قبل** البذر أيضًا، لا بعده وحده ────────────
+  // العلاج أدناه (السطر التالي للبذر) كان مطبَّقًا على نصف المسار: الملاحة
+  // التي **تلي** البذر وحدها. وأوّل ملاحة — هذه — بقيت `domcontentloaded`،
+  // فظلّ `p3` يسقط على WebKit بـ`Frame load interrupted` **قبل أن يبدأ**
+  // (٠ ناجح · خطأ طقم) بينما يمرّ ١٥/١٥ على Chromium.
+  //
+  // ⚠️ وقد أُعيد هذا السطر إلى `domcontentloaded` مرّةً باستيعاب فرعٍ آخر
+  // (§4.1: الدمج يبتلع إصلاحات الموجات السابقة بصمت) — فأُعيد إصلاحه ووُثِّق
+  // هنا كي يُرى الأثر قبل أن يُمحى مرّة ثالثة.
+  await page.goto(url, { waitUntil: 'commit' })
   await page.evaluate((pairs) => {
     window.localStorage.clear()
     for (const [k, v] of pairs) window.localStorage.setItem(k, v)
