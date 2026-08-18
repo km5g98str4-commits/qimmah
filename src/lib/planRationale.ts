@@ -22,7 +22,8 @@ import type { Muscle, WorkoutPlan } from '@/types/workout'
 import { effectiveGoalTypeForAge } from '@/lib/calculators'
 import { resolveGymAccess } from '@/lib/equipmentAccess'
 import { getExercise } from '@/data/exercises'
-import { hasRecognizedInjuryArea, type GeneratedPlan } from '@/lib/planGenerator'
+import type { GeneratedPlan } from '@/lib/planGenerator'
+import { injuryFilterState } from '@/lib/injurySafety'
 
 // ============================================================================
 // نقطة الامتداد الموثّقة — محور trainingFocus
@@ -236,8 +237,10 @@ export function buildPlanRationale(profile: Profile, plan: GeneratedPlan): PlanR
   const usedAdvancedSplit = profile.splitMode === 'advanced' && Boolean(profile.splitChoice)
   const conservativeStart =
     effectiveGoal === 'returning' || profile.consistency === 'returning' || profile.consistency === 'onoff'
-  const hasInjuryText = Boolean(profile.injuries?.trim())
-  const injuryFilterApplied = hasRecognizedInjuryArea(profile.injuries)
+  // [SOVEREIGN-PLAN-001] الحالة تُقرأ الآن من **مصدر الترشيح نفسه** لا من تعبير
+  // نمطي موازٍ، وتشمل المفاتيح البنيوية (`injuryAreas`) كما تشمل النصّ الحرّ —
+  // فلا يفترق ما يُعلَن للمستخدم عمّا رشّحه المحرّك فعلًا.
+  const injuryState = injuryFilterState(profile)
 
   const decisions: PlanDecision[] = []
 
@@ -314,11 +317,8 @@ export function buildPlanRationale(profile: Profile, plan: GeneratedPlan): PlanR
   // ٧) تصفية الإصابات — **لا يخرج نصّ الإصابة** (§9)، وجودها فقط.
   decisions.push({
     area: 'injuryFilter',
-    drivers: [{ key: 'injuries', value: hasInjuryText ? 'declared' : 'none' }],
-    outcome: {
-      key: 'filter',
-      value: injuryFilterApplied ? 'applied' : hasInjuryText ? 'unrecognized' : 'notApplied',
-    },
+    drivers: [{ key: 'injuries', value: injuryState === 'notApplied' ? 'none' : 'declared' }],
+    outcome: { key: 'filter', value: injuryState },
     basis: 'structural',
   })
 

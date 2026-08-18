@@ -14,6 +14,7 @@ import type { Profile } from '@/types/profile'
 import type { Exercise } from '@/types/workout'
 import { exercises, getExercise } from '@/data/exercises'
 import { makeEquipmentGate } from '@/lib/equipmentAccess'
+import { makeProfileInjuryFilter } from '@/lib/injurySafety'
 
 export type SubReason = 'busy' | 'unavailable' | 'home'
 
@@ -61,17 +62,24 @@ export function findSubstitutes(
   if (!current) return []
 
   const gate = makeEquipmentGate(profile, { homeOnly: reason === 'home' })
+  // [SOVEREIGN-PLAN-001] كان هذا المحرّك يستقبل `Profile` كاملًا **ولا يقرأ الإصابة
+  // إطلاقًا**: مصاب الركبة يضغط «بدّل» على القرفصاء فيُعرض عليه قرفصاء آخر. أي
+  // بابٌ يلتفّ حول ترشيح المولّد بلمسة واحدة. المرشِّح نفسه يمرّ هنا الآن.
+  const injuryOk = makeProfileInjuryFilter(profile)
   // A candidate the user could not touch anyway (busy/unavailable) is still a
   // candidate — we only need a DIFFERENT station, which is guaranteed below.
   const preferDifferentStation = reason === 'busy' || reason === 'unavailable'
 
-  const candidates = exercises.filter(
-    (ex) =>
-      ex.id !== current.id &&
-      ex.movementPattern === current.movementPattern && // preserve the movement pattern (hard rule)
-      ex.primaryMuscle === current.primaryMuscle && //       same trained muscle
-      gate(ex.equipment), //                                  user's equipment ONLY
-  )
+  const eligible = (ex: Exercise): boolean =>
+    ex.id !== current.id && ex.primaryMuscle === current.primaryMuscle && gate(ex.equipment) && injuryOk(ex)
+
+  // نمط الحركة قاعدة صلبة **إلا حين يكون هو نفسه الميكانيكا المصابة**: تمرين في
+  // خطة قديمة صار ممنوعًا بعد إعلان الإصابة لا يجوز أن يُصلَح ببديل من نمطه.
+  // فحينها نُرخي النمط ونُبقي العضلة — بديل آمن لنفس العضلة أصدق من لا شيء.
+  const samePattern = exercises.filter((ex) => eligible(ex) && ex.movementPattern === current.movementPattern)
+  const currentIsContraindicated = !injuryOk(current)
+  const candidates =
+    samePattern.length > 0 || !currentIsContraindicated ? samePattern : exercises.filter(eligible)
 
   const curatedSet = new Set(current.alternatives)
 
