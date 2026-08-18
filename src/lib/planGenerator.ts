@@ -24,7 +24,7 @@ import {
   goalTypeLabel,
   MINOR_GOAL_RESTRICTION_NOTE,
 } from '@/lib/calculators'
-import { makeEquipmentGate, resolveGymAccess } from '@/lib/equipmentAccess'
+import { makeExerciseGate, resolveMachinesOnly } from '@/lib/equipmentAccess'
 import {
   detectInjuryRegions,
   hasRecognizedInjury,
@@ -158,8 +158,7 @@ const SCHEMES: Record<GoalType, RepScheme> = {
 /** فلتر الأدوات حسب نوع النادي (gymType). لا نولّد تمارين مستحيلة للبيئة المختارة.
  *  المنطق يعيش في equipmentAccess.ts — مصدر واحد يشاركه محرّك الاستبدال (شاشة ٣١). */
 function makeEquipFilter(p: Profile): (ex: Exercise) => boolean {
-  const gate = makeEquipmentGate(p)
-  return (ex) => gate(ex.equipment)
+  return makeExerciseGate(p)
 }
 
 /** هل التمرين مناسب لمستوى الخبرة؟ المبتدئ/المستجد لا نعطيه تمارين متقدّمة. */
@@ -660,8 +659,8 @@ function generateWorkoutPlan(p: Profile): { plan: WorkoutPlan; specs: DaySpec[] 
   // لا بار/دمبل أساسي إطلاقًا. كيبل الكتالوج (بايسبس/ترايسبس/كرنش) معتمد لكل المستويات لأنه
   // ضمن اختيار المؤسس، فلا يمرّ على cableOk. (جولة 2) لا كارديو يُضاف إطلاقًا — أُزيل addCutCardio.
   // في المنزل/وزن الجسم لا توجد أجهزة — نُبقي السلوك السابق المناسب للأدوات المتاحة.
-  const access = resolveGymAccess(p)
-  const machinesOnly = access === 'full' || access === 'small'
+  // [SOVEREIGN-PLAN-001] النيّة تُقرأ من مصدرها المستقلّ، لا من «النادي كبير أم صغير».
+  const machinesOnly = resolveMachinesOnly(p)
   const pool = machinesOnly
     ? // أجهزة فقط: الحوض حصريًا من قائمة الأساسيات الـ٣٢ (قرار زياد النهائي). لا أجهزة
       // ذراعين/بطن ولا كيبل هنا — الذراعان والبطن يُدرَّبان تبعيًا عبر المركّبات (ضغط الصدر
