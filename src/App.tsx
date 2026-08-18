@@ -46,6 +46,9 @@ function createLazyViews() {
     // المركز التنفيذي — حزمة مستقلّة لا تدخل حزمة الإقلاع. الحارس داخل المكوّن
     // نفسه، فجلب الحزمة **لا يمنح شيئًا**: من ليس مؤسسًا يرى شاشة المنع.
     AdminRoute: lazy(() => import('@/admin').then((m) => ({ default: m.AdminRoute }))),
+    PendingTrialResume: lazy(() =>
+      import('@/views/reveal/PendingTrialResume').then((m) => ({ default: m.PendingTrialResume })),
+    ),
   }
 }
 import type { MainTab, QuickLogTarget } from '@/components/MobileShell'
@@ -683,6 +686,23 @@ export default function App() {
         {/* بوّابة Premium — نداء واحد لكل فعل محجوب، من أي شاشة. تُرسم هنا مرّة
             واحدة فلا يبني كل سطح نافذته الخاصّة فتتفرّق الرسالة. */}
         <PremiumGateLayer lang={LANG} route={view} />
+        {/* [SOVEREIGN-003] استئناف التجربة المعلّقة — **الوعد الذي كان يُقطع ولا يُوفّى.**
+
+            `OnboardingV2` يكتب نيّة التجربة (`markPendingTrialIntent`) حين يضغط
+            المستخدم «جرّب Premium» بلا حساب، لأن شاشة التسليم **تُفكَّك** في الطريق
+            إلى إنشاء الحساب. والوفاء بالوعد كان يقع على `PendingTrialResume`،
+            وتوثيقه يقول حرفيًّا «يُركَّب في جذر التطبيق» — **ولم يُركَّب قطّ**:
+            لا مستورد واحد في المستودع.
+
+            فالسلسلة كانت مقطوعة عند آخر حلقة: النيّة تُكتب · تنجو من المصادقة ·
+            **ولا يقرؤها سطح حيّ**، فتنتهي صامتة بعد ٢٤ ساعة. والمستخدم أنشأ
+            حسابًا لأجل تجربة لا أحد يعرض عليه استئنافها.
+
+            يُركَّب هنا مرّة واحدة فوق كل الشاشات: المكوّن يحرس نفسه (لا يرسم شيئًا
+            بلا نيّة سارية **و**حساب فعليّ)، فلا يحتاج شرطًا في المسار. */}
+        <Suspense fallback={null}>
+          <V.PendingTrialResume lang={LANG} signedIn={Boolean(auth.user)} />
+        </Suspense>
       </RouteErrorBoundary>
     </>
   )

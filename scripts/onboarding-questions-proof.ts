@@ -537,6 +537,19 @@ check('والاستئناف يستهلك النيّة مرّة واحدة', resu
 check('وانقطاع الشبكة لا يُسقط النيّة (لا عقاب على عطل ليس منه)', resumeSource.includes("if (outcome !== 'offline') {"))
 check('نصّ الاستئناف بلغتين وبلا ضغط', revealStrings.ar.cta.resumeTrialTitle.length > 0 && revealStrings.en.cta.resumeTrialTitle.length > 0 && !/!/.test(revealStrings.ar.cta.resumeTrialTitle))
 
+// ═══ [SOVEREIGN-003] السلسلة تُقاس إلى آخر حلقة، لا إلى آخر ملف مكتوب ═══
+// كل ما فوق يفحص **محتوى** `PendingTrialResume`، وكان الملف بلا مستورد واحد في
+// المستودع: نيّة تُكتب · تنجو من المصادقة · **ولا يقرؤها سطح حيّ** فتنتهي صامتة
+// بعد ٢٤ ساعة. ووصفُ المكوّن نفسه يقول «يُركَّب في جذر التطبيق» — ولم يُركَّب.
+// فحصُ المحتوى وحده كان يمرّ أخضر على سطح لا يبلغه مستخدم.
+const appSource = readFileSync(resolve(process.cwd(), 'src/App.tsx'), 'utf8')
+check('سطح الاستئناف **مُركَّب فعلًا** في جذر التطبيق',
+  /<V\.PendingTrialResume\b/.test(appSource) && appSource.includes("import('@/views/reveal/PendingTrialResume')"))
+check('ويُمرَّر له حالة الدخول الحقيقية لا قيمة ثابتة',
+  /<V\.PendingTrialResume[^>]*signedIn=\{Boolean\(auth\.user\)\}/.test(appSource))
+check('⚔️ ونزع التركيب كان سيُكتشف',
+  !/<V\.PendingTrialResume\b/.test(appSource.replace(/<V\.PendingTrialResume/g, '<V.Removed')))
+
 console.log('\n═══ 9) محاكاة الالتفاف: العدد/الربط/المفردات لا تمرّ رخوة ═══')
 check('إضافة معرّف زائد كانت ستُكشف', [...ONBOARDING_QUESTION_IDS, 'filler.fake'].length !== 20)
 check('ربط أسماء متفرقة بلا data-question-id لا يكفي', !viewSource.includes('data-question-name='))
