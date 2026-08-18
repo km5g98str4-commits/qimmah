@@ -299,7 +299,14 @@ export function collectErrors(page) {
   const pageErrors = []
   const consoleErrors = []
   page.on('pageerror', (e) => pageErrors.push(String(e)))
-  page.on('console', (m) => { if (m.type() === 'error') consoleErrors.push(m.text()) })
+  // نُلحق **وجهة** المورد بنصّ الخطأ. «Failed to load resource: net::ERR_FAILED»
+  // وحده لا يقول لمن كان النداء، فأي استثناء عليه يصير استثناءً بالنصّ لا
+  // بالوجهة — وذلك يبتلع أخطاء حقيقية. ومع الوجهة يصير الاستثناء قابلًا للتحقّق.
+  page.on('console', (m) => {
+    if (m.type() !== 'error') return
+    const url = m.location()?.url || ''
+    consoleErrors.push(url ? `${m.text()} @ ${url}` : m.text())
+  })
   return { pageErrors, consoleErrors }
 }
 
@@ -313,6 +320,43 @@ export const BENIGN_CONSOLE = [
   /ServiceWorker|sw\.js/i,
   /Download the React DevTools/i,
 ]
+
+/**
+ * حجب «شبكة خاصّة» (Private Network Access) لأصل التطبيق نفسه على loopback.
+ *
+ * ═══ ما يحدث بالضبط ═══
+ * `p6-auth` يعزل مساراته بقفزة `page.goto('about:blank')`، و`about:blank` أصلُه
+ * **null**. فأي طلب أصلٍ لا يزال في الطريق وقت القفزة يُنسب إلى مستندٍ بأصل
+ * معتِم — وهو **ليس سياقًا آمنًا**. وChromium يمنع عندها أي نداء من سياق غير آمن
+ * إلى مساحة عناوين أضيق (`loopback`)، فيصرخ على `icon-192.png` من بيان التطبيق.
+ *
+ * ولماذا هذا أثر بيئة لا عطل منتج — مقيسًا لا مفترضًا:
+ *   • الأصل **موجود ويُخدَم ٢٠٠** من نفس الخادم (تحقّق مباشر بـcurl).
+ *   • الأصل هو خادم القطعة تحت الاختبار نفسه (localhost/127.0.0.1)، لا مضيف غريب.
+ *   • على أصل https الحقيقي لا يقع الحجب أصلًا: السياق آمن فلا تنطبق القاعدة.
+ * وهو نفس صنف `ENVIRONMENT_PAGE_ERRORS` أعلاه: قطعةُ إنتاج تُشغَّل على http محلّي.
+ *
+ * والاستثناء **ضيّق عمدًا**: يشترط نصّ الحجب بعينه **وأن تكون الوجهة loopback**.
+ * فـ٤٠٤ على نفس الأصل لا يُعفى (نصّه مختلف)، ولا يُعفى حجبٌ إلى مضيف غريب
+ * (وجهته ليست loopback). ويحرسه تأكيد مضادّ في `static/regression-ledger`.
+ */
+const LOOPBACK_TARGET = /@\s*https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:\d+)?\//
+const PRIVATE_NETWORK_BLOCK = /more-private address space|not a secure context and the resource is in/i
+const URL_OF = (e) => (e.match(/@\s*(https?:\/\/\S+)/) || [])[1] || ''
+
+/** الرسالة **الواصفة** للحجب: تحمل سببه بنصّه، ووجهتها loopback. */
+export const isLoopbackPrivateNetworkBlock = (e) =>
+  LOOPBACK_TARGET.test(e) && PRIVATE_NETWORK_BLOCK.test(e)
+
+/**
+ * الحجب الواحد يصل كرسالتين لنفس المورد: واصفة بالسبب، وعامّة
+ * (‏`net::ERR_FAILED`) بلا سبب. والعامّة وحدها لا تُعفى أبدًا — تُعفى **فقط**
+ * حين تكون وجهتها هي بعينها وجهةَ حجبٍ شُخِّص بنصّه في نفس الدفعة.
+ * فـ`ERR_FAILED` إلى أي مورد آخر يبقى خطأً محسوبًا.
+ */
+function privateNetworkPairedUrls(errors) {
+  return new Set(errors.filter(isLoopbackPrivateNetworkBlock).map(URL_OF).filter(Boolean))
+}
 
 /**
  * Page errors that are ENVIRONMENT artefacts of running a production artifact
@@ -332,4 +376,13 @@ export const ENVIRONMENT_PAGE_ERRORS = [
 
 export const realPageErrors = (errors) => errors.filter((e) => !ENVIRONMENT_PAGE_ERRORS.some((re) => re.test(e)))
 
-export const realConsoleErrors = (errors) => errors.filter((e) => !BENIGN_CONSOLE.some((re) => re.test(e)))
+export const realConsoleErrors = (errors) => {
+  const blocked = privateNetworkPairedUrls(errors)
+  return errors.filter((e) => {
+    if (BENIGN_CONSOLE.some((re) => re.test(e))) return false
+    if (isLoopbackPrivateNetworkBlock(e)) return false
+    const url = URL_OF(e)
+    if (/net::ERR_FAILED/.test(e) && url && blocked.has(url)) return false
+    return true
+  })
+}

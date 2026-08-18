@@ -497,6 +497,25 @@ export async function run() {
     realConsoleErrors(realErrorSamples).length === realErrorSamples.length,
     `benign patterns=${BENIGN_CONSOLE.length}`)
 
+  // ══ [SOVEREIGN-003] استثناء حجب الشبكة الخاصّة — يُحرَس بالاتجاهين (§4.2) ══
+  const PNA_ICON = "Access to resource at 'http://localhost:5411/icon-192.png' from origin 'null' has been blocked by CORS policy: The request client is not a secure context and the resource is in more-private address space `loopback`. @ http://localhost:5411/icon-192.png"
+  const PNA_PAIRED = 'Failed to load resource: net::ERR_FAILED @ http://localhost:5411/icon-192.png'
+  rec.check('the console filter DOES suppress the exact loopback private-network block it names',
+    realConsoleErrors([PNA_ICON, PNA_PAIRED]).length === 0,
+    'both the descriptive block and its paired generic message, same URL')
+  rec.check('⚔️ but the generic ERR_FAILED alone is NOT suppressed without a diagnosed block',
+    realConsoleErrors([PNA_PAIRED]).length === 1,
+    'an unpaired ERR_FAILED must stay a finding')
+  rec.check('⚔️ and ERR_FAILED to a DIFFERENT loopback resource is NOT suppressed',
+    realConsoleErrors([PNA_ICON, 'Failed to load resource: net::ERR_FAILED @ http://localhost:5411/assets/app.js']).length === 1,
+    'the pairing is per-URL, not per-batch')
+  rec.check('⚔️ and a private-network block to a FOREIGN host is NOT suppressed',
+    realConsoleErrors(["Access to resource at 'https://tracker.example.com/x' from origin 'null' has been blocked by CORS policy: The request client is not a secure context and the resource is in more-private address space `loopback`. @ https://tracker.example.com/x"]).length === 1,
+    'only the artifact server under test is excused')
+  rec.check('⚔️ and a plain 404 on the same asset is NOT suppressed',
+    realConsoleErrors(['Failed to load resource: the server responded with a status of 404 () @ http://localhost:5411/icon-192.png']).length === 1,
+    'a missing asset is a real finding, not an environment artefact')
+
   rec.check('every non-informational entry reads a real source file',
     LEDGER.filter((e) => !e.informational).every((e) => {
       const [, evidence] = e.assert()

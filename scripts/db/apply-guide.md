@@ -51,6 +51,25 @@ Paste and run each file **in filename order**:
 10. `20260726120003_p14_rls_policies.sql`
 11. `20260726120004_p14_measurement_logs_tombstone.sql`
 12. `20260726120005_p14_schema_guard.sql`
+13. `20260806120001_entitlements_core.sql`
+14. `20260806120002_entitlement_rpcs.sql`
+15. `20260806120003_table_privileges_hardening.sql`
+16. `20260809120001_revocation_ledger.sql`
+17. `20260809120002_code_grant_recovery.sql`
+18. `20260809120003_public_execute_hardening.sql`
+19. `20260809120004_entitlement_security_remediation.sql`
+20. `20260812120001_salla_webhook_ingest.sql`
+21. `20260816120001_commerce_integrity_fixes.sql`
+22. `20260816120002_founder_role_provisioning.sql`
+23. `20260816120003_founder_dashboard_reads.sql`
+24. `20260816120004_email_outbox.sql`
+
+> **القائمة مولَّدة من `supabase/migrations/` ويحرسها `test:migration-guide`.**
+> كانت تتوقّف عند الملف الثاني عشر بينما المستودع يشحن أربعة وعشرين — أي أن اثني
+> عشر ملفًا (الاستحقاقات · التجارة · ويبهوك سلة · **دور المؤسس** · **قراءات
+> اللوحة** · صندوق البريد) لم تكن مذكورة إطلاقًا. فمن يتبع الخيار (ب) حرفيًّا
+> يطبّق نصف المخطّط ثم يجد اللوحة التنفيذية مغلقة عليه بلا سبب ظاهر — والسبب
+> وثيقةٌ شاخت، لا عطل في الكود. **الملفّان ٢٢ و٢٣ هما اللذان يفتحان اللوحة.**
 
 Re-running any file is safe — **and order matters on a re-run**: file 12 is the
 convergence step that resolves the one collision a full re-run can create (file 4
