@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { Icon } from '@/components/Icon'
 import { PlanPreview } from '@/components/plan/PlanPreview'
@@ -15,6 +15,7 @@ import { product } from '@/config/product'
 import { buildOnboardingProfile } from '@/lib/planBuilderAnswers'
 import { buildPlanArtifactsFromOnboarding, hasCompletedOnboardingProfile, saveOnboardingProfile } from '@/lib/onboardingProfile'
 import { markCompleted } from '@/lib/onboarding'
+import { getStorageFailure } from '@/lib/safeStorage'
 import { persistOnboardingToProfile } from '@/lib/onboardingSync'
 import { trackLocal, SETUP_STEP_NAMES } from '@/lib/tracking'
 import { POLICY_LINKS, policyCopy } from '@/data/policyCopy'
@@ -26,7 +27,10 @@ import { goalWordingFor, onboardingIntentStrings } from '@/i18n/dict/onboardingI
 import { setupWhyLines } from '@/i18n/dict/setupWhy'
 import { trainingHistoryStrings, type HistoryOption } from '@/i18n/dict/trainingHistory'
 import { onboardingLifestyleStrings } from '@/i18n/dict/onboardingLifestyle'
+import { onboardingEquipmentStrings } from '@/i18n/dict/onboardingEquipment'
+import { EQUIPMENT_VALUES } from '@/lib/onboardingKeys'
 import { dietPatternChoices, neatChoices } from '@/data/planBuilder'
+import type { Equipment } from '@/types/profile'
 import type {
   DietPattern,
   LastTrainedBucket,
@@ -40,8 +44,12 @@ import {
   DAYS,
   DURATIONS,
   HISTORY_STEP,
+  DEFAULT_EQUIPMENT_FOR_PLACE,
   LAST_INPUT_STEP,
+  NAME_MAX_LENGTH,
   canAdvance,
+  isBodyweightOnly,
+  withBodyweight,
   clearDraftV2,
   finalizeReduce,
   historyFollowUpsApply,
@@ -134,6 +142,11 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
   // (درس BUG-001 — الكاتب يرفض بحقّ، لكن المعالج يجب أن يفتح البوّابة أولًا).
   const { guard: guardPaid, can: canPaid } = useAccess()
   const [initialDraft] = useState(() => initialDraftV2(userId))
+  /**
+   * هل نجحت كتابة ملفّ الإعداد في هذه الجلسة؟ يفتح إعادةَ المحاولة بعد فشل
+   * تخزينٍ جزئي بلا بوّابة دفع: المستخدم لا يُطالَب بالدفع ليُكمل ما بدأه حرًّا.
+   */
+  const completionWriteRef = useRef(false)
   // 0 الأساسيات · 1 النية · 2 التاريخ · 3 الهدف · 4 الجدول · 5 السياق · 6 القيود · 7 جاهز.
   const [step, setStep] = useState(initialDraft.step)
   const [status, setStatus] = useState<FinalizeStatus>('idle')
@@ -143,6 +156,9 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
 
   // بيانات الجسم — تُحفظ نصًّا أثناء الكتابة (حالات وسيطة كـ«١» أو «» مسموحة)
   // وتُحوَّل إلى أرقام عند التحقق والحفظ. هكذا لا يُمحى ما يكتبه المستخدم.
+  // الاسم — نصّ حرّ اختياري. لا يدخل `validateStep` إطلاقًا: حقل يستطيع
+  // المستخدم تركه فارغًا لا يجوز أن يحجب زرّ «التالي» بأي حال.
+  const [nameText, setNameText] = useState(initialDraft.name)
   const [ageText, setAgeText] = useState(initialDraft.age == null ? '' : String(initialDraft.age))
   const [gender, setGender] = useState<V2Gender | null>(initialDraft.gender)
   const [heightText, setHeightText] = useState(initialDraft.heightCm == null ? '' : String(initialDraft.heightCm))
@@ -161,6 +177,9 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
   const [days, setDays] = useState(initialDraft.days)
   const [duration, setDuration] = useState(initialDraft.duration)
   const [place, setPlace] = useState<string | null>(initialDraft.place)
+  // الأدوات — تُبذَر من المكان وتبقى **قرار المستخدم** بمجرّد أن يلمسها.
+  const [equipment, setEquipment] = useState<Equipment[]>(initialDraft.equipment)
+  const [equipmentTouched, setEquipmentTouched] = useState(initialDraft.equipmentTouched)
   const [neat, setNeat] = useState<NeatLevel | null>(initialDraft.neat)
   const [dietPattern, setDietPattern] = useState<DietPattern | null>(initialDraft.dietPattern)
   const [hasInjury, setHasInjury] = useState(initialDraft.hasInjury)
@@ -192,6 +211,7 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
   const bodyT = bodyStepStrings[lang] ?? bodyStepStrings.ar
   const historyT = trainingHistoryStrings[lang] ?? trainingHistoryStrings.ar
   const lifestyleT = onboardingLifestyleStrings[lang] ?? onboardingLifestyleStrings.ar
+  const equipmentT = onboardingEquipmentStrings[lang] ?? onboardingEquipmentStrings.ar
   // صياغة الأهداف تتبع المستوى المُعلن — نفس القيم المخزّنة، لغة مختلفة.
   const goalWording = useMemo(() => goalWordingFor(lang, level), [lang, level])
   // سطر «ليش نسأل» للخطوات السبع من مصدر واحد، بترتيب التدفّق.
@@ -202,7 +222,7 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
   const answers = {
     age: ageNum, gender, heightCm: heightNum, weightKg: weightNum,
     intent, level, trainedBefore, totalMonths, lastTrained, consistency: trainingConsistency,
-    goal, days, duration, place: place as V2Place | null, neat, dietPattern, hasInjury, injuries, healthDataConsent,
+    goal, days, duration, place: place as V2Place | null, equipment, neat, dietPattern, hasInjury, injuries, healthDataConsent,
   }
 
   /**
@@ -238,20 +258,20 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
   useEffect(() => {
     if (status === 'building' || status === 'done') return
     const draft: OnboardingV2Draft = {
-      step, age: ageNum, gender, heightCm: heightNum, weightKg: weightNum,
+      step, name: nameText, age: ageNum, gender, heightCm: heightNum, weightKg: weightNum,
       intent, level, trainedBefore, totalMonths, lastTrained, consistency: trainingConsistency,
-      goal, days, duration, place: place as V2Place | null, neat, dietPattern,
+      goal, days, duration, place: place as V2Place | null, equipment, equipmentTouched, neat, dietPattern,
       hasInjury, injuries, healthDataConsent,
     }
     saveDraftV2(draft, userId)
-  }, [step, ageNum, gender, heightNum, weightNum, intent, level, trainedBefore, totalMonths, lastTrained, trainingConsistency, goal, days, duration, place, neat, dietPattern, hasInjury, injuries, healthDataConsent, status, userId])
+  }, [step, nameText, ageNum, gender, heightNum, weightNum, intent, level, trainedBefore, totalMonths, lastTrained, trainingConsistency, goal, days, duration, place, equipment, equipmentTouched, neat, dietPattern, hasInjury, injuries, healthDataConsent, status, userId])
 
   // Auto-dismiss a shown validation message once the step becomes complete.
   useEffect(() => {
     if (validation && canAdvance(step, answers)) setValidation(null)
     // answers is derived each render; the primitive fields are the real deps.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [validation, step, intent, level, trainedBefore, totalMonths, lastTrained, trainingConsistency, goal, days, duration, place, neat, dietPattern, hasInjury, injuries, healthDataConsent])
+  }, [validation, step, intent, level, trainedBefore, totalMonths, lastTrained, trainingConsistency, goal, days, duration, place, equipment, neat, dietPattern, hasInjury, injuries, healthDataConsent])
 
   const next = () => {
     const v = validateStep(step, answers)
@@ -278,6 +298,28 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
     }
     setValidation(null)
   }
+  /**
+   * اختيار المكان يبذر الأدوات **مرّة واحدة**: بعد أول لمسة من المستخدم صارت
+   * قائمته هي الحقيقة، فلا يدهسها تبديل مكانٍ لاحق. لا أحد يواجه قائمة فارغة،
+   * ولا أحد يُحبَس في افتراضنا.
+   */
+  const onPlace = (value: string) => {
+    setPlace(value)
+    if (!equipmentTouched) {
+      const seeded = DEFAULT_EQUIPMENT_FOR_PLACE[value as V2Place]
+      if (seeded) setEquipment(withBodyweight(seeded))
+    }
+    setValidation(null)
+  }
+  const onEquipment = (value: Equipment) => {
+    setEquipmentTouched(true)
+    setEquipment((list) => {
+      const next = list.includes(value) ? list.filter((x) => x !== value) : [...list, value]
+      // وزن الجسم لا يُنزع — نزعُه يترك المستخدم بلا حركة ممكنة واحدة.
+      return withBodyweight(next)
+    })
+    setValidation(null)
+  }
   const onHasInjury = (value: boolean) => {
     setHasInjury(value)
     if (!value) setInjuries([])
@@ -301,9 +343,10 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
           if (mode === 'error') throw new Error('forced onboarding failure (dev preview)')
         }
         const built0 = toAnswersFromV2({
+          name: nameText,
           age: ageNum, gender, heightCm: heightNum, weightKg: weightNum,
           intent, level, trainedBefore, totalMonths, lastTrained, consistency: trainingConsistency,
-          goal, days, duration, place: place as V2Place | null, neat, dietPattern,
+          goal, days, duration, place: place as V2Place | null, equipment, neat, dietPattern,
           hasInjury: hasInjury === true,
           injuries: hasInjury === true ? injuries : [],
           healthDataConsent,
@@ -317,18 +360,57 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
         // يسأل `hasCompletedOnboardingProfile()`. فالفحص هنا يجمعهما — أي شرط
         // يرمي في الأسفل يجب أن يُلتقط هنا أوّلًا، وإلّا صار المنعُ «عطلًا».
         if ((isExistingPlanEdit() || hasCompletedOnboardingProfile()) && !canPaid('plan.saveEdit')) {
-          guardPaid('plan.saveEdit', () => {})()
-          // 'reset' → idle: البوّابة مفتوحة والشاشة تعود قابلة للتفاعل،
-          // ولا تُعرَض شاشة خطأ — المنع ليس عطلًا.
-          setStatus((st) => finalizeReduce(st, 'reset'))
+          // [SOVEREIGN-ENTRY-001] استثناء واحد داخل البوّابة لا حولها: إعادة
+          // المحاولة بعد **فشل تخزين جزئي في هذه الجلسة نفسها** ليست تحويرًا
+          // لخطة قائمة، بل إتمامًا لنفس الإكمال المجاني. بلا هذا الاستثناء
+          // يُطالَب المستخدم بالدفع ليتعافى من عطلٍ عندنا (تقرير R10 §A2c).
+          // والشرط ضيّق: مرجع في الذاكرة لا يعيش بعد إعادة التحميل، فلا يفتح
+          // بابًا لتحوير خطة في جلسة جديدة.
+          if (!completionWriteRef.current) {
+            guardPaid('plan.saveEdit', () => {})()
+            // 'reset' → idle: البوّابة مفتوحة والشاشة تعود قابلة للتفاعل،
+            // ولا تُعرَض شاشة خطأ — المنع ليس عطلًا.
+            setStatus((st) => finalizeReduce(st, 'reset'))
+            return
+          }
+        }
+        // ═══ سلسلة صدق الحفظ (الميثاق §5 · النمط المرجعي: `finishWorkout.ts`) ═══
+        // تأكيد ← كتابة ← **فحص** ← عند الفشل: استرجاع اللقطة + رسالة صادقة +
+        // **بقاء البيانات**. كان كل ما تحت هذا السطر يعمل بلا فحص واحد: شاشة
+        // النجاح و`markCompleted` و`clearDraftV2` تُطلق جميعها بلا قيد بعد
+        // كتابتين غير مفحوصتين. فعلى جهاز محجوب التخزين يكمل المستخدم إعداده،
+        // ويرى خطته الحقيقية **من الذاكرة**، وتُمحى مسودّته القابلة للاستئناف،
+        // ثم تعرض عليه إعادةُ التحميل خطةَ شخصٍ آخر. كل إدخالاته تضيع.
+        const profileWrite = saveOnboardingProfile(op)
+        if (profileWrite !== 'ok') {
+          // لا مسح مسودّة، ولا وسم إكمال، ولا شاشة نجاح. البيانات كلها في مكانها.
+          setStatus((st) => finalizeReduce(st, 'storageFail'))
           return
         }
-        saveOnboardingProfile(op)
+        // نجحت كتابة مرساة الاسترجاع ⇒ إعادة المحاولة بعدها **ليست تحويرًا
+        // لخطة قائمة** بل إتمامًا لنفس الإكمال. بلا هذا العلم يصير المستخدم
+        // مطالَبًا بالدفع ليتعافى من عطلٍ عندنا (تقرير R10 §A2c).
+        completionWriteRef.current = true
         const artifacts = await buildPlanArtifactsFromOnboarding(op, customization)
+        // اللقطة قبل التطبيق — `applyCustomization` يضع الحالة في الذاكرة أوّلًا
+        // ثم يكتب، وكاتبه لا يُرجع نتيجة. فنقيس الكتابة بمؤشّر الفشل العالمي
+        // (نفس ما يفعله `finishWorkout.ts:89-97` على نفس صنف الكتابة).
+        const snapshot = customization
+        const failureBefore = getStorageFailure()
         applyCustomization(artifacts.customization)
+        if (getStorageFailure() !== failureBefore) {
+          applyCustomization(snapshot) // استرجاع اللقطة: لا خطة معروضة بلا خطة محفوظة
+          setStatus((st) => finalizeReduce(st, 'storageFail'))
+          return
+        }
+        markCompleted(userId)
+        if (getStorageFailure() !== failureBefore) {
+          applyCustomization(snapshot)
+          setStatus((st) => finalizeReduce(st, 'storageFail'))
+          return
+        }
         // نفس التوليد الذي حُفظ يُسلَّم للتسليم — لا توليد ثانٍ للعرض.
         onPlanReady?.({ plan: artifacts.generated, goalType: artifacts.profile.goalType, rationale: artifacts.rationale })
-        markCompleted(userId)
         // [CTO-68] الحدث ٣ — إكمال الإعداد. **بعد** بناء الخطة وحفظها ووسمها مكتملة،
         // لا عند ضغط الزر: الفشل يرمي قبل هذا السطر فلا يُسجَّل إكمال لم يحدث.
         trackLocal('setup_completed', {})
@@ -381,6 +463,7 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
             الحقيقية، فلا يمشي عدّاد بلا عمل خلفه (§6.1). */}
         {status === 'building' && <SynthesisScreen lang={lang} done={false} />}
         {status === 'error' && <ErrorScreen lang={lang} t={t} onRetry={finalize} onDismiss={() => setStatus('idle')} />}
+        {status === 'storage' && <StorageBlockedScreen lang={lang} t={t} onRetry={finalize} onDismiss={() => setStatus('idle')} />}
       </>
     )
   }
@@ -419,6 +502,8 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
               lang={lang}
               titleId={stepTitleId}
               why={whyLines[0]}
+              name={nameText}
+              onName={setNameText}
               age={ageText}
               gender={gender}
               heightCm={heightText}
@@ -473,9 +558,11 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
               titleId={stepTitleId}
               why={whyLines[5]}
               place={place}
+              equipment={equipment}
               neat={neat}
               dietPattern={dietPattern}
-              onPlace={(v) => { setPlace(v); setValidation(null) }}
+              onPlace={onPlace}
+              onEquipment={onEquipment}
               onNeat={(v) => { setNeat(v); setValidation(null) }}
               onDietPattern={(v) => { setDietPattern(v); setValidation(null) }}
             />
@@ -512,6 +599,8 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
                       ? historyT.validation
                     : validation === 'ageBelowMin'
                       ? bodyT.ageBelowMin
+                      : validation === 'equipment'
+                        ? equipmentT.validation
                       : validation === 'lifestyle'
                         ? lifestyleT.contextValidation
                         : validation === 'limitations'
@@ -612,10 +701,11 @@ function NumField({
  * لكل مستخدمي التطبيق**. وبلا عمر، حاجز القاصرين لا يُفعَّل أصلًا.
  */
 function BodyStep({
-  lang, titleId, why, age, gender, heightCm, weightKg, healthDataConsent, onAge, onGender, onHeight, onWeight, onConsent,
+  lang, titleId, why, name, age, gender, heightCm, weightKg, healthDataConsent, onName, onAge, onGender, onHeight, onWeight, onConsent,
 }: {
   lang: Lang; titleId: string; why: string
-  age: string; gender: V2Gender | null; heightCm: string; weightKg: string; healthDataConsent: boolean
+  name: string; age: string; gender: V2Gender | null; heightCm: string; weightKg: string; healthDataConsent: boolean
+  onName: (v: string) => void
   onAge: (v: string) => void; onGender: (g: V2Gender) => void; onHeight: (v: string) => void; onWeight: (v: string) => void
   onConsent: (checked: boolean) => void
 }) {
@@ -637,6 +727,28 @@ function BodyStep({
       </div>
 
       <Group legend={s.title} className="mt-5 block space-y-4">
+        {/* الاسم أولًا: سؤال دافئ بلا رقم يفتح الشاشة، ومصرَّح باختياريّته
+            في سطره لا في تلميح مخفي. */}
+        <label htmlFor="v2-body-name" data-question-id="profile.display_name" className="block">
+          <span className="mb-1.5 block text-[0.82rem] font-bold text-ink-700">{s.nameQ}</span>
+          <span className="flex items-center gap-2 rounded-2xl border border-line bg-surface px-4 py-3 focus-within:border-ink-400">
+            <input
+              id="v2-body-name"
+              type="text"
+              autoComplete="given-name"
+              maxLength={NAME_MAX_LENGTH}
+              placeholder={s.namePlaceholder}
+              value={name}
+              onChange={(e) => onName(e.target.value)}
+              aria-label={s.nameLabel}
+              aria-describedby="v2-body-name-optional"
+              // ≥16px يمنع تكبير iOS التلقائي عند التركيز.
+              className="min-w-0 flex-1 bg-transparent text-[1rem] font-bold text-ink-900 outline-none placeholder:font-normal placeholder:text-ink-400"
+            />
+          </span>
+          <span id="v2-body-name-optional" className="mt-1.5 block text-[0.78rem] leading-snug text-ink-500">{s.nameOptional}</span>
+        </label>
+
         <div className="grid grid-cols-2 gap-3">
           <NumField id="v2-body-age" questionId="body.age" label={s.ageLabel} unit={s.ageUnit} placeholder={s.agePlaceholder} value={age} onChange={onAge} />
           <NumField id="v2-body-height" questionId="body.height" label={s.heightLabel} unit={s.heightUnit} placeholder={s.heightPlaceholder} value={heightCm} onChange={onHeight} />
@@ -990,13 +1102,16 @@ function TileGroup({ options, value, onChange }: { options: readonly { value: st
 }
 
 function LifestyleStep({
-  lang, t, titleId, why, place, neat, dietPattern, onPlace, onNeat, onDietPattern,
+  lang, t, titleId, why, place, equipment, neat, dietPattern, onPlace, onEquipment, onNeat, onDietPattern,
 }: {
   lang: Lang; t: T; titleId: string; why: string
-  place: string | null; neat: NeatLevel | null; dietPattern: DietPattern | null
-  onPlace: (v: string) => void; onNeat: (v: NeatLevel) => void; onDietPattern: (v: DietPattern) => void
+  place: string | null; equipment: Equipment[]; neat: NeatLevel | null; dietPattern: DietPattern | null
+  onPlace: (v: string) => void
+  onEquipment: (v: Equipment) => void
+  onNeat: (v: NeatLevel) => void; onDietPattern: (v: DietPattern) => void
 }) {
   const s = onboardingLifestyleStrings[lang] ?? onboardingLifestyleStrings.ar
+  const eq = onboardingEquipmentStrings[lang] ?? onboardingEquipmentStrings.ar
   const activityOptions: readonly HistoryOption<NeatLevel>[] = neatChoices.map((option) => ({
     value: option.value,
     label: lang === 'en' ? option.labelEn ?? option.label : option.label,
@@ -1014,6 +1129,38 @@ function LifestyleStep({
       <Group questionId="training.place" legend={t.legends.place}>
         <p className="mt-6 mb-3 text-sm font-bold text-ink-700">{t.equipment.placeQ}</p>
         <TileGroup options={t.places} value={place} onChange={onPlace} />
+      </Group>
+
+      {/* الأدوات بعد المكان مباشرةً: المكان يبذرها، والمستخدم يحسمها. */}
+      <Group questionId="equipment.available" legend={eq.legend} className="mt-7 block">
+        <p className="mb-1 text-sm font-bold text-ink-900">{eq.question}</p>
+        <p className="mb-3 text-xs leading-relaxed text-ink-500">{eq.note}</p>
+        <div className="flex flex-wrap gap-2">
+          {EQUIPMENT_VALUES.map((key) => {
+            const on = equipment.includes(key)
+            return (
+              <button
+                key={key}
+                type="button"
+                onClick={() => onEquipment(key)}
+                aria-pressed={on}
+                className={cn(
+                  'v2-pressable flex min-h-[44px] items-center gap-1.5 rounded-full border px-3.5 py-2 text-sm font-semibold',
+                  on ? 'v2-choice-selected text-ink-900' : 'border-line bg-beige text-ink-700',
+                )}
+              >
+                {on && <Icon name="Check" className="h-3.5 w-3.5 shrink-0" strokeWidth={3} />}
+                {eq.labels[key]}
+              </button>
+            )
+          })}
+        </div>
+        {isBodyweightOnly(equipment) && equipment.length > 0 && (
+          <p className="mt-3 flex items-start gap-2 rounded-2xl border border-line bg-beige p-3 text-[0.8rem] font-bold leading-snug text-ink-700">
+            <Icon name="Info" className="mt-0.5 h-4 w-4 shrink-0 text-ink-500" />
+            {eq.bodyweightOnlyNote}
+          </p>
+        )}
       </Group>
 
       <HistoryGroup questionId="activity.neat" legend={s.legends.activity} question={s.activityQ} options={activityOptions} value={neat} onSelect={onNeat} />
@@ -1094,6 +1241,39 @@ function ErrorScreen({ lang, t, onRetry, onDismiss }: { lang: Lang; t: T; onRetr
         <button type="button" onClick={onRetry} className="btn-primary w-full py-4 text-[1.1875rem] shadow-glow">
           <Icon name="RotateCcw" className="h-5 w-5" />
           {t.error.retry}
+        </button>
+        <button type="button" onClick={onDismiss} className="w-full rounded-2xl border border-line bg-surface py-3 text-sm font-bold text-ink-700">
+          {t.back}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * فشل الحفظ — **الصدق قبل الطمأنينة** (الميثاق §6-4).
+ *
+ * ليست نسخة ثانية من `ErrorScreen`: تلك تصف عطلًا عابرًا يُصلحه زرّ إعادة،
+ * وهذه تصف حالة **قائمة في الجهاز** (تخزين ممتلئ أو محجوب) لا تزول بالضغط
+ * وحده. فتسمّي السبب، وتقول للمستخدم ما يفعله، وتؤكّد له الأهمّ: **إجاباته
+ * باقية** — لأن أسوأ ما يفعله فشل الحفظ هو أن يظنّ المستخدم أنه فقد كل شيء
+ * فيعيد الإعداد من الصفر.
+ */
+function StorageBlockedScreen({ lang, t, onRetry, onDismiss }: { lang: Lang; t: T; onRetry: () => void; onDismiss: () => void }) {
+  return (
+    <div dir={lang === 'en' ? 'ltr' : 'rtl'} className="v2-surface-dark fixed inset-0 z-[60] flex flex-col items-center justify-center bg-page px-6 text-center text-ink-900" data-testid="onboarding-storage-blocked">
+      <div role="alert" className="flex flex-col items-center">
+        <span className="v2-error-panel v2-error-icon grid h-16 w-16 place-items-center rounded-2xl border">
+          <Icon name="Database" className="h-8 w-8" strokeWidth={2.25} />
+        </span>
+        <h1 className="mt-5 text-2xl font-black tracking-tight">{t.storage.title}</h1>
+        <p className="mt-2 max-w-xs text-sm leading-relaxed text-ink-500">{t.storage.message}</p>
+        <p className="mt-3 max-w-xs text-sm font-bold leading-relaxed text-ink-700">{t.storage.kept}</p>
+      </div>
+      <div className="mt-7 w-full max-w-xs space-y-2.5">
+        <button type="button" onClick={onRetry} className="btn-primary w-full py-4 text-[1.1875rem] shadow-glow">
+          <Icon name="RotateCcw" className="h-5 w-5" />
+          {t.storage.retry}
         </button>
         <button type="button" onClick={onDismiss} className="w-full rounded-2xl border border-line bg-surface py-3 text-sm font-bold text-ink-700">
           {t.back}

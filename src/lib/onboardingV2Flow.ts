@@ -25,6 +25,8 @@ import type {
   TrainingConsistency,
 } from '@/types/onboarding'
 import type { V2Place } from '@/lib/onboardingV2Adapter'
+import { ALWAYS_AVAILABLE_EQUIPMENT, normalizeEquipment } from '@/lib/onboardingKeys'
+import type { Equipment } from '@/types/profile'
 import { classifyExperience, classifyTrainingStatus } from '@/lib/personalization/experience'
 import {
   ALGO_VERSION,
@@ -60,6 +62,34 @@ export function historyFollowUpsApply(trainedBefore: TrainedBefore | null): bool
   return trainedBefore !== null && trainedBefore !== 'never'
 }
 
+/**
+ * الأدوات المفترضة لكل مكان — **بذرة لا قرار**.
+ *
+ * لا أحد يواجه قائمة فارغة، ولا أحد يُحبس في افتراض: أوّل لمسة من المستخدم
+ * تجعل قائمته هي الحاكمة (`equipmentTouched`). والقيم مشتقّة من مجموعات
+ * `equipmentAccess.ts` نفسها حتى لا يفترق الافتراض عن سلوك المولّد اليوم.
+ */
+export const DEFAULT_EQUIPMENT_FOR_PLACE: Record<V2Place, readonly Equipment[]> = {
+  gym: ['dumbbell', 'barbell', 'bench', 'machine', 'cable', 'smith', 'pullup_bar', 'bodyweight'],
+  home: ['dumbbell', 'bands', 'bodyweight'],
+  machines: ['machine', 'cable', 'smith', 'bodyweight'],
+}
+
+/**
+ * وزن الجسم **لا يُنزع**: لا يملكه أحد ولا يفقده أحد، وقائمة بلا حركة ممكنة
+ * واحدة تُنتج خطة فارغة. يُضاف عند الحدّ لا في الواجهة وحدها، فلا يوجد طريق
+ * يتجاوزه.
+ */
+export function withBodyweight(equipment: readonly Equipment[]): Equipment[] {
+  return normalizeEquipment([...equipment, ALWAYS_AVAILABLE_EQUIPMENT])
+}
+
+/** هل الاختيار وزن جسم صرفًا؟ يجعل فرع `gymAccess='bodyweight'` قابلًا للوصول. */
+export function isBodyweightOnly(equipment: readonly Equipment[]): boolean {
+  const normalized = withBodyweight(equipment)
+  return normalized.length === 1 && normalized[0] === ALWAYS_AVAILABLE_EQUIPMENT
+}
+
 export function injuryAreasApply(hasInjury: boolean | null): boolean {
   return hasInjury === true
 }
@@ -81,12 +111,27 @@ export { AGE_RANGE, HEIGHT_RANGE, WEIGHT_RANGE } from '@/config/profileDomain'
 export type V2Gender = 'male' | 'female'
 
 /** Version stamp for the persisted v2 draft — supported predecessors migrate explicitly. */
-export const DRAFT_VERSION = 6
-const READABLE_DRAFT_VERSIONS = [5, DRAFT_VERSION] as const
+export const DRAFT_VERSION = 7
+const READABLE_DRAFT_VERSIONS = [5, 6, DRAFT_VERSION] as const
+
+/**
+ * حدّ طول الاسم المعروض. ليس تحقّقًا أمنيًا (لا شيء هنا يُنفَّذ) بل حدّ عرض:
+ * التحيّة سطر واحد في الرئيسية وشاشة الكشف، واسم من مئة حرف يكسرهما. القصّ
+ * صامت وغير حاجب — الاسم اختياري، فلا يُردّ المستخدم برسالة خطأ على حقل
+ * يستطيع تخطّيه أصلًا.
+ */
+export const NAME_MAX_LENGTH = 24
+
+/** يقصّ ويشذّب الاسم — نقطة واحدة يمرّ بها الحفظ والتحميل والتحويل معًا. */
+export function normalizeName(raw: unknown): string {
+  return typeof raw === 'string' ? raw.trim().slice(0, NAME_MAX_LENGTH) : ''
+}
 
 /** Full resumable state of the v2 onboarding flow. */
 export interface OnboardingV2Draft {
   step: number
+  /** الاسم المعروض — **اختياري**؛ السلسلة الفارغة تعني «ما كتبه» لا «فشل». */
+  name: string
   /** بيانات الجسم — null قبل الإجابة (لا قيمة افتراضية صامتة). */
   age: number | null
   gender: V2Gender | null
@@ -103,6 +148,17 @@ export interface OnboardingV2Draft {
   days: number
   duration: number
   place: V2Place | null
+  /**
+   * الأدوات المتاحة فعلًا. **المكان سياق والأداة حاكمة** — انظر قاموس
+   * `onboardingEquipment`. فارغة تعني «لم يُجَب بعد» (مسودّة أقدم).
+   */
+  equipment: Equipment[]
+  /**
+   * هل لمس المستخدم قائمة الأدوات بنفسه؟ يفصل «افتراض من المكان» عن «قرار
+   * المستخدم»: تغيير المكان يعيد البذر ما لم يكن قد قرّر، وقراره **حاكم**
+   * فلا يُدهس باختيار مكانٍ لاحق.
+   */
+  equipmentTouched: boolean
   neat: NeatLevel | null
   dietPattern: DietPattern | null
   hasInjury: boolean | null
@@ -123,6 +179,7 @@ export function inRange(v: number | null, r: { min: number; max: number }): bool
 export function initialDraftV2(userId?: string | null): OnboardingV2Draft {
   return loadDraftV2(userId) ?? {
     step: 0,
+    name: '',
     age: null,
     gender: null,
     heightCm: null,
@@ -137,6 +194,8 @@ export function initialDraftV2(userId?: string | null): OnboardingV2Draft {
     days: 4,
     duration: 45,
     place: null,
+    equipment: [],
+    equipmentTouched: false,
     neat: null,
     dietPattern: null,
     hasInjury: null,
@@ -154,11 +213,17 @@ interface PersistedDraft extends Partial<OnboardingV2Draft> {
 }
 
 /** Which step-specific validation message to surface, or null when the step is complete. */
-export type StepValidation = 'body' | 'ageBelowMin' | 'intentLevel' | 'trainingHistory' | 'goal' | 'healthConsent' | 'training' | 'lifestyle' | 'limitations' | null
+export type StepValidation = 'body' | 'ageBelowMin' | 'intentLevel' | 'trainingHistory' | 'goal' | 'healthConsent' | 'training' | 'lifestyle' | 'equipment' | 'limitations' | null
 
-/** Async plan-assembly status driving the loading / error / done screens. */
-export type FinalizeStatus = 'idle' | 'building' | 'error' | 'done'
-export type FinalizeAction = 'start' | 'fail' | 'ok' | 'reset'
+/**
+ * Async plan-assembly status driving the loading / error / done screens.
+ *
+ * `'storage'` حالة **مستقلّة عن `'error'`** عمدًا: العطل العابر يُصلحه زرّ
+ * إعادة، أمّا التخزين المحجوب فسببه لا يزول بإعادة المحاولة وحدها — فرسالته
+ * مختلفة (وش صار · وش بقي · وش يسوي)، وهي تؤكّد أن **بياناته لم تضع**.
+ */
+export type FinalizeStatus = 'idle' | 'building' | 'error' | 'storage' | 'done'
+export type FinalizeAction = 'start' | 'fail' | 'storageFail' | 'ok' | 'reset'
 
 /**
  * Finalize state machine. `start` covers both the first attempt (idle → building)
@@ -170,6 +235,8 @@ export function finalizeReduce(status: FinalizeStatus, action: FinalizeAction): 
       return status === 'done' ? status : 'building'
     case 'fail':
       return 'error'
+    case 'storageFail':
+      return 'storage'
     case 'ok':
       return 'done'
     case 'reset':
@@ -195,6 +262,7 @@ type Validatable = Pick<
   | 'days'
   | 'duration'
   | 'place'
+  | 'equipment'
   | 'neat'
   | 'dietPattern'
   | 'hasInjury'
@@ -207,6 +275,8 @@ export const LAST_INPUT_STEP = 6
 
 /** سجلّ الأسئلة الثابت — الموافقة الصحية بوابة، وليست ضمن أسئلة التخصيص الـ18. */
 export const ONBOARDING_QUESTION_IDS = [
+  'profile.display_name',
+  'equipment.available',
   'body.age', 'body.sex', 'body.height', 'body.weight',
   'intent.primary', 'experience.declared',
   'history.trained_before', 'history.total_months', 'history.last_trained', 'history.consistency',
@@ -263,7 +333,13 @@ export function validateStep(step: number, d: Validatable): StepValidation {
   }
   if (step === 3) return d.goal ? null : 'goal'
   if (step === 4) return DAYS.includes(d.days as (typeof DAYS)[number]) && DURATIONS.includes(d.duration as (typeof DURATIONS)[number]) ? null : 'training'
-  if (step === 5) return d.place && d.neat && d.dietPattern ? null : 'lifestyle'
+  if (step === 5) {
+    if (!d.place || !d.neat) return 'lifestyle'
+    // وزن الجسم متاح دائمًا، فالقائمة لا يمكن أن تكون فارغة بحقّ — الفراغ هنا
+    // يعني «لم يُسأل بعد» فيُحجب.
+    if (d.equipment.length === 0) return 'equipment'
+    return null
+  }
   if (step === 6) {
     if (d.hasInjury === null) return 'limitations'
     return injuryAreasApply(d.hasInjury) && d.injuries.length === 0 ? 'limitations' : null
@@ -369,6 +445,9 @@ function isPersistedDraft(value: unknown): value is PersistedDraft {
   const maxStep = d.v === 5 ? 4 : LAST_INPUT_STEP
   if (!Number.isInteger(d.step) || (d.step as number) < 0 || (d.step as number) > maxStep) return false
   if (![d.age, d.heightCm, d.weightKg].every(nullableNumber)) return false
+  // الاسم اختياري: غيابه من مسودّة أقدم مقبول، ووجوده بنوع خاطئ ليس كذلك.
+  if (d.name !== undefined && typeof d.name !== 'string') return false
+  if (d.equipment !== undefined && !Array.isArray(d.equipment)) return false
   if (d.gender !== null && d.gender !== 'male' && d.gender !== 'female') return false
   if (d.goal !== null && d.goal !== 'cut' && d.goal !== 'maintain' && d.goal !== 'bulk') return false
   if (d.intent !== null && d.intent !== 'plan' && d.intent !== 'meals' && d.intent !== 'numbers') return false
@@ -412,6 +491,8 @@ function migrateDraft(raw: PersistedDraft): OnboardingV2Draft {
   const legacy = raw.v === 5
   return normalizeDraft({
     step: legacy ? Math.min(raw.step as number, HISTORY_STEP) : raw.step as number,
+    // v5/v6 لا تحملان اسمًا — الغياب يعني «لم يُسأل»، لا اسمًا فارغًا مفقودًا.
+    name: normalizeName(raw.name),
     age: raw.age ?? null,
     gender: raw.gender ?? null,
     heightCm: raw.heightCm ?? null,
@@ -426,6 +507,9 @@ function migrateDraft(raw: PersistedDraft): OnboardingV2Draft {
     days: raw.days as number,
     duration: raw.duration as number,
     place: raw.place ?? null,
+    // مسودّة أقدم لم تُسأل عن الأدوات؛ الفراغ جواب صادق («لم يُسأل») لا خسارة.
+    equipment: normalizeEquipment(raw.equipment),
+    equipmentTouched: raw.equipmentTouched === true,
     neat: legacy ? null : raw.neat ?? null,
     dietPattern: legacy ? null : raw.dietPattern ?? null,
     // v5=false كان افتراضيًا لا جوابًا صريحًا؛ true وحدها معلومة يمكن حفظها.
@@ -440,6 +524,10 @@ export function normalizeDraft(draft: OnboardingV2Draft): OnboardingV2Draft {
   const never = draft.trainedBefore === 'never'
   return {
     ...draft,
+    name: normalizeName(draft.name),
+    // التطبيع عند الحفظ والتحميل معًا: ترتيب السجلّ لا ترتيب النقر، وبلا
+    // تكرار، وبلا مفتاح لا ينتمي للاتّحاد مهما جاء من تخزين معطوب.
+    equipment: normalizeEquipment(draft.equipment),
     totalMonths: never ? null : draft.totalMonths,
     lastTrained: never ? null : draft.lastTrained,
     consistency: never ? null : draft.consistency,

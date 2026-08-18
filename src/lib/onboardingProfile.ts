@@ -40,6 +40,9 @@ import { hasSavedCustomization, loadCustomization } from '@/lib/customization'
 import { loadOnboarding } from '@/lib/onboarding'
 import { enqueueSyncOperation } from '@/lib/syncQueue'
 import { assertPaid } from '@/lib/access/guard'
+import { readRaw, removeKey, writeJson, type WriteResult } from '@/lib/safeStorage'
+import { normalizeEquipment, normalizeInjuryAreas } from '@/lib/onboardingKeys'
+import type { Equipment, InjuryAreaKey } from '@/types/profile'
 
 export const ONBOARDING_PROFILE_KEY = 'qimmah:onboarding:profile:v1'
 
@@ -90,12 +93,10 @@ function migrateLegacyOnbGoal(goal: OnboardingProfile['goal']): OnboardingProfil
 /** يقرأ مصدر الحقيقة المحفوظ مدموجًا فوق الافتراضي (آمن ضد بيانات تالفة/قديمة). */
 export function loadOnboardingProfile(): OnboardingProfile | null {
   if (typeof window === 'undefined') return null
-  let raw: string | null
-  try {
-    raw = window.localStorage.getItem(ONBOARDING_PROFILE_KEY)
-  } catch {
-    return null
-  }
+  // القراءة عبر `readRaw`: مجرّد لمس `window.localStorage` يرمي `SecurityError`
+  // حين يُحجب التخزين (سياسة مؤسسة/تصفّح خاص)، والطبقة تبتلعه إلى `null` بدل
+  // أن يتسرّب الاستثناء إلى كل مستدعٍ.
+  const raw = readRaw(ONBOARDING_PROFILE_KEY)
   if (!raw) return null
   try {
     const saved = JSON.parse(raw) as Partial<OnboardingProfile>
@@ -131,6 +132,11 @@ export function loadOnboardingProfile(): OnboardingProfile | null {
  * onboarding خارج طابور المزامنة عندما تكون المزامنة مفعّلة.
  */
 export function enqueueOnboardingProfileUpsert(value: OnboardingProfile): void {
+  // ⚠️ قيمة الموافقة الصحّية (`value.consents.healthData.accepted`) **لا تُقرأ
+  // هنا عمدًا**. حاجز الحسّاس يعيش في حارة المزامنة نفسها
+  // (`syncQueue.sanitizeSyncPayload` + `hasSensitiveHealthConsent`)، ووضع حاجز
+  // ثانٍ هنا يكسر `test:sync-coverage` (الملفّ المهاجَر من تخصيص قديم يحمل
+  // `accepted:false` بحقّ، ويجب أن يُرفع). التفصيل في تقرير الموجة.
   enqueueSyncOperation('profiles', 'profile', {
     data: { onboarding: value },
     updated_at: value._meta.updatedAt ?? value._meta.completedAt ?? new Date().toISOString(),
@@ -152,8 +158,24 @@ export function hasCompletedOnboardingProfile(): boolean {
   return loadOnboardingProfile()?._meta?.completed === true
 }
 
-export function saveOnboardingProfile(value: OnboardingProfile): void {
-  if (typeof window === 'undefined') return
+/**
+ * يكتب مصدر الحقيقة — **ويُبلّغ بالنتيجة**.
+ *
+ * ═══ لماذا صار للدالة قيمة راجعة (P0 · تقرير R10 §A بند ٤) ═══
+ * كانت الكتابة `try { localStorage.setItem(…) } catch { /* تجاهل *\/ }`، أي أن
+ * فشلها **غير قابل للتبليغ بنيويًا**: التوقيع `void` لا يملك قناة تقول «لم
+ * أكتب». وهذا هو المفتاح الذي يثبت `A2` أنه **مرساة الاسترجاع** — من ملفّه
+ * وحده تُعاد الخطة كاملة بدقّة. فحين يفشل بصمت على جهاز محجوب التخزين (تصفّح
+ * Safari الخاص · حصّة ممتلئة · سياسة مؤسسة) يرى المستخدم خطته الحقيقية من
+ * الذاكرة، تُمسح مسودّته القابلة للاستئناف، ثم يجد بعد إعادة التحميل خطة
+ * شخصٍ آخر — ٢٤ سنة و٨٦ كجم لا تخصّه.
+ *
+ * فالآن: كتابة عبر `writeJson` (لا ترمي أبدًا وتُصنّف السبب)، والنتيجة تُرجَع،
+ * و**الرفع إلى طابور المزامنة لا يحدث إلّا بعد `'ok'`** — كتابة لم تصل القرص
+ * لا تدخل طابورًا يدّعي أنها وصلت.
+ */
+export function saveOnboardingProfile(value: OnboardingProfile): WriteResult {
+  if (typeof window === 'undefined') return 'unavailable'
   // ── [PHASE-II] حدّ التحوير، لا حدّ الزرّ ──────────────────────────────────
   // أوّل إكمال **مجاني** (ميثاق §0.1: التخصيص وتوليد الخطة ومعاينتها مجانية
   // للجميع بلا حساب ولا دفع) — وهذه بوّابة القمع الأولى فلا تُغلق أبدًا.
@@ -169,36 +191,25 @@ export function saveOnboardingProfile(value: OnboardingProfile): void {
   // لأنه ترطيب لا تحوير من المستخدم. ولا تُحرَس هجرة `ensureOnboardingProfile`
   // لأنها لا تعمل إلا حين لا يوجد ملف أصلًا (`existing` = null أدناه).
   if (hasCompletedOnboardingProfile()) assertPaid('plan.saveEdit')
-  try {
-    // ختم LWW عند كل حفظ محلي — دليل الأحدثية لدمج profiles.data.onboarding.
-    const stamped: OnboardingProfile = { ...value, _meta: { ...value._meta, updatedAt: new Date().toISOString() } }
-    window.localStorage.setItem(ONBOARDING_PROFILE_KEY, JSON.stringify(stamped))
-    enqueueOnboardingProfileUpsert(stamped)
-  } catch {
-    /* تجاهل أخطاء التخزين (وضع التصفّح الخاص …) */
-  }
+  // ختم LWW عند كل حفظ محلي — دليل الأحدثية لدمج profiles.data.onboarding.
+  const stamped: OnboardingProfile = { ...value, _meta: { ...value._meta, updatedAt: new Date().toISOString() } }
+  const result = writeJson(ONBOARDING_PROFILE_KEY, stamped)
+  if (result !== 'ok') return result
+  enqueueOnboardingProfileUpsert(stamped)
+  return 'ok'
 }
 
 /**
  * كتابة ملف الإعداد من مسار المزامنة (hydrate) بعد فوزه بالـLWW — **دون إعادة
  * ختم** (إعادة الختم بـ«الآن» تزوّر الأحدثية وتقلب دمج الأجهزة اللاحق).
  */
-export function saveOnboardingProfileFromSync(value: OnboardingProfile): void {
-  if (typeof window === 'undefined') return
-  try {
-    window.localStorage.setItem(ONBOARDING_PROFILE_KEY, JSON.stringify(value))
-  } catch {
-    /* تجاهل أخطاء التخزين */
-  }
+export function saveOnboardingProfileFromSync(value: OnboardingProfile): WriteResult {
+  if (typeof window === 'undefined') return 'unavailable'
+  return writeJson(ONBOARDING_PROFILE_KEY, value)
 }
 
 export function clearOnboardingProfile(): void {
-  if (typeof window === 'undefined') return
-  try {
-    window.localStorage.removeItem(ONBOARDING_PROFILE_KEY)
-  } catch {
-    /* تجاهل */
-  }
+  removeKey(ONBOARDING_PROFILE_KEY)
 }
 
 // ===== قراءة الجنس لكل حساب (إصلاح P10.1) =====
@@ -252,6 +263,34 @@ const NEAT_TO_ACTIVITY: Record<NeatLevel, ActivityLevel> = {
 }
 
 const showsTargetWeight = (g?: OnbGoalType) => g === 'cut' || g === 'bulk'
+
+/**
+ * الأدوات المُعلَنة كما نجت في التخزين — **مدخل غير موثوق يُصفّى، لا يُصدَّق**.
+ *
+ * الحقل يعيش خارج `OnbTrainingPreferences` مؤقّتًا (النوع في `types/onboarding`
+ * وهو خارج نطاق هذه الحارة)، فيُقرأ كـ`unknown` ويمرّ بحارس الاتّحاد. وهذه
+ * ليست حيلة نوعية بل الصواب: القيمة تأتي من JSON محلي أو من مزامنة، وكلاهما
+ * مدخل غير موثوق بنصّ الميثاق §5.
+ */
+function declaredEquipment(tp: OnboardingProfile['trainingPreferences']): Equipment[] {
+  return normalizeEquipment((tp as { equipment?: unknown }).equipment)
+}
+
+/**
+ * مناطق الإصابة كمفاتيح بنيويّة.
+ *
+ * `op.limitations.injuries` سلسلة مفاتيح أصلًا (`knee` · `shoulder` …)، لكنها
+ * كانت تُسلسَل إلى نصّ واحد يُطابَق بتعبير نمطي عربي في المولّد
+ * (`planGenerator.ts:198-203`) — فترجمة واحدة تكسر الترشيح كلّه. الحقل النصّي
+ * `injuries` يبقى **كما هو** للتوافق الرجعي، وهذا هو المصدر البنيوي.
+ *
+ * و`hasInjury` يُقرأ هنا فعلًا لا يُهمَل: «لا» تعني قائمة فارغة مهما بقي في
+ * التخزين من إجابة سابقة — الجواب الصريح يفوز على البقايا.
+ */
+function declaredInjuryAreas(limitations: OnboardingProfile['limitations']): InjuryAreaKey[] {
+  if (limitations.hasInjury === false) return []
+  return normalizeInjuryAreas(limitations.injuries)
+}
 
 /** يحوّل مصدر الحقيقة إلى Profile الذي يستهلكه مولّد الخطة الحالي. */
 export function toLegacyProfile(op: OnboardingProfile, base: Profile = defaultProfile): Profile {
@@ -319,7 +358,10 @@ export function toLegacyProfile(op: OnboardingProfile, base: Profile = defaultPr
     experienceLevel,
     gymAccess,
     gymType,
-    equipment: [],
+    // كان `[]` مثبَّتًا هنا: الملفّ يحمل حقلًا للأدوات والإعداد لا يسأل عنها
+    // إطلاقًا، فيبقى فارغًا دائمًا ويعود المولّد لاشتقاق المكان وحده.
+    equipment: declaredEquipment(tp),
+    injuryAreas: declaredInjuryAreas(op.limitations),
     schedulingStyle: 'flexible',
     preferredDays: [],
     remindersOptIn: op.appPreferences.reminders,

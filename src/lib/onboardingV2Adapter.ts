@@ -10,6 +10,9 @@
 import { defaultAnswers, type Answers } from './planBuilderAnswers'
 import {
   historyFollowUpsApply,
+  isBodyweightOnly,
+  normalizeName,
+  withBodyweight,
   resolveExperienceLevel,
   resolveTrainingConsistency,
   type V2Intent,
@@ -26,14 +29,19 @@ import type {
   TrainingConsistency,
 } from '@/types/onboarding'
 import type { V2GoalValue } from '@/design-system/v2/labels'
+import type { Equipment } from '@/types/profile'
 
 export type V2Place = 'gym' | 'home' | 'machines'
 
 export interface V2OnboardingChoices {
+  /** الاسم المعروض — اختياري؛ غيابه يعني تحيّة بلا اسم، لا اسمًا مخترعًا. */
+  name?: string | null
   goal: V2GoalValue | null
   days: number
   duration: number
   place: V2Place | null
+  /** الأدوات المتاحة — فارغة تعني «لم يُسأل» فيبقى اشتقاق المكان كما كان. */
+  equipment?: readonly Equipment[]
   neat: NeatLevel | null
   dietPattern: DietPattern | null
   hasInjury: boolean
@@ -102,6 +110,10 @@ export function toAnswersFromV2(choices: V2OnboardingChoices): Answers {
 
   return {
     ...defaultAnswers,
+    // الاسم يقطع الأنبوب كاملًا من هنا: `Answers.name` → `op.profile.name` →
+    // `profile.name` → `identity.userName` → تحيّة الرئيسية. لا حلقة جديدة،
+    // إنما منبع لأنبوب كان قائمًا بلا مصدر.
+    name: normalizeName(choices.name),
     age: choices.age ?? defaultAnswers.age,
     sex: choices.gender ?? defaultAnswers.sex,
     heightCm: choices.heightCm ?? defaultAnswers.heightCm,
@@ -123,11 +135,22 @@ export function toAnswersFromV2(choices: V2OnboardingChoices): Answers {
     } : undefined,
     // النية ⇒ أسلوب التغذية؛ بلا نية يبقى الافتراضي كما كان (توافق رجعي).
     nutritionStyle: choices.intent ? INTENT_TO_NUTRITION[choices.intent] : defaultAnswers.nutritionStyle,
+    // ═══ الأدوات: المكان سياق، والأداة حاكمة ═══
+    // فارغة ⇒ لا نضيف وزن الجسم من عندنا: مسودّة أقدم لم تُسأل، وحقنُ قيمة
+    // فيها يقلب «لم يُسأل» إلى «أجاب بوزن الجسم» — وهو ما يجعل `toLegacyProfile`
+    // يظنّ أن لديه إعلانًا ويضيّق الخطة على ملفّ قديم بلا سبب.
+    equipment: choices.equipment && choices.equipment.length > 0 ? withBodyweight(choices.equipment) : [],
     goalValue: choices.goal ?? undefined,
     trainingDays: choices.days,
     daysTouched: true,
     sessionDurationMin: choices.duration,
-    environment: choices.place ? PLACE_TO_ENV[choices.place] : undefined,
+    // فرع `bodyweight` كان **غير قابل للوصول** من الإعداد إطلاقًا: `V2Place`
+    // ثلاث قيم لا رابع، فمن عنده سجّادة وحدها كان يُسلَّم برنامج بار. الآن
+    // إعلانُ «وزن الجسم وحده» يفتح الفرع المنفَّذ أصلًا في
+    // `equipmentAccess.ts:44-45` وفي المولّد.
+    environment: choices.equipment && choices.equipment.length > 0 && isBodyweightOnly(choices.equipment)
+      ? 'bodyweight'
+      : choices.place ? PLACE_TO_ENV[choices.place] : undefined,
     neat: choices.neat ?? defaultAnswers.neat,
     dietPattern: choices.dietPattern ?? defaultAnswers.dietPattern,
     hasInjury: choices.hasInjury,
