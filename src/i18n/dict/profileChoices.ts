@@ -67,7 +67,19 @@ const en: ProfileChoiceStrings = {
   generatedWarning: {
     'بدأنا بحجم أخفّ هذا الأسبوع لبداية آمنة — زِد تدريجيًا بعدها.': 'We started with lighter volume this week for a safer return. Build up gradually afterward.',
     'للمبتدئ ننصح بـ3–4 أيام في البداية لبناء الالتزام والاستشفاء.': 'For beginners, we recommend starting with 3–4 days to build consistency and recovery.',
+    // [QIM-V1-018] مفتاح تاريخي — يبقى لأن الخطط **المخزَّنة** عند مستخدمين
+    // قائمين تحمل نصّه الخام، والترجمة تقع عند العرض. حذفه يُفقد الإنجليزية
+    // عند من ولّد خطّته قبل إعادة الصياغة.
     'راعينا الإصابات المحددة باستبعاد تمارين عالية الخطورة واختيار بدائل أأمن لنفس العضلات.': 'We accounted for the injuries you listed by excluding higher-risk exercises and choosing safer alternatives for the same muscles.',
+    // [QIM-V1-018] الصياغة الحيّة (`planGenerator.ts:1101`). غيابها كان يُسقط
+    // **ادّعاء السلامة نفسه** إلى نصّ عامّ بالإنجليزية: «راجع ملاحظة الخطة».
+    'راعينا مناطق الإصابة التي تعرّفنا عليها: استبعدنا الحركات التي تحمّل المنطقة المصابة واخترنا بدائل لنفس العضلات.': 'We accounted for the injury areas we recognised: we excluded movements that load the injured area and chose alternatives for the same muscles.',
+    // [QIM-V1-018] الحالة الثالثة (`planGenerator.ts:1104`) — **وهي الأخطر**:
+    // من كتب قيدًا لم نفهمه كان يُترك بالإنجليزية بلا خبر، فيظنّ أن خطّته راعته.
+    'كتبت لنا قيدًا ما قدرنا نحوّله لقاعدة تمرين، فما استبعدنا شيئًا بسببه. اختر المنطقة من القائمة (ركبة/كتف/أسفل الظهر/رسغ/مرفق/كاحل) عشان نراعيها.': 'You wrote a limitation we could not turn into a training rule, so nothing was excluded because of it. Pick the area from the list (knee / shoulder / lower back / wrist / elbow / ankle) so we can account for it.',
+    // [QIM-V1-018] تنويه القاصرين يدخل نفس المصفوفة (`planGenerator.ts:1091`)،
+    // فيحتاج مدخله هنا ولو كان له نصّ مستقلّ في `minorGoalNote`.
+    'أهداف تعديل الوزن متاحة من 18 سنة — ننصح بمراجعة مختص تغذية': 'Weight-change goals are available from age 18 — we recommend consulting a nutrition specialist.',
     'تقسيمتك المختارة تدرّب الأرجل أقل من مرّتين أسبوعيًا — فكّر بزيادة الأيام أو تقسيمة أخرى.': 'Your selected split trains legs fewer than twice a week. Consider adding a day or choosing another split.',
     'تأكد من تدريب الأرجل مرتين أسبوعيًا على الأقل في خطط التضخيم.': 'For bulking plans, make sure you train legs at least twice a week.',
     'هذه أمثلة وجبات مبدئية وليست خطة كاملة مطابقة للأهداف.': 'These are starter meal examples, not a complete plan matched exactly to your targets.',
