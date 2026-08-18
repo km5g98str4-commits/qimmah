@@ -384,15 +384,6 @@ const SRC_FILES = []
 })(resolve(root, 'src'))
 
 const DURATION_AUTHORITY = 'src/lib/workoutStats.ts'
-/**
- * **استثناء واحد معلَن، خارج ملكية هذه الحارة.**
- * `estimateSessionMinutes` في باني الخطة المخصّصة نموذجٌ ثالث للمدّة، وتعليقه
- * يقول إنه «نفس heuristic todayV2Model/workoutV2Model» — وهو **وصفٌ بائت** بعد
- * توحيدهما على السلطة. إصلاحه سطر واحد (`return estimateDurationMin(day)`)
- * لكنه ملفُ حارةٍ أخرى، فيُرفَع في التقرير ولا يُلمس. ويحرسه التأكيد أدناه:
- * لحظة إصلاحه يسقط الفحص ويجب حذف الاستثناء — فلا يبقى مُخلَّدًا.
- */
-const KNOWN_STRAY_FILE = 'src/features/customPlan/builder.ts'
 /** أنماط «حساب مدّة جلسة» — كلٌّ مسمّى كي تُقال المخالفة باسم نمطها. */
 const DURATION_PATTERNS = [
   { name: 'مجموعات × (عمل + راحة)', re: /restSec[^\n]*\*|\*[^\n]*restSec/ },
@@ -417,12 +408,13 @@ function scanDurationFormulas(sources) {
   const sources = SRC_FILES.map((f) => ({ rel: relative(root, f), text: readFileSync(f, 'utf8') }))
   const stray = scanDurationFormulas(sources)
   if (stray.length) console.log(`    نماذج شاردة: ${stray.join(' · ')}`)
-  const outsideException = stray.filter((h) => !h.startsWith(`${KNOWN_STRAY_FILE}:`))
-  check(`نموذج المدّة واحد داخل نطاق الحارة: لا حساب مدّة خارج ${DURATION_AUTHORITY} إلا الاستثناء المُعلَن (${sources.length} ملف مفحوص)`, outsideException.length === 0)
-  // §4.2 — الاستثناء يُحرَس: لو أُصلح الملف المستثنى وجب حذف الاستثناء لا إبقاؤه.
-  const exceptionStillReal = stray.some((h) => h.startsWith(`${KNOWN_STRAY_FILE}:`))
-  check(`الاستثناء المُعلَن ما زال حقيقيًا: ${KNOWN_STRAY_FILE} يحمل نموذجًا ثالثًا (يُحذف الاستثناء فور إصلاحه)`, exceptionStillReal)
-  check('والاستثناء واحدٌ لا قائمة تتمدّد', stray.length === 1)
+  // ═══ الاستثناء سقط لأنه أُصلح — لا لأنه وُسِّع ═══
+  // كُتب هذا الفحص باستثناء واحد معلَن (`src/features/customPlan/builder.ts`)
+  // لأن الملف خارج ملكية حارة المحرّك، ومعه حارسٌ يسقط **لحظة إصلاحه** كي لا
+  // يُخلَّد. وقد أُصلح في نفس الموجة (`estimateSessionMinutes` صار غلافًا على
+  // `estimateDurationMin`)، فسقط الحارس بالضبط كما صُمّم — فحُذف الاستثناء.
+  // والصيغة الآن مطلقة: **صفر** نموذج مدّة خارج السلطة.
+  check(`نموذج المدّة واحد بلا استثناء: لا حساب مدّة خارج ${DURATION_AUTHORITY} (${sources.length} ملف مفحوص)`, stray.length === 0)
 
   const consumers = sources.filter((s) => /\bestimateDurationMin\s*\(/.test(s.text) && s.rel !== DURATION_AUTHORITY)
   const importsAuthority = consumers.every((s) => /from '@\/lib\/workoutStats'/.test(s.text))

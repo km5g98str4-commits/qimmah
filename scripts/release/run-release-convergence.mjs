@@ -22,7 +22,7 @@ import { execSync } from 'node:child_process'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import * as playwright from 'playwright'
-import { ROOT, buildArtifact, verifyArtifact, serveArtifact, waitForServer, engineAvailable } from './lib/harness.mjs'
+import { ROOT, buildArtifact, verifyArtifact, serveArtifact, waitForServer, engineAvailable, launchOptionsFor } from './lib/harness.mjs'
 import { captureGuestSeed } from './lib/drive.mjs'
 
 const args = process.argv.slice(2)
@@ -120,13 +120,7 @@ const results = []
 let seed = null
 
 for (const engine of engines) {
-  // نفس علاج `e2e/lib/engine.mjs`: الحاويات تحمل Chromium بنسخة بناء تخالف ما
-  // تطلبه حزمة playwright، فيفشل الإطلاق ولو كان في الجهاز متصفّح صالح. هذا
-  // المشغّل يختار محرّكه بالاسم فلا يمرّ بالوحدة المشتركة — فيقرأ العلَم بنفسه.
-  const launchOpts = engine.name === 'chromium' && process.env.PW_CHROMIUM
-    ? { executablePath: process.env.PW_CHROMIUM }
-    : {}
-  const browser = await playwright[engine.name].launch(launchOpts)
+  const browser = await playwright[engine.name].launch(launchOptionsFor(engine.name))
   try {
     for (const suite of active) {
       if (suite.kind === 'static' && engine.name !== engines[0].name) continue

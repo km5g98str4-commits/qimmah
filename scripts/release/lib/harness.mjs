@@ -183,9 +183,26 @@ export async function waitForServer(url, ms = 40000) {
  * VALIDATION_DOWNGRADE = WEBKIT_UNAVAILABLE rather than silently using Chromium
  * and calling it an iPhone result.
  */
+/**
+ * خيارات الإطلاق لمحرّك بعينه — **مصدر واحد** يستعمله الفحص والتشغيل معًا.
+ *
+ * الحاويات تحمل Chromium بنسخة بناء تخالف ما تطلبه حزمة playwright، فيفشل
+ * `launch()` ولو كان في الجهاز متصفّح صالح. و`e2e/lib/engine.mjs` يعالجها بـ
+ * `PW_CHROMIUM`، لكن هذا المشغّل يختار محرّكه بالاسم فلا يمرّ بتلك الوحدة.
+ *
+ * ولا بدّ أن يقرأ **الفحص** العلَم كما يقرأه **التشغيل**: فحصٌ يطلق بلا العلَم
+ * يحكم «المحرّك غير متاح» ثم يرفض المشغّل إصدار حكم — وهو رفض صحيح، لكنّ
+ * سببه خطأ. فصار الاثنان من هنا.
+ */
+export function launchOptionsFor(name) {
+  return name === 'chromium' && process.env.PW_CHROMIUM
+    ? { executablePath: process.env.PW_CHROMIUM }
+    : {}
+}
+
 export async function engineAvailable(playwright, name) {
   try {
-    const b = await playwright[name].launch()
+    const b = await playwright[name].launch(launchOptionsFor(name))
     const v = b.version()
     await b.close()
     return { available: true, version: v }

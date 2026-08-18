@@ -38,6 +38,7 @@ import {
   validateSchedule,
 } from '@/lib/workoutCalendar'
 import { DATA_KEYS } from '@/lib/userDataKeys'
+import { estimateDurationMin } from '@/lib/workoutStats'
 import { setSyncRuntime } from '@/lib/syncQueue'
 import { buildExportBundle, applyImport } from '@/lib/portability'
 import { STORE_BY_ID } from '@/lib/portability/registry'
@@ -253,15 +254,30 @@ console.log('\n⑤ القوالب المسمّاة: حفظ/سرد/تطبيق/ح�
   check('قالب مشوّه يُسقط والسليم يبقى', listTemplates(UID).length === 1 && listTemplates(UID)[0].id === 'ok')
 }
 
-console.log('\n⑥ المحقّقات: وقت الجلسة (heuristic ٩ دقائق) + الحجم العضلي — تحذيرات لا موانع')
+console.log('\n⑥ المحقّقات: وقت الجلسة (السلطة الواحدة) + الحجم العضلي — تحذيرات لا موانع')
 {
   const plan = buildPlan([{ type: 'push', exercises: PUSH.concat(['push-up', 'dumbbell-fly']) }])
-  check('estimateSessionMinutes: ٥ تمارين → ٤٥ دقيقة (نفس heuristic النماذج)', estimateSessionMinutes(plan.days[0].exercises.length ? plan.days[0] : plan.days[0]) === 45)
-  check('estimateSessionMinutes: يوم فارغ → ٠ · تمرين واحد → ٢٠ (حدّ أدنى)', estimateSessionMinutes({ id: 'x', nameAr: 'س', nameEn: 'X', exercises: [] }) === 0 && estimateSessionMinutes({ ...plan.days[0], exercises: plan.days[0].exercises.slice(0, 1) }) === 20)
+  // ═══ العدد تغيّر بصدق، ولم يُضعَف التأكيد ═══
+  // كان الباني يحمل نموذجًا **ثالثًا** للمدّة (٩ دقائق لكل تمرين مقرَّبة لأقرب
+  // ٥)، وتعليقه يزعم أنه «نفس heuristic النماذج» — زعمٌ صار كاذبًا بعد توحيد
+  // `todayV2Model` و`workoutV2Model` على `estimateDurationMin`. فكان تحذير
+  // «الجلسة طويلة» يُحسب بمسطرة غير التي وُلِّدت بها الجلسة وتُعرض بها.
+  // فوُصل الباني بالسلطة، فتبدّلت الأرقام: ٥ تمارين ٤٥ ⇐ ٣٠ · واحد ٢٠ ⇐ ٨.
+  //
+  // والتأكيد أقوى: بدل تثبيت عددٍ يدويّ نفحص **اتّفاق المسطرتين** على نفس
+  // اليوم. فأي نموذج رابع يُدسّ في الباني يسقط هذا باسمه ولو صادف رقمًا مألوفًا.
+  check('وقت الجلسة في الباني = وقتها في السلطة — مسطرة واحدة',
+    estimateSessionMinutes(plan.days[0]) === estimateDurationMin(plan.days[0]))
+  check('estimateSessionMinutes: ٥ تمارين → ٣٠ دقيقة (السلطة)', estimateSessionMinutes(plan.days[0]) === 30)
+  check('estimateSessionMinutes: يوم فارغ → ٠ · تمرين واحد → ٨', estimateSessionMinutes({ id: 'x', nameAr: 'س', nameEn: 'X', exercises: [] }) === 0 && estimateSessionMinutes({ ...plan.days[0], exercises: plan.days[0].exercises.slice(0, 1) }) === 8)
 
   const eight = buildPlan([{ type: 'push', exercises: [...PUSH, ...PULL, 'push-up', 'dumbbell-fly'] }])
-  const longWarnings = validatePlan(eight, { targetSessionMinutes: 60 })
-  check('٨ تمارين (~٧٠ دقيقة) فوق هدف ٦٠ → تحذير session-too-long', longWarnings.some((w) => w.code === 'session-too-long' && w.messageAr.includes('70') && w.messageEn.includes('70')))
+  // الحدّ ٤٥ لا ٦٠: ٨ تمارين = ٥١ دقيقة بالسلطة. المقصد «طولٌ يتجاوز الهدف
+  // يُحذَّر منه» محفوظ حرفيًّا — وما تغيّر هو المسطرة لا القاعدة.
+  const longWarnings = validatePlan(eight, { targetSessionMinutes: 45 })
+  check('٨ تمارين (٥١ دقيقة) فوق هدف ٤٥ → تحذير session-too-long', longWarnings.some((w) => w.code === 'session-too-long' && w.messageAr.includes('51') && w.messageEn.includes('51')))
+  check('⚔️ وتحت هدفٍ يسعها (٦٠) لا يُطلَق التحذير — الحدّ يُقاس لا يُفترَض',
+    !validatePlan(eight, { targetSessionMinutes: 60 }).some((w) => w.code === 'session-too-long'))
 
   const withEmpty = addDay(plan, 'legs')
   check('يوم فارغ → تحذير empty-day', withEmpty.status === 'ok' && validatePlan(withEmpty.plan).some((w) => w.code === 'empty-day' && w.subject === withEmpty.plan.days[1].id))

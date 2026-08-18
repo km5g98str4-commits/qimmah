@@ -15,6 +15,7 @@ import type { TrainingLevel } from '@/types/profile'
 import { getExercise } from '@/data/exercises'
 import { muscleGroups } from '@/data/muscleGroups'
 import { createPlanExercise } from '@/lib/workoutPlan'
+import { estimateDurationMin } from '@/lib/workoutStats'
 import {
   loadWeeklySchedule,
   namedSplitForDays,
@@ -490,12 +491,20 @@ export {
 // ── 6) المحقّقات (تحذيرات لا موانع) ───────────────────────────────────────────
 
 /**
- * تقدير وقت الجلسة بالدقائق — **نفس heuristic** todayV2Model/workoutV2Model:
- * ٩ دقائق لكل تمرين، تقريب لأقرب ٥، حدّ أدنى ٢٠ (٠ ليوم فارغ).
+ * تقدير وقت الجلسة بالدقائق — **غلافٌ على السلطة الواحدة** لا نموذج ثالث.
+ *
+ * ═══ ما كان هنا ═══
+ * `Math.max(20, Math.round((n * 9) / 5) * 5)` — تسع دقائق لكل تمرين مقرَّبة
+ * لأقرب خمس، وتعليقٌ يزعم أنه «نفس heuristic todayV2Model/workoutV2Model».
+ * وقد صار الزعم **كاذبًا** بعد أن وُحِّد النموذجان على `estimateDurationMin`
+ * (مجموعات × عمل + راحة) في [SOVEREIGN-003]/D2.
+ *
+ * وأثره ليس تجميليًّا: تحذير `session-too-long` كان يُحسب بنموذج **غير** الذي
+ * وُلِّدت به الجلسة وتُعرض به — فيحذّر المستخدم من طول لا تراه بقيّة الشاشات،
+ * أو يسكت عن طولٍ تراه. حذفُ العدد لا يكفي؛ المطلوب أن يقيس الجميع بمسطرة واحدة.
  */
 export function estimateSessionMinutes(day: PlanDay): number {
-  const n = day.exercises.length
-  return n > 0 ? Math.max(20, Math.round((n * 9) / 5) * 5) : 0
+  return day.exercises.length > 0 ? estimateDurationMin(day) : 0
 }
 
 export interface PlanWarning {
