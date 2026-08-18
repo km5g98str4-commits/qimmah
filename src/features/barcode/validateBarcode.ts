@@ -2,6 +2,7 @@
 // يقبل الأرقام العربية الشرقية (٠-٩ و ۰-۹) وينسّقها لأرقام ASCII قبل الفحص — دعم ثنائي اللغة حقيقي.
 
 import { lookupBarcode, type LookupResult, type OffLookupDeps } from './openFoodFacts'
+import { foldDigits } from '@/lib/numberFormat'
 
 export type ManualBarcodeFormat = 'ean_13' | 'upc_a' | 'ean_8' | 'upc_e'
 
@@ -18,22 +19,18 @@ export type BarcodeValidation =
     }
   | { ok: false; reason: BarcodeValidationFailure }
 
-const ARABIC_INDIC_ZERO = 0x0660 // ٠
-const EXTENDED_ARABIC_INDIC_ZERO = 0x06f0 // ۰
-
-/** يحذف الفواصل الشائعة (مسافات/شرطات) ويحوّل الأرقام العربية الشرقية إلى ASCII. */
+/**
+ * يحذف الفواصل الشائعة (مسافات/شرطات) ويحوّل الأرقام العربية الشرقية إلى ASCII.
+ *
+ * الطيّ نفسه **مفوَّض إلى `foldDigits`** — الطبقة الرقمية القانونية الوحيدة.
+ * كانت هنا نسخة ثالثة قريبة الشبه لا تعرف `٫` ولا `٬`، وهما ما يُصدره
+ * `formatNumber` نفسه؛ فبقيت النسخ تشيخ متفرّقة.
+ */
 export function normalizeDigits(input: string): string {
   let out = ''
-  for (const ch of input.trim()) {
+  for (const ch of foldDigits(input.trim())) {
     if (/\s/.test(ch) || ch === '-') continue
-    const code = ch.codePointAt(0) ?? 0
-    if (code >= ARABIC_INDIC_ZERO && code <= ARABIC_INDIC_ZERO + 9) {
-      out += String(code - ARABIC_INDIC_ZERO)
-    } else if (code >= EXTENDED_ARABIC_INDIC_ZERO && code <= EXTENDED_ARABIC_INDIC_ZERO + 9) {
-      out += String(code - EXTENDED_ARABIC_INDIC_ZERO)
-    } else {
-      out += ch
-    }
+    out += ch
   }
   return out
 }

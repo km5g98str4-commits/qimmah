@@ -14,6 +14,7 @@ import {
   weightRangeCopy,
   type RangeCopy,
 } from '@/config/profileDomain'
+import { foldDigits } from '@/lib/numberFormat'
 
 // حدود إدخال واقعية + رسائل ودّية — **كلاهما من `config/profileDomain`**.
 //
@@ -106,6 +107,11 @@ export function inRange(n: number, min: number, max: number): boolean {
  * يعقّم نص إدخال رقمي أثناء الكتابة: يزيل الأحرف غير الرقمية والإشارة السالبة،
  * ويسمح بنقطة عشرية واحدة (إن decimal)، ويحصر الحدّ الأعلى فقط (لا الأدنى حتى لا يقفز أثناء الكتابة).
  * يُبقي السلسلة الفارغة كما هي ليتمكّن المستخدم من المسح.
+ *
+ * ⚠️ **الطيّ أولًا، قبل أي ترشيح ASCII.** كانت الدالة ترشّح `[^0-9]` مباشرةً
+ * فتحذف الأرقام العربية بدل أن ترفضها — يكتب المستخدم «٢٤» فيختفي ما يكتبه،
+ * و«78٫5» تصير «785» (خطأ ×١٠ صامت). والحقل كان يعجز عن قراءة مخرجات التطبيق
+ * نفسه: `sanitizeNumericInput(formatNumber(250,'ar'))` كانت `""`.
  */
 export function sanitizeNumericInput(
   raw: string,
@@ -113,7 +119,8 @@ export function sanitizeNumericInput(
 ): string {
   const { max, decimal = false } = opts
   if (raw === '') return ''
-  let cleaned = raw.replace(decimal ? /[^0-9.]/g : /[^0-9]/g, '')
+  const folded = foldDigits(raw)
+  let cleaned = folded.replace(decimal ? /[^0-9.]/g : /[^0-9]/g, '')
   if (decimal) {
     const parts = cleaned.split('.')
     cleaned = parts.shift() ?? ''
@@ -126,13 +133,49 @@ export function sanitizeNumericInput(
   return cleaned
 }
 
-/** يحوّل نص/رقم إدخال إلى رقم آمن للتخزين: منتهٍ، غير سالب، ومحصور ضمن النطاق. */
+/**
+ * يحوّل نص/رقم إدخال إلى رقم آمن للتخزين: منتهٍ، غير سالب، ومحصور ضمن النطاق.
+ *
+ * ⚠️ **الطيّ أولًا.** `Number()` تتبع نحو ECMAScript فلا تقبل إلا `0-9` — فكانت
+ * `parseSafeNumber('٢٤',{min:13})` تعطي **`13`**: بالغ يُعاد تصنيفه قاصرًا بصمت
+ * فتُقفل أهداف التنشيف والتضخيم. القيمة الراجعة **رقم معقول لا خطأ**، وهذا
+ * أخطر من الرفض.
+ */
 export function parseSafeNumber(
   raw: string | number,
   opts: { min?: number; max?: number; fallback?: number } = {},
 ): number {
   const { min = 0, max = Number.MAX_SAFE_INTEGER, fallback = min } = opts
-  const n = typeof raw === 'number' ? raw : Number(raw)
+  const n = typeof raw === 'number' ? raw : Number(foldDigits(raw).trim())
   if (!Number.isFinite(n)) return fallback
   return clamp(n, min, max)
+}
+
+/**
+ * تحليل صادق لحدّ الإدخال: يفرّق بين «فارغ» و«غير مقروء» و«خارج النطاق»
+ * و«صالح» — بدل ابتلاع الثلاثة الأولى في رقم معقول.
+ *
+ * تستعملها الحقول لتُظهر رسالة تقول **ما الخطأ**، فلا يُمسح ما كتبه المستخدم
+ * بصمت ولا يُستبدل برقم لم يكتبه.
+ */
+export type NumericParse =
+  | { status: 'empty' }
+  | { status: 'unreadable'; raw: string }
+  | { status: 'out-of-range'; value: number; min?: number; max?: number }
+  | { status: 'ok'; value: number }
+
+export function parseNumericField(
+  raw: string,
+  opts: { min?: number; max?: number; integer?: boolean } = {},
+): NumericParse {
+  const { min, max, integer = false } = opts
+  const folded = foldDigits(raw).trim()
+  if (folded === '') return { status: 'empty' }
+  const n = Number(folded)
+  if (!Number.isFinite(n)) return { status: 'unreadable', raw }
+  if (integer && !Number.isInteger(n)) return { status: 'unreadable', raw }
+  if ((min !== undefined && n < min) || (max !== undefined && n > max)) {
+    return { status: 'out-of-range', value: n, min, max }
+  }
+  return { status: 'ok', value: n }
 }
