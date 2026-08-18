@@ -1,3 +1,13 @@
+// CANONICAL-SURFACE-LOCK — وحدة خارج الرسم. [QIM-V1-015]
+//
+// **المالك الحيّ لتصدير البيانات هو `src/lib/portability/`** (يستهلكه
+// `DataManagementPanel` من الإعدادات والملف الشخصي). أما هذا الملفّ فلا
+// مستدعٍ منتجيّ له إطلاقًا؛ يستهلكه `scripts/data-portability-proof.ts` وحده.
+//
+// **لا تُصلح عطل تصدير هنا** — الإصلاح لن يصل مستخدمًا. اقرأ `canonical-surfaces.mjs`
+// أولًا؛ ويحرس هذا الإعلانَ `test:canonical-surface`.
+// الحذف قرار مستقلّ (`QIM-V1-020`)، ولا يقع في V1.
+
 import { loadActiveSession } from '@/lib/activeSession'
 import { loadWorkoutSummary } from '@/lib/workoutSummary'
 import { getLastUser } from '@/lib/accountScope'

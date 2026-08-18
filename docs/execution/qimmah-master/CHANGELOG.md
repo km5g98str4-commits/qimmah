@@ -214,3 +214,30 @@ Delivered instead: the separation is now **enforced**, not merely written — `t
 > session reading the old wording would have wired the consents together believing it was closing a
 > gap — and the only thing standing in the way would have been that session's own care. Now the gate
 > stands in the way instead.
+
+---
+
+## 2026-08-18 — `QIM-V1-003` and `QIM-V1-015` DONE
+
+**`QIM-V1-015`** was delivered through the mechanism that already existed rather than the one the
+plan described. `scripts/canonical-surfaces.mjs` (`CANONICAL-SURFACE-LOCK`) already declared the
+three doubled *views* and already required each twin to carry a self-declaring banner — so the
+plan's header-comment DoD was partly redundant. The real gap was **modules**, not surfaces:
+`UNROUTED_MODULES` now declares `src/lib/dataPortability.ts` and the three `src/lib/coach/*` files,
+and `test:canonical-surface` asserts each is outside the built graph and self-declaring
+(33 checks; removing one banner fails it).
+
+`src/lib/personalization/*` is deliberately excluded: `experience.ts` and `types.ts` are live, so
+listing the folder would be a lie. Its state stays in `04-FEATURE-MAP.md` (F-GAP-14).
+
+Stale pointers corrected: `CLAUDE.md`/`AGENTS.md` §11 named **`WorkoutV2`** as the file whose
+save-honesty chain must not be touched — it is an unrouted twin no user reaches; the live chain is
+`WorkoutView.tsx:256-270`. That single stale word already cost one review a misclassified P1.
+Supersession banners added to the five `STATE.md` documents, `docs/RELEASE-RUNBOOK.md`,
+`docs/FOUNDER-QA-HANDOFF.md`, and `ROADMAP.md` — the last because a cold-start test showed a new
+session could read it and rebuild features that already ship.
+
+**Not done, and named:** `README.md` still describes an older generation of the app (a
+`StartView → SetupView → DemoView` flow, "60 nutrition components", and «صفحتي» phrasing the
+copywriting rules forbid). It is the repository's front door and deserves a rewrite rather than a
+banner. Recorded as `QIM-V1-022`, POST_LAUNCH — it misleads agents, not users.

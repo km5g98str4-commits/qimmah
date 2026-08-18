@@ -1,5 +1,18 @@
 # FINAL-INTEGRATION-STATE
 
+> ⚠️ **وثيقة متجاوَزة — لا تُتَّخذ مصدرًا للحالة.** [QIM-V1-015]
+>
+> حالة المشروع الجارية تعيش في **[`docs/execution/qimmah-master/`](../qimmah-master/README.md)**:
+> الأرض في `00-GROUND.md` · القرارات في `01-DECISIONS.md` · الخطة في `06-MASTER-PLAN.md` ·
+> والحالة في `07-STATE.md` وحده.
+>
+> هذا الملفّ **سجلّ تاريخي** لموجته: يُقرأ لفهم كيف وصلنا، لا لمعرفة أين نحن. وما يخالف
+> لوحة التحكّم فيه **متجاوَز**، ما لم يُثبت الكودُ الحاليّ عكس ذلك.
+>
+> *وسبب وجود هذه اللافتة:* اختبار إقلاع بارد وجد **خمسة** ملفّات `STATE.md` واثقة النبرة،
+> يُعيدها `find` قبل لوحة التحكّم، ولا واحد منها يقول إنه متجاوَز.
+
+
 > Integration Command Center — Phase II closure, release convergence, founder handoff.
 > Authority: coordinator. Read-only monitoring opened 2026-08-15 ~01:40 UTC.
 > **Git is the source of truth. Chat claims and lane self-reports are inputs, not evidence.**

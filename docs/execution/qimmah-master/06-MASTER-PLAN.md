@@ -203,7 +203,7 @@ is answered. Everything else is parallel — nothing else waits on a human.
   `test:storage-honesty` grows a case per site with a counter-proof that fails **by name**.
 
 ---
-**QIM-V1-015 — Stamp the orphans; fix the stale charter clause** · `RELEASE` · S · HIGH
+**QIM-V1-015 — Stamp the orphans; fix the stale charter clause** · `RELEASE` · S · ✅ **DONE**
 - **problem:** two implementations of the same behaviour make every future audit ambiguous — this
   audit already had to downgrade a "P1 data-loss bug" after discovering the file was an orphan.
 - **DoD:** a header line on each orphan naming its live owner and its `ARCHIVE` status
@@ -211,6 +211,19 @@ is answered. Everything else is parallel — nothing else waits on a human.
   `CLAUDE.md §11`'s "the save-honesty chain in `WorkoutV2` must not be touched" corrected to name
   `WorkoutView`; the five superseded `STATE.md` files pointed at this control plane.
   **No file is deleted in V1** — deletion is one clustered post-launch PR after a dynamic-reference grep.
+- **outcome — done through the existing guarded registry, not through loose comments.** A
+  `CANONICAL-SURFACE-LOCK` registry already existed for the three doubled *views* and already
+  required each twin to declare itself; the plan's header-comment DoD was partly redundant.
+  What was missing was **modules**: `UNROUTED_MODULES` now declares `src/lib/dataPortability.ts`
+  (live owner `src/lib/portability/`) and the three `src/lib/coach/*` files, the guard asserts each
+  is outside the built module graph **and** self-declaring, and each file carries the banner.
+  `src/lib/personalization/*` is deliberately **not** listed: two of its files are live, so listing
+  the folder would be a lie — its state stays in `04-FEATURE-MAP.md` (F-GAP-14).
+  Red reproduced: removing one banner fails the guard, exit 1.
+- **stale pointers corrected:** `CLAUDE.md`/`AGENTS.md` §11 no longer name `WorkoutV2` as the
+  save-honesty owner (the live one is `WorkoutView.tsx:256-270`); the five superseded `STATE.md`
+  files, `docs/RELEASE-RUNBOOK.md`, `docs/FOUNDER-QA-HANDOFF.md` and `ROADMAP.md` now open with a
+  supersession banner pointing at this control plane.
 
 ---
 **QIM-V1-008 — Browser matrix on the release candidate** · `GATE` · S · MEDIUM
@@ -236,6 +249,7 @@ is answered. Everything else is parallel — nothing else waits on a human.
 | **QIM-V1-017** | Register the ~15 unregistered storage keys | the prefix sweep already prevents cross-account leakage |
 | **QIM-V1-019** | Explain plan changes on regeneration, not only in the customizer (CLM-023) | DEC-013.3 forbids *silent automatic* edits; a user re-running setup is neither |
 | **QIM-V1-020** | Physically delete the archived orphans, in one clustered PR | history keeps everything; one review beats ten |
+| **QIM-V1-022** | Rewrite `README.md` — it describes an older app generation (`StartView → SetupView → DemoView`, "60 nutrition components") and uses the «صفحتي» phrasing the copywriting rules forbid | it misleads **agents**, not users; a banner is not enough for the repo's front door |
 | **QIM-V1-021** | Fix the three wrong migration numbers in file **headers** (`20260816120001` appears three times) and the stale "runs LAST by filename" invariant in `20260726120005` | latent, not live: filenames are unique and correctly ordered |
 
 ### NOT_A_BUG — recorded so they are not re-litigated

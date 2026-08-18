@@ -1,5 +1,11 @@
 # Release Runbook — Qimmah (iOS + web)
 
+> ⚠️ **متجاوَزة لأغراض V1.** [QIM-V1-015]
+> كُتيّب إصدار V1 هو **[`docs/execution/qimmah-master/09-RELEASE-RUNBOOK.md`](./execution/qimmah-master/09-RELEASE-RUNBOOK.md)**.
+> هذا الملفّ يصف نموذج فروع `integration/waveN` **لم يعد قائمًا**، ومسارًا iOS-أوّلًا
+> **مؤجَّلًا بـDEC-014**. يبقى مرجعًا لخطوات iOS حين يحين وقتها.
+
+
 End-to-end release flow with **rollback points (RP-n)** at each risk step. This is
 the operational runbook; the pass/fail gate list lives in `docs/release-checklist.md`
 and iOS signing in `docs/ios-setup.md`. Traces to `integration/wave3`.

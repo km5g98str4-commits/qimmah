@@ -10,7 +10,7 @@ import { readFileSync } from 'node:fs'
 import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import assert from 'node:assert/strict'
-import { SURFACES, WRAPPED, UNROUTED_SECTIONS, TREATMENTS } from './canonical-surfaces.mjs'
+import { SURFACES, WRAPPED, UNROUTED_SECTIONS, UNROUTED_MODULES, TREATMENTS } from './canonical-surfaces.mjs'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const read = (p) => readFileSync(resolve(root, p), 'utf8')
@@ -101,6 +101,14 @@ for (const s of SURFACES) {
     check(`${t} يعلن نفسه غير موجَّه في أول ٤٠ سطرًا`, read(t).split('\n').slice(0, 40).join('\n').includes(BANNER))
   }
 }
+
+console.log('\n⑥-ب وحدات خارج الرسم تعلن نفسها — [QIM-V1-015]')
+for (const m of UNROUTED_MODULES) {
+  check(`${m.path} خارج الرسم (لا يُشحن)`, !LIVE.has(m.path))
+  check(`${m.path} يعلن نفسه في أول ٤٠ سطرًا`, read(m.path).split('\n').slice(0, 40).join('\n').includes(BANNER))
+}
+// حارس للحارس: قائمة فارغة تجعل الفحص أعلاه بلا أثر.
+check('سجلّ الوحدات غير فارغ', UNROUTED_MODULES.length >= 3)
 
 console.log('\n⑦ محاكاة الالتفاف')
 // (أ) توأم يُوجَّه دون تحديث السجلّ ⇒ يجب أن يسقط.

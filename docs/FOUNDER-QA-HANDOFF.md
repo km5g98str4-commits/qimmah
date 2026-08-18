@@ -1,5 +1,12 @@
 # Qimmah — Founder QA Handoff
 
+> ⚠️ **وثيقة متجاوَزة.** [QIM-V1-015]
+> تصف مكدّس التزامات قديمًا (`9671c0f` وما قبله) لم يعد له وجود على الجبهة.
+> الحالة الجارية وقائمة ما ينتظر المؤسس في
+> **[`docs/execution/qimmah-master/`](./execution/qimmah-master/README.md)**
+> (`07-STATE.md` و`10-FOUNDER-ACTIONS.md`).
+
+
 What to test manually before Codex review. Everything below is **local only** —
 nothing is pushed, merged, or deployed. Codex review is **on hold** until you ask.
 
