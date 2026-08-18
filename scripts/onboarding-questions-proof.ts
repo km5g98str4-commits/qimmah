@@ -70,7 +70,7 @@ const firstWeek = (over: Partial<V2OnboardingChoices> = {}) => {
   return buildPlanRationale(profile, plan).decisions.find((decision) => decision.area === 'startingLoad')?.outcome.value
 }
 
-console.log('\n═══ 1) سجلّ ثابت: 18 بالضبط، وكل معرّف مربوط بالواجهة مرة ═══')
+console.log('\n═══ 1) سجلّ ثابت: 20 بالضبط، وكل معرّف مربوط بالواجهة مرة ═══')
 // ═══ العدد تغيّر بصدق، ولم يُحذف التأكيد ═══
 // ١٨ ← ٢٠: أُضيف `profile.display_name` (الاسم) و`equipment.available`
 // (الأدوات). التأكيد يبقى رقمًا
@@ -92,7 +92,7 @@ check('totalMonths مطابق', trainingHistoryStrings.en.totalMonths.map((x) =>
 check('lastTrained مطابق', trainingHistoryStrings.en.lastTrained.map((x) => x.value).join() === canonical('lastTrained').join())
 check('consistency مطابق', trainingHistoryStrings.en.consistency.map((x) => x.value).join() === canonical('consistency').join())
 
-console.log('\n═══ 3) نسختا النص كاملتان لكل واحد من الأسئلة الـ18 ═══')
+console.log('\n═══ 3) نسختا النص كاملتان لكل واحد من الأسئلة الـ20 ═══')
 const copyById = (lang: 'ar' | 'en'): Record<(typeof ONBOARDING_QUESTION_IDS)[number], string> => {
   const body = bodyStepStrings[lang]
   const intent = onboardingIntentStrings[lang]

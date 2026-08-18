@@ -65,7 +65,19 @@ check('العمر وصل', a.age === 30)
 check('الجنس وصل', a.sex === 'male')
 check('الطول وصل', a.heightCm === 180)
 check('الوزن وصل', a.weightKg === 90)
-check('وزن الهدف مشتقّ من الوزن المُجاب لا الافتراضي', a.targetWeightKg === 81)
+// ═══ العدد تغيّر بصدق، ولم يُضعَف التأكيد ═══
+// ٨١ ← ٨٣: كان في المستودع **معاملان متنازعان** لنفس الاشتقاق — `×0.9` في
+// `onboardingV2Adapter` و`×0.92` في `planDerive` — وشاشة التسليم ترسم الثاني.
+// فوحّدت [SOVEREIGN-003] السلطة على `planDerive` وحذفت المعامل المكرّر، فصار
+// ٩٠ × ٠٫٩٢ = ٨٢٫٨ ⇐ ٨٣. القيمة القديمة كانت تُثبّت المعامل **الذي لا يراه
+// المستخدم**.
+//
+// والمقصد محفوظ بل مشدود: لا يكفي أن يطابق الرقم، بل يجب أن **يتبع الوزن
+// المُجاب**. فوزنٌ آخر يعطي هدفًا آخر — وهو ما يسقط لو عاد افتراضي صامت.
+check('وزن الهدف مشتقّ من الوزن المُجاب لا الافتراضي', a.targetWeightKg === 83)
+const heavier = toAnswersFromV2({ ...base, ...body, weightKg: 110 })
+check('ووزن مُجاب آخر يعطي هدفًا آخر — لا ثابت مُقنَّع',
+  heavier.targetWeightKg !== a.targetWeightKg && heavier.targetWeightKg === 101)
 
 console.log('\n═══ 4) الحسم: مستخدمان مختلفان ⇒ طاقتان مختلفتان ═══')
 const p1 = toLegacyProfile(buildOnboardingProfile(toAnswersFromV2({ ...base, age: 22, gender: 'male', heightCm: 190, weightKg: 95 })))
