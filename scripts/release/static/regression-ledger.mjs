@@ -206,8 +206,17 @@ const LEDGER = [
         'src/views/NutritionView.tsx': 'nutrition tab (live route)',
         'src/views/WorkoutView.tsx': 'workout tab (live route)',
       }
-      const missing = Object.keys(liveOwners).filter((p) => !/formatNumber/.test(src(p)))
-      return [missing.length === 0, `live owners WITHOUT the central formatter: [${missing.join(', ')}]`]
+      // [SOVEREIGN-002] الحدّ المركزي **وحدتان** لا دالّة واحدة: `formatNumber`
+      // للأرقام المفردة، و`formatNumeralsIn` للنصّ المركَّب — وكلتاهما من
+      // `numberFormat.ts` وتشتقّان جدول الأرقام من مصدر واحد. كان الفحص يطلب
+      // الاسم الأول حرفيًا، فرسَب `TodayV2` وهو يستعمل الثانية عبر `loc()`:
+      // أي أنه كان يقيس **اسم الدالّة** لا **عبور الحدّ**.
+      // ولا يُوسَّع أكثر من ذلك: أي منسّق محلّي أو `toLocaleString` يبقى راسبًا.
+      const CENTRAL = /\b(formatNumber|formatNumeralsIn)\b/
+      const missing = Object.keys(liveOwners).filter((p) => !CENTRAL.test(src(p)))
+      // والتأكيد المضادّ: الفحص ليس فارغًا — ملف بلا أي منسّق يجب أن يرسب.
+      const controlFails = !CENTRAL.test('const x = String(n)')
+      return [missing.length === 0 && controlFails, `live owners WITHOUT the central formatter: [${missing.join(', ')}] · control-fails=${controlFails}`]
     },
   },
 
@@ -357,6 +366,50 @@ const LEDGER = [
       return [nut && wk, `twins declared in the canonical-surface registry: NutritionV2=${nut} WorkoutV2=${wk}`]
     },
     informational: true,
+  },
+
+  // ── [SOVEREIGN-002] الأربعة التي كانت موثَّقة بلا حارس ────────────────────
+  // كان السجلّ يوثّق ٣٦ عيبًا ويحرس ٣٢ — والفارق **يسقط الطقم بالتصميم**، وهو
+  // الصواب: عيب يُكتب ولا يُحرَس يشيخ بصمت. هذه أربعتها، كلٌّ بفحصه الحقيقي.
+  {
+    id: 'BUG-033', title: 'Cancelling the share sheet announced a success that never happened',
+    liveCoverage: 'test:e2e:settings-security (delivery outcomes)',
+    assert: () => {
+      const s = src('src/lib/dataPortability.ts')
+      const hasCancelled = /'cancelled'/.test(s)
+      const abortMapped = /AbortError/.test(s)
+      return [hasCancelled && abortMapped, `cancelled outcome=${hasCancelled} AbortError mapped=${abortMapped}`]
+    },
+  },
+  {
+    id: 'BUG-034', title: 'Two E2E races Chromium hid and WebKit exposed', status: 'RESOLVED',
+    liveCoverage: 'the browser matrix itself (webkit runs of p1/p3/p8)',
+    assert: () => {
+      // العطل كان في بنية الاختبار لا في المنتج: انتظارٌ ضمنيّ بدل شرط صريح.
+      const s = src('scripts/release/lib/drive.mjs')
+      const explicitWaits = /waitForFunction|waitForSelector|waitForLoadState/.test(s)
+      return [explicitWaits, `explicit waits present=${explicitWaits}`]
+    },
+  },
+  {
+    id: 'BUG-035', title: 'Touch-target assertion failed on floating-point representation',
+    liveCoverage: 'p8-responsive-matrix (44px targets across the viewport matrix)',
+    assert: () => {
+      const s = src('scripts/e2e/profile-reliability.mjs')
+      // العقد لم يُخفَّف: التسامح جزء من مئة البكسل — أصغر من أي بكسل جهاز.
+      const tolerant = /44\s*-\s*0?\.0\d|>=\s*43\.9\d|EPSILON|0\.01/.test(s)
+      return [tolerant, `sub-pixel tolerance present=${tolerant}`]
+    },
+  },
+  {
+    id: 'BUG-036', title: 'WebKit page crash under host memory pressure', status: 'DIAGNOSED', informational: true,
+    liveCoverage: 'environment — no code fix exists',
+    assert: () => {
+      // لا كود يُحرَس؛ المحروس أن **التشخيص ما زال مكتوبًا** فلا يُعاد اكتشافه.
+      const doc = src('docs/execution/qimmah-web-sovereign/BUGS.md')
+      const documented = /BUG-036/.test(doc) && /ذاكرة/.test(doc)
+      return [documented, `diagnosis still documented=${documented}`]
+    },
   },
 ]
 
