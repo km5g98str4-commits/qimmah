@@ -4,7 +4,7 @@ import { ProgressBar } from '@/components/ProgressBar'
 import { type FoodItem, type FoodSize } from '@/data/foodItems'
 import { getAppCatalog, isOffDerived } from '@/lib/food/catalog/appCatalog'
 import type { RankedHit } from '@/lib/food/catalog/rank'
-import { PACKAGED_CANDIDATE_LIMIT, mergeUnified, rankCurated } from '@/lib/food/unifiedSearch'
+import { mergeUnified, rankCurated, rankPackaged } from '@/lib/food/unifiedSearch'
 import { dataAttributionStrings } from '@/i18n/dict/dataAttribution'
 import { useNutritionToday, type MealSlot } from '@/lib/nutritionTracking'
 import { NUM_LIMITS, parseSafeNumber, sanitizeNumericInput } from '@/lib/validation'
@@ -86,6 +86,9 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
    * مؤجَّلون ٢٥٠ ملّي وغير متزامنين: المنسَّق يظهر فورًا والمعبّأ يلحق. وبلا
    * التأجيل يتحوّل كل حرف إلى استعلام، وهو ما تمنعه هذه الحزمة أصلًا.
    * تُحفظ **الرتبة** لا السجل المجرّد، لأن الدمج المرتَّب يحتاجها.
+   *
+   * **بلا `deepShards`**: الشرائح غير مرفوعة، ومسحها يعني ٤١ طلبًا يعود كلّها ٤٠٤.
+   * وصلها قرار نشر يسبقه رفعها — انظر `docs/execution/qimmah-sovereign-closure/FOOD-LONGTAIL-PLAN.md`.
    */
   const [packagedHits, setPackagedHits] = useState<RankedHit[]>([])
   useEffect(() => {
@@ -95,7 +98,7 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
     const timer = setTimeout(async () => {
       const cat = await getAppCatalog()
       if (!cat || !alive) return
-      const hits = await cat.searchRanked(q, { limit: PACKAGED_CANDIDATE_LIMIT })
+      const hits = await rankPackaged(cat, q)
       if (alive) setPackagedHits(hits)
     }, 250)
     return () => { alive = false; clearTimeout(timer) }

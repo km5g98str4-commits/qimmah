@@ -8,31 +8,34 @@
  *   • **المعبّأ** (الطقم الساخن، ٥٩٩ سجلًا) — قاعدة **باركود**: سلع مغلّفة بـGTIN.
  *     لا تحوي طبقًا مركّبًا واحدًا؛ أقرب ما فيها لـ«برجر» هو **خبز البرجر**.
  *
- * كان السطحان يُلصقان لصقًا: المنسَّق أولًا مقصوصًا عند ١٠، ثم المعبّأ تحته —
- * فيهبط تطابقٌ تامّ من المعبّأ تحت تضمينٍ ضعيف من المنسَّق، ويسقط منسَّقٌ قويّ خارج
- * العشرة بلا مقارنة. **الترتيب كان ترتيب المصدر لا ترتيب المطابقة.**
+ * وكانت شاشة التسجيل السريع تستدعي `catalog.search()` وحدها — أي **المعبّأ فقط**.
+ * فقياسًا على الجذع: «شاورما» ⇒ صفر · «كبسة» ⇒ صفر · «مندي» ⇒ صفر · «برجر» ⇒ ١
+ * (خبز برجر) · «بيتزا» ⇒ ١ (صلصة بيتزا). والبيانات الممتازة موجودة، غير موصولة.
+ * **عطل تكامل مصدر بيانات، لا نقص بيانات.**
  *
  * ═══ القاعدة الحاكمة ═══
  * الرتب من المصدرين تُسقَط على **سلّم واحد** (`strength`، الأصغر أفضل)، وعند
  * تكافؤ المعنى **يتقدّم المنسَّق**: من كتب «شاورما» يريد الساندويتش لا رغيفه.
  * تطابق الباركود التامّ وحده يعلو الجميع — فمسح الباركود يبقى كما هو.
  *
+ * ═══ مصدر واحد للدرجة، لا مرآة ═══
+ * قوّة الصنف المنسَّق تأتي من `searchFoodScored` في وحدة البيانات نفسها — **لا
+ * تُعاد حسابها هنا**. مرآةٌ للترتيب تتباعد عن أصلها بعد موجتين، والاتحاد يصير
+ * يخمّن ما حُسب أصلًا.
+ *
  * ═══ المصدر يبقى معلَنًا ═══
  * كل نتيجة تحمل `source`، ومعرّف المعبّأ يبقى ببادئة `off:` — فنسب ODbL يظهر حين
  * تظهر سجلات OFF **وحدها**، ولا يُنسب صنف قِمّة المنسَّق إلى مصدر لم يأتِ منه.
  *
  * ⚠️ **لا ادّعاء ذيل طويل هنا.** المعبّأ الحيّ اليوم ٥٩٩ سجلًا — الشرائح الأربعون
- * غير مخدومة (انظر رأس `catalog/catalog.ts`). هذه الوحدة توحّد ما هو **موجود**.
+ * غير مخدومة (انظر `catalog/catalog.ts` و`longTailAvailability`). هذه الوحدة
+ * توحّد ما هو **موجود**، ولا تعد بما ليس مرفوعًا.
  */
-import {
-  LOANWORD_SPELLINGS,
-  SCRIPT_TRANSLITERATIONS,
-  normalizeSearch,
-  searchFood,
-  type FoodItem,
-} from '@/data/foodItems'
+import { foodItems, searchFoodScored, type FoodItem } from '@/data/foodItems'
+import { normalizeProductKey } from '@/lib/text/foodNormalize'
 import { catalogProductToFoodItem } from './catalog/appCatalog'
 import { tierRank, type RankedHit } from './catalog/rank'
+import { queryVariants } from './queryVariants'
 import type { Catalog } from './catalog/catalog'
 
 export type FoodSource = 'curated' | 'packaged'
@@ -51,57 +54,6 @@ export const PACKAGED_CANDIDATE_LIMIT = 12
 export const DEFAULT_RESULT_LIMIT = 18
 
 /**
- * مرآة تطبيع `searchFood` — **مبنيّة من جدولَيها المُصدَّرين لا منسوخة عنهما**.
- *
- * السبب: الترتيب الموحَّد يحتاج **قوّة** مطابقة الصنف المنسَّق، و`searchFood` تحسبها
- * ثم تسقطها. إعادة الحساب هنا تفتح باب تباعد — فيُغلق بجدولين مصدرهما واحد،
- * **ويُحرَس** بتأكيد في `scripts/run-food-meal-search-proof.mjs` يثبت أن قوّتي
- * المرآة لا تتناقصان أبدًا عبر ترتيب `searchFood` نفسه (§4.2).
- */
-const replacementsFrom = (groups: readonly (readonly string[])[]): readonly (readonly [string, string])[] =>
-  groups
-    .flatMap(([canonical, ...variants]) =>
-      variants.map((v) => [normalizeSearch(v), normalizeSearch(canonical ?? '')] as const),
-    )
-    .sort((a, b) => b[0].length - a[0].length)
-
-const LOANWORD_REPLACEMENTS = replacementsFrom(LOANWORD_SPELLINGS)
-const TRANSLITERATION_REPLACEMENTS = replacementsFrom(SCRIPT_TRANSLITERATIONS)
-
-const applyReplacements = (text: string, pairs: readonly (readonly [string, string])[]): string => {
-  let out = text
-  for (const [variant, canonical] of pairs) {
-    if (out.includes(variant)) out = out.split(variant).join(canonical)
-  }
-  return out
-}
-
-/** التطبيع الكامل للبحث: عربي عام ← مقابلات دخيلة ← نقل صوتي — بترتيب `searchFood`. */
-export function canonicalizeForSearch(text: string): string {
-  return applyReplacements(applyReplacements(normalizeSearch(text), LOANWORD_REPLACEMENTS), TRANSLITERATION_REPLACEMENTS)
-}
-
-/**
- * درجة الصنف المنسَّق مقابل استعلام **مُطبَّع مسبقًا** — نفس سلّم `searchFood`:
- * ٠ تطابق عربي · ١ بادئة عربية · ٢ تضمين عربي · ٣ بادئة إنجليزية · ٤ تضمين
- * إنجليزي · ٥ كلمة مفتاحية بادئة · ٦ كلمة مفتاحية متضمَّنة. و`null` لا مطابقة.
- */
-export function curatedScore(item: FoodItem, canonicalQuery: string): number | null {
-  if (!canonicalQuery) return null
-  const ar = canonicalizeForSearch(item.nameAr)
-  const en = canonicalizeForSearch(item.nameEn)
-  const kws = (item.keywords ?? []).map((k) => canonicalizeForSearch(k))
-  if (ar === canonicalQuery) return 0
-  if (ar.startsWith(canonicalQuery)) return 1
-  if (ar.includes(canonicalQuery)) return 2
-  if (en.startsWith(canonicalQuery)) return 3
-  if (en.includes(canonicalQuery)) return 4
-  if (kws.some((k) => k === canonicalQuery || k.startsWith(canonicalQuery))) return 5
-  if (kws.some((k) => k.includes(canonicalQuery))) return 6
-  return null
-}
-
-/**
  * السلّم الموحَّد — **متشابكان لا متتاليان**، والمنسَّق يسبق نظيره في المعنى:
  *
  * | القوّة | من | ماذا |
@@ -110,25 +62,77 @@ export function curatedScore(item: FoodItem, canonicalQuery: string): number | n
  * | ١ / ٢ | منسَّق / معبّأ | اسم مطابق تمامًا |
  * | ٣ / ٤ | منسَّق / معبّأ | بادئة اسم |
  * | ٥ / ٦ | منسَّق / معبّأ | تضمين في الاسم |
- * | ٧ / ٨ | منسَّق / معبّأ | بادئة إنجليزية / بادئة رمز |
- * | ٩ · ١١ · ١٣ | منسَّق | تضمين إنجليزي · كلمة مفتاحية بادئة · متضمَّنة |
+ * | ٧ | منسَّق | بادئة الاسم الإنجليزي |
+ * | ٨ | معبّأ | بادئة رمز GTIN |
+ * | ٩ · ١١ · ١٣ | منسَّق | تضمين إنجليزي · كلمة مفتاحية بادئة · كلمة مفتاحية متضمَّنة |
  * | ١٢ | معبّأ | مطابقة علامة تجارية |
+ *
+ * **الأثر المقصود، حرفيًا:** «برجر» ⇒ «برجر لحم» المنسَّق بادئةٌ ⇒ قوّة ٣، بينما
+ * «خبز البرجر بالسمسم» المعبّأ تضمينٌ ⇒ قوّة ٦. فالساندويتش يعلو الرغيف — بالبنية
+ * لا بالمصادفة.
  */
 const CURATED_STRENGTH = [1, 3, 5, 7, 9, 11, 13] as const
 const PACKAGED_STRENGTH = [0, 2, 4, 8, 6, 12] as const
 
-/** مرشّحو المصدر المنسَّق مرتّبين — **متزامن**، فلا ينتظر المستخدم شبكة ليرى أكله. */
+/** أضعف قوّة ممكنة — تُستعمل حين تخرج درجةٌ خارج السلّم (لا يقع عمليًا). */
+const WEAKEST_STRENGTH = 14
+
+/**
+ * ترتيب الصنف في `foodItems` — يكسر تعادل القوّة **حتميًّا**.
+ * يُبنى مرّة: الاتحاد قد يدمج نتائج عدّة صيغ للاستعلام، فيضيع الترتيب الأصلي الذي
+ * يضمنه `searchFoodScored` داخل الصيغة الواحدة.
+ */
+const CURATED_ORDER: ReadonlyMap<string, number> = new Map(foodItems.map((f, i) => [f.id, i]))
+
+/** مفتاح إزالة التكرار بين المصدرين — تطبيع واحد لا اثنان. */
+const dedupeKey = (item: FoodItem): string => normalizeProductKey(item.nameAr)
+
+/**
+ * مرشّحو المصدر المنسَّق مرتّبين — **متزامن**، فلا ينتظر المستخدم شبكة ليرى أكله.
+ *
+ * الاستعلام يُوسَّع إلى صيغه (طيّ عربي + مفرد إنجليزي) وتُدمج نتائجها بأخذ **أقوى**
+ * درجة لكل صنف: صيغة إضافية توسّع الاستدعاء ولا تُضعف مطابقةً وجدها الأصل.
+ */
 export function rankCurated(query: string, limit: number = CURATED_CANDIDATE_LIMIT): UnifiedFoodResult[] {
-  const q = canonicalizeForSearch(query)
-  if (!q) return []
-  const out: UnifiedFoodResult[] = []
-  for (const item of searchFood(query)) {
-    const score = curatedScore(item, q)
-    if (score === null) continue
-    out.push({ item, source: 'curated', strength: CURATED_STRENGTH[score] ?? 13 })
-    if (out.length >= limit) break
+  const variants = queryVariants(query)
+  if (variants.length === 0) return []
+  const best = new Map<string, { item: FoodItem; score: number }>()
+  for (const v of variants) {
+    for (const scored of searchFoodScored(v)) {
+      const prev = best.get(scored.item.id)
+      if (!prev || scored.score < prev.score) best.set(scored.item.id, scored)
+    }
   }
-  return out
+  return [...best.values()]
+    .sort((a, b) => (a.score - b.score) || ((CURATED_ORDER.get(a.item.id) ?? 0) - (CURATED_ORDER.get(b.item.id) ?? 0)))
+    .slice(0, limit)
+    .map(({ item, score }) => ({ item, source: 'curated' as const, strength: CURATED_STRENGTH[score] ?? WEAKEST_STRENGTH }))
+}
+
+/**
+ * مرشّحو المصدر المعبّأ — **غير متزامن** لأن الكتالوج قد يجلب.
+ *
+ * يُوسَّع الاستعلام هنا أيضًا كي يستفيد المعبّأ من ردّ المفرد الإنجليزي. الطيّ
+ * العربي يجريه الكتالوج داخليًا عبر `normalizeProductKey`، فالصيغة المطوية تكرار
+ * حميد يسقط في إزالة التكرار أدناه.
+ */
+export async function rankPackaged(
+  catalog: Catalog | null | undefined,
+  query: string,
+  opts: { limit?: number; deepShards?: string[] } = {},
+): Promise<RankedHit[]> {
+  if (!catalog) return []
+  const limit = opts.limit ?? PACKAGED_CANDIDATE_LIMIT
+  const seen = new Set<string>()
+  const hits: RankedHit[] = []
+  for (const v of queryVariants(query)) {
+    for (const hit of await catalog.searchRanked(v, { limit, deepShards: opts.deepShards })) {
+      if (seen.has(hit.product.gtin)) continue
+      seen.add(hit.product.gtin)
+      hits.push(hit)
+    }
+  }
+  return hits.slice(0, limit)
 }
 
 /**
@@ -142,21 +146,21 @@ export function mergeUnified(
   lang: 'ar' | 'en',
   limit: number = DEFAULT_RESULT_LIMIT,
 ): UnifiedFoodResult[] {
-  const seen = new Set(curated.map((r) => canonicalizeForSearch(r.item.nameAr)))
+  const seen = new Set(curated.map((r) => dedupeKey(r.item)))
   const merged: UnifiedFoodResult[] = [...curated]
   for (const hit of packaged) {
     const item = catalogProductToFoodItem(hit.product, lang)
-    const key = canonicalizeForSearch(item.nameAr)
+    const key = dedupeKey(item)
     if (seen.has(key)) continue
     seen.add(key)
-    merged.push({ item, source: 'packaged', strength: PACKAGED_STRENGTH[tierRank(hit.tier)] ?? 12 })
+    merged.push({ item, source: 'packaged', strength: PACKAGED_STRENGTH[tierRank(hit.tier)] ?? WEAKEST_STRENGTH })
   }
   return merged.sort((a, b) => a.strength - b.strength).slice(0, limit)
 }
 
 /**
  * البحث الموحَّد كاملًا — نقطة واحدة يستعملها الإثبات وأي مستهلك لا يحتاج
- * فصل المتزامن عن المؤجَّل. الواجهة تستعمل `rankCurated` + `mergeUnified` كي
+ * فصل المتزامن عن المؤجَّل. الواجهة تستعمل `rankCurated` + `rankPackaged` كي
  * يظهر المنسَّق فورًا ويلحق المعبّأ.
  */
 export async function searchAllFoods(
@@ -164,8 +168,6 @@ export async function searchAllFoods(
   opts: { catalog?: Catalog | null; lang?: 'ar' | 'en'; limit?: number; deepShards?: string[] } = {},
 ): Promise<UnifiedFoodResult[]> {
   const curated = rankCurated(query)
-  const packaged = opts.catalog
-    ? await opts.catalog.searchRanked(query, { limit: PACKAGED_CANDIDATE_LIMIT, deepShards: opts.deepShards })
-    : []
+  const packaged = await rankPackaged(opts.catalog, query, { deepShards: opts.deepShards })
   return mergeUnified(curated, packaged, opts.lang ?? 'ar', opts.limit ?? DEFAULT_RESULT_LIMIT)
 }

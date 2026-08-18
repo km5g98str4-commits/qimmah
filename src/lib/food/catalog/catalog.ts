@@ -55,12 +55,44 @@ interface LoadedShard {
   count: number
 }
 
+/**
+ * حالة الذيل الطويل كما **يعرفها التطبيق فعلًا** — لا كما يعلنها البيان.
+ *
+ * البيان يعلن ٥٩٬٩٤١ سجلًا في ٤١ شريحة. الشرائح **غير مرفوعة** اليوم، فكل طلب لها
+ * يعود ٤٠٤. الفارق بين الرقمين هو بالضبط ما لا يجوز لأي سطح أن يعد به:
+ *   • `declaredRecords` — ما يقوله البيان. **رقم بناء لا رقم إنتاج.**
+ *   • `searchableRecords` — ما يمكن البحث فيه هذه اللحظة: الطقم الساخن + كل شريحة
+ *     نجح تحميلها. **هذا وحده رقم صادق.**
+ *   • `verdict` — لا يُخمَّن: يبقى `unproven` حتى **تُجرَّب** شريحة أو فهرس فعلًا.
+ *
+ * §5 من الميثاق: حين لا نعرف، نقولها صريحة. «لم نجرّب» ليست «متاح».
+ */
+export interface LongTailAvailability {
+  /** مجموع ما يعلنه البيان في الشرائح — بناءً لا إنتاجًا. */
+  declaredRecords: number
+  /** عدد الشرائح التي يعلنها البيان. */
+  declaredShards: number
+  /** ما يمكن البحث فيه الآن حقًّا: الطقم الساخن + الشرائح المحمَّلة. */
+  searchableRecords: number
+  /** كم محاولة جلب ذيلٍ طويل جرت (حمولة أو فهرس). */
+  attempts: number
+  /** كم منها فشلت (٤٠٤ أو JSON تالف). */
+  failures: number
+  /**
+   * `unproven` لم تُجرَّب بعد · `available` نجحت محاولة واحدة على الأقل ·
+   * `unavailable` جُرِّبت وفشلت كلّها.
+   */
+  verdict: 'unproven' | 'available' | 'unavailable'
+}
+
 export class Catalog {
   private manifest: CatalogManifest | null = null
   private hot: HotSetPayload | null = null
   private hotByGtin = new Map<string, CatalogProduct>()
   private shards = new Map<string, LoadedShard>()
   private indexes = new Map<string, ShardIndex>()
+  /** محاولات الذيل الطويل ونتائجها — أساس `longTailAvailability`، لا تخمين. */
+  private longTail = { attempts: 0, failures: 0 }
   private stats: CatalogStats = {
     hotSetLoaded: false, hotSetCount: 0, shardsFetched: [], indexesFetched: [],
     networkFetches: 0, cacheHits: 0, cacheKind: 'memory', recordsInMemory: 0,
@@ -117,8 +149,9 @@ export class Catalog {
   private async shardByName(name: string): Promise<LoadedShard | null> {
     const already = this.shards.get(name)
     if (already) return already
+    this.longTail.attempts += 1
     const payload = this.parse<ShardPayload>(await this.load(`shards/${name}.json`))
-    if (!payload?.records) return null
+    if (!payload?.records) { this.longTail.failures += 1; return null }
     const loaded: LoadedShard = { byGtin: new Map(Object.entries(payload.records)), count: payload.count }
     this.shards.set(name, loaded)
     this.stats.shardsFetched.push(name)
@@ -150,8 +183,9 @@ export class Catalog {
   private async indexFor(name: string): Promise<ShardIndex | null> {
     const already = this.indexes.get(name)
     if (already) return already
+    this.longTail.attempts += 1
     const idx = this.parse<ShardIndex>(await this.load(`shards/${name}.idx.json`))
-    if (!idx) return null
+    if (!idx) { this.longTail.failures += 1; return null }
     this.indexes.set(name, idx)
     this.stats.indexesFetched.push(name)
     return idx
@@ -223,9 +257,13 @@ export class Catalog {
       // ⚠️ B2 — كان هنا `this.shards.get(name)`: قراءةُ خريطةٍ لا يملؤها إلا مسار
       // الباركود، فكان البحث العميق يجلب الفهرس ثم يخرج صفر اليدين دائمًا.
       // الحمولة تُطلب الآن فعلًا، وبعد أن أثبت الفهرس أن فيها ما يطابق.
+      //
+      // الميزانية تُحاسِب **الجلب** لا القراءة: شريحة حاضرة في الذاكرة أصلًا
+      // (جلبها مسحُ باركود سابق) لا تكلّف بايتًا، فلا يُعقل أن تستهلك حصّة.
+      const resident = this.shards.has(name)
       const shard = await this.shardByName(name)
       if (!shard) continue
-      payloadsLoaded += 1
+      if (!resident) payloadsLoaded += 1
       for (const i of positions) {
         const gtin = idx.order[i]
         const p = gtin ? shard.byGtin.get(gtin) : undefined
@@ -245,5 +283,27 @@ export class Catalog {
 
   getStats(): CatalogStats {
     return { ...this.stats, shardsFetched: [...this.stats.shardsFetched], indexesFetched: [...this.stats.indexesFetched] }
+  }
+
+  /**
+   * **ما يجوز للتطبيق أن يعد به الآن.** أي سطح يريد ذكر حجم قاعدة الطعام يقرأ
+   * `searchableRecords` من هنا — لا `declaredRecords`، ولا رقمًا مكتوبًا في نصّ.
+   *
+   * الشرائح غير مرفوعة اليوم، فالفرق بين الرقمين ٥٩٬٩٤١ سجلًا. عرض الرقم المعلَن
+   * على المستخدم يجعل الواجهة تعد بستين ألفًا وتسلّم ٥٩٩ — وهو بالضبط ما يمنعه §5.
+   */
+  longTailAvailability(): LongTailAvailability {
+    const declaredShards = this.manifest?.shards?.length ?? 0
+    const declaredRecords = (this.manifest?.shards ?? []).reduce((a, s) => a + (s.count ?? 0), 0)
+    const { attempts, failures } = this.longTail
+    const verdict = attempts === 0 ? 'unproven' : failures < attempts ? 'available' : 'unavailable'
+    return {
+      declaredRecords,
+      declaredShards,
+      searchableRecords: this.stats.recordsInMemory,
+      attempts,
+      failures,
+      verdict,
+    }
   }
 }
