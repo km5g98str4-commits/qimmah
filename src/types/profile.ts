@@ -43,8 +43,34 @@ export type GymAccess = 'full' | 'small' | 'home' | 'bodyweight'
 /** نوع مكان التمرين الدلالي (إعداد v2). */
 export type GymType = 'commercial' | 'small' | 'home' | 'bodyweight'
 export type SchedulingStyle = 'fixed' | 'flexible'
-/** أدوات متاحة في البيت/النادي الصغير. */
-export type Equipment = 'dumbbell' | 'barbell' | 'bench' | 'machine' | 'cable' | 'bands'
+/**
+ * الأدوات المتاحة فعليًا للمستخدم — **سلطة توليد التمارين**.
+ *
+ * [SOVEREIGN-EQUIPMENT-001] كان المكان (منزل/نادٍ) هو المصدر الوحيد، فكان
+ * «منزل» يعني ضمنًا بارًا ومقعدًا ودمبلات؛ ومن قاس وجد أن **٣٣٫٦٪** من خانات
+ * خطط المنزل تطلب بارًا أو مقعدًا لا يملكه أحد بالضرورة. المكان يبقى سياقًا،
+ * والأداة تصير هي الحاكمة.
+ */
+export type Equipment =
+  | 'dumbbell'
+  | 'barbell'
+  | 'bench'
+  | 'machine'
+  | 'cable'
+  | 'bands'
+  | 'smith'
+  | 'pullup_bar'
+  | 'bodyweight'
+
+/**
+ * مناطق الإصابة المُعلَنة — **مفاتيح ثابتة لا نصًّا موطَّنًا**.
+ *
+ * [SOVEREIGN-INJURY-001] كان `injuries` سلسلة نصّية تُطابَق بتعبير نمطي، وكان
+ * الترشيح كلّه قائمة معرّفات مكتوبة باليد لا تعرف ميكانيكا الحركة — فمرّت
+ * «ضغط الكتف بالدمبل» لمن أعلن إصابة كتف لأن أحدًا لم يكتب اسمها في القائمة.
+ * تبقى `injuries` للتوافق مع الملفّات القديمة، وهذا الحقل هو المصدر البنيوي.
+ */
+export type InjuryAreaKey = 'knee' | 'shoulder' | 'lower_back' | 'wrist' | 'elbow' | 'ankle'
 
 /** بيانات الجسم/الملف الشخصي التي تُبنى عليها الحسابات. */
 export interface Profile {
@@ -88,7 +114,16 @@ export interface Profile {
   gymAccess?: GymAccess
   /** نوع مكان التمرين الدلالي (إعداد v2). */
   gymType?: GymType
+  /**
+   * الأدوات التي أعلن المستخدم امتلاكها. **فارغة أو غائبة = لم يُسأل بعد**،
+   * فيعود التوليد إلى اشتقاق المكان (سلوك الملفّات القديمة بلا تغيير).
+   */
   equipment?: Equipment[]
+  /**
+   * مناطق الإصابة بمفاتيح ثابتة. مصدر الترشيح البنيوي؛ `injuries` النصّية
+   * تبقى احتياطًا للملفّات القديمة وتُشتقّ منها هذه عند غيابها.
+   */
+  injuryAreas?: InjuryAreaKey[]
   schedulingStyle?: SchedulingStyle
   /** أيام التمرين المفضّلة كفهارس أسبوع (0=السبت … 6=الجمعة). */
   preferredDays?: number[]
