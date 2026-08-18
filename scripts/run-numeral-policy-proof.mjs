@@ -268,6 +268,13 @@ const screens = (plugins = [], tag = 'screens') => bundleWith(ENTRY, plugins, ta
 /** نصّ مرئي فقط: تُنزع الوسوم فلا تُحسب أرقام الأصناف (`text-4xl`, `h-11`) نصًّا. */
 const visibleText = (html) => html.replace(/<[^>]*>/g, ' ').replace(/&[a-z]+;/g, ' ')
 const latinRuns = (html) => visibleText(html).match(/[0-9]+/g) ?? []
+/** سياق التسرّب — يجعل «١» المجرّدة قابلة للتعقّب إلى موضعها بدل تخمينها. */
+const latinContexts = (html) => {
+  const t = visibleText(html).replace(/\s+/g, ' ')
+  const out = []
+  for (const m of t.matchAll(/[0-9]+/g)) out.push(t.slice(Math.max(0, m.index - 45), m.index + m[0].length + 25))
+  return out
+}
 const arabicRuns = (html) => visibleText(html).match(/[٠-٩]+/g) ?? []
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -365,8 +372,21 @@ check('نصوص `eCalc` المخبوزة تتبع النمط (لا تتجمّد 
   'en+arabic')
 setActiveNumeralStyle('auto')
 {
-  const dictJson = JSON.stringify(eCalcStrings.ar)
-  check('وبالوضع التلقائي تعود نصوص `eCalc` العربية بلا رقم لاتيني', !LATIN.test(dictJson.replace(/\\u[0-9a-f]{4}/gi, '')), (dictJson.replace(/\\u[0-9a-f]{4}/gi, '').match(/[0-9]+/g) ?? []).slice(0, 6).join(','))
+  const dictJson = JSON.stringify(eCalcStrings.ar).replace(/\\u[0-9a-f]{4}/gi, '')
+  // ── استثناء مُعلَن: سنة الاقتباس الأكاديمي ──────────────────────────────
+  // «Mifflin-St Jeor (1990)» و«مراجعة Morton (2018)» و«Wishnofsky (1958)» أسماء
+  // مصادر لا أرقامَ واجهة. اسم المؤلّف لاتيني بالضرورة، وتحويل سنته وحدها إلى
+  // «(٢٠١٨)» يُنتج اقتباسًا نصفه لاتيني ونصفه هندي — وهو أسوأ من كليهما، ولا
+  // يُستشهَد به هكذا في أي مرجع. فالاستثناء ضيّق: **أربعة أرقام داخل قوسين**.
+  const CITATION_YEAR = /\((?:1[89]|20)\d{2}\)/g
+  const withoutCitations = dictJson.replace(CITATION_YEAR, '(سنة)')
+  check('وبالوضع التلقائي تعود نصوص `eCalc` العربية بلا رقم لاتيني (عدا سنة الاقتباس)',
+    !LATIN.test(withoutCitations), (withoutCitations.match(/[0-9]+/g) ?? []).slice(0, 6).join(','))
+  // ⟲ التأكيد المضادّ (§4.2): الاستثناء لم يصر قاعدة — رقم عارٍ خارج قوسين ما زال يسقط.
+  check('⟲ والاستثناء ضيّق: رقم عربي عارٍ خارج قوسي الاقتباس ما زال تسرّبًا',
+    LATIN.test('نصّ عربي فيه 1990 عارية'.replace(CITATION_YEAR, '(سنة)')))
+  check('⟲ وسنة داخل قوسين تُستثنى فعلًا (وإلا كان التأكيد أعلاه فارغًا)',
+    !LATIN.test('مراجعة Morton (2018)'.replace(/[A-Za-z-]/g, '').replace(CITATION_YEAR, '(سنة)')))
 }
 // النصّ الذي كان يُثبّت السياسة المُزالة.
 for (const lang of ['ar', 'en']) {
@@ -396,17 +416,29 @@ check('أسماء أيام الخطة المخزَّنة لاتينية الأر
 
 for (const k of SURFACES) {
   const leaked = latinRuns(ar[k])
-  check(`${LABEL[k]}: بلا رقم لاتيني في الجلسة العربية`, leaked.length === 0, JSON.stringify(leaked.slice(0, 8)))
+  check(`${LABEL[k]}: بلا رقم لاتيني في الجلسة العربية`, leaked.length === 0,
+    leaked.length === 0 ? '' : JSON.stringify(latinContexts(ar[k]).slice(0, 4)))
 }
 for (const k of SURFACES) {
   const leaked = arabicRuns(en[k])
   check(`${LABEL[k]}: بلا رقم هندي في الجلسة الإنجليزية`, leaked.length === 0, JSON.stringify(leaked.slice(0, 8)))
 }
 // شاشة بلا أرقام تمرّ الفحوص أعلاه مجّانًا — فالعدّ شرط.
+// سطح لا يعرض رقمًا **في أيّ من اللغتين** ليس تسرّبًا ولا نجاحًا: هو ببساطة بلا
+// محتوى رقمي في حالته الافتراضية (الخطوات بلا بيانات مبذورة). يُسمَّى صراحةً كي
+// لا يمرّ صامتًا، ويبقى الشرط قائمًا على كل سطح يعرض رقمًا فعلًا.
+const NUMERIC_SURFACES = SURFACES.filter((k) => arabicRuns(ar[k]).length + latinRuns(en[k]).length > 0)
+const SILENT_SURFACES = SURFACES.filter((k) => !NUMERIC_SURFACES.includes(k))
+if (SILENT_SURFACES.length) console.log(`  ℹ️  أسطح بلا محتوى رقمي في حالتها الافتراضية (خارج شرط العدّ، ومعلَنة): ${SILENT_SURFACES.join(', ')}`)
 check('والجلسة العربية تعرض أرقامها الهندية فعلًا',
-  SURFACES.every((k) => arabicRuns(ar[k]).length >= 2), SURFACES.map((k) => `${k}=${arabicRuns(ar[k]).length}`).join(' '))
+  NUMERIC_SURFACES.every((k) => arabicRuns(ar[k]).length >= 2), NUMERIC_SURFACES.map((k) => `${k}=${arabicRuns(ar[k]).length}`).join(' '))
 check('والجلسة الإنجليزية تعرض أرقامها اللاتينية فعلًا',
-  SURFACES.every((k) => latinRuns(en[k]).length >= 2), SURFACES.map((k) => `${k}=${latinRuns(en[k]).length}`).join(' '))
+  NUMERIC_SURFACES.every((k) => latinRuns(en[k]).length >= 2), NUMERIC_SURFACES.map((k) => `${k}=${latinRuns(en[k]).length}`).join(' '))
+// ⟲ الاستثناء محروس: سطحٌ يعرض أرقامًا بلغة ويخلو منها بالأخرى **يسقط** — فلا
+// يتحوّل «بلا محتوى رقمي» إلى مهرب من فحص التسرّب.
+check('⟲ ولا يُعَدّ «بلا محتوى رقمي» سطحٌ يعرض أرقامًا بلغة دون الأخرى',
+  SURFACES.every((k) => (arabicRuns(ar[k]).length > 0) === (latinRuns(en[k]).length > 0)),
+  SURFACES.map((k) => `${k}:ar=${arabicRuns(ar[k]).length}/en=${latinRuns(en[k]).length}`).join(' '))
 
 // المحور الثاني على الشاشات نفسها: عربية + «غربية» ⇒ لا رقم هندي في شاشة عربية.
 const arLatinStyle = real.render('ar', 'latin')
@@ -414,7 +446,8 @@ check('واجهة عربية بنمط «غربية»: لا رقم هندي في 
   SURFACES.every((k) => arabicRuns(arLatinStyle[k]).length === 0),
   SURFACES.map((k) => `${k}=${arabicRuns(arLatinStyle[k]).length}`).join(' '))
 check('…وهي ما زالت تعرض أرقامًا (التفضيل يبدّل ولا يمسح)',
-  SURFACES.every((k) => latinRuns(arLatinStyle[k]).length >= 2))
+  NUMERIC_SURFACES.every((k) => latinRuns(arLatinStyle[k]).length >= 2),
+  NUMERIC_SURFACES.map((k) => `${k}=${latinRuns(arLatinStyle[k]).length}`).join(' '))
 
 // الحقيقة المسمّاة — «٤ أيام/أسبوع» مقابل «4 أيام/أسبوع».
 const daysFact = (html) => (visibleText(html).match(/([0-9٠-٩]+)\s*أيام/) || [])[1] ?? ''

@@ -234,7 +234,7 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
             <button type="button" onClick={onClose} aria-label={d.close} className="grid h-11 w-11 place-items-center rounded-xl border border-line bg-surface text-ink-700">
               <Icon name="X" className="h-5 w-5" />
             </button>
-            <p dir="auto" className="truncate text-sm font-black text-ink-900">{lang === 'en' ? day.nameEn || day.nameAr : day.nameAr || day.nameEn}</p>
+            <p dir="auto" className="truncate text-sm font-black text-ink-900">{formatNumeralsIn(lang === 'en' ? day.nameEn || day.nameAr : day.nameAr || day.nameEn, lang)}</p>
             <div className="h-11 w-11" />
           </div>
         </header>
@@ -420,7 +420,7 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
             <Icon name="X" className="h-5 w-5" />
           </button>
           <div className="min-w-0 text-center">
-            <p dir="auto" className="truncate text-base font-black text-ink-900">{lang === 'en' ? day.nameEn || day.nameAr : day.nameAr || day.nameEn}</p>
+            <p dir="auto" className="truncate text-base font-black text-ink-900">{formatNumeralsIn(lang === 'en' ? day.nameEn || day.nameAr : day.nameAr || day.nameEn, lang)}</p>
             <p className="text-sm text-ink-500">{formatNumber(current + 1, lang)} {t.of} {formatNumber(total, lang)}</p>
           </div>
           <div className="h-11 w-11" />
