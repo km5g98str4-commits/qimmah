@@ -17,6 +17,13 @@
  *
  * الإثبات يشغّل الكاتب الحقيقي على تخزين حقيقي (لا محاكاة منطق)، ويهاجم نفسه:
  * إعادة أيٍّ من نصفَي الإصلاح إلى صيغته القديمة تُسقط فحصًا **مسمّى**.
+ *
+ * ═══ [SOVEREIGN-COMMERCE-001] وامتدّ إلى صدق المنع على مسار التجربة ═══
+ * نفس السؤال في موضع ثانٍ: **حين لا تبدأ التجربة، هل يعرف المستخدم لماذا؟**
+ * كان الجواب لا: نداء «جرّب Premium ٣ أيام» ميتٌ بنيويًا (مضيفه شاشة عابرة
+ * يتلفها الانتقال إلى إنشاء الحساب)، وحين يفشل يُعرض المنعُ الإداري الدائم
+ * بنصّ «تأكّد من اتصالك وجرّب مرة ثانية». الأقسام ⑦–⑫ تُثبت الإصلاح
+ * **بالتنفيذ**: تخزين حقيقي، ودوالّ حقيقية، وبناء معاينة حقيقي.
  */
 import { readFileSync } from 'node:fs'
 import { loadTsModule } from './food-production/lib/loadTs.mjs'
@@ -140,6 +147,218 @@ console.log('\n⑥ محاكاة الالتفاف (§4.2) — إعادة كلّ �
     blindCatch(denial) === 'error-screen' && honestCatch(denial) === 'premium-gate')
   ok('وكلاهما يعرض عطلًا للعطل الحقيقي — فالإصلاح لم يبتلع الأعطال',
     blindCatch(new Error('boom')) === 'error-screen' && honestCatch(new Error('boom')) === 'error-screen')
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  [SOVEREIGN-COMMERCE-001] ⑦–⑫ — صدق المنع على مسار التجربة والوصول
+// ═══════════════════════════════════════════════════════════════════════════
+const { build } = await import('esbuild')
+const { mkdtempSync, rmSync } = await import('node:fs')
+const { tmpdir } = await import('node:os')
+const { join, resolve: pathResolve } = await import('node:path')
+const { pathToFileURL } = await import('node:url')
+
+const ROOT = pathResolve(import.meta.dirname, '..')
+/** يصرّف وحدة TS ويستوردها، مع إمكان **زرع بيئة بناء** حقيقية. */
+async function loadWithEnv(relPath, env = {}, patch = null) {
+  const dir = mkdtempSync(join(tmpdir(), 'qimmah-trial-'))
+  const outfile = join(dir, `m-${Math.random().toString(36).slice(2)}.mjs`)
+  try {
+    // بذرة الهجوم: تُعدَّل **الشيفرة نفسها** ثم يُعاد بناؤها وتُشغَّل. لا محاكاة
+    // منطقٍ بيدنا — ذاك يُثبت أن حسابنا صحيح، لا أن الكود صحيح (الميثاق §4.2).
+    const plugins = patch ? [{
+      name: 'attack-patch',
+      setup(b) {
+        b.onLoad({ filter: new RegExp(`${patch.file.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`) }, (a) => {
+          const text = readFileSync(a.path, 'utf8')
+          const next = patch.apply(text)
+          if (next === text) throw new Error(`attack patch had no effect on ${a.path}`)
+          return { contents: next, loader: 'ts' }
+        })
+      },
+    }] : []
+    await build({
+      entryPoints: [pathResolve(ROOT, relPath)],
+      bundle: true, format: 'esm', platform: 'node', outfile,
+      alias: { '@': pathResolve(ROOT, 'src') },
+      external: ['@supabase/supabase-js'],
+      define: { 'import.meta.env': JSON.stringify(env) },
+      plugins,
+      logLevel: 'silent',
+    })
+    return await import(pathToFileURL(outfile).href)
+  } finally {
+    try { rmSync(dir, { recursive: true, force: true }) } catch { /* ignore */ }
+  }
+}
+
+console.log('\n⑦ نيّة التجربة تنجو من رحلة المصادقة — تخزين حقيقي')
+const intent = await loadWithEnv('src/lib/access/trialIntent.ts')
+storage.clear()
+ok('لا نيّة في البداية', intent.readTrialIntent() === null)
+const wrote = intent.recordTrialIntent('reveal')
+ok('★ التسجيل يعيد `WriteResult` ولا يبتلعه (الميثاق §5)', wrote === 'ok', `wrote=${wrote}`)
+ok('والنيّة تعيش في التخزين لا في الذاكرة — فتنجو من إعادة التحميل',
+  storage.getItem(intent.TRIAL_INTENT_KEY) !== null, intent.TRIAL_INTENT_KEY)
+{
+  // نفس التخزين، **نسخة وحدة ثانية** = محاكاة إعادة تحميل كاملة (تبويب جديد
+  // من رابط تأكيد البريد)، لا مجرّد إعادة قراءة من نفس الحالة.
+  const reloaded = await loadWithEnv('src/lib/access/trialIntent.ts')
+  const survived = reloaded.readTrialIntent()
+  ok('★ نسخة وحدة جديدة على نفس التخزين تقرأ النيّة — نجت من إعادة التحميل',
+    survived !== null && survived.origin === 'reveal', JSON.stringify(survived))
+}
+{
+  storage.setItem(intent.TRIAL_INTENT_KEY, JSON.stringify({ recordedAt: Date.now() - intent.TRIAL_INTENT_TTL_MS - 1000, origin: 'reveal' }))
+  ok('★ نيّة تجاوزت مدّتها تُقرأ `null` **وتُمسح**',
+    intent.readTrialIntent() === null && storage.getItem(intent.TRIAL_INTENT_KEY) === null)
+  storage.setItem(intent.TRIAL_INTENT_KEY, JSON.stringify({ recordedAt: Date.now() + 3_600_000, origin: 'reveal' }))
+  ok('★ ساعة الجهاز رجعت للوراء ⇒ تُلغى ولا تُمدَّد', intent.readTrialIntent() === null)
+  storage.setItem(intent.TRIAL_INTENT_KEY, '{"nonsense":true}')
+  ok('ونيّة مشوَّهة تُمسح ولا تُفسَّر', intent.readTrialIntent() === null && storage.getItem(intent.TRIAL_INTENT_KEY) === null)
+}
+ok('والنيّة مسجَّلة في سجلّ المفاتيح المركزي',
+  readFileSync('src/lib/userDataKeys.ts', 'utf8').includes("key: 'qimmah:access:trial-intent:v1'"))
+
+console.log('\n⑧ استهلاك النيّة — الجواب النهائي وحده، ولا يُعاقَب المستخدم على عطلنا')
+for (const [outcome, consumes] of [
+  ['started', true], ['already_claimed', true], ['revoked', true],
+  ['email_not_verified', false], ['not_authenticated', false],
+  ['timeout', false], ['offline', false], ['service_error', false], ['backend_unconfigured', false],
+]) {
+  ok(`«${outcome}» ${consumes ? 'يستهلك' : 'يُبقي'} النيّة`, intent.consumesTrialIntent(outcome) === consumes)
+}
+ok('★ `email_not_verified` تُبقي النيّة — وهي اللحظة التي وُجدت لأجلها',
+  intent.consumesTrialIntent('email_not_verified') === false)
+ok('★ ولا عطلٍ من عندنا يبتلع نيّة المستخدم',
+  ['timeout', 'offline', 'service_error', 'backend_unconfigured'].every((o) => !intent.consumesTrialIntent(o)))
+ok('★ و`started` وحدها تعني «بدأت» — لا نتيجة أخرى تُقرأ نجاحًا',
+  intent.trialDidStart('started') === true
+  && ['already_claimed', 'email_not_verified', 'not_authenticated', 'revoked', 'timeout', 'offline', 'service_error', 'backend_unconfigured', null]
+    .every((o) => intent.trialDidStart(o) === false))
+
+console.log('\n⑨ بناء المراجعة يفشل **مغلقًا** ويقولها — تنفيذ على بناء حقيقي')
+{
+  const previewSrc = await loadWithEnv('src/lib/access/entitlementSource.ts', { VITE_APP_ENV: 'founder_preview' })
+  const outcome = await previewSrc.startTrial()
+  ok('★ بناء المعاينة لا يبدأ تجربة، ويعيد `backend_unconfigured` لا `offline`',
+    outcome === 'backend_unconfigured', `outcome=${outcome}`)
+  ok('★ ولا يُعرض ذلك «بدأت»', intent.trialDidStart(outcome) === false)
+  ok('والنيّة تبقى — لأن الغياب ليس ذنب المستخدم', intent.consumesTrialIntent(outcome) === false)
+  const redeemed = await previewSrc.redeemActivationCode('QIMMAH-AAAA-BBBB')
+  ok('★ والتفعيل في بناء المعاينة يرفض بـ`backend_unconfigured` لا بلوم النت',
+    redeemed === 'backend_unconfigured', `redeem=${redeemed}`)
+  ok('والفارغ يُردّ محلّيًا قبل أي رحلة', (await previewSrc.redeemActivationCode('   ')) === 'empty')
+  const msgs = await loadWithEnv('src/lib/access/outcomeMessages.ts', { VITE_APP_ENV: 'founder_preview' })
+  const text = msgs.trialMessage(outcome, 'ar')
+  ok('★ ونصّها يقول «نسخة مراجعة» ولا يذكر النت',
+    /نسخة مراجعة/.test(text) && !/النت|اتصال/.test(text), text)
+}
+
+console.log('\n⑩ مؤشّر الوصول — كل حالة سطرها، والوقت من الخادم')
+const sum = await loadWithEnv('src/lib/access/accessSummary.ts')
+const snap = (serverState, extra = {}) => ({
+  status: ['premiumActive', 'specialAccessActive', 'trialActive'].includes(serverState) ? 'active' : 'none',
+  source: 'backend',
+  detail: { serverState, entitlementType: 'trial', noExpiry: false, expiresAtMs: null, activatedAtMs: null, serverTimeMs: 0, receivedAtPerfMs: 0, ...extra },
+})
+const labels = new Map()
+for (const st of ['premiumActive', 'specialAccessActive', 'trialActive', 'trialExpired', 'revoked', 'noAccess']) {
+  const r = sum.summarizeAccess(snap(st), 'ar', 0)
+  ok(`حالة ${st} لها سطر غير فارغ`, typeof r.label === 'string' && r.label.length > 0, r.label)
+  labels.set(st, r.label)
+}
+ok('★ ستّ حالات ⇒ ستّة سطور — لا حالتان تتقاسمان نصًّا', new Set(labels.values()).size === 6,
+  [...labels.values()].join(' | '))
+ok('★ «موقوف» يُعرض إيقافًا لا معاينة',
+  sum.summarizeAccess(snap('revoked'), 'ar', 0).kind === 'revoked')
+ok('★ و«ما قدرنا نتحقّق» ليست «معاينة» — الجهل يُقرّ به لا يُلبَس حالةً',
+  sum.summarizeAccess({ status: 'none', source: 'backend', detail: null, lastError: 'backend_error' }, 'ar', 0).kind === 'unknown'
+  && sum.summarizeAccess({ status: 'none', source: 'none', detail: null, lastError: 'backend_unconfigured' }, 'ar', 0).kind === 'preview')
+{
+  // ٧٢ ساعة من ساعة الخادم؛ ونقيس ما مضى بـ`performance.now()` وحده.
+  const hours = (h) => h * 3_600_000
+  const trial = snap('trialActive', { expiresAtMs: hours(72), serverTimeMs: 0, receivedAtPerfMs: 0 })
+  const atStart = sum.summarizeAccess(trial, 'ar', 0)
+  ok('عدّاد التجربة يبدأ من ٧٢ ساعة', atStart.remainingMs === hours(72), String(atStart.remainingMs))
+  const after70 = sum.summarizeAccess(trial, 'ar', hours(70))
+  ok('★ وبعد ٧٠ ساعة يبقى ساعتان — القياس من عدّاد أحادي لا من ساعة الجهاز',
+    after70.remainingMs === hours(2), String(after70.remainingMs))
+  ok('★ وتحت العتبة تتغيّر النبرة إلى «تقارب تخلص» بلا تهويل',
+    after70.tone === 'ending' && !/سارع|بادر|!/.test(after70.label), after70.label)
+  const expired = sum.summarizeAccess(trial, 'ar', hours(73))
+  ok('★ وبعد انقضائها لا رقم سالب ولا «متبقٍّ» كاذب', expired.remainingMs === 0)
+  ok('وأرقام العربية هندية والإنجليزية لاتينية',
+    /[٠-٩]/.test(sum.summarizeAccess(trial, 'ar', 0).label) && /[0-9]/.test(sum.summarizeAccess(trial, 'en', 0).label))
+  ok('★ وPremium بلا مدّة معروضة — أي وصف مدّة هنا يصير وعدًا (§0.1)',
+    sum.summarizeAccess(snap('premiumActive'), 'ar', 0).remainingMs === null
+    && !/سنة|سنوي|مدى الحياة|lifetime/i.test(labels.get('premiumActive')))
+}
+
+console.log('\n⑪ التأكيد المضادّ — الشيفرة تُعدَّل وتُعاد بناءً، لا تُحاكى بيدنا')
+{
+  // هجوم ١: «امسح النيّة عند أي جواب» — السلوك الساذج الذي يبتلع نيّة من لم
+  // يؤكّد بريده بعد، أي يقتل الميزة في اللحظة التي وُجدت لأجلها بالضبط.
+  const greedy = await loadWithEnv('src/lib/access/trialIntent.ts', {}, {
+    file: 'src/lib/access/trialIntent.ts',
+    apply: (t) => t.replace(
+      "return outcome === 'started' || outcome === 'already_claimed' || outcome === 'revoked'",
+      'return true'),
+  })
+  ok('★ بناءٌ يمسح النيّة دائمًا يبتلع `email_not_verified` — والسليم يُبقيها',
+    greedy.consumesTrialIntent('email_not_verified') === true
+    && intent.consumesTrialIntent('email_not_verified') === false,
+    'لو تساوى البناءان لما كان الفحص يقيس شيئًا')
+  ok('وكذلك يبتلعها عند عطلٍ من عندنا — والسليم لا',
+    greedy.consumesTrialIntent('service_error') === true
+    && intent.consumesTrialIntent('service_error') === false)
+
+  // هجوم ٢: «كل ما ليس فشلًا صريحًا = بدأت» — إعلانُ بدءٍ لم يقع.
+  const optimistic = await loadWithEnv('src/lib/access/trialIntent.ts', {}, {
+    file: 'src/lib/access/trialIntent.ts',
+    apply: (t) => t.replace(
+      "return outcome === 'started'\n}",
+      "return outcome !== null && outcome !== 'offline'\n}"),
+  })
+  ok('★ بناءٌ متفائل يعلن «بدأت» لتجربة استُهلكت من قبل — والسليم لا',
+    optimistic.trialDidStart('already_claimed') === true
+    && intent.trialDidStart('already_claimed') === false)
+  ok('★ ويعلنها حتى لمن أُوقف حسابه — والسليم يرفض',
+    optimistic.trialDidStart('revoked') === true && intent.trialDidStart('revoked') === false)
+  ok('وكلا البناءين يوافقان على `started` — فالفحص يميّز ولا يرفض كل شيء',
+    optimistic.trialDidStart('started') === true && intent.trialDidStart('started') === true)
+
+  // هجوم ٣: خلط «لا نعرف» بـ«معاينة» — تلبيسُ الجهل حالةً.
+  const blurred = await loadWithEnv('src/lib/access/accessSummary.ts', {}, {
+    file: 'src/lib/access/accessSummary.ts',
+    apply: (t) => t.replace("  if (snapshot.lastError) return 'unknown'\n", ''),
+  })
+  const unknownSnap = { status: 'none', source: 'backend', detail: null, lastError: 'backend_error' }
+  ok('★ بناءٌ يحذف فرع «لا نعرف» يعرض تعذّرَ القراءة «معاينة» — والسليم يقرّ بالجهل',
+    blurred.summarizeAccess(unknownSnap, 'ar', 0).kind === 'preview'
+    && sum.summarizeAccess(unknownSnap, 'ar', 0).kind === 'unknown')
+
+  ok('ومؤشّر الوصول عرضٌ فقط — لا يُقرَّر منه إذن',
+    sum.summarizeAccess(snap('revoked'), 'ar', 0).allowed === false
+    && sum.summarizeAccess(snap('premiumActive'), 'ar', 0).allowed === true)
+}
+
+console.log('\n⑫ كتابة مدفوعة في المعاينة تبقى مرفوضة — لم يُضعَف شيء')
+{
+  seedGap()
+  ok('★ الحارس ما زال يمنع الفعل المدفوع', canPerform('plan.saveEdit') === false)
+  let threw = null
+  try { saveOnboardingProfile(defaultOnboardingProfile()) } catch (e) { threw = e }
+  ok('★ والكاتب ما زال يرمي `PaidActionDenied` بعد كل هذه الإضافات',
+    threw !== null && threw.name === 'PaidActionDenied', `thrown=${threw && threw.name}`)
+  const src = readFileSync('src/lib/access/entitlementSource.ts', 'utf8')
+  ok('★ ولا نتيجة من النتائج الجديدة تُترجَم نجاحًا',
+    ['backend_unconfigured', 'timeout', 'service_error', 'offline', 'empty']
+      .every((o) => !new RegExp(`case '${o}': return 'success'`).test(src)))
+  ok('والنيّة لا تُقرأ في أي قرار وصول',
+    !readFileSync('src/lib/access/guard.ts', 'utf8').includes('trialIntent')
+    && !readFileSync('src/lib/access/paidActions.ts', 'utf8').includes('trialIntent'))
 }
 
 const failed = checks.filter((c) => !c.pass)
