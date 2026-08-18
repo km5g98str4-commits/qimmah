@@ -165,7 +165,27 @@ check('consistency → بداية أسبوع مخففة', firstWeek({ consistenc
 check('goal → سعرات الهدف', planFor({ goal: 'cut' }).targets.targetCalories !== planFor({ goal: 'bulk' }).targets.targetCalories)
 check('days → عدد أيام الخطة', planFor({ days: 3 }).workoutPlan.days.length !== planFor({ days: 6 }).workoutPlan.days.length)
 check('duration → حجم الجلسات', countExercises({ duration: 30 }) !== countExercises({ duration: 75 }))
-check('place → اختيار التمارين', JSON.stringify(planFor({ place: 'gym' }).workoutPlan) !== JSON.stringify(planFor({ place: 'home' }).workoutPlan))
+// [SOVEREIGN-002] المكان سياق، والأداة سلطة.
+//
+// كان هذا الفحص يؤكّد أن «نادي» ≠ «منزل» في اختيار التمارين — وهو صحيح في النموذج
+// القديم حيث المكان **يستنتج** العدّة. وبعد أن صارت `profile.equipment` سلطة
+// التوليد، صار السؤال الصحيح مختلفًا: من يملك ناديًا كاملًا في بيته يستحقّ الخطة
+// نفسها في الموضعين، ولا يُحرَم من بارٍ يملكه لأنه أجاب «منزل».
+//
+// فيُثبَت الآن أمران معًا: المكان **يحسم حين لا تُعلَن العدّة** (مسار التوافق مع
+// الملفّات القائمة)، **ولا يحسم حين تُعلَن** — والثاني تأكيد مضادّ يسقط لو عاد
+// المكان يتجاوز ما أعلنه المستخدم أنه يملك.
+const noKit: Partial<V2OnboardingChoices> = { equipment: [] }
+check(
+  'place → اختيار التمارين (حين لا تُعلَن العدّة)',
+  JSON.stringify(planFor({ ...noKit, place: 'gym' }).workoutPlan) !==
+    JSON.stringify(planFor({ ...noKit, place: 'home' }).workoutPlan),
+)
+check(
+  '⟲ وبعدّة مُعلَنة كاملة لا يغيّر المكان الخطة — الأداة سلطة لا المكان',
+  JSON.stringify(planFor({ place: 'gym' }).workoutPlan) ===
+    JSON.stringify(planFor({ place: 'home' }).workoutPlan),
+)
 check('NEAT → TDEE', planFor({ neat: 'sedentary' }).targets.tdee !== planFor({ neat: 'high' }).targets.tdee)
 const unrestrictedMeals = planFor({ dietPattern: 'none' }).nutritionPlan.meals
 const veganMeals = planFor({ dietPattern: 'vegan' }).nutritionPlan.meals
