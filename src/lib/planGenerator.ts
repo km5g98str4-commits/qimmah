@@ -25,7 +25,13 @@ import {
   MINOR_GOAL_RESTRICTION_NOTE,
 } from '@/lib/calculators'
 import { makeEquipmentGate, resolveGymAccess } from '@/lib/equipmentAccess'
-import { canonicalExerciseId, exercises, getExercise } from '@/data/exercises'
+import {
+  detectInjuryRegions,
+  hasRecognizedInjury,
+  injuryFilterState,
+  makeInjurySafetyFilter,
+} from '@/lib/injurySafety'
+import { exercises, getExercise } from '@/data/exercises'
 import { primaryMachineIdSet } from '@/data/machineCatalog'
 import { getTemplate } from '@/data/workoutTemplates'
 import { mealTemplates, getMealTemplate } from '@/data/mealTemplates'
@@ -187,82 +193,17 @@ function prefersMachines(tier: ExpTier): boolean {
   return tier === 'beginner' || tier === 'novice'
 }
 
-// — تصفية الإصابات: نستبعد التمارين عالية الخطورة ونُبقي بدائل أأمن (بلا نصائح طبية) —
-type InjuryArea = 'knee' | 'shoulder' | 'back' | 'wrist' | 'elbow' | 'ankle'
+// — تصفية الإصابات — [SOVEREIGN-PLAN-001] —
+//
+// انتقل النموذج كاملًا إلى `@/lib/injurySafety`: **ميكانيكا الحركة** (`jointLoads`
+// على كل تمرين) مضمومةً إلى القائمة اليدوية القديمة، مع **الفشل مغلقًا** على
+// المركّبات غير المصنَّفة. هنا يبقى الاستدعاء فقط — والمرشِّح نفسه يُمرَّر إلى
+// **كل** موضع اختيار: الحوضان أدناه، وفتحة الإضافة (`pickAccessory`)، ومحرّك
+// الاستبدال الحيّ في `workoutSubstitution` (كان الثلاثة عميانًا عن الإصابة).
 
-/** يكتشف مناطق الإصابة من نص القيود (معرّفات الإعداد القياسية + التسميات العربية). */
-function detectInjuries(injuries?: string): Set<InjuryArea> {
-  const out = new Set<InjuryArea>()
-  if (!injuries) return out
-  const t = injuries.toLowerCase()
-  if (/knee|ركبة|ركب/.test(t)) out.add('knee')
-  if (/shoulder|كتف|أكتاف|اكتاف/.test(t)) out.add('shoulder')
-  if (/back|lower_back|ظهر|عمود/.test(t)) out.add('back')
-  if (/wrist|رسغ|معصم/.test(t)) out.add('wrist')
-  if (/elbow|مرفق|كوع/.test(t)) out.add('elbow')
-  if (/ankle|كاحل|كعب/.test(t)) out.add('ankle')
-  return out
-}
-
-/** هل نصّ القيود يفعّل فعلًا واحدًا على الأقل من مرشّحات الإصابة في المولّد؟ */
+/** هل نصّ القيود/المفاتيح البنيوية تفعّل فعلًا منطقة إصابة واحدة على الأقل؟ */
 export function hasRecognizedInjuryArea(injuries?: string): boolean {
-  return detectInjuries(injuries).size > 0
-}
-
-// تمارين نستبعدها افتراضيًا لكل إصابة — مع إبقاء بدائل أأمن لنفس المجموعة العضلية.
-// المبدأ: عند الشك نستبعد (محافظ)، مع ضمان بقاء بدائل تملأ الخطة (أجهزة/كيبل/دمبل).
-// المعرّفات هنا قانونية (P12): كائنات التمارين تحمل المعرّف القانوني وفحص العضوية يتم عليه.
-const INJURY_RISKY_IDS: Record<InjuryArea, ReadonlySet<string>> = {
-  // الركبة: نتجنّب القرفصاء الثقيل والاندفاع العميق ومدّ الرجل؛ نُبقي ليج برس/قرفصاء خفيف والهيپ.
-  knee: new Set([
-    'barbell-back-squat', 'front-squat', 'hack-squat-machine', 'smith-machine-squat', 'sissy-squat',
-    'belt-squat', 'leg-press-narrow', 'bulgarian-split-squat', 'walking-lunge',
-    'reverse-lunge', 'step-up', 'leg-extension-machine', 'wall-sit',
-  ]),
-  // الكتف: نتجنّب الضغط العلوي بالبار والتجديف العمودي؛ نُبقي ضغط الدمبل/الجهاز والرفرفات.
-  shoulder: new Set(['overhead-press', 'push-press', 'upright-row', 'arnold-press']),
-  // الظهر: نتجنّب الهينج الثقيل المحمّل على العمود؛ نُبقي التجديف المدعوم/الجهاز والهيپ ثرَست.
-  back: new Set([
-    'deadlift', 'sumo-deadlift', 'stiff-leg-deadlift', 'good-morning', 'barbell-row', 't-bar-row-machine',
-    'romanian-deadlift', 'dumbbell-rdl', 'single-leg-rdl',
-  ]),
-  // الرسغ: نتجنّب القبضة الثقيلة (رفعات/عقلة/تجديف بار)، وحمل وزن الجسم على الكفّ (ضغط/غطس)،
-  // وتمرير البار المستقيم والضغط الضيّق (إجهاد الرسغ). نُبقي أجهزة/كيبل/دمبل بقبضة محايدة.
-  wrist: new Set([
-    'deadlift', 'sumo-deadlift', 'rack-pull', 'barbell-row', 'pendlay-row', 't-bar-row-machine',
-    'meadows-row', 'pull-up', 'chin-up', 'inverted-row', 'dumbbell-shrug', 'barbell-shrug',
-    'kettlebell-swing', 'hanging-leg-raise', 'toes-to-bar', 'front-squat',
-    'barbell-curl', 'ez-bar-curl', 'cable-biceps-curl', 'reverse-curl', 'preacher-curl-machine', 'spider-curl',
-    'skull-crusher', 'close-grip-bench-press', 'jm-press',
-    'push-up', 'incline-push-up', 'knee-push-up', 'diamond-push-up', 'chest-dip', 'bench-dip',
-    'ab-wheel-rollout', 'mountain-climber', 'burpees',
-  ]),
-  // المرفق: نتجنّب تمارين ثني/مدّ المرفق تحت حِمل مباشر (التمريرات، مدّ الترايسبس الثقيل، الغطس).
-  // نُبقي دفع الترايسبس بالكيبل (بوش داون) والضغط بالجهاز/الدمبل لملء اليوم.
-  elbow: new Set([
-    'barbell-curl', 'dumbbell-curl', 'hammer-curl', 'preacher-curl-machine', 'cable-biceps-curl',
-    'concentration-curl', 'incline-dumbbell-curl', 'ez-bar-curl', 'spider-curl', 'cable-hammer-curl',
-    'reverse-curl', 'machine-curl',
-    'skull-crusher', 'overhead-triceps-extension', 'cable-overhead-extension', 'dumbbell-kickback',
-    'close-grip-bench-press', 'jm-press', 'bench-dip', 'chest-dip', 'assisted-dip-machine',
-    'diamond-push-up',
-  ]),
-  // الكاحل: نتجنّب القفز/الارتطام، ورفع السمانة واقفًا (توازن على الكاحل)، والاندفاع.
-  // نُبقي سمانة جالس/ليج برس والقرفصاء المدعوم والكارديو منخفض الارتطام.
-  ankle: new Set([
-    'bulgarian-split-squat', 'walking-lunge', 'reverse-lunge', 'step-up',
-    'standing-calf-raise-machine', 'bodyweight-calf-raise', 'donkey-calf-raise', 'single-leg-calf-raise',
-    'jump-rope', 'burpees', 'high-knees', 'mountain-climber',
-  ]),
-}
-
-/** يبني فلتر إصابات يستبعد التمارين عالية الخطورة للإصابات المحددة. */
-function makeInjuryFilter(areas: Set<InjuryArea>): (ex: Exercise) => boolean {
-  if (!areas.size) return () => true
-  const banned = new Set<string>()
-  // canonicalExerciseId تحصين إضافي: لو تسلّل معرّف قديم للقوائم يبقى الاستبعاد صحيحًا.
-  for (const area of areas) for (const id of INJURY_RISKY_IDS[area]) banned.add(canonicalExerciseId(id))
-  return (ex) => !banned.has(ex.id)
+  return hasRecognizedInjury({ injuries })
 }
 
 // — فتحات اليوم (Slots): قائمة مرتّبة بالأولوية تُملأ بأفضل تمرين متاح —
@@ -391,10 +332,20 @@ function accessoryCategory(type: DayType, variation: number): 'triceps' | 'bicep
  * الكيبل الحرّ للمتقدّم فقط، فلا يتسرّب «كيبل بايسبس/ترايسبس» إلى خطة المبتدئ عبر باب الإضافة.
  * إن لم يتبقَّ مرشّح مسموح غير مستخدم → null (تُلحَق البطاقة من مكان آخر، بلا كيبل حرّ ولا تكرار).
  */
-function pickAccessory(cat: 'triceps' | 'biceps' | 'abs', dayIndex: number, used: Set<string>, tier: ExpTier): string | null {
+function pickAccessory(
+  cat: 'triceps' | 'biceps' | 'abs',
+  dayIndex: number,
+  used: Set<string>,
+  tier: ExpTier,
+  injuryOk: (ex: Exercise) => boolean,
+): string | null {
   const pool = ACCESSORY_POOL[cat].filter((id) => {
     const ex = getExercise(id)
-    return !ex || cableOk(ex, tier)
+    // [SOVEREIGN-PLAN-001] الإضافة كانت تدخل الخطة **خارج مرشّح الإصابات كلّيًا**:
+    // ستّة معرّفات ثابتة تُلحَق بنهاية اليوم بلا سؤال. كانت غير ضارّة بالمصادفة لا
+    // بالتصميم (كلها أجهزة/كيبل). الآن تمرّ على نفس المرشّح الذي يمرّ عليه الحوض.
+    if (!ex) return false
+    return cableOk(ex, tier) && injuryOk(ex)
   })
   for (let k = 0; k < pool.length; k++) {
     const cand = pool[(dayIndex + k) % pool.length]
@@ -702,8 +653,8 @@ function generateWorkoutPlan(p: Profile): { plan: WorkoutPlan; specs: DaySpec[] 
   const tier = expTier(p)
   const target = targetExerciseCount(tier, p.workoutDuration)
   const equipOk = makeEquipFilter(p)
-  const injuryAreas = detectInjuries(p.injuries)
-  const injuryOk = makeInjuryFilter(injuryAreas)
+  const injuryRegions = detectInjuryRegions(p)
+  const injuryOk = makeInjurySafetyFilter(injuryRegions)
   const preferMachines = prefersMachines(tier)
   // P12 «أجهزة فقط»: في النادي (كامل/صغير) التمارين الأساسية هي أجهزة الكتالوج المعتمد حصريًا —
   // لا بار/دمبل أساسي إطلاقًا. كيبل الكتالوج (بايسبس/ترايسبس/كرنش) معتمد لكل المستويات لأنه
@@ -742,14 +693,18 @@ function generateWorkoutPlan(p: Profile): { plan: WorkoutPlan; specs: DaySpec[] 
     // (جولة 3) يوم الجسم الكامل لا يقل عن ٥ أساسيات (أرجل+صدر+ظهر+أكتاف+أرجل خلفية) مهما قصُرت
     // الجلسة — كي يلمس كل مجموعة كبرى؛ بقية الأنواع تتبع عدد الجلسة المعتاد.
     const dayTarget = spec.type === 'full' ? Math.max(target, FULL_BODY_MIN) : target
-    const ids = buildDayExercises(spec.type, variation, nVar, pool, dayTarget, preferMachines, rank, machinesOnly)
+    // [SOVEREIGN-PLAN-001] حين تُعلَن إصابة يضيق الحوض حتمًا (إصابة كتف تُخرج كل
+    // الدفع الأمامي مثلًا). «آمن» يجب ألّا يُشترى بخطة فارغة — فنسمح بالإكمال من
+    // بقية الحوض **المُرشَّح** كي يبقى اليوم كامل العدد بحركات مسموحة، لا ناقصًا.
+    const fillWide = machinesOnly || injuryRegions.size > 0
+    const ids = buildDayExercises(spec.type, variation, nVar, pool, dayTarget, preferMachines, rank, fillWide)
     // إضافة واحدة تُلحَق بنهاية اليوم (أجهزة فقط) — ذراعان/بطن حسب نوع اليوم، غير أساسية.
     // (جولة 2) نُدوّر الإضافة بفهرس النسخة (variation) لا فهرس اليوم المطلق — كي يأخذ يومَا نفس
     // النوع (سفلي أ/ب) إضافتين مختلفتين بدل تكرار نفسها (كان سبب تداخل ٤٥٪ في يوم السفلي).
     let accId: string | null = null
     if (machinesOnly) {
       const cat = accessoryCategory(spec.type, variation)
-      const acc = cat ? pickAccessory(cat, variation, new Set(ids), tier) : null
+      const acc = cat ? pickAccessory(cat, variation, new Set(ids), tier, injuryOk) : null
       if (acc) { ids.push(acc); accId = acc }
     }
     return {
@@ -1137,10 +1092,18 @@ export function generatePlan(profile: Profile): GeneratedPlan {
   if (p.trainingLevel === 'beginner' && p.trainingDays >= 5) {
     warnings.push('للمبتدئ ننصح بـ3–4 أيام في البداية لبناء الالتزام والاستشفاء.')
   }
-  // تنبيه عند تصفية الإصابات: استبعدنا تمارين عالية الخطورة واخترنا بدائل أأمن.
-  const injuryAreas = detectInjuries(p.injuries)
-  if (injuryAreas.size) {
-    warnings.push('راعينا مناطق الإصابة التي تعرّفنا عليها باستبعاد التمارين المطابقة لقائمة المخاطر واختيار بدائل لنفس العضلات.')
+  // تنبيه الإصابات — **ثلاث حالات لا حالتان** (§5: لا واجهة تَعِد بما لا يحدث).
+  // كان النصّ يدّعي الحماية كلما لمس تعبيرٌ نمطيّ الحقل. الآن: ادّعاء الحماية
+  // مقصور على ما رشّحناه فعلًا، و«أعلنتَ شيئًا لم نفهمه» تُقال صراحةً بدل الصمت.
+  switch (injuryFilterState(p)) {
+    case 'applied':
+      warnings.push('راعينا مناطق الإصابة التي تعرّفنا عليها: استبعدنا الحركات التي تحمّل المنطقة المصابة واخترنا بدائل لنفس العضلات.')
+      break
+    case 'unrecognized':
+      warnings.push('كتبت لنا قيدًا ما قدرنا نحوّله لقاعدة تمرين، فما استبعدنا شيئًا بسببه. اختر المنطقة من القائمة (ركبة/كتف/أسفل الظهر/رسغ/مرفق/كاحل) عشان نراعيها.')
+      break
+    case 'notApplied':
+      break
   }
   // فحص تكرار الأرجل: القاعدة مضمونة في التلقائي؛ هنا ننبّه إذا اختار المستخدم تقسيمة متقدّمة تدرّب الأرجل أقل من مرّتين.
   const legDays = weeklySchedule.filter((d) => d.type === 'legs' || d.type === 'full').length

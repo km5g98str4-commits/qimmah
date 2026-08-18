@@ -91,9 +91,16 @@ check('raw injury text is absent from the rationale', !JSON.stringify(injured).i
 check('raw injury text is absent in Arabic too', !JSON.stringify(injured).includes('الركبة'))
 check('injury presence is reported as a stable token', outcomeOf(injured, 'injuryFilter') === 'applied')
 check('no declared injury reports notApplied', outcomeOf(base, 'injuryFilter') === 'notApplied')
-const unrecognizedInjury = rationaleFor({ injuries: 'hip pain' })
+// [SOVEREIGN-PLAN-001] «الورك» صار **منطقة مشتقّة معترفًا بها**: يحرسها النموذج
+// بأحمال الهينج وثني الركبة العميق والارتطام. فلم يعد مثالًا صالحًا لغير المتعرَّف
+// عليه — والتأكيد لم يُحذف بل انقسم: مثال جديد غير معترف به، ومثال الورك يصعد إلى
+// «مُطبَّق». حذفه كان سيخفي بالضبط ما تغيّر.
+const recognizedHip = rationaleFor({ injuries: 'hip pain' })
+check('a hip complaint is now a recognized (derived) region, not silently dropped', outcomeOf(recognizedHip, 'injuryFilter') === 'applied')
+check('the hip complaint still never leaks its raw text', !JSON.stringify(recognizedHip).includes('hip pain'))
+const unrecognizedInjury = rationaleFor({ injuries: 'ACL reconstruction' })
 check('an unrecognized injury note never claims that filtering happened', outcomeOf(unrecognizedInjury, 'injuryFilter') === 'unrecognized')
-check('an unrecognized injury note still never leaks its raw text', !JSON.stringify(unrecognizedInjury).includes('hip pain'))
+check('an unrecognized injury note still never leaks its raw text', !JSON.stringify(unrecognizedInjury).includes('ACL reconstruction'))
 
 console.log('\n═══ 3) INACTIVE AXES ARE DECLARED, NOT CLAIMED (§5) ═══')
 const focusAxis = base.inactiveAxes.find((a) => a.axis === 'trainingFocus')
