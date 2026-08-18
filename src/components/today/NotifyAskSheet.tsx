@@ -66,7 +66,7 @@ export function NotifyAskSheet({ lang, prefs, onAccept, onDecline }: NotifyAskSh
           <button
             type="button"
             onClick={() => setEditing(true)}
-            className="mt-3 text-sm font-bold text-primary-c underline underline-offset-4"
+            className="tap-target mt-3 inline-flex items-center text-sm font-bold text-primary-c underline underline-offset-4"
           >
             {t.notifyAskChangeTime}
           </button>
@@ -86,10 +86,10 @@ export function NotifyAskSheet({ lang, prefs, onAccept, onDecline }: NotifyAskSh
         {denied && <p className="mt-3 text-sm leading-relaxed text-ink-500">{t.notifyAskDenied}</p>}
 
         <div className="mt-5 space-y-2">
-          <button type="button" disabled={busy} onClick={() => void accept()} aria-busy={busy} className="btn-primary w-full py-3.5 text-[1.0625rem] disabled:opacity-60">
+          <button type="button" disabled={busy} onClick={() => void accept()} aria-busy={busy} className="btn-primary tap-target w-full py-3.5 text-[1.0625rem] disabled:opacity-60">
             {busy ? nc.saving : t.notifyAskYes}
           </button>
-          <button type="button" onClick={onDecline} className="w-full rounded-2xl py-3 text-center text-sm font-bold text-ink-700">
+          <button type="button" onClick={onDecline} className="tap-target w-full rounded-2xl py-3 text-center text-sm font-bold text-ink-700">
             {t.notifyAskNo}
           </button>
         </div>

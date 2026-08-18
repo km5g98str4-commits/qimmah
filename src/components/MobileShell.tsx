@@ -205,16 +205,26 @@ export function MobileShell({ lang, tab, badge: _badge, onNavigate, onOpenSettin
           style={{ paddingTop: 'var(--safe-top)' }}
         >
           <div className="flex h-14 items-center justify-between gap-3 px-4">
-            {tab === 'dashboard' ? (
-              <button type="button" onClick={() => onNavigate('dashboard')} className="flex min-h-[44px] items-center gap-2">
-                <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-white shadow-glow">
-                  <Icon name="Dumbbell" className="h-5 w-5" strokeWidth={2.5} />
-                </span>
-                <span className="text-base font-extrabold text-ink-900">{pageTitle}</span>
-              </button>
-            ) : (
-              <h1 className="text-lg font-black text-ink-900">{pageTitle}</h1>
-            )}
+            {/* [R3-UX-A11Y] عنوان الصفحة `h1` **في كل تبويب بلا استثناء**.
+                كان تبويب الرئيسية وحده يستبدل العنوان بـ`<button><span>` — فتفتح
+                شجرةُ العناوين على الشاشة الأكثر زيارةً بلا `h1` إطلاقًا، بينما
+                `TodayV2` يبني عليها ويتنازل إلى `h2` معلنًا أن «القشرة تملك h1
+                الصفحة». وعدٌ لم يكن يُسلَّم.
+                العلاج: يبقى العنوان `h1` ويُلبَس الزرّ **داخله** — الزرّ محتوى
+                عباري (phrasing content) فالتركيب صحيح بنيويًّا، والاسم المحسوب
+                للعنوان هو نصّ الزرّ نفسه. والأيقونة زينة معلَنة كذلك. */}
+            <h1 className="min-w-0 text-lg font-black text-ink-900">
+              {tab === 'dashboard' ? (
+                <button type="button" onClick={() => onNavigate('dashboard')} className="tap-target flex items-center gap-2">
+                  <span aria-hidden="true" className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-white shadow-glow">
+                    <Icon name="Dumbbell" className="h-5 w-5" strokeWidth={2.5} />
+                  </span>
+                  <span className="text-base font-extrabold text-ink-900">{pageTitle}</span>
+                </button>
+              ) : (
+                pageTitle
+              )}
+            </h1>
 
             <div className="flex items-center gap-2">
               <button
@@ -277,7 +287,7 @@ export function MobileShell({ lang, tab, badge: _badge, onNavigate, onOpenSettin
                     type="button"
                     onClick={() => { void playHaptic('selection'); setQuickLogOpen(true) }}
                     aria-label={tb.label}
-                    className="-mt-5 flex flex-col items-center gap-1 text-[10px] font-bold text-primary-c"
+                    className="tap-target -mt-5 flex flex-col items-center gap-1 text-[10px] font-bold text-primary-c"
                   >
                     <span className="grid h-14 w-14 place-items-center rounded-full bg-primary text-white shadow-glow ring-4 ring-surface">
                       <Icon name={tb.icon} className="h-6 w-6" strokeWidth={2.75} />
@@ -295,7 +305,7 @@ export function MobileShell({ lang, tab, badge: _badge, onNavigate, onOpenSettin
                 onClick={() => { void playHaptic('selection'); onNavigate(tb.route) }}
                 aria-current={active ? 'page' : undefined}
                 className={cn(
-                  'flex flex-col items-center justify-center gap-1 py-2.5 text-[10px] font-bold transition-colors',
+                  'tap-target flex flex-col items-center justify-center gap-1 py-2.5 text-[10px] font-bold transition-colors',
                   active ? 'text-primary-c' : 'text-ink-500 hover:text-ink-700',
                 )}
               >

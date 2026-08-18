@@ -243,12 +243,12 @@ export function StepsView({ lang, onBack, onOpenSettings }: StepsViewProps) {
             {(model?.hasData || health.enabled) && (
               <div className="mt-4 flex flex-wrap gap-2 border-t border-line pt-4">
                 {health.enabled && (
-                  <button type="button" onClick={() => void refresh()} data-testid="steps-refresh" className="btn-primary px-4 py-2.5 text-sm">
+                  <button type="button" onClick={() => void refresh()} data-testid="steps-refresh" className="btn-primary tap-target px-4 py-2.5 text-sm">
                     <Icon name="RefreshCw" className="h-4 w-4" />
                     {copy.refresh}
                   </button>
                 )}
-                <button type="button" onClick={onOpenSettings} className="btn-ghost px-4 py-2.5 text-sm">
+                <button type="button" onClick={onOpenSettings} className="btn-ghost tap-target px-4 py-2.5 text-sm">
                   <Icon name="Settings" className="h-4 w-4" />
                   {copy.openSettings}
                 </button>

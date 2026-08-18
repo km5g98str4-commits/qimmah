@@ -39,7 +39,7 @@ export function MissedDayCard({ lang, fullMin, easyMin, onStartEasy }: MissedDay
         <p className="mt-3 text-sm font-black text-ink-900">{t.missedEasierLine(fullMin, easyMin)}</p>
       )}
 
-      <button type="button" onClick={onStartEasy} className="btn-primary mt-3 w-full py-3">
+      <button type="button" onClick={onStartEasy} className="btn-primary tap-target mt-3 w-full py-3">
         {t.missedEasierCta}
       </button>
 

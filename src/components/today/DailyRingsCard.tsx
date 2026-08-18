@@ -74,7 +74,7 @@ export function DailyRingsCard({ lang, calories, protein, carbs, fat, onOpen }: 
         type="button"
         onClick={() => { void playHaptic('selection'); onOpen() }}
         aria-label={`${d.remainingTitle} — ${d.openNutrition}`}
-        className="v2-pressable flex w-full items-center gap-3.5 text-start"
+        className="v2-pressable tap-target flex w-full items-center gap-3.5 text-start"
       >
         <ProgressRing value={ratioOf(calories)} size={84} stroke={8} color={TONE.calories}>
           <span className="flex flex-col items-center gap-0.5">
