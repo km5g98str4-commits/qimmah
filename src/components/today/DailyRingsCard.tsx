@@ -81,7 +81,7 @@ export function DailyRingsCard({ lang, calories, protein, carbs, fat, onOpen }: 
             <span aria-hidden="true" className="text-[26px] font-black leading-none tracking-tight text-ink-900 tabular-nums">
               {hasCalTarget ? n(remainingOf(calories)) : '—'}
             </span>
-            <span aria-hidden="true" className="text-[10px] font-bold leading-none text-ink-500">
+            <span aria-hidden="true" className="text-[11px] font-bold leading-none text-ink-500">
               {d.caloriesUnit}
             </span>
           </span>
@@ -95,7 +95,7 @@ export function DailyRingsCard({ lang, calories, protein, carbs, fat, onOpen }: 
           <span dir="ltr" className={`mt-1 block text-sm font-bold tabular-nums text-ink-500 ${ar ? 'text-end' : 'text-start'}`}>
             {hasCalTarget ? d.ofTarget(n(Math.round(calories.consumed)), n(calories.target)) : '—'}
           </span>
-          <span className="mt-1.5 block text-[11px] leading-snug text-ink-400">{d.ringLegend}</span>
+          <span className="mt-1.5 block text-[12px] leading-snug text-ink-500">{d.ringLegend}</span>
         </span>
       </button>
 
@@ -104,7 +104,7 @@ export function DailyRingsCard({ lang, calories, protein, carbs, fat, onOpen }: 
           const has = m.slice.target > 0
           const remaining = remainingOf(m.slice)
           return (
-            <li key={m.key} className="flex flex-col items-center gap-1">
+            <li key={m.key} className="flex flex-col items-center gap-1.5">
               {/* الوصف الكامل مرّة واحدة لقارئ الشاشة؛ والمرئي مخفيّ عنه فلا يتكرّر. */}
               <span className="sr-only">
                 {has
@@ -113,13 +113,29 @@ export function DailyRingsCard({ lang, calories, protein, carbs, fat, onOpen }: 
               </span>
               <span aria-hidden="true" className="contents">
                 <ProgressRing value={ratioOf(m.slice)} size={40} stroke={5} color={m.color}>
-                  <span className="text-[13px] font-black leading-none text-ink-900 tabular-nums">
+                  <span className="text-[14px] font-black leading-none text-ink-900 tabular-nums">
                     {has ? n(remaining) : '—'}
                   </span>
                 </ProgressRing>
-                <span className="text-[11px] font-bold leading-none text-ink-700">{m.label}</span>
-                <span dir="ltr" className="whitespace-nowrap text-[11px] leading-none text-ink-400 tabular-nums">
-                  {has ? `${n(Math.round(m.slice.consumed))} / ${n(m.slice.target)} ${d.gramsShort}` : '—'}
+                <span className="text-[12px] font-bold leading-none text-ink-700">{m.label}</span>
+                {/*
+                  [SOVEREIGN-003] كان هذا السطر `dir="ltr"` على **الكتلة كلها**
+                  ونصّه «٩٥ / ٢٣٥ غ». والوحدة «غ» حرف عربي (قويّ يمينًا) في آخر
+                  فقرة يسارية، فترفعه الخوارزمية إلى مدّى معكوس يبتلع ما قبله:
+                  المعروض فعليًّا كان **«غ ٢٣٥ / ٩٥»** — نفس عطل سطر التاريخ
+                  بالضبط، على بعد بطاقة واحدة.
+                  العلاج: العزل يقع على **النسبة الرقمية وحدها** (`<bdi dir="ltr">`
+                  فالقسمة تُقرأ يسارًا في اللغتين)، والوحدة تخرج منه فتتبع اتجاه
+                  الفقرة. فلا يبقى حرف عربي داخل مدًى يساري مفروض.
+                */}
+                <span className="whitespace-nowrap text-[12px] leading-none text-ink-500 tabular-nums">
+                  {has ? (
+                    <>
+                      <bdi dir="ltr">{`${n(Math.round(m.slice.consumed))} / ${n(m.slice.target)}`}</bdi> {d.gramsShort}
+                    </>
+                  ) : (
+                    '—'
+                  )}
                 </span>
               </span>
             </li>

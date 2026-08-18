@@ -1,5 +1,6 @@
 import { Icon } from '@/components/Icon'
 import { todayHomeStrings } from '@/i18n/dict/todayHome'
+import { todayCoherenceStrings } from '@/i18n/dict/todayCoherence'
 import type { Lang } from '@/lib/appPreferences'
 import type { TodayV2Model } from '@/lib/todayV2Model'
 import { formatNumber, formatNumeralsIn } from '@/lib/numberFormat'
@@ -26,6 +27,7 @@ export function NextActionCard({
   hero,
   training,
   durationMin,
+  durationSource,
   restDay,
   eyebrowOverride,
   onNavigate,
@@ -35,6 +37,8 @@ export function NextActionCard({
   training: TodayV2Model['training']
   /** مدّة الجلسة كما يعرضها النموذج — نفس الرقم الذي يستعمله البطل، لا رقم ثانٍ. */
   durationMin: number
+  /** سند رقم المدّة — يحدّد الوسم المعروض بجانبه. لا رقم بلا سند (§5). */
+  durationSource: TodayV2Model['durationSource']
   restDay: boolean
   /** يستبدل لمحة البطل حين يملك السياق لمحة أدقّ (مثل «تم» بعد التمرين). */
   eyebrowOverride?: string
@@ -42,6 +46,7 @@ export function NextActionCard({
 }) {
   const ar = lang !== 'en'
   const d = todayHomeStrings[lang]
+  const c = todayCoherenceStrings[lang]
   const n = (value: number) => formatNumber(value, lang)
   /**
    * حدّ التوطين (القرار المعتمد C): النموذج يخزّن ويؤلّف بأرقام لاتينية، والتحويل
@@ -100,7 +105,18 @@ export function NextActionCard({
           <dl className="mt-3 flex items-center gap-3 text-sm">
             <Metric label={d.metaExercises} value={n(training.exerciseCount)} />
             <Divider />
-            <Metric label={d.metaDuration} value={`${n(durationMin)} ${d.minutesShort}`} />
+            {/*
+              [SOVEREIGN-003] المدّة **رقم مشتقّ** لا مقيس، وكانت تُعرض بجانب
+              «تمارين» و«مجموعات» — وهما مقيسان من الخطة — بنفس الثقة تمامًا.
+              الوسم يقول أيّهما: محسوبًا من تمارين اليوم، أو مأخوذًا من إعداد
+              المستخدم. والوصف الكامل في `sr-only` فلا يضيع على قارئ الشاشة.
+            */}
+            <Metric
+              label={d.metaDuration}
+              value={`${n(durationMin)} ${d.minutesShort}`}
+              note={durationSource === 'estimated' ? c.durationEstimate : durationSource === 'preference' ? c.durationPreference : null}
+              noteAria={durationSource === 'estimated' ? c.durationEstimateAria : durationSource === 'preference' ? c.durationPreferenceAria : null}
+            />
             {training.setCount > 0 && (
               <>
                 <Divider />
@@ -150,11 +166,33 @@ export function NextActionCard({
   )
 }
 
-function Metric({ label, value }: { label: string; value: string }) {
+function Metric({
+  label,
+  value,
+  note,
+  noteAria,
+}: {
+  label: string
+  value: string
+  /** وسم السند المرئي («تقديري» / «من إعدادك») — `null` حين الرقم مقيس. */
+  note?: string | null
+  /** الجملة الكاملة لقارئ الشاشة؛ الوسم المرئي مختصرها ولذلك يُخفى عنه. */
+  noteAria?: string | null
+}) {
   return (
     <div className="flex min-w-0 items-baseline gap-1.5">
-      <dt className="text-[11px] font-bold text-ink-400">{label}</dt>
-      <dd className="whitespace-nowrap text-sm font-black text-ink-900 tabular-nums">{value}</dd>
+      <dt className="text-[12px] font-bold text-ink-500">{label}</dt>
+      <dd className="whitespace-nowrap text-sm font-black text-ink-900 tabular-nums">
+        {value}
+        {note && (
+          <>
+            <span aria-hidden="true" className="ms-1 text-[11px] font-bold text-ink-500">
+              {note}
+            </span>
+            <span className="sr-only">{noteAria ?? note}</span>
+          </>
+        )}
+      </dd>
     </div>
   )
 }
