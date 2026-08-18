@@ -32,7 +32,6 @@ import type { RecoveryEngineEntry, RecoverySuggestion, TrainingLoad } from '@/li
 import {
   detectMissedDay,
   loadWeeklySchedule,
-  scheduledDayFor,
   type MissedDayDecision,
   type ScheduledDay,
   type WeeklySchedule,
