@@ -11,6 +11,7 @@ import {
   validateStep,
   type OnboardingV2Draft,
 } from '@/lib/onboardingV2Flow'
+import type { Equipment } from '@/types/profile'
 import { V2_ONBOARDING } from '@/design-system/v2/labels'
 
 let pass = 0
@@ -30,7 +31,9 @@ function draft(over: Partial<OnboardingV2Draft> = {}): OnboardingV2Draft {
     step: 2, name: '', age: null, gender: null, heightCm: null, weightKg: null,
     intent: 'meals', level: 'intermediate',
     trainedBefore: 'months', totalMonths: 'm6_12', lastTrained: 'now', consistency: 'mostly',
-    goal: 'cut', days: 4, duration: 45, place: 'gym', neat: 'moderate', dietPattern: 'none',
+    goal: 'cut', days: 4, duration: 45, place: 'gym',
+    equipment: ['dumbbell', 'bodyweight'], equipmentTouched: false,
+    neat: 'moderate', dietPattern: 'none',
     hasInjury: true, injuries: ['knee'], healthDataConsent: true, ...over,
   }
 }
@@ -42,7 +45,7 @@ const V = (over: Partial<OnboardingV2Draft> = {}) => ({
   trainedBefore: 'months' as const, totalMonths: 'm6_12' as const,
   lastTrained: 'now' as const, consistency: 'mostly' as const,
   goal: 'cut' as const, days: 4, duration: 45,
-  place: null, neat: null, dietPattern: null, hasInjury: null, injuries: [] as string[], healthDataConsent: true,
+  place: null, equipment: [] as Equipment[], neat: null, dietPattern: null, hasInjury: null, injuries: [] as string[], healthDataConsent: true,
   ...over,
 })
 
@@ -62,7 +65,8 @@ console.log('\n① تحقّق الخطوات (رسالة خاصة بكل خطو�
   check('خطوة الهدف بلا هدف → goal', validateStep(3, V({ goal: null })) === 'goal')
   check('خطوة الجدول ترفض أيامًا شاذة', validateStep(4, V({ days: 7 })) === 'training')
   check('خطوة السياق تتطلب المكان والنشاط والأكل', validateStep(5, V({ place: 'gym', neat: null, dietPattern: 'none' })) === 'lifestyle')
-  check('خطوة السياق مكتملة', validateStep(5, V({ place: 'gym', neat: 'moderate', dietPattern: 'none' })) === null)
+  check('خطوة السياق تتطلب أداة واحدة على الأقل', validateStep(5, V({ place: 'gym', neat: 'moderate', dietPattern: 'none', equipment: [] })) === 'equipment')
+  check('خطوة السياق مكتملة', validateStep(5, V({ place: 'gym', neat: 'moderate', dietPattern: 'none', equipment: ['bodyweight'] })) === null)
   check('خطوة القيود تتطلب جوابًا صريحًا', validateStep(6, V({ hasInjury: null })) === 'limitations')
   check('الإصابة تتطلب منطقة', validateStep(6, V({ hasInjury: true, injuries: [] })) === 'limitations')
   check('لا إصابة جواب صالح', validateStep(6, V({ hasInjury: false })) === null)
@@ -151,6 +155,8 @@ console.log('\n⑤ افتراضيات أول تشغيل')
     days: 4,
     duration: 45,
     place: null,
+    equipment: [],
+    equipmentTouched: false,
     neat: null,
     dietPattern: null,
     hasInjury: null,

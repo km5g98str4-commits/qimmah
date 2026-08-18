@@ -19,6 +19,7 @@ import type {
 } from '@/types/onboarding'
 import { HEALTH_CONSENT_POLICY_VERSION, ONBOARDING_SCHEMA_VERSION } from '@/types/onboarding'
 import type { GoalValue } from '@/data/planBuilder'
+import type { Equipment } from '@/types/profile'
 
 export interface Answers {
   // profile + bodyMetrics
@@ -36,6 +37,11 @@ export interface Answers {
   consistency?: OnbConsistency
   trainingHistory?: OnbTrainingHistory
   environment?: Environment
+  /**
+   * الأدوات المُعلَنة. **فارغة = لم يُسأل** فيعود التوليد لاشتقاق المكان
+   * (سلوك الملفّات القديمة حرفيًا بلا تغيير).
+   */
+  equipment: Equipment[]
   trainingDays: number
   daysTouched: boolean
   sessionDurationMin: number
@@ -67,6 +73,7 @@ export const defaultAnswers: Answers = {
   weightKg: 75,
   targetWeightKg: 70,
   targetTouched: false,
+  equipment: [],
   trainingDays: 3,
   daysTouched: false,
   sessionDurationMin: 60,
@@ -107,6 +114,13 @@ export function buildOnboardingProfile(a: Answers): OnboardingProfile {
       consistency: a.consistency ?? (beginner ? 'new' : undefined),
       history: a.trainingHistory,
       environment: a.environment,
+      // ⚠️ `equipment` يعيش **خارج** `OnbTrainingPreferences` حاليًا: النوع في
+      // `src/types/onboarding.ts` وهو خارج نطاق هذه الحارة. الإدراج بالنشر
+      // (لا بمفتاح صريح) يتجاوز فحص الخصائص الزائدة بلا خداع نوعي، والحقل
+      // ينجو في الجولة عبر التخزين لأن `loadOnboardingProfile` يدمج بالنشر.
+      // والقراءة في `toLegacyProfile` تمرّ بحارس اتّحاد فلا يُصدَّق مدخل معطوب.
+      // المطلوب من المنسّق: إضافة `equipment?: Equipment[]` إلى النوع.
+      ...(a.equipment.length > 0 ? { equipment: [...a.equipment] } : {}),
       daysPerWeek: a.trainingDays,
       sessionDurationMin: a.sessionDurationMin,
       // المبتدئ لا يختار التقسيمة — تبقى «تلقائي» دائمًا (P2.6: تثبيت الإجابة لا الـ UI فقط).

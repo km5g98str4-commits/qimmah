@@ -27,7 +27,10 @@ import { goalWordingFor, onboardingIntentStrings } from '@/i18n/dict/onboardingI
 import { setupWhyLines } from '@/i18n/dict/setupWhy'
 import { trainingHistoryStrings, type HistoryOption } from '@/i18n/dict/trainingHistory'
 import { onboardingLifestyleStrings } from '@/i18n/dict/onboardingLifestyle'
+import { onboardingEquipmentStrings } from '@/i18n/dict/onboardingEquipment'
+import { EQUIPMENT_VALUES } from '@/lib/onboardingKeys'
 import { dietPatternChoices, neatChoices } from '@/data/planBuilder'
+import type { Equipment } from '@/types/profile'
 import type {
   DietPattern,
   LastTrainedBucket,
@@ -41,9 +44,12 @@ import {
   DAYS,
   DURATIONS,
   HISTORY_STEP,
+  DEFAULT_EQUIPMENT_FOR_PLACE,
   LAST_INPUT_STEP,
   NAME_MAX_LENGTH,
   canAdvance,
+  isBodyweightOnly,
+  withBodyweight,
   clearDraftV2,
   finalizeReduce,
   historyFollowUpsApply,
@@ -171,6 +177,9 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
   const [days, setDays] = useState(initialDraft.days)
   const [duration, setDuration] = useState(initialDraft.duration)
   const [place, setPlace] = useState<string | null>(initialDraft.place)
+  // الأدوات — تُبذَر من المكان وتبقى **قرار المستخدم** بمجرّد أن يلمسها.
+  const [equipment, setEquipment] = useState<Equipment[]>(initialDraft.equipment)
+  const [equipmentTouched, setEquipmentTouched] = useState(initialDraft.equipmentTouched)
   const [neat, setNeat] = useState<NeatLevel | null>(initialDraft.neat)
   const [dietPattern, setDietPattern] = useState<DietPattern | null>(initialDraft.dietPattern)
   const [hasInjury, setHasInjury] = useState(initialDraft.hasInjury)
@@ -202,6 +211,7 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
   const bodyT = bodyStepStrings[lang] ?? bodyStepStrings.ar
   const historyT = trainingHistoryStrings[lang] ?? trainingHistoryStrings.ar
   const lifestyleT = onboardingLifestyleStrings[lang] ?? onboardingLifestyleStrings.ar
+  const equipmentT = onboardingEquipmentStrings[lang] ?? onboardingEquipmentStrings.ar
   // صياغة الأهداف تتبع المستوى المُعلن — نفس القيم المخزّنة، لغة مختلفة.
   const goalWording = useMemo(() => goalWordingFor(lang, level), [lang, level])
   // سطر «ليش نسأل» للخطوات السبع من مصدر واحد، بترتيب التدفّق.
@@ -212,7 +222,7 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
   const answers = {
     age: ageNum, gender, heightCm: heightNum, weightKg: weightNum,
     intent, level, trainedBefore, totalMonths, lastTrained, consistency: trainingConsistency,
-    goal, days, duration, place: place as V2Place | null, neat, dietPattern, hasInjury, injuries, healthDataConsent,
+    goal, days, duration, place: place as V2Place | null, equipment, neat, dietPattern, hasInjury, injuries, healthDataConsent,
   }
 
   /**
@@ -250,18 +260,18 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
     const draft: OnboardingV2Draft = {
       step, name: nameText, age: ageNum, gender, heightCm: heightNum, weightKg: weightNum,
       intent, level, trainedBefore, totalMonths, lastTrained, consistency: trainingConsistency,
-      goal, days, duration, place: place as V2Place | null, neat, dietPattern,
+      goal, days, duration, place: place as V2Place | null, equipment, equipmentTouched, neat, dietPattern,
       hasInjury, injuries, healthDataConsent,
     }
     saveDraftV2(draft, userId)
-  }, [step, nameText, ageNum, gender, heightNum, weightNum, intent, level, trainedBefore, totalMonths, lastTrained, trainingConsistency, goal, days, duration, place, neat, dietPattern, hasInjury, injuries, healthDataConsent, status, userId])
+  }, [step, nameText, ageNum, gender, heightNum, weightNum, intent, level, trainedBefore, totalMonths, lastTrained, trainingConsistency, goal, days, duration, place, equipment, equipmentTouched, neat, dietPattern, hasInjury, injuries, healthDataConsent, status, userId])
 
   // Auto-dismiss a shown validation message once the step becomes complete.
   useEffect(() => {
     if (validation && canAdvance(step, answers)) setValidation(null)
     // answers is derived each render; the primitive fields are the real deps.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [validation, step, intent, level, trainedBefore, totalMonths, lastTrained, trainingConsistency, goal, days, duration, place, neat, dietPattern, hasInjury, injuries, healthDataConsent])
+  }, [validation, step, intent, level, trainedBefore, totalMonths, lastTrained, trainingConsistency, goal, days, duration, place, equipment, neat, dietPattern, hasInjury, injuries, healthDataConsent])
 
   const next = () => {
     const v = validateStep(step, answers)
@@ -286,6 +296,28 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
       setLastTrained(null)
       setTrainingConsistency(null)
     }
+    setValidation(null)
+  }
+  /**
+   * اختيار المكان يبذر الأدوات **مرّة واحدة**: بعد أول لمسة من المستخدم صارت
+   * قائمته هي الحقيقة، فلا يدهسها تبديل مكانٍ لاحق. لا أحد يواجه قائمة فارغة،
+   * ولا أحد يُحبَس في افتراضنا.
+   */
+  const onPlace = (value: string) => {
+    setPlace(value)
+    if (!equipmentTouched) {
+      const seeded = DEFAULT_EQUIPMENT_FOR_PLACE[value as V2Place]
+      if (seeded) setEquipment(withBodyweight(seeded))
+    }
+    setValidation(null)
+  }
+  const onEquipment = (value: Equipment) => {
+    setEquipmentTouched(true)
+    setEquipment((list) => {
+      const next = list.includes(value) ? list.filter((x) => x !== value) : [...list, value]
+      // وزن الجسم لا يُنزع — نزعُه يترك المستخدم بلا حركة ممكنة واحدة.
+      return withBodyweight(next)
+    })
     setValidation(null)
   }
   const onHasInjury = (value: boolean) => {
@@ -314,7 +346,7 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
           name: nameText,
           age: ageNum, gender, heightCm: heightNum, weightKg: weightNum,
           intent, level, trainedBefore, totalMonths, lastTrained, consistency: trainingConsistency,
-          goal, days, duration, place: place as V2Place | null, neat, dietPattern,
+          goal, days, duration, place: place as V2Place | null, equipment, neat, dietPattern,
           hasInjury: hasInjury === true,
           injuries: hasInjury === true ? injuries : [],
           healthDataConsent,
@@ -526,9 +558,11 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
               titleId={stepTitleId}
               why={whyLines[5]}
               place={place}
+              equipment={equipment}
               neat={neat}
               dietPattern={dietPattern}
-              onPlace={(v) => { setPlace(v); setValidation(null) }}
+              onPlace={onPlace}
+              onEquipment={onEquipment}
               onNeat={(v) => { setNeat(v); setValidation(null) }}
               onDietPattern={(v) => { setDietPattern(v); setValidation(null) }}
             />
@@ -565,6 +599,8 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
                       ? historyT.validation
                     : validation === 'ageBelowMin'
                       ? bodyT.ageBelowMin
+                      : validation === 'equipment'
+                        ? equipmentT.validation
                       : validation === 'lifestyle'
                         ? lifestyleT.contextValidation
                         : validation === 'limitations'
@@ -1066,13 +1102,16 @@ function TileGroup({ options, value, onChange }: { options: readonly { value: st
 }
 
 function LifestyleStep({
-  lang, t, titleId, why, place, neat, dietPattern, onPlace, onNeat, onDietPattern,
+  lang, t, titleId, why, place, equipment, neat, dietPattern, onPlace, onEquipment, onNeat, onDietPattern,
 }: {
   lang: Lang; t: T; titleId: string; why: string
-  place: string | null; neat: NeatLevel | null; dietPattern: DietPattern | null
-  onPlace: (v: string) => void; onNeat: (v: NeatLevel) => void; onDietPattern: (v: DietPattern) => void
+  place: string | null; equipment: Equipment[]; neat: NeatLevel | null; dietPattern: DietPattern | null
+  onPlace: (v: string) => void
+  onEquipment: (v: Equipment) => void
+  onNeat: (v: NeatLevel) => void; onDietPattern: (v: DietPattern) => void
 }) {
   const s = onboardingLifestyleStrings[lang] ?? onboardingLifestyleStrings.ar
+  const eq = onboardingEquipmentStrings[lang] ?? onboardingEquipmentStrings.ar
   const activityOptions: readonly HistoryOption<NeatLevel>[] = neatChoices.map((option) => ({
     value: option.value,
     label: lang === 'en' ? option.labelEn ?? option.label : option.label,
@@ -1090,6 +1129,38 @@ function LifestyleStep({
       <Group questionId="training.place" legend={t.legends.place}>
         <p className="mt-6 mb-3 text-sm font-bold text-ink-700">{t.equipment.placeQ}</p>
         <TileGroup options={t.places} value={place} onChange={onPlace} />
+      </Group>
+
+      {/* الأدوات بعد المكان مباشرةً: المكان يبذرها، والمستخدم يحسمها. */}
+      <Group questionId="equipment.available" legend={eq.legend} className="mt-7 block">
+        <p className="mb-1 text-sm font-bold text-ink-900">{eq.question}</p>
+        <p className="mb-3 text-xs leading-relaxed text-ink-500">{eq.note}</p>
+        <div className="flex flex-wrap gap-2">
+          {EQUIPMENT_VALUES.map((key) => {
+            const on = equipment.includes(key)
+            return (
+              <button
+                key={key}
+                type="button"
+                onClick={() => onEquipment(key)}
+                aria-pressed={on}
+                className={cn(
+                  'v2-pressable flex min-h-[44px] items-center gap-1.5 rounded-full border px-3.5 py-2 text-sm font-semibold',
+                  on ? 'v2-choice-selected text-ink-900' : 'border-line bg-beige text-ink-700',
+                )}
+              >
+                {on && <Icon name="Check" className="h-3.5 w-3.5 shrink-0" strokeWidth={3} />}
+                {eq.labels[key]}
+              </button>
+            )
+          })}
+        </div>
+        {isBodyweightOnly(equipment) && equipment.length > 0 && (
+          <p className="mt-3 flex items-start gap-2 rounded-2xl border border-line bg-beige p-3 text-[0.8rem] font-bold leading-snug text-ink-700">
+            <Icon name="Info" className="mt-0.5 h-4 w-4 shrink-0 text-ink-500" />
+            {eq.bodyweightOnlyNote}
+          </p>
+        )}
       </Group>
 
       <HistoryGroup questionId="activity.neat" legend={s.legends.activity} question={s.activityQ} options={activityOptions} value={neat} onSelect={onNeat} />

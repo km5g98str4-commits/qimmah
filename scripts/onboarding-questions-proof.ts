@@ -11,6 +11,7 @@ import {
   type OnboardingV2Draft,
 } from '@/lib/onboardingV2Flow'
 import { toAnswersFromV2, type V2OnboardingChoices } from '@/lib/onboardingV2Adapter'
+import type { Equipment } from '@/types/profile'
 import { buildOnboardingProfile } from '@/lib/planBuilderAnswers'
 import {
   ONBOARDING_PROFILE_KEY,
@@ -26,6 +27,7 @@ import { bodyStepStrings } from '@/i18n/dict/bodyStep'
 import { onboardingIntentStrings } from '@/i18n/dict/onboardingIntent'
 import { trainingHistoryStrings } from '@/i18n/dict/trainingHistory'
 import { onboardingLifestyleStrings } from '@/i18n/dict/onboardingLifestyle'
+import { onboardingEquipmentStrings } from '@/i18n/dict/onboardingEquipment'
 import { dietPatternChoices, neatChoices } from '@/data/planBuilder'
 import { V2_ONBOARDING } from '@/design-system/v2/labels'
 
@@ -40,7 +42,9 @@ const base: V2OnboardingChoices = {
   age: 30, gender: 'male', heightCm: 180, weightKg: 82,
   intent: 'meals', level: 'intermediate',
   trainedBefore: 'months', totalMonths: 'm3_6', lastTrained: 'now', consistency: 'mostly',
-  goal: 'cut', days: 4, duration: 60, place: 'gym', neat: 'moderate', dietPattern: 'none',
+  goal: 'cut', days: 4, duration: 60, place: 'gym',
+  equipment: ['dumbbell', 'barbell', 'bench', 'machine', 'cable', 'smith', 'pullup_bar', 'bodyweight'],
+  neat: 'moderate', dietPattern: 'none',
   hasInjury: false, injuries: [], healthDataConsent: true,
 }
 
@@ -57,10 +61,11 @@ const firstWeek = (over: Partial<V2OnboardingChoices> = {}) => {
 
 console.log('\n═══ 1) سجلّ ثابت: 18 بالضبط، وكل معرّف مربوط بالواجهة مرة ═══')
 // ═══ العدد تغيّر بصدق، ولم يُحذف التأكيد ═══
-// ١٨ ← ١٩: أُضيف `profile.display_name` (الاسم الاختياري). التأكيد يبقى رقمًا
+// ١٨ ← ٢٠: أُضيف `profile.display_name` (الاسم) و`equipment.available`
+// (الأدوات). التأكيد يبقى رقمًا
 // صريحًا لا `> 0`: سؤال يُضاف بلا قرار يجب أن يسقط البناء.
-check('السجل يحمل 19 سؤالًا بالضبط', ONBOARDING_QUESTION_IDS.length === 19)
-check('كل المعرّفات فريدة', new Set(ONBOARDING_QUESTION_IDS).size === 19)
+check('السجل يحمل 20 سؤالًا بالضبط', ONBOARDING_QUESTION_IDS.length === 20)
+check('كل المعرّفات فريدة', new Set(ONBOARDING_QUESTION_IDS).size === 20)
 const viewSource = readFileSync(resolve(process.cwd(), 'src/views/OnboardingV2.tsx'), 'utf8')
 const profileSource = readFileSync(resolve(process.cwd(), 'src/lib/onboardingProfile.ts'), 'utf8')
 for (const id of ONBOARDING_QUESTION_IDS) {
@@ -82,9 +87,11 @@ const copyById = (lang: 'ar' | 'en'): Record<(typeof ONBOARDING_QUESTION_IDS)[nu
   const intent = onboardingIntentStrings[lang]
   const history = trainingHistoryStrings[lang]
   const lifestyle = onboardingLifestyleStrings[lang]
+  const equipment = onboardingEquipmentStrings[lang]
   const v2 = V2_ONBOARDING[lang]
   return {
     'profile.display_name': body.nameQ,
+    'equipment.available': equipment.question,
     'body.age': body.ageLabel,
     'body.sex': body.genderLabel,
     'body.height': body.heightLabel,
@@ -120,7 +127,8 @@ const valid = {
   trainedBefore: 'months' as const, totalMonths: 'm3_6' as const,
   lastTrained: 'now' as const, consistency: 'mostly' as const,
   goal: 'cut' as const, days: 4, duration: 60,
-  place: 'gym' as const, neat: 'moderate' as const, dietPattern: 'none' as const,
+  place: 'gym' as const, equipment: ['dumbbell', 'bodyweight'] as Equipment[],
+  neat: 'moderate' as const, dietPattern: 'none' as const,
   hasInjury: false, injuries: [] as string[], healthDataConsent: true,
 }
 for (const field of ['age', 'gender', 'heightCm', 'weightKg'] as const) check(`${field}: غيابه يحجب الجسد`, validateStep(0, { ...valid, [field]: null }) === 'body')
@@ -129,7 +137,8 @@ for (const field of ['trainedBefore', 'totalMonths', 'lastTrained', 'consistency
 check('goal: غيابه يحجب الهدف', validateStep(3, { ...valid, goal: null }) === 'goal')
 check('days: قيمة خارج المجال تُحجب', validateStep(4, { ...valid, days: 2 }) === 'training')
 check('duration: قيمة خارج المجال تُحجب', validateStep(4, { ...valid, duration: 50 }) === 'training')
-for (const field of ['place', 'neat', 'dietPattern'] as const) check(`${field}: غيابه يحجب السياق`, validateStep(5, { ...valid, [field]: null }) === 'lifestyle')
+for (const field of ['place', 'neat'] as const) check(`${field}: غيابه يحجب السياق`, validateStep(5, { ...valid, [field]: null }) === 'lifestyle')
+check('equipment: قائمة فارغة تُحجب برسالتها الخاصة', validateStep(5, { ...valid, equipment: [] }) === 'equipment')
 check('hasInjury: غيابه يحجب القيود', validateStep(6, { ...valid, hasInjury: null }) === 'limitations')
 check('injury areas: مطلوبة عند نعم', validateStep(6, { ...valid, hasInjury: true, injuries: [] }) === 'limitations')
 
@@ -248,8 +257,24 @@ check('لا كتابة خام إلى localStorage في مسار الإكمال',
 check('كاتب مصدر الحقيقة لا يبتلع الفشل', !/window\.localStorage\.setItem\(ONBOARDING_PROFILE_KEY/.test(profileSource))
 check('شاشة فشل الحفظ تصرّح ببقاء البيانات', viewSource.includes('t.storage.kept') && V2_ONBOARDING.ar.storage.kept.length > 0 && V2_ONBOARDING.en.storage.kept.length > 0)
 
+console.log('\n═══ 8ب) الأدوات والإصابة تصلان الملفّ فعلًا — لا حقلًا مثبَّتًا على الفراغ ═══')
+const gymFull = profileFor({ place: 'gym' })
+check('الأدوات المعلنة تصل Profile.equipment', gymFull.equipment?.includes('barbell') === true && gymFull.equipment?.includes('bodyweight') === true)
+const homeMinimal = profileFor({ place: 'home', equipment: ['bands'] })
+check('إعلان مختلف ⇒ أدوات مختلفة (لا [] ثابتة)', JSON.stringify(homeMinimal.equipment) !== JSON.stringify(gymFull.equipment))
+check('وزن الجسم يُضاف دائمًا ولا يُنزع', homeMinimal.equipment?.includes('bodyweight') === true)
+const bwOnly = profileFor({ place: 'home', equipment: ['bodyweight'] })
+check('«وزن الجسم وحده» يفتح فرع gymAccess=bodyweight الذي كان غير قابل للوصول', bwOnly.gymAccess === 'bodyweight' && bwOnly.gymType === 'bodyweight')
+check('وغيره لا يفتحه بالخطأ', gymFull.gymAccess === 'full' && homeMinimal.gymAccess === 'home')
+check('مسودّة بلا إعلان أدوات تبقى كما كانت (توافق رجعي)', (profileFor({ equipment: [] }).equipment ?? []).length === 0)
+const injured = profileFor({ hasInjury: true, injuries: ['knee', 'shoulder'] })
+check('مناطق الإصابة تصل Profile.injuryAreas كمفاتيح', JSON.stringify(injured.injuryAreas) === JSON.stringify(['knee', 'shoulder']))
+check('والنصّ القديم يبقى كما هو (توافق رجعي)', injured.injuries === 'knee، shoulder')
+check('«لا إصابة» تُقرأ فعلًا فتُفرَّغ المناطق', (profileFor({ hasInjury: false, injuries: ['knee'] }).injuryAreas ?? []).length === 0)
+check('مفتاح مخترَع لا يدخل المناطق', (profileFor({ hasInjury: true, injuries: ['knee', 'neck'] }).injuryAreas ?? []).join() === 'knee')
+
 console.log('\n═══ 9) محاكاة الالتفاف: العدد/الربط/المفردات لا تمرّ رخوة ═══')
-check('إضافة معرّف زائد كانت ستُكشف', [...ONBOARDING_QUESTION_IDS, 'filler.fake'].length !== 19)
+check('إضافة معرّف زائد كانت ستُكشف', [...ONBOARDING_QUESTION_IDS, 'filler.fake'].length !== 20)
 check('ربط أسماء متفرقة بلا data-question-id لا يكفي', !viewSource.includes('data-question-name='))
 check('مفردة مختلقة لا تنتمي للبنك', !canonical('totalMonths').includes('about_a_year'))
 

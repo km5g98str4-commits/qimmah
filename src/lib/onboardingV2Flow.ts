@@ -25,6 +25,8 @@ import type {
   TrainingConsistency,
 } from '@/types/onboarding'
 import type { V2Place } from '@/lib/onboardingV2Adapter'
+import { ALWAYS_AVAILABLE_EQUIPMENT, normalizeEquipment } from '@/lib/onboardingKeys'
+import type { Equipment } from '@/types/profile'
 import { classifyExperience, classifyTrainingStatus } from '@/lib/personalization/experience'
 import {
   ALGO_VERSION,
@@ -58,6 +60,34 @@ export const DIET_PATTERN_VALUES = ['none', 'vegetarian', 'vegan', 'pescatarian'
 
 export function historyFollowUpsApply(trainedBefore: TrainedBefore | null): boolean {
   return trainedBefore !== null && trainedBefore !== 'never'
+}
+
+/**
+ * الأدوات المفترضة لكل مكان — **بذرة لا قرار**.
+ *
+ * لا أحد يواجه قائمة فارغة، ولا أحد يُحبس في افتراض: أوّل لمسة من المستخدم
+ * تجعل قائمته هي الحاكمة (`equipmentTouched`). والقيم مشتقّة من مجموعات
+ * `equipmentAccess.ts` نفسها حتى لا يفترق الافتراض عن سلوك المولّد اليوم.
+ */
+export const DEFAULT_EQUIPMENT_FOR_PLACE: Record<V2Place, readonly Equipment[]> = {
+  gym: ['dumbbell', 'barbell', 'bench', 'machine', 'cable', 'smith', 'pullup_bar', 'bodyweight'],
+  home: ['dumbbell', 'bands', 'bodyweight'],
+  machines: ['machine', 'cable', 'smith', 'bodyweight'],
+}
+
+/**
+ * وزن الجسم **لا يُنزع**: لا يملكه أحد ولا يفقده أحد، وقائمة بلا حركة ممكنة
+ * واحدة تُنتج خطة فارغة. يُضاف عند الحدّ لا في الواجهة وحدها، فلا يوجد طريق
+ * يتجاوزه.
+ */
+export function withBodyweight(equipment: readonly Equipment[]): Equipment[] {
+  return normalizeEquipment([...equipment, ALWAYS_AVAILABLE_EQUIPMENT])
+}
+
+/** هل الاختيار وزن جسم صرفًا؟ يجعل فرع `gymAccess='bodyweight'` قابلًا للوصول. */
+export function isBodyweightOnly(equipment: readonly Equipment[]): boolean {
+  const normalized = withBodyweight(equipment)
+  return normalized.length === 1 && normalized[0] === ALWAYS_AVAILABLE_EQUIPMENT
 }
 
 export function injuryAreasApply(hasInjury: boolean | null): boolean {
@@ -118,6 +148,17 @@ export interface OnboardingV2Draft {
   days: number
   duration: number
   place: V2Place | null
+  /**
+   * الأدوات المتاحة فعلًا. **المكان سياق والأداة حاكمة** — انظر قاموس
+   * `onboardingEquipment`. فارغة تعني «لم يُجَب بعد» (مسودّة أقدم).
+   */
+  equipment: Equipment[]
+  /**
+   * هل لمس المستخدم قائمة الأدوات بنفسه؟ يفصل «افتراض من المكان» عن «قرار
+   * المستخدم»: تغيير المكان يعيد البذر ما لم يكن قد قرّر، وقراره **حاكم**
+   * فلا يُدهس باختيار مكانٍ لاحق.
+   */
+  equipmentTouched: boolean
   neat: NeatLevel | null
   dietPattern: DietPattern | null
   hasInjury: boolean | null
@@ -153,6 +194,8 @@ export function initialDraftV2(userId?: string | null): OnboardingV2Draft {
     days: 4,
     duration: 45,
     place: null,
+    equipment: [],
+    equipmentTouched: false,
     neat: null,
     dietPattern: null,
     hasInjury: null,
@@ -170,7 +213,7 @@ interface PersistedDraft extends Partial<OnboardingV2Draft> {
 }
 
 /** Which step-specific validation message to surface, or null when the step is complete. */
-export type StepValidation = 'body' | 'ageBelowMin' | 'intentLevel' | 'trainingHistory' | 'goal' | 'healthConsent' | 'training' | 'lifestyle' | 'limitations' | null
+export type StepValidation = 'body' | 'ageBelowMin' | 'intentLevel' | 'trainingHistory' | 'goal' | 'healthConsent' | 'training' | 'lifestyle' | 'equipment' | 'limitations' | null
 
 /**
  * Async plan-assembly status driving the loading / error / done screens.
@@ -219,6 +262,7 @@ type Validatable = Pick<
   | 'days'
   | 'duration'
   | 'place'
+  | 'equipment'
   | 'neat'
   | 'dietPattern'
   | 'hasInjury'
@@ -232,6 +276,7 @@ export const LAST_INPUT_STEP = 6
 /** سجلّ الأسئلة الثابت — الموافقة الصحية بوابة، وليست ضمن أسئلة التخصيص الـ18. */
 export const ONBOARDING_QUESTION_IDS = [
   'profile.display_name',
+  'equipment.available',
   'body.age', 'body.sex', 'body.height', 'body.weight',
   'intent.primary', 'experience.declared',
   'history.trained_before', 'history.total_months', 'history.last_trained', 'history.consistency',
@@ -288,7 +333,13 @@ export function validateStep(step: number, d: Validatable): StepValidation {
   }
   if (step === 3) return d.goal ? null : 'goal'
   if (step === 4) return DAYS.includes(d.days as (typeof DAYS)[number]) && DURATIONS.includes(d.duration as (typeof DURATIONS)[number]) ? null : 'training'
-  if (step === 5) return d.place && d.neat && d.dietPattern ? null : 'lifestyle'
+  if (step === 5) {
+    if (!d.place || !d.neat) return 'lifestyle'
+    // وزن الجسم متاح دائمًا، فالقائمة لا يمكن أن تكون فارغة بحقّ — الفراغ هنا
+    // يعني «لم يُسأل بعد» فيُحجب.
+    if (d.equipment.length === 0) return 'equipment'
+    return null
+  }
   if (step === 6) {
     if (d.hasInjury === null) return 'limitations'
     return injuryAreasApply(d.hasInjury) && d.injuries.length === 0 ? 'limitations' : null
@@ -396,6 +447,7 @@ function isPersistedDraft(value: unknown): value is PersistedDraft {
   if (![d.age, d.heightCm, d.weightKg].every(nullableNumber)) return false
   // الاسم اختياري: غيابه من مسودّة أقدم مقبول، ووجوده بنوع خاطئ ليس كذلك.
   if (d.name !== undefined && typeof d.name !== 'string') return false
+  if (d.equipment !== undefined && !Array.isArray(d.equipment)) return false
   if (d.gender !== null && d.gender !== 'male' && d.gender !== 'female') return false
   if (d.goal !== null && d.goal !== 'cut' && d.goal !== 'maintain' && d.goal !== 'bulk') return false
   if (d.intent !== null && d.intent !== 'plan' && d.intent !== 'meals' && d.intent !== 'numbers') return false
@@ -455,6 +507,9 @@ function migrateDraft(raw: PersistedDraft): OnboardingV2Draft {
     days: raw.days as number,
     duration: raw.duration as number,
     place: raw.place ?? null,
+    // مسودّة أقدم لم تُسأل عن الأدوات؛ الفراغ جواب صادق («لم يُسأل») لا خسارة.
+    equipment: normalizeEquipment(raw.equipment),
+    equipmentTouched: raw.equipmentTouched === true,
     neat: legacy ? null : raw.neat ?? null,
     dietPattern: legacy ? null : raw.dietPattern ?? null,
     // v5=false كان افتراضيًا لا جوابًا صريحًا؛ true وحدها معلومة يمكن حفظها.
@@ -470,6 +525,9 @@ export function normalizeDraft(draft: OnboardingV2Draft): OnboardingV2Draft {
   return {
     ...draft,
     name: normalizeName(draft.name),
+    // التطبيع عند الحفظ والتحميل معًا: ترتيب السجلّ لا ترتيب النقر، وبلا
+    // تكرار، وبلا مفتاح لا ينتمي للاتّحاد مهما جاء من تخزين معطوب.
+    equipment: normalizeEquipment(draft.equipment),
     totalMonths: never ? null : draft.totalMonths,
     lastTrained: never ? null : draft.lastTrained,
     consistency: never ? null : draft.consistency,

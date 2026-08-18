@@ -41,6 +41,8 @@ import { loadOnboarding } from '@/lib/onboarding'
 import { enqueueSyncOperation } from '@/lib/syncQueue'
 import { assertPaid } from '@/lib/access/guard'
 import { readRaw, removeKey, writeJson, type WriteResult } from '@/lib/safeStorage'
+import { normalizeEquipment, normalizeInjuryAreas } from '@/lib/onboardingKeys'
+import type { Equipment, InjuryAreaKey } from '@/types/profile'
 
 export const ONBOARDING_PROFILE_KEY = 'qimmah:onboarding:profile:v1'
 
@@ -262,6 +264,34 @@ const NEAT_TO_ACTIVITY: Record<NeatLevel, ActivityLevel> = {
 
 const showsTargetWeight = (g?: OnbGoalType) => g === 'cut' || g === 'bulk'
 
+/**
+ * الأدوات المُعلَنة كما نجت في التخزين — **مدخل غير موثوق يُصفّى، لا يُصدَّق**.
+ *
+ * الحقل يعيش خارج `OnbTrainingPreferences` مؤقّتًا (النوع في `types/onboarding`
+ * وهو خارج نطاق هذه الحارة)، فيُقرأ كـ`unknown` ويمرّ بحارس الاتّحاد. وهذه
+ * ليست حيلة نوعية بل الصواب: القيمة تأتي من JSON محلي أو من مزامنة، وكلاهما
+ * مدخل غير موثوق بنصّ الميثاق §5.
+ */
+function declaredEquipment(tp: OnboardingProfile['trainingPreferences']): Equipment[] {
+  return normalizeEquipment((tp as { equipment?: unknown }).equipment)
+}
+
+/**
+ * مناطق الإصابة كمفاتيح بنيويّة.
+ *
+ * `op.limitations.injuries` سلسلة مفاتيح أصلًا (`knee` · `shoulder` …)، لكنها
+ * كانت تُسلسَل إلى نصّ واحد يُطابَق بتعبير نمطي عربي في المولّد
+ * (`planGenerator.ts:198-203`) — فترجمة واحدة تكسر الترشيح كلّه. الحقل النصّي
+ * `injuries` يبقى **كما هو** للتوافق الرجعي، وهذا هو المصدر البنيوي.
+ *
+ * و`hasInjury` يُقرأ هنا فعلًا لا يُهمَل: «لا» تعني قائمة فارغة مهما بقي في
+ * التخزين من إجابة سابقة — الجواب الصريح يفوز على البقايا.
+ */
+function declaredInjuryAreas(limitations: OnboardingProfile['limitations']): InjuryAreaKey[] {
+  if (limitations.hasInjury === false) return []
+  return normalizeInjuryAreas(limitations.injuries)
+}
+
 /** يحوّل مصدر الحقيقة إلى Profile الذي يستهلكه مولّد الخطة الحالي. */
 export function toLegacyProfile(op: OnboardingProfile, base: Profile = defaultProfile): Profile {
   const tp = op.trainingPreferences
@@ -328,7 +358,10 @@ export function toLegacyProfile(op: OnboardingProfile, base: Profile = defaultPr
     experienceLevel,
     gymAccess,
     gymType,
-    equipment: [],
+    // كان `[]` مثبَّتًا هنا: الملفّ يحمل حقلًا للأدوات والإعداد لا يسأل عنها
+    // إطلاقًا، فيبقى فارغًا دائمًا ويعود المولّد لاشتقاق المكان وحده.
+    equipment: declaredEquipment(tp),
+    injuryAreas: declaredInjuryAreas(op.limitations),
     schedulingStyle: 'flexible',
     preferredDays: [],
     remindersOptIn: op.appPreferences.reminders,
