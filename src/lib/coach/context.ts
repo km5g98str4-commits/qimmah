@@ -99,6 +99,21 @@ export interface CoachInjury {
   areas: readonly InjuryAreaKey[]
 }
 
+/**
+ * سلسلة الوزن المسجَّل — **عدّها جزء من الجواب**. نقطة واحدة ليست اتجاهًا،
+ * وصفر نقاط ليس «صفر كيلو». فالحقل يحمل العدّ صراحةً كي يفرّق المحرّك بين
+ * «لا نعرف» و«نعرف واحدة» و«نعرف فرقًا بين تاريخين».
+ */
+export interface CoachWeightLog {
+  count: number
+  firstKg: number | null
+  firstDate: string | null
+  lastKg: number | null
+  lastDate: string | null
+  /** الفرق بالأيام بين أول قياس وآخره — `null` حين تقلّ النقاط عن اثنتين. */
+  spanDays: number | null
+}
+
 export interface CoachContext {
   lang: Lang
   todayStamp: string
@@ -119,6 +134,7 @@ export interface CoachContext {
   /** الأهداف محسوبة من ملفّ يطابق الملف الحالي؟ (`profileHash` — المصدر نفسه). */
   targetsFresh: boolean
   latestLoggedWeightKg: number | null
+  weightLog: CoachWeightLog
   rationale: PlanRationale | null
   injury: CoachInjury
 }
@@ -187,6 +203,41 @@ const numOf = (v: string | number | undefined): number => {
   if (v === undefined) return NaN
   const m = String(v).match(/-?[\d.]+/)
   return m ? Number(m[0]) : NaN
+}
+
+/** نقاط الوزن المسجَّلة مرتّبة تصاعديًا بالتاريخ — مصدر السلسلة والأحدث معًا. */
+function weightPoints(logs: readonly MeasurementLog[]): Array<{ date: string; kg: number }> {
+  return logs
+    .filter((l) => l.values.weightKg !== undefined && l.values.weightKg !== '')
+    .map((l) => ({ date: l.date, kg: numOf(l.values.weightKg) }))
+    .filter((p) => Number.isFinite(p.kg))
+    .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0))
+}
+
+function weightLogFrom(logs: readonly MeasurementLog[]): CoachWeightLog {
+  const points = weightPoints(logs)
+  if (points.length === 0) {
+    return { count: 0, firstKg: null, firstDate: null, lastKg: null, lastDate: null, spanDays: null }
+  }
+  const first = points[0]
+  const last = points[points.length - 1]
+  const spanDays =
+    points.length > 1
+      ? Math.max(
+          0,
+          Math.round(
+            (Date.parse(`${last.date}T12:00:00`) - Date.parse(`${first.date}T12:00:00`)) / 86_400_000,
+          ),
+        )
+      : null
+  return {
+    count: points.length,
+    firstKg: first.kg,
+    firstDate: first.date,
+    lastKg: last.kg,
+    lastDate: last.date,
+    spanDays: Number.isFinite(spanDays as number) ? spanDays : null,
+  }
 }
 
 /** أحدث وزن **مسجَّل فعلًا** (يدوي أو مستورد) — لا وزن الملف الشخصي. */
@@ -281,6 +332,7 @@ export function buildCoachContext(env: CoachEnvironment, now: Date = new Date())
     targetsMeta: customization.targetsMeta,
     targetsFresh: customization.targetsMeta.lastCalculatedFromProfileHash === profileHash(profile),
     latestLoggedWeightKg: latestLoggedWeight(env.measurements),
+    weightLog: weightLogFrom(env.measurements),
     rationale: env.rationale,
     injury: injuryFrom(profile),
   }
