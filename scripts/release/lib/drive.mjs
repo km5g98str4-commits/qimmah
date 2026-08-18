@@ -8,6 +8,8 @@
 // up as a driver fix, not a false product defect.
 
 import { settle, tap, tapIfPresent } from './harness.mjs'
+import { answerDietPattern } from '../../e2e/lib/onboarding-driver.mjs'
+import { loadAppCopy } from '../../e2e/lib/app-copy.mjs'
 
 export const PREFS_KEY = 'qimmah:prefs:v1'
 export const ONBOARDING_KEY = 'qimmah:onboarding:v1'
@@ -137,7 +139,11 @@ export async function completeOnboarding(page, { age = 28, height = 178, weight 
   await page.waitForSelector('#onb-title-lifestyle', { timeout: 20000 })
   await group(page, 'training.place').getByRole('button').nth(0).click({ force: true })
   await group(page, 'activity.neat').getByRole('button').nth(1).click({ force: true })
-  await group(page, 'nutrition.diet_pattern').getByRole('button').nth(0).click({ force: true })
+  // نمط الأكل مشروط بالنيّة؛ هذا السائق يختار أوّل نيّة (`intents[0]`).
+  const diet = await answerDietPattern(page, (await loadAppCopy()).intent.intents[0].value)
+  if (!diet.agrees) {
+    throw new Error(`عقد نمط الأكل انكسر: ظهور متوقَّع=${diet.applies} والشاشة أعطت ${diet.rendered}`)
+  }
 
   await next()
   await page.waitForSelector('#onb-title-limitations', { timeout: 20000 })

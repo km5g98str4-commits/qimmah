@@ -219,7 +219,7 @@ export interface V2OnboardingCopy {
   welcome: { eyebrow: string; title: string; subtitle: string; start: string; timeNote: string }
   /** [CTO-009/WP-2] تسليم ما بعد الخطة: معاينة موجزة ← Premium ← حساب. */
   handoff: {
-    eyebrow: string; title: string; subtitle: string; premiumCta: string; enterFree: string; accountNote: string
+    eyebrow: string; title: string; subtitle: string; accountNote: string
     /** [QIM-WEB-FOUNDER-UX-004/حزمة ٣] كشف القيمة: ما الذي يفتحه Premium وما يبقى مفتوحًا. */
     benefitsTitle: string
     benefits: readonly string[]
@@ -303,8 +303,6 @@ export const V2_ONBOARDING: Record<'ar' | 'en', V2OnboardingCopy> = {
       eyebrow: 'تمّ',
       title: 'جهزنا خطتك',
       subtitle: 'بنيناها من إجاباتك أنت — أيامك ووقتك ومكان تمرينك وهدفك.',
-      premiumCta: 'احصل على قِمّة Premium',
-      enterFree: 'استعرض قِمّة أولًا',
       accountNote: 'إنشاء حساب يخلّي خطتك تنتقل معك لأي جهاز.',
       benefitsTitle: 'وش يفتح لك Premium؟',
       benefits: [
@@ -411,8 +409,6 @@ export const V2_ONBOARDING: Record<'ar' | 'en', V2OnboardingCopy> = {
       eyebrow: 'Done',
       title: 'Your plan is ready',
       subtitle: 'We built it from your own answers — your days, your time, where you train, and your goal.',
-      premiumCta: 'Get Qimmah Premium',
-      enterFree: 'Explore Qimmah first',
       accountNote: 'Creating an account carries your plan to any device.',
       benefitsTitle: 'What does Premium open up?',
       benefits: [

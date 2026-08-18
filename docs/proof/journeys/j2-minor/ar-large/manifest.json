@@ -5,10 +5,10 @@
   "lang": "ar",
   "viewport": "large",
   "ground": {
-    "branch": "i/journey-advanced",
-    "commit": "b47cbf3",
-    "subject": "chore(e2e): توثيق أداة تشخيص الحراسة وضمّها",
-    "dirty": false
+    "branch": "claude/qimmah-sovereign-closure-h503u6",
+    "commit": "139a7b0",
+    "subject": "docs(qa): [SOVEREIGN-002] قائمة مراجعة المؤسس — عشر دقائق بما أُصلح وما لم يُصلَح",
+    "dirty": true
   },
   "frames": [
     {
@@ -76,10 +76,10 @@
     },
     {
       "seq": 10,
-      "file": "10-workout-minor-active.png",
-      "slug": "workout-minor-active",
-      "captionAr": "جلسة القاصر نشطة",
-      "captionEn": "Minor's session active"
+      "file": "10-workout-minor-premium-gate.png",
+      "slug": "workout-minor-premium-gate",
+      "captionAr": "بدء تمرين القاصر من المعاينة — بوابة Premium",
+      "captionEn": "Minor preview workout — Premium gate"
     }
   ],
   "checks": [
@@ -159,9 +159,19 @@
       "detail": ""
     },
     {
+      "name": "الاختيار المقيَّد أُبطل تلقائيًا عند خفض العمر",
+      "ok": true,
+      "detail": "الحاجز يُبطل السابق لا يمنع الجديد فقط"
+    },
+    {
       "name": "«ثبات وتحسين عام» يُختار بلا عائق",
       "ok": true,
       "detail": ""
+    },
+    {
+      "name": "نمط الأكل يظهر بحسب النيّة لا دائمًا",
+      "ok": true,
+      "detail": "applies=false rendered=false"
     },
     {
       "name": "شاشة «خطتك جاهزة» ظهرت للقاصر",
@@ -194,7 +204,12 @@
       "detail": ""
     },
     {
-      "name": "جلسة القاصر تبدأ من شاشة التمارين",
+      "name": "فعل بدء التمرين ظاهر للقاصر في المعاينة",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "المعاينة لا تبدأ جلسة مدفوعة للقاصر بصمت",
       "ok": true,
       "detail": ""
     },
@@ -204,12 +219,6 @@
       "detail": ""
     }
   ],
-  "findings": [
-    {
-      "title": "اختيار مقيَّد ينجو من خفض العمر — القاصر يبقى على هدف تنشيف مختار",
-      "evidence": "اختير «خسارة دهون» بعمر 28، ثم خُفض العمر إلى 15: الزرّ عاد disabled وظهر التنويه، لكن aria-pressed بقي \"true\" — أي أن الحالة المخزَّنة ما زالت هدفًا مقيَّدًا على مستخدم قاصر. الحاجز يمنع **الاختيار الجديد** ولا يُبطل **اختيارًا سابقًا** عند تغيّر العمر. الأثر محدود بالعرض لأن effectiveGoalTypeForAge (src/lib/calculators.ts) يفرض المحافظة عند الحساب — لكن شاشةً تُظهر «تنشيف» مختارًا لابن ١٥ بند امتثال بصري قائم.",
-      "severity": "متوسط"
-    }
-  ],
+  "findings": [],
   "skipped": []
 }

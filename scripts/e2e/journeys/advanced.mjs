@@ -15,12 +15,14 @@
 // وإن تطابقت الأرقام تمامًا، فذلك **نتيجة تُرفَع لا اختبار يُطوَّع**: يعني أن
 // المستوى لا يصل إلى الحساب، وهو ما يجب أن يعرفه المنسّق لا أن يُخفى.
 
-import { chromium } from 'playwright'
+import { chromium } from '../lib/engine.mjs'
 import {
   VIEWPORTS, startApp, createRecorder, openPage, screenText,
   report, ensureProofRoot, seedSession,
+  realClientErrors,
 } from './lib/kit.mjs'
 import { loadJourneyCopy } from './lib/journey-copy.mjs'
+import { answerDietPattern } from '../lib/onboarding-driver.mjs'
 
 const PORT = 5341
 const LANG = 'ar'
@@ -117,7 +119,9 @@ try {
     await next.click(); await page.waitForTimeout(400)
     await group(page, 'training.place').getByRole('button').nth(0).click()
     await group(page, 'activity.neat').getByRole('button').nth(2).click()
-    await group(page, 'nutrition.diet_pattern').getByRole('button').nth(0).click()
+    const advDiet = await answerDietPattern(page, intent.intents[0].value)
+    rec.check('نمط الأكل يظهر بحسب النيّة لا دائمًا', advDiet.agrees,
+      `applies=${advDiet.applies} rendered=${advDiet.rendered}`)
     await rec.shot(page, `${tag}-5-lifestyle`, `${tag} — المكان والحركة ونمط الأكل`, `${tag} — place, activity and diet`)
     await next.click(); await page.waitForSelector('#onb-title-limitations')
     await group(page, 'limitations.has_injury').getByRole('button').nth(1).click()
@@ -130,7 +134,7 @@ try {
     await rec.shot(page, `${tag}-7-plan`, `${tag} — «خطتك جاهزة»`, `${tag} — plan ready`)
     await page.getByRole('button', { name: t.ready.enter }).first().click().catch(() => {})
     await page.waitForSelector('[data-testid="plan-handoff"]')
-    await page.getByRole('button', { name: t.handoff.enterFree, exact: true }).click()
+    await page.getByTestId('handoff-preview-cta').click()
     await page.waitForTimeout(1100)
 
     // الأرقام الغذائية من الشاشة التي يراها المستخدم.
@@ -276,8 +280,7 @@ try {
   }
 
   // ───────────── أخطاء الطرف العميل ─────────────
-  const allErrors = [...beginner.errors, ...advanced.errors]
-    .filter((e) => !(/401/.test(e) && /Failed to load resource/.test(e)))
+  const allErrors = realClientErrors([...beginner.errors, ...advanced.errors])
   rec.check('لا أخطاء طرف عميل في المسارين (عدا 401 الجلسة المزروعة — استثناء معلَن)',
     allErrors.length === 0, allErrors.slice(0, 3).join(' | '))
 

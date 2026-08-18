@@ -21,7 +21,7 @@ import { spawn, execFileSync } from 'node:child_process'
 import { mkdirSync, writeFileSync, rmSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { setTimeout as sleep } from 'node:timers/promises'
-import { chromium } from 'playwright'
+import { chromium } from '../../lib/engine.mjs'
 
 /**
  * ختم الأرض — الفرع والـcommit اللذان جرت عليهما الرحلة.
@@ -207,7 +207,15 @@ export async function openPage(browser, { viewport, lang }) {
     locale: lang === 'ar' ? 'ar-SA' : 'en-US',
   })
   const errors = []
-  page.on('console', (m) => m.type() === 'error' && errors.push(m.text()))
+  // نلحق **وجهة** المورد بنصّ الخطأ: «Failed to load resource» وحده لا يقول
+  // لمن كان النداء، فيصير أي استثناء معلَن عليه استثناءً بالنصّ لا بالوجهة.
+  // ومع الوجهة يصير الاستثناء قابلًا للتحقّق: نسمح بعطل نداء الخلفية المزروعة
+  // ولا نسمح بعطل نداء إلى مضيف لم نقصده.
+  page.on('console', (m) => {
+    if (m.type() !== 'error') return
+    const url = m.location()?.url || ''
+    errors.push(url ? `${m.text()} @ ${url}` : m.text())
+  })
   page.on('pageerror', (e) => errors.push(String(e)))
   return { page, errors }
 }
@@ -283,3 +291,31 @@ export function report(journeyName, results) {
 export function ensureProofRoot() {
   if (!existsSync(PROOF_ROOT)) mkdirSync(PROOF_ROOT, { recursive: true })
 }
+
+/**
+ * ضجيج الخلفية المزروعة — استثناء **معلَن ومحقَّق بالوجهة** لا بالنصّ.
+ *
+ * ═══ لماذا لا يكفي «401» ═══
+ * الرحلات تزرع جلسة برمز وهمي، فيردّ Supabase 401 على نداءات الاستحقاق. وكان
+ * الاستثناء يُمسك بـ`/401/` وحده. وفي بيئة بلا منفذ خارجي لا يصل النداء أصلًا،
+ * فيصير `ERR_TUNNEL_CONNECTION_FAILED` — نفس السبب بنصّ آخر، فتحمرّ الرحلة على
+ * قيد بيئة لا على عطل منتج.
+ *
+ * والعلاج ليس توسيع النصّ — ذلك يبتلع أخطاء حقيقية. العلاج أن يُقاس **إلى أين
+ * كان النداء**: نعفو عن تعذّر نداء إلى مضيف الخلفية المُعلَن وحده، وأي مضيف آخر
+ * يبقى خطأً محسوبًا. ولذلك يُلحق `kit` وجهة المورد بنصّ كل خطأ.
+ */
+const BACKEND_ORIGIN = /https:\/\/[a-z0-9-]+\.supabase\.(co|in)\//
+const OFFLINE_CODES = /ERR_TUNNEL_CONNECTION_FAILED|ERR_PROXY_CONNECTION_FAILED|ERR_NAME_NOT_RESOLVED|ERR_INTERNET_DISCONNECTED|ERR_CONNECTION_REFUSED/
+
+export function seededBackendNoise(entry) {
+  if (!/Failed to load resource/.test(entry)) return false
+  // الوجهة شرطٌ في الحالتين. جعلُها شرطًا في تعذّر الوصول وحده كان يترك ٤٠١
+  // من **أي** مضيف معفوًّا — وهي الثغرة التي أسقطها التأكيد المضادّ في
+  // `run-journey-noise-proof.mjs` قبل أن تهبط.
+  if (!BACKEND_ORIGIN.test(entry)) return false
+  return /\b401\b/.test(entry) || OFFLINE_CODES.test(entry)
+}
+
+/** أخطاء العميل الحقيقية بعد طرح الضجيج المُعلَن. */
+export const realClientErrors = (errors) => errors.filter((e) => !seededBackendNoise(e))

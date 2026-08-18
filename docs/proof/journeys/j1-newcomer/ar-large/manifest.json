@@ -5,10 +5,10 @@
   "lang": "ar",
   "viewport": "large",
   "ground": {
-    "branch": "i/journey-advanced",
-    "commit": "b47cbf3",
-    "subject": "chore(e2e): توثيق أداة تشخيص الحراسة وضمّها",
-    "dirty": false
+    "branch": "claude/qimmah-sovereign-closure-h503u6",
+    "commit": "139a7b0",
+    "subject": "docs(qa): [SOVEREIGN-002] قائمة مراجعة المؤسس — عشر دقائق بما أُصلح وما لم يُصلَح",
+    "dirty": true
   },
   "frames": [
     {
@@ -48,80 +48,94 @@
     },
     {
       "seq": 6,
-      "file": "06-setup-3-goal.png",
-      "slug": "setup-3-goal",
-      "captionAr": "خطوة ٣ — الهدف بصياغة المبتدئ",
-      "captionEn": "Step 3 — goal in beginner wording"
+      "file": "06-setup-3-history.png",
+      "slug": "setup-3-history",
+      "captionAr": "خطوة ٣ — تاريخ التدريب",
+      "captionEn": "Step 3 — training history"
     },
     {
       "seq": 7,
-      "file": "07-setup-4-training.png",
-      "slug": "setup-4-training",
-      "captionAr": "خطوة ٤ — أيام التمرين ومدّته",
-      "captionEn": "Step 4 — training days and duration"
+      "file": "07-setup-3-history-never.png",
+      "slug": "setup-3-history-never",
+      "captionAr": "تاريخ التدريب — أول مرة بلا تاريخ مختلق",
+      "captionEn": "Training history — first time, no invented history"
     },
     {
       "seq": 8,
-      "file": "08-setup-5-equipment.png",
-      "slug": "setup-5-equipment",
-      "captionAr": "خطوة ٥ — المكان والمعدّات",
-      "captionEn": "Step 5 — place and equipment"
+      "file": "08-setup-4-goal.png",
+      "slug": "setup-4-goal",
+      "captionAr": "خطوة ٤ — الهدف بصياغة المبتدئ",
+      "captionEn": "Step 4 — goal in beginner wording"
     },
     {
       "seq": 9,
-      "file": "09-plan-ready.png",
+      "file": "09-setup-5-training.png",
+      "slug": "setup-5-training",
+      "captionAr": "خطوة ٥ — أيام التمرين ومدّته",
+      "captionEn": "Step 5 — training days and duration"
+    },
+    {
+      "seq": 10,
+      "file": "10-setup-6-lifestyle.png",
+      "slug": "setup-6-lifestyle",
+      "captionAr": "خطوة ٦ — المكان والحركة ونمط الأكل",
+      "captionEn": "Step 6 — place, activity and diet"
+    },
+    {
+      "seq": 11,
+      "file": "11-setup-7-limitations.png",
+      "slug": "setup-7-limitations",
+      "captionAr": "خطوة ٧ — القيود والإصابات",
+      "captionEn": "Step 7 — limitations and injuries"
+    },
+    {
+      "seq": 12,
+      "file": "12-plan-ready.png",
       "slug": "plan-ready",
       "captionAr": "الخطة جاهزة — أول مخرَج يراه المستخدم",
       "captionEn": "Plan ready — the first output"
     },
     {
-      "seq": 10,
-      "file": "10-dashboard.png",
+      "seq": 13,
+      "file": "13-plan-handoff.png",
+      "slug": "plan-handoff",
+      "captionAr": "كشف الخطة — Premium أو المعاينة",
+      "captionEn": "Plan reveal — Premium or preview"
+    },
+    {
+      "seq": 14,
+      "file": "14-dashboard.png",
       "slug": "dashboard",
       "captionAr": "لوحة اليوم — بعد اعتماد الخطة",
       "captionEn": "Today dashboard — after approving the plan"
     },
     {
-      "seq": 11,
-      "file": "11-workout.png",
+      "seq": 15,
+      "file": "15-workout.png",
       "slug": "workout",
       "captionAr": "شاشة التمارين بعد اعتماد الخطة",
       "captionEn": "Workout tab after approving the plan"
     },
     {
-      "seq": 12,
-      "file": "12-workout-active.png",
-      "slug": "workout-active",
-      "captionAr": "الجلسة نشطة — أول تمرين",
-      "captionEn": "Session active — first exercise"
+      "seq": 16,
+      "file": "16-workout-premium-gate.png",
+      "slug": "workout-premium-gate",
+      "captionAr": "بدء تمرين من المعاينة — بوابة Premium",
+      "captionEn": "Starting a workout in preview — Premium gate"
     },
     {
-      "seq": 13,
-      "file": "13-workout-set-logged.png",
-      "slug": "workout-set-logged",
-      "captionAr": "جولة مسجَّلة — ٤٠ كجم",
-      "captionEn": "A set logged — 40 kg"
-    },
-    {
-      "seq": 14,
-      "file": "14-nutrition.png",
+      "seq": 17,
+      "file": "17-nutrition.png",
       "slug": "nutrition",
       "captionAr": "شاشة التغذية",
       "captionEn": "Nutrition screen"
     },
     {
-      "seq": 15,
-      "file": "15-nutrition-add-sheet.png",
-      "slug": "nutrition-add-sheet",
-      "captionAr": "لوحة إضافة وجبة",
-      "captionEn": "Add-a-meal sheet"
-    },
-    {
-      "seq": 16,
-      "file": "16-nutrition-search-kabsa.png",
-      "slug": "nutrition-search-kabsa",
-      "captionAr": "البحث عن «كبسة» — نتائج القاعدة السعودية",
-      "captionEn": "Searching \"Kabsa\" — Saudi food results"
+      "seq": 18,
+      "file": "18-nutrition-premium-gate.png",
+      "slug": "nutrition-premium-gate",
+      "captionAr": "تسجيل الماء من المعاينة — بوابة Premium",
+      "captionEn": "Logging water in preview — Premium gate"
     }
   ],
   "checks": [
@@ -151,7 +165,12 @@
       "detail": ""
     },
     {
-      "name": "اختيار «مبتدئ» يُخفي حقل سنوات التدريب",
+      "name": "اختيار «مبتدئ» لا يعرض حقل سنوات تدريب رقميًا مكررًا",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "«أول مرة» يخفي أسئلة المدة والانقطاع والانتظام",
       "ok": true,
       "detail": ""
     },
@@ -166,9 +185,14 @@
       "detail": ""
     },
     {
-      "name": "المكان «نادي» والتفضيل «مزيج» كلاهما مُختار",
+      "name": "المكان «نادي» والحركة مختارة",
       "ok": true,
       "detail": ""
+    },
+    {
+      "name": "نمط الأكل يظهر بحسب النيّة لا دائمًا",
+      "ok": true,
+      "detail": "intent=plan applies=false rendered=false"
     },
     {
       "name": "زرّ بناء الخطة ظاهر في آخر خطوة",
@@ -196,7 +220,12 @@
       "detail": ""
     },
     {
-      "name": "زرّ «الدخول للوحة» ينقل إلى التطبيق",
+      "name": "زرّ «الدخول للوحة» يكشف شاشة التسليم",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "الكشف يعرض Premium والتجربة والمعاينة بلا جدار حساب",
       "ok": true,
       "detail": ""
     },
@@ -206,12 +235,17 @@
       "detail": ""
     },
     {
-      "name": "الجلسة تبدأ من شاشة التمارين",
+      "name": "شاشة التمارين تعرض الخطة المبنيّة لا طلب إعداد جديد",
       "ok": true,
       "detail": ""
     },
     {
-      "name": "جولة تُسجَّل فعليًا",
+      "name": "فعل بدء التمرين موجود في المعاينة",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "بدء تمرين مدفوع يفتح بوابة Premium ولا يبدأ جلسة صامتة",
       "ok": true,
       "detail": ""
     },
@@ -221,22 +255,17 @@
       "detail": ""
     },
     {
-      "name": "شاشة التغذية تعكس الهدف المختار في الإعداد",
-      "ok": true,
-      "detail": "وسم الهدف ظاهر أعلى الشاشة"
-    },
-    {
       "name": "هدف السعرات اليومي محسوب ومعروض",
       "ok": true,
-      "detail": ""
+      "detail": "1937"
     },
     {
-      "name": "زرّ «أضف وجبة» يفتح لوحة الإضافة",
+      "name": "فعل زيادة الماء موجود في المعاينة",
       "ok": true,
       "detail": ""
     },
     {
-      "name": "البحث عن «كبسة» يُرجع نتيجة من قاعدة الأطعمة السعودية",
+      "name": "تسجيل التغذية يستخدم بوابة Premium نفسها",
       "ok": true,
       "detail": ""
     },

@@ -18,12 +18,14 @@
 //   اعتمدت «نية ← مستوى ← موافقة ← جسد». الرحلة تُوثّق الواقع كما هو —
 //   حارس الرحلات يكشف ولا يصلح (الإصلاح لحارة الملف).
 
-import { chromium } from 'playwright'
+import { chromium } from '../lib/engine.mjs'
 import {
   VIEWPORTS, startApp, createRecorder, createVocabularyGuard,
   openPage, screenText, report, ensureProofRoot, seedSession,
+  realClientErrors,
 } from './lib/kit.mjs'
 import { loadJourneyCopy, assertTermExistsInSource } from './lib/journey-copy.mjs'
+import { answerDietPattern } from '../lib/onboarding-driver.mjs'
 
 const PORT = 5311
 const LANG = 'ar'
@@ -221,14 +223,17 @@ try {
   var place = t.places.find((p) => p.value === 'gym') ?? t.places[0]
   await group(page, 'training.place').getByRole('button', { name: place.label, exact: true }).click()
   await group(page, 'activity.neat').getByRole('button').nth(1).click()
-  await group(page, 'nutrition.diet_pattern').getByRole('button').nth(0).click()
+  const newcomerDiet = await answerDietPattern(page, planIntent.value)
   await page.waitForTimeout(300)
   rec.check(
-    `المكان «${place.label}» والحركة ونمط الأكل مختارة`,
+    `المكان «${place.label}» والحركة مختارة`,
     await group(page, 'training.place').getByRole('button', { name: place.label, exact: true }).getAttribute('aria-pressed') === 'true' &&
-      await group(page, 'activity.neat').getByRole('button').nth(1).getAttribute('aria-pressed') === 'true' &&
-      await group(page, 'nutrition.diet_pattern').getByRole('button').nth(0).getAttribute('aria-pressed') === 'true',
+      await group(page, 'activity.neat').getByRole('button').nth(1).getAttribute('aria-pressed') === 'true',
   )
+  // نيّة «خطة» لا تستهلك نمط الأكل، فغيابه هو الصواب — والفحص يقيس الاتجاهين
+  // بدل أن يفترض حضوره كما كان.
+  rec.check('نمط الأكل يظهر بحسب النيّة لا دائمًا', newcomerDiet.agrees,
+    `intent=${planIntent.value} applies=${newcomerDiet.applies} rendered=${newcomerDiet.rendered}`)
   await next.click()
   await page.waitForTimeout(400)
 
@@ -256,10 +261,15 @@ try {
   rec.check(`زرّ «${t.ready.enter}» يكشف شاشة التسليم`, entered)
   await page.waitForSelector('[data-testid="plan-handoff"]')
   const handoffText = await visit('plan-handoff', 'كشف الخطة — Premium أو المعاينة', 'Plan reveal — Premium or preview')
-  rec.check('الكشف يعرض Premium والمعاينة بلا جدار حساب',
-    handoffText.includes(t.handoff.premiumCta) && handoffText.includes(t.handoff.enterFree) &&
+  // الشاشة صارت ثلاثة نداءات (Premium · تجربة · معاينة) من قاموس `reveal`،
+  // بعد أن كانت نداءين من `labels.handoff`. نربط بالمعرّفات الثابتة لا بالنصّ:
+  // النصّ يتغيّر بموجة تحرير، والعقد المقصود هو **وجود المسارات الثلاثة**.
+  rec.check('الكشف يعرض Premium والتجربة والمعاينة بلا جدار حساب',
+    await page.getByTestId('handoff-premium-cta').isVisible() &&
+      await page.getByTestId('handoff-trial-cta').isVisible() &&
+      await page.getByTestId('handoff-preview-cta').isVisible() &&
       !/أنشئ حساب|سجّل الدخول/.test(handoffText))
-  await page.getByRole('button', { name: t.handoff.enterFree, exact: true }).click()
+  await page.getByTestId('handoff-preview-cta').click()
   await page.waitForTimeout(900)
   await visit('dashboard', 'لوحة اليوم — بعد اعتماد الخطة', 'Today dashboard — after approving the plan')
 
@@ -309,7 +319,9 @@ try {
   rec.check('هدف السعرات اليومي محسوب ومعروض', Number(calorieTarget) >= 1200, calorieTarget ?? 'لا رقم')
   // نمط الأكل المختار لا ينشئ بطاقات وجبات جاهزة؛ زيادة الماء طفرة تغذية
   // حقيقية موجودة لكل ملف، ومحروسة بالعقد نفسه.
-  const addNutrition = page.getByRole('button', { name: /250/ }).first()
+  // الوسم القائم في `WaterPanel` لا رقم لاتيني: نصّ الزرّ يمرّ بـ`formatNumeralsIn`
+  // فيصير «+٢٥٠ مل» بالعربية. الملف نفسه يحذّر من هذا الخطأ بالاسم.
+  const addNutrition = page.getByTestId('water-preset-250').first()
   rec.check('فعل زيادة الماء موجود في المعاينة', await addNutrition.isVisible().catch(() => false))
   await addNutrition.click()
   await page.waitForSelector('[data-testid="premium-gate"]')
@@ -323,8 +335,7 @@ try {
   // استثناء **معلَن** (§4: الممنوع هو التعطيل الصامت): الجلسة المزروعة رمز وهمي،
   // فأي نداء إلى Supabase يردّ 401. هذا أثر أداة الاختبار لا عطل منتج. وأي خطأ
   // آخر يبقى محسوبًا — والقائمة تُطبع كاملة عند السقوط.
-  const seededAuthNoise = (e) => /401/.test(e) && /Failed to load resource/.test(e)
-  const realErrors = errors.filter((e) => !seededAuthNoise(e))
+  const realErrors = realClientErrors(errors)
   rec.check(
     'لا أخطاء طرف عميل خلال الرحلة (عدا 401 الجلسة المزروعة — استثناء معلَن)',
     realErrors.length === 0,

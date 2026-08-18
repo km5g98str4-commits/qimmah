@@ -16,12 +16,14 @@
 // خطوات محجوبة بعطل مرفوع في ط-١ (شاشة التمارين لا ترى الخطة) تُعلَن بالتخطّي،
 // بأمر [CTO-43/أ]: «امضي الآن بآلية التخطّي المعلَن — لا تنتظري الإصلاح».
 
-import { chromium } from 'playwright'
+import { chromium } from '../lib/engine.mjs'
 import {
   VIEWPORTS, startApp, createRecorder, openPage, screenText,
   report, ensureProofRoot, seedSession,
+  realClientErrors,
 } from './lib/kit.mjs'
 import { loadJourneyCopy } from './lib/journey-copy.mjs'
+import { answerDietPattern } from '../lib/onboarding-driver.mjs'
 
 const PORT = 5321
 const LANG = 'ar'
@@ -219,7 +221,9 @@ try {
   await next.click(); await page.waitForTimeout(400)
   await group(page, 'training.place').getByRole('button').nth(0).click()
   await group(page, 'activity.neat').getByRole('button').nth(1).click()
-  await group(page, 'nutrition.diet_pattern').getByRole('button').nth(0).click()
+  const minorDiet = await answerDietPattern(page, intent.intents[0].value)
+  rec.check('نمط الأكل يظهر بحسب النيّة لا دائمًا', minorDiet.agrees,
+    `applies=${minorDiet.applies} rendered=${minorDiet.rendered}`)
   await next.click(); await page.waitForTimeout(400)
   await group(page, 'limitations.has_injury').getByRole('button').nth(1).click()
   await page.waitForTimeout(300)
@@ -237,7 +241,7 @@ try {
   // ───────────────── ٦) الحساب نفسه ─────────────────
   await page.getByRole('button', { name: t.ready.enter }).first().click().catch(() => {})
   await page.waitForSelector('[data-testid="plan-handoff"]')
-  await page.getByRole('button', { name: t.handoff.enterFree, exact: true }).click()
+  await page.getByTestId('handoff-preview-cta').click()
   await page.waitForTimeout(1000)
   const stored = await page.evaluate(() => localStorage.getItem('qimmah:customization:v1') || '')
   let goalType = ''
@@ -270,7 +274,7 @@ try {
   await visit('workout-minor-premium-gate', 'بدء تمرين القاصر من المعاينة — بوابة Premium', "Minor preview workout — Premium gate")
   rec.check('المعاينة لا تبدأ جلسة مدفوعة للقاصر بصمت', await page.locator('[data-testid="premium-gate"]').isVisible())
 
-  const realErrors = errors.filter((e) => !(/401/.test(e) && /Failed to load resource/.test(e)))
+  const realErrors = realClientErrors(errors)
   rec.check('لا أخطاء طرف عميل (عدا 401 الجلسة المزروعة — استثناء معلَن)', realErrors.length === 0,
     realErrors.slice(0, 3).join(' | '))
 

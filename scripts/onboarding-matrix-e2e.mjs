@@ -6,12 +6,13 @@
 // فحص ممثّل للفشل/إعادة المحاولة وفحص استئناف لمسار تاريخ التدريب المشروط.
 
 import { spawn } from 'node:child_process'
-import { chromium } from 'playwright'
+import { chromium } from './e2e/lib/engine.mjs'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { tmpdir } from 'node:os'
 import { setTimeout as sleep } from 'node:timers/promises'
 import { assertDevFlag, loadAppCopy } from './e2e/lib/app-copy.mjs'
+import { answerDietPattern } from './e2e/lib/onboarding-driver.mjs'
 
 const EVIDENCE_DIR = resolve(process.argv[2] || process.env.EVIDENCE_DIR || join(tmpdir(), `qimmah-onboarding-matrix-${Date.now()}`))
 mkdirSync(EVIDENCE_DIR, { recursive: true })
@@ -66,7 +67,11 @@ async function runCombo(page, copy, goal, place, neat) {
   await next() // قيم الجدول الافتراضية صالحة ومعلنة في الواجهة.
   await group(page, 'training.place').getByRole('button').nth(PLACES.indexOf(place)).click()
   await group(page, 'activity.neat').getByRole('button').nth(NEAT.indexOf(neat)).click()
-  await group(page, 'nutrition.diet_pattern').getByRole('button').first().click()
+  // نمط الأكل مشروط بالنيّة؛ الطقم يختار `intents[0]`. نقيس التطابق ونسقط باسمه.
+  const diet = await answerDietPattern(page, copy.intent.intents[0].value)
+  if (!diet.agrees) {
+    throw new Error(`عقد نمط الأكل انكسر: النيّة «${copy.intent.intents[0].value}» تتوقّع ظهورًا=${diet.applies} والشاشة أعطت ${diet.rendered}`)
+  }
   await next()
   await group(page, 'limitations.has_injury').getByRole('button').nth(1).click()
   await next()
