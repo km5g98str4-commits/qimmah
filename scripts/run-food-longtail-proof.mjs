@@ -97,7 +97,14 @@ if (allAbsent) {
   ok('الحضور: الحكم «available»', avail.verdict === 'available', avail.verdict)
   const hits = await cat.search('حليب', { deepShards: declaredShards.slice(0, 3), limit: 10 })
   ok('الحضور: البحث العميق يصل السجلات فعلًا — لا بايتات صامتة', hits.length > 0, `${hits.length} نتيجة`)
-  ok('الحضور: القابل للبحث تجاوز الطقم الساخن', avail.searchableRecords > hotOnly, `${avail.searchableRecords} > ${hotOnly}`)
+  // القياس **بعد** العملية التي تغيّره، لا قبلها: `avail` أعلاه التُقط قبل أي بحث
+  // عميق، فكان يقيس حالة الإقلاع ثم يُسأل عن أثر عمليةٍ لم تكن قد جرت.
+  const availAfter = cat.longTailAvailability()
+  ok('الحضور: القابل للبحث تجاوز الطقم الساخن بعد البحث العميق',
+    availAfter.searchableRecords > hotOnly, `${availAfter.searchableRecords} > ${hotOnly}`)
+  // ⟲ والفارق سببه الشرائح لا عدّادٌ ينمو من تلقائه.
+  ok('⟲ والنموّ جاء من حمولة شريحة فعلًا', cat.getStats().shardsFetched.length > 0,
+    `شرائح مجلوبة: ${cat.getStats().shardsFetched.length}`)
 } else {
   ok('حالة مختلطة: رفعٌ ناقص — تُعالَج قبل أي ادّعاء عن الذيل الطويل', false, `${present}/${declaredShards.length}`)
 }
