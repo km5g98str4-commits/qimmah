@@ -264,7 +264,6 @@ console.log('\n⑥ المحقّقات: وقت الجلسة (الحسّاب ال�
   check('estimateSessionMinutes: يوم فارغ → ٠ (لا حدّ أدنى لجلسة لا وجود لها) · تمرين واحد → ٨', estimateSessionMinutes({ id: 'x', nameAr: 'س', nameEn: 'X', exercises: [] }) === 0 && estimateSessionMinutes({ ...plan.days[0], exercises: plan.days[0].exercises.slice(0, 1) }) === 8)
 
   const eight = buildPlan([{ type: 'push', exercises: [...PUSH, ...PULL, 'push-up', 'dumbbell-fly'] }])
-  const longWarnings = validatePlan(eight, { targetSessionMinutes: 60 })
   check('٨ تمارين (~٥١ دقيقة) فوق هدف ٤٥ → تحذير session-too-long', validatePlan(eight, { targetSessionMinutes: 45 }).some((w) => w.code === 'session-too-long' && w.messageAr.includes('51') && w.messageEn.includes('51')))
 
   const withEmpty = addDay(plan, 'legs')
