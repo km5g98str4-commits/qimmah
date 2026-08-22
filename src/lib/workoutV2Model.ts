@@ -7,6 +7,7 @@ import type { Customization } from '@/lib/customization'
 import type { Lang } from '@/lib/appPreferences'
 import type { CalorieGoal } from '@/types/profile'
 import { scheduledDayFor } from '@/lib/workoutCalendar'
+import { estimateSessionMinutes } from '@/lib/workoutStats'
 import { getExercise } from '@/data/exercises'
 import { getCue } from '@/lib/coaching'
 
@@ -123,8 +124,10 @@ export function buildWorkoutV2Model(customization: Customization, lang: Lang): W
     }
   })
 
-  // Source classification: NON-STANDARD Qimmah display heuristic (~9 min/exercise, rounded to 5).
-  const durationMin = total > 0 ? Math.max(20, Math.round((total * 9) / 5) * 5) : 0
+  // [SOVEREIGN-PLAN-004] المقدِّر المعتمد الوحيد (`workoutStats`). كان هنا
+  // heuristic «٩ دقائق لكل تمرين» لا يقرأ المجموعات ولا الراحة — فيُعلن ٥٥ دقيقة
+  // لجلسة تُعلنها شاشة التمرين ٤٠ **وهي نفسها**. لا صيغة محلّية بعد اليوم.
+  const durationMin = estimateSessionMinutes(day)
   const muscles = Array.from(new Set(exercises.flatMap((e) => e.muscles))).slice(0, 4)
   const goalWordAr = goal === 'cut' ? 'التنشيف' : goal === 'bulk' ? 'التضخيم' : goal === 'maintain' ? 'المحافظة' : ''
 
