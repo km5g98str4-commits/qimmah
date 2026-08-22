@@ -31,6 +31,13 @@ const ar: CoachStrings = {
   askLabel: 'اسأل المرشد',
   askPlaceholder: 'مثال: ليش سعراتي هذا الرقم؟',
   askSubmit: 'اسأل',
+  noMemoryNote:
+    'ما أحفظ أسئلتك ولا أتعلّم منها. كل جواب ينحسب من جديد وقت ما تسأل — فلو تغيّرت بياناتك تغيّر الجواب، ولو ما تغيّرت جاك نفسه.',
+  answerBlocked:
+    'فيه سطر ما قدرت أربطه بمصدر من بياناتك، وما راح أعرض لك نصف جواب. جرّب سؤال ثاني من القائمة.',
+  entryTitle: 'مرشد قِمّة',
+  entryBody: 'ستة أسئلة يجاوبها من بياناتك أنت — بلا نموذج لغوي وبلا اتصال.',
+  entryCta: 'افتح المرشد',
   quickTitle: 'أسئلة جاهزة',
   answerTitle: 'الجواب',
   sourceLabel: 'المصدر',
@@ -198,6 +205,13 @@ const en: CoachStrings = {
   askLabel: 'Ask the coach',
   askPlaceholder: 'e.g. Why is my calorie number this?',
   askSubmit: 'Ask',
+  noMemoryNote:
+    "I don't keep your questions and I don't learn from them. Every answer is worked out fresh the moment you ask — change your data and the answer changes, leave it and you get the same one back.",
+  answerBlocked:
+    "One line here couldn't be tied back to a source in your data, and I won't show you half an answer. Try another question from the list.",
+  entryTitle: 'Qimmah coach',
+  entryBody: 'Six questions answered from your own data — no language model, no connection.',
+  entryCta: 'Open the coach',
   quickTitle: 'Ready-made questions',
   answerTitle: 'Answer',
   sourceLabel: 'Source',
