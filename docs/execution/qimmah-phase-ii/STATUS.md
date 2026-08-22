@@ -97,6 +97,10 @@ branches are read-only.
   English/auth, executive denial, and the seven verdicts. It remains
   `PREPARED_NOT_EXECUTABLE` until the accepted candidate and passed evidence fill
   every field.
+- Established a continuous Phase II test-change ledger through the exact four
+  lane heads. It records eight new exercise scripts, the path-scope hardening,
+  sixteen named mutations across the two packages, and confirms that no baseline
+  test, shared gate, package manifest, or CI workflow has changed so far.
 
 ## In Progress
 

@@ -160,7 +160,8 @@ Blocking references: `WS-PACKAGE-LOCK-001` and external backend owner evidence.
 - [ ] Food dataset version/activation-pointer rollback documented.
 - [x] Exercise media manifest/version rollback documented; no activation was performed.
 - [ ] Current release notes generated from accepted commit range.
-- [ ] Phase II test-change ledger completed.
+- [x] Continuous Phase II test-change ledger established through the recorded four lane heads.
+- [ ] Phase II test-change ledger frozen at the final candidate with every rebound change recorded.
 - [ ] Final production checklist frozen to an exact candidate SHA.
 - [x] 10–15 minute founder checklist structure prepared with hard-stop rules and evidence bindings.
 - [ ] 10–15 minute founder checklist generated from passed evidence.
