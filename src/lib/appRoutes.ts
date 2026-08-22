@@ -38,6 +38,9 @@ export type AppRoute =
   | 'admin'
   // «التعافي» (v1.1) — تسجيل ذاتي + توصية غير طبية + سجل؛ مدخلها من اليوم (يوم راحة) والتقدّم.
   | 'recovery'
+  // [SOVEREIGN-COACH-002] «المرشد» — شاشة مستقلّة، مدخلها بطاقة في «اليوم». تقرأ
+  // ولا تكتب، فلا فعل مدفوع لها ولا حاجة لاسم في `PAID_ACTIONS`.
+  | 'coach'
   // مسار احتياطي داخلي فقط — لا يُسجَّل في ROUTES ولا يُكتب في hash مباشرة.
   | 'notfound'
   | 'accountRequired'
@@ -58,6 +61,7 @@ const ROUTES: AppRoute[] = [
   'profile',
   'calc',
   'recovery',
+  'coach',
   'settings',
   'privacy',
   'terms',
