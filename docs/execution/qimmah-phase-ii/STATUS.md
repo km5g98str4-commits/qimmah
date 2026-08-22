@@ -70,6 +70,15 @@ branches are read-only.
   is pushed: a deterministic 181-ID review ledger, conservative media states,
   six digest-derived duplicate groups, byte-for-byte regeneration, and seven
   named anti-circumvention mutations. It changes no product or package file.
+- Published a single evidence-led production checklist covering isolation,
+  rebind, gates, release personas, food, exercise media, Executive Dashboard,
+  security/privacy, operations, and founder-only authority. Unchecked work stays
+  visibly unchecked; the checklist grants no deployment or merge permission.
+- Food documentation checkpoint `8a78f86eec8b9b0019c021dfa6213a45e1a20763`
+  is pushed from the untouched `cc60adf` parent: canonical data contract,
+  source-of-truth ledger, status, and adversarial test plan only. Baseline food
+  proofs passed 25/25 and 123/123, with typecheck/lint/diff checks green; remote
+  59,941-row artifacts remain quarantined evidence, not adopted production data.
 
 ## In Progress
 
