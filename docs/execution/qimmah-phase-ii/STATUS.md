@@ -104,6 +104,10 @@ branches are read-only.
 - Prepared an owner-operated deployment handoff that separates the web app,
   marketing/legal site, backend, and iOS targets; requires current external
   trigger evidence and immutable rollback IDs; and performs no external action.
+- Added an executable release-evidence contract: deterministic synthetic
+  fixture, fail-closed validator, seven-verdict guard, and 9/9 named proof cases.
+  It cannot emit GO from fixture mode and still waits for the accepted artifact
+  before any browser result is created.
 
 ## In Progress
 
@@ -116,8 +120,8 @@ branches are read-only.
 - Executive lane is converting the reviewed architecture into executable,
   implementation-independent contract fixtures and negative tests; route and
   live-provider work remain blocked.
-- Release evidence harness implementation remains pending; the persona and
-  rebind plans are complete and wait only at their named integration points.
+- Release evidence schema validation is executable; browser runner/selectors
+  remain pending and wait at the accepted-artifact integration point.
 
 ## Deferred
 

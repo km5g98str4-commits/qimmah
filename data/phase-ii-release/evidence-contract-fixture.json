@@ -1,0 +1,154 @@
+{
+  "candidateSha": "1111111111111111111111111111111111111111",
+  "createdAt": "2026-08-22T00:00:00.000Z",
+  "distManifestSha256": "2222222222222222222222222222222222222222222222222222222222222222",
+  "generatedFor": "CONTRACT_PROOF_ONLY_NOT_RELEASE_EVIDENCE",
+  "records": [
+    {
+      "action": "Contract-fixture action",
+      "actual": "Contract-fixture actual result",
+      "assertionId": "REL-FIXTURE-CONTRACT",
+      "candidateSha": "1111111111111111111111111111111111111111",
+      "consoleErrors": [],
+      "contractReason": null,
+      "counterProofId": null,
+      "dependencyId": null,
+      "distManifestSha256": "2222222222222222222222222222222222222222222222222222222222222222",
+      "engine": "chromium",
+      "evidenceId": "REL-FIXTURE-PASS-001",
+      "expected": "Contract-fixture expected result",
+      "finishedAt": "2026-08-22T00:00:00.000Z",
+      "initialState": "fresh",
+      "locale": "ar",
+      "networkFailures": [],
+      "personaId": "P1",
+      "screenshot": null,
+      "status": "PASS",
+      "viewport": {
+        "height": 844,
+        "width": 390
+      }
+    },
+    {
+      "action": "Contract-fixture action",
+      "actual": "Contract-fixture actual result",
+      "assertionId": "REL-FIXTURE-FAIL",
+      "candidateSha": "1111111111111111111111111111111111111111",
+      "consoleErrors": [],
+      "contractReason": null,
+      "counterProofId": null,
+      "dependencyId": null,
+      "distManifestSha256": "2222222222222222222222222222222222222222222222222222222222222222",
+      "engine": "chromium",
+      "evidenceId": "REL-FIXTURE-FAIL-001",
+      "expected": "Contract-fixture expected result",
+      "finishedAt": "2026-08-22T00:00:00.000Z",
+      "initialState": "fresh",
+      "locale": "en",
+      "networkFailures": [],
+      "personaId": "P1",
+      "screenshot": null,
+      "status": "FAIL",
+      "viewport": {
+        "height": 844,
+        "width": 390
+      }
+    },
+    {
+      "action": "Contract-fixture action",
+      "actual": "Contract-fixture actual result",
+      "assertionId": "REL-FIXTURE-BLOCKED",
+      "candidateSha": "1111111111111111111111111111111111111111",
+      "consoleErrors": [],
+      "contractReason": null,
+      "counterProofId": null,
+      "dependencyId": "WS-REL-ARTIFACT-001",
+      "distManifestSha256": "2222222222222222222222222222222222222222222222222222222222222222",
+      "engine": "chromium",
+      "evidenceId": "REL-FIXTURE-BLOCKED-001",
+      "expected": "Contract-fixture expected result",
+      "finishedAt": "2026-08-22T00:00:00.000Z",
+      "initialState": "interrupted",
+      "locale": "ar",
+      "networkFailures": [],
+      "personaId": "P1",
+      "screenshot": null,
+      "status": "BLOCKED",
+      "viewport": {
+        "height": 844,
+        "width": 390
+      }
+    },
+    {
+      "action": "Contract-fixture action",
+      "actual": "Contract-fixture actual result",
+      "assertionId": "REL-FIXTURE-NA",
+      "candidateSha": "1111111111111111111111111111111111111111",
+      "consoleErrors": [],
+      "contractReason": "Contract excludes this synthetic branch.",
+      "counterProofId": "REL-FIXTURE-COUNTER-001",
+      "dependencyId": null,
+      "distManifestSha256": "2222222222222222222222222222222222222222222222222222222222222222",
+      "engine": "webkit",
+      "evidenceId": "REL-FIXTURE-NA-001",
+      "expected": "Contract-fixture expected result",
+      "finishedAt": "2026-08-22T00:00:00.000Z",
+      "initialState": "corrupt",
+      "locale": "ar",
+      "networkFailures": [],
+      "personaId": "P1",
+      "screenshot": null,
+      "status": "NOT_APPLICABLE",
+      "viewport": {
+        "height": 844,
+        "width": 390
+      }
+    }
+  ],
+  "schemaVersion": 1,
+  "sourceMode": "FIXTURE_ONLY",
+  "verdicts": {
+    "GO_FOUNDER_DEVICE_QA": {
+      "dependencyIds": [],
+      "evidenceIds": [],
+      "reason": "Contract fixture cannot evaluate a release verdict.",
+      "status": "NOT_EVALUATED"
+    },
+    "GO_PREVIEW_FREE_USERS": {
+      "dependencyIds": [],
+      "evidenceIds": [],
+      "reason": "Contract fixture cannot evaluate a release verdict.",
+      "status": "NOT_EVALUATED"
+    },
+    "GO_PAID_COMMERCIAL_FUNNEL": {
+      "dependencyIds": [],
+      "evidenceIds": [],
+      "reason": "Contract fixture cannot evaluate a release verdict.",
+      "status": "NOT_EVALUATED"
+    },
+    "GO_EXECUTIVE_DASHBOARD_FRONTEND": {
+      "dependencyIds": [],
+      "evidenceIds": [],
+      "reason": "Contract fixture cannot evaluate a release verdict.",
+      "status": "NOT_EVALUATED"
+    },
+    "GO_PRODUCTION_DATA_INGEST": {
+      "dependencyIds": [],
+      "evidenceIds": [],
+      "reason": "Contract fixture cannot evaluate a release verdict.",
+      "status": "NOT_EVALUATED"
+    },
+    "GO_EXERCISE_MEDIA_RELEASE": {
+      "dependencyIds": [],
+      "evidenceIds": [],
+      "reason": "Contract fixture cannot evaluate a release verdict.",
+      "status": "NOT_EVALUATED"
+    },
+    "GO_MERGE_MAIN": {
+      "dependencyIds": [],
+      "evidenceIds": [],
+      "reason": "Contract fixture cannot evaluate a release verdict.",
+      "status": "NOT_EVALUATED"
+    }
+  }
+}

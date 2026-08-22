@@ -61,6 +61,7 @@ The checked baseline gate proves planning-branch integrity only.
 - [x] Historical defect replay ledger defined.
 - [x] Preview bypass and production-bundle attack surfaces defined.
 - [x] Seven evidence-linked GO/NO-GO rules defined.
+- [x] Evidence manifest validator and nine named anti-circumvention proof cases pass in explicit fixture-only mode.
 - [ ] Harness selectors/adapters validated against accepted routes.
 - [ ] Tests executed against the final built artifact, not a dev server.
 - [ ] Fresh/returning/interrupted/corrupt/unauthorized contexts executed.
