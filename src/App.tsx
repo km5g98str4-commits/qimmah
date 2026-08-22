@@ -51,6 +51,7 @@ function createLazyViews() {
 import type { MainTab, QuickLogTarget } from '@/components/MobileShell'
 import type { AppBadge } from '@/components/AppNav'
 import { useAuth } from '@/lib/authContext'
+import { PendingTrialResume } from '@/views/reveal/PendingTrialResume'
 import { adoptGuestOnboarding, isAccountOnboarded, isOnboardingComplete, markCompleted } from '@/lib/onboarding'
 import { reconcileAccountScope } from '@/lib/accountScope'
 import { ensureOnboardingProfile } from '@/lib/onboardingProfile'
@@ -658,6 +659,25 @@ export default function App() {
       </a>
       <RouteErrorBoundary onRetry={retryLazyViews}>
         <div id="main-content" tabIndex={-1} className="outline-none">
+          {/*
+            [QIM-FINAL-CLOSURE-001] استئناف التجربة المعلّقة — الحلقة المكسورة تُغلق هنا.
+
+            كان `markPendingTrialIntent()` يكتب النيّة عند زرّ التجربة في التسليم
+            (`OnboardingV2.tsx`)، و`PendingTrialResume` يقرأها — **ولا شيء يركّبه**.
+            فالوعد يُقطع عند «تحتاج حسابًا» ولا يُوفّى بعده أبدًا: النيّة تنتهي
+            صلاحيتها بعد ٢٤ ساعة بلا أن يراها أحد. الملف نفسه كان يقول في ترويسته
+            إنه «يُركَّب في جذر التطبيق» — وهي الجملة الوحيدة فيه التي لم تكن صحيحة.
+
+            **ولماذا في التدفّق لا `fixed`:** التعليق أسفل هذا الملف يسجّل ما فعله
+            `InstallPrompt` بـ`fixed bottom-0 z-[60]` — جعل قاع التطبيق كلّه غير
+            قابل للنقر باختبار الإصابة. فلا يُكرَّر ذلك: البطاقة تُرسم **داخل**
+            `#main-content` قبل محتوى المسار، فلا تعلو شيئًا ولا تحجب هدف لمس.
+
+            وهي تُخفي نفسها (`return null`) ما لم تجتمع نيّة سارية **مع** حساب
+            فعليّ، فلا تظهر لضيف ولا لمن لم يطلب التجربة. والسلطة تبقى للخادم:
+            `beginTrial()` ينادي `start_trial` ولا يمنح العميل شيئًا.
+          */}
+          <PendingTrialResume lang={LANG} signedIn={Boolean(auth.user)} />
           <Suspense fallback={<LoadingFallback />}>{content}</Suspense>
         </div>
         {/*
