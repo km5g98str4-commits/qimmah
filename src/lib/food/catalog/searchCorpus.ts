@@ -45,7 +45,8 @@ export interface CorpusStats {
   pagesFetched: string[]
 }
 
-const MIN_HITS_BEFORE_STOP = 12
+/** حدّ العرض الافتراضي حين لا يسمّيه المستدعي. */
+const DEFAULT_LIMIT = 12
 
 export class SearchCorpus {
   private directory: BucketDirectory | null = null
@@ -87,9 +88,15 @@ export class SearchCorpus {
   /**
    * بحث الذيل الطويل. يعيد الرتب لا السجلات المجرّدة — طبقة الاتحاد تحتاج القوّة.
    *
-   * التوقّف المبكر مقصود: صفحات الحزمة مرتّبة **سعوديًا أولًا ثم بالاسم الأقصر**،
-   * فأوّلها أقربها إلى مطابقة تامّة أو بادئة. من وجد اثني عشر مرشّحًا في الصفحة
-   * الأولى لا يحتاج أن ينزّل البقية ليعرض ثمانية عشر سطرًا.
+   * ═══ ⚠️ لا توقّف مبكر — وهذا سطر كُتب بعد سقوط مقيس ═══
+   * أوّل تنفيذ توقّف حالما بلغت المطابقات حدّ العرض: «وجدنا اثني عشر، يكفي».
+   * وهو **يكسر الضمانة الوحيدة التي تستحقّ الإعلان**: أن كل سجل قابل للبلوغ.
+   * سجلٌ في الصفحة الثانية من حزمته يصير غير قابل للوصول **بأي استعلام** إن
+   * أشبعت الصفحة الأولى الحدّ — فينهار «٥٩٬٩٤١ قابلة للبلوغ» إلى رقم أصغر
+   * مجهول، ولا يكشفه إلا عدّ حقيقي.
+   *
+   * فالميزانية تُقاس **بالصفحات لا بالمطابقات**: تُقرأ صفحات الحزمة حتى ميزانيتها
+   * دائمًا، ثم يُرتَّب المجموع ويُقصّ. الكلفة معلَنة وأعلاها مقيس، والضمانة تصمد.
    */
   async searchRanked(
     query: string,
@@ -102,7 +109,7 @@ export class SearchCorpus {
 
     const q = normalizeProductKey(query)
     const budget = Math.max(1, opts.pageBudget ?? DEFAULT_BUCKET_PAGE_BUDGET)
-    const limit = opts.limit ?? MIN_HITS_BEFORE_STOP
+    const limit = opts.limit ?? DEFAULT_LIMIT
     const available = pageCount(plan.records, directory.page_size)
     const hits: RankedHit[] = []
     let pagesRead = 0
@@ -117,7 +124,6 @@ export class SearchCorpus {
         const tier = tierForProduct(product, q)
         if (tier) hits.push({ product, tier })
       }
-      if (hits.length >= limit) break
     }
 
     return {
