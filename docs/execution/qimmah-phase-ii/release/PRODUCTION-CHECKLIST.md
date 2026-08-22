@@ -155,6 +155,7 @@ Blocking references: `WS-PACKAGE-LOCK-001` and external backend owner evidence.
 - [x] Baseline runbooks/checklists inventoried and classified by currency.
 - [x] Stale branch/SHA references identified rather than copied.
 - [x] Potential contradiction about Cloudflare deployment from `main` recorded.
+- [x] Implementation-independent deployment-owner handoff prepared for web app, site, backend, and iOS targets.
 - [ ] Current Cloudflare app/site project IDs, production branches, outputs, domains, and triggers supplied by owner.
 - [ ] One authoritative release runbook reconciled to accepted SHA and current external settings.
 - [ ] Food dataset version/activation-pointer rollback documented.

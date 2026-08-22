@@ -101,6 +101,9 @@ branches are read-only.
   lane heads. It records eight new exercise scripts, the path-scope hardening,
   sixteen named mutations across the two packages, and confirms that no baseline
   test, shared gate, package manifest, or CI workflow has changed so far.
+- Prepared an owner-operated deployment handoff that separates the web app,
+  marketing/legal site, backend, and iOS targets; requires current external
+  trigger evidence and immutable rollback IDs; and performs no external action.
 
 ## In Progress
 

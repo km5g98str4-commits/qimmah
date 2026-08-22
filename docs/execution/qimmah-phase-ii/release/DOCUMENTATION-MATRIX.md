@@ -48,6 +48,7 @@ deployment authorization.
 | `release/RELEASE-NOTES-TEMPLATE.md` | `CURRENT-PHASE-II` | Evidence-bound bilingual release-note contract, explicitly unreleased. |
 | `release/FOUNDER-MORNING-QA-TEMPLATE.md` | `CURRENT-PHASE-II` | Prepared 10–15 minute device path; not executable until final evidence fills it. |
 | `release/TEST-CHANGE-LEDGER.md` | `CURRENT-PHASE-II` | Continuous exact-SHA inventory of executable proof changes and anti-weakening review. |
+| `release/DEPLOYMENT-OWNER-HANDOFF.md` | `CURRENT-PHASE-II` | Owner-operated target, evidence, authorization, smoke, and rollback protocol; no external action. |
 | Food contract package on `c/phase-ii-food-production-002` | `CURRENT-PHASE-II` | Canonical contract, source ledger, status, and adversarial test plan. |
 | Exercise contract package on `h/phase-ii-exercise-production-002` | `CURRENT-PHASE-II` | Review-led exercise data/media contract and counter-proof plan. |
 | Executive contract package on `e/phase-ii-executive-dashboard-002` | `CURRENT-PHASE-II` | Fail-closed access/data architecture and future browser/security test plan. |
