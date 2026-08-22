@@ -92,6 +92,12 @@ branches are read-only.
   privacy-minimized user data, one-screen information architecture, and a
   browser/security test plan. No route, live provider, backend, or product
   behavior was added.
+- Executive executable-contract checkpoint
+  `1dc78d6751fb9269a75176f40ad5ba2483db651c` is independently verified: six
+  load states, three metric states, five chart identities, two minimized users,
+  four attention states, deterministic fingerprints, 9 positive assertions,
+  and 11/11 named mutations. It remains synthetic and externally blocked from
+  live wiring.
 - Prepared a time-boxed Founder Morning QA template covering artifact identity,
   Arabic Preview, save honesty, returning/interrupted state, exercise recovery,
   English/auth, executive denial, and the seven verdicts. It remains
@@ -117,9 +123,8 @@ branches are read-only.
 - Exercise lane has completed the conservative review ledger and blocked image
   queue; human mechanics authoring and visual review remain queued without
   guessing or premature generation.
-- Executive lane is converting the reviewed architecture into executable,
-  implementation-independent contract fixtures and negative tests; route and
-  live-provider work remain blocked.
+- Executive contract fixtures are complete; UI, route, browser proof, and live
+  provider remain blocked or deferred at their named seams.
 - Release evidence schema validation is executable; browser runner/selectors
   remain pending and wait at the accepted-artifact integration point.
 

@@ -127,6 +127,7 @@ Current truth: `GO_EXERCISE_MEDIA_RELEASE=NO-GO`.
 - [x] Attention contracts carry source/version/time/owner/threshold and detected/clear/unmonitorable/error states.
 - [x] Chart contracts forbid relabeling active-user series as workout or retention data.
 - [x] User contracts minimize list payloads and exclude individual health values from the executive surface.
+- [x] Synthetic Executive contract fixtures reproduce deterministically and kill 11/11 named authorization/data-honesty mutations at `1dc78d6751fb9269a75176f40ad5ba2483db651c`.
 - [ ] No fake/inert refresh/open/destructive control is visible.
 - [ ] One-screen home answers KPIs, alerts, trends, attention, and recent activity.
 - [ ] Arabic/English, RTL, keyboard, focus, 44px touch, contrast, browser layout, and large-data tests pass.

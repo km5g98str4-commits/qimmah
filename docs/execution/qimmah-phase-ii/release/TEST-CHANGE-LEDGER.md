@@ -16,14 +16,16 @@ Recorded lane heads for this checkpoint:
 
 | Lane | Recorded head | Executable test/tooling delta from baseline |
 | --- | --- | --- |
-| Release | `142789e8e4180c5ec57e3642b1998b99b5fbfd4e` | None; documents only |
+| Release | `4863da1df56d7785304bb2090e75a6d18d991de8` | Four new lane-owned evidence scripts; no baseline script changed |
 | Food | `8a78f86eec8b9b0019c021dfa6213a45e1a20763` | None; documents only at this head |
 | Exercise | `e7435544410bb4c151a017da55658e435c8e69c2` | Eight new lane-owned scripts; no baseline script changed |
-| Executive | `09dbf087a1acec45efd4739d7307fc9eb6e4edcd` | None; documents only at this head |
+| Executive | `1dc78d6751fb9269a75176f40ad5ba2483db651c` | Three new lane-owned fixture scripts; no baseline script changed |
 
-Any newer lane head makes this ledger stale until its diff is appended. The
-final candidate needs a regenerated file inventory after rebind; branch names
-or earlier assertion totals are not sufficient.
+Any newer lane head containing an executable/tooling delta makes this ledger
+stale until its diff is appended; later documentation-only commits do not alter
+the executable inventory. The final candidate needs a regenerated file
+inventory after rebind; branch names or earlier assertion totals are not
+sufficient.
 
 ## 2. Executable changes
 
@@ -55,6 +57,27 @@ Introduced at `e7435544410bb4c151a017da55658e435c8e69c2`.
 | `scripts/exercise-production/validate-image-production-jobs.mjs` | New validator entry point | Confirm 37/37 coverage, mechanics blocks, and zero generated outputs | `IMAGE_PRODUCTION_JOBS` | None |
 | `scripts/exercise-production/image-production-jobs-proof.mjs` | New anti-circumvention suite | Reject schema drift, dropped IDs, binding drift, invented metadata/mechanics/safety, premature prompts, and fake outputs | Eight named mutations | None |
 
+### Executive contract-fixture package
+
+Introduced at `1dc78d6751fb9269a75176f40ad5ba2483db651c`.
+
+| Path | Change | Why | Assertions/evidence | Production behavior impact |
+| --- | --- | --- | --- | --- |
+| `scripts/executive-dashboard/lib/contract-fixtures.mjs` | New source-integrity, deterministic generation, access/provider, data-minimization, chart, attention, capability, and bundle validator | Turn the reviewed admin architecture into executable contracts without adding a route or live source | Six load states, three metric states, five chart identities, two minimized users, four attention states, source/bundle fingerprints | None; synthetic fixture code outside `src/**` |
+| `scripts/executive-dashboard/generate-fixtures.mjs` | New `--check`, `--integrity`, and `--print` entry point | Prove repeatable generation and inspect exact fingerprints | Byte-for-byte output and fixed reference time | None |
+| `scripts/executive-dashboard/proof-contract-fixtures.mjs` | New proof suite | Attack absence-as-zero, partial/stale honesty, chart identity, raw/health data, role forgery, early provider calls, and fake capability controls | 9 positive assertions and 11/11 named mutations | None |
+
+### Release evidence-contract package
+
+Introduced at `4863da1df56d7785304bb2090e75a6d18d991de8`.
+
+| Path | Change | Why | Assertions/evidence | Production behavior impact |
+| --- | --- | --- | --- | --- |
+| `scripts/phase-ii-release/evidence-lib.mjs` | New evidence/verdict validator and deterministic fixture builder | Bind every future browser result to immutable artifact identity and prevent fixture data from becoming a release decision | Record/state/dependency/path/identity rules and seven exact verdict names | None; no browser or product import |
+| `scripts/phase-ii-release/build-contract-fixture.mjs` | New fixture writer/check | Keep the synthetic contract fixture byte-for-byte reproducible | `EVIDENCE_FIXTURE_REPRODUCIBILITY` | None |
+| `scripts/phase-ii-release/validate-evidence-manifest.mjs` | New manifest CLI | Fail closed on malformed final evidence | 4 fixture records / 7 verdict slots validation | None |
+| `scripts/phase-ii-release/release-evidence-proof.mjs` | New counter-proof suite | Prevent identity mismatch, status loopholes, path traversal, or unevidenced verdicts | Base assertion plus 8 named mutations; 9/9 total | None |
+
 ## 3. Existing baseline tests changed
 
 None through the recorded heads.
@@ -64,8 +87,8 @@ None through the recorded heads.
   conditional.
 - No browser test was converted into an SSR/static-markup proof.
 
-The exercise scripts above are entirely new under
-`scripts/exercise-production/**`. Changes between their two Phase II commits are
+The Exercise, Executive, and Release scripts above are entirely new in their
+lane-owned directories. Changes between the two Exercise Phase II commits are
 explicitly described in section 2 instead of being hidden by the baseline-only
 comparison.
 
@@ -87,7 +110,7 @@ named, reviewed CI invocation with equivalent failure behavior.
 
 ## 5. Anti-weakening audit
 
-The recorded Phase II executable scripts were reviewed for the prohibited test
+The recorded Exercise, Executive, and Release executable scripts were reviewed for the prohibited test
 shortcuts named in the launch brief:
 
 - no `.skip`, focused `.only`, or placeholder `todo` test;
@@ -96,8 +119,8 @@ shortcuts named in the launch brief:
 - no mocked production entitlement, backend, media approval, or generated file;
 - every exception hardening has a named mutation that attacks its stated intent.
 
-The review result applies only to the exact exercise head recorded above. It
-must be rerun for later Food/Executive/release harness commits.
+The review result applies only to the exact three executable heads recorded
+above. It must be rerun for later Food or other harness commits.
 
 ## 6. Documentation-only plans
 
@@ -107,8 +130,8 @@ These specify future tests but are not counted as passes:
 | --- | --- | --- |
 | Food | `docs/execution/qimmah-phase-ii/food/TEST-PLAN.md` | Contract plan at `8a78f86`; executable seed pipeline pending |
 | Exercise | `docs/execution/qimmah-phase-ii/exercise/TEST-PLAN.md` | Plan plus the focused executable packages listed above |
-| Executive | `docs/execution/qimmah-phase-ii/admin/TEST-PLAN.md` | Future contract/component/browser/server plan; no executable admin test at `09dbf08` |
-| Release | `docs/execution/qimmah-phase-ii/release/RELEASE-CONVERGENCE-PLAN.md` | Persona/attack contract; final-artifact execution blocked |
+| Executive | `docs/execution/qimmah-phase-ii/admin/TEST-PLAN.md` | Contract fixtures execute at `1dc78d6`; component/browser/server execution remains blocked |
+| Release | `docs/execution/qimmah-phase-ii/release/RELEASE-CONVERGENCE-PLAN.md` | Evidence schema executes at `4863da1`; persona/browser execution remains blocked |
 
 ## 7. Append protocol
 
@@ -130,4 +153,3 @@ For every later pushed checkpoint:
 | Dependency ID | Description | Blocking Web Sovereign artifact | Expected future integration point | Remaining work after integration |
 | --- | --- | --- | --- | --- |
 | `WS-TEST-LEDGER-001` | The continuous ledger can record independent Phase II proofs now, but cannot inventory final route/browser/gate changes against an unaccepted implementation. | Founder-accepted Web SHA and every rebound lane head selected for the final candidate. | Coordinator-owned final convergence and gate-union review. | Diff each rebound head from its recorded checkpoint, append all executable changes, audit assertion removals/weakening, run the union and exact-SHA CI, then freeze the ledger at the final candidate. |
-
