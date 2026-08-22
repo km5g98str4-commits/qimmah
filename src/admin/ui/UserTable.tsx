@@ -38,14 +38,42 @@ const VIEWPORT_HEIGHT = 560
 /** فوق هذا العدد تُشغَّل الافتراضية. تحته الرسم الكامل أرخص وأبسط. */
 const VIRTUALIZE_ABOVE = 60
 
+/**
+ * عقد «الخادم يبحث ويصفّح».
+ *
+ * ═══ لماذا وضعان لا وضع واحد ═══
+ * الجدول كان يبحث ويصفّح **في المتصفّح** على ما وصله. وذلك صحيح على قائمة
+ * كاملة، **وكذبٌ على شريحة**: البحث في أول ٢٠٠ صفًّا يعيد «ما فيه نتائج» عن
+ * حساب موجود فعلًا، والعدد المعروض يصير عدد ما جُلب لا عدد الحسابات.
+ * فحين يُمرَّر هذا العقد يتنحّى المتصفّح عن الثلاثة كلها (بحث · ترتيب · تصفّح)
+ * ويتولّاها الخادم، ويبقى المنطق المحلّي كما هو لمن يمرّر قائمة كاملة
+ * (التجهيزات والإثباتات).
+ */
+export interface ServerPaging {
+  readonly search: string
+  readonly page: number
+  readonly pageSize: number
+  /**
+   * عدد الحسابات **كلها** بعد البحث — من الخادم لا من طول المصفوفة.
+   * `null` = لم يعدّ الخادم بعد. **ليس صفرًا**: صفرٌ هنا يُقرأ «لا حسابات».
+   */
+  readonly total: number | null
+  readonly onSearch: (search: string) => void
+  readonly onPage: (page: number) => void
+  /** صفحة قيد الجلب — يُعلَن ولا يُخفى خلف صفوف قديمة بلا إشارة. */
+  readonly busy?: boolean
+}
+
 interface UserTableProps {
   data: MetricValue<readonly AdminUserRow[]>
   onOpen?: (userId: string) => void
   /** معرّف المقياس الذي يشرح سبب غياب الجدول. */
   metricId?: string
+  /** حين يُمرَّر: البحث والتصفّح على الخادم، والترتيب معطّل بسبب مسمّى. */
+  server?: ServerPaging
 }
 
-export function UserTable({ data, onOpen, metricId = 'users.total' }: UserTableProps) {
+export function UserTable({ data, onOpen, metricId = 'users.total', server }: UserTableProps) {
   const { lang, dir } = useLanguage()
   const t = adminStrings[lang]
   // اتجاه سهم «افتح» يتبع اتجاه القراءة — بلا صنف اتجاهي ثابت.
@@ -60,9 +88,25 @@ export function UserTable({ data, onOpen, metricId = 'users.total' }: UserTableP
   const [now] = useState(() => Date.now())
   // الاشتقاق داخل الـmemo: مصفوفة `[]` جديدة في كل رسم كانت تُبطل الذاكرة
   // دائمًا، فيُعاد فرز خمسة آلاف صفّ على كل ضغطة مفتاح في حقل البحث.
-  const result = useMemo(() => runQuery(data.state === 'ready' ? data.value : [], query, now), [data, query, now])
+  const clientResult = useMemo(() => runQuery(data.state === 'ready' ? data.value : [], query, now), [data, query, now])
+
+  // في وضع الخادم لا يُعاد تشغيل خطّ المعالجة على الصفحة: الخادم بحث ورتّب
+  // وقصّ، وإعادة القصّ هنا تعني **تصفّحًا داخل تصفّح** — صفحة من صفحة.
+  const result = server
+    ? {
+        rows: data.state === 'ready' ? data.value : [],
+        total: server.total,
+        page: server.page,
+        pageSize: server.pageSize,
+        // بلا عدّ من الخادم لا عدد صفحات يُدّعى: تبقى الصفحة الحالية سقفًا،
+        // فزرّ «التالي» يُعطَّل بدل أن يَعِد بصفحة لا نعرف وجودها.
+        pageCount:
+          server.total === null ? server.page : Math.max(1, Math.ceil(server.total / Math.max(1, server.pageSize))),
+      }
+    : clientResult
 
   const patch = (p: Partial<TableQuery>) => setQuery((q) => ({ ...q, ...p, page: p.page ?? 1 }))
+  const goToPage = (p: number) => (server ? server.onPage(p) : setQuery((q) => ({ ...q, page: p })))
 
   if (data.state !== 'ready') {
     return (
@@ -106,7 +150,7 @@ export function UserTable({ data, onOpen, metricId = 'users.total' }: UserTableP
           {t.table.heading}
         </h2>
         <span className="text-xs tabular-nums text-ink-500">
-          {result.total} {t.table.rows}
+          {result.total === null ? '—' : result.total} {t.table.rows}
         </span>
       </div>
 
@@ -121,17 +165,24 @@ export function UserTable({ data, onOpen, metricId = 'users.total' }: UserTableP
             type="search"
             className="input"
             placeholder={t.table.searchPlaceholder}
-            value={query.search}
-            onChange={(e) => patch({ search: e.target.value })}
+            value={server ? server.search : query.search}
+            onChange={(e) => (server ? server.onSearch(e.target.value) : patch({ search: e.target.value }))}
           />
         </div>
         <div>
           <label htmlFor="admin-user-sort" className="mb-1 block text-xs font-bold text-ink-500">
             {t.table.sortBy}
           </label>
+          {/*
+            في وضع الخادم الترتيب **معطّل بسبب مسمّى** لا مُطبَّق محليًا: دالة
+            الصفحة ترتّب بالأحدث ولا تقبل مفتاحًا، وترتيب الصفحة وحدها يُقرأ
+            ترتيبًا للكل — وهو بالضبط ما يمنعه عقد الصدق.
+          */}
           <select
             id="admin-user-sort"
             className="input"
+            disabled={Boolean(server)}
+            title={server ? t.table.sortServerNote : undefined}
             value={query.sortKey}
             onChange={(e) => patch({ sortKey: e.target.value as SortKey })}
           >
@@ -144,6 +195,8 @@ export function UserTable({ data, onOpen, metricId = 'users.total' }: UserTableP
         <button
           type="button"
           className="btn-ghost tap-target"
+          disabled={Boolean(server)}
+          title={server ? t.table.sortServerNote : undefined}
           onClick={() => patch({ sortDir: query.sortDir === 'asc' ? 'desc' : 'asc' })}
           aria-label={query.sortDir === 'asc' ? t.table.sortAsc : t.table.sortDesc}
         >
@@ -151,6 +204,15 @@ export function UserTable({ data, onOpen, metricId = 'users.total' }: UserTableP
           <span className="text-xs">{query.sortDir === 'asc' ? t.table.sortAsc : t.table.sortDesc}</span>
         </button>
       </div>
+
+      {server ? (
+        <p className="mt-2 flex items-start gap-2 text-[11px] leading-relaxed text-ink-500" data-server-paging="true">
+          <Icon name="Info" className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+          <span>
+            {t.table.serverNote} {server.busy ? t.table.searching : ''}
+          </span>
+        </p>
+      ) : null}
 
       {/* ——— المصافي ——— */}
       <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label={t.table.heading}>
@@ -269,7 +331,7 @@ export function UserTable({ data, onOpen, metricId = 'users.total' }: UserTableP
           type="button"
           className="btn-ghost tap-target"
           disabled={result.page <= 1}
-          onClick={() => setQuery((q) => ({ ...q, page: q.page - 1 }))}
+          onClick={() => goToPage(result.page - 1)}
         >
           {t.table.prev}
         </button>
@@ -280,7 +342,7 @@ export function UserTable({ data, onOpen, metricId = 'users.total' }: UserTableP
           type="button"
           className="btn-ghost tap-target"
           disabled={result.page >= result.pageCount}
-          onClick={() => setQuery((q) => ({ ...q, page: q.page + 1 }))}
+          onClick={() => goToPage(result.page + 1)}
         >
           {t.table.next}
         </button>

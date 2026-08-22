@@ -35,6 +35,7 @@ import { FunnelChart, TrendChart } from './Charts'
 import { MetricCard } from './MetricCard'
 import { UserDetailPanel } from './UserDetail'
 import { UserTable } from './UserTable'
+import type { ServerPaging } from './UserTable'
 
 /** شريط وضع المنصّة — أربع حقائق يعرفها العميل عن نفسه بلا خادم. */
 function PostureStrip({ platform }: { platform: PlatformPosture }) {
@@ -87,6 +88,10 @@ interface AdminShellProps {
   onOpenUser?: (userId: string) => void
   onCloseUser?: () => void
   onRefresh?: () => void
+  /** حين يُمرَّر: بحث وتصفّح الجدول يمرّان بالخادم لا بالمتصفّح. */
+  userPaging?: ServerPaging
+  /** حالة قراءة صفحة التفصيل — مستقلّة عن اللقطة، فالفشل يُسمّى وحده. */
+  detailLive?: LiveReadState
   /**
    * حالة القراءة الحيّة. **بلا قيمة ⇒ `'not-founder'`** — الافتراض الأقلّ ادّعاءً:
    * مكوّن يُرسَم بلا إخبار عن مصدره لا يجوز أن يقول «حيّ».
@@ -94,7 +99,17 @@ interface AdminShellProps {
   live?: LiveReadState
 }
 
-export function AdminShell({ decision, snapshot, detail, onOpenUser, onCloseUser, onRefresh, live = 'not-founder' }: AdminShellProps) {
+export function AdminShell({
+  decision,
+  snapshot,
+  detail,
+  onOpenUser,
+  onCloseUser,
+  onRefresh,
+  userPaging,
+  detailLive,
+  live = 'not-founder',
+}: AdminShellProps) {
   const lang = useLang()
   const t = adminStrings[lang]
   const [tab, setTab] = useState<Tab>('overview')
@@ -270,9 +285,9 @@ export function AdminShell({ decision, snapshot, detail, onOpenUser, onCloseUser
       {tab === 'users' ? (
         <div className="mt-4 flex flex-col gap-4">
           {detail ? (
-            <UserDetailPanel detail={detail} onBack={onCloseUser} />
+            <UserDetailPanel detail={detail} onBack={onCloseUser} live={detailLive} />
           ) : (
-            <UserTable data={rowsValue} onOpen={onOpenUser} />
+            <UserTable data={rowsValue} onOpen={onOpenUser} server={userPaging} />
           )}
         </div>
       ) : null}

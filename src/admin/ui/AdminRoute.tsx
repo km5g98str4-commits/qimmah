@@ -27,7 +27,7 @@ import { CLOSED_DECISION, isAdmin, resolveAdminRole } from '../auth/adminRole'
 import type { AdminRoleDecision } from '../auth/adminRole'
 import { loadLiveExecutiveSnapshot, loadLiveUserPage } from '../contract/liveSource'
 import type { LiveReadState } from '../contract/liveSource'
-import type { ExecutiveSnapshot } from '../contract/types'
+import type { AdminUserPage, ExecutiveSnapshot, MetricValue } from '../contract/types'
 import { AdminDenied } from './AdminDenied'
 import { AdminShell } from './AdminShell'
 
@@ -43,6 +43,11 @@ function AdminLoading({ label }: { label: string }) {
   )
 }
 
+/** حجم الصفحة على الخادم. ٢٥ لا ٢٠٠: صفحة تُقرأ، لا شريحة تُقصّ ثم يُبحث فيها. */
+const PAGE_SIZE = 25
+/** تأخير البحث — كل حرف نداءً يعني نداءً لكل حرف، وقائمة نتائج تتأرجح. */
+const SEARCH_DEBOUNCE_MS = 300
+
 export function AdminRoute() {
   const lang = useLang()
   const t = adminStrings[lang]
@@ -54,28 +59,37 @@ export function AdminRoute() {
   const allowed = isAdmin(decision)
 
   const [snapshot, setSnapshot] = useState<ExecutiveSnapshot | null>(null)
-  const [live, setLive] = useState<LiveReadState>('not-founder')
+  const [snapLive, setSnapLive] = useState<LiveReadState>('not-founder')
   const [nonce, setNonce] = useState(0)
+
+  // ═══ حالة الجدول — **مقسومة عمدًا إلى ثلاثة** ═══
+  // `typed` ما يكتبه المؤسس الآن (فوري، بلا نداء) · `search` ما استقرّ بعد
+  // التأخير (هو وحده يُرسَل) · `page` رقم الصفحة على الخادم.
+  const [typed, setTyped] = useState('')
+  const [search, setSearch] = useState('')
+  const [page, setPage] = useState(1)
+  const [userPage, setUserPage] = useState<MetricValue<AdminUserPage> | null>(null)
+  const [pageLive, setPageLive] = useState<LiveReadState>('not-founder')
+  const [pageBusy, setPageBusy] = useState(false)
+
   // يمنع أن تكتب استجابة قديمة فوق أحدث لقطة بعد «حدّث» متكرّر.
   const runRef = useRef(0)
+  const pageRunRef = useRef(0)
 
+  // ── اللقطة التنفيذية: لا تُعاد بتغيّر الصفحة ──
   useEffect(() => {
     if (!allowed) {
       setSnapshot(null)
-      setLive('not-founder')
+      setSnapLive('not-founder')
       return
     }
     const run = ++runRef.current
     let alive = true
     void (async () => {
-      const [snap, page] = await Promise.all([
-        loadLiveExecutiveSnapshot(decision),
-        loadLiveUserPage(decision, { pageSize: 200 }),
-      ])
+      const snap = await loadLiveExecutiveSnapshot(decision)
       if (!alive || run !== runRef.current) return
-      setSnapshot({ ...snap.snapshot, users_page: page.page })
-      // الحالة المعروضة هي **الأضعف** بين النداءين: نجاحٌ جزئي لا يُعلَن «حيّ».
-      setLive(snap.live === 'live' && page.live === 'live' ? 'live' : snap.live)
+      setSnapshot(snap.snapshot)
+      setSnapLive(snap.live)
     })()
     return () => {
       alive = false
@@ -84,10 +98,60 @@ export function AdminRoute() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allowed, auth.user?.id, nonce])
 
+  // ── تأخير البحث: الحرف لا يُرسَل، والاستقرار يُرسَل ──
+  useEffect(() => {
+    if (!allowed) return
+    const id = setTimeout(() => {
+      setSearch(typed)
+      setPage(1)
+    }, SEARCH_DEBOUNCE_MS)
+    return () => clearTimeout(id)
+  }, [typed, allowed])
+
+  // ── صفحة الجدول: **الخادم يبحث ويصفّح** ──
+  useEffect(() => {
+    if (!allowed) {
+      setUserPage(null)
+      setPageLive('not-founder')
+      return
+    }
+    const run = ++pageRunRef.current
+    let alive = true
+    setPageBusy(true)
+    void (async () => {
+      const res = await loadLiveUserPage(decision, { search, page, pageSize: PAGE_SIZE })
+      if (!alive || run !== pageRunRef.current) return
+      setUserPage(res.page)
+      setPageLive(res.live)
+      setPageBusy(false)
+    })()
+    return () => {
+      alive = false
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allowed, auth.user?.id, nonce, search, page])
+
   const refresh = useCallback(() => setNonce((n) => n + 1), [])
+  const onSearch = useCallback((v: string) => setTyped(v), [])
+  const onPage = useCallback((p: number) => setPage(Math.max(1, Math.trunc(p))), [])
 
   if (!allowed) return <AdminDenied decision={decision} />
   if (!snapshot) return <AdminLoading label={t.states.loading} />
 
-  return <AdminShell decision={decision} snapshot={snapshot} live={live} onRefresh={refresh} />
+  // الحالة المعروضة هي **الأضعف** بين النداءين: نجاحٌ جزئي لا يُعلَن «حيّ».
+  const live: LiveReadState = snapLive === 'live' && pageLive === 'live' ? 'live' : snapLive
+  const merged: ExecutiveSnapshot = userPage ? { ...snapshot, users_page: userPage } : snapshot
+  // العدد الكلّي من الخادم. **`null` لا صفر**: بلا صفحة جاهزة لا عدد يُدّعى،
+  // والصفر هنا كان سيُقرأ «لا حسابات» وهو أشدّ الأكاذيب في لوحة تنفيذية.
+  const total = merged.users_page.state === 'ready' ? merged.users_page.value.total : null
+
+  return (
+    <AdminShell
+      decision={decision}
+      snapshot={merged}
+      live={live}
+      onRefresh={refresh}
+      userPaging={{ search: typed, page, pageSize: PAGE_SIZE, total, onSearch, onPage, busy: pageBusy }}
+    />
+  )
 }

@@ -116,6 +116,12 @@ export interface AdminStrings {
     open: string
     noName: string
     noSignIn: string
+    /** يظهر حين يكون البحث والتصفّح على الخادم لا في المتصفّح. */
+    serverNote: string
+    /** سبب تعطيل الترتيب في وضع الخادم — الدالة ترتّب بالأحدث ولا تقبل مفتاحًا. */
+    sortServerNote: string
+    /** أثناء جلب صفحة جديدة من الخادم. */
+    searching: string
   }
   detail: {
     heading: string
@@ -512,6 +518,9 @@ export const adminStrings: Record<Lang, AdminStrings> = {
       open: 'افتح',
       noName: 'بلا اسم',
       noSignIn: 'ما سجّل دخول',
+      serverNote: 'البحث والتصفّح يصيران على الخادم — العدد هنا عدد كل الحسابات لا عدد الصفحة.',
+      sortServerNote: 'الترتيب على الخادم بالأحدث تسجيلًا. ترتيب صفحة وحدها يوهم إنه ترتيب الكل.',
+      searching: 'نجيب الصفحة…',
     },
     detail: {
       heading: 'صفحة المستخدم',
@@ -649,6 +658,9 @@ export const adminStrings: Record<Lang, AdminStrings> = {
       open: 'Open',
       noName: 'No name',
       noSignIn: 'Never signed in',
+      serverNote: 'Search and paging run on the server — the count is every account, not this page.',
+      sortServerNote: 'The server sorts newest first. Sorting one page would look like sorting everyone.',
+      searching: 'Fetching the page…',
     },
     detail: {
       heading: 'User detail',

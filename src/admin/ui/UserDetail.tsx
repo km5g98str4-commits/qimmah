@@ -16,7 +16,9 @@
 import { Icon } from '@/components/Icon'
 import { adminStrings } from '@/i18n/dict/admin'
 import { useLang } from '@/i18n'
+import { cn } from '@/lib/cn'
 import { findMetric } from '../contract/metrics'
+import type { LiveReadState } from '../contract/liveSource'
 import type { AdminUserDetail, MetricValue } from '../contract/types'
 
 /** سطر قيمة — يعرض الجاهز، ويعلن الغائب بسببه. لا شرطة تُقرأ صفرًا. */
@@ -46,9 +48,14 @@ function ValueRow({ label, value, metricId }: { label: string; value: MetricValu
 interface UserDetailProps {
   detail: AdminUserDetail
   onBack?: () => void
+  /**
+   * حالة قراءة هذه الصفحة بعينها. **بلا قيمة ⇒ لا شريط** — لا ادّعاء ولا نفي:
+   * من يرسم الصفحة من تجهيزة لا يقول عنها «حيّة» ولا «معطوبة».
+   */
+  live?: LiveReadState
 }
 
-export function UserDetailPanel({ detail, onBack }: UserDetailProps) {
+export function UserDetailPanel({ detail, onBack, live }: UserDetailProps) {
   const lang = useLang()
   const t = adminStrings[lang]
   const r = detail.row
@@ -66,6 +73,23 @@ export function UserDetailPanel({ detail, onBack }: UserDetailProps) {
           </button>
         ) : null}
       </div>
+
+      {/*
+        شريط حالة القراءة — يظهر حين تُعلَن الحالة **وتكون غير حيّة**. الصفحة
+        التي تُرسم من ردّ ناقص يجب أن تقول ذلك في سطرها الأول، وإلا قُرئ نقصها
+        على أنه حقيقة الحساب.
+      */}
+      {live && live !== 'live' ? (
+        <p
+          data-detail-live-state={live}
+          className={cn(
+            'mt-3 flex items-start gap-2 rounded-xl border border-warning/40 bg-warning/[0.07] p-3 text-xs leading-relaxed text-ink-700',
+          )}
+        >
+          <Icon name="Info" className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
+          {t.live[live]}
+        </p>
+      ) : null}
 
       {/* ——— الحساب: الحقول المُصرَّح بها وحدها ——— */}
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
