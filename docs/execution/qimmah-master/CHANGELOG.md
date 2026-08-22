@@ -4,6 +4,37 @@
 > Product changes live in git. This file records **plan** changes: the Master Plan is versioned,
 > and **agents are forbidden from silently expanding scope**.
 
+---
+
+## GOV-003 — freeze + composition — 2026-08-18
+
+**Ground frozen.** `dc031fa36929e07c3b00fa025a676ed64327ce59` pinned at
+`origin/archive/ground-v1-rc-20260818`, plus 12 archive refs for every current-era branch
+GOV-002 found carrying unique work, and one for the verified descendant `a464268`.
+⚠️ Annotated **tags could not be pushed** — this container returns HTTP 403 on `refs/tags/*`
+while branch refs push normally. The archive **branch** refs are the durable anchors.
+
+**One control plane.** This folder is canonical. `docs/control/` is stamped SUPERSEDED on every
+file (its GOV-002 forensics remain valid and are referenced). `docs/governance/` was empty.
+
+**Blockers closed** — each with a counter-proof that fails by name:
+- Allergy notice reaches the live routed surface (it had been proven green on an unrouted twin).
+- Corrupt state no longer bypasses the paid-edit guard.
+- Sensitive-health consent is a real write boundary; the `profiles`-only short-circuit is gone and
+  unknown tables fail closed.
+- Commercial/legal copy reconciled with DEC-015 across 7 surfaces.
+- STITCH-01 ledger union completed **with two patterns rejected on evidence**, not merged blindly.
+
+**Vacuity exposed, not papered over.** `test:chaos` was passing because `VITE_SYNC_ENABLED` was
+unset in its harness — 12 queue invariants had never executed. The flag is now set and the proof
+is **red and ungated**, recorded in `07-STATE.md` rather than hidden or force-greened. Likewise
+the two "declared exclusions" (`test:safe-storage`, `test:body-model`) were measured and are red;
+charter §11 now says so.
+
+**Scope held.** No merge to `main`, no deploy, no migration applied, no branch or tag deleted, no
+Salla change. QAE untouched (reference). AI Coach classified POST_LAUNCH, not shipped. Watermarked
+media stayed excluded.
+
 Every plan change needs: `PLAN-CHANGE-ID` · reason · tasks added/removed · critical-path impact · scope impact.
 
 ---

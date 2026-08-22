@@ -14,7 +14,7 @@ interface NotFoundViewProps {
 export function NotFoundView({ lang, onHome, onBack }: NotFoundViewProps) {
   const t = getStrings(lang)
   return (
-    <div dir={lang === 'en' ? 'ltr' : 'rtl'} className="h-[100dvh] min-h-0 overflow-hidden bg-page">
+    <div dir={lang === 'en' ? 'ltr' : 'rtl'} data-testid="route-not-found" className="h-[100dvh] min-h-0 overflow-hidden bg-page">
       <main
         className="app-scroll flex h-full min-h-0 flex-col items-center overflow-y-auto overscroll-y-contain px-6 py-12"
         style={{ paddingTop: 'max(3rem, var(--safe-top))', paddingBottom: 'max(3rem, var(--safe-bottom))' }}

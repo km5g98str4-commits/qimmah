@@ -79,7 +79,13 @@ const result = await build({
   write: false,
   banner: { js: banner },
   alias: { '@': resolve(root, 'src') },
-  define: { 'import.meta.env': JSON.stringify({ MODE: 'test', DEV: false, PROD: false }) },
+  // [GOV-003] `VITE_SYNC_ENABLED` **يجب** أن يكون هنا. بدونه يقرأ
+  // `src/lib/syncQueue.ts:11` علمًا غير معرَّف فيصير `enqueueSyncOperation`
+  // لا-عمليّة صامتة — فتمرّ فحوص عزل الطابور بين الحسابات وهي **لا تقيس شيئًا**.
+  // أي أن غيابه كان يجعل الفوضى تسقط لسبب من صنع المِعْدَان لا من صنع المنتج.
+  define: {
+    'import.meta.env': JSON.stringify({ MODE: 'test', DEV: false, PROD: false, VITE_SYNC_ENABLED: 'true' }),
+  },
   logLevel: 'warning',
 })
 

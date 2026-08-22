@@ -19,7 +19,7 @@
 import { chromium } from 'playwright'
 import {
   VIEWPORTS, startApp, createRecorder, openPage, screenText,
-  report, ensureProofRoot, seedSession,
+  report, ensureProofRoot, seedSession, classifyClientErrors,
 } from './lib/kit.mjs'
 import { loadJourneyCopy } from './lib/journey-copy.mjs'
 import { answerDietPattern } from '../lib/onboarding-driver.mjs'
@@ -30,6 +30,10 @@ const VIEWPORT = VIEWPORTS.large
 const MINOR_AGE = '15'
 const ADULT_AGE = '28'
 const group = (page, id) => page.locator(`[data-question-id="${id}"]`)
+/** خيار داخل مجموعة سؤال — بقيمة النموذج (`cut`) لا بصياغتها المعروضة. */
+const choice = (page, questionId, value) => group(page, questionId).locator(`[data-choice="${value}"]`)
+/** مُحدِّد ثابت بمعرّف اختبار — لا نصّ فيه. */
+const byTestId = (page, id) => page.locator(`[data-testid="${id}"]`)
 
 const app = await startApp(PORT)
 let browser
@@ -39,7 +43,6 @@ try {
   const copy = await loadJourneyCopy()
   const t = copy.onboarding(LANG)
   const intent = copy.intent(LANG)
-  const body = copy.body(LANG)
   const choices = copy.profileChoices(LANG)
   // القاصر مبتدئ في هذه الرحلة — الصياغة التي يراها فعلًا.
   const wording = copy.goalWording(LANG, 'beginner')
@@ -54,7 +57,7 @@ try {
   })
 
   browser = await chromium.launch()
-  const { page, errors } = await openPage(browser, { viewport: VIEWPORT, lang: LANG })
+  const { page, errors, network } = await openPage(browser, { viewport: VIEWPORT, lang: LANG })
   const visit = async (slug, ar, en) => {
     await rec.shot(page, slug, ar, en)
     return screenText(page)
@@ -64,13 +67,13 @@ try {
   await seedSession(page, { uid: 'journey-minor' })
   await page.goto(app.url, { waitUntil: 'networkidle' })
   await page.waitForTimeout(600)
-  await page.getByRole('button', { name: /ابدأ|Start/ }).first().click().catch(() => {})
+  await byTestId(page, 'welcome-start-cta').first().click().catch(() => {})
   await page.waitForTimeout(700)
-  const onboardingStart = page.getByRole('button', { name: t.welcome.start, exact: true })
+  const onboardingStart = byTestId(page, 'onboarding-welcome-start')
   if (await onboardingStart.isVisible().catch(() => false)) await onboardingStart.click()
   await page.waitForSelector('#v2-body-age')
 
-  const next = page.getByRole('button', { name: t.next }).first()
+  const next = byTestId(page, 'onboarding-next').first()
 
   /** يملأ خطوة الجسد بعمر معيّن. */
   const fillBody = async (age) => {
@@ -78,7 +81,7 @@ try {
     await nums.nth(0).fill(age)
     await nums.nth(1).fill('170')
     await nums.nth(2).fill('60')
-    await page.getByRole('button', { name: body.genderMale, exact: true }).first().click().catch(() => {})
+    await choice(page, 'body.sex', 'male').click().catch(() => {})
     await page.waitForTimeout(300)
   }
 
@@ -107,8 +110,8 @@ try {
   await page.waitForTimeout(400)
 
   // النية والمستوى
-  await page.getByRole('button', { name: new RegExp(intent.intents[0].label) }).first().click()
-  await page.getByRole('button', { name: new RegExp(intent.levels.find((l) => l.value === 'beginner').label) }).first().click()
+  await choice(page, 'intent.primary', intent.intents[0].value).click()
+  await choice(page, 'experience.declared', 'beginner').click()
   await page.waitForTimeout(250)
   await next.click()
   await page.waitForTimeout(500)
@@ -155,7 +158,7 @@ try {
 
   // ───────────────── ٣) الهجوم: النقر على المحجوب ─────────────────
   console.log('\n▸ محاولة الالتفاف ١ — النقر المباشر على هدف محجوب')
-  await page.getByRole('button', { name: new RegExp(wording.cut.label) }).first()
+  await choice(page, 'goal.primary', 'cut')
     .click({ force: true, timeout: 3000 }).catch(() => {})
   await page.waitForTimeout(300)
   const afterForce = await goalStates()
@@ -170,7 +173,7 @@ try {
   // ───────────────── ٤) الهجوم: خفض العمر بعد الاختيار ─────────────────
   console.log('\n▸ محاولة الالتفاف ٢ — اختيار الهدف ببلوغ ثم خفض العمر')
   // ارجع إلى خطوة الجسد وارفع العمر.
-  const back = page.getByRole('button', { name: /رجوع|Back/ }).first()
+  const back = byTestId(page, 'onboarding-back').first()
   await back.click().catch(() => {}); await page.waitForTimeout(250)
   await back.click().catch(() => {}); await page.waitForTimeout(250)
   await back.click().catch(() => {}); await page.waitForTimeout(400)
@@ -183,7 +186,7 @@ try {
   const cutAdult = adultStates.find((s) => s.text.includes(wording.cut.label))
   rec.check(`بعمر ${ADULT_AGE} يصير «${wording.cut.label}» متاحًا`, cutAdult?.disabled === false,
     'الحاجز مرتبط بالعمر لا ثابت')
-  await page.getByRole('button', { name: new RegExp(wording.cut.label) }).first().click()
+  await choice(page, 'goal.primary', 'cut').click()
   await page.waitForTimeout(300)
   rec.check('الهدف المقيَّد اختير فعلًا بعمر بالغ',
     (await goalStates()).find((s) => s.text.includes(wording.cut.label))?.pressed === 'true')
@@ -212,7 +215,7 @@ try {
 
   // ───────────────── ٥) الإكمال بالمحافظة ─────────────────
   console.log('\n▸ الإكمال بالمحافظة')
-  await page.getByRole('button', { name: new RegExp(wording.maintain.label) }).first().click()
+  await choice(page, 'goal.primary', 'maintain').click()
   await page.waitForTimeout(300)
   rec.check(`«${wording.maintain.label}» يُختار بلا عائق`,
     (await goalStates()).find((s) => s.text.includes(wording.maintain.label))?.pressed === 'true')
@@ -224,7 +227,8 @@ try {
   await next.click(); await page.waitForTimeout(400)
   await group(page, 'limitations.has_injury').getByRole('button').nth(1).click()
   await page.waitForTimeout(300)
-  await page.locator('footer button').last().click().catch(() => {})
+  // زرّ الخطوة الأخيرة هو زرّ المتابعة نفسه بنصّ آخر — نفس المُحدِّد الثابت.
+  await byTestId(page, 'onboarding-next').first().click().catch(() => {})
   await page.waitForTimeout(1400)
 
   const planText = await visit('plan-minor', 'خطة القاصر — على المحافظة', "The minor's plan — on maintenance")
@@ -236,9 +240,11 @@ try {
   )
 
   // ───────────────── ٦) الحساب نفسه ─────────────────
-  await page.getByRole('button', { name: t.ready.enter }).first().click().catch(() => {})
+  await byTestId(page, 'ready-enter-cta').first().click().catch(() => {})
   await page.waitForSelector('[data-testid="plan-handoff"]')
-  await page.getByRole('button', { name: t.handoff.enterFree, exact: true }).click()
+  // نصّ هذا الزرّ انتقل من `V2_ONBOARDING.handoff` إلى `revealStrings.cta`؛
+  // المُحدِّد الثابت لا يعرف بالنقلة أصلًا.
+  await byTestId(page, 'handoff-preview-cta').click()
   await page.waitForTimeout(1000)
   const stored = await page.evaluate(() => localStorage.getItem('qimmah:customization:v1') || '')
   let goalType = ''
@@ -260,20 +266,29 @@ try {
   await page.evaluate(() => { location.hash = '#/workout' })
   await page.waitForTimeout(1200)
   const workoutText = await visit('workout-minor', 'شاشة تمارين القاصر', "Minor's workout screen")
+  // إثبات إيجابي على السطح الحيّ (`WorkoutView`) لا نفي على توأم غير موجَّه:
+  // بطاقة الخطة وأيامها حاضرة، والحالة الفارغة الحيّة غائبة.
+  const minorPlanDays = await byTestId(page, 'workout-plan-day').count()
   rec.check(
-    'شاشة التمارين ترى خطة القاصر (لا «أكمل إعداد خطتك»)',
-    !workoutText.includes('أكمل إعداد خطتك'),
+    'شاشة التمارين ترى خطة القاصر (بطاقة خطة بأيامها، لا حالة «ما عندك خطة»)',
+    (await byTestId(page, 'workout-plan-card').isVisible()) &&
+      minorPlanDays > 0 &&
+      (await byTestId(page, 'workout-no-plan').count()) === 0,
+    `${minorPlanDays} يومًا`,
   )
-  const startSession = page.getByRole('button', { name: /ابدأ تمرين فارغ/ }).first()
+  const startSession = byTestId(page, 'workout-start-empty').first()
   rec.check('فعل بدء التمرين ظاهر للقاصر في المعاينة', await startSession.isVisible().catch(() => false))
   await startSession.click()
   await page.waitForSelector('[data-testid="premium-gate"]')
   await visit('workout-minor-premium-gate', 'بدء تمرين القاصر من المعاينة — بوابة Premium', "Minor preview workout — Premium gate")
   rec.check('المعاينة لا تبدأ جلسة مدفوعة للقاصر بصمت', await page.locator('[data-testid="premium-gate"]').isVisible())
 
-  const realErrors = errors.filter((e) => !(/401/.test(e) && /Failed to load resource/.test(e)))
-  rec.check('لا أخطاء طرف عميل (عدا 401 الجلسة المزروعة — استثناء معلَن)', realErrors.length === 0,
-    realErrors.slice(0, 3).join(' | '))
+  const clientErrors = classifyClientErrors(errors, network, app.url)
+  rec.check('لا أخطاء طرف عميل (عدا فشل خلفية الجلسة المزروعة — استثناء معلَن)',
+    clientErrors.real.length === 0,
+    clientErrors.real.length
+      ? clientErrors.real.slice(0, 3).join(' | ')
+      : `${clientErrors.declared.length} خطأ خلفية مستثنى — بصماته: ${clientErrors.offAppSignatures.join(' · ') || 'لا شيء'}`)
 
   exitCode = report('ط-٢ · رحلة القاصر', [rec.finish()])
 } finally {

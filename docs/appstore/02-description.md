@@ -39,7 +39,7 @@
 
 قِمّة عربي أولًا، مع دعم الإنجليزية.
 
-قِمّة+ (لاحقًا): خطط وتحليلات أعمق — والأساسيات تبقى مجانية.
+قِمّة Premium: إعدادك وتوليد خطتك ومعاينتها كاملة مجانًا. وتسجيل تمارينك وأكلك ومايك وقياساتك يفتح بتجربة ٧٢ ساعة، أو بكود وصول، أو بشراء واحد لقِمّة Premium — بلا اشتراك شهري.
 
 ---
 
@@ -78,7 +78,7 @@ when you sign in. You can delete your account and all your data from inside the 
 
 Qimmah is Arabic-first, with English support.
 
-Qimmah+ (later): deeper plans and insights — the essentials stay free.
+Qimmah Premium: your setup, plan generation, and full plan preview are free. Logging your workouts, food, water, and measurements opens with a 72-hour trial, an access code, or a one-time Qimmah Premium purchase — no monthly subscription.
 
 ---
 
@@ -103,7 +103,7 @@ Qimmah+ (later): deeper plans and insights — the essentials stay free.
 | No ads/tracking, local-first, optional sync | `analytics/providers/noop.ts`, `syncService.ts`; legal pack `docs/legal/app-privacy-labels.md` §A, `privacy-policy.md` §1 | — |
 | In-app account deletion | `authContext.tsx`, RPC `delete_own_account` | — |
 | Arabic-first + English support | `product.ts`, `config/strings.ts` (en) | "with English support", **not** "fully bilingual" |
-| Qimmah+ one line, essentials free | `profileV2Model.ts` (`subscription.enabled:false`) | **no IAP/paywall** implied |
+| Premium access line: free setup/plan/preview, paid logging | `src/lib/access/paidActions.ts` (`PAID_ACTIONS` — 13 gated actions; `isPaidActionAllowed` grants only on server `active`), `src/i18n/dict/access.ts` | one-time purchase; **no auto-renewing subscription**; three gates only (72-hour trial · Premium · access code) |
 
 **Deliberately NOT claimed:** background step collection beyond HealthKit's stored totals, Google Fit, any
-subscription/premium tier for purchase, background web notifications, "fully offline install", "fully bilingual".
+auto-renewing subscription, background web notifications, "fully offline install", "fully bilingual".

@@ -28,7 +28,10 @@
   <meta name="twitter:title" content="قِمّة — درّب بوضوح. تقدّم بثقة." />
   <meta name="twitter:description" content="تمرينك وتغذيتك وتقدّمك في مكان واحد — بالعربية، وعلى جهازك أولًا." />
   <meta name="twitter:image" content="https://qimmah.app/assets/og-image.png" />
-  <!-- Structured data — iOS fitness app (crawler metadata only; triggers no request). -->
+  <!-- Structured data — iOS fitness app (crawler metadata only; triggers no request).
+       No "offers" node on purpose: this site is not a purchase channel, and a price-0 offer
+       would tell crawlers the app is free while logging needs Qimmah Premium, a 72-hour trial,
+       or an access code. Price lives on the purchase channel. -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -39,8 +42,7 @@
     "applicationCategory": "HealthApplication",
     "inLanguage": "ar",
     "url": "https://qimmah.app/",
-    "description": "قِمّة رفيقك العربي للياقة: خطة تمارين واضحة، تسجيل وجبات ومسح باركود، ومتابعة تقدّم صادقة — كل يومك في مكان واحد. محلي أولًا مع مزامنة سحابية اختيارية.",
-    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "SAR" }
+    "description": "قِمّة رفيقك العربي للياقة: خطة تمارين واضحة، تسجيل وجبات ومسح باركود، ومتابعة تقدّم صادقة — كل يومك في مكان واحد. محلي أولًا مع مزامنة سحابية اختيارية."
   }
   </script>
 </head>
@@ -146,8 +148,8 @@
         </div>
 
         <div class="plus-line">
-          <span class="k">قِمّة+</span>
-          <span class="d">خطط وتحليلات أعمق — اختياري تمامًا، ويُعرض حين تظهر قيمته. الأساسيات تبقى مجانية بالكامل.</span>
+          <span class="k">قِمّة Premium</span>
+          <span class="d">إعدادك وتوليد خطتك ومعاينتها كاملة مجانًا وبلا حساب. والتسجيل — تمارينك وأكلك ومايك وقياساتك — يفتح مع تجربة ٧٢ ساعة أو قِمّة Premium: شراء واحد، بلا اشتراك شهري.</span>
         </div>
       </div>
     </section>

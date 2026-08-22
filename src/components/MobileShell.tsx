@@ -290,6 +290,7 @@ export function MobileShell({ lang, tab, badge: _badge, onNavigate, onOpenSettin
                     type="button"
                     onClick={() => { void playHaptic('selection'); setQuickLogOpen(true) }}
                     aria-label={tb.label}
+                    data-testid="tab-log-action"
                     className="tap-target -mt-5 flex flex-col items-center gap-1 text-[10px] font-bold text-primary-c"
                   >
                     <span className="grid h-14 w-14 place-items-center rounded-full bg-primary text-white shadow-glow ring-4 ring-surface">
@@ -307,6 +308,7 @@ export function MobileShell({ lang, tab, badge: _badge, onNavigate, onOpenSettin
                 type="button"
                 onClick={() => { void playHaptic('selection'); onNavigate(tb.route) }}
                 aria-current={active ? 'page' : undefined}
+                data-testid={`tab-${tb.id}`}
                 className={cn(
                   'tap-target flex flex-col items-center justify-center gap-1 py-2.5 text-[10px] font-bold transition-colors',
                   active ? 'text-primary-c' : 'text-ink-500 hover:text-ink-700',
