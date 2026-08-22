@@ -47,6 +47,11 @@ export function weeklyCompleted(sessions = loadSessions()): number {
 /** مدة تقديرية لليوم بالدقائق (زمن مجموعة ~٤٠ث + الراحة). */
 export function estimateDurationMin(day: PlanDay | undefined): number {
   if (!day) return 0
+  // [SOVEREIGN-003] يومٌ بلا تمارين = **صفر** لا خمس دقائق.
+  // الحدّ الأدنى ٥ معناه «أقصر جلسة حقيقية»، ولا معنى له لجلسة لا وجود لها.
+  // لم يظهر ما دام المستدعي واحدًا يفحص الفراغ قبله؛ وظهر يوم صار هذا الحسّاب
+  // المصدرَ الوحيد فورثه باني الخطة الذي **يعرض** الرقم ليوم فارغ.
+  if (day.exercises.length === 0) return 0
   const sec = day.exercises.reduce((sum, pe) => sum + Math.max(1, pe.sets) * (40 + (pe.restSec || 60)), 0)
   return Math.max(5, Math.round(sec / 60))
 }

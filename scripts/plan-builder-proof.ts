@@ -253,15 +253,19 @@ console.log('\n⑤ القوالب المسمّاة: حفظ/سرد/تطبيق/ح�
   check('قالب مشوّه يُسقط والسليم يبقى', listTemplates(UID).length === 1 && listTemplates(UID)[0].id === 'ok')
 }
 
-console.log('\n⑥ المحقّقات: وقت الجلسة (heuristic ٩ دقائق) + الحجم العضلي — تحذيرات لا موانع')
+
+console.log('\n⑥ المحقّقات: وقت الجلسة (الحسّاب المركزي) + الحجم العضلي — تحذيرات لا موانع')
 {
   const plan = buildPlan([{ type: 'push', exercises: PUSH.concat(['push-up', 'dumbbell-fly']) }])
-  check('estimateSessionMinutes: ٥ تمارين → ٤٥ دقيقة (نفس heuristic النماذج)', estimateSessionMinutes(plan.days[0].exercises.length ? plan.days[0] : plan.days[0]) === 45)
-  check('estimateSessionMinutes: يوم فارغ → ٠ · تمرين واحد → ٢٠ (حدّ أدنى)', estimateSessionMinutes({ id: 'x', nameAr: 'س', nameEn: 'X', exercises: [] }) === 0 && estimateSessionMinutes({ ...plan.days[0], exercises: plan.days[0].exercises.slice(0, 1) }) === 20)
+  // [SOVEREIGN-003] الأرقام تغيّرت **بقرار**: الباني كان يقدّر بـ«٩ دقائق لكل
+  // تمرين» بينما الرئيسية تحسب مجموعات × (عمل + راحة). فصار الاثنان مصدرًا
+  // واحدًا، وهذه قيمه المقيسة على نفس اليوم (٣ مجموعات × ٩٠ث راحة).
+  check('estimateSessionMinutes: ٥ تمارين → ٣٠ دقيقة (الحسّاب المركزي)', estimateSessionMinutes(plan.days[0]) === 30)
+  check('estimateSessionMinutes: يوم فارغ → ٠ (لا حدّ أدنى لجلسة لا وجود لها) · تمرين واحد → ٨', estimateSessionMinutes({ id: 'x', nameAr: 'س', nameEn: 'X', exercises: [] }) === 0 && estimateSessionMinutes({ ...plan.days[0], exercises: plan.days[0].exercises.slice(0, 1) }) === 8)
 
   const eight = buildPlan([{ type: 'push', exercises: [...PUSH, ...PULL, 'push-up', 'dumbbell-fly'] }])
   const longWarnings = validatePlan(eight, { targetSessionMinutes: 60 })
-  check('٨ تمارين (~٧٠ دقيقة) فوق هدف ٦٠ → تحذير session-too-long', longWarnings.some((w) => w.code === 'session-too-long' && w.messageAr.includes('70') && w.messageEn.includes('70')))
+  check('٨ تمارين (~٥١ دقيقة) فوق هدف ٤٥ → تحذير session-too-long', validatePlan(eight, { targetSessionMinutes: 45 }).some((w) => w.code === 'session-too-long' && w.messageAr.includes('51') && w.messageEn.includes('51')))
 
   const withEmpty = addDay(plan, 'legs')
   check('يوم فارغ → تحذير empty-day', withEmpty.status === 'ok' && validatePlan(withEmpty.plan).some((w) => w.code === 'empty-day' && w.subject === withEmpty.plan.days[1].id))
