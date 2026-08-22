@@ -6,8 +6,8 @@
   "viewport": "large",
   "ground": {
     "branch": "claude/qimmah-sovereign-closure-h503u6",
-    "commit": "7126fb9",
-    "subject": "fix(e2e): [SOVEREIGN-003] ثلاث رحلات كانت تفحص سطحًا بائتًا — والاستثناء صار يُحقَّق بالوجهة",
+    "commit": "8ff7660",
+    "subject": "merge(engine): [SOVEREIGN-003] استيعاب متأخّر — فحص نتيجة الكتابة في الإعدادات",
     "dirty": true
   },
   "frames": [

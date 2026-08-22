@@ -6,8 +6,8 @@
   "viewport": "large",
   "ground": {
     "branch": "claude/qimmah-sovereign-closure-h503u6",
-    "commit": "139a7b0",
-    "subject": "docs(qa): [SOVEREIGN-002] قائمة مراجعة المؤسس — عشر دقائق بما أُصلح وما لم يُصلَح",
+    "commit": "8ff7660",
+    "subject": "merge(engine): [SOVEREIGN-003] استيعاب متأخّر — فحص نتيجة الكتابة في الإعدادات",
     "dirty": true
   },
   "frames": [
