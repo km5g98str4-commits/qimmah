@@ -199,7 +199,14 @@ export function createVocabularyGuard(terms) {
   }
 }
 
-/** يفتح صفحة بمقاس ولغة محدّدين، ويلتقط أخطاء الطرف العميل. */
+/**
+ * يفتح صفحة بمقاس ولغة محدّدين، ويلتقط أخطاء الطرف العميل.
+ *
+ * ويلتقط معها **مصدر كل فشل شبكي**: رسالة الطرف العميل «Failed to load resource»
+ * لا تحمل عنوان الطلب، فلا يمكن التمييز بها بين عطل في التطبيق وبين نداء خلفية
+ * مزروعة. الشبكة تُسجَّل هنا بعناوينها ليصير الاستثناء **محدودًا بمصدره** لا
+ * مطلقًا (§4.2: الاستثناء يُحرَس، ولا يصير قاعدة).
+ */
 export async function openPage(browser, { viewport, lang }) {
   const page = await browser.newPage({
     viewport: { width: viewport.width, height: viewport.height },
@@ -207,9 +214,43 @@ export async function openPage(browser, { viewport, lang }) {
     locale: lang === 'ar' ? 'ar-SA' : 'en-US',
   })
   const errors = []
+  /** كل فشل شبكي بعنوانه وبصمته — أساس تصنيف الأخطاء أدناه. */
+  const network = []
   page.on('console', (m) => m.type() === 'error' && errors.push(m.text()))
   page.on('pageerror', (e) => errors.push(String(e)))
-  return { page, errors }
+  page.on('requestfailed', (r) => network.push({ url: r.url(), signature: r.failure()?.errorText ?? 'unknown' }))
+  page.on('response', (r) => { if (r.status() >= 400) network.push({ url: r.url(), signature: String(r.status()) }) })
+  return { page, errors, network }
+}
+
+/**
+ * يفصل أخطاء الطرف العميل الحقيقية عن **ضجيج الخلفية المزروعة**.
+ *
+ * الجلسة المزروعة رمز وهمي، فنداءات Supabase تردّ ٤٠١ حيث توجد شبكة، وتسقط
+ * بـ`net::ERR_*` حيث لا توجد. الحالتان أثر أداة الاختبار لا عطل منتج — لكن
+ * تجاوزهما بمطابقة نصّية على «401» أو «Failed to load resource» يبتلع معهما أي
+ * عطل حقيقي بنفس الصياغة. فالاستثناء هنا **مربوط بمصدره**:
+ *
+ *   • بصمة الفشل (رمز الحالة أو نصّ خطأ الشبكة) تُجمع من الطلبات الفعلية.
+ *   • خطأ يحمل بصمة صادرة عن **أصل التطبيق نفسه** لا يُستثنى أبدًا.
+ *   • وأي خطأ لا يطابق بصمة شبكية مرصودة يبقى أحمر — ومنها استثناءات JS كلّها.
+ *
+ * فإن سقط أصل التطبيق نفسه، سقط الفحص باسمه كما يجب.
+ */
+export function classifyClientErrors(errors, network, appUrl) {
+  const appOrigin = new URL(appUrl).origin
+  const offApp = new Set(network.filter((n) => !n.url.startsWith(appOrigin)).map((n) => n.signature))
+  const onApp = new Set(network.filter((n) => n.url.startsWith(appOrigin)).map((n) => n.signature))
+  const isDeclaredNoise = (e) =>
+    /Failed to load resource/.test(e) &&
+    [...offApp].some((sig) => e.includes(sig)) &&
+    ![...onApp].some((sig) => e.includes(sig))
+  return {
+    real: errors.filter((e) => !isDeclaredNoise(e)),
+    declared: errors.filter(isDeclaredNoise),
+    offAppSignatures: [...offApp],
+    onAppSignatures: [...onApp],
+  }
 }
 
 /** نصّ الشاشة الحالي — مصدر كل فحص محتوى. */

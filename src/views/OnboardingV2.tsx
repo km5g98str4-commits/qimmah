@@ -475,6 +475,7 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
             type="button"
             onClick={back}
             aria-label={t.back}
+            data-testid="onboarding-back"
             className="grid h-11 w-11 place-items-center rounded-xl border border-line bg-surface text-ink-700"
           >
             <Icon name="ChevronRight" className="h-5 w-5 rtl:rotate-0 ltr:rotate-180" />
@@ -616,6 +617,7 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
             type="button"
             onClick={next}
             aria-disabled={!canAdvance(step, answers)}
+            data-testid="onboarding-next"
             className="btn-primary w-full py-4 text-[1.1875rem]"
           >
             {step === LAST_INPUT_STEP ? t.equipment.cta : t.next}
@@ -767,6 +769,7 @@ function BodyStep({
                 type="button"
                 onClick={() => onGender(g)}
                 aria-pressed={gender === g}
+                data-choice={g}
                 className={cn(
                   'min-h-[44px] flex-1 rounded-2xl border px-4 py-3 text-[0.9rem] font-bold transition',
                   gender === g ? 'border-ink-900 bg-ink-900 text-page' : 'border-line bg-surface text-ink-700',
@@ -794,12 +797,13 @@ function BodyStep({
  * صف اختيار واحد بعنوان ووصف — يُستخدم للنية والمستوى.
  * هدف لمس ≥44px، ودلالة اختيار غير لونية (شارة صح) لا لونًا فقط (WCAG 1.4.1).
  */
-function ChoiceRow({ label, desc, icon, selected, onSelect }: { label: string; desc: string; icon: string; selected: boolean; onSelect: () => void }) {
+function ChoiceRow({ value, label, desc, icon, selected, onSelect }: { value: string; label: string; desc: string; icon: string; selected: boolean; onSelect: () => void }) {
   return (
     <button
       type="button"
       onClick={onSelect}
       aria-pressed={selected}
+      data-choice={value}
       className={cn(
         'v2-pressable relative flex min-h-[44px] w-full items-center gap-3.5 overflow-hidden rounded-2xl border p-3.5 text-start',
         selected ? 'v2-choice-selected' : 'border-line bg-surface hover:border-ink-400/40',
@@ -847,7 +851,7 @@ function IntentStep({
         <p className="mt-6 mb-3 text-sm font-bold text-ink-700">{s.intentQ}</p>
         <div className="space-y-2.5">
           {s.intents.map((o) => (
-            <ChoiceRow key={o.value} label={o.label} desc={o.desc} icon={o.icon} selected={intent === o.value} onSelect={() => onIntent(o.value)} />
+            <ChoiceRow key={o.value} value={o.value} label={o.label} desc={o.desc} icon={o.icon} selected={intent === o.value} onSelect={() => onIntent(o.value)} />
           ))}
         </div>
       </Group>
@@ -856,7 +860,7 @@ function IntentStep({
         <p className="mt-7 mb-3 text-sm font-bold text-ink-700">{s.levelQ}</p>
         <div className="space-y-2.5">
           {s.levels.map((o) => (
-            <ChoiceRow key={o.value} label={o.label} desc={o.desc} icon={o.icon} selected={level === o.value} onSelect={() => onLevel(o.value)} />
+            <ChoiceRow key={o.value} value={o.value} label={o.label} desc={o.desc} icon={o.icon} selected={level === o.value} onSelect={() => onLevel(o.value)} />
           ))}
         </div>
       </Group>
@@ -871,6 +875,7 @@ function HistoryRow<V extends string>({ option, selected, onSelect }: { option: 
       type="button"
       onClick={onSelect}
       aria-pressed={selected}
+      data-choice={option.value}
       className={cn(
         'v2-pressable relative flex min-h-[44px] w-full items-center gap-3 overflow-hidden rounded-xl border px-3.5 py-2.5 text-start',
         selected ? 'v2-choice-selected' : 'border-line bg-surface hover:border-ink-400/40',
@@ -964,6 +969,7 @@ function GoalStep({ lang, t, titleId, why, goal, wording, isMinor, onPick }: { l
               onClick={() => onPick(g.value)}
               disabled={disabled}
               aria-pressed={on}
+              data-choice={g.value}
               aria-disabled={disabled}
               aria-describedby={disabled ? 'v2-goal-minor-note' : undefined}
               className={cn(
@@ -1084,6 +1090,7 @@ function TileGroup({ options, value, onChange }: { options: readonly { value: st
             type="button"
             onClick={() => onChange(o.value)}
             aria-pressed={on}
+            data-choice={o.value}
             className={cn(
               'v2-pressable relative flex min-h-[5rem] flex-col items-center justify-center gap-1.5 rounded-2xl border px-2 py-3 text-center',
               on ? 'v2-choice-selected' : 'border-line bg-surface hover:border-ink-400/40',
@@ -1198,6 +1205,7 @@ function LimitationsStep({
               type="button"
               onClick={() => onHasInjury(value)}
               aria-pressed={hasInjury === value}
+              data-choice={String(value)}
               className={cn(
                 'v2-pressable min-h-[44px] rounded-2xl border px-4 py-3 text-sm font-bold',
                 hasInjury === value ? 'v2-choice-selected text-ink-900' : 'border-line bg-surface text-ink-700',
@@ -1313,7 +1321,7 @@ function WelcomeScreen({ lang, t, onStart, onExit }: { lang: Lang; t: T; onStart
             {w.timeNote}
           </p>
         </div>
-        <button type="button" onClick={onStart} className="btn-primary min-h-[52px] w-full text-base">
+        <button type="button" onClick={onStart} data-testid="onboarding-welcome-start" className="btn-primary min-h-[52px] w-full text-base">
           {w.start}
         </button>
       </div>
@@ -1585,7 +1593,7 @@ function ReadyScreen({ lang, t, goalLabel, days, duration, split, placeLabel, le
 
         <div className="space-y-3">
           <p className="text-center text-[0.7rem] font-medium text-ink-400">{t.ready.previewNote}</p>
-          <button type="button" onClick={onEnter} disabled={busy} aria-busy={busy} className="btn-primary w-full py-4 text-[1.1875rem] shadow-glow disabled:opacity-60">
+          <button type="button" onClick={onEnter} disabled={busy} aria-busy={busy} data-testid="ready-enter-cta" className="btn-primary w-full py-4 text-[1.1875rem] shadow-glow disabled:opacity-60">
             {t.ready.enter}
           </button>
         </div>

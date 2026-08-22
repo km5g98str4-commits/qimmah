@@ -24,7 +24,7 @@ for (const route of ['#/today','#/onboarding','#/workout','#/settings']) {
   await p.evaluate((r)=>{ location.hash = r }, route)
   for (const ms of [300, 900, 2000]) {
     await p.waitForTimeout(ms === 300 ? 300 : ms - (ms === 900 ? 300 : 900))
-    const s = await p.evaluate(()=>({ hash: location.hash, notFound: document.body.innerText.includes('الصفحة غير موجودة'), head: (document.querySelector('h1,h2')||{}).innerText || '' }))
+    const s = await p.evaluate(()=>({ hash: location.hash, notFound: Boolean(document.querySelector('[data-testid="route-not-found"]')), head: (document.querySelector('h1,h2')||{}).innerText || '' }))
     console.log(`${route} @${ms}ms →`, JSON.stringify(s))
   }
 }

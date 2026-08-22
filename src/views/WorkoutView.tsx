@@ -348,6 +348,7 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
             <button
               type="button"
               onClick={startEmpty}
+              data-testid="workout-start-empty"
               className="flex items-center gap-3 rounded-2xl border border-line bg-surface p-4 text-start shadow-card hover:bg-beige"
             >
               <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary-c">
@@ -426,7 +427,7 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
           </div>
 
           {plan.days.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-line bg-surface px-6 py-8 text-center">
+            <div data-testid="workout-no-plan" className="rounded-2xl border border-dashed border-line bg-surface px-6 py-8 text-center">
               <p className="text-sm text-ink-500">{d.noPlanYet}</p>
               <div className="mt-4 flex flex-wrap justify-center gap-2">
                 <button type="button" onClick={() => onNavigate('setup')} className="btn-primary px-4 py-2.5 text-xs">
@@ -440,7 +441,7 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
               </div>
             </div>
           ) : (
-            <div className="card p-5">
+            <div data-testid="workout-plan-card" className="card p-5">
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
@@ -491,6 +492,7 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
                     key={pd.id}
                     type="button"
                     onClick={() => startDay(pd)}
+                    data-testid="workout-plan-day"
                     className="flex items-center justify-between gap-2 rounded-xl border border-line bg-surface p-3 text-start hover:bg-beige"
                   >
                     <span className="min-w-0">

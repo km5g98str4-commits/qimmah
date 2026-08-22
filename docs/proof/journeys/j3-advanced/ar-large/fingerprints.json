@@ -1,0 +1,31 @@
+{
+  "body": {
+    "age": "28",
+    "heightCm": "178",
+    "weightKg": "82"
+  },
+  "beginner": {
+    "level": "beginner",
+    "goalLabel": "خسارة دهون",
+    "calories": 2207,
+    "protein": 207,
+    "split": "upper_lower",
+    "daysPerWeek": 4,
+    "sessionMin": 45,
+    "experience": "novice",
+    "splitMode": "auto",
+    "weeklyExercises": 16
+  },
+  "advanced": {
+    "level": "advanced",
+    "goalLabel": "تنشيف (Cut)",
+    "calories": 2207,
+    "protein": 207,
+    "split": "upper_lower",
+    "daysPerWeek": 4,
+    "sessionMin": 45,
+    "experience": "intermediate",
+    "splitMode": "auto",
+    "weeklyExercises": 20
+  }
+}
