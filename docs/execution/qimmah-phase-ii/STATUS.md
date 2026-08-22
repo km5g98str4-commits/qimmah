@@ -128,6 +128,11 @@ branches are read-only.
 - Added a deterministic built-artifact manifest tool with ordered file digests,
   candidate identity, symlink rejection, and seven focused proof cases. It has not
   been run to declare a final Web artifact.
+- Added a fail-closed built-artifact policy scanner with 10/10 synthetic attack
+  proofs. A provisional 408-file baseline build passed immutable manifest
+  reproduction but failed the policy on one GoTrue-bundled localhost URL. The
+  finding is recorded as `WS-LOCAL-ENDPOINT-001`; no allowlist or product fix was
+  applied from Phase II.
 
 ## In Progress
 
@@ -170,6 +175,7 @@ branches are read-only.
 | `WS-CLOSURE-001` | Newer candidate/closure refs use words such as `final` and `READY`, but no founder acceptance was received in this task. | Explicit founder acceptance naming the authoritative SHA. | Update the baseline ledger before any rebase. | Compare only recorded dependencies against the accepted SHA; do not repeat completed source discovery. |
 | `WS-PACKAGE-LOCK-001` | The final dependency graph is unaccepted, so tooling remediation cannot be selected against an authoritative lockfile. | Founder-accepted Web Sovereign HEAD and exact package manifests. | Coordinator-owned build-tooling wave after final-HEAD rebind. | Re-audit, map reachability, apply reviewed upgrades, regenerate the lockfile, and run the full gate plus exact-SHA CI. |
 | `WS-DOC-RECONCILE-001` | Final product paths and build identity are required to reconcile stale release documents. | Founder-accepted Web Sovereign SHA and final route/build inventory. | Post-rebind documentation reconciliation. | Update commands/journeys, generate current release notes and production checklist, and cite the accepted build for every verdict. |
+| `WS-LOCAL-ENDPOINT-001` | The provisional baseline bundle contains a localhost URL literal from the GoTrue dependency; the final bundle identity and dependency graph are not accepted yet. | Founder-accepted Web Sovereign SHA, final lockfile, and exact built artifact. | Final dependency audit and built-artifact policy scan after lane rebind. | Rebuild and rescan; if still present, determine reachable behavior and remove/upgrade it or obtain an explicit founder isolation decision. Never add a silent scanner exception. |
 | `FOOD-LICENSE-001` | The seed package includes Open Food Facts-derived evidence and cannot become a distributable production dataset without a reviewed rights decision. | None; this is a provenance/licensing approval, not a Web Sovereign artifact. | Dataset approval record before any activation pointer or runtime adapter is created. | Record the ODbL attribution/share-alike decision, approve or reject the package, then build only the authorized immutable dataset version. |
 | `EX-MECHANICS-001` | Missing exercise images cannot be generated safely from absent or unreviewed mechanics. | None; reviewed bilingual mechanics and safety notes are external editorial evidence. | Versioned authoring package before a later binding to the accepted media resolver. | Obtain reviewer identity/timestamp and reviewed start/end mechanics, build the next job schema, then generate only released jobs. |
 | `EX-VIDEO-REVIEW-001` | Nine exact public candidates have one-researcher evidence but no independent suitability approval. | None; independent human visual review is external editorial evidence. | Versioned review package before a later binding to the accepted exercise-detail/media resolver. | Review movement, equipment, variation, coaching fit, and rights per record; promote only signed accepted rows and rerun live availability. |
@@ -193,6 +199,10 @@ branches are read-only.
 - Food provenance and exercise-media suitability are distinct from file
   presence. No record becomes production-approved through a completeness count
   alone.
+- The provisional built artifact contains `http://localhost:9999` from the
+  bundled GoTrue client. No final-severity or reachability conclusion transfers
+  until the accepted artifact is rebuilt and scanned, but the final release
+  cannot pass the current no-local-endpoint policy while the literal remains.
 
 ## Next Tasks
 

@@ -64,6 +64,8 @@ The checked baseline gate proves planning-branch integrity only.
 - [x] Seven evidence-linked GO/NO-GO rules defined.
 - [x] Evidence manifest validator and nine named anti-circumvention proof cases pass in explicit fixture-only mode.
 - [x] Built-artifact manifest tool proves ordered checksums, candidate binding, content drift, and symlink rejection on synthetic fixtures.
+- [x] Built-artifact policy scanner kills 10/10 synthetic secret/endpoint/bypass/symlink attacks.
+- [x] Provisional baseline build was manifested and scanned; its one `LOCAL_WEB_ENDPOINT` failure is named, not waived.
 - [ ] Harness selectors/adapters validated against accepted routes.
 - [ ] Tests executed against the final built artifact, not a dev server.
 - [ ] Fresh/returning/interrupted/corrupt/unauthorized contexts executed.
