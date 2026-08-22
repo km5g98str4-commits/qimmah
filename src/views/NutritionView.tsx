@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Icon } from '@/components/Icon'
 import { ProgressBar } from '@/components/ProgressBar'
 import { QuickMealLogger } from '@/components/nutrition/QuickMealLogger'
@@ -9,6 +9,7 @@ import { getStrings } from '@/config/strings'
 import { nutritionScreenStrings } from '@/i18n/dict/nutritionScreen'
 import type { Lang } from '@/lib/appPreferences'
 import { useAccess } from '@/lib/access/useAccess'
+import { clearQuickLogIntent, takeQuickLogIntent, type QuickLogIntent } from '@/lib/quickLogIntent'
 
 interface NutritionViewProps {
   lang: Lang
@@ -60,25 +61,34 @@ export function NutritionView({ lang, quickLogIntent, onQuickLogIntentHandled }:
    * التحديث إلى الأبد · وقيمة غير معروفة تُمسح وتُتجاهَل بلا رمي.
    */
   const [autoOpen, setAutoOpen] = useState<MealSlot | null>(null)
+  /**
+   * «ماء» كانت نيّة معلَنة بلا مستهلك: الورقة تعرض ثلاثة أزرار، فيضغط المستخدم
+   * «ماء» فتُمسح نيّته ويهبط على التغذية **ولا يحدث شيء** — ولوحة الماء أسفل
+   * الشاشة لا تُرى بلا تمرير. زرٌّ يعلن فعلًا ولا يفعله هو تعريف الزرّ الميت.
+   *
+   * والعلاج تركيز لا كتابة: نأخذه إلى لوحة الماء ونضع التركيز على أول إجراء
+   * فيها. لا نضيف ماءً نيابةً عنه — `nutrition.water` فعل مدفوع، وإضافته تلقائيًا
+   * تكتب بيانات لم يطلبها وتلتفّ على بوّابة Premium معًا.
+   */
+  const [focusWater, setFocusWater] = useState(false)
   useEffect(() => {
     if (quickLogIntent !== 'meal' && quickLogIntent !== 'water') return
-    try { window.sessionStorage.removeItem('qimmah:quick-log-intent') } catch { /* transient storage unavailable */ }
+    clearQuickLogIntent()
     if (quickLogIntent === 'meal') setAutoOpen('breakfast')
+    else setFocusWater(true)
     onQuickLogIntentHandled?.()
   }, [quickLogIntent, onQuickLogIntentHandled])
   useEffect(() => {
-    const consume = (raw: string | null) => {
-      if (raw === null) return
-      // المسح أولًا: أي خروج بعده (قيمة مجهولة، أو حجب Premium) لا يترك نيّة معلّقة.
-      try { window.sessionStorage.removeItem('qimmah:quick-log-intent') } catch { /* تخزين غير متاح */ }
-      if (raw !== 'meal' && raw !== 'water') return
-      if (raw === 'meal') setAutoOpen('breakfast')
+    const apply = (intent: QuickLogIntent | null) => {
+      if (intent === 'meal') setAutoOpen('breakfast')
+      else if (intent === 'water') setFocusWater(true)
     }
-    try { consume(window.sessionStorage.getItem('qimmah:quick-log-intent')) } catch { /* تخزين غير متاح */ }
+    apply(takeQuickLogIntent(['meal', 'water']))
     const onEvent = (e: Event) => {
       const detail = (e as CustomEvent<string>).detail
-      try { window.sessionStorage.removeItem('qimmah:quick-log-intent') } catch { /* تخزين غير متاح */ }
+      clearQuickLogIntent()
       if (detail === 'meal') setAutoOpen('breakfast')
+      else if (detail === 'water') setFocusWater(true)
     }
     window.addEventListener('qimmah:quick-log', onEvent)
     return () => window.removeEventListener('qimmah:quick-log', onEvent)
@@ -191,7 +201,7 @@ export function NutritionView({ lang, quickLogIntent, onQuickLogIntentHandled }:
         )}
 
         {/* الماء */}
-        <WaterPanel lang={lang} waterMl={state.waterMl} targetMl={targetWaterMl} onAdd={addWater} />
+        <WaterPanel lang={lang} waterMl={state.waterMl} targetMl={targetWaterMl} onAdd={addWater} focusRequested={focusWater} onFocusHandled={() => setFocusWater(false)} />
 
         <p className="mt-6 flex items-start gap-2 text-[11px] text-ink-400">
           <Icon name="Info" className="mt-0.5 h-3.5 w-3.5 shrink-0" />
@@ -459,12 +469,20 @@ function MealCard({
 
 
 /** لوحة الماء — +250/+500 + إدخال كمية مخصّصة (50–3000 مل). */
-function WaterPanel({ lang, waterMl, targetMl, onAdd: rawAdd }: { lang: Lang; waterMl: number; targetMl: number; onAdd: (ml: number) => boolean }) {
+function WaterPanel({ lang, waterMl, targetMl, onAdd: rawAdd, focusRequested = false, onFocusHandled }: { lang: Lang; waterMl: number; targetMl: number; onAdd: (ml: number) => boolean; focusRequested?: boolean; onFocusHandled?: () => void }) {
   const t = getStrings(lang).nutrition
   const d = nutritionScreenStrings[lang]
   const { guard } = useAccess()
   const [ml, setMl] = useState('')
   const [saveError, setSaveError] = useState(false)
+  // وصول نيّة «ماء»: تُظهر اللوحة وتضع التركيز على أوّل إجراء — بلا كتابة.
+  const presetRef = useRef<HTMLButtonElement>(null)
+  useEffect(() => {
+    if (!focusRequested) return
+    presetRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+    presetRef.current?.focus({ preventScroll: true })
+    onFocusHandled?.()
+  }, [focusRequested, onFocusHandled])
   const onAdd = guard('nutrition.water', (amountMl: number, onSaved?: () => void) => {
     if (rawAdd(amountMl)) {
       setSaveError(false)
@@ -495,7 +513,7 @@ function WaterPanel({ lang, waterMl, targetMl, onAdd: rawAdd }: { lang: Lang; wa
       </div>
       <ProgressBar current={waterMl} target={targetMl || 1} color="bg-primary" className="mt-3 h-1.5" />
       <div className="mt-3 flex flex-wrap gap-2">
-        <button type="button" onClick={() => addPreset(250)} className="btn-ghost min-h-[44px] px-3 py-2 text-xs">{t.addWater250}</button>
+        <button ref={presetRef} type="button" onClick={() => addPreset(250)} className="btn-ghost min-h-[44px] px-3 py-2 text-xs">{t.addWater250}</button>
         <button type="button" onClick={() => addPreset(500)} className="btn-ghost min-h-[44px] px-3 py-2 text-xs">{t.addWater500}</button>
       </div>
       <div className="mt-2 flex items-center gap-2">

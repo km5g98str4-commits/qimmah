@@ -102,8 +102,12 @@ const tool = (cmd) => {
   }
 }
 const dockerUp = tool('docker info')
-const supabaseCli = tool('npx --yes supabase --version')
-const psqlPresent = tool('which psql')
+// هذا preflight معلَن كفحص offline؛ `npx --yes` كان يحاول تنزيل Supabase من
+// الشبكة لمجرّد سؤال إعلامي، ويمكنه تعليق البوابة بلا حد حين لا تصل registry.
+// فحص الملف المحلي يجيب السؤال نفسه بلا كتابة أو شبكة. التثبيت — إن لزم —
+// يخصّ التشغيل الكامل وصاحب بيئة Docker، لا هذا الإثبات المنطقي.
+const supabaseCli = tool('test -x node_modules/.bin/supabase')
+const psqlPresent = tool('command -v psql')
 console.log(`  docker daemon: ${dockerUp ? 'يعمل' : 'متوقّف/غير متاح'}`)
 console.log(`  supabase CLI : ${supabaseCli ? 'متاح' : 'غير متاح (سيُثبّت عند التشغيل)'}`)
 console.log(`  psql client  : ${psqlPresent ? 'متاح' : 'غير متاح'}`)

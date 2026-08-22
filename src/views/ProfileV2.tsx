@@ -15,6 +15,7 @@ import { NativeSettingsPanel } from '@/components/NativeSettingsPanel'
 import { NATIVE_SETTINGS_COPY } from '@/data/nativeSettings'
 import { V2_ROUTINE_TRACKER } from '@/design-system/v2/labels'
 import { requestSetupFocus } from '@/lib/setupFocus'
+import { clearQuickLogIntent, takeQuickLogIntent } from '@/lib/quickLogIntent'
 import { medicationName, supplementName } from '@/lib/wellnessPlan'
 import { useWellnessToday } from '@/lib/wellnessTracking'
 import { formatNumber } from '@/lib/numberFormat'
@@ -83,22 +84,16 @@ export function ProfileV2({ lang, onNavigate, quickLogIntent, onQuickLogIntentHa
     const openRoutine = (event: Event) => {
       if ((event as CustomEvent).detail === 'routine') setScreen('routine')
     }
-    // sessionStorage قناة عبور اختيارية فقط؛ بعض أوضاع الخصوصية/الحصص تحظرها.
-    // الحدث الحيّ يظلّ يعمل، لذلك لا نسمح لفشل القراءة أن يكسر Profile كله.
-    try {
-      const pending = window.sessionStorage.getItem('qimmah:quick-log-intent')
-      if (pending === 'routine') {
-        window.sessionStorage.removeItem('qimmah:quick-log-intent')
-        setScreen('routine')
-      }
-    } catch { /* transient storage unavailable */ }
+    // القراءة تمرّ بالمالك المحروس: الوصول الخام كان يرمي أثناء التركيب حين
+    // يُحجب التخزين، فينهار مسار «ملفك» كلّه إلى حدّ الخطأ بدل أن يفتح عاديًا.
+    if (takeQuickLogIntent(['routine'])) setScreen('routine')
     window.addEventListener('qimmah:quick-log', openRoutine)
     return () => window.removeEventListener('qimmah:quick-log', openRoutine)
   }, [])
 
   useEffect(() => {
     if (quickLogIntent !== 'routine') return
-    try { window.sessionStorage.removeItem('qimmah:quick-log-intent') } catch { /* transient storage unavailable */ }
+    clearQuickLogIntent()
     setScreen('routine')
     onQuickLogIntentHandled?.()
   }, [quickLogIntent, onQuickLogIntentHandled])

@@ -1,6 +1,6 @@
 # Qimmah Web Sovereign — autonomous founder decisions
 
-Updated: 2026-08-14 (Layer 3 Profile / PKG-8 recovery-reviewed and verified)
+Updated: 2026-08-22 (PKG-10 concurrent-recovery convergence; final gate pending)
 
 ## Decision 001 — Use the exact Founder checkpoint
 
@@ -124,6 +124,106 @@ PKG-8 converges Profile on existing route, data and account owners. No assertion
 | `e2e/progress-reliability.mjs` | expected the removed duplicate Arabic Profile heading | requires the single canonical route `h1` «ملفك» | preserve the existing Profile→Measurements check after heading convergence | stronger precision |
 | `run-delete-account-proof.mjs` | required a historical comment string in `profileV2Model` | checks the signed-in capability, conditional UI copy and live Profile→Settings binding together | retain the App Store deletion guard after guest/account truth separation | stronger behavior binding |
 | momentum/cross-system smoke locators | treated the internal reminder heading as another `h1` | require its correct `h2` level beneath the route heading | keep historical journeys aligned with one-page-one-`h1` semantics | stronger accessibility |
+
+PKG-9/10 close Navigation/Quick Log and strengthen dirty-state/artifact truth. No product assertion
+was removed or weakened.
+
+| Test | Old contract | New contract | Why | Strength |
+| --- | --- | --- | --- | --- |
+| `quick-log-reliability-proof.ts` | absent at PKG-8; 27 checks at pushed PKG-9 | 31 runtime/structural checks, including acknowledged in-memory delivery, deterministic 404 replacement and named mutation attacks | guard the canonical storage owner plus the two convergence defects without relying on timing | new guard, then stronger |
+| `e2e/navigation-quick-log.mjs` | uncommitted 60/65-case local recovery draft | 68 built-artifact assertions across AR/EN 320/390/430, pointer/keyboard/focus/touch/overflow, Preview no-write, all blocked-storage destinations, internal/direct 404 and no-loop recovery; script/network failures are now named | prove the real lazy-route and history behavior that static checks cannot settle | new built-browser guard |
+| Quick Log seeded fixture | opened an unseeded app at `domcontentloaded`, then changed storage/hash and forced reload | seeds with `addInitScript` before the first app byte and boots directly at `#/dashboard` | the old fixture deliberately cancelled the pending Supabase dynamic import; WebKit correctly reported that artificial failure. Dirty-state owns unseeded/legacy boot | more faithful; assertions/timeouts unchanged |
+| `e2e/dirty-state-recovery.mjs` | absent | 47 browser checks over eleven corrupt/legacy/fresh states plus blocked write | boot dirty state without fabricated completion or crash | new built-browser guard |
+| `production-bundle-safety-proof.mjs` | source inference only | 9 two-build assertions with mock-seam visibility counter-proof and owned-endpoint attacks | prove the shipped artifact contains no test-only Premium seam or owned dev endpoint | new artifact guard |
+| `e2e/profile-reliability.mjs` | printed 27/27 but could retain the Vite grandchild | assertions unchanged; detached owned process-group teardown returns exit 0 | make green evidence usable by CI without changing product expectations | infrastructure fix, assertions unchanged |
+| `scripts/run-navigation-quick-log-proof.mjs` | local redundant structural draft | removed only after its unique in-memory/404 assertions migrated into canonical `test:quick-log` and were attacked there | avoid two drifting structural owners while preserving every contract | consolidated, not weakened |
+| `e2e/navigation-history.mjs` | 96 assertions | unchanged; rerun after deterministic visible 404 recovery | verify the historical browser contract remains intact | unchanged, reverified in final gate |
+| Quick Log / Navigation / dirty-state / Preview browser runners | Chromium-only launch | select Chromium by default or WebKit via `QIMMAH_BROWSER=webkit`; aggregate `test:e2e:webkit` runs all four | execute the same 246 critical assertions on Safari-equivalent WebKit without duplicating contracts | broader engine coverage; assertions unchanged |
+| `e2e-auth/preflight.mjs` tool availability | offline preflight invoked `npx --yes supabase --version`, which could download/hang | checks the local executable path only; logical 19 assertions unchanged | keep an explicitly offline proof offline and bounded while reporting Docker/backend absence honestly | infrastructure fix; assertions unchanged |
+
+## Decision 015 — Quick Log gets one guarded owner, and «ماء» focuses rather than writes
+
+- Decision: move the `qimmah:quick-log-intent` key behind a single canonical owner
+  (`src/lib/quickLogIntent.ts`) built on the existing `setupFocus.ts` pattern; resolve the route
+  guard **before** writing an intent; scope consumption so each screen takes only the values it
+  owns; and make the water intent scroll to and focus the water panel instead of logging water.
+- Why: the three defects were one structural fault seen from three sides — a key with three owners
+  and no single guarding discipline. The repository already had the answer in `setupFocus.ts`, so
+  this routes to an existing pattern rather than inventing a mechanism (verify-before-build).
+- Alternatives rejected: adding a `try/catch` at each of the three call sites (leaves three owners
+  and the next consumer repeats the bug); auto-adding a default water amount on intent (invents
+  user data **and** bypasses the `nutrition.water` paid gate); consuming any intent found (lets one
+  screen swallow another's); keeping the write-then-navigate order and clearing stale intents on a
+  timer (guesswork instead of asking the guard).
+- Risk: the focus jump is a visible movement the user did not explicitly scroll to. It is bound to
+  an intent the user just expressed one tap earlier, and it is one-shot — `onFocusHandled` clears
+  it, so it cannot repeat on re-render.
+- Reversibility: one package. The new module is additive; the three consumers are three small
+  call-site changes; no stored shape, schema or key name changed.
+- Affected files: `src/lib/quickLogIntent.ts` (new), `src/App.tsx`, `src/views/ProfileV2.tsx`,
+  `src/views/NutritionView.tsx`, `scripts/quick-log-reliability-proof.ts` and its runner.
+- Known remaining copy of the old pattern: `src/views/NutritionV2.tsx` still holds unguarded raw
+  access. It is **not the live route** (canonical map: “`NutritionV2.tsx` is not the live route
+  wrapper”), so it was deliberately left untouched rather than widening this package into dead code.
+  Recorded here so it is a decision, not an oversight.
+
+## Decision 016 — The production artifact is proven by a two-build counter-proof
+
+- Decision: prove acceptance items 27 and 30 against the **built** artifact, and prove them with two
+  builds — production must lack the test seam, and a mock build must **contain** it.
+- Why: a scanner that greps for a string can pass because the string is absent everywhere, including
+  from the scanner's own reach. Absence is only evidence once the same scanner has been shown to
+  detect presence. This is the charter's “مرور غير مستحقّ ليس نجاحًا” (§4.2) applied to a bundle scan.
+- Alternatives rejected: trusting the source-level `mockEnabled()` argument (it is a build-time
+  decision, so only the build can settle it); scanning `dist/` as it happens to exist (previous
+  steps leave mock builds there — the artifact under test must be built by the proof itself).
+- Risk: the proof runs two Vite builds, so it is too slow for `test:gate`'s 100+ node proofs. It is
+  registered as `test:bundle-safety` and run in the final gate, matching the existing precedent that
+  build-dependent proofs (`test:e2e:*`) sit outside `test:gate`. This placement is a declared
+  exclusion, not a silent one (§4).
+- Reversibility: a proof script and one package.json entry; no product code involved.
+- Affected files: `scripts/production-bundle-safety-proof.mjs`, `package.json`.
+
+## Decision 017 — Cross-route intent uses acknowledged memory; 404 recovery replaces invalid history
+
+- Decision: keep the guarded canonical Quick Log storage owner, but make `App`'s typed React state
+  the guaranteed handoff across lazy route mounting and clear it only after the destination
+  acknowledges consumption. For 404, retain the last valid in-app route and replace the invalid
+  history entry after applying the route guard.
+- Why: a zero-delay custom event is not a queue and can precede a lazy consumer's listener; guarded
+  storage can legitimately be unavailable. Likewise, browser history is not an application route
+  authority and may point outside Qimmah. Both defects require an owner that survives the relevant
+  asynchronous/foreign boundary.
+- Alternatives rejected: a longer event timeout (race disguised as timing); forcing storage
+  availability; swallowing the missed action; `history.back()` for direct entrants; hash assignment
+  that pushes the invalid entry underneath a valid route.
+- Risk: keeping both memory and the optional storage/event bridges can deliver duplicate signals.
+  Consumption is idempotent (open/focus the same surface), storage is cleared before action, and the
+  App state is acknowledged once. The built suite attacks all three blocked-storage targets.
+- Reversibility: no persistent schema or entitlement authority changes. The change is confined to
+  route handoff props/state, 404 recovery, and their tests.
+- Affected files: `src/App.tsx`, `src/views/ProfileView.tsx`, `src/views/ProfileV2.tsx`,
+  `src/views/NutritionView.tsx`, `scripts/quick-log-reliability-proof.ts`,
+  `scripts/e2e/navigation-quick-log.mjs` and `package.json`.
+
+## Decision 018 — WebKit reuses the exact critical contracts; an offline preflight never installs
+
+- Decision: add one explicit `QIMMAH_BROWSER=webkit` selection to the four critical built-browser
+  runners and aggregate them as `test:e2e:webkit`; keep Chromium the default. Make Auth preflight
+  inspect only locally installed tools instead of invoking a network-installing `npx --yes` probe.
+- Why: engine parity is meaningful only when the assertions are identical. A duplicated Safari test
+  would drift. The Auth preflight labels itself offline, so an unbounded registry download in its
+  informational section violates its own contract and can freeze final gates despite 19 green checks.
+- Alternatives rejected: call Chromium evidence Safari evidence; copy four WebKit-specific scripts;
+  ignore WebKit because the prior container lacked it; increase a timeout around `npx`; pretend the
+  backend harness ran when Docker is absent.
+- Risk: Playwright WebKit is Safari-equivalent, not every physical iOS device. The 246 assertions
+  cover the named launch matrix; a later device lab can add physical-device evidence without
+  changing these contracts. Full Auth server lifecycle remains explicitly EXTERNAL-003.
+- Reversibility: runner selection and one package script only; no product or persistent data change.
+- Affected files: `package.json`, `scripts/e2e/navigation-quick-log.mjs`,
+  `scripts/e2e/navigation-history.mjs`, `scripts/e2e/dirty-state-recovery.mjs`,
+  `scripts/e2e/preview-gate.mjs`, `scripts/e2e-auth/preflight.mjs`.
 
 ## Decision 006 — Error recovery never means product completion
 

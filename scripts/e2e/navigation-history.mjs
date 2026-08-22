@@ -11,12 +11,14 @@
 // التشغيل: npm run test:e2e:navigation
 
 import { spawn } from 'node:child_process'
-import { chromium } from 'playwright'
+import { chromium, webkit } from 'playwright'
 import { answerHistory, finishInputSteps } from './lib/onboarding-driver.mjs'
 
 const PORT = 5325
 const EXTERNAL = process.env.PREVIEW_URL || ''
 const URL = EXTERNAL || `http://localhost:${PORT}`
+const BROWSER_NAME = process.env.QIMMAH_BROWSER === 'webkit' ? 'webkit' : 'chromium'
+const BROWSER_TYPE = BROWSER_NAME === 'webkit' ? webkit : chromium
 
 let pass = 0
 let fail = 0
@@ -91,7 +93,10 @@ async function onboardToPreview(page, ar = true) {
 const preview = startPreview()
 try {
   await waitForServer()
-  browser = await chromium.launch({ executablePath: process.env.PW_CHROMIUM || undefined })
+  browser = await BROWSER_TYPE.launch(BROWSER_NAME === 'chromium'
+    ? { executablePath: process.env.PW_CHROMIUM || undefined }
+    : {})
+  console.log(`Browser: ${BROWSER_NAME} ${await browser.version()}`)
 
   // ═══ ١) مسارات الحساب الثلاثة — رابط مباشر، تحديث، رجوع، تقدّم ═══
   for (const lang of ['ar', 'en']) {

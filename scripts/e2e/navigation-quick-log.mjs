@@ -2,7 +2,7 @@
 // sessionStorage behavior, and deterministic 404 recovery.
 
 import { spawn } from 'node:child_process'
-import { chromium } from 'playwright'
+import { chromium, webkit } from 'playwright'
 import { loadAppCopy, requireKey } from './lib/app-copy.mjs'
 
 const { dataKeys } = await loadAppCopy()
@@ -13,6 +13,8 @@ const INTENT_KEY = 'qimmah:quick-log-intent'
 const PORT = 5330
 const EXTERNAL = process.env.PREVIEW_URL || ''
 const URL = EXTERNAL || `http://127.0.0.1:${PORT}`
+const BROWSER_NAME = process.env.QIMMAH_BROWSER === 'webkit' ? 'webkit' : 'chromium'
+const BROWSER_TYPE = BROWSER_NAME === 'webkit' ? webkit : chromium
 
 let pass = 0
 let fail = 0
@@ -25,6 +27,9 @@ function check(label, condition, detail = '') {
 const preview = EXTERNAL ? null : spawn('npx', ['vite', 'preview', '--host', '127.0.0.1', '--port', String(PORT), '--strictPort'], {
   stdio: ['ignore', 'pipe', 'pipe'],
   env: process.env,
+  // `npx` may leave Vite as a grandchild; own a process group so teardown
+  // cannot print green and then hang on the still-open ready-signal pipes.
+  detached: true,
 })
 const previewReady = preview ? new Promise((resolve, reject) => {
   let output = ''
@@ -52,11 +57,26 @@ function diagnostics(page) {
   const values = []
   page.on('pageerror', (error) => values.push(`pageerror: ${error}`))
   page.on('console', (message) => { if (message.type() === 'error') values.push(`console: ${message.text()}`) })
+  page.on('requestfailed', (request) => {
+    if (request.resourceType() === 'script') values.push(`script-requestfailed: ${request.url()} — ${request.failure()?.errorText ?? 'unknown'}`)
+  })
+  page.on('response', (response) => {
+    if (response.request().resourceType() === 'script' && response.status() >= 400) values.push(`script-response: ${response.status()} ${response.url()}`)
+  })
   return values
 }
 
 async function newSeededPage(browser, { width = 390, lang = 'ar', blockIntentStorage = false } = {}) {
   const context = await browser.newContext({ viewport: { width, height: 800 }, locale: lang === 'ar' ? 'ar-SA' : 'en-US' })
+  // Seed before the first application byte executes. The old fixture opened an
+  // unseeded app at `domcontentloaded`, then rewrote storage/hash and reloaded.
+  // WebKit correctly reported the deliberately aborted, still-pending Supabase
+  // module import as a failed script request. That measured the fixture's forced
+  // navigation, not a user's seeded boot. Dirty-state owns unseeded/legacy boot.
+  await context.addInitScript(({ onboarding, prefs, language }) => {
+    localStorage.setItem(onboarding, JSON.stringify({ completed: true, completedAt: '2026-01-01T00:00:00.000Z' }))
+    localStorage.setItem(prefs, JSON.stringify({ language }))
+  }, { onboarding: K_ONBOARDING, prefs: K_PREFS, language: lang })
   if (blockIntentStorage) {
     await context.addInitScript((intentKey) => {
       const original = Storage.prototype.setItem
@@ -68,13 +88,7 @@ async function newSeededPage(browser, { width = 390, lang = 'ar', blockIntentSto
   }
   const page = await context.newPage()
   const errors = diagnostics(page)
-  await page.goto(URL, { waitUntil: 'domcontentloaded' })
-  await page.evaluate(({ onboarding, prefs, language }) => {
-    localStorage.setItem(onboarding, JSON.stringify({ completed: true, completedAt: '2026-01-01T00:00:00.000Z' }))
-    localStorage.setItem(prefs, JSON.stringify({ language }))
-    location.hash = '#/dashboard'
-  }, { onboarding: K_ONBOARDING, prefs: K_PREFS, language: lang })
-  await page.reload({ waitUntil: 'networkidle' })
+  await page.goto(`${URL}#/dashboard`, { waitUntil: 'networkidle' })
   await page.getByRole('button', { name: lang === 'ar' ? 'تسجيل' : 'Log', exact: true }).waitFor()
   return { context, page, errors }
 }
@@ -95,7 +109,10 @@ async function openQuickLog(page, lang) {
 let browser
 try {
   await waitForServer()
-  browser = await chromium.launch({ headless: true, executablePath: process.env.PW_CHROMIUM || undefined })
+  browser = await BROWSER_TYPE.launch(BROWSER_NAME === 'chromium'
+    ? { headless: true, executablePath: process.env.PW_CHROMIUM || undefined }
+    : { headless: true })
+  console.log(`\n=== Browser: ${BROWSER_NAME} ${await browser.version()} ===`)
 
   console.log('\n=== AR/EN × 320/390/430 modal matrix ===')
   for (const lang of ['ar', 'en']) {
@@ -142,7 +159,10 @@ try {
     const { dialog } = await openQuickLog(page, 'ar')
     await dialog.getByRole('button', { name: 'ماء', exact: true }).click()
     await page.waitForURL(/#\/nutrition$/)
-    check('Water routes to Nutrition without fabricating a log', await page.getByTestId('premium-gate').count() === 0)
+    const waterAction = page.getByRole('button', { name: '+250 مل', exact: true })
+    await waterAction.waitFor()
+    check('Water routes to its live panel and focuses the first action', await waterAction.evaluate((node) => document.activeElement === node))
+    check('Water intent does not fabricate a log or open the mutation gate', await page.getByTestId('premium-gate').count() === 0)
     check('Water flow has no page/console errors', errors.length === 0, errors.join(' | '))
     await context.close()
   }
@@ -158,18 +178,25 @@ try {
   }
 
   console.log('\n=== Blocked sessionStorage counter-proof ===')
-  for (const target of ['meal', 'routine']) {
+  for (const target of ['meal', 'water', 'routine']) {
     const { context, page, errors } = await newSeededPage(browser, { blockIntentStorage: true })
     const { dialog } = await openQuickLog(page, 'ar')
-    await dialog.getByRole('button', { name: target === 'meal' ? 'وجبة' : 'دواء أو مكمّل', exact: true }).click()
+    const label = target === 'meal' ? 'وجبة' : target === 'water' ? 'ماء' : 'دواء أو مكمّل'
+    await dialog.getByRole('button', { name: label, exact: true }).click()
+    let reachedLiveDestination = true
     if (target === 'meal') {
       await page.waitForURL(/#\/nutrition$/)
       await page.getByTestId('premium-gate').waitFor()
+    } else if (target === 'water') {
+      await page.waitForURL(/#\/nutrition$/)
+      const waterAction = page.getByRole('button', { name: '+250 مل', exact: true })
+      await waterAction.waitFor()
+      reachedLiveDestination = await waterAction.evaluate((node) => document.activeElement === node)
     } else {
       await page.waitForURL(/#\/profile$/)
       await page.getByRole('heading', { name: 'دوائي ومكمّلاتي', exact: true, level: 2 }).waitFor()
     }
-    check(`blocked sessionStorage: ${target} still reaches live destination`, true)
+    check(`blocked sessionStorage: ${target} still reaches live destination`, reachedLiveDestination)
     check(`blocked sessionStorage: ${target} has no uncaught error`, errors.length === 0, errors.join(' | '))
     await context.close()
   }
@@ -201,7 +228,11 @@ try {
   }
 } finally {
   await browser?.close().catch(() => {})
-  preview?.kill('SIGTERM')
+  if (preview) {
+    try { process.kill(-preview.pid, 'SIGTERM') } catch { preview.kill('SIGTERM') }
+    preview.stdout?.destroy()
+    preview.stderr?.destroy()
+  }
 }
 
 console.log(`\n${fail === 0 ? '✅' : '❌'} navigation-quick-log — ${pass} passed, ${fail} failed`)
