@@ -42,10 +42,18 @@ export type { AdminRole, AdminRoleDecision, DenialReason, RoleClaimSource, RoleP
 
 export { loadExecutiveSnapshot, readPlatformPosture, WIRING_STATE } from './contract/source'
 export type { WiringState } from './contract/source'
-export { loadLiveExecutiveSnapshot, loadLiveUserPage } from './contract/liveSource'
-export type { LiveReadState, LiveSnapshotResult, LiveUserPageResult } from './contract/liveSource'
+export { loadLiveExecutiveSnapshot, loadLiveUserDetail, loadLiveUserPage } from './contract/liveSource'
+export type { LiveReadState, LiveSnapshotResult, LiveUserDetailResult, LiveUserPageResult } from './contract/liveSource'
 
-export { METRIC_REGISTRY, findMetric, metricsInGroup, availabilityCounts, DASHBOARD_RPC, USER_PAGE_RPC } from './contract/metrics'
+export {
+  METRIC_REGISTRY,
+  findMetric,
+  metricsInGroup,
+  availabilityCounts,
+  DASHBOARD_RPC,
+  USER_PAGE_RPC,
+  USER_DETAIL_RPC,
+} from './contract/metrics'
 export { buildAttentionQueue, detectedCount, blindCount } from './model/attention'
 export { runQuery, USER_FILTERS, isFilterApplicable, virtualWindow, DEFAULT_QUERY } from './model/filters'
 

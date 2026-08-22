@@ -90,6 +90,11 @@ export interface AdminStrings {
   labels: Record<string, string>
   /** مفاتيحها = `unavailableReasonKey`. */
   reasons: Record<string, string>
+  /**
+   * قيم شريط وضع المنصّة — **تُترجَم ولا تُطبع خامًا**.
+   * `backend-unconfigured` تحديدًا كانت ستُقرأ رمزًا تقنيًا لا حالةً.
+   */
+  postureValues: Record<string, string>
   filters: Record<string, string>
   funnel: Record<string, string>
   attention: Record<string, AdminAttentionCopy>
@@ -116,6 +121,12 @@ export interface AdminStrings {
     open: string
     noName: string
     noSignIn: string
+    /** يظهر حين يكون البحث والتصفّح على الخادم لا في المتصفّح. */
+    serverNote: string
+    /** سبب تعطيل الترتيب في وضع الخادم — الدالة ترتّب بالأحدث ولا تقبل مفتاحًا. */
+    sortServerNote: string
+    /** أثناء جلب صفحة جديدة من الخادم. */
+    searching: string
   }
   detail: {
     heading: string
@@ -131,7 +142,28 @@ export interface AdminStrings {
     lastActive: string
     support: string
     sensitiveExcluded: string
+    /** الكتلة التشغيلية المضافة في [ADMIN-R4] — دعم ومطابقة، لا ملفّ شخصي. */
+    emailVerified: string
+    yes: string
+    no: string
+    entState: string
+    entSource: string
+    entActivated: string
+    entExpires: string
+    entRevoked: string
+    entRevokedReason: string
+    noExpiry: string
+    commerceHeading: string
+    codesRedeemed: string
+    purchases: string
+    lastOrderId: string
+    lastPurchaseAt: string
+    accessRevoked: string
+    /** ما يُعرض حين يقول الخادم «لا شيء» (لا حين لا نعرف). */
+    none: string
   }
+  /** أسماء حالات الاستحقاق كما تشتقّها القاعدة — لا يُعرض المعرّف الخام. */
+  entitlementState: Record<string, string>
   entitlementView: {
     premium: string
     trial: string
@@ -486,6 +518,16 @@ export const adminStrings: Record<Lang, AdminStrings> = {
     },
     labels: arLabels,
     reasons: arReasons,
+    postureValues: {
+      on: 'شغّال',
+      off: 'مطفأ',
+      ok: 'مضبوط',
+      missing: 'ناقص',
+      mock: 'تقليد',
+      none: 'بلا مصدر',
+      backend: 'الخادم',
+      'backend-unconfigured': 'الخادم — مفاتيحه ناقصة',
+    },
     filters: arFilters,
     funnel: arFunnel,
     attention: arAttention,
@@ -512,6 +554,9 @@ export const adminStrings: Record<Lang, AdminStrings> = {
       open: 'افتح',
       noName: 'بلا اسم',
       noSignIn: 'ما سجّل دخول',
+      serverNote: 'البحث والتصفّح يصيران على الخادم — العدد هنا عدد كل الحسابات لا عدد الصفحة.',
+      sortServerNote: 'الترتيب على الخادم بالأحدث تسجيلًا. ترتيب صفحة وحدها يوهم إنه ترتيب الكل.',
+      searching: 'نجيب الصفحة…',
     },
     detail: {
       heading: 'صفحة المستخدم',
@@ -528,6 +573,31 @@ export const adminStrings: Record<Lang, AdminStrings> = {
       support: 'سياق الدعم',
       sensitiveExcluded:
         'الإصابات والأدوية والحساسيات وقيم القياسات ما تدخل هذي الشاشة إطلاقًا — ولا بأي دور.',
+      emailVerified: 'البريد مؤكّد',
+      yes: 'نعم',
+      no: 'لا',
+      entState: 'حالة الاستحقاق',
+      entSource: 'مصدر الاستحقاق',
+      entActivated: 'تاريخ التفعيل',
+      entExpires: 'ينتهي في',
+      entRevoked: 'أُلغي في',
+      entRevokedReason: 'سبب الإلغاء',
+      noExpiry: 'بلا انتهاء',
+      commerceHeading: 'الطلبات والأكواد',
+      codesRedeemed: 'أكواد استُردّت',
+      purchases: 'عمليات شراء',
+      lastOrderId: 'آخر رقم طلب',
+      lastPurchaseAt: 'تاريخ آخر شراء',
+      accessRevoked: 'وصوله محظور',
+      none: 'ما فيه',
+    },
+    entitlementState: {
+      premiumActive: 'Premium فعّال',
+      trialActive: 'تجربة سارية',
+      trialExpired: 'تجربة منتهية',
+      specialAccessActive: 'كود وصول ساري',
+      noAccess: 'معاينة — بلا وصول',
+      revoked: 'ملغى',
     },
     entitlementView: {
       premium: 'Premium',
@@ -623,6 +693,16 @@ export const adminStrings: Record<Lang, AdminStrings> = {
     },
     labels: enLabels,
     reasons: enReasons,
+    postureValues: {
+      on: 'On',
+      off: 'Off',
+      ok: 'Configured',
+      missing: 'Missing',
+      mock: 'Mock',
+      none: 'No source',
+      backend: 'Backend',
+      'backend-unconfigured': 'Backend — keys missing',
+    },
     filters: enFilters,
     funnel: enFunnel,
     attention: enAttention,
@@ -649,6 +729,9 @@ export const adminStrings: Record<Lang, AdminStrings> = {
       open: 'Open',
       noName: 'No name',
       noSignIn: 'Never signed in',
+      serverNote: 'Search and paging run on the server — the count is every account, not this page.',
+      sortServerNote: 'The server sorts newest first. Sorting one page would look like sorting everyone.',
+      searching: 'Fetching the page…',
     },
     detail: {
       heading: 'User detail',
@@ -665,6 +748,31 @@ export const adminStrings: Record<Lang, AdminStrings> = {
       support: 'Support context',
       sensitiveExcluded:
         'Injuries, medications, allergies and measurement values never enter this screen — under any role.',
+      emailVerified: 'Email confirmed',
+      yes: 'Yes',
+      no: 'No',
+      entState: 'Entitlement state',
+      entSource: 'Entitlement source',
+      entActivated: 'Activated on',
+      entExpires: 'Expires on',
+      entRevoked: 'Revoked on',
+      entRevokedReason: 'Revocation reason',
+      noExpiry: 'No expiry',
+      commerceHeading: 'Orders and codes',
+      codesRedeemed: 'Codes redeemed',
+      purchases: 'Purchases',
+      lastOrderId: 'Last order id',
+      lastPurchaseAt: 'Last purchase on',
+      accessRevoked: 'Access blocked',
+      none: 'None',
+    },
+    entitlementState: {
+      premiumActive: 'Premium active',
+      trialActive: 'Trial running',
+      trialExpired: 'Trial ended',
+      specialAccessActive: 'Access code running',
+      noAccess: 'Preview — no access',
+      revoked: 'Revoked',
     },
     entitlementView: {
       premium: 'Premium',

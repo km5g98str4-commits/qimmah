@@ -26,10 +26,11 @@
 
 import { getSupabase } from '@/lib/supabaseClient'
 import { loadExecutiveSnapshot } from './source'
-import { DASHBOARD_RPC, USER_PAGE_RPC } from './metrics'
+import { DASHBOARD_RPC, USER_DETAIL_RPC, USER_PAGE_RPC } from './metrics'
 import { isAdmin } from '../auth/adminRole'
 import type { AdminRoleDecision } from '../auth/adminRole'
 import type {
+  AdminUserDetail,
   AdminUserPage,
   AdminUserRow,
   EntitlementView,
@@ -38,7 +39,7 @@ import type {
   OnboardingView,
   SeriesPoint,
 } from './types'
-import { ready } from './types'
+import { ready, unavailable } from './types'
 
 /** حالة القراءة الحيّة — مسمّاة دائمًا، فلا فراغ بلا تفسير. */
 export type LiveReadState =
@@ -258,5 +259,136 @@ export async function loadLiveUserPage(
     }
   } catch {
     return { page: gap, live: 'failed' }
+  }
+}
+
+
+export interface LiveUserDetailResult {
+  /** `null` = ما وصلت صفحة. **لا كائن نصف مملوء** يُقرأ حسابًا بلا بيانات. */
+  readonly detail: AdminUserDetail | null
+  readonly live: LiveReadState
+}
+
+/**
+ * قارئ نصّي — أخو `num()`.
+ *
+ * **لا يعيد نصًّا فارغًا احتياطيًا.** ما ليس نصًّا ولا `null` صريحًا هو غياب.
+ * والفرق بين `null` و«غير متاح» جوهري هنا: `null` جوابُ خادم («لا تاريخ
+ * انتهاء» = منحة دائمة)، و«غير متاح» يعني أننا لم نقرأ.
+ */
+function str(raw: unknown, asOf: string): MetricValue<string | null> {
+  if (typeof raw === 'string') return ready(raw, asOf)
+  if (raw === null) return ready(null, asOf)
+  return unavailable<string | null>('NEEDS_BACKEND')
+}
+
+/** قارئ منطقي — `true`/`false` وحدهما يمرّان. */
+function bool(raw: unknown, asOf: string): MetricValue<boolean> {
+  if (typeof raw === 'boolean') return ready(raw, asOf)
+  return unavailable<boolean>('NEEDS_BACKEND')
+}
+
+/** حالة استحقاق الخادم ⟵ تصنيف الواجهة. المجهول يبقى مجهولًا ولا يُطوى. */
+function entitlementViewOf(state: unknown): EntitlementView {
+  switch (state) {
+    case 'premiumActive':
+      return 'premium'
+    case 'trialActive':
+      return 'trial'
+    case 'specialAccessActive':
+      return 'code'
+    case 'noAccess':
+    case 'trialExpired':
+      return 'preview'
+    default:
+      return 'unknown'
+  }
+}
+
+/**
+ * يحمّل صفحة حساب واحد.
+ *
+ * ═══ ثلاثة قيود ═══
+ *  ① **لا نداء قبل حسم الدور** — كما في الدالتين الأخريين.
+ *  ② **الأساس غياب**: كل كتلة منتج (خطة · تمارين · تغذية · قياسات) تُبنى
+ *     `unavailable` **ولا تُقرأ من الحمولة إطلاقًا**. ولو حشا الخادم مفتاحًا
+ *     باسمها لا يُقرأ: لا مصدر يعني لا مصدر (نفس قاعدة `redemptionFailures24h`).
+ *  ③ **رد بلا `as_of` أو بلا كتلة حساب يُرفض كلّه** — لا صفحة نصف مملوءة.
+ */
+export async function loadLiveUserDetail(
+  decision: AdminRoleDecision,
+  userId: string,
+): Promise<LiveUserDetailResult> {
+  if (!isAdmin(decision)) return { detail: null, live: 'not-founder' }
+
+  const client = await getSupabase()
+  if (!client) return { detail: null, live: 'no-backend' }
+
+  let payload: Record<string, unknown>
+  try {
+    const { data, error } = await client.rpc(USER_DETAIL_RPC, { p_user_id: userId })
+    if (error) return { detail: null, live: classify(error) }
+    if (!data || typeof data !== 'object') return { detail: null, live: 'failed' }
+    payload = data as Record<string, unknown>
+  } catch {
+    return { detail: null, live: 'failed' }
+  }
+
+  const asOf = typeof payload.as_of === 'string' ? payload.as_of : null
+  if (!asOf) return { detail: null, live: 'failed' }
+
+  const acct = bag(payload, 'account')
+  const ent = bag(payload, 'entitlement')
+  const com = bag(payload, 'commerce')
+  // الصفّ يُبنى من كتلة الحساب نفسها لا من صفّ الجدول: الجدول قد يكون بايتًا،
+  // وصفحة الحساب يجب أن تعرض ما تقوله القاعدة **الآن**.
+  if (typeof acct.user_id !== 'string' || typeof acct.created_at !== 'string') {
+    return { detail: null, live: 'failed' }
+  }
+  const row: AdminUserRow = {
+    userId: acct.user_id,
+    displayName: typeof acct.display_name === 'string' ? acct.display_name : null,
+    emailMasked: typeof acct.email_masked === 'string' ? acct.email_masked : null,
+    createdAt: acct.created_at,
+    lastSignInAt: typeof acct.last_sign_in_at === 'string' ? acct.last_sign_in_at : null,
+    entitlement: entitlementViewOf(ent.state),
+    onboarding: ONBOARDING_VIEWS.find((v) => v === payload.onboarding) ?? 'unknown',
+  }
+
+  const consentGap = <T,>(): MetricValue<T> => unavailable<T>('IMPOSSIBLE_WITHOUT_CONSENT_CHANGE')
+
+  return {
+    detail: {
+      row,
+      // ⚠️ كتل المنتج **لا تُقرأ من الحمولة**: مقامها متحيّز بالموافقة، ولا
+      // ترفع ذلك هجرةٌ. عرضها رقمًا هنا كان سيجعل حسابًا لم يوافق يبدو خاملًا.
+      planSummary: consentGap<string | null>(),
+      activity: {
+        workoutsCompleted: consentGap<number>(),
+        nutritionDaysLogged: consentGap<number>(),
+        // ولا حتى عدّاد أحداث القياس: عدُّ جدول صحّي يفتح مسارًا إليه.
+        measurementEvents: consentGap<number>(),
+        lastActivityAt: consentGap<string | null>(),
+      },
+      recentWorkouts: consentGap<readonly { date: string; dayName: string | null }[]>(),
+      supportContext: unavailable<readonly string[]>('NEEDS_BACKEND'),
+      emailVerified: bool(acct.email_verified, asOf),
+      entitlementDetail: {
+        state: typeof ent.state === 'string' ? ready(ent.state, asOf) : unavailable<string>('NEEDS_BACKEND'),
+        source: str(ent.source, asOf),
+        activatedAt: str(ent.activated_at, asOf),
+        expiresAt: str(ent.expires_at, asOf),
+        revokedAt: str(ent.revoked_at, asOf),
+        revokedReason: str(ent.revoked_reason, asOf),
+      },
+      commerce: {
+        codesRedeemed: num(com.codesRedeemed, asOf, unavailable<number>('NEEDS_BACKEND')),
+        purchases: num(com.purchases, asOf, unavailable<number>('NEEDS_BACKEND')),
+        lastOrderId: str(com.lastOrderId, asOf),
+        lastPurchaseAt: str(com.lastPurchaseAt, asOf),
+        accessRevoked: bool(com.accessRevoked, asOf),
+      },
+    },
+    live: 'live',
   }
 }

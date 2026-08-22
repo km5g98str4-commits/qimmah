@@ -35,6 +35,7 @@ import { FunnelChart, TrendChart } from './Charts'
 import { MetricCard } from './MetricCard'
 import { UserDetailPanel } from './UserDetail'
 import { UserTable } from './UserTable'
+import type { ServerPaging } from './UserTable'
 
 /** شريط وضع المنصّة — أربع حقائق يعرفها العميل عن نفسه بلا خادم. */
 function PostureStrip({ platform }: { platform: PlatformPosture }) {
@@ -69,7 +70,10 @@ function PostureStrip({ platform }: { platform: PlatformPosture }) {
           <Icon name={c.icon} className={cn('h-4 w-4 shrink-0', c.ok ? 'text-success' : 'text-warning')} />
           <div className="min-w-0">
             <span className="block truncate text-[11px] font-bold text-ink-500">{t.labels[c.id]}</span>
-            <span className="block truncate text-sm font-extrabold text-ink-900">{c.value}</span>
+            {/* القيمة تُترجَم إن كانت حالةً معلومة، وتُطبع كما هي إن كانت وسم بناء. */}
+            <span className="block truncate text-sm font-extrabold text-ink-900" data-posture-value={c.value}>
+              {t.postureValues[c.value] ?? c.value}
+            </span>
           </div>
         </div>
       ))}
@@ -87,6 +91,16 @@ interface AdminShellProps {
   onOpenUser?: (userId: string) => void
   onCloseUser?: () => void
   onRefresh?: () => void
+  /** حين يُمرَّر: بحث وتصفّح الجدول يمرّان بالخادم لا بالمتصفّح. */
+  userPaging?: ServerPaging
+  /** حالة قراءة صفحة التفصيل — مستقلّة عن اللقطة، فالفشل يُسمّى وحده. */
+  detailLive?: LiveReadState
+  /**
+   * صفحة حساب **مفتوحة**. مستقلّة عن `detail` عمدًا: الفتح فعلٌ وقع، وتعذّر
+   * الجلب حدثٌ آخر. لولا الفصل لعاد الضغط على الصفّ إلى الجدول بلا كلمة —
+   * وهو أسوأ أشكال الفشل: فشلٌ يبدو «ما صار شيء».
+   */
+  detailOpen?: boolean
   /**
    * حالة القراءة الحيّة. **بلا قيمة ⇒ `'not-founder'`** — الافتراض الأقلّ ادّعاءً:
    * مكوّن يُرسَم بلا إخبار عن مصدره لا يجوز أن يقول «حيّ».
@@ -94,7 +108,18 @@ interface AdminShellProps {
   live?: LiveReadState
 }
 
-export function AdminShell({ decision, snapshot, detail, onOpenUser, onCloseUser, onRefresh, live = 'not-founder' }: AdminShellProps) {
+export function AdminShell({
+  decision,
+  snapshot,
+  detail,
+  onOpenUser,
+  onCloseUser,
+  onRefresh,
+  userPaging,
+  detailLive,
+  detailOpen,
+  live = 'not-founder',
+}: AdminShellProps) {
   const lang = useLang()
   const t = adminStrings[lang]
   const [tab, setTab] = useState<Tab>('overview')
@@ -270,9 +295,11 @@ export function AdminShell({ decision, snapshot, detail, onOpenUser, onCloseUser
       {tab === 'users' ? (
         <div className="mt-4 flex flex-col gap-4">
           {detail ? (
-            <UserDetailPanel detail={detail} onBack={onCloseUser} />
+            <UserDetailPanel detail={detail} onBack={onCloseUser} live={detailLive} />
+          ) : detailOpen ? (
+            <DetailUnavailable live={detailLive ?? 'failed'} onBack={onCloseUser} />
           ) : (
-            <UserTable data={rowsValue} onOpen={onOpenUser} />
+            <UserTable data={rowsValue} onOpen={onOpenUser} server={userPaging} />
           )}
         </div>
       ) : null}
@@ -301,6 +328,37 @@ export function AdminShell({ decision, snapshot, detail, onOpenUser, onCloseUser
         </div>
       ) : null}
     </main>
+  )
+}
+
+/**
+ * صفحة حساب طُلبت ولم تصل — **تُعلَن ولا تُبتلع**.
+ *
+ * الرجوع الصامت إلى الجدول كان سيجعل الضغطة تبدو بلا أثر، فيظنّ المؤسس أن
+ * الزرّ معطّل لا أن القراءة فشلت. والحالة هنا **مسمّاة** كما في شريط اللقطة.
+ */
+function DetailUnavailable({ live, onBack }: { live: LiveReadState; onBack?: () => void }) {
+  const lang = useLang()
+  const t = adminStrings[lang]
+  return (
+    <section className="card p-4 text-start sm:p-5" data-detail-unavailable={live}>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 className="text-base font-extrabold text-ink-900">{t.detail.heading}</h2>
+        {onBack ? (
+          <button type="button" className="btn-ghost tap-target" onClick={onBack}>
+            <Icon name="ArrowLeft" className="h-4 w-4" />
+            <span className="text-xs">{t.detail.back}</span>
+          </button>
+        ) : null}
+      </div>
+      <div className="mt-4 flex items-start gap-3 rounded-xl border border-dashed border-line p-4">
+        <Icon name="CircleSlash" className="mt-0.5 h-5 w-5 shrink-0 text-ink-400" />
+        <div>
+          <p className="text-sm font-bold text-ink-500">{t.states.unavailable}</p>
+          <p className="mt-1 text-[11px] leading-relaxed text-ink-400">{t.live[live]}</p>
+        </div>
+      </div>
+    </section>
   )
 }
 

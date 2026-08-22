@@ -263,6 +263,23 @@ export const userDetailFixture: AdminUserDetail = {
   },
   recentWorkouts: unavailable('IMPOSSIBLE_WITHOUT_CONSENT_CHANGE'),
   supportContext: unavailable('NEEDS_BACKEND'),
+  // الكتل التشغيلية جاهزة في التجهيزة كي تُرسَم الحالة الممتلئة ويُصمَّم عليها.
+  emailVerified: ready(true, FIXTURE_AS_OF),
+  entitlementDetail: {
+    state: ready('premiumActive', FIXTURE_AS_OF),
+    source: ready('salla', FIXTURE_AS_OF),
+    activatedAt: ready('2026-08-01T09:12:00.000Z', FIXTURE_AS_OF),
+    expiresAt: ready(null, FIXTURE_AS_OF),
+    revokedAt: ready(null, FIXTURE_AS_OF),
+    revokedReason: ready(null, FIXTURE_AS_OF),
+  },
+  commerce: {
+    codesRedeemed: ready(0, FIXTURE_AS_OF),
+    purchases: ready(1, FIXTURE_AS_OF),
+    lastOrderId: ready('SLA-10241', FIXTURE_AS_OF),
+    lastPurchaseAt: ready('2026-08-01T09:11:40.000Z', FIXTURE_AS_OF),
+    accessRevoked: ready(false, FIXTURE_AS_OF),
+  },
 }
 
 // ───────────────────────────── لقطات كاملة ─────────────────────────────
