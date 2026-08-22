@@ -57,13 +57,18 @@ branches are read-only.
   branches. Existing operational documents are retained as references; stale
   branch identities, absent current release notes, and a Cloudflare deployment-
   trigger contradiction are named instead of being silently recopied.
+- Published the implementation-independent Release Convergence matrix: immutable
+  artifact identity, eight personas, viewport/locale/engine coverage, attack and
+  historical-defect ledgers, evidence schema, and seven explicit verdict rules.
+  No prior PASS or GO was transferred from quarantined branches.
 
 ## In Progress
 
 - Release convergence plan and evidence matrix.
 - Gap analysis of the existing Food, Exercise, and Executive Phase II branches
   to identify net-new independent work without consuming their Web ancestry.
-- Release convergence plan and dependency-led final-HEAD rebind procedure.
+- Release evidence harness implementation remains pending; the persona and
+  rebind plans are complete and wait only at their named integration points.
 
 ## Deferred
 
