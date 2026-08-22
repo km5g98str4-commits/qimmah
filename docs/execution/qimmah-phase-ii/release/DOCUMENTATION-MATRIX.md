@@ -50,6 +50,7 @@ deployment authorization.
 | `release/TEST-CHANGE-LEDGER.md` | `CURRENT-PHASE-II` | Continuous exact-SHA inventory of executable proof changes and anti-weakening review. |
 | `release/DEPLOYMENT-OWNER-HANDOFF.md` | `CURRENT-PHASE-II` | Owner-operated target, evidence, authorization, smoke, and rollback protocol; no external action. |
 | `release/EVIDENCE-HARNESS.md` | `CURRENT-PHASE-II` | Executable evidence/verdict contract with fixture-GO prevention; browser execution remains blocked. |
+| `release/ARTIFACT-MANIFEST.md` | `CURRENT-PHASE-II` | Deterministic built-file identity tool; final manifest waits for the accepted candidate. |
 | Food contract package on `c/phase-ii-food-production-002` | `CURRENT-PHASE-II` | Canonical contract, source ledger, status, and adversarial test plan. |
 | Exercise contract package on `h/phase-ii-exercise-production-002` | `CURRENT-PHASE-II` | Review-led exercise data/media contract and counter-proof plan. |
 | Executive contract package on `e/phase-ii-executive-dashboard-002` | `CURRENT-PHASE-II` | Fail-closed access/data architecture and future browser/security test plan. |

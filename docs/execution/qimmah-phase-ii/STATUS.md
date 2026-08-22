@@ -114,6 +114,9 @@ branches are read-only.
   fixture, fail-closed validator, seven-verdict guard, and 9/9 named proof cases.
   It cannot emit GO from fixture mode and still waits for the accepted artifact
   before any browser result is created.
+- Added a deterministic built-artifact manifest tool with ordered file digests,
+  candidate identity, symlink rejection, and seven focused proof cases. It has not
+  been run to declare a final Web artifact.
 
 ## In Progress
 
