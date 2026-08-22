@@ -53,6 +53,10 @@ branches are read-only.
   through development/build tooling, while `npm audit --omit=dev` reports zero
   production findings. Remediation is recorded against the final lockfile
   dependency; no automatic fix changed the provisional baseline.
+- Inventoried release/runbook/checklist coverage across `main` and quarantined
+  branches. Existing operational documents are retained as references; stale
+  branch identities, absent current release notes, and a Cloudflare deployment-
+  trigger contradiction are named instead of being silently recopied.
 
 ## In Progress
 
@@ -87,6 +91,8 @@ branches are read-only.
 | `WS-PH2-ANCESTRY-001` | Existing remote Phase II branches contain the unaccepted `d83add2` Web head in their history, so they cannot be consumed wholesale. | Founder-accepted Web Sovereign SHA plus file-level proof that each candidate Phase II commit is implementation-independent. | Selective Phase II adoption or final lane rebase after acceptance. | Reuse only proven Phase-owned commits, run conflict assertions, and leave all coupled product changes deferred. |
 | `WS-CLOSURE-001` | Newer candidate/closure refs use words such as `final` and `READY`, but no founder acceptance was received in this task. | Explicit founder acceptance naming the authoritative SHA. | Update the baseline ledger before any rebase. | Compare only recorded dependencies against the accepted SHA; do not repeat completed source discovery. |
 | `WS-PACKAGE-LOCK-001` | The final dependency graph is unaccepted, so tooling remediation cannot be selected against an authoritative lockfile. | Founder-accepted Web Sovereign HEAD and exact package manifests. | Coordinator-owned build-tooling wave after final-HEAD rebind. | Re-audit, map reachability, apply reviewed upgrades, regenerate the lockfile, and run the full gate plus exact-SHA CI. |
+| `WS-DOC-RECONCILE-001` | Final product paths and build identity are required to reconcile stale release documents. | Founder-accepted Web Sovereign SHA and final route/build inventory. | Post-rebind documentation reconciliation. | Update commands/journeys, generate current release notes and production checklist, and cite the accepted build for every verdict. |
+| `OPS-DEPLOY-TRUTH-001` | Repository documents conflict on whether updating main triggers external Cloudflare deployment. | None; the blocker is current Cloudflare project/settings evidence from the founder or deployment owner. | Pre-merge/pre-deploy production checklist. | Record project IDs, branches, outputs, domains and triggers; reconcile runbooks before any authorized release action. |
 
 ## Risks
 
