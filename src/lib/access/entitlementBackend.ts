@@ -11,7 +11,16 @@
 // ١) **الخادم هو السلطة.** لا عنوان، ولا `localStorage`، ولا عودة من صفحة
 //    الدفع، ولا ردّ محلّي — تفتح فعلًا مدفوعًا. المدخل الوحيد `my_entitlement()`.
 // ٢) **الفشل يُغلق لا يفتح.** أي خطأ — شبكة، دالّة غير مطبَّقة بعد، جلسة
-//    منتهية — يعيد `none` مع سبب صادق. لا تفاؤل، ولا تخزين مؤقّت لنتيجة سابقة.
+//    منتهية — يعيد `none` مع سبب صادق. لا تفاؤل، ولا تخزين مؤقّت لنتيجة سابقة
+//    **في هذا الملف**: ما هنا هو ما قاله الخادم الآن، لا ما قاله بالأمس.
+//    [OFFLINE-ENTITLEMENT-001] ولأن «الآن» قد لا يكون متاحًا — انقطاع أو مهلة —
+//    صارت هناك طبقة أعلى تعيد **آخر إجابة موجبة** بحدودها
+//    (`entitlementCache.applyOfflineGrace`): مربوطةً بالحساب، مقصوصةً بانتهاء
+//    الخادم، وضمن نافذة سماح مقفلة، ويمسحها أوّل ردٍّ سالب. وهي لا تُنشئ
+//    استحقاقًا قط — تُعيد واحدًا أصدره الخادم. وهذا الملف يخدمها بشيئين لا
+//    ثالث: **تصنيف الفشل** (`failure`) و**هوية الحساب** (`accountId`)؛ فبلا
+//    الأوّل لا يُفرَّق بين «لم نصل» و«قيل لا»، وبلا الثاني يخدم سجلُّ حسابٍ
+//    حسابًا آخر.
 // ٣) **الوقت من الخادم لا من الجهاز.** التجربة ٧٢ ساعة يحسمها `expires_at`
 //    مقابل `server_time` **كلاهما من قاعدة البيانات**. ونقيس ما مضى محلّيًا
 //    بـ`performance.now()` — عدّاد لا يتأثّر بتغيير ساعة النظام — فإرجاع ساعة
@@ -65,6 +74,18 @@ export interface EntitlementDetail {
   serverTimeMs: number
   /** قراءة `performance.now()` وقت الاستلام — لقياس ما مضى بلا ساعة الجهاز. */
   receivedAtPerfMs: number
+  /**
+   * [OFFLINE-ENTITLEMENT-001] الحساب الذي أجاب عنه الخادم — **من جلسة المصادقة
+   * لا من مدخل مستخدم**. وُجد لأن الإجابة صارت تُحفَظ لتُعاد عند انقطاع
+   * (`entitlementCache.ts`)، وإجابةٌ بلا هوية تصلح لأي حساب على الجهاز: أي
+   * تسريبُ استحقاقِ حسابٍ إلى آخر. فالهوية جزء من الإجابة لا زينة عليها.
+   */
+  accountId: string
+  /**
+   * هل هذه إجابةٌ **معادة** من آخر تحقّق (لا طازجة من الخادم)؟ تُعلَن ولا
+   * تُموَّه. غيابها = طازجة.
+   */
+  fromCache?: true
 }
 
 export interface BackendEntitlement {
@@ -72,6 +93,14 @@ export interface BackendEntitlement {
   detail: EntitlementDetail | null
   /** سبب عام — لا يكشف وجود كود ولا تفاصيل داخلية. */
   error?: string
+  /**
+   * [OFFLINE-ENTITLEMENT-001] تصنيف الفشل — **الفيصل بين «لم نصل» و«أُجبنا
+   * بالمنع»**. بدونه لا يستطيع أي مستدعٍ أن يفرّق بين شبكةٍ غائبة وخادمٍ قال
+   * «لا»، فيتساوى المشتري المنقطع مع من لا استحقاق له. غيابه = لا فشل.
+   */
+  failure?: AccessFailure
+  /** الحساب كما عرفته الجلسة وقت المحاولة — يُعرف حتى حين يفشل النداء. */
+  accountId?: string | null
 }
 
 const DENIED: BackendEntitlement = { status: 'none', detail: null }
@@ -195,35 +224,75 @@ export function backendAvailable(): boolean {
 }
 
 /**
+ * نصّ خطأ من ردٍّ قد يحمل `{ error }` — بلا `any` وبلا افتراض شكل.
+ * يُرجع `null` حين **لا يوجد كائن خطأ أصلًا** (وهو تمييز يعتمد عليه المستدعي:
+ * «لا جلسة» غير «تعذّر تجديد الجلسة»).
+ */
+function errorMessageOf(value: unknown): string | null {
+  if (!value || typeof value !== 'object') return null
+  const err = (value as { error?: unknown }).error
+  if (!err || typeof err !== 'object') return null
+  const message = (err as { message?: unknown }).message
+  return typeof message === 'string' ? message : ''
+}
+
+/**
  * القراءة المعتمدة. تُستدعى عند الإقلاع وعند كل تغيّر جلسة وبعد كل استبدال.
- * لا تُخزَّن نتيجتها بين الجلسات — الاستحقاق يُسأل عنه، ولا يُتذكَّر.
+ *
+ * [OFFLINE-ENTITLEMENT-001] **هذه الدالّة ما زالت لا تقرأ تخزينًا ولا تتذكّر
+ * شيئًا** — ما تقوله هو ما قاله الخادم في هذه اللحظة، وكل فشل يعود منعًا.
+ * الجديد أن الفشل صار **مصنَّفًا ومسمّى الهوية**: من يريد أن يعيد آخر إجابة
+ * موجبة عند انقطاعٍ يفعلها في طبقة أعلى (`entitlementCache.applyOfflineGrace`)
+ * وبحدودها، ولا يفعلها هذا الجسر. سلطة الجسر تبقى للخادم وحده.
  */
 export async function fetchEntitlement(): Promise<BackendEntitlement> {
-  if (!isSupabaseConfigured()) return { ...DENIED, error: 'backend_unconfigured' }
+  if (!isSupabaseConfigured()) return { ...DENIED, error: 'backend_unconfigured', failure: 'backend_unconfigured' }
   const supabase = await getSupabase()
-  if (!supabase) return { ...DENIED, error: 'backend_unavailable' }
+  if (!supabase) return { ...DENIED, error: 'backend_unavailable', failure: 'service_error' }
 
   // بلا جلسة لا استحقاق. الدالّة نفسها ترفض `auth.uid() is null`، ونوفّر رحلة.
   const sessionResult = await withDeadline(supabase.auth.getSession())
-  if (sessionResult === TIMED_OUT) return { ...DENIED, error: 'backend_timeout' }
-  if (!sessionResult?.data?.session) return { ...DENIED, error: 'not_authenticated' }
+  if (sessionResult === TIMED_OUT) return { ...DENIED, error: 'backend_timeout', failure: 'timeout' }
+  const session = sessionResult?.data?.session
+  if (!session) {
+    // **جلسةٌ غابت بسبب الشبكة ليست «غير مسجَّل»** — والفرق يقرّر مصير مشترٍ
+    // انقطعت شبكته: `getSession()` تحاول تجديد رمزٍ منتهٍ، وتعيد عند فشل
+    // الشبكة `{ session: null, error }`. لو قرأنا ذلك «لا حساب» لصار كل من
+    // تجاوزت جلسته ساعةً بلا نت مستخدمًا مجهولًا.
+    const message = errorMessageOf(sessionResult)
+    if (message !== null && looksLikeNetworkFailure(message)) {
+      return { ...DENIED, error: 'backend_offline', failure: 'offline' }
+    }
+    return { ...DENIED, error: 'not_authenticated', failure: 'service_error' }
+  }
+  const rawAccountId = (session as { user?: { id?: unknown } }).user?.id
+  const accountId = typeof rawAccountId === 'string' && rawAccountId !== '' ? rawAccountId : null
 
   const receivedAtPerfMs = perfNow()
   const rpcResult = await withDeadline(supabase.rpc('my_entitlement'))
-  if (rpcResult === TIMED_OUT) return { ...DENIED, error: 'backend_timeout' }
+  if (rpcResult === TIMED_OUT) return { ...DENIED, error: 'backend_timeout', failure: 'timeout', accountId }
   const { data, error } = rpcResult
-  if (error) return { ...DENIED, error: 'backend_error' }
+  if (error) {
+    // المجهول عطلٌ عندنا حتى يثبت أنه شبكة المستخدم — نفس قاعدة
+    // `classifyRedeemError`، ولا تُوسَّع «انقطاع الشبكة» لتبتلع أعطالنا.
+    const text = `${error.message ?? ''} ${String((error as { code?: string }).code ?? '')}`
+    const failure: AccessFailure = looksLikeNetworkFailure(text) ? 'offline' : 'service_error'
+    return { ...DENIED, error: failure === 'offline' ? 'backend_offline' : 'backend_error', failure, accountId }
+  }
 
   const row = Array.isArray(data) ? data[0] : data
-  if (!row || typeof row !== 'object') return { ...DENIED, error: 'backend_empty' }
+  if (!row || typeof row !== 'object') return { ...DENIED, error: 'backend_empty', failure: 'service_error', accountId }
 
   const r = row as Record<string, unknown>
   const serverState = String(r.state ?? 'noAccess') as ServerEntitlementState
   // حالة لا نعرفها ⇒ منع. لا نفترض أن الجديد آمن.
-  if (!SERVER_ENTITLEMENT_STATES.includes(serverState)) return { ...DENIED, error: 'backend_unknown_state' }
+  if (!SERVER_ENTITLEMENT_STATES.includes(serverState)) return { ...DENIED, error: 'backend_unknown_state', failure: 'service_error', accountId }
 
   const serverTimeMs = ms(r.server_time)
-  if (serverTimeMs === null) return { ...DENIED, error: 'backend_no_clock' }
+  if (serverTimeMs === null) return { ...DENIED, error: 'backend_no_clock', failure: 'service_error', accountId }
+
+  // هويةٌ مجهولة مع ردٍّ سليم ⇒ لا نبني تفصيلًا بلا صاحب. منعٌ صادق.
+  if (accountId === null) return { ...DENIED, error: 'not_authenticated', failure: 'service_error' }
 
   const rawType = String(r.entitlement_type ?? 'none')
   const entitlementType = (['premium', 'special', 'trial'] as const).includes(rawType as never)
@@ -232,6 +301,7 @@ export async function fetchEntitlement(): Promise<BackendEntitlement> {
 
   return {
     status: statusForServerState(serverState),
+    accountId,
     detail: {
       serverState,
       entitlementType,
@@ -240,6 +310,7 @@ export async function fetchEntitlement(): Promise<BackendEntitlement> {
       activatedAtMs: ms(r.activated_at),
       serverTimeMs,
       receivedAtPerfMs,
+      accountId,
     },
   }
 }

@@ -11,6 +11,7 @@ import { canPerform } from './guard'
 import type { PaidAction } from './paidActions'
 import { AccessContext, type AccessContextValue } from './context'
 import { claimPendingGrants, redeemActivationCode, resolveEntitlement, startTrial } from './entitlementSource'
+import { applyOfflineGrace } from './entitlementCache'
 import { getSupabase } from '@/lib/supabaseClient'
 import type { TrialOutcome } from './entitlementBackend'
 import {
@@ -33,13 +34,24 @@ export function EntitlementProvider({ children }: { children: ReactNode }) {
   // المخزن العادي هو مصدر الحقيقة؛ الحالة هنا مرآة له فتُعاد الواجهة عند تغيّره.
   useEffect(() => subscribeEntitlement(setSnapshot), [])
 
+  /**
+   * [OFFLINE-ENTITLEMENT-001] القراءة ثم **سياسة السماح** ثم المخزن.
+   *
+   * الترتيب هو المعنى: `resolveEntitlement` تسأل الخادم ولا تتذكّر شيئًا، ثم
+   * `applyOfflineGrace` تفعل ثلاثة أشياء لا رابع لها — تحفظ الإجابة الموجبة
+   * الطازجة، وتمسحها فور أوّل ردٍّ سالب (إلغاء · استرداد · انتهاء · خروج)،
+   * وتعيدها بحدودها حين **يتعذّر الوصول** إلى الخادم وحدها. فمن دفع لا يُطالَب
+   * بالدفع ثانيةً لأن شبكته انقطعت، ومن لم يدفع لا يُفتح له شيء.
+   */
   const refresh = useCallback(async () => {
     const resolved = await resolveEntitlement()
+    const settled = applyOfflineGrace(resolved)
     setEntitlement({
-      status: resolved.status,
-      source: resolved.source,
-      detail: resolved.detail ?? null,
-      lastError: resolved.lastError,
+      status: settled.status,
+      source: settled.source,
+      detail: settled.detail ?? null,
+      lastError: settled.lastError,
+      cacheReason: settled.cacheReason,
     })
   }, [])
 
@@ -76,6 +88,21 @@ export function EntitlementProvider({ children }: { children: ReactNode }) {
       cancelled = true
       unsubscribe?.()
     }
+  }, [refresh])
+
+  /**
+   * [OFFLINE-ENTITLEMENT-001] **عودة الشبكة تُعيد السؤال فورًا.**
+   *
+   * سماح الانقطاع لا يعني إلا شيئًا واحدًا: «الخادم غير متاح الآن». فلحظة
+   * عودته يجب أن يُسأل، وإلا صار السماح تأجيلًا للإلغاء والاسترداد إلى أن
+   * يتصادف حدثُ مصادقة. وهذا هو ما يجعل «الخادم يفوز فورًا» جملةً تنفيذية لا
+   * وعدًا: الإلغاء يصل في أوّل ثانية اتصال، لا بعد ثلاثة أيام.
+   */
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const onReconnect = () => { void refresh() }
+    window.addEventListener('online', onReconnect)
+    return () => window.removeEventListener('online', onReconnect)
   }, [refresh])
 
   const can = useCallback((action: PaidAction) => canPerform(action), [])
