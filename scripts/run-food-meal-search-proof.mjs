@@ -108,14 +108,24 @@ ok('«بيتزا»: النتيجة الأولى ليست صلصة', !/صلصة/.
  * ⟲ التأكيد المضادّ للترتيب (§4.2): محاكاة **اللصق بترتيب المصدر** — أي
  * السلوك الذي تستبدله هذه الموجة. لو كان الترتيب ترتيبَ مصدرٍ لا ترتيبَ مطابقة،
  * لتصدَّر المعبّأُ حين يُلصق أولًا. الفحص يسمّي ذلك بدل أن يمرّ صامتًا.
+ *
+ * ═══ ⚠️ صيغة هذا الضابط تغيّرت في [FOOD-LONGTAIL-002]، والسبب يُسمّى ═══
+ * كان يقول: «أعلى المعبّأ لبرجر **خبزٌ** لا وجبة» — وكان صادقًا حين كان المعبّأ
+ * الحيّ ٥٩٩ سجلًا لا تحوي طبقًا مركّبًا واحدًا. ومع وصل الذيل الطويل صار المعبّأ
+ * يقدّم «برجر بقري» — منتجًا حقيقيًا لا خبزًا. **فالمقدّمة شاخت، لا القاعدة.**
+ *
+ * والقاعدة الباقية أقوى وأقلّ تعلّقًا ببيانات بعينها: اللصق الساذج يضع **سجلًا
+ * معبّأً** في الصدارة، والسلّم يضع المنسَّق. ويُشترط أن يكونا **مختلفين** فعلًا،
+ * وإلّا كان الضابط يمرّ بلا أن يفرّق بين ترتيبين (§4.2: المرور غير المستحقّ ليس نجاحًا).
  */
 {
   const packagedFirst = await unified.rankPackaged(cat, 'برجر')
   const naiveTop = packagedFirst[0]
+  const naiveName = naiveTop?.product.name_ar ?? naiveTop?.product.name_en ?? ''
   counter(
-    'محاكاة اللصق بترتيب المصدر تُكشف — أعلى المعبّأ لـ«برجر» خبزٌ لا وجبة',
-    !!naiveTop && /خبز/.test(naiveTop.product.name_ar ?? ''),
-    `${naiveTop?.product.name_ar ?? 'لا مرشّح معبّأ'}`,
+    'محاكاة اللصق بترتيب المصدر تُكشف — صدارتها معبّأة تخالف صدارة السلّم',
+    !!naiveTop && burger[0]?.source === 'curated' && naiveName !== (burger[0]?.item.nameAr ?? ''),
+    `اللصق: ${naiveName || 'لا مرشّح معبّأ'} · السلّم: ${burger[0]?.item.nameAr}`,
   )
   counter(
     'وسلّم القوّة يضعه تحت المنسَّق فعلًا — لا بالمصادفة',
@@ -170,12 +180,33 @@ const chickenSingular = await countOf('chicken')
 ok(`ردّ المفرد يصل النتائج فعلًا: «chickens» ⇒ ${chickenPlural} (المفرد ${chickenSingular})`, chickenPlural > 0 && chickenPlural === chickenSingular)
 counter('وردّ المفرد لا يخترع مطابقة — `squats` و`squat` كلاهما صفر', (await countOf('squats')) === 0 && (await countOf('squat')) === 0)
 
-// ═══════════ ٦) الصدق: لا ادّعاء ذيل طويل والشرائح غائبة ═══════════
+// ═══════════ ٦) الصدق: لا ادّعاء يتجاوز ما يُسلَّم ═══════════
+//
+// ⚠️ **هذا الفحص انقلب اتجاهه في [FOOD-LONGTAIL-002]، ولم يُحذف.**
+// كان يشترط `searchable < declared` لأن الشرائح لم تكن تُبلَغ، فادّعاء الرقم
+// المعلَن كان كذبًا. وبعد وصل حزم البحث صار الرقمان يتساويان **باستحقاق**.
+// فالقاعدة الباقية ليست «أقلّ دائمًا» بل: **لا يتجاوز المدّعى ما يُسلَّم**،
+// ولا يُبلغ التساوي إلا حين يكون الدليل محمَّلًا فعلًا. ويحرسه ضابطٌ مضادّ
+// أدناه: كتالوج بلا حزم يعود إلى الطقم الساخن ولا يدّعي ستين ألفًا.
 const availability = cat.longTailAvailability()
 ok(
-  `الصدق: القابل للبحث الآن ${availability.searchableRecords} سجلًا معبّأً — لا ${availability.declaredRecords} المعلَنة في البيان`,
-  availability.searchableRecords < availability.declaredRecords,
-  `معلَن ${availability.declaredRecords} · قابل ${availability.searchableRecords}`,
+  `الصدق: القابل للبحث ${availability.searchableRecords} لا يتجاوز المعلَن ${availability.declaredRecords}`,
+  availability.searchableRecords <= availability.declaredRecords,
+  `معلَن ${availability.declaredRecords} · قابل ${availability.searchableRecords} · حزم ${availability.corpusRecords}`,
+)
+counter(
+  'والتساوي مستحقٌّ لا مُدَّعى — كتالوج بلا حزم يعود إلى الطقم الساخن',
+  await (async () => {
+    const blind = await Catalog.create({
+      fetchText: async (url) => (url.includes('/search/') ? null : fetchText(url)),
+      cache: createMemoryCache(),
+    })
+    await blind.init()
+    await blind.searchRanked('kinder', { deep: true })
+    const a = blind.longTailAvailability()
+    return a.searchableRecords < a.declaredRecords && a.verdict === 'unavailable'
+  })(),
+  'الدليل مقطوع ⇒ لا ادّعاء',
 )
 ok(
   `الصدق: حكم الذيل الطويل «${availability.verdict}» — لا يُخمَّن قبل المحاولة`,
