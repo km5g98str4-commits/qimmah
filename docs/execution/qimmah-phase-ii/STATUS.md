@@ -68,8 +68,10 @@ branches are read-only.
   Web Sovereign or launch-readiness verdict.
 - Exercise lane checkpoint `cea98dca086f0277025cc39d4a54120895d20a5c`
   is pushed: a deterministic 181-ID review ledger, conservative media states,
-  six digest-derived duplicate groups, byte-for-byte regeneration, and seven
-  named anti-circumvention mutations. It changes no product or package file.
+  six digest-derived duplicate groups, and byte-for-byte regeneration. Follow-up
+  `e7435544410bb4c151a017da55658e435c8e69c2` adds 37 mechanics-blocked image
+  jobs, a confined media-path guard, eight ledger and eight job mutations, and
+  generation/rollback runbooks without producing or approving an asset.
 - Published a single evidence-led production checklist covering isolation,
   rebind, gates, release personas, food, exercise media, Executive Dashboard,
   security/privacy, operations, and founder-only authority. Unchecked work stays
@@ -83,12 +85,25 @@ branches are read-only.
   identities, Arabic/English claim parity, operator/security notes, validation,
   blockers, rollback, and seven verdicts. It remains explicitly unreleased and
   cannot be published while placeholders or unaccepted SHAs remain.
+- Executive Dashboard architecture is pushed at
+  `3824c08b1cd3dec488b143f3e17f16a268d3fbb4`, with dependency normalization at
+  `09dbf087a1acec45efd4739d7307fc9eb6e4edcd`: fail-closed access, independent
+  server authorization, six top-level states, metric/source-quality contracts,
+  privacy-minimized user data, one-screen information architecture, and a
+  browser/security test plan. No route, live provider, backend, or product
+  behavior was added.
 
 ## In Progress
 
-- Release convergence plan and evidence matrix.
-- Gap analysis of the existing Food, Exercise, and Executive Phase II branches
-  to identify net-new independent work without consuming their Web ancestry.
+- Food lane is building the first deterministic production-data package from
+  the fingerprinted 55-row packaged source, with strict row accounting and
+  adversarial proof cases.
+- Exercise lane has completed the conservative review ledger and blocked image
+  queue; human mechanics authoring and visual review remain queued without
+  guessing or premature generation.
+- Executive lane is converting the reviewed architecture into executable,
+  implementation-independent contract fixtures and negative tests; route and
+  live-provider work remain blocked.
 - Release evidence harness implementation remains pending; the persona and
   rebind plans are complete and wait only at their named integration points.
 
@@ -142,12 +157,13 @@ branches are read-only.
 
 ## Next Tasks
 
-1. Commit and push the remote source-of-truth discovery checkpoint.
-2. Complete gap analyses for the existing food, exercise, and executive Phase
-   II branches; retain only net-new independent work.
-3. Publish the dependency-led release convergence persona/evidence matrix.
-4. Add deterministic, implementation-independent validators and negative tests
-   in lane-owned paths; request the coordinator-owned `package.json` union only
-   after the proofs exist.
-5. Prepare deployment runbooks, production checklists, founder QA documents,
-   release notes, and the final rebase procedure without executing deployment.
+1. Verify and record the food seed-pipeline checkpoint, including source hash,
+   row conservation, deterministic output, and named negative mutations.
+2. Add executable Executive Dashboard contract fixtures and fail-closed
+   mutations without adding a route, backend, or live product behavior.
+3. Produce the founder 10–15 minute QA checklist and a Phase II test-change
+   ledger bound to exact future evidence IDs.
+4. Prepare food dataset activation/rollback and deployment-owner handoff
+   runbooks without mutating external systems.
+5. Keep mechanics/video/media review work explicit and blocked where human
+   evidence is absent; never convert queue presence into approval.

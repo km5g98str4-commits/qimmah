@@ -14,9 +14,9 @@ live database work, Salla mutation, or App Store/TestFlight submission.
 - [x] Active Web Sovereign worktree is documented as read-only.
 - [x] No Web Sovereign merge, rebase, cherry-pick, manual port, or file copy was used by the `-002` lanes.
 - [x] Superseded `/private/tmp` worktrees were preserved after host cleanup; no destructive recovery was attempted.
-- [x] Immediate commit-and-push cadence established on release and exercise lanes.
+- [x] Immediate commit-and-push cadence established on all four lanes.
 - [x] Food first checkpoint pushed at `8a78f86eec8b9b0019c021dfa6213a45e1a20763`.
-- [ ] Executive first checkpoint pushed.
+- [x] Executive architecture checkpoint pushed at `3824c08b1cd3dec488b143f3e17f16a268d3fbb4`; dependency schema corrected at `09dbf087a1acec45efd4739d7307fc9eb6e4edcd`.
 
 Evidence: central `STATUS.md`, `release/SOURCE-OF-TRUTH.md`, and remote `-002`
 branch heads.
@@ -100,15 +100,16 @@ lane dependency register.
 - [x] Image states are conservative: 0 approved, 144 needs review, 37 missing.
 - [x] Video states are conservative: 0 approved, 181 missing.
 - [x] Six duplicate-content groups are derived from asset-pair digests.
-- [x] Validator, byte-for-byte regeneration, and seven named mutations pass.
-- [ ] Asset path scope prevents traversal outside approved media root.
+- [x] Ledger validator, byte-for-byte regeneration, and eight named mutations pass.
+- [x] Asset path scope confines still pairs and machine diagrams to their separate approved roots; `MEDIA_PATH_SCOPE` rejects traversal.
+- [x] A deterministic 37-job image queue records missing mechanics as blocked; every prompt is null and every output is `NOT_GENERATED`.
 - [ ] Every image candidate has exercise/equipment/anatomy/start-end/safety/crop review.
 - [ ] Duplicate groups adjudicated; no different exercise silently shares approved media.
 - [ ] Original candidates produced for the 37 missing exercises with prompt/tool/version metadata.
 - [ ] Exact public video references researched and independently reviewed.
 - [ ] No YouTube search-result URL appears as an approved video.
 - [ ] Arabic and English descriptions/steps/cues/mistakes/breathing meet the authored-content contract.
-- [ ] Released media manifest has rollback/version/checksum procedure.
+- [x] Media rollback/version/checksum procedure documented; release activation remains undone.
 - [ ] Accepted Web surfaces use one approved resolver with honest fallback states.
 
 Current truth: `GO_EXERCISE_MEDIA_RELEASE=NO-GO`.
@@ -117,21 +118,21 @@ Current truth: `GO_EXERCISE_MEDIA_RELEASE=NO-GO`.
 
 - [x] Existing remote dashboard audited without consumption.
 - [x] Missing backend/admin authority recognized as external rather than invented.
-- [ ] Isolated v2 data/access contract pushed.
-- [ ] `AdminAccessDecision` distinguishes denied, authorized founder/admin, and unavailable.
-- [ ] Server authorization is required before any sensitive read; UI guard alone is insufficient.
-- [ ] Top-level denied/loading/empty/partial/error/ready states are explicit.
-- [ ] Every metric carries definition, source, window, updated time, freshness/quality, privacy class, role, owner, and unavailable state.
-- [ ] Attention items carry source, time, owner, and detectable/blind distinction.
-- [ ] Active-user data is never relabeled as workout or retention data.
-- [ ] User rows are privacy-minimized and health detail requires deliberate drill-down.
+- [x] Isolated v2 data/access contract pushed at `3824c08b1cd3dec488b143f3e17f16a268d3fbb4`.
+- [x] `AdminAccessDecision` contract is fail-closed and separates loading, denied reasons, and allowed server-claim roles; the exact founder/admin policy remains `ADM-001`.
+- [x] Architecture requires server authorization before every sensitive read; the UI guard is explicitly insufficient.
+- [x] Top-level denied/loading/empty/partial/error/ready states are explicit in the contract.
+- [x] Metric definitions require source/window/time/privacy/role/owner/unavailable state, and ready values require as-of/freshness/quality/coverage.
+- [x] Attention contracts carry source/version/time/owner/threshold and detected/clear/unmonitorable/error states.
+- [x] Chart contracts forbid relabeling active-user series as workout or retention data.
+- [x] User contracts minimize list payloads and exclude individual health values from the executive surface.
 - [ ] No fake/inert refresh/open/destructive control is visible.
 - [ ] One-screen home answers KPIs, alerts, trends, attention, and recent activity.
 - [ ] Arabic/English, RTL, keyboard, focus, 44px touch, contrast, browser layout, and large-data tests pass.
 - [ ] Non-admin/forged-claim/browser-route attacks fail closed.
-- [ ] Live provider remains externally blocked until reviewed backend read contracts exist.
+- [x] Live provider is explicitly `EXTERNALLY_BLOCKED` until reviewed backend read contracts and server authorization exist.
 
-Blocking references: `WS-ROUTE-001`, `WS-REL-ADMIN-001`, and the executive lane
+Blocking references: `WS-ROUTE-001` and `ADM-001..009` in the executive lane
 dependency register.
 
 ## 8. Privacy and security
@@ -157,7 +158,7 @@ Blocking references: `WS-PACKAGE-LOCK-001` and external backend owner evidence.
 - [ ] Current Cloudflare app/site project IDs, production branches, outputs, domains, and triggers supplied by owner.
 - [ ] One authoritative release runbook reconciled to accepted SHA and current external settings.
 - [ ] Food dataset version/activation-pointer rollback documented.
-- [ ] Exercise media manifest/version rollback documented.
+- [x] Exercise media manifest/version rollback documented; no activation was performed.
 - [ ] Current release notes generated from accepted commit range.
 - [ ] Phase II test-change ledger completed.
 - [ ] Final production checklist frozen to an exact candidate SHA.

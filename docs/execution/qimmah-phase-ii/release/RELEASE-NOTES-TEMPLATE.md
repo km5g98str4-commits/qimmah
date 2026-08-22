@@ -1,6 +1,7 @@
 # Qimmah Release Notes — Evidence Template
 
-Status: `UNRELEASED_NOT_GENERATED`  
+Status: `UNRELEASED_NOT_GENERATED`
+
 This file is a release-notes contract, not a claim about the current product.
 
 Do not replace the status above until a founder-accepted Web SHA, rebound Phase
