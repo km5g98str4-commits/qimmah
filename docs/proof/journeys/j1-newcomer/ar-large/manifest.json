@@ -6,9 +6,9 @@
   "viewport": "large",
   "ground": {
     "branch": "codex/qimmah-v1-final-closure-001",
-    "commit": "8ffcc7c",
-    "subject": "docs(state): [QIM-FINAL-CLOSURE-001] تسجيل اكتشاف `activeSession` — تغطية على سطح لا يكتبه التطبيق",
-    "dirty": true
+    "commit": "1768e83",
+    "subject": "feat(access): [QIM-FINAL-CLOSURE-001] Premium يصمد في الانقطاع القصير — والسلطة تبقى للخادم",
+    "dirty": false
   },
   "frames": [
     {
