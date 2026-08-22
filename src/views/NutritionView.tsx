@@ -12,6 +12,8 @@ import { useAccess } from '@/lib/access/useAccess'
 
 interface NutritionViewProps {
   lang: Lang
+  quickLogIntent?: 'meal' | 'water' | 'routine' | null
+  onQuickLogIntentHandled?: () => void
 }
 
 const round = (n: number) => Math.round(n)
@@ -39,7 +41,7 @@ function slotForEntry(meal: MealSlot | undefined, visible: { id: MealSlot }[]): 
 }
 
 /** تبويب التغذية — متتبّع يومي للوجبات والماكروز والماء (موبايل أولًا). */
-export function NutritionView({ lang }: NutritionViewProps) {
+export function NutritionView({ lang, quickLogIntent, onQuickLogIntentHandled }: NutritionViewProps) {
   const { customization } = useCustomization()
   const t = getStrings(lang).nutrition
   const d = nutritionScreenStrings[lang]
@@ -58,6 +60,12 @@ export function NutritionView({ lang }: NutritionViewProps) {
    * التحديث إلى الأبد · وقيمة غير معروفة تُمسح وتُتجاهَل بلا رمي.
    */
   const [autoOpen, setAutoOpen] = useState<MealSlot | null>(null)
+  useEffect(() => {
+    if (quickLogIntent !== 'meal' && quickLogIntent !== 'water') return
+    try { window.sessionStorage.removeItem('qimmah:quick-log-intent') } catch { /* transient storage unavailable */ }
+    if (quickLogIntent === 'meal') setAutoOpen('breakfast')
+    onQuickLogIntentHandled?.()
+  }, [quickLogIntent, onQuickLogIntentHandled])
   useEffect(() => {
     const consume = (raw: string | null) => {
       if (raw === null) return

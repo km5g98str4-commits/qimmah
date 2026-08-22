@@ -24,6 +24,8 @@ import { profileScreenStrings } from '@/i18n/dict/profileScreen'
 interface ProfileV2Props {
   lang: Lang
   onNavigate: (route: AppRoute) => void
+  quickLogIntent?: 'meal' | 'water' | 'routine' | null
+  onQuickLogIntentHandled?: () => void
 }
 
 type Screen = 'home' | 'privacy' | 'settings' | 'notifications' | 'data-settings' | 'data-privacy' | 'routine'
@@ -55,7 +57,7 @@ function rememberProfileReturnScreen(returnScreen: 'settings' | 'privacy'): void
  * banner, no modal, no fake scarcity. Destructive + account actions route to the
  * EXISTING safe Settings flow; they are never reimplemented or weakened here.
  */
-export function ProfileV2({ lang, onNavigate }: ProfileV2Props) {
+export function ProfileV2({ lang, onNavigate, quickLogIntent, onQuickLogIntentHandled }: ProfileV2Props) {
   const { customization } = useCustomization()
   const auth = useAuth()
   const ar = lang !== 'en'
@@ -81,14 +83,25 @@ export function ProfileV2({ lang, onNavigate }: ProfileV2Props) {
     const openRoutine = (event: Event) => {
       if ((event as CustomEvent).detail === 'routine') setScreen('routine')
     }
-    const pending = window.sessionStorage.getItem('qimmah:quick-log-intent')
-    if (pending === 'routine') {
-      window.sessionStorage.removeItem('qimmah:quick-log-intent')
-      setScreen('routine')
-    }
+    // sessionStorage قناة عبور اختيارية فقط؛ بعض أوضاع الخصوصية/الحصص تحظرها.
+    // الحدث الحيّ يظلّ يعمل، لذلك لا نسمح لفشل القراءة أن يكسر Profile كله.
+    try {
+      const pending = window.sessionStorage.getItem('qimmah:quick-log-intent')
+      if (pending === 'routine') {
+        window.sessionStorage.removeItem('qimmah:quick-log-intent')
+        setScreen('routine')
+      }
+    } catch { /* transient storage unavailable */ }
     window.addEventListener('qimmah:quick-log', openRoutine)
     return () => window.removeEventListener('qimmah:quick-log', openRoutine)
   }, [])
+
+  useEffect(() => {
+    if (quickLogIntent !== 'routine') return
+    try { window.sessionStorage.removeItem('qimmah:quick-log-intent') } catch { /* transient storage unavailable */ }
+    setScreen('routine')
+    onQuickLogIntentHandled?.()
+  }, [quickLogIntent, onQuickLogIntentHandled])
 
   const uid = auth.user?.id ?? null
   const openCanonicalSettings = (returnScreen: 'settings' | 'privacy') => {

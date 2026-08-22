@@ -222,6 +222,10 @@ export default function App() {
   const didInitialAuthRoute = useRef(false)
   const [showSuccess, setShowSuccess] = useState(false)
   const dismissSuccess = useCallback(() => setShowSuccess(false), [])
+  // قناة ذاكرة مملوكة من App تضمن بقاء نيّة Quick Log حتى يركب المسار الكسول.
+  // sessionStorage أدناه احتياط للتحديث، لا نقطة فشل وحيدة.
+  const [pendingQuickLog, setPendingQuickLog] = useState<QuickLogTarget | null>(null)
+  const clearPendingQuickLog = useCallback(() => setPendingQuickLog(null), [])
   /**
    * [QIM-WEB-FOUNDER-UX-006/حزمة ٦] وضع شاشة الحساب **يُشتقّ من المسار**.
    * كان `useState` هنا وفي `LoginView` معًا، فالعنوان لا يتحرّك مع التبديل.
@@ -252,6 +256,12 @@ export default function App() {
   const beforeCalcRef = useRef<AppRoute>('profile')
   useEffect(() => {
     if (view !== 'calc') beforeCalcRef.current = view
+  }, [view])
+  // صفحة 404 لا تعتمد على سجلّ المتصفح غير الموثوق: نحتفظ بآخر مسار تطبيق
+  // صالح، ثم نستبدل المدخل المكسور عند التعافي حتى لا يصنع زر الرجوع حلقة 404.
+  const beforeNotFoundRef = useRef<AppRoute | null>(null)
+  useEffect(() => {
+    if (view !== 'notfound' && view !== 'accountRequired') beforeNotFoundRef.current = view
   }, [view])
 
   // view → hash (نُبقي مسار 404 على hash الخاطئ كما هو حتى لا نطمس الرابط الأصلي).
@@ -385,7 +395,10 @@ export default function App() {
   }
 
   const openQuickLog = (target: QuickLogTarget) => {
-    window.sessionStorage.setItem('qimmah:quick-log-intent', target)
+    setPendingQuickLog(target)
+    // التخزين هنا وسيلة عبور مؤقتة بين شاشتين، لا كتابة منتج ولا سلطة نجاح.
+    // عند حظره يبقى الحدث الحيّ أدناه قادرًا على إيصال النيّة بلا انهيار التنقّل.
+    try { window.sessionStorage.setItem('qimmah:quick-log-intent', target) } catch { /* transient storage unavailable */ }
     if (target === 'routine') {
       navigate('profile')
       window.setTimeout(() => window.dispatchEvent(new CustomEvent('qimmah:quick-log', { detail: target })), 0)
@@ -393,6 +406,15 @@ export default function App() {
     }
     navigate('nutrition')
     window.setTimeout(() => window.dispatchEvent(new CustomEvent('qimmah:quick-log', { detail: target })), 0)
+  }
+
+  const recoverNotFound = (requested: AppRoute) => {
+    const guarded = guardRoute(requested, uid)
+    // `accountRequired` و`notfound` حالتا عرض داخليتان وليستا hash عامًّا.
+    const target: AppRoute = guarded === 'accountRequired' || guarded === 'notfound' ? 'start' : guarded
+    beforeNotFoundRef.current = target
+    setView(target)
+    window.location.replace(`#/${target}`)
   }
 
   // ——— بوابة الإقلاع: أثناء استعادة جلسة المصادقة نعرض حالة تحميل قصيرة (لا شاشة دخول)
@@ -468,11 +490,14 @@ export default function App() {
   } else if (view === 'contact') {
     content = <V.ContactView lang={LANG} onBack={() => window.history.back()} />
   } else if (view === 'notfound') {
-    const goHome = () => {
-      const target = isOnboardingComplete(uid) ? 'dashboard' : 'start'
-      setView(guardRoute(target, uid))
-    }
-    content = <V.NotFoundView lang={LANG} onHome={goHome} onBack={() => window.history.back()} />
+    const safeHome = isOnboardingComplete(uid) ? 'dashboard' : 'start'
+    content = (
+      <V.NotFoundView
+        lang={LANG}
+        onHome={() => recoverNotFound(safeHome)}
+        onBack={() => recoverNotFound(beforeNotFoundRef.current ?? safeHome)}
+      />
+    )
   } else if (view === 'accountRequired') {
     content = (
       <V.AccountRequiredView
@@ -560,7 +585,11 @@ export default function App() {
           )}
           {view === 'nutrition' && (
             <Suspense fallback={<TabSkeleton />}>
-              <V.NutritionView lang={LANG} />
+              <V.NutritionView
+                lang={LANG}
+                quickLogIntent={pendingQuickLog}
+                onQuickLogIntentHandled={clearPendingQuickLog}
+              />
             </Suspense>
           )}
           {view === 'progress' && (
@@ -575,7 +604,12 @@ export default function App() {
           )}
           {view === 'profile' && (
             <Suspense fallback={<TabSkeleton />}>
-              <V.ProfileView lang={LANG} onNavigate={navigate} />
+              <V.ProfileView
+                lang={LANG}
+                onNavigate={navigate}
+                quickLogIntent={pendingQuickLog}
+                onQuickLogIntentHandled={clearPendingQuickLog}
+              />
             </Suspense>
           )}
           {view === 'stats' && (
