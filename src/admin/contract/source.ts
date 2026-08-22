@@ -32,6 +32,7 @@ import type {
   EntitlementSnapshot,
   ErrorsSnapshot,
   ExecutiveSnapshot,
+  JourneySnapshot,
   MetricAvailability,
   MetricValue,
   OnboardingSnapshot,
@@ -156,6 +157,40 @@ function commerceGap(): CommerceSnapshot {
     codesUnused: gapOf('commerce.codesUnused'),
     redemptionFailures24h: gapOf('commerce.redemptionFailures24h'),
     revokedActive: gapOf('commerce.revokedActive'),
+    webhookProcessed: gapOf('commerce.webhookProcessed'),
+    webhookPending: gapOf('commerce.webhookPending'),
+    webhookRetried: gapOf('commerce.webhookRetried'),
+    grantsManual: gapOf('commerce.grantsManual'),
+  }
+}
+
+/**
+ * رحلة الزائر — **كتلة غياب كاملة، ولا يرفعها تطبيق أي هجرة**.
+ *
+ * المرحلتان الأخيرتان (شراء · استحقاق) لهما مصدر حقيقي، والسبع قبلهما لا.
+ * وضعُهنّ في قمع واحد مقصود: القمع الذي يبدأ من «شراء» يُقرأ كأن كل زائر
+ * يشتري، والقمع الذي يعلن سبع مراحل «غير مقيسة» يقول أين ينقطع علمنا بالضبط.
+ */
+function journeyGap(): JourneySnapshot {
+  return {
+    landing: gapOf('journey.landing'),
+    onboardingStarted: gapOf('journey.onboardingStarted'),
+    onboardingCompleted: gapOf('journey.onboardingCompleted'),
+    reveal: gapOf('journey.reveal'),
+    premiumCta: gapOf('journey.premiumCta'),
+    trialCta: gapOf('journey.trialCta'),
+    sallaClick: gapOf('journey.sallaClick'),
+    funnel: [
+      { id: 'landing', labelKey: 'funnel.landing', count: gapOf('journey.landing') },
+      { id: 'onboardingStarted', labelKey: 'funnel.onboardingStarted', count: gapOf('journey.onboardingStarted') },
+      { id: 'onboardingCompleted', labelKey: 'funnel.onboardingCompleted', count: gapOf('journey.onboardingCompleted') },
+      { id: 'reveal', labelKey: 'funnel.reveal', count: gapOf('journey.reveal') },
+      { id: 'premiumCta', labelKey: 'funnel.premiumCta', count: gapOf('journey.premiumCta') },
+      { id: 'trialCta', labelKey: 'funnel.trialCta', count: gapOf('journey.trialCta') },
+      { id: 'sallaClick', labelKey: 'funnel.sallaClick', count: gapOf('journey.sallaClick') },
+      { id: 'purchase', labelKey: 'funnel.purchase', count: gapOf('commerce.ordersPaid') },
+      { id: 'entitlement', labelKey: 'funnel.entitlement', count: gapOf('entitlement.premiumActive') },
+    ],
   }
 }
 
@@ -195,6 +230,7 @@ export async function loadExecutiveSnapshot(): Promise<ExecutiveSnapshot> {
     commerce: commerceGap(),
     errors: errorsGap(),
     onboarding: onboardingGap(),
+    journey: journeyGap(),
     attention: [],
     users_page: gapOf('users.total'),
   }

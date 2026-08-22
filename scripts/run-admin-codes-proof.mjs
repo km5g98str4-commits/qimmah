@@ -285,17 +285,24 @@ await ungatedDb.exec(`
   create or replace function auth.uid() returns uuid language sql stable as $$
     select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $$;
 `)
+// ⚠️ النزع يشمل **كل** هجرة تحمل البوّابة لا هجرتين مسمّاتين: حصرُه بملفّين
+// يجعل التأكيد يشيخ في أوّل هجرة تالية تعيد تعريف دالة بالبوّابة — وقد حدث
+// ذلك فعلًا في `test:admin-db` وسقط باسمه.
+const GATE_RE = /\n\s*perform private\.require_founder\(\);/g
+const gatedFiles = migrationFiles().filter((f) => GATE_RE.test(readMigration(f)) && (GATE_RE.lastIndex = 0) === 0)
 let stripped = 0
 for (const f of migrationFiles()) {
   let sql = readMigration(f)
-  if (f === MIG_DETAIL || f === MIG_CODES) {
-    const before = sql
-    sql = sql.replace(/\n\s*perform private\.require_founder\(\);/g, '\n  -- gate removed by counter-proof')
-    if (sql !== before) stripped += 1
-  }
+  const before = sql
+  sql = sql.replace(GATE_RE, '\n  -- gate removed by counter-proof')
+  if (sql !== before) stripped += 1
   await ungatedDb.exec(sql)
 }
-check('البوّابة نُزعت فعلًا من نسختَي الهجرة', stripped === 2, `${stripped}`)
+check(
+  `البوّابة نُزعت من كل هجرة تحملها (${stripped}/${gatedFiles.length})`,
+  stripped === gatedFiles.length && stripped >= 2,
+  gatedFiles.join(' '),
+)
 await ungatedDb.exec(AUTH_STUB)
 await ungatedDb.exec(`insert into private.identity_pepper (version, pepper) values (1, 'counter-proof-pepper-0123456789ab')`)
 const uNormal = (await ungatedDb.query(`insert into auth.users (email) values ('u@x.test') returning id`)).rows[0].id

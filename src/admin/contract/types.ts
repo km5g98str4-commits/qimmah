@@ -47,7 +47,16 @@ export type RefreshCadence = 'on-load' | '1m' | '5m' | '1h' | 'on-demand'
 export type MetricOwner = 'client' | 'backend' | 'product-decision'
 
 /** المجموعة التي ينتمي إليها المقياس في الواجهة. */
-export type MetricGroup = 'platform' | 'users' | 'activity' | 'entitlement' | 'onboarding' | 'commerce' | 'errors'
+export type MetricGroup =
+  | 'platform'
+  | 'users'
+  | 'activity'
+  | 'entitlement'
+  | 'onboarding'
+  | 'commerce'
+  | 'errors'
+  /** رحلة الزائر قبل الحساب — بلا مصدر بالكامل اليوم (انظر `metrics.ts`). */
+  | 'journey'
 
 /**
  * تعريف مقياس واحد — البند الكامل من الوثيقة. يُقرأ في وقت التشغيل لبناء بطاقة
@@ -264,6 +273,30 @@ export interface CommerceSnapshot {
   readonly codesUnused: MetricValue<number>
   readonly redemptionFailures24h: MetricValue<number>
   readonly revokedActive: MetricValue<number>
+  readonly webhookProcessed: MetricValue<number>
+  readonly webhookPending: MetricValue<number>
+  /** لا عمود إعادة محاولة في الجدول — يبقى غائبًا حتى مع خادم مثالي. */
+  readonly webhookRetried: MetricValue<number>
+  readonly grantsManual: MetricValue<number>
+}
+
+/**
+ * رحلة الزائر — **الكتلة التي لا مصدر لها بالكامل**.
+ *
+ * كل حقل هنا حدثُ عميل لا يغادر الجهاز (`trackLocal()` محلّي). فالكتلة تُعرض
+ * «غير مقيسة» ولا تُحذف: حذفها يجعل القمع يبدأ من «شراء» فيُقرأ كأن كل زائر
+ * يشتري، وتصفيرها يقول «ما دخل أحد» عن شيء لا نقيسه.
+ */
+export interface JourneySnapshot {
+  readonly landing: MetricValue<number>
+  readonly onboardingStarted: MetricValue<number>
+  readonly onboardingCompleted: MetricValue<number>
+  readonly reveal: MetricValue<number>
+  readonly premiumCta: MetricValue<number>
+  readonly trialCta: MetricValue<number>
+  readonly sallaClick: MetricValue<number>
+  /** القمع الكامل: من الهبوط إلى الاستحقاق. مرحلتاه الأخيرتان وحدهما مقيستان. */
+  readonly funnel: readonly FunnelStage[]
 }
 
 /** الأخطاء — لا مصدر واحد منها اليوم؛ الكتلة موجودة كي يبقى العمى مُعلَنًا. */
@@ -296,6 +329,7 @@ export interface ExecutiveSnapshot {
   readonly commerce: CommerceSnapshot
   readonly errors: ErrorsSnapshot
   readonly onboarding: OnboardingSnapshot
+  readonly journey: JourneySnapshot
   readonly attention: readonly AttentionItem[]
   readonly users_page: MetricValue<AdminUserPage>
 }

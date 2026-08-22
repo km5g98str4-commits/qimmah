@@ -267,6 +267,26 @@ export function AdminShell({
             <MetricCard metricId="commerce.codesRedeemed" value={snapshot.commerce.codesRedeemed} />
             <MetricCard metricId="commerce.codesUnused" value={snapshot.commerce.codesUnused} />
             <MetricCard metricId="commerce.redemptionFailures24h" value={snapshot.commerce.redemptionFailures24h} />
+            <MetricCard metricId="commerce.webhookProcessed" value={snapshot.commerce.webhookProcessed} />
+            <MetricCard metricId="commerce.webhookPending" value={snapshot.commerce.webhookPending} />
+            <MetricCard metricId="commerce.webhookRetried" value={snapshot.commerce.webhookRetried} />
+            <MetricCard metricId="commerce.grantsManual" value={snapshot.commerce.grantsManual} />
+          </Section>
+
+          {/*
+            ═══ رحلة الزائر — قسمٌ كل بنوده «غير مقيسة» ═══
+            بقاؤه معروضًا وهو فارغ هو **المقصد**: القمع الذي يبدأ من «شراء»
+            يُقرأ كأن كل زائر يشتري. وهذا القسم يقول أين ينقطع علمنا بالضبط،
+            وأن ما ينقص خطّ أحداث بأكمله لا هجرة تُطبَّق.
+          */}
+          <Section id="journey" icon="Footprints">
+            <MetricCard metricId="journey.landing" value={snapshot.journey.landing} />
+            <MetricCard metricId="journey.onboardingStarted" value={snapshot.journey.onboardingStarted} />
+            <MetricCard metricId="journey.onboardingCompleted" value={snapshot.journey.onboardingCompleted} />
+            <MetricCard metricId="journey.reveal" value={snapshot.journey.reveal} />
+            <MetricCard metricId="journey.premiumCta" value={snapshot.journey.premiumCta} />
+            <MetricCard metricId="journey.trialCta" value={snapshot.journey.trialCta} />
+            <MetricCard metricId="journey.sallaClick" value={snapshot.journey.sallaClick} />
           </Section>
 
           <Section id="funnel" icon="SlidersHorizontal">
@@ -328,6 +348,8 @@ export function AdminShell({
             stages={snapshot.entitlement.activationFunnel}
           />
           <FunnelChart title={t.charts.onboardingFunnel} metricId="users.total" stages={snapshot.onboarding.funnel} />
+          {/* قمع الرحلة الكامل — تسع مراحل، سبعٌ منها بلا مصدر ومعلَنة كذلك. */}
+          <FunnelChart title={t.charts.journeyFunnel} metricId="journey.landing" stages={snapshot.journey.funnel} />
           <TrendChart
             title={t.charts.workoutTrend}
             metricId="activity.workoutsCompleted7d"

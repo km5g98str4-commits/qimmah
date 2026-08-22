@@ -202,10 +202,18 @@ export async function loadLiveExecutiveSnapshot(decision: AdminRoleDecision): Pr
       // ⚠️ **لا مصدر**: لا يُقرأ من الحمولة ولو أُضيف مفتاح بهذا الاسم يومًا.
       redemptionFailures24h: base.commerce.redemptionFailures24h,
       revokedActive: num(e.revokedActive, asOf, base.commerce.revokedActive),
+      webhookProcessed: num(c.webhookProcessed, asOf, base.commerce.webhookProcessed),
+      webhookPending: num(c.webhookPending, asOf, base.commerce.webhookPending),
+      // ⚠️ **لا مصدر**: لا عمود محاولات في الجدول. لا يُقرأ ولو حُشي المفتاح.
+      webhookRetried: base.commerce.webhookRetried,
+      grantsManual: num(c.grantsManual, asOf, base.commerce.grantsManual),
     },
-    // الأخطاء والتخصيص: بلا مسار وبلا مقام غير متحيّز — تبقى كما بناها الغياب.
+    // الأخطاء والتخصيص والرحلة: بلا مسار وبلا مقام غير متحيّز — تبقى كما بناها
+    // الغياب. و**الرحلة تحديدًا لا تُقرأ من الحمولة إطلاقًا**: خطّ الأحداث غير
+    // موجود، فأي مفتاح بهذه الأسماء في ردّ الخادم رقمٌ لا نعرف من أين جاء.
     errors: base.errors,
     onboarding: base.onboarding,
+    journey: base.journey,
   }
 
   return { snapshot, live: 'live' }
