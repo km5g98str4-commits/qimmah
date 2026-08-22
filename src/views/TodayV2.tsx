@@ -248,7 +248,22 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
         {/* ① وين أنا اليوم؟ — التاريخ سياقٌ صغير فوق التحية، والصورة مدخل للملف. */}
         <header className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-sm font-bold text-ink-500">{loc(model.dateLabel)}</p>
+            {/* [R3-UX-BIDI] سطر التاريخ يُصفّ في `flex` من جزأين، ولا يُركَّب نصًّا
+                واحدًا. الفاصل «·» محايد الاتجاه؛ لو بقي داخل النصّ لكان ترتيبه
+                البصري نتيجةَ حلّ المحايدات على جيرانه لا نتيجةَ ما كُتب هنا.
+                بالتصفيف يصير الترتيب البصري = ترتيب الـDOM قطعًا، و`<bdi>` يعزل
+                الجزء الحامل للأرقام فلا يبتلعه أو يقلبه أيّ نصّ يجاوره لاحقًا.
+                والسطر الكامل يُنطَق مرّة واحدة من `dateLabel` — والفاصل مخفيّ عن
+                قارئ الشاشة لأنه علامة تنسيق لا كلمة. */}
+            <p aria-label={loc(model.dateLabel)} className="flex flex-wrap items-baseline gap-x-1.5 text-sm font-bold text-ink-500">
+              <span aria-hidden="true">{loc(model.dateParts.weekday)}</span>
+              {model.dateParts.detail !== '' && (
+                <>
+                  <span aria-hidden="true" className="text-ink-400">·</span>
+                  <bdi aria-hidden="true">{loc(model.dateParts.detail)}</bdi>
+                </>
+              )}
+            </p>
             {/* `h2` لا `h1`: القشرة (`MobileShell`) تملك `h1` الصفحة، وعنوانان من
                 المستوى الأول على شاشة واحدة يكسران شجرة العناوين لقارئ الشاشة. */}
             <h2 className="mt-0.5 truncate text-3xl font-black leading-tight tracking-tight">{loc(model.greeting)}</h2>

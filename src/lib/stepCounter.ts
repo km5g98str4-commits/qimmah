@@ -2,7 +2,8 @@
 // كل القيم تهبط في المتجر نفسه لكل يوم، مع حفظ المصدر بوضوح.
 
 import { getDayStamp } from './today'
-import { safeWriteJson } from '@/lib/safeStorage'
+import { safeWriteJson, type WriteResult } from '@/lib/safeStorage'
+import { isNativePlatform } from '@/lib/pwa'
 
 export const STEP_LOG_KEY = 'qimmah:steps:v1'
 export const STEP_SOURCE_KEY = 'qimmah:stepSource:v1'
@@ -199,6 +200,90 @@ export function registerStepBridge(): void {
     version: 1,
     ingest: ingestExternalSteps,
   }
+}
+
+// ===== [R3-UX-STEPS] الإدخال اليدوي الصادق =====
+
+/**
+ * حدث تغيّر الخطوات — تلتقطه كل الأسطح فتعيد القراءة من المصدر الواحد.
+ * كان يُطلقه `healthKit` وحده، فكانت كتابة يدوية في سطح لا تظهر في سطح آخر
+ * إلا بإعادة تركيبه. الآن يُطلق من نقطة الكتابة نفسها فيسري على كل كاتب.
+ */
+export const STEPS_UPDATED_EVENT = 'qimmah:steps-updated'
+
+function announceStepsChanged(): void {
+  if (typeof window === 'undefined') return
+  try {
+    window.dispatchEvent(new CustomEvent(STEPS_UPDATED_EVENT))
+  } catch {
+    // بيئة بلا CustomEvent (اختبار عقدي) — الكتابة تمّت، والإعلان زينة.
+  }
+}
+
+/**
+ * كيف تصل الخطوات إلى قِمّة على **هذه** المنصّة — [R3-UX-STEPS].
+ *
+ * ═══ لماذا هذا التمييز موجود أصلًا ═══
+ * جسر `window.QimmahSteps` مسجَّل في كل بيئة (`main.tsx`)، لكن **لا أحد يدفع
+ * فيه شيئًا في المتصفّح**: قراءة HealthKit تعيش في plugin أصلي لا وجود له في
+ * بناء الويب. فوجود الجسر ليس دليل تتبّع تلقائي — وأي نصّ يقول «نتتبّع خطواتك»
+ * في الويب يَعِد بما لا يحدث (§5).
+ *
+ *   • `'manual-only'` — بناء الويب: لا مصدر تلقائي إطلاقًا. ما يكتبه المستخدم
+ *     هو كلّ ما نعرفه، ونقولها له صراحةً.
+ *   • `'bridge-available'` — الغلاف الأصلي: الجسر **قد** يدفع مجاميع Apple
+ *     Health إن ربطها المستخدم من الإعدادات. «قد» لا «سوف»: الربط قراره،
+ *     وiOS لا يكشف الرفض أصلًا (انظر عقد الصدق في `healthKit.ts`).
+ */
+export type StepEntryMode = 'manual-only' | 'bridge-available'
+
+export function stepEntryMode(): StepEntryMode {
+  return isNativePlatform() ? 'bridge-available' : 'manual-only'
+}
+
+/** نتيجة كتابة يدوية — الرقم المحفوظ **ونتيجة التخزين** معًا. */
+export interface StepWriteResult {
+  /** `true` فقط حين وصلت البيانات التخزين فعلًا. */
+  ok: boolean
+  /** سبب الفشل حين `ok === false` — للرسالة الصادقة لا للسجلّ فقط. */
+  reason: WriteResult
+  /** القيمة بعد القصّ — ما سيُقرأ لاحقًا إن نجحت الكتابة. */
+  steps: number
+}
+
+/**
+ * كتابة يدوية **تُفصح عن فشلها** — [R3-UX-STEPS] · §5.
+ *
+ * `setSteps` تُرجع الرقم وحده وتبتلع نتيجة التخزين، فتستطيع واجهةٌ أن تعرض
+ * «تم الحفظ» على كتابة لم تقع (حصّة ممتلئة · تخزين محجوب). هذه الدالة تُرجع
+ * النتيجتين معًا فلا تملك الواجهة عذرًا لادّعاء نجاح.
+ *
+ * تكتب السجلّ ثم المصدر، وتُبلّغ فشل **أيّهما** — فسجلّ بلا مصدره حالة ناقصة.
+ */
+export function writeSteps(steps: number, date = getDayStamp(), source: StepSource = DEFAULT_SOURCE): StepWriteResult {
+  const log = loadStepLog()
+  const sources = loadSourceLog()
+  const value = clampSteps(steps)
+  if (value <= 0) {
+    delete log[date]
+    delete sources[date]
+  } else {
+    log[date] = value
+    sources[date] = normalizeSource(source)
+  }
+  const logResult = safeWriteJson(STEP_LOG_KEY, log)
+  const sourceResult = safeWriteJson(STEP_SOURCE_KEY, sources)
+  const failed = logResult !== 'ok' ? logResult : sourceResult
+  if (failed === 'ok') announceStepsChanged()
+  return { ok: failed === 'ok', reason: failed, steps: value }
+}
+
+/** كتابة الهدف اليومي بنفس عقد الصدق. */
+export function writeStepGoal(goal: number): StepWriteResult {
+  const value = clampGoal(goal)
+  const result = safeWriteJson(STEP_GOAL_KEY, value)
+  if (result === 'ok') announceStepsChanged()
+  return { ok: result === 'ok', reason: result, steps: value }
 }
 
 /** آخر ٧ أيام (الأقدم → الأحدث) للرسم المصغّر؛ الأيام بلا تسجيل = 0. */

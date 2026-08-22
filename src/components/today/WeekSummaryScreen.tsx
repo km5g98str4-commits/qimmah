@@ -70,13 +70,13 @@ export function WeekSummaryScreen({ lang, stats, weightKg, showAccountOffer, onC
           <section aria-labelledby="week-account" className="rounded-3xl border border-line bg-surface p-4 shadow-card">
             <h2 id="week-account" className="text-base font-black">{t.weekAccountTitle}</h2>
             <p className="mt-1.5 text-sm leading-relaxed text-ink-500">{t.weekAccountBody}</p>
-            <button type="button" onClick={onCreateAccount} className="btn-primary mt-3 w-full py-3">
+            <button type="button" onClick={onCreateAccount} className="btn-primary tap-target mt-3 w-full py-3">
               {t.weekAccountCta}
             </button>
           </section>
         )}
 
-        <button type="button" onClick={onClose} className="w-full rounded-2xl border border-line bg-surface py-3 text-center text-sm font-bold text-ink-700">
+        <button type="button" onClick={onClose} className="tap-target w-full rounded-2xl border border-line bg-surface py-3 text-center text-sm font-bold text-ink-700">
           {t.weekClose}
         </button>
       </div>

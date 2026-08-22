@@ -69,7 +69,7 @@ export function FirstWinCard({ lang, suggestion, done, doneKind, warmupMinutes, 
       <button
         type="button"
         onClick={() => onPick(primary)}
-        className="v2-pressable mt-4 flex w-full items-center gap-3 rounded-2xl border border-line bg-page p-3.5 text-start transition-colors hover:border-primary/50"
+        className="v2-pressable tap-target mt-4 flex w-full items-center gap-3 rounded-2xl border border-line bg-page p-3.5 text-start transition-colors hover:border-primary/50"
       >
         <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary-soft">
           <Icon name={WIN_ICON[primary]} className="h-5 w-5 text-primary-c" />
