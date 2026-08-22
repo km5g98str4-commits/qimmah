@@ -92,6 +92,11 @@ branches are read-only.
   privacy-minimized user data, one-screen information architecture, and a
   browser/security test plan. No route, live provider, backend, or product
   behavior was added.
+- Prepared a time-boxed Founder Morning QA template covering artifact identity,
+  Arabic Preview, save honesty, returning/interrupted state, exercise recovery,
+  English/auth, executive denial, and the seven verdicts. It remains
+  `PREPARED_NOT_EXECUTABLE` until the accepted candidate and passed evidence fill
+  every field.
 
 ## In Progress
 

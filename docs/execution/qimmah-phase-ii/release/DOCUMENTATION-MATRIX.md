@@ -43,10 +43,13 @@ deployment authorization.
 | `release/SOURCE-OF-TRUTH.md` | `CURRENT-PHASE-II` | Exact refs, ancestry, PR inventory, and CI truth. |
 | `release/FINAL-HEAD-REBIND-RUNBOOK.md` | `CURRENT-PHASE-II` | Future rebase without force-pushing published checkpoints. |
 | `release/DEPENDENCY-RISK.md` | `CURRENT-PHASE-II` | Exact baseline npm advisory reachability and deferred remediation. |
+| `release/RELEASE-CONVERGENCE-PLAN.md` | `CURRENT-PHASE-II` | Persona, attack, evidence, and verdict contract awaiting the accepted artifact. |
+| `release/PRODUCTION-CHECKLIST.md` | `CURRENT-PHASE-II` | Continuously updated evidence checklist; unchecked items remain hard stops. |
+| `release/RELEASE-NOTES-TEMPLATE.md` | `CURRENT-PHASE-II` | Evidence-bound bilingual release-note contract, explicitly unreleased. |
+| `release/FOUNDER-MORNING-QA-TEMPLATE.md` | `CURRENT-PHASE-II` | Prepared 10–15 minute device path; not executable until final evidence fills it. |
+| Food contract package on `c/phase-ii-food-production-002` | `CURRENT-PHASE-II` | Canonical contract, source ledger, status, and adversarial test plan. |
 | Exercise contract package on `h/phase-ii-exercise-production-002` | `CURRENT-PHASE-II` | Review-led exercise data/media contract and counter-proof plan. |
-
-Food and Executive packages are in independent gap analysis and are not marked
-current until their first commits are pushed.
+| Executive contract package on `e/phase-ii-executive-dashboard-002` | `CURRENT-PHASE-II` | Fail-closed access/data architecture and future browser/security test plan. |
 
 ## Quarantined documents found remotely
 
@@ -66,12 +69,12 @@ contain unaccepted Web history.
 
 | Deliverable | Current class | Completion rule |
 | --- | --- | --- |
-| Final release convergence persona/evidence matrix | `MISSING` on the isolated branch | Define exact journeys now; execute only against accepted built SHA. |
-| Current release notes | `MISSING` | Generate from the eventual accepted range, distinguish product changes from operations, and cite exact commits. |
-| Phase II production checklist | `MISSING` | Union only current food/media/admin/release gates; no historical branch identities. |
-| 10–15 minute founder checklist | `QUARANTINED` only | Reconcile after final evidence; every expected state tied to the accepted build label. |
+| Final release convergence persona/evidence matrix | `CURRENT-PHASE-II / EXECUTION_BLOCKED` | Execute only against the founder-accepted built SHA. |
+| Current release notes | `CURRENT-PHASE-II / TEMPLATE_ONLY` | Generate from the eventual accepted range, distinguish product changes from operations, and cite exact commits. |
+| Phase II production checklist | `CURRENT-PHASE-II / CONTINUOUS` | Freeze only after the candidate and evidence bundle are immutable. |
+| 10–15 minute founder checklist | `CURRENT-PHASE-II / PREPARED_NOT_EXECUTABLE` | Fill only from final passed evidence; every expected state must remain tied to the accepted build label. |
 | Food rollback/data-version procedure | `MISSING` | Define immutable dataset version, checksums, activation pointer, and reversible rollback without production execution. |
-| Exercise media rollback/version procedure | `MISSING` | Define manifest version, asset checksum set, reviewer ledger, and fallback behavior. |
+| Exercise media rollback/version procedure | `CURRENT-PHASE-II` | Runbook exists on the exercise lane; activation remains unperformed. |
 | Executive dashboard live-data handoff | `EXTERNAL-EVIDENCE` | Requires reviewed admin role/read endpoints and metric source ownership. |
 | Deployment target truth | `EXTERNAL-EVIDENCE` | Founder/Cloudflare owner provides current projects, branches, build outputs, domains, and deployment triggers. |
 
@@ -96,8 +99,8 @@ or push as potentially deployment-triggering and performs neither.
 
 ## Next documentation actions
 
-1. Build the isolated persona/evidence matrix without declaring any GO.
-2. Prepare versioned food and media rollback procedures from their contracts.
+1. Prepare the versioned food rollback procedure from its canonical contract.
+2. Maintain the Phase II test-change ledger as executable proofs land.
 3. Keep the existing baseline runbooks referenced, not copied.
 4. After final-HEAD acceptance, reconcile one authoritative release runbook,
    production checklist, release-notes file, and founder checklist.

@@ -162,6 +162,7 @@ Blocking references: `WS-PACKAGE-LOCK-001` and external backend owner evidence.
 - [ ] Current release notes generated from accepted commit range.
 - [ ] Phase II test-change ledger completed.
 - [ ] Final production checklist frozen to an exact candidate SHA.
+- [x] 10–15 minute founder checklist structure prepared with hard-stop rules and evidence bindings.
 - [ ] 10–15 minute founder checklist generated from passed evidence.
 - [ ] No deployment executed by Phase II.
 
