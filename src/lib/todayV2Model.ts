@@ -17,7 +17,7 @@ import { getSteps, loadStepGoal } from '@/lib/stepCounter'
 import { getNutritionLog, getWorkoutSessions } from '@/lib/historyStore'
 import { todaysCompletion } from '@/lib/workoutSessionEngine'
 import { getDayStamp, weekdayName } from '@/lib/today'
-import { estimateDurationMin } from '@/lib/workoutStats'
+import { estimateSessionMinutes } from '@/lib/workoutStats'
 import { buildWarmupPlan } from '@/lib/warmupPlan'
 import { loadOnboardingProfile } from '@/lib/onboardingProfile'
 
@@ -201,12 +201,17 @@ export function buildTodayV2Model(customization: Customization, lang: Lang, user
    * **جلسة اليوم نفسها** لا تفضيل المستخدم العام: التفضيل يصف ما يريده أسبوعيًا،
    * والرقم المعروض يصف ما سيفعله الآن. ويبقى التفضيل مرجّحًا إن تعذّر التقدير.
    */
-  const estimated = estimateDurationMin(day)
+  // الإحماء يُبنى من تمارين **هذا اليوم** — لا من قائمة عامّة، ولا رقمًا مكتوبًا.
+  // ويُحسب **قبل** التقدير لأنه جزء منه: الجلسة تشمل إحماءها.
+  const warmupMinutes = workoutAvailable ? buildWarmupPlan(day).estMinutes : 0
+  const estimated = estimateSessionMinutes(day, warmupMinutes > 0 ? { warmupMin: warmupMinutes } : {})
   const durationMin = estimated > 0
     ? estimated
     : customization.profile.workoutDuration > 0 ? customization.profile.workoutDuration : 0
-  // الإحماء يُبنى من تمارين **هذا اليوم** — لا من قائمة عامّة، ولا رقمًا مكتوبًا.
-  const warmupMinutes = workoutAvailable ? buildWarmupPlan(day).estMinutes : 0
+  // ملاحظة: `compareSessionDuration` متاحة في `workoutStats` لعرض الفرق بين
+  // التفضيل الأسبوعي وجلسة اليوم كسطر تفسيري. لم تُركَّب هنا لأن التناقض الذي
+  // استدعاها **زال من أصله**: كل السطوح تحسب من مقدِّر واحد، فلا رقمان متنازعان
+  // يحتاجان شرحًا. تُركَّب حين يُراد الشرح لا حين يُراد رفع التناقض.
   // (P5) الاكتمال الصادق بدل «أي finishedAt»: جلسة completed فقط تُكمل اليوم؛
   // الإنهاء المبكر (ended_early) = جزئي — لا يقلب الحالة إلى afterWorkout، ويظهر
   // كتقدّم حقيقي على عمود التدريب. الجلسات القديمة بلا status تبقى completed.

@@ -45,11 +45,12 @@ check('`workoutStats` يملك الصيغة الحقيقية (مجموعات × 
   /export function estimateDurationMin/.test(stats) && /restSec/.test(stats))
 
 const builder = code(read('src/features/customPlan/builder.ts'))
-check('باني الخطة المخصّصة يستدعي الحسّاب المركزي', /estimateDurationMin/.test(builder))
+check('باني الخطة المخصّصة يعيد تصدير الحسّاب المركزي لا نسخةً ثالثة',
+  /from '@\/lib\/workoutStats'/.test(builder) && /export \{ estimateSessionMinutes \}/.test(builder))
 check('② ولا يحمل التقدير الثاني بعد اليوم', !NINE_MIN.test(builder), 'نمط «٩ دقائق/تمرين» غائب')
 
 const today = code(read('src/lib/todayV2Model.ts'))
-check('الرئيسية تستدعي الحسّاب المركزي', /estimateDurationMin/.test(today))
+check('الرئيسية تستدعي الحسّاب المركزي', /estimateSessionMinutes|estimateDurationMin/.test(today))
 check('  ولا تحمل تقديرًا ثانيًا', !NINE_MIN.test(today))
 
 console.log('\n③ المُعلَنة تبقى ميزانيةً لا تقديرَ جلسة')
@@ -66,7 +67,7 @@ check('`WorkoutV2` بلا مستورد في قشرة التطبيق — فتقد
   !/WorkoutV2/.test(app), 'توأم ميت موثَّق')
 
 console.log('\n⟲ التأكيد المضادّ — الفحص ليس فارغًا')
-const revived = builder.replace('estimateDurationMin(day)', 'Math.max(20, Math.round((day.exercises.length * 9) / 5) * 5)')
+const revived = builder.replace('export { estimateSessionMinutes }', 'export function estimateSessionMinutes(day) { return Math.max(20, Math.round((day.exercises.length * 9) / 5) * 5) }')
 check('⟲ إعادة «٩ دقائق/تمرين» إلى الباني تُلتقَط بالنمط نفسه',
   NINE_MIN.test(revived) && !NINE_MIN.test(builder))
 
