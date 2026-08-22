@@ -18,6 +18,7 @@ import { DailyRingsCard } from '@/components/today/DailyRingsCard'
 import { NextActionCard } from '@/components/today/NextActionCard'
 import { QuickActions } from '@/components/today/QuickActions'
 import { WaterCard } from '@/components/today/WaterCard'
+import { StepsCard } from '@/components/today/StepsCard'
 import { WeeklyPulseCard } from '@/components/today/WeeklyPulseCard'
 import { FirstWinCard } from '@/components/today/FirstWinCard'
 import { NotifyAskSheet } from '@/components/today/NotifyAskSheet'
@@ -365,6 +366,12 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
 
         {/* ④ كيف ماشي معي؟ */}
         <WaterCard lang={lang} consumedMl={dayLog.waterMl} targetMl={waterTargetMl} onAdd={addWater} />
+
+        {/* [R4-UX-STEPS] الخطوات تُكتب هنا لا في مكان آخر. `StepsView` تعرض ثم
+            تحيل إلى الإعدادات، وزرّها «حدّث من Apple Health» لا يفعل شيئًا في
+            المتصفّح — فبناء الويب بلا قارئ عدّاد أصلًا. من غير هذه البطاقة لا
+            يملك مستخدم الويب طريقًا واحدًا لإدخال رقمه. */}
+        <StepsCard lang={lang} onOpenDetail={() => onNavigate('steps')} />
 
         <QuickActions
           lang={lang}
