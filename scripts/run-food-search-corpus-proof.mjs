@@ -32,10 +32,27 @@ const SEARCH = resolve(FOOD, 'search')
 // ══ §٠ — الأصول موجودة على القرص؟ لا ادّعاء بلا ملف. ══
 let directory = null
 try { directory = JSON.parse(readFileSync(resolve(SEARCH, 'directory.json'), 'utf8')) } catch { /* غائب */ }
+// ═══ الأصول غائبة: تبعية نشر، لا عطل كود — ونفس معاملة `run-food-longtail-proof` ═══
+//
+// حزم البحث مشتقّة من `public/food/shards/` وكلاهما خارج git (٤٦ + ٨٢ ميغابايت).
+// فعلى نسخة نظيفة لا وجود لهما. والحكم حينها **ليس** «سقط الإثبات» بل: هل يتدهور
+// التطبيق بصدق؟ يبقى أخضر بشرط واحد — أن يعلن الغياب لا أن يبتلعه.
+//
+// ⚠️ **وهذا الفرع ثغرة محتملة بطبعه:** بوّابة تخضرّ أبدًا لأن الأصول غائبة أبدًا
+// لا تحرس شيئًا. حراسة **وجود** الأصول شأن `test:artifact-freshness` ومسار
+// النشر، لا شأن هذا الملف — ويُسمّى هنا كي لا يُنسى.
 if (!directory) {
-  console.log('✗ `public/food/search/directory.json` غائب.')
-  console.log('  أعِد التصدير: node scripts/food-production/emit-search-buckets.mjs')
-  process.exit(1)
+  const { Catalog: C } = await loadTsModule('src/lib/food/catalog/catalog.ts')
+  const { createMemoryCache: mem } = await loadTsModule('src/lib/food/catalog/idbCache.ts')
+  const bare = await C.create({ fetchText: async () => null, cache: mem() })
+  await bare.init()
+  await bare.searchRanked('kinder', { deep: true })
+  const a = bare.longTailAvailability()
+  const honest = a.verdict === 'unavailable' && a.corpusRecords === 0
+  console.log('⚠️  `public/food/search/` غائب — لم تُقَس التغطية في هذا التشغيل.')
+  console.log('   أنتجه: node scripts/food-production/emit-search-buckets.mjs (يتطلّب public/food/shards/)')
+  console.log(`${honest ? '✓' : '✗'} وفي غيابه يتدهور التطبيق بصدق: verdict=${a.verdict} · حزم=${a.corpusRecords}`)
+  process.exit(honest ? 0 : 1)
 }
 const corpusManifest = JSON.parse(readFileSync(resolve(SEARCH, 'manifest.json'), 'utf8'))
 const shardManifest = JSON.parse(readFileSync(resolve(FOOD, 'manifest.json'), 'utf8'))
