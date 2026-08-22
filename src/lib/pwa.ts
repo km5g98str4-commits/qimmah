@@ -24,6 +24,15 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 let deferredPrompt: BeforeInstallPromptEvent | null = null
+/**
+ * هل أطلق المتصفّح `beforeinstallprompt` في هذه الجلسة **ولو استُهلك بعدها**؟
+ *
+ * التمييز ليس تفصيلًا: `deferredPrompt === null` تجمع حالتين مختلفتين تمامًا —
+ * «متصفّح لا يدعم التثبيت أصلًا» و«دعمه وفتح المستخدم المربّع ثم أغلقه». الأولى
+ * يجب أن تصمت، والثانية يجب أن تقول مسار قائمة المتصفّح؛ فلا مربّع ثانٍ في هذه
+ * الجلسة. بلا هذا العلم تصير الحالتان زرَّ «ثبّت» واحدًا، وأحدهما ميّت.
+ */
+let promptFired = false
 const listeners = new Set<() => void>()
 
 function notify(): void {
@@ -35,6 +44,7 @@ if (typeof window !== 'undefined') {
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault() // نمنع الشريط الافتراضي لنعرض زرّنا المخصّص وقت ما نشاء.
     deferredPrompt = e as BeforeInstallPromptEvent
+    promptFired = true
     notify()
   })
   window.addEventListener('appinstalled', () => {
@@ -74,18 +84,42 @@ export function canPromptInstall(): boolean {
   return !isNativePlatform() && deferredPrompt !== null
 }
 
-/** يُطلق مربّع تثبيت المتصفح الأصلي؛ يُعيد true إذا قبل المستخدم. */
-export async function promptInstall(): Promise<boolean> {
-  if (!deferredPrompt) return false
+/**
+ * هل أطلق المتصفّح حدث التثبيت في هذه الجلسة؟ (يبقى `true` بعد استهلاك المربّع)
+ * تستعمله دعوة التثبيت لتفرّق بين «لا مسار تثبيت هنا» و«المسار قائم لكن المربّع
+ * لا يُعاد فتحه» — انظر `installInviteKind`.
+ */
+export function installPromptFired(): boolean {
+  return !isNativePlatform() && promptFired
+}
+
+/**
+ * نتيجة محاولة التثبيت **بثلاث حالات لا اثنتين**.
+ *
+ * `promptInstall` تُرجع `false` لثلاثة أسباب مختلفة (لا مربّع · رفض المستخدم ·
+ * عطل)، فتعجز الواجهة عن قول الصدق: «ما ظهر لك مربّع؟» تختلف عن «أغلقت المربّع».
+ */
+export type InstallOutcome = 'accepted' | 'dismissed' | 'unavailable'
+
+export async function promptInstallOutcome(): Promise<InstallOutcome> {
+  if (!deferredPrompt) return 'unavailable'
   try {
     await deferredPrompt.prompt()
     const { outcome } = await deferredPrompt.userChoice
     deferredPrompt = null
     notify()
-    return outcome === 'accepted'
+    return outcome === 'accepted' ? 'accepted' : 'dismissed'
   } catch {
-    return false
+    // المربّع لم يُفتح (سياسة تفاعل، حدث بائت) — لا نزعم رفضًا لم يقع.
+    deferredPrompt = null
+    notify()
+    return 'unavailable'
   }
+}
+
+/** يُطلق مربّع تثبيت المتصفح الأصلي؛ يُعيد true إذا قبل المستخدم. */
+export async function promptInstall(): Promise<boolean> {
+  return (await promptInstallOutcome()) === 'accepted'
 }
 
 // —— التنبيهات ——

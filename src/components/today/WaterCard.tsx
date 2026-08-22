@@ -79,6 +79,7 @@ export function WaterCard({
           type="button"
           onClick={add}
           aria-label={d.waterAdd}
+          data-testid="water-add"
           className="v2-pressable grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary-soft text-[color:var(--c-primary)]"
         >
           <Icon name="Plus" className="h-5 w-5" strokeWidth={3} />

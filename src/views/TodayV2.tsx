@@ -18,8 +18,10 @@ import { DailyRingsCard } from '@/components/today/DailyRingsCard'
 import { NextActionCard } from '@/components/today/NextActionCard'
 import { QuickActions } from '@/components/today/QuickActions'
 import { WaterCard } from '@/components/today/WaterCard'
+import { StepsCard } from '@/components/today/StepsCard'
 import { WeeklyPulseCard } from '@/components/today/WeeklyPulseCard'
 import { FirstWinCard } from '@/components/today/FirstWinCard'
+import { FirstDayCard } from '@/components/today/FirstDayCard'
 import { NotifyAskSheet } from '@/components/today/NotifyAskSheet'
 import { MissedDayCard } from '@/components/today/MissedDayCard'
 import { WeekSummaryScreen } from '@/components/today/WeekSummaryScreen'
@@ -318,8 +320,13 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
           />
         )}
 
-        {/* ② وش يهمّني الحين؟ — الحلقات لصاحب الأرقام، وبطاقة إعداد للقادم الجديد. */}
-        {!showRings ? (
+        {/* ② وش يهمّني الحين؟ — ثلاث حالات لا اثنتان:
+            القادم الجديد بلا أي إشارة يرى **شرح اليوم الأول** (وش متوقّع منه ·
+            وش يسوي · وش تعني الأرقام قبل ظهورها). ومن له أرقام بلا أهداف محسوبة
+            يرى بطاقة الإعداد. ومن له أهداف يرى حلقاته. */}
+        {blankSlate ? (
+          <FirstDayCard lang={lang} cards={model.cards} onOpenCard={openCard} />
+        ) : !showRings ? (
           <section aria-labelledby="today-setup-title" className="rounded-3xl border border-line bg-surface p-4 shadow-card">
             <h2 id="today-setup-title" className="text-lg font-black">{d.noTargetsTitle}</h2>
             <p className="mt-1 text-base leading-relaxed text-ink-500">{d.noTargetsBody}</p>
@@ -365,6 +372,12 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
 
         {/* ④ كيف ماشي معي؟ */}
         <WaterCard lang={lang} consumedMl={dayLog.waterMl} targetMl={waterTargetMl} onAdd={addWater} />
+
+        {/* [R4-UX-STEPS] الخطوات تُكتب هنا لا في مكان آخر. `StepsView` تعرض ثم
+            تحيل إلى الإعدادات، وزرّها «حدّث من Apple Health» لا يفعل شيئًا في
+            المتصفّح — فبناء الويب بلا قارئ عدّاد أصلًا. من غير هذه البطاقة لا
+            يملك مستخدم الويب طريقًا واحدًا لإدخال رقمه. */}
+        <StepsCard lang={lang} onOpenDetail={() => onNavigate('steps')} />
 
         <QuickActions
           lang={lang}

@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Icon } from './Icon'
-import { InstallBanner } from './InstallBanner'
+import { InstallInvite } from './today/InstallInvite'
 import { StateBlock } from './StateBlock'
 import { useOnlineStatus } from '@/lib/useOnlineStatus'
 import { cn } from '@/lib/cn'
@@ -256,8 +256,11 @@ export function MobileShell({ lang, tab, badge: _badge, onNavigate, onOpenSettin
           </div>
         )}
 
-        {/* شريط تثبيت التطبيق — قابل للإغلاق، يظهر فقط عند الحاجة */}
-        <InstallBanner lang={lang} onOpenSettings={onOpenSettings} />
+        {/* [R4-UX-INSTALL] دعوة التثبيت — في تدفّق القشرة لا فوقها، ولكل حالة
+            فعلٌ حقيقي. حلّت محلّ `InstallBanner` لعطلين مقيسين: زرّ «ثبّت» على
+            آيفون بلا مربّع أصلي يفتحه، وإغلاقٌ أبدي بلا زمن. الملف القديم يبقى
+            كما هو — حذفه يخصّ موجة تنظيف الكود الميت المستقلّة (§11). */}
+        <InstallInvite lang={lang} onOpenGuide={onOpenSettings} />
 
         {/* المحتوى — هدف رابط التخطّي؛ حشوة سفلية واعية بمنطقة الأمان فلا يُحجب المحتوى خلف الشريط. */}
         <main

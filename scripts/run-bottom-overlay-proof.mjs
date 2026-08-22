@@ -117,10 +117,17 @@ check(
 )
 
 // ٢) الوظيفة لم تُحذف: النسخة الصحيحة داخل مسار القشرة، لا فوقها.
-check('دعوة التثبيت ما زالت مركَّبة داخل القشرة', shell.includes('<InstallBanner'))
+//
+// [R4-UX-INSTALL] الفحص كان يسمّي `InstallBanner` وحده، فكان يحرس **اسمًا** لا
+// بنية: أي بديل أصدق يُسقط البوابة، وأي بديل أسوأ يمرّ ما دام الاسم باقيًا.
+// الآن: تُستخرج دعوة التثبيت المركَّبة فعلًا من القشرة، ويُفحص **ملفّها هي**.
+const MOUNTED_INVITES = ['InstallInvite', 'InstallBanner']
+const mountedInvite = MOUNTED_INVITES.find((name) => shell.includes(`<${name}`)) ?? null
+check(`دعوة التثبيت ما زالت مركَّبة داخل القشرة${mountedInvite ? ` (${mountedInvite})` : ''}`, mountedInvite !== null)
+const invitePath = mountedInvite === 'InstallInvite' ? 'src/components/today/InstallInvite.tsx' : 'src/components/InstallBanner.tsx'
 check(
   'شريط القشرة في التدفّق لا ثابتًا (لا يمكنه بنيويًا أن يعلو التنقّل)',
-  !declaresBottomOverlay(read('src/components/InstallBanner.tsx')),
+  mountedInvite !== null && !declaresBottomOverlay(read(invitePath)),
 )
 check('دليل التثبيت الدائم باقٍ في الإعدادات', read('src/views/SettingsView.tsx').includes('InstallGuideSection'))
 
@@ -129,6 +136,14 @@ check('سبب استبعاد الشريط الثابت مكتوب في رأس م
 
 // ٤) شريط التنقّل ما زال في تدفّق القشرة (لا يُنقل إلى fixed سرًّا).
 check('شريط التنقّل في مسار القشرة', shell.includes('شريط التنقّل السفلي في مسار القشرة') && /<nav\b[\s\S]{0,240}?relative z-50/.test(shell))
+
+// [R4-UX-INSTALL] محاكاة الالتفاف على الفحص ٢: دعوة تثبيت تُعلن سطحًا سفليًّا
+// ثابتًا يجب أن **تسقط باسمها** ولو كانت مركَّبة في القشرة. الاسم وحده لا يشفع.
+{
+  const attackedInvite = read(invitePath).replace('className="flex flex-wrap', 'className="fixed inset-x-0 bottom-0 z-[60] flex flex-wrap')
+  if (attackedInvite === read(invitePath)) throw new Error('FAIL: محاكاة دعوة التثبيت لم تُغيّر شيئًا — الإثبات معطوب')
+  check('محاكاة الالتفاف: دعوة تثبيت ثابتة في القاع تُكتشف باسمها', declaresBottomOverlay(attackedInvite))
+}
 
 // ————————————————— محاكاة الالتفاف (الميثاق §4.2) —————————————————
 // إحكامٌ لم يُهاجَم لا يُقبل. نُعيد تركيب الشريط الثابت في نسخة **مُصطنَعة** من
