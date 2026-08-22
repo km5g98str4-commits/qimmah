@@ -120,16 +120,22 @@
 - `build_id`:
   `7bfe4cc245e45ce4d152f0b2956ab8f7e0cece71d95b6d27f63165f709c58ebe`؛
   بصمة build manifest:
-  `555399cc0538b15500396fe8acff65f1300e4e83dd6d4e71aff409512cedb926`.
+  `61f9f69b72e05136ac157fd8389230f477f9d471e17f93d12336cd3a304b229b`.
 
 ### التحقق المنفذ
 
 - بُنيت النواة مرتين إلى مجلدين مؤقتين مختلفين؛ `diff -qr` لم يُخرج أي فرق،
   وكان `build_id` وبصمة manifest متطابقين في المرتين.
 - `node scripts/food-production/validate-pkg-001.mjs`: `PASS` — خمسة آثار تحققت
-  بالبصمة والحجم والعدد، و55/55 سجلًا اجتاز `CanonicalFoodV1`.
-- `node scripts/food-production/run-data-1a-proof.mjs`: `PASS` — 18/18، وتشمل
+  بالبصمة والحجم والعدد، و55/55 سجلًا اجتاز `CanonicalFoodV1`. يعيد المدقق حساب
+  `build_id`، ويثبت baseline/source/schema/release identity في envelope وmanifest
+  والآثار، ويرفض قبل القراءة أي مسار مطلق أو backslash أو NUL أو dot segment أو
+  resolved escape، ويطلب مجموعة الآثار الخمسة exact وفريدة.
+- `node scripts/food-production/run-data-1a-proof.mjs`: `PASS` — 25/25، وتشمل
   طفرات GTIN/check digit، GTIN صالح مكرر، provenance غائب، مغذٍ سالب، صف قصير،
-  schema drift، بصمة مدخل مختلفة، ومنع دمج GTINين مختلفين متشابهين نصيًا.
+  schema drift، بصمة مدخل مختلفة، ومنع دمج GTINين مختلفين متشابهين نصيًا، وست
+  طفرات إحكام تسقط بالأسماء `BUILD_ID_DRIFT` و`ARTIFACT_PATH_SCOPE`
+  و`ARTIFACT_SET_DRIFT` و`RELEASE_STATUS_DRIFT` و`BASELINE_IDENTITY_DRIFT`
+  و`ARTIFACT_COUNT_DRIFT`، بلا قبول سقوط تقني عارض.
 - `npm run typecheck`: `PASS` — `tsc -b --noEmit`.
 - `npm run lint`: `PASS` — صفر تحذيرات وفق `--max-warnings 0`.

@@ -17,6 +17,7 @@ import {
   sha256,
 } from './lib/canonical-food-v1.mjs'
 import { assertSupportedSchema, validateJsonSchema } from './lib/json-schema.mjs'
+import { computeBuildId } from './lib/pkg-001-validation.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 
@@ -27,7 +28,6 @@ function arg(name, fallback) {
 
 const sourcePath = resolve(ROOT, arg('--source', SOURCE_PATH))
 const outputRoot = resolve(ROOT, arg('--out-root', 'data/food-production'))
-const baselineCommit = arg('--baseline', BASELINE_COMMIT)
 const sourceBytes = readFileSync(sourcePath)
 const sourceObject = JSON.parse(sourceBytes.toString('utf8'))
 const schemaPath = resolve(ROOT, SCHEMA_PATH)
@@ -38,7 +38,7 @@ assertSupportedSchema(schema)
 const built = buildSeed({
   sourceObject,
   sourceBytes,
-  baselineCommit,
+  baselineCommit: BASELINE_COMMIT,
   declaredFingerprint: SOURCE_SHA256,
 })
 const canonicalRecords = [
@@ -75,12 +75,8 @@ const schemaSha = sha256(schemaBytes)
 const manifest = {
   artifact_root: 'data/food-production',
   artifacts: written.sort((a, b) => a.path.localeCompare(b.path)),
-  build_id: sha256(Buffer.from([
-    built.sourceEnvelope.input_fingerprint_sha256,
-    schemaSha,
-    NORMALIZATION_VERSION,
-    PIPELINE_VERSION,
-  ].join(':'))),
+  baseline_commit: BASELINE_COMMIT,
+  build_id: computeBuildId(built.sourceEnvelope.input_fingerprint_sha256, schemaSha),
   manifest_version: '1.0.0',
   normalization_version: NORMALIZATION_VERSION,
   pipeline_version: PIPELINE_VERSION,

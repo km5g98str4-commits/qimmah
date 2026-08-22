@@ -1,8 +1,11 @@
 {
   "artifact_version": "1.0.0",
+  "baseline_commit": "cc60adfc0da0f893b101230269d4847d33490429",
   "count": 0,
   "normalization_version": "1.0.0",
   "records": [],
   "release_status": "QUARANTINED_SEED_NOT_FOR_DISTRIBUTION",
-  "schema_version": "1.0.0"
+  "schema_path": "data/food-production/schema/canonical-food-v1.schema.json",
+  "schema_version": "1.0.0",
+  "source_path": "docs/data-factory/packaged/PKG-001-saudi-gulf-packaged.json"
 }

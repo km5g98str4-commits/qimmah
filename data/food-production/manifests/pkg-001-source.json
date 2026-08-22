@@ -14,6 +14,7 @@
   "pipeline_version": "1.0.0",
   "produced_on_raw": "2026-07-30",
   "release_status": "QUARANTINED_SEED_NOT_FOR_DISTRIBUTION",
+  "schema_path": "data/food-production/schema/canonical-food-v1.schema.json",
   "source_collection_count": 55,
   "source_collection_pointer": "/items",
   "source_id": "qimmah_pkg_001",

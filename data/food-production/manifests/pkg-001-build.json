@@ -2,36 +2,37 @@
   "artifact_root": "data/food-production",
   "artifacts": [
     {
-      "bytes": 142266,
+      "bytes": 142489,
       "count": 51,
       "path": "accepted/pkg-001.json",
-      "sha256": "bc458bfce33b6043a5aa4b0e9f2410aa7e59fdde6c8b7f9168bf6b6f1adb4ee8"
+      "sha256": "3ad0cdf8b68f4b40cf6ac0fa47c8a5588a0386eb2ed277a8f9f2d4acbb95b0a9"
     },
     {
-      "bytes": 925,
+      "bytes": 1003,
       "count": 55,
       "path": "manifests/pkg-001-source.json",
-      "sha256": "765881ea57f809beaf7778765144e0614d807b1672920c4ea96cc573d0cab24d"
+      "sha256": "5de043eaed906179416d3f8eb3e3bcb7721b2cea1fec35bc260859aa6cb160f6"
     },
     {
-      "bytes": 191,
+      "bytes": 414,
       "count": 0,
       "path": "rejected/pkg-001.json",
-      "sha256": "ff0d85db94ec96c12ed046e2be1aa4a18bcafbd736d1df8f9295616f7d20dc22"
+      "sha256": "6000d405a9cd7cf6271b70ba03253da855165bb906bf99183e9920da1879fc67"
     },
     {
-      "bytes": 874,
+      "bytes": 1097,
       "count": 55,
       "path": "reports/pkg-001-build.json",
-      "sha256": "49efeafe9ffe5848a4581864c2af69ee5a6911584bf207e8e9605cf19406c314"
+      "sha256": "36f2a844fe43a0fe76f5b72d0966558eff9e5e8cdfa12c4d0f055b4a462aab74"
     },
     {
-      "bytes": 14560,
+      "bytes": 14783,
       "count": 4,
       "path": "review/pkg-001.json",
-      "sha256": "19982db229fb11bd4cd6fcca75d3534df89198d8ebbce70ae6757ef9048d39f0"
+      "sha256": "3fb9d07edd371a82d2291f0d5adccc91eae9dd66eb9745f72b71c21e023ed0a5"
     }
   ],
+  "baseline_commit": "cc60adfc0da0f893b101230269d4847d33490429",
   "build_id": "7bfe4cc245e45ce4d152f0b2956ab8f7e0cece71d95b6d27f63165f709c58ebe",
   "manifest_version": "1.0.0",
   "normalization_version": "1.0.0",

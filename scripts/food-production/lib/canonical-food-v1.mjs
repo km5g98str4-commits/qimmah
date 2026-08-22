@@ -267,9 +267,14 @@ export function buildSeed({ sourceObject, sourceBytes, declaredFingerprint = nul
   const canonicalRecords = [...accepted, ...review.map((entry) => entry.canonical_record)]
   const rawRows = sourceObject.items.length
   const terminalOutcomes = accepted.length + rejected.length + review.length
+  const artifactIdentity = {
+    baseline_commit: baselineCommit,
+    schema_path: SCHEMA_PATH,
+    source_path: SOURCE_PATH,
+  }
 
   const sourceEnvelope = {
-    baseline_commit: baselineCommit,
+    ...artifactIdentity,
     batch: sourceObject.batch ?? null,
     envelope_version: '1.0.0',
     input_fingerprint_sha256: inputSha,
@@ -287,10 +292,10 @@ export function buildSeed({ sourceObject, sourceBytes, declaredFingerprint = nul
     source_collection_count: rawRows,
     source_collection_pointer: '/items',
     source_id: 'qimmah_pkg_001',
-    source_path: SOURCE_PATH,
   }
 
   const report = {
+    ...artifactIdentity,
     accepted_unique: accepted.length,
     duplicate_valid_gtin_rows: rejected.filter((entry) => entry.reasons.includes('duplicate_valid_gtin')).length,
     input_fingerprint_sha256: inputSha,
@@ -316,6 +321,7 @@ export function buildSeed({ sourceObject, sourceBytes, declaredFingerprint = nul
 
   return {
     acceptedArtifact: {
+      ...artifactIdentity,
       artifact_version: '1.0.0',
       count: accepted.length,
       normalization_version: NORMALIZATION_VERSION,
@@ -324,6 +330,7 @@ export function buildSeed({ sourceObject, sourceBytes, declaredFingerprint = nul
       schema_version: SCHEMA_VERSION,
     },
     rejectedArtifact: {
+      ...artifactIdentity,
       artifact_version: '1.0.0',
       count: rejected.length,
       normalization_version: NORMALIZATION_VERSION,
@@ -333,6 +340,7 @@ export function buildSeed({ sourceObject, sourceBytes, declaredFingerprint = nul
     },
     report,
     reviewArtifact: {
+      ...artifactIdentity,
       artifact_version: '1.0.0',
       count: review.length,
       normalization_version: NORMALIZATION_VERSION,

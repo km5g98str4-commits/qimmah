@@ -11,13 +11,16 @@ import {
   classifyGtin,
   jsonBytes,
   rawRecordSha,
+  sha256,
 } from './lib/canonical-food-v1.mjs'
 import { assertSupportedSchema, validateJsonSchema } from './lib/json-schema.mjs'
+import { validateArtifactPathManifest, validateHardeningCore } from './lib/pkg-001-validation.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const sourceBytes = readFileSync(resolve(ROOT, SOURCE_PATH))
 const source = JSON.parse(sourceBytes.toString('utf8'))
-const schema = JSON.parse(readFileSync(resolve(ROOT, SCHEMA_PATH), 'utf8'))
+const schemaBytes = readFileSync(resolve(ROOT, SCHEMA_PATH))
+const schema = JSON.parse(schemaBytes.toString('utf8'))
 assertSupportedSchema(schema)
 
 const checks = []
@@ -35,6 +38,21 @@ function buildMutation(mutated) {
 }
 function findReason(built, reason) {
   return built.rejectedArtifact.records.some((entry) => entry.reasons.includes(reason))
+}
+function loadArtifact(path) {
+  return JSON.parse(readFileSync(resolve(ROOT, 'data/food-production', path), 'utf8'))
+}
+function hardeningMutation(label, expectedCode, mutate, baselineInputs) {
+  const mutated = clone(baselineInputs)
+  mutate(mutated)
+  let codes = []
+  try {
+    codes = validateHardeningCore(mutated).map((failure) => failure.code)
+  } catch (error) {
+    check(label, false, `unexpected_exception:${error.name}:${error.message}`)
+    return
+  }
+  check(label, codes.includes(expectedCode), `expected=${expectedCode} actual=${codes.join(',')}`)
 }
 
 const baseline = buildSeed({ sourceObject: source, sourceBytes })
@@ -105,6 +123,59 @@ const distinctBuilt = buildMutation(distinctMutation)
 const acceptedSourceGtins = new Set(distinctBuilt.acceptedArtifact.records.map((record) => record.gtin_as_source))
 check('MUTATION DISTINCT VALID GTINS: اسمان متطابقان وGTINان صالحان يبقيان سجلين', acceptedSourceGtins.has(firstGtin) && acceptedSourceGtins.has(secondGtin) && distinctBuilt.report.accepted_unique === 51)
 check('MUTATION DISTINCT VALID GTINS: لا duplicate/reject زائف', distinctBuilt.report.duplicate_valid_gtin_rows === 0 && distinctBuilt.report.rejected_unique === 0)
+
+const hardeningInputs = {
+  accepted: loadArtifact('accepted/pkg-001.json'),
+  inputSha: sha256(sourceBytes),
+  manifest: loadArtifact('manifests/pkg-001-build.json'),
+  outputRoot: resolve(ROOT, 'data/food-production'),
+  rejected: loadArtifact('rejected/pkg-001.json'),
+  report: loadArtifact('reports/pkg-001-build.json'),
+  review: loadArtifact('review/pkg-001.json'),
+  schemaSha: sha256(schemaBytes),
+  sourceEnvelope: loadArtifact('manifests/pkg-001-source.json'),
+}
+check('HARDENING BASELINE: هوية البناء والمسارات والحالات والأعداد صحيحة', validateHardeningCore(hardeningInputs).length === 0)
+hardeningMutation('COUNTER-MUTATION BUILD_ID_DRIFT: تغيير build_id يسقط باسمه', 'BUILD_ID_DRIFT', (value) => {
+  value.manifest.build_id = '0'.repeat(64)
+}, hardeningInputs)
+const pathAttacks = [
+  '/tmp/qimmah-escape.json',
+  'accepted\\pkg-001.json',
+  'accepted/\0pkg-001.json',
+  'accepted/../pkg-001.json',
+  '../qimmah-escape.json',
+]
+let pathAttackPass = true
+let pathAttackDetail = ''
+try {
+  for (const attack of pathAttacks) {
+    const mutated = clone(hardeningInputs)
+    mutated.manifest.artifacts[0].path = attack
+    const result = validateArtifactPathManifest(mutated.manifest, mutated.outputRoot)
+    if (!result.failures.some((failure) => failure.code === 'ARTIFACT_PATH_SCOPE') || result.resolvedPaths.size !== 0) {
+      pathAttackPass = false
+      pathAttackDetail = `attack=${JSON.stringify(attack)} codes=${result.failures.map((failure) => failure.code).join(',')} resolved=${result.resolvedPaths.size}`
+      break
+    }
+  }
+} catch (error) {
+  pathAttackPass = false
+  pathAttackDetail = `unexpected_exception:${error.name}:${error.message}`
+}
+check('COUNTER-MUTATION ARTIFACT_PATH_SCOPE: absolute/backslash/NUL/dot/resolved escape تسقط قبل القراءة', pathAttackPass, pathAttackDetail)
+hardeningMutation('COUNTER-MUTATION ARTIFACT_SET_DRIFT: حذف أثر من الخمسة يسقط باسمه', 'ARTIFACT_SET_DRIFT', (value) => {
+  value.manifest.artifacts.pop()
+}, hardeningInputs)
+hardeningMutation('COUNTER-MUTATION RELEASE_STATUS_DRIFT: تغيير حالة أثر يسقط باسمه', 'RELEASE_STATUS_DRIFT', (value) => {
+  value.accepted.release_status = 'UNQUARANTINED'
+}, hardeningInputs)
+hardeningMutation('COUNTER-MUTATION BASELINE_IDENTITY_DRIFT: تغيير أساس envelope يسقط باسمه', 'BASELINE_IDENTITY_DRIFT', (value) => {
+  value.sourceEnvelope.baseline_commit = '0'.repeat(40)
+}, hardeningInputs)
+hardeningMutation('COUNTER-MUTATION ARTIFACT_COUNT_DRIFT: فصل count عن records يسقط باسمه', 'ARTIFACT_COUNT_DRIFT', (value) => {
+  value.review.count += 1
+}, hardeningInputs)
 
 console.log('════════ DATA-1A seed proof ════════')
 let failed = 0
