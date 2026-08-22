@@ -10,7 +10,7 @@ import { spawn } from 'node:child_process'
 import { chromium } from './e2e/lib/engine.mjs'
 import { setTimeout as sleep } from 'node:timers/promises'
 import { loadAppCopy, labelOf, assertDevFlag } from './e2e/lib/app-copy.mjs'
-import { answerHistory, finishInputSteps } from './e2e/lib/onboarding-driver.mjs'
+import { answerHistory, finishInputSteps, selectIntent } from './e2e/lib/onboarding-driver.mjs'
 
 const PORT = 4319
 const BASE = `http://127.0.0.1:${PORT}/scripts/momentum-shot/?surface=onboarding`
@@ -117,14 +117,19 @@ try {
   const next = page.getByRole('button', { name: t.next })
   await fillBodyAndConsent(page)
   await next.click()
-  await page.getByRole('button', { name: new RegExp(intent.intents[0].label) }).click()
+  // [FINAL-CONVERGENCE] النيّة تُختار بقيمتها وتُبلَّغ بنفس القيمة.
+  // كان هذا المستدعي وحده يختار بالنصّ من `intents[0]` (= «plan») ثم يترك
+  // `finishInputSteps` على افتراضها «meals» — فيطالب الحارس بعرض «نمط الأكل»
+  // لنيّة لا تستهلكه، ويسقط الطقم بخطأ يقرأ كأنه عيب منتج. و`selectIntent`
+  // مكتوبة لهذا بالذات ولم يستدعها أحد.
+  const chosenIntent = await selectIntent(page, 'plan')
   await page.getByRole('button', { name: new RegExp(intent.levels.find((x) => x.value === 'beginner').label) }).click()
   const neverHistory = await answerHistory(page, () => next.click())
   check('never-trained sees one history question only', neverHistory.historyGroups === 1)
   const beginnerCut = intent.goalWording.beginner.cut.label
   check('beginner goal uses level-specific wording', beginnerCut === 'خسارة دهون' && await page.getByRole('button', { name: new RegExp(escapeRegExp(beginnerCut)) }).isVisible())
   await page.getByRole('button', { name: new RegExp(escapeRegExp(beginnerCut)) }).click()
-  await finishInputSteps(page, () => next.click())
+  await finishInputSteps(page, () => next.click(), { intent: chosenIntent })
   check('summary rendered', await page.getByRole('heading', { name: t.ready.title }).isVisible())
 
   await page.evaluate((k) => localStorage.setItem(k, '1'), FORCE_FAIL)
