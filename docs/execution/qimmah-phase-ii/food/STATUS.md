@@ -131,11 +131,13 @@
   `build_id`، ويثبت baseline/source/schema/release identity في envelope وmanifest
   والآثار، ويرفض قبل القراءة أي مسار مطلق أو backslash أو NUL أو dot segment أو
   resolved escape، ويطلب مجموعة الآثار الخمسة exact وفريدة.
-- `node scripts/food-production/run-data-1a-proof.mjs`: `PASS` — 25/25، وتشمل
+- `node scripts/food-production/run-data-1a-proof.mjs`: `PASS` — 27/27، وتشمل
   طفرات GTIN/check digit، GTIN صالح مكرر، provenance غائب، مغذٍ سالب، صف قصير،
   schema drift، بصمة مدخل مختلفة، ومنع دمج GTINين مختلفين متشابهين نصيًا، وست
   طفرات إحكام تسقط بالأسماء `BUILD_ID_DRIFT` و`ARTIFACT_PATH_SCOPE`
   و`ARTIFACT_SET_DRIFT` و`RELEASE_STATUS_DRIFT` و`BASELINE_IDENTITY_DRIFT`
-  و`ARTIFACT_COUNT_DRIFT`، بلا قبول سقوط تقني عارض.
+  و`ARTIFACT_COUNT_DRIFT`، بلا قبول سقوط تقني عارض. ويثبت كذلك أن GTIN بالأرقام
+  العربية والهندية يخرج ASCII في `gtin_as_source` وGTIN-14، وأن تعطيل التحويل
+  يسقط باسم `GTIN_ARABIC_ASCII_DRIFT`.
 - `npm run typecheck`: `PASS` — `tsc -b --noEmit`.
 - `npm run lint`: `PASS` — صفر تحذيرات وفق `--max-warnings 0`.

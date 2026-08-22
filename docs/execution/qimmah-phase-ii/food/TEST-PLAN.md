@@ -41,7 +41,7 @@
 | FOOD-D2-001 | row accounting | طرفا معادلة raw outcomes متساويان | صف قصير يؤدي إلى عدم توازن وفشل مسمى |
 | FOOD-D2-002 | short-row rejection | كل صف أقل من الأعمدة المطلوبة له outcome وسبب ورقم صف | `continue` صامت يسقط الحارس |
 | FOOD-D2-003 | unique rejects | `unique_rejected_rows` مستقل عن مجموع الأسباب | صف بعلمين لا يُعد صفين مرفوضين |
-| FOOD-D2-004 | GTIN lengths/check digit | 8/12/13/14 الصحيحة تمر والخاطئة ترفض | placeholder صالح checksum لا يمر |
+| FOOD-D2-004 | GTIN lengths/check digit/digits | 8/12/13/14 الصحيحة تمر، والعربية والهندية تتحول إلى ASCII قبل الحفظ | check digit خاطئ يرفض؛ وnormalizer يترك رقمًا غير ASCII يسقط باسم `GTIN_ARABIC_ASCII_DRIFT` |
 | FOOD-D2-005 | raw preservation | كل تحويل مهم يعرض raw value/ref وtransformation code | حذف raw sodium أو energy يسقط |
 | FOOD-D2-006 | negative nutrients | السالب في macro/sodium/micronutrient يرفض بعلم الحقل | إسقاط micronutrient سالب إلى `null` يسقط |
 | FOOD-D2-007 | energy units | kJ/kcal معلنان ولا تصحيح تخميني صامت | 2000 kcal المشتبه لا يتحول تلقائيًا إلى kcal/4.184 |

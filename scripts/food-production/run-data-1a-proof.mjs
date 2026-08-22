@@ -10,6 +10,7 @@ import {
   buildSeed,
   classifyGtin,
   jsonBytes,
+  normalizeDigits,
   rawRecordSha,
   sha256,
 } from './lib/canonical-food-v1.mjs'
@@ -54,6 +55,29 @@ function hardeningMutation(label, expectedCode, mutate, baselineInputs) {
   }
   check(label, codes.includes(expectedCode), `expected=${expectedCode} actual=${codes.join(',')}`)
 }
+function encodeDigits(value, digits) {
+  return [...value].map((digit) => digits[Number(digit)]).join('')
+}
+function validateArabicGtinAsciiGate(asciiGtin, normalizer = normalizeDigits) {
+  const variants = [
+    ['arabic_indic', encodeDigits(asciiGtin, '٠١٢٣٤٥٦٧٨٩')],
+    ['eastern_arabic', encodeDigits(asciiGtin, '۰۱۲۳۴۵۶۷۸۹')],
+  ]
+  const failures = []
+  for (const [variant, encoded] of variants) {
+    let normalized
+    try {
+      normalized = normalizer(encoded)
+    } catch (error) {
+      failures.push({ code: 'GTIN_ARABIC_ASCII_DRIFT', detail: `${variant}:unexpected_exception:${error.name}` })
+      continue
+    }
+    if (normalized !== asciiGtin || !/^[0-9]+$/.test(normalized)) {
+      failures.push({ code: 'GTIN_ARABIC_ASCII_DRIFT', detail: `${variant}:${JSON.stringify(normalized)}` })
+    }
+  }
+  return failures
+}
 
 const baseline = buildSeed({ sourceObject: source, sourceBytes })
 const baselineCanonical = [
@@ -73,6 +97,19 @@ gtinMutation.items[0].barcode = `${originalGtin.slice(0, -1)}${(Number(originalG
 const gtinBuilt = buildMutation(gtinMutation)
 check('MUTATION GTIN/CHECK-DIGIT: الكود المكسور يُرفض باسم gtin_checksum', findReason(gtinBuilt, 'gtin_checksum'))
 check('MUTATION GTIN/CHECK-DIGIT: الكود الأصلي صالح قبل الطفرة', classifyGtin(originalGtin).ok)
+
+const arabicGtinBuilds = ['٠١٢٣٤٥٦٧٨٩', '۰۱۲۳۴۵۶۷۸۹'].map((digits) => {
+  const mutation = clone(source)
+  mutation.items[0].barcode = encodeDigits(originalGtin, digits)
+  return buildMutation(mutation)
+})
+check('GTIN ARABIC→ASCII: الرقمان العربي والهندي يخرجان gtin_as_source وGTIN-14 من ASCII',
+  arabicGtinBuilds.every((built) => built.acceptedArtifact.records.some((record) =>
+    record.gtin_as_source === originalGtin && record.gtin === originalGtin.padStart(14, '0'))))
+const arabicBypassFailures = validateArabicGtinAsciiGate(originalGtin, (value) => String(value))
+check('COUNTER-MUTATION GTIN_ARABIC_ASCII_DRIFT: normalizer الذي يترك الرقم العربي يسقط باسمه',
+  arabicBypassFailures.length === 2 && arabicBypassFailures.every((failure) => failure.code === 'GTIN_ARABIC_ASCII_DRIFT'),
+  `codes=${arabicBypassFailures.map((failure) => failure.code).join(',')}`)
 
 const duplicateMutation = clone(source)
 duplicateMutation.items.push(clone(duplicateMutation.items[0]))
