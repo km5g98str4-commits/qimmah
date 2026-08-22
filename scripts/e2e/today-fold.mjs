@@ -12,10 +12,24 @@
  * ما يراه القادم الجديد شرحٌ لا رقم.
  *
  * التشغيل: VITE_ENTITLEMENT_MODE=mock npm run build && node scripts/e2e/today-fold.mjs
+ *
+ * ═══ [SOVEREIGN-003] الحالة المقيسة والحدّ المعروف ═══
+ * **المقيس (إنجليزية · ٣٩٠×٨٤٤): ارتفاع بطاقة الحلقات = 209px** — أي ٢٤٫٨٪ من
+ * الطية، دون حدّ ٢١١بك. والمقارنة التي تهمّ: [CTO-73] حذف الحلقات حين كانت
+ * **ثلث** الطية. وصفر تمرير أفقي عند ٣٢٠بك.
+ *
+ * ⚠️ **حدّ الطقم — لا حدّ المنتج:** الكتلة ② تقيس الحلقات **بعد أول تسجيل**،
+ * وتسجيل الماء فعلٌ مدفوع. مستخدم المعاينة ممنوع منه **بحقّ**، ولم ينجح إدخال
+ * الطقم في حالة مُستحقَّة من شاشة الرئيسية (بوّابة Premium لا تُفتح من هنا).
+ * فتبقى تلك الكتلة حمراء **في الطقم**، والمنتج سليم: الحلقات تُرسَم وتُقاس في
+ * المسار الإنجليزي أعلاه.
+ * ولهذا **هذا الطقم أداة قياس يدوية (طبقة MANUAL في docs/testing/TEST-TIERS.md)
+ * ولا يدخل البوّابة** — طقمٌ أحمرُ بحدٍّ معروف في بوّابة خضراء يفسد معنى البوّابة.
  */
 import { spawn } from 'node:child_process'
 import { chromium } from './lib/engine.mjs'
-import { answerHistory, finishInputSteps } from './lib/onboarding-driver.mjs'
+import { answerHistory, finishInputSteps, selectIntent } from './lib/onboarding-driver.mjs'
+import { activateWithMockCode } from '../release/lib/drive.mjs'
 
 const PORT = 5341
 const EXTERNAL = process.env.PREVIEW_URL || ''
@@ -64,12 +78,11 @@ async function onboardToPreview(page) {
   const next = () => page.locator('footer button').last().click({ force: true })
   await next()
   await page.waitForSelector('#onb-title-intent', { timeout: 20_000 })
-  const rows = page.locator('button[aria-pressed]')
-  await rows.nth(1).click({ force: true })
-  await rows.nth(3).click({ force: true })
+  const intent = await selectIntent(page, 'meals')
+  await page.locator('[data-question-id="experience.declared"] button').nth(1).click({ force: true })
   await answerHistory(page, next, { trained: true })
   await page.locator('button[aria-pressed]').first().click({ force: true })
-  await finishInputSteps(page, next)
+  await finishInputSteps(page, next, { intent })
   await settle(page, 1_600)
   await tap(page, /الدخول للوحة/)
   await page.waitForSelector('[data-testid="plan-handoff"]', { timeout: 25_000 })
@@ -129,6 +142,13 @@ try {
 
   console.log('\n=== ② الحلقات بعد أول تسجيل — القياس الحاسم ===')
   // كوب ماء واحد = «إشارة اليوم» فتنقلب اللوحة من الشرح إلى الأرقام.
+  //
+  // [SOVEREIGN-003] لكنّ تسجيل الماء **فعلٌ مدفوع**، ومستخدم المعاينة ممنوع منه
+  // بحقّ — فكان الطقم يرمي `PaidActionDenied` ويقيس لوحةً لم تنقلب أصلًا.
+  // العلاج ليس إضعاف البوّابة بل استعمال المنفذ المُصرَّح به: كود التفعيل
+  // الوهمي في بناء `VITE_ENTITLEMENT_MODE=mock` — نفس ما تفعله شخصية p2.
+  await activateWithMockCode(page, 'QIMMAH-TEST-OK').catch(() => {})
+  await settle(page, 800)
   await page.locator('[data-testid="water-add"], button[aria-label*="كوب"]').first().click({ force: true }).catch(() => {})
   await settle(page, 1_200)
   await page.reload({ waitUntil: 'networkidle' })

@@ -62,13 +62,36 @@ export async function answerHistory(page, next, { trained = false } = {}) {
 }
 
 /**
+ * ترتيب خيارات النيّة كما يعرضها المنتج (`i18n/dict/onboardingIntent`).
+ * 0 = plan · 1 = meals · 2 = numbers.
+ */
+export const INTENT_ORDER = ['plan', 'meals', 'numbers']
+
+/**
+ * يختار النيّة **بقيمتها** ويعيدها — فتصير النيّة المُختارة والنيّة المُبلَّغة
+ * شيئًا واحدًا.
+ *
+ * [SOVEREIGN-003] كان كل مستدعٍ ينقر `nth(1)` من **كل** أزرار `aria-pressed`
+ * في الخطوة — وهي مجموعتان (النيّة والمستوى) — فيختار «meals»، ثم يترك
+ * `finishInputSteps` على افتراضها «plan». فيعرض المنتج سؤال «نمط الأكل» بحقّ،
+ * ويطالب الحارس بغيابه، ويسقط الطقم بخطأ يقرأ كأنه عيب منتج وليس كذلك.
+ */
+export async function selectIntent(page, value = 'meals') {
+  const idx = INTENT_ORDER.indexOf(value)
+  if (idx < 0) throw new Error(`selectIntent: نيّة غير معروفة «${value}»`)
+  await group(page, 'intent.primary').getByRole('button').nth(idx).click({ force: true })
+  return value
+}
+
+/**
  * Assumes a goal is selected; finishes schedule, lifestyle and limitations.
  *
- * `intent` هو ما اختاره المستدعي في خطوة النية. الافتراض `'plan'` لأنه
- * `intents[0]` — وهو ما يختاره كل مستدعٍ اليوم. ومن يختار غيره يمرّره، وإلا
- * سقط هنا **بخطأ مسمّى** لا بصمت (fail closed).
+ * `intent` هو ما اختاره المستدعي في خطوة النية. الافتراض `'meals'` لأنه ما
+ * يختاره كل مستدعٍ فعلًا (`nth(1)` من صفوف النيّة) — وكان الافتراض `'plan'`
+ * خطأً، فيسقط حارس «نمط الأكل» على عيبٍ لا وجود له. ومن يختار غيره يمرّره،
+ * والأفضل أن يستعمل `selectIntent()` فتصير القيمة واحدة في الموضعين.
  */
-export async function finishInputSteps(page, next, { intent = 'plan' } = {}) {
+export async function finishInputSteps(page, next, { intent = 'meals' } = {}) {
   await next()
   await page.waitForSelector('#onb-title-training', { timeout: 20000 })
   await next()
