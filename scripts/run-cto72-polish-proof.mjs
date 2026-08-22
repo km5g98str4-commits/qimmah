@@ -106,7 +106,12 @@ const today = read('src/views/TodayV2.tsx')
  * ممنوع أن تدّعي البطاقة نسبةً أو يومًا مكتملًا بلا جلسة (يحرسه `test:today-home`
  * سلوكيًّا، ويحرسه أدناه بنيويًّا).
  */
-const BLANK_GUARD = '{!showRings ? ('
+// [SOVEREIGN-003] السلسلة صارت **ثلاثة فروع** لا اثنين:
+//   {blankSlate ? <FirstDayCard/> : !showRings ? <بطاقة الإعداد/> : <الحلقات/>}
+// الفرع الأول أُضيف لليوم الأول (شرحٌ قبل أي رقم). فالمرساة تبدأ من رأس
+// السلسلة، والشرط المحروس **اشتدّ** لا رخا: الحلقات آخر الفروع، ولا تظهر إلا
+// بانتفاء «اليوم الأول» **و**«بلا أهداف» معًا.
+const BLANK_GUARD = '{blankSlate ? ('
 
 // أ) التعريف: القيد مركّب من شرطين — «قادم جديد» **و**«لا إشارة اليوم».
 const blankDecl = /const blankSlate = model\.state === 'newUser' && !hasTodaySignal/.test(today)
@@ -154,17 +159,23 @@ function ternaryRegion(src, opener) {
   return src.slice(start, i)
 }
 const ringsTernary = ternaryRegion(today, BLANK_GUARD)
-const branchSplit = ringsTernary.indexOf(') : (')
-check('حارس الحلقات تعبير ثلاثي مستخرَج بحدوده', ringsTernary.length > 0 && branchSplit > 0)
+const firstSplit = ringsTernary.indexOf(') : ')          // نهاية فرع «اليوم الأول»
+const secondSplit = ringsTernary.indexOf(') : (', firstSplit + 1) // نهاية فرع «بلا أهداف»
+const firstBranch = firstSplit > 0 ? ringsTernary.slice(0, firstSplit) : ''
+const middleBranch = secondSplit > 0 ? ringsTernary.slice(firstSplit, secondSplit) : ''
+const lastBranch = secondSplit > 0 ? ringsTernary.slice(secondSplit) : ''
+check('حارس الحلقات سلسلة ثلاثية مستخرَجة بحدودها', ringsTernary.length > 0 && firstSplit > 0 && secondSplit > firstSplit)
 check(
-  'وبديل الحالة الفارغة (بطاقة إعداد) في فرع «فارغ» لا أصفار',
-  branchSplit > 0 && ringsTernary.slice(0, branchSplit).includes('d.noTargetsTitle'),
+  'وفرع اليوم الأول يشرح قبل أن يقيس (FirstDayCard) — بلا أرقام',
+  firstBranch.includes('<FirstDayCard') && !firstBranch.includes('<DailyRingsCard'),
 )
 check(
-  'وبطاقة الحلقات في الفرع الآخر — لا تُرسم إلا بانتفاء الفراغ',
-  branchSplit > 0
-    && ringsTernary.slice(branchSplit).includes('<DailyRingsCard')
-    && !ringsTernary.slice(0, branchSplit).includes('<DailyRingsCard'),
+  'وبديل الحالة الفارغة (بطاقة إعداد) في فرعه الأوسط لا أصفار',
+  middleBranch.includes('d.noTargetsTitle') && !middleBranch.includes('<DailyRingsCard'),
+)
+check(
+  'وبطاقة الحلقات في الفرع الأخير وحده — لا تُرسم إلا بانتفاء الفرعين قبلها',
+  lastBranch.includes('<DailyRingsCard'),
 )
 check(
   'ولا حلقات متبقّية خارج البطاقة (مصدر واحد للحلقات)',
@@ -202,11 +213,17 @@ check(
     ternaryRegion(tampered, BLANK_GUARD) === '',
     'الفحص مرّ على مصدر منزوع الحارس — البوابة رخوة',
   )
-  // وقلب الفرعين (الحلقات للقادم الجديد) ⇒ يجب أن يسقط الفحص كذلك.
-  const swapped = ringsTernary.slice(0, branchSplit).replace('d.noTargetsTitle', '<DailyRingsCard')
+  // ونقل الحلقات إلى فرعٍ أسبق (اليوم الأول أو «بلا أهداف») ⇒ يجب أن يسقط
+  // الفحص باسمه: هذا هو العطل الأصلي — لوحة أصفار لمن لا رقم له.
+  const swappedFirst = firstBranch.replace('<FirstDayCard', '<DailyRingsCard')
+  const swappedMiddle = middleBranch.replace('d.noTargetsTitle', '<DailyRingsCard')
   check(
-    '⚔️ وضع الحلقات في فرع الحالة الفارغة يُسقط الفحص باسمه',
-    swapped.includes('<DailyRingsCard'),
+    '⚔️ وضع الحلقات في فرع اليوم الأول يُسقط الفحص باسمه',
+    swappedFirst.includes('<DailyRingsCard') && !firstBranch.includes('<DailyRingsCard'),
+  )
+  check(
+    '⚔️ ووضعها في فرع «بلا أهداف» يُسقطه كذلك',
+    swappedMiddle.includes('<DailyRingsCard') && !middleBranch.includes('<DailyRingsCard'),
   )
 }
 // ز) ⚔️ ومحاكاة ثانية على البند المنسوخ: إعادة `hasData` إلى «أو وجود خطة»
