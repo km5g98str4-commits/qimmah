@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "policyId": "qimmah-built-artifact-policy-v1",
+  "textExtensions": [
+    ".css",
+    ".html",
+    ".js",
+    ".json",
+    ".map",
+    ".mjs",
+    ".svg",
+    ".txt",
+    ".webmanifest"
+  ],
+  "rules": [
+    {
+      "id": "SERVICE_ROLE_REFERENCE",
+      "pattern": "SUPABASE_SERVICE_ROLE_KEY|service_role",
+      "flags": "iu"
+    },
+    {
+      "id": "LOCAL_WEB_ENDPOINT",
+      "pattern": "(?:https?|wss?):\\/\\/(?:localhost|127\\.0\\.0\\.1|0\\.0\\.0\\.0)(?::[0-9]+)?",
+      "flags": "iu"
+    },
+    {
+      "id": "PRIVATE_WEB_ENDPOINT",
+      "pattern": "(?:https?|wss?):\\/(?:\\/10\\.|\\/192\\.168\\.|\\/172\\.(?:1[6-9]|2[0-9]|3[01])\\.)",
+      "flags": "iu"
+    },
+    {
+      "id": "TEST_ENTITLEMENT_HOOK",
+      "pattern": "QIMMAH_(?:TEST|DEV)_ENTITLEMENT|test[-_ ]entitlement|fixture-admin",
+      "flags": "iu"
+    },
+    {
+      "id": "PREVIEW_BYPASS_HOOK",
+      "pattern": "preview[-_ ]bypass|bypass[-_ ]preview",
+      "flags": "iu"
+    },
+    {
+      "id": "PRIVATE_KEY_MATERIAL",
+      "pattern": "-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----",
+      "flags": "u"
+    },
+    {
+      "id": "PROVIDER_SECRET_TOKEN",
+      "pattern": "(?:sk_live_|gh[pousr]_)[A-Za-z0-9_-]{16,}",
+      "flags": "u"
+    }
+  ]
+}
