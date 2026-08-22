@@ -33,6 +33,7 @@ import {
   SYNC_QUEUE_PREFIX,
 } from '@/lib/syncQueue'
 import { setSyncTransportForTests, flushSyncQueue, hydrateFromCloud, type SyncTransport } from '@/lib/syncService'
+import { setCloudSyncConsent } from '@/lib/syncConsent'
 import { setSteps, getSteps } from '@/lib/stepCounter'
 import { getDayStamp, loadToday, saveToday } from '@/lib/today'
 import { loadNutritionToday } from '@/lib/nutritionTracking'
@@ -83,6 +84,24 @@ function reset(): void {
   setSyncFeatureEnabledForTests(undefined)
   setSyncTransportForTests(undefined)
   setSyncRuntime(null, false)
+}
+
+/**
+ * [GOV-003] الموافقة الأولى شرط بنيوي في `syncAllowedFor` (syncQueue.ts:131): بلا
+ * موافقة سارية يُرجع `enqueueSyncOperation` قيمة null ويُرجع `flushSyncQueue`
+ * حالة 'guest'. كان الهيكل يشغّل العلم ولا يمنح الموافقة — فتسقط فحوص الطابور
+ * كلّها **بنقص إعداد لا بعيب منتج**.
+ *
+ * وهذا إعدادُ بيئة لا تليينُ تأكيد: البوابة نفسها تُختبر في ⑪ أدناه، حيث يُثبَت
+ * أن نزع هذا السطر يُسقط الإدراج والرفع معًا (§4.2 — كل استثناء يُحرَس).
+ *
+ * تُستدعى بعد كل `reset()` لأن `ls.clear()` يمحو مفتاح الموافقة مع ما يمحو.
+ */
+function grantCloudSyncConsent(...userIds: string[]): void {
+  for (const uid of userIds) {
+    const written = setCloudSyncConsent(uid, true)
+    if (written !== 'ok') throw new Error(`chaos setup: consent write for ${uid} returned ${written}`)
+  }
 }
 // mulberry32 seeded PRNG — permutes race orderings so a different seed surfaces
 // order-dependence without changing which invariants are asserted.
@@ -183,6 +202,7 @@ console.log('\n① الشبكة: انقطاع قبل/بعد الحفظ، flap، 
   setSyncFeatureEnabledForTests(true)
   const srv = makeServer()
   setSyncTransportForTests(srv.transport)
+  grantCloudSyncConsent('A')
   setSyncRuntime('A', false)
   srv.setUser('A')
 
@@ -309,6 +329,7 @@ console.log('\n⑤ تبديل الحساب: طابور A لا يُنفَّذ ت�
   setSyncFeatureEnabledForTests(true)
   const srv = makeServer()
   setSyncTransportForTests(srv.transport)
+  grantCloudSyncConsent('A', 'B')
 
   // A has an unsynced workout queued.
   setSyncRuntime('A', false)
@@ -351,6 +372,7 @@ console.log('\n⑥ استعادة كلمة المرور: لا مزامنة/اس�
   setSyncFeatureEnabledForTests(true)
   const srv = makeServer()
   setSyncTransportForTests(srv.transport)
+  grantCloudSyncConsent('A')
   setSyncRuntime('A', true) // recoveryActive = true
   srv.setUser('A')
 
@@ -414,6 +436,7 @@ console.log('\n⑨ السباقات: نقر مزدوج، ترتيب أحداث �
   setSyncFeatureEnabledForTests(true)
   const srv = makeServer()
   setSyncTransportForTests(srv.transport)
+  grantCloudSyncConsent('A')
   setSyncRuntime('A', false)
   srv.setUser('A')
 
@@ -447,6 +470,7 @@ console.log('\n⑩ الاستيراد: رفض المفاتيح الخام/الت
 {
   reset()
   setSyncFeatureEnabledForTests(true)
+  grantCloudSyncConsent('A')
   setSyncRuntime('A', false)
   const base = { kind: 'qimmah-data-export', app: 'qimmah', appVersion: '1.0.0', exportedAt: '2026-07-16T00:00:00.000Z', summaryAr: '', counts: {}, stores: {}, unregistered: {} }
 
@@ -466,6 +490,7 @@ console.log('\n⑩ الاستيراد: رفض المفاتيح الخام/الت
   setSyncFeatureEnabledForTests(true)
   const srv = makeServer()
   setSyncTransportForTests(srv.transport)
+  grantCloudSyncConsent('A')
   setSyncRuntime('A', false)
   srv.setUser('A')
   // seed cloud + local so hydrate logs a conflict, then inspect what was logged.
@@ -478,6 +503,48 @@ console.log('\n⑩ الاستيراد: رفض المفاتيح الخام/الت
   console.info = origInfo
   const leaked = JSON.stringify(logged)
   check('سجلّ التعارض لا يحوي حمولة/توكن/بريد/قيم صحية', !/token|email|password|access_token|weightKg|"data":/.test(leaked), [11])
+}
+
+// ═══════════════════ FAMILY 11 — حارس الإعداد: بوابة الموافقة تحمل وزنًا ═══════════════════
+//
+// [GOV-003] §4.2 — «كل استثناء يُحرَس». الهيكل أعلاه يمنح الموافقة قبل كل عائلة
+// مزامنة، وهو استثناء إعدادٍ لا بدّ منه. ولولا هذه العائلة لَما أمكن لقارئٍ أن
+// يميّز «الموافقة شرط بنيوي فعلًا» من «سطرٌ زائد يُطمئن الناظر»: لو صارت البوابة
+// لا-عمليّة غدًا لبقيت الفحوص الـ٥٧ خضراء وهي لا تقيس شيئًا — وهو بعينه العطب
+// الذي كان في `VITE_SYNC_ENABLED` الغائب من الـdefine.
+//
+// فهذه محاكاة الالتفاف المطلوبة: نزع المنح ⇒ سقوط **بفحص مسمّى** لا باستثناء تقني.
+console.log('\n⑪ حارس الإعداد: بلا موافقة لا يُدرَج بايت ولا يُرفع صفّ')
+{
+  // (أ) بلا موافقة إطلاقًا — العلم مُشغَّل والمالك مُصادَق، والفارق الوحيد الموافقة.
+  reset()
+  setSyncFeatureEnabledForTests(true)
+  const srv = makeServer()
+  setSyncTransportForTests(srv.transport)
+  setSyncRuntime('A', false)
+  srv.setUser('A')
+  check('بلا موافقة: syncAllowedFor = false رغم العلم والمالك المصادَق', syncAllowedFor('A') === false)
+  check('بلا موافقة: enqueue → null والطابور فارغ (لا التقاط)', enqueueSyncOperation('workout_sessions', 'sess-x', { local_id: 'sess-x' }) === null && readSyncQueue('A').length === 0)
+  const noConsent = await flushSyncQueue(Date.now())
+  check('بلا موافقة: flush → guest ولا صفّ على الخادم', noConsent.state === 'guest' && srv.rowCount('workout_sessions') === 0)
+
+  // (ب) موافقة على **نسخة سياسة قديمة** ليست موافقة — النصّ تغيّر فتُطلب من جديد.
+  ls.setItem(
+    'qimmah:syncConsent:v1:A',
+    JSON.stringify({ cloudSync: { accepted: true, acceptedAt: '2020-01-01T00:00:00.000Z', policyVersion: '2020-01-01' }, sensitiveHealth: { accepted: false } }),
+  )
+  check('موافقة بنسخة سياسة بائتة → لا تُعدّ سارية (لا إدراج)', syncAllowedFor('A') === false && enqueueSyncOperation('workout_sessions', 'sess-y', { local_id: 'sess-y' }) === null)
+
+  // (ج) المنح يُحيي المسار — فالفارق بين (أ) و(ج) هو الموافقة وحدها لا غير.
+  grantCloudSyncConsent('A')
+  check('بعد المنح: نفس الاستدعاء يُدرج فعلًا (المنح هو الفارق الوحيد)', enqueueSyncOperation('workout_sessions', 'sess-z', { local_id: 'sess-z' }) !== null && readSyncQueue('A').length === 1)
+
+  // (د) سحب الموافقة بعد الإدراج: يتوقّف الرفع، و**العملية تبقى على الجهاز** —
+  //     البوابة تمنع التسريب ولا تُتلف بيانات المستخدم (لا فقد مقابل الخصوصية).
+  const withdrawn = setCloudSyncConsent('A', false)
+  check('سحب الموافقة يُكتب بنجاح (WriteResult مفحوص لا مبتلع)', withdrawn === 'ok')
+  const afterWithdraw = await flushSyncQueue(Date.now())
+  check('بعد السحب: لا رفع، والعملية باقية على الجهاز (لا فقد بيانات)', afterWithdraw.state === 'guest' && srv.rowCount('workout_sessions') === 0 && readSyncQueue('A').length === 1, [12])
 }
 
 // ─────────────────────────── summary ───────────────────────────
