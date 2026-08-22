@@ -110,6 +110,10 @@ async function bundleAccessLayer(name, env) {
   writeFileSync(entry, [
     `export * from '${resolve(root, 'src/lib/access/entitlementSource').replaceAll('\\', '/')}'`,
     `export * from '${resolve(root, 'src/lib/access/entitlementStore').replaceAll('\\', '/')}'`,
+    // [QIM-FINAL-CLOSURE-001] مسار الذاكرة المؤقّتة صار جزءًا من الرسم: بدونه
+    // كان هذا الهجوم يفحص `entitlementSource` وحدها — وهي **بلا تخزين عمدًا** —
+    // فيمرّ صادقًا عمّا يفحصه وأعمى عن الطريق الجديد الذي يقرأ من القرص.
+    `export * from '${resolve(root, 'src/lib/access/entitlementCache').replaceAll('\\', '/')}'`,
     `export * from '${resolve(root, 'src/lib/access/guard').replaceAll('\\', '/')}'`,
     `export * from '${resolve(root, 'src/lib/access/paidActions').replaceAll('\\', '/')}'`,
     `export { CLOSED_ACCESS } from '${resolve(root, 'src/lib/access/context').replaceAll('\\', '/')}'`,
@@ -122,6 +126,8 @@ const FORGED_KEYS = [
   'qimmah:entitlement-mock:v1', 'qimmah:entitlement', 'qimmah:premium', 'premium',
   'entitlement', 'status', 'qimmah_premium', 'qimmah:access', 'qimmah:paid',
   'subscription', 'isPremium', 'qimmah:entitlement:v1',
+  // مفتاح الذاكرة المؤقّتة الحقيقي — تسميمه هو الهجوم، لا مفاتيح مخترعة.
+  'qimmah:entitlement-verified:v1',
 ]
 function poisonEverything(win) {
   for (const k of FORGED_KEYS) {
@@ -152,6 +158,40 @@ const sourceOnly = await bundle(resolve(root, 'src/lib/access/entitlementSource.
 const prodGuard = prod, prodStore = prod, prodPolicy = prod, prodCtx = prod
 
 check('وضع التقليد مطفأ في بناء الإنتاج', prod.mod.mockEnabled() === false)
+
+// ── [QIM-FINAL-CLOSURE-001] سجلّ مؤقّت **مصوغ صياغةً سليمة** — لا سلسلة «active» ──
+// التسميم أعلاه يكتب النصّ `'active'`، ومهاجم حقيقي لا يفعل ذلك: يكتب سجلًّا
+// بالشكل الصحيح تمامًا. هذا هو الهجوم الذي يستحقّ الاسم.
+{
+  // الشكل الحقيقي للسجلّ (`VerifiedEntitlementRecord`) — بحقوله كما هي: `v`،
+  // `serverState`، `verifiedAtDeviceMs`. أول صياغة لهذا الهجوم استعملت أسماءً
+  // مخترعة (`version`, `state`)، فرُفض السجلّ **لسوء شكله** قبل أن يبلغ فحص
+  // البصمة أصلًا — أي أن الفحص كان يمرّ بسبب غير الذي يدّعيه. اكتُشف بتعطيل
+  // فحص البصمة عمدًا ورؤية الفحص **يظلّ أخضر** (§4.2: المرور غير المستحقّ).
+  const now = Date.now()
+  const body = {
+    v: 1, accountId: 'attacker-account', serverState: 'premiumActive',
+    entitlementType: 'premium', noExpiry: true, expiresAtMs: null,
+    activatedAtMs: now - 1000, verifiedAtServerMs: now, verifiedAtDeviceMs: now,
+  }
+  win.localStorage.setItem(prod.mod.VERIFIED_ENTITLEMENT_KEY,
+    JSON.stringify({ ...body, integrity: 'deadbeefdeadbeef' }))
+  const read = prod.mod.readVerifiedEntitlement()
+  const judged = prod.mod.judgeVerifiedEntitlement(read, 'attacker-account', now)
+  check('سجلّ مؤقّت **صحيح الشكل** ببصمة مزوّرة ⇒ يُرفض بالاسم `tampered`',
+    judged.reason === 'tampered', `reason=${judged.reason}`)
+
+  // وببصمة **معاد حسابها** صحيحة: الشكل والبصمة سليمان، والحساب وحده مختلف.
+  const selfConsistent = { ...body, integrity: prod.mod.fingerprintRecord(body) }
+  win.localStorage.setItem(prod.mod.VERIFIED_ENTITLEMENT_KEY, JSON.stringify(selfConsistent))
+  const readOk = prod.mod.readVerifiedEntitlement()
+  check('وبالبصمة الصحيحة يُقبل الشكل — فالرفض أعلاه سببه البصمة لا سوء الصياغة',
+    typeof readOk === 'object' && readOk !== null, `read=${JSON.stringify(readOk).slice(0, 50)}`)
+  const other = prod.mod.judgeVerifiedEntitlement(readOk, 'a-different-account', now)
+  check('لكنّه لحساب آخر ⇒ `account_mismatch`، لا مَنْح',
+    other.reason === 'account_mismatch', `reason=${other.reason}`)
+  win.localStorage.removeItem(prod.mod.VERIFIED_ENTITLEMENT_KEY)
+}
 
 const r1 = await prod.mod.resolveEntitlement()
 check(`localStorage مسمومة بـ${FORGED_KEYS.length} مفتاحًا ⇒ ما زال ${r1.status}`, r1.status === 'none')

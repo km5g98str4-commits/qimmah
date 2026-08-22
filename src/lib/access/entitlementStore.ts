@@ -12,8 +12,15 @@
 import type { EntitlementStatus } from './paidActions'
 import type { EntitlementDetail } from './entitlementBackend'
 
-/** من أين جاءت الحقيقة — يُعرض في التقارير ولا يُخفى. */
-export type EntitlementSource = 'mock' | 'backend' | 'none'
+/**
+ * من أين جاءت الحقيقة — يُعرض في التقارير ولا يُخفى.
+ *
+ * [OFFLINE-ENTITLEMENT-001] `'cache'` = **إجابة الخادم الأخيرة مُعادةً** حين
+ * تعذّر سؤاله (`entitlementCache.applyOfflineGrace`). ليست مصدرًا ثالثًا
+ * للحقيقة بل صدىً للثاني، ولذلك تُسمّى ولا تُدسّ تحت `'backend'`: من يقرأ
+ * تقريرًا يجب أن يرى الفرق بين «سألنا الآن» و«هذا ما قاله آخر مرّة».
+ */
+export type EntitlementSource = 'mock' | 'backend' | 'cache' | 'none'
 
 export interface EntitlementSnapshot {
   status: EntitlementStatus
@@ -28,6 +35,14 @@ export interface EntitlementSnapshot {
    * لأن وضع التقليد ووضع «لا مصدر» لا يملكان تفصيلًا يقولانه.
    */
   detail?: EntitlementDetail | null
+  /**
+   * [OFFLINE-ENTITLEMENT-001] لماذا قُبلت الذاكرة أو رُفضت — باسمها
+   * (`within_grace` · `tampered` · `stale` · `account_mismatch` …). حقل تشخيص
+   * **لا يُقرَّر منه شيء**، ووجوده يمنع أن يُلبَس سجلٌّ معبوث ثوبَ «ما فيه نت».
+   * نصّ حرّ عمدًا: النوع الدقيق `CacheRejection` يعيش في طبقته، والمخزن حاملٌ
+   * لا حاكم.
+   */
+  cacheReason?: string
 }
 
 /**
@@ -50,6 +65,7 @@ export function setEntitlement(next: EntitlementSnapshot): void {
     next.status === current.status &&
     next.source === current.source &&
     next.lastError === current.lastError &&
+    next.cacheReason === current.cacheReason &&
     next.detail === current.detail
   ) return
   current = next

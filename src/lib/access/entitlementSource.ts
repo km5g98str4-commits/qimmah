@@ -99,6 +99,14 @@ export async function resolveEntitlement(): Promise<{
   source: EntitlementSource
   detail?: EntitlementDetail | null
   lastError?: string
+  /**
+   * [OFFLINE-ENTITLEMENT-001] تصنيف الفشل وهوية الحساب **يعبران كما هما**.
+   * هذه الدالّة لا تقرّر شيئًا بهما ولا تلمس تخزينًا؛ من يقرّر هو
+   * `applyOfflineGrace` في `entitlementCache`، والمزوّد يركّبهما. وتركُ
+   * القرار خارج هنا مقصود: يبقى هذا الملف «ما قاله المصدر الآن» بلا ذاكرة.
+   */
+  failure?: AccessFailure
+  accountId?: string | null
 }> {
   // وضع التقليد قرار وقت بناء، ويسبق كل شيء — تستخدمه إثباتات المصفوفة وحدها.
   if (mockEnabled()) return { status: readMockActive() ? 'active' : 'none', source: 'mock' }
@@ -107,7 +115,14 @@ export async function resolveEntitlement(): Promise<{
   // يعود `none` مع سبب عام — الفشل يُغلق ولا يفتح.
   if (!backendAvailable()) return { status: 'none', source: 'none', lastError: 'backend_unconfigured' }
   const result = await fetchEntitlement()
-  return { status: result.status, source: 'backend', detail: result.detail, lastError: result.error }
+  return {
+    status: result.status,
+    source: 'backend',
+    detail: result.detail,
+    lastError: result.error,
+    failure: result.failure,
+    accountId: result.accountId,
+  }
 }
 
 /**
