@@ -17,9 +17,9 @@
 
 The committed result is 9 `CANDIDATE_NEEDS_INDEPENDENT_REVIEW`, 1 honest `MISSING`, and 0 `APPROVED`. Every candidate is first-researcher evidence only. It must not be copied into the review ledger, product code, or a release manifest before independent review.
 
-| Dependency ID | Description | Blocking artifact | Acceptance evidence | Work after acceptance |
+| Dependency ID | Description | Blocking Web Sovereign artifact | Expected future integration point | Remaining work after integration |
 | --- | --- | --- | --- | --- |
-| `EX-DEP-VIDEO-REVIEW-001` | The nine pilot matches were found and verified by one primary researcher, so they are not independent approvals. | Independent visual review of the exact movement, equipment, variation, coaching suitability, and product fit for every candidate. | Signed, versioned review tied to the pilot SHA/fingerprint, with reviewer identity, ISO timestamp, and a per-record accept/reject verdict. | Promote only accepted records through a later manifest package; retain rejected and missing rows visibly and rerun live availability verification before integration. |
+| `EX-DEP-VIDEO-REVIEW-001` | The nine pilot matches were found and verified by one primary researcher, so they are not independent approvals. | None; the blocker is independent human review, not a Web Sovereign artifact. | A versioned review package tied to the pilot SHA/fingerprint, before any later binding to the accepted exercise-detail/media resolver. | Review exact movement, equipment, variation, coaching suitability, and product fit per record; record reviewer/timestamp/verdict; promote only accepted records; retain rejected/missing rows; rerun live availability before integration. |
 
 ## Contract and source policy
 

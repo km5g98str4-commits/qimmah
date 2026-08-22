@@ -11,9 +11,9 @@ This runbook prepares a future image-generation wave; it does not authorize or p
 
 No job may advance merely because an exercise has no current image.
 
-| Dependency ID | Description | Blocking artifact | Acceptance evidence | Work after acceptance |
+| Dependency ID | Description | Blocking Web Sovereign artifact | Expected future integration point | Remaining work after integration |
 | --- | --- | --- | --- | --- |
-| `EX-DEP-MECH-001` | Image generation must not infer exercise mechanics, equipment, anatomy, or safe form. | Reviewed bilingual start/end descriptions and safe-mechanics notes for each selected job, plus reviewer identity and ISO timestamp. | A versioned authoring artifact tied to the same ledger fingerprint and approved by the named exercise-content reviewer. | Build a new job-schema version, assemble prompts mechanically from approved fields, run preflight, then generate only the explicitly released batch. |
+| `EX-DEP-MECH-001` | Image generation must not infer exercise mechanics, equipment, anatomy, or safe form. | None; the blocker is reviewed bilingual mechanics and metadata, not a Web Sovereign artifact. | A versioned authoring artifact tied to the same ledger fingerprint, before any later binding to the accepted media resolver. | Obtain reviewed start/end and safe-mechanics content with reviewer/timestamp, create a new job-schema version, assemble prompts mechanically, run preflight, and generate only the explicitly released batch. |
 
 ## Sources and grain
 
