@@ -16,9 +16,9 @@ Recorded lane heads for this checkpoint:
 
 | Lane | Recorded head | Executable test/tooling delta from baseline |
 | --- | --- | --- |
-| Release | `4863da1df56d7785304bb2090e75a6d18d991de8` | Four new lane-owned evidence scripts; no baseline script changed |
-| Food | `8a78f86eec8b9b0019c021dfa6213a45e1a20763` | None; documents only at this head |
-| Exercise | `e7435544410bb4c151a017da55658e435c8e69c2` | Eight new lane-owned scripts; no baseline script changed |
+| Release | `67c6b2407447fd84679698647df6a7d5c14e1411` | Seven new lane-owned evidence/artifact scripts; no baseline script changed |
+| Food | `4a4380654ed08fa73124a262411c056d12aa8049` | Six new lane-owned seed-pipeline scripts; no baseline script changed |
+| Exercise | `e97522f3e68d9022aa7bd6c3203da5b2a2f41355` | Thirteen new lane-owned scripts; no baseline script changed |
 | Executive | `1dc78d6751fb9269a75176f40ad5ba2483db651c` | Three new lane-owned fixture scripts; no baseline script changed |
 
 Any newer lane head containing an executable/tooling delta makes this ledger
@@ -28,6 +28,24 @@ inventory after rebind; branch names or earlier assertion totals are not
 sufficient.
 
 ## 2. Executable changes
+
+### Food deterministic seed package
+
+Introduced at `ed162aed` and hardened at
+`4a4380654ed08fa73124a262411c056d12aa8049`.
+
+| Path | Change | Why | Assertions/evidence | Production behavior impact |
+| --- | --- | --- | --- | --- |
+| `scripts/food-production/lib/canonical-food-v1.mjs` | New canonicalization and terminal-outcome builder | Transform only the fingerprinted 55-row package while preserving raw provenance | 55 rows become exactly 51 accepted, four review, zero rejected | None; emits quarantined Phase-owned data only |
+| `scripts/food-production/lib/json-schema.mjs` | New local schema validator | Validate emitted canonical rows without adding a runtime dependency | Every emitted canonical record satisfies `canonical-food-v1.schema.json` | None |
+| `scripts/food-production/lib/pkg-001-validation.mjs` | New fail-closed package validator, later hardened around identity and exact artifact set | Bind source, build, baseline, status, counts, paths, and checksums so a valid row file cannot hide a corrupt envelope | Build/source fingerprints, five exact artifacts, confined paths, record counts, terminal conservation | None |
+| `scripts/food-production/build-pkg-001.mjs` | New deterministic package builder/check mode | Make all five artifacts reproducible from the immutable source | Byte-for-byte rebuild and build ID `7bfe4cc245e45ce4d152f0b2956ab8f7e0cece71d95b6d27f63165f709c58ebe` | None |
+| `scripts/food-production/validate-pkg-001.mjs` | New validator entry point | Produce explicit nonzero failure on package drift | Manifest checksum `61f9f69b72e05136ac157fd8389230f477f9d471e17f93d12336cd3a304b229b` at the recorded head | None |
+| `scripts/food-production/run-data-1a-proof.mjs` | New anti-circumvention suite, later extended with envelope attacks | Prove row accounting, GTIN, provenance, schema, input identity, and package metadata fail by name | 25/25 named checks, including six hardening counter-mutations | None |
+
+The seed package remains `QUARANTINED_SEED_NOT_FOR_DISTRIBUTION`. Its executable
+evidence proves integrity and determinism, not data rights, full-catalog
+coverage, production activation, or runtime behavior.
 
 ### Exercise review-ledger package
 
@@ -57,6 +75,23 @@ Introduced at `e7435544410bb4c151a017da55658e435c8e69c2`.
 | `scripts/exercise-production/validate-image-production-jobs.mjs` | New validator entry point | Confirm 37/37 coverage, mechanics blocks, and zero generated outputs | `IMAGE_PRODUCTION_JOBS` | None |
 | `scripts/exercise-production/image-production-jobs-proof.mjs` | New anti-circumvention suite | Reject schema drift, dropped IDs, binding drift, invented metadata/mechanics/safety, premature prompts, and fake outputs | Eight named mutations | None |
 
+### Exercise video-research pilot package
+
+Introduced at `40937fe7cca4812ec5aa0f0fdff8bcad916c245e`; dependency wording was
+normalized without changing executable files at
+`e97522f3e68d9022aa7bd6c3203da5b2a2f41355`.
+
+| Path | Change | Why | Assertions/evidence | Production behavior impact |
+| --- | --- | --- | --- | --- |
+| `scripts/exercise-production/video-research-pilot-lib.mjs` | New deterministic candidate builder and validator | Record exact public evidence for a bounded ten-ID pilot without treating research as approval | Ten rows: nine `CANDIDATE_NEEDS_INDEPENDENT_REVIEW`, one `MISSING`, zero `APPROVED` | None |
+| `scripts/exercise-production/build-video-research-pilot.mjs` | New builder/check entry point | Reproduce the pilot byte-for-byte | `VIDEO_RESEARCH_REPRODUCIBILITY` | None |
+| `scripts/exercise-production/validate-video-research-pilot.mjs` | New offline validator | Fail closed on malformed, unbound, or prematurely approved research | Candidate URL/ID/source/status and source-fingerprint rules | None |
+| `scripts/exercise-production/video-research-pilot-proof.mjs` | New anti-circumvention suite | Attack approval, missing-result dishonesty, URL shape, publisher binding, canonical coverage, and source drift | Eight named mutations pass | None |
+| `scripts/exercise-production/verify-video-research-live.mjs` | New read-only public metadata verifier | Detect deleted/private/reassigned candidates before any later review package | 9/9 candidate IDs returned public metadata from the recorded publisher on 2026-08-22 | None; network read only |
+
+Live availability does not prove movement correctness, coaching suitability,
+rights, or independent approval. Those remain `EX-VIDEO-REVIEW-001`.
+
 ### Executive contract-fixture package
 
 Introduced at `1dc78d6751fb9269a75176f40ad5ba2483db651c`.
@@ -78,6 +113,19 @@ Introduced at `4863da1df56d7785304bb2090e75a6d18d991de8`.
 | `scripts/phase-ii-release/validate-evidence-manifest.mjs` | New manifest CLI | Fail closed on malformed final evidence | 4 fixture records / 7 verdict slots validation | None |
 | `scripts/phase-ii-release/release-evidence-proof.mjs` | New counter-proof suite | Prevent identity mismatch, status loopholes, path traversal, or unevidenced verdicts | Base assertion plus 8 named mutations; 9/9 total | None |
 
+### Release built-artifact manifest package
+
+Introduced at `67c6b2407447fd84679698647df6a7d5c14e1411`.
+
+| Path | Change | Why | Assertions/evidence | Production behavior impact |
+| --- | --- | --- | --- | --- |
+| `scripts/phase-ii-release/artifact-manifest-lib.mjs` | New deterministic file inventory and digest library | Bind future release evidence to exact built bytes instead of a branch name | Ordered relative paths, sizes, per-file SHA-256, candidate SHA, root label, tree digest | None |
+| `scripts/phase-ii-release/build-artifact-manifest.mjs` | New manifest CLI | Generate or verify the future accepted build manifest | Refuses missing/empty roots and symlinks | None |
+| `scripts/phase-ii-release/artifact-manifest-proof.mjs` | New fixture and mutation suite | Attack byte drift, identity drift, label drift, empty output, ordering, and symlink traversal | 7/7 focused proof cases | None |
+
+This tool has been proven only on synthetic fixtures; no final Web artifact
+manifest has been generated or declared.
+
 ## 3. Existing baseline tests changed
 
 None through the recorded heads.
@@ -87,7 +135,7 @@ None through the recorded heads.
   conditional.
 - No browser test was converted into an SSR/static-markup proof.
 
-The Exercise, Executive, and Release scripts above are entirely new in their
+The Food, Exercise, Executive, and Release scripts above are entirely new in their
 lane-owned directories. Changes between the two Exercise Phase II commits are
 explicitly described in section 2 instead of being hidden by the baseline-only
 comparison.
@@ -110,7 +158,7 @@ named, reviewed CI invocation with equivalent failure behavior.
 
 ## 5. Anti-weakening audit
 
-The recorded Exercise, Executive, and Release executable scripts were reviewed for the prohibited test
+The recorded Food, Exercise, Executive, and Release executable scripts were reviewed for the prohibited test
 shortcuts named in the launch brief:
 
 - no `.skip`, focused `.only`, or placeholder `todo` test;
@@ -128,10 +176,10 @@ These specify future tests but are not counted as passes:
 
 | Lane | Plan | Current truth |
 | --- | --- | --- |
-| Food | `docs/execution/qimmah-phase-ii/food/TEST-PLAN.md` | Contract plan at `8a78f86`; executable seed pipeline pending |
-| Exercise | `docs/execution/qimmah-phase-ii/exercise/TEST-PLAN.md` | Plan plus the focused executable packages listed above |
+| Food | `docs/execution/qimmah-phase-ii/food/TEST-PLAN.md` | Plan plus the deterministic quarantined seed package at `4a43806`; full licensed production corpus remains pending |
+| Exercise | `docs/execution/qimmah-phase-ii/exercise/TEST-PLAN.md` | Plan plus ledger, image-job, and video-pilot executable packages; human approval remains pending |
 | Executive | `docs/execution/qimmah-phase-ii/admin/TEST-PLAN.md` | Contract fixtures execute at `1dc78d6`; component/browser/server execution remains blocked |
-| Release | `docs/execution/qimmah-phase-ii/release/RELEASE-CONVERGENCE-PLAN.md` | Evidence schema executes at `4863da1`; persona/browser execution remains blocked |
+| Release | `docs/execution/qimmah-phase-ii/release/RELEASE-CONVERGENCE-PLAN.md` | Evidence schema and synthetic artifact-manifest proofs execute through `67c6b24`; persona/browser execution remains blocked |
 
 ## 7. Append protocol
 

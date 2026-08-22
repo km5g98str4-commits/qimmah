@@ -72,15 +72,25 @@ branches are read-only.
   `e7435544410bb4c151a017da55658e435c8e69c2` adds 37 mechanics-blocked image
   jobs, a confined media-path guard, eight ledger and eight job mutations, and
   generation/rollback runbooks without producing or approving an asset.
+- Exercise video-research checkpoint `40937fe7cca4812ec5aa0f0fdff8bcad916c245e`
+  is pushed, followed by dependency-schema normalization at
+  `e97522f3e68d9022aa7bd6c3203da5b2a2f41355`: a deterministic ten-exercise
+  pilot contains nine exact public candidates and one honest missing result,
+  while all ten remain unapproved pending independent human review. Offline
+  validation, byte-for-byte regeneration, eight named mutations, and a live
+  public-metadata verification of 9/9 candidates passed.
 - Published a single evidence-led production checklist covering isolation,
   rebind, gates, release personas, food, exercise media, Executive Dashboard,
   security/privacy, operations, and founder-only authority. Unchecked work stays
   visibly unchecked; the checklist grants no deployment or merge permission.
-- Food documentation checkpoint `8a78f86eec8b9b0019c021dfa6213a45e1a20763`
-  is pushed from the untouched `cc60adf` parent: canonical data contract,
-  source-of-truth ledger, status, and adversarial test plan only. Baseline food
-  proofs passed 25/25 and 123/123, with typecheck/lint/diff checks green; remote
-  59,941-row artifacts remain quarantined evidence, not adopted production data.
+- Food seed-pipeline checkpoint `4a4380654ed08fa73124a262411c056d12aa8049`
+  is pushed from the untouched `cc60adf` parent. The immutable 55-row source
+  (`SHA-256 038c7569c724d4aee5d3e167aa1efe1cce98528bc59ceaa46d1a7bcb0c2e1f7f`)
+  produces 51 accepted, four review, and zero rejected rows with exact row
+  conservation. All five emitted artifacts are checksummed, reproduce
+  byte-for-byte, and pass a fail-closed validator plus 25/25 named mutations.
+  The package remains `QUARANTINED_SEED_NOT_FOR_DISTRIBUTION`; no runtime data
+  or remote 59,941-row artifact was adopted.
 - Added an evidence-bound release-notes contract: immutable app/data/media/admin
   identities, Arabic/English claim parity, operator/security notes, validation,
   blockers, rollback, and seven verdicts. It remains explicitly unreleased and
@@ -104,9 +114,10 @@ branches are read-only.
   `PREPARED_NOT_EXECUTABLE` until the accepted candidate and passed evidence fill
   every field.
 - Established a continuous Phase II test-change ledger through the exact four
-  lane heads. It records eight new exercise scripts, the path-scope hardening,
-  sixteen named mutations across the two packages, and confirms that no baseline
-  test, shared gate, package manifest, or CI workflow has changed so far.
+  lane heads. It now records the Food seed pipeline, all Exercise media research
+  tools, Executive fixtures, the Release evidence contract, and the built-file
+  manifest tool. It confirms that no baseline test, shared gate, package
+  manifest, or CI workflow has changed so far.
 - Prepared an owner-operated deployment handoff that separates the web app,
   marketing/legal site, backend, and iOS targets; requires current external
   trigger evidence and immutable rollback IDs; and performs no external action.
@@ -120,12 +131,13 @@ branches are read-only.
 
 ## In Progress
 
-- Food lane is building the first deterministic production-data package from
-  the fingerprinted 55-row packaged source, with strict row accounting and
-  adversarial proof cases.
-- Exercise lane has completed the conservative review ledger and blocked image
-  queue; human mechanics authoring and visual review remain queued without
-  guessing or premature generation.
+- Food lane has completed the quarantined deterministic seed package; immutable
+  activation/rollback design and broader licensed-source acquisition remain in
+  progress without changing runtime data.
+- Exercise lane has completed the conservative review ledger, blocked image
+  queue, and ten-record video research pilot; human mechanics authoring and
+  independent visual review remain queued without guessing or premature
+  generation.
 - Executive contract fixtures are complete; UI, route, browser proof, and live
   provider remain blocked or deferred at their named seams.
 - Release evidence schema validation is executable; browser runner/selectors
@@ -158,6 +170,9 @@ branches are read-only.
 | `WS-CLOSURE-001` | Newer candidate/closure refs use words such as `final` and `READY`, but no founder acceptance was received in this task. | Explicit founder acceptance naming the authoritative SHA. | Update the baseline ledger before any rebase. | Compare only recorded dependencies against the accepted SHA; do not repeat completed source discovery. |
 | `WS-PACKAGE-LOCK-001` | The final dependency graph is unaccepted, so tooling remediation cannot be selected against an authoritative lockfile. | Founder-accepted Web Sovereign HEAD and exact package manifests. | Coordinator-owned build-tooling wave after final-HEAD rebind. | Re-audit, map reachability, apply reviewed upgrades, regenerate the lockfile, and run the full gate plus exact-SHA CI. |
 | `WS-DOC-RECONCILE-001` | Final product paths and build identity are required to reconcile stale release documents. | Founder-accepted Web Sovereign SHA and final route/build inventory. | Post-rebind documentation reconciliation. | Update commands/journeys, generate current release notes and production checklist, and cite the accepted build for every verdict. |
+| `FOOD-LICENSE-001` | The seed package includes Open Food Facts-derived evidence and cannot become a distributable production dataset without a reviewed rights decision. | None; this is a provenance/licensing approval, not a Web Sovereign artifact. | Dataset approval record before any activation pointer or runtime adapter is created. | Record the ODbL attribution/share-alike decision, approve or reject the package, then build only the authorized immutable dataset version. |
+| `EX-MECHANICS-001` | Missing exercise images cannot be generated safely from absent or unreviewed mechanics. | None; reviewed bilingual mechanics and safety notes are external editorial evidence. | Versioned authoring package before a later binding to the accepted media resolver. | Obtain reviewer identity/timestamp and reviewed start/end mechanics, build the next job schema, then generate only released jobs. |
+| `EX-VIDEO-REVIEW-001` | Nine exact public candidates have one-researcher evidence but no independent suitability approval. | None; independent human visual review is external editorial evidence. | Versioned review package before a later binding to the accepted exercise-detail/media resolver. | Review movement, equipment, variation, coaching fit, and rights per record; promote only signed accepted rows and rerun live availability. |
 | `OPS-DEPLOY-TRUTH-001` | Repository documents conflict on whether updating main triggers external Cloudflare deployment. | None; the blocker is current Cloudflare project/settings evidence from the founder or deployment owner. | Pre-merge/pre-deploy production checklist. | Record project IDs, branches, outputs, domains and triggers; reconcile runbooks before any authorized release action. |
 
 ## Risks
@@ -181,13 +196,13 @@ branches are read-only.
 
 ## Next Tasks
 
-1. Verify and record the food seed-pipeline checkpoint, including source hash,
-   row conservation, deterministic output, and named negative mutations.
-2. Add executable Executive Dashboard contract fixtures and fail-closed
-   mutations without adding a route, backend, or live product behavior.
-3. Produce the founder 10–15 minute QA checklist and a Phase II test-change
-   ledger bound to exact future evidence IDs.
-4. Prepare food dataset activation/rollback and deployment-owner handoff
-   runbooks without mutating external systems.
+1. Prepare the food dataset activation/rollback package without activating or
+   changing runtime data.
+2. Extend licensed-source acquisition and review planning without copying any
+   quarantined branch artifact.
+3. Keep the release test-change ledger and production checklist current at every
+   executable lane checkpoint.
+4. Define the coordinator-owned future gate union without editing `package.json`
+   before the final accepted dependency graph exists.
 5. Keep mechanics/video/media review work explicit and blocked where human
    evidence is absent; never convert queue presence into approval.

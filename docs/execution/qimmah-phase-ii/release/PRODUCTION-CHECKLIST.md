@@ -15,7 +15,8 @@ live database work, Salla mutation, or App Store/TestFlight submission.
 - [x] No Web Sovereign merge, rebase, cherry-pick, manual port, or file copy was used by the `-002` lanes.
 - [x] Superseded `/private/tmp` worktrees were preserved after host cleanup; no destructive recovery was attempted.
 - [x] Immediate commit-and-push cadence established on all four lanes.
-- [x] Food first checkpoint pushed at `8a78f86eec8b9b0019c021dfa6213a45e1a20763`.
+- [x] Food deterministic seed checkpoint pushed at `4a4380654ed08fa73124a262411c056d12aa8049`.
+- [x] Exercise video research and normalized dependency checkpoint pushed at `e97522f3e68d9022aa7bd6c3203da5b2a2f41355`.
 - [x] Executive architecture checkpoint pushed at `3824c08b1cd3dec488b143f3e17f16a268d3fbb4`; dependency schema corrected at `09dbf087a1acec45efd4739d7307fc9eb6e4edcd`.
 
 Evidence: central `STATUS.md`, `release/SOURCE-OF-TRUTH.md`, and remote `-002`
@@ -76,16 +77,18 @@ Current truth: `GO_MERGE_MAIN=NO-GO`; no accepted artifact or merge authority.
 - [x] Baseline catalog and packaged-source inventory completed read-only.
 - [x] Existing remote food branch audited without consumption.
 - [x] Isolated `CanonicalFoodV1` contract, source ledger, status, and test plan pushed.
-- [ ] Raw source files have immutable IDs and SHA-256 fingerprints.
-- [ ] Every parsed row is accepted or counted under one unique rejection record.
-- [ ] Short/malformed rows cannot disappear silently.
-- [ ] Negative nutrients and unit fallbacks produce named quality flags or rejection.
-- [ ] GTIN 8/12/13/14 checks and Arabic-digit normalization have counter-proofs.
+- [x] The 55-row seed source has an immutable ID, byte count, and SHA-256 fingerprint.
+- [x] Every seed row is accounted for exactly once: 51 accepted, four review, zero rejected.
+- [x] Short/malformed seed rows cannot disappear silently; a named mutation kills the build.
+- [x] Negative seed nutrients produce a named validation failure.
+- [x] Seed GTIN checksum validation has a named negative mutation.
+- [ ] Arabic-digit normalization has a dedicated counter-proof.
 - [ ] Exact GTIN, source ID, brand/name/size, and fuzzy-review dedupe stages are distinct.
-- [ ] Differing valid GTINs never merge automatically.
-- [ ] Every accepted row has provenance, normalization version, and raw-value traceability.
+- [x] A named seed counter-proof confirms differing valid GTINs do not merge automatically.
+- [x] Every accepted seed row has provenance, normalization version, source reference, and raw-value traceability.
 - [ ] Full accepted shards, conflict set, and review queue are available and checksummed.
 - [ ] Full artifacts reproduce byte-for-byte from fingerprinted inputs.
+- [x] The five quarantined seed artifacts reproduce byte-for-byte, carry exact checksums, and are bound to build ID `7bfe4cc245e45ce4d152f0b2956ab8f7e0cece71d95b6d27f63165f709c58ebe`.
 - [ ] ODbL attribution/share-alike decision approved before shipping OFF-derived data.
 - [ ] Saudi/SFDA source availability and permitted use recorded honestly.
 - [ ] Food production report derives all counts from final artifacts.
@@ -105,11 +108,13 @@ lane dependency register.
 - [x] Ledger validator, byte-for-byte regeneration, and eight named mutations pass.
 - [x] Asset path scope confines still pairs and machine diagrams to their separate approved roots; `MEDIA_PATH_SCOPE` rejects traversal.
 - [x] A deterministic 37-job image queue records missing mechanics as blocked; every prompt is null and every output is `NOT_GENERATED`.
+- [x] A deterministic ten-exercise video pilot records nine exact public candidates and one honest missing result; all remain unapproved.
+- [x] Video pilot validation, byte-for-byte regeneration, eight named mutations, and live public-metadata verification pass for 9/9 candidates.
 - [ ] Every image candidate has exercise/equipment/anatomy/start-end/safety/crop review.
 - [ ] Duplicate groups adjudicated; no different exercise silently shares approved media.
 - [ ] Original candidates produced for the 37 missing exercises with prompt/tool/version metadata.
-- [ ] Exact public video references researched and independently reviewed.
-- [ ] No YouTube search-result URL appears as an approved video.
+- [ ] Exact public video references researched and independently reviewed across the full 181-ID library.
+- [x] No YouTube search-result URL or pilot candidate appears as an approved video.
 - [ ] Arabic and English descriptions/steps/cues/mistakes/breathing meet the authored-content contract.
 - [x] Media rollback/version/checksum procedure documented; release activation remains undone.
 - [ ] Accepted Web surfaces use one approved resolver with honest fallback states.
