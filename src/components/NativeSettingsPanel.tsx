@@ -3,6 +3,7 @@ import type { Lang } from '@/lib/appPreferences'
 import { loadPreferences, setHapticsEnabled } from '@/lib/appPreferences'
 import {
   connectHealthKit,
+  isHealthKitPlatform,
   connectHealthWeight,
   disconnectHealthWeight,
   disconnectSteps,
@@ -12,7 +13,7 @@ import {
   type HealthKitPermission,
   type HealthPointSample,
 } from '@/lib/healthKit'
-import { getSteps, setSteps } from '@/lib/stepCounter'
+import { getSteps, writeSteps } from '@/lib/stepCounter'
 import { parseSafeNumber, sanitizeNumericInput } from '@/lib/validation'
 import { NATIVE_SETTINGS_COPY } from '@/data/nativeSettings'
 import { Icon } from './Icon'
@@ -116,10 +117,24 @@ export function NativeSettingsPanel({ lang }: { lang: Lang }) {
     setStepsUpdated(null)
   }
 
+  /** هل نحن على منصّة تملك HealthKit أصلًا؟ الويب: لا. */
+  const healthNative = isHealthKitPlatform()
+
+  /**
+   * حفظ يدويّ **مؤكَّد** — [FINAL-CONVERGENCE].
+   *
+   * كان يعلن «انحفظت خطواتك» من مخرَج `setSteps`، وهو يعيد **القيمة المطلوبة**
+   * لا نتيجة الكتابة: يمرّ على `safeStorage` ثم يبتلع فشله. فعند امتلاء التخزين
+   * أو حجبه تظهر رسالة نجاح والرقم لم يُحفظ (§5).
+   *
+   * والعلاج بسلطة المتجر نفسها لا بقراءةٍ بعد الكتابة في موضع النداء:
+   * `writeSteps` يعيد `StepWriteResult` وهو الكاتب الذي تستعمله `StepsCard`
+   * أصلًا — فيبقى للصدق مصدر واحد بدل عقدين لنفس الفعل.
+   */
   const saveManualSteps = () => {
-    const saved = setSteps(parseSafeNumber(manualSteps, { min: 0 }), undefined, 'manual')
-    setManualSteps(String(saved || ''))
-    setManualStepsMsg(copy.manualStepsSaved)
+    const written = writeSteps(parseSafeNumber(manualSteps, { min: 0 }), undefined, 'manual')
+    setManualSteps(String(written.steps || ''))
+    setManualStepsMsg(written.ok ? copy.manualStepsSaved : copy.manualStepsFailed)
   }
 
   const connectWeight = async () => {
@@ -178,7 +193,13 @@ export function NativeSettingsPanel({ lang }: { lang: Lang }) {
 
       {/* Steps — Apple Health, manual fallback always present */}
           <MetricRow icon="Footprints" title={copy.stepsTitle} body={copy.stepsBody} source={stepsSource} lang={lang} updated={stepsUpdated}>
-            <div className="flex flex-wrap gap-2">
+            {/* الويب لا يصل HealthKit إطلاقًا (`connectHealthKit` يردّ `unavailable`
+                خارج iOS دائمًا). فعرض «اربط» هنا نداءٌ لا ينجح مهما ضُغط — والصدق
+                أن نقول أين يعمل ونُبقي المسار العامل: الإدخال اليدوي أسفله. */}
+            {!healthNative && (
+              <p className="text-xs leading-relaxed text-ink-500" data-testid="health-native-only">{copy.healthNativeOnly}</p>
+            )}
+            <div className={healthNative ? 'flex flex-wrap gap-2' : 'hidden'}>
               <button type="button" onClick={() => void connectSteps()} disabled={busy !== null} className="btn-ghost px-4 py-2.5 text-sm disabled:opacity-50">
                 <Icon name="Footprints" className="h-4 w-4" />
                 {stepsConnected ? copy.refresh : copy.connect}

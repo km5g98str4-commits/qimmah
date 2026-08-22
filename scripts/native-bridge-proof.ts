@@ -10,6 +10,9 @@ import {
 import { getSteps, getStepSource, setSteps } from '@/lib/stepCounter'
 import { latestWeightImport, loadLogs } from '@/lib/measurementLog'
 import { shouldPlayHaptic } from '@/lib/nativeFeedback'
+import { NATIVE_SETTINGS_COPY } from '@/data/nativeSettings'
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 
 // [QIM-WEB-FOUNDER-UX-003/حزمة ٢] هذا الإثبات يمارس **كتّاب حالة مدفوعة**
 // (تمرين/تغذية/قياسات). بعد بوّابة الوصول صار الافتراض منعًا، فيلزم أن يعلن
@@ -98,4 +101,30 @@ assert.equal(shouldPlayHaptic(true, false, false), false, 'settings toggle disab
 assert.equal(shouldPlayHaptic(true, true, true), false, 'Reduce Motion disables haptics')
 assert.equal(shouldPlayHaptic(true, true, false), true)
 
-console.log('✅ native bridge proof: per-metric permissions (steps/weight/HR), on-demand only, manual fallback, imported-weight labeling, HR honesty, haptics')
+// ══ [FINAL-CONVERGENCE] لوحة الصحّة على الويب: لا نداء مستحيل ولا نجاح مكذوب ══
+//
+// عطلان من صنف واحد في `NativeSettingsPanel` (تُركَّب على الويب عبر `ProfileV2`):
+//   ١) زرّ «اربط Apple Health» معروض على الويب، و`connectHealthKit` يردّ
+//      `unavailable` دائمًا خارج iOS — نداءٌ لا ينجح مهما ضُغط.
+//   ٢) `saveManualSteps` كان يعلن النجاح من مخرَج `setSteps` — وهو يعيد القيمة
+//      المطلوبة لا نتيجة الكتابة.
+// والعلاج بسلطة المتجر نفسها: `writeSteps` يعيد `StepWriteResult`، وهو الكاتب
+// الذي تستعمله `StepsCard` أصلًا — فيبقى للصدق مصدر واحد لا عقدان.
+{
+  const panel = readFileSync(resolve(process.cwd(), 'src/components/NativeSettingsPanel.tsx'), 'utf8')
+  assert.match(panel, /const healthNative = isHealthKitPlatform\(\)/, 'the panel must know the platform')
+  assert.match(panel, /data-testid="health-native-only"/, 'web must state where Health sync actually works')
+  assert.match(panel, /const written = writeSteps\(/, 'manual save must use the checked writer')
+  assert.match(panel, /written\.ok \? copy\.manualStepsSaved : copy\.manualStepsFailed/,
+    'manual save must be able to announce failure')
+  assert.equal(/setSteps\(/.test(panel), false, 'the unchecked writer must not remain in this panel')
+  assert.equal(NATIVE_SETTINGS_COPY.ar.manualStepsFailed.length > 0, true)
+  assert.equal(NATIVE_SETTINGS_COPY.en.healthNativeOnly.length > 0, true)
+
+  // ⚔️ التأكيد المضادّ: نزع البوّابة يُكتشف — المحاكاة تُغيّر النصّ فعلًا.
+  assert.equal(/const healthNative = isHealthKitPlatform\(\)/.test(
+    panel.replace('const healthNative = isHealthKitPlatform()', 'const healthNative = true')), false,
+    'the counter-simulation must actually remove the gate, otherwise it proves nothing')
+}
+
+console.log('✅ native bridge proof: per-metric permissions (steps/weight/HR), on-demand only, manual fallback, imported-weight labeling, HR honesty, haptics, web-health honesty')
