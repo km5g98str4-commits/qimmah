@@ -15,9 +15,11 @@ import { PREFS_KEY } from '@/lib/appPreferences'
 import { AdminShell } from '@/admin/ui/AdminShell'
 import { UserTable } from '@/admin/ui/UserTable'
 import { UserDetailPanel } from '@/admin/ui/UserDetail'
+import { CodesPanel } from '@/admin/ui/CodesPanel'
 import { resolveAdminRole, ADMIN_ROLE_CLAIM, CLOSED_DECISION } from '@/admin/auth/adminRole'
 import { FIXTURE_SCENARIOS, fixtureFor, largeUserSet, userDetailFixture, type FixtureScenario } from '@/admin/contract/fixtures'
-import { ready } from '@/admin/contract/types'
+import { ready, unavailable } from '@/admin/contract/types'
+import type { AdminCodePage } from '@/admin/contract/types'
 import { METRIC_REGISTRY } from '@/admin/contract/metrics'
 import { adminStrings } from '@/i18n/dict/admin'
 import type { Lang } from '@/lib/appPreferences'
@@ -171,6 +173,72 @@ const SENSITIVE_WORDS = ['إصابة', 'إصابات', 'دواء', 'أدوية',
 const found = SENSITIVE_WORDS.filter((w) => detailHtml.includes(w) && !detailHtml.includes(`لا تدخل هذي الشاشة`))
 check(`صفحة المستخدم بلا حقل حسّاس (${SENSITIVE_WORDS.length} كلمات مفحوصة)`, found.length === 0 || detailHtml.includes('ما تدخل هذي الشاشة'))
 check('حدّ الحساسية معروض في الشاشة', detailHtml.includes('ما تدخل هذي الشاشة إطلاقًا'))
+
+// ═══════════ ٨) لوحة الأكواد [ADMIN-R4] ═══════════
+// ⚠️ **الرسم فحصٌ لا زينة**: مكوّن يُمرَّر دائمًا من `AdminRoute` وينهار عند
+// الرسم عطلٌ لا يكشفه مترجم ولا فحص بنيوي.
+const CODE_PAGE: AdminCodePage = {
+  rows: [
+    {
+      codeId: 'c1', label: 'ramadan', status: 'issued', durationDays: 30, maxRedemptions: 5,
+      redemptionCount: 1, startsAt: '2026-08-01T00:00:00.000Z', expiresAt: null,
+      createdBy: 'founder:u1', createdReason: 'حملة رمضان', createdAt: '2026-08-01T00:00:00.000Z',
+    },
+    {
+      codeId: 'c2', label: null, status: 'disabled', durationDays: 14, maxRedemptions: 1,
+      redemptionCount: 0, startsAt: '2026-07-01T00:00:00.000Z', expiresAt: null,
+      createdBy: 'founder:u1', createdReason: 'اختبار', createdAt: '2026-07-01T00:00:00.000Z',
+    },
+  ],
+  total: 2, page: 1, pageSize: 25,
+}
+const codesProps = {
+  page: ready(CODE_PAGE, '2026-08-22T00:00:00.000Z'),
+  live: 'live' as const,
+  search: '',
+  onSearch: () => {},
+  onIssue: () => {},
+  onToggle: () => {},
+  issued: null,
+  onDismissIssued: () => {},
+  writeError: null,
+}
+const codesHtml = render(<CodesPanel {...codesProps} />, 'ar')
+check('لوحة الأكواد تُرسم', codesHtml.includes('data-codes-panel="true"'))
+check('كل كود صفٌّ مُعلَّم', (codesHtml.match(/data-code-row=/g) ?? []).length === 2)
+check('الحالتان مترجمتان لا خامتان', codesHtml.includes('صادر') && codesHtml.includes('معطّل'))
+// ⚠️ **سبب غياب زرّ المنح الدائم معروض للمؤسس** — الزرّ الغائب بلا تفسير
+// يُقرأ «ميزة ناقصة»، والمكتوب يُقرأ «قرار».
+check('سبب غياب المنح الدائم معروض في الشاشة', codesHtml.includes('مفتاح الخادم'))
+// وقائمة غير متاحة **لا تُرسم جدولًا فارغًا يبدو جوابًا**.
+const codesGap = render(
+  <CodesPanel {...codesProps} page={unavailable<AdminCodePage>('NEEDS_BACKEND')} live="rpc-missing" />,
+  'ar',
+)
+check('قائمة غير متاحة لا تُرسم جدولًا فارغًا', !codesGap.includes('data-code-row=') && codesGap.includes('غير متاح'))
+// والكود الصادر يُعرض **مع تحذير الظهور الواحد**.
+const issuedHtml = render(
+  <CodesPanel
+    {...codesProps}
+    issued={{ id: 'c9', code: 'WZVZJ2WZ34VJ', label: 'ramadan', durationDays: 30, maxRedemptions: 5, expiresAt: null, issuedAt: '2026-08-22T00:00:00.000Z' }}
+  />,
+  'ar',
+)
+check('الكود الصادر معروض', issuedHtml.includes('WZVZJ2WZ34VJ'))
+check('وتحذير الظهور الواحد معه', issuedHtml.includes('المرّة الوحيدة'))
+// وفشل الكتابة **يُعرض باسم حالته** لا يُبتلع.
+const writeFailHtml = render(<CodesPanel {...codesProps} writeError="denied-by-server" />, 'ar')
+check('فشل الكتابة معروض باسم حالته', writeFailHtml.includes('data-code-write-error="denied-by-server"'))
+// وبالإنجليزية تنقلب كاملة بلا تسرّب.
+const codesEn = render(<CodesPanel {...codesProps} />, 'en')
+check('لوحة الأكواد بالإنجليزية', codesEn.includes('Issued') && codesEn.includes('Disabled'))
+check('لا نصّ عربي متسرّب في الإنجليزية', !codesEn.includes('صادر'))
+
+// ═══════════ ٩) الكتلة التشغيلية في صفحة الحساب ═══════════
+check('تفصيل الاستحقاق معروض', detailHtml.includes('حالة الاستحقاق') && detailHtml.includes('Premium فعّال'))
+check('أثر التجارة معروض', detailHtml.includes('آخر رقم طلب') && detailHtml.includes('SLA-10241'))
+// و«بلا انتهاء» ليست «—»: `null` جوابُ خادم لا جهلٌ.
+check('انتهاء null يُعرض «بلا انتهاء» لا شرطة', detailHtml.includes('بلا انتهاء'))
 
 console.log(`\n✅ ${pass} فحص رسم — الشاشة تُخرج ما يقوله العقد\n`)
 

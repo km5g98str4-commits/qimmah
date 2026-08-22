@@ -31,6 +31,8 @@ import type { LiveReadState } from '../contract/liveSource'
 import { buildAttentionQueue, detectedCount } from '../model/attention'
 import { AdminDenied } from './AdminDenied'
 import { AttentionPanel } from './AttentionPanel'
+import { CodesPanel } from './CodesPanel'
+import type { CodesPanelProps } from './CodesPanel'
 import { FunnelChart, TrendChart } from './Charts'
 import { MetricCard } from './MetricCard'
 import { UserDetailPanel } from './UserDetail'
@@ -81,7 +83,7 @@ function PostureStrip({ platform }: { platform: PlatformPosture }) {
   )
 }
 
-type Tab = 'overview' | 'users' | 'charts'
+type Tab = 'overview' | 'users' | 'codes' | 'charts'
 
 interface AdminShellProps {
   decision: AdminRoleDecision
@@ -102,6 +104,11 @@ interface AdminShellProps {
    */
   detailOpen?: boolean
   /**
+   * لوحة الأكواد. **بلا هذه الخصائص لا يظهر التبويب أصلًا** — تبويبٌ يفتح على
+   * شاشة لا تفعل شيئًا أسوأ من تبويب غائب.
+   */
+  codes?: CodesPanelProps
+  /**
    * حالة القراءة الحيّة. **بلا قيمة ⇒ `'not-founder'`** — الافتراض الأقلّ ادّعاءً:
    * مكوّن يُرسَم بلا إخبار عن مصدره لا يجوز أن يقول «حيّ».
    */
@@ -118,6 +125,7 @@ export function AdminShell({
   userPaging,
   detailLive,
   detailOpen,
+  codes,
   live = 'not-founder',
 }: AdminShellProps) {
   const lang = useLang()
@@ -138,6 +146,8 @@ export function AdminShell({
   const TABS: { id: Tab; label: string; icon: string }[] = [
     { id: 'overview', label: t.shell.navOverview, icon: 'LayoutGrid' },
     { id: 'users', label: t.shell.navUsers, icon: 'Users' },
+    // يظهر حين تُمرَّر قدرته فقط — لا تبويب يَعِد بما لا يعمل.
+    ...(codes ? [{ id: 'codes' as Tab, label: t.codes.heading, icon: 'KeyRound' }] : []),
     { id: 'charts', label: t.shell.navCharts, icon: 'BarChart3' },
   ]
 
@@ -257,6 +267,26 @@ export function AdminShell({
             <MetricCard metricId="commerce.codesRedeemed" value={snapshot.commerce.codesRedeemed} />
             <MetricCard metricId="commerce.codesUnused" value={snapshot.commerce.codesUnused} />
             <MetricCard metricId="commerce.redemptionFailures24h" value={snapshot.commerce.redemptionFailures24h} />
+            <MetricCard metricId="commerce.webhookProcessed" value={snapshot.commerce.webhookProcessed} />
+            <MetricCard metricId="commerce.webhookPending" value={snapshot.commerce.webhookPending} />
+            <MetricCard metricId="commerce.webhookRetried" value={snapshot.commerce.webhookRetried} />
+            <MetricCard metricId="commerce.grantsManual" value={snapshot.commerce.grantsManual} />
+          </Section>
+
+          {/*
+            ═══ رحلة الزائر — قسمٌ كل بنوده «غير مقيسة» ═══
+            بقاؤه معروضًا وهو فارغ هو **المقصد**: القمع الذي يبدأ من «شراء»
+            يُقرأ كأن كل زائر يشتري. وهذا القسم يقول أين ينقطع علمنا بالضبط،
+            وأن ما ينقص خطّ أحداث بأكمله لا هجرة تُطبَّق.
+          */}
+          <Section id="journey" icon="Footprints">
+            <MetricCard metricId="journey.landing" value={snapshot.journey.landing} />
+            <MetricCard metricId="journey.onboardingStarted" value={snapshot.journey.onboardingStarted} />
+            <MetricCard metricId="journey.onboardingCompleted" value={snapshot.journey.onboardingCompleted} />
+            <MetricCard metricId="journey.reveal" value={snapshot.journey.reveal} />
+            <MetricCard metricId="journey.premiumCta" value={snapshot.journey.premiumCta} />
+            <MetricCard metricId="journey.trialCta" value={snapshot.journey.trialCta} />
+            <MetricCard metricId="journey.sallaClick" value={snapshot.journey.sallaClick} />
           </Section>
 
           <Section id="funnel" icon="SlidersHorizontal">
@@ -304,6 +334,9 @@ export function AdminShell({
         </div>
       ) : null}
 
+      {/* ——— الأكواد ——— */}
+      {tab === 'codes' && codes ? <div className="mt-4">{<CodesPanel {...codes} />}</div> : null}
+
       {/* ——— الاتجاهات ——— */}
       {tab === 'charts' ? (
         <div className="mt-4 grid gap-4 lg:grid-cols-2">
@@ -315,6 +348,8 @@ export function AdminShell({
             stages={snapshot.entitlement.activationFunnel}
           />
           <FunnelChart title={t.charts.onboardingFunnel} metricId="users.total" stages={snapshot.onboarding.funnel} />
+          {/* قمع الرحلة الكامل — تسع مراحل، سبعٌ منها بلا مصدر ومعلَنة كذلك. */}
+          <FunnelChart title={t.charts.journeyFunnel} metricId="journey.landing" stages={snapshot.journey.funnel} />
           <TrendChart
             title={t.charts.workoutTrend}
             metricId="activity.workoutsCompleted7d"

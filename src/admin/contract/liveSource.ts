@@ -26,15 +26,27 @@
 
 import { getSupabase } from '@/lib/supabaseClient'
 import { loadExecutiveSnapshot } from './source'
-import { DASHBOARD_RPC, USER_DETAIL_RPC, USER_PAGE_RPC } from './metrics'
+import {
+  CODE_ENABLE_RPC,
+  CODE_ISSUE_RPC,
+  CODE_PAGE_RPC,
+  DASHBOARD_RPC,
+  REVOKE_ACCESS_RPC,
+  USER_DETAIL_RPC,
+  USER_PAGE_RPC,
+} from './metrics'
 import { isAdmin } from '../auth/adminRole'
 import type { AdminRoleDecision } from '../auth/adminRole'
 import type {
+  AdminCodePage,
+  AdminCodeRow,
   AdminUserDetail,
   AdminUserPage,
   AdminUserRow,
+  CodeStatus,
   EntitlementView,
   ExecutiveSnapshot,
+  IssuedCode,
   MetricValue,
   OnboardingView,
   SeriesPoint,
@@ -190,10 +202,18 @@ export async function loadLiveExecutiveSnapshot(decision: AdminRoleDecision): Pr
       // ⚠️ **لا مصدر**: لا يُقرأ من الحمولة ولو أُضيف مفتاح بهذا الاسم يومًا.
       redemptionFailures24h: base.commerce.redemptionFailures24h,
       revokedActive: num(e.revokedActive, asOf, base.commerce.revokedActive),
+      webhookProcessed: num(c.webhookProcessed, asOf, base.commerce.webhookProcessed),
+      webhookPending: num(c.webhookPending, asOf, base.commerce.webhookPending),
+      // ⚠️ **لا مصدر**: لا عمود محاولات في الجدول. لا يُقرأ ولو حُشي المفتاح.
+      webhookRetried: base.commerce.webhookRetried,
+      grantsManual: num(c.grantsManual, asOf, base.commerce.grantsManual),
     },
-    // الأخطاء والتخصيص: بلا مسار وبلا مقام غير متحيّز — تبقى كما بناها الغياب.
+    // الأخطاء والتخصيص والرحلة: بلا مسار وبلا مقام غير متحيّز — تبقى كما بناها
+    // الغياب. و**الرحلة تحديدًا لا تُقرأ من الحمولة إطلاقًا**: خطّ الأحداث غير
+    // موجود، فأي مفتاح بهذه الأسماء في ردّ الخادم رقمٌ لا نعرف من أين جاء.
     errors: base.errors,
     onboarding: base.onboarding,
+    journey: base.journey,
   }
 
   return { snapshot, live: 'live' }
@@ -390,5 +410,176 @@ export async function loadLiveUserDetail(
       },
     },
     live: 'live',
+  }
+}
+
+
+// ═══════════════════ إدارة أكواد الوصول ═══════════════════
+//
+// ⚠️ **الخطّ الفاصل مُعاد هنا كي لا يُقرأ الكود بلا سببه:**
+// المؤسس من المتصفّح **يُغلق الأبواب ويفتح بابًا موقوتًا قابلًا للسحب**؛
+// ومنح Premium الدائم ورفع الحظر يبقيان بيد **مفتاح الخادم** — ولا مُغلِّف
+// لأيّهما في هذا الملف بأي حال. (الأسماء والتعليل في رأس هجرة
+// `20260822120002_founder_code_management.sql`؛ لا تُكتب هنا كي يبقى كود اللوحة
+// خاليًا من كل اسم مميّز — يحرسه `test:admin-secret-leak` بالاسم لا بالسياق.)
+
+const CODE_STATUSES: readonly CodeStatus[] = ['issued', 'redeemed', 'expired', 'disabled']
+
+export interface LiveCodePageResult {
+  readonly page: MetricValue<AdminCodePage>
+  readonly live: LiveReadState
+}
+
+/** نتيجة فعل كتابة — **مسمّاة دائمًا**، فلا زرّ يُضغط ولا يُعرف ما جرى. */
+export type WriteOutcome<T> = { readonly ok: true; readonly value: T } | { readonly ok: false; readonly live: LiveReadState }
+
+/** يحوّل صفّ كود خامًا. حالة خارج القائمة تُسقط الصفحة ولا تُخترع. */
+function toCodeRow(raw: Record<string, unknown>): AdminCodeRow | null {
+  const status = CODE_STATUSES.find((v) => v === raw.status)
+  if (typeof raw.code_id !== 'string' || typeof raw.created_at !== 'string' || !status) return null
+  if (typeof raw.duration_days !== 'number' || typeof raw.max_redemptions !== 'number') return null
+  if (typeof raw.redemption_count !== 'number') return null
+  return {
+    codeId: raw.code_id,
+    label: typeof raw.label === 'string' ? raw.label : null,
+    status,
+    durationDays: raw.duration_days,
+    maxRedemptions: raw.max_redemptions,
+    redemptionCount: raw.redemption_count,
+    startsAt: typeof raw.starts_at === 'string' ? raw.starts_at : raw.created_at,
+    expiresAt: typeof raw.expires_at === 'string' ? raw.expires_at : null,
+    createdBy: typeof raw.created_by === 'string' ? raw.created_by : '',
+    createdReason: typeof raw.created_reason === 'string' ? raw.created_reason : '',
+    createdAt: raw.created_at,
+  }
+}
+
+/** يحمّل صفحة من جدول الأكواد. البحث بالوسم والسبب والحالة — **لا بالكود**. */
+export async function loadLiveCodePage(
+  decision: AdminRoleDecision,
+  opts: { search?: string; page?: number; pageSize?: number } = {},
+): Promise<LiveCodePageResult> {
+  const gap = unavailable<AdminCodePage>('NEEDS_BACKEND')
+  if (!isAdmin(decision)) return { page: gap, live: 'not-founder' }
+
+  const client = await getSupabase()
+  if (!client) return { page: gap, live: 'no-backend' }
+
+  const page = Math.max(1, Math.trunc(opts.page ?? 1))
+  const pageSize = Math.min(200, Math.max(1, Math.trunc(opts.pageSize ?? 25)))
+
+  try {
+    const { data, error } = await client.rpc(CODE_PAGE_RPC, {
+      p_search: opts.search ?? '',
+      p_page: page,
+      p_page_size: pageSize,
+    })
+    if (error) return { page: gap, live: classify(error) }
+    if (!Array.isArray(data)) return { page: gap, live: 'failed' }
+
+    const rows: AdminCodeRow[] = []
+    let total: number | null = null
+    for (const item of data) {
+      if (!item || typeof item !== 'object') return { page: gap, live: 'failed' }
+      const rec = item as Record<string, unknown>
+      const row = toCodeRow(rec)
+      // صفّ مشوّه يُسقط الصفحة **كلّها**: نصف قائمة أكواد أخطر من لا قائمة.
+      if (!row) return { page: gap, live: 'failed' }
+      rows.push(row)
+      if (typeof rec.total_rows === 'number' && Number.isFinite(rec.total_rows)) total = rec.total_rows
+    }
+    const measuredTotal = total === null ? rows.length : total
+    return { page: ready({ rows, total: measuredTotal, page, pageSize }, new Date().toISOString()), live: 'live' }
+  } catch {
+    return { page: gap, live: 'failed' }
+  }
+}
+
+/**
+ * يُصدر كودًا. `code` فارغًا ⇒ **يولّده الخادم** — وهو المسار الافتراضي:
+ * كود يكتبه إنسان يبدو عشوائيًا وليس كذلك (`RAMADAN2345` يمرّ عقد الشكل كاملًا).
+ */
+export async function issueAccessCode(
+  decision: AdminRoleDecision,
+  input: { reason: string; label?: string; durationDays: number; maxRedemptions: number; code?: string },
+): Promise<WriteOutcome<IssuedCode>> {
+  if (!isAdmin(decision)) return { ok: false, live: 'not-founder' }
+  const client = await getSupabase()
+  if (!client) return { ok: false, live: 'no-backend' }
+  try {
+    const { data, error } = await client.rpc(CODE_ISSUE_RPC, {
+      p_reason: input.reason,
+      p_label: input.label ?? null,
+      p_duration_days: input.durationDays,
+      p_max_redemptions: input.maxRedemptions,
+      p_expires_at: null,
+      p_code: input.code ?? null,
+    })
+    if (error) return { ok: false, live: classify(error) }
+    const rec = (data ?? {}) as Record<string, unknown>
+    // بلا نصّ كود في الرد **لا نجاح يُعلَن**: النجاح هنا هو أن يظهر الكود مرّة.
+    if (typeof rec.id !== 'string' || typeof rec.code !== 'string') return { ok: false, live: 'failed' }
+    return {
+      ok: true,
+      value: {
+        id: rec.id,
+        code: rec.code,
+        label: typeof rec.label === 'string' ? rec.label : null,
+        durationDays: typeof rec.duration_days === 'number' ? rec.duration_days : input.durationDays,
+        maxRedemptions: typeof rec.max_redemptions === 'number' ? rec.max_redemptions : input.maxRedemptions,
+        expiresAt: typeof rec.expires_at === 'string' ? rec.expires_at : null,
+        issuedAt: typeof rec.issued_at === 'string' ? rec.issued_at : new Date().toISOString(),
+      },
+    }
+  } catch {
+    return { ok: false, live: 'failed' }
+  }
+}
+
+/** يعطّل كودًا أو يعيد تشغيله. **لا حذف** — صفّ الكود أثر إداري. */
+export async function setAccessCodeEnabled(
+  decision: AdminRoleDecision,
+  codeId: string,
+  enabled: boolean,
+  reason: string,
+): Promise<WriteOutcome<boolean>> {
+  if (!isAdmin(decision)) return { ok: false, live: 'not-founder' }
+  const client = await getSupabase()
+  if (!client) return { ok: false, live: 'no-backend' }
+  try {
+    const { data, error } = await client.rpc(CODE_ENABLE_RPC, {
+      p_code_id: codeId,
+      p_enabled: enabled,
+      p_reason: reason,
+    })
+    if (error) return { ok: false, live: classify(error) }
+    const rec = (data ?? {}) as Record<string, unknown>
+    if (typeof rec.enabled !== 'boolean') return { ok: false, live: 'failed' }
+    return { ok: true, value: rec.enabled }
+  } catch {
+    return { ok: false, live: 'failed' }
+  }
+}
+
+/**
+ * يسحب وصول حساب.
+ * **ولا نظير له للمنح في هذا الملف** — سكّ وصول دائم فعل مفتاح خادم لا فعل
+ * متصفّح، ورفع الحظر كذلك. الاتجاه المسموح من هنا واحد: **يسحب ولا يمنح**.
+ */
+export async function revokeUserAccess(
+  decision: AdminRoleDecision,
+  userId: string,
+  reason: string,
+): Promise<WriteOutcome<string>> {
+  if (!isAdmin(decision)) return { ok: false, live: 'not-founder' }
+  const client = await getSupabase()
+  if (!client) return { ok: false, live: 'no-backend' }
+  try {
+    const { data, error } = await client.rpc(REVOKE_ACCESS_RPC, { p_user_id: userId, p_reason: reason })
+    if (error) return { ok: false, live: classify(error) }
+    if (typeof data !== 'string') return { ok: false, live: 'failed' }
+    return { ok: true, value: data }
+  } catch {
+    return { ok: false, live: 'failed' }
   }
 }

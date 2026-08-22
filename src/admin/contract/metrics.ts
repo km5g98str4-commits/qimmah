@@ -39,6 +39,16 @@ export const DASHBOARD_RPC = 'founder_executive_snapshot'
 export const USER_PAGE_RPC = 'founder_user_page'
 /** دالة صفحة الحساب الواحد — تُطلب عند التعمّق وحده، لا مع الجدول. */
 export const USER_DETAIL_RPC = 'founder_user_detail'
+/** دوال إدارة أكواد الوصول — قراءةً وكتابةً، كلها خلف `require_founder()`. */
+export const CODE_PAGE_RPC = 'founder_code_page'
+export const CODE_ISSUE_RPC = 'founder_issue_access_code'
+export const CODE_ENABLE_RPC = 'founder_set_code_enabled'
+/**
+ * سحب وصول حساب. **ولا نظير له للمنح**: منح Premium الدائم يبقى بيد **مفتاح
+ * الخادم** عمدًا — سكّ وصول دائم لا يخرج من متصفّح. التعليل الكامل في رأس
+ * `20260822120002_founder_code_management.sql`.
+ */
+export const REVOKE_ACCESS_RPC = 'founder_revoke_access'
 
 export const METRIC_REGISTRY: readonly MetricDefinition[] = [
   // ─────────────────────────────────────────────────────────────────────
@@ -609,6 +619,177 @@ export const METRIC_REGISTRY: readonly MetricDefinition[] = [
     owner: 'product-decision',
     availability: 'IMPOSSIBLE_WITHOUT_CONSENT_CHANGE',
     unavailableReasonKey: 'reason.onboardingBias',
+  },
+
+  // ─────────────────────────────────────────────────────────────────────
+  // رحلة المستخدم — **الكتلة التي لا مصدر لها بالكامل** [ADMIN-R4].
+  //
+  // ⚠️ ولذلك هي هنا: حذفها من السجلّ كان سيجعل القمع يبدأ من «شراء» فيُقرأ
+  // كأن كل زائر يشتري. ووضع صفر مكانها كان سيقول «ما دخل أحد» عن شيء **لا
+  // نقيسه أصلًا**. البند المعلَن «غير مقيس» هو الجواب الثالث الوحيد الصادق.
+  //
+  // ما ينقص ليست دالة خادم بل **خطّ أحداث عميل بأكمله**: `trackLocal()` محلّي
+  // ولا يغادر الجهاز، ولا يوجد مسار يستقبل حدثًا واحدًا. تطبيق أي هجرة لا يرفع
+  // هذه البنود، ولذلك درجتها `source-system-missing` لا `endpoint-missing`.
+  // ─────────────────────────────────────────────────────────────────────
+  {
+    id: 'journey.landing',
+    labelKey: 'journey.landing',
+    group: 'journey',
+    source: 'لا مصدر: لا خطّ تحليلات عميل يصل الخادم (trackLocal محلّي)',
+    aggregation: 'count-distinct',
+    privacyClass: 'aggregate',
+    requiredRole: 'founder',
+    refresh: '1h',
+    owner: 'backend',
+    availability: 'NEEDS_BACKEND',
+    backendGap: 'source-system-missing',
+    unavailableReasonKey: 'reason.notInstrumented',
+  },
+  {
+    id: 'journey.onboardingStarted',
+    labelKey: 'journey.onboardingStarted',
+    group: 'journey',
+    source: 'لا مصدر: بدء التخصيص حدث عميل لا يُرسَل',
+    aggregation: 'count-distinct',
+    privacyClass: 'aggregate',
+    requiredRole: 'founder',
+    refresh: '1h',
+    owner: 'backend',
+    availability: 'NEEDS_BACKEND',
+    backendGap: 'source-system-missing',
+    unavailableReasonKey: 'reason.notInstrumented',
+  },
+  {
+    id: 'journey.onboardingCompleted',
+    labelKey: 'journey.onboardingCompleted',
+    group: 'journey',
+    source: 'لا مصدر: إكمال التخصيص حدث عميل لا يُرسَل',
+    aggregation: 'count-distinct',
+    privacyClass: 'aggregate',
+    requiredRole: 'founder',
+    refresh: '1h',
+    owner: 'backend',
+    availability: 'NEEDS_BACKEND',
+    backendGap: 'source-system-missing',
+    unavailableReasonKey: 'reason.notInstrumented',
+  },
+  {
+    id: 'journey.reveal',
+    labelKey: 'journey.reveal',
+    group: 'journey',
+    source: 'لا مصدر: الوصول إلى معاينة الخطة حدث عميل لا يُرسَل',
+    aggregation: 'count-distinct',
+    privacyClass: 'aggregate',
+    requiredRole: 'founder',
+    refresh: '1h',
+    owner: 'backend',
+    availability: 'NEEDS_BACKEND',
+    backendGap: 'source-system-missing',
+    unavailableReasonKey: 'reason.notInstrumented',
+  },
+  {
+    id: 'journey.premiumCta',
+    labelKey: 'journey.premiumCta',
+    group: 'journey',
+    source: 'لا مصدر: ضغط زرّ Premium حدث عميل لا يُرسَل',
+    aggregation: 'count-distinct',
+    privacyClass: 'aggregate',
+    requiredRole: 'founder',
+    refresh: '1h',
+    owner: 'backend',
+    availability: 'NEEDS_BACKEND',
+    backendGap: 'source-system-missing',
+    unavailableReasonKey: 'reason.notInstrumented',
+  },
+  {
+    id: 'journey.trialCta',
+    labelKey: 'journey.trialCta',
+    group: 'journey',
+    source: 'لا مصدر: ضغط زرّ التجربة حدث عميل لا يُرسَل',
+    aggregation: 'count-distinct',
+    privacyClass: 'aggregate',
+    requiredRole: 'founder',
+    refresh: '1h',
+    owner: 'backend',
+    availability: 'NEEDS_BACKEND',
+    backendGap: 'source-system-missing',
+    unavailableReasonKey: 'reason.notInstrumented',
+  },
+  {
+    id: 'journey.sallaClick',
+    labelKey: 'journey.sallaClick',
+    group: 'journey',
+    source: 'لا مصدر: الخروج إلى سلة حدث عميل لا يُرسَل',
+    aggregation: 'count-distinct',
+    privacyClass: 'aggregate',
+    requiredRole: 'founder',
+    refresh: '1h',
+    owner: 'backend',
+    availability: 'NEEDS_BACKEND',
+    backendGap: 'source-system-missing',
+    unavailableReasonKey: 'reason.notInstrumented',
+  },
+
+  // ── تفصيل التجارة [ADMIN-R4] ──
+  {
+    id: 'commerce.webhookProcessed',
+    labelKey: 'commerce.webhookProcessed',
+    group: 'commerce',
+    source: "public.salla_webhook_events → count(classification = 'processed')",
+    aggregation: 'count',
+    privacyClass: 'aggregate',
+    requiredRole: 'founder',
+    refresh: '5m',
+    owner: 'backend',
+    availability: 'NEEDS_BACKEND',
+    backendGap: 'endpoint-missing',
+    unavailableReasonKey: 'reason.migrationPending',
+  },
+  {
+    id: 'commerce.webhookPending',
+    labelKey: 'commerce.webhookPending',
+    group: 'commerce',
+    source: "public.salla_webhook_events → count(classification in ('received','verified'))",
+    aggregation: 'count',
+    privacyClass: 'aggregate',
+    requiredRole: 'founder',
+    refresh: '5m',
+    owner: 'backend',
+    availability: 'NEEDS_BACKEND',
+    backendGap: 'endpoint-missing',
+    unavailableReasonKey: 'reason.migrationPending',
+  },
+  {
+    // ⚠️ **لا عمود إعادة محاولة في الجدول**، ولا يرفعه تطبيق هجرة. الحدث
+    // المُعاد يصل ببصمة مطابقة فيُصنَّف `duplicate` — وهو ليس «إعادة محاولة
+    // ناجحة» ولا يُقرأ كذلك. البند معلَن كي يبقى العمى مرئيًا.
+    id: 'commerce.webhookRetried',
+    labelKey: 'commerce.webhookRetried',
+    group: 'commerce',
+    source: 'لا مصدر: لا عدّاد محاولات في salla_webhook_events',
+    aggregation: 'count',
+    privacyClass: 'aggregate',
+    requiredRole: 'founder',
+    refresh: '5m',
+    owner: 'backend',
+    availability: 'NEEDS_BACKEND',
+    backendGap: 'source-system-missing',
+    unavailableReasonKey: 'reason.notInstrumented',
+  },
+  {
+    id: 'commerce.grantsManual',
+    labelKey: 'commerce.grantsManual',
+    group: 'commerce',
+    source: "public.entitlements → count(source = 'manual')",
+    aggregation: 'count',
+    privacyClass: 'aggregate',
+    requiredRole: 'founder',
+    refresh: '5m',
+    owner: 'backend',
+    availability: 'NEEDS_BACKEND',
+    backendGap: 'endpoint-missing',
+    unavailableReasonKey: 'reason.migrationPending',
   },
 ] as const
 

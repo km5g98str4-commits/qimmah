@@ -55,6 +55,8 @@ export interface AdminStrings {
     funnel: string
     errors: string
     product: string
+    /** رحلة الزائر — القسم الذي كل بنوده غير مقيسة اليوم. */
+    journey: string
   }
   denied: {
     title: string
@@ -186,6 +188,8 @@ export interface AdminStrings {
     retention: string
     workoutTrend: string
     nutritionTrend: string
+    /** قمع الرحلة الكامل — من الهبوط إلى الاستحقاق. */
+    journeyFunnel: string
   }
   attentionPanel: {
     heading: string
@@ -198,6 +202,47 @@ export interface AdminStrings {
     heading: string
     note: string
   }
+  /** لوحة أكواد الوصول — الإصدار والقائمة والتعطيل. */
+  codes: {
+    heading: string
+    note: string
+    /** لماذا لا يوجد زرّ «امنح Premium» هنا — يُقال ولا يُسكت عنه. */
+    grantNote: string
+    issueHeading: string
+    reasonLabel: string
+    reasonPlaceholder: string
+    labelLabel: string
+    labelPlaceholder: string
+    durationLabel: string
+    maxLabel: string
+    customCodeLabel: string
+    customCodePlaceholder: string
+    customCodeHint: string
+    issueButton: string
+    issuing: string
+    issuedHeading: string
+    issuedOnce: string
+    dismiss: string
+    searchLabel: string
+    searchPlaceholder: string
+    colLabel: string
+    colStatus: string
+    colUses: string
+    colDuration: string
+    colCreatedBy: string
+    colCreatedAt: string
+    colReason: string
+    disable: string
+    enable: string
+    rows: string
+    noRows: string
+    noLabel: string
+    days: string
+    writeFailed: string
+    needReason: string
+  }
+  /** حالات الكود كما تشتقّها القاعدة. */
+  codeStatus: Record<string, string>
 }
 
 const arLabels: Record<string, string> = {
@@ -230,6 +275,17 @@ const arLabels: Record<string, string> = {
   'commerce.codesUnused': 'أكواد فعّالة ما استُخدمت',
   'commerce.redemptionFailures24h': 'محاولات كود مرفوضة — ٢٤ ساعة',
   'commerce.revokedActive': 'حسابات موقوفة الآن',
+  'commerce.webhookProcessed': 'أحداث سلة مُعالَجة',
+  'commerce.webhookPending': 'أحداث سلة معلّقة',
+  'commerce.webhookRetried': 'أحداث سلة أُعيدت محاولتها',
+  'commerce.grantsManual': 'منح يدوية',
+  'journey.landing': 'وصلوا الصفحة الأولى',
+  'journey.onboardingStarted': 'بدأوا التخصيص',
+  'journey.onboardingCompleted': 'أكملوا التخصيص',
+  'journey.reveal': 'شافوا معاينة الخطة',
+  'journey.premiumCta': 'ضغطوا زرّ Premium',
+  'journey.trialCta': 'ضغطوا زرّ التجربة',
+  'journey.sallaClick': 'راحوا لسلة',
   'errors.clientErrors24h': 'أخطاء التطبيق — ٢٤ ساعة',
   'errors.rpcFailures24h': 'فشل نداءات الخادم — ٢٤ ساعة',
   'entitlement.trialActive': 'داخل التجربة الآن',
@@ -272,6 +328,17 @@ const enLabels: Record<string, string> = {
   'commerce.codesUnused': 'Live codes never used',
   'commerce.redemptionFailures24h': 'Rejected code attempts — 24h',
   'commerce.revokedActive': 'Accounts revoked right now',
+  'commerce.webhookProcessed': 'Salla events processed',
+  'commerce.webhookPending': 'Salla events pending',
+  'commerce.webhookRetried': 'Salla events retried',
+  'commerce.grantsManual': 'Manual grants',
+  'journey.landing': 'Reached the landing page',
+  'journey.onboardingStarted': 'Started onboarding',
+  'journey.onboardingCompleted': 'Finished onboarding',
+  'journey.reveal': 'Saw the plan preview',
+  'journey.premiumCta': 'Tapped the Premium button',
+  'journey.trialCta': 'Tapped the trial button',
+  'journey.sallaClick': 'Went to Salla',
   'errors.clientErrors24h': 'App errors — 24h',
   'errors.rpcFailures24h': 'Server call failures — 24h',
   'entitlement.trialActive': 'In trial right now',
@@ -300,6 +367,8 @@ const arReasons: Record<string, string> = {
     'ما فيه نظام استحقاق أصلًا — لا جدول ولا صفّ. والبناء المنشور ما يقدر يعطي Premium لأحد. المالك: Backend.',
   'reason.noAuditLog':
     'ما فيه سجلّ لمحاولات التفعيل المرفوضة. ولو انبنى: يتخزّن مجمّع بالوقت بس، بدون الكود المُدخَل. المالك: Backend.',
+  'reason.notInstrumented':
+    '**ما نقيسه بعد** — مو صفر. ما فيه خطّ أحداث عميل يوصل الخادم أصلًا (`trackLocal` محلّي وما يغادر الجهاز)، فما فيه رقم لا صحيح ولا خاطئ. وتطبيق أي هجرة ما يرفع هذا البند: يحتاج بناء خطّ أحداث كامل بقرار خصوصية معه. المالك: Backend.',
   'reason.onboardingBias':
     'المقام كامل بس البسط ناقص: علامة الإكمال ما توصل الخادم إلا بمزامنة موافَق عليها. يعني اللي أكمل وما وافق يُحسب «ما أكمل» — والرقم يطلع أسوأ من الواقع باتجاه ثابت. يحتاج قرار منتج.',
 }
@@ -320,6 +389,8 @@ const enReasons: Record<string, string> = {
     'There is no entitlement system — no table, no rows. The deployed build cannot grant Premium to anyone. Owner: Backend.',
   'reason.noAuditLog':
     'There is no log of rejected activation attempts. If built, it stores time-bucketed counts only — never the submitted code. Owner: Backend.',
+  'reason.notInstrumented':
+    '**Not instrumented yet** — not zero. There is no client event pipeline reaching the server at all (`trackLocal` is local and never leaves the device), so there is no number, right or wrong. No migration lifts this: it needs a whole events pipeline plus a privacy decision. Owner: Backend.',
   'reason.onboardingBias':
     'The denominator is complete but the numerator is not: the completion flag only reaches the server through consented sync. Someone who finished but declined sync counts as "did not finish" — the number is wrong in one fixed direction. Needs a product decision.',
 }
@@ -357,6 +428,15 @@ const arFunnel: Record<string, string> = {
   'funnel.signedUp': 'أنشأوا حساب',
   'funnel.started': 'بدأوا التخصيص',
   'funnel.completed': 'أكملوا التخصيص',
+  'funnel.landing': 'الصفحة الأولى',
+  'funnel.onboardingStarted': 'بدأ التخصيص',
+  'funnel.onboardingCompleted': 'أكمل التخصيص',
+  'funnel.reveal': 'معاينة الخطة',
+  'funnel.premiumCta': 'زرّ Premium',
+  'funnel.trialCta': 'زرّ التجربة',
+  'funnel.sallaClick': 'الخروج لسلة',
+  'funnel.purchase': 'شراء',
+  'funnel.entitlement': 'استحقاق فعّال',
 }
 
 const enFunnel: Record<string, string> = {
@@ -366,6 +446,15 @@ const enFunnel: Record<string, string> = {
   'funnel.signedUp': 'Created an account',
   'funnel.started': 'Started onboarding',
   'funnel.completed': 'Finished onboarding',
+  'funnel.landing': 'Landing',
+  'funnel.onboardingStarted': 'Onboarding started',
+  'funnel.onboardingCompleted': 'Onboarding finished',
+  'funnel.reveal': 'Plan preview',
+  'funnel.premiumCta': 'Premium button',
+  'funnel.trialCta': 'Trial button',
+  'funnel.sallaClick': 'Left for Salla',
+  'funnel.purchase': 'Purchase',
+  'funnel.entitlement': 'Entitlement active',
 }
 
 const arAttention: Record<string, AdminAttentionCopy> = {
@@ -484,6 +573,7 @@ export const adminStrings: Record<Lang, AdminStrings> = {
       funnel: 'القمع',
       errors: 'الأخطاء',
       product: 'استخدام المنتج',
+      journey: 'رحلة الزائر — قبل الحساب',
     },
     denied: {
       title: 'هذي الشاشة للمؤسس',
@@ -617,6 +707,7 @@ export const adminStrings: Record<Lang, AdminStrings> = {
       retention: 'البقاء حسب أسبوع التسجيل',
       workoutTrend: 'اتجاه إكمال التمارين',
       nutritionTrend: 'اتجاه تسجيل الأكل',
+      journeyFunnel: 'قمع الرحلة — من الزيارة للاستحقاق',
     },
     attentionPanel: {
       heading: 'يحتاج انتباهك',
@@ -628,6 +719,50 @@ export const adminStrings: Record<Lang, AdminStrings> = {
     roadmap: {
       heading: 'خارطة الطريق',
       note: 'الأفعال اللي ما لها قدرة خادم مُراجَعة تظهر هنا — ما تظهر أزرار تكذب.',
+    },
+    codes: {
+      heading: 'أكواد الوصول',
+      note: 'الكود يُخزَّن مبصومًا لا خامًا — يظهر لك مرّة وحدة عند الإصدار، وبعدها ما أحد يقدر يستعيده.',
+      grantNote:
+        'ما فيه زرّ «امنح Premium» هنا عن قصد: منحة دائمة تُسكّ من مفتاح الخادم لا من متصفّح. وكذلك رفع الحظر. اللي تقدر تسويه من هنا يسحب أو يعطي وصولًا موقوتًا تقدر تسحبه.',
+      issueHeading: 'أصدر كودًا',
+      reasonLabel: 'السبب (إلزامي)',
+      reasonPlaceholder: 'ليش هذا الكود؟',
+      labelLabel: 'الوسم',
+      labelPlaceholder: 'حملة، اسم شريك…',
+      durationLabel: 'المدّة بالأيام',
+      maxLabel: 'أقصى عدد استخدامات',
+      customCodeLabel: 'كود بخطّ يدك (اختياري)',
+      customCodePlaceholder: 'اتركه فاضي والخادم يولّده',
+      customCodeHint: 'كود تكتبه بنفسك يبدو عشوائيًا وهو مو كذا. خلّه فاضي إلا إذا كانت حملة باسم معروف.',
+      issueButton: 'أصدر',
+      issuing: 'نصدر…',
+      issuedHeading: 'الكود صدر',
+      issuedOnce: 'انسخه الحين — هذي المرّة الوحيدة اللي يظهر فيها.',
+      dismiss: 'خلاص، نسخته',
+      searchLabel: 'ابحث في الأكواد',
+      searchPlaceholder: 'وسم أو سبب أو حالة…',
+      colLabel: 'الوسم',
+      colStatus: 'الحالة',
+      colUses: 'الاستخدامات',
+      colDuration: 'المدّة',
+      colCreatedBy: 'أصدره',
+      colCreatedAt: 'تاريخ الإصدار',
+      colReason: 'السبب',
+      disable: 'عطّله',
+      enable: 'شغّله',
+      rows: 'كود',
+      noRows: 'ما فيه أكواد تطابق البحث.',
+      noLabel: 'بلا وسم',
+      days: 'يوم',
+      writeFailed: 'ما تمّ الفعل — والسبب:',
+      needReason: 'لازم سبب قبل أي فعل — الأثر الإداري ما يكون مجهول.',
+    },
+    codeStatus: {
+      issued: 'صادر',
+      redeemed: 'استُرد',
+      expired: 'منتهٍ',
+      disabled: 'معطّل',
     },
   },
   en: {
@@ -659,6 +794,7 @@ export const adminStrings: Record<Lang, AdminStrings> = {
       funnel: 'Funnel',
       errors: 'Errors',
       product: 'Product usage',
+      journey: 'Visitor journey — before the account',
     },
     denied: {
       title: 'This screen is founder-only',
@@ -792,6 +928,7 @@ export const adminStrings: Record<Lang, AdminStrings> = {
       retention: 'Retention by signup week',
       workoutTrend: 'Workout completion trend',
       nutritionTrend: 'Food logging trend',
+      journeyFunnel: 'Journey funnel — visit to entitlement',
     },
     attentionPanel: {
       heading: 'Needs you',
@@ -799,6 +936,50 @@ export const adminStrings: Record<Lang, AdminStrings> = {
       blind: 'Cannot watch yet',
       blindNote: 'This is not "all clear" — these are things we have no way to see at all.',
       allClear: 'Nothing detected right now.',
+    },
+    codes: {
+      heading: 'Access codes',
+      note: 'Codes are stored hashed, never in the clear — you see one once, at issue time, and nobody can recover it after that.',
+      grantNote:
+        'There is no "grant Premium" button here on purpose: a permanent grant is minted with the server key, not from a browser. Same for lifting a ban. What you can do here either takes access away or hands out time-boxed access you can take back.',
+      issueHeading: 'Issue a code',
+      reasonLabel: 'Reason (required)',
+      reasonPlaceholder: 'What is this code for?',
+      labelLabel: 'Label',
+      labelPlaceholder: 'Campaign, partner name…',
+      durationLabel: 'Duration in days',
+      maxLabel: 'Max redemptions',
+      customCodeLabel: 'Hand-written code (optional)',
+      customCodePlaceholder: 'Leave empty and the server generates it',
+      customCodeHint: 'A code you write yourself looks random and is not. Leave it empty unless this is a named campaign.',
+      issueButton: 'Issue',
+      issuing: 'Issuing…',
+      issuedHeading: 'Code issued',
+      issuedOnce: 'Copy it now — this is the only time it is shown.',
+      dismiss: 'Copied, close',
+      searchLabel: 'Search codes',
+      searchPlaceholder: 'Label, reason or status…',
+      colLabel: 'Label',
+      colStatus: 'Status',
+      colUses: 'Redemptions',
+      colDuration: 'Duration',
+      colCreatedBy: 'Issued by',
+      colCreatedAt: 'Issued on',
+      colReason: 'Reason',
+      disable: 'Disable',
+      enable: 'Enable',
+      rows: 'codes',
+      noRows: 'No codes match this search.',
+      noLabel: 'No label',
+      days: 'days',
+      writeFailed: 'The action did not go through — reason:',
+      needReason: 'A reason is required before any action — no anonymous admin trail.',
+    },
+    codeStatus: {
+      issued: 'Issued',
+      redeemed: 'Redeemed',
+      expired: 'Expired',
+      disabled: 'Disabled',
     },
     roadmap: {
       heading: 'Roadmap',

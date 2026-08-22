@@ -22,7 +22,15 @@ import type { Lang } from '@/lib/appPreferences'
 import { AdminRoute } from '@/admin/ui/AdminRoute'
 import { AdminShell } from '@/admin/ui/AdminShell'
 import { ADMIN_ROLE_CLAIM, resolveAdminRole } from '@/admin/auth/adminRole'
-import { loadLiveExecutiveSnapshot, loadLiveUserPage } from '@/admin/contract/liveSource'
+import {
+  issueAccessCode,
+  loadLiveCodePage,
+  loadLiveExecutiveSnapshot,
+  loadLiveUserDetail,
+  loadLiveUserPage,
+  revokeUserAccess,
+  setAccessCodeEnabled,
+} from '@/admin/contract/liveSource'
 import type { MetricValue } from '@/admin/contract/types'
 
 const read = (p: string) => readFileSync(resolve(process.cwd(), p), 'utf8')
@@ -264,6 +272,109 @@ for (const bad of ['localStorage', 'sessionStorage', 'document.cookie', 'URLSear
   check(`نقطة التركيب لا تقرأ ${bad}`, !routeCode.includes(bad))
 }
 check('نقطة التركيب مُصدَّرة من الباب الرئيسي', read('src/admin/index.ts').includes("export { AdminRoute }"))
+
+// ═══════════════ ٨) القرّاء الجدد [ADMIN-R4]: تفصيل · أكواد · كتابة ═══════════════
+// ⚠️ **الغياب هنا أخطر منه في اللقطة**: صفحةٌ فارغة تُقرأ «حساب بلا نشاط»،
+// وقائمة أكواد فارغة تُقرأ «ما أصدرنا شيئًا». فالفشل يجب أن يُسمّى دائمًا.
+
+// ٨-أ) غير المؤسس لا يصل الشبكة أصلًا — في القرّاء الأربعة.
+type Decision = typeof FOUNDER
+const NEW_READERS: [string, (d: Decision) => Promise<{ live: string }>][] = [
+  ['تفصيل الحساب', (d) => loadLiveUserDetail(d, 'u1')],
+  ['قائمة الأكواد', (d) => loadLiveCodePage(d)],
+  ['إصدار كود', async (d) => {
+    const r = await issueAccessCode(d, { reason: 'x', durationDays: 14, maxRedemptions: 1 })
+    return { live: r.ok ? 'live' : r.live }
+  }],
+  ['تعطيل كود', async (d) => {
+    const r = await setAccessCodeEnabled(d, 'c1', false, 'x')
+    return { live: r.ok ? 'live' : r.live }
+  }],
+  ['سحب وصول', async (d) => {
+    const r = await revokeUserAccess(d, 'u1', 'x')
+    return { live: r.ok ? 'live' : r.live }
+  }],
+]
+for (const [label, run] of NEW_READERS) {
+  setRpc(ok({}))
+  const r = await run(NORMAL)
+  check(`${label}: غير المؤسس ⇒ not-founder بلا نداء`, r.live === 'not-founder' && globalThis.__RPC_CALLS__.length === 0)
+  check(`${label}: ولا طلب لعميل الخادم`, globalThis.__SB_CLIENT_CALLS__ === 0)
+}
+
+// ٨-ب) **بلا خادم مضبوط: حالة مسمّاة لا فراغ** — بشخصية المؤسس، وإلا مُنع قبله.
+globalThis.__SB_CONFIGURED__ = false
+for (const [label, run] of NEW_READERS) {
+  setRpc(ok({}))
+  const r = await run(FOUNDER)
+  check(`${label}: بلا خادم ⇒ no-backend مسمّاة`, r.live === 'no-backend')
+}
+const codesNoBackend = await loadLiveCodePage(FOUNDER)
+check('قائمة الأكواد بلا خادم غير متاحة — لا قائمة فارغة تبدو جوابًا', codesNoBackend.page.state === 'unavailable')
+globalThis.__SB_CONFIGURED__ = true
+
+// ٨-ج) الدالة غير موجودة (الهجرة لم تُطبَّق) ⇒ rpc-missing لا فراغ.
+setRpc(fail({ code: 'PGRST202', message: 'Could not find the function' }))
+const detailMissing = await loadLiveUserDetail(FOUNDER, 'u1')
+check('تفصيل الحساب: الهجرة غير مطبَّقة ⇒ rpc-missing', detailMissing.live === 'rpc-missing' && detailMissing.detail === null)
+setRpc(fail({ code: '42501', message: 'founder_role_required' }))
+const codesDenied = await loadLiveCodePage(FOUNDER)
+check('قائمة الأكواد: منع الخادم ⇒ denied-by-server', codesDenied.live === 'denied-by-server')
+setRpc(fail({ code: '42501', message: 'founder_role_required' }))
+const issueDenied = await issueAccessCode(FOUNDER, { reason: 'x', durationDays: 14, maxRedemptions: 1 })
+check('الإصدار: منع الخادم يُسمّى ولا يُبتلع', !issueDenied.ok && issueDenied.live === 'denied-by-server')
+
+// ٨-د) رد ناجح: الحقول تمرّ، وكتل المنتج **تبقى غائبة**.
+const DETAIL_OK = {
+  as_of: AS_OF,
+  account: {
+    user_id: 'u1', display_name: 'زياد', email_masked: 'z••••@x.com',
+    email_verified: true, created_at: '2026-08-01T00:00:00Z', last_sign_in_at: null,
+  },
+  entitlement: { state: 'premiumActive', source: 'salla', activated_at: '2026-08-01T00:00:00Z', expires_at: null, revoked_at: null, revoked_reason: null },
+  onboarding: 'unknown',
+  commerce: { codesRedeemed: 0, purchases: 1, lastOrderId: 'O-1', lastPurchaseAt: '2026-08-01T00:00:00Z', accessRevoked: false },
+}
+setRpc(ok(DETAIL_OK))
+const detailLive = await loadLiveUserDetail(FOUNDER, 'u1')
+check('تفصيل الحساب يصل حيًّا', detailLive.live === 'live' && detailLive.detail !== null)
+const d = detailLive.detail!
+check('حالة الاستحقاق وصلت', d.entitlementDetail.state.state === 'ready')
+check('تاريخ انتهاء null **جواب** لا غياب', d.entitlementDetail.expiresAt.state === 'ready' && d.entitlementDetail.expiresAt.value === null)
+check('البريد المُقنَّع وحده', (d.row.emailMasked ?? '').includes('••••'))
+// ⚠️ **جوهر الفحص**: كتل المنتج غائبة حتى في رد ناجح.
+for (const [id, m] of [
+  ['planSummary', d.planSummary],
+  ['workoutsCompleted', d.activity.workoutsCompleted],
+  ['measurementEvents', d.activity.measurementEvents],
+  ['recentWorkouts', d.recentWorkouts],
+] as [string, MetricValue<unknown>][]) {
+  check(`${id} يبقى غير متاح في رد ناجح`, m.state === 'unavailable')
+}
+// وحتى لو **حشا الخادم** كتلة منتج، لا تُقرأ: لا مصدر يعني لا مصدر.
+setRpc(ok({ ...DETAIL_OK, activity: { workoutsCompleted: 42, measurementEvents: 7 }, planSummary: 'دفع/سحب' }))
+const stuffed = await loadLiveUserDetail(FOUNDER, 'u1')
+check('كتلة منتج محشوّة لا تُقرأ', stuffed.detail!.activity.workoutsCompleted.state === 'unavailable')
+// ورد بلا كتلة حساب يُرفض كلّه.
+setRpc(ok({ as_of: AS_OF, entitlement: {}, commerce: {} }))
+const noAccount = await loadLiveUserDetail(FOUNDER, 'u1')
+check('رد بلا كتلة حساب يُرفض كلّه', noAccount.live === 'failed' && noAccount.detail === null)
+
+// ٨-هـ) صفحة الأكواد: حالة مجهولة تُسقط الصفحة، والخام لا يُقبل بلا نصّ.
+const CODE_ROW = {
+  code_id: 'c1', label: 'ramadan', status: 'issued', duration_days: 30, max_redemptions: 5,
+  redemption_count: 1, starts_at: AS_OF, expires_at: null, created_by: 'founder:u1',
+  created_reason: 'حملة', created_at: AS_OF, total_rows: 1,
+}
+setRpc(ok([CODE_ROW]))
+const codes = await loadLiveCodePage(FOUNDER)
+check('صفحة الأكواد تصل', codes.live === 'live' && codes.page.state === 'ready')
+setRpc(ok([{ ...CODE_ROW, status: 'GOD_MODE' }]))
+const weirdCode = await loadLiveCodePage(FOUNDER)
+check('حالة كود مجهولة تُسقط الصفحة كلّها لا تُخترع', weirdCode.live === 'failed')
+setRpc(ok({ id: 'c9' }))
+const noPlain = await issueAccessCode(FOUNDER, { reason: 'x', durationDays: 14, maxRedemptions: 1 })
+check('إصدار بلا نصّ كود ليس نجاحًا', !noPlain.ok)
 
   console.log(`\n✅ ${pass} فحصًا — التركيب والقراءة الحيّة صادقان\n`)
 }

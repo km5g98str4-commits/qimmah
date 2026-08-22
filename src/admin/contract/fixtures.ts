@@ -27,6 +27,7 @@ import type {
   ErrorsSnapshot,
   ExecutiveSnapshot,
   FunnelStage,
+  JourneySnapshot,
   MetricValue,
   OnboardingSnapshot,
   PlatformPosture,
@@ -133,6 +134,36 @@ export const commerceReadyFixture: CommerceSnapshot = {
   codesUnused: ready(287, FIXTURE_AS_OF),
   redemptionFailures24h: unavailable('NEEDS_BACKEND'),
   revokedActive: ready(3, FIXTURE_AS_OF),
+  webhookProcessed: ready(188, FIXTURE_AS_OF),
+  webhookPending: ready(2, FIXTURE_AS_OF),
+  // ⚠️ غائب **في كل تجهيزة**: لا عمود محاولات، فلا شاشة تُرسم عليه.
+  webhookRetried: unavailable('NEEDS_BACKEND'),
+  grantsManual: ready(4, FIXTURE_AS_OF),
+}
+
+/**
+ * رحلة الزائر — **غائبة في كل تجهيزة بلا استثناء**، كالأخطاء تمامًا.
+ * ملؤها برقم يجعل المصمّم يرسم شاشة لا يمكن أن توجد بلا خطّ أحداث عميل.
+ */
+export const journeyGapFixture: JourneySnapshot = {
+  landing: unavailable('NEEDS_BACKEND'),
+  onboardingStarted: unavailable('NEEDS_BACKEND'),
+  onboardingCompleted: unavailable('NEEDS_BACKEND'),
+  reveal: unavailable('NEEDS_BACKEND'),
+  premiumCta: unavailable('NEEDS_BACKEND'),
+  trialCta: unavailable('NEEDS_BACKEND'),
+  sallaClick: unavailable('NEEDS_BACKEND'),
+  funnel: [
+    { id: 'landing', labelKey: 'funnel.landing', count: unavailable('NEEDS_BACKEND') },
+    { id: 'onboardingStarted', labelKey: 'funnel.onboardingStarted', count: unavailable('NEEDS_BACKEND') },
+    { id: 'onboardingCompleted', labelKey: 'funnel.onboardingCompleted', count: unavailable('NEEDS_BACKEND') },
+    { id: 'reveal', labelKey: 'funnel.reveal', count: unavailable('NEEDS_BACKEND') },
+    { id: 'premiumCta', labelKey: 'funnel.premiumCta', count: unavailable('NEEDS_BACKEND') },
+    { id: 'trialCta', labelKey: 'funnel.trialCta', count: unavailable('NEEDS_BACKEND') },
+    { id: 'sallaClick', labelKey: 'funnel.sallaClick', count: unavailable('NEEDS_BACKEND') },
+    { id: 'purchase', labelKey: 'funnel.purchase', count: unavailable('NEEDS_BACKEND') },
+    { id: 'entitlement', labelKey: 'funnel.entitlement', count: unavailable('NEEDS_BACKEND') },
+  ],
 }
 
 /** الأخطاء — غائبة في **كل** تجهيزة بلا استثناء: لا مسار لها أصلًا. */
@@ -148,6 +179,10 @@ function allCommerce(v: <T>() => MetricValue<T>): CommerceSnapshot {
     ordersFailed: v(),
     codesIssued: v(),
     codesRedeemed: v(),
+    webhookProcessed: v(),
+    webhookPending: v(),
+    webhookRetried: v(),
+    grantsManual: v(),
     codesUnused: v(),
     // يبقى غائبًا حتى في تجهيزة «فارغ»: صفرٌ هنا يدّعي قياسًا لا يوجد.
     redemptionFailures24h: unavailable('NEEDS_BACKEND'),
@@ -296,6 +331,7 @@ export const snapshotReady: ExecutiveSnapshot = {
   commerce: commerceReadyFixture,
   errors: errorsGapFixture,
   onboarding: onboardingReadyFixture,
+  journey: journeyGapFixture,
   attention: attentionFixture,
   users_page: ready({ rows: smallUserSet, total: 1_284, page: 1, pageSize: 25 }, FIXTURE_AS_OF),
 }
@@ -316,6 +352,7 @@ export const snapshotEmpty: ExecutiveSnapshot = {
   commerce: allCommerce(readyZero),
   errors: errorsGapFixture,
   onboarding: allOnboarding(gapV),
+  journey: journeyGapFixture,
   attention: attentionFixture,
   users_page: ready({ rows: [], total: 0, page: 1, pageSize: 25 }, FIXTURE_AS_OF),
 }
@@ -328,6 +365,7 @@ export const snapshotLoading: ExecutiveSnapshot = {
   commerce: allCommerce(loadingV),
   errors: errorsGapFixture,
   onboarding: allOnboarding(loadingV),
+  journey: journeyGapFixture,
   attention: attentionFixture,
   users_page: { state: 'loading' },
 }
@@ -354,6 +392,7 @@ export const snapshotPartial: ExecutiveSnapshot = {
   commerce: allCommerce(errorV),
   errors: errorsGapFixture,
   onboarding: allOnboarding(gapV),
+  journey: journeyGapFixture,
   attention: attentionFixture,
   users_page: ready({ rows: smallUserSet, total: 1_284, page: 1, pageSize: 25 }, FIXTURE_AS_OF),
 }
@@ -366,6 +405,7 @@ export const snapshotError: ExecutiveSnapshot = {
   commerce: allCommerce(errorV),
   errors: errorsGapFixture,
   onboarding: allOnboarding(errorV),
+  journey: journeyGapFixture,
   attention: attentionFixture,
   users_page: { state: 'error', code: 'fixture.error' },
 }
@@ -388,6 +428,7 @@ export const snapshotToday: ExecutiveSnapshot = {
   commerce: allCommerce(gapV),
   errors: errorsGapFixture,
   onboarding: allOnboarding(gapV),
+  journey: journeyGapFixture,
   attention: attentionFixture,
   users_page: unavailable('NEEDS_BACKEND'),
 }
