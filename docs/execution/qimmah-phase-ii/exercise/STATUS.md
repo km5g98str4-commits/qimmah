@@ -2,15 +2,16 @@
 
 ## Wave
 
-- Package: `EX-LEDGER-1` — deterministic production review ledger and validator.
+- Package: `EX-MEDIA-PLAN` — blocked image-production jobs and rollback protocol.
 - Branch: `h/phase-ii-exercise-production-002`.
 - Audited baseline: `origin/main@cc60adfc0da0f893b101230269d4847d33490429`.
 - Refreshed: 2026-08-22.
-- Scope: `data/exercise-production/**`, `scripts/exercise-production/**`, and this status file only. No product code, package manifest, Web Sovereign worktree, merge, rebase, or deployment was touched.
+- Scope: `data/exercise-production/**`, `scripts/exercise-production/**`, and the two exercise-media runbooks plus this status file. No product code, package manifest, Web Sovereign worktree, merge, rebase, generation, or deployment was touched.
 
 | Dependency ID | Description | Blocking Web Sovereign artifact | Expected future integration point | Remaining work after integration |
 | --- | --- | --- | --- | --- |
 | `EX-DEP-WS-001` | The final catalog, guidance, media resolver, and exercise-detail seams are not authoritative yet. | Founder-accepted Web Sovereign HEAD plus its canonical exercise/media provenance. | Regenerate the audit and review manifest first; bind approved records only at the accepted media resolver/detail boundary. | Recompute IDs and source fingerprint, review drift, complete outstanding content/media review, run focused counter-proofs and the full gate, then read exact-SHA CI. |
+| `EX-DEP-MECH-001` | The 37 missing-image jobs cannot safely become prompts from media-only ledger data. | Reviewed mechanics with bilingual start/end descriptions, safe-mechanics notes, exact equipment/muscles/movement metadata, reviewer identity, and review timestamp. | Versioned authoring evidence bound to the same ledger `sourceFingerprint`; all fields complete for each released job. | Create a new prompt-ready job version, assemble prompts mechanically, run preflight, generate a bounded batch, and keep all outputs `NEEDS_REVIEW` until independent visual approval. |
 
 This dependency does not block the contracts in this package. It blocks only the later baseline rebind and any product integration.
 
@@ -85,7 +86,7 @@ Some groups cross equipment or movement variants. Duplicate bytes are evidence o
 
 - `[EX-1]` audit contract: documented; deterministic baseline fingerprint and canonical-key coverage are now executable.
 - `[EX-2]` media contract: documented; `data/exercise-production/review-ledger.json` now records all 181 canonical IDs with conservative statuses and evidence digests.
-- `[EX-3]` original image production: not started.
+- `[EX-3]` original image production: 37/37 stable jobs planned; all prompts blocked and all outputs `NOT_GENERATED` pending `EX-DEP-MECH-001`.
 - `[EX-4]` exact video research: not started.
 - `[EX-5]` product integration: deferred until `EX-DEP-WS-001` closes and the final baseline is revalidated.
 
@@ -104,11 +105,16 @@ Fresh direct-script results on 2026-08-22:
 | Command | Result |
 | --- | --- |
 | `node scripts/exercise-production/validate-review-ledger.mjs` | PASS — 181 rows; images 0 approved / 144 needs review / 37 missing; videos 0 approved / 181 missing; 6 duplicate-content groups |
-| `node scripts/exercise-production/review-ledger-proof.mjs` | PASS — base ledger plus 7/7 named anti-circumvention mutations |
+| `node scripts/exercise-production/review-ledger-proof.mjs` | PASS — base ledger plus 8/8 named anti-circumvention mutations, including `MEDIA_PATH_SCOPE` |
 | `node scripts/exercise-production/build-review-ledger.mjs --check` | PASS — committed ledger matches deterministic generation byte-for-byte |
-| `node --check scripts/exercise-production/*.mjs` and `git diff --check` | PASS — direct scripts parse; no whitespace errors |
+| `for file in scripts/exercise-production/*.mjs; do node --check "$file"; done` and `git diff --check` | PASS — direct scripts parse; no whitespace errors |
+| `node scripts/exercise-production/validate-image-production-jobs.mjs` | PASS — 37/37 ledger `MISSING` IDs; 37 mechanics-blocked; 37 not generated |
+| `node scripts/exercise-production/image-production-jobs-proof.mjs` | PASS — 8/8 named mutations reject schema drift, coverage loss, binding drift, invented metadata/mechanics/safety, premature prompts, and fake outputs |
+| `node scripts/exercise-production/build-image-production-jobs.mjs --check` | PASS — committed job queue matches ledger-only generation byte-for-byte |
 
-The seven attacked guards are `MEDIA_COVERAGE`, `MEDIA_ORPHAN`, `MEDIA_KEY_MISMATCH`, `IMAGE_APPROVAL_EVIDENCE`, `VIDEO_REFERENCE_EXACT`, `DUPLICATE_CONTENT_PAIR`, and `MEDIA_FILE_INTEGRITY`. The duplicate queue is derived from real asset-pair digests rather than a hand-maintained list; its six groups match the baseline findings above.
+The ledger guards are `MEDIA_COVERAGE`, `MEDIA_ORPHAN`, `MEDIA_KEY_MISMATCH`, `IMAGE_APPROVAL_EVIDENCE`, `VIDEO_REFERENCE_EXACT`, `DUPLICATE_CONTENT_PAIR`, `MEDIA_FILE_INTEGRITY`, and `MEDIA_PATH_SCOPE`. `MEDIA_PATH_SCOPE` rejects backslashes, NULs, dot segments, and resolved escapes; start/end assets are confined to `/exercise-images/`, while the existing machine-diagram candidates are separately confined to `/exercise-machine-images/`. The duplicate queue is derived from real asset-pair digests rather than a hand-maintained list; its six groups match the baseline findings above.
+
+`image-production-jobs.json` reads only the committed review ledger. Because that ledger does not contain names, equipment, muscles, movement pattern, or reviewed mechanics, the corresponding job fields remain explicitly null/empty and `metadataStatus=BLOCKED_METADATA_NOT_PRESENT_IN_LEDGER`. No prompt or safety language was inferred from application code or model knowledge.
 
 ## Decisions needed
 

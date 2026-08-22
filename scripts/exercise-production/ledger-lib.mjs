@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto'
 import { spawnSync } from 'node:child_process'
 import { existsSync, readFileSync } from 'node:fs'
-import { dirname, resolve } from 'node:path'
+import { dirname, isAbsolute, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { isDeepStrictEqual } from 'node:util'
 import { build } from 'esbuild'
@@ -30,7 +30,50 @@ const IMAGE_REVIEW_KEYS = [
 
 const sha256 = (value) => createHash('sha256').update(value).digest('hex')
 const fileSha256 = (path) => sha256(readFileSync(path))
-const publicFile = (publicPath) => resolve(ROOT, 'public', publicPath.replace(/^\//, ''))
+const ASSET_ROOT_BY_KIND = {
+  START_END_COMPOSITE: '/exercise-images/',
+  START_END_PAIR: '/exercise-images/',
+  MACHINE_DIAGRAM: '/exercise-machine-images/',
+}
+
+function pathScopeError(publicPath, detail) {
+  const error = new Error(`MEDIA_PATH_SCOPE: ${detail}: ${String(publicPath)}`)
+  error.code = 'MEDIA_PATH_SCOPE'
+  return error
+}
+
+function publicFile(publicPath, kind) {
+  if (typeof publicPath !== 'string' || !publicPath.startsWith('/')) {
+    throw pathScopeError(publicPath, 'path must be public-root absolute')
+  }
+  if (publicPath.includes('\\') || publicPath.includes('\0')) {
+    throw pathScopeError(publicPath, 'backslash and NUL are forbidden')
+  }
+  let decoded
+  try {
+    decoded = decodeURIComponent(publicPath)
+  } catch {
+    throw pathScopeError(publicPath, 'invalid percent encoding')
+  }
+  if (decoded.includes('\\') || decoded.includes('\0')) {
+    throw pathScopeError(publicPath, 'decoded backslash and NUL are forbidden')
+  }
+  const segments = decoded.split('/')
+  if (segments.some((segment) => segment === '.' || segment === '..')) {
+    throw pathScopeError(publicPath, 'dot path segments are forbidden')
+  }
+  const allowedPrefix = ASSET_ROOT_BY_KIND[kind]
+  if (!allowedPrefix || !decoded.startsWith(allowedPrefix)) {
+    throw pathScopeError(publicPath, `path is outside the ${kind ?? 'unknown'} allow-list`)
+  }
+  const allowedRoot = resolve(ROOT, 'public', allowedPrefix.slice(1))
+  const diskPath = resolve(ROOT, 'public', decoded.slice(1))
+  const fromAllowedRoot = relative(allowedRoot, diskPath)
+  if (fromAllowedRoot.startsWith('..') || isAbsolute(fromAllowedRoot)) {
+    throw pathScopeError(publicPath, 'resolved path escaped its allowed root')
+  }
+  return diskPath
+}
 
 function assertBaselineSources() {
   const result = spawnSync('git', ['diff', '--quiet', BASELINE_COMMIT, '--', ...SOURCE_FILES], {
@@ -103,11 +146,8 @@ function svgDimensions(buffer) {
   return { width, height }
 }
 
-export function inspectAsset(publicPath) {
-  if (typeof publicPath !== 'string' || !publicPath.startsWith('/')) {
-    throw new Error(`MEDIA_FILE_INTEGRITY: invalid public path ${String(publicPath)}`)
-  }
-  const diskPath = publicFile(publicPath)
+export function inspectAsset(publicPath, kind = 'START_END_PAIR') {
+  const diskPath = publicFile(publicPath, kind)
   if (!existsSync(diskPath)) throw new Error(`MEDIA_FILE_INTEGRITY: missing ${publicPath}`)
   const bytes = readFileSync(diskPath)
   if (bytes.length === 0) throw new Error(`MEDIA_FILE_INTEGRITY: zero-byte ${publicPath}`)
@@ -128,14 +168,14 @@ function sourceInventory() {
   return { sourceFiles, sourceFingerprint }
 }
 
-function rightsFor(paths, provenanceByPath) {
+function rightsFor(paths, provenanceByPath, kind) {
   const rows = paths.map((path) => provenanceByPath.get(path))
   if (rows.some((row) => !row)) {
     const missing = paths.filter((path, index) => !rows[index])
     throw new Error(`RIGHTS_PROVENANCE: no provenance row for ${missing.join(', ')}`)
   }
   for (const [index, row] of rows.entries()) {
-    const actual = inspectAsset(paths[index])
+    const actual = inspectAsset(paths[index], kind)
     if (row.sha256 !== actual.sha256) {
       throw new Error(`MEDIA_FILE_INTEGRITY: provenance digest mismatch for ${paths[index]}`)
     }
@@ -185,7 +225,7 @@ export async function buildLedger() {
 
     let image = null
     if (media.status === 'stills' && media.stillStart && media.stillEnd) {
-      const assets = [inspectAsset(media.stillStart.path), inspectAsset(media.stillEnd.path)]
+      const assets = [inspectAsset(media.stillStart.path, 'START_END_PAIR'), inspectAsset(media.stillEnd.path, 'START_END_PAIR')]
       for (const [index, expected] of [media.stillStart, media.stillEnd].entries()) {
         const actual = assets[index]
         if (actual.width !== expected.width || actual.height !== expected.height || actual.bytes !== expected.bytes) {
@@ -196,17 +236,17 @@ export async function buildLedger() {
         kind: 'START_END_PAIR',
         version: 1,
         assets,
-        ...rightsFor(assets.map((asset) => asset.path), provenanceByPath),
+        ...rightsFor(assets.map((asset) => asset.path), provenanceByPath, 'START_END_PAIR'),
         originalProduction: null,
         review: emptyImageReview(),
       }
     } else if (media.status === 'placeholder-only' && machineImages[exercise.id]) {
-      const asset = inspectAsset(machineImages[exercise.id])
+      const asset = inspectAsset(machineImages[exercise.id], 'MACHINE_DIAGRAM')
       image = {
         kind: 'MACHINE_DIAGRAM',
         version: 1,
         assets: [asset],
-        ...rightsFor([asset.path], provenanceByPath),
+        ...rightsFor([asset.path], provenanceByPath, 'MACHINE_DIAGRAM'),
         originalProduction: null,
         review: emptyImageReview(),
       }
@@ -295,12 +335,12 @@ export async function validateLedger(ledger) {
       } else {
         for (const asset of entry.image.assets) {
           try {
-            const actual = inspectAsset(asset.path)
+            const actual = inspectAsset(asset.path, entry.image.kind)
             if (!isDeepStrictEqual(actual, asset)) {
               issue(issues, 'MEDIA_FILE_INTEGRITY', `${key} metadata/digest mismatch for ${asset.path}`)
             }
           } catch (error) {
-            issue(issues, 'MEDIA_FILE_INTEGRITY', `${key}: ${error.message}`)
+            issue(issues, error.code === 'MEDIA_PATH_SCOPE' ? 'MEDIA_PATH_SCOPE' : 'MEDIA_FILE_INTEGRITY', `${key}: ${error.message}`)
           }
         }
       }

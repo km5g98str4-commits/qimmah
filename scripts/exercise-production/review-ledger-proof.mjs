@@ -78,4 +78,8 @@ await expectNamedFailure('MUTATION_FILE_INTEGRITY', (ledger) => {
   ledger.exercises['barbell-bench-press'].image.assets[0].sha256 = '0'.repeat(64)
 }, 'MEDIA_FILE_INTEGRITY')
 
-console.log('EXERCISE_PRODUCTION_PROOF: PASS (7 named mutations)')
+await expectNamedFailure('MUTATION_MEDIA_PATH_SCOPE', (ledger) => {
+  ledger.exercises['barbell-bench-press'].image.assets[0].path = '/exercise-images/../../package.json'
+}, 'MEDIA_PATH_SCOPE')
+
+console.log('EXERCISE_PRODUCTION_PROOF: PASS (8 named mutations)')

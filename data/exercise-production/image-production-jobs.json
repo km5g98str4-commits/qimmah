@@ -1,0 +1,1460 @@
+{
+  "schemaVersion": 1,
+  "version": 1,
+  "source": {
+    "ledgerPath": "data/exercise-production/review-ledger.json",
+    "ledgerSha256": "ec84b995637b4e9ad3d5c6d06671d10dea1338c2562364fd0c83f0987fe16719",
+    "baselineCommit": "cc60adfc0da0f893b101230269d4847d33490429",
+    "sourceFingerprint": "12ce6523dc2f98920b421110b44f49141e937f7dfbccb7f80430e4dd0f682c60"
+  },
+  "summary": {
+    "jobs": 37,
+    "blockedNeedsReviewedMechanics": 37,
+    "notGenerated": 37
+  },
+  "jobs": [
+    {
+      "jobId": "exercise-image-v1:ankle-mobility",
+      "version": 1,
+      "exerciseId": "ankle-mobility",
+      "sourceFingerprint": "12ce6523dc2f98920b421110b44f49141e937f7dfbccb7f80430e4dd0f682c60",
+      "metadata": {
+        "names": {
+          "ar": null,
+          "en": null
+        },
+        "equipment": [],
+        "muscles": {
+          "primary": [],
+          "secondary": []
+        },
+        "movementPattern": null
+      },
+      "metadataStatus": "BLOCKED_METADATA_NOT_PRESENT_IN_LEDGER",
+      "requiredAuthoring": {
+        "startPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "endPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "safeMechanics": {
+          "ar": null,
+          "en": null
+        },
+        "mechanicsReviewer": null,
+        "mechanicsReviewedAt": null
+      },
+      "prompt": null,
+      "promptStatus": "BLOCKED_NEEDS_REVIEWED_MECHANICS",
+      "output": null,
+      "outputStatus": "NOT_GENERATED"
+    },
+    {
+      "jobId": "exercise-image-v1:assault-bike",
+      "version": 1,
+      "exerciseId": "assault-bike",
+      "sourceFingerprint": "12ce6523dc2f98920b421110b44f49141e937f7dfbccb7f80430e4dd0f682c60",
+      "metadata": {
+        "names": {
+          "ar": null,
+          "en": null
+        },
+        "equipment": [],
+        "muscles": {
+          "primary": [],
+          "secondary": []
+        },
+        "movementPattern": null
+      },
+      "metadataStatus": "BLOCKED_METADATA_NOT_PRESENT_IN_LEDGER",
+      "requiredAuthoring": {
+        "startPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "endPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "safeMechanics": {
+          "ar": null,
+          "en": null
+        },
+        "mechanicsReviewer": null,
+        "mechanicsReviewedAt": null
+      },
+      "prompt": null,
+      "promptStatus": "BLOCKED_NEEDS_REVIEWED_MECHANICS",
+      "output": null,
+      "outputStatus": "NOT_GENERATED"
+    },
+    {
+      "jobId": "exercise-image-v1:banded-lateral-walk",
+      "version": 1,
+      "exerciseId": "banded-lateral-walk",
+      "sourceFingerprint": "12ce6523dc2f98920b421110b44f49141e937f7dfbccb7f80430e4dd0f682c60",
+      "metadata": {
+        "names": {
+          "ar": null,
+          "en": null
+        },
+        "equipment": [],
+        "muscles": {
+          "primary": [],
+          "secondary": []
+        },
+        "movementPattern": null
+      },
+      "metadataStatus": "BLOCKED_METADATA_NOT_PRESENT_IN_LEDGER",
+      "requiredAuthoring": {
+        "startPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "endPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "safeMechanics": {
+          "ar": null,
+          "en": null
+        },
+        "mechanicsReviewer": null,
+        "mechanicsReviewedAt": null
+      },
+      "prompt": null,
+      "promptStatus": "BLOCKED_NEEDS_REVIEWED_MECHANICS",
+      "output": null,
+      "outputStatus": "NOT_GENERATED"
+    },
+    {
+      "jobId": "exercise-image-v1:battle-ropes",
+      "version": 1,
+      "exerciseId": "battle-ropes",
+      "sourceFingerprint": "12ce6523dc2f98920b421110b44f49141e937f7dfbccb7f80430e4dd0f682c60",
+      "metadata": {
+        "names": {
+          "ar": null,
+          "en": null
+        },
+        "equipment": [],
+        "muscles": {
+          "primary": [],
+          "secondary": []
+        },
+        "movementPattern": null
+      },
+      "metadataStatus": "BLOCKED_METADATA_NOT_PRESENT_IN_LEDGER",
+      "requiredAuthoring": {
+        "startPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "endPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "safeMechanics": {
+          "ar": null,
+          "en": null
+        },
+        "mechanicsReviewer": null,
+        "mechanicsReviewedAt": null
+      },
+      "prompt": null,
+      "promptStatus": "BLOCKED_NEEDS_REVIEWED_MECHANICS",
+      "output": null,
+      "outputStatus": "NOT_GENERATED"
+    },
+    {
+      "jobId": "exercise-image-v1:belt-squat",
+      "version": 1,
+      "exerciseId": "belt-squat",
+      "sourceFingerprint": "12ce6523dc2f98920b421110b44f49141e937f7dfbccb7f80430e4dd0f682c60",
+      "metadata": {
+        "names": {
+          "ar": null,
+          "en": null
+        },
+        "equipment": [],
+        "muscles": {
+          "primary": [],
+          "secondary": []
+        },
+        "movementPattern": null
+      },
+      "metadataStatus": "BLOCKED_METADATA_NOT_PRESENT_IN_LEDGER",
+      "requiredAuthoring": {
+        "startPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "endPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "safeMechanics": {
+          "ar": null,
+          "en": null
+        },
+        "mechanicsReviewer": null,
+        "mechanicsReviewedAt": null
+      },
+      "prompt": null,
+      "promptStatus": "BLOCKED_NEEDS_REVIEWED_MECHANICS",
+      "output": null,
+      "outputStatus": "NOT_GENERATED"
+    },
+    {
+      "jobId": "exercise-image-v1:bicycle-crunch",
+      "version": 1,
+      "exerciseId": "bicycle-crunch",
+      "sourceFingerprint": "12ce6523dc2f98920b421110b44f49141e937f7dfbccb7f80430e4dd0f682c60",
+      "metadata": {
+        "names": {
+          "ar": null,
+          "en": null
+        },
+        "equipment": [],
+        "muscles": {
+          "primary": [],
+          "secondary": []
+        },
+        "movementPattern": null
+      },
+      "metadataStatus": "BLOCKED_METADATA_NOT_PRESENT_IN_LEDGER",
+      "requiredAuthoring": {
+        "startPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "endPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "safeMechanics": {
+          "ar": null,
+          "en": null
+        },
+        "mechanicsReviewer": null,
+        "mechanicsReviewedAt": null
+      },
+      "prompt": null,
+      "promptStatus": "BLOCKED_NEEDS_REVIEWED_MECHANICS",
+      "output": null,
+      "outputStatus": "NOT_GENERATED"
+    },
+    {
+      "jobId": "exercise-image-v1:burpees",
+      "version": 1,
+      "exerciseId": "burpees",
+      "sourceFingerprint": "12ce6523dc2f98920b421110b44f49141e937f7dfbccb7f80430e4dd0f682c60",
+      "metadata": {
+        "names": {
+          "ar": null,
+          "en": null
+        },
+        "equipment": [],
+        "muscles": {
+          "primary": [],
+          "secondary": []
+        },
+        "movementPattern": null
+      },
+      "metadataStatus": "BLOCKED_METADATA_NOT_PRESENT_IN_LEDGER",
+      "requiredAuthoring": {
+        "startPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "endPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "safeMechanics": {
+          "ar": null,
+          "en": null
+        },
+        "mechanicsReviewer": null,
+        "mechanicsReviewedAt": null
+      },
+      "prompt": null,
+      "promptStatus": "BLOCKED_NEEDS_REVIEWED_MECHANICS",
+      "output": null,
+      "outputStatus": "NOT_GENERATED"
+    },
+    {
+      "jobId": "exercise-image-v1:cable-hip-adduction",
+      "version": 1,
+      "exerciseId": "cable-hip-adduction",
+      "sourceFingerprint": "12ce6523dc2f98920b421110b44f49141e937f7dfbccb7f80430e4dd0f682c60",
+      "metadata": {
+        "names": {
+          "ar": null,
+          "en": null
+        },
+        "equipment": [],
+        "muscles": {
+          "primary": [],
+          "secondary": []
+        },
+        "movementPattern": null
+      },
+      "metadataStatus": "BLOCKED_METADATA_NOT_PRESENT_IN_LEDGER",
+      "requiredAuthoring": {
+        "startPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "endPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "safeMechanics": {
+          "ar": null,
+          "en": null
+        },
+        "mechanicsReviewer": null,
+        "mechanicsReviewedAt": null
+      },
+      "prompt": null,
+      "promptStatus": "BLOCKED_NEEDS_REVIEWED_MECHANICS",
+      "output": null,
+      "outputStatus": "NOT_GENERATED"
+    },
+    {
+      "jobId": "exercise-image-v1:cable-shoulder-press",
+      "version": 1,
+      "exerciseId": "cable-shoulder-press",
+      "sourceFingerprint": "12ce6523dc2f98920b421110b44f49141e937f7dfbccb7f80430e4dd0f682c60",
+      "metadata": {
+        "names": {
+          "ar": null,
+          "en": null
+        },
+        "equipment": [],
+        "muscles": {
+          "primary": [],
+          "secondary": []
+        },
+        "movementPattern": null
+      },
+      "metadataStatus": "BLOCKED_METADATA_NOT_PRESENT_IN_LEDGER",
+      "requiredAuthoring": {
+        "startPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "endPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "safeMechanics": {
+          "ar": null,
+          "en": null
+        },
+        "mechanicsReviewer": null,
+        "mechanicsReviewedAt": null
+      },
+      "prompt": null,
+      "promptStatus": "BLOCKED_NEEDS_REVIEWED_MECHANICS",
+      "output": null,
+      "outputStatus": "NOT_GENERATED"
+    },
+    {
+      "jobId": "exercise-image-v1:cable-woodchop",
+      "version": 1,
+      "exerciseId": "cable-woodchop",
+      "sourceFingerprint": "12ce6523dc2f98920b421110b44f49141e937f7dfbccb7f80430e4dd0f682c60",
+      "metadata": {
+        "names": {
+          "ar": null,
+          "en": null
+        },
+        "equipment": [],
+        "muscles": {
+          "primary": [],
+          "secondary": []
+        },
+        "movementPattern": null
+      },
+      "metadataStatus": "BLOCKED_METADATA_NOT_PRESENT_IN_LEDGER",
+      "requiredAuthoring": {
+        "startPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "endPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "safeMechanics": {
+          "ar": null,
+          "en": null
+        },
+        "mechanicsReviewer": null,
+        "mechanicsReviewedAt": null
+      },
+      "prompt": null,
+      "promptStatus": "BLOCKED_NEEDS_REVIEWED_MECHANICS",
+      "output": null,
+      "outputStatus": "NOT_GENERATED"
+    },
+    {
+      "jobId": "exercise-image-v1:chest-press-machine",
+      "version": 1,
+      "exerciseId": "chest-press-machine",
+      "sourceFingerprint": "12ce6523dc2f98920b421110b44f49141e937f7dfbccb7f80430e4dd0f682c60",
+      "metadata": {
+        "names": {
+          "ar": null,
+          "en": null
+        },
+        "equipment": [],
+        "muscles": {
+          "primary": [],
+          "secondary": []
+        },
+        "movementPattern": null
+      },
+      "metadataStatus": "BLOCKED_METADATA_NOT_PRESENT_IN_LEDGER",
+      "requiredAuthoring": {
+        "startPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "endPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "safeMechanics": {
+          "ar": null,
+          "en": null
+        },
+        "mechanicsReviewer": null,
+        "mechanicsReviewedAt": null
+      },
+      "prompt": null,
+      "promptStatus": "BLOCKED_NEEDS_REVIEWED_MECHANICS",
+      "output": null,
+      "outputStatus": "NOT_GENERATED"
+    },
+    {
+      "jobId": "exercise-image-v1:chest-supported-row",
+      "version": 1,
+      "exerciseId": "chest-supported-row",
+      "sourceFingerprint": "12ce6523dc2f98920b421110b44f49141e937f7dfbccb7f80430e4dd0f682c60",
+      "metadata": {
+        "names": {
+          "ar": null,
+          "en": null
+        },
+        "equipment": [],
+        "muscles": {
+          "primary": [],
+          "secondary": []
+        },
+        "movementPattern": null
+      },
+      "metadataStatus": "BLOCKED_METADATA_NOT_PRESENT_IN_LEDGER",
+      "requiredAuthoring": {
+        "startPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "endPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "safeMechanics": {
+          "ar": null,
+          "en": null
+        },
+        "mechanicsReviewer": null,
+        "mechanicsReviewedAt": null
+      },
+      "prompt": null,
+      "promptStatus": "BLOCKED_NEEDS_REVIEWED_MECHANICS",
+      "output": null,
+      "outputStatus": "NOT_GENERATED"
+    },
+    {
+      "jobId": "exercise-image-v1:dumbbell-sumo-squat",
+      "version": 1,
+      "exerciseId": "dumbbell-sumo-squat",
+      "sourceFingerprint": "12ce6523dc2f98920b421110b44f49141e937f7dfbccb7f80430e4dd0f682c60",
+      "metadata": {
+        "names": {
+          "ar": null,
+          "en": null
+        },
+        "equipment": [],
+        "muscles": {
+          "primary": [],
+          "secondary": []
+        },
+        "movementPattern": null
+      },
+      "metadataStatus": "BLOCKED_METADATA_NOT_PRESENT_IN_LEDGER",
+      "requiredAuthoring": {
+        "startPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "endPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "safeMechanics": {
+          "ar": null,
+          "en": null
+        },
+        "mechanicsReviewer": null,
+        "mechanicsReviewedAt": null
+      },
+      "prompt": null,
+      "promptStatus": "BLOCKED_NEEDS_REVIEWED_MECHANICS",
+      "output": null,
+      "outputStatus": "NOT_GENERATED"
+    },
+    {
+      "jobId": "exercise-image-v1:elliptical",
+      "version": 1,
+      "exerciseId": "elliptical",
+      "sourceFingerprint": "12ce6523dc2f98920b421110b44f49141e937f7dfbccb7f80430e4dd0f682c60",
+      "metadata": {
+        "names": {
+          "ar": null,
+          "en": null
+        },
+        "equipment": [],
+        "muscles": {
+          "primary": [],
+          "secondary": []
+        },
+        "movementPattern": null
+      },
+      "metadataStatus": "BLOCKED_METADATA_NOT_PRESENT_IN_LEDGER",
+      "requiredAuthoring": {
+        "startPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "endPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "safeMechanics": {
+          "ar": null,
+          "en": null
+        },
+        "mechanicsReviewer": null,
+        "mechanicsReviewedAt": null
+      },
+      "prompt": null,
+      "promptStatus": "BLOCKED_NEEDS_REVIEWED_MECHANICS",
+      "output": null,
+      "outputStatus": "NOT_GENERATED"
+    },
+    {
+      "jobId": "exercise-image-v1:frog-pump",
+      "version": 1,
+      "exerciseId": "frog-pump",
+      "sourceFingerprint": "12ce6523dc2f98920b421110b44f49141e937f7dfbccb7f80430e4dd0f682c60",
+      "metadata": {
+        "names": {
+          "ar": null,
+          "en": null
+        },
+        "equipment": [],
+        "muscles": {
+          "primary": [],
+          "secondary": []
+        },
+        "movementPattern": null
+      },
+      "metadataStatus": "BLOCKED_METADATA_NOT_PRESENT_IN_LEDGER",
+      "requiredAuthoring": {
+        "startPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "endPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "safeMechanics": {
+          "ar": null,
+          "en": null
+        },
+        "mechanicsReviewer": null,
+        "mechanicsReviewedAt": null
+      },
+      "prompt": null,
+      "promptStatus": "BLOCKED_NEEDS_REVIEWED_MECHANICS",
+      "output": null,
+      "outputStatus": "NOT_GENERATED"
+    },
+    {
+      "jobId": "exercise-image-v1:high-knees",
+      "version": 1,
+      "exerciseId": "high-knees",
+      "sourceFingerprint": "12ce6523dc2f98920b421110b44f49141e937f7dfbccb7f80430e4dd0f682c60",
+      "metadata": {
+        "names": {
+          "ar": null,
+          "en": null
+        },
+        "equipment": [],
+        "muscles": {
+          "primary": [],
+          "secondary": []
+        },
+        "movementPattern": null
+      },
+      "metadataStatus": "BLOCKED_METADATA_NOT_PRESENT_IN_LEDGER",
+      "requiredAuthoring": {
+        "startPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "endPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "safeMechanics": {
+          "ar": null,
+          "en": null
+        },
+        "mechanicsReviewer": null,
+        "mechanicsReviewedAt": null
+      },
+      "prompt": null,
+      "promptStatus": "BLOCKED_NEEDS_REVIEWED_MECHANICS",
+      "output": null,
+      "outputStatus": "NOT_GENERATED"
+    },
+    {
+      "jobId": "exercise-image-v1:hollow-hold",
+      "version": 1,
+      "exerciseId": "hollow-hold",
+      "sourceFingerprint": "12ce6523dc2f98920b421110b44f49141e937f7dfbccb7f80430e4dd0f682c60",
+      "metadata": {
+        "names": {
+          "ar": null,
+          "en": null
+        },
+        "equipment": [],
+        "muscles": {
+          "primary": [],
+          "secondary": []
+        },
+        "movementPattern": null
+      },
+      "metadataStatus": "BLOCKED_METADATA_NOT_PRESENT_IN_LEDGER",
+      "requiredAuthoring": {
+        "startPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "endPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "safeMechanics": {
+          "ar": null,
+          "en": null
+        },
+        "mechanicsReviewer": null,
+        "mechanicsReviewedAt": null
+      },
+      "prompt": null,
+      "promptStatus": "BLOCKED_NEEDS_REVIEWED_MECHANICS",
+      "output": null,
+      "outputStatus": "NOT_GENERATED"
+    },
+    {
+      "jobId": "exercise-image-v1:incline-chest-press-machine",
+      "version": 1,
+      "exerciseId": "incline-chest-press-machine",
+      "sourceFingerprint": "12ce6523dc2f98920b421110b44f49141e937f7dfbccb7f80430e4dd0f682c60",
+      "metadata": {
+        "names": {
+          "ar": null,
+          "en": null
+        },
+        "equipment": [],
+        "muscles": {
+          "primary": [],
+          "secondary": []
+        },
+        "movementPattern": null
+      },
+      "metadataStatus": "BLOCKED_METADATA_NOT_PRESENT_IN_LEDGER",
+      "requiredAuthoring": {
+        "startPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "endPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "safeMechanics": {
+          "ar": null,
+          "en": null
+        },
+        "mechanicsReviewer": null,
+        "mechanicsReviewedAt": null
+      },
+      "prompt": null,
+      "promptStatus": "BLOCKED_NEEDS_REVIEWED_MECHANICS",
+      "output": null,
+      "outputStatus": "NOT_GENERATED"
+    },
+    {
+      "jobId": "exercise-image-v1:incline-treadmill-walk",
+      "version": 1,
+      "exerciseId": "incline-treadmill-walk",
+      "sourceFingerprint": "12ce6523dc2f98920b421110b44f49141e937f7dfbccb7f80430e4dd0f682c60",
+      "metadata": {
+        "names": {
+          "ar": null,
+          "en": null
+        },
+        "equipment": [],
+        "muscles": {
+          "primary": [],
+          "secondary": []
+        },
+        "movementPattern": null
+      },
+      "metadataStatus": "BLOCKED_METADATA_NOT_PRESENT_IN_LEDGER",
+      "requiredAuthoring": {
+        "startPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "endPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "safeMechanics": {
+          "ar": null,
+          "en": null
+        },
+        "mechanicsReviewer": null,
+        "mechanicsReviewedAt": null
+      },
+      "prompt": null,
+      "promptStatus": "BLOCKED_NEEDS_REVIEWED_MECHANICS",
+      "output": null,
+      "outputStatus": "NOT_GENERATED"
+    },
+    {
+      "jobId": "exercise-image-v1:jump-rope",
+      "version": 1,
+      "exerciseId": "jump-rope",
+      "sourceFingerprint": "12ce6523dc2f98920b421110b44f49141e937f7dfbccb7f80430e4dd0f682c60",
+      "metadata": {
+        "names": {
+          "ar": null,
+          "en": null
+        },
+        "equipment": [],
+        "muscles": {
+          "primary": [],
+          "secondary": []
+        },
+        "movementPattern": null
+      },
+      "metadataStatus": "BLOCKED_METADATA_NOT_PRESENT_IN_LEDGER",
+      "requiredAuthoring": {
+        "startPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "endPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "safeMechanics": {
+          "ar": null,
+          "en": null
+        },
+        "mechanicsReviewer": null,
+        "mechanicsReviewedAt": null
+      },
+      "prompt": null,
+      "promptStatus": "BLOCKED_NEEDS_REVIEWED_MECHANICS",
+      "output": null,
+      "outputStatus": "NOT_GENERATED"
+    },
+    {
+      "jobId": "exercise-image-v1:landmine-press",
+      "version": 1,
+      "exerciseId": "landmine-press",
+      "sourceFingerprint": "12ce6523dc2f98920b421110b44f49141e937f7dfbccb7f80430e4dd0f682c60",
+      "metadata": {
+        "names": {
+          "ar": null,
+          "en": null
+        },
+        "equipment": [],
+        "muscles": {
+          "primary": [],
+          "secondary": []
+        },
+        "movementPattern": null
+      },
+      "metadataStatus": "BLOCKED_METADATA_NOT_PRESENT_IN_LEDGER",
+      "requiredAuthoring": {
+        "startPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "endPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "safeMechanics": {
+          "ar": null,
+          "en": null
+        },
+        "mechanicsReviewer": null,
+        "mechanicsReviewedAt": null
+      },
+      "prompt": null,
+      "promptStatus": "BLOCKED_NEEDS_REVIEWED_MECHANICS",
+      "output": null,
+      "outputStatus": "NOT_GENERATED"
+    },
+    {
+      "jobId": "exercise-image-v1:leg-swings",
+      "version": 1,
+      "exerciseId": "leg-swings",
+      "sourceFingerprint": "12ce6523dc2f98920b421110b44f49141e937f7dfbccb7f80430e4dd0f682c60",
+      "metadata": {
+        "names": {
+          "ar": null,
+          "en": null
+        },
+        "equipment": [],
+        "muscles": {
+          "primary": [],
+          "secondary": []
+        },
+        "movementPattern": null
+      },
+      "metadataStatus": "BLOCKED_METADATA_NOT_PRESENT_IN_LEDGER",
+      "requiredAuthoring": {
+        "startPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "endPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "safeMechanics": {
+          "ar": null,
+          "en": null
+        },
+        "mechanicsReviewer": null,
+        "mechanicsReviewedAt": null
+      },
+      "prompt": null,
+      "promptStatus": "BLOCKED_NEEDS_REVIEWED_MECHANICS",
+      "output": null,
+      "outputStatus": "NOT_GENERATED"
+    },
+    {
+      "jobId": "exercise-image-v1:meadows-row",
+      "version": 1,
+      "exerciseId": "meadows-row",
+      "sourceFingerprint": "12ce6523dc2f98920b421110b44f49141e937f7dfbccb7f80430e4dd0f682c60",
+      "metadata": {
+        "names": {
+          "ar": null,
+          "en": null
+        },
+        "equipment": [],
+        "muscles": {
+          "primary": [],
+          "secondary": []
+        },
+        "movementPattern": null
+      },
+      "metadataStatus": "BLOCKED_METADATA_NOT_PRESENT_IN_LEDGER",
+      "requiredAuthoring": {
+        "startPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "endPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "safeMechanics": {
+          "ar": null,
+          "en": null
+        },
+        "mechanicsReviewer": null,
+        "mechanicsReviewedAt": null
+      },
+      "prompt": null,
+      "promptStatus": "BLOCKED_NEEDS_REVIEWED_MECHANICS",
+      "output": null,
+      "outputStatus": "NOT_GENERATED"
+    },
+    {
+      "jobId": "exercise-image-v1:mountain-climber",
+      "version": 1,
+      "exerciseId": "mountain-climber",
+      "sourceFingerprint": "12ce6523dc2f98920b421110b44f49141e937f7dfbccb7f80430e4dd0f682c60",
+      "metadata": {
+        "names": {
+          "ar": null,
+          "en": null
+        },
+        "equipment": [],
+        "muscles": {
+          "primary": [],
+          "secondary": []
+        },
+        "movementPattern": null
+      },
+      "metadataStatus": "BLOCKED_METADATA_NOT_PRESENT_IN_LEDGER",
+      "requiredAuthoring": {
+        "startPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "endPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "safeMechanics": {
+          "ar": null,
+          "en": null
+        },
+        "mechanicsReviewer": null,
+        "mechanicsReviewedAt": null
+      },
+      "prompt": null,
+      "promptStatus": "BLOCKED_NEEDS_REVIEWED_MECHANICS",
+      "output": null,
+      "outputStatus": "NOT_GENERATED"
+    },
+    {
+      "jobId": "exercise-image-v1:outdoor-walk",
+      "version": 1,
+      "exerciseId": "outdoor-walk",
+      "sourceFingerprint": "12ce6523dc2f98920b421110b44f49141e937f7dfbccb7f80430e4dd0f682c60",
+      "metadata": {
+        "names": {
+          "ar": null,
+          "en": null
+        },
+        "equipment": [],
+        "muscles": {
+          "primary": [],
+          "secondary": []
+        },
+        "movementPattern": null
+      },
+      "metadataStatus": "BLOCKED_METADATA_NOT_PRESENT_IN_LEDGER",
+      "requiredAuthoring": {
+        "startPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "endPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "safeMechanics": {
+          "ar": null,
+          "en": null
+        },
+        "mechanicsReviewer": null,
+        "mechanicsReviewedAt": null
+      },
+      "prompt": null,
+      "promptStatus": "BLOCKED_NEEDS_REVIEWED_MECHANICS",
+      "output": null,
+      "outputStatus": "NOT_GENERATED"
+    },
+    {
+      "jobId": "exercise-image-v1:pendlay-row",
+      "version": 1,
+      "exerciseId": "pendlay-row",
+      "sourceFingerprint": "12ce6523dc2f98920b421110b44f49141e937f7dfbccb7f80430e4dd0f682c60",
+      "metadata": {
+        "names": {
+          "ar": null,
+          "en": null
+        },
+        "equipment": [],
+        "muscles": {
+          "primary": [],
+          "secondary": []
+        },
+        "movementPattern": null
+      },
+      "metadataStatus": "BLOCKED_METADATA_NOT_PRESENT_IN_LEDGER",
+      "requiredAuthoring": {
+        "startPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "endPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "safeMechanics": {
+          "ar": null,
+          "en": null
+        },
+        "mechanicsReviewer": null,
+        "mechanicsReviewedAt": null
+      },
+      "prompt": null,
+      "promptStatus": "BLOCKED_NEEDS_REVIEWED_MECHANICS",
+      "output": null,
+      "outputStatus": "NOT_GENERATED"
+    },
+    {
+      "jobId": "exercise-image-v1:pike-push-up",
+      "version": 1,
+      "exerciseId": "pike-push-up",
+      "sourceFingerprint": "12ce6523dc2f98920b421110b44f49141e937f7dfbccb7f80430e4dd0f682c60",
+      "metadata": {
+        "names": {
+          "ar": null,
+          "en": null
+        },
+        "equipment": [],
+        "muscles": {
+          "primary": [],
+          "secondary": []
+        },
+        "movementPattern": null
+      },
+      "metadataStatus": "BLOCKED_METADATA_NOT_PRESENT_IN_LEDGER",
+      "requiredAuthoring": {
+        "startPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "endPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "safeMechanics": {
+          "ar": null,
+          "en": null
+        },
+        "mechanicsReviewer": null,
+        "mechanicsReviewedAt": null
+      },
+      "prompt": null,
+      "promptStatus": "BLOCKED_NEEDS_REVIEWED_MECHANICS",
+      "output": null,
+      "outputStatus": "NOT_GENERATED"
+    },
+    {
+      "jobId": "exercise-image-v1:rowing-machine",
+      "version": 1,
+      "exerciseId": "rowing-machine",
+      "sourceFingerprint": "12ce6523dc2f98920b421110b44f49141e937f7dfbccb7f80430e4dd0f682c60",
+      "metadata": {
+        "names": {
+          "ar": null,
+          "en": null
+        },
+        "equipment": [],
+        "muscles": {
+          "primary": [],
+          "secondary": []
+        },
+        "movementPattern": null
+      },
+      "metadataStatus": "BLOCKED_METADATA_NOT_PRESENT_IN_LEDGER",
+      "requiredAuthoring": {
+        "startPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "endPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "safeMechanics": {
+          "ar": null,
+          "en": null
+        },
+        "mechanicsReviewer": null,
+        "mechanicsReviewedAt": null
+      },
+      "prompt": null,
+      "promptStatus": "BLOCKED_NEEDS_REVIEWED_MECHANICS",
+      "output": null,
+      "outputStatus": "NOT_GENERATED"
+    },
+    {
+      "jobId": "exercise-image-v1:shoulder-dislocates",
+      "version": 1,
+      "exerciseId": "shoulder-dislocates",
+      "sourceFingerprint": "12ce6523dc2f98920b421110b44f49141e937f7dfbccb7f80430e4dd0f682c60",
+      "metadata": {
+        "names": {
+          "ar": null,
+          "en": null
+        },
+        "equipment": [],
+        "muscles": {
+          "primary": [],
+          "secondary": []
+        },
+        "movementPattern": null
+      },
+      "metadataStatus": "BLOCKED_METADATA_NOT_PRESENT_IN_LEDGER",
+      "requiredAuthoring": {
+        "startPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "endPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "safeMechanics": {
+          "ar": null,
+          "en": null
+        },
+        "mechanicsReviewer": null,
+        "mechanicsReviewedAt": null
+      },
+      "prompt": null,
+      "promptStatus": "BLOCKED_NEEDS_REVIEWED_MECHANICS",
+      "output": null,
+      "outputStatus": "NOT_GENERATED"
+    },
+    {
+      "jobId": "exercise-image-v1:single-arm-pushdown",
+      "version": 1,
+      "exerciseId": "single-arm-pushdown",
+      "sourceFingerprint": "12ce6523dc2f98920b421110b44f49141e937f7dfbccb7f80430e4dd0f682c60",
+      "metadata": {
+        "names": {
+          "ar": null,
+          "en": null
+        },
+        "equipment": [],
+        "muscles": {
+          "primary": [],
+          "secondary": []
+        },
+        "movementPattern": null
+      },
+      "metadataStatus": "BLOCKED_METADATA_NOT_PRESENT_IN_LEDGER",
+      "requiredAuthoring": {
+        "startPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "endPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "safeMechanics": {
+          "ar": null,
+          "en": null
+        },
+        "mechanicsReviewer": null,
+        "mechanicsReviewedAt": null
+      },
+      "prompt": null,
+      "promptStatus": "BLOCKED_NEEDS_REVIEWED_MECHANICS",
+      "output": null,
+      "outputStatus": "NOT_GENERATED"
+    },
+    {
+      "jobId": "exercise-image-v1:single-leg-hip-thrust",
+      "version": 1,
+      "exerciseId": "single-leg-hip-thrust",
+      "sourceFingerprint": "12ce6523dc2f98920b421110b44f49141e937f7dfbccb7f80430e4dd0f682c60",
+      "metadata": {
+        "names": {
+          "ar": null,
+          "en": null
+        },
+        "equipment": [],
+        "muscles": {
+          "primary": [],
+          "secondary": []
+        },
+        "movementPattern": null
+      },
+      "metadataStatus": "BLOCKED_METADATA_NOT_PRESENT_IN_LEDGER",
+      "requiredAuthoring": {
+        "startPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "endPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "safeMechanics": {
+          "ar": null,
+          "en": null
+        },
+        "mechanicsReviewer": null,
+        "mechanicsReviewedAt": null
+      },
+      "prompt": null,
+      "promptStatus": "BLOCKED_NEEDS_REVIEWED_MECHANICS",
+      "output": null,
+      "outputStatus": "NOT_GENERATED"
+    },
+    {
+      "jobId": "exercise-image-v1:stairmaster",
+      "version": 1,
+      "exerciseId": "stairmaster",
+      "sourceFingerprint": "12ce6523dc2f98920b421110b44f49141e937f7dfbccb7f80430e4dd0f682c60",
+      "metadata": {
+        "names": {
+          "ar": null,
+          "en": null
+        },
+        "equipment": [],
+        "muscles": {
+          "primary": [],
+          "secondary": []
+        },
+        "movementPattern": null
+      },
+      "metadataStatus": "BLOCKED_METADATA_NOT_PRESENT_IN_LEDGER",
+      "requiredAuthoring": {
+        "startPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "endPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "safeMechanics": {
+          "ar": null,
+          "en": null
+        },
+        "mechanicsReviewer": null,
+        "mechanicsReviewedAt": null
+      },
+      "prompt": null,
+      "promptStatus": "BLOCKED_NEEDS_REVIEWED_MECHANICS",
+      "output": null,
+      "outputStatus": "NOT_GENERATED"
+    },
+    {
+      "jobId": "exercise-image-v1:stationary-bike",
+      "version": 1,
+      "exerciseId": "stationary-bike",
+      "sourceFingerprint": "12ce6523dc2f98920b421110b44f49141e937f7dfbccb7f80430e4dd0f682c60",
+      "metadata": {
+        "names": {
+          "ar": null,
+          "en": null
+        },
+        "equipment": [],
+        "muscles": {
+          "primary": [],
+          "secondary": []
+        },
+        "movementPattern": null
+      },
+      "metadataStatus": "BLOCKED_METADATA_NOT_PRESENT_IN_LEDGER",
+      "requiredAuthoring": {
+        "startPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "endPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "safeMechanics": {
+          "ar": null,
+          "en": null
+        },
+        "mechanicsReviewer": null,
+        "mechanicsReviewedAt": null
+      },
+      "prompt": null,
+      "promptStatus": "BLOCKED_NEEDS_REVIEWED_MECHANICS",
+      "output": null,
+      "outputStatus": "NOT_GENERATED"
+    },
+    {
+      "jobId": "exercise-image-v1:thoracic-rotation",
+      "version": 1,
+      "exerciseId": "thoracic-rotation",
+      "sourceFingerprint": "12ce6523dc2f98920b421110b44f49141e937f7dfbccb7f80430e4dd0f682c60",
+      "metadata": {
+        "names": {
+          "ar": null,
+          "en": null
+        },
+        "equipment": [],
+        "muscles": {
+          "primary": [],
+          "secondary": []
+        },
+        "movementPattern": null
+      },
+      "metadataStatus": "BLOCKED_METADATA_NOT_PRESENT_IN_LEDGER",
+      "requiredAuthoring": {
+        "startPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "endPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "safeMechanics": {
+          "ar": null,
+          "en": null
+        },
+        "mechanicsReviewer": null,
+        "mechanicsReviewedAt": null
+      },
+      "prompt": null,
+      "promptStatus": "BLOCKED_NEEDS_REVIEWED_MECHANICS",
+      "output": null,
+      "outputStatus": "NOT_GENERATED"
+    },
+    {
+      "jobId": "exercise-image-v1:toes-to-bar",
+      "version": 1,
+      "exerciseId": "toes-to-bar",
+      "sourceFingerprint": "12ce6523dc2f98920b421110b44f49141e937f7dfbccb7f80430e4dd0f682c60",
+      "metadata": {
+        "names": {
+          "ar": null,
+          "en": null
+        },
+        "equipment": [],
+        "muscles": {
+          "primary": [],
+          "secondary": []
+        },
+        "movementPattern": null
+      },
+      "metadataStatus": "BLOCKED_METADATA_NOT_PRESENT_IN_LEDGER",
+      "requiredAuthoring": {
+        "startPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "endPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "safeMechanics": {
+          "ar": null,
+          "en": null
+        },
+        "mechanicsReviewer": null,
+        "mechanicsReviewedAt": null
+      },
+      "prompt": null,
+      "promptStatus": "BLOCKED_NEEDS_REVIEWED_MECHANICS",
+      "output": null,
+      "outputStatus": "NOT_GENERATED"
+    },
+    {
+      "jobId": "exercise-image-v1:treadmill-run",
+      "version": 1,
+      "exerciseId": "treadmill-run",
+      "sourceFingerprint": "12ce6523dc2f98920b421110b44f49141e937f7dfbccb7f80430e4dd0f682c60",
+      "metadata": {
+        "names": {
+          "ar": null,
+          "en": null
+        },
+        "equipment": [],
+        "muscles": {
+          "primary": [],
+          "secondary": []
+        },
+        "movementPattern": null
+      },
+      "metadataStatus": "BLOCKED_METADATA_NOT_PRESENT_IN_LEDGER",
+      "requiredAuthoring": {
+        "startPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "endPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "safeMechanics": {
+          "ar": null,
+          "en": null
+        },
+        "mechanicsReviewer": null,
+        "mechanicsReviewedAt": null
+      },
+      "prompt": null,
+      "promptStatus": "BLOCKED_NEEDS_REVIEWED_MECHANICS",
+      "output": null,
+      "outputStatus": "NOT_GENERATED"
+    },
+    {
+      "jobId": "exercise-image-v1:wall-sit",
+      "version": 1,
+      "exerciseId": "wall-sit",
+      "sourceFingerprint": "12ce6523dc2f98920b421110b44f49141e937f7dfbccb7f80430e4dd0f682c60",
+      "metadata": {
+        "names": {
+          "ar": null,
+          "en": null
+        },
+        "equipment": [],
+        "muscles": {
+          "primary": [],
+          "secondary": []
+        },
+        "movementPattern": null
+      },
+      "metadataStatus": "BLOCKED_METADATA_NOT_PRESENT_IN_LEDGER",
+      "requiredAuthoring": {
+        "startPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "endPositionDescription": {
+          "ar": null,
+          "en": null
+        },
+        "safeMechanics": {
+          "ar": null,
+          "en": null
+        },
+        "mechanicsReviewer": null,
+        "mechanicsReviewedAt": null
+      },
+      "prompt": null,
+      "promptStatus": "BLOCKED_NEEDS_REVIEWED_MECHANICS",
+      "output": null,
+      "outputStatus": "NOT_GENERATED"
+    }
+  ]
+}
