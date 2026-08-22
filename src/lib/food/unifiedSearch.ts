@@ -27,9 +27,10 @@
  * كل نتيجة تحمل `source`، ومعرّف المعبّأ يبقى ببادئة `off:` — فنسب ODbL يظهر حين
  * تظهر سجلات OFF **وحدها**، ولا يُنسب صنف قِمّة المنسَّق إلى مصدر لم يأتِ منه.
  *
- * ⚠️ **لا ادّعاء ذيل طويل هنا.** المعبّأ الحيّ اليوم ٥٩٩ سجلًا — الشرائح الأربعون
- * غير مخدومة (انظر `catalog/catalog.ts` و`longTailAvailability`). هذه الوحدة
- * توحّد ما هو **موجود**، ولا تعد بما ليس مرفوعًا.
+ * ═══ الذيل الطويل يمرّ من هنا ═══
+ * `rankPackaged` يشعل حزم البحث افتراضيًا (`deep: true`)، فأي شاشة تستدعيه تصل
+ * إلى الستين ألفًا بلا أن تعرف شريحة. والسلّم أعلاه هو ما يمنع ذلك من إغراق
+ * المنسَّق: «شاورما» تبقى الساندويتش، لأن قوّة المنسَّق تسبق نظيرها المعبّأ.
  */
 import { foodItems, searchFoodScored, type FoodItem } from '@/data/foodItems'
 import { normalizeProductKey } from '@/lib/text/foodNormalize'
@@ -119,14 +120,18 @@ export function rankCurated(query: string, limit: number = CURATED_CANDIDATE_LIM
 export async function rankPackaged(
   catalog: Catalog | null | undefined,
   query: string,
-  opts: { limit?: number; deepShards?: string[] } = {},
+  opts: { limit?: number; deepShards?: string[]; deep?: boolean; pageBudget?: number } = {},
 ): Promise<RankedHit[]> {
   if (!catalog) return []
   const limit = opts.limit ?? PACKAGED_CANDIDATE_LIMIT
+  // ═══ العمق مشتعل هنا، لا في الكتالوج ═══
+  // الكتالوج آلة: يفعل ما يُطلب. **قرار «هل يستحق المستخدم الذيل الطويل» قرار
+  // منتج**، وموضعه هذه الطبقة. وإطفاؤه ممكن صراحةً لمن أراد الطقم الساخن وحده.
+  const deep = opts.deep ?? true
   const seen = new Set<string>()
   const hits: RankedHit[] = []
   for (const v of queryVariants(query)) {
-    for (const hit of await catalog.searchRanked(v, { limit, deepShards: opts.deepShards })) {
+    for (const hit of await catalog.searchRanked(v, { limit, deepShards: opts.deepShards, deep, pageBudget: opts.pageBudget })) {
       if (seen.has(hit.product.gtin)) continue
       seen.add(hit.product.gtin)
       hits.push(hit)
@@ -165,9 +170,9 @@ export function mergeUnified(
  */
 export async function searchAllFoods(
   query: string,
-  opts: { catalog?: Catalog | null; lang?: 'ar' | 'en'; limit?: number; deepShards?: string[] } = {},
+  opts: { catalog?: Catalog | null; lang?: 'ar' | 'en'; limit?: number; deepShards?: string[]; deep?: boolean; pageBudget?: number } = {},
 ): Promise<UnifiedFoodResult[]> {
   const curated = rankCurated(query)
-  const packaged = await rankPackaged(opts.catalog, query, { deepShards: opts.deepShards })
+  const packaged = await rankPackaged(opts.catalog, query, { deepShards: opts.deepShards, deep: opts.deep, pageBudget: opts.pageBudget })
   return mergeUnified(curated, packaged, opts.lang ?? 'ar', opts.limit ?? DEFAULT_RESULT_LIMIT)
 }
