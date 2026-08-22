@@ -4,6 +4,7 @@
  * العقد يذكرها صراحةً: «الترتيب معلَن في الكود لا مبثوث». ترتيبٌ مبثوث في ثلاثة
  * مواضع يصير ثلاثة ترتيبات بعد موجتين، ولا يمكن اختبار أيّها الصحيح.
  */
+import { normalizeProductKey } from '@/lib/text/foodNormalize'
 import type { CatalogProduct } from './types'
 
 /** رتب المطابقة من الأقوى إلى الأضعف — الرقم الأصغر أفضل. */
@@ -101,4 +102,18 @@ export function classifyMatch(
   if (direct) return direct
   const bare = withoutAl(normalizedQuery)
   return bare ? tierFor(product, bare, normalizedFields) : null
+}
+
+/**
+ * رتبة سجل مقابل استعلام **مطبَّع** — تطبيع الحقول هنا لا في كل مستهلك.
+ *
+ * كان هذا التركيب مكتوبًا داخل `Catalog.tierFor` وحده. ونسخه في مستهلك ثانٍ
+ * (حزم البحث) كان سيصنع تطبيعين يتباعدان بعد موجة — وهو بالضبط ما يمنعه §٦ من
+ * عقد البحث: «الترتيب معلَن في الكود لا مبثوث».
+ */
+export function tierForProduct(product: CatalogProduct, normalizedQuery: string): MatchTier | null {
+  return classifyMatch(product, normalizedQuery, {
+    name: normalizeProductKey(`${product.name_ar ?? ''} ${product.name_en ?? ''}`),
+    brand: normalizeProductKey(`${product.brand_ar ?? ''} ${product.brand_en ?? ''}`),
+  })
 }

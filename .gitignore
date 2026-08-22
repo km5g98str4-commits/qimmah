@@ -63,3 +63,8 @@ docs/execution/qimmah-postweb/release/evidence/run-*.json
 # بصماتها كلّها في data/food-production/manifests/build-manifest.json،
 # وطريقة إعادة إنتاجها في data/food-production/accepted/README.md
 data/food-production/accepted/shards/
+
+# أصول بحث الطعام المولَّدة — ٤٦ ميغابايت مشتقّة من الشرائح بأمر واحد:
+#   node scripts/food-production/emit-search-buckets.mjs
+# حتمية بالبايت (merkle_root في search/manifest.json)، فلا معنى لإيداعها.
+public/food/search/

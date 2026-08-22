@@ -20,18 +20,25 @@
  * `safeStorage` — الطبقة الثالثة من العقد. هذا الملف **للقراءة فقط**: لا يكتب
  * بيانات مستخدم ولا يلمس مفاتيحها.
  *
- * ═══ ⚠️ حالة الشرائح اليوم — صدق قبل طمأنينة (§5) ═══
- * **الشرائح الأربعون لا تُخدَم حاليًا.** `public/food/` يحمل البيان والطقم الساخن
- * فقط؛ كل طلب `shards/*.json` يعود ٤٠٤ فيصير `null` بلا رمي. فالمشحون فعلًا
- * **٥٩٩ سجلًا معبّأً** لا ستون ألفًا، والذيل الطويل تبعية رفع لا وعد قائم
- * (`docs/execution/qimmah-postweb/food/DEPENDENCIES.md` F-2). الكود أدناه صحيح
- * **حين** تُرفع الشرائح — ولا يدّعي أنها مرفوعة.
+ * ═══ الطريق الثالث: حزم البحث (`searchCorpus`) ═══
+ * `deepShards` أدناه يشترط أن **يسمّي المستدعي شريحة**. والواجهة لا تملك اسمًا
+ * تسمّيه: الشرائح موزَّعة بالـGTIN والمستخدم يكتب اسمًا. فبقي الذيل الطويل
+ * مكتوبًا وغير قابل للوصول من أي شاشة — وهو ما تغلقه `SearchCorpus`: الكلمة
+ * تعرف ملفّها (`kin` ⇒ حزمة واحدة)، فلا حاجة إلى معرفة الشريحة أصلًا.
+ *
+ * **`deepShards` يبقى كما هو** لمن يعرف شريحته (المسح، الإثباتات)، وحزم البحث
+ * تُضاف بجانبه بـ`deep: true` — لا تستبدله.
+ *
+ * ═══ ⚠️ ما لا يدّعيه هذا الملف (§5) ═══
+ * `longTailAvailability()` أدناه لا يقرأ رقمًا من بيانٍ ويعلنه؛ يقول ما **جُرِّب
+ * ونجح** هذه اللحظة. غياب الأصول يبقى `unavailable` صريحة، لا صفرًا صامتًا.
  */
 import { assignShard, shardName } from '../shardRouting'
 import { normalizeProductKey } from '@/lib/text/foodNormalize'
 import { classifyGtin } from '../gtin'
 import { createIdbCache, createMemoryCache, type BlobCache } from './idbCache'
-import { classifyMatch, rankRankedHits, type RankedHit } from './rank'
+import { rankRankedHits, tierForProduct, tierRank, type RankedHit } from './rank'
+import { SearchCorpus, type CorpusQueryTrace, type CorpusStats } from './searchCorpus'
 import type { CatalogManifest, CatalogProduct, CatalogStats, HotSetPayload, ShardIndex, ShardPayload } from './types'
 
 export interface CatalogDeps {
@@ -72,8 +79,18 @@ export interface LongTailAvailability {
   declaredRecords: number
   /** عدد الشرائح التي يعلنها البيان. */
   declaredShards: number
-  /** ما يمكن البحث فيه الآن حقًّا: الطقم الساخن + الشرائح المحمَّلة. */
+  /**
+   * ما يمكن **بلوغه بالبحث** الآن حقًّا.
+   *
+   * ⚠️ ليس «ما هو محمَّل في الذاكرة». حزم البحث تجعل كل سجل بالغًا بكلمة من
+   * كلماته بطلب واحد، فالمحمَّل في الذاكرة صار قياسًا للتكلفة لا للتغطية.
+   * وحين لا يُحمَّل الدليل يعود الرقم إلى ما في الذاكرة فعلًا — لا ادّعاء.
+   */
   searchableRecords: number
+  /** ما يعلنه دليل الحزم — صفر ما لم يُحمَّل الدليل فعلًا. */
+  corpusRecords: number
+  /** عدد حزم البحث المحمَّلة في الدليل. */
+  corpusBuckets: number
   /** كم محاولة جلب ذيلٍ طويل جرت (حمولة أو فهرس). */
   attempts: number
   /** كم منها فشلت (٤٠٤ أو JSON تالف). */
@@ -83,6 +100,21 @@ export interface LongTailAvailability {
    * `unavailable` جُرِّبت وفشلت كلّها.
    */
   verdict: 'unproven' | 'available' | 'unavailable'
+}
+
+export interface CatalogSearchOptions {
+  limit?: number
+  /** شرائح يسمّيها المستدعي (مسح باركود · إثبات) — يبقى كما كان. */
+  deepShards?: string[]
+  maxShardPayloads?: number
+  /**
+   * تشغيل حزم البحث بالكلمة. **هذا ما يصل المستخدم إلى الذيل الطويل** بلا أن
+   * يعرف شريحة. مطفأ افتراضيًا كي لا يتغيّر عقد أي مستدعٍ قائم بلا علمه؛ طبقة
+   * الاتحاد (`unifiedSearch`) هي التي تشعله، فهي موضع قرار المنتج.
+   */
+  deep?: boolean
+  /** أقصى صفحات حزمة لاستعلام واحد (افتراضها `DEFAULT_BUCKET_PAGE_BUDGET`). */
+  pageBudget?: number
 }
 
 export class Catalog {
@@ -95,8 +127,14 @@ export class Catalog {
   private longTail = { attempts: 0, failures: 0 }
   private stats: CatalogStats = {
     hotSetLoaded: false, hotSetCount: 0, shardsFetched: [], indexesFetched: [],
-    networkFetches: 0, cacheHits: 0, cacheKind: 'memory', recordsInMemory: 0,
+    networkFetches: 0, networkBytes: 0, cacheHits: 0, cacheKind: 'memory', recordsInMemory: 0,
   }
+
+  /**
+   * حزم البحث بالكلمة — **الطريق الوحيد الذي يسلكه المستخدم** إلى الذيل الطويل.
+   * تشترك مع الشرائح في `load` نفسها: ذاكرة مؤقتة واحدة وعدّاد بايتات واحد.
+   */
+  private corpus = new SearchCorpus((path) => this.load(path))
 
   private constructor(private deps: Required<Pick<CatalogDeps, 'fetchText' | 'baseUrl'>> & { cache: BlobCache }) {
     this.stats.cacheKind = deps.cache.kind
@@ -114,6 +152,8 @@ export class Catalog {
     const text = await this.deps.fetchText(`${this.deps.baseUrl}/${path}`)
     if (text === null) return null
     this.stats.networkFetches += 1
+    // بايتات UTF-8 لا محارف: العربية محرفان إلى ثلاثة للحرف، والفرق ليس تجميليًا.
+    this.stats.networkBytes += new TextEncoder().encode(text).length
     await this.deps.cache.put(path, text)
     return text
   }
@@ -193,10 +233,7 @@ export class Catalog {
 
   /** مطابقة سجل واحد — نفس التطبيع الذي بُني به الفهرس. */
   private tierFor(p: CatalogProduct, q: string) {
-    return classifyMatch(p, q, {
-      name: normalizeProductKey(`${p.name_ar ?? ''} ${p.name_en ?? ''}`),
-      brand: normalizeProductKey(`${p.brand_ar ?? ''} ${p.brand_en ?? ''}`),
-    })
+    return tierForProduct(p, q)
   }
 
   /**
@@ -236,10 +273,7 @@ export class Catalog {
    *    للفهرس). فلا تُجلب حمولة **إلا لشريحة أعطى فهرسها مواضع مطابقة فعلًا**،
    *    وبحدٍّ أعلى معلَن. الفهارس التي لا تطابق لا تكلّف حمولة أصلًا.
    */
-  async searchRanked(
-    query: string,
-    opts: { limit?: number; deepShards?: string[]; maxShardPayloads?: number } = {},
-  ): Promise<RankedHit[]> {
+  async searchRanked(query: string, opts: CatalogSearchOptions = {}): Promise<RankedHit[]> {
     const q = normalizeProductKey(query)
     if (!q) return []
     const hits = this.hotHits(q)
@@ -272,12 +306,44 @@ export class Catalog {
         if (tier) hits.push({ product: p, tier })
       }
     }
-    const ranked = rankRankedHits(hits)
+    // ═══ حزم البحث — الطريق الذي لا يحتاج المستخدم أن يعرف شريحة ═══
+    if (opts.deep) {
+      const { hits: deep, trace } = await this.corpus.searchRanked(query, {
+        limit: opts.limit,
+        pageBudget: opts.pageBudget,
+      })
+      this.lastCorpusTrace = trace
+      // محاولة ذيلٍ طويل **مسمّاة**: الحكم أدناه يقوم عليها لا على تخمين.
+      if (trace.plan.reason !== 'too-short') {
+        this.longTail.attempts += 1
+        if (trace.plan.reason === 'no-directory') this.longTail.failures += 1
+      }
+      for (const hit of deep) hits.push(hit)
+    }
+
+    // ═══ إزالة التكرار — الطقم الساخن **مُضمَّن في** الشرائح والحزم معًا ═══
+    // ٥٩٩ سجل الطقم الساخن كلّها موجودة في الشرائح (مقيس: ٥٩٩/٥٩٩). فبلا هذا
+    // الحسم يظهر السجل الواحد مرّتين حالما يُوصل مصدر ثانٍ — تكرارٌ يراه المستخدم.
+    // الأقوى يفوز: الرتبة الأصغر رقمًا.
+    const best = new Map<string, RankedHit>()
+    for (const hit of hits) {
+      const prior = best.get(hit.product.gtin)
+      if (!prior || tierRank(hit.tier) < tierRank(prior.tier)) best.set(hit.product.gtin, hit)
+    }
+    const ranked = rankRankedHits([...best.values()])
     return typeof opts.limit === 'number' ? ranked.slice(0, opts.limit) : ranked
   }
 
+  /** أثر آخر استعلام حزم — للإثبات والتشخيص، لا للواجهة. */
+  lastCorpusTrace: CorpusQueryTrace | null = null
+
+  /** إحصاء حزم البحث — كم صفحة قُرئت وأي دليل حُمِّل. */
+  corpusStats(): CorpusStats {
+    return this.corpus.stats()
+  }
+
   /** نفس البحث بالسجلات المجرّدة — الواجهة القائمة، بلا تغيير في عقدها. */
-  async search(query: string, opts: { limit?: number; deepShards?: string[]; maxShardPayloads?: number } = {}): Promise<CatalogProduct[]> {
+  async search(query: string, opts: CatalogSearchOptions = {}): Promise<CatalogProduct[]> {
     return (await this.searchRanked(query, opts)).map((h) => h.product)
   }
 
@@ -289,18 +355,23 @@ export class Catalog {
    * **ما يجوز للتطبيق أن يعد به الآن.** أي سطح يريد ذكر حجم قاعدة الطعام يقرأ
    * `searchableRecords` من هنا — لا `declaredRecords`، ولا رقمًا مكتوبًا في نصّ.
    *
-   * الشرائح غير مرفوعة اليوم، فالفرق بين الرقمين ٥٩٬٩٤١ سجلًا. عرض الرقم المعلَن
-   * على المستخدم يجعل الواجهة تعد بستين ألفًا وتسلّم ٥٩٩ — وهو بالضبط ما يمنعه §5.
+   * والفرق بين `declaredRecords` و`searchableRecords` هو بالضبط ما لا يجوز لأي
+   * سطح أن يعد به: الأول ما يقوله البيان، والثاني ما جُرِّب فنجح. حين يتساويان
+   * صار الوعد مستحقًّا؛ وحين يفترقان تُعرض الحقيقة الصغرى لا الكبرى.
    */
   longTailAvailability(): LongTailAvailability {
     const declaredShards = this.manifest?.shards?.length ?? 0
     const declaredRecords = (this.manifest?.shards ?? []).reduce((a, s) => a + (s.count ?? 0), 0)
     const { attempts, failures } = this.longTail
     const verdict = attempts === 0 ? 'unproven' : failures < attempts ? 'available' : 'unavailable'
+    const corpus = this.corpus.stats()
     return {
       declaredRecords,
       declaredShards,
-      searchableRecords: this.stats.recordsInMemory,
+      // الطقم الساخن **جزء من** الحزم (٥٩٩/٥٩٩ مقيسة)، فلا جمع يضاعف سجلًا.
+      searchableRecords: Math.max(corpus.directoryRecords, this.stats.recordsInMemory),
+      corpusRecords: corpus.directoryRecords,
+      corpusBuckets: corpus.buckets,
       attempts,
       failures,
       verdict,
