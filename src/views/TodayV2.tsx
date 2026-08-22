@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { QuickLogTarget } from '@/components/MobileShell'
+import { CoachTodayEntry } from '@/features/coach/CoachTodayEntry'
 import { Icon } from '@/components/Icon'
 import { MinorGoalNotice } from '@/components/MinorGoalNotice'
 import type { Lang } from '@/lib/appPreferences'
@@ -369,6 +370,15 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
             else if (model.hero.destination) onNavigate(model.hero.destination)
           }}
         />
+
+        {/* [FINAL-CONVERGENCE] مدخل المرشد — كان يتيمًا.
+            المسار `#/coach` مسجَّل (`appRoutes.ts:43,64`) ومُركَّب (`App.tsx:564`)،
+            وهذه البطاقة مكتوبة لتكون مدخله من «اليوم» — **ولم يستوردها أحد**، ولا
+            وُجد في `src/` نداءُ تنقّل واحد إلى `coach`. فالشاشة كاملة ومُثبَتة
+            بـ٧١٣ فحصًا، ولا يبلغها مستخدم إلا بكتابة الهاش بيده.
+            وهي خفيفة عمدًا (أيقونة وثلاثة نصوص ونداء تنقّل) فلا تجرّ حزمة
+            المرشد إلى «اليوم» — الثقيل يبقى خلف `React.lazy` على المسار. */}
+        <CoachTodayEntry lang={lang} onOpen={() => onNavigate('coach')} />
 
         {/* ④ كيف ماشي معي؟ */}
         <WaterCard lang={lang} consumedMl={dayLog.waterMl} targetMl={waterTargetMl} onAdd={addWater} />

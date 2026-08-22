@@ -835,6 +835,39 @@ function digitBearingTemplates(root: unknown): string[] {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
+// [FINAL-CONVERGENCE] البلوغ — أهمّ ما يفتقده إثباتٌ يقرأ ملفًّا
+// ════════════════════════════════════════════════════════════════════════════
+//
+// كل ما سبق يقرأ `CoachTodayEntry.tsx` ويؤكّد محتواه. وقد كان الملف **بلا
+// مستورد واحد**، ولم يوجد في `src/` نداء تنقّل واحد إلى `coach`. فالمسار
+// مسجَّل ومُركَّب والشاشة مُثبَتة بمئات الفحوص — ولا يبلغها مستخدم إلا بكتابة
+// الهاش بيده. إثباتٌ أخضر على سطح يتيم.
+//
+// فيُقاس البلوغ نفسه، لا المحتوى وحده.
+{
+  const SRC_FILES = walk(join(ROOT, 'src'))
+  const importers = SRC_FILES.filter(([rel, body]) =>
+    rel !== 'src/features/coach/CoachTodayEntry.tsx' && /from '@\/features\/coach\/CoachTodayEntry'/.test(body))
+  check(`بطاقة المدخل مستورَدة في سطح حيّ (${importers.length} مستورد)`, importers.length > 0)
+  check('والمستورد هو شاشة «اليوم»', importers.some(([rel]) => rel === 'src/views/TodayV2.tsx'))
+
+  const today = SRC_FILES.find(([rel]) => rel === 'src/views/TodayV2.tsx')?.[1] ?? ''
+  check('والبطاقة مركَّبة في الرسم لا مستوردة فقط', /<CoachTodayEntry\b/.test(today))
+  const navigators = SRC_FILES.filter(([, body]) => /onNavigate\('coach'\)|navigate\('coach'\)|setView\('coach'\)/.test(body))
+  check(`يوجد نداء تنقّل حقيقي إلى المسار (${navigators.length})`, navigators.length > 0)
+
+  // ⚔️ التأكيد المضادّ: نزع التركيب يُكتشف — لا يمرّ صامتًا كما مرّ قبل الآن.
+  check('⚔️ ونزع التركيب من «اليوم» كان سيُكتشف',
+    !/<CoachTodayEntry\b/.test(today.replace(/<CoachTodayEntry/g, '<Removed')))
+
+  // [FINAL-CONVERGENCE] مستوعَب من `claude/qimmah-sovereign-closure-h503u6`:
+  // المرشد حتميّ، فلا يجوز أن يُسوَّق ذكاءً في أي سطح يراه المستخدم.
+  const AI_WORDS = ['ذكاء اصطناعي', 'مدرب ذكي', 'مدرّب ذكي', 'AI Coach', 'AI coach', 'smart coach']
+  const uiFiles = SRC_FILES.filter(([rel]) => /^src\/(views|components|features)\//.test(rel) || /^src\/i18n\/dict\//.test(rel))
+  const offenders = uiFiles.filter(([, body]) => AI_WORDS.some((w) => body.includes(w))).map(([rel]) => rel)
+  check(`لا سطح واجهة يسوّق المرشد ذكاءً (${uiFiles.length} ملفًا)`, offenders.length === 0)
+  check('⚔️ والكلمة المحظورة لو وُجدت لَكُشفت', AI_WORDS.some((w) => `نص فيه ${AI_WORDS[0]}`.includes(w)))
+}
 
 console.log(`\n${'═'.repeat(60)}`)
 console.log(`✓ ${pass} فحصًا ناجحًا · ✗ ${fail} فاشلًا`)
