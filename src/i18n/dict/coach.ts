@@ -18,10 +18,34 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 import type { Lang } from '@/lib/appPreferences'
-import type { CoachStrings } from '@/lib/coach/strings'
+import type { CoachEntryStrings, CoachStrings } from '@/lib/coach/strings'
+
+// ── نصوص بطاقة المدخل — كائنان مستقلّان قبل القاموسين الكبيرين ──────────────
+//
+// السبب: بطاقة «اليوم» تحتاج أربعة نصوص لا ثلاثمئة، والفصل يجعل `coachStrings`
+// **غير مشار إليه** من مسار البطاقة فيصير هزّه ممكنًا. **وقيس ولم يُهَزّ**:
+// esbuild يبقي القاموس كاملًا (٧٫٤ ك.ب مضغوطة) — وRollup لم يُقَس لأن الشاشة لم
+// تُوصَل بعد بـ`App.tsx`. فالفصل بنية صحيحة **لا مكسبًا مُثبَتًا**، ويُقال كذلك
+// بدل أن يُكتب رقم لم يُقَس. القياس يُعاد بعد الوصل: `scripts/coach-chunk-measure.mjs`.
+
+const arEntry: CoachEntryStrings = {
+  eyebrow: 'المرشد',
+  entryTitle: 'مرشد قِمّة',
+  entryBody: 'ستة أسئلة يجاوبها من بياناتك أنت — بلا نموذج لغوي وبلا اتصال.',
+  entryCta: 'افتح المرشد',
+}
+
+const enEntry: CoachEntryStrings = {
+  eyebrow: 'Coach',
+  entryTitle: 'Qimmah coach',
+  entryBody: 'Six questions answered from your own data — no language model, no connection.',
+  entryCta: 'Open the coach',
+}
+
+export const coachEntryStrings: Record<Lang, CoachEntryStrings> = { ar: arEntry, en: enEntry }
 
 const ar: CoachStrings = {
-  eyebrow: 'المرشد',
+  ...arEntry,
   title: 'مرشد قِمّة',
   subtitle: 'يجاوب من بياناتك أنت — لا غير.',
   back: 'رجوع',
@@ -35,9 +59,6 @@ const ar: CoachStrings = {
     'ما أحفظ أسئلتك ولا أتعلّم منها. كل جواب ينحسب من جديد وقت ما تسأل — فلو تغيّرت بياناتك تغيّر الجواب، ولو ما تغيّرت جاك نفسه.',
   answerBlocked:
     'فيه سطر ما قدرت أربطه بمصدر من بياناتك، وما راح أعرض لك نصف جواب. جرّب سؤال ثاني من القائمة.',
-  entryTitle: 'مرشد قِمّة',
-  entryBody: 'ستة أسئلة يجاوبها من بياناتك أنت — بلا نموذج لغوي وبلا اتصال.',
-  entryCta: 'افتح المرشد',
   quickTitle: 'أسئلة جاهزة',
   answerTitle: 'الجواب',
   sourceLabel: 'المصدر',
@@ -65,14 +86,16 @@ const ar: CoachStrings = {
     'today.rest': 'اليوم راحة في جدولك.',
     'today.restNext': 'أقرب يوم تمرين: {day}، بعد {days} يوم.',
     'today.restNoNext': 'وما لقيت يوم تمرين قادم في جدولك.',
-    'today.training': 'اليوم {day}: {exercises} تمارين، {sets} مجموعة.',
+    // «{day}» يأتي باسم يوم الخطة، وقد يبدأ بكلمة «اليوم» («اليوم ٣ · جسم كامل»).
+    // فالقالب لا يسبقه بها ثانيةً — «اليوم اليوم ٣» تلعثم قِيس على خطة حقيقية.
+    'today.training': '{day} — {exercises} تمارين، {sets} مجموعة.',
     'today.recovery': 'حسب تسجيل تعافيك اليوم، يبدو الأنسب {suggestion} — ثقة تقريبية {confidence}٪.',
     'today.recoveryUnknown': 'ما سجّلت تعافيك اليوم، فما عندي شي أقوله عن جاهزيتك.',
     'today.caloriesLeft': 'باقي لك {remaining} سعرة من هدف {target}.',
     'today.caloriesOver': 'تجاوزت هدفك بـ{over} سعرة (الهدف {target}).',
     'today.caloriesUnknown': 'ما فيه هدف سعرات محفوظ، فما أقدر أقول لك كم باقي.',
     'why.noPlan': 'ما فيه خطة محفوظة أشرح لك اختياراتها.',
-    'why.todayDay': 'يوم اليوم في خطتك اسمه {day}.',
+    'why.todayDay': 'يومك في الخطة: {day}.',
     'why.trainingDays': 'اخترت {days} أيام تمرين بالأسبوع في الإعداد، والتقسيمة انبنت على هذا الرقم.',
     'why.sessionSize': 'عدد تمارين اليوم {exercises} — مربوط بالوقت اللي حدّدته للجلسة.',
     'why.experienceLoad': 'مستواك المسجّل {level}، وهو اللي يحدّد التكرارات والراحة.',
@@ -86,7 +109,7 @@ const ar: CoachStrings = {
     'why.inactiveAxis': 'محور «{axis}» ما هو موصول بالتوليد لين الآن — نقولها بدل ما ندّعي أنه أثّر.',
     'missed.noSchedule': 'ما فيه جدول أسبوعي محفوظ، فما أقدر أعرف إذا فاتك يوم.',
     'missed.none': 'ما فيه يوم فايت في جدولك.',
-    'missed.found': 'فاتك يوم {day} بتاريخ {date}.',
+    'missed.found': 'فاتك {day} بتاريخ {date}.',
     'missed.yoursToDecide': 'القرار لك: تنقله، تتخطّاه، أو تعيد جدولته. ما يتحرّك شي بروحه.',
     'missed.adherence': 'سجّلت {sessions} جلسة في آخر سبعة أيام.',
     'missed.next': 'أقرب يوم تمرين: {day}، بعد {days} يوم.',
@@ -195,7 +218,7 @@ const ar: CoachStrings = {
 }
 
 const en: CoachStrings = {
-  eyebrow: 'Coach',
+  ...enEntry,
   title: 'Qimmah coach',
   subtitle: 'Answers built from your data — nothing else.',
   back: 'Back',
@@ -209,9 +232,6 @@ const en: CoachStrings = {
     "I don't keep your questions and I don't learn from them. Every answer is worked out fresh the moment you ask — change your data and the answer changes, leave it and you get the same one back.",
   answerBlocked:
     "One line here couldn't be tied back to a source in your data, and I won't show you half an answer. Try another question from the list.",
-  entryTitle: 'Qimmah coach',
-  entryBody: 'Six questions answered from your own data — no language model, no connection.',
-  entryCta: 'Open the coach',
   quickTitle: 'Ready-made questions',
   answerTitle: 'Answer',
   sourceLabel: 'Source',
@@ -239,7 +259,7 @@ const en: CoachStrings = {
     'today.rest': 'Today is a rest day on your schedule.',
     'today.restNext': 'Your next training day is {day}, {days} day(s) from now.',
     'today.restNoNext': "And I couldn't find an upcoming training day on your schedule.",
-    'today.training': 'Today is {day}: {exercises} exercises, {sets} sets.',
+    'today.training': '{day} — {exercises} exercises, {sets} sets.',
     'today.recovery':
       "Going by today's recovery check-in, {suggestion} looks like the best fit — roughly {confidence}% confidence.",
     'today.recoveryUnknown': "You haven't logged your recovery today, so I have nothing to say about how ready you are.",
@@ -247,7 +267,7 @@ const en: CoachStrings = {
     'today.caloriesOver': "You're {over} kcal past your {target} goal.",
     'today.caloriesUnknown': "There's no saved calorie goal, so I can't tell you what's left.",
     'why.noPlan': "There's no saved plan for me to explain.",
-    'why.todayDay': "Today's day in your plan is {day}.",
+    'why.todayDay': 'Your day in the plan: {day}.',
     'why.trainingDays': 'You picked {days} training days a week during setup, and the split was built around that.',
     'why.sessionSize': 'Today has {exercises} exercises — tied to the session length you set.',
     'why.experienceLoad': 'Your saved level is {level}, and that sets the reps and the rest periods.',

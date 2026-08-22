@@ -24,8 +24,22 @@ export interface CoachEnumTables {
   injuryArea: Record<InjuryAreaKey, string>
 }
 
-export interface CoachStrings {
+/**
+ * نصوص **بطاقة المدخل** وحدها — مفصولة في واجهة مستقلّة عمدًا.
+ *
+ * شاشة «اليوم» يفتحها كل مستخدم كل يوم، والبطاقة تحتاج أربعة نصوص لا ثلاثمئة.
+ * فصلُها يجعل `coachEntryStrings` قابلًا للاستيراد وحده، ويسقط بقيّة القاموس
+ * في هزّ الشجرة بدل أن يدخل حزمة اللوحة. و`CoachStrings` **يرث** هذه الحقول
+ * فلا تُكتب مرّتين ولا تتباعد نسختان.
+ */
+export interface CoachEntryStrings {
   eyebrow: string
+  entryTitle: string
+  entryBody: string
+  entryCta: string
+}
+
+export interface CoachStrings extends CoachEntryStrings {
   title: string
   subtitle: string
   back: string
@@ -46,10 +60,6 @@ export interface CoachStrings {
    * يُبتلع الخطأ: تُقال المشكلة صريحة ويبقى المستخدم بلا رقم مخترَع (§5).
    */
   answerBlocked: string
-  /** بطاقة المدخل في «اليوم» — عنوانها ونصّها وندَاؤها. */
-  entryTitle: string
-  entryBody: string
-  entryCta: string
   quickTitle: string
   answerTitle: string
   sourceLabel: string

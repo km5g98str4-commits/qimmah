@@ -463,6 +463,22 @@ for (const lang of LANGS) {
     )
   }
 
+  // المسار الافتراضي للأرقام (`formatNumber` بسياسة الأرقام الموحّدة) يعمل في
+  // اللغتين. الإثبات يقيس بمنسّق هويّة كي يقارن حرفيًا؛ وهذا يقيس ما يراه المستخدم.
+  for (const lang of LANGS) {
+    let ok = true
+    let sample = ''
+    try {
+      const live = renderCoachAnswer(answerFor('todayPlan', personaDefault(lang)), coachStrings[lang], lang)
+      sample = live.lines.map((l) => l.text).join(' | ')
+      ok = live.lines.every((l) => l.text.trim().length > 0)
+    } catch {
+      ok = false
+    }
+    check(`[${lang}] المنسّق الافتراضي يرسم بلا انهيار`, ok)
+    console.log(`    ↳ [${lang}] ${sample.slice(0, 150)}`)
+  }
+
   // الحتميّة: نفس السياق ⇒ نفس الجواب حرفيًا. لا عشوائية ولا حالة مخبوءة.
   const env = personaRich('ar')
   const a = JSON.stringify(answerFor('todayPlan', env))
@@ -544,6 +560,15 @@ const ROUTES = read('src/lib/appRoutes.ts')
     check(`[${name}] كل زرّ ≥ ٤٤ بكسل (${small.join(',') || 'صفر مخالف'})`, small.length === 0)
   }
 
+  // كل أيقونة مستعملة موجودة في الخريطة — الاسم المفقود يسقط وقت التشغيل
+  // على شاشة المستخدم لا في البناء، فيُفحَص هنا.
+  const iconsFile = read('src/lib/icons.ts')
+  const usedIcons = [...(VIEW + PANEL + ENTRY).matchAll(/<Icon\s+name="([A-Za-z0-9]+)"/g)].map((m) => m[1])
+  check(`أيقونات مستعملة (${[...new Set(usedIcons)].join(',')})`, usedIcons.length >= 6)
+  for (const name of new Set(usedIcons)) {
+    check(`الأيقونة «${name}» مسجَّلة في خريطة الأيقونات`, new RegExp(`^\\s*${name},$`, 'm').test(iconsFile))
+  }
+
   // وصولية الشاشة.
   check('حقل السؤال مربوط بتسميته', VIEW.includes('htmlFor="coach-ask"') && VIEW.includes('id="coach-ask"'))
   check('منطقة الجواب حيّة لقارئ الشاشة', VIEW.includes('aria-live="polite"'))
@@ -571,6 +596,9 @@ const ROUTES = read('src/lib/appRoutes.ts')
   check(`لا استيراد ساكن لشاشة المرشد (${eager.join(',') || 'صفر'})`, eager.length === 0)
   // وبطاقة «اليوم» لا تجرّ المحرّك: بلا هذا تدخل طبقة المرشد حزمة اللوحة.
   check('بطاقة اليوم لا تستورد @/lib/coach', !ENTRY.includes("@/lib/coach"))
+  // ولا تستورد القاموس الكامل: `coachStrings` هو المفتاح الثقيل، و`coachEntryStrings`
+  // هو الأربعة التي تحتاجها. الفارق المقيس ٧٫٤ ك.ب مضغوطة (`coach-chunk-measure`).
+  check('وبطاقة اليوم تستورد نصوص المدخل لا القاموس الكامل', ENTRY.includes('coachEntryStrings') && !/\bcoachStrings\b/.test(ENTRY))
   check('وبطاقة اليوم لا تستورد الشاشة', !/from\s+['"]\.\/CoachView['"]/.test(ENTRY))
 }
 
