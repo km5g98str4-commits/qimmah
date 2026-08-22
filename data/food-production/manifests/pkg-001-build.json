@@ -1,0 +1,58 @@
+{
+  "artifact_root": "data/food-production",
+  "artifacts": [
+    {
+      "bytes": 142266,
+      "count": 51,
+      "path": "accepted/pkg-001.json",
+      "sha256": "bc458bfce33b6043a5aa4b0e9f2410aa7e59fdde6c8b7f9168bf6b6f1adb4ee8"
+    },
+    {
+      "bytes": 925,
+      "count": 55,
+      "path": "manifests/pkg-001-source.json",
+      "sha256": "765881ea57f809beaf7778765144e0614d807b1672920c4ea96cc573d0cab24d"
+    },
+    {
+      "bytes": 191,
+      "count": 0,
+      "path": "rejected/pkg-001.json",
+      "sha256": "ff0d85db94ec96c12ed046e2be1aa4a18bcafbd736d1df8f9295616f7d20dc22"
+    },
+    {
+      "bytes": 874,
+      "count": 55,
+      "path": "reports/pkg-001-build.json",
+      "sha256": "49efeafe9ffe5848a4581864c2af69ee5a6911584bf207e8e9605cf19406c314"
+    },
+    {
+      "bytes": 14560,
+      "count": 4,
+      "path": "review/pkg-001.json",
+      "sha256": "19982db229fb11bd4cd6fcca75d3534df89198d8ebbce70ae6757ef9048d39f0"
+    }
+  ],
+  "build_id": "7bfe4cc245e45ce4d152f0b2956ab8f7e0cece71d95b6d27f63165f709c58ebe",
+  "manifest_version": "1.0.0",
+  "normalization_version": "1.0.0",
+  "pipeline_version": "1.0.0",
+  "release_status": "QUARANTINED_SEED_NOT_FOR_DISTRIBUTION",
+  "schema": {
+    "path": "data/food-production/schema/canonical-food-v1.schema.json",
+    "schema_version": "1.0.0",
+    "sha256": "a0e1b7e279022d3c262c23064bf27ab852824b77edac0f2437765b0c85c1866b"
+  },
+  "source": {
+    "input_fingerprint_sha256": "038c7569c724d4aee5d3e167aa1efe1cce98528bc59ceaa46d1a7bcb0c2e1f7f",
+    "input_size_bytes": 105300,
+    "path": "docs/data-factory/packaged/PKG-001-saudi-gulf-packaged.json"
+  },
+  "totals": {
+    "accepted_unique": 51,
+    "raw_source_rows": 55,
+    "rejected_unique": 0,
+    "review_unique": 4,
+    "terminal_outcomes": 55,
+    "valid_unique_gtin": 55
+  }
+}

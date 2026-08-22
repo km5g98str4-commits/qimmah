@@ -1,0 +1,21 @@
+{
+  "baseline_commit": "cc60adfc0da0f893b101230269d4847d33490429",
+  "batch": "PKG-001",
+  "envelope_version": "1.0.0",
+  "input_fingerprint_sha256": "038c7569c724d4aee5d3e167aa1efe1cce98528bc59ceaa46d1a7bcb0c2e1f7f",
+  "input_size_bytes": 105300,
+  "licence_status": "REVIEW_REQUIRED_ODBL_REFERENCES_PRESENT",
+  "non_ingested_sections": [
+    "/needs_field_verification/rejected_entries",
+    "/needs_field_verification/category_gaps_ar"
+  ],
+  "non_ingested_sections_reason": "Reference audit sections are not candidate rows; the candidate collection is /items only.",
+  "odbl_distribution_approved": false,
+  "pipeline_version": "1.0.0",
+  "produced_on_raw": "2026-07-30",
+  "release_status": "QUARANTINED_SEED_NOT_FOR_DISTRIBUTION",
+  "source_collection_count": 55,
+  "source_collection_pointer": "/items",
+  "source_id": "qimmah_pkg_001",
+  "source_path": "docs/data-factory/packaged/PKG-001-saudi-gulf-packaged.json"
+}

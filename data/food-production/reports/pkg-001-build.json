@@ -1,0 +1,28 @@
+{
+  "accepted_unique": 51,
+  "duplicate_valid_gtin_rows": 0,
+  "input_fingerprint_sha256": "038c7569c724d4aee5d3e167aa1efe1cce98528bc59ceaa46d1a7bcb0c2e1f7f",
+  "malformed_short_rows": 0,
+  "missing_provenance_rows": 0,
+  "negative_nutrient_rows": 0,
+  "normalization_version": "1.0.0",
+  "pipeline_version": "1.0.0",
+  "quality_flag_counts": {
+    "allergens_unverified": 55,
+    "ingested_at_unset_deterministic_seed": 55,
+    "market_unverified": 55,
+    "nutrition_basis_unverified": 55,
+    "package_size_unparsed": 29,
+    "serving_size_unparsed": 11,
+    "source_divergence_review": 4
+  },
+  "raw_source_rows": 55,
+  "rejected_unique": 0,
+  "rejection_reason_counts": {},
+  "release_status": "QUARANTINED_SEED_NOT_FOR_DISTRIBUTION",
+  "review_unique": 4,
+  "schema_version": "1.0.0",
+  "terminal_balance": true,
+  "terminal_outcomes": 55,
+  "valid_unique_gtin": 55
+}

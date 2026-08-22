@@ -1,0 +1,346 @@
+{
+  "artifact_version": "1.0.0",
+  "count": 4,
+  "normalization_version": "1.0.0",
+  "records": [
+    {
+      "canonical_record": {
+        "allergens": null,
+        "allergens_completeness_raw": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+        "brand_ar": "لوزين (المراعي)",
+        "brand_en": null,
+        "carbs_g": 43.33,
+        "category_ar": "خبز",
+        "confidence_label_raw": "يحتاج مراجعة — مصدران موثّقان يتباعدان",
+        "confidence_score": null,
+        "country": null,
+        "cross_source_max_divergence_pct_raw": 16.8,
+        "energy_kcal": 256.67,
+        "fat_g": 3.33,
+        "fiber_g": 6.67,
+        "gtin": "06281007047654",
+        "gtin_as_source": "6281007047654",
+        "image_url": null,
+        "ingested_at": null,
+        "ingredients": null,
+        "manufacturer": null,
+        "market": null,
+        "micronutrients": null,
+        "name_ar": "خبز لوزين توست بالبران",
+        "name_en": "L'usine Sliced Bread Bran",
+        "normalization_version": "1.0.0",
+        "note_raw": "تباعد 16.8% بين الموقع الرسمي وبطاقة OFF. القيم المعروضة من الموقع الرسمي، وقيم OFF لكل 100: طاقة 257 · بروتين 10 · دهن 4 · كربوهيدرات 43.3. قد يكون اختلاف تركيبة أو إصدار عبوة — يُحسم بقراءة ملصق العبوة الحالية.",
+        "nutrition_basis": null,
+        "off_atwater_dev_pct_raw": 3,
+        "package_size_text_raw": null,
+        "package_size_unit": null,
+        "package_size_value": null,
+        "product_id": "qimmah_pkg_001:06281007047654",
+        "protein_g": 10,
+        "quality_flags": [
+          "allergens_unverified",
+          "ingested_at_unset_deterministic_seed",
+          "market_unverified",
+          "nutrition_basis_unverified",
+          "serving_size_unparsed",
+          "source_divergence_review"
+        ],
+        "raw_ref": {
+          "input_fingerprint_sha256": "038c7569c724d4aee5d3e167aa1efe1cce98528bc59ceaa46d1a7bcb0c2e1f7f",
+          "json_pointer": "/items/31",
+          "raw_record_sha256": "0d585d2ace34df636063bc7f2fb4eb44d556d9faa5fc9183d26fe6160d662146",
+          "source_path": "docs/data-factory/packaged/PKG-001-saudi-gulf-packaged.json"
+        },
+        "saturated_fat_g": 3.33,
+        "schema_version": "1.0.0",
+        "serving_size_text_raw": "شريحة 30 غ",
+        "serving_size_value": null,
+        "serving_unit": null,
+        "servings_per_container": null,
+        "sodium_mg": 343.33,
+        "source": {
+          "batch": "PKG-001",
+          "input_fingerprint_sha256": "038c7569c724d4aee5d3e167aa1efe1cce98528bc59ceaa46d1a7bcb0c2e1f7f",
+          "source_id": "qimmah_pkg_001",
+          "source_path": "docs/data-factory/packaged/PKG-001-saudi-gulf-packaged.json",
+          "source_record_id": "PKG-001:6281007047654",
+          "source_row_index": 31,
+          "source_urls": [
+            "https://www.almarai.com/en/brands/lusine/bakery/bread/sliced-bread-bran",
+            "https://world.openfoodfacts.org/product/6281007047654"
+          ]
+        },
+        "source_tier_raw": "official+off_divergent",
+        "source_updated_at": null,
+        "source_verified_on": "2026-07-30",
+        "sugar_g": 3.33,
+        "transformations": [
+          "carbohydrates_g_to_carbs_g",
+          "gtin_to_gtin14",
+          "source_urls_compacted"
+        ]
+      },
+      "outcome": "review",
+      "reasons": [
+        "cross_source_divergence"
+      ],
+      "source_index": 31
+    },
+    {
+      "canonical_record": {
+        "allergens": null,
+        "allergens_completeness_raw": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+        "brand_ar": "المراعي",
+        "brand_en": null,
+        "carbs_g": 11,
+        "category_ar": "عصائر",
+        "confidence_label_raw": "يحتاج مراجعة — مصدران موثّقان يتباعدان",
+        "confidence_score": null,
+        "country": null,
+        "cross_source_max_divergence_pct_raw": 9.1,
+        "energy_kcal": 46,
+        "fat_g": 0,
+        "fiber_g": 0.2,
+        "gtin": "06281007055420",
+        "gtin_as_source": "6281007055420",
+        "image_url": null,
+        "ingested_at": null,
+        "ingredients": null,
+        "manufacturer": null,
+        "market": null,
+        "micronutrients": null,
+        "name_ar": "عصير برتقال المراعي",
+        "name_en": "Almarai Orange Juice",
+        "normalization_version": "1.0.0",
+        "note_raw": "تباعد 9.1% بين الموقع الرسمي وبطاقة OFF. القيم المعروضة من الموقع الرسمي، وقيم OFF لكل 100: طاقة 42 · بروتين 0.5 · دهن 0 · كربوهيدرات 10. قد يكون اختلاف تركيبة أو إصدار عبوة — يُحسم بقراءة ملصق العبوة الحالية.",
+        "nutrition_basis": null,
+        "off_atwater_dev_pct_raw": 0,
+        "package_size_text_raw": null,
+        "package_size_unit": null,
+        "package_size_value": null,
+        "product_id": "qimmah_pkg_001:06281007055420",
+        "protein_g": 0.5,
+        "quality_flags": [
+          "allergens_unverified",
+          "ingested_at_unset_deterministic_seed",
+          "market_unverified",
+          "nutrition_basis_unverified",
+          "serving_size_unparsed",
+          "source_divergence_review"
+        ],
+        "raw_ref": {
+          "input_fingerprint_sha256": "038c7569c724d4aee5d3e167aa1efe1cce98528bc59ceaa46d1a7bcb0c2e1f7f",
+          "json_pointer": "/items/25",
+          "raw_record_sha256": "b19c9afdcb7ae7341a94c7c8431da09e99a33d47290841c40a6a1d7f7ea5e650",
+          "source_path": "docs/data-factory/packaged/PKG-001-saudi-gulf-packaged.json"
+        },
+        "saturated_fat_g": 0,
+        "schema_version": "1.0.0",
+        "serving_size_text_raw": "200 مل",
+        "serving_size_value": null,
+        "serving_unit": null,
+        "servings_per_container": null,
+        "sodium_mg": 4.3,
+        "source": {
+          "batch": "PKG-001",
+          "input_fingerprint_sha256": "038c7569c724d4aee5d3e167aa1efe1cce98528bc59ceaa46d1a7bcb0c2e1f7f",
+          "source_id": "qimmah_pkg_001",
+          "source_path": "docs/data-factory/packaged/PKG-001-saudi-gulf-packaged.json",
+          "source_record_id": "PKG-001:6281007055420",
+          "source_row_index": 25,
+          "source_urls": [
+            "https://www.almarai.com/en/brands/almarai/juices/orange-juices/orange",
+            "https://world.openfoodfacts.org/product/6281007055420"
+          ]
+        },
+        "source_tier_raw": "official+off_divergent",
+        "source_updated_at": null,
+        "source_verified_on": "2026-07-30",
+        "sugar_g": 10.5,
+        "transformations": [
+          "carbohydrates_g_to_carbs_g",
+          "gtin_to_gtin14",
+          "source_urls_compacted"
+        ]
+      },
+      "outcome": "review",
+      "reasons": [
+        "cross_source_divergence"
+      ],
+      "source_index": 25
+    },
+    {
+      "canonical_record": {
+        "allergens": [
+          "حليب"
+        ],
+        "allergens_completeness_raw": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+        "brand_ar": "المراعي",
+        "brand_en": null,
+        "carbs_g": 9.6,
+        "category_ar": "بروتين",
+        "confidence_label_raw": "يحتاج مراجعة — مصدران موثّقان يتباعدان",
+        "confidence_score": null,
+        "country": null,
+        "cross_source_max_divergence_pct_raw": 12.7,
+        "energy_kcal": 73,
+        "fat_g": 0.4,
+        "fiber_g": 0.3,
+        "gtin": "06281007061261",
+        "gtin_as_source": "6281007061261",
+        "image_url": null,
+        "ingested_at": null,
+        "ingredients": null,
+        "manufacturer": null,
+        "market": null,
+        "micronutrients": null,
+        "name_ar": "حليب بروتين المراعي بالشوكولاتة 400 مل",
+        "name_en": "Almarai Chocolate Protein Milk 400ml",
+        "normalization_version": "1.0.0",
+        "note_raw": "تباعد 12.7% بين الموقع الرسمي وبطاقة OFF. القيم المعروضة من الموقع الرسمي، وقيم OFF لكل 100: طاقة 82.5 · بروتين 8.5 · دهن 0.4 · كربوهيدرات 11. قد يكون اختلاف تركيبة أو إصدار عبوة — يُحسم بقراءة ملصق العبوة الحالية.",
+        "nutrition_basis": null,
+        "off_atwater_dev_pct_raw": 1.1,
+        "package_size_text_raw": "400 ml",
+        "package_size_unit": null,
+        "package_size_value": null,
+        "product_id": "qimmah_pkg_001:06281007061261",
+        "protein_g": 8.5,
+        "quality_flags": [
+          "allergens_unverified",
+          "ingested_at_unset_deterministic_seed",
+          "market_unverified",
+          "nutrition_basis_unverified",
+          "package_size_unparsed",
+          "serving_size_unparsed",
+          "source_divergence_review"
+        ],
+        "raw_ref": {
+          "input_fingerprint_sha256": "038c7569c724d4aee5d3e167aa1efe1cce98528bc59ceaa46d1a7bcb0c2e1f7f",
+          "json_pointer": "/items/50",
+          "raw_record_sha256": "eb68fbf925a03e2e9aeb9694c16057679b41500c9978bafad23428fdbb86359b",
+          "source_path": "docs/data-factory/packaged/PKG-001-saudi-gulf-packaged.json"
+        },
+        "saturated_fat_g": 0.3,
+        "schema_version": "1.0.0",
+        "serving_size_text_raw": "100 مل",
+        "serving_size_value": null,
+        "serving_unit": null,
+        "servings_per_container": null,
+        "sodium_mg": 119,
+        "source": {
+          "batch": "PKG-001",
+          "input_fingerprint_sha256": "038c7569c724d4aee5d3e167aa1efe1cce98528bc59ceaa46d1a7bcb0c2e1f7f",
+          "source_id": "qimmah_pkg_001",
+          "source_path": "docs/data-factory/packaged/PKG-001-saudi-gulf-packaged.json",
+          "source_record_id": "PKG-001:6281007061261",
+          "source_row_index": 50,
+          "source_urls": [
+            "https://www.almarai.com/en/brands/almarai/liquid-dairy/protein-milk/protein-milk-chocolate",
+            "https://world.openfoodfacts.org/product/6281007061261"
+          ]
+        },
+        "source_tier_raw": "official+off_divergent",
+        "source_updated_at": null,
+        "source_verified_on": "2026-07-30",
+        "sugar_g": 8.9,
+        "transformations": [
+          "carbohydrates_g_to_carbs_g",
+          "gtin_to_gtin14",
+          "source_urls_compacted"
+        ]
+      },
+      "outcome": "review",
+      "reasons": [
+        "cross_source_divergence"
+      ],
+      "source_index": 50
+    },
+    {
+      "canonical_record": {
+        "allergens": [
+          "حليب"
+        ],
+        "allergens_completeness_raw": "من حقول OFF — قد لا تكون كاملة، لا تُعتمد وحدها للتحسس",
+        "brand_ar": "المراعي",
+        "brand_en": null,
+        "carbs_g": 6.47,
+        "category_ar": "زبادي",
+        "confidence_label_raw": "يحتاج مراجعة — مصدران موثّقان يتباعدان",
+        "confidence_score": null,
+        "country": null,
+        "cross_source_max_divergence_pct_raw": 8.2,
+        "energy_kcal": 70.59,
+        "fat_g": 3.53,
+        "fiber_g": 0,
+        "gtin": "06281007063067",
+        "gtin_as_source": "6281007063067",
+        "image_url": null,
+        "ingested_at": null,
+        "ingredients": null,
+        "manufacturer": null,
+        "market": null,
+        "micronutrients": null,
+        "name_ar": "زبادي المراعي طازج كامل الدسم",
+        "name_en": "Almarai Fresh Zabadi Full Fat",
+        "normalization_version": "1.0.0",
+        "note_raw": "تباعد 8.2% بين الموقع الرسمي وبطاقة OFF. القيم المعروضة من الموقع الرسمي، وقيم OFF لكل 100: طاقة 70.6 · بروتين 4.12 · دهن 3.24 · كربوهيدرات 6.18. قد يكون اختلاف تركيبة أو إصدار عبوة — يُحسم بقراءة ملصق العبوة الحالية.",
+        "nutrition_basis": null,
+        "off_atwater_dev_pct_raw": 0.3,
+        "package_size_text_raw": null,
+        "package_size_unit": null,
+        "package_size_value": null,
+        "product_id": "qimmah_pkg_001:06281007063067",
+        "protein_g": 4.12,
+        "quality_flags": [
+          "allergens_unverified",
+          "ingested_at_unset_deterministic_seed",
+          "market_unverified",
+          "nutrition_basis_unverified",
+          "serving_size_unparsed",
+          "source_divergence_review"
+        ],
+        "raw_ref": {
+          "input_fingerprint_sha256": "038c7569c724d4aee5d3e167aa1efe1cce98528bc59ceaa46d1a7bcb0c2e1f7f",
+          "json_pointer": "/items/12",
+          "raw_record_sha256": "72d6250e7133ca35fb9fa297ce4f11204ae18f10a157b1c0732af3cccdfb641f",
+          "source_path": "docs/data-factory/packaged/PKG-001-saudi-gulf-packaged.json"
+        },
+        "saturated_fat_g": 1.76,
+        "schema_version": "1.0.0",
+        "serving_size_text_raw": "عبوة 170 غ",
+        "serving_size_value": null,
+        "serving_unit": null,
+        "servings_per_container": null,
+        "sodium_mg": 67.65,
+        "source": {
+          "batch": "PKG-001",
+          "input_fingerprint_sha256": "038c7569c724d4aee5d3e167aa1efe1cce98528bc59ceaa46d1a7bcb0c2e1f7f",
+          "source_id": "qimmah_pkg_001",
+          "source_path": "docs/data-factory/packaged/PKG-001-saudi-gulf-packaged.json",
+          "source_record_id": "PKG-001:6281007063067",
+          "source_row_index": 12,
+          "source_urls": [
+            "https://www.almarai.com/en/brands/almarai/yoghurts/zabadi/full-fat-zabadi",
+            "https://world.openfoodfacts.org/product/6281007063067"
+          ]
+        },
+        "source_tier_raw": "official+off_divergent",
+        "source_updated_at": null,
+        "source_verified_on": "2026-07-30",
+        "sugar_g": 6.47,
+        "transformations": [
+          "carbohydrates_g_to_carbs_g",
+          "gtin_to_gtin14",
+          "source_urls_compacted"
+        ]
+      },
+      "outcome": "review",
+      "reasons": [
+        "cross_source_divergence"
+      ],
+      "source_index": 12
+    }
+  ],
+  "release_status": "QUARANTINED_SEED_NOT_FOR_DISTRIBUTION",
+  "schema_version": "1.0.0"
+}
