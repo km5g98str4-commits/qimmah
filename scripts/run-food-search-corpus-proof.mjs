@@ -40,6 +40,7 @@ if (!directory) {
 const corpusManifest = JSON.parse(readFileSync(resolve(SEARCH, 'manifest.json'), 'utf8'))
 const shardManifest = JSON.parse(readFileSync(resolve(FOOD, 'manifest.json'), 'utf8'))
 const hotSet = JSON.parse(readFileSync(resolve(FOOD, 'hot-set.json'), 'utf8'))
+const hotGtins = new Set(hotSet.order)
 
 // ══ خادم حقيقي: يقدّم الملفات ويحسب البايتات المنقولة **مضغوطة** ══
 let sentGzip = 0
@@ -191,7 +192,6 @@ ok('«شاورما» أولها منسَّق لا معبّأ — الترتيب 
 // ══════════════════════════════════════════════════════════════════════
 // §٤ — خمسة سجلات معبّأة **خارج الطقم الساخن**، بأسمائها
 // ══════════════════════════════════════════════════════════════════════
-const hotGtins = new Set(hotSet.order)
 // الاستعلام لكل سجل هو **ما يكتبه إنسان**: اسم المنتج كما يقرؤه على العلبة.
 // و«Lurpak» يُبحث بعلامته لأن اسم سجله «Unsalted Butter» والعلامة في حقلها —
 // وهي حالة حقيقية في القاعدة، فتُختبر كما هي لا كما نحبّ.
@@ -212,6 +212,37 @@ for (const item of LONG_TAIL) {
   ok(`«${item.q}» يبلغ ${item.name} من الذيل الطويل برتبة ${item.tier}`,
     !!found && found.tier === item.tier,
     `${hits.length} مطابقة · ${spend.gzip} بايت · ${found ? found.tier : 'غائب'}`)
+}
+
+// ═══ الوصل نفسه محروس، لا الآلة وحدها ═══
+//
+// ⚠️ **هذا الفحص كُتب بعد التفاف نجح.** كانت فحوص الذيل الطويل أعلاه تنادي
+// `searchRanked(..., { deep: true })` صراحةً — أي تختبر **الآلة**. فحين خُرِّب
+// السطر الذي يشعل العمق في `unifiedSearch` (وهو السطر الوحيد الذي يصل الشاشة
+// بالذيل الطويل) **مرّ الإثبات كاملًا أخضر**. §4.2: مرورٌ غير مستحقّ ليس نجاحًا.
+//
+// فيُختبر هنا **نفس النداء الذي تكتبه الشاشة**: بلا `deep`، بلا `deepShards`،
+// بكتالوج جديد لم يُحمَّل له شيء. سقوطه يعني أن المستخدم فقد الذيل الطويل.
+{
+  const wired = await newCatalog()
+  // (أ) سطر الوصل نفسه، قبل أي إزالة تكرار: المرشّح المعبّأ يصل بالـGTIN بعينه.
+  const wiredHits = await unified.rankPackaged(wired, 'kinder chocolate')
+  ok('المسار الذي تستدعيه الشاشة — بلا أي خيار عمق — يبلغ الذيل الطويل',
+    wiredHits.some((h) => h.product.gtin === '08000500141601'),
+    `${wiredHits.length} مرشّحًا معبّأً`)
+  // (ب) وما يراه المستخدم فعلًا بعد الاتحاد وإزالة التكرار: سجلٌ من خارج الساخن.
+  //     التمييز مقصود — الدمج يوحّد الأسماء المتطابقة، فقد يفوز GTIN آخر بنفس
+  //     الاسم. المطلوب أن **يصل الذيل الطويل**، لا أن يفوز صفٌّ بعينه.
+  const asScreenCalls = await unified.searchAllFoods('kinder chocolate', { catalog: wired, lang: 'ar', limit: 24 })
+  const topOff = asScreenCalls[0]
+  ok('وما يظهر للمستخدم سجلٌ معبّأ من خارج الطقم الساخن',
+    !!topOff && topOff.source === 'packaged' && topOff.item.id.startsWith('off:')
+      && !hotGtins.has(topOff.item.id.slice(4)),
+    `${asScreenCalls.length} نتيجة · ${topOff?.item.nameAr ?? '—'} (${topOff?.item.id})`)
+  const availability = wired.longTailAvailability()
+  ok('وبعده يصير القابل للبحث = المعلَن، عن قياسٍ لا عن بيان',
+    availability.searchableRecords === availability.declaredRecords && availability.verdict === 'available',
+    `قابل ${availability.searchableRecords} · معلَن ${availability.declaredRecords} · ${availability.verdict}`)
 }
 
 // ضابط الاختلاق: سجل الحزمة **مشتقّ** من حمولة الشريحة، لا مصنوع.
