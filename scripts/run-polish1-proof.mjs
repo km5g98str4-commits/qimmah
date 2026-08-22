@@ -17,7 +17,8 @@ console.log('  ✓ Info.plist declares the location + health permission keys')
 const banner = `
 const __store = new Map();
 globalThis.localStorage = { getItem:k=>__store.get(k)??null, setItem:(k,v)=>__store.set(k,String(v)), removeItem:k=>__store.delete(k), clear:()=>__store.clear(), key:i=>Array.from(__store.keys())[i]??null, get length(){return __store.size} };
-globalThis.window = { localStorage: globalThis.localStorage, dispatchEvent() {}, matchMedia:()=>({matches:false}) };
+globalThis.window = {
+  addEventListener() {}, removeEventListener() {}, dispatchEvent() { return true }, localStorage: globalThis.localStorage, dispatchEvent() {}, matchMedia:()=>({matches:false}) };
 globalThis.CustomEvent = class CustomEvent { constructor(type){ this.type=type } };
 `
 const result = await build({

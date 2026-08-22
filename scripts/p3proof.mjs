@@ -10,6 +10,7 @@ import { loadOnboardingProfile, saveOnboardingProfile, defaultOnboardingProfile 
 // minimal localStorage/window shim so storage-backed loaders run on Node.
 const _store = new Map()
 globalThis.window = {
+  addEventListener() {}, removeEventListener() {}, dispatchEvent() { return true },
   localStorage: {
     getItem: (k) => (_store.has(k) ? _store.get(k) : null),
     setItem: (k, v) => _store.set(k, String(v)),

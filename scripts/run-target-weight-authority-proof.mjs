@@ -39,7 +39,8 @@ const __ls = {
   removeItem:(k)=>{__s.delete(k)}, clear:()=>{__s.clear()},
 };
 globalThis.localStorage = __ls;
-globalThis.window = { localStorage: __ls };
+globalThis.window = {
+  addEventListener() {}, removeEventListener() {}, dispatchEvent() { return true }, localStorage: __ls };
 if (typeof globalThis.performance === 'undefined') globalThis.performance = { now: () => 0 };
 `
 const ENTRY = `

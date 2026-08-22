@@ -117,7 +117,8 @@ const ls = {
 }
 globalThis.localStorage = ls
 globalThis.sessionStorage = ls
-globalThis.window = { localStorage: ls, sessionStorage: ls, location: { href: 'https://preview.example/', hash: '', search: '' }, addEventListener() {}, removeEventListener() {} }
+globalThis.window = {
+  addEventListener() {}, removeEventListener() {}, dispatchEvent() { return true }, localStorage: ls, sessionStorage: ls, location: { href: 'https://preview.example/', hash: '', search: '' }, addEventListener() {}, removeEventListener() {} }
 if (typeof globalThis.performance === 'undefined') globalThis.performance = { now: () => 0 }
 
 const attempts = installNetworkTripwire()

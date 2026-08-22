@@ -12,7 +12,8 @@ globalThis.localStorage = {
   getItem: (k) => __store.get(k) ?? null, setItem: (k, v) => __store.set(k, String(v)),
   removeItem: (k) => __store.delete(k), clear: () => __store.clear(),
 };
-globalThis.window = { localStorage: globalThis.localStorage, location: { reload() {} } };
+globalThis.window = {
+  addEventListener() {}, removeEventListener() {}, dispatchEvent() { return true }, localStorage: globalThis.localStorage, location: { reload() {} } };
 const __APP_VERSION__ = '1.0.0';
 const __BUILD_COMMIT__ = 'proof123';
 `

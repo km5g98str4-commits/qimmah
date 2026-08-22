@@ -30,7 +30,8 @@ class MemStorage {
   get length() { return this.#m.size }
 }
 const storage = new MemStorage()
-globalThis.window = { localStorage: storage, dispatchEvent() {}, addEventListener() {} }
+globalThis.window = {
+  addEventListener() {}, removeEventListener() {}, dispatchEvent() { return true }, localStorage: storage, dispatchEvent() {}, addEventListener() {} }
 globalThis.localStorage = storage
 
 const ONBOARDING_KEY = 'qimmah:onboarding:v1'

@@ -165,7 +165,8 @@ async function verifyRollover() {
   const file = join(dir, 'store.mjs')
   const banner = `
     const __m = new Map();
-    globalThis.window = { localStorage: { getItem:k=>__m.has(k)?__m.get(k):null, setItem:(k,v)=>__m.set(k,String(v)), removeItem:k=>__m.delete(k), get length(){return __m.size}, key:i=>[...__m.keys()][i] } };
+    globalThis.window = {
+  addEventListener() {}, removeEventListener() {}, dispatchEvent() { return true }, localStorage: { getItem:k=>__m.has(k)?__m.get(k):null, setItem:(k,v)=>__m.set(k,String(v)), removeItem:k=>__m.delete(k), get length(){return __m.size}, key:i=>[...__m.keys()][i] } };
     globalThis.localStorage = globalThis.window.localStorage;
   `
   writeFileSync(file, banner + '\n' + b.outputFiles[0].text)

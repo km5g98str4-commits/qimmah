@@ -52,7 +52,8 @@ const __ls = {
   },
 };
 globalThis.localStorage = __ls;
-globalThis.window = { localStorage: __ls };
+globalThis.window = {
+  addEventListener() {}, removeEventListener() {}, dispatchEvent() { return true }, localStorage: __ls };
 globalThis.__store = __store;
 `
 

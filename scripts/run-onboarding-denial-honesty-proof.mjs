@@ -42,7 +42,8 @@ class MemStorage {
   get length() { return this.#m.size }
 }
 const storage = new MemStorage()
-globalThis.window = { localStorage: storage, dispatchEvent() {}, addEventListener() {}, removeEventListener() {} }
+globalThis.window = {
+  addEventListener() {}, removeEventListener() {}, dispatchEvent() { return true }, localStorage: storage, dispatchEvent() {}, addEventListener() {}, removeEventListener() {} }
 globalThis.localStorage = storage
 
 const PROFILE_KEY = 'qimmah:onboarding:profile:v1'
