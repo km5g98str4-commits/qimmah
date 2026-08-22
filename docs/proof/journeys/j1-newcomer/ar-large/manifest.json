@@ -5,9 +5,9 @@
   "lang": "ar",
   "viewport": "large",
   "ground": {
-    "branch": "codex/qimmah-v1-final-closure-001",
-    "commit": "1768e83",
-    "subject": "feat(access): [QIM-FINAL-CLOSURE-001] Premium يصمد في الانقطاع القصير — والسلطة تبقى للخادم",
+    "branch": "codex/qimmah-final-founder-qa-rc-001",
+    "commit": "6042366a",
+    "subject": "merge(convergence): [QIM-FINAL-RC-001] الجبهتان تلتقيان — اتّحاد لا انتصار",
     "dirty": false
   },
   "frames": [
