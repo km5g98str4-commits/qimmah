@@ -70,7 +70,7 @@ export function NextActionCard({
   const innerEyebrow = hero.eyebrow === eyebrow ? null : hero.eyebrow
 
   return (
-    <section aria-labelledby="today-next-title">
+    <section aria-labelledby="today-next-title" data-testid="next-action-card">
       <p className="mb-2 flex items-center gap-2 text-sm font-black text-[color:var(--v2-ember-text)]">
         <span aria-hidden="true" className="inline-block h-1.5 w-1.5 rounded-full bg-primary" />
         {eyebrow}
