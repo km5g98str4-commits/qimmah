@@ -25,7 +25,7 @@ import {
   exerciseGuidance,
 } from '@/lib/exerciseGuidance'
 import type { Exercise, MovementPattern, Muscle } from '@/types/workout'
-import { exercises, getExercise } from '@/data/exercises'
+import { exercises } from '@/data/exercises'
 
 let pass = 0
 const fails: string[] = []
