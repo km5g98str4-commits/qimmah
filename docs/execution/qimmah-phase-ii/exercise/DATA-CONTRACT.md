@@ -7,8 +7,10 @@ The production audit has exactly one record per canonical exercise ID. The prima
 | Dependency ID | Description | Blocking Web Sovereign artifact | Expected future integration point | Remaining work after integration |
 | --- | --- | --- | --- | --- |
 | `EX-DEP-WS-001` | The final catalog, guidance, media resolver, and exercise-detail seams are not authoritative yet. | Founder-accepted Web Sovereign HEAD plus its canonical exercise/media provenance. | Regenerate the audit and review manifest first; bind approved records only at the accepted media resolver/detail boundary. | Recompute IDs and source fingerprint, review drift, complete outstanding content/media review, run focused counter-proofs and the full gate, then read exact-SHA CI. |
+| `EX-DEP-MECH-001` | Image generation must not infer exercise mechanics, equipment, anatomy, or safe form. | None; the blocker is reviewed bilingual mechanics and metadata, not a Web Sovereign artifact. | A versioned authoring artifact tied to the same ledger fingerprint, before any later binding to the accepted media resolver. | Obtain reviewed start/end and safe-mechanics content with reviewer/timestamp, create a new job-schema version, assemble prompts mechanically, run preflight, and generate only the explicitly released batch. |
+| `EX-DEP-VIDEO-REVIEW-001` | The nine pilot matches were found and verified by one primary researcher, so they are not independent approvals. | None; the blocker is independent human review, not a Web Sovereign artifact. | A versioned review package tied to the pilot SHA/fingerprint, before any later binding to the accepted exercise-detail/media resolver. | Review exact movement, equipment, variation, coaching suitability, and product fit per record; record reviewer/timestamp/verdict; promote only accepted records; retain rejected/missing rows; rerun live availability before integration. |
 
-The contract is baseline-independent. When the dependency closes, the generator must be rerun against the final HEAD; copied Web Sovereign data is not accepted.
+The contract is baseline-independent. When `EX-DEP-WS-001` closes, the generator must be rerun against the final HEAD; copied Web Sovereign data is not accepted. The mechanics and video-review dependencies gate their own later authoring or approval work, not deterministic audit generation.
 
 ## Source-of-truth order
 
