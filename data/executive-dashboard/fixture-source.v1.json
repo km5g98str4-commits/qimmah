@@ -1,0 +1,121 @@
+{
+  "schemaVersion": "qimmah.executive-dashboard.fixture-source/v1",
+  "contractVersion": "qimmah.executive-dashboard.contract/v2",
+  "sourceFingerprint": "sha256:1799183e693527d5dcf1dd88349ba7f5031037daed0ea0f03e6858ec061d258b",
+  "expectedBundleFingerprint": "sha256:cdfc24d76c4d0aff9f3ab68957fe99c37c2bc4e0c8190c47eb9ea8bdbf3fc1cd",
+  "referenceTime": "2026-08-22T09:00:00.000Z",
+  "sourceVersion": "fixture-source/2026-08-22.1",
+  "users": [
+    {
+      "safeId": "usr_fixture_7f3a",
+      "displayName": "مستخدم تجريبي",
+      "emailMasked": "z••••@example.test",
+      "accountStatus": "active",
+      "entitlement": "preview",
+      "activationState": "not-applicable",
+      "createdAt": "2026-08-20T08:15:00.000Z",
+      "lastActiveAt": "2026-08-22T07:45:00.000Z",
+      "daysInactive": 0,
+      "onboardingComplete": true,
+      "language": "ar",
+      "platform": "web"
+    },
+    {
+      "safeId": "usr_fixture_b291",
+      "displayName": "Fixture User",
+      "emailMasked": "a••••@example.test",
+      "accountStatus": "active",
+      "entitlement": "premium",
+      "activationState": "redeemed",
+      "createdAt": "2026-08-10T12:00:00.000Z",
+      "lastActiveAt": "2026-08-18T11:30:00.000Z",
+      "daysInactive": 3,
+      "onboardingComplete": true,
+      "language": "en",
+      "platform": "ios"
+    }
+  ],
+  "series": {
+    "users.growthSeries": [
+      ["2026-08-20", 1],
+      ["2026-08-21", 2],
+      ["2026-08-22", 3]
+    ],
+    "activity.signedInSeries": [
+      ["2026-08-20", 1],
+      ["2026-08-21", 1],
+      ["2026-08-22", 2]
+    ],
+    "workouts.completedSeries": [
+      ["2026-08-20", 2],
+      ["2026-08-21", 4],
+      ["2026-08-22", 3]
+    ],
+    "meals.loggedSeries": [
+      ["2026-08-20", 3],
+      ["2026-08-21", 5],
+      ["2026-08-22", 4]
+    ]
+  },
+  "retentionCohorts": [
+    {
+      "cohortStart": "2026-08-03",
+      "periods": [1, 0.75, 0.5]
+    },
+    {
+      "cohortStart": "2026-08-10",
+      "periods": [1, 0.6]
+    }
+  ],
+  "attention": [
+    {
+      "id": "activation-failure-spike",
+      "state": "detected",
+      "severity": "warning",
+      "source": "fixture.activation-audit",
+      "owner": "Backend/Security",
+      "window": "rolling 24h",
+      "threshold": ">=5 rejected attempts",
+      "asOf": "2026-08-22T09:00:00.000Z",
+      "freshness": "fresh"
+    },
+    {
+      "id": "account-source-drift",
+      "state": "clear",
+      "severity": "info",
+      "source": "fixture.account-reconciliation",
+      "owner": "Backend/Data",
+      "window": "latest reconciliation",
+      "threshold": ">0 unmatched accounts",
+      "asOf": "2026-08-22T09:00:00.000Z",
+      "freshness": "fresh"
+    },
+    {
+      "id": "product-activity-coverage",
+      "state": "unmonitorable",
+      "severity": "info",
+      "source": "dependency.ADM-006",
+      "owner": "Founder/Product/Privacy",
+      "window": "not established",
+      "threshold": "not established",
+      "asOf": null,
+      "freshness": "unknown"
+    },
+    {
+      "id": "exercise-media-pipeline",
+      "state": "error",
+      "severity": "warning",
+      "source": "fixture.exercise-media-audit",
+      "owner": "Exercise production",
+      "window": "latest audit",
+      "threshold": "audit must complete",
+      "asOf": null,
+      "freshness": "unknown"
+    }
+  ],
+  "capabilities": {
+    "refresh": true,
+    "openUser": true,
+    "export": false
+  }
+}

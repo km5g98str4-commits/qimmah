@@ -1,0 +1,106 @@
+{
+  "schemaVersion": "qimmah.executive-dashboard.fixture-contract-source/v1",
+  "contractVersion": "qimmah.executive-dashboard.contract/v2",
+  "sourceId": "docs/product/EXECUTIVE-DASHBOARD-DATA-CONTRACT-V2.md@cc60adf",
+  "sourceFingerprint": "sha256:1799183e693527d5dcf1dd88349ba7f5031037daed0ea0f03e6858ec061d258b",
+  "wiringState": "EXTERNALLY_BLOCKED",
+  "rolePolicy": {
+    "production": {
+      "state": "dependency",
+      "dependencyId": "ADM-001",
+      "allowedRoles": []
+    },
+    "fixture": {
+      "claimName": "qimmah_role",
+      "acceptedRole": "fixture-admin",
+      "acceptedClaimPath": "session.user.app_metadata",
+      "rejectedClaimPath": "session.user.user_metadata"
+    }
+  },
+  "topLevelStates": [
+    "denied",
+    "loading",
+    "empty",
+    "partial",
+    "error",
+    "ready"
+  ],
+  "metricDatumStates": [
+    "ready",
+    "unavailable",
+    "stale"
+  ],
+  "metricIdentity": {
+    "userGrowth": {
+      "kind": "line",
+      "metricName": "users.growthSeries"
+    },
+    "signedIn": {
+      "kind": "line",
+      "metricName": "activity.signedInSeries"
+    },
+    "workoutCompletion": {
+      "kind": "line",
+      "metricName": "workouts.completedSeries"
+    },
+    "nutritionLogging": {
+      "kind": "line",
+      "metricName": "meals.loggedSeries"
+    },
+    "retention": {
+      "kind": "cohort-matrix",
+      "metricName": "retention.cohorts"
+    }
+  },
+  "userFieldAllowlist": [
+    "safeId",
+    "displayName",
+    "emailMasked",
+    "accountStatus",
+    "entitlement",
+    "activationState",
+    "createdAt",
+    "lastActiveAt",
+    "daysInactive",
+    "onboardingComplete",
+    "workoutsCountWindow",
+    "lastWorkoutAt",
+    "nutritionActivity",
+    "measurementActivity",
+    "language",
+    "platform"
+  ],
+  "rawEmailFields": [
+    "email",
+    "rawEmail",
+    "emailAddress"
+  ],
+  "healthFieldDenylist": [
+    "weight",
+    "weightKg",
+    "heightCm",
+    "bodyFat",
+    "measurements",
+    "injuries",
+    "medications",
+    "supplements",
+    "allergies",
+    "foodNames"
+  ],
+  "sensitiveFieldDenylist": [
+    "activationCode",
+    "accessToken",
+    "refreshToken"
+  ],
+  "attentionStates": [
+    "detected",
+    "clear",
+    "unmonitorable",
+    "error"
+  ],
+  "capabilities": [
+    "refresh",
+    "openUser",
+    "export"
+  ]
+}

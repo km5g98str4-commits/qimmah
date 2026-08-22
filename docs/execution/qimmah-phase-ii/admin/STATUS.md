@@ -6,19 +6,21 @@
 
 **السند:** `cc60adfc0da0f893b101230269d4847d33490429`
 
-**الحالة:** `ARCHITECTURE_ONLY / LIVE_EXTERNALLY_BLOCKED`
+**الحالة:** `EXECUTABLE_CONTRACT_FIXTURES / LIVE_EXTERNALLY_BLOCKED`
 
 ## 1. ملخص تنفيذي
 
-بدأت الحارة من `main@cc60adf` في worktree مستقل. هذه الموجة وثائق معمارية فقط:
-لم تُعدّل `src/` أو route أو Backend/Supabase أو `package.json`، ولم تستهلك أو
-تنسخ ملفات من فرع Dashboard أو Web بعيد.
+بدأت الحارة من `main@cc60adf` في worktree مستقل. بعد موجة الوثائق المعمارية،
+أضافت الموجة الحالية حزمة contract-fixtures تنفيذية مستقلة داخل `data/` و`scripts/`
+فقط. لم تُعدّل `src/` أو route أو Backend/Supabase أو `package.json`، ولم تستهلك
+أو تنسخ ملفات من فرع Dashboard أو Web بعيد.
 
-النتيجة الحالية تحدد عقدًا V2 قابلًا للتنفيذ لاحقًا، وتغلق بالتصميم فجوات
-الهوية، والتفويض، وحالات الصفحة، وصدق المقاييس، وتقليل البيانات، والشاشة
-الواحدة، والوصولية والاختبارات. لا يوجد live provider أو admin route بعد.
+النتيجة الحالية تحدد عقدًا V2 وتولّد fixtures حتمية وتتحقق منها وتهاجمها بطفرات
+مسماة. تغطي الحزمة الهوية، وحالات الصفحة، وصدق المقاييس، وتقليل البيانات، وهوية
+السلاسل، والتنبيهات، وقدرات عناصر التحكم. لا يوجد live provider أو UI أو admin
+route أو browser proof بعد.
 
-## 2. نواتج هذه الموجة
+## 2. نواتج الحارة
 
 | Artifact | Purpose | Status |
 |---|---|---|
@@ -26,15 +28,24 @@
 | `docs/execution/qimmah-phase-ii/admin/ARCHITECTURE.md` | حدود الثقة والمكونات وتدفق البيانات وUX/accessibility | COMPLETE |
 | `docs/execution/qimmah-phase-ii/admin/TEST-PLAN.md` | مصفوفة التحقق من unit إلى browser/server/security | COMPLETE |
 | `docs/execution/qimmah-phase-ii/admin/STATUS.md` | الحالة والاعتماديات والقرارات والمخاطر | COMPLETE |
+| `data/executive-dashboard/contract.v1.json` | schema/version، سياسة الدور غير المحسومة، allowlists وهوية الرسوم | COMPLETE |
+| `data/executive-dashboard/fixture-source.v1.json` | مصدر fixture ثابت بزمن ومصادر صناعية وبصمات متوقعة | COMPLETE |
+| `scripts/executive-dashboard/lib/contract-fixtures.mjs` | توليد، validation، fingerprints، access/provider guards | COMPLETE |
+| `scripts/executive-dashboard/generate-fixtures.mjs` | `--check` حتمي و`--integrity` و`--print` | COMPLETE |
+| `scripts/executive-dashboard/proof-contract-fixtures.mjs` | إثبات موجب + 11 طفرة مضادة مسماة | COMPLETE |
 
 ## 3. ما حُسم في الوثائق
 
 ### حقيقة مؤكدة على هذا الفرع
 
 - البداية هي `cc60adf`، لا HEAD من Web الجاري.
-- لا implementation للوحة أُضيف في هذه الموجة.
+- لا implementation داخل التطبيق أُضيف؛ الحزمة executable خارج `src/` فقط.
 - لا endpoint إداري ولا role policy أُنشئ هنا.
 - ملفات التنفيذ المحجورة لم تُمس.
+- `sourceFingerprint` المثبت هو
+  `sha256:1799183e693527d5dcf1dd88349ba7f5031037daed0ea0f03e6858ec061d258b`.
+- `bundleFingerprint` الحتمي هو
+  `sha256:cdfc24d76c4d0aff9f3ab68957fe99c37c2bc4e0c8190c47eb9ea8bdbf3fc1cd`.
 
 ### تصميم معتمد للموجة، ينتظر التنفيذ
 
@@ -48,6 +59,10 @@
 - لا fake controls؛ control بلا handler أو capability لا يظهر.
 - user payload مصغر، وقيم الصحة خارج العقد.
 - responsive/accessibility تُثبت في متصفح فعلي.
+- fixture role موسوم `fixture-admin` حصرًا، بينما قائمة أدوار production فارغة
+  خلف `ADM-001`؛ الحزمة لا تحسم قرار founder/admin.
+- validator يثبت الحالات denied/loading/empty/partial/error/ready، وحالات metric
+  ready/unavailable/stale، وحالات attention الأربع.
 
 ### افتراض ممنوع تحويله إلى حقيقة
 
@@ -67,7 +82,7 @@
 | Entitlement/activation metrics | لا source system معتمد | بعد `ADM-005` |
 | Product activity metrics | coverage/consent غير محسومين | بعد `ADM-006` |
 | Onboarding completion KPI | الإشارة الحالية قد تعتمد على sync | بعد `ADM-007` |
-| Browser proofs | لا implementation في هذه الموجة | أول موجة UI مستقلة |
+| UI/browser proofs | الحزمة الحالية data/scripts فقط | أول موجة UI مستقلة |
 | Writes/admin actions | Phase II read-first ولا capability مراجعة | خارج النطاق الحالي |
 
 ## 5. سجل الاعتماديات الحاكم
@@ -112,8 +127,9 @@
 
 ## 8. بوابة الموجة التالية
 
-يجوز بدء موجة UI مستقلة على fixtures من هذا العقد إذا بقيت بلا route وبلا live
-provider. لا يجوز بدء integration إلا بعد:
+يجوز بدء موجة UI مستقلة على fixtures من هذه الحزمة إذا بقيت بلا route وبلا live
+provider، وبعد إعادة تشغيل `generate-fixtures.mjs --check` وإثبات الطفرات. لا
+يجوز بدء integration إلا بعد:
 
 - قبول `WS-001`.
 - إعادة فحص HEAD المعتمد ومواضع App/auth/routes.
@@ -122,13 +138,19 @@ provider. لا يجوز بدء integration إلا بعد:
 
 ## 9. تعريف الاكتمال
 
-هذه الموجة مكتملة عندما:
+موجة contract-fixtures الحالية مكتملة عندما:
 
-- توجد الوثائق الأربع ويشير بعضها إلى بعض بلا تناقض.
-- تستخدم كل الاعتماديات جدول الأعمدة الخمسة المعتمد.
-- لا تدعي أي وثيقة `LIVE` أو backend readiness.
-- يمر `git diff --check`.
-- يبقى diff محصورًا في الوثائق الأربع.
+- يمر `node scripts/executive-dashboard/generate-fixtures.mjs --check` مرتين من
+  المصدر نفسه إلى bytes وبصمة متطابقة.
+- يمر `node scripts/executive-dashboard/proof-contract-fixtures.mjs` ويقتل
+  الطفرات الإحدى عشرة بالأسماء المطلوبة.
+- تمر `node --check` على ملفات `.mjs` الثلاثة.
+- تستخدم الاعتماديات جدول الأعمدة الخمسة الحاكم دون تغيير.
+- لا يدعي أي artifact `LIVE` أو backend/UI/browser readiness.
+- يمر `git diff --check` ويبقى الفرق داخل `data/executive-dashboard/**` و
+  `scripts/executive-dashboard/**` وهذا الملف فقط.
 
-المنتج نفسه لا يصبح مكتملًا بإكمال هذه الموجة؛ الناتج هو أساس معماري قابل
-للمراجعة والتنفيذ بعد فك الاعتماديات.
+الدليل الفعلي للموجة عند بنائها: deterministic check = ست حالات + ثلاث حالات
+metric + خمسة charts + مستخدمان + أربع حالات attention؛ proof = تسعة تأكيدات
+موجبة وإحدى عشرة طفرة مقتولة. المنتج نفسه لا يصبح مكتملًا بذلك؛ الناتج حزمة
+عقود وfixtures صناعية، لا لوحة حيّة.
