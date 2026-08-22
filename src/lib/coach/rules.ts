@@ -251,7 +251,12 @@ function canSubstitute(ctx: CoachContext, bag: FactBag, reason: SubReason): Answ
   lines.push(line('sub.intro', { params: { exercise: bag.use(exName) }, ref: { kind: 'exercise', id: subject.id, factId: exId } }))
 
   const injury = injuryFact(ctx, bag)
-  if (ctx.injury.declared) lines.push(line('why.injuryFilterApplied', { basis: [injury] }))
+  // حالة الإصابة **تُعلَن في الحالتين** — كما في «ليش هذا التمرين» تمامًا.
+  // [SOVEREIGN-COACH-002] كانت تُعلَن حين تُصرَّح وحدها، فتبقى حقيقة `injuryState`
+  // بلا سطر يستعملها حين لا إصابة **ووُجدت بدائل** ⇒ `orphan-fact` يرميه حارس
+  // الإسناد قبل الرسم ⇒ الشاشة تعرض «ما قدرت أربط سطرًا بمصدره» في أكثر حالات
+  // البدائل شيوعًا. الحارس أدّى دوره؛ والعلاج أن يُقال الصدق لا أن يُخفَّف.
+  lines.push(line(ctx.injury.declared ? 'why.injuryFilterApplied' : 'why.injuryFilterNone', { basis: [injury] }))
 
   // ② المحرّك الحقيقي — الواعي بالإصابة. لا ترتيب ولا ترشيح مكتوب هنا.
   const options = findSubstitutes(subject.id, ctx.profile, reason, 4)
