@@ -30,6 +30,16 @@ export interface TodayHomeStrings {
   noTargetsBody: string
   openNutrition: string
 
+  // — اليوم الأول (يُعرض للقادم الجديد قبل أي رقم) —
+  /** عنوان يقول أين هو من الرحلة، لا «مرحبًا» عامًّا. */
+  firstDayTitle: string
+  /** وش متوقّع منه اليوم — جملة واحدة، بلا ضغط ولا قائمة مهامّ. */
+  firstDayExpect: string
+  /** لمحة القائمة: هذه أبواب اليوم لا مهامّ مطلوبة كلّها. */
+  firstDayPickOne: string
+  /** **وش تعني الأرقام** — يُقال قبل أن يظهر أول رقم لا بعده. */
+  firstDayNumbers: string
+
   // — الإجراء التالي —
   nextStepEyebrow: string
   restDayChip: string
@@ -93,6 +103,11 @@ const ar: TodayHomeStrings = {
   noTargetsBody: 'سجّل أول وجبة ووزنك الحالي، ونعرض لك حلقات السعرات والماكروز على طول.',
   openNutrition: 'افتح التغذية',
 
+  firstDayTitle: 'يومك الأول في قِمّة',
+  firstDayExpect: 'اليوم ما نبي منك إلا بداية صغيرة — خطوة وحدة تكفي، وباقي اليوم يجي وراها.',
+  firstDayPickOne: 'اختر اللي يناسبك الحين:',
+  firstDayNumbers: 'أول ما تسجّل، تبدأ الأرقام تظهر: حلقة السعرات تبيّن اللي استهلكته والرقم داخلها الباقي. وكل هدف تقديري مبني على بياناتك — ما فيه رقم يجي من فراغ.',
+
   nextStepEyebrow: 'خطوتك الجاية · الحين',
   restDayChip: 'يوم راحة',
   metaExercises: 'تمارين',
@@ -154,6 +169,11 @@ const en: TodayHomeStrings = {
   noTargetsTitle: 'Let us set up your day first',
   noTargetsBody: 'Log your first meal and your current weight, and we will show your calorie and macro rings right away.',
   openNutrition: 'Open nutrition',
+
+  firstDayTitle: 'Your first day on Qimmah',
+  firstDayExpect: 'All we want today is a small start — one step is enough, the rest follows.',
+  firstDayPickOne: 'Pick whatever suits you right now:',
+  firstDayNumbers: 'Once you log something, the numbers show up: the calorie ring shows what you have used, and the number inside is what is left. Every target is an estimate built from your data — no number comes out of nowhere.',
 
   nextStepEyebrow: 'Your next step · now',
   restDayChip: 'Rest day',
