@@ -15,6 +15,7 @@ import type { TrainingLevel } from '@/types/profile'
 import { getExercise } from '@/data/exercises'
 import { muscleGroups } from '@/data/muscleGroups'
 import { createPlanExercise } from '@/lib/workoutPlan'
+import { estimateDurationMin } from '@/lib/workoutStats'
 import {
   loadWeeklySchedule,
   namedSplitForDays,
@@ -490,12 +491,18 @@ export {
 // ── 6) المحقّقات (تحذيرات لا موانع) ───────────────────────────────────────────
 
 /**
- * تقدير وقت الجلسة بالدقائق — **نفس heuristic** todayV2Model/workoutV2Model:
- * ٩ دقائق لكل تمرين، تقريب لأقرب ٥، حدّ أدنى ٢٠ (٠ ليوم فارغ).
+ * تقدير وقت الجلسة بالدقائق — **مصدر واحد مع بقيّة التطبيق**.
+ *
+ * [SOVEREIGN-003] كان هنا تقديرٌ ثانٍ: «٩ دقائق لكل تمرين». والرئيسية تحسب
+ * بالصيغة الحقيقية (مجموعات × (عمل + راحة)) في `workoutStats`. فكان تحذير
+ * «جلستك أطول من هدفك» يُبنى على رقم لا يراه المستخدم في أي شاشة أخرى —
+ * ومن قاس وجد الفارق يبلغ عشرات الدقائق على نفس اليوم.
+ *
+ * التعليق القديم كان يصف الحال بصدق («نفس heuristic todayV2Model») — وبطل
+ * يوم انتقلت الرئيسية إلى الصيغة الحقيقية ولم ينتقل هذا معها.
  */
 export function estimateSessionMinutes(day: PlanDay): number {
-  const n = day.exercises.length
-  return n > 0 ? Math.max(20, Math.round((n * 9) / 5) * 5) : 0
+  return estimateDurationMin(day)
 }
 
 export interface PlanWarning {
