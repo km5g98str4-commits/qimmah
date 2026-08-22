@@ -2,11 +2,11 @@
 
 ## Wave
 
-- Package: `EX-DOC-1` — independent contracts and test plan.
+- Package: `EX-LEDGER-1` — deterministic production review ledger and validator.
 - Branch: `h/phase-ii-exercise-production-002`.
 - Audited baseline: `origin/main@cc60adfc0da0f893b101230269d4847d33490429`.
 - Refreshed: 2026-08-22.
-- Scope: documentation only. No product code, catalog data, package manifest, Web Sovereign worktree, merge, or deployment was touched.
+- Scope: `data/exercise-production/**`, `scripts/exercise-production/**`, and this status file only. No product code, package manifest, Web Sovereign worktree, merge, rebase, or deployment was touched.
 
 | Dependency ID | Description | Blocking Web Sovereign artifact | Expected future integration point | Remaining work after integration |
 | --- | --- | --- | --- | --- |
@@ -83,12 +83,33 @@ Some groups cross equipment or movement variants. Duplicate bytes are evidence o
 
 ## Package state
 
-- `[EX-1]` audit contract: documented; deterministic artifact generator remains a later package.
-- `[EX-2]` media contract: documented; canonical JSON manifest remains a later package.
+- `[EX-1]` audit contract: documented; deterministic baseline fingerprint and canonical-key coverage are now executable.
+- `[EX-2]` media contract: documented; `data/exercise-production/review-ledger.json` now records all 181 canonical IDs with conservative statuses and evidence digests.
 - `[EX-3]` original image production: not started.
 - `[EX-4]` exact video research: not started.
 - `[EX-5]` product integration: deferred until `EX-DEP-WS-001` closes and the final baseline is revalidated.
 
+## Executable evidence
+
+The committed review ledger is generated only from the four ordered `cc60adf` source-of-truth files named in `DATA-CONTRACT.md`. Its composite `sourceFingerprint` is:
+
+```text
+12ce6523dc2f98920b421110b44f49141e937f7dfbccb7f80430e4dd0f682c60
+```
+
+The generator records an individual SHA-256 for each source and a SHA-256 plus measured byte count and dimensions for every referenced image asset. It refuses source drift from `cc60adfc0da0f893b101230269d4847d33490429`.
+
+Fresh direct-script results on 2026-08-22:
+
+| Command | Result |
+| --- | --- |
+| `node scripts/exercise-production/validate-review-ledger.mjs` | PASS — 181 rows; images 0 approved / 144 needs review / 37 missing; videos 0 approved / 181 missing; 6 duplicate-content groups |
+| `node scripts/exercise-production/review-ledger-proof.mjs` | PASS — base ledger plus 7/7 named anti-circumvention mutations |
+| `node scripts/exercise-production/build-review-ledger.mjs --check` | PASS — committed ledger matches deterministic generation byte-for-byte |
+| `node --check scripts/exercise-production/*.mjs` and `git diff --check` | PASS — direct scripts parse; no whitespace errors |
+
+The seven attacked guards are `MEDIA_COVERAGE`, `MEDIA_ORPHAN`, `MEDIA_KEY_MISMATCH`, `IMAGE_APPROVAL_EVIDENCE`, `VIDEO_REFERENCE_EXACT`, `DUPLICATE_CONTENT_PAIR`, and `MEDIA_FILE_INTEGRITY`. The duplicate queue is derived from real asset-pair digests rather than a hand-maintained list; its six groups match the baseline findings above.
+
 ## Decisions needed
 
-None for this reversible documentation wave. Extending the exercise library remains out of scope until the current 181-row inventory is production-audited, consistent with the locked project decision.
+None for this reversible ledger wave. Extending the exercise library remains out of scope until the current 181-row inventory is production-audited, consistent with the locked project decision.
