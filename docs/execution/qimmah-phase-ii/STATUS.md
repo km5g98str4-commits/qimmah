@@ -38,15 +38,21 @@ branches are read-only.
 - Preserved the superseded `-001` worktrees untouched after the host removed
   their tracked files from `/private/tmp`; they contain no Phase II commits and
   are not used for execution.
+- Refreshed `origin` and completed the remote source-of-truth inventory. Exact
+  Phase II branches already exist, but every observed Phase branch contains the
+  unaccepted `d83add2` Web head in its ancestry and is quarantined from direct
+  consumption.
+- Read the current GitHub PR and CI metadata. No Phase II/Web Sovereign PR is
+  open. `main@cc60adf` has ten recent green nightly runs; Web Sovereign has eleven
+  visible red CI runs caused at the inspected endpoints by artifact quota after
+  its code and browser gates passed.
 
 ## In Progress
 
 - Release convergence plan and evidence matrix.
-- Production Food `CanonicalFoodV1` contract, provenance policy, and test plan.
-- Exercise production contract, rights-aware media manifest, and test plan.
-- Executive Dashboard snapshot/access contracts and fail-closed architecture.
-- Independent branch and remote inventory without consuming Web Sovereign
-  implementation changes.
+- Gap analysis of the existing Food, Exercise, and Executive Phase II branches
+  to identify net-new independent work without consuming their Web ancestry.
+- Release convergence plan and dependency-led final-HEAD rebind procedure.
 
 ## Deferred
 
@@ -58,6 +64,8 @@ branches are read-only.
 - `package.json` and shared CI-gate edits until the independent validators and
   their coordinator-owned union are ready.
 - Merge, rebase, cherry-pick, or manual port of any Web Sovereign change.
+- Re-authoring artifacts that already exist on remote Phase II branches before
+  their ownership, ancestry, and completeness have been audited.
 
 ## Dependencies
 
@@ -69,13 +77,19 @@ branches are read-only.
 | `WS-FOOD-SCAN-001` | The live camera path currently requires a finalized product seam before safe barcode validation can be attached. | Accepted food-scan flow and Open Food Facts integration boundary. | Food production adapter at the accepted scan/query boundary. | Wire strict GTIN validation and honest unavailable/error states, then run invalid-code and no-network tests. |
 | `WS-EXERCISE-UI-001` | Exercise media can be produced independently but not approved in the final UI context. | Accepted exercise-detail and active-workout presentation. | Media resolver/view-model boundary after rebase. | Verify crop, RTL/LTR layout, accessibility text, asset failure states, and performance in the accepted screens. |
 | `WS-QA-001` | Founder QA cannot declare final product behavior while Web Sovereign is unaccepted. | Accepted Web Sovereign build and immutable commit SHA. | Final founder QA checklist and release evidence bundle. | Execute the prepared journeys against the accepted build and attach results without re-investigating completed production assets. |
+| `WS-PH2-ANCESTRY-001` | Existing remote Phase II branches contain the unaccepted `d83add2` Web head in their history, so they cannot be consumed wholesale. | Founder-accepted Web Sovereign SHA plus file-level proof that each candidate Phase II commit is implementation-independent. | Selective Phase II adoption or final lane rebase after acceptance. | Reuse only proven Phase-owned commits, run conflict assertions, and leave all coupled product changes deferred. |
+| `WS-CLOSURE-001` | Newer candidate/closure refs use words such as `final` and `READY`, but no founder acceptance was received in this task. | Explicit founder acceptance naming the authoritative SHA. | Update the baseline ledger before any rebase. | Compare only recorded dependencies against the accepted SHA; do not repeat completed source discovery. |
 
 ## Risks
 
 - `origin/main` is a provisional baseline, not authorization to consume the
   moving Web Sovereign branch.
-- GitHub/CI visibility was unavailable during the initial inventory; remote
-  claims require a fresh authoritative read before convergence.
+- Web Sovereign CI is red from `f78676e` through `d83add2` in the visible run
+  history. The inspected failure is artifact quota, but red remains red until a
+  complete workflow succeeds or the founder explicitly isolates it.
+- An independent artifact-quota fix already exists at
+  `origin/ci/artifact-quota-nonblocking@9e679c3`; it is not in `main` or Web and
+  must not be silently duplicated or adopted without verification.
 - The installed dependency graph reports three high-severity findings. Their
   reachability and remediation must be assessed; `npm audit fix` was not run.
 - Host cleanup removed tracked files from the original `/private/tmp` Phase II
@@ -87,10 +101,10 @@ branches are read-only.
 
 ## Next Tasks
 
-1. Commit and push this ledger as the first resumable checkpoint.
-2. Publish the release convergence source-of-truth matrix and dependency-led
-   convergence plan in a separate commit.
-3. Commit and push the first food, exercise, and executive contract waves.
+1. Commit and push the remote source-of-truth discovery checkpoint.
+2. Complete gap analyses for the existing food, exercise, and executive Phase
+   II branches; retain only net-new independent work.
+3. Publish the dependency-led release convergence and final-HEAD rebind plan.
 4. Add deterministic, implementation-independent validators and negative tests
    in lane-owned paths; request the coordinator-owned `package.json` union only
    after the proofs exist.
