@@ -72,21 +72,21 @@
 
 ## 5. سجل الاعتماديات الحاكم
 
-كل اعتماد له مالك وحالة ودليل قبول. لا يكفي commit message أو وجود ملف ليصبح
-`ACCEPTED`.
+كل اعتماد يحمل وصف حالته، وأثر Web الحاجب، ونقطة ربطه، والعمل المتبقي بعد
+الربط. لا يكفي commit message أو وجود ملف ليصبح `ACCEPTED`.
 
-| Dependency | Owner | Status | Acceptance Evidence | Notes |
+| Dependency ID | Description | Blocking Web Sovereign artifact | Expected future integration point | Remaining work after integration |
 |---|---|---|---|---|
-| `WS-001` — HEAD نهائي معتمد للـWeb Sovereign | Founder / Coordinator | BLOCKED | SHA معتمد صراحةً + CI أخضر مقروء كاملًا | بعده فقط يعاد ربط الحارة، بلا نسخ مبكر |
-| `ADM-001` — قرار سياسة `founder/admin` | Founder / Security | OPEN | قرار مسمى يحدد الأدوار المقبولة واسم claim | قبل القرار كل role policy غير محسومة = deny |
-| `ADM-002` — مصدر claim خادمي | Backend / Auth | EXTERNALLY_BLOCKED | JWT test يثبت `app_metadata` + negative self-assertion test | لا بريد أو `user_metadata` |
-| `ADM-003` — endpoints قراءة إدارية | Backend / Security | EXTERNALLY_BLOCKED | typed API contract + server auth tests + RLS review | لا client service role |
-| `ADM-004` — مصدر حسابات reconciled | Backend / Data | OPEN | مقارنة `auth.users`/`profiles` + backfill/deployment evidence | شرط total/new users |
-| `ADM-005` — entitlement/activation system | Backend / Commerce | MISSING_SOURCE | schema/lifecycle/audit/endpoints معتمدة | شرط premium/preview/codes/conversion |
-| `ADM-006` — consent-aware activity denominator | Founder / Product / Privacy | NEEDS_DECISION | قرار مقام وتغطية وموافقة + privacy review | شرط product active/workout/meal/measurement |
-| `ADM-007` — onboarding completion signal | Founder / Product | NEEDS_DECISION | signal مستقل عن sync مع contract/test | شرط completion/stuck |
-| `ADM-008` — production posture source | Release / Backend | OPEN | runtime deployment metadata موثقة | شرط build/sync/backend health |
-| `ADM-009` — attention/recent activity sources | Backend / Data / Release | OPEN | provenance + thresholds + freshness لكل signal | تعرض unmonitorable حتى القبول |
+| `WS-001` | `BLOCKED`: اعتماد المؤسس للرأس النهائي وCI كامل أخضر. | SHA نهائي مقبول صراحةً للـWeb Sovereign. | إعادة ربط حارة `e/*` ثم فحص host/auth/routes. | تنفيذ تكامل route والاختبارات فقط؛ لا نسخ أو ربط قبله. |
+| `ADM-001` | `OPEN`: قرار Founder/Security لسياسة `founder/admin`. | لا شيء؛ قرار مستقل عن كود Web. | `AdminAccessPolicy` في host. | تثبيت الأدوار واسم claim وسياسة المنح/السحب؛ يبقى deny حتى حسم القرار. |
+| `ADM-002` | `EXTERNALLY_BLOCKED`: claim خادمي موثوق. | عقد auth/session النهائي وموقع claim في Web. | seam `session.user` وserver authorization. | إصدار claim وfixtures JWT واختبار منع self-assertion. |
+| `ADM-003` | `EXTERNALLY_BLOCKED`: endpoints قراءة إدارية. | عقد host/router/auth النهائي للـWeb. | `LiveAdminProvider` وحدود API. | typed API، تحقق JWT/role، مراجعة RLS وfield allowlist. |
+| `ADM-004` | `OPEN`: مصدر حسابات reconciled. | مخطط الحساب/profile النهائي وعلاقته بالمصادقة. | total/new users وقائمة المستخدمين. | تقرير reconciliation وbackfill/deployment evidence. |
+| `ADM-005` | `MISSING_SOURCE`: entitlement/activation system. | العقد النهائي لمسار الاستحقاق والتفعيل في Web، إن كان ضمنه. | premium/preview/codes/conversion. | اعتماد schema/lifecycle/audit/endpoints؛ وإلا تبقى unavailable. |
+| `ADM-006` | `NEEDS_DECISION`: consent-aware activity denominator. | عقد sync/consent النهائي في Web. | product active/workout/meal/measurement. | قرار المقام والتغطية والخصوصية ثم المصدر. |
+| `ADM-007` | `NEEDS_DECISION`: onboarding completion signal. | حالة وعقد onboarding النهائيان في Web. | completion/stuck metrics. | signal مستقل عن sync مع contract/test. |
+| `ADM-008` | `OPEN`: production posture source. | عقد build/runtime/env النهائي للـWeb. | build/sync/backend health. | runtime deployment metadata واختبار freshness. |
+| `ADM-009` | `OPEN`: attention/recent activity sources. | مصادر الأحداث والحالات النهائية في Web. | attention queue/recent activity. | provenance/threshold/asOf/owner واختبارات signals. |
 
 ## 6. قرارات مطلوبة
 

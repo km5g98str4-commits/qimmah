@@ -211,18 +211,18 @@ Phase II هنا read-first. القاعدة البنيوية:
 
 ## 12. الاعتماديات
 
-| Dependency | Owner | Status | Acceptance Evidence | Notes |
+| Dependency ID | Description | Blocking Web Sovereign artifact | Expected future integration point | Remaining work after integration |
 |---|---|---|---|---|
-| `WS-001` — HEAD نهائي معتمد للـWeb Sovereign | Founder / Coordinator | BLOCKED | SHA معتمد وCI أخضر مقروء | لا route/rebase/copy قبله |
-| `ADM-001` — سياسة الدور الإداري | Founder / Security | OPEN | قرار يحدد founder/admin والclaim | fail closed حتى القرار |
-| `ADM-002` — claim server issuance | Backend / Auth | EXTERNALLY_BLOCKED | JWT fixture واختبار عدم self-assertion | `session.user` هو seam |
-| `ADM-003` — reviewed read endpoints | Backend / Security | EXTERNALLY_BLOCKED | API + authorization + RLS review | شرط live provider |
-| `ADM-004` — account-source reconciliation | Backend / Data | OPEN | تقرير count/backfill/reconciliation | يمنع totals غير الموثوقة |
-| `ADM-005` — entitlement/activation source | Backend / Commerce | MISSING_SOURCE | schema + audit + endpoint acceptance | يمنع commerce KPIs |
-| `ADM-006` — consent-aware activity basis | Founder / Product / Privacy | NEEDS_DECISION | مقام وتغطية وموافقة معتمدة | يمنع activity ratios |
-| `ADM-007` — independent onboarding signal | Founder / Product | NEEDS_DECISION | contract واختبار مستقل عن sync | يمنع completion bias |
-| `ADM-008` — runtime posture source | Release / Backend | OPEN | build/sync state من البيئة الفعلية | لا استنتاج من template |
-| `ADM-009` — operational signal sources | Backend / Data / Release | OPEN | provenance/threshold/asOf لكل signal | attention يبقى unmonitorable |
+| `WS-001` | `BLOCKED`: اعتماد المؤسس للرأس النهائي وCI كامل أخضر. | SHA نهائي مقبول صراحةً للـWeb Sovereign. | إعادة ربط حارة `e/*` ثم فحص host/auth/routes. | تنفيذ تكامل route والاختبارات فقط بعد القبول؛ لا نسخ أو ربط مبكر. |
+| `ADM-001` | `OPEN`: سياسة الدور الإداري قرار Founder/Security. | لا شيء؛ قرار مستقل عن كود Web. | `AdminAccessPolicy` داخل host. | تثبيت الأدوار والclaim وسياسة المنح/السحب؛ يبقى التنفيذ fail-closed حتى حسم القرار. |
+| `ADM-002` | `EXTERNALLY_BLOCKED`: إصدار claim خادمي موثوق. | عقد auth/session النهائي وموقع claim في Web. | seam `session.user` وserver authorization. | fixtures JWT واختبارات منع self-assertion والبريد و`user_metadata`. |
+| `ADM-003` | `EXTERNALLY_BLOCKED`: endpoints قراءة مراجعة. | عقد host/router/auth النهائي للـWeb. | `LiveAdminProvider` وحدود API. | بناء API والتحقق الخادمي ومراجعة RLS والحقول. |
+| `ADM-004` | `OPEN`: reconciliation لمصدر الحسابات. | مخطط الحساب/profile النهائي وعلاقته بالمصادقة. | KPIs وقائمة المستخدمين. | تقرير count/backfill/reconciliation ثم إثبات totals. |
+| `ADM-005` | `MISSING_SOURCE`: مصدر entitlement/activation. | العقد النهائي لمسار الاستحقاق والتفعيل في Web، إن كان ضمنه. | KPIs التجارة وحالات المستخدم. | اعتماد schema/audit/endpoints؛ وإلا تبقى unavailable. |
+| `ADM-006` | `NEEDS_DECISION`: أساس نشاط متوافق مع الموافقة. | عقد sync/consent النهائي في Web. | KPIs النشاط والمنتج. | اعتماد المقام والتغطية والخصوصية ثم مصدر consent-aware. |
+| `ADM-007` | `NEEDS_DECISION`: إشارة onboarding مستقلة. | حالة وعقد onboarding النهائيان في Web. | completion/stuck metrics. | تعريف contract واختباره مستقلًا عن sync. |
+| `ADM-008` | `OPEN`: مصدر runtime posture. | عقد build/runtime/env النهائي للـWeb. | بطاقات build/sync/backend. | توصيل metadata الفعلية واختبار freshness. |
+| `ADM-009` | `OPEN`: مصادر operational signals. | مصادر الأحداث والحالات النهائية في Web. | attention/recent activity. | provenance/threshold/asOf/owner واختبارات كل signal. |
 
 ## 13. قرار الجاهزية
 

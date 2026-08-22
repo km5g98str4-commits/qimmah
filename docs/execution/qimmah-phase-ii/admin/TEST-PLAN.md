@@ -289,18 +289,18 @@ browser خلف SSR proof.
 
 ## 15. الاعتماديات
 
-| Dependency | Owner | Status | Acceptance Evidence | Notes |
+| Dependency ID | Description | Blocking Web Sovereign artifact | Expected future integration point | Remaining work after integration |
 |---|---|---|---|---|
-| `WS-001` — approved Web HEAD for host tests | Founder / Coordinator | BLOCKED | SHA approved + full green CI | route E2E waits for it |
-| `ADM-001` — role policy | Founder / Security | OPEN | named founder/admin decision | access matrix uses deny meanwhile |
-| `ADM-002` — server-issued claim | Backend / Auth | EXTERNALLY_BLOCKED | signed JWT fixtures + negative tests | required for allowed case |
-| `ADM-003` — reviewed endpoints | Backend / Security | EXTERNALLY_BLOCKED | API/auth/RLS acceptance suite | required for live provider tests |
-| `ADM-004` — account reconciliation | Backend / Data | OPEN | staging reconciliation report | required for authoritative empty/total |
-| `ADM-005` — commerce source | Backend / Commerce | MISSING_SOURCE | schema + lifecycle + audit fixtures | related KPIs remain unavailable |
-| `ADM-006` — consent-aware activity basis | Founder / Product / Privacy | NEEDS_DECISION | accepted coverage/consent contract | related metrics remain unavailable |
-| `ADM-007` — onboarding completion signal | Founder / Product | NEEDS_DECISION | independent signal test | completion remains unavailable |
-| `ADM-008` — runtime posture | Release / Backend | OPEN | deployment metadata fixture/endpoint | runtime cards remain unavailable |
-| `ADM-009` — operational signal sources | Backend / Data / Release | OPEN | signal contracts + test fixtures | attention/recent activity partial |
+| `WS-001` | `BLOCKED`: اعتماد المؤسس للرأس النهائي وCI كامل أخضر. | SHA نهائي مقبول صراحةً للـWeb Sovereign. | إعادة ربط حارة `e/*` واختبارات host/route. | تشغيل route E2E ومصفوفة المتصفح فقط بعد القبول؛ لا نسخ مبكر. |
+| `ADM-001` | `OPEN`: قرار Founder/Security لسياسة الدور. | لا شيء؛ قرار مستقل عن كود Web. | access policy suite. | تثبيت founder/admin والclaim ثم تفعيل حالة allow؛ deny هو الافتراضي. |
+| `ADM-002` | `EXTERNALLY_BLOCKED`: server-issued claim. | عقد auth/session النهائي وموقع claim في Web. | JWT fixtures وclient claim seam. | اختبارات allow ورفض self-asserted/user-metadata/email roles. |
+| `ADM-003` | `EXTERNALLY_BLOCKED`: reviewed read endpoints. | عقد host/router/auth النهائي للـWeb. | live-provider وserver integration suites. | API/auth/RLS/allowlist/audit acceptance. |
+| `ADM-004` | `OPEN`: account reconciliation. | مخطط الحساب/profile النهائي وعلاقته بالمصادقة. | authoritative empty/total tests. | staging reconciliation/backfill report. |
+| `ADM-005` | `MISSING_SOURCE`: commerce source. | العقد النهائي لمسار entitlement/activation في Web، إن كان ضمنه. | commerce KPI provider tests. | schema/lifecycle/audit fixtures؛ تبقى KPIs unavailable حتى ذلك. |
+| `ADM-006` | `NEEDS_DECISION`: consent-aware activity basis. | عقد sync/consent النهائي في Web. | activity coverage tests. | اعتماد المقام والتغطية والخصوصية؛ تبقى metrics unavailable حتى ذلك. |
+| `ADM-007` | `NEEDS_DECISION`: onboarding completion signal. | حالة وعقد onboarding النهائيان في Web. | completion/stuck tests. | independent signal contract/test. |
+| `ADM-008` | `OPEN`: runtime posture. | عقد build/runtime/env النهائي للـWeb. | runtime cards/provider tests. | deployment metadata fixture/endpoint واختبار freshness. |
+| `ADM-009` | `OPEN`: operational signal sources. | مصادر الأحداث والحالات النهائية في Web. | attention/recent activity suites. | signal contracts + provenance/threshold/asOf/owner fixtures. |
 
 ## 16. دليل هذه الموجة
 

@@ -365,21 +365,21 @@ route/handler فعلي. الأفعال غير المتاحة تُذكر بوصف
 
 ## 12. الاعتماديات
 
-هذا الجدول هو صيغة الاعتمادية الإلزامية؛ لا تتحول `Status` إلى `ACCEPTED` إلا
-بعد وجود الدليل المذكور.
+هذا الجدول هو صيغة الاعتمادية الإلزامية؛ تبقى الحالة داخل الوصف غير مقبولة حتى
+يكتمل العمل المتبقي ويُرفق دليله الفعلي في سجل التنفيذ.
 
-| Dependency | Owner | Status | Acceptance Evidence | Notes |
+| Dependency ID | Description | Blocking Web Sovereign artifact | Expected future integration point | Remaining work after integration |
 |---|---|---|---|---|
-| `WS-001` — HEAD نهائي معتمد للـWeb Sovereign | Founder / Coordinator | BLOCKED | SHA معتمد صراحةً وقراءة CI كاملة خضراء | لا rebase أو copy أو integration قبله |
-| `ADM-001` — سياسة قبول `founder` و`admin` | Founder / Security | OPEN | قرار مسمى يحدد الأدوار والادعاء ومسؤول الإصدار | الافتراض الحالي deny |
-| `ADM-002` — إصدار claim خادمي موثوق | Backend / Auth | EXTERNALLY_BLOCKED | اختبار JWT يثبت claim في `app_metadata` وعدم إمكان self-assertion | لا بريد ولا `user_metadata` بديلًا |
-| `ADM-003` — endpoints قراءة إدارية مراجعة | Backend / Security | EXTERNALLY_BLOCKED | API contract + server auth tests + RLS review + audit evidence | لا `service_role` في المتصفح |
-| `ADM-004` — تطابق مصدر الحسابات | Backend / Data | OPEN | reconciliation بين `auth.users` و`profiles` + backfill إن لزم | trigger وحده غير كافٍ |
-| `ADM-005` — نظام الاستحقاق والتفعيل | Backend / Commerce | MISSING_SOURCE | schema + lifecycle + audit + aggregate endpoints معتمدة | لا conversion قبله |
-| `ADM-006` — أساس نشاط متوافق مع الموافقة | Founder / Product / Privacy | NEEDS_DECISION | تعريف مقام وتغطية وموافقة معتمد | لا نسب نشاط منتج قبله |
-| `ADM-007` — إشارة إكمال onboarding مستقلة عن sync | Founder / Product | NEEDS_DECISION | تعريف وكتابة واختبار لا يتسرب منه محتوى الملف | يمنع انحياز completion |
-| `ADM-008` — runtime deployment posture | Release / Backend | OPEN | مصدر runtime موثق لـbuild/sync/backend state | `.env.example` ليس دليل production |
-| `ADM-009` — مصادر attention/recent activity | Backend / Data / Release | OPEN | contracts لكل signal مع source/threshold/asOf/owner | unmonitorable حتى القبول |
+| `WS-001` | `BLOCKED`: اعتماد المؤسس للرأس النهائي وقراءة CI الكاملة. | SHA نهائي مقبول صراحةً للـWeb Sovereign. | إعادة ربط حارة `e/*` بالرأس المقبول وفق runbook التقارب. | إعادة فحص host/auth/routes ثم تنفيذ اختبارات التكامل فقط؛ لا نسخ أو ربط قبله. |
+| `ADM-001` | `OPEN`: قرار Founder/Security لسياسة قبول `founder` و`admin`. | لا شيء؛ قرار ملكية وأمان مستقل عن تنفيذ Web. | `AdminAccessPolicy` في host بعد إعادة الربط. | تثبيت الأدوار واسم claim وسياسة منحه/سحبه ثم اختبارات deny/allow. |
+| `ADM-002` | `EXTERNALLY_BLOCKED`: claim خادمي لا يستطيع المستخدم تزويره. | عقد auth/session النهائي وموقع claim المقبولان في Web. | محول `session.user` وطبقة server authorization. | إصدار claim، fixtures JWT، واختبار رفض `user_metadata` والبريد. |
+| `ADM-003` | `EXTERNALLY_BLOCKED`: endpoints قراءة إدارية مراجعة أمنيًا. | عقد host/router/auth النهائي الذي سيستهلك endpoints. | `LiveAdminProvider` وحدود API بعد rebind. | API contract، تحقق JWT/role، مراجعة RLS، allowlist، وaudit evidence. |
+| `ADM-004` | `OPEN`: مصدر حسابات reconciled موثوق. | مخطط الحساب/profile النهائي وعلاقة auth بالمزامنة في Web. | مزود KPIs وقائمة المستخدمين. | تقرير reconciliation وcount/backfill ثم إثبات authoritative empty/totals. |
+| `ADM-005` | `MISSING_SOURCE`: نظام الاستحقاق والتفعيل غير مثبت. | العقد النهائي لمسار entitlement/activation في Web، إن كان ضمنه. | KPIs التجارة وحالات المستخدم. | اعتماد schema/lifecycle/audit/endpoints؛ تبقى القيم unavailable حتى ذلك. |
+| `ADM-006` | `NEEDS_DECISION`: أساس نشاط يحترم المحلي-افتراضيًا والموافقة. | عقد sync/consent النهائي للـWeb Sovereign. | KPIs النشاط والتمارين/الوجبات/القياسات. | اعتماد المقام والتغطية والخصوصية ثم بناء مصدر consent-aware. |
+| `ADM-007` | `NEEDS_DECISION`: إشارة إكمال onboarding مستقلة عن sync. | عقد وحالة onboarding النهائية في Web. | KPI الإكمال وطابور التعثر. | تعريف signal وكتابته واختباره دون تسريب محتوى الملف. |
+| `ADM-008` | `OPEN`: مصدر runtime deployment posture موثوق. | عقد build/runtime/env النهائي للـWeb. | بطاقات build/sync/backend في الصفحة الرئيسية. | توصيل metadata من البيئة الفعلية واختبار freshness؛ لا استنتاج من template. |
+| `ADM-009` | `OPEN`: مصادر attention/recent activity المسماة. | مصادر الأحداث والحالات النهائية التي يعتمدها Web. | attention queue وrecent operational activity. | عقد كل signal مع provenance/threshold/asOf/owner واختبارات detected/clear/unmonitorable. |
 
 ## 13. ما لا يثبته هذا العقد
 
