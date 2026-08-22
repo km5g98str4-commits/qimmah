@@ -1,8 +1,8 @@
 // إثبات محرّك باني الجدول اليدوي (P6) — يعمل فوق localStorage مُحاكى عبر
 // run-plan-builder-proof.mjs. يغطّي: الإنشاء/الإضافة/الترتيب/النقل/النسخ/تكرار
 // الأسبوع/الحذف الآمن مع سلامة مراجع التقويم (P4) وخريطة الاستبدال، القوالب
-// المسمّاة (حفظ/سرد/تطبيق/حذف/عزل مالك/سقف)، المحقّقات (وقت الجلسة heuristic
-// ٩ دقائق/تمرين + الحجم العضلي الأسبوعي — تحذيرات لا موانع)، وجولة تصدير/استيراد
+// المسمّاة (حفظ/سرد/تطبيق/حذف/عزل مالك/سقف)، المحقّقات (وقت الجلسة من المقدِّر
+// المعتمد في `workoutStats` + الحجم العضلي الأسبوعي — تحذيرات لا موانع)، وجولة تصدير/استيراد
 // كاملة عبر سجلّ النقل، والتوافق الخلفي لسجلات customPlan القديمة (بلا اسم خطة).
 
 import {
@@ -253,15 +253,24 @@ console.log('\n⑤ القوالب المسمّاة: حفظ/سرد/تطبيق/ح�
   check('قالب مشوّه يُسقط والسليم يبقى', listTemplates(UID).length === 1 && listTemplates(UID)[0].id === 'ok')
 }
 
-console.log('\n⑥ المحقّقات: وقت الجلسة (heuristic ٩ دقائق) + الحجم العضلي — تحذيرات لا موانع')
+console.log('\n⑥ المحقّقات: وقت الجلسة (المقدِّر المعتمد) + الحجم العضلي — تحذيرات لا موانع')
 {
+  // [SOVEREIGN-PLAN-004] كان هنا heuristic «٩ دقائق × عدد التمارين» — لا يقرأ
+  // المجموعات ولا الراحة، فالتحذير المبنيّ عليه كان يقيس ما لا يتغيّر. المقدِّر
+  // صار مُعادًا تصديره من `@/lib/workoutStats`، والأرقام أدناه مقيسة منه.
   const plan = buildPlan([{ type: 'push', exercises: PUSH.concat(['push-up', 'dumbbell-fly']) }])
-  check('estimateSessionMinutes: ٥ تمارين → ٤٥ دقيقة (نفس heuristic النماذج)', estimateSessionMinutes(plan.days[0].exercises.length ? plan.days[0] : plan.days[0]) === 45)
-  check('estimateSessionMinutes: يوم فارغ → ٠ · تمرين واحد → ٢٠ (حدّ أدنى)', estimateSessionMinutes({ id: 'x', nameAr: 'س', nameEn: 'X', exercises: [] }) === 0 && estimateSessionMinutes({ ...plan.days[0], exercises: plan.days[0].exercises.slice(0, 1) }) === 20)
+  const five = estimateSessionMinutes(plan.days[0])
+  const one = estimateSessionMinutes({ ...plan.days[0], exercises: plan.days[0].exercises.slice(0, 1) })
+  check(`estimateSessionMinutes: ٥ تمارين → ${five} دقيقة (مقروءة من المجموعات والراحة)`, five === 35)
+  check(`estimateSessionMinutes: يوم فارغ → ٠ · تمرين واحد → ${one}`, estimateSessionMinutes({ id: 'x', nameAr: 'س', nameEn: 'X', exercises: [] }) === 0 && one === 10)
+  // التحذير يقرأ ما يتغيّر: نفس الخمسة بمجموعات وراحة أثقل تتجاوز السقف.
+  const heavySession = { ...plan, days: [{ ...plan.days[0], exercises: plan.days[0].exercises.map((e) => ({ ...e, sets: 5, restSec: 180 })) }] }
+  check('نفس عدد التمارين بمجموعات/راحة أثقل ⇒ تحذير session-too-long (الـheuristic القديم كان أعمى عنه)', validatePlan(heavySession, { targetSessionMinutes: 60 }).some((w) => w.code === 'session-too-long') && !validatePlan(plan, { targetSessionMinutes: 60 }).some((w) => w.code === 'session-too-long'))
 
   const eight = buildPlan([{ type: 'push', exercises: [...PUSH, ...PULL, 'push-up', 'dumbbell-fly'] }])
-  const longWarnings = validatePlan(eight, { targetSessionMinutes: 60 })
-  check('٨ تمارين (~٧٠ دقيقة) فوق هدف ٦٠ → تحذير session-too-long', longWarnings.some((w) => w.code === 'session-too-long' && w.messageAr.includes('70') && w.messageEn.includes('70')))
+  const eightMin = estimateSessionMinutes(eight.days[0])
+  const longWarnings = validatePlan(eight, { targetSessionMinutes: 45 })
+  check(`٨ تمارين (~${eightMin} دقيقة) فوق هدف ٤٥ → تحذير session-too-long بالرقم نفسه`, eightMin === 60 && longWarnings.some((w) => w.code === 'session-too-long' && w.messageAr.includes(String(eightMin)) && w.messageEn.includes(String(eightMin))))
 
   const withEmpty = addDay(plan, 'legs')
   check('يوم فارغ → تحذير empty-day', withEmpty.status === 'ok' && validatePlan(withEmpty.plan).some((w) => w.code === 'empty-day' && w.subject === withEmpty.plan.days[1].id))

@@ -15,6 +15,7 @@ import type { TrainingLevel } from '@/types/profile'
 import { getExercise } from '@/data/exercises'
 import { muscleGroups } from '@/data/muscleGroups'
 import { createPlanExercise } from '@/lib/workoutPlan'
+import { estimateSessionMinutes } from '@/lib/workoutStats'
 import {
   loadWeeklySchedule,
   namedSplitForDays,
@@ -490,13 +491,13 @@ export {
 // ── 6) المحقّقات (تحذيرات لا موانع) ───────────────────────────────────────────
 
 /**
- * تقدير وقت الجلسة بالدقائق — **نفس heuristic** todayV2Model/workoutV2Model:
- * ٩ دقائق لكل تمرين، تقريب لأقرب ٥، حدّ أدنى ٢٠ (٠ ليوم فارغ).
+ * تقدير وقت الجلسة بالدقائق — **يُعاد تصديره** من المقدِّر المعتمد الوحيد في
+ * `@/lib/workoutStats` ([SOVEREIGN-PLAN-004]). كان هنا نسخة ثالثة من heuristic
+ * «٩ دقائق لكل تمرين»: لا تقرأ المجموعات ولا الراحة، فيوم ٦ تمارين × ٥ مجموعات
+ * براحة دقيقتين يتساوى عندها بيوم ٦ × ٣ براحة ٤٥ ثانية. وعلى هذا الرقم يُبنى
+ * تحذير «الجلسة أطول من هدفك» — أي أن التحذير كان يقيس ما لا يتغيّر.
  */
-export function estimateSessionMinutes(day: PlanDay): number {
-  const n = day.exercises.length
-  return n > 0 ? Math.max(20, Math.round((n * 9) / 5) * 5) : 0
-}
+export { estimateSessionMinutes }
 
 export interface PlanWarning {
   code: 'session-too-long' | 'empty-day' | 'low-muscle-volume' | 'high-muscle-volume'
