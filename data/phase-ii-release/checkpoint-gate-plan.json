@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "planId": "qimmah-phase-ii-checkpoint-gate-v1",
+  "lanes": [
+    {
+      "id": "release",
+      "branch": "i/phase-ii-release-convergence-002",
+      "commands": [
+        { "id": "release-evidence-fixture", "executable": "node", "args": ["scripts/phase-ii-release/build-contract-fixture.mjs", "--check"] },
+        { "id": "release-evidence-validate", "executable": "node", "args": ["scripts/phase-ii-release/validate-evidence-manifest.mjs", "data/phase-ii-release/evidence-contract-fixture.json"] },
+        { "id": "release-evidence-proof", "executable": "node", "args": ["scripts/phase-ii-release/release-evidence-proof.mjs"] },
+        { "id": "release-artifact-proof", "executable": "node", "args": ["scripts/phase-ii-release/artifact-manifest-proof.mjs"] }
+      ]
+    },
+    {
+      "id": "food",
+      "branch": "c/phase-ii-food-production-002",
+      "commands": [
+        { "id": "food-seed-reproducibility", "executable": "node", "args": ["scripts/food-production/build-pkg-001.mjs", "--check"] },
+        { "id": "food-seed-validate", "executable": "node", "args": ["scripts/food-production/validate-pkg-001.mjs"] },
+        { "id": "food-seed-proof", "executable": "node", "args": ["scripts/food-production/run-data-1a-proof.mjs"] }
+      ]
+    },
+    {
+      "id": "exercise",
+      "branch": "h/phase-ii-exercise-production-002",
+      "commands": [
+        { "id": "exercise-ledger-reproducibility", "executable": "node", "args": ["scripts/exercise-production/build-review-ledger.mjs", "--check"] },
+        { "id": "exercise-ledger-validate", "executable": "node", "args": ["scripts/exercise-production/validate-review-ledger.mjs"] },
+        { "id": "exercise-ledger-proof", "executable": "node", "args": ["scripts/exercise-production/review-ledger-proof.mjs"] },
+        { "id": "exercise-image-jobs-reproducibility", "executable": "node", "args": ["scripts/exercise-production/build-image-production-jobs.mjs", "--check"] },
+        { "id": "exercise-image-jobs-validate", "executable": "node", "args": ["scripts/exercise-production/validate-image-production-jobs.mjs"] },
+        { "id": "exercise-image-jobs-proof", "executable": "node", "args": ["scripts/exercise-production/image-production-jobs-proof.mjs"] },
+        { "id": "exercise-video-reproducibility", "executable": "node", "args": ["scripts/exercise-production/build-video-research-pilot.mjs", "--check"] },
+        { "id": "exercise-video-validate", "executable": "node", "args": ["scripts/exercise-production/validate-video-research-pilot.mjs"] },
+        { "id": "exercise-video-proof", "executable": "node", "args": ["scripts/exercise-production/video-research-pilot-proof.mjs"] }
+      ]
+    },
+    {
+      "id": "executive",
+      "branch": "e/phase-ii-executive-dashboard-002",
+      "commands": [
+        { "id": "executive-fixture-reproducibility", "executable": "node", "args": ["scripts/executive-dashboard/generate-fixtures.mjs", "--check"] },
+        { "id": "executive-fixture-proof", "executable": "node", "args": ["scripts/executive-dashboard/proof-contract-fixtures.mjs"] }
+      ]
+    }
+  ]
+}
