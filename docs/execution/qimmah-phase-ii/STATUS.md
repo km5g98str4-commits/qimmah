@@ -49,6 +49,10 @@ branches are read-only.
 - Prepared the final-HEAD rebind runbook. It preserves published `-002` branches
   and uses new rebound branch names, satisfying the future rebase instruction
   without force-pushing or rewriting the recovery checkpoints.
+- Triaged the three high-severity npm audit findings on `cc60adf`: all resolve
+  through development/build tooling, while `npm audit --omit=dev` reports zero
+  production findings. Remediation is recorded against the final lockfile
+  dependency; no automatic fix changed the provisional baseline.
 
 ## In Progress
 
@@ -82,6 +86,7 @@ branches are read-only.
 | `WS-QA-001` | Founder QA cannot declare final product behavior while Web Sovereign is unaccepted. | Accepted Web Sovereign build and immutable commit SHA. | Final founder QA checklist and release evidence bundle. | Execute the prepared journeys against the accepted build and attach results without re-investigating completed production assets. |
 | `WS-PH2-ANCESTRY-001` | Existing remote Phase II branches contain the unaccepted `d83add2` Web head in their history, so they cannot be consumed wholesale. | Founder-accepted Web Sovereign SHA plus file-level proof that each candidate Phase II commit is implementation-independent. | Selective Phase II adoption or final lane rebase after acceptance. | Reuse only proven Phase-owned commits, run conflict assertions, and leave all coupled product changes deferred. |
 | `WS-CLOSURE-001` | Newer candidate/closure refs use words such as `final` and `READY`, but no founder acceptance was received in this task. | Explicit founder acceptance naming the authoritative SHA. | Update the baseline ledger before any rebase. | Compare only recorded dependencies against the accepted SHA; do not repeat completed source discovery. |
+| `WS-PACKAGE-LOCK-001` | The final dependency graph is unaccepted, so tooling remediation cannot be selected against an authoritative lockfile. | Founder-accepted Web Sovereign HEAD and exact package manifests. | Coordinator-owned build-tooling wave after final-HEAD rebind. | Re-audit, map reachability, apply reviewed upgrades, regenerate the lockfile, and run the full gate plus exact-SHA CI. |
 
 ## Risks
 
