@@ -463,6 +463,22 @@ for (const lang of LANGS) {
     )
   }
 
+  // المسار الافتراضي للأرقام (`formatNumber` بسياسة الأرقام الموحّدة) يعمل في
+  // اللغتين. الإثبات يقيس بمنسّق هويّة كي يقارن حرفيًا؛ وهذا يقيس ما يراه المستخدم.
+  for (const lang of LANGS) {
+    let ok = true
+    let sample = ''
+    try {
+      const live = renderCoachAnswer(answerFor('todayPlan', personaDefault(lang)), coachStrings[lang], lang)
+      sample = live.lines.map((l) => l.text).join(' | ')
+      ok = live.lines.every((l) => l.text.trim().length > 0)
+    } catch {
+      ok = false
+    }
+    check(`[${lang}] المنسّق الافتراضي يرسم بلا انهيار`, ok)
+    console.log(`    ↳ [${lang}] ${sample.slice(0, 150)}`)
+  }
+
   // الحتميّة: نفس السياق ⇒ نفس الجواب حرفيًا. لا عشوائية ولا حالة مخبوءة.
   const env = personaRich('ar')
   const a = JSON.stringify(answerFor('todayPlan', env))
