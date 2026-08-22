@@ -1,0 +1,366 @@
+{
+  "schemaVersion": 1,
+  "version": 1,
+  "pilotId": "EX-4A",
+  "baseline": {
+    "commit": "cc60adfc0da0f893b101230269d4847d33490429",
+    "sourceFingerprint": "12ce6523dc2f98920b421110b44f49141e937f7dfbccb7f80430e4dd0f682c60",
+    "metadataSource": "git:cc60adfc0da0f893b101230269d4847d33490429:src/data/exercises.ts"
+  },
+  "selection": {
+    "strategy": "versioned-common-foundational-set-v1; records sorted by exerciseId",
+    "count": 10,
+    "exerciseIds": [
+      "barbell-bench-press",
+      "bodyweight-squat",
+      "burpees",
+      "deadlift",
+      "front-squat",
+      "kettlebell-swing",
+      "overhead-press",
+      "plank",
+      "pull-up",
+      "push-up"
+    ]
+  },
+  "researchProtocol": {
+    "researcherRole": "PRIMARY_RESEARCHER",
+    "preferredSource": "official-or-trusted-instruction-channel",
+    "verificationMethod": "public YouTube watch URL plus successful YouTube oEmbed metadata response",
+    "independentReviewRequired": true,
+    "downloadOrRehost": false
+  },
+  "summary": {
+    "total": 10,
+    "candidatesNeedingIndependentReview": 9,
+    "missing": 1,
+    "approved": 0
+  },
+  "records": [
+    {
+      "exerciseId": "barbell-bench-press",
+      "names": {
+        "ar": "بنش بريس بار",
+        "en": "Barbell Bench Press"
+      },
+      "equipment": [
+        "barbell",
+        "bench"
+      ],
+      "movementPattern": "push",
+      "youtubeVideoId": "ihXeA1HAKwE",
+      "canonicalUrl": "https://www.youtube.com/watch?v=ihXeA1HAKwE",
+      "channel": "CrossFit",
+      "videoTitle": "Bench Press Technique | CrossFit Coaching Tips",
+      "matchConfidence": 0.98,
+      "verifiedAt": "2026-08-22T17:15:30.000Z",
+      "notes": "Official CrossFit coaching demonstration; title, channel, and public metadata matched the exact barbell bench-press movement. Independent visual review is still required.",
+      "researchStatus": "CANDIDATE_NEEDS_INDEPENDENT_REVIEW",
+      "verificationSources": [
+        {
+          "type": "YOUTUBE_WATCH_PAGE",
+          "url": "https://www.youtube.com/watch?v=ihXeA1HAKwE",
+          "checkedAt": "2026-08-22T17:15:30.000Z",
+          "outcome": "PUBLIC_WATCH_URL"
+        },
+        {
+          "type": "YOUTUBE_OEMBED",
+          "url": "https://www.youtube.com/oembed?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DihXeA1HAKwE&format=json",
+          "checkedAt": "2026-08-22T17:15:30.000Z",
+          "outcome": "PUBLIC_METADATA_MATCH"
+        }
+      ]
+    },
+    {
+      "exerciseId": "bodyweight-squat",
+      "names": {
+        "ar": "سكوات وزن الجسم",
+        "en": "Bodyweight Squat"
+      },
+      "equipment": [
+        "bodyweight"
+      ],
+      "movementPattern": "squat",
+      "youtubeVideoId": "C_VtOYc6j5c",
+      "canonicalUrl": "https://www.youtube.com/watch?v=C_VtOYc6j5c",
+      "channel": "CrossFit",
+      "videoTitle": "The Air Squat: CrossFit Foundational Movement",
+      "matchConfidence": 0.9,
+      "verifiedAt": "2026-08-22T17:15:30.000Z",
+      "notes": "Official CrossFit foundational air-squat demonstration; mapped to the catalog bodyweight squat, with terminology equivalence left for independent review.",
+      "researchStatus": "CANDIDATE_NEEDS_INDEPENDENT_REVIEW",
+      "verificationSources": [
+        {
+          "type": "YOUTUBE_WATCH_PAGE",
+          "url": "https://www.youtube.com/watch?v=C_VtOYc6j5c",
+          "checkedAt": "2026-08-22T17:15:30.000Z",
+          "outcome": "PUBLIC_WATCH_URL"
+        },
+        {
+          "type": "YOUTUBE_OEMBED",
+          "url": "https://www.youtube.com/oembed?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DC_VtOYc6j5c&format=json",
+          "checkedAt": "2026-08-22T17:15:30.000Z",
+          "outcome": "PUBLIC_METADATA_MATCH"
+        }
+      ]
+    },
+    {
+      "exerciseId": "burpees",
+      "names": {
+        "ar": "بيربي",
+        "en": "Burpees"
+      },
+      "equipment": [
+        "bodyweight"
+      ],
+      "movementPattern": "cardio",
+      "youtubeVideoId": "TU8QYVW0gDU",
+      "canonicalUrl": "https://www.youtube.com/watch?v=TU8QYVW0gDU",
+      "channel": "CrossFit",
+      "videoTitle": "The Burpee",
+      "matchConfidence": 0.98,
+      "verifiedAt": "2026-08-22T17:15:30.000Z",
+      "notes": "Official CrossFit movement demonstration with an exact burpee title; independent review must confirm the catalog variation.",
+      "researchStatus": "CANDIDATE_NEEDS_INDEPENDENT_REVIEW",
+      "verificationSources": [
+        {
+          "type": "YOUTUBE_WATCH_PAGE",
+          "url": "https://www.youtube.com/watch?v=TU8QYVW0gDU",
+          "checkedAt": "2026-08-22T17:15:30.000Z",
+          "outcome": "PUBLIC_WATCH_URL"
+        },
+        {
+          "type": "YOUTUBE_OEMBED",
+          "url": "https://www.youtube.com/oembed?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DTU8QYVW0gDU&format=json",
+          "checkedAt": "2026-08-22T17:15:30.000Z",
+          "outcome": "PUBLIC_METADATA_MATCH"
+        }
+      ]
+    },
+    {
+      "exerciseId": "deadlift",
+      "names": {
+        "ar": "رفعة ميتة",
+        "en": "Deadlift"
+      },
+      "equipment": [
+        "barbell"
+      ],
+      "movementPattern": "hinge",
+      "youtubeVideoId": "1ZXobu7JvvE",
+      "canonicalUrl": "https://www.youtube.com/watch?v=1ZXobu7JvvE",
+      "channel": "CrossFit",
+      "videoTitle": "The Deadlift",
+      "matchConfidence": 0.98,
+      "verifiedAt": "2026-08-22T17:15:30.000Z",
+      "notes": "Official CrossFit deadlift demonstration; exact movement title and public metadata verified. Independent review must confirm equipment and presentation fit.",
+      "researchStatus": "CANDIDATE_NEEDS_INDEPENDENT_REVIEW",
+      "verificationSources": [
+        {
+          "type": "YOUTUBE_WATCH_PAGE",
+          "url": "https://www.youtube.com/watch?v=1ZXobu7JvvE",
+          "checkedAt": "2026-08-22T17:15:30.000Z",
+          "outcome": "PUBLIC_WATCH_URL"
+        },
+        {
+          "type": "YOUTUBE_OEMBED",
+          "url": "https://www.youtube.com/oembed?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3D1ZXobu7JvvE&format=json",
+          "checkedAt": "2026-08-22T17:15:30.000Z",
+          "outcome": "PUBLIC_METADATA_MATCH"
+        }
+      ]
+    },
+    {
+      "exerciseId": "front-squat",
+      "names": {
+        "ar": "سكوات أمامي",
+        "en": "Front Squat"
+      },
+      "equipment": [
+        "barbell"
+      ],
+      "movementPattern": "squat",
+      "youtubeVideoId": "m4ytaCJZpl0",
+      "canonicalUrl": "https://www.youtube.com/watch?v=m4ytaCJZpl0",
+      "channel": "CrossFit",
+      "videoTitle": "The Front Squat: CrossFit Foundational Movement",
+      "matchConfidence": 0.98,
+      "verifiedAt": "2026-08-22T17:15:30.000Z",
+      "notes": "Official CrossFit foundational front-squat demonstration; exact movement title and public metadata verified.",
+      "researchStatus": "CANDIDATE_NEEDS_INDEPENDENT_REVIEW",
+      "verificationSources": [
+        {
+          "type": "YOUTUBE_WATCH_PAGE",
+          "url": "https://www.youtube.com/watch?v=m4ytaCJZpl0",
+          "checkedAt": "2026-08-22T17:15:30.000Z",
+          "outcome": "PUBLIC_WATCH_URL"
+        },
+        {
+          "type": "YOUTUBE_OEMBED",
+          "url": "https://www.youtube.com/oembed?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3Dm4ytaCJZpl0&format=json",
+          "checkedAt": "2026-08-22T17:15:30.000Z",
+          "outcome": "PUBLIC_METADATA_MATCH"
+        }
+      ]
+    },
+    {
+      "exerciseId": "kettlebell-swing",
+      "names": {
+        "ar": "أرجحة الكيتل بل",
+        "en": "Kettlebell Swing"
+      },
+      "equipment": [
+        "kettlebell"
+      ],
+      "movementPattern": "hinge",
+      "youtubeVideoId": "vdezTMulJ-k",
+      "canonicalUrl": "https://www.youtube.com/watch?v=vdezTMulJ-k",
+      "channel": "CrossFit",
+      "videoTitle": "The Kettlebell Swing",
+      "matchConfidence": 0.96,
+      "verifiedAt": "2026-08-22T17:15:30.000Z",
+      "notes": "Official CrossFit kettlebell-swing demonstration; independent review must confirm that the demonstrated swing variation matches the catalog intent.",
+      "researchStatus": "CANDIDATE_NEEDS_INDEPENDENT_REVIEW",
+      "verificationSources": [
+        {
+          "type": "YOUTUBE_WATCH_PAGE",
+          "url": "https://www.youtube.com/watch?v=vdezTMulJ-k",
+          "checkedAt": "2026-08-22T17:15:30.000Z",
+          "outcome": "PUBLIC_WATCH_URL"
+        },
+        {
+          "type": "YOUTUBE_OEMBED",
+          "url": "https://www.youtube.com/oembed?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DvdezTMulJ-k&format=json",
+          "checkedAt": "2026-08-22T17:15:30.000Z",
+          "outcome": "PUBLIC_METADATA_MATCH"
+        }
+      ]
+    },
+    {
+      "exerciseId": "overhead-press",
+      "names": {
+        "ar": "ضغط كتف بار واقف",
+        "en": "Overhead Press"
+      },
+      "equipment": [
+        "barbell"
+      ],
+      "movementPattern": "push",
+      "youtubeVideoId": "xe19t2_6yis",
+      "canonicalUrl": "https://www.youtube.com/watch?v=xe19t2_6yis",
+      "channel": "CrossFit",
+      "videoTitle": "The Shoulder Press: CrossFit Foundational Movement",
+      "matchConfidence": 0.9,
+      "verifiedAt": "2026-08-22T17:15:30.000Z",
+      "notes": "Official CrossFit shoulder-press demonstration; mapped to the catalog overhead press, with naming and exact equipment variation left for independent review.",
+      "researchStatus": "CANDIDATE_NEEDS_INDEPENDENT_REVIEW",
+      "verificationSources": [
+        {
+          "type": "YOUTUBE_WATCH_PAGE",
+          "url": "https://www.youtube.com/watch?v=xe19t2_6yis",
+          "checkedAt": "2026-08-22T17:15:30.000Z",
+          "outcome": "PUBLIC_WATCH_URL"
+        },
+        {
+          "type": "YOUTUBE_OEMBED",
+          "url": "https://www.youtube.com/oembed?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3Dxe19t2_6yis&format=json",
+          "checkedAt": "2026-08-22T17:15:30.000Z",
+          "outcome": "PUBLIC_METADATA_MATCH"
+        }
+      ]
+    },
+    {
+      "exerciseId": "plank",
+      "names": {
+        "ar": "بلانك",
+        "en": "Plank"
+      },
+      "equipment": [
+        "bodyweight"
+      ],
+      "movementPattern": "core",
+      "youtubeVideoId": null,
+      "canonicalUrl": null,
+      "channel": null,
+      "videoTitle": null,
+      "matchConfidence": null,
+      "verifiedAt": null,
+      "notes": "Bounded official-channel search did not produce an accepted exact standalone plank instruction video; no URL was forced into coverage.",
+      "researchStatus": "MISSING",
+      "verificationSources": [
+        {
+          "type": "OFFICIAL_LIBRARY_REVIEW",
+          "url": "https://www.crossfit.com/crossfit-movements",
+          "checkedAt": "2026-08-22T17:15:30.000Z",
+          "outcome": "NO_EXACT_STANDALONE_MATCH_ACCEPTED"
+        }
+      ]
+    },
+    {
+      "exerciseId": "pull-up",
+      "names": {
+        "ar": "عقلة",
+        "en": "Pull-Up"
+      },
+      "equipment": [
+        "bodyweight"
+      ],
+      "movementPattern": "pull",
+      "youtubeVideoId": "aAggnpPyR6E",
+      "canonicalUrl": "https://www.youtube.com/watch?v=aAggnpPyR6E",
+      "channel": "CrossFit",
+      "videoTitle": "The Pull-Up",
+      "matchConfidence": 0.8,
+      "verifiedAt": "2026-08-22T17:15:30.000Z",
+      "notes": "Official CrossFit pull-up demonstration; confidence is lower because the catalog ID does not specify strict versus kipping variation.",
+      "researchStatus": "CANDIDATE_NEEDS_INDEPENDENT_REVIEW",
+      "verificationSources": [
+        {
+          "type": "YOUTUBE_WATCH_PAGE",
+          "url": "https://www.youtube.com/watch?v=aAggnpPyR6E",
+          "checkedAt": "2026-08-22T17:15:30.000Z",
+          "outcome": "PUBLIC_WATCH_URL"
+        },
+        {
+          "type": "YOUTUBE_OEMBED",
+          "url": "https://www.youtube.com/oembed?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DaAggnpPyR6E&format=json",
+          "checkedAt": "2026-08-22T17:15:30.000Z",
+          "outcome": "PUBLIC_METADATA_MATCH"
+        }
+      ]
+    },
+    {
+      "exerciseId": "push-up",
+      "names": {
+        "ar": "ضغط (تمرين الجسم)",
+        "en": "Push-Up"
+      },
+      "equipment": [
+        "bodyweight"
+      ],
+      "movementPattern": "push",
+      "youtubeVideoId": "_l3ySVKYVJ8",
+      "canonicalUrl": "https://www.youtube.com/watch?v=_l3ySVKYVJ8",
+      "channel": "CrossFit",
+      "videoTitle": "The Push-Up",
+      "matchConfidence": 0.98,
+      "verifiedAt": "2026-08-22T17:15:30.000Z",
+      "notes": "Official CrossFit push-up demonstration; exact title and public metadata verified after resolving the official embed reference.",
+      "researchStatus": "CANDIDATE_NEEDS_INDEPENDENT_REVIEW",
+      "verificationSources": [
+        {
+          "type": "YOUTUBE_WATCH_PAGE",
+          "url": "https://www.youtube.com/watch?v=_l3ySVKYVJ8",
+          "checkedAt": "2026-08-22T17:15:30.000Z",
+          "outcome": "PUBLIC_WATCH_URL"
+        },
+        {
+          "type": "YOUTUBE_OEMBED",
+          "url": "https://www.youtube.com/oembed?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3D_l3ySVKYVJ8&format=json",
+          "checkedAt": "2026-08-22T17:15:30.000Z",
+          "outcome": "PUBLIC_METADATA_MATCH"
+        }
+      ]
+    }
+  ]
+}
