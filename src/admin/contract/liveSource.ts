@@ -410,8 +410,10 @@ export async function loadLiveUserDetail(
 //
 // ⚠️ **الخطّ الفاصل مُعاد هنا كي لا يُقرأ الكود بلا سببه:**
 // المؤسس من المتصفّح **يُغلق الأبواب ويفتح بابًا موقوتًا قابلًا للسحب**؛
-// و`admin_grant_premium` (منحة دائمة) و`admin_unrevoke` (رفع حظر) تبقيان بيد
-// `service_role` — ولا مُغلِّف لهما في هذا الملف بأي حال.
+// ومنح Premium الدائم ورفع الحظر يبقيان بيد **مفتاح الخادم** — ولا مُغلِّف
+// لأيّهما في هذا الملف بأي حال. (الأسماء والتعليل في رأس هجرة
+// `20260822120002_founder_code_management.sql`؛ لا تُكتب هنا كي يبقى كود اللوحة
+// خاليًا من كل اسم مميّز — يحرسه `test:admin-secret-leak` بالاسم لا بالسياق.)
 
 const CODE_STATUSES: readonly CodeStatus[] = ['issued', 'redeemed', 'expired', 'disabled']
 

@@ -44,9 +44,9 @@ export const CODE_PAGE_RPC = 'founder_code_page'
 export const CODE_ISSUE_RPC = 'founder_issue_access_code'
 export const CODE_ENABLE_RPC = 'founder_set_code_enabled'
 /**
- * سحب وصول حساب. **ولا نظير له للمنح**: `admin_grant_premium` تبقى بيد
- * `service_role` عمدًا — سكّ وصول دائم لا يخرج من متصفّح (انظر رأس
- * `20260822120002_founder_code_management.sql`).
+ * سحب وصول حساب. **ولا نظير له للمنح**: منح Premium الدائم يبقى بيد **مفتاح
+ * الخادم** عمدًا — سكّ وصول دائم لا يخرج من متصفّح. التعليل الكامل في رأس
+ * `20260822120002_founder_code_management.sql`.
  */
 export const REVOKE_ACCESS_RPC = 'founder_revoke_access'
 
