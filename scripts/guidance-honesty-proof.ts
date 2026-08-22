@@ -21,7 +21,7 @@
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { exercises, getExercise } from '@/data/exercises'
-import { getTechniqueTips, getCommonMistakes, getSafetyNotes, guidanceFor } from '@/lib/exerciseGuidance'
+import { getTechniqueTips, guidanceFor } from '@/lib/exerciseGuidance'
 import { getCue, hasCue } from '@/lib/coaching'
 import type { Exercise } from '@/types/workout'
 import type { Lang } from '@/lib/appPreferences'
@@ -36,7 +36,7 @@ const check = (label: string, ok: boolean, detail = ''): boolean => {
   else { fails.push(`${label}${detail ? ' — ' + detail : ''}`); console.log(`  ✗ ${label}${detail ? ' — ' + detail : ''}`) }
   return ok
 }
-const ARABIC = /[؀-ۿݐ-ݿﭐ-﷿ﹰ-﻿]/
+const ARABIC = /[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]/
 
 /** ما تعرضه بطاقة «عن التمرين» فعلًا — نفس ترتيب ExerciseDetail بالحرف. */
 interface Rendered { howTo: string[]; tips: string[]; mistakes: string[]; safety: string }
