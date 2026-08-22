@@ -7,6 +7,21 @@ import { muscleLabels } from '@/lib/muscles'
 // إذا كان للتمرين محتوى خاص (techniqueTipsAr/commonMistakesAr/safetyNotesAr) استخدمناه،
 // وإلا نولّد إرشادًا عامًا مناسبًا حسب نمط الحركة والعضلة المستهدفة.
 // كما نوفّر exerciseGuidance() ثنائية اللغة لوضع التمرين النشط (WorkoutMode).
+//
+// ── حدّ الصدق المُقاس (لا يُخمَّن) ───────────────────────────────────────────────
+// هذا الملف **مستوى نمط حركي، لا مستوى تمرين** في اللغتين معًا. قياس على الكتالوج
+// كاملًا (١٨١ تمرينًا): ١٨١/١٨١ من `techniqueTipsAr` هي حرفيًا نصّ جدول النمط
+// أدناه — لأن `ex()` في src/data/exercises.ts يملأ الحقل من `getTechniqueTips(base)`
+// نفسها. فلا يوجد تأليف عربي لكل تمرين هنا يمكن للإنجليزية أن «تقصّر» عنه.
+//
+// لذلك كان الحارس القديم `if (getExercise(exercise.id)) return []` **يحمي وهمًا**:
+// أفرغ الإنجليزية على ١٨١/١٨١ باسم «لا نترجم بالاستنتاج»، بينما الجانب العربي
+// المقابل ليس ترجمة ولا تأليفًا خاصًا — بل نفس النصّ العام. النتيجة الوحيدة كانت
+// رسالة «English guidance … is not available yet» على كل تمرين في التطبيق.
+//
+// الإرشاد **المؤلَّف لكل تمرين** يعيش في src/data/coaching/exerciseCues*.generated.ts
+// (١٨١/١٨١ عربي و١٨١/١٨١ إنجليزي)، وتقرؤه الواجهة عبر `getCue(id, lang)`.
+// جداول النمط هنا شبكة أمان متكافئة اللغتين، ولا تدّعي خصوصية تمرين.
 
 const TECHNIQUE_BY_PATTERN: Record<MovementPattern, string[]> = {
   push: [
@@ -158,11 +173,8 @@ export function muscleName(m: Muscle, lang: Lang = 'ar'): string {
 /** نقاط تكنيك للتمرين — الخاصة به إن وُجدت، وإلا افتراضية حسب نمط الحركة. */
 export function getTechniqueTips(exercise: Exercise, lang: Lang = 'ar'): string[] {
   if (lang !== 'en' && exercise.techniqueTipsAr?.length) return exercise.techniqueTipsAr
-  if (lang === 'en') {
-    if (exercise.techniqueTipsEn?.length) return exercise.techniqueTipsEn
-    // A catalog item without authored English is intentionally not translated by inference.
-    if (getExercise(exercise.id)) return []
-  }
+  if (lang === 'en' && exercise.techniqueTipsEn?.length) return exercise.techniqueTipsEn
+  // لا فرع لغويّ بعد هنا: اللغتان تسقطان إلى جدول النمط الخاص بها، بنفس العمق بالضبط.
   const table = lang === 'en' ? TECHNIQUE_BY_PATTERN_EN : TECHNIQUE_BY_PATTERN
   const base = table[exercise.movementPattern] ?? table.isolation
   const lead =
@@ -175,10 +187,7 @@ export function getTechniqueTips(exercise: Exercise, lang: Lang = 'ar'): string[
 /** أخطاء شائعة للتمرين — الخاصة به إن وُجدت، وإلا افتراضية حسب نمط الحركة. */
 export function getCommonMistakes(exercise: Exercise, lang: Lang = 'ar'): string[] {
   if (lang !== 'en' && exercise.commonMistakesAr?.length) return exercise.commonMistakesAr
-  if (lang === 'en') {
-    if (exercise.commonMistakesEn?.length) return exercise.commonMistakesEn
-    if (getExercise(exercise.id)) return []
-  }
+  if (lang === 'en' && exercise.commonMistakesEn?.length) return exercise.commonMistakesEn
   const table = lang === 'en' ? MISTAKES_BY_PATTERN_EN : MISTAKES_BY_PATTERN
   return table[exercise.movementPattern] ?? table.isolation
 }
@@ -186,10 +195,7 @@ export function getCommonMistakes(exercise: Exercise, lang: Lang = 'ar'): string
 /** تنبيهات أمان للتمرين — الخاصة به إن وُجدت، وإلا افتراضية حسب نمط الحركة. */
 export function getSafetyNotes(exercise: Exercise, lang: Lang = 'ar'): string[] {
   if (lang !== 'en' && exercise.safetyNotesAr?.length) return exercise.safetyNotesAr
-  if (lang === 'en') {
-    if (exercise.safetyNotesEn?.length) return exercise.safetyNotesEn
-    if (getExercise(exercise.id)) return []
-  }
+  if (lang === 'en' && exercise.safetyNotesEn?.length) return exercise.safetyNotesEn
   const table = lang === 'en' ? SAFETY_BY_PATTERN_EN : SAFETY_BY_PATTERN
   const base = table[exercise.movementPattern] ?? table.isolation
   const priorInjury =
@@ -333,8 +339,7 @@ const byPattern: Record<MovementPattern, Guidance> = {
 
 /**
  * نقاط التكنيك والأخطاء الشائعة لتمرين — لوضع التمرين النشط (ثنائي اللغة).
- * العربية: تفضّل المحتوى الخاص بالتمرين إن وُجد، ثم النمط الحركي.
- * الإنجليزية: تعتمد على إرشاد النمط الحركي.
+ * اللغتان بنفس المسار بالضبط: المؤلَّف على مستوى التمرين إن وُجد، وإلا نمط الحركة.
  */
 export function exerciseGuidance(exerciseId: string, lang: Lang): GuidanceText {
   const ex = getExercise(exerciseId)
@@ -514,21 +519,13 @@ const GUIDANCE_BY_PATTERN_EN: Record<MovementPattern, ExerciseGuidance> = {
 export function guidanceFor(ex: Exercise, lang: Lang = 'ar'): ExerciseGuidance {
   const table = lang === 'en' ? GUIDANCE_BY_PATTERN_EN : GUIDANCE_BY_PATTERN
   const generic = table[ex.movementPattern] ?? table.isolation
-  const known = Boolean(getExercise(ex.id))
-  // Synthetic callers (and legacy probes) still receive the stable pattern card.
-  if (!known) return generic
-  if (lang === 'en') {
-    return {
-      howTo: ex.howToEn ?? [],
-      tips: getTechniqueTips(ex, 'en'),
-      mistakes: getCommonMistakes(ex, 'en'),
-      safety: getSafetyNotes(ex, 'en')[0] ?? '',
-    }
-  }
+  // فرع واحد لكل لغة، بنفس الشكل بالضبط: المؤلَّف على مستوى التمرين إن وُجد، وإلا
+  // بطاقة النمط بلغتها. لا لغةَ تُفرَّغ بينما نظيرتها تُملأ من نفس المستوى.
+  const authoredHowTo = lang === 'en' ? ex.howToEn : undefined
   return {
-    ...generic,
-    tips: getTechniqueTips(ex),
-    mistakes: getCommonMistakes(ex),
-    safety: getSafetyNotes(ex)[0] ?? generic.safety,
+    howTo: authoredHowTo?.length ? authoredHowTo : generic.howTo,
+    tips: getTechniqueTips(ex, lang),
+    mistakes: getCommonMistakes(ex, lang),
+    safety: getSafetyNotes(ex, lang)[0] ?? generic.safety,
   }
 }

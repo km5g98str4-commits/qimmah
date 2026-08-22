@@ -192,6 +192,12 @@ function AboutTab({ ex, d, lang, onAddToPlan }: { ex: NonNullable<ReturnType<typ
    */
   const cue = getCue(ex.id, lang)
   const howTo = cue.steps.length ? cue.steps : g.howTo
+  /**
+   * «نصائح تقنية» وحدها بلا نظير مؤلَّف: `ExerciseCue` يحمل steps/mistakes/safety
+   * ولا يحمل tips. فمصدرها في اللغتين هو جدول نمط الحركة في exerciseGuidance.ts.
+   * كانت الإنجليزية تُفرَّغ هناك بحارس أفرغها على ١٨١/١٨١، فتظهر رسالة «غير متاح»
+   * في كل تمرين بينما العربية تعرض نفس النصّ العام. صار المصدر واحدًا بلغتين.
+   */
   const tips = g.tips
   const mistakes = cue.mistakes.length ? cue.mistakes : g.mistakes
   const safety = cue.safety.length ? cue.safety : g.safety
@@ -210,7 +216,7 @@ function AboutTab({ ex, d, lang, onAddToPlan }: { ex: NonNullable<ReturnType<typ
         )}
       </Block>
 
-      {/* كيف تؤديه — إرشاد قِمّة المكتوب لكل تمرين (عربي)؛ للإنجليزية يبقى الإرشاد العام. */}
+      {/* كيف تؤديه — إرشاد قِمّة المؤلَّف لكل تمرين، عربيًا وإنجليزيًا (getCue). */}
       <Block title={d.howToPerform} icon="CheckCircle2">
         {howTo.length > 0 ? <ol className="space-y-1.5">
           {howTo.map((h, i) => (
@@ -222,7 +228,7 @@ function AboutTab({ ex, d, lang, onAddToPlan }: { ex: NonNullable<ReturnType<typ
         </ol> : <p className="text-sm leading-relaxed text-ink-500">{d.guidanceUnavailable}</p>}
       </Block>
 
-      {/* نصائح تقنية (عام، ثنائي اللغة) */}
+      {/* نصائح تقنية — مستوى نمط الحركة في اللغتين معًا (لا تأليف لكل تمرين هنا) */}
       <Block title={d.techniqueTips} icon="Sparkles">
         {tips.length > 0 ? <BulletList items={tips} dotClassName="bg-success" /> : <p className="text-sm leading-relaxed text-ink-500">{d.guidanceUnavailable}</p>}
       </Block>

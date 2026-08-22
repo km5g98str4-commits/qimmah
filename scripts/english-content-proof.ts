@@ -25,7 +25,7 @@ import {
   exerciseGuidance,
 } from '@/lib/exerciseGuidance'
 import type { Exercise, MovementPattern, Muscle } from '@/types/workout'
-import { getExercise } from '@/data/exercises'
+import { exercises, getExercise } from '@/data/exercises'
 
 let pass = 0
 const fails: string[] = []
@@ -217,9 +217,40 @@ console.log('\n④ إرشاد التمارين (exerciseGuidance)')
   // تنبيه استشارة المختص موجود في اللغتين (قاعدة «لا ادّعاءات طبية»)
   check('تنبيه استشارة المختص يظهر بالعربية', getSafetyNotes(ex).some((t) => t.includes('استشر مختصًا')))
   check('تنبيه استشارة المختص يظهر بالإنجليزية', getSafetyNotes(ex, 'en').some((t) => /qualified professional/i.test(t)))
-  const catalogExercise = getExercise('barbell-bench-press')!
-  const catalogEn = guidanceFor(catalogExercise, 'en')
-  check('التمرين الحقيقي بلا إنجليزي مؤلف لا يتلقى ترجمة مخترعة', catalogEn.howTo.length === 0 && catalogEn.tips.length === 0 && catalogEn.mistakes.length === 0 && catalogEn.safety === '')
+  // ── الكتالوج كاملًا: تكافؤ لا فراغ ───────────────────────────────────────────
+  //
+  // كان هنا تأكيد واحد يقول: «التمرين الحقيقي بلا إنجليزي مؤلف لا يتلقى ترجمة
+  // مخترعة» ويثبته بأن الأقسام الأربعة **فارغة** بالإنجليزية. وكان يمرّ بصدق —
+  // لكنه يحرس عطلًا: قياسٌ على الـ١٨١ يُظهر أن العربية المقابلة ليست تأليفًا خاصًا
+  // بل نصّ جدول نمط الحركة نفسه، فالفراغ الإنجليزي لم يكن امتناعًا عن الترجمة بل
+  // حرمانًا من محتوى **مؤلَّف إنجليزيًا وموجود**. أُبدل بثلاثة تأكيدات أقوى تحرس
+  // المقصد الأصلي (لا اختراع) دون أن تحرس الفراغ.
+  const CATALOG = exercises
+  const emptyEn = CATALOG.filter((ex) => {
+    const g = guidanceFor(ex, 'en')
+    return g.howTo.length === 0 || g.tips.length === 0 || g.mistakes.length === 0 || g.safety.trim().length === 0
+  }).map((ex) => ex.id)
+  check(`لا تمرين كتالوج بقسم إنجليزي فارغ (${CATALOG.length}/${CATALOG.length})`, emptyEn.length === 0, emptyEn.slice(0, 5).join(','))
+
+  const unevenDepth = CATALOG.filter((ex) => {
+    const a = guidanceFor(ex, 'ar')
+    const e = guidanceFor(ex, 'en')
+    return a.howTo.length !== e.howTo.length || a.tips.length !== e.tips.length || a.mistakes.length !== e.mistakes.length
+  }).map((ex) => ex.id)
+  check('عمق الإرشاد الإنجليزي = عمق العربي لكل تمرين كتالوج', unevenDepth.length === 0, unevenDepth.slice(0, 5).join(','))
+
+  // «لا ترجمة مخترعة» بصيغتها الصحيحة: الإنجليزي المعروض نصّ إنجليزي مؤلَّف —
+  // إمّا حقل التمرين الإنجليزي، وإمّا جدول النمط الإنجليزي. لا شيء ثالث.
+  const invented = CATALOG.filter((ex) => {
+    const en = guidanceFor(ex, 'en')
+    const stripped = { ...ex, techniqueTipsEn: undefined, commonMistakesEn: undefined, safetyNotesEn: undefined } as Exercise
+    const patternTips = getTechniqueTips(stripped, 'en')
+    const authoredTips = ex.techniqueTipsEn ?? []
+    const fromPattern = en.tips.length === patternTips.length && en.tips.every((t, i) => t === patternTips[i])
+    const fromAuthored = en.tips.length === authoredTips.length && en.tips.every((t, i) => t === authoredTips[i])
+    return !fromPattern && !fromAuthored
+  }).map((ex) => ex.id)
+  check('كل نصيحة إنجليزية معروضة مصدرها جدول النمط الإنجليزي أو حقل التمرين — لا نصّ ثالث', invented.length === 0, invented.slice(0, 5).join(','))
 }
 
 console.log(`\n${fails.length === 0 ? '✅' : '❌'} إثبات المحتوى الإنجليزي: ${pass} نجح · ${fails.length} فشل`)
