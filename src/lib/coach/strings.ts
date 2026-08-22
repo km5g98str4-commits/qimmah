@@ -35,6 +35,21 @@ export interface CoachStrings {
   askLabel: string
   askPlaceholder: string
   askSubmit: string
+  /**
+   * **لا ذاكرة ولا تكيّف.** الواجهة تقولها صراحةً: المحرّك حتميّ، لا يحفظ
+   * سؤالًا ولا يتعلّم من جواب — وكل جواب يُبنى من جديد لحظة السؤال. إخفاء هذا
+   * يترك المستخدم يفترض ذكاءً غير موجود، وهو ادّعاء لا نملكه (§6/٤).
+   */
+  noMemoryNote: string
+  /**
+   * حين يسقط عقد الإسناد (`CoachProvenanceError`) لا يُعرض جزء من الجواب ولا
+   * يُبتلع الخطأ: تُقال المشكلة صريحة ويبقى المستخدم بلا رقم مخترَع (§5).
+   */
+  answerBlocked: string
+  /** بطاقة المدخل في «اليوم» — عنوانها ونصّها وندَاؤها. */
+  entryTitle: string
+  entryBody: string
+  entryCta: string
   quickTitle: string
   answerTitle: string
   sourceLabel: string
