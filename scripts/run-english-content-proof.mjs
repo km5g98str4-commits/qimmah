@@ -20,7 +20,18 @@ const __ls = {
   clear:()=>{__s.clear()},
 };
 globalThis.localStorage = __ls;
-globalThis.window = { localStorage: __ls };
+// [SOVEREIGN-003] كائن نافذة كامل لا نصفه.
+// كان الكعب يحمل localStorage وحده: فيصير typeof window !== undefined صحيحًا
+// فتدخل وحداتٌ فرعَها المخصّص للمتصفّح ثم تسقط على addEventListener غير
+// الموجود. أي أن الكعب يدّعي متصفّحًا ثم لا يكون واحدًا — والعطل يظهر في
+// إثبات محتوى لا علاقة له بالنافذة، لمجرّد أن رسم الاستيراد اتّسع.
+// (بلا علامات اقتباس خلفية: هذه الكتلة تعيش داخل قالب نصّي.)
+globalThis.window = {
+  localStorage: __ls,
+  addEventListener() {},
+  removeEventListener() {},
+  dispatchEvent() { return true },
+};
 if (typeof globalThis.performance === 'undefined') globalThis.performance = { now: () => 0 };
 `
 
