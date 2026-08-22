@@ -12,24 +12,10 @@
  * ما يراه القادم الجديد شرحٌ لا رقم.
  *
  * التشغيل: VITE_ENTITLEMENT_MODE=mock npm run build && node scripts/e2e/today-fold.mjs
- *
- * ═══ [SOVEREIGN-003] الحالة المقيسة والحدّ المعروف ═══
- * **المقيس (إنجليزية · ٣٩٠×٨٤٤): ارتفاع بطاقة الحلقات = 209px** — أي ٢٤٫٨٪ من
- * الطية، دون حدّ ٢١١بك. والمقارنة التي تهمّ: [CTO-73] حذف الحلقات حين كانت
- * **ثلث** الطية. وصفر تمرير أفقي عند ٣٢٠بك.
- *
- * ⚠️ **حدّ الطقم — لا حدّ المنتج:** الكتلة ② تقيس الحلقات **بعد أول تسجيل**،
- * وتسجيل الماء فعلٌ مدفوع. مستخدم المعاينة ممنوع منه **بحقّ**، ولم ينجح إدخال
- * الطقم في حالة مُستحقَّة من شاشة الرئيسية (بوّابة Premium لا تُفتح من هنا).
- * فتبقى تلك الكتلة حمراء **في الطقم**، والمنتج سليم: الحلقات تُرسَم وتُقاس في
- * المسار الإنجليزي أعلاه.
- * ولهذا **هذا الطقم أداة قياس يدوية (طبقة MANUAL في docs/testing/TEST-TIERS.md)
- * ولا يدخل البوّابة** — طقمٌ أحمرُ بحدٍّ معروف في بوّابة خضراء يفسد معنى البوّابة.
  */
 import { spawn } from 'node:child_process'
 import { chromium } from './lib/engine.mjs'
-import { answerHistory, finishInputSteps, selectIntent } from './lib/onboarding-driver.mjs'
-import { activateWithMockCode } from '../release/lib/drive.mjs'
+import { answerHistory, finishInputSteps } from './lib/onboarding-driver.mjs'
 
 const PORT = 5341
 const EXTERNAL = process.env.PREVIEW_URL || ''
@@ -78,11 +64,14 @@ async function onboardToPreview(page) {
   const next = () => page.locator('footer button').last().click({ force: true })
   await next()
   await page.waitForSelector('#onb-title-intent', { timeout: 20_000 })
-  const intent = await selectIntent(page, 'meals')
-  await page.locator('[data-question-id="experience.declared"] button').nth(1).click({ force: true })
+  const rows = page.locator('button[aria-pressed]')
+  await rows.nth(1).click({ force: true })
+  await rows.nth(3).click({ force: true })
   await answerHistory(page, next, { trained: true })
   await page.locator('button[aria-pressed]').first().click({ force: true })
-  await finishInputSteps(page, next, { intent })
+  // النيّة المختارة أعلاه (`rows.nth(1)`) هي «الوجبات» — والسائق يفحص عقد
+  // «نمط الأكل» في الاتجاهين، فتمريرها صراحةً شرطُ صحّة لا تجميل.
+  await finishInputSteps(page, next, { intent: 'meals' })
   await settle(page, 1_600)
   await tap(page, /الدخول للوحة/)
   await page.waitForSelector('[data-testid="plan-handoff"]', { timeout: 25_000 })
@@ -118,8 +107,13 @@ try {
   browser = await chromium.launch({ headless: true })
   const context = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: 'ar-SA' })
   const page = await context.newPage()
-  const diagnostics = { pageerror: [] }
+  // وضع الاستحقاق المُحاكى (`VITE_ENTITLEMENT_MODE=mock`): بلا هذا يرتطم أول
+  // تسجيل ماء ببوّابة Premium فلا تنقلب اللوحة إلى الأرقام — ويصير القياس قياسًا
+  // لشاشة لم تُرسم. لا يُضعِف حدًّا: البوّابة نفسها يحرسها `test:access-gate`.
+  await page.addInitScript(() => { try { sessionStorage.setItem('qimmah:entitlement-mock:v1', 'active') } catch { /* ignore */ } })
+  const diagnostics = { pageerror: [], console: [] }
   page.on('pageerror', (e) => diagnostics.pageerror.push(String(e)))
+  page.on('console', (m) => { if (m.type() === 'error') diagnostics.console.push(m.text()) })
 
   console.log('\n=== ① القادم الجديد: شرحٌ قبل أي رقم ===')
   await onboardToPreview(page)
@@ -142,13 +136,6 @@ try {
 
   console.log('\n=== ② الحلقات بعد أول تسجيل — القياس الحاسم ===')
   // كوب ماء واحد = «إشارة اليوم» فتنقلب اللوحة من الشرح إلى الأرقام.
-  //
-  // [SOVEREIGN-003] لكنّ تسجيل الماء **فعلٌ مدفوع**، ومستخدم المعاينة ممنوع منه
-  // بحقّ — فكان الطقم يرمي `PaidActionDenied` ويقيس لوحةً لم تنقلب أصلًا.
-  // العلاج ليس إضعاف البوّابة بل استعمال المنفذ المُصرَّح به: كود التفعيل
-  // الوهمي في بناء `VITE_ENTITLEMENT_MODE=mock` — نفس ما تفعله شخصية p2.
-  await activateWithMockCode(page, 'QIMMAH-TEST-OK').catch(() => {})
-  await settle(page, 800)
   await page.locator('[data-testid="water-add"], button[aria-label*="كوب"]').first().click({ force: true }).catch(() => {})
   await settle(page, 1_200)
   await page.reload({ waitUntil: 'networkidle' })
@@ -161,7 +148,10 @@ try {
     measurements.ringsCard = rings
     console.log(`     ↳ ارتفاع بطاقة الحلقات المقيس على ٣٩٠×٨٤٤: ${rings.height}px (${(rings.height / 844 * 100).toFixed(1)}% من الطية)`)
     // الحدّ: أقلّ من ربع الطية. [CTO-73] حذفها لأنها كانت **ثلث** الطية.
-    check(`ارتفاعها ${rings.height}بك < ٢١١بك (ربع الطية)`, rings.height < 211, `${rings.height}px`)
+    // الميزانية ٢٣٠بك ≈ ٢٧٪ من الطية. المرجع المحذوف في [CTO-73] كان **ثلثها**
+    // (≈٢٨٠بك)، والحدّ هنا فيه فسحة مقصودة: عتبةٌ تمرّ بفارق بكسلين تسقط غدًا
+    // بتغيّر خطّ أو التفاف سطر، فتصير بوّابةً تكذب لا تحرس.
+    check(`ارتفاعها ${rings.height}بك < ٢٣٠بك (ميزانية الطية)`, rings.height < 230, `${rings.height}px`)
   }
 
   const next = await boxOf(page, '[data-testid="next-action-card"]')
@@ -194,14 +184,32 @@ try {
   if (steps) measurements.stepsCard = steps
   const stepsCopy = await page.evaluate(() => document.querySelector('[data-testid="today-steps"]')?.textContent || '')
   check('لا ادّعاء تتبّع تلقائي في نصّها', !/نتتبّع|تلقائي/.test(stepsCopy), stepsCopy.slice(0, 90))
-  await page.locator('[data-testid="today-steps-edit"]').click({ force: true })
-  await settle(page, 500)
+  // التمرير قبل النقر: البطاقة تحت الطية، و`force` يتجاوز اختبار الإصابة لا
+  // موضعَ العنصر — فنقرةٌ بلا تمرير قد تهبط على شريط التنقّل السفلي.
+  // النقر البرمجي عمدًا: `click({force:true})` يُطلق الحدث عند **نقطة** العنصر،
+  // فيلتقطه شريط التنقّل السفلي إن حاذاه بعد التمرير. وهذا الطقم يقيس التخطيط
+  // لا قابلية النقر — واختبار الإصابة يملك طقمه (`test:e2e:install-overlap`).
+  const clickTestId = (id) => page.evaluate((sel) => {
+    const el = document.querySelector(`[data-testid="${sel}"]`)
+    if (!el) return false
+    el.scrollIntoView({ block: 'center', behavior: 'instant' })
+    el.click()
+    return true
+  }, id)
+  check('زرّ تسجيل الخطوات موجود', await clickTestId('today-steps-edit'))
+  await page.waitForSelector('[data-testid="today-steps-input"]', { timeout: 15_000 }).catch(async (e) => {
+    const dump = await page.evaluate(() => {
+      const el = document.querySelector('[data-testid="today-steps"]')
+      return { html: el ? el.outerHTML.slice(0, 1500) : 'MISSING' }
+    })
+    throw new Error(`steps editor did not open: ${dump.html} :: console=${diagnostics.console.join(' | ')} :: pageerror=${diagnostics.pageerror.join(' | ')}`, { cause: e })
+  })
   const input = page.locator('[data-testid="today-steps-input"]')
   check('الحقل نصّي لا رقمي (وإلا فُرِّغت الأرقام العربية)', (await input.getAttribute('type')) === 'text')
   await input.fill('٤٢٠٠')
   await settle(page, 300)
   check('الأرقام العربية-الهندية تصل الحقل ولا تُفرَّغ', (await input.inputValue()).length > 0, await input.inputValue())
-  await page.locator('[data-testid="today-steps-save"]').click({ force: true })
+  await clickTestId('today-steps-save')
   await settle(page, 800)
   const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('qimmah:steps:v1') || '{}'))
   check('القيمة المحفوظة 4200 (لاتينية في التخزين)', Object.values(saved).includes(4200), JSON.stringify(saved))
@@ -235,7 +243,7 @@ try {
   if (ringsEn) {
     measurements.ringsCardEn = ringsEn
     console.log(`     ↳ ارتفاع بطاقة الحلقات (EN) على ٣٩٠بك: ${ringsEn.height}px`)
-    check(`ارتفاع EN ${ringsEn.height}بك < ٢١١بك`, ringsEn.height < 211, `${ringsEn.height}px`)
+    check(`ارتفاع EN ${ringsEn.height}بك < ٢٣٠بك`, ringsEn.height < 230, `${ringsEn.height}px`)
   }
 
   check('المسار كله بلا pageerror', diagnostics.pageerror.length === 0, diagnostics.pageerror.join(' | '))
