@@ -544,6 +544,15 @@ const ROUTES = read('src/lib/appRoutes.ts')
     check(`[${name}] كل زرّ ≥ ٤٤ بكسل (${small.join(',') || 'صفر مخالف'})`, small.length === 0)
   }
 
+  // كل أيقونة مستعملة موجودة في الخريطة — الاسم المفقود يسقط وقت التشغيل
+  // على شاشة المستخدم لا في البناء، فيُفحَص هنا.
+  const iconsFile = read('src/lib/icons.ts')
+  const usedIcons = [...(VIEW + PANEL + ENTRY).matchAll(/<Icon\s+name="([A-Za-z0-9]+)"/g)].map((m) => m[1])
+  check(`أيقونات مستعملة (${[...new Set(usedIcons)].join(',')})`, usedIcons.length >= 6)
+  for (const name of new Set(usedIcons)) {
+    check(`الأيقونة «${name}» مسجَّلة في خريطة الأيقونات`, new RegExp(`^\\s*${name},$`, 'm').test(iconsFile))
+  }
+
   // وصولية الشاشة.
   check('حقل السؤال مربوط بتسميته', VIEW.includes('htmlFor="coach-ask"') && VIEW.includes('id="coach-ask"'))
   check('منطقة الجواب حيّة لقارئ الشاشة', VIEW.includes('aria-live="polite"'))
