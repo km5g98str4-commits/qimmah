@@ -17,6 +17,7 @@ import type { Exercise, Muscle, MovementPattern, PlanDay, PlanExercise, WorkoutP
 import type { MuscleId } from '@/types/muscles'
 import type { RoutineDay } from '@/types'
 import type { RoutineRow } from '@/lib/customization'
+import { estimateSessionMinutes } from '@/lib/workoutStats'
 import type { Lang } from '@/lib/appPreferences'
 import {
   computeTargets,
@@ -1109,6 +1110,70 @@ export function planLabel(p: Profile, templateId: string): string {
 }
 
 /** المولّد الكامل. */
+
+// ════════════════════════════════════════════════════════════════════════════
+// [FINAL-CONVERGENCE] ميزانية الجلسة — الإجابة تحكم المخرَج فعلًا
+// ════════════════════════════════════════════════════════════════════════════
+//
+// مُستوعَب من `claude/qimmah-sovereign-closure-h503u6`. الأساس كان يستجيب
+// لإجابة المدّة عبر `targetExerciseCount` وحدها (٣٠ دقيقة ⇒ −٢ تمرين · ٩٠ ⇒ +٢)
+// ثم **لا يقيس الناتج**: فيخرج يومٌ يتجاوز السقف المُعلَن ولا شيء يردّه.
+//
+// وهذا القالب يعمل على ما **بعد** الفتحات الأساسية: الإضافة المُلحَقة أولًا،
+// ثم المجموعات من الذيل إلى الرأس حتى أرضية المجموعتين.
+//
+// ═══ ولماذا لا تُمَسّ فتحة أساسية أبدًا ═══
+// حوض المصاب أضيق ⇒ تمارينه براحات أطول ⇒ يتجاوز الميزانية **أوّلًا** ⇒ فلو
+// اقتُطعت الأساسيات لفقد فتحةً يحتفظ بها السليم بنفس التهيئة. أي أن «قصر
+// الجلسة» يصير بابًا خلفيًّا لإفقار خطة المصاب. الحدّ يغلق الباب من أصله،
+// ويحرسه `test:injury-safety` الذي يقارن يوم المصاب بضابطٍ سليم.
+const MIN_SETS_UNDER_BUDGET = 2
+
+function trailingOptionalCount(exercises: readonly PlanExercise[]): number {
+  let n = 0
+  for (let i = exercises.length - 1; i >= 0 && exercises[i].optional; i--) n++
+  return n
+}
+
+/** يقلّص يومًا واحدًا حتى يدخل الميزانية — أو يعيده كما هو إن كان داخلها. */
+function fitDayToBudget(day: PlanDay, budgetMin: number): PlanDay {
+  if (!Number.isFinite(budgetMin) || budgetMin <= 0) return day
+  if (estimateSessionMinutes(day) <= budgetMin) return day
+
+  let exercises = day.exercises.slice()
+
+  // ١) الإضافة المُلحَقة أولًا — غير أساسية بالتعريف، فهي أول ما يسقط.
+  let optional = trailingOptionalCount(exercises)
+  while (optional > 0 && estimateSessionMinutes({ ...day, exercises }) > budgetMin) {
+    exercises = exercises.slice(0, -1)
+    optional--
+  }
+
+  // ٢) ثم المجموعات، من الذيل إلى الرأس، حتى أرضية المجموعتين — كي يبقى الحمل
+  //    على المركّبات الأولى ما أمكن.
+  let reduced = true
+  while (reduced && estimateSessionMinutes({ ...day, exercises }) > budgetMin) {
+    reduced = false
+    for (let i = exercises.length - 1; i >= 0; i--) {
+      if (estimateSessionMinutes({ ...day, exercises }) <= budgetMin) break
+      if (exercises[i].sets > MIN_SETS_UNDER_BUDGET) {
+        exercises = exercises.map((pe, j) => (j === i ? { ...pe, sets: pe.sets - 1 } : pe))
+        reduced = true
+      }
+    }
+  }
+
+  // بلوغ السقف ليس مضمونًا (أرضية المجموعات + الفتحات الأساسية) — وحين يتعذّر
+  // يبقى التقدير على حقيقته وتعرضه الشاشة كما هو. لا تقصير مزيّف ولا رقم مُجمَّل.
+  return { ...day, exercises: exercises.map((pe, i) => ({ ...pe, order: i })) }
+}
+
+/** يطبّق ميزانية الجلسة على الخطة كلّها. */
+export function fitPlanToSessionBudget(plan: WorkoutPlan, budgetMin: number): WorkoutPlan {
+  if (!Number.isFinite(budgetMin) || budgetMin <= 0) return plan
+  return { ...plan, days: plan.days.map((d) => fitDayToBudget(d, budgetMin)) }
+}
+
 export function generatePlan(profile: Profile): GeneratedPlan {
   // حدّ دفاعي عند مدخل المحرّك: المخطط/الهجرة يحاولان تثبيت هدف القاصر، لكن
   // generatePlan قد يُستدعى بملف قديم أو مباشر. لذلك يُشتق الهدف الفعّال مرة
@@ -1129,6 +1194,7 @@ export function generatePlan(profile: Profile): GeneratedPlan {
   let workoutPlan = plan
   workoutPlan = applyMuscleFocus(workoutPlan, p.muscleFocus ?? 'balanced')
   if (isConservativeStart) workoutPlan = applyDeload(workoutPlan)
+  workoutPlan = fitPlanToSessionBudget(workoutPlan, p.workoutDuration)
 
   const weeklySchedule = buildScheduleFromSpecs(specs, p.trainingDays, p.preferredDays)
   const { plan: nutritionPlan, warning: nutritionWarning } = generateNutrition(p, targets)

@@ -172,6 +172,9 @@ export function toAnswersFromV2(choices: V2OnboardingChoices): Answers {
     injuries: [...choices.injuries],
     healthDataConsent: choices.healthDataConsent,
     targetWeightKg,
-    targetTouched: true,
+    // [FINAL-CONVERGENCE] هذا المحوّل **يشتقّ** الوزن المستهدف دائمًا
+    // (`deriveTargetWeight` أعلاه) ولا يسأل المستخدم عنه. فـ`true` كانت تعلن
+    // لمسًا لم يقع، وتُقرأ لاحقًا كأن الرقم مُدخَل لا مُستنتَج.
+    targetTouched: false,
   }
 }
