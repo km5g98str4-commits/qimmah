@@ -14,7 +14,7 @@
 
 import { Icon } from '@/components/Icon'
 import type { Lang } from '@/lib/appPreferences'
-import { coachStrings } from '@/i18n/dict/coach'
+import { coachEntryStrings } from '@/i18n/dict/coach'
 
 interface CoachTodayEntryProps {
   lang: Lang
@@ -23,7 +23,7 @@ interface CoachTodayEntryProps {
 }
 
 export function CoachTodayEntry({ lang, onOpen }: CoachTodayEntryProps) {
-  const s = coachStrings[lang]
+  const s = coachEntryStrings[lang]
   return (
     <section aria-labelledby="coach-entry-title" className="rounded-3xl border border-line bg-surface p-4 shadow-card">
       <span className="flex items-center gap-1.5 text-xs font-black" style={{ color: 'var(--v2-blue-text)' }}>

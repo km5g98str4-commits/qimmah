@@ -571,6 +571,9 @@ const ROUTES = read('src/lib/appRoutes.ts')
   check(`لا استيراد ساكن لشاشة المرشد (${eager.join(',') || 'صفر'})`, eager.length === 0)
   // وبطاقة «اليوم» لا تجرّ المحرّك: بلا هذا تدخل طبقة المرشد حزمة اللوحة.
   check('بطاقة اليوم لا تستورد @/lib/coach', !ENTRY.includes("@/lib/coach"))
+  // ولا تستورد القاموس الكامل: `coachStrings` هو المفتاح الثقيل، و`coachEntryStrings`
+  // هو الأربعة التي تحتاجها. الفارق المقيس ٧٫٤ ك.ب مضغوطة (`coach-chunk-measure`).
+  check('وبطاقة اليوم تستورد نصوص المدخل لا القاموس الكامل', ENTRY.includes('coachEntryStrings') && !/\bcoachStrings\b/.test(ENTRY))
   check('وبطاقة اليوم لا تستورد الشاشة', !/from\s+['"]\.\/CoachView['"]/.test(ENTRY))
 }
 

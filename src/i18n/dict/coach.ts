@@ -18,10 +18,34 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 import type { Lang } from '@/lib/appPreferences'
-import type { CoachStrings } from '@/lib/coach/strings'
+import type { CoachEntryStrings, CoachStrings } from '@/lib/coach/strings'
+
+// ── نصوص بطاقة المدخل — كائنان مستقلّان قبل القاموسين الكبيرين ──────────────
+//
+// السبب: بطاقة «اليوم» تحتاج أربعة نصوص لا ثلاثمئة، والفصل يجعل `coachStrings`
+// **غير مشار إليه** من مسار البطاقة فيصير هزّه ممكنًا. **وقيس ولم يُهَزّ**:
+// esbuild يبقي القاموس كاملًا (٧٫٤ ك.ب مضغوطة) — وRollup لم يُقَس لأن الشاشة لم
+// تُوصَل بعد بـ`App.tsx`. فالفصل بنية صحيحة **لا مكسبًا مُثبَتًا**، ويُقال كذلك
+// بدل أن يُكتب رقم لم يُقَس. القياس يُعاد بعد الوصل: `scripts/coach-chunk-measure.mjs`.
+
+const arEntry: CoachEntryStrings = {
+  eyebrow: 'المرشد',
+  entryTitle: 'مرشد قِمّة',
+  entryBody: 'ستة أسئلة يجاوبها من بياناتك أنت — بلا نموذج لغوي وبلا اتصال.',
+  entryCta: 'افتح المرشد',
+}
+
+const enEntry: CoachEntryStrings = {
+  eyebrow: 'Coach',
+  entryTitle: 'Qimmah coach',
+  entryBody: 'Six questions answered from your own data — no language model, no connection.',
+  entryCta: 'Open the coach',
+}
+
+export const coachEntryStrings: Record<Lang, CoachEntryStrings> = { ar: arEntry, en: enEntry }
 
 const ar: CoachStrings = {
-  eyebrow: 'المرشد',
+  ...arEntry,
   title: 'مرشد قِمّة',
   subtitle: 'يجاوب من بياناتك أنت — لا غير.',
   back: 'رجوع',
@@ -35,9 +59,6 @@ const ar: CoachStrings = {
     'ما أحفظ أسئلتك ولا أتعلّم منها. كل جواب ينحسب من جديد وقت ما تسأل — فلو تغيّرت بياناتك تغيّر الجواب، ولو ما تغيّرت جاك نفسه.',
   answerBlocked:
     'فيه سطر ما قدرت أربطه بمصدر من بياناتك، وما راح أعرض لك نصف جواب. جرّب سؤال ثاني من القائمة.',
-  entryTitle: 'مرشد قِمّة',
-  entryBody: 'ستة أسئلة يجاوبها من بياناتك أنت — بلا نموذج لغوي وبلا اتصال.',
-  entryCta: 'افتح المرشد',
   quickTitle: 'أسئلة جاهزة',
   answerTitle: 'الجواب',
   sourceLabel: 'المصدر',
@@ -195,7 +216,7 @@ const ar: CoachStrings = {
 }
 
 const en: CoachStrings = {
-  eyebrow: 'Coach',
+  ...enEntry,
   title: 'Qimmah coach',
   subtitle: 'Answers built from your data — nothing else.',
   back: 'Back',
@@ -209,9 +230,6 @@ const en: CoachStrings = {
     "I don't keep your questions and I don't learn from them. Every answer is worked out fresh the moment you ask — change your data and the answer changes, leave it and you get the same one back.",
   answerBlocked:
     "One line here couldn't be tied back to a source in your data, and I won't show you half an answer. Try another question from the list.",
-  entryTitle: 'Qimmah coach',
-  entryBody: 'Six questions answered from your own data — no language model, no connection.',
-  entryCta: 'Open the coach',
   quickTitle: 'Ready-made questions',
   answerTitle: 'Answer',
   sourceLabel: 'Source',
