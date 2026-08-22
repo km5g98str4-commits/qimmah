@@ -46,6 +46,9 @@ function createLazyViews() {
     // المركز التنفيذي — حزمة مستقلّة لا تدخل حزمة الإقلاع. الحارس داخل المكوّن
     // نفسه، فجلب الحزمة **لا يمنح شيئًا**: من ليس مؤسسًا يرى شاشة المنع.
     AdminRoute: lazy(() => import('@/admin').then((m) => ({ default: m.AdminRoute }))),
+    // مرشد قِمّة — حزمة مستقلّة كذلك: محرّك القواعد وسياقه لا يدخلان حزمة
+    // الإقلاع، فزائرٌ لا يفتح المرشد لا ينزّل شيئًا منه.
+    CoachView: lazy(() => import('@/features/coach/CoachView').then((m) => ({ default: m.CoachView }))),
   }
 }
 import type { MainTab, QuickLogTarget } from '@/components/MobileShell'
@@ -558,6 +561,10 @@ export default function App() {
     // ويرسم شاشة المنع لكل من ليس مؤسسًا. وتحويل الضيف إلى «أنشئ حسابًا» كذبة:
     // الحساب لا يمنح الدور.
     content = <V.AdminRoute />
+  } else if (view === 'coach') {
+    // [SOVEREIGN-COACH-002] المرشد مسارٌ كامل لا نافذة: يُفتح بالرابط ويُغلق
+    // بالرجوع، فيبقى قابلًا للمشاركة والاختبار كبقيّة الشاشات.
+    content = <V.CoachView lang={LANG} onBack={() => setView('dashboard')} onNavigate={navigate} />
   } else if (view === 'calc') {
     content = (
       <V.CalcExplainerView
