@@ -90,6 +90,11 @@ export interface AdminStrings {
   labels: Record<string, string>
   /** مفاتيحها = `unavailableReasonKey`. */
   reasons: Record<string, string>
+  /**
+   * قيم شريط وضع المنصّة — **تُترجَم ولا تُطبع خامًا**.
+   * `backend-unconfigured` تحديدًا كانت ستُقرأ رمزًا تقنيًا لا حالةً.
+   */
+  postureValues: Record<string, string>
   filters: Record<string, string>
   funnel: Record<string, string>
   attention: Record<string, AdminAttentionCopy>
@@ -513,6 +518,16 @@ export const adminStrings: Record<Lang, AdminStrings> = {
     },
     labels: arLabels,
     reasons: arReasons,
+    postureValues: {
+      on: 'شغّال',
+      off: 'مطفأ',
+      ok: 'مضبوط',
+      missing: 'ناقص',
+      mock: 'تقليد',
+      none: 'بلا مصدر',
+      backend: 'الخادم',
+      'backend-unconfigured': 'الخادم — مفاتيحه ناقصة',
+    },
     filters: arFilters,
     funnel: arFunnel,
     attention: arAttention,
@@ -678,6 +693,16 @@ export const adminStrings: Record<Lang, AdminStrings> = {
     },
     labels: enLabels,
     reasons: enReasons,
+    postureValues: {
+      on: 'On',
+      off: 'Off',
+      ok: 'Configured',
+      missing: 'Missing',
+      mock: 'Mock',
+      none: 'No source',
+      backend: 'Backend',
+      'backend-unconfigured': 'Backend — keys missing',
+    },
     filters: enFilters,
     funnel: enFunnel,
     attention: enAttention,

@@ -192,7 +192,21 @@ export interface AttentionItem {
 export interface PlatformPosture {
   readonly buildLabel: string
   readonly syncPipeline: 'enabled' | 'disabled'
-  readonly entitlementSource: 'none' | 'mock' | 'backend'
+  /**
+   * مصدر الاستحقاق **كما هو فعلًا**، بأربع قيم لا اثنتين.
+   *
+   * ═══ لماذا أربع ═══
+   * كان القارئ يُصدر `'mock'` أو `'none'` وحدهما بينما شرط «سليم» في الشريط
+   * `=== 'backend'` — أي أن الشريحة **لا يمكن أن تخضرّ أبدًا**، ولو وصل الخادم
+   * وطُبِّقت كل هجرة. وشريطٌ لا يخضرّ في أي عالم ليس مؤشّرًا بل زينة.
+   *
+   * والتمييز بين `none` و`backend-unconfigured` ليس لفظيًا:
+   *   • `none` = لا مصدر استحقاق أصلًا (حالة ما قبل الخلفية · التجهيزات).
+   *   • `backend-unconfigured` = **الخلفية هي المصدر، ومفاتيحها غائبة عن هذا
+   *     البناء** — عطل إعداد يُصلَح بمتغيّر بيئة، لا غياب معماري.
+   * طيّهما في «لا شيء» يجعل عطلًا قابلًا للإصلاح يبدو قرار تصميم.
+   */
+  readonly entitlementSource: 'none' | 'mock' | 'backend' | 'backend-unconfigured'
   readonly backendConfigured: boolean
   readonly asOf: string
 }

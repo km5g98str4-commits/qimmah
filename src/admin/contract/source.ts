@@ -71,12 +71,31 @@ function gapOf<T>(id: string): MetricValue<T> {
  * لا تقرأ صفّ أحد، فلا تعبر أي بوّابة، ولا تحتاج دورًا في قاعدة البيانات.
  */
 export function readPlatformPosture(): PlatformPosture {
+  const configured = isSupabaseConfigured()
   return {
     buildLabel: BUILD_LABEL,
     syncPipeline: import.meta.env.VITE_SYNC_ENABLED === 'true' ? 'enabled' : 'disabled',
-    // يطابق `entitlementSource.ts`: بلا وضع تقليد صريح لا مصدر استحقاق إطلاقًا.
-    entitlementSource: import.meta.env.VITE_ENTITLEMENT_MODE === 'mock' ? 'mock' : 'none',
-    backendConfigured: isSupabaseConfigured(),
+    /*
+      ═══ الشريحة التي لم تكن تستطيع أن تخضرّ ═══
+      كان السطر: `VITE_ENTITLEMENT_MODE === 'mock' ? 'mock' : 'none'` — أي أن
+      `'backend'` قيمةٌ **مُعلَنة في النوع ولا يُصدرها أحد**، وشرط «سليم» في
+      `AdminShell` يطلبها. فالشريحة كهرمانية أبدًا مهما وصل الخادم.
+
+      والقراءة الآن تطابق `resolveEntitlement()` حرفًا بحرف: وضع التقليد يسبق
+      كل شيء (قرار وقت بناء) · ثم `backendAvailable()` وهي `isSupabaseConfigured()`
+      نفسها · وغيابها يُسمّى `backend-unconfigured` **لا `none`**: عطل إعداد
+      يُصلَح بمتغيّر بيئة، لا غياب معماري.
+
+      ⚠️ **وحدّ هذه القراءة معلَن:** «مضبوط» ≠ «الهجرات مطبَّقة». تُثبت هذه
+      القيمة أن للعميل طريقًا إلى الخادم، ولا تُثبت أن الدوال موجودة عليه —
+      وذلك ما يقوله شريط `data-live-state` وحده.
+    */
+    entitlementSource: import.meta.env.VITE_ENTITLEMENT_MODE === 'mock'
+      ? 'mock'
+      : configured
+        ? 'backend'
+        : 'backend-unconfigured',
+    backendConfigured: configured,
     asOf: new Date().toISOString(),
   }
 }

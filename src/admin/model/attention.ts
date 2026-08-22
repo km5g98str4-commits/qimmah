@@ -29,7 +29,9 @@ const SEVERITY_ORDER: Record<AttentionItem['severity'], number> = { critical: 0,
 export function platformAttention(platform: PlatformPosture): AttentionItem[] {
   const items: AttentionItem[] = []
 
-  if (platform.entitlementSource === 'none') {
+  // يشمل `backend-unconfigured` أيضًا: مفاتيح غائبة تعني أن أحدًا لا يستطيع
+  // أن يشتري اليوم — وهو حدث حرج بنفس درجة «لا مصدر أصلًا».
+  if (platform.entitlementSource !== 'backend' && platform.entitlementSource !== 'mock') {
     items.push({
       id: 'attn.entitlementSourceMissing',
       severity: 'critical',

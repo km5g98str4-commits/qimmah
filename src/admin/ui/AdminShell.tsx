@@ -70,7 +70,10 @@ function PostureStrip({ platform }: { platform: PlatformPosture }) {
           <Icon name={c.icon} className={cn('h-4 w-4 shrink-0', c.ok ? 'text-success' : 'text-warning')} />
           <div className="min-w-0">
             <span className="block truncate text-[11px] font-bold text-ink-500">{t.labels[c.id]}</span>
-            <span className="block truncate text-sm font-extrabold text-ink-900">{c.value}</span>
+            {/* القيمة تُترجَم إن كانت حالةً معلومة، وتُطبع كما هي إن كانت وسم بناء. */}
+            <span className="block truncate text-sm font-extrabold text-ink-900" data-posture-value={c.value}>
+              {t.postureValues[c.value] ?? c.value}
+            </span>
           </div>
         </div>
       ))}
