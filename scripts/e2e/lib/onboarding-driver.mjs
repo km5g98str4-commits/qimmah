@@ -91,7 +91,13 @@ export async function selectIntent(page, value = 'meals') {
  * خطأً، فيسقط حارس «نمط الأكل» على عيبٍ لا وجود له. ومن يختار غيره يمرّره،
  * والأفضل أن يستعمل `selectIntent()` فتصير القيمة واحدة في الموضعين.
  */
-export async function finishInputSteps(page, next, { intent = 'meals' } = {}) {
+// [QIM-FINAL-RC-001] الافتراض `'plan'` لا `'meals'` — وهذا تصحيح التقاء لا تفضيل.
+// جبهة A رفعت الافتراض هنا إلى `'meals'` بينما `answerDietPattern` أعلاه بقي على
+// `'plan'`، فاجتمع في ملفّ واحد افتراضان متناقضان. وثلاثة عشر مستدعيًا من خمسة عشر
+// **لا يصرّحون بالنيّة** وينقرون `intents[0]` = `plan`؛ والاثنان اللذان يحتاجان
+// `meals` (`today-fold`, `preview-gate`) يصرّحان بها. فالافتراض الصادق هو ما يفعله
+// الأغلب فعلًا. والحارس في `answerDietPattern` هو من كشف التناقض — لم يُليَّن.
+export async function finishInputSteps(page, next, { intent = 'plan' } = {}) {
   await next()
   await page.waitForSelector('#onb-title-training', { timeout: 20000 })
   await next()
