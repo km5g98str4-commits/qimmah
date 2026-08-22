@@ -39,6 +39,16 @@ export const DASHBOARD_RPC = 'founder_executive_snapshot'
 export const USER_PAGE_RPC = 'founder_user_page'
 /** دالة صفحة الحساب الواحد — تُطلب عند التعمّق وحده، لا مع الجدول. */
 export const USER_DETAIL_RPC = 'founder_user_detail'
+/** دوال إدارة أكواد الوصول — قراءةً وكتابةً، كلها خلف `require_founder()`. */
+export const CODE_PAGE_RPC = 'founder_code_page'
+export const CODE_ISSUE_RPC = 'founder_issue_access_code'
+export const CODE_ENABLE_RPC = 'founder_set_code_enabled'
+/**
+ * سحب وصول حساب. **ولا نظير له للمنح**: `admin_grant_premium` تبقى بيد
+ * `service_role` عمدًا — سكّ وصول دائم لا يخرج من متصفّح (انظر رأس
+ * `20260822120002_founder_code_management.sql`).
+ */
+export const REVOKE_ACCESS_RPC = 'founder_revoke_access'
 
 export const METRIC_REGISTRY: readonly MetricDefinition[] = [
   // ─────────────────────────────────────────────────────────────────────

@@ -26,6 +26,8 @@ export { AdminDenied } from './ui/AdminDenied'
 export { UserTable } from './ui/UserTable'
 export { UserDetailPanel } from './ui/UserDetail'
 export { AttentionPanel } from './ui/AttentionPanel'
+export { CodesPanel } from './ui/CodesPanel'
+export type { CodesPanelProps } from './ui/CodesPanel'
 export { MetricCard, AvailabilityChip } from './ui/MetricCard'
 export { TrendChart, FunnelChart } from './ui/Charts'
 
@@ -42,8 +44,23 @@ export type { AdminRole, AdminRoleDecision, DenialReason, RoleClaimSource, RoleP
 
 export { loadExecutiveSnapshot, readPlatformPosture, WIRING_STATE } from './contract/source'
 export type { WiringState } from './contract/source'
-export { loadLiveExecutiveSnapshot, loadLiveUserDetail, loadLiveUserPage } from './contract/liveSource'
-export type { LiveReadState, LiveSnapshotResult, LiveUserDetailResult, LiveUserPageResult } from './contract/liveSource'
+export {
+  loadLiveExecutiveSnapshot,
+  loadLiveUserDetail,
+  loadLiveUserPage,
+  loadLiveCodePage,
+  issueAccessCode,
+  setAccessCodeEnabled,
+  revokeUserAccess,
+} from './contract/liveSource'
+export type {
+  LiveReadState,
+  LiveSnapshotResult,
+  LiveUserDetailResult,
+  LiveUserPageResult,
+  LiveCodePageResult,
+  WriteOutcome,
+} from './contract/liveSource'
 
 export {
   METRIC_REGISTRY,
@@ -53,6 +70,10 @@ export {
   DASHBOARD_RPC,
   USER_PAGE_RPC,
   USER_DETAIL_RPC,
+  CODE_PAGE_RPC,
+  CODE_ISSUE_RPC,
+  CODE_ENABLE_RPC,
+  REVOKE_ACCESS_RPC,
 } from './contract/metrics'
 export { buildAttentionQueue, detectedCount, blindCount } from './model/attention'
 export { runQuery, USER_FILTERS, isFilterApplicable, virtualWindow, DEFAULT_QUERY } from './model/filters'

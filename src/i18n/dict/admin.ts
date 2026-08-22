@@ -198,6 +198,47 @@ export interface AdminStrings {
     heading: string
     note: string
   }
+  /** لوحة أكواد الوصول — الإصدار والقائمة والتعطيل. */
+  codes: {
+    heading: string
+    note: string
+    /** لماذا لا يوجد زرّ «امنح Premium» هنا — يُقال ولا يُسكت عنه. */
+    grantNote: string
+    issueHeading: string
+    reasonLabel: string
+    reasonPlaceholder: string
+    labelLabel: string
+    labelPlaceholder: string
+    durationLabel: string
+    maxLabel: string
+    customCodeLabel: string
+    customCodePlaceholder: string
+    customCodeHint: string
+    issueButton: string
+    issuing: string
+    issuedHeading: string
+    issuedOnce: string
+    dismiss: string
+    searchLabel: string
+    searchPlaceholder: string
+    colLabel: string
+    colStatus: string
+    colUses: string
+    colDuration: string
+    colCreatedBy: string
+    colCreatedAt: string
+    colReason: string
+    disable: string
+    enable: string
+    rows: string
+    noRows: string
+    noLabel: string
+    days: string
+    writeFailed: string
+    needReason: string
+  }
+  /** حالات الكود كما تشتقّها القاعدة. */
+  codeStatus: Record<string, string>
 }
 
 const arLabels: Record<string, string> = {
@@ -629,6 +670,50 @@ export const adminStrings: Record<Lang, AdminStrings> = {
       heading: 'خارطة الطريق',
       note: 'الأفعال اللي ما لها قدرة خادم مُراجَعة تظهر هنا — ما تظهر أزرار تكذب.',
     },
+    codes: {
+      heading: 'أكواد الوصول',
+      note: 'الكود يُخزَّن مبصومًا لا خامًا — يظهر لك مرّة وحدة عند الإصدار، وبعدها ما أحد يقدر يستعيده.',
+      grantNote:
+        'ما فيه زرّ «امنح Premium» هنا عن قصد: منحة دائمة تُسكّ من مفتاح الخادم لا من متصفّح. وكذلك رفع الحظر. اللي تقدر تسويه من هنا يسحب أو يعطي وصولًا موقوتًا تقدر تسحبه.',
+      issueHeading: 'أصدر كودًا',
+      reasonLabel: 'السبب (إلزامي)',
+      reasonPlaceholder: 'ليش هذا الكود؟',
+      labelLabel: 'الوسم',
+      labelPlaceholder: 'حملة، اسم شريك…',
+      durationLabel: 'المدّة بالأيام',
+      maxLabel: 'أقصى عدد استخدامات',
+      customCodeLabel: 'كود بخطّ يدك (اختياري)',
+      customCodePlaceholder: 'اتركه فاضي والخادم يولّده',
+      customCodeHint: 'كود تكتبه بنفسك يبدو عشوائيًا وهو مو كذا. خلّه فاضي إلا إذا كانت حملة باسم معروف.',
+      issueButton: 'أصدر',
+      issuing: 'نصدر…',
+      issuedHeading: 'الكود صدر',
+      issuedOnce: 'انسخه الحين — هذي المرّة الوحيدة اللي يظهر فيها.',
+      dismiss: 'خلاص، نسخته',
+      searchLabel: 'ابحث في الأكواد',
+      searchPlaceholder: 'وسم أو سبب أو حالة…',
+      colLabel: 'الوسم',
+      colStatus: 'الحالة',
+      colUses: 'الاستخدامات',
+      colDuration: 'المدّة',
+      colCreatedBy: 'أصدره',
+      colCreatedAt: 'تاريخ الإصدار',
+      colReason: 'السبب',
+      disable: 'عطّله',
+      enable: 'شغّله',
+      rows: 'كود',
+      noRows: 'ما فيه أكواد تطابق البحث.',
+      noLabel: 'بلا وسم',
+      days: 'يوم',
+      writeFailed: 'ما تمّ الفعل — والسبب:',
+      needReason: 'لازم سبب قبل أي فعل — الأثر الإداري ما يكون مجهول.',
+    },
+    codeStatus: {
+      issued: 'صادر',
+      redeemed: 'استُرد',
+      expired: 'منتهٍ',
+      disabled: 'معطّل',
+    },
   },
   en: {
     shell: {
@@ -799,6 +884,50 @@ export const adminStrings: Record<Lang, AdminStrings> = {
       blind: 'Cannot watch yet',
       blindNote: 'This is not "all clear" — these are things we have no way to see at all.',
       allClear: 'Nothing detected right now.',
+    },
+    codes: {
+      heading: 'Access codes',
+      note: 'Codes are stored hashed, never in the clear — you see one once, at issue time, and nobody can recover it after that.',
+      grantNote:
+        'There is no "grant Premium" button here on purpose: a permanent grant is minted with the server key, not from a browser. Same for lifting a ban. What you can do here either takes access away or hands out time-boxed access you can take back.',
+      issueHeading: 'Issue a code',
+      reasonLabel: 'Reason (required)',
+      reasonPlaceholder: 'What is this code for?',
+      labelLabel: 'Label',
+      labelPlaceholder: 'Campaign, partner name…',
+      durationLabel: 'Duration in days',
+      maxLabel: 'Max redemptions',
+      customCodeLabel: 'Hand-written code (optional)',
+      customCodePlaceholder: 'Leave empty and the server generates it',
+      customCodeHint: 'A code you write yourself looks random and is not. Leave it empty unless this is a named campaign.',
+      issueButton: 'Issue',
+      issuing: 'Issuing…',
+      issuedHeading: 'Code issued',
+      issuedOnce: 'Copy it now — this is the only time it is shown.',
+      dismiss: 'Copied, close',
+      searchLabel: 'Search codes',
+      searchPlaceholder: 'Label, reason or status…',
+      colLabel: 'Label',
+      colStatus: 'Status',
+      colUses: 'Redemptions',
+      colDuration: 'Duration',
+      colCreatedBy: 'Issued by',
+      colCreatedAt: 'Issued on',
+      colReason: 'Reason',
+      disable: 'Disable',
+      enable: 'Enable',
+      rows: 'codes',
+      noRows: 'No codes match this search.',
+      noLabel: 'No label',
+      days: 'days',
+      writeFailed: 'The action did not go through — reason:',
+      needReason: 'A reason is required before any action — no anonymous admin trail.',
+    },
+    codeStatus: {
+      issued: 'Issued',
+      redeemed: 'Redeemed',
+      expired: 'Expired',
+      disabled: 'Disabled',
     },
     roadmap: {
       heading: 'Roadmap',

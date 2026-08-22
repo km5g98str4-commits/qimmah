@@ -300,6 +300,53 @@ export interface ExecutiveSnapshot {
   readonly users_page: MetricValue<AdminUserPage>
 }
 
+/**
+ * حالة كود الوصول — **مشتقّة بوقت القاعدة** لا عمود مخزَّن.
+ * الترتيب حاسم: معطّل يسبق منتهيًا يسبق مستنفَدًا. كودٌ عُطِّل وانتهى معًا
+ * حالته «معطّل»: الفعل الإداري يعلو على مرور الوقت في وصف ما جرى.
+ */
+export type CodeStatus = 'issued' | 'redeemed' | 'expired' | 'disabled'
+
+/**
+ * صفّ كود في لوحة الأكواد.
+ * ⚠️ **لا بصمة ولا كود خام**: البصمة لا تخدم قرارًا إداريًا وإخراجها يمنح
+ * مهاجمًا هدفًا بلا مقابل، والخام لا يوجد في القاعدة أصلًا.
+ */
+export interface AdminCodeRow {
+  readonly codeId: string
+  readonly label: string | null
+  readonly status: CodeStatus
+  readonly durationDays: number
+  readonly maxRedemptions: number
+  readonly redemptionCount: number
+  readonly startsAt: string
+  readonly expiresAt: string | null
+  readonly createdBy: string
+  readonly createdReason: string
+  readonly createdAt: string
+}
+
+export interface AdminCodePage {
+  readonly rows: readonly AdminCodeRow[]
+  readonly total: number
+  readonly page: number
+  readonly pageSize: number
+}
+
+/**
+ * كود صدر للتوّ — **الظهور الوحيد للنصّ الخام**.
+ * الجدول يحفظ بصمته المملّحة فقط؛ فإن أُغلقت الشاشة لا يستعيده أحد.
+ */
+export interface IssuedCode {
+  readonly id: string
+  readonly code: string
+  readonly label: string | null
+  readonly durationDays: number
+  readonly maxRedemptions: number
+  readonly expiresAt: string | null
+  readonly issuedAt: string
+}
+
 /** بانٍ مختصر لقيمة غير متاحة. */
 export function unavailable<T>(availability: MetricAvailability): MetricValue<T> {
   return { state: 'unavailable', availability }

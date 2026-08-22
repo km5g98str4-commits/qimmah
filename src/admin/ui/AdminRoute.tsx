@@ -25,9 +25,24 @@ import { useLang } from '@/i18n'
 import { useAuth } from '@/lib/authContext'
 import { CLOSED_DECISION, isAdmin, resolveAdminRole } from '../auth/adminRole'
 import type { AdminRoleDecision } from '../auth/adminRole'
-import { loadLiveExecutiveSnapshot, loadLiveUserDetail, loadLiveUserPage } from '../contract/liveSource'
+import {
+  issueAccessCode,
+  loadLiveCodePage,
+  loadLiveExecutiveSnapshot,
+  loadLiveUserDetail,
+  loadLiveUserPage,
+  setAccessCodeEnabled,
+} from '../contract/liveSource'
 import type { LiveReadState } from '../contract/liveSource'
-import type { AdminUserDetail, AdminUserPage, ExecutiveSnapshot, MetricValue } from '../contract/types'
+import type {
+  AdminCodePage,
+  AdminUserDetail,
+  AdminUserPage,
+  ExecutiveSnapshot,
+  IssuedCode,
+  MetricValue,
+} from '../contract/types'
+import { unavailable } from '../contract/types'
 import { AdminDenied } from './AdminDenied'
 import { AdminShell } from './AdminShell'
 
@@ -75,6 +90,16 @@ export function AdminRoute() {
   // ═══ التعمّق — **نداء مستقل عند الطلب وحده** ═══
   // تحميل التفصيل مع الجدول كان سيجلب عن كل صفّ ما لا تعرضه الشاشة. وما لا
   // يُنقل لا يُسرَّب: الصفحة تُطلب حين يفتحها المؤسس، لا قبل ذلك.
+  // ═══ الأكواد ═══
+  const [codeSearch, setCodeSearch] = useState('')
+  const [codePage, setCodePage] = useState<MetricValue<AdminCodePage>>(() => unavailable<AdminCodePage>('NEEDS_BACKEND'))
+  const [codeLive, setCodeLive] = useState<LiveReadState>('not-founder')
+  const [issued, setIssued] = useState<IssuedCode | null>(null)
+  const [writeError, setWriteError] = useState<LiveReadState | null>(null)
+  const [codeBusy, setCodeBusy] = useState(false)
+  const [codeNonce, setCodeNonce] = useState(0)
+  const codeRunRef = useRef(0)
+
   const [openUserId, setOpenUserId] = useState<string | null>(null)
   const [detail, setDetail] = useState<AdminUserDetail | null>(null)
   const [detailLive, setDetailLive] = useState<LiveReadState>('not-founder')
@@ -160,11 +185,76 @@ export function AdminRoute() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allowed, auth.user?.id, openUserId, nonce])
 
+  // ── قائمة الأكواد ──
+  useEffect(() => {
+    if (!allowed) {
+      setCodePage(unavailable<AdminCodePage>('NEEDS_BACKEND'))
+      setCodeLive('not-founder')
+      return
+    }
+    const run = ++codeRunRef.current
+    let alive = true
+    void (async () => {
+      const res = await loadLiveCodePage(decision, { search: codeSearch, page: 1, pageSize: 100 })
+      if (!alive || run !== codeRunRef.current) return
+      setCodePage(res.page)
+      setCodeLive(res.live)
+    })()
+    return () => {
+      alive = false
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allowed, auth.user?.id, codeSearch, codeNonce, nonce])
+
   const refresh = useCallback(() => setNonce((n) => n + 1), [])
   const onSearch = useCallback((v: string) => setTyped(v), [])
   const onPage = useCallback((p: number) => setPage(Math.max(1, Math.trunc(p))), [])
   const onOpenUser = useCallback((id: string) => setOpenUserId(id), [])
   const onCloseUser = useCallback(() => setOpenUserId(null), [])
+
+  /**
+   * الإصدار. **الكود يُعرض ولا يُخزَّن في أي مكان آخر** — لا تخزين محلّي ولا
+   * سجلّ ولا عنوان. ظهوره في الحالة وحدها، وحتى يصرفه المؤسس بنفسه.
+   */
+  const onIssue = useCallback(
+    (input: { reason: string; label?: string; durationDays: number; maxRedemptions: number; code?: string }) => {
+      setCodeBusy(true)
+      setWriteError(null)
+      void (async () => {
+        const res = await issueAccessCode(decision, input)
+        setCodeBusy(false)
+        if (!res.ok) {
+          setWriteError(res.live)
+          return
+        }
+        setIssued(res.value)
+        setCodeNonce((n) => n + 1)
+      })()
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [auth.user?.id],
+  )
+
+  const onToggleCode = useCallback(
+    (codeId: string, enabled: boolean, reason: string) => {
+      setCodeBusy(true)
+      setWriteError(null)
+      void (async () => {
+        const res = await setAccessCodeEnabled(decision, codeId, enabled, reason)
+        setCodeBusy(false)
+        if (!res.ok) {
+          setWriteError(res.live)
+          return
+        }
+        setCodeNonce((n) => n + 1)
+      })()
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [auth.user?.id],
+  )
+
+  const onDismissIssued = useCallback(() => setIssued(null), [])
+  const onCodeSearch = useCallback((v: string) => setCodeSearch(v), [])
 
   if (!allowed) return <AdminDenied decision={decision} />
   if (!snapshot) return <AdminLoading label={t.states.loading} />
@@ -188,6 +278,18 @@ export function AdminRoute() {
       detailLive={openUserId ? detailLive : undefined}
       onOpenUser={onOpenUser}
       onCloseUser={onCloseUser}
+      codes={{
+        page: codePage,
+        live: codeLive,
+        search: codeSearch,
+        onSearch: onCodeSearch,
+        onIssue,
+        onToggle: onToggleCode,
+        issued,
+        onDismissIssued,
+        writeError,
+        busy: codeBusy,
+      }}
     />
   )
 }

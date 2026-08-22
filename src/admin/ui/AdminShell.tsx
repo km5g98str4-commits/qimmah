@@ -31,6 +31,8 @@ import type { LiveReadState } from '../contract/liveSource'
 import { buildAttentionQueue, detectedCount } from '../model/attention'
 import { AdminDenied } from './AdminDenied'
 import { AttentionPanel } from './AttentionPanel'
+import { CodesPanel } from './CodesPanel'
+import type { CodesPanelProps } from './CodesPanel'
 import { FunnelChart, TrendChart } from './Charts'
 import { MetricCard } from './MetricCard'
 import { UserDetailPanel } from './UserDetail'
@@ -81,7 +83,7 @@ function PostureStrip({ platform }: { platform: PlatformPosture }) {
   )
 }
 
-type Tab = 'overview' | 'users' | 'charts'
+type Tab = 'overview' | 'users' | 'codes' | 'charts'
 
 interface AdminShellProps {
   decision: AdminRoleDecision
@@ -102,6 +104,11 @@ interface AdminShellProps {
    */
   detailOpen?: boolean
   /**
+   * لوحة الأكواد. **بلا هذه الخصائص لا يظهر التبويب أصلًا** — تبويبٌ يفتح على
+   * شاشة لا تفعل شيئًا أسوأ من تبويب غائب.
+   */
+  codes?: CodesPanelProps
+  /**
    * حالة القراءة الحيّة. **بلا قيمة ⇒ `'not-founder'`** — الافتراض الأقلّ ادّعاءً:
    * مكوّن يُرسَم بلا إخبار عن مصدره لا يجوز أن يقول «حيّ».
    */
@@ -118,6 +125,7 @@ export function AdminShell({
   userPaging,
   detailLive,
   detailOpen,
+  codes,
   live = 'not-founder',
 }: AdminShellProps) {
   const lang = useLang()
@@ -138,6 +146,8 @@ export function AdminShell({
   const TABS: { id: Tab; label: string; icon: string }[] = [
     { id: 'overview', label: t.shell.navOverview, icon: 'LayoutGrid' },
     { id: 'users', label: t.shell.navUsers, icon: 'Users' },
+    // يظهر حين تُمرَّر قدرته فقط — لا تبويب يَعِد بما لا يعمل.
+    ...(codes ? [{ id: 'codes' as Tab, label: t.codes.heading, icon: 'KeyRound' }] : []),
     { id: 'charts', label: t.shell.navCharts, icon: 'BarChart3' },
   ]
 
@@ -303,6 +313,9 @@ export function AdminShell({
           )}
         </div>
       ) : null}
+
+      {/* ——— الأكواد ——— */}
+      {tab === 'codes' && codes ? <div className="mt-4">{<CodesPanel {...codes} />}</div> : null}
 
       {/* ——— الاتجاهات ——— */}
       {tab === 'charts' ? (
