@@ -79,6 +79,10 @@ branches are read-only.
   source-of-truth ledger, status, and adversarial test plan only. Baseline food
   proofs passed 25/25 and 123/123, with typecheck/lint/diff checks green; remote
   59,941-row artifacts remain quarantined evidence, not adopted production data.
+- Added an evidence-bound release-notes contract: immutable app/data/media/admin
+  identities, Arabic/English claim parity, operator/security notes, validation,
+  blockers, rollback, and seven verdicts. It remains explicitly unreleased and
+  cannot be published while placeholders or unaccepted SHAs remain.
 
 ## In Progress
 
