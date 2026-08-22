@@ -22,7 +22,7 @@
 import type { WorkoutPlan } from '@/types/workout'
 import type { Customization } from '@/lib/customization'
 import { loadCustomPlanRecord } from '@/features/customPlan'
-import { scheduledDayFor, type ScheduledDay } from '@/lib/workoutCalendar'
+import { scheduledDayFor, type ResolveDayOptions, type ScheduledDay } from '@/lib/workoutCalendar'
 
 /** كم يومًا نتقدّم بحثًا عن التمرين التالي قبل أن نُقرّ بعدم وجوده. */
 const NEXT_LOOKAHEAD_DAYS = 14
@@ -48,8 +48,9 @@ export function currentWorkout(
   userId: string | null | undefined,
   customization: Customization,
   date: Date = new Date(),
+  opts: ResolveDayOptions = {},
 ): ScheduledDay | undefined {
-  return scheduledDayFor(activeWorkoutPlan(userId, customization), date)
+  return scheduledDayFor(activeWorkoutPlan(userId, customization), date, opts)
 }
 
 /** التمرين التالي مع تاريخه — أول يوم تدريب بعد `from`. */
@@ -78,6 +79,9 @@ export function nextWorkout(
     // منتصف النهار يحمي من انزياح التوقيت الصيفي عند إضافة الأيام — نفس
     // الاحتياط المستعمل في `workoutCalendar`.
     const probe = new Date(from.getFullYear(), from.getMonth(), from.getDate() + offset, 12, 0, 0, 0)
+    // [SOVEREIGN-PLAN-003] مرساة «الجلسة الأولى» لا تتسرّب هنا: شرطها أن يكون
+    // التاريخ **هو اليوم**، وكل تحقيق أدناه مستقبليّ (offset ≥ 1). فلو تسرّبت
+    // لأعلن الاستشراف «اليوم ١ غدًا» أبدًا ما دام المستخدم لم يتمرّن.
     const resolved = scheduledDayFor(plan, probe)
     if (resolved?.type === 'training') return { day: resolved, inDays: offset, date: probe }
   }

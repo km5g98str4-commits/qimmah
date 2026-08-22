@@ -67,6 +67,13 @@ const seedOnboarded = () => ls.setItem('qimmah:onboarding:profile:v1', '{}')
 const seedMigratedFlag = () => ls.setItem('qimmah:history:migrated:v1', 'done')
 const stamp = getDayStamp()
 const seedSteps = (n: number) => ls.setItem('qimmah:steps:v1', JSON.stringify({ [stamp]: n }))
+/** جلسة منتهية **أمس** — تُخرج الملف من حالة «الجلسة الأولى معلّقة». */
+const seedPriorFinishedSession = () => {
+  const y = new Date()
+  y.setDate(y.getDate() - 1)
+  const ys = getDayStamp(y)
+  ls.setItem('qimmah:history:workoutSessions:v1', JSON.stringify([{ id: `s-${ys}`, date: ys, workoutDayId: 'd0', workoutDayName: 'اليوم ١', startedAt: `${ys}T10:00:00.000Z`, finishedAt: `${ys}T11:00:00.000Z`, status: 'completed', exercises: [] }]))
+}
 
 // مراسي تواريخ ثابتة (٢٠٢٦-٠٧): الخميس 23، الأربعاء 22، الجمعة 24، السبت 25.
 const THU = new Date(2026, 6, 23, 12)
@@ -101,10 +108,18 @@ console.log('\n③ حلّ اليوم: تدريب/راحة صادقة + احتي�
   ls.clear()
   const plan = makePlan(3)
   // بلا جدول مضبوط: الاحتياط القديم (التدوير) — سلوك المستخدمين الحاليين محفوظ.
-  const legacy = scheduledDayFor(plan, THU)
-  check('بلا جدول: احتياط التدوير القديم (لا راحة مزيّفة)', legacy?.type === 'training' && legacy.source === 'legacy-rotation' && legacy.planDayIndex === THU.getDay() % 3)
-  const legacyToday = scheduledDayFor(plan, new Date())
-  check('الاحتياط يطابق todayPlanDay المهجور بالضبط', legacyToday?.type === 'training' && legacyToday.day.id === todayPlanDay(plan)?.id)
+  // [SOVEREIGN-PLAN-003] الاحتياط صار مرسًى ببداية الأسبوع (السبت=٠) بدل
+  // `getDay()` الخام؛ ومرساة «الجلسة الأولى» تسبقه، فنُعطّلها صراحةً هنا لفحصه.
+  const legacy = scheduledDayFor(plan, THU, { firstSessionPending: false, now: THU })
+  check('بلا جدول: احتياط التدوير مرسًى ببداية الأسبوع (لا راحة مزيّفة)', legacy?.type === 'training' && legacy.source === 'legacy-rotation' && legacy.planDayIndex === (THU.getDay() - 6 + 7) % 7 % 3)
+  // القطيعة المقصودة مع `todayPlanDay` المهجور: هو `getDay() % n` حرفيًا — وهو ما
+  // كان يستقبل مستخدم الأربعاء على خطة رباعية بـ«اليوم ٤». التطابق **مرفوض** الآن.
+  const settledToday = scheduledDayFor(plan, new Date(), { firstSessionPending: false })
+  const rawIndex = new Date().getDay() % plan.days.length
+  check('الاحتياط لم يعد يطابق todayPlanDay المهجور إلا مصادفةً حسابية', settledToday?.type === 'training' && settledToday.planDayIndex === (new Date().getDay() - 6 + 7) % 7 % plan.days.length && (settledToday.planDayIndex === rawIndex ? todayPlanDay(plan)?.id === settledToday.day.id : true))
+  // الجلسة الأولى تسبق الاحتياط: بلا جلسة سابقة يبدأ الجديد من «اليوم ١» دائمًا.
+  const firstEver = scheduledDayFor(plan, THU, { now: THU })
+  check('مستخدم جديد (بلا جلسة سابقة): الخميس يعطي «اليوم ١» بمصدر first-session', firstEver?.type === 'training' && firstEver.source === 'first-session' && firstEver.planDayIndex === 0)
   // جدول سبت/إثنين/أربعاء:
   const saved = setTrainingWeekdays(plan, [6, 1, 3], 6)
   check('حفظ سبت/إثنين/أربعاء مقبول', saved.status === 'saved')
@@ -123,6 +138,9 @@ console.log('\n④ النموذجان يعكسان الراحة بصدق (workou
   seedMigratedFlag()
   seedOnboarded()
   seedSteps(4000) // سجلّ حقيقي → الحالة normal لا newUser
+  // [SOVEREIGN-PLAN-003] هذا القسم يفحص **المستخدم المستقرّ**: جلسة منتهية سابقة
+  // تُنهي مرساة «الجلسة الأولى»، وإلا فيوم الراحة الأول لا يُعرَض راحةً بحقّ.
+  seedPriorFinishedSession()
   const c = baseCustomization()
   const todayWd = new Date().getDay()
   // جدول لا يتضمّن اليوم — أيام متباعدة (+1/+3/+5) فلا تتابع مخالفًا أيًّا كان اليوم.
