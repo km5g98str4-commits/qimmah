@@ -90,7 +90,17 @@ check('shell makes header/nav inert on immersive', shell.includes('el.inert = im
 check('shell listens for immersive events', shell.includes("'qimmah:immersive'"))
 
 // ── C: touch targets ≥ 44px (min-h/-w or expanded hit-area) ──
-check('header brand button ≥44 tall', shell.includes('min-h-[44px] items-center gap-2'))
+// [SOVEREIGN-003] القيد لا الهجاء.
+// كان الفحص يطابق النصّ `min-h-[44px] items-center gap-2` حرفيًّا، فسقط حين
+// استعمل الزرّ صنف `.tap-target` المشترك — وهو **نفس القيد** (`@apply
+// min-h-[44px] min-w-[44px]`) وأفضل هجاءً: الصنف كان مُعلَنًا في الأنماط
+// ومستعمَلًا صفر مرّة. فحصٌ يرفض تحسينًا مكافئًا يحرس هجاءه لا مستخدمه.
+// ويبقى محكمًا باتجاهين: يُقبل الهجاءان، **ويُتحقَّق أن الصنف نفسه ما زال
+// يعني ٤٤ بكسلًا** — فلو أُفرغ `.tap-target` غدًا سقط الفحص باسمه.
+const TAP_TARGET_RULE = /\.tap-target\s*\{[^}]*min-h-\[44px\][^}]*\}/
+const brandOk = shell.includes('min-h-[44px] items-center gap-2') || /class[^>]*tap-target/.test(shell)
+check('header brand button ≥44 tall (صراحةً أو عبر .tap-target)', brandOk)
+check('⟲ و`.tap-target` ما زال يعني ٤٤ بكسلًا فعلًا', TAP_TARGET_RULE.test(read('src/styles/index.css')))
 check('language toggle (compact) ≥44 tall', read('src/i18n/LanguageToggle.tsx').includes('min-h-[44px]'))
 check('close-workout button 44×44', workout.includes('h-11 w-11 place-items-center rounded-xl'))
 check('plate + warmup buttons use expanded hit-area', (workout.match(/before:-inset/g) ?? []).length >= 2)
