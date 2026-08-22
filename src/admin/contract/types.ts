@@ -126,7 +126,38 @@ export interface AdminActivitySummary {
   readonly lastActivityAt: MetricValue<string | null>
 }
 
-/** صفحة مستخدم واحد — تُطلب بنداء مستقل عند التعمّق. */
+/**
+ * تفصيل الاستحقاق لحساب واحد — **السؤال الثاني الذي بُنيت له الشاشة**.
+ * الحالة مشتقّة بوقت القاعدة لا مقروءة من عمود مخزَّن.
+ */
+export interface AdminEntitlementDetail {
+  readonly state: MetricValue<string>
+  readonly source: MetricValue<string | null>
+  readonly activatedAt: MetricValue<string | null>
+  readonly expiresAt: MetricValue<string | null>
+  readonly revokedAt: MetricValue<string | null>
+  readonly revokedReason: MetricValue<string | null>
+}
+
+/**
+ * أثر التجارة لحساب واحد — **مطابقة الطلب بالمنحة**.
+ * لا مبلغ ولا وسيلة دفع: العدد ورقم الطلب يكفيان للمطابقة، وما زاد كشفٌ بلا حاجة.
+ */
+export interface AdminCommerceDetail {
+  readonly codesRedeemed: MetricValue<number>
+  readonly purchases: MetricValue<number>
+  readonly lastOrderId: MetricValue<string | null>
+  readonly lastPurchaseAt: MetricValue<string | null>
+  readonly accessRevoked: MetricValue<boolean>
+}
+
+/**
+ * صفحة مستخدم واحد — تُطلب بنداء مستقل عند التعمّق.
+ *
+ * ⚠️ الحقول المضافة في [ADMIN-R4] **تشغيلية بحتة**: تحقّق البريد وتفصيل
+ * الاستحقاق وأثر التجارة. ولا حقل صحّي واحد — ولا حتى عدّاد أحداث القياس،
+ * فهو يبقى `unavailable` بلا مصدر خادم عمدًا (عدُّ جدول صحّي يفتح مسارًا إليه).
+ */
 export interface AdminUserDetail {
   readonly row: AdminUserRow
   readonly planSummary: MetricValue<string | null>
@@ -134,6 +165,10 @@ export interface AdminUserDetail {
   /** أحدث الجلسات — **تاريخ واسم يوم فقط**، بلا أوزان ولا تكرارات. */
   readonly recentWorkouts: MetricValue<readonly { date: string; dayName: string | null }[]>
   readonly supportContext: MetricValue<readonly string[]>
+  /** هل أكّد بريده؟ السبب الأوّل لبلاغات «ما أقدر أدخل». */
+  readonly emailVerified: MetricValue<boolean>
+  readonly entitlementDetail: AdminEntitlementDetail
+  readonly commerce: AdminCommerceDetail
 }
 
 /** شدّة بند طابور الاهتمام. */

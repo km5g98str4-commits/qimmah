@@ -137,7 +137,28 @@ export interface AdminStrings {
     lastActive: string
     support: string
     sensitiveExcluded: string
+    /** الكتلة التشغيلية المضافة في [ADMIN-R4] — دعم ومطابقة، لا ملفّ شخصي. */
+    emailVerified: string
+    yes: string
+    no: string
+    entState: string
+    entSource: string
+    entActivated: string
+    entExpires: string
+    entRevoked: string
+    entRevokedReason: string
+    noExpiry: string
+    commerceHeading: string
+    codesRedeemed: string
+    purchases: string
+    lastOrderId: string
+    lastPurchaseAt: string
+    accessRevoked: string
+    /** ما يُعرض حين يقول الخادم «لا شيء» (لا حين لا نعرف). */
+    none: string
   }
+  /** أسماء حالات الاستحقاق كما تشتقّها القاعدة — لا يُعرض المعرّف الخام. */
+  entitlementState: Record<string, string>
   entitlementView: {
     premium: string
     trial: string
@@ -537,6 +558,31 @@ export const adminStrings: Record<Lang, AdminStrings> = {
       support: 'سياق الدعم',
       sensitiveExcluded:
         'الإصابات والأدوية والحساسيات وقيم القياسات ما تدخل هذي الشاشة إطلاقًا — ولا بأي دور.',
+      emailVerified: 'البريد مؤكّد',
+      yes: 'نعم',
+      no: 'لا',
+      entState: 'حالة الاستحقاق',
+      entSource: 'مصدر الاستحقاق',
+      entActivated: 'تاريخ التفعيل',
+      entExpires: 'ينتهي في',
+      entRevoked: 'أُلغي في',
+      entRevokedReason: 'سبب الإلغاء',
+      noExpiry: 'بلا انتهاء',
+      commerceHeading: 'الطلبات والأكواد',
+      codesRedeemed: 'أكواد استُردّت',
+      purchases: 'عمليات شراء',
+      lastOrderId: 'آخر رقم طلب',
+      lastPurchaseAt: 'تاريخ آخر شراء',
+      accessRevoked: 'وصوله محظور',
+      none: 'ما فيه',
+    },
+    entitlementState: {
+      premiumActive: 'Premium فعّال',
+      trialActive: 'تجربة سارية',
+      trialExpired: 'تجربة منتهية',
+      specialAccessActive: 'كود وصول ساري',
+      noAccess: 'معاينة — بلا وصول',
+      revoked: 'ملغى',
     },
     entitlementView: {
       premium: 'Premium',
@@ -677,6 +723,31 @@ export const adminStrings: Record<Lang, AdminStrings> = {
       support: 'Support context',
       sensitiveExcluded:
         'Injuries, medications, allergies and measurement values never enter this screen — under any role.',
+      emailVerified: 'Email confirmed',
+      yes: 'Yes',
+      no: 'No',
+      entState: 'Entitlement state',
+      entSource: 'Entitlement source',
+      entActivated: 'Activated on',
+      entExpires: 'Expires on',
+      entRevoked: 'Revoked on',
+      entRevokedReason: 'Revocation reason',
+      noExpiry: 'No expiry',
+      commerceHeading: 'Orders and codes',
+      codesRedeemed: 'Codes redeemed',
+      purchases: 'Purchases',
+      lastOrderId: 'Last order id',
+      lastPurchaseAt: 'Last purchase on',
+      accessRevoked: 'Access blocked',
+      none: 'None',
+    },
+    entitlementState: {
+      premiumActive: 'Premium active',
+      trialActive: 'Trial running',
+      trialExpired: 'Trial ended',
+      specialAccessActive: 'Access code running',
+      noAccess: 'Preview — no access',
+      revoked: 'Revoked',
     },
     entitlementView: {
       premium: 'Premium',

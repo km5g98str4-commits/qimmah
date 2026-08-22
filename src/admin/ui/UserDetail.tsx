@@ -22,7 +22,21 @@ import type { LiveReadState } from '../contract/liveSource'
 import type { AdminUserDetail, MetricValue } from '../contract/types'
 
 /** سطر قيمة — يعرض الجاهز، ويعلن الغائب بسببه. لا شرطة تُقرأ صفرًا. */
-function ValueRow({ label, value, metricId }: { label: string; value: MetricValue<unknown>; metricId: string }) {
+function ValueRow({
+  label,
+  value,
+  metricId,
+  format,
+}: {
+  label: string
+  value: MetricValue<unknown>
+  metricId: string
+  /**
+   * تنسيق القيمة الجاهزة. **يُستدعى على `value.value` وحدها** — لا على الغياب،
+   * فلا يوجد مسار يجعل منسّقًا يخترع نصًّا لقيمة لم تصل.
+   */
+  format?: (v: unknown) => string
+}) {
   const lang = useLang()
   const t = adminStrings[lang]
   const def = findMetric(metricId)
@@ -30,7 +44,9 @@ function ValueRow({ label, value, metricId }: { label: string; value: MetricValu
     <div className="flex flex-col gap-0.5 border-t border-line py-2 text-start first:border-t-0">
       <span className="text-xs font-bold text-ink-500">{label}</span>
       {value.state === 'ready' ? (
-        <span className="text-sm font-bold text-ink-900">{String(value.value ?? '—')}</span>
+        <span className="text-sm font-bold text-ink-900">
+          {format ? format(value.value) : String(value.value ?? '—')}
+        </span>
       ) : value.state === 'loading' ? (
         <span className="skeleton h-4 w-24" aria-label={t.states.loading} />
       ) : value.state === 'error' ? (
@@ -44,6 +60,13 @@ function ValueRow({ label, value, metricId }: { label: string; value: MetricValu
     </div>
   )
 }
+
+/**
+ * تنسيق تاريخ ISO إلى يوم واحد. **الوقت مقصوص عمدًا**: الساعة لا تخدم أي قرار
+ * إداري هنا، وعرضها يجرّ منطقة زمنية تصير سؤالًا بلا جواب.
+ */
+const fmtDate = (whenNull: string) => (v: unknown) =>
+  typeof v === 'string' ? v.slice(0, 10) : v === null ? whenNull : String(v)
 
 interface UserDetailProps {
   detail: AdminUserDetail
@@ -148,6 +171,93 @@ export function UserDetailPanel({ detail, onBack, live }: UserDetailProps) {
             />
             <ValueRow label={t.detail.lastActive} value={detail.activity.lastActivityAt} metricId="activity.productActive7d" />
             <ValueRow label={t.detail.support} value={detail.supportContext} metricId="entitlement.activationFailed24h" />
+          </div>
+        </div>
+      </div>
+
+      {/*
+        ═══ الكتلة التشغيلية ═══
+        السؤال الثاني الذي بُنيت له الشاشة: **هل استحقاقه صحيح؟**
+        كل سطر هنا من `founder_user_detail` مباشرة، والحالة **مشتقّة بوقت
+        القاعدة** لا مقروءة من عمود قد يشيخ.
+      */}
+      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        <div>
+          <h3 className="text-xs font-extrabold text-ink-500">{t.detail.entitlement}</h3>
+          <div className="mt-2 flex flex-col">
+            <ValueRow
+              label={t.detail.entState}
+              value={detail.entitlementDetail.state}
+              metricId="entitlement.premiumActive"
+              format={(v) => (typeof v === 'string' ? (t.entitlementState[v] ?? v) : String(v))}
+            />
+            <ValueRow
+              label={t.detail.entSource}
+              value={detail.entitlementDetail.source}
+              metricId="entitlement.premiumActive"
+              format={(v) => (v === null ? t.detail.none : String(v))}
+            />
+            <ValueRow
+              label={t.detail.entActivated}
+              value={detail.entitlementDetail.activatedAt}
+              metricId="entitlement.activationRedeemed"
+              format={fmtDate(t.detail.none)}
+            />
+            <ValueRow
+              label={t.detail.entExpires}
+              value={detail.entitlementDetail.expiresAt}
+              metricId="entitlement.trialActive"
+              // `null` هنا **جواب** لا جهل: منحة بلا انتهاء. ولذلك لا يُعرض «—».
+              format={fmtDate(t.detail.noExpiry)}
+            />
+            <ValueRow
+              label={t.detail.entRevoked}
+              value={detail.entitlementDetail.revokedAt}
+              metricId="commerce.revokedActive"
+              format={fmtDate(t.detail.none)}
+            />
+            <ValueRow
+              label={t.detail.entRevokedReason}
+              value={detail.entitlementDetail.revokedReason}
+              metricId="commerce.revokedActive"
+              format={(v) => (v === null ? t.detail.none : String(v))}
+            />
+          </div>
+        </div>
+
+        <div>
+          <h3 className="text-xs font-extrabold text-ink-500">{t.detail.commerceHeading}</h3>
+          <div className="mt-2 flex flex-col">
+            <ValueRow label={t.detail.purchases} value={detail.commerce.purchases} metricId="commerce.ordersPaid" />
+            <ValueRow
+              label={t.detail.codesRedeemed}
+              value={detail.commerce.codesRedeemed}
+              metricId="commerce.codesRedeemed"
+            />
+            <ValueRow
+              label={t.detail.lastOrderId}
+              value={detail.commerce.lastOrderId}
+              metricId="commerce.ordersSeen"
+              format={(v) => (v === null ? t.detail.none : String(v))}
+            />
+            <ValueRow
+              label={t.detail.lastPurchaseAt}
+              value={detail.commerce.lastPurchaseAt}
+              metricId="commerce.ordersPaid"
+              format={fmtDate(t.detail.none)}
+            />
+            <ValueRow
+              label={t.detail.accessRevoked}
+              value={detail.commerce.accessRevoked}
+              metricId="commerce.revokedActive"
+              format={(v) => (v === true ? t.detail.yes : t.detail.no)}
+            />
+            <ValueRow
+              label={t.detail.emailVerified}
+              value={detail.emailVerified}
+              metricId="users.verified"
+              format={(v) => (v === true ? t.detail.yes : t.detail.no)}
+            />
           </div>
         </div>
       </div>

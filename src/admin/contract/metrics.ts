@@ -37,6 +37,8 @@ export const MISSING_SOURCE_TABLES = [] as const
 export const DASHBOARD_RPC = 'founder_executive_snapshot'
 /** دالة صفحة الجدول. */
 export const USER_PAGE_RPC = 'founder_user_page'
+/** دالة صفحة الحساب الواحد — تُطلب عند التعمّق وحده، لا مع الجدول. */
+export const USER_DETAIL_RPC = 'founder_user_detail'
 
 export const METRIC_REGISTRY: readonly MetricDefinition[] = [
   // ─────────────────────────────────────────────────────────────────────

@@ -25,9 +25,9 @@ import { useLang } from '@/i18n'
 import { useAuth } from '@/lib/authContext'
 import { CLOSED_DECISION, isAdmin, resolveAdminRole } from '../auth/adminRole'
 import type { AdminRoleDecision } from '../auth/adminRole'
-import { loadLiveExecutiveSnapshot, loadLiveUserPage } from '../contract/liveSource'
+import { loadLiveExecutiveSnapshot, loadLiveUserDetail, loadLiveUserPage } from '../contract/liveSource'
 import type { LiveReadState } from '../contract/liveSource'
-import type { AdminUserPage, ExecutiveSnapshot, MetricValue } from '../contract/types'
+import type { AdminUserDetail, AdminUserPage, ExecutiveSnapshot, MetricValue } from '../contract/types'
 import { AdminDenied } from './AdminDenied'
 import { AdminShell } from './AdminShell'
 
@@ -71,6 +71,14 @@ export function AdminRoute() {
   const [userPage, setUserPage] = useState<MetricValue<AdminUserPage> | null>(null)
   const [pageLive, setPageLive] = useState<LiveReadState>('not-founder')
   const [pageBusy, setPageBusy] = useState(false)
+
+  // ═══ التعمّق — **نداء مستقل عند الطلب وحده** ═══
+  // تحميل التفصيل مع الجدول كان سيجلب عن كل صفّ ما لا تعرضه الشاشة. وما لا
+  // يُنقل لا يُسرَّب: الصفحة تُطلب حين يفتحها المؤسس، لا قبل ذلك.
+  const [openUserId, setOpenUserId] = useState<string | null>(null)
+  const [detail, setDetail] = useState<AdminUserDetail | null>(null)
+  const [detailLive, setDetailLive] = useState<LiveReadState>('not-founder')
+  const detailRunRef = useRef(0)
 
   // يمنع أن تكتب استجابة قديمة فوق أحدث لقطة بعد «حدّث» متكرّر.
   const runRef = useRef(0)
@@ -131,9 +139,32 @@ export function AdminRoute() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allowed, auth.user?.id, nonce, search, page])
 
+  // ── صفحة الحساب الواحد ──
+  useEffect(() => {
+    if (!allowed || !openUserId) {
+      setDetail(null)
+      setDetailLive(allowed ? 'not-founder' : 'not-founder')
+      return
+    }
+    const run = ++detailRunRef.current
+    let alive = true
+    void (async () => {
+      const res = await loadLiveUserDetail(decision, openUserId)
+      if (!alive || run !== detailRunRef.current) return
+      setDetail(res.detail)
+      setDetailLive(res.live)
+    })()
+    return () => {
+      alive = false
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allowed, auth.user?.id, openUserId, nonce])
+
   const refresh = useCallback(() => setNonce((n) => n + 1), [])
   const onSearch = useCallback((v: string) => setTyped(v), [])
   const onPage = useCallback((p: number) => setPage(Math.max(1, Math.trunc(p))), [])
+  const onOpenUser = useCallback((id: string) => setOpenUserId(id), [])
+  const onCloseUser = useCallback(() => setOpenUserId(null), [])
 
   if (!allowed) return <AdminDenied decision={decision} />
   if (!snapshot) return <AdminLoading label={t.states.loading} />
@@ -152,6 +183,11 @@ export function AdminRoute() {
       live={live}
       onRefresh={refresh}
       userPaging={{ search: typed, page, pageSize: PAGE_SIZE, total, onSearch, onPage, busy: pageBusy }}
+      detail={detail}
+      detailOpen={Boolean(openUserId)}
+      detailLive={openUserId ? detailLive : undefined}
+      onOpenUser={onOpenUser}
+      onCloseUser={onCloseUser}
     />
   )
 }
