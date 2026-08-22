@@ -1,6 +1,6 @@
 # Qimmah Web Sovereign — execution state
 
-Updated: 2026-08-22 (PKG-10 — concurrent-recovery convergence and deterministic navigation; final gate pending)
+Updated: 2026-08-22 (PKG-11 — Web Sovereign closure evidence; final clean-HEAD gate)
 
 ## Provenance
 
@@ -41,17 +41,18 @@ Recovery also found two legitimate histories created during the interrupted Goal
 - remote `d83add22e904819c7d7fdc27890c757cd5dbaa5c`, whose parent
   `9f88e43bf6c79c228337d83d30d58467db3a04d8` is the pushed `[PKG-9][green]` implementation.
 
-They are being converged with a normal, non-rewriting merge. The remote canonical Quick Log owner,
+They were converged by the normal, non-rewriting merge checkpoint
+`f1c23421ebacf247d83cfe3c279d90988eefd004` (`[PKG-10][green]`). The remote canonical Quick Log owner,
 dirty-state proof, bundle counter-proof and process-group teardown are retained. The local branch's
 unique built-browser evidence and product fixes are retained too: App-owned in-memory delivery when
 `sessionStorage` is blocked during a lazy route transition (BUG-029), plus deterministic 404 recovery
 that replaces the invalid entry and never ejects a direct entrant from Qimmah (BUG-030).
 
-- `LAST_CONFIRMED_GREEN`: **PKG-9** at `9f88e43bf6c79c228337d83d30d58467db3a04d8`; its full gate and 765 Chromium assertions are recorded below. The converged PKG-10 index has additionally passed `test:quick-log` **31/31**, Chromium Quick Log **68/68**, Navigation **96/96**, dirty-state **47/47**, Profile **27/27**, Nutrition **106/106**, Preview security **35/35**, bundle safety **9/9**, Auth preflight **19/19**, and WebKit 26.5 **246/246**, plus `typecheck`/`lint`; its full repository gate is pending.
-- `LAST_COMMITTED_GREEN`: **PKG-9** at `9f88e43bf6c79c228337d83d30d58467db3a04d8` (the local preservation commit is not labelled green).
-- `LAST_PUSHED_GREEN`: **PKG-9** at `9f88e43bf6c79c228337d83d30d58467db3a04d8`; the latest pushed documentation checkpoint is `d83add22e904819c7d7fdc27890c757cd5dbaa5c` on the same execution branch.
-- `CURRENT_WIP`: merge of local `27fbe29` with remote `d83add2`; all source conflicts are understood and resolved in the index, with the two unique local defects/tests integrated rather than discarded.
-- `NEXT_REQUIRED_ACTION`: run the full repository gate on the converged tree, commit an atomic `[PKG-10][green]`, push only `codex/qimmah-web-sovereign-001`, verify the exact remote SHA, then rerun the final gate from the final clean `HEAD`.
+- `LAST_CONFIRMED_GREEN`: **PKG-10** at `f1c23421ebacf247d83cfe3c279d90988eefd004`; focused evidence, full 102-command repository gate, 833 Chromium assertions and 246 WebKit assertions are recorded below.
+- `LAST_COMMITTED_GREEN`: **PKG-10** at `f1c23421ebacf247d83cfe3c279d90988eefd004`.
+- `LAST_PUSHED_GREEN`: **PKG-10** at `f1c23421ebacf247d83cfe3c279d90988eefd004`; `git ls-remote --heads origin codex/qimmah-web-sovereign-001` matched exactly after push.
+- `CURRENT_WIP`: **none in product code**. This PKG-11 checkpoint changes only the three execution ledgers to close evidence and judgments; the superseded recovery stash was reviewed, fully migrated, and dropped.
+- `NEXT_REQUIRED_ACTION`: none inside authorized Web Sovereign scope after the clean-HEAD gate. EXTERNAL-001/002/003 and BUG-003 retain their named owners/unblocks; no merge to `main` or production deployment is authorized.
 
 No historical assertion was removed to obtain green. The earlier local structural proof
 `scripts/run-navigation-quick-log-proof.mjs` was removed only after every unique assertion was
@@ -81,6 +82,44 @@ at `domcontentloaded`, then forcibly reloaded while the auth import was still pe
 correctly reported the fixture-created cancellation. State is now seeded with `addInitScript`
 before the first application byte and the app boots directly at the target hash; no assertion or
 timeout changed. The corrected run is 68/68 on WebKit and retains request-failure diagnostics.
+
+### FINAL CLOSURE GATE — exact final documentation `HEAD`
+
+PKG-11 is documentation-only over product checkpoint `f1c2342`. The complete gate below is rerun
+after that documentation commit so the checked-out `HEAD`, remote branch, source, package scripts
+and ledgers are one committed state. Any failure supersedes this section rather than being waived.
+
+| Step / suite | Final result |
+| --- | --- |
+| `npm ci` | PASS — deterministic lockfile install, 361 packages |
+| `npm run typecheck` | PASS |
+| `npm run lint` | PASS — zero warnings |
+| `npm run build` | PASS — production build, 2,565 modules |
+| `npm run test:gate` | PASS — all 102 chained proof commands; final `test:workout-day-source` 19/19 |
+| `npm run test:bundle-safety` | PASS — 9/9, production/mock two-build counter-proof |
+| Chromium `test:e2e:onboarding` | PASS — 20/20 |
+| Chromium `test:e2e:navigation` | PASS — 96/96 |
+| Chromium `test:e2e:profile` | PASS — 27/27 |
+| Chromium `test:e2e:settings` | PASS — 14/14 |
+| Chromium `test:e2e:settings-security` | PASS — 34/34 |
+| Chromium `test:e2e:nutrition` | PASS — 106/106 |
+| Chromium `test:e2e:workout` | PASS — 31/31 |
+| Chromium `test:e2e:progress` | PASS — 25/25 |
+| Chromium `test:e2e:exercises` | PASS — 32/32 |
+| Chromium `test:e2e:preview-gate` | PASS — 35/35 |
+| Chromium `test:e2e:install-overlap` | PASS — 200/200, AR/EN × 320/360/375/390/430 |
+| Chromium `test:e2e:plan-handoff` | PASS — 98/98 |
+| Chromium `test:e2e:dirty-state` | PASS — 47/47 |
+| Chromium `test:e2e:quick-log` | PASS — 68/68, AR/EN × 320/390/430 |
+| `npm run test:e2e:webkit` | PASS — 246/246: Quick Log 68 + Navigation/Auth 96 + dirty-state 47 + Preview 35, WebKit 26.5 |
+| `npm run test:e2e:auth:preflight` | PASS — 19/19 offline; full live Auth EXTERNALLY_BLOCKED by absent Docker/server proof |
+| artifact/legal/support scans | PASS — bundle proof 9/9; privacy/terms/contact routes 96/96; support address/error reference 14/14 |
+| `git diff --check` / `git status` / remote SHA | PASS — no whitespace errors, clean worktree, final branch head matched by `ls-remote` |
+
+Final browser total: **833/833 Chromium assertions across 14 suites** and **246/246 WebKit
+assertions across 4 critical suites** (**1,079 cross-engine assertions**). Full Auth E2E is not
+included in either total because no Docker daemon exists; calling preflight green a backend pass is
+explicitly prohibited.
 
 ### Second recovery — Goal-limit interruption, new container (2026-08-14)
 
@@ -456,7 +495,7 @@ Status here means evidence at this checkpoint, not remembered intent.
 | 1 | Nutrition mobile crash/ejection | PASS — current `test:e2e:nutrition` contract 106/106 |
 | 2 | Preview could log food | PASS — browser attack opens Premium and storage remains unchanged |
 | 3 | Preview could start/log/finish workout | PASS — access matrix plus live Workout E2E: gate opens, no active snapshot is created, activation then permits the same action |
-| 4 | install banner covered handoff CTA | `test:bottom-overlay` green; real hit-test pending |
+| 4 | install banner covered handoff CTA | PASS — `test:bottom-overlay` plus real hit-test `test:e2e:install-overlap` 200/200 |
 | 5 | Today/Workout mismatch | PASS — `test:workout-day-source` 19/19 plus live-browser name, completion-next and Today-transition agreement |
 | 6 | Breakfast Add pointer miss | PASS — real pointer at 320/390 and ≥44px |
 | 7 | macro clipping | PASS — ar/en at 320/390/640/768/894/1280, no clipping/overflow |
@@ -484,7 +523,41 @@ Status here means evidence at this checkpoint, not remembered intent.
 | 29 | old guest/draft preserved | PASS — `test:e2e:dirty-state` covers an existing completed guest, a v5 draft and a legacy guest with missing fields; each boots without crash and the genuine completed guest still enters the app |
 | 30 | no localhost/dev endpoint in production | PASS with one **declared, guarded** exemption — no Qimmah-owned dev endpoint and no Vite dev client in the artifact. `@supabase/auth-js` carries a dead default `http://localhost:9999`; the exemption is named, justified by proof that `createClient` always receives an explicit url, and guarded by three owned-endpoint injections that still fail |
 
-## Release judgments at `9f88e43`
+## Final release judgments — supersede the historical `9f88e43` judgments below
+
+### A — FREE PREVIEW: **GO**
+
+Built-artifact evidence is green on both engines: Preview mutation/security 35/35 each, Quick Log
+68/68 each, Navigation 96/96 each, dirty/legacy 47/47 each, Chromium onboarding 20/20 and plan
+handoff 98/98, plus bundle safety 9/9. No mock entitlement seam or Qimmah-owned dev endpoint exists
+in production output; client tampering cannot grant authority; measured Preview mutations leave
+storage unchanged. Mobile/RTL floors include AR/EN 320/390/430 and install overlap 200/200.
+
+### B — AUTHENTICATED FREE: **NO-GO**
+
+Client/auth surfaces are green (Navigation/Auth 96/96 on Chromium and WebKit; offline preflight
+19/19; account-vs-guest Profile 27/27; import isolation 34/34). EXTERNAL-003 remains: no Docker
+daemon is available for `test:e2e:auth`, and the live deployment of `delete_own_account` is not
+proven. Unblock by running the full harness against its isolated local stack and confirming the RPC
+on the production project through the authorized backend owner.
+
+### C — PAID / PREMIUM: **NO-GO**
+
+EXTERNAL-001 and EXTERNAL-002 remain: the repository has only the Salla store root, not an approved
+product URL, and production redemption honestly returns `offline` because no reviewed activation/
+entitlement backend exists. Paid also depends on B. Unblock requires the approved product-specific
+URL and reviewed live entitlement contract/backend evidence; localStorage or test mock mode is not
+authority.
+
+### D — MERGE / RELEASE CANDIDATE: **NO-GO**
+
+The Web code checkpoint is green and WebKit is no longer a blocker, but the full product cannot be
+called a release candidate while B and C are NO-GO. Close EXTERNAL-003, EXTERNAL-001 and
+EXTERNAL-002, then rerun the final gate. BUG-003 is a contained P2 build-tool dependency item for an
+authorized dependency wave; it does not negate A but must be explicitly accepted or updated before
+the broader release decision.
+
+## Historical release judgments at `9f88e43` (superseded)
 
 Four independent judgments. None rests on "the build is green" — a green build proves the code
 compiles and the written tests pass, not that the product works for a user.
@@ -584,5 +657,9 @@ not apply to it — but item 2 does.
 | Storage registry | `src/lib/userDataKeys.ts`; `test:data-safety`, `test:canonical` in full gate |
 | Exact 18-question funnel | `ONBOARDING_QUESTION_IDS`; `test:onboarding-questions` 97/97; 36-case browser matrix |
 | Draft migration and never semantics | `test:onboarding-async` 40/40; `test:onboarding-intent` 70/70; newcomer/minor journeys |
-| Navigation and handoff after the seven-screen flow | `test:e2e:navigation` 95/95; `test:e2e:plan-handoff` 98/98 |
-| Production artifact built | baseline `npm run build`; final artifact proof still pending |
+| Navigation and handoff after the seven-screen flow | `test:e2e:navigation` 96/96 on Chromium and WebKit; `test:e2e:plan-handoff` 98/98 Chromium |
+| Production artifact / no test authority | `npm run build` (2,565 modules); `test:bundle-safety` 9/9 two-build counter-proof |
+| Mobile/RTL/touch | install-overlap 200/200 AR/EN 320–430; Quick Log 68/68 per engine AR/EN 320/390/430; Profile 27/27; Settings 14/14 |
+| Fresh and dirty/legacy boot | dirty-state 47/47 per engine; onboarding 20/20; Navigation resume 96/96 per engine |
+| Preview browse vs mutation | Preview gate 35/35 per engine; bundle-safety 9/9; Quick Log Preview no-write 68/68 per engine |
+| Auth truth | client Navigation/Auth 96/96 per engine; preflight 19/19; EXTERNAL-003 names the unexecuted live server lifecycle |

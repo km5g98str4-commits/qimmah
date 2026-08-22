@@ -1,6 +1,6 @@
 # Qimmah Web Sovereign — autonomous founder decisions
 
-Updated: 2026-08-22 (PKG-10 concurrent-recovery convergence; final gate pending)
+Updated: 2026-08-22 (PKG-11 final Web Sovereign closure evidence)
 
 ## Decision 001 — Use the exact Founder checkpoint
 

@@ -1,6 +1,6 @@
 # Qimmah Web Sovereign — bug ledger
 
-Updated: 2026-08-22 (PKG-10 convergence; focused evidence green, final gate pending)
+Updated: 2026-08-22 (PKG-11 final closure; internal P0/P1 closed, external blockers explicit)
 
 ## BUG-001 — Preview mutation handlers can surface an exception instead of Premium
 
