@@ -14,6 +14,7 @@ import type { CommitmentPlan } from '@/types/progress'
 import type { MeasurementPlan } from '@/types/progress'
 import type { NutritionPlan, PlanMeal } from '@/types/nutrition'
 import type { Exercise, Muscle, MovementPattern, PlanDay, PlanExercise, WorkoutPlan } from '@/types/workout'
+import type { MuscleId } from '@/types/muscles'
 import type { RoutineDay } from '@/types'
 import type { RoutineRow } from '@/lib/customization'
 import type { Lang } from '@/lib/appPreferences'
@@ -210,6 +211,19 @@ interface Slot {
   muscles: Muscle[]
   role: ExRole | 'any'
   patterns?: MovementPattern[]
+  /**
+   * [SOVEREIGN-PLAN-002] قيد تشريحي **صارم** على رؤوس العضلة (لا تخفيف عند الفراغ).
+   *
+   * الرمز العامّ `'shoulders'` يجمع ثلاثة رؤوس تعمل في اتجاهين متعاكسين: الأمامي
+   * والجانبي يدفعان، والخلفي يسحب. فكانت فتحة «عزل أكتاف» في **يوم السحب** بلا
+   * قيد تمامًا، وتُملأ من نفس الحوض الذي يملأ فتحة يوم الدفع — أي رفرفة أمامي في
+   * يوم ظهر، ورفرفة خلفي في يوم صدر. التشريح الصحيح موجود في
+   * `primaryMusclesDetailed` وكان مُهمَلًا هنا؛ هذه الفتحة تقرؤه.
+   *
+   * وبخلاف `patterns` (تفضيل يسقط إن خلا الحوض) هذا **حدّ لا يُتجاوز**: فتحة بلا
+   * مرشّح صحيح تُترك فارغة ويكملها الإكمال المُصفَّى — ولا تُملأ بتشريح خاطئ.
+   */
+  detailed?: MuscleId[]
 }
 
 type DayType = 'full' | 'upper' | 'lower' | 'push' | 'pull' | 'arms' | 'core'
@@ -251,9 +265,10 @@ const SLOTS: Record<DayType, Slot[]> = {
   ],
   push: [
     { muscles: ['chest'], role: 'compound', patterns: ['push'] },
-    { muscles: ['shoulders'], role: 'compound', patterns: ['push'] },
+    { muscles: ['shoulders'], role: 'compound', patterns: ['push'], detailed: ['front_delts', 'side_delts'] },
     { muscles: ['chest'], role: 'any' },
-    { muscles: ['shoulders'], role: 'isolation' },
+    // عزل الكتف في يوم الدفع: أمامي/جانبي فقط — الخلفي عضلة سحب.
+    { muscles: ['shoulders'], role: 'isolation', detailed: ['front_delts', 'side_delts'] },
     { muscles: ['triceps'], role: 'isolation' },
     { muscles: ['triceps'], role: 'isolation' },
     { muscles: ['core'], role: 'any' },
@@ -262,7 +277,8 @@ const SLOTS: Record<DayType, Slot[]> = {
     { muscles: ['back'], role: 'compound', patterns: ['pull'] },
     { muscles: ['back'], role: 'compound', patterns: ['pull'] },
     { muscles: ['back'], role: 'any' },
-    { muscles: ['shoulders'], role: 'isolation' },
+    // عزل الكتف في يوم السحب: الدالة الخلفية حصرًا — وهي الرأس الذي يسحب.
+    { muscles: ['shoulders'], role: 'isolation', detailed: ['rear_delts'] },
     { muscles: ['biceps'], role: 'isolation' },
     { muscles: ['biceps'], role: 'isolation' },
     { muscles: ['core'], role: 'any' },
@@ -297,6 +313,29 @@ const TYPE_MUSCLES: Record<DayType, Muscle[]> = {
   // إضافة جهاز الكتف الثالث ليومَي الذراعين (كان يجبرهما على تطابق أجهزة الكتف → تداخل ٤٠٪).
   arms: ['biceps', 'triceps'],
   core: ['core'],
+}
+
+/**
+ * [SOVEREIGN-PLAN-002] رؤوس عضلية **ممنوعة** على نوع اليوم — حارس الإكمال.
+ *
+ * الفتحات وحدها لا تكفي: `buildDayExercises` يكمل النقص من `TYPE_MUSCLES`، وهي
+ * تعطي يوم السحب الرمز العامّ `'shoulders'`. فباب الإكمال كان يُدخل «رفرفة أمامي»
+ * إلى يوم ظهر من الخلف بعد أن أغلقت الفتحةُ البابَ الأمامي. القيد يُطبَّق على
+ * **حوض اليوم كلّه** فيسري على الفتحات والإكمالين الاثنين معًا.
+ *
+ * الفحص على `primaryMusclesDetailed` وحدها: الرأس **المحرّك** هو ما يصنّف الحركة.
+ * مشاركة ثانوية (الدالة الخلفية في تجديف البار) لا تنقل التمرين إلى اليوم الآخر.
+ */
+const TYPE_EXCLUDE_DETAILED: Partial<Record<DayType, readonly MuscleId[]>> = {
+  push: ['rear_delts'],
+  pull: ['front_delts'],
+}
+
+/** هل يخالف التمرين تشريح نوع اليوم؟ (رأس محرّك ممنوع على هذا اليوم) */
+function violatesDayAnatomy(type: DayType, ex: Exercise): boolean {
+  const banned = TYPE_EXCLUDE_DETAILED[type]
+  if (!banned || !banned.length) return false
+  return ex.primaryMusclesDetailed.some((m) => banned.includes(m))
 }
 
 // ————— الإضافات (Accessories) — قرار زياد النهائي P12 —————
@@ -407,6 +446,10 @@ function pickForSlot(slot: Slot, pool: Exercise[], used: Set<string>, variation:
       (slot.role === 'any' || exerciseRole(ex) === slot.role) &&
       !used.has(ex.id),
   )
+  // القيد التشريحي **قبل** تفضيل النمط ولا يسقط أبدًا (بخلاف patterns أدناه).
+  if (slot.detailed?.length) {
+    cands = cands.filter((ex) => ex.primaryMusclesDetailed.some((m) => slot.detailed!.includes(m)))
+  }
   if (slot.patterns) {
     const byPattern = cands.filter((ex) => slot.patterns!.includes(ex.movementPattern))
     if (byPattern.length) cands = byPattern
@@ -430,9 +473,12 @@ function buildDayExercises(
 ): string[] {
   const used = new Set<string>()
   const ids: string[] = []
+  // [SOVEREIGN-PLAN-002] حوض اليوم مُصفّى تشريحيًا **مرّة واحدة** — فيسري القيد على
+  // الفتحات وعلى بابَي الإكمال أدناه معًا، ولا يبقى باب خلفي يُدخل الرأس الممنوع.
+  const dayPool = pool.filter((ex) => !violatesDayAnatomy(type, ex))
   for (const slot of SLOTS[type]) {
     if (ids.length >= target) break
-    const id = pickForSlot(slot, pool, used, variation, nVar, preferMachines, rank)
+    const id = pickForSlot(slot, dayPool, used, variation, nVar, preferMachines, rank)
     if (id) {
       ids.push(id)
       used.add(id)
@@ -443,7 +489,7 @@ function buildDayExercises(
   if (ids.length < target) {
     const extra = partitionOrder(
       sortCandidates(
-        pool.filter((ex) => !used.has(ex.id) && TYPE_MUSCLES[type].includes(ex.primaryMuscle)),
+        dayPool.filter((ex) => !used.has(ex.id) && TYPE_MUSCLES[type].includes(ex.primaryMuscle)),
         preferMachines,
       ),
       variation,
@@ -461,7 +507,7 @@ function buildDayExercises(
   // نكمل من بقية أجهزة الكتالوج، مقسومًا على النسخة (تنويع A/B) بترتيب ثابت داخل كل نسخة.
   if (fillFromWholePool && ids.length < target) {
     const extra = partitionOrder(
-      sortCandidates(pool.filter((ex) => !used.has(ex.id)), preferMachines),
+      sortCandidates(dayPool.filter((ex) => !used.has(ex.id)), preferMachines),
       variation,
       nVar,
       rank,

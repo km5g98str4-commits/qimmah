@@ -148,6 +148,111 @@ const muscleDetailById: Record<string, MuscleDetail> = {
   'rowing-machine': { primary: [] },
   elliptical: { primary: [] },
   'jump-rope': { primary: [] },
+
+  // ═══ إكمال التغطية إلى ١٨١/١٨١ — [SOVEREIGN-PLAN-002] ═══
+  //
+  // كان ٧٧ تمرينًا بلا مدخل صريح، فيسقط على `coarseToDetailed` — وهي خريطة
+  // **عامّة لا تعرف الحركة**: كل ما `primaryMuscle: 'shoulders'` يصير
+  // «جانبي + أمامي» مهما كانت حركته. فكان `cable-rear-delt-fly` — رفرفة خلفي —
+  // يُعلن دالتين أماميّتين و**صفر دالة خلفية**. وعلى هذا الاسم يبني مولّد الخطة
+  // تصنيف الدفع/السحب، فتهبط الرفرفة الخلفية في يوم دفع.
+  // الخريطة الآن مغطّية كاملةً، والاحتياط العامّ يبقى للتمارين المخصّصة وحدها.
+
+  // ===== الصدر =====
+  'decline-barbell-press': { primary: ['chest_lower', 'triceps'], secondary: ['front_delts'] },
+  'decline-dumbbell-press': { primary: ['chest_lower', 'triceps'], secondary: ['front_delts'] },
+  'smith-machine-bench': { primary: ['chest_mid', 'triceps'], secondary: ['front_delts'] },
+  'low-cable-fly': { primary: ['chest_upper'], secondary: ['front_delts'] },
+  'incline-cable-fly': { primary: ['chest_upper'], secondary: ['front_delts'] },
+  'chest-dip': { primary: ['chest_lower', 'triceps'], secondary: ['front_delts'] },
+  'svend-press': { primary: ['chest_mid'], secondary: ['front_delts'] },
+  'machine-fly': { primary: ['chest_mid'], secondary: ['front_delts'] },
+  'knee-push-up': { primary: ['chest_mid', 'triceps'], secondary: ['front_delts'] },
+  'diamond-push-up': { primary: ['triceps', 'chest_mid'], secondary: ['front_delts'] },
+
+  // ===== الظهر =====
+  'pendlay-row': { primary: ['lats', 'upper_back'], secondary: ['biceps', 'rear_delts', 'lower_back'] },
+  'chest-supported-row': { primary: ['upper_back', 'lats'], secondary: ['biceps', 'rear_delts'] },
+  'close-grip-pulldown': { primary: ['lats'], secondary: ['biceps', 'upper_back'] },
+  'neutral-grip-pulldown': { primary: ['lats'], secondary: ['biceps', 'upper_back'] },
+  'single-arm-cable-row': { primary: ['lats', 'upper_back'], secondary: ['biceps', 'rear_delts'] },
+  'inverted-row': { primary: ['upper_back', 'lats'], secondary: ['biceps', 'rear_delts'] },
+  'meadows-row': { primary: ['lats', 'upper_back'], secondary: ['biceps', 'rear_delts', 'forearms'] },
+  'barbell-shrug': { primary: ['traps'], secondary: ['forearms'] },
+  'rack-pull': { primary: ['traps', 'lower_back'], secondary: ['lats', 'glutes', 'hamstrings', 'forearms'] },
+
+  // ===== الأكتاف — الرؤوس الثلاثة مفصولة (أساس تصنيف الدفع/السحب) =====
+  'arnold-press': { primary: ['front_delts', 'side_delts', 'triceps'], secondary: ['traps'] },
+  'seated-dumbbell-press': { primary: ['front_delts', 'side_delts', 'triceps'], secondary: ['traps'] },
+  'push-press': { primary: ['front_delts', 'side_delts', 'triceps'], secondary: ['quads', 'glutes'] },
+  'landmine-press': { primary: ['front_delts'], secondary: ['triceps', 'chest_upper'] },
+  'pike-push-up': { primary: ['front_delts'], secondary: ['triceps', 'side_delts'] },
+  'seated-lateral-raise': { primary: ['side_delts'], secondary: ['traps'] },
+  'upright-row': { primary: ['side_delts', 'traps'], secondary: ['biceps'] },
+  // العطل المسمّى: رفرفة خلفي كيبل كانت بلا دالة خلفية واحدة.
+  'cable-rear-delt-fly': { primary: ['rear_delts'], secondary: ['upper_back'] },
+
+  // ===== البايسبس والساعد =====
+  'incline-dumbbell-curl': { primary: ['biceps'], secondary: ['forearms'] },
+  'ez-bar-curl': { primary: ['biceps'], secondary: ['forearms'] },
+  'spider-curl': { primary: ['biceps'] },
+  'machine-curl': { primary: ['biceps'] },
+  'cable-hammer-curl': { primary: ['biceps', 'forearms'] },
+  'reverse-curl': { primary: ['forearms', 'biceps'] },
+
+  // ===== الترايسبس =====
+  'single-arm-pushdown': { primary: ['triceps'] },
+  'cable-overhead-extension': { primary: ['triceps'] },
+  'dumbbell-kickback': { primary: ['triceps'] },
+  'jm-press': { primary: ['triceps'], secondary: ['chest_mid', 'front_delts'] },
+
+  // ===== الأرجل =====
+  'reverse-lunge': { primary: ['quads', 'glutes'], secondary: ['hamstrings', 'calves'] },
+  'leg-press-narrow': { primary: ['quads'], secondary: ['glutes'] },
+  'belt-squat': { primary: ['quads', 'glutes'], secondary: ['hamstrings'] },
+  'wall-sit': { primary: ['quads'] },
+  'stiff-leg-deadlift': { primary: ['hamstrings', 'glutes'], secondary: ['lower_back'] },
+  'single-leg-rdl': { primary: ['hamstrings', 'glutes'], secondary: ['lower_back'] },
+  'nordic-curl': { primary: ['hamstrings'], secondary: ['glutes'] },
+  'glute-ham-raise': { primary: ['hamstrings', 'glutes'], secondary: ['calves'] },
+  'single-leg-hip-thrust': { primary: ['glutes'], secondary: ['hamstrings'] },
+  'hip-abduction-machine': { primary: ['glutes'] },
+  'banded-lateral-walk': { primary: ['glutes'] },
+  'frog-pump': { primary: ['glutes'] },
+  'leg-press-calf-raise': { primary: ['calves'] },
+  'donkey-calf-raise': { primary: ['calves'] },
+  'single-leg-calf-raise': { primary: ['calves'] },
+
+  // ===== الكور =====
+  'leg-raise': { primary: ['abs'], secondary: ['obliques'] },
+  'bicycle-crunch': { primary: ['abs', 'obliques'] },
+  'dead-bug': { primary: ['abs'] },
+  'hollow-hold': { primary: ['abs'] },
+  'flutter-kicks': { primary: ['abs'] },
+  'toes-to-bar': { primary: ['abs'], secondary: ['lats', 'forearms'] },
+  'cable-woodchop': { primary: ['obliques'], secondary: ['abs'] },
+  'pallof-press': { primary: ['obliques'], secondary: ['abs'] },
+
+  // ===== كارديو (بلا عضلة هدف تفصيلية — نفس قاعدة jump-rope) =====
+  'incline-treadmill-walk': { primary: [] },
+  stairmaster: { primary: [] },
+  'assault-bike': { primary: [] },
+  'outdoor-walk': { primary: [] },
+  burpees: { primary: [] },
+  'high-knees': { primary: [] },
+  'battle-ropes': { primary: [] },
+
+  // ===== إحماء ومرونة — المنطقة المستهدَفة لا «عضلة تُبنى» =====
+  'arm-circles': { primary: ['front_delts', 'side_delts', 'rear_delts'] },
+  'shoulder-dislocates': { primary: ['front_delts', 'rear_delts'] },
+  'thoracic-rotation': { primary: ['upper_back'] },
+  'cat-cow': { primary: ['lower_back'], secondary: ['abs'] },
+  'child-pose': { primary: ['lower_back'], secondary: ['lats'] },
+  'hip-flexor-stretch': { primary: ['quads'] },
+  'world-greatest-stretch': { primary: ['hamstrings', 'glutes'] },
+  'leg-swings': { primary: ['hamstrings', 'glutes'] },
+  'hamstring-stretch': { primary: ['hamstrings'] },
+  'ankle-mobility': { primary: ['calves'] },
 }
 
 // خريطة احتياطية من العضلة العامة إلى العضلات التفصيلية (للتمارين المخصّصة دون تفصيل صريح).

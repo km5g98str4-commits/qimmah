@@ -25,6 +25,7 @@ import { getDayStamp } from '@/lib/today'
 import { runMigration } from '@/lib/dataOwnership'
 import { enqueueSyncDelete, enqueueSyncOperation } from '@/lib/syncQueue'
 import { hasSavedCustomization, loadCustomization } from '@/lib/customization'
+import { loadSessions } from '@/lib/workoutSessions'
 
 export const WORKOUT_CALENDAR_KEY = 'qimmah:workoutCalendar:v1'
 
@@ -59,7 +60,7 @@ export interface WeeklySchedule {
 
 /** نتيجة حلّ يومٍ ما من الجدول — الراحة تُعاد بصدق، لا تدوير صامت. */
 export type ScheduledDay =
-  | { type: 'training'; source: 'schedule' | 'override' | 'legacy-rotation'; planDayIndex: number; day: PlanDay }
+  | { type: 'training'; source: 'schedule' | 'override' | 'legacy-rotation' | 'first-session'; planDayIndex: number; day: PlanDay }
   | { type: 'rest'; source: 'schedule' }
 
 export interface ScheduleViolation {
@@ -402,10 +403,57 @@ export function setTrainingWeekdays(plan: WorkoutPlan, trainingWeekdays: readonl
 
 // ── حلّ اليوم (بديل التدوير) ──────────────────────────────────────────────────
 
-/** التدوير القديم — محفوظ كاحتياط فقط حين لا جدول مضبوطًا. (نفس todayPlanDay المهجور.) */
+/**
+ * التدوير الاحتياطي — حين لا جدول مضبوطًا.
+ *
+ * [SOVEREIGN-PLAN-003] كان `date.getDay() % plan.days.length` حرفيًا: فهرسة JS
+ * الخام (٠=الأحد) على خطة لا تعرف الأحد. فيوم الأربعاء (getDay()=3) على خطة
+ * أربعة أيام يعطي الفهرس ٣ — أي **«اليوم ٤»** لمن لم يتمرّن يومًا واحدًا بعد.
+ * الآن الموضع يُقاس من **بداية الأسبوع** (السبت في السياق السعودي، وهي البداية
+ * التي يبني عليها `buildAssignments` أصلًا) فيبدأ الأسبوع من يوم الخطة ١.
+ * يبقى تدويرًا بلا أيام راحة — وهذا كل المقصود منه: احتياط موثّق، لا جدول.
+ */
 function legacyRotation(plan: WorkoutPlan, date: Date): ScheduledDay {
-  const index = date.getDay() % plan.days.length
+  const position = (date.getDay() - DEFAULT_WEEK_START + 7) % 7
+  const index = position % plan.days.length
   return { type: 'training', source: 'legacy-rotation', planDayIndex: index, day: plan.days[index] }
+}
+
+/** بداية الأسبوع الافتراضية — السبت، كما في كل مولّدات الجدول أعلاه. */
+const DEFAULT_WEEK_START: WeekStart = 6
+
+/**
+ * [SOVEREIGN-PLAN-003] هل ما زالت **الجلسة الأولى** معلّقة عند هذا التاريخ؟
+ *
+ * «معلّقة» = لا جلسة منتهية واحدة في يوم **سابق** لهذا التاريخ. اشتراط «سابق»
+ * متعمّد: لو قِسناها على «لا جلسة إطلاقًا» لانقلبت بطاقة اليوم إلى «راحة» في
+ * اللحظة التي ينهي فيها المستخدم جلسته الأولى — فيرى الشاشة تنكر ما فعله للتوّ.
+ * الإنهاء المبكر يُحتسب جلسةً: المستخدم تمرّن فعلًا، والرقم ليس ادّعاء اكتمال.
+ */
+export function isFirstSessionPending(date: Date = new Date()): boolean {
+  const stamp = getDayStamp(date)
+  return !loadSessions().some((s) => s.finishedAt && s.date < stamp)
+}
+
+/** خيارات حلّ اليوم — كلها قابلة للحقن كي يبقى القرار مُثبَتًا بلا تخزين. */
+export interface ResolveDayOptions {
+  /** تجاوز قراءة الجلسات (للإثباتات وللمستهلكين الذين يملكون الجواب أصلًا). */
+  firstSessionPending?: boolean
+  /** «الآن» — مرساة تحديد أن التاريخ المطلوب هو اليوم نفسه. */
+  now?: Date
+}
+
+/**
+ * هل ينطبق مرساة الجلسة الأولى على هذا التاريخ؟
+ *
+ * شرطان معًا: (أ) لم تُنجَز جلسة قبل اليوم، (ب) التاريخ المطلوب **هو اليوم**.
+ * الشرط (ب) هو ما يمنع `nextWorkout` من إعلان «اليوم ١» لكل يوم قادم إلى الأبد:
+ * الاستشراف يسأل عن تواريخ مستقبلية، وهي تُحلّ بالجدول الطبيعي.
+ */
+function firstSessionAnchorApplies(date: Date, opts: ResolveDayOptions): boolean {
+  const now = opts.now ?? new Date()
+  if (getDayStamp(date) !== getDayStamp(now)) return false
+  return opts.firstSessionPending ?? isFirstSessionPending(date)
 }
 
 /**
@@ -415,8 +463,17 @@ function legacyRotation(plan: WorkoutPlan, date: Date): ScheduledDay {
  *   • بلا جدول مضبوط: احتياط التدوير القديم (source: 'legacy-rotation').
  * undefined فقط حين لا توجد خطة أصلًا.
  */
-export function scheduledDayFor(plan: WorkoutPlan, date: Date = new Date()): ScheduledDay | undefined {
+export function scheduledDayFor(plan: WorkoutPlan, date: Date = new Date(), opts: ResolveDayOptions = {}): ScheduledDay | undefined {
   if (!plan.days.length) return undefined
+  // [SOVEREIGN-PLAN-003] **الجلسة الأولى تبدأ من أول يوم في الخطة، لا من يوم الأسبوع.**
+  //
+  // الجدول الأسبوعي يربط يوم الخطة ٠ بالسبت (بداية الأسبوع). وهو صحيح لمن استقرّ
+  // على إيقاع أسبوعي — وخاطئ تمامًا لمن أنهى التخصيص للتوّ يوم إثنين أو خميس:
+  // كان يُستقبَل بـ«راحة» قبل أن يتمرّن مرّة، أو (بلا جدول) بـ«اليوم ٤».
+  // المرساة تعمل **مرّة واحدة**: بعد أوّل جلسة منتهية يستأنف الجدول عمله كاملًا.
+  if (firstSessionAnchorApplies(date, opts)) {
+    return { type: 'training', source: 'first-session', planDayIndex: 0, day: plan.days[0] }
+  }
   const schedule = loadWeeklySchedule()
   if (!schedule) return legacyRotation(plan, date)
   const override = schedule.overrides[getDayStamp(date)]
