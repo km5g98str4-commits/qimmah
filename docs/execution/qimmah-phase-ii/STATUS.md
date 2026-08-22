@@ -61,6 +61,15 @@ branches are read-only.
   artifact identity, eight personas, viewport/locale/engine coverage, attack and
   historical-defect ledgers, evidence schema, and seven explicit verdict rules.
   No prior PASS or GO was transferred from quarantined branches.
+- Verified the release-planning checkpoint `c20211cea0e45f3056fcb1a5a077cc44a807d90d`
+  after the earlier clean `npm ci`: `typecheck`, zero-warning `lint`, production
+  `build` (2,539 modules), full `test:gate`, and `git diff --check` all exited 0.
+  This proves the provisional `cc60adf`-based planning branch only; it is not a
+  Web Sovereign or launch-readiness verdict.
+- Exercise lane checkpoint `cea98dca086f0277025cc39d4a54120895d20a5c`
+  is pushed: a deterministic 181-ID review ledger, conservative media states,
+  six digest-derived duplicate groups, byte-for-byte regeneration, and seven
+  named anti-circumvention mutations. It changes no product or package file.
 
 ## In Progress
 
