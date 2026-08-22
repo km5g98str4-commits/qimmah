@@ -46,6 +46,9 @@ branches are read-only.
   open. `main@cc60adf` has ten recent green nightly runs; Web Sovereign has eleven
   visible red CI runs caused at the inspected endpoints by artifact quota after
   its code and browser gates passed.
+- Prepared the final-HEAD rebind runbook. It preserves published `-002` branches
+  and uses new rebound branch names, satisfying the future rebase instruction
+  without force-pushing or rewriting the recovery checkpoints.
 
 ## In Progress
 
@@ -104,7 +107,7 @@ branches are read-only.
 1. Commit and push the remote source-of-truth discovery checkpoint.
 2. Complete gap analyses for the existing food, exercise, and executive Phase
    II branches; retain only net-new independent work.
-3. Publish the dependency-led release convergence and final-HEAD rebind plan.
+3. Publish the dependency-led release convergence persona/evidence matrix.
 4. Add deterministic, implementation-independent validators and negative tests
    in lane-owned paths; request the coordinator-owned `package.json` union only
    after the proofs exist.
