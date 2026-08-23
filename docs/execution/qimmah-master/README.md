@@ -1,5 +1,11 @@
 # QIMMAH — PROJECT CONTROL PLANE
 
+> ⛔ **سطح ضبط متجاوَز — يُقرأ تاريخًا لا أمرًا.**
+> الحقيقة الجارية في [`docs/execution/qimmah-final-launch/STATE.md`](../qimmah-final-launch/STATE.md).
+> أرقام هذا الملفّ وأحكامه تصف لحظتها، وقد تغيّرت. لا يُبنى عليها قرار اليوم.
+
+---
+
 **Start here. Every session. No exceptions.**
 
 This folder exists because Qimmah kept restarting: each new session reconstructed the project

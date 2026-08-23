@@ -1,5 +1,11 @@
 # Qimmah Web Sovereign — execution state
 
+> ⛔ **سطح ضبط متجاوَز — يُقرأ تاريخًا لا أمرًا.**
+> الحقيقة الجارية في [`docs/execution/qimmah-final-launch/STATE.md`](../qimmah-final-launch/STATE.md).
+> أرقام هذا الملفّ وأحكامه تصف لحظتها، وقد تغيّرت. لا يُبنى عليها قرار اليوم.
+
+---
+
 Updated: 2026-08-14 (PKG-9 — Quick Log, dirty-state boot and production-artifact safety; second recovery)
 
 ## Provenance
