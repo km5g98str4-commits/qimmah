@@ -67,6 +67,20 @@ function adjust(value: string, delta: number, max: number): string {
   return `${next}`
 }
 
+/**
+ * مجموعة جاهزة للتخزين — الأرقام مطويّة غربيًّا.
+ *
+ * مسارا الكتابة اثنان (لقطة الجلسة الجارية · وسجلّ الجلسة المنتهية)، وكلاهما
+ * كان يمرّر ما كُتب حرفيًّا. فمن سجّل «٨٥» خزّن «٨٥»، وقارئو المخزون لا يطوون:
+ * `progressStats` تعطي حجمًا صفرًا و`exerciseHistory` لا تسجّل رقمًا قياسيًّا —
+ * والمجموعة تبدو محفوظة في الواجهة. نقطة طيّ واحدة تخدم المسارين.
+ */
+const storedSet = <T extends { weightKg: string; actualReps: string }>(x: T): T => ({
+  ...x,
+  weightKg: foldDigits(x.weightKg),
+  actualReps: foldDigits(x.actualReps),
+})
+
 const parseVal = (v: string): number => {
   const m = foldDigits(String(v ?? '')).match(/-?[\d.]+/)
   return m ? Number(m[0]) : NaN
@@ -148,6 +162,18 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
 
   // (ح-١) حفظ الجلسة الجارية بعد كل تغيير — فإن قُتل التطبيق أو أُعيد التحميل عاد
   // المستخدم إلى موضعه وجولاته. المخزَّن قيم ثابتة (معرّفات وأرقام) لا نصوص معروضة.
+  //
+  // ═══ [LIVE-QA-001ب] والطيّ هنا لا في الحقل ═══
+  // هذا السطر أعلاه كان **وعدًا لا عقدًا**: الحقل يسلّم ما كُتب حرفيًّا، فمن يكتب
+  // «٨٥» يخزّن «٨٥». وقارئو المخزون لا يطوون:
+  //   • `progressStats.ts:9` — `Number('٨٥')` = NaN ⇒ حجم الجلسة **صفر**.
+  //   • `exerciseHistory.ts:37` — `/[\d.]+/` أرقام ASCII حصرًا ⇒ **لا رقم قياسيًا**.
+  // فالمجموعة تظهر محفوظة في الواجهة، وتختفي من التقدّم بصمت. وذلك أسوأ من رفضٍ
+  // صريح: المستخدم لا يعلم أن جهده لم يُحتسب.
+  //
+  // والطيّ عند حدّ التخزين لا في `onChange`: لو طُوي أثناء الكتابة لانقلب «٨» إلى
+  // «8» تحت إصبع المستخدم. فتبقى المسوّدة كما كتبها، ويصير المخزَّن غربيًّا
+  // قانونيًّا كما يقول السطر أعلاه — فيُوفّى الوعد بدل أن يبقى تعليقًا.
   useEffect(() => {
     // «تمرين فارغ» (بلا عناصر خطة) لا جلسة له تُستأنف.
     if (day.exercises.length === 0) return
@@ -161,7 +187,7 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
         Object.entries(state).map(([id, st]) => [
           id,
           {
-            sets: st.sets.map((s) => ({
+            sets: st.sets.map((s) => storedSet({
               setNumber: s.setNumber,
               targetReps: s.targetReps,
               actualReps: s.actualReps,
@@ -374,7 +400,8 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
           targetReps: p.reps,
           targetRestSec: p.restSec,
           completed: exDone(p.id),
-          sets: st.sets.map((x) => (st.rpe ? { ...x, rpe: st.rpe } : x)),
+          // نفس الطيّ: هذا هو السجلّ الذي تقرؤه إحصاءات التقدّم والأرقام القياسية.
+          sets: st.sets.map((x) => storedSet(st.rpe ? { ...x, rpe: st.rpe } : x)),
           difficulty: st.difficulty,
           painNote: st.painNote,
           notes: st.notes,

@@ -208,6 +208,12 @@ The founder's reasoning: "مدى الحياة" / "lifetime" binds us legally and
 **Note on the internal flag name.** The original brief specified a "lifetime flag". It is implemented as **`no_expiry`** so the banned word does not exist anywhere in the codebase, not even as a column name that could leak into an API response or an error string. Same semantics, zero leak surface.
 
 **Enforced, not merely intended:** a new gate check `test:premium-copy` fails the build if `مدى الحياة`, `lifetime`, `للأبد`, or `كل التحديثات الحالية` appears in `src/i18n/dict/**` or `site/**`. Per charter §4.2 it ships with a counter-assertion proving the guard actually fires on a planted violation.
+>
+> ⚠️ **وهذا السطر كان دعوى غير منفَّذة حتى [LIVE-QA-004].** لم يكن في
+> `package.json` سكربت بهذا الاسم ولا ملفّ يقابله؛ وقاعدة الكتابة كانت أصدق إذ
+> تسمّيه «الحارس المخطَّط». ادّعاءُ إنفاذٍ غير قائم أسوأ من الاعتراف بالغياب:
+> من يقرأ هنا يظنّ السطح محروسًا فلا يفحصه. **بُني الحارس فصار السطر صحيحًا** —
+> `scripts/run-premium-copy-proof.mjs`، سبعة فحوص منها أربعة تأكيدات مضادّة.
 
 ### 4.6 Authentication
 
