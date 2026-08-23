@@ -14,7 +14,7 @@
 // مجلّد الأدلة قابل للحقن.
 
 import { spawn } from 'node:child_process'
-import { chromium } from 'playwright'
+import { chromium } from './e2e/lib/engine.mjs'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { tmpdir } from 'node:os'

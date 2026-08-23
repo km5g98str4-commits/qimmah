@@ -3,7 +3,7 @@
 
 import { spawn } from 'node:child_process'
 import { readFileSync } from 'node:fs'
-import { chromium } from 'playwright'
+import { chromium } from './lib/engine.mjs'
 import { loadAppCopy, requireKey } from './lib/app-copy.mjs'
 import { answerHistory, finishInputSteps } from './lib/onboarding-driver.mjs'
 

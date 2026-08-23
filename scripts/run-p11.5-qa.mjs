@@ -6,7 +6,7 @@
 //
 // التشغيل: npm run qa:p11.5  (يبني أولًا عبر prequa إن رُبط، وإلا: npm run build && node scripts/run-p11.5-qa.mjs)
 
-import { chromium } from 'playwright'
+import { chromium } from './e2e/lib/engine.mjs'
 import { spawn } from 'node:child_process'
 import { setTimeout as sleep } from 'node:timers/promises'
 import { readdirSync, readFileSync } from 'node:fs'

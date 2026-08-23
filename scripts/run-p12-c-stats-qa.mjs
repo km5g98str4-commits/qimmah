@@ -10,7 +10,7 @@
 //  (c) حساب فارغ → حالات فارغة ودّية، لا NaN/undefined/أقسام بيضاء.
 //  (d) ar (rtl) + en (ltr)، صفر تسرّب عربي في EN، لا انزلاق أفقي على 320×568 و390×844.
 //  (e) فتح المسار من بطاقة الرئيسية + لا أخطاء صفحة في كامل الجولة.
-import { chromium } from 'playwright'
+import { chromium } from './e2e/lib/engine.mjs'
 import { spawn } from 'node:child_process'
 import { setTimeout as sleep } from 'node:timers/promises'
 

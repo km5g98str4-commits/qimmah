@@ -7,7 +7,7 @@
  *
  * التشغيل: node scripts/today-bidi-order-shot.mjs
  */
-import { chromium } from 'playwright'
+import { chromium } from './e2e/lib/engine.mjs'
 
 const MARKUP = (dir, weekday, detail) => `
 <div dir="${dir}" style="width:390px;font:700 14px system-ui">

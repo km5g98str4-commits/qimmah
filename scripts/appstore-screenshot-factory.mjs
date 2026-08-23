@@ -11,7 +11,7 @@
 
 import { spawn } from 'node:child_process'
 import { mkdirSync } from 'node:fs'
-import { chromium } from 'playwright'
+import { chromium } from './e2e/lib/engine.mjs'
 
 const PORT = 5299
 const EXTERNAL = process.env.PREVIEW_URL || ''

@@ -1,6 +1,6 @@
 import { mkdir } from 'node:fs/promises'
 import { resolve } from 'node:path'
-import { chromium } from 'playwright'
+import { chromium } from './e2e/lib/engine.mjs'
 import { createServer } from 'vite'
 
 const root = process.cwd()

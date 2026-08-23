@@ -6,7 +6,7 @@
 // فحص ممثّل للفشل/إعادة المحاولة وفحص استئناف لمسار تاريخ التدريب المشروط.
 
 import { spawn } from 'node:child_process'
-import { chromium } from 'playwright'
+import { chromium } from './e2e/lib/engine.mjs'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { tmpdir } from 'node:os'

@@ -1,7 +1,7 @@
 // أداة QA تطويرية: تحمّل حزمة الإنتاج في متصفح headless وتتحقق من المسارات،
 // وسلامة التخزين التالف، والتنقّل بين التبويبات، وغياب أخطاء الـ console.
 // تشغيل: node scripts/qa-smoke.mjs  (يتطلّب خادمًا يخدم dist على المنفذ المُمرّر أو 4173)
-import { chromium } from 'playwright'
+import { chromium } from './e2e/lib/engine.mjs'
 
 const BASE = process.env.QA_BASE || 'http://localhost:4173'
 const results = []

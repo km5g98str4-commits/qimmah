@@ -15,7 +15,7 @@
 //   EVIDENCE_DIR=/tmp/my-evidence node scripts/offline-session-e2e.mjs
 
 import { spawn } from 'node:child_process'
-import { chromium } from 'playwright'
+import { chromium } from './e2e/lib/engine.mjs'
 import { mkdirSync, mkdtempSync, writeFileSync, rmSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { tmpdir } from 'node:os'

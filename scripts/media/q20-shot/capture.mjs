@@ -1,6 +1,6 @@
 // يلتقط لقطات الحالات الثلاث من harness التطوير (Q20).
 // يفترض خادم vite شغّالًا: PORT=5201 node scripts/media/q20-shot/capture.mjs
-import { chromium } from 'playwright'
+import { chromium } from '../../e2e/lib/engine.mjs'
 import { mkdirSync } from 'node:fs'
 import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'

@@ -15,7 +15,7 @@ import { spawn } from 'node:child_process'
 import { mkdtempSync, writeFileSync, mkdirSync, readFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { chromium } from 'playwright'
+import { chromium } from './lib/engine.mjs'
 import { loadAppCopy, requireKey, assertUnregistered } from './lib/app-copy.mjs'
 
 // مفاتيح التخزين تُقرأ من السجلّ المركزي (src/lib/userDataKeys.ts) لا مكرّرة هنا:

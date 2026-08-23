@@ -22,7 +22,7 @@ import { execSync } from 'node:child_process'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import * as playwright from 'playwright'
-import { ROOT, buildArtifact, verifyArtifact, serveArtifact, waitForServer, engineAvailable } from './lib/harness.mjs'
+import { ROOT, buildArtifact, verifyArtifact, serveArtifact, waitForServer, engineAvailable, launchOptionsFor } from './lib/harness.mjs'
 import { captureGuestSeed } from './lib/drive.mjs'
 
 const args = process.argv.slice(2)
@@ -120,7 +120,7 @@ const results = []
 let seed = null
 
 for (const engine of engines) {
-  const browser = await playwright[engine.name].launch()
+  const browser = await playwright[engine.name].launch(launchOptionsFor(engine.name))
   try {
     for (const suite of active) {
       if (suite.kind === 'static' && engine.name !== engines[0].name) continue

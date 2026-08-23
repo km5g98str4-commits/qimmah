@@ -1,7 +1,7 @@
 // إثبات متصفح لسطح تفاصيل التمرين الحيّ — [Exercise Production إغلاق].
 // التشغيل القانوني: npm run test:e2e:exercise-detail
 import { spawn } from 'node:child_process'
-import { chromium } from 'playwright'
+import { chromium } from './lib/engine.mjs'
 
 const PORT = 5335
 const BASE = process.env.PREVIEW_URL || `http://127.0.0.1:${PORT}`

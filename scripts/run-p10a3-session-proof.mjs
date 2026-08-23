@@ -2,7 +2,7 @@
 // Proves: signed-in session survives hard reload AND a full "restart" (new browser
 // context with the same storage), the login screen is NOT shown while restoring, and
 // explicit sign-out returns to the pre-login (start/login) screen.
-import { chromium } from 'playwright'
+import { chromium } from './e2e/lib/engine.mjs'
 import { spawn } from 'node:child_process'
 import { setTimeout as sleep } from 'node:timers/promises'
 
