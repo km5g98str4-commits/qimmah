@@ -82,6 +82,13 @@ jobs:
       - name: Workout write-path (entitled) — live browser
         run: npm run test:e2e:workout
 
+      # بقيّة مسار الكتابة: تغذية وماء، وقياسات وتقدّم.
+      - name: Nutrition write-path (entitled) — live browser
+        run: node scripts/e2e/nutrition-reliability.mjs
+
+      - name: Progress & measurements write-path (entitled) — live browser
+        run: node scripts/e2e/progress-reliability.mjs
+
       - name: Upload dist artifact
         if: success()
         # [CTO-87] الرفع **دليل بناء لا شرط إطلاق**: لا خطوة تُنزّله

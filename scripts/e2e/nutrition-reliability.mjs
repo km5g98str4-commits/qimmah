@@ -293,7 +293,10 @@ try {
     check('إضافة 1.5 حصة تحفظ الحصص و225غ ووحدة الإدخال معًا', foods.length === 2 && servingEntry.servings === 1.5 && servingEntry.grams === 225 && servingEntry.unit === 'serving' && servingEntry.calories === 372, JSON.stringify(servingEntry))
 
     await page.locator('button[aria-label^="عدّل الكمية"]').last().click()
-    const editInput = page.locator('input[type="number"][max="20"]')
+    // المُحدِّد كان `input[type="number"]` — وقد **تغيّر النوع عمدًا** إلى نصّي
+    // لأن تعقيم HTML لـ`type=number` يُفرِّغ القيمة قبل أن تصل React، فلا يُنقذ
+    // الأرقامَ العربية أيُّ طيّ داخل التطبيق. فبقي المُحدِّد يصف بنيةً متقاعدة.
+    const editInput = page.locator('input[inputmode="decimal"][max="20"]')
     await editInput.fill('2')
     await page.getByRole('button', { name: 'احفظ التعديل', exact: true }).click()
     await settle(page, 700)
@@ -301,7 +304,7 @@ try {
     check('تعديل الحصة يعيد حساب الجرامات والماكروز نسبةً إلى أساس معروف', foods[1].servings === 2 && foods[1].grams === 300 && foods[1].calories === 496 && foods[1].protein === 92, JSON.stringify(foods[1]))
 
     await page.locator('button[aria-label^="عدّل الكمية"]').last().click()
-    await page.locator('input[type="number"][max="20"]').fill('3')
+    await page.locator('input[inputmode="decimal"][max="20"]').fill('3')
     const beforeFailedEdit = JSON.stringify(await nutritionFoods(page))
     await page.evaluate(() => {
       window.__qimmahOriginalStorageSetItem = Storage.prototype.setItem
@@ -313,7 +316,7 @@ try {
     await page.getByRole('button', { name: 'احفظ التعديل', exact: true }).click()
     await settle(page, 700)
     const afterFailedEdit = JSON.stringify(await nutritionFoods(page))
-    check('فشل التخزين يعرض رسالة صادقة ويبقي مدخل 3 حصص', await page.getByRole('alert').filter({ hasText: /ما قدرنا نحفظ التغيير/ }).isVisible().catch(() => false) && await page.locator('input[type="number"][max="20"]').inputValue() === '3')
+    check('فشل التخزين يعرض رسالة صادقة ويبقي مدخل 3 حصص', await page.getByRole('alert').filter({ hasText: /ما قدرنا نحفظ التغيير/ }).isVisible().catch(() => false) && await page.locator('input[inputmode="decimal"][max="20"]').inputValue() === '3')
     check('فشل التخزين لا يغيّر القيد المحفوظ', afterFailedEdit === beforeFailedEdit, `${beforeFailedEdit} → ${afterFailedEdit}`)
     await page.evaluate(() => {
       Storage.prototype.setItem = window.__qimmahOriginalStorageSetItem
