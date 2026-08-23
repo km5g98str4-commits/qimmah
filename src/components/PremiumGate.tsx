@@ -13,6 +13,7 @@ import { accessStrings } from '@/i18n/dict/access'
 import { useAccess } from '@/lib/access/useAccess'
 import type { PaidAction } from '@/lib/access/paidActions'
 import { outcomeTone, redeemMessage, type RedeemUiState } from '@/lib/access/outcomeMessages'
+import { founderQaEntitlementEnabled, FOUNDER_QA_CODE } from '@/lib/access/entitlementSource'
 import type { Lang } from '@/lib/appPreferences'
 
 /** الفعل المحجوب ⇒ اسمه بلغة المستخدم. الكود لا يظهر للمستخدم أبدًا. */
@@ -140,6 +141,22 @@ export function PremiumGate({ lang }: { lang: Lang }) {
             <button type="button" onClick={() => setCodeOpen(true)} data-testid="premium-gate-have-code" className="btn-ghost min-h-[44px] w-full text-sm">
               {s.haveCode}
             </button>
+          )}
+
+          {/* ═══ لافتة QA — في معاينة المؤسس وحدها ═══
+              فحص المؤسس الحيّ توقّف عند «بلا حسابات»: الآلية موجودة والكود
+              موجود، ولا شيء في الشاشة يقول ذلك. فالفجوة كانت **إفصاحًا** لا
+              قدرة. والشرط `founderQaEntitlementEnabled()` نصّ حرفي وقت البناء،
+              فتُهزّ هذه الكتلة كاملةً خارج حزمة الإنتاج — لا تُخفى بشرط تشغيل.
+              والوسم صريح «مراجعة» كي لا يُقرأ استحقاقُ QA شهادةً على الخادم. */}
+          {founderQaEntitlementEnabled() && (
+            <div data-testid="founder-qa-hint" className="rounded-2xl border border-dashed border-primary/50 bg-primary-soft/40 p-3 text-start">
+              <p className="text-[0.78rem] font-black text-ink-900">{s.qaTitle}</p>
+              <p className="mt-1 text-[0.72rem] leading-relaxed text-ink-600">{s.qaBody}</p>
+              <code data-testid="founder-qa-code" dir="ltr" className="mt-2 block rounded-lg bg-surface px-2.5 py-1.5 text-[0.8rem] font-black tracking-wide text-primary-c">
+                {FOUNDER_QA_CODE}
+              </code>
+            </div>
           )}
 
           {codeOpen && (

@@ -216,7 +216,21 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
   const blankSlate = model.state === 'newUser' && !hasTodaySignal
   // بلا أهداف محسوبة لا حلقات: «—» في أربع حلقات ليست معلومة (§5).
   const hasAnyTarget = calories.target > 0 || protein.target > 0 || carbs.target > 0 || fat.target > 0
-  const showRings = !blankSlate && hasAnyTarget
+  /**
+   * ═══ [LIVE-QA-B] الحلقات لم تعد محجوبة عن اليوم الأول ═══
+   * كان الشرط `!blankSlate && hasAnyTarget`، فمن أنهى الإعداد للتوّ لا يرى
+   * حلقاته — ويقول له «أول ما تسجّل، تبدأ الأرقام تظهر». والأرقام **موجودة
+   * أصلًا**: مقيس على المعاينة الحيّة بعد إعداد كامل ⇒
+   * `{cal:2273, pro:192, carb:223, fat:68}`. أي أن التطبيق حسب هدفه ثمّ أخفاه.
+   *
+   * وهذا ليس خرقًا لقاعدة §5 التي وُضع الشرط لأجلها: القاعدة تمنع أربع حلقات
+   * بـ«—» حين **لا هدف محسوب**، وهي محفوظة كما هي في `hasAnyTarget`. أمّا
+   * «٠ من ٢٢٧٣» فمعلومة كاملة لا فراغ — وهي أول ما يريد المستخدم رؤيته.
+   *
+   * وشرح اليوم الأول لم يُحذف: يبقى **تحت** الحلقات لمن لا إشارة له بعد،
+   * فيجتمع الرقم والدعوة بدل أن يحجب أحدهما الآخر.
+   */
+  const showRings = hasAnyTarget
 
   const quick = (target: QuickLogTarget, fallback: AppRoute) => {
     if (onQuickLog) onQuickLog(target)
@@ -331,6 +345,17 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
             القادم الجديد بلا أي إشارة يرى **شرح اليوم الأول** (وش متوقّع منه ·
             وش يسوي · وش تعني الأرقام قبل ظهورها). ومن له أرقام بلا أهداف محسوبة
             يرى بطاقة الإعداد. ومن له أهداف يرى حلقاته. */}
+        {showRings && (
+          <DailyRingsCard
+            lang={lang}
+            calories={calories}
+            protein={protein}
+            carbs={carbs}
+            fat={fat}
+            onOpen={() => quick('meal', 'nutrition')}
+          />
+        )}
+
         {blankSlate ? (
           <FirstDayCard lang={lang} cards={model.cards} onOpenCard={openCard} />
         ) : !showRings ? (
@@ -353,16 +378,7 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
               ))}
             </ul>
           </section>
-        ) : (
-          <DailyRingsCard
-            lang={lang}
-            calories={calories}
-            protein={protein}
-            carbs={carbs}
-            fat={fat}
-            onOpen={() => onNavigate('nutrition')}
-          />
-        )}
+        ) : null}
 
         {/* ③ وش أسوي بعده؟ — البطاقة تصيّر `model.hero` ولا تستنتج شيئًا. */}
         <NextActionCard

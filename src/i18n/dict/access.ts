@@ -38,6 +38,9 @@ export interface AccessStrings {
   }
   /** كود التفعيل (§D). */
   haveCode: string
+  /** لافتة QA — تظهر في بناء معاينة المؤسس وحده. */
+  qaTitle: string
+  qaBody: string
   codeTitle: string
   /**
    * [OVERNIGHT-5] كان النصّ «اكتب الكود اللي وصلك **بعد الشراء**» — ووعدٌ لا
@@ -135,6 +138,8 @@ export const accessStrings: Record<Lang, AccessStrings> = {
       recovery: 'تسجيل التعافي',
     },
     haveCode: 'عندك كود تفعيل؟',
+    qaTitle: 'وضع مراجعة المؤسس — تفعيل QA',
+    qaBody: 'هذا الكود للمراجعة على هذا الجهاز فقط: يفتح أفعال Premium محليًّا عشان تجرّب التمرين والتغذية والقياسات. ما يمسّ أي حساب ولا خادم، ويروح لو أغلقت التبويب.',
     codeTitle: 'كود التفعيل',
     codeBody: 'اكتب كود الوصول اللي وصلك من حملة أو دعوة. الشراء من سلة يفتح حسابك بنفسه — ما يحتاج كود.',
     codeLabel: 'كود التفعيل',
@@ -195,6 +200,8 @@ export const accessStrings: Record<Lang, AccessStrings> = {
       recovery: 'recovery logging',
     },
     haveCode: 'Have an activation code?',
+    qaTitle: 'Founder review mode — QA activation',
+    qaBody: 'Review-only code for this device: it unlocks Premium actions locally so you can test workouts, nutrition and measurements. It touches no account or server, and clears when you close the tab.',
     codeTitle: 'Activation code',
     codeBody: 'Enter an access code from a campaign or invite. A Salla purchase unlocks your account on its own — no code needed.',
     codeLabel: 'Activation code',

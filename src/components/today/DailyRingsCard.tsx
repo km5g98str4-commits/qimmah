@@ -68,6 +68,7 @@ export function DailyRingsCard({ lang, calories, protein, carbs, fat, onOpen }: 
   return (
     <section
       aria-labelledby="today-rings-title"
+      data-testid="today-rings"
       className="rounded-3xl border border-line bg-surface p-3.5 shadow-card"
     >
       <button
@@ -126,6 +127,17 @@ export function DailyRingsCard({ lang, calories, protein, carbs, fat, onOpen }: 
           )
         })}
       </ul>
+      {/* [LIVE-QA-B] نداء صريح للطعام على «اليوم».
+          البطاقة كلّها كانت قابلة للضغط، لكن لا سطر يقول «سجّل وجبة» — فالفعل
+          موجود وغير مرئي. وهو نفس الوجهة ونفس المسجّل القانوني: لا مسجّل ثانٍ. */}
+      <button
+        type="button"
+        onClick={() => { void playHaptic('selection'); onOpen() }}
+        data-testid="today-log-food"
+        className="btn-primary mt-3 min-h-[44px] w-full justify-center text-sm"
+      >
+        {d.logMeal}
+      </button>
     </section>
   )
 }

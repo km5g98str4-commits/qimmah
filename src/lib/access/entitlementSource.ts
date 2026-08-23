@@ -36,6 +36,37 @@ export function mockEnabled(): boolean {
 }
 
 /**
+ * مسار تفعيل QA لمعاينة المؤسس — **مفتوح في `founder_preview` وحده**.
+ *
+ * ═══ العطل الذي يغلقه ═══
+ * فحص المؤسس الحيّ على iPhone اصطدم بـ«هذي نسخة مراجعة — بلا حسابات»، فتعذّر
+ * عليه بلوغ **أي** فعل مدفوع: تسجيل مجموعة · وجبة · ماء · قياس · إنهاء تمرين.
+ * أي أن نسخة المراجعة كانت تمنع مراجعة نصف المنتج. والآلية كانت موجودة
+ * (`VITE_ENTITLEMENT_MODE=mock`) لكنها **بناءٌ آخر** لا يصل المؤسس أبدًا.
+ *
+ * ═══ لماذا يستحيل تسرّبها إلى الإنتاج ═══
+ * `import.meta.env.VITE_APP_ENV` **نصّ حرفي وقت البناء** يستبدله Vite ثم يطوي
+ * المُصغِّر الشرط. فبناء الإنتاج (بلا هذا المتغيّر) يصير الشرط فيه `false`
+ * ثابتًا، فتُهزّ `MOCK_CODES` ومخزن التقليد خارج الحزمة **بالكامل** — لا
+ * «موجود ولا يُستعمل» بل غير موجود. ويحرسه `test:preview-safety`.
+ *
+ * ═══ وما لا تفتحه عمدًا ═══
+ * **التجربة الحقيقية لا تُقلَّد.** `startTrial` لا تسأل هذه الدالّة إطلاقًا:
+ * تجربة ٧٢ ساعة يحسمها الخادم، ولو «نجحت» في المعاينة لأعطت المؤسس دليلًا
+ * كاذبًا على أن عقد التجربة يعمل. فتبقى `backend_unconfigured` صادقةً حتى
+ * يصل خادم غير إنتاجي. القياس: QA Premium يفتح **سلوك المنتج**، ولا يشهد
+ * على **عقد الخادم**.
+ */
+export function founderQaEntitlementEnabled(): boolean {
+  return import.meta.env.VITE_APP_ENV === 'founder_preview'
+}
+
+/** يفتح مخزن التقليد: بناء تقليد صريح، أو معاينة المؤسس. */
+function localEntitlementEnabled(): boolean {
+  return mockEnabled() || founderQaEntitlementEnabled()
+}
+
+/**
  * نتائج استبدال كود التفعيل — الحالات التي تطلبها واجهة المؤسس (§D).
  *
  * [SOVEREIGN-COMMERCE-001] **`'expired'` أُزيلت**، ولم تُستبدل.
@@ -69,8 +100,14 @@ export type RedeemOutcome =
  * فكان يُثبت لنا في المراجعة تمييزًا لا وجود له في الإنتاج. صار يُنتج نفس
  * `invalid` المدموجة — فأصبح **إثباتًا للدمج** بدل أن يكون إخفاءً له.
  */
+/**
+ * الكود المعروض في لافتة QA بمعاينة المؤسس. **مصدر واحد**: تعرضه الشاشة
+ * وتقبله `redeemCode` من نفس الثابت، فلا يفترقان بتحرير.
+ */
+export const FOUNDER_QA_CODE = 'QIMMAH-TEST-OK'
+
 const MOCK_CODES: Record<string, RedeemOutcome> = {
-  'QIMMAH-TEST-OK': 'success',
+  [FOUNDER_QA_CODE]: 'success',
   'QIMMAH-TEST-USED': 'already_used',
   // مدموج مع «غير معروف» عمدًا — انظر التعليل أعلاه.
   'QIMMAH-TEST-EXPIRED': 'invalid',
@@ -80,7 +117,7 @@ const MOCK_CODES: Record<string, RedeemOutcome> = {
 }
 
 function readMockActive(): boolean {
-  if (!mockEnabled()) return false
+  if (!localEntitlementEnabled()) return false
   try {
     return window.sessionStorage.getItem(MOCK_KEY) === 'active'
   } catch {
@@ -108,8 +145,9 @@ export async function resolveEntitlement(): Promise<{
   failure?: AccessFailure
   accountId?: string | null
 }> {
-  // وضع التقليد قرار وقت بناء، ويسبق كل شيء — تستخدمه إثباتات المصفوفة وحدها.
-  if (mockEnabled()) return { status: readMockActive() ? 'active' : 'none', source: 'mock' }
+  // وضع التقليد قرار وقت بناء، ويسبق كل شيء — إثباتات المصفوفة ومعاينة المؤسس.
+  // و`source: 'mock'` تُعلن نفسها: لا يُقرأ هذا الاستحقاق شهادةً على الخادم.
+  if (localEntitlementEnabled()) return { status: readMockActive() ? 'active' : 'none', source: 'mock' }
   // [OVERNIGHT-3] عقد الخادم صار موجودًا. بلا ضبط Supabase تبقى الإجابة `none`
   // **بصدق**: لا مصدر ⇒ لا استحقاق. ومع الضبط تُسأل قاعدة البيانات، وأي فشل
   // يعود `none` مع سبب عام — الفشل يُغلق ولا يفتح.
@@ -142,7 +180,7 @@ export async function redeemActivationCode(code: string): Promise<RedeemOutcome>
   // مدخل مشوَّه: كلّه فواصل/رموز تُنزع فلا يبقى شيء يُرسَل. رفضٌ محلّي صادق،
   // ويُعرض بنفس رسالة «الكود ما ضبط» — فلا يُستدلّ من الرسالة على شكل الأكواد.
   if (!normalized) return 'invalid'
-  if (mockEnabled()) {
+  if (localEntitlementEnabled()) {
     const outcome = MOCK_CODES[mockKey] ?? 'invalid'
     if (outcome === 'success') {
       try {
@@ -216,9 +254,15 @@ export async function claimPendingGrants(): Promise<boolean> {
   return claimPendingGrantsOnServer()
 }
 
-/** يُنهي جلسة التقليد (تسجيل خروج/اختبار). لا أثر له في الإنتاج. */
+/**
+ * يُنهي جلسة التقليد (تسجيل خروج/إعادة ضبط QA). **لا أثر له في الإنتاج.**
+ *
+ * ويشمل معاينة المؤسس عمدًا: بلا ذلك يبقى استحقاق QA لاصقًا بعد تسجيل الخروج،
+ * فينتقل إلى شخصية أخرى — وهو بالضبط ما يمنعه شرط «لا يُمنح Premium خارج شخصية
+ * QA». وهو كذلك زرّ إعادة الضبط الحتمي: امسح، ثمّ فعّل من جديد.
+ */
 export function clearMockEntitlement(): void {
-  if (!mockEnabled()) return
+  if (!localEntitlementEnabled()) return
   try {
     window.sessionStorage.removeItem(MOCK_KEY)
   } catch {

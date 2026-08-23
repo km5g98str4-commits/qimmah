@@ -89,6 +89,12 @@ jobs:
       - name: Progress & measurements write-path (entitled) — live browser
         run: node scripts/e2e/progress-reliability.mjs
 
+      # رحلة مراجعة المؤسس على **نفس أرتيفكت المعاينة المنشور** — لا على بناء
+      # تقليد. فحص المؤسس الحيّ أسقط ادّعاءً أخضر مصدره أن الرحلات كانت تعمل
+      # على بناء آخر لا يفتحه المؤسس أبدًا.
+      - name: Founder QA journey (founder_preview artifact) — live browser
+        run: npm run test:e2e:founder-qa
+
       - name: Upload dist artifact
         if: success()
         # [CTO-87] الرفع **دليل بناء لا شرط إطلاق**: لا خطوة تُنزّله
