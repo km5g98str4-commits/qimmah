@@ -242,6 +242,65 @@ try {
     check('حلقات «اليوم» تعكس الوجبة المسجَّلة', consumed.length > 0 && !/^\s*$/.test(consumed))
   }
 
+  // ═══ ع/ف) الماء والخطوات — من «اليوم» نفسه، بأرقام عربية ═══
+  // البند Q في رحلة المؤسس. كان مغطًّى بإثباتات حتمية وبرحلات أخرى، لا بهذه
+  // الرحلة — ورحلة المؤسس هي التي تقيس **الأرتيفكت الذي يفتحه**.
+  console.log('\n▸ ع/ف) الماء والخطوات على «اليوم»')
+  await page.evaluate(() => { location.hash = '/dashboard' })
+  await settle(page, 1_600)
+  await clearOverlays()
+
+  // المفتاحان القانونيّان: لقطة اليوم (`qimmah:nutrition:v2`) والدفتر المؤرَّخ
+  // (`qimmah:history:waterLogs:v1`). ويُقرآن **معًا** لأن الأول وحده يُمحى بيوم
+  // جديد، والثاني وحده لا يثبت أن الشاشة رأت الكتابة.
+  const readWater = () => page.evaluate(() => {
+    const out = { day: 0, ledger: 0 }
+    try { out.day = Number(JSON.parse(localStorage.getItem('qimmah:nutrition:v2') || '{}').waterMl) || 0 } catch { /* noop */ }
+    try {
+      const logs = JSON.parse(localStorage.getItem('qimmah:history:waterLogs:v1') || '{}')
+      out.ledger = Math.max(0, ...Object.values(logs).map((v) => Number(v && v.waterMl) || 0), 0)
+    } catch { /* noop */ }
+    return out
+  })
+  const waterBefore = await readWater()
+  const waterAdded = await page.locator('[data-testid="water-add"]').first()
+    .click({ timeout: 15_000 }).then(() => true).catch(() => false)
+  await settle(page, 1_400)
+  const waterAfter = await readWater()
+  check('تسجيل الماء من «اليوم» يكتب في لقطة اليوم', waterAdded && waterAfter.day > waterBefore.day,
+    `قبل=${JSON.stringify(waterBefore)} بعد=${JSON.stringify(waterAfter)}`)
+  check('   ويصل الدفتر المؤرَّخ كذلك — لا كتابة تموت مع اليوم',
+    waterAfter.ledger > waterBefore.ledger, JSON.stringify(waterAfter))
+
+  // الخطوات: تُكتب بالأرقام العربية، ويُقرأ المخزَّن **قيمةً قانونية** لا نصًّا.
+  await clearOverlays()
+  const stepsEdit = page.locator('[data-testid="today-steps-edit"]').first()
+  const stepsOpened = await stepsEdit.click({ timeout: 15_000 }).then(() => true).catch(() => false)
+  await settle(page, 900)
+  let stepsSaved = false
+  if (stepsOpened) {
+    await page.locator('[data-testid="today-steps-input"]').fill('٨٤٠٠').catch(() => {})
+    await page.locator('[data-testid="today-steps-save"]').click({ timeout: 10_000 }).catch(() => {})
+    await settle(page, 1_400)
+    stepsSaved = await page.locator('[data-testid="today-steps-saved"]').isVisible().catch(() => false)
+  }
+  check('حقل الخطوات يقبل ٨٤٠٠ بالأرقام العربية ويُعلن الحفظ', stepsSaved)
+  const stepsStored = await page.evaluate(() => {
+    for (const k of Object.keys(localStorage)) {
+      if (!k.includes('steps')) continue
+      try {
+        const v = JSON.parse(localStorage.getItem(k) || 'null')
+        const found = JSON.stringify(v)
+        if (found.includes('8400')) return { key: k, raw: found.slice(0, 160) }
+      } catch { /* مفتاح ليس JSON — يُتجاوز */ }
+    }
+    return null
+  })
+  // §4.2: لا يكفي «حُفظ» — القيمة المخزَّنة يجب أن تكون **٨٤٠٠ لاتينية**، فالخزن
+  // الخام لـ«٨٤٠٠» يجعل كل قارئ لاحق يرى NaN بينما الشاشة تبدو ناجحة.
+  check('والمخزَّن قيمة قانونية 8400 لا «٨٤٠٠»', stepsStored !== null,
+    stepsStored ? stepsStored.raw : 'لم يُعثر على 8400 في أي مفتاح خطوات')
+
   // ═══ ص) التحديث يحفظ حالة QA ═══
   console.log('\n▸ ص) التحديث يحفظ الاستحقاق والبيانات')
   await page.reload({ waitUntil: 'networkidle' })
