@@ -103,6 +103,7 @@ export function WarmupScreen({ lang, plan, dayNameAr, dayNameEn, onStart, onSkip
             ref={startRef}
             type="button"
             onClick={onStart}
+            data-testid="warmup-start"
             className="btn-primary min-h-[52px] w-full py-3"
           >
             <Icon name="Flame" className="h-4 w-4" aria-hidden="true" />
@@ -111,6 +112,7 @@ export function WarmupScreen({ lang, plan, dayNameAr, dayNameEn, onStart, onSkip
           <button
             type="button"
             onClick={onSkip}
+            data-testid="warmup-skip"
             className="tap-target w-full rounded-2xl border border-line bg-surface py-3 text-sm font-bold text-ink-700"
           >
             {w.skipCta}
@@ -119,6 +121,7 @@ export function WarmupScreen({ lang, plan, dayNameAr, dayNameEn, onStart, onSkip
           <button
             type="button"
             onClick={onDisable}
+            data-testid="warmup-disable"
             className="tap-target mx-auto inline-flex items-center px-3 text-xs font-bold text-ink-400 underline underline-offset-4"
           >
             {w.hideForever}

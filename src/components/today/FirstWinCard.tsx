@@ -69,6 +69,7 @@ export function FirstWinCard({ lang, suggestion, done, doneKind, warmupMinutes, 
       <button
         type="button"
         onClick={() => onPick(primary)}
+        data-testid={`today-win-${primary}`}
         className="v2-pressable tap-target mt-4 flex w-full items-center gap-3 rounded-2xl border border-line bg-page p-3.5 text-start transition-colors hover:border-primary/50"
       >
         <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary-soft">

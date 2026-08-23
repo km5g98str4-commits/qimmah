@@ -31,6 +31,7 @@ import { completeFirstWin } from '@/lib/firstWin'
 import { WarmupScreen } from '@/components/workout/WarmupScreen'
 import { buildWarmupPlan, type WarmupPlan } from '@/lib/warmupPlan'
 import { loadWarmupPref, saveWarmupPref } from '@/lib/strength/warmup'
+import { takeWorkoutIntent } from '@/lib/workoutIntent'
 import { estimateDurationMin } from '@/lib/workoutStats'
 import { cappedSessionMinutes, easyExerciseCount, easyMinutesFor, isEasyToday } from '@/lib/easySession'
 import { journeyDayIndex } from '@/lib/tracking/signals'
@@ -160,6 +161,24 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
     }
     setPendingWarmup({ day, plan: warmup })
   })
+
+  /**
+   * نيّة «اليوم» تُستهلَك عند الدخول — وإلا هبط النداء على الشاشة العامّة.
+   *
+   * `startDay` هي المدخل الوحيد للإحماء، وهي `guardPaid` — فالنيّة **لا تلتفّ
+   * على بوّابة Premium**: من لا يملك الوصول يرى البوّابة نفسها التي يراها لو
+   * ضغط «ابدأ» من هنا. النيّة تحمل القصد لا الصلاحية.
+   *
+   * والقراءة مستهلِكة (`take` تمسح قبل أن تُعيد)، فلا يُعاد فتح الإحماء عند كل
+   * تحديث للصفحة — ولا يضرّ استدعاء React المزدوج للأثر في وضع التطوير.
+   */
+  useEffect(() => {
+    if (!planDay) return
+    if (takeWorkoutIntent(['warmup']) !== 'warmup') return
+    startDay(planDay)
+    // يُقرأ مرّة عند توفّر يوم التدريب؛ `startDay` مستقرّة بما يكفي لهذا الغرض.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [planDay?.id])
 
   /** يوم الجلسة المعلّقة كما هو في الخطة الحالية — القرار على المعرّف لا على الاسم. */
   const resumeDay = pendingResume ? plan.days.find((dd) => dd.id === pendingResume.dayId) : undefined

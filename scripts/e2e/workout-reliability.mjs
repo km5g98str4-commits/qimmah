@@ -4,7 +4,7 @@
 
 import { spawn } from 'node:child_process'
 import { chromium } from './lib/engine.mjs'
-import { answerHistory, finishInputSteps } from './lib/onboarding-driver.mjs'
+import { answerHistory, finishInputSteps, selectIntent } from './lib/onboarding-driver.mjs'
 
 const PORT = 5324
 const EXTERNAL = process.env.PREVIEW_URL || ''
@@ -52,6 +52,20 @@ const tap = (page, re) => page.evaluate((source) => {
   return true
 }, re.source)
 
+/**
+ * يعبر مرحلة الإحماء إن ظهرت.
+ *
+ * `startDay` تُظهر `WarmupScreen` كلّما كان لليوم خطوات إحماء والمستخدم لم
+ * يعطّلها (`show: true` افتراضًا). فانتظارُ حقل الوزن مباشرةً بعد البدء افتراضٌ
+ * يتخطّى مرحلة حقيقية، ويسقط بمهلة غامضة تبدو عطلَ تفعيل.
+ */
+async function passWarmup(page) {
+  const start = page.locator('[data-testid="warmup-start"]')
+  if (await start.isVisible().catch(() => false)) {
+    await start.click({ force: true })
+  }
+}
+
 async function onboardToPreview(page) {
   await page.goto(URL, { waitUntil: 'networkidle' })
   await settle(page, 2_600)
@@ -67,12 +81,15 @@ async function onboardToPreview(page) {
   const next = () => page.locator('footer button').last().click({ force: true })
   await next()
   await page.waitForSelector('#onb-title-intent', { timeout: 20_000 })
+  // النيّة تُختار **بقيمتها** ثم تُبلَّغ بنفس القيمة — لا `nth(1)` هنا و«plan»
+  // هناك. الافتراضان المتباعدان أسقطا حارس «نمط الأكل» على عيبٍ لا وجود له:
+  // السكربت ينقر «meals» ويخبر السائق «plan»، فيبلّغ السائق عن سؤال بلا أثر.
+  const chosenIntent = await selectIntent(page, 'meals')
   const rows = page.locator('button[aria-pressed]')
-  await rows.nth(1).click({ force: true })
   await rows.nth(3).click({ force: true })
   await answerHistory(page, next, { trained: true })
   await page.locator('button[aria-pressed]').first().click({ force: true })
-  await finishInputSteps(page, next)
+  await finishInputSteps(page, next, { intent: chosenIntent })
   await settle(page, 1_600)
   await tap(page, /الدخول للوحة/)
   await page.waitForSelector('[data-testid="plan-handoff"]', { timeout: 25_000 })
@@ -203,7 +220,22 @@ try {
   check('المعاينة تفتح بوّابة Premium عند البدء', await page.locator('[data-testid="premium-gate"]').isVisible())
   check('المعاينة لا تنشئ لقطة تمرين قبل التفعيل', (await activeRaw(page)) === null)
   await activateFromOpenGate(page)
+
   await startToday.click()
+
+  // ═══ الإحماء مرحلة قبل أول مجموعة عمل — لا يُقفز عنها ═══
+  // كانت الرحلة تنتظر حقل الوزن مباشرةً بعد البدء، وهو افتراض بائت: `startDay`
+  // تُظهر شاشة الإحماء أولًا (الافتراض `show: true`). فكانت تسقط بمهلة غامضة
+  // تبدو عطلَ تفعيل، ومصدرها توقّعٌ يتخطّى مرحلة حقيقية.
+  await page.locator('[data-testid="warmup-start"]').waitFor({ timeout: 20_000 })
+  check('بدء التمرين يفتح شاشة الإحماء لا الجلسة مباشرةً',
+    await page.locator('[data-testid="warmup-start"]').isVisible())
+  check('وشاشة الإحماء تعرض التخطّي كخيار صريح',
+    await page.locator('[data-testid="warmup-skip"]').isVisible())
+  check('ولا حقل وزن قبل إتمام الإحماء أو تخطّيه — الترتيب محفوظ',
+    (await page.locator('input[inputmode="decimal"]').count()) === 0)
+  await page.locator('[data-testid="warmup-start"]').click({ force: true })
+
   await page.locator('input[inputmode="decimal"]').first().waitFor()
   check('التفعيل يفتح وضع الجلسة الحيّ', await page.getByRole('button', { name: 'إغلاق', exact: true }).isVisible())
 
@@ -282,6 +314,14 @@ try {
   console.log('\n=== جلسة كاملة ثانية + اكتمال Today بعد multiple completed ===')
   await page.evaluate(() => { location.hash = '/workout' })
   await page.getByRole('button', { name: /^ابدأ تمرين اليوم/ }).first().click()
+  // المخرج الثاني من الإحماء: **التخطّي**. الجلسة الأولى دخلت عبر «ابدأ»،
+  // وهذه تدخل عبر «تخطَّ» — فالمساران مُثبَتان لا أحدهما.
+  {
+    const skip = page.locator('[data-testid="warmup-skip"]')
+    const shown = await skip.isVisible().catch(() => false)
+    check('الإحماء يُعرض عند البدء الثاني كذلك', shown)
+    if (shown) await skip.click({ force: true })
+  }
   await page.locator('input[inputmode="decimal"]').first().waitFor()
   const fullFinish = await completeEverySet(page)
   await fullFinish.click()
@@ -309,6 +349,36 @@ try {
   await page.reload({ waitUntil: 'networkidle' })
   await page.getByRole('heading', { name: /^كفو عليك اليوم/ }).waitFor()
   check('اكتمال Today يبقى بعد reload', await page.getByRole('heading', { name: /^كفو عليك اليوم/ }).isVisible())
+
+  console.log('\n=== نداء الإحماء في «اليوم» يفتح الإحماء فعلًا ===')
+  // [LIVE-QA-005] «اليوم» يعرض «إحماء قصير · سوّه الحين»، وضغطُه كان ينفّذ
+  // `onNavigate('workout')` وحدها — فيهبط المستخدم على الشاشة العامّة. شاشة
+  // الإحماء موجودة وموصولة، لكن مدخلها الوحيد `startDay` **داخل** شاشة التمرين.
+  //
+  // يُفحص الأمران: الآلية (النيّة تُكتب وتُستهلَك) والنداء الحقيقي حين يُعرض.
+  // والفصل مقصود: `suggestFirstWin` يقترح الماء بعد التاسعة مساءً، فالنداء قد
+  // لا يكون معروضًا وقت التشغيل — والآلية تبقى قابلة للفحص في كل وقت.
+  await page.evaluate(() => { location.hash = '/dashboard' })
+  await settle(page, 1_200)
+
+  // الآلية — حتمية في كل وقت: النيّة تُكتب ثم يُنتقل، فتُستهلَك عند الدخول.
+  await page.evaluate(() => { location.hash = '/dashboard' })
+  await settle(page, 900)
+  await page.evaluate(() => window.sessionStorage.setItem('qimmah:workout-intent', 'warmup'))
+  await page.evaluate(() => { location.hash = '/workout' })
+  await settle(page, 1_600)
+  check('نيّة «warmup» المحمولة عبر الحدّ تفتح شاشة الإحماء',
+    await page.locator('[data-testid="warmup-start"]').isVisible().catch(() => false))
+  // والنيّة **مستهلِكة**: لا يُعاد فتح الإحماء عند كل دخول لاحق.
+  const intentAfter = await page.evaluate(() => window.sessionStorage.getItem('qimmah:workout-intent'))
+  check('النيّة تُستهلَك عند القراءة — لا تبقى معلّقة', intentAfter === null, String(intentAfter))
+  await passWarmup(page)
+  await settle(page, 800)
+  await page.evaluate(() => { location.hash = '/dashboard' })
+  await settle(page, 1_200)
+  check('⚔️ الدخول التالي بلا نيّة لا يفتح الإحماء — الفحص ليس دائم الصدق',
+    !(await page.locator('[data-testid="warmup-start"]').isVisible().catch(() => false)))
+
   check('المسار كله بلا pageerror', diagnostics.pageerror.length === 0, diagnostics.pageerror.join(' | '))
 
   await context.close()

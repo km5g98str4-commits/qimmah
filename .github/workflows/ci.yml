@@ -73,6 +73,15 @@ jobs:
       - name: Arabic numeral input — live browser
         run: npm run test:e2e:arabic-numerals
 
+      # نداء «اليوم» كان يَعِد بالإحماء ويُسلّم قائمة التمارين — النيّة تُفقد
+      # عند الحدّ بين الشاشتين. يُفحص حيًّا لأن العطل كان في التوصيل لا في الوحدة.
+      - name: Today warm-up CTA — live browser
+        run: npm run test:e2e:warmup-cta
+
+      # مسار الكتابة تحت استحقاق: بوّابة → تفعيل → إحماء → تسجيل مجموعة → إنهاء.
+      - name: Workout write-path (entitled) — live browser
+        run: npm run test:e2e:workout
+
       - name: Upload dist artifact
         if: success()
         # [CTO-87] الرفع **دليل بناء لا شرط إطلاق**: لا خطوة تُنزّله

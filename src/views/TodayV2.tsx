@@ -36,6 +36,7 @@ import { DEFAULT_NOTIFICATION_PREFS, loadNotificationPrefs, saveNotificationPref
 import type { NotificationPrefs } from '@/lib/notifications/types'
 import { requestNotificationPermission, reconcileNotificationSchedule } from '@/lib/notifications/engine'
 import { hasEventToday, journeyDayIndex } from '@/lib/tracking/signals'
+import { requestWorkoutIntent } from '@/lib/workoutIntent'
 import { useAchievementsEngine } from '@/features/achievements/useAchievements'
 
 interface TodayV2Props {
@@ -314,7 +315,12 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
             warmupMinutes={model.warmupMinutes}
             onPick={(kind) => {
               // الضغطة توصّل للسطح الحيّ؛ الإنجاز يُسجَّل عند وقوع الفعل هناك.
-              if (kind === 'warmup') onNavigate('workout')
+              if (kind === 'warmup') {
+                // النيّة تُحمل عبر الحدّ: التنقّل وحده كان يهبط على الشاشة
+                // العامّة، فيَعِد النداء بالإحماء ويُسلّم قائمة تمارين.
+                requestWorkoutIntent('warmup')
+                onNavigate('workout')
+              }
               else if (kind === 'water') quick('water', 'nutrition')
               else quick('meal', 'nutrition')
             }}
