@@ -65,3 +65,48 @@ npm run test:release:convergence
 - **قاعدة حيّة.** لا هجرة طُبِّقت. `test:migration-order` يقيس على PGlite لا على الإنتاج.
 - **التزامن الحقيقي** على الاسترداد — PGlite جلسة واحدة.
 - **جهاز iOS فعلي** — وعطل إقلاع `ERR_UNKNOWN` دَين مفتوح خارج نطاق هذه المهمّة.
+
+---
+
+## نتيجة التقاء الإصدار — قيست فعلًا
+
+```
+✅ static-bundle-safety              pass  26 · fail 0 · blocked 0
+✅ static-regression-ledger          pass  45 · fail 0 · blocked 3
+✅ p1-preview-user (chromium)        pass  67 · fail 0 · blocked 1
+✅ p2-premium-test-state             pass  25 · fail 0 · blocked 0
+✅ p3-returning-guest                pass  15 · fail 0 · blocked 0
+✅ p4-interrupted-onboarding         pass  16 · fail 0 · blocked 0
+✅ p5-dirty-state                    pass  52 · fail 0 · blocked 0
+✅ p6-auth                           pass  50 · fail 0 · blocked 1
+✅ p7-failure-conditions             pass  27 · fail 0 · blocked 0
+✅ p8-responsive-matrix              pass 140 · fail 0 · blocked 0
+────────────────────────────────────────────────────────────────
+TOTAL  pass 463 · fail 0 · externally-blocked 5
+```
+
+الخمسة المحجوبة خارجيًا محجوبة **بغياب خادم وقاعدة**، لا بعطل — وهو الحجب المُعلَن
+نفسه في [`EXTERNAL-BLOCKERS.md`](./EXTERNAL-BLOCKERS.md).
+
+## أرتيفكت المعاينة — فُحص بيدي لا بتقرير حارسه
+
+`npm run build:founder-preview` ثمّ تمشيط `dist/` مباشرةً:
+
+| الشرط | المقيس |
+|---|---|
+| `qimmah-env = founder_preview` | ✅ `<meta name="qimmah-env" content="founder_preview">` |
+| عنوان مشروع Supabase الإنتاجي | ✅ **٠ ملفّ** |
+| مفتاح anon الإنتاجي | ✅ **٠ ملفّ** |
+| `service_role` | ✅ **٠ ملفّ** |
+| وسم تقليد الاستحقاق | ✅ **٠ ملفّ** |
+| `BUILD_LABEL` = هاش الرأس | ✅ `e8e8ff83` = `HEAD` |
+
+**ومطابقتان بقيتا — وكلتاهما نمط بدل لا مشروع:** `dist/_headers` يحمل
+`connect-src … https://*.supabase.co` (قيد CSP لا اعتماد)، و`index-*.js` يحمل
+`e.push("*.supabase.co","*.supabase.in")` (قائمة مضيفين). لا مرجع مشروع في أيّهما.
+
+> والفرق حاكم: الاعتمادات **غير موجودة في الأرتيفكت**، لا «موجودة ولا تُستعمل».
+> `import.meta.env.VITE_APP_ENV` يُقرأ حرفيًا وقت البناء فيطوي المُصغِّر الشرط
+> ويهزّ `DEFAULT_SUPABASE_*` خارج الحزمة بالكامل.
+
+**فالأرتيفكت جاهز للنشر — والنشر وحده هو المحجوب**، لا سلامته.
