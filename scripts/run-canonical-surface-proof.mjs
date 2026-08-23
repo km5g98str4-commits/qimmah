@@ -6,11 +6,11 @@
  * ولو بدا قديمًا. أي قائمة يدوية كانت ستشيخ بنفس الطريقة التي أنتجت العطل أصلًا.
  */
 import { build } from 'esbuild'
-import { readFileSync } from 'node:fs'
+import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import assert from 'node:assert/strict'
-import { SURFACES, WRAPPED, UNROUTED_SECTIONS, TREATMENTS } from './canonical-surfaces.mjs'
+import { SURFACES, WRAPPED, UNROUTED_SECTIONS, UNROUTED_COMPONENTS, SCANNED_DIRS, TREATMENTS } from './canonical-surfaces.mjs'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const read = (p) => readFileSync(resolve(root, p), 'utf8')
@@ -74,6 +74,41 @@ for (const w of WRAPPED) {
 console.log('\n④ الأقسام غير الموجَّهة معلَنة لا مكتشَفة لاحقًا')
 for (const p of UNROUTED_SECTIONS) check(`قسم غير موجَّه معلَن: ${p}`, !LIVE.has(p))
 
+console.log('\n④ب اكتمال السجلّ — لا سطح ميت بلا إعلان، ولا إعلان بائت')
+//
+// ═══ الفجوة التي يسدّها ═══
+// كان الحارس يفحص **المعلَن** وحده. فملفّ يخرج من الرسم ولا يُسجَّل يمرّ صامتًا —
+// وهو الشكل الذي وُجد الحارس ليمنعه. و`src/features/` لم يكن يُمشَّط إطلاقًا،
+// وفيه وحدتان ميتتان لم يذكرهما أحد.
+//
+// والقفل باتجاهين عمدًا: (أ) ميت غير معلَن يسقط بالاسم؛ (ب) معلَنٌ ميتًا **عاد
+// حيًّا** يسقط كذلك — وإلّا شاخ السجلّ بصمت وصار يصف شجرةً لم تعد قائمة.
+const walkTsx = (dir, acc = []) => {
+  for (const entry of readdirSync(resolve(root, dir))) {
+    const rel = `${dir}/${entry}`
+    if (statSync(resolve(root, rel)).isDirectory()) walkTsx(rel, acc)
+    else if (entry.endsWith('.tsx')) acc.push(rel)
+  }
+  return acc
+}
+const DECLARED_DEAD = new Set([...SURFACES.flatMap((s) => s.twins), ...UNROUTED_SECTIONS, ...UNROUTED_COMPONENTS])
+const onDisk = SCANNED_DIRS.flatMap((d) => walkTsx(d))
+const undeclaredDead = onDisk.filter((p) => !LIVE.has(p) && !DECLARED_DEAD.has(p))
+assert.deepEqual(
+  undeclaredDead,
+  [],
+  `canonical-surface-undeclared-dead: سطح خارج حزمة الشحن بلا إعلان →\n    ${undeclaredDead.join('\n    ')}`,
+)
+check(`لا سطح ميت غير معلَن (${onDisk.length} ملفًا في ${SCANNED_DIRS.length} أدلّة)`, true)
+
+const staleDeclarations = [...DECLARED_DEAD].filter((p) => LIVE.has(p))
+assert.deepEqual(
+  staleDeclarations,
+  [],
+  `canonical-surface-stale-declaration: معلَنٌ ميتًا وهو داخل الرسم →\n    ${staleDeclarations.join('\n    ')}`,
+)
+check(`كل إعلان في السجلّ ما زال صادقًا (${DECLARED_DEAD.size} إعلانًا)`, true)
+
 console.log('\n⑤ قاعدة التغطية — لا إصلاح يهبط على توأم دون المالك الحيّ')
 const violations = []
 for (const s of SURFACES) {
@@ -122,6 +157,36 @@ check('توجيه توأم دون تحديث السجلّ يسقط بفحص مس
   const regressed = tr.pattern.test(twin) && !tr.pattern.test(live)
   check('نزع المعالجة من المالك الحيّ يعيد إنتاج BUG-019 ويُكشف', regressed)
 }
+
+// (ج-١) ملفّ ميت لم يُعلَن يجب أن يسقط **باسمه** لا بعدد.
+assert.throws(
+  () => {
+    const pretend = [...undeclaredDead, 'src/features/ghost/GhostCard.tsx']
+    assert.deepEqual(pretend, [], `canonical-surface-undeclared-dead: ${pretend.join(' ')}`)
+  },
+  /canonical-surface-undeclared-dead: .*GhostCard\.tsx/,
+  'محاكاة: سطح ميت غير معلَن يجب أن يسقط باسمه',
+)
+check('سطح ميت غير معلَن يسقط بفحص مسمّى يذكر الملفّ', true)
+
+// (ج-٢) والاتجاه المضادّ: إعلانٌ بائت — ملفّ معلَن ميتًا عاد إلى الرسم.
+assert.throws(
+  () => {
+    const pretendLive = new Set([...LIVE, UNROUTED_COMPONENTS[0]])
+    const stale = [...DECLARED_DEAD].filter((p) => pretendLive.has(p))
+    assert.deepEqual(stale, [], `canonical-surface-stale-declaration: ${stale.join(' ')}`)
+  },
+  /canonical-surface-stale-declaration: .*EditableTable\.tsx/,
+  'محاكاة: إعلان بائت يجب أن يسقط باسمه',
+)
+check('إعلان بائت (معلَن ميتًا وهو حيّ) يسقط بفحص مسمّى', true)
+
+// (ج-٣) السجلّ لا يجوز أن يُفرَّغ ليمرّ الفحص.
+assert.ok(
+  UNROUTED_COMPONENTS.length >= 20 && SCANNED_DIRS.length >= 4,
+  'canonical-surface-registry-gutted: السجلّ أو نطاق التمشيط قُلّص فصار الاكتمال بلا معنى',
+)
+check('نطاق التمشيط والسجلّ لم يُقلَّصا لإرضاء الفحص', true)
 
 // (ج) سجلّ فارغ لا يجوز أن يمرّ — وإلا صار الحارس زينة.
 assert.ok(SURFACES.length >= 3 && TREATMENTS.length >= 3, 'canonical-surface-registry-empty: السجلّ أفرغ فصار الحارس بلا أثر')

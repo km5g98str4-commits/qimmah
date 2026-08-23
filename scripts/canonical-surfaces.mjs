@@ -52,6 +52,53 @@ export const WRAPPED = [
 ]
 
 /** أقسام قديمة خارج الرسم — ليست أسطحًا مزدوجة، لكنها ليست إنتاجًا أيضًا. */
+/**
+ * الأدلّة التي تُمشَّط بحثًا عن سطح ميت غير معلَن.
+ *
+ * كان الحارس يفحص **المعلَن** وحده: توأمًا مسجَّلًا وقسمًا مسجَّلًا. فملفّ يموت
+ * ولا يُسجَّل يمرّ صامتًا — وهو الشكل الذي وُجد الحارس أصلًا ليمنعه.
+ */
+export const SCANNED_DIRS = ['src/views', 'src/components', 'src/features', 'src/sections']
+
+/**
+ * مكوّنات خارج حزمة الشحن — **معلَنة لا مكتشَفة لاحقًا**.
+ *
+ * ⚠️ هذا السجلّ يقول «لا يصل المستخدم»، ولا يقول «آمن الحذف». الحذف موجة
+ * مستقلّة بشرطها في الميثاق (§11/٩): كل مرشَّح يحتاج `grep` للمراجع الديناميكية
+ * (مفاتيح نصّية · `lazy` · جداول مسارات) موثّقًا في التقرير. أمّا «خارج الرسم»
+ * فمُثبَت هنا بالبناء نفسه: ما لا يجمعه esbuild من `src/main.tsx` لا يُشحن.
+ */
+export const UNROUTED_COMPONENTS = [
+  // طبقة المخصِّص القديمة — سبقت `OnboardingV2` ولم يُوجَّه منها شيء.
+  'src/components/customizer/EditableTable.tsx',
+  'src/components/customizer/steps/StepBasics.tsx',
+  'src/components/customizer/steps/StepGoal.tsx',
+  'src/components/customizer/steps/StepLook.tsx',
+  'src/components/customizer/steps/StepMeals.tsx',
+  'src/components/customizer/steps/StepMetrics.tsx',
+  'src/components/customizer/steps/StepSchedule.tsx',
+  'src/components/customizer/steps/StepSupplements.tsx',
+  'src/components/customizer/steps/StepWorkouts.tsx',
+  // قشرة الهبوط القديمة.
+  'src/components/Header.tsx',
+  'src/components/SectionHeading.tsx',
+  // بدائل خريطة العضلات — ملفّ التصادم المجمَّد (#7 وما بعده).
+  'src/components/FlatMuscleBody.tsx',
+  'src/components/MuscleChips.tsx',
+  // نداءات التثبيت — النسخة الحيّة غيرها.
+  'src/components/InstallBanner.tsx',
+  'src/components/InstallPrompt.tsx',
+  // بطاقات وأغطية بلا موضع رسم حاليًا.
+  'src/components/AllergyNotice.tsx',
+  'src/components/StepCounterCard.tsx',
+  'src/components/SyncConsentGate.tsx',
+  'src/components/coaching/TodayLearnCard.tsx',
+  'src/components/nutrition/CalorieExplainer.tsx',
+  // وحدات `features` — الرسم لم يكن يُمشَّط هنا إطلاقًا قبل هذا الحارس.
+  'src/features/achievements/AchievementsCard.tsx',
+  'src/features/todo/TodoWidget.tsx',
+]
+
 export const UNROUTED_SECTIONS = [
   'src/sections/CommitmentKeys.tsx',
   'src/sections/Customization.tsx',
