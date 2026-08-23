@@ -17,6 +17,27 @@ import { PREFS_KEY } from '../lib/drive.mjs'
 
 const AUTH_ROUTES = ['login', 'signup', 'forgot']
 
+/**
+ * إعادة تحميل **باردة** لمسار يختلف بالشظيّة وحدها.
+ *
+ * والقفزة إلى `about:blank` ضرورية (انظر التعليق في موضع الاستدعاء)، لكنها
+ * كانت تُنفَّذ **والوثيقة السابقة ما زالت تجلب مواردها**: بيان التطبيق
+ * (`manifest.webmanifest`) وأيقوناته يُجلبان كسولًا بعد `domcontentloaded`.
+ * فإن قفزنا وهي في الطريق، أُعيد إسناد الطلب إلى وثيقة `about:blank` ذات
+ * **الأصل المُعتِم (`null`)**، فيمنعه Chromium بقاعدة الوصول للشبكة الخاصّة:
+ * «العميل ليس سياقًا آمنًا، والمورد في `loopback`». فيُسجَّل خطأ كونسول
+ * **من صنع أداة الفحص لا من صنع المنتج** — ويستحيل وقوعه على `https` حيث
+ * السياق آمن أصلًا.
+ *
+ * فالانتظار حتى سكون الشبكة قبل القفزة يزيل السباق من جذره، ولا يمسّ ما
+ * يفحصه هذا الطقم: البرودة محفوظة (القفزة باقية) والمنتج لم يُلمس.
+ */
+async function coldGoto(page, target) {
+  await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {})
+  await page.goto('about:blank')
+  await page.goto(target, { waitUntil: 'domcontentloaded' })
+}
+
 async function openFresh(browser, url, { lang = 'ar' } = {}) {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: lang === 'en' ? 'en-US' : 'ar-SA' })
   const page = await ctx.newPage()
@@ -41,8 +62,7 @@ export async function run({ browser, url, engine }) {
         // its fragment does NOT reload the document — it just moves the hash, so
         // the app would still be running with whatever state it booted with.
         // Navigating away first forces a genuine cold load of the route.
-        await page.goto('about:blank')
-        await page.goto(`${url}/#/${route}`, { waitUntil: 'domcontentloaded' })
+        await coldGoto(page, `${url}/#/${route}`)
         await settle(page, 3200)
         const state = await page.evaluate(() => ({
           hash: location.hash,
@@ -62,8 +82,7 @@ export async function run({ browser, url, engine }) {
       }
 
       rec.section(`[${lang}] refresh · Back · Forward across the auth routes`)
-      await page.goto('about:blank')
-      await page.goto(`${url}/#/login`, { waitUntil: 'domcontentloaded' }); await settle(page, 3000)
+      await coldGoto(page, `${url}/#/login`); await settle(page, 3000)
       await goRoute(page, 'signup', 2400)
       await goRoute(page, 'forgot', 2400)
       await page.reload({ waitUntil: 'domcontentloaded' }); await settle(page, 2800)
@@ -80,8 +99,7 @@ export async function run({ browser, url, engine }) {
       rec.check(`[${lang}] Forward returns to signup`, fwd.includes('signup'), fwd)
 
       rec.section(`[${lang}] invalid input is refused honestly, with no crash`)
-      await page.goto('about:blank')
-      await page.goto(`${url}/#/login`, { waitUntil: 'domcontentloaded' }); await settle(page, 3000)
+      await coldGoto(page, `${url}/#/login`); await settle(page, 3000)
       const email = page.locator('input[type=email]').first()
       const password = page.locator('input[type=password]').first()
       if (await email.count()) {
@@ -109,8 +127,7 @@ export async function run({ browser, url, engine }) {
       }
 
       rec.section(`[${lang}] keyboard reachability`)
-      await page.goto('about:blank')
-      await page.goto(`${url}/#/login`, { waitUntil: 'domcontentloaded' }); await settle(page, 3000)
+      await coldGoto(page, `${url}/#/login`); await settle(page, 3000)
       const tabbed = []
       for (let i = 0; i < 12; i += 1) {
         await page.keyboard.press('Tab')
