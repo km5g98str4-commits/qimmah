@@ -5,9 +5,12 @@ import { loadHistory } from './exerciseHistory'
 import { getExercise } from '@/data/exercises'
 import { getDayStamp } from './today'
 import type { Muscle } from '@/types/workout'
+import { foldDigits } from './numberFormat'
 
 const num = (v: unknown): number => {
-  const n = Number(v)
+  // الطيّ أولًا: `Number('٨٥')` = NaN، فكان حجم الجلسة يصير صفرًا لكل مجموعة
+  // سُجّلت بأرقام عربية — والقيم المخزَّنة قبل [LIVE-QA-001ب] ما زالت كذلك.
+  const n = Number(foldDigits(String(v ?? '')))
   return Number.isFinite(n) && n > 0 ? n : 0
 }
 

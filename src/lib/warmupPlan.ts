@@ -26,6 +26,7 @@ import { getExercise } from '@/data/exercises'
 import { getRecord } from '@/lib/exerciseHistory'
 import { generateWarmup } from '@/lib/strength/warmup'
 import { defaultPlateConfig, loadPlateConfig, type PlateConfig } from '@/lib/strength/plates'
+import { foldDigits } from './numberFormat'
 
 /** أدوات يُحمَّل عليها بالأقراص — وحدها تستحقّ سلّم النِّسَب. */
 const RAMPABLE_EQUIPMENT = new Set(['barbell', 'ez-bar', 'smith'])
@@ -73,9 +74,11 @@ function firstReps(reps: string | undefined): number {
 
 /** وزن العمل المعروف لهذا التمرين: وزن الخطة، وإلا آخر وزن مسجَّل. NaN إن مجهول. */
 function knownWorkingKg(pe: PlanExercise): number {
-  const fromPlan = Number(String(pe.startingWeight ?? '').match(/[\d.]+/)?.[0])
+  // الطيّ أولًا: «وزن البداية» يُكتب في محرّر الخطة بحقل نصّي حرّ، فقد يصل عربيًّا.
+  // وبلا طيّ يسقط سلّم التحميل كلّه إلى خطوة عامّة بلا أوزان — إحماءٌ أفقر بصمت.
+  const fromPlan = Number(foldDigits(String(pe.startingWeight ?? '')).match(/[\d.]+/)?.[0])
   if (Number.isFinite(fromPlan) && fromPlan > 0) return fromPlan
-  const fromHistory = Number(String(getRecord(pe.exerciseId)?.lastWeight ?? '').match(/[\d.]+/)?.[0])
+  const fromHistory = Number(foldDigits(String(getRecord(pe.exerciseId)?.lastWeight ?? '')).match(/[\d.]+/)?.[0])
   return Number.isFinite(fromHistory) && fromHistory > 0 ? fromHistory : Number.NaN
 }
 

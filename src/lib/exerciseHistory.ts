@@ -5,6 +5,7 @@
 
 import type { SessionExercise } from './workoutSessions'
 import { getExerciseHistory, saveExerciseHistory } from './historyStore'
+import { foldDigits } from './numberFormat'
 
 // — مفتاح قديم (للتوافق فقط؛ الكتابة الفعلية في historyStore) —
 export const EXERCISE_HISTORY_KEY = 'qimmah:exerciseHistory:v1'
@@ -36,7 +37,9 @@ export function getRecord(exerciseId: string): ExerciseRecord | undefined {
 
 const numOf = (w?: string): number => {
   if (!w) return NaN
-  const m = String(w).match(/[\d.]+/)
+  // `\d` أرقام ASCII حصرًا في كل الأوضاع — فبلا طيّ لا يُسجَّل رقم قياسي أصلًا،
+  // و`recordExercise` ترتدّ مبكرًا فلا يُكتب صفّ التاريخ إطلاقًا.
+  const m = foldDigits(String(w)).match(/[\d.]+/)
   return m ? Number(m[0]) : NaN
 }
 

@@ -3,7 +3,7 @@
 
 import { spawn } from 'node:child_process'
 import { chromium } from './lib/engine.mjs'
-import { answerHistory, finishInputSteps } from './lib/onboarding-driver.mjs'
+import { answerHistory, finishInputSteps, selectIntent } from './lib/onboarding-driver.mjs'
 
 // 5329 لا 5325: كان هذا الطقم يتقاسم 5325 مع `navigation-history.mjs`. وما دام كلٌّ
 // يبني `dist/` ثم يخدمه، فبقاء خادم أحدهما لحظةً إضافية يجعل الآخر يتصل بـ**بناء
@@ -61,11 +61,12 @@ async function onboardToPreview(page) {
   await next()
   await page.waitForSelector('#onb-title-intent', { timeout: 20_000 })
   const rows = page.locator('button[aria-pressed]')
-  await rows.nth(1).click({ force: true })
+  // النيّة تُختار بقيمتها وتُبلَّغ بها — لا `nth(1)` هنا و«plan» هناك.
+  const chosenIntent = await selectIntent(page, 'meals')
   await rows.nth(3).click({ force: true })
   await answerHistory(page, next, { trained: true })
   await page.locator('button[aria-pressed]').first().click({ force: true })
-  await finishInputSteps(page, next)
+  await finishInputSteps(page, next, { intent: chosenIntent })
   await settle(page, 1_600)
   await tap(page, /الدخول للوحة/)
   await page.waitForSelector('[data-testid="plan-handoff"]', { timeout: 25_000 })

@@ -3,10 +3,12 @@
 
 import { loadSessions, type WorkoutSession } from './workoutSessions'
 import type { ProgressPoint } from '@/types'
+import { foldDigits } from './numberFormat'
 
 const numOf = (w?: string): number => {
   if (!w) return NaN
-  const m = String(w).match(/[\d.]+/)
+  // الطيّ أولًا — سلسلة التقدّم و1RM تقرآن قيمًا قد تكون عربية في المخزون.
+  const m = foldDigits(String(w)).match(/[\d.]+/)
   return m ? Number(m[0]) : NaN
 }
 

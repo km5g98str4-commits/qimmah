@@ -18,6 +18,7 @@ import { recentVolumes } from '@/lib/progressStats'
 import { getExercise } from '@/data/exercises'
 import { getDayStamp } from '@/lib/today'
 import { formatNumber } from '@/lib/numberFormat'
+import { foldDigits } from './numberFormat'
 
 const DAY_MS = 86_400_000
 const WINDOW_DAYS = 14
@@ -108,7 +109,8 @@ const GOAL_AR: Record<CalorieGoal, string> = { cut: 'تنشيف', maintain: 'م�
 
 const numOf = (v: string | number | undefined): number => {
   if (v === undefined) return NaN
-  const m = String(v).match(/-?[\d.]+/)
+  // الطيّ أولًا — سلاسل القياسات وأثقل وزن تقرأ المخزون كما هو، وقد يكون عربيًّا.
+  const m = foldDigits(String(v)).match(/-?[\d.]+/)
   return m ? Number(m[0]) : NaN
 }
 const round1 = (n: number): number => Math.round(n * 10) / 10

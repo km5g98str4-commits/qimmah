@@ -33,6 +33,7 @@ writeFileSync(ENTRY, `
 export { foldDigits } from '@/lib/numberFormat'
 export { sessionVolume } from '@/lib/progressStats'
 export { topCompletedWeight } from '@/lib/exerciseHistory'
+export { buildWarmupPlan } from '@/lib/warmupPlan'
 `)
 const out = await build({
   entryPoints: [ENTRY], bundle: true, write: false, format: 'esm', platform: 'neutral',
@@ -64,15 +65,30 @@ console.log('\n① الطيّ عند حدّ التخزين يجعل القيمت
     `غربي=${topLatin} · عربي مطويّ=${topArabic}`)
 }
 
-console.log('\n② التأكيد المضادّ — بلا طيّ يضيع الجهد بصمت')
+console.log('\n①ب القارئ يطوي كذلك — فالمخزون العربي القديم لا يبقى ضائعًا')
 {
-  // هذا هو المخزون قبل الإصلاح حرفيًّا: أرقام عربية خام.
-  const raw = sessionWith('٨٥', '١٠')
-  const vol = sessionVolume(raw)
-  check('⚔️ حجم جلسة من أرقام عربية خام = صفر — الجهد يختفي بلا رسالة', vol === 0, `الحجم=${vol}`)
-  const top = topCompletedWeight(raw.exercises[0])
-  check('⚔️ ولا رقم قياسيًّا منها', Number.isNaN(top), `الرقم=${top}`)
-  check('⚔️ والفارق ليس تقريبًا بل فقدًا كاملًا', sessionVolume(sessionWith('85', '10')) > 0 && vol === 0)
+  // الطيّ عند الكتابة يحمي الجديد وحده. ومن سجّل بالعربية قبل الإصلاح مخزونه
+  // عربيّ بالفعل — فلولا طيّ القارئ لبقي جهده مفقودًا إلى الأبد.
+  const legacy = sessionWith('٨٥', '١٠')
+  check('حجم جلسة من مخزون عربي **قديم** يُقرأ صحيحًا الآن', sessionVolume(legacy) === 850,
+    `الحجم=${sessionVolume(legacy)}`)
+  check('ورقمها القياسي يُقرأ صحيحًا', topCompletedWeight(legacy.exercises[0]) === 85,
+    `الرقم=${topCompletedWeight(legacy.exercises[0])}`)
+  const persian = sessionWith('۸۵', '۱۰')
+  check('والفارسية كذلك', sessionVolume(persian) === 850, `الحجم=${sessionVolume(persian)}`)
+}
+
+console.log('\n② التأكيد المضادّ — الفحص ليس دائم الصدق')
+{
+  // يجب أن يبقى الفحص قادرًا على الرسوب: قيمة لا رقم فيها تعطي صفرًا، وقيمة
+  // غائبة تعطي NaN. لولا ذلك لكان «٨٥٠» يمرّ لأي مدخل مهما كان.
+  check('⚔️ نصّ بلا رقم يعطي حجمًا صفرًا — لا رقمًا مخترعًا',
+    sessionVolume(sessionWith('كثير', 'كثير')) === 0)
+  check('⚔️ ومجموعة غير مكتملة لا تُحتسب',
+    sessionVolume({ ...sessionWith('85', '10'), exercises: [{ ...sessionWith('85','10').exercises[0],
+      sets: [{ setNumber: 1, targetReps: '10', actualReps: '10', weightKg: '85', completed: false }] }] }) === 0)
+  check('⚔️ والفارق بين ٨٥ و٩٠ محفوظ — الطيّ لا يسوّي القيم',
+    sessionVolume(sessionWith('٨٥', '١٠')) !== sessionVolume(sessionWith('٩٠', '١٠')))
 }
 
 console.log('\n③ الطيّ يغطّي الفاصلة العربية والأرقام الفارسية')

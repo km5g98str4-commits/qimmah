@@ -14,7 +14,7 @@
 
 import { spawn } from 'node:child_process'
 import { chromium } from './lib/engine.mjs'
-import { answerHistory, finishInputSteps } from './lib/onboarding-driver.mjs'
+import { answerHistory, finishInputSteps, selectIntent } from './lib/onboarding-driver.mjs'
 
 const PORT = 5323
 const EXTERNAL = process.env.PREVIEW_URL || ''
@@ -97,10 +97,10 @@ async function onboardToPreview(page) {
   const next = () => page.locator('footer button').last().click({ force: true })
   await next(); await page.waitForSelector('#onb-title-intent', { timeout: 20000 })
   const rows = page.locator('button[aria-pressed]')
-  await rows.nth(1).click({ force: true }); await rows.nth(3).click({ force: true })
+  const chosenIntent = await selectIntent(page, 'meals'); await rows.nth(3).click({ force: true })
   await answerHistory(page, next)
   await page.locator('button[aria-pressed]').first().click({ force: true })
-  await finishInputSteps(page, next); await settle(page, 1600)
+  await finishInputSteps(page, next, { intent: chosenIntent }); await settle(page, 1600)
   await tap(page, /الدخول للوحة/)
   await page.waitForSelector('[data-testid="plan-handoff"]', { timeout: 25000 })
   await page.locator('[data-testid="handoff-preview-cta"]').click({ force: true })
@@ -353,10 +353,10 @@ try {
       const next = () => page.locator('footer button').last().click({ force: true })
       await next(); await page.waitForSelector('#onb-title-intent', { timeout: 20000 })
       const rows = page.locator('button[aria-pressed]')
-      await rows.nth(1).click({ force: true }); await rows.nth(3).click({ force: true })
+      const chosenIntent = await selectIntent(page, 'meals'); await rows.nth(3).click({ force: true })
       await answerHistory(page, next)
       await page.locator('button[aria-pressed]').first().click({ force: true })
-      await finishInputSteps(page, next); await settle(page, 1600)
+      await finishInputSteps(page, next, { intent: chosenIntent }); await settle(page, 1600)
       await tap(page, lang === 'ar' ? /الدخول للوحة/ : /Enter|Open/i)
       await page.waitForSelector('[data-testid="plan-handoff"]', { timeout: 25000 })
       await page.locator('[data-testid="handoff-preview-cta"]').click({ force: true })
