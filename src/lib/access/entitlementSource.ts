@@ -147,7 +147,12 @@ export async function resolveEntitlement(): Promise<{
 }> {
   // وضع التقليد قرار وقت بناء، ويسبق كل شيء — إثباتات المصفوفة ومعاينة المؤسس.
   // و`source: 'mock'` تُعلن نفسها: لا يُقرأ هذا الاستحقاق شهادةً على الخادم.
-  if (localEntitlementEnabled()) return { status: readMockActive() ? 'active' : 'none', source: 'mock' }
+  if (localEntitlementEnabled()) {
+    // والسبب يُحمَل حين لا خادم: «الخدمة غير مضبوطة» لا «ما فيه نت» — نسخة
+    // المراجعة بلا خادم أصلًا، ولوم شبكة المستخدم عليها كذبة صغيرة.
+    const local = { status: readMockActive() ? ('active' as const) : ('none' as const), source: 'mock' as const }
+    return backendAvailable() ? local : { ...local, lastError: 'backend_unconfigured' }
+  }
   // [OVERNIGHT-3] عقد الخادم صار موجودًا. بلا ضبط Supabase تبقى الإجابة `none`
   // **بصدق**: لا مصدر ⇒ لا استحقاق. ومع الضبط تُسأل قاعدة البيانات، وأي فشل
   // يعود `none` مع سبب عام — الفشل يُغلق ولا يفتح.

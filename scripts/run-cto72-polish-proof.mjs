@@ -94,8 +94,8 @@ const today = read('src/views/TodayV2.tsx')
  *
  * **المقصد محروس كما هو؛ البنية تغيّرت فتتبعها الحراسة.**
  *   • سطر الماكروز الأربع الرقاقات ⇐ `DailyRingsCard` (حلقة سعرات + ثلاث ماكرو).
- *   • الحارس `{!blankSlate && (` ⇐ `showRings` = `!blankSlate && hasAnyTarget`،
- *     وهو **أشدّ** لا أرخى: يضيف شرط وجود أهداف محسوبة أصلًا.
+ *   • الحارس `{!blankSlate && (` ⇐ `showRings` = `hasAnyTarget` (انظر [LIVE-QA-B]
+ *     أدناه): شرط الأهداف المحسوبة باقٍ، وشرط «ليس اليوم الأول» سقط بدليل حيّ.
  *   • مصادر الإشارة صارت هوك التغذية الحيّ (`totals` · `dayLog`) بدل لقطة
  *     `buildNutritionV2Model` غير التفاعلية — نفس البيانات، ومصدرٌ يتحدّث فورًا.
  *
@@ -106,19 +106,27 @@ const today = read('src/views/TodayV2.tsx')
  * ممنوع أن تدّعي البطاقة نسبةً أو يومًا مكتملًا بلا جلسة (يحرسه `test:today-home`
  * سلوكيًّا، ويحرسه أدناه بنيويًّا).
  */
-// [SOVEREIGN-003] السلسلة صارت **ثلاثة فروع** لا اثنين:
-//   {blankSlate ? <FirstDayCard/> : !showRings ? <بطاقة الإعداد/> : <الحلقات/>}
-// الفرع الأول أُضيف لليوم الأول (شرحٌ قبل أي رقم). فالمرساة تبدأ من رأس
-// السلسلة، والشرط المحروس **اشتدّ** لا رخا: الحلقات آخر الفروع، ولا تظهر إلا
-// بانتفاء «اليوم الأول» **و**«بلا أهداف» معًا.
+// [LIVE-QA-B] الحلقات خرجت من السلسلة إلى ما فوقها:
+//   {showRings && <DailyRingsCard/>}
+//   {blankSlate ? <FirstDayCard/> : !showRings ? <بطاقة الإعداد/> : null}
+// **المقصد المحروس لم يتغيّر** — «لا لوحة أصفار لمن لا رقم له» — لكن مرساته
+// انتقلت من «الحلقات آخر الفروع» إلى «الحلقات مشروطة بالأهداف المحسوبة وحدها».
+// والفرق ليس أسلوبيًّا: القاعدة القديمة كانت تحجب حلقاتٍ **محسوبة أصلًا** عمّن
+// أنهى الإعداد للتوّ — عطلٌ حيّ رفعه المؤسس من المعاينة المنشورة، والدليل الحيّ
+// يعلو على الإثبات البائت (§2: القرارات تشيخ كما يشيخ الكود).
 const BLANK_GUARD = '{blankSlate ? ('
+const RINGS_GUARD = '{showRings && ('
 
 // أ) التعريف: القيد مركّب من شرطين — «قادم جديد» **و**«لا إشارة اليوم».
 const blankDecl = /const blankSlate = model\.state === 'newUser' && !hasTodaySignal/.test(today)
 check('`blankSlate` = قادم جديد ∧ لا إشارة اليوم (شرطان لا واحد)', blankDecl)
 check(
-  'وحارس الحلقات يضيف شرط الأهداف المحسوبة (أشدّ لا أرخى)',
-  /const showRings = !blankSlate && hasAnyTarget/.test(today),
+  'وحارس الحلقات = الأهداف المحسوبة وحدها (§5 محفوظة: لا «—» بلا هدف)',
+  /const showRings = hasAnyTarget$/m.test(today),
+)
+check(
+  'ولا يعود شرط «ليس اليوم الأول» — العطل الحيّ الذي حجب حلقات محسوبة',
+  !/const showRings = !blankSlate/.test(today),
 )
 
 // ب) الإشارة مشتقّة من مصادر البطاقات نفسها — لا علم منفصل يشيخ.
@@ -158,24 +166,35 @@ function ternaryRegion(src, opener) {
   }
   return src.slice(start, i)
 }
+const ringsBlock = ternaryRegion(today, RINGS_GUARD)
 const ringsTernary = ternaryRegion(today, BLANK_GUARD)
-const firstSplit = ringsTernary.indexOf(') : ')          // نهاية فرع «اليوم الأول»
-const secondSplit = ringsTernary.indexOf(') : (', firstSplit + 1) // نهاية فرع «بلا أهداف»
+const firstSplit = ringsTernary.indexOf(') : ')                  // نهاية فرع «اليوم الأول»
+const secondSplit = ringsTernary.indexOf(') : ', firstSplit + 1) // نهاية فرع «بلا أهداف»
 const firstBranch = firstSplit > 0 ? ringsTernary.slice(0, firstSplit) : ''
 const middleBranch = secondSplit > 0 ? ringsTernary.slice(firstSplit, secondSplit) : ''
-const lastBranch = secondSplit > 0 ? ringsTernary.slice(secondSplit) : ''
-check('حارس الحلقات سلسلة ثلاثية مستخرَجة بحدودها', ringsTernary.length > 0 && firstSplit > 0 && secondSplit > firstSplit)
+check(
+  'كتلة الحلقات مستخرَجة بحدودها (لا رضا بمجرّد ورود الاسم)',
+  ringsBlock.length > 0 && ringsBlock.includes('<DailyRingsCard'),
+)
+check(
+  'وسلسلة الحالة الفارغة مستخرَجة بفرعيها',
+  ringsTernary.length > 0 && firstSplit > 0 && secondSplit > firstSplit,
+)
+check(
+  'والحلقات **تسبق** السلسلة (الرقم يقود · والشرح تحته لا فوقه)',
+  today.indexOf(RINGS_GUARD) > 0 && today.indexOf(RINGS_GUARD) < today.indexOf(BLANK_GUARD),
+)
 check(
   'وفرع اليوم الأول يشرح قبل أن يقيس (FirstDayCard) — بلا أرقام',
   firstBranch.includes('<FirstDayCard') && !firstBranch.includes('<DailyRingsCard'),
 )
 check(
-  'وبديل الحالة الفارغة (بطاقة إعداد) في فرعه الأوسط لا أصفار',
+  'وبديل «بلا أهداف» (بطاقة إعداد) في فرعه الأوسط لا أصفار',
   middleBranch.includes('d.noTargetsTitle') && !middleBranch.includes('<DailyRingsCard'),
 )
 check(
-  'وبطاقة الحلقات في الفرع الأخير وحده — لا تُرسم إلا بانتفاء الفرعين قبلها',
-  lastBranch.includes('<DailyRingsCard'),
+  'ومصدر الحلقات واحد — لا نسخة ثانية داخل السلسلة',
+  (today.match(/<DailyRingsCard/g) ?? []).length === 1,
 )
 check(
   'ولا حلقات متبقّية خارج البطاقة (مصدر واحد للحلقات)',
@@ -204,26 +223,38 @@ check(
   !/blankSlate[\s\S]{0,120}(localStorage|safeStorage|setItem)/.test(today),
 )
 
-// و) ⚔️ محاكاة التفاف: انزع الحارس ⇒ يجب أن يسقط فحص بنيوي **مسمّى**.
+// و) ⚔️ محاكاة التفاف — كل شدّ يُهاجَم، والسقوط بفحص **مسمّى** (§4.2).
 {
-  // نزع الحارس نفسه ⇒ التعبير الثلاثي لا يُستخرج أصلًا فيسقط الفحص باسمه.
-  const tampered = today.split(BLANK_GUARD).join('{true ? (')
+  // ١) نزع شرط الأهداف ⇒ أربع حلقات بـ«—» لمن لا رقم له: يسقط باسمه.
+  const unconditional = today.replace('const showRings = hasAnyTarget', 'const showRings = true')
   check(
-    '⚔️ نزع الحارس يُسقط فحص «بطاقة الحلقات في الفرع الآخر»',
-    ternaryRegion(tampered, BLANK_GUARD) === '',
-    'الفحص مرّ على مصدر منزوع الحارس — البوابة رخوة',
+    '⚔️ جعل الحلقات بلا شرط يُسقط فحص «الأهداف المحسوبة وحدها»',
+    !/const showRings = hasAnyTarget$/m.test(unconditional),
+    'الفحص مرّ على مصدر بلا شرط أهداف — البوابة رخوة',
   )
-  // ونقل الحلقات إلى فرعٍ أسبق (اليوم الأول أو «بلا أهداف») ⇒ يجب أن يسقط
-  // الفحص باسمه: هذا هو العطل الأصلي — لوحة أصفار لمن لا رقم له.
-  const swappedFirst = firstBranch.replace('<FirstDayCard', '<DailyRingsCard')
-  const swappedMiddle = middleBranch.replace('d.noTargetsTitle', '<DailyRingsCard')
+  // ٢) إعادة `!blankSlate` ⇒ عودة العطل الحيّ نفسه: يسقط باسمه.
+  const regressed = today.replace('const showRings = hasAnyTarget', 'const showRings = !blankSlate && hasAnyTarget')
   check(
-    '⚔️ وضع الحلقات في فرع اليوم الأول يُسقط الفحص باسمه',
-    swappedFirst.includes('<DailyRingsCard') && !firstBranch.includes('<DailyRingsCard'),
+    '⚔️ إعادة حجب اليوم الأول تُسقط فحص «لا يعود شرط ليس اليوم الأول»',
+    /const showRings = !blankSlate/.test(regressed),
   )
+  // ٣) دسّ نسخة ثانية داخل السلسلة ⇒ مصدران للحلقات: يسقط باسمه.
+  const duplicated = today.replace('<FirstDayCard', '<DailyRingsCard')
   check(
-    '⚔️ ووضعها في فرع «بلا أهداف» يُسقطه كذلك',
-    swappedMiddle.includes('<DailyRingsCard') && !middleBranch.includes('<DailyRingsCard'),
+    '⚔️ نسخة ثانية من الحلقات داخل السلسلة تُسقط فحص «مصدر واحد»',
+    (duplicated.match(/<DailyRingsCard/g) ?? []).length !== 1,
+  )
+  // ٤) نزع كتلة الحلقات كلّها ⇒ لا تُستخرج أصلًا: يسقط باسمه.
+  const removed = today.split(RINGS_GUARD).join('{false && (')
+  check(
+    '⚔️ نزع كتلة الحلقات يُسقط فحص «مستخرَجة بحدودها»',
+    ternaryRegion(removed, RINGS_GUARD) === '',
+  )
+  // ٥) وإنزال الحلقات تحت السلسلة يُسقط فحص الترتيب باسمه.
+  const reordered = today.split(RINGS_GUARD).join('{showRingsMoved && (')
+  check(
+    '⚔️ نقل الحلقات أسفل السلسلة يُسقط فحص «الرقم يقود»',
+    !(reordered.indexOf(RINGS_GUARD) > 0 && reordered.indexOf(RINGS_GUARD) < reordered.indexOf(BLANK_GUARD)),
   )
 }
 // ز) ⚔️ ومحاكاة ثانية على البند المنسوخ: إعادة `hasData` إلى «أو وجود خطة»

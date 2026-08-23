@@ -386,7 +386,14 @@ export function applyOfflineGrace(
   // هذا هو القفل الثاني على بناء المعاينة (`VITE_APP_ENV=founder_preview`):
   // الأوّل أنّ `resolveEntitlement` تعيد `none` قبل أي نداء، والثاني هنا.
   // وضع التقليد شأنه شأن نفسه — لا يُحفَظ ولا يُقرأ من هنا.
-  if (resolved.source === 'mock') return resolved
+  //
+  // [LIVE-QA-A] وبعد أن صارت المعاينة تفتح تفعيل QA، صار مصدرها `mock` — فكان
+  // يمرّ **بلا سبب**، فتضيع الرسالة الصادقة «الخدمة غير مضبوطة» ويحلّ محلّها
+  // صمت. القفل نفسه لم يتغيّر (لا استعارة من التخزين)، والسبب يُحمَل معه:
+  // بناءٌ محلّي بلا خادم يبقى `backend_unconfigured` لا «تأكّد من اتصالك».
+  if (resolved.source === 'mock') {
+    return backendAvailable() ? resolved : { ...resolved, cacheReason: 'backend_unconfigured' }
+  }
   if (!backendAvailable()) return { ...resolved, cacheReason: 'backend_unconfigured' }
   if (resolved.source !== 'backend') return resolved
 
