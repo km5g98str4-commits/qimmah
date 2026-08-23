@@ -68,3 +68,6 @@ data/food-production/accepted/shards/
 #   node scripts/food-production/emit-search-buckets.mjs
 # حتمية بالبايت (merkle_root في search/manifest.json)، فلا معنى لإيداعها.
 public/food/search/
+
+# esbuild scratch bundles produced by proof runners
+scripts/.*.bundle.mjs

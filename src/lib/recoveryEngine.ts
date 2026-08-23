@@ -403,8 +403,13 @@ export function saveRecoveryEngineEntry(ownerId: string | null, input: RecoveryE
 /**
  * مزامنة سجلّ التعافي (P12): صف لكل (مالك، يوم) في recovery_logs — يُرفع فقط حين
  * يطابق مالك السجلّ مالكَ جلسة المزامنة الموثَّق (بوابات العلم/التبنّي في syncQueue).
- * الفحص إدخال يدوي من المستخدم؛ إشارات الصحة داخله (نبض/HRV) تبقى محلية —
- * anonymized إلى مدخلات القرار فقط ولا تُرفع عيّناتها الخام أبدًا (انظر SYNC-COVERAGE).
+ * الفحص إدخال يدوي من المستخدم. وإشارات الصحة داخله (نبض/HRV/وجع العضلات)
+ * **ليست محليّة دائمًا** — وهذا التعليق كان يقول إنها كذلك، وكان **غير صحيح**:
+ * الحمولة أعلاه تحمل `input` كاملًا. [GOV-003] ما يحكمها الآن هو الموافقة
+ * الصحّية المنفصلة: عند رفضها يجرّدها `sanitizeSyncPayload` من الصفّ (سياسة
+ * `recovery_logs` في `syncFieldPolicy.ts`)، وعند منحها تُرفع بعلم المستخدم.
+ * فالضمان **موافقة**، لا «لا تغادر الجهاز» — والفرق بينهما هو ما يجعل الجملة
+ * الأولى وعدًا لا يُحفظ (§5: الصدق قبل الطمأنينة).
  */
 function enqueueRecoveryEntrySync(ownerId: string | null, entry: RecoveryEngineEntry): void {
   if (!ownerId || ownerId !== getSyncRuntime().userId) return

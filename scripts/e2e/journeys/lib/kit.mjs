@@ -199,7 +199,14 @@ export function createVocabularyGuard(terms) {
   }
 }
 
-/** يفتح صفحة بمقاس ولغة محدّدين، ويلتقط أخطاء الطرف العميل. */
+/**
+ * يفتح صفحة بمقاس ولغة محدّدين، ويلتقط أخطاء الطرف العميل.
+ *
+ * ويلتقط معها **مصدر كل فشل شبكي**: رسالة الطرف العميل «Failed to load resource»
+ * لا تحمل عنوان الطلب، فلا يمكن التمييز بها بين عطل في التطبيق وبين نداء خلفية
+ * مزروعة. الشبكة تُسجَّل هنا بعناوينها ليصير الاستثناء **محدودًا بمصدره** لا
+ * مطلقًا (§4.2: الاستثناء يُحرَس، ولا يصير قاعدة).
+ */
 export async function openPage(browser, { viewport, lang }) {
   const page = await browser.newPage({
     viewport: { width: viewport.width, height: viewport.height },
@@ -207,16 +214,43 @@ export async function openPage(browser, { viewport, lang }) {
     locale: lang === 'ar' ? 'ar-SA' : 'en-US',
   })
   const errors = []
-  // [FINAL-CONVERGENCE] نُلحق **وجهة** المورد بنصّ الخطأ. «Failed to load
-  // resource» وحده لا يقول لمن كان النداء، فيصير أي استثناء عليه استثناءً
-  // بالنصّ لا بالوجهة — وذلك يبتلع أخطاء حقيقية.
-  page.on('console', (m) => {
-    if (m.type() !== 'error') return
-    const url = m.location()?.url || ''
-    errors.push(url ? `${m.text()} @ ${url}` : m.text())
-  })
+  /** كل فشل شبكي بعنوانه وبصمته — أساس تصنيف الأخطاء أدناه. */
+  const network = []
+  page.on('console', (m) => m.type() === 'error' && errors.push(m.text()))
   page.on('pageerror', (e) => errors.push(String(e)))
-  return { page, errors }
+  page.on('requestfailed', (r) => network.push({ url: r.url(), signature: r.failure()?.errorText ?? 'unknown' }))
+  page.on('response', (r) => { if (r.status() >= 400) network.push({ url: r.url(), signature: String(r.status()) }) })
+  return { page, errors, network }
+}
+
+/**
+ * يفصل أخطاء الطرف العميل الحقيقية عن **ضجيج الخلفية المزروعة**.
+ *
+ * الجلسة المزروعة رمز وهمي، فنداءات Supabase تردّ ٤٠١ حيث توجد شبكة، وتسقط
+ * بـ`net::ERR_*` حيث لا توجد. الحالتان أثر أداة الاختبار لا عطل منتج — لكن
+ * تجاوزهما بمطابقة نصّية على «401» أو «Failed to load resource» يبتلع معهما أي
+ * عطل حقيقي بنفس الصياغة. فالاستثناء هنا **مربوط بمصدره**:
+ *
+ *   • بصمة الفشل (رمز الحالة أو نصّ خطأ الشبكة) تُجمع من الطلبات الفعلية.
+ *   • خطأ يحمل بصمة صادرة عن **أصل التطبيق نفسه** لا يُستثنى أبدًا.
+ *   • وأي خطأ لا يطابق بصمة شبكية مرصودة يبقى أحمر — ومنها استثناءات JS كلّها.
+ *
+ * فإن سقط أصل التطبيق نفسه، سقط الفحص باسمه كما يجب.
+ */
+export function classifyClientErrors(errors, network, appUrl) {
+  const appOrigin = new URL(appUrl).origin
+  const offApp = new Set(network.filter((n) => !n.url.startsWith(appOrigin)).map((n) => n.signature))
+  const onApp = new Set(network.filter((n) => n.url.startsWith(appOrigin)).map((n) => n.signature))
+  const isDeclaredNoise = (e) =>
+    /Failed to load resource/.test(e) &&
+    [...offApp].some((sig) => e.includes(sig)) &&
+    ![...onApp].some((sig) => e.includes(sig))
+  return {
+    real: errors.filter((e) => !isDeclaredNoise(e)),
+    declared: errors.filter(isDeclaredNoise),
+    offAppSignatures: [...offApp],
+    onAppSignatures: [...onApp],
+  }
 }
 
 /** نصّ الشاشة الحالي — مصدر كل فحص محتوى. */
@@ -290,31 +324,3 @@ export function report(journeyName, results) {
 export function ensureProofRoot() {
   if (!existsSync(PROOF_ROOT)) mkdirSync(PROOF_ROOT, { recursive: true })
 }
-
-/**
- * ضجيج الخلفية المزروعة — استثناء **معلَن ومحقَّق بالوجهة** لا بالنصّ.
- *
- * ═══ لماذا لا يكفي «401» ═══
- * الرحلات تزرع جلسة برمز وهمي، فيردّ Supabase 401 على نداءات الاستحقاق. وكان
- * الاستثناء يُمسك بـ`/401/` وحده. وفي بيئة بلا منفذ خارجي لا يصل النداء أصلًا،
- * فيصير `ERR_TUNNEL_CONNECTION_FAILED` — نفس السبب بنصّ آخر، فتحمرّ الرحلة على
- * قيد بيئة لا على عطل منتج.
- *
- * والعلاج ليس توسيع النصّ — ذلك يبتلع أخطاء حقيقية. العلاج أن يُقاس **إلى أين
- * كان النداء**: نعفو عن تعذّر نداء إلى مضيف الخلفية المُعلَن وحده، وأي مضيف آخر
- * يبقى خطأً محسوبًا. ولذلك يُلحق `kit` وجهة المورد بنصّ كل خطأ.
- */
-const BACKEND_ORIGIN = /https:\/\/[a-z0-9-]+\.supabase\.(co|in)\//
-const OFFLINE_CODES = /ERR_TUNNEL_CONNECTION_FAILED|ERR_PROXY_CONNECTION_FAILED|ERR_NAME_NOT_RESOLVED|ERR_INTERNET_DISCONNECTED|ERR_CONNECTION_REFUSED/
-
-export function seededBackendNoise(entry) {
-  if (!/Failed to load resource/.test(entry)) return false
-  // الوجهة شرطٌ في الحالتين. جعلُها شرطًا في تعذّر الوصول وحده كان يترك ٤٠١
-  // من **أي** مضيف معفوًّا — وهي الثغرة التي أسقطها التأكيد المضادّ في
-  // `run-journey-noise-proof.mjs` قبل أن تهبط.
-  if (!BACKEND_ORIGIN.test(entry)) return false
-  return /\b401\b/.test(entry) || OFFLINE_CODES.test(entry)
-}
-
-/** أخطاء العميل الحقيقية بعد طرح الضجيج المُعلَن. */
-export const realClientErrors = (errors) => errors.filter((e) => !seededBackendNoise(e))

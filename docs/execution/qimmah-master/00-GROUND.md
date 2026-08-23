@@ -7,13 +7,54 @@
 
 ## CANONICAL_GROUND
 
+> **Updated by GOV-002 + GOV-003 (2026-08-18).** The previous entry named
+> `codex/qimmah-sovereign-closure-001 @ 139a7b00` — that SHA is now an **ancestor** of the
+> ground below, and the branch it named has since moved. **Branch names carry no authority
+> here; only SHAs and archive refs do.**
+
 ```
-CANONICAL_GROUND_BRANCH = codex/qimmah-sovereign-closure-001
-CANONICAL_GROUND_SHA    = 139a7b00d154e1950e5970ed86d2fe6165dba5c6
-ESTABLISHED             = 2026-08-18
-ESTABLISHED_BY          = QIM-MASTER (recovery / control-plane mission)
-WORKING_BRANCH          = claude/qimmah-recovery-control-plane-hph1jg  (fast-forwarded onto the ground)
+CANONICAL_GROUND_SHA      = dc031fa36929e07c3b00fa025a676ed64327ce59
+CANONICAL_GROUND_ARCHIVE  = origin/archive/ground-v1-rc-20260818   (immutable ref, verified)
+ESTABLISHED               = 2026-08-18
+ESTABLISHED_BY            = GOV-002 (containment proof over all 81 remote heads) + founder pin
+COMPOSITION_BRANCH        = codex/qimmah-v1-ground-composition-001   (descends from the SHA above)
 ```
+
+**How this ground was established — by containment, never by name.** Every one of the 81
+remote heads was tested with `git merge-base --is-ancestor`; the winner is the branch that
+contains all the others, not the one whose name says "final". The name-based shortlist used
+in the first pass **missed this SHA entirely** because it carries none of the words
+`final|canonical|release|closure|sovereign`.
+
+```
+main cc60adf  ──strict ancestor──▶  139a7b0  ──▶  dc031fa  (ground, CI green: run 32174357740)
+                                                     └──▶  a464268  (descendant, see below)
+```
+
+### A verified descendant exists — founder decision, not an agent's
+
+`a46426836bb92242ebd6538c4ac6b11239f69319` (archived at `origin/archive/gov003-base-a464268`)
+is a **strict descendant** of the pinned ground: +7 commits, 0 divergence, **CI green (run 429)**,
+gate **140 → 142 steps with nothing removed**. It closes GOV-002's `DEFECT_8` (target weight
+contradicting the stated goal) and adds two gate proofs.
+
+It is **not** silently adopted. The founder pinned `dc031fa`; advancing the pin is the
+founder's call. Both SHAs are preserved as immutable archive refs.
+
+### Preservation refs (all verified present on `origin`)
+
+| ref | SHA | holds |
+|---|---|---|
+| `archive/ground-v1-rc-20260818` | `dc031fa…` | the pinned ground |
+| `archive/gov003-base-a464268` | `a464268…` | the verified descendant |
+| `archive/gov002-*` (12 refs) | — | every current-era branch GOV-002 found carrying unique work |
+
+⚠️ **Annotated tags could not be pushed from the build container** — `git push origin
+refs/tags/*` returns **HTTP 403** by environment policy, while branch refs push normally.
+The tags exist locally (`archive/qimmah-ground-gov002-dc031fa`, `ground/v1-rc-20260818`);
+the durable remote anchors are the `archive/*` **branch refs** above, which pin the identical
+SHAs. Converting them to tags is one founder command per ref from a machine without that
+policy. **This is a recorded environment limit, not an unpinned ground.**
 
 **`main` is NOT the frontier.** `main = cc60adf` is **228 commits behind** the ground.
 `main` is the *production* pointer (Cloudflare Pages auto-deploys from it), not the

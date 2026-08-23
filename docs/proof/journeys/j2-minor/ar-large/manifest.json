@@ -6,8 +6,8 @@
   "viewport": "large",
   "ground": {
     "branch": "codex/qimmah-final-sovereign-convergence-001",
-    "commit": "63c7727f",
-    "subject": "fix(health,gate): [FINAL-CONVERGENCE] صدق لوحة الصحّة على الويب — وتسعة حرّاس يتيمة تدخل البوّابة",
+    "commit": "c99df326",
+    "subject": "feat(gate): [FINAL-CONVERGENCE] قفل الأسطح يصير مكتملًا — ٢٢ سطحًا ميتًا كان يمرّ صامتًا",
     "dirty": true
   },
   "frames": [
@@ -194,9 +194,9 @@
       "detail": ""
     },
     {
-      "name": "شاشة التمارين ترى خطة القاصر (لا «أكمل إعداد خطتك»)",
+      "name": "شاشة التمارين ترى خطة القاصر (بطاقة خطة بأيامها، لا حالة «ما عندك خطة»)",
       "ok": true,
-      "detail": ""
+      "detail": "4 يومًا"
     },
     {
       "name": "فعل بدء التمرين ظاهر للقاصر في المعاينة",
@@ -209,9 +209,9 @@
       "detail": ""
     },
     {
-      "name": "لا أخطاء طرف عميل (عدا 401 الجلسة المزروعة — استثناء معلَن)",
+      "name": "لا أخطاء طرف عميل (عدا فشل خلفية الجلسة المزروعة — استثناء معلَن)",
       "ok": true,
-      "detail": ""
+      "detail": "12 خطأ خلفية مستثنى — بصماته: net::ERR_TUNNEL_CONNECTION_FAILED"
     }
   ],
   "findings": [],

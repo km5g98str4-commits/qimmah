@@ -6,8 +6,8 @@
   "viewport": "large",
   "ground": {
     "branch": "codex/qimmah-final-sovereign-convergence-001",
-    "commit": "63c7727f",
-    "subject": "fix(health,gate): [FINAL-CONVERGENCE] صدق لوحة الصحّة على الويب — وتسعة حرّاس يتيمة تدخل البوّابة",
+    "commit": "c99df326",
+    "subject": "feat(gate): [FINAL-CONVERGENCE] قفل الأسطح يصير مكتملًا — ٢٢ سطحًا ميتًا كان يمرّ صامتًا",
     "dirty": true
   },
   "frames": [
@@ -262,7 +262,7 @@
     {
       "name": "شاشة التمارين تعرض الخطة المبنيّة لا طلب إعداد جديد",
       "ok": true,
-      "detail": ""
+      "detail": "4 يومًا · علوي / سفلي"
     },
     {
       "name": "فعل بدء التمرين موجود في المعاينة",
@@ -315,9 +315,9 @@
       "detail": "صفر ظهور"
     },
     {
-      "name": "لا أخطاء طرف عميل خلال الرحلة (عدا 401 الجلسة المزروعة — استثناء معلَن)",
+      "name": "لا أخطاء طرف عميل خلال الرحلة (عدا فشل خلفية الجلسة المزروعة — استثناء معلَن)",
       "ok": true,
-      "detail": ""
+      "detail": "12 خطأ خلفية مستثنى — بصماته: net::ERR_TUNNEL_CONNECTION_FAILED"
     }
   ],
   "findings": [],

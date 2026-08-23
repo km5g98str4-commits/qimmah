@@ -1,3 +1,17 @@
+/**
+ * ⛔ SUPERSEDED — غير موجَّه، والمالك الحيّ غيره.
+ *
+ * المالك الحيّ لتصدير/استيراد البيانات هو **`src/lib/portability/`**، ويصله
+ * المستخدم عبر `src/components/DataManagementPanel.tsx`. هذا الملف **بلا مستورِد
+ * واحد** في `src/` (تحقّق: خريطة الاستيراد من `src/main.tsx` تضعه خارج الرسم).
+ *
+ * ⚠️ ومع ذلك يستهلكه إثبات داخل البوابة (`test:data-portability`) — أي أن البوابة
+ * تحرس النسخة الميتة بينما الحيّة يحرسها `test:portability`. لا تقرأ خضرة ذلك
+ * الإثبات على أنها تغطية للمسار الحيّ (GOV-002 §7).
+ *
+ * لا يُحذف في هذه الموجة: الحذف يحتاج إثبات أمان مستقلًّا. الغرض من هذا الوسم
+ * أن يمنع وكيلًا قادمًا من ظنّه المالكَ الحيّ.
+ */
 import { loadActiveSession } from '@/lib/activeSession'
 import { loadWorkoutSummary } from '@/lib/workoutSummary'
 import { getLastUser } from '@/lib/accountScope'

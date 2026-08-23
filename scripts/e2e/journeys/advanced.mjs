@@ -18,8 +18,7 @@
 import { chromium } from '../lib/engine.mjs'
 import {
   VIEWPORTS, startApp, createRecorder, openPage, screenText,
-  report, ensureProofRoot, seedSession,
-  realClientErrors,
+  report, ensureProofRoot, seedSession, classifyClientErrors,
 } from './lib/kit.mjs'
 import { loadJourneyCopy } from './lib/journey-copy.mjs'
 import { answerDietPattern } from '../lib/onboarding-driver.mjs'
@@ -32,15 +31,18 @@ const VIEWPORT = VIEWPORTS.large
 const BODY = { age: '28', heightCm: '178', weightKg: '82' }
 
 /**
- * يهرّب محارف التعبير النمطي في تسمية قادمة من القاموس.
+ * الاختيار **بقيمة النموذج لا بصياغته**.
  *
- * ضرورة لا رفاهية: تسميات المتقدّم تحمل أقواسًا — «تنشيف (Cut)» و«تضخيم نظيف
- * (Lean\u00A0Bulk)». وتمريرها إلى RegExp يجعل «(Cut)» مجموعة التقاط فيبحث
- * المُحدِّد عن «تنشيفCut» ولا يجده. والمسافة داخل «Lean Bulk» غير فاصلة (U+00A0)
- * عمدًا في المصدر، فالمطابقة الحرفية وحدها تنجو منها.
+ * وهذا ما ألغى حاجةً كاملة كانت هنا: تسميات المتقدّم تحمل أقواسًا — «تنشيف
+ * (Cut)» و«تضخيم نظيف (Lean\u00A0Bulk)» — ومسافةً غير فاصلة (U+00A0) داخل
+ * «Lean Bulk»، فكان لا بدّ من مهرّب تعبير نمطي كي لا يبحث المُحدِّد عن
+ * «تنشيفCut». المُحدِّد الآن يقرأ `data-choice="cut"`، فلا صياغة فيه أصلًا ولا
+ * محارف تُهرَّب — والصياغة تبقى للتأكيدات وحدها حيث هي المقصودة فعلًا.
  */
-const rx = (label) => new RegExp(label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
 const group = (page, id) => page.locator(`[data-question-id="${id}"]`)
+const choice = (page, questionId, value) => group(page, questionId).locator(`[data-choice="${value}"]`)
+/** مُحدِّد ثابت بمعرّف اختبار — لا نصّ فيه. */
+const byTestId = (page, id) => page.locator(`[data-testid="${id}"]`)
 
 const app = await startApp(PORT)
 let browser
@@ -50,7 +52,6 @@ try {
   const copy = await loadJourneyCopy()
   const t = copy.onboarding(LANG)
   const intent = copy.intent(LANG)
-  const body = copy.body(LANG)
 
   ensureProofRoot()
   const rec = createRecorder({
@@ -68,31 +69,31 @@ try {
    * المستخدم على الشاشة، لا كما نحسبها نحن.
    */
   const runProfile = async (level, tag) => {
-    const { page, errors } = await openPage(browser, { viewport: VIEWPORT, lang: LANG })
+    const { page, errors, network } = await openPage(browser, { viewport: VIEWPORT, lang: LANG })
     // كل مسار في سياق نظيف بمالك مختلف — لا تسرّب حالة بينهما.
     await seedSession(page, { uid: `journey-${level}` })
     await page.goto(app.url, { waitUntil: 'networkidle' })
     await page.waitForTimeout(700)
-    await page.getByRole('button', { name: /ابدأ|Start/ }).first().click().catch(() => {})
+    await byTestId(page, 'welcome-start-cta').first().click().catch(() => {})
     await page.waitForTimeout(700)
-    const onboardingStart = page.getByRole('button', { name: t.welcome.start, exact: true })
+    const onboardingStart = byTestId(page, 'onboarding-welcome-start')
     if (await onboardingStart.isVisible().catch(() => false)) await onboardingStart.click()
     await page.waitForSelector('#v2-body-age')
 
-    const next = page.getByRole('button', { name: t.next }).first()
+    const next = byTestId(page, 'onboarding-next').first()
     await page.getByRole('checkbox').first().check()
     const nums = page.locator('input[inputmode="numeric"], input[type="number"]')
     await nums.nth(0).fill(BODY.age)
     await nums.nth(1).fill(BODY.heightCm)
     await nums.nth(2).fill(BODY.weightKg)
-    await page.getByRole('button', { name: body.genderMale, exact: true }).first().click().catch(() => {})
+    await choice(page, 'body.sex', 'male').click().catch(() => {})
     await page.waitForTimeout(300)
     await next.click(); await page.waitForTimeout(400)
 
     // النية ثابتة، والمستوى هو المتغيّر الوحيد.
-    await page.getByRole('button', { name: rx(intent.intents[0].label) }).first().click()
+    await choice(page, 'intent.primary', intent.intents[0].value).click()
     const levelOpt = intent.levels.find((l) => l.value === level)
-    await page.getByRole('button', { name: rx(levelOpt.label) }).first().click()
+    await choice(page, 'experience.declared', levelOpt.value).click()
     await page.waitForTimeout(300)
     await rec.shot(page, `${tag}-1-level`, `${tag} — المستوى «${levelOpt.label}»`, `${tag} — level "${levelOpt.label}"`)
     await next.click(); await page.waitForSelector('#onb-title-history')
@@ -109,7 +110,7 @@ try {
     const wording = copy.goalWording(LANG, level)
     const goalText = await screenText(page)
     await rec.shot(page, `${tag}-3-goal`, `${tag} — شاشة الهدف بصياغته`, `${tag} — goal step in its own wording`)
-    await page.getByRole('button', { name: rx(wording.cut.label) }).first().click()
+    await choice(page, 'goal.primary', 'cut').click()
     await page.waitForTimeout(300)
     await next.click(); await page.waitForTimeout(400)
 
@@ -125,14 +126,15 @@ try {
     await group(page, 'limitations.has_injury').getByRole('button').nth(1).click()
     await page.waitForTimeout(300)
     await rec.shot(page, `${tag}-6-limitations`, `${tag} — بلا إصابة معلنة`, `${tag} — no declared injury`)
-    await page.locator('footer button').last().click()
+    // زرّ الخطوة الأخيرة هو زرّ المتابعة نفسه بنصّ آخر — نفس المُحدِّد الثابت.
+    await byTestId(page, 'onboarding-next').first().click()
     await page.waitForTimeout(1500)
 
     const planText = await screenText(page)
     await rec.shot(page, `${tag}-7-plan`, `${tag} — «خطتك جاهزة»`, `${tag} — plan ready`)
-    await page.getByRole('button', { name: t.ready.enter }).first().click().catch(() => {})
+    await byTestId(page, 'ready-enter-cta').first().click().catch(() => {})
     await page.waitForSelector('[data-testid="plan-handoff"]')
-    await page.getByTestId('handoff-preview-cta').click()
+    await byTestId(page, 'handoff-preview-cta').click()
     await page.waitForTimeout(1100)
 
     // الأرقام الغذائية من الشاشة التي يراها المستخدم.
@@ -164,8 +166,13 @@ try {
     const fingerprint = {
       level,
       goalLabel: wording.cut.label,
-      // من الشاشة
-      calories: num(/([\d,]{3,6})\s*سعرة/, nutriText),
+      // السعرات من **التخزين** لا من نصّ الشاشة: التعبير النمطي كان يشترط
+      // كلمة «سعرة» ملاصقة للرقم، وشاشة التغذية لا تكتبها هكذا — فكان يُرجع
+      // `null` في المسارين، و`null === null` يجعل المقياس «متطابقًا» أبدًا.
+      // مقياسٌ لا يُقاس أسوأ من مقياس مفقود: يُحسب في جدول المقارنة ولا يقيس
+      // شيئًا (§4.2). المصدر الآن `nutritionPlan.targetCalories` — نفس الرقم
+      // الذي تعرضه الشاشة، مقروءًا من حيث لا يضيع.
+      calories: customization?.nutritionPlan?.targetCalories ?? null,
       protein: num(/(\d{2,3})\s*g?\s*بروتين/, nutriText),
       // من التخزين
       split: calendar.split ?? null,
@@ -180,8 +187,11 @@ try {
     }
 
     const advancedWording = copy.goalWording(LANG, 'advanced')
+    // التصنيف يجري **قبل إغلاق الصفحة** وبعنوان التطبيق، فالبصمات تُقرأ من نفس
+    // التشغيل ولا تُخلط بين المسارين.
+    const clientErrors = classifyClientErrors(errors, network, app.url)
     await page.close()
-    return { fingerprint, goalText, trainingText, planText, workoutText, errors, advancedWording }
+    return { fingerprint, goalText, trainingText, planText, workoutText, clientErrors, advancedWording }
   }
 
   // ───────────── المسار الأول: مبتدئ ─────────────
@@ -251,6 +261,15 @@ try {
     b.experience !== a.experience,
     `${b.experience} → ${a.experience} (مستبعَد من جدول المخرَجات: مدخل لا مخرَج)`)
 
+  // حارس المقارنة نفسها: مقياس يقرأ `null` في المسارين لم يُقَس أصلًا، ووجوده
+  // في عمود «المتطابق» يُطمئن بلا حقّ. يُسمّى هنا قبل أي استنتاج.
+  const unmeasured = rows.filter(([, bv, av]) => bv === null && av === null).map(([l]) => l)
+  rec.check(
+    'كل مقياس في جدول المقارنة مقروء فعلًا (لا null≡null يتنكّر في صورة تطابق)',
+    unmeasured.length === 0,
+    unmeasured.length ? `غير مقيس: ${unmeasured.join(' · ')}` : `${rows.length} مقاييس مقروءة`,
+  )
+
   const differing = rows.filter(([, bv, av]) => String(bv) !== String(av)).map(([l]) => l)
   const identical = rows.filter(([, bv, av]) => String(bv) === String(av)).map(([l]) => l)
 
@@ -278,10 +297,11 @@ try {
   }
 
   // ───────────── أخطاء الطرف العميل ─────────────
-  const allErrors = realClientErrors([...beginner.errors, ...advanced.errors])
-    
-  rec.check('لا أخطاء طرف عميل في المسارين (عدا 401 الجلسة المزروعة — استثناء معلَن)',
-    allErrors.length === 0, allErrors.slice(0, 3).join(' | '))
+  const allErrors = [...beginner.clientErrors.real, ...advanced.clientErrors.real]
+  const declaredCount = beginner.clientErrors.declared.length + advanced.clientErrors.declared.length
+  rec.check('لا أخطاء طرف عميل في المسارين (عدا فشل خلفية الجلسة المزروعة — استثناء معلَن)',
+    allErrors.length === 0,
+    allErrors.length ? allErrors.slice(0, 3).join(' | ') : `${declaredCount} خطأ خلفية مستثنى`)
 
   const result = rec.finish()
   // البصمتان تدخلان البيان ليقرأهما المراجع بلا إعادة تشغيل.

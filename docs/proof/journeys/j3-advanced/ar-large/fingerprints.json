@@ -7,7 +7,7 @@
   "beginner": {
     "level": "beginner",
     "goalLabel": "خسارة دهون",
-    "calories": null,
+    "calories": 2207,
     "protein": 207,
     "split": "upper_lower",
     "daysPerWeek": 4,
@@ -19,7 +19,7 @@
   "advanced": {
     "level": "advanced",
     "goalLabel": "تنشيف (Cut)",
-    "calories": null,
+    "calories": 2207,
     "protein": 207,
     "split": "upper_lower",
     "daysPerWeek": 4,

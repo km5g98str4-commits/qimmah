@@ -1,0 +1,19 @@
+=== GOV-002 PRESERVATION RECORD ===
+date: 2026-08-18T19:11:16Z
+current branch: claude/control-files-tier1-verify-yyxg50
+current HEAD full SHA: 64fca13b0ce89eedb0a57046c4d94bb2360612a5
+origin/main full SHA: cc60adfc0da0f893b101230269d4847d33490429
+local main full SHA: cc60adfc0da0f893b101230269d4847d33490429
+--- working tree status (porcelain, untracked=all) ---
+(lines: 0)
+--- stash ---
+--- worktrees ---
+/home/user/qimmah  64fca13 [claude/control-files-tier1-verify-yyxg50]
+--- local branches ---
+claude/control-files-tier1-verify-yyxg50 64fca13b0ce89eedb0a57046c4d94bb2360612a5
+main cc60adfc0da0f893b101230269d4847d33490429
+--- unpushed commits on current branch ---
+--- remote count ---
+81
+--- tags ---
+186

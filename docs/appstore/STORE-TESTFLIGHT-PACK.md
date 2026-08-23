@@ -71,7 +71,7 @@
 
 قِمّة عربي أول، ومعه الإنجليزي.
 
-قِمّة+ (لاحقًا): خطط وتحليلات أعمق — والأساسيات تبقى مجانية.
+قِمّة Premium: إعدادك وتوليد خطتك ومعاينتها كاملة مجانًا. وتسجيل تمارينك وأكلك ومايك وقياساتك يفتح بتجربة ٧٢ ساعة، أو بكود وصول، أو بشراء واحد لقِمّة Premium — بلا اشتراك شهري.
 ```
 
 > **ما تغيّر عن `02-description.md`:** فقرة «حركتك وعافيتك» كانت تقول «سجّل خطواتك اليومية» فقط — وهو وصف ناقص لتطبيق يقرأ ٢٤ مقياسًا من HealthKit؛ الوصف الآن يذكر الربط والقراءة-فقط والموافقة. وأُضيفت فقرة «أرقام صادقة» — تحمل التحفّظ الطبي وقيد القاصرين، ويقرأها المراجع قبل أن يبحث عنها.
@@ -118,7 +118,7 @@ professional. For users under 18, goals stay on maintenance.
 
 Qimmah is Arabic-first, with English right there too.
 
-Qimmah+ (later): deeper plans and insights — the essentials stay free.
+Qimmah Premium: your setup, plan generation, and full plan preview are free. Logging your workouts, food, water, and measurements opens with a 72-hour trial, an access code, or a one-time Qimmah Premium purchase — no monthly subscription.
 ```
 
 ## ١-ج · الوصف القصير

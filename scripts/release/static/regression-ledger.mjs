@@ -216,7 +216,34 @@ const LEDGER = [
       const missing = Object.keys(liveOwners).filter((p) => !CENTRAL.test(src(p)))
       // والتأكيد المضادّ: الفحص ليس فارغًا — ملف بلا أي منسّق يجب أن يرسب.
       const controlFails = !CENTRAL.test('const x = String(n)')
-      return [missing.length === 0 && controlFails, `live owners WITHOUT the central formatter: [${missing.join(', ')}] · control-fails=${controlFails}`]
+
+      // ── [GOV-003/STITCH-01] اتّحاد دلالي مع سجلّ `final-release-convergence` ──
+      // ذلك السجلّ حمل ستّة أنماط «موضع عرض عارٍ»، كلٌّ منها إخفاق REL-001 مرصود
+      // قبل إصلاحه. أربعة منها **مواضع عرض فعلية** وتُضاف هنا: وجودها ارتداد
+      // مُثبَت لا تخمين. واثنان **لم يُنقَلا عمدًا**، وهذا سبب كلٍّ منهما:
+      //
+      //   · `src/lib/todayV2Model.ts` ⇒ `${durationMin} دقيقة`
+      //     ليس موضع عرض. مالك العرض `NextActionCard.tsx:97` يمرّر النصّ كاملًا
+      //     عبر `loc()` = `formatNumeralsIn`. فالنمط يقيس **طبقة النموذج**
+      //     والعقد على **حدّ العرض** — ونقله يجعل الفحص يرسب على كود سليم.
+      //   · `src/design-system/v2/labels.ts` ⇒ `V2_TODAY.remainingCount`
+      //     **بلا مستهلك واحد** في `src/` (تحقّق: grep يعود فارغًا). حراسة سطح
+      //     ميت تصنع ثقة زائفة، وهي العلّة نفسها التي كُتب هذا السجلّ ضدّها.
+      //
+      // القاعدة المستخلصة: النمط يُحرَس عند **من يعرض**، لا عند من يركّب النصّ.
+      const RENDER_SITE_REGRESSIONS = [
+        ['nutrition hero “remaining”', 'src/views/NutritionView.tsx', />\{remaining\}</],
+        ['nutrition meal-row calories', 'src/views/NutritionView.tsx', />\{cals\} \{d\.caloriesUnit\}/],
+        ['workout days-per-week', 'src/views/WorkoutView.tsx', />\{plan\.days\.length\} \{d\.daysPerWeek\}</],
+        ['workout per-day exercises', 'src/views/WorkoutView.tsx', />\{pd\.exercises\.length\} \{d\.exercisesUnit\}/],
+      ]
+      const regressed = RENDER_SITE_REGRESSIONS.filter(([, f, re]) => re.test(src(f))).map(([w]) => w)
+      // تأكيد مضادّ ثانٍ: مصفوفة الأنماط ليست فارغة ولا مُعطَّلة.
+      const patternsLive = RENDER_SITE_REGRESSIONS.length === 4
+        && RENDER_SITE_REGRESSIONS[0][2].test('<span>{remaining}</span>')
+
+      const ok = missing.length === 0 && controlFails && regressed.length === 0 && patternsLive
+      return [ok, `live owners WITHOUT the central formatter: [${missing.join(', ')}] · bare render sites returned: [${regressed.join(', ')}] · control-fails=${controlFails} · patterns-live=${patternsLive}`]
     },
   },
 

@@ -118,11 +118,18 @@ async function onboard(page) {
   await page.locator('button[aria-pressed]').first().click({ force: true })
   const next = () => page.locator('footer button').last().click({ force: true })
   await next(); await page.waitForSelector('#onb-title-intent', { timeout: 20000 })
+  // [GOV-003] النيّة المختارة تُصرَّح، ولا تُفترض. صفحة النيّة تعرض مجموعتين
+  // (النيّة ثم المستوى) وكلتاهما `button[aria-pressed]`، فـ`nth(1)` هو خيار
+  // النيّة الثاني = **`meals`** (الترتيب: plan · meals · numbers)، و`nth(3)` هو
+  // أول خيار في مجموعة المستوى. وكان المستدعي يمرّر `intent` الافتراضي `'plan'`
+  // إلى `finishInputSteps` بينما اختار `meals` فعلًا — فيظهر سؤال «نمط الأكل»
+  // بحقّ ويسقط الحصّاد على تناقض **من صنعه هو**، لا من صنع المنتج.
+  const INTENT = 'meals'
   const rows = page.locator('button[aria-pressed]')
   await rows.nth(1).click({ force: true }); await rows.nth(3).click({ force: true })
   await answerHistory(page, next)
   await page.locator('button[aria-pressed]').first().click({ force: true })
-  await finishInputSteps(page, next); await settle(page, 1600)
+  await finishInputSteps(page, next, { intent: INTENT }); await settle(page, 1600)
   await tap(page, /الدخول للوحة/)
   await page.waitForSelector('[data-testid="plan-handoff"]', { timeout: 25000 })
   await page.locator('[data-testid="handoff-preview-cta"]').click({ force: true })

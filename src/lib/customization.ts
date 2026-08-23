@@ -566,8 +566,36 @@ const PLAN_IDENTITY_FIELDS = [
  * `getLastUser()` هو قارئ المالك خارج React (نفس ما يستهلكه `dataPortability`):
  * نصّ = حساب فيُقرأ سجلّ الحسابات · `null`/`undefined` = ضيف فيُقرأ علم الجهاز.
  */
+/**
+ * **هل تشهد الحالة بخطّة سابقة؟** — [GOV-003/BLOCKER-D]
+ *
+ * `hasSavedCustomization()` تعود `true` على `'saved'` وحدها، وكان حارس
+ * `plan.saveEdit` مبنيًّا عليها. فكانت النتيجة **تجاوزًا للاستحقاق عبر التلف**:
+ * مخزَّن معطوب ⇒ `state !== 'saved'` ⇒ `isExistingPlanEdit()` تعود `false` ⇒
+ * لا `assertPaid` إطلاقًا. أي أن إفساد بايت واحد في `localStorage` كان يفتح
+ * تحوير الخطة مجّانًا إلى الأبد.
+ *
+ * التمييز الصحيح ليس «هل نقدر نقرأ؟» بل **«هل كانت هناك خطة؟»**:
+ *   · `absent`          — لا بايتات إطلاقًا ⇒ مستخدم جديد، وخطته الأولى **مجّانية**
+ *                          (الميثاق §0.1: التخصيص وتوليد الخطة ومعاينتها مجّانية).
+ *   · `saved`           — خطة قائمة ⇒ يُحرَس التحوير.
+ *   · `recoverable`     — بايتات موجودة وتعذّرت قراءتها ⇒ **خطة كانت هنا** ⇒ يُحرَس.
+ *   · `unreadable`      — كذلك.
+ *   · `storage-blocked` — لم نقرأ شيئًا لأن التخزين محجوب، **والكتابة ستفشل
+ *                          أصلًا**. فلا يُحرَس: إظهار جدار دفع بدل خطأ تخزين
+ *                          صادق يكذب على المستخدم بسبب عطل ليس سببه.
+ *
+ * والإصلاح لا يجعل التلف مدفوعًا: مسار الإصلاح يمرّ بنيّة `system-repair`
+ * ببرهان تلف حيّ، وهو مجّاني ولم يُمسّ. المحروس هنا **تحوير هويّة الخطة**
+ * بنيّة `user-edit` فوق حالة تشهد بخطّة سابقة.
+ */
+export function hasPriorPlanEvidence(): boolean {
+  const { state } = readCustomization()
+  return state === 'saved' || state === 'recoverable' || state === 'unreadable'
+}
+
 export function isExistingPlanEdit(): boolean {
-  return hasSavedCustomization() && isOnboardingComplete(getLastUser() ?? null)
+  return hasPriorPlanEvidence() && isOnboardingComplete(getLastUser() ?? null)
 }
 
 /** خيارات الكتابة — النيّة تُصرَّح، ولا تُفترض. */

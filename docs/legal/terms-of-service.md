@@ -42,10 +42,16 @@
 وصور توضيحية من مصادر عامة (GitHub/jsDelivr)، وروابط بحث خارجية على YouTube. استخدامك لتلك الخدمات قد يخضع
 لشروطها، ولسنا مسؤولين عن محتواها أو توفّرها.
 
-### 8. الاشتراك المستقبلي «قِمّة+»
-قد نطرح لاحقًا اشتراكًا مدفوعًا (**قِمّة+**) يضيف تحليلات وخطط أعمق. الميزات الأساسية تبقى مجانية. تُعرض شروط
-الاشتراك والأسعار والتجديد والإلغاء واستردادات App Store عند توفّر الميزة قبل أي عملية شراء. **لا يوجد اشتراك
-فعّال في هذه النسخة.**
+### 8. الوصول والدفع
+**مجانًا بلا حساب وبلا دفع:** إعداد ملفك الشخصي، وتوليد خطتك، ومعاينة الخطة كاملةً، وإنشاء الحساب. كما يمكن
+تصفّح شاشات التطبيق في وضع المعاينة.
+
+**خلف الوصول المدفوع:** الأفعال المنتِجة وحدها — تسجيل التمارين والمجموعات، وتسجيل الطعام والماء، وتسجيل الوزن
+والقياسات، وتسجيل التعافي، وحفظ تعديلات الخطة. ويُفتح ذلك بإحدى ثلاث بوّابات لا رابع لها: **تجربة مدّتها ٧٢ ساعة**
+تُمنح مرّة واحدة لكل حساب مُوثَّق، أو **قِمّة Premium**، أو **كود وصول** بمدّة محدودة.
+
+**قِمّة Premium عملية شراء واحدة، وليست اشتراكًا شهريًا ولا تجديدًا تلقائيًا.** يشمل تحديثات قِمّة — بلا اشتراك شهري.
+ويُعرض السعر وشروط الشراء والاسترداد على قناة الشراء قبل إتمام أي عملية.
 
 ### 9. إخلاء المسؤولية وحدودها
 تُقدَّم الخدمة «كما هي» دون ضمانات. لا نضمن دقّة التقديرات أو نتائج معيّنة. إلى الحد الذي يسمح به النظام، لا نتحمّل
@@ -101,10 +107,18 @@ The app relies on Supabase (auth & sync), Open Food Facts (barcode product data 
 images from public sources (GitHub/jsDelivr), and external YouTube search links. Your use of those services may
 be subject to their terms; we are not responsible for their content or availability.
 
-### 8. Future subscription — “Qimmah+”
-We may later offer a paid subscription (**Qimmah+**) adding deeper analytics and plans. Core features remain
-free. Subscription terms, pricing, renewal, cancellation, and App Store refunds will be presented when the
-feature is available, before any purchase. **No subscription is active in this version.**
+### 8. Access and payment
+**Free, with no account and no payment:** setting up your profile, generating your plan, previewing the full
+plan, and creating an account. You can also browse the app's screens in preview mode.
+
+**Behind paid access:** the productive actions only — logging workouts and sets, logging food and water,
+logging weight and measurements, logging recovery, and saving plan edits. These open through one of three
+gates and no fourth: a **72-hour trial** granted once per verified account, **Qimmah Premium**, or an
+**access code** of limited duration.
+
+**Qimmah Premium is a one-time purchase — not a monthly subscription and not an auto-renewing plan.** It
+includes Qimmah updates — no monthly subscription. Price, purchase terms, and refund terms are shown on the
+purchase channel before any purchase is completed.
 
 ### 9. Disclaimers & limitation of liability
 The service is provided “as is” without warranties. We do not guarantee estimate accuracy or specific results.
