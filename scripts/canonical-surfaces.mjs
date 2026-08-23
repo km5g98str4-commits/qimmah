@@ -89,7 +89,11 @@ export const UNROUTED_COMPONENTS = [
   'src/components/InstallBanner.tsx',
   'src/components/InstallPrompt.tsx',
   // بطاقات وأغطية بلا موضع رسم حاليًا.
-  'src/components/AllergyNotice.tsx',
+  //
+  // ملحوظة مسجَّلة: `AllergyNotice.tsx` كان هنا، وخرج من السجلّ عند التقاء
+  // `QIM-FINAL-RC-001` لأن تلك الموجة **وصلته فعلًا** بـ`NutritionView` الحيّة.
+  // ولم يُكتشف بالمراجعة بل أسقط البوّابة باسمه (`canonical-surface-stale-
+  // declaration`) — وهو الاتجاه الثاني من القفل يعمل كما وُضع له.
   'src/components/StepCounterCard.tsx',
   'src/components/SyncConsentGate.tsx',
   'src/components/coaching/TodayLearnCard.tsx',
