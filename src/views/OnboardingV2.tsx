@@ -7,6 +7,7 @@ import type { GeneratedPlan } from '@/lib/planGenerator'
 import type { PlanRationale } from '@/lib/planRationale'
 import type { GoalType, Profile } from '@/types/profile'
 import { cn } from '@/lib/cn'
+import { foldDigits } from '@/lib/numberFormat'
 import type { Lang } from '@/lib/appPreferences'
 import { V2_GOAL_MODEL, V2_ONBOARDING, type V2GoalValue } from '@/design-system/v2/labels'
 import { useCustomization } from '@/lib/customizationContext'
@@ -105,6 +106,38 @@ const TITLE_ID = [
   'onb-title-limitations',
 ] as const
 
+/**
+ * نصّ حقل رقمي → رقم — **بعد الطيّ، لا قبله**.
+ *
+ * ═══ العطل الذي وُلد منه ═══
+ * الحقول كانت تقرأ `Number(ageText)` مباشرةً. و`Number` تتبع نحو ECMAScript
+ * فلا تقبل إلا `0-9`: فـ`Number('٢٤')` تعطي **NaN**. والمستخدم العربي يكتب
+ * ٢٤ و١٧٧ و١٠٦ فيرى «أكمل الأربعة بقيم منطقية» — رسالةً تتّهمه بأنه لم يكمل
+ * وهو أكمل. وحقلٌ عربيّ واحد يكفي لإسقاط الخطوة كلّها.
+ *
+ * وأخطر من رسالة الخطأ أثران صامتان: `isMinorAge(NaN)` كاذبة **فلا يُفعَّل
+ * حاجز القاصرين**، و`showMinorNote` كاذبة **فلا يظهر التنويه**. أي أن الإدخال
+ * العربي كان يُعطِّل ضابطًا امتثاليًا لا حقلَ إدخال فحسب.
+ *
+ * ولم تكن الطبقة الرقمية ناقصة: `foldDigits` تعالج ٠-٩ و۰-۹ والفاصلة العشرية
+ * `٫` وفاصلة الآلاف وعلامات الاتجاه — **والشاشة وحدها لم تكن تستدعيها**.
+ * ولذلك مرّت البوّابات خضراء: تفحص الطبقة، لا مستهلكها.
+ *
+ * ═══ ولماذا الطيّ عند القراءة لا عند الكتابة ═══
+ * لو طُوي في `onChange` لانقلب ما يكتبه المستخدم إلى `24` تحت إصبعه. فتبقى
+ * **المسوّدة كما كتبها**، ويبقى **المخزَّن غربيًّا قانونيًّا** — وهو نفس عقد
+ * `numberFormat`: «التطبيع عند حدّ الإدخال حصرًا، والقيم المخزَّنة تبقى غربية».
+ *
+ * وتُرجع `null` لغير المقروء بدل `NaN`: العقد أصلًا `number | null`، و`NaN`
+ * يمرّ في كل مقارنة صامتًا بينما `null` يُفحص.
+ */
+function readField(text: string): number | null {
+  const folded = foldDigits(text).trim()
+  if (folded === '') return null
+  const n = Number(folded)
+  return Number.isFinite(n) ? n : null
+}
+
 const toAr = (n: number, lang: Lang) => (lang === 'en' ? String(n) : String(n).replace(/\d/g, (x) => '٠١٢٣٤٥٦٧٨٩'[Number(x)]))
 
 /**
@@ -173,9 +206,9 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
   const [validation, setValidation] = useState<StepValidation>(null)
 
   // أرقام الجسم المُحوَّلة (NaN حين يكون الحقل فارغًا أو نصًّا غير رقمي).
-  const ageNum = ageText.trim() === '' ? null : Number(ageText)
-  const heightNum = heightText.trim() === '' ? null : Number(heightText)
-  const weightNum = weightText.trim() === '' ? null : Number(weightText)
+  const ageNum = readField(ageText)
+  const heightNum = readField(heightText)
+  const weightNum = readField(weightText)
 
   // القاصرون (دون 18) — المحافظة فقط.
   // العمر يُجمَع الآن في الخطوة الأولى، فالحاجز يعمل للضيف الجديد أيضًا. سابقًا
@@ -510,7 +543,8 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
               onConsent={setHealthDataConsent}
               onAge={(v) => {
                 setAgeText(v)
-                const nextAge = v.trim() === '' ? 0 : Number(v)
+                // الطيّ هنا كذلك: بلا الطيّ كانت `isMinorAge(NaN)` كاذبة فلا يُفعَّل الحاجز.
+                const nextAge = readField(v) ?? 0
                 if (isMinorAge(nextAge)) setGoal((current) => goalAllowedForEligibility(current, true))
                 setValidation(null)
               }}
@@ -716,7 +750,8 @@ function BodyStep({
 }) {
   const s = bodyStepStrings[lang]
   const policy = policyCopy[lang]
-  const parsedAge = Number(age)
+  // بلا الطيّ كان التنويه يختفي كلّما كُتب العمر بالعربية.
+  const parsedAge = readField(age) ?? Number.NaN
   const showMinorNote = Number.isFinite(parsedAge) && parsedAge >= AGE_RANGE.min && parsedAge < 18
   return (
     <section aria-labelledby={titleId}>

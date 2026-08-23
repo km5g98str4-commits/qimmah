@@ -67,6 +67,12 @@ jobs:
       - name: Onboarding v2 browser E2E
         run: npm run test:e2e:onboarding
 
+      # فحص المؤسس اليدوي أسقط ادّعاءً آليًا أخضر: الحقول تقبل ٢٤ و١٧٧ و١٠٦
+      # بصريًّا ثمّ تردّ «أكمل الأربعة». والبوّابة كانت خضراء بصدق — تفحص
+      # `foldDigits` لا مستهلكها. فهذا الفحص **يقود المتصفّح** على الأرتيفكت.
+      - name: Arabic numeral input — live browser
+        run: npm run test:e2e:arabic-numerals
+
       - name: Upload dist artifact
         if: success()
         # [CTO-87] الرفع **دليل بناء لا شرط إطلاق**: لا خطوة تُنزّله
