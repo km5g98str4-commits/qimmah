@@ -15,10 +15,11 @@
 // وإن تطابقت الأرقام تمامًا، فذلك **نتيجة تُرفَع لا اختبار يُطوَّع**: يعني أن
 // المستوى لا يصل إلى الحساب، وهو ما يجب أن يعرفه المنسّق لا أن يُخفى.
 
-import { chromium } from 'playwright'
+import { chromium } from '../lib/engine.mjs'
 import {
   VIEWPORTS, startApp, createRecorder, openPage, screenText,
   report, ensureProofRoot, seedSession,
+  realClientErrors,
 } from './lib/kit.mjs'
 import { loadJourneyCopy } from './lib/journey-copy.mjs'
 import { answerDietPattern } from '../lib/onboarding-driver.mjs'
@@ -131,7 +132,7 @@ try {
     await rec.shot(page, `${tag}-7-plan`, `${tag} — «خطتك جاهزة»`, `${tag} — plan ready`)
     await page.getByRole('button', { name: t.ready.enter }).first().click().catch(() => {})
     await page.waitForSelector('[data-testid="plan-handoff"]')
-    await page.getByRole('button', { name: t.handoff.enterFree, exact: true }).click()
+    await page.getByTestId('handoff-preview-cta').click()
     await page.waitForTimeout(1100)
 
     // الأرقام الغذائية من الشاشة التي يراها المستخدم.
@@ -277,8 +278,8 @@ try {
   }
 
   // ───────────── أخطاء الطرف العميل ─────────────
-  const allErrors = [...beginner.errors, ...advanced.errors]
-    .filter((e) => !(/401/.test(e) && /Failed to load resource/.test(e)))
+  const allErrors = realClientErrors([...beginner.errors, ...advanced.errors])
+    
   rec.check('لا أخطاء طرف عميل في المسارين (عدا 401 الجلسة المزروعة — استثناء معلَن)',
     allErrors.length === 0, allErrors.slice(0, 3).join(' | '))
 

@@ -18,10 +18,11 @@
 //   اعتمدت «نية ← مستوى ← موافقة ← جسد». الرحلة تُوثّق الواقع كما هو —
 //   حارس الرحلات يكشف ولا يصلح (الإصلاح لحارة الملف).
 
-import { chromium } from 'playwright'
+import { chromium } from '../lib/engine.mjs'
 import {
   VIEWPORTS, startApp, createRecorder, createVocabularyGuard,
   openPage, screenText, report, ensureProofRoot, seedSession,
+  realClientErrors,
 } from './lib/kit.mjs'
 import { loadJourneyCopy, assertTermExistsInSource } from './lib/journey-copy.mjs'
 import { answerDietPattern } from '../lib/onboarding-driver.mjs'
@@ -52,6 +53,9 @@ let exitCode = 1
 try {
   const copy = await loadJourneyCopy()
   const t = copy.onboarding(LANG)
+  const rv = copy.reveal(LANG)
+  const wel = copy.welcome(LANG)
+  const shell = copy.shell(LANG)
   const intent = copy.intent(LANG)
   const body = copy.body(LANG)
   const policy = copy.policy(LANG)
@@ -94,20 +98,46 @@ try {
   )
   await visit('welcome', 'شاشة الترحيب — أول ما يراه المستخدم', 'Welcome — the first screen')
 
-  // ───────── جدار الحساب: ما يصطدم به المولود الجديد فعلًا ─────────
-  const welcomeButtons = await page.evaluate(() =>
-    [...document.querySelectorAll('button')].map((b) => (b.innerText || '').trim()).filter(Boolean),
+  // ───────── مدخل الضيف: يُفحص بالبنية لا بالمفردة ─────────
+  //
+  // تصحيح مسجَّل: كان هنا بلاغ «عالٍ» يقول إنه «لا مسار ضيف، و(ابدأ الآن) تقود
+  // إلى إنشاء حساب». وهو **كاذب في ادّعاءاته الثلاثة**: `StartViewV2` يستقبل
+  // `onGuest` ويربطه بالنداء **الأساسي** (`welcome-start-cta`)، و`onLogin` نداء
+  // **ثانوي** منفصل، و`continueGuest`/`guestNote` مرسومان لا يتيمان.
+  //
+  // ومصدر الكذب أن الفحص بحث عن **مفردة** «ضيف» في نصّ زرّ. والمنتج لا يسمّي
+  // مدخله «كمّل كضيف» — يبدأ ببساطة ويكتب الوعد تحته. ففحصُ مفردةٍ يتنكّر في
+  // هيئة فحص قدرة (§4.2: «مرور غير مستحقّ ليس نجاحًا» — والسقوط غير المستحقّ
+  // مثله). والبرهان القاطع أن هذه الرحلة نفسها تكمل الإعداد والخطة واليوم
+  // **بلا حساب قط** — الفحوص الثلاثة والثلاثون أدناه هي إثبات الوجهة.
+  const entryCtas = await page.evaluate(() => {
+    const start = document.querySelector('[data-testid="welcome-start-cta"]')
+    const login = document.querySelector('[data-testid="welcome-login-cta"]')
+    return {
+      startText: (start?.innerText || '').trim(),
+      loginText: (login?.innerText || '').trim(),
+      distinct: !!start && !!login && start !== login,
+    }
+  })
+  rec.check(
+    `النداء الأساسي على شاشة البداية هو «${wel.primary}» — مدخل الضيف لا جدار حساب`,
+    entryCtas.startText.includes(wel.primary),
+    entryCtas.startText || 'لا نداء أساسي',
   )
-  const hasGuestPath = welcomeButtons.some((b) => /ضيف|Guest/.test(b))
-  if (!hasGuestPath) {
-    rec.finding(
-      'لا مسار ضيف من شاشة الترحيب — «ابدأ الآن» تقود إلى إنشاء حساب',
-      'أزرار الترحيب: ' + welcomeButtons.join(' · ') + ' — و«ابدأ الآن» تنقل إلى #/login. ' +
-        'ونصّ «كمّل كضيف» موجود في src/config/strings.ts (٤ مداخل عربي+إنجليزي) ولا يشير إليه أي مكوّن: ' +
-        'StartViewV2 يرسم onSignup وonLogin فقط. وعد «محلي افتراضيًا» (الميثاق §9) بلا مدخل في تدفّق v2.',
-      'عالٍ',
-    )
-  }
+  // التأكيد المضادّ (§4.2): وجود الزرّين لا يكفي — يجب أن يكونا **عنصرين
+  // مختلفين**، وأن يحمل الثانوي نصّ تسجيل الدخول. فلو صار الأساسي هو نفسه
+  // مدخل الحساب لسقط الفحص باسمه بدل أن يمرّ على وجود عنصرين.
+  rec.check(
+    'تسجيل الدخول نداء ثانوي منفصل — لا هو النداء الأساسي',
+    entryCtas.distinct && entryCtas.loginText.includes(wel.secondary),
+    `أساسي: ${entryCtas.startText} · ثانوي: ${entryCtas.loginText}`,
+  )
+  // «محلي افتراضيًا» (الميثاق §9) وعدٌ **مكتوب** تحت النداء لا مستنتَج.
+  const welcomeText = await screenText(page)
+  rec.check(
+    `وعد الضيف مكتوب صراحةً — «${shell.start.guestNote}»`,
+    welcomeText.includes(shell.start.guestNote),
+  )
   // حراسة المسار للزائر — تُفحص بأسماء المسارات **الحقيقية** من src/lib/appRoutes.ts.
   // تصحيح مسجَّل: تشغيل سابق فحص «#/today» و«#/onboarding» وهما ليسا اسمي مسارين
   // أصلًا (الصحيح dashboard وsetup)، فقرأ ٤٠٤ المسار المجهول عطلَ حجب. الاسم
@@ -261,10 +291,27 @@ try {
   rec.check(`زرّ «${t.ready.enter}» يكشف شاشة التسليم`, entered)
   await page.waitForSelector('[data-testid="plan-handoff"]')
   const handoffText = await visit('plan-handoff', 'كشف الخطة — Premium أو المعاينة', 'Plan reveal — Premium or preview')
-  rec.check('الكشف يعرض Premium والمعاينة بلا جدار حساب',
-    handoffText.includes(t.handoff.premiumCta) && handoffText.includes(t.handoff.enterFree) &&
-      !/أنشئ حساب|سجّل الدخول/.test(handoffText))
-  await page.getByRole('button', { name: t.handoff.enterFree, exact: true }).click()
+  // النداءات الثلاثة تُفحص **بمعرّفاتها الثابتة مقترنةً بنصّها من قاموسها**.
+  //
+  // كان الفحص يقرأ النصّ من `V2_ONBOARDING.handoff` — نسخة ثانية بائتة لشاشة
+  // صارت ترسم من `revealStrings`. فمرّ الفحص على نصّ متقاعد ثم علّق النقر حتى
+  // انتهاء المهلة: عطلٌ يبدو في المنتج ومصدره في الرحلة.
+  //
+  // والاقتران مقصود (§4.2): المعرّف وحده يمرّ ولو أُفرغ النصّ، والنصّ وحده يكسر
+  // عند أي تحرير. فيُطلب الاثنان معًا — عقدٌ لا يتغيّر بتحرير ولا بلغة.
+  const handoffCtas = [
+    { testId: 'handoff-premium-cta', label: 'Premium', text: rv.cta.premiumCta },
+    { testId: 'handoff-trial-cta', label: 'التجربة', text: rv.cta.trialCta },
+    { testId: 'handoff-preview-cta', label: 'المعاينة', text: rv.cta.previewCta },
+  ]
+  for (const cta of handoffCtas) {
+    const el = page.getByTestId(cta.testId)
+    const shown = await el.isVisible().catch(() => false)
+    const carries = shown && (await el.innerText().catch(() => '')).includes(cta.text)
+    rec.check(`نداء ${cta.label} ظاهر ويحمل نصّ قاموسه «${cta.text}»`, carries)
+  }
+  rec.check('الكشف بلا جدار حساب', !/أنشئ حساب|سجّل الدخول/.test(handoffText))
+  await page.getByTestId('handoff-preview-cta').click()
   await page.waitForTimeout(900)
   await visit('dashboard', 'لوحة اليوم — بعد اعتماد الخطة', 'Today dashboard — after approving the plan')
 
@@ -314,7 +361,12 @@ try {
   rec.check('هدف السعرات اليومي محسوب ومعروض', Number(calorieTarget) >= 1200, calorieTarget ?? 'لا رقم')
   // نمط الأكل المختار لا ينشئ بطاقات وجبات جاهزة؛ زيادة الماء طفرة تغذية
   // حقيقية موجودة لكل ملف، ومحروسة بالعقد نفسه.
-  const addNutrition = page.getByRole('button', { name: /250/ }).first()
+  //
+  // ويُلتقط الزرّ **بمعرّفه الثابت** لا برقمه: التسمية تمرّ بـ`formatNumeralsIn`،
+  // وجدول أرقامها يتبع `activeNumeralStyle` وقت التشغيل — فقد تُرسم «٢٥٠» هنديّة
+  // وقد تُرسم «250» لاتينية. مُحدِّدٌ يقرأ الأرقام يربط الرحلة بتفضيل عرض متغيّر،
+  // لا بالفعل الذي تدّعي فحصه. والمنتج وضع المعرّف لهذا السبب بالذات.
+  const addNutrition = page.getByTestId('water-preset-250')
   rec.check('فعل زيادة الماء موجود في المعاينة', await addNutrition.isVisible().catch(() => false))
   await addNutrition.click()
   await page.waitForSelector('[data-testid="premium-gate"]')
@@ -328,8 +380,7 @@ try {
   // استثناء **معلَن** (§4: الممنوع هو التعطيل الصامت): الجلسة المزروعة رمز وهمي،
   // فأي نداء إلى Supabase يردّ 401. هذا أثر أداة الاختبار لا عطل منتج. وأي خطأ
   // آخر يبقى محسوبًا — والقائمة تُطبع كاملة عند السقوط.
-  const seededAuthNoise = (e) => /401/.test(e) && /Failed to load resource/.test(e)
-  const realErrors = errors.filter((e) => !seededAuthNoise(e))
+  const realErrors = realClientErrors(errors)
   rec.check(
     'لا أخطاء طرف عميل خلال الرحلة (عدا 401 الجلسة المزروعة — استثناء معلَن)',
     realErrors.length === 0,

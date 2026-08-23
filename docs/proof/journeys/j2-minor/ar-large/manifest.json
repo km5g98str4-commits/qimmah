@@ -1,0 +1,219 @@
+{
+  "id": "j2-minor",
+  "titleAr": "رحلة القاصر — حاجز الامتثال",
+  "titleEn": "The minor journey — the compliance gate",
+  "lang": "ar",
+  "viewport": "large",
+  "ground": {
+    "branch": "codex/qimmah-final-sovereign-convergence-001",
+    "commit": "63c7727f",
+    "subject": "fix(health,gate): [FINAL-CONVERGENCE] صدق لوحة الصحّة على الويب — وتسعة حرّاس يتيمة تدخل البوّابة",
+    "dirty": true
+  },
+  "frames": [
+    {
+      "seq": 1,
+      "file": "01-body-15.png",
+      "slug": "body-15",
+      "captionAr": "الأساسيات — العمر 15 سنة",
+      "captionEn": "Basics — age 15"
+    },
+    {
+      "seq": 2,
+      "file": "02-goal-minor.png",
+      "slug": "goal-minor",
+      "captionAr": "شاشة الهدف — القاصر يرى المحافظة وحدها متاحة",
+      "captionEn": "Goal step — only maintenance available to a minor"
+    },
+    {
+      "seq": 3,
+      "file": "03-goal-force-click-blocked.png",
+      "slug": "goal-force-click-blocked",
+      "captionAr": "بعد نقر قسري على هدف محجوب — لا شيء تغيّر",
+      "captionEn": "After force-clicking a blocked goal — nothing changed"
+    },
+    {
+      "seq": 4,
+      "file": "04-goal-adult-cut.png",
+      "slug": "goal-adult-cut",
+      "captionAr": "بعمر 28 — «خسارة دهون» مختار",
+      "captionEn": "At 28 — restricted goal selected"
+    },
+    {
+      "seq": 5,
+      "file": "05-age-lowered-to-15.png",
+      "slug": "age-lowered-to-15",
+      "captionAr": "خفض العمر إلى ١٥ بعد اختيار هدف مقيَّد",
+      "captionEn": "Age lowered to 15 after picking a restricted goal"
+    },
+    {
+      "seq": 6,
+      "file": "06-goal-after-age-lowered.png",
+      "slug": "goal-after-age-lowered",
+      "captionAr": "شاشة الهدف بعد خفض العمر — هل بقي المقيَّد مختارًا؟",
+      "captionEn": "Goal step after lowering age — did the restricted pick survive?"
+    },
+    {
+      "seq": 7,
+      "file": "07-plan-minor.png",
+      "slug": "plan-minor",
+      "captionAr": "خطة القاصر — على المحافظة",
+      "captionEn": "The minor's plan — on maintenance"
+    },
+    {
+      "seq": 8,
+      "file": "08-nutrition-minor.png",
+      "slug": "nutrition-minor",
+      "captionAr": "تغذية القاصر — بلا عجز أو فائض",
+      "captionEn": "Minor's nutrition — no deficit or surplus"
+    },
+    {
+      "seq": 9,
+      "file": "09-workout-minor.png",
+      "slug": "workout-minor",
+      "captionAr": "شاشة تمارين القاصر",
+      "captionEn": "Minor's workout screen"
+    },
+    {
+      "seq": 10,
+      "file": "10-workout-minor-premium-gate.png",
+      "slug": "workout-minor-premium-gate",
+      "captionAr": "بدء تمرين القاصر من المعاينة — بوابة Premium",
+      "captionEn": "Minor preview workout — Premium gate"
+    }
+  ],
+  "checks": [
+    {
+      "name": "العمر ١٥ مقبول ولا يُطرد المستخدم",
+      "ok": true,
+      "detail": "الحاجز تقييد لا طرد — الحدّ الأدنى ١٣"
+    },
+    {
+      "name": "الأهداف الثلاثة معروضة (لا إخفاء صامت)",
+      "ok": true,
+      "detail": "خسارة دهون · ثبات وتحسين عام · بناء عضل"
+    },
+    {
+      "name": "«خسارة دهون» محجوب بخاصية disabled الأصلية",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "«بناء عضل» محجوب بخاصية disabled الأصلية",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "«ثبات وتحسين عام» متاح",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "المحجوبان يحملان aria-disabled=true",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "المحجوبان مربوطان بالتنويه عبر aria-describedby",
+      "ok": true,
+      "detail": "قارئ الشاشة يسمع السبب لا الحجب وحده"
+    },
+    {
+      "name": "تنويه القاصر معروض بنصّه من القاموس",
+      "ok": true,
+      "detail": "أهداف تعديل الوزن متاحة من 18 سنة — ننصح بمراجعة مختص تغذية"
+    },
+    {
+      "name": "التنويه يذكر جهة مختصّة لا منعًا مجرَّدًا",
+      "ok": true,
+      "detail": "يعطي طريقًا بدل أن يقف عند الرفض"
+    },
+    {
+      "name": "النقر القسري على «خسارة دهون» لا يختاره",
+      "ok": true,
+      "detail": "حارس ثانٍ في onPick خلف disabled"
+    },
+    {
+      "name": "المتابعة تبقى محجوبة بلا هدف مختار",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "بعمر 28 يصير «خسارة دهون» متاحًا",
+      "ok": true,
+      "detail": "الحاجز مرتبط بالعمر لا ثابت"
+    },
+    {
+      "name": "الهدف المقيَّد اختير فعلًا بعمر بالغ",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "«خسارة دهون» عاد محجوبًا بعد خفض العمر",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "تنويه القاصر عاد للظهور",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "الاختيار المقيَّد أُبطل تلقائيًا عند خفض العمر",
+      "ok": true,
+      "detail": "الحاجز يُبطل السابق لا يمنع الجديد فقط"
+    },
+    {
+      "name": "«ثبات وتحسين عام» يُختار بلا عائق",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "شاشة «خطتك جاهزة» ظهرت للقاصر",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "ملخّص الخطة يذكر «ثبات وتحسين عام»",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "ملخّص الخطة لا يذكر «خسارة دهون» ولا «بناء عضل»",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "الهدف المخزَّن للقاصر ليس تنشيفًا ولا تضخيمًا",
+      "ok": true,
+      "detail": "goalType=maintenance"
+    },
+    {
+      "name": "شاشة التغذية لا تعرض هدف تنشيف للقاصر",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "شاشة التمارين ترى خطة القاصر (لا «أكمل إعداد خطتك»)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "فعل بدء التمرين ظاهر للقاصر في المعاينة",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "المعاينة لا تبدأ جلسة مدفوعة للقاصر بصمت",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "لا أخطاء طرف عميل (عدا 401 الجلسة المزروعة — استثناء معلَن)",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "findings": [],
+  "skipped": []
+}

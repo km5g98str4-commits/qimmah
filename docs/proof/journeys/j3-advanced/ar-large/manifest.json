@@ -1,0 +1,185 @@
+{
+  "id": "j3-advanced",
+  "titleAr": "رحلة المتقدّم — تأكيد عددي",
+  "titleEn": "The advanced journey — numeric assertion",
+  "lang": "ar",
+  "viewport": "large",
+  "ground": {
+    "branch": "codex/qimmah-final-sovereign-convergence-001",
+    "commit": "63c7727f",
+    "subject": "fix(health,gate): [FINAL-CONVERGENCE] صدق لوحة الصحّة على الويب — وتسعة حرّاس يتيمة تدخل البوّابة",
+    "dirty": true
+  },
+  "frames": [
+    {
+      "seq": 1,
+      "file": "01-مبتدئ-1-level.png",
+      "slug": "مبتدئ-1-level",
+      "captionAr": "مبتدئ — المستوى «مبتدئ»",
+      "captionEn": "مبتدئ — level \"مبتدئ\""
+    },
+    {
+      "seq": 2,
+      "file": "02-مبتدئ-2-history.png",
+      "slug": "مبتدئ-2-history",
+      "captionAr": "مبتدئ — تاريخ تدريب ثابت",
+      "captionEn": "مبتدئ — fixed training history"
+    },
+    {
+      "seq": 3,
+      "file": "03-مبتدئ-3-goal.png",
+      "slug": "مبتدئ-3-goal",
+      "captionAr": "مبتدئ — شاشة الهدف بصياغته",
+      "captionEn": "مبتدئ — goal step in its own wording"
+    },
+    {
+      "seq": 4,
+      "file": "04-مبتدئ-4-training.png",
+      "slug": "مبتدئ-4-training",
+      "captionAr": "مبتدئ — الأيام والمدّة كما يقترحها التطبيق",
+      "captionEn": "مبتدئ — days and duration as suggested"
+    },
+    {
+      "seq": 5,
+      "file": "05-مبتدئ-5-lifestyle.png",
+      "slug": "مبتدئ-5-lifestyle",
+      "captionAr": "مبتدئ — المكان والحركة ونمط الأكل",
+      "captionEn": "مبتدئ — place, activity and diet"
+    },
+    {
+      "seq": 6,
+      "file": "06-مبتدئ-6-limitations.png",
+      "slug": "مبتدئ-6-limitations",
+      "captionAr": "مبتدئ — بلا إصابة معلنة",
+      "captionEn": "مبتدئ — no declared injury"
+    },
+    {
+      "seq": 7,
+      "file": "07-مبتدئ-7-plan.png",
+      "slug": "مبتدئ-7-plan",
+      "captionAr": "مبتدئ — «خطتك جاهزة»",
+      "captionEn": "مبتدئ — plan ready"
+    },
+    {
+      "seq": 8,
+      "file": "08-مبتدئ-8-nutrition.png",
+      "slug": "مبتدئ-8-nutrition",
+      "captionAr": "مبتدئ — أرقامه الغذائية",
+      "captionEn": "مبتدئ — its nutrition numbers"
+    },
+    {
+      "seq": 9,
+      "file": "09-مبتدئ-9-workout.png",
+      "slug": "مبتدئ-9-workout",
+      "captionAr": "مبتدئ — بنية تمرينه",
+      "captionEn": "مبتدئ — its workout structure"
+    },
+    {
+      "seq": 10,
+      "file": "10-متقدّم-1-level.png",
+      "slug": "متقدّم-1-level",
+      "captionAr": "متقدّم — المستوى «متقدّم»",
+      "captionEn": "متقدّم — level \"متقدّم\""
+    },
+    {
+      "seq": 11,
+      "file": "11-متقدّم-2-history.png",
+      "slug": "متقدّم-2-history",
+      "captionAr": "متقدّم — تاريخ تدريب ثابت",
+      "captionEn": "متقدّم — fixed training history"
+    },
+    {
+      "seq": 12,
+      "file": "12-متقدّم-3-goal.png",
+      "slug": "متقدّم-3-goal",
+      "captionAr": "متقدّم — شاشة الهدف بصياغته",
+      "captionEn": "متقدّم — goal step in its own wording"
+    },
+    {
+      "seq": 13,
+      "file": "13-متقدّم-4-training.png",
+      "slug": "متقدّم-4-training",
+      "captionAr": "متقدّم — الأيام والمدّة كما يقترحها التطبيق",
+      "captionEn": "متقدّم — days and duration as suggested"
+    },
+    {
+      "seq": 14,
+      "file": "14-متقدّم-5-lifestyle.png",
+      "slug": "متقدّم-5-lifestyle",
+      "captionAr": "متقدّم — المكان والحركة ونمط الأكل",
+      "captionEn": "متقدّم — place, activity and diet"
+    },
+    {
+      "seq": 15,
+      "file": "15-متقدّم-6-limitations.png",
+      "slug": "متقدّم-6-limitations",
+      "captionAr": "متقدّم — بلا إصابة معلنة",
+      "captionEn": "متقدّم — no declared injury"
+    },
+    {
+      "seq": 16,
+      "file": "16-متقدّم-7-plan.png",
+      "slug": "متقدّم-7-plan",
+      "captionAr": "متقدّم — «خطتك جاهزة»",
+      "captionEn": "متقدّم — plan ready"
+    },
+    {
+      "seq": 17,
+      "file": "17-متقدّم-8-nutrition.png",
+      "slug": "متقدّم-8-nutrition",
+      "captionAr": "متقدّم — أرقامه الغذائية",
+      "captionEn": "متقدّم — its nutrition numbers"
+    },
+    {
+      "seq": 18,
+      "file": "18-متقدّم-9-workout.png",
+      "slug": "متقدّم-9-workout",
+      "captionAr": "متقدّم — بنية تمرينه",
+      "captionEn": "متقدّم — its workout structure"
+    }
+  ],
+  "checks": [
+    {
+      "name": "المتقدّم يرى «تنشيف (Cut)»",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "المتقدّم يرى «إعادة تركيب (Recomposition)» — وهي المفردة المحجوبة عن المبتدئ في ط-١",
+      "ok": true,
+      "detail": "Recomposition"
+    },
+    {
+      "name": "المتقدّم يرى «تضخيم نظيف (Lean Bulk)»",
+      "ok": true,
+      "detail": "Lean Bulk"
+    },
+    {
+      "name": "والمبتدئ لم يرَ أيًّا من الثلاث في شاشته",
+      "ok": true,
+      "detail": "تأكيد متقابل: نفس التشغيل، شاشتان، مفردتان"
+    },
+    {
+      "name": "الجسد متطابق بين المسارين (شرط عزل المتغيّر)",
+      "ok": true,
+      "detail": "28 سنة · 178سم · 82كجم — مُدخَل حرفيًا في الاثنين"
+    },
+    {
+      "name": "المتغيّر المستقلّ (المستوى) تغيّر فعلًا بين المسارين — شرط صحّة المقارنة",
+      "ok": true,
+      "detail": "novice → intermediate (مستبعَد من جدول المخرَجات: مدخل لا مخرَج)"
+    },
+    {
+      "name": "خطة المتقدّم تختلف عدديًا عن خطة المبتدئ لنفس الجسد",
+      "ok": true,
+      "detail": "يختلف في: تمارين الأسبوع"
+    },
+    {
+      "name": "لا أخطاء طرف عميل في المسارين (عدا 401 الجلسة المزروعة — استثناء معلَن)",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "findings": [],
+  "skipped": []
+}

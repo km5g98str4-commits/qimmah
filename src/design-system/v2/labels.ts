@@ -217,9 +217,16 @@ export interface V2OnboardingCopy {
   ready: { eyebrow: string; title: string; subtitle: string; enter: string; previewNote: string }
   /** [CTO-009/WP-2] شاشة الترحيب قبل أول سؤال. */
   welcome: { eyebrow: string; title: string; subtitle: string; start: string; timeNote: string }
-  /** [CTO-009/WP-2] تسليم ما بعد الخطة: معاينة موجزة ← Premium ← حساب. */
+  /**
+   * [CTO-009/WP-2] تسليم ما بعد الخطة — **ما تبقّى منه هنا فقط**.
+   *
+   * العنوان والنداءات انتقلت إلى `@/i18n/dict/reveal` حين صارت الشاشة ثلاثة
+   * نداءات (Premium · تجربة · معاينة)، وبقيت نسختها هنا **سلطةً ثانية ميّتة**
+   * لنفس الشاشة: لا يرسمها مكوّن، وتقرأها الرحلات فتنتظر زرًّا بنصّ متقاعد.
+   * فحُذفت — والباقي أدناه هو وحده ما يرسمه `OnboardingV2`.
+   */
   handoff: {
-    eyebrow: string; title: string; subtitle: string; premiumCta: string; enterFree: string; accountNote: string
+    accountNote: string
     /** [QIM-WEB-FOUNDER-UX-004/حزمة ٣] كشف القيمة: ما الذي يفتحه Premium وما يبقى مفتوحًا. */
     benefitsTitle: string
     benefits: readonly string[]
@@ -300,11 +307,6 @@ export const V2_ONBOARDING: Record<'ar' | 'en', V2OnboardingCopy> = {
       timeNote: 'دقيقتان تقريبًا · تقدر تغيّر أي جواب بعدين',
     },
     handoff: {
-      eyebrow: 'تمّ',
-      title: 'جهزنا خطتك',
-      subtitle: 'بنيناها من إجاباتك أنت — أيامك ووقتك ومكان تمرينك وهدفك.',
-      premiumCta: 'احصل على قِمّة Premium',
-      enterFree: 'استعرض قِمّة أولًا',
       accountNote: 'إنشاء حساب يخلّي خطتك تنتقل معك لأي جهاز.',
       benefitsTitle: 'وش يفتح لك Premium؟',
       benefits: [
@@ -408,11 +410,6 @@ export const V2_ONBOARDING: Record<'ar' | 'en', V2OnboardingCopy> = {
       timeNote: 'About two minutes · you can change any answer later',
     },
     handoff: {
-      eyebrow: 'Done',
-      title: 'Your plan is ready',
-      subtitle: 'We built it from your own answers — your days, your time, where you train, and your goal.',
-      premiumCta: 'Get Qimmah Premium',
-      enterFree: 'Explore Qimmah first',
       accountNote: 'Creating an account carries your plan to any device.',
       benefitsTitle: 'What does Premium open up?',
       benefits: [

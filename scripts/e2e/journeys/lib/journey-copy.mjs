@@ -18,7 +18,8 @@ import { tmpdir } from 'node:os'
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', '..')
 
 const ENTRY = `
-export { V2_ONBOARDING, V2_GOAL_MODEL, V2_TAB_LABELS } from '@/design-system/v2/labels'
+export { V2_ONBOARDING, V2_GOAL_MODEL, V2_TAB_LABELS, V2_WELCOME } from '@/design-system/v2/labels'
+export { getStrings } from '@/config/strings'
 export { onboardingIntentStrings, goalWordingFor } from '@/i18n/dict/onboardingIntent'
 export { bodyStepStrings } from '@/i18n/dict/bodyStep'
 export { trainingHistoryStrings } from '@/i18n/dict/trainingHistory'
@@ -26,6 +27,7 @@ export { onboardingLifestyleStrings } from '@/i18n/dict/onboardingLifestyle'
 export { neatChoices, dietPatternChoices } from '@/data/planBuilder'
 export { profileChoiceStrings } from '@/i18n/dict/profileChoices'
 export { policyCopy } from '@/data/policyCopy'
+export { revealStrings } from '@/i18n/dict/reveal'
 export { DATA_KEYS } from '@/lib/userDataKeys'
 `
 
@@ -72,6 +74,18 @@ export async function loadJourneyCopy() {
     profileChoices: (lang) => mod.profileChoiceStrings[lang],
     /** نصّ إقرار البيانات الصحية. */
     policy: (lang) => mod.policyCopy[lang],
+    /**
+     * نصوص شاشة الكشف — **مصدر النداءات الثلاثة**.
+     *
+     * كانت الرحلات تقرأ نداءات التسليم من `V2_ONBOARDING.handoff`، وهي نسخة
+     * ثانية بائتة لنفس الشاشة: المكوّن يرسم من `revealStrings` منذ أن صارت
+     * النداءات ثلاثة. فبقيت الرحلات تنتظر زرًّا بنصّ متقاعد حتى تنتهي مهلته.
+     */
+    reveal: (lang) => mod.revealStrings[lang],
+    /** شاشة البداية (`StartViewV2`) — نداؤها الأساسي هو مدخل الضيف. */
+    welcome: (lang) => mod.V2_WELCOME[lang],
+    /** نصوص القشرة — منها وعد الضيف المكتوب تحت النداء الأساسي. */
+    shell: (lang) => mod.getStrings(lang),
     dataKeys: mod.DATA_KEYS,
   }
   return cached
