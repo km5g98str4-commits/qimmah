@@ -74,9 +74,10 @@ console.log('\n② السلوك — كل كاتب خطير يفشل مغلقًا
 const ENTRY = `
 import { isSupabaseConfigured, getSupabase } from '@/lib/supabaseClient'
 import { startTrialOnServer, redeemCodeOnServer, claimPendingGrantsOnServer, backendAvailable } from '@/lib/access/entitlementBackend'
-import { resolveEntitlement, redeemActivationCode } from '@/lib/access/entitlementSource'
+import { resolveEntitlement, redeemActivationCode, clearMockEntitlement, startTrial, FOUNDER_QA_CODE } from '@/lib/access/entitlementSource'
 export { isSupabaseConfigured, getSupabase, startTrialOnServer, redeemCodeOnServer,
-         claimPendingGrantsOnServer, backendAvailable, resolveEntitlement, redeemActivationCode }
+         claimPendingGrantsOnServer, backendAvailable, resolveEntitlement, redeemActivationCode,
+         clearMockEntitlement, startTrial, FOUNDER_QA_CODE }
 `
 async function loadUnder(appEnv) {
   const dir = mkdtempSync(join(tmpdir(), 'fp-safety-'))
@@ -145,10 +146,28 @@ check('③ استهلاك كود تفعيل إنتاج مستحيل — الكا
 check('   وكذلك لا يلوم الشبكة', redeem !== 'offline', `عاد: ${redeem}`)
 const claim = await preview.claimPendingGrantsOnServer()
 check('منح معلّقة لا تُطالَب', claim === false, `عاد: ${claim}`)
+/**
+ * [LIVE-QA-A] أمرُ المؤسس فتح **مراجعة QA** داخل بناء المعاينة وحده، فصار
+ * مصدر الاستحقاق `mock` لا `none`. والخاصيّة المحروسة هنا **اشتدّت لا رخت**:
+ * كانت «لا استحقاق»، وصارت «لا استحقاق قبل تفعيل معلَن **ولا ادّعاء شهادة
+ * خادم أبدًا**». و`mock` تُعلن محلّيتها؛ `none` كانت تخفيها خلف حياد.
+ */
 const ent = await preview.resolveEntitlement()
-check('الاستحقاق `none` بمصدر `none` وسبب معلَن', ent.status === 'none' && ent.source === 'none' && ent.lastError === 'backend_unconfigured', JSON.stringify(ent))
+check('الاستحقاق `none` قبل أي تفعيل — المعاينة لا تمنح شيئًا بذاتها',
+  ent.status === 'none', JSON.stringify(ent))
+check('   والسبب معلَن: خادمٌ غير مضبوط، لا شبكة المستخدم',
+  ent.lastError === 'backend_unconfigured', JSON.stringify(ent))
+check('   ولا يدّعي شهادة خادم (`backend`) أبدًا',
+  ent.source !== 'backend', JSON.stringify(ent))
+check('   ويُعلن محلّيته صراحةً (`mock`) لا يتنكّر في حياد `none`',
+  ent.source === 'mock', JSON.stringify(ent))
+// وكودٌ خارج مجموعة المراجعة يُردّ **بالسبب الصادق ولا يمنح**: «لم يُجرَّب»
+// لا «جُرّب فلم يُقبل» — فالمعاينة لا خادم لها تحاكم به كود أحد.
 const redeemUi = await preview.redeemActivationCode('QIMMAH-TEST-CODE')
 check('مسار الواجهة للاستبدال يرفض بنفس السبب المعلَن', REFUSES_HONESTLY(redeemUi), `عاد: ${redeemUi}`)
+check('   ولا يحكم على كود المستخدم بـ`invalid` وهو لم يُجرَّب', redeemUi !== 'invalid', `عاد: ${redeemUi}`)
+const afterBadCode = await preview.resolveEntitlement()
+check('   ولم يمنح شيئًا: الاستحقاق ما زال `none`', afterBadCode.status === 'none', JSON.stringify(afterBadCode))
 check('   والحقل الفارغ يُردّ محلّيًا بـ`empty` — بلا نداء ولا لوم',
   (await preview.redeemActivationCode('   ')) === 'empty')
 
@@ -158,6 +177,40 @@ check('⑤ لا نتيجة تدّعي نجاحًا لم يحدث', ![trial, rede
 
 // ⑧ المِشْبَك: صفر محاولات خروج طوال ما سبق.
 check(`⑧ صفر نداء شبكة صادر عن الكتّاب (سُجّل ${attempts.length})`, attempts.length === 0, attempts.slice(0, 3).join(' · '))
+
+// ── ⑨ الشقّ المعلَن: مراجعة QA حقيقية · محلّية · قابلة للإقفال ───────────────
+/**
+ * [LIVE-QA-A] الشقّ الذي فتحه أمر المؤسس **يُعلن ويُقاس** — لا يُترك موجودًا
+ * بلا حارس. وأربع خصائص تُثبت هنا مجتمعةً، لا واحدة منها تكفي وحدها:
+ *   • حقيقي   — الكود المسمّى يمنح فعلًا (وإلا فالمؤسس عالق كما كان).
+ *   • محلّي   — بصفر نداء شبكة (المِشْبَك شاهد، لا الادّعاء).
+ *   • محصور  — التجربة الحقيقية لا تمرّ منه، فلا يشهد على عقد الخادم.
+ *   • راجع    — إقفال واحد يعيد الحالة، فإعادة الضبط حتمية لا احتمالية.
+ */
+console.log('\n⑨ شقّ مراجعة QA — معلَن، محلّي، محصور، وقابل للإقفال')
+const beforeQa = attempts.length
+const qaRedeem = await preview.redeemActivationCode(preview.FOUNDER_QA_CODE)
+check('كود المراجعة المسمّى يمنح في المعاينة (الشقّ حقيقي لا زينة)', qaRedeem === 'success', `عاد: ${qaRedeem}`)
+const qaEnt = await preview.resolveEntitlement()
+check('   والاستحقاق `active` بمصدر `mock` المعلَن — لا `backend`',
+  qaEnt.status === 'active' && qaEnt.source === 'mock', JSON.stringify(qaEnt))
+check('   وبلا نداء شبكة واحد (المِشْبَك ما زال صفرًا)',
+  attempts.length === beforeQa, attempts.slice(0, 3).join(' · '))
+const qaTrial = await preview.startTrial()
+check('   والتجربة الحقيقية لا تمرّ من الشقّ — تبقى مرفوضة بسببها المعلَن',
+  qaTrial === 'backend_unconfigured', `عاد: ${qaTrial}`)
+preview.clearMockEntitlement()
+const qaCleared = await preview.resolveEntitlement()
+check('   وإقفال واحد يعيدها `none` — إعادة ضبط حتمية لا احتمالية',
+  qaCleared.status === 'none', JSON.stringify(qaCleared))
+
+// ⚔️ ولا تُشترى الترقية من مخزن المستخدم: مفاتيح المنتج المزوَّرة لا تمنح شيئًا.
+//    (سلطة QA الوحيدة مخزنها المعلَن، وهو **غائب من الإنتاج** — يحرسه
+//     `test:qa-boundary` على الأرتيفكت لا على المصدر.)
+for (const k of ['qimmah:entitlement', 'qimmah:premium', 'premiumActive', 'qimmah:access']) store.set(k, 'active')
+const forged = await preview.resolveEntitlement()
+check('⚔️ تزوير مفاتيح المنتج في التخزين لا يمنح شيئًا', forged.status === 'none', JSON.stringify(forged))
+for (const k of ['qimmah:entitlement', 'qimmah:premium', 'premiumActive', 'qimmah:access']) store.delete(k)
 
 // ── ③ الوضع لا يُقلَب من المتصفّح ────────────────────────────────────────────
 console.log('\n③ الوضع قرار بناء لا يملكه المستخدم')
@@ -184,6 +237,14 @@ console.log('\n⑤ الإنتاج بلا تغيير')
 const prod = await loadUnder(null)
 check('⑥ الإنتاج: `isSupabaseConfigured()` صادقة كما كانت', prod.isSupabaseConfigured() === true)
 check('⑥ الإنتاج: `backendAvailable()` صادقة كما كانت', prod.backendAvailable() === true)
+
+// ⚔️ [LIVE-QA-A] وشقّ المراجعة **مشروط بالبناء**، لا بالكود: نفس الكود المسمّى
+//    على وحدات الإنتاج لا يمنح شيئًا — وهذا هو الفرق بين شقٍّ محصور وبابٍ خلفي.
+const prodRedeem = await prod.redeemActivationCode(preview.FOUNDER_QA_CODE)
+check('⚔️ الكود نفسه على بناء الإنتاج لا يمنح', prodRedeem !== 'success', `عاد: ${prodRedeem}`)
+const prodEnt = await prod.resolveEntitlement()
+check('   والاستحقاق هناك ليس `active` ولا مصدره `mock`',
+  prodEnt.status !== 'active' && prodEnt.source !== 'mock', JSON.stringify(prodEnt))
 
 /**
  * ⚠️ **المِشْبَك يجب أن يُثبَت صالحًا، والفرق البنيوي أن يُقاس.**

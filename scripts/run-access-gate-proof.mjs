@@ -189,8 +189,27 @@ check('وضع التقليد قرار وقت بناء عبر VITE_ENTITLEMENT_MO
 // لا يوجد مسار يمنح استحقاقًا من جهة العميل.
 check('بلا خادم مضبوط: لا استحقاق إطلاقًا (العجز الافتراضي محفوظ)',
   /if \(!backendAvailable\(\)\) return \{ status: 'none', source: 'none'/.test(src))
-check('وضع التقليد يسبق كل شيء ويبقى قرار وقت بناء',
-  /if \(mockEnabled\(\)\) return \{ status: readMockActive\(\) \? 'active' : 'none', source: 'mock' \}/.test(src))
+// [LIVE-QA-A] **العقد اتّسع بمقدارٍ مسمّى، فالفحص يتبعه ولا يُحذف.**
+// أمرُ المؤسس فتح مراجعة QA في بناء المعاينة وحده، فصار الفرع المحلّي
+// `localEntitlementEnabled()` = تقليدٌ **أو** معاينة مؤسس. والضمان المحفوظ هو
+// نفسه بحرفه: **لا مسار عميل يمنح استحقاقًا** خارج مخزن التقليد المعلَن،
+// وسلطته قرار وقت بناء يطويه المُصغِّر — لا مدخل يملكه المستخدم.
+check('الفرع المحلّي يسبق كل شيء (تقليد أو معاينة مؤسس)',
+  /if \(localEntitlementEnabled\(\)\) \{/.test(src))
+check('  ولا يمنح إلا من مخزن التقليد المعلَن — لا مصدر ثالث',
+  /status: readMockActive\(\) \? \('active' as const\) : \('none' as const\), source: 'mock' as const/.test(src))
+check('  وسلطته حصرًا: `mockEnabled` أو `founderQaEntitlementEnabled` — لا ثالث',
+  /function localEntitlementEnabled\(\): boolean \{\s*return mockEnabled\(\) \|\| founderQaEntitlementEnabled\(\)\s*\}/.test(src))
+check('  وشرط المعاينة نصّ بيئة حرفي وقت بناء (يطويه المُصغِّر)',
+  /VITE_APP_ENV === 'founder_preview'/.test(src))
+check('  ويحمل سببه حين لا خادم — لا صمت ولا لوم شبكة',
+  /backendAvailable\(\) \? local : \{ \.\.\.local, lastError: 'backend_unconfigured' \}/.test(src))
+// ⚔️ ولو صار الفرع المحلّي يقرأ مدخلًا يملكه المستخدم لسقط الفحص باسمه.
+{
+  const tampered = src.replace("VITE_APP_ENV === 'founder_preview'", "location.search.includes('qa')")
+  check('  ⚔️ ربط الشقّ بالعنوان بدل البيئة يُسقط فحص «قرار وقت بناء»',
+    !/VITE_APP_ENV === 'founder_preview'/.test(tampered))
+}
 check('★ ومع خادم مضبوط: الحقيقة من `fetchEntitlement` لا من العميل',
   /const result = await fetchEntitlement\(\)/.test(src))
 // والحارس الحقيقي: **لا مسار عميل يمنح `active`**. تُستخرَج كل عودة في الملفّ

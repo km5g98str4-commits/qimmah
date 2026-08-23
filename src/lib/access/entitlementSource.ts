@@ -186,7 +186,19 @@ export async function redeemActivationCode(code: string): Promise<RedeemOutcome>
   // ويُعرض بنفس رسالة «الكود ما ضبط» — فلا يُستدلّ من الرسالة على شكل الأكواد.
   if (!normalized) return 'invalid'
   if (localEntitlementEnabled()) {
-    const outcome = MOCK_CODES[mockKey] ?? 'invalid'
+    const known = MOCK_CODES[mockKey]
+    if (known === undefined) {
+      // [LIVE-QA-A] كودٌ خارج مجموعة المراجعة، في بناءٍ **لا خادم فيه أصلًا**.
+      // و`invalid` تعني «جُرّب فلم يُقبل» — وقولها هنا حكمٌ بلا محاكمة على كودٍ
+      // قد يكون صحيحًا تمامًا على الإنتاج. الصدق أنّه **لم يُجرَّب** (§5).
+      //
+      // وبناء التقليد (مصفوفة الرحلات) يبقى على عقده المُعلَن: `invalid` جوابه
+      // المقصود، وعليه يقوم فحصا «لا عرّاف» و«الدمج المتعمّد مع المنتهي».
+      // أمّا معاينة المؤسس فبيانات اعتمادها مهزوزة خارج الحزمة بنيويًّا، فـ
+      // `backend_unconfigured` فيها ليست تخمينًا بل وصفٌ مقيس للأرتيفكت.
+      return mockEnabled() ? 'invalid' : 'backend_unconfigured'
+    }
+    const outcome = known
     if (outcome === 'success') {
       try {
         window.sessionStorage.setItem(MOCK_KEY, 'active')
