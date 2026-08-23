@@ -2,28 +2,29 @@
 
 > كلٌّ منها **مالكه إنسان**، ولا يُغلق بكود. وكلٌّ مذكور بأمره الحرفي حتى يُنفَّذ بلا اجتهاد.
 
-## ١. نشر معاينة المؤسس — محجوب بسببين مستقلّين
+## ١. نشر معاينة المؤسس — ⚠️ **هذا البند كان خاطئًا وقد صُحِّح**
 
-**السبب الأول — الصلاحية.** الميثاق (§1 · §1.1) يحصر **أي نشر** بالمؤسس، ويشترط
-تفويضًا مسمّىً في كل مرّة. ولم يصل تفويض بالنشر في هذه المهمّة.
+**ما قيل سابقًا:** «النشر محجوب بسببين — تفويض مفقود واعتماد Cloudflare غائب.»
+**والصحيح:** الاعتماد غائب فعلًا، **لكن النشر لم يكن مطلوبًا أصلًا** — تكامل Git
+في Cloudflare Pages يبني كل فرع معاينةً تلقائيًا، **ورابط المعاينة موجود منذ
+الدفعة**. الخطأ أنّي استنتجت «لا نشر» من غياب رمز، ولم أفحص سطح النشر الحقيقي.
 
-**السبب الثاني — الاعتماد.** لا `CLOUDFLARE_API_TOKEN` ولا `CF_API_TOKEN` في بيئة
-هذه الحاوية (`env | grep -ci 'CLOUDFLARE\|CF_API'` ⇒ ٠). فحتى لو أُذن، لا يستطيع
-`wrangler` المصادقة من هنا.
+**الرابط الثابت:** `https://codex-qimmah-final-sovereign.qimmah-8qp.pages.dev`
+مصدره مخرَج فحص Cloudflare (check-run `97128380176`) لا تخمينًا. التفصيل في
+[`COMMISSIONING.md`](./COMMISSIONING.md) §٠.
 
-**الأمر المعتمد** — كما هو موثّق في `docs/execution/qimmah-founder-qa/PREVIEW-SAFETY.md:219`:
+**والمحجوب فعلًا هو الفحص الحيّ لا النشر:**
 
-```bash
-npm run build:founder-preview && \
-  npx wrangler pages deploy dist --project-name qimmah --branch founder-qa-preview
+```
+qimmah-8qp.pages.dev:443   → connect_rejected  (gateway 403 — policy denial)
+api.cloudflare.com:443     → connect_rejected
+dash.cloudflare.com:443    → connect_rejected
 ```
 
-⚠️ **`--branch founder-qa-preview` ليس زينة.** حذفه ينشر على فرع الإنتاج.
-⚠️ **و`build:founder-preview` ليس `build`.** الأول يضبط `VITE_APP_ENV=founder_preview`؛
-واستبداله بـ`npm run build` عاديًا يشحن اعتمادات الإنتاج في الأرتيفكت — وهو مسجَّل
-خطرًا **حرجًا** في `docs/execution/qimmah-sovereign-closure/recon/R7-commerce.md:698`.
+سياسة شبكة الحاوية تمنع الخروج إلى Cloudflare. فلا يمكن من هنا التأكّد أن الحيّ
+يعلن `founder_preview`، ولا معرفة إن كان Cloudflare Access يحجب الرابط.
 
-**BLOCKER — المؤسس — نفّذ الأمر أعلاه بحرفه، ثم سلّم الرابط الناتج ليُفحص.**
+**BLOCKER — المؤسس — افتح الرابط ونفّذ فحص الستّين ثانية في `COMMISSIONING.md` §١.**
 
 ## ٢. WebKit — غير مثبَّت في هذه الحاوية
 
