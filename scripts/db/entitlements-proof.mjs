@@ -54,7 +54,8 @@ const ACTIVATION_HARDENING = '20260824120004_activation_hardening.sql'
 // تنشئها FIX المستبعَدة. فتركُها في البيئة «القديمة» يترك دالّةً تشير إلى
 // دالّةٍ غير موجودة، فيسقط الإثبات المضادّ بخطأٍ تقنيّ لا بالسلوك الذي يقيسه.
 const CAMPAIGN_CODES = '20260824120005_campaign_is_not_a_credential.sql'
-const HARDENING_LINEAGE = [FIX, SALLA_INGEST, INTEGRITY, ACTIVATION_HARDENING, CAMPAIGN_CODES]
+const RATE_LIMIT = '20260824120001_roles_and_redeem_rate_limit.sql'
+const HARDENING_LINEAGE = [FIX, SALLA_INGEST, INTEGRITY, RATE_LIMIT, ACTIVATION_HARDENING, CAMPAIGN_CODES]
 
 /**
  * [OVERNIGHT-5] السلسلة **المطبَّقة فعلًا** في هذا الإثبات — بالترتيب.
@@ -265,6 +266,7 @@ check('الهجرة idempotent (تشغيل ثانٍ)', rerun)
 {
   const { readdirSync } = await import('node:fs')
   const dir = new URL('../../supabase/migrations/', import.meta.url)
+  const MIG_DIR = resolve(root, 'supabase/migrations')
   const commerce = readdirSync(dir)
     .filter((f) => f.endsWith('.sql'))
     .filter((f) => /entitlement|revocation|code_grant|public_execute|salla|integrity|privileges/.test(f))
@@ -286,6 +288,67 @@ check('الهجرة idempotent (تشغيل ثانٍ)', rerun)
   // ولا يكفي أن يكون الاستثناء معلَنًا: لو صار الإعلان غطاءً لكل شيء لسقط هذا.
   check('والاستثناءات أقلّية معلَنة لا قاعدة',
     DECLARED_EXCLUSIONS.size < applied.length)
+
+  /**
+   * ═══ ١-ج) وحارسٌ ثانٍ لقائمةٍ ثانية: `HARDENING_LINEAGE` ═══
+   *
+   * `APPLIED_CHAIN` محروسة أعلاه. و`HARDENING_LINEAGE` **لم تكن** — وهي قائمة
+   * يدوية أخرى تحمل نفس العلّة بالضبط، ونصُّ الملف نفسه يأمر بصيانتها يدويًّا:
+   * «أي هجرة تحصين قادمة تُضاف هنا كذلك». والأمر المكتوب ليس حارسًا.
+   *
+   * وعلّتها موصوفة في تعليقاتها: هجرةٌ تعيد تعريف دالّة تحصّنها FIX ثم تُغفَل
+   * هنا ⇒ البيئة «القديمة» تُحصَّن من حيث لا نريد، فتنجح فحوصٌ يُفترض أن تسقط
+   * — «ضجيج يخفي نفسه». أو تسقط بخطأٍ **تقنيّ** (دالّة تشير إلى أخرى غائبة)
+   * لا بالسلوك المقيس، وهو ما تصفه فقرة CAMPAIGN_CODES حرفيًّا.
+   *
+   * فتُشتقّ القائمة من الهجرات بدل أن تُتذكَّر: كل هجرة **بعد** FIX تعيد
+   * تعريف أي دالّة تُعرّفها FIX ⇒ تُستبعَد. لا اجتهاد ولا ذاكرة.
+   *
+   * ⚠️ وكشف الاشتقاق واحدةً مُغفَلة فعلًا يوم كُتب:
+   * `20260824120001_roles_and_redeem_rate_limit.sql` تعيد تعريف
+   * `public.redeem_access_code` غلافًا فوق `private.redeem_core`. وكانت
+   * **غير ضارّة بالصدفة** — فحوص البيئة القديمة لا تنادي مسار الاستهلاك
+   * أصلًا. ولو نادته يومًا لسقطت بـ«`normalize_access_code` غير موجودة»:
+   * فشلٌ بلا اسم يخفي ما يقيسه. أُضيفت، فصارت السلامة بالبناء لا بالصدفة.
+   *
+   * ⚠️ **وأوّل محاولةٍ لمهاجمة هذا الحارس كانت هي الرخوة:** هجرةُ شبح تعيد
+   * تعريف `my_entitlement` **بتوقيع مختلف**، فسقطت عند بناء الصندوق بـ
+   * `cannot change return type of existing function` — أي **قبل أن تبلغ
+   * الحارس أصلًا**. ومرورٌ كهذا يُقرأ «الحارس يعمل» وهو لم يُستدعَ. فشُدّت
+   * المحاكاة إلى توقيعٍ مطابق حتى تُطبَّق نظيفةً وتسقط **باسم الحارس**
+   * ومسمّيةً الهجرة المخالفة (§4.2: سقوطٌ غير مسمّى ليس إثباتًا).
+   */
+  const readMig = (f) => readFileSync(join(MIG_DIR, f), 'utf8')
+  const definedIn = (src) => new Set(
+    [...src.matchAll(/create\s+or\s+replace\s+function\s+([a-z_]+\.[a-z_0-9]+)/gi)]
+      .map((m) => m[1].toLowerCase()))
+  const hardened = definedIn(readMig(FIX))
+  const all = readdirSync(dir).filter((f) => f.endsWith('.sql')).sort()
+  const redefiners = all.filter((f) => f > FIX)
+    .filter((f) => [...definedIn(readMig(f))].some((n) => hardened.has(n)))
+
+  const lineageMissing = redefiners.filter((f) => !HARDENING_LINEAGE.includes(f))
+  check('★ وكل هجرة تعيد تعريف دالّةً تحصّنها FIX مُستبعَدة من بيئة counter-proof',
+    lineageMissing.length === 0,
+    lineageMissing.join(', ') || `${redefiners.length} مشتقّة · ${hardened.size} دالّة محصَّنة`)
+
+  // ⟲ **وأنّ الاشتقاق قرأ شيئًا أصلًا.** «صفر مُغفَلة» من مجموعةٍ فارغة ليست
+  //    نجاحًا بل عمًى — فلو انكسر التعبير النمطي لمرّ الفحص أعلاه صامتًا.
+  check('⟲ والاشتقاق غير فارغ — دوالّ FIX مقروءة وللسلالة مشتقّون',
+    hardened.size >= 4 && redefiners.length >= 3, `${hardened.size} دالّة · ${redefiners.length} هجرة`)
+
+  // ⟲ **ولو أُسقطت واحدة من السلالة لالتقطها** — بمحاكاة إسقاط كلٍّ بدورها.
+  const everyLineageOmissionCaught = redefiners.every((victim) =>
+    redefiners.filter((f) => !HARDENING_LINEAGE.filter((x) => x !== victim).includes(f)).length > 0)
+  check('⟲ ولو أُسقطت أيّ هجرة من السلالة لالتقطها — بمحاكاة إسقاط كلٍّ بدورها',
+    everyLineageOmissionCaught && redefiners.length > 0, `${redefiners.length} هجرة مهاجَمة`)
+
+  // ⟲ **وألّا تصير السلالة قاعدة.** استبعادُ كل شيء يُرضي الفحص أعلاه ويُفرغ
+  //    البيئة «القديمة» من معناها — فيُشترط أن كل عضوٍ فيها مُبرَّر بالاشتقاق.
+  const unjustified = HARDENING_LINEAGE.filter((f) => f !== FIX && !redefiners.includes(f))
+  check('⟲ ولا عضو في السلالة بلا مبرّر مشتقّ — فهي استثناء لا قاعدة',
+    unjustified.length === 0 && HARDENING_LINEAGE.length < all.length,
+    unjustified.join(', ') || `${HARDENING_LINEAGE.length} من ${all.length}`)
 }
 
 // ── ٢) الملح المُرقَّم ─────────────────────────────────────────────────────
