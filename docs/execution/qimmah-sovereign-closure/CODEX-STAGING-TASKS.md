@@ -1,7 +1,35 @@
 # طلب تنفيذ إلى كود اكس — تشغيل staging
 
+> **تحديث بعد محاولتك الأولى — اقرأ هذا القسم قبل كل شيء.**
+>
+> ✅ **مشروع staging أُنشئ:** `odpkvswfiihrkglgfghd` — والإنتاج لم يُمَسّ. ممتاز.
+>
+> ✅ **وتوقُّفك عند السقوط بدل إصلاحه كان صحيحًا تمامًا** — الخطأ الذي أرسلتَه
+> كشف عيبًا حقيقيًّا في أدواتنا، ولو أصلحتَه في مكانه لبقي مخفيًّا.
+>
+> ### سبب السقوط — وليس هجراتنا
+>
+> `permission denied to alter role` جاء من **تشغيل `scripts/db/lib/supabase-shim.sql`
+> على القاعدة الحقيقية**. وذلك الملف يجعل Postgres عاديًّا **يشبه** Supabase،
+> ولا يُشغَّل **على** Supabase (الذي يملك تلك الأدوار سلفًا). اسمه كان مضلّلًا.
+>
+> **أُصلح الآن:** الملف يرفض العمل على قاعدة Supabase حقيقية برسالة مسمّاة.
+> ومعه أُصلح عيبٌ أعمق: كل إثباتاتنا كانت تعمل بصلاحية superuser، وSupabase لا
+> يعطيها. صار عندنا إثبات `test:nonsuperuser-apply` يطبّق **الهجرات الثلاث
+> والثلاثين بدور غير متميّز** — ويمرّ ٣٣/٣٣.
+>
+> **⇒ هجراتنا لا تحتاج superuser. ما فشل هو الأداة الخطأ في المكان الخطأ.**
+>
+> ### ولا تحتاج كلمة مرور القاعدة أصلًا
+>
+> عندك أدوات Supabase — استعمل `apply_migration` / `execute_sql`، وهي تمرّ عبر
+> واجهة الإدارة بلا `psql` وبلا كلمة مرور. **§٣ أدناه أُعيدت كتابتها لهذا
+> المسار.** ولا تشغّل الشيم إطلاقًا.
+
+---
+
 > **إلى:** كود اكس (يملك صلاحية Supabase التي لا أملكها).
-> **الفرع:** `codex/qimmah-final-sovereign-convergence-001` · **الرأس:** `b91f1336`
+> **الفرع:** `codex/qimmah-final-sovereign-convergence-001` · **الرأس:** آخر التزام على الفرع
 > **لا تبنِ شيئًا جديدًا.** كل الكود جاهز ومُختبَر. المطلوب **تشغيل** لا تطوير.
 
 ---
@@ -20,14 +48,11 @@
 
 ---
 
-## ١. أنشئ مشروع staging
+## ١. أنشئ مشروع staging — ✅ **منجَزة**
 
-- **الاسم:** `qimmah-staging` — اسمٌ لا يلتبس بالإنتاج أبدًا.
-- **المنطقة:** الأقرب للسعودية.
-- **كلمة مرور القاعدة:** ولّدها واحفظها عندك. **لا تدخل Git ولا تُرسَل في التقرير.**
+`odpkvswfiihrkglgfghd` · `https://odpkvswfiihrkglgfghd.supabase.co` · `ACTIVE_HEALTHY`.
 
-**سجّل:** `project ref` · `URL` · `anon key`.
-هذه الثلاثة **معرّفات عامّة** تظهر في الحزمة أصلًا — إرسالها لي آمن.
+**الباقي منها:** أرسل `anon key` (معرّف عام يظهر في الحزمة أصلًا — إرساله آمن).
 أمّا `service_role key` وكلمة مرور القاعدة فـ**لا تُرسَل ولا تُكتب في أي ملف**.
 
 ---
@@ -49,25 +74,52 @@ SUPABASE_PROJECT_REF=ledlypcyrtnzvjvhykwz node scripts/staging/preflight.mjs   #
 
 ---
 
-## ٣. شغّل القاعدة — أمر واحد
+## ٣. طبّق الهجرات — عبر أدوات Supabase، بلا كلمة مرور
 
-```bash
-DATABASE_URL='postgres://postgres:<pwd>@db.<ref>.supabase.co:5432/postgres' \
-SUPABASE_PROJECT_REF='<ref>' \
-npm run db:commission
+**لا تشغّل `supabase-shim.sql`.** وهو الآن يرفض ذلك من نفسه.
+
+طبّق ملفات `supabase/migrations/*.sql` **بترتيب اسمها** واحدًا واحدًا عبر
+`apply_migration` (اسم الهجرة = اسم الملف بلا `.sql`). ثلاث وثلاثون ملفًّا.
+
+**الترتيب مُلزَم** — بعضها يعيد تعريف دوالّ سابقة، وعكسه يجعل الأقدم يكتب فوق
+الأحدث بلا خطأ.
+
+### ثم بذرة الملح — خطوة لا تنشئها أي هجرة (لأنها سرّ)
+
+بدونها ترفع **كل** دالّة كتابة `identity_pepper: no active version` عند أول
+مستخدم حقيقي. عبر `execute_sql`:
+
+```sql
+insert into private.identity_pepper (version, pepper)
+values (1, encode(extensions.gen_random_bytes(32), 'hex'))
+on conflict (version) do nothing;
 ```
 
-يطبّق ٣٣ هجرة بسجلّ، ويبذر ملح الهوية، ثم **يتحقّق من الكتالوج الحيّ**.
+> ⚠️ **لا تطبع الملح ولا ترسله.** ولا تعِد تشغيلها إن كان مبذورًا — استبدال ملح
+> قائم يُبطل كل بصمة مسجَّلة (التجارب والأكواد والمشتريات).
 
-**معيار النجاح:** ينتهي بـ`✅ القاعدة مُشغَّلة ومُتحقَّق منها`.
-سيسقط فحص «يوجد مؤسس» — **متوقَّع الآن**، يُسنَد الدور في §٦.
+### ثم تحقّق — من الكتالوج الحيّ لا من عدّ الملفات
 
-> **لا تطبّق الهجرات بيدك ولا بـ`supabase db push`.** إعادة التشغيل اليدوي تموت
-> عند `20260822120002` (`cannot change return type`). السكربت يمسك سجلًّا في
-> `supabase_migrations.schema_migrations` — نفس جدول Supabase CLI — ويطبّق كل
-> هجرة داخل معاملة مع سطر سجلّها. **وإعادة تشغيله آمنة تمامًا.**
+```sql
+select
+  (select count(*) from pg_class c join pg_namespace n on n.oid=c.relnamespace
+    where n.nspname='public' and c.relkind='r')                              as tables,
+  (select count(*) from pg_class c join pg_namespace n on n.oid=c.relnamespace
+    where n.nspname='public' and c.relkind='r' and c.relrowsecurity)         as with_rls,
+  (select count(*) from pg_policies where schemaname='public')               as policies,
+  (select count(*) from information_schema.role_table_grants
+    where grantee='anon' and table_schema='public'
+      and privilege_type in ('INSERT','UPDATE','DELETE'))                    as anon_writes,
+  (select count(*) from private.identity_pepper)                             as pepper,
+  (select count(*) from information_schema.role_routine_grants
+    where grantee in ('anon','authenticated') and routine_schema='public'
+      and routine_name='redeem_access_code')                                 as legacy_open;
+```
 
----
+**المتوقَّع:** `tables = with_rls` · `policies > 0` · `anon_writes = 0` ·
+`pepper = 1` · `legacy_open = 0`.
+
+**أرسل لي هذا الصفّ كما هو.**
 
 ## ٤. اضبط المصادقة
 
@@ -105,17 +157,23 @@ grep -rl '<ref>'                dist/assets/*.js | wc -l    # لازم ≥ 1
 **بهذا الترتيب:**
 
 1. يسجّل المؤسس حسابه **من التطبيق نفسه** (تسجيل عادي) ويؤكّد بريده.
-2. ثم:
+2. ثم عبر `execute_sql` (بلا كلمة مرور):
 
-```bash
-DATABASE_URL='…' SUPABASE_PROJECT_REF='<ref>' \
-FOUNDER_EMAIL='<بريد المؤسس>' \
-npm run db:commission
+```sql
+select public.admin_set_role('<بريد المؤسس>', 'founder', 'staging commissioning');
 ```
 
-**معيار النجاح:** `✓ أُسنِد دور المؤسس` و`✓ يوجد مؤسس واحد على الأقل`.
+**تحقّق:**
 
-> السكربت **لا يُنشئ حسابات ولا يولّد كلمات مرور**. يُسنِد الدور لحسابٍ قائم فقط.
+```sql
+select email, raw_app_meta_data ->> 'qimmah_role' as role
+from auth.users where email = '<بريد المؤسس>';
+```
+
+**المتوقَّع:** `role = founder`.
+
+> ⚠️ الدور يُكتب في `raw_app_meta_data` وحده — لا في `user_metadata` الذي
+> يستطيع المستخدم تعديله بنفسه. ولا يُنشأ حساب هنا ولا تُولَّد كلمة مرور.
 
 ---
 

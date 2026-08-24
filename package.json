@@ -255,7 +255,8 @@
     "test:migration-version": "node scripts/run-migration-version-proof.mjs",
     "db:commission": "node scripts/staging/commission.mjs",
     "db:commission:verify": "node scripts/staging/commission.mjs --verify-only",
-    "test:gateway-contract": "node scripts/run-gateway-contract-proof.mjs"
+    "test:gateway-contract": "node scripts/run-gateway-contract-proof.mjs",
+    "test:nonsuperuser-apply": "node scripts/db/nonsuperuser-apply-proof.mjs"
   },
   "dependencies": {
     "@capacitor/app": "^8.1.0",

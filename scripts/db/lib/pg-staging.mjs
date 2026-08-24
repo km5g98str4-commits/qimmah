@@ -102,7 +102,7 @@ export function createStaging(name = `qimmah_stg_${Date.now().toString(36)}`) {
 export function provision(stg, { founderEmail = null, pepperVersion = 1 } = {}) {
   const steps = []
   stg.sql(`insert into private.identity_pepper (version, pepper)
-           values (${pepperVersion}, 'stg-pepper-v${pepperVersion}-' || encode(gen_random_bytes(16), 'hex'))
+           values (${pepperVersion}, 'stg-pepper-v${pepperVersion}-' || encode(extensions.gen_random_bytes(16), 'hex'))
            on conflict (version) do nothing;`)
   steps.push(`identity_pepper v${pepperVersion}`)
   if (founderEmail) {
