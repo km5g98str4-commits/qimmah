@@ -114,9 +114,15 @@ from auth.users where email = '<بريدك>';
 **Edge Functions لا تُنشر من المتصفّح.** تُترك لجلسة فيها `supabase` CLI:
 
 ```bash
-supabase functions deploy salla-webhook  --project-ref odpkvswfiihrkglgfghd
-supabase functions deploy qimmah-gateway --project-ref odpkvswfiihrkglgfghd
+npx supabase@2.115.0 functions deploy salla-webhook  --project-ref odpkvswfiihrkglgfghd --use-api
+npx supabase@2.115.0 functions deploy qimmah-gateway --project-ref odpkvswfiihrkglgfghd --use-api
 ```
+
+> `--use-api` يحزم على الخادم بدل Docker محلّيًا — بدونه تسقط على آلة بلا Docker.
+> والأداة تعمل بـ`npx` بلا تثبيت (مقيس). فالنشر **محجوبٌ باعتماد لا بأداة**:
+> يحتاج `SUPABASE_ACCESS_TOKEN` **في بيئة جلستك**.
+> ⛔ **ولا يُلصَق رمز وصول في محادثة** — رمزٌ ظهر في محادثة محروقٌ ويُلغى فورًا.
+
 
 **لكن أسرارها تُضبط من المتصفّح الآن** (Edge Functions → Secrets):
 

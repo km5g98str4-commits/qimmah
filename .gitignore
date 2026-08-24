@@ -71,3 +71,8 @@ public/food/search/
 
 # esbuild scratch bundles produced by proof runners
 scripts/.*.bundle.mjs
+
+# حالة Supabase CLI المحلّية — تكتبها الأداة عند أي `npx supabase …`.
+# لا شأن لها بالمستودع، وقد تحمل حالةً مرتبطة بالمشروع المربوط. تُتجاهَل
+# صراحةً بدل الاعتماد على أن ينتبه أحدٌ إليها في `git status` (rules/security.md).
+supabase/.temp/

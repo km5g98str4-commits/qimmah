@@ -221,9 +221,15 @@ from auth.users where email = '<بريد المؤسس>';
 ## ٧. انشر الطرفيتين
 
 ```bash
-supabase functions deploy salla-webhook  --project-ref <ref>
-supabase functions deploy qimmah-gateway --project-ref <ref>
+npx supabase@2.115.0 functions deploy salla-webhook  --project-ref <ref> --use-api
+npx supabase@2.115.0 functions deploy qimmah-gateway --project-ref <ref> --use-api
 ```
+
+> `--use-api` يحزم على الخادم بدل Docker محلّيًا — بدونه تسقط على آلة بلا Docker.
+> والأداة تعمل بـ`npx` بلا تثبيت (مقيس). فالنشر **محجوبٌ باعتماد لا بأداة**:
+> يحتاج `SUPABASE_ACCESS_TOKEN` **في بيئة جلستك**.
+> ⛔ **ولا يُلصَق رمز وصول في محادثة** — رمزٌ ظهر في محادثة محروقٌ ويُلغى فورًا.
+
 
 `supabase/config.toml` موجود ويحمل `verify_jwt` لكل طرفية — **لا تعدّله**.
 

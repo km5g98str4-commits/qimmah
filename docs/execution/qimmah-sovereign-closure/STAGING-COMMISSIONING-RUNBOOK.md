@@ -105,9 +105,20 @@ docs/execution/qimmah-sovereign-closure/staging-smoke.sql
 ## ٣. انشر الطرفيات
 
 ```bash
-supabase functions deploy salla-webhook  --project-ref <ref>
-supabase functions deploy qimmah-gateway --project-ref <ref>
+npx supabase@2.115.0 functions deploy salla-webhook  --project-ref <ref> --use-api
+npx supabase@2.115.0 functions deploy qimmah-gateway --project-ref <ref> --use-api
 ```
+
+> **`--use-api` ليس زينة:** بدونه تحزم الأداة الطرفية **بـDocker محلّيًا**،
+> فتسقط على أي آلة بلا Docker — وهي حال أكثر جلسات الوكلاء. ومعه تُحزَم على
+> الخادم، فلا يبقى شرطٌ إلا الاعتماد.
+>
+> **ومقيسٌ أن الأداة نفسها ليست عائقًا:** `npx supabase@2.115.0 --version`
+> يعمل في جلسة وكيل بلا تثبيت مسبق. فالنشر **محجوبٌ باعتماد لا بأداة** —
+> يحتاج `SUPABASE_ACCESS_TOKEN` أو `supabase login`.
+>
+> ⛔ **ولا يُلصَق رمز وصول في محادثة.** رمزٌ ظهر في محادثة يُعتبر محروقًا
+> ويُلغى فورًا. يُصدَّر في بيئة الجلسة التي تنشر، أو يشغّلها المؤسس بنفسه.
 
 `supabase/config.toml` يحمل الإعلان الحاسم:
 

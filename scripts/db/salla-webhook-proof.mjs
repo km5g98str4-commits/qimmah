@@ -16,7 +16,7 @@
 //
 // التشغيل: npm run test:salla-webhook
 // ============================================================================
-import { readFileSync } from 'node:fs'
+import { readFileSync, readdirSync, existsSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, resolve, join } from 'node:path'
 import { createSandbox, asRole, makeUser } from './lib/supabase-sandbox.mjs'
@@ -957,6 +957,42 @@ check('فحص الترتيب يسقط على ترتيب مقلوب مزروع',
     !/verify_jwt\s*=\s*false/.test(sectionOf('qimmah-gateway')))
   check('⟲ والبوّابة التجارية تُبقيه `true` — متصفّح مصادَق لا webhook',
     /verify_jwt\s*=\s*true/.test(sectionOf('qimmah-gateway')))
+
+  /**
+   * ═══ والقائمة أعلاه تُحرَس من أن تشيخ (§4.2) ═══
+   * الفحوص الثلاثة السابقة تُسمّي طرفياتها **باليد**. وهي كاملة اليوم بالصدفة
+   * لا بالبناء: طرفيةٌ رابعة تُضاف غدًا لا يصرخ لغيابها أحد — فترث الافتراض
+   * `verify_jwt = true` **صامتًا**. ولو كانت webhook، رُدّ كل تسليم بـ401 قبل
+   * أن يعمل سطرٌ من كودها — وهو العطل بعينه الذي تشرحه الترويسة أعلاه، عائدًا
+   * من باب لا يحرسه أحد.
+   *
+   * فيُقاس الإعلان **من القرص لا من قائمة**: كل مجلّد فيه `index.ts` طرفيةٌ
+   * تُنشَر، وكل طرفية تُنشَر يجب أن تحمل قرارًا **صريحًا** — أيًّا كان.
+   * السكوت هو المرفوض، لا القيمة.
+   */
+  const fnRoot = join(root, 'supabase/functions')
+  const deployable = readdirSync(fnRoot, { withFileTypes: true })
+    .filter((d) => d.isDirectory() && existsSync(join(fnRoot, d.name, 'index.ts')))
+    .map((d) => d.name)
+    .sort()
+  const undeclared = deployable.filter((n) => !/verify_jwt\s*=\s*(true|false)/.test(sectionOf(n)))
+  check(`⚔️ وكل طرفية على القرص تحمل قرار verify_jwt صريحًا (${deployable.length})`,
+    undeclared.length === 0,
+    undeclared.length ? `بلا إعلان: ${undeclared.join(' · ')}` : deployable.join(' · '))
+
+  // ⟲ **محاكاة التفاف:** طرفيةٌ جديدة بلا قسم — هل يسقط الفحص **باسمه**؟
+  // بلا هذه، «صفر غير معلَنة» قد تعني «لا يقرأ القرص» لا «القرص نظيف».
+  const ghost = 'qimmah-ghost-endpoint'
+  const wouldCatch = ![ghost].every((n) => /verify_jwt\s*=\s*(true|false)/.test(sectionOf(n)))
+  check('⟲ ولو أُضيفت طرفية بلا قسم لالتقطها — فالفحص ليس تحصيل حاصل', wouldCatch)
+  // ⟲ وأنه يقرأ القرص فعلًا: لو كان يقرأ قائمةً مكتوبة لبقي العدد ثابتًا.
+  check('⟲ ويقرأ المجلّدات لا قائمةً مكتوبة — والثلاث المعلومة ضمنها',
+    deployable.length >= 3
+      && ['qimmah-gateway', 'qimmah-mailer', 'salla-webhook'].every((n) => deployable.includes(n)),
+    `${deployable.length} مجلّدًا`)
+  // ⟲ و`_shared` ليست طرفية — لا `index.ts` فيها، فلا تُطالَب بإعلان.
+  check('⟲ و`_shared` خارج العدّ — مجلّد مشترك لا طرفية تُنشَر',
+    !deployable.includes('_shared'))
 }
 
 // ── الخلاصة ────────────────────────────────────────────────────────────────
