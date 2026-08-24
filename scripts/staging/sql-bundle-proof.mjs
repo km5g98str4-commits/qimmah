@@ -140,6 +140,58 @@ try {
       reFail === null, reFail ? reFail.slice(0, 150) : '')
     check(`  والتخطّي **حقيقي** لا إشعارٌ يدّعيه (${migCount} تخطٍّ)`,
       skips === migCount, `${skips}/${migCount}`)
+
+    /**
+     * ═══ وكل حزمة تُعيد صفًّا — لا إشعارًا وحده ═══
+     * الحزم ١-٥ كانت بلا `select` إطلاقًا: عبر **واجهة الإدارة** — وهي القناة
+     * التي عملت فعلًا على staging — لا تعود الإشعارات، فيصل `201` وناتجٌ فارغ.
+     * الفشل يظهر (خطأ الواجهة)، لكن **النجاح لا يُميَّز من اللاشيء**.
+     * وهو نفس عيب الفحص السلوكي: نتيجةٌ تُكتب في قناةٍ لا تبلغ قارئها.
+     */
+    let allOk = true
+    const rows = []
+    for (const f of bundles) {
+      const out = psql(asRole, ['-v', 'ON_ERROR_STOP=1', '-f', join(OUT, f)]).trim().split('\n')
+      // آخر صفّ في الحزمة هو صفّ حالتها — عدا السادسة، فآخرها صفّ التحقّق
+      // الشامل وصفّ الحالة قبله مباشرةً.
+      const line = (f === bundles[bundles.length - 1] ? out[out.length - 2] : out[out.length - 1]) || ''
+      rows.push(line)
+      if (!/\|OK$/.test(line)) allOk = false
+    }
+    check('⚔️ وكل حزمة تُعيد صفّ حالتها — فتصل عبر واجهة الإدارة لا الإشعارات وحدها',
+      allOk && rows.length === bundles.length, rows.join(' · ').slice(0, 160))
+
+    /**
+     * ⟲ **التأكيد المضادّ — وأوّل صيغةٍ منه كانت مرورًا مجّانيًّا.**
+     * كُتبت أوّلًا بـ`… || true` في آخر الشرط، فمرّت مهما كانت النتيجة. وهو
+     * بالضبط «مرورٌ غير مستحقّ ليس نجاحًا» (§4.2) — بوابةٌ تُرضى بلا أن تُفحص.
+     *
+     * والصحيح أن يُنتزع **صفّ الحالة وحده** ويُشغَّل بعد محو تسجيلة هجرة:
+     * إعادةُ لصق الحزمة كاملةً تُعيد تطبيق الممحوّة وتُسجّلها، فيعود `OK`
+     * ولا يُقاس شيء. أمّا الصفّ منفردًا فيقرأ السجلّ كما هو.
+     */
+    const statusSqlOf = (f) => {
+      const src = readFileSync(join(OUT, f), 'utf8')
+      const i = src.indexOf('-- ── صفّ الحزمة')
+      if (i < 0) return null
+      const from = src.indexOf('select', i)
+      const to = src.indexOf(';', from)
+      return from < 0 || to < 0 ? null : src.slice(from, to + 1)
+    }
+    const stmt = statusSqlOf(bundles[0])
+    check('  وصفّ الحالة قابل للانتزاع من الحزمة — وإلا لا يُمكن قياسه',
+      stmt !== null && /schema_migrations/.test(stmt))
+    const victim = sql(asRole, `select version from supabase_migrations.schema_migrations order by version limit 1;`).trim()
+    sql(asRole, `delete from supabase_migrations.schema_migrations where version = '${victim}';`)
+    const degraded = stmt ? sql(asRole, stmt).trim() : ''
+    check('⟲ ومحوُ تسجيلةِ هجرةٍ واحدة يقلب صفّ حزمتها إلى INCOMPLETE — فهو محسوب لا ثابت',
+      /\|INCOMPLETE$/.test(degraded), `${degraded}  (الممحوّة: ${victim})`)
+    // وتُعاد التسجيلة كي لا تُفسد ما بعدها.
+    sql(asRole, `insert into supabase_migrations.schema_migrations (version, name)
+                 values ('${victim}', 'restored-by-proof') on conflict do nothing;`)
+    const healed = stmt ? sql(asRole, stmt).trim() : ''
+    check('  وبإعادتها يعود OK — فالانقلاب كان بسببه لا بالصدفة',
+      /\|OK$/.test(healed), healed)
     // ⟲ لو كان التخطّي إشعارًا فقط لأعادت الحزم التطبيق فسقطت — وهو ما وقع فعلًا
     //    في أوّل صيغة. فبقاء العدد مطابقًا هو الدليل على أنها لم تُنفَّذ.
     check('⟲ ولا هجرة سُجِّلت مرّتين', sql(asRole, `select count(*) from supabase_migrations.schema_migrations;`).trim() === String(migCount))

@@ -929,3 +929,13 @@ grant execute on function public.founder_review_food_submission(uuid, text, text
   values ('20260824120003', '20260824120003_food_submissions.sql');
 end
 $qimmah_mig_20260824120003_wrap$;
+
+-- ── صفّ الحزمة: ماذا فعلت هذه اللصقة بالضبط ───────────────────────────────
+select
+  '5/6'                                                     as bundle,
+  count(*) filter (where m.version is not null)                   as registered,
+  2                                                  as expected,
+  case when count(*) filter (where m.version is not null) = 2
+       then 'OK' else 'INCOMPLETE' end                            as status
+from (values ('20260824120002'), ('20260824120003')) as v(version)
+left join supabase_migrations.schema_migrations m on m.version = v.version;

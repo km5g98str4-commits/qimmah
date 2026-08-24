@@ -1041,6 +1041,16 @@ comment on function public.gate_admit(text, text, int) is
 end
 $qimmah_mig_20260824120006_wrap$;
 
+-- ── صفّ الحزمة: ماذا فعلت هذه اللصقة بالضبط ───────────────────────────────
+select
+  '6/6'                                                     as bundle,
+  count(*) filter (where m.version is not null)                   as registered,
+  3                                                  as expected,
+  case when count(*) filter (where m.version is not null) = 3
+       then 'OK' else 'INCOMPLETE' end                            as status
+from (values ('20260824120004'), ('20260824120005'), ('20260824120006')) as v(version)
+left join supabase_migrations.schema_migrations m on m.version = v.version;
+
 -- ═══════════════════════════════════════════════════════════════════════════
 -- الحزمة الأخيرة — بذرة الملح ثم التحقّق
 -- ═══════════════════════════════════════════════════════════════════════════

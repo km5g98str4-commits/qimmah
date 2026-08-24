@@ -114,6 +114,33 @@ $${tag}_wrap$;
   }).join('\n')
 }
 
+/**
+ * ═══ كل حزمة تُعيد صفًّا يقول ماذا فعلت ═══
+ *
+ * الحزم ١-٥ كانت تُنهي عملها بإشعارات تخطٍّ **بلا عبارة `select` واحدة**. وفي
+ * `psql` أو المحرّر يقرأها الإنسان فيطمئنّ. أمّا عبر **واجهة الإدارة** — وهي
+ * القناة التي عملت فعلًا — فلا تعود الإشعارات: يصل `201` وناتجٌ فارغ، ولا
+ * يعرف المشغّل أطُبِّقت الهجرات أم تُخطِّيت أم لم يحدث شيء.
+ *
+ * وهو **نفس عيب الفحص السلوكي** الذي أُصلح قبل هذا بساعة: نتيجةٌ تُكتب في
+ * قناةٍ لا تبلغ قارئها. فالفشل يظهر (الواجهة تُعيد خطأً)، لكن **النجاح لا
+ * يُميَّز من اللاشيء** — وذلك يكفي ليكون عيبًا.
+ *
+ * فصار لكل حزمة صفٌّ ختامي يقارن هجراتها بسجلّ الهجرات الحيّ: `OK` أو
+ * `INCOMPLETE` ومعه العدد. يصل عبر أي قناة تُعيد صفوفًا.
+ */
+const STATUS = (i, n, list) => `
+-- ── صفّ الحزمة: ماذا فعلت هذه اللصقة بالضبط ───────────────────────────────
+select
+  '${i}/${n}'                                                     as bundle,
+  count(*) filter (where m.version is not null)                   as registered,
+  ${list.length}                                                  as expected,
+  case when count(*) filter (where m.version is not null) = ${list.length}
+       then 'OK' else 'INCOMPLETE' end                            as status
+from (values ${list.map((f) => `('${versionOf(f)}')`).join(', ')}) as v(version)
+left join supabase_migrations.schema_migrations m on m.version = v.version;
+`
+
 const VERIFY = `
 -- ═══════════════════════════════════════════════════════════════════════════
 -- الحزمة الأخيرة — بذرة الملح ثم التحقّق
@@ -158,7 +185,10 @@ mkdirSync(OUT, { recursive: true })
 let total = 0
 chunks.forEach((list, i) => {
   const n = String(i + 1).padStart(2, '0')
+  // ⚠️ `STATUS` قبل `VERIFY`: بعض القنوات تُعيد **آخر** ناتج وحده، فيبقى صفّ
+  //    التحقّق الشامل هو الأخير في الحزمة السادسة كما كان.
   const body = HEADER(i + 1, chunks.length, list) + chunkBody(list)
+    + STATUS(i + 1, chunks.length, list)
     + (i === chunks.length - 1 ? VERIFY : '')
   const path = join(OUT, `${n}-qimmah-staging.sql`)
   writeFileSync(path, body)

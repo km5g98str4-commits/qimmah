@@ -1611,3 +1611,13 @@ grant select on public.access_code_redemptions to authenticated;
   values ('20260806120001', '20260806120001_entitlements_core.sql');
 end
 $qimmah_mig_20260806120001_wrap$;
+
+-- ── صفّ الحزمة: ماذا فعلت هذه اللصقة بالضبط ───────────────────────────────
+select
+  '1/6'                                                     as bundle,
+  count(*) filter (where m.version is not null)                   as registered,
+  13                                                  as expected,
+  case when count(*) filter (where m.version is not null) = 13
+       then 'OK' else 'INCOMPLETE' end                            as status
+from (values ('20260713120001'), ('20260713120002'), ('20260713120003'), ('20260713120004'), ('20260713120005'), ('20260713120006'), ('20260713120007'), ('20260726120001'), ('20260726120002'), ('20260726120003'), ('20260726120004'), ('20260726120005'), ('20260806120001')) as v(version)
+left join supabase_migrations.schema_migrations m on m.version = v.version;

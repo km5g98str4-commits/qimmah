@@ -1196,3 +1196,13 @@ $$;
   values ('20260809120003', '20260809120003_public_execute_hardening.sql');
 end
 $qimmah_mig_20260809120003_wrap$;
+
+-- ── صفّ الحزمة: ماذا فعلت هذه اللصقة بالضبط ───────────────────────────────
+select
+  '2/6'                                                     as bundle,
+  count(*) filter (where m.version is not null)                   as registered,
+  5                                                  as expected,
+  case when count(*) filter (where m.version is not null) = 5
+       then 'OK' else 'INCOMPLETE' end                            as status
+from (values ('20260806120002'), ('20260806120003'), ('20260809120001'), ('20260809120002'), ('20260809120003')) as v(version)
+left join supabase_migrations.schema_migrations m on m.version = v.version;

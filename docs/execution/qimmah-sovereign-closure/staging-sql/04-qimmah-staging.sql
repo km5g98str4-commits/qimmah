@@ -1327,3 +1327,13 @@ comment on function public.redeem_access_code_v2(text) is
   values ('20260824120001', '20260824120001_roles_and_redeem_rate_limit.sql');
 end
 $qimmah_mig_20260824120001_wrap$;
+
+-- ── صفّ الحزمة: ماذا فعلت هذه اللصقة بالضبط ───────────────────────────────
+select
+  '4/6'                                                     as bundle,
+  count(*) filter (where m.version is not null)                   as registered,
+  5                                                  as expected,
+  case when count(*) filter (where m.version is not null) = 5
+       then 'OK' else 'INCOMPLETE' end                            as status
+from (values ('20260816120004'), ('20260822120001'), ('20260822120002'), ('20260822120003'), ('20260824120001')) as v(version)
+left join supabase_migrations.schema_migrations m on m.version = v.version;
