@@ -35,6 +35,51 @@ const sql = (url, s) => psql(url, ['-v', 'ON_ERROR_STOP=1', '-c', s])
 
 console.log('\n══ حِزَم اللصق ══')
 
+/**
+ * ═══ ٠) قاعدةٌ عامّة: كل ملف SQL يُلصَق **يُبلِّغ بصفّ** ═══
+ *
+ * تكرّر العطل الواحد أربع مرّات في يوم: نتيجةٌ تُكتب في قناةٍ لا تبلغ قارئها.
+ *   ① الفحص السلوكي كتب حكمه بـ`RAISE NOTICE` — فشُغِّل على staging وضاع حكمه.
+ *   ② الحزم ١-٥ بلا `select` إطلاقًا — `201` وناتجٌ فارغ.
+ * وأُصلحت الحالتان **باليد**. واليدُ لا تحرس الخامسة.
+ *
+ * فالقاعدة تصير بنيةً: كل ملف SQL في مجلّد التنفيذ مقصودٌ للّصق في قناةٍ
+ * تُعيد صفوفًا — واجهة الإدارة أو المحرّر — فيجب أن ينتهي بعبارة `select`
+ * على مستوى الملف. والإشعارات زيادةٌ حسنة، لا وسيلةَ الإبلاغ الوحيدة.
+ *
+ * ⚠️ **الفحص على `select` في مستوى الملف لا في أي موضع:** `select` داخل جسم
+ *    دالّة أو `do` لا يُعيد شيئًا للمشغّل، فعدُّها يجعل الفحص يمرّ على ملف
+ *    صامت تمامًا.
+ */
+{
+  const PASTE_DIRS = [
+    join(ROOT, 'docs/execution/qimmah-sovereign-closure'),
+    join(ROOT, 'docs/execution/qimmah-sovereign-closure/staging-sql'),
+  ]
+  const pasteFiles = PASTE_DIRS.flatMap((d) => {
+    let names = []
+    try { names = readdirSync(d).filter((f) => f.endsWith('.sql')) } catch { names = [] }
+    return names.map((f) => ({ dir: d, f, path: join(d, f) }))
+  })
+  // عبارة `select` في **مستوى الملف**: في أوّل العمود، غير مسبوقة بمسافة.
+  const reportsByRow = (path) => /^select\b/mi.test(readFileSync(path, 'utf8'))
+  const silent = pasteFiles.filter((x) => !reportsByRow(x.path)).map((x) => x.f)
+  check(`⚔️ كل ملف SQL يُلصَق يُبلِّغ بصفّ لا بإشعار (${pasteFiles.length})`,
+    silent.length === 0 && pasteFiles.length >= 7,
+    silent.length ? `صامتة: ${silent.join(' · ')}` : `${pasteFiles.length} ملفًّا`)
+
+  // ⟲ **محاكاة التفاف:** ملفٌّ يُبلِّغ بالإشعارات وحدها — هل يُلتقط؟ والكاشف
+  //    يُجرَّب على نصٍّ في الذاكرة، فلا يُكتب شيء في الشجرة ولا يُنسى حذفه.
+  const ghostSilent = "do $x$ begin raise notice 'تمّ'; end $x$;\n"
+  const ghostLoud = ghostSilent + "select 1 as ok;\n"
+  const detects = !/^select\b/mi.test(ghostSilent) && /^select\b/mi.test(ghostLoud)
+  check('⟲ والكاشف يفرّق بين ملفٍّ صامت وآخر يُبلِّغ — فليس تحصيل حاصل', detects)
+  // ⟲ ولا يُخدَع بـ`select` مدسوسة داخل جسم دالّة أو `do`.
+  const ghostNested = "do $x$ begin\n  perform (select 1);\nend $x$;\n"
+  check('⟲ ولا تُرضيه `select` داخل جسم `do` — فهي لا تُعيد شيئًا للمشغّل',
+    !/^select\b/mi.test(ghostNested))
+}
+
 // ── ١) لا انحراف عن الهجرات ───────────────────────────────────────────────
 const before = readdirSync(OUT).filter((f) => f.endsWith('.sql')).sort()
   .map((f) => readFileSync(join(OUT, f), 'utf8')).join('\n')
