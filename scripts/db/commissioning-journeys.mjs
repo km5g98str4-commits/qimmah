@@ -546,6 +546,20 @@ check('كودُ مفتاح الخادم اليدوي لا يُنسَب له رق
 refuses('⟲ وتكرارُه يُردّ باسمٍ عامّ ولا يُعيد البصمة المملّحة في التفصيل',
   () => stg.one(`select public.admin_create_access_code('HANDTYPEDCDE2','ops','مرّة ثانية',14,1,'batch-W2');`,
     { role: 'service_role' }), 'code_already_exists')
+// ⚔️ **وتصحيحٌ لسببٍ كُتب خطأً**: قيل إن أرضيةً على مسار مفتاح الخادم «زينة»
+// لأن حامله يستطيع الإدراج مباشرةً. يُقاس ذلك هنا بدل أن يُصدَّق:
+refuses('⚔️ ومفتاح الخادم **لا** يستطيع سكّ كودٍ بالإدراج المباشر — فالدالّة بوّابة لا واجهة',
+  () => stg.one(`insert into public.access_codes (code_hash, hash_version, duration_days, max_redemptions, created_by, created_reason)
+                 values (private.hash_identity('BYPASSATTEMPT23', 1), 1, 30, 1, 'ops', 'bypass') returning id;`,
+    { role: 'service_role' }), 'permission denied')
+check('  ولا يبلغ أي دور عميل الجدول أصلًا',
+  ['anon', 'authenticated'].every((role) => {
+    try {
+      stg.one(`insert into public.access_codes (code_hash, hash_version, duration_days, max_redemptions, created_by, created_reason)
+               values ('x', 1, 30, 1, 'x', 'x') returning id;`, role === 'anon' ? { role } : { role, uid: carol })
+      return false
+    } catch { return true }
+  }))
 
 // ⚠️ و«مرئيّ» تعني **تصل الشاشة**، لا «محفوظة في عمود». عمودٌ لا تقرأه صفحة
 // المؤسس ادّعاءُ رؤيةٍ بلا مسار — وهو بالضبط ما يمنعه التكليف. فتُقاس هنا من
