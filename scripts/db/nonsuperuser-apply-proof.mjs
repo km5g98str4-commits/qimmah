@@ -55,9 +55,18 @@ const psql = (url, args) => execFileSync('psql', [url, '-v', 'ON_ERROR_STOP=1', 
   { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] })
 const sql = (url, s) => psql(url, ['-c', s])
 
+// «لم يُشغَّل» ليست «سقط» — انظر الشرح في `scripts/staging/sql-bundle-proof.mjs`.
 try { execFileSync('pg_isready', ['-h', HOST, '-p', PORT], { stdio: 'ignore' }) } catch {
-  console.log(`\n⛔ EXTERNALLY_BLOCKED: لا عنقود Postgres على ${HOST}:${PORT} — الإثبات لم يُشغَّل.`)
-  process.exit(2)
+  console.log('\n────────────────────────────────────────────────────────────')
+  console.log('⏭️  تُخُطِّي — وهذا **ليس فشلًا**')
+  console.log('────────────────────────────────────────────────────────────')
+  console.log('لا عنقود Postgres محلّي على هذه الآلة، وهذه الفحوص تحتاجه.')
+  console.log('ما فوق مرّ فعلًا؛ وما تحته لم يُشغَّل — ولا يعني أن شيئًا معطوب.')
+  console.log('')
+  console.log('⇒ إن كنت تطبّق الحِزَم على Supabase: **امضِ**. لا علاقة لهذا بها.')
+  console.log('⇒ وهذه الفحوص مُشغَّلة في CI حيث يوجد عنقود، وهناك غيابُه فشلٌ حقيقي.')
+  console.log('────────────────────────────────────────────────────────────')
+  process.exit(process.env.CI === 'true' ? 2 : 0)
 }
 
 console.log('\n══ الهجرات بلا superuser — محاكاة دور postgres في Supabase ══')
