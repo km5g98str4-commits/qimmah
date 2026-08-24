@@ -65,6 +65,12 @@ export interface AccessContextValue {
   trialResume: TrialOutcome | null
   /** يُقرّ باطّلاع المستخدم على نتيجة الاستئناف فتُخفى. */
   acknowledgeTrialResume: () => void
+  /**
+   * [COMMISSIONING §2] يُعلِم الطبقة أن المستخدم غادر إلى صفحة الشراء.
+   * عند عودة التبويب مرئيًّا تُطالَب المنح المعلّقة ويُعاد الحسم **مرّة واحدة**،
+   * فلا يرى من دفع «مجّاني» حتى يحدّث الصفحة بنفسه.
+   */
+  notePurchaseAttempt: () => void
 }
 
 export const AccessContext = createContext<AccessContextValue | null>(null)
@@ -88,4 +94,5 @@ export const CLOSED_ACCESS: AccessContextValue = {
   clearTrialIntent: () => {},
   trialResume: null,
   acknowledgeTrialResume: () => {},
+  notePurchaseAttempt: () => {},
 }

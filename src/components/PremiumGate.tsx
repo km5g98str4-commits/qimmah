@@ -26,7 +26,7 @@ function actionLabel(action: PaidAction, s: ReturnType<() => typeof accessString
 }
 
 export function PremiumGate({ lang }: { lang: Lang }) {
-  const { blockedAction, closeGate, redeem, beginTrial, recordTrialIntent, entitlement } = useAccess()
+  const { blockedAction, closeGate, redeem, beginTrial, recordTrialIntent, entitlement, notePurchaseAttempt } = useAccess()
   const s = accessStrings[lang] ?? accessStrings.ar
   const [codeOpen, setCodeOpen] = useState(false)
   const [code, setCode] = useState('')
@@ -132,6 +132,9 @@ export function PremiumGate({ lang }: { lang: Lang }) {
             target="_blank"
             rel="noopener noreferrer"
             data-testid="premium-gate-cta"
+            // [COMMISSIONING §2] الوسم قبل المغادرة: التبويب يبقى مفتوحًا خلف
+            // صفحة الشراء، فعند عودته تُطالَب المنحة ويُعاد الحسم مرّة واحدة.
+            onClick={notePurchaseAttempt}
             className="btn-primary flex min-h-[48px] w-full items-center justify-center gap-2 text-sm"
           >
             {s.gatePrimary}

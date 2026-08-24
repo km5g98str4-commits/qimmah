@@ -12,6 +12,27 @@ import { getStrings } from '@/config/strings'
 import { nutritionScreenStrings } from '@/i18n/dict/nutritionScreen'
 import type { Lang } from '@/lib/appPreferences'
 import { trackLocal } from '@/lib/tracking'
+import { reportMissingFood, type MissingFoodOutcome } from '@/lib/missingFoodReport'
+
+/**
+ * نتيجة البلاغ ⇒ نصّها. **لكل حالة نصّها** — لا رسالة عامّة تُخفي السبب،
+ * ولا `default` يبتلع حالةً جديدة بصمت (المترجم يحرس الاكتمال بـ`never`).
+ */
+function reportOutcomeText(
+  state: MissingFoodOutcome,
+  d: { reportQueued: string; reportAlreadyQueued: string; reportRateLimited: string
+       reportNeedsAccount: string; reportNoBackend: string; reportFailed: string },
+): string {
+  switch (state) {
+    case 'queued': return d.reportQueued
+    case 'already_queued': return d.reportAlreadyQueued
+    case 'rate_limited': return d.reportRateLimited
+    case 'not_authenticated': return d.reportNeedsAccount
+    case 'backend_unconfigured': return d.reportNoBackend
+    case 'invalid':
+    case 'service_error': return d.reportFailed
+  }
+}
 import { cn } from '@/lib/cn'
 import { useAccess } from '@/lib/access/useAccess'
 
@@ -47,6 +68,8 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
   const [tab, setTab] = useState<Tab>('search')
   const [scanOpen, setScanOpen] = useState(false)
   const [query, setQuery] = useState('')
+  /** حالة بلاغ الصنف الناقص. `idle` ⇒ لم يُرسَل بعد. */
+  const [reportState, setReportState] = useState<'idle' | 'sending' | MissingFoodOutcome>('idle')
   const [selected, setSelected] = useState<FoodItem | null>(null)
   /** الحجم المختار (صغير/وسط/كبير) عندما يملك العنصر أحجامًا — يقود الماكروز الأساسية. */
   const [sizeId, setSizeId] = useState<string | null>(null)
@@ -325,8 +348,45 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
 
               {!selected && query.trim() && (
                 <ul className="mt-2 max-h-56 divide-y divide-line overflow-y-auto rounded-lg border border-line">
+                  {/* ═══ [COMMISSIONING §7] الحلقة الراجعة تبدأ من هنا ═══
+                      البحث الفاشل كان يُسجَّل محلّيًا فقط: يعرف به الجهاز ولا
+                      يعرفه أحد. فالمستخدم يفقد وجبته، والمؤسس لا يعرف أنّ أحدًا
+                      بحث عنها. الآن يصل البلاغ طابور مراجعة.
+
+                      ولا يُرسَل إلا **نصّ ما بحث عنه** — لا سعرات ولا تخمين
+                      (التكليف: «لا تختلق قيمًا غذائية»). والنصّ لا يَعِد بموعد:
+                      «نراجعه ونضيفه لو ضبط» لا «بنضيفه». */}
                   {results.length === 0 && (
-                    <li className="p-3 text-xs text-ink-400">{d.noResults}</li>
+                    <li className="p-3 text-xs text-ink-400">
+                      <span>{d.noResults}</span>
+                      {reportState === 'idle' ? (
+                        <button
+                          type="button"
+                          data-testid="report-missing-food"
+                          onClick={() => {
+                            const q = query.trim()
+                            if (!q) return
+                            setReportState('sending')
+                            void reportMissingFood({ query: q, lang }).then(setReportState)
+                          }}
+                          className="btn-ghost ms-2 min-h-[36px] px-2.5 py-1 text-[11px] font-bold"
+                        >
+                          {d.reportMissing}
+                        </button>
+                      ) : (
+                        <span
+                          role="status"
+                          data-testid="report-missing-result"
+                          data-report-state={reportState}
+                          className="ms-2 font-bold text-ink-700"
+                        >
+                          {reportState === 'sending' ? '…' : reportOutcomeText(reportState, d)}
+                        </span>
+                      )}
+                      {reportState === 'idle' ? (
+                        <span className="mt-1 block text-[10px] text-ink-400">{d.reportMissingHint}</span>
+                      ) : null}
+                    </li>
                   )}
                   {results.map((f) => (
                     <li key={f.id}>

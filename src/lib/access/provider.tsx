@@ -105,6 +105,45 @@ export function EntitlementProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener('online', onReconnect)
   }, [refresh])
 
+  /**
+   * ═══ [COMMISSIONING §2] عودة المشتري من سلة ═══
+   *
+   * البوّابة تفتح صفحة الشراء في **تبويب آخر** (`target="_blank"`)، فتبويب
+   * التطبيق يبقى كما هو خلفها. والويبهوك يمنح الاستحقاق على الخادم بعد ثوانٍ —
+   * **ولا شيء يخبر المتصفّح**. فالمستخدم يدفع، يعود، ويرى «مجّاني» حتى يُحدِّث
+   * الصفحة بنفسه. وهذا بعينه ما يجعل سلة وقِمّة تبدوان نظامين لا نظامًا واحدًا.
+   *
+   * ولا استطلاع دوري هنا: تُوسَم **نيّة شراء** عند فتح التبويب، فإذا عاد
+   * التطبيق مرئيًّا سُئل الخادم مرّة واحدة — مطالبةً بالمنح المعلّقة ثم إعادة
+   * حسم. والوسم يُمسح بعد أول سؤال، فلا يتحوّل إلى نبضٍ دائم.
+   *
+   * والذاكرة تكفي: التبويب نفسه هو من يعود. لو أُغلق فمسار `SIGNED_IN`
+   * و`INITIAL_SESSION` يمطالبان بالمنح المعلّقة أصلًا عند أول تحميل.
+   */
+  const purchasePendingRef = useRef(false)
+  const notePurchaseAttempt = useCallback(() => { purchasePendingRef.current = true }, [])
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return
+    const onVisible = () => {
+      if (document.visibilityState !== 'visible') return
+      if (!purchasePendingRef.current) return
+      purchasePendingRef.current = false
+      void (async () => {
+        // المطالبة أوّلًا: الشراء قد يكون سُجّل قبل وجود الحساب، فالمنحة
+        // تنتظر في السجلّ ولا تصل بإعادة الحسم وحدها.
+        await claimPendingGrants()
+        await refresh()
+      })()
+    }
+    document.addEventListener('visibilitychange', onVisible)
+    window.addEventListener('focus', onVisible)
+    return () => {
+      document.removeEventListener('visibilitychange', onVisible)
+      window.removeEventListener('focus', onVisible)
+    }
+  }, [refresh])
+
   const can = useCallback((action: PaidAction) => canPerform(action), [])
 
   const guard = useCallback(
@@ -170,10 +209,10 @@ export function EntitlementProvider({ children }: { children: ReactNode }) {
   const value = useMemo<AccessContextValue>(
     () => ({
       entitlement, can, guard, blockedAction, closeGate, redeem, refresh, beginTrial,
-      recordTrialIntent, hasTrialIntent, clearTrialIntent, trialResume, acknowledgeTrialResume,
+      recordTrialIntent, hasTrialIntent, clearTrialIntent, trialResume, acknowledgeTrialResume, notePurchaseAttempt,
     }),
     [entitlement, can, guard, blockedAction, closeGate, redeem, refresh, beginTrial,
-     recordTrialIntent, hasTrialIntent, clearTrialIntent, trialResume, acknowledgeTrialResume],
+     recordTrialIntent, hasTrialIntent, clearTrialIntent, trialResume, acknowledgeTrialResume, notePurchaseAttempt],
   )
 
   return <AccessContext.Provider value={value}>{children}</AccessContext.Provider>

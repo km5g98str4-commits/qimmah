@@ -27,6 +27,18 @@ export interface NutritionScreenStrings {
   invalidQuantity: string
   saveFailed: string
   noResults: string
+  /**
+   * [COMMISSIONING §7] بلاغ الصنف الناقص — يظهر في حالة «ما فيه نتائج» وحدها.
+   * النبرة: دعوة قصيرة بلا وعدٍ بموعد، ونتيجةٌ لكل حالة بسببها الصادق.
+   */
+  reportMissing: string
+  reportMissingHint: string
+  reportQueued: string
+  reportAlreadyQueued: string
+  reportRateLimited: string
+  reportNeedsAccount: string
+  reportNoBackend: string
+  reportFailed: string
   foodNameExample: string
   // ingredient picker
   ingredientLibraryTitle: string
@@ -91,6 +103,14 @@ const ar: NutritionScreenStrings = {
   invalidQuantity: 'اكتب كمية أكبر من صفر وضمن الحد المسموح.',
   saveFailed: 'ما قدرنا نحفظ التغيير. مدخلاتك باقية—جرّب مرة ثانية.',
   noResults: 'ما فيه نتائج',
+  reportMissing: 'بلّغنا عنه',
+  reportMissingHint: 'نراجعه ونضيفه لو ضبط. ما نضيف أرقام من عندنا.',
+  reportQueued: 'وصلنا بلاغك. نراجعه ونضيفه لو ضبط.',
+  reportAlreadyQueued: 'فيه بلاغ عنه عندنا أصلًا — تحت المراجعة.',
+  reportRateLimited: 'بلّغت كثير اليوم. جرّب بكرة.',
+  reportNeedsAccount: 'تحتاج حساب عشان نعرف نرجع لك.',
+  reportNoBackend: 'هذي نسخة مراجعة بلا خادم، فما نقدر نستقبل البلاغ.',
+  reportFailed: 'ما وصل البلاغ — العطل عندنا. جرّب بعد شوي.',
   foodNameExample: 'مثال: صحن كبسة بيت',
   ingredientLibraryTitle: 'مكتبة المكونات',
   close: 'إغلاق',
@@ -153,6 +173,14 @@ const en: NutritionScreenStrings = {
   invalidQuantity: 'Enter an amount above zero and within the allowed limit.',
   saveFailed: "Couldn't save the change. Your input is still here—try again.",
   noResults: 'No results',
+  reportMissing: 'Tell us',
+  reportMissingHint: "We'll review it and add it if it checks out. We never make up numbers.",
+  reportQueued: "Got it. We'll review it and add it if it checks out.",
+  reportAlreadyQueued: "Someone already reported this — it's in review.",
+  reportRateLimited: "That's a lot of reports today. Try again tomorrow.",
+  reportNeedsAccount: 'You need an account so we can follow up.',
+  reportNoBackend: 'This is a review build with no server, so we cannot take the report.',
+  reportFailed: "The report didn't go through — that's on us. Try again shortly.",
   foodNameExample: 'e.g. Home kabsa plate',
   ingredientLibraryTitle: 'Ingredient library',
   close: 'Close',
