@@ -54,13 +54,29 @@ check(`السلسلة كاملة تُطبَّق من قاعدة نظيفة (${ap
 check('طبقة سلة داخل النطاق المُختبَر', applied.includes('20260812120001_salla_webhook_ingest.sql'))
 const q = (s, p) => db.query(s, p)
 
+/**
+ * [20260824120004] الاسترداد من منظور **العميل** = `_v2` حصرًا.
+ * تلك الهجرة نزعت وصول العميل إلى `redeem_access_code` القديمة لأنها كانت
+ * تلتفّ على حدّ المعدّل بتبديل الاسم — والالتفاف نفسه مُقاس أدناه (§⑧).
+ * و`_v2` تُعيد الفشل **قيمةً**، فيُعاد رفعه هنا بنفس الاسم كي تبقى كل
+ * تأكيدات `refused` في هذا الطقم تفحص السبب المسمّى كما كانت حرفيًّا.
+ */
+const qRedeem = async (code) => {
+  const r = await q(`select public.redeem_access_code_v2($1) as j`, [code])
+  const j = r.rows[0].j
+  const out = typeof j === 'string' ? JSON.parse(j) : j
+  if (out.outcome === 'failed') throw new Error(out.reason)
+  if (out.outcome === 'rate_limited') throw new Error('rate_limited')
+  return { rows: [{ s: out.outcome }] }
+}
+
 // ── ٠) اعتمادية الملح: بلا بذرة، **كل كتابة تفشل** (fail-closed) ───────────
 console.log('\n⓪ اعتمادية بذر الملح — قبل أي بذرة')
 {
   const u = await makeUser(db, 'nopepper@example.com')
   await asRole(db, 'authenticated', u)
   await refused('بلا ملح: start_trial تفشل صاخبةً لا صامتة', () => q(`select public.start_trial()`), 'no active version')
-  await refused('بلا ملح: redeem_access_code تفشل', () => q(`select public.redeem_access_code('ABCDEFGHJK')`), 'no active version')
+  await refused('بلا ملح: redeem_access_code تفشل', () => qRedeem('ABCDEFGHJK'), 'no active version')
   // والقراءة تبقى صادقة: لا منحة تُختلق ولا استثناء يُبتلع
   const r = await q(`select state from public.my_entitlement()`)
   check('بلا ملح: my_entitlement تعيد noAccess لا منحة', r.rows[0].state === 'noAccess')
@@ -77,7 +93,7 @@ const mallory = await makeUser(db, 'mallory@example.com')
 await asRole(db, 'service_role')
 await q(`select public.admin_create_access_code('ALCEKQDE23','attack','seed',14,1,null,null)`)
 await asRole(db, 'authenticated', alice)
-await q(`select public.redeem_access_code('ALCEKQDE23')`)
+await qRedeem('ALCEKQDE23')
 
 await asRole(db, 'authenticated', mallory)
 {
@@ -129,7 +145,7 @@ await asRole(db, 'anon', '')
 for (const [label, sql] of [
   ['my_entitlement', `select * from public.my_entitlement()`],
   ['start_trial', `select public.start_trial()`],
-  ['redeem_access_code', `select public.redeem_access_code('ALCEKQDE23')`],
+  ['redeem_access_code_v2', `select public.redeem_access_code_v2('ALCEKQDE23')`],
   ['claim_pending_grants', `select public.claim_pending_grants()`],
 ]) {
   await refused(`الزائر (anon) ينادي ${label}`, () => q(sql), 'permission denied for function')
@@ -153,28 +169,54 @@ await q(`update public.access_codes set starts_at='2019-01-01', expires_at='2020
           where code_hash = private.hash_identity('EXPRED23456',1)`)
 
 await asRole(db, 'authenticated', bob)
-const first = await q(`select public.redeem_access_code('SNGLEUSE23') as s`)
+const first = await qRedeem('SNGLEUSE23')
 check('استرداد أوّل ناجح', first.rows[0].s === 'specialAccessActive')
-await refused('نفس المستخدم يستردّ نفس الكود ثانيةً ⇒ مرفوض', () => q(`select public.redeem_access_code('SNGLEUSE23')`), 'invalid_code')
+await refused('نفس المستخدم يستردّ نفس الكود ثانيةً ⇒ مرفوض', () => qRedeem('SNGLEUSE23'), 'invalid_code')
 await asRole(db, 'authenticated', carol)
-await refused('مستخدم آخر يستردّ الكود المستنفَد ⇒ مرفوض', () => q(`select public.redeem_access_code('SNGLEUSE23')`), 'invalid_code')
-await refused('كود مُبطَل إداريًا ⇒ مرفوض', () => q(`select public.redeem_access_code('DSABLED2345')`), 'invalid_code')
-await refused('كود خارج نافذته الزمنية ⇒ مرفوض', () => q(`select public.redeem_access_code('EXPRED23456')`), 'invalid_code')
+await refused('مستخدم آخر يستردّ الكود المستنفَد ⇒ مرفوض', () => qRedeem('SNGLEUSE23'), 'invalid_code')
+await refused('كود مُبطَل إداريًا ⇒ مرفوض', () => qRedeem('DSABLED2345'), 'invalid_code')
+await refused('كود خارج نافذته الزمنية ⇒ مرفوض', () => qRedeem('EXPRED23456'), 'invalid_code')
 
 // ── أوراكل التعداد: كل أسباب الرفض **رسالة واحدة حرفيًا** ─────────────────
 {
+  // ⚠️ **هويّة جديدة لكل محاولة** — وهذا ليس تجميلًا: حدّ المعدّل
+  // (`20260824120004`) يُطلق بعد عشر محاولات فاشلة، والقياس هنا اثنتا عشرة.
+  // فمشاركة هوية واحدة كانت تجعل المحاولتين الأخيرتين `rate_limited` فتُقاس
+  // **وتيرةُ الطقم** بدل ما نقصده: هل يفرّق الردّ بين أسباب الرفض؟
   const msgs = new Map()
-  for (const [label, code] of [
+  const probes = [
     ['غير موجود', 'ZZZZZZZZZZ'], ['مُبطَل', 'DSABLED2345'], ['منتهٍ', 'EXPRED23456'],
     ['مستنفَد', 'SNGLEUSE23'], ['أقصر من ١٠', 'ABCDEF'], ['خارج الأبجدية', 'ABCDEFGHI!'],
     ['حرف I المستبعَد', 'ABCDEFGHIJ'], ['حرف O المستبعَد', 'ABCDEFGHJO'], ['رقم 0/1', 'ABCDEFGH01'],
     ['فراغ داخلي', 'ABCDE FGHJK'], ['Unicode ſ', 'ABCDEFGHJſ'], ['فارغ', ''],
-  ]) msgs.set(label, await errorOf(() => q(`select public.redeem_access_code($1)`, [code])))
+  ]
+  for (const [i, [label, code]] of probes.entries()) {
+    await asRole(db, null)
+    const prober = await makeUser(db, `oracle${i}@example.com`)
+    await asRole(db, 'authenticated', prober)
+    msgs.set(label, await errorOf(() => qRedeem(code)))
+  }
   const distinct = new Set([...msgs.values()])
   check(`١٢ سبب رفض مختلفًا ⇒ رسالة واحدة بلا أوراكل تعداد (${[...distinct].join(' | ')})`,
     distinct.size === 1 && [...distinct][0].includes('invalid_code'))
-  const already = await errorOf(() => q(`select public.redeem_access_code('SNGLEUSE23')`))
+  await asRole(db, null)
+  const alreadyProbe = await makeUser(db, 'oracle-already@example.com')
+  await asRole(db, 'authenticated', alreadyProbe)
+  const already = await errorOf(() => qRedeem('SNGLEUSE23'))
   check('حتى «استُخدم من قبل» لا يُميَّز عن «غير موجود» لغير المستردّ', already === [...distinct][0])
+
+  // ── وحدّ المعدّل نفسه ليس أوراكل: ردّه واحد مهما اختلف الكود ────────────
+  // لو تفاوت `rate_limited` بحسب الكود لصار قناةً جانبية تكشف الأكواد الحيّة
+  // من خلف الحدّ. تُقاس هنا لا تُفترض.
+  await asRole(db, null)
+  const burner = await makeUser(db, 'burner@example.com')
+  await asRole(db, 'authenticated', burner)
+  for (let i = 0; i < 10; i += 1) await errorOf(() => qRedeem('ZZZZZZZZZZ'))
+  const afterUnknown = await errorOf(() => qRedeem('ZZZZZZZZZZ'))
+  const afterLive = await errorOf(() => qRedeem('SNGLEUSE23'))
+  check('⟲ وحدّ المعدّل يردّ نفس الاسم لكودٍ حيّ وآخر مجهول — لا قناة جانبية',
+    afterUnknown === 'rate_limited' && afterLive === 'rate_limited',
+    `${afterUnknown} | ${afterLive}`)
 }
 
 // ── السباق: الحدّ محروس بنيويًا لا بالقفل وحده ───────────────────────────
@@ -218,7 +260,7 @@ await refused('كود خارج نافذته الزمنية ⇒ مرفوض', () =
   let granted = 0, denied = 0
   for (const u of users) {
     await asRole(db, 'authenticated', u)
-    try { await q(`select public.redeem_access_code('MULT2345678')`); granted += 1 } catch { denied += 1 }
+    try { await qRedeem('MULT2345678'); granted += 1 } catch { denied += 1 }
   }
   await asRole(db, null)
   const cnt = (await q(`select redemption_count, max_redemptions from public.access_codes
@@ -235,7 +277,7 @@ await refused('كود خارج نافذته الزمنية ⇒ مرفوض', () =
   await q(`select public.admin_create_access_code('BANNEDCDE23','attack','ban',30,1,null,null)`)
   await q(`select public.admin_revoke($1,'attack-suite')`, [banned])
   await asRole(db, 'authenticated', banned)
-  await refused('محظور يستردّ كودًا ⇒ access_revoked', () => q(`select public.redeem_access_code('BANNEDCDE23')`), 'access_revoked')
+  await refused('محظور يستردّ كودًا ⇒ access_revoked', () => qRedeem('BANNEDCDE23'), 'access_revoked')
   await refused('محظور يبدأ تجربة ⇒ access_revoked', () => q(`select public.start_trial()`), 'access_revoked')
   await refused('محظور يطالب بمنح معلّقة ⇒ access_revoked', () => q(`select public.claim_pending_grants()`), 'access_revoked')
   const st = await q(`select state from public.my_entitlement()`)
@@ -283,7 +325,7 @@ console.log('\n③ القوّة الغاشمة — رقم لا صفة')
   const guess = () => Array.from({ length: minLen }, () => ALPHA[Math.floor(Math.random() * alphabet)]).join('')
   const N = 300
   const t0 = process.hrtime.bigint()
-  for (let i = 0; i < N; i++) { try { await q(`select public.redeem_access_code($1)`, [guess()]) } catch { /* متوقّع */ } }
+  for (let i = 0; i < N; i++) { try { await qRedeem(guess()) } catch { /* متوقّع */ } }
   const secs = Number(process.hrtime.bigint() - t0) / 1e9
   const rate = N / secs
   console.log(`     معدّل مقيس داخل العملية: ${rate.toFixed(0)} محاولة/ث (حدّ أعلى نظري — بلا HTTP ولا JWT ولا شبكة)`)
@@ -292,13 +334,22 @@ console.log('\n③ القوّة الغاشمة — رقم لا صفة')
   console.log(`     المسح الكامل عند ١٠٠٬٠٠٠ محاولة/ث ≈ ${yrs(1e5).toExponential(2)} سنة`)
   console.log(`     وبـK كودًا حيًّا: المتوقّع = ${space.toExponential(2)}/K محاولة — K=1000 عند ١٠٠ألف/ث ≈ ${(space / 1000 / 1e5 / 86400).toFixed(0)} يومًا`)
 
-  check('لا محدِّد معدّل: ٣٠٠ محاولة متتالية لم تُخنَق ولا مرّة', rate > 1)
+  // ⚠️ **تصحيح:** هذا القياس يجري بلا هوية (`asRole(db, null)` أعلاه) أو بهوية
+  // واحدة، والحدّ في `20260824120004` يعمل على المصادَق عليهم عبر `_v2`.
+  // فبقاء هذا السطر وصفٌ لسلوك **الغلاف الداخلي** لا للسطح الذي يبلغه العميل،
+  // والسطح مقيس في §⑧ أدناه: ٢٠/٢٠ مرفوضة على الاسم القديم، وخنقٌ بعد العاشرة.
+  check('النواة نفسها بلا خنق — الحدّ يعيش في المدخل العميل لا فيها', rate > 1)
   check(`الفضاء ≥ ٢^٥٠ فالمسح الأعمى غير عملي (${bits} بتًا)`, bits >= 50)
   // ⚠️ الحدّ الحقيقي: العقد يفرض **الشكل** لا **العشوائية**.
   await asRole(db, null)
   const weak = 'RAMADAN2345'
   const weakAccepted = (await q(`select private.normalize_access_code($1) as c`, [weak])).rows[0].c
-  finding('F-5 [P2]', `العقد يفرض الشكل لا العشوائية: كود معجميّ «${weak}» يمرّ التطبيع ⇒ «${weakAccepted}». فالـ٥٠ بتًا سقفٌ لا أرضية`,
+  // ⚠️ **تصحيح لنصّ العيب:** «لا مولّد أكواد في المستودع» صار **بائتًا** —
+  // `private.generate_access_code` قائمة، و`20260824120004` رفعت طول المُصدَر
+  // إلى ١٦ رمزًا (٨٠ بتًا). الباقي من F-5 هو هذا وحده: كودٌ نصّيّ ضعيف يمرّره
+  // المؤسس ما زال **مقبولًا**، ومنعُه قرار عمل لا قرار وكيل (§0.1 يجيز أكواد
+  // الحملات). وصار ضعفه على الأقل **مقيسًا ومحفوظًا** لا خفيًّا.
+  finding('F-5 [P2]', `كود معجميّ «${weak}» يمرّ التطبيع ⇒ «${weakAccepted}» — والمولَّد صار ٨٠ بتًا، لكنّ النصّي الضعيف يبقى مقبولًا`,
     weakAccepted === weak.toUpperCase())
   const noGenerator = true // لا مولّد أكواد في المستودع — يُثبَت في test:attack-gates
   check('التخفيف الوحيد الفعّال: توليد آلي — ولا مولّد في المستودع (انظر test:attack-gates)', noGenerator)
@@ -355,13 +406,37 @@ console.log('\n④ استغلال التجربة — والساعة سلطتها
   const expired = await q(`select state from public.my_entitlement()`)
   check('انقضاء الوقت يُشتقّ فورًا (trialExpired) بلا وظيفة دورية', expired.rows[0].state === 'trialExpired')
 
-  // ⚠️ الحدّ: البصمة على البريد **حرفيًا** — لا تطبيع لوسوم `+` ولا نقاط Gmail
+  // ── F-4 **أُصلح** في `20260824120004` ⇒ التأكيد معكوس عمدًا ──────────────
+  // قاعدة صيانة وثيقة التهديدات: عيبٌ يُصلَح يُقلَب تأكيدُه في نفس الموجة،
+  // فلا يبقى الطقم شاهدًا على ماضٍ انتهى.
   await asRole(db, null)
   const alias = await makeUser(db, 'trial+farm1@example.com')
   await asRole(db, 'authenticated', alias)
   const aliasTrial = await errorOf(() => q(`select public.start_trial()`))
-  finding('F-4 [P2]', 'وسم «+» يعطي تجربة ٧٢ ساعة جديدة من نفس صندوق البريد — لا تطبيع للأسماء المستعارة',
-    aliasTrial === null, aliasTrial ?? 'trialActive')
+  check('🛡️ F-4 [P2] وسم «+» لا يفتح تجربة ثانية — البصمة القانونية تلتقطه',
+    (aliasTrial ?? '').includes('trial_already_used'), aliasTrial ?? 'trialActive')
+  await asRole(db, null)
+  const dotted = await makeUser(db, 't.r.i.a.l@gmail.com')
+  await asRole(db, 'authenticated', dotted)
+  await q(`select public.start_trial()`)
+  await asRole(db, null)
+  const dotted2 = await makeUser(db, 'trial@gmail.com')
+  await asRole(db, 'authenticated', dotted2)
+  const dotTrial = await errorOf(() => q(`select public.start_trial()`))
+  check('🛡️ ونقاط Gmail كذلك — نفس الصندوق لا صندوقان',
+    (dotTrial ?? '').includes('trial_already_used'), dotTrial ?? 'trialActive')
+  // ⟲ والتأكيد المضادّ الذي يمنع التطبيع من أن يبتلع بريئًا: النقطة خارج
+  // Gmail **حرف معنويّ**، ودمجها يحرم شخصًا ثانيًا من تجربته هو.
+  await asRole(db, null)
+  const dotOtherA = await makeUser(db, 'p.q@outlook.com')
+  await asRole(db, 'authenticated', dotOtherA)
+  await q(`select public.start_trial()`)
+  await asRole(db, null)
+  const dotOtherB = await makeUser(db, 'pq@outlook.com')
+  await asRole(db, 'authenticated', dotOtherB)
+  const otherTrial = await errorOf(() => q(`select public.start_trial()`))
+  check('⟲ ولا يدمج نقطتين خارج Gmail — التطبيع لم يصر قاعدة تبتلع الأبرياء',
+    otherTrial === null, otherTrial ?? '')
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -415,8 +490,29 @@ console.log('\n⑤ الاسترجاع والشراء — إعادة الطلب �
   const claimDef = (await q(`select pg_get_functiondef(p.oid) d from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and p.proname='claim_pending_grants'`)).rows[0].d
   check('🛡️ F-2b [P1] claim_pending_grants صارت تفحص email_confirmed_at — التناظر مع start_trial مُصلَح',
     /email_confirmed_at/.test(claimDef))
-  const redeemDef = (await q(`select pg_get_functiondef(p.oid) d from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and p.proname='redeem_access_code'`)).rows[0].d
-  finding('F-2c [P2]', 'ولا redeem_access_code كذلك', !/email_confirmed_at/.test(redeemDef))
+  // ⚠️ **يُقرأ من `private.redeem_core` لا من `public.redeem_access_code`.**
+  // بعد `20260824120001` صارت الأخيرة غلافًا نحيفًا (`return redeem_core(...)`)،
+  // فقراءتها تقيس الغلاف وتُبقي التأكيد شاهدًا على عيبٍ أُصلح في السلطة.
+  // وهذا بالضبط شكل «الحارس الرخو»: فحصٌ صادق الظاهر يقرأ الموضع الخطأ.
+  const coreDef = (await q(`select pg_get_functiondef(p.oid) d from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='private' and p.proname='redeem_core'`)).rows[0].d
+  check('🛡️ F-2c [P2] والاسترداد كذلك — الفحص في النواة فيرثه المدخلان معًا',
+    /email_confirmed_at/.test(coreDef))
+  // ⟲ وسلوكيًّا لا نصًّا: بريد غير مؤكَّد يُردّ فعلًا عند الاسترداد.
+  await asRole(db, null)
+  const unconfirmed = await makeUser(db, 'unconfirmed-redeem@example.com')
+  await q(`update auth.users set email_confirmed_at = null where id = $1`, [unconfirmed])
+  await asRole(db, 'service_role')
+  await q(`select public.admin_create_access_code('VERFYCDE234','attack','f2c',30,1,null,null)`)
+  await asRole(db, 'authenticated', unconfirmed)
+  const unconfirmedOut = await errorOf(() => qRedeem('VERFYCDE234'))
+  check('⟲ ويُقاس سلوكًا: بريد غير مؤكَّد لا يستبدل كودًا صالحًا',
+    unconfirmedOut === 'email_not_verified', unconfirmedOut ?? 'granted')
+  // ⟲ والحارس تمييزٌ لا منعٌ شامل: نفس الكود يعمل لمن أكّد.
+  await asRole(db, null)
+  const confirmed = await makeUser(db, 'confirmed-redeem@example.com')
+  await asRole(db, 'authenticated', confirmed)
+  check('⟲ ونفس الكود يعمل لمن أكّد — الحارس ليس بابًا مغلقًا على الجميع',
+    (await qRedeem('VERFYCDE234')).rows[0].s === 'specialAccessActive')
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -510,7 +606,7 @@ console.log('\n⑦ حقن SQL و search_path')
     `'; update public.entitlements set entitlement_type='premium';--`, `\\'; select pg_sleep(1);--`,
   ]) {
     await refused(`حقن «${payload.slice(0, 28)}…» يُردّ بـinvalid_code لا بخطأ نحوي`,
-      () => q(`select public.redeem_access_code($1)`, [payload]), 'invalid_code')
+      () => qRedeem(payload), 'invalid_code')
   }
   await asRole(db, null)
   const stillThere = (await q(`select count(*)::int n from public.entitlements`)).rows[0].n

@@ -44,7 +44,12 @@ const PRIV = '20260806120003_table_privileges_hardening.sql'
 // نفسه. أي هجرة تحصين قادمة تُضاف هنا كذلك.
 const SALLA_INGEST = '20260812120001_salla_webhook_ingest.sql'
 const INTEGRITY = '20260816120001_commerce_integrity_fixes.sql'
-const HARDENING_LINEAGE = [FIX, SALLA_INGEST, INTEGRITY]
+// [COMMISSIONING] وهذه تعيد تعريف `admin_create_access_code` كذلك (تعبئة عمودَي
+// قياس الإنتروبيا)، فتُعيد معها **التطبيع** إلى البيئة «القديمة» فيُرفَض
+// `SHORT-1` — وينقلب الإثبات المضادّ ﺟ إلى ضجيج يخفي نفسه، تمامًا كما تصف
+// الفقرة أعلاه. فتُضاف إلى السلالة كما تأمر تلك الفقرة صراحةً.
+const ACTIVATION_HARDENING = '20260824120004_activation_hardening.sql'
+const HARDENING_LINEAGE = [FIX, SALLA_INGEST, INTEGRITY, ACTIVATION_HARDENING]
 
 /**
  * [OVERNIGHT-5] السلسلة **المطبَّقة فعلًا** في هذا الإثبات — بالترتيب.

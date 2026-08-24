@@ -199,10 +199,19 @@ console.log('\n🔒 المرحلة ب — بعد التحصين (السلسلة 
   await db.exec(`drop function public.future_fn(); drop table public.future_tbl;`)
 
   // والدوال المخصّصة للعميل ما زالت مكشوفة صراحةً (fail-closed لا fail-broken)
+  // ⚠️ **`redeem_access_code_v2` لا `redeem_access_code`:** الأخيرة نُزعت من
+  // `authenticated` في `20260824120004` لأنها كانت تلتفّ على حدّ المعدّل بتبديل
+  // الاسم. فالمدخل العميل للاسترداد صار `_v2` وحده.
   const rpcOpen = await db.query(`select count(*)::int n from information_schema.role_routine_grants
                                   where routine_schema='public' and grantee='authenticated'
-                                    and routine_name in ('my_entitlement','start_trial','redeem_access_code','claim_pending_grants')`)
+                                    and routine_name in ('my_entitlement','start_trial','redeem_access_code_v2','claim_pending_grants')`)
   check('دوال العميل الأربع ما زالت مكشوفة صراحةً', rpcOpen.rows[0].n >= 4, `${rpcOpen.rows[0].n}`)
+  // ⟲ والتأكيد المضادّ: النزع **فعليّ** لا اسمٌ في هجرة — الاسم القديم مغلق.
+  const legacyClosed = await db.query(`select count(*)::int n from information_schema.role_routine_grants
+                                       where routine_schema='public' and grantee in ('anon','authenticated')
+                                         and routine_name = 'redeem_access_code'`)
+  check('⟲ والاسم القديم مغلق على أدوار العميل — لا مسار استرداد بلا حدّ',
+    legacyClosed.rows[0].n === 0, `${legacyClosed.rows[0].n}`)
   const adminOpen = await db.query(`select count(*)::int n from information_schema.role_routine_grants
                                     where routine_schema='public' and grantee in ('anon','authenticated')
                                       and routine_name like 'admin\\_%'`)

@@ -62,6 +62,9 @@ const REDEEM_MESSAGE = {
   // [COMMISSIONING §5] نصٌّ خاصّ لا يتقاسمه أحد: «كودك غلط» بعد عشر محاولات
   // كذبةٌ تدفع لمحاولة حادية عشرة، والحقيقة أن الوتيرة هي التي رُفضت.
   rate_limited: 'redeemRateLimited',
+  // [COMMISSIONING §5] وكذلك هذه: الكود صحيح والناقص تأكيد البريد. ودمجها في
+  // `codeInvalid` كان يرسل المستخدم يفتّش عن غلطٍ لا وجود له.
+  email_not_verified: 'codeNeedsVerifiedEmail',
   backend_unconfigured: 'codeBackendAbsent',
   timeout: 'codeTimeout',
   service_error: 'codeServiceError',

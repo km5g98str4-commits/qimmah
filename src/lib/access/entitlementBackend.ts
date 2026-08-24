@@ -323,6 +323,14 @@ export type RedeemServerOutcome =
   | 'revoked'
   | 'not_authenticated'
   /**
+   * [COMMISSIONING §5] بريدٌ لم يُؤكَّد بعد.
+   *
+   * **والكود ليس خاطئًا** — فقول «كودك غلط» هنا يرسل المستخدم يفتّش عن خطأ في
+   * كودٍ صحيح، ويترك الخطوة الحقيقية (تأكيد البريد) غير مذكورة. الخطوة
+   * التالية تُقال صريحة (§6/٤).
+   */
+  | 'email_not_verified'
+  /**
    * [COMMISSIONING §5/§12] تجاوز حدّ المحاولات.
    *
    * **ليست فشلًا في الكود بل في وتيرة المحاولة**، فلها نصّها: من أخطأ عشر
@@ -353,6 +361,10 @@ export function classifyRedeemError(message: string, code: string): RedeemServer
   const text = `${message} ${code}`.toLowerCase()
   if (text.includes('code_already_redeemed') || code === '23505') return 'already_used'
   if (text.includes('access_revoked')) return 'revoked'
+  // ⚠️ **قبل فحص `28000`**: تأكيد البريد يرفع بنفس رمز الحالة، فترتيبٌ معكوس
+  // يترجمه «لست مسجّل الدخول» — وهو مسجّل الدخول فعلًا، فيُرسَل إلى شاشة لا
+  // تحلّ شيئًا. والفصل بالاسم لا بالرمز.
+  if (text.includes('email_not_verified')) return 'email_not_verified'
   if (text.includes('not authenticated') || code === '28000') return 'not_authenticated'
   if (text.includes('invalid_code') || code === '22023') return 'invalid'
   if (looksLikeNetworkFailure(text)) return 'offline'

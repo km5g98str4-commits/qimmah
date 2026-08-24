@@ -21,6 +21,19 @@ const check = (label, ok, detail = '') => {
   if (ok) { pass += 1; console.log(`  ✓ ${label}`) }
   else { fails.push(label); console.log(`  ✗ FAIL: ${label}${detail ? ` — ${detail}` : ''}`) }
 }
+/**
+ * الاسترداد من منظور العميل — **`_v2` حصرًا**، لأن `20260824120004` نزعت وصول
+ * العميل إلى الغلاف القديم (كان يلتفّ على حدّ المعدّل بتبديل الاسم).
+ * و`_v2` تُعيد الفشل **قيمةً** لا استثناءً، فيُعاد الرفعُ هنا كي تبقى تأكيدات
+ * `refuses` أدناه تفحص **اسم السبب** كما كانت بالضبط.
+ */
+function redeem(code, opts) {
+  const raw = JSON.parse(stg.one(`select public.redeem_access_code_v2('${code}')::text;`, opts))
+  if (raw.outcome === 'failed') { const e = new Error(raw.reason); e.stderr = raw.reason; throw e }
+  if (raw.outcome === 'rate_limited') { const e = new Error('rate_limited'); e.stderr = 'rate_limited'; throw e }
+  return raw.outcome
+}
+
 /** ينتظر فشلًا **مسمّى**: السقوط بلا اسم ليس إثباتًا (§4.2). */
 function refuses(label, fn, expected) {
   try {
@@ -160,9 +173,9 @@ check('المؤسس يُصدر كودًا من الخادم', typeof CODE === 's
 
 const carol = makeUser(stg, 'carol@example.test')
 check('المستخدم يستهلكه فيُمنح',
-  stg.one(`select public.redeem_access_code('QMMAHSTAGE23');`, { role: 'authenticated', uid: carol }) === 'specialAccessActive')
+  redeem('QMMAHSTAGE23', { role: 'authenticated', uid: carol }) === 'specialAccessActive')
 refuses('وإعادة استهلاكه مرفوضة',
-  () => stg.one(`select public.redeem_access_code('QMMAHSTAGE23');`, { role: 'authenticated', uid: carol }), 'invalid_code')
+  () => redeem('QMMAHSTAGE23', { role: 'authenticated', uid: carol }), 'invalid_code')
 
 // **دمجٌ متعمّد لا كسل:** المستنفَد والمجهول والمُبطَل كلّها `invalid_code`،
 // فلا يصير الردّ عرّافًا يكشف أيّ الأكواد حقيقي.
@@ -180,7 +193,7 @@ stg.one(`select public.founder_issue_access_code('race', 'batch-R', 14, 1, null,
 const r1 = makeUser(stg, 'race1@example.test')
 const r2 = makeUser(stg, 'race2@example.test')
 const results = await stg.race(
-  [`select public.redeem_access_code('${raceCode}');`, `select public.redeem_access_code('${raceCode}');`],
+  [`select public.redeem_access_code_v2('${raceCode}');`, `select public.redeem_access_code_v2('${raceCode}');`],
   [{ role: 'authenticated', uid: r1 }, { role: 'authenticated', uid: r2 }]
 )
 const granted = results.filter((r) => r.code === 0 && r.out.includes('specialAccessActive')).length
@@ -198,10 +211,10 @@ const codeId = stg.one(`select id::text from public.access_codes where label = '
 stg.one(`select public.founder_set_code_enabled('${codeId}', false, 'commissioning revoke');`, { role: 'authenticated', uid: founderId })
 const dave = makeUser(stg, 'dave@example.test')
 refuses('كودٌ مُبطَل لا يُستهلَك',
-  () => stg.one(`select public.redeem_access_code('KLLQMMAH2345');`, { role: 'authenticated', uid: dave }), 'invalid_code')
+  () => redeem('KLLQMMAH2345', { role: 'authenticated', uid: dave }), 'invalid_code')
 
 refuses('وكودٌ مجهول يُرفض بردٍّ عامّ',
-  () => stg.one(`select public.redeem_access_code('ZZZZQMMAH999');`, { role: 'authenticated', uid: dave }), 'invalid_code')
+  () => redeem('ZZZZQMMAH999', { role: 'authenticated', uid: dave }), 'invalid_code')
 
 // وسلطة الإصدار للمؤسس وحده — لا يصدرها مستخدم عادي.
 refuses('⚔️ ومستخدم عادي لا يُصدر أكوادًا',
@@ -289,13 +302,18 @@ check('الرفع يُلغي كتابة المحاولة — فعدّادٌ فو
   stg.one('select count(*) from public._rollback_probe;') === '0')
 
 const grinder = makeUser(stg, 'grinder@example.test')
+// العدّ **بالفارق لا بالمجموع**: أقسامٌ أخرى في هذا الطقم صارت تمرّ بـ`_v2`
+// كذلك (بعد نزع وصول العميل للغلاف القديم)، فمجموعٌ عامّ يقيس الطقم كلّه
+// لا هذا الحارس. والفارق يقيس ما نقصده بالضبط.
+const attemptsBefore = Number(stg.one(`select count(*) from private.redeem_attempts where not succeeded;`))
 let outcomes = []
 for (let i = 0; i < 12; i += 1) {
   outcomes.push(JSON.parse(stg.one(`select public.redeem_access_code_v2('ZZZQMMAHPQR${i % 10}')::text;`,
     { role: 'authenticated', uid: grinder })))
 }
 check('عشر محاولات فاشلة تُثبَّت فعلًا (لا تُلغى مع الرفع)',
-  stg.one(`select count(*) from private.redeem_attempts where not succeeded;`) === '10')
+  Number(stg.one(`select count(*) from private.redeem_attempts where not succeeded;`)) - attemptsBefore === 10,
+  `الفارق ${Number(stg.one(`select count(*) from private.redeem_attempts where not succeeded;`)) - attemptsBefore}`)
 check('والحادية عشرة تُردّ `rate_limited` — الحارس أطلق',
   outcomes[10].outcome === 'rate_limited' && outcomes[10].reason === 'too_many_attempts',
   JSON.stringify(outcomes[10]))
@@ -307,8 +325,8 @@ stg.one(`select public.founder_issue_access_code('legit', 'batch-L', 14, 1, null
 const legit = makeUser(stg, 'legit@example.test')
 const legitOut = JSON.parse(stg.one(`select public.redeem_access_code_v2('LEGTQMMAH234')::text;`, { role: 'authenticated', uid: legit }))
 check('ومن يستهلك كودًا صحيحًا لا يمسّه الحدّ', legitOut.outcome === 'specialAccessActive', JSON.stringify(legitOut))
-check('  والنواة واحدة: الغلاف القديم يبقى رافعًا بنفس الاسم',
-  (() => { try { stg.one(`select public.redeem_access_code('ZZZQMMAHPQR9');`, { role: 'authenticated', uid: legit }); return false }
+check('  والنواة واحدة: مستهلكٌ لم يبلغ حدَّه يتلقّى نفس الاسم العامّ',
+  (() => { try { redeem('ZZZQMMAHPQR9', { role: 'authenticated', uid: legit }); return false }
            catch (e) { return String(e.stderr || '').includes('invalid_code') } })())
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -383,6 +401,108 @@ try {
   edited = stg.one(`select count(*) from public.food_submissions where review_note = 'self';`) !== '0'
 } catch { /* المطلوب */ }
 check('⚔️ وصاحب البلاغ لا يحرّره بعد إرساله — الدليل لا يُعاد كتابته', !edited)
+
+// ═══════════════════════════════════════════════════════════════════════════
+console.log('\n⑩ إحكام التفعيل — أربعة مسارات كانت مفتوحة [20260824120004]')
+
+// ── ١) تجاوز حدّ المعدّل بتغيير اسم الدالّة ────────────────────────────────
+// الهجرة السابقة أضافت `_v2` محدودةَ المعدّل وأبقت القديمة ممنوحة بلا حدّ،
+// فكان الالتفاف **تبديل اسمٍ في الطلب** لا أكثر.
+const AB = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+// الأكواد داخل الأبجدية المقبولة عمدًا: لو خرجت عنها لسقط الفحص على التطبيع
+// لا على ما نقيسه — وسقوطٌ في غير موضعه ليس إثباتًا (§4.2).
+const bogus = (i) => `BOGUSCODE${AB[i % 32]}${AB[(i * 7 + 3) % 32]}`
+const rateUser = makeUser(stg, 'rate@qimmah.test')
+let legacyDenied = 0, legacyReached = 0
+for (let i = 0; i < 20; i += 1) {
+  try {
+    stg.one(`select public.redeem_access_code('${bogus(i)}');`, { role: 'authenticated', uid: rateUser })
+    legacyReached += 1
+  } catch (e) {
+    if (String(e.stderr || e.message || '').includes('permission denied')) legacyDenied += 1
+    else legacyReached += 1
+  }
+}
+check('⚔️ الغلاف القديم غير قابل للنداء من العميل — ٢٠/٢٠ مرفوضة',
+  legacyDenied === 20 && legacyReached === 0, `مرفوض ${legacyDenied} · بلغ المنطق ${legacyReached}`)
+
+let throttled = 0
+for (let i = 0; i < 20; i += 1) {
+  if (String(stg.one(`select public.redeem_access_code_v2('${bogus(i)}');`,
+    { role: 'authenticated', uid: rateUser })).includes('rate_limited')) throttled += 1
+}
+check('⟲ و`_v2` تخنق بعد العاشرة — الحدّ يعمل حيث بقي الباب', throttled === 10, `مخنوق ${throttled}/20`)
+
+// ── ٢) F-4: مزرعة التجارب بوسم «+» ───────────────────────────────────────
+const farmA = makeUser(stg, 'farm@gmail.com')
+check('التجربة الأولى تُمنح', stg.one(`select public.start_trial();`, { role: 'authenticated', uid: farmA }) === 'trialActive')
+const farmB = makeUser(stg, 'farm+one@gmail.com')
+refuses('⚔️ ووسم «+» لا يفتح ثانية من الصندوق نفسه (F-4)',
+  () => stg.one(`select public.start_trial();`, { role: 'authenticated', uid: farmB }), 'trial_already_used')
+const farmC = makeUser(stg, 'f.a.r.m@gmail.com')
+refuses('  ونقاط Gmail كذلك',
+  () => stg.one(`select public.start_trial();`, { role: 'authenticated', uid: farmC }), 'trial_already_used')
+// ⟲ التأكيد المضادّ الذي يمنع التطبيع من أن يصير قاعدة تبتلع الأبرياء:
+// النقطة في نطاق غير Gmail **حرف معنويّ**، ودمجها يحرم شخصًا ثانيًا من تجربته.
+const dotA = makeUser(stg, 'x.y@outlook.com')
+stg.one(`select public.start_trial();`, { role: 'authenticated', uid: dotA })
+const dotB = makeUser(stg, 'xy@outlook.com')
+check('⟲ ولا يدمج نقطتين خارج Gmail — شخصان مختلفان لا شخص واحد',
+  stg.one(`select public.start_trial();`, { role: 'authenticated', uid: dotB }) === 'trialActive')
+check('  والسجلّ القديم لا يُبطَل: العمود يُضاف ولا يستبدل',
+  stg.one(`select count(*) from information_schema.columns
+           where table_schema='public' and table_name='trial_ledger'
+             and column_name in ('email_hash','canonical_hash');`) === '2')
+
+// ── ٣) F-2c: تأكيد البريد شرطٌ للاسترداد كما هو للتجربة والمطالبة ─────────
+stg.sql(`select public.admin_create_access_code('QMMAHVERFY2345', 'ops', 'رحلة الاسترداد', 14, 2);`,
+  { role: 'service_role' })
+const unverified = makeUser(stg, 'unverified@qimmah.test', { confirmed: false })
+const unvOut = JSON.parse(stg.one(`select public.redeem_access_code_v2('QMMAHVERFY2345')::text;`,
+  { role: 'authenticated', uid: unverified }))
+check('⚔️ بريد غير مؤكَّد لا يستبدل كودًا (F-2c) — والسبب مسمّى لا مبهم',
+  unvOut.outcome === 'failed' && unvOut.reason === 'email_not_verified', JSON.stringify(unvOut))
+const verifiedUser = makeUser(stg, 'verified@qimmah.test')
+check('⟲ والمؤكَّد يستبدله فعلًا — الحارس تمييزٌ لا منعٌ شامل',
+  JSON.parse(stg.one(`select public.redeem_access_code_v2('QMMAHVERFY2345')::text;`,
+    { role: 'authenticated', uid: verifiedUser })).outcome === 'specialAccessActive')
+
+// ── ٤) F-5: طول الكود المُصدَر ٨٠ بتًا لا ٦٠ ──────────────────────────────
+// ⚠️ **تصحيح لوثيقة التهديدات:** §٢-٨ يقول «لا مولّد أكواد في المستودع كلّه»
+// وهو **بائت** — `private.generate_access_code` قائمة منذ `20260822120002`
+// وتستعملها `founder_issue_access_code`. الخلل الباقي كان **الطول** وحده.
+const issued = JSON.parse(stg.one(
+  `select public.founder_issue_access_code('كود مولَّد', 'batch-G', 14, 1)::text;`,
+  { role: 'authenticated', uid: founderId }))
+check('الخادم يولّد ١٦ رمزًا من الأبجدية المقبولة — ٨٠ بتًا لا ٦٠',
+  /^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{16}$/.test(issued.code), issued.code)
+check('  ويعلن سقفه محسوبًا من الطول لا رقمًا مكتوبًا بيد', issued.entropy_ceiling_bits === 80)
+check('  وموسومٌ مولَّدًا — يُميَّز عن نصٍّ خارجي', issued.generated === true)
+const genUser = makeUser(stg, 'generated@qimmah.test')
+check('  والكود المولَّد يُستبدل فعلًا — ليس شكلًا بلا مسار',
+  redeem(issued.code, { role: 'authenticated', uid: genUser }) === 'specialAccessActive')
+
+const minted = new Set()
+for (let i = 0; i < 40; i += 1) {
+  minted.add(JSON.parse(stg.one(`select public.founder_issue_access_code('دفعة', 'bulk-${i}', 14, 1)::text;`,
+    { role: 'authenticated', uid: founderId })).code)
+}
+check('⟲ أربعون إصدارًا ⇒ أربعون كودًا مختلفًا — المولّد ليس ثابتًا', minted.size === 40, `${minted.size}/40`)
+check('⟲ وكلّها ١٦ رمزًا — لا يعود واحدٌ إلى ١٢ بصمت',
+  [...minted].every((c) => c.length === 16))
+// ⟲ التأكيد المضادّ الحاسم: **الفحص قادر على الرسوب.** لو بقي النداء على ١٢
+// لسقط الفحص أعلاه — نُثبته بقياس المولّد نفسه على الطول القديم.
+check('⟲ والمولّد ذاته ما زال يقبل ١٢ — فالترقية في موضع الإصدار لا بكسر المولّد',
+  String(stg.one(`select private.generate_access_code(12);`)).length === 12)
+// وكودٌ نصّي يمرّه المؤسس يبقى مقبولًا **وموسومًا بضعفه** — القرار مرفوع لا مفترَض.
+const weak = JSON.parse(stg.one(
+  `select public.founder_issue_access_code('حملة', 'batch-W', 14, 1, null, 'RAMADAN2345')::text;`,
+  { role: 'authenticated', uid: founderId }))
+check('وكود الحملة النصّي يبقى مقبولًا — ومنعه قرار عمل لا قرار وكيل',
+  weak.code === 'RAMADAN2345' && weak.generated === false)
+check('  لكنّ ضعفه صار **مرئيًّا** لا خفيًّا — سقفٌ محفوظ وعلامةُ مصدر',
+  weak.entropy_ceiling_bits === 55
+  && stg.one(`select count(*) from public.access_codes where label = 'batch-W' and not generated_server_side;`) === '1')
 
 // ═══════════════════════════════════════════════════════════════════════════
 stg.drop()

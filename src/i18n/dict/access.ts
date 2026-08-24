@@ -104,6 +104,7 @@ export interface AccessStrings {
   trialCta: string
   /** [COMMISSIONING §5] كثرة المحاولات — تهدئة لا اتّهام للكود. */
   redeemRateLimited: string
+  codeNeedsVerifiedEmail: string
 
   /**
    * ═══ مؤشّر الوصول الحالي ═══
@@ -176,6 +177,7 @@ export const accessStrings: Record<Lang, AccessStrings> = {
     trialOffline: 'يبدو ما فيه اتصال بالنت، وما بدأت تجربتك. تأكّد من اتصالك وجرّب مرة ثانية.',
     trialCta: 'جرّب Premium ٧٢ ساعة',
     redeemRateLimited: 'حاولت كثير في وقت قصير. خذ لك دقايق وجرّب بعدها.',
+    codeNeedsVerifiedEmail: 'كودك تمام — بس لازم تأكّد بريدك أول. افتح رسالة التأكيد وبعدها ارجع جرّب.',
 
     statusChecking: 'نتحقّق من وصولك…',
     statusPremium: 'قِمّة Premium مفعّل',
@@ -240,6 +242,7 @@ export const accessStrings: Record<Lang, AccessStrings> = {
     trialOffline: "Looks like there's no internet connection, so your trial did not start. Check it and try again.",
     trialCta: 'Try Premium for 72 hours',
     redeemRateLimited: "That's a lot of tries in a short window. Give it a few minutes and try again.",
+    codeNeedsVerifiedEmail: 'Your code is fine — you just need to confirm your email first. Open the confirmation message, then try again.',
 
     statusChecking: 'Checking your access…',
     statusPremium: 'Qimmah Premium is active',

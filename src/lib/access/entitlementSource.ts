@@ -87,6 +87,11 @@ export type RedeemOutcome =
   | 'not_authenticated'
   /** [COMMISSIONING §5] وتيرة المحاولة تجاوزت الحدّ — ليست حكمًا على الكود. */
   | 'rate_limited'
+  /**
+   * [COMMISSIONING §5] بريدٌ لم يُؤكَّد. **والكود صحيح** — والخطوة التالية
+   * تأكيد البريد لا تفتيشٌ عن غلطٍ في كودٍ لا غلط فيه.
+   */
+  | 'email_not_verified'
   | AccessFailure
 
 /**
@@ -233,6 +238,8 @@ export async function redeemActivationCode(code: string): Promise<RedeemOutcome>
     case 'not_authenticated': return 'not_authenticated'
     // وتيرةٌ لا كود: تعبر بنفسها كي تُعرض برسالتها الخاصّة.
     case 'rate_limited': return 'rate_limited'
+    // وكذلك تأكيد البريد: خطوةٌ ناقصة لا كودٌ خاطئ.
+    case 'email_not_verified': return 'email_not_verified'
     // أصناف الفشل تعبر كما هي — كلٌّ برسالته. والافتراض `service_error` لا
     // `offline`: المجهول عطلٌ عندنا حتى يثبت أنه شبكة المستخدم.
     case 'backend_unconfigured': return 'backend_unconfigured'

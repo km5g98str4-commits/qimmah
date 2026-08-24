@@ -56,6 +56,17 @@
 | ١٦ | `20260824120001_roles_and_redeem_rate_limit.sql` | دور `support` · `private.is_admin`/`require_admin` · دفتر محاولات الاستهلاك · `private.redeem_core` · `redeem_access_code_v2` | ٢ · ١٠ |
 | ١٧ | `20260824120002_founder_operations_reads.sql` | **تعيد تعريف** القراءات الأربع بحارس `require_admin` · `founder_failed_orders` · `founder_code_redemptions` · `founder_email_health` · `founder_grants_by_source` · وتوسّع `founder_code_page` | **١٥ و١٦ إلزامًا** |
 | ١٨ | `20260824120003_food_submissions.sql` | `food_submissions` + `submit_missing_food` + طابور المراجعة وقراره | ١٦ · ١٧ |
+| ١٩ | `20260824120004_activation_hardening.sql` | نزع الغلاف القديم عن العميل (تجاوز حدّ المعدّل) · `private.canonical_identity` + عمود بصمة ثانٍ على `trial_ledger` · فحص تأكيد البريد داخل `redeem_core` · طول الكود المُصدَر ٨٠ بتًا | **١٤ و١٦ إلزامًا** |
+
+> ⛔ **والخطوة ١٩ بعد ١٤ و١٦ قطعًا.** هي تعيد تعريف `founder_issue_access_code`
+> (من ١٤) و`private.redeem_core` (من ١٦)، وتنزع منحة `redeem_access_code`
+> التي أضافتها ١٦. تطبيقها قبلهما يجعل الأقدم يكتب فوق الأحدث بلا خطأ — نفس
+> الفخّ الموصوف أعلاه بالضبط.
+>
+> ⚠️ **وأثرٌ يُقال قبل التطبيق لا بعده:** بعد الخطوة ١٩، صفوف `trial_ledger`
+> القائمة تبقى `canonical_hash = null` **ولا backfill لها** — السجلّ يحفظ
+> البصمة لا البريد. فحارس الأسماء المستعارة **يحرس ما بعد التطبيق**، ومن
+> استهلك تجربته قبله يبقى محروسًا بالبصمة الخام كما كان.
 
 > ⛔ **الخطوة ١٥ بعد ١١ قطعًا.** عكسهما هو المثال المُثبَت أعلاه: تعود النسخة
 > القديمة بلا خطأ، فتظهر اللوحة صادقة وهي عمياء عن حالة الـwebhook.

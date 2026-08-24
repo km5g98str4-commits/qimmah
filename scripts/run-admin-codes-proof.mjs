@@ -249,7 +249,19 @@ check('القائمة لا تحمل بصمة ولا كودًا خامًا', !Obj
 await asRole(db, 'authenticated', founderId)
 const single = (await db.query(`select public.founder_issue_access_code('كود لمرّة','once',7,1) as j`)).rows[0].j
 await asRole(db, 'authenticated', normalId)
-await db.query(`select public.redeem_access_code($1)`, [single.code]).catch(() => null)
+// [20260824120004] الاسترداد من منظور العميل = `_v2` حصرًا؛ الاسم القديم نُزع
+// من `authenticated` لأنه كان يلتفّ على حدّ المعدّل. **ولا يُبتلع الردّ:**
+// كان هنا `.catch(() => null)` يخفي أي فشل، فتبقى الحالة `issued` ويُقرأ ذلك
+// انحدارًا في صفحة الأكواد بدل أن يُقرأ عطلًا في الاسترداد. يُقاس الآن صراحةً.
+const redeemOut = (await db.query(`select public.redeem_access_code_v2($1) as j`, [single.code])).rows[0].j
+const redeemJson = typeof redeemOut === 'string' ? JSON.parse(redeemOut) : redeemOut
+// ⚠️ والمتوقَّع **ليس** `specialAccessActive` بالضرورة: هذا المستخدم يحمل
+// Premium من فقرة سابقة، و`redeem_core` تُبقي المنحة الأعلى وتعيدها
+// (`premiumActive`) — **وتسجّل الاستهلاك على أي حال**، وهو ما يقلب الحالة
+// أدناه. فالمقصود هنا: **لم يفشل**، لا اسمُ منحةٍ بعينها.
+check('الاسترداد نفسه نجح — لا يُبتلع فشلٌ يُقرأ لاحقًا انحدارًا في الصفحة',
+  redeemJson.outcome !== 'failed' && redeemJson.outcome !== 'rate_limited',
+  JSON.stringify(redeemJson))
 await asRole(db, 'authenticated', founderId)
 const afterRedeem = (await db.query(`select * from public.founder_code_page('once',1,10)`)).rows[0]
 check('كود استُنفد يصير «استُرد»', afterRedeem.status === 'redeemed', afterRedeem.status)
