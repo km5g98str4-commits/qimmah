@@ -23,7 +23,7 @@ import { Icon } from '@/components/Icon'
 import { adminStrings } from '@/i18n/dict/admin'
 import { useLang } from '@/i18n'
 import { useAuth } from '@/lib/authContext'
-import { CLOSED_DECISION, isAdmin, resolveAdminRole } from '../auth/adminRole'
+import { CLOSED_DECISION, canWrite, isAdmin, resolveAdminRole } from '../auth/adminRole'
 import type { AdminRoleDecision } from '../auth/adminRole'
 import {
   issueAccessCode,
@@ -32,6 +32,7 @@ import {
   loadLiveUserDetail,
   loadLiveUserPage,
   setAccessCodeEnabled,
+  revokeUserAccess,
 } from '../contract/liveSource'
 import type { LiveReadState } from '../contract/liveSource'
 import type {
@@ -213,6 +214,25 @@ export function AdminRoute() {
   const onCloseUser = useCallback(() => setOpenUserId(null), [])
 
   /**
+   * [COMMISSIONING §4] سحب الوصول — القدرة كانت مكتوبة ومُثبَتة **وبلا مستدعٍ**.
+   *
+   * تُمرَّر `undefined` لغير المؤسس، فلا يرسم `UserDetailPanel` الزرّ أصلًا:
+   * الدعم يقرأ ولا يغيّر، والخادم يرفض فعله أيضًا — فالشاشة توافق الخادم بدل
+   * أن تَعِد بما سيُرفض.
+   */
+  const onRevoke = useCallback(
+    async (reason: string) => {
+      if (!openUserId) return
+      const out = await revokeUserAccess(decision, openUserId, reason)
+      if (!out.ok) { setWriteError(out.live); return }
+      // نجاح السحب يغيّر حالة الاستحقاق، فتُعاد قراءة الصفحة والتفصيل معًا —
+      // وإلا بقيت الشاشة تعرض «مفعّل» بعد سحبٍ تمّ فعلًا.
+      await refresh()
+    },
+    [decision, openUserId, refresh],
+  )
+
+  /**
    * الإصدار. **الكود يُعرض ولا يُخزَّن في أي مكان آخر** — لا تخزين محلّي ولا
    * سجلّ ولا عنوان. ظهوره في الحالة وحدها، وحتى يصرفه المؤسس بنفسه.
    */
@@ -278,6 +298,7 @@ export function AdminRoute() {
       detailLive={openUserId ? detailLive : undefined}
       onOpenUser={onOpenUser}
       onCloseUser={onCloseUser}
+      onRevokeUser={canWrite(decision) ? onRevoke : undefined}
       codes={{
         page: codePage,
         live: codeLive,

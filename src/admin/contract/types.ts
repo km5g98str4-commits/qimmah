@@ -400,3 +400,63 @@ export function ready<T>(value: T, asOf: string): MetricValue<T> {
 export function metricValue<T>(m: MetricValue<T>): T | null {
   return m.state === 'ready' ? m.value : null
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// [COMMISSIONING §4/§7/§11] غرفة العمليات — من عدّاد إلى شيء يُفعل به شيء
+// ─────────────────────────────────────────────────────────────────────────────
+// أربعة أسئلة تشغيلية كان لها أرقامٌ بلا أسماء. الأنواع أدناه تحمل **الأسماء**.
+// وكلّها مصدرها دوالّ مؤسس محروسة بـ`require_admin` — لا قراءة جدول مباشرة.
+
+/** طلب سلة لم يُسلَّم. الهوية **مرجعٌ مُقنَّع** لا بريد — يكفي للمطابقة ولا يكشف. */
+export interface FailedOrderRow {
+  readonly providerOrderId: string
+  readonly classification: string
+  readonly reason: string | null
+  readonly receivedAt: string
+  readonly amountMinor: number | null
+  readonly currency: string | null
+  readonly identityRef: string | null
+}
+
+/** من استهلك كودًا ومتى. البريد مُقنَّع **في SQL** لا في المتصفّح. */
+export interface CodeRedemptionRow {
+  readonly redeemedAt: string
+  readonly userId: string
+  readonly maskedEmail: string | null
+}
+
+/** صحّة طابور البريد. بلا مستلِم وبلا حمولة — السؤال تشغيلي لا شخصي. */
+export interface EmailHealth {
+  readonly asOf: string
+  readonly byState: Readonly<Record<string, number>>
+  readonly dead: readonly {
+    readonly idempotencyKey: string
+    readonly templateId: string
+    readonly attempts: number
+    readonly lastReason: string | null
+    readonly deadAt: string | null
+  }[]
+}
+
+/** بلاغ طعام ناقص كما يراه المؤسس. حقول `evidence*` دليلُ مستخدم لا حقيقة. */
+export type FoodSubmissionStatus = 'pending' | 'approved' | 'rejected' | 'needs_info'
+
+export interface FoodSubmissionRow {
+  readonly id: string
+  readonly submittedAt: string
+  readonly submitterRef: string
+  readonly productName: string
+  readonly brand: string | null
+  readonly barcode: string | null
+  readonly servingDesc: string | null
+  readonly evidenceKcal: number | null
+  readonly evidenceProteinG: number | null
+  readonly evidenceCarbsG: number | null
+  readonly evidenceFatG: number | null
+  readonly evidenceNote: string | null
+  readonly status: FoodSubmissionStatus
+  readonly reviewedAt: string | null
+  readonly reviewerRef: string | null
+  readonly reviewNote: string | null
+  readonly publishedFoodId: string | null
+}

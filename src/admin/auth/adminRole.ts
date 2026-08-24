@@ -28,8 +28,22 @@
  * تتعاضدان، ولا تُغني إحداهما عن الأخرى.
  */
 
-/** نتيجة الحسم — دور واحد مسمّى أو منع. لا حالة ثالثة متساهلة. */
-export type AdminRole = 'founder' | 'denied'
+/**
+ * نتيجة الحسم — دورٌ مسمّى أو منع. لا حالة ثالثة متساهلة.
+ *
+ * ═══ [COMMISSIONING §4] لماذا صار الدوران اثنين ═══
+ * كانت القيمة المقبولة واحدة، فتفويض شخصٍ ثانٍ يعني **توريثه كل شيء**:
+ * يُصدر أكوادًا، يُبطلها، يسحب وصول أي مستخدم. والمؤسس يريد مساعدًا لا شريكًا
+ * في الأفعال التي لا رجعة فيها.
+ *
+ *   `founder` — كل شيء.
+ *   `support` — **قراءة فقط**: يرى اللوحة والحسابات والأكواد ولا يغيّر شيئًا.
+ *
+ * والحدّ الحقيقي في الخادم لا هنا: `require_admin` تحرس القراءات،
+ * و`require_founder` تبقى على كل فعل. هذا الملف يجعل الشاشة **تقول الحقيقة
+ * نفسها** بدل أن تعرض زرًّا يفشل عند الضغط.
+ */
+export type AdminRole = 'founder' | 'support' | 'denied'
 
 /** سبب المنع — مسمّى دائمًا، فيسقط الاختبار بالاسم لا بـ`TypeError` عابر. */
 export type DenialReason =
@@ -65,8 +79,8 @@ export interface RoleClaimSource {
 /** اسم الادّعاء الذي يجب أن يصدره الخادم. */
 export const ADMIN_ROLE_CLAIM = 'qimmah_role'
 
-/** القيمة الوحيدة المقبولة. قائمة بيضاء: كل ما عداها `unknown-role`. */
-const ACCEPTED_ROLE = 'founder'
+/** القائمة البيضاء — نفس قيم `admin_set_role` في الخادم حرفًا بحرف. */
+const ACCEPTED_ROLES: readonly AdminRole[] = ['founder', 'support']
 
 function claimOf(bag: Record<string, unknown> | null | undefined): unknown {
   if (!bag || typeof bag !== 'object') return undefined
@@ -97,15 +111,27 @@ export function resolveAdminRole(session: RoleClaimSource | null | undefined): A
   }
 
   // ٣) قائمة بيضاء صارمة.
-  if (appClaim !== ACCEPTED_ROLE) {
+  const matched = ACCEPTED_ROLES.find((r) => appClaim === r)
+  if (!matched) {
     return { role: 'denied', reason: 'unknown-role' }
   }
 
-  return { role: 'founder', reason: null }
+  return { role: matched, reason: null }
 }
 
-/** السؤال الوحيد الذي تسأله الواجهة. لا مسار آخر للسماح. */
+/** هل تُفتح الغرفة أصلًا؟ مؤسس **أو** دعم. */
 export function isAdmin(decision: AdminRoleDecision): boolean {
+  return decision.role === 'founder' || decision.role === 'support'
+}
+
+/**
+ * هل يملك صاحب القرار أن **يغيّر** شيئًا؟ المؤسس وحده.
+ *
+ * ⚠️ **هذا ليس الحارس.** الخادم يرفض فعل الدعم بـ`founder_role_required`
+ * مهما فعل المتصفّح. وظيفة هذه الدالّة أن **لا تعرض الشاشة وعدًا كاذبًا**:
+ * زرٌّ يظهر ثم يفشل أسوأ من زرٍّ لا يظهر (§ الصدق قبل الطمأنينة).
+ */
+export function canWrite(decision: AdminRoleDecision): boolean {
   return decision.role === 'founder'
 }
 

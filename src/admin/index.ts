@@ -34,6 +34,7 @@ export { TrendChart, FunnelChart } from './ui/Charts'
 export {
   resolveAdminRole,
   isAdmin,
+  canWrite,
   canRead,
   adminRoleProvisioning,
   CLOSED_DECISION,

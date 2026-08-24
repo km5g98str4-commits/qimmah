@@ -34,12 +34,22 @@ import {
   REVOKE_ACCESS_RPC,
   USER_DETAIL_RPC,
   USER_PAGE_RPC,
+  FAILED_ORDERS_RPC,
+  CODE_REDEMPTIONS_RPC,
+  EMAIL_HEALTH_RPC,
+  GRANTS_BY_SOURCE_RPC,
+  FOOD_SUBMISSIONS_RPC,
+  FOOD_REVIEW_RPC,
 } from './metrics'
-import { isAdmin } from '../auth/adminRole'
+import { canWrite, isAdmin } from '../auth/adminRole'
 import type { AdminRoleDecision } from '../auth/adminRole'
 import type {
   AdminCodePage,
   AdminCodeRow,
+  CodeRedemptionRow,
+  EmailHealth,
+  FailedOrderRow,
+  FoodSubmissionRow,
   AdminUserDetail,
   AdminUserPage,
   AdminUserRow,
@@ -503,7 +513,7 @@ export async function issueAccessCode(
   decision: AdminRoleDecision,
   input: { reason: string; label?: string; durationDays: number; maxRedemptions: number; code?: string },
 ): Promise<WriteOutcome<IssuedCode>> {
-  if (!isAdmin(decision)) return { ok: false, live: 'not-founder' }
+  if (!canWrite(decision)) return { ok: false, live: 'not-founder' }
   const client = await getSupabase()
   if (!client) return { ok: false, live: 'no-backend' }
   try {
@@ -543,7 +553,7 @@ export async function setAccessCodeEnabled(
   enabled: boolean,
   reason: string,
 ): Promise<WriteOutcome<boolean>> {
-  if (!isAdmin(decision)) return { ok: false, live: 'not-founder' }
+  if (!canWrite(decision)) return { ok: false, live: 'not-founder' }
   const client = await getSupabase()
   if (!client) return { ok: false, live: 'no-backend' }
   try {
@@ -571,7 +581,7 @@ export async function revokeUserAccess(
   userId: string,
   reason: string,
 ): Promise<WriteOutcome<string>> {
-  if (!isAdmin(decision)) return { ok: false, live: 'not-founder' }
+  if (!canWrite(decision)) return { ok: false, live: 'not-founder' }
   const client = await getSupabase()
   if (!client) return { ok: false, live: 'no-backend' }
   try {
@@ -579,6 +589,191 @@ export async function revokeUserAccess(
     if (error) return { ok: false, live: classify(error) }
     if (typeof data !== 'string') return { ok: false, live: 'failed' }
     return { ok: true, value: data }
+  } catch {
+    return { ok: false, live: 'failed' }
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// [COMMISSIONING §4/§7/§11] غرفة العمليات
+// ─────────────────────────────────────────────────────────────────────────────
+// نفس عقد بقيّة هذا الملف بحرفه: **القراءة تبدأ من الغياب**، والفشل يُصنَّف
+// باسمه (`rpc-missing` · `denied-by-server` · `failed`) ولا يتحوّل إلى صفر ولا
+// إلى قائمة فارغة تُقرأ «لا يوجد شيء». الفرق بين «لا طلبات فاشلة» و«لم نستطع
+// السؤال» فرقٌ تشغيلي حقيقي، فيبقى مرئيًّا.
+
+/** نتيجة قراءة قائمة: إمّا صفوف، وإمّا سببٌ مسمّى لغيابها. */
+export type ListResult<T> =
+  | { readonly ok: true; readonly rows: readonly T[] }
+  | { readonly ok: false; readonly live: LiveReadState }
+
+async function readRows<T>(
+  decision: AdminRoleDecision,
+  rpc: string,
+  args: Record<string, unknown>,
+  map: (row: Record<string, unknown>) => T,
+): Promise<ListResult<T>> {
+  if (!isAdmin(decision)) return { ok: false, live: 'not-founder' }
+  const client = await getSupabase()
+  if (!client) return { ok: false, live: 'no-backend' }
+  try {
+    const { data, error } = await client.rpc(rpc, args)
+    if (error) return { ok: false, live: classify(error) }
+    if (!Array.isArray(data)) return { ok: false, live: 'failed' }
+    return { ok: true, rows: data.map((r) => map(r as Record<string, unknown>)) }
+  } catch {
+    return { ok: false, live: 'failed' }
+  }
+}
+
+const txt = (v: unknown): string => (typeof v === 'string' ? v : '')
+const txtOrNull = (v: unknown): string | null => (typeof v === 'string' && v !== '' ? v : null)
+/** رقمٌ أو **غياب** — لا صفر بديلًا عن «لم يصل». */
+const numOrNull = (v: unknown): number | null => {
+  const n = typeof v === 'number' ? v : typeof v === 'string' ? Number(v) : Number.NaN
+  return Number.isFinite(n) ? n : null
+}
+
+/** طابور الطلبات التي لم تُسلَّم — الرقم صار أسماءً. */
+export async function loadFailedOrders(
+  decision: AdminRoleDecision,
+  limit = 50,
+): Promise<ListResult<FailedOrderRow>> {
+  return readRows(decision, FAILED_ORDERS_RPC, { p_limit: limit }, (r) => ({
+    providerOrderId: txt(r.provider_order_id),
+    classification: txt(r.classification),
+    reason: txtOrNull(r.reason),
+    receivedAt: txt(r.received_at),
+    amountMinor: numOrNull(r.amount_minor),
+    currency: txtOrNull(r.currency),
+    identityRef: txtOrNull(r.identity_ref),
+  }))
+}
+
+/** «من استهلك هذا الكود ومتى» — كان عدّادًا، وصار سجلًّا. */
+export async function loadCodeRedemptions(
+  decision: AdminRoleDecision,
+  codeId: string,
+): Promise<ListResult<CodeRedemptionRow>> {
+  return readRows(decision, CODE_REDEMPTIONS_RPC, { p_code_id: codeId }, (r) => ({
+    redeemedAt: txt(r.redeemed_at),
+    userId: txt(r.user_id),
+    maskedEmail: txtOrNull(r.masked_email),
+  }))
+}
+
+/** طابور بلاغات الطعام الناقص. */
+export async function loadFoodSubmissions(
+  decision: AdminRoleDecision,
+  status: 'pending' | 'approved' | 'rejected' | 'needs_info' | 'all' = 'pending',
+  limit = 50,
+): Promise<ListResult<FoodSubmissionRow>> {
+  return readRows(decision, FOOD_SUBMISSIONS_RPC, { p_status: status, p_limit: limit }, (r) => ({
+    id: txt(r.id),
+    submittedAt: txt(r.submitted_at),
+    submitterRef: txt(r.submitter_ref),
+    productName: txt(r.product_name),
+    brand: txtOrNull(r.brand),
+    barcode: txtOrNull(r.barcode),
+    servingDesc: txtOrNull(r.serving_desc),
+    evidenceKcal: numOrNull(r.evidence_kcal),
+    evidenceProteinG: numOrNull(r.evidence_protein_g),
+    evidenceCarbsG: numOrNull(r.evidence_carbs_g),
+    evidenceFatG: numOrNull(r.evidence_fat_g),
+    evidenceNote: txtOrNull(r.evidence_note),
+    status: (['pending', 'approved', 'rejected', 'needs_info'] as const)
+      .find((s) => s === r.status) ?? 'pending',
+    reviewedAt: txtOrNull(r.reviewed_at),
+    reviewerRef: txtOrNull(r.reviewer_ref),
+    reviewNote: txtOrNull(r.review_note),
+    publishedFoodId: txtOrNull(r.published_food_id),
+  }))
+}
+
+/**
+ * قرار مراجعة بلاغ. **`canWrite` لا `isAdmin`**: الدعم يقرأ الطابور ولا يبتّ
+ * فيه — وهذا ما يفرضه الخادم أيضًا، فالشاشة توافقه بدل أن تَعِد بما سيُرفض.
+ */
+export async function reviewFoodSubmission(
+  decision: AdminRoleDecision,
+  id: string,
+  verdict: 'approved' | 'rejected' | 'needs_info',
+  note: string,
+  publishedFoodId?: string,
+): Promise<WriteOutcome<string>> {
+  if (!canWrite(decision)) return { ok: false, live: 'not-founder' }
+  const client = await getSupabase()
+  if (!client) return { ok: false, live: 'no-backend' }
+  try {
+    const { data, error } = await client.rpc(FOOD_REVIEW_RPC, {
+      p_id: id, p_decision: verdict, p_note: note,
+      p_published_food_id: publishedFoodId ?? null,
+    })
+    if (error) return { ok: false, live: classify(error) }
+    return { ok: true, value: JSON.stringify(data ?? {}) }
+  } catch {
+    return { ok: false, live: 'failed' }
+  }
+}
+
+/** صحّة طابور البريد. */
+export async function loadEmailHealth(
+  decision: AdminRoleDecision,
+): Promise<{ ok: true; health: EmailHealth } | { ok: false; live: LiveReadState }> {
+  if (!isAdmin(decision)) return { ok: false, live: 'not-founder' }
+  const client = await getSupabase()
+  if (!client) return { ok: false, live: 'no-backend' }
+  try {
+    const { data, error } = await client.rpc(EMAIL_HEALTH_RPC, { p_limit: 20 })
+    if (error) return { ok: false, live: classify(error) }
+    if (!data || typeof data !== 'object') return { ok: false, live: 'failed' }
+    const root = data as Record<string, unknown>
+    const byStateRaw = bag(root, 'byState')
+    const byState: Record<string, number> = {}
+    for (const [k, v] of Object.entries(byStateRaw)) {
+      const n = numOrNull(v)
+      if (n !== null) byState[k] = n
+    }
+    const deadRaw = Array.isArray(root.dead) ? root.dead : []
+    return {
+      ok: true,
+      health: {
+        asOf: txt(root.as_of),
+        byState,
+        dead: deadRaw.map((d) => {
+          const row = d as Record<string, unknown>
+          return {
+            idempotencyKey: txt(row.idempotency_key),
+            templateId: txt(row.template_id),
+            attempts: numOrNull(row.attempts) ?? 0,
+            lastReason: txtOrNull(row.last_reason),
+            deadAt: txtOrNull(row.dead_at),
+          }
+        }),
+      },
+    }
+  } catch {
+    return { ok: false, live: 'failed' }
+  }
+}
+
+/** «كيف حصلوا على Premium؟» إجماليًّا. مصدرٌ بلا أحد **لا يظهر** — لا صفر مخترع. */
+export async function loadGrantsBySource(
+  decision: AdminRoleDecision,
+): Promise<{ ok: true; bySource: Readonly<Record<string, number>> } | { ok: false; live: LiveReadState }> {
+  if (!isAdmin(decision)) return { ok: false, live: 'not-founder' }
+  const client = await getSupabase()
+  if (!client) return { ok: false, live: 'no-backend' }
+  try {
+    const { data, error } = await client.rpc(GRANTS_BY_SOURCE_RPC)
+    if (error) return { ok: false, live: classify(error) }
+    if (!data || typeof data !== 'object') return { ok: false, live: 'failed' }
+    const out: Record<string, number> = {}
+    for (const [k, v] of Object.entries(data as Record<string, unknown>)) {
+      const n = numOrNull(v)
+      if (n !== null) out[k] = n
+    }
+    return { ok: true, bySource: out }
   } catch {
     return { ok: false, live: 'failed' }
   }

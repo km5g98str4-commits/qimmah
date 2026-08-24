@@ -29,6 +29,7 @@ import { isAdmin } from '../auth/adminRole'
 import type { AdminUserDetail, ExecutiveSnapshot, PlatformPosture } from '../contract/types'
 import type { LiveReadState } from '../contract/liveSource'
 import { buildAttentionQueue, detectedCount } from '../model/attention'
+import { OperationsPanel } from './OperationsPanel'
 import { AdminDenied } from './AdminDenied'
 import { AttentionPanel } from './AttentionPanel'
 import { CodesPanel } from './CodesPanel'
@@ -83,13 +84,15 @@ function PostureStrip({ platform }: { platform: PlatformPosture }) {
   )
 }
 
-type Tab = 'overview' | 'users' | 'codes' | 'charts'
+type Tab = 'overview' | 'users' | 'codes' | 'ops' | 'charts'
 
 interface AdminShellProps {
   decision: AdminRoleDecision
   snapshot: ExecutiveSnapshot
   /** تفصيل مستخدم — يُطلب عند التعمّق، فلا يُحمَّل مع الجدول. */
   detail?: AdminUserDetail | null
+  /** [COMMISSIONING §4] سحب الوصول. **`undefined` ⇒ لا زرّ** — الدعم يقرأ ولا يغيّر. */
+  onRevokeUser?: (reason: string) => Promise<void> | void
   onOpenUser?: (userId: string) => void
   onCloseUser?: () => void
   onRefresh?: () => void
@@ -121,6 +124,7 @@ export function AdminShell({
   detail,
   onOpenUser,
   onCloseUser,
+  onRevokeUser,
   onRefresh,
   userPaging,
   detailLive,
@@ -148,6 +152,10 @@ export function AdminShell({
     { id: 'users', label: t.shell.navUsers, icon: 'Users' },
     // يظهر حين تُمرَّر قدرته فقط — لا تبويب يَعِد بما لا يعمل.
     ...(codes ? [{ id: 'codes' as Tab, label: t.codes.heading, icon: 'KeyRound' }] : []),
+    // [COMMISSIONING §4] غرفة العمليات — بلا شرط: الغلاف كلّه خلف
+    // `isAdmin(decision)` أعلاه، فمن وصل هنا مؤسسٌ أو دعم. وكل قراءة داخلها
+    // محروسة بالدور في الخادم كذلك، وتعلن غيابها بسببه المسمّى.
+    { id: 'ops', label: t.ops.nav, icon: 'Activity' },
     { id: 'charts', label: t.shell.navCharts, icon: 'BarChart3' },
   ]
 
@@ -325,7 +333,7 @@ export function AdminShell({
       {tab === 'users' ? (
         <div className="mt-4 flex flex-col gap-4">
           {detail ? (
-            <UserDetailPanel detail={detail} onBack={onCloseUser} live={detailLive} />
+            <UserDetailPanel detail={detail} onBack={onCloseUser} live={detailLive} onRevoke={onRevokeUser} />
           ) : detailOpen ? (
             <DetailUnavailable live={detailLive ?? 'failed'} onBack={onCloseUser} />
           ) : (
@@ -338,6 +346,8 @@ export function AdminShell({
       {tab === 'codes' && codes ? <div className="mt-4">{<CodesPanel {...codes} />}</div> : null}
 
       {/* ——— الاتجاهات ——— */}
+      {tab === 'ops' ? <OperationsPanel lang={lang} decision={decision} /> : null}
+
       {tab === 'charts' ? (
         <div className="mt-4 grid gap-4 lg:grid-cols-2">
           <TrendChart title={t.charts.growth} metricId="users.growthSeries" data={snapshot.users.growthSeries} />

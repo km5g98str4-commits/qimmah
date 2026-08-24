@@ -13,6 +13,7 @@
  * ويحرس الاستبعاد `test:admin-dashboard` بتأكيد مضادّ يمنع ظهور أي حقل حسّاس.
  */
 
+import { useState } from 'react'
 import { Icon } from '@/components/Icon'
 import { adminStrings } from '@/i18n/dict/admin'
 import { useLang } from '@/i18n'
@@ -76,12 +77,25 @@ interface UserDetailProps {
    * من يرسم الصفحة من تجهيزة لا يقول عنها «حيّة» ولا «معطوبة».
    */
   live?: LiveReadState
+  /**
+   * [COMMISSIONING §4] سحب الوصول.
+   *
+   * ═══ لماذا أُضيف ═══
+   * `founder_revoke_access` مكتوبة ومُثبَتة على قاعدة حقيقية، ولها غلاف عميل
+   * مكتوب — **ولم يستدعِها أي مكوّن قط**. قدرةٌ كاملة ميتة عند الوصول: يملكها
+   * المنتج ولا يستطيع المؤسس بلوغها من الشاشة.
+   *
+   * **بلا قيمة ⇒ لا زرّ.** فمن يرسم الصفحة من تجهيزة، أو يفتحها بجلسة دعم،
+   * لا يرى فعلًا لا يملكه (`canWrite` يقرّر في `AdminShell`).
+   */
+  onRevoke?: (reason: string) => Promise<void> | void
 }
 
-export function UserDetailPanel({ detail, onBack, live }: UserDetailProps) {
+export function UserDetailPanel({ detail, onBack, live, onRevoke }: UserDetailProps) {
   const lang = useLang()
   const t = adminStrings[lang]
   const r = detail.row
+  const [revoking, setRevoking] = useState(false)
 
   return (
     <section className="card p-4 text-start sm:p-5" aria-labelledby="admin-detail-heading">
@@ -261,6 +275,30 @@ export function UserDetailPanel({ detail, onBack, live }: UserDetailProps) {
           </div>
         </div>
       </div>
+
+      {/* ——— سحب الوصول — فعلٌ لا رجعة فيه، فيسأل عن سببه أوّلًا ——— */}
+      {onRevoke ? (
+        <div className="mt-4 rounded-xl border border-danger/40 bg-danger/[0.05] p-3">
+          <button
+            type="button"
+            data-testid="admin-revoke-access"
+            disabled={revoking}
+            onClick={() => {
+              // السبب إلزامي — نفس شرط الخادم، ونفس نمط `CodesPanel`:
+              // لا أثر إداريّ مجهول السبب.
+              const reason = window.prompt(t.detail.revokePrompt) ?? ''
+              if (reason.trim() === '') return
+              setRevoking(true)
+              void Promise.resolve(onRevoke(reason.trim())).finally(() => setRevoking(false))
+            }}
+            className={cn('btn-ghost tap-target px-3 py-2 text-xs font-bold text-danger', revoking && 'opacity-60')}
+          >
+            <Icon name="ShieldOff" className="h-4 w-4" />
+            <span>{t.detail.revoke}</span>
+          </button>
+          <p className="mt-2 text-[11px] leading-relaxed text-ink-500">{t.detail.revokeNote}</p>
+        </div>
+      ) : null}
 
       {/* ——— حدّ الحساسية معلَن في الشاشة ——— */}
       <p className="mt-4 flex items-start gap-2 rounded-xl border border-line bg-beige p-3 text-[11px] leading-relaxed text-ink-500">

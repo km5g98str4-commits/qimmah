@@ -50,6 +50,16 @@ export const CODE_ENABLE_RPC = 'founder_set_code_enabled'
  */
 export const REVOKE_ACCESS_RPC = 'founder_revoke_access'
 
+// ── [COMMISSIONING] قراءات غرفة العمليات ─────────────────────────────────
+// كلّها محروسة بـ`require_admin` في الخادم: المؤسس **والدعم** يقرآن.
+// وفعلُ المراجعة وحده يبقى على `require_founder`.
+export const FAILED_ORDERS_RPC = 'founder_failed_orders'
+export const CODE_REDEMPTIONS_RPC = 'founder_code_redemptions'
+export const EMAIL_HEALTH_RPC = 'founder_email_health'
+export const GRANTS_BY_SOURCE_RPC = 'founder_grants_by_source'
+export const FOOD_SUBMISSIONS_RPC = 'founder_food_submissions'
+export const FOOD_REVIEW_RPC = 'founder_review_food_submission'
+
 export const METRIC_REGISTRY: readonly MetricDefinition[] = [
   // ─────────────────────────────────────────────────────────────────────
   // وضع المنصّة — الكتلة الوحيدة المتاحة اليوم.

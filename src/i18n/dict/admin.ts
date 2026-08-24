@@ -144,6 +144,10 @@ export interface AdminStrings {
     lastActive: string
     support: string
     sensitiveExcluded: string
+    /** [COMMISSIONING §4] سحب الوصول — فعلٌ لا رجعة فيه، فسببه إلزامي. */
+    revoke: string
+    revokePrompt: string
+    revokeNote: string
     /** الكتلة التشغيلية المضافة في [ADMIN-R4] — دعم ومطابقة، لا ملفّ شخصي. */
     emailVerified: string
     yes: string
@@ -201,6 +205,40 @@ export interface AdminStrings {
   roadmap: {
     heading: string
     note: string
+  }
+  /**
+   * [COMMISSIONING §4] غرفة العمليات — أسئلة تشغيلية كانت أرقامًا بلا أسماء.
+   * النبرة هنا **تشغيلية قصيرة**: المؤسس يقرأها وهو يبحث عن خلل، لا وهو يتصفّح.
+   */
+  ops: {
+    nav: string
+    heading: string
+    /** شريط يُعلن أن الجلسة قراءة فقط — بدل زرٍّ يظهر ثم يفشل. */
+    readOnly: string
+    failedHeading: string
+    failedEmpty: string
+    failedUnavailable: string
+    colOrder: string
+    colWhy: string
+    colWhen: string
+    colWho: string
+    emailHeading: string
+    emailEmpty: string
+    emailDead: string
+    emailAttempts: string
+    sourcesHeading: string
+    sourcesEmpty: string
+    foodHeading: string
+    foodEmpty: string
+    foodEvidence: string
+    foodBarcode: string
+    foodApprove: string
+    foodReject: string
+    foodNeedInfo: string
+    foodNotePrompt: string
+    foodPublishedPrompt: string
+    foodEvidenceNote: string
+    actionFailed: string
   }
   /** لوحة أكواد الوصول — الإصدار والقائمة والتعطيل. */
   codes: {
@@ -663,6 +701,9 @@ export const adminStrings: Record<Lang, AdminStrings> = {
       support: 'سياق الدعم',
       sensitiveExcluded:
         'الإصابات والأدوية والحساسيات وقيم القياسات ما تدخل هذي الشاشة إطلاقًا — ولا بأي دور.',
+      revoke: 'اسحب الوصول',
+      revokePrompt: 'ليش تسحب وصوله؟ (يُسجَّل مع القرار)',
+      revokeNote: 'السحب لاصق: ينجو من حذف الحساب وإعادة التسجيل. رفعه يحتاج مفتاح الخادم.',
       emailVerified: 'البريد مؤكّد',
       yes: 'نعم',
       no: 'لا',
@@ -719,6 +760,35 @@ export const adminStrings: Record<Lang, AdminStrings> = {
     roadmap: {
       heading: 'خارطة الطريق',
       note: 'الأفعال اللي ما لها قدرة خادم مُراجَعة تظهر هنا — ما تظهر أزرار تكذب.',
+    },
+    ops: {
+      nav: 'العمليات',
+      heading: 'غرفة العمليات',
+      readOnly: 'جلستك للقراءة فقط — تقدر تشوف كل شيء، والتغيير للمؤسس.',
+      failedHeading: 'طلبات ما وصلت',
+      failedEmpty: 'ما فيه طلب فاشل — كل اللي وصل انصرف.',
+      failedUnavailable: 'ما قدرنا نسأل عن الطلبات الفاشلة. السبب:',
+      colOrder: 'رقم الطلب',
+      colWhy: 'وش صار',
+      colWhen: 'متى',
+      colWho: 'مرجع العميل',
+      emailHeading: 'طابور البريد',
+      emailEmpty: 'ما فيه بريد عالق.',
+      emailDead: 'وقف نهائيًا',
+      emailAttempts: 'محاولات',
+      sourcesHeading: 'من وين جاهم الوصول',
+      sourcesEmpty: 'ما فيه وصول مفعّل بعد.',
+      foodHeading: 'أصناف ناقصة تنتظر مراجعة',
+      foodEmpty: 'ما فيه بلاغات تنتظرك.',
+      foodEvidence: 'اللي كتبه المستخدم',
+      foodBarcode: 'باركود',
+      foodApprove: 'اعتمد',
+      foodReject: 'ارفض',
+      foodNeedInfo: 'ناقص معلومات',
+      foodNotePrompt: 'وش السبب؟ (يُسجَّل مع القرار)',
+      foodPublishedPrompt: 'معرّف الصنف بعد ما تنشره (اختياري)',
+      foodEvidenceNote: 'هذي أرقام المستخدم — دليل مو مصدر. ما تدخل الكتالوج إلا بعد ما تتحقّق منها بنفسك.',
+      actionFailed: 'ما تمّ الإجراء. السبب:',
     },
     codes: {
       heading: 'أكواد الوصول',
@@ -884,6 +954,9 @@ export const adminStrings: Record<Lang, AdminStrings> = {
       support: 'Support context',
       sensitiveExcluded:
         'Injuries, medications, allergies and measurement values never enter this screen — under any role.',
+      revoke: 'Revoke access',
+      revokePrompt: 'Why are you revoking access? (recorded with the decision)',
+      revokeNote: 'Revocation is sticky: it survives account deletion and re-signup. Lifting it needs the server key.',
       emailVerified: 'Email confirmed',
       yes: 'Yes',
       no: 'No',
@@ -984,6 +1057,35 @@ export const adminStrings: Record<Lang, AdminStrings> = {
     roadmap: {
       heading: 'Roadmap',
       note: 'Actions with no reviewed backend capability appear here — no buttons that lie.',
+    },
+    ops: {
+      nav: 'Operations',
+      heading: 'Operations room',
+      readOnly: 'Your session is read-only — you can see everything; changes are the founder\'s.',
+      failedHeading: 'Orders that did not land',
+      failedEmpty: 'No failed orders — everything that arrived was fulfilled.',
+      failedUnavailable: 'We could not ask about failed orders. Reason:',
+      colOrder: 'Order',
+      colWhy: 'What happened',
+      colWhen: 'When',
+      colWho: 'Customer ref',
+      emailHeading: 'Email queue',
+      emailEmpty: 'Nothing stuck.',
+      emailDead: 'gave up',
+      emailAttempts: 'attempts',
+      sourcesHeading: 'Where access came from',
+      sourcesEmpty: 'No active access yet.',
+      foodHeading: 'Missing foods awaiting review',
+      foodEmpty: 'Nothing waiting on you.',
+      foodEvidence: 'What the user wrote',
+      foodBarcode: 'Barcode',
+      foodApprove: 'Approve',
+      foodReject: 'Reject',
+      foodNeedInfo: 'Need info',
+      foodNotePrompt: 'Why? (recorded with the decision)',
+      foodPublishedPrompt: 'Catalog id once you publish it (optional)',
+      foodEvidenceNote: 'These are the user\'s numbers — evidence, not a source. Nothing enters the catalog until you verify it yourself.',
+      actionFailed: 'The action did not go through. Reason:',
     },
   },
 }
