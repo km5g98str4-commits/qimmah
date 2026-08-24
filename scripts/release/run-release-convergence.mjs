@@ -19,10 +19,10 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 import { execSync } from 'node:child_process'
-import { mkdirSync, writeFileSync } from 'node:fs'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import * as playwright from 'playwright'
-import { ROOT, buildArtifact, verifyArtifact, serveArtifact, waitForServer, engineAvailable, launchOptionsFor } from './lib/harness.mjs'
+import { ARTIFACTS, ROOT, buildArtifact, verifyArtifact, serveArtifact, waitForServer, engineAvailable, launchOptionsFor } from './lib/harness.mjs'
 import { captureGuestSeed } from './lib/drive.mjs'
 
 const args = process.argv.slice(2)
@@ -90,7 +90,34 @@ const servers = {}
 for (const mode of needArtifacts) {
   servers[mode] = serveArtifact(mode)
   await waitForServer(servers[mode].url)
-  console.log(`▶ serving "${mode}" at ${servers[mode].url}`)
+
+  /**
+   * ═══ الخادم المُقدَّم هو الأرتيفكت المبنيّ — لا خادمٌ ناجٍ من تشغيلٍ سابق ═══
+   *
+   * **وقع فعلًا:** بقيت خوادم `vite preview` من تشغيلات سابقة تحتلّ المنافذ،
+   * فقُدِّم على منفذ «التقليد» أرتيفكتُ **الإنتاج**. النتيجة ستّة فحوص حمراء
+   * تصف عطلًا لا وجود له («الكود الصحيح لا يمنح»، «الماء لا يُكتب») — وكلّها
+   * كانت ستُقرأ انحدارَ منتج وتُلاحَق في الكود.
+   *
+   * فالبصمة تُقارَن قبل أي فحص: اسم الحزمة المُقدَّمة يجب أن يطابق ما في
+   * `index.html` المبنيّ للتوّ. وأي اختلاف **يُوقِف التشغيل باسمه** بدل أن
+   * يُنتج تقريرًا عن أرتيفكت لم نبنِه (§4.2: نتيجةٌ غير مستحقّة ليست نتيجة).
+   */
+  {
+    const built = readFileSync(resolve(ROOT, ARTIFACTS[mode].outDir, 'index.html'), 'utf8')
+    const wantAsset = (built.match(/\/assets\/index-[A-Za-z0-9_-]+\.js/) ?? [])[0]
+    const servedHtml = await (await fetch(servers[mode].url)).text()
+    const gotAsset = (servedHtml.match(/\/assets\/index-[A-Za-z0-9_-]+\.js/) ?? [])[0]
+    if (!wantAsset || wantAsset !== gotAsset) {
+      throw new Error(
+        `artifact mismatch on ${servers[mode].url}: built "${wantAsset}" but the port serves "${gotAsset}". `
+        + 'A preview server from an earlier run is probably still holding this port — '
+        + 'kill it (pkill -f "vite preview") and re-run. Refusing to report a verdict on an artifact we did not build.',
+      )
+    }
+  }
+
+  console.log(`▶ serving "${mode}" at ${servers[mode].url} (${(await (await fetch(servers[mode].url)).text()).match(/\/assets\/index-[A-Za-z0-9_-]+\.js/) ?? ['?']})`)
 }
 
 // ── engines ────────────────────────────────────────────────────────────────

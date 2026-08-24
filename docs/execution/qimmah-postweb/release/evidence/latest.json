@@ -1,9 +1,9 @@
 {
   "contract": "QIMMAH-SOVEREIGN-PHASE-II-001",
   "agent": "AGENT-A",
-  "head": "c39cd14bdd667a54d02154294e5f0424abd19af6",
-  "headSubject": "feat(product): [COMMISSIONING] لحظة التجهيز · اتّصال الجلسة · تغطية الطعام — وستّة أعطال أدخلتها الموجة",
-  "ranAt": "2026-08-24T03:07:31.267Z",
+  "head": "5ca33200108ffa8272e53329775871140f5baf65",
+  "headSubject": "fix(access): [COMMISSIONING] الصدق كسر الدمج المتعمّد — فاجتمعا بجملة واحدة",
+  "ranAt": "2026-08-24T03:47:00.764Z",
   "provisional": true,
   "provisionalReason": "validation downgraded: VALIDATION_DOWNGRADE = WEBKIT_UNAVAILABLE",
   "artifactsReused": false,
@@ -12,19 +12,19 @@
       "mode": "prod",
       "outDir": "dist-release/prod",
       "absDir": "/home/user/qimmah-conv/dist-release/prod",
-      "ms": 10432,
-      "head": "c39cd14bdd667a54d02154294e5f0424abd19af6",
-      "builtAt": "2026-08-24T02:50:13.246Z",
-      "sourceFingerprint": 1787538153267
+      "ms": 10139,
+      "head": "5ca33200108ffa8272e53329775871140f5baf65",
+      "builtAt": "2026-08-24T03:29:43.486Z",
+      "sourceFingerprint": 1787540628169
     },
     "mock": {
       "mode": "mock",
       "outDir": "dist-release/mock",
       "absDir": "/home/user/qimmah-conv/dist-release/mock",
-      "ms": 10386,
-      "head": "c39cd14bdd667a54d02154294e5f0424abd19af6",
-      "builtAt": "2026-08-24T02:50:23.651Z",
-      "sourceFingerprint": 1787538153267
+      "ms": 9904,
+      "head": "5ca33200108ffa8272e53329775871140f5baf65",
+      "builtAt": "2026-08-24T03:29:53.402Z",
+      "sourceFingerprint": 1787540628169
     }
   },
   "engines": [
@@ -40,8 +40,8 @@
     }
   ],
   "totals": {
-    "pass": 462,
-    "fail": 1,
+    "pass": 463,
+    "fail": 0,
     "blocked": 5
   },
   "suites": [
@@ -194,7 +194,7 @@
           "section": "shipped shell integrity",
           "label": "index.html carries a verifiable build identity",
           "ok": true,
-          "evidence": "<meta name=\"qimmah-build\" content=\"v1.0.0·c39cd14b\"> <meta name=\"qimmah-commit\" content=\"c39cd14b\"> <meta name=\"qimmah-build-time\" content=\"2026-08-24T02:50:03.337Z\"> <meta name=\"qimmah-sw-version\" content=\"qimmah-c39cd14b\"> <meta name=\"qimmah-env\" content=\"production\">"
+          "evidence": "<meta name=\"qimmah-build\" content=\"v1.0.0·5ca33200\"> <meta name=\"qimmah-commit\" content=\"5ca33200\"> <meta name=\"qimmah-build-time\" content=\"2026-08-24T03:29:33.833Z\"> <meta name=\"qimmah-sw-version\" content=\"qimmah-5ca33200\"> <meta name=\"qimmah-env\" content=\"production\">"
         },
         {
           "section": "shipped shell integrity",
@@ -936,16 +936,10 @@
     },
     {
       "suite": "p2-premium-test-state (chromium)",
-      "pass": 24,
-      "fail": 1,
+      "pass": 25,
+      "fail": 0,
       "blocked": 0,
-      "failures": [
-        {
-          "section": "activation-code outcomes (sanctioned mock codes)",
-          "label": "the deliberate fusion holds: an expired code is indistinguishable from an unknown one",
-          "evidence": "expired=الكود ما ضبط. تأكّد منه وجرّب مرة ثانية. | unknown=هذي نسخة مراجعة بلا خادم، فالتفعيل ما يشتغل فيها. كودك ينفع في النسخة الحيّة."
-        }
-      ],
+      "failures": [],
       "checks": [
         {
           "section": "forged authority is refused (localStorage · query param · direct store)",
@@ -987,31 +981,31 @@
           "section": "activation-code outcomes (sanctioned mock codes)",
           "label": "code «AAAA-BBBB-CCCC» produces a visible, non-empty outcome",
           "ok": true,
-          "evidence": "هذي نسخة مراجعة بلا خادم، فالتفعيل ما يشتغل فيها. كودك ينفع في النسخة الحيّة."
+          "evidence": "الكود ما ضبط. تأكّد منه وجرّب مرة ثانية."
         },
         {
           "section": "activation-code outcomes (sanctioned mock codes)",
           "label": "code «ZZZZ-YYYY-XXXX» produces a visible, non-empty outcome",
           "ok": true,
-          "evidence": "هذي نسخة مراجعة بلا خادم، فالتفعيل ما يشتغل فيها. كودك ينفع في النسخة الحيّة."
+          "evidence": "الكود ما ضبط. تأكّد منه وجرّب مرة ثانية."
         },
         {
           "section": "activation-code outcomes (sanctioned mock codes)",
           "label": "no oracle: two different unknown codes give the SAME generic message",
           "ok": true,
-          "evidence": "هذي نسخة مراجعة بلا خادم، فالتفعيل ما يشتغل فيها. كودك ينفع في النسخة الحيّة. | هذي نسخة مراجعة بلا خادم، فالتفعيل ما يشتغل فيها. كودك ينفع في النسخة الحيّة."
+          "evidence": "الكود ما ضبط. تأكّد منه وجرّب مرة ثانية. | الكود ما ضبط. تأكّد منه وجرّب مرة ثانية."
         },
         {
           "section": "activation-code outcomes (sanctioned mock codes)",
           "label": "the deliberate fusion holds: an expired code is indistinguishable from an unknown one",
-          "ok": false,
-          "evidence": "expired=الكود ما ضبط. تأكّد منه وجرّب مرة ثانية. | unknown=هذي نسخة مراجعة بلا خادم، فالتفعيل ما يشتغل فيها. كودك ينفع في النسخة الحيّة."
+          "ok": true,
+          "evidence": "expired=الكود ما ضبط. تأكّد منه وجرّب مرة ثانية. | unknown=الكود ما ضبط. تأكّد منه وجرّب مرة ثانية."
         },
         {
           "section": "activation-code outcomes (sanctioned mock codes)",
           "label": "distinct real outcomes are still distinguished (used ≠ offline ≠ generic)",
           "ok": true,
-          "evidence": "هذا الكود مستخدم من قبل. | الكود ما ضبط. تأكّد منه وجرّب مرة ثانية. | يبدو ما فيه اتصال بالنت. تأكّد من اتصالك وجرّب مرة ثانية. | هذي نسخة مراجعة بلا خادم، فالتفعيل ما يشتغل فيها. كودك ينفع في النسخة الحيّة. | هذي نسخة مراجعة بلا خادم، فالتفعيل ما يشتغل فيها. كودك ينفع في النسخة الحيّة."
+          "evidence": "هذا الكود مستخدم من قبل. | الكود ما ضبط. تأكّد منه وجرّب مرة ثانية. | يبدو ما فيه اتصال بالنت. تأكّد من اتصالك وجرّب مرة ثانية. | الكود ما ضبط. تأكّد منه وجرّب مرة ثانية. | الكود ما ضبط. تأكّد منه وجرّب مرة ثانية."
         },
         {
           "section": "activation-code outcomes (sanctioned mock codes)",
@@ -1476,7 +1470,7 @@
           "section": "primitive-where-object-expected — a scalar in a structured slot must be rejected at the boundary",
           "label": "primitive-where-object-expected: unrelated user data (qimmah:onboarding:v1) was NOT destroyed",
           "ok": true,
-          "evidence": "value={\"completed\":true,\"completedAt\":\"2026-08-24T02:54:02.711Z\"}"
+          "evidence": "value={\"completed\":true,\"completedAt\":\"2026-08-24T03:33:32.967Z\"}"
         },
         {
           "section": "primitive-where-object-expected — a scalar in a structured slot must be rejected at the boundary",
@@ -1512,7 +1506,7 @@
           "section": "stale-active-workout — a foreign/stale session payload must not be resumed as if it were the user’s",
           "label": "stale-active-workout: unrelated user data (qimmah:onboarding:v1) was NOT destroyed",
           "ok": true,
-          "evidence": "value={\"completed\":true,\"completedAt\":\"2026-08-24T02:54:02.711Z\"}"
+          "evidence": "value={\"completed\":true,\"completedAt\":\"2026-08-24T03:33:32.967Z\"}"
         },
         {
           "section": "stale-active-workout — a foreign/stale session payload must not be resumed as if it were the user’s",
@@ -1548,7 +1542,7 @@
           "section": "empty-string-values — empty values are a real disk outcome and must read as absent, not as data",
           "label": "empty-string-values: unrelated user data (qimmah:onboarding:v1) was NOT destroyed",
           "ok": true,
-          "evidence": "value={\"completed\":true,\"completedAt\":\"2026-08-24T02:54:02.711Z\"}"
+          "evidence": "value={\"completed\":true,\"completedAt\":\"2026-08-24T03:33:32.967Z\"}"
         },
         {
           "section": "empty-string-values — empty values are a real disk outcome and must read as absent, not as data",
@@ -1584,7 +1578,7 @@
           "section": "prototype-pollution-payload — untrusted stored JSON must not be able to reach Object.prototype",
           "label": "prototype-pollution-payload: unrelated user data (qimmah:onboarding:v1) was NOT destroyed",
           "ok": true,
-          "evidence": "value={\"completed\":true,\"completedAt\":\"2026-08-24T02:54:02.711Z\"}"
+          "evidence": "value={\"completed\":true,\"completedAt\":\"2026-08-24T03:33:32.967Z\"}"
         },
         {
           "section": "prototype-pollution-payload — untrusted stored JSON must not be able to reach Object.prototype",
@@ -2045,13 +2039,13 @@
           "section": "a lazy route chunk that never arrives must not blank the app",
           "label": "the user is told something failed rather than shown a blank screen",
           "ok": true,
-          "evidence": "تخطَّ إلى المحتوى الرئيسي\nصار خطأ غير متوقّع\n\nما قدرنا نحمّل هذي الشاشة. جرّب مرة ثانية — بياناتك محفوظة على جهازك.\n\nمرجع الخطأ: QW-MT6NCY6R-F2C47D\n\nجرّب مرة ثانية\nراسل الدعم"
+          "evidence": "تخطَّ إلى المحتوى الرئيسي\nصار خطأ غير متوقّع\n\nما قدرنا نحمّل هذي الشاشة. جرّب مرة ثانية — بياناتك محفوظة على جهازك.\n\nمرجع الخطأ: QW-MT6ORR3B-B6440F\n\nجرّب مرة ثانية\nراسل الدعم"
         },
         {
           "section": "a lazy route chunk that never arrives must not blank the app",
           "label": "the failure surface exposes no stack trace or raw message",
           "ok": true,
-          "evidence": "تخطَّ إلى المحتوى الرئيسي\nصار خطأ غير متوقّع\n\nما قدرنا نحمّل هذي الشاشة. جرّب مرة ثانية — بياناتك محفوظة على جهازك.\n\nمرجع الخطأ: QW-MT6NCY6R-F2C47D\n\nجرّب مرة ثانية\nراسل الدعم"
+          "evidence": "تخطَّ إلى المحتوى الرئيسي\nصار خطأ غير متوقّع\n\nما قدرنا نحمّل هذي الشاشة. جرّب مرة ثانية — بياناتك محفوظة على جهازك.\n\nمرجع الخطأ: QW-MT6ORR3B-B6440F\n\nجرّب مرة ثانية\nراسل الدعم"
         },
         {
           "section": "a lazy route chunk that never arrives must not blank the app",
@@ -2063,7 +2057,7 @@
           "section": "a lazy route chunk that never arrives must not blank the app",
           "label": "a support reference id is offered for correlation (BUG-005 contract)",
           "ok": true,
-          "evidence": "تخطَّ إلى المحتوى الرئيسي\nصار خطأ غير متوقّع\n\nما قدرنا نحمّل هذي الشاشة. جرّب مرة ثانية — بياناتك محفوظة على جهازك.\n\nمرجع الخطأ: QW-MT6NCY6R-F2C47D\n\nجرّب مرة ثانية\nراسل الدعم"
+          "evidence": "تخطَّ إلى المحتوى الرئيسي\nصار خطأ غير متوقّع\n\nما قدرنا نحمّل هذي الشاشة. جرّب مرة ثانية — بياناتك محفوظة على جهازك.\n\nمرجع الخطأ: QW-MT6ORR3B-B6440F\n\nجرّب مرة ثانية\nراسل الدعم"
         },
         {
           "section": "a lazy route chunk that never arrives must not blank the app",
@@ -2081,19 +2075,19 @@
           "section": "going fully offline mid-session",
           "label": "already-loaded surfaces keep working offline (local-first)",
           "ok": true,
-          "evidence": "len=174"
+          "evidence": "len=960"
         },
         {
           "section": "going fully offline mid-session",
           "label": "offline navigation shows no raw exception",
           "ok": true,
-          "evidence": "تخطَّ إلى المحتوى الرئيسي\nصار خطأ غير متوقّع\n\nما قدرنا نحمّل هذي الشاشة. جرّب مرة ثانية — بياناتك محفوظة على جهازك.\n\nمرجع الخطأ: QW-MT6ND65D-03B665\n\nجرّب مرة ثا"
+          "evidence": "تخطَّ إلى المحتوى الرئيسي\nتخطَّ إلى المحتوى\nالتقدّم\nدون اتصال\nتعمل محليًا — يُحفظ كل شيء ويُزامَن عند عودة الاتصال.\nالتقدّم\nتنشيف\nشكلك في بداية الطريق\n\nملخّص آخ"
         },
         {
           "section": "going fully offline mid-session",
           "label": "coming back online restores normal navigation",
           "ok": true,
-          "evidence": "len=174"
+          "evidence": "len=1525"
         },
         {
           "section": "going fully offline mid-session",
