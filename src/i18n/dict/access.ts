@@ -100,6 +100,10 @@ export interface AccessStrings {
   trialTimeout: string
   trialServiceError: string
   trialOffline: string
+  /** [COMMISSIONING §1] نداء بدء التجربة من داخل البوّابة — لا من التسليم وحده. */
+  trialCta: string
+  /** [COMMISSIONING §5] كثرة المحاولات — تهدئة لا اتّهام للكود. */
+  redeemRateLimited: string
 
   /**
    * ═══ مؤشّر الوصول الحالي ═══
@@ -170,6 +174,8 @@ export const accessStrings: Record<Lang, AccessStrings> = {
     trialTimeout: 'الطلب طوّل وما وصلنا ردّ، وما بدأت تجربتك. جرّب مرة ثانية.',
     trialServiceError: 'فيه خلل عندنا — مو عندك — وما بدأت تجربتك. جرّب بعد شوي.',
     trialOffline: 'يبدو ما فيه اتصال بالنت، وما بدأت تجربتك. تأكّد من اتصالك وجرّب مرة ثانية.',
+    trialCta: 'جرّب Premium ٧٢ ساعة',
+    redeemRateLimited: 'حاولت كثير في وقت قصير. خذ لك دقايق وجرّب بعدها.',
 
     statusChecking: 'نتحقّق من وصولك…',
     statusPremium: 'قِمّة Premium مفعّل',
@@ -232,6 +238,8 @@ export const accessStrings: Record<Lang, AccessStrings> = {
     trialTimeout: 'The request took too long and we got no answer — your trial did not start. Give it another try.',
     trialServiceError: 'Something broke on our side — not yours — and your trial did not start. Try again shortly.',
     trialOffline: "Looks like there's no internet connection, so your trial did not start. Check it and try again.",
+    trialCta: 'Try Premium for 72 hours',
+    redeemRateLimited: "That's a lot of tries in a short window. Give it a few minutes and try again.",
 
     statusChecking: 'Checking your access…',
     statusPremium: 'Qimmah Premium is active',

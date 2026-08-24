@@ -55,6 +55,7 @@ import type { MainTab, QuickLogTarget } from '@/components/MobileShell'
 import type { AppBadge } from '@/components/AppNav'
 import { useAuth } from '@/lib/authContext'
 import { PendingTrialResume } from '@/views/reveal/PendingTrialResume'
+import { AccessStatusLine } from '@/components/AccessStatusLine'
 import { adoptGuestOnboarding, isAccountOnboarded, isOnboardingComplete, markCompleted } from '@/lib/onboarding'
 import { reconcileAccountScope } from '@/lib/accountScope'
 import { ensureOnboardingProfile } from '@/lib/onboardingProfile'
@@ -685,6 +686,14 @@ export default function App() {
             `beginTrial()` ينادي `start_trial` ولا يمنح العميل شيئًا.
           */}
           <PendingTrialResume lang={LANG} signedIn={Boolean(auth.user)} />
+          {/*
+            [COMMISSIONING §1] سطر حالة الوصول — يُركَّب هنا لسببين، والثاني
+            أهمّ من الأول: يُري المستخدمَ تجربته، **ويُسلِّح مؤقّت إعادة الحسم
+            عند لحظة الانتهاء** (يعيش داخل `useAccessSummary`). فبلا تركيبه
+            تبقى الجلسة `active` في المتصفّح بعد انقضاء الـ٧٢ ساعة حتى يوقظها
+            تحديثُ رمزٍ بعد نحو ساعة — نافذةٌ تكذب فيها الواجهة على صاحبها.
+          */}
+          <AccessStatusLine lang={LANG} signedIn={Boolean(auth.user)} />
           <Suspense fallback={<LoadingFallback />}>{content}</Suspense>
         </div>
         {/*

@@ -59,6 +59,9 @@ const REDEEM_MESSAGE = {
   already_used: 'codeAlreadyUsed',
   revoked: 'codeRevoked',
   not_authenticated: 'codeNeedsAccount',
+  // [COMMISSIONING §5] نصٌّ خاصّ لا يتقاسمه أحد: «كودك غلط» بعد عشر محاولات
+  // كذبةٌ تدفع لمحاولة حادية عشرة، والحقيقة أن الوتيرة هي التي رُفضت.
+  rate_limited: 'redeemRateLimited',
   backend_unconfigured: 'codeBackendAbsent',
   timeout: 'codeTimeout',
   service_error: 'codeServiceError',

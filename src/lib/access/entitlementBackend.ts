@@ -322,6 +322,14 @@ export type RedeemServerOutcome =
   | 'already_used'
   | 'revoked'
   | 'not_authenticated'
+  /**
+   * [COMMISSIONING §5/§12] تجاوز حدّ المحاولات.
+   *
+   * **ليست فشلًا في الكود بل في وتيرة المحاولة**، فلها نصّها: من أخطأ عشر
+   * مرّات يستحقّ أن يُقال له «هدّئ شوي» لا «كودك غلط» — والثانية كذبة صغيرة
+   * تدفعه لمحاولة حادية عشرة.
+   */
+  | 'rate_limited'
   | AccessFailure
 
 /**
@@ -361,12 +369,41 @@ export async function redeemCodeOnServer(code: string): Promise<RedeemServerOutc
   if (sessionResult === TIMED_OUT) return 'timeout'
   if (!sessionResult?.data?.session) return 'not_authenticated'
 
-  const rpcResult = await withDeadline(supabase.rpc('redeem_access_code', { p_code: code }))
+  /**
+   * ═══ [COMMISSIONING §5] لماذا `_v2` ═══
+   * الدالّة القديمة **ترفع** عند كل فشل تجاري، والرفع يُلغي معاملته — بما فيه
+   * أي صفّ يسجّل المحاولة. فحدُّ المعدّل فوقها كان سيعدّ **النجاحات وحدها**:
+   * حارسٌ لا يُطلق أبدًا. و`_v2` تُعيد الفشل **قيمةً**، فتُثبَّت المحاولة
+   * ويصير الحدّ ذا معنى. والنواة واحدة، فلا سلوك اختلف في المسار السعيد.
+   *
+   * والارتداد مقصود ومعلَن: خادمٌ لم تُطبَّق عليه هجرة `_v2` بعد يردّ
+   * `PGRST202`، فنسقط إلى التوقيع القديم بدل أن نُفشل المستخدم على فرقٍ
+   * في النشر لا يعنيه.
+   */
+  const rpcResult = await withDeadline(supabase.rpc('redeem_access_code_v2', { p_code: code }))
   if (rpcResult === TIMED_OUT) return 'timeout'
   const { data, error } = rpcResult
-  if (error) return classifyRedeemError(error.message ?? '', String((error as { code?: string }).code ?? ''))
+
+  if (error) {
+    const code404 = String((error as { code?: string }).code ?? '')
+    const missing = code404 === 'PGRST202' || code404 === '42883'
+      || (error.message ?? '').toLowerCase().includes('could not find the function')
+    if (!missing) return classifyRedeemError(error.message ?? '', code404)
+    const legacy = await withDeadline(supabase.rpc('redeem_access_code', { p_code: code }))
+    if (legacy === TIMED_OUT) return 'timeout'
+    if (legacy.error) return classifyRedeemError(legacy.error.message ?? '', String((legacy.error as { code?: string }).code ?? ''))
+    return typeof legacy.data === 'string' && statusForServerState(legacy.data) === 'active' ? 'success' : 'invalid'
+  }
+
+  // `_v2` تُعيد `{ outcome, reason }`. والفشل قيمةٌ هنا، فيُصنَّف بنفس المُصنِّف
+  // الذي يقرأ رسائل الأخطاء — مصدرٌ واحد للتسمية، لا جدولان يتباعدان.
+  const payload = (data ?? {}) as { outcome?: unknown; reason?: unknown }
+  const outcome = typeof payload.outcome === 'string' ? payload.outcome : ''
+  const reason = typeof payload.reason === 'string' ? payload.reason : ''
+  if (outcome === 'rate_limited') return 'rate_limited'
+  if (outcome === 'failed') return classifyRedeemError(reason, '')
   // النجاح لا يُعلَن من هنا: المستدعي يُعيد القراءة من `fetchEntitlement`.
-  return typeof data === 'string' && statusForServerState(data) === 'active' ? 'success' : 'invalid'
+  return statusForServerState(outcome) === 'active' ? 'success' : 'invalid'
 }
 
 /** نتائج بدء التجربة — كلٌّ منها رسالة صادقة للمستخدم. */

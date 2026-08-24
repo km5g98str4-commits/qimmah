@@ -79,7 +79,7 @@ import { RevealJourney } from '@/views/reveal/RevealJourney'
 import { RevealValue } from '@/views/reveal/RevealValue'
 import { revealStrings } from '@/i18n/dict/reveal'
 import { deriveTargetWeight } from '@/lib/planDerive'
-import { markPendingTrialIntent } from '@/lib/entryIntent'
+import { recordTrialIntent } from '@/lib/access/trialIntent'
 import { useAccess } from '@/lib/access/useAccess'
 
 interface OnboardingV2Props {
@@ -1446,9 +1446,20 @@ export function PlanHandoffScreen({
     // الطريق نفسه (إنشاء الحساب) يفكّ هذه الشاشة، فما يبقى في ذاكرتها يموت
     // معها. والكتابة مفحوصة — زرٌّ يَعِد باستئناف لن يحدث أسوأ من لا شيء.
     //
+    // ═══ [COMMISSIONING §1] سلطةٌ واحدة للنيّة، لا اثنتان ═══
+    // كان هذا السطر يكتب في `entryIntent` — مخزنٌ ثانٍ بمفتاح ثانٍ، لا يقرؤه
+    // إلا لافتةٌ تطلب ضغطة أخرى بعد التسجيل. وفي المقابل كان `trialIntent`
+    // **موصولًا بالاستئناف التلقائي** في مزوّد الوصول (`SIGNED_IN` ⇒ تبدأ
+    // التجربة وحدها) **وبلا كاتب في الإنتاج إطلاقًا** — أي أن القدرة الأقوى
+    // كانت ميتة، والأضعف هي العاملة.
+    //
+    // فالكتابة انتقلت إلى السلطة الواحدة. والأثر الذي يراه المستخدم: يضغط
+    // «جرّب Premium» ⇐ يُنشئ حسابه ⇐ **تبدأ تجربته من نفسها** ولا يُطلب منه
+    // أن يعيد الضغط على ما ضغطه قبل دقيقة.
+    //
     // وهي جملة مستقلّة عن الاختصار أدناه عمدًا: شكل ذلك السطر مثبَّت في
     // `test:entry-flow` كإثبات على أن الضيف يُبلَّغ بسببه الصادق بلا رحلة شبكة.
-    if (!signedIn) setTrialIntentStored(markPendingTrialIntent() === 'ok')
+    if (!signedIn) setTrialIntentStored(recordTrialIntent('reveal') === 'ok')
     if (!signedIn) { setTrialState('not_authenticated'); return }
     setTrialState('working')
     setTrialState(await beginTrial())

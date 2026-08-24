@@ -12,7 +12,7 @@ import { product } from '@/config/product'
 import { accessStrings } from '@/i18n/dict/access'
 import { useAccess } from '@/lib/access/useAccess'
 import type { PaidAction } from '@/lib/access/paidActions'
-import { outcomeTone, redeemMessage, type RedeemUiState } from '@/lib/access/outcomeMessages'
+import { outcomeTone, redeemMessage, trialMessage, type RedeemUiState, type TrialUiState } from '@/lib/access/outcomeMessages'
 import { founderQaEntitlementEnabled, FOUNDER_QA_CODE } from '@/lib/access/entitlementSource'
 import type { Lang } from '@/lib/appPreferences'
 
@@ -26,11 +26,12 @@ function actionLabel(action: PaidAction, s: ReturnType<() => typeof accessString
 }
 
 export function PremiumGate({ lang }: { lang: Lang }) {
-  const { blockedAction, closeGate, redeem } = useAccess()
+  const { blockedAction, closeGate, redeem, beginTrial, recordTrialIntent, entitlement } = useAccess()
   const s = accessStrings[lang] ?? accessStrings.ar
   const [codeOpen, setCodeOpen] = useState(false)
   const [code, setCode] = useState('')
   const [state, setState] = useState<RedeemUiState>('idle')
+  const [trialState, setTrialState] = useState<TrialUiState>('idle')
   const dialogRef = useRef<HTMLDivElement>(null)
   const closeRef = useRef<HTMLButtonElement>(null)
   /** العنصر الذي كان يملك التركيز قبل الفتح — يُعاد إليه عند الإغلاق. */
@@ -136,6 +137,43 @@ export function PremiumGate({ lang }: { lang: Lang }) {
             {s.gatePrimary}
             <Icon name="ExternalLink" className="h-4 w-4" />
           </a>
+
+          {/* ═══ [COMMISSIONING §1] بدء التجربة **من هنا** لا من التسليم وحده ═══
+              كان النداء الوحيد للتجربة في شاشة كشف الخطّة. فمن تجاوزها، أو
+              اصطدم بالحدّ بعد أسبوع، لم يبق له إلا الشراء أو كودٌ لا يملكه —
+              والتكليف يقول إنّ التجربة أحد **أربعة مسارات** إلى نفس الاستحقاق.
+
+              وشرط الإخفاء يقرأ الاستحقاق نفسه: من عنده وصول قائم لا يُعرض
+              عليه أن يبدأ تجربة (§ لا زرّ يَعِد بما لا معنى له).
+
+              وبلا حساب لا يفشل الزرّ بل **يقطع وعدًا يُوفّى**: النيّة تُكتب،
+              ثم يُنشئ المستخدم حسابه، فتبدأ تجربته وحدها عند أول دخول. */}
+          {!codeOpen && entitlement.status !== 'active' && (
+            <button
+              type="button"
+              data-testid="premium-gate-start-trial"
+              disabled={trialState === 'working'}
+              onClick={() => {
+                void (async () => {
+                  // النيّة **قبل** النداء: لو تبيّن أنه بلا حساب، يكون الوعد
+                  // محفوظًا على القرص قبل أن يغادر هذه الشاشة إلى التسجيل.
+                  recordTrialIntent('gate')
+                  setTrialState('working')
+                  setTrialState(await beginTrial())
+                })()
+              }}
+              className="btn-ghost min-h-[44px] w-full text-sm"
+            >
+              {s.trialCta}
+            </button>
+          )}
+
+          {/* النتيجة بسببها الصادق — من نفس المُصنِّف الذي تقرؤه بقيّة الأسطح. */}
+          {trialMessage(trialState, lang) ? (
+            <p role="status" data-testid="premium-gate-trial-message" className="text-xs font-bold leading-relaxed text-ink-700">
+              {trialMessage(trialState, lang)}
+            </p>
+          ) : null}
 
           {!codeOpen && (
             <button type="button" onClick={() => setCodeOpen(true)} data-testid="premium-gate-have-code" className="btn-ghost min-h-[44px] w-full text-sm">

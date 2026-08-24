@@ -85,6 +85,8 @@ export type RedeemOutcome =
   | 'already_used'
   | 'revoked'
   | 'not_authenticated'
+  /** [COMMISSIONING §5] وتيرة المحاولة تجاوزت الحدّ — ليست حكمًا على الكود. */
+  | 'rate_limited'
   | AccessFailure
 
 /**
@@ -219,6 +221,8 @@ export async function redeemActivationCode(code: string): Promise<RedeemOutcome>
     // «موقوف» و«غير مسجَّل» ليستا «كودًا خاطئًا» — تُعرضان بنصّهما لا مبتلعتين.
     case 'revoked': return 'revoked'
     case 'not_authenticated': return 'not_authenticated'
+    // وتيرةٌ لا كود: تعبر بنفسها كي تُعرض برسالتها الخاصّة.
+    case 'rate_limited': return 'rate_limited'
     // أصناف الفشل تعبر كما هي — كلٌّ برسالته. والافتراض `service_error` لا
     // `offline`: المجهول عطلٌ عندنا حتى يثبت أنه شبكة المستخدم.
     case 'backend_unconfigured': return 'backend_unconfigured'

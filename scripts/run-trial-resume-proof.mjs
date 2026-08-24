@@ -20,7 +20,12 @@ const ROOT = process.cwd()
 const COMPONENT = 'src/views/reveal/PendingTrialResume.tsx'
 const HOST = 'src/App.tsx'
 const ENTRY = 'src/main.tsx'
-const INTENT = 'src/lib/entryIntent.ts'
+// [COMMISSIONING §1] السلطة الوحيدة للنيّة. كان هنا `src/lib/entryIntent.ts`،
+// وهو مخزنٌ ثانٍ بمفتاح ثانٍ لا يقرؤه إلا لافتةٌ يدوية. وفي المقابل كان
+// `trialIntent` موصولًا بالاستئناف التلقائي في مزوّد الوصول **وبلا كاتب في
+// الإنتاج** — القدرة الأقوى ميتة والأضعف عاملة. فحُذف الثاني ووُحّدت الكتابة.
+const INTENT = 'src/lib/access/trialIntent.ts'
+const PROVIDER = 'src/lib/access/provider.tsx'
 const CTA_HOST = 'src/views/OnboardingV2.tsx'
 
 class NamedFailure extends Error {
@@ -77,6 +82,10 @@ function assertChainIntact(graph) {
   named('trial-intent-writer-not-live',
     graph.live.has(INTENT) && (graph.importers.get(INTENT) ?? new Set()).has(CTA_HOST),
     `كاتب النيّة ${INTENT} غير موصول بزرّ التجربة في ${CTA_HOST}`)
+  // والقارئ التلقائي على نفس السلطة: لولاه لعاد المستخدم إلى ضغطةٍ ثانية.
+  named('trial-intent-autoresume-not-live',
+    graph.live.has(PROVIDER) && (graph.importers.get(INTENT) ?? new Set()).has(PROVIDER),
+    `مزوّد الوصول ${PROVIDER} لا يقرأ ${INTENT} — لا استئناف تلقائي`)
 }
 
 console.log('① الحلقة كاملة — من نقطة الدخول إلى المكوّن')
@@ -87,6 +96,11 @@ ok('جذر التطبيق هو من يركّبه (لا شاشة فرعية ول�
   (GRAPH.importers.get(COMPONENT) ?? new Set()).has(HOST),
   [...(GRAPH.importers.get(COMPONENT) ?? [])].join(', '))
 ok('كاتب النيّة موصول بزرّ التجربة', (GRAPH.importers.get(INTENT) ?? new Set()).has(CTA_HOST))
+ok('والمزوّد يقرأ **نفس** السلطة — فالاستئناف تلقائي لا ضغطة ثانية',
+  (GRAPH.importers.get(INTENT) ?? new Set()).has(PROVIDER))
+// **سلطة واحدة لا اثنتان**: المخزن الثاني حُذف، ولا يعود بلا أن يسقط هذا.
+ok('ولا مخزن نيّة ثانٍ في الشجرة الحيّة',
+  ![...GRAPH.live].some((f) => f.endsWith('src/lib/entryIntent.ts')))
 
 console.log('\n② العقد الذي يجب ألّا ينكسر — قراءة المصدر المقترنة')
 const comp = readFileSync(resolve(ROOT, COMPONENT), 'utf8')
@@ -99,10 +113,18 @@ ok('السلطة للخادم — `beginTrial` لا منح محلّي',
   /const outcome = await beginTrial\(\)/.test(comp) && !/localStorage[^\n]*premium/i.test(comp))
 ok('النقر المزدوج لا يبدأ تجربتين', /if \(state === 'working'\) return/.test(comp))
 ok('النيّة تُستهلك مرّة واحدة على كل نتيجة حاسمة',
-  /if \(outcome !== 'offline'\) \{[\s\S]{0,120}clearPendingTrialIntent\(\)/.test(comp))
+  /if \(outcome !== 'offline'\) \{[\s\S]{0,120}clearTrialIntent\(\)/.test(comp))
+// اللافتة صارت **احتياطًا**: نتيجةٌ وصلت تلقائيًّا تُخفيها فورًا، فلا يُطلب
+// من أحد أن يضغط على ما تمّ.
+ok('ونتيجة الاستئناف التلقائي تُخفي اللافتة بدل أن تكرّر الطلب',
+  /if \(trialResume\) \{[\s\S]{0,220}setPending\(false\)/.test(comp)
+  && /acknowledgeTrialResume\(\)/.test(comp))
 ok('وانقطاع الشبكة لا يُسقط النيّة — لا يُعاقَب المستخدم على عطل ليس منه',
   /outcome !== 'offline'/.test(comp))
-ok('النيّة تنتهي صلاحيتها ولا تُبعث صامتة', /PENDING_TRIAL_TTL_MS/.test(intent) && /now - raw\.at > PENDING_TRIAL_TTL_MS/.test(intent))
+ok('النيّة تنتهي صلاحيتها ولا تُبعث صامتة',
+  /TRIAL_INTENT_TTL_MS/.test(intent) && /age > TRIAL_INTENT_TTL_MS/.test(intent))
+// وساعةٌ رجعت إلى الوراء لا تُمدِّد النيّة — تُلغى لا تُمنح.
+ok('وساعة الجهاز الراجعة تُلغي النيّة ولا تمدّدها', /age < 0/.test(intent))
 ok('كل نتيجة لها رسالتها الصادقة — لا رسالة عامّة',
   ['trialStarting','trialStarted','trialNeedsVerifiedEmail','trialAlreadyUsed','trialOffline','trialNeedsAccount']
     .every((k) => comp.includes(k)))

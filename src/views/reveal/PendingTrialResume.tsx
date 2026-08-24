@@ -2,7 +2,8 @@
 // [SOVEREIGN-ENTRY-001] الحزمة ٧.
 //
 // ═══ لماذا هنا لا في شاشة التسليم؟ ═══
-// شاشة التسليم **تُفكَّك** في الطريق إلى إنشاء الحساب (انظر `lib/entryIntent.ts`).
+// شاشة التسليم **تُفكَّك** في الطريق إلى إنشاء الحساب، فالنيّة تعيش على القرص
+// في `lib/access/trialIntent.ts` — السلطة الوحيدة، ويقرؤها الاستئناف التلقائي.
 // فالوعد يُقطع هناك، ويجب أن يُوفّى **بعد** الحساب — أي على السطح الذي يهبط
 // عليه المستخدم عائدًا. هذا المكوّن هو ذلك السطح: يُركَّب في جذر التطبيق،
 // ويظهر **فقط** حين تجتمع نيّة سارية مع حساب فعليّ.
@@ -17,7 +18,7 @@ import { useEffect, useState } from 'react'
 import type { Lang } from '@/lib/appPreferences'
 import type { TrialOutcome } from '@/lib/access/entitlementBackend'
 import { useAccess } from '@/lib/access/useAccess'
-import { clearPendingTrialIntent, hasPendingTrialIntent } from '@/lib/entryIntent'
+import { clearTrialIntent, hasTrialIntent } from '@/lib/access/trialIntent'
 import { revealStrings } from '@/i18n/dict/reveal'
 import { Icon } from '@/components/Icon'
 
@@ -29,14 +30,31 @@ export interface PendingTrialResumeProps {
 
 export function PendingTrialResume({ lang, signedIn }: PendingTrialResumeProps) {
   const t = revealStrings[lang] ?? revealStrings.ar
-  const { beginTrial } = useAccess()
+  const { beginTrial, trialResume, acknowledgeTrialResume } = useAccess()
   const [pending, setPending] = useState(false)
   const [state, setState] = useState<'idle' | 'working' | TrialOutcome>('idle')
 
-  // القراءة عند التركيب وعند تغيّر حالة الدخول — لا استطلاع دوري.
+  /**
+   * ═══ [COMMISSIONING §1] صار هذا السطح **احتياطًا معلنًا** لا مسارًا أوّليًّا ═══
+   *
+   * المسار الأوّل تلقائيّ: مزوّد الوصول يستأنف النيّة عند `SIGNED_IN` بلا أي
+   * ضغطة. فما الذي يبقى لهذه اللافتة؟ **الحالة التي لا يصلها ذلك الحدث**:
+   * من يؤكّد بريده برابط يفتح **تبويبًا جديدًا** تصله الجلسة حدثَ
+   * `INITIAL_SESSION` لا `SIGNED_IN`. فالنيّة تبقى سارية بلا استئناف، ولولا
+   * هذه اللافتة لضاع وعدُ الزرّ بصمت.
+   *
+   * ولذلك تُخفى فور وصول نتيجة تلقائية: لا يُطلب من أحد أن يضغط على ما تمّ.
+   */
   useEffect(() => {
-    setPending(signedIn && hasPendingTrialIntent())
-  }, [signedIn])
+    if (trialResume) {
+      // وصلت نتيجة من الاستئناف التلقائي — تُعرض هنا ثم تُقرّ، فلا تتكرّر.
+      setState(trialResume)
+      setPending(false)
+      acknowledgeTrialResume()
+      return
+    }
+    setPending(signedIn && hasTrialIntent())
+  }, [signedIn, trialResume, acknowledgeTrialResume])
 
   if (!pending || !signedIn) return null
 
@@ -48,7 +66,7 @@ export function PendingTrialResume({ lang, signedIn }: PendingTrialResumeProps) 
     // تُستهلك النيّة على كل نتيجة **حاسمة**. أمّا `offline` فمؤقّت بطبعه:
     // إسقاطها عنده يعاقب المستخدم على انقطاع شبكة ليس منه.
     if (outcome !== 'offline') {
-      clearPendingTrialIntent()
+      clearTrialIntent()
       setPending(false)
     }
   }
@@ -85,7 +103,7 @@ export function PendingTrialResume({ lang, signedIn }: PendingTrialResumeProps) 
         </button>
         <button
           type="button"
-          onClick={() => { clearPendingTrialIntent(); setPending(false) }}
+          onClick={() => { clearTrialIntent(); setPending(false) }}
           data-testid="pending-trial-dismiss"
           className="min-h-[44px] rounded-2xl border border-line bg-surface px-4 text-sm font-bold text-ink-700"
         >
